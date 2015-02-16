@@ -20,6 +20,8 @@ test -f ~/.bashrc && source ~/.bashrc
 # Set Default Editor
 export EDITOR='sublime'
 
+export BLOCKSIZE=1k
+
 set meta-flag on
 set input-meta on
 set output-meta on
@@ -29,9 +31,10 @@ set convert-meta off
 alias locale='locale -a | grep UTF-8'
 alias ls='ls -Gp'
 alias l='ls -Gp'
-alias la='ls -FGlAhp'
-alias ll='ls -FGlAhp'
+alias la='ls -lisa'
+alias ll='ls -lisa'
 alias lr='ls -R | grep ":$" | sed -e '\''s/:$//'\'' -e '\''s/[^-][^\/]*\//--/g'\'' -e '\''s/^/   /'\'' -e '\''s/-/|/'\'' | less'
+alias h='history'
 alias du="du -h"
 alias grep="grep --color"
 alias mate="open -a 'Sublime Text 2'"
@@ -74,21 +77,21 @@ alias emptytrash="sudo rm -rfv /Volumes/*/.Trashes; sudo rm -rfv ~/.Trash; speed
 
 #   cleanupDS:  Recursively delete .DS_Store files
 #   -------------------------------------------------------------------
-    alias cleanupDS="find . -type f -name '*.DS_Store' -ls -delete"
+alias cleanupDS="find . -type f -name '*.DS_Store' -ls -delete"
 
 #   finderShowHidden:   Show hidden files in Finder
 #   finderHideHidden:   Hide hidden files in Finder
 #   -------------------------------------------------------------------
-    alias finderShowHidden='defaults write com.apple.finder ShowAllFiles TRUE'
-    alias finderHideHidden='defaults write com.apple.finder ShowAllFiles FALSE'
+alias finderShowHidden='defaults write com.apple.finder ShowAllFiles TRUE'
+alias finderHideHidden='defaults write com.apple.finder ShowAllFiles FALSE'
 
 #   cleanupLS:  Clean up LaunchServices to remove duplicates in the "Open With" menu
 #   -----------------------------------------------------------------------------------
-    alias cleanupLS="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user && killall Finder"
- 
+alias cleanupLS="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user && killall Finder"
+
 #    screensaverDesktop: Run a screensaver on the Desktop
 #   -----------------------------------------------------------------------------------
-    alias screensaverDesktop='/System/Library/Frameworks/ScreenSaver.framework/Resources/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine -background'
+alias screensaverDesktop='/System/Library/Frameworks/ScreenSaver.framework/Resources/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine -background'
 
 # things for subversion
 alias sm='svn move'
@@ -110,16 +113,16 @@ alias ipinfo='/Users/seb/Bin/gt-ipinfo.sh'
 #       Taken from this macosxhints article
 #       http://www.macosxhints.com/article.php?story=20060816123853639
 #   ------------------------------------------------------------
-    alias ttop="top -R -F -s 10 -o rsize"
- 
+alias ttop="top -R -F -s 10 -o rsize"
+
 #   my_ps: List processes owned by my user:
 #   ------------------------------------------------------------
-    my_ps() { ps $@ -u $USER -o pid,%cpu,%mem,start,time,bsdtime,command ; }
+my_ps() { ps $@ -u $USER -o pid,%cpu,%mem,start,time,bsdtime,command ; }
 
 #   ---------------------------
 #   6.  NETWORKING
 #   ---------------------------
- 
+
 alias myip='curl -s checkip.dyndns.org | sed -e "s/.*Current IP Address: //" -e "s/<.*$//"'                    # myip:         Public facing IP Address
 alias netCons='lsof -i'                             # netCons:      Show all open TCP/IP sockets
 alias flushDNS='dscacheutil -flushcache'            # flushDNS:     Flush out the DNS Cache
@@ -133,28 +136,36 @@ alias ips="ifconfig -a | perl -nle'/(\d+\.\d+\.\d+\.\d+)/ && print $1'"
 alias openPorts='sudo lsof -i | grep LISTEN'        # openPorts:    All listening connections
 alias showBlocked='sudo ipfw list'                  # showBlocked:  All ipfw rules inc/ blocked IPs
 
- 
+
 #   ii:  display useful host related informaton
 #   -------------------------------------------------------------------
-    ii() {
-        echo -e "\nYou are logged on ${RED}$HOST"
-        echo -e "\nAdditionnal information:$NC " ; uname -a
-        echo -e "\n${RED}Users logged on:$NC " ; w -h
-        echo -e "\n${RED}Current date :$NC " ; date
-        echo -e "\n${RED}Machine stats :$NC " ; uptime
-        echo -e "\n${RED}Current network location :$NC " ; scselect
-        echo -e "\n${RED}Public facing IP Address :$NC " ;myip
-        echo -e "\n${RED}DNS Configuration:$NC " ; scutil --dns
-        echo
-    }
+ii() {
+  echo -e "\nYou are logged on ${RED}$HOST"
+  echo -e "\nAdditionnal information:$NC " ; uname -a
+  echo -e "\n${RED}Users logged on:$NC " ; w -h
+  echo -e "\n${RED}Current date :$NC " ; date
+  echo -e "\n${RED}Machine stats :$NC " ; uptime
+  echo -e "\n${RED}Current network location :$NC " ; scselect
+  echo -e "\n${RED}Public facing IP Address :$NC " ;myip
+  echo -e "\n${RED}DNS Configuration:$NC " ; scutil --dns
+  echo
+}
 
 #   httpDebug:  Download a web page and show info on what took time
 #   -------------------------------------------------------------------
-    httpDebug () { /usr/bin/curl $@ -o /dev/null -w "dns: %{time_namelookup} connect: %{time_connect} pretransfer: %{time_pretransfer} starttransfer: %{time_starttransfer} total: %{time_total}\n" ; }
+httpDebug () { /usr/bin/curl $@ -o /dev/null -w "dns: %{time_namelookup} connect: %{time_connect} pretransfer: %{time_pretransfer} starttransfer: %{time_starttransfer} total: %{time_total}\n" ; }
 
 
 # List of open ports
 alias op='sudo lsof -i -P'
+
+#   -------------------------------
+#   3.  FILE AND FOLDER MANAGEMENT
+#   -------------------------------
+
+zipf () { zip -r "$1".zip "$1" ; }          # zipf:         To create a ZIP archive of a folder
+alias numFiles='echo $(ls -1 | wc -l)'      # numFiles:     Count of non-hidden files in current dir
+
 
 # function to make 'rm' move files to the trash  
 function rm () {
@@ -189,12 +200,12 @@ function cd {
 
 # Create a new directory and enter it
 function md() {
-    mkdir -p "$@" && cd "$@"
+  mkdir -p "$@" && cd "$@"
 }
 
 # Remove a direcory and its files
 function rd() {
-    rm -rf "$@"
+  rm -rf "$@"
 }
 
 # function to Logout from OS X via the Terminal
@@ -312,26 +323,26 @@ fi
 #   ---------------------------------------
 #   9.  REMINDERS & NOTES
 #   ---------------------------------------
- 
+
 #   remove_disk: spin down unneeded disk
 #   ---------------------------------------
 #   diskutil eject /dev/disk1s3
- 
+
 #   to change the password on an encrypted disk image:
 #   ---------------------------------------
 #   hdiutil chpass /path/to/the/diskimage
- 
+
 #   to mount a read-only disk image as read-write:
 #   ---------------------------------------
 #   hdiutil attach example.dmg -shadow /tmp/example.shadow -noverify
- 
+
 #   mounting a removable drive (of type msdos or hfs)
 #   ---------------------------------------
 #   mkdir /Volumes/Foo
 #   ls /dev/disk*   to find out the device to use in the mount command)
 #   mount -t msdos /dev/disk1s1 /Volumes/Foo
 #   mount -t hfs /dev/disk1s1 /Volumes/Foo
- 
+
 #   to create a file of a given size: /usr/sbin/mkfile or /usr/bin/hdiutil
 #   ---------------------------------------
 #   e.g.: mkfile 10m 10MB.dat
