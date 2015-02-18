@@ -12,13 +12,13 @@ test -f ~/.bashrc && source ~/.bashrc
 
 # Change prompt
   # Root prompt (RED)
-  export SUDO_PS1="$(tput setaf 1)[\d \t] \w @ \h(\u): $"
+  export SUDO_PS1="$(tput setaf 1)[\d \t] \w @ $(tput setaf 7)\h(🔴 \u): $"
 
   # Normal prompt (WHITE)
-  export PS1="$(tput setaf 7)[\d \t] \w @ \h(\u): $"
+  export PS1="$(tput setaf 7)[\d \t] \w @ \h(👤 \u): $"
 
 # Set Default Editor
-export EDITOR='sublime'
+export EDITOR='atom'
 
 export BLOCKSIZE=1k
 
@@ -37,15 +37,17 @@ alias lr='ls -R | grep ":$" | sed -e '\''s/:$//'\'' -e '\''s/[^-][^\/]*\//--/g'\
 alias h='history'
 alias du="du -h"
 alias grep="grep --color"
-alias mate="open -a 'Sublime Text 2'"
+alias mate="open -a 'Atom'"
+alias edit="open -a 'Atom'"
+alias e="open -a 'Atom'"
 alias preview="open -a Preview"
 alias mkdir='mkdir -pv'
-mcd () { mkdir -p "$1" && cd "$1"; }        # mcd:      Makes new Dir and jumps inside      
+mcd () { mkdir -p "$1" && cd "$1"; }        # mcd:      Makes new Dir and jumps inside
 trash () { command mv "$@" ~/.Trash ; }     # trash:    Moves a file to the MacOS trash
 ql () { qlmanage -p "$*" >& /dev/null; }    # ql:       Opens any file in MacOS Quicklook Preview
 alias DT='tee ~/Desktop/terminalOut.txt'    # DT:       Pipe content to file on MacOS Desktop
-alias cl='clear' 
-cd() { builtin cd "$@"; ll; } 
+alias c='clear'
+cd() { builtin cd "$@"; ll; }
 alias ~="cd ~"
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -55,6 +57,7 @@ alias path='echo -e ${PATH//:/\\n}'
 alias showoptions='shopt'
 alias opencurrent='open -a Finder ./'
 alias zap='rm -i' #remove file with warning
+alias ionicupdate='npm update -g cordova ionic'
 
 # See http://www.shellperson.net/using-sudo-with-an-alias/
 alias sudo='sudo '
@@ -167,7 +170,7 @@ zipf () { zip -r "$1".zip "$1" ; }          # zipf:         To create a ZIP arch
 alias numFiles='echo $(ls -1 | wc -l)'      # numFiles:     Count of non-hidden files in current dir
 
 
-# function to make 'rm' move files to the trash  
+# function to make 'rm' move files to the trash
 function rm () {
   local path
   for path in "$@"; do
@@ -281,43 +284,8 @@ export PATH=$PATH:/Users/seb/Library/Android/sdk/platform-tools
 export JAVA_HOME='/Library/Java/JavaVirtualMachines/jdk1.8.0_31.jdk/Contents/Home'
 export ANT_HOME='/usr/local/Cellar/ant/1.9.4/libexec/'
 export MAVEN_HOME='/usr/local/Cellar/maven/3.2.5/libexec'
-export GIT_EDITOR="sublime"
-
-export ANDROID_HOME='/Users/seb/Library/Android/sdk/'###-begin-appbuilder-completion-###
-COMP_WORDBREAKS=${COMP_WORDBREAKS/=/}
-COMP_WORDBREAKS=${COMP_WORDBREAKS/@/}
-export COMP_WORDBREAKS
-
-if complete &>/dev/null; then
-  _appbuilder_completion () {
-    local si="$IFS"
-    IFS=$'\n' COMPREPLY=($(COMP_CWORD="$COMP_CWORD" \
-     COMP_LINE="$COMP_LINE" \
-     COMP_POINT="$COMP_POINT" \
-     appbuilder completion -- "${COMP_WORDS[@]}" \
-     2>/dev/null)) || return $?
-    IFS="$si"
-  }
-  complete -F _appbuilder_completion -o default appbuilder
-elif compctl &>/dev/null; then
-  _appbuilder_completion () {
-    local cword line point words si
-    read -Ac words
-    read -cn cword
-    let cword-=1
-    read -l line
-    read -ln point
-    si="$IFS"
-    IFS=$'\n' reply=($(COMP_CWORD="$cword" \
-     COMP_LINE="$line" \
-     COMP_POINT="$point" \
-     appbuilder completion -- "${words[@]}" \
-     2>/dev/null)) || return $?
-    IFS="$si"
-  }
-  compctl -K _appbuilder_completion -f appbuilder
-fi
-###-end-appbuilder-completion-###
+export GIT_EDITOR="atom"
+export ANDROID_HOME='/Users/seb/Library/Android/sdk/'
 
 
 #   ---------------------------------------
