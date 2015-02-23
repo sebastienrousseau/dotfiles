@@ -1,3 +1,5 @@
+### A Mac OS X Bash Profile Sample File ###
+
 # Set language flags
 export LANG=en_GB.UTF-8
 
@@ -18,7 +20,23 @@ test -f ~/.bashrc && source ~/.bashrc
   export PS1="$(tput setaf 7)[\d \t] \w @ \h(👤 \u): $"
 
 # Set Default Editor
+# A hackable text editor for the 21st Century available at https://atom.io/
 export EDITOR='atom'
+
+# don't put duplicate lines or lines starting with space in the history.
+# See bash(1) for more options
+HISTCONTROL=ignoreboth
+
+# append to the history file, don't overwrite it
+shopt -s histappend
+
+# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
+HISTSIZE=1000
+HISTFILESIZE=2000
+
+# check the window size after each command and, if necessary,
+# update the values of LINES and COLUMNS.
+shopt -s checkwinsize
 
 export BLOCKSIZE=1k
 
@@ -35,6 +53,7 @@ alias la='ls -lisa'
 alias ll='ls -lisa'
 alias lr='ls -R | grep ":$" | sed -e '\''s/:$//'\'' -e '\''s/[^-][^\/]*\//--/g'\'' -e '\''s/^/   /'\'' -e '\''s/-/|/'\'' | less'
 alias h='history'
+alias r='reload'
 alias du="du -h"
 alias grep="grep --color"
 alias mate="open -a 'Atom'"
@@ -57,7 +76,18 @@ alias path='echo -e ${PATH//:/\\n}'
 alias showoptions='shopt'
 alias opencurrent='open -a Finder ./'
 alias zap='rm -i' #remove file with warning
+
+##### ionic framework #####
 alias ionicupdate='npm update -g cordova ionic'
+
+##### appengine #####
+alias gaeauth='appcfg.py --oauth2'
+alias gaeup='appcfg.py --oauth2 update .'
+alias gaeupauth='appcfg.py --oauth2 -V dev update . && appcfg.py --oauth2 update . -V'
+
+# Add an "alert" alias for long running commands.  Use like so:
+# sleep 10; alert
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
 # See http://www.shellperson.net/using-sudo-with-an-alias/
 alias sudo='sudo '
@@ -109,7 +139,6 @@ alias www='open -a /Applications/Safari.app'
 alias preview='open -a /Applications/Preview.app'
 alias sql='open -a /Applications/Sequel\ Pro.app'
 alias css='open -a /Applications/CSSEdit.app'
-alias ipinfo='/Users/seb/Bin/gt-ipinfo.sh'
 
 #   ttop:  Recommended 'top' invocation to minimize resources
 #   ------------------------------------------------------------
@@ -240,7 +269,6 @@ else
 fi
 }
 
-
 #   ---------------------------
 #   4.  SEARCHING
 #   ---------------------------
@@ -257,17 +285,15 @@ alias memHogsTop='top -l 1 -o rsize | head -20'
 alias memHogsPs='ps wwaxm -o pid,stat,vsize,rss,time,command | head -10'
 
 
-    #   cpuHogs:  Find CPU hogs
+#   cpuHogs:  Find CPU hogs
 #   -----------------------------------------------------
 alias cpu_hogs='ps wwaxr -o pid,stat,%cpu,time,command | head -10'
 
-
-
 # The next line updates PATH for the Google Cloud SDK.
-source '/Users/seb/google-cloud-sdk/path.bash.inc'
+source '~/google-cloud-sdk/path.bash.inc'
 
 # The next line enables bash completion for gcloud.
-source '/Users/seb/google-cloud-sdk/completion.bash.inc'
+source '~/google-cloud-sdk/completion.bash.inc'
 
 # Aliases
 alias reload='. .bash_profile'
@@ -278,42 +304,11 @@ alias purge='rm -rf ~/library/Developer/Xcode/DerivedData/*'
 alias brewupdate='brew update && brew upgrade'
 
 # Paths
-export PATH=$PATH:/Users/seb/Library/Android/sdk/platform-tools
+export PATH=$PATH:'~/Library/Android/sdk/platform-tools'
 
 # Setting JAVA environments
 export JAVA_HOME='/Library/Java/JavaVirtualMachines/jdk1.8.0_31.jdk/Contents/Home'
 export ANT_HOME='/usr/local/Cellar/ant/1.9.4/libexec/'
 export MAVEN_HOME='/usr/local/Cellar/maven/3.2.5/libexec'
 export GIT_EDITOR="atom"
-export ANDROID_HOME='/Users/seb/Library/Android/sdk/'
-
-
-#   ---------------------------------------
-#   9.  REMINDERS & NOTES
-#   ---------------------------------------
-
-#   remove_disk: spin down unneeded disk
-#   ---------------------------------------
-#   diskutil eject /dev/disk1s3
-
-#   to change the password on an encrypted disk image:
-#   ---------------------------------------
-#   hdiutil chpass /path/to/the/diskimage
-
-#   to mount a read-only disk image as read-write:
-#   ---------------------------------------
-#   hdiutil attach example.dmg -shadow /tmp/example.shadow -noverify
-
-#   mounting a removable drive (of type msdos or hfs)
-#   ---------------------------------------
-#   mkdir /Volumes/Foo
-#   ls /dev/disk*   to find out the device to use in the mount command)
-#   mount -t msdos /dev/disk1s1 /Volumes/Foo
-#   mount -t hfs /dev/disk1s1 /Volumes/Foo
-
-#   to create a file of a given size: /usr/sbin/mkfile or /usr/bin/hdiutil
-#   ---------------------------------------
-#   e.g.: mkfile 10m 10MB.dat
-#   e.g.: hdiutil create -size 10m 10MB.dmg
-#   the above create files that are almost all zeros - if random bytes are desired
-#   then use: ~/Dev/Perl/randBytes 1048576 > 10MB.dat
+export ANDROID_HOME='~/Library/Android/sdk/'
