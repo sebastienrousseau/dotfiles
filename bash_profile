@@ -1,5 +1,3 @@
-### A Mac OS X Bash Profile Sample File ###
-
 # Set language flags
 export LANG=en_GB.UTF-8
 
@@ -8,6 +6,11 @@ export ARCHFLAGS="-arch x86_64"
 
 # Ensure user-installed binaries take precedence
 export PATH=/usr/local/bin:$PATH
+
+# To connect the Docker client to the Docker daemon
+export DOCKER_TLS_VERIFY=1
+export DOCKER_HOST=tcp://192.168.59.103:2376
+export DOCKER_CERT_PATH=/Users/seb/.boot2docker/certs/boot2docker-vm
 
 # Load .bashrc if it exists
 test -f ~/.bashrc && source ~/.bashrc
@@ -20,7 +23,6 @@ test -f ~/.bashrc && source ~/.bashrc
   export PS1="$(tput setaf 7)[\d \t] \w @ \h(👤 \u): $"
 
 # Set Default Editor
-# A hackable text editor for the 21st Century available at https://atom.io/
 export EDITOR='atom'
 
 # don't put duplicate lines or lines starting with space in the history.
@@ -77,17 +79,45 @@ alias showoptions='shopt'
 alias opencurrent='open -a Finder ./'
 alias zap='rm -i' #remove file with warning
 
-##### ionic framework #####
-alias ionicupdate='npm update -g cordova ionic'
+# Ionic commands
+alias ionup='npm update -g cordova ionic'
+alias ions="ionic serve"
+alias ionios="ionic emulate ios"
+alias ionandroid="ionic emulate android"
+alias ioniosrun="ionic run ios"
+alias ionandroidrun="ionic run android"
+alias ionicons="open http://ionicons.com/"
+alias ionpa-ios="ionic platform add ios"
+alias ionpa-android="ionic platform add android"
+alias ionpr-ios="ionic platform remove ios"
+alias ionpr-android="ionic platform remove android"
+alias ionb="ionic build"
+alias ionbios="ionic build ios"
+alias ionbandroid="ionic build android"
+alias ionosreset="ionpr-ios | ionpa-ios | ionbios"
+alias iondroidreset="ionpr-android | ionpa-android | ionbandroid"
+
+# Emulate iOS using different Apple devices
+alias ione-ios-4s="ionic emulate ios --target="iPhone-4s""
+alias ione-ios-5="ionic emulate ios --target="iPhone-5""
+alias ione-ios-5s="ionic emulate ios --target="iPhone-5s""
+alias ione-ios-6="ionic emulate ios --target="iPhone-6""
+alias ione-ios-6-Plus="ionic emulate ios --target="iPhone-6-Plus""
+alias ione-ios-iPad-2="ionic emulate ios --target="iPad-2""
+alias ione-ios-iPad-Retina="ionic emulate ios --target="iPad-Retina""
+alias ione-ios-iPad-Air="ionic emulate ios --target="iPad-Air""
+
 
 ##### appengine #####
 alias gaeauth='appcfg.py --oauth2'
 alias gaeup='appcfg.py --oauth2 update .'
 alias gaeupauth='appcfg.py --oauth2 -V dev update . && appcfg.py --oauth2 update . -V'
 
+
 # Add an "alert" alias for long running commands.  Use like so:
-# sleep 10; alert
+#   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
 
 # See http://www.shellperson.net/using-sudo-with-an-alias/
 alias sudo='sudo '
@@ -139,6 +169,7 @@ alias www='open -a /Applications/Safari.app'
 alias preview='open -a /Applications/Preview.app'
 alias sql='open -a /Applications/Sequel\ Pro.app'
 alias css='open -a /Applications/CSSEdit.app'
+alias ipinfo='/Users/seb/Bin/gt-ipinfo.sh'
 
 #   ttop:  Recommended 'top' invocation to minimize resources
 #   ------------------------------------------------------------
@@ -269,6 +300,7 @@ else
 fi
 }
 
+
 #   ---------------------------
 #   4.  SEARCHING
 #   ---------------------------
@@ -285,15 +317,17 @@ alias memHogsTop='top -l 1 -o rsize | head -20'
 alias memHogsPs='ps wwaxm -o pid,stat,vsize,rss,time,command | head -10'
 
 
-#   cpuHogs:  Find CPU hogs
+    #   cpuHogs:  Find CPU hogs
 #   -----------------------------------------------------
 alias cpu_hogs='ps wwaxr -o pid,stat,%cpu,time,command | head -10'
 
+
+
 # The next line updates PATH for the Google Cloud SDK.
-source '~/google-cloud-sdk/path.bash.inc'
+source '/Users/seb/google-cloud-sdk/path.bash.inc'
 
 # The next line enables bash completion for gcloud.
-source '~/google-cloud-sdk/completion.bash.inc'
+source '/Users/seb/google-cloud-sdk/completion.bash.inc'
 
 # Aliases
 alias reload='. .bash_profile'
@@ -304,11 +338,42 @@ alias purge='rm -rf ~/library/Developer/Xcode/DerivedData/*'
 alias brewupdate='brew update && brew upgrade'
 
 # Paths
-export PATH=$PATH:'~/Library/Android/sdk/platform-tools'
+export PATH=$PATH:/Users/seb/Library/Android/sdk/platform-tools
 
 # Setting JAVA environments
 export JAVA_HOME='/Library/Java/JavaVirtualMachines/jdk1.8.0_31.jdk/Contents/Home'
 export ANT_HOME='/usr/local/Cellar/ant/1.9.4/libexec/'
 export MAVEN_HOME='/usr/local/Cellar/maven/3.2.5/libexec'
 export GIT_EDITOR="atom"
-export ANDROID_HOME='~/Library/Android/sdk/'
+export ANDROID_HOME='/Users/seb/Library/Android/sdk/'
+
+
+#   ---------------------------------------
+#   9.  REMINDERS & NOTES
+#   ---------------------------------------
+
+#   remove_disk: spin down unneeded disk
+#   ---------------------------------------
+#   diskutil eject /dev/disk1s3
+
+#   to change the password on an encrypted disk image:
+#   ---------------------------------------
+#   hdiutil chpass /path/to/the/diskimage
+
+#   to mount a read-only disk image as read-write:
+#   ---------------------------------------
+#   hdiutil attach example.dmg -shadow /tmp/example.shadow -noverify
+
+#   mounting a removable drive (of type msdos or hfs)
+#   ---------------------------------------
+#   mkdir /Volumes/Foo
+#   ls /dev/disk*   to find out the device to use in the mount command)
+#   mount -t msdos /dev/disk1s1 /Volumes/Foo
+#   mount -t hfs /dev/disk1s1 /Volumes/Foo
+
+#   to create a file of a given size: /usr/sbin/mkfile or /usr/bin/hdiutil
+#   ---------------------------------------
+#   e.g.: mkfile 10m 10MB.dat
+#   e.g.: hdiutil create -size 10m 10MB.dmg
+#   the above create files that are almost all zeros - if random bytes are desired
+#   then use: ~/Dev/Perl/randBytes 1048576 > 10MB.dat
