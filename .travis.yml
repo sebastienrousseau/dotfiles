@@ -6,6 +6,5 @@ deploy:
   provider: releases
   api_key:
     secure: uTEGlCyxmVlq3xTYKdlRSttmhdXsGskn9gnBjbGUfzKd1V0h3Pg7AJ9AQixbJ5U2Yvg25QPEx3n3jmMCQowbAGqCRUe/C2nbo6AtugbqfDTKCq7b1BdQpM/tiX0/viyZDCLZ1kI/hI18DuiveSmi4XUMO2uKrId2/yJ2qk2kKLGq442HO6m/kPF867RqhNpbybgsy7l+7iEx7z5vLFYPYZybK7tc9I63XTrSHdyHGyCqEF0/PVqlPWSqeBlCasiQbK5BYvfmumfzpDffKMo1r4/SJH07hp3xt/IgUTZZ+6yA/MOUSZENgXWy44OU0RZam6PTHtJ+k6mOU4GTEghTwCeelmUpi1BNMQo2EcPBxaEP7UMUg154N6xAK2pRcVumfFuDFsztX7kUBIwJ/vVtYItByaw0fqOe+k3QBvLgYaBu07bgOcWy+bBJim0Rz8lIZkvpjhBipbFR6INCKK7DYKSIXOd1AUiEvOVxLs8R+Vc8VxU4lasTU5AYG/X75deGOcJNUX5gZMi0f/nMFbP1OPyNGWAHh4GZ4nHUUWNTrt9keM+1gVm+0nbo5Cj+M+L0Rr3yf7mlSmclL9cTE/kwYOl+7THT+t8DsuROoEymWrbP83eZ8JlJ7kingxhbA1hgfqUbPk+inC8y/al2BepbOw8OKiqp/MUOnZzzjFx5aAM=
-  file: "*"
   on:
     repo: reedia/dotfiles
