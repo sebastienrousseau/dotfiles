@@ -161,7 +161,6 @@ alias path='echo -e ${PATH//:/\\n}'
 alias showoptions='shopt'
 alias opencurrent='open -a Finder ./'
 alias zap='rm -i' #remove file with warning
-alias repos='cd ~/Dropbox\ \(REEDIA\)$HOME/Repositories/'
 
 # make less always work with colored input
 alias less="less -R"

@@ -31,8 +31,17 @@ Within the release you'll find the following :
 ```
 .
 ├── .bash_profile
+├── .curlrc
+├── .eslintrc
+├── .gitignore
+├── .jshintrc
+├── .travis.yml
+├── .wgetrc
 ├── LICENSE
-└── README.md
+├── README.md
+└── homebrew
+    ├── brewfile.sh
+    └── install.sh
 ```
 
 ## Contributing
