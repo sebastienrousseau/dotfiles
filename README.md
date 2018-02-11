@@ -1,5 +1,8 @@
-# Dotfiles
+<p align="center">
+  <img src="Dotfiles.png" alt="Dotfiles Logo" title="Dotfiles Logo">
+</p>
 
+# Dotfiles
 ## Mac OS X Dotfiles
 
 Simply designed to fit your web life.
