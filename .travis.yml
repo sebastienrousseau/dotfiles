@@ -21,4 +21,3 @@ deploy:
     fit your web life."  
   on:
     repo: reedia/dotfiles
-    tags: true
