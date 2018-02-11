@@ -6,6 +6,8 @@ deploy:
   provider: releases
   skip-cleanup: true
   github-token: "$GITHUB_TOKEN"
+  api-key:
+    secure: 4b5Hy1KCiuzZtLaOAfoR2KycKYQfZGqt2y7MvO9LUUmN4JKAblDRVqdRytaIUpeNt4GJ2DA70OHVbLww4jbh3bsIpDWoOJ0BNeZIjHfH7A+j9BFdN8MuHqeHkLMRr10XQGJLtnrC3qIY0sjbdp6IwTDXzgCW10CN7c8Fw0OjNFCXIlzunymoD0i4TZjzutnoLcsoHvsSntx6B4N2GXWVlOKmiowzwNJQNUXgmU6Q4IJuSLnckso0nxl8X0d7eJzvvHpLZNr1puTGh/eL6idH6/6/gft4Fm9krpJ1KNaeniAQZivRANOaUm0EY+V+UWwZAyO+LqdpZ3qSEGZY/pBTdi/xKEk7nXLlBkq/8xOD1Z9M+n1HWgxd77i6jRIIWUAx7Ge+I3Y9PNXUMmpg6vMDJC2groiVAVDNDJP8+LM+/K/ew0Y0dilYUuYi5FzpySvHcJ4zeDu9EONeCdVfg7GR8VQoeFbj6zjZZkbcvIojXeOpNUI981C7UvqBhBiiMK6pIG0sq+/lKQRvjuZhKZxDtS1E5NhSb6gb43HBiqU86Rh/4pZu3ktxsOVV5/xLusjhwFLRQMkHicyCE0GWvumVl7SAWevW04ayBqSorZmPfyJVg13BqQdSH6m2j0az06lMSnBVmN1doV8/dcYGY+TN3fBdGqfWOuiUVrHWC8brONs=
   keep-history: true
   on:
     branch: master
@@ -14,5 +16,3 @@ deploy:
   body: "<strong>Change Log:</strong><br />Release created on $(date +'%d/%m/%Y')
     at $(date +'%T')<br />A set of Mac OS X configuration files. Designed to
     fit your web life."
-  api-key:
-    secure: 4b5Hy1KCiuzZtLaOAfoR2KycKYQfZGqt2y7MvO9LUUmN4JKAblDRVqdRytaIUpeNt4GJ2DA70OHVbLww4jbh3bsIpDWoOJ0BNeZIjHfH7A+j9BFdN8MuHqeHkLMRr10XQGJLtnrC3qIY0sjbdp6IwTDXzgCW10CN7c8Fw0OjNFCXIlzunymoD0i4TZjzutnoLcsoHvsSntx6B4N2GXWVlOKmiowzwNJQNUXgmU6Q4IJuSLnckso0nxl8X0d7eJzvvHpLZNr1puTGh/eL6idH6/6/gft4Fm9krpJ1KNaeniAQZivRANOaUm0EY+V+UWwZAyO+LqdpZ3qSEGZY/pBTdi/xKEk7nXLlBkq/8xOD1Z9M+n1HWgxd77i6jRIIWUAx7Ge+I3Y9PNXUMmpg6vMDJC2groiVAVDNDJP8+LM+/K/ew0Y0dilYUuYi5FzpySvHcJ4zeDu9EONeCdVfg7GR8VQoeFbj6zjZZkbcvIojXeOpNUI981C7UvqBhBiiMK6pIG0sq+/lKQRvjuZhKZxDtS1E5NhSb6gb43HBiqU86Rh/4pZu3ktxsOVV5/xLusjhwFLRQMkHicyCE0GWvumVl7SAWevW04ayBqSorZmPfyJVg13BqQdSH6m2j0az06lMSnBVmN1doV8/dcYGY+TN3fBdGqfWOuiUVrHWC8brONs=
