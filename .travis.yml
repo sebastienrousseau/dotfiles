@@ -4,13 +4,14 @@ notifications:
   email: false
 deploy:
   provider: releases
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  keep-history: true
+  on:
+    branch: master
+    tags: false    
   api_key:
     secure: COroxSGtJLNO3IG9HSGrQIeGb5TBBemK9SO10pCAulFPLcDbQgtmQMOcXOvmOKqqQg9fwhjfw562Nd2B1Qg0/G3A5lYpKXXukCe6T7c3FOWHp5ZoVm1AKQA0cYf4748z1kXh7r+AevXVnr2lTAP99vahCdd9PzUy7hcv2Hru/nn8t6wmQJj4dWlv9w+YfuNBxUYTfNl/TlRPnQjEYHsiPCl4UJdpsmekqB7HTOT+FhZ7KQQdMjxEbe6ayMVxnthGmowOfd5gvr9wZsWFPtv3zBd21b20RqJtWIzCJY/tBFJuV8CjczrBqYop5wTzbREEfW4N34P5FeZvpRYU0P2/3ojmtPFKScPMT+a/gafCsK67sRZNROBj3rIAJV26tJKcfQMJ7LZVAU+r4FzzZQRJyjn1N3DgqX5wyxFS/lnJ7al+6s3FPB2dOcTAssR040eCWjkdbp/4Aflz77JzDSnbel7bcq2vLAptn0qqaYe0BgAGsvKr9DqhWEigpncn26tXL2blUgmdGLnKxPugSavOFDyU0BnWpm2A28WjQxqak+8SuHkQ/0qOi5mEvEioDIgjMXLFwy56ZNlcQRhp59HOa8AjJqowqe7XCiRIAMdybl4amgPSKacNTV5e3uOFEUyqSLE3Hff71LUgDOLLicZ3LTFH6R1Ag3S9lWHDd4sZuvY=
-  file: dist/*
   name: Dotfiles v1.0.$TRAVIS_BUILD_NUMBER
   body: <strong>Change Log:</strong><br /><br />Release created on $(date +'%d/%m/%Y') at $(date +'%T')<br /><br />A set of Mac OS X configuration files. Designed to fit your web life.
-  skip_cleanup: true
   file_glob: true
-  on:
-    repo: reedia/dotfiles
-    tags: false
