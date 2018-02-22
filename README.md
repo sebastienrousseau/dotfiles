@@ -2,10 +2,16 @@
   <img src="Dotfiles.png" alt="Dotfiles Logo" title="Dotfiles Logo">
 </p>
 
+
+[![NPM](https://nodei.co/npm/reedia-dotfiles.png)](https://nodei.co/npm/reedia-dotfiles/)
+[![npm version](https://badge.fury.io/js/reedia-dotfiles.svg)](https://badge.fury.io/js/reedia-dotfiles)
+[![Build Status](https://travis-ci.org/reedia/dotfiles.svg?branch=master)](https://travis-ci.org/reedia/dotfiles)
+[![Packagist](https://img.shields.io/badge/license-MIT-blue.svg)](https://skeletonic.github.io/license)
+
 # Dotfiles
 ## Mac OS X Dotfiles
 
-Simply designed to fit your web life.
+Simply designed to fit your shell life.
 
 <a href="https://github.com/reedia/dotfiles/releases/latest">Download Dotfiles</a>
 
@@ -18,7 +24,7 @@ Simply designed to fit your web life.
 -   [Our Values](#our-values)
 -   [History](#history)
 -   [License](#license)
--   [Acknowledgments](#acknowledgments)
+-   [Acknowledgements](#acknowledgements)
 
 ## Getting Started
 
@@ -29,10 +35,17 @@ A few options are available:
 
 ## What's in the box
 
-Within the release you'll find the following :
+Within the release you'll find the following files and folders s:
 
 ```
 .
+├── .bash_profile
+├── .curlrc
+├── .eslintrc
+├── .gitignore
+├── .jshintrc
+├── .travis.yml
+├── .wgetrc
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
 ├── Dotfiles.png
@@ -76,7 +89,6 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 | [Sebastien Rousseau](https://github.com/sebastienrousseau)                                                      |
 
 ## About Reedia
-----------------
 
 ![Reedia](https://avatars0.githubusercontent.com/u/488747?s=200)
 
