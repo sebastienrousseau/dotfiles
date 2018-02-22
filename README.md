@@ -33,18 +33,17 @@ Within the release you'll find the following :
 
 ```
 .
-├── .bash_profile
-├── .curlrc
-├── .eslintrc
-├── .gitignore
-├── .jshintrc
-├── .travis.yml
-├── .wgetrc
+├── CODE_OF_CONDUCT.md
+├── CONTRIBUTING.md
+├── Dotfiles.png
+├── Icon\r
 ├── LICENSE
 ├── README.md
-└── homebrew
-    ├── brewfile.sh
-    └── install.sh
+├── homebrew
+│   ├── brewfile.sh
+│   └── install.sh
+└── package.json
+
 ```
 
 ## Contributing
@@ -68,7 +67,7 @@ We are committed to preserving and fostering a diverse, welcoming community. Ple
 
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/reedia/dotfiles/blob/master/LICENSE) file for details
 
-## Acknowledgments
+## Acknowledgements
 
 [Dotfiles](https://dotfiles.io) is beautifully crafted by these people and a bunch of awesome [contributors](https://github.com/reedia/dotfiles/graphs/contributors)
 
