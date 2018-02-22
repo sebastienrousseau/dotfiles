@@ -4,6 +4,8 @@
 
 
 [![NPM](https://nodei.co/npm/reedia-dotfiles.png)](https://nodei.co/npm/reedia-dotfiles/)
+
+
 [![npm version](https://badge.fury.io/js/reedia-dotfiles.svg)](https://badge.fury.io/js/reedia-dotfiles)
 [![Build Status](https://travis-ci.org/reedia/dotfiles.svg?branch=master)](https://travis-ci.org/reedia/dotfiles)
 [![Packagist](https://img.shields.io/badge/license-MIT-blue.svg)](https://skeletonic.github.io/license)
