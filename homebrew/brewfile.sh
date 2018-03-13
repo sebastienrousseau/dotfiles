@@ -7,25 +7,25 @@ brew update
 brew upgrade
 
 # Add Taps
-brew tap 'aspnet/dnx'
-brew tap 'buildit/buildit-setup'
-brew tap 'buo/cask-upgrade'
-brew tap 'caskroom/cask'
-brew tap 'caskroom/drivers'
-brew tap 'ethereum/ethereum'
-brew tap 'homebrew/bundle'
-brew tap 'homebrew/completions'
-brew tap 'homebrew/core'
-brew tap 'homebrew/dupes'
-brew tap 'homebrew/fuse'
-brew tap 'homebrew/science'
-brew tap 'homebrew/services'
-brew tap 'homebrew/versions'
-brew tap 'neovim/neovim'
-brew tap 'phinze/cask'
-brew tap 'raggi/ale'
-brew tap 'theseal/ssh-askpass'
-brew tap 'thoughtbot/formulae'
+# brew tap 'aspnet/dnx' ## OBSOLETE - https://github.com/aspnet/homebrew-dnx
+brew tap 'buildit/buildit-setup' ## https://github.com/buildit/homebrew-buildit-setup
+brew tap 'buo/cask-upgrade' ## https://github.com/buo/homebrew-cask-upgrade
+brew tap 'caskroom/cask' ## https://caskroom.github.io/
+brew tap 'caskroom/drivers' ## https://github.com/caskroom/homebrew-drivers
+brew tap 'ethereum/ethereum' ## https://github.com/ethereum/homebrew-ethereum
+brew tap 'homebrew/bundle'  ## https://github.com/Homebrew/homebrew-bundle
+# brew tap 'homebrew/completions' ## DEPRECIATED - moved to core - https://github.com/Homebrew/homebrew-completions
+brew tap 'homebrew/core' ## This is Default tap - not sure why its added - https://github.com/Homebrew/brew
+# brew tap 'homebrew/dupes' ## DEPRECIATED - moved to core - https://github.com/Homebrew/homebrew-dupes
+# brew tap 'homebrew/fuse' ## DEPRECIATED - moved to core - https://github.com/Homebrew/homebrew-fuse
+# brew tap 'homebrew/science' ## DEPRECIATED - moved to core - https://github.com/Homebrew/homebrew-science
+brew tap 'homebrew/services' ## https://github.com/Homebrew/homebrew-services
+# brew tap 'homebrew/versions' ## DEPRECIATED - moved to core - https://github.com/Homebrew/homebrew-versions
+brew tap 'neovim/neovim' ## https://github.com/neovim/homebrew-neovim
+# brew tap 'phinze/cask' ## removing cant find info on this tap
+# brew tap 'raggi/ale' ## limited info on whats availabl in tap - https://github.com/raggi/homebrew-ale
+brew tap 'theseal/ssh-askpass' ## https://github.com/theseal/ssh-askpass
+brew tap 'thoughtbot/formulae' ## https://github.com/thoughtbot/homebrew-formulae 
 
 # Add binaries
 brew install ack
