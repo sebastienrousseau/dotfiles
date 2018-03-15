@@ -33,7 +33,7 @@ brew tap 'caskroom/versions' ## https://github.com/caskroom/homebrew-versions
 
 
 brew cask install java
-brew cast install java8 ## added to replace java7, line above installs java 9
+brew cask install java8 ## added to replace java7, line above installs java 9
 
 # Add binaries
 brew install ack
