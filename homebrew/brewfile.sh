@@ -56,7 +56,7 @@ brew install binutils
 brew install binwalk
 brew install boost
 brew install boot2docker
-brew install brew-brew cask install-completion
+#brew install brew-brew cask install-completion ## brew-brew could not find. install-completion???
 brew install cairo
 brew install calc
 brew install chromedriver
