@@ -6,28 +6,51 @@ brew update
 # Upgrade any already-installed formulae.
 brew upgrade
 
+##########################################
 # Add Taps
-brew tap 'aspnet/dnx'
-brew tap 'buildit/buildit-setup'
-brew tap 'buo/cask-upgrade'
-brew tap 'caskroom/cask'
-brew tap 'caskroom/drivers'
-brew tap 'ethereum/ethereum'
-brew tap 'homebrew/bundle'
-brew tap 'homebrew/completions'
-brew tap 'homebrew/core'
-brew tap 'homebrew/dupes'
-brew tap 'homebrew/fuse'
-brew tap 'homebrew/science'
-brew tap 'homebrew/services'
-brew tap 'homebrew/versions'
-brew tap 'neovim/neovim'
-brew tap 'phinze/cask'
-brew tap 'raggi/ale'
-brew tap 'theseal/ssh-askpass'
-brew tap 'thoughtbot/formulae'
+##########################################
 
+# Removed defunct Tap
+# brew tap 'aspnet/dnx' ## OBSOLETE - https://github.com/aspnet/homebrew-dnx
+# brew tap 'homebrew/completions' ## DEPRECIATED - moved to core - https://github.com/Homebrew/homebrew-completions
+# brew tap 'homebrew/dupes' ## DEPRECIATED - moved to core - https://github.com/Homebrew/homebrew-dupes
+# brew tap 'homebrew/fuse' ## DEPRECIATED - moved to core - https://github.com/Homebrew/homebrew-fuse
+# brew tap 'homebrew/science' ## DEPRECIATED - moved to core - https://github.com/Homebrew/homebrew-science
+# brew tap 'homebrew/versions' ## DEPRECIATED - moved to core - https://github.com/Homebrew/homebrew-versions
+# brew tap 'phinze/cask' ## removing cant find info on this tap
+
+brew tap 'buildit/buildit-setup' ## https://github.com/buildit/homebrew-buildit-setup
+brew tap 'buo/cask-upgrade' ## https://github.com/buo/homebrew-cask-upgrade
+brew tap 'caskroom/cask' ## https://caskroom.github.io/
+brew tap 'caskroom/drivers' ## https://github.com/caskroom/homebrew-drivers
+brew tap 'ethereum/ethereum' ## https://github.com/ethereum/homebrew-ethereum
+brew tap 'homebrew/bundle'  ## https://github.com/Homebrew/homebrew-bundle
+brew tap 'homebrew/core' ## This is Default tap - not sure why its added - https://github.com/Homebrew/brew
+brew tap 'homebrew/services' ## https://github.com/Homebrew/homebrew-services
+brew tap 'neovim/neovim' ## https://github.com/neovim/homebrew-neovim
+brew tap 'theseal/ssh-askpass' ## https://github.com/theseal/ssh-askpass
+brew tap 'thoughtbot/formulae' ## https://github.com/thoughtbot/homebrew-formulae 
+brew tap 'raggi/ale' ## limited info on whats availabl in tap - https://github.com/raggi/homebrew-ale
+brew tap 'caskroom/versions' ## https://github.com/caskroom/homebrew-versions
+
+
+## Many of the binaries require Java so to avoid errors and warning Java is being installed first
+brew cask install java
+brew cask install java8 ## added to replace java7, line above installs java 9
+
+##########################################
 # Add binaries
+##########################################
+
+# removed defunct / obsolete binaries and newer / more relevent version being installed below (where applicable)
+#brew install bash-completion ## cannot install bash-completion@2 if this one is installed
+#brew install bash-completion2 ## Same as below
+#brew install brew-brew cask install-completion ## brew-brew could not find. install-completion???
+#brew install gnupg21 ## doesnt exist
+#brew install gnupg@2.1 ## doesnt exist
+
+
+
 brew install ack
 brew install adns
 brew install aircrack-ng
@@ -40,15 +63,11 @@ brew install automake
 brew install awscli
 brew install axel
 brew install bash
-brew install bash-completion
-brew install bash-completion2
 brew install bash-completion@2
 brew install bfg
 brew install binutils
 brew install binwalk
 brew install boost
-brew install boot2docker
-brew install brew-brew cask install-completion
 brew install cairo
 brew install calc
 brew install chromedriver
@@ -69,6 +88,7 @@ brew install dns2tcp
 brew install docker
 brew install docker-compose
 brew install docker-machine
+brew install boot2docker # Moved here (from alphabetical order for cleaner install)
 brew install dockutil
 brew install doxygen
 brew install emacs
@@ -94,8 +114,6 @@ brew install git-flow
 brew install glib
 brew install gmp
 brew install gnupg
-brew install gnupg21
-brew install gnupg@2.1
 brew install gnutls
 brew install go
 brew install gobject-introspection
@@ -308,8 +326,6 @@ brew cask install ios-console
 brew cask install istat-menus
 brew cask install iterm2
 brew cask install itsycal
-brew cask install java
-brew cask install java7
 brew cask install joinme
 brew cask install kaleidoscope
 brew cask install keka

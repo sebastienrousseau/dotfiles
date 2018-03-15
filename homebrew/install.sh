@@ -22,6 +22,8 @@ then
     echo "${os_type} is not supported" >&2
     exit 1
   fi 
+else
+  echo "🍺  Looks like Homebrew is already installed!"
 fi
 
 exit 0
