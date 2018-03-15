@@ -27,6 +27,14 @@ brew tap 'neovim/neovim' ## https://github.com/neovim/homebrew-neovim
 brew tap 'theseal/ssh-askpass' ## https://github.com/theseal/ssh-askpass
 brew tap 'thoughtbot/formulae' ## https://github.com/thoughtbot/homebrew-formulae 
 
+## Newly added
+brew tap 'caskroom/versions' ## https://github.com/caskroom/homebrew-versions
+
+
+
+brew cask install java
+brew cast install java8 ## added to replace java7, line above installs java 9
+
 # Add binaries
 brew install ack
 brew install adns
@@ -40,8 +48,8 @@ brew install automake
 brew install awscli
 brew install axel
 brew install bash
-brew install bash-completion
-brew install bash-completion2
+#brew install bash-completion ## cannot install bash-completion@2 if this one is installed
+#brew install bash-completion2 ## Same as below
 brew install bash-completion@2
 brew install bfg
 brew install binutils
@@ -308,8 +316,10 @@ brew cask install ios-console
 brew cask install istat-menus
 brew cask install iterm2
 brew cask install itsycal
-brew cask install java
-brew cask install java7
+## Moving the java installs above the formula installs as some of these have dependancies on java
+# brew cask install java
+# brew cast install java8 ## added to replace java7, line above installs java 9
+# #brew cask install java7 ## No longer available via brew. -> 6, 8, 9 are available (9 currently default)
 brew cask install joinme
 brew cask install kaleidoscope
 brew cask install keka
