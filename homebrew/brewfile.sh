@@ -102,8 +102,8 @@ brew install git-flow
 brew install glib
 brew install gmp
 brew install gnupg
-brew install gnupg21
-brew install gnupg@2.1
+#brew install gnupg21 ## doesnt exist
+#brew install gnupg@2.1 ## doesnt exist
 brew install gnutls
 brew install go
 brew install gobject-introspection
