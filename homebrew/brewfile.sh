@@ -261,7 +261,24 @@ brew install yarn
 brew install youtube-dl
 brew install zsh
 
+##########################################
+# Properly setting up bash
+##########################################
+# Homebrew's install of bash sets it up in your $PATH as with most brew installs, however 
+# it appears does not change your the users shell to use the new bash install
+# This can cause errors, for example when adding bash-completion to your .bash_pofile
+# The following sets up bash properly with your machine and your user shell 
+# This does require sudo and your user password
+
+# Add the new shell to the list of allowed shells
+sudo bash -c 'echo /usr/local/bin/bash >> /etc/shells'
+# Change to the new shell
+chsh -s /usr/local/bin/bash 
+
+
+##########################################
 # Add softwares
+##########################################
 brew cask install a-better-finder-rename
 brew cask install adobe-creative-cloud
 brew cask install alfred
