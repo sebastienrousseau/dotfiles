@@ -515,6 +515,12 @@ alias memHogsPs='ps wwaxm -o pid,stat,vsize,rss,time,command | head -10'
 #   -----------------------------------------------------
 alias cpu_hogs='ps wwaxr -o pid,stat,%cpu,time,command | head -10'
 
+# Full bash completion for all supported brew installs and then some - 'bash-completion@2'
+# The bash-completion@2 required bash 4.1+ which is installed via brew (apple default bash is very old)
+if [ -f "$(brew --prefix)"/share/bash-completion/bash_completion ]; then 
+	source "$(brew --prefix)"/share/bash-completion/bash_completion
+fi
+
 # The next line updates PATH for the Google Cloud SDK.
 # source $HOME/google-cloud-sdk/path.bash.inc
 # shellcheck disable=SC1090
