@@ -72,12 +72,12 @@ test -f "$HOME/.bashrc" && source "$HOME/.bashrc"
 #   2. Change prompt
 #  ---------------------------------------------------------------------------
 
-# Root prompt (RED)
-SUDO_PS1="$(tput setaf 1)[\\d \\t] @ $(tput setaf 7)\\h(💀 \\u): $"
+# Root prompt (😈)
+SUDO_PS1="\[root@$(hostname -f) 😈: $ "
 export SUDO_PS1
 
-# Normal prompt (WHITE)
-PS1="$(tput setaf 7)[\\d \\t] @ \\h(👽 \\u): $"
+# Normal prompt (👽)
+PS1="$(hostname -f) 👽: $ "
 export PS1
 
 
@@ -199,7 +199,7 @@ function rm() {
 	done
 }
 
-# cd: function to Enable 'cd' into directory aliases
+# cd: Function to Enable 'cd' into directory aliases
 function cd() {
 	if [ ${#1} == 0 ]; then
 		builtin cd
@@ -211,6 +211,56 @@ function cd() {
 	else
 		builtin cd "${1}"
 	fi
+}
+
+# tree: Function to generates a tree view from the current directory
+function tree(){
+	pwd
+	ls -R | grep ":$" |   \
+	sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
+}
+
+# sshKeyGen: Function to generates SSH key
+function sshKeyGen() {
+
+	echo "What's the name of the Key (no spaced please) ? ";
+	read -r name;
+
+	echo "What's the email associated with it? ";
+	read -r email;
+
+	$(ssh-keygen -t rsa -f ~/.ssh/id_rsa_$name -C "$email");
+
+	ssh-add ~/.ssh/id_rsa_$name;
+
+	pbcopy < ~/.ssh/id_rsa_$name.pub;
+
+	echo "SSH Key copied in your clipboard";
+
+}
+
+# filestolower: Function to rename all the files which contain uppercase letters to lowercase in the current folder
+function filestolower(){
+  read -r -p "This will rename all the files and directories to lowercase in the current folder, continue? [y/n]: " letsdothis
+  if [ "$letsdothis" = "y" ] || [ "$letsdothis" = "Y" ]; then
+    for x in `ls`
+      do
+      skip=false
+      if [ -d $x ]; then
+	read -p "'$x' is a folder, rename it? [y/n]: " renamedir
+	if [ "$renamedir" = "n" ] || [ "$renameDir" = "N" ]; then
+	  skip=true
+	fi
+      fi
+      if [ "$skip" == "false" ]; then
+        lc=`echo $x  | tr '[A-Z]' '[a-z]'`
+        if [ $lc != $x ]; then
+          echo "renaming $x -> $lc"
+          mv $x $lc
+        fi
+      fi
+    done
+  fi
 }
 
 # mkcd: Function to combine mkdir and cd
@@ -266,6 +316,29 @@ extract() {
 	else
 		echo "'$1' is not a valid file"
 	fi
+}
+
+# Generates a random password
+function randompwd() {
+	if [ -z $1 ]; then
+		MAXSIZE=10
+	else
+		MAXSIZE=$1
+	fi
+	array1=( 
+	q w e r t y u i o p a s d f g h j k l z x c v b n m Q W E R T Y U I O P A S D 
+	F G H J K L Z X C V B N M 1 2 3 4 5 6 7 8 9 0 
+	\! \@ \$ \% \^ \& \* \! \@ \$ \% \^ \& \* \@ \$ \% \^ \& \* 
+	) 
+	MODNUM=${#array1[*]} 
+	pwd_len=0 
+	while [ $pwd_len -lt $MAXSIZE ] 
+	do 
+	    index=$(($RANDOM%$MODNUM)) 
+	    echo -n "${array1[$index]}" 
+	    ((pwd_len++)) 
+	done 
+	echo 
 }
 
 # mcd: Function to makes new Dir and jumps inside
