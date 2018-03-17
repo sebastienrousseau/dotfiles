@@ -318,27 +318,11 @@ extract() {
 	fi
 }
 
-# Generates a random password
+# randompwd: Function to generates a strong random password of 20 characters
+# https://www.gnu.org/software/sed/manual/html_node/Character-Classes-and-Bracket-Expressions.html
 function randompwd() {
-	if [ -z $1 ]; then
-		MAXSIZE=10
-	else
-		MAXSIZE=$1
-	fi
-	array1=( 
-	q w e r t y u i o p a s d f g h j k l z x c v b n m Q W E R T Y U I O P A S D 
-	F G H J K L Z X C V B N M 1 2 3 4 5 6 7 8 9 0 
-	\! \@ \$ \% \^ \& \* \! \@ \$ \% \^ \& \* \@ \$ \% \^ \& \* 
-	) 
-	MODNUM=${#array1[*]} 
-	pwd_len=0 
-	while [ $pwd_len -lt $MAXSIZE ] 
-	do 
-	    index=$(($RANDOM%$MODNUM)) 
-	    echo -n "${array1[$index]}" 
-	    ((pwd_len++)) 
-	done 
-	echo 
+	cat /dev/urandom | LC_CTYPE=C tr -dc [:alnum:],[:alpha:],[:punct:] | fold -w 256 | head -c 20 | sed -e 's/^0*//'
+	echo
 }
 
 # mcd: Function to makes new Dir and jumps inside
@@ -401,9 +385,11 @@ export ANT_HOME
 MAVEN_HOME="$(brew --prefix)/Cellar/maven/3.5.2/libexec"
 export MAVEN_HOME
 
-export M2=$MAVEN_HOME/bin
+M2=$MAVEN_HOME/bin
+export M2
 
-export GIT_EDITOR="atom"
+GIT_EDITOR="atom"
+export GIT_EDITOR
 
 ANDROID_HOME="$HOME/Library/Android/sdk/"
 export ANDROID_HOME
@@ -418,6 +404,9 @@ PATH="$(brew --prefix)/opt/python/libexec/bin:$PATH"
 export PATH
 
 PATH="$(brew --prefix)/sbin:$PATH"
+export PATH
+
+PATH="/usr/local/opt/imagemagick@6/bin:$PATH"
 export PATH
 
 #  ---------------------------------------------------------------------------
