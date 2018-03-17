@@ -37,11 +37,10 @@ A few options are available:
 
 ## What's in the box
 
-Within the release you'll find the following files and folders s:
+Within the release you'll find the following files and folders:
 
 ```
 .
-├── .bash_profile
 ├── .curlrc
 ├── .eslintrc
 ├── .gitignore
@@ -51,9 +50,14 @@ Within the release you'll find the following files and folders s:
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
 ├── Dotfiles.png
+├── ISSUE_TEMPLATE.md
 ├── Icon\r
 ├── LICENSE
 ├── README.md
+├── bash
+│   ├── .aliases
+│   ├── .bash_profile
+│   └── .bashrc
 ├── homebrew
 │   ├── brewfile.sh
 │   └── install.sh
@@ -77,7 +81,6 @@ We are committed to preserving and fostering a diverse, welcoming community. Ple
 
 *   See [Dotfiles Release](https://github.com/reedia/dotfiles/releases) list.
 
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/reedia/dotfiles/blob/master/LICENSE) file for details
@@ -89,9 +92,9 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 
 [Dotfiles](https://dotfiles.io) is beautifully crafted by these people and a bunch of awesome [contributors](https://github.com/reedia/dotfiles/graphs/contributors)
 
-| [![Sebastien Rousseau](https://avatars0.githubusercontent.com/u/1394998?s=117)](http://sebastienrousseau.co.uk) |
-| :-------------------------------------------------------------------------------------------------------------: |
-| [Sebastien Rousseau](https://github.com/sebastienrousseau)                                                      |
+| [![Sebastien Rousseau](https://avatars0.githubusercontent.com/u/1394998?s=117)](http://sebastienrousseau.co.uk) | [![Graham Colgate](https://avatars0.githubusercontent.com/u/35816108?s=117)](https://github.com/gramtech) |
+| :-------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: |
+| [Sebastien Rousseau](https://github.com/sebastienrousseau) | [Graham Colgate](https://github.com/gramtech) |
 
 ## About Reedia
 
