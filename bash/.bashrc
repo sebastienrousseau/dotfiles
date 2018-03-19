@@ -22,3 +22,8 @@ fi
 if [ -f ~/.bash_aliases ]; then
   source ~/.bash_aliases
 fi
+
+# Source the .bash_completion file.
+if [ -f ~/.bash_completion ]; then
+  source ~/.bash_completion
+fi
