@@ -1,22 +1,29 @@
 #!/bin/bash -l
 
-#  ---------------------------------------------------------------------------  #
-#  																				#
-#  Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.	#
-#  																				#
-#  Sections:																	#
-#  																				#
-#  	1.  Configurations															#
-#  	2.  Change prompt															#
-#  	3.  Bash shell shopt options												#	
-#  	4.  Exports																	#
-#  	5.  History Options															#	
-#  	6.  GOLANG configurations													#
-#  	7.  System Operations & Information											#
-#  	8.  Paths Management														#
-#  	9.  Reminders & Notes														#
-#  																				#
-#  ---------------------------------------------------------------------------  #
+#  ---------------------------------------------------------------------------
+#
+#  ______      _  ______ _ _           
+#  |  _  \    | | |  ___(_) |          
+#  | | | |___ | |_| |_   _| | ___  ___ 
+#  | | | / _ \| __|  _| | | |/ _ \/ __|
+#  | |/ / (_) | |_| |   | | |  __/\__ \
+#  |___/ \___/ \__\_|   |_|_|\___||___/
+#                                                                            
+#  Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
+#  																			
+#  Sections:																
+#  																			
+#  	1.  Configurations
+#  	2.  Change prompt
+#  	3.  Bash shell shopt options
+#  	4.  Exports
+#  	5.  History Options
+#  	6.  GOLANG configurations
+#  	7.  System Operations & Information
+#  	8.  Paths Management
+#  	9.  Reminders & Notes
+#
+#  ---------------------------------------------------------------------------
 
 
 #  ---------------------------------------------------------------------------

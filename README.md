@@ -55,7 +55,7 @@ Within the release you'll find the following files and folders:
 ├── LICENSE
 ├── README.md
 ├── bash
-│   ├── .aliases
+│   ├── .bash_aliases
 │   ├── .bash_profile
 │   └── .bashrc
 ├── homebrew
