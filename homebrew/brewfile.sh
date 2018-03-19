@@ -63,7 +63,8 @@ brew install automake
 brew install awscli
 brew install axel
 brew install bash
-brew install bash-completion@2
+brew install bash-completion
+#brew install bash-completion@2 ## Further setup required. see .bash_completion file
 brew install bfg
 brew install binutils
 brew install binwalk
@@ -262,23 +263,6 @@ brew install youtube-dl
 brew install zsh
 
 ##########################################
-# Properly setting up bash
-##########################################
-# Homebrew's install of bash sets it up in your $PATH as with most brew installs, however 
-# it does not change your user shell to use the new bash install
-# This can cause errors, for example when adding bash-completion@2 to your .bash_pofile
-# The following sets up brew bash your user shell 
-# This does require sudo and your user password
-# This change can be descrutive so the below is commented out and you can add in as required or do not use completion@2:
-# see here for details - https://github.com/Homebrew/homebrew-core/issues/25370
-
-# # Add the new shell to the list of allowed shells
-# sudo bash -c 'echo /usr/local/bin/bash >> /etc/shells'
-# # Change to the new shell
-# chsh -s /usr/local/bin/bash 
-
-
-##########################################
 # Add softwares
 ##########################################
 brew cask install a-better-finder-rename
@@ -310,7 +294,7 @@ brew cask install chefdk
 brew cask install cleanmymac
 brew cask install cocoapods-app
 brew cask install codekit
-brew cask install colorpicker
+# brew cask install colorpicker ## removing, not found on install
 brew cask install colorsnapper
 brew cask install coteditor
 brew cask install docker
@@ -394,6 +378,7 @@ brew cask install vagrant
 brew cask install vagrant-manager
 brew cask install versions
 brew cask install virtualbox
+brew cask install virtualbox-extension-pack
 brew cask install visual-studio-code
 brew cask install vlc
 brew cask install webpquicklook
