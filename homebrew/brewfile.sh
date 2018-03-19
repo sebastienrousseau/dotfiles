@@ -378,6 +378,7 @@ brew cask install vagrant
 brew cask install vagrant-manager
 brew cask install versions
 brew cask install virtualbox
+brew cask install virtualbox-extension-pack
 brew cask install visual-studio-code
 brew cask install vlc
 brew cask install webpquicklook
