@@ -294,7 +294,7 @@ brew cask install chefdk
 brew cask install cleanmymac
 brew cask install cocoapods-app
 brew cask install codekit
-brew cask install colorpicker
+# brew cask install colorpicker ## removing, not found on install
 brew cask install colorsnapper
 brew cask install coteditor
 brew cask install docker
