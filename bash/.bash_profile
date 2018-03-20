@@ -375,12 +375,16 @@ httpDebug() { /usr/bin/curl "$@" -o /dev/null -w "dns: %{time_namelookup} connec
 # The next line updates PATH for the Google Cloud SDK.
 # source $HOME/google-cloud-sdk/path.bash.inc
 # shellcheck disable=SC1090
-source "$(brew --prefix)"/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc
+if [ -f "$(brew --prefix)"/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc ]; then 
+	source "$(brew --prefix)"/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc
+fi
 
 # The next line enables bash completion for gcloud.
 # source $HOME/google-cloud-sdk/completion.bash.inc
 # shellcheck disable=SC1090
-source "$(brew --prefix)"/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc
+if [ -f "$(brew --prefix)"/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc ]; then 
+	source "$(brew --prefix)"/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc
+fi
 
 # Setting JAVA environments
 JAVA_HOME='/Library/Java/JavaVirtualMachines/jdk-9.0.4.jdk/Contents/Home'
