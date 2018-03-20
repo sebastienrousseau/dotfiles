@@ -1,6 +1,6 @@
 {
     "name": "reedia-dotfiles",
-    "version": "0.1.71",
+    "version": "0.1.85",
     "description": "Dotfiles - A set of Mac OS X configuration files - Simply designed to fit your shell life.",
     "keywords": [
         "dotfiles",
@@ -14,6 +14,9 @@
     ],
     "repository": "https://github.com/reedia/dotfiles.git",
     "author": "Reedia Limited (https://github.com/reedia)",
+    "contributors": [
+        "Graham Colgate (https://github.com/gramtech)"
+    ],
     "license": "MIT",
     "license_URI": "http://www.opensource.org/licenses/mit-license.php",
     "bugs": {

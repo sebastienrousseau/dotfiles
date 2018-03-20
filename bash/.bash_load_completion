@@ -23,7 +23,7 @@
 #   1. Bash Completion
 #  ---------------------------------------------------------------------------
 
-# set bash completion for support of macOS and brew bash versions (V 3+)
+# Set bash completion for support of macOS and brew bash versions (V 3+)
 # this requires the 'bash-completion' brew install 
 
 if [ -f /usr/local/etc/bash_completion ]; then
