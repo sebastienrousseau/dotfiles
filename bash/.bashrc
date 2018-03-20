@@ -25,5 +25,5 @@ fi
 
 # Source the .bash_completion file.
 if [ -f ~/.bash_completion ]; then
-  source ~/.bash_completion
+  source ~/.bash_load_completion
 fi
