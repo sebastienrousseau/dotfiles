@@ -53,7 +53,8 @@
 alias sudo='sudo '
 
 # Common
-alias reload='~/.bash_profile'
+alias reload='reset; source ~/.bashrc'
+alias reloads='source ~/.bashrc &> /dev/null'
 
 # Purging Xcode DerivedData
 alias purge='rm -rf ~/library/Developer/Xcode/DerivedData/*'
@@ -77,8 +78,10 @@ alias ll='ls -lisa'
 alias locale='locale -a | grep UTF-8'
 alias lr='ls -R | grep ":$" | sed -e '\''s/:$//'\'' -e '\''s/[^-][^\/]*\//--/g'\'' -e '\''s/^/   /'\'' -e '\''s/-/|/'\'' | less'
 alias ls='ls -FGlAhp'
+alias lsd='ls -l | grep "^d"'   #list only directories
 alias mate='open -a "Visual Studio Code"'
 alias mkdir='mkdir -pv'
+alias p='pwd'
 alias path='echo -e ${PATH//:/\\n}' # path:         Echo all executable Paths
 alias preview="open -a Preview"
 alias r='reload'

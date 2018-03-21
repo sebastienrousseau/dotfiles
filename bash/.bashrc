@@ -19,11 +19,15 @@ if [[ $- != *i* ]] ; then
 fi
 
 # Source the .bash_aliases file.
-if [ -f ~/.bash_aliases ]; then
-  source ~/.bash_aliases
+if [[ -f ~/.bash_aliases ]] ; then
+  # File may not exist, so don't follow for shellcheck linting (SC1090).
+  # shellcheck source=/dev/null
+  source "$HOME/.bash_aliases"
 fi
 
 # Source the .bash_load_completion file.
-if [ -f ~/.bash_load_completion ]; then
-  source ~/.bash_load_completion
+if [[ -f ~/.bash_load_completion ]]; then
+  # File may not exist, so don't follow for shellcheck linting (SC1090).
+  # shellcheck source=/dev/null
+  source "$HOME/.bash_load_completion"
 fi
