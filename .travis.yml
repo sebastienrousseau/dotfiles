@@ -4,9 +4,9 @@ notifications:
   email: false
 after_success:
   - export GIT_TAG=build-$TRAVIS_BRANCH-$(date -u "+%Y-%m-%d")-$TRAVIS_BUILD_NUMBER
-  - export TRAVIS_COMMIT_MSG="$(git log --format=%B --no-merges -n 1)
+  - export TRAVIS_COMMIT_MSG=$(git log --format=%B --no-merges -n 1)
   - echo -n $GIT_TAG > v0.1.$TRAVIS_BUILD_NUMBER
-  - git commit -m "Set build VERSION number to v0.1."$TRAVIS_BUILD_NUMBER
+  - git commit -m "Set build VERSION number to v0.1."$TRAVIS_BUILD_NUMBER --allow-empty
   - git tag $GIT_TAG -a -m "Generated tag from TravisCI build $TRAVIS_BUILD_NUMBER"
   - git push --quiet https://$GITHUBKEY@github.com/reedia/dotfiles $GIT_TAG > /dev/null 2>&1  
 deploy:
@@ -16,6 +16,6 @@ deploy:
   api_key:
     secure: uTEGlCyxmVlq3xTYKdlRSttmhdXsGskn9gnBjbGUfzKd1V0h3Pg7AJ9AQixbJ5U2Yvg25QPEx3n3jmMCQowbAGqCRUe/C2nbo6AtugbqfDTKCq7b1BdQpM/tiX0/viyZDCLZ1kI/hI18DuiveSmi4XUMO2uKrId2/yJ2qk2kKLGq442HO6m/kPF867RqhNpbybgsy7l+7iEx7z5vLFYPYZybK7tc9I63XTrSHdyHGyCqEF0/PVqlPWSqeBlCasiQbK5BYvfmumfzpDffKMo1r4/SJH07hp3xt/IgUTZZ+6yA/MOUSZENgXWy44OU0RZam6PTHtJ+k6mOU4GTEghTwCeelmUpi1BNMQo2EcPBxaEP7UMUg154N6xAK2pRcVumfFuDFsztX7kUBIwJ/vVtYItByaw0fqOe+k3QBvLgYaBu07bgOcWy+bBJim0Rz8lIZkvpjhBipbFR6INCKK7DYKSIXOd1AUiEvOVxLs8R+Vc8VxU4lasTU5AYG/X75deGOcJNUX5gZMi0f/nMFbP1OPyNGWAHh4GZ4nHUUWNTrt9keM+1gVm+0nbo5Cj+M+L0Rr3yf7mlSmclL9cTE/kwYOl+7THT+t8DsuROoEymWrbP83eZ8JlJ7kingxhbA1hgfqUbPk+inC8y/al2BepbOw8OKiqp/MUOnZzzjFx5aAM=
   name: Dotfiles v0.1.$TRAVIS_BUILD_NUMBER
-  body: "<strong>Change Log:</strong><br />Release created on $(date +'%d/%m/%Y') at $(date +'%T')<br />A set of Mac OS X configuration files. Designed to fit your web life.<br />Integrated commit:'$TRAVIS_COMMIT_MSG' at $(date +'%Y-%m-%d %H:%M:%S')"
+  body: "<strong>Change Log:</strong><br />Release created on $(date +'%d/%m/%Y') at $(date +'%T')<br />A set of Mac OS X configuration files. Designed to fit your web life.<br />Integrated commit:${TRAVIS_COMMIT_MSG} at $(date +'%Y-%m-%d %H:%M:%S')"
   on:
     repo: reedia/dotfiles
