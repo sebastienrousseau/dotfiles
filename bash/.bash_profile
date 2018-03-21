@@ -80,11 +80,11 @@ test -f "$HOME/.bashrc" && source "$HOME/.bashrc"
 #  ---------------------------------------------------------------------------
 
 # Root prompt (😈)
-SUDO_PS1="\[root@$(hostname -f) 😈: $ "
+SUDO_PS1="\[root@$(hostname -s) 😈: $ "
 export SUDO_PS1
 
 # Normal prompt (👽)
-PS1="$(hostname -f) 👽: $ "
+PS1="$(hostname -s) 👽: $ "
 export PS1
 
 
