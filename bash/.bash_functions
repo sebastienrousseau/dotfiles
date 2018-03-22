@@ -59,6 +59,11 @@ function cd() {
 	fi
 }
 
+# matrix: Function to Enable Matrix Effect in the terminal
+matrix() {
+	echo -e "\\e[1;40m" ; clear ; while :; do echo $LINES $COLUMNS $(( $RANDOM % $COLUMNS)) $(( $RANDOM % 72 )) ;sleep 0.05; done|awk '{ letters="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()"; c=$4; letter=substr(letters,c,1);a[$3]=0;for (x in a) {o=a[x];a[x]=a[x]+1; printf "\033[%s;%sH\033[2;32m%s",o,x,letter; printf "\033[%s;%sH\033[1;37m%s\033[0;0H",a[x],x,letter;if (a[x] >= $1) { a[x]=0; } }}' 
+}
+
 # tree: Function to generates a tree view from the current directory
 if [ ! -e /usr/local/bin/tree ]; then
 	function tree(){
@@ -224,6 +229,60 @@ ii() {
 	echo -e "\\n${RED}DNS Configuration:$NC "
 	scutil --dns
 	echo
+}
+
+# Show hidden system and dotfile files
+function showhiddenfiles() {
+  defaults write com.apple.Finder AppleShowAllFiles YES
+  osascript -e 'tell application "Finder" to quit'
+  sleep 0.25
+  osascript -e 'tell application "Finder" to activate'
+}
+
+# Hide hidden system and dotfile files
+function hidehiddenfiles() {
+  defaults write com.apple.Finder AppleShowAllFiles NO
+  osascript -e 'tell application "Finder" to quit'
+  sleep 0.25
+  osascript -e 'tell application "Finder" to activate'
+}
+
+## hammer a service with curl for a given number of times
+## usage: curlhammer $url
+function curlhammer () {
+  bot "about to hammer $1 with $2 curls ⇒";
+  echo "curl -k -s -D - $1 -o /dev/null | grep 'HTTP/1.1' | sed 's/HTTP\/1.1 //'"
+  for i in {1..$2}
+  do
+    curl -k -s -D - $1 -o /dev/null | grep 'HTTP/1.1' | sed 's/HTTP\/1.1 //'
+  done
+  bot "done"
+}
+
+## curlheader will return only a specific response header or all response headers for a given URL
+## usage: curlheader $header $url
+## usage: curlheader $url
+function curlheader() {
+  if [[ -z "$2" ]]; then
+    echo "curl -k -s -D - $1 -o /dev/null"
+    curl -k -s -D - $1 -o /dev/null:
+  else
+    echo "curl -k -s -D - $2 -o /dev/null | grep $1:"
+    curl -k -s -D - $2 -o /dev/null | grep $1:
+  fi
+}
+
+## get the timings for a curl to a URL
+## usage: curltime $url
+function curltime(){
+  curl -w "   time_namelookup:  %{time_namelookup}\n\
+      time_connect:  %{time_connect}\n\
+   time_appconnect:  %{time_appconnect}\n\
+  time_pretransfer:  %{time_pretransfer}\n\
+     time_redirect:  %{time_redirect}\n\
+time_starttransfer:  %{time_starttransfer}\n\
+--------------------------\n\
+        time_total:  %{time_total}\n" -o /dev/null -s "$1"
 }
 
 # httpDebug: Function to download a web page and show info on what took time
