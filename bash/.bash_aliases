@@ -254,8 +254,8 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 #  	11.  Get OS X Software Updates, update Homebrew itself, and upgrade installed Homebrew packages
 #  ---------------------------------------------------------------------------
 
-alias update="sudo softwareupdate -i -a; brew cu --all; brew doctor; brew prune; clear;"
-
+# Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages
+alias update='sudo softwareupdate -i -a; brew cu --all; brew doctor; brew prune; clear; mas upgrade; npm install npm -g; npm update -g; sudo gem update --system; sudo gem update; sudo gem cleanup'
 
 #  ---------------------------------------------------------------------------
 #  	12.  Shorter commands for `Homebrew`.
