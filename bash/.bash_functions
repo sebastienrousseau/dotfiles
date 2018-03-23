@@ -14,7 +14,10 @@
 #  Sections:																
 #  																			
 #  	1. Addding and Removing Files and Folders
-#  	2. Functions, File and Folder Management
+#  	2. Compression, Decompress and Archive Functions
+#  	3. General Function (could be better sorted)
+#  	4. Network and Debugging Function 
+#  	5. Fun Functions
 #
 #  ---------------------------------------------------------------------------
 
@@ -74,20 +77,46 @@ function rd() {
 	rm -rf "$@"
 }
 
+# trash: Function to moves a file to the MacOS trash
+trash() { 
+	command mv "$@" ~/.Trash; 
+}
+
 #  ---------------------------------------------------------------------------
-#   2. Functions, File and Folder Management
+#   2. Compression, Decompress and Archive Functions
 #  ---------------------------------------------------------------------------
 
 # zipf: Function to create a ZIP archive of a folder
 zipf() { zip -r "$1".zip "$1"; }
 
+# extract: Function to extract most know archives with one command
+extract() {
+	if [ -f $1 ]; then
+		case $1 in
+		*.tar.bz2) tar xjf $1 ;;
+		*.tar.gz) tar xzf $1 ;;
+		*.bz2) bunzip2 $1 ;;
+		*.rar) unrar e $1 ;;
+		*.gz) gunzip $1 ;;
+		*.tar) tar xf $1 ;;
+		*.tbz2) tar xjf $1 ;;
+		*.tgz) tar xzf $1 ;;
+		*.zip) unzip $1 ;;
+		*.Z) uncompress $1 ;;
+		*.7z) 7z x $1 ;;
+		*) echo "'$1' cannot be extracted via extract()" ;;
+		esac
+	else
+		echo "'$1' is not a valid file"
+	fi
+}
+
+#  ---------------------------------------------------------------------------
+#   3. General Function (could be better sorted)
+#  ---------------------------------------------------------------------------
+
 # numFiles: Function to count of non-hidden files in current dir
 alias numFiles='echo $(ls -1 | wc -l)' 
-
-# matrix: Function to Enable Matrix Effect in the terminal
-matrix() {
-	echo -e "\\e[1;40m" ; clear ; while :; do echo $LINES $COLUMNS $(( $RANDOM % $COLUMNS)) $(( $RANDOM % 72 )) ;sleep 0.05; done|awk '{ letters="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()"; c=$4; letter=substr(letters,c,1);a[$3]=0;for (x in a) {o=a[x];a[x]=a[x]+1; printf "\033[%s;%sH\033[2;32m%s",o,x,letter; printf "\033[%s;%sH\033[1;37m%s\033[0;0H",a[x],x,letter;if (a[x] >= $1) { a[x]=0; } }}' 
-}
 
 # tree: Function to generates a tree view from the current directory
 if [ ! -e /usr/local/bin/tree ]; then
@@ -179,37 +208,12 @@ function stopwatch(){
    done
 }
 
-# extract: Function to extract most know archives with one command
-extract() {
-	if [ -f $1 ]; then
-		case $1 in
-		*.tar.bz2) tar xjf $1 ;;
-		*.tar.gz) tar xzf $1 ;;
-		*.bz2) bunzip2 $1 ;;
-		*.rar) unrar e $1 ;;
-		*.gz) gunzip $1 ;;
-		*.tar) tar xf $1 ;;
-		*.tbz2) tar xjf $1 ;;
-		*.tgz) tar xzf $1 ;;
-		*.zip) unzip $1 ;;
-		*.Z) uncompress $1 ;;
-		*.7z) 7z x $1 ;;
-		*) echo "'$1' cannot be extracted via extract()" ;;
-		esac
-	else
-		echo "'$1' is not a valid file"
-	fi
-}
-
 # randompwd: Function to generates a strong random password of 20 characters
 # https://www.gnu.org/software/sed/manual/html_node/Character-Classes-and-Bracket-Expressions.html
 function randompwd() {
 	cat /dev/urandom | LC_CTYPE=C tr -dc [:alnum:],[:alpha:],[:punct:] | fold -w 256 | head -c 20 | sed -e 's/^0*//'
 	echo
 }
-
-# trash: Function to moves a file to the MacOS trash
-trash() { command mv "$@" ~/.Trash; }
 
 # ql: Function to open any file in MacOS Quicklook Preview
 ql() { qlmanage -p "$*" >&/dev/null; }   
@@ -253,6 +257,10 @@ function hidehiddenfiles() {
   osascript -e 'tell application "Finder" to activate'
 }
 
+#  ---------------------------------------------------------------------------
+#   4. Network and Debugging Functions
+#  ---------------------------------------------------------------------------
+
 ## hammer a service with curl for a given number of times
 ## usage: curlhammer $url
 function curlhammer () {
@@ -293,3 +301,12 @@ time_starttransfer:  %{time_starttransfer}\n\
 
 # httpDebug: Function to download a web page and show info on what took time
 httpDebug() { /usr/bin/curl "$@" -o /dev/null -w "dns: %{time_namelookup} connect: %{time_connect} pretransfer: %{time_pretransfer} starttransfer: %{time_starttransfer} total: %{time_total}\\n"; }
+
+#  ---------------------------------------------------------------------------
+#   5. Fun Functions
+#  ---------------------------------------------------------------------------
+
+# matrix: Function to Enable Matrix Effect in the terminal
+matrix() {
+	echo -e "\\e[1;40m" ; clear ; while :; do echo $LINES $COLUMNS $(( $RANDOM % $COLUMNS)) $(( $RANDOM % 72 )) ;sleep 0.05; done|awk '{ letters="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()"; c=$4; letter=substr(letters,c,1);a[$3]=0;for (x in a) {o=a[x];a[x]=a[x]+1; printf "\033[%s;%sH\033[2;32m%s",o,x,letter; printf "\033[%s;%sH\033[1;37m%s\033[0;0H",a[x],x,letter;if (a[x] >= $1) { a[x]=0; } }}' 
+}
