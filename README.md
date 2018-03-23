@@ -72,58 +72,6 @@ Within the release you'll find the following files and folders:
 
 ```
 
-## Terminal Cheatsheet
-
-The Terminal on macOS offers quite an amount of functionality, but most of it is hard to discover unless you already know what you’re looking for. So here’s a quick cheat sheet explaining unique functions with their corresponding key combos:
-
-### Marks
-
-Marks allow you to mark certain lines in the output, and allow you to jump between different parts of the output.
-
-By default, every time you hit enter on your prompt, Terminal will automatically insert a mark for you. You can configure this in the `Edit` menu, under `Marks` with the option `Automatically Mark Prompt Lines`.
-
-Marks are visualised in the Terminal window as light grey square brackets (They are not, however, part of the output).
-
-*   `Cmd-⬆`: Jump to previous mark
-*   `Cmd-⬇`: Jump to next mark
-*   `Cmd-Shift-A`: Selects the output between the current marks
-*   `Cmd-Enter`: `Enter`, and will always create a mark
-*   `Cmd-Shift-Enter`: `Enter`, but will never create a mark
-*   `Cmd-U`: Create mark
-*   `Cmd-Shift-U`: Remove mark
-*   `Cmd-L`: Clear screen to previous mark
-
-### Bookmarks
-
-Similar to marks, they can optionally be named, and are more useful to denote larger sections of the output. They are denoted by light grey bars.
-
-*   `Cmd-Shift-M`: Insert Bookmark
-*   `Cmd-Option-U`: Mark current line as bookmark
-*   `Cmd-Shift-Option-M`: Insert named bookmark
-*   `Cmd-Option-⬆`: Jump to previous bookmark
-*   `Cmd-Option-⬇`: Jump to next bookmark
-*   `Cmd-Option-L`: Clear to previous bookmark
-
-### Panes
-
-View different parts of the scrollback buffer of the same terminal.
-
-*   `Cmd-D`: Split window into panes
-*   `Cmd-Shift-D`: close split pane
-
-## Miscellaneous
-
-*   `Cmd-K`: Clear everything
-*   `Cmd-Option-K`: Clear scroll back (everything except what you see on the screen)
-*   `Cmd-Option-O`: Toggle use of option as meta key
-*   `Cmd-Ctrl-V`: Paste escaped text. Useful for pasting e.g. paths containing whitespace.
-*   `Cmd-Shift-Option-C`: Copy as plain text
-*   `Cmd-Option-PageUp` or `PageDown`: Scroll one line up/down
-*   `Cmd-[` or `]`: Switch between windows
-*   `Cmd-Shift-[` or `]`: Switch between tabs
-
-(Some of this I learned from mjtsai’s post [Mac Terminal Tips](http://mjtsai.com/blog/2016/09/26/mac-terminal-tips/), which is a great jumping off point for further interesting things the Terminal can do)
-
 ## Contributing
 
 Please read carefully through our [Contributing Guidelines](https://github.com/reedia/dotfiles/blob/master/CONTRIBUTING.md) for further details on the process for submitting pull requests to us.
