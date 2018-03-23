@@ -88,7 +88,6 @@ alias r='reload'
 alias repairperms='sudo /usr/libexec/repair_packages --repair --standard-pkgs --volume /'
 alias xcode='open -a xcode'
 
-
 #  ---------------------------------------------------------------------------
 #  	3.  Quicker navigation
 #  ---------------------------------------------------------------------------
@@ -164,6 +163,7 @@ alias ione-ios-iPad-Retina="ionic emulate ios --target='iPad-Retina'"
 #  	8.  Git SCM Cheats
 #  ---------------------------------------------------------------------------
 
+alias clear="printf '\33c\e[3J'"
 alias c='clear'
 alias flush="sudo dscacheutil -flushcache"
 alias g=git
