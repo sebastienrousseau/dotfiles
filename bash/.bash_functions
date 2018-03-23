@@ -26,7 +26,7 @@
 #  ---------------------------------------------------------------------------
 
 # rm: Function to make 'rm' move files to the trash
-function rm() {
+rm() {
 	local path
 	for path in "$@"; do
 		# ignore any arguments
@@ -43,7 +43,7 @@ function rm() {
 }
 
 # cd: Function to Enable 'cd' into directory aliases
-function cd() {
+cd() {
 	if [ ${#1} == 0 ]; then
 		builtin cd
 	elif [ -d "${1}" ]; then
@@ -63,7 +63,7 @@ mkcd() {
 }
 
 # md: Function to create a new directory and enter it
-function md() {
+md() {
 	mkdir -p "$@" && cd "$@" || exit 
 }
 
@@ -73,7 +73,7 @@ mcd() {
 }
 
 # rd: Function to remove a direcory and its files
-function rd() {
+rd() {
 	rm -rf "$@"
 }
 
@@ -120,7 +120,7 @@ alias numFiles='echo $(ls -1 | wc -l)'
 
 # tree: Function to generates a tree view from the current directory
 if [ ! -e /usr/local/bin/tree ]; then
-	function tree(){
+	tree(){
 		pwd
 		ls -R | grep ":$" |   \
 		sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
@@ -128,7 +128,7 @@ if [ ! -e /usr/local/bin/tree ]; then
 fi
 
 # sshKeyGen: Function to generates SSH key
-function sshKeyGen() {
+sshKeyGen() {
 
 	echo "What's the name of the Key (no spaced please) ? ";
 	read -r name;
@@ -147,7 +147,7 @@ function sshKeyGen() {
 }
 
 # filestolower: Function to rename all the files which contain uppercase letters to lowercase in the current folder
-function filestolower(){
+filestolower(){
   read -r -p "This will rename all the files and directories to lowercase in the current folder, continue? [y/n]: " letsdothis
   if [ "$letsdothis" = "y" ] || [ "$letsdothis" = "Y" ]; then
     for x in `ls`
@@ -193,7 +193,7 @@ logout() {
 }
 
 # countdown: Function for countdown
-function countdown(){
+countdown(){
    date1=$((`date +%s` + $1));
    while [ "$date1" -ne `date +%s` ]; do
      echo -ne "$(date -u --date @$((`date +%s` - $date1)) +%H:%M:%S)\r";
@@ -201,7 +201,7 @@ function countdown(){
 }
 
 # logout: Function for a stopwatch
-function stopwatch(){
+stopwatch(){
   date1=`date +%s`;
    while true; do
     echo -ne "$(date -u --date @$((`date +%s` - $date1)) +%H:%M:%S)\r";
@@ -210,7 +210,7 @@ function stopwatch(){
 
 # randompwd: Function to generates a strong random password of 20 characters
 # https://www.gnu.org/software/sed/manual/html_node/Character-Classes-and-Bracket-Expressions.html
-function randompwd() {
+randompwd() {
 	cat /dev/urandom | LC_CTYPE=C tr -dc [:alnum:],[:alpha:],[:punct:] | fold -w 256 | head -c 20 | sed -e 's/^0*//'
 	echo
 }
@@ -242,7 +242,7 @@ ii() {
 }
 
 # Show hidden system and dotfile files
-function showhiddenfiles() {
+showhiddenfiles() {
   defaults write com.apple.Finder AppleShowAllFiles YES
   osascript -e 'tell application "Finder" to quit'
   sleep 0.25
@@ -250,7 +250,7 @@ function showhiddenfiles() {
 }
 
 # Hide hidden system and dotfile files
-function hidehiddenfiles() {
+hidehiddenfiles() {
   defaults write com.apple.Finder AppleShowAllFiles NO
   osascript -e 'tell application "Finder" to quit'
   sleep 0.25
@@ -263,7 +263,7 @@ function hidehiddenfiles() {
 
 ## hammer a service with curl for a given number of times
 ## usage: curlhammer $url
-function curlhammer () {
+curlhammer () {
   bot "about to hammer $1 with $2 curls ⇒";
   echo "curl -k -s -D - $1 -o /dev/null | grep 'HTTP/1.1' | sed 's/HTTP\/1.1 //'"
   for i in {1..$2}
@@ -276,7 +276,7 @@ function curlhammer () {
 ## curlheader will return only a specific response header or all response headers for a given URL
 ## usage: curlheader $header $url
 ## usage: curlheader $url
-function curlheader() {
+curlheader() {
   if [[ -z "$2" ]]; then
     echo "curl -k -s -D - $1 -o /dev/null"
     curl -k -s -D - $1 -o /dev/null:
@@ -288,7 +288,7 @@ function curlheader() {
 
 ## get the timings for a curl to a URL
 ## usage: curltime $url
-function curltime(){
+curltime(){
   curl -w "   time_namelookup:  %{time_namelookup}\n\
       time_connect:  %{time_connect}\n\
    time_appconnect:  %{time_appconnect}\n\
