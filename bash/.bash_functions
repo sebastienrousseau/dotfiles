@@ -13,20 +13,14 @@
 #  																			
 #  Sections:																
 #  																			
-#  	1. Functions, File and Folder Management
+#  	1. Addding and Removing Files and Folders
+#  	2. Functions, File and Folder Management
 #
 #  ---------------------------------------------------------------------------
 
-
 #  ---------------------------------------------------------------------------
-#   1. Functions, File and Folder Management
+#   1. Addding and Removing Files and Folders
 #  ---------------------------------------------------------------------------
-
-# zipf: Function to create a ZIP archive of a folder
-zipf() { zip -r "$1".zip "$1"; }
-
-# numFiles: Function to count of non-hidden files in current dir
-alias numFiles='echo $(ls -1 | wc -l)' 
 
 # rm: Function to make 'rm' move files to the trash
 function rm() {
@@ -58,6 +52,37 @@ function cd() {
 		builtin cd "${1}"
 	fi
 }
+
+# mkcd: Function to combine mkdir and cd
+mkcd() {
+	mkdir "$1"
+	cd "$1" || exit
+}
+
+# md: Function to create a new directory and enter it
+function md() {
+	mkdir -p "$@" && cd "$@" || exit 
+}
+
+# mcd: Function to makes new Dir and jumps inside
+mcd() { 
+	mkdir -p "$1" && cd "$1" || exit; 
+}
+
+# rd: Function to remove a direcory and its files
+function rd() {
+	rm -rf "$@"
+}
+
+#  ---------------------------------------------------------------------------
+#   2. Functions, File and Folder Management
+#  ---------------------------------------------------------------------------
+
+# zipf: Function to create a ZIP archive of a folder
+zipf() { zip -r "$1".zip "$1"; }
+
+# numFiles: Function to count of non-hidden files in current dir
+alias numFiles='echo $(ls -1 | wc -l)' 
 
 # matrix: Function to Enable Matrix Effect in the terminal
 matrix() {
@@ -121,12 +146,6 @@ aliasc() {
   alias | grep "^${1}=" | awk -F= '{ print $2 }' | sed "s/^'//" | sed "s/'$//"
 }
 
-# mkcd: Function to combine mkdir and cd
-mkcd() {
-	mkdir "$1"
-	cd "$1" || exit
-}
-
 # tosu: Function to combine touch and osu
 tosu() {
 	touch "$1"
@@ -136,16 +155,6 @@ tosu() {
 # size: Function to check a file size
 size() {
 	stat -f '%z' "$1"
-}
-
-# md: Function to create a new directory and enter it
-function md() {
-	mkdir -p "$@" && cd "$@" || exit 
-}
-
-# rd: Function to remove a direcory and its files
-function rd() {
-	rm -rf "$@"
 }
 
 # logout: Function to logout from OS X via the Terminal
@@ -198,9 +207,6 @@ function randompwd() {
 	cat /dev/urandom | LC_CTYPE=C tr -dc [:alnum:],[:alpha:],[:punct:] | fold -w 256 | head -c 20 | sed -e 's/^0*//'
 	echo
 }
-
-# mcd: Function to makes new Dir and jumps inside
-mcd() { mkdir -p "$1" && cd "$1" || exit; }
 
 # trash: Function to moves a file to the MacOS trash
 trash() { command mv "$@" ~/.Trash; }
