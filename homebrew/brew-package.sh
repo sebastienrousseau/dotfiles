@@ -30,8 +30,9 @@ brew upgrade
 # Many of the binaries require Java so to avoid errors and warning Java 
 # is being installed first
 #  ---------------------------------------------------------------------------
-brew cask install java
-brew cask install java8 ## added to replace java7, line above installs java 9
+brew cask install java ## Java 10
+brew cask install java8 
+brew cask install java9
 
 
 #  ---------------------------------------------------------------------------
