@@ -290,3 +290,6 @@ if [ -f "$HOME/exec -l /bin/bash/google-cloud-sdk/completion.bash.inc" ]; then s
 # You can set that up like this:
 #   PERL_MM_OPT="INSTALL_BASE=$HOME/perl5" cpan local::lib
 #   echo 'eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"' >> ~/.bash_profile
+
+# Init jenv
+if which jenv > /dev/null; then eval "$(jenv init -)"; fi
