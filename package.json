@@ -25,6 +25,7 @@
     "bugs": {
         "url": "https://github.com/sebastienrousseau/dotfiles/issues"
     },
+    "preinstall":"npm config set package-lock false",
     "scripts": {},
     "devDependencies": {},
     "dependencies": {
