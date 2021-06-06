@@ -2,15 +2,14 @@
   <img src="Dotfiles.png" alt="Dotfiles Logo" title="Dotfiles Logo">
 </p>
 
-
 [![NPM](https://nodei.co/npm/reedia-dotfiles.png)](https://nodei.co/npm/reedia-dotfiles/)
-
 
 [![npm version](https://badge.fury.io/js/reedia-dotfiles.svg)](https://badge.fury.io/js/reedia-dotfiles)
 [![Build Status](https://travis-ci.org/reedia/dotfiles.svg?branch=master)](https://travis-ci.org/reedia/dotfiles)
 [![Packagist](https://img.shields.io/badge/license-MIT-blue.svg)](https://skeletonic.github.io/license)
 
 # Dotfiles
+
 ## Mac OS X Dotfiles
 
 Simply designed to fit your shell life.
@@ -35,8 +34,8 @@ Simply designed to fit your shell life.
 
 A few options are available:
 
--   Download the latest [release](https://github.com/sebastienrousseau/dotfiles/releases/latest)
--   Or simply clone the main repository: `git clone https://github.com/sebastienrousseau/dotfiles.git`
+- Download the latest [release](https://github.com/sebastienrousseau/dotfiles/releases/latest)
+- Or simply clone the main repository: `git clone https://github.com/sebastienrousseau/dotfiles.git`
 
 ## What's in the box
 
@@ -82,21 +81,22 @@ Within the release you'll find the following files and folders:
 Please read carefully through our [Contributing Guidelines](https://github.com/sebastienrousseau/dotfiles/blob/master/CONTRIBUTING.md) for further details on the process for submitting pull requests to us.
 
 ## Code of Conduct
+
 We are committed to preserving and fostering a diverse, welcoming community. Please read our [Code of Conduct](https://github.com/sebastienrousseau/dotfiles/blob/master/CODE_OF_CONDUCT.md).
 
 ## Our Values
-1.  We believe perfection must consider everything.
-2.  We take our passion beyond Code into our daily practices.
-3.  We are just obsessed about creating and delivering exceptional solutions.
+
+1. We believe perfection must consider everything.
+2. We take our passion beyond Code into our daily practices.
+3. We are just obsessed about creating and delivering exceptional solutions.
 
 ## History
 
-*   See [Dotfiles Release](https://github.com/sebastienrousseau/dotfiles/releases) list.
+- See [Dotfiles Release](https://github.com/sebastienrousseau/dotfiles/releases) list.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/sebastienrousseau/dotfiles/blob/master/LICENSE) file for details
-
 
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Freedia%2Fdotfiles.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Freedia%2Fdotfiles?ref=badge_large)
 
