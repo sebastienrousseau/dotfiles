@@ -1,6 +1,6 @@
 {
     "name": "@sebastienrousseau/dotfiles",
-    "version": "0.2.442",
+    "version": "0.2.443",
     "description": "Dotfiles - A set of Mac OS X configuration files - Simply designed to fit your shell life.",
     "keywords": [
         "dotfiles",
@@ -14,7 +14,7 @@
     ],
     "publishConfig": {
         "registry": "https://npm.pkg.github.com/"
-      },
+    },
     "repository": "https://github.com/sebastienrousseau/dotfiles.git",
     "author": "RSebastien Rousseau (https://github.com/sebastienrousseau)",
     "contributors": [
