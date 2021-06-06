@@ -2,7 +2,7 @@
 
 Thank you so much for wanting to contribute to Dotfiles! There are a couple ways to help out.
 
-## Evangelise!
+## Evangelise
 
 Just tell people about Dotfiles. We believe that a bigger, more involved community makes for a better product, and that better products make the world a better place. We can always use more feedback and learn from you.
 
@@ -30,7 +30,7 @@ Warning us of a bug is possibly the single most valuable contribution you can ma
 
 Contributing code is one of the more difficult ways to contribute to Dotfiles.
 
-**Feature Requests**
+#### Feature Requests
 
 Filling feature requests is one of the most popular ways to contribute to Dotfiles.
 
@@ -38,23 +38,24 @@ Is there some feature request that you'd like to code up yourself? Is there a fe
 
 Here's how to contribute code for a new feature to Dotfiles. Pull Requests allow you to share your own code with us, and we can merge it into the main repo.
 
-**Adding Code**
+#### Adding Code
 
 1) Fork the repo.
 
 2) Clone the repo **you forked** by running
+
 ```sh
-$ git clone https://github.com/YOUR-USERNAME-HERE/dotfiles.git
+git clone https://github.com/YOUR-USERNAME-HERE/dotfiles.git
 ```
 
-**Fixing an Issue**
+#### Fixing an Issue
 
 Have you found a solution to an issue? Here is how you can submit your code to Dotfiles.
 
 1) Fork the repo, and refer above for how to change up code.
 
-1) Head to your local fork of the repo, and click the "New Pull Request" button.
+2) Head to your local fork of the repo, and click the "New Pull Request" button.
 
-2) Include a title that is straight to the point.
+3) Include a title that is straight to the point.
 
-3) Wait for someone to review the pull request, and then merge your pull request!
+4) Wait for someone to review the pull request, and then merge your pull request!
