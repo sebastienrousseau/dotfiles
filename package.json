@@ -26,5 +26,8 @@
         "url": "https://github.com/sebastienrousseau/dotfiles/issues"
     },
     "scripts": {},
-    "devDependencies": {}
+    "devDependencies": {},
+    "dependencies": {
+        "npm": "^7.16.0"
+    }
 }

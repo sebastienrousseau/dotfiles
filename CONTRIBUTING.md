@@ -42,11 +42,7 @@ Here's how to contribute code for a new feature to Dotfiles. Pull Requests allow
 
 1) Fork the repo.
 
-2) Clone the repo **you forked** by running
-
-```sh
-git clone https://github.com/YOUR-USERNAME-HERE/dotfiles.git
-```
+2) Clone the repo **you forked** by running `git clone https://github.com/YOUR-USERNAME-HERE/dotfiles.git`
 
 #### Fixing an Issue
 
