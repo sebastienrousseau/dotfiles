@@ -2,10 +2,8 @@
   <img src="Dotfiles.png" alt="Dotfiles Logo" title="Dotfiles Logo">
 </p>
 
-[![NPM](https://nodei.co/npm/reedia-dotfiles.png)](https://nodei.co/npm/https://nodei.co/npm/@sebastienrousseau/dotfiles/)
-
-[![npm version](https://badge.fury.io/js/reedia-dotfiles.svg)](https://badge.fury.io/js/@sebastienrousseau/dotfiles/)
-[![Build Status](https://travis-ci.org/reedia/dotfiles.svg?branch=master)](https://travis-ci.org/@sebastienrousseau/dotfiles/)
+[![npm version](https://badge.fury.io/js/%40sebastienrousseau%2Fdotfiles.svg)](https://badge.fury.io/js/%40sebastienrousseau%2Fdotfiles)
+[![Build Status](https://travis-ci.org/@sebastienrousseau/dotfiles.svg?branch=master)](https://travis-ci.org/@sebastienrousseau/dotfiles/)
 [![Packagist](https://img.shields.io/badge/license-MIT-blue.svg)](https://skeletonic.github.io/license)
 
 # Dotfiles
