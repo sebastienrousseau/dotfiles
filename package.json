@@ -25,12 +25,13 @@
     "bugs": {
         "url": "https://github.com/sebastienrousseau/dotfiles/issues"
     },
-    "preinstall":"npm config set package-lock false",
+    "preinstall": "npm config set package-lock false",
     "scripts": {
         "test": "mocha"
-      },
+    },
     "devDependencies": {},
     "dependencies": {
+        "mocha": "^8.4.0",
         "npm": "^7.16.0"
     }
 }
