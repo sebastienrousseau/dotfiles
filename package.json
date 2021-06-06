@@ -26,7 +26,7 @@
         "url": "https://github.com/sebastienrousseau/dotfiles/issues"
     },
     "scripts": {
-        "test": "mocha"
+        "test": "echo \"Error: no test specified\" && exit 1"
     },
     "devDependencies": {},
     "dependencies": {
