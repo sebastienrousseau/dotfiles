@@ -26,7 +26,9 @@
         "url": "https://github.com/sebastienrousseau/dotfiles/issues"
     },
     "preinstall":"npm config set package-lock false",
-    "scripts": {},
+    "scripts": {
+        "test": "mocha"
+      },
     "devDependencies": {},
     "dependencies": {
         "npm": "^7.16.0"
