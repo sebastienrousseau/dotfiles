@@ -30,8 +30,6 @@
     },
     "devDependencies": {},
     "dependencies": {
-        "chai": "^4.3.4",
-        "mocha": "^8.4.0",
         "npm": "^7.16.0"
     }
 }
