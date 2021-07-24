@@ -108,10 +108,10 @@ $RECYCLE.BIN/
 .idea
 .lock-wscript
 .node_repl_history
-.node-*
 .npm
 .nyc_output
 .sonarlint
+.vscode
 Desktop.ini
 Icon
 Network Trash Folder
@@ -122,3 +122,4 @@ coverage
 ehthumbs.db
 lib-cov
 yarn.lock
+Gemfile.lock
