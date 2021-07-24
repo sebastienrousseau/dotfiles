@@ -2,7 +2,7 @@
 
 ![Banner representing the Dotfiles Library](./media/dotfiles.svg)
 
-## Step 1: Are you in the right place?
+## Step 1: Are you in the right place
 
 -   For issues or feature requests related to the code **in this repository** file a [Github issue](https://github.com/reedia/dotfiles/issues).
 
