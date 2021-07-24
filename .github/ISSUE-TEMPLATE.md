@@ -19,9 +19,9 @@
 
 ## Step 4: Highlights the steps to reproduce
 
--
--
--
+-   1
+-   2
+-   3
   
 ## Step 5: Observed Results
 
