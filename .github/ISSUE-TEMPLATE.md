@@ -1,6 +1,6 @@
 # Issue template
 
-![Banner representing the Dotfiles Library](./media/dotfiles.svg)
+![Banner representing the Dotfiles Library](/media/dotfiles.svg)
 
 ## Step 1: Are you in the right place
 

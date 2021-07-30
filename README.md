@@ -1,6 +1,6 @@
 # macOS Shell Dotfiles
 
-![Banner representing the Dotfiles Library](./media/dotfiles.svg)
+![Banner representing the Dotfiles Library](/media/dotfiles.svg)
 
 [![Build Status](https://travis-ci.org/@sebastienrousseau/dotfiles.svg?branch=master)](https://travis-ci.org/@sebastienrousseau/dotfiles/)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/a5d4c83f3dfd4dee8cfc9e363af24974)](https://app.codacy.com/gh/sebastienrousseau/dotfiles?utm_source=github.com&utm_medium=referral&utm_content=sebastienrousseau/dotfiles&utm_campaign=Badge_Grade_Settings)

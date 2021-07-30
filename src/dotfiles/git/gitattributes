@@ -1,0 +1,22 @@
+#
+#  ____        _   _____ _ _
+# |  _ \  ___ | |_|  ___(_) | ___  ___
+# | | | |/ _ \| __| |_  | | |/ _ \/ __|
+# | |_| | (_) | |_|  _| | | |  __/\__ \
+# |____/ \___/ \__|_|   |_|_|\___||___/
+#
+# DotFiles v0.2.447
+# https://dotfiles.io
+#
+# Description: 
+#
+# Copyright (c) Sebastien Rousseau 2021. All rights reserved
+# Licensed under the MIT license
+#
+
+
+# Automatically detect text files and convert to unix line endings
+* text=auto eol=lf
+
+# Disable diff for minified files
+*.min.* -diff
