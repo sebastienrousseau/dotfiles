@@ -1,3 +1,4 @@
+
 # Dotfiles aliases
 
 ![Banner representing the Dotfiles Library](/media/dotfiles.svg)
@@ -420,7 +421,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hred:mm | `heroku redis:maxmemory` | Set the key eviction policy. |
 | hred:mt | `heroku redis:maintenance` | Manage maintenance windows. |
 | hred:p | `heroku redis:promote` | Sets DATABASE as your REDIS_URL. |
-| hred:sr | `heroku redis:stats-reset` | Reset all stats covered by RESETSTAT (https://redis.io/commands/config-resetstat). |
+| hred:sr | `heroku redis:stats-reset` | Reset all stats covered by RESETSTAT (<https://redis.io/commands/config-resetstat>). |
 | hred:t | `heroku redis:timeout` | Set the number of seconds to wait before killing idle connections. |
 | hred:w | `heroku redis:wait` | Wait for Redis instance to be available. |
 
