@@ -1,3 +1,4 @@
+
 # Dotfiles aliases
 
 ![Banner representing the Dotfiles Library](/media/dotfiles.svg)
@@ -331,3 +332,4 @@ that file will be open with `acroread`.
 - Opens C, C++, Tex and text files using editor specified by the variable `$EDITOR`
 - Opens images using image viewer specified by the variable `$XIVIEWER`
 - Opens videos and other media using mplayer
+  
