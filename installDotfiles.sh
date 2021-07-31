@@ -62,17 +62,17 @@ waitForProcess () {
     terminate=$3
 
     echo "${Cyan}[INFO]${Reset}  ${White}$(date) | Waiting for '$processName' processes to end"
-    while ps aux | grep "$processName" | grep -v grep &>/dev/null; do
+    while ps aux | grep "$processName" | grep -v grep >log /dev/null; do
 
-        if [[ $terminate == "true" ]]; then
+        if [ "$terminate" = "true" ]; then
             echo "${Cyan}[INFO]${Reset}  ${White}$(date) | $appName running, terminating $processpath ...${Reset}"
             pkill -f "$processName"
             return
         fi
 
         # If we've been passed a delay we should use it, otherwise we'll create a random delay each run
-        if [[ ! $fixedDelay ]]; then
-            delay=$(( RANDOM % 50 + 10 ))
+        if [ ! "$fixedDelay" ]; then
+            delay=$( RANDOM % 50 + 10 )
         else
             delay=$fixedDelay
         fi
@@ -97,7 +97,7 @@ downloadDotfiles () {
 
   cd "$tempDir" || exit
   curl -f -s --connect-timeout 30 --retry 5 --retry-delay 60 -L -J -O "$webUrl/$fileVersion"
-  if [ $? == 0 ]; then
+  if [ $? = 0 ]; then
 
           # We have downloaded a file, we need to know what the file is called and what type of file it is
           tempSearchPath="$tempDir/*"
@@ -115,7 +115,8 @@ downloadDotfiles () {
               # We can't tell what this is by the file name, lets look at the metadata
               echo "${Red}[ERROR]${Reset} ${White}$(date) | Unknown file type $f, analysing metadata${Reset}"
               metadata=$(file "$tempFile")
-              if [[ "$metadata" == *"Zip archive data"* ]]; then
+              if [ "$metadata" = 'Zip archive data' ]; 
+              then
                   packageType="ZIP"
                   mv "$tempFile" "$tempDir/$fileVersion"
                   tempFile="$tempDir/$fileVersion"
@@ -123,7 +124,7 @@ downloadDotfiles () {
               ;;
           esac
 
-          if [[ ! $packageType ]]; then
+          if [ ! $packageType ]; then
               echo "${Red}[ERROR]${Reset} ${White}Failed to determine temp file type $metadata${Reset}"
               rm -rf "$tempDir"
           else
@@ -142,7 +143,7 @@ downloadDotfiles () {
 # backupDotfiles: Create a Backup folder
 backupDotfiles () {
   echo "${Cyan}[INFO]${Reset}  ${White}$(date) | Starts a one-time backup operation of the existing Dotfiles${Reset}"
-  if [[ ! -d "$backupDirectory" ]]; then
+  if [ ! -d "$backupDirectory" ]; then
     mkdir -p "$backupDirectory"
   else
     echo "${Yellow}[WARNING]${Reset} ${White}$(date) | The Dotfiles backup folder seems to already exists.${Reset}"
@@ -165,7 +166,7 @@ recoverDotfiles () {
 
 # startLog: start logging - Output to log file and STDOUT
 startLog () {
-    if [[ ! -d "$HOME/$logsDirectory" ]]; then
+    if [ ! -d "$HOME/$logsDirectory" ]; then
         
         echo "${Cyan}[INFO]${Reset} ${White}$(date) | Creating $logsDirectory to store Dotfiles logs.${Reset}"
         
