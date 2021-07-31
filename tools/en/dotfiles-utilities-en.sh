@@ -19,10 +19,11 @@
 # Load configuration files
 # shellcheck disable=SC2154
 # shellcheck disable=SC2002 # Don't warn about UUOC
-# shellcheck disable=SC3000-SC4000
+# shellcheck disable=SC3000
+# shellcheck disable=SC4000
 # shellcheck disable=SC1091
-source "tools/en/dotfiles-colors-en.sh"
-source "tools/en/dotfiles-variables-en.sh"
+./dotfiles-colors-en.sh
+./dotfiles-variables-en.sh
 
 pid () {
   eval "${1}=$(sh -c 'echo ${PPID}')"
