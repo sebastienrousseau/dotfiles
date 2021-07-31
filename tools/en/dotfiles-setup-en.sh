@@ -19,10 +19,11 @@
 # Load configuration files
 # shellcheck disable=SC2154
 # shellcheck disable=SC2002
-# shellcheck disable=SC3000-SC4000
+# shellcheck disable=SC3000
+# shellcheck disable=SC4000
 # shellcheck disable=SC1091
-source "tools/en/dotfiles-colors-en.sh"
-source "tools/en/dotfiles-utilities-en.sh"
+./dotfiles-colors-en.sh
+./dotfiles-utilities-en.sh
 
 # Create the setup function
 setup (){
