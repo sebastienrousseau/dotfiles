@@ -323,5 +323,3 @@ that file will be open with `acroread`.
 | tar     | `tar tf`    | Lists files inside a .tar file      |
 | tar.gz  | `echo`      | Lists files inside a .tar.gz file   |
 | ace     | `unace l`   | Lists files inside a .ace file      |
-
-  
