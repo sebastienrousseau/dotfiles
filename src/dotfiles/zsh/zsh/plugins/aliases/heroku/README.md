@@ -5,48 +5,48 @@
 
 This aliases.zsh file creates helpful shortcut aliases for many commonly used commands.
 
-## Table of Contents.
+## Table of Contents
 
 - [Dotfiles aliases](#dotfiles-aliases)
-  - [Table of Contents.](#table-of-contents)
-    - [1. Heroku Core aliases.](#1-heroku-core-aliases)
-      - [1.1 Heroku Access aliases.](#11-heroku-access-aliases)
-      - [1.2 Heroku Add-ons aliases.](#12-heroku-add-ons-aliases)
-      - [1.3 Heroku Apps aliases.](#13-heroku-apps-aliases)
-      - [1.4 Heroku Auth 2fa aliases.](#14-heroku-auth-2fa-aliases)
-      - [1.5 Heroku Authorizations aliases.](#15-heroku-authorizations-aliases)
-      - [1.6 Heroku Build packs aliases.](#16-heroku-build-packs-aliases)
-      - [1.7 Heroku Certs aliases.](#17-heroku-certs-aliases)
-      - [1.8 Heroku ci aliases.](#18-heroku-ci-aliases)
-      - [1.9 Heroku config aliases.](#19-heroku-config-aliases)
-    - [2. Heroku Configuration aliases.](#2-heroku-configuration-aliases)
-      - [2.1 Heroku Container aliases.](#21-heroku-container-aliases)
-      - [2.2 Heroku Domains aliases.](#22-heroku-domains-aliases)
-      - [2.3 Heroku Drains aliases.](#23-heroku-drains-aliases)
-      - [2.4 Heroku Dyno aliases.](#24-heroku-dyno-aliases)
-      - [2.5 Heroku Features aliases.](#25-heroku-features-aliases)
-      - [2.6 Heroku Git aliases.](#26-heroku-git-aliases)
-      - [2.7 Heroku Keys aliases.](#27-heroku-keys-aliases)
-      - [2.9 Heroku Labs aliases.](#29-heroku-labs-aliases)
-    - [3. Heroku Advanced aliases.](#3-heroku-advanced-aliases)
-      - [3.1 Heroku Local aliases.](#31-heroku-local-aliases)
-      - [3.2 Heroku Maintenance aliases.](#32-heroku-maintenance-aliases)
-      - [3.3 Heroku Members aliases.](#33-heroku-members-aliases)
-      - [3.4 Heroku Postgres aliases.](#34-heroku-postgres-aliases)
-      - [3.5 Heroku Pipelines aliases.](#35-heroku-pipelines-aliases)
-      - [3.6 Heroku Plugins aliases.](#36-heroku-plugins-aliases)
-      - [3.7 Heroku `ps` aliases.](#37-heroku-ps-aliases)
-      - [3.8 Heroku redis aliases.](#38-heroku-redis-aliases)
-      - [3.9 Heroku Releases aliases.](#39-heroku-releases-aliases)
-      - [3.10.1 Heroku Spaces aliases.](#3101-heroku-spaces-aliases)
-      - [3.10.2 Heroku Run aliases.](#3102-heroku-run-aliases)
-      - [3.10.4 Heroku Sessions aliases.](#3104-heroku-sessions-aliases)
-      - [3.10.5 Heroku Spaces aliases.](#3105-heroku-spaces-aliases)
-      - [3.10.6 Heroku Webhooks aliases.](#3106-heroku-webhooks-aliases)
+  - [Table of Contents](#table-of-contents)
+    - [1. Heroku Core aliases](#1-heroku-core-aliases)
+      - [1.1 Heroku Access aliases](#11-heroku-access-aliases)
+      - [1.2 Heroku Add-ons aliases](#12-heroku-add-ons-aliases)
+      - [1.3 Heroku Apps aliases](#13-heroku-apps-aliases)
+      - [1.4 Heroku Auth 2fa aliases](#14-heroku-auth-2fa-aliases)
+      - [1.5 Heroku Authorizations aliases](#15-heroku-authorizations-aliases)
+      - [1.6 Heroku Build packs aliases](#16-heroku-build-packs-aliases)
+      - [1.7 Heroku Certs aliases](#17-heroku-certs-aliases)
+      - [1.8 Heroku ci aliases](#18-heroku-ci-aliases)
+      - [1.9 Heroku config aliases](#19-heroku-config-aliases)
+    - [2. Heroku Configuration aliases](#2-heroku-configuration-aliases)
+      - [2.1 Heroku Container aliases](#21-heroku-container-aliases)
+      - [2.2 Heroku Domains aliases](#22-heroku-domains-aliases)
+      - [2.3 Heroku Drains aliases](#23-heroku-drains-aliases)
+      - [2.4 Heroku Dyno aliases](#24-heroku-dyno-aliases)
+      - [2.5 Heroku Features aliases](#25-heroku-features-aliases)
+      - [2.6 Heroku Git aliases](#26-heroku-git-aliases)
+      - [2.7 Heroku Keys aliases](#27-heroku-keys-aliases)
+      - [2.9 Heroku Labs aliases](#29-heroku-labs-aliases)
+    - [3. Heroku Advanced aliases](#3-heroku-advanced-aliases)
+      - [3.1 Heroku Local aliases](#31-heroku-local-aliases)
+      - [3.2 Heroku Maintenance aliases](#32-heroku-maintenance-aliases)
+      - [3.3 Heroku Members aliases](#33-heroku-members-aliases)
+      - [3.4 Heroku Postgres aliases](#34-heroku-postgres-aliases)
+      - [3.5 Heroku Pipelines aliases](#35-heroku-pipelines-aliases)
+      - [3.6 Heroku Plugins aliases](#36-heroku-plugins-aliases)
+      - [3.7 Heroku `ps` aliases](#37-heroku-ps-aliases)
+      - [3.8 Heroku redis aliases](#38-heroku-redis-aliases)
+      - [3.9 Heroku Releases aliases](#39-heroku-releases-aliases)
+      - [3.10.1 Heroku Spaces aliases](#3101-heroku-spaces-aliases)
+      - [3.10.2 Heroku Run aliases](#3102-heroku-run-aliases)
+      - [3.10.4 Heroku Sessions aliases](#3104-heroku-sessions-aliases)
+      - [3.10.5 Heroku Spaces aliases](#3105-heroku-spaces-aliases)
+      - [3.10.6 Heroku Webhooks aliases](#3106-heroku-webhooks-aliases)
 
-### 1. Heroku Core aliases.
+### 1. Heroku Core aliases
 
-#### 1.1 Heroku Access aliases.
+#### 1.1 Heroku Access aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -74,7 +74,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | h:ulk | `heroku unlock`         | Unlock an app so any team member can join. |
 | h:w | `heroku which`            | Show which plugin a command is in. |
 
-#### 1.2 Heroku Add-ons aliases.
+#### 1.2 Heroku Add-ons aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -93,7 +93,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | had:u | `heroku addons:upgrade ` | Change add-on plan. |
 | had:w | `heroku addons:wait` | Show provisioning status of the add-ons on the app. |
 
-#### 1.3 Heroku Apps aliases.
+#### 1.3 Heroku Apps aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -115,7 +115,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hap:t | `heroku apps:transfer` | Transfer applications to another user or team. |
 | hap:ulck | `heroku apps:unlock` | unlock an app so any team member can join. |
 
-#### 1.4 Heroku Auth 2fa aliases.
+#### 1.4 Heroku Auth 2fa aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -126,7 +126,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | h2fa:s | `heroku auth:2fa` | Check 2fa status. |
 | h2fa:t | `heroku auth:token` | Outputs current CLI authentication token. |
 
-#### 1.5 Heroku Authorizations aliases.
+#### 1.5 Heroku Authorizations aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -137,7 +137,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hauthz:ro | `heroku authorizations:rotate` | Updates an OAuth authorization token. |
 | hauthz:u | `heroku authorizations:update` | Updates an OAuth authorization. |
 
-#### 1.6 Heroku Build packs aliases.
+#### 1.6 Heroku Build packs aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -150,7 +150,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hbps:s | `heroku buildpacks:search` | Search for build-packs. |
 | hbps:v | `heroku buildpacks:versions` | List versions of a build-pack. |
 
-#### 1.7 Heroku Certs aliases.
+#### 1.7 Heroku Certs aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -167,7 +167,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hc:r | `heroku certs:remove` | Remove an SSL certificate from an app. |
 | hc:u | `heroku certs:update` | Update an SSL certificate on an app. |
 
-#### 1.8 Heroku ci aliases.
+#### 1.8 Heroku ci aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -184,7 +184,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hci:r | `heroku ci:run` | Run tests against current directory. |
 | hci:r2 | `heroku ci:rerun` | Rerun tests against current directory. |
 
-#### 1.9 Heroku config aliases.
+#### 1.9 Heroku config aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -195,7 +195,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hcl:s | `heroku clients:rotate` | Rotate OAuth client secret. |
 | hcl:u | `heroku clients:update` | Update OAuth client. |
 
-### 2. Heroku Configuration aliases.
+### 2. Heroku Configuration aliases
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
 | hcf:e | `heroku config:edit` | Interactively edit config vars. |
@@ -204,7 +204,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hcf:u | `heroku config:unset` | Unset one or more config vars. |
 | hcf:v | `heroku config` | Display the config vars for an app. |
 
-#### 2.1 Heroku Container aliases.
+#### 2.1 Heroku Container aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -217,7 +217,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hct:rm | `heroku container:rm` | Remove the process type from your app. |
 | hct:run | `heroku container:run` | Builds, then runs the docker image locally. |
 
-#### 2.2 Heroku Domains aliases.
+#### 2.2 Heroku Domains aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -229,7 +229,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hdo:u | `heroku domains:update` | Update a domain to use a different SSL certificate on an app. |
 | hdo:w | `heroku domains:wait` | Wait for domain to be active for an app. |
 
-#### 2.3 Heroku Drains aliases.
+#### 2.3 Heroku Drains aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -237,7 +237,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hdr:a | `heroku drains:add` | Adds a log drain to an app. |
 | hdr:r | `heroku drains:remove` | Removes a log drain from an app. |
 
-#### 2.4 Heroku Dyno aliases.
+#### 2.4 Heroku Dyno aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -247,7 +247,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hdy:sc | `heroku dyno:scale` | Scale dyno quantity up or down. |
 | hdy:st | `heroku dyno:stop` | Stop app dyno. |
 
-#### 2.5 Heroku Features aliases.
+#### 2.5 Heroku Features aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -256,14 +256,14 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hfeat:e | `heroku features:enable` | Enables an app feature. |
 | hfeat:i | `heroku features:info` | Display information about a feature. |
 
-#### 2.6 Heroku Git aliases.
+#### 2.6 Heroku Git aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
 | hgit:c | `heroku git:clone` | Clones a heroku app to your local machine at DIRECTORY (defaults to app name). |
 | hgit:r | `heroku git:remote` | Adds a git remote to an app repo. |
 
-#### 2.7 Heroku Keys aliases.
+#### 2.7 Heroku Keys aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -272,7 +272,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hk:cl | `heroku keys:clear` | Remove all SSH keys for current user. |
 | hk:r | `heroku keys:remove` | Remove an SSH key from the user. |
 
-#### 2.9 Heroku Labs aliases.
+#### 2.9 Heroku Labs aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -281,9 +281,9 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hlab:e | `heroku labs:enable` | Enables an experimental feature. |
 | hlab:i | `heroku labs:info` | Show feature info. |
 
-### 3. Heroku Advanced aliases.
+### 3. Heroku Advanced aliases
 
-#### 3.1 Heroku Local aliases.
+#### 3.1 Heroku Local aliases
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
 | hloc | `heroku local` | Run heroku app locally. |
@@ -291,7 +291,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hloc:v | `heroku local:version` | Display node-foreman version. |
 | hloc:lck | `heroku lock` | Prevent team members from joining an app. |
 
-#### 3.2 Heroku Maintenance aliases.
+#### 3.2 Heroku Maintenance aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -299,7 +299,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hmt:off | `heroku maintenance:off` | take the app out of maintenance mode. |
 | hmt:on | `heroku maintenance:on` | put the app into maintenance mode. |
 
-#### 3.3 Heroku Members aliases.
+#### 3.3 Heroku Members aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -308,7 +308,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hmb:r | `heroku members:remove` | removes a user from a team. |
 | hmb:s | `heroku members:set` | sets a members role in a team. |
 
-#### 3.4 Heroku Postgres aliases.
+#### 3.4 Heroku Postgres aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -361,7 +361,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hpg:ww | `heroku pg:wait` | Blocks until database is available. |
 | pg:uf | `heroku pg:unfollow` | Stop a replica from following and make it a writeable database. |
 
-#### 3.5 Heroku Pipelines aliases.
+#### 3.5 Heroku Pipelines aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -380,7 +380,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hpipe:tt | `heroku pipelines:transfer` | Transfer ownership of a pipeline. |
 | hpipe:u | `heroku pipelines:update` | Update the app's stage in a pipeline. |
 
-#### 3.6 Heroku Plugins aliases.
+#### 3.6 Heroku Plugins aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -390,7 +390,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hplugs:ui | `heroku plugins:uninstall` | Removes a plugin from the CLI. |
 | hplugs:u | `heroku plugins:update` | Update installed plugins. |
 
-#### 3.7 Heroku `ps` aliases.
+#### 3.7 Heroku `ps` aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -409,7 +409,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hps:t   | `heroku ps:type` | Manage dyno sizes. |
 | hps:w   | `heroku ps:wait` | Wait for all dynos to be running latest version after a release. |
 
-#### 3.8 Heroku redis aliases.
+#### 3.8 Heroku redis aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -425,7 +425,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hred:t | `heroku redis:timeout` | Set the number of seconds to wait before killing idle connections. |
 | hred:w | `heroku redis:wait` | Wait for Redis instance to be available. |
 
-#### 3.9 Heroku Releases aliases.
+#### 3.9 Heroku Releases aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -434,28 +434,28 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hrel:o | `heroku releases:output` | View the release command output. |
 | hrel:r | `heroku releases:rollback` | Rollback to a previous release. |
 
-#### 3.10.1 Heroku Spaces aliases.
+#### 3.10.1 Heroku Spaces aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
 | hrva:d | `heroku reviewapps:disable` | Disable review apps and/or settings on an existing pipeline. |
 | hrva:e | `heroku reviewapps:enable` | Enable review apps and/or settings on an existing pipeline. |
 
-#### 3.10.2 Heroku Run aliases.
+#### 3.10.2 Heroku Run aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
 | hrun | `heroku run` | Run a one-off process inside a heroku dyno. |
 | hrun:d | `heroku run:detached` | Run a detached dyno, where output is sent to your logs. |
 
-#### 3.10.4 Heroku Sessions aliases.
+#### 3.10.4 Heroku Sessions aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
 | hsessions | `heroku sessions` | List your OAuth sessions. |
 | hsessions:d | `heroku sessions:destroy` | Delete (logout) OAuth session by ID. |
 
-#### 3.10.5 Heroku Spaces aliases.
+#### 3.10.5 Heroku Spaces aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
@@ -480,7 +480,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 | hsp:v   | `heroku spaces:vpn:wait` | Wait for VPN Connection to be created. |
 | hsp:w   | `heroku spaces:wait` | Wait for a space to be created. |
 
-#### 3.10.6 Heroku Webhooks aliases.
+#### 3.10.6 Heroku Webhooks aliases
 
 | Alias     | Command             | Description                                |
 |-----------|---------------------|--------------------------------------------|
