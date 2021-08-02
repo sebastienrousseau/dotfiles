@@ -29,7 +29,6 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
   - [File extension aliases](#file-extension-aliases)
     - [Reading Docs](#reading-docs)
     - [Listing files inside a packed file](#listing-files-inside-a-packed-file)
-    - [Some other features](#some-other-features)
 
 ### 1. System detection utility
 
@@ -325,10 +324,4 @@ that file will be open with `acroread`.
 | tar.gz  | `echo`      | Lists files inside a .tar.gz file   |
 | ace     | `unace l`   | Lists files inside a .ace file      |
 
-### Some other features
-
-- Opens urls in terminal using browser specified by the variable `$BROWSER`
-- Opens C, C++, Tex and text files using editor specified by the variable `$EDITOR`
-- Opens images using image viewer specified by the variable `$XIVIEWER`
-- Opens videos and other media using mplayer
   
