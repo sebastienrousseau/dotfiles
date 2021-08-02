@@ -1,5 +1,5 @@
 
-# Dotfiles aliases
+# Dotfiles aliases.
 
 ![Banner representing the Dotfiles Library](/media/dotfiles.svg)
 
@@ -7,7 +7,7 @@ This aliases.zsh file creates helpful shortcut aliases for many commonly used co
 
 ## Table of Contents.
 
-- [Dotfiles aliases](#dotfiles-aliases)
+- [Dotfiles aliases.](#dotfiles-aliases)
   - [Table of Contents.](#table-of-contents)
     - [1. System detection utility.](#1-system-detection-utility)
       - [1.1 Checking the aliases already installed.](#11-checking-the-aliases-already-installed)
