@@ -2,7 +2,7 @@
 
 ![Banner representing the Dotfiles Library](/media/dotfiles.svg)
 
-[![Build Status](https://travis-ci.org/@sebastienrousseau/dotfiles.svg?branch=master)](https://travis-ci.org/@sebastienrousseau/dotfiles/)
+[![Node.js CI](https://github.com/sebastienrousseau/dotfiles/actions/workflows/node.js.yml/badge.svg)](https://github.com/sebastienrousseau/dotfiles/actions/workflows/node.js.yml)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/a5d4c83f3dfd4dee8cfc9e363af24974)](https://app.codacy.com/gh/sebastienrousseau/dotfiles?utm_source=github.com&utm_medium=referral&utm_content=sebastienrousseau/dotfiles&utm_campaign=Badge_Grade_Settings)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://skeletonic.github.io/license)
 [![npm version](https://badge.fury.io/js/%40sebastienrousseau%2Fdotfiles.svg)](https://badge.fury.io/js/%40sebastienrousseau%2Fdotfiles)
