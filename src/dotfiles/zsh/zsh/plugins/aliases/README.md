@@ -1,43 +1,43 @@
 
-# Dotfiles aliases.
+# Dotfiles aliases
 
 ![Banner representing the Dotfiles Library](/media/dotfiles.svg)
 
 This aliases.zsh file creates helpful shortcut aliases for many commonly used commands.
 
-## Table of Contents.
+## Table of Contents
 
-- [Dotfiles aliases.](#dotfiles-aliases)
-  - [Table of Contents.](#table-of-contents)
-    - [1. System detection utility.](#1-system-detection-utility)
-      - [1.1 Checking the aliases already installed.](#11-checking-the-aliases-already-installed)
-      - [1.2 Swapping to the collection of GNU find, xargs, and locate.](#12-swapping-to-the-collection-of-gnu-find-xargs-and-locate)
-        - [Aliases for the GNU coreutils (Core GNU utilities) programs.](#aliases-for-the-gnu-coreutils-core-gnu-utilities-programs)
-    - [2. System tools and system information aliases.](#2-system-tools-and-system-information-aliases)
-      - [2.1 System tools aliases.](#21-system-tools-aliases)
-      - [2.2 System information aliases.](#22-system-information-aliases)
-      - [2.3 Interactive mode commands.](#23-interactive-mode-commands)
-        - [Interactive mode aliases.](#interactive-mode-aliases)
+- [Dotfiles aliases](#dotfiles-aliases)
+  - [Table of Contents](#table-of-contents)
+    - [1. System detection utility](#1-system-detection-utility)
+      - [1.1 Checking the aliases already installed](#11-checking-the-aliases-already-installed)
+      - [1.2 Swapping to the collection of GNU find, xargs, and locate](#12-swapping-to-the-collection-of-gnu-find-xargs-and-locate)
+        - [Aliases for the GNU coreutils (Core GNU utilities) programs](#aliases-for-the-gnu-coreutils-core-gnu-utilities-programs)
+    - [2. System tools and system information aliases](#2-system-tools-and-system-information-aliases)
+      - [2.1 System tools aliases](#21-system-tools-aliases)
+      - [2.2 System information aliases](#22-system-information-aliases)
+      - [2.3 Interactive mode commands](#23-interactive-mode-commands)
+        - [Interactive mode aliases](#interactive-mode-aliases)
     - [3. Common shell aliases](#3-common-shell-aliases)
-      - [3.1 Generic aliases.](#31-generic-aliases)
-      - [3.2 Finding commands (find and grep).](#32-finding-commands-find-and-grep)
-      - [3.3 List directory aliases commands (ls).](#33-list-directory-aliases-commands-ls)
-      - [3.4 Networking aliases.](#34-networking-aliases)
-      - [3.5 Quicker navigation aliases.](#35-quicker-navigation-aliases)
-      - [3.6 Jekyll Aliases.](#36-jekyll-aliases)
+      - [3.1 Generic aliases](#31-generic-aliases)
+      - [3.2 Finding commands (find and grep)](#32-finding-commands-find-and-grep)
+      - [3.3 List directory aliases commands (ls)](#33-list-directory-aliases-commands-ls)
+      - [3.4 Networking aliases](#34-networking-aliases)
+      - [3.5 Quicker navigation aliases](#35-quicker-navigation-aliases)
+      - [3.6 Jekyll Aliases](#36-jekyll-aliases)
   - [Global aliases](#global-aliases)
   - [File extension aliases](#file-extension-aliases)
     - [Reading Docs](#reading-docs)
     - [Listing files inside a packed file](#listing-files-inside-a-packed-file)
     - [Some other features](#some-other-features)
 
-### 1. System detection utility.
+### 1. System detection utility
 
 The `aliases.plugin.zsh` file contains a system detection utility that identifies
 which `ls` flavor is in use. (GNU or macOS) in order to help setting up the right
 `LS_COLORS` environment variables to your Z Shell.
 
-#### 1.1 Checking the aliases already installed.
+#### 1.1 Checking the aliases already installed
 
 Type the following alias command in your terminal:
 
@@ -45,7 +45,7 @@ Type the following alias command in your terminal:
 alias
 ```
 
-#### 1.2 Swapping to the collection of GNU find, xargs, and locate.
+#### 1.2 Swapping to the collection of GNU find, xargs, and locate
 
 macOS systems are based on BSD, rather than on GNU/Linux like RedHat, Debian, and
 Ubuntu. As a result, a lot of the command line tools that ship with macOS aren’t
@@ -69,7 +69,7 @@ Type the following alias command in your terminal:
 brew install findutils
 ```
 
-##### Aliases for the GNU coreutils (Core GNU utilities) programs.
+##### Aliases for the GNU coreutils (Core GNU utilities) programs
 
 | Alias | Command     | Description             |
 |-------|-------------|-------------------------|
@@ -80,9 +80,9 @@ brew install findutils
 | sed   | `gsed` | Stream editor. |
 | sort   | `gsort` | Sort or merge records (lines) of text and binary files. |
 
-### 2. System tools and system information aliases.
+### 2. System tools and system information aliases
 
-#### 2.1 System tools aliases.
+#### 2.1 System tools aliases
 
 | Alias | Command     | Description             |
 |-------|-------------|-------------------------|
@@ -97,7 +97,7 @@ brew install findutils
 | ttop   | `top -F -s 10  rsize` | Recommended 'top' invocation to minimize resources. |
 | zshrc | `${=EDITOR} $HOME/.zshrc` | Quick access to the `.zshrc` file. |
 
-#### 2.2 System information aliases.
+#### 2.2 System information aliases
 
 | Alias | Command     | Description             |
 |-------|-------------|-------------------------|
@@ -110,9 +110,9 @@ brew install findutils
 | psmem  | `ps aux | sort -nr -k 4 | head -3`   | Getting top 3 memory eating processes. |
 | psmem10  | `ps aux | sort -nr -k 4 | head -10`   | Getting top 10 memory eating processes. |
 
-#### 2.3 Interactive mode commands.
+#### 2.3 Interactive mode commands
 
-##### Interactive mode aliases.
+##### Interactive mode aliases
 
 | Alias | Command     | Description              |
 |-------|-------------|--------------------------|
@@ -124,7 +124,7 @@ brew install findutils
 
 ### 3. Common shell aliases
 
-#### 3.1 Generic aliases.
+#### 3.1 Generic aliases
 
 | Alias | Command     | Description             |
 |-------|-------------|-------------------------|
@@ -159,7 +159,7 @@ brew install findutils
 | vp | `diskutil verifyPermissions /` | Verify macOS Permissions |
 | vv | `diskutil verifyvolume /` | Verify macOS Volume  |
 
-#### 3.2 Finding commands (find and grep).
+#### 3.2 Finding commands (find and grep)
 
 | Alias | Command                                             | Description                             |
 |-------|-----------------------------------------------------|-----------------------------------------|
@@ -171,7 +171,7 @@ brew install findutils
 | hgrep | `history | grep`                                    | Searches for a word in the list of previously used commands. |
 | sgrep | `grep -R -n -H -C 5 --exclude-dir={.git,.svn,CVS}`  | Useful for searching within files.   |
 
-#### 3.3 List directory aliases commands (ls).
+#### 3.3 List directory aliases commands (ls)
 
 | Alias | Command       |Description                                                                                                                                    |
 |-------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
@@ -199,7 +199,7 @@ brew install findutils
 | lu    | `ls -ltur`    | Sort by/show access time,most recent last.                                                                                                    |
 | lx    | `ls -lXB`     | Sort by extension.                                                                                                                            |
 
-#### 3.4 Networking aliases.
+#### 3.4 Networking aliases
 
 | Alias     | Command             | Description                                                 |
 |-----------|---------------------|-------------------------------------------------------------|
@@ -213,7 +213,7 @@ brew install findutils
 | op | `sudo lsof -i -P` | List of open ports. |
 | wip | `dig +short myip.opendns.com @resolver1.opendns.com` | Public facing IP Address. |
 
-#### 3.5 Quicker navigation aliases.
+#### 3.5 Quicker navigation aliases
 
 | Alias     | Command             | Description                                                 |
 |-----------|---------------------|-------------------------------------------------------------|
@@ -257,7 +257,7 @@ brew install findutils
 | so | `setopt` | Lists the active options. |
 | uso | `unsetopt` | Lists the inactive options. |
 
-#### 3.6 Jekyll Aliases.
+#### 3.6 Jekyll Aliases
 
 | Alias     | Command             | Description                                                 |
 |-----------|---------------------|-------------------------------------------------------------|
@@ -268,8 +268,7 @@ brew install findutils
 | jko | `open http://localhost:4000` | Open local development server. |
 | jkp | `JEKYLL_ENV=production bundle exec jekyll serve --watch --trace` | Does a production build of the site to '_site' and runs a local development server. |
 
-
- ## Global aliases
+## Global aliases
 
 These aliases are expanded in any position in the command line, meaning you can use them even at the
 end of the command you've typed. Examples:
