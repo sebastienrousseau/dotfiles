@@ -28,6 +28,7 @@ Dotfiles uses the following under the GPL-3.0 license:
 - docutils
 - flake8
 - spdx-license-ids
+- spdx-exceptions
 - Sphinx
 - sphinx-rtd-theme
 - validate-npm-package-license
