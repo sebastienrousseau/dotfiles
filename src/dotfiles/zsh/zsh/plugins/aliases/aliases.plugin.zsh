@@ -593,34 +593,6 @@ alias uso='unsetopt'
 
 
 ##  ----------------------------------------------------------------------------
-##  3.6 Jekyll Aliases.
-##  ----------------------------------------------------------------------------
-
-# jkd: Does a development build of the site to '_site' and runs a local
-# development server.
-alias jkd='JEKYLL_ENV=development bundle exec jekyll serve --watch --trace'
-
-# jkb: Performs a one off build your site to ./_site.
-alias jkb='JEKYLL_ENV=development bundle exec jekyll build'
-
-# jkc: Removes all generated files: destination folder, metadata file, Sass and
-# Jekyll caches.
-alias jkc='JEKYLL_ENV=development bundle exec jekyll clean'
-
-# jkl: Does a development build of the site to '_site' and runs a 
-# local development server. 
-alias jkl='JEKYLL_ENV=development bundle exec jekyll serve --livereload'
-
-# jko: Open local development server.
-alias jko="open http://localhost:4000/"
-
-# jkp: Does a production build of the site to '_site' and runs a local
-# development server.
-alias jkp='JEKYLL_ENV=production bundle exec jekyll serve --watch --trace'
-
-
-
-##  ----------------------------------------------------------------------------
 ##  3.7 Heroku's aliases.
 ##  ----------------------------------------------------------------------------
 
