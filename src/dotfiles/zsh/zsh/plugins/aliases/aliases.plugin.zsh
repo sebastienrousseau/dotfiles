@@ -592,68 +592,6 @@ alias uso='unsetopt'
 
 
 
-##  ----------------------------------------------------------------------------
-##  3.7 Heroku's aliases.
-##  ----------------------------------------------------------------------------
-
-# hk: Heroku CLI command shortcut.
-alias hk='heroku'
-
-# hka: List who has access to an app.
-
-# hc: Display CI config vars
-alias hc='heroku ci:config'
-
-# hca: 
-alias hca='heroku config:add'
-
-# hcc: 
-alias hcc='heroku config:clear'
-
-# hcon: 
-alias hcon='heroku console'
-
-# hcp: 
-alias hcp='heroku console --remote production'
-
-# hcr: 
-alias hcr='heroku config:remove'
-
-# hcs: 
-alias hcs='heroku console --remote staging'
-
-# hi: 
-alias hi='heroku info'
-
-# hlogs: 
-alias hlogs='heroku logs'
-
-# hlp: 
-alias hlp='heroku logs -t --remote production'
-
-# hls: 
-alias hls='heroku logs -t --remote staging'
-
-# hnew: 
-alias hnew='heroku create'
-
-# ho: 
-alias ho='heroku open'
-
-# hoff: 
-alias hoff='heroku maintenance:off'
-
-# hon: 
-alias hon='heroku maintenance:on'
-
-# hr: 
-alias hr='heroku rake'
-
-# hrc: 
-alias hrc='heroku autocomplete --refresh-cache'
-
-# hrestart: 
-alias hrestart='heroku restart'
 
 #  ---------------------------------------------------------------------------
 #  	7.  Emulate iOS using different Apple devices
@@ -673,37 +611,37 @@ alias ione-ios-iPad-Retina='ionic emulate ios --target='iPad-Retina''
 #  	8.  Git SCM Cheats
 #  ---------------------------------------------------------------------------
 
-alias g=git
-alias ga='git add'
-alias gaa='git add --all'
-alias gad='git add .'
-alias gau='git add --update'
 alias gb='git branch'
 alias gbd='git branch -d'
 alias gbl='git blame --date short'
 alias gbr='git branch -r'
 alias gbs='git branch -a'
+alias gitremoveallmergedbranches='git branch --merged | grep -v '\*' | xargs -n 1 git branch -d'
+
 alias gc='git commit'
 alias gcam='git commit --amend -m'
 alias gce='git commit -a'
 alias gcl='git config --list'
 alias gcm='git commit -m '
-alias gco='git checkout'            #undo to last commit
+
+
 alias gd='git diff'
 alias gdh='git diff HEAD'
 alias gdh1='git diff HEAD^'
 alias gdh2='git diff HEAD^^'
 alias gdh5='git diff HEAD~5'
 alias gds='git diff --staged'
+
 alias gf='git fetch'
 alias gi='git init'
-alias gitremoveallmergedbranches='git branch --merged | grep -v '\*' | xargs -n 1 git branch -d'
+
 alias gl1d='git log --since=1.day.ago'
 alias gl1w='git log --since=1.week.ago'
 alias gl7d='git log --since=7.days.ago'
 alias glg='git log --oneline --graph --all --decorate'
 alias glgc='clear && git log --oneline --graph --all --decorate'
 alias gll='git log --graph --full-history --all --color'
+
 alias gm='git merge'
 alias gnuke='git branch --merged | xargs git branch -d'
 alias gob='git checkout -b'

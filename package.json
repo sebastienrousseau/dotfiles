@@ -30,6 +30,6 @@
     },
     "devDependencies": {},
     "dependencies": {
-        "npm": "^7.20.0"
+        "npm": "^7.21.0"
     }
 }
