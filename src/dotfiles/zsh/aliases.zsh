@@ -17,10 +17,7 @@
 #  	2.  Generic aliases
 #  	3.  Quicker navigation
 #  	4.  Jekyll
-#  	5.  Heroku's commands
-#  	6.  Ionic commands
 #  	7.  Emulate iOS using different Apple devices
-#  	8.  Git SCM Cheats
 #  	9.  App engine commands
 #  	10. Add an 'alert' alias for long running commands.
 #  	11. Get OS X Software Updates, update Homebrew itself, and upgrade installed Homebrew packages
@@ -160,46 +157,6 @@ alias ~='cd ~'
 
 
 #  ---------------------------------------------------------------------------
-#  	4.  Jekyll
-#  ---------------------------------------------------------------------------
-
-alias site-dev='JEKYLL_ENV=dev bundle exec jekyll serve --watch --trace'
-alias site-production='JEKYLL_ENV=production bundle exec jekyll serve --watch --trace'
-
-
-#  ---------------------------------------------------------------------------
-#  	5.  Heroku's commands
-#  ---------------------------------------------------------------------------
-
-alias hcp='heroku console --remote production'
-alias hcs='heroku console --remote staging'
-alias hlp='heroku logs -t --remote production'
-alias hls='heroku logs -t --remote staging'
-
-
-#  ---------------------------------------------------------------------------
-#  	6.  Ionic commands
-#  ---------------------------------------------------------------------------
-
-alias ionandroid='ionic emulate android'
-alias ionandroidrun='ionic run android'
-alias ionb='ionic build'
-alias ionbandroid='ionic build android'
-alias ionbios='ionic build ios'
-alias iondroidreset='ionpr-android | ionpa-android | ionbandroid'
-alias ionicons='open http://ionicons.com/'
-alias ionios='ionic emulate ios'
-alias ioniosrun='ionic run ios'
-alias ionosreset='ionpr-ios | ionpa-ios | ionbios'
-alias ionpa-android='ionic platform add android'
-alias ionpa-ios='ionic platform add ios'
-alias ionpr-android='ionic platform remove android'
-alias ionpr-ios='ionic platform remove ios'
-alias ions='ionic serve'
-alias ionup='npm update -g cordova ionic'
-
-
-#  ---------------------------------------------------------------------------
 #  	7.  Emulate iOS using different Apple devices
 #  ---------------------------------------------------------------------------
 
@@ -211,79 +168,6 @@ alias ione-ios-6='ionic emulate ios --target='iPhone-6''
 alias ione-ios-iPad-2='ionic emulate ios --target='iPad-2''
 alias ione-ios-iPad-Air='ionic emulate ios --target='iPad-Air''
 alias ione-ios-iPad-Retina='ionic emulate ios --target='iPad-Retina''
-
-
-#  ---------------------------------------------------------------------------
-#  	8.  Git SCM Cheats
-#  ---------------------------------------------------------------------------
-
-alias g=git
-alias ga='git add'
-alias gaa='git add --all'
-alias gad='git add .'
-alias gau='git add --update'
-alias gb='git branch'
-alias gbd='git branch -d'
-alias gbl='git blame --date short'
-alias gbr='git branch -r'
-alias gbs='git branch -a'
-alias gc='git commit'
-alias gcam='git commit --amend -m'
-alias gce='git commit -a'
-alias gcl='git config --list'
-alias gcm='git commit -m '
-alias gco='git checkout'            #undo to last commit
-alias gd='git diff'
-alias gdh='git diff HEAD'
-alias gdh1='git diff HEAD^'
-alias gdh2='git diff HEAD^^'
-alias gdh5='git diff HEAD~5'
-alias gds='git diff --staged'
-alias gf='git fetch'
-alias gi='git init'
-alias gitremoveallmergedbranches='git branch --merged | grep -v '\*' | xargs -n 1 git branch -d'
-alias gl1d='git log --since=1.day.ago'
-alias gl1w='git log --since=1.week.ago'
-alias gl7d='git log --since=7.days.ago'
-alias glg='git log --oneline --graph --all --decorate'
-alias glgc='clear && git log --oneline --graph --all --decorate'
-alias gll='git log --graph --full-history --all --color'
-alias gm='git merge'
-alias gnuke='git branch --merged | xargs git branch -d'
-alias gob='git checkout -b'
-alias gout='git checkout'
-alias gpo='git push -u origin'
-alias gpo='git push origin'
-alias gpom='git push -u origin master'
-alias gpt='git push --tags'
-alias gpul='git pull'
-alias gpum='git pull origin master'
-alias gpus='git push'
-alias gra='git remote add'
-alias grao='git remote add origin'
-alias grh='git reset HEAD'          #unstage some files
-alias grhh='git reset --hard HEAD^' #role back fully to last commit! //be careful
-alias grm='git rm'
-alias grmc='git rm --cached'
-alias grs='git remote -v'
-alias grsh='git reset --soft HEAD^' #role back to stage!
-alias grso='git remote show origin'
-alias grv='git revert'
-alias gs='git status -sb'
-alias gsu='git submodule update --recursive'
-alias gt='git tag'
-alias gta='git tag -a'
-alias gts='git tag'
-
-
-#  ---------------------------------------------------------------------------
-#  	9.  App engine commands
-#  ---------------------------------------------------------------------------
-
-alias gaeauth='appcfg.py --oauth2'
-alias gaeup='appcfg.py --oauth2 update .'
-alias gaeupauth='appcfg.py --oauth2 -V dev update . && appcfg.py --oauth2 update . -V'
-
 
 
 #  ---------------------------------------------------------------------------
