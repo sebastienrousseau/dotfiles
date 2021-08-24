@@ -32,6 +32,9 @@
 #      2.6 Aliases to show various types of objects.
 #      2.7 Aliases to reset current HEAD to the specified state.
 #      2.8 Aliases to pick out and massage parameters.
+#      2.9 Aliases to remove files from the working tree and from the index.
+#      3.0 Aliases to show what revision and author last modified each line of a file.
+#      3.1 Aliases to get and set repository or global options.
 #
 # Copyright (c) Sebastien Rousseau 2021. All rights reserved
 # Licensed under the MIT license
