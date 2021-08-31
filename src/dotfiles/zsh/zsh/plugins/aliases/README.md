@@ -101,7 +101,7 @@ brew install findutils
 | Alias | Command     | Description             |
 |-------|-------------|-------------------------|
 | kp  | `ps auxwww`   | Getting full path of executables. The "auxwww" are options to the ps (process) command. The options mean display all process running that belong to you and to other users and provide information about who owns what process. The three "www"'s mean display the entire command line regardless of how long it is and wrap it in your window. |
-| p  | `ps -f`   | Display the uid, pid, parent pid, recent CPU usage, process start time, controlling tty, elapsed CPU usage, and the associated command.  |
+| pid  | `ps -f`   | Display the uid, pid, parent pid, recent CPU usage, process start time, controlling tty, elapsed CPU usage, and the associated command.  |
 | ping  | `ping -c 5`   | Limit Ping to 5 ECHO_REQUEST packets. |
 | ports  | `netstat -tulan`   | Display ports   |
 | pscpu  | `ps aux | sort -nr -k 3 | head -3`   | Getting top 3 CPU eating processes.    |

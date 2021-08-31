@@ -13,15 +13,10 @@
 #
 # Sections:
 #
-#	1.  Allow aliases to be with sudo
-#  	2.  Generic aliases
-#  	3.  Quicker navigation
-#  	4.  Jekyll
 #  	7.  Emulate iOS using different Apple devices
 #  	9.  App engine commands
 #  	10. Add an 'alert' alias for long running commands.
 #  	11. Get OS X Software Updates, update Homebrew itself, and upgrade installed Homebrew packages
-#  	12. Shorter commands for `Homebrew`.
 #  	13. Speed-up Terminal load time by clearing system logs
 #  	14. Empty the Trash on all mounted volumes and the main HDD
 #  	15. Open the device simulators
@@ -57,143 +52,6 @@ else # macOS `ls`
 fi
 
 
-#  ---------------------------------------------------------------------------
-#  	1.  Allow aliases to be with sudo
-#       Please refer to http://www.shellperson.net/using-sudo-with-an-alias/
-#  ---------------------------------------------------------------------------
-
-# Common
-alias sudo='sudo '
-alias reload='reset'
-alias zshrc='${=EDITOR} ${ZDOTDIR:-$HOME}/.zshrc' # Quick access to the .zshrc file
-
-# Purging Xcode DerivedData
-alias purge='rm -rf ~/library/Developer/Xcode/DerivedData/*'
-
-
-#  ---------------------------------------------------------------------------
-#  	2.  Generic aliases
-#  ---------------------------------------------------------------------------
-alias c="clear && printf '\e[3J'"
-alias cp='cp -i'
-alias dt='tee ~/Desktop/terminalOut.txt' # dt: Pipe content to file on MacOS Desktop
-alias du='du -h'
-alias dud='du -d 1 -h'
-alias duf='du -sh *'
-alias ff='find . -type f -name'
-alias flush='sudo dscacheutil -flushcache'
-alias grep='grep --color'
-alias h='history'
-alias kp='ps auxwww'
-alias locale='locale -a | grep UTF-8'
-alias makedir='mkdir -pv'
-alias mv='mv -i'
-alias numFiles='echo $(ls -1 | wc -l)' # numFiles: Function to count of non-hidden files in current dir
-alias p='ps -f'
-alias p='pwd'
-alias path='echo -e ${PATH//:/\\n}'
-alias q='exit'
-alias r='reload'
-alias removedir=rmdir
-alias repair_permissions='diskutil repairPermissions /'
-alias repair_volume='diskutil repairvolume /'
-alias rm='rm -i'
-alias rmdir='rm –rf'
-alias sgrep='grep -R -n -H -C 5 --exclude-dir={.git,.svn,CVS} '
-alias shutdown="shutdown -h now"
-alias sortnr='sort -n -r'
-alias t='tail -f'
-alias top='htop'
-alias verify_permissions='diskutil verifyPermissions /'
-alias verify_volume='diskutil verifyvolume /'
-
-
-
-# ls commands
-alias l='ls -lFh'     			# Size, show type, human readable
-alias l1='ls -1' 				# Display one file per line
-alias la='ls -lAFh'   			# Long list, show almost all, show type, human readable
-alias lart='ls -1Fcart'			# Force output to be one entry per line, last changed, includes directory entries whose names begin with a dot, reverse, sort by time modified
-alias last='ls -t' 				# Sorts all files by modification time, showing the last edited file first.
-alias ld='ls -ld' 				# Display directory information
-alias ldot='ls -ld .*'			# Display only dot files
-alias lf='ls -lf' 				# Visual Classification of Files With Special Characters
-alias lh='ls -lh' 				# Display file size in human readable format
-alias li='ls -i' 				# Display File Inode Number 
-alias ll='ls -l'      			# Long list
-alias ln='ls -n' 				# Display File UID and GID 
-alias lq='ls -q' 				# Hide Control Characters
-alias lr='ls -tRFh'   			# Display Files Recursively sorted by date,recursive, show type, human readable
-alias lrt='ls -1Fcrt'			# Order Files Based on Last Modified Time (In Reverse Order)
-alias lS='ls -1FSsh'			# Order Files Based on Last Modified Time and size
-alias lsd='ls -l | grep "^d"'	# Display only directories
-alias lt='ls -ltFh'   			# Display Files long list, sorted by date, show type, human readable
-
-
-
-
-
-
-
-#  ---------------------------------------------------------------------------
-#  	3.  Quicker navigation
-#  ---------------------------------------------------------------------------
-alias 1='cd -'
-alias 2='cd -2'
-alias 3='cd -3'
-alias 4='cd -4'
-alias 5='cd -5'
-alias 6='cd -6'
-alias 7='cd -7'
-alias 8='cd -8'
-alias 9='cd -9'
-alias cd.='cd $(readlink -f .)'     # go to real dir (i.e. if current dir is linked)
-alias less='less -R'                # Make less always work with coloured input
-alias opendir='open -a Finder ./'
-alias path='echo "$PATH" | tr ":" "\n" | nl'
-alias so='shopt'
-alias zap='rm -i'                   # Remove file with warning
-alias ~='cd ~'
-
-
-#  ---------------------------------------------------------------------------
-#  	7.  Emulate iOS using different Apple devices
-#  ---------------------------------------------------------------------------
-
-alias ione-ios-4s='ionic emulate ios --target='iPhone-4s''
-alias ione-ios-5='ionic emulate ios --target='iPhone-5''
-alias ione-ios-5s='ionic emulate ios --target='iPhone-5s''
-alias ione-ios-6-Plus='ionic emulate ios --target='iPhone-6-Plus''
-alias ione-ios-6='ionic emulate ios --target='iPhone-6''
-alias ione-ios-iPad-2='ionic emulate ios --target='iPad-2''
-alias ione-ios-iPad-Air='ionic emulate ios --target='iPad-Air''
-alias ione-ios-iPad-Retina='ionic emulate ios --target='iPad-Retina''
-
-
-#  ---------------------------------------------------------------------------
-#  	10.  Add an 'alert' alias for long running commands.  Use like so: sleep 10; alert
-#  ---------------------------------------------------------------------------
-
-#alias alert='notify-send --urgency=low -i ''$([ $? = 0 ] && echo terminal || echo error)'' ''$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')'''
-
-
-#  ---------------------------------------------------------------------------
-#  	11.  Get OS X Software Updates, update Homebrew itself, and upgrade installed Homebrew packages
-#  ---------------------------------------------------------------------------
-
-# Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages
-
-alias update='sudo softwareupdate -i -a; brew cu --all; brew doctor; brew update; brew upgrade; brew cask cleanup; brew prune; brew cleanup; mas upgrade; npm install npm -g; npm update -g; sudo gem update --system; sudo gem update; sudo gem cleanup'
-
-#  ---------------------------------------------------------------------------
-#  	12.  Shorter commands for `Homebrew`.
-#  ---------------------------------------------------------------------------
-
-alias brewd='brew doctor'
-alias brewi='brew install'
-alias brews='brew search'
-alias brewu='brew uninstall'
-alias brewupdate='brew update && brew upgrade && brew cleanup && brew doctor'
 
 
 #  ---------------------------------------------------------------------------

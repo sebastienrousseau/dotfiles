@@ -187,7 +187,7 @@ alias kp='ps auxwww'
 
 # Display the uid, pid, parent pid, recent CPU usage, process start time, 
 # controlling tty, elapsed CPU usage, and the associated command.
-alias p='ps -f'
+alias pid='ps -f'
 
 # Limit Ping to 5 ECHO_REQUEST packets.
 alias ping='ping -c 5'
