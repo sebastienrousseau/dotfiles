@@ -13,50 +13,24 @@
 #
 # Sections:
 #
-#   1. System detection utility.
+#   1.0 System detection utility.
 #      1.1 Detect which `ls` flavor is in use.
 #      1.2 Aliases for the GNU coreutils (Core GNU utilities) programs.
-#      1.3 Detect which `ls` flavor is in use.
+#      1.3 Checking that the aliases are already installed.
 #
-#   2. System tools and system information aliases.
+#   2.0 System tools and system information aliases.
 #      2.1 System tools aliases.
-#      2.2 Checking that the aliases are already installed.
+#      2.2 System information aliases.
+#      2.3 Interactive mode commands. 
 #
-#   3. Common shell aliases.
+#   3.0 Common shell aliases.
 #      3.1 Generic aliases.
 #      3.2 Finding (find and grep).
 #      3.3 List directory aliases commands (ls).
 #      3.4 Networking aliases.
 #      3.5 Quicker navigation aliases.
-#      3.6 Jekyll Aliases. 
 #
-#   4. sssNetworking aliases.
-#   ) Quicker navigation
-#   ) Jekyll
-#   ) Heroku's commands
-#   ) Ionic commands
-#   ) Emulate iOS using different Apple devices
-#   ) Git SCM Cheats
-#   ) App engine commands
-#   ) Add an 'alert' alias for long running commands.
-#   ) Get OS X Software Updates, update and upgrade Homebrew packages
-#   ) Shorter commands for `Homebrew`.
-#   ) Speed-up Terminal load time by clearing system logs
-#   ) Empty the Trash on all mounted volumes and the main HDD
-#   ) Open the device simulators
-#   ) Recursively delete .DS_Store files
-#   ) Hidden Files
-#   ) Clean up LaunchServices to remove duplicates in the 'Open With' menu
-#   ) Run a screen saver on the Desktop
-#   ) Things for Subversion
-#   ) Application launchers
-#   ) Recommended 'top' invocation to minimize resources
-#   ) Networking
-#   ) Limit Ping to 5 ECHO_REQUEST packets
-#   ) Wget with resume
-#   ) Searching
-#   ) Find memory hogs
-#   ) Find CPU hogs
+#   4.0 Get OS X Software Updates, update Homebrew itself, and upgrade installed Homebrew packages.
 #
 # Copyright (c) Sebastien Rousseau 2021. All rights reserved
 # Licensed under the MIT license
@@ -64,11 +38,11 @@
 
 
 #   ----------------------------------------------------------------------------
-#  	1. System detection utility
+#  	1.0 System detection utility.
 #   ----------------------------------------------------------------------------
 
 ##  ----------------------------------------------------------------------------
-##  1.1 Detect which `ls` flavor is in use
+##  1.1 Detect which `ls` flavor is in use.
 ##  ----------------------------------------------------------------------------
 
     if ls --color > /dev/null 2>&1; then # GNU `ls`
@@ -84,7 +58,7 @@
 
 
 ##  ----------------------------------------------------------------------------
-##  1.2 Aliases for the GNU coreutils (Core GNU utilities) programs
+##  1.2 Aliases for the GNU coreutils (Core GNU utilities) programs.
 ##  ----------------------------------------------------------------------------
 
 # Only applying these aliases on macOS.
@@ -124,7 +98,7 @@ fi
 
 
 ##  ----------------------------------------------------------------------------
-##  1.3 Checking that the aliases are already installed
+##  1.3 Checking that the aliases are already installed.
 ##  ----------------------------------------------------------------------------
 
 alias alias='alias | sort -nk 10'
@@ -132,7 +106,7 @@ alias alias='alias | sort -nk 10'
 
 
 #   ----------------------------------------------------------------------------
-#   2. System tools and system information aliases.
+#   2.0 System tools and system information aliases.
 #   ----------------------------------------------------------------------------
 
 
@@ -175,7 +149,7 @@ alias zshrc='${=EDITOR} $HOME/.zshrc'
 
 
 ##  ----------------------------------------------------------------------------
-##  2.2 System information aliases
+##  2.2 System information aliases.
 ##  ----------------------------------------------------------------------------
 
 # Getting full path of executables. The "auxwww" are options to the ps (process)
@@ -209,7 +183,7 @@ alias psmem10='ps aux | sort -nr -k 4 | head -10'
 
 
 ##  ----------------------------------------------------------------------------
-##  2.3 Interactive mode commands
+##  2.3 Interactive mode commands.
 ##  ----------------------------------------------------------------------------
 
 ## Interactive mode aliases.
@@ -231,7 +205,7 @@ alias zap='rm -i'
 
 
 #   ----------------------------------------------------------------------------
-#   3. Common shell aliases.
+#   3.0 Common shell aliases.
 #   ----------------------------------------------------------------------------
 
 
@@ -332,7 +306,7 @@ alias vv='diskutil verifyvolume /'
 
 
 ##  ----------------------------------------------------------------------------
-##  3.2 Finding (find and grep)
+##  3.2 Finding (find and grep).
 ##  ----------------------------------------------------------------------------
 
 # egrep: Searches that can handle extended regular expressions (EREs)
@@ -358,7 +332,7 @@ alias sgrep='grep -R -n -H -C 5 --exclude-dir={.git,.svn,CVS} '
 
 
 ##  ----------------------------------------------------------------------------
-##  3.3 List directory aliases commands (ls)
+##  3.3 List directory aliases commands (ls).
 ##  ----------------------------------------------------------------------------
 
 # l: Size, show type, human readable.
@@ -435,7 +409,7 @@ alias lx='ls -lXB'
 
 
 ##  ----------------------------------------------------------------------------
-##  3.4 Networking aliases
+##  3.4 Networking aliases.
 ##  ----------------------------------------------------------------------------
 
 
@@ -560,21 +534,6 @@ alias 4.='cd ../../../..; ls'
 # 5.: Move back to five levels and show the directory content.
 alias 5.='cd ../../../../..; ls'
 
-# cd 1.: Move back to one level and show the directory content.
-alias cd 1.='cd ..; ls'
-
-# cd 2.: Move back to two levels and show the directory content.
-alias cd 2.='cd ../..; ls'
-
-# cd 3.: Move back to three levels and show the directory content.
-alias cd 3.='cd ../../..; ls'
-
-# cd 4.: Move back to four levels and show the directory content. 
-alias cd 4.='cd ../../../..; ls'
-
-# cd 5.: Move back to five levels and show the directory content.
-alias cd 5.='cd ../../../../..; ls'
-
 # less: Make less always work with colored input.
 alias less='less -R'
 
@@ -592,118 +551,19 @@ alias uso='unsetopt'
 
 
 
-
-#  ---------------------------------------------------------------------------
-#  	7.  Emulate iOS using different Apple devices
-#  ---------------------------------------------------------------------------
-
-alias ione-ios-4s='ionic emulate ios --target='iPhone-4s''
-alias ione-ios-5='ionic emulate ios --target='iPhone-5''
-alias ione-ios-5s='ionic emulate ios --target='iPhone-5s''
-alias ione-ios-6-Plus='ionic emulate ios --target='iPhone-6-Plus''
-alias ione-ios-6='ionic emulate ios --target='iPhone-6''
-alias ione-ios-iPad-2='ionic emulate ios --target='iPad-2''
-alias ione-ios-iPad-Air='ionic emulate ios --target='iPad-Air''
-alias ione-ios-iPad-Retina='ionic emulate ios --target='iPad-Retina''
-
-
-#  ---------------------------------------------------------------------------
-#  	8.  Git SCM Cheats
-#  ---------------------------------------------------------------------------
-
-alias gb='git branch'
-alias gbd='git branch -d'
-alias gbl='git blame --date short'
-alias gbr='git branch -r'
-alias gbs='git branch -a'
-alias gitremoveallmergedbranches='git branch --merged | grep -v '\*' | xargs -n 1 git branch -d'
-
-alias gc='git commit'
-alias gcam='git commit --amend -m'
-alias gce='git commit -a'
-alias gcl='git config --list'
-alias gcm='git commit -m '
-
-
-alias gd='git diff'
-alias gdh='git diff HEAD'
-alias gdh1='git diff HEAD^'
-alias gdh2='git diff HEAD^^'
-alias gdh5='git diff HEAD~5'
-alias gds='git diff --staged'
-
-alias gf='git fetch'
-alias gi='git init'
-
-alias gl1d='git log --since=1.day.ago'
-alias gl1w='git log --since=1.week.ago'
-alias gl7d='git log --since=7.days.ago'
-alias glg='git log --oneline --graph --all --decorate'
-alias glgc='clear && git log --oneline --graph --all --decorate'
-alias gll='git log --graph --full-history --all --color'
-
-alias gm='git merge'
-alias gnuke='git branch --merged | xargs git branch -d'
-alias gob='git checkout -b'
-alias gout='git checkout'
-alias gpo='git push -u origin'
-alias gpo='git push origin'
-alias gpom='git push -u origin master'
-alias gpt='git push --tags'
-alias gpul='git pull'
-alias gpum='git pull origin master'
-alias gpus='git push'
-alias gra='git remote add'
-alias grao='git remote add origin'
-alias grh='git reset HEAD'          #unstage some files
-alias grhh='git reset --hard HEAD^' #role back fully to last commit! //be careful
-alias grm='git rm'
-alias grmc='git rm --cached'
-alias grs='git remote -v'
-alias grsh='git reset --soft HEAD^' #role back to stage!
-alias grso='git remote show origin'
-alias grv='git revert'
-alias gs='git status -sb'
-alias gsu='git submodule update --recursive'
-alias gt='git tag'
-alias gta='git tag -a'
-alias gts='git tag'
-
-
-#  ---------------------------------------------------------------------------
-#  	9.  App engine commands
-#  ---------------------------------------------------------------------------
-
-alias gaeauth='appcfg.py --oauth2'
-alias gaeup='appcfg.py --oauth2 update .'
-alias gaeupauth='appcfg.py --oauth2 -V dev update . && appcfg.py --oauth2 update . -V'
-
-
-
-#  ---------------------------------------------------------------------------
-#  	10.  Add an 'alert' alias for long running commands.  Use like so: sleep 10; alert
-#  ---------------------------------------------------------------------------
-
-#alias alert='notify-send --urgency=low -i ''$([ $? = 0 ] && echo terminal || echo error)'' ''$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')'''
-
-
-#  ---------------------------------------------------------------------------
-#  	11.  Get OS X Software Updates, update Homebrew itself, and upgrade installed Homebrew packages
-#  ---------------------------------------------------------------------------
+#   ----------------------------------------------------------------------------
+#   4.0 Get OS X Software Updates, update Homebrew itself, and upgrade installed Homebrew packages.
+#   ----------------------------------------------------------------------------
 
 # Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages
 
 alias update='sudo softwareupdate -i -a; brew cu --all; brew doctor; brew update; brew upgrade; brew cask cleanup; brew prune; brew cleanup; mas upgrade; npm install npm -g; npm update -g; sudo gem update --system; sudo gem update; sudo gem cleanup'
 
-#  ---------------------------------------------------------------------------
-#  	12.  Shorter commands for `Homebrew`.
-#  ---------------------------------------------------------------------------
 
-alias brewd='brew doctor'
-alias brewi='brew install'
-alias brews='brew search'
-alias brewu='brew uninstall'
-alias brewupdate='brew update && brew upgrade && brew cleanup && brew doctor'
+
+#   ----------------------------------------------------------------------------
+#   5.0 Speed-up Terminal load time by clearing system logs.
+#   ----------------------------------------------------------------------------
 
 
 #  ---------------------------------------------------------------------------

@@ -14,31 +14,41 @@
 # Copyright (c) Sebastien Rousseau 2021. All rights reserved
 # Licensed under the MIT license
 
-
 # Enable colors in prompt
 autoload -Uz colors && colors
 
 # Enable command completion
 autoload -Uz compinit && compinit -u
 
-# Set the path of zsh configuration directory
-export ZSH_HOME=$HOME/.zsh
-
 # Don't enable any fancy or breaking features if the shell session is non-interactive
 if [[ $- != *i* ]] ; then
   return
 fi
+
+# Current Version of DotFiles
+export DOTFILES_VERSION='0.2.447'
+export DOTFILES_HOME='$HOME/.zsh'
 
 # Fix array index for zsh
 if [ "$ZSH_NAME" = "zsh" ];then
   setopt localoptions ksharrays
 fi
 
+# Set the path of zsh configuration directory
+if [[ -z "$ZSH_HOME" ]]; then
+  export ZSH_HOME="$HOME/.zsh"
+fi
+
+# Set the path of zsh aliases directory
+if [[ -z "$ZSH_ALIASES" ]]; then
+  export ZSH_ALIASES="$ZSH_HOME/dotfiles/zsh/plugins/aliases"
+fi
+
 # Source the aliases.zsh file.
-if [[ -f ~/aliases.zsh ]] ; then
+if [[ -z "ZSH_ALIASES" ]] ; then
   # File may not exist, so don't follow for shellcheck linting (SC1090).
   # shellcheck source=/dev/null
-  source "$HOME/aliases.zsh"
+  source "$ZSH_ALIASES/aliases.plugin.zsh"
 fi
 
 # Source the configurations.zsh file.
