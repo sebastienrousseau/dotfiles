@@ -27,7 +27,23 @@ fi
 
 # Current Version of DotFiles
 export DOTFILES_VERSION='0.2.447'
-export DOTFILES_HOME='$HOME/.zsh'
+
+# Current location of DotFiles
+export DOTFILES_HOME='$HOME/.dotfiles'
+
+# Targeted directory of DotFiles
+export DOTFILES_TARGET_DIR='$HOME'
+
+if [ -z "$DOTFILES_HOME" ]; then
+
+
+fi
+
+if ! test -d "$DOTFILES_HOME"; then
+  mkdir "$DOTFILES_HOME"
+  chmod g-w "$DOTFILES_HOME"
+  chmod o-w "$DOTFILES_HOME"
+fi
 
 # Fix array index for zsh
 if [ "$ZSH_NAME" = "zsh" ];then
