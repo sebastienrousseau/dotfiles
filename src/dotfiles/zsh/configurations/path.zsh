@@ -68,7 +68,10 @@ export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
 export PATH
 
-
+# Enable Heroku
+if type brew &>/dev/null; then
+  FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
+fi
 
 ##  ----------------------------------------------------------------------------
 ##  1.3 Custom exports.

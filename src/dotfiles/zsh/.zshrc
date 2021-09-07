@@ -14,11 +14,12 @@
 # Copyright (c) Sebastien Rousseau 2021. All rights reserved
 # Licensed under the MIT license
 
+
 # Enable colors in prompt
 autoload -Uz colors && colors
 
 # Enable command completion
-autoload -Uz compinit && compinit -u
+# autoload -Uz compinit && compinit -u
 
 # Don't enable any fancy or breaking features if the shell session is non-interactive
 if [[ $- != *i* ]] ; then
@@ -29,14 +30,14 @@ fi
 export DOTFILES_VERSION='0.2.447'
 
 # Current location of DotFiles
-export DOTFILES_HOME='$HOME/.dotfiles'
+export DOTFILES_HOME=$HOME/.dotfiles
 
 # Targeted directory of DotFiles
-export DOTFILES_TARGET_DIR='$HOME'
+export DOTFILES_TARGET_DIR=$HOME
+
 
 if [ -z "$DOTFILES_HOME" ]; then
-
-
+  # TODO: #17 Add update routine
 fi
 
 if ! test -d "$DOTFILES_HOME"; then
