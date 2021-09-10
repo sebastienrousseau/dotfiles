@@ -14,48 +14,31 @@
 # Sections:
 #
 #   1.0 System detection utility.
-#      1.1 Detect which `ls` flavor is in use.
+#       1.1 Detect which `ls` flavor is in use.
 #
-#   2. System tools and system information aliases.
-#      2.1 System tools aliases.
-#      2.2 Checking that the aliases are already installed.
+#   2.0 System tools and system information aliases.
+#       2.1 System tools aliases.
+#       2.2 System information aliases.
+#       2.3 Interactive mode commands.
 #
-#   3. Common shell aliases.
-#      3.1 Generic aliases.
-#      3.2 Finding (find and grep).
-#      3.3 List directory aliases commands (ls).
-#      3.4 Networking aliases.
-#      3.5 Quicker navigation aliases.
-#      3.6 Jekyll Aliases. 
+#   3.0 Common shell aliases.
+#       3.1 Generic aliases.
+#       3.2 Finding (find and grep).
+#       3.3 List directory aliases commands (ls).
+#       3.4 Networking aliases.
+#       3.5 Quicker navigation aliases.
 #
-#   4. Networking aliases.
-#   ) Quicker navigation
-#   ) Jekyll
-#   ) Heroku's commands
-#   ) Ionic commands
-#   ) Emulate iOS using different Apple devices
-#   ) Git SCM Cheats
-#   ) App engine commands
-#   ) Add an 'alert' alias for long running commands.
-#   ) Get OS X Software Updates, update and upgrade Homebrew packages
-#   ) Shorter commands for `Homebrew`.
-#   ) Speed-up Terminal load time by clearing system logs
-#   ) Empty the Trash on all mounted volumes and the main HDD
-#   ) Open the device simulators
-#   ) Recursively delete .DS_Store files
-#   ) Hidden Files
-#   ) Clean up LaunchServices to remove duplicates in the 'Open With' menu
-#   ) Run a screen saver on the Desktop
-#   ) Things for Subversion
-#   ) Application launchers
-#   ) Recommended 'top' invocation to minimize resources
-#   ) Networking
-#   ) Limit Ping to 5 ECHO_REQUEST packets
-#   ) Wget with resume
-#   ) Searching
-#   ) Find memory hogs
-#   ) Find CPU hogs
-#
+#   4.0 Convenience shortcuts.
+#       4.1 Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages.
+#       4.2 Speed-up Terminal load time by clearing system logs.
+#       4.3 Empty the Trash on all mounted volumes and the main HDD.
+#       4.4 Open the device simulators.
+#       4.5 Recursively delete .DS_Store files.
+#       4.6 Hidden Files.
+#       4.7 Clean up LaunchServices to remove duplicates in the 'Open With' menu.
+#       4.8 Application launchers.
+#       4.9 Various.
+#       
 # Copyright (c) Sebastien Rousseau 2021. All rights reserved
 # Licensed under the MIT license
 #
@@ -125,7 +108,7 @@ alias zshrc='${=EDITOR} $HOME/.zshrc'
 
 
 ##  ----------------------------------------------------------------------------
-##  2.2 System information aliases
+##  2.2 System information aliases.
 ##  ----------------------------------------------------------------------------
 
 # Getting full path of executables. The "auxwww" are options to the ps (process)
@@ -159,7 +142,7 @@ alias psmem10='ps aux | sort -nr -k 4 | head -10'
 
 
 ##  ----------------------------------------------------------------------------
-##  2.3 Interactive mode commands
+##  2.3 Interactive mode commands.
 ##  ----------------------------------------------------------------------------
 
 ## Interactive mode aliases.
@@ -181,7 +164,7 @@ alias zap='rm -i'
 
 
 #   ----------------------------------------------------------------------------
-#   3. Common shell aliases.
+#   3.0 Common shell aliases.
 #   ----------------------------------------------------------------------------
 
 
@@ -282,7 +265,7 @@ alias vv='diskutil verifyvolume /'
 
 
 ##  ----------------------------------------------------------------------------
-##  3.2 Finding (find and grep)
+##  3.2 Finding (find and grep).
 ##  ----------------------------------------------------------------------------
 
 # egrep: Searches that can handle extended regular expressions (EREs)
@@ -308,7 +291,7 @@ alias sgrep='grep -R -n -H -C 5 --exclude-dir={.git,.svn,CVS} '
 
 
 ##  ----------------------------------------------------------------------------
-##  3.3 List directory aliases commands (ls)
+##  3.3 List directory aliases commands (ls).
 ##  ----------------------------------------------------------------------------
 
 # l: Size, show type, human readable.
@@ -385,7 +368,7 @@ alias lx='ls -lXB'
 
 
 ##  ----------------------------------------------------------------------------
-##  3.4 Networking aliases
+##  3.4 Networking aliases.
 ##  ----------------------------------------------------------------------------
 
 
@@ -465,21 +448,6 @@ alias cd ....='cd ../../../..; ls'
 # cd .....: Move back to five levels and show the directory content. 
 alias cd .....='cd ../../../../..; ls'
 
-# -: Navigate to the previous one level directory (or back) and show the directory content. 
-#alias -='cd -; ls'
-
-# --: Navigate to the previous two levels directory (or back) and show the directory content. 
-#alias --='cd -2; ls'
-
-# ---: Navigate to the previous three levels directory (or back) and show the directory content. 
-#alias ---='cd -3; ls'
-
-# ----: Navigate to the previous four levels directory (or back) and show the directory content. 
-#alias ----='cd -4; ls'
-
-# -----: Navigate to the previous five levels directory (or back) and show the directory content. 
-#alias -----='cd -5; ls'
-
 # 1: Navigate to the previous one level directory (or back) and show the directory content. 
 alias 1='cd -; ls'
 
@@ -543,131 +511,118 @@ alias uso='unsetopt'
 
 
 #  ---------------------------------------------------------------------------
-#  	11.  Get OS X Software Updates, update Homebrew itself, and upgrade installed Homebrew packages
+#  	4.0 Convenience shortcuts.
 #  ---------------------------------------------------------------------------
 
-# Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages
+##  ---------------------------------------------------------------------------
+##  4.1 Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages.
+##  ---------------------------------------------------------------------------
 
+# update: Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages.
 alias update='sudo softwareupdate -i -a; brew cu --all; brew doctor; brew update; brew upgrade; brew cleanup; mas upgrade; npm install npm -g; npm update -g; sudo gem update --system; sudo gem update; sudo gem cleanup; npm update ncu; npm audit fix; ncu -g'
 
-#  ---------------------------------------------------------------------------
-#  	12.  Shorter commands for `Homebrew`.
-#  ---------------------------------------------------------------------------
 
-alias brewd='brew doctor'
-alias brewi='brew install'
-alias brews='brew search'
-alias brewu='brew uninstall'
-alias brewup='brew update && brew upgrade && brew cleanup && brew doctor'
+##  --------------------------------------------------------------------------
+##  4.2 Speed-up Terminal load time by clearing system logs.
+##  --------------------------------------------------------------------------
 
-
-#  ---------------------------------------------------------------------------
-#  	13.  Speed-up Terminal load time by clearing system logs
-#  ---------------------------------------------------------------------------
-
+# speedup: Speed up terminal by clearing ASL logs.
 alias speedup='sudo rm -rf /private/var/log/asl/*'
 
 
-#  ---------------------------------------------------------------------------
-#  	14.  Empty the Trash on all mounted volumes and the main HDD
-# Also, clear Apple’s System Logs to improve shell startup speed
-#  ---------------------------------------------------------------------------
+##  --------------------------------------------------------------------------
+##  4.3 Empty the Trash on all mounted volumes and the main HDD.
+##  --------------------------------------------------------------------------
 
+# Empty the Trash on all mounted volumes and the main HDD. 
+# Also, clear Apple’s System Logs to improve shell startup speed.
 alias emptytrash='rm -rf ~/.Trash/*'
 
 
-#  ---------------------------------------------------------------------------
-#  	15.  Open the device simulators
-#  ---------------------------------------------------------------------------
+##  ---------------------------------------------------------------------------
+##  4.4 Open the device simulators.
+##  --------------------------------------------------------------------------
 
+# iphone: Open the device simulators.
 alias iphone='open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app'
 
 
-#  ---------------------------------------------------------------------------
-#  	16.  cleanupDS: Recursively delete .DS_Store files
-#  ---------------------------------------------------------------------------
+##  --------------------------------------------------------------------------
+##  4.5 Recursively delete .DS_Store files.
+##  --------------------------------------------------------------------------
 
+# cleanupDS: Recursively delete .DS_Store files.
 alias cleanupDS='find . -type f -name ''*.DS_Store'' -ls -delete'
 
 
-#  ---------------------------------------------------------------------------
-#  	17.  Hidden Files  
-#   finderShowHidden:   Show hidden files in Finder
-#   finderHideHidden:   Hide hidden files in Finder
-#  ---------------------------------------------------------------------------
+##  --------------------------------------------------------------------------
+##  4.6 Hidden Files.
+##  --------------------------------------------------------------------------
 
-alias finderHideHidden='defaults write com.apple.finder ShowAllFiles FALSE'
+# finderShowHidden: Show hidden files in Finder
 alias finderShowHidden='defaults write com.apple.finder ShowAllFiles TRUE'
 
+# finderHideHidden: Hide hidden files in Finder
+alias finderHideHidden='defaults write com.apple.finder ShowAllFiles FALSE'
 
-#  ---------------------------------------------------------------------------
-#  	18.  cleanupLS:  Clean up LaunchServices to remove duplicates in the 'Open With' menu
-#  ---------------------------------------------------------------------------
 
+##  --------------------------------------------------------------------------
+##  4.7 Clean up LaunchServices to remove duplicates in the 'Open With' menu.
+##  --------------------------------------------------------------------------
+
+# cleanupLS:  Clean up LaunchServices to remove duplicates in the 'Open With' menu
 alias cleanupLS='/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user && killall Finder'
 
 
-#  ---------------------------------------------------------------------------
-#  	19.  screensaverDesktop: Run a screensaver on the Desktop
-#  ---------------------------------------------------------------------------
+##  --------------------------------------------------------------------------
+##  4.8 Run a screensaver on the Desktop.
+##  --------------------------------------------------------------------------
 
+# screensaverDesktop: Run a screensaver on the Desktop
 alias screensaverDesktop='/System/Library/Frameworks/ScreenSaver.framework/Resources/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine -background'
 
 
-#  ---------------------------------------------------------------------------
-#  	20.  Subversion
-#  ---------------------------------------------------------------------------
+##  --------------------------------------------------------------------------
+##  4.8 Application launchers.
+##  --------------------------------------------------------------------------
 
-alias sa='svn add'
-alias sc='svn commit'
-alias sd='svn delete'
-alias sm='svn move'
-alias sr='svn rename'
-alias ss='svn status'
-
-
-#  ---------------------------------------------------------------------------
-#  	21.  Application launchers
-#  ---------------------------------------------------------------------------
-
-alias css='open -a /Applications/CSSEdit.app'
+# e: Launch Visual Studio Code as an editor.
 alias e='open -a "Visual Studio Code"'
+
+# edit: Launch Visual Studio Code as an editor.
 alias edit='open -a "Visual Studio Code"'
-alias ipinfo='$HOME/Bin/gt-ipinfo.sh'
+
+# mate: Launch Visual Studio Code as an editor.
 alias mate='open -a "Visual Studio Code"'
+
+# preview: Launch Preview app in macOS.
 alias preview='open -a /System/Applications/Preview.app'
+
+# sql: Launch Sequel Pro app in macOS.
 alias sql='open -a /Applications/Sequel\ Pro.app'
+
+# www: Launch Safari app in macOS.
 alias www='open -a /Applications/Safari.app'
+
+# xcode: Launch XCode app in macOS.
 alias xcode='open -a xcode'
 
 
+##  --------------------------------------------------------------------------
+##  4.9 Various
+##  --------------------------------------------------------------------------
 
-
-
-
-#  ---------------------------------------------------------------------------
-#  	25.  wget with resume
-#  ---------------------------------------------------------------------------
-
+# wget: wget with resume.
 alias wget='wget -c'
 
+# qfind: Quickly search for file
+alias qfind='find . -name '              
 
-#  ---------------------------------------------------------------------------
-#  	26.  Searching
-#  ---------------------------------------------------------------------------
-
-alias qfind='find . -name '              # qfind:    Quickly search for file
-
-
-#  ---------------------------------------------------------------------------
-#  	27.  memHogsTop, memHogsPs:  Find memory hogs
-#  ---------------------------------------------------------------------------
-
+# memHogsPs: Find memory hogs
 alias memHogsPs='ps wwaxm -o pid,stat,vsize,rss,time,command | head -10'
+
+# memHogsTop: Find memory hogs
 alias memHogsTop='top -l 1 -o rsize | head -20'
 
-#  ---------------------------------------------------------------------------
-#  	28.  cpuHogs:  Find CPU hogs
-#  ---------------------------------------------------------------------------
-
+# cpuHogs:  Find CPU hogs
 alias cpu_hogs='ps wwaxr -o pid,stat,%cpu,time,command | head -10'
