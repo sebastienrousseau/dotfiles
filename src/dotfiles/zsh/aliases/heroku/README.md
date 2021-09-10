@@ -1,24 +1,40 @@
-c| hau   | `heroku access:update`                   | Update existing collaborators on an team app.      |
-| hh    | `heroku help`                            | Display help for heroku.                           |
-| hip   | `heroku trusted-ips --space "$@"`        | list trusted IP ranges for a space.                |
-| hipa  | `heroku trusted-ips:add --space "$@"`    | Add one range to the list of trusted IP ranges.    |
-| hipr  | `heroku trusted-ips:remove --space "$@"` | Remove a range from the list of trusted IP ranges. |
-| hj    | `heroku join`                            | Add yourself to a team app.                        |
-| hl    | `heroku commands`                        | List all the commands.                             |
-| hla   | `heroku access`                          | List who has access to an app.                     |
-| hlg   | `heroku logs`                            | Display recent log output.                         |
-| hn    | `heroku notifications`                   | Display notifications.                             |
-| ho    | `heroku orgs`                            | List the teams that you are a member of.           |
-| hoo   | `heroku orgs:open`                       | Open the team interface in a browser.              |
-| hp    | `heroku psql`                            | Open a psql shell to the database.                 |
-| hq    | `heroku leave`                           | Remove yourself from a team app.                   |
-| hr    | `heroku access:remove`                   | Remove users from a team app.                      |
-| hrg   | `heroku regions`                         | List available regions for deployment.             |
-| hs    | `heroku status`                          | Display current status of the Heroku platform.     |
-| ht    | `heroku teams`                           | List the teams that you are a member of.           |
-| hu    | `heroku update`                          | Update the heroku CLI.                             |
-| hulk  | `heroku unlock`                          | Unlock an app so any team member can join.         |
-| hw    | `heroku which`                           | Show which plugin a command is in.                 |
+# Dotfiles aliases
+
+![Banner representing the Dotfiles Library](/media/dotfiles.svg)
+
+The `heroku.plugin.zsh` file creates helpful shortcut aliases for many commonly
+[Heroku](https://www.heroku.com/) commands.
+
+## Table of Contents
+
+### 1. Heroku aliases
+#### 1.1 Heroku Access aliases.
+
+| Alias   | Command                   | Description                                                |
+| ------- | ------------------------- | ---------------------------------------------------------- |
+| h   | `heroku`    | h: Heroku CLI command shortcut. |
+| ha   | `heroku access:add`    | ha: Add new users to your app. |
+| hau   | `heroku access:update`    | hau: Update existing collaborators on an team app. |
+| hh   | `heroku help`    | hh: Display help for heroku. |
+| hip   | `heroku trusted-ips --space "$@"`    | hip: List trusted IP ranges for a space. |
+| hipa   | `heroku trusted-ips:add --space "$@"`    | hipa: Add one range to the list of trusted IP ranges. |
+| hipr   | `heroku trusted-ips:remove --space "$@"`    | hipr: Remove a range from the list of trusted IP ranges. |
+| hj   | `heroku join`    | hj: Add yourself to a team app. |
+| hl   | `heroku commands`    | hl: List all the commands. |
+| hla   | `heroku access`    | hla: List who has access to an app. |
+| hlg   | `heroku logs`    | hlg: Display recent log output. |
+| hn   | `heroku notifications`    | hn: Display notifications. |
+| ho   | `heroku orgs`    | ho: List the teams that you are a member of. |
+| hoo   | `heroku orgs:open`    | hoo: Open the team interface in a browser. |
+| hp   | `heroku psql`    | hp: Open a psql shell to the database. |
+| hq   | `heroku leave`    | hq: Remove yourself from a team app. |
+| hr   | `heroku access:remove`    | hr: Remove users from a team app. |
+| hrg   | `heroku regions`    | hrg: List available regions for deployment. |
+| hs   | `heroku status`    | hs: Display current status of the Heroku platform. |
+| ht   | `heroku teams`    | ht: List the teams that you are a member of. |
+| hu   | `heroku update`    | hu: Update the heroku CLI.  |
+| hulk   | `heroku unlock`    | hulk: Unlock an app so any team member can join. |
+| hw   | `heroku which`    | hw: Show which plugin a command is in. |
 
 #### 1.2 Heroku Add-ons aliases
 

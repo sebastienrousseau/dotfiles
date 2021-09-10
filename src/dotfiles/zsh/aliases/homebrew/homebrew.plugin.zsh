@@ -471,6 +471,7 @@ alias bru='brew update "$1"' # Fetch the newest version of Homebrew and all form
 alias brum='brew update "$1" --merge' # Use git merge to apply updates (rather than git rebase).
 alias brup='brew update "$1" --preinstall' # Run on auto-updates (e.g. before brew install). Skips some slower steps.
 alias bruf='brew update "$1" --force' # Always do a slower, full update check (even if unnecessary).
+alias brewup='brew update && brew upgrade && brew cleanup && brew doctor' # Combining updates.
 
 
 

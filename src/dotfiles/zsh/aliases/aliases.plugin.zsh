@@ -15,22 +15,46 @@
 #
 #   1.0 System detection utility.
 #      1.1 Detect which `ls` flavor is in use.
-#      1.2 Aliases for the GNU coreutils (Core GNU utilities) programs.
-#      1.3 Checking that the aliases are already installed.
 #
-#   2.0 System tools and system information aliases.
+#   2. System tools and system information aliases.
 #      2.1 System tools aliases.
-#      2.2 System information aliases.
-#      2.3 Interactive mode commands. 
+#      2.2 Checking that the aliases are already installed.
 #
-#   3.0 Common shell aliases.
+#   3. Common shell aliases.
 #      3.1 Generic aliases.
 #      3.2 Finding (find and grep).
 #      3.3 List directory aliases commands (ls).
 #      3.4 Networking aliases.
 #      3.5 Quicker navigation aliases.
+#      3.6 Jekyll Aliases. 
 #
-#   4.0 Get OS X Software Updates, update Homebrew itself, and upgrade installed Homebrew packages.
+#   4. Networking aliases.
+#   ) Quicker navigation
+#   ) Jekyll
+#   ) Heroku's commands
+#   ) Ionic commands
+#   ) Emulate iOS using different Apple devices
+#   ) Git SCM Cheats
+#   ) App engine commands
+#   ) Add an 'alert' alias for long running commands.
+#   ) Get OS X Software Updates, update and upgrade Homebrew packages
+#   ) Shorter commands for `Homebrew`.
+#   ) Speed-up Terminal load time by clearing system logs
+#   ) Empty the Trash on all mounted volumes and the main HDD
+#   ) Open the device simulators
+#   ) Recursively delete .DS_Store files
+#   ) Hidden Files
+#   ) Clean up LaunchServices to remove duplicates in the 'Open With' menu
+#   ) Run a screen saver on the Desktop
+#   ) Things for Subversion
+#   ) Application launchers
+#   ) Recommended 'top' invocation to minimize resources
+#   ) Networking
+#   ) Limit Ping to 5 ECHO_REQUEST packets
+#   ) Wget with resume
+#   ) Searching
+#   ) Find memory hogs
+#   ) Find CPU hogs
 #
 # Copyright (c) Sebastien Rousseau 2021. All rights reserved
 # Licensed under the MIT license
@@ -57,58 +81,10 @@
     fi
 
 
-##  ----------------------------------------------------------------------------
-##  1.2 Aliases for the GNU coreutils (Core GNU utilities) programs.
-##  ----------------------------------------------------------------------------
-
-# Only applying these aliases on macOS.
-if [ "$(uname -s)" == "Darwin" ]; then
-
-    # Install command: `brew install findutils`
-    #  Switch dircolors by gnu dircolors.
-    if [ "$(type -P gdircolors)" ]; then
-        alias dircolors="gdircolors"
-    fi
-
-    #  Switch find by gnu find.
-    if [ "$(type -P gfind)" ]; then
-        alias find="gfind"
-    fi
-
-    #  Switch grep by gnu grep.
-    if [ "$(type -P ggrep)" ]; then
-        alias grep="ggrep"
-    fi
-
-    #  Switch readlink by gnu readlink.
-    if [ "$(type -P greadlink)" ]; then
-        alias readlink="greadlink"
-    fi
-
-    #  Switch sed by gnu sed.
-    if [ "$(type -P gsed)" ]; then
-        alias sed="gsed"
-    fi
-
-    #  Switch sort by gnu sort.
-    if [ "$(type -P gsort)" ]; then
-        alias sort="gsort"
-    fi
-fi
-
-
-##  ----------------------------------------------------------------------------
-##  1.3 Checking that the aliases are already installed.
-##  ----------------------------------------------------------------------------
-
-alias alias='alias | sort -nk 10'
-
-
 
 #   ----------------------------------------------------------------------------
 #   2.0 System tools and system information aliases.
 #   ----------------------------------------------------------------------------
-
 
 ##  ----------------------------------------------------------------------------
 ##  2.1 System tools aliases.
@@ -149,7 +125,7 @@ alias zshrc='${=EDITOR} $HOME/.zshrc'
 
 
 ##  ----------------------------------------------------------------------------
-##  2.2 System information aliases.
+##  2.2 System information aliases
 ##  ----------------------------------------------------------------------------
 
 # Getting full path of executables. The "auxwww" are options to the ps (process)
@@ -183,7 +159,7 @@ alias psmem10='ps aux | sort -nr -k 4 | head -10'
 
 
 ##  ----------------------------------------------------------------------------
-##  2.3 Interactive mode commands.
+##  2.3 Interactive mode commands
 ##  ----------------------------------------------------------------------------
 
 ## Interactive mode aliases.
@@ -205,7 +181,7 @@ alias zap='rm -i'
 
 
 #   ----------------------------------------------------------------------------
-#   3.0 Common shell aliases.
+#   3. Common shell aliases.
 #   ----------------------------------------------------------------------------
 
 
@@ -306,7 +282,7 @@ alias vv='diskutil verifyvolume /'
 
 
 ##  ----------------------------------------------------------------------------
-##  3.2 Finding (find and grep).
+##  3.2 Finding (find and grep)
 ##  ----------------------------------------------------------------------------
 
 # egrep: Searches that can handle extended regular expressions (EREs)
@@ -332,7 +308,7 @@ alias sgrep='grep -R -n -H -C 5 --exclude-dir={.git,.svn,CVS} '
 
 
 ##  ----------------------------------------------------------------------------
-##  3.3 List directory aliases commands (ls).
+##  3.3 List directory aliases commands (ls)
 ##  ----------------------------------------------------------------------------
 
 # l: Size, show type, human readable.
@@ -409,7 +385,7 @@ alias lx='ls -lXB'
 
 
 ##  ----------------------------------------------------------------------------
-##  3.4 Networking aliases.
+##  3.4 Networking aliases
 ##  ----------------------------------------------------------------------------
 
 
@@ -490,19 +466,19 @@ alias cd ....='cd ../../../..; ls'
 alias cd .....='cd ../../../../..; ls'
 
 # -: Navigate to the previous one level directory (or back) and show the directory content. 
-alias -='cd -; ls'
+#alias -='cd -; ls'
 
 # --: Navigate to the previous two levels directory (or back) and show the directory content. 
-alias --='cd -2; ls'
+#alias --='cd -2; ls'
 
 # ---: Navigate to the previous three levels directory (or back) and show the directory content. 
-alias ---='cd -3; ls'
+#alias ---='cd -3; ls'
 
 # ----: Navigate to the previous four levels directory (or back) and show the directory content. 
-alias ----='cd -4; ls'
+#alias ----='cd -4; ls'
 
 # -----: Navigate to the previous five levels directory (or back) and show the directory content. 
-alias -----='cd -5; ls'
+#alias -----='cd -5; ls'
 
 # 1: Navigate to the previous one level directory (or back) and show the directory content. 
 alias 1='cd -; ls'
@@ -534,6 +510,21 @@ alias 4.='cd ../../../..; ls'
 # 5.: Move back to five levels and show the directory content.
 alias 5.='cd ../../../../..; ls'
 
+# cd 1.: Move back to one level and show the directory content.
+alias cd 1.='cd ..; ls'
+
+# cd 2.: Move back to two levels and show the directory content.
+alias cd 2.='cd ../..; ls'
+
+# cd 3.: Move back to three levels and show the directory content.
+alias cd 3.='cd ../../..; ls'
+
+# cd 4.: Move back to four levels and show the directory content. 
+alias cd 4.='cd ../../../..; ls'
+
+# cd 5.: Move back to five levels and show the directory content.
+alias cd 5.='cd ../../../../..; ls'
+
 # less: Make less always work with colored input.
 alias less='less -R'
 
@@ -551,19 +542,23 @@ alias uso='unsetopt'
 
 
 
-#   ----------------------------------------------------------------------------
-#   4.0 Get OS X Software Updates, update Homebrew itself, and upgrade installed Homebrew packages.
-#   ----------------------------------------------------------------------------
+#  ---------------------------------------------------------------------------
+#  	11.  Get OS X Software Updates, update Homebrew itself, and upgrade installed Homebrew packages
+#  ---------------------------------------------------------------------------
 
 # Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages
 
-alias update='sudo softwareupdate -i -a; brew cu --all; brew doctor; brew update; brew upgrade; brew cask cleanup; brew prune; brew cleanup; mas upgrade; npm install npm -g; npm update -g; sudo gem update --system; sudo gem update; sudo gem cleanup'
+alias update='sudo softwareupdate -i -a; brew cu --all; brew doctor; brew update; brew upgrade; brew cleanup; mas upgrade; npm install npm -g; npm update -g; sudo gem update --system; sudo gem update; sudo gem cleanup; npm update ncu; npm audit fix; ncu -g'
 
+#  ---------------------------------------------------------------------------
+#  	12.  Shorter commands for `Homebrew`.
+#  ---------------------------------------------------------------------------
 
-
-#   ----------------------------------------------------------------------------
-#   5.0 Speed-up Terminal load time by clearing system logs.
-#   ----------------------------------------------------------------------------
+alias brewd='brew doctor'
+alias brewi='brew install'
+alias brews='brew search'
+alias brewu='brew uninstall'
+alias brewup='brew update && brew upgrade && brew cleanup && brew doctor'
 
 
 #  ---------------------------------------------------------------------------
