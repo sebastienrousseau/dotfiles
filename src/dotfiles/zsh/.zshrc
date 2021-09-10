@@ -83,7 +83,7 @@ fi
 if [[ -z "$ZSH_HOME" ]]; then
   # File may not exist, so don't follow for shellcheck linting (SC1090).
   # shellcheck source=/dev/null
-  source $ZSH_HOME/aliases/aliases.plugin.zsh
+  source $ZSH_HOME/aliases.zsh
 fi
 
 # Source the configurations.zsh file.
