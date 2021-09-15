@@ -173,11 +173,8 @@ export LDFLAGS="-L$(brew --prefix)/opt/ruby/lib"
 export CPPFLAGS="-I$(brew --prefix)/opt/ruby/include"
 export PKG_CONFIG_PATH="$(brew --prefix)/opt/ruby/lib/pkgconfig"
 
-# NodeJS, NPM exports
-export PATH="./$HOME/.npm-packages/bin:$PATH"
-export NPM_PACKAGES="$HOME/.npm-packages"
-export NODE_PATH="$NPM_PACKAGES/lib/node_modules:$NODE_PATH"
-export PATH="$NPM_PACKAGES/bin:$PATH"
+# NPM Packages export
+export NPM_PACKAGES="$(brew --prefix)/.npm-packages"
 
 # Set Heroku
 export FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
@@ -185,7 +182,7 @@ export FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
 # Set Perl
 eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"
 
-# Set travis
+# Set Travis
 [ -f $HOME/.travis/travis.sh ] && source $HOME/.travis/travis.sh
 
 # Set Ruby

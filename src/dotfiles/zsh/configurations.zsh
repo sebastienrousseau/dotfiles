@@ -18,6 +18,6 @@
 #
 
 # Load custom configurations
-for config in $HOME/zsh/configurations/[^.#]*.zsh; do
+for config in $ZSH_HOME/configurations/[^.#]*.zsh; do
   source $config
 done

@@ -18,11 +18,11 @@
 #
 
 # Load custom executable functions
-for function in ~/zsh/functions/*; do
+for function in $ZSH_HOME/functions/[^.#]*.zsh; do
   source $function
 done
 
-# To be tested and triaged (multi-display support)
+# TODO: #19 To be tested and triaged (multi-display support)
 #
 # set dual monitors
 # dual () {
@@ -39,7 +39,7 @@ done
 # }
 # 
 # 
-# 
+# TODO: #20 Test Function alias
 # # aliasc: Function alias
 # function aliasc() {
 #   alias | grep "^${1}=" | awk -F= '{ print $2 }' | sed "s/^'//" | sed "s/'$//"

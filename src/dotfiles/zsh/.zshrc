@@ -63,7 +63,6 @@ if [[ $- != *i* ]] ; then
   return
 fi
 
-
 if [ -z "$DOTFILES_HOME" ]; then
   # TODO: #17 Add update routine
 fi
@@ -79,6 +78,20 @@ if [ "$ZSH_NAME" = "zsh" ];then
   setopt localoptions ksharrays
 fi
 
+# Source the functions.zsh file.
+if [[ -z "$ZSH_HOME" ]]; then
+  # File may not exist, so don't follow for shellcheck linting (SC1090).
+  # shellcheck source=/dev/null
+  source $ZSH_HOME/functions.zsh
+fi
+
+# Source the configurations.zsh file.
+if [[ -z "$ZSH_HOME" ]]; then
+  # File may not exist, so don't follow for shellcheck linting (SC1090).
+  # shellcheck source=/dev/null
+  source $ZSH_HOME/configurations.zsh
+fi
+
 # Set the path of zsh aliases directory
 if [[ -z "$ZSH_HOME" ]]; then
   # File may not exist, so don't follow for shellcheck linting (SC1090).
@@ -86,25 +99,11 @@ if [[ -z "$ZSH_HOME" ]]; then
   source $ZSH_HOME/aliases.zsh
 fi
 
-# Source the configurations.zsh file.
-if [[ -f ~/configurations.zsh ]]; then
-  # File may not exist, so don't follow for shellcheck linting (SC1090).
-  # shellcheck source=/dev/null
-  source "$HOME/configurations.zsh"
-fi
-
 # Source the profile.zsh file.
 if [[ -f ~/profile.zsh ]] ; then
   # File may not exist, so don't follow for shellcheck linting (SC1090).
   # shellcheck source=/dev/null
-  source "$HOME/profile.zsh"
-fi
-
-# Source the functions.zsh file.
-if [[ -f ~/functions.zsh ]]; then
-  # File may not exist, so don't follow for shellcheck linting (SC1090).
-  # shellcheck source=/dev/null
-  # source "$HOME/functions.zsh"
+  source $HOME/profile.zsh
 fi
 
 # Source the exit.zsh file.
