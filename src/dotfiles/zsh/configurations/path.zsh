@@ -13,36 +13,20 @@
 #
 # Sections:
 #
-#   1.0 Setting PATH environments.
-#      1.1 Prepend $PATH without duplicates.
-#      1.2 Construct $PATH. 
-#      1.3 Custom exports. 
-#      
+#   1.0 Construct $PATH.
+#      1.1 Default Paths.
+#      1.2 Custom exports.
 #
 # Copyright (c) Sebastien Rousseau 2021. All rights reserved
 # Licensed under the MIT license
 #
 
 #   ----------------------------------------------------------------------------
-#  	1.0 Setting PATH environments.
+#  	1.0 Construct $PATH.
 #   ----------------------------------------------------------------------------
 
 ##  ----------------------------------------------------------------------------
-##  1.1 Prepend $PATH without duplicates.
-##  ----------------------------------------------------------------------------
-
-# prependpath: Prepend $PATH without duplicates
-function prependpath() {
-    if ! $( echo "$PATH" | tr ":" "\n" | grep -qx "$1" ) ; then
-        PATH="$1:$PATH"
-    fi
-}
-
-
-
-##  ----------------------------------------------------------------------------
-##  1.2 Construct $PATH.
-##  - Default Paths,
+##  1.1 Default Paths.
 ##  - Custom bin folder for Homebrew, Node, OpenJDK, Ruby, Python, CoreUtils.
 ##  ----------------------------------------------------------------------------
 
@@ -80,7 +64,7 @@ if type brew &>/dev/null; then
 fi
 
 ##  ----------------------------------------------------------------------------
-##  1.3 Custom exports.
+##  1.2 Custom exports.
 ##  ----------------------------------------------------------------------------
 
 # Set ANT_HOME
