@@ -51,8 +51,14 @@ export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 # Add Homebrew to PATH
 [ -d /usr/local/bin ] && prependpath "/usr/local/bin"
 
-# Add Node to PATH
+# Add Homebrew to PATH
+[ -d /usr/local/sbin ] && prependpath "/usr/local/sbin"
+
+# Add NPM to PATH
 [ -d /usr/local/bin/npm ] && prependpath "/usr/local/bin/npm"
+
+# Add Node to PATH
+[ -d /usr/local/bin/node ] && prependpath "/usr/local/bin/node"
 
 # Add OpenJDK to PATH
 [ -d /usr/local/opt/openjdk/bin ] && prependpath "/opt/openjdk/bin"
