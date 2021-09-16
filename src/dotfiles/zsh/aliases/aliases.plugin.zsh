@@ -208,6 +208,9 @@ alias hs='history | grep'
 # hsi: Use grep to do a case-insensitive search of the command history.
 alias hsi='history | grep -i'
 
+# hsfreq: Check frequency of commands used.
+alias hsfreq="history | cut -c8- | sort | uniq -c | sort -rn | head"
+
 # gz: Compress a whole directory (including subdirectories) 
 alias gz='tar -zcvf'
 

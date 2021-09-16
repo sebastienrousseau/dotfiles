@@ -79,36 +79,26 @@ if [ "$ZSH_NAME" = "zsh" ];then
 fi
 
 # Source the functions.zsh file.
-if [[ -z "$ZSH_HOME" ]]; then
-  # File may not exist, so don't follow for shellcheck linting (SC1090).
-  # shellcheck source=/dev/null
-  source $ZSH_HOME/functions.zsh
-fi
+# File may not exist, so don't follow for shellcheck linting (SC1090).
+# shellcheck source=/dev/null
+source $ZSH_HOME/functions.zsh
 
 # Source the configurations.zsh file.
-if [[ -z "$ZSH_HOME" ]]; then
-  # File may not exist, so don't follow for shellcheck linting (SC1090).
-  # shellcheck source=/dev/null
-  source $ZSH_HOME/configurations.zsh
-fi
+# File may not exist, so don't follow for shellcheck linting (SC1090).
+# shellcheck source=/dev/null
+source $ZSH_HOME/configurations.zsh
 
 # Set the path of zsh aliases directory
-if [[ -z "$ZSH_HOME" ]]; then
-  # File may not exist, so don't follow for shellcheck linting (SC1090).
-  # shellcheck source=/dev/null
-  source $ZSH_HOME/aliases.zsh
-fi
+# File may not exist, so don't follow for shellcheck linting (SC1090).
+# shellcheck source=/dev/null
+source $ZSH_HOME/aliases.zsh
 
-# Source the profile.zsh file.
-if [[ -f ~/profile.zsh ]] ; then
-  # File may not exist, so don't follow for shellcheck linting (SC1090).
-  # shellcheck source=/dev/null
-  source $HOME/profile.zsh
-fi
+# Source the history.zsh file.
+# File may not exist, so don't follow for shellcheck linting (SC1090).
+# shellcheck source=/dev/null
+source $ZSH_HOME/history.zsh
 
 # Source the exit.zsh file.
-if [[ -f ~/exit.zsh ]]; then
-  # File may not exist, so don't follow for shellcheck linting (SC1090).
-  # shellcheck source=/dev/null
-  source "$HOME/exit.zsh"
-fi
+# File may not exist, so don't follow for shellcheck linting (SC1090).
+# shellcheck source=/dev/null
+source $ZSH_HOME/exit.zsh

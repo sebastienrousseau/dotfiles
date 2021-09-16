@@ -113,6 +113,14 @@ export HOSTNAME
 INPUTRC=~/.inputrc
 export INPUTRC
 
+# Set JAVA_HOME
+# For zsh shell, export $JAVA_HOME at ~/.zshenv or ~/.zshrc.
+JAVA_HOME="$(brew --prefix)/Cellar/openjdk/16.0.2/libexec"
+export JAVA_HOME
+
+# Set JRE_HOME
+export JRE_HOME=${JAVA_HOME}/jre
+
 # set JENV_HOME
 _JENV_HOME="$HOME/.jenv"
 
