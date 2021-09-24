@@ -78,27 +78,32 @@ if [ "$ZSH_NAME" = "zsh" ];then
   setopt localoptions ksharrays
 fi
 
-# Source the functions.zsh file.
+# Source Dotfiles functions.zsh file.
 # File may not exist, so don't follow for shellcheck linting (SC1090).
 # shellcheck source=/dev/null
 source $ZSH_HOME/functions.zsh
 
-# Source the configurations.zsh file.
+# Source Dotfiles plugins files.
+# File may not exist, so don't follow for shellcheck linting (SC1090).
+# shellcheck source=/dev/null
+source $ZSH_HOME/plugins/*/[^.#]*.zsh
+
+# Source Dotfiles configurations.zsh file.
 # File may not exist, so don't follow for shellcheck linting (SC1090).
 # shellcheck source=/dev/null
 source $ZSH_HOME/configurations.zsh
 
-# Set the path of zsh aliases directory
+# Source Dotfiles path of zsh aliases directory
 # File may not exist, so don't follow for shellcheck linting (SC1090).
 # shellcheck source=/dev/null
 source $ZSH_HOME/aliases.zsh
 
-# Source the history.zsh file.
+# Source Dotfiles history.zsh file.
 # File may not exist, so don't follow for shellcheck linting (SC1090).
 # shellcheck source=/dev/null
 source $ZSH_HOME/history.zsh
 
-# Source the exit.zsh file.
+# Source Dotfiles exit.zsh file.
 # File may not exist, so don't follow for shellcheck linting (SC1090).
 # shellcheck source=/dev/null
 source $ZSH_HOME/exit.zsh

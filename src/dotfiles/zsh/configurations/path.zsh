@@ -131,6 +131,9 @@ then
   eval "$(jenv init -)"
 fi
 
+# set PERL
+eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"
+
 # Set language flags
 LANG=en_GB.UTF-8
 export LANG 
