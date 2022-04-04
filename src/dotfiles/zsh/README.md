@@ -9,6 +9,25 @@ This zsh folder contains helpful shortcut aliases, configurations and plugins fo
 - [Dotfiles aliases](#dotfiles-aliases)
   - [Table of Contents](#table-of-contents)
     - [1. .zhrc](#1-zhrc)
+      - [1.1 Initializing DotFiles](#11-initializing-dotfiles)
+      - [1.2 Setting PATH environments](#12-setting-path-environments)
+        - [1.2.1 Current Version of DotFiles](#121-current-version-of-dotfiles)
+        - [1.2.2 Current location of DotFiles](#122-current-location-of-dotfiles)
+        - [1.2.3 Targeted zsh directory of DotFiles](#123-targeted-zsh-directory-of-dotfiles)
+        - [1.2.4 Targeted zsh aliases directory of DotFiles](#124-targeted-zsh-aliases-directory-of-dotfiles)
+      - [1.3 Autoload Functions](#13-autoload-functions)
+        - [1.3.1 Initialize the completion system](#131-initialize-the-completion-system)
+        - [1.3.2 Enable colors in prompt](#132-enable-colors-in-prompt)
+        - [1.3.3 Starting to find autocorrect rather annoying...](#133-starting-to-find-autocorrect-rather-annoying)
+      - [1.4 Source key files](#14-source-key-files)
+        - [1.4.1 Don't enable any fancy or breaking features if the shell session is non-interactive](#141-dont-enable-any-fancy-or-breaking-features-if-the-shell-session-is-non-interactive)
+        - [1.4.2 Fix array index for zsh](#142-fix-array-index-for-zsh)
+        - [1.4.3 Source Dotfiles functions.zsh file](#143-source-dotfiles-functionszsh-file)
+        - [1.4.4 Source Dotfiles plugins files](#144-source-dotfiles-plugins-files)
+        - [1.4.5 Source Dotfiles configurations.zsh file](#145-source-dotfiles-configurationszsh-file)
+        - [1.4.6 Source Dotfiles path of zsh aliases directory](#146-source-dotfiles-path-of-zsh-aliases-directory)
+        - [1.4.7 Source Dotfiles history.zsh file](#147-source-dotfiles-historyzsh-file)
+        - [1.4.8 Source Dotfiles exit.zsh file](#148-source-dotfiles-exitzsh-file)
     - [2. aliases.zsh](#2-aliaseszsh)
       - [2.1 Sourcing alias plugins.](#21-sourcing-alias-plugins)
         - [2.1.1 Main Aliases location](#211-main-aliases-location)
@@ -37,6 +56,119 @@ This zsh folder contains helpful shortcut aliases, configurations and plugins fo
         - [6.1.6 History command configuration](#616-history-command-configuration)
 
 ### 1. .zhrc 
+
+The `zhrc` file contains helpful shortcut zhrc (GNU or macOS) in order to help setting up the right
+`zhrc` environment variables to your Z Shell.
+
+#### 1.1 Initializing DotFiles
+
+#### 1.2 Setting PATH environments
+
+##### 1.2.1 Current Version of DotFiles
+
+```bash
+export DOTFILES_VERSION='0.2.447'
+```
+
+##### 1.2.2 Current location of DotFiles
+
+```bash
+export DOTFILES_HOME=$HOME/.dotfiles
+```
+
+##### 1.2.3 Targeted zsh directory of DotFiles
+
+```bash
+export ZSH_HOME="$DOTFILES_HOME/zsh"
+```
+
+##### 1.2.4 Targeted zsh aliases directory of DotFiles
+
+```bash
+export ZSH_ALIASES="$ZSH_HOME/aliases"
+```
+
+#### 1.3 Autoload Functions
+
+##### 1.3.1 Initialize the completion system
+
+```bash
+autoload -Uz compinit
+```
+
+##### 1.3.2 Enable colors in prompt
+
+```bash
+autoload -Uz colors && colors
+```
+
+##### 1.3.3 Starting to find autocorrect rather annoying...
+
+```bash
+unsetopt correct_all
+```
+
+#### 1.4 Source key files
+
+##### 1.4.1 Don't enable any fancy or breaking features if the shell session is non-interactive
+
+```bash
+if [[ $- != *i* ]] ; then
+  return
+fi
+
+if [ -z "$DOTFILES_HOME" ]; then
+  # TODO: #17 Add update routine
+fi
+
+if ! test -d "$DOTFILES_HOME"; then
+  mkdir "$DOTFILES_HOME"
+  chmod g-w "$DOTFILES_HOME"
+  chmod o-w "$DOTFILES_HOME"
+fi
+```
+
+##### 1.4.2 Fix array index for zsh
+
+```bash
+if [ "$ZSH_NAME" = "zsh" ];then
+  setopt localoptions ksharrays
+fi
+```
+
+##### 1.4.3 Source Dotfiles functions.zsh file
+
+```bash
+source $ZSH_HOME/functions.zsh
+```
+
+##### 1.4.4 Source Dotfiles plugins files
+
+```bash
+source $ZSH_HOME/plugins/*/[^.#]*.zsh
+```
+
+##### 1.4.5 Source Dotfiles configurations.zsh file
+
+```bash
+source $ZSH_HOME/configurations.zsh
+```
+
+##### 1.4.6 Source Dotfiles path of zsh aliases directory
+```bash
+source $ZSH_HOME/aliases.zsh
+```
+
+##### 1.4.7 Source Dotfiles history.zsh file
+```bash
+source $ZSH_HOME/history.zsh
+```
+
+##### 1.4.8 Source Dotfiles exit.zsh file
+```bash
+source $ZSH_HOME/exit.zsh
+```
+
 ### 2. aliases.zsh
 
 The `aliases.zsh` file contains helpful shortcut aliases (GNU or macOS) in order to help setting up the right
