@@ -6,14 +6,14 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.447
+# DotFiles v0.2.448
 # https://dotfiles.io
 #                                                                           
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
 #
 # History options
 #
-# Copyright (c) Sebastien Rousseau 2021. All rights reserved
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # Licensed under the MIT license
 #
 
@@ -45,15 +45,15 @@ case ${HIST_STAMPS-} in
 esac
 
 # Command history configuration
-[ -z "$HISTFILE" ] && HISTFILE="$HOME/.zsh_history"
+export HISTFILE=$HOME/.zsh_history
 
 # Number of histories saved in memory
-export HISTSIZE=50000 
+export HISTSIZE=10000 
 
 # Number of histories saved in history file
 export SAVEHIST=10000
 
-# History command configuration
+# Specifying some history options
 setopt always_to_end            # Move cursor to the end of a completed word.
 setopt append_history           # Sessions will append their history list to the history file, rather than replace it. 
 setopt auto_cd                  # cd to a directory if it's given without a command.
@@ -77,4 +77,4 @@ setopt hist_verify              # Whenever the user enters a line with history e
 setopt list_packed              # Display with complementary candidates packed
 setopt list_types               # Mark the file type in the completion candidate list
 setopt pushd_ignore_dups        # Don’t push multiple copies of the same directory onto the directory stack.
-setopt share_history            # Imports new commands from the history file, and also causes the typed commands to be appended to the history file
+setopt share_history            # Imports new commands from the history file, and also causes the typed commands to be appended to the history file 

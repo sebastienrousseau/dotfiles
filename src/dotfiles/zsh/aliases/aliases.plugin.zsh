@@ -6,7 +6,7 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.447
+# DotFiles v0.2.448
 # https://dotfiles.io
 #                                                                           
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
@@ -39,7 +39,7 @@
 #       4.8 Application launchers.
 #       4.9 Various.
 #       
-# Copyright (c) Sebastien Rousseau 2021. All rights reserved
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # Licensed under the MIT license
 #
 
@@ -296,6 +296,9 @@ alias sgrep='grep -R -n -H -C 5 --exclude-dir={.git,.svn,CVS} '
 ##  ----------------------------------------------------------------------------
 ##  3.3 List directory aliases commands (ls).
 ##  ----------------------------------------------------------------------------
+
+# ls: Colorize the ls output
+alias ls='ls --color'
 
 # l: Size, show type, human readable.
 alias l='ls -lFh'

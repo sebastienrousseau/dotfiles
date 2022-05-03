@@ -6,7 +6,7 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.447
+# DotFiles v0.2.448
 # https://dotfiles.io
 #                                                                           
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
@@ -17,7 +17,7 @@
 #      1.1 Default Paths.
 #      1.2 Custom exports.
 #
-# Copyright (c) Sebastien Rousseau 2021. All rights reserved
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # Licensed under the MIT license
 #
 
@@ -169,7 +169,9 @@ export CPPFLAGS="-I$(brew --prefix)/opt/ruby/include"
 export PKG_CONFIG_PATH="$(brew --prefix)/opt/ruby/lib/pkgconfig"
 
 # NPM Packages export
-export NPM_PACKAGES="$(brew --prefix)/.npm-packages"
+# export NPM_PACKAGES="$(brew --prefix)/npm_packages"
+export NPM_CONFIG_PREFIX="$HOME/.nvm/versions/node/v18.0.0"
+export NODE_PATH="$HOME/.nvm/versions/node/v18.0.0/lib/node_modules"
 
 # Set Heroku
 export FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
@@ -182,9 +184,9 @@ eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"
 
 # Set Ruby
 export PATH="$(brew --prefix)/opt/ruby/bin:$PATH"
-export GEM_HOME="$(brew --prefix)/Cellar/ruby/3.0.2/lib/ruby/gems/3.0.0/"
-export GEM_PATH="$(brew --prefix)/Cellar/ruby/3.0.2/lib/ruby/gems/3.0.0/"
-export PATH="$(brew --prefix)/Cellar/ruby/3.0.2/lib/ruby/gems/3.0.0/bin:$PATH"
+export GEM_HOME="$(brew --prefix)/Cellar/ruby/3.1.2/lib/ruby/gems/3.1.0/"
+export GEM_PATH="$(brew --prefix)/Cellar/ruby/3.1.2/lib/ruby/gems/3.1.0/"
+export PATH="$(brew --prefix)/Cellar/ruby/3.1.2/lib/ruby/gems/3.1.0/bin:$PATH"
 
 # Prevent Homebrew from reporting - https://github.com/Homebrew/brew/blob/master/share/doc/homebrew/Analytics.md
 export HOMEBREW_NO_ANALYTICS=1

@@ -6,10 +6,10 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.447
+# DotFiles v0.2.448
 # https://dotfiles.io
 #
-# Description: Script to install the latest DotFiles v0.2.447
+# Description: Script to install the latest DotFiles v0.2.448
 #
 # Copyright (c) Sebastien Rousseau 2021. All rights reserved
 # Licensed under the MIT license
@@ -29,7 +29,7 @@
 helpMenuDotfiles() {
   echo "${Green}┌──────────────────────────────────────┐${Reset}" 
   echo "${Green}│                                      │${Reset}"
-  echo "${Green}│          ${White}DotFiles v0.2.447${Reset}           │${Reset}"
+  echo "${Green}│          ${White}DotFiles v0.2.448${Reset}           │${Reset}"
   echo "${Green}│                                      │${Reset}"
   echo "${Green}└──────────────────────────────────────┘${Reset}"
   echo

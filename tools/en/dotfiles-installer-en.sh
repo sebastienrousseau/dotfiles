@@ -6,10 +6,10 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.447
+# DotFiles v0.2.448
 # https://dotfiles.io
 #
-# Desription: Installation procedures for DotFiles v0.2.447.
+# Desription: Installation procedures for DotFiles v0.2.448.
 #
 # Copyright (c) Sebastien Rousseau 2021. All rights reserved
 # Licensed under the MIT license

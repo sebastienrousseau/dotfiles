@@ -6,7 +6,7 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.447
+# DotFiles v0.2.448
 # hkttps://dotfiles.io
 #
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
@@ -41,7 +41,7 @@
 #      3.3 Heroku Spaces aliases.
 #      3.4 Heroku Webhooks aliases.
 #
-# Copyright (c) Sebastien Rousseau 2021. All rights reserved
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # Licensed under the MIT license
 #
 

@@ -6,7 +6,7 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.447
+# DotFiles v0.2.448
 # https://dotfiles.io
 #
 # Description: Constant variables for the Skeletonic Stylus Documentation (v0.0.1).
@@ -19,7 +19,7 @@
 # shellcheck disable=SC2034  # Unused variables left for readability
 
 appName=dotfiles
-fileVersion=v0.2.447.zip
+fileVersion=v0.2.448.zip
 backupDirectory=dotfiles_backup
 directory=dotfiles
 progName="$(basename "$0")"

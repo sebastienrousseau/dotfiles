@@ -3,7 +3,7 @@
 
 ![Banner representing the Dotfiles Library](/media/dotfiles.svg)
 
-This `jekyll.plugin.zsh` file creates helpful shortcut aliases for many commonly
+This `jekyll.plugin.zsh` file creates helpful shortcut aliases for many commonly 
 used [Jekyll](https://jekyllrb.com/) commands.
 
 ## Table of Contents

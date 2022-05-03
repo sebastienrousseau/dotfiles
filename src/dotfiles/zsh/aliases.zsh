@@ -6,7 +6,7 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.447
+# DotFiles v0.2.448
 # https://dotfiles.io
 #
 # Description: Add these lines to your .zshrc for aliases and functions
@@ -14,7 +14,7 @@
 #
 #   1.0 Sourcing alias plugins.
 #
-# Copyright (c) Sebastien Rousseau 2021. All rights reserved
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # Licensed under the MIT license
 
 
@@ -30,7 +30,7 @@
 
     # git aliases.
     # TODO #18 Fix "fatal: not a git repository (or any of the parent directories): .git"
-    # source $ZSH_HOME/aliases/git/git.plugin.zsh
+    source $ZSH_HOME/aliases/git/git.plugin.zsh
 
     # heroku aliases.
     source $ZSH_HOME/aliases/heroku/heroku.plugin.zsh
