@@ -6,7 +6,7 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.448
+# DotFiles v0.2.449
 # https://dotfiles.io
 #
 # Description: Installer of the symbolic links (Symlinks) for the Z shell (Zsh)
@@ -30,7 +30,7 @@ pid () {
 }
 
 error () {
-  _error_pid 
+  _error_pid
   _error_pid pid
   echo "❌ [${Red}ERROR${Reset}:${Blue}${pid}${Reset}] ${Green}$(date +%F)${Reset}: ${Blue}${progName}${Reset}: ${Blue}${1}${Reset}: Exited with status ${code}.${Reset}"
   logs

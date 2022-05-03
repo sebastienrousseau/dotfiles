@@ -6,14 +6,14 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.448
+# DotFiles v0.2.449
 # https://dotfiles.io
-#                                                                           
+#
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
-#  																			
-# Sections:																
-#  																			
-#   1. Executed by Ze Shell when login shell exits 
+#
+# Sections:
+#
+#   1. Executed by Ze Shell when login shell exits
 #
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # Licensed under the MIT license

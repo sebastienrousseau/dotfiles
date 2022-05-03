@@ -1,0 +1,8 @@
+*.json
+/.git/
+/.github/
+/.vscode/
+/build/
+/doc/
+/media/
+/node_modules/

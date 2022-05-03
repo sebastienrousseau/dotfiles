@@ -6,7 +6,7 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.448
+# DotFiles v0.2.449
 # https://dotfiles.io
 #
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
@@ -23,7 +23,7 @@
 #      1.7 Aliases to create, run, and manage VMs on Google infrastructure.
 #      1.8 Aliases to build highly scalable applications on a fully managed serverless platform.
 #      1.9 Aliases to commands that might come in handy.
-#      
+#
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # Licensed under the MIT license
 #
@@ -49,7 +49,7 @@ alias gcv='gcloud version' # Display version and installed components.
 ##  ----------------------------------------------------------------------------
 ##  1.2 Aliases to make the Cloud SDK your own; personalize your configuration with properties.
 ##  ----------------------------------------------------------------------------
-  
+
 alias gccca='gcloud config configurations activate' # Switch to an existing named configuration.
 alias gcccc='gcloud config configurations create' # Create a new named configuration.
 alias gcccl='gcloud config configurations list' # Display a list of all available configurations.
@@ -137,7 +137,7 @@ alias gcapv='gcloud app versions list' # List all versions of all services deplo
 ##  ----------------------------------------------------------------------------
 ##  1.9 Aliases to commands that might come in handy.
 ##  ----------------------------------------------------------------------------
-    
+
 alias gckmsd='gcloud kms decrypt' # Decrypt ciphertext (to a plaintext file) using a Cloud Key Management Service (Cloud KMS) key.
 alias gclll='gcloud logging logs list' # List your project's logs.
 alias gcsqlb='gcloud sql backups describe' # Display info about a Cloud SQL instance backup.

@@ -6,7 +6,7 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.448
+# DotFiles v0.2.449
 # hkttps://dotfiles.io
 #
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
@@ -99,7 +99,7 @@ alias hko='heroku orgs'
 alias hkoo='heroku orgs:open'
 
 # hkp: Open a psql shell to the database.
-alias hkp='heroku psql'      
+alias hkp='heroku psql'
 
 # hkq: Remove yourself from a team app.
 alias hkq='heroku leave'
@@ -116,8 +116,8 @@ alias hks='heroku status'
 # hkt: List the teams that you are a member of.
 alias hkt='heroku teams'
 
-# hku: Update the heroku CLI. 
-alias hku='heroku update' 
+# hku: Update the heroku CLI.
+alias hku='heroku update'
 
 # hkulk: Unlock an app so any team member can join.
 alias hkulk='heroku unlock'
@@ -263,7 +263,7 @@ alias hk2fat='heroku auth:token'
 alias hkauc='heroku authorizations:create'
 
 # hkaui: Show an existing OAuth authorization.
-alias hkaui='heroku authorizations:info' 
+alias hkaui='heroku authorizations:info'
 
 # hkaul: List OAuth authorizations. |
 alias hkaul='heroku authorizations'
@@ -828,7 +828,7 @@ alias hkpipett='heroku pipelines:transfer'
 
 # Update the app's stage in a pipeline.
 alias hkpipeu='heroku pipelines:update'
- 
+
 
 ##  ----------------------------------------------------------------------------
 ##  3.6 Heroku Plugins aliases

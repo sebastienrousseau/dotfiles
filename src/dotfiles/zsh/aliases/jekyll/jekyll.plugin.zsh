@@ -6,7 +6,7 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.448
+# DotFiles v0.2.449
 # https://dotfiles.io
 #
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
@@ -42,8 +42,8 @@ alias jkc='JEKYLL_ENV=development bundle exec jekyll clean'
 # development server.
 alias jkd='JEKYLL_ENV=development bundle exec jekyll serve --watch --trace'
 
-# jkl: Does a development build of the site to '_site' and runs a 
-# local development server. 
+# jkl: Does a development build of the site to '_site' and runs a
+# local development server.
 alias jkl='JEKYLL_ENV=development bundle exec jekyll serve --livereload'
 
 # jko: Open local development server.

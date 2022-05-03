@@ -6,9 +6,9 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.448
+# DotFiles v0.2.449
 # https://dotfiles.io
-#                                                                           
+#
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
 #
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
@@ -17,7 +17,7 @@
 
 
 # rm: Function to make 'rm' move files to the trash
-# function rm() { 
+# function rm() {
 # 	if [[ "$#" != 1 ]]; then
 #     echo "[ERROR] Please add one argument" >&2
 #     return 1

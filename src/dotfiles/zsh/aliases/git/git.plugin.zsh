@@ -6,7 +6,7 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.448
+# DotFiles v0.2.449
 # https://dotfiles.io
 #
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
@@ -27,7 +27,7 @@
 #      2.1 Aliases to manage set of tracked repositories.
 #      2.2 Aliases to revert some existing commits.
 #      2.3 Aliases to initialize, update or inspect submodules.
-#      2.4 Aliases to show the working tree status. 
+#      2.4 Aliases to show the working tree status.
 #      2.5 Aliases to create, list, delete or verify a tag object signed with GPG.
 #      2.6 Aliases to show various types of objects.
 #      2.7 Aliases to reset current HEAD to the specified state.
@@ -56,14 +56,14 @@ alias g='git'
 # ga: Add file contents to the index.
 alias ga='git add'
 
-# gaa: Add file contents and update the index not only where the working tree has a 
+# gaa: Add file contents and update the index not only where the working tree has a
 # file matching <pathspec> but also where the index already has an entry.
 alias gaa='git add --all'
 
-# gad: Add current directory file contents to the index. 
+# gad: Add current directory file contents to the index.
 alias gad='git add .'
 
-# gau: Add file contents and update the index just where it already has an entry 
+# gau: Add file contents and update the index just where it already has an entry
 # matching <pathspec>.
 alias gau='git add --update'
 
@@ -92,7 +92,7 @@ alias gsc='git sparse-checkout'
 ##  ----------------------------------------------------------------------------
 
 # gcl: Clone a repository into a new directory.
-alias gcl='git clone' 
+alias gcl='git clone'
 
 # gin: Create an empty Git repository or reinitialize an existing one.
 alias gin='git init'
@@ -115,7 +115,7 @@ alias gg='git grep'
 # gl: Show commit logs this month.
 alias gl='git log --since="last month" --oneline'
 
-# glg: Show commit logs and Draw a text-based graphical representation of the 
+# glg: Show commit logs and Draw a text-based graphical representation of the
 # commit history on the left hand side of the output.
 alias glg='git log --oneline --graph --full-history --all --color --decorate'
 
@@ -150,7 +150,7 @@ alias gbrsb='git show-branch'
 alias gct='git commit'
 
 # gmg: Join two or more development histories together.
-alias gmg='git merge' 
+alias gmg='git merge'
 
 # grb: Reapply commits on top of another base tip.
 alias grb='git rebase'
@@ -215,13 +215,13 @@ alias gcm='git commit --message '
 # Show changes between the working tree and the index or a tree.
 alias gd='git diff'
 
-# Show only names and status of changed files. 
+# Show only names and status of changed files.
 alias gdch='git diff --name-status'
 
 # Show all changes of tracked files which are present in working directory and staging area.
 alias gdh='git diff HEAD'
 
-# Show changes to files in the "staged" area. 
+# Show changes to files in the "staged" area.
 alias gdstaged='git diff --staged'
 
 # Shows the changes between the index and the HEAD (which is the last commit on this branch).
@@ -308,7 +308,7 @@ alias gcom='git checkout main && git fetch origin --prune && git reset --hard or
 ##  2.0 Aliases to update remote refs along with associated objects.
 ##  ----------------------------------------------------------------------------
 
-# Publish the current branch by pushing it to the remote "origin", and setting 
+# Publish the current branch by pushing it to the remote "origin", and setting
 # the current branch to track the upstream branch.
 alias gpb='git push --set-upstream origin $(git current-branch)'
 
@@ -324,8 +324,8 @@ alias gpoll='git push origin --all'
 # Fetch from and integrate with another repository or a local branch.
 alias gpull='git pull'
 
-# Pull changes from the locally stored branch origin/master and merge that to 
-# the local checked-out branch. 
+# Pull changes from the locally stored branch origin/master and merge that to
+# the local checked-out branch.
 alias gpullm='git pull origin master'
 
 # Do a pull for just one branch.
@@ -386,7 +386,7 @@ alias gro="open `git remote -v | awk '/fetch/{print $2}' | sed -Ee 's#(git@|git:
 alias grp="git remote | xargs -I% -n1 git push %"
 
 # Push all remotes.
-alias grpa="for i in `git remote`; do git push $i; done;" 
+alias grpa="for i in `git remote`; do git push $i; done;"
 
 # Print the url for the current repo.
 alias grprint="git remote -v | sed -n '/github.com.*push/{s/^[^[:space:]]\+[[:space:]]\+//;s|git@github.com:|https://github.com/|;s/\.git.*//;p}"
@@ -400,7 +400,7 @@ alias grso='git remote show origin'
 # Fetch updates for a named set of remotes in the repository as defined by remotes.
 alias gru='git remote update'
 
-# Shows URLs of remote repositories when listing your current remote connections. 
+# Shows URLs of remote repositories when listing your current remote connections.
 alias grv='git remote -v'
 
 

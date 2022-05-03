@@ -6,9 +6,9 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.448
+# DotFiles v0.2.449
 # https://dotfiles.io
-#                                                                           
+#
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
 #
 # Sections:
@@ -38,7 +38,7 @@
 #       4.7 Clean up LaunchServices to remove duplicates in the 'Open With' menu.
 #       4.8 Application launchers.
 #       4.9 Various.
-#       
+#
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # Licensed under the MIT license
 #
@@ -92,11 +92,11 @@ alias purge='rm -rf ~/library/Developer/Xcode/DerivedData/*'
 alias reload='reset'
 
 # sudo: Allows a system administrator to delegate authority to give certain users
-# (or groups of users) the ability to run some (or all) commands as root or another 
+# (or groups of users) the ability to run some (or all) commands as root or another
 # user while providing an audit trail of the commands and their arguments.
 alias sudo='sudo '
 
-# top: Allows the user to interactively monitor the system's vital resources or 
+# top: Allows the user to interactively monitor the system's vital resources or
 # server's processes in real time.
 alias top='htop'
 
@@ -112,13 +112,13 @@ alias zshrc='${=EDITOR} $HOME/.zshrc'
 ##  ----------------------------------------------------------------------------
 
 # Getting full path of executables. The "auxwww" are options to the ps (process)
-# command. The options mean display all process running that belong to you and 
-# to other users and provide information about who owns what process. 
-# The three "www"'s mean display the entire command line regardless of how long 
+# command. The options mean display all process running that belong to you and
+# to other users and provide information about who owns what process.
+# The three "www"'s mean display the entire command line regardless of how long
 # it is and wrap it in your window.
 alias kp='ps auxwww'
 
-# Display the uid, pid, parent pid, recent CPU usage, process start time, 
+# Display the uid, pid, parent pid, recent CPU usage, process start time,
 # controlling tty, elapsed CPU usage, and the associated command.
 alias pid='ps -f'
 
@@ -179,7 +179,7 @@ alias c="clear && printf '\e[3J'"
 alias cls="clear && printf '\e[3J'"
 
 # countf: Count of non-hidden files in current dir.
-alias countf='echo $(ls -1 | wc -l)' 
+alias countf='echo $(ls -1 | wc -l)'
 
 # dt: Pipe content to file in the $HOME directory.
 alias dt='tee $HOME/terminal-$(date +%F).txt'
@@ -193,7 +193,7 @@ alias dud='du -d 1 -h'
 # duf: File size human readable output sorted.
 alias duf='du -sh *'
 
-# egz: Extract a whole directory (including subdirectories) 
+# egz: Extract a whole directory (including subdirectories)
 alias egz='tar -xvzf'
 
 # flush: Flush the directory service cache and restart the multicast DNS daemon.
@@ -211,7 +211,7 @@ alias hsi='history | grep -i'
 # hsfreq: Check frequency of commands used.
 alias hsfreq="history | cut -c8- | sort | uniq -c | sort -rn | head"
 
-# gz: Compress a whole directory (including subdirectories) 
+# gz: Compress a whole directory (including subdirectories)
 alias gz='tar -zcvf'
 
 # locale: Check UTF-8 locale.
@@ -256,14 +256,14 @@ alias sort='LC_ALL=C sort'
 # sortnr: Sort in a descending order according to numerical value.
 alias sortnr='sort -n -r'
 
-# t: Prints the last 10 lines of a text or log file, and then waits for new 
-# additions to the file to print it in real time. 
+# t: Prints the last 10 lines of a text or log file, and then waits for new
+# additions to the file to print it in real time.
 alias t='tail -f'
 
-# vp: Verify macOS Permissions 
+# vp: Verify macOS Permissions
 alias vp='diskutil verifyPermissions /'
 
-# vv: Verify macOS Volume 
+# vv: Verify macOS Volume
 alias vv='diskutil verifyvolume /'
 
 
@@ -309,8 +309,8 @@ alias l1='ls -1'
 # la: Long list, show almost all, show type, human readable.
 alias la='ls -lAFh'
 
-# lart: Force output to be one entry per line, last changed, 
-# includes directory entries whose names begin with a dot, reverse, sort by time 
+# lart: Force output to be one entry per line, last changed,
+# includes directory entries whose names begin with a dot, reverse, sort by time
 # modified.
 alias lart='ls -1Fcart'
 
@@ -332,16 +332,16 @@ alias lf='ls -lf'
 # lh: Display file size in human readable format.
 alias lh='ls -lh'
 
-# li: Display File Inode Number. 
+# li: Display File Inode Number.
 alias li='ls -i'
 
 # lk: Sort by size, biggest last.
 alias lk='ls -lSr'
 
 # ll: Long list
-alias ll='ls -lghFG | sort -n -td -k2'  
+alias ll='ls -lghFG | sort -n -td -k2'
 
-# ln: Display File UID and GID. 
+# ln: Display File UID and GID.
 alias ln='ls -n'
 
 # lq: Hide Control Characters.
@@ -365,7 +365,7 @@ alias lt='ls -ltFh'
 # ltr: Sort by date, most recent last.
 alias ltr='ls -ltr'
 
-# lu: Sort by/show access time,most recent last.        
+# lu: Sort by/show access time,most recent last.
 alias lu='ls -ltur'
 
 # lx: Sort by extension.
@@ -418,43 +418,43 @@ alias ~="cd ~"
 # cd.: Show true (physical) path instead of symbolic links in the path.
 alias cd.="cd -P ."
 
-# cd/: Change to / root directory and show the directory content. 
+# cd/: Change to / root directory and show the directory content.
 alias cd/='cd /; ls'
 
 # gitRoot: Change to Git Root directory.
 alias gitRoot='cd "$(git rev-parse --show-toplevel)"'
 
-# .: Move back to one level and show the directory content. 
+# .: Move back to one level and show the directory content.
 alias .='cd ..; ls'
 
-# ..: Move back to two levels and show the directory content. 
+# ..: Move back to two levels and show the directory content.
 alias ..='cd ../..; ls'
 
-# ...: Move back to three levels and show the directory content. 
+# ...: Move back to three levels and show the directory content.
 alias ...='cd ../../..; ls'
 
-# ....: Move back to four levels and show the directory content. 
+# ....: Move back to four levels and show the directory content.
 alias ....='cd ../../../..; ls'
 
-# .....: Move back to five levels and show the directory content. 
+# .....: Move back to five levels and show the directory content.
 alias .....='cd ../../../../..; ls'
 
-# cd .: Move back to one level and show the directory content. 
+# cd .: Move back to one level and show the directory content.
 alias cd .='cd ..; ls'
 
-# cd ..: Move back to two levels and show the directory content. 
+# cd ..: Move back to two levels and show the directory content.
 alias cd ..='cd ../..; ls'
 
-# cd ...: Move back to three levels and show the directory content. 
+# cd ...: Move back to three levels and show the directory content.
 alias cd ...='cd ../../..; ls'
 
-# cd ....: Move back to four levels and show the directory content. 
+# cd ....: Move back to four levels and show the directory content.
 alias cd ....='cd ../../../..; ls'
 
-# cd .....: Move back to five levels and show the directory content. 
+# cd .....: Move back to five levels and show the directory content.
 alias cd .....='cd ../../../../..; ls'
 
-# 1: Navigate to the previous one level directory (or back) and show the directory content. 
+# 1: Navigate to the previous one level directory (or back) and show the directory content.
 alias 1='cd -; ls'
 
 # 2: Navigate to the previous two levels directory (or back) and show the directory content.
@@ -469,16 +469,16 @@ alias 4='cd -4; ls'
 # 5: Navigate to the previous five levels directory (or back) and show the directory content.
 alias 5='cd -5; ls'
 
-# 1.: Move back to one level and show the directory content. 
+# 1.: Move back to one level and show the directory content.
 alias 1.='cd ..; ls'
 
-# 2.: Move back to two levels and show the directory content. 
+# 2.: Move back to two levels and show the directory content.
 alias 2.='cd ../..; ls'
 
-# 3.: Move back to three levels and show the directory content. 
+# 3.: Move back to three levels and show the directory content.
 alias 3.='cd ../../..; ls'
 
-# 4.: Move back to four levels and show the directory content. 
+# 4.: Move back to four levels and show the directory content.
 alias 4.='cd ../../../..; ls'
 
 # 5.: Move back to five levels and show the directory content.
@@ -493,7 +493,7 @@ alias cd 2.='cd ../..; ls'
 # cd 3.: Move back to three levels and show the directory content.
 alias cd 3.='cd ../../..; ls'
 
-# cd 4.: Move back to four levels and show the directory content. 
+# cd 4.: Move back to four levels and show the directory content.
 alias cd 4.='cd ../../../..; ls'
 
 # cd 5.: Move back to five levels and show the directory content.
@@ -540,7 +540,7 @@ alias speedup='sudo rm -rf /private/var/log/asl/*'
 ##  4.3 Empty the Trash on all mounted volumes and the main HDD.
 ##  --------------------------------------------------------------------------
 
-# Empty the Trash on all mounted volumes and the main HDD. 
+# Empty the Trash on all mounted volumes and the main HDD.
 # Also, clear Apple’s System Logs to improve shell startup speed.
 alias emptytrash='rm -rf ~/.Trash/*'
 
@@ -622,7 +622,7 @@ alias xcode='open -a xcode'
 alias wget='wget -c'
 
 # qfind: Quickly search for file
-alias qfind='find . -name '              
+alias qfind='find . -name '
 
 # memHogsPs: Find memory hogs
 alias memHogsPs='ps wwaxm -o pid,stat,vsize,rss,time,command | head -10'

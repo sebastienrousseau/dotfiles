@@ -6,11 +6,11 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.448
+# DotFiles v0.2.449
 # https://dotfiles.io
-#                                                                           
+#
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
-#  																			
+#
 # Custom Functions
 #
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
@@ -28,17 +28,17 @@ done
 # dual () {
 #     xrandr --output eDP1 --primary --left-of HDMI1 --output HDMI1 --mode 1280x720
 # }
-# 
+#
 # dual2 () {
 #     xrandr --output eDP1 --primary --left-of HDMI1 --output HDMI1 --auto
 # }
-# 
+#
 # # set single monitor
 # single () {
 #     xrandr --output HDMI1 --off
 # }
-# 
-# 
+#
+#
 # TODO: #20 Test Function alias
 # # aliasc: Function alias
 # function aliasc() {

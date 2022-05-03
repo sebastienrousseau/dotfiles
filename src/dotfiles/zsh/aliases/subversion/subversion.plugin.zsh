@@ -6,7 +6,7 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.448
+# DotFiles v0.2.449
 # https://dotfiles.io
 #
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
@@ -26,7 +26,7 @@
 ##  ----------------------------------------------------------------------------
 
 # sad: Put new files and directories under version control.
-alias sad='svn add' 
+alias sad='svn add'
 
 # sau: Manage cached authentication credentials.
 alias sau='svn auth'
@@ -34,13 +34,13 @@ alias sau='svn auth'
 # sbl: Show when each line of a file was last (or next) changed.
 alias sbl='svn blame'
 
-# scg: Associate (or dissociate) changelist CLNAME with the named files. 
+# scg: Associate (or dissociate) changelist CLNAME with the named files.
 alias scg='svn changelist'
 
 # sco: Check out a working copy from a repository.
 alias sco='svn checkout'
 
-# scl: Either recover from an interrupted operation that left the working copy 
+# scl: Either recover from an interrupted operation that left the working copy
 #      locked, or remove unwanted files.
 alias scl='svn cleanup'
 
@@ -71,7 +71,7 @@ alias sip='svn import'
 # slg: Show the log messages for a set of revision(s) and/or path(s).
 alias slg='svn log'
 
-# slock: Lock working copy paths or URLs in the repository, so that no other 
+# slock: Lock working copy paths or URLs in the repository, so that no other
 #        user can commit changes to them.
 alias slk='svn lock'
 

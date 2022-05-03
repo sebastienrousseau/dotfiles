@@ -6,10 +6,10 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.448
+# DotFiles v0.2.449
 # https://dotfiles.io
 #
-# Description: 
+# Description:
 #
 # Copyright (c) Sebastien Rousseau 2021. All rights reserved
 # Licensed under the MIT license
@@ -34,7 +34,7 @@ build-fr: # @HELP Creates the french documentation.
 build-fr:
 	@echo
 	@echo "Building the french documentation"
-	sh './tools/en/dotfiles-setup-fr.sh'	
+	sh './tools/en/dotfiles-setup-fr.sh'
 
 build-theme-fr: # @HELP Creates the french mkdocs theme.
 build-theme-fr:

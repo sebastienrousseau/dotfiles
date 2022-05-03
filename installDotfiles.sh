@@ -6,10 +6,10 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.448
+# DotFiles v0.2.449
 # https://dotfiles.io
 #
-# Description: Script to install the latest DotFiles v0.2.448
+# Description: Script to install the latest DotFiles v0.2.449
 #
 # Copyright (c) Sebastien Rousseau 2021. All rights reserved
 # Licensed under the MIT license
@@ -27,9 +27,9 @@
 
 # helpMenuDotfiles: Present the Help Menu.
 helpMenuDotfiles() {
-  echo "${Green}┌──────────────────────────────────────┐${Reset}" 
+  echo "${Green}┌──────────────────────────────────────┐${Reset}"
   echo "${Green}│                                      │${Reset}"
-  echo "${Green}│          ${White}DotFiles v0.2.448${Reset}           │${Reset}"
+  echo "${Green}│          ${White}DotFiles v0.2.449${Reset}           │${Reset}"
   echo "${Green}│                                      │${Reset}"
   echo "${Green}└──────────────────────────────────────┘${Reset}"
   echo
@@ -80,7 +80,7 @@ waitForProcess () {
         echo "${Cyan}[INFO]${Reset}  ${White}$(date) |  + Another instance of $processName is running, waiting $delay seconds${Reset}"
         sleep "$delay"
     done
-    
+
     echo "${Cyan}[INFO]${Reset}  ${White}$(date) | No instances of $processName found, safe to proceed${Reset}"
 
 }
@@ -115,12 +115,12 @@ downloadDotfiles () {
               # We can't tell what this is by the file name, lets look at the metadata
               echo "${Red}[ERROR]${Reset} ${White}$(date) | Unknown file type $f, analysing metadata${Reset}"
               metadata=$(file "$tempFile")
-              if [ "$metadata" = 'Zip archive data' ]; 
+              if [ "$metadata" = 'Zip archive data' ];
               then
                   packageType="ZIP"
                   mv "$tempFile" "$tempDir/$fileVersion"
                   tempFile="$tempDir/$fileVersion"
-              fi          
+              fi
               ;;
           esac
 
@@ -131,9 +131,9 @@ downloadDotfiles () {
               echo "${Cyan}[INFO]${Reset}  ${White}$(date) | Downloaded $app to $tempDir${Reset}"
               echo "${Cyan}[INFO]${Reset}  ${White}$(date) | Detected install type as $packageType${Reset}"
           fi
-        
+
   else
-  
+
       echo "${Red}[ERROR]${Reset} ${White}$(date) | Failure to download $webUrl/$fileVersion${Reset}"
         exit 1
   fi
@@ -147,7 +147,7 @@ backupDotfiles () {
     mkdir -p "$backupDirectory"
   else
     echo "${Yellow}[WARNING]${Reset} ${White}$(date) | The Dotfiles backup folder seems to already exists.${Reset}"
-  fi  
+  fi
   echo "${Green}[SUCCESS]${Reset}  ${White}$(date) | The backup directory '$backupDirectory' was successfully created.${Reset}"
 }
 
@@ -167,19 +167,19 @@ recoverDotfiles () {
 # startLog: start logging - Output to log file and STDOUT
 startLog () {
     if [ ! -d "$HOME/$logsDirectory" ]; then
-        
+
         echo "${Cyan}[INFO]${Reset} ${White}$(date) | Creating $logsDirectory to store Dotfiles logs.${Reset}"
-        
+
         # Switching directory to $HOME and creating Dotfiles logs folder
         cd "$HOME" && mkdir -p "$logsDirectory" && touch "$logFile"
-        
+
     else
       echo "${Yellow}[WARNING]${Reset} ${White}$(date) | The Dotfiles logs folder seems to already exists.${Reset}"
     fi
 
     #exec 1>>"$logFile"
     exec 1>>"$logFile"
-    
+
 }
 
 # Initiate logging

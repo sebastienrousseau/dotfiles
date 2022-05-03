@@ -6,9 +6,9 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.448
+# DotFiles v0.2.449
 # https://dotfiles.io
-#                                                                           
+#
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
 #
 # Sections:
@@ -92,8 +92,8 @@ fi
 # vsd: Open a file difference editor. Requires two file paths as arguments.
 alias vsd='vs --diff'
 
-# vsgt: When used with file:line[:character], opens a file at a specific line and 
-#       optional character position. This argument is provided since some operating 
+# vsgt: When used with file:line[:character], opens a file at a specific line and
+#       optional character position. This argument is provided since some operating
 #       systems permit : in a file name.
 alias vsgt='vs --goto'
 

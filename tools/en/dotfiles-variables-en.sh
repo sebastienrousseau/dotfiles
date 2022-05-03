@@ -6,7 +6,7 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.448
+# DotFiles v0.2.449
 # https://dotfiles.io
 #
 # Description: Constant variables for the Skeletonic Stylus Documentation (v0.0.1).
@@ -19,16 +19,16 @@
 # shellcheck disable=SC2034  # Unused variables left for readability
 
 appName=dotfiles
-fileVersion=v0.2.448.zip
+fileVersion=v0.2.449.zip
 backupDirectory=dotfiles_backup
 directory=dotfiles
 progName="$(basename "$0")"
 
 # The location of the logs directory
-logsDirectory="$HOME/.$appName" 
+logsDirectory="$HOME/.$appName"
 
 # The location of the Dotfiles log file
-logFile="$logsDirectory/$appName-$(date +%F).log" 
+logFile="$logsDirectory/$appName-$(date +%F).log"
 
 # Make a temporary directory instead of a file.
 tempDir=$(mktemp -d)

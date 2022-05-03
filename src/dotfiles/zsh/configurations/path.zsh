@@ -6,9 +6,9 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.448
+# DotFiles v0.2.449
 # https://dotfiles.io
-#                                                                           
+#
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
 #
 # Sections:
@@ -136,7 +136,7 @@ eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"
 
 # Set language flags
 LANG=en_GB.UTF-8
-export LANG 
+export LANG
 
 # Set LIBCURL_CFLAGS
 LIBCURL_CFLAGS=-L$(brew --prefix)/opt/curl/lib

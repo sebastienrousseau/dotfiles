@@ -6,7 +6,7 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.448
+# DotFiles v0.2.449
 # https://dotfiles.io
 #
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
@@ -334,10 +334,10 @@ alias broi='brew options --installed' # Show options for formulae that are curre
 alias brod='brew outdated' # List installed casks and formulae that have an updated version available. By default, version information is displayed in interactive shells, and suppressed otherwise.
 alias brodc='brew outdated --cask' # List only outdated casks.
 alias brodf='brew outdated --formula' # List only outdated formulae.
-alias brodfh='brew outdated --fetch-HEAD' # Fetch the upstream repository to detect if the HEAD installation of the formula is outdated. Otherwise, the repository's HEAD will only be checked for updates when a new stable or development version has been released. 
+alias brodfh='brew outdated --fetch-HEAD' # Fetch the upstream repository to detect if the HEAD installation of the formula is outdated. Otherwise, the repository's HEAD will only be checked for updates when a new stable or development version has been released.
 alias brodg='brew outdated --greedy' # Print outdated casks with auto_updates true or version :latest.
 alias brodgau='brew outdated --greedy-auto-updates' # Print outdated casks including those with auto_updates true.
-alias brodgl='brew outdated --greedy-latest' # Print outdated casks including those with version :latest. 
+alias brodgl='brew outdated --greedy-latest' # Print outdated casks including those with version :latest.
 alias brodj='brew outdated --json' # Print output in JSON format. There are two versions: v1 and v2. v1 is deprecated and is currently the default if no version is specified. v2 prints outdated formulae and casks.
 alias brodq='brew outdated --quiet' # List only the names of outdated kegs (takes precedence over --verbose).
 alias brodv='brew outdated --verbose' # Include detailed version information.
@@ -391,7 +391,7 @@ alias brrnq='brew reinstall "$1" --no-quarantine' # Disable quarantining of down
 alias brrq='brew reinstall "$1" --quarantine' # Enable quarantining of downloads (default: enabled).
 alias brrr='brew reinstall "$1" --git' # Create a Git repository, useful for creating patches to the software.
 alias brrrs='brew reinstall "$1" --require-sha' # Require all casks to have a checksum.
-alias brrscd='brew reinstall "$1" --skip-cask-deps' # Skip installing cask dependencies. 
+alias brrscd='brew reinstall "$1" --skip-cask-deps' # Skip installing cask dependencies.
 alias brrv='brew reinstall "$1" --verbose' # Print the verification and postinstall steps.
 
 

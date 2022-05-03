@@ -6,9 +6,9 @@
 # | |_| | (_) | |_|  _| | | |  __/\__ \
 # |____/ \___/ \__|_|   |_|_|\___||___/
 #
-# DotFiles v0.2.448
+# DotFiles v0.2.449
 # https://dotfiles.io
-#                                                                           
+#
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
 #
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
@@ -21,7 +21,7 @@ function genpwd() {
     m=$(openssl rand -base64 32 | cut -c 1-6);
     a=$(openssl rand -base64 32 | cut -c 1-6);
     c=$(openssl rand -base64 32 | cut -c 1-6);
-    pwd="$m-$a-$c"; 
+    pwd="$m-$a-$c";
     echo "[INFO] The password has been copied to the clipboard: $pwd"
-    echo "$pwd"| pbcopy | pbpaste;  
+    echo "$pwd"| pbcopy | pbpaste;
 }
