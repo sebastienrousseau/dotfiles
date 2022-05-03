@@ -1,0 +1,98 @@
+{
+    "cSpell.words": [
+      "autocommit",
+      "chsh",
+      "Codacy",
+      "connrefused",
+      "copydir",
+      "curlrc",
+      "Dyno",
+      "dynos",
+      "findutils",
+      "gitattributes",
+      "gitmessage",
+      "hada",
+      "hadc",
+      "hadd",
+      "hadk",
+      "hauthz",
+      "hbps",
+      "hconf",
+      "hfeat",
+      "hgit",
+      "hlab",
+      "hloc",
+      "hpipe",
+      "hplugs",
+      "hred",
+      "hrun",
+      "hrva",
+      "hsessions",
+      "Inode",
+      "keyspace",
+      "lart",
+      "lmds",
+      "lxml",
+      "MSIE",
+      "nofollow",
+      "pathspec",
+      "Postgres",
+      "psql",
+      "RESETSTAT",
+      "Shortform",
+      "submodules",
+      "symlink",
+      "timestamping",
+      "toplevel",
+      "ulck",
+      "updatedb",
+      "wgetrc",
+      "xargs"
+    ],
+    "markdownlint.config": {
+        "default": false,
+        "MD001": true,
+        "MD003": {
+          "style": "atx"
+        },
+        "MD004": true,
+        "MD005": false,
+        "MD006": true,
+        "MD007": false,
+        "MD009": true,
+        "MD010": true,
+        "MD012": true,
+        "MD018": true,
+        "MD019": true,
+        "MD023": true,
+        "MD024": {
+          "allow_different_nesting": true
+        },
+        "MD025": true,
+        "MD029": true,
+        "MD030": {
+          "ol_single": 2,
+          "ol_multi": 2,
+          "ul_single": 3,
+          "ul_multi": 3
+        },
+        "MD032": true,
+        "MD035": true,
+        "MD036": true,
+        "MD037": true,
+        "MD038": false,
+        "MD040": true,
+        "MD046": {
+          "style": "fenced"
+        }
+      },
+      "spellright.language": [
+        "en"
+      ],
+      "spellright.documentTypes": [
+        "markdown",
+        "latex",
+        "plaintext",
+        "shellscript"
+      ]
+}
