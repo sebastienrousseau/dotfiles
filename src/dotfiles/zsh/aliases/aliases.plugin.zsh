@@ -1,634 +1,177 @@
-#!/bin/zsh
-#
-#  ____        _   _____ _ _
-# |  _ \  ___ | |_|  ___(_) | ___  ___
-# | | | |/ _ \| __| |_  | | |/ _ \/ __|
-# | |_| | (_) | |_|  _| | | |  __/\__ \
-# |____/ \___/ \__|_|   |_|_|\___||___/
-#
-# DotFiles v0.2.449
-# https://dotfiles.io
-#
-# Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
-#
-# Sections:
-#
-#   1.0 System detection utility.
-#       1.1 Detect which `ls` flavor is in use.
-#
-#   2.0 System tools and system information aliases.
-#       2.1 System tools aliases.
-#       2.2 System information aliases.
-#       2.3 Interactive mode commands.
-#
-#   3.0 Common shell aliases.
-#       3.1 Generic aliases.
-#       3.2 Finding (find and grep).
-#       3.3 List directory aliases commands (ls).
-#       3.4 Networking aliases.
-#       3.5 Quicker navigation aliases.
-#
-#   4.0 Convenience shortcuts.
-#       4.1 Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages.
-#       4.2 Speed-up Terminal load time by clearing system logs.
-#       4.3 Empty the Trash on all mounted volumes and the main HDD.
-#       4.4 Open the device simulators.
-#       4.5 Recursively delete .DS_Store files.
-#       4.6 Hidden Files.
-#       4.7 Clean up LaunchServices to remove duplicates in the 'Open With' menu.
-#       4.8 Application launchers.
-#       4.9 Various.
-#
-# Copyright (c) Sebastien Rousseau 2022. All rights reserved
-# Licensed under the MIT license
-#
-
-
-#   ----------------------------------------------------------------------------
-#  	1.0 System detection utility.
-#   ----------------------------------------------------------------------------
-
-##  ----------------------------------------------------------------------------
-##  1.1 Detect which `ls` flavor is in use.
-##  ----------------------------------------------------------------------------
-
-    if ls --color > /dev/null 2>&1; then # GNU `ls`
-        colorflag='--color'
-    export colorflag
-        export LS_COLORS='no=00:fi=00:di=01;31:ln=01;36:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.gz=01;31:*.bz2=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.avi=01;35:*.fli=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.ogg=01;35:*.mp3=01;35:*.wav=01;35:'
-    else # macOS `ls`
-        colorflag='-G'
-    export colorflag
-        export CLICOLOR=1
-        export LSCOLORS='GxFxCxDxBxegedabagaced'
-    fi
-
-
-
-#   ----------------------------------------------------------------------------
-#   2.0 System tools and system information aliases.
-#   ----------------------------------------------------------------------------
-
-##  ----------------------------------------------------------------------------
-##  2.1 System tools aliases.
-##  ----------------------------------------------------------------------------
-
-# htop: Append sudo to htop (interactive process viewer) command.
-alias htop='sudo htop'
-
-# ifconfig: Append sudo to ifconfig (configure network interface parameters) command.
-alias ifconfig='sudo ifconfig'
-
-# iotop: Append sudo to iotop (display top disk I/O events by process) command.
-alias iotop='sudo iotop'
-
-# iptables: Append sudo to iptables (Administration tool for packet filtering) command.
-alias iptables='sudo iptables'
-
-# purge: Purging Xcode DerivedData.
-alias purge='rm -rf ~/library/Developer/Xcode/DerivedData/*'
-
-# reload: Reset and initialize the Terminal screen.
-alias reload='reset'
-
-# sudo: Allows a system administrator to delegate authority to give certain users
-# (or groups of users) the ability to run some (or all) commands as root or another
-# user while providing an audit trail of the commands and their arguments.
-alias sudo='sudo '
-
-# top: Allows the user to interactively monitor the system's vital resources or
-# server's processes in real time.
-alias top='htop'
-
-# ttop: Recommended 'top' invocation to minimize resources
-alias ttop='top -F -s 10  rsize'
-
-# Quick access to the .zshrc file.
-alias zshrc='${=EDITOR} $HOME/.zshrc'
-
-
-##  ----------------------------------------------------------------------------
-##  2.2 System information aliases.
-##  ----------------------------------------------------------------------------
-
-# Getting full path of executables. The "auxwww" are options to the ps (process)
-# command. The options mean display all process running that belong to you and
-# to other users and provide information about who owns what process.
-# The three "www"'s mean display the entire command line regardless of how long
-# it is and wrap it in your window.
-alias kp='ps auxwww'
-
-# Display the uid, pid, parent pid, recent CPU usage, process start time,
-# controlling tty, elapsed CPU usage, and the associated command.
-alias pid='ps -f'
-
-# Limit Ping to 5 ECHO_REQUEST packets.
-alias ping='ping -c 5'
-
-# Display ports
-alias ports='netstat -tulan'
-
-# Getting top 3 CPU eating processes
-alias pscpu='ps aux | sort -nr -k 3 | head -3'
-
-# Getting top 10 CPU eating processes
-alias pscpu10='ps aux | sort -nr -k 3 | head -10'
-
-# Getting top 3 memory eating processes
-alias psmem='ps aux | sort -nr -k 4 | head -3'
-
-# Getting top 10 memory eating processes
-alias psmem10='ps aux | sort -nr -k 4 | head -10'
-
-
-##  ----------------------------------------------------------------------------
-##  2.3 Interactive mode commands.
-##  ----------------------------------------------------------------------------
-
-## Interactive mode aliases.
-
-# cp: Copy files with warning
-alias cp='cp -i'
-
-# ln: Make links with warning
-alias ln='ln -i'
-
-# mv: Move files with warning
-alias mv='mv -i'
-
-# rm: Remove file with warning
-alias rm='rm -i'
-
-# zap: Remove file with warning
-alias zap='rm -i'
-
-
-#   ----------------------------------------------------------------------------
-#   3.0 Common shell aliases.
-#   ----------------------------------------------------------------------------
-
-
-##  ----------------------------------------------------------------------------
-##  3.1 Generic aliases.
-##  ----------------------------------------------------------------------------
-
-# c: Clear screen shortcut.
-alias c="clear && printf '\e[3J'"
-
-# cls: Clear screen command.
-alias cls="clear && printf '\e[3J'"
-
-# countf: Count of non-hidden files in current dir.
-alias countf='echo $(ls -1 | wc -l)'
-
-# dt: Pipe content to file in the $HOME directory.
-alias dt='tee $HOME/terminal-$(date +%F).txt'
-
-# du: File size human readable output sorted by size.
-alias du='du -h'
-
-# dud: File size human readable output sorted by depth.
-alias dud='du -d 1 -h'
-
-# duf: File size human readable output sorted.
-alias duf='du -sh *'
-
-# egz: Extract a whole directory (including subdirectories)
-alias egz='tar -xvzf'
-
-# flush: Flush the directory service cache and restart the multicast DNS daemon.
-alias flush='sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder'
-
-# h: Lists all recently used commands.
-alias h='history'
-
-# hs: Use grep to search the command history.
-alias hs='history | grep'
-
-# hsi: Use grep to do a case-insensitive search of the command history.
-alias hsi='history | grep -i'
-
-# hsfreq: Check frequency of commands used.
-alias hsfreq="history | cut -c8- | sort | uniq -c | sort -rn | head"
-
-# gz: Compress a whole directory (including subdirectories)
-alias gz='tar -zcvf'
-
-# locale: Check UTF-8 locale.
-alias locale='locale -a | grep UTF-8'
-
-# mkdir: Create the directory and all parent directories, verbose mode.
-alias mkdir='mkdir -pv'
-
-# p: Shortcut for `pwd` which returns working directory name.
-alias p='pwd'
-
-# path: Display the $PATH variable on newlines.
-alias path='echo -e ${PATH//:/\\n}'
-
-# q: Shortcut for the `exit` command.
-alias q='exit'
-
-# r: Shortcut for the `reload` command.
-alias r='reload'
-
-# reboot: Restart immediately.
-alias reboot="sudo shutdown -r now"
-
-# reload: Reload the Z shell.
-alias reload=". ~/.zshrc"
-
-# rp: Repair macOS Permissions.
-alias rp='diskutil repairPermissions /'
-
-# rv: Repair macOS Volume.
-alias rv='diskutil repairvolume /'
-
-# rmdir: Remove directory.
-alias rmdir='rm –rf'
-
-# shutdown: Shutdown immediately.
-alias shutdown="sudo shutdown -h now"
-
-# sort: Fix sorting order
-alias sort='LC_ALL=C sort'
-
-# sortnr: Sort in a descending order according to numerical value.
-alias sortnr='sort -n -r'
-
-# t: Prints the last 10 lines of a text or log file, and then waits for new
-# additions to the file to print it in real time.
-alias t='tail -f'
-
-# vp: Verify macOS Permissions
-alias vp='diskutil verifyPermissions /'
-
-# vv: Verify macOS Volume
-alias vv='diskutil verifyvolume /'
-
-
-##  ----------------------------------------------------------------------------
-##  3.2 Finding (find and grep).
-##  ----------------------------------------------------------------------------
-
-# egrep: Searches that can handle extended regular expressions (EREs)
-alias egrep='egrep --color'
-
-# fd: Find a directory with a given name
-alias fd='find . -type d -name'
-
-# ff: Find a file with a given name
-alias ff='find . -type f -name'
-
-# fgrep: Searches that can only handle fixed patterns
-alias fgrep='fgrep --color'
-
-# grep: Searches for a query string
-alias grep='grep --color'
-
-# hgrep: Searches for a word in the list of previously used commands.
-alias hgrep='history | grep'
-
-# sgrep: Useful for searching within files
-alias sgrep='grep -R -n -H -C 5 --exclude-dir={.git,.svn,CVS} '
-
-
-##  ----------------------------------------------------------------------------
-##  3.3 List directory aliases commands (ls).
-##  ----------------------------------------------------------------------------
-
-# ls: Colorize the ls output
-alias ls='ls --color'
-
-# l: Size, show type, human readable.
-alias l='ls -lFh'
-
-# l1: Display one file per line.
-alias l1='ls -1'
-
-# la: Long list, show almost all, show type, human readable.
-alias la='ls -lAFh'
-
-# lart: Force output to be one entry per line, last changed,
-# includes directory entries whose names begin with a dot, reverse, sort by time
-# modified.
-alias lart='ls -1Fcart'
-
-# last: Sorts all files by modification time, showing the last edited file first.
-alias last='ls -t'
-
-# lc: Sort by/show change time,most recent last.
-alias lc='ls -ltcr'
-
-# ld: Display directory information.
-alias ld='ls -ld'
-
-# ldot: Display only dot files.
-alias ldot='ls -ld .*'
-
-# lf: Visual Classification of Files With Special Characters.
-alias lf='ls -lf'
-
-# lh: Display file size in human readable format.
-alias lh='ls -lh'
-
-# li: Display File Inode Number.
-alias li='ls -i'
-
-# lk: Sort by size, biggest last.
-alias lk='ls -lSr'
-
-# ll: Long list
-alias ll='ls -lghFG | sort -n -td -k2'
-
-# ln: Display File UID and GID.
-alias ln='ls -n'
-
-# lq: Hide Control Characters.
-alias lq='ls -q'
-
-# lr: Display Files Recursively sorted by date,recursive, show type, human readable.
-alias lr='ls -tRFh'
-
-# lrt: Order Files Based on Last Modified Time (In Reverse Order).
-alias lrt='ls -1Fcrt'
-
-# lS: Order Files Based on Last Modified Time and size.
-alias lS='ls -1FSsh'
-
-# lsd: Display only directories.
-alias lsd='ls -l | grep "^d"'
-
-# lt: Display Files long list, sorted by date, show type, human readable.
-alias lt='ls -ltFh'
-
-# ltr: Sort by date, most recent last.
-alias ltr='ls -ltr'
-
-# lu: Sort by/show access time,most recent last.
-alias lu='ls -ltur'
-
-# lx: Sort by extension.
-alias lx='ls -lXB'
-
-
-
-##  ----------------------------------------------------------------------------
-##  3.4 Networking aliases.
-##  ----------------------------------------------------------------------------
-
-
-# ipInfo0: Get info on connections for en0.
-alias ipInfo0='ipconfig getpacket en0'
-
-# ipInfo1: Get info on connections for en1.
-alias ipInfo1='ipconfig getpacket en1'
-
-# lsock: Display open sockets.
-alias lsock='sudo /usr/sbin/lsof -i -P'
-
-# lsockTCP: Display only open TCP sockets.
-alias lsockTCP='sudo /usr/sbin/lsof -nP | grep TCP'
-
-# lsockUDP: Display only open UDP sockets.
-alias lsockUDP='sudo /usr/sbin/lsof -nP | grep UDP'
-
-# lsof: Show all open TCP/IP sockets.
-alias lsof='lsof -i'
-
-# mic: Listening to all connections.
-alias mic='sudo lsof -i | grep LISTEN'
-
-# op: List of open ports.
-alias op='sudo lsof -i -P'
-
-# wip: Public facing IP Address.
-alias wip='dig +short myip.opendns.com @resolver1.opendns.com'
-
-
-
-
-##  ----------------------------------------------------------------------------
-##  3.5 Quicker navigation aliases.
-##  ----------------------------------------------------------------------------
-
-# ~: Change to $HOME directory.
-alias ~="cd ~"
-
-# cd.: Show true (physical) path instead of symbolic links in the path.
-alias cd.="cd -P ."
-
-# cd/: Change to / root directory and show the directory content.
-alias cd/='cd /; ls'
-
-# gitRoot: Change to Git Root directory.
-alias gitRoot='cd "$(git rev-parse --show-toplevel)"'
-
-# .: Move back to one level and show the directory content.
-alias .='cd ..; ls'
-
-# ..: Move back to two levels and show the directory content.
-alias ..='cd ../..; ls'
-
-# ...: Move back to three levels and show the directory content.
-alias ...='cd ../../..; ls'
-
-# ....: Move back to four levels and show the directory content.
-alias ....='cd ../../../..; ls'
-
-# .....: Move back to five levels and show the directory content.
-alias .....='cd ../../../../..; ls'
-
-# cd .: Move back to one level and show the directory content.
-alias cd .='cd ..; ls'
-
-# cd ..: Move back to two levels and show the directory content.
-alias cd ..='cd ../..; ls'
-
-# cd ...: Move back to three levels and show the directory content.
-alias cd ...='cd ../../..; ls'
-
-# cd ....: Move back to four levels and show the directory content.
-alias cd ....='cd ../../../..; ls'
-
-# cd .....: Move back to five levels and show the directory content.
-alias cd .....='cd ../../../../..; ls'
-
-# 1: Navigate to the previous one level directory (or back) and show the directory content.
-alias 1='cd -; ls'
-
-# 2: Navigate to the previous two levels directory (or back) and show the directory content.
-alias 2='cd -2; ls'
-
-# 3: Navigate to the previous three levels directory (or back) and show the directory content.
-alias 3='cd -3; ls'
-
-# 4: Navigate to the previous four levels directory (or back) and show the directory content.
-alias 4='cd -4; ls'
-
-# 5: Navigate to the previous five levels directory (or back) and show the directory content.
-alias 5='cd -5; ls'
-
-# 1.: Move back to one level and show the directory content.
-alias 1.='cd ..; ls'
-
-# 2.: Move back to two levels and show the directory content.
-alias 2.='cd ../..; ls'
-
-# 3.: Move back to three levels and show the directory content.
-alias 3.='cd ../../..; ls'
-
-# 4.: Move back to four levels and show the directory content.
-alias 4.='cd ../../../..; ls'
-
-# 5.: Move back to five levels and show the directory content.
-alias 5.='cd ../../../../..; ls'
-
-# cd 1.: Move back to one level and show the directory content.
-alias cd 1.='cd ..; ls'
-
-# cd 2.: Move back to two levels and show the directory content.
-alias cd 2.='cd ../..; ls'
-
-# cd 3.: Move back to three levels and show the directory content.
-alias cd 3.='cd ../../..; ls'
-
-# cd 4.: Move back to four levels and show the directory content.
-alias cd 4.='cd ../../../..; ls'
-
-# cd 5.: Move back to five levels and show the directory content.
-alias cd 5.='cd ../../../../..; ls'
-
-# less: Make less always work with colored input.
-alias less='less -R'
-
-# openDir: Open any folder from macOS Terminal.
-alias openDir='open -a Finder ./'
-
-# path: Display or print $PATH variable.
-alias path='echo "$PATH" | tr ":" "\n" | nl'
-
-# so: Lists the active options.
-alias so='setopt'
-
-# uso: Lists the inactive options.
-alias uso='unsetopt'
-
-
-
-#  ---------------------------------------------------------------------------
-#  	4.0 Convenience shortcuts.
-#  ---------------------------------------------------------------------------
-
-##  ---------------------------------------------------------------------------
-##  4.1 Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages.
-##  ---------------------------------------------------------------------------
-
-# update: Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages.
-alias update='sudo softwareupdate -i -a; brew cu --all; brew doctor; brew update; brew upgrade; brew cleanup; mas upgrade; npm install npm -g; npm update -g; sudo gem update --system; sudo gem update; sudo gem cleanup; npm update ncu; npm audit fix; ncu -g'
-
-
-##  --------------------------------------------------------------------------
-##  4.2 Speed-up Terminal load time by clearing system logs.
-##  --------------------------------------------------------------------------
-
-# speedup: Speed up terminal by clearing ASL logs.
-alias speedup='sudo rm -rf /private/var/log/asl/*'
-
-
-##  --------------------------------------------------------------------------
-##  4.3 Empty the Trash on all mounted volumes and the main HDD.
-##  --------------------------------------------------------------------------
-
-# Empty the Trash on all mounted volumes and the main HDD.
-# Also, clear Apple’s System Logs to improve shell startup speed.
-alias emptytrash='rm -rf ~/.Trash/*'
-
-
-##  ---------------------------------------------------------------------------
-##  4.4 Open the device simulators.
-##  --------------------------------------------------------------------------
-
-# iphone: Open the device simulators.
-alias iphone='open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app'
-
-
-##  --------------------------------------------------------------------------
-##  4.5 Recursively delete .DS_Store files.
-##  --------------------------------------------------------------------------
-
-# cleanupDS: Recursively delete .DS_Store files.
-alias cleanupDS='find . -type f -name ''*.DS_Store'' -ls -delete'
-
-
-##  --------------------------------------------------------------------------
-##  4.6 Hidden Files.
-##  --------------------------------------------------------------------------
-
-# finderShowHidden: Show hidden files in Finder
-alias finderShowHidden='defaults write com.apple.finder ShowAllFiles TRUE'
-
-# finderHideHidden: Hide hidden files in Finder
-alias finderHideHidden='defaults write com.apple.finder ShowAllFiles FALSE'
-
-
-##  --------------------------------------------------------------------------
-##  4.7 Clean up LaunchServices to remove duplicates in the 'Open With' menu.
-##  --------------------------------------------------------------------------
-
-# cleanupLS:  Clean up LaunchServices to remove duplicates in the 'Open With' menu
-alias cleanupLS='/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user && killall Finder'
-
-
-##  --------------------------------------------------------------------------
-##  4.8 Run a screensaver on the Desktop.
-##  --------------------------------------------------------------------------
-
-# screensaverDesktop: Run a screensaver on the Desktop
-alias screensaverDesktop='/System/Library/Frameworks/ScreenSaver.framework/Resources/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine -background'
-
-
-##  --------------------------------------------------------------------------
-##  4.8 Application launchers.
-##  --------------------------------------------------------------------------
-
-# e: Launch Visual Studio Code as an editor.
-alias e='open -a "Visual Studio Code"'
-
-# edit: Launch Visual Studio Code as an editor.
-alias edit='open -a "Visual Studio Code"'
-
-# mate: Launch Visual Studio Code as an editor.
-alias mate='open -a "Visual Studio Code"'
-
-# preview: Launch Preview app in macOS.
-alias preview='open -a /System/Applications/Preview.app'
-
-# sql: Launch Sequel Pro app in macOS.
-alias sql='open -a /Applications/Sequel\ Pro.app'
-
-# www: Launch Safari app in macOS.
-alias www='open -a /Applications/Safari.app'
-
-# xcode: Launch XCode app in macOS.
-alias xcode='open -a xcode'
-
-
-##  --------------------------------------------------------------------------
-##  4.9 Various
-##  --------------------------------------------------------------------------
-
-# wget: wget with resume.
-alias wget='wget -c'
-
-# qfind: Quickly search for file
-alias qfind='find . -name '
-
-# memHogsPs: Find memory hogs
-alias memHogsPs='ps wwaxm -o pid,stat,vsize,rss,time,command | head -10'
-
-# memHogsTop: Find memory hogs
-alias memHogsTop='top -l 1 -o rsize | head -20'
-
-# cpuHogs:  Find CPU hogs
-alias cpu_hogs='ps wwaxr -o pid,stat,%cpu,time,command | head -10'
+#!/usr/bin/env zsh
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
+
+# 🅰🅻🅸🅰🆂🅴🆂
+unalias -a                                        # Remove all previous environment defined aliases.
+alias -- -="cd -"                                 # -: Shortcut to go to previous directory.
+alias .....='cd ../../../..'                      # .....: Shortcut to go to great-great-grandparent directory.
+alias ....='cd ../../..'                          # ....: Shortcut to go to great-grandparent directory.
+alias ...='cd ../..'                              # ...: Shortcut to go to grandparent directory.
+alias ..='cd ..'                                  # ..: Shortcut to go to parent directory.
+alias '~'='cd ~'                                  # ~: Shortcut to go to home directory.
+alias {:q,q,x,bye,quit}='exit'                    # q: Shortcut for the `exit` command.
+alias {c,cl,clr,clear}="clear && printf '\e[3J'"  # c: Clear screen shortcut.
+alias {e,edit,mate,v}='vim'                       # e, edit, mate: Edit current file.
+alias {l.,ldot}="ls -dlhF .* | grep -v '^d'"      # l.: List hidden files.
+alias {md,mkd}='mkdir -pv'                        # mkd: Create the directory and all parent directories, verbose mode.
+alias {sudo,please,_}='sudo '                     # sudo: Execute a command as the superuser.
+alias 000='chmod -R 000'                          # 000: Make all files and directories read-only.
+alias 644='chmod -R 644'                          # 644: Make all files and directories readable and writable.
+alias 666='chmod -R 666'                          # 666: Make all files and directories readable and writable.
+alias 755='chmod -R 755'                          # 755: Make all files and directories readable and writable.
+alias 777='chmod -R 777'                          # 777: Make all files and directories readable and writable.
+alias chmox='chmod +x'                            # chmox: Make a file executable.
+alias cgz='tar -zcvf'                             # cgz: Compress a whole directory (including subdirectories) to a tarball.
+alias cr='cargo run'                              # cr: Run cargo.
+alias ctf='echo $(ls -1 | wc -l)'                 # ctf: Count the number of files in the current directory.
+alias curl='curl --compressed'                    # curl: Use compression when transferring data.
+alias da='date "+%Y-%m-%d %A %T %Z"'              # alias to show the date and timezone
+alias dot='cd $DOTFILES'                          # dot: Shortcut to go to the dotfiles directory.
+alias dsp="sudo du -shc ."                        # dsp: Show the size of the current directory.
+alias du='sudo du -h'                             # du: File size human readable output sorted by size.
+alias duf='sudo du -sh *'                         # duf: File size human readable output sorted.
+alias egz='tar -xvzf'                             # egz: Extract a whole directory (including subdirectories)
+alias f='find . -name '                            # f: Quickly search for file
+alias fd='find . -type d -name'                    # fd: Quickly search for directory
+alias ff='find . -type f -name'                    # ff: Quickly search for file
+alias g='git'                                     # g: Shortcut to git.
+alias ga='git add '                               # ga: Shortcut to git add.
+alias gb='git branch '                            # gb: Shortcut to git branch.
+alias gc='git commit -m '                         # gc: Shortcut to git commit.
+alias gcb="git checkout -b "                      # gcb: Create a new branch and switch to it.
+alias gcl='git clone '                            # gcl: Shortcut to git clone.
+alias gco='git checkout '                         # gco: Shortcut to git checkout.
+alias gd='git diff '                              # gd: Shortcut to git diff.
+alias gf='git fetch '                             # gf: Shortcut to git fetch.
+alias gl='git log '                               # gl: Shortcut to git log.
+alias gmv='git mv'                                # gmv: Move or rename a file, a directory, or a symlink.
+alias gph="git push"                              # gp: Push local commits to remote.
+alias gpl="git pull"                              # gl: Update and merge remote changes.
+alias gr='git remote '                            # gr: Shortcut to git remote.
+alias grm='git remove'                            # grm: Remove files from the working tree and from the index.
+alias grt='cd "$(git rev-parse --show-toplevel)"' # gr: Change to Git Root directory.
+alias gst='git status '                           # gst: Shortcut to git status.
+alias gsta='git stash save '                      # gsta: Shortcut to git stash save.
+alias gz='tar -zcvf'                              # gz: Compress a whole directory (including subdirectories) to a tarball.
+alias h='history'                                 # h: Lists all recently used commands.
+alias halt="sudo /sbin/halt"                      # halt: Shutdown the system.
+alias ifconfig='sudo ifconfig'                      # ifconfig: Append sudo to ifconfig (configure network interface parameters) command.
+alias ipinfo='ipconfig getpacket en0'              # ipInfo0: Get network interface parameters for en0.
+alias l='ls -lFh'                                 # l: Size, show type, human readable.
+alias l1='ls -1'                                  # l1: Display one file per line.
+alias la='ls -Alh'                                # la: show hidden files on the command line.
+alias labc='ls -lap'                              #alphabetical sort
+alias lc='ls -lcrh'                               # lc: sort by change time
+alias ldir="ls -l | egrep '^d'"                   # directories only
+alias lf="ls -l | egrep -v '^d'"                  # files only
+alias lk='ls -lSrh'                               # lk: sort by size
+alias ll='ls -lAFh'                               # ll: Long list, show almost all, show type, human readable.
+alias lm='ls -alh |more'                          # lm: pipe through 'more'
+alias ln='ln -i'                                  # ln: interactive symbolic link
+alias locale='locale -a | grep UTF-8'             # locale: List all available locales.
+alias lp='sudo lsof -i -T -n'                     # lp: List all open ports.
+alias lr='ls -lRh'                                # lr: recursive ls
+alias ls='ls --color'                             # ls: Colorize the output.
+alias lS='ls -1FSsh'                              # lS: Order Files Based on Last Modified Time and size.
+alias lt='ls -ltrh'                               # lt: sort by date
+alias lu='ls -lurh'                               # lu: sort by access time
+alias lw='ls -xAh'                                # wide listing format
+alias lx='ls | sort -k 1,1 -t .'                  # lx: sort by extension
+alias mc='make clean'                             # mc: Make clean.
+alias mi='make install'                           # mi: Make install.
+alias mk=make                                     # mk: Make.
+alias mkbz2='tar -cvjf'                           # mkbz2: Create a temporary tar ball compressed with bzip2.
+alias mkdd='mkdir -pv $(date +%Y%m%d)'            # mkdd: Create a directory with the current date.
+alias mkgz='tar -cvzf'                            # mkgz: Create a temporary tar ball compressed with gzip.
+alias mkh="make help"                             # mkh: Make help.
+alias mkr="make run"                              # mkr: Make run.
+alias mkt="make test"                             # mkt: Make test.
+alias mktar='tar -cvf'                            # mktar: Create a temporary tarball.
+alias mv='mv -vi'                                 # mv: Move files interactively (ask before overwrite) and verbose.
+alias mx='chmod a+x'                              # mx: Make executable.
+alias nls='sudo lsof -i -P | grep LISTEN'         # nls: Show only active network listeners.
+alias now='date +"%T"'                            # now: Show the current time.
+alias npmi='npm install '                         # npmi: Install npm package.
+alias npms='npm start '                           # npms: Start npm package.
+alias op='sudo lsof -i -P'                        # op: List of open ports.
+alias p='pwd'                                     # p: Shortcut for `pwd` which returns working directory name.
+alias path='echo -e ${PATH//:/\\n}'               # path: Display the $PATH variable on newlines.
+alias pbcopy='xsel --clipboard --input'           # pbcopy: Copy to clipboard.
+alias pbpaste='xsel --clipboard --output'         # pbpaste: Paste from clipboard.
+alias pid='ps -f'                                 # pid: Display the uid, pid, parent pid, recent CPU usage, process start time, controlling tty, elapsed CPU usage, and the associated command.
+alias ping='ping -c 5'                            # ping: Limit Ping to 5 ECHO_REQUEST packets.
+alias pn='pnpm'                                   # pn: Shortcut to pnpm.
+alias ports='netstat -tulan'                      # ports: List all listening ports.
+alias poweroff="sudo /sbin/shutdown"              # poweroff: Poweroff the system.
+alias ps='ps auxwww'                              # kp: Getting full path of executables.
+alias qfind='find . -name '                         # qfind: Quickly search for file.
+alias r=reload                                    # r: Reload the shell.
+alias reboot="sudo /sbin/reboot"                  # reboot: Reboot the system.
+alias reload='exec $SHELL -l'                     # reload: Reload the shell.
+alias rm='rm -I'                                  # rm: Prompts for every file before removing.
+alias rr="rm -rf"                                 # rr: Remove directory and all its contents.
+alias shutdown='sudo shutdown -h now'             # shutdown: Shutdown the system.
+alias spd='sudo rm -rf /private/var/log/asl/*'    # spd: Remove all log files in /private/var/log/asl.
+alias srv='python3 -m http.server'                # srv: Start a simple HTTP server.
+alias svi='sudo vi'                               # svi: Run vi in sudo mode.
+alias t='tail -f'                                 # t: Prints the last 10 lines of a text or log file, and then waits for new additions to the file to print it in real time.
+alias top='sudo btop'                             # top: Allows the user to interactively monitor the system's vital resources or server's processes in real time.
+alias tm='tmux'                                   # tm: Start tmux.
+alias tma='tmux attach'                           # tma: Attach to a tmux session.
+alias tma0='tmux attach -t 0'                     # tma0: Attach to a tmux session 0.
+alias tma1='tmux attach -t 1'                     # tma1: Attach to a tmux session 1.
+alias tma2='tmux attach -t 2'                     # tma2: Attach to a tmux session 2.
+alias tmk='tmux kill-session -t'                  # tmk: Kill a tmux session.
+alias tml='tmux list-sessions'                    # tml: List tmux sessions.
+alias trash="rm -fr ~/.Trash"                     # trash: Remove all files in the trash.
+alias tree='tree -CAhF --dirsfirst'                # tree: Display a directory tree.
+alias unbz2='tar -xvjf'                           # unbz2: Extract a tarball compressed with bzip2.
+alias undopush="git push -f origin HEAD^:master"  # undopush: Undo the last push.
+alias ungz='tar -xvzf'                            # ungz: Extract a tarball compressed with gzip.
+alias untar='tar -xvf'                            # untar: Extract a tarball.
+alias usage='du -ch | grep total'                 # usage: Grabs the disk usage in the current directory.
+alias v='vim $(f)'                                # v: Edit a file.
+alias wget='wget -c'                              # wget: wget with resume.
+alias wip='dig +short myip.opendns.com @resolver1.opendns.com' # wip: Get public IP address.
+alias wk='date +%V'                               # wk: Show the current week number.
+
+if [[ "$OSTYPE" =~ ^darwin ]]; then
+    alias upd='
+        sudo softwareupdate -i -a;
+        pnpm i;
+        pnpm update;
+        brew cu --all;
+        brew doctor;
+        brew update;
+        brew upgrade;
+        brew cleanup;
+        mas upgrade;
+        npm install npm -g;
+        npm update -g;
+        sudo gem update --system;
+        sudo gem update;
+        sudo gem cleanup;
+        npm update ncu;
+        npm audit fix;
+        ncu -g;'
+elif [[ "$OSTYPE" =~ ^linux ]]; then
+    alias upd='
+        sudo apt update;
+        sudo apt upgrade -y;
+        pnpm i;
+        pnpm update;
+        brew cu --all;
+        brew doctor;
+        brew update;
+        brew upgrade;
+        brew cleanup;
+        mas upgrade;
+        npm install npm -g;
+        npm update -g;
+        sudo gem update --system;
+        sudo gem update;
+        sudo gem cleanup;
+        npm update ncu;
+        npm audit fix;
+        ncu -g;'
+fi
