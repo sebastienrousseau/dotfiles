@@ -1,4 +1,5 @@
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
+#!/usr/bin/env bash
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - Color configuration.
 
 ## 🅲🅾🅻🅾🆁🆂
 export colorflag='-G' # Enable color output

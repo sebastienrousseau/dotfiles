@@ -1,7 +1,7 @@
-#!/usr/bin/env zsh
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
+#!/usr/bin/env bash
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - Editor configuration.
 
-if ! [[ `command -v vim` ]]; then
+if ! [[ $(command -v vim) ]]; then
   export VISUAL="vi"
 else
   export VISUAL="vim"
