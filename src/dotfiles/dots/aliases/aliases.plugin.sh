@@ -1,5 +1,7 @@
-#!/usr/bin/env zsh
+# shellcheck shell=bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
+cite 'about-alias'w
+about-alias 'general aliases'
 
 # 🅰🅻🅸🅰🆂🅴🆂
 unalias -a                                        # Remove all previous environment defined aliases.
@@ -20,14 +22,19 @@ alias 644='chmod -R 644'                          # 644: Make all files and dire
 alias 666='chmod -R 666'                          # 666: Make all files and directories readable and writable.
 alias 755='chmod -R 755'                          # 755: Make all files and directories readable and writable.
 alias 777='chmod -R 777'                          # 777: Make all files and directories readable and writable.
-alias chmox='chmod +x'                            # chmox: Make a file executable.
+alias cde="cd ~/Code; ls"                         # cde: Shortcut to go to the Code directory and list its contents.
 alias cgz='tar -zcvf'                             # cgz: Compress a whole directory (including subdirectories) to a tarball.
+alias chmox='chmod +x'                            # chmox: Make a file executable.
 alias cr='cargo run'                              # cr: Run cargo.
 alias ctf='echo $(ls -1 | wc -l)'                 # ctf: Count the number of files in the current directory.
 alias curl='curl --compressed'                    # curl: Use compression when transferring data.
-alias da='date "+%Y-%m-%d %A %T %Z"'              # alias to show the date and timezone
+alias da='date "+%Y-%m-%d %A %T %Z"'              # da: Display the current date and time.
+alias dn="cd ~/Downloads; ls"                     # dn: Shortcut to go to the Downloads directory and list its contents.
 alias dot='cd $DOTFILES'                          # dot: Shortcut to go to the dotfiles directory.
+alias ds="cd ~/Documents; ls"                     # ds: Shortcut to go to the Documents directory and list its contents.
 alias dsp="sudo du -shc ."                        # dsp: Show the size of the current directory.
+alias dt="cd ~/Desktop; ls"                       # dt: Shortcut to go to the Desktop directory and list its contents.
+alias digg="dig @8.8.8.8 +nocmd any +multiline +noall +answer" # digg: Dig with Google's DNS.
 alias du='sudo du -h'                             # du: File size human readable output sorted by size.
 alias duf='sudo du -sh *'                         # duf: File size human readable output sorted.
 alias egz='tar -xvzf'                             # egz: Extract a whole directory (including subdirectories)
@@ -55,17 +62,24 @@ alias gsta='git stash save '                      # gsta: Shortcut to git stash 
 alias gz='tar -zcvf'                              # gz: Compress a whole directory (including subdirectories) to a tarball.
 alias h='history'                                 # h: Lists all recently used commands.
 alias halt="sudo /sbin/halt"                      # halt: Shutdown the system.
-alias ifconfig='sudo ifconfig'                      # ifconfig: Append sudo to ifconfig (configure network interface parameters) command.
-alias ipinfo='ipconfig getpacket en0'              # ipInfo0: Get network interface parameters for en0.
+alias ifconfig='sudo ifconfig'                    # ifconfig: Append sudo to ifconfig (configure network interface parameters) command.
+alias ipinfo='ipconfig getpacket en0'             # ipInfo0: Get network interface parameters for en0.
+alias ip4="dig +short myip.opendns.com @resolver1.opendns.com -4" # ip4: Get the public IPv4 address.
+alias ip6="dig -6 AAAA +short myip.opendns.com. @resolver1.opendns.com." # ip6: Get the public IPv6 address.
+alias ip="ip4; ip6"                               # ip: Get the public IPv4 and IPv6 addresses.
 alias l='ls -lFh'                                 # l: Size, show type, human readable.
 alias l1='ls -1'                                  # l1: Display one file per line.
 alias la='ls -Alh'                                # la: show hidden files on the command line.
-alias labc='ls -lap'                              #alphabetical sort
-alias lc='ls -lcrh'                               # lc: sort by change time
+alias labc='ls -lap'                              # labc: List all files in alphabetical order.
+
+alias lc='wc -l'                                  # lc: Count the number of lines in the file.
+alias lct='ls -lcrh'                              # lc: sort by change time
 alias ldir="ls -l | egrep '^d'"                   # directories only
+alias left='ls -t -1'                             # left: List files by date, most recent last.
 alias lf="ls -l | egrep -v '^d'"                  # files only
 alias lk='ls -lSrh'                               # lk: sort by size
 alias ll='ls -lAFh'                               # ll: Long list, show almost all, show type, human readable.
+alias lla='ls -l -d $PWD/*'                       # lla: List full path of all files in current directory.
 alias lm='ls -alh |more'                          # lm: pipe through 'more'
 alias ln='ln -i'                                  # ln: interactive symbolic link
 alias locale='locale -a | grep UTF-8'             # locale: List all available locales.
@@ -116,13 +130,6 @@ alias srv='python3 -m http.server'                # srv: Start a simple HTTP ser
 alias svi='sudo vi'                               # svi: Run vi in sudo mode.
 alias t='tail -f'                                 # t: Prints the last 10 lines of a text or log file, and then waits for new additions to the file to print it in real time.
 alias top='sudo btop'                             # top: Allows the user to interactively monitor the system's vital resources or server's processes in real time.
-alias tm='tmux'                                   # tm: Start tmux.
-alias tma='tmux attach'                           # tma: Attach to a tmux session.
-alias tma0='tmux attach -t 0'                     # tma0: Attach to a tmux session 0.
-alias tma1='tmux attach -t 1'                     # tma1: Attach to a tmux session 1.
-alias tma2='tmux attach -t 2'                     # tma2: Attach to a tmux session 2.
-alias tmk='tmux kill-session -t'                  # tmk: Kill a tmux session.
-alias tml='tmux list-sessions'                    # tml: List tmux sessions.
 alias trash="rm -fr ~/.Trash"                     # trash: Remove all files in the trash.
 alias tree='tree -CAhF --dirsfirst'                # tree: Display a directory tree.
 alias unbz2='tar -xvjf'                           # unbz2: Extract a tarball compressed with bzip2.
@@ -131,6 +138,8 @@ alias ungz='tar -xvzf'                            # ungz: Extract a tarball comp
 alias untar='tar -xvf'                            # untar: Extract a tarball.
 alias usage='du -ch | grep total'                 # usage: Grabs the disk usage in the current directory.
 alias v='vim $(f)'                                # v: Edit a file.
+alias vs="code ./"                                # vs: Open VS Code.
+alias wth='curl https://wttr.in'                  # wth: Get the weather.
 alias wget='wget -c'                              # wget: wget with resume.
 alias wip='dig +short myip.opendns.com @resolver1.opendns.com' # wip: Get public IP address.
 alias wk='date +%V'                               # wk: Show the current week number.
@@ -155,6 +164,7 @@ if [[ "$OSTYPE" =~ ^darwin ]]; then
         npm audit fix;
         ncu -g;'
 elif [[ "$OSTYPE" =~ ^linux ]]; then
+    alias open="xdg-open >/dev/null 2>&1"             # open: Open a file or URL in the user's preferred application.
     alias upd='
         sudo apt update;
         sudo apt upgrade -y;

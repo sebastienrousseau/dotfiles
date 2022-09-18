@@ -1,60 +1,6 @@
-#!/bin/zsh
-#
-#  ____        _   _____ _ _
-# |  _ \  ___ | |_|  ___(_) | ___  ___
-# | | | |/ _ \| __| |_  | | |/ _ \/ __|
-# | |_| | (_) | |_|  _| | | |  __/\__ \
-# |____/ \___/ \__|_|   |_|_|\___||___/
-#
-# DotFiles v0.2.449
-# https://dotfiles.io
-#
-# Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
-#
-# Sections:
-#
-#   1.0 Homebrew Core aliases.
-#   1.1 Homebrew Access aliases.
-#   1.2 Control Homebrew's anonymous aggregate user behaviour analytics.
-#   1.3 Uninstall formulae that were only installed as a dependency of another formula and are now no longer needed.
-#   1.4 Remove stale lock files and outdated downloads for all formulae and casks, and remove old versions of installed formulae.
-#   1.5 Show lists of built-in and external commands.
-#   1.6 Control whether Homebrew automatically links external tap shell completion files.
-#   1.7 Show Homebrew and system configuration info useful for debugging.
-#   1.8 Show dependencies for formula.
-#   1.9 Display formula's name and one-line description. Formula descriptions are cached; the cache is created on the first search, making that search slower than subsequent ones.
-#   2.0 Control Homebrew's developer mode.
-#   2.1 Check  your  system for potential problems.
-#   2.2 Download a bottle (if available) or source packages for formulae and binaries for casks.
-#   2.3 Display brief statistics for your Homebrew installation.
-#   2.4 Install a formula or cask. Additional options specific to a formula may be appended to the command.
-#   2.5 List installed formulae that are not dependencies of another installed formula.
-#   2.6 Symlink all of formula's installed files into Homebrew's prefix. This is done automatically when you install formulae but can be useful for DIY installations.
-#   2.7 List all installed formulae and casks.
-#   2.8 Show the git log for formula, or show the log for the Homebrew repository if no formula is provided.
-#   2.9 Migrate renamed packages to new names, where formula are old names of packages.
-#   3.0 Check the given formula kegs for missing dependencies.
-#   3.1 Show install options specific to formula.
-#   3.2 List installed casks and formulae that have an updated version available.
-#   3.3 Pin the specified formula, preventing them from being upgraded when issuing the brew upgrade formula command.
-#   3.4 Rerun the post-install steps for formula.
-#   3.5 Import all items from the specified tap, or from all installed taps if none is provided.
-#   3.6  Uninstall and then reinstall a formula or cask using the same options it was originally installed with, plus any appended options specific to a formula.
-#   3.7 Perform a substring search of cask tokens and formula names for text. If text is flanked by slashes, it is interpreted as a regular expression.
-#   3.8 Tap a formula repository.
-#   3.9 Show detailed information about one or more taps.
-#   4.0 Uninstall a formula or cask.
-#   4.1 Remove symlinks for formula from Homebrew's prefix.
-#   4.2 Fetch the newest version of Homebrew and all formulae from GitHub using git(1) and perform any necessary migrations.
-#   4.3 Upgrade outdated casks and outdated, unpinned formulae using the same options they were originally installed with, plus any appended brew formula options.
-#   4.4 Show  formulae  and  casks  that  specify formula as a dependency; that is, show dependents of formula.
-#   4.5 Display Homebrew's download cache. See also HOMEBREW_CACHE.
-#   4.6 Official external commands.
-#
-# Copyright (c) Sebastien Rousseau 2022. All rights reserved
-# Licensed under the MIT license
-#
-
+# shellcheck shell=bash
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
+about-alias 'Homebrew aliases'
 
 
 ##  ----------------------------------------------------------------------------
