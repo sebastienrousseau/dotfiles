@@ -1,38 +1,36 @@
-# macOS Shell Dotfiles
+# ⚫ Dotfiles
 
 ![Banner representing the Dotfiles Library](/media/dotfiles.svg)
 
-[![Node.js CI](https://github.com/sebastienrousseau/dotfiles/actions/workflows/node.js.yml/badge.svg)](https://github.com/sebastienrousseau/dotfiles/actions/workflows/node.js.yml)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a5d4c83f3dfd4dee8cfc9e363af24974)](https://app.codacy.com/gh/sebastienrousseau/dotfiles?utm_source=github.com&utm_medium=referral&utm_content=sebastienrousseau/dotfiles&utm_campaign=Badge_Grade_Settings)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://skeletonic.github.io/license)
-[![npm version](https://badge.fury.io/js/%40sebastienrousseau%2Fdotfiles.svg)](https://badge.fury.io/js/%40sebastienrousseau%2Fdotfiles)
-[![Open Source Love svg1](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
+![Codacy grade](https://img.shields.io/codacy/grade/634cfc4de08e492ebcbb341631066241?style=for-the-badge)
+[![Contributors][contributors-shield]](https://github.com/sebastienrousseau/dotfiles/graphs/contributors)
+[![Forks][forks-shield]](https://github.com/sebastienrousseau/dotfiles/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge\&color=ff69b4)](https://opensource.org/licenses/MIT)
+![Made with Love](/media/made-with-love.svg)
 
 ## Table of contents
 
-- [macOS Shell Dotfiles](#macos-shell-dotfiles)
-  - [Table of contents](#table-of-contents)
-  - [About Dotfiles](#about-dotfiles)
-    - [Getting Started](#getting-started)
-    - [Installation](#installation)
-      - [Install from CDN](#install-from-cdn)
-      - [Install from GitHub](#install-from-github)
-      - [Install from NPM](#install-from-npm)
-      - [Install the npm command line interface](#install-the-npm-command-line-interface)
-        - [Check installation](#check-installation)
-      - [Install Dotfiles via Yarn](#install-dotfiles-via-yarn)
-  - [In this repository](#in-this-repository)
-    - [Git dotfiles](#git-dotfiles)
-    - [Bash Shell dotfiles](#bash-shell-dotfiles)
-    - [Z Shell dotfiles](#z-shell-dotfiles)
-    - [Homebrew dotfiles](#homebrew-dotfiles)
-  - [Requirements](#requirements)
-  - [Contributing](#contributing)
-  - [Code of Conduct](#code-of-conduct)
-  - [Our Values](#our-values)
-  - [History](#history)
-  - [Acknowledgements](#acknowledgements)
-  - [License](#license)
+- [About Dotfiles](#about-dotfiles)
+  - [Getting Started](#getting-started)
+  - [Installation](#installation)
+    - [Install from CDN](#install-from-cdn)
+    - [Install from GitHub](#install-from-github)
+    - [Install from NPM](#install-from-npm)
+    - [Install the npm command line interface](#install-the-npm-command-line-interface)
+      - [Check installation](#check-installation)
+    - [Install Dotfiles via Yarn](#install-dotfiles-via-yarn)
+- [In this repository](#in-this-repository)
+  - [Git dotfiles](#git-dotfiles)
+  - [Bash Shell dotfiles](#bash-shell-dotfiles)
+  - [Z Shell dotfiles](#z-shell-dotfiles)
+  - [Homebrew dotfiles](#homebrew-dotfiles)
+- [Requirements](#requirements)
+- [Contributing](#contributing)
+- [Code of Conduct](#code-of-conduct)
+- [Our Values](#our-values)
+- [History](#history)
+- [Acknowledgements](#acknowledgements)
+- [License](#license)
 
 ## About Dotfiles
 
@@ -52,6 +50,7 @@ This repository contains the source code for multiple macOS Dotfiles and Shells:
 ### Installation
 
 A few options are available:
+
 #### Install from CDN
 
 A pre-bundled package that contains all dotfiles and components needed to use is available on CDN.
@@ -197,3 +196,10 @@ We are committed to preserving and fostering a diverse, welcoming community. Ple
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/sebastienrousseau/dotfiles/blob/master/LICENSE) file for details
 
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Freedia%2Fdotfiles.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Freedia%2Fdotfiles?ref=badge_large)
+
+[contributors-shield]: https://img.shields.io/github/contributors/sebastienrousseau/dotfiles.svg?style=for-the-badge
+[contributors-url]: https://github.com/sebastienrousseau/dotfiles/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/sebastienrousseau/dotfiles.svg?style=for-the-badge
+[forks-url]: https://github.com/sebastienrousseau/dotfiles/network/members
+
+
