@@ -1,20 +1,5 @@
-#!/bin/sh
-#
-#  ____        _   _____ _ _
-# |  _ \  ___ | |_|  ___(_) | ___  ___
-# | | | |/ _ \| __| |_  | | |/ _ \/ __|
-# | |_| | (_) | |_|  _| | | |  __/\__ \
-# |____/ \___/ \__|_|   |_|_|\___||___/
-#
-# DotFiles v0.2.449
-# https://dotfiles.io
-#
-# Description:
-#
-# Copyright (c) Sebastien Rousseau 2021. All rights reserved
-# Licensed under the MIT license
-#
-
+#!/usr/bin/env sh
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 
 .DEFAULT_GOAL := help
 
@@ -63,7 +48,7 @@ serve:
 help: # @HELP Display the help menu.
 help:
 	@grep -E '^.*: *# *@HELP' $(MAKEFILE_LIST)    \
-	    | awk '                                   \
-	        BEGIN {FS = ": *# *@HELP"};           \
-	        { printf "  %-30s %s\n", $$1, $$2 };  \
-	    '
+		| awk '                                   \
+				BEGIN {FS = ": *# *@HELP"};           \
+				{ printf "  %-30s %s\n", $$1, $$2 };  \
+		'

@@ -1,0 +1,7 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
+
+# Automatically detect text files and convert to unix line endings
+* text=auto eol=lf
+
+# Disable diff for minified files
+*.min.* -diff
