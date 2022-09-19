@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 
-## 🆂🅷🅴🅻🅻
-# if [ "$TMUX" = "" ]; then tmux; fi
-
-## 🅴🆇🅿🅾🆁🆃🆂
+## 🆅🅰🆁🅸🅰🅱🅻🅴🆂
 USER_LANGUAGE="en_GB.UTF-8" # Set the default language.
 USER=$(whoami) # Set USER variable.
 
+## 🅴🆇🅿🅾🆁🆃🆂
 export DF_HOME=$DOTFILES/dots # Path to the bash directory.
 export DOTFILES_VERSION='0.2.450' # DotFiles v0.2.450.
 export DOTFILES=$HOME/.dotfiles # Path to the dotfiles directory.
