@@ -2,7 +2,7 @@
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 
 # Load custom executable functions
-for function in "$DF_HOME"/functions/[^.#]*.zsh; do
+for function in "$DF_HOME"/functions/[^.#]*.bash; do
   # shellcheck source=/dev/null
   source "$function"
 done

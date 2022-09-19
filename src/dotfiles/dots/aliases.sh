@@ -2,8 +2,15 @@
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 
 ## 🅰🅻🅸🅰🆂🅴🆂
+
+# Load custom executable aliases
+for file in $DF_HOME/aliases/*/[^.#]*.sh; do
+  # shellcheck source=/dev/null
+  source "$file"
+done
+
 # shellcheck source=/dev/null
-source "$DF_HOME"/aliases/aliases.plugin.sh # Load default aliases.
+# source "$DF_HOME"/aliases/aliases.plugin.sh # Load default aliases.
 
 ## shellcheck source=/dev/null
 # source "$DF_HOME"/aliases/gcloud/gcloud.plugin.zsh # Load gcloud aliases.

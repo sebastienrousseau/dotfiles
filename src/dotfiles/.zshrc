@@ -12,12 +12,12 @@ export LANGUAGE=${USER_LANGUAGE} # Set the default language.
 export LC_ALL=${USER_LANGUAGE} # Set the default language.
 export TERM=xterm-256color # Use 256 color terminal.
 export USER=$(whoami) # Set USER variable.
-export DF_HOME=$DOTFILES/zsh # Path to the zsh directory.
+export DF_HOME=$DOTFILES/dots # Path to the bash directory.
 
 ## 🆂🅾🆄🆁🅲🅴🆂
-source $DF_HOME/aliases.zsh # Load aliases.
-source $DF_HOME/configurations.zsh # Load configurations.
-source $DF_HOME/exit.zsh # Load exit.
-source $DF_HOME/functions.zsh # Load functions.
-source $DF_HOME/history.zsh # Load history.
-source $DF_HOME/plugins/*/[^.#]*.zsh # Load plugins.
+source $DF_HOME/aliases.bash # Load aliases.
+source $DF_HOME/configurations.bash # Load configurations.
+source $DF_HOME/exit.bash # Load exit.
+source $DF_HOME/functions.bash # Load functions.
+source $DF_HOME/history.bash # Load history.
+source $DF_HOME/plugins/*/[^.#]*.sh # Load plugins.

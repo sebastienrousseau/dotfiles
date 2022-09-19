@@ -19,7 +19,11 @@ function dotfiles_history {
     builtin fc "$@"
   else
     # unless a number is provided, show all history events (starting from 1)
-    [[ ${@[-1]-} = *[0-9]* ]] && builtin fc -l "$@" || builtin fc -l "$@" 1
+    if [[ "${1:-}" =~ ^[0-9]+$ ]]; then
+      builtin fc "$@"
+    else
+      builtin fc -l 1
+    fi
   fi
 }
 

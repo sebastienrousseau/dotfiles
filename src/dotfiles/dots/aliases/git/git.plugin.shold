@@ -344,7 +344,7 @@ alias gpushr='git remote | xargs -I% -n1 git push %'
 alias gunpub='git push origin :$(git current-branch)'
 
 # Push current branch
-alias gpcb='git push origin "$(git branch|grep '\*'|tr -d '* \n')"'
+# alias gpcb='git push origin "$(git branch|grep '\*'|tr -d '* \n')"'
 
 
 
@@ -362,7 +362,7 @@ alias gra='git remote add'
 alias grall='git remote | xargs -L1 git push --all'
 
 # Git remote all remotes except origin.
-alias grallo="git remote -v | grep "(fetch)" | sed -e 's#[[:blank:]].*##g' | grep -v "origin" | xargs -n 1 git remote rm"
+# alias grallo="git remote -v | grep "(fetch)" | sed -e 's#[[:blank:]].*##g' | grep -v "origin" | xargs -n 1 git remote rm"
 
 # Add a new remote 'origin' if it doesn't exist.
 alias grao='git remote add origin'
@@ -488,7 +488,7 @@ alias gtrm='for t in `git tag` do; git push origin :$t; git tag -d $t; done'
 alias gshab='for k in `git branch|perl -pe s/^..//`;do echo -e `git show --pretty=format:"%Cgreen%ci %Cblue%cr%Creset" $k|head -n 1`\\t$k;done|sort -r'
 
 # Find the nearest parent branch of the current git branch.
-alias gshf='git show-branch -a | grep '\*' | grep -v 'git rev-parse --abbrev-ref HEAD' | head -n1 | sed 's/.*\[\(.*\)\].*/\1/' | sed 's/[\^~].*//''
+# alias gshf='git show-branch -a | grep '\*' | grep -v 'git rev-parse --abbrev-ref HEAD' | head -n1 | sed 's/.*\[\(.*\)\].*/\1/' | sed 's/[\^~].*//''
 
 # Show list of files changed by commit.
 alias gshls='git show --relative --pretty=format:'''

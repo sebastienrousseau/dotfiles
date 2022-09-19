@@ -14,15 +14,13 @@ if [[ $TERM != *-256color ]] && [[ $TERM != alacritty* ]] && [[ $TERM != *-kitty
     return 0
 fi
 
-# if [ "$TMUX" = "" ]; then tmux; fi
-function custom_build_prompt {
-    local cyan='\e[0;36m'
-    local green='\e[0;32m'
-    local pink='\e[0;35m'
-    local reset='\e[0m]'
-    local white='\e[0;37m'
-
+if [[ -n "$BASH_VERSION" ]]; then
+    cyan='\e[0;36m'
+    green='\e[0;32m'
+    pink='\e[0;35m'
+    reset='\e[0m]'
     export PS1="${pink} ❭${reset} ${green}\w${reset} ${cyan}$ ${reset}"
-}
-
-export PROMPT_COMMAND=custom_build_prompt
+elif [[ -n "$ZSH_VERSION" ]]; then
+    export PROMPT='%F{magenta} ❭%f %F{green}%~%f %F{cyan}$ %f'
+    export RPROMPT='%B%F{cyan}%*%f%b'
+fi
