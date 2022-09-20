@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -10,7 +9,7 @@
 #
 
 # extract: Function to extract most know archives with one command
-function extract() {
+extract() {
 	if [[ "$#" != 1 ]]; then
 		echo "[ERROR] Please add one argument" >&2
 		return 1

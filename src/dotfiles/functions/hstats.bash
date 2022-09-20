@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -11,6 +10,6 @@
 
 
 # hstats: Function to display Ze Shell history stats informaton
-function hstats() {
+hstats() {
   history | awk '{CMD[$2]++;count++;}END { for (a in CMD)print CMD[a] " " CMD[a]/count*100 "% " a;}' | grep -v "./" | column -c3 -s " " -t | sort -nr | nl |  head -n20
 }

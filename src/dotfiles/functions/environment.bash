@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -11,7 +10,7 @@
 
 
 # environment: Function to detect the current environment
-function environment ()
+environment ()
 {
     # Define a fallback `OS`
     LOCAL_OS="other"

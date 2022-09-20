@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -11,7 +10,7 @@
 
 
 # rd: Function to remove a direcory and its files
-function rd() {
+rd() {
 	if [[ "$#" != 1 ]]; then
     echo "[ERROR] Please add one argument" >&2
     return 1

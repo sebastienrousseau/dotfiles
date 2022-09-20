@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 #
 # 🅰🅻🅸🅰🆂🅴🆂
@@ -156,16 +156,16 @@ alias wk='date +%V'                          # wk: Show the current week number.
 alias wth='curl https://wttr.in'             # wth: Get the weather.
 alias x='quit'                               # q: Shortcut for the `exit` command.
 
-if [[ "$OSTYPE" =~ ^darwin ]]; then
+if [ "$(uname)" = "Darwin" ]; then
     alias upd='
         sudo softwareupdate -i -a;
         pnpm i;
         pnpm update;
-        brew cu --all;
-        brew doctor;
-        brew update;
-        brew upgrade;
-        brew cleanup;
+        # brew cu --all;
+        # brew doctor;
+        # brew update;
+        # brew upgrade;
+        # brew cleanup;
         mas upgrade;
         npm install npm -g;
         npm update -g;
@@ -175,19 +175,13 @@ if [[ "$OSTYPE" =~ ^darwin ]]; then
         npm update ncu;
         npm audit fix;
         ncu -g;'
-elif [[ "$OSTYPE" =~ ^linux ]]; then
+elif [ "$(uname)" = "Linux" ]; then
     alias open="xdg-open >/dev/null 2>&1" # open: Open a file or URL in the user's preferred application.
     alias upd='
         sudo apt update;
         sudo apt upgrade -y;
         pnpm i;
         pnpm update;
-        brew cu --all;
-        brew doctor;
-        brew update;
-        brew upgrade;
-        brew cleanup;
-        mas upgrade;
         npm install npm -g;
         npm update -g;
         sudo gem update --system;

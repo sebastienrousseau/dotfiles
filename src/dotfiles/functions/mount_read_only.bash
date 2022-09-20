@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -11,6 +10,6 @@
 
 
 # mount_read_only: Function to mount a read-only disk image as read-write
-function mount_read_only() {
+mount_read_only() {
   hdiutil attach "$1" -shadow /tmp/"$1".shadow -noverify
 }

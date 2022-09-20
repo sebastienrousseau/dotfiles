@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -13,7 +12,7 @@
 # goto: Function to change to the directory inputed
 goto() {
   if [ -e "$1" ]; then
-	  cd "$1"; l
+	  cd "$1" || exit; l
   else
 	  echo "[ERROR] Please add a directory name" >&2
   fi

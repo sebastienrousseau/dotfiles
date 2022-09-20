@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -11,7 +10,7 @@
 
 
 # uppercase: Function to move filenames or directory names to uppercase
-function uppercase()
+uppercase()
 {
   if [[ "$#" != 1 ]]; then
     echo "[ERROR] The filename or directory name is incorrect." >&2
@@ -20,10 +19,10 @@ function uppercase()
   for file ; do
       filename=${file##*/}
       case "$filename" in
-      */*) dirname==${file%/*} ;;
+      */*) dirname=${file%/*} ;;
       *) dirname=.;;
       esac
-      nf=$(echo $filename | tr a-z A-Z)
+      nf=$(echo "$filename" | tr '[:upper:]' '[:lower:]')
       newname="${dirname}/${nf}"
       if [ "$nf" != "$filename" ]; then
           mv "$file" "$newname"

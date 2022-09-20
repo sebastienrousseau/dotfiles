@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -11,10 +10,10 @@
 
 
 # trash: Function to moves a file to the MacOS trash
-function trash() {
-	if [[ "$#" != 1 ]]; then
-    echo "[ERROR] Please add one argument" >&2
-    return 1
-  fi
-  rm "$1"
-}
+#trash(){
+#	if [ "$#" != 1 ]; then
+#    echo "[ERROR] Please add one argument" >&2
+#    return 1
+#  fi
+#  rm "$1"
+#}

@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -11,4 +10,4 @@
 
 
 # myproc: Function to list processes owned by an user
-function myproc() { ps "$@" -u "$USER" -o pid,%cpu,%mem,start,time,bsdtime,command; }
+myproc() { ps "$@" -u "$USER" -o pid,%cpu,%mem,start,time,bsdtime,command; }

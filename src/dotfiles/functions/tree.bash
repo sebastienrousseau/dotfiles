@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -11,10 +10,10 @@
 
 
 # tree: Function to generates a tree view from the current directory
-if [ ! -e /usr/local/bin/tree ]; then
-	function tree(){
-		pwd
-		ls -R | grep ":$" |   \
-		sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
-	}
-fi
+#if [ ! -e /usr/local/bin/tree ]; then
+#	tree(){
+#		pwd
+#		ls -R | grep ":$" |   \
+#		sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
+#	}
+#fi

@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -11,4 +10,4 @@
 
 
 # ql: Function to open any file in MacOS Quicklook Preview
-function ql() { qlmanage -p "$*" >&/dev/null; }
+ql() { qlmanage -p "$*" >&/dev/null; }

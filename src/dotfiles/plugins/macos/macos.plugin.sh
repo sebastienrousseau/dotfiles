@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 
 # 🅼🅰🅲🅾🆂 🅿🅻🆄🅶🅸🅽🅶 🅰🅻🅸🅰🆂🅴🆂
@@ -19,8 +19,8 @@ alias xcode='open -a xcode' # xcode: Launch XCode app in macOS.
 # 🅼🅰🅲🅾🆂 🅿🅻🆄🅶🅸🅽🅶 🅵🆄🅽🅲🆃🅸🅾🅽🆂
 
 # Erases purgeable disk space with 0s on the selected disk
-function freespace(){
-  if [[ -z "$1" ]]; then
+freespace(){
+  if [ -z "$1" ]; then
     echo "Usage: $0 <disk>"
     echo "Example: $0 /dev/disk1s1"
     echo
@@ -33,12 +33,12 @@ function freespace(){
   diskutil secureErase freespace 0 "$1"
 }
 
-function man-preview() {
+mp() {
   # Don't let Preview.app steal focus if the man page doesn't exist
-  man -w "$@" &>/dev/null && man -t "$@" | open -f -a Preview || man "$@"
+  man -w "$@" > /dev/null 2>&1 && man -t "$@" | open -f -a Preview || man "$@"
 }
 
-function quick-look() {
+ql() {
   (( $# > 0 )) && qlmanage -p "$*" &>/dev/null &
 }
 

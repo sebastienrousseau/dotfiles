@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -24,8 +23,8 @@
 ##  ----------------------------------------------------------------------------
 
 # prependpath: Prepend $PATH without duplicates
-function prependpath() {
-    if ! $( echo "$PATH" | tr ":" "\n" | grep -qx "$1" ) ; then
+prependpath() {
+    if ! echo "$PATH" | tr ":" "\n" | grep -qx "$1" ; then
         PATH="$1:$PATH"
     fi
 }

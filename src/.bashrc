@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 
 ## 🆅🅰🆁🅸🅰🅱🅻🅴🆂
@@ -16,19 +16,19 @@ export USER # Set USER variable.
 
 ## 🆂🅾🆄🆁🅲🅴🆂
 # shellcheck source=/dev/null
-. "$DOTFILES"/aliases.bash # Load aliases.
+. "$DOTFILES"/aliases.sh # Load aliases.
 
 # shellcheck source=/dev/null
-. "$DOTFILES"/configurations.bash # Load configurations.
+. "$DOTFILES"/configurations.sh # Load configurations.
 
 # shellcheck source=/dev/null
-. "$DOTFILES"/exit.bash # Load exit.
+. "$DOTFILES"/exit.sh # Load exit.
 
 # shellcheck source=/dev/null
-. "$DOTFILES"/functions.bash # Load functions.
+. "$DOTFILES"/functions.sh # Load functions.
 
 # shellcheck source=/dev/null
-. "$DOTFILES"/history.bash # Load history.
+. "$DOTFILES"/history.sh # Load history.
 
 # shellcheck source=/dev/null
 . "$DOTFILES"/plugins/*/[!.#]*.sh # Load plugins.

@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -11,7 +10,7 @@
 
 
 # genpwd: Function to generates a strong random password of 20 characters (similar to Apple)
-function genpwd() {
+genpwd() {
     m=$(openssl rand -base64 32 | cut -c 1-6);
     a=$(openssl rand -base64 32 | cut -c 1-6);
     c=$(openssl rand -base64 32 | cut -c 1-6);

@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 
 # Load custom executable functions

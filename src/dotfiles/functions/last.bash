@@ -1,5 +1,5 @@
-#!/usr/bin/env sh
+#! /bin/bash
 # last: List the modified files within 60 minutes.
-function last() {
+last() {
   find . -type f -mmin -60
 }

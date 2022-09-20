@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - Path configuration.
 
 ## 🅿🅰🆃🅷🆂
@@ -7,10 +7,17 @@
 # typeset -U PATH
 
 ### Add 'PATH' entries.
-if [ -d /opt/homebrew/bin ]; then
-  export PATH=/opt/homebrew/bin:"$PATH" # Homebrew binaries
-  export PATH=/opt/homebrew/sbin:"$PATH" # Homebrew binaries
-fi
+# if [ -d /opt/homebrew/bin ]; then
+#   export PATH=/opt/homebrew/bin:"$PATH" # Homebrew binaries
+#   export PATH=/opt/homebrew/sbin:"$PATH" # Homebrew binaries
+#
+#   # Prevent Homebrew from reporting - https://github.com/Homebrew/brew/blob/master/share/doc/homebrew/Analytics.md
+#   export HOMEBREW_NO_ANALYTICS=1
+#
+#   # set HOMEBREW_CASK_OPTS
+#   HOMEBREW_CASK_OPTS="--appdir=/Applications"
+#   export HOMEBREW_CASK_OPTS
+# fi
 export PATH=/bin:"$PATH" # Add /bin to the path
 export PATH=/sbin:"$PATH" # Add /sbin to the path
 export PATH=/usr/bin:"$PATH" # Add /usr/bin to the path
@@ -50,9 +57,6 @@ export ARCHFLAGS
 # export PATH="/Applications/Visual Studio Code.app/Contents/Resources/app/bin:$PATH"
 #export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
 
-# set HOMEBREW_CASK_OPTS
-HOMEBREW_CASK_OPTS="--appdir=/Applications"
-export HOMEBREW_CASK_OPTS
 
 # set HOSTNAME
 HOSTNAME=$(hostname -f)
@@ -64,8 +68,8 @@ export INPUTRC
 
 # Set JAVA_HOME
 # For zsh shell, export $JAVA_HOME at ~/.zshenv or ~/.zshrc.
-JAVA_HOME="$(brew --prefix)/Cellar/openjdk/18.0.1/libexec"
-export JAVA_HOME
+# JAVA_HOME="$(brew --prefix)/Cellar/openjdk/18.0.1/libexec"
+# export JAVA_HOME
 
 # Set JRE_HOME
 export JRE_HOME="${JAVA_HOME}"/jre
@@ -88,12 +92,12 @@ fi
 # export LANG
 
 # Set LIBCURL_CFLAGS
-LIBCURL_CFLAGS=-L$(brew --prefix)/opt/curl/lib
-export LIBCURL_CFLAGS
+# LIBCURL_CFLAGS=-L$(brew --prefix)/opt/curl/lib
+# export LIBCURL_CFLAGS
 
 # Set LIBCURL_LIBS
-LIBCURL_LIBS=-I$(brew --prefix)/opt/curl/include
-export LIBCURL_LIBS
+# LIBCURL_LIBS=-I$(brew --prefix)/opt/curl/include
+# export LIBCURL_LIBS
 
 # Set MAVEN_OPTS
 # MAVEN_OPTS="-Xms512m -Xmx512m"
@@ -111,6 +115,3 @@ export SSL_CERT_FILE
 # export LDFLAGS="-L$(brew --prefix)/opt/ruby/lib"
 # export CPPFLAGS="-I$(brew --prefix)/opt/ruby/include"
 # export PKG_CONFIG_PATH="$(brew --prefix)/opt/ruby/lib/pkgconfig"
-
-# Prevent Homebrew from reporting - https://github.com/Homebrew/brew/blob/master/share/doc/homebrew/Analytics.md
-export HOMEBREW_NO_ANALYTICS=1

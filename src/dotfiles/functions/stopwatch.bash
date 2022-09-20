@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -11,10 +10,10 @@
 
 
 # stopwatch: Function for a stopwatch
-function stopwatch(){
-  date1=`gdate +%s`;
+stopwatch(){
+  date1=$(gdate +%s);
    while true; do
-    echo -ne "$(gdate -u --date @$((`date +%s` - $date1)) +%H:%M:%S)\r";
+    echo -ne "$(gdate -u --date @$(($(date +%s) - $date1)) +%H:%M:%S)\r";
     sleep 0.1
    done
 }

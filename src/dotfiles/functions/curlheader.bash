@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -13,7 +12,7 @@
 ## curlheader will return only a specific response header or all response headers for a given URL
 ## usage: curlheader $header $url
 ## usage: curlheader $url
-function curlheader() {
+curlheader() {
   if [[ -z "$2" ]]; then
     echo "curl -k -s -D - $1 -o /dev/null"
     curl -k -s -D - $1 -o /dev/null:

@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -11,4 +10,4 @@
 
 
 # Add Visual Studio Code (code)
-code () { VSCODE_CWD="$PWD" open -n -b "com.microsoft.VSCode" --args $"*" ;}
+# code () { VSCODE_CWD="$PWD" open -n -b "com.microsoft.VSCode" --args $"*" ;}

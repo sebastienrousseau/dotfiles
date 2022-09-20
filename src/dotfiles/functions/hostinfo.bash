@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -11,7 +10,7 @@
 
 
 # hostinfo: Function to display useful host related informaton
-function hostinfo() {
+hostinfo() {
 	echo -e "\\nYou are logged on ${RED}$HOST"
 	echo -e "\\nAdditionnal information:$NC "
 	uname -a

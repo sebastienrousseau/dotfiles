@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -11,4 +10,4 @@
 
 
 # history-all: Function to display the full view of the history command
-function history-all { history -E 1 }
+#function history-all { history -E 1 }

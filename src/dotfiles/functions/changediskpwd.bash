@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -11,6 +10,6 @@
 
 
 # changediskpwd: Function to change the password on an encrypted disk image
-function changediskpwd() {
-  hdiutil chpass '$1'
-}
+# changediskpwd() {
+#   hdiutil chpass "$1"
+# }

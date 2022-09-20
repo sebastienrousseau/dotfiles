@@ -1,7 +1,7 @@
-#!/usr/bin/env sh
+#! /bin/bash
 
 # uuid: Function to generate a UUID (Universally Unique IDentifier)
-function uuid() {
+uuid() {
 	local N B C='89ab' # 89ab is the hexadecimal value of 10, 11, 12, 13, 14, 15 in decimal
 	for ((N = 0; N < 16; ++N)); do
 		B=$(("$RANDOM" % 256))

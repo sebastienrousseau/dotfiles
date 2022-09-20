@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -11,7 +10,7 @@
 
 
 # Hide hidden system and dotfile files
-function hidehiddenfiles() {
+hidehiddenfiles() {
   defaults write com.apple.Finder AppleShowAllFiles NO
   osascript -e 'tell application "Finder" to quit'
   sleep 0.25

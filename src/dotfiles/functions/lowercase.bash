@@ -1,5 +1,4 @@
-#!/bin/zsh
-#!/usr/bin/env sh
+#! /bin/bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
@@ -11,7 +10,7 @@
 
 
 # lowercase: Function to move filenames or directory names to lowercase
-function lowercase()
+lowercase()
 {
   if [[ "$#" != 1 ]]; then
     echo "[ERROR] The filename or directory name is incorrect." >&2
@@ -23,7 +22,7 @@ function lowercase()
       */*) dirname==${file%/*} ;;
       *) dirname=.;;
       esac
-      nf=$(echo $filename | tr A-Z a-z)
+      nf=$(echo "$filename" | tr A-Z a-z)
       newname="${dirname}/${nf}"
       if [ "$nf" != "$filename" ]; then
           mv "$file" "$newname"
