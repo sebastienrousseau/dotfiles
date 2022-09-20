@@ -116,8 +116,6 @@ alias npms='npm start '                      # npms: Start npm package.
 alias op='sudo lsof -i -P'                   # op: List of open ports.
 alias p='pwd'                                # p: Shortcut for `pwd` which returns working directory name.
 alias path='echo -e ${PATH//:/\\n}'          # path: Display the $PATH variable on newlines.
-alias pbcopy='xsel --clipboard --input'      # pbcopy: Copy to clipboard.
-alias pbpaste='xsel --clipboard --output'    # pbpaste: Paste from clipboard.
 alias pid='ps -f'                            # pid: Display the uid, pid, parent pid, recent CPU usage, process start time, controlling tty, elapsed CPU usage, and the associated command.
 alias ping='ping -c 5'                       # ping: Limit Ping to 5 ECHO_REQUEST packets.
 alias please='sudo -'                        # sudo: Execute a command as the superuser.
@@ -177,6 +175,8 @@ if [ "$(uname)" = "Darwin" ]; then
         ncu -g;'
 elif [ "$(uname)" = "Linux" ]; then
     alias open="xdg-open >/dev/null 2>&1" # open: Open a file or URL in the user's preferred application.
+    alias pbcopy='xsel --clipboard --input'      # pbcopy: Copy to clipboard.
+    alias pbpaste='xsel --clipboard --output'    # pbpaste: Paste from clipboard.
     alias upd='
         sudo apt update;
         sudo apt upgrade -y;
