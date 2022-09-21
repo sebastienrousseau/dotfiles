@@ -15,12 +15,12 @@ if [[ $TERM != *-256color ]] && [[ $TERM != alacritty* ]] && [[ $TERM != *-kitty
 fi
 
 if [[ -n "$BASH_VERSION" ]]; then
-    # cyan='\e[0;36m'
-    # green='\e[0;32m'
-    # pink='\e[0;35m'
-    # reset='\e[0m]'
-    #export PS1="${pink} ❭${reset} ${green}\w${reset} ${cyan}$ ${reset}"
-    export PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
+    cyan='\[\033[1;36m\]'
+    green='\[\033[1;32m\]'
+    pink='\[\033[1;35m\]'
+    reset='\[\033[0m\]'
+    export PS1="${pink} ❭${reset} ${green} \w ${reset} ${cyan}$ ${reset}"
+    #export PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
 elif [[ -n "$ZSH_VERSION" ]]; then
     export PROMPT='%F{magenta} ❭%f %F{green}%~%f %F{cyan}$ %f'
     export RPROMPT='%B%F{cyan}%*%f%b'
