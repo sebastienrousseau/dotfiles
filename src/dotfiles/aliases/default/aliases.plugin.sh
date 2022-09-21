@@ -134,7 +134,6 @@ alias rr="rm -rf"                            # rr: Remove directory and all its 
 alias shutdown='sudo shutdown -h now'        # shutdown: Shutdown the system.
 alias spd='sudo rm -rf /private/var/log/asl/*'                 # spd: Remove all log files in /private/var/log/asl.
 alias srv='python3 -m http.server'           # srv: Start a simple HTTP server.
-alias sudo='sudo -'                          # sudo: Execute a command as the superuser.
 alias svi='sudo vi'                          # svi: Run vi in sudo mode.
 alias t='tail -f'                            # t: Prints the last 10 lines of a text or log file, and then waits for new additions to the file to print it in real time.
 alias top='sudo btop'                        # top: Allows the user to interactively monitor the system's vital resources or server's processes in real time.
