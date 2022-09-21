@@ -3,60 +3,38 @@
 
 ## 🅿🅰🆃🅷🆂
 
-### Uniquify 'PATH' entries.
-# typeset -U PATH
-
 ### Add 'PATH' entries.
-# if [ -d /opt/homebrew/bin ]; then
-#   export PATH=/opt/homebrew/bin:"$PATH" # Homebrew binaries
-#   export PATH=/opt/homebrew/sbin:"$PATH" # Homebrew binaries
-#
-#   # Prevent Homebrew from reporting - https://github.com/Homebrew/brew/blob/master/share/doc/homebrew/Analytics.md
-#   export HOMEBREW_NO_ANALYTICS=1
-#
-#   # set HOMEBREW_CASK_OPTS
-#   HOMEBREW_CASK_OPTS="--appdir=/Applications"
-#   export HOMEBREW_CASK_OPTS
-# fi
-export PATH=/bin:"$PATH" # Add /bin to the path
-export PATH=/sbin:"$PATH" # Add /sbin to the path
-export PATH=/usr/bin:"$PATH" # Add /usr/bin to the path
-export PATH=/usr/local/bin:"$PATH" # Add /usr/local/bin to the path
-export PATH=/usr/local/sbin:"$PATH" # Add /usr/local/sbin to the path
-export PATH=/usr/sbin:"$PATH" # Add /usr/sbin to the path
-export PATH="$HOME"/.cargo/bin:"$PATH" # Add ~/.cargo/bin to the path
-export PATH="$HOME"/.yarn/bin:"$PATH" # Add ~/.yarn/bin to the path
-export PATH="$HOME"/go/bin:"$PATH" # Add ~/go/bin to the path
+  export PATH=/usr/local/bin:"$PATH" # Add /usr/local/bin to the path
+  export PATH=/usr/local/sbin:"$PATH" # Add /usr/local/sbin to the path
+  export PATH=/usr/bin:"$PATH" # Add /usr/bin to the path
+  export PATH=/bin:"$PATH" # Add /bin to the path
+  export PATH=/usr/sbin:"$PATH" # Add /usr/sbin to the path
+  export PATH=/sbin:"$PATH" # Add /sbin to the path
+  export PATH="$HOME"/.cargo/bin:"$PATH" # Add ~/.cargo/bin to the path
+  export PATH="$HOME"/.yarn/bin:"$PATH" # Add ~/.yarn/bin to the path
+  export PATH="$HOME"/go/bin:"$PATH" # Add ~/go/bin to the path
 
 # Set ARCHFLAGS
 ARCHFLAGS="-arch arm64"
 export ARCHFLAGS
 
-# GO
-# GOROOT="$(brew --prefix)/opt/go/libexec"
-# export GOROOT
+### Add 'PATH' entries.
+if [[ "$OSTYPE" == "darwin"* ]]; then
 
-# GOPATH=$HOME/.go
-# export GOPATH
+  ### Uniquify 'PATH' entries.
+  typeset -U PATH
 
-# GOBIN=$GOPATH/bin
-# export GOBIN
+  export PATH=/opt/homebrew/bin:"$PATH" # Homebrew binaries
+  export PATH=/opt/homebrew/sbin:"$PATH" # Homebrew binaries
 
-# PATH=$PATH:$GOPATH
-# export PATH
+  # Prevent Homebrew from reporting - https://github.com/Homebrew/brew/blob/master/share/doc/homebrew/Analytics.md
+  export HOMEBREW_NO_ANALYTICS=1
 
-# PATH=$PATH:$GOROOT/bin
-# export PATH
+  # set HOMEBREW_CASK_OPTS
+  HOMEBREW_CASK_OPTS="--appdir=/Applications"
+  export HOMEBREW_CASK_OPTS
 
-# export GO111MODULE=off
-
-# set openjdk
-# export PATH="$(brew --prefix)/opt/openjdk/bin:$PATH"
-# export PATH="$(brew --prefix)/opt/openssl@3/bin:$PATH"
-
-# export PATH="/Applications/Visual Studio Code.app/Contents/Resources/app/bin:$PATH"
-#export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
-
+fi
 
 # set HOSTNAME
 HOSTNAME=$(hostname -f)
@@ -67,9 +45,12 @@ INPUTRC=~/.inputrc
 export INPUTRC
 
 # Set JAVA_HOME
-# For zsh shell, export $JAVA_HOME at ~/.zshenv or ~/.zshrc.
-# JAVA_HOME="$(brew --prefix)/Cellar/openjdk/18.0.1/libexec"
-# export JAVA_HOME
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  JAVA_HOME="$(brew --prefix)/Cellar/openjdk/18.0.1/libexec"
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
+fi
+export JAVA_HOME
 
 # Set JRE_HOME
 export JRE_HOME="${JAVA_HOME}"/jre
@@ -84,34 +65,6 @@ then
   eval "$(jenv init -)"
 fi
 
-# set PERL
-# eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"
-
-# Set language flags
-# LANG=en_GB.UTF-8
-# export LANG
-
-# Set LIBCURL_CFLAGS
-# LIBCURL_CFLAGS=-L$(brew --prefix)/opt/curl/lib
-# export LIBCURL_CFLAGS
-
-# Set LIBCURL_LIBS
-# LIBCURL_LIBS=-I$(brew --prefix)/opt/curl/include
-# export LIBCURL_LIBS
-
-# Set MAVEN_OPTS
-# MAVEN_OPTS="-Xms512m -Xmx512m"
-# export MAVEN_OPTS
-
 # Set SSL_CERT_FILE
-SSL_CERT_FILE=~/cacert.pem
-export SSL_CERT_FILE
-
-# Set ZSH_CURRENT_USER
-# ZSH_CURRENT_USER=$(whoami)
-# export ZSH_CURRENT_USER
-
-# Set LDFLAGS
-# export LDFLAGS="-L$(brew --prefix)/opt/ruby/lib"
-# export CPPFLAGS="-I$(brew --prefix)/opt/ruby/include"
-# export PKG_CONFIG_PATH="$(brew --prefix)/opt/ruby/lib/pkgconfig"
+# SSL_CERT_FILE=~/cacert.pem
+# export SSL_CERT_FILE
