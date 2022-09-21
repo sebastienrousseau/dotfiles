@@ -8,7 +8,6 @@
 # Licensed under the MIT license
 #
 
-
 # rd: Function to remove a directory and its files
 rd() {
   if [[ "$#" != 1 ]]; then
@@ -19,12 +18,3 @@ rd() {
   rm -rf "$1" || exit;
   ls -lh;
 }
-
-
-# rd() {
-# 	if [[ "$#" != 1 ]]; then
-#     echo "[ERROR] Please add one argument" >&2
-#     return 1
-#   fi
-#   rm "$1"
-# }

@@ -1,14 +1,5 @@
-#
-#  ___                              _    ___                       _
-# | _ \__ _ _______ __ _____ _ _ __| |  / __|___ _ _  ___ _ _ __ _| |_ ___ _ _
-# |  _/ _` (_-<_-< V  V / _ \ '_/ _` | | (_ / -_) ' \/ -_) '_/ _` |  _/ _ \ '_|
-# |_| \__,_/__/__/\_/\_/\___/_| \__,_|  \___\___|_||_\___|_| \__,_|\__\___/_|
-#
-# Password Generator
-# https://password-generator.pro/
-#
-# Copyright (c) Sebastien Rousseau 2022. All rights reserved
-# Licensed under the MIT license
+#!/usr/bin/env sh
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 #
 # http://editorconfig.org
 #
@@ -27,15 +18,22 @@
 root = true
 
 [*]
-indent_style = space
-indent_size = 2
-end_of_line = lf
 charset = utf-8
-trim_trailing_whitespace = true
+end_of_line = lf
+indent_size = 2
+indent_style = space
 insert_final_newline = true
+trim_trailing_whitespace = true
 
 [*.md]
 trim_trailing_whitespace = false
+
+[{configure,configure.*,config.*,*.{sh,yml}}]
+indent_size = 2
+
+[{makefile.vc,nmake.opt}]
+end_of_line = crlf
+indent_style = tab
 
 [Makefile]
 indent_style = tab

@@ -1,3 +1,5 @@
+#!/usr/bin/env sh
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 #
 # Main entry file needs lf only line endings so that bash shell doesn't barf.
 #
@@ -7,4 +9,31 @@ src/bin/index.js text eol=lf
 #
 package.json text eol=lf
 package-lock.json text eol=lf
+
+# Declare files that will always have LF line endings on checkout.
+*.bash            text eol=lf
+*.m4              text eol=lf
+*.sh              text eol=lf
+*.sh              text eol=lf
+config.guess      text eol=lf
+config.sub        text eol=lf
+configure         text eol=lf
+configure.ac      text eol=lf
+cpl_config.h.in   text eol=lf
+gdal.pc.in        text eol=lf
+GNUmake.opt*      text eol=lf
+GNUmakefile       text eol=lf
+install-sh        text eol=lf
+VERSION           text eol=lf
+
+# Docs allow trailing whitespaces
+*.md whitespace=-blank-at-eol
+*.rst whitespace=-blank-at-eol
+
+# Declare files that will always have CRLF line endings on checkout.
+*.bat             text eol=crlf
+*.cmd             text eol=crlf
+*.ps1             text eol=crlf
+cpl_config.h.vc.* text eol=crlf
+makefile.vc       text eol=crlf
 
