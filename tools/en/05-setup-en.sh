@@ -15,8 +15,12 @@
 # shellcheck disable=SC3000
 # shellcheck disable=SC4000
 # shellcheck disable=SC1091
-./dotfiles-colors-en.sh
-./dotfiles-utilities-en.sh
+
+# shellcheck source=/dev/null
+. ./tools/"${lang}"/02-colors-en.sh
+
+# shellcheck source=/dev/null
+. ./tools/"${lang}"/04-utilities-en.sh
 
 # Create the setup function
 setup (){

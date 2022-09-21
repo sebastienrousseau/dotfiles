@@ -12,10 +12,15 @@
 # shellcheck disable=SC2034  # Unused variables left for readability
 
 appName=dotfiles
+export appName
 fileVersion=v0.2.450.zip
+export fileVersion
 backupDirectory=dotfiles_backup
+export backupDirectory
 directory=dotfiles
+export directory
 progName="$(basename "$0")"
+export progName
 
 # The location of the logs directory
 logsDirectory="$HOME/.$appName"
@@ -26,6 +31,6 @@ logFile="$logsDirectory/$appName-$(date +%F).log"
 # Make a temporary directory instead of a file.
 tempDir=$(mktemp -d)
 
-tools=tools
-version=$(git rev-parse --short head)
-webUrl="https://github.com/sebastienrousseau/dotfiles/archive/refs/tags"
+#tools=tools
+#version=$(git rev-parse --short head)
+#webUrl="https://github.com/sebastienrousseau/dotfiles/archive/refs/tags"

@@ -3,23 +3,18 @@
 
 set -e
 
-# Load configuration files
-# shellcheck disable=SC2154
-# shellcheck disable=SC3000
-# shellcheck disable=SC4000
-# shellcheck disable=SC1091
-# shellcheck disable=SC2009
-# shellcheck disable=SC2181
-
-# chmod u+r+x ./tools/en/*.sh
 # Load locales configuration files
-# "$(printf '%s' "$LANG" | cut -c 1,2)"
+lang="$(printf '%s' "$LANG" | cut -c 1,2)"
+export lang
 
 # shellcheck source=/dev/null
-. ./02-colors-en.sh
+. ./tools/"${lang}"/02-colors-en.sh
 
 # shellcheck source=/dev/null
-. ./03-variables-en.sh
+. ./tools/"${lang}"/03-variables-en.sh
+
+# shellcheck source=/dev/null
+. ./tools/"${lang}"/04-utilities-en.sh
 
 # helpMenuDotfiles: Present the Help Menu.
 helpMenuDotfiles() {
@@ -40,7 +35,7 @@ helpMenuDotfiles() {
   echo "${BGreen}[INFO]${Reset}  ${White}Please choose an option and press [ENTER]:${Reset}"
   read -r a
   case $a in
-  0) clear exit 0 ;;
+  0) exit 0 ;;
   1)
     backupDotfiles
     helpMenuDotfiles
@@ -103,12 +98,12 @@ downloadDotfiles() {
   #download the file
   echo "${Cyan}[INFO]${Reset}  ${White}$(date) | Downloading $(appName)${Reset}"
 
-  cd "$tempDir" || exit
+  cd "$(tempDir)" || exit
   curl -f -s --connect-timeout 30 --retry 5 --retry-delay 60 -L -J -O "$(webUrl)/$(fileVersion)"
   if [ $? = 0 ]; then
 
     # We have downloaded a file, we need to know what the file is called and what type of file it is
-    tempSearchPath="$tempDir/*"
+    tempSearchPath="$(tempDir)/*"
     for f in $tempSearchPath; do
       tempFile=$f
     done
@@ -125,15 +120,15 @@ downloadDotfiles() {
       metadata=$(file "$tempFile")
       if [ "$metadata" = 'Zip archive data' ]; then
         packageType="ZIP"
-        mv "$tempFile" "$tempDir/$(fileVersion)"
-        tempFile="$tempDir/$(fileVersion)"
+        mv "$tempFile" "$(tempDir)/$(fileVersion)"
+        tempFile="$(tempDir)/$(fileVersion)"
       fi
       ;;
     esac
 
     if [ ! $packageType ]; then
       echo "${Red}[ERROR]${Reset} ${White}Failed to determine temp file type $metadata${Reset}"
-      rm -rf "$tempDir"
+      rm -rf "$(tempDir)"
     else
       echo "${Cyan}[INFO]${Reset}  ${White}$(date) | Downloaded $(app) to $tempDir${Reset}"
       echo "${Cyan}[INFO]${Reset}  ${White}$(date) | Detected install type as $packageType${Reset}"
@@ -161,7 +156,7 @@ backupDotfiles() {
 # documentDotfiles: Start Documentation
 documentDotfiles() {
   cd -- "$(dirname "$0")" || exit
-  sh './tools/en/dotfiles-setup-en.sh'
+  sh './tools/"${lang}"/05-setup-en.sh'
 }
 
 # recoverDotfiles: Recovers a previous backup folder
@@ -184,7 +179,7 @@ startLog() {
     echo "${Yellow}[WARNING]${Reset} ${White}$(date) | The Dotfiles logs folder seems to already exists.${Reset}"
   fi
 
-  exec 1>>"$(logFile)"
+  exec 1>>"${logFile}"
 
 }
 
@@ -192,7 +187,8 @@ startLog() {
 # startLog
 
 echo ""
-echo "${Cyan}[INFO]${Reset} ${White}$(date) | Logging procedure has started of $(appName) to $(logFile)${Reset}"
+echo "${BRed}[INFO]${Reset} ${Red}$(date)${Reset}"
+echo "${BRed}[INFO]${Reset} ${Red}Logging procedure has started of ${appName} to '${logFile}${Reset}'"
 echo ""
 
 helpMenuDotfiles

@@ -2,14 +2,14 @@
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 
 # Regular Colors
-Black="\033[0;30m"        # Black
-Blue="\033[0;34m"         # Blue
-Cyan="\033[0;36m"         # Cyan
-Green="\033[0;32m"        # Green
-Purple="\033[0;35m"       # Purple
-Red="\033[0;31m"          # Red
-White="\033[0;37m"        # White
-Yellow="\033[0;33m"       # Yellow
+Black="\e[\033[0;30m"    # Black
+Blue="\e[\033[0;34m"     # Blue
+Cyan="\e[\033[0;36m"     # Cyan
+Green="\e[\033[0;32m"    # Green
+Purple="\e[\033[0;35m"   # Purple
+Red="\e[\033[0;31m"      # Red
+White="\e[\033[0;37m"    # White
+Yellow="\e[\033[0;33m"   # Yellow
 
 export Black
 export Blue
@@ -21,14 +21,14 @@ export White
 export Yellow
 
 # Bold
-BBlack="\033[1;30m"       # Black
-BBlue="\033[1;34m"        # Blue
-BCyan="\033[1;36m"        # Cyan
-BGreen="\033[1;32m"       # Green
-BPurple="\033[1;35m"      # Purple
-BRed="\033[1;31m"         # Red
-BWhite="\033[1;37m"       # White
-BYellow="\033[1;33m"      # Yellow
+BBlack="\e[\033[1;30m"   # Black
+BBlue="\e[\033[1;34m"    # Blue
+BCyan="\e[\033[1;36m"    # Cyan
+BGreen="\e[\033[1;32m"   # Green
+BPurple="\e[\033[1;35m"  # Purple
+BRed="\e[\033[1;31m"     # Red
+BWhite="\e[\033[1;37m"   # White
+BYellow="\e[\033[1;36m"  # Yellow
 
 export BBlack
 export BBlue
@@ -59,14 +59,14 @@ export UWhite
 export UYellow
 
 # Background
-BGBlack="\033[40m"       # Black
-BGBlue="\033[44m"        # Blue
-BGCyan="\033[46m"        # Cyan
-BGGreen="\033[42m"       # Green
-BGPurple="\033[45m"      # Purple
-BGRed="\033[41m"         # Red
-BGWhite="\033[47m"       # White
-BGYellow="\033[43m"      # Yellow
+BGBlack="\e[\033[0;40m"  # Black
+BGBlue="\e[\033[0;44m"   # Blue
+BGCyan="\e[\033[0;46m"   # Cyan
+BGGreen="\e[\033[0;42m"  # Green
+BGPurple="\e[\033[0;45m" # Purple
+BGRed="\e[\033[0;41m"    # Red
+BGWhite="\e[\033[0;47m"  # White
+BGYellow="\e[\033[0;43m" # Yellow
 
 export BGBlack
 export BGBlue
@@ -77,7 +77,7 @@ export BGRed
 export BGWhite
 export BGYellow
 
-# High Intensty
+# High Intensity
 IBlack="\033[0;90m"       # Black
 IBlue="\033[0;94m"        # Blue
 ICyan="\033[0;96m"        # Cyan
@@ -96,15 +96,15 @@ export IRed
 export IWhite
 export IYellow
 
-# Bold High Intensty
-BIBlack="\033[1;90m"      # Black
-BIBlue="\033[1;94m"       # Blue
-BICyan="\033[1;96m"       # Cyan
-BIGreen="\033[1;92m"      # Green
-BIPurple="\033[1;95m"     # Purple
-BIRed="\033[1;91m"        # Red
-BIWhite="\033[1;97m"      # White
-BIYellow="\033[1;93m"     # Yellow
+# Bold High Intensity
+BIBlack="\e[\033[0;90m"  # Black
+BIBlue="\e[\033[0;94m"   # Blue
+BICyan="\e[\033[0;96m"   # Cyan
+BIGreen="\e[\033[0;92m"  # Green
+BIPurple="\e[\033[0;95m" # Purple
+BIRed="\e[\033[0;91m"    # Red
+BIWhite="\e[\033[0;97m"  # White
+BIYellow="\e[\033[0;93m" # Yellow
 
 export BIBlack
 export BIBlue
@@ -115,15 +115,15 @@ export BIRed
 export BIWhite
 export BIYellow
 
-# High Intensty backgrounds
-BGIBlack="\033[0;100m"   # Black
-BGIBlue="\033[0;104m"    # Blue
-BGICyan="\033[0;106m"    # Cyan
-BGIGreen="\033[0;102m"   # Green
-BGIPurple="\033[10;95m"  # Purple
-BGIRed="\033[0;101m"     # Red
-BGIWhite="\033[0;107m"   # White
-BGIYellow="\033[0;103m"  # Yellow
+# High Intensity backgrounds
+BGIBlack="\e[\033[0;100m"   # Black
+BGIBlue="\e[\033[0;104m"    # Blue
+BGICyan="\e[\033[0;106m"    # Cyan
+BGIGreen="\e[\033[0;102m"   # Green
+BGIPurple="\e[\033[0;105m"  # Purple
+BGIRed="\e[\033[0;101m"     # Red
+BGIWhite="\e[\033[0;107m"   # White
+BGIYellow="\e[\033[0;103m"  # Yellow
 
 export BGIBlack
 export BGIBlue
