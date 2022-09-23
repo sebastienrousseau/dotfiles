@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env sh
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 
 ## 🆅🅰🆁🅸🅰🅱🅻🅴🆂
@@ -6,8 +6,8 @@ USER_LANGUAGE="en_GB.UTF-8" # Set the default language.
 USER=$(whoami) # Set USER variable.
 
 ## 🅴🆇🅿🅾🆁🆃🆂
-export DOTFILES_VERSION='0.2.450' # DotFiles v0.2.450.
-export DOTFILES="$HOME"/.dotfiles # Path to the dotfiles directory.
+export DOTFILES_VERSION='0.2.450' # DotFiles version.
+export DOTFILES="$HOME"/.dotfiles/shell # Path to the dotfiles directory.
 export LANG=${USER_LANGUAGE} # Set the default language.
 export LANGUAGE=${USER_LANGUAGE} # Set the default language.
 export LC_ALL=${USER_LANGUAGE} # Set the default language.

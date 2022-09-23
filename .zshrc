@@ -6,9 +6,8 @@ USER_LANGUAGE="en_GB.UTF-8" # Set the default language.
 USER=$(whoami) # Set USER variable.
 
 ## 🅴🆇🅿🅾🆁🆃🆂
-export DOTFILES=$DOTFILES/dots # Path to the bash directory.
-export DOTFILES_VERSION='0.2.450' # DotFiles v0.2.450.
-export DOTFILES=$HOME/.dotfiles # Path to the dotfiles directory.
+export DOTFILES_VERSION='0.2.450' # DotFiles version.
+export DOTFILES=$HOME/.dotfiles/shell # Path to the dotfiles directory.
 export LANG=${USER_LANGUAGE} # Set the default language.
 export LANGUAGE=${USER_LANGUAGE} # Set the default language.
 export LC_ALL=${USER_LANGUAGE} # Set the default language.
@@ -17,19 +16,19 @@ export USER # Set USER variable.
 
 ## 🆂🅾🆄🆁🅲🅴🆂
 # shellcheck source=/dev/null
-source "$DOTFILES"/aliases.bash # Load aliases.
+source "$DOTFILES"/aliases.sh # Load aliases.
 
 # shellcheck source=/dev/null
-source "$DOTFILES"/configurations.bash # Load configurations.
+source "$DOTFILES"/configurations.sh # Load configurations.
 
 # shellcheck source=/dev/null
-source "$DOTFILES"/exit.bash # Load exit.
+source "$DOTFILES"/exit.sh # Load exit.
 
 # shellcheck source=/dev/null
-source "$DOTFILES"/functions.bash # Load functions.
+source "$DOTFILES"/functions.sh # Load functions.
 
 # shellcheck source=/dev/null
-source "$DOTFILES"/history.bash # Load history.
+source "$DOTFILES"/history.sh # Load history.
 
 # shellcheck source=/dev/null
 source "$DOTFILES"/plugins/*/[^.#]*.sh # Load plugins.
