@@ -1,3 +1,4 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 sudo: false
 language: bash
 notifications:
@@ -8,7 +9,7 @@ after_success:
   - echo -n $GIT_TAG > v0.2.$TRAVIS_BUILD_NUMBER
   - git commit -m "Set build VERSION number to v0.2."$TRAVIS_BUILD_NUMBER --allow-empty
   - git tag $GIT_TAG -a -m "Generated tag from TravisCI build $TRAVIS_BUILD_NUMBER"
-  - git push --quiet https://$GITHUBKEY@github.com/reedia/dotfiles $GIT_TAG > /dev/null 2>&1  
+  - git push --quiet https://$GITHUBKEY@github.com/reedia/dotfiles $GIT_TAG > /dev/null 2>&1
 deploy:
   provider: releases
   skip-cleanup: true

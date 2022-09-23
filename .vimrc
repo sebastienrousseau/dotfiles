@@ -1,3 +1,5 @@
+" 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
+
 set autoindent                      " autoindent
 set autoread                        " auto-read
 set background=dark                 " background color (dark)
@@ -5,7 +7,7 @@ set backspace=indent,eol,start      " backspace behavior (indent, eol, start)
 set backupdir=~/.vim/backups        " backup directory (~/.vim/backups)
 set cc=80                           " column count (80)
 set clipboard=unnamedplus           " clipboard support (unnamedplus)
-set cmdheight=1                     " command line height (1)   
+set cmdheight=1                     " command line height (1)
 set confirm                         " confirm before exiting
 set cursorline                      " cursorline support
 set encoding=utf-8                  " encoding support (utf-8)
@@ -15,7 +17,7 @@ set foldnestmax=3                   " foldnestmax support (3)
 set gcr=a:blinkon0                  " disable blinking cursor (a:blinkon0)
 set hidden                          " hidden support
 set history=10000                   " history support (10000)
-set hlsearch                        " highlight search 
+set hlsearch                        " highlight search
 set ignorecase                      " ignorecase support
 set incsearch                       " incremental search
 set laststatus=2                    " laststatus support (2)
@@ -24,14 +26,14 @@ set linebreak                       " linebreak support
 set modelines=0                     " modelines support (0)
 set mouse=a                         " mouse support (all)
 set nobackup                        " nobackup support
-set nocompatible                    " nocompatible support  
+set nocompatible                    " nocompatible support
 set nocp                            " nocp support"
-set nofoldenable                    " nofoldenable support  
+set nofoldenable                    " nofoldenable support
 set nomodeline                      " nomodeline support
 set noswapfile                      " noswapfile support
 set nowb                            " nowb support"
 set nowrap                          " nowrap support
-set number                          " number support 
+set number                          " number support
 set ruler                           " ruler support"
 set scrolloff=3                     " scrolloff support (3)
 set shiftwidth=2                    " shiftwidth support (2)

@@ -2,7 +2,7 @@
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #
-# Desription: Setup procedures for DotFiles v0.2.449.
+# Desription: Setup procedures for DotFiles v0.2.450.
 #
 # Copyright (c) Sebastien Rousseau 2021. All rights reserved
 # Licensed under the MIT license
