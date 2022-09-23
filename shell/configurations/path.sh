@@ -65,6 +65,9 @@ then
   eval "$(jenv init -)"
 fi
 
+PNPM_HOME="$HOME"/Library/pnpm
+export PNPM_HOME
+
 # Set SSL_CERT_FILE
 # SSL_CERT_FILE=~/cacert.pem
 # export SSL_CERT_FILE
