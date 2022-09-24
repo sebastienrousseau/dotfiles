@@ -8,9 +8,7 @@
     ],
     "description": "Dotfiles - A set of Mac OS X configuration files - Simply designed to fit your shell life.",
     "devDependencies": {
-        "npm": "^8.19.2",
-        "pnpm": "^7.12.2",
-        "yarn": "^1.22.19"
+        "pnpm": "^7.12.2"
     },
     "keywords": [
         "dotfiles",
