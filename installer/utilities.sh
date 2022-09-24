@@ -17,23 +17,23 @@
 # shellcheck disable=SC1091
 
 # shellcheck source=/dev/null
-. ./tools/"${lang}"/02-colors-en.sh
+. ./installer/colors.sh
 
 # shellcheck source=/dev/null
-. ./tools/"${lang}"/03-variables-en.sh
+. ./installer/variables.sh
 
 pid () {
   eval "${1}=$(sh -c 'echo ${PPID}')"
 }
 
-error () {
-  _error_pid
-  _error_pid pid
-  echo "❌ [${Red}ERROR${Reset}:${Blue}${pid}${Reset}] ${Green}$(date +%F)${Reset}: ${Blue}${progName}${Reset}: ${Blue}${1}${Reset}: Exited with status ${code}.${Reset}"
-  logs
-  echo [ERROR:"${pid}"] "$(date +%F)": "${progName}": "${1}": Exited with status "${code}".
-  exit "${code}"
-}
+# error () {
+#   _error_pid
+#   _error_pid pid
+#   echo "❌ [${Red}ERROR${Reset}:${Blue}${pid}${Reset}] ${Green}$(date +%F)${Reset}: ${Blue}${progName}${Reset}: ${Blue}${1}${Reset}: Exited with status ${code}.${Reset}"
+#   logs
+#   echo [ERROR:"${pid}"] "$(date +%F)": "${progName}": "${1}": Exited with status "${code}".
+#   exit "${code}"
+# }
 
 logs () {
   script_log="errors-$(date +%F).log"

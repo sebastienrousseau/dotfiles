@@ -1,30 +1,23 @@
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
+#!/usr/bin/env make -f
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - Dotfiles Installer makefile.
 
 .DEFAULT_GOAL := help
 
-build-en: # @HELP Creates the english documentation.
+homedir := ./installer
+language := en
+
+.PHONY: installer
+installer: # @HELP Installation of the dotfiles packages.
+installer: ## Install dotfiles
+	@set -e; \
+	sh "$(homedir)/$(language)/configuration/menu.sh"
+
+
+build-en: # @HELP English language installer.
 build-en:
 	@echo
 	@echo "Building the english documentation"
-	sh './tools/en/dotfiles-setup-en.sh'
-
-build-theme-en: # @HELP Creates the english mkdocs theme.
-build-theme-en:
-	@echo
-	@echo "Building the english theme"
-	sh './tools/en/dotfiles-themes-en.sh'
-
-build-fr: # @HELP Creates the french documentation.
-build-fr:
-	@echo
-	@echo "Building the french documentation"
-	sh './tools/en/dotfiles-setup-fr.sh'
-
-build-theme-fr: # @HELP Creates the french mkdocs theme.
-build-theme-fr:
-	@echo
-	@echo "Building the french theme"
-	sh './tools/en/dotfiles-themes-fr.sh'
+	sh './installer/en/dotfiles-setup-en.sh'
 
 clean: # @HELP Removes any previous setup directories. (site, theme source and theme folders)
 clean: site-clean theme-source-clean theme-clean
