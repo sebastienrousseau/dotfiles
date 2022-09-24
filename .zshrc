@@ -28,7 +28,7 @@ export TERM=xterm-256color                # default terminal color.
 export USER                               # current user name.
 
 ## 🅻🅾🅰🅳🅴🆁🆂 - Load the dotfiles.
-for loaders in "$DOTFILES"/[!.#]*/*.sh; do
+for loaders in "$DOTFILES"/*.sh; do
   # shellcheck source=/dev/null
-  source "$loaders"
+  . "$loaders"
 done
