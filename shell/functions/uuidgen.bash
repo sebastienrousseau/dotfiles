@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 
 # uuid: Function to generate a UUID (Universally Unique IDentifier)
 uuidgen() {

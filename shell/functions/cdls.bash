@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 
 # cdls: Function cd & ls

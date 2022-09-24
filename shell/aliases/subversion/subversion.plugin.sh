@@ -1,6 +1,6 @@
-#! /bin/bash
+#!/usr/bin/env bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
-#! /bin/bash
+#!/usr/bin/env bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 # https://dotfiles.io
 #

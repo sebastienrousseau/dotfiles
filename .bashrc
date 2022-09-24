@@ -1,34 +1,34 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
 
-## 🆅🅰🆁🅸🅰🅱🅻🅴🆂
-USER_LANGUAGE="en_GB.UTF-8" # Set the default language.
-USER=$(whoami) # Set USER variable.
+## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set variables.
+HOSTNAME=$(hostname -f)                   # hostname of the machine.
+INPUTRC=$HOME/.inputrc                    # set INPUTRC (so that .inputrc is respected)
+OS_ARCH=$(uname -m)                       # machine hardware name.
+OS_NAME=$(uname)                          # operating system name.
+OS_VERSION=$(uname -r)                    # operating system version number.
+SSL_CERT_FILE=$HOME/cacert.pem            # set the SSL_CERT_FILE environment variable.
+USER_LANGUAGE="en_GB.UTF-8"               # default language.
+USER=$(whoami)                            # current user name.
 
-## 🅴🆇🅿🅾🆁🆃🆂
-export DOTFILES_VERSION='0.2.450' # DotFiles version.
-export DOTFILES="$HOME"/.dotfiles/shell # Path to the dotfiles directory.
-export LANG=${USER_LANGUAGE} # Set the default language.
-export LANGUAGE=${USER_LANGUAGE} # Set the default language.
-export LC_ALL=${USER_LANGUAGE} # Set the default language.
-export TERM=xterm-256color # Use 256 color terminal.
-export USER # Set USER variable.
+## 🅴🆇🅿🅾🆁🆃🆂 - Export the variables.
+export ARCHFLAGS="-arch ${OS_ARCH}"       # archflags for the current machine.
+export DOTFILES_VERSION='0.2.450'         # version of the dotfiles.
+export DOTFILES="$HOME"/.dotfiles/shell   # path to the cross plaform dotfiles.
+export HOSTNAME=${HOSTNAME}               # hostname of the machine.
+export INPUTRC=${INPUTRC}                 # set INPUTRC (so that .inputrc is respected)
+export LANG=${USER_LANGUAGE}              # default language.
+export LANGUAGE=${USER_LANGUAGE}          # default language.
+export LC_ALL=${USER_LANGUAGE}            # default language.
+export OS_ARCH                            # machine hardware name.
+export OS_NAME                            # operating system name.
+export OS_VERSION                         # operating system version number.
+export SSL_CERT_FILE=${SSL_CERT_FILE}     # set the SSL_CERT_FILE environment variable.
+export TERM=xterm-256color                # default terminal color.
+export USER                               # current user name.
 
-## 🆂🅾🆄🆁🅲🅴🆂
-# shellcheck source=/dev/null
-. "$DOTFILES"/aliases.sh # Load aliases.
-
-# shellcheck source=/dev/null
-. "$DOTFILES"/configurations.sh # Load configurations.
-
-# shellcheck source=/dev/null
-. "$DOTFILES"/exit.sh # Load exit.
-
-# shellcheck source=/dev/null
-. "$DOTFILES"/functions.sh # Load functions.
-
-# shellcheck source=/dev/null
-. "$DOTFILES"/history.sh # Load history.
-
-# shellcheck source=/dev/null
-. "$DOTFILES"/plugins/*/[!.#]*.sh # Load plugins.
+## 🅻🅾🅰🅳🅴🆁🆂 - Load the dotfiles.
+for loaders in "$DOTFILES"/[!.#]*/*.sh; do
+  # shellcheck source=/dev/null
+  source "$loaders"
+done

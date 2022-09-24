@@ -1,4 +1,4 @@
-# ⚫ Dotfiles
+# Dotfiles
 
 ![Banner representing the Dotfiles Library](/media/dotfiles.svg)
 
@@ -10,42 +10,50 @@
 
 ## Table of contents
 
-- [About Dotfiles](#about-dotfiles)
-  - [Getting Started](#getting-started)
-  - [Installation](#installation)
-    - [Install from CDN](#install-from-cdn)
-    - [Install from GitHub](#install-from-github)
-    - [Install from NPM](#install-from-npm)
-    - [Install the npm command line interface](#install-the-npm-command-line-interface)
-      - [Check installation](#check-installation)
-    - [Install Dotfiles via Yarn](#install-dotfiles-via-yarn)
-- [In this repository](#in-this-repository)
-  - [Git dotfiles](#git-dotfiles)
-  - [Bash Shell dotfiles](#bash-shell-dotfiles)
-  - [Z Shell dotfiles](#z-shell-dotfiles)
-  - [Homebrew dotfiles](#homebrew-dotfiles)
-- [Requirements](#requirements)
-- [Contributing](#contributing)
-- [Code of Conduct](#code-of-conduct)
-- [Our Values](#our-values)
-- [History](#history)
-- [Acknowledgements](#acknowledgements)
-- [License](#license)
+- [Dotfiles](#dotfiles)
+  - [Table of contents](#table-of-contents)
+  - [About Dotfiles](#about-dotfiles)
+    - [Getting Started](#getting-started)
+    - [Installation](#installation)
+      - [Install from CDN](#install-from-cdn)
+      - [Install from GitHub](#install-from-github)
+      - [Install from NPM](#install-from-npm)
+      - [Install the npm command line interface](#install-the-npm-command-line-interface)
+        - [Check installation](#check-installation)
+      - [Install Dotfiles via Yarn](#install-dotfiles-via-yarn)
+  - [In this repository](#in-this-repository)
+    - [Git dotfiles](#git-dotfiles)
+    - [Bash Shell dotfiles](#bash-shell-dotfiles)
+    - [Z Shell dotfiles](#z-shell-dotfiles)
+    - [Homebrew dotfiles](#homebrew-dotfiles)
+  - [Requirements](#requirements)
+  - [Contributing](#contributing)
+  - [Code of Conduct](#code-of-conduct)
+  - [Our Values](#our-values)
+  - [History](#history)
+  - [Acknowledgements](#acknowledgements)
+  - [License](#license)
 
 ## About Dotfiles
 
-*Simply designed to fit your shell life.*
+The Dotfiles resources aggregate a collection of standalone 'dotfiles' to help you customize your configurations across different computers and operating systems into one cohesive and consistent approach.
 
-The Dotfiles resources aggregate a collection of standalone 'dotfiles' to help you customize your system and related services into one cohesive and consistent approach.
+The Dotfiles aim to be cross-platform and are designed to work on macOS, Linux, and Windows.
+
+The Dotfiles are optimized for performance and productivity.
 
 ### Getting Started
 
 This repository contains the source code for multiple macOS Dotfiles and Shells:
 
+- [Curl dotfiles](#curl-dotfiles)
 - [Git dotfiles](#git-dotfiles)
-- [Bash Shell dotfiles](#bash-shell-dotfiles)
-- [Z Shell dotfiles](#z-shell-dotfiles)
 - [Homebrew dotfiles](#homebrew-dotfiles)
+- [JSHint dotfiles](#jshint-dotfiles)
+- [Shell dotfiles](#shell-dotfiles)
+- [Tmux dotfiles](#tmux-dotfiles)
+- [Vim dotfiles](#vim-dotfiles)
+- [Wget dotfiles](#wget-dotfiles)
 
 ### Installation
 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - Homebrew installer
 
 # Check for Homebrew presence

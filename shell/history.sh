@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - History options
 #
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved

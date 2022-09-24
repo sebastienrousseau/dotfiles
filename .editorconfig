@@ -27,8 +27,9 @@ trim_trailing_whitespace = true
 [*.md]
 trim_trailing_whitespace = false
 
-[{configure,configure.*,config.*,*.{sh,yml}}]
+[{configure,configure.*,config.*,*.{sh,yml,yaml}}]
 indent_size = 2
+indent_style = spaces
 
 [{makefile.vc,nmake.opt}]
 end_of_line = crlf
@@ -36,3 +37,7 @@ indent_style = tab
 
 [Makefile]
 indent_style = tab
+
+[*.json]
+indent_style = tab
+

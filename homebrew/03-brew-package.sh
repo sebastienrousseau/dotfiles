@@ -14,6 +14,7 @@ if test "$(which brew)"; then
   brew install autoconf                     # Automatically configure source code on many Un*x platforms
   brew install automake                     # Tool for generating GNU Standards-compliant Makefiles
   brew install awk                          # Pattern scanning and processing language
+  brew install bash                         # GNU Bourne-Again SHell
   brew install bdw-gc                       # Garbage collector for C and C++
   brew install berkeley-db                  # Berkeley Database
   brew install brotli                       # Generic-purpose lossless compression algorithm
