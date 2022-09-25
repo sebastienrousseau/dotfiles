@@ -1,7 +1,7 @@
 
 # Dotfiles aliases
 
-![Banner representing the Dotfiles Library](/media/dotfiles.svg)
+![Banner representing the Dotfiles Library](/assets/dotfiles.svg)
 
 This aliases.zsh file creates helpful shortcut aliases for many commonly used commands.
 
@@ -286,7 +286,7 @@ $ find . -type f 2>/dev/null
 ```
 
 | Alias | Command                     | Description                                                 |
-|-------|-----------------------------|-------------------------------------------------------------| 
+|-------|-----------------------------|-------------------------------------------------------------|
 | H     | `\| head`                   | Pipes output to head which outputs the first part of a file |
 | T     | `\| tail`                   | Pipes output to tail which outputs the last part of a file  |
 | G     | `\| grep`                   | Pipes output to grep to search for some word                |

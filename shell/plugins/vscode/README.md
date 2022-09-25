@@ -1,6 +1,6 @@
 # Dotfiles aliases
 
-![Banner representing the Dotfiles Library](/media/dotfiles.svg)
+![Banner representing the Dotfiles Library](/assets/dotfiles.svg)
 
 This `vscode.plugin.zsh` file creates helpful shortcut aliases for many commonly
 used [Visual Studio](https://visualstudio.microsoft.com) commands.

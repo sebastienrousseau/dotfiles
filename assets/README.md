@@ -1,6 +1,6 @@
 # Dotfiles assets
 
-![Banner representing the Dotfiles Library](/media/dotfiles.svg)
+![Banner representing the Dotfiles Library](/assets/dotfiles.svg)
 
 This directory contains the following files and directories that are used by the dotfiles:
 

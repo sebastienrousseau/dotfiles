@@ -1,6 +1,6 @@
 # Dotfiles aliases
 
-![Banner representing the Dotfiles Library](/media/dotfiles.svg)
+![Banner representing the Dotfiles Library](/assets/dotfiles.svg)
 
 The `gcloud.plugin.zsh` file creates helpful shortcut aliases for many commonly
 [Google Cloud](https://cloud.google.com/) commands.

@@ -1,12 +1,12 @@
 # Dotfiles
 
-![Banner representing the Dotfiles Library](/media/dotfiles.svg)
+![Banner representing the Dotfiles Library](/assets/dotfiles.svg)
 
 ![Codacy grade](https://img.shields.io/codacy/grade/634cfc4de08e492ebcbb341631066241?style=for-the-badge)
 [![Contributors][contributors-shield]](https://github.com/sebastienrousseau/dotfiles/graphs/contributors)
 [![Forks][forks-shield]](https://github.com/sebastienrousseau/dotfiles/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge\&color=ff69b4)](https://opensource.org/licenses/MIT)
-![Made with Love](/media/made-with-love.svg)
+![Made with Love](/assets/made-with-love.svg)
 
 ## Table of contents
 
