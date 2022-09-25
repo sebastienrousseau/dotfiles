@@ -3,12 +3,13 @@
 
 # 🅼🅰🅲🅾🆂 🅿🅻🆄🅶🅸🅽🅶 🅰🅻🅸🅰🆂🅴🆂
 
-alias cleanupDS='find . -type f -name ''*.DS_Store'' -ls -delete' # cleanupDS: Recursively delete .DS_Store files.
+alias cleanupDS='find . -type f -name "*.DS_Store" -ls -delete' # cleanupDS: Recursively delete .DS_Store files.
 alias cleanupLS='/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user && killall Finder' # cleanupLS:  Clean up LaunchServices to remove duplicates in the 'Open With' menu.
 alias emptytrash='rm -rf ~/.Trash/*' # Empty the Trash on all mounted volumes and the main HDD.
 alias finderHideHidden='defaults write com.apple.finder ShowAllFiles FALSE' # finderHideHidden: Hide hidden files in Finder.
 alias finderShowHidden='defaults write com.apple.finder ShowAllFiles TRUE' # finderShowHidden: Show hidden files in Finder.
 alias iphone='open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app' # iphone: Open the device simulators.
+alias noDS='defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true'
 alias ofd='open $PWD' # Open the current directory in a Finder window.
 alias purge='rm -rf ~/library/Developer/Xcode/DerivedData/*' # purge: Purging Xcode DerivedData.
 alias screensaverDesktop='/System/Library/Frameworks/ScreenSaver.framework/Resources/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine -background' # screensaverDesktop: Run a screensaver on the Desktop.
