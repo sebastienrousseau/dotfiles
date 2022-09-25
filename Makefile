@@ -20,7 +20,7 @@ install: ## Install the dotfiles on your system.
 
 .PHONY: clean
 clean: # @HELP Removes any previous setup directories. (site, theme source and theme folders)
-clean: site-clean theme-source-clean theme-clean
+clean: pnpm run clean
 
 .PHONY: help
 help: # @HELP Display the help menu.
