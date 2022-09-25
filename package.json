@@ -28,6 +28,21 @@
     },
     "repository": "https://github.com/sebastienrousseau/dotfiles.git",
     "scripts": {
+        "backups": "pnpm run bkp:dir && pnpm run bkp:zsh",
+        "bkmacos": "pnpm run bkp:dir && pnpm run bkp:zsh",
+        "bkp:bsh": "mv -f $HOME/.bashrc $HOME/.dotfiles_backup/bashrc.bkp",
+        "bkp:dir": "mv -f $HOME/.dotfiles $HOME/.dotfiles_backup",
+        "bkp:zsh": "mv -f $HOME/.zshrc $HOME/.dotfiles_backup/zshrc.bkp",
+        "bld:cpb": "cp ./shell/bash/bashrc $HOME/.bashrc",
+        "bld:cpd": "cp -R ./shell $HOME/.dotfiles/shell ",
+        "bld:cpp": "cp ./shell/plugins/profile/profile $HOME/.profile",
+        "bld:cpt": "cp ./shell/plugins/tmux/tmux $HOME/.tmux.conf",
+        "bld:cpv": "cp ./shell/plugins/vim/vimrc $HOME/.vimrc",
+        "bld:cpw": "cp ./shell/plugins/wget/wgetrc $HOME/.wgetrc",
+        "bld:cpz": "cp ./shell/plugins/zsh/zshrc $HOME/.zshrc",
+        "build": "pnpm run backups && pnpm run directory && pnpm run copy",
+        "copy": "pnpm run bld:cpd && pnpm run bld:cpp && pnpm run bld:cpt && pnpm run bld:cpv && pnpm run bld:cpw && pnpm run bld:cpz",
+        "directory": "mkdir $HOME/.dotfiles",
         "test": "echo \"No test specified\""
     },
     "version": "0.2.450"
