@@ -10,62 +10,61 @@
 
 ## Table of contents
 
-- [Dotfiles](#dotfiles)
-  - [Table of contents](#table-of-contents)
-  - [About Dotfiles](#about-dotfiles)
-    - [Getting Started](#getting-started)
-    - [Installation](#installation)
-      - [Install from CDN](#install-from-cdn)
-      - [Install from GitHub](#install-from-github)
-      - [Install from NPM](#install-from-npm)
-      - [Install the npm command line interface](#install-the-npm-command-line-interface)
-        - [Check installation](#check-installation)
-      - [Install Dotfiles via Yarn](#install-dotfiles-via-yarn)
-  - [In this repository](#in-this-repository)
-    - [Git dotfiles](#git-dotfiles)
-    - [Bash Shell dotfiles](#bash-shell-dotfiles)
-    - [Z Shell dotfiles](#z-shell-dotfiles)
-    - [Homebrew dotfiles](#homebrew-dotfiles)
-  - [Requirements](#requirements)
-  - [Contributing](#contributing)
-  - [Code of Conduct](#code-of-conduct)
-  - [Our Values](#our-values)
-  - [History](#history)
-  - [Acknowledgements](#acknowledgements)
-  - [License](#license)
+- [About Dotfiles](#about-dotfiles)
+  - [Getting Started](#getting-started)
+  - [Installation](#installation)
+    - [Installation Methods](#installation-methods)
+      - [Installing from a Content Delivery Network (CDN)](#installing-from-a-content-delivery-network-cdn)
+      - [Installing from GitHub](#installing-from-github)
+    - [Install from NPM](#install-from-npm)
+    - [Install the npm command line interface](#install-the-npm-command-line-interface)
+      - [Check installation](#check-installation)
+    - [Install Dotfiles via Yarn](#install-dotfiles-via-yarn)
+- [In this repository](#in-this-repository)
+  - [Git dotfiles](#git-dotfiles)
+  - [Bash Shell dotfiles](#bash-shell-dotfiles)
+  - [Z Shell dotfiles](#z-shell-dotfiles)
+  - [Homebrew dotfiles](#homebrew-dotfiles)
+- [Requirements](#requirements)
+- [Contributing](#contributing)
+- [Code of Conduct](#code-of-conduct)
+- [Our Values](#our-values)
+- [History](#history)
+- [Acknowledgements](#acknowledgements)
+- [License](#license)
 
 ## About Dotfiles
 
-The Dotfiles resources aggregate a collection of standalone 'dotfiles' to help you customize your configurations across different computers and operating systems into one cohesive and consistent approach.
-
-The Dotfiles aim to be cross-platform and are designed to work on macOS, Linux, and Windows.
-
-The Dotfiles are optimized for performance and productivity.
+Dotfiles aggregates a collection of standalone configuration files (dotfiles) that can be used to customize your development environment across
+numerous computers and operating systems into one cohesive and consistent approach.
 
 ### Getting Started
 
-This repository contains the source code for multiple macOS Dotfiles and Shells:
+This repository contains the source code for multiple dotfiles and shell/terminal configurations.
 
-- [Curl dotfiles](#curl-dotfiles)
-- [Git dotfiles](#git-dotfiles)
-- [Homebrew dotfiles](#homebrew-dotfiles)
-- [JSHint dotfiles](#jshint-dotfiles)
+These configurations consist of the following files:
+
+- [Curl dotfiles](#curl-dotfiles) - The curl configuration file.
+- [Git dotfiles](#git-dotfiles) - The git configuration file.
+- [Homebrew dotfiles](#homebrew-dotfiles) - The Homebrew configuration file.
+- [JSHint dotfiles](#jshint-dotfiles) - The JSHint configuration file.
 - [Shell dotfiles](#shell-dotfiles)
-- [Tmux dotfiles](#tmux-dotfiles)
-- [Vim dotfiles](#vim-dotfiles)
-- [Wget dotfiles](#wget-dotfiles)
+- [TMUX dotfiles](#tmux-dotfiles) - The TMUX configuration file.
+- [Vim dotfiles](#vim-dotfiles) - The vim configuration file.
+- [Wget dotfiles](#wget-dotfiles) - The wget configuration file.
 
 ### Installation
 
-A few options are available:
+A few different installation methods are available:
 
-#### Install from CDN
+#### Installation Methods
 
-A pre-bundled package that contains all dotfiles and components needed to use is available on CDN.
+##### 1. Installing from a Content Delivery Network (CDN)
 
-The following table lists alternate CDN locations where Dotfiles is hosted.
+The most widely used installation method is from a Content Delivery Network (CDN). This method is the easiest and fastest way to install Dotfiles and the recommended method for most users.
 
-#### Install from GitHub
+
+##### 2. Installing from GitHub
 
 Clone the main repository to get all source files including build scripts:
 
@@ -75,16 +74,18 @@ https://github.com/sebastienrousseau/dotfiles.git
 
 [Download Dotfiles](https://github.com/sebastienrousseau/dotfiles/releases/latest)
 
-#### Install from NPM
+##### 3. Install from NPM
 
 To use Dotfiles, you will need the npm JavaScript package manager.
 
-#### Install the npm command line interface
+##### 4. Install the npm command line interface
+
 npm is distributed with Node.js which means that when you download Node.js, you automatically get npm installed on your computer.
 
 To install Node.js and the npm command line interface using either a Node version manager or a Node installer.
 
 ##### Check installation
+
 To check if you have Node.js installed, run this command in your terminal:
 
 ```bash
@@ -98,6 +99,7 @@ npm --version
 ```
 
 #### Install Dotfiles via Yarn
+
 To install Dotfiles, you can use the npm JavaScript package manager as follows:
 
 ```bash
@@ -108,24 +110,26 @@ npm i @sebastienrousseau/dotfiles
 
 Within the release you'll find the following files and folders:
 
+### Directory Structure
+
 ```bash
 
-[ 704]  ./
-├── [ 160]  assets/
-│   ├── [ 583]  README.md
-│   ├── [ 41K]  dotfiles.svg
-│   └── [1.4K]  made-with-love.svg
-├── [  96]  bin/
-│   └── [1.1K]  dotfiles.sh
-├── [ 320]  installer/
-│   ├── [ 224]  en/
-│   │   ├── [ 192]  configuration/
-│   │   │   ├── [1.9K]  deploy.sh*
-│   │   │   ├── [1.7K]  menu.sh
-│   │   │   ├── [ 635]  setup.sh*
-│   │   │   └── [1.6K]  symlinks-en.sh*
-│   │   ├── [ 256]  git/
-│   │   │   ├── [  96]  config/
+./
+├── assets/ # Contains the assets for the README.md file.
+│   ├── README.md # The README.md file.
+│   ├── dotfiles.svg # The Dotfiles logo.
+│   └── made-with-love.svg # The made with love icon.
+├── bin/ # The bin directory contains executable files.
+│   └── dotfiles.sh # The dotfiles executable file.
+├── installer/ # The installer directory contains the installation scripts.
+│   ├── en/ # The en directory contains the English installation scripts.
+│   │   ├── configuration/ # The configuration directory contains the configuration scripts.
+│   │   │   ├── deploy.sh* # The deploy script.
+│   │   │   ├── menu.sh # The menu script.
+│   │   │   ├── setup.sh* # The setup script.
+│   │   │   └── symlinks-en.sh* # The symlinks script.
+│   │   ├── git/ # The git directory contains the git scripts.
+│   │   │   ├── config/ # The config directory contains the git configuration scripts.
 │   │   │   │   └── [  96]  git/
 │   │   │   │       └── [  96]  template/
 │   │   │   │           └── [  20]  HEAD
@@ -319,13 +323,13 @@ We are committed to preserving and fostering a diverse, welcoming community. Ple
 
 ## Our Values
 
-1.  We believe perfection must consider everything.
-2.  We take our passion beyond Code into our daily practices.
-3.  We are just obsessed about creating and delivering exceptional solutions.
+1. We believe perfection must consider everything.
+2. We take our passion beyond Code into our daily practices.
+3. We are just obsessed about creating and delivering exceptional solutions.
 
 ## History
 
--   See [Dotfiles Release](https://github.com/sebastienrousseau/dotfiles/releases) list.
+- See [Dotfiles Release](https://github.com/sebastienrousseau/dotfiles/releases) list.
 
 ## Acknowledgements
 
@@ -340,10 +344,3 @@ We are committed to preserving and fostering a diverse, welcoming community. Ple
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/sebastienrousseau/dotfiles/blob/master/LICENSE) file for details
 
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Freedia%2Fdotfiles.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Freedia%2Fdotfiles?ref=badge_large)
-
-[contributors-shield]: https://img.shields.io/github/contributors/sebastienrousseau/dotfiles.svg?style=for-the-badge
-[contributors-url]: https://github.com/sebastienrousseau/dotfiles/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/sebastienrousseau/dotfiles.svg?style=for-the-badge
-[forks-url]: https://github.com/sebastienrousseau/dotfiles/network/members
-
-
