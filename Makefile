@@ -6,37 +6,23 @@
 homedir := ./installer
 language := en
 
-.PHONY: installer
-installer: # @HELP Installation of the dotfiles packages.
-installer: ## Install dotfiles
+.PHONY: backup
+backup: # @HELP Backup your current dotfiles.
+backup: ## Backup your current dotfiles.
 	@set -e; \
-	sh "$(homedir)/$(language)/configuration/menu.sh"
+	pnpm run backup
 
+.PHONY: install
+install: # @HELP Install the dotfiles on your system.
+install: ## Install the dotfiles on your system.
+	@set -e; \
+	pnpm run build
 
-build-en: # @HELP English language installer.
-build-en:
-	@echo
-	@echo "Building the english documentation"
-	sh './installer/en/dotfiles-setup-en.sh'
-
+.PHONY: clean
 clean: # @HELP Removes any previous setup directories. (site, theme source and theme folders)
 clean: site-clean theme-source-clean theme-clean
 
-site-clean:
-	rm -fr site
-
-theme-source-clean:
-	rm -fr mkdocs-material
-
-theme-clean:
-	rm -fr material
-
-serve: # @HELP Starts the web server.
-serve:
-	@echo
-	@echo "Starting web server"
-	serve -p 8000 site/
-
+.PHONY: help
 help: # @HELP Display the help menu.
 help:
 	@grep -E '^.*: *# *@HELP' $(MAKEFILE_LIST)    \

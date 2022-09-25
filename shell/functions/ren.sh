@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - Function to rename files extension.
+#
 # https://dotfiles.io
 #
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
@@ -8,12 +9,9 @@
 # Licensed under the MIT license
 #
 
-
-# goto: Function to change to the directory inputed
-goto() {
-  if [ -e "$1" ]; then
-	  cd "$1" || exit; l
-  else
-	  echo "[ERROR] Please add a directory name" >&2
-  fi
+# ren: Function to rename files extension.
+ren() {
+  for f in *."$1"; do
+    mv "$f" "${f%."$1"}.$2"
+  done
 }

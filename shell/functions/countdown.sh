@@ -1,16 +1,7 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
-# https://dotfiles.io
-#
-# Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
-#
-# Copyright (c) Sebastien Rousseau 2022. All rights reserved
-# Licensed under the MIT license
-#
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - Function for countdown.
 
 # countdown: Function for countdown
-# Countdown in seconds
-
 countdown() {
 
   if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
@@ -33,3 +24,6 @@ countdown() {
   echo -ne "\033[2k\r"
   echo "Countdown finished on $(date)"
 }
+
+alias cntd='countdown' # Alias for countdown
+alias ctd='countdown' # Alias for countdown
