@@ -36,7 +36,7 @@ freespace(){
 
 mp() {
   # Don't let Preview.app steal focus if the man page doesn't exist
-  man -w "$@" > /dev/null 2>&1 && man -t "$@" | open -f -a Preview || man "$@"
+  man -w "$@" > /dev/null 2>&1 || man -t "$@" | open -f -a Preview || man "$@"
 }
 
 ql() {
