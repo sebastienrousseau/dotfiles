@@ -63,7 +63,6 @@ A few different installation methods are available:
 
 The most widely used installation method is from a Content Delivery Network (CDN). This method is the easiest and fastest way to install Dotfiles and the recommended method for most users.
 
-
 ##### 2. Installing from GitHub
 
 Clone the main repository to get all source files including build scripts:
