@@ -28,18 +28,18 @@
     },
     "repository": "https://github.com/sebastienrousseau/dotfiles.git",
     "scripts": {
-				"backup": "pnpm run bk:dir && pnpm run bk:bsh && pnpm run bk:zsh",
+        "backup": "pnpm run bk:dir && pnpm run bk:bsh && pnpm run bk:zsh",
         "bk:bsh": "if [ -z $HOME/.bashrc ]; then mv -f $HOME/.bashrc $HOME/.dotfiles_backup/bashrc.bk; fi ",
         "bk:dir": "if [ -d $HOME/.dotfiles ]; then mv -f $HOME/.dotfiles $HOME/dotfiles_backup; fi ",
         "bk:zsh": "if [ -z $HOME/.zshrc ]; then mv -f $HOME/.zshrc $HOME/.dotfiles_backup/zshrc.bk; fi ",
         "build": "pnpm run backup && pnpm run directory && pnpm run copy",
-				"clean": "rm -viR $HOME/.dotfiles/",
+        "clean": "rm -viR $HOME/.dotfiles/",
         "copy": "pnpm run cp:dirs && pnpm run cp:bash && pnpm run cp:prof && pnpm run cp:tmux && pnpm run cp:curl && pnpm run cp:cert && pnpm run cp:vimr && pnpm run cp:wget && pnpm run cp:zshr",
-				"cp:bash": "cp ./shell/bash/bashrc $HOME/.bashrc",
-				"cp:curl": "cp ./shell/plugins/curl/curlrc $HOME/.curlrc",
+        "cp:bash": "cp ./shell/bash/bashrc $HOME/.bashrc",
+        "cp:curl": "cp ./shell/plugins/curl/curlrc $HOME/.curlrc",
         "cp:cert": "cp ./shell/plugins/curl/cacert.pem $HOME/cacert.pem",
         "cp:dirs": "cp -R ./shell $HOME/.dotfiles/shell ",
-				"cp:jsht": "cp ./shell/plugins/jshint/jshintrc $HOME/.jshintrc",
+        "cp:jsht": "cp ./shell/plugins/jshint/jshintrc $HOME/.jshintrc",
         "cp:prof": "cp ./shell/plugins/profile/profile $HOME/.profile",
         "cp:tmux": "cp ./shell/plugins/tmux/tmux $HOME/.tmux.conf",
         "cp:vimr": "cp ./shell/plugins/vim/vimrc $HOME/.vimrc",
@@ -48,5 +48,8 @@
         "directory": "mkdir $HOME/.dotfiles",
         "test": "echo \"No test specified\""
     },
-    "version": "0.2.450"
+    "version": "0.2.450",
+    "dependencies": {
+        "user": "^0.0.0"
+    }
 }
