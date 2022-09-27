@@ -30,11 +30,26 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm build
-      - if: ${{ github.event_name == 'push' && github.event.ref == 'refs/heads/main' }}
-        name: Configure npm token
-        run: pnpm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-      - name: Publish Dry Run
-        run: pnpm -r publish --no-git-checks --dry-run
-      - if: ${{ github.event_name == 'push' && github.event.ref == 'refs/heads/main' }}
-        name: Publish if needed
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: pnpm/action-setup@v2.2.2
+        with:
+          node-version: 16
+          registry-url: "https://registry.npmjs.org"
+          scope: sebastienrousseau
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+      - name: Set package registry
+        run: pnpm config set registry https://npm.pkg.github.com
+      - name: Github package registry authentication
+        run: pnpm set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
+      - name: pnpm registry authentication
+        run: pnpm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+      - name: Publish the package to Github and Npm package registries
         run: pnpm -r publish --access public
