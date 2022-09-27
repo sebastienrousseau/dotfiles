@@ -282,28 +282,6 @@ Within the release you'll find the following files and folders:
 
 ```
 
-### Git dotfiles
-
-```bash
-git
-├── config
-│   └── git
-│       └── template
-│           └── HEAD
-├── gitattributes
-├── gitconfig
-├── gitignore
-└── gitmessage
-
-3 directories, 5 files
-```
-
-### Bash Shell dotfiles
-
-### Z Shell dotfiles
-
-### Homebrew dotfiles
-
 ## Requirements
 
 Set zsh as your login shell:
