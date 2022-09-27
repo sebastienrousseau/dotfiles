@@ -33,7 +33,7 @@ case ${HIST_STAMPS-} in
 "dd.mm.yyyy") alias history='dotfiles_history -E' ;;
 "yyyy-mm-dd") alias history='dotfiles_history -i' ;;
 "") alias history='dotfiles_history' ;;
-*) alias history="dotfiles_history -t '$HIST_STAMPS'" ;;
+*) alias history='dotfiles_history -t $HIST_STAMPS' ;;
 esac
 
 # Command history configuration
