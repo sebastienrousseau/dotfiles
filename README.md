@@ -10,28 +10,27 @@
 
 ## Table of contents
 
-- [About Dotfiles](#about-dotfiles)
-  - [Getting Started](#getting-started)
-  - [Installation](#installation)
-    - [Installation Methods](#installation-methods)
-      - [Installing from a Content Delivery Network (CDN)](#installing-from-a-content-delivery-network-cdn)
-      - [Installing from GitHub](#installing-from-github)
-    - [Install from NPM](#install-from-npm)
-    - [Install the npm command line interface](#install-the-npm-command-line-interface)
-      - [Check installation](#check-installation)
-    - [Install Dotfiles via Yarn](#install-dotfiles-via-yarn)
-- [In this repository](#in-this-repository)
-  - [Git dotfiles](#git-dotfiles)
-  - [Bash Shell dotfiles](#bash-shell-dotfiles)
-  - [Z Shell dotfiles](#z-shell-dotfiles)
-  - [Homebrew dotfiles](#homebrew-dotfiles)
-- [Requirements](#requirements)
-- [Contributing](#contributing)
-- [Code of Conduct](#code-of-conduct)
-- [Our Values](#our-values)
-- [History](#history)
-- [Acknowledgements](#acknowledgements)
-- [License](#license)
+- [Dotfiles](#dotfiles)
+  - [Table of contents](#table-of-contents)
+  - [About Dotfiles](#about-dotfiles)
+    - [Getting Started](#getting-started)
+    - [Installation](#installation)
+      - [Installation Methods](#installation-methods)
+        - [1. Installing from a Content Delivery Network (CDN)](#1-installing-from-a-content-delivery-network-cdn)
+        - [2. Installing from GitHub](#2-installing-from-github)
+        - [3. Install from NPM](#3-install-from-npm)
+        - [4. Install the npm command line interface](#4-install-the-npm-command-line-interface)
+        - [Check installation](#check-installation)
+      - [Install Dotfiles via Yarn](#install-dotfiles-via-yarn)
+  - [In this repository](#in-this-repository)
+    - [Directory Structure](#directory-structure)
+  - [Requirements](#requirements)
+  - [Contributing](#contributing)
+  - [Code of Conduct](#code-of-conduct)
+  - [Our Values](#our-values)
+  - [History](#history)
+  - [Acknowledgements](#acknowledgements)
+  - [License](#license)
 
 ## About Dotfiles
 
@@ -44,14 +43,11 @@ This repository contains the source code for multiple dotfiles and shell/termina
 
 These configurations consist of the following files:
 
-- [Curl dotfiles](#curl-dotfiles) - The curl configuration file.
-- [Git dotfiles](#git-dotfiles) - The git configuration file.
-- [Homebrew dotfiles](#homebrew-dotfiles) - The Homebrew configuration file.
-- [JSHint dotfiles](#jshint-dotfiles) - The JSHint configuration file.
-- [Shell dotfiles](#shell-dotfiles)
-- [TMUX dotfiles](#tmux-dotfiles) - The TMUX configuration file.
-- [Vim dotfiles](#vim-dotfiles) - The vim configuration file.
-- [Wget dotfiles](#wget-dotfiles) - The wget configuration file.
+- [Curl dotfiles](./shell/plugins/curl/curlrc) - The curl configuration file.
+- [JSHint dotfiles](./shell/plugins/jshint/jshintrc) - The JSHint configuration file.
+- [TMUX dotfiles](./shell/plugins/tmux/tmux) - The TMUX configuration file.
+- [Vim dotfiles](./shell/plugins/vim/vimrc) - The vim configuration file.
+- [Wget dotfiles](./shell/plugins/wget/wgetrc) - The wget configuration file.
 
 ### Installation
 
@@ -321,10 +317,4 @@ We are committed to preserving and fostering a diverse, welcoming community. Ple
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/sebastienrousseau/dotfiles/blob/master/LICENSE) file for details
 
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Freedia%2Fdotfiles.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Freedia%2Fdotfiles?ref=badge_large)
-
-
-[forks-shield]: https://img.shields.io/github/forks/sebastienrousseau/dotfiles.svg?style=for-the-badge
-[forks-url]: https://github.com/sebastienrousseau/dotfiles/network/members
-[contributors-shield]: https://img.shields.io/github/contributors/sebastienrousseau/dotfiles.svg?style=for-the-badge
-[contributors-url]: https://github.com/sebastienrousseau/dotfiles/graphs/contributors
 
