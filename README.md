@@ -321,3 +321,10 @@ We are committed to preserving and fostering a diverse, welcoming community. Ple
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/sebastienrousseau/dotfiles/blob/master/LICENSE) file for details
 
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Freedia%2Fdotfiles.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Freedia%2Fdotfiles?ref=badge_large)
+
+
+[forks-shield]: https://img.shields.io/github/forks/sebastienrousseau/dotfiles.svg?style=for-the-badge
+[forks-url]: https://github.com/sebastienrousseau/dotfiles/network/members
+[contributors-shield]: https://img.shields.io/github/contributors/sebastienrousseau/dotfiles.svg?style=for-the-badge
+[contributors-url]: https://github.com/sebastienrousseau/dotfiles/graphs/contributors
+
