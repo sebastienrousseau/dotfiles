@@ -48,8 +48,5 @@
         "directory": "mkdir $HOME/.dotfiles",
         "test": "echo \"No test specified\""
     },
-    "version": "0.2.450",
-    "dependencies": {
-        "user": "^0.0.0"
-    }
+    "version": "0.2.450"
 }
