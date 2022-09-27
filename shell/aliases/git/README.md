@@ -250,7 +250,7 @@ The `git.plugin.zsh` file creates helpful shortcut aliases for many commonly
 | gcb     | `git rev-parse --abbrev-ref HEAD` | Get the current branch name.   |
 | gub     | `git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)` | Get the upstream branch name.   |
 
-### 2.9 Aliases to remove files from the working tree and from the index.
+### 2.9 Aliases to remove files from the working tree and from the index
 
 | Alias   | Command                                  | Description           |
 | ------- | ---------------------------------------- | --------------------- |

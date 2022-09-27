@@ -8,7 +8,8 @@ The `heroku.plugin.zsh` file creates helpful shortcut aliases for many commonly
 ## Table of Contents
 
 ### 1. Heroku aliases
-#### 1.1 Heroku Access aliases.
+
+#### 1.1 Heroku Access aliases
 
 | Alias   | Command                   | Description                                                |
 | ------- | ------------------------- | ---------------------------------------------------------- |

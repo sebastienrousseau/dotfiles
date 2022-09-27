@@ -1,4 +1,3 @@
-
 # Dotfiles aliases
 
 ![Banner representing the Dotfiles Library](/assets/dotfiles.svg)
@@ -57,10 +56,10 @@ capabilities to other commands.
 
 The tools supplied with this package are:
 
--  find - search for files in a directory hierarchy
--  locate - list files in databases that match a pattern
--  updatedb - update a file name database
--  xargs - build and execute command lines from standard input
+- find - search for files in a directory hierarchy
+- locate - list files in databases that match a pattern
+- updatedb - update a file name database
+- xargs - build and execute command lines from standard input
 
 Type the following alias command in your terminal:
 
@@ -91,7 +90,7 @@ brew install findutils
 | iptables  | `sudo iptables` | Append sudo to iptables (Append sudo to iptables (Administration tool for packet filtering) command. |
 | purge | `rm -rf ~/library/Developer/Xcode/DerivedData/*`     | Purging Xcode DerivedData. |
 | reload    | `reset` | Reset and initialize the Terminal screen. |
-| sudo  | `sudo ` | Allows a system administrator to delegate authority to give certain users (or groups of users) the ability to run some (or all) commands as root or another user while providing an audit trail of the commands and their arguments. |
+| sudo  | `sudo` | Allows a system administrator to delegate authority to give certain users (or groups of users) the ability to run some (or all) commands as root or another user while providing an audit trail of the commands and their arguments. |
 | top   | `htop` | Allows the user to interactively monitor the system's vital resources or server's processes in real time. |
 | ttop   | `top -F -s 10  rsize` | Recommended 'top' invocation to minimize resources. |
 | zshrc | `${=EDITOR} $HOME/.zshrc` | Quick access to the `.zshrc` file. |
@@ -273,12 +272,15 @@ These aliases are expanded in any position in the command line, meaning you can 
 end of the command you've typed. Examples:
 
 Quickly pipe to less:
+
 ```zsh
 $ ls -l /var/log L
 # will run
 $ ls -l /var/log | less
 ```
+
 Silences stderr output:
+
 ```zsh
 $ find . -type f NE
 # will run
