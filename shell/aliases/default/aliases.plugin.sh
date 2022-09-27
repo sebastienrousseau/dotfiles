@@ -162,21 +162,20 @@ if [ "$(uname)" = "Darwin" ]; then
     alias upd='
         sudo softwareupdate -i -a;
         pnpm i;
-        pnpm update;
-        # brew cu --all;
-        # brew doctor;
-        # brew update;
-        # brew upgrade;
-        # brew cleanup;
+        pnpm i yarn --global;
+        pnpm i npm --global;
+        pnpm i pnpm --global;
+        pnpm up;
+        brew cu --all;
+        brew doctor;
+        brew update;
+        brew upgrade;
+        brew cleanup;
         mas upgrade;
-        npm install npm -g;
-        npm update -g;
         sudo gem update --system;
         sudo gem update;
         sudo gem cleanup;
-        npm update ncu;
-        npm audit fix;
-        ncu -g;'
+        '
 elif [ "$(uname)" = "Linux" ]; then
     alias open="xdg-open >/dev/null 2>&1" # open: Open a file or URL in the user's preferred application.
     alias pbcopy='xsel --clipboard --input'      # pbcopy: Copy to clipboard.
@@ -185,13 +184,12 @@ elif [ "$(uname)" = "Linux" ]; then
         sudo apt update;
         sudo apt upgrade -y;
         pnpm i;
-        pnpm update;
-        npm install npm -g;
-        npm update -g;
+        pnpm i yarn --global;
+        pnpm i npm --global;
+        pnpm i pnpm --global;
+        pnpm up;
         sudo gem update --system;
         sudo gem update;
         sudo gem cleanup;
-        npm update ncu;
-        npm audit fix;
-        ncu -g;'
+        '
 fi

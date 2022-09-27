@@ -130,153 +130,153 @@ Within the release you'll find the following files and folders:
 │   │   │   └── symlinks-en.sh* # The symlinks script.
 │   │   ├── git/ # The git directory contains the git scripts.
 │   │   │   ├── config/ # The config directory contains the git configuration scripts.
-│   │   │   │   └── [  96]  git/
-│   │   │   │       └── [  96]  template/
-│   │   │   │           └── [  20]  HEAD
-│   │   │   ├── [  86]  README.md
-│   │   │   ├── [ 182]  gitattributes
-│   │   │   ├── [5.8K]  gitconfig
-│   │   │   ├── [1.4K]  gitignore
-│   │   │   └── [ 288]  gitmessage
-│   │   ├── [ 224]  homebrew/
-│   │   │   ├── [ 836]  01-install.sh*
-│   │   │   ├── [1.4K]  02-brew-tap.sh
-│   │   │   ├── [ 13K]  03-brew-package.sh
-│   │   │   ├── [6.7K]  04-brew-cask.sh
-│   │   │   └── [  86]  README.md
-│   │   └── [  86]  README.md
-│   ├── [  86]  README.md
-│   ├── [2.7K]  colors.sh*
-│   ├── [5.0K]  functions.sh*
-│   ├── [ 232]  install.sh*
-│   ├── [1.0K]  utilities.sh*
-│   └── [ 687]  variables.sh*
-├── [ 544]  shell/
-│   ├── [ 352]  aliases/
-│   │   ├── [ 128]  default/
-│   │   │   ├── [   0]  README.md
-│   │   │   └── [ 14K]  aliases.plugin.sh
-│   │   ├── [ 128]  gcloud/
-│   │   │   ├── [8.2K]  README.md
-│   │   │   └── [7.5K]  gcloud.plugin.sh
-│   │   ├── [ 128]  git/
-│   │   │   ├── [ 22K]  README.md
-│   │   │   └── [ 20K]  git.plugin.shold
-│   │   ├── [ 128]  heroku/
-│   │   │   ├── [ 41K]  README.md
-│   │   │   └── [ 31K]  heroku.plugin.sh
-│   │   ├── [ 128]  jekyll/
-│   │   │   ├── [1.7K]  README.md
-│   │   │   └── [1.9K]  jekyll.plugin.sh
-│   │   ├── [ 128]  subversion/
-│   │   │   ├── [4.1K]  README.md
-│   │   │   └── [3.7K]  subversion.plugin.sh
-│   │   ├── [ 128]  tmux/
-│   │   │   ├── [   0]  README.md
-│   │   │   └── [ 619]  tmux.plugin.sh
-│   │   └── [ 22K]  README.md
-│   ├── [  96]  bash/
-│   │   └── [1.9K]  bashrc
-│   ├── [ 224]  configurations/
-│   │   ├── [  86]  README.md
-│   │   ├── [ 437]  color.sh
-│   │   ├── [ 279]  editor.sh
-│   │   ├── [2.9K]  options.old
-│   │   └── [1.0K]  prompt.sh
-│   ├── [1.4K]  functions/
-│   │   ├── [  86]  README.md
-│   │   ├── [ 422]  cdls.sh
-│   │   ├── [ 390]  changediskpwd.sh
-│   │   ├── [ 377]  code.sh
-│   │   ├── [ 701]  countdown.sh
-│   │   ├── [ 666]  curlheader.sh
-│   │   ├── [1.1K]  curltime.sh
-│   │   ├── [ 929]  environment.sh
-│   │   ├── [ 894]  extract.sh
-│   │   ├── [ 130]  filehead.sh
-│   │   ├── [ 638]  genpwd.sh
-│   │   ├── [ 440]  goto.sh
-│   │   ├── [ 247]  headers.sh
-│   │   ├── [ 501]  hidehiddenfiles.sh
-│   │   ├── [ 377]  history-all.sh
-│   │   ├── [ 762]  hostinfo.sh
-│   │   ├── [ 511]  hstats.sh
-│   │   ├── [ 540]  httpdebug.sh
-│   │   ├── [ 645]  keygen.sh
-│   │   ├── [ 109]  last.sh
-│   │   ├── [ 411]  logout.sh
-│   │   ├── [ 914]  lowercase.sh
-│   │   ├── [ 763]  matrix.sh
-│   │   ├── [ 587]  mcd.sh
-│   │   ├── [ 419]  mount_read_only.sh
-│   │   ├── [ 397]  myproc.sh
-│   │   ├── [ 921]  prependpath.sh
-│   │   ├── [ 434]  print.sh
-│   │   ├── [ 364]  ql.sh
-│   │   ├── [ 529]  rd.sh
-│   │   ├── [ 346]  remove_disk.sh
-│   │   ├── [ 415]  ren.sh
-│   │   ├── [ 451]  rm.sh
-│   │   ├── [2.2K]  rps.sh*
-│   │   ├── [ 502]  showhiddenfiles.sh
-│   │   ├── [ 467]  size.sh
-│   │   ├── [ 451]  stopwatch.sh
-│   │   ├── [ 436]  trash.sh
-│   │   ├── [ 496]  tree.sh
-│   │   ├── [ 929]  uppercase.sh
-│   │   ├── [ 456]  uuidgen.sh
-│   │   ├── [ 197]  view-source.sh
-│   │   ├── [ 264]  whoisport.sh
-│   │   └── [ 510]  zipf.sh
-│   ├── [ 224]  paths/
-│   │   ├── [  96]  default/
-│   │   │   └── [ 746]  default.path.sh
-│   │   ├── [  96]  homebrew/
-│   │   │   └── [ 714]  homebrew.path.sh
-│   │   ├── [  96]  java/
-│   │   │   └── [ 530]  java.path.sh
-│   │   ├── [  96]  pnpm/
-│   │   │   └── [ 351]  pnpm.path.sh
-│   │   └── [  96]  tmux/
-│   │       └── [ 261]  tmux.path.sh
-│   ├── [ 416]  plugins/
-│   │   ├── [ 128]  curl/
-│   │   │   ├── [217K]  cacert.pem
-│   │   │   └── [ 374]  curlrc
-│   │   ├── [ 128]  encode64/
-│   │   │   ├── [ 963]  README.md
-│   │   │   └── [ 448]  encode64.plugin.sh
-│   │   ├── [  96]  jshint/
-│   │   │   └── [ 642]  jshintrc
-│   │   ├── [  96]  macos/
-│   │   │   └── [2.3K]  macos.plugin.sh
-│   │   ├── [  96]  profile/
-│   │   │   └── [ 930]  profile
-│   │   ├── [  96]  tmux/
-│   │   │   └── [7.4K]  tmux
-│   │   ├── [  96]  vim/
-│   │   │   └── [4.1K]  vimrc
-│   │   ├── [ 128]  vscode/
-│   │   │   ├── [1.6K]  README.md
-│   │   │   └── [3.2K]  vscode.plugin.sh
-│   │   ├── [  96]  wget/
-│   │   │   └── [1.2K]  wgetrc
-│   │   └── [  96]  zsh/
-│   │       └── [1.9K]  zshrc
-│   ├── [  86]  README.md
-│   ├── [ 254]  aliases.sh
-│   ├── [ 254]  configurations.sh
-│   ├── [ 193]  exit.sh
-│   ├── [ 228]  functions.sh
-│   ├── [3.8K]  history.sh
-│   ├── [ 241]  paths.sh
-│   └── [ 226]  plugins.sh
-├── [  28]  CODEOWNERS
-├── [ 150]  COPYRIGHT
-├── [ 67K]  LICENSE
-├── [ 817]  Makefile
-├── [6.2K]  README.md
-└── [ 297]  pnpm-lock.yaml
+│   │   │   │   └── git/
+│   │   │   │       └── template/
+│   │   │   │           └── HEAD
+│   │   │   ├── README.md
+│   │   │   ├── gitattributes
+│   │   │   ├── gitconfig
+│   │   │   ├── gitignore
+│   │   │   └── gitmessage
+│   │   ├── homebrew/
+│   │   │   ├── 01-install.sh*
+│   │   │   ├── 02-brew-tap.sh
+│   │   │   ├── 03-brew-package.sh
+│   │   │   ├── 04-brew-cask.sh
+│   │   │   └── README.md
+│   │   └── README.md
+│   ├── README.md
+│   ├── colors.sh* # The colors script.
+│   ├── functions.sh* # The functions script.
+│   ├── install.sh* # The install script.
+│   ├── utilities.sh* # The utilities script.
+│   └── variables.sh* # The variables script.
+├── shell/
+│   ├── aliases/
+│   │   ├── default/
+│   │   │   ├── README.md
+│   │   │   └── aliases.plugin.sh # The default aliases plugin.
+│   │   ├── gcloud/
+│   │   │   ├── README.md
+│   │   │   └── gcloud.plugin.sh # The gcloud aliases plugin.
+│   │   ├── git/
+│   │   │   ├── README.md
+│   │   │   └── git.plugin.sh # The git aliases plugin.
+│   │   ├── heroku/
+│   │   │   ├── README.md
+│   │   │   └── heroku.plugin.sh # The heroku aliases plugin.
+│   │   ├── jekyll/
+│   │   │   ├── README.md
+│   │   │   └── jekyll.plugin.sh # The jekyll aliases plugin.
+│   │   ├── subversion/
+│   │   │   ├── README.md
+│   │   │   └── subversion.plugin.sh # The subversion aliases plugin.
+│   │   ├── tmux/
+│   │   │   ├── README.md
+│   │   │   └── tmux.plugin.sh # The tmux aliases plugin.
+│   │   └── README.md
+│   ├── bash/
+│   │   └── bashrc # The bashrc file.
+│   ├── configurations/
+│   │   ├── README.md
+│   │   ├── color.sh
+│   │   ├── editor.sh
+│   │   ├── options.old
+│   │   └── prompt.sh
+│   ├── functions/
+│   │   ├── README.md
+│   │   ├── cdls.sh # The cdls function.
+│   │   ├── changediskpwd.sh # The changediskpwd function.
+│   │   ├── code.sh # The code function.
+│   │   ├── countdown.sh # The countdown function.
+│   │   ├── curlheader.sh # The curlheader function.
+│   │   ├── curltime.sh # The curltime function.
+│   │   ├── environment.sh # The environment function.
+│   │   ├── extract.sh # The extract function.
+│   │   ├── filehead.sh # The filehead function.
+│   │   ├── genpwd.sh # The genpwd function.
+│   │   ├── goto.sh # The goto function.
+│   │   ├── headers.sh # The headers function.
+│   │   ├── hidehiddenfiles.sh # The hidehiddenfiles function.
+│   │   ├── history-all.sh # The history-all function.
+│   │   ├── hostinfo.sh # The hostinfo function.
+│   │   ├── hstats.sh # The hstats function.
+│   │   ├── httpdebug.sh # The httpdebug function.
+│   │   ├── keygen.sh # The keygen function.
+│   │   ├── last.sh # The last function.
+│   │   ├── logout.sh # The logout function.
+│   │   ├── lowercase.sh # The lowercase function.
+│   │   ├── matrix.sh # The matrix function.
+│   │   ├── mcd.sh # The mcd function.
+│   │   ├── mount_read_only.sh # The mount_read_only function.
+│   │   ├── myproc.sh # The myproc function.
+│   │   ├── prependpath.sh # The prependpath function.
+│   │   ├── print.sh # The print function.
+│   │   ├── ql.sh # The ql function.
+│   │   ├── rd.sh # The rd function.
+│   │   ├── remove_disk.sh # The remove_disk function.
+│   │   ├── ren.sh # The ren function.
+│   │   ├── rm.sh # The rm function.
+│   │   ├── rps.sh # The rps function.
+│   │   ├── showhiddenfiles.sh # The showhiddenfiles function.
+│   │   ├── size.sh # The size function.
+│   │   ├── stopwatch.sh # The stopwatch function.
+│   │   ├── trash.sh # The trash function.
+│   │   ├── tree.sh # The tree function.
+│   │   ├── uppercase.sh # The uppercase function.
+│   │   ├── uuidgen.sh # The uuidgen function.
+│   │   ├── view-source.sh # The view-source function.
+│   │   ├── whoisport.sh # The whoisport function.
+│   │   └── zipf.sh # The zipf function.
+│   ├── paths/
+│   │   ├── default/
+│   │   │   └── default.path.sh # The default paths.
+│   │   ├── homebrew/
+│   │   │   └── homebrew.path.sh # The homebrew paths.
+│   │   ├── java/
+│   │   │   └── java.path.sh # The java paths.
+│   │   ├── pnpm/
+│   │   │   └── pnpm.path.sh # The pnpm paths.
+│   │   └── tmux/
+│   │       └── tmux.path.sh # The tmux paths.
+│   ├── plugins/
+│   │   ├── curl/
+│   │   │   ├── cacert.pem # The cacert.pem file.
+│   │   │   └── curlrc # The curlrc file.
+│   │   ├── encode64/
+│   │   │   ├── README.md
+│   │   │   └── encode64.plugin.sh # The encode64 aliases plugin.
+│   │   ├── jshint/
+│   │   │   └── jshintrc # The jshintrc file.
+│   │   ├── macos/
+│   │   │   └── macos.plugin.sh # The macos plugin.
+│   │   ├── profile/
+│   │   │   └── profile # The profile file.
+│   │   ├── tmux/
+│   │   │   └── tmux # The tmux plugin.
+│   │   ├── vim/
+│   │   │   └── vimrc # The vimrc plugin.
+│   │   ├── vscode/
+│   │   │   ├── README.md
+│   │   │   └── vscode.plugin.sh
+│   │   ├── wget/
+│   │   │   └── wgetrc
+│   │   └── zsh/
+│   │       └── zshrc
+│   ├── README.md
+│   ├── aliases.sh
+│   ├── configurations.sh
+│   ├── exit.sh
+│   ├── functions.sh
+│   ├── history.sh
+│   ├── paths.sh
+│   └── plugins.sh
+├── CODEOWNERS
+├── COPYRIGHT
+├── LICENSE
+├── Makefile
+├── README.md
+└── pnpm-lock.yaml
 
 39 directories, 123 files
 

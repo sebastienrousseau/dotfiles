@@ -9,4 +9,5 @@ if [ -z "$PNPM_HOME" ]; then
     PNPM_HOME="$HOME"/.local/share/pnpm
   fi
   export PNPM_HOME
+  export PATH="$PNPM_HOME:$PATH"
 fi
