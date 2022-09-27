@@ -6,6 +6,9 @@
     "contributors": [
         "Graham Colgate (https://github.com/gramtech)"
     ],
+    "dependencies": {
+        "@changesets/cli": "^2.24.4"
+    },
     "description": "Dotfiles - A set of Mac OS X configuration files - Simply designed to fit your shell life.",
     "devDependencies": {
         "pnpm": "^7.12.2"
@@ -36,8 +39,8 @@
         "clean": "rm -viR $HOME/.dotfiles/",
         "copy": "pnpm run cp:dirs && pnpm run cp:bash && pnpm run cp:prof && pnpm run cp:tmux && pnpm run cp:curl && pnpm run cp:cert && pnpm run cp:vimr && pnpm run cp:wget && pnpm run cp:zshr",
         "cp:bash": "cp ./shell/bash/bashrc $HOME/.bashrc",
-        "cp:curl": "cp ./shell/plugins/curl/curlrc $HOME/.curlrc",
         "cp:cert": "cp ./shell/plugins/curl/cacert.pem $HOME/cacert.pem",
+        "cp:curl": "cp ./shell/plugins/curl/curlrc $HOME/.curlrc",
         "cp:dirs": "cp -R ./shell $HOME/.dotfiles/shell ",
         "cp:jsht": "cp ./shell/plugins/jshint/jshintrc $HOME/.jshintrc",
         "cp:prof": "cp ./shell/plugins/profile/profile $HOME/.profile",
@@ -46,6 +49,8 @@
         "cp:wget": "cp ./shell/plugins/wget/wgetrc $HOME/.wgetrc",
         "cp:zshr": "cp ./shell/plugins/zsh/zshrc $HOME/.zshrc",
         "directory": "mkdir $HOME/.dotfiles",
+				"release:version": "pnpm changeset version && pnpm install --no-frozen-lockfile",
+				"release:publish": "pnpm publish -r --report-summary",
         "test": "echo \"No test specified\""
     },
     "version": "0.2.450"
