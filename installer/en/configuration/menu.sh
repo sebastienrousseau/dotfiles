@@ -12,21 +12,21 @@ done
 ## 🅷🅴🅻🅿 🅼🅴🅽🆄
 helpMenuDotfiles() {
   echo ""
-  echo "${ICyan}┌──────────────────────────────────────┐${Reset}"
-  echo "${ICyan}│                                      │${Reset}"
-  echo "${ICyan}│          ${IWhite}DotFiles (v0.2.450)${Reset}         ${ICyan}│${Reset}"
-  echo "${ICyan}│                                      │${Reset}"
-  echo "${ICyan}└──────────────────────────────────────┘${Reset}"
+  echo "┌──────────────────────────────────────┐"
+  echo "│                                      │"
+  echo "│          DotFiles (v0.2.450)         |"
+  echo "│                                      │"
+  echo "└──────────────────────────────────────┘"
   echo
-  echo "${IGreen}[INFO] Available options:${Reset}"
+  echo "[INFO] Available options:"
   echo "
-  ${ICyan}[0]${Reset} ${IWhite}Exit menu.${Reset}
-  ${ICyan}[1]${Reset} ${IWhite}Backup an existing Dotfiles folder${Reset}
-  ${ICyan}[2]${Reset} ${IWhite}Download the latest Dotfiles release${Reset}
-  ${ICyan}[3]${Reset} ${IWhite}Recover a previous Dotfiles folder${Reset}
-  ${ICyan}[4]${Reset} ${IWhite}Generate the Dotfiles documentation locally${Reset}"
+  [0] Exit menu.
+  [1] Backup an existing Dotfiles folder.
+  [2] Download the latest Dotfiles release.
+  [3] Recover a previous Dotfiles folder.
+  [4] Generate the Dotfiles documentation locally."
   echo
-  echo "${IGreen}[INFO]${Reset}  ${IWhite}Please choose an option and press [ENTER]:${Reset}"
+  echo "[INFO] Please choose an option and press [ENTER]:"
   read -r a
   case $a in
   0) exit 0 ;;
@@ -46,7 +46,7 @@ helpMenuDotfiles() {
     documentDotfiles
     helpMenuDotfiles
     ;;
-  *) echo "${IRed}[ERROR]${Reset} ${IWhite}Wrong option.${Reset}" ;;
+  *) echo "[ERROR] Wrong option." ;;
   esac
 }
 
