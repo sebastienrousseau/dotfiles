@@ -49,8 +49,8 @@
         "cp:wget": "cp ./shell/plugins/wget/wgetrc $HOME/.wgetrc",
         "cp:zshr": "cp ./shell/plugins/zsh/zshrc $HOME/.zshrc",
         "directory": "mkdir $HOME/.dotfiles",
-				"release:version": "pnpm changeset version && pnpm install --no-frozen-lockfile",
-				"release:publish": "pnpm publish -r --report-summary",
+        "release:version": "pnpm changeset version && pnpm install --no-frozen-lockfile",
+        "release:publish": "pnpm publish -r --report-summary",
         "test": "echo \"No test specified\""
     },
     "version": "0.2.450"
