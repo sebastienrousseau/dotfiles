@@ -42,10 +42,6 @@ jobs:
           registry-url: "https://registry.npmjs.org"
           scope: sebastienrousseau
       - run: pnpm install --frozen-lockfile
-      - run: pnpm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Set package registry
         run: pnpm config set registry https://npm.pkg.github.com
       - name: Github package registry authentication
