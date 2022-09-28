@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451)
 # https://dotfiles.io
 #
 # Description: Deploy documentation to gh-pages

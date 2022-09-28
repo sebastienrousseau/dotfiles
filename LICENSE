@@ -24,13 +24,13 @@ SOFTWARE.
 
 Dotfiles uses the following under the GPL-3.0 license:
 
--   docutils
--   flake8
--   spdx-license-ids
--   spdx-exceptions
--   Sphinx
--   sphinx-rtd-theme
--   validate-npm-package-license
+- docutils
+- flake8
+- spdx-license-ids
+- spdx-exceptions
+- Sphinx
+- sphinx-rtd-theme
+- validate-npm-package-license
 
 GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
@@ -104,7 +104,7 @@ modification follow.
 
 TERMS AND CONDITIONS
 
-1.  Definitions.
+1. Definitions.
 
       "This License" refers to version 3 of the GNU General Public License.
 
@@ -143,7 +143,7 @@ TERMS AND CONDITIONS
     the interface presents a list of user commands or options, such as a
     menu, a prominent item in the list meets this criterion.
 
-2.  Source Code.
+2. Source Code.
 
       The "source code" for a work means the preferred form of the work
     for making modifications to it.  "Object code" means any non-source
@@ -185,7 +185,7 @@ TERMS AND CONDITIONS
       The Corresponding Source for a work in source code form is that
     same work.
 
-3.  Basic Permissions.
+3. Basic Permissions.
 
       All rights granted under this License are granted for the term of
     copyright on the Program, and are irrevocable provided the stated
@@ -210,7 +210,7 @@ TERMS AND CONDITIONS
     the conditions stated below.  Sub-licensing is not allowed; section 10
     makes it unnecessary.
 
-4.  Protecting Users' Legal Rights From Anti-Circumvention Law.
+4. Protecting Users' Legal Rights From Anti-Circumvention Law.
 
       No covered work shall be deemed part of an effective technological
     measure under any applicable law fulfilling obligations under article
@@ -226,7 +226,7 @@ TERMS AND CONDITIONS
     users, your or third parties' legal rights to forbid circumvention of
     technological measures.
 
-5.  Conveying Verbatim Copies.
+5. Conveying Verbatim Copies.
 
       You may convey verbatim copies of the Program's source code as you
     receive it, in any medium, provided that you conspicuously and
@@ -239,7 +239,7 @@ TERMS AND CONDITIONS
       You may charge any price or no price for each copy that you convey,
     and you may offer support or warranty protection for a fee.
 
-6.  Conveying Modified Source Versions.
+6. Conveying Modified Source Versions.
 
       You may convey a work based on the Program, or the modifications to
     produce it from the Program, in the form of source code under the
@@ -251,7 +251,7 @@ TERMS AND CONDITIONS
         b) The work must carry prominent notices stating that it is
         released under this License and any conditions added under section
 
-7.  This requirement modifies the requirement in section 4 to
+7. This requirement modifies the requirement in section 4 to
         "keep intact all notices".
 
         c) You must license the entire work, as a whole, under this
@@ -277,7 +277,7 @@ TERMS AND CONDITIONS
     in an aggregate does not cause this License to apply to the other
     parts of the aggregate.
 
-8.  Conveying Non-Source Forms.
+8. Conveying Non-Source Forms.
 
       You may convey a covered work in object code form under the terms
     of sections 4 and 5, provided that you also convey the
@@ -375,7 +375,7 @@ TERMS AND CONDITIONS
     source code form), and must require no special password or key for
     unpacking, reading or copying.
 
-9.  Additional Terms.
+9. Additional Terms.
 
       "Additional permissions" are terms that supplement the terms of this
     License by making exceptions from one or more of its conditions.
@@ -692,7 +692,7 @@ notice like this when it starts in an interactive mode:
     This is free software, and you are welcome to redistribute it
     under certain conditions; type `show c' for details.
 
-The hypothetical commands `show w' and `show c' should show the appropriate
+The hypothetical commands `show w' and`show c' should show the appropriate
 parts of the General Public License.  Of course, your program's commands
 might be different; for a GUI interface, you would use an "about box".
 
@@ -710,7 +710,7 @@ Public License instead of this License.  But first, please read
 
 Dotfiles uses the following under the GPL-3.0 license:
 
--   docutils
+- docutils
 
 GNU GENERAL PUBLIC LICENSE
          Version 2, June 1991
@@ -773,7 +773,7 @@ modification follow.
       GNU GENERAL PUBLIC LICENSE
    TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 
-0.  This License applies to any program or other work which contains
+0. This License applies to any program or other work which contains
     a notice placed by the copyright holder saying it may be distributed
     under the terms of this General Public License.  The "Program", below,
     refers to any such program or work, and a "work based on the Program"
@@ -790,7 +790,7 @@ is covered only if its contents constitute a work based on the
 Program (independent of having been made by running the Program).
 Whether that is true depends on what the Program does.
 
-1.  You may copy and distribute verbatim copies of the Program's
+1. You may copy and distribute verbatim copies of the Program's
     source code as you receive it, in any medium, provided that you
     conspicuously and appropriately publish on each copy an appropriate
     copyright notice and disclaimer of warranty; keep intact all the
@@ -801,7 +801,7 @@ Whether that is true depends on what the Program does.
 You may charge a fee for the physical act of transferring a copy, and
 you may at your option offer warranty protection in exchange for a fee.
 
-2.  You may modify your copy or copies of the Program or any portion
+2. You may modify your copy or copies of the Program or any portion
     of it, thus forming a work based on the Program, and copy and
     distribute such modifications or work under the terms of Section 1
     above, provided that you also meet all of these conditions:
@@ -845,7 +845,7 @@ with the Program (or with a work based on the Program) on a volume of
 a storage or distribution medium does not bring the other work under
 the scope of this License.
 
-3.  You may copy and distribute the Program (or a work based on it,
+3. You may copy and distribute the Program (or a work based on it,
     under Section 2) in object code or executable form under the terms of
     Sections 1 and 2 above provided that you also do one of the following:
 
@@ -891,7 +891,7 @@ However, parties who have received copies, or rights, from you under
 this License will not have their licenses terminated so long as such
 parties remain in full compliance.
 
-5.  You are not required to accept this License, since you have not
+5. You are not required to accept this License, since you have not
     signed it.  However, nothing else grants you permission to modify or
     distribute the Program or its derivative works.  These actions are
     prohibited by law if you do not accept this License.  Therefore, by
@@ -900,7 +900,7 @@ parties remain in full compliance.
     all its terms and conditions for copying, distributing or modifying
     the Program or works based on it.
 
-6.  Each time you redistribute the Program (or any work based on the
+6. Each time you redistribute the Program (or any work based on the
     Program), the recipient automatically receives a license from the
     original licensor to copy, distribute or modify the Program subject to
     these terms and conditions.  You may not impose any further
@@ -908,7 +908,7 @@ parties remain in full compliance.
     You are not responsible for enforcing compliance by third parties to
     this License.
 
-7.  If, as a consequence of a court judgment or allegation of patent
+7. If, as a consequence of a court judgment or allegation of patent
     infringement or for any other reason (not limited to patent issues),
     conditions are imposed on you (whether by court order, agreement or
     otherwise) that contradict the conditions of this License, they do not
@@ -948,7 +948,7 @@ those countries, so that distribution is permitted only in or among
 countries not thus excluded.  In such case, this License incorporates
 the limitation as if written in the body of this License.
 
-9.  The Free Software Foundation may publish revised and/or new versions
+9. The Free Software Foundation may publish revised and/or new versions
     of the General Public License from time to time.  Such new versions will
     be similar in spirit to the present version, but may differ in detail to
     address new problems or concerns.
@@ -1031,9 +1031,9 @@ when it starts in an interactive mode:
     This is free software, and you are welcome to redistribute it
     under certain conditions; type `show c' for details.
 
-The hypothetical commands `show w' and `show c' should show the appropriate
+The hypothetical commands `show w' and`show c' should show the appropriate
 parts of the General Public License.  Of course, the commands you use may
-be called something other than `show w' and `show c'; they could even be
+be called something other than `show w' and`show c'; they could even be
 mouse-clicks or menu items--whatever suits your program.
 
 You should also get your employer (if you work as a programmer) or your
@@ -1054,7 +1054,7 @@ Public License instead of this License.
 
 Dotfiles uses the following under the Apache License Version 2.0:
 
--   qrcode-terminal
+- qrcode-terminal
 
                                  Apache License
                            Version 2.0, January 2004
@@ -1062,7 +1062,7 @@ Dotfiles uses the following under the Apache License Version 2.0:
 
    TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
-1.  Definitions.
+1. Definitions.
 
     "License" shall mean the terms and conditions for use, reproduction,
     and distribution as defined by Sections 1 through 9 of this document.
@@ -1121,14 +1121,14 @@ Dotfiles uses the following under the Apache License Version 2.0:
     on behalf of whom a Contribution has been received by Licensor and
     subsequently incorporated within the Work.
 
-2.  Grant of Copyright License. Subject to the terms and conditions of
+2. Grant of Copyright License. Subject to the terms and conditions of
     this License, each Contributor hereby grants to You a perpetual,
     worldwide, non-exclusive, no-charge, royalty-free, irrevocable
     copyright license to reproduce, prepare Derivative Works of,
     publicly display, publicly perform, sublicense, and distribute the
     Work and such Derivative Works in Source or Object form.
 
-3.  Grant of Patent License. Subject to the terms and conditions of
+3. Grant of Patent License. Subject to the terms and conditions of
     this License, each Contributor hereby grants to You a perpetual,
     worldwide, non-exclusive, no-charge, royalty-free, irrevocable
     (except as stated in this section) patent license to make, have made,
@@ -1144,7 +1144,7 @@ Dotfiles uses the following under the Apache License Version 2.0:
     granted to You under this License for that Work shall terminate
     as of the date such litigation is filed.
 
-4.  Redistribution. You may reproduce and distribute copies of the
+4. Redistribution. You may reproduce and distribute copies of the
     Work or Derivative Works thereof in any medium, with or without
     modifications, and in Source or Object form, provided that You
     meet the following conditions:
@@ -1185,7 +1185,7 @@ Dotfiles uses the following under the Apache License Version 2.0:
     reproduction, and distribution of the Work otherwise complies with
     the conditions stated in this License.
 
-5.  Submission of Contributions. Unless You explicitly state otherwise,
+5. Submission of Contributions. Unless You explicitly state otherwise,
     any Contribution intentionally submitted for inclusion in the Work
     by You to the Licensor shall be under the terms and conditions of
     this License, without any additional terms or conditions.
@@ -1193,12 +1193,12 @@ Dotfiles uses the following under the Apache License Version 2.0:
     the terms of any separate license agreement you may have executed
     with Licensor regarding such Contributions.
 
-6.  Trademarks. This License does not grant permission to use the trade
+6. Trademarks. This License does not grant permission to use the trade
     names, trademarks, service marks, or product names of the Licensor,
     except as required for reasonable and customary use in describing the
     origin of the Work and reproducing the content of the NOTICE file.
 
-7.  Disclaimer of Warranty. Unless required by applicable law or
+7. Disclaimer of Warranty. Unless required by applicable law or
     agreed to in writing, Licensor provides the Work (and each
     Contributor provides its Contributions) on an "AS IS" BASIS,
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
@@ -1208,7 +1208,7 @@ Dotfiles uses the following under the Apache License Version 2.0:
     appropriateness of using or redistributing the Work and assume any
     risks associated with Your exercise of permissions under this License.
 
-8.  Limitation of Liability. In no event and under no legal theory,
+8. Limitation of Liability. In no event and under no legal theory,
     whether in tort (including negligence), contract, or otherwise,
     unless required by applicable law (such as deliberate and grossly
     negligent acts) or agreed to in writing, shall any Contributor be
@@ -1220,7 +1220,7 @@ Dotfiles uses the following under the Apache License Version 2.0:
     other commercial damages or losses), even if such Contributor
     has been advised of the possibility of such damages.
 
-9.  Accepting Warranty or Additional Liability. While redistributing
+9. Accepting Warranty or Additional Liability. While redistributing
        the Work or Derivative Works thereof, You may choose to offer,
        and charge a fee for, acceptance of support, warranty, indemnity,
        or other liability obligations and/or rights consistent with this
@@ -1260,7 +1260,7 @@ Dotfiles uses the following under the Apache License Version 2.0:
 
 ==============================================================
 
-# This product also include the following sof§tware:
+# This product also include the following sof§tware
 
  QRCode for JavaScript
 
@@ -1277,4 +1277,4 @@ Dotfiles uses the following under the Apache License Version 2.0:
 
 Located in ./vendor/QRCode
 
--   project has been modified to work in Node and some refactoring was done for code cleanup
+- project has been modified to work in Node and some refactoring was done for code cleanup

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451)
 
 alias tm='tmux'                     # tm: Start tmux.
 alias tma="tmux attach-session"     # tma: Attach to a tmux session.

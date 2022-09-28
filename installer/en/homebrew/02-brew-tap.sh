@@ -1,5 +1,5 @@
 #!/bin/sh
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - Homebrew tap installer.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - Homebrew tap installer.
 
 # Check for Homebrew presence
 if test "$(which brew)"; then

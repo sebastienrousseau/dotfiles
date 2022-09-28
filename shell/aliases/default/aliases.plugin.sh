@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451)
 #
 # 🅰🅻🅸🅰🆂🅴🆂
 unalias -a                                  # Remove all previous environment defined aliases.
 alias _='sudo -'                            # sudo: Execute a command as the superuser.
-alias -- -='cd -'                             # -: Shortcut to go to previous directory.
+alias -- -='cd -'                           # -: Shortcut to go to previous directory.
 alias .....='cd ../../../..'                # .....: Shortcut to go to great-great-grandparent directory.
 alias ....='cd ../../..'                    # ....: Shortcut to go to great-grandparent directory.
 alias ...='cd ../..'                        # ...: Shortcut to go to grandparent directory.
 alias ..='cd ..'                            # ..: Shortcut to go to parent directory.
+alias ...../='cd ../../../..'               # .....: Shortcut to go to great-great-grandparent directory.
+alias ..../='cd ../../..'                   # ....: Shortcut to go to great-grandparent directory.
+alias .../='cd ../..'                       # ...: Shortcut to go to grandparent directory.
+alias ../='cd ..'                           # ..: Shortcut to go to parent directory.
 alias ':q'='quit'                           # q: Shortcut for the `exit` command.
 alias '~'='cd ~'                            # ~: Shortcut to go to home directory.
 alias 'l.'="ls -dlhF .* | grep -v '^d'"     # l.: List hidden files.
@@ -143,7 +147,7 @@ alias svi='sudo vi'                          # svi: Run vi in sudo mode.
 alias t='tail -f'                            # t: Prints the last 10 lines of a text or log file, and then waits for new additions to the file to print it in real time.
 alias top='sudo btop'                        # top: Allows the user to interactively monitor the system's vital resources or server's processes in real time.
 alias trash="rm -fr ~/.Trash"                # trash: Remove all files in the trash.
-alias tree='tree -CAhF --dirsfirst'          # tree: Display a directory tree.
+alias tree='tree --dirsfirst'                # tree: Display a directory tree.
 alias unbz2='tar -xvjf'                      # unbz2: Extract a tarball compressed with bzip2.
 alias undopush="git push -f origin HEAD^:master"               # undopush: Undo the last push.
 alias ungz='tar -xvzf'                       # ungz: Extract a tarball compressed with gzip.

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451)
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451)
 # https://dotfiles.io
 #
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.

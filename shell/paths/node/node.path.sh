@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - NODE Path configuration.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - NODE Path configuration.
 
 ## 🅽🅾🅳🅴 🅿🅰🆃🅷
 if [ -z "$NODE_PATH" ]; then

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - Function to rename files extension.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - Function to rename files extension.
 #
 # https://dotfiles.io
 #

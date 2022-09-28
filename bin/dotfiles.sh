@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451)
 
 # TODO: Create bin executable for dotfiles.
 # clone() {
@@ -12,7 +12,7 @@
 
 # help() {
 #   echo \
-#     "Dotfiles (v0.2.450) - Simply designed to fit your shell life.
+#     "Dotfiles (v0.2.451) - Simply designed to fit your shell life.
 
 # Usage: dotfiles.sh [OPTION] [COMMAND]
 

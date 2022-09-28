@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - Loading configurations.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - Loading configurations.
 
 ## 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽🆂
-for config in "$DOTFILES"/configurations/*.sh; do
+for config in "${DOTFILES}"/configurations/[!.#]*/*.sh; do
   # shellcheck source=/dev/null
-  . "$config"
+  . "${config}"
 done

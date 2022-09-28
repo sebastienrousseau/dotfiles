@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - Loading paths.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - Loading paths.
 
 ## 🅿🅰🆃🅷🆂
 
 # Load custom executable paths.
-for file in "$DOTFILES"/paths/[!.#]*/*.sh; do
+for file in "${DOTFILES}"/paths/[!.#]*/*.sh; do
   # shellcheck source=/dev/null
-  source "$file"
+  source "${file}"
 done

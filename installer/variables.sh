@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450)
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451)
 
 ## 🆅🅰🆁🅸🅰🅱🅻🅴🆂
 appName=dotfiles
 backupDirectory=dotfiles_backup
 directory=dotfiles
-fileVersion=v0.2.450.zip
+fileVersion=v0.2.451.zip
 lang="$(printf '%s' "$LANG" | cut -c 1,2)"
 logFile="$logsDirectory/$appName-$(date +%F).log"
 logsDirectory="$HOME/.$appName"

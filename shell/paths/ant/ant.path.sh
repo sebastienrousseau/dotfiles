@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - ANT Path configuration.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - ANT Path configuration.
 
 ## 🅰🅽🆃 🅷🅾🅼🅴
 if [ -z "$ANT_HOME" ]; then

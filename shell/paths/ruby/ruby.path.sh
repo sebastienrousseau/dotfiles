@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - PNPM Path configuration.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - PNPM Path configuration.
 
 ## 🆁🆄🅱🆈 🅷🅾🅼🅴
 if [ -z "$RUBY_HOME" ]; then

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - Function to return only a specific response header or all response headers for a given URL.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - Function to return only a specific response header or all response headers for a given URL.
 #
 
 ## curlheader: Function to return only a specific response header or all response headers for a given URL.

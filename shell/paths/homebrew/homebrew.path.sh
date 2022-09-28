@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - Homebrew Path configuration.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - Homebrew Path configuration.
 
 ## 🅷🅾🅼🅴🅱🆁🅴🆆 🅿🅰🆃🅷🆂
 if [[ "$OSTYPE" == "darwin"* ]]; then

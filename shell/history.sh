@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.450) - History options
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - History options
 #
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # Licensed under the MIT license
@@ -10,11 +10,11 @@ function dotfiles_history {
   local clear list
   zparseopts -E c=clear l=list
 
-  if [[ -n "$clear" ]]; then
+  if [[ -n "${clear}" ]]; then
     # if -c provided, clobber the history file
-    echo -n >|"$HISTFILE"
+    echo -n >|"${HISTFILE}"
     echo >&2 History file deleted. Reload the session to see its effects.
-  elif [[ -n "$list" ]]; then
+  elif [[ -n "${list}" ]]; then
     # if -l provided, run as if calling `fc' directly
     builtin fc "$@"
   else
@@ -37,7 +37,7 @@ case ${HIST_STAMPS-} in
 esac
 
 # Command history configuration
-export HISTFILE=$HOME/.zsh_history
+export HISTFILE=${HOME}/.zsh_history
 
 # Number of histories saved in memory
 export HISTSIZE=10000
