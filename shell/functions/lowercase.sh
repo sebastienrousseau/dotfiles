@@ -18,17 +18,17 @@ lowercase()
   fi
   for file ; do
       filename=${file##*/}
-      case "$filename" in
-      */*) dirname==${file%/*} ;;
+      case "${filename}" in
+      */*) [[ "dirname" == "${file%/*}" ]] ;;
       *) dirname=.;;
       esac
-      nf=$(echo "$filename" | tr A-Z a-z)
+      nf=$(echo "${filename}" | tr '[:upper:]' '[:lower:]')
       newname="${dirname}/${nf}"
-      if [ "$nf" != "$filename" ]; then
-          mv "$file" "$newname"
-          echo "[INFO] Renaming $file to lowercase: $newname"
+      if [[ "${nf}" != "${filename}" ]]; then
+          mv "${file}" "${newname}"
+          echo "[INFO] Renaming ${file} to lowercase: ${newname}"
       else
-          echo "[ERROR] The operation is not valid, $file has not changed."
+          echo "[ERROR] The operation is not valid, ${file} has not changed."
       fi
   done
 }
