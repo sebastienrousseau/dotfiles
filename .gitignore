@@ -6,7 +6,6 @@ debug
 dist
 *.json
 /.git/
-/.github/
 /.vscode/
 /build/
 /doc/
