@@ -3,8 +3,8 @@
 
 # 🅼🅰🅲🅾🆂 🅿🅻🆄🅶🅸🅽🅶 🅰🅻🅸🅰🆂🅴🆂
 
-alias cleanupDS='find . -type f -name "*.DS_Store" -ls -delete' # cleanupDS: Recursively delete .DS_Store files.
-alias cleanupLS='/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user && killall Finder' # cleanupLS:  Clean up LaunchServices to remove duplicates in the 'Open With' menu.
+alias clds='find . -type f -name "*.DS_Store" -ls -delete' # clds: Recursively delete .DS_Store files.
+alias clls='/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user && killall Finder' # clls:  Clean up LaunchServices to remove duplicates in the 'Open With' menu.
 alias emptytrash='rm -rf ~/.Trash/*' # Empty the Trash on all mounted volumes and the main HDD.
 alias finderHideHidden='defaults write com.apple.finder ShowAllFiles FALSE' # finderHideHidden: Hide hidden files in Finder.
 alias finderShowHidden='defaults write com.apple.finder ShowAllFiles TRUE' # finderShowHidden: Show hidden files in Finder.
@@ -21,7 +21,7 @@ alias xcode='open -a xcode' # xcode: Launch XCode app in macOS.
 
 # Erases purgeable disk space with 0s on the selected disk
 freespace(){
-  if [ -z "$1" ]; then
+  if [[ -z "$1" ]]; then
     echo "Usage: $0 <disk>"
     echo "Example: $0 /dev/disk1s1"
     echo

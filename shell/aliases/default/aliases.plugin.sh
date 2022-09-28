@@ -3,7 +3,6 @@
 #
 # 🅰🅻🅸🅰🆂🅴🆂
 unalias -a                                  # Remove all previous environment defined aliases.
-alias _='sudo -'                            # sudo: Execute a command as the superuser.
 alias -- -='cd -'                           # -: Shortcut to go to previous directory.
 alias .....='cd ../../../..'                # .....: Shortcut to go to great-great-grandparent directory.
 alias ....='cd ../../..'                    # ....: Shortcut to go to great-grandparent directory.
@@ -36,7 +35,7 @@ alias curl='curl --compressed'              # curl: Use compression when transfe
 alias da='date "+%Y-%m-%d %A %T %Z"'        # da: Display the current date and time.
 alias digg="dig @8.8.8.8 +nocmd any +multiline +noall +answer"           # digg: Dig with Google's DNS.
 alias dn="cd ~/Downloads; ls"               # dn: Shortcut to go to the Downloads directory and list its contents.
-alias dot='cd $DOTFILES'                    # dot: Shortcut to go to the dotfiles directory.
+alias dot='cd ${DOTFILES}'                  # dot: Shortcut to go to the dotfiles directory.
 alias ds="cd ~/Documents; ls"               # ds: Shortcut to go to the Documents directory and list its contents.
 alias dsp="sudo du -shc ."                  # dsp: Show the size of the current directory.
 alias dt="cd ~/Desktop; ls"                 # dt: Shortcut to go to the Desktop directory and list its contents.
@@ -155,14 +154,13 @@ alias untar='tar -xvf'                       # untar: Extract a tarball.
 alias usage='du -ch | grep total'            # usage: Grabs the disk usage in the current directory.
 alias v='vim $(f)'                           # v: Edit a file.
 alias v='vim'                                # e, edit, mate: Edit current file.
-alias vs="code ./"                           # vs: Open VS Code.
 alias wget='wget -c'                         # wget: wget with resume.
 alias wip='dig +short myip.opendns.com @resolver1.opendns.com' # wip: Get public IP address.
 alias wk='date +%V'                          # wk: Show the current week number.
 alias wth='curl https://wttr.in'             # wth: Get the weather.
 alias x='quit'                               # q: Shortcut for the `exit` command.
 
-if [ "$(uname)" = "Darwin" ]; then
+if [[ "$(uname || true)" = "Darwin" ]]; then
     alias upd='
         sudo softwareupdate -i -a;
         pnpm i;
@@ -176,11 +174,10 @@ if [ "$(uname)" = "Darwin" ]; then
         brew upgrade;
         brew cleanup;
         mas upgrade;
-        sudo gem update --system;
         sudo gem update;
         sudo gem cleanup;
         '
-elif [ "$(uname)" = "Linux" ]; then
+elif [[ "$(uname || true)" = "Linux" ]]; then
     alias open="xdg-open >/dev/null 2>&1" # open: Open a file or URL in the user's preferred application.
     alias pbcopy='xsel --clipboard --input'      # pbcopy: Copy to clipboard.
     alias pbpaste='xsel --clipboard --output'    # pbpaste: Paste from clipboard.
@@ -192,7 +189,6 @@ elif [ "$(uname)" = "Linux" ]; then
         pnpm i npm --global;
         pnpm i pnpm --global;
         pnpm up;
-        sudo gem update --system;
         sudo gem update;
         sudo gem cleanup;
         '
