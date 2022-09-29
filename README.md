@@ -1,12 +1,12 @@
 # Dotfiles
 
-![Banner representing the Dotfiles Library](/assets/dotfiles.svg)
+![Banner representing the Dotfiles Library](https://github.com/sebastienrousseau/dotfiles/raw/master/assets/dotfiles.svg)
 
-![Codacy grade](https://img.shields.io/codacy/grade/634cfc4de08e492ebcbb341631066241?style=for-the-badge)
-[![Contributors][contributors-shield]](https://github.com/sebastienrousseau/dotfiles/graphs/contributors)
-[![Forks][forks-shield]](https://github.com/sebastienrousseau/dotfiles/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge\&color=ff69b4)](https://opensource.org/licenses/MIT)
-![Made with Love](/assets/made-with-love.svg)
+[![Codacy][codacy-grade]][codacy-url]
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![License][license]][license-url]
+[![Love][love]][project-url]
 
 ## About Dotfiles
 
@@ -23,7 +23,7 @@ and centralized way to configure your environment and applications.
 
 To read the documentation for Dotfiles, please visit:
 
-- [Dotfiles website](https://dotfiles.io/)
+- [Dotfiles website][project-url]
 - [Dotfiles GitHub repository](https://github.com/sebastienrousseau/dotfiles)
 
 ### Pre-Installation
@@ -142,7 +142,7 @@ Please read our [Code of Conduct](https://github.com/sebastienrousseau/dotfiles/
 
 ## Acknowledgements
 
-[Dotfiles](https://dotfiles.io) is beautifully crafted by these people and a
+[Dotfiles][project-url] is beautifully crafted by these people and a
 bunch of awesome [contributors](https://github.com/sebastienrousseau/dotfiles/graphs/contributors)
 
 | [![Sebastien Rousseau](https://avatars0.githubusercontent.com/u/1394998?s=117)](http://sebastienrousseau.co.uk) | [![Graham Colgate](https://avatars0.githubusercontent.com/u/35816108?s=117)](https://github.com/gramtech) |
@@ -155,10 +155,13 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Freedia%2Fdotfiles.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Freedia%2Fdotfiles?ref=badge_large)
 
+[codacy-grade]: https://img.shields.io/codacy/grade/634cfc4de08e492ebcbb341631066241?style=for-the-badge
+[codacy-url]:https://www.codacy.com/gh/sebastienrousseau/dotfiles/dashboard
 [contributors-shield]: https://img.shields.io/github/contributors/sebastienrousseau/dotfiles.svg?style=for-the-badge
 [contributors-url]: https://github.com/sebastienrousseau/dotfiles/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/sebastienrousseau/dotfiles.svg?style=for-the-badge
 [forks-url]: https://github.com/sebastienrousseau/dotfiles/network/members
-
-
-
+[license]: https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge\&color=ff69b4
+[license-url]: https://opensource.org/licenses/MIT
+[love]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/made-with-love.svg
+[project-url]: https://dotfiles.io/
