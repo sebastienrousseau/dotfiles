@@ -61,15 +61,6 @@ alias hkau='heroku access:update'
 # hkh: Display help for heroku.
 alias hkh='heroku help'
 
-# hkip: List trusted IP ranges for a space.
-alias hkip='heroku trusted-ips --space "$@"'
-
-# hkipa: Add one range to the list of trusted IP ranges.
-alias hkipa='heroku trusted-ips:add --space "$@"'
-
-# hkipr: Remove a range from the list of trusted IP ranges.
-alias hkipr='heroku trusted-ips:remove --space "$@"'
-
 # hkj: Add yourself to a team app.
 alias hkj='heroku join'
 
