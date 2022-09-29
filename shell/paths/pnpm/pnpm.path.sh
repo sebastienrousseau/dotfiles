@@ -2,12 +2,12 @@
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - PNPM Path configuration.
 
 ## 🅿🅽🅿🅼 🅿🅰🆃🅷🆂
-if [ -z "$PNPM_HOME" ]; then
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    PNPM_HOME="$HOME"/Library/pnpm
-  elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    PNPM_HOME="$HOME"/.local/share/pnpm
+if [[ -z "${PNPM_HOME}" ]]; then
+  if [[ "${OSTYPE}" == "darwin"* ]]; then
+    PNPM_HOME="${HOME}"/Library/pnpm
+  elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
+    PNPM_HOME="${HOME}"/.local/share/pnpm
   fi
   export PNPM_HOME
-  export PATH="$PNPM_HOME:$PATH"
+  export PATH="${PNPM_HOME}:${PATH}"
 fi

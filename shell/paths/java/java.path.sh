@@ -3,11 +3,11 @@
 
 ## 🅹🅰🆅🅰_🅷🅾🅼🅴
 # Set JAVA_HOME
-if [[ "$OSTYPE" == "darwin"* ]]; then
+if [[ "${OSTYPE}" == "darwin"* ]]; then
   export CPPFLAGS="-I/opt/homebrew/opt/openjdk/include"
-  export PATH=/opt/homebrew/opt/openjdk/bin:"$PATH" # Java binaries
+  export PATH=/opt/homebrew/opt/openjdk/bin:"${PATH}" # Java binaries
   JAVA_HOME="/opt/homebrew/Cellar/openjdk/$(java -version 2>&1 | head -n 1 | cut -d'"' -f2)/libexec/openjdk.jdk/Contents/Home"
-elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
   JAVA_HOME="/usr/lib/jvm/java-11-openjdk-arm64/"
 fi
 export JAVA_HOME

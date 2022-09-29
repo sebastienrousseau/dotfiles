@@ -5,6 +5,10 @@
 if command -v 'tmux'>/dev/null; then
   TMUX_PATH=$(command -v tmux)
   export TMUX_PATH
+
 fi
 
-if [ "$TMUX" = "" ]; then tmux; fi
+if [[ -z "${TMUX}" ]] && [[ ${UID} != 0 ]]
+then
+    tmux attach -t default || tmux new -s default
+fi
