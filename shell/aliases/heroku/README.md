@@ -17,9 +17,6 @@ The `heroku.plugin.zsh` file creates helpful shortcut aliases for many commonly
 | ha   | `heroku access:add`    | ha: Add new users to your app. |
 | hau   | `heroku access:update`    | hau: Update existing collaborators on an team app. |
 | hh   | `heroku help`    | hh: Display help for heroku. |
-| hip   | `heroku trusted-ips --space "$@"`    | hip: List trusted IP ranges for a space. |
-| hipa   | `heroku trusted-ips:add --space "$@"`    | hipa: Add one range to the list of trusted IP ranges. |
-| hipr   | `heroku trusted-ips:remove --space "$@"`    | hipr: Remove a range from the list of trusted IP ranges. |
 | hj   | `heroku join`    | hj: Add yourself to a team app. |
 | hl   | `heroku commands`    | hl: List all the commands. |
 | hla   | `heroku access`    | hla: List who has access to an app. |

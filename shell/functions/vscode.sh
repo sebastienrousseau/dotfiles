@@ -22,8 +22,6 @@ elif [[ "$(uname || true)" = "Linux" ]]; then
   alias code="code"
 fi
 
-alias cde="code"
-alias mate="code"
 alias vs="code"
 alias vsc="code"
 alias vscode="code"

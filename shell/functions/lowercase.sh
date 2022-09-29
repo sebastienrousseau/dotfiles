@@ -19,7 +19,7 @@ lowercase()
   for file ; do
       filename=${file##*/}
       case "${filename}" in
-      */*) [[ "dirname" == "${file%/*}" ]] ;;
+      */*) [[ "dirname" = "${file%/*}" ]] ;;
       *) dirname=.;;
       esac
       nf=$(echo "${filename}" | tr '[:upper:]' '[:lower:]')
