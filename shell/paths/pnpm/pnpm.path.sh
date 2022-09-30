@@ -8,6 +8,6 @@ if [[ -z "${PNPM_HOME}" ]]; then
   elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
     PNPM_HOME="${HOME}"/.local/share/pnpm
   fi
-  export PNPM_HOME
-  export PATH="${PNPM_HOME}:${PATH}"
+  export PNPM_HOME="${PNPM_HOME}"
+  export PATH="$PNPM_HOME:$PATH"
 fi
