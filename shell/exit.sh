@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - Exit
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - Exit
 
 # When leaving the console clear the screen to increase privacy
 if [[ "${SHLVL}" = 1 ]]; then

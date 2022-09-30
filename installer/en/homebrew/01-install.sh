@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - Homebrew installer
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - Homebrew installer
 
 # Check for Homebrew presence
 if test ! "$(which brew)"; then

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - MAVEN Path configuration.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - MAVEN Path configuration.
 
 ## 🅼🅰🆅🅴🅽 🅷🅾🅼🅴
 if [[ -z "${MAVEN_HOME}" ]]; then

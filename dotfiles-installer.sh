@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - Dotfiles installer.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - Dotfiles installer.
 
 ## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set variables.
 BASEDIR="${HOME}/.test_dotfiles"
@@ -41,16 +41,16 @@ backup_dotfiles() {
 
 ## 🅸🅽🆂🆃🅰🅻🅻🅴🆁 - Install dotfiles.
 get_installer() {
-  echo "Installing Dotfiles v0.2.451"
-  wget https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.451.zip -O "${DOWNLOADDIR}/v0.2.451.zip"
+  echo "Installing Dotfiles v0.2.452"
+  wget https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.452.zip -O "${DOWNLOADDIR}/v0.2.452.zip"
 }
 
 ## 🆄🅽🅿🅰🅲🅺 - Unpack installer.
 unpack_installer() {
-  echo "Unpacking Dotfiles v0.2.451"
-  unzip "${DOWNLOADDIR}/v0.2.451.zip" -d "${DOWNLOADDIR}"
-  mv "${DOWNLOADDIR}/dotfiles-0.2.451/shell/" "${BASEDIR}"
-  rm "${DOWNLOADDIR}/v0.2.451.zip"
+  echo "Unpacking Dotfiles v0.2.452"
+  unzip "${DOWNLOADDIR}/v0.2.452.zip" -d "${DOWNLOADDIR}"
+  mv "${DOWNLOADDIR}/dotfiles-0.2.452/shell/" "${BASEDIR}"
+  rm "${DOWNLOADDIR}/v0.2.452.zip"
 }
 
 ## 🅼🅰🅸🅽 - Main function.
@@ -77,16 +77,16 @@ run_install() {
 get_help() {
   cat <<EOF
 
-Dotfiles v0.2.451 Installer
+Dotfiles v0.2.452 Installer
 
 OPTIONS:
 
   -b, --backup    - Backup previous dotfiles from your ${HOME} directory.
   -d, --download  - Download the latest dotfiles package.
   -h, --help      - Show this help menu.
-  -i, --install   - Install Dotfiles v0.2.451.
+  -i, --install   - Install Dotfiles v0.2.452.
   -e, --execute   - Execute the installation scripts.
-  -u, --unpack    - Unpack Dotfiles v0.2.451 package.
+  -u, --unpack    - Unpack Dotfiles v0.2.452 package.
 
 EOF
 }

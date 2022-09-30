@@ -1,5 +1,5 @@
 #!/bin/sh
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - Package installer.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - Package installer.
 
 # Check for Homebrew presence
 if test "$(which brew)"; then

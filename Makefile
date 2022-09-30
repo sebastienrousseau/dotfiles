@@ -1,5 +1,5 @@
 #!/usr/bin/env make -f
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - Dotfiles Installer makefile.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - Dotfiles Installer makefile.
 
 .DEFAULT_GOAL := help
 

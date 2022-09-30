@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451)
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452)
 
 # Load configuration files
 # shellcheck disable=SC2154

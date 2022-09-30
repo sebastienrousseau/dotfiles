@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451)
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452)
 #
 # 🅰🅻🅸🅰🆂🅴🆂
 unalias -a                                   # Remove all previous environment defined aliases.

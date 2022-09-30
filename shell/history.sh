@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - History options
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - History options
 #
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # Licensed under the MIT license

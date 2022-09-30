@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - NVM Path configuration.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - NVM Path configuration.
 
 ## 🅽🆅🅼 🅿🅰🆃🅷
 if [[ -z "${NVM_DIR}" ]]; then

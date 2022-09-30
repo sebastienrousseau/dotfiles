@@ -48,9 +48,9 @@ However, we recommend that you read the below guidelines before installing
 Dotfiles. A few different installation methods are available to you, depending
 on your needs and preferences.
 
-### Download Dotfiles v0.2.451
+### Download Dotfiles v0.2.452
 
-You can download the latest version (v0.2.451) with the following options:
+You can download the latest version (v0.2.452) with the following options:
 
 - [**Manual download**](https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.450.zip)
   Download the latest release of the Dotfiles and extract the archive in your

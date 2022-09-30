@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - Loading configurations.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - Loading configurations.
 
 ## 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽🆂
 for config in "${DOTFILES}"/configurations/[!.#]*/*.sh; do
