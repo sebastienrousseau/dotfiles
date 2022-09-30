@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - Java Path configuration.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - Java Path configuration.
 
 ## 🅹🅰🆅🅰_🅷🅾🅼🅴
 # Set JAVA_HOME

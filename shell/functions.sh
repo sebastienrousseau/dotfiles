@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - Loading functions.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - Loading functions.
 
 # Load custom executable functions
 for function in "${DOTFILES}"/functions/[!.#]*.sh; do

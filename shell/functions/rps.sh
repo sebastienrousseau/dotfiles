@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - Rock Paper Scissors
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - Rock Paper Scissors
 # Adapted from https://github.com/Ananta-Gupta/Rock-Paper-Scissors
 
 # rps: Function to play Rock Paper Scissors

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451) - Function to combine mkdir and cd.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - Function to combine mkdir and cd.
 # https://dotfiles.io
 #
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.

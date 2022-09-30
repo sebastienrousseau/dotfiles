@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.451)
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452)
 
 # encode64: Function to encode a string to base64.
 encode64() {

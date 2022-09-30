@@ -48,5 +48,5 @@
         "directory": "mkdir $HOME/.dotfiles",
 				"test": "echo \"No test specified\""
     },
-    "version": "0.2.451"
+    "version": "0.2.452"
 }
