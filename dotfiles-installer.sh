@@ -91,17 +91,17 @@ OPTIONS:
 EOF
 }
 
-if [[ "$1" == "-b" || "$1" == "--backup" ]]; then
+if [ "$1" = "-b" ] || [ "$1" = "--backup" ]; then
   backup_dotfiles
-elif [[ "$1" == "-d" || "$1" == "--download" ]]; then
+elif [ "$1" = "-d" ] || [ "$1" = "--download" ]; then
   get_installer
-elif [[ "$1" == "-e" || "$1" == "--execute" ]]; then
+elif [ "$1" = "-e" ] || [ "$1" = "--execute" ]; then
   main
-elif [[ "$1" == "-h" || "$1" == "--help" ]]; then
+elif [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
   get_help
-elif [[ "$1" == "-i" || "$1" == "--install" ]]; then
+elif [ "$1" = "-i" ] || [ "$1" = "--install" ]; then
   run_install
-elif [[ "$1" == "-u" || "$1" == "--unpack" ]]; then
+elif [ "$1" = "-u" ] || [ "$1" = "--unpack" ]; then
   unpack_installer
 else
   get_help
