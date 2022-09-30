@@ -32,7 +32,7 @@ backup_dotfiles() {
   "
 
   for file in ${FILES}; do
-    if [[ -e "${HOME}/${file}" ]]; then
+    if [ -e "${HOME}/${file}" ]; then
       echo "Backing up ${file}..."
       cp -f "${HOME}"/"${file}" "${BACKUPDIR}"/"${file}"
     fi
