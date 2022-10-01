@@ -195,7 +195,7 @@ Please read our [Code of Conduct](https://github.com/sebastienrousseau/dotfiles/
 ## ❤️ Contributing
 
 Thank you for using Dotfiles! If you like the library, it would be
-great if you can give it a star ⭐ on [GitHub][17].
+great if you can give it a star ⭐ on [GitHub][01].
 
 There are also many ways in which you can participate in this project, for
 example:
@@ -227,6 +227,7 @@ bunch of awesome [contributors](https://github.com/sebastienrousseau/dotfiles/gr
 | :-------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: |
 | [Sebastien Rousseau](https://github.com/sebastienrousseau) | [Graham Colgate](https://github.com/gramtech) |
 
+[01]: https://github.com/sebastienrousseau/dotfiles
 [codacy-grade]: https://img.shields.io/codacy/grade/634cfc4de08e492ebcbb341631066241?style=for-the-badge
 [codacy-url]:https://www.codacy.com/gh/sebastienrousseau/dotfiles/dashboard
 [contributors-shield]: https://img.shields.io/github/contributors/sebastienrousseau/dotfiles.svg?style=for-the-badge
