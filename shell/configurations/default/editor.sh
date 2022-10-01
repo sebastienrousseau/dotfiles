@@ -4,7 +4,7 @@
 # License: MIT
 
 cmd_vim=$(command -v vim)
-if ! [[ -n ${cmd_vim} ]]; then
+if [[ -z ${cmd_vim} ]]; then
   export VISUAL="vi"
 else
   export VISUAL="vim"
