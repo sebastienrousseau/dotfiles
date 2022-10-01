@@ -105,7 +105,7 @@ Even though this is normally not mandatory, it is always a good idea to backup
 as there might be situations in which you could be required to restore your
 previous installation.
 
-### 3️⃣ What's included?
+### 3️⃣ What's included
 
 Dotfiles contains key elements that are used to configure your terminal, shell,
 and other components for your development environment.
