@@ -1,30 +1,25 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452)
-# https://dotfiles.io
-#
-# Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
-#
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
-# Licensed under the MIT license
-#
-
+# License: MIT
 
 # hostinfo: Function to display useful host related informaton
 hostinfo() {
-	echo -e "\\nYou are logged on ${RED}$HOST"
-	echo -e "\\nAdditionnal information:$NC "
+	echo "You are logged on"
+	$HOST
+	echo "Additionnal information: "
 	uname -a
-	echo -e "\\n${RED}Users logged on:$NC "
+	echo "Users logged on: "
 	w -h
-	echo -e "\\n${RED}Current date :$NC "
+	echo "Current date : "
 	date
-	echo -e "\\n${RED}Machine stats :$NC "
+	echo "Machine stats : "
 	uptime
-	echo -e "\\n${RED}Current network location :$NC "
+	echo "Current network location : "
 	scselect
-	echo -e "\\n${RED}Public facing IP Address :$NC "
+	echo "Public facing IP Address : "
 	myip
-	echo -e "\\n${RED}DNS Configuration:$NC "
+	echo "DNS Configuration: "
 	scutil --dns
 	echo
 }

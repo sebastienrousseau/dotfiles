@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452)
-#!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452)
-# https://dotfiles.io
-#
-# Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
-#
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# License: MIT
+
+# 🅹🅴🅺🆈🅻🅻 🅰🅻🅸🅰🆂🅴🆂 - Jekyll aliases.
+
 # Sections:
 #
 #   1. Jekyll Core aliases.
@@ -16,6 +15,10 @@
 # Licensed under the MIT license
 #
 
+cmd_jekyll=$(command -v jekyll)
+if ! [[ -x "${cmd_jekyll}" ]]; then
+  return 0
+fi
 
 ##  ----------------------------------------------------------------------------
 ##  1. Jekyll Core aliases.

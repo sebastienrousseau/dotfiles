@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - Rock Paper Scissors
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# License: MIT
+
 # Adapted from https://github.com/Ananta-Gupta/Rock-Paper-Scissors
 
 # rps: Function to play Rock Paper Scissors
@@ -80,7 +83,7 @@ rps() {
       ;;
     esac
 
-    check "$ch1" "$ch2"
+    check "${ch1}" "${ch2}"
     echo "To exit press 0"
     echo "To play again press p : "
     read -r ch3

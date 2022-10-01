@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - Function to combine cd and ls.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# License: MIT
 
+# Function to combine cd and ls.
 # cdls: Function to combine cd and ls.
 cdls() {
   # Add \ because cd loops with alias

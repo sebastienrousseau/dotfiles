@@ -1,13 +1,7 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452)
-# https://dotfiles.io
-#
-# Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
-#
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
-# Licensed under the MIT license
-#
-
+# License: MIT
 
 # uppercase: Function to move filenames or directory names to uppercase
 uppercase()
@@ -18,17 +12,17 @@ uppercase()
   fi
   for file ; do
       filename=${file##*/}
-      case "$filename" in
+      case "${filename}" in
       */*) dirname=${file%/*} ;;
       *) dirname=.;;
       esac
-      nf=$(echo "$filename" | tr '[:upper:]' '[:lower:]')
+      nf=$(echo "${filename}" | tr '[:upper:]' '[:lower:]')
       newname="${dirname}/${nf}"
-      if [ "$nf" != "$filename" ]; then
-          mv "$file" "$newname"
-          echo "[INFO] Renaming $file to uppercase: $newname"
+      if [ "${nf}" != "${filename}" ]; then
+          mv "${file}" "${newname}"
+          echo "[INFO] Renaming ${file} to uppercase: ${newname}"
       else
-          echo "[ERROR] The operation is not valid, $file has not changed."
+          echo "[ERROR] The operation is not valid, ${file} has not changed."
       fi
   done
 }

@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - History options
-#
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
-# Licensed under the MIT license
-#
+# License: MIT
 
 ## History wrapper
 function dotfiles_history {

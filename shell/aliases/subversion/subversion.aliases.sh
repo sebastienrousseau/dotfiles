@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452)
-#!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452)
-# https://dotfiles.io
-#
-# Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
-#
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# License: MIT
+
+# 🆂🆄🅱🆅🅴🆁🆂🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂 - Subversion aliases.
 # Sections:
 #
 #   1.0 Subversion Core aliases.
@@ -13,8 +11,10 @@
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # Licensed under the MIT license
 #
-
-
+cmd_svn=$(command -v svn)
+if ! [[ -x "${cmd_svn}" ]]; then
+  return 0
+fi
 
 ##  ----------------------------------------------------------------------------
 ##  1.0 Subversion Core aliases.
