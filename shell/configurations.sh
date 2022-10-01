@@ -4,7 +4,7 @@
 # License: MIT
 
 ## 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽🆂
-for config in "${DOTFILES}"/configurations/[!.#]*/*.sh; do
+for config in "${HOME}"/.dotfiles/shell/configurations/[!.#]*/*.sh; do
   # shellcheck source=/dev/null
   . "${config}"
 done

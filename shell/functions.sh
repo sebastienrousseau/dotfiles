@@ -4,7 +4,7 @@
 # License: MIT
 
 # Load custom executable functions
-for function in "${DOTFILES}"/functions/[!.#]*.sh; do
+for function in "${HOME}"/.dotfiles/shell/functions/[!.#]*.sh; do
   # shellcheck source=/dev/null
   . "${function}"
 done

@@ -3,11 +3,6 @@
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
-cmd_tmux=$(command -v tmux)
-if ! [[ -x "${cmd_tmux}" ]]; then
-  return 0
-fi
-
 # 🆃🅼🆄🆇 🅰🅻🅸🅰🆂🅴🆂
 alias tm='tmux'                     # tm: Start tmux.
 alias tma="tmux attach-session"     # tma: Attach to a tmux session.

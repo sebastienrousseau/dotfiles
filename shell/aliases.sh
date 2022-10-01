@@ -6,7 +6,7 @@
 ## 🅰🅻🅸🅰🆂🅴🆂
 
 # Load custom executable aliases
-for file in "${DOTFILES}"/aliases/[!.#]*/*.sh; do
+for file in "${HOME}"/.dotfiles/shell/aliases/[!.#]*/*.sh; do
   # shellcheck source=/dev/null
   source "${file}"
 done
