@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# License: MIT
 
 # uuid: Function to generate a UUID (Universally Unique IDentifier)
 uuidgen() {
@@ -10,13 +13,13 @@ uuidgen() {
 			printf '4%x' $((B % 16))
 			;;
 		8)
-			printf '%c%x' ${C:$RANDOM%${#C}:1} $((B % 16))
+			printf '%c%x' ${C:$RANDOM%${#C}:1} ${B % 16}
 			;;
 		3 | 5 | 7 | 9)
-			printf '%02x-' $B
+			printf '%02x-' "${B}"
 			;;
 		*)
-			printf '%02x' $B
+			printf '%02x' "${B}"
 			;;
 		esac
 	done

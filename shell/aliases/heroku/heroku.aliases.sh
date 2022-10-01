@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452)
-# hkttps://dotfiles.io
-#
-# Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
-#
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# License: MIT
+
+# 🅷🅴🆁🅾🅺🆄 🅰🅻🅸🅰🆂🅴🆂 - Heroku aliases.
+
 # Sections:
 #
 #   1. Heroku aliases.
@@ -38,7 +39,10 @@
 # Licensed under the MIT license
 #
 
-
+cmd_heroku=$(command -v heroku)
+if ! [[ -x "${cmd_heroku}" ]]; then
+  return 0
+fi
 
 ##  ----------------------------------------------------------------------------
 ##  1. Heroku Core aliases

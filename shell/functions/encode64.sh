@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452)
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# License: MIT
 
 # encode64: Function to encode a string to base64.
 encode64() {

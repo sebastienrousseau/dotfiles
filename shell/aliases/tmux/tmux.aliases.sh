@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452)
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# License: MIT
 
+cmd_tmux=$(command -v tmux)
+if ! [[ -x "${cmd_tmux}" ]]; then
+  return 0
+fi
+
+# 🆃🅼🆄🆇 🅰🅻🅸🅰🆂🅴🆂
 alias tm='tmux'                     # tm: Start tmux.
 alias tma="tmux attach-session"     # tma: Attach to a tmux session.
 alias tmat="tmux attach-session -t" # tmat: Attach to a tmux session with name.

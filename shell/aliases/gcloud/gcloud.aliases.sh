@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452)
-# https://dotfiles.io
-#
-# Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
-#
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# License: MIT
+
+cmd_gcloud=$(command -v gcloud)
+if ! [[ -x "${cmd_gcloud}" ]]; then
+  return 0
+fi
+
+# 🅶🅲🅻🅾🆄🅳 🅰🅻🅸🅰🆂🅴🆂 - Google Cloud aliases.
 # Sections:
 #
 #      1.0 Google Cloud Aliases.

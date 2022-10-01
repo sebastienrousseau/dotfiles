@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - Function to return only a specific response header or all response headers for a given URL.
-#
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# License: MIT
 
 ## curlheader: Function to return only a specific response header or all response headers for a given URL.
 ## usage: curlheader $header $url

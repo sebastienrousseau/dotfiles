@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452)
-#
-# 🅰🅻🅸🅰🆂🅴🆂
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# License: MIT
+
+# 🅳🅴🅵🅰🆄🅻🆃 🅰🅻🅸🅰🆂🅴🆂
 unalias -a                                   # Remove all previous environment defined aliases.
 alias -- -='cd -'                            # -: Shortcut to go to previous directory.
 alias .....='cd ../../../..'                 # .....: Shortcut to go to great-great-grandparent directory.
