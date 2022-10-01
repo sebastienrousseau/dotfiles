@@ -3,8 +3,6 @@
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
- - Color configuration.
-
 ## 🅲🅾🅻🅾🆁🆂
 export colorflag='-G' # Enable color output
 
@@ -14,7 +12,6 @@ export CLICOLOR=1
 export CLICOLOR_FORCE=1
 
 export LSCOLORS='GxFxCxDxBxegedabagaced'
-# export LSCOLORS='Exfxcxdxbxegedabagacad'
 
 # Tell grep to highlight matches
 export GREP_OPTIONS='--color=auto'
