@@ -74,7 +74,6 @@ on your needs and preferences.
   a package manager for JavaScript and Node.js. It is fast, disk space efficient
   and reliable. This is recommended for installing Dotfiles with ease and speed.
 
-
 ### 1️⃣ Download Dotfiles v0.2.452
 
 You can download the latest version (v0.2.452) with the following options:
