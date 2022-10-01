@@ -34,11 +34,6 @@
 # Licensed under the MIT license
 #
 
-cmd_git=$(command -v git)
-if ! [[ -x "${cmd_git}" ]]; then
-  return 0
-fi
-
 ##  ----------------------------------------------------------------------------
 ##  1.0 Git Core aliases.
 ##  ----------------------------------------------------------------------------
@@ -530,7 +525,7 @@ alias gtp='git rev-parse --show-toplevel'
 alias gcb='git rev-parse --abbrev-ref HEAD'
 
 # Get the upstream branch name.
-alias gub='git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)'
+# alias gub='git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)'
 
 
 
@@ -588,3 +583,4 @@ alias gconfl='git config --list'
 
 # Output remote origin from within a local repository.
 alias gconfr='git config --local --get remote.origin.url'
+

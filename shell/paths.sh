@@ -6,7 +6,7 @@
 ## 🅿🅰🆃🅷🆂
 
 # Load custom executable paths.
-for file in "${DOTFILES}"/paths/[!.#]*/*.sh; do
+for file in "${HOME}"/.dotfiles/shell/paths/[!.#]*/*.sh; do
   # shellcheck source=/dev/null
   source "${file}"
 done
