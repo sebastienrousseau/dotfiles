@@ -1,5 +1,8 @@
 {
     "author": "Sebastien Rousseau (https://github.com/sebastienrousseau)",
+		"bin": {
+			"dotfiles": "./bin/dotfiles"
+		},
     "bugs": {
         "url": "https://github.com/sebastienrousseau/dotfiles/issues"
     },
@@ -46,7 +49,8 @@
         "cp:wget": "cp ./shell/configurations/wget/wgetrc $HOME/.wgetrc",
         "cp:zshr": "cp ./shell/configurations/zsh/zshrc $HOME/.zshrc",
         "directory": "mkdir $HOME/.dotfiles",
-				"test": "echo \"No test specified\""
-    },
-    "version": "0.2.452"
+				"start": "sh ./bin/dotfiles.sh",
+				"test": "echo \"Error: no test specified\" && exit 1"
+		},
+		"version": "0.2.452"
 }
