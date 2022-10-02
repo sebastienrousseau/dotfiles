@@ -49,8 +49,8 @@ export HISTFILESIZE=2000000
 # Number of histories saved in history file
 export SAVEHIST=1000
 
-if [[ "${SHELL}" = "/bin/zsh" ]]; then
-
+if [[ -n "${ZSH_VERSION}" ]]; then
+  # echo "Running shell is zsh"
   # Specifying some history options
   setopt always_to_end          # Move cursor to the end of a completed word.
   setopt append_history         # Sessions will append their history list to the history file, rather than replace it.
@@ -78,16 +78,31 @@ if [[ "${SHELL}" = "/bin/zsh" ]]; then
   setopt share_history          # Imports new commands from the history file, and also causes the typed commands to be appended to the history file
   setopt transient_rprompt      # Display the right prompt only when the cursor is on the rightmost column.
 
-elif [[ "${SHELL}" = "/bin/bash" ]]; then
-
-  # autocd - automatically cd to a directory when it is the only argument to a command
-  # cdspell - fix minor spelling mistakes in dirname of a cd command
-  # dirspell - Bash attempts spelling correction on directory names during word completion if the directory name initially supplied does not exist.
-  # histappend - append to $HISTFILE instead of overwriting it
-  # checkjobs - check if there are any stopped or running jobs before exiting an interactive shell
-  # checkwinsize - check the window size after each external command and, if necessary, updates the values of $LINES and $COLUMNSk
-  # cmdhist - save multiple-line commands in the same history entry
-  shopt -s autocd cdspell dirspell histappend checkjobs direxpand checkwinsize cmdhist
+elif [[ -n "${BASH_VERSION}" ]]; then
+  # echo "Running shell is bash"
+  # Shopt settings
+  shopt -s autocd       # autocd - automatically cd to a directory when it is the only argument to a command
+  shopt -s cdspell      # cdspell - spell check the path when changing directories.
+  shopt -s checkhash    # checkhash - check hash table for commands before running them.
+  shopt -s checkjobs    # checkjobs - check for stopped jobs after each command and report them to the user.
+  shopt -s checkwinsize # checkwinsize - check the window size after each command and, if necessary, update the values of LINES and COLUMNS.
+  shopt -s cmdhist      # cmdhist - save multi-line commands as one entry in history.
+  shopt -s dirspell     # dirspell - spell check the path when changing directories.
+  shopt -s dotglob      # dotglob - include dotfiles in globbing.
+  shopt -s extglob      # extglob - extended globbing.
+  shopt -s globstar     # globstar - allow ** to match multiple directories.
+  shopt -s histappend   # histappend - append to the history file, don't overwrite it.
+  shopt -s histverify   # histverify - verify commands from history before executing them.
+  shopt -s hostcomplete # hostcomplete - complete hostnames when using the ssh command.
+  shopt -s lithist      # lithist - save multi-line commands as one entry in history.
+  shopt -s huponexit    # huponexit - send SIGHUP to jobs when the shell exits.
+  shopt -s no_empty_cmd_completion # no_empty_cmd_completion - don't complete empty commands.
+  shopt -s nocaseglob   # nocaseglob - case insensitive globbing.
+  shopt -s nocasematch  # nocasematch - case insensitive matching.
+  shopt -s nullglob     # nullglob - if no matches are found, the pattern expands to nothing.
+  shopt -s progcomp     # progcomp - programmable completion.
+  shopt -s promptvars   # promptvars - allow prompt strings to contain shell variables.
+  shopt -s sourcepath   # sourcepath - search the PATH for the directory containing a sourced script before using the current directory.
 
 else
   echo "Unsupported shell: ${SHELL}"

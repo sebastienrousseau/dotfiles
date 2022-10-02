@@ -6,7 +6,7 @@
 ## 🅽🅾🅳🅴 🅿🅰🆃🅷
 if [[ -z "${NODE_PATH}" ]]; then
   if [[ "${OSTYPE}" == "darwin"* ]]; then
-    NODE_PATH=$(which node)
+    NODE_PATH=${HOME}/.nvm/versions/node/v18.9.1/bin/node
   elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
     NODE_PATH=${HOME}/.nvm/versions/node/$(node -v)/bin/node
   fi

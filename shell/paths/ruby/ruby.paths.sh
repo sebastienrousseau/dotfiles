@@ -6,7 +6,9 @@
 ## 🆁🆄🅱🆈 🅷🅾🅼🅴
 if [[ -z "${RUBY_HOME}" ]]; then
   if [[ "${OSTYPE}" == "darwin"* ]]; then
-    RUBY_HOME="$(brew --prefix)/opt/ruby/bin"
+    if [[ -d "/opt/homebrew/opt/ruby/bin" ]]; then
+      RUBY_HOME="/opt/homebrew/opt/ruby/bin"
+    fi
   elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
     RUBY_HOME="/usr/lib/ruby/2.6.0/"
   fi
@@ -17,8 +19,11 @@ fi
 ## 🅶🅴🅼 🅷🅾🅼🅴
 if [[ -z "${GEM_HOME}" ]]; then
   if [[ "${OSTYPE}" == "darwin"* ]]; then
-    GEM_HOME="$(brew --prefix)/Cellar/ruby/3.1.2_1/lib/ruby/gems/3.1.0/"
-    GEM_PATH="$(brew --prefix)/Cellar/ruby/3.1.2/lib/ruby/gems/3.1.0/"
+    if [[ -d "/opt/homebrew/opt/ruby/bin" ]]; then
+      # shellcheck disable=SC2006
+      GEM_HOME=$(gem environment gemdir)
+      GEM_PATH=$(gem environment gemdir)
+    fi
   elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
     GEM_HOME="/usr/lib/ruby/2.6.0/"
     GEM_PATH="/usr/lib/ruby/2.6.0/"
