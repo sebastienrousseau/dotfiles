@@ -9,7 +9,7 @@
 homedir := ./installer
 language := en
 PNPM := $(shell command -v pnpm 2> /dev/null)
-HOME:= $(shell pwd)
+HOMEDIR:= $(shell pwd)
 
 .PHONY: backup
 backup: # @HELP Backup your current dotfiles.
@@ -17,7 +17,7 @@ backup: ## Backup your current dotfiles.
 ifdef PNPM
 	pnpm run backup
 else
-	sh $(HOME)/bin/dotfiles.sh backup
+	sh $(HOMEDIR)/bin/dotfiles.sh backup
 endif
 
 .PHONY: install
@@ -26,7 +26,7 @@ install: ## Install the dotfiles on your system.
 ifdef PNPM
 	pnpm run install
 else
-	sh $(HOME)/bin/dotfiles install
+	sh $(HOMEDIR)/bin/dotfiles install
 endif
 
 .PHONY: copy
@@ -35,7 +35,7 @@ copy: ## Copy the dotfiles on your system.
 ifdef PNPM
 	pnpm run copy
 else
-	sh $(HOME)/bin/dotfiles copy
+	sh $(HOMEDIR)/bin/dotfiles copy
 endif
 
 .PHONY: download
@@ -44,7 +44,7 @@ download: ## Download the dotfiles on your system.
 ifdef PNPM
 	pnpm run download
 else
-	sh $(HOME)/bin/dotfiles download
+	sh $(HOMEDIR)/bin/dotfiles download
 endif
 
 .PHONY: unpack
@@ -53,7 +53,7 @@ unpack: ## Unpack the dotfiles on your system.
 ifdef PNPM
 	pnpm run unpack
 else
-	sh $(HOME)/bin/dotfiles unpack
+	sh $(HOMEDIR)/bin/dotfiles unpack
 endif
 
 .PHONY: clean
@@ -62,7 +62,7 @@ clean:
 ifdef PNPM
 	pnpm run clean
 else
-	sh $(HOME)/bin/dotfiles clean
+	sh $(HOMEDIR)/bin/dotfiles clean
 endif
 
 .PHONY: help
