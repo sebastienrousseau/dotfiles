@@ -6,7 +6,7 @@
 ## 🅼🅰🆅🅴🅽 🅷🅾🅼🅴
 if [[ -z "${MAVEN_HOME}" ]]; then
   if [[ "${OSTYPE}" == "darwin"* ]]; then
-    MAVEN_HOME="$(brew --prefix)/Cellar/maven/$(mvn -v)/libexec"
+    MAVEN_HOME="/opt/homebrew/Cellar/maven/"
   elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
     MAVEN_HOME="/usr/share/maven/"
   fi
