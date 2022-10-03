@@ -12,7 +12,7 @@
 
 Dotfiles - A set of macOS / Linux and Windows configuration files.
 
-*Simply designed to fit your shell life.*
+### Simply designed to fit your shell life
 
 Dotfiles aggregates a collection of standalone configuration files (dotfiles)
 combined into a `shell` directory that can be used to customize your development
