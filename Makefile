@@ -20,13 +20,13 @@ else
 	sh $(HOMEDIR)/bin/dotfiles.sh backup
 endif
 
-.PHONY: install
-install: # @HELP Install the dotfiles on your system.
-install: ## Install the dotfiles on your system.
+.PHONY: installer
+installer: # @HELP Install the dotfiles on your system.
+installer: ## Install the dotfiles on your system.
 ifdef PNPM
-	pnpm run install
+	pnpm run installer
 else
-	sh $(HOMEDIR)/bin/dotfiles install
+	sh $(HOMEDIR)/bin/dotfiles installer
 endif
 
 .PHONY: copy
