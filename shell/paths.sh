@@ -8,5 +8,5 @@
 # Load custom executable paths.
 for file in "${HOME}"/.dotfiles/shell/paths/[!.#]*/*.sh; do
   # shellcheck source=/dev/null
-  source "${file}"
+  . "${file}"
 done

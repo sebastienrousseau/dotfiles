@@ -6,5 +6,5 @@
 # Load custom executable functions
 for function in "${HOME}"/.dotfiles/shell/functions/[!.#]*.sh; do
   # shellcheck source=/dev/null
-  . "${function}"
+  source "${function}"
 done

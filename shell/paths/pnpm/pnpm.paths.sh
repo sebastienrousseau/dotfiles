@@ -4,12 +4,10 @@
 # License: MIT
 
 ## 🅿🅽🅿🅼 🅿🅰🆃🅷🆂
-if [[ -z "${PNPM_HOME}" ]]; then
-  if [[ "${OSTYPE}" == "darwin"* ]]; then
-    PNPM_HOME="${HOME}"/Library/pnpm
-  elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
-    PNPM_HOME="${HOME}"/.local/share/pnpm
-  fi
-  export PNPM_HOME="${PNPM_HOME}"
-  export PATH="${PNPM_HOME}:${PATH}"
+if [[ "${OSTYPE}" == "darwin"* ]]; then
+  PNPM_HOME="${HOME}"/Library/pnpm
+elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
+  PNPM_HOME="${HOME}"/.local/share/pnpm
 fi
+export PNPM_HOME="${PNPM_HOME}"
+export PATH="${PNPM_HOME}:${PATH}"

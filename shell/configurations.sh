@@ -6,5 +6,5 @@
 ## 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽🆂
 for config in "${HOME}"/.dotfiles/shell/configurations/[!.#]*/*.sh; do
   # shellcheck source=/dev/null
-  . "${config}"
+  source "${config}"
 done
