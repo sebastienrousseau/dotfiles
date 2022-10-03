@@ -1,4 +1,4 @@
-var exec = require('child_process').exec;
+import { exec } from "child_process";
 
 /**
  * Execute simple shell command (async wrapper).
@@ -18,8 +18,8 @@ async function sh(cmd) {
 }
 
 async function main() {
-  let { stdout } = await sh('pnpm run installer');
-  for (let line of stdout.split('\n')) {
+  let { stdout } = await sh("pnpm run installer");
+  for (let line of stdout.split("\n")) {
     console.log(`${line}`);
   }
 }
