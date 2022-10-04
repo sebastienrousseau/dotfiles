@@ -4,7 +4,9 @@
     </a>
 </p>
 
-<h3 align="center">Introducing Dotfiles - v2.0.2.452</h3>
+<h2 align="center">Introducing Dotfiles - v2.0.2.452</h2>
+
+<p>Dotfiles - A set of macOS / Linux and Windows configuration files.</p>
 
 <p align="center">A set of Mac OS X configuration files.</p>
 <p align="center">Simply designed to fit your shell life.</p>
