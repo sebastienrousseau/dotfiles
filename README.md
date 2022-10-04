@@ -164,7 +164,7 @@ pnpm install
 ### Post installation
 
 Following the installation, you can verify that the dotfiles package is installed
-in the following directory `$HOME/.dotfiles`.
+in the following directory `$HOME/.dotfiles_backup`.
 
 Just quit your terminal and restart it. If the installation is successful, you
 should be able to see a new interface of your terminal and be able to start
