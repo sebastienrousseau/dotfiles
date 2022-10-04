@@ -4,7 +4,7 @@
 # License: MIT
 
 ## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set variables.
-BACKUPDIR="${HOME}/.dotfiles/backup"  # Backup directory.
+BACKUPDIR="${HOME}/.dotfiles_backup"  # Backup directory.
 BIGreen='\033[1;92m'               # Green color.
 BIRed='\033[1;91m'                 # Red color.
 DOTFILESDIR="${HOME}/.dotfiles"    # Location of dotfiles.
@@ -20,19 +20,28 @@ backup() {
   echo "${BIRed}❭${NC} Backing up existing dotfiles in '${BIGreen}${BACKUPDIR}${NC}'..."
   # File list (use trailing slash for directories)
   FILES="
+  .alias
+  .bash_aliases
+  .bash_profile
+  .bash_prompt
   .bashrc
   .curlrc
+  .dir_colors
+  .exports
+  .functions
   .gitattributes
   .gitconfig
   .gitignore
   .gitmessage
   .inputrc
   .npmrc
+  .path
   .profile
   .tmux.conf
   .vimrc
   .wgetrc
   .yarnrc
+  .zshenv
   .zshrc
   cacert.pem
   "
@@ -97,8 +106,6 @@ copy() {
   rm -Rf "${DOTFILESDIR}"/shell/configurations/zsh &&
 
   echo "${BIRed}❭${NC} ${BIGreen}Dotfiles v${VERSION}${NC} installed."
-  ${SHELL}
-
 }
 
 ## 🅷🅴🅻🅿 🅼🅴🅽🆄 - Display help menu.
