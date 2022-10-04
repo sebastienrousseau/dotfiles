@@ -68,7 +68,7 @@ set -g history-limit 102400                                         # increase h
 set -g message-style "bg=#14222A, fg=#D0D3D5"                       # Mirage blue and Iron grey
 set -g set-clipboard on                                             # copy to system clipboard
 set -g status-left-length 400                                       # status left length
-set -g status-right "#[bg=#027bff] #(whoami)@#h #[bg=red] %Y-%m-%d %I:%M%p " # status right
+set -g status-right "#[bg=#027bff] #(whoami)@#h #[bg=red] %_d %B %I:%M%p " # status right
 set -g status-right-length 600                                      # status right length
 set -g status-style "bg=#14222A, fg=#D0D3D5"                        # mirage blue and iron grey
 set -wg pane-active-border-style "fg=#14222A"                       # mirage blue
