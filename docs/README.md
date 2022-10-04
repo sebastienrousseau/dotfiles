@@ -1,12 +1,17 @@
 # Dotfiles
 
-![Banner representing the Dotfiles Library](https://github.com/sebastienrousseau/dotfiles/raw/master/assets/dotfiles.svg)
+[![Banner representing the Dotfiles Library][logo]][website]
 
 [![Codacy][codacy-grade]][codacy-url]
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![License][license]][license-url]
-[![Love][love]][project-url]
+[![Love][love]][website]
+
+**[Website][website] • [Documentation][github]
+• [Report Bug][issues]
+• [Request Feature][issues]
+• [Contributing Guidelines][contributing]**
 
 ## 👋 Welcome to Dotfiles
 
@@ -29,8 +34,8 @@ and centralized way to configure your environment and applications.
 
 To read the documentation for Dotfiles, please visit:
 
-- [Dotfiles website][project-url]
-- [Dotfiles Docs GitHub repository](https://github.com/sebastienrousseau/dotfiles/docs)
+- [Dotfiles website][website]
+- [Dotfiles Docs GitHub repository][docs]
 
 ![divider][divider]
 
@@ -58,33 +63,27 @@ you choose the one that best suits your needs.
 
 The following requirements are needed to install Dotfiles:
 
-- [**Bash**](https://www.gnu.org/software/bash/) - a shell, or command language
-  interpreter, for the GNU operating system.
-- Or [**Zsh**](https://www.zsh.org/) - a shell designed for interactive use,
-  although it is also a powerful scripting language.
-- [**Git**](https://git-scm.com) - a free and open source distributed version
-  control system designed to handle everything from small to very large projects
-  with speed and efficiency.
-- [**Curl**](https://curl.se) - a command line tool for transferring data with
-  URL syntax.
-- [**Wget**](https://www.gnu.org/software/wget/) - a free software package for
-  retrieving files using HTTP, HTTPS and FTP, the most widely-used Internet
-  protocols.
-- [**Make**](https://www.gnu.org/software/make/) - a tool which controls the
-  generation of executables and other non-source files of a program from the
-  program's source files.
-- [**Shell**](https://www.gnu.org/software/shell/) - a shell command line
-  interpreter program for Unix-like operating systems.
-- [**PnPM**](https://pnpm.io) - a package manager for JavaScript and Node.js. It
-  is fast, disk space efficient and reliable.
+- [**Bash**][bash] - a shell, or command language interpreter, for the GNU
+  operating system.
+- Or [**Zsh**][zsh] - a shell designed for interactive use, although it is also a
+  powerful scripting language.
+- [**Git**][git] - a free and open source distributed version control system
+  designed to handle everything from small to very large projects with speed and efficiency.
+- [**Curl**][curl] - a command line tool for transferring data with URL syntax.
+- [**Wget**][wget] - a free software package for retrieving files using HTTP,
+  HTTPS and FTP, the most widely-used Internet protocols.
+- [**Make**][make] - a tool which controls the generation of executables and other
+  non-source files of a program from the program's source files.
+- [**Shell**][shell] - a shell command line interpreter program for Unix-like
+  operating systems.
+- [**PnPM**][pnpm] - a package manager for JavaScript and Node.js. It is fast,
+  disk space efficient and reliable.
 
 ### 1️⃣ Download Dotfiles
 
-You can download the latest version (v0.2.452) with any of the following
-options:
+You can download the latest version (v0.2.452) with the following options:
 
-- [**Manual download**](https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.450.zip) Download the latest release and extract the archive in your home
-  directory. **This is the easiest way to install Dotfiles.**
+- [**Manual download**][releases] - **The easiest way to install Dotfiles.**
 - [**Install with PnPM**](https://www.npmjs.com/package/@sebastienrousseau/dotfiles)
   `pnpm i -g @sebastienrousseau/dotfiles`.
 - [**Install with Npm**](https://www.npmjs.com/package/@sebastienrousseau/dotfiles)
@@ -99,25 +98,55 @@ options:
 
 Before installing Dotfiles, we strongly recommend that you back up your existing
 data. The Dotfiles installer will try to automatically backup any previous
-installation of known dotfiles.
+installation of known dotfiles into a backup directory
+`$HOME/.dotfiles/backup`.
+
+The backup files are the following:
+
+```bash
+.alias
+.bash_aliases
+.bash_profile
+.bash_prompt
+.bashrc
+.curlrc
+.dir_colors
+.exports
+.functions
+.gitattributes
+.gitconfig
+.gitignore
+.gitmessage
+.inputrc
+.npmrc
+.path
+.profile
+.tmux.conf
+.vimrc
+.wgetrc
+.yarnrc
+.zshenv
+.zshrc
+cacert.pem
+```
 
 After installation, you will find the backup files in the `~/dotfiles_backup`
-directory.
-
-It is always a good idea to backup as there might be situations in which you
+directory. It is always a good idea to backup as there might be situations in which you
 could be required to restore your previous installation.
 
 ### 3️⃣ Try it out and let us know what you think
 
 To install the latest version of the dotfiles, run the following command:
 
-#### Using make (recommended if you have make installed)
+#### Using make (highly recommended)
+
+Simply run the following command in your terminal / shell:
 
 ```bash
-make install
+make installer
 ```
 
-or if you want to check the options available:
+or if you want to just check the options available, run the following command:
 
 ```bash
 make help
@@ -125,18 +154,31 @@ make help
 
 #### Using PnPM (recommended if you have PnPM installed)
 
+PnPM is a key dependency of the dotfiles package. It will help you install the
+dotfiles rapidly and very efficiently.
+
 ```bash
 pnpm install
 ```
+
+### Post installation
+
+Following the installation, you can verify that the dotfiles package is installed
+in the following directory `$HOME/.dotfiles`.
+
+Just quit your terminal and restart it. If the installation is successful, you
+should be able to see a new interface of your terminal and be able to start
+using the dotfiles aliases and other configurations.
+
+Please refer to the [documentation][docs] for more information.
 
 ![divider][divider]
 
 ### 4️⃣ What's included
 
-Dotfiles contains core elements that are used to configure your terminal, shell,
-and other components catered for your development environment setup.
+Dotfiles contains core elements that are used to configure your shell, and other components catered for your environment setup.
 
-Within the download you'll find all the Dotfiles source files grouped into the
+Within the download you'll find all the Dotfiles source files grouped within the
 `shell` folder.
 
 You'll see something like this:
@@ -276,7 +318,7 @@ You'll see something like this:
 
 ## 🔗 Releases
 
-Releases are available on the [GitHub releases page][releases-url].
+Releases are available on the [GitHub releases page][releases].
 
 ![divider][divider]
 
@@ -317,7 +359,7 @@ Please read our [Code of Conduct](https://github.com/sebastienrousseau/dotfiles/
 ## ❤️ Contributing
 
 Thank you for using Dotfiles! If you like the library, it would be
-great if you can give it a star ⭐ on [GitHub][01].
+great if you can give it a star ⭐ on [GitHub][github].
 
 There are also many ways in which you can participate in this project, for
 example:
@@ -327,7 +369,7 @@ example:
 - Review the [documentation](https://github.com/sebastienrousseau/dotfiles/docs) and make pull requests for anything from typos to additional and new content.
 
 Please read carefully through our
-[Contributing Guidelines](https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CONTRIBUTING.md)
+[Contributing Guidelines][contributing]
 for further details on the process for submitting pull requests to us.
 
 ![divider][divider]
@@ -342,14 +384,29 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 
 ## 🏢 Acknowledgements
 
-[Dotfiles][project-url] is beautifully crafted by these people and a
+[Dotfiles][website] is beautifully crafted by these people and a
 bunch of awesome [contributors](https://github.com/sebastienrousseau/dotfiles/graphs/contributors)
 
 | [![Sebastien Rousseau](https://avatars0.githubusercontent.com/u/1394998?s=117)](http://sebastienrousseau.co.uk) | [![Graham Colgate](https://avatars0.githubusercontent.com/u/35816108?s=117)](https://github.com/gramtech) |
 | :-------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: |
 | [Sebastien Rousseau](https://github.com/sebastienrousseau) | [Graham Colgate](https://github.com/gramtech) |
 
-[01]: https://github.com/sebastienrousseau/dotfiles
+[bash]: https://www.gnu.org/software/bash/
+[contributing]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CONTRIBUTING.md
+[curl]: https://curl.se/
+[docs]: https://github.com/sebastienrousseau/dotfiles/docs
+[git]: https://git-scm.com/
+[github]: https://github.com/sebastienrousseau/dotfiles
+[issues]: https://github.com/sebastienrousseau/dotfiles/issues
+[make]: https://www.gnu.org/software/make/
+[pnpm]: https://pnpm.io
+[releases]: https://github.com/sebastienrousseau/dotfiles/releases
+[shell]: https://www.gnu.org/software/shell/
+[website]: https://dotfiles.io
+[wget]: https://www.gnu.org/software/wget/
+[zsh]: https://www.zsh.org/
+
+[logo]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/dotfiles.svg
 [codacy-grade]: https://img.shields.io/codacy/grade/634cfc4de08e492ebcbb341631066241?style=for-the-badge
 [codacy-url]:https://www.codacy.com/gh/sebastienrousseau/dotfiles/dashboard
 [contributors-shield]: https://img.shields.io/github/contributors/sebastienrousseau/dotfiles.svg?style=for-the-badge
@@ -360,7 +417,5 @@ bunch of awesome [contributors](https://github.com/sebastienrousseau/dotfiles/gr
 [license-url]: https://opensource.org/licenses/MIT
 [license]: https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge\&color=ff69b4
 [love]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/made-with-love.svg
-[project-url]: https://dotfiles.io/
-[releases-url]: https://github.com/sebastienrousseau/dotfiles/releases
 [semver-url]: http://semver.org/
 [eslint-semantic-url]: https://github.com/eslint/eslint#semantic-versioning-policy
