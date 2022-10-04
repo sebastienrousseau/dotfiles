@@ -81,7 +81,7 @@ The following requirements are needed to install Dotfiles:
 
 ### 1️⃣ Download Dotfiles
 
-You can download the latest version (v0.2.452) with the following options:
+You can download the latest version (v0.2.453) with the following options:
 
 - [**Manual download**][releases] - **The easiest way to install Dotfiles.**
 - [**Install with PnPM**](https://www.npmjs.com/package/@sebastienrousseau/dotfiles)
