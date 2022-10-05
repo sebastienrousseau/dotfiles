@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.453) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
@@ -11,5 +11,9 @@ if [[ "${OSTYPE}" == "darwin"* ]]; then
 elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
   PYTHONHOME="/usr/lib/python*/"
 fi
+
+# Make Python use UTF-8 encoding for output to stdin, stdout, and stderr.
+export PYTHONIOENCODING='UTF-8';
+
 export PYTHONHOME
 export PATH="${PYTHONHOME}:${PATH}"

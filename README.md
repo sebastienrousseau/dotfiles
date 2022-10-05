@@ -1,4 +1,4 @@
-# Dotfiles
+# Dotfiles v0.2.453
 
 [![Banner representing the Dotfiles Library][logo]][website]
 
@@ -15,7 +15,10 @@
 
 ## 👋 Welcome to Dotfiles
 
-Dotfiles - A set of macOS / Linux and Windows configuration files.
+Dotfiles are set of macOS / Linux and Windows configuration files.
+
+[![Getting Started][getting started]](#getting-started)
+[![Download Dotfiles v0.2.453][download_button]][download]
 
 ### Simply designed to fit your shell life
 
@@ -39,7 +42,9 @@ To read the documentation for Dotfiles, please visit:
 
 ![divider][divider]
 
-## 🔧 Installation
+## Getting Started
+
+### 🔧 Installation
 
 We are so delighted that you have decided to try Dotfiles, and are sure that you
 will find Dotfiles unique and helpful.
@@ -81,7 +86,7 @@ The following requirements are needed to install Dotfiles:
 
 ### 1️⃣ Download Dotfiles
 
-You can download the latest version (v0.2.452) with the following options:
+You can download the latest version (v0.2.453) with the following options:
 
 - [**Manual download**][releases] - **The easiest way to install Dotfiles.**
 - [**Install with PnPM**](https://www.npmjs.com/package/@sebastienrousseau/dotfiles)
@@ -158,7 +163,7 @@ PnPM is a key dependency of the dotfiles package. It will help you install the
 dotfiles rapidly and very efficiently.
 
 ```bash
-pnpm install
+pnpm installer
 ```
 
 ### Post installation
@@ -395,6 +400,7 @@ bunch of awesome [contributors](https://github.com/sebastienrousseau/dotfiles/gr
 [contributing]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CONTRIBUTING.md
 [curl]: https://curl.se/
 [docs]: https://github.com/sebastienrousseau/dotfiles/docs
+[download]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.453.tar.gz
 [git]: https://git-scm.com/
 [github]: https://github.com/sebastienrousseau/dotfiles
 [issues]: https://github.com/sebastienrousseau/dotfiles/issues
@@ -407,6 +413,8 @@ bunch of awesome [contributors](https://github.com/sebastienrousseau/dotfiles/gr
 [zsh]: https://www.zsh.org/
 
 [logo]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/dotfiles.svg
+[download_button]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/button-secondary.svg
+[getting started]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/button-primary.svg
 [codacy-grade]: https://img.shields.io/codacy/grade/634cfc4de08e492ebcbb341631066241?style=for-the-badge
 [codacy-url]:https://www.codacy.com/gh/sebastienrousseau/dotfiles/dashboard
 [contributors-shield]: https://img.shields.io/github/contributors/sebastienrousseau/dotfiles.svg?style=for-the-badge

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.453) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
@@ -18,7 +18,7 @@ uppercase()
       esac
       nf=$(echo "${filename}" | tr '[:upper:]' '[:lower:]')
       newname="${dirname}/${nf}"
-      if [ "${nf}" != "${filename}" ]; then
+      if [[ "${nf}" != "${filename}" ]]; then
           mv "${file}" "${newname}"
           echo "[INFO] Renaming ${file} to uppercase: ${newname}"
       else

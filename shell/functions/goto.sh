@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.453) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
 # goto: Function to change to the directory inputed
 goto() {
-  if [ -e "$1" ]; then
+  if [[ -e "$1" ]]; then
     cd "$1" || exit
     l
   else

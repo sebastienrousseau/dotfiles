@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.453) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
@@ -35,16 +35,13 @@ case ${HIST_STAMPS-} in
 esac
 
 # Command history configuration
-export HISTFILE=${HOME}/.history
+export HISTFILE=${HOME}/.zsh_history
 
 # Don't put duplicate lines or lines starting with space in the history.
 export HISTCONTROL=ignoreboth
 
 # Number of histories saved in memory
-export HISTSIZE=100000
-
-# History file size limit in bytes
-export HISTFILESIZE=2000000
+export HISTSIZE=10000
 
 # Number of histories saved in history file
 export SAVEHIST=1000

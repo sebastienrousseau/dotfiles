@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.452) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.453) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
@@ -10,7 +10,7 @@ extract() {
 		return 1
 	fi
 
-	if [ -f "$1" ]; then
+	if [[ -f "$1" ]]; then
 		echo "[INFO] Extracting $1"
 		case $1 in
 		*.tar.bz2) tar xjf "$1" ;;
