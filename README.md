@@ -163,7 +163,7 @@ PnPM is a key dependency of the dotfiles package. It will help you install the
 dotfiles rapidly and very efficiently.
 
 ```bash
-pnpm install
+pnpm installer
 ```
 
 ### Post installation
