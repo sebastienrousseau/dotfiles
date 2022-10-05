@@ -15,15 +15,15 @@ if [[ ${TERM} != *-256color ]] && [[ ${TERM} != alacritty* ]] && [[ ${TERM} != *
 fi
 
 if [[ -n "${BASH_VERSION}" ]]; then
-  cyan='\[\033[1;36m\]'
-  green='\[\033[1;32m\]'
-  pink='\[\033[1;35m\]'
+  cyan='\[\033[1;96m\]'
+  green='\[\033[1;92m\]'
+  purple='\[\033[1;95m\]'
   reset='\[\033[0m\]'
 
   if [[ "${OSTYPE}" == "darwin"* ]]; then
-    PS1="  $(uname)${pink} ❭${reset} ${green} \w ${reset} ${cyan}$ ${reset}"
+    PS1="  $(uname)${purple} ❭${reset} ${green} \w ${reset} ${cyan}$ ${reset}"
   else
-    PS1=" 🐧 $(uname)${pink} ❭${reset} ${green} \w ${reset} ${cyan}$ ${reset}"
+    PS1=" 🐧 $(uname)${purple} ❭${reset} ${green} \w ${reset} ${cyan}$ ${reset}"
   fi
   export PS1
 elif [[ -n "${ZSH_VERSION}" ]]; then
