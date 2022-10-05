@@ -8,7 +8,7 @@ set colored-stats On # Color the completion stats
 set completion-ignore-case on # Ignore case when completing
 set completion-prefix-display-length 1 # Show the first character of the common prefix
 set completion-query-items 200 # Show all completions
-set expand-tilde On # Expand ~ to $HOME
+set expand-tilde Off # Expand ~ to $HOME
 set horizontal-scroll-mode Off # Disable horizontal scrolling
 set mark-directories on # Mark directories with a slash
 set mark-modified-lines on # Mark modified lines with a *
