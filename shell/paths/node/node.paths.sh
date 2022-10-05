@@ -5,7 +5,7 @@
 
 ## 🅽🅾🅳🅴 🅿🅰🆃🅷
 if [[ "${OSTYPE}" == "darwin"* ]]; then
-  NODE_PATH=/opt/homebrew/opt/node
+  NODE_PATH=/opt/homebrew/Cellar/node@18/18.10.0
 elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
   NODE_PATH=${HOME}/.nvm/versions/node/v18.10.0/bin/node
 fi
