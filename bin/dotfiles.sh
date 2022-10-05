@@ -14,7 +14,7 @@ VERSION="0.2.453"                  # Dotfiles Version number.
 
 ## 🅱🅰🅲🅺🆄🅿 - Backup existing files.
 backup() {
-  echo "${BIRed}❭${NC} Creating a backup directory '${BIGreen}${DOTFILESDIR}${NC}'."
+  echo "${BIRed}❭${NC} Creating a backup directory '${BIGreen}${BACKUPDIR}${NC}'."
   mkdir -p "${BACKUPDIR}"
 
   echo "${BIRed}❭${NC} Backing up existing dotfiles in '${BIGreen}${BACKUPDIR}${NC}'..."
