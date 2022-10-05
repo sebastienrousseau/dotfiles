@@ -24,7 +24,7 @@
     "description": "Dotfiles - A set of macOS / Linux and Windows configuration files - Simply designed to fit your shell life.",
     "devDependencies": {
         "filesizes": "^0.1.2",
-        "pnpm": "^7.13.0",
+        "pnpm": "^7.13.1",
         "rimraf": "^3.0.2"
     },
     "directories": {
@@ -97,6 +97,6 @@
         "start": "node index.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
-		"type": "module",
+    "type": "module",
     "version": "0.2.453"
 }
