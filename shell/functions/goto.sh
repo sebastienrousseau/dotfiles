@@ -5,7 +5,7 @@
 
 # goto: Function to change to the directory inputed
 goto() {
-  if [ -e "$1" ]; then
+  if [[ -e "$1" ]]; then
     cd "$1" || exit
     l
   else

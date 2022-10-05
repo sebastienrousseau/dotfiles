@@ -18,7 +18,7 @@ uppercase()
       esac
       nf=$(echo "${filename}" | tr '[:upper:]' '[:lower:]')
       newname="${dirname}/${nf}"
-      if [ "${nf}" != "${filename}" ]; then
+      if [[ "${nf}" != "${filename}" ]]; then
           mv "${file}" "${newname}"
           echo "[INFO] Renaming ${file} to uppercase: ${newname}"
       else

@@ -6,6 +6,6 @@
 # ren: Function to rename files extension.
 ren() {
   for f in *."$1"; do
-    mv "$f" "${f%."$1"}.$2"
+    mv "${f}" "${f%."$1"}.$2"
   done
 }

@@ -10,7 +10,7 @@ extract() {
 		return 1
 	fi
 
-	if [ -f "$1" ]; then
+	if [[ -f "$1" ]]; then
 		echo "[INFO] Extracting $1"
 		case $1 in
 		*.tar.bz2) tar xjf "$1" ;;
