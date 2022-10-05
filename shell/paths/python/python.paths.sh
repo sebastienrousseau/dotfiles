@@ -11,5 +11,9 @@ if [[ "${OSTYPE}" == "darwin"* ]]; then
 elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
   PYTHONHOME="/usr/lib/python*/"
 fi
+
+# Make Python use UTF-8 encoding for output to stdin, stdout, and stderr.
+export PYTHONIOENCODING='UTF-8';
+
 export PYTHONHOME
 export PATH="${PYTHONHOME}:${PATH}"
