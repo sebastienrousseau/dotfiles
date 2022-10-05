@@ -5,7 +5,7 @@
 
 ## 🅿🅽🅿🅼 🅿🅰🆃🅷🆂
 if [[ "${OSTYPE}" == "darwin"* ]]; then
-  PNPM_HOME=${HOME}/Library/pnpm
+  PNPM_HOME=/opt/homebrew/opt/pnpm
 elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
   PNPM_HOME="${HOME}"/.local/share/pnpm
 fi
