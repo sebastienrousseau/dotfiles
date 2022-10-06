@@ -1,4 +1,4 @@
-# Dotfiles v0.2.453
+# Dotfiles v0.2.454
 
 [![Banner representing the Dotfiles Library][logo]][website]
 
@@ -18,7 +18,7 @@
 Dotfiles are set of macOS / Linux and Windows configuration files.
 
 [![Getting Started][getting started]](#getting-started)
-[![Download Dotfiles v0.2.453][download_button]][download]
+[![Download Dotfiles v0.2.454][download_button]][download]
 
 ### Simply designed to fit your shell life
 
@@ -86,7 +86,7 @@ The following requirements are needed to install Dotfiles:
 
 ### 1️⃣ Download Dotfiles
 
-You can download the latest version (v0.2.453) with the following options:
+You can download the latest version (v0.2.454) with the following options:
 
 - [**Manual download**][releases] - **The easiest way to install Dotfiles.**
 - [**Install with PnPM**](https://www.npmjs.com/package/@sebastienrousseau/dotfiles)
@@ -400,7 +400,7 @@ bunch of awesome [contributors](https://github.com/sebastienrousseau/dotfiles/gr
 [contributing]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CONTRIBUTING.md
 [curl]: https://curl.se/
 [docs]: https://github.com/sebastienrousseau/dotfiles/docs
-[download]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.453.tar.gz
+[download]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.454.tar.gz
 [git]: https://git-scm.com/
 [github]: https://github.com/sebastienrousseau/dotfiles
 [issues]: https://github.com/sebastienrousseau/dotfiles/issues

@@ -5,11 +5,11 @@ importers:
   .:
     specifiers:
       filesizes: ^0.1.2
-      pnpm: ^7.13.1
+      pnpm: ^7.13.2
       rimraf: ^3.0.2
     devDependencies:
       filesizes: registry.npmjs.org/filesizes/0.1.2
-      pnpm: registry.npmjs.org/pnpm/7.13.1
+      pnpm: registry.npmjs.org/pnpm/7.13.2
       rimraf: registry.npmjs.org/rimraf/3.0.2
 
 packages:
@@ -192,10 +192,10 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
-  registry.npmjs.org/pnpm/7.13.1:
-    resolution: {integrity: sha512-Nu1LzxlH3qdIFe0DJ5SciqBl9i7t/eW+c0zKf9g8TXRo20EhXy/e9YwCLY2fEwbIYL/3gZ4zuys010PRpsbHFQ==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/pnpm/-/pnpm-7.13.1.tgz}
+  registry.npmjs.org/pnpm/7.13.2:
+    resolution: {integrity: sha512-lOQRBcCWycLK1PB9KptqTd6iyiH7m4GRuS4G2j4b74yDx/XvRXtP/weYz8e0/ia7HX1pMF1vJCF48ssklq0TJQ==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/pnpm/-/pnpm-7.13.2.tgz}
     name: pnpm
-    version: 7.13.1
+    version: 7.13.2
     engines: {node: '>=14.6'}
     hasBin: true
     dev: true
