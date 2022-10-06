@@ -75,7 +75,7 @@
 		"bk:zsh": "if [ -z $HOME/.zshrc ]; then mv -f $HOME/.zshrc $HOME/.dotfiles_backup/zshrc.bk; fi ",
 		"build": "pnpm run cp:shell && pnpm run cp:bin && pnpm run cp:make && pnpm run filesizes",
 		"clean:dist": "rimraf \"dist/\"",
-		"compile": "pnpm run clean:dist && tsc --build tsconfig.json && pnpm run build",
+		"compile": "pnpm run clean:dist && tsc --build --clean && tsc --build tsconfig.json && pnpm run build",
 		"copy": "pnpm run cp:dirs && pnpm run cp:bash && pnpm run cp:prof && pnpm run cp:tmux && pnpm run cp:curl && pnpm run cp:jsht && pnpm run cp:inpt && pnpm run cp:cert && pnpm run cp:vimr && pnpm run cp:wget && pnpm run cp:zshr",
 		"cp:bash": "cp ./shell/configurations/bash/bashrc $HOME/.bashrc",
 		"cp:bin":  "cp -R ./bin/ ./dist/bin",
@@ -96,7 +96,7 @@
 		"filesizes": "filesizes dist/ > dist/filesizes.txt",
 		"help": "sh ./bin/dotfiles.sh --help",
 		"installer": "pnpm run backup && pnpm run directory && pnpm run copy",
-		"start": "node index.js",
+		"start": "node dist/shell/index.js",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"types": "./dist/index.d.ts",
