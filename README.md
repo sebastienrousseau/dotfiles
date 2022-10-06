@@ -15,12 +15,14 @@
 
 ## 👋 Welcome to Dotfiles
 
-Dotfiles are set of macOS / Linux and Windows configuration files.
+### Simply designed to fit your shell life
+
+Dotfiles are a set of macOS, Linux and Windows configuration files. They are
+aimed at making your life easier by providing a set of scripts and configuration
+files with new ways to get things done.
 
 [![Getting Started][getting_started]][getting-started]
 [![Download Dotfiles v0.2.454][download_button]][download]
-
-### Simply designed to fit your shell life
 
 Dotfiles aggregates a collection of standalone configuration files (dotfiles)
 combined into a `shell` directory that can be used to customize your development
@@ -44,29 +46,42 @@ To read the documentation for Dotfiles, please visit:
 
 ## 🚀 Getting Started
 
-### 🔧 Installation
-
 We are so delighted that you have decided to try Dotfiles, and are sure that you
 will find Dotfiles unique and helpful.
 
-Dotfiles seeks to bring you high quality and easy to use standalone and modular configuration files that can be used to customize your development environment
+Dotfiles seeks to bring you high quality and easy to use standalone and modular
+configuration files that can be used to customize your development environment
 across numerous computers and operating systems (macOS, Windows, Linux).
 
+### 🔧 Installation
+
 We understand that you may want to install Dotfiles without reading long manuals
-and lengthy documentation. So we have tried to make the installation process as
-easy as possible.
+and lengthy documentation. In that respect, we have tried to make the
+installation process as easy as possible.
 
-### 📦 Prerequisites
+A range of installation methods are available, and we recommend that you choose
+the one that best suits your needs.
 
-However, we recommend that you read the below guidelines before installing
-Dotfiles. A range of installation methods are available, and we recommend that
-you choose the one that best suits your needs.
+Before you begin your installation, use this information to ensure that you meet
+all the hardware, software, and system requirements for installing Dotfiles.
+
+#### 📋 System Requirements
+
+You need a modern operating system to install Dotfiles. Here's an non-exhaustive
+list of the recommended operating systems that we support.
+
+If you don't see your operating system listed, it may still work, but we have
+yet been able to test it. If you have any issues, please let us know.
+
+- macOS 10.15 or later
+- Windows 10 or later
+- A Debian based distribution (Debian, Ubuntu, PoP!_OS, Zorin OS, Q4OS, Kali Linux, Devuan, Deepin, etc.)
 
 ![divider][divider]
 
-### ✔️ Requirements
+#### ✔️ Software Requirements
 
-The following requirements are needed to install Dotfiles:
+The following programs must be installed on your system to install Dotfiles:
 
 - [**Bash**][bash] - a shell, or command language interpreter, for the GNU
   operating system.

@@ -1,102 +1,104 @@
 {
-    "author": "Sebastien Rousseau (https://github.com/sebastienrousseau)",
-    "autoupdate": {
-        "fileMap": [
-            {
-                "basePath": "dist",
-                "files": [
-                    "**/*"
-                ]
-            }
-        ],
-        "source": "git",
-        "target": "git://github.com/sebastienrousseau/dotfiles.git"
-    },
-    "bin": {
-        "dotfiles": "./index.js"
-    },
-    "bugs": {
-        "url": "https://github.com/sebastienrousseau/dotfiles/issues"
-    },
-    "contributors": [
-        "Graham Colgate (https://github.com/gramtech)"
-    ],
-    "description": "Dotfiles - A set of macOS / Linux and Windows configuration files - Simply designed to fit your shell life.",
-    "devDependencies": {
-        "filesizes": "^0.1.2",
-        "pnpm": "^7.13.2",
-        "rimraf": "^3.0.2"
-    },
-    "directories": {
-        "bin": "./bin",
-        "docs": "./docs",
-        "shell": "./shell"
-    },
-    "files": [
-        "/index.js",
-        "/bin",
-        "/COPYRIGHT",
-        "/LICENSE",
-        "/Makefile",
-        "/package.json",
-        "/pnpm-lock.yaml",
-        "/pnpm-workspace.yaml",
-        "/README.md",
-        "/shell"
-    ],
-    "homepage": "https://dotfiles.io/",
-    "keywords": [
-        "dotfiles",
-        "bash",
-        "bash-profile",
-        "macos",
-        "macosx",
-        "shell",
-        "homebrew",
-        "dotfiles-resources"
-    ],
-    "license": "MIT",
-    "license_URI": "http://www.opensource.org/licenses/mit-license.php",
-    "main": "index.js",
-    "name": "@sebastienrousseau/dotfiles",
-    "publishConfig": {
-        "access": "public",
-        "registry": "https://npm.pkg.github.com/"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git@github.com:sebastienrousseau/dotfiles.git"
-    },
-    "scripts": {
-        "backup": "pnpm run bk:dir && pnpm run bk:bsh && pnpm run bk:zsh",
-        "bk:bsh": "if [ -z $HOME/.bashrc ]; then mv -f $HOME/.bashrc $HOME/.dotfiles_backup/bashrc.bk; fi ",
-        "bk:dir": "if [ -d $HOME/.dotfiles ]; then mv -f $HOME/.dotfiles $HOME/dotfiles_backup; fi ",
-        "bk:zsh": "if [ -z $HOME/.zshrc ]; then mv -f $HOME/.zshrc $HOME/.dotfiles_backup/zshrc.bk; fi ",
-        "build": "pnpm run clean:dist && pnpm run cp:shell && pnpm run cp:bin && pnpm run cp:docs  && pnpm run cp:make && pnpm run filesizes",
-        "clean:dist": "rimraf \"dist/\"",
-        "copy": "pnpm run cp:dirs && pnpm run cp:bash && pnpm run cp:prof && pnpm run cp:tmux && pnpm run cp:curl && pnpm run cp:jsht && pnpm run cp:inpt && pnpm run cp:cert && pnpm run cp:vimr && pnpm run cp:wget && pnpm run cp:zshr",
-        "cp:bash": "cp ./shell/configurations/bash/bashrc $HOME/.bashrc",
-        "cp:bin": "cp -R ./bin/ ./dist",
-        "cp:cert": "cp ./shell/configurations/curl/cacert.pem $HOME/cacert.pem",
-        "cp:curl": "cp ./shell/configurations/curl/curlrc $HOME/.curlrc",
-        "cp:dirs": "cp -R ./shell $HOME/.dotfiles/shell ",
-        "cp:docs": "cp -R ./docs ./dist/docs && cp ./README.md ./dist && cp ./LICENSE ./dist && cp ./COPYRIGHT ./dist",
-        "cp:inpt": "cp ./shell/configurations/inputrc/inputrc $HOME/.inputrc",
-        "cp:jsht": "cp ./shell/configurations/jshint/jshintrc $HOME/.jshintrc",
-        "cp:make": "cp ./Makefile ./dist",
-        "cp:prof": "cp ./shell/configurations/profile/profile $HOME/.profile",
-        "cp:shell": "cp -R ./shell/ ./dist",
-        "cp:tmux": "cp ./shell/configurations/tmux/tmux $HOME/.tmux.conf",
-        "cp:vimr": "cp ./shell/configurations/vim/vimrc $HOME/.vimrc",
-        "cp:wget": "cp ./shell/configurations/wget/wgetrc $HOME/.wgetrc",
-        "cp:zshr": "cp ./shell/configurations/zsh/zshrc $HOME/.zshrc",
-        "directory": "mkdir $HOME/.dotfiles",
-        "filesizes": "filesizes dist/ > dist/filesizes.txt",
-        "help": "sh ./bin/dotfiles.sh --help",
-        "installer": "pnpm run backup && pnpm run directory && pnpm run copy",
-        "start": "node index.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "type": "module",
-    "version": "0.2.454"
+	"assets":["index.js"],
+	"author": "Sebastien Rousseau (https://github.com/sebastienrousseau)",
+	"autoupdate": {
+		"fileMap": [
+			{
+				"basePath": "dist",
+				"files": [
+					"**/*"
+				]
+			}
+		],
+		"source": "git",
+		"target": "git://github.com/sebastienrousseau/dotfiles.git"
+	},
+	"bin": {
+		"dotfiles": "./index.js"
+	},
+	"bugs": {
+		"url": "https://github.com/sebastienrousseau/dotfiles/issues"
+	},
+	"contributors": [
+		"Graham Colgate (https://github.com/gramtech)"
+	],
+	"description": "Dotfiles - A set of macOS / Linux and Windows configuration files - Simply designed to fit your shell life.",
+	"devDependencies": {
+		"@types/node": "^16.11.64",
+		"filesizes": "^0.1.2",
+		"pnpm": "^7.13.2",
+		"rimraf": "^3.0.2",
+		"tsd": "0.24.1",
+		"typescript": "^4.8.4"
+	},
+	"directories": {
+		"bin": "./bin",
+		"docs": "./docs",
+		"shell": "./shell"
+	},
+	"engines": {
+		"node": "^12.20.0 || ^14.13.1 || >=16.0.0"
+	},
+	"exports": "./index.js",
+	"files": [
+		"index.js",
+    "dist/"
+	],
+	"homepage": "https://dotfiles.io/",
+	"keywords": [
+		"dotfiles",
+		"bash",
+		"bash-profile",
+		"macos",
+		"macosx",
+		"shell",
+		"homebrew",
+		"dotfiles-resources"
+	],
+	"license": "MIT",
+	"license_URI": "http://www.opensource.org/licenses/mit-license.php",
+	"lockfileVersion": 1,
+	"main": "./dist/index.js",
+	"name": "@sebastienrousseau/dotfiles",
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://npm.pkg.github.com/"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:sebastienrousseau/dotfiles.git"
+	},
+	"scripts": {
+		"backup": "pnpm run bk:dir && pnpm run bk:bsh && pnpm run bk:zsh",
+		"bk:bsh": "if [ -z $HOME/.bashrc ]; then mv -f $HOME/.bashrc $HOME/.dotfiles_backup/bashrc.bk; fi ",
+		"bk:dir": "if [ -d $HOME/.dotfiles ]; then mv -f $HOME/.dotfiles $HOME/dotfiles_backup; fi ",
+		"bk:zsh": "if [ -z $HOME/.zshrc ]; then mv -f $HOME/.zshrc $HOME/.dotfiles_backup/zshrc.bk; fi ",
+		"build": "pnpm run cp:shell && pnpm run cp:bin && pnpm run cp:make && pnpm run filesizes",
+		"clean:dist": "rimraf \"dist/\"",
+		"compile": "pnpm run clean:dist && tsc --build tsconfig.json && pnpm run build",
+		"copy": "pnpm run cp:dirs && pnpm run cp:bash && pnpm run cp:prof && pnpm run cp:tmux && pnpm run cp:curl && pnpm run cp:jsht && pnpm run cp:inpt && pnpm run cp:cert && pnpm run cp:vimr && pnpm run cp:wget && pnpm run cp:zshr",
+		"cp:bash": "cp ./shell/configurations/bash/bashrc $HOME/.bashrc",
+		"cp:bin":  "cp -R ./bin/ ./dist/bin",
+		"cp:cert": "cp ./shell/configurations/curl/cacert.pem $HOME/cacert.pem",
+		"cp:curl": "cp ./shell/configurations/curl/curlrc $HOME/.curlrc",
+		"cp:dirs": "cp -R ./shell $HOME/.dotfiles/shell/",
+		"cp:docs": "cp -R ./docs ./dist/docs && cp ./README.md ./dist && cp ./LICENSE ./dist && cp ./COPYRIGHT ./dist",
+		"cp:inpt": "cp ./shell/configurations/inputrc/inputrc $HOME/.inputrc",
+		"cp:jsht": "cp ./shell/configurations/jshint/jshintrc $HOME/.jshintrc",
+		"cp:make": "cp ./Makefile ./dist",
+		"cp:prof": "cp ./shell/configurations/profile/profile $HOME/.profile",
+		"cp:shell": "cp -R ./shell/ ./dist/shell/",
+		"cp:tmux": "cp ./shell/configurations/tmux/tmux $HOME/.tmux.conf",
+		"cp:vimr": "cp ./shell/configurations/vim/vimrc $HOME/.vimrc",
+		"cp:wget": "cp ./shell/configurations/wget/wgetrc $HOME/.wgetrc",
+		"cp:zshr": "cp ./shell/configurations/zsh/zshrc $HOME/.zshrc",
+		"directory": "mkdir $HOME/.dotfiles",
+		"filesizes": "filesizes dist/ > dist/filesizes.txt",
+		"help": "sh ./bin/dotfiles.sh --help",
+		"installer": "pnpm run backup && pnpm run directory && pnpm run copy",
+		"start": "node index.js",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"types": "./dist/index.d.ts",
+	"version": "0.2.454"
 }
