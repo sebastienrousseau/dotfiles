@@ -126,3 +126,4 @@ ehthumbs.db
 lib-cov
 yarn.lock
 Gemfile.lock
+tsconfig.tsbuildinfo
