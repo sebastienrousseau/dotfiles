@@ -17,7 +17,7 @@
 
 Dotfiles are set of macOS / Linux and Windows configuration files.
 
-[![Getting Started][getting started]](#getting-started)
+[![Getting Started][getting started]][getting-started]
 [![Download Dotfiles v0.2.454][download_button]][download]
 
 ### Simply designed to fit your shell life
@@ -42,7 +42,7 @@ To read the documentation for Dotfiles, please visit:
 
 ![divider][divider]
 
-## Getting Started
+## 🚀 Getting Started
 
 ### 🔧 Installation
 
@@ -401,6 +401,7 @@ bunch of awesome [contributors](https://github.com/sebastienrousseau/dotfiles/gr
 [curl]: https://curl.se/
 [docs]: https://github.com/sebastienrousseau/dotfiles/docs
 [download]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.454.tar.gz
+[getting-started]: https://github.com/sebastienrousseau/dotfiles#getting-started
 [git]: https://git-scm.com/
 [github]: https://github.com/sebastienrousseau/dotfiles
 [issues]: https://github.com/sebastienrousseau/dotfiles/issues
