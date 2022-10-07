@@ -69,12 +69,10 @@
 		"url": "git@github.com:sebastienrousseau/dotfiles.git"
 	},
 	"scripts": {
-		"//": "Backing up routines",
 		"backup": "pnpm run bk:dir && pnpm run bk:bsh && pnpm run bk:zsh",
 		"bk:bsh": "if [ -z $HOME/.bashrc ]; then mv -f $HOME/.bashrc $HOME/.dotfiles_backup/bashrc.bk; fi ",
 		"bk:dir": "if [ -d $HOME/.dotfiles ]; then mv -f $HOME/.dotfiles $HOME/dotfiles_backup; fi ",
 		"bk:zsh": "if [ -z $HOME/.zshrc ]; then mv -f $HOME/.zshrc $HOME/.dotfiles_backup/zshrc.bk; fi ",
-		"//": "Copy routines",
 		"copy": "chmod 755 \"./bin/copy.sh\" && ./bin/copy.sh",
 		"cp:bash": "cp ./shell/configurations/bash/bashrc $HOME/.bashrc",
 		"cp:bin":  "cp -R ./bin/ ./dist/bin",
@@ -90,10 +88,8 @@
 		"cp:vimr": "cp ./shell/configurations/vim/vimrc $HOME/.vimrc",
 		"cp:wget": "cp ./shell/configurations/wget/wgetrc $HOME/.wgetrc",
 		"cp:zshr": "cp ./shell/configurations/zsh/zshrc $HOME/.zshrc",
-		"//": "Cleanup routines",
 		"clean": "rimraf \"dist/\" && tsc --build --clean",
 		"cl:tmp": "rimraf \"./dist/shell/**/*.tmp\"",
-		"//": "Generic routines",
 		"build": "pnpm run clean && tsc --build tsconfig.json && pnpm run compile",
 		"compile": "chmod 755 \"./bin/compile.sh\" && ./bin/compile.sh",
 		"directory": "mkdir $HOME/.dotfiles",
