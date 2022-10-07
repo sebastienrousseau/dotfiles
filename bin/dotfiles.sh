@@ -119,6 +119,7 @@ copy() {
 
 ## 🅷🅴🅻🅿 🅼🅴🅽🆄 - Display help menu.
 help() {
+  clear
   cat <<EOF
 
 ┌───────────────────────────────────────────┐
@@ -129,16 +130,22 @@ help() {
 
 USAGE:
 
-  dotfiles.sh [COMMAND]
+  dotfiles [COMMAND]
 
 COMMANDS:
 
-  backup    - Backup previous dotfiles from your '${HOME}' directory.
-  copy      - Copy dotfiles (v${VERSION}) to your '${HOME}' directory.
-  download  - Download the latest dotfiles package (v${VERSION}.zip).
-  prepare   - Run the full installation process.
-  unpack    - Unpack Dotfiles (v${VERSION}.zip) package.
-  help      - Show the help menu.
+  backup    - Backup existing dotfiles from the '${HOME}' directory
+  download  - Download the latest Dotfiles (v${VERSION})
+  copy      - Copy the new dotfiles files to your '${HOME}' directory
+  unpack    - Unpack the Dotfiles
+  prepare   - Run the full installation process
+  help      - Show the help menu
+
+DOCUMENTATION:
+  website   - https://dotfiles.io
+
+LICENSE:
+  This project is licensed under the MIT License.
 
 EOF
 }
