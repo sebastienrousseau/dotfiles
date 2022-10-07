@@ -10,5 +10,6 @@ if command -v 'tmux' >/dev/null; then
 fi
 
 if [[ -z "${TMUX}" ]] && [[ ${UID} != 0 ]]; then
-  tmux new -s "Dotfiles (v0.2.454)"
+  tmux kill-session -t "Dotfiles (v0.2.454)" 2>/dev/null
+  tmux new-session -t "Dotfiles (v0.2.454)"
 fi
