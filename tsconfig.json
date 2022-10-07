@@ -22,7 +22,7 @@
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo" /* Specify file to store incremental compilation information. */
   },
   "exclude": [
-    "node_modules",
+		"node_modules",
     "dist",
     "test"
   ],

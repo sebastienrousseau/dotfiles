@@ -6,7 +6,7 @@ importers:
     specifiers:
       '@types/node': ^16.11.64
       filesizes: ^0.1.2
-      jsmin: 1.0.1
+      jsmin: ^1.0.1
       pnpm: ^7.13.2
       rimraf: ^3.0.2
       tsd: 0.24.1
