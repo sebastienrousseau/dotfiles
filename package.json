@@ -94,7 +94,7 @@
 		"clean": "rimraf \"dist/\" && tsc --build --clean",
 		"cl:tmp": "rimraf \"./dist/shell/**/*.tmp\"",
 		"//": "Generic routines",
-		"build": "tsc --build tsconfig.json && pnpm run compile",
+		"build": "pnpm run clean && tsc --build tsconfig.json && pnpm run compile",
 		"compile": "chmod 755 \"./bin/compile.sh\" && ./bin/compile.sh",
 		"directory": "mkdir $HOME/.dotfiles",
 		"filesizes": "filesizes ./dist/ > ./dist/filesizes.txt",
