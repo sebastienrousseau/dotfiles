@@ -4,7 +4,6 @@
 
 # Exclude Directories and package
 *.tgz
-*.wip
 debug
 dist
 /.git/
