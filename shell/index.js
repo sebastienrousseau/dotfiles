@@ -2,12 +2,18 @@
 const exec = require("child_process").exec;
 
 function main() {
-  exec("make installer", function (err, stdout) {
-    if (err) {
-      console.error(err);
+  exec("make installer", (error, stdout, stderr) => {
+    if (error) {
+      console.error(`error: ${error.message}`);
       return;
     }
-    console.log(stdout);
+
+    if (stderr) {
+      console.error(`stderr: ${stderr}`);
+      return;
+    }
+
+    console.log(`stdout:\n${stdout}`);
   });
 }
 
