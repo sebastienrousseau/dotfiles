@@ -55,6 +55,14 @@ backup() {
   done
 }
 
+## 🅲🅻🅴🅰🅽 - Clean up.
+clean() {
+  echo "${BIRed}❭${NC} Cleaning up..."
+  rm -rfi "${DOTFILESDIR}"
+  rm -rfi "${BACKUPDIR}"
+  rm -rfi "${DOWNLOADDIR}"/dotfiles*
+}
+
 ## 🅳🅾🆆🅽🅻🅾🅰🅳 - Download the dotfiles on your system.
 download() {
   echo "${BIRed}❭${NC} Downloading ${BIGreen}Dotfiles v${VERSION}${NC} on your system."
@@ -135,10 +143,11 @@ USAGE:
 COMMANDS:
 
   backup    - Backup existing dotfiles from the '${HOME}' directory
-  download  - Download the latest Dotfiles (v${VERSION})
+  clean     - Removes any previous setup directories
   copy      - Copy the new dotfiles files to your '${HOME}' directory
-  unpack    - Unpack the Dotfiles
+  download  - Download the latest Dotfiles (v${VERSION})
   prepare   - Run the full installation process
+  unpack    - Unpack the Dotfiles
   help      - Show the help menu
 
 DOCUMENTATION:
@@ -154,6 +163,9 @@ EOF
 if [ "$1" = "backup" ]; then
   echo "${BIRed}❭${NC} Backing up.${NC}"
   backup
+elif [ "$1" = "clean" ]; then
+  echo "${BIRed}❭${NC} Removes any previous setup directories.${NC}"
+  clean
 elif [ "$1" = "copy" ]; then
   echo "${BIRed}❭${NC} Copying dotfiles.${NC}"
   copy
