@@ -5,6 +5,7 @@ importers:
   .:
     specifiers:
       '@types/node': ^16.11.64
+      '@types/shelljs': 0.8.11
       filesizes: ^0.1.2
       jsmin: ^1.0.1
       pnpm: ^7.13.2
@@ -15,6 +16,7 @@ importers:
       typescript: ^4.8.4
     devDependencies:
       '@types/node': registry.npmjs.org/@types/node/16.11.64
+      '@types/shelljs': registry.npmjs.org/@types/shelljs/0.8.11
       filesizes: registry.npmjs.org/filesizes/0.1.2
       jsmin: registry.npmjs.org/jsmin/1.0.1
       pnpm: registry.npmjs.org/pnpm/7.13.2
@@ -101,10 +103,25 @@ packages:
     version: 1.0.0
     dev: true
 
+  registry.npmjs.org/@types/glob/8.0.0:
+    resolution: {integrity: sha512-l6NQsDDyQUVeoTynNpC9uRvCUint/gSUXQA2euwmTuWGvPY5LSDUu6tkCtJB2SvGQlJQzLaKqcGZP4//7EDveA==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/@types/glob/-/glob-8.0.0.tgz}
+    name: '@types/glob'
+    version: 8.0.0
+    dependencies:
+      '@types/minimatch': registry.npmjs.org/@types/minimatch/5.1.2
+      '@types/node': registry.npmjs.org/@types/node/16.11.64
+    dev: true
+
   registry.npmjs.org/@types/json-schema/7.0.11:
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/@types/json-schema/-/json-schema-7.0.11.tgz}
     name: '@types/json-schema'
     version: 7.0.11
+    dev: true
+
+  registry.npmjs.org/@types/minimatch/5.1.2:
+    resolution: {integrity: sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/@types/minimatch/-/minimatch-5.1.2.tgz}
+    name: '@types/minimatch'
+    version: 5.1.2
     dev: true
 
   registry.npmjs.org/@types/minimist/1.2.2:
@@ -123,6 +140,15 @@ packages:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/@types/normalize-package-data/-/normalize-package-data-2.4.1.tgz}
     name: '@types/normalize-package-data'
     version: 2.4.1
+    dev: true
+
+  registry.npmjs.org/@types/shelljs/0.8.11:
+    resolution: {integrity: sha512-x9yaMvEh5BEaZKeVQC4vp3l+QoFj3BXcd4aYfuKSzIIyihjdVARAadYy3SMNIz0WCCdS2vB9JL/U6GQk5PaxQw==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/@types/shelljs/-/shelljs-0.8.11.tgz}
+    name: '@types/shelljs'
+    version: 0.8.11
+    dependencies:
+      '@types/glob': registry.npmjs.org/@types/glob/8.0.0
+      '@types/node': registry.npmjs.org/@types/node/16.11.64
     dev: true
 
   registry.npmjs.org/ansi-escapes/4.3.2:
