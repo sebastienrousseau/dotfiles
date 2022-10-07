@@ -9,6 +9,8 @@ importers:
       jsmin: ^1.0.1
       pnpm: ^7.13.2
       rimraf: ^3.0.2
+      shelljs: ^0.8.5
+      shelljs-nodecli: ^0.1.1
       tsd: 0.24.1
       typescript: ^4.8.4
     devDependencies:
@@ -17,6 +19,8 @@ importers:
       jsmin: registry.npmjs.org/jsmin/1.0.1
       pnpm: registry.npmjs.org/pnpm/7.13.2
       rimraf: registry.npmjs.org/rimraf/3.0.2
+      shelljs: registry.npmjs.org/shelljs/0.8.5
+      shelljs-nodecli: registry.npmjs.org/shelljs-nodecli/0.1.1
       tsd: registry.npmjs.org/tsd/0.24.1
       typescript: registry.npmjs.org/typescript/4.8.4
 
@@ -560,6 +564,13 @@ packages:
     version: 2.0.4
     dev: true
 
+  registry.npmjs.org/interpret/1.4.0:
+    resolution: {integrity: sha512-agE4QfB2Lkp9uICn7BAqoscw4SZP9kTE2hxiFI3jBPmXJfdqiahTbUuKGsMoN2GtqL9AxhYioAcVvgsb1HvRbA==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/interpret/-/interpret-1.4.0.tgz}
+    name: interpret
+    version: 1.4.0
+    engines: {node: '>= 0.10'}
+    dev: true
+
   registry.npmjs.org/irregular-plurals/3.3.0:
     resolution: {integrity: sha512-MVBLKUTangM3EfRPFROhmWQQKRDsrgI83J8GS3jXy+OwYqiR2/aoWndYQ5416jLE3uaGgLH7ncme3X9y09gZ3g==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/irregular-plurals/-/irregular-plurals-3.3.0.tgz}
     name: irregular-plurals
@@ -932,6 +943,15 @@ packages:
       type-fest: registry.npmjs.org/type-fest/0.6.0
     dev: true
 
+  registry.npmjs.org/rechoir/0.6.2:
+    resolution: {integrity: sha512-HFM8rkZ+i3zrV+4LQjwQ0W+ez98pApMGM3HUrN04j3CqzPOzl9nmP15Y8YXNm8QHGv/eacOVEjqhmWpkRV0NAw==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/rechoir/-/rechoir-0.6.2.tgz}
+    name: rechoir
+    version: 0.6.2
+    engines: {node: '>= 0.10'}
+    dependencies:
+      resolve: registry.npmjs.org/resolve/1.22.1
+    dev: true
+
   registry.npmjs.org/redent/3.0.0:
     resolution: {integrity: sha512-6tDA8g98We0zd0GvVeMT9arEOnTw9qM03L9cJXaCjrip1OO764RDBLBfrB4cwzNGDj5OA5ioymC9GkizgWJDUg==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/redent/-/redent-3.0.0.tgz}
     name: redent
@@ -992,6 +1012,34 @@ packages:
     hasBin: true
     dependencies:
       lru-cache: registry.npmjs.org/lru-cache/6.0.0
+    dev: true
+
+  registry.npmjs.org/shelljs-nodecli/0.1.1:
+    resolution: {integrity: sha512-/e+APCWKKW9A8YMHKgDzhWQ21zPuDLjn6ATBczxbp6uUeiCSwvw95ynKAjMsRd1yrd5dlCkMKJoc/Lpwrt2w+A==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/shelljs-nodecli/-/shelljs-nodecli-0.1.1.tgz}
+    name: shelljs-nodecli
+    version: 0.1.1
+    dependencies:
+      shelljs: registry.npmjs.org/shelljs/0.2.6
+    dev: true
+
+  registry.npmjs.org/shelljs/0.2.6:
+    resolution: {integrity: sha512-LQiM15qPbSyzHDFfI4v7EVhjBXG5PUAKWVBnVMBXwdlQSHZtzKYeKGzDHBIqpenPrCsPWqBSOF5o7oSvSfX+CA==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/shelljs/-/shelljs-0.2.6.tgz}
+    name: shelljs
+    version: 0.2.6
+    engines: {node: '>=0.8.0'}
+    hasBin: true
+    dev: true
+
+  registry.npmjs.org/shelljs/0.8.5:
+    resolution: {integrity: sha512-TiwcRcrkhHvbrZbnRcFYMLl30Dfov3HKqzp5tO5b4pt6G/SezKcYhmDg15zXVBswHmctSAQKznqNW2LO5tTDow==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/shelljs/-/shelljs-0.8.5.tgz}
+    name: shelljs
+    version: 0.8.5
+    engines: {node: '>=4'}
+    hasBin: true
+    dependencies:
+      glob: registry.npmjs.org/glob/7.2.3
+      interpret: registry.npmjs.org/interpret/1.4.0
+      rechoir: registry.npmjs.org/rechoir/0.6.2
     dev: true
 
   registry.npmjs.org/slash/3.0.0:

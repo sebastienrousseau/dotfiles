@@ -1,16 +1,8 @@
 "use strict";
-const exec = require("child_process").exec;
+var shell = require("shelljs");
 
 function main() {
-  exec("make installer", (error, stdout, stderr) => {
-    if (error) {
-      return;
-    }
-
-    if (stderr) {
-      return;
-    }
-  });
+  shell.exec("pnpm run prepare");
 }
 
 main();
