@@ -6,7 +6,6 @@
 *.tgz
 debug
 dist
-*.json
 /.git/
 /.vscode/
 /build/
