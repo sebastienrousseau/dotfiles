@@ -56,7 +56,7 @@ else
 endif
 
 .PHONY: clean
-clean: # @HELP Removes any previous setup directories. (site, theme source and theme folders)
+clean: # @HELP Removes any previous setup directories.
 clean:
 ifdef PNPM
 	pnpm run clean
