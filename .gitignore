@@ -4,6 +4,7 @@
 
 # Exclude Directories and package
 *.tgz
+*.na
 debug
 dist
 /.git/
