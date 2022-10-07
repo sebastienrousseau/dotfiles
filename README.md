@@ -160,25 +160,34 @@ To install the latest version of the dotfiles, run the following command:
 
 #### Using make (easiest)
 
-Simply run the following command in your terminal / shell:
+The easiest way to install Dotfiles is to use the `make` command. This will
+install the latest version of the dotfiles and will automatically backup
+any existing dotfiles you may have into a backup directory
+`$HOME/dotfiles_backup`.
+
+The installer will check if you have PnPM installed to switch to the PnPM installation method. If not, it will fallback to equivalent shell scripts.
+
+Switch to the `dist` directory and run:
 
 ```bash
-cd ~/dist && make install
+make prepare
 ```
 
-or if you want to just check the options available, run the following command:
+You can also just check the installer options available, by simply running:
 
 ```bash
 make help
 ```
 
-#### Using PnPM (recommended if you have PnPM installed)
+#### Using PnPM (highly recommended if you have PnPM installed)
 
 PnPM is a key dependency of the dotfiles package. It will help you install the
 dotfiles rapidly and very efficiently.
 
+Switch to the `dist` directory and run:
+
 ```bash
-pnpm prepare
+pnpm run prepare
 ```
 
 ### Post installation
