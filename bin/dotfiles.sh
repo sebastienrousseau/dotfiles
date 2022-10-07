@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.453) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.454) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
 ## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set variables.
 BACKUPDIR="${HOME}/.dotfiles_backup"  # Backup directory.
-BIGreen='\033[1;92m'               # Green color.
-BIRed='\033[1;91m'                 # Red color.
-DOTFILESDIR="${HOME}/.dotfiles"    # Location of dotfiles.
-DOWNLOADDIR="${HOME}/Downloads"    # Download directory.
-NC='\033[0m'                       # Reset/No Color
-VERSION="0.2.453"                  # Dotfiles Version number.
+BIGreen='\033[1;92m'                  # Green color.
+BIRed='\033[1;91m'                    # Red color.
+DOTFILESDIR="${HOME}/.dotfiles"       # Location of dotfiles.
+DOWNLOADDIR="${HOME}/Downloads"       # Download directory.
+NC='\033[0m'                          # Reset/No Color
+VERSION="0.2.454"                     # Dotfiles Version number.
 
 ## 🅱🅰🅲🅺🆄🅿 - Backup existing files.
 backup() {
@@ -55,47 +55,64 @@ backup() {
   done
 }
 
-## 🅸🅽🆂🆃🅰🅻🅻🅴🆁 - Install dotfiles.
+## 🅲🅻🅴🅰🅽 - Clean up.
+clean() {
+  echo "${BIRed}❭${NC} Cleaning up..."
+  rm -rfi "${DOTFILESDIR}"
+  rm -rfi "${BACKUPDIR}"
+  rm -rfi "${DOWNLOADDIR}"/dotfiles*
+}
+
+## 🅳🅾🆆🅽🅻🅾🅰🅳 - Download the dotfiles on your system.
 download() {
-  echo "${BIRed}❭${NC} Installing ${BIGreen}Dotfiles v${VERSION}${NC}"
+  echo "${BIRed}❭${NC} Downloading ${BIGreen}Dotfiles v${VERSION}${NC} on your system."
   # wget https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v"${VERSION}".zip -N -O "${DOWNLOADDIR}/v${VERSION}.zip"
   curl https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v"${VERSION}".zip -o "${DOWNLOADDIR}"/v"${VERSION}".zip
 }
 
-## 🆄🅽🅿🅰🅲🅺 - Unpack installer.
+## 🆄🅽🅿🅰🅲🅺 - Unpack the dotfiles on your system.
 unpack() {
-  echo "${BIRed}❭${NC} Unpacking ${BIGreen}Dotfiles v${VERSION}${NC}"
+  echo "${BIRed}❭${NC} Unpacking ${BIGreen}Dotfiles v${VERSION}${NC}."
   unzip -qq -u "${DOWNLOADDIR}"/v"${VERSION}".zip -d "${DOWNLOADDIR}"
   mv "${DOWNLOADDIR}/dotfiles-${VERSION}/shell/" "${DOTFILESDIR}"
   rm "${DOWNLOADDIR}/v${VERSION}.zip"
 }
 
-## 🅸🅽🆂🆃🅰🅻🅻 - Install dotfiles.
-installer() {
-  echo "${BIRed}❭${NC} Installing dotfiles..."
+## 🅿🆁🅴🅿🅰🆁🅴 - Prepare the dotfiles on your system.
+prepare() {
+  echo "${BIRed}❭${NC} Preparing the dotfiles on your system."
   backup &&
   download &&
   unpack &&
   copy
 }
 
-## 🅲🅾🅿🆈 - Copy dotfiles.
+## 🅲🅾🅿🆈 - Copy the dotfiles on your system.
 copy() {
-  # echo "${BIRed}❭${NC} Switching to the Dotfiles directory"
+  # echo "${BIRed}❭${NC} Copying the Dotfiles on your system."
   # cd "${DOTFILESDIR}" &&
 
-  echo "${BIRed}❭${NC} Launching the installation script..."
+  echo "${BIRed}❭${NC} Copying the Dotfiles on your system."
+  echo "${BIRed}❭${NC} Copying ${BIGreen}.bashrc${NC}"
   cp -f "${DOTFILESDIR}"/shell/configurations/bash/bashrc "${HOME}"/.bashrc &&
+  echo "${BIRed}❭${NC} Copying ${BIGreen}cacert.pem${NC}"
   cp -f "${DOTFILESDIR}"/shell/configurations/curl/cacert.pem "${HOME}"/cacert.pem &&
+  echo "${BIRed}❭${NC} Copying ${BIGreen}.curlrc${NC}"
   cp -f "${DOTFILESDIR}"/shell/configurations/curl/curlrc "${HOME}"/.curlrc &&
+  echo "${BIRed}❭${NC} Copying ${BIGreen}.jshintrc${NC}"
   cp -f "${DOTFILESDIR}"/shell/configurations/jshint/jshintrc "${HOME}"/.jshintrc &&
+  echo "${BIRed}❭${NC} Copying ${BIGreen}.profile${NC}"
   cp -f "${DOTFILESDIR}"/shell/configurations/profile/profile "${HOME}"/.profile &&
+  echo "${BIRed}❭${NC} Copying ${BIGreen}.tmux.conf${NC}"
   cp -f "${DOTFILESDIR}"/shell/configurations/tmux/tmux "${HOME}"/.tmux.conf &&
+  echo "${BIRed}❭${NC} Copying ${BIGreen}.vimrc${NC}"
   cp -f "${DOTFILESDIR}"/shell/configurations/vim/vimrc "${HOME}"/.vimrc &&
+  echo "${BIRed}❭${NC} Copying ${BIGreen}.wgetrc${NC}"
   cp -f "${DOTFILESDIR}"/shell/configurations/wget/wgetrc "${HOME}"/.wgetrc &&
+  echo "${BIRed}❭${NC} Copying ${BIGreen}.zshrc${NC}"
   cp -f "${DOTFILESDIR}"/shell/configurations/zsh/zshrc "${HOME}"/.zshrc
 
-  echo "${BIRed}❭${NC} Cleaning up..."
+  echo "${BIRed}❭${NC} Cleaning up installation files."
   rm -Rf "${DOTFILESDIR}"/shell/configurations/bash &&
   rm -Rf "${DOTFILESDIR}"/shell/configurations/curl &&
   rm -Rf "${DOTFILESDIR}"/shell/configurations/jshint &&
@@ -105,11 +122,12 @@ copy() {
   rm -Rf "${DOTFILESDIR}"/shell/configurations/wget &&
   rm -Rf "${DOTFILESDIR}"/shell/configurations/zsh &&
 
-  echo "${BIRed}❭${NC} ${BIGreen}Dotfiles v${VERSION}${NC} installed."
+  echo "${BIRed}❭${NC} ${BIGreen}Dotfiles v${VERSION}${NC} has been installed on your system."
 }
 
 ## 🅷🅴🅻🅿 🅼🅴🅽🆄 - Display help menu.
 help() {
+  clear
   cat <<EOF
 
 ┌───────────────────────────────────────────┐
@@ -120,16 +138,23 @@ help() {
 
 USAGE:
 
-  dotfiles.sh [COMMAND]
+  dotfiles [COMMAND]
 
 COMMANDS:
 
-  backup    - Backup previous dotfiles from your '${HOME}' directory.
-  copy      - Copy dotfiles (v${VERSION}) to your '${HOME}' directory.
-  download  - Download the latest dotfiles package (v${VERSION}.zip).
-  installer - Run the full installation process.
-  unpack    - Unpack Dotfiles (v${VERSION}.zip) package.
-  help      - Show the help menu.
+  backup    - Backup existing dotfiles from the '${HOME}' directory
+  clean     - Removes any previous setup directories
+  copy      - Copy the new dotfiles files to your '${HOME}' directory
+  download  - Download the latest Dotfiles (v${VERSION})
+  prepare   - Run the full installation process
+  unpack    - Unpack the Dotfiles
+  help      - Show the help menu
+
+DOCUMENTATION:
+  website   - https://dotfiles.io
+
+LICENSE:
+  This project is licensed under the MIT License.
 
 EOF
 }
@@ -138,6 +163,9 @@ EOF
 if [ "$1" = "backup" ]; then
   echo "${BIRed}❭${NC} Backing up.${NC}"
   backup
+elif [ "$1" = "clean" ]; then
+  echo "${BIRed}❭${NC} Removes any previous setup directories.${NC}"
+  clean
 elif [ "$1" = "copy" ]; then
   echo "${BIRed}❭${NC} Copying dotfiles.${NC}"
   copy
@@ -146,9 +174,9 @@ elif [ "$1" = "download" ]; then
   download
 elif [ "$1" = "help" ]; then
   help
-elif [ "$1" = "installer" ]; then
+elif [ "$1" = "prepare" ]; then
   echo "${BIRed}❭${NC} Installing ${BIGreen}Dotfiles v${VERSION}${NC}."
-  installer
+  prepare
 elif [ "$1" = "unpack" ]; then
   echo "${BIRed}❭${NC} Unpacking ${BIGreen}Dotfiles v${VERSION}${NC}."
   unpack

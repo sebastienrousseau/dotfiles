@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "allowJs": true, /* Allow javascript files to be compiled. */
+    "allowSyntheticDefaultImports": true, /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */
+    "alwaysStrict": true, /* Parse in strict mode and emit "use strict" for each source file. */
+    "baseUrl": ".", /* Base directory to resolve non-absolute module names. */
+    "checkJs": true, /* Check javascript files for errors. */
+    "composite": true, /* Enable project compilation */
+    "declaration": true, /* Generates corresponding '.d.ts' file. */
+    "declarationMap": true, /* Generates a sourcemap for each corresponding '.d.ts' file. */
+    "forceConsistentCasingInFileNames": true, /* Disallow inconsistently-cased references to the same file. */
+    "lib": [
+      "es2015"
+    ], /* Specify library files to be included in the compilation. */
+    "newLine": "lf", /* Specifies the end of line sequence to be used when emitting files: 'crlf' (Windows) or 'lf' (Unix). */
+    "outDir": "./dist", /* Redirect output structure to the directory. */
+    "preserveConstEnums": true, /* Do not convert constant enum declarations to enums with string valued members. */
+    "pretty": true, /* Enable verbose and human readable output. */
+    "removeComments": true, /* Do not emit comments to output. */
+    "rootDir": ".", /* Specify the root directory of input files. */
+    "sourceMap": true, /* Generates corresponding '.map' file. */
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo" /* Specify file to store incremental compilation information. */
+  },
+  "exclude": [
+		"node_modules",
+    "dist",
+    "test"
+  ],
+  "include": [
+    "shell/index.js"
+  ]
+}

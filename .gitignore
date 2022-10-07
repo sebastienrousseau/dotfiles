@@ -1,4 +1,4 @@
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.453) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.454) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
@@ -6,7 +6,6 @@
 *.tgz
 debug
 dist
-*.json
 /.git/
 /.vscode/
 /build/
@@ -126,3 +125,4 @@ ehthumbs.db
 lib-cov
 yarn.lock
 Gemfile.lock
+tsconfig.tsbuildinfo

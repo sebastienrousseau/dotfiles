@@ -1,12 +1,11 @@
 #!/usr/bin/env make -f
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.453) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.454) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
 .DEFAULT_GOAL := help
 
-homedir := ./installer
 language := en
 PNPM := $(shell command -v pnpm 2> /dev/null)
 HOMEDIR:= $(shell pwd)
@@ -20,13 +19,13 @@ else
 	sh $(HOMEDIR)/bin/dotfiles.sh backup
 endif
 
-.PHONY: installer
-installer: # @HELP Install the dotfiles on your system.
-installer: ## Install the dotfiles on your system.
+.PHONY: prepare
+prepare: # @HELP Prepare the dotfiles on your system.
+prepare: ## Prepare the dotfiles on your system.
 ifdef PNPM
-	pnpm run installer
+	pnpm run prepare
 else
-	sh $(HOMEDIR)/bin/dotfiles installer
+	sh $(HOMEDIR)/bin/dotfiles prepare
 endif
 
 .PHONY: copy
@@ -57,7 +56,7 @@ else
 endif
 
 .PHONY: clean
-clean: # @HELP Removes any previous setup directories. (site, theme source and theme folders)
+clean: # @HELP Removes any previous setup directories.
 clean:
 ifdef PNPM
 	pnpm run clean

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.453) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.454) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
@@ -10,5 +10,6 @@ if command -v 'tmux' >/dev/null; then
 fi
 
 if [[ -z "${TMUX}" ]] && [[ ${UID} != 0 ]]; then
-  tmux new -s "Dotfiles"
+  tmux kill-session -t "Dotfiles (v0.2.454)" 2>/dev/null
+  tmux new-session -t "Dotfiles (v0.2.454)"
 fi

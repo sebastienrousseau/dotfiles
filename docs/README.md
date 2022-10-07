@@ -1,4 +1,4 @@
-# Dotfiles v0.2.453
+# Dotfiles
 
 [![Banner representing the Dotfiles Library][logo]][website]
 
@@ -13,14 +13,16 @@
 • [Request Feature][issues]
 • [Contributing Guidelines][contributing]**
 
-## 👋 Welcome to Dotfiles
-
-Dotfiles are set of macOS / Linux and Windows configuration files.
-
-[![Getting Started][getting started]](#getting-started)
-[![Download Dotfiles v0.2.453][download_button]][download]
+## 👋 Welcome to Dotfiles (v0.2.454)
 
 ### Simply designed to fit your shell life
+
+Dotfiles are a set of macOS, Linux and Windows configuration files. They are
+aimed at making your life easier by providing a set of scripts and configuration
+files with new ways to get things done.
+
+[![Getting Started][getting_started]][getting-started]
+[![Download Dotfiles v0.2.454][download_button]][download]
 
 Dotfiles aggregates a collection of standalone configuration files (dotfiles)
 combined into a `shell` directory that can be used to customize your development
@@ -42,31 +44,44 @@ To read the documentation for Dotfiles, please visit:
 
 ![divider][divider]
 
-## Getting Started
-
-### 🔧 Installation
+## 🚀 Getting Started
 
 We are so delighted that you have decided to try Dotfiles, and are sure that you
 will find Dotfiles unique and helpful.
 
-Dotfiles seeks to bring you high quality and easy to use standalone and modular configuration files that can be used to customize your development environment
+Dotfiles seeks to bring you high quality and easy to use standalone and modular
+configuration files that can be used to customize your development environment
 across numerous computers and operating systems (macOS, Windows, Linux).
 
+### 🔧 Installation
+
 We understand that you may want to install Dotfiles without reading long manuals
-and lengthy documentation. So we have tried to make the installation process as
-easy as possible.
+and lengthy documentation. In that respect, we have tried to make the
+installation process as easy as possible.
 
-### 📦 Prerequisites
+A range of installation methods are available, and we recommend that you choose
+the one that best suits your needs.
 
-However, we recommend that you read the below guidelines before installing
-Dotfiles. A range of installation methods are available, and we recommend that
-you choose the one that best suits your needs.
+Before you begin your installation, use this information to ensure that you meet
+all the hardware, software, and system requirements for installing Dotfiles.
+
+#### 📋 System Requirements
+
+You need a modern operating system to install Dotfiles. Here's an non-exhaustive
+list of the recommended operating systems that we support.
+
+If you don't see your operating system listed, it may still work, but we have
+yet been able to test it. If you have any issues, please let us know.
+
+- macOS 10.15 or later
+- Windows 10 or later
+- A Debian based distribution (Debian, Ubuntu, PoP!_OS, Zorin OS, Q4OS, Kali Linux, Devuan, Deepin, etc.)
 
 ![divider][divider]
 
-### ✔️ Requirements
+#### ✔️ Software Requirements
 
-The following requirements are needed to install Dotfiles:
+The following programs must be installed on your system to install Dotfiles:
 
 - [**Bash**][bash] - a shell, or command language interpreter, for the GNU
   operating system.
@@ -86,7 +101,7 @@ The following requirements are needed to install Dotfiles:
 
 ### 1️⃣ Download Dotfiles
 
-You can download the latest version (v0.2.453) with the following options:
+You can download the latest version (v0.2.454) with the following options:
 
 - [**Manual download**][releases] - **The easiest way to install Dotfiles.**
 - [**Install with PnPM**](https://www.npmjs.com/package/@sebastienrousseau/dotfiles)
@@ -143,27 +158,36 @@ could be required to restore your previous installation.
 
 To install the latest version of the dotfiles, run the following command:
 
-#### Using make (highly recommended)
+#### Using make (easiest)
 
-Simply run the following command in your terminal / shell:
+The easiest way to install Dotfiles is to use the `make` command. This will
+install the latest version of the dotfiles and will automatically backup
+any existing dotfiles you may have into a backup directory
+`$HOME/dotfiles_backup`.
+
+The installer will check if you have PnPM installed to switch to the PnPM installation method. If not, it will fallback to equivalent shell scripts.
+
+Switch to the `dist` directory and run:
 
 ```bash
-make installer
+make prepare
 ```
 
-or if you want to just check the options available, run the following command:
+You can also just check the installer options available, by simply running:
 
 ```bash
 make help
 ```
 
-#### Using PnPM (recommended if you have PnPM installed)
+#### Using PnPM (highly recommended if you have PnPM installed)
 
 PnPM is a key dependency of the dotfiles package. It will help you install the
 dotfiles rapidly and very efficiently.
 
+Switch to the `dist` directory and run:
+
 ```bash
-pnpm installer
+pnpm run prepare
 ```
 
 ### Post installation
@@ -190,135 +214,126 @@ You'll see something like this:
 
 ```bash
 .
-├── aliases
-│   ├── default
-│   │   ├── README.md
-│   │   └── default.aliases.sh    # Default aliases
-│   ├── gcloud
-│   │   ├── README.md
-│   │   └── gcloud.aliases.sh     # GCloud aliases
-│   ├── git
-│   │   ├── README.md
-│   │   └── git.aliases.wip       # Git aliases (WIP)
-│   ├── heroku
-│   │   ├── README.md
-│   │   └── heroku.aliases.sh     # Heroku aliases
-│   ├── jekyll
-│   │   ├── README.md
-│   │   └── jekyll.aliases.sh     # Jekyll aliases
-│   ├── pnpm
-│   │   ├── README.md
-│   │   └── pnpm.aliases.sh       # PnPM aliases
-│   ├── subversion
-│   │   ├── README.md
-│   │   └── subversion.aliases.sh # Subversion aliases
-│   ├── tmux
-│   │   ├── README.md
-│   │   └── tmux.aliases.sh       # Tmux aliases
-│   └── README.md
-├── configurations
-│   ├── bash
-│   │   └── bashrc                # Bash configurations
-│   ├── curl
-│   │   ├── cacert.pem            # CA Certificates
-│   │   └── curlrc                # Curl configurations
-│   ├── default
-│   │   ├── color.sh              # Color definitions
-│   │   ├── editor.sh             # Editor definitions
-│   │   └── prompt.sh             # Prompt definitions
-│   ├── inputrc
-│   │   └── inputrc               # Inputrc configurations
-│   ├── jshint
-│   │   └── jshintrc              # JSHint configurations
-│   ├── profile
-│   │   └── profile               # Profile configurations
-│   ├── tmux
-│   │   └── tmux                  # Tmux configurations
-│   ├── vim
-│   │   └── vimrc                 # Vim configurations
-│   ├── wget
-│   │   └── wgetrc                # Wget configurations
-│   ├── zsh
-│   │   └── zshrc                 # Zsh configurations
-│   └── README.md
-├── functions
-│   ├── README.md
-│   ├── cdls.sh                   # cdls function
-│   ├── changediskpwd.sh          # changediskpwd function
-│   ├── code.sh                   # code function
-│   ├── countdown.sh              # countdown function
-│   ├── curlheader.sh             # curlheader function
-│   ├── curltime.sh               # curltime function
-│   ├── encode64.sh               # encode64 function
-│   ├── environment.sh            # environment function
-│   ├── extract.sh                # extract function
-│   ├── filehead.sh               # filehead function
-│   ├── genpwd.sh                 # genpwd function
-│   ├── goto.sh                   # goto function
-│   ├── headers.sh                # headers function
-│   ├── hidehiddenfiles.sh        # hidehiddenfiles function
-│   ├── history-all.sh            # history-all function
-│   ├── hostinfo.sh               # hostinfo function
-│   ├── hstats.sh                 # hstats function
-│   ├── httpdebug.sh              # httpdebug function
-│   ├── keygen.sh                 # keygen function
-│   ├── last.sh                   # last function
-│   ├── logout.sh                 # logout function
-│   ├── lowercase.sh              # lowercase function
-│   ├── macos.sh                  # macos function
-│   ├── matrix.sh                 # matrix function
-│   ├── mcd.sh                    # mcd function
-│   ├── mount_read_only.sh        # mount_read_only function
-│   ├── myproc.sh                 # myproc function
-│   ├── prependpath.sh            # prependpath function
-│   ├── print.sh                  # print function
-│   ├── ql.sh                     # ql function
-│   ├── rd.sh                     # rd function
-│   ├── remove_disk.sh            # remove_disk function
-│   ├── ren.sh                    # ren function
-│   ├── rm.sh                     # rm function
-│   ├── rps.sh                    # rps function
-│   ├── showhiddenfiles.sh        # showhiddenfiles function
-│   ├── size.sh                   # size function
-│   ├── stopwatch.sh              # stopwatch function
-│   ├── trash.sh                  # trash function
-│   ├── tree.sh                   # tree function
-│   ├── uppercase.sh              # uppercase function
-│   ├── uuidgen.sh                # uuidgen function
-│   ├── view-source.sh            # view-source function
-│   ├── vscode.sh                 # vscode function
-│   ├── whoisport.sh              # whoisport function
-│   └── zipf.sh                   # zipf function
-├── paths
-│   ├── ant
-│   │   └── ant.paths.sh          # Ant paths
-│   ├── default
-│   │   └── default.paths.sh      # Default paths
-│   ├── homebrew
-│   │   └── homebrew.paths.sh     # Homebrew paths
-│   ├── java
-│   │   └── java.paths.sh         # Java paths
-│   ├── maven
-│   │   └── maven.paths.sh        # Maven paths
-│   ├── node
-│   │   └── node.paths.sh         # Node paths
-│   ├── nvm
-│   │   └── nvm.paths.sh          # Nvm paths
-│   ├── pnpm
-│   │   └── pnpm.paths.sh         # Pnpm paths
-│   ├── ruby
-│   │   └── ruby.paths.sh         # Ruby paths
-│   └── tmux
-│       └── tmux.paths.sh         # Tmux paths
-├── README.md
-├── aliases.sh                    # aliases loader
-├── configurations.sh             # configurations loader
-├── exit.sh                       # exit loader
-├── functions.sh                  # functions loader
-├── history.sh                    # history loader
-└── paths.sh                      # paths loader
+├── bin
+│   └── dotfiles.sh
+├── shell
+│   ├── aliases
+│   │   ├── default
+│   │   │   ├── README.md
+│   │   │   └── default.aliases.sh    # Default aliases.
+│   │   ├── gcloud
+│   │   │   └── gcloud.aliases.sh     # GCloud aliases.
+│   │   ├── git
+│   │   ├── heroku
+│   │   │   └── heroku.aliases.sh     # Heroku aliases.
+│   │   ├── jekyll
+│   │   │   └── jekyll.aliases.sh     # Jekyll aliases.
+│   │   ├── pnpm
+│   │   │   └── pnpm.aliases.sh       # Pnpm aliases.
+│   │   ├── subversion
+│   │   │   └── subversion.aliases.sh # Subversion aliases.
+│   │   └── tmux
+│   │       └── tmux.aliases.sh       # Tmux aliases.
+│   ├── configurations
+│   │   ├── bash
+│   │   │   └── bashrc                # Bashrc configuration file.
+│   │   ├── curl
+│   │   │   ├── cacert.pem            # CA Certificates.
+│   │   │   └── curlrc                # Curlrc configuration file.
+│   │   ├── default
+│   │   │   ├── color.sh              # Color definitions.
+│   │   │   ├── editor.sh             # Editor definitions.
+│   │   │   └── prompt.sh             # Prompt definitions.
+│   │   ├── inputrc
+│   │   │   └── inputrc               # Inputrc configuration file.
+│   │   ├── jshint
+│   │   │   └── jshintrc              # Jshintrc configuration file.
+│   │   ├── profile
+│   │   │   └── profile               # Profile configuration file.
+│   │   ├── tmux
+│   │   │   └── tmux                  # Tmux configuration file.
+│   │   ├── vim
+│   │   │   └── vimrc                 # Vimrc configuration file.
+│   │   ├── wget
+│   │   │   └── wgetrc                # Wgetrc configuration file.
+│   │   ├── zsh
+│   │   │   └── zshrc                 # Zshrc configuration file.
+│   │   └── README.md
+│   ├── functions
+│   │   ├── README.md                 # Functions documentation.
+│   │   ├── cdls.sh                   # cdls function.
+│   │   ├── curlheader.sh             # curlheader function.
+│   │   ├── curltime.sh               # curltime function.
+│   │   ├── encode64.sh               # encode64 function.
+│   │   ├── environment.sh            # environment function.
+│   │   ├── extract.sh                # extract function.
+│   │   ├── filehead.sh               # filehead function.
+│   │   ├── genpwd.sh                 # genpwd function.
+│   │   ├── goto.sh                   # goto function.
+│   │   ├── hidehiddenfiles.sh        # hidehiddenfiles function.
+│   │   ├── hostinfo.sh               # hostinfo function.
+│   │   ├── hstats.sh                 # hstats function.
+│   │   ├── httpdebug.sh              # httpdebug function.
+│   │   ├── keygen.sh                 # keygen function.
+│   │   ├── last.sh                   # last function.
+│   │   ├── logout.sh                 # logout function.
+│   │   ├── lowercase.sh              # lowercase function.
+│   │   ├── macos.sh                  # macos function.
+│   │   ├── matrix.sh                 # matrix function.
+│   │   ├── mcd.sh                    # mcd function.
+│   │   ├── mount_read_only.sh        # mount_read_only function.
+│   │   ├── myproc.sh                 # myproc function.
+│   │   ├── prependpath.sh            # prependpath function.
+│   │   ├── ql.sh                     # ql function.
+│   │   ├── rd.sh                     # rd function.
+│   │   ├── remove_disk.sh            # remove_disk function.
+│   │   ├── ren.sh                    # ren function.
+│   │   ├── showhiddenfiles.sh        # showhiddenfiles function.
+│   │   ├── size.sh                   # size function.
+│   │   ├── stopwatch.sh              # stopwatch function.
+│   │   ├── uppercase.sh              # uppercase function.
+│   │   ├── view-source.sh            # view-source function.
+│   │   ├── vscode.sh                 # vscode function.
+│   │   ├── whoisport.sh              # whoisport function.
+│   │   └── zipf.sh                   # zipf function.
+│   ├── paths
+│   │   ├── ant
+│   │   │   └── ant.paths.sh          # Ant paths.
+│   │   ├── default
+│   │   │   └── default.paths.sh      # Default paths.
+│   │   ├── homebrew
+│   │   │   └── homebrew.paths.sh     # Homebrew paths.
+│   │   ├── java
+│   │   │   └── java.paths.sh         # Java paths.
+│   │   ├── maven
+│   │   │   └── maven.paths.sh        # Maven paths.
+│   │   ├── node
+│   │   │   └── node.paths.sh         # Node paths.
+│   │   ├── nvm
+│   │   │   └── nvm.paths.sh          # NVM paths.
+│   │   ├── pnpm
+│   │   │   └── pnpm.paths.sh         # Pnpm paths.
+│   │   ├── python
+│   │   │   └── python.paths.sh       # Python paths.
+│   │   ├── ruby
+│   │   │   └── ruby.paths.sh         # Ruby paths.
+│   │   └── tmux
+│   │       └── tmux.paths.sh         # Tmux paths.
+│   ├── README.md                     # Dotfiles documentation.
+│   ├── aliases.sh                    # Aliases loader file.
+│   ├── configurations.sh             # Configurations loader file.
+│   ├── exit.sh                       # Exit loader file.
+│   ├── functions.sh                  # Functions loader file.
+│   ├── history.sh                    # History loader file.
+│   ├── index.d.ts                    # Typescript type information.
+│   ├── index.d.ts.map                # Typescript type map information.
+│   ├── index.js                      # Dotfiles main JS file.
+│   ├── index.js.map                  # Dotfiles main JS map file.
+│   └── paths.sh                      # Paths loader file.
+├── Makefile                          # Makefile.
+└── filesizes.txt                     # Filesizes in the `dist` directory.
 
-32 directories, 95 files
+35 directories, 83 files
 ```
 
 ## 🔗 Releases
@@ -400,7 +415,8 @@ bunch of awesome [contributors](https://github.com/sebastienrousseau/dotfiles/gr
 [contributing]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CONTRIBUTING.md
 [curl]: https://curl.se/
 [docs]: https://github.com/sebastienrousseau/dotfiles/docs
-[download]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.453.tar.gz
+[download]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.454.tar.gz
+[getting-started]: https://github.com/sebastienrousseau/dotfiles#getting-started
 [git]: https://git-scm.com/
 [github]: https://github.com/sebastienrousseau/dotfiles
 [issues]: https://github.com/sebastienrousseau/dotfiles/issues
@@ -414,7 +430,7 @@ bunch of awesome [contributors](https://github.com/sebastienrousseau/dotfiles/gr
 
 [logo]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/dotfiles.svg
 [download_button]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/button-secondary.svg
-[getting started]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/button-primary.svg
+[getting_started]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/button-primary.svg
 [codacy-grade]: https://img.shields.io/codacy/grade/634cfc4de08e492ebcbb341631066241?style=for-the-badge
 [codacy-url]:https://www.codacy.com/gh/sebastienrousseau/dotfiles/dashboard
 [contributors-shield]: https://img.shields.io/github/contributors/sebastienrousseau/dotfiles.svg?style=for-the-badge
