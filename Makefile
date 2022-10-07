@@ -6,7 +6,6 @@
 
 .DEFAULT_GOAL := help
 
-homedir := ./installer
 language := en
 PNPM := $(shell command -v pnpm 2> /dev/null)
 HOMEDIR:= $(shell pwd)
@@ -20,11 +19,11 @@ else
 	sh $(HOMEDIR)/bin/dotfiles.sh backup
 endif
 
-.PHONY: installer
-installer: # @HELP Install the dotfiles on your system.
-installer: ## Install the dotfiles on your system.
+.PHONY: install
+install: # @HELP Install the dotfiles on your system.
+install: ## Install the dotfiles on your system.
 ifdef PNPM
-	pnpm run installer
+	pnpm run prepare
 else
 	sh $(HOMEDIR)/bin/dotfiles installer
 endif

@@ -1,4 +1,4 @@
-# Dotfiles v0.2.454
+# Dotfiles
 
 [![Banner representing the Dotfiles Library][logo]][website]
 
@@ -13,7 +13,7 @@
 • [Request Feature][issues]
 • [Contributing Guidelines][contributing]**
 
-## 👋 Welcome to Dotfiles
+## 👋 Welcome to Dotfiles (v0.2.454)
 
 ### Simply designed to fit your shell life
 
@@ -158,12 +158,12 @@ could be required to restore your previous installation.
 
 To install the latest version of the dotfiles, run the following command:
 
-#### Using make (highly recommended)
+#### Using make (easiest)
 
 Simply run the following command in your terminal / shell:
 
 ```bash
-make installer
+cd ~/dist && make install
 ```
 
 or if you want to just check the options available, run the following command:
@@ -178,7 +178,7 @@ PnPM is a key dependency of the dotfiles package. It will help you install the
 dotfiles rapidly and very efficiently.
 
 ```bash
-pnpm installer
+pnpm prepare
 ```
 
 ### Post installation
@@ -205,135 +205,126 @@ You'll see something like this:
 
 ```bash
 .
-├── aliases
-│   ├── default
-│   │   ├── README.md
-│   │   └── default.aliases.sh    # Default aliases
-│   ├── gcloud
-│   │   ├── README.md
-│   │   └── gcloud.aliases.sh     # GCloud aliases
-│   ├── git
-│   │   ├── README.md
-│   │   └── git.aliases.wip       # Git aliases (WIP)
-│   ├── heroku
-│   │   ├── README.md
-│   │   └── heroku.aliases.sh     # Heroku aliases
-│   ├── jekyll
-│   │   ├── README.md
-│   │   └── jekyll.aliases.sh     # Jekyll aliases
-│   ├── pnpm
-│   │   ├── README.md
-│   │   └── pnpm.aliases.sh       # PnPM aliases
-│   ├── subversion
-│   │   ├── README.md
-│   │   └── subversion.aliases.sh # Subversion aliases
-│   ├── tmux
-│   │   ├── README.md
-│   │   └── tmux.aliases.sh       # Tmux aliases
-│   └── README.md
-├── configurations
-│   ├── bash
-│   │   └── bashrc                # Bash configurations
-│   ├── curl
-│   │   ├── cacert.pem            # CA Certificates
-│   │   └── curlrc                # Curl configurations
-│   ├── default
-│   │   ├── color.sh              # Color definitions
-│   │   ├── editor.sh             # Editor definitions
-│   │   └── prompt.sh             # Prompt definitions
-│   ├── inputrc
-│   │   └── inputrc               # Inputrc configurations
-│   ├── jshint
-│   │   └── jshintrc              # JSHint configurations
-│   ├── profile
-│   │   └── profile               # Profile configurations
-│   ├── tmux
-│   │   └── tmux                  # Tmux configurations
-│   ├── vim
-│   │   └── vimrc                 # Vim configurations
-│   ├── wget
-│   │   └── wgetrc                # Wget configurations
-│   ├── zsh
-│   │   └── zshrc                 # Zsh configurations
-│   └── README.md
-├── functions
-│   ├── README.md
-│   ├── cdls.sh                   # cdls function
-│   ├── changediskpwd.sh          # changediskpwd function
-│   ├── code.sh                   # code function
-│   ├── countdown.sh              # countdown function
-│   ├── curlheader.sh             # curlheader function
-│   ├── curltime.sh               # curltime function
-│   ├── encode64.sh               # encode64 function
-│   ├── environment.sh            # environment function
-│   ├── extract.sh                # extract function
-│   ├── filehead.sh               # filehead function
-│   ├── genpwd.sh                 # genpwd function
-│   ├── goto.sh                   # goto function
-│   ├── headers.sh                # headers function
-│   ├── hidehiddenfiles.sh        # hidehiddenfiles function
-│   ├── history-all.sh            # history-all function
-│   ├── hostinfo.sh               # hostinfo function
-│   ├── hstats.sh                 # hstats function
-│   ├── httpdebug.sh              # httpdebug function
-│   ├── keygen.sh                 # keygen function
-│   ├── last.sh                   # last function
-│   ├── logout.sh                 # logout function
-│   ├── lowercase.sh              # lowercase function
-│   ├── macos.sh                  # macos function
-│   ├── matrix.sh                 # matrix function
-│   ├── mcd.sh                    # mcd function
-│   ├── mount_read_only.sh        # mount_read_only function
-│   ├── myproc.sh                 # myproc function
-│   ├── prependpath.sh            # prependpath function
-│   ├── print.sh                  # print function
-│   ├── ql.sh                     # ql function
-│   ├── rd.sh                     # rd function
-│   ├── remove_disk.sh            # remove_disk function
-│   ├── ren.sh                    # ren function
-│   ├── rm.sh                     # rm function
-│   ├── rps.sh                    # rps function
-│   ├── showhiddenfiles.sh        # showhiddenfiles function
-│   ├── size.sh                   # size function
-│   ├── stopwatch.sh              # stopwatch function
-│   ├── trash.sh                  # trash function
-│   ├── tree.sh                   # tree function
-│   ├── uppercase.sh              # uppercase function
-│   ├── uuidgen.sh                # uuidgen function
-│   ├── view-source.sh            # view-source function
-│   ├── vscode.sh                 # vscode function
-│   ├── whoisport.sh              # whoisport function
-│   └── zipf.sh                   # zipf function
-├── paths
-│   ├── ant
-│   │   └── ant.paths.sh          # Ant paths
-│   ├── default
-│   │   └── default.paths.sh      # Default paths
-│   ├── homebrew
-│   │   └── homebrew.paths.sh     # Homebrew paths
-│   ├── java
-│   │   └── java.paths.sh         # Java paths
-│   ├── maven
-│   │   └── maven.paths.sh        # Maven paths
-│   ├── node
-│   │   └── node.paths.sh         # Node paths
-│   ├── nvm
-│   │   └── nvm.paths.sh          # Nvm paths
-│   ├── pnpm
-│   │   └── pnpm.paths.sh         # Pnpm paths
-│   ├── ruby
-│   │   └── ruby.paths.sh         # Ruby paths
-│   └── tmux
-│       └── tmux.paths.sh         # Tmux paths
-├── README.md
-├── aliases.sh                    # aliases loader
-├── configurations.sh             # configurations loader
-├── exit.sh                       # exit loader
-├── functions.sh                  # functions loader
-├── history.sh                    # history loader
-└── paths.sh                      # paths loader
+├── bin
+│   └── dotfiles.sh
+├── shell
+│   ├── aliases
+│   │   ├── default
+│   │   │   ├── README.md
+│   │   │   └── default.aliases.sh    # Default aliases.
+│   │   ├── gcloud
+│   │   │   └── gcloud.aliases.sh     # GCloud aliases.
+│   │   ├── git
+│   │   ├── heroku
+│   │   │   └── heroku.aliases.sh     # Heroku aliases.
+│   │   ├── jekyll
+│   │   │   └── jekyll.aliases.sh     # Jekyll aliases.
+│   │   ├── pnpm
+│   │   │   └── pnpm.aliases.sh       # Pnpm aliases.
+│   │   ├── subversion
+│   │   │   └── subversion.aliases.sh # Subversion aliases.
+│   │   └── tmux
+│   │       └── tmux.aliases.sh       # Tmux aliases.
+│   ├── configurations
+│   │   ├── bash
+│   │   │   └── bashrc                # Bashrc configuration file.
+│   │   ├── curl
+│   │   │   ├── cacert.pem            # CA Certificates.
+│   │   │   └── curlrc                # Curlrc configuration file.
+│   │   ├── default
+│   │   │   ├── color.sh              # Color definitions.
+│   │   │   ├── editor.sh             # Editor definitions.
+│   │   │   └── prompt.sh             # Prompt definitions.
+│   │   ├── inputrc
+│   │   │   └── inputrc               # Inputrc configuration file.
+│   │   ├── jshint
+│   │   │   └── jshintrc              # Jshintrc configuration file.
+│   │   ├── profile
+│   │   │   └── profile               # Profile configuration file.
+│   │   ├── tmux
+│   │   │   └── tmux                  # Tmux configuration file.
+│   │   ├── vim
+│   │   │   └── vimrc                 # Vimrc configuration file.
+│   │   ├── wget
+│   │   │   └── wgetrc                # Wgetrc configuration file.
+│   │   ├── zsh
+│   │   │   └── zshrc                 # Zshrc configuration file.
+│   │   └── README.md
+│   ├── functions
+│   │   ├── README.md                 # Functions documentation.
+│   │   ├── cdls.sh                   # cdls function.
+│   │   ├── curlheader.sh             # curlheader function.
+│   │   ├── curltime.sh               # curltime function.
+│   │   ├── encode64.sh               # encode64 function.
+│   │   ├── environment.sh            # environment function.
+│   │   ├── extract.sh                # extract function.
+│   │   ├── filehead.sh               # filehead function.
+│   │   ├── genpwd.sh                 # genpwd function.
+│   │   ├── goto.sh                   # goto function.
+│   │   ├── hidehiddenfiles.sh        # hidehiddenfiles function.
+│   │   ├── hostinfo.sh               # hostinfo function.
+│   │   ├── hstats.sh                 # hstats function.
+│   │   ├── httpdebug.sh              # httpdebug function.
+│   │   ├── keygen.sh                 # keygen function.
+│   │   ├── last.sh                   # last function.
+│   │   ├── logout.sh                 # logout function.
+│   │   ├── lowercase.sh              # lowercase function.
+│   │   ├── macos.sh                  # macos function.
+│   │   ├── matrix.sh                 # matrix function.
+│   │   ├── mcd.sh                    # mcd function.
+│   │   ├── mount_read_only.sh        # mount_read_only function.
+│   │   ├── myproc.sh                 # myproc function.
+│   │   ├── prependpath.sh            # prependpath function.
+│   │   ├── ql.sh                     # ql function.
+│   │   ├── rd.sh                     # rd function.
+│   │   ├── remove_disk.sh            # remove_disk function.
+│   │   ├── ren.sh                    # ren function.
+│   │   ├── showhiddenfiles.sh        # showhiddenfiles function.
+│   │   ├── size.sh                   # size function.
+│   │   ├── stopwatch.sh              # stopwatch function.
+│   │   ├── uppercase.sh              # uppercase function.
+│   │   ├── view-source.sh            # view-source function.
+│   │   ├── vscode.sh                 # vscode function.
+│   │   ├── whoisport.sh              # whoisport function.
+│   │   └── zipf.sh                   # zipf function.
+│   ├── paths
+│   │   ├── ant
+│   │   │   └── ant.paths.sh          # Ant paths.
+│   │   ├── default
+│   │   │   └── default.paths.sh      # Default paths.
+│   │   ├── homebrew
+│   │   │   └── homebrew.paths.sh     # Homebrew paths.
+│   │   ├── java
+│   │   │   └── java.paths.sh         # Java paths.
+│   │   ├── maven
+│   │   │   └── maven.paths.sh        # Maven paths.
+│   │   ├── node
+│   │   │   └── node.paths.sh         # Node paths.
+│   │   ├── nvm
+│   │   │   └── nvm.paths.sh          # NVM paths.
+│   │   ├── pnpm
+│   │   │   └── pnpm.paths.sh         # Pnpm paths.
+│   │   ├── python
+│   │   │   └── python.paths.sh       # Python paths.
+│   │   ├── ruby
+│   │   │   └── ruby.paths.sh         # Ruby paths.
+│   │   └── tmux
+│   │       └── tmux.paths.sh         # Tmux paths.
+│   ├── README.md                     # Dotfiles documentation.
+│   ├── aliases.sh                    # Aliases loader file.
+│   ├── configurations.sh             # Configurations loader file.
+│   ├── exit.sh                       # Exit loader file.
+│   ├── functions.sh                  # Functions loader file.
+│   ├── history.sh                    # History loader file.
+│   ├── index.d.ts                    # Typescript type information.
+│   ├── index.d.ts.map                # Typescript type map information.
+│   ├── index.js                      # Dotfiles main JS file.
+│   ├── index.js.map                  # Dotfiles main JS map file.
+│   └── paths.sh                      # Paths loader file.
+├── Makefile                          # Makefile.
+└── filesizes.txt                     # Filesizes in the `dist` directory.
 
-32 directories, 95 files
+35 directories, 83 files
 ```
 
 ## 🔗 Releases
