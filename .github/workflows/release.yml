@@ -65,6 +65,6 @@ jobs:
         run: pnpm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
 
       - name: Publish the package to Github package registry
-        run: pnpm -r publish --access public
+        run: pnpm -r publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
