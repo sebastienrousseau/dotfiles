@@ -69,27 +69,5 @@ jobs:
         env:
           # Note: we are using a different GITHUB_TOKEN due to the issues in this thread:
           # https://github.com/changesets/action/issues/187
-          GITHUB_TOKEN: ${{ secrets.CHANGESETS_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish to NPM
-        run: pnpm publish --access public --tag latest
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Build packages
-        run: pnpm run build
-
-      - name: Set package registry
-        run: pnpm config set registry https://npm.pkg.github.com
-
-      - name: GitHub package registry authentication
-        run: pnpm set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Npm registry authentication
-        run: pnpm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish the package to GitHub package registry
-        run: pnpm -r publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
