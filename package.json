@@ -24,6 +24,7 @@
 	],
 	"description": "Dotfiles - A set of macOS / Linux and Windows configuration files - Simply designed to fit your shell life.",
 	"devDependencies": {
+		"@changesets/cli": "^2.25.0",
 		"@types/node": "^16.11.64",
 		"@types/shelljs":"0.8.11",
 		"filesizes": "^0.1.2",
@@ -94,14 +95,16 @@
 		"clean": "rimraf \"dist/\" && tsc --build --clean",
 		"cl:tmp": "rimraf \"./dist/shell/**/*.tmp\"",
 		"build": "pnpm run clean && tsc --build tsconfig.json && pnpm run compile",
+		"changeset": "changeset",
 		"compile": "chmod 755 \"./bin/compile.sh\" && ./bin/compile.sh",
 		"directory": "mkdir $HOME/.dotfiles",
 		"filesizes": "filesizes ./dist/ > ./dist/filesizes.txt",
 		"help": "chmod 755 \"./bin/dotfiles.sh\" && ./bin/dotfiles.sh",
 		"minify": "jsmin ./shell/index.js > dist/shell/index.js",
-		"prepare": "pnpm run backup && pnpm run directory && pnpm run copy",
+		"assemble": "pnpm run backup && pnpm run directory && pnpm run copy",
 		"start": "node dist/shell/index.js",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"version": "pnpm changeset version && pnpm run assemble --no-frozen-lockfile"
 	},
 	"types": "./dist/index.d.ts",
 	"version": "0.2.454"
