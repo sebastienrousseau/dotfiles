@@ -2,7 +2,7 @@ name: Release
 
 on:
   release:
-    types: [created]
+    types: [published]
 
 jobs:
   build:
@@ -49,6 +49,12 @@ jobs:
 
       - name: Build
         run: pnpm run build
+
+      - name: Pack
+        run: pnpm pack
+
+      - name: Result
+        run: ls -al ./dist
 
       - name: Publish to NPM
         run: pnpm publish --access public --tag latest
