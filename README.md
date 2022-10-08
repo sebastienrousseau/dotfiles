@@ -13,7 +13,7 @@
 • [Request Feature][issues]
 • [Contributing Guidelines][contributing]**
 
-## 👋 Welcome to Dotfiles (v0.2.454)
+## 👋 Welcome to Dotfiles (v0.2.455)
 
 ### Simply designed to fit your shell life
 
@@ -22,7 +22,7 @@ aimed at making your life easier by providing a set of scripts and configuration
 files with new ways to get things done.
 
 [![Getting Started][getting_started]][getting-started]
-[![Download Dotfiles v0.2.454][download_button]][download]
+[![Download Dotfiles v0.2.455][download_button]][download]
 
 Dotfiles aggregates a collection of standalone configuration files (dotfiles)
 combined into a `shell` directory that can be used to customize your development
@@ -101,7 +101,7 @@ The following programs must be installed on your system to install Dotfiles:
 
 ### 1️⃣ Download Dotfiles
 
-You can download the latest version (v0.2.454) with the following options:
+You can download the latest version (v0.2.455) with the following options:
 
 - [**Manual download**][releases] - **The easiest way to install Dotfiles.**
 - [**Install with PnPM**](https://www.npmjs.com/package/@sebastienrousseau/dotfiles)
@@ -119,7 +119,7 @@ You can download the latest version (v0.2.454) with the following options:
 Before installing Dotfiles, we strongly recommend that you back up your existing
 data. The Dotfiles installer will try to automatically backup any previous
 installation of known dotfiles into a backup directory
-`$HOME/.dotfiles/backup`.
+`$HOME/.dotfiles_backup`.
 
 The backup files are the following:
 
@@ -150,9 +150,7 @@ The backup files are the following:
 cacert.pem
 ```
 
-After installation, you will find the backup files in the `~/dotfiles_backup`
-directory. It is always a good idea to backup as there might be situations in which you
-could be required to restore your previous installation.
+It is always a good idea to backup as there might be situations in which you could be required to restore your previous installation.
 
 ### 3️⃣ Try it out and let us know what you think
 
@@ -170,7 +168,7 @@ The installer will check if you have PnPM installed to switch to the PnPM instal
 Switch to the `dist` directory and run:
 
 ```bash
-make prepare
+make assemble
 ```
 
 You can also just check the installer options available, by simply running:
@@ -187,7 +185,7 @@ dotfiles rapidly and very efficiently.
 Switch to the `dist` directory and run:
 
 ```bash
-pnpm run prepare
+pnpm run assemble
 ```
 
 ### Post installation
@@ -208,7 +206,7 @@ Please refer to the [documentation][docs] for more information.
 Dotfiles contains core elements that are used to configure your shell, and other components catered for your environment setup.
 
 Within the download you'll find all the Dotfiles source files grouped within the
-`shell` folder.
+`dist` folder.
 
 You'll see something like this:
 
@@ -415,7 +413,7 @@ bunch of awesome [contributors](https://github.com/sebastienrousseau/dotfiles/gr
 [contributing]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CONTRIBUTING.md
 [curl]: https://curl.se/
 [docs]: https://github.com/sebastienrousseau/dotfiles/docs
-[download]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.454.tar.gz
+[download]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.455.tar.gz
 [getting-started]: https://github.com/sebastienrousseau/dotfiles#getting-started
 [git]: https://git-scm.com/
 [github]: https://github.com/sebastienrousseau/dotfiles

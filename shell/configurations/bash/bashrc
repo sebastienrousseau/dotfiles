@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.454) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.455) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
@@ -15,7 +15,7 @@ USER=$(whoami)                            # current user name.
 
 ## 🅴🆇🅿🅾🆁🆃🆂 - Export the variables.
 export ARCHFLAGS="-arch ${OS_ARCH}"       # archflags for the current machine.
-export DOTFILES_VERSION='0.2.454'         # version of the dotfiles.
+export DOTFILES_VERSION='0.2.455'         # version of the dotfiles.
 export DOTFILES="${HOME}"/.dotfiles/shell   # path to the cross plaform dotfiles.
 export HOSTNAME=${HOSTNAME}               # hostname of the machine.
 export INPUTRC=${INPUTRC}                 # set INPUTRC (so that .inputrc is respected)

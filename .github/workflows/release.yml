@@ -43,27 +43,31 @@ jobs:
       - uses: pnpm/action-setup@v2.2.2
         with:
           version: 7
-          registry-url: "https://registry.npmjs.org"
-          scope: sebastienrousseau
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: echo "::set-output name=pnpm_cache_dir::$(pnpm store path)"
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
-      - name: Publish to NPM
-        run: pnpm publish --access public --tag latest
+
+      - name: PR or Publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: pnpm run version
+          publish: pnpm run publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Set package registry
-        run: pnpm config set registry https://npm.pkg.github.com
-
-      - name: Github package registry authentication
-        run: pnpm set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Npm registry authentication
-        run: pnpm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish the package to Github package registry
-        run: pnpm -r publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          # Note: we are using a different GITHUB_TOKEN due to the issues in this thread:
+          # https://github.com/changesets/action/issues/187
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
