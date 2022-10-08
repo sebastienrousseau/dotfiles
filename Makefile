@@ -1,6 +1,6 @@
 #!/usr/bin/env make -f
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.455) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.456) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
