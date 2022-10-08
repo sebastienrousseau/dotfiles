@@ -2,6 +2,5 @@
 	"$schema": "https://unpkg.com/@changesets/config@2.2.0/schema.json",
 	"access": "public",
   "baseBranch": "master",
-  "changelog": ["@changesets/changelog-github", {"repo": "sebastienrousseau/dotfiles"}],
-  "fixed": [["dotfiles*"]]
+  "changelog": ["@changesets/changelog-github", {"repo": "sebastienrousseau/dotfiles"}]
 }

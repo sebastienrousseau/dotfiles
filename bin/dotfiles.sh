@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.454) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.455) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
@@ -10,7 +10,7 @@ BIRed='\033[1;91m'                    # Red color.
 DOTFILESDIR="${HOME}/.dotfiles"       # Location of dotfiles.
 DOWNLOADDIR="${HOME}/Downloads"       # Download directory.
 NC='\033[0m'                          # Reset/No Color
-VERSION="0.2.454"                     # Dotfiles Version number.
+VERSION="0.2.455"                     # Dotfiles Version number.
 
 ## 🅱🅰🅲🅺🆄🅿 - Backup existing files.
 backup() {

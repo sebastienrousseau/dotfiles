@@ -29,6 +29,7 @@
 		"@types/shelljs":"0.8.11",
 		"filesizes": "^0.1.2",
 		"jsmin": "^1.0.1",
+		"nps": "^5.10.0",
 		"pnpm": "^7.13.2",
 		"rimraf": "^3.0.2",
 		"shelljs": "^0.8.5",
@@ -94,6 +95,7 @@
 		"cp:zshr": "cp ./shell/configurations/zsh/zshrc $HOME/.zshrc",
 		"clean": "rimraf \"dist/\" && tsc --build --clean",
 		"cl:tmp": "rimraf \"./dist/shell/**/*.tmp\"",
+		"assemble": "pnpm run backup && pnpm run directory && pnpm run copy",
 		"build": "pnpm run clean && tsc --build tsconfig.json && pnpm run compile",
 		"changeset": "changeset",
 		"compile": "chmod 755 \"./bin/compile.sh\" && ./bin/compile.sh",
@@ -101,11 +103,11 @@
 		"filesizes": "filesizes ./dist/ > ./dist/filesizes.txt",
 		"help": "chmod 755 \"./bin/dotfiles.sh\" && ./bin/dotfiles.sh",
 		"minify": "jsmin ./shell/index.js > dist/shell/index.js",
-		"assemble": "pnpm run backup && pnpm run directory && pnpm run copy",
+		"publish": "nps git:tag && pnpm changeset publish --no-git-tag",
 		"start": "node dist/shell/index.js",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"version": "pnpm changeset version && pnpm run assemble --no-frozen-lockfile"
 	},
 	"types": "./dist/index.d.ts",
-	"version": "0.2.454"
+	"version": "0.2.455"
 }
