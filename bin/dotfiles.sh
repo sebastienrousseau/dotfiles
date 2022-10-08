@@ -78,8 +78,8 @@ unpack() {
   rm "${DOWNLOADDIR}/v${VERSION}.zip"
 }
 
-## 🅿🆁🅴🅿🅰🆁🅴 - Prepare the dotfiles on your system.
-prepare() {
+## 🅰🆂🆂🅴🅼🅱🅻🅴 - Assemble the dotfiles on your system.
+assemble() {
   echo "${BIRed}❭${NC} Preparing the dotfiles on your system."
   backup &&
   download &&
@@ -146,7 +146,7 @@ COMMANDS:
   clean     - Removes any previous setup directories
   copy      - Copy the new dotfiles files to your '${HOME}' directory
   download  - Download the latest Dotfiles (v${VERSION})
-  prepare   - Run the full installation process
+  assemble  - Run the full installation process
   unpack    - Unpack the Dotfiles
   help      - Show the help menu
 
@@ -174,9 +174,9 @@ elif [ "$1" = "download" ]; then
   download
 elif [ "$1" = "help" ]; then
   help
-elif [ "$1" = "prepare" ]; then
+elif [ "$1" = "assemble" ]; then
   echo "${BIRed}❭${NC} Installing ${BIGreen}Dotfiles v${VERSION}${NC}."
-  prepare
+  assemble
 elif [ "$1" = "unpack" ]; then
   echo "${BIRed}❭${NC} Unpacking ${BIGreen}Dotfiles v${VERSION}${NC}."
   unpack

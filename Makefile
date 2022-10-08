@@ -19,13 +19,13 @@ else
 	sh $(HOMEDIR)/bin/dotfiles.sh backup
 endif
 
-.PHONY: prepare
-prepare: # @HELP Prepare the dotfiles on your system.
-prepare: ## Prepare the dotfiles on your system.
+.PHONY: assemble
+assemble: # @HELP Assemble the dotfiles on your system.
+assemble: ## Prepare the dotfiles on your system.
 ifdef PNPM
-	pnpm run prepare
+	pnpm run assemble
 else
-	sh $(HOMEDIR)/bin/dotfiles prepare
+	sh $(HOMEDIR)/bin/dotfiles assemble
 endif
 
 .PHONY: copy
