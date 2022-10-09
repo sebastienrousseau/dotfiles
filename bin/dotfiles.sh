@@ -4,7 +4,7 @@
 # License: MIT
 
 ## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set variables.
-BACKUPDIR="${HOME}/.dotfiles_backup"  # Backup directory.
+BACKUPDIR="${HOME}/dotfiles_backup"  # Backup directory.
 BIGreen='\033[1;92m'                  # Green color.
 BIRed='\033[1;91m'                    # Red color.
 DOTFILESDIR="${HOME}/.dotfiles"       # Location of dotfiles.
