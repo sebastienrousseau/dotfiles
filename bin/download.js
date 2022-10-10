@@ -10,7 +10,7 @@ async function download() {
   const {promisify} = require('util');
   var fs = require("fs");
   var os = require("os");
-  var path = require('path');
+  var path = require("path");
   const { dotfile, version } = require("./constants.js");
   var destPath = path.resolve(__dirname, os.homedir() + "/dotfiles_backup/");
   const https = require("https");
