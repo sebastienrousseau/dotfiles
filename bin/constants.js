@@ -5,7 +5,7 @@
 */
 
 // 🅲🅾🅽🆂🆃🅰🅽🆃🆂 - Constants.
-const version = 'dotfiles-0.2.457.tgz';
+const version = "dotfiles-0.2.457.tgz";
 const dotfile ="https://registry.npmjs.org/@sebastienrousseau/dotfiles/-/dotfiles-0.2.457.tgz";
 
 const aliases = [
