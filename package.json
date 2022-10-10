@@ -102,7 +102,7 @@
 		"directory": "mkdir $HOME/.dotfiles",
 		"filesizes": "filesizes ./dist/ > ./dist/filesizes.txt",
 		"help": "chmod 755 \"./bin/dotfiles.sh\" && ./bin/dotfiles.sh",
-		"minify": "jsmin ./shell/index.js > dist/shell/index.js",
+		"minify": "jsmin ./bin/index.js > dist/bin/index.js",
 		"start": "node ./bin/index.js",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
