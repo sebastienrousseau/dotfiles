@@ -13,7 +13,7 @@ const unpack = require("./unpack.js");
 const { aliases, copies } = require('./constants.js');
 const sleep = (waitTimeInMs) => new Promise(resolve => setTimeout(resolve, waitTimeInMs));
 var fs = require('fs');
-var os = require('os');
+var os = require("os");
 var path = require('path');
 
 const dir=path.resolve(__dirname, os.homedir());
