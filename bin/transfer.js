@@ -30,6 +30,6 @@ async function transfer(dest) {
   await fs.removeSync(filesizes);
   await fs.removeSync(make);
 
-};
+}
 
 module.exports = transfer;
