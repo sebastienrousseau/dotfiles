@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.456) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.457) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
 ## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set variables.
-BACKUPDIR="${HOME}/.dotfiles_backup"  # Backup directory.
+BACKUPDIR="${HOME}/dotfiles_backup"  # Backup directory.
 BIGreen='\033[1;92m'                  # Green color.
 BIRed='\033[1;91m'                    # Red color.
 DOTFILESDIR="${HOME}/.dotfiles"       # Location of dotfiles.
 DOWNLOADDIR="${HOME}/Downloads"       # Download directory.
 NC='\033[0m'                          # Reset/No Color
-VERSION="0.2.456"                     # Dotfiles Version number.
+VERSION="0.2.457"                     # Dotfiles Version number.
 
 ## 🅱🅰🅲🅺🆄🅿 - Backup existing files.
 backup() {

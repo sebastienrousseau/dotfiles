@@ -1,5 +1,7 @@
 {
-	"assets":["index.js"],
+	"assets": [
+		"index.js"
+	],
 	"author": "Sebastien Rousseau (https://github.com/sebastienrousseau)",
 	"autoupdate": {
 		"fileMap": [
@@ -25,15 +27,17 @@
 	"description": "Dotfiles - A set of macOS / Linux and Windows configuration files - Simply designed to fit your shell life.",
 	"devDependencies": {
 		"@types/node": "^16.11.64",
-		"@types/shelljs":"0.8.11",
+		"@types/shelljs": "0.8.11",
 		"filesizes": "^0.1.2",
+		"fs-extra":"10.1.0",
 		"jsmin": "^1.0.1",
-		"pnpm": "^7.13.2",
+		"pnpm": "^7.13.3",
 		"rimraf": "^3.0.2",
 		"shelljs": "^0.8.5",
+		"shelljs-nodecli": "^0.1.1",
 		"tsd": "0.24.1",
 		"typescript": "^4.8.4",
-    "shelljs-nodecli": "^0.1.1"
+		"compressing": "^1.6.2"
 	},
 	"directories": {
 		"bin": "./bin",
@@ -42,10 +46,8 @@
 	"engines": {
 		"node": "^12.20.0 || ^14.13.1 || >=16.0.0"
 	},
-	"exports": "./index.js",
 	"files": [
-		"index.js",
-    "dist/"
+		"dist/"
 	],
 	"homepage": "https://dotfiles.io/",
 	"keywords": [
@@ -61,7 +63,7 @@
 	"license": "MIT",
 	"license_URI": "http://www.opensource.org/licenses/mit-license.php",
 	"lockfileVersion": 1,
-	"main": "./dist/index.js",
+	"main": "./bin/index.js",
 	"name": "@sebastienrousseau/dotfiles",
 	"publishConfig": {
 		"access": "public",
@@ -72,38 +74,38 @@
 		"url": "git@github.com:sebastienrousseau/dotfiles.git"
 	},
 	"scripts": {
+		"assemble": "pnpm run backup && pnpm run directory && pnpm run copy",
 		"backup": "pnpm run bk:dir && pnpm run bk:bsh && pnpm run bk:zsh",
 		"bk:bsh": "if [ -z $HOME/.bashrc ]; then mv -f $HOME/.bashrc $HOME/.dotfiles_backup/bashrc.bk; fi ",
 		"bk:dir": "if [ -d $HOME/.dotfiles ]; then mv -f $HOME/.dotfiles $HOME/dotfiles_backup; fi ",
 		"bk:zsh": "if [ -z $HOME/.zshrc ]; then mv -f $HOME/.zshrc $HOME/.dotfiles_backup/zshrc.bk; fi ",
-		"copy": "chmod 755 \"./bin/copy.sh\" && ./bin/copy.sh",
-		"cp:bash": "cp ./shell/configurations/bash/bashrc $HOME/.bashrc",
-		"cp:bin":  "cp -R ./bin/ ./dist/bin",
-		"cp:cert": "cp ./shell/configurations/curl/cacert.pem $HOME/cacert.pem",
-		"cp:curl": "cp ./shell/configurations/curl/curlrc $HOME/.curlrc",
-		"cp:dirs": "cp -R ./shell $HOME/.dotfiles/shell/",
-		"cp:inpt": "cp ./shell/configurations/inputrc/inputrc $HOME/.inputrc",
-		"cp:jsht": "cp ./shell/configurations/jshint/jshintrc $HOME/.jshintrc",
-		"cp:make": "cp ./Makefile ./dist",
-		"cp:prof": "cp ./shell/configurations/profile/profile $HOME/.profile",
-		"cp:shell": "cp -R ./shell/ ./dist/shell/",
-		"cp:tmux": "cp ./shell/configurations/tmux/tmux $HOME/.tmux.conf",
-		"cp:vimr": "cp ./shell/configurations/vim/vimrc $HOME/.vimrc",
-		"cp:wget": "cp ./shell/configurations/wget/wgetrc $HOME/.wgetrc",
-		"cp:zshr": "cp ./shell/configurations/zsh/zshrc $HOME/.zshrc",
-		"clean": "rimraf \"dist/\" && tsc --build --clean",
-		"cl:tmp": "rimraf \"./dist/shell/**/*.tmp\"",
-		"assemble": "pnpm run backup && pnpm run directory && pnpm run copy",
 		"build": "pnpm run clean && tsc --build tsconfig.json && pnpm run compile",
 		"changeset": "changeset",
+		"cl:tmp": "rimraf \"./dist/shell/**/*.tmp\"",
+		"clean": "rimraf \"dist/\" && tsc --build --clean",
 		"compile": "chmod 755 \"./bin/compile.sh\" && ./bin/compile.sh",
+		"copy": "chmod 755 \"./bin/copy.sh\" && ./bin/copy.sh",
+		"cp:bash": "cp -vf ./shell/configurations/bash/bashrc $HOME/.bashrc",
+		"cp:bin": "cp -vf -R ./bin/ ./dist/bin",
+		"cp:cert": "cp -vf ./shell/configurations/curl/cacert.pem $HOME/cacert.pem",
+		"cp:curl": "cp -vf ./shell/configurations/curl/curlrc $HOME/.curlrc",
+		"cp:dirs": "cp -vf -R ./shell $HOME/.dotfiles/shell/",
+		"cp:inpt": "cp -vf ./shell/configurations/inputrc/inputrc $HOME/.inputrc",
+		"cp:jsht": "cp -vf ./shell/configurations/jshint/jshintrc $HOME/.jshintrc",
+		"cp:make": "cp -vf ./Makefile ./dist",
+		"cp:prof": "cp -vf ./shell/configurations/profile/profile $HOME/.profile",
+		"cp:shell": "cp -vR ./shell/ ./dist/shell/",
+		"cp:tmux": "cp -vf ./shell/configurations/tmux/tmux $HOME/.tmux.conf",
+		"cp:vimr": "cp -vf ./shell/configurations/vim/vimrc $HOME/.vimrc",
+		"cp:wget": "cp -vf ./shell/configurations/wget/wgetrc $HOME/.wgetrc",
+		"cp:zshr": "cp -vf ./shell/configurations/zsh/zshrc $HOME/.zshrc",
 		"directory": "mkdir $HOME/.dotfiles",
 		"filesizes": "filesizes ./dist/ > ./dist/filesizes.txt",
 		"help": "chmod 755 \"./bin/dotfiles.sh\" && ./bin/dotfiles.sh",
-		"minify": "jsmin ./shell/index.js > dist/shell/index.js",
-		"start": "node dist/shell/index.js",
+		"minify": "jsmin ./bin/backup.js > dist/bin/backup.js && jsmin ./bin/constants.js > dist/bin/constants.js && jsmin ./bin/copy.js > dist/bin/copy.js && jsmin ./bin/dotfiles.js > dist/bin/dotfiles.js && jsmin ./bin/download.js > dist/bin/download.js && jsmin ./bin/index.js > dist/bin/index.js && jsmin ./bin/transfer.js > dist/bin/transfer.js && jsmin ./bin/unpack.js > dist/bin/unpack.js",
+		"start": "node ./bin/index.js",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"types": "./dist/index.d.ts",
-	"version": "0.2.456"
+	"version": "0.2.457"
 }

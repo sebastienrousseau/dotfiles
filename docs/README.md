@@ -13,7 +13,7 @@
 • [Request Feature][issues]
 • [Contributing Guidelines][contributing]**
 
-## 👋 Welcome to Dotfiles (v0.2.456)
+## 👋 Welcome to Dotfiles (v0.2.457)
 
 ### Simply designed to fit your shell life
 
@@ -22,7 +22,7 @@ aimed at making your life easier by providing a set of scripts and configuration
 files with new ways to get things done.
 
 [![Getting Started][getting_started]][getting-started]
-[![Download Dotfiles v0.2.456][download_button]][download]
+[![Download Dotfiles v0.2.457][download_button]][download]
 
 Dotfiles aggregates a collection of standalone configuration files (dotfiles)
 combined into a `shell` directory that can be used to customize your development
@@ -101,15 +101,15 @@ The following programs must be installed on your system to install Dotfiles:
 
 ### 1️⃣ Download Dotfiles
 
-You can download the latest version (v0.2.456) with the following options:
+You can download the latest version (v0.2.457) with the following options:
 
 - [**Manual download**][releases] - **The easiest way to install Dotfiles.**
 - [**Install with PnPM**](https://www.npmjs.com/package/@sebastienrousseau/dotfiles)
-  `pnpm i -g @sebastienrousseau/dotfiles`.
+  `pnpm i @sebastienrousseau/dotfiles`.
 - [**Install with Npm**](https://www.npmjs.com/package/@sebastienrousseau/dotfiles)
-  `npm install -g @sebastienrousseau/dotfiles`.
+  `npm install @sebastienrousseau/dotfiles`.
 - [**Install with Yarn**](https://yarnpkg.com/package/@sebastienrousseau/dotfiles)
-  `yarn global add @sebastienrousseau/dotfiles`.
+  `yarn add @sebastienrousseau/dotfiles`.
 - **Clone the main repository** to get all source files including build scripts:
   `git clone https://github.com/sebastienrousseau/dotfiles.git`. This will clone
   the latest version of the Dotfiles repository.
@@ -176,6 +176,20 @@ You can also just check the installer options available, by simply running:
 ```bash
 make help
 ```
+
+#### Using Node.js (advanced)
+
+If you want to install Dotfiles using Node.js, you can run the following command
+in the `dist` directory located in your
+`node_modules/@sebastienrousseau/dotfiles/dist` directory:
+
+```bash
+node .
+```
+
+This will install the latest version of the dotfiles and will automatically
+backup any existing dotfiles you may have into a backup directory
+`$HOME/dotfiles_backup`.
 
 #### Using PnPM (highly recommended if you have PnPM installed)
 
@@ -413,7 +427,7 @@ bunch of awesome [contributors](https://github.com/sebastienrousseau/dotfiles/gr
 [contributing]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CONTRIBUTING.md
 [curl]: https://curl.se/
 [docs]: https://github.com/sebastienrousseau/dotfiles/docs
-[download]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.456.tar.gz
+[download]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.457.tar.gz
 [getting-started]: https://github.com/sebastienrousseau/dotfiles#getting-started
 [git]: https://git-scm.com/
 [github]: https://github.com/sebastienrousseau/dotfiles
