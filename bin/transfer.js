@@ -7,7 +7,7 @@
 // 🆃🆁🅰🅽🆂🅵🅴🆁 - Transfer function.
 async function transfer(dest) {
 
-  const fs = require('fs-extra');
+  const fs = require("fs-extra");
   var os = require('os');
   var path = require('path');
 
