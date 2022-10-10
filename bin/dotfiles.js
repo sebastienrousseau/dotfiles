@@ -1,3 +1,10 @@
+/**
+* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.457) - https://dotfiles.io
+* Copyright (c) Sebastien Rousseau 2022. All rights reserved
+* License: MIT
+*/
+
+// 🅼🅰🅸🅽 - Main function.
 const copy = require('./copy.js');
 const transfer = require('./transfer.js');
 const backup = require('./backup.js');
@@ -15,12 +22,14 @@ module.exports = async function main() {
 
   let i = 0
 
+  // Backup files and copy dotfiles.
   do {
     backup(aliases[i], aliases[i]);
     copy(copies[i], aliases[i]);
     i++
   } while (i < aliases.length && i < copies.length);
 
+  // Download and unpack dotfiles.
   download(); // download the dotfiles
   await sleep(2500); // wait for download to complete
   unpack(); // unpack the downloaded file

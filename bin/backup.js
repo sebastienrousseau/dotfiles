@@ -1,3 +1,10 @@
+/**
+* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.457) - https://dotfiles.io
+* Copyright (c) Sebastien Rousseau 2022. All rights reserved
+* License: MIT
+*/
+
+// 🅱🅰🅲🅺🆄🅿 - Backup function (src, dest).
 async function backup(src, dest) {
   var fs = require('fs');
   var os = require('os');
@@ -9,7 +16,7 @@ async function backup(src, dest) {
   }
 
   var srcPath = path.resolve(__dirname, os.homedir() + "/" + src);
-  var destPath = path.resolve(__dirname, os.homedir() + "/dotfiles_backup/" + dest);
+  var destPath = dir + "/" + dest;
 
   await fs.promises.copyFile(srcPath, destPath);
 

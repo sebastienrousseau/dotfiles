@@ -1,3 +1,10 @@
+/**
+* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.457) - https://dotfiles.io
+* Copyright (c) Sebastien Rousseau 2022. All rights reserved
+* License: MIT
+*/
+
+// 🆃🆁🅰🅽🆂🅵🅴🆁 - Transfer function.
 async function transfer(dest) {
 
   const fs = require('fs-extra');
@@ -10,20 +17,18 @@ async function transfer(dest) {
   const filesizes =  path.resolve(__dirname, "/" + dest + "/.dotfiles/filesizes.txt");
   const make =  path.resolve(__dirname, "/" + dest + "/.dotfiles/Makefile");
 
+  // Remove the destination directory if it exists.
   if (fs.existsSync(dotfiles)){
     await fs.removeSync(dotfiles);
   }
 
-  // Copy the files
+  // Copy the source directory to the destination.
   await fs.copy(source, dotfiles);
 
-  // Clean up
+  // Clean up the destination directory, remove the files we don't need.
   await fs.removeSync(bin);
   await fs.removeSync(filesizes);
   await fs.removeSync(make);
-
-  // await fs.move(tmp, destination, {overwrite: true});
-
 
 };
 
