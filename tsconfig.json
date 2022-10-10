@@ -27,6 +27,7 @@
     "test"
   ],
   "include": [
-    "shell/index.js"
+		"bin/**/*.js",
+    "bin/index.js"
   ]
 }
