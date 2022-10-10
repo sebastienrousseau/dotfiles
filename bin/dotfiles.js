@@ -20,13 +20,13 @@ const dir=path.resolve(__dirname, os.homedir());
 
 module.exports = async function main() {
 
-  let i = 0
+  let i = 0;
 
   // Backup files and copy dotfiles.
   do {
     backup(aliases[i], aliases[i]);
     copy(copies[i], aliases[i]);
-    i++
+    i++;
   } while (i < aliases.length && i < copies.length);
 
   // Download and unpack dotfiles.
