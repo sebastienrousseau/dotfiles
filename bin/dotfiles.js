@@ -9,7 +9,7 @@ const copy = require('./copy.js');
 const transfer = require('./transfer.js');
 const backup = require("./backup.js");
 const download = require('./download.js');
-const unpack = require('./unpack.js');
+const unpack = require("./unpack.js");
 const { aliases, copies } = require('./constants.js');
 const sleep = (waitTimeInMs) => new Promise(resolve => setTimeout(resolve, waitTimeInMs));
 var fs = require('fs');
