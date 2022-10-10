@@ -6,7 +6,7 @@
 
 // 🆄🅽🅿🅰🅲🅺 - Unpack function.
 async function unpack() {
-  const compressing = require('compressing');
+  const compressing = require("compressing");
   var os = require('os');
   var path = require('path');
   const { version } = require("./constants.js");
