@@ -8,7 +8,7 @@
 async function download() {
 
   const {promisify} = require('util');
-  var fs = require('fs');
+  var fs = require("fs");
   var os = require("os");
   var path = require('path');
   const { dotfile, version } = require("./constants.js");
