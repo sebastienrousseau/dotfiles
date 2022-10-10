@@ -6,7 +6,7 @@
 
 // 🅱🅰🅲🅺🆄🅿 - Backup function (src, dest).
 async function backup(src, dest) {
-  var fs = require('fs');
+  var fs = require("fs");
   var os = require('os');
   var path = require('path');
   var dir = path.resolve(__dirname, os.homedir() + '/dotfiles_backup');
