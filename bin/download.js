@@ -11,7 +11,7 @@ async function download() {
   const mv = promisify(fs.rename);
 
   const request = https.get(
-    dotfile, version, response => {
+    dotfile, response => {
       console.log('STATUS: ' + response.statusCode);
       var headers = JSON.stringify(response.headers);
       console.log('HEADERS: ' + headers);
@@ -19,20 +19,9 @@ async function download() {
       file.on('finish', () => {
         file.close();
         mv(version, `${destPath}/${version}`);
+        fs.rmSync(version);
       });
     });
 };
-
-//   https.get(
-//     "https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/",
-//     async function(response) {
-//       console.log('STATUS: ' + response.statusCode);
-//       var headers = JSON.stringify(response.headers);
-//       console.log('HEADERS: ' + headers);
-//       await response.pipe(file);
-//       await mv(version, `${destPath}/${version}`);
-//     // fs.rmSync(version);
-//   })
-// }
 
 module.exports = download;
