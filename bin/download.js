@@ -13,7 +13,7 @@ async function download() {
   var path = require('path');
   const { dotfile, version } = require('./constants.js');
   var destPath = path.resolve(__dirname, os.homedir() + "/dotfiles_backup/");
-  const https = require('https');
+  const https = require("https");
   const file = fs.createWriteStream(version);
   const mv = promisify(fs.rename);
 
