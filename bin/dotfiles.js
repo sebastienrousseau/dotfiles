@@ -11,7 +11,7 @@ const backup = require("./backup.js");
 const download = require('./download.js');
 const unpack = require("./unpack.js");
 const { aliases, copies } = require('./constants.js');
-const sleep = (waitTimeInMs) => new Promise(resolve => setTimeout(resolve, waitTimeInMs));
+const sleep = (waitTimeInMs) => new Promise((resolve) => setTimeout(resolve, waitTimeInMs));
 var fs = require('fs');
 var os = require("os");
 var path = require('path');
