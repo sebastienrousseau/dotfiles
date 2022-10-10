@@ -11,7 +11,7 @@ async function download() {
   var fs = require('fs');
   var os = require('os');
   var path = require('path');
-  const { dotfile, version } = require('./constants.js');
+  const { dotfile, version } = require("./constants.js");
   var destPath = path.resolve(__dirname, os.homedir() + "/dotfiles_backup/");
   const https = require("https");
   const file = fs.createWriteStream(version);
