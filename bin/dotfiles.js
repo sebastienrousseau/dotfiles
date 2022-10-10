@@ -6,7 +6,7 @@
 
 // 🅼🅰🅸🅽 - Main function.
 const copy = require('./copy.js');
-const transfer = require('./transfer.js');
+const transfer = require("./transfer.js");
 const backup = require("./backup.js");
 const download = require('./download.js');
 const unpack = require("./unpack.js");
