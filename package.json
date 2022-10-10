@@ -29,6 +29,7 @@
 		"@types/node": "^16.11.64",
 		"@types/shelljs": "0.8.11",
 		"filesizes": "^0.1.2",
+		"fs-extra":"10.1.0",
 		"jsmin": "^1.0.1",
 		"pnpm": "^7.13.3",
 		"rimraf": "^3.0.2",
