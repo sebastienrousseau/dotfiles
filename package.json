@@ -95,7 +95,7 @@
 		"cp:make": "cp -vf ./Makefile ./dist",
 		"cp:prof": "cp -vf ./shell/configurations/profile/profile $HOME/.profile",
 		"cp:shell": "cp -vR ./shell/ ./dist/shell/",
-		"cp:tmux": "cp -vf ./shell/configurations/tmux/tmux $HOME/.tmux.conf",
+		"cp:tmux": "cp -vf ./shell/configurations/tmux/tmux.conf $HOME/.tmux.conf && cp -vR ./shell/configurations/tmux/tmux/ $HOME/tmux/",
 		"cp:vimr": "cp -vf ./shell/configurations/vim/vimrc $HOME/.vimrc",
 		"cp:wget": "cp -vf ./shell/configurations/wget/wgetrc $HOME/.wgetrc",
 		"cp:zshr": "cp -vf ./shell/configurations/zsh/zshrc $HOME/.zshrc",
