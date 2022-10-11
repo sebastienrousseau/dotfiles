@@ -11,5 +11,5 @@ fi
 
 if [[ -z "${TMUX}" ]] && [[ ${UID} != 0 ]]; then
   tmux kill-session -t 2>/dev/null
-  tmux new-session -t
+  tmux
 fi
