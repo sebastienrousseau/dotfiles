@@ -1,0 +1,20 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.458) - https://dotfiles.io
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# License: MIT
+
+bind r source-file ~/.tmux.conf \; display ".tmux.conf reloaded"  \; \
+        source-file $HOME/.dotfiles/shell/configurations/tmux/default                       \; \
+        source-file $HOME/.dotfiles/shell/configurations/tmux/display                       \; \
+        source-file $HOME/.dotfiles/shell/configurations/tmux/linux                         \; \
+        source-file $HOME/.dotfiles/shell/configurations/tmux/navigation                    \; \
+        source-file $HOME/.dotfiles/shell/configurations/tmux/panes                         \; \
+        source-file $HOME/.dotfiles/shell/configurations/tmux/panes                         \; \
+        source-file $HOME/.dotfiles/shell/configurations/tmux/vi \;
+
+source-file $HOME/.dotfiles/shell/configurations/tmux/default
+source-file $HOME/.dotfiles/shell/configurations/tmux/display
+source-file $HOME/.dotfiles/shell/configurations/tmux/linux
+source-file $HOME/.dotfiles/shell/configurations/tmux/navigation
+source-file $HOME/.dotfiles/shell/configurations/tmux/panes
+source-file $HOME/.dotfiles/shell/configurations/tmux/theme
+source-file $HOME/.dotfiles/shell/configurations/tmux/vi

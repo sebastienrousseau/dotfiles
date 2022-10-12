@@ -34,4 +34,16 @@ const copies = [
   "shell/configurations/zsh/zshrc",
 ];
 
-module.exports = { aliases, copies, dotfile, version };
+const config = [
+  "shell/configurations/tmux/default",
+  "shell/configurations/tmux/display",
+  "shell/configurations/tmux/linux",
+  "shell/configurations/tmux/navigation",
+  "shell/configurations/tmux/panes",
+  "shell/configurations/tmux/theme",
+  "shell/configurations/tmux/vi"
+];
+
+const tmux = "$DOTFILES/configurations/tmux/";
+
+module.exports = { aliases, config, copies, dotfile, tmux, version };
