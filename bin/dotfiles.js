@@ -26,7 +26,7 @@ module.exports = async function main() {
   do {
     backup(aliases[i], aliases[i]);
     copy(copies[i], aliases[i]);
-    copy(config[i], tmux);
+    copy(config[i], tmux[i]);
     i++;
   } while (i < aliases.length && i < copies.length);
 
