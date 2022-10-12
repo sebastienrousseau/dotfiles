@@ -32,7 +32,7 @@ module.exports = async function main() {
   // Copy configurations.
   i = 0;
   do {
-    copy(config[i], tmux );
+    copy(config[i], tmux[i] );
     i++;
   } while (i < config.length);
 
