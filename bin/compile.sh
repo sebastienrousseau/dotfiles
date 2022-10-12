@@ -6,7 +6,7 @@
 ## 🅲🅾🅼🅿🅸🅻🅴 🅳🅾🆃🅵🅸🅻🅴🆂 - Compile dotfiles.
 
 compile() {
-  pnpm run cp:shell &&
+  pnpm run cp:lib &&
   pnpm run cl:tmp &&
   pnpm run cp:bin &&
   pnpm run cp:make &&

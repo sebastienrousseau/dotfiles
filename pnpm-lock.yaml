@@ -1,13 +1,13 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@types/node': ^16.11.64
+  '@types/node': ^16.11.65
   '@types/shelljs': 0.8.11
   compressing: ^1.6.2
   filesizes: ^0.1.2
   fs-extra: 10.1.0
   jsmin: ^1.0.1
-  pnpm: ^7.13.3
+  pnpm: ^7.13.4
   rimraf: ^3.0.2
   shelljs: ^0.8.5
   shelljs-nodecli: ^0.1.1
@@ -15,13 +15,13 @@ specifiers:
   typescript: ^4.8.4
 
 devDependencies:
-  '@types/node': registry.npmjs.org/@types/node/16.11.64
+  '@types/node': registry.npmjs.org/@types/node/16.11.65
   '@types/shelljs': registry.npmjs.org/@types/shelljs/0.8.11
   compressing: registry.npmjs.org/compressing/1.6.2
   filesizes: registry.npmjs.org/filesizes/0.1.2
   fs-extra: registry.npmjs.org/fs-extra/10.1.0
   jsmin: registry.npmjs.org/jsmin/1.0.1
-  pnpm: registry.npmjs.org/pnpm/7.13.3
+  pnpm: registry.npmjs.org/pnpm/7.13.4
   rimraf: registry.npmjs.org/rimraf/3.0.2
   shelljs: registry.npmjs.org/shelljs/0.8.5
   shelljs-nodecli: registry.npmjs.org/shelljs-nodecli/0.1.1
@@ -111,7 +111,7 @@ packages:
     version: 8.0.0
     dependencies:
       '@types/minimatch': registry.npmjs.org/@types/minimatch/5.1.2
-      '@types/node': registry.npmjs.org/@types/node/16.11.64
+      '@types/node': registry.npmjs.org/@types/node/16.11.65
     dev: true
 
   registry.npmjs.org/@types/json-schema/7.0.11:
@@ -132,10 +132,10 @@ packages:
     version: 1.2.2
     dev: true
 
-  registry.npmjs.org/@types/node/16.11.64:
-    resolution: {integrity: sha512-z5hPTlVFzNwtJ2LNozTpJcD1Cu44c4LNuzaq1mwxmiHWQh2ULdR6Vjwo1UGldzRpzL0yUEdZddnfqGW2G70z6Q==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/@types/node/-/node-16.11.64.tgz}
+  registry.npmjs.org/@types/node/16.11.65:
+    resolution: {integrity: sha512-Vfz7wGMOr4jbQGiQHVJm8VjeQwM9Ya7mHe9LtQ264/Epf5n1KiZShOFqk++nBzw6a/ubgYdB9Od7P+MH/LjoWw==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/@types/node/-/node-16.11.65.tgz}
     name: '@types/node'
-    version: 16.11.64
+    version: 16.11.65
     dev: true
 
   registry.npmjs.org/@types/normalize-package-data/2.4.1:
@@ -150,7 +150,7 @@ packages:
     version: 0.8.11
     dependencies:
       '@types/glob': registry.npmjs.org/@types/glob/8.0.0
-      '@types/node': registry.npmjs.org/@types/node/16.11.64
+      '@types/node': registry.npmjs.org/@types/node/16.11.65
     dev: true
 
   registry.npmjs.org/ansi-escapes/4.3.2:
@@ -937,10 +937,10 @@ packages:
       kind-of: registry.npmjs.org/kind-of/6.0.3
     dev: true
 
-  registry.npmjs.org/minimist/1.2.6:
-    resolution: {integrity: sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/minimist/-/minimist-1.2.6.tgz}
+  registry.npmjs.org/minimist/1.2.7:
+    resolution: {integrity: sha512-bzfL1YUZsP41gmu/qjrEk0Q6i2ix/cVeAhbCbqH9u3zYutS1cLg00qhrD0M2MVdCcx4Sc0UpP2eBWo9rotpq6g==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/minimist/-/minimist-1.2.7.tgz}
     name: minimist
-    version: 1.2.6
+    version: 1.2.7
     dev: true
 
   registry.npmjs.org/mkdirp/0.5.6:
@@ -949,7 +949,7 @@ packages:
     version: 0.5.6
     hasBin: true
     dependencies:
-      minimist: registry.npmjs.org/minimist/1.2.6
+      minimist: registry.npmjs.org/minimist/1.2.7
     dev: true
 
   registry.npmjs.org/normalize-package-data/2.5.0:
@@ -1076,10 +1076,10 @@ packages:
       irregular-plurals: registry.npmjs.org/irregular-plurals/3.3.0
     dev: true
 
-  registry.npmjs.org/pnpm/7.13.3:
-    resolution: {integrity: sha512-6avqSfzfAr/9w1ZleaMI276ZuZUu88eOIe6v2mTCuwtSjUEqheboH1G4m7jgF+4arMUfnBrz371UAU+DCeCiSA==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/pnpm/-/pnpm-7.13.3.tgz}
+  registry.npmjs.org/pnpm/7.13.4:
+    resolution: {integrity: sha512-ZaP5+PRzXI0g4KijU7zx4hi7RUJcSYBJIb90e+lyTeQyRw91+peJoFAzWa63+4fjJIz6CqY0cNkP7trZXh5l8w==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/pnpm/-/pnpm-7.13.4.tgz}
     name: pnpm
-    version: 7.13.3
+    version: 7.13.4
     engines: {node: '>=14.6'}
     hasBin: true
     dev: true

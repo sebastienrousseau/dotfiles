@@ -3,10 +3,8 @@
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
-## 🅰🅻🅸🅰🆂🅴🆂
-
-# Load custom executable aliases
-for file in "${HOME}"/.dotfiles/shell/aliases/[!.#]*/*.sh; do
+## 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽🆂
+for config in "${HOME}"/.dotfiles/lib/configurations/[!.#]*/*.sh; do
   # shellcheck source=/dev/null
-  source "${file}"
+  source "${config}"
 done

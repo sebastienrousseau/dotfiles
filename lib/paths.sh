@@ -3,8 +3,10 @@
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
-# Load custom executable functions
-for function in "${HOME}"/.dotfiles/shell/functions/[!.#]*.sh; do
+## 🅿🅰🆃🅷🆂
+
+# Load custom executable paths.
+for file in "${HOME}"/.dotfiles/lib/paths/[!.#]*/*.sh; do
   # shellcheck source=/dev/null
-  source "${function}"
+  . "${file}"
 done

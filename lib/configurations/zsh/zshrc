@@ -4,19 +4,19 @@
 # License: MIT
 
 ## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set variables.
-HOSTNAME=$(hostname -f)                   # hostname of the machine.
-INPUTRC=${HOME}/.inputrc                    # set INPUTRC (so that .inputrc is respected)
-OS_ARCH=$(uname -m)                       # machine hardware name.
-OS_NAME=$(uname)                          # operating system name.
-OS_VERSION=$(uname -r)                    # operating system version number.
-SSL_CERT_FILE=${HOME}/cacert.pem            # set the SSL_CERT_FILE environment variable.
-USER_LANGUAGE="en_GB.UTF-8"               # default language.
-USER=$(whoami)                            # current user name.
+HOSTNAME=$(hostname -f)          # hostname of the machine.
+INPUTRC=${HOME}/.inputrc         # set INPUTRC (so that .inputrc is respected)
+OS_ARCH=$(uname -m)              # machine hardware name.
+OS_NAME=$(uname)                 # operating system name.
+OS_VERSION=$(uname -r)           # operating system version number.
+SSL_CERT_FILE=${HOME}/cacert.pem # set the SSL_CERT_FILE environment variable.
+USER_LANGUAGE="en_GB.UTF-8"      # default language.
+USER=$(whoami)                   # current user name.
 
 ## 🅴🆇🅿🅾🆁🆃🆂 - Export the variables.
 export ARCHFLAGS="-arch ${OS_ARCH}"       # archflags for the current machine.
 export DOTFILES_VERSION='0.2.458'         # version of the dotfiles.
-export DOTFILES="${HOME}"/.dotfiles/shell   # path to the cross plaform dotfiles.
+export DOTFILES="${HOME}"/.dotfiles/lib # path to the cross plaform dotfiles.
 export HOSTNAME=${HOSTNAME}               # hostname of the machine.
 export INPUTRC=${INPUTRC}                 # set INPUTRC (so that .inputrc is respected)
 export LANG=${USER_LANGUAGE}              # default language.
@@ -34,3 +34,17 @@ for loaders in "${DOTFILES}"/*.sh; do
   # shellcheck source=/dev/null
   . "${loaders}"
 done
+
+# Remove duplicates in zsh $PATH
+# shellcheck disable=SC2034
+typeset -aU path
+
+# Initialize the completion system
+autoload -Uz compinit
+
+# Enable colors in prompt
+autoload -Uz colors && colors
+
+# Starting to find autocorrect rather annoying...
+unsetopt correct_all
+

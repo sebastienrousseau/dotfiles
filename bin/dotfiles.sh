@@ -74,7 +74,7 @@ download() {
 unpack() {
   echo "${BIRed}❭${NC} Unpacking ${BIGreen}Dotfiles v${VERSION}${NC}."
   unzip -qq -u "${DOWNLOADDIR}"/v"${VERSION}".zip -d "${DOWNLOADDIR}"
-  mv "${DOWNLOADDIR}/dotfiles-${VERSION}/shell/" "${DOTFILESDIR}"
+  mv "${DOWNLOADDIR}/dotfiles-${VERSION}/lib/" "${DOTFILESDIR}"
   rm "${DOWNLOADDIR}/v${VERSION}.zip"
 }
 
@@ -94,33 +94,33 @@ copy() {
 
   echo "${BIRed}❭${NC} Copying the Dotfiles on your system."
   echo "${BIRed}❭${NC} Copying ${BIGreen}.bashrc${NC}"
-  cp -f "${DOTFILESDIR}"/shell/configurations/bash/bashrc "${HOME}"/.bashrc &&
+  cp -f "${DOTFILESDIR}"/lib/configurations/bash/bashrc "${HOME}"/.bashrc &&
   echo "${BIRed}❭${NC} Copying ${BIGreen}cacert.pem${NC}"
-  cp -f "${DOTFILESDIR}"/shell/configurations/curl/cacert.pem "${HOME}"/cacert.pem &&
+  cp -f "${DOTFILESDIR}"/lib/configurations/curl/cacert.pem "${HOME}"/cacert.pem &&
   echo "${BIRed}❭${NC} Copying ${BIGreen}.curlrc${NC}"
-  cp -f "${DOTFILESDIR}"/shell/configurations/curl/curlrc "${HOME}"/.curlrc &&
+  cp -f "${DOTFILESDIR}"/lib/configurations/curl/curlrc "${HOME}"/.curlrc &&
   echo "${BIRed}❭${NC} Copying ${BIGreen}.jshintrc${NC}"
-  cp -f "${DOTFILESDIR}"/shell/configurations/jshint/jshintrc "${HOME}"/.jshintrc &&
+  cp -f "${DOTFILESDIR}"/lib/configurations/jshint/jshintrc "${HOME}"/.jshintrc &&
   echo "${BIRed}❭${NC} Copying ${BIGreen}.profile${NC}"
-  cp -f "${DOTFILESDIR}"/shell/configurations/profile/profile "${HOME}"/.profile &&
+  cp -f "${DOTFILESDIR}"/lib/configurations/profile/profile "${HOME}"/.profile &&
   echo "${BIRed}❭${NC} Copying ${BIGreen}.tmux.conf${NC}"
-  cp -f "${DOTFILESDIR}"/shell/configurations/tmux/tmux "${HOME}"/.tmux.conf &&
+  cp -f "${DOTFILESDIR}"/lib/configurations/tmux/tmux "${HOME}"/.tmux.conf &&
   echo "${BIRed}❭${NC} Copying ${BIGreen}.vimrc${NC}"
-  cp -f "${DOTFILESDIR}"/shell/configurations/vim/vimrc "${HOME}"/.vimrc &&
+  cp -f "${DOTFILESDIR}"/lib/configurations/vim/vimrc "${HOME}"/.vimrc &&
   echo "${BIRed}❭${NC} Copying ${BIGreen}.wgetrc${NC}"
-  cp -f "${DOTFILESDIR}"/shell/configurations/wget/wgetrc "${HOME}"/.wgetrc &&
+  cp -f "${DOTFILESDIR}"/lib/configurations/wget/wgetrc "${HOME}"/.wgetrc &&
   echo "${BIRed}❭${NC} Copying ${BIGreen}.zshrc${NC}"
-  cp -f "${DOTFILESDIR}"/shell/configurations/zsh/zshrc "${HOME}"/.zshrc
+  cp -f "${DOTFILESDIR}"/lib/configurations/zsh/zshrc "${HOME}"/.zshrc
 
   echo "${BIRed}❭${NC} Cleaning up installation files."
-  rm -Rf "${DOTFILESDIR}"/shell/configurations/bash &&
-  rm -Rf "${DOTFILESDIR}"/shell/configurations/curl &&
-  rm -Rf "${DOTFILESDIR}"/shell/configurations/jshint &&
-  rm -Rf "${DOTFILESDIR}"/shell/configurations/profile &&
-  rm -Rf "${DOTFILESDIR}"/shell/configurations/tmux &&
-  rm -Rf "${DOTFILESDIR}"/shell/configurations/vim &&
-  rm -Rf "${DOTFILESDIR}"/shell/configurations/wget &&
-  rm -Rf "${DOTFILESDIR}"/shell/configurations/zsh &&
+  rm -Rf "${DOTFILESDIR}"/lib/configurations/bash &&
+  rm -Rf "${DOTFILESDIR}"/lib/configurations/curl &&
+  rm -Rf "${DOTFILESDIR}"/lib/configurations/jshint &&
+  rm -Rf "${DOTFILESDIR}"/lib/configurations/profile &&
+  rm -Rf "${DOTFILESDIR}"/lib/configurations/tmux &&
+  rm -Rf "${DOTFILESDIR}"/lib/configurations/vim &&
+  rm -Rf "${DOTFILESDIR}"/lib/configurations/wget &&
+  rm -Rf "${DOTFILESDIR}"/lib/configurations/zsh &&
 
   echo "${BIRed}❭${NC} ${BIGreen}Dotfiles v${VERSION}${NC} has been installed on your system."
 }

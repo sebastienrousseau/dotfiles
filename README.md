@@ -25,7 +25,7 @@ files with new ways to get things done.
 [![Download Dotfiles v0.2.458][download_button]][download]
 
 Dotfiles aggregates a collection of standalone configuration files (dotfiles)
-combined into a `shell` directory that can be used to customize your development
+combined into a `lib` directory that can be used to customize your development
 environment across numerous computers and operating systems (macOS, Windows,
 Linux).
 
@@ -262,7 +262,7 @@ You'll see something like this:
 │   ├── unpack.d.ts.map
 │   ├── unpack.js
 │   └── unpack.js.map
-├── shell
+├── lib
 │   ├── aliases
 │   │   ├── default
 │   │   │   └── default.aliases.sh
