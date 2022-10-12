@@ -1,0 +1,17 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.458) - https://dotfiles.io
+# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# License: MIT
+
+## 🅳🅴🅵🅰🆄🅻🆃
+set -g default-terminal "screen-256color"   # use 256 colors
+if 'infocmp -x tmux-256color > /dev/null 2>&1' 'set -g default-terminal "tmux-256color"'
+
+bind C-a send-prefix -2     # GNU-Screen compatible prefix
+set -g history-limit 102400 # Increase history limit
+set -g prefix2 C-a          # GNU-Screen compatible prefix
+set -g set-clipboard on     # Copy to system clipboard
+set -s escape-time 10       # Faster command sequences
+set -s focus-events on      # Enable mouse focus events
+set -sg repeat-time 600     # Increase repeat timeout
+setw -g xterm-keys on       # Enable xterm keys
+setw -q -g utf8 on          # Expect UTF-8 (tmux < 2.2)

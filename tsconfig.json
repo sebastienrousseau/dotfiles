@@ -10,7 +10,7 @@
     "declarationMap": true, /* Generates a sourcemap for each corresponding '.d.ts' file. */
     "forceConsistentCasingInFileNames": true, /* Disallow inconsistently-cased references to the same file. */
     "lib": [
-      "es2015"
+      "es2015", "dom"
     ], /* Specify library files to be included in the compilation. */
     "newLine": "lf", /* Specifies the end of line sequence to be used when emitting files: 'crlf' (Windows) or 'lf' (Unix). */
     "outDir": "./dist", /* Redirect output structure to the directory. */
