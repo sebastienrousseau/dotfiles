@@ -26,9 +26,8 @@ module.exports = async function main() {
   do {
     backup(aliases[i], aliases[i]);
     copy(copies[i], aliases[i]);
-    copy(config[i], tmux[i] );
     i++;
-  } while (i < aliases.length && i < copies.length && i < tmux.length);
+  } while (i < aliases.length && i < copies.length);
 
   // Download and unpack dotfiles.
   download(); // download the dotfiles
