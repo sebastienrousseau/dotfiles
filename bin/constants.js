@@ -44,6 +44,14 @@ const config = [
   "lib/configurations/tmux/vi"
 ];
 
-const tmux = "$DOTFILES/configurations/tmux/";
+const tmux  = [
+  "$DOTFILES/configurations/tmux/",
+  "$DOTFILES/configurations/tmux/",
+  "$DOTFILES/configurations/tmux/",
+  "$DOTFILES/configurations/tmux/",
+  "$DOTFILES/configurations/tmux/",
+  "$DOTFILES/configurations/tmux/",
+  "$DOTFILES/configurations/tmux/"
+];
 
 module.exports = { aliases, config, copies, dotfile, tmux, version };
