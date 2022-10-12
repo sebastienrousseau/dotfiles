@@ -169,7 +169,7 @@ alias gf='git fetch'
 alias gp='git pull'
 
 # Update remote refs along with associated objects.
-alias gpu='git push'
+alias gph='git push'
 
 
 
@@ -286,7 +286,7 @@ alias gclout='git clean -df && git checkout -- .'
 alias gco='git checkout'
 
 # Create a new branch named <new_branch> and start it at <start_point>.
-alias gcob='git checkout -b'
+alias gcb='git checkout -b'
 
 # Delete all local branches that have been merged into the local main branch.
 alias gcode='git checkout main && git branch --merged | xargs git branch --delete'
@@ -371,15 +371,10 @@ alias grf="find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && 
 # Fetch all git remotes for a repo.
 alias grfall="git branch -r | awk -F'/' '{print "git fetch "$1,$2}' | xargs -I {} sh -c {}"
 
-# Open current Git repository URL.
-alias gro="open `git remote -v | awk '/fetch/{print $2}' | sed -Ee 's#(git@|git://)#http://#' -e 's@com:@com/@'`| head -n1"x
-
 # For each remote branch, push it.
 alias grp="git remote | xargs -I% -n1 git push %"
 
 # Push all remotes.
-alias grpa="for i in `git remote`; do git push $i; done;"
-
 # Print the url for the current repo.
 alias grprint="git remote -v | sed -n '/github.com.*push/{s/^[^[:space:]]\+[[:space:]]\+//;s|git@github.com:|https://github.com/|;s/\.git.*//;p}"
 
@@ -440,8 +435,11 @@ alias gsmuir='git submodule update --init --recursive'
 # Show the working tree status.
 alias gst='git status'
 
+# Stash the changes.
+alias gsta='git stash save '
+
 # Remove untracked files in a git repository.
-alias gstrmu='git status -su | cut -d' ' -f2- | tr '\n' '\0' | xargs -0 rm'
+alias gstrmu='git status -su | cut -d' ' -f2- | tr "\n" "\0" | xargs -0 rm'
 
 # Status with short format instead of full details.
 alias gsts='git status --short'
@@ -458,17 +456,11 @@ alias gstsb='git status --short --branch'
 # See all tags.
 alias gt='git tag'
 
-# Add a tag.
-alias gta='git tag -a $1 -m $2'
-
 # Create, list, delete or verify a tag object signed with GPG.
 alias gtg='git tag'
 
 # Last tag in the current branch.
 alias gtl='git describe --tags --abbrev=0'
-
-# Delete all tags.
-alias gtrm='for t in `git tag` do; git push origin :$t; git tag -d $t; done'
 
 
 
@@ -476,8 +468,8 @@ alias gtrm='for t in `git tag` do; git push origin :$t; git tag -d $t; done'
 ##  2.6 Aliases to show various types of objects.
 ##  ----------------------------------------------------------------------------
 
-# Show git branches by date - useful for showing active branches.
-alias gshab='for k in `git branch|perl -pe s/^..//`;do echo -e `git show --pretty=format:"%Cgreen%ci %Cblue%cr%Creset" $k|head -n 1`\\t$k;done|sort -r'
+# Show various types of objects
+alias gshow='git show'
 
 # Find the nearest parent branch of the current git branch.
 # alias gshf='git show-branch -a | grep '\*' | grep -v 'git rev-parse --abbrev-ref HEAD' | head -n1 | sed 's/.*\[\(.*\)\].*/\1/' | sed 's/[\^~].*//''
@@ -522,7 +514,7 @@ alias gresu='git reset --hard $(git upstream-branch)'
 alias gtp='git rev-parse --show-toplevel'
 
 # Get the current branch name.
-alias gcb='git rev-parse --abbrev-ref HEAD'
+alias grpa='git rev-parse --abbrev-ref HEAD'
 
 # Get the upstream branch name.
 # alias gub='git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)'
@@ -548,9 +540,6 @@ alias grmd2='git rm $(git ls-files --deleted)'
 # Remove .DS_Store from the repository.
 alias grmds='find . -name .DS_Store -exec git rm --ignore-unmatch --cached {} +'
 
-# Remove all new files.
-alias grmn='for file in $(git status | grep "new file" | sed "s/#\tnew file://"); do git rm --cached $file; done'
-
 # Remove for all deleted files, including those with space/quote/unprintable characters in their filename/path.
 alias grmx='git ls-files -z -d | xargs -0 git rm --'
 
@@ -559,12 +548,6 @@ alias grmx='git ls-files -z -d | xargs -0 git rm --'
 ##  ----------------------------------------------------------------------------
 ##  3.0 Aliases to show what revision and author last modified each line of a file.
 ##  ----------------------------------------------------------------------------
-
-# Specifies a format used to output short dates.
-alias gbl='git blame --date short "$1"'
-
-# Count the number of lines attributed to each author.
-alias gblc='git blame --line-porcelain "$1" | sed -n 's/^author //p' | sort | uniq -c | sort -rn'
 
 # Prints per-line contribution per author for a GIT repository.
 alias gblau='git ls-files | xargs -n1 git blame --line-porcelain | sed -n 's/^author //p' | sort -f | uniq -ic | sort -nr'
