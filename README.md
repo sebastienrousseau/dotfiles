@@ -231,7 +231,6 @@ You'll see something like this:
 │   ├── backup.d.ts.map
 │   ├── backup.js
 │   ├── backup.js.map
-│   ├── compile.sh
 │   ├── constants.d.ts
 │   ├── constants.d.ts.map
 │   ├── constants.js
@@ -240,12 +239,10 @@ You'll see something like this:
 │   ├── copy.d.ts.map
 │   ├── copy.js
 │   ├── copy.js.map
-│   ├── copy.sh
 │   ├── dotfiles.d.ts
 │   ├── dotfiles.d.ts.map
 │   ├── dotfiles.js
 │   ├── dotfiles.js.map
-│   ├── dotfiles.sh
 │   ├── download.d.ts
 │   ├── download.d.ts.map
 │   ├── download.js
@@ -269,6 +266,7 @@ You'll see something like this:
 │   │   ├── gcloud
 │   │   │   └── gcloud.aliases.sh
 │   │   ├── git
+│   │   │   └── git.aliases.sh
 │   │   ├── heroku
 │   │   │   └── heroku.aliases.sh
 │   │   ├── jekyll
@@ -289,14 +287,21 @@ You'll see something like this:
 │   │   │   ├── color.sh
 │   │   │   ├── editor.sh
 │   │   │   └── prompt.sh
-│   │   ├── input
+│   │   ├── inputrc
 │   │   │   └── inputrc
 │   │   ├── jshint
 │   │   │   └── jshintrc
 │   │   ├── profile
 │   │   │   └── profile
 │   │   ├── tmux
-│   │   │   └── tmux
+│   │   │   ├── default
+│   │   │   ├── display
+│   │   │   ├── linux
+│   │   │   ├── navigation
+│   │   │   ├── panes
+│   │   │   ├── theme
+│   │   │   ├── tmux
+│   │   │   └── vi
 │   │   ├── vim
 │   │   │   └── vimrc
 │   │   ├── wget
@@ -374,7 +379,7 @@ You'll see something like this:
 ├── Makefile
 └── filesizes.txt
 
-35 directories, 112 files
+35 directories, 117 files
 ```
 
 ## 🔗 Releases

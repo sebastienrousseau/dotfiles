@@ -16,7 +16,7 @@ backup: ## Backup your current dotfiles.
 ifdef PNPM
 	pnpm run backup
 else
-	sh $(HOMEDIR)/bin/dotfiles.sh backup
+	sh $(HOMEDIR)/scripts/dotfiles backup
 endif
 
 .PHONY: assemble
@@ -25,7 +25,7 @@ assemble: ## Prepare the dotfiles on your system.
 ifdef PNPM
 	pnpm run assemble
 else
-	sh $(HOMEDIR)/bin/dotfiles assemble
+	sh $(HOMEDIR)/scripts/dotfiles assemble
 endif
 
 .PHONY: copy
@@ -34,7 +34,7 @@ copy: ## Copy the dotfiles on your system.
 ifdef PNPM
 	pnpm run copy
 else
-	sh $(HOMEDIR)/bin/dotfiles copy
+	sh $(HOMEDIR)/scripts/dotfiles copy
 endif
 
 .PHONY: download
@@ -43,7 +43,7 @@ download: ## Download the dotfiles on your system.
 ifdef PNPM
 	pnpm run download
 else
-	sh $(HOMEDIR)/bin/dotfiles download
+	sh $(HOMEDIR)/scripts/dotfiles download
 endif
 
 .PHONY: unpack
@@ -52,7 +52,7 @@ unpack: ## Unpack the dotfiles on your system.
 ifdef PNPM
 	pnpm run unpack
 else
-	sh $(HOMEDIR)/bin/dotfiles unpack
+	sh $(HOMEDIR)/scripts/dotfiles unpack
 endif
 
 .PHONY: clean
@@ -61,7 +61,7 @@ clean:
 ifdef PNPM
 	pnpm run clean
 else
-	sh $(HOMEDIR)/bin/dotfiles clean
+	sh $(HOMEDIR)/scripts/dotfiles clean
 endif
 
 .PHONY: help
