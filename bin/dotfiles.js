@@ -5,16 +5,16 @@
 */
 
 // 🅼🅰🅸🅽 - Main function.
-const copy = require('./copy.js');
+const copy = require("./copy.js");
 const transfer = require("./transfer.js");
 const backup = require("./backup.js");
-const download = require('./download.js');
+const download = require("./download.js");
 const unpack = require("./unpack.js");
-const { aliases, config, copies, tmux } = require('./constants.js');
+const { aliases, config, copies, tmux } = require("./constants.js");
 const sleep = (waitTimeInMs) => new Promise((resolve) => setTimeout(resolve, waitTimeInMs));
-var fs = require('fs');
+var fs = require("fs");
 var os = require("os");
-var path = require('path');
+var path = require("path");
 
 const dir=path.resolve(__dirname, os.homedir());
 
@@ -26,9 +26,15 @@ module.exports = async function main() {
   do {
     backup(aliases[i], aliases[i]);
     copy(copies[i], aliases[i]);
-    copy(config[i], tmux[i]);
     i++;
   } while (i < aliases.length && i < copies.length);
+
+  // Copy configurations.
+  i = 0;
+  do {
+    copy(config[i], tmux );
+    i++;
+  } while (i < config.length);
 
   // Download and unpack dotfiles.
   download(); // download the dotfiles
