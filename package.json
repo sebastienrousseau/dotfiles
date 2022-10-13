@@ -89,6 +89,7 @@
 		"cp:cert": "cp -vf ./lib/configurations/curl/cacert.pem $HOME/cacert.pem",
 		"cp:curl": "cp -vf ./lib/configurations/curl/curlrc $HOME/.curlrc",
 		"cp:dirs": "cp -vf -R ./lib $HOME/.dotfiles/lib/",
+		"cp:gemr": "cp -vf ./lib/configurations/gem/gemrc $HOME/.gemrc",
 		"cp:inpt": "cp -vf ./lib/configurations/inputrc/inputrc $HOME/.inputrc",
 		"cp:jsht": "cp -vf ./lib/configurations/jshint/jshintrc $HOME/.jshintrc",
 		"cp:make": "cp -vf ./Makefile ./dist",

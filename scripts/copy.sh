@@ -7,15 +7,16 @@
 
 copy() {
   pnpm run cp:bash &&
-  pnpm run cp:cert &&
-  pnpm run cp:curl &&
-  pnpm run cp:dirs &&
-  pnpm run cp:inpt &&
-  pnpm run cp:jsht &&
-  pnpm run cp:prof &&
-  pnpm run cp:tmux &&
-  pnpm run cp:vimr &&
-  pnpm run cp:wget &&
-  pnpm run cp:zshr
+    pnpm run cp:cert &&
+    pnpm run cp:curl &&
+    pnpm run cp:dirs &&
+    pnpm run cp:gemr &&
+    pnpm run cp:inpt &&
+    pnpm run cp:jsht &&
+    pnpm run cp:prof &&
+    pnpm run cp:tmux &&
+    pnpm run cp:vimr &&
+    pnpm run cp:wget &&
+    pnpm run cp:zshr
 }
 copy
