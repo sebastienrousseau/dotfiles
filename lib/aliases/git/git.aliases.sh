@@ -366,10 +366,10 @@ alias grbk='git reset --soft HEAD^'
 alias grcl='git remote prune'
 
 # Show GIT Remote Origin for each immediate subfolder.
-alias grf="find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && echo '{}' && git config --get remote.origin.url" \;"
+# alias grf="find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && echo '{}' && git config --get remote.origin.url" \;"
 
 # Fetch all git remotes for a repo.
-alias grfall="git branch -r | awk -F'/' '{print "git fetch "$1,$2}' | xargs -I {} sh -c {}"
+# alias grfall="git branch -r | awk -F'/' '{print "git fetch "$1,$2}' | xargs -I {} sh -c {}"
 
 # For each remote branch, push it.
 alias grp="git remote | xargs -I% -n1 git push %"
@@ -439,7 +439,7 @@ alias gst='git status'
 alias gsta='git stash save '
 
 # Remove untracked files in a git repository.
-alias gstrmu='git status -su | cut -d' ' -f2- | tr "\n" "\0" | xargs -0 rm'
+# alias gstrmu='git status -su | cut -d' ' -f2- | tr "\n" "\0" | xargs -0 rm'
 
 # Status with short format instead of full details.
 alias gsts='git status --short'
@@ -550,7 +550,7 @@ alias grmx='git ls-files -z -d | xargs -0 git rm --'
 ##  ----------------------------------------------------------------------------
 
 # Prints per-line contribution per author for a GIT repository.
-alias gblau='git ls-files | xargs -n1 git blame --line-porcelain | sed -n 's/^author //p' | sort -f | uniq -ic | sort -nr'
+# alias gblau='git ls-files | xargs -n1 git blame --line-porcelain | sed -n 's/^author //p' | sort -f | uniq -ic | sort -nr'
 
 
 

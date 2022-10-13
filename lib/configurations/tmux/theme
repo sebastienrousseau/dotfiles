@@ -17,7 +17,7 @@ if 'uname -s | grep -q MINGW' 'set -g status-left "#[bg=#007ACC] 🪟 Windows #[
 set -g status-bg "#2D1681" # Status bar background color (purple)
 set -g status-fg "#FFFFFF" # Status bar foreground color (text)
 set -g status-interval 5 # Status bar refresh interval in seconds
-set -g status-justify absolute-centre # Status bar justification (left, right, centre, absolute-left, absolute-right, absolute-centre)
+set -g status-justify centre # Status bar justification (left, right, centre, absolute-left, absolute-right, absolute-centre)
 set -g status-left-length 50 # Status bar left length
 set -g status-right-length 50 # Status bar right length
 set -g status-right "#[fg=#FFFFFF] #[bg=#14222A] ⬛ #I #[bg=#007ACC] %d/%m/%Y #[bg=#EB0000] %_d %B %I:%M%p "

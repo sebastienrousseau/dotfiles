@@ -171,12 +171,6 @@ elif [[ "$(uname || true)" = "Linux" ]]; then
         sudo apt update;
         sudo apt upgrade -y;
         pnpm up;
-        brew cu -ayi;
-        brew doctor;
-        brew update;
-        brew upgrade;
-        brew cleanup;
-        mas upgrade;
         sudo gem update;
         sudo gem cleanup;
     '
