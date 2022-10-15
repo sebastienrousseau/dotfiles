@@ -13,7 +13,7 @@ export DF_DOTFILESDIR="${DF_DOTFILESDIR}" # Exporting Location of dotfiles.
 ## 🆄🅽🅿🅰🅲🅺 - Unpack the dotfiles on your system.
 unpack() {
   # shellcheck disable=SC2154
-  echo "${DF_BIRed}❭${DF_NC} Unpacking ${DF_BIGreen}Dotfiles v${VERSION}${NC}."
+  echo "${RED}❭${NC} Unpacking ${GREEN}Dotfiles v${VERSION}${NC}."
 
   # shellcheck disable=SC2154
   unzip -qq -u "${DF_DOWNLOADDIR}"/v"${DF_VERSION}".zip -d "${DF_DOWNLOADDIR}"

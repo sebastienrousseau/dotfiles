@@ -4,13 +4,12 @@
 # License: MIT
 
 ## 🅳🅾🆃🅵🅸🅻🅴🆂 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set Dotfiles variables.
-DF_BACKUPDIR="${HOME}/dotfiles_backup" # Backup directory.
-DF_DOWNLOADDIR="${HOME}/Downloads"     # Download directory.
-DF_VERSION="0.2.459"                   # Dotfiles Version number.
+DF_BACKUPDIR="${HOME}/dotfiles_backup"    # Backup directory.
+DF_DOWNLOADDIR="${HOME}/Downloads"        # Download directory.
+DF_VERSION="0.2.459"                      # Dotfiles Version number.
+DF_TIMESTAMP="$(date +%Y-%m-%d_%H-%M-%S)" # Timestamp for backup directory.
 
-export DF_BACKUPDIR="${DF_BACKUPDIR}"     # Exporting Backup directory.
-export DF_DOWNLOADDIR="${DF_DOWNLOADDIR}" # Exporting Download directory.
-export DF_VERSION="${DF_VERSION}"         # Exporting Dotfiles Version number.
+export DF_BACKUPDIR, DF_DOWNLOADDIR, DF_TIMESTAMP, DF_VERSION
 
 ## 🅲🅾🅻🅾🆁🆂 - Set colors.
 BLACK=$(tput setaf 0)               # Black
@@ -23,12 +22,4 @@ CYAN=$(tput bold && tput setaf 6)   # Cyan
 WHITE=$(tput bold && tput setaf 7)  # White
 NC=$(tput sgr0)                     # No Color
 
-export BLACK="${BLACK}"   # Exporting Black.
-export RED="${RED}"       # Exporting Red.
-export GREEN="${GREEN}"   # Exporting Green.
-export YELLOW="${YELLOW}" # Exporting Yellow.
-export BLUE="${BLUE}"     # Exporting Blue.
-export PURPLE="${PURPLE}" # Exporting Purple.
-export CYAN="${CYAN}"     # Exporting Cyan.
-export WHITE="${WHITE}"   # Exporting White.
-export NC="${NC}"         # Exporting No Color.
+export BLACK, RED, GREEN, YELLOW, BLUE, PURPLE, CYAN, WHITE, NC

@@ -13,28 +13,28 @@ DF_DOTFILESDIR="${HOME}/.dotfiles" # Location of dotfiles.
 ## 🅲🅾🅿🆈 - Copy the dotfiles on your system.
 copy() {
   # shellcheck disable=SC2154
-  echo "${DF_BIRed}❭${DF_NC} Copying the Dotfiles on your system."
+  echo "${RED}❭${NC} Copying the Dotfiles on your system."
 
   # shellcheck disable=SC2154
-  echo "${DF_BIRed}❭${DF_NC} Copying ${DF_BIGreen}.bashrc${DF_NC}"
+  echo "${RED}❭${NC} Copying ${GREEN}.bashrc${NC}"
 
   cp -f "${DF_DOTFILESDIR}"/lib/configurations/bash/bashrc "${HOME}"/.bashrc &&
-    echo "${DF_BIRed}❭${DF_NC} Copying ${DF_BIGreen}cacert.pem${DF_NC}"
+    echo "${RED}❭${NC} Copying ${GREEN}cacert.pem${NC}"
   # shellcheck disable=SC2154
   cp -f "${DOTFILESDIR}"/lib/configurations/curl/cacert.pem "${HOME}"/cacert.pem &&
-    echo "${DF_BIRed}❭${DF_NC} Copying ${DF_BIGreen}.curlrc${DF_NC}"
+    echo "${RED}❭${NC} Copying ${GREEN}.curlrc${NC}"
   cp -f "${DOTFILESDIR}"/lib/configurations/curl/curlrc "${HOME}"/.curlrc &&
-    echo "${DF_BIRed}❭${DF_NC} Copying ${DF_BIGreen}.jshintrc${DF_NC}"
+    echo "${RED}❭${NC} Copying ${GREEN}.jshintrc${NC}"
   cp -f "${DOTFILESDIR}"/lib/configurations/jshint/jshintrc "${HOME}"/.jshintrc &&
-    echo "${DF_BIRed}❭${DF_NC} Copying ${DF_BIGreen}.profile${DF_NC}"
+    echo "${RED}❭${NC} Copying ${GREEN}.profile${NC}"
   cp -f "${DOTFILESDIR}"/lib/configurations/profile/profile "${HOME}"/.profile &&
-    echo "${DF_BIRed}❭${DF_NC} Copying ${DF_BIGreen}.tmux.conf${DF_NC}"
+    echo "${RED}❭${NC} Copying ${GREEN}.tmux.conf${NC}"
   cp -f "${DOTFILESDIR}"/lib/configurations/tmux/tmux "${HOME}"/.tmux.conf &&
-    echo "${DF_BIRed}❭${DF_NC} Copying ${DF_BIGreen}.vimrc${DF_NC}"
+    echo "${RED}❭${NC} Copying ${GREEN}.vimrc${NC}"
   cp -f "${DOTFILESDIR}"/lib/configurations/vim/vimrc "${HOME}"/.vimrc &&
-    echo "${DF_BIRed}❭${DF_NC} Copying ${DF_BIGreen}.wgetrc${DF_NC}"
+    echo "${RED}❭${NC} Copying ${GREEN}.wgetrc${NC}"
   cp -f "${DOTFILESDIR}"/lib/configurations/wget/wgetrc "${HOME}"/.wgetrc &&
-    echo "${DF_BIRed}❭${DF_NC} Copying ${DF_BIGreen}.zshrc${DF_NC}"
+    echo "${RED}❭${NC} Copying ${GREEN}.zshrc${NC}"
   cp -f "${DOTFILESDIR}"/lib/configurations/zsh/zshrc "${HOME}"/.zshrc
 }
 

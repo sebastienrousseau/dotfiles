@@ -25,7 +25,7 @@ DF_DOTFILESDIR="${HOME}/.dotfiles" # Location of dotfiles.
 assemble() {
 
   # shellcheck disable=SC2154
-  echo "${DF_BIRed}❭${DF_NC} Preparing the dotfiles on your system."
+  echo "${RED}❭${NC} Preparing the dotfiles on your system."
 
   backup &&
     download &&

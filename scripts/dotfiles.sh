@@ -6,35 +6,34 @@
 ## 🅸🅼🅿🅾🆁🆃🆂 - Importing constants and functions.
 
 # shellcheck disable=SC1091
-. "./scripts/constants.sh"
+. "./lib/configurations/default/constants.sh"
 
 ## 🅼🅰🅸🅽 - Main function.
 
 if [[ "$1" = "backup" ]]; then
-
   # shellcheck disable=SC2154
-  echo "${DF_BIRed}❭${DF_NC} Backing up.${DF_NC}"
+  echo "${RED}❭${NC} Backing up.${NC}"
   . "./scripts/backup.sh" &&
-    echo "${DF_BIRed}❭${DF_NC} Backup completed.${DF_NC}"
+    echo "${RED}❭${NC} Backup completed.${NC}"
 
 elif [[ "$1" = "clean" ]]; then
 
   # shellcheck disable=SC2154
-  echo "${DF_BIRed}❭${DF_NC} Removes any previous setup directories.${DF_NC}"
+  echo "${RED}❭${NC} Removes any previous setup directories.${NC}"
   . "./scripts/clean.sh" &&
     clean
 
 elif [[ "$1" = "copy" ]]; then
 
   # shellcheck disable=SC2154
-  echo "${DF_BIRed}❭${DF_NC} Copying dotfiles.${DF_NC}"
+  echo "${RED}❭${NC} Copying dotfiles.${NC}"
   . "./scripts/copy.sh" &&
     copy
 
 elif [[ "$1" = "download" ]]; then
 
   # shellcheck disable=SC2154
-  echo "${DF_BIRed}❭${DF_NC} Downloading ${DF_BIGreen}Dotfiles v${DF_VERSION}${DF_NC}."
+  echo "${RED}❭${NC} Downloading ${GREEN}Dotfiles v${DF_VERSION}${NC}."
   . "./scripts/download.sh" &&
     download
 
@@ -45,14 +44,14 @@ elif [[ "$1" = "help" ]]; then
 elif [[ "$1" = "assemble" ]]; then
 
   # shellcheck disable=SC2154
-  echo "${DF_BIRed}❭${DF_NC} Installing ${DF_BIGreen}Dotfiles v${VERSION}${DF_NC}."
+  echo "${RED}❭${NC} Installing ${GREEN}Dotfiles v${VERSION}${NC}."
   . "./scripts/assemble.sh" &&
     assemble
 
 elif [[ "$1" = "unpack" ]]; then
 
   # shellcheck disable=SC2154
-  echo "${DF_BIRed}❭${DF_NC} Unpacking ${DF_BIGreen}Dotfiles v${DF_VERSION}${DF_NC}."
+  echo "${RED}❭${NC} Unpacking ${GREEN}Dotfiles v${DF_VERSION}${NC}."
   . "./scripts/unpack.sh" &&
     unpack
 

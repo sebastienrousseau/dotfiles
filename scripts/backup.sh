@@ -17,7 +17,7 @@ backup() {
   . "./scripts/banner.sh"
 
   # shellcheck disable=SC2154
-  echo "${RED}❭${NC} Starting Backup Procedure on the $(date +"%dth %B %Y at %H:%M:%S")."
+  echo "${RED}❭${NC} Starting Backup Procedure on the ${DF_TIMESTAMP}."
   echo ""
 
   # Create backup directory.
@@ -32,9 +32,9 @@ backup() {
 
   # Backup existing Dotfiles directory.
   if [[ -d "${HOME}"/.dotfiles ]]; then
-    echo "${GREEN}  ✔${NC} Backing up previous Dotfiles installation to '${GREEN}${DF_BACKUPDIR}/.dotfiles/${NC}'..."
+    echo "${GREEN}  ✔${NC} Backing up previous Dotfiles installation to '${GREEN}${DF_BACKUPDIR}/${DF_TIMESTAMP}/${NC}'..."
     # shellcheck disable=SC2154
-    mv -f "${DF_DOTFILESDIR}" "${HOME}"/dotfiles_backup/
+    mv -f "${DF_DOTFILESDIR}" "${HOME}"/dotfiles_backup/"${DF_TIMESTAMP}"/
   fi
 
   # File list (use trailing slash for directories)

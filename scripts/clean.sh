@@ -13,7 +13,7 @@ export DF_DOTFILESDIR="${DF_DOTFILESDIR}" # Exporting Location of dotfiles.
 ## 🅲🅻🅴🅰🅽 - Clean up.
 clean() {
   # shellcheck disable=SC2154
-  echo "${DF_BIRed}❭${DF_NC} Cleaning up installation files."
+  echo "${RED}❭${NC} Cleaning up installation files."
 
   # shellcheck disable=SC2154
   rm -Rf "${DF_DOTFILESDIR}"/lib/configurations/bash &&
@@ -26,7 +26,7 @@ clean() {
     rm -Rf "${DF_DOTFILESDIR}"/lib/configurations/zsh
 
   # shellcheck disable=SC2154
-  echo "${DF_BIRed}❭${DF_NC} ${DF_BIGreen}Dotfiles v${DF_VERSION}${DF_NC} has been installed on your system."
+  echo "${RED}❭${NC} ${GREEN}Dotfiles v${DF_VERSION}${NC} has been installed on your system."
 
   # shellcheck disable=SC2154
   # rm -rfi "${DF_DOTFILESDIR}" &&

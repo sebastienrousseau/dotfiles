@@ -13,7 +13,7 @@ export DF_DOTFILESDIR="${DF_DOTFILESDIR}" # Exporting Location of dotfiles.
 ## 🅳🅾🆆🅽🅻🅾🅰🅳 - Download the dotfiles on your system.
 download() {
   # shellcheck disable=SC2154
-  echo "${DF_BIRed}❭${DF_NC} Downloading ${DF_BIGreen}Dotfiles v${DF_VERSION}${DF_NC} on your system."
+  echo "${RED}❭${NC} Downloading ${GREEN}Dotfiles v${DF_VERSION}${NC} on your system."
 
   # shellcheck disable=SC2154
   # wget https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v"${DF_VERSION}".zip -N -O "${DF_DOWNLOADDIR}/v${DF_VERSION}.zip"
