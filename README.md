@@ -139,7 +139,7 @@ You can download the latest version (v0.2.459) with the following options:
 Before installing Dotfiles, we strongly recommend that you back up your existing
 data. The Dotfiles installer will try to automatically backup any previous
 installation of known dotfiles into a backup directory
-`$HOME/.dotfiles_backup`.
+`$HOME/dotfiles_backup`.
 
 The backup files are the following:
 
@@ -225,7 +225,7 @@ pnpm run assemble
 ### Post installation
 
 Following the installation, you can verify that the dotfiles package is installed
-in the following directory `$HOME/.dotfiles_backup`.
+in the following directory `$HOME/dotfiles_backup`.
 
 Just quit your terminal and restart it. If the installation is successful, you
 should be able to see a new interface of your terminal and be able to start

@@ -76,9 +76,9 @@
 	"scripts": {
 		"assemble": "pnpm run backup && pnpm run directory && pnpm run copy",
 		"backup": "pnpm run bk:dir && pnpm run bk:bsh && pnpm run bk:zsh",
-		"bk:bsh": "if [ -z $HOME/.bashrc ]; then mv -f $HOME/.bashrc $HOME/.dotfiles_backup/bashrc.bk; fi ",
+		"bk:bsh": "if [ -f $HOME/.bashrc ]; then mv -f $HOME/.bashrc $HOME/dotfiles_backup/bashrc; fi ",
 		"bk:dir": "if [ -d $HOME/.dotfiles ]; then mv -f $HOME/.dotfiles $HOME/dotfiles_backup; fi ",
-		"bk:zsh": "if [ -z $HOME/.zshrc ]; then mv -f $HOME/.zshrc $HOME/.dotfiles_backup/zshrc.bk; fi ",
+		"bk:zsh": "if [ -f $HOME/.zshrc ]; then mv -f $HOME/.zshrc $HOME/dotfiles_backup/zshrc; fi ",
 		"build": "pnpm run clean && tsc --build tsconfig.json && pnpm run compile",
 		"cl:tmp": "rimraf \"./dist/lib/**/*.tmp\"",
 		"clean": "rimraf \"dist/\" && tsc --build --clean",
