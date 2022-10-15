@@ -7,8 +7,16 @@
 DF_DOTFILESDIR="${HOME}/.dotfiles" # Location of dotfiles.
 export DF_DOTFILESDIR              # Exporting Location of dotfiles.
 
-# shellcheck source=/dev/null
-. "${DF_DOTFILESDIR}/scripts/constants.sh"
+# shellcheck disable=SC1091
+. "./lib/configurations/default/constants.sh"
+
+# shellcheck disable=SC1091
+. "./scripts/banner.sh"
+
+echo ""
+# shellcheck disable=SC2154
+echo "${RED}❭${NC} Starting help menu."
+echo ""
 
 ## 🅷🅴🅻🅿 🅼🅴🅽🆄 - Display help menu.
 help() {
@@ -43,3 +51,10 @@ LICENSE:
 
 EOF
 }
+
+args=$*               # Arguments passed to script.
+export args="${args}" # Exporting arguments.
+if [[ ${args} = "help" ]]; then
+  echo "$*"
+  help
+fi
