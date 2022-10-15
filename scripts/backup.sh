@@ -4,8 +4,8 @@
 # License: MIT
 
 ## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set Dotfiles variable.
-DF_DOTFILESDIR="${HOME}/.dotfiles"        # Location of dotfiles.
-export DF_DOTFILESDIR="${DF_DOTFILESDIR}" # Exporting Location of dotfiles.
+DF_DOTFILESDIR="${HOME}/.dotfiles" # Location of dotfiles.
+export DF_DOTFILESDIR              # Exporting Location of dotfiles.
 
 ## 🅱🅰🅲🅺🆄🅿 - Backup existing files.
 backup() {
@@ -16,8 +16,9 @@ backup() {
   # shellcheck disable=SC1091
   . "./scripts/banner.sh"
 
+  echo ""
   # shellcheck disable=SC2154
-  echo "${RED}❭${NC} Starting Backup Procedure on the ${DF_TIMESTAMP}."
+  echo "${RED}❭${NC} Starting Backup Procedure."
   echo ""
 
   # Create backup directory.
@@ -68,7 +69,7 @@ backup() {
   for file in ${FILES}; do
     # shellcheck disable=SC2292
     if [ -e "${HOME}/${file}" ]; then
-      echo "${GREEN}  ✔${NC} Backing up '${YELLOW}${file}${NC}'..."
+      echo "${GREEN}  ✔${NC} Backing up '${YELLOW}${file}${NC}'"
       cp -f "${HOME}"/"${file}" "${DF_BACKUPDIR}"/"${file}"
     fi
   done

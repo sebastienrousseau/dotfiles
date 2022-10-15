@@ -4,8 +4,8 @@
 # License: MIT
 
 ## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set Dotfiles variable.
-DF_DOTFILESDIR="${HOME}/.dotfiles"        # Location of dotfiles.
-export DF_DOTFILESDIR="${DF_DOTFILESDIR}" # Exporting Location of dotfiles.
+DF_DOTFILESDIR="${HOME}/.dotfiles" # Location of dotfiles.
+export DF_DOTFILESDIR              # Exporting Location of dotfiles.
 
 # shellcheck source=/dev/null
 . "${DF_DOTFILESDIR}/scripts/constants.sh"

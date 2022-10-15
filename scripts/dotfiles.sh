@@ -28,7 +28,7 @@ elif [[ "$1" = "copy" ]]; then
   # shellcheck disable=SC2154
   echo "${RED}❭${NC} Copying dotfiles.${NC}"
   . "./scripts/copy.sh" &&
-    copy
+    echo "${RED}❭${NC} Copying completed.${NC}"
 
 elif [[ "$1" = "download" ]]; then
 

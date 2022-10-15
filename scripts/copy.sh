@@ -3,53 +3,87 @@
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
-## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set Dotfiles variable.
-DF_DOTFILESDIR="${HOME}/.dotfiles" # Location of dotfiles.
-
-# shellcheck disable=SC1091
-. "${DF_DOTFILESDIR}/scripts/constants.sh"
-
-## 🅲🅾🅿🆈 🅳🅾🆃🅵🅸🅻🅴🆂 - Copy dotfiles.
 ## 🅲🅾🅿🆈 - Copy the dotfiles on your system.
 copy() {
+
+  # shellcheck disable=SC1091
+  . "./lib/configurations/default/constants.sh"
+
+  # shellcheck disable=SC1091
+  . "./scripts/banner.sh"
+
+  echo ""
   # shellcheck disable=SC2154
-  echo "${RED}❭${NC} Copying the Dotfiles on your system."
+  echo "${RED}❭${NC} Starting Copying Procedure."
+  echo ""
 
   # shellcheck disable=SC2154
-  echo "${RED}❭${NC} Copying ${GREEN}.bashrc${NC}"
+  if [[ -d "${DF_DIR}" ]]; then
+    echo "${RED}❭${NC} Copying ${GREEN}Dotfiles v${DF_VERSION}${NC} to ${CYAN}${DF_DIR}${NC}"
+    cp -f -R ./lib/ "${DF_DIR}"lib/
+  else
+    echo "${RED}❭${NC} Copying ${GREEN}Dotfiles v${DF_VERSION}${NC} to ${CYAN}${DF_DIR}${NC}"
+    mkdir -p "${DF_DIR}"
+    cp -f -R ./lib/ "${DF_DIR}"lib/
+  fi
 
-  cp -f "${DF_DOTFILESDIR}"/lib/configurations/bash/bashrc "${HOME}"/.bashrc &&
-    echo "${RED}❭${NC} Copying ${GREEN}cacert.pem${NC}"
+  # cacert -- Copying cacert.pem file.
   # shellcheck disable=SC2154
-  cp -f "${DOTFILESDIR}"/lib/configurations/curl/cacert.pem "${HOME}"/cacert.pem &&
-    echo "${RED}❭${NC} Copying ${GREEN}.curlrc${NC}"
-  cp -f "${DOTFILESDIR}"/lib/configurations/curl/curlrc "${HOME}"/.curlrc &&
-    echo "${RED}❭${NC} Copying ${GREEN}.jshintrc${NC}"
-  cp -f "${DOTFILESDIR}"/lib/configurations/jshint/jshintrc "${HOME}"/.jshintrc &&
-    echo "${RED}❭${NC} Copying ${GREEN}.profile${NC}"
-  cp -f "${DOTFILESDIR}"/lib/configurations/profile/profile "${HOME}"/.profile &&
-    echo "${RED}❭${NC} Copying ${GREEN}.tmux.conf${NC}"
-  cp -f "${DOTFILESDIR}"/lib/configurations/tmux/tmux "${HOME}"/.tmux.conf &&
-    echo "${RED}❭${NC} Copying ${GREEN}.vimrc${NC}"
-  cp -f "${DOTFILESDIR}"/lib/configurations/vim/vimrc "${HOME}"/.vimrc &&
-    echo "${RED}❭${NC} Copying ${GREEN}.wgetrc${NC}"
-  cp -f "${DOTFILESDIR}"/lib/configurations/wget/wgetrc "${HOME}"/.wgetrc &&
-    echo "${RED}❭${NC} Copying ${GREEN}.zshrc${NC}"
-  cp -f "${DOTFILESDIR}"/lib/configurations/zsh/zshrc "${HOME}"/.zshrc
+  cp -f "${PWD}"/lib/configurations/curl/cacert.pem "${HOME}"/.cacert.pem &&
+    echo "${GREEN}  ✔${NC} Copying '${YELLOW}cacert.pem${NC}'" &&
+
+    # bashrc -- Copying .bashrc file.
+    cp -f "${PWD}"/lib/configurations/bash/bashrc "${HOME}"/.bashrc &&
+    echo "${GREEN}  ✔${NC} Copying '${YELLOW}.bashrc${NC}'" &&
+
+    # curlrc -- Copying .curlrc file.
+    cp -f "${PWD}"/lib/configurations/curl/curlrc "${HOME}"/.curlrc &&
+    echo "${GREEN}  ✔${NC} Copying '${YELLOW}.curlrc${NC}'" &&
+
+    # gemrc -- Copying .gemrc file.
+    cp -f "${PWD}"/lib/configurations/gem/gemrc "${HOME}"/.gemrc &&
+    echo "${GREEN}  ✔${NC} Copying '${YELLOW}.gemrc${NC}'" &&
+
+    # inputrc -- Copying .inputrc file.
+    cp -f "${PWD}"/lib/configurations/inputrc/inputrc "${HOME}"/.inputrc &&
+    echo "${GREEN}  ✔${NC} Copying '${YELLOW}.inputrc${NC}'" &&
+
+    # jshintrc -- Copying .jshintrc file.
+    cp -f "${PWD}"/lib/configurations/jshint/jshintrc "${HOME}"/.jshintrc &&
+    echo "${GREEN}  ✔${NC} Copying '${YELLOW}.jshintrc${NC}'" &&
+
+    # nanorc -- Copying .nanorc file.
+    cp -f "${PWD}"/lib/configurations/nano/nanorc "${HOME}"/.nanorc &&
+    echo "${GREEN}  ✔${NC} Copying '${YELLOW}.nanorc${NC}'" &&
+
+    # profile -- Copying .profile file.
+    cp -f "${PWD}"/lib/configurations/profile/profile "${HOME}"/.profile &&
+    echo "${GREEN}  ✔${NC} Copying '${YELLOW}.profile${NC}'" &&
+
+    # tmux -- Copying .tmux.conf file.
+    cp -f "${PWD}"/lib/configurations/tmux/tmux "${HOME}"/.tmux.conf &&
+    echo "${GREEN}  ✔${NC} Copying '${YELLOW}.tmux.conf${NC}'" &&
+
+    # vimrc -- Copying .vimrc file.
+    cp -f "${PWD}"/lib/configurations/vim/vimrc "${HOME}"/.vimrc &&
+    echo "${GREEN}  ✔${NC} Copying '${YELLOW}.vimrc${NC}'" &&
+
+    # wgetrc -- Copying .wgetrc file.
+    cp -f "${PWD}"/lib/configurations/wget/wgetrc "${HOME}"/.wgetrc &&
+    echo "${GREEN}  ✔${NC} Copying '${YELLOW}.wgetrc${NC}'" &&
+
+    # zshrc -- Copying .zshrc file.
+    cp -f "${PWD}"/lib/configurations/zsh/zshrc "${HOME}"/.zshrc &&
+    echo "${GREEN}  ✔${NC} Copying '${YELLOW}.zshrc${NC}'"
+
+  # shellcheck disable=SC2154
+  echo "${GREEN}  ✔${NC} All files have been copied up'"
+  echo ""
 }
 
-# copy() {
-#   pnpm run cp:bash &&
-#     pnpm run cp:cert &&
-#     pnpm run cp:curl &&
-#     pnpm run cp:dirs &&
-#     pnpm run cp:gemr &&
-#     pnpm run cp:inpt &&
-#     pnpm run cp:jsht &&
-#     pnpm run cp:prof &&
-#     pnpm run cp:tmux &&
-#     pnpm run cp:vimr &&
-#     pnpm run cp:wget &&
-#     pnpm run cp:zshr
-# }
-# copy
+args=$*               # Arguments passed to script.
+export args="${args}" # Exporting arguments.
+if [[ ${args} = "copy" ]]; then
+  echo "$*"
+  copy
+fi
