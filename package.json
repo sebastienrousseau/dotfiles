@@ -80,13 +80,7 @@
 		"compile": "chmod 755 \"./scripts/compile.sh\" && ./scripts/compile.sh compile",
 		"help": "chmod 755 \"./scripts/help.sh\" && ./scripts/help.sh help",
 		"build": "pnpm run clean && tsc --build tsconfig.json && pnpm run compile",
-		"cl:tmp": "rimraf \"./dist/lib/**/*.tmp\"",
 		"clean": "rimraf \"dist/\" && tsc --build --clean",
-		"cp:bin": "cp -vf -R ./bin ./dist/",
-		"cp:make": "cp -vf ./Makefile ./dist",
-		"cp:lib": "cp -vR ./lib ./dist/",
-		"filesizes": "filesizes ./dist/ > ./dist/filesizes.txt",
-		"minify": "jsmin ./bin/backup.js > dist/bin/backup.js && jsmin ./bin/constants.js > dist/bin/constants.js && jsmin ./bin/copy.js > dist/bin/copy.js && jsmin ./bin/dotfiles.js > dist/bin/dotfiles.js && jsmin ./bin/download.js > dist/bin/download.js && jsmin ./bin/index.js > dist/bin/index.js && jsmin ./bin/transfer.js > dist/bin/transfer.js && jsmin ./bin/unpack.js > dist/bin/unpack.js",
 		"pack": "pnpm pack",
 		"start": "node ./bin/index.js",
 		"test": "echo \"Error: no test specified\" && exit 1"
