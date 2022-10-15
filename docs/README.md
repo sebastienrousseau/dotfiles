@@ -99,6 +99,26 @@ The following programs must be installed on your system to install Dotfiles:
 - [**PnPM**][pnpm] - a package manager for JavaScript and Node.js. It is fast,
   disk space efficient and reliable.
 
+#### Font
+
+We recommend using a font such as `Roboto Mono for Powerline` for terminal and vscode editor.
+
+On macOS, you can install the font using the following command:
+
+```bash
+brew tap homebrew/cask-fonts
+```
+
+```bash
+brew cask install font-roboto-mono-for-powerline
+```
+
+On Linux, you can install the font using the following command:
+
+```bash
+sudo apt install fonts-roboto-mono-for-powerline
+```
+
 ### 1️⃣ Download Dotfiles
 
 You can download the latest version (v0.2.459) with the following options:
