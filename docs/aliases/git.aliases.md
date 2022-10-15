@@ -99,10 +99,10 @@ The `git.plugin.zsh` file creates helpful shortcut aliases for many commonly
 | gc    | `git commit -a`                          | Commit command to automatically "add" changes from all known files. |
 | gca   | `git commit --amend`                     | Amend the tip of the current branch rather than creating a new commit. |
 | gcall | `git add -A && git commit -av`           | Commit all changes. |
-| gcam  | `git commit --amend --message `          | Amend the tip of the current branch, and edit the message. |
+| gcam  | `git commit --amend --message`          | Amend the tip of the current branch, and edit the message. |
 | gcane | `git commit --amend --no-edit`           | Amend the tip of the current branch, and do not edit the message. |
 | gcint | `git commit --interactive`               | Commit interactive. |
-| gcm   | `git commit --message `                  | Commit with a message. |
+| gcm   | `git commit --message`                  | Commit with a message. |
 
 ### 1.7 Aliases to show changes between commits, commit and working tree, etc
 
@@ -175,9 +175,9 @@ The `git.plugin.zsh` file creates helpful shortcut aliases for many commonly
 | grcl    | `git remote prune` | Deletes all stale remote-tracking branches under <name>. |
 | grf     | `find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && echo '{}' && git config --get remote.origin.url" \;` | Show GIT Remote Origin for each immediate subfolder. |
 | grfall  | `git branch -r | awk -F'/' '{print "git fetch "$1,$2}' | xargs -I {} sh -c {}` | Fetch all git remotes for a repo. |
-| gro     | `open `git remote -v | awk '/fetch/{print $2}' | sed -Ee 's#(git@|git://)#http://#' -e 's@com:@com/@'`| head -n1` | Open current Git repository URL. |
+| gro     | `open`git remote -v | awk '/fetch/{print $2}' | sed -Ee 's#(git@|git://)#http://#' -e 's@com:@com/@'`| head -n1` | Open current Git repository URL. |
 | grp     | `git remote | xargs -I% -n1 git push %` | For each remote branch, push it. |
-| grpa    | `for i in `git remote`; do git push $i; done;` | Push all remotes. |
+| grpa    | `for i in`git remote`; do git push $i; done;` | Push all remotes. |
 | grprint | `git remote -v` |  | Print the url for the current repo. |
 | grs     | `git show` | Gives some information about the remote <name>. |
 | grso    | `git remote show origin` | Display where the origin resides. |
@@ -220,13 +220,13 @@ The `git.plugin.zsh` file creates helpful shortcut aliases for many commonly
 | gta   | `git tag -a $1 -m $2` | gta: Add a tag. |
 | gtg   | `git tag` | gtg: Create, list, delete or verify a tag object signed with GPG. |
 | gtl   | `git describe --tags --abbrev=0` | gtl: Last tag in the current branch. |
-| gtrm  | `for t in `git tag` do; git push origin :$t; git tag -d $t; done` | gtrm: Delete all tags. |
+| gtrm  | `for t in`git tag`do; git push origin :$t; git tag -d $t; done` | gtrm: Delete all tags. |
 
 ### 2.6 Aliases to show various types of objects
 
 | Alias   | Command                                  | Description                    |
 | ------- | ---------------------------------------- | ------------------------------ |
-| gshab   | `for k in ``git branch|perl -pe s/^..//``;do echo -e ``git show --pretty=format:"%Cgreen%ci %Cblue%cr%Creset" $k|head -n 1``\\t$k;done|sort -r` | Show git branches by date - useful for showing active branches. |
+| gshab   | `for k in ``git branch|perl -pe s/^..//``;do echo  ``git show --pretty=format:"%Cgreen%ci %Cblue%cr%Creset" $k|head -n 1``\\t$k;done|sort -r` | Show git branches by date - useful for showing active branches. |
 | gshf    |  | Find the nearest parent branch of the current git branch. |
 | gshls   | `git show --relative --pretty=format:''` | Show list of files changed by commit. |
 | gshnp   | `git show --no-patch --pretty="tformat:%h (%s, %ad)" --date=short` | Given any git object, try to show it briefly. |

@@ -142,7 +142,7 @@ brew install findutils
 | locale | `locale -a | grep UTF-8` | Check UTF-8 locale. |
 | mkdir | `mkdir -pv` | Create the directory and all parent directories, verbose mode. |
 | p | `pwd` | Shortcut for `pwd` which returns working directory name. |
-| path | `echo -e ${PATH//:/\\n}` | Display the $PATH variable on newlines. |
+| path | `echo  ${PATH//:/\\n}` | Display the $PATH variable on newlines. |
 | q | `exit` | Shortcut for the `exit` command. |
 | r | `reload` | Shortcut for the `reload` command. |
 | reboot | `sudo shutdown -r now` | Restart immediately. |
