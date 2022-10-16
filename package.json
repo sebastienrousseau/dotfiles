@@ -33,7 +33,6 @@
 		"husky": "^8.0.1",
 		"jsmin": "^1.0.1",
 		"rimraf": "^3.0.2",
-		"tsd": "0.24.1",
 		"typescript": "^4.8.4"
 	},
 	"directories": {
@@ -73,7 +72,7 @@
 	"scripts": {
 		"assemble": "pnpm run backup && pnpm run copy",
 		"backup": "chmod 755 \"./scripts/backup.sh\" && sh ./scripts/backup.sh backup",
-		"build": "pnpm run clean && tsc --build tsconfig.json && pnpm run compile",
+		"build": "pnpm run clean && npx tsc --build tsconfig.json && pnpm run compile",
 		"clean": "chmod 755 \"./scripts/clean.sh\" && sh ./scripts/clean.sh clean",
 		"compile": "chmod 755 \"./scripts/compile.sh\" && ./scripts/compile.sh compile",
 		"copy": "chmod 755 \"./scripts/copy.sh\" && ./scripts/copy.sh copy",

@@ -17,8 +17,7 @@ clean() {
   # shellcheck disable=SC2154
   echo "${GREEN}  ✔${NC} Cleaning up installation files."
   rm -fr dist/
-  rm -fr node_modules/
-  rm -f pnpm-lock.yaml
+  rm -f tsconfig.tsbuildinfo
 
 }
 
