@@ -1,6 +1,6 @@
 # Contributing to Dotfiles
 
-![Banner representing the Dotfiles Library](../media/dotfiles.svg)
+[![Banner representing the Dotfiles Library][logo]][website]
 
 Thank you so much for wanting to contribute to Dotfiles! There are a couple ways to help out.
 
@@ -49,3 +49,6 @@ Have you found a solution to an issue? Here is how you can submit your code to D
 -   Head to your local fork of the repo, and click the "New Pull Request" button.
 -   Include a title that is straight to the point.
 -   Wait for someone to review the pull request, and then merge your pull request!
+
+[logo]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/dotfiles.svg
+[website]: https://dotfiles.io
