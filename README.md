@@ -219,8 +219,12 @@ dotfiles rapidly and very efficiently.
 Switch to the `dist` directory and run:
 
 ```bash
-pnpm run assemble
+pnpm run build
 ```
+
+This will install the latest version of the dotfiles and will automatically
+backup any existing dotfiles you may have into a backup directory
+`$HOME/dotfiles_backup`.
 
 ### Post installation
 
@@ -305,12 +309,17 @@ You'll see something like this:
 │   │   │   └── curlrc
 │   │   ├── default
 │   │   │   ├── color.sh
+│   │   │   ├── constants.sh
 │   │   │   ├── editor.sh
 │   │   │   └── prompt.sh
-│   │   ├── inputrc
+│   │   ├── gem
+│   │   │   └── gemrc
+│   │   ├── input
 │   │   │   └── inputrc
 │   │   ├── jshint
 │   │   │   └── jshintrc
+│   │   ├── nano
+│   │   │   └── nanorc
 │   │   ├── profile
 │   │   │   └── profile
 │   │   ├── tmux
@@ -332,6 +341,9 @@ You'll see something like this:
 │   ├── functions
 │   │   ├── README.md
 │   │   ├── cdls.sh
+│   │   ├── changediskpwd.tmp
+│   │   ├── code.tmp
+│   │   ├── countdown.tmp
 │   │   ├── curlheader.sh
 │   │   ├── curltime.sh
 │   │   ├── encode64.sh
@@ -340,7 +352,9 @@ You'll see something like this:
 │   │   ├── filehead.sh
 │   │   ├── genpwd.sh
 │   │   ├── goto.sh
+│   │   ├── headers.tmp
 │   │   ├── hidehiddenfiles.sh
+│   │   ├── history-all.tmp
 │   │   ├── hostinfo.sh
 │   │   ├── hstats.sh
 │   │   ├── httpdebug.sh
@@ -354,14 +368,20 @@ You'll see something like this:
 │   │   ├── mount_read_only.sh
 │   │   ├── myproc.sh
 │   │   ├── prependpath.sh
+│   │   ├── print.tmp
 │   │   ├── ql.sh
 │   │   ├── rd.sh
 │   │   ├── remove_disk.sh
 │   │   ├── ren.sh
+│   │   ├── rm.tmp
+│   │   ├── rps.tmp
 │   │   ├── showhiddenfiles.sh
 │   │   ├── size.sh
 │   │   ├── stopwatch.sh
+│   │   ├── trash.tmp
+│   │   ├── tree.tmp
 │   │   ├── uppercase.sh
+│   │   ├── uuidgen.tmp
 │   │   ├── view-source.sh
 │   │   ├── vscode.sh
 │   │   ├── whoisport.sh
@@ -396,10 +416,22 @@ You'll see something like this:
 │   ├── functions.sh
 │   ├── history.sh
 │   └── paths.sh
+├── scripts
+│   ├── assemble.sh
+│   ├── backup.sh
+│   ├── banner.sh
+│   ├── clean.sh
+│   ├── compile.sh
+│   ├── copy.sh
+│   ├── dotfiles.sh
+│   ├── download.sh
+│   ├── help.sh
+│   └── unpack.sh
 ├── Makefile
 └── filesizes.txt
 
-35 directories, 117 files
+38 directories, 141 files
+
 ```
 
 ## 🔗 Releases
@@ -412,7 +444,7 @@ Releases are available on the [GitHub releases page][releases].
 
 For transparency into our release cycle and in striving to maintain backward
 compatibility, `Dotfiles` follows [Semantic Versioning][semver-url]
-(SemVer) and [ESLint's Semantic Versioning Policy][eslint-semantic-url].
+(SemVer).
 
 ![divider][divider]
 
@@ -508,4 +540,3 @@ bunch of awesome [contributors](https://github.com/sebastienrousseau/dotfiles/gr
 [license]: https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge\&color=ff69b4
 [love]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/made-with-love.svg
 [semver-url]: http://semver.org/
-[eslint-semantic-url]: https://github.com/eslint/eslint#semantic-versioning-policy
