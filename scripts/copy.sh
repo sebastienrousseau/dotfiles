@@ -15,14 +15,14 @@ copy() {
   echo ""
 
   # shellcheck disable=SC2154
-  if [[ -d "${DF_DIR}" ]]; then
-    echo "${RED}❭${NC} Copying Binaries to ${DF_DIR}."
-    cp -f -R ./bin/ "${DF_DIR}"bin/
-  else
-    echo "${RED}❭${NC} Copying Binaries to ${DF_DIR}."
-    mkdir -p "${DF_DIR}"
-    cp -f -R ./bin/ "${DF_DIR}"bin/
-  fi
+  # if [[ -d "${DF_DIR}" ]]; then
+  #   echo "${RED}❭${NC} Copying Binaries to ${DF_DIR}."
+  #   cp -f -R ./bin/ "${DF_DIR}"bin/
+  # else
+  #   echo "${RED}❭${NC} Copying Binaries to ${DF_DIR}."
+  #   mkdir -p "${DF_DIR}"
+  #   cp -f -R ./bin/ "${DF_DIR}"bin/
+  # fi
 
   # shellcheck disable=SC2154
   if [[ -d "${DF_DIR}" ]]; then
@@ -35,14 +35,14 @@ copy() {
   fi
 
   # shellcheck disable=SC2154
-  if [[ -d "${DF_DIR}" ]]; then
-    echo "${RED}❭${NC} Copying Scripts to ${CYAN}${DF_DIR}${NC}"
-    cp -f -R ./scripts/ "${DF_DIR}"scripts/
-  else
-    echo "${RED}❭${NC} Copying Scripts to ${CYAN}${DF_DIR}${NC}"
-    mkdir -p "${DF_DIR}"
-    cp -f -R ./scripts/ "${DF_DIR}"scripts/
-  fi
+  # if [[ -d "${DF_DIR}" ]]; then
+  #   echo "${RED}❭${NC} Copying Scripts to ${CYAN}${DF_DIR}${NC}"
+  #   cp -f -R ./scripts/ "${DF_DIR}"scripts/
+  # else
+  #   echo "${RED}❭${NC} Copying Scripts to ${CYAN}${DF_DIR}${NC}"
+  #   mkdir -p "${DF_DIR}"
+  #   cp -f -R ./scripts/ "${DF_DIR}"scripts/
+  # fi
 
   # cacert -- Copying cacert.pem file.
   # shellcheck disable=SC2154
