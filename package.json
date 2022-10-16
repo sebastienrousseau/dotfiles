@@ -26,22 +26,19 @@
 	],
 	"description": "Dotfiles - A set of macOS / Linux and Windows configuration files - Simply designed to fit your shell life.",
 	"devDependencies": {
-		"@types/node": "^16.11.65",
-		"@types/shelljs": "0.8.11",
+		"@types/node": "^16.11.66",
 		"compressing": "^1.6.2",
 		"filesizes": "^0.1.2",
 		"fs-extra": "10.1.0",
+		"husky": "^8.0.1",
 		"jsmin": "^1.0.1",
-		"pnpm": "^7.13.4",
 		"rimraf": "^3.0.2",
-		"shelljs": "^0.8.5",
-		"shelljs-nodecli": "^0.1.1",
 		"tsd": "0.24.1",
 		"typescript": "^4.8.4"
 	},
 	"directories": {
 		"bin": "./bin",
-		"shell": "./lib"
+		"lib": "./lib"
 	},
 	"engines": {
 		"node": "^12.20.0 || ^14.13.1 || >=16.0.0"
@@ -76,13 +73,15 @@
 	"scripts": {
 		"assemble": "pnpm run backup && pnpm run copy",
 		"backup": "chmod 755 \"./scripts/backup.sh\" && sh ./scripts/backup.sh backup",
-		"copy": "chmod 755 \"./scripts/copy.sh\" && ./scripts/copy.sh copy",
-		"compile": "chmod 755 \"./scripts/compile.sh\" && ./scripts/compile.sh compile",
-		"help": "chmod 755 \"./scripts/help.sh\" && ./scripts/help.sh help",
 		"build": "pnpm run clean && tsc --build tsconfig.json && pnpm run compile",
-		"clean": "rimraf \"dist/\" && tsc --build --clean",
+		"clean": "chmod 755 \"./scripts/clean.sh\" && sh ./scripts/clean.sh clean",
+		"compile": "chmod 755 \"./scripts/compile.sh\" && ./scripts/compile.sh compile",
+		"copy": "chmod 755 \"./scripts/copy.sh\" && ./scripts/copy.sh copy",
+		"help": "chmod 755 \"./scripts/help.sh\" && ./scripts/help.sh help",
 		"pack": "pnpm pack",
-		"start": "node ./bin/index.js",
+		"preinstall": "npx only-allow pnpm",
+		"prepare": "husky install",
+		"start": "node ./dist/bin/index.js",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"types": "./dist/bin/index.d.ts",

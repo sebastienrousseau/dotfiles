@@ -10,9 +10,6 @@ compile() {
   # shellcheck disable=SC1091
   . "./lib/configurations/default/constants.sh"
 
-  # shellcheck disable=SC1091
-  . "./scripts/banner.sh"
-
   echo ""
   # shellcheck disable=SC2154
   echo "${RED}❭${NC} Starting Compilation."

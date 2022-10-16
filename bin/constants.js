@@ -6,14 +6,16 @@
 
 // 🅲🅾🅽🆂🆃🅰🅽🆃🆂 - Constants.
 const version = "dotfiles-0.2.459.tgz";
-const dotfile ="https://registry.npmjs.org/@sebastienrousseau/dotfiles/-/dotfiles-0.2.459.tgz";
+const dotfile = "https://registry.npmjs.org/@sebastienrousseau/dotfiles/-/dotfiles-0.2.459.tgz";
 
 const aliases = [
   ".bashrc",
   "cacert.pem",
   ".curlrc",
+  ".gemrc",
   ".inputrc",
   ".jshintrc",
+  ".nanorc",
   ".profile",
   ".tmux.conf",
   ".vimrc",
@@ -25,8 +27,10 @@ const copies = [
   "lib/configurations/bash/bashrc",
   "lib/configurations/curl/cacert.pem",
   "lib/configurations/curl/curlrc",
+  "lib/configurations/gem/gemrc",
   "lib/configurations/input/inputrc",
   "lib/configurations/jshint/jshintrc",
+  "lib/configurations/nano/nanorc",
   "lib/configurations/profile/profile",
   "lib/configurations/tmux/tmux",
   "lib/configurations/vim/vimrc",
@@ -44,6 +48,6 @@ const config = [
   "lib/configurations/tmux/vi"
 ];
 
-const tmux  = "$DOTFILES/configurations/tmux/";
+const tmux = "$DOTFILES/configurations/tmux/";
 
 module.exports = { aliases, config, copies, dotfile, tmux, version };

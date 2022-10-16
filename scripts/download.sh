@@ -7,8 +7,8 @@
 DF_DOTFILESDIR="${HOME}/.dotfiles" # Location of dotfiles.
 export DF_DOTFILESDIR              # Exporting Location of dotfiles.
 
-# shellcheck source=/dev/null
-. "${DF_DOTFILESDIR}/scripts/constants.sh"
+# shellcheck disable=SC1091
+. "./lib/configurations/default/constants.sh"
 
 ## 🅳🅾🆆🅽🅻🅾🅰🅳 - Download the dotfiles on your system.
 download() {
