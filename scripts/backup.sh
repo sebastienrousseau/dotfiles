@@ -30,9 +30,14 @@ backup() {
 
   # Backup existing Dotfiles directory.
   if [[ -d "${HOME}"/.dotfiles ]]; then
-    echo "${GREEN}  ✔${NC} Backing up previous Dotfiles installation to '${GREEN}${DF_BACKUPDIR}/${DF_TIMESTAMP}/${NC}'..."
+    echo "${GREEN}  ✔${NC} Backing up previous Dotfiles installation to '${GREEN}${DF_BACKUPDIR}${DF_TIMESTAMP}/${NC}'..."
     # shellcheck disable=SC2154
-    mv -f "${DF_DOTFILESDIR}" "${HOME}"/dotfiles_backup/"${DF_TIMESTAMP}"/
+    if [[ -d "${DF_BACKUPDIR}${DF_TIMESTAMP}/${DF}" ]]; then
+      mv -f "${DF_DOTFILESDIR}" "${DF_BACKUPDIR}${DF_TIMESTAMP}/${DF}"
+    else
+      mkdir -p "${DF_BACKUPDIR}${DF_TIMESTAMP}/${DF}"
+      mv -f "${DF_DOTFILESDIR}" "${DF_BACKUPDIR}${DF_TIMESTAMP}/${DF}"
+    fi
   fi
 
   # File list (use trailing slash for directories)
