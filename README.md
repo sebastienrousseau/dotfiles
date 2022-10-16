@@ -13,7 +13,7 @@
 • [Request Feature][issues]
 • [Contributing Guidelines][contributing]**
 
-## 👋 Welcome to Dotfiles (v0.2.459)
+## 👋 Welcome to Dotfiles (v0.2.460)
 
 ### Simply designed to fit your shell life
 
@@ -22,7 +22,7 @@ aimed at making your life easier by providing a set of scripts and configuration
 files with new ways to get things done.
 
 [![Getting Started][getting_started]][getting-started]
-[![Download Dotfiles v0.2.459][download_button]][download]
+[![Download Dotfiles v0.2.460][download_button]][download]
 
 Dotfiles aggregates a collection of standalone configuration files (dotfiles)
 combined into a `lib` directory that can be used to customize your development
@@ -121,7 +121,7 @@ sudo apt install fonts-roboto-mono-for-powerline
 
 ### 1️⃣ Download Dotfiles
 
-You can download the latest version (v0.2.459) with the following options:
+You can download the latest version (v0.2.460) with the following options:
 
 - [**Manual download**][releases] - **The easiest way to install Dotfiles.**
 - [**Install with PnPM**](https://www.npmjs.com/package/@sebastienrousseau/dotfiles)
@@ -417,9 +417,9 @@ You'll see something like this:
 │   ├── history.sh
 │   └── paths.sh
 ├── scripts
-│   ├── assemble.sh
 │   ├── backup.sh
 │   ├── banner.sh
+│   ├── build.sh
 │   ├── clean.sh
 │   ├── compile.sh
 │   ├── copy.sh
@@ -513,7 +513,7 @@ bunch of awesome [contributors](https://github.com/sebastienrousseau/dotfiles/gr
 [contributing]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CONTRIBUTING.md
 [curl]: https://curl.se/
 [docs]: https://github.com/sebastienrousseau/dotfiles/docs
-[download]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.459.tar.gz
+[download]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.460.tar.gz
 [getting-started]: https://github.com/sebastienrousseau/dotfiles#getting-started
 [git]: https://git-scm.com/
 [github]: https://github.com/sebastienrousseau/dotfiles

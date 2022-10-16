@@ -1,5 +1,5 @@
 /**
-* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.459) - https://dotfiles.io
+* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.460) - https://dotfiles.io
 * Copyright (c) Sebastien Rousseau 2022. All rights reserved
 * License: MIT
 */
@@ -12,13 +12,13 @@ async function transfer(dest) {
   var path = require('path');
 
   const source = path.resolve(__dirname, os.homedir() + "/dotfiles_backup/package/dist/");
-  const dotfiles =  path.resolve(__dirname, "/" + dest + "/.dotfiles");
-  const bin =  path.resolve(__dirname, "/" + dest + "/.dotfiles/bin");
-  const filesizes =  path.resolve(__dirname, "/" + dest + "/.dotfiles/filesizes.txt");
-  const make =  path.resolve(__dirname, "/" + dest + "/.dotfiles/Makefile");
+  const dotfiles = path.resolve(__dirname, "/" + dest + "/.dotfiles");
+  const bin = path.resolve(__dirname, "/" + dest + "/.dotfiles/bin");
+  const filesizes = path.resolve(__dirname, "/" + dest + "/.dotfiles/filesizes.txt");
+  const make = path.resolve(__dirname, "/" + dest + "/.dotfiles/Makefile");
 
   // Remove the destination directory if it exists.
-  if (fs.existsSync(dotfiles)){
+  if (fs.existsSync(dotfiles)) {
     await fs.removeSync(dotfiles);
   }
 

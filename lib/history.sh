@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.459) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.460) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
@@ -78,28 +78,28 @@ if [[ -n "${ZSH_VERSION}" ]]; then
 elif [[ -n "${BASH_VERSION}" ]]; then
   # echo "Running shell is bash"
   # Shopt settings
-  shopt -s autocd       # autocd - automatically cd to a directory when it is the only argument to a command
-  shopt -s cdspell      # cdspell - spell check the path when changing directories.
-  shopt -s checkhash    # checkhash - check hash table for commands before running them.
-  shopt -s checkjobs    # checkjobs - check for stopped jobs after each command and report them to the user.
-  shopt -s checkwinsize # checkwinsize - check the window size after each command and, if necessary, update the values of LINES and COLUMNS.
-  shopt -s cmdhist      # cmdhist - save multi-line commands as one entry in history.
-  shopt -s dirspell     # dirspell - spell check the path when changing directories.
-  shopt -s dotglob      # dotglob - include dotfiles in globbing.
-  shopt -s extglob      # extglob - extended globbing.
-  shopt -s globstar     # globstar - allow ** to match multiple directories.
-  shopt -s histappend   # histappend - append to the history file, don't overwrite it.
-  shopt -s histverify   # histverify - verify commands from history before executing them.
-  shopt -s hostcomplete # hostcomplete - complete hostnames when using the ssh command.
-  shopt -s lithist      # lithist - save multi-line commands as one entry in history.
-  shopt -s huponexit    # huponexit - send SIGHUP to jobs when the shell exits.
+  shopt -s autocd                  # autocd - automatically cd to a directory when it is the only argument to a command
+  shopt -s cdspell                 # cdspell - spell check the path when changing directories.
+  shopt -s checkhash               # checkhash - check hash table for commands before running them.
+  shopt -s checkjobs               # checkjobs - check for stopped jobs after each command and report them to the user.
+  shopt -s checkwinsize            # checkwinsize - check the window size after each command and, if necessary, update the values of LINES and COLUMNS.
+  shopt -s cmdhist                 # cmdhist - save multi-line commands as one entry in history.
+  shopt -s dirspell                # dirspell - spell check the path when changing directories.
+  shopt -s dotglob                 # dotglob - include dotfiles in globbing.
+  shopt -s extglob                 # extglob - extended globbing.
+  shopt -s globstar                # globstar - allow ** to match multiple directories.
+  shopt -s histappend              # histappend - append to the history file, don't overwrite it.
+  shopt -s histverify              # histverify - verify commands from history before executing them.
+  shopt -s hostcomplete            # hostcomplete - complete hostnames when using the ssh command.
+  shopt -s lithist                 # lithist - save multi-line commands as one entry in history.
+  shopt -s huponexit               # huponexit - send SIGHUP to jobs when the shell exits.
   shopt -s no_empty_cmd_completion # no_empty_cmd_completion - don't complete empty commands.
-  shopt -s nocaseglob   # nocaseglob - case insensitive globbing.
-  shopt -s nocasematch  # nocasematch - case insensitive matching.
-  shopt -s nullglob     # nullglob - if no matches are found, the pattern expands to nothing.
-  shopt -s progcomp     # progcomp - programmable completion.
-  shopt -s promptvars   # promptvars - allow prompt strings to contain shell variables.
-  shopt -s sourcepath   # sourcepath - search the PATH for the directory containing a sourced script before using the current directory.
+  shopt -s nocaseglob              # nocaseglob - case insensitive globbing.
+  shopt -s nocasematch             # nocasematch - case insensitive matching.
+  shopt -s nullglob                # nullglob - if no matches are found, the pattern expands to nothing.
+  shopt -s progcomp                # progcomp - programmable completion.
+  shopt -s promptvars              # promptvars - allow prompt strings to contain shell variables.
+  shopt -s sourcepath              # sourcepath - search the PATH for the directory containing a sourced script before using the current directory.
 
 else
   echo "Unsupported shell: ${SHELL}"

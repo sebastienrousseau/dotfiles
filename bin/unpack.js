@@ -1,5 +1,5 @@
 /**
-* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.459) - https://dotfiles.io
+* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.460) - https://dotfiles.io
 * Copyright (c) Sebastien Rousseau 2022. All rights reserved
 * License: MIT
 */
@@ -11,7 +11,7 @@ async function unpack() {
   var path = require('path');
   const { version } = require("./constants.js");
   var destPath = path.resolve(__dirname, os.homedir() + "/dotfiles_backup/");
-  compressing.tgz.uncompress(destPath+"/"+version, destPath+"/");
+  compressing.tgz.uncompress(destPath + "/" + version, destPath + "/");
 }
 
 module.exports = unpack;
