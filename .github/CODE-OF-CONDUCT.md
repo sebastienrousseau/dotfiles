@@ -1,6 +1,6 @@
 # Contributor Covenant Code of Conduct
 
-![Banner representing the Dotfiles Library](../media/dotfiles.svg)
+[![Banner representing the Dotfiles Library][logo]][website]
 
 ## Our Pledge
 
@@ -45,5 +45,7 @@ Project maintainers who do not follow or enforce the Code of Conduct in good fai
 This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 1.4, available at [http://contributor-covenant.org/version/1/4][version]
 
 [homepage]: http://contributor-covenant.org
-
 [version]: http://contributor-covenant.org/version/1/4/
+[logo]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/dotfiles.svg
+[website]: https://dotfiles.io
+
