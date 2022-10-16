@@ -16,32 +16,32 @@ backup: ## Backup your current dotfiles.
 
 .PHONY: clean
 clean: # @HELP
-clean: ## Removes any previous setup directories.
+clean: ## Removes any previous setup.
 clean:
 	@$(HOMEDIR)/scripts/clean.sh clean
 
 .PHONY: copy
-copy: # @HELP Copy the dotfiles on your system.
+copy: # @HELP
 copy: ## Copy the dotfiles on your system.
-	@$(HOMEDIR)/scripts/dotfiles copy
+	@$(HOMEDIR)/scripts/copy.sh copy
 
 .PHONY: download
-download: # @HELP Download the dotfiles on your system.
+download: # @HELP
 download: ## Download the dotfiles on your system.
-	@$(HOMEDIR)/scripts/dotfiles download
+	@$(HOMEDIR)/scripts/download.sh download
 
-.PHONY: assemble
-assemble: # @HELP Assemble the dotfiles on your system.
-assemble: ## Run the full installation process.
-	@$(HOMEDIR)/scripts/dotfiles assemble
+.PHONY: build
+build: # @HELP
+build: ## Run the full installation process.
+	@$(HOMEDIR)/scripts/build.sh build
 
 .PHONY: unpack
-unpack: # @HELP Unpack the dotfiles on your system.
+unpack: # @HELP
 unpack: ## Extract the dotfiles to your system.
-	@$(HOMEDIR)/scripts/dotfiles unpack
+	@$(HOMEDIR)/scripts/unpack.sh unpack
 
 .PHONY: help
-help: # @HELP Display the help menu.
+help: # @HELP
 help: ## Display the help menu.
 	@$(BANNER)
 	@awk 'BEGIN {FS = ":.*##"; printf "\USAGE:\n\n make \033[1;96m[COMMAND]\033[0m\n\nCOMMANDS:\n\n"} /^[$$()% a-zA-Z_-]+:.*?##/ { printf "  \033[1;96m%-8s\033[0m -%s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)

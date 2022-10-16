@@ -18,8 +18,8 @@
 # shellcheck disable=SC1091
 . "./scripts/copy.sh"
 
-## 🅰🆂🆂🅴🅼🅱🅻🅴 - Assemble the dotfiles on your system.
-assemble() {
+## 🅱🆄🅸🅻🅳 - Build the dotfiles on your system.
+build() {
 
   # shellcheck disable=SC2154
   echo "${RED}❭${NC} Preparing the dotfiles on your system."
@@ -30,3 +30,10 @@ assemble() {
     copy
 
 }
+
+args=$*               # Arguments passed to script.
+export args="${args}" # Exporting arguments.
+if [[ ${args} = "build" ]]; then
+  echo "$*"
+  build
+fi
