@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.459) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.460) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
@@ -77,8 +77,6 @@ alias grm='git remove'
 # gsc: Initialize and modify the sparse-checkout.
 alias gsc='git sparse-checkout'
 
-
-
 ##  ----------------------------------------------------------------------------
 ##  1.2 Aliases to start a working area.
 ##  ----------------------------------------------------------------------------
@@ -88,8 +86,6 @@ alias gcl='git clone'
 
 # gin: Create an empty Git repository or reinitialize an existing one.
 alias gin='git init'
-
-
 
 ##  ----------------------------------------------------------------------------
 ##  1.3 Aliases to examine the history and state.
@@ -113,8 +109,6 @@ alias glg='git log --oneline --graph --full-history --all --color --decorate'
 
 # Show various types of objects.
 alias gs='git show'
-
-
 
 ##  ----------------------------------------------------------------------------
 ##  1.4 Aliases to list, create, or delete branches.
@@ -153,8 +147,6 @@ alias grs='git reset'
 # gswb: Switch branches.
 alias gswb='git switch'
 
-
-
 ##  ----------------------------------------------------------------------------
 ##  1.5 Aliases to collaborate.
 ##  ----------------------------------------------------------------------------
@@ -170,8 +162,6 @@ alias gp='git pull'
 
 # Update remote refs along with associated objects.
 alias gph='git push'
-
-
 
 ##  ----------------------------------------------------------------------------
 ##  1.6 Aliases to record changes to the repository.
@@ -198,8 +188,6 @@ alias gcint='git commit --interactive'
 # Commit with a message.
 alias gcm='git commit --message '
 
-
-
 ##  ----------------------------------------------------------------------------
 ##  1.7 Aliases to show changes between commits, commit and working tree, etc.
 ##  ----------------------------------------------------------------------------
@@ -221,8 +209,6 @@ alias gdcached='git diff --cached'
 
 # Generate a diffstat.
 alias gdstat='git diff --stat --ignore-space-change -r'
-
-
 
 ##  ----------------------------------------------------------------------------
 ##  1.8 Aliases to show commit logs.
@@ -273,8 +259,6 @@ alias glw='git log --since=1-week-ago'
 # Show the log of the recent year.
 alias gly='git log --since=1-year-ago'
 
-
-
 ##  ----------------------------------------------------------------------------
 ##  1.9  Aliases to switch branches or restore working tree files.
 ##  ----------------------------------------------------------------------------
@@ -293,8 +277,6 @@ alias gcode='git checkout main && git branch --merged | xargs git branch --delet
 
 # Ensure local is like the main branch.
 alias gcom='git checkout main && git fetch origin --prune && git reset --hard origin/main'
-
-
 
 ##  ----------------------------------------------------------------------------
 ##  2.0 Aliases to update remote refs along with associated objects.
@@ -337,8 +319,6 @@ alias gunpub='git push origin :$(git current-branch)'
 
 # Push current branch
 # alias gpcb='git push origin "$(git branch|grep '\*'|tr -d '* \n')"'
-
-
 
 ##  ----------------------------------------------------------------------------
 ##  2.1 Aliases to manage set of tracked repositories.
@@ -390,16 +370,12 @@ alias gru='git remote update'
 # Shows URLs of remote repositories when listing your current remote connections.
 alias grv='git remote -v'
 
-
-
 ##  ----------------------------------------------------------------------------
 ##  2.2 Aliases to revert some existing commits.
 ##  ----------------------------------------------------------------------------
 
-alias grev='git revert' # Undo the changes from some existing commits
+alias grev='git revert'               # Undo the changes from some existing commits
 alias grevnc='git revert --no-commit' # Revert without autocommit; useful when you're reverting more than one commits' effect to your index in a row.
-
-
 
 ##  ----------------------------------------------------------------------------
 ##  2.3 Aliases to initialize, update or inspect submodules.
@@ -426,8 +402,6 @@ alias gsmui='git submodule update --init'
 # Submodule update with initialize and recursive; this is useful to bring a submodule fully up to date.
 alias gsmuir='git submodule update --init --recursive'
 
-
-
 ##  ----------------------------------------------------------------------------
 ##  2.4 Aliases to show the working tree status.
 ##  ----------------------------------------------------------------------------
@@ -447,8 +421,6 @@ alias gsts='git status --short'
 # Status with short format and showing branch and tracking info.
 alias gstsb='git status --short --branch'
 
-
-
 ##  ----------------------------------------------------------------------------
 ##  2.5 Aliases to create, list, delete or verify a tag object signed with GPG.
 ##  ----------------------------------------------------------------------------
@@ -461,8 +433,6 @@ alias gtg='git tag'
 
 # Last tag in the current branch.
 alias gtl='git describe --tags --abbrev=0'
-
-
 
 ##  ----------------------------------------------------------------------------
 ##  2.6 Aliases to show various types of objects.
@@ -483,8 +453,6 @@ alias gshnp='git show --no-patch --pretty="tformat:%h (%s, %ad)" --date=short'
 # Show who contributed, in descending order by number of commits.
 alias gshwho='git shortlog --summary --numbered --no-merges'
 
-
-
 ##  ----------------------------------------------------------------------------
 ##  2.7 Aliases to reset current HEAD to the specified state.
 ##  ----------------------------------------------------------------------------
@@ -504,8 +472,6 @@ alias gress='git reset --soft HEAD~1'
 # Reset to upstream.
 alias gresu='git reset --hard $(git upstream-branch)'
 
-
-
 ##  ----------------------------------------------------------------------------
 ##  2.8 Aliases to pick out and massage parameters.
 ##  ----------------------------------------------------------------------------
@@ -518,8 +484,6 @@ alias grpa='git rev-parse --abbrev-ref HEAD'
 
 # Get the upstream branch name.
 # alias gub='git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)'
-
-
 
 ##  ----------------------------------------------------------------------------
 ##  2.9 Aliases to remove files from the working tree and from the index.
@@ -543,16 +507,12 @@ alias grmds='find . -name .DS_Store -exec git rm --ignore-unmatch --cached {} +'
 # Remove for all deleted files, including those with space/quote/unprintable characters in their filename/path.
 alias grmx='git ls-files -z -d | xargs -0 git rm --'
 
-
-
 ##  ----------------------------------------------------------------------------
 ##  3.0 Aliases to show what revision and author last modified each line of a file.
 ##  ----------------------------------------------------------------------------
 
 # Prints per-line contribution per author for a GIT repository.
 # alias gblau='git ls-files | xargs -n1 git blame --line-porcelain | sed -n 's/^author //p' | sort -f | uniq -ic | sort -nr'
-
-
 
 ##  ----------------------------------------------------------------------------
 ##  3.1 Aliases to get and set repository or global options.
@@ -566,4 +526,3 @@ alias gconfl='git config --list'
 
 # Output remote origin from within a local repository.
 alias gconfr='git config --local --get remote.origin.url'
-

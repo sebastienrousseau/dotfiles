@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.459) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.460) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
 # environment: Function to detect the current environment
-environment ()
-{
+environment() {
     # Define a fallback `OS`
     LOCAL_OS="other"
 

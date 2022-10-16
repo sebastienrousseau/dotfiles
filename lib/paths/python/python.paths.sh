@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.459) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.460) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
@@ -15,10 +15,10 @@ elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
 fi
 
 # Encoding[:errors] used for stdin/stdout/stderr.
-export PYTHONIOENCODING='UTF-8';
+export PYTHONIOENCODING='UTF-8'
 
 # If set to 1, enables the UTF-8 mode.
-export PYTHONUTF8=1;
+export PYTHONUTF8=1
 
 # Export PYTHONHOME variable
 export PYTHONHOME

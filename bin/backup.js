@@ -1,5 +1,5 @@
 /**
-* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.459) - https://dotfiles.io
+* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.460) - https://dotfiles.io
 * Copyright (c) Sebastien Rousseau 2022. All rights reserved
 * License: MIT
 */
@@ -11,7 +11,7 @@ async function backup(src, dest) {
   var path = require("path");
   var dir = path.resolve(__dirname, os.homedir() + '/dotfiles_backup');
 
-  if (!fs.existsSync(dir)){
+  if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
   }
 

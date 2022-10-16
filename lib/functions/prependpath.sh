@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.459) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.460) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
@@ -13,7 +13,7 @@
 
 # prependpath: Prepend $PATH without duplicates
 prependpath() {
-    if ! echo "${PATH}" | tr ":" "\n" | grep -qx "$1" ; then
+    if ! echo "${PATH}" | tr ":" "\n" | grep -qx "$1"; then
         PATH="$1:${PATH}"
     fi
 }

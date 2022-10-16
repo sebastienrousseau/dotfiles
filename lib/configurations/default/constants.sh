@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.459) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.460) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
@@ -9,7 +9,7 @@ DF=".dotfiles/"                           # Dotfiles.
 DF_DIR="${HOME}/.dotfiles/"               # Dotfiles directory.
 DF_BACKUPDIR="${HOME}/dotfiles_backup/"   # Backup directory.
 DF_DOWNLOADDIR="${HOME}/Downloads"        # Download directory.
-DF_VERSION="0.2.459"                      # Dotfiles Version number.
+DF_VERSION="0.2.460"                      # Dotfiles Version number.
 DF_TIMESTAMP="$(date +%Y-%m-%d_%H-%M-%S)" # Timestamp for backup directory.
 
 export DF

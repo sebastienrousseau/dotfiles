@@ -1,5 +1,5 @@
 /**
-* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.459) - https://dotfiles.io
+* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.460) - https://dotfiles.io
 * Copyright (c) Sebastien Rousseau 2022. All rights reserved
 * License: MIT
 */
@@ -7,7 +7,7 @@
 // 🅳🅾🆆🅽🅻🅾🅰🅳 - Download function.
 async function download() {
 
-  const {promisify} = require('util');
+  const { promisify } = require('util');
   var fs = require("fs");
   var os = require("os");
   var path = require("path");
