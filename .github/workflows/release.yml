@@ -6,7 +6,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -57,7 +56,7 @@ jobs:
         run: ls -al ./dist
 
       - name: Publish to NPM
-        run: pnpm publish --access public --tag latest
+        run: pnpm publish --access public --tag latest --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -71,6 +70,6 @@ jobs:
         run: pnpm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
 
       - name: Publish the package to Github package registry
-        run: pnpm -r publish --access public --no-git-checks
+        run: pnpm publish --access public --tag latest --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
