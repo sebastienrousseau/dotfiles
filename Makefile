@@ -33,7 +33,7 @@ download: ## Download the dotfiles on your system.
 .PHONY: build
 build: # @HELP
 build: ## Run the full installation process.
-	@$(HOMEDIR)/scripts/build build
+	@$(HOMEDIR)/scripts/build.sh build
 
 .PHONY: unpack
 unpack: # @HELP
