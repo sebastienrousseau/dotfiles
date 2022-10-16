@@ -14,50 +14,31 @@ backup: # @HELP
 backup: ## Backup your current dotfiles.
 	@$(HOMEDIR)/scripts/backup.sh backup
 
-.PHONY: assemble
-assemble: # @HELP Assemble the dotfiles on your system.
-assemble: ## Prepare the dotfiles on your system.
-# ifdef PNPM
-# 	pnpm run assemble
-# else
-	sh $(HOMEDIR)/scripts/dotfiles assemble
-# endif
+.PHONY: clean
+clean: # @HELP
+clean: ## Removes any previous setup directories.
+clean:
+	@$(HOMEDIR)/scripts/clean.sh clean
 
 .PHONY: copy
 copy: # @HELP Copy the dotfiles on your system.
 copy: ## Copy the dotfiles on your system.
-# ifdef PNPM
-# 	pnpm run copy
-# else
-	sh $(HOMEDIR)/scripts/dotfiles copy
-# endif
+	@$(HOMEDIR)/scripts/dotfiles copy
 
 .PHONY: download
 download: # @HELP Download the dotfiles on your system.
 download: ## Download the dotfiles on your system.
-# ifdef PNPM
-# 	pnpm run download
-# else
-	sh $(HOMEDIR)/scripts/dotfiles download
-# endif
+	@$(HOMEDIR)/scripts/dotfiles download
+
+.PHONY: assemble
+assemble: # @HELP Assemble the dotfiles on your system.
+assemble: ## Run the full installation process.
+	@$(HOMEDIR)/scripts/dotfiles assemble
 
 .PHONY: unpack
 unpack: # @HELP Unpack the dotfiles on your system.
-unpack: ## Unpack the dotfiles on your system.
-# ifdef PNPM
-# 	pnpm run unpack
-# else
-	sh $(HOMEDIR)/scripts/dotfiles unpack
-# endif
-
-.PHONY: clean
-clean: # @HELP Removes any previous setup directories.
-clean:
-# ifdef PNPM
-# 	pnpm run clean
-# else
-	sh $(HOMEDIR)/scripts/dotfiles clean
-# endif
+unpack: ## Extract the dotfiles to your system.
+	@$(HOMEDIR)/scripts/dotfiles unpack
 
 .PHONY: help
 help: # @HELP Display the help menu.

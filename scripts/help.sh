@@ -28,13 +28,13 @@ USAGE:
 
 COMMANDS:
 
-  $(echo -e "\033[1;96mbackup\033[0m\n")    - Backup existing dotfiles from the '$(echo -e "\033[4;36m${HOME}\033[0m\n")' directory
-  $(echo -e "\033[1;96mclean\033[0m\n")     - Removes any previous setup directories
-  $(echo -e "\033[1;96mcopy\033[0m\n")      - Copy the new dotfiles files to your '$(echo -e "\033[4;36m${HOME}\033[0m\n")' directory
-  $(echo -e "\033[1;96mdownload\033[0m\n")  - Download the latest $(echo -e "\033[1;96mDotfiles (v${DF_VERSION})\033[0m\n")
-  $(echo -e "\033[1;96massemble\033[0m\n")  - Run the full installation process
-  $(echo -e "\033[1;96munpack\033[0m\n")    - Unpack the Dotfiles
-  $(echo -e "\033[1;96mhelp\033[0m\n")      - Show the help menu
+  $(echo -e "\033[1;96mbackup\033[0m\n")   - Backup your current dotfiles.
+  $(echo -e "\033[1;96mclean\033[0m\n")    - Removes any previous setup directories.
+  $(echo -e "\033[1;96mcopy\033[0m\n")     - Copy the dotfiles on your system.
+  $(echo -e "\033[1;96mdownload\033[0m\n") - Download the dotfiles on your system.
+  $(echo -e "\033[1;96massemble\033[0m\n") - Run the full installation process.
+  $(echo -e "\033[1;96munpack\033[0m\n")   - Extract the dotfiles to your system.
+  $(echo -e "\033[1;96mhelp\033[0m\n")     - Display the help menu.
 
 DOCUMENTATION:
 
