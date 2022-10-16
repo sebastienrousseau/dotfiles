@@ -62,7 +62,7 @@ copy() {
     echo "${GREEN}  ✔${NC} Copying '${YELLOW}.gemrc${NC}'" &&
 
     # inputrc -- Copying .inputrc file.
-    cp -f "${PWD}"/lib/configurations/inputrc/inputrc "${HOME}"/.inputrc &&
+    cp -f "${PWD}"/lib/configurations/input/inputrc "${HOME}"/.inputrc &&
     echo "${GREEN}  ✔${NC} Copying '${YELLOW}.inputrc${NC}'" &&
 
     # jshintrc -- Copying .jshintrc file.

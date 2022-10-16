@@ -23,7 +23,7 @@ clean:
 .PHONY: copy
 copy: # @HELP Copy the dotfiles on your system.
 copy: ## Copy the dotfiles on your system.
-	@$(HOMEDIR)/scripts/dotfiles copy
+	@$(HOMEDIR)/scripts/copy.sh copy
 
 .PHONY: download
 download: # @HELP Download the dotfiles on your system.
