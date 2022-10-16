@@ -63,6 +63,13 @@ clean:
 help: # @HELP Display the help menu.
 help: ## Display the help menu.
 	@$(BANNER)
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n\n make \033[36m[target]\033[0m\n\n"} /^[$$()% a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-8s\033[0m -%s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*##"; printf "\USAGE:\n\n make \033[1;96m[COMMAND]\033[0m\n\nCOMMANDS:\n\n"} /^[$$()% a-zA-Z_-]+:.*?##/ { printf "  \033[1;96m%-8s\033[0m -%s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+	@echo ""
+	@echo "DOCUMENTATION:"
+	@echo ""
+	@echo -e "  \033[4;36mhttps://dotfiles.io\033[0m\n"
+	@echo "LICENSE:"
+	@echo ""
+	@echo "  This project is licensed under the MIT License."
 	@echo ""
 

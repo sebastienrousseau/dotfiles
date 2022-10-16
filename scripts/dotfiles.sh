@@ -35,27 +35,27 @@ elif [[ "$1" = "download" ]]; then
   # shellcheck disable=SC2154
   echo "${RED}❭${NC} Downloading ${GREEN}Dotfiles v${DF_VERSION}${NC}."
   . "./scripts/download.sh" &&
-    download
+    echo "${RED}❭${NC} Download completed.${NC}"
 
 elif [[ "$1" = "help" ]]; then
   . "./scripts/help.sh" &&
-    help
+    echo "${RED}❭${NC} Help menu.${NC}"
 
 elif [[ "$1" = "assemble" ]]; then
 
   # shellcheck disable=SC2154
   echo "${RED}❭${NC} Installing ${GREEN}Dotfiles v${VERSION}${NC}."
   . "./scripts/assemble.sh" &&
-    assemble
+    echo "${RED}❭${NC} Installation completed.${NC}"
 
 elif [[ "$1" = "unpack" ]]; then
 
   # shellcheck disable=SC2154
   echo "${RED}❭${NC} Unpacking ${GREEN}Dotfiles v${DF_VERSION}${NC}."
   . "./scripts/unpack.sh" &&
-    unpack
+    echo "${RED}❭${NC} Unpacking completed.${NC}"
 
 else
   . "./scripts/help.sh" &&
-    help
+    echo "${RED}❭${NC} Help menu.${NC}"
 fi

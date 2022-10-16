@@ -10,9 +10,6 @@ export DF_DOTFILESDIR              # Exporting Location of dotfiles.
 # shellcheck disable=SC1091
 . "./lib/configurations/default/constants.sh"
 
-# shellcheck disable=SC1091
-. "./scripts/banner.sh"
-
 echo ""
 # shellcheck disable=SC2154
 echo "${RED}❭${NC} Starting help menu."
@@ -20,33 +17,31 @@ echo ""
 
 ## 🅷🅴🅻🅿 🅼🅴🅽🆄 - Display help menu.
 help() {
-  clear
+
+  # shellcheck disable=SC1091
+  . "./scripts/banner.sh"
+
   cat <<EOF
-
-┌───────────────────────────────────────────┐
-│             Dotfiles (v${DF_VERSION})           │
-├───────────────────────────────────────────┤
-│   Simply designed to fit your shell life. │
-└───────────────────────────────────────────┘
-
 USAGE:
 
-  dotfiles [COMMAND]
+  pnpm run $(echo -e "\033[1;96m[COMMAND]\033[0m\n")
 
 COMMANDS:
 
-  backup    - Backup existing dotfiles from the '${HOME}' directory
-  clean     - Removes any previous setup directories
-  copy      - Copy the new dotfiles files to your '${HOME}' directory
-  download  - Download the latest Dotfiles (v${DF_VERSION})
-  assemble  - Run the full installation process
-  unpack    - Unpack the Dotfiles
-  help      - Show the help menu
+  $(echo -e "\033[1;96mbackup\033[0m\n")    - Backup existing dotfiles from the '$(echo -e "\033[4;36m${HOME}\033[0m\n")' directory
+  $(echo -e "\033[1;96mclean\033[0m\n")     - Removes any previous setup directories
+  $(echo -e "\033[1;96mcopy\033[0m\n")      - Copy the new dotfiles files to your '$(echo -e "\033[4;36m${HOME}\033[0m\n")' directory
+  $(echo -e "\033[1;96mdownload\033[0m\n")  - Download the latest $(echo -e "\033[1;96mDotfiles (v${DF_VERSION})\033[0m\n")
+  $(echo -e "\033[1;96massemble\033[0m\n")  - Run the full installation process
+  $(echo -e "\033[1;96munpack\033[0m\n")    - Unpack the Dotfiles
+  $(echo -e "\033[1;96mhelp\033[0m\n")      - Show the help menu
 
 DOCUMENTATION:
-  website   - https://dotfiles.io
+
+  $(echo -e "\033[4;36mhttps://dotfiles.io\033[0m\n")
 
 LICENSE:
+
   This project is licensed under the MIT License.
 
 EOF

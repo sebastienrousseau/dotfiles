@@ -7,10 +7,12 @@
 
 # shellcheck disable=SC2154
 clear
-printf "\n❭ Package: Dotfiles - Simply designed to fit your shell life"
-printf "\n❭ Description: A set of macOS / Linux and Windows configuration files."
-printf "\n❭ Version: v%s" "${DF_VERSION}" | tr -d '"'
-printf "\n❭ Website: https://dotfiles.io"
-printf "\n❭ Copyright: (c) Sebastien Rousseau 2022. All rights reserved."
-printf "\n❭ License: MIT"
-printf "\n"
+cat <<EOF
+
+┌───────────────────────────────────────────────┐
+│             $(echo -e "\033[1;96mDotfiles (v${DF_VERSION})\033[0m\n")               │
+├───────────────────────────────────────────────┤
+│    $(echo -e "\033[0;93mSimply designed to fit your shell life\033[0m\n")     │
+└───────────────────────────────────────────────┘
+
+EOF
