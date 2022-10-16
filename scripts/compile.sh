@@ -19,6 +19,10 @@ compile() {
   # shellcheck disable=SC1091
   cp -R ./lib ./dist/
 
+  echo "${GREEN}  ✔${NC} Copying scripts."
+  # shellcheck disable=SC1091
+  cp -R ./scripts ./dist/
+
   echo "${GREEN}  ✔${NC} Removing temporary files."
   # shellcheck disable=SC1091
   rimraf \"./dist/lib/**/*.tmp\"

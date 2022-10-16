@@ -37,7 +37,8 @@
 	},
 	"directories": {
 		"bin": "./bin",
-		"lib": "./lib"
+		"lib": "./lib",
+		"scripts": "./scripts"
 	},
 	"engines": {
 		"node": "^12.20.0 || ^14.13.1 || >=16.0.0"
@@ -70,9 +71,9 @@
 		"url": "git@github.com:sebastienrousseau/dotfiles.git"
 	},
 	"scripts": {
-		"assemble": "pnpm run backup && pnpm run copy",
+		"build": "pnpm run backup && pnpm run copy && pnpm run assemble",
 		"backup": "chmod 755 \"./scripts/backup.sh\" && sh ./scripts/backup.sh backup",
-		"build": "pnpm run clean && npx tsc --build tsconfig.json && pnpm run compile",
+		"assemble": "pnpm run clean && npx tsc --build tsconfig.json && pnpm run compile",
 		"clean": "chmod 755 \"./scripts/clean.sh\" && sh ./scripts/clean.sh clean",
 		"compile": "chmod 755 \"./scripts/compile.sh\" && ./scripts/compile.sh compile",
 		"copy": "chmod 755 \"./scripts/copy.sh\" && ./scripts/copy.sh copy",

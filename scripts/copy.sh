@@ -16,12 +16,32 @@ copy() {
 
   # shellcheck disable=SC2154
   if [[ -d "${DF_DIR}" ]]; then
+    echo "${RED}❭${NC} Copying Binaries to ${DF_DIR}."
+    cp -f -R ./bin/ "${DF_DIR}"bin/
+  else
+    echo "${RED}❭${NC} Copying Binaries to ${DF_DIR}."
+    mkdir -p "${DF_DIR}"
+    cp -f -R ./bin/ "${DF_DIR}"bin/
+  fi
+
+  # shellcheck disable=SC2154
+  if [[ -d "${DF_DIR}" ]]; then
     echo "${RED}❭${NC} Copying ${GREEN}Dotfiles v${DF_VERSION}${NC} to ${CYAN}${DF_DIR}${NC}"
     cp -f -R ./lib/ "${DF_DIR}"lib/
   else
     echo "${RED}❭${NC} Copying ${GREEN}Dotfiles v${DF_VERSION}${NC} to ${CYAN}${DF_DIR}${NC}"
     mkdir -p "${DF_DIR}"
     cp -f -R ./lib/ "${DF_DIR}"lib/
+  fi
+
+  # shellcheck disable=SC2154
+  if [[ -d "${DF_DIR}" ]]; then
+    echo "${RED}❭${NC} Copying Scripts to ${CYAN}${DF_DIR}${NC}"
+    cp -f -R ./scripts/ "${DF_DIR}"scripts/
+  else
+    echo "${RED}❭${NC} Copying Scripts to ${CYAN}${DF_DIR}${NC}"
+    mkdir -p "${DF_DIR}"
+    cp -f -R ./scripts/ "${DF_DIR}"scripts/
   fi
 
   # cacert -- Copying cacert.pem file.
