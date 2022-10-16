@@ -13,7 +13,7 @@
 • [Request Feature][issues]
 • [Contributing Guidelines][contributing]**
 
-## 👋 Welcome to Dotfiles (v0.2.458)
+## 👋 Welcome to Dotfiles (v0.2.459)
 
 ### Simply designed to fit your shell life
 
@@ -22,7 +22,7 @@ aimed at making your life easier by providing a set of scripts and configuration
 files with new ways to get things done.
 
 [![Getting Started][getting_started]][getting-started]
-[![Download Dotfiles v0.2.458][download_button]][download]
+[![Download Dotfiles v0.2.459][download_button]][download]
 
 Dotfiles aggregates a collection of standalone configuration files (dotfiles)
 combined into a `lib` directory that can be used to customize your development
@@ -99,9 +99,29 @@ The following programs must be installed on your system to install Dotfiles:
 - [**PnPM**][pnpm] - a package manager for JavaScript and Node.js. It is fast,
   disk space efficient and reliable.
 
+#### Font
+
+We recommend using a font such as `Roboto Mono for Powerline` for terminal and vscode editor.
+
+On macOS, you can install the font using the following command:
+
+```bash
+brew tap homebrew/cask-fonts
+```
+
+```bash
+brew cask install font-roboto-mono-for-powerline
+```
+
+On Linux, you can install the font using the following command:
+
+```bash
+sudo apt install fonts-roboto-mono-for-powerline
+```
+
 ### 1️⃣ Download Dotfiles
 
-You can download the latest version (v0.2.458) with the following options:
+You can download the latest version (v0.2.459) with the following options:
 
 - [**Manual download**][releases] - **The easiest way to install Dotfiles.**
 - [**Install with PnPM**](https://www.npmjs.com/package/@sebastienrousseau/dotfiles)
@@ -119,7 +139,7 @@ You can download the latest version (v0.2.458) with the following options:
 Before installing Dotfiles, we strongly recommend that you back up your existing
 data. The Dotfiles installer will try to automatically backup any previous
 installation of known dotfiles into a backup directory
-`$HOME/.dotfiles_backup`.
+`$HOME/dotfiles_backup`.
 
 The backup files are the following:
 
@@ -199,13 +219,17 @@ dotfiles rapidly and very efficiently.
 Switch to the `dist` directory and run:
 
 ```bash
-pnpm run assemble
+pnpm run build
 ```
+
+This will install the latest version of the dotfiles and will automatically
+backup any existing dotfiles you may have into a backup directory
+`$HOME/dotfiles_backup`.
 
 ### Post installation
 
 Following the installation, you can verify that the dotfiles package is installed
-in the following directory `$HOME/.dotfiles_backup`.
+in the following directory `$HOME/dotfiles_backup`.
 
 Just quit your terminal and restart it. If the installation is successful, you
 should be able to see a new interface of your terminal and be able to start
@@ -285,12 +309,17 @@ You'll see something like this:
 │   │   │   └── curlrc
 │   │   ├── default
 │   │   │   ├── color.sh
+│   │   │   ├── constants.sh
 │   │   │   ├── editor.sh
 │   │   │   └── prompt.sh
-│   │   ├── inputrc
+│   │   ├── gem
+│   │   │   └── gemrc
+│   │   ├── input
 │   │   │   └── inputrc
 │   │   ├── jshint
 │   │   │   └── jshintrc
+│   │   ├── nano
+│   │   │   └── nanorc
 │   │   ├── profile
 │   │   │   └── profile
 │   │   ├── tmux
@@ -312,6 +341,9 @@ You'll see something like this:
 │   ├── functions
 │   │   ├── README.md
 │   │   ├── cdls.sh
+│   │   ├── changediskpwd.tmp
+│   │   ├── code.tmp
+│   │   ├── countdown.tmp
 │   │   ├── curlheader.sh
 │   │   ├── curltime.sh
 │   │   ├── encode64.sh
@@ -320,7 +352,9 @@ You'll see something like this:
 │   │   ├── filehead.sh
 │   │   ├── genpwd.sh
 │   │   ├── goto.sh
+│   │   ├── headers.tmp
 │   │   ├── hidehiddenfiles.sh
+│   │   ├── history-all.tmp
 │   │   ├── hostinfo.sh
 │   │   ├── hstats.sh
 │   │   ├── httpdebug.sh
@@ -334,14 +368,20 @@ You'll see something like this:
 │   │   ├── mount_read_only.sh
 │   │   ├── myproc.sh
 │   │   ├── prependpath.sh
+│   │   ├── print.tmp
 │   │   ├── ql.sh
 │   │   ├── rd.sh
 │   │   ├── remove_disk.sh
 │   │   ├── ren.sh
+│   │   ├── rm.tmp
+│   │   ├── rps.tmp
 │   │   ├── showhiddenfiles.sh
 │   │   ├── size.sh
 │   │   ├── stopwatch.sh
+│   │   ├── trash.tmp
+│   │   ├── tree.tmp
 │   │   ├── uppercase.sh
+│   │   ├── uuidgen.tmp
 │   │   ├── view-source.sh
 │   │   ├── vscode.sh
 │   │   ├── whoisport.sh
@@ -376,10 +416,22 @@ You'll see something like this:
 │   ├── functions.sh
 │   ├── history.sh
 │   └── paths.sh
+├── scripts
+│   ├── assemble.sh
+│   ├── backup.sh
+│   ├── banner.sh
+│   ├── clean.sh
+│   ├── compile.sh
+│   ├── copy.sh
+│   ├── dotfiles.sh
+│   ├── download.sh
+│   ├── help.sh
+│   └── unpack.sh
 ├── Makefile
 └── filesizes.txt
 
-35 directories, 117 files
+38 directories, 141 files
+
 ```
 
 ## 🔗 Releases
@@ -392,7 +444,7 @@ Releases are available on the [GitHub releases page][releases].
 
 For transparency into our release cycle and in striving to maintain backward
 compatibility, `Dotfiles` follows [Semantic Versioning][semver-url]
-(SemVer) and [ESLint's Semantic Versioning Policy][eslint-semantic-url].
+(SemVer).
 
 ![divider][divider]
 
@@ -461,7 +513,7 @@ bunch of awesome [contributors](https://github.com/sebastienrousseau/dotfiles/gr
 [contributing]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CONTRIBUTING.md
 [curl]: https://curl.se/
 [docs]: https://github.com/sebastienrousseau/dotfiles/docs
-[download]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.458.tar.gz
+[download]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.459.tar.gz
 [getting-started]: https://github.com/sebastienrousseau/dotfiles#getting-started
 [git]: https://git-scm.com/
 [github]: https://github.com/sebastienrousseau/dotfiles
@@ -488,4 +540,3 @@ bunch of awesome [contributors](https://github.com/sebastienrousseau/dotfiles/gr
 [license]: https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge\&color=ff69b4
 [love]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/made-with-love.svg
 [semver-url]: http://semver.org/
-[eslint-semantic-url]: https://github.com/eslint/eslint#semantic-versioning-policy

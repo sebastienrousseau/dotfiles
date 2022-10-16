@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.458) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.459) - https://dotfiles.io
 # Copyright (c) Sebastien Rousseau 2022. All rights reserved
 # License: MIT
 
@@ -105,7 +105,7 @@ alias op='sudo lsof -i -P'                                               # op: L
 alias p='pwd'                                                            # p: Shortcut for `pwd` which returns working directory name.
 alias pa="clear && pwd && echo '' && ls && echo ''"                      # pa: Clear the screen, show the current directory, and list the files.
 alias paa="clear && pwd && echo '' && ls -a && echo ''"                  # paa: Clear the screen, show the current directory, and list all files.
-alias path='echo -e ${PATH//:/\\n}'                                      # path: Display the $PATH variable on newlines.
+alias path='echo  ${PATH//:/\\n}'                                        # path: Display the $PATH variable on newlines.
 alias pid='ps -f'                                                        # pid: Display the uid, pid, parent pid, recent CPU usage, process start time, controlling tty, elapsed CPU usage, and the associated command.
 alias ping='ping -c 5'                                                   # ping: Limit Ping to 5 ECHO_REQUEST packets.
 alias please='sudo -'                                                    # sudo: Execute a command as the superuser.

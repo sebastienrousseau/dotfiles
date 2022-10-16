@@ -1,5 +1,5 @@
 /**
-* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.458) - https://dotfiles.io
+* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.459) - https://dotfiles.io
 * Copyright (c) Sebastien Rousseau 2022. All rights reserved
 * License: MIT
 */
@@ -10,13 +10,13 @@ const transfer = require("./transfer.js");
 const backup = require("./backup.js");
 const download = require("./download.js");
 const unpack = require("./unpack.js");
-const { aliases, config, copies, tmux } = require("./constants.js");
+const { aliases, copies } = require("./constants.js");
 const sleep = (waitTimeInMs) => new Promise((resolve) => setTimeout(resolve, waitTimeInMs));
 var fs = require("fs");
 var os = require("os");
 var path = require("path");
 
-const dir=path.resolve(__dirname, os.homedir());
+const dir = path.resolve(__dirname, os.homedir());
 
 module.exports = async function main() {
 
@@ -34,7 +34,7 @@ module.exports = async function main() {
   await sleep(2500); // wait for download to complete
   unpack(); // unpack the downloaded file
   await sleep(2500); // wait for unpack to complete
-  if (fs.existsSync(dir)){
+  if (fs.existsSync(dir)) {
     await transfer(dir); // transfer the unpacked files
   }
   else {
