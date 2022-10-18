@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.460) - https://dotfiles.io
-# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.461) - https://dotfiles.io
+# Made with ♥ in London, UK by @sebastienrousseau
+# Copyright (c) 2022. All rights reserved
 # License: MIT
 
 # 🅹🅴🅺🆈🅻🅻 🅰🅻🅸🅰🆂🅴🆂 - Jekyll aliases.
@@ -11,7 +12,8 @@
 #      1.1 Jekyll development aliases.
 #      1.2 Jekyll release aliases.
 #
-# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# Made with ♥ in London, UK by @sebastienrousseau
+# Copyright (c) 2022. All rights reserved
 # Licensed under the MIT license
 #
 
