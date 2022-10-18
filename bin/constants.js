@@ -1,12 +1,13 @@
 /**
-* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.460) - https://dotfiles.io
-* Copyright (c) Sebastien Rousseau 2022. All rights reserved
+* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.461) - https://dotfiles.io
+* Made with ♥ in London, UK by @sebastienrousseau
+* Copyright (c) 2022. All rights reserved
 * License: MIT
 */
 
 // 🅲🅾🅽🆂🆃🅰🅽🆃🆂 - Constants.
-const version = "dotfiles-0.2.460.tgz";
-const dotfile = "https://registry.npmjs.org/@sebastienrousseau/dotfiles/-/dotfiles-0.2.460.tgz";
+const version = "dotfiles-0.2.461.tgz";
+const dotfile = "https://registry.npmjs.org/@sebastienrousseau/dotfiles/-/dotfiles-0.2.461.tgz";
 
 const aliases = [
   ".bashrc",

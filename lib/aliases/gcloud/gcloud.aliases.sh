@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.460) - https://dotfiles.io
-# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.461) - https://dotfiles.io
+# Made with ♥ in London, UK by @sebastienrousseau
+# Copyright (c) 2022. All rights reserved
 # License: MIT
 
 # 🅶🅲🅻🅾🆄🅳 🅰🅻🅸🅰🆂🅴🆂 - Google Cloud aliases.
@@ -17,7 +18,8 @@
 #      1.8 Aliases to build highly scalable applications on a fully managed serverless platform.
 #      1.9 Aliases to commands that might come in handy.
 #
-# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# Made with ♥ in London, UK by @sebastienrousseau
+# Copyright (c) 2022. All rights reserved
 # Licensed under the MIT license
 #
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.460) - https://dotfiles.io
-# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.461) - https://dotfiles.io
+# Made with ♥ in London, UK by @sebastienrousseau
+# Copyright (c) 2022. All rights reserved
 # License: MIT
 
 # 🅶🅸🆃 🅰🅻🅸🅰🆂🅴🆂 - Git aliases.
@@ -30,7 +31,8 @@
 #      3.0 Aliases to show what revision and author last modified each line of a file.
 #      3.1 Aliases to get and set repository or global options.
 #
-# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# Made with ♥ in London, UK by @sebastienrousseau
+# Copyright (c) 2022. All rights reserved
 # Licensed under the MIT license
 #
 

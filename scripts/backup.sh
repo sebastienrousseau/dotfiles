@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.460) - https://dotfiles.io
-# Copyright (c) Sebastien Rousseau 2022. All rights reserved
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.461) - https://dotfiles.io
+# Made with ♥ in London, UK by @sebastienrousseau
+# Copyright (c) 2022. All rights reserved
 # License: MIT
 
 ## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set Dotfiles variable.
@@ -51,11 +52,13 @@ backup() {
   .dir_colors
   .exports
   .functions
+  .gemrc
   .gitattributes
   .gitconfig
   .gitignore
   .gitmessage
   .inputrc
+  .nanorc
   .npmrc
   .path
   .profile
@@ -65,12 +68,14 @@ backup() {
   .yarnrc
   .zshenv
   .zshrc
+  .zprofile
   cacert.pem
   "
 
   for file in ${FILES}; do
     # shellcheck disable=SC2292
-    if [ -e "${HOME}/${file}" ]; then
+    if [ -f "${HOME}/${file}" ]; then
+      # shellcheck disable=SC2154
       echo "${GREEN}  ✔${NC} Backing up '${YELLOW}${file}${NC}'"
       cp -f "${HOME}"/"${file}" "${DF_BACKUPDIR}"/"${file}"
     fi

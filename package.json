@@ -80,11 +80,13 @@
 		"help": "chmod 755 \"./scripts/help.sh\" && ./scripts/help.sh help",
 		"pack": "pnpm pack",
 		"preinstall": "npx only-allow pnpm",
+		"prepublishOnly": "pnpm run build",
 		"prepare": "husky install",
+		"release": "pnpm run prepublishOnly && pnpm publish ./dist --access public --publish-branch 'release/latest'",
 		"start": "node ./dist/bin/index.js",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"types": "./dist/bin/index.d.ts",
-	"version": "0.2.460"
+	"version": "0.2.461"
 }
 
