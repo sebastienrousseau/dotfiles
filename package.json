@@ -82,11 +82,10 @@
 		"preinstall": "npx only-allow pnpm",
 		"prepublishOnly": "pnpm run build",
 		"prepare": "husky install",
-		"release": "pnpm run prepublishOnly && pnpm publish ./dist --access public --publish-branch 'release/latest'",
+		"release": "pnpm run prepublishOnly && pnpm publish ./dist --access public --publish-branch production --report-summary",
 		"start": "node ./dist/bin/index.js",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"types": "./dist/bin/index.d.ts",
 	"version": "0.2.461"
 }
-
