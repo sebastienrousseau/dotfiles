@@ -18,11 +18,11 @@ If you encounter a bug that hasn't already been filled, please file a bug report
 
 Warning us of a bug is possibly the single most valuable contribution you can make to Dotfiles.
 
--   Head [here](https://github.com/reedia/dotfiles/issues/new) to submit a new issue.
--   Include a descriptive title that is straight to the point.
--   Write a detailed description on what the issue is all about.
--   Wait for someone to get to the issue and add labels.
--   The issue will be fixed soon!
+- Head [here](https://github.com/reedia/dotfiles/issues/new) to submit a new issue.
+- Include a descriptive title that is straight to the point.
+- Write a detailed description on what the issue is all about.
+- Wait for someone to get to the issue and add labels.
+- The issue will be fixed soon!
 
 ### Code Contributions
 
@@ -38,17 +38,17 @@ Here's how to contribute code for a new feature to Dotfiles. Pull Requests allow
 
 #### Adding Code
 
--   Fork the repo.
--   Clone the repo **you forked** by running `git clone https://github.com/sebastienrousseau/dotfiles.git`
+- Fork the repo.
+- Clone the repo **you forked** by running `git clone https://github.com/sebastienrousseau/dotfiles.git`
 
 #### Fixing an Issue
 
 Have you found a solution to an issue? Here is how you can submit your code to Dotfiles.
 
--   Fork the repo, and refer above for how to change up code.
--   Head to your local fork of the repo, and click the "New Pull Request" button.
--   Include a title that is straight to the point.
--   Wait for someone to review the pull request, and then merge your pull request!
+- Fork the repo, and refer above for how to change up code.
+- Head to your local fork of the repo, and click the "New Pull Request" button.
+- Include a title that is straight to the point.
+- Wait for someone to review the pull request, and then merge your pull request!
 
 [logo]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/dotfiles.svg
 [website]: https://dotfiles.io
