@@ -82,7 +82,7 @@
 		"preinstall": "npx only-allow pnpm",
 		"prepublishOnly": "pnpm run build",
 		"prepare": "husky install",
-		"release": "pnpm run prepublishOnly && pnpm publish ./dist --access public --publish-branch production --report-summary",
+		"release": "pnpm run prepublishOnly && pnpm publish --access public --tag latest --no-git-checks --report-summary",
 		"start": "node ./dist/bin/index.js",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},

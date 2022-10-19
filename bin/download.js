@@ -5,10 +5,11 @@
 * License: MIT
 */
 
+export const { promisify } = require('util');
+
 // 🅳🅾🆆🅽🅻🅾🅰🅳 - Download function.
 async function download() {
 
-  const { promisify } = require('util');
   var fs = require("fs");
   var os = require("os");
   var path = require("path");
