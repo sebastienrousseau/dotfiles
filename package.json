@@ -26,7 +26,7 @@
 	],
 	"description": "Dotfiles - A set of macOS / Linux and Windows configuration files - Simply designed to fit your shell life.",
 	"devDependencies": {
-		"@types/node": "^16.11.66",
+		"@types/node": "^16.11.68",
 		"compressing": "^1.6.2",
 		"filesizes": "^0.1.2",
 		"fs-extra": "10.1.0",

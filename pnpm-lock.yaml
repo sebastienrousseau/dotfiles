@@ -1,7 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@types/node': ^16.11.66
+  '@types/node': ^16.11.68
   compressing: ^1.6.2
   filesizes: ^0.1.2
   fs-extra: 10.1.0
@@ -11,7 +11,7 @@ specifiers:
   typescript: ^4.8.4
 
 devDependencies:
-  '@types/node': registry.npmjs.org/@types/node/16.11.66
+  '@types/node': registry.npmjs.org/@types/node/16.11.68
   compressing: registry.npmjs.org/compressing/1.6.2
   filesizes: registry.npmjs.org/filesizes/0.1.2
   fs-extra: registry.npmjs.org/fs-extra/10.1.0
@@ -22,10 +22,10 @@ devDependencies:
 
 packages:
 
-  registry.npmjs.org/@types/node/16.11.66:
-    resolution: {integrity: sha512-+xvMrGl3eAygKcf5jm+4zA4tbfEgmKM9o6/glTmN0RFVdu2VuFXMYYtRmuv3zTGCgAYMnEZLde3B7BTp+Yxcig==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/@types/node/-/node-16.11.66.tgz}
+  registry.npmjs.org/@types/node/16.11.68:
+    resolution: {integrity: sha512-JkRpuVz3xCNCWaeQ5EHLR/6woMbHZz/jZ7Kmc63AkU+1HxnoUugzSWMck7dsR4DvNYX8jp9wTi9K7WvnxOIQZQ==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/@types/node/-/node-16.11.68.tgz}
     name: '@types/node'
-    version: 16.11.66
+    version: 16.11.68
     dev: true
 
   registry.npmjs.org/ansi-styles/4.3.0:
