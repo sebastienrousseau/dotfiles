@@ -75,8 +75,9 @@ yet been able to test it. If you have any issues, please let us know.
 
 - macOS 10.15 or later
 - Windows 10 or later
-- A Debian based distribution (Debian, Ubuntu, PoP!_OS, Zorin OS, Q4OS, Kali
-  Linux, Devuan, Deepin, etc.)
+- A Debian based distribution ([Debian][debian], [Ubuntu][ubuntu],
+[PoP!_OS][pop], [Zorin OS][zorin], [Q4OS][q4], [Kali Linux][kali],
+[Devuan][devuan], [Deepin][deepin], etc.)
 
 ![divider][divider]
 
@@ -127,11 +128,11 @@ sudo apt install fonts-roboto-mono-for-powerline
 You can download the latest version (v0.2.461) with the following options:
 
 - [**Manual download**][releases] - **The easiest way to install Dotfiles.**
-- [**Install with PnPM**](https://www.npmjs.com/package/@sebastienrousseau/dotfiles)
+- [**Install with PnPM**][package]
   `pnpm i @sebastienrousseau/dotfiles`.
-- [**Install with Npm**](https://www.npmjs.com/package/@sebastienrousseau/dotfiles)
+- [**Install with Npm**][package]
   `npm install @sebastienrousseau/dotfiles`.
-- [**Install with Yarn**](https://yarnpkg.com/package/@sebastienrousseau/dotfiles)
+- [**Install with Yarn**][package]
   `yarn add @sebastienrousseau/dotfiles`.
 - **Clone the main repository** to get all source files including build scripts:
   `git clone https://github.com/sebastienrousseau/dotfiles.git`. This will clone
@@ -204,8 +205,8 @@ make help
 
 #### Using Node.js (advanced)
 
-If you want to install Dotfiles using Node.js, you can run the following command
-in the `dist` directory located in your
+If you want to install Dotfiles using Node.js, you can run the following
+command in the `dist` directory located in your
 `node_modules/@sebastienrousseau/dotfiles/dist` directory:
 
 ```bash
@@ -249,8 +250,8 @@ Please refer to the [documentation][docs] for more information.
 Dotfiles contains core elements that are used to configure your shell, and
 other components catered for your environment setup.
 
-Within the download you'll find all the Dotfiles source files grouped within the
-`dist` folder.
+Within the download you'll find all the Dotfiles source files grouped within
+the `dist` folder.
 
 You'll see something like this:
 
@@ -449,26 +450,24 @@ Releases are available on the [GitHub releases page][releases].
 ## 🚥 Semantic versioning policy
 
 For transparency into our release cycle and in striving to maintain backward
-compatibility, `Dotfiles` follows [Semantic Versioning][semver-url]
-(SemVer).
+compatibility, `Dotfiles` follows [Semantic Versioning][semver-url].
 
 ![divider][divider]
 
 ## History
 
-- See [Dotfiles Release](https://github.com/sebastienrousseau/dotfiles/releases)
-  list.
+- See [Dotfiles Release][releases] for a list of changes.
 
 ## ✅ Changelog
 
-- [GitHub Releases](https://github.com/sebastienrousseau/dotfiles/releases)
+- [GitHub Releases][releases] are used for changelogs.
 
 ![divider][divider]
 
 ## 📖 Code of Conduct
 
 We are committed to preserving and fostering a diverse, welcoming community.
-Please read our [Code of Conduct](https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CODE-OF-CONDUCT.md).
+Please read our [Code of Conduct][code-of-conduct].
 
 ![divider][divider]
 
@@ -488,9 +487,11 @@ great if you can give it a star ⭐ on [GitHub][github].
 There are also many ways in which you can participate in this project, for
 example:
 
-- [Submit bugs and feature requests](https://github.com/sebastienrousseau/dotfiles/issues/new), and help us verify as they are checked in,
-- Review [source code changes](https://github.com/sebastienrousseau/dotfiles/pulls), and help us improve our code quality,
-- Review the [documentation](https://github.com/sebastienrousseau/dotfiles/docs) and make pull requests for anything from typos to additional and new content.
+- [Submit bugs and feature requests][issues], and help us verify as they are
+checked in,
+- Review [source code changes][download], and help us improve our code quality,
+- Review the [documentation][docs] and make pull requests for anything from
+typos to additional and new content.
 
 Please read carefully through our
 [Contributing Guidelines][contributing]
@@ -500,49 +501,62 @@ for further details on the process for submitting pull requests to us.
 
 ## 🥂 License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/sebastienrousseau/dotfiles/blob/master/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE][license-url]
+file for details.
 
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Freedia%2Fdotfiles.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Freedia%2Fdotfiles?ref=badge_large)
+[![FOSSA Status][fossa]][fossa-url]
 
 ![divider][divider]
 
 ## 🏢 Acknowledgements
 
-[Dotfiles][website] is beautifully crafted by these people and a
-bunch of awesome [contributors](https://github.com/sebastienrousseau/dotfiles/graphs/contributors)
+[Dotfiles][website] is beautifully crafted by these people and a bunch of
+awesome [contributors][contributors-url]
 
 | [![Sebastien Rousseau](https://avatars0.githubusercontent.com/u/1394998?s=117)](http://sebastienrousseau.co.uk) | [![Graham Colgate](https://avatars0.githubusercontent.com/u/35816108?s=117)](https://github.com/gramtech) |
 | :-------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: |
 | [Sebastien Rousseau](https://github.com/sebastienrousseau) | [Graham Colgate](https://github.com/gramtech) |
 
 [bash]: https://www.gnu.org/software/bash/
+[codacy-url]:https://www.codacy.com/gh/sebastienrousseau/dotfiles/dashboard
+[code-of-conduct]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CODE-OF-CONDUCT.md
 [contributing]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CONTRIBUTING.md
 [curl]: https://curl.se/
+[debian]: https://www.debian.org/
+[deepin]: https://www.deepin.org/en/
+[devuan]: https://devuan.org/
 [docs]: https://github.com/sebastienrousseau/dotfiles/docs
 [download]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.461.tar.gz
+[fossa-url]: https://app.fossa.io/projects/git%2Bgithub.com%2Freedia%2Fdotfiles?ref=badge_large
+[forks-url]: https://github.com/sebastienrousseau/dotfiles/network/members
 [getting-started]: https://github.com/sebastienrousseau/dotfiles#getting-started
 [git]: https://git-scm.com/
 [github]: https://github.com/sebastienrousseau/dotfiles
 [issues]: https://github.com/sebastienrousseau/dotfiles/issues
+[kali]: https://www.kali.org/
+[license]: https://github.com/sebastienrousseau/dotfiles/blob/master/LICENSE
+[license-url]: https://opensource.org/licenses/MIT
 [make]: https://www.gnu.org/software/make/
+[package]:https://www.npmjs.com/package/@sebastienrousseau/dotfiles
 [pnpm]: https://pnpm.io
+[pop]: https://pop.system76.com/
+[q4]: https://q4os.org/
 [releases]: https://github.com/sebastienrousseau/dotfiles/releases
+[semver-url]: http://semver.org/
 [shell]: https://www.gnu.org/software/shell/
+[ubuntu]: https://ubuntu.com/
 [website]: https://dotfiles.io
 [wget]: https://www.gnu.org/software/wget/
+[zorin]: https://zorinos.com/
 [zsh]: https://www.zsh.org/
 
-[logo]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/dotfiles.svg
-[download_button]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/button-secondary.svg
-[getting_started]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/button-primary.svg
-[codacy-grade]: https://img.shields.io/codacy/grade/634cfc4de08e492ebcbb341631066241?style=for-the-badge
-[codacy-url]:https://www.codacy.com/gh/sebastienrousseau/dotfiles/dashboard
-[contributors-shield]: https://img.shields.io/github/contributors/sebastienrousseau/dotfiles.svg?style=for-the-badge
-[contributors-url]: https://github.com/sebastienrousseau/dotfiles/graphs/contributors
-[divider]: https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/assets/divider.svg "divider"
-[forks-shield]: https://img.shields.io/github/forks/sebastienrousseau/dotfiles.svg?style=for-the-badge
-[forks-url]: https://github.com/sebastienrousseau/dotfiles/network/members
-[license-url]: https://opensource.org/licenses/MIT
-[license]: https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge\&color=ff69b4
-[love]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/made-with-love.svg
-[semver-url]: http://semver.org/
+[codacy-grade]: https://img.shields.io/codacy/grade/634cfc4de08e492ebcbb341631066241?style=for-the-badge "Codacy grade"
+[contributors-shield]: https://img.shields.io/github/contributors/sebastienrousseau/dotfiles.svg?style=for-the-badge "Contributors"
+[contributors-url]: https://github.com/sebastienrousseau/dotfiles/graphs/contributors "List of contributors"
+[divider]: https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/assets/divider.svg "Divider"
+[download_button]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/button-secondary.svg "Download"
+[forks-shield]: https://img.shields.io/github/forks/sebastienrousseau/dotfiles.svg?style=for-the-badge "Forks"
+[fossa]: https://app.fossa.io/api/projects/git%2Bgithub.com%2Freedia%2Fdotfiles.svg?type=large "FOSSA"
+[getting_started]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/button-primary.svg "Getting Started"
+[logo]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/dotfiles.svg "Dotfiles"
+[love]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/made-with-love.svg "Made with love"
