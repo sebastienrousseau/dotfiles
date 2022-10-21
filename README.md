@@ -75,7 +75,8 @@ yet been able to test it. If you have any issues, please let us know.
 
 - macOS 10.15 or later
 - Windows 10 or later
-- A Debian based distribution (Debian, Ubuntu, PoP!_OS, Zorin OS, Q4OS, Kali Linux, Devuan, Deepin, etc.)
+- A Debian based distribution (Debian, Ubuntu, PoP!_OS, Zorin OS, Q4OS, Kali
+  Linux, Devuan, Deepin, etc.)
 
 ![divider][divider]
 
@@ -85,15 +86,16 @@ The following programs must be installed on your system to install Dotfiles:
 
 - [**Bash**][bash] - a shell, or command language interpreter, for the GNU
   operating system.
-- Or [**Zsh**][zsh] - a shell designed for interactive use, although it is also a
-  powerful scripting language.
+- Or [**Zsh**][zsh] - a shell designed for interactive use, although it is also
+  a powerful scripting language.
 - [**Git**][git] - a free and open source distributed version control system
-  designed to handle everything from small to very large projects with speed and efficiency.
+  designed to handle everything from small to very large projects with speed and
+  efficiency.
 - [**Curl**][curl] - a command line tool for transferring data with URL syntax.
 - [**Wget**][wget] - a free software package for retrieving files using HTTP,
   HTTPS and FTP, the most widely-used Internet protocols.
-- [**Make**][make] - a tool which controls the generation of executables and other
-  non-source files of a program from the program's source files.
+- [**Make**][make] - a tool which controls the generation of executables and
+  other non-source files of a program from the program's source files.
 - [**Shell**][shell] - a shell command line interpreter program for Unix-like
   operating systems.
 - [**PnPM**][pnpm] - a package manager for JavaScript and Node.js. It is fast,
@@ -101,7 +103,8 @@ The following programs must be installed on your system to install Dotfiles:
 
 #### Font
 
-We recommend using a font such as `Roboto Mono for Powerline` for terminal and vscode editor.
+We recommend using a font such as `Roboto Mono for Powerline` for terminal and
+vscode editor.
 
 On macOS, you can install the font using the following command:
 
@@ -170,7 +173,8 @@ The backup files are the following:
 cacert.pem
 ```
 
-It is always a good idea to backup as there might be situations in which you could be required to restore your previous installation.
+It is always a good idea to backup as there might be situations in which you
+could be required to restore your previous installation.
 
 ### 3️⃣ Try it out and let us know what you think
 
@@ -183,7 +187,8 @@ install the latest version of the dotfiles and will automatically backup
 any existing dotfiles you may have into a backup directory
 `$HOME/dotfiles_backup`.
 
-The installer will check if you have PnPM installed to switch to the PnPM installation method. If not, it will fallback to equivalent shell scripts.
+The installer will check if you have PnPM installed to switch to the PnPM
+installation method. If not, it will fallback to equivalent shell scripts.
 
 Switch to the `dist` directory and run:
 
@@ -228,8 +233,8 @@ backup any existing dotfiles you may have into a backup directory
 
 ### Post installation
 
-Following the installation, you can verify that the dotfiles package is installed
-in the following directory `$HOME/dotfiles_backup`.
+Following the installation, you can verify that the dotfiles package is
+installed in the following directory `$HOME/dotfiles_backup`.
 
 Just quit your terminal and restart it. If the installation is successful, you
 should be able to see a new interface of your terminal and be able to start
@@ -241,7 +246,8 @@ Please refer to the [documentation][docs] for more information.
 
 ### 4️⃣ What's included
 
-Dotfiles contains core elements that are used to configure your shell, and other components catered for your environment setup.
+Dotfiles contains core elements that are used to configure your shell, and
+other components catered for your environment setup.
 
 Within the download you'll find all the Dotfiles source files grouped within the
 `dist` folder.
