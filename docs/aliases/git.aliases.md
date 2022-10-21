@@ -11,9 +11,12 @@ The `git.plugin.zsh` file creates helpful shortcut aliases for many commonly
 | ----- | ----- | ----- |
 | g | `git` | Short-form git commands. |
 | ga | `git add` | Add file contents to the index. |
-| gaa | `git add --all` | Add file contents and update the index not only where the working tree has a file matching <pathspec> but also where the index already has an entry. |
+| gaa | `git add --all` | Add file contents and update the index not only where
+the working tree has a file matching <pathspec> but also where the index already
+has an entry. |
 | gad | `git add .` | Add current directory file contents to the index. |
-| gau | `git add --update` | Add file contents and update the index just where it already has an entry matching <pathspec>. |
+| gau | `git add --update` | Add file contents and update the index just where
+| | | it already has an entry matching <pathspec>. |
 | gco | `git checkout` | Undo to last commit. |
 | gdis | `git checkout --` | Discard changes in a (list of) file(s) in working tree. |
 | gmv | `git mv` | Move or rename a file, a directory, or a symlink. |
@@ -167,12 +170,12 @@ The `git.plugin.zsh` file creates helpful shortcut aliases for many commonly
 | Alias | Command | Description |
 | ----- | ----- | ----- |
 | gsmi | `git submodule init` | Initialize the submodules recorded in the index. |
-| gsma | `git submodule add`                  | Add the given repository as a Submodule at the given path to the changeset to be committed next to the current project: the current project is termed the "superproject". |
+| gsma | `git submodule add` | Add the given repository as a Submodule at the given path to the changeset to be committed next to the current project: the current project is termed the "superproject". |
 | gsm | `git submodule` | Enables foreign repositories to be embedded within a dedicated subdirectory of the source tree. |
 | gsms | `git submodule sync` | Synchronizes submodules' remote URL configuration setting to the value specified in .gitmodules. |
 | gsmu | `git submodule update` | Update the registered submodules to match what the superproject expects by cloning missing submodules, fetching missing commits in submodules and updating the working tree of the submodules. |
 | gsmui | `git submodule update --init` | Submodule update with initialize. |
-| gsmuir | `git submodule update --init --recursive` | Submodule update with initialize and recursive; this is useful to bring a submodule fully up to datec |
+| gsmuir | `git submodule update --init --recursive` | Submodule update with initialize and recursive; this is useful to bring a submodule fully up to datec. |
 
 ## Aliases to show the working tree status
 
