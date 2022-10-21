@@ -513,9 +513,11 @@ file for details.
 [Dotfiles][website] is beautifully crafted by these people and a bunch of
 awesome [contributors][contributors-url]
 
-| [![Sebastien Rousseau](https://avatars0.githubusercontent.com/u/1394998?s=117)](http://sebastienrousseau.co.uk) | [![Graham Colgate](https://avatars0.githubusercontent.com/u/35816108?s=117)](https://github.com/gramtech) |
-| :-------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: |
-| [Sebastien Rousseau](https://github.com/sebastienrousseau) | [Graham Colgate](https://github.com/gramtech) |
+| [![sr]][sr-url] | [![gr]][gr-url] |
+|:-----------------:|:------------------------------------:|
+| [Sebastien Rousseau][sr-url]| [Graham Colgate][gr-url] |
+
+[![divider]][divider]
 
 [bash]: https://www.gnu.org/software/bash/
 [codacy-url]:https://www.codacy.com/gh/sebastienrousseau/dotfiles/dashboard
@@ -527,15 +529,16 @@ awesome [contributors][contributors-url]
 [devuan]: https://devuan.org/
 [docs]: https://github.com/sebastienrousseau/dotfiles/docs
 [download]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.461.tar.gz
-[fossa-url]: https://app.fossa.io/projects/git%2Bgithub.com%2Freedia%2Fdotfiles?ref=badge_large
 [forks-url]: https://github.com/sebastienrousseau/dotfiles/network/members
+[fossa-url]: https://app.fossa.io/projects/git%2Bgithub.com%2Freedia%2Fdotfiles?ref=badge_large
 [getting-started]: https://github.com/sebastienrousseau/dotfiles#getting-started
 [git]: https://git-scm.com/
 [github]: https://github.com/sebastienrousseau/dotfiles
+[gr-url]: https://github.com/gramtech
 [issues]: https://github.com/sebastienrousseau/dotfiles/issues
 [kali]: https://www.kali.org/
-[license]: https://github.com/sebastienrousseau/dotfiles/blob/master/LICENSE
 [license-url]: https://opensource.org/licenses/MIT
+[license]: https://github.com/sebastienrousseau/dotfiles/blob/master/LICENSE
 [make]: https://www.gnu.org/software/make/
 [package]:https://www.npmjs.com/package/@sebastienrousseau/dotfiles
 [pnpm]: https://pnpm.io
@@ -544,6 +547,7 @@ awesome [contributors][contributors-url]
 [releases]: https://github.com/sebastienrousseau/dotfiles/releases
 [semver-url]: http://semver.org/
 [shell]: https://www.gnu.org/software/shell/
+[sr-url]: https://github.com/sebastienrousseau
 [ubuntu]: https://ubuntu.com/
 [website]: https://dotfiles.io
 [wget]: https://www.gnu.org/software/wget/
@@ -558,5 +562,7 @@ awesome [contributors][contributors-url]
 [forks-shield]: https://img.shields.io/github/forks/sebastienrousseau/dotfiles.svg?style=for-the-badge "Forks"
 [fossa]: https://app.fossa.io/api/projects/git%2Bgithub.com%2Freedia%2Fdotfiles.svg?type=large "FOSSA"
 [getting_started]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/button-primary.svg "Getting Started"
+[gr]: https://avatars0.githubusercontent.com/u/35816108?s=117 "Graham Colgate"
 [logo]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/dotfiles.svg "Dotfiles"
 [love]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/made-with-love.svg "Made with love"
+[sr]: https://avatars0.githubusercontent.com/u/1394998?s=117 "Sebastien Rousseau"
