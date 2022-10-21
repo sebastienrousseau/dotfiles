@@ -137,21 +137,21 @@ The `git.plugin.zsh` file creates helpful shortcut aliases for many commonly
 
 | Alias | Command | Description |
 | ----- | ----- | ----- |
-| gr  | `git remote` | Manage set of tracked repositories. |
+| gr | `git remote` | Manage set of tracked repositories. |
 | gra | `git remote add` | Add a remote named <name> for the repository at <url>. |
 | grall | `git remote | xargs -L1 git push --all` | Push all branches to all remotes. |
 | grallo | `git remote -v | grep "(fetch)" | | Git remote all remotes except origin. |
-| grao  | `git remote add origin` | Add a new remote 'origin' if it doesn't exist. |
-| grbk  | `git reset --soft HEAD^` | Rollback to stage. |
-| grcl  | `git remote prune` | Deletes all stale remote-tracking branches under <name>. |
+| grao | `git remote add origin` | Add a new remote 'origin' if it doesn't exist. |
+| grbk | `git reset --soft HEAD^` | Rollback to stage. |
+| grcl | `git remote prune` | Deletes all stale remote-tracking branches under <name>. |
 | grf | `find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && echo '{}' && git config --get remote.origin.url" \;` | Show GIT Remote Origin for each immediate subfolder. |
 | grfall | `git branch -r | awk -F'/' '{print "git fetch "$1,$2}' | xargs -I {} sh -c {}` | Fetch all git remotes for a repo. |
 | gro | `open`git remote -v | awk '/fetch/{print $2}' | sed -Ee 's#(git@|git://)#http://#' -e 's@com:@com/@'`| head -n1` | Open current Git repository URL. |
 | grp | `git remote | xargs -I% -n1 git push %` | For each remote branch, push it. |
-| grpa  | `for i in`git remote`; do git push $i; done;` | Push all remotes. |
+| grpa | `for i in`git remote`; do git push $i; done;` | Push all remotes. |
 | grprint | `git remote -v` | | Print the url for the current repo. |
 | grs | `git show` | Gives some information about the remote <name>. |
-| grso  | `git remote show origin` | Display where the origin resides. |
+| grso | `git remote show origin` | Display where the origin resides. |
 | grv | `git remote -v` | Shows URLs of remote repositories when listing your current remote connections. |
 | gru | `git remote update` | Fetch updates for a named set of remotes in the repository as defined by remotes. |
 
@@ -166,11 +166,11 @@ The `git.plugin.zsh` file creates helpful shortcut aliases for many commonly
 
 | Alias | Command | Description |
 | ----- | ----- | ----- |
-| gsmi  | `git submodule init` | Initialize the submodules recorded in the index. |
-| gsma  | `git submodule add`                   | Add the given repository as a Submodule at the given path to the changeset to be committed next to the current project: the current project is termed the "superproject". |
+| gsmi | `git submodule init` | Initialize the submodules recorded in the index. |
+| gsma | `git submodule add`                  | Add the given repository as a Submodule at the given path to the changeset to be committed next to the current project: the current project is termed the "superproject". |
 | gsm | `git submodule` | Enables foreign repositories to be embedded within a dedicated subdirectory of the source tree. |
-| gsms  | `git submodule sync` | Synchronizes submodules' remote URL configuration setting to the value specified in .gitmodules. |
-| gsmu  | `git submodule update` | Update the registered submodules to match what the superproject expects by cloning missing submodules, fetching missing commits in submodules and updating the working tree of the submodules. |
+| gsms | `git submodule sync` | Synchronizes submodules' remote URL configuration setting to the value specified in .gitmodules. |
+| gsmu | `git submodule update` | Update the registered submodules to match what the superproject expects by cloning missing submodules, fetching missing commits in submodules and updating the working tree of the submodules. |
 | gsmui | `git submodule update --init` | Submodule update with initialize. |
 | gsmuir | `git submodule update --init --recursive` | Submodule update with initialize and recursive; this is useful to bring a submodule fully up to datec |
 
@@ -180,14 +180,14 @@ The `git.plugin.zsh` file creates helpful shortcut aliases for many commonly
 | ----- | ----- | ----- |
 | gst | `git status` | Show the working tree status. |
 | gstrmu | `git status -su | cut -d' ' -f2- | tr '\n' '\0' | xargs -0 rm` | Remove untracked files in a git repository. |
-| gsts  | `git status --short` | Status with short format instead of full details. |
+| gsts | `git status --short` | Status with short format instead of full details. |
 | gstsb | `git status --short --branch` | Status with short format and showing branch and tracking info. |
 
 ## Aliases to create, list, delete or verify a tag object signed with GPG
 
 | Alias | Command | Description |
 | ----- | ----- | ----- |
-| gt  | `git tag` | gt: See all tags. |
+| gt | `git tag` | gt: See all tags. |
 | gta | `git tag -a $1 -m $2` | gta: Add a tag. |
 | gtg | `git tag` | gtg: Create, list, delete or verify a tag object signed with GPG. |
 | gtl | `git describe --tags --abbrev=0` | gtl: Last tag in the current branch. |
@@ -198,7 +198,7 @@ The `git.plugin.zsh` file creates helpful shortcut aliases for many commonly
 | Alias | Command | Description |
 | ----- | ----- | ----- |
 | gshab | `for k in ``git branch|perl -pe s/^..//``;do echo  ``git show --pretty=format:"%Cgreen%ci %Cblue%cr%Creset" $k|head -n 1``\\t$k;done|sort -r` | Show git branches by date - useful for showing active branches. |
-| gshf  | | Find the nearest parent branch of the current git branch. |
+| gshf | | Find the nearest parent branch of the current git branch. |
 | gshls | `git show --relative --pretty=format:''` | Show list of files changed by commit. |
 | gshnp | `git show --no-patch --pretty="tformat:%h (%s, %ad)" --date=short` | Given any git object, try to show it briefly. |
 | gshwho | `git shortlog --summary --numbered --no-merges` | Show who contributed, in descending order by number of commits. |
@@ -225,20 +225,20 @@ The `git.plugin.zsh` file creates helpful shortcut aliases for many commonly
 
 | Alias | Command | Description |
 | ----- | ----- | ----- |
-| grm   | `git rm` | Remove files from the working tree and from the index.
-| grmc  | `git rm --cached` | Unstage and remove paths only from the index.
-| grmd  | `git ls-files -z --deleted | xargs -0 git rm` | git remove files which have been deleted. |
+| grm | `git rm` | Remove files from the working tree and from the index.
+| grmc | `git rm --cached` | Unstage and remove paths only from the index.
+| grmd | `git ls-files -z --deleted | xargs -0 git rm` | git remove files which have been deleted. |
 | grmd2 | `git rm $(git ls-files --deleted)` | git remove files which have been deleted. |
 | grmds | `find . -name .DS_Store -exec git rm --ignore-unmatch --cached {} +` | Remove .DS_Store from the repository. |
-| grmn  | `for file in $(git status | grep "new file" | sed "s/#\tnew file://"); do git rm --cached $file; done` | Remove all new files. |
-| grmx  | `git ls-files -z -d | xargs -0 git rm --` | Remove for all deleted files, including those with space/quote/unprintable characters in their filename/path. |
+| grmn | `for file in $(git status | grep "new file" | sed "s/#\tnew file://"); do git rm --cached $file; done` | Remove all new files. |
+| grmx | `git ls-files -z -d | xargs -0 git rm --` | Remove for all deleted files, including those with space/quote/unprintable characters in their filename/path. |
 
 ## Aliases to show what revision and author last modified each line of a file
 
 | Alias | Command | Description |
 | ----- | ----- | ----- |
 | gbl | `git blame --date short "$1"` | Specifies a format used to output short dates. |
-| gblc  | `git blame --line-porcelain "$1" | sed -n 's/^author //p' | sort | uniq -c | sort -rn` | Count the number of lines attributed to each author. |
+| gblc | `git blame --line-porcelain "$1" | sed -n 's/^author //p' | sort | uniq -c | sort -rn` | Count the number of lines attributed to each author. |
 | gblau | `git ls-files | xargs -n1 git blame --line-porcelain | sed -n 's/^author //p' | sort -f | uniq -ic | sort -nr` | Prints per-line contribution per author for a GIT repository. |
 
 ## Aliases to get and set repository or global options
