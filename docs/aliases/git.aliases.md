@@ -2,7 +2,7 @@
 
 ![Banner representing the Dotfiles Library](/assets/dotfiles.svg)
 
-The `git.plugin.zsh` file creates helpful shortcut aliases for many commonly
+The `git.aliases.zsh` file creates helpful shortcut aliases for many commonly
 [Git](https://www.heroku.com/) commands.
 
 ## Aliases to work on the current change
@@ -11,12 +11,9 @@ The `git.plugin.zsh` file creates helpful shortcut aliases for many commonly
 | ----- | ----- | ----- |
 | g | `git` | Short-form git commands. |
 | ga | `git add` | Add file contents to the index. |
-| gaa | `git add --all` | Add file contents and update the index not only where
-the working tree has a file matching <pathspec> but also where the index already
-has an entry. |
+| gaa | `git add --all` | Add file contents and update the index not only where the working tree has a file matching <pathspec> but also where the index already has an entry. |
 | gad | `git add .` | Add current directory file contents to the index. |
-| gau | `git add --update` | Add file contents and update the index just where
-| | | it already has an entry matching <pathspec>. |
+| gau | `git add --update` | Add file contents and update the index just where it already has an entry matching <pathspec>. |
 | gco | `git checkout` | Undo to last commit. |
 | gdis | `git checkout --` | Discard changes in a (list of) file(s) in working tree. |
 | gmv | `git mv` | Move or rename a file, a directory, or a symlink. |

@@ -2,7 +2,7 @@
 
 ![Banner representing the Dotfiles Library](/assets/dotfiles.svg)
 
-The `heroku.plugin.zsh` file creates helpful shortcut aliases for many commonly
+The `heroku.aliases.zsh` file creates helpful shortcut aliases for many commonly
 [Heroku](https://www.heroku.com/) commands.
 
 ## Table of Contents
