@@ -1,17 +1,17 @@
 # Dotfiles
 
-[![Banner representing the Dotfiles Library][logo]][website]
+[![Banner representing the Dotfiles Library][logo]][website-url]
 
 [![Codacy][codacy-grade]][codacy-url]
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![License][license]][license-url]
-[![Love][love]][website]
+[![Love][love]][website-url]
 
-**[Website][website] • [Documentation][github]
-• [Report Bug][issues]
-• [Request Feature][issues]
-• [Contributing Guidelines][contributing]**
+**[Website][website-url] • [Documentation][github-url]
+• [Report Bug][issues-url]
+• [Request Feature][issues-url]
+• [Contributing Guidelines][contributing-url]**
 
 ## 👋 Welcome to Dotfiles (v0.2.461)
 
@@ -21,8 +21,8 @@ Dotfiles are a set of macOS, Linux and Windows configuration files. They are
 aimed at making your life easier by providing a set of scripts and configuration
 files with new ways to get things done.
 
-[![Getting Started][getting_started]][getting-started]
-[![Download Dotfiles v0.2.461][download_button]][download]
+[![Getting Started][getting_started]][getting-started-url]
+[![Download Dotfiles v0.2.461][download_button]][download-url]
 
 Dotfiles aggregates a collection of standalone configuration files (dotfiles)
 combined into a `lib` directory that can be used to customize your development
@@ -39,8 +39,8 @@ and centralized way to configure your environment and applications.
 
 To read the documentation for Dotfiles, please visit:
 
-- [Dotfiles website][website]
-- [Dotfiles Docs GitHub repository][docs]
+- [Dotfiles website][website-url]
+- [Dotfiles Docs GitHub repository][docs-url]
 
 ![divider][divider]
 
@@ -75,9 +75,9 @@ yet been able to test it. If you have any issues, please let us know.
 
 - macOS 10.15 or later
 - Windows 10 or later
-- A Debian based distribution ([Debian][debian], [Ubuntu][ubuntu],
-[PoP!_OS][pop], [Zorin OS][zorin], [Q4OS][q4], [Kali Linux][kali],
-[Devuan][devuan], [Deepin][deepin], etc.)
+- A Debian based distribution ([Debian][debian-url], [Ubuntu][ubuntu-url],
+[PoP!_OS][pop-url], [Zorin OS][zorin-url], [Q4OS][q4-url],
+[Kali Linux][kali-url], [Devuan][devuan-url], [Deepin][deepin-url], etc.)
 
 ![divider][divider]
 
@@ -85,22 +85,23 @@ yet been able to test it. If you have any issues, please let us know.
 
 The following programs must be installed on your system to install Dotfiles:
 
-- [**Bash**][bash] - a shell, or command language interpreter, for the GNU
+- [**Bash**][bash-url] - a shell, or command language interpreter, for the GNU
   operating system.
-- Or [**Zsh**][zsh] - a shell designed for interactive use, although it is also
-  a powerful scripting language.
-- [**Git**][git] - a free and open source distributed version control system
+- Or [**Zsh**][zsh-url] - a shell designed for interactive use, although it is
+  also a powerful scripting language.
+- [**Git**][git-url] - a free and open source distributed version control system
   designed to handle everything from small to very large projects with speed and
   efficiency.
-- [**Curl**][curl] - a command line tool for transferring data with URL syntax.
-- [**Wget**][wget] - a free software package for retrieving files using HTTP,
-  HTTPS and FTP, the most widely-used Internet protocols.
-- [**Make**][make] - a tool which controls the generation of executables and
+- [**Curl**][curl-url] - a command line tool for transferring data with URL
+  syntax.
+- [**Wget**][wget-url] - a free software package for retrieving files using
+  HTTP, HTTPS and FTP, the most widely-used Internet protocols.
+- [**Make**][make-url] - a tool which controls the generation of executables and
   other non-source files of a program from the program's source files.
-- [**Shell**][shell] - a shell command line interpreter program for Unix-like
-  operating systems.
-- [**PnPM**][pnpm] - a package manager for JavaScript and Node.js. It is fast,
-  disk space efficient and reliable.
+- [**Shell**][shell-url] - a shell command line interpreter program for
+  Unix-like operating systems.
+- [**PnPM**][pnpm-url] - a package manager for JavaScript and Node.js. It is
+  fast, disk space efficient and reliable.
 
 #### Font
 
@@ -127,12 +128,12 @@ sudo apt install fonts-roboto-mono-for-powerline
 
 You can download the latest version (v0.2.461) with the following options:
 
-- [**Manual download**][releases] - **The easiest way to install Dotfiles.**
-- [**Install with PnPM**][package]
+- [**Manual download**][releases-url] - **The easiest way to install Dotfiles.**
+- [**Install with PnPM**][package-url]
   `pnpm i @sebastienrousseau/dotfiles`.
-- [**Install with Npm**][package]
+- [**Install with Npm**][package-url]
   `npm install @sebastienrousseau/dotfiles`.
-- [**Install with Yarn**][package]
+- [**Install with Yarn**][package-url]
   `yarn add @sebastienrousseau/dotfiles`.
 - **Clone the main repository** to get all source files including build scripts:
   `git clone https://github.com/sebastienrousseau/dotfiles.git`. This will clone
@@ -241,7 +242,7 @@ Just quit your terminal and restart it. If the installation is successful, you
 should be able to see a new interface of your terminal and be able to start
 using the dotfiles aliases and other configurations.
 
-Please refer to the [documentation][docs] for more information.
+Please refer to the [documentation][docs-url] for more information.
 
 ![divider][divider]
 
@@ -443,7 +444,7 @@ You'll see something like this:
 
 ## 🔗 Releases
 
-Releases are available on the [GitHub releases page][releases].
+Releases are available on the [GitHub releases page][releases-url].
 
 ![divider][divider]
 
@@ -456,18 +457,18 @@ compatibility, `Dotfiles` follows [Semantic Versioning][semver-url].
 
 ## History
 
-- See [Dotfiles Release][releases] for a list of changes.
+- See [Dotfiles Release][releases-url] for a list of changes.
 
 ## ✅ Changelog
 
-- [GitHub Releases][releases] are used for changelogs.
+- [GitHub Releases][releases-url] are used for changelogs.
 
 ![divider][divider]
 
 ## 📖 Code of Conduct
 
 We are committed to preserving and fostering a diverse, welcoming community.
-Please read our [Code of Conduct][code-of-conduct].
+Please read our [Code of Conduct][code-of-conduct-url].
 
 ![divider][divider]
 
@@ -482,27 +483,26 @@ Please read our [Code of Conduct][code-of-conduct].
 ## ❤️ Contributing
 
 Thank you for using Dotfiles! If you like the library, it would be
-great if you can give it a star ⭐ on [GitHub][github].
+great if you can give it a star ⭐ on [Github][github-url].
 
 There are also many ways in which you can participate in this project, for
 example:
 
-- [Submit bugs and feature requests][issues], and help us verify as they are
+- [Submit bugs and feature requests][issues-url], and help us verify as they are
 checked in,
-- Review [source code changes][download], and help us improve our code quality,
-- Review the [documentation][docs] and make pull requests for anything from
+- Review [source code changes][download-url], and help us improve our code quality,
+- Review the [documentation][docs-url] and make pull requests for anything from
 typos to additional and new content.
 
 Please read carefully through our
-[Contributing Guidelines][contributing]
+[Contributing Guidelines][contributing-url]
 for further details on the process for submitting pull requests to us.
 
 ![divider][divider]
 
 ## 🥂 License
 
-This project is licensed under the MIT License - see the [LICENSE][license-url]
-file for details.
+This project is licensed under the [MIT License][license-url] file for details.
 
 [![FOSSA Status][fossa]][fossa-url]
 
@@ -510,49 +510,46 @@ file for details.
 
 ## 🏢 Acknowledgements
 
-[Dotfiles][website] is beautifully crafted by these people and a bunch of
+[Dotfiles][website-url] is beautifully crafted by these people and a bunch of
 awesome [contributors][contributors-url]
 
 | [![sr]][sr-url] | [![gr]][gr-url] |
 |:-----------------:|:------------------------------------:|
 | [Sebastien Rousseau][sr-url]| [Graham Colgate][gr-url] |
 
-[![divider]][divider]
-
-[bash]: https://www.gnu.org/software/bash/
+[bash-url]: https://www.gnu.org/software/bash/
 [codacy-url]:https://www.codacy.com/gh/sebastienrousseau/dotfiles/dashboard
-[code-of-conduct]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CODE-OF-CONDUCT.md
-[contributing]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CONTRIBUTING.md
-[curl]: https://curl.se/
-[debian]: https://www.debian.org/
-[deepin]: https://www.deepin.org/en/
-[devuan]: https://devuan.org/
-[docs]: https://github.com/sebastienrousseau/dotfiles/docs
-[download]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.461.tar.gz
+[code-of-conduct-url]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CODE-OF-CONDUCT.md
+[contributing-url]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CONTRIBUTING.md
+[curl-url]: https://curl.se/
+[debian-url]: https://www.debian.org/
+[deepin-url]: https://www.deepin.org/en/
+[devuan-url]: https://devuan.org/
+[docs-url]: https://github.com/sebastienrousseau/dotfiles/docs
+[download-url]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.461.tar.gz
 [forks-url]: https://github.com/sebastienrousseau/dotfiles/network/members
 [fossa-url]: https://app.fossa.io/projects/git%2Bgithub.com%2Freedia%2Fdotfiles?ref=badge_large
-[getting-started]: https://github.com/sebastienrousseau/dotfiles#getting-started
-[git]: https://git-scm.com/
-[github]: https://github.com/sebastienrousseau/dotfiles
+[getting-started-url]: https://github.com/sebastienrousseau/dotfiles#getting-started
+[git-url]: https://git-scm.com/
+[github-url]: https://github.com/sebastienrousseau/dotfiles
 [gr-url]: https://github.com/gramtech
-[issues]: https://github.com/sebastienrousseau/dotfiles/issues
-[kali]: https://www.kali.org/
+[issues-url]: https://github.com/sebastienrousseau/dotfiles/issues
+[kali-url]: https://www.kali.org/
 [license-url]: https://opensource.org/licenses/MIT
-[license]: https://github.com/sebastienrousseau/dotfiles/blob/master/LICENSE
-[make]: https://www.gnu.org/software/make/
-[package]:https://www.npmjs.com/package/@sebastienrousseau/dotfiles
-[pnpm]: https://pnpm.io
-[pop]: https://pop.system76.com/
-[q4]: https://q4os.org/
-[releases]: https://github.com/sebastienrousseau/dotfiles/releases
+[make-url]: https://www.gnu.org/software/make/
+[package-url]:https://www.npmjs.com/package/@sebastienrousseau/dotfiles
+[pnpm-url]: https://pnpm.io
+[pop-url]: https://pop.system76.com/
+[q4-url]: https://q4os.org/
+[releases-url]: https://github.com/sebastienrousseau/dotfiles/releases
 [semver-url]: http://semver.org/
-[shell]: https://www.gnu.org/software/shell/
+[shell-url]: https://www.gnu.org/software/shell/
 [sr-url]: https://github.com/sebastienrousseau
-[ubuntu]: https://ubuntu.com/
-[website]: https://dotfiles.io
-[wget]: https://www.gnu.org/software/wget/
-[zorin]: https://zorinos.com/
-[zsh]: https://www.zsh.org/
+[ubuntu-url]: https://ubuntu.com/
+[website-url]: https://dotfiles.io
+[wget-url]: https://www.gnu.org/software/wget/
+[zorin-url]: https://zorinos.com/
+[zsh-url]: https://www.zsh.org/
 
 [codacy-grade]: https://img.shields.io/codacy/grade/634cfc4de08e492ebcbb341631066241?style=for-the-badge "Codacy grade"
 [contributors-shield]: https://img.shields.io/github/contributors/sebastienrousseau/dotfiles.svg?style=for-the-badge "Contributors"
@@ -563,6 +560,7 @@ awesome [contributors][contributors-url]
 [fossa]: https://app.fossa.io/api/projects/git%2Bgithub.com%2Freedia%2Fdotfiles.svg?type=large "FOSSA"
 [getting_started]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/button-primary.svg "Getting Started"
 [gr]: https://avatars0.githubusercontent.com/u/35816108?s=117 "Graham Colgate"
+[license]: https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge\&color=ff69b4 "License"
 [logo]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/dotfiles.svg "Dotfiles"
-[love]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/made-with-love.svg "Made with love"
+[love]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/made-with-love.svg "Made with Love"
 [sr]: https://avatars0.githubusercontent.com/u/1394998?s=117 "Sebastien Rousseau"
