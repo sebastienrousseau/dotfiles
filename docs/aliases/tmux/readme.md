@@ -1,7 +1,5 @@
 # Tmux core aliases
 
-![Banner representing the Dotfiles Library](/assets/dotfiles.svg)
-
 This `tmux.aliases.zsh` file creates helpful shortcut aliases for many
 commonly used [tmux](https://github.com/tmux/tmux/wiki) commands.
 

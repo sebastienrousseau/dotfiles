@@ -1,7 +1,5 @@
 # Jekyll Core aliases
 
-![Banner representing the Dotfiles Library](/assets/dotfiles.svg)
-
 This `jekyll.aliases.zsh` file creates helpful shortcut aliases for many
 commonly used [Jekyll](https://jekyllrb.com/) commands.
 

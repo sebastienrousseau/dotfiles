@@ -13,7 +13,7 @@
 • [Request Feature][issues-url]
 • [Contributing Guidelines][contributing-url]**
 
-## 👋 Welcome to Dotfiles (v0.2.461)
+## 👋 Welcome to Dotfiles (v0.2.462)
 
 ### Simply designed to fit your shell life
 
@@ -22,7 +22,7 @@ aimed at making your life easier by providing a set of scripts and configuration
 files with new ways to get things done.
 
 [![Getting Started][getting_started]][getting-started-url]
-[![Download Dotfiles v0.2.461][download_button]][download-url]
+[![Download Dotfiles v0.2.462][download_button]][download-url]
 
 Dotfiles aggregates a collection of standalone configuration files (dotfiles)
 combined into a `lib` directory that can be used to customize your development
@@ -126,7 +126,7 @@ sudo apt install fonts-roboto-mono-for-powerline
 
 ### 1️⃣ Download Dotfiles
 
-You can download the latest version (v0.2.461) with the following options:
+You can download the latest version (v0.2.462) with the following options:
 
 - [**Manual download**][releases-url] - **The easiest way to install Dotfiles.**
 - [**Install with PnPM**][package-url]
@@ -526,7 +526,7 @@ awesome [contributors][contributors-url]
 [deepin-url]: https://www.deepin.org/en/
 [devuan-url]: https://devuan.org/
 [docs-url]: https://github.com/sebastienrousseau/dotfiles/docs
-[download-url]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.461.tar.gz
+[download-url]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.462.tar.gz
 [forks-url]: https://github.com/sebastienrousseau/dotfiles/network/members
 [fossa-url]: https://app.fossa.io/projects/git%2Bgithub.com%2Freedia%2Fdotfiles?ref=badge_large
 [getting-started-url]: https://github.com/sebastienrousseau/dotfiles#getting-started

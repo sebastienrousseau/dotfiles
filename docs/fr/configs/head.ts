@@ -1,0 +1,17 @@
+export const head: string[] = [
+  ["link", { rel: "icon", href: "/icon.png" }],
+  ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black' },],
+  ['meta', { name: 'apple-mobile-web-app-title', content: 'Dotfiles' }],
+  ['meta', { name: 'application-name', content: 'Dotfiles FR' }],
+  ['meta', { name: 'robots', content: 'index, follow' }],
+  ["meta", { name: "twitter:alt", content: "Starship: Cross-Shell Prompt" }],
+  ["meta", { name: "twitter:card", content: "summary" }],
+  ["meta", { name: "twitter:description", content: "Starship is the minimal, blazing fast, and extremely customizable prompt for any shell! Shows the information you need, while staying sleek and minimal. Quick installation available for Bash, Fish, ZSH, Ion, Tcsh, Elvish, Nu, Xonsh, Cmd, and Powershell.", }],
+  ["meta", { name: "twitter:image", content: "https://dotfiles.io/icon.png" }],
+  ["meta", { name: "twitter:title", content: "Starship: Cross-Shell Prompt" }],
+  ["meta", { property: "og:description", content: "Starship is the minimal, blazing fast, and extremely customizable prompt for any shell! Shows the information you need, while staying sleek and minimal. Quick installation available for Bash, Fish, ZSH, Ion, Tcsh, Elvish, Nu, Xonsh, Cmd, and Powershell.", }],
+  ["meta", { property: "og:image", content: "https://dotfiles.io/icon.png" }],
+  ["meta", { property: "og:title", content: "Starship: Cross-Shell Prompt" }],
+  ["meta", { property: "og:type", content: "website" }],
+  ["meta", { property: "og:url", content: "https://dotfiles.io/" }],
+];

@@ -1,7 +1,5 @@
 # Dotfiles aliases
 
-![Banner representing the Dotfiles Library](/assets/dotfiles.svg)
-
 The `suversion.aliases.zsh` file creates helpful shortcut aliases for many
 commonly [Suversion](https://subversion.apache.org) commands.
 

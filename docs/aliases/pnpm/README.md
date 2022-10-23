@@ -1,7 +1,5 @@
 # Dotfiles aliases
 
-![Banner representing the Dotfiles Library](/assets/dotfiles.svg)
-
 This `pnpm.aliases.zsh` file creates helpful shortcut aliases for many
 commonly used [PNpm](https://pnpm.io) commands.
 
