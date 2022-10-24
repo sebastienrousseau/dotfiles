@@ -1,13 +1,3 @@
-## 🆕 GNU coreutils aliases
-
-| Alias | Command | Description |
-|---|---|---|
-| dircolors | `gdircolors` | Color setup for ls. |
-| find | `gfind` | Search for files in a directory hierarchy. |
-| grep | `ggrep` | File pattern searcher. |
-| readlink | `greadlink` |Display file status. |
-| sed | `gsed` | Stream editor. |
-| sort | `gsort` | Sort or merge records (lines) of text and binary files. |
 
 ## 👽 System aliases
 
