@@ -4,7 +4,7 @@
 # Copyright (c) 2015-2022. All rights reserved
 # License: MIT
 
-# 🆃🅼🆄🆇 🅰🅻🅸🅰🆂🅴🆂
+# 🅶🅽🆄 🅲🅾🆁🅴🆄🆃🅸🅻🆂 🅰🅻🅸🅰🆂🅴🆂
 alias dircolors="gdircolors" # Color setup for ls, etc.
 alias find="gfind"           # Search for files in a directory hierarchy.
 alias grep="ggrep"           # File pattern searcher.
