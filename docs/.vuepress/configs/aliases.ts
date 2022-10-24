@@ -4,6 +4,7 @@ export const aliases = {
   collapsable: false,
   children: [
     ["/aliases/", "Aliases"],
+    ["/aliases/default/", " ❯ Default aliases"],
     ["/aliases/gcloud/", " ❯ GCloud aliases"],
     ["/aliases/git/", " ❯ Git aliases"],
     ["/aliases/jekyll/", " ❯ Jekyll aliases"],
