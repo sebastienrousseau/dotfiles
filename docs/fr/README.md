@@ -1,12 +1,12 @@
 ---
 home: true
-title: Accueil
+title: À propos
 subtitle: Un ensemble de fichiers de configuration macOS/Linux et Windows, simplement conçus pour s'adapter à votre vie de shell !
 heroImage: /logo.svg
 heroText: null
 tagline: Un ensemble de fichiers de configuration macOS/Linux et Windows, simplement conçus pour s'adapter à votre vie de shell !
 actionText: Commencez →
-actionLink: ./guide/
+actionLink: ./a-propos/
 features:
   - title: Compatibilité avant tout
     details: Fonctionne sur tous les principaux shells et système d'exploitation. Utilisez-le partout !
@@ -19,6 +19,39 @@ footer: Licence ISC | Copyright © 2019-présent Contributeurs Starship
 #Used for the description meta tag, for SEO
 metaTitle: "Les fichiers de configuration Dotfiles"
 description: "Un ensemble de fichiers de configuration macOS/Linux et Windows, simplement conçus pour s'adapter à votre vie de shell !"
+
+meta:
+  - name: apple-mobile-web-app-status-bar-style
+    content: black
+  - name: apple-mobile-web-app-title
+    content: Les fichiers de configuration Dotfiles v0.2.462
+  - name: application-name
+    content: Dotfiles v0.2.462
+  - name: author
+    content: Sebastien Rousseau
+  - name: format-detection
+    content: telephone=no
+  - name: msapplication-tap-highlight
+    content: no
+  - name: robots
+    content: index, follow
+  - name: theme-color
+    content: "#0F0"
+  - name: twitter:card
+    content: france - The Dotfiles provides modular configuration files (aliases, functions and paths) built for speed, higher performance, with the aim of helping you have an easy and centralized way to configure your environment and applications.
+  - name: twitter:creator
+    content: "@wwdseb"
+  - name: twitter:description
+    content: france - The Dotfiles provides modular configuration files (aliases, functions and paths) built for speed, higher performance, with the aim of helping you have an easy and centralized way to configure your environment and applications.
+  - name: twitter:image
+    content: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/dotfiles.svg
+  - name: twitter:site
+    content: "@wwdseb"
+  - name: twitter:title
+    content: Dotfiles v0.2.462
+  - name: twitter:url
+    content: https://dotfiles.io/
+
 
 # Used for the Open Graph image meta tag, for SEO
 ogImage: /logo.png

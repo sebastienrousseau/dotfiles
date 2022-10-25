@@ -1,21 +1,25 @@
-import { sidebar, navbar, head } from './configs'
+import { enNavbar } from './config/nav';
+import { enSidebar } from './config/sidebar';
+import { frNavbar } from './config/nav';
+import { frSidebar } from './config/sidebar';
+import { headers } from './config/head';
 
 module.exports = {
   locales: {
     "/": {
       lang: 'en-GB',
       title: "Dotfiles",
-      description: "The minimal, blazing-fast, and infinitely customizable prompt for any shell!",
+      description: "A set of macOS / Linux and Windows configuration files, simply designed to fit your shell life!",
     },
     "/fr/": {
       lang: "fr-FR",
       title: "Dotfiles",
-      description: "L'invite minimaliste, ultra-rapide et personnalisable à l'infini pour n'importe quel shell !",
+      description: "Un ensemble de fichiers de configuration macOS/Linux et Windows, simplement conçus pour s'adapter à votre vie de shell !",
     }
   },
   // prettier-ignore
-  head: head,
   evergreen: true,
+  head: headers,
   theme: "default-prefers-color-scheme",
   themeConfig: {
     search: false,
@@ -40,12 +44,9 @@ module.exports = {
         // Custom text for edit link. Defaults to "Edit this page"
         editLinkText: "Edit this page on GitHub",
         // Custom navbar values
-        nav: [
-          { text: "Aliases", link: "/aliases/", ariaLabel: "Aliases" },
-          { text: "Overview", link: "/overview/", ariaLabel: "Overview" }
-        ],
+        nav: enNavbar,
         // Custom sidebar values
-        sidebar: navbar
+        sidebar: enSidebar,
       },
       "/fr/": {
         // text for the language dropdown
@@ -57,12 +58,9 @@ module.exports = {
         // Custom text for edit link. Defaults to "Edit this page"
         editLinkText: "Éditez cette page sur GitHub",
         // Custom navbar values
-        nav: [
-          { text: "Alias", link: "/fr/aliases/", ariaLabel: "Les alias" },
-          { text: "À propos", link: "/fr/overview/", ariaLabel: "À propos" }
-        ],
+        nav: frNavbar,
         // Custom sidebar values
-        sidebar: navbar
+        sidebar: frSidebar,
       },
     },
   },

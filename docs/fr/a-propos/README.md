@@ -1,4 +1,4 @@
-## 👋 Welcome to Dotfiles (v0.2.462)
+# 👋 Welcome to Dotfiles (v0.2.462)
 
 ### Simply designed to fit your shell life
 

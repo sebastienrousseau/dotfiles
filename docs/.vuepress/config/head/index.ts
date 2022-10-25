@@ -1,4 +1,4 @@
-export const head: string[] = [
+export const headers: string[] = [
   ["link", { rel: "icon", href: "/icon.png" }],
   ["link", { rel: "manifest", href: "/manifest.json" }],
   ["link", { rel: "alternate", href: "https://dotfiles.io", hreflang: "en" }],
@@ -17,7 +17,6 @@ export const head: string[] = [
   ["meta", { name: "format-detection", content: "telephone=no" },],
   ["meta", { name: "msapplication-tap-highlight", content: "no" },],
   ["meta", { name: "robots", content: "index, follow" }],
-  ["meta", { name: "twitter:alt", content: "Dotfiles - Simply designed to fit your shell life!" }],
   ["meta", { name: "twitter:card", content: "The Dotfiles provides modular configuration files (aliases, functions and paths) built for speed, higher performance, with the aim of helping you have an easy and centralized way to configure your environment and applications." }],
   ["meta", { name: "twitter:creator", content: "@wwdseb" }],
   ["meta", { name: "twitter:description", content: "The Dotfiles provides modular configuration files (aliases, functions and paths) built for speed, higher performance, with the aim of helping you have an easy and centralized way to configure your environment and applications." }],

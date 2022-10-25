@@ -1,70 +1,7 @@
-# Aliases
 
-The `default.aliases.zsh` file creates a set of aliases for a variety of
-commands. The aliases are defined in the `/lib/aliases` directory. The aliases
-are loaded in the `~/.bashrc` file if you are using the Bash shell, and in
-the `~/.zshrc` file if you are using the Zsh shell. The aliases are grouped by
-category, and include:
+## 👽 System aliases
 
-- `default` - The default aliases that are loaded for all users, regardless of
-  the shell they are using, and regardless of the operating system they are on,
-- `gcloud` aliases for the Google Cloud SDK,
-- `git` aliases for the Git version control system,
-- `heroku` aliases for the Heroku Platform,
-- `jekyll` aliases for the Jekyll static site generator,
-- `pnpm` aliases for the pnpm package manager,
-- `subversion` aliases for the Subversion version control system,
-- `tmux` aliases for the tmux terminal multiplexer.
-
-## 🔎 System detection utility
-
-The above file also contains a utility function for detecting the current `ls` flavor that is in use. (GNU or macOS) in order to help setting up the right `LS_COLORS` environment variables to your system.
-
-### Checking the aliases already installed
-
-Type the following alias command in your terminal:
-
-```bash
-alias
-```
-
-### Swapping to the collection of GNU find, xargs, and locate
-
-macOS systems are based on BSD, rather than on GNU/Linux like RedHat, Debian,
-and Ubuntu. As a result, a lot of the command line tools that ship with macOS aren’t 100% compatible. For example, the `find` command on macOS doesn’t support the `-printf` option, which is used by the `locate` command. This means that the `locate` command doesn’t work on macOS. To fix this, you can install the GNU versions of these commands, which are fully compatible with the Linux versions.
-
-The GNU Find Utilities are the basic directory searching utilities of the GNU
-operating system. These programs are typically used in conjunction with other
-programs to provide modular and powerful directory search and file locating
-capabilities to other commands.
-
-The tools supplied with this package are:
-
-- find - search for files in a directory hierarchy
-- locate - list files in databases that match a pattern
-- updatedb - update a file name database
-- xargs - build and execute command lines from standard input
-
-Type the following alias command in your terminal:
-
-```bash
-brew install findutils
-```
-
-## Aliases for the GNU coreutils (Core GNU utilities) programs
-
-| Alias | Command | Description |
-|---|---|---|
-| dircolors | `gdircolors` | Color setup for ls. |
-| find | `gfind` | Search for files in a directory hierarchy. |
-| grep | `ggrep` | File pattern searcher. |
-| readlink | `greadlink` |Display file status. |
-| sed | `gsed` | Stream editor. |
-| sort | `gsort` | Sort or merge records (lines) of text and binary files. |
-
-### 2. System tools and system information aliases
-
-#### 2.1 System tools aliases
+### System tools aliases
 
 | Alias | Command | Description |
 |---|---|---|
@@ -79,7 +16,7 @@ brew install findutils
 | ttop | `top -F -s 10  rsize` | Recommended 'top' invocation to minimize resources. |
 | zshrc | `${=EDITOR} $HOME/.zshrc` | Quick access to the `.zshrc` file. |
 
-#### 2.2 System information aliases
+### System information aliases
 
 | Alias | Command | Description |
 |---|---|---|
@@ -92,9 +29,9 @@ brew install findutils
 | psmem | `ps aux | sort -nr -k 4 | head -3` | Getting top 3 memory eating processes. |
 | psmem10 | `ps aux | sort -nr -k 4 | head -10` | Getting top 10 memory eating processes. |
 
-#### 2.3 Interactive mode commands
+## ℹ️ Interactive mode aliases
 
-##### Interactive mode aliases
+### Interactive mode aliases
 
 | Alias | Command | Description |
 |---|---|---|
@@ -104,9 +41,7 @@ brew install findutils
 | rm | `rm -i` | Remove file with warning.|
 | zap | `rm -i` | Remove file with warning.|
 
-### 3. Common shell aliases
-
-#### 3.1 Generic aliases
+## 🧬 Generic aliases
 
 | Alias | Command | Description |
 |---|---|---|
@@ -141,7 +76,7 @@ brew install findutils
 | vp | `diskutil verifyPermissions /` | Verify macOS Permissions |
 | vv | `diskutil verifyvolume /` | Verify macOS Volume |
 
-#### 3.2 Finding commands (find and grep)
+## 🔎 Finding aliases
 
 | Alias | Command | Description |
 |---|---|---|
@@ -153,7 +88,7 @@ brew install findutils
 | hgrep | `history | grep`            | Searches for a word in the list of previously used commands. |
 | sgrep | `grep -R -n -H -C 5 --exclude-dir={.git,.svn,CVS}` | Useful for searching within files. |
 
-#### 3.3 List directory aliases commands (ls)
+## 🗂 List directory aliases
 
 | Alias | Command | Description |
 |---|---|---|
@@ -181,7 +116,7 @@ brew install findutils
 | lu | `ls -ltur` | Sort by/show access time,most recent last.                                                                            |
 | lx | `ls -lXB` | Sort by extension.                                                                                                    |
 
-#### 3.4 Networking aliases
+## 🚈 Networking aliases
 
 | Alias | Command | Description |
 |---|---|---|
@@ -195,7 +130,7 @@ brew install findutils
 | op | `sudo lsof -i -P` | List of open ports. |
 | wip | `dig +short myip.opendns.com @resolver1.opendns.com` | Public facing IP Address. |
 
-#### 3.5 Quicker navigation aliases
+## 🧭 Navigation aliases
 
 | Alias | Command | Description |
 |---|---|---|
@@ -239,16 +174,27 @@ brew install findutils
 | so | `setopt` | Lists the active options. |
 | uso | `unsetopt` | Lists the inactive options. |
 
-#### 3.6 Jekyll Aliases
+## 📂 Path aliases
 
 | Alias | Command | Description |
 |---|---|---|
-| jkd | `JEKYLL_ENV=development bundle exec jekyll serve --watch --trace` | Does a development build of the site to `_site` and runs a local development server. |
-| jkb | `JEKYLL_ENV=development bundle exec jekyll build` | Performs a one off build your site to `./_site`. |
-| jkc | `JEKYLL_ENV=development bundle exec jekyll clean` | Removes all generated files: destination folder, metadata file, Sass and Jekyll caches. |
-| jkl | `JEKYLL_ENV=development bundle exec jekyll serve --livereload` | Does a development build of the site to '_site' and runs a local development server. |
-| jko | `open http://localhost:4000` | Open local development server. |
-| jkp | `JEKYLL_ENV=production bundle exec jekyll serve --watch --trace` | Does a production build of the site to '_site' and runs a local development server. |
+| .bash_profile | `cd ~/.bash_profile` | Change to .bash_profile directory. |
+| .bashrc | `cd ~/.bashrc` | Change to .bashrc directory. |
+| .gitconfig | `cd ~/.gitconfig` | Change to .gitconfig directory. |
+| .gitignore | `cd ~/.gitignore` | Change to .gitignore directory. |
+
+## 📝 Process aliases
+
+| Alias | Command | Description |
+|---|---|---|
+| kill9 | `kill -9` | Kill a process. |
+| killall | `killall` | Kill a process. |
+| ps | `ps -ef` | List all processes. |
+| psa | `ps aux` | List all processes. |
+| psax | `ps ax` | List all processes. |
+| psaux | `ps aux` | List all processes. |
+| psauxw | `ps auxw` | List all processes. |
+| psauxww | `ps auxww` | List all processes. |
 
 ## 🌐 Global aliases
 

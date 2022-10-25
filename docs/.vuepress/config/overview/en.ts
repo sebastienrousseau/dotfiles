@@ -1,8 +1,6 @@
 export const overview = {
   ariaLabel: 'Overview',
-  text: 'Overview',
+  title: 'Overview',
+  path: '/overview/',
   collapsable: false,
-  children: [
-    ["/overview/", "Overview"],
-  ]
 }

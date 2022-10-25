@@ -1,4 +1,4 @@
-# GNU Core Utilities Aliases
+# GNU coreutils aliases
 
 The `gnucoreutls-aliases.sh` file creates helpful shortcut aliases for many commonly used [GNU coreutils][coreutils] commands. The GNU Core Utilities are
 the basic file, shell and text manipulation utilities of the GNU operating
