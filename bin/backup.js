@@ -12,8 +12,8 @@ async function backup(src, dest) {
   var path = require("path");
   var dir = path.resolve(__dirname, os.homedir() + '/dotfiles_backup');
 
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
+  if (!fs.existsSync("~/.dotfiles_backup")) {
+    fs.mkdirSync("~/.dotfiles_backup");
   }
 
   var srcPath = path.resolve(__dirname, os.homedir() + "/" + src);
