@@ -1,10 +1,11 @@
 ---
 home: true
-subtitle: A set of macOS / Linux and Windows configuration files, simply designed to fit your shell life!
+title: About - Dotfiles (EN)
+subtitle: Bash configuration files for macOS, Linux and Windows. Tailored to your needs and usage.
 heroImage: /logo.svg
-heroText: null
-tagline: A set of macOS / Linux and Windows configuration files, simply designed to fit your shell life!
-actionText: Get Started →
+heroText: Simply designed to fit your shell
+tagline: Bash configuration files for macOS, Linux and Windows. Tailored to your needs and usage.
+actionText: Read more →
 actionLink: ./overview/
 features:
   - title: Ease of Use
@@ -16,6 +17,6 @@ features:
 footer: Copyright © Sebastien Rousseau 2015-2022. All rights reserved.
 
 # Used for the description meta tag, for SEO
-metaTitle: Dotfiles - Simply designed to fit your shell life!
-description: Dotfiles are a set of macOS, Linux and Windows configuration files.They are aimed at making your life easier by providing a set of scripts and configuration files with new ways to get things done.
+metaTitle: About - Dotfiles (EN)
+description: Bash configuration files for macOS, Linux and Windows. Tailored to your needs and usage.
 ---

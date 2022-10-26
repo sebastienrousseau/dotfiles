@@ -9,12 +9,12 @@ module.exports = {
     "/": {
       lang: 'en-GB', // English
       title: "Dotfiles",
-      description: "A set of macOS / Linux and Windows configuration files, simply designed to fit your shell life!",
+      description: "A set of macOS / Linux and Windows configuration files, simply designed to fit your shell!",
     },
     "/fr/": {
       lang: "fr-FR", // French
       title: "Dotfiles",
-      description: "Un ensemble de fichiers de configuration macOS/Linux et Windows, simplement conçus pour s'adapter à votre vie de shell !",
+      description: "Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et votre usage.",
     }
   },
   // Enable evergreen browsers support

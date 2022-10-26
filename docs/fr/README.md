@@ -1,12 +1,12 @@
 ---
 home: true
-title: À propos
-subtitle: Un ensemble de fichiers de configuration macOS/Linux et Windows, simplement conçus pour s'adapter à votre vie de shell !
+title: À propos des Dotfiles
+subtitle: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et votre usage.
 heroImage: /logo.svg
-heroText: null
-tagline: Un ensemble de fichiers de configuration macOS/Linux et Windows, simplement conçus pour s'adapter à votre vie de shell !
-actionText: Commencez →
-actionLink: ./a-propos/
+heroText: Conçus pour s'adapter à votre shell
+tagline: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et votre usage.
+actionText: En savoir plus →
+actionLink: ./apropos/
 features:
   - title: Compatibilité avant tout
     details: Fonctionne sur tous les principaux shells et système d'exploitation. Utilisez-le partout !
@@ -17,16 +17,16 @@ features:
 footer: Licence ISC | Copyright © 2019-présent Contributeurs Starship
 
 #Used for the description meta tag, for SEO
-metaTitle: "Les fichiers de configuration Dotfiles"
-description: "Un ensemble de fichiers de configuration macOS/Linux et Windows, simplement conçus pour s'adapter à votre vie de shell !"
+metaTitle: "À propos des Dotfiles"
+description: "Des fichiers de configuration Bash pour macOS, Linux et Windows.Adaptés à vos besoins et votre usage."
 
 meta:
   - name: apple-mobile-web-app-status-bar-style
     content: black
   - name: apple-mobile-web-app-title
-    content: Les fichiers de configuration Dotfiles v0.2.462
+    content: Les fichiers de configuration Dotfiles (v0.2.462)
   - name: application-name
-    content: Dotfiles v0.2.462
+    content: Dotfiles (v0.2.462)
   - name: author
     content: Sebastien Rousseau
   - name: format-detection
@@ -38,23 +38,23 @@ meta:
   - name: theme-color
     content: "#F0F"
   - name: twitter:card
-    content: france - The Dotfiles provides modular configuration files (aliases, functions and paths) built for speed, higher performance, with the aim of helping you have an easy and centralized way to configure your environment and applications.
+    content: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et votre usage.
   - name: twitter:creator
     content: "@wwdseb"
   - name: twitter:description
-    content: france - The Dotfiles provides modular configuration files (aliases, functions and paths) built for speed, higher performance, with the aim of helping you have an easy and centralized way to configure your environment and applications.
+    content: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et votre usage.
   - name: twitter:image
     content: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/dotfiles.svg
   - name: twitter:site
     content: "@wwdseb"
   - name: twitter:title
-    content: Dotfiles v0.2.462
+    content: Dotfiles (v0.2.462)
   - name: twitter:url
     content: https://dotfiles.io/
 
 
 # Used for the Open Graph image meta tag, for SEO
-ogImage: /logo.png
+ogImage: /dotfiles.png
 ogImageWidth: 1200
 ogImageHeight: 630
 ogImageAlt: Dotfiles Logo

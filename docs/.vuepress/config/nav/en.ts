@@ -1,29 +1,10 @@
 import type { NavbarConfig } from '@vuepress/theme-default'
 
 import { aliases } from '../aliases/en'
-import { overview } from '../overview/en'
+import { about } from '../about/en'
 
 export const enNavbar: NavbarConfig =
   [
     { text: "Aliases", link: "/aliases/", ariaLabel: "Aliases" },
-    { text: "Overview", link: "/overview/", ariaLabel: "Overview" }
+    { text: "About", link: "/about/", ariaLabel: "About" },
   ]
-
-// [
-//   {
-//     ariaLabel: 'Overview',
-//     title: 'Overview',
-//     path: '/overview/',
-//     collapsable: false,
-//   },
-// ]
-
-// import type { NavbarConfig } from '@vuepress/theme-default'
-
-// import { aliases } from '../aliases'
-// import { overview } from '../overview'
-
-// export const navbar: NavbarConfig = [
-//   overview,
-//   aliases,
-// ]
