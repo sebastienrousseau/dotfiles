@@ -9,8 +9,8 @@
 async function transfer(dest) {
 
   const fs = require("fs-extra");
-  var os = require('os');
-  var path = require('path');
+  var os = require("os");
+  var path = require("path");
 
   const source = path.resolve(__dirname, os.homedir() + "/dotfiles_backup/package/dist/");
   const dotfiles = path.resolve(__dirname, "/" + dest + "/.dotfiles");
@@ -26,7 +26,7 @@ async function transfer(dest) {
   // Copy the source directory to the destination.
   await fs.copy(source, dotfiles);
 
-  // Clean up the destination directory, remove the files we don't need.
+  // Clean up the destination directory, remove the files we don"t need.
   await fs.removeSync(bin);
   await fs.removeSync(filesizes);
   await fs.removeSync(make);
