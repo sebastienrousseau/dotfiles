@@ -16,6 +16,6 @@ async function copy(src, dest) {
 
   await fs.promises.copyFile(srcPath, destPath);
 
-};
+}
 
 module.exports = copy;
