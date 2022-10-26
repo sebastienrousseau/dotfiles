@@ -5,7 +5,7 @@
 * License: MIT
 */
 
-export const { promisify } = require('util');
+export const { promisify } = require("util");
 
 // 🅳🅾🆆🅽🅻🅾🅰🅳 - Download function.
 async function download() {
@@ -23,9 +23,9 @@ async function download() {
     dotfile, response => {
       // console.log("STATUS: " + response.statusCode);
       var headers = JSON.stringify(response.headers);
-      // console.log('HEADERS: ' + headers);
+      // console.log("HEADERS: " + headers);
       response.pipe(file);
-      file.on('finish', () => {
+      file.on("finish", () => {
         file.close();
         mv(version, `${destPath}/${version}`);
         fs.rmSync(version);
