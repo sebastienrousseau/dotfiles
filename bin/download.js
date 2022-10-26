@@ -31,8 +31,6 @@ async function download() {
         fs.rmSync(version);
       });
     });
-
-
-};
+}
 
 module.exports = download;
