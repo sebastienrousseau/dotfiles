@@ -8,9 +8,9 @@
 // 🅱🅰🅲🅺🆄🅿 - Backup function (src, dest).
 async function backup(src, dest) {
   var fs = require("fs");
-  var os = require('os');
+  var os = require("os");
   var path = require("path");
-  var dir = path.resolve(__dirname, os.homedir() + '/dotfiles_backup');
+  var dir = path.resolve(__dirname, os.homedir() + "/dotfiles_backup");
 
   if (!fs.existsSync("~/.dotfiles_backup")) {
     fs.mkdirSync("~/.dotfiles_backup");
