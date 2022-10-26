@@ -1,32 +1,37 @@
-import { enNavbar } from './config/nav';
-import { enSidebar } from './config/sidebar';
-import { frNavbar } from './config/nav';
-import { frSidebar } from './config/sidebar';
-import { headers } from './config/head';
+import { enNavbar } from './config/nav'; // Import English navbar
+import { enSidebar } from './config/sidebar'; // Import English sidebar
+import { frNavbar } from './config/nav'; // Import French navbar
+import { frSidebar } from './config/sidebar'; // Import French sidebar
+import { headers } from './config/head'; // Import Headers for SEO
 
 module.exports = {
   locales: {
     "/": {
-      lang: 'en-GB',
+      lang: 'en-GB', // English
       title: "Dotfiles",
       description: "A set of macOS / Linux and Windows configuration files, simply designed to fit your shell life!",
     },
     "/fr/": {
-      lang: "fr-FR",
+      lang: "fr-FR", // French
       title: "Dotfiles",
       description: "Un ensemble de fichiers de configuration macOS/Linux et Windows, simplement conçus pour s'adapter à votre vie de shell !",
     }
   },
-  // prettier-ignore
+  // Enable evergreen browsers support
   evergreen: true,
+  // Headers for SEO
   head: headers,
+  // Theme default color scheme
   theme: "default-prefers-color-scheme",
+  // Theme configuration
   themeConfig: {
+    // Search bar configuration
     search: false,
+    // Logo configuration
     logo: "/dotfiles.png",
-    // the GitHub repo path
+    // The GitHub repo path
     repo: "sebastienrousseau/dotfiles",
-    // the label linking to the repo
+    // The label linking to the repo
     repoLabel: "GitHub",
     // if your docs are not at the root of the repo:
     docsDir: "docs",
