@@ -21,7 +21,7 @@ async function backup(src, dest) {
 
   await fs.promises.copyFile(srcPath, destPath);
 
-};
+}
 
 module.exports = backup;
 
