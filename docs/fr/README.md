@@ -36,7 +36,7 @@ meta:
   - name: robots
     content: index, follow
   - name: theme-color
-    content: "#0F0"
+    content: "#F0F"
   - name: twitter:card
     content: france - The Dotfiles provides modular configuration files (aliases, functions and paths) built for speed, higher performance, with the aim of helping you have an easy and centralized way to configure your environment and applications.
   - name: twitter:creator
