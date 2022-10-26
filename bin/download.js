@@ -21,9 +21,9 @@ async function download() {
 
   const request = https.get(
     dotfile, response => {
-      console.log("STATUS: " + response.statusCode);
+      // console.log("STATUS: " + response.statusCode);
       var headers = JSON.stringify(response.headers);
-      console.log('HEADERS: ' + headers);
+      // console.log('HEADERS: ' + headers);
       response.pipe(file);
       file.on('finish', () => {
         file.close();
