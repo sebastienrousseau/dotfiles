@@ -1,24 +1,24 @@
 ---
 home: true
 title: À propos des Dotfiles
-subtitle: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et votre usage.
+subtitle: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et à votre usage.
 heroImage: /logo.svg
 heroText: Conçus pour s'adapter à votre shell
-tagline: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et votre usage.
+tagline: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et à votre usage.
 actionText: En savoir plus →
 actionLink: ./apropos/
 features:
-  - title: Compatibilité avant tout
-    details: Fonctionne sur tous les principaux shells et système d'exploitation. Utilisez-le partout !
-  - title: Propulsé par Rust
-    details: Profitez de toute la rapidité et la sécurité de Rust pour rendre votre invite de commandes la plus rapide et fiable possible.
+  - title: Facilité d’utilisation
+    details: Très facile à configurer, les fichiers Dotfiles sont prêts à l'emploi et idéals pour personnaliser votre shell et vos applications.
+  - title: Découvrez nos collections
+    details: Une formidable collection de fichiers de configuration Bash mise à votre disposition gratuitement et bien plus encore.
   - title: Personnalisable
-    details: Tous les petits détails sont personnalisable à votre goût, pour rendre votre invite de commandes aussi légère ou complète que le vous souhaitez.
-footer: Licence ISC | Copyright © 2019-présent Contributeurs Starship
+    details: Découvrez tous les détails des fichiers Dotfiles et choisissez ceux que vous préférez.
+footer: Copyright © Sebastien Rousseau 2015-2022. Tous droits réservés.
 
 #Used for the description meta tag, for SEO
 metaTitle: "À propos des Dotfiles"
-description: "Des fichiers de configuration Bash pour macOS, Linux et Windows.Adaptés à vos besoins et votre usage."
+description: "Des fichiers de configuration Bash pour macOS, Linux et Windows.Adaptés à vos besoins et à votre usage."
 
 meta:
   - name: apple-mobile-web-app-status-bar-style
@@ -38,11 +38,11 @@ meta:
   - name: theme-color
     content: "#F0F"
   - name: twitter:card
-    content: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et votre usage.
+    content: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et à votre usage.
   - name: twitter:creator
     content: "@wwdseb"
   - name: twitter:description
-    content: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et votre usage.
+    content: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et à votre usage.
   - name: twitter:image
     content: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/dotfiles.svg
   - name: twitter:site

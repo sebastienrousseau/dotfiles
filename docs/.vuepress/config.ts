@@ -14,7 +14,7 @@ module.exports = {
     "/fr/": {
       lang: "fr-FR", // French
       title: "Dotfiles",
-      description: "Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et votre usage.",
+      description: "Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et à votre usage.",
     }
   },
   // Enable evergreen browsers support
