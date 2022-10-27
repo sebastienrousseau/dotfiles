@@ -19,4 +19,20 @@ footer: Copyright © Sebastien Rousseau 2015-2022. All rights reserved.
 # Used for the description meta tag, for SEO
 metaTitle: About Dotfiles
 description: Bash configuration files for macOS, Linux and Windows. Tailored to your needs and usage.
+
+meta:
+  - name: twitter:card
+    content: Bash configuration files for macOS, Linux and Windows. Tailored to your needs and usage.
+  - name: twitter:creator
+    content: "@wwdseb"
+  - name: twitter:description
+    content: Bash configuration files for macOS, Linux and Windows. Tailored to your needs and usage.
+  - name: og:title
+    content: About Dotfiles (v0.2.462)
+  - name: og:description
+    content: Bash configuration files for macOS, Linux and Windows. Tailored to your needs and usage.
+  - name: og:image:alt
+    content: Dotfiles - Simply designed to fit your shell
+  - name: og:locale
+    content: en_GB
 ---
