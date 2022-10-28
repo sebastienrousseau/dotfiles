@@ -6,7 +6,7 @@
 
 # https://dotfiles.io
 #
-# Description:  Mac OS X Dotfiles - Simply designed to fit your shell.
+# Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
 #
 # Made with ♥ in London, UK by @sebastienrousseau
 # Copyright (c) 2015-2022. All rights reserved

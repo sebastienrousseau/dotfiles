@@ -13,7 +13,7 @@ cat <<EOF
 ┌───────────────────────────────────────────────┐
 │             $(echo -e "\033[1;96mDotfiles (v${DF_VERSION})\033[0m\n")               │
 ├───────────────────────────────────────────────┤
-│    $(echo -e "\033[0;93mSimply designed to fit your shell\033[0m\n")     │
+│    $(echo -e "\033[0;93mSimply designed to fit your shell life\033[0m\n")     │
 └───────────────────────────────────────────────┘
 
 EOF

@@ -1,23 +1,23 @@
 ---
-description: Des fichiers de configuration Bash pour macOS, Linux et Windows.Adaptés à vos besoins et à votre usage.
+description: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et pour vous servir
 heroImage: /logo.svg
-heroText: Conçus pour s'adapter à votre shell
+heroText: Conçus pour s'adapter à votre vie de shell
 home: true
 lang: fr-FR
-metaTitle: À propos des Dotfiles (v0.2.462)
-subtitle: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et à votre usage
+metaTitle: À propos des Dotfiles v0.2.462 - (France)
+subtitle: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et pour vous servir
 permalink: /
-tagline: Les fichiers Dotfiles - Conçus pour s'adapter à votre shell
+tagline: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et pour vous servir
 title: À propos des Dotfiles (v0.2.462)
 actionText: En savoir plus →
 actionLink: /fr/apropos/
 features:
   - title: Facilité d’utilisation
     details: Très facile à configurer, les fichiers Dotfiles sont prêts à l'emploi et idéals pour personnaliser votre shell et vos applications
-  - title: Découvrez nos collections
-    details: Une formidable collection de fichiers de configuration Bash mise à votre disposition gratuitement et bien plus encore
+  - title: Découvrez notre collection
+    details: Une collection de fichiers de configuration Bash mise à votre disposition gratuitement
   - title: Personnalisable
-    details: Découvrez tous les détails des fichiers Dotfiles et choisissez ceux que vous préférez
+    details: Découvrez tous les détails des fichiers Dotfiles et choisissez ceux que vous préférez suivant vos besoins
 footer: Copyright © Sebastien Rousseau 2015-2022. Tous droits réservés.
 
 link:

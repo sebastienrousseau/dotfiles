@@ -15,7 +15,7 @@
 
 ## 👋 Welcome to Dotfiles (v0.2.462)
 
-### Simply designed to fit your shell
+### Simply designed to fit your shell life
 
 Dotfiles are a set of macOS, Linux and Windows configuration files. They are
 aimed at making your life easier by providing a set of scripts and configuration
