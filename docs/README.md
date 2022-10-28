@@ -1,12 +1,16 @@
 ---
+description: Bash configuration files for macOS, Linux and Windows. Tailored to your needs and at your service
 heroImage: /logo.svg
 heroText: Simply designed to fit your shell life
 home: true
+lang: en-GB
+metaTitle: About Dotfiles v0.2.462 - (United Kingdom)
+permalink: /
 subtitle: Bash configuration files for macOS, Linux and Windows. Tailored to your needs and at your service
 tagline: Bash configuration files for macOS, Linux and Windows. Tailored to your needs and at your service
 title: About Dotfiles v0.2.462 - (United Kingdom)
 actionText: Read more →
-actionLink: ./about/
+actionLink: /about/
 features:
   - title: Easy to learn
     details: Easy to configure, Dotfiles are ready to use in seconds and ideal for customizing your shell and applications.
@@ -17,8 +21,6 @@ features:
 footer: Copyright © Sebastien Rousseau 2015-2022. All rights reserved.
 
 # Used for the description meta tag, for SEO
-metaTitle: About Dotfiles
-description: Bash configuration files for macOS, Linux and Windows. Tailored to your needs and at your service
 
 meta:
   - name: twitter:card
