@@ -17,7 +17,7 @@ features:
   - title: Découvrez notre collection
     details: Une collection de fichiers de configuration Bash mise à votre disposition gratuitement
   - title: Personnalisable
-    details: Découvrez tous les détails des fichiers Dotfiles et choisissez ceux que vous préférez suivant vos envies.
+    details: Découvrez tous les détails des fichiers Dotfiles et choisissez ceux que vous préférez suivant vos envies
 footer: Copyright © Sebastien Rousseau 2015-2022. Tous droits réservés.
 
 meta:
