@@ -12,12 +12,12 @@ title: About Dotfiles - Dotfiles (UK)
 actionText: Read more →
 actionLink: /about/
 features:
-  - title: Easy to learn
-    details: Easy to configure, Dotfiles are ready to use in seconds and ideal for customizing your shell and applications.
+  - title: Ease of use
+    details: Very easy to configure, Dotfiles are ready to use and ideal for customizing your shell and applications
   - title: Discover our collections
-    details: A great collection of Bash configuration files available to you free of charge and much more.
+    details: A collection of Bash configuration files available for free
   - title: Customizable
-    details: Discover all the details of Dotfiles and choose the ones you prefer.
+    details: Discover all the details of the Dotfiles and choose the ones you prefer according to your desires
 footer: Copyright © Sebastien Rousseau 2015-2022. All rights reserved.
 
 meta:

@@ -1,62 +1,44 @@
-# 👋 Welcome to Dotfiles (v0.2.462)
+# 👋 Welcome to Dotfiles v0.2.462
 
-## Simply designed to fit your shell life
+## 🏁 Introduction
 
-Dotfiles are a set of macOS, Linux and Windows configuration files. They are
-aimed at making your life easier by providing a set of scripts and configuration
-files with new ways to get things done.
+Dotfiles are a set of Bash configuration files for macOS, Linux and Windows.
+They are aimed at making your life easier by providing a set of scripts and
+configuration files that you can use to customize your shell and applications.
+All in one place.
 
-Dotfiles aggregates a collection of standalone configuration files (dotfiles)
-combined into a `lib` directory that can be used to customize your development
-environment across numerous computers and operating systems (macOS, Windows,
-Linux).
+Dotfiles live right in your home directory, so you can keep them under version
+control, and you can use them on any computer, anywhere.
 
-The Dotfiles provides modular configuration files (aliases, functions and paths)
-built for speed, higher performance, with the aim of helping you have an easy
-and centralized way to configure your environment and applications.
+They aggregates a collection of standalone `dotfiles` combined into a single
+`lib` directory. They provide aliases, functions paths and ready-to-use settings
+built for speed and high performance.
 
 ![divider][divider]
 
 ## 🚀 Getting Started
 
 We are so delighted that you have decided to try Dotfiles, and are sure that you
-will find Dotfiles unique and helpful.
-
-Dotfiles seeks to bring you high quality and easy to use standalone and modular
-configuration files that can be used to customize your development environment
-across numerous computers and operating systems (macOS, Windows, Linux).
-
-### 🔧 Installation
-
-We understand that you may want to install Dotfiles without reading long manuals
-and lengthy documentation. In that respect, we have tried to make the
-installation process as easy as possible.
+will find them unique and helpful.
 
 A range of installation methods are available, and we recommend that you choose
 the one that best suits your needs.
 
-Before you begin your installation, use this information to ensure that you meet
-all the hardware, software, and system requirements for installing Dotfiles.
+::: tip
+Before you begin your installation, use the below instructions to ensure that
+you meet all the hardware, software, and system requirements for installing
+Dotfiles.
+:::
 
-#### 📋 System Requirements
+### System Requirements
 
-You need a modern operating system to install Dotfiles. Here's an non-exhaustive
-list of the recommended operating systems that we support.
+You will need a modern operating system to install Dotfiles. We recommend that
+you use the latest version of macOS, Linux or Windows for best performance,
+security and compatibility.
 
-If you don't see your operating system listed, it may still work, but we have
-yet been able to test it. If you have any issues, please let us know.
+### Software Requirements
 
-- macOS 10.15 or later
-- Windows 10 or later
-- A Debian based distribution ([Debian][debian-url], [Ubuntu][ubuntu-url],
-[PoP!_OS][pop-url], [Zorin OS][zorin-url], [Q4OS][q4-url],
-[Kali Linux][kali-url], [Devuan][devuan-url], [Deepin][deepin-url], etc.)
-
-![divider][divider]
-
-#### ✔️ Software Requirements
-
-The following programs must be installed on your system to install Dotfiles:
+The following programs are required on your system to install the Dotfiles:
 
 - [**Bash**][bash-url] - a shell, or command language interpreter, for the GNU
   operating system.
@@ -76,32 +58,31 @@ The following programs must be installed on your system to install Dotfiles:
 - [**PnPM**][pnpm-url] - a package manager for JavaScript and Node.js. It is
   fast, disk space efficient and reliable.
 
-#### Font
+### Font Requirements
 
 We recommend using a font such as `Roboto Mono for Powerline` for terminal and
 vscode editor.
 
-On macOS, you can install the font using the following command:
+- On macOS, you can install the font using the following command:
 
 ```bash
-brew tap homebrew/cask-fonts
+brew tap homebrew/cask-fonts && brew cask install font-roboto-mono-for-powerline
 ```
 
-```bash
-brew cask install font-roboto-mono-for-powerline
-```
-
-On Linux, you can install the font using the following command:
+- On Debian based Linux distributions, you can install the font using the
+   following command:
 
 ```bash
 sudo apt install fonts-roboto-mono-for-powerline
 ```
 
+## 🧰 Installation
+
 ### 1️⃣ Download Dotfiles
 
-You can download the latest version (v0.2.462) with the following options:
+You can download the latest version of Dotfiles (v0.2.462) using the following:
 
-- [**Manual download**][releases-url] - **The easiest way to install Dotfiles.**
+- [**Manual download**][releases-url] **The easiest way to install Dotfiles.**
 - [**Install with PnPM**][package-url]
   `pnpm i @sebastienrousseau/dotfiles`.
 - [**Install with Npm**][package-url]
@@ -109,17 +90,20 @@ You can download the latest version (v0.2.462) with the following options:
 - [**Install with Yarn**][package-url]
   `yarn add @sebastienrousseau/dotfiles`.
 - **Clone the main repository** to get all source files including build scripts:
-  `git clone https://github.com/sebastienrousseau/dotfiles.git`. This will clone
-  the latest version of the Dotfiles repository.
+  `git clone https://github.com/sebastienrousseau/dotfiles.git`.
 
 ### 2️⃣ Back Up Your Existing Data
 
+::: tip
 Before installing Dotfiles, we strongly recommend that you back up your existing
-data. The Dotfiles installer will try to automatically backup any previous
-installation of known dotfiles into a backup directory
-`$HOME/dotfiles_backup`.
+data. It is always a good idea to backup as there might be situations in which you
+could be required to restore your previous installation.
+:::
 
-The backup files are the following:
+The Dotfiles installer will try to automatically backup any previous
+installation of known dotfiles into a backup directory `$HOME/dotfiles_backup`.
+
+The files that will be backed up are listed below:
 
 ```bash
 .alias
@@ -148,27 +132,19 @@ The backup files are the following:
 cacert.pem
 ```
 
-It is always a good idea to backup as there might be situations in which you
-could be required to restore your previous installation.
+Try it out and let us know what you think!
 
-### 3️⃣ Try it out and let us know what you think
-
-To install the latest version of the dotfiles, run the following command:
-
-#### Using make (easiest)
+### 3️⃣ Installation using the make file
 
 The easiest way to install Dotfiles is to use the `make` command. This will
 install the latest version of the dotfiles and will automatically backup
 any existing dotfiles you may have into a backup directory
 `$HOME/dotfiles_backup`.
 
-The installer will check if you have PnPM installed to switch to the PnPM
-installation method. If not, it will fallback to equivalent shell scripts.
-
 Switch to the `dist` directory and run:
 
 ```bash
-make assemble
+make build
 ```
 
 You can also just check the installer options available, by simply running:
@@ -177,7 +153,7 @@ You can also just check the installer options available, by simply running:
 make help
 ```
 
-#### Using Node.js (advanced)
+### 4️⃣ Installation using Node.js
 
 If you want to install Dotfiles using Node.js, you can run the following
 command in the `dist` directory located in your
@@ -191,7 +167,7 @@ This will install the latest version of the dotfiles and will automatically
 backup any existing dotfiles you may have into a backup directory
 `$HOME/dotfiles_backup`.
 
-#### Using PnPM (highly recommended if you have PnPM installed)
+### 5️⃣ Installation using PnPM
 
 PnPM is a key dependency of the dotfiles package. It will help you install the
 dotfiles rapidly and very efficiently.
@@ -206,7 +182,7 @@ This will install the latest version of the dotfiles and will automatically
 backup any existing dotfiles you may have into a backup directory
 `$HOME/dotfiles_backup`.
 
-### Post installation
+### 6️⃣ Post installation
 
 Following the installation, you can verify that the dotfiles package is
 installed in the following directory `$HOME/dotfiles_backup`.
@@ -215,11 +191,9 @@ Just quit your terminal and restart it. If the installation is successful, you
 should be able to see a new interface of your terminal and be able to start
 using the dotfiles aliases and other configurations.
 
-Please refer to the [documentation][docs-url] for more information.
-
 ![divider][divider]
 
-### 4️⃣ What's included
+## ❓ What's included
 
 Dotfiles contains core elements that are used to configure your shell, and
 other components catered for your environment setup.
@@ -432,6 +406,8 @@ compatibility, `Dotfiles` follows [Semantic Versioning][semver-url].
 
 - See [Dotfiles Release][releases-url] for a list of changes.
 
+![divider][divider]
+
 ## ✅ Changelog
 
 - [GitHub Releases][releases-url] are used for changelogs.
@@ -494,9 +470,6 @@ awesome [contributors][contributors-url]
 [code-of-conduct-url]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CODE-OF-CONDUCT.md
 [contributing-url]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CONTRIBUTING.md
 [curl-url]: https://curl.se/
-[debian-url]: https://www.debian.org/
-[deepin-url]: https://www.deepin.org/en/
-[devuan-url]: https://devuan.org/
 [docs-url]: https://github.com/sebastienrousseau/dotfiles/docs
 [download-url]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.462.tar.gz
 [fossa-url]: https://app.fossa.io/projects/git%2Bgithub.com%2Freedia%2Fdotfiles?ref=badge_large
@@ -504,21 +477,16 @@ awesome [contributors][contributors-url]
 [github-url]: https://github.com/sebastienrousseau/dotfiles
 [gr-url]: https://github.com/gramtech
 [issues-url]: https://github.com/sebastienrousseau/dotfiles/issues
-[kali-url]: https://www.kali.org/
 [license-url]: https://opensource.org/licenses/MIT
 [make-url]: https://www.gnu.org/software/make/
 [package-url]:https://www.npmjs.com/package/@sebastienrousseau/dotfiles
 [pnpm-url]: https://pnpm.io
-[pop-url]: https://pop.system76.com/
-[q4-url]: https://q4os.org/
 [releases-url]: https://github.com/sebastienrousseau/dotfiles/releases
 [semver-url]: http://semver.org/
 [shell-url]: https://www.gnu.org/software/shell/
 [sr-url]: https://github.com/sebastienrousseau
-[ubuntu-url]: https://ubuntu.com/
 [website-url]: https://dotfiles.io
 [wget-url]: https://www.gnu.org/software/wget/
-[zorin-url]: https://zorinos.com/
 [zsh-url]: https://www.zsh.org/
 
 [contributors-url]: https://github.com/sebastienrousseau/dotfiles/graphs/contributors "List of contributors"

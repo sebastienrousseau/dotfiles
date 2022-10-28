@@ -168,7 +168,7 @@ installation method. If not, it will fallback to equivalent shell scripts.
 Switch to the `dist` directory and run:
 
 ```bash
-make assemble
+make build
 ```
 
 You can also just check the installer options available, by simply running:
