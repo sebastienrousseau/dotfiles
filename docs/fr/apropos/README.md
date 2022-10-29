@@ -206,7 +206,7 @@ Vérifier que les dotfiles sont bien installés dans le répertoire
 Si l'installation est réussie, vous devriez voir la nouvelle interface Dotfiles
 dans votre shell.
 
-## :question: Contenu des Dotfiles
+## :question: Contenu
 
 Dotfiles contient des éléments de base qui sont utilisés pour configurer votre
 shell, et d'autres composants adaptés à la configuration de votre environnement.
@@ -343,10 +343,9 @@ suivants :
 
 ```
 
-## :link: Versions des Dotfiles
+## :link: Publication
 
-Les versions précédentes des Dotfiles sont disponibles sur
-[GitHub][releases-url].
+Les publications des Dotfiles sont disponibles sur [GitHub][releases-url].
 
 ## :traffic_light: Versionnage sémantique
 
@@ -358,7 +357,7 @@ maintenir les Dotfiles suivent les principes de
 
 - [GitHub Releases][releases-url] are used for changelogs.
 
-## :book: Code of Conduct
+## :book: Code de conduite
 
 Nous nous engageons à préserver et à favoriser une communauté diversifiée et
 accueillante. Veuillez lire notre [Code de conduite][code-of-conduct-url].
