@@ -4,11 +4,11 @@ heroImage: /logo.svg
 heroText: Conçus pour s'adapter à votre vie de shell
 home: true
 lang: fr-FR
-metaTitle: À propos des Dotfiles - Dotfiles (FR)
+metaTitle: Dotfiles (France)
 permalink: /
 subtitle: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et pour vous servir
 tagline: Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et pour vous servir
-title: À propos des Dotfiles - Dotfiles (FR)
+title: Dotfiles (France)
 actionText: En savoir plus →
 actionLink: /fr/apropos/
 features:
@@ -28,7 +28,7 @@ meta:
   - name: twitter:description
     content: "Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et pour vous servir"
   - name: og:title
-    content: "À propos des Dotfiles - Dotfiles (FR)"
+    content: "Dotfiles (France)"
   - name: og:description
     content: "Des fichiers de configuration Bash pour macOS, Linux et Windows. Adaptés à vos besoins et pour vous servir"
   - name: og:image:alt

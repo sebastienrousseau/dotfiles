@@ -4,11 +4,11 @@ heroImage: /logo.svg
 heroText: Simply designed to fit your shell life
 home: true
 lang: en-GB
-metaTitle: About Dotfiles - Dotfiles (UK)
+metaTitle: Dotfiles (United Kingdom)
 permalink: /
 subtitle: Bash configuration files for macOS, Linux and Windows. Tailored to your needs and at your service
 tagline: Bash configuration files for macOS, Linux and Windows. Tailored to your needs and at your service
-title: About Dotfiles - Dotfiles (UK)
+title: Dotfiles (United Kingdom)
 actionText: Read more →
 actionLink: /about/
 features:
@@ -28,7 +28,7 @@ meta:
   - name: twitter:description
     content: Bash configuration files for macOS, Linux and Windows. Tailored to your needs and at your service
   - name: og:title
-    content: About Dotfiles - Dotfiles (UK)
+    content: Dotfiles (United Kingdom)
   - name: og:description
     content: Bash configuration files for macOS, Linux and Windows. Tailored to your needs and at your service
   - name: og:image:alt
