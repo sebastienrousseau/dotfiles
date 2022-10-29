@@ -365,22 +365,22 @@ accueillante. Veuillez lire notre [Code de conduite][code-of-conduct-url].
 
 ## :star: Nos valeurs
 
-- Nous pensons que la perfection doit tout prendre en compte.
-- Nous portons notre passion au-delà du code dans nos pratiques quotidiennes.
-- Nous sommes stimulés par le développement de solutions exceptionnelles.
+- Nous pensons que la perfection fait partie de tout.
+- Notre passion va au-delà du code et s’intègre dans notre vie quotidienne.
+- Nous cherchons toujours à fournir des solutions exceptionnelles et innovantes.
 
 ## :handshake: Contribution
 
-Merci d'utiliser Dotfiles ! Si vous aimez la bibliothèque, ce serait formidable
-si vous pouvez lui donner une étoile ⭐ sur [Github][github-url].
+Merci d'utiliser Dotfiles ! Si vous aimez notre projet, n'hésitez pas à nous
+donner une étoile :star: sur [Github][github-url].
 
 Il existe également de nombreuses façons de participer à ce projet, par
 exemple :
 
 - [Soumettre des bogues et des demandes de fonctionnalités][issues-url], et
-  vous pouvez même aider à les résoudre.
+  vous pouvez même nous aider à les résoudre.
 - Examinez la [documentation][docs-url] et aidez-nous à la rendre encore
-  meilleure.
+  meilleure, plus claire et plus complète.
 
 Veuillez lire attentivement nos [Contributing Guidelines][contributing-url]
 pour de plus amples informations sur notre processus de développement et sur
