@@ -22,9 +22,9 @@ meta:
 ---
 
 
-# 👋 Welcome to Dotfiles v0.2.462
+# :wave: Welcome to Dotfiles v0.2.462
 
-## 🔰 Introduction
+## :beginner: Introduction
 
 A set of Bash configuration files for macOS, Linux and Windows, that you can use
 to customize your shell and applications. All in one place and ready to use.
@@ -40,7 +40,7 @@ and high performance for your shell.
 Try them out and let us know what you think of Dotfiles. We are always looking
 for ways to improve our products and services.
 
-## 🚀 Getting Started
+## :rocket: Getting Started
 
 We are so delighted that you have decided to try Dotfiles, and are sure that you
 will find them unique and helpful.
@@ -55,13 +55,13 @@ installing Dotfiles on your computer and backup any current configuration files
 you may have.
 :::
 
-### 1️⃣ System Requirements
+### :one: System Requirements
 
 You need a modern operating system to install Dotfiles and we recommend that you
 use the latest version of macOS, Linux or Windows for best performance, security
 and compatibility with the latest Dotfiles features.
 
-### 2️⃣ Software Requirements
+### :two: Software Requirements
 
 The latest version of the following software is required to install Dotfiles:
 
@@ -74,7 +74,7 @@ The latest version of the following software is required to install Dotfiles:
 1. [**Make**][make-url] (3.0 or higher), for installing the Dotfiles.
 1. [**PnPM**][pnpm-url] (6.0 or higher), for installing the Dotfiles.
 
-### 3️⃣ Font Requirements
+### :three: Font Requirements
 
 We also recommend using an open-source typeface such as `JetBrains Mono` for
 configuring your terminal, and any IDEs or editors you may use.
@@ -97,9 +97,9 @@ supports a wide range of programming languages.
   sudo apt install fonts-jetbrains-mono
   ```
 
-## 🧰 How to Install
+## :toolbox: How to Install
 
-### 1️⃣ Back Up Your Existing Data
+### :one: Back Up Your Existing Data
 
 ::: tip
 Before installing Dotfiles, we strongly recommend that you back up your existing
@@ -140,7 +140,7 @@ exhaustive and may change over time as Dotfiles evolves.
 cacert.pem
 ```
 
-### 2️⃣ Download Dotfiles
+### :two: Download Dotfiles
 
 Download the latest version of Dotfiles (v0.2.462) through any of these methods:
 
@@ -155,7 +155,7 @@ Download the latest version of Dotfiles (v0.2.462) through any of these methods:
 - [**Using Git**][git-url] - Clone the Dotfiles repository from GitHub
   `git clone https://github.com/sebastienrousseau/dotfiles.git`.
 
-### 3️⃣ Installation using Make
+### :three: Installation using Make
 
 The easiest way to install Dotfiles is to use the `make` command in your shell.
 This will install the latest version of the dotfiles and will automatically try
@@ -174,7 +174,7 @@ You can also just check the installer options, by simply running:
 make help
 ```
 
-### 4️⃣ Installation using Node.js
+### :four: Installation using Node.js
 
 If you want to install Dotfiles using Node.js, switch to the `dotfiles-0.2.462`
 directory and run:
@@ -183,7 +183,7 @@ directory and run:
 node .
 ```
 
-### 5️⃣ Installation using PnPM
+### :five: Installation using PnPM
 
 If you want to install Dotfiles using PnPM, switch to the `dotfiles-0.2.462`
 directory and run:
@@ -192,7 +192,7 @@ directory and run:
 pnpm run build
 ```
 
-### 6️⃣ Post installation
+### :six: Post installation
 
 Following the installation, you can now verify that the dotfiles are installed
 in the following directory `$HOME/.dotfiles`. To complete the setup, just
@@ -201,7 +201,7 @@ restart your terminal.
 If the installation is successful, you should be able to see the new Dotfiles
 interface in your terminal and you can start using it right away.
 
-## ❓ What's included
+## :question: What's included
 
 Dotfiles contains core elements that are used to configure your shell, and
 other components catered for your environment setup.
@@ -338,31 +338,31 @@ files:
 
 ```
 
-## 🔗 Releases
+## :link: Releases
 
 Releases are available on the [GitHub releases page][releases-url].
 
-## 🚥 Semantic versioning policy
+## :traffic_light: Semantic versioning policy
 
 For transparency into our release cycle and in striving to maintain backward
 compatibility, `Dotfiles` follows [Semantic Versioning][semver-url].
 
-## ✅ Changelog
+## :white_check_mark: Changelog
 
 - [GitHub Releases][releases-url] are used for changelogs.
 
-## 📖 Code of Conduct
+## :book: Code of Conduct
 
 We are committed to preserving and fostering a diverse, welcoming community.
 Please read our [Code of Conduct][code-of-conduct-url].
 
-## ⭐️ Our Values
+## :star: Our Values
 
 - We believe perfection must consider everything.
 - We take our passion beyond code into our daily practices.
 - We are just obsessed about creating and delivering exceptional solutions.
 
-## ❤️ Contributing
+## :handshake: Contributing
 
 Thank you for using Dotfiles! If you like the library, it would be
 great if you can give it a star ⭐ on [Github][github-url].
@@ -385,7 +385,7 @@ This project is licensed under the [MIT License][license-url] file for details.
 
 [![FOSSA Status][fossa]][fossa-url]
 
-## 🏢 Acknowledgements
+## :blue_heart: Acknowledgements
 
 [Dotfiles][website-url] is beautifully crafted by these people and a bunch of
 awesome [contributors][contributors-url]
