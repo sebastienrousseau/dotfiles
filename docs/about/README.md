@@ -97,7 +97,7 @@ supports a wide range of programming languages.
   sudo apt install fonts-jetbrains-mono
   ```
 
-## 🧰 How to Install
+## :wrench: How to Install
 
 ### :one: Back Up Your Existing Data
 

@@ -38,17 +38,18 @@ aider à travailler plus efficacement et obtenir de meilleurs résultats avec
 votre shell.
 
 Nous sommes ravis que vous ayez décidé d'installer les Dotfiles, et espérons que
-vous les trouverez accessibles et avec une aisance incomparable.
+vous les trouverez accessibles et d'une aisance incomparable.
 
-Essayez-les et faites-nous savoir ce que vous en pensez. Nous sommes toujours à
-la recherche de commentaires et de suggestions pour améliorer nos produits et
-services.
+Essayez-les dès maintenant, et faites-nous savoir ce que vous en pensez. Nous
+sommes toujours à la recherche de commentaires et de suggestions pour améliorer
+nos produits et services.
 
 ## :rocket: Démarrage
 
 Les Dotfiles fournissent un ensemble de méthodes d'installation pour vous aider
 à démarrer rapidement. Vous pouvez choisir celle qui correspond le mieux à vos
-besoins et à vos préférences.
+besoins et à vos préférences. Plus d'informations sur les méthodes
+d'installation sont disponibles dans la section [Installation](#installation).
 
 ::: tip
 Avant de commencer cependant, veuillez lire les instructions ci-dessous pour
@@ -57,34 +58,32 @@ vous assurer que vous avez les prérequis nécessaires.
 
 ### :one: Configuration matérielle requise
 
-Pour installer les Dotfiles, nous vous recommandons d'utiliser la dernière
-version de macOS, Linux ou Windows pour de meilleures performances, sécurité et
+Pour installer les Dotfiles, nous vous recommandons d'utiliser une version
+récente de macOS, Linux ou Windows pour de meilleures performances, sécurité et
 compatibilité.
 
 ### :two: Configuration logiciel requise
 
-Certaines fonctionnalités ont des dépendances logicielles qui doivent être
-installées avant de pouvoir utiliser les fichiers. Ces dépendances sont listées
-ci-dessous.
+Les Dotfiles ont des dépendances logicielles qui doivent être installées avant
+de pouvoir les utiliser. Ces dépendances sont listées ci-dessous.
 
 1. ([**Bash**][bash-url] ou [**Zsh**][zsh-url]), pour exécuter les scripts de
-   configuration.
-1. [**Git**][git-url] (2.0 ou plus), pour cloner le dépôt des Dotfiles.
-1. [**Curl**][curl-url] (7.0 ou plus) or [**Wget**][wget-url] (1.0 ou plus),
-   pour télécharger les fichiers de configuration.
-1. [**Make**][make-url] (3.0 ou plus) or [**PnPM**][pnpm-url] (6.0 ou plus),
-   pour installer les Dotfiles.
+   configuration et les fonctions.
+2. [**Git**][git-url] (2.0 ou plus), si vous souhaitez installer les Dotfiles
+   via Git.
+3. [**Curl**][curl-url] (7.0 ou plus) or [**Wget**][wget-url] (1.0 ou plus),
+   pour télécharger les fichiers de configuration depuis les scripts
+   d'installation.
+4. [**Make**][make-url] (3.0 ou plus) or [**PnPM**][pnpm-url] (6.0 ou plus),
+   pour installer les Dotfiles via Make ou PnPM.
+5. [**Tmux**][tmux-url] (2.0 ou plus), un outil vous permettant de manipuler
+   plusieurs terminaux virtuels au sein d'une même fenêtre de terminal.
 
 ### :three: Polices de caractères
 
 Vous pouvez également utiliser une police de caractères open source telle que
 [**JetBrains Mono**][font-url] pour une meilleure expérience sur votre shell,
 IDE ou éditeur de texte.
-
-JetBrains Mono est une police de caractères gratuite et open source pour les
-développeurs, conçue pour être confortable à lire. Elle est disponible dans un
-large éventail de poids et de styles, et supporte un grand nombre de langages
-de programmation.
 
 - Sur macOS, vous pouvez installer la police en exécutant la commande suivante
   dans votre terminal :
@@ -100,7 +99,7 @@ de programmation.
   sudo apt install fonts-jetbrains-mono
   ```
 
-## 🧰 Installation
+## :wrench: Installation
 
 ### :one: Sauvegardez vos données
 
@@ -351,16 +350,18 @@ Les publications des Dotfiles sont disponibles sur [GitHub][releases-url].
 
 Dans un souci de transparence de notre cycle de publication et dans le but de
 maintenir les Dotfiles suivent les principes de
-[Versionnage sémantique][semver-url].
+[versionnage sémantique][semver-url].
 
 ## :white_check_mark: Liste des modifications
 
-- [GitHub Releases][releases-url] are used for changelogs.
+- [Le Journal des modifications GitHub][releases-url] est utilisé pour suivre
+  les différentes versions des Dotfiles et leurs changements.
 
 ## :book: Code de conduite
 
 Nous nous engageons à préserver et à favoriser une communauté diversifiée et
-accueillante. Veuillez lire notre [Code de conduite][code-of-conduct-url].
+accueillante. Vous pouvez lire notre [Code de conduite][code-of-conduct-url]
+pour en savoir plus.
 
 ## :star: Nos valeurs
 
@@ -370,24 +371,26 @@ accueillante. Veuillez lire notre [Code de conduite][code-of-conduct-url].
 
 ## :handshake: Contribution
 
-Merci d'utiliser Dotfiles ! Si vous aimez notre projet, n'hésitez pas à nous
-donner une étoile :star: sur [Github][github-url].
+Merci d'utiliser Dotfiles ! Si vous aimez ce projet, n'hésitez pas à nous donner
+un coup de pouce en le notant sur [GitHub][github-url] ou en le partageant avec
+vos amis et collègues.
 
-Il existe également de nombreuses façons de participer à ce projet, par
-exemple :
+Il existe également d'autres façons de contribuer, comme :
 
-- [Soumettre des bogues et des demandes de fonctionnalités][issues-url], et
-  vous pouvez même nous aider à les résoudre.
-- Examinez la [documentation][docs-url] et aidez-nous à la rendre encore
-  meilleure, plus claire et plus complète.
+- [Soumettre des bogues et des demandes de fonctionnalités][issues-url], vous
+  pouvez même nous aider à les résoudre et faire partie de la communauté.
+- Vérifiez notre [documentation][docs-url] et traductions pour nous aider à
+  améliorer la qualité de notre contenu.
+- [Faire un don][donate-url] pour nous aider à continuer à améliorer le projet
+  ou payer pour un café.
 
-Veuillez lire attentivement nos [Contributing Guidelines][contributing-url]
+Veuillez lire attentivement nos [guides de contribution][contributing-url]
 pour de plus amples informations sur notre processus de développement et sur
 la façon de soumettre des demandes de fonctionnalités ou des rapports de bogues.
 
 ## 🥂 Licence d'utilisation
 
-Ce projet est soumis à la licence [MIT License][license-url].
+Ce projet est soumis à la licence [MIT][license-url].
 
 [![FOSSA Status][fossa]][fossa-url]
 
@@ -405,6 +408,7 @@ Ce projet est soumis à la licence [MIT License][license-url].
 [contributing-url]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CONTRIBUTING.md
 [curl-url]: https://curl.se/
 [docs-url]: https://github.com/sebastienrousseau/dotfiles/tree/master/docs
+[donate-url]: https://paypal.me/wwdseb
 [font-url]: https://www.jetbrains.com/lp/mono/#intro
 [fossa-url]: https://app.fossa.io/projects/git%2Bgithub.com%2Freedia%2Fdotfiles?ref=badge_large
 [git-url]: https://git-scm.com/
@@ -417,6 +421,7 @@ Ce projet est soumis à la licence [MIT License][license-url].
 [releases-url]: https://github.com/sebastienrousseau/dotfiles/releases
 [semver-url]: http://semver.org/
 [sr-url]: https://github.com/sebastienrousseau
+[tmux-url]: https://github.com/tmux/tmux/wiki
 [website-url]: https://dotfiles.io
 [wget-url]: https://www.gnu.org/software/wget/
 [zsh-url]: https://www.zsh.org/
