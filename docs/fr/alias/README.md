@@ -94,9 +94,8 @@ shell Bash ou dans le fichier `~/.zshrc` si vous utilisez le shell Zsh.
 
 Ils ont été regroupés par catégories logiques :
 
-- [Défault][default-url] - Les alias par défaut qui sont chargés pour tous les
-  utilisateurs, quel que soit le shell qu'ils utilisent et le système
-  d'exploitation qu'ils utilisent.
+- [Base][default-url] - Les alias de base disponibles pour tous les utilisateurs
+  , quel que soit le shell utilisé.
 - [GCloud][gcloud-url] - Les alias pour le Google Cloud SDK,
 - [Git][git-url] - Les alias pour le système de contrôle de version Git,
 - [Heroku][heroku-url] - Les alias pour la plateforme Heroku,

@@ -1,39 +1,40 @@
 
-## 👽 System aliases
+# Les alias de base
 
-### System tools aliases
+## :alien: Les alias système
 
-| Alias | Command | Description |
+| Alias | Commande | Description |
 |---|---|---|
-| htop | `sudo htop` | Append sudo to htop (interactive process viewer) command. |
-| ifconfig | `sudo ifconfig` | Append sudo to ifconfig (configure network interface parameters) command. |
-| iotop | `sudo iotop` | Append sudo to iotop (display top disk I/O events by process) command. |
-| iptables | `sudo iptables` | Append sudo to iptables (Append sudo to iptables (Administration tool for packet filtering) command. |
-| purge | `rm -rf ~/library/Developer/Xcode/DerivedData/*` | Purging Xcode DerivedData. |
-| reload | `reset` | Reset and initialize the Terminal screen. |
-| sudo | `sudo` | Allows a system administrator to delegate authority to give certain users (or groups of users) the ability to run some (or all) commands as root or another user while providing an audit trail of the commands and their arguments. |
-| top | `htop` | Allows the user to interactively monitor the system's vital resources or server's processes in real time. |
-| ttop | `top -F -s 10  rsize` | Recommended 'top' invocation to minimize resources. |
-| zshrc | `${=EDITOR} $HOME/.zshrc` | Quick access to the `.zshrc` file. |
+| bashrc | `${=EDITOR} $HOME/.bashrc` | Ouvre le fichier de configuration bashrc |
+| htop | `sudo htop` | Ajoute sudo à la commande htop (pour visualiser les processus en cours) |
+| ifconfig | `sudo ifconfig` | Ajoute sudo à la commande ifconfig (pour visualiser les interfaces réseau) |
+| iotop | `sudo iotop` | Ajoute sudo à la commande iotop (pour visualiser les processus en cours) |
+| iptables | `sudo iptables` | Ajoute sudo à la commande iptables (pour visualiser les règles de filtrage) |
+| purge | `rm -rf ~/library/Developer/Xcode/DerivedData/*` | Supprime les fichiers temporaires Xcode |
+| reload | `reset` | Recharge le terminal |
+| sudo | `sudo` | Pour exécuter une commande en tant qu'administrateur |
+| top | `htop` | Pour visualiser les processus en cours |
+| ttop | `top -F -s 10  rsize` | Pour visualiser les processus en cours |
+| zshrc | `${=EDITOR} $HOME/.zshrc` | Ouvre le fichier de configuration zshrc |
 
-### System information aliases
+## :tv: Les alias d'information
 
-| Alias | Command | Description |
+| Alias | Commande | Description |
 |---|---|---|
-| kp | `ps auxwww` | Getting full path of executables. The "auxwww" are options to the ps (process) command. The options mean display all process running that belong to you and to other users and provide information about who owns what process. The three "www"'s mean display the entire command line regardless of how long it is and wrap it in your window. |
-| pid | `ps -f` | Display the uid, pid, parent pid, recent CPU usage, process start time, controlling tty, elapsed CPU usage, and the associated command. |
-| ping | `ping -c 5` | Limit Ping to 5 ECHO_REQUEST packets. |
-| ports | `netstat -tulan` | Display ports |
-| pscpu | `ps aux | sort -nr -k 3 | head -3` | Getting top 3 CPU eating processes. |
-| pscpu10 | `ps aux | sort -nr -k 3 | head -10` | Getting top 10 CPU eating processes. |
-| psmem | `ps aux | sort -nr -k 4 | head -3` | Getting top 3 memory eating processes. |
-| psmem10 | `ps aux | sort -nr -k 4 | head -10` | Getting top 10 memory eating processes. |
+| kp | `ps auxwww` | Pour visualiser les processus en cours |
+| pid | `ps -f` | Pour visualiser les processus en cours |
+| ping | `ping -c 5` | Pour tester la connexion internet |
+| ports | `netstat -tulan` | Pour visualiser les ports en cours d'utilisation |
+| pscpu | `ps aux | sort -nr -k 3 | head -3` | Pour visualiser les trois processus les plus gourmands en CPU |
+| pscpu10 | `ps aux | sort -nr -k 3 | head -10` | Pour visualiser les dix processus les plus gourmands en CPU |
+| psmem | `ps aux | sort -nr -k 4 | head -3` | Pour visualiser les trois processus les plus gourmands en mémoire |
+| psmem10 | `ps aux | sort -nr -k 4 | head -10` | Pour visualiser les dix processus les plus gourmands en mémoire |
 
 ## ℹ️ Interactive mode aliases
 
-### Interactive mode aliases
+## Interactive mode aliases
 
-| Alias | Command | Description |
+| Alias | Commande | Description |
 |---|---|---|
 | cp | `cp -i` | Copy files with warning. |
 | ln | `ln -i` | Make links with warning. |
@@ -43,7 +44,7 @@
 
 ## 🧬 Generic aliases
 
-| Alias | Command | Description |
+| Alias | Commande | Description |
 |---|---|---|
 | c | `clear && printf '\e[3J'` | Clear screen shortcut. |
 | cls | `clear && printf '\e[3J` | Clear screen command. |
@@ -78,7 +79,7 @@
 
 ## 🔎 Finding aliases
 
-| Alias | Command | Description |
+| Alias | Commande | Description |
 |---|---|---|
 | egrep | `egrep --color`             | Searches that can handle extended regular expressions (EREs). |
 | fd | `find . -type d -name`      | Find a directory with a given name. |
@@ -90,7 +91,7 @@
 
 ## 🗂 List directory aliases
 
-| Alias | Command | Description |
+| Alias | Commande | Description |
 |---|---|---|
 | l | `ls -lFh` | Size, show type, human readable.                                                                                       |
 | l1 | `ls -1`  | Display one file per line.                                                                                            |
@@ -132,7 +133,7 @@
 
 ## 🧭 Navigation aliases
 
-| Alias | Command | Description |
+| Alias | Commande | Description |
 |---|---|---|
 | ~ | `cd ~` | Change to $HOME directory. |
 | cd. | `cd -P .` | Show true (physical) path instead of symbolic links in the path. |
@@ -176,7 +177,7 @@
 
 ## 📂 Path aliases
 
-| Alias | Command | Description |
+| Alias | Commande | Description |
 |---|---|---|
 | .bash_profile | `cd ~/.bash_profile` | Change to .bash_profile directory. |
 | .bashrc | `cd ~/.bashrc` | Change to .bashrc directory. |
@@ -185,7 +186,7 @@
 
 ## 📝 Process aliases
 
-| Alias | Command | Description |
+| Alias | Commande | Description |
 |---|---|---|
 | kill9 | `kill -9` | Kill a process. |
 | killall | `killall` | Kill a process. |
@@ -236,9 +237,9 @@ These are special aliases that are triggered when a file name is passed as the c
 if the pdf file extension is aliased to `acroread` (a popular Linux pdf reader), when running `file.pdf`
 that file will be open with `acroread`.
 
-### Reading Docs
+## Reading Docs
 
-| Alias | Command | Description |
+| Alias | Commande | Description |
 |---|---|---|
 | pdf | `acroread` | Opens up a document using acroread |
 | ps | `gv`   | Opens up a .ps file using gv   |
@@ -246,9 +247,9 @@ that file will be open with `acroread`.
 | chm | `xchm` | Opens up a .chm file using xchm |
 | djvu | `djview` | Opens up a .djvu file using djview |
 
-### Listing files inside a packed file
+## Listing files inside a packed file
 
-| Alias | Command | Description |
+| Alias | Commande | Description |
 |---|---|---|
 | zip | `unzip -l` | Lists files inside a .zip file |
 | rar | `unrar l` | Lists files inside a .rar file |
