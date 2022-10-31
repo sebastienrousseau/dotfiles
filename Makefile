@@ -45,7 +45,7 @@ unpack: ## Extract the dotfiles to your system.
 help: # @HELP
 help: ## Display the help menu.
 	@$(BANNER)
-	@awk 'BEGIN {FS = ":.*##"; printf "\USAGE:\n\n make \033[1;96m[COMMAND]\033[0m\n\nCOMMANDS:\n\n"} /^[$$()% a-zA-Z_-]+:.*?##/ { printf "  \033[1;96m%-8s\033[0m -%s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*##"; printf "USAGE:\n\n make \033[1;96m[COMMAND]\033[0m\n\nCOMMANDS:\n\n"} /^[$$()% a-zA-Z_-]+:.*?##/ { printf "  \033[1;96m%-8s\033[0m -%s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 	@echo ""
 	@echo "DOCUMENTATION:"
 	@echo ""
