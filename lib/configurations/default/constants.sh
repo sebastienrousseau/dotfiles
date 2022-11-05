@@ -6,18 +6,18 @@
 
 ## 🅳🅾🆃🅵🅸🅻🅴🆂 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set Dotfiles variables.
 # DF_CURRENT_DIR=${PWD}                   # Current directory.
-DF=".dotfiles/"                           # Dotfiles.
-DF_DIR="${HOME}/.dotfiles/"               # Dotfiles directory.
-DF_BACKUPDIR="${HOME}/dotfiles_backup/"   # Backup directory.
-DF_DOWNLOADDIR="${HOME}/Downloads"        # Download directory.
-DF_VERSION="0.2.462"                      # Dotfiles Version number.
-DF_TIMESTAMP="$(date +%Y-%m-%d_%H-%M-%S)" # Timestamp for backup directory.
+DF=".dotfiles/"                         # Dotfiles.
+DF_DIR="${HOME}/.dotfiles/"             # Dotfiles directory.
+DF_BACKUPDIR="${HOME}/dotfiles_backup/" # Backup directory.
+DF_DOWNLOADDIR="${HOME}/Downloads"      # Download directory.
+DF_VERSION="0.2.462"                    # Dotfiles Version number.
+# DF_TIMESTAMP="$(date +%Y-%m-%d_%H-%M-%S)" # Timestamp for backup directory.
 
 export DF
 export DF_BACKUPDIR
 export DF_DIR
 export DF_DOWNLOADDIR
-export DF_TIMESTAMP
+# export DF_TIMESTAMP
 export DF_VERSION
 
 ## 🅲🅾🅻🅾🆁🆂 - Set colors.
