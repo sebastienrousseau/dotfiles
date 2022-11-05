@@ -5,7 +5,6 @@
 # License: MIT
 
 # 🅳🅴🅵🅰🆄🅻🆃 🅰🅻🅸🅰🆂🅴🆂
-unalias -a                                                                                  # Remove all previous environment defined aliases.
 alias ':q'='quit'                                                                           # q: Shortcut for the `exit` command.
 alias bye='quit'                                                                            # q: Shortcut for the `exit` command.
 alias ctf='echo $(ls -1 | wc -l)'                                                           # ctf: Count the number of files in the current directory.
@@ -13,19 +12,10 @@ alias curl='curl --compressed'                                                  
 alias da='date "+%Y-%m-%d %A %T %Z"'                                                        # da: Display the current date and time.
 alias del="rm -rfv"                                                                         # del: Remove a file or directory.
 alias digg="dig @8.8.8.8 +nocmd any +multiline +noall +answer"                              # digg: Dig with Google's DNS.
-alias dsp="sudo du -shc ."                                                                  # dsp: Show the size of the current directory.
-alias du='sudo du -h'                                                                       # du: File size human readable output sorted by size.
-alias duf='sudo du -sh *'                                                                   # duf: File size human readable output sorted.
-alias e='vim'                                                                               # e, edit, mate: Edit current file.
-alias edit='vim'                                                                            # e, edit, mate: Edit current file.
 alias h='history'                                                                           # h: Lists all recently used commands.
 alias halt="sudo /sbin/halt"                                                                # halt: Shutdown the system.
 alias ifconfig='sudo ifconfig'                                                              # ifconfig: Append sudo to ifconfig (configure network interface parameters) command.
-alias ip="ip4; ip6"                                                                         # ip: Get the public IPv4 and IPv6 addresses.
-alias ip4="dig +short myip.opendns.com @resolver1.opendns.com -4"                           # ip4: Get the public IPv4 address.
-alias ip6="dig -6 AAAA +short myip.opendns.com. @resolver1.opendns.com."                    # ip6: Get the public IPv6 address.
 alias ipinfo='ipconfig getpacket en0'                                                       # ipInfo0: Get network interface parameters for en0.
-alias mate='vim'                                                                            # e, edit, mate: Edit current file.
 alias moon='curl -s "wttr.in/?format=%m"'                                                   # moon: Get the moon phase.
 alias nls='sudo lsof -i -P | grep LISTEN'                                                   # nls: Show only active network listeners.
 alias now='date +"%T"'                                                                      # now: Show the current time.
@@ -50,11 +40,10 @@ alias reboot="sudo /sbin/reboot"                                                
 alias reload='exec $SHELL -l'                                                               # reload: Reload the shell.
 alias rr="rm -rf"                                                                           # rr: Remove directory and all its contents.
 alias rs='rsync -avz'                                                                       # rs: Rsync with verbose and progress.
-alias s='sudo'                                                                              # s: Execute a command as the superuser.
 alias shutdown='sudo shutdown -h now'                                                       # shutdown: Shutdown the system.
 alias spd='sudo rm -rf /private/var/log/asl/*'                                              # spd: Remove all log files in /private/var/log/asl.
 alias srv='python3 -m http.server'                                                          # srv: Start a simple HTTP server.
-alias svi='sudo vi'                                                                         # svi: Run vi in sudo mode.
+alias svi='sudo nano'                                                                       # svi: Run vi in sudo mode.
 alias t='tail -f'                                                                           # t: Prints the last 10 lines of a text or log file, and then waits for new additions to the file to print it in real time.
 alias top='sudo btop'                                                                       # top: Allows the user to interactively monitor the system's vital resources or server's processes in real time.
 alias trash='rm -fr ${HOME}/.Trash'                                                         # trash: Remove all files in the trash.
@@ -62,8 +51,6 @@ alias tree='tree --dirsfirst'                                                   
 alias undopush="git push -f origin HEAD^:master"                                            # undopush: Undo the last push.
 alias usage='du -ch | grep total'                                                           # usage: Grabs the disk usage in the current directory.
 alias uuid="uuidgen | tr -d '\n' | tr '[:upper:]' '[:lower:]'  | pbcopy && pbpaste && echo" # uuid: Generate a UUID and copy it to the clipboard.
-alias v='vim $(f)'                                                                          # v: Edit a file.
-alias v='vim'                                                                               # e, edit, mate: Edit current file.
 alias wget='wget -c'                                                                        # wget: wget with resume.
 alias wip='dig +short myip.opendns.com @resolver1.opendns.com'                              # wip: Get public IP address.
 alias wk='date +%V'                                                                         # wk: Show the current week number.
@@ -74,6 +61,7 @@ if [[ "$(uname || true)" = "Darwin" ]]; then
   alias upd='
         sudo softwareupdate -i -a;
         pnpm up;
+        rustup update stable;
         if [[ "$(command -v brew cu)" ]]; then
             brew cu -ayi;
         else
@@ -95,6 +83,7 @@ elif [[ "$(uname || true)" = "Linux" ]]; then
         sudo apt update;
         sudo apt upgrade -y;
         pnpm up;
+        rustup update stable;
         sudo gem update;
         sudo gem cleanup;
     '

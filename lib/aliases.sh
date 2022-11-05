@@ -6,7 +6,10 @@
 
 ## 🅰🅻🅸🅰🆂🅴🆂
 
-# Load custom executable aliases
+# Remove all aliases from the current shell.
+unalias -a # Remove all previous environment defined aliases.
+
+# Then load custom Dotfiles aliases.
 for file in "${HOME}"/.dotfiles/lib/aliases/[!.#]*/*.sh; do
   # shellcheck source=/dev/null
   source "${file}"
