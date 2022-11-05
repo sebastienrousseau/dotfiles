@@ -17,7 +17,7 @@
 ## get the timings for a curl to a URL
 ## usage: curltime $url
 curltime() {
-    curl -w "\n\
+  curl -w "\n\
 ┌──────────────────────────────┐\n\
 │Time appconnect:    %{time_appconnect}s │\n\
 │Time connect:       %{time_connect}s │\n\
@@ -28,5 +28,5 @@ curltime() {
 └──────────────────────────────┘\n\
 Time total:  %{time_total}s\n\n" -o /dev/null -s "$1"
 }
-alias clh='curlheader'   # Alias for curlheader
-alias crlhd='curlheader' # Alias for curlheader
+alias cht="curltime"  # cht: Curl Time.
+alias chtm="curltime" # chtm: Curl Time.
