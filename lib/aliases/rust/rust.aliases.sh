@@ -6,28 +6,28 @@
 
 # 🅲🅰🆁🅶🅾 🅰🅻🅸🅰🆂🅴🆂
 if command -v cargo &>/dev/null; then
-  alias c='cargo'                # c: Cargo shortcut.
-  alias cgb='c build'            # cgb: Cargo build.
-  alias cgbh='c bench'           # cgbh: Cargo bench.
-  alias cgbr='c build --release' # cbr: Cargo build release.
-  alias cgc='c check'            # cgc: Cargo check.
-  alias cgcl='c clean'           # cgcl: Cargo clean.
-  alias cgcy='c clippy'          # cgcy: Cargo clippy.
-  alias cgd='c doc --open'       # cgd: Cargo doc.
-  alias cgdr='c doc --release'   # cgdr: Cargo doc release.
-  alias cgf='c fmt'              # cgf: Cargo format.
-  alias cgi='c install'          # cgi: Cargo install.
-  alias cginit='c init'          # cginit: Cargo init.
-  alias cgn='c new'              # cgn: Cargo new.
-  alias cgp='c publish'          # cgp: Cargo publish.
-  alias cgr='c run'              # cgr: Cargo run.
-  alias cgrr='c run --release'   # cgrr: Cargo run release.
-  alias cgs='c search'           # cgs: Cargo search.
-  alias cgt='c test'             # cgt: Cargo test.
-  alias cgtr='c test --release'  # cgtr: Cargo test release.
-  alias cgtt='c tree'            # cgtt: Cargo tree.
-  alias cgu='c update'           # cgu: Cargo update.
-  alias cgun='c uninstall'       # cgun: Cargo uninstall.
+  alias cg='cargo'                 # c: Cargo shortcut.
+  alias cgb='cg  build'            # cgb: Cargo build.
+  alias cgbh='cg  bench'           # cgbh: Cargo bench.
+  alias cgbr='cg  build --release' # cbr: Cargo build release.
+  alias cgc='cg  check'            # cgc: Cargo check.
+  alias cgcl='cg  clean'           # cgcl: Cargo clean.
+  alias cgcy='cg  clippy'          # cgcy: Cargo clippy.
+  alias cgd='cg  doc --open'       # cgd: Cargo doc.
+  alias cgdr='cg  doc --release'   # cgdr: Cargo doc release.
+  alias cgf='cg  fmt'              # cgf: Cargo format.
+  alias cgi='cg  install'          # cgi: Cargo install.
+  alias cginit='cg  init'          # cginit: Cargo init.
+  alias cgn='cg  new'              # cgn: Cargo new.
+  alias cgp='cg  publish'          # cgp: Cargo publish.
+  alias cgr='cg  run'              # cgr: Cargo run.
+  alias cgrr='cg  run --release'   # cgrr: Cargo run release.
+  alias cgs='cg  search'           # cgs: Cargo search.
+  alias cgt='cg  test'             # cgt: Cargo test.
+  alias cgtr='cg  test --release'  # cgtr: Cargo test release.
+  alias cgtt='cg  tree'            # cgtt: Cargo tree.
+  alias cgu='cg  update'           # cgu: Cargo update.
+  alias cgun='cg  uninstall'       # cgun: Cargo uninstall.
 fi
 
 # 🆁🆄🆂🆃🆄🅿 🅰🅻🅸🅰🆂🅴🆂

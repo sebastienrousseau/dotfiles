@@ -5,10 +5,9 @@
 # License: MIT
 
 # 🅲🅻🅴🅰🆁 🅰🅻🅸🅰🆂🅴🆂
-alias c="clear"                       # c: Clear screen shortcut.
-alias cl="c"                          # cl: Clear screen shortcut.
-alias clear="clear && printf '\e[3J'" # clear: Clear screen shortcut.
-alias clr="c"                         # clr: Clear screen shortcut.
-alias cls="c"                         # cls: Clear screen shortcut.
-alias ct="clear && tree ./"           # ct: Clear screen and list directory contents.
-alias ctree="ct"                      # ctree: Clear screen and list directory contents.
+alias c="clear"             # c: Clear screen shortcut.
+alias cl="c"                # cl: Clear screen shortcut.
+alias clr="c"               # clr: Clear screen shortcut.
+alias cls="c"               # cls: Clear screen shortcut.
+alias ct="clear && tree ./" # ct: Clear screen and list directory contents.
+alias ctree="ct"            # ctree: Clear screen and list directory contents.
