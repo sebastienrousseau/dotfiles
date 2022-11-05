@@ -529,4 +529,6 @@ if command -v git &>/dev/null; then
 
   # Output remote origin from within a local repository.
   alias gconfr='git config --local --get remote.origin.url'
+
+  alias undopush="git push -f origin HEAD^:master" # undopush: Undo the last push.
 fi
