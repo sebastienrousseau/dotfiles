@@ -5,27 +5,27 @@
 # License: MIT
 
 # 🅳🅴🅵🅰🆄🅻🆃 🅰🅻🅸🅰🆂🅴🆂
-alias ':q'='quit'                              # q: Shortcut for the `exit` command.
-alias bye='quit'                               # q: Shortcut for the `exit` command.
-alias ctf='echo $(ls -1 | wc -l)'              # ctf: Count the number of files in the current directory.
-alias curl='curl --compressed'                 # curl: Use compression when transferring data.
-alias da='date "+%Y-%m-%d %A %T %Z"'           # da: Display the current date and time.
-alias h='history'                              # h: Lists all recently used commands.
-alias halt="sudo /sbin/halt"                   # halt: Shutdown the system.
-alias ifconfig='sudo ifconfig'                 # ifconfig: Append sudo to ifconfig (configure network interface parameters) command.
-alias ipinfo='ipconfig getpacket en0'          # ipInfo0: Get network interface parameters for en0.
-alias moon='curl -s "wttr.in/?format=%m"'      # moon: Get the moon phase.
-alias nls='sudo lsof -i -P | grep LISTEN'      # nls: Show only active network listeners.
-alias now='date +"%T"'                         # now: Show the current time.
-alias op='sudo lsof -i -P'                     # op: List of open ports.
-alias p='pwd'                                  # p: Shortcut for `pwd` which returns working directory name.
-alias path='echo  ${PATH//:/\\n}'              # path: Display the $PATH variable on newlines.
-alias pid='ps -f'                              # pid: Display the uid, pid, parent pid, recent CPU usage, process start time, controlling tty, elapsed CPU usage, and the associated command.
-alias ping='ping -c 5'                         # ping: Limit Ping to 5 ECHO_REQUEST packets.
-alias please='sudo -'                          # sudo: Execute a command as the superuser.
-alias ports='netstat -tulan'                   # ports: List all listening ports.
-alias poweroff="sudo /sbin/shutdown"           # poweroff: Poweroff the system.
-alias ps='ps auxwww'                           # kp: Getting full path of executables.
+alias ':q'='quit'                         # q: Shortcut for the `exit` command.
+alias bye='quit'                          # q: Shortcut for the `exit` command.
+alias ctf='echo $(ls -1 | wc -l)'         # ctf: Count the number of files in the current directory.
+alias curl='curl --compressed'            # curl: Use compression when transferring data.
+alias da='date "+%Y-%m-%d %A %T %Z"'      # da: Display the current date and time.
+alias h='history'                         # h: Lists all recently used commands.
+alias halt="sudo /sbin/halt"              # halt: Shutdown the system.
+alias ifconfig='sudo ifconfig'            # ifconfig: Append sudo to ifconfig (configure network interface parameters) command.
+alias ipinfo='ipconfig getpacket en0'     # ipInfo0: Get network interface parameters for en0.
+alias moon='curl -s "wttr.in/?format=%m"' # moon: Get the moon phase.
+alias nls='sudo lsof -i -P | grep LISTEN' # nls: Show only active network listeners.
+alias now='date +"%T"'                    # now: Show the current time.
+alias op='sudo lsof -i -P'                # op: List of open ports.
+alias p='pwd'                             # p: Shortcut for `pwd` which returns working directory name.
+alias path='echo  ${PATH//:/\\n}'         # path: Display the $PATH variable on newlines.
+
+alias ping='ping -c 5'               # ping: Limit Ping to 5 ECHO_REQUEST packets.
+alias please='sudo -'                # sudo: Execute a command as the superuser.
+alias ports='netstat -tulan'         # ports: List all listening ports.
+alias poweroff="sudo /sbin/shutdown" # poweroff: Poweroff the system.
+
 alias q='quit'                                 # q: Shortcut for the `exit` command.
 alias qfind='find . -name '                    # qfind: Quickly search for file.
 alias quit='exit'                              # q: Shortcut for the `exit` command.

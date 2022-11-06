@@ -6,6 +6,8 @@
 
 # 🆆🅶🅴🆃 🅰🅻🅸🅰🆂🅴🆂
 if command -v wget &>/dev/null; then
-  alias wget='wget -c' # wget: Continue a partially-downloaded file.
-  alias wg='wget'      # wg: wget.
+  alias wg='wget'              # wg: wget.
+  alias wgc='wg'               # wgc: wget with continue.
+  alias wge='wg -e robots=off' # wge: wget with robots=off.
+  alias wget='wget -c'         # wget: wget with continue.
 fi
