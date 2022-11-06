@@ -1,11 +1,11 @@
 /**
-* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.461) - https://dotfiles.io
+* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.462) - https://dotfiles.io
 * Made with ♥ in London, UK by @sebastienrousseau
-* Copyright (c) 2022. All rights reserved
+* Copyright (c) 2015-2022. All rights reserved
 * License: MIT
 */
 
-export const { promisify } = require('util');
+export const { promisify } = require("util");
 
 // 🅳🅾🆆🅽🅻🅾🅰🅳 - Download function.
 async function download() {
@@ -21,18 +21,16 @@ async function download() {
 
   const request = https.get(
     dotfile, response => {
-      console.log("STATUS: " + response.statusCode);
+      // console.log("STATUS: " + response.statusCode);
       var headers = JSON.stringify(response.headers);
-      console.log('HEADERS: ' + headers);
+      // console.log("HEADERS: " + headers);
       response.pipe(file);
-      file.on('finish', () => {
+      file.on("finish", () => {
         file.close();
         mv(version, `${destPath}/${version}`);
         fs.rmSync(version);
       });
     });
-
-
-};
+}
 
 module.exports = download;

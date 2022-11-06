@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.461) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.462) - https://dotfiles.io
 # Made with ♥ in London, UK by @sebastienrousseau
-# Copyright (c) 2022. All rights reserved
+# Copyright (c) 2015-2022. All rights reserved
 # License: MIT
 
 ## 🅳🅾🆃🅵🅸🅻🅴🆂 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set Dotfiles variables.
 # DF_CURRENT_DIR=${PWD}                   # Current directory.
-DF=".dotfiles/"                           # Dotfiles.
-DF_DIR="${HOME}/.dotfiles/"               # Dotfiles directory.
-DF_BACKUPDIR="${HOME}/dotfiles_backup/"   # Backup directory.
-DF_DOWNLOADDIR="${HOME}/Downloads"        # Download directory.
-DF_VERSION="0.2.461"                      # Dotfiles Version number.
-DF_TIMESTAMP="$(date +%Y-%m-%d_%H-%M-%S)" # Timestamp for backup directory.
+DF=".dotfiles/"                         # Dotfiles.
+DF_DIR="${HOME}/.dotfiles/"             # Dotfiles directory.
+DF_BACKUPDIR="${HOME}/dotfiles_backup/" # Backup directory.
+DF_DOWNLOADDIR="${HOME}/Downloads"      # Download directory.
+DF_VERSION="0.2.462"                    # Dotfiles Version number.
+# DF_TIMESTAMP="$(date +%Y-%m-%d_%H-%M-%S)" # Timestamp for backup directory.
 
 export DF
 export DF_BACKUPDIR
 export DF_DIR
 export DF_DOWNLOADDIR
-export DF_TIMESTAMP
+# export DF_TIMESTAMP
 export DF_VERSION
 
 ## 🅲🅾🅻🅾🆁🆂 - Set colors.

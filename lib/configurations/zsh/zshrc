@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.461) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.462) - https://dotfiles.io
 # Made with ♥ in London, UK by @sebastienrousseau
-# Copyright (c) 2022. All rights reserved
+# Copyright (c) 2015-2022. All rights reserved
 # License: MIT
 
 ## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set Dotfiles variable.
@@ -12,11 +12,11 @@ OS_NAME=$(uname)                 # operating system name.
 OS_VERSION=$(uname -r)           # operating system version number.
 SSL_CERT_FILE=${HOME}/cacert.pem # set the SSL_CERT_FILE environment variable.
 USER_LANGUAGE="en_GB.UTF-8"      # default language.
-USER=$(whoami)                   # current user name.
+# USER=$(whoami)                   # current user name.
 
 ## 🅴🆇🅿🅾🆁🆃🆂 - Export the variables.
 export ARCHFLAGS="-arch ${OS_ARCH}"     # archflags for the current machine.
-export DOTFILES_VERSION='0.2.461'       # version of the dotfiles.
+export DOTFILES_VERSION='0.2.462'       # version of the dotfiles.
 export DOTFILES="${HOME}"/.dotfiles/lib # path to the cross plaform dotfiles.
 export HOSTNAME=${HOSTNAME}             # hostname of the machine.
 export INPUTRC=${INPUTRC}               # set INPUTRC (so that .inputrc is respected)
@@ -28,7 +28,7 @@ export OS_NAME                          # operating system name.
 export OS_VERSION                       # operating system version number.
 export SSL_CERT_FILE=${SSL_CERT_FILE}   # set the SSL_CERT_FILE environment variable.
 export TERM=xterm-256color              # default terminal color.
-export USER                             # current user name.
+# export USER                             # current user name.
 
 ## 🅻🅾🅰🅳🅴🆁🆂 - Load the dotfiles.
 for loaders in "${DOTFILES}"/*.sh; do

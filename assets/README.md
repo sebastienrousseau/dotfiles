@@ -11,4 +11,5 @@ This directory contains the following files and directories that are used by the
 
 The dotfiles logo is licensed under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).
 
-The made with love.svg file is licensed under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).
+The made with love.svg file is licensed under the [Creative Commons Attribution
+4.0 International License](https://creativecommons.org/licenses/by/4.0/).

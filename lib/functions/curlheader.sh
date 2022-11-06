@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.461) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.462) - https://dotfiles.io
 # Made with ♥ in London, UK by @sebastienrousseau
-# Copyright (c) 2022. All rights reserved
+# Copyright (c) 2015-2022. All rights reserved
 # License: MIT
 
 ## curlheader: Function to return only a specific response header or all response headers for a given URL.
@@ -13,9 +13,9 @@ curlheader() {
     curl -k -s -D - "$1" -o /dev/null:
   else
     echo "curl -k -s -D - $2 -o /dev/null | grep $1:"
-    curl -k -s -D - "$2" -o /dev/null | grep "$1":
+    curl -k -s -D - "$2" -o /dev/null || grep "$1":
   fi
 }
 
-alias clh='curlheader'   # Alias for curlheader
-alias crlhd='curlheader' # Alias for curlheader
+alias chd='curlheader'  # Alias for curlheader
+alias chdr='curlheader' # Alias for curlheader
