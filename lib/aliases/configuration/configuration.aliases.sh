@@ -5,8 +5,8 @@
 # License: MIT
 
 # 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂
-alias bash_profile='${=EDITOR} $HOME/.bash_profile' # bash_profile: Ouvre le fichier de configuration bash_profile
-alias bashrc='${=EDITOR} $HOME/.bashrc'             # bashrc: Ouvre le fichier de configuration bashrc
-alias gitconfig='${=EDITOR} $HOME/.gitconfig'       # gitconfig: Ouvre le fichier de configuration gitconfig
-alias gitignore='${=EDITOR} $HOME/.gitignore'       # gitignore: Ouvre le fichier de configuration gitignore
-alias zshrc='${=EDITOR} $HOME/.zshrc'               # zshrc: Ouvre le fichier de configuration zshrc
+alias bshp='${=EDITOR} $HOME/.bash_profile' # bshp: Open the Bash profile in the default text editor.
+alias bshrc='${=EDITOR} $HOME/.bashrc'      # bshrc: Open the Bash configuration file in the default text editor.
+alias gcfg='${=EDITOR} $HOME/.gitconfig'    # gcfg: Open the Git configuration file in the default text editor.
+alias gign='${=EDITOR} $HOME/.gitignore'    # gign: Open the Git ignore file in the default text editor.
+alias zshrc='${=EDITOR} $HOME/.zshrc'       # zshrc: Open the Zsh configuration file in the default text editor.
