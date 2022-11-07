@@ -5,7 +5,7 @@
 # License: MIT
 
 # 🅲🅰🆁🅶🅾 🅰🅻🅸🅰🆂🅴🆂
-if command -v cargo &>/dev/null; then
+if command -v 'cargo' >/dev/null; then
   alias cg='cargo'                 # c: Cargo shortcut.
   alias cgb='cg  build'            # cgb: Cargo build.
   alias cgbh='cg  bench'           # cgbh: Cargo bench.
@@ -31,7 +31,7 @@ if command -v cargo &>/dev/null; then
 fi
 
 # 🆁🆄🆂🆃🆄🅿 🅰🅻🅸🅰🆂🅴🆂
-if command -v rustup &>/dev/null; then
+if command -v 'rustup' >/dev/null; then
   alias ru='rustup update'               # ru: Rustup update.
   alias rca='rustup component add'       # rca: Rustup component add.
   alias rcl='rustup component list'      # rcl: Rustup component list.
