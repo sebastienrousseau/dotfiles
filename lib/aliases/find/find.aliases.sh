@@ -5,7 +5,7 @@
 # License: MIT
 
 # 🅵🅸🅽🅳 🅰🅻🅸🅰🆂🅴🆂
-if command -v fd &>/dev/null; then
+if command -v 'fd' >/dev/null; then
   alias fd='fd --color always '  # fd: always colorize output by default.
   alias fda='fd --absolute-path' # fda: list all files with absolute path.
   alias fdc='fd --ignore-case'   # fdc: list all files with case insensitive search.
