@@ -5,7 +5,7 @@
 # License: MIT
 
 # 🆆🅶🅴🆃 🅰🅻🅸🅰🆂🅴🆂
-if command -v wget &>/dev/null; then
+if command -v 'wget' >/dev/null; then
   alias wg='wget'              # wg: wget.
   alias wgc='wg'               # wgc: wget with continue.
   alias wge='wg -e robots=off' # wge: wget with robots=off.
