@@ -5,7 +5,7 @@
 # License: MIT
 
 # 🅴🅳🅸🆃🅾🆁 🅰🅻🅸🅰🆂🅴🆂
-editors="nano vim vi emacs code atom subl sublime textmate mate gedit geany"
+editors="nano vim vi code gedi notepad++"
 for editor in ${editors}; do
   if command -v "${editor}" &>/dev/null; then
     alias e='${editor}'      # e: Edit a file.
