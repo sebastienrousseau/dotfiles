@@ -5,7 +5,7 @@
 # License: MIT
 
 # 🅳🅸🅶 🅰🅻🅸🅰🆂🅴🆂
-if command -v dig &>/dev/null; then
+if command -v 'dig' >/dev/null; then
   alias d='$(which dig)'                                                            # d: Run the dig command with the default options.
   alias d4='$(which dig) +short -4'                                                 # d4: Perform a DNS lookup for an IPv4 address.
   alias d6='$(which dig) +short -6'                                                 # d6: Perform a DNS lookup for an IPv6 address.
