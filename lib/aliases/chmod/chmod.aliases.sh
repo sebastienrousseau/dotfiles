@@ -4,8 +4,8 @@
 # Copyright (c) 2015-2022. All rights reserved
 # License: MIT
 
-# 🅿🅴🆁🅼🅸🆂🆂🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂
-if command -v chmod &>/dev/null; then
+# 🅲🅷🅼🅾🅳 🅰🅻🅸🅰🆂🅴🆂
+if command -v 'chmod' >/dev/null; then
   alias 000='chmod -R 000'         # 000: (chmod a-rwx) sets permissions so that, (U)ser / owner can't read, can't write and can't execute. (G)roup can't read, can't write and can't execute. (O)thers can't read, can't write and can't execute.
   alias 400='chmod -R 400'         # 400: (chmod a-rw) sets permissions so that, (U)ser / owner can't read, can't write and can execute. (G)roup can't read, can't write and can execute. (O)thers can't read, can't write and can execute.
   alias 444='chmod -R 444'         # 444: (chmod a-r) sets permissions so that, (U)ser / owner can't read, can't write and can execute. (G)roup can't read, can't write and can execute. (O)thers can't read, can't write and can execute.
