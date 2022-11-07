@@ -5,7 +5,7 @@
 # License: MIT
 
 # 🆂🆄🅱🆅🅴🆁🆂🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂 - Subversion aliases.
-if command -v svn &>/dev/null; then
+if command -v 'svn' >/dev/null; then
   alias sad='svn add'        # sad: Put new files and directories under version control.
   alias sau='svn auth'       # sau: Manage cached authentication credentials.
   alias sbl='svn blame'      # sbl: Show when each line of a file was last (or next) changed.
