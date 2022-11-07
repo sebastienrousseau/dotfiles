@@ -31,7 +31,7 @@ module.exports = async function main() {
   } while (i < aliases.length && i < copies.length);
 
   // Download and unpack dotfiles.
-  download(); // download the dotfiles
+  download; // download the dotfiles
   await sleep(2500); // wait for download to complete
   unpack(); // unpack the downloaded file
   await sleep(2500); // wait for unpack to complete
