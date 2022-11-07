@@ -5,6 +5,6 @@
 # License: MIT
 
 # 🆄🆄🅸🅳 🅰🅻🅸🅰🆂🅴🆂
-if command -v uuidgen &>/dev/null; then
+if command -v 'uuidgen' >/dev/null; then
   alias uuid="uuidgen | tr -d '\n' | tr '[:upper:]' '[:lower:]'  | pbcopy && pbpaste && echo" # uuid: Generate a UUID and copy it to the clipboard.
 fi
