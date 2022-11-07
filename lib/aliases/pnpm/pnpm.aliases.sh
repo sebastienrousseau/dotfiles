@@ -5,7 +5,7 @@
 # License: MIT
 
 # 🅿🅽🅿🅼 🅰🅻🅸🅰🆂🅴🆂 - Pnpm aliases
-if command -v pnpm &>/dev/null; then
+if command -v 'pnpm' >/dev/null; then
   alias pna='pnpm add'                             # pna: Add a dependency to the project.
   alias pnad='pnpm add --save-dev'                 # pnad: Add a dev dependency to the project.
   alias pnap='pnpm add --save-peer'                # pnap: Add a peer dependency to the project.
