@@ -88,7 +88,7 @@ if command -v 'git' >/dev/null; then
   alias gpushr='git remote | xargs -I% -n1 git push %'                                       # For each remote branch, push it.
   alias gunpub='git push origin :$(git current-branch)'                                      # Unpublish the current branch by deleting the remote version of the current branch.
   alias gr='git remote'                                                                      # Manage set of tracked repositories.
-  alias gra='git remote add'                                                                 # Add a remote named <name> for the repository at <url>.
+  alias gra='git remote add'                                                                 # Add a remote named name for the repository at url.
   alias grall='git remote | xargs -L1 git push --all'                                        # Push all branches to all remotes.
   alias grao='git remote add origin'                                                         # Add a new remote 'origin' if it doesn't exist.
   alias grbk='git reset --soft HEAD^'                                                        # Rollback to stage.
