@@ -1,31 +1,31 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@types/node': ^16.11.68
-  compressing: ^1.6.2
+  '@types/node': ^16.18.11
+  compressing: ^1.6.3
   filesizes: ^0.1.2
   fs-extra: 10.1.0
-  husky: ^8.0.1
+  husky: ^8.0.2
   jsmin: ^1.0.1
   rimraf: ^3.0.2
-  typescript: ^4.8.4
+  typescript: ^4.9.4
 
 devDependencies:
-  '@types/node': registry.npmjs.org/@types/node/16.11.68
-  compressing: registry.npmjs.org/compressing/1.6.2
+  '@types/node': registry.npmjs.org/@types/node/16.18.11
+  compressing: registry.npmjs.org/compressing/1.6.3
   filesizes: registry.npmjs.org/filesizes/0.1.2
   fs-extra: registry.npmjs.org/fs-extra/10.1.0
-  husky: registry.npmjs.org/husky/8.0.1
+  husky: registry.npmjs.org/husky/8.0.2
   jsmin: registry.npmjs.org/jsmin/1.0.1
   rimraf: registry.npmjs.org/rimraf/3.0.2
-  typescript: registry.npmjs.org/typescript/4.8.4
+  typescript: registry.npmjs.org/typescript/4.9.4
 
 packages:
 
-  registry.npmjs.org/@types/node/16.11.68:
-    resolution: {integrity: sha512-JkRpuVz3xCNCWaeQ5EHLR/6woMbHZz/jZ7Kmc63AkU+1HxnoUugzSWMck7dsR4DvNYX8jp9wTi9K7WvnxOIQZQ==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/@types/node/-/node-16.11.68.tgz}
+  registry.npmjs.org/@types/node/16.18.11:
+    resolution: {integrity: sha512-3oJbGBUWuS6ahSnEq1eN2XrCyf4YsWI8OyCvo7c64zQJNplk3mO84t53o8lfTk+2ji59g5ycfc6qQ3fdHliHuA==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/@types/node/-/node-16.18.11.tgz}
     name: '@types/node'
-    version: 16.11.68
+    version: 16.18.11
     dev: true
 
   registry.npmjs.org/ansi-styles/4.3.0:
@@ -136,10 +136,10 @@ packages:
     engines: {node: '>= 6'}
     dev: true
 
-  registry.npmjs.org/compressing/1.6.2:
-    resolution: {integrity: sha512-1HK+eK//Tx45n2kuVCl2ITDMZD2JkZAolOYyJrV260lUnq1rPt4d+6L6OvwRFLqAt5aR0vAtGGGiJNmTxqff/g==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/compressing/-/compressing-1.6.2.tgz}
+  registry.npmjs.org/compressing/1.6.3:
+    resolution: {integrity: sha512-BPkE937R8kXT1k55PgnVgMpCAs4Ws5ZgROx+qZEaYIi0tA4nvB9s5HAX/YH5suYp9njGGJOKEAOHhB3OQ5/IJA==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/compressing/-/compressing-1.6.3.tgz}
     name: compressing
-    version: 1.6.2
+    version: 1.6.3
     engines: {node: '>= 4.0.0'}
     dependencies:
       flushwritable: registry.npmjs.org/flushwritable/1.0.0
@@ -271,10 +271,10 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  registry.npmjs.org/husky/8.0.1:
-    resolution: {integrity: sha512-xs7/chUH/CKdOCs7Zy0Aev9e/dKOMZf3K1Az1nar3tzlv0jfqnYtu235bstsWTmXOR0EfINrPa97yy4Lz6RiKw==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/husky/-/husky-8.0.1.tgz}
+  registry.npmjs.org/husky/8.0.2:
+    resolution: {integrity: sha512-Tkv80jtvbnkK3mYWxPZePGFpQ/tT3HNSs/sasF9P2YfkMezDl3ON37YN6jUUI4eTg5LcyVynlb6r4eyvOmspvg==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/husky/-/husky-8.0.2.tgz}
     name: husky
-    version: 8.0.1
+    version: 8.0.2
     engines: {node: '>=14'}
     hasBin: true
     dev: true
@@ -486,10 +486,10 @@ packages:
     version: 1.1.1
     dev: true
 
-  registry.npmjs.org/typescript/4.8.4:
-    resolution: {integrity: sha512-QCh+85mCy+h0IGff8r5XWzOVSbBO+KfeYrMQh7NJ58QujwcE22u+NUSmUxqF+un70P9GXKxa2HCNiTTMJknyjQ==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/typescript/-/typescript-4.8.4.tgz}
+  registry.npmjs.org/typescript/4.9.4:
+    resolution: {integrity: sha512-Uz+dTXYzxXXbsFpM86Wh3dKCxrQqUcVMxwU54orwlJjOpO3ao8L7j5lH+dWfTwgCwIuM9GQ2kvVotzYJMXTBZg==, registry: https://npm.pkg.github.com/sebastienrousseau, tarball: https://registry.npmjs.org/typescript/-/typescript-4.9.4.tgz}
     name: typescript
-    version: 4.8.4
+    version: 4.9.4
     engines: {node: '>=4.2.0'}
     hasBin: true
     dev: true
