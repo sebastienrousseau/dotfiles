@@ -115,7 +115,7 @@ brew tap homebrew/cask-fonts
 ```
 
 ```bash
-brew cask install font-roboto-mono-for-powerline
+brew install --cask font-roboto-mono-for-powerline
 ```
 
 On Linux, you can install the font using the following command:
