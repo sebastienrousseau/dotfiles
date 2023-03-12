@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.462) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.463) - https://dotfiles.io
 # Made with ♥ in London, UK by @sebastienrousseau
-# Copyright (c) 2015-2022. All rights reserved
+# Copyright (c) 2015-2023. All rights reserved
 # License: MIT
 
 # 🅿🅽🅿🅼 🅰🅻🅸🅰🆂🅴🆂 - Pnpm aliases
-if command -v pnpm &>/dev/null; then
+if command -v 'pnpm' >/dev/null; then
   alias pna='pnpm add'                             # pna: Add a dependency to the project.
   alias pnad='pnpm add --save-dev'                 # pnad: Add a dev dependency to the project.
   alias pnap='pnpm add --save-peer'                # pnap: Add a peer dependency to the project.

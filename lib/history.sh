@@ -1,19 +1,29 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.462) - https://dotfiles.io
-# Made with ♥ in London, UK by @sebastienrousseau
-# Copyright (c) 2015-2022. All rights reserved
+# 🅳🅾🆃🅵🅸🅻🅴🆂
+# Author: Sebastien Rousseau
+# Copyright (c) 2015-2023. All rights reserved
+# Description: Sets history options for the current shell.
 # License: MIT
+# Script: history.sh
+# Version: 0.2.463
+# Website: https://dotfiles.io
+
+# Exit immediately if any command fails
+set -o errexit
+
+# Exit if any undefined variables are used
+set -o nounset
 
 ## History wrapper
 function dotfiles_history {
   local clear list
   zparseopts -E c=clear l=list
 
-  if [[ -n "${clear}" ]]; then
+  if [[ -n "${clear:-}" ]]; then
     # if -c provided, clobber the history file
-    echo -n >|"${HISTFILE}"
-    echo >&2 History file deleted. Reload the session to see its effects.
-  elif [[ -n "${list}" ]]; then
+    echo -n >|"${HISTFILE:-}"
+    echo >&2 "History file deleted. Reload the session to see its effects."
+  elif [[ -n "${list:-}" ]]; then
     # if -l provided, run as if calling `fc' directly
     builtin fc "$@"
   else
@@ -27,27 +37,20 @@ function dotfiles_history {
 }
 
 # Timestamp format
-case ${HIST_STAMPS-} in
+case "${HIST_STAMPS:-}" in
 "mm/dd/yyyy") alias history='dotfiles_history -f' ;;
 "dd.mm.yyyy") alias history='dotfiles_history -E' ;;
 "yyyy-mm-dd") alias history='dotfiles_history -i' ;;
 "") alias history='dotfiles_history' ;;
-*) alias history='dotfiles_history -t $HIST_STAMPS' ;;
+*) alias history='dotfiles_history -t ${HIST_STAMPS}' ;;
 esac
 
-# Command history configuration
-export HISTFILE=${HOME}/.zsh_history
+export HISTFILE="${HOME}/.zsh_history" # History file
+export HISTCONTROL="ignoreboth"        # Ignore duplicate commands and commands that start with a space
+export HISTSIZE="10000"                # Number of commands to save in memory
+export SAVEHIST="1000"                 # Number of commands to save on disk
 
-# Don't put duplicate lines or lines starting with space in the history.
-export HISTCONTROL=ignoreboth
-
-# Number of histories saved in memory
-export HISTSIZE=10000
-
-# Number of histories saved in history file
-export SAVEHIST=1000
-
-if [[ -n "${ZSH_VERSION}" ]]; then
+if [[ -n "${ZSH_VERSION:-}" ]]; then
   # echo "Running shell is zsh"
   # Specifying some history options
   setopt always_to_end          # Move cursor to the end of a completed word.

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.462) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.463) - https://dotfiles.io
 # Made with ♥ in London, UK by @sebastienrousseau
-# Copyright (c) 2015-2022. All rights reserved
+# Copyright (c) 2015-2023. All rights reserved
 # License: MIT
 
 ## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set Dotfiles variable.
@@ -16,13 +16,14 @@ USER=$(whoami)                   # current user name.
 
 ## 🅴🆇🅿🅾🆁🆃🆂 - Export the variables.
 export ARCHFLAGS="-arch ${OS_ARCH}"     # archflags for the current machine.
-export DOTFILES_VERSION='0.2.462'       # version of the dotfiles.
+export DOTFILES_VERSION='0.2.463'       # version of the dotfiles.
 export DOTFILES="${HOME}"/.dotfiles/lib # path to the cross plaform dotfiles.
 export HOSTNAME=${HOSTNAME}             # hostname of the machine.
 export INPUTRC=${INPUTRC}               # set INPUTRC (so that .inputrc is respected)
 export LANG=${USER_LANGUAGE}            # default language.
 export LANGUAGE=${USER_LANGUAGE}        # default language.
 export LC_ALL=${USER_LANGUAGE}          # default language.
+export LC_CTYPE=${USER_LANGUAGE}        # default language.
 export OS_ARCH                          # machine hardware name.
 export OS_NAME                          # operating system name.
 export OS_VERSION                       # operating system version number.
