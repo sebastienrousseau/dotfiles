@@ -5,34 +5,28 @@
 # Description: Sets history options for the current shell.
 # License: MIT
 # Script: history.sh
-# Version: 0.2.463
+# Version: 0.2.464
 # Website: https://dotfiles.io
 
-# Exit immediately if any command fails
-set -o errexit
-
-# Exit if any undefined variables are used
-set -o nounset
-
-## History wrapper
+# History wrapper
 function dotfiles_history {
-  local clear list
-  zparseopts -E c=clear l=list
+  local clear_flag list_flag
+  zparseopts -E c=clear_flag l=list_flag
 
-  if [[ -n "${clear:-}" ]]; then
-    # if -c provided, clobber the history file
-    echo -n >|"${HISTFILE:-}"
-    echo >&2 "History file deleted. Reload the session to see its effects."
-  elif [[ -n "${list:-}" ]]; then
-    # if -l provided, run as if calling `fc' directly
-    builtin fc "$@"
+  if [[ -n ${clear_flag} ]]; then
+    # If -c flag is provided, clobber the history file and remove duplicates
+    fc -W
+    fc -R
+    echo "%F{magenta}History file deleted and duplicates removed. Reload the session to see its effects.%f" >&2
+  elif [[ -n ${list_flag} ]] || [[ $# -ne 0 ]]; then
+    # If -l flag is provided or arguments are passed, run as if calling `fc` directly
+    fc_output=$(builtin fc "$@")
+    printf '%s\n' "$(tput setaf 5)$(tput sgr0)$(tput setaf 2)$(echo "${fc_output//$'\e'/$(tput setaf 2)}" | sed -E "s/^([[:space:]]*[0-9]+)/$(tput setaf 2)\1$(tput sgr0)/")" || true
   else
-    # unless a number is provided, show all history events (starting from 1)
-    if [[ "${1:-}" =~ ^[0-9]+$ ]]; then
-      builtin fc "$@"
-    else
-      builtin fc -l 1
-    fi
+    # Otherwise, ensure the history file has no duplicates and show all history events starting from 1
+    fc -W # Remove duplicates from the history file
+    fc_output=$(builtin fc -li 1)
+    printf '%s\n' "$(tput setaf 5)$(tput sgr0)$(tput setaf 2)$(echo "${fc_output//$'\e'/$(tput setaf 2)}" | sed -E "s/^([[:space:]]*[0-9]+)/$(tput setaf 2)\1$(tput sgr0)/")" || true
   fi
 }
 

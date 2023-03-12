@@ -4,7 +4,7 @@
 # Description: Sets aliases for the `dig` command.
 # License: MIT
 # Script: dig.aliases.sh
-# Version: 0.2.463
+# Version: 0.2.464
 # Website: https://dotfiles.io
 
 # 🅳🅸🅶 🅰🅻🅸🅰🆂🅴🆂

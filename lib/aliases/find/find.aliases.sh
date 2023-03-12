@@ -4,7 +4,7 @@
 # Description: Sets Find Aliases
 # License: MIT
 # Script: find.aliases.sh
-# Version: 0.2.463
+# Version: 0.2.464
 # Website: https://dotfiles.io
 
 # 🅵🅸🅽🅳 🅰🅻🅸🅰🆂🅴🆂
