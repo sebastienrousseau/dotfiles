@@ -4,7 +4,7 @@
 # Description: Sets paths for the current shell.
 # License: MIT
 # Script: paths.sh
-# Version: 0.2.464
+# Version: 0.2.463
 # Website: https://dotfiles.io
 
 ## 🅿🅰🆃🅷🆂

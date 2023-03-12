@@ -5,7 +5,7 @@
 # Description: Sets history options for the current shell.
 # License: MIT
 # Script: history.sh
-# Version: 0.2.464
+# Version: 0.2.463
 # Website: https://dotfiles.io
 
 # Exit immediately if any command fails

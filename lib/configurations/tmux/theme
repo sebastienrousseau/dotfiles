@@ -1,4 +1,4 @@
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.464) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.463) - https://dotfiles.io
 # Made with ♥ in London, UK by @sebastienrousseau
 # Copyright (c) 2015-2023. All rights reserved
 # License: MIT
@@ -22,7 +22,7 @@ set -g status-justify centre # Status bar justification (left, right, centre, ab
 set -g status-left-length 50 # Status bar left length
 set -g status-right-length 50 # Status bar right length
 set -g status-right "#[fg=#FFFFFF] #[bg=#14222A] ⬛ #I #[bg=#007ACC] #H #[bg=#EB0000] %_d %B %I:%M%p "
-set -g window-status-current-format "#[bg=#2D1681]Dotfiles (v0.2.464)" # Current window status format
+set -g window-status-current-format "#[bg=#2D1681]Dotfiles (v0.2.463)" # Current window status format
 set -g window-status-current-style "bg=#EB0000" # Current window status style
 set -g window-status-separator "" # Window status separator
 set-window-option -g clock-mode-colour "#FFFFFF" # Clock mode color

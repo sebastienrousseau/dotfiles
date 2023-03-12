@@ -4,7 +4,7 @@
 # Description: Sets Editor Aliases
 # License: MIT
 # Script: editor.aliases.sh
-# Version: 0.2.464
+# Version: 0.2.463
 # Website: https://dotfiles.io
 
 # 🅴🅳🅸🆃🅾🆁 🅰🅻🅸🅰🆂🅴🆂
