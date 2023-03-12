@@ -4,7 +4,7 @@
 # Description: Sets configuration aliases.
 # License: MIT
 # Script: configuration.aliases.sh
-# Version: 0.2.463
+# Version: 0.2.464
 # Website: https://dotfiles.io
 
 # 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂

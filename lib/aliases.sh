@@ -4,7 +4,7 @@
 # Description: Sets aliases for the current shell.
 # License: MIT
 # Script: aliases.sh
-# Version: 0.2.463
+# Version: 0.2.464
 # Website: https://dotfiles.io
 
 ## 🅰🅻🅸🅰🆂🅴🆂

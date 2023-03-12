@@ -4,7 +4,7 @@
 # Description: Sets Google Cloud Aliases
 # License: MIT
 # Script: gcloud.aliases.sh
-# Version: 0.2.463
+# Version: 0.2.464
 # Website: https://dotfiles.io
 
 if command -v 'gcloud' >/dev/null; then

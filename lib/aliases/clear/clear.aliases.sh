@@ -4,7 +4,7 @@
 # Description: Sets aliases for the `clear` command.
 # License: MIT
 # Script: clear.aliases.sh
-# Version: 0.2.463
+# Version: 0.2.464
 # Website: https://dotfiles.io
 
 # 🅲🅻🅴🅰🆁 🅰🅻🅸🅰🆂🅴🆂
