@@ -11,6 +11,6 @@ if command -v 'tmux' >/dev/null; then
 fi
 
 if [[ -z "${TMUX}" ]] && [[ ${UID} != 0 ]]; then
-  tmux kill-session -t 2>/dev/null
-  tmux
+  "${TMUX_PATH}" kill-session -t 2>/dev/null
+  "${TMUX_PATH}"
 fi

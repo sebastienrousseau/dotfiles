@@ -36,15 +36,6 @@ add the following lines to your .bashrc or .bash_profile file.
 - `755d`: Set permissions of all directories to rwxr-xr-x.
 - `644f`: Set permissions of all files to rw-r--r--.
 
-### Modify specific permissions
-
-- `+x`: Add execute permission for the current user.
-- `-x`: Remove execute permission for the current user.
-- `+w`: Add write permission for the current user.
-- `-w`: Remove write permission for the current user.
-- `+r`: Add read permission for the current user.
-- `-r`: Remove read permission for the current user.
-
 ### Set permissions for specific user types
 
 - `u+x`: Add execute permission for the owner of the file.

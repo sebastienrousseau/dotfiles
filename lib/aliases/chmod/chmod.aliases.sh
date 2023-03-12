@@ -37,14 +37,6 @@ if command -v 'chmod' >/dev/null; then
   alias 755d='find . -type d -exec chmod 755 {} \;' # 755d: Set permissions of all directories to rwxr-xr-x.
   alias 644f='find . -type f -exec chmod 644 {} \;' # 644f: Set permissions of all files to rw-r--r--.
 
-  # Shortcuts to modify specific permissions
-  alias +x='chmod +x' # +x: Add execute permission for the current user.
-  alias -x='chmod -x' # -x: Remove execute permission for the current user.
-  alias +w='chmod +w' # +w: Add write permission for the current user.
-  alias -w='chmod -w' # -w: Remove write permission for the current user.
-  alias +r='chmod +r' # +r: Add read permission for the current user.
-  alias -r='chmod -r' # -r: Remove read permission for the current user.
-
   # Shortcuts to set permissions for specific user types
   alias u+x='chmod u+x' # u+x: Add execute permission for the owner of the file.
   alias u-x='chmod u-x' # u-x: Remove execute permission for the owner of the file.

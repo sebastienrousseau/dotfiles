@@ -6,10 +6,35 @@
 
 # matrix: Function to Enable Matrix Effect in the terminal
 matrix() {
-	echo "\\e[1;40m"
-	clear
+	# Set the color of the output
+	tput setaf 2 # green
+
 	while :; do
-		echo $LINES $COLUMNS $((RANDOM % COLUMNS)) $((RANDOM % 72))
+		# Generate random numbers
+		read -r LINES COLUMNS x y <<<"$(
+			tput lines || true
+			tput cols || true
+			shuf -i 1-100 -n 2 || true
+		)"
+
+		# Update the matrix animation
+		for ((i = 0; i < LINES; i++)); do
+			# Move the cursor to the appropriate position
+			tput cup $i $y
+
+			# Print the character in green
+			tput setaf 2 # green
+			printf "%s" "${RANDOM:0:1}"
+
+			# Move the cursor to the next position
+			tput cup $((i - 1)) $y
+
+			# Print the character in white
+			tput setaf 7 # white
+			printf "%s" "${RANDOM:0:1}"
+		done
+
+		# Sleep for a short duration
 		sleep 0.05
-	done | awk '{ letters="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()"; c=$4; letter=substr(letters,c,1);a[$3]=0;for (x in a) {o=a[x];a[x]=a[x]+1; printf "\033[%s;%sH\033[2;32m%s",o,x,letter; printf "\033[%s;%sH\033[1;37m%s\033[0;0H",a[x],x,letter;if (a[x] >= $1) { a[x]=0; } }}'
+	done
 }
