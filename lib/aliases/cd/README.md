@@ -44,9 +44,3 @@ navigate your file system. To use them, add the following lines to your
 - `mus`: Shortcut to go to the Music directory and list its contents.
 - `pic`: Shortcut to go to the Pictures directory and list its contents.
 - `vid`: Shortcut to go to the Videos directory and list its contents.
-
-### System directories
-
-- `etc`: Shortcut to go to the etc directory and list its contents.
-- `var`: Shortcut to go to the var directory and list its contents.
-- `tmp`: Shortcut to go to the tmp directory and list its contents.
