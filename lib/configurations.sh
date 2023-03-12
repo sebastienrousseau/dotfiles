@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.463) - https://dotfiles.io
-# Made with ♥ in London, UK by @sebastienrousseau
-# Copyright (c) 2015-2022. All rights reserved
+# Author: Sebastien Rousseau
+# Copyright (c) 2015-2023. All rights reserved
+# Description: Sets configurations for the current shell.
 # License: MIT
+# Script: configurations.sh
+# Version: 0.2.464
+# Website: https://dotfiles.io
 
 ## 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽🆂
 for config in "${HOME}"/.dotfiles/lib/configurations/[!.#]*/*.sh; do
