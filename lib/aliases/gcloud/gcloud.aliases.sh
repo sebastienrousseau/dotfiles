@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.462) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.465) - https://dotfiles.io
 # Made with ♥ in London, UK by @sebastienrousseau
-# Copyright (c) 2015-2022. All rights reserved
+# Copyright (c) 2015-2023. All rights reserved
 # License: MIT
 
 # 🅶🅲🅻🅾🆄🅳 🅰🅻🅸🅰🆂🅴🆂 - Google Cloud aliases.
@@ -20,7 +20,7 @@ if command -v gcloud &>/dev/null; then
   #      1.9 Aliases to commands that might come in handy.
   #
   # Made with ♥ in London, UK by @sebastienrousseau
-  # Copyright (c) 2015-2022. All rights reserved
+  # Copyright (c) 2015-2023. All rights reserved
   # Licensed under the MIT license
   #
 

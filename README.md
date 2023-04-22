@@ -1,6 +1,14 @@
-# Dotfiles
+<!-- markdownlint-disable MD033 MD041 -->
 
-[![Banner representing the Dotfiles Library][logo]][website-url]
+<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg" alt="dotfiles logo" width="261" align="right" />
+
+<!-- markdownlint-enable MD033 MD041 -->
+
+# Dotfiles (v0.2.465)
+
+Simply designed to fit your shell life 🐚
+
+![Dotfiles banner][banner]
 
 [![Codacy][codacy-grade]][codacy-url]
 [![Contributors][contributors-shield]][contributors-url]
@@ -8,105 +16,116 @@
 [![License][license]][license-url]
 [![Love][love]][website-url]
 
-**[Website][website-url] • [Documentation][github-url]
-• [Report Bug][issues-url]
-• [Request Feature][issues-url]
-• [Contributing Guidelines][contributing-url]**
+**[Website][website-url] • [Documentation][github-url] • [Report Bug][issues-url] • [Request Feature][issues-url] • [Contributing Guidelines][contributing-url]**
 
-## 👋 Welcome to Dotfiles (v0.2.462)
+![divider][divider]
 
-### Simply designed to fit your shell life
+## Welcome to Dotfiles (v0.2.465) 👋
 
-Dotfiles are a set of macOS, Linux and Windows configuration files. They are
-aimed at making your life easier by providing a set of scripts and configuration
-files with new ways to get things done.
+## Overview 📖
+
+Dotfiles are a powerful set of configuration files for macOS, Linux, and
+Windows providing scripts and customized settings to streamline your
+workflow. These files are an essential tool for developers and users who
+want to modify their environment and applications to their exact needs.
+
+The Dotfiles library are combined into a single `lib` directory. This
+directory allows you to easily setup your development environment across
+numerous computers and operating systems, ensuring consistency and
+productivity no matter where you work.
+
+<!-- markdownlint-disable MD033 MD041 -->
+<br>
+<center>
+<!-- markdownlint-enable MD033 MD041 -->
 
 [![Getting Started][getting_started]][getting-started-url]
-[![Download Dotfiles v0.2.462][download_button]][download-url]
+[![Download Dotfiles v0.2.465][download_button]][download-url]
 
-Dotfiles aggregates a collection of standalone configuration files (dotfiles)
-combined into a `lib` directory that can be used to customize your development
-environment across numerous computers and operating systems (macOS, Windows,
-Linux).
+<!-- markdownlint-disable MD033 MD041 -->
+</center>
+<br>
+<!-- markdownlint-enable MD033 MD041 -->
 
-The Dotfiles provides modular configuration files (aliases, functions and paths)
-built for speed, higher performance, with the aim of helping you have an easy
-and centralized way to configure your environment and applications.
+## Features ✨
+
+- A familiar feel and comforts across environments.
+- A unified set of aliases and useful commands for macOS, Linux, and
+  Windows.
+- Coloured multiplexer tmux prompt, customizable, and easy to use.
+- Fast and flexible configuration files for Bash, Zsh, and more.
+- Fully documented and translated into several languages (English,
+  French, and more).
+- Supports Apple Silicon (M1) and Intel chips (x86_64).
+- Uses Roboto Mono for Powerline font for enhanced terminal experience.
 
 ![divider][divider]
 
-## 💼 Documentation
+## Getting Started 🚀
 
-To read the documentation for Dotfiles, please visit:
+We are so delighted that you have decided to try Dotfiles, and are sure
+that you will find Dotfiles unique and helpful.
 
-- [Dotfiles website][website-url]
-- [Dotfiles Docs GitHub repository][docs-url]
+To get started, please follow the instructions below. If you have any
+questions, please feel free to contact us.
 
-![divider][divider]
+### Installation
 
-## 🚀 Getting Started
+We understand that you may want to install Dotfiles without reading long
+manuals and lengthy documentation. In that respect, we have tried to
+make the installation process as easy and automated as possible.
 
-We are so delighted that you have decided to try Dotfiles, and are sure that you
-will find Dotfiles unique and helpful.
+A range of installation methods are available, and we recommend that you
+choose the one that best suits your needs.
 
-Dotfiles seeks to bring you high quality and easy to use standalone and modular
-configuration files that can be used to customize your development environment
-across numerous computers and operating systems (macOS, Windows, Linux).
+Before you begin your installation, use this information to ensure that
+you meet all the hardware, software, and system requirements for
+installing Dotfiles.
 
-### 🔧 Installation
+#### 1) System Requirements
 
-We understand that you may want to install Dotfiles without reading long manuals
-and lengthy documentation. In that respect, we have tried to make the
-installation process as easy as possible.
+You need a modern operating system to install Dotfiles. Here's an non-
+exhaustive list of the recommended operating systems that we support.
 
-A range of installation methods are available, and we recommend that you choose
-the one that best suits your needs.
-
-Before you begin your installation, use this information to ensure that you meet
-all the hardware, software, and system requirements for installing Dotfiles.
-
-#### 📋 System Requirements
-
-You need a modern operating system to install Dotfiles. Here's an non-exhaustive
-list of the recommended operating systems that we support.
-
-If you don't see your operating system listed, it may still work, but we have
-yet been able to test it. If you have any issues, please let us know.
+If you don't see your operating system listed, it may still work, but we
+have yet been able to test it. If you have any issues, please let us
+know.
 
 - macOS 10.15 or later
 - Windows 10 or later
 - A Debian based distribution ([Debian][debian-url], [Ubuntu][ubuntu-url],
 [PoP!_OS][pop-url], [Zorin OS][zorin-url], [Q4OS][q4-url],
-[Kali Linux][kali-url], [Devuan][devuan-url], [Deepin][deepin-url], etc.)
+[Kali Linux][kali-url], [Devuan][devuan-url], [Deepin][deepin-url],
+etc.)
 
-![divider][divider]
+#### 2) Software Requirements
 
-#### ✔️ Software Requirements
+The following programs must be installed on your system to install
+Dotfiles:
 
-The following programs must be installed on your system to install Dotfiles:
-
-- [**Bash**][bash-url] - a shell, or command language interpreter, for the GNU
-  operating system.
-- Or [**Zsh**][zsh-url] - a shell designed for interactive use, although it is
-  also a powerful scripting language.
-- [**Git**][git-url] - a free and open source distributed version control system
-  designed to handle everything from small to very large projects with speed and
-  efficiency.
-- [**Curl**][curl-url] - a command line tool for transferring data with URL
-  syntax.
-- [**Wget**][wget-url] - a free software package for retrieving files using
-  HTTP, HTTPS and FTP, the most widely-used Internet protocols.
-- [**Make**][make-url] - a tool which controls the generation of executables and
-  other non-source files of a program from the program's source files.
+- [**Bash**][bash-url] - a shell, or command language interpreter, for
+  the GNU operating system.
+- Or [**Zsh**][zsh-url] - a shell designed for interactive use, although
+  it is also a powerful scripting language.
+- [**Git**][git-url] - a free and open source distributed version
+  control system designed to handle everything from small to very large
+  projects with speed and efficiency.
+- [**Curl**][curl-url] - a command line tool for transferring data with
+  URL syntax.
+- [**Wget**][wget-url] - a free software package for retrieving files
+  using HTTP, HTTPS and FTP, the most widely-used Internet protocols.
+- [**Make**][make-url] - a tool which controls the generation of
+  executables and other non-source files of a program from the
+  program's source files.
 - [**Shell**][shell-url] - a shell command line interpreter program for
   Unix-like operating systems.
-- [**PnPM**][pnpm-url] - a package manager for JavaScript and Node.js. It is
-  fast, disk space efficient and reliable.
+- [**PnPM**][pnpm-url] - a package manager for JavaScript and Node.js.
+  It is fast, disk space efficient and reliable.
 
-#### Font
+#### 3) Font Requirements
 
-We recommend using a font such as `Roboto Mono for Powerline` for terminal and
-vscode editor.
+We recommend using a font such as `Roboto Mono for Powerline` for
+terminal and vscode editor.
 
 On macOS, you can install the font using the following command:
 
@@ -124,9 +143,20 @@ On Linux, you can install the font using the following command:
 sudo apt install fonts-roboto-mono-for-powerline
 ```
 
+### Documentation
+
+To read the documentation for Dotfiles, please visit:
+
+- [Dotfiles website][website-url]
+- [Dotfiles Docs GitHub repository][docs-url]
+
+![divider][divider]
+
+## Usage 📖
+
 ### 1️⃣ Download Dotfiles
 
-You can download the latest version (v0.2.462) with the following options:
+You can download the latest version (v0.2.465) with the following options:
 
 - [**Manual download**][releases-url] - **The easiest way to install Dotfiles.**
 - [**Install with PnPM**][package-url]
@@ -246,209 +276,13 @@ Please refer to the [documentation][docs-url] for more information.
 
 ![divider][divider]
 
-### 4️⃣ What's included
-
-Dotfiles contains core elements that are used to configure your shell, and
-other components catered for your environment setup.
-
-Within the download you'll find all the Dotfiles source files grouped within
-the `dist` folder.
-
-You'll see something like this:
-
-```bash
-.
-├── bin
-│   ├── backup.d.ts
-│   ├── backup.d.ts.map
-│   ├── backup.js
-│   ├── backup.js.map
-│   ├── constants.d.ts
-│   ├── constants.d.ts.map
-│   ├── constants.js
-│   ├── constants.js.map
-│   ├── copy.d.ts
-│   ├── copy.d.ts.map
-│   ├── copy.js
-│   ├── copy.js.map
-│   ├── dotfiles.d.ts
-│   ├── dotfiles.d.ts.map
-│   ├── dotfiles.js
-│   ├── dotfiles.js.map
-│   ├── download.d.ts
-│   ├── download.d.ts.map
-│   ├── download.js
-│   ├── download.js.map
-│   ├── index.d.ts
-│   ├── index.d.ts.map
-│   ├── index.js
-│   ├── index.js.map
-│   ├── transfer.d.ts
-│   ├── transfer.d.ts.map
-│   ├── transfer.js
-│   ├── transfer.js.map
-│   ├── unpack.d.ts
-│   ├── unpack.d.ts.map
-│   ├── unpack.js
-│   └── unpack.js.map
-├── lib
-│   ├── aliases
-│   │   ├── default
-│   │   │   └── default.aliases.sh
-│   │   ├── gcloud
-│   │   │   └── gcloud.aliases.sh
-│   │   ├── git
-│   │   │   └── git.aliases.sh
-│   │   ├── heroku
-│   │   │   └── heroku.aliases.sh
-│   │   ├── jekyll
-│   │   │   └── jekyll.aliases.sh
-│   │   ├── pnpm
-│   │   │   └── pnpm.aliases.sh
-│   │   ├── subversion
-│   │   │   └── subversion.aliases.sh
-│   │   └── tmux
-│   │       └── tmux.aliases.sh
-│   ├── configurations
-│   │   ├── bash
-│   │   │   └── bashrc
-│   │   ├── curl
-│   │   │   ├── cacert.pem
-│   │   │   └── curlrc
-│   │   ├── default
-│   │   │   ├── color.sh
-│   │   │   ├── constants.sh
-│   │   │   ├── editor.sh
-│   │   │   └── prompt.sh
-│   │   ├── gem
-│   │   │   └── gemrc
-│   │   ├── input
-│   │   │   └── inputrc
-│   │   ├── jshint
-│   │   │   └── jshintrc
-│   │   ├── nano
-│   │   │   └── nanorc
-│   │   ├── profile
-│   │   │   └── profile
-│   │   ├── tmux
-│   │   │   ├── default
-│   │   │   ├── display
-│   │   │   ├── linux
-│   │   │   ├── navigation
-│   │   │   ├── panes
-│   │   │   ├── theme
-│   │   │   ├── tmux
-│   │   │   └── vi
-│   │   ├── vim
-│   │   │   └── vimrc
-│   │   ├── wget
-│   │   │   └── wgetrc
-│   │   ├── zsh
-│   │   │   └── zshrc
-│   │   └── README.md
-│   ├── functions
-│   │   ├── README.md
-│   │   ├── cdls.sh
-│   │   ├── changediskpwd.tmp
-│   │   ├── code.tmp
-│   │   ├── countdown.tmp
-│   │   ├── curlheader.sh
-│   │   ├── curltime.sh
-│   │   ├── encode64.sh
-│   │   ├── environment.sh
-│   │   ├── extract.sh
-│   │   ├── filehead.sh
-│   │   ├── genpwd.sh
-│   │   ├── goto.sh
-│   │   ├── headers.tmp
-│   │   ├── hidehiddenfiles.sh
-│   │   ├── history-all.tmp
-│   │   ├── hostinfo.sh
-│   │   ├── hstats.sh
-│   │   ├── httpdebug.sh
-│   │   ├── keygen.sh
-│   │   ├── last.sh
-│   │   ├── logout.sh
-│   │   ├── lowercase.sh
-│   │   ├── macos.sh
-│   │   ├── matrix.sh
-│   │   ├── mcd.sh
-│   │   ├── mount_read_only.sh
-│   │   ├── myproc.sh
-│   │   ├── prependpath.sh
-│   │   ├── print.tmp
-│   │   ├── ql.sh
-│   │   ├── rd.sh
-│   │   ├── remove_disk.sh
-│   │   ├── ren.sh
-│   │   ├── rm.tmp
-│   │   ├── rps.tmp
-│   │   ├── showhiddenfiles.sh
-│   │   ├── size.sh
-│   │   ├── stopwatch.sh
-│   │   ├── trash.tmp
-│   │   ├── tree.tmp
-│   │   ├── uppercase.sh
-│   │   ├── uuidgen.tmp
-│   │   ├── view-source.sh
-│   │   ├── vscode.sh
-│   │   ├── whoisport.sh
-│   │   └── zipf.sh
-│   ├── paths
-│   │   ├── ant
-│   │   │   └── ant.paths.sh
-│   │   ├── default
-│   │   │   └── default.paths.sh
-│   │   ├── homebrew
-│   │   │   └── homebrew.paths.sh
-│   │   ├── java
-│   │   │   └── java.paths.sh
-│   │   ├── maven
-│   │   │   └── maven.paths.sh
-│   │   ├── node
-│   │   │   └── node.paths.sh
-│   │   ├── nvm
-│   │   │   └── nvm.paths.sh
-│   │   ├── pnpm
-│   │   │   └── pnpm.paths.sh
-│   │   ├── python
-│   │   │   └── python.paths.sh
-│   │   ├── ruby
-│   │   │   └── ruby.paths.sh
-│   │   └── tmux
-│   │       └── tmux.paths.sh
-│   ├── README.md
-│   ├── aliases.sh
-│   ├── configurations.sh
-│   ├── exit.sh
-│   ├── functions.sh
-│   ├── history.sh
-│   └── paths.sh
-├── scripts
-│   ├── backup.sh
-│   ├── banner.sh
-│   ├── build.sh
-│   ├── clean.sh
-│   ├── compile.sh
-│   ├── copy.sh
-│   ├── dotfiles.sh
-│   ├── download.sh
-│   ├── help.sh
-│   └── unpack.sh
-├── Makefile
-└── filesizes.txt
-
-38 directories, 141 files
-
-```
-
-## 🔗 Releases
+## Releases 🔗
 
 Releases are available on the [GitHub releases page][releases-url].
 
 ![divider][divider]
 
-## 🚥 Semantic versioning policy
+## Semantic versioning policy 🚥
 
 For transparency into our release cycle and in striving to maintain backward
 compatibility, `Dotfiles` follows [Semantic Versioning][semver-url].
@@ -480,7 +314,7 @@ Please read our [Code of Conduct][code-of-conduct-url].
 
 ![divider][divider]
 
-## ❤️ Contributing
+## Contribution 🤝
 
 Thank you for using Dotfiles! If you like the library, it would be
 great if you can give it a star ⭐ on [Github][github-url].
@@ -500,7 +334,7 @@ for further details on the process for submitting pull requests to us.
 
 ![divider][divider]
 
-## 🥂 License
+## License 📝
 
 This project is licensed under the [MIT License][license-url] file for details.
 
@@ -508,7 +342,7 @@ This project is licensed under the [MIT License][license-url] file for details.
 
 ![divider][divider]
 
-## 🏢 Acknowledgements
+## Acknowledgements 💙
 
 [Dotfiles][website-url] is beautifully crafted by these people and a bunch of
 awesome [contributors][contributors-url]
@@ -526,7 +360,7 @@ awesome [contributors][contributors-url]
 [deepin-url]: https://www.deepin.org/en/
 [devuan-url]: https://devuan.org/
 [docs-url]: https://github.com/sebastienrousseau/dotfiles/docs
-[download-url]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.462.tar.gz
+[download-url]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.465.tar.gz
 [forks-url]: https://github.com/sebastienrousseau/dotfiles/network/members
 [fossa-url]: https://app.fossa.io/projects/git%2Bgithub.com%2Freedia%2Fdotfiles?ref=badge_large
 [getting-started-url]: https://github.com/sebastienrousseau/dotfiles#getting-started
@@ -551,6 +385,7 @@ awesome [contributors][contributors-url]
 [zorin-url]: https://zorinos.com/
 [zsh-url]: https://www.zsh.org/
 
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 [codacy-grade]: https://img.shields.io/codacy/grade/634cfc4de08e492ebcbb341631066241?style=for-the-badge "Codacy grade"
 [contributors-shield]: https://img.shields.io/github/contributors/sebastienrousseau/dotfiles.svg?style=for-the-badge "Contributors"
 [contributors-url]: https://github.com/sebastienrousseau/dotfiles/graphs/contributors "List of contributors"
@@ -561,6 +396,5 @@ awesome [contributors][contributors-url]
 [getting_started]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/button-primary.svg "Getting Started"
 [gr]: https://avatars0.githubusercontent.com/u/35816108?s=117 "Graham Colgate"
 [license]: https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge\&color=ff69b4 "License"
-[logo]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/dotfiles.svg "Dotfiles"
 [love]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/made-with-love.svg "Made with Love"
 [sr]: https://avatars0.githubusercontent.com/u/1394998?s=117 "Sebastien Rousseau"
