@@ -38,3 +38,6 @@ alias sshconf='${=EDITOR} $HOME/.ssh/config'
 
 # Alias to open the Zsh configuration file in the default text editor
 alias zshrc='${=EDITOR} $HOME/.zshrc'
+
+# Alias to open the Zsh profile in the default text editor
+alias zshp='${=EDITOR} $HOME/.zsh_profile'
