@@ -5,6 +5,7 @@
 # License: MIT
 
 # 🅽🅰🆅🅸🅶🅰🆃🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂
+
 alias -- -='cd -'                       # -: Shortcut to go to previous directory.
 alias .....='cd ../../../..'            # .....: Shortcut to go to great-great-grandparent directory.
 alias ....='cd ../../..'                # ....: Shortcut to go to great-grandparent directory.
