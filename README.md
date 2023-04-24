@@ -160,11 +160,11 @@ You can download the latest version (v0.2.465) with the following options:
 
 - [**Manual download**][releases-url] - **The easiest way to install Dotfiles.**
 - [**Install with PnPM**][package-url]
-  `pnpm i @sebastienrousseau/dotfiles`.
+  `pnpm i @wwdseb/dotfiles`.
 - [**Install with Npm**][package-url]
-  `npm install @sebastienrousseau/dotfiles`.
+  `npm install @wwdseb/dotfiles`.
 - [**Install with Yarn**][package-url]
-  `yarn add @sebastienrousseau/dotfiles`.
+  `yarn add @wwdseb/dotfiles`.
 - **Clone the main repository** to get all source files including build scripts:
   `git clone https://github.com/sebastienrousseau/dotfiles.git`. This will clone
   the latest version of the Dotfiles repository.
@@ -238,7 +238,7 @@ make help
 
 If you want to install Dotfiles using Node.js, you can run the following
 command in the `dist` directory located in your
-`node_modules/@sebastienrousseau/dotfiles/dist` directory:
+`node_modules/@wwdseb/dotfiles/dist` directory:
 
 ```bash
 node .
@@ -371,7 +371,7 @@ awesome [contributors][contributors-url]
 [kali-url]: https://www.kali.org/
 [license-url]: https://opensource.org/licenses/MIT
 [make-url]: https://www.gnu.org/software/make/
-[package-url]:https://www.npmjs.com/package/@sebastienrousseau/dotfiles
+[package-url]:https://www.npmjs.com/package/@wwdseb/dotfiles
 [pnpm-url]: https://pnpm.io
 [pop-url]: https://pop.system76.com/
 [q4-url]: https://q4os.org/

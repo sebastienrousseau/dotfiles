@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.465) - https://dotfiles.io
-# Made with ♥ in London, UK by @sebastienrousseau
+# Made with ♥ in London, UK by @wwdseb
 # Copyright (c) 2015-2023. All rights reserved
 # License: MIT
 
@@ -8,7 +8,7 @@
 #
 # Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
 #
-# Made with ♥ in London, UK by @sebastienrousseau
+# Made with ♥ in London, UK by @wwdseb
 # Copyright (c) 2015-2023. All rights reserved
 # Licensed under the MIT license
 #

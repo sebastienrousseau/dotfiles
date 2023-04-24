@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.465) - https://dotfiles.io
-# Made with ♥ in London, UK by @sebastienrousseau
+# Made with ♥ in London, UK by @wwdseb
 # Copyright (c) 2015-2023. All rights reserved
 # License: MIT
 
@@ -31,7 +31,7 @@
 #      3.0 Aliases to show what revision and author last modified each line of a file.
 #      3.1 Aliases to get and set repository or global options.
 #
-# Made with ♥ in London, UK by @sebastienrousseau
+# Made with ♥ in London, UK by @wwdseb
 # Copyright (c) 2015-2023. All rights reserved
 # Licensed under the MIT license
 #
