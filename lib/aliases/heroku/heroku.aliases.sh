@@ -36,18 +36,13 @@ if command -v heroku &>/dev/null; then
   #      3.3 Heroku Spaces aliases.
   #      3.4 Heroku Webhooks aliases.
   #
-  # Made with ♥ in London, UK by @wwdseb
-  # Copyright (c) 2015-2023. All rights reserved
-  # Licensed under the MIT license
-  #
-
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  1. Heroku Core aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  1.1 Heroku Access aliases.
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hk: Heroku CLI command shortcut.
   alias hkk='heroku'
@@ -109,9 +104,9 @@ if command -v heroku &>/dev/null; then
   # hkw: Show which plugin a command is in.
   alias hkw='heroku which'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  1.2 Heroku Add-ons aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # Attach an existing add-on resource to an app.
   alias hkada='heroku addons:attach'
@@ -155,9 +150,9 @@ if command -v heroku &>/dev/null; then
   # Show provisioning status of the add-ons on the app.
   alias hkadw='heroku addons:wait'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  1.3 Heroku Apps aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkapc: Creates a new app.
   alias hkapc='heroku apps:create'
@@ -210,9 +205,9 @@ if command -v heroku &>/dev/null; then
   # hkapulk: Unlock an app so any team member can join.
   alias hkapulk='heroku apps:unlock'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  1.4 Heroku Auth 2fa aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hk2fa: Display the current logged in user.
   alias hk2fa='heroku auth:whoami'
@@ -223,7 +218,7 @@ if command -v heroku &>/dev/null; then
   # hk2fain: Login with your Heroku credentials.
   alias hk2fain='heroku auth:login'
 
-  # hk2faout: Clears local login credentials and invalidates API session.
+  # hk2faout: Clears local login credentials and invalidates API session
   alias hk2faout='heroku auth:logout'
 
   # hk2fas: Check 2fa status.
@@ -232,9 +227,9 @@ if command -v heroku &>/dev/null; then
   # hk2fat: Outputs current CLI authentication token.
   alias hk2fat='heroku auth:token'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  1.5 Heroku Authorizations aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkauc: Create a new OAuth authorization.
   alias hkauc='heroku authorizations:create'
@@ -242,26 +237,27 @@ if command -v heroku &>/dev/null; then
   # hkaui: Show an existing OAuth authorization.
   alias hkaui='heroku authorizations:info'
 
-  # hkaul: List OAuth authorizations. |
+  # hkaul: List OAuth authorizations.
   alias hkaul='heroku authorizations'
 
-  # hkaur: Revoke OAuth authorization. |
+  # hkaur: Revoke OAuth authorization.
   alias hkaur='heroku authorizations:revoke'
 
-  # hkauro: Updates an OAuth authorization token. |
+  # hkauro: Updates an OAuth authorization token.
   alias hkauro='heroku authorizations:rotate'
 
   # hkauu: Updates an OAuth authorization.
   alias hkauu='heroku authorizations:update'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  1.6 Heroku Build packs aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkbpac: Display autocomplete installation instructions.
   alias hkbpac='heroku autocomplete'
 
-  # hkbpad: Add new app build-pack, inserting into list of build-packs if necessary.
+  # hkbpad: Add new app build-pack, inserting into list of build-packs
+  # if necessary.
   alias hkbpad='heroku buildpacks:add'
 
   # hkbpcl: Clear all build-packs set on the app.
@@ -279,12 +275,12 @@ if command -v heroku &>/dev/null; then
   # hkbps: Search for build-packs.
   alias hkbps='heroku buildpacks:search'
 
-  # hkbpv: List versions of a build-pack. |
+  # hkbpv: List versions of a build-pack.
   alias hkbpv='heroku buildpacks:versions'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  1.7 Heroku Certs aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkca: Show ACM status for an app.
   alias hkca='heroku certs:auto'
@@ -322,9 +318,9 @@ if command -v heroku &>/dev/null; then
   # hkcu: Update an SSL certificate on an app.
   alias hkcu='heroku certs:update'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  1.8 Heroku ci aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkcicg: Get a CI config var.
   alias hkcicg='heroku ci:config:get'
@@ -338,10 +334,12 @@ if command -v heroku &>/dev/null; then
   # hkcicv: Display CI config vars.
   alias hkcicv=' ci:config'
 
-  # hkcid: Opens an interactive test debugging session with the contents of the current directory.
+  # hkcid: Opens an interactive test debugging session with the contents
+  # of the current directory.
   alias hkcid='heroku ci:debug'
 
-  # hkcie: Looks for the most recent run and returns the output of that run.
+  # hkcie: Looks for the most recent run and returns the output of that
+  # run.
   alias hkcie='heroku ci:last'
 
   # hkcii: Show the status of a specific test run.
@@ -350,7 +348,8 @@ if command -v heroku &>/dev/null; then
   # hkcil: Display the most recent CI runs for the given pipeline.
   alias hkcil='heroku ci'
 
-  # hkcim: 'app-ci.json' is deprecated. Run this command to migrate to app.json with an environments key.
+  # hkcim: 'app-ci.json' is deprecated. Run this command to migrate to
+  # app.json with an environments key.
   alias hkcim='heroku ci:migrate-manifest'
 
   # hkcio: Open the Dashboard version of Heroku CI.
@@ -362,9 +361,9 @@ if command -v heroku &>/dev/null; then
   # hkcir2: Rerun tests against current directory.
   alias hkcir2='heroku ci:rerun'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  1.9 Heroku config aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkclc: Create a new OAuth client.
   alias hkclc='heroku clients:create'
@@ -381,12 +380,12 @@ if command -v heroku &>/dev/null; then
   # hkcls: Rotate OAuth client secret.
   alias hkcls='heroku clients:rotate'
 
-  # hkclu: Update OAuth client. |
+  # hkclu: Update OAuth client.
   alias hkclu='heroku clients:update'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  2. Heroku Configuration aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkcfe: Interactively edit config vars.
   alias hkcfe='heroku config:edit'
@@ -403,9 +402,9 @@ if command -v heroku &>/dev/null; then
   # hkcfv: Display the config vars for an app.
   alias hkcfv='heroku config'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  2.1 Heroku Container aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkct: Use containers to build and deploy Heroku apps.
   alias hkct='heroku container'
@@ -419,10 +418,12 @@ if command -v heroku &>/dev/null; then
   # hkctpull: Pulls an image from an app's process type.
   alias hkctpull='heroku container:pull'
 
-  # hkctpush: Builds, then pushes Docker images to deploy your Heroku app.
+  # hkctpush: Builds, then pushes Docker images to deploy your Heroku
+  # app.
   alias hkctpush='heroku container:push'
 
-  # hkctrelease: Releases previously pushed Docker images to your Heroku app.
+  # hkctrelease: Releases previously pushed Docker images to your Heroku
+  # app.
   alias hkctrelease='heroku container:release'
 
   # hkctrm: Remove the process type from your app.
@@ -431,9 +432,9 @@ if command -v heroku &>/dev/null; then
   # hkctrun: Builds, then runs the docker image locally.
   alias hkctrun='heroku container:run'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  2.2 Heroku Domains aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkdo: List domains for an app.
   alias hkdo='heroku domains'
@@ -456,9 +457,9 @@ if command -v heroku &>/dev/null; then
   # hkdow: Wait for domain to be active for an app.
   alias hkdow='heroku domains:wait'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  2.3 Heroku Drains aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkdr: Display the log drains of an app.
   alias hkdr='heroku drains'
@@ -469,9 +470,9 @@ if command -v heroku &>/dev/null; then
   # hkdrr: Removes a log drain from an app.
   alias hkdrr='heroku drains:remove'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  2.4 Heroku Dyno aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkdyk: Stop app dyno.
   alias hkdyk='heroku dyno:kill'
@@ -488,9 +489,9 @@ if command -v heroku &>/dev/null; then
   # hkdyst: Stop app dyno.
   alias hkdyst='heroku dyno:stop'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  2.5 Heroku Features aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkfeat: List available app features.
   alias hkfeat='heroku features'
@@ -504,19 +505,20 @@ if command -v heroku &>/dev/null; then
   # hkfeati: Display information about a feature.
   alias hkfeati='heroku features:info'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  2.6 Heroku Git aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
-  # Clones a heroku app to your local machine at DIRECTORY (defaults to app name).
+  # Clones a heroku app to your local machine at DIRECTORY
+  # (defaults to app name).
   alias hkgitc='heroku git:clone'
 
   # Adds a git remote to an app repo.
   alias hkgitr='heroku git:remote'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  2.7 Heroku Keys aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # Display your SSH keys.
   alias hkk='heroku keys'
@@ -530,9 +532,9 @@ if command -v heroku &>/dev/null; then
   # Remove an SSH key from the user.
   alias hkkr='heroku keys:remove'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  2.8 Heroku Labs aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hklab: List experimental features.
   alias hklab='heroku labs'
@@ -546,13 +548,13 @@ if command -v heroku &>/dev/null; then
   # hklabi: Show feature info.
   alias hklabi='heroku labs:info'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  3. Heroku Advanced aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  3.1 Heroku Local aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkloc: Run heroku app locally.
   alias hkloc='heroku local'
@@ -566,9 +568,9 @@ if command -v heroku &>/dev/null; then
   # hkloclk: Prevent team members from joining an app.
   alias hkloclk='heroku lock'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  3.2 Heroku Maintenance aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkmt: Display the current maintenance status of app.
   alias hkmt='heroku maintenance'
@@ -579,9 +581,9 @@ if command -v heroku &>/dev/null; then
   # hkmton: Put the app into maintenance mode.
   alias hkmton='heroku maintenance:on'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  3.3 Heroku Members aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkmb: List members of a team.
   alias hkmb='heroku members'
@@ -592,17 +594,18 @@ if command -v heroku &>/dev/null; then
   # hkmbr: Removes a user from a team.
   alias hkmbr='heroku members:remove'
 
-  # hkmbs: Sets a members role in a team. |
+  # hkmbs: Sets a members role in a team.
   alias hkmbs='heroku members:set'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  3.4 Heroku Postgres aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkpg: Show database information.
   alias hkpg='heroku pg'
 
-  # hkpgb: Show table and index bloat in your database ordered by most wasteful.
+  # hkpgb: Show table and index bloat in your database ordered by most
+  # wasteful.
   alias hkpgb='heroku pg:bloat'
 
   # hkpgbk: List database backups.
@@ -638,7 +641,8 @@ if command -v heroku &>/dev/null; then
   # hkpgbkk: Stop daily backups.
   alias hkpgbkk='heroku pg:backups:unschedule'
 
-  # hkpgblk: Display queries holding locks other queries are waiting to be released.
+  # hkpgblk: Display queries holding locks other queries are waiting to
+  # be released.
   alias hkpgblk='heroku pg:blocking'
 
   # hkpgc: Copy all data from source db to target.
@@ -659,7 +663,8 @@ if command -v heroku &>/dev/null; then
   # hkpgcrr: Rotate the database credentials.
   alias hkpgcrr='heroku pg:credentials:rotate'
 
-  # hkpgcrrd: Repair the permissions of the default credential within database.
+  # hkpgcrrd: Repair the permissions of the default credential within
+  # database.
   alias hkpgcrrd='heroku pg:credentials:repair-default'
 
   # hkpgcrurl: Show information on a database credential.
@@ -698,7 +703,8 @@ if command -v heroku &>/dev/null; then
   # hkpgmtw: Set weekly maintenance window.
   alias hkpgmtw='heroku pg:maintenance:window'
 
-  # hkpgo: Show 10 queries that have longest execution time in aggregate.
+  # hkpgo: Show 10 queries that have longest execution time in
+  # aggregate.
   alias hkpgo='heroku pg:outliers'
 
   # hkpgp: Sets DATABASE as your DATABASE_URL.
@@ -722,30 +728,36 @@ if command -v heroku &>/dev/null; then
   # hkpgreset: Show your current database settings.
   alias hkpgset='heroku pg:settings'
 
-  # hkpgsetllw: Controls whether a log message is produced when a session waits longer than the deadlock_timeout to acquire a lock. deadlock_timeout is se... .
+  # hkpgsetllw: Controls whether a log message is produced when a
+  # session waits longer than the deadlock_timeout to acquire a lock.
   alias hkpgsetllw='heroku pg:settings:log-lock-waits'
 
-  # hkpgsetlmds: The duration of each completed statement will be logged if the statement completes after the time specified by VALUE.
+  # hkpgsetlmds: The duration of each completed statement will be logged
+  # if the statement completes after the time specified by VALUE.
   alias hkpgsetlmds='heroku pg:settings:log-min-duration-statement'
 
-  # hkpgsetlgs: 'log_statement' controls which SQL statements are logged.
+  # hkpgsetlgs: 'log_statement' controls which SQL statements
+  # are logged.
   alias hkpgsetlgs='heroku pg:settings:log-statement'
 
-  # hkpguf: Stop a replica from following and make it a writeable database.
+  # hkpguf: Stop a replica from following and make it a writeable
+  # database.
   alias hkpguf='heroku pg:unfollow'
 
-  # hkpgup: Unfollow a database and upgrade it to the latest stable PostgreSQL version.
+  # hkpgup: Unfollow a database and upgrade it to the latest stable
+  # PostgreSQL version.
   alias hkpgup='heroku pg:upgrade'
 
-  # hkpgvs: Show dead rows and whether an automatic vacuum is expected to be triggered.
+  # hkpgvs: Show dead rows and whether an automatic vacuum is expected
+  # to be triggered.
   alias hkpgvs='heroku pg:vacuum-stats'
 
   # hkpgww: Blocks until database is available.
   alias hkpgww='heroku pg:wait'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  3.5 Heroku Pipelines aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # List pipelines you have access to.
   alias hkpipe='heroku pipelines'
@@ -780,7 +792,9 @@ if command -v heroku &>/dev/null; then
   # Rename a pipeline.
   alias hkpipern='heroku pipelines:rename'
 
-  # Bootstrap a new pipeline with common settings and create a production and staging app (requires a fully formed app.json in the repo).
+  # Bootstrap a new pipeline with common settings and create a
+  # production and staging app (requires a fully formed app.json in
+  # the repo).
   alias hkpipes='heroku pipelines:setup'
 
   # Transfer ownership of a pipeline.
@@ -789,9 +803,9 @@ if command -v heroku &>/dev/null; then
   # Update the app's stage in a pipeline.
   alias hkpipeu='heroku pipelines:update'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  3.6 Heroku Plugins aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkplugs: List installed plugins.
   alias hkplugs='heroku plugins'
@@ -808,9 +822,9 @@ if command -v heroku &>/dev/null; then
   # hkplugsu: Update installed plugins.
   alias hkplugsu='heroku plugins:update'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  3.7 Heroku 'ps' aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkpsad: Disable web dyno autoscaling.
   alias hkpsad='heroku ps:autoscale:disable'
@@ -851,12 +865,13 @@ if command -v heroku &>/dev/null; then
   # hkpst: Manage dyno sizes.
   alias hkpst='heroku ps:type'
 
-  # hkpsw: Wait for all dynos to be running latest version after a release.
+  # hkpsw: Wait for all dynos to be running latest version after
+  # a release.
   alias hkpsw='heroku ps:wait'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  3.8 Heroku redis aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkred: Gets information about redis.
   alias hkred='heroku redis'
@@ -882,18 +897,20 @@ if command -v heroku &>/dev/null; then
   # hkredp: Sets DATABASE as your REDIS_URL.
   alias hkredp='heroku redis:promote'
 
-  # hkredsr: Reset all stats covered by RESETSTAT (<https://redis.io/commands/config-resetstat>).
+  # hkredsr: Reset all stats covered by RESETSTAT
+  # (<https://redis.io/commands/config-resetstat>).
   alias hkredsr='heroku redis:stats-reset'
 
-  # hkredt: Set the number of seconds to wait before killing idle connections.
+  # hkredt: Set the number of seconds to wait before killing idle
+  # connections.
   alias hkredt='heroku redis:timeout'
 
   # hkredw: Wait for Redis instance to be available.
   alias hkredw='heroku redis:wait'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  3.9 Heroku Releases aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkrel: Display the releases for an app.
   alias hkrel='heroku releases'
@@ -907,9 +924,9 @@ if command -v heroku &>/dev/null; then
   # hkrelr: Rollback to a previous release.
   alias hkrelr='heroku releases:rollback'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  3.10.1 Heroku Spaces aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkrvae: Enable review apps and/or settings on an existing pipeline.
   alias hkrvae='heroku reviewapps:enable'
@@ -917,9 +934,9 @@ if command -v heroku &>/dev/null; then
   # hkrvad: Disable review apps and/or settings on an existing pipeline.
   alias hkrvad='heroku reviewapps:disable'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  3.10.2 Heroku Run aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkrun: Run a one-off process inside a heroku dyno.
   alias hkrun='heroku run'
@@ -927,9 +944,9 @@ if command -v heroku &>/dev/null; then
   # hkrund: Run a detached dyno, where output is sent to your logs.
   alias hkrund='heroku run:detached'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  3.10.3 Heroku Sessions aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hksessions: List your OAuth sessions.
   alias hksessions='heroku sessions'
@@ -937,9 +954,9 @@ if command -v heroku &>/dev/null; then
   # hksessionsd: Delete (logout) OAuth session by ID.
   alias hksessionsd='heroku sessions:destroy'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  3.10.4 Heroku Spaces aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hksp: List available spaces.
   alias hksp='heroku spaces'
@@ -953,7 +970,8 @@ if command -v heroku &>/dev/null; then
   # hkspi: Show info about a space.
   alias hkspi='heroku spaces:info'
 
-  # hksppi: Display the information necessary to initiate a peering connection.
+  # hksppi: Display the information necessary to initiate a peering
+  # connection.
   alias hksppi='heroku spaces:peering:info'
 
   # hkspp: List peering connections for a space.
@@ -1001,9 +1019,9 @@ if command -v heroku &>/dev/null; then
   # hkspw: Wait for a space to be created.
   alias hkspw='heroku spaces:wait'
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  3.10.5 Heroku Webhooks aliases
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # hkwh: List webhooks on an app.
   alias hkwh='heroku webhooks'
