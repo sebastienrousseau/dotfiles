@@ -6,19 +6,55 @@
 
 # 🅽🅿🅼 🅰🅻🅸🅰🆂🅴🆂
 if command -v npm &>/dev/null; then
-  alias npb='npm build'      # npb: Build npm script.
-  alias npc='npm cache'      # npc: Cache npm package.
-  alias npd='npm dev'        # npd: Dev npm script.
-  alias npg='npm global'     # npg: Global npm package.
-  alias npi='npm install'    # npi: Install npm package.
-  alias npl='npm list'       # npl: List npm packages.
-  alias npp='npm publish'    # npp: Publish npm package.
-  alias npr='npm run'        # npr: Run npm script.
-  alias nprw='npm run watch' # nprw: Run npm script watch.
-  alias nps='npm start'      # nps: Start npm script.
-  alias npsv='npm serve'     # npsv: Serve npm script.
-  alias npt='npm test'       # npt: Test npm script.
-  alias npu='npm update'     # npu: Update npm package.
-  alias npx='npm exec'       # npx: Exec npm package.
-  alias npy='npm why'        # npy: Why npm package.
+  # Audit npm packages.
+  alias npa='npm audit'
+
+  # Build npm script.
+  alias npb='npm build'
+
+  # Cache npm package.
+  alias npc='npm cache'
+
+  # Dev npm script.
+  alias npd='npm dev'
+
+  # Global npm package.
+  alias npg='npm global'
+
+  # Install npm package.
+  alias npi='npm install'
+
+  # List npm packages.
+  alias npl='npm list'
+
+  # Publish npm package.
+  alias npp='npm publish'
+
+  # Remove npm package.
+  alias nprm='npm uninstall'
+
+  # Run npm script.
+  alias npr='npm run'
+
+  # Run npm script watch.
+  alias nprw='npm run watch'
+
+  # Start npm script.
+  alias nps='npm start'
+
+  # Serve npm script.
+  alias npsv='npm serve'
+
+  # Test npm script.
+  alias npt='npm test'
+
+  # Update npm package.
+  alias npu='npm update'
+
+  # Exec npm package.
+  alias npx='npm exec'
+
+  # Why npm package.
+  alias npy='npm why'
+
 fi
