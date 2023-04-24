@@ -6,19 +6,50 @@
 
 # 🅵🅸🅽🅳 🅰🅻🅸🅰🆂🅴🆂
 if command -v fd &>/dev/null; then
-  alias fd='fd --color always '  # fd: always colorize output by default.
-  alias fda='fd --absolute-path' # fda: list all files with absolute path.
-  alias fdc='fd --ignore-case'   # fdc: list all files with case insensitive search.
-  alias fdd='fd  --list-details' # fdd: list all files with details.
-  alias fde='fd --extension'     # fde: list all files with extension.
-  alias fdf='fd --follow'        # fdf: list all files with follow symlinks.
-  alias fdh='fd --help'          # fdh: list all files with help.
-  alias fdh='fd --hidden'        # fdh: list all files with hidden files.
-  alias fdn='fd --glob'          # fdn: list all files with glob.
-  alias fdo='fd --owner'         # fdo: list all files with owner.
-  alias fds='fd --size'          # fds: list all files with size.
-  alias fdu='fd --exclude'       # fdu: list all files with exclude.
-  alias fdv='fd --version'       # fdv: list all files with version.
-  alias fdx='fd --exec'          # fdx: Execute a command for each search result.
-  alias find='fd'                # find: fd is a simple, fast and user-friendly alternative to find.
+  # fd: a simple, fast and user-friendly alternative to find
+  # Always colorize output by default.
+  alias fd='fd --color always'
+
+  # List all files with absolute path.
+  alias fda='fd --absolute-path'
+
+  # List all files with case-insensitive search.
+  alias fdc='fd --ignore-case'
+
+  # List all files with details.
+  alias fdd='fd --list-details'
+
+  # List all files with extension.
+  alias fde='fd --extension'
+
+  # List all files with follow symlinks.
+  alias fdf='fd --follow'
+
+  # List all files with help.
+  alias fdh='fd --help'
+
+  # List all files, including hidden files.
+  alias fdh='fd --hidden'
+
+  # List all files with glob.
+  alias fdn='fd --glob'
+
+  # List all files with owner.
+  alias fdo='fd --owner'
+
+  # List all files with size.
+  alias fds='fd --size'
+
+  # List all files with exclude.
+  alias fdu='fd --exclude'
+
+  # List all files with version.
+  alias fdv='fd --version'
+
+  # Execute a command for each search result.
+  alias fdx='fd --exec'
+
+  # Use fd as a replacement for find.
+  alias find='fd'
+
 fi
