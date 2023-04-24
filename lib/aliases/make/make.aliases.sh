@@ -5,11 +5,30 @@
 # License: MIT
 
 # 🅼🅰🅺🅴 🅰🅻🅸🅰🆂🅴🆂
-alias mk='make'          # mk: Make.
-alias mkc='make clean'   # mkc: Make clean.
-alias mkd='make doc'     # mkd: Make doc.
-alias mkf='make format'  # mkf: Make format.
-alias mkh="make help"    # mkh: Make help.
-alias mki='make install' # mki: Make install.
-alias mkr="make run"     # mkr: Make run.
-alias mkt='make test'    # mkt: Make test.
+
+# mk - make
+alias mk='make'
+
+# mkc - make clean
+alias mkc='make clean'
+
+# mkd - make doc
+alias mkd='make doc'
+
+# mkf - make format
+alias mkf='make format'
+
+# mkh - make help
+alias mkh='make help'
+
+# mki - make install
+alias mki='make install'
+
+# mka - make all
+alias mka='make all'
+
+# mkr - make run
+alias mkr='make run'
+
+# mkt - make test
+alias mkt='make test'
