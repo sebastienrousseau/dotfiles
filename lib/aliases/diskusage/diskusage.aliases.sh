@@ -5,6 +5,7 @@
 # License: MIT
 
 # 🅳🅸🆂🅺 🆄🆂🅰🅶🅴 🅰🅻🅸🅰🆂🅴🆂
+
 if command -v du &>/dev/null; then
   # Display the disk usage of the current directory.
   alias du="du -h"
@@ -21,7 +22,8 @@ if command -v du &>/dev/null; then
   # File size human readable output sorted by size.
   alias dus='du -hs *'
 
-  # File size of files and directories in current directory including symlinks.
+  # File size of files and directories in current directory including
+  # symlinks.
   alias dusym="du * -hsLc"
 
   # Total file size of current directory.

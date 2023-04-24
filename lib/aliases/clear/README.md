@@ -2,7 +2,8 @@
 
 <!-- markdownlint-disable MD033 MD041 -->
 
-<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg" alt="dotfiles logo" width="261" align="right" />
+<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
 
@@ -12,7 +13,8 @@ terminal easier and more efficient. The following aliases are included:
 - `c` clears the terminal screen.
 - `cdw` changes the current directory to the workspace directory.
 - `cl` is an alias for `c`, which clears the terminal screen.
-- `clc` clears the terminal screen and lists the contents of the current directory.
+- `clc` clears the terminal screen and lists the contents of the current
+  directory.
 - `clh` clears the terminal screen and prints the command history.
 - `clp` clears the terminal screen and prints the current working
   directory.

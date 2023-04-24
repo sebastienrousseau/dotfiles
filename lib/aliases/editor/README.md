@@ -2,11 +2,13 @@
 
 <!-- markdownlint-disable MD033 MD041 -->
 
-<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg" alt="dotfiles logo" width="261" align="right" />
+<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-This code provides command aliases for editing files on a Unix-based system using various text editors. The following editors are supported:
+This code provides command aliases for editing files on a Unix-based
+system using various text editors. The following editors are supported:
 
 - nano
 - vim
@@ -15,7 +17,8 @@ This code provides command aliases for editing files on a Unix-based system usin
 - gedi
 - notepad++
 
-The aliases are designed to make it easy for users to quickly open and edit files with their preferred text editor. The aliases are:
+The aliases are designed to make it easy for users to quickly open and
+edit files with their preferred text editor. The aliases are:
 
 - `e`: Edit a file
 - `edit`: Edit a file
@@ -24,8 +27,13 @@ The aliases are designed to make it easy for users to quickly open and edit file
 - `n`: Edit a file
 - `v`: Edit a file
 
-The code checks if any of the supported editors are installed on the system and sets the corresponding alias to open the file in the available editor.
+The code checks if any of the supported editors are installed on the
+system and sets the corresponding alias to open the file in the
+available editor.
 
-This makes it easy for users to switch between editors or use their preferred editor without having to remember the specific command for each editor.
+This makes it easy for users to switch between editors or use their
+preferred editor without having to remember the specific command for
+each editor.
 
-Enjoy the convenience of quickly editing files with these command aliases!
+Enjoy the convenience of quickly editing files with these command
+aliases!

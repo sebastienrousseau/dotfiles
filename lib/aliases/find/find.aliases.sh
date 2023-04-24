@@ -5,6 +5,7 @@
 # License: MIT
 
 # 🅵🅸🅽🅳 🅰🅻🅸🅰🆂🅴🆂
+
 if command -v fd &>/dev/null; then
   # fd: a simple, fast and user-friendly alternative to find
   # Always colorize output by default.
