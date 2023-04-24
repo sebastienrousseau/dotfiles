@@ -5,6 +5,7 @@
 # License: MIT
 
 # 🅻🅸🆂🆃 🅰🅻🅸🅰🆂🅴🆂
+
 alias 'l.'='ls -dlhF .* | grep -v "^d"' # l.: List hidden files.
 alias l='ls -lFh'                       # l: Size, show type, human readable.
 alias l1='ls -1'                        # l1: Display one file per line.

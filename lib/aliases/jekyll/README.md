@@ -7,7 +7,7 @@ alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-This code provides a set of interactive aliases for
+This code provides a set of aliases for
 [Jekyll](https://jekyllrb.com/).
 
 ## Aliases
