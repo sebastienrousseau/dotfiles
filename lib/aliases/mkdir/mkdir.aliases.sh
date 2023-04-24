@@ -5,9 +5,24 @@
 # License: MIT
 
 # 🅼🅰🅺🅴🅳🅸🆁 🅰🅻🅸🅰🆂🅴🆂
-alias mcd='mkdir -pv && cd'           # mcd: Make directory and cd into it.
-alias mcdp='mkdir -pv && cd'          # mcdp: Make directory and parents and cd into it.
-alias md='mkd'                        # md: Make directory.
-alias mdd='mkdir -pv $(date +%Y%m%d)' # mdd: Make directory with date.
-alias mdp='mkdir -pv'                 # mdp: Make directory and parents.
-alias mdt='mkdir -pv $(date +%h%m%s)' # mdt: Make directory with time.
+
+# Make directory and cd into it.
+alias mcd='mkdir -pv && cd'
+
+# Make example directory with current date.
+alias mde='mkdir -pv "$(date +%Y%m%d)-example"'
+
+# Make directory.
+alias md='mkdir -v'
+
+# Make directory with date.
+alias mdd='mkdir -pv $(date +%Y%m%d) && cd $(date +%Y%m%d)'
+
+# Make notes directory with current date.
+alias mdn='mkdir -pv "$(date +%Y%m%d)-notes"'
+
+# Make work directory with current date.
+alias mdw='mkdir -pv "$(date +%Y%m%d)-work"'
+
+# Make directory with time.
+alias mdt='mkdir -pv $(date +%H%M%S)'
