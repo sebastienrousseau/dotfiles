@@ -4,7 +4,7 @@
 # Copyright (c) 2015-2023. All rights reserved
 # License: MIT
 
-# 🅹🅴🅺🆈🅻🅻 🅰🅻🅸🅰🆂🅴🆂 - Jekyll aliases.
+# 🅹🅴🅺🆈🅻🅻 🅰🅻🅸🅰🆂🅴🆂
 if command -v jekyll &>/dev/null; then
   # Sections:
   #
