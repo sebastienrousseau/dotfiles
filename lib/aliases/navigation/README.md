@@ -16,7 +16,7 @@ This code provides a set of aliases for the `mkdir` command.
 - `....` Shortcut to go to great-grandparent directory.
 - `...` Shortcut to go to grandparent directory.
 - `..` Shortcut to go to parent directory.
-- `'~'` Shortcut to go to home directory.
+- `~` Shortcut to go to home directory.
 - `app` Shortcut to go to the Applications directory.
 - `cod` Shortcut to go to the Code directory and list its contents.
 - `des` Shortcut to go to the Desktop directory and list its contents.
