@@ -5,7 +5,7 @@
 # Copyright (c) 2015-2023. All rights reserved
 # License: MIT
 
-# 🆂🆄🅱🆅🅴🆁🆂🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂 - Subversion aliases.
+# 🆂🆄🅱🆅🅴🆁🆂🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂
 if command -v 'svn' >/dev/null; then
   alias sad='svn add'        # sad: Put new files and directories under version control.
   alias sau='svn auth'       # sau: Manage cached authentication credentials.

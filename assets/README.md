@@ -1,6 +1,11 @@
 # Dotfiles assets
 
-![Banner representing the Dotfiles Library](/assets/dotfiles.svg)
+<!-- markdownlint-disable MD033 MD041 -->
+
+<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+alt="dotfiles logo" width="261" align="right" />
+
+<!-- markdownlint-enable MD033 MD041 -->
 
 This directory contains the following files and directories that are used by the
 dotfiles:
