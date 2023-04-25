@@ -108,13 +108,7 @@ if command -v git &>/dev/null; then
 
   # Show commit logs and Draw a text-based graphical representation of
   # the commit history on the left hand side of the output.
-  alias glg='git log \
-  --oneline \
-  --graph \
-  --full-history \
-  --all \
-  --color \
-  --decorate'
+  alias glg='git log --oneline --graph --full-history --all --color --decorate'
 
   # Show various types of objects.
   alias gs='git show'
@@ -268,15 +262,7 @@ if command -v git &>/dev/null; then
 
   # Show log in our preferred format for our key performance indicators,
   # with long items.
-  alias glll='git log \
-  --graph \
-  --topo-order \
-  --date=iso8601-strict \
-  --no-abbrev-commit \
-  --decorate \
-  --all \
-  --boundary \
-  --pretty=format:"%Cgreen%ad %Cred%h%Creset -%C(yellow)%d%Creset %s %Cblue[%cn <%ce>]%Creset %Cblue%G?%Creset"'
+  alias glll='git log --graph --topo-order --date=iso8601-strict --no-abbrev-commit --decorate --all --boundary --pretty=format:"%Cgreen%ad %Cred%h%Creset -%C(yellow)%d%Creset %s %Cblue[%cn <%ce>]%Creset %Cblue%G?%Creset"'
 
   # Show the log of the recent month.
   alias glm='git log --since=1-month-ago'
@@ -306,14 +292,10 @@ if command -v git &>/dev/null; then
 
   # Delete all local branches that have been merged into the local main
   # branch.
-  alias gcode='git checkout main && \
-  git branch --merged | \
-  xargs git branch --delete'
+  alias gcode='git checkout main && git branch --merged | xargs git branch --delete'
 
   # Ensure local is like the main branch.
-  alias gcom='git checkout main && \
-  git fetch origin --prune && \
-  git reset --hard origin/main'
+  alias gcom='git checkout main && git fetch origin --prune && git reset --hard origin/main'
 
   ##  ------------------------------------------------------------------
   ##  2.0 Aliases to update remote refs along with associated objects
@@ -385,13 +367,7 @@ if command -v git &>/dev/null; then
 
   # Push all remotes.
   # Print the url for the current repo.
-  alias grprint="git remote -v | \
-  sed -n '/github.com.*push/{ \
-    s/^[^[:space:]]\+[[:space:]]\+//; \
-    s|git@github.com:|https://github.com/|; \
-    s/\.git.*//; \
-    p \
-  }'"
+  alias grprint="git remote -v | sed -n '/github.com.*push/{ s/^[^[:space:]]\+[[:space:]]\+//; s|git@github.com:|https://github.com/|; s/\.git.*//; p }'"
 
   # Gives some information about the remote <name>.
   alias grs='git show'
@@ -491,10 +467,7 @@ if command -v git &>/dev/null; then
   alias gshls='git show --relative --pretty=format:'''
 
   # Given any git object, try to show it briefly.
-  alias gshnp='git show \
-  --no-patch \
-  --pretty="tformat:%h (%s, %ad)" \
-  --date=short'
+  alias gshnp='git show --no-patch --pretty="tformat:%h (%s, %ad)" --date=short'
 
   # Show who contributed, in descending order by number of commits.
   alias gshwho='git shortlog --summary --numbered --no-merges'
@@ -546,9 +519,7 @@ if command -v git &>/dev/null; then
   alias grmd2='git rm $(git ls-files --deleted)'
 
   # Remove .DS_Store from the repository.
-  alias grmds='find . \
-  -name .DS_Store \
-  -exec git rm --ignore-unmatch --cached {} +'
+  alias grmds='find . -name .DS_Store -exec git rm --ignore-unmatch --cached {} +'
 
   # Remove for all deleted files, including those with
   # space/quote/unprintable characters in their filename/path.
@@ -560,12 +531,7 @@ if command -v git &>/dev/null; then
   ##  ------------------------------------------------------------------
 
   # Prints per-line contribution per author for a GIT repository.
-  # alias gblau='git ls-files | \
-  #   xargs -n1 git blame --line-porcelain | \
-  #   sed -n "s/^author //p" | \
-  #   sort -f | \
-  #   uniq -ic | \
-  #   sort -nr'
+  # alias gblau='git ls-files | xargs -n1 git blame --line-porcelain | sed -n "s/^author //p" | sort -f | uniq -ic | sort -nr'
 
   ##  ------------------------------------------------------------------
   ##  3.1 Aliases to get and set repository or global options.
