@@ -8,51 +8,35 @@
 
 if command -v chmod &>/dev/null; then
 
-  # (chmod a-rwx) sets permissions so that, (U)ser / owner can't read,
-  # can't write and can't execute. (G)roup can't read, can't write and
-  # can't execute. (O)thers can't read, can't write and can't execute.
+  # Set permissions to no read, write, or execute for user, group, and
+  # others.
   alias 000='chmod -R 000'
 
-  # (chmod a-rw) sets permissions so that, (U)ser / owner can't read,
-  # can't write and can execute. (G)roup can't read, can't write and can
-  # execute. (O)thers can't read, can't write and can execute.
+  # Set permissions to no read or write, but allow execute for user
+  # only.
   alias 400='chmod -R 400'
 
-  # (chmod a-r) sets permissions so that, (U)ser / owner can't read,
-  # can't write and can execute. (G)roup can't read, can't write and can
-  # execute. (O)thers can't read, can't write and can execute.
+  # Set permissions to no write or execute, but allow read for all.
   alias 444='chmod -R 444'
 
-  # (chmod a+rwx,u-x,g-rwx,o-rwx) sets permissions so that, (U)ser /
-  # owner can read, can write and can't execute. (G)roup can't read,
-  # can't write and can't execute. (O)thers can't read, can't write and
-  # can't execute.
+  # Set permissions to read and write for user only.
   alias 600='chmod -R 600'
 
-  # (chmod a+rwx,u-x,g-wx,o-wx) sets permissions so that, (U)ser /
-  # owner can read, can write and can't execute. (G)roup can read,
-  # can't write and can't execute. (O)thers can read, can't write and
-  # can't execute.
+  # Set permissions to read for all, but write only for user.
   alias 644='chmod -R 644'
 
-  # (chmod a+rwx,u-x,g-x,o-x) sets permissions so that, (U)ser / owner
-  # can read, can write and can't execute. (G)roup can read, can write
-  # and can't execute. (O)thers can read, can write and can't execute.
+  # Set permissions to read and write for all.
   alias 666='chmod -R 666'
 
-  # (chmod a+rwx,g-w,o-w) sets permissions so that, (U)ser / owner can
-  # read, can write and can execute. (G)roup can read, can't write and
-  # can execute. (O)thers can read, can't write and can execute.
+  # Set permissions to read, write, and execute for user, but only read
+  # and execute for group and others.
   alias 755='chmod -R 755'
 
-  # (chmod a+rwx,g-x,o-wx) sets permissions so that, (U)ser / owner
-  # can read, can write and can execute. (G)roup can read, can write and
-  # can't execute. (O)thers can read, can't write and can't execute.
+  # Set permissions to read and write for user and group, but only read
+  #  for others.
   alias 764='chmod -R 764'
 
-  # (chmod a+rwx) sets permissions so that, (U)ser / owner can read,
-  # can write and can execute. (G)roup can read, can write and can
-  # execute. (O)thers can read, can write and can execute.
+  # Set permissions to read, write, and execute for all.
   alias 777='chmod -R 777'
 
   # Change group ownership of files or directories.
@@ -62,7 +46,7 @@ if command -v chmod &>/dev/null; then
   alias chgrpr='chgrp -Rv'
 
   # Change group ownership of files or directories recursively to the
-  # current user.
+  #  current user.
   alias chgrpu='chgrp -Rv ${USER}'
 
   # Change file mode bits.
@@ -85,4 +69,5 @@ if command -v chmod &>/dev/null; then
 
   # Change file owner and group recursively to the current user.
   alias chownu='chown -Rv ${USER}'
+
 fi

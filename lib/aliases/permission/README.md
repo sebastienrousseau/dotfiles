@@ -11,36 +11,19 @@ This code provides a set of aliases for file permissions.
 
 ## Aliases
 
-- `000` (chmod a-rwx) sets permissions so that, (U)ser / owner can't
-  read, can't write and can't execute. (G)roup can't read, can't write
-  and can't execute. (O)thers can't read, can't write and can't execute.
-- `400` (chmod a-rw) sets permissions so that, (U)ser / owner can't
-  read, can't write and can execute. (G)roup can't read, can't write and
-  can execute. (O)thers can't read, can't write and can execute.
-- `444` (chmod a-r) sets permissions so that, (U)ser / owner can't read,
-  can't write and can execute. (G)roup can't read, can't write and can
-  execute. (O)thers can't read, can't write and can execute.
-- `600` (chmod a+rwx,u-x,g-rwx,o-rwx) sets permissions so that, (U)ser /
-  owner can read, can write and can't execute. (G)roup can't read, can't
-  write and can't execute. (O)thers can't read, can't write and can't
-  execute.
-- `644` (chmod a+rwx,u-x,g-wx,o-wx) sets permissions so that, (U)ser /
-  owner can read, can write and can't execute. (G)roup can read, can't
-  write and can't execute. (O)thers can read, can't write and can't
-  execute.
-- `666` (chmod a+rwx,u-x,g-x,o-x) sets permissions so that, (U)ser /
-  owner can read, can write and can't execute. (G)roup can read, can
-  write and can't execute. (O)thers can read, can write and can't
-  execute.
-- `755` (chmod a+rwx,g-w,o-w) sets permissions so that, (U)ser / owner
-  can read, can write and can execute. (G)roup can read, can't write and
-  can execute. (O)thers can read, can't write and can execute.
-- `764` (chmod a+rwx,g-x,o-wx) sets permissions so that, (U)ser / owner
-  can read, can write and can execute. (G)roup can read, can write and
-  can't execute. (O)thers can read, can't write and can't execute.
-- `777` (chmod a+rwx) sets permissions so that, (U)ser / owner can read,
-  can write and can execute. (G)roup can read, can write and can
-  execute. (O)thers can read, can write and can execute.
+- `000` Set permissions to no read, write, or execute for user, group,
+  and others.
+- `400` Set permissions to no read or write, but allow execute for user
+  only.
+- `444` Set permissions to no write or execute, but allow read for all.
+- `600` Set permissions to read and write for user only.
+- `644` Set permissions to read for all, but write only for user.
+- `666` Set permissions to read and write for all.
+- `755` Set permissions to read, write, and execute for user, but only
+  read and execute for group and others.
+- `764` Set permissions to read and write for user and group, but only
+  read for others.
+- `777` Set permissions to read, write, and execute for all.
 - `chgrp` Change group ownership of files or directories.
 - `chgrpr` Change group ownership of files or directories recursively.
 - `chgrpu` Change group ownership of files or directories recursively to
