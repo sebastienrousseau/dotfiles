@@ -4,7 +4,7 @@
 # Copyright (c) 2015-2023. All rights reserved
 # License: MIT
 
-# 🅿🅽🅿🅼 🅰🅻🅸🅰🆂🅴🆂 - Pnpm aliases
+# 🅿🅽🅿🅼 🅰🅻🅸🅰🆂🅴🆂
 if command -v 'pnpm' >/dev/null; then
   # Add a dependency to the project.
   alias pna='pnpm add'
