@@ -2,7 +2,8 @@
 
 <!-- markdownlint-disable MD033 MD041 -->
 
-<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg" alt="dotfiles logo" width="261" align="right" />
+<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
 
@@ -73,17 +74,17 @@ common Git commands, making them shorter and more intuitive.
   of the current branch.
 - `gpcb` Push current branch
 - `gr` Manage set of tracked repositories.
-- `gra` Add a remote named <name> for the repository at <url>.
+- `gra` Add a remote named `name` for the repository at `url`.
 - `grall` Push all branches to all remotes.
 - `grallo` Git remote all remotes except origin.
 - `grao` Add a new remote 'origin' if it doesn't exist.
 - `grbk` Rollback to stage.
-- `grcl` Deletes all stale remote-tracking branches under <name>.
+- `grcl` Deletes all stale remote-tracking branches under `name`.
 - `grf` Show GIT Remote Origin for each immediate subfolder.
 - `grfall` Fetch all git remotes for a repo.
 - `grp` Push all remotes.
 - `grprint` Print the url for the current repo.
-- `grs` Gives some information about the remote <name>.
+- `grs` Gives some information about the remote `name`.
 - `grso` Display where the origin resides.
 - `gru` Fetch updates for a named set of remotes in the repository as
   defined by remotes.

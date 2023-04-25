@@ -17,7 +17,9 @@ Simply designed to fit your shell life 🐚
 [![License][license]][license-url]
 [![Love][love]][website-url]
 
-**[Website][website-url] • [Documentation][github-url] • [Report Bug][issues-url] • [Request Feature][issues-url] • [Contributing Guidelines][contributing-url]**
+• [Website][website-url] • [Documentation][github-url]
+• [Report Bug][issues-url] • [Request Feature][issues-url]
+• [Contributing Guidelines][contributing-url]
 
 ![divider][divider]
 

@@ -1,4 +1,3 @@
-
 # 🅸🅽🆃🅴🆁🅰🅲🆃🅸🆅🅴 🅰🅻🅸🅰🆂🅴🆂
 
 <!-- markdownlint-disable MD033 MD041 -->
@@ -13,7 +12,7 @@ operations. The aliases are designed to simplify and enhance the user
 experience by adding interactive prompts before executing potentially
 destructive operations.
 
-# File manipulation aliases
+## File manipulation aliases
 
 - `cp` Copy files and directories.
 - `del` Remove a file or directory.
@@ -22,11 +21,11 @@ destructive operations.
 - `rm` Prompts for every file before removing.
 - `zap` Remove files interactively (ask before overwrite).
 
-# Trash manipulation alias
+## Trash manipulation alias
 
 - `bin` Remove all files in the trash.
 
-# Other interactive aliases
+## Other interactive aliases
 
 - `chmod` Change permissions of a file or directory.
 - `chown` Change the owner and group of a file or directory.
