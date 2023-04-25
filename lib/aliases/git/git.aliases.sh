@@ -250,15 +250,7 @@ if command -v git &>/dev/null; then
   alias glh='git log --since=1-hour-ago'
 
   # Show log in our preferred format for our key performance indicators.
-  alias gll='git log \
-  --graph \
-  --topo-order \
-  --date=short \
-  --abbrev-commit \
-  --decorate \
-  --all \
-  --boundary \
-  --pretty=format:"%Cgreen%ad %Cred%h%Creset -%C(yellow)%d%Creset %s %Cblue[%cn]%Creset %Cblue%G?%Creset"'
+  alias gll='git log --graph --topo-order --date=short --abbrev-commit --decorate --all --boundary --pretty=format:"%Cgreen%ad %Cred%h%Creset -%C(yellow)%d%Creset %s %Cblue[%cn]%Creset %Cblue%G?%Creset"'
 
   # Show log in our preferred format for our key performance indicators,
   # with long items.

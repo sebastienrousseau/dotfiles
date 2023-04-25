@@ -242,13 +242,7 @@ if command -v gcloud &>/dev/null; then
   alias gcco='gcloud compute ssh'
 
   # Set default project to current directory name.
-  alias gcd='
-    gcloud config set project $( \
-      gcloud projects list \
-        --format="value(projectId)" \
-        --filter="name:${PWD##*/}" \
-    )
-  '
+  alias gcd='gcloud config set project $(gcloud projects list --format="value(projectId)" --filter="name:${PWD##\*/}")'
 
   # Manage Google Cloud Datastore.
   alias gcdb='gcloud datastore'
