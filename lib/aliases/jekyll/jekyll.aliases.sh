@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.465) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.465) - <https://dotfiles.io>
 # Made with ♥ in London, UK by @wwdseb
 # Copyright (c) 2015-2023. All rights reserved
 # License: MIT
@@ -17,23 +17,23 @@ if command -v jekyll &>/dev/null; then
   # Licensed under the MIT license
   #
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  1. Jekyll Core aliases.
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  1.1 Jekyll development aliases.
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # jkb: Performs a one off build your site to ./_site.
   alias jkb='JEKYLL_ENV=development bundle exec jekyll build'
 
-  # jkc: Removes all generated files: destination folder, metadata file, Sass and
-  # Jekyll caches.
+  # jkc: Removes all generated files: destination folder, metadata file,
+  # Sass and Jekyll caches.
   alias jkc='JEKYLL_ENV=development bundle exec jekyll clean'
 
-  # jkd: Does a development build of the site to '_site' and runs a local
-  # development server.
+  # jkd: Does a development build of the site to '_site' and runs a
+  # local development server.
   alias jkd='JEKYLL_ENV=development bundle exec jekyll serve --watch --trace'
 
   # jkl: Does a development build of the site to '_site' and runs a
@@ -43,9 +43,9 @@ if command -v jekyll &>/dev/null; then
   # jko: Open local development server.
   alias jko="open http://localhost:4000/"
 
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
   ##  1.2 Jekyll release aliases.
-  ##  ----------------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
 
   # jkp: Does a production build of the site to '_site' and runs a local
   # development server.

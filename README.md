@@ -1,6 +1,7 @@
 <!-- markdownlint-disable MD033 MD041 -->
 
-<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg" alt="dotfiles logo" width="261" align="right" />
+<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
 
@@ -93,10 +94,10 @@ know.
 
 - macOS 10.15 or later
 - Windows 10 or later
-- A Debian based distribution ([Debian][debian-url], [Ubuntu][ubuntu-url],
-[PoP!_OS][pop-url], [Zorin OS][zorin-url], [Q4OS][q4-url],
-[Kali Linux][kali-url], [Devuan][devuan-url], [Deepin][deepin-url],
-etc.)
+- A Debian based distribution ([Debian][debian-url],
+[Ubuntu][ubuntu-url], [PoP!_OS][pop-url], [Zorin OS][zorin-url],
+[Q4OS][q4-url], [Kali Linux][kali-url], [Devuan][devuan-url],
+[Deepin][deepin-url], etc.)
 
 #### 2) Software Requirements
 
@@ -134,7 +135,7 @@ brew tap homebrew/cask-fonts
 ```
 
 ```bash
-brew cask install font-roboto-mono-for-powerline
+brew install --cask font-roboto-mono-for-powerline
 ```
 
 On Linux, you can install the font using the following command:

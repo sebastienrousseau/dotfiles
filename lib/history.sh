@@ -1,53 +1,49 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.465) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.465) - <https://dotfiles.io>
 # Made with ♥ in London, UK by @wwdseb
 # Copyright (c) 2015-2023. All rights reserved
 # License: MIT
+# Script: history.sh
+# Version: 0.2.464
+# Website: https://dotfiles.io
 
-## History wrapper
+# History wrapper
 function dotfiles_history {
-  local clear list
-  zparseopts -E c=clear l=list
+  local clear_flag list_flag
+  zparseopts -E c=clear_flag l=list_flag
 
-  if [[ -n "${clear}" ]]; then
-    # if -c provided, clobber the history file
-    echo -n >|"${HISTFILE}"
-    echo >&2 History file deleted. Reload the session to see its effects.
-  elif [[ -n "${list}" ]]; then
-    # if -l provided, run as if calling `fc' directly
-    builtin fc "$@"
+  if [[ -n ${clear_flag} ]]; then
+    # If -c flag is provided, clobber the history file and remove duplicates
+    fc -W
+    fc -R
+    echo "%F{magenta}History file deleted and duplicates removed. Reload the session to see its effects.%f" >&2
+  elif [[ -n ${list_flag} ]] || [[ $# -ne 0 ]]; then
+    # If -l flag is provided or arguments are passed, run as if calling `fc` directly
+    fc_output=$(builtin fc "$@")
+    printf '%s\n' "$(tput setaf 5)$(tput sgr0)$(tput setaf 2)$(echo "${fc_output//$'\e'/$(tput setaf 2)}" | sed -E "s/^([[:space:]]*[0-9]+)/$(tput setaf 2)\1$(tput sgr0)/")" || true
   else
-    # unless a number is provided, show all history events (starting from 1)
-    if [[ "${1:-}" =~ ^[0-9]+$ ]]; then
-      builtin fc "$@"
-    else
-      builtin fc -l 1
-    fi
+    # Otherwise, ensure the history file has no duplicates and show all history events starting from 1
+    fc -W # Remove duplicates from the history file
+    fc_output=$(builtin fc -li 1)
+    printf '%s\n' "$(tput setaf 5)$(tput sgr0)$(tput setaf 2)$(echo "${fc_output//$'\e'/$(tput setaf 2)}" | sed -E "s/^([[:space:]]*[0-9]+)/$(tput setaf 2)\1$(tput sgr0)/")" || true
   fi
 }
 
 # Timestamp format
-case ${HIST_STAMPS-} in
+case "${HIST_STAMPS:-}" in
 "mm/dd/yyyy") alias history='dotfiles_history -f' ;;
 "dd.mm.yyyy") alias history='dotfiles_history -E' ;;
 "yyyy-mm-dd") alias history='dotfiles_history -i' ;;
 "") alias history='dotfiles_history' ;;
-*) alias history='dotfiles_history -t $HIST_STAMPS' ;;
+*) alias history='dotfiles_history -t ${HIST_STAMPS}' ;;
 esac
 
-# Command history configuration
-export HISTFILE=${HOME}/.zsh_history
+export HISTFILE="${HOME}/.zsh_history" # History file
+export HISTCONTROL="ignoreboth"        # Ignore duplicate commands and commands that start with a space
+export HISTSIZE="10000"                # Number of commands to save in memory
+export SAVEHIST="1000"                 # Number of commands to save on disk
 
-# Don't put duplicate lines or lines starting with space in the history.
-export HISTCONTROL=ignoreboth
-
-# Number of histories saved in memory
-export HISTSIZE=10000
-
-# Number of histories saved in history file
-export SAVEHIST=1000
-
-if [[ -n "${ZSH_VERSION}" ]]; then
+if [[ -n "${ZSH_VERSION:-}" ]]; then
   # echo "Running shell is zsh"
   # Specifying some history options
   setopt always_to_end          # Move cursor to the end of a completed word.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.465) - https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.465) - <https://dotfiles.io>
 # Made with ♥ in London, UK by @wwdseb
 # Copyright (c) 2015-2023. All rights reserved
 # License: MIT
@@ -23,6 +23,7 @@ export INPUTRC=${INPUTRC}               # set INPUTRC (so that .inputrc is respe
 export LANG=${USER_LANGUAGE}            # default language.
 export LANGUAGE=${USER_LANGUAGE}        # default language.
 export LC_ALL=${USER_LANGUAGE}          # default language.
+export LC_CTYPE=${USER_LANGUAGE}        # default language.
 export OS_ARCH                          # machine hardware name.
 export OS_NAME                          # operating system name.
 export OS_VERSION                       # operating system version number.
