@@ -6,7 +6,15 @@
 # License: MIT
 
 # 🆂🆄🅳🅾 🅰🅻🅸🅰🆂🅴🆂
-alias root='s'     # root: Execute a command as the superuser.
-alias s='sudo -i'  # s: Execute a command as the superuser.
-alias su='sudo su' # su: Execute a command as the superuser.
-alias sudo='s'     # sudo: Execute a command as the superuser.
+
+# Execute a command as the superuser.
+alias root='s'
+
+# Execute a command as the superuser.
+alias s='sudo -i'
+
+# Execute a command as the superuser.
+alias su='sudo su'
+
+# Execute a command as the superuser.
+alias sudo='s'
