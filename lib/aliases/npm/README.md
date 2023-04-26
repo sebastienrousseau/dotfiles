@@ -10,7 +10,7 @@ alt="dotfiles logo" width="261" align="right" />
 This code provides a set of aliases for
 [npm](https://www.npmjs.com/) package manager.
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 - `npa` Audit npm packages.
 - `npb` Build npm script.

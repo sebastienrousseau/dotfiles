@@ -9,7 +9,7 @@ alt="dotfiles logo" width="261" align="right" />
 
 This code provides a set of aliases for listing files.
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 - `l` List files with size, show type, human readable.
 - `l1` Display one file per line.

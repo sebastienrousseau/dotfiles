@@ -10,7 +10,7 @@ alt="dotfiles logo" width="261" align="right" />
 This code provides a set of aliases for updating various software on
 macOS and Linux.
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 ### macOS
 

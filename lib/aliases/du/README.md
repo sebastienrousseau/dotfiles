@@ -4,7 +4,7 @@ These aliases provide shortcuts for the `du` command to help you
 quickly query disk usage. To use them, add the following lines to your
 `.bashrc` or `.bash_profile` file.
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 ### Disk usage aliases
 

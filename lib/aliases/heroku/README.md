@@ -10,7 +10,7 @@ alt="dotfiles logo" width="261" align="right" />
 This is a collection of aliases for the
 [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli).
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 ### 1. Heroku Core aliases
 

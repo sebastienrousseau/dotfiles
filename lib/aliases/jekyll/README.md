@@ -10,7 +10,7 @@ alt="dotfiles logo" width="261" align="right" />
 This code provides a set of aliases for
 [Jekyll](https://jekyllrb.com/).
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 ### 1. Jekyll Core aliases
 

@@ -9,7 +9,7 @@ alt="dotfiles logo" width="261" align="right" />
 
 This code provides a set of aliases for the `rsync` command.
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 - `rs` Rsync with verbose and progress.
 - `rs` Rsync with verbose and progress.

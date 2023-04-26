@@ -10,7 +10,7 @@ alt="dotfiles logo" width="261" align="right" />
 This code provides a set of aliases for
 [ps](https://www.gnu.org/software/ps/).
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 - `pid` Display the uid, pid, parent pid, recent CPU usage, process
   start time, controlling tty, elapsed CPU usage, and the associated

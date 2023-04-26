@@ -9,7 +9,7 @@ alt="dotfiles logo" width="261" align="right" />
 
 This code provides a set of aliases for the `mkdir` command.
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 - `mcd` Make directory and cd into it.
 - `mde` Make example directory with current date.

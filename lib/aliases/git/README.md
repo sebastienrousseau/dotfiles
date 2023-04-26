@@ -10,7 +10,7 @@ alt="dotfiles logo" width="261" align="right" />
 This is a collection of handy Git aliases that simplify and speed up
 common Git commands, making them shorter and more intuitive.
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 - `gc` Commit command to automatically "add" changes from all known
   files

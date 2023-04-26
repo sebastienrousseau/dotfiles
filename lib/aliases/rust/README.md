@@ -10,7 +10,7 @@ alt="dotfiles logo" width="261" align="right" />
 This code provides a set of aliases for the  `rustup`  and  `cargo`
 commands.
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 - `cg` Cargo shortcut.
 - `cgb` Cargo build.

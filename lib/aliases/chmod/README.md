@@ -4,7 +4,7 @@ These aliases provide shortcuts for the chmod command to help you
 quickly change the permissions of files and directories. To use them,
 add the following lines to your .bashrc or .bash_profile file.
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 ### Change permissions
 

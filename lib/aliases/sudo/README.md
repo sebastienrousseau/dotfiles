@@ -9,7 +9,7 @@ alt="dotfiles logo" width="261" align="right" />
 
 This code provides a set of aliases for the `sudo` command.
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 - `root` Execute a command as the superuser.
 - `s` Execute a command as the superuser.

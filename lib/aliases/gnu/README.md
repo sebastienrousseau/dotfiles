@@ -18,7 +18,7 @@ basic file manipulation commands like "cp" and "rm" to more advanced
 text processing commands like "awk" and "sed". There are also aliases
 for various checksum and hash utilities like "md5sum" and "sha256sum".
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 ### Basic file management utilities
 

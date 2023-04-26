@@ -9,7 +9,7 @@ alt="dotfiles logo" width="261" align="right" />
 
 This code provides a set of aliases for the `tmux` command.
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 - `tm` Start tmux.
 - `tma` Attach to a tmux session.

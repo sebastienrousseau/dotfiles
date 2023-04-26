@@ -9,7 +9,7 @@ alt="dotfiles logo" width="261" align="right" />
 
 This code provides a set of aliases for [pnpm](https://pnpm.js.org/).
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 - `pni` Initialize a new project.
 - `pnin` Install the project dependencies.

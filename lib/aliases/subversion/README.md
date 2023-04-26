@@ -9,7 +9,7 @@ alt="dotfiles logo" width="261" align="right" />
 
 This code provides a set of aliases for the Subversion command line.
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 - `sad` Put new files and directories under version control.
 - `sau` Manage cached authentication credentials.

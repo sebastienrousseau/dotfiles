@@ -9,7 +9,7 @@ alt="dotfiles logo" width="261" align="right" />
 
 This code provides a set of aliases for file permissions.
 
-## Aliases
+## 🅰🅻🅸🅰🆂🅴🆂
 
 - `000` Set permissions to no read, write, or execute for user, group,
   and others.
