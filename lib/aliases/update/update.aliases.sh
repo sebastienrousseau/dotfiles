@@ -28,7 +28,7 @@ if [[ "${os_name}" = "Darwin" ]]; then
         sudo gem update && sudo gem cleanup;
         echo '❯ Updating Python packages...';
         pip install --upgrade --user pip setuptools wheel;
-        pip list --user --outdated --format=columns | awk 'NR>2 {print $1}' | xargs -n1 pip install -U --user;
+        pip list --user --outdated --format=columns | awk 'NR>2 {print $1}' | xargs -n1 pip install -U --user\;
         echo '❯ Updating Node.js packages...';
         npm update -g;
         echo '❯ Update complete!';
