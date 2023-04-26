@@ -19,5 +19,5 @@ elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
   alias uuid="uuid | tr '[:upper:]' '[:lower:]' | xsel -ib && xsel -ob && echo"
 elif [[ "${OSTYPE}" == "msys" || "${OSTYPE}" == "cygwin" ]]; then
   # Windows
-  alias uuid="powershell.exe -Command $id = [guid]::NewGuid().ToString().ToLower(); Set-Clipboard -Value $id; Get-Clipboard | tr -d '\n'; echo\""
+  alias uuid='powershell.exe -Command $id = [guid]::NewGuid().ToString().ToLower(); Set-Clipboard -Value $id; Get-Clipboard | tr -d '\n'; echo\"'
 fi
