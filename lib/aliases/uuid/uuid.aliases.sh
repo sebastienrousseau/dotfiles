@@ -6,6 +6,18 @@
 # License: MIT
 
 # 🆄🆄🅸🅳 🅰🅻🅸🅰🆂🅴🆂
-if command -v 'uuidgen' >/dev/null; then
-  alias uuid="uuidgen | tr -d '\n' | tr '[:upper:]' '[:lower:]'  | pbcopy && pbpaste && echo" # uuid: Generate a UUID and copy it to the clipboard.
+
+# uuid: Generate a UUID and copy it to the clipboard.
+if [[ "${OSTYPE}" == "darwin"* ]]; then
+
+  if command -v 'uuidgen' >/dev/null; then
+    # macOS
+    alias uuid="uuidgen | tr -d '\n' | tr '[:upper:]' '[:lower:]' | pbcopy && pbpaste && echo"
+  fi
+elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
+  # Linux
+  alias uuid="uuid | tr '[:upper:]' '[:lower:]' | xsel -ib && xsel -ob && echo"
+elif [[ "${OSTYPE}" == "msys" || "${OSTYPE}" == "cygwin" ]]; then
+  # Windows
+  alias uuid="powershell.exe -Command $id = [guid]::NewGuid().ToString().ToLower(); Set-Clipboard -Value $id; Get-Clipboard | tr -d '\n'; echo\""
 fi
