@@ -16,9 +16,9 @@ Simply designed to fit your shell life 🐚
 This is a collection of aliases for the
 [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli).
 
-### 1. Heroku Core aliases
+## 1. Heroku Core aliases
 
-#### 1.1 Heroku Access aliases
+### 1.1 Heroku Access aliases
 
 - `hkk` Heroku CLI command shortcut.
 - `hka` Add new users to your app.
