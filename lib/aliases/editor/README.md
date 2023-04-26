@@ -11,7 +11,7 @@ Simply designed to fit your shell life 🐚
 
 ![Dotfiles banner][banner]
 
-# 🅴🅳🅸🆃🅾🆁 🅰🅻🅸🅰🆂🅴🆂
+## 🅴🅳🅸🆃🅾🆁 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides command aliases for editing files on a Unix-based
 system using various text editors.

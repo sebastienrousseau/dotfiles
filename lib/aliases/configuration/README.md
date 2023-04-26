@@ -11,7 +11,7 @@ Simply designed to fit your shell life 🐚
 
 ![Dotfiles banner][banner]
 
-# 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂
+## 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides a set of command aliases to open important
 configuration files in default text editors quickly and easily. The

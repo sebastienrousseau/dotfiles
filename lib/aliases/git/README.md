@@ -11,7 +11,7 @@ Simply designed to fit your shell life 🐚
 
 ![Dotfiles banner][banner]
 
-# 🅶🅸🆃 🅰🅻🅸🅰🆂🅴🆂
+## 🅶🅸🆃 🅰🅻🅸🅰🆂🅴🆂
 
 This is a collection of handy Git aliases that simplify and speed up
 common Git commands, making them shorter and more intuitive.

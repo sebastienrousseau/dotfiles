@@ -11,12 +11,10 @@ Simply designed to fit your shell life 🐚
 
 ![Dotfiles banner][banner]
 
-# 🆄🅿🅳🅰🆃🅴 🅰🅻🅸🅰🆂🅴🆂
+## 🆄🅿🅳🅰🆃🅴 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides a set of aliases for updating various software on
 macOS and Linux.
-
-## 🅰🅻🅸🅰🆂🅴🆂
 
 ### macOS
 

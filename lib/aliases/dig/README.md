@@ -11,7 +11,7 @@ Simply designed to fit your shell life 🐚
 
 ![Dotfiles banner][banner]
 
-# 🅳🅸🅶 🅰🅻🅸🅰🆂🅴🆂
+## 🅳🅸🅶 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides a set of command aliases to simplify working with DNS
 (Domain Name System) lookup using the dig command on a Unix-based system

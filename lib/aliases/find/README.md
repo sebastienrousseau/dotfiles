@@ -11,7 +11,7 @@ Simply designed to fit your shell life 🐚
 
 ![Dotfiles banner][banner]
 
-# 🅵🅸🅽🅳 🅰🅻🅸🅰🆂🅴🆂
+## 🅵🅸🅽🅳 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides a set of command aliases for the `fd` utility that is
 an alternative to the `find` command on Unix-based systems.

@@ -11,7 +11,7 @@ Simply designed to fit your shell life 🐚
 
 ![Dotfiles banner][banner]
 
-# 🅲🅻🅴🅰🆁 🅰🅻🅸🅰🆂🅴🆂
+## 🅲🅻🅴🅰🆁 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides a set of command aliases to make working with the
 terminal easier and more efficient. The following aliases are included:
