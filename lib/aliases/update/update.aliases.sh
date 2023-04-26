@@ -33,7 +33,7 @@ if [[ "${os_name}" = "Darwin" ]]; then
         npm update -g;
         echo '❯ Update complete!';
     "
-elif [[ "$os_name" = "Linux" ]]; then
+elif [[ "${os_name}" = "Linux" ]]; then
   # Open a file or URL in the user's preferred application.
   alias open="xdg-open >/dev/null 2>&1"
 
