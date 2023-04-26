@@ -1,5 +1,3 @@
-# 🆁🆄🆂🆃🆄🅿 🅰🅽🅳 🅲🅰🆁🅶🅾 🅰🅻🅸🅰🆂🅴🆂
-
 <!-- markdownlint-disable MD033 MD041 -->
 
 <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
@@ -7,10 +5,16 @@ alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
 
+# Dotfiles (v0.2.465)
+
+Simply designed to fit your shell life 🐚
+
+![Dotfiles banner][banner]
+
+## 🆁🆄🆂🆃🆄🅿 🅰🅽🅳 🅲🅰🆁🅶🅾 🅰🅻🅸🅰🆂🅴🆂
+
 This code provides a set of aliases for the  `rustup`  and  `cargo`
 commands.
-
-## 🅰🅻🅸🅰🆂🅴🆂
 
 - `cg` Cargo shortcut.
 - `cgb` Cargo build.
@@ -49,3 +53,5 @@ commands.
 - `rtu` Rustup toolchain uninstall.
 - `ruc` Update rustup nightly.
 - `rus` Update rustup stable.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

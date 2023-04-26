@@ -1,5 +1,3 @@
-# 🆂🆄🅱🆅🅴🆁🆂🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂
-
 <!-- markdownlint-disable MD033 MD041 -->
 
 <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
@@ -7,9 +5,15 @@ alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-This code provides a set of aliases for the Subversion command line.
+# Dotfiles (v0.2.465)
 
-## 🅰🅻🅸🅰🆂🅴🆂
+Simply designed to fit your shell life 🐚
+
+![Dotfiles banner][banner]
+
+## 🆂🆄🅱🆅🅴🆁🆂🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂
+
+This code provides a set of aliases for the Subversion command line.
 
 - `sad` Put new files and directories under version control.
 - `sau` Manage cached authentication credentials.
@@ -54,3 +58,5 @@ This code provides a set of aliases for the Subversion command line.
 - `sup` Bring changes from the repository into the working copy.
 - `supg` Upgrade the metadata storage format for a working copy.
 - `sxp` Create an unversioned copy of a tree.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

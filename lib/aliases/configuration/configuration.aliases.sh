@@ -5,7 +5,7 @@
 # Copyright (c) 2015-2023. All rights reserved
 # License: MIT
 # Script: configuration.aliases.sh
-# Version: 0.2.464
+# Version: 0.2.465
 # Website: https://dotfiles.io
 
 # 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂

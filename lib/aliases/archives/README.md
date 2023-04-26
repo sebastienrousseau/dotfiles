@@ -1,11 +1,17 @@
-# 🅰🆁🅲🅷🅸🆅🅴🆂 🅰🅻🅸🅰🆂🅴🆂
-
 <!-- markdownlint-disable MD033 MD041 -->
 
 <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
 alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
+
+# Dotfiles (v0.2.465)
+
+Simply designed to fit your shell life 🐚
+
+![Dotfiles banner][banner]
+
+# 🅰🆁🅲🅷🅸🆅🅴🆂 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides a set of command aliases to help users compress and
 extract files and directories in various formats on a Unix-based system.
@@ -46,3 +52,5 @@ software to be installed on your system.
 
 Enjoy the convenience of quickly compressing and extracting files and
 directories with these command aliases!
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

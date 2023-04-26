@@ -1,5 +1,3 @@
-# 🅷🅴🆁🅾🅺🆄 🅰🅻🅸🅰🆂🅴🆂
-
 <!-- markdownlint-disable MD033 MD041 -->
 
 <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
@@ -7,10 +5,16 @@ alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
 
+# Dotfiles (v0.2.465)
+
+Simply designed to fit your shell life 🐚
+
+![Dotfiles banner][banner]
+
+# 🅷🅴🆁🅾🅺🆄 🅰🅻🅸🅰🆂🅴🆂
+
 This is a collection of aliases for the
 [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli).
-
-## 🅰🅻🅸🅰🆂🅴🆂
 
 ### 1. Heroku Core aliases
 
@@ -418,3 +422,5 @@ This is a collection of aliases for the
 - `hkwhi` Info for a webhook on an app
 - `hkwhr` Removes a webhook from an app
 - `hkwhu` Updates a webhook in an app
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

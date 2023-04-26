@@ -1,11 +1,17 @@
-# 🅳🅴🅵🅰🆄🅻🆃 🅰🅻🅸🅰🆂🅴🆂
-
 <!-- markdownlint-disable MD033 MD041 -->
 
 <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
 alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
+
+# Dotfiles (v0.2.465)
+
+Simply designed to fit your shell life 🐚
+
+![Dotfiles banner][banner]
+
+# 🅳🅴🅵🅰🆄🅻🆃 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides a set of command aliases to make common tasks and
 commands more convenient and faster to execute. These aliases range from
@@ -24,4 +30,7 @@ Some of the most useful aliases include:
 - `top`: allows the user to interactively monitor the system's vital
   resources or server's processes in real-time.
 - `qfind`: quickly search for files.
-- `clc`: clear the terminal screen and print the contents of the current directory.
+- `clc`: clear the terminal screen and print the contents of the current
+  directory.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

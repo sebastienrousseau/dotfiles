@@ -1,5 +1,3 @@
-# 🅿🅴🆁🅼🅸🆂🆂🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂
-
 <!-- markdownlint-disable MD033 MD041 -->
 
 <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
@@ -7,9 +5,15 @@ alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-This code provides a set of aliases for file permissions.
+# Dotfiles (v0.2.465)
 
-## 🅰🅻🅸🅰🆂🅴🆂
+Simply designed to fit your shell life 🐚
+
+![Dotfiles banner][banner]
+
+## 🅿🅴🆁🅼🅸🆂🆂🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂
+
+This code provides a set of aliases for file permissions.
 
 - `000` Set permissions to no read, write, or execute for user, group,
   and others.
@@ -35,3 +39,5 @@ This code provides a set of aliases for file permissions.
 - `chown` Change file owner and group.
 - `chownr` Change file owner and group recursively.
 - `chownu` Change file owner and group recursively to the current user.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

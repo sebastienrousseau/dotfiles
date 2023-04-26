@@ -1,5 +1,3 @@
-# 🅽🅿🅼 🅰🅻🅸🅰🆂🅴🆂
-
 <!-- markdownlint-disable MD033 MD041 -->
 
 <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
@@ -7,10 +5,16 @@ alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
 
+# Dotfiles (v0.2.465)
+
+Simply designed to fit your shell life 🐚
+
+![Dotfiles banner][banner]
+
+## 🅽🅿🅼 🅰🅻🅸🅰🆂🅴🆂
+
 This code provides a set of aliases for
 [npm](https://www.npmjs.com/) package manager.
-
-## 🅰🅻🅸🅰🆂🅴🆂
 
 - `npa` Audit npm packages.
 - `npb` Build npm script.
@@ -29,3 +33,5 @@ This code provides a set of aliases for
 - `npu` Update npm package.
 - `npx` Exec npm package.
 - `npy` Why npm package.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

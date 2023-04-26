@@ -1,11 +1,17 @@
-# 🅳🅸🆂🅺 🆄🆂🅰🅶🅴 🅰🅻🅸🅰🆂🅴🆂
-
 <!-- markdownlint-disable MD033 MD041 -->
 
 <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
 alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
+
+# Dotfiles (v0.2.465)
+
+Simply designed to fit your shell life 🐚
+
+![Dotfiles banner][banner]
+
+# 🅳🅸🆂🅺 🆄🆂🅰🅶🅴 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides a set of command aliases to help users manage disk
 usage on a Unix-based system.
@@ -22,3 +28,5 @@ The following aliases are provided:
 - `dusym`: Show the file size of files and directories in the current
   directory, including symlinks.
 - `dut`: Show the total file size of the current directory.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

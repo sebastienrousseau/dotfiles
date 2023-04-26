@@ -1,28 +1,61 @@
-# CHMOD Aliases
+<!-- markdownlint-disable MD033 MD041 -->
+
+<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+alt="dotfiles logo" width="261" align="right" />
+
+<!-- markdownlint-enable MD033 MD041 -->
+
+# Dotfiles (v0.2.465)
+
+Simply designed to fit your shell life 🐚
+
+![Dotfiles banner][banner]
+
+## 🅲🅷🅼🅾🅳 🅰🅻🅸🅰🆂🅴🆂
 
 These aliases provide shortcuts for the chmod command to help you
 quickly change the permissions of files and directories. To use them,
 add the following lines to your .bashrc or .bash_profile file.
 
-## 🅰🅻🅸🅰🆂🅴🆂
-
 ### Change permissions
 
-- `000`: (chmod a-rwx) sets permissions so that, (U)ser / owner can't read, can't write and can't execute. (G)roup can't read, can't write and can't execute. (O)thers can't read, can't write and can't execute.
-- `400`: (chmod a-rw) sets permissions so that, (U)ser / owner can't read, can't write and can execute. (G)roup can't read, can't write and can execute. (O)thers can't read, can't write and can execute.
-- `444`: (chmod a-r) sets permissions so that, (U)ser / owner can't read, can't write and can execute. (G)roup can't read, can't write and can execute. (O)thers can't read, can't write and can execute.
-- `600`: (chmod a+rwx,u-x,g-rwx,o-rwx) sets permissions so that, (U)ser / owner can read, can write and can't execute. (G)roup can't read, can't write and can't execute. (O)thers can't read, can't write and can't execute.
-- `644`: (chmod a+rwx,u-x,g-wx,o-wx) sets permissions so that, (U)ser / owner can read, can write and can't execute. (G)roup can read, can't write and can't execute. (O)thers can read, can't write and can't execute.
-- `666`: (chmod a+rwx,u-x,g-x,o-x) sets permissions so that, (U)ser / owner can read, can write and can't execute. (G)roup can read, can write and can't execute. (O)thers can read, can write and can't execute.
-- `755`: (chmod a+rwx,g-w,o-w) sets permissions so that, (U)ser / owner can read, can write and can execute. (G)roup can read, can't write and can execute. (O)thers can read, can't write and can execute.
-- `764`: (chmod a+rwx,g-x,o-wx) sets permissions so that, (U)ser / owner can read, can write and can execute. (G)roup can read, can write and can't execute. (O)thers can read, can't write and can't execute.
-- `777`: (chmod a+rwx) sets permissions so that, (U)ser / owner can read, can write and can execute. (G)roup can read, can write and can execute. (O)thers can read, can write and can execute.
+- `000`: (chmod a-rwx) sets permissions so that, (U)ser / owner can't
+  read, can't write and can't execute. (G)roup can't read, can't write
+  and can't execute. (O)thers can't read, can't write and can't execute.
+- `400`: (chmod a-rw) sets permissions so that, (U)ser / owner can't
+  read, can't write and can execute. (G)roup can't read, can't write and
+  can execute. (O)thers can't read, can't write and can execute.
+- `444`: (chmod a-r) sets permissions so that, (U)ser / owner can't
+  read, can't write and can execute. (G)roup can't read, can't write and
+  can execute. (O)thers can't read, can't write and can execute.
+- `600`: (chmod a+rwx,u-x,g-rwx,o-rwx) sets permissions so that, (U)ser
+  / owner can read, can write and can't execute. (G)roup can't read,
+  can't write and can't execute. (O)thers can't read, can't write and
+  can't execute.
+- `644`: (chmod a+rwx,u-x,g-wx,o-wx) sets permissions so that, (U)ser /
+  owner can read, can write and can't execute. (G)roup can read, can't
+  write and can't execute. (O)thers can read, can't write and can't
+  execute.
+- `666`: (chmod a+rwx,u-x,g-x,o-x) sets permissions so that, (U)ser /
+  owner can read, can write and can't execute. (G)roup can read, can
+  write and can't execute. (O)thers can read, can write and can't
+  execute.
+- `755`: (chmod a+rwx,g-w,o-w) sets permissions so that, (U)ser / owner
+  can read, can write and can execute. (G)roup can read, can't write
+  and can execute. (O)thers can read, can't write and can execute.
+- `764`: (chmod a+rwx,g-x,o-wx) sets permissions so that, (U)ser /
+  owner can read, can write and can execute. (G)roup can read, can write
+  and can't execute. (O)thers can read, can't write and can't execute.
+- `777`: (chmod a+rwx) sets permissions so that, (U)ser / owner can
+  read, can write and can execute. (G)roup can read, can write and can
+  execute. (O)thers can read, can write and can execute.
 
 ### Change ownership
 
 - `chgrp`: Change group ownership of files or directories.
 - `chgrpr`: Change group ownership of files or directories recursively.
-- `chgrpu`: Change group ownership of files or directories recursively to the current user.
+- `chgrpu`: Change group ownership of files or directories recursively
+  to the current user.
 - `chmod`: Change file mode bits.
 - `chmodr`: Change file mode bits recursively.
 - `chmodu`: Change file mode bits recursively to the current user.
@@ -68,3 +101,5 @@ add the following lines to your .bashrc or .bash_profile file.
 - `755`: Set permissions to rwxr-xr-x.
 - `775`: Set permissions to rwxrwxr-x.
 - `777`: Set permissions to rwxrwxrwx.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

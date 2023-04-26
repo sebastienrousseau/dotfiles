@@ -1,11 +1,17 @@
-# 🅲🅻🅴🅰🆁 🅰🅻🅸🅰🆂🅴🆂
-
 <!-- markdownlint-disable MD033 MD041 -->
 
 <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
 alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
+
+# Dotfiles (v0.2.465)
+
+Simply designed to fit your shell life 🐚
+
+![Dotfiles banner][banner]
+
+# 🅲🅻🅴🅰🆁 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides a set of command aliases to make working with the
 terminal easier and more efficient. The following aliases are included:
@@ -23,3 +29,5 @@ terminal easier and more efficient. The following aliases are included:
   directory and the contents of the current directory.
 - `cplt` clears the terminal screen and prints the current working
   directory and the directory tree.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

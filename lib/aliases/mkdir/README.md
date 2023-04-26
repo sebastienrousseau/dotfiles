@@ -1,5 +1,3 @@
-# 🅼🅰🅺🅴🅳🅸🆁 🅰🅻🅸🅰🆂🅴🆂
-
 <!-- markdownlint-disable MD033 MD041 -->
 
 <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
@@ -7,9 +5,15 @@ alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-This code provides a set of aliases for the `mkdir` command.
+# Dotfiles (v0.2.465)
 
-## 🅰🅻🅸🅰🆂🅴🆂
+Simply designed to fit your shell life 🐚
+
+![Dotfiles banner][banner]
+
+## 🅼🅰🅺🅴🅳🅸🆁 🅰🅻🅸🅰🆂🅴🆂
+
+This code provides a set of aliases for the `mkdir` command.
 
 - `mcd` Make directory and cd into it.
 - `mde` Make example directory with current date.
@@ -18,3 +22,5 @@ This code provides a set of aliases for the `mkdir` command.
 - `mdn` Make notes directory with current date.
 - `mdw` Make work directory with current date.
 - `mdt` Make directory with time.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

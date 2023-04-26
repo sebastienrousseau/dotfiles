@@ -1,11 +1,17 @@
-# 🅶🅽🆄 🅲🅾🆁🅴🆄🆃🅸🅻🆂 🅰🅻🅸🅰🆂🅴🆂
-
 <!-- markdownlint-disable MD033 MD041 -->
 
 <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
 alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
+
+# Dotfiles (v0.2.465)
+
+Simply designed to fit your shell life 🐚
+
+![Dotfiles banner][banner]
+
+# 🅶🅽🆄 🅲🅾🆁🅴🆄🆃🅸🅻🆂 🅰🅻🅸🅰🆂🅴🆂
 
 This is a collection of aliases for the GNU Coreutils package, which is
 a set of standard Unix utilities often included in Linux distributions.
@@ -75,3 +81,5 @@ for various checksum and hash utilities like "md5sum" and "sha256sum".
 - `base32` Print or convert base32 data.
 - `base64` Encode or decode base64 data.
 - `basenc` Encode or decode base64, base32,
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

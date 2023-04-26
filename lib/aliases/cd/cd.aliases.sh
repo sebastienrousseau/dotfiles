@@ -4,7 +4,7 @@
 # Description: Sets aliases for the `cd` command.
 # License: MIT
 # Script: cd.aliases.sh
-# Version: 0.2.464
+# Version: 0.2.465
 # Website: https://dotfiles.io
 
 # 🅲🅳 🅰🅻🅸🅰🆂🅴🆂
