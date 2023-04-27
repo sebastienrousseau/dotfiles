@@ -5,7 +5,7 @@ alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.465)
+# Dotfiles (v0.2.466)
 
 Simply designed to fit your shell life 🐚
 
@@ -17,6 +17,8 @@ shell experience and productivity.
 The functions are organized by category and are listed below.
 
 ## 🅵🆄🅽🅲🆃🅸🅾🅽🆂 🅻🅸🆂🆃
+
+<!-- markdownlint-disable MD013-->
 
 ### Navigation elements
 
@@ -66,5 +68,7 @@ The functions are organized by category and are listed below.
 | `uppercase` | Function to move filenames or directory names to uppercase. | `uppercase <file>` |
 | `vsc` | Function to open a file or folder in Visual Studio Code. | `vsc <file>` |
 | `zipf` | Function to zip a file. | `zipf <file>` |
+
+<!-- markdownlint-enable MD013-->
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

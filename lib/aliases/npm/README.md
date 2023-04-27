@@ -5,7 +5,7 @@ alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.465)
+# Dotfiles (v0.2.466)
 
 Simply designed to fit your shell life 🐚
 
