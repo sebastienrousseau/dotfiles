@@ -1,50 +1,33 @@
-# Dig Aliases
+<!-- markdownlint-disable MD033 MD041 -->
 
-These aliases provide shortcuts for the `dig` command to help you
-quickly query DNS records. To use them, add the following lines to your
-`.bashrc` or `.bash_profile` file.
+<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+alt="dotfiles logo" width="261" align="right" />
 
-## Aliases
+<!-- markdownlint-enable MD033 MD041 -->
 
-### DNS lookups with dig command
+# Dotfiles (v0.2.465)
 
-- `d`: Run the dig command with the default options.
-- `d4`: Perform a DNS lookup for an IPv4 address.
-- `d6`: Perform a DNS lookup for an IPv6 address.
-- `dga`: Perform a DNS lookup for all records.
-- `dgs`: Perform a DNS lookup for a short answer.
+Simply designed to fit your shell life 🐚
 
-### DNS lookups with specific options
+![Dotfiles banner][banner]
 
-- `digg`: Dig with Google's DNS.
+## 🅳🅸🅶 🅰🅻🅸🅰🆂🅴🆂
 
-### IP address lookups
+This code provides a set of command aliases to simplify working with DNS
+(Domain Name System) lookup using the dig command on a Unix-based system
+.
 
-- `ip4`: Get your public IPv4 address.
-- `ip6`: Get your public IPv6 address.
-- `ips`: Get your public IPv4 and IPv6 addresses.
-- `wip`: Get your public IP address.
+The following aliases are included:
 
-### DNS lookups for MX records
+- `d`: runs the dig command with default options.
+- `d4`: performs a DNS lookup for an IPv4 address.
+- `d6`: performs a DNS lookup for an IPv6 address.
+- `dga`: performs a DNS lookup for all records.
+- `dgs`: performs a DNS lookup for a short answer.
+- `digg`: performs a dig with Google's DNS.
+- `ip4`: retrieves your public IPv4 address.
+- `ip6`: retrieves your public IPv6 address.
+- `ips`: retrieves your public IPv4 and IPv6 addresses.
+- `wip`: retrieves your public IP address.
 
-- `dmx`: Perform a DNS lookup for MX records.
-
-### DNS lookups for NS records
-
-- `dns`: Perform a DNS lookup for NS records.
-
-### DNS lookups for CNAME records
-
-- `dc`: Perform a DNS lookup for CNAME records.
-
-### DNS lookups for SOA records
-
-- `dsoa`: Perform a DNS lookup for SOA records.
-
-### DNS lookups for TXT records
-
-- `dt`: Perform a DNS lookup for TXT records.
-
-### DNS lookups for PTR records
-
-- `dptr`: Perform a DNS lookup for PTR records.
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

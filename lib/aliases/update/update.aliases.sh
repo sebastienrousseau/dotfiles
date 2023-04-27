@@ -1,38 +1,69 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.464) - https://dotfiles.io
-# Made with ♥ in London, UK by @sebastienrousseau
+
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.465) - <https://dotfiles.io>
+# Made with ♥ in London, UK by @wwdseb
 # Copyright (c) 2015-2023. All rights reserved
 # License: MIT
 
 # 🆄🅿🅳🅰🆃🅴 🅰🅻🅸🅰🆂🅴🆂
-if [[ "$(uname || true)" = "Darwin" ]]; then
-    alias upd='
+os_name="$(uname)"
+
+if [[ "${os_name}" = "Darwin" ]]; then
+  alias upd="
+        echo \"❯ Updating \${os_name}...\";
         sudo softwareupdate -i -a;
+        echo '❯ Updating Homebrew...';
+        brew update && brew upgrade;
+        echo '❯ Updating pnpm packages...';
         pnpm up;
+        echo '❯ Updating Rust stable toolchain...';
         rustup update stable;
-        if [[ "$(command -v brew cu)" ]]; then
-            brew cu -ayi;
-        else
-            brew tap buo/cask-upgrade;
-        fi;
-        brew doctor;
-        brew update;
-        brew upgrade;
-        brew cleanup;
+        echo '❯ Updating Homebrew Casks...';
+        brew cu -ayi || (brew tap buo/cask-upgrade && brew cu -ayi);
+        echo '❯ Cleaning up Homebrew...';
+        brew cleanup && brew doctor;
+        echo '❯ Updating Mac App Store apps...';
         mas upgrade;
-        sudo gem update;
-        sudo gem cleanup;
-    '
-elif [[ "$(uname || true)" = "Linux" ]]; then
-    alias open="xdg-open >/dev/null 2>&1"     # open: Open a file or URL in the user's preferred application.
-    alias pbcopy='xsel --clipboard --input'   # pbcopy: Copy to clipboard.
-    alias pbpaste='xsel --clipboard --output' # pbpaste: Paste from clipboard.
-    alias upd='
-        sudo apt update;
-        sudo apt upgrade -y;
+        echo '❯ Updating Ruby gems...';
+        sudo gem update && sudo gem cleanup;
+        echo '❯ Updating Python packages...';
+        pip install --upgrade --user pip setuptools wheel;
+        update_outdated_pip_packages();
+        echo '❯ Updating Node.js packages...';
+        npm update -g;
+        echo '❯ Update complete!';
+    "
+elif [[ "${os_name}" = "Linux" ]]; then
+  # Open a file or URL in the user's preferred application.
+  alias open="xdg-open >/dev/null 2>&1"
+
+  # Copy to clipboard.
+  alias pbcopy='xsel --clipboard --input'
+
+  # Paste from clipboard.
+  alias pbpaste='xsel --clipboard --output'
+  alias upd="
+        echo \"❯ Updating \${os_name}...\";
+        sudo apt update && sudo apt upgrade -y;
+        echo '❯ Cleaning up package cache...';
+        sudo apt autoremove -y && sudo apt clean;
+        echo '❯ Updating pnpm packages...';
         pnpm up;
+        echo '❯ Updating Rust stable toolchain...';
         rustup update stable;
-        sudo gem update;
-        sudo gem cleanup;
-    '
+        echo '❯ Updating Ruby gems...';
+        sudo gem update && sudo gem cleanup;
+        echo '❯ Updating Python packages...';
+        pip install --upgrade --user pip setuptools wheel;
+        update_outdated_pip_packages();
+        echo '❯ Updating Node.js packages...';
+        npm update -g;
+        echo '❯ Update complete!';
+    "
 fi
+
+function update_outdated_pip_packages() {
+  pip list --user --outdated --format=columns |
+    awk 'NR>2 {print $1}' |
+    xargs -I{} pip install -U --user "{}" || true
+}

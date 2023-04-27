@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# 🅳🅾🆃🅵🅸🅻🅴🆂
-# Author: Sebastien Rousseau
+
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.465) - <https://dotfiles.io>
+# Made with ♥ in London, UK by @wwdseb
 # Copyright (c) 2015-2023. All rights reserved
-# Description: Sets history options for the current shell.
 # License: MIT
 # Script: history.sh
-# Version: 0.2.464
+# Version: 0.2.465
 # Website: https://dotfiles.io
 
 # History wrapper

@@ -1,46 +1,35 @@
-# Configuration aliases
+<!-- markdownlint-disable MD033 MD041 -->
 
-These aliases provide configuration shortcuts. They are useful for
-configuring the terminal. To use them, add the following lines to your
-`.bashrc` or `.bash_profile` file.
+<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+alt="dotfiles logo" width="261" align="right" />
 
-## Aliases
+<!-- markdownlint-enable MD033 MD041 -->
 
-### Bash aliases
+# Dotfiles (v0.2.465)
 
-- `brc`: Open the Bash configuration file in the default text editor.
-- `brhp`: Open the Bash profile file in the default text editor.
-- `benv`: Open the Bash environment file in the default text editor.
-- `bali`: Open the Bash aliases file in the default text editor.
-- `bhist`: Open the Bash history file in the default text editor.
-- `binput`: Open the Bash input file in the default text editor.
-- `bhlp`: Open the Bash help file in the default text editor.
+Simply designed to fit your shell life 🐚
 
-### Git aliases
+![Dotfiles banner][banner]
 
-- `gco`: Open the Git configuration file in the default text editor.
-- `gign`: Open the Git ignore file in the default text editor.
-- `glog`: Open the Git log file in the default text editor.
-- `gmsg`: Open the Git commit message file in the default text editor.
+## 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂
 
-### Nano aliases
+This code provides a set of command aliases to open important
+configuration files in default text editors quickly and easily. The
+following aliases are included:
 
-- `n`: Open Nano text editor.
-- `nano`: Open Nano text editor with automatic line wrapping.
-- `nanow`: Open Nano text editor with settings for editing whitespace.
+- `apconf` opens the Apache configuration file in the default text
+  editor.
+- `bshrc` opens the Bash configuration file in the default text editor.
+- `bshp` opens the Bash profile in the default text editor.
+- `dockcomp` opens the Docker Compose file in the default text editor.
+- `eddir` opens the current directory in the default text editor.
+- `gcfg` opens the Git configuration file in the default text editor.
+- `gign` opens the Git ignore file in the default text editor.
+- `hosts` opens the hosts file in the default text editor.
+- `ngconf` opens the Nginx configuration file in the default text
+  editor.
+- `sshconf` opens the SSH configuration file in the default text editor.
+- `zshrc` opens the Zsh configuration file in the default text editor.
+- `zshp` opens the Zsh profile in the default text editor.
 
-### Zsh aliases
-
-- `zrc`: Open the Zsh configuration file in the default text editor.
-- `zenv`: Open the Zsh environment file in the default text editor.
-- `zali`: Open the Zsh aliases file in the default text editor.
-- `zfunc`: Open the Zsh functions file in the default text editor.
-- `zhlp`: Open the Zsh help file in the default text editor.
-
-### Vim aliases
-
-- `vimrc`: Open the Vim configuration file in the default text editor.
-- `vimft`: Open the Vim filetype file in the default text editor.
-- `vimftd`: Open the Vim ftdetect directory in the default file manager.
-- `vimftpl`: Open the Vim ftplugin directory in the default file manager.
-- `vimplt`: Open the Vim plugin directory in the default file manager.
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

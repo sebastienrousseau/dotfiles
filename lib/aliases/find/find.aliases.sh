@@ -1,34 +1,60 @@
 #!/usr/bin/env bash
-# Author: Sebastien Rousseau
+
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.465) - <https://dotfiles.io>
+# Made with ♥ in London, UK by @wwdseb
 # Copyright (c) 2015-2023. All rights reserved
-# Description: Sets Find Aliases
 # License: MIT
 # Script: find.aliases.sh
-# Version: 0.2.464
+# Version: 0.2.465
 # Website: https://dotfiles.io
 
 # 🅵🅸🅽🅳 🅰🅻🅸🅰🆂🅴🆂
-if command -v 'fd' >/dev/null; then
-  alias fd='fd --color always'        # fd: always colorize output by default.
-  alias fda='fd --absolute-path'      # fda: list all files with absolute path.
-  alias fdb='fd --base-directory'     # fdb: list all files with a base directory.
-  alias fdc='fd --ignore-case'        # fdc: list all files with case insensitive search.
-  alias fdd='fd --list-details'       # fdd: list all files with details.
-  alias fdD='fd --max-depth'          # fdD: search up to a maximum depth.
-  alias fde='fd --extension'          # fde: list all files with extension.
-  alias fdf='fd --follow'             # fdf: list all files with follow symlinks.
-  alias fdh='fd --hidden'             # fdh: list all files with hidden files.
-  alias fdl='fd --follow --type file' # fdl: list all files following symlinks.
-  alias fdn='fd --glob'               # fdn: list all files with glob.
-  alias fdo='fd --owner'              # fdo: list all files with owner.
-  alias fdp='fd --full-path'          # fdp: list all files with the full path.
-  alias fdr='fd --type directory'     # fdr: list only directories.
-  alias fds='fd --size'               # fds: list all files with size.
-  alias fdsy='fd --type symlink'      # fdsy: list only symlinks.
-  alias fdt='fd --type'               # fdt: list all files of a specific type.
-  alias fdu='fd --exclude'            # fdu: list all files with exclude.
-  alias fdv='fd --version'            # fdv: list all files with version.
-  alias fdx='fd --exec'               # fdx: Execute a command for each search result.
-  alias fdz='fd --size -0'            # fdz: list all files with size of 0 bytes.
-  alias find='fd'                     # find: fd is a simple, fast and user-friendly alternative to find.
+
+if command -v fd &>/dev/null; then
+  # fd: a simple, fast and user-friendly alternative to find
+  # Always colorize output by default.
+  alias fd='fd --color always'
+
+  # List all files with absolute path.
+  alias fda='fd --absolute-path'
+
+  # List all files with case-insensitive search.
+  alias fdc='fd --ignore-case'
+
+  # List all files with details.
+  alias fdd='fd --list-details'
+
+  # List all files with extension.
+  alias fde='fd --extension'
+
+  # List all files with follow symlinks.
+  alias fdf='fd --follow'
+
+  # List all files with help.
+  alias fdh='fd --help'
+
+  # List all files, including hidden files.
+  alias fdh='fd --hidden'
+
+  # List all files with glob.
+  alias fdn='fd --glob'
+
+  # List all files with owner.
+  alias fdo='fd --owner'
+
+  # List all files with size.
+  alias fds='fd --size'
+
+  # List all files with exclude.
+  alias fdu='fd --exclude'
+
+  # List all files with version.
+  alias fdv='fd --version'
+
+  # Execute a command for each search result.
+  alias fdx='fd --exec'
+
+  # Use fd as a replacement for find.
+  alias find='fd'
+
 fi

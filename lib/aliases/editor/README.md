@@ -1,47 +1,49 @@
-# Editor Aliases
+<!-- markdownlint-disable MD033 MD041 -->
 
-These aliases provide shortcuts for common editor commands. To use them,
-add the following lines to your `.bashrc` or `.bash_profile` file.
+<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+alt="dotfiles logo" width="261" align="right" />
 
-## Aliases
+<!-- markdownlint-enable MD033 MD041 -->
 
-### Nano Aliases
+# Dotfiles (v0.2.465)
 
-- `n`: Edit a file with Nano.
-- `nano1`: Edit a file with Nano, with cursor position display.
-- `nanos`: Edit a file with Nano, soft wrapping enabled.
+Simply designed to fit your shell life 🐚
 
-### Vim or Vi Aliases
+![Dotfiles banner][banner]
 
-- `v`: Edit a file with Vim.
-- `vi`: Edit a file with Vim.
-- `vimdiff`: Compare two files with Vimdiff.
-- `vimh`: Edit a file with Vim in no compatible mode.
-- `vims`: Edit a file with Vim, sourcing the given session file.
+## 🅴🅳🅸🆃🅾🆁 🅰🅻🅸🅰🆂🅴🆂
 
-### Visual Studio Code Aliases
+This code provides command aliases for editing files on a Unix-based
+system using various text editors.
 
-- `c`: Edit a file with Visual Studio Code.
-- `code1`: Edit a file with Visual Studio Code, with extensions disabled.
-- `codef`: Open a new instance of Visual Studio Code.
-- `cdiff`: Compare two files with Visual Studio Code.
+The following editors are supported:
 
-### Gedit Aliases
+- nano (GNU nano)
+- vim (Vim)
+- vi (Vi)
+- code (Visual Studio Code)
+- gedit (gedit)
+- notepad++ (Notepad++)
 
-- `g`: Edit a file with Gedit.
-- `gedit1`: Edit a file with Gedit and wait until it is closed.
-- `geditd`: Edit a file with Gedit, with split view enabled.
+The aliases are designed to make it easy for users to quickly open and
+edit files with their preferred text editor. The aliases are:
 
-### Notepad++ Aliases
+- `e`: Edit a file
+- `edit`: Edit a file
+- `editor`: Edit a file
+- `mate`: Edit a file
+- `n`: Edit a file
+- `v`: Edit a file
 
-- `npp`: Edit a file with Notepad++.
-- `npp1`: Edit a file with Notepad++, without restoring a previous session.
+The code checks if any of the supported editors are installed on the
+system and sets the corresponding alias to open the file in the
+available editor.
 
-### Generic Editor Aliases
+This makes it easy for users to switch between editors or use their
+preferred editor without having to remember the specific command for
+each editor.
 
-- `e`: Edit a file.
-- `edit`: Edit a file.
-- `editor`: Edit a file.
-- `mate`: Edit a file.
-- `n`: Edit a file.
-- `v`: Edit a file.
+Enjoy the convenience of quickly editing files with these command
+aliases!
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

@@ -1,84 +1,56 @@
-# Compression Aliases
+<!-- markdownlint-disable MD033 MD041 -->
 
-This repository contains a set of shell aliases for various compression
-tools. These aliases can be added to your shell profile to make it easy
-to compress and extract files from the command line.
+<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+alt="dotfiles logo" width="261" align="right" />
 
-## Aliases
+<!-- markdownlint-enable MD033 MD041 -->
 
-### 7z
+# Dotfiles (v0.2.465)
 
-- `c7z`: Compress a whole directory (including subdirectories) to a 7z file.
-- `e7z`: Extract a whole directory (including subdirectories) from a 7z file.
-- `l7z`: List contents of a 7z archive.
-- `t7z`: Test integrity of a 7z archive.
-- `x7z`: Extract files with full paths from a 7z archive.
+Simply designed to fit your shell life 🐚
 
-### bzip2
+![Dotfiles banner][banner]
 
-- `cbz2`: Compress a file to a bz2 file.
-- `ebz2`: Extract a file from a bz2 file.
+## 🅰🆁🅲🅷🅸🆅🅴🆂 🅰🅻🅸🅰🆂🅴🆂
 
-### gzip
+This code provides a set of command aliases to help users compress and
+extract files and directories in various formats on a Unix-based system.
 
-- `cgz`: Compress a file to a gz file.
-- `egz`: Extract a file from a gz file.
+The following compression formats are supported:
 
-### jar
+- 7z
+- bzip2
+- gzip
+- jar
+- lz4
+- lzma
+- lzo
+- pigz
+- tar
+- xz
+- zstd
+- zip
 
-- `cjar`: Compress a whole directory (including subdirectories) to a jar file.
-- `ejar`: Extract a whole directory (including subdirectories) from a jar file.
+These aliases enable users to compress or extract files and directories
+quickly by using simple commands.
 
-### lzma
+For example:
 
-- `clzma`: Compress a file to a lzma file.
-- `elzma`: Extract a file from a lzma file.
+- `c7z` can be used to compress a whole directory (including
+  subdirectories) to a 7z file.
+- `e7z` can be used to extract a whole directory (including
+  subdirectories) from a 7z file.
 
-### rar
+Similarly, there are aliases for compressing and extracting files and
+directories in all supported formats.
 
-- `crar`: Compress a file to a rar file.
-- `erar`: Extract a file from a rar file.
+The aliases are designed to be easy to remember and use, and they should
+make the compression and extraction process much simpler for users.
 
-### tar
+Please note that some of the compression formats may require additional
+software to be installed on your system.
 
-- `ctar`: Compress a whole directory (including subdirectories) to a tar file.
-- `etar`: Extract a whole directory (including subdirectories) from a tar file.
-- `t7z`: Compress a whole directory (including subdirectories) to a 7z file.
-- `tbz`: Compress a whole directory (including subdirectories) to a bzip2 file.
-- `tgz`: Compress a whole directory (including subdirectories) to a tar.gz file.
-- `txz`: Compress a whole directory (including subdirectories) to a xz file.
-- `txzstd`: Compress a whole directory (including subdirectories) to a zstd file.
-- `tz`: Compress a whole directory (including subdirectories) to a gzip file.
-- `unzip`: Extract a whole directory (including subdirectories) from a zip file.
-- `x7z`: Extract a whole directory (including subdirectories) from a 7z file.
-- `xbz`: Extract a whole directory (including subdirectories) from a bzip2 file.
-- `xgz`: Extract a whole directory (including subdirectories) from a tar.gz file.
-- `xxz`: Extract a whole directory (including subdirectories) from a xz file.
-- `xxzstd`: Extract a whole directory (including subdirectories) from a zstd file.
-- `xz`: Extract a whole directory (including subdirectories) from a gzip file.
-- `zip`: Compress a whole directory (including subdirectories) to a zip file.
+Enjoy the convenience of quickly compressing and extracting files and
+directories with these command aliases!
 
-### xz
-
-- `cxz`: Compress a file to a xz file.
-- `exz`: Extract a file from a xz file.
-- `tlz`: Compress a whole directory (including subdirectories) to a lz file.
-- `xlz`: Extract a whole directory (including subdirectories) from a lz file.
-
-### zip
-
-- `cz`: Compress a whole directory (including subdirectories) to a zip file.
-- `ez`: Extract a whole directory (including subdirectories) from a zip file.
-- `tbz`: Compress a whole directory (including subdirectories) to a bzip2 file.
-- `txz`: Compress a whole directory (including subdirectories) to a xz file.
-- `tz`: Compress a whole directory (including subdirectories) to a gzip file.
-- `xbz`: Extract a whole directory (including subdirectories) from a bzip2 file.
-- `xxz`: Extract a whole directory (including subdirectories) from a xz file.
-- `xz`: Extract a whole directory (including subdirectories) from a gzip file.
-
-### zstd
-
-- `czstd`: Compress a whole directory (including subdirectories) to a zstd file.
-- `ezstd`: Extract a whole directory (including subdirectories) from a zstd file.
-- `tzstd`: Compress a whole directory (including subdirectories) to a tar.zst file.
-- `xzstd`: Extract a whole directory (including subdirectories) from a tar.zst file.
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

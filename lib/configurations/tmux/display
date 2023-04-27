@@ -1,9 +1,13 @@
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.464) - https://dotfiles.io
-# Made with ♥ in London, UK by @sebastienrousseau
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.465) - <https://dotfiles.io>
+
+# Made with ♥ in London, UK by @wwdseb
+
 # Copyright (c) 2015-2023. All rights reserved
+
 # License: MIT
 
 ## 🅳🅸🆂🅿🅻🅰🆈
+
 bind -n C-l send-keys C-l \; run 'sleep 0.2' \; clear-history     # clear both screen and history
 set -g aggressive-resize on                                       # resize panes automatically when window is resized
 set -g base-index 1                                               # start windows numbering at 1

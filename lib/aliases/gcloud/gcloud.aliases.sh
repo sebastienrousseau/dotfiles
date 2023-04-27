@@ -1,146 +1,335 @@
 #!/usr/bin/env bash
-# Author: Sebastien Rousseau
+
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.465) - <https://dotfiles.io>
+# Made with ♥ in London, UK by @wwdseb
 # Copyright (c) 2015-2023. All rights reserved
-# Description: Sets Google Cloud Aliases
 # License: MIT
 # Script: gcloud.aliases.sh
-# Version: 0.2.464
+# Version: 0.2.465
 # Website: https://dotfiles.io
 
-if command -v 'gcloud' >/dev/null; then
+# 🅶🅲🅻🅾🆄🅳 🅰🅻🅸🅰🆂🅴🆂 - Google Cloud aliases.
+if command -v gcloud &>/dev/null; then
+  # Sections:
+  #
+  #      1.0 Google Cloud Aliases.
+  #      1.1 Aliases to get going with the gcloud command-line tool.
+  #      1.2 Aliases to make the Cloud SDK your own; personalize your
+  #          configuration with properties.
+  #      1.3 Aliases to grant and revoke authorization to Cloud SDK.
+  #      1.4 Aliases to configuring Cloud Identity & Access Management
+  #          (IAM) preferences and service accounts.
+  #      1.5 Aliases to manage project access policies.
+  #      1.6 Aliases to manage containerized applications on Kubernetes.
+  #      1.7 Aliases to create, run, and manage VMs on Google
+  #          infrastructure.
+  #      1.8 Aliases to build highly scalable applications on a fully
+  #          managed serverless platform.
+  #      1.9 Aliases to commands that might come in handy.
+  #      1.10 Additional Google Cloud Aliases.
 
-  # Authenticate and authorize
-  alias gcaasa='gcloud auth activate-service-account' # gcaasa: Like gcloud auth login but with service account credentials.
-  alias gcacd='gcloud auth configure-docker'          # gcacd: Configure Docker to use gcloud as a credential helper.
-  alias gcal='gcloud auth list'                       # gcal: List the accounts you are logged in with.
-  alias gcapat='gcloud auth print-access-token'       # gcapat: Print the access token for the current active account.
-  alias gcar='gcloud auth revoke'                     # gcar: Revoke credentials for the current active account.
+  ##  ------------------------------------------------------------------
+  ##  1.0 Google Cloud Aliases
+  ##  ------------------------------------------------------------------
+  ##  ------------------------------------------------------------------
+  ##  1.1 Aliases to get going with the gcloud command-line tool.
+  ##  ------------------------------------------------------------------
 
-  # App Engine
-  alias gcapb='gcloud app browse'        # gcapb: Open the App Engine app in your default browser.
-  alias gcapc='gcloud app create'        # gcapc: Create a new App Engine app.
-  alias gcapd='gcloud app deploy'        # gcapd: Deploy an App Engine app.
-  alias gcapl='gcloud app logs read'     # gcapl: Read the logs for an App Engine app.
-  alias gcapv='gcloud app versions list' # gcapv: List the versions of an App Engine app.
+  # Install specific components.
+  alias gcci='gcloud components install'
 
-  # Cloud SDK configuration and management
-  alias gccca='gcloud config configurations activate' # gccca: Switch to an existing named configuration.
-  alias gcccc='gcloud config configurations create'   # gcccc: Create a new named configuration.
-  alias gcccl='gcloud config configurations list'     # gcccl: Display a list of all available configurations.
-  alias gccl='gcloud config list'                     # gccl:Display all the properties for the current configuration.
-  alias gccgv='gcloud config get-value'               # gccgv: Fetch value of a Cloud SDK property.
-  alias gccs='gcloud config set'                      # gccs: Define a property (like compute/zone) for the current configuration.
-  alias gccsp='gcloud config set project'             # gccsp: Set a default Google Cloud project to work on.
-  alias gccu='gcloud components update'               # gccu: Update your Cloud SDK to the latest version.
-  alias gci='gcloud init'                             # gci: Initialize, authorize, and configure the gcloud tool.
-  alias gcinf='gcloud info'                           # gcinf: Display current gcloud tool environment details.
-  alias gciov='gcloud io verify-email'                # gciov: Verify your email address for Google Cloud.
+  # Set a default Google Cloud project to work on.
+  alias gccsp='gcloud config set project'
 
-  # Container
-  alias gcccc='gcloud container clusters create'          # gcccc: Create a cluster to run GKE containers.
-  alias gcccg='gcloud container clusters get-credentials' # gcccg: Update kubeconfig to get kubectl to use a GKE cluster.
-  alias gcccl='gcloud container clusters list'            # gcccl: List clusters for running GKE containers.
-  alias gccil='gcloud container images list-tags'         # gccil: List tag and digest metadata for a container image.
-  alias gcd='gcloud container'                            # gcd: A convenience command group for all container-related commands.
+  # Update your Cloud SDK to the latest version.
+  alias gccu='gcloud components update'
 
-  # IAM
-  alias gciamk='gcloud iam service-accounts keys list'                  # gciamk: List a service account's keys.
-  alias gciaml='gcloud iam list-grantable-roles'                        # gciaml: List IAM grantable roles for a resource.
-  alias gciamp='gcloud iam service-accounts add-iam-policy-binding'     # gciamp: Add an IAM policy binding to a service account.
-  alias gciamr='gcloud iam roles create'                                # gciamr: Create a custom role for a project or org
-  alias gciamd='gcloud iam roles delete'                                # gciamd: Delete a custom role for a project or org.
-  alias gciampd='gcloud iam service-accounts remove-iam-policy-binding' # gciampd: Remove an IAM policy binding from a service account.
-  alias gciamro='gcloud iam roles describe'                             # gciamro: Describe a custom role for a project or org.
-  alias gciamsp='gcloud iam service-accounts set-iam-policy'            # gciamsp: Replace the IAM policy of a service account.
-  alias gciamu='gcloud iam roles undelete'                              # gciamu: Undelete a custom role for a project or org.
-  alias gciamup='gcloud iam service-accounts update'                    # gciamup: Update a service account.
-  alias gcimp='gcloud organizations list'                               # gcimp: List available Cloud Identity domains.
-  alias gcimpe='gcloud organizations add-iam-policy-binding'            # gcimpe: Add an IAM policy binding to a Cloud Identity domain.
-  alias gcimpr='gcloud organizations remove-iam-policy-binding'         # gcimpr: Remove an IAM policy binding from a Cloud Identity domain.
-  alias gcsac='gcloud auth application-default login'                   # gcsac: Obtain an access token for the Google Cloud APIs.
+  # Initialize, authorize, and configure the gcloud tool.
+  alias gci='gcloud init'
 
-  # Compute
-  alias gcc='gcloud compute'                          # gcc: A convenience command group for all compute-related commands.
-  alias gcpa='gcloud projects add-iam-policy-binding' # gcpa: Add an IAM policy binding to a specified project.
-  alias gcpc='gcloud compute copy-files'              # gcpc: Copy files.
-  alias gcpd='gcloud projects describe'               # gcpd: Display metadata for a project (including its ID).
-  alias gcpdown='gcloud compute instances stop'       # gcpdown: Stop instance.
-  alias gcpds='gcloud compute disks snapshot'         # gcpds: Create snapshot of persistent disks.
-  alias gcpid='gcloud compute instances describe'     # gcpid: Display a VM instance's details.
-  alias gcpil='gcloud compute instances list'         # gcpil: List all VM instances in a project.
-  alias gcprm='gcloud compute instances delete'       # gcprm: Delete instance.
-  alias gcpsk='gcloud compute snapshots delete'       # gcpsk: Delete a snapshot.
-  alias gcpssh='gcloud compute ssh'                   # gcpssh: Connect to a VM instance by using SSH.
-  alias gcpup='gcloud compute instances start'        # gcpup: Start instance.
-  alias gcpzl='gcloud compute zones list'             # gcpzl:List Compute Engine zones.
+  # Display current gcloud tool environment details.
+  alias gcinf='gcloud info'
 
-  # Deployment Manager
-  alias gcdm='gcloud deployment-manager'                       # gcdm: A convenience command group for all deployment-manager-related commands.
-  alias gcdma='gcloud deployment-manager deployments create'   # gcdma: Create a new deployment.
-  alias gcdmd='gcloud deployment-manager deployments delete'   # gcdmd: Delete a deployment.
-  alias gcdmg='gcloud deployment-manager deployments describe' # gcdmg: Describe a deployment.
-  alias gcdml='gcloud deployment-manager deployments list'     # gcdml: List all deployments.
-  alias gcdmu='gcloud deployment-manager deployments update'   # gcdmu: Update a deployment.
+  # Display version and installed components.
+  alias gcv='gcloud version'
 
-  # DNS
-  alias gcdns='gcloud dns'                                  # gcdns: A convenience command group for all dns-related commands.
-  alias gcdnsz='gcloud dns managed-zones'                   # gcdnsz: List managed DNS zones.
-  alias gcdnsc='gcloud dns record-sets changes'             # gcdnsc: List or apply DNS record sets changes.
-  alias gcdnsd='gcloud dns managed-zones delete'            # gcdnsd: Delete a managed DNS zone.
-  alias gcdnsi='gcloud dns managed-zones create'            # gcdnsi: Create a new managed DNS zone.
-  alias gcdnsk='gcloud dns dns-keys'                        # gcdnsk: List and manage DNSSEC keys for a zone.
-  alias gcdnsl='gcloud dns record-sets list'                # gcdnsl: List record sets in a managed zone.
-  alias gcdnsr='gcloud dns record-sets transaction start'   # gcdnsr: Start a transaction to add, update, or remove record sets.
-  alias gcdnss='gcloud dns record-sets transaction execute' # gcdnss: Execute a transaction to add, update, or remove record sets.
-  alias gcdnst='gcloud dns record-sets transaction abort'   # gcdnst: Abort a transaction to add, update, or remove record sets.
+  ##  ------------------------------------------------------------------
+  ##  1.2 Aliases to make the Cloud SDK your own; personalize your
+  ##      configuration with properties.
+  ##  ------------------------------------------------------------------
 
-  # Functions
-  alias gcf='gcloud functions' # gcf: A convenience command group for all functions-related commands.
+  # Switch to an existing named configuration.
+  alias gccca='gcloud config configurations activate'
 
-  # Cloud Build
+  # Create a new named configuration.
+  alias gcccc='gcloud config configurations create'
 
-  alias gcb='gcloud builds'         # gcb: A convenience command group for all Cloud Build-related commands.
-  alias gcbh='gcloud builds list'   # gcbh: List all builds in a project.
-  alias gcbb='gcloud builds submit' # gcbb: Submit a build to Cloud Build.
+  # Display a list of all available configurations.
+  alias gcccl='gcloud config configurations list'
 
-  # Cloud Run
+  # Fetch value of a Cloud SDK property.
+  alias gccgv='gcloud config get-value'
 
-  alias gcr='gcloud run'           # gcr: A convenience command group for all Cloud Run-related commands.
-  alias gcrd='gcloud run deploy'   # gcrd: Deploy a container to Cloud Run.
-  alias gcrs='gcloud run services' # gcrs: List, describe, and manage services on Cloud Run.
-  alias gcru='gcloud run update'   # gcru: Update an existing Cloud Run service.
-  alias gcrf='gcloud run logs'     # gcrf: Display logs for a Cloud Run service.
+  # Display all the properties for the current configuration.
+  alias gccl='gcloud config list'
 
-  # Cloud Storage
+  # Define a property (like compute/zone) for the current configuration.
+  alias gccs='gcloud config set'
 
-  alias gcs='gsutil'           # gcs: A convenience command group for all Cloud Storage-related commands.
-  alias gcsc='gsutil cp'       # gcsc: Copy files and objects to/from Cloud Storage.
-  alias gcscp='gsutil -m cp'   # gcscp: Copy files and objects to/from Cloud Storage using parallel processing.
-  alias gcsd='gsutil du'       # gcsd: Display the total size of a bucket or object.
-  alias gcsl='gsutil ls'       # gcsl:List contents of a bucket or folder.
-  alias gcspm='gsutil setmeta' # gcspm: Set metadata for objects in Cloud Storage.
+  ##  ------------------------------------------------------------------
+  ##  1.3 Aliases to grant and revoke authorization to Cloud SDK
+  ##  ------------------------------------------------------------------
 
-  # BigQuery
+  # Like gcloud auth login but with service account credentials.
+  alias gcaasa='gcloud auth activate-service-account'
 
-  alias gcbq='bq'        # gcbq:  A convenience command group for all BigQuery-related commands.
-  alias gcbql='bq ls'    # gcbql: List all datasets in a project.
-  alias gcbqs='bq show'  # gcbqs: Show details about a specific dataset or table.
-  alias gcbqd='bq rm'    # gcbqd: Delete a dataset or table.
-  alias gcbqc='bq query' # gcbqc: Run a BigQuery SQL query.
+  # Register the gcloud tool as a Docker credential helper.
+  alias gcacd='gcloud auth configure-docker'
 
-  # Cloud SQL
+  # List all credentialed accounts.
+  alias gcal='gcloud auth list'
 
-  alias gcsql='gcloud sql'                     # gcsql: A convenience command group for all Cloud SQL-related commands.
-  alias gcsqlc='gcloud sql connect'            # gcsqlc: Connect to a Cloud SQL instance.
-  alias gcsqlc='gcloud sql instances create'   # gcsqlc: Create a new Cloud SQL instance.
-  alias gcsqlr='gcloud sql instances describe' # gcsqlr: Describe a Cloud SQL instance.
-  alias gcsqlu='gcloud sql users set-password' # gcsqlu: Update the password for a Cloud SQL user.
+  # Authorize Google Cloud access for the gcloud tool with Google user
+  # credentials and set current account as active.
+  alias gcal='gcloud auth login'
 
-  # Pub/Sub
+  # Display the current account's access token.
+  alias gcapat='gcloud auth print-access-token'
 
-  alias gcps='gcloud pubsub'                # gcps: A convenience command group for all Pub/Sub-related commands.
-  alias gcpsp='gcloud pubsub topics'        # gcpsp: List, create, and manage Pub/Sub topics.
-  alias gcpss='gcloud pubsub subscriptions' # gcpss: List, create, and manage Pub/Sub subscriptions.
-  alias gcpsp='gcloud pubsub publish'       # gcpsp: Publish a message to a Pub/Sub topic.
+  # Remove access credentials for an account.
+  alias gcar='gcloud auth revoke'
+
+  ##  ------------------------------------------------------------------
+  ##  1.4 Aliases to configuring Cloud Identity & Access Management
+  ##      (IAM) preferences and service accounts.
+  ##  ------------------------------------------------------------------
+
+  # List a service account's keys.
+  alias gciamk='gcloud iam service-accounts keys list'
+
+  # List IAM grantable roles for a resource.
+  alias gciaml='gcloud iam list-grantable-roles'
+
+  # Add an IAM policy binding to a service account.
+  alias gciamp='gcloud iam service-accounts add-iam-policy-binding'
+
+  # Create a custom role for a project or org.
+  alias gciamr='gcloud iam roles create'
+
+  # Replace existing IAM policy binding.
+  alias gciams='gcloud iam service-accounts set-iam-policy'
+
+  # Create a service account for a project.
+  alias gciamv='gcloud iam service-accounts create'
+
+  ##  ------------------------------------------------------------------
+  ##  1.5 Aliases to manage project access policies
+  ##  ------------------------------------------------------------------
+
+  # Add an IAM policy binding to a specified project.
+  alias gcpa='gcloud projects add-iam-policy-binding'
+
+  # Display metadata for a project (including its ID).
+  alias gcpd='gcloud projects describe'
+
+  ## -------------------------------------------------------------------
+  ## 1.6 Aliases to manage containerized applications on Kubernetes
+  ## -------------------------------------------------------------------
+
+  # Create a cluster to run GKE containers.
+  alias gcccc='gcloud container clusters create'
+
+  # Update kubeconfig to get kubectl to use a GKE cluster.
+  alias gcccg='gcloud container clusters get-credentials'
+
+  # List clusters for running GKE containers.
+  alias gcccl='gcloud container clusters list'
+
+  # List tag and digest metadata for a container image.
+  alias gccil='gcloud container images list-tags'
+
+  ## -------------------------------------------------------------------
+  ## 1.7 Aliases to create, run, and manage VMs on
+  ##     Google infrastructure.
+  ## -------------------------------------------------------------------
+
+  # Copy files
+  alias gcpc='gcloud compute copy-files'
+
+  # Stop instance
+  alias gcpdown='gcloud compute instances stop'
+
+  # Create snapshot of persistent disks.
+  alias gcpds='gcloud compute disks snapshot'
+
+  # Display a VM instance's details.
+  alias gcpid='gcloud compute instances describe'
+
+  # List all VM instances in a project.
+  alias gcpil='gcloud compute instances list'
+
+  # Delete instance
+  alias gcprm='gcloud compute instances delete'
+
+  # Delete a snapshot.
+  alias gcpsk='gcloud compute snapshots delete'
+
+  # Connect to a VM instance by using SSH.
+  alias gcpssh='gcloud compute ssh'
+
+  # Start instance.
+  alias gcpup='gcloud compute instances start'
+
+  # List Compute Engine zones.
+  alias gcpzl='gcloud compute zones list'
+
+  ## -------------------------------------------------------------------
+  ## 1.8 Aliases to build highly scalable applications on a fully
+  ##     managed serverless platform.
+  ## -------------------------------------------------------------------
+
+  # Open the current app in a web browser.
+  alias gcapb='gcloud app browse'
+
+  # Create an App Engine app within your current project.
+  alias gcapc='gcloud app create'
+
+  # Deploy your app's code and configuration to the App Engine server.
+  alias gcapd='gcloud app deploy'
+
+  # Display the latest App Engine app logs.
+  alias gcapl='gcloud app logs read'
+
+  # List all versions of all services deployed to the App Engine server.
+  alias gcapv='gcloud app versions list'
+
+  ## -------------------------------------------------------------------
+  ## 1.9 Aliases to commands that might come in handy
+  ## -------------------------------------------------------------------
+
+  # Decrypt ciphertext (to a plaintext file) using a Cloud Key
+  # Management Service (Cloud KMS) key.
+  alias gckmsd='gcloud kms decrypt'
+
+  # List your project's logs.
+  alias gclll='gcloud logging logs list'
+
+  # Display info about a Cloud SQL instance backup.
+  alias gcsqlb='gcloud sql backups describe'
+
+  # Export data from a Cloud SQL instance to a SQL file.
+  alias gcsqle='gcloud sql export sql'
+
+  ## -------------------------------------------------------------------
+  ## 1.10 Aliases to commands that might come in handy
+  ## -------------------------------------------------------------------
+
+  # Authenticate with Google Cloud.
+  alias gca='gcloud auth'
+
+  # Access to beta commands.
+  alias gcb='gcloud beta'
+
+  # Manage Google Cloud Build.
+  alias gcb='gcloud builds'
+
+  # Manage Compute Engine IP addresses.
+  alias gcca='gcloud compute addresses'
+
+  # Create a new virtual machine instance.
+  alias gccc='gcloud compute instances create'
+
+  # Connect to a virtual machine instance by using SSH.
+  alias gcco='gcloud compute ssh'
+
+  # Set default project to current directory name.
+  alias gcd='gcloud config set project $(gcloud projects list --format="value(projectId)" --filter="name:${PWD##\*/}")'
+
+  # Manage Google Cloud Datastore.
+  alias gcdb='gcloud datastore'
+
+  # Manage Google Cloud Dataproc.
+  alias gcdp='gcloud dataproc'
+
+  # Manage Google Cloud Endpoints.
+  alias gce='gcloud endpoints'
+
+  # Manage Google Cloud Eventarc.
+  alias gcem='gcloud eventarc'
+
+  # Manage Google Cloud Functions.
+  alias gcf='gcloud functions'
+
+  # Manage Google Cloud Compute Engine instances.
+  alias gci='gcloud compute instances'
+
+  # Manage Google Cloud Identity and Access Management.
+  alias gcic='gcloud iam'
+
+  # Manage Google Cloud IoT Core.
+  alias gcir='gcloud iot'
+
+  # List all configurations.
+  alias gck='gcloud config configurations list'
+
+  # Manage Google Cloud KMS.
+  alias gcki='gcloud kms'
+
+  # Manage Google Cloud Logging.
+  alias gcla='gcloud logging'
+
+  # Manage Google Cloud Monitoring.
+  alias gcma='gcloud monitoring'
+
+  # Manage Google Cloud Networks.
+  alias gcn='gcloud networks'
+
+  # Manage Google Cloud projects.
+  alias gcp='gcloud projects'
+
+  # Delete a Google Cloud project.
+  alias gcpd='gcloud projects delete'
+
+  # Display details for a Compute Engine IP address.
+  alias gcpha='gcloud compute addresses describe'
+
+  # Manage Google Cloud Pub/Sub.
+  alias gcps='gcloud pubsub'
+
+  # Delete a container image from Google Container Registry
+  alias gcr='gcloud container images delete'
+
+  # Manage Google Cloud resources.
+  alias gcrm='gcloud resource-manager'
+
+  # Manage Google Cloud Run.
+  alias gcro='gcloud run'
+
+  # Manage Google Cloud Kubernetes Engine clusters.
+  alias gcs='gcloud container clusters'
+
+  # Set the account for the current configuration.
+  alias gcsa='gcloud config set account'
+
+  # Manage Google Cloud Source Repositories.
+  alias gcsc='gcloud source'
+
+  # Open the Google Cloud Console for the current project.
+  alias gcso='gcloud organizations'
+
+  # Manage Google Cloud SQL.
+  alias gcsq='gcloud sql'
+
+  # Manage Google Cloud Storage.
+  alias gcss='gcloud storage'
+
+  # Enable or disable Google Cloud services.
+  alias gcst='gcloud services'
+
+  # Manage Google Cloud Tasks.
+  alias gct='gcloud tasks'
+
+  # Manage Google Cloud App Engine.
+  alias gcu='gcloud app'
 
 fi

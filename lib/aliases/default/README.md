@@ -1,62 +1,36 @@
-# Default aliases
+<!-- markdownlint-disable MD033 MD041 -->
 
-These aliases provide default aliases. They are useful for configuring
-the terminal. To use them, add the following lines to your `.bashrc` or
-`.bash_profile` file.
+<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+alt="dotfiles logo" width="261" align="right" />
 
-## Aliases
+<!-- markdownlint-enable MD033 MD041 -->
 
-### Directory aliases
+# Dotfiles (v0.2.465)
 
-- `ctf`: Count the number of files in the current directory.
-- `p`: Print working directory.
+Simply designed to fit your shell life 🐚
 
-### Exit aliases
+![Dotfiles banner][banner]
 
-- `bye`: Exit the shell.
-- `q`: Exit the shell.
-- `quit`: Exit the shell.
+## 🅳🅴🅵🅰🆄🅻🆃 🅰🅻🅸🅰🆂🅴🆂
 
-### Misc aliases
+This code provides a set of command aliases to make common tasks and
+commands more convenient and faster to execute. These aliases range from
+general purpose to system monitoring and file system navigation.
 
-- `h`: Display command history.
-- `ipinfo`: Get network interface parameters for en0.
-- `path`: Display the $PATH variable on newlines.
-- `please`: Run command as superuser.
-- `spd`: Remove all log files in /private/var/log/asl/.
-- `srv`: Start a simple HTTP server.
-- `t`: Print last 10 lines of a file in real time.
-- `x`: Exit the shell.
+Some of the most useful aliases include:
 
-### Package manager aliases
+- `c`: shortcut for the `clear` command to clear the terminal screen.
+- `p`: shortcut for the `pwd` command to display the current working
+  directory.
+- `h`: lists all recently used commands.
+- `path`: displays the `$PATH` variable on new lines.
+- `quit`: shortcut for the `exit` command to exit the shell.
+- `halt`, `poweroff`, `reboot`: system shutdown and reboot commands.
+- `srv`: starts a simple HTTP server.
+- `top`: allows the user to interactively monitor the system's vital
+  resources or server's processes in real-time.
+- `qfind`: quickly search for files.
+- `clc`: clear the terminal screen and print the contents of the current
+  directory.
 
-- `apt-get`: Append sudo to apt-get command.
-- `aptitude`: Run command as superuser.
-- `pacman`: Run command as superuser.
-- `yum`: Run command as superuser.
-
-### System aliases
-
-- `da`: Display the current date and time.
-- `moon`: Get the moon phase.
-- `nls`: Show only active network listeners.
-- `now`: Show the current time.
-- `op`: List of open ports.
-- `ping`: Limit Ping to 5 ECHO_REQUEST packets.
-- `ports`: List all listening ports.
-- `top`: Display the top processes.
-- `tree`: Display the directory tree.
-- `wth`: Get the weather.
-- `wk`: Display the current week number.
-
-### System control aliases
-
-- `halt`: Halt the system.
-- `poweroff`: Power off the system.
-- `reboot`: Reboot the system.
-- `shutdown`: Shut down the system.
-
-### Terminal control aliases
-
-- `reload`: Reload the shell.
-- `r`: Reload the shell.
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

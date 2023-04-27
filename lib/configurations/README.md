@@ -1,3 +1,14 @@
-# Dotfiles aliases
+<!-- markdownlint-disable MD033 MD041 -->
 
-![Banner representing the Dotfiles Library](/assets/dotfiles.svg)
+<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+alt="dotfiles logo" width="261" align="right" />
+
+<!-- markdownlint-enable MD033 MD041 -->
+
+# Dotfiles (v0.2.465)
+
+Simply designed to fit your shell life 🐚
+
+![Dotfiles banner][banner]
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

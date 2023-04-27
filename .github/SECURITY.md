@@ -1,18 +1,30 @@
-# Security
+<!-- markdownlint-disable MD033 MD041 -->
 
-[![Banner representing the Dotfiles Library][logo]][website]
+<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+alt="dotfiles logo" width="261" align="right" />
 
-We take the security of our software products and services seriously, which
-includes all source code repositories managed through our GitHub repositories.
+<!-- markdownlint-enable MD033 MD041 -->
 
-If you believe you have found a security vulnerability in any of our repository,
-please report it to us as described below.
+# Dotfiles (v0.2.465)
+
+Simply designed to fit your shell life 🐚
+
+![Dotfiles banner][banner]
+
+## Security
+
+We take the security of our software products and services seriously,
+which includes all source code repositories managed through our GitHub
+repositories.
+
+If you believe you have found a security vulnerability in any of our
+repository, please report it to us as described below.
 
 ## Reporting Security Issues
 
-Please include the requested information listed below (as much as you can
-provide) to help us better understand the nature and scope of the possible
-issue:
+Please include the requested information listed below (as much as you
+can provide) to help us better understand the nature and scope of the
+possible issue:
 
 - Type of issue (e.g. buffer overflow, SQL injection, cross-site scripting,
   etc.)
@@ -25,5 +37,4 @@ issue:
 
 This information will help us triage your report more quickly.
 
-[logo]: https://github.com/sebastienrousseau/dotfiles/raw/master/assets/dotfiles.svg
-[website]: https://dotfiles.io
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
