@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.465) - <https://dotfiles.io>
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.466) - <https://dotfiles.io>
 # Made with ♥ in London, UK by @wwdseb
 # Copyright (c) 2015-2023. All rights reserved
 # License: MIT
 # Script: configurations.sh
-# Version: 0.2.465
+# Version: 0.2.466
 # Website: https://dotfiles.io
 
 ## 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽🆂

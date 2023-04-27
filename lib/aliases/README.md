@@ -5,20 +5,23 @@ alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.465)
+# Dotfiles (v0.2.466)
 
 Simply designed to fit your shell life 🐚
 
 ![Dotfiles banner][banner]
 
-- [Archives](archives/README.md) - Compress and extract files and directories in various formats on a Unix-based system.
+- [Archives](archives/README.md) - Compress and extract files and
+  directories in various formats on a Unix-based system.
 - [Cd](cd/README.md) - Navigate the file system.
-- [Chmod](chmod/README.md) - Change the permissions of files and directories.
+- [Chmod](chmod/README.md) - Change the permissions of files and
+  directories.
 - [Clear](clear/README.md) - Clear the terminal screen.
 - [Configuration](configuration/README.md) - Configure the dotfiles.
 - [Default](default/README.md) - Manage the default shell.
 - [Dig](dig/README.md) - Query DNS name servers.
-- [Disk Usage](disk-usage/README.md) - Display the disk usage of files and directories.
+- [Disk Usage](disk-usage/README.md) - Display the disk usage of files
+  and directories.
 - [Editor](editor/README.md) - Manage the default text editor.
 - [Find](find/README.md) - Search for files and directories.
 - [gCloud](gcloud/README.md) - Manage the Google Cloud SDK.
@@ -37,7 +40,8 @@ Simply designed to fit your shell life 🐚
 - [ps](ps/README.md) - Manage the process status.
 - [rsync](rsync/README.md) - Manage the rsync file transfer utility.
 - [rust](rust/README.md) - Manage the Rust programming language.
-- [subversion](subversion/README.md) - Manage the Subversion version control system.
+- [subversion](subversion/README.md) - Manage the Subversion version
+  control system.
 - [sudo](sudo/README.md) - Manage the superuser.
 - [tmux](tmux/README.md) - Manage the tmux terminal multiplexer.
 - [update](update/README.md) - Help users update the dotfiles.
