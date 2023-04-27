@@ -22,8 +22,14 @@ alias finderHideHidden='defaults write com.apple.finder ShowAllFiles FALSE'
 # Show hidden files in Finder.
 alias finderShowHidden='defaults write com.apple.finder ShowAllFiles TRUE'
 
+# Hide the Desktop icons.
+alias hideDesktopIcons='defaults write com.apple.finder CreateDesktop false && killall Finder'
+
 # Open the device simulators.
 alias iphone='open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app'
+
+# Lock the screen (when going AFK).
+alias lockScreen='/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend'
 
 # Disable .DS_Store files on network volumes
 alias noDS='defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true'
@@ -31,10 +37,16 @@ alias noDS='defaults write com.apple.desktopservices DSDontWriteNetworkStores -b
 # Open the current directory in a Finder window.
 alias ofd='open $PWD'
 
-# purge: Purging Xcode DerivedData.
+# Purging Xcode DerivedData.
 alias purge='rm -rf ~/library/Developer/Xcode/DerivedData/*'
 
-# screensaverDesktop: Run a screensaver on the Desktop.
+# Launch Safari in Safe Mode.
+alias safariSafeMode='open -a Safari --args -safe-mode'
+
+# Show the Desktop icons.
+alias showDesktopIcons='defaults write com.apple.finder CreateDesktop true && killall Finder'
+
+# Run a screensaver on the Desktop.
 alias screensaverDesktop='/System/Library/Frameworks/ScreenSaver.framework/Resources/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine -background'
 
 # vp: Verify macOS Permissions.
@@ -42,6 +54,12 @@ alias vp='diskutil verifyPermissions /'
 
 # vv: Verify macOS Volume.
 alias vv='diskutil verifyvolume /'
+
+# Turn Wi-Fi on.
+alias wifiOn='networksetup -setairportpower en0 on'
+
+# Turn Wi-Fi off.
+alias wifiOff='networksetup -setairportpower en0 off'
 
 # xcode: Launch XCode app in macOS.
 alias xcode='open -a xcode'
