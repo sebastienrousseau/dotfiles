@@ -4,7 +4,7 @@
 # Description: Sets aliases for the `chmod` command.
 # License: MIT
 # Script: chmod.aliases.sh
-# Version: 0.2.466
+# Version: 0.2.467
 # Website: https://dotfiles.io
 
 # 🅲🅷🅼🅾🅳 🅰🅻🅸🅰🆂🅴🆂

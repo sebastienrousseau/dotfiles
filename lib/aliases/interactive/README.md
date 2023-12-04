@@ -5,7 +5,7 @@ alt="dotfiles logo" width="261" align="right" />
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.466)
+# Dotfiles (v0.2.467)
 
 Simply designed to fit your shell life 🐚
 
@@ -20,24 +20,23 @@ destructive operations.
 
 ### File manipulation aliases
 
-- `cp` Copy files and directories.
-- `del` Remove a file or directory.
-- `ln` Create a symbolic link.
-- `mv` Move files interactively (ask before overwrite) and verbose.
-- `rm` Prompts for every file before removing.
-- `zap` Remove files interactively (ask before overwrite).
+- `cp` Copy files and directories interactively (ask before overwrite) with verbose output.
+- `del` Remove files or directories interactively (ask before each removal) with verbose output, recursively.
+- `ln` Create symbolic links interactively (ask before overwrite) with verbose output.
+- `mv` Move or rename files interactively (ask before overwrite) with verbose output.
+- `rm` Remove files or directories interactively (ask before each removal) with verbose output.
+- `zap` Alias for 'rm', removes files or directories interactively (ask before each removal) with verbose output.
 
 ### Trash manipulation alias
 
-- `bin` Remove all files in the trash.
+- `bin` Remove all files in the trash directory (user's .Trash) forcefully and recursively.
 
 ### Other interactive aliases
 
-- `chmod` Change permissions of a file or directory.
-- `chown` Change the owner and group of a file or directory.
-- `diff` Compare two files and show the differences.
-- `grep` Search for a pattern in a file or output.
-- `mkdir` Create a new directory and display a message on success.
-- `touch` Create a new file and display a message on success.
+- `chmod` Change file or directory permissions with verbose output.
+- `chown` Change file or directory owner and group with verbose output.
+- `diff` Compare and show differences between two files in unified format.
+- `grep` Search for a pattern in files or output, showing line numbers and case-insensitively.
+- `mkdir` Create a new directory, making parent directories as needed, with verbose output.
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

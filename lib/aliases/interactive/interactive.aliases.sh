@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.466) - <https://dotfiles.io>
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.467) - <https://dotfiles.io>
 # Made with ♥ in London, UK by @wwdseb
 # Copyright (c) 2015-2023. All rights reserved
 # License: MIT
@@ -9,45 +9,42 @@
 
 # File manipulation aliases
 
-# cp: Copy files and directories.
+# cp: Copy files and directories interactively (ask before overwrite) with verbose output.
 alias cp="cp -vi"
 
-# del: Remove a file or directory.
+# del: Remove files or directories interactively (ask before each removal) with verbose output, recursively.
 alias del="rm -rfvi"
 
-# ln: interactive symbolic link
+# ln: Create symbolic links interactively (ask before overwrite) with verbose output.
 alias ln='ln -vi'
 
-# mv: Move files interactively (ask before overwrite) and verbose.
+# mv: Move or rename files interactively (ask before overwrite) with verbose output.
 alias mv='mv -vi'
 
-# rm: Prompts for every file before removing.
+# rm: Remove files or directories interactively (ask before each removal) with verbose output.
 alias rm='rm -vi'
 
-# zap: Remove files interactively (ask before overwrite).
+# zap: Alias for 'rm', removes files or directories interactively (ask before each removal) with verbose output.
 alias zap='rm -vi'
 
 # Trash manipulation alias
 
-# bin: Remove all files in the trash.
+# bin: Remove all files in the trash directory (user's .Trash) forcefully and recursively.
 alias bin='rm -fr ${HOME}/.Trash'
 
 # Other interactive aliases
 
-# chmod: Change permissions of a file or directory.
+# chmod: Change file or directory permissions with verbose output.
 alias chmod='chmod -v'
 
-# chown: Change the owner and group of a file or directory.
+# chown: Change file or directory owner and group with verbose output.
 alias chown='chown -v'
 
-# diff: Compare two files and show the differences.
+# diff: Compare and show differences between two files in unified format.
 alias diff='diff -u'
 
-# grep: Search for a pattern in a file or output.
+# grep: Search for a pattern in files or output, showing line numbers and case-insensitively.
 alias grep='grep -n -i'
 
-# mkdir: Create a new directory and display a message on success.
+# mkdir: Create a new directory, making parent directories as needed, with verbose output.
 alias mkdir='mkdir -pv'
-
-# touch: Create a new file and display a message on success.
-alias touch='touch -v'
