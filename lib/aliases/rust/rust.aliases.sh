@@ -12,67 +12,67 @@ if command -v 'cargo' >/dev/null; then
   alias cg='cargo'
 
   # cgb: Cargo build.
-  alias cgb='cg  build'
+  alias cgb='cg build'
 
   # cgbh: Cargo bench.
-  alias cgbh='cg  bench'
+  alias cgbh='cg bench'
 
   # cbr: Cargo build release.
-  alias cgbr='cg  build --release'
+  alias cgbr='cg build --release'
 
   # cgc: Cargo check.
-  alias cgc='cg  check'
+  alias cgc='cg check'
 
   # cgcl: Cargo clean.
-  alias cgcl='cg  clean'
+  alias cgcl='cg clean'
 
   # cgcy: Cargo clippy.
-  alias cgcy='cg  clippy'
+  alias cgcy='cg clippy'
 
   # cgd: Cargo doc.
-  alias cgd='cg  doc --open'
+  alias cgd='cg doc --open'
 
   # cgdr: Cargo doc release.
-  alias cgdr='cg  doc --release'
+  alias cgdr='cg doc --release'
 
   # cgf: Cargo format.
-  alias cgf='cg  fmt'
+  alias cgf='cg fmt'
 
   # cgi: Cargo install.
-  alias cgi='cg  install'
+  alias cgi='cg install'
 
   # cginit: Cargo init.
-  alias cginit='cg  init'
+  alias cginit='cg init'
 
   # cgn: Cargo new.
-  alias cgn='cg  new'
+  alias cgn='cg new'
 
   # cgp: Cargo publish.
-  alias cgp='cg  publish'
+  alias cgp='cg publish'
 
   # cgr: Cargo run.
-  alias cgr='cg  run'
+  alias cgr='cg run'
 
   # cgrr: Cargo run release.
-  alias cgrr='cg  run --release'
+  alias cgrr='cg run --release'
 
   # cgs: Cargo search.
-  alias cgs='cg  search'
+  alias cgs='cg search'
 
   # cgt: Cargo test.
-  alias cgt='cg  test'
+  alias cgt='cg test'
 
   # cgtr: Cargo test release.
-  alias cgtr='cg  test --release'
+  alias cgtr='cg test --release'
 
   # cgtt: Cargo tree.
-  alias cgtt='cg  tree'
+  alias cgtt='cg tree'
 
   # cgu: Cargo update.
-  alias cgu='cg  update'
+  alias cgu='cg update'
 
   # cgun: Cargo uninstall.
-  alias cgun='cg  uninstall'
+  alias cgun='cg uninstall'
 
 fi
 
