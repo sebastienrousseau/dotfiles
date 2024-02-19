@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.467) - <https://dotfiles.io>
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.468) - <https://dotfiles.io>
 # Made with ♥ in London, UK by @wwdseb
-# Copyright (c) 2015-2023. All rights reserved
+# Copyright (c) 2015-2024. All rights reserved
 # License: MIT
 
 ## 🅳🅾🆃🅵🅸🅻🅴🆂 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set Dotfiles variables.
@@ -11,7 +11,7 @@ DF=".dotfiles/"                         # Dotfiles.
 DF_DIR="${HOME}/.dotfiles/"             # Dotfiles directory.
 DF_BACKUPDIR="${HOME}/dotfiles_backup/" # Backup directory.
 DF_DOWNLOADDIR="${HOME}/Downloads"      # Download directory.
-DF_VERSION="0.2.467"                    # Dotfiles Version number.
+DF_VERSION="0.2.468"                    # Dotfiles Version number.
 # DF_TIMESTAMP="$(date +%Y-%m-%d_%H-%M-%S)" # Timestamp for backup directory.
 
 export DF

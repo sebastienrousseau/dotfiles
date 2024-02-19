@@ -1,15 +1,19 @@
-<!-- markdownlint-disable MD033 MD041 -->
+<!-- markdownlint-disable MD033 MD041 MD043 -->
 
-<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
-alt="dotfiles logo" width="261" align="right" />
+<img
+  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+  alt="dotfiles logo"
+  width="261"
+  align="right"
+/>
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.467)
+# Dotfiles (v0.2.468)
 
 Simply designed to fit your shell life 🐚
 
-<!-- markdownlint-disable MD033 MD041 -->
+<!-- markdownlint-disable MD033 MD041 MD043 -->
 <center>
 <!-- markdownlint-enable MD033 MD041 -->
 
@@ -25,7 +29,7 @@ Simply designed to fit your shell life 🐚
 • [Report Bug][17] • [Request Feature][17]
 • [Contributing Guidelines][05]
 
-<!-- markdownlint-disable MD033 MD041 -->
+<!-- markdownlint-disable MD033 MD041 MD043 -->
 </center>
 <!-- markdownlint-enable MD033 MD041 -->
 
@@ -43,15 +47,15 @@ directory allows you to easily setup your development environment across
 numerous computers and operating systems, ensuring consistency and
 productivity no matter where you work.
 
-<!-- markdownlint-disable MD033 MD041 -->
+<!-- markdownlint-disable MD033 MD041 MD043 -->
 <br>
 <center>
 <!-- markdownlint-enable MD033 MD041 -->
 
 [![Getting Started][getting_started]][getting-started-url]
-[![Download Dotfiles v0.2.467][download_button]][12]
+[![Download Dotfiles v0.2.468][download_button]][12]
 
-<!-- markdownlint-disable MD033 MD041 -->
+<!-- markdownlint-disable MD033 MD041 MD043 -->
 </center>
 <br />
 <!-- markdownlint-enable MD033 MD041 -->
@@ -164,7 +168,7 @@ To read the documentation for Dotfiles, please visit:
 
 ### 1️⃣ Download Dotfiles
 
-You can download the latest version (v0.2.467) with the following
+You can download the latest version (v0.2.468) with the following
 options:
 
 - [**Manual download**][24] - **The easiest way to install Dotfiles.**
@@ -360,7 +364,7 @@ Apache License (Version 2.0).
 [09]: https://www.deepin.org/en/ "Deepin"
 [10]: https://devuan.org/ "Devuan"
 [11]: https://github.com/sebastienrousseau/dotfiles/docs "Documentation"
-[12]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.467.tar.gz "Download Dotfiles v0.2.467"
+[12]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.468.tar.gz "Download Dotfiles v0.2.468"
 [13]: https://github.com/sebastienrousseau/dotfiles/network/members "List of members"
 [14]: https://github.com/sebastienrousseau/dotfiles/graphs/contributors "List of contributors"
 [15]: https://git-scm.com/ "Git"

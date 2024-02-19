@@ -1,20 +1,50 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.467) - <https://dotfiles.io>
-# Made with ♥ in London, UK by @wwdseb
-# Copyright (c) 2015-2023. All rights reserved
-# License: MIT
+################################################################################
+# 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: aliases.sh
-# Version: 0.2.467
+# Version: 0.2.468
+# Author: @wwdseb
+# Copyright (c) 2015-2024. All rights reserved
+# Description: Script to manage shell aliases
 # Website: https://dotfiles.io
+# License: MIT
+################################################################################
 
 ## 🅰🅻🅸🅰🆂🅴🆂
 
-# Remove all aliases from the current shell.
-unalias -a # Remove all previous environment defined aliases.
+# Function: remove_all_aliases
+#
+# Description:
+#   Removes all aliases from the current shell.
+#
+# Arguments:
+#   None
+#
+# Further Reading:
+#   Bash Unalias Documentation: https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html#Bash-Builtins
 
-# Then load custom Dotfiles aliases.
-for file in "${HOME}"/.dotfiles/lib/aliases/[!.#]*/*.sh; do
-  # shellcheck source=/dev/null
-  source "${file}"
-done
+remove_all_aliases() {
+  unalias -a # Remove all previous environment defined aliases.
+}
+
+# Function: load_custom_aliases
+#
+# Description:
+#   Loads custom Dotfiles aliases from the specified directory.
+#
+# Arguments:
+#   None
+#
+# Further Reading:
+#   ShellCheck Documentation: https://github.com/koalaman/shellcheck
+
+load_custom_aliases() {
+  for file in "${HOME}"/.dotfiles/lib/aliases/[!.#]*/*.sh; do
+    # shellcheck source=/dev/null
+    source "${file}"
+  done
+}
+
+remove_all_aliases
+load_custom_aliases

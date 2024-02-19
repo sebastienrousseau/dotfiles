@@ -1,17 +1,33 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.467) - <https://dotfiles.io>
-# Made with ♥ in London, UK by @wwdseb
-# Copyright (c) 2015-2023. All rights reserved
-# License: MIT
-# Script: paths.sh
-# Version: 0.2.467
+################################################################################
+# 🅳🅾🆃🅵🅸🅻🅴🆂
+# Script: configurations.sh
+# Version: 0.2.468
+# Author: @wwdseb
+# Copyright (c) 2015-2024. All rights reserved
+# Description: Script to manage shell configurations
 # Website: https://dotfiles.io
+# License: MIT
+################################################################################
 
-## 🅿🅰🆃🅷🆂
+## 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽🆂
+# Function: load_custom_configurations
+#
+# Description:
+#   Loads custom shell configurations from the specified directory.
+#
+# Arguments:
+#   None
+#
+# Further Reading:
+#   ShellCheck Documentation: https://github.com/koalaman/shellcheck
 
-# Load custom executable paths.
-for file in "${HOME}"/.dotfiles/lib/paths/[!.#]*/*.sh; do
-  # shellcheck source=/dev/null
-  . "${file}"
-done
+load_custom_configurations() {
+  for config in "${HOME}"/.dotfiles/lib/configurations/[!.#]*/*.sh; do
+    # shellcheck source=/dev/null
+    source "${config}"
+  done
+}
+
+load_custom_configurations

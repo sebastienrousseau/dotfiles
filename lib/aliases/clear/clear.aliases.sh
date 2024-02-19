@@ -1,42 +1,71 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.467) - <https://dotfiles.io>
-# Made with ♥ in London, UK by @wwdseb
-# Copyright (c) 2015-2023. All rights reserved
-# License: MIT
+################################################################################
+# 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: clear.aliases.sh
-# Version: 0.2.467
+# Version: 0.2.468
+# Author: @wwdseb
+# Copyright (c) 2015-2024. All rights reserved
+# Description: Enhances terminal interaction with aliases for clearing the screen,
+# navigating directories, and displaying directory contents in an organized manner.
 # Website: https://dotfiles.io
+# License: MIT
+################################################################################
+
+# Configurable paths
+WORKSPACE_DIR="${HOME}/workspace"
+
+# Validate directory existence
+function validate_dir() {
+    if [[ ! -d "$1" ]]; then
+        echo "Directory $1 not found."
+        return 1
+    fi
+    return 0
+}
+
+# Functions for aliases
+function cd_workspace() {
+    validate_dir "${WORKSPACE_DIR}" && cd "${WORKSPACE_DIR}" || return
+}
+
+function clear_screen() {
+    clear
+}
+
+function clear_list_current() {
+    clear && ls -a
+}
+
+function clear_pwd_list() {
+    clear && pwd && echo '' && ls -a && echo ''
+}
+
+function clear_pwd_tree() {
+    clear && pwd && echo '' && tree ./ && echo ''
+}
+
+function clear_history() {
+    clear && history
+}
+
+function print_working_dir() {
+    pwd
+}
+
+function clear_print_tree() {
+    clear && tree
+}
 
 # 🅲🅻🅴🅰🆁 🅰🅻🅸🅰🆂🅴🆂
 
-# Alias to change to the workspace directory
-alias cdw="cd ~/workspace"
-
-# Alias to clear the terminal screen
-alias c="clear"
-
-# Alias to clear the terminal screen and list the contents of the
-# current directory
-alias clc="clear && ls -a"
-
-# Alias to clear the terminal screen and print the current working
-# directory and the contents of the current directory
-alias cpl="clear && pwd && echo '' && ls -a && echo ''"
-
-# Alias to clear the terminal screen and print the current working
-# directory and the directory tree
-alias cplt="clear && pwd && echo '' && tree ./ && echo ''"
-
-# Alias to clear the terminal screen and print the command history
-alias clh="clear && history"
-
-# Alias to clear the terminal screen
-alias cl="c"
-
-# Alias to clear the terminal screen and print the current
-# working directory
-alias clp="pwd"
-
-# Alias to clear the terminal screen and print the directory tree
-alias clt="clear && tree"
+# Alias definitions
+alias cdw='cd_workspace'
+alias c='clear_screen'
+alias clc='clear_list_current'
+alias cpl='clear_pwd_list'
+alias cplt='clear_pwd_tree'
+alias clh='clear_history'
+alias cl='clear_screen'
+alias clp='print_working_dir'
+alias clt='clear_print_tree'

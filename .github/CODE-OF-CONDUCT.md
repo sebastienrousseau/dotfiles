@@ -1,11 +1,15 @@
-<!-- markdownlint-disable MD033 MD041 -->
+<!-- markdownlint-disable MD033 MD041 MD043 -->
 
-<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
-alt="dotfiles logo" width="261" align="right" />
+<img
+  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+  alt="dotfiles logo"
+  width="261"
+  align="right"
+/>
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.467)
+# Dotfiles (v0.2.468)
 
 Simply designed to fit your shell life 🐚
 
@@ -27,22 +31,22 @@ religion, or sexual identity and orientation.
 Examples of behaviour that contributes to creating a positive
 environment include:
 
-- Using welcoming and inclusive language
-- Being respectful of differing viewpoints and experiences
-- Gracefully accepting constructive criticism
-- Focusing on what is best for the community
-- Showing empathy towards other community members
+* Using welcoming and inclusive language
+* Being respectful of differing viewpoints and experiences
+* Gracefully accepting constructive criticism
+* Focusing on what is best for the community
+* Showing empathy towards other community members
 
 Examples of unacceptable behaviour by participants include:
 
-- The use of sexualized language or imagery and unwelcome sexual
+* The use of sexualized language or imagery and unwelcome sexual
   attention or advances
-- Trolling, insulting/derogatory comments, and personal or political
+* Trolling, insulting/derogatory comments, and personal or political
   attacks
-- Public or private harassment
-- Publishing others' private information, such as a physical or
+* Public or private harassment
+* Publishing others' private information, such as a physical or
   electronic address, without explicit permission
-- Other conduct which could reasonably be considered inappropriate in a
+* Other conduct which could reasonably be considered inappropriate in a
   professional setting
 
 ### Our Responsibilities
@@ -89,5 +93,7 @@ This Code of Conduct is adapted from the
 [http://contributor-covenant.org/version/1/4][version]
 
 [homepage]: http://contributor-covenant.org
+
 [version]: http://contributor-covenant.org/version/1/4/
+
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

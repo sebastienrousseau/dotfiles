@@ -1,36 +1,43 @@
 /**
-* 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.467) - <https://dotfiles.io>
-* Made with ♥ in London, UK by @wwdseb
-* Copyright (c) 2015-2023. All rights reserved
-* License: MIT
-*/
+ * 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.468) - <https://dotfiles.io>
+ * Made with ♥ in London, UK by @wwdseb
+ * Copyright (c) 2015-2024. All rights reserved
+ * License: MIT
+ */
 
-export const { promisify } = require("util");
+import fs from "fs";
+import os from "os";
+import path from "path";
+import { dotfile, version } from "./constants.js";
+import { promisify } from "util";
 
-// 🅳🅾🆆🅽🅻🅾🅰🅳 - Download function.
-async function download() {
+const destPath = path.resolve(__dirname, os.homedir() + "/dotfiles_backup/");
+const https = require("https");
+const mv = promisify(fs.rename);
 
-  var fs = require("fs");
-  var os = require("os");
-  var path = require("path");
-  const { dotfile, version } = require("./constants.js");
-  var destPath = path.resolve(__dirname, os.homedir() + "/dotfiles_backup/");
-  const https = require("https");
+const download = async () => {
   const file = fs.createWriteStream(version);
-  const mv = promisify(fs.rename);
 
-  const request = https.get(
-    dotfile, response => {
-      // console.log("STATUS: " + response.statusCode);
-      var headers = JSON.stringify(response.headers);
-      // console.log("HEADERS: " + headers);
-      response.pipe(file);
-      file.on("finish", () => {
-        file.close();
-        mv(version, `${destPath}/${version}`);
+  const request = https.get(dotfile, (response) => {
+    response.pipe(file);
+    file.on("finish", async () => {
+      file.close();
+      try {
+        await mv(version, `${destPath}/${version}`);
         fs.rmSync(version);
-      });
+      } catch (err) {
+        /* eslint-disable no-console */
+        console.error("Error during file download:", err);
+        /* eslint-enable no-console */
+      }
     });
-}
+  });
 
-module.exports = download;
+  request.on("error", (err) => {
+    /* eslint-disable no-console */
+    console.error("Error during file download:", err);
+    /* eslint-enable no-console */
+  });
+};
+
+export default download;
