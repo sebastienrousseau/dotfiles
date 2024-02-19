@@ -1,8 +1,6 @@
 name: Release
 
-on:
-  release:
-    types: [published]
+on: [push, pull_request]
 
 jobs:
   build:
