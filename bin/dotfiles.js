@@ -35,12 +35,10 @@ module.exports = async function main() {
   await sleep(2500); // wait for download to complete
   unpack(); // unpack the downloaded file
   await sleep(2500); // wait for unpack to complete
-  if (fs.existsSync(dir)) {
-    await transfer(dir); // transfer the unpacked files
-  }
-  else {
-    await fs.mkdirSync(dir);
+  if (!fs.existsSync(dir)) {
+    // Use fs.promises.mkdir for async operation
+    await fs.promises.mkdir(dir);
     await sleep(2500); // wait for mkdir to complete
-    await transfer(dir); // transfer the unpacked files
   }
+  await transfer(dir); // transfer the unpacked files to the home directory
 };
