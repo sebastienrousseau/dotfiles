@@ -5,68 +5,61 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [21.x]
 
     steps:
       - run: echo ${{github.ref}}
-
       - uses: actions/checkout@v3
-
       - uses: pnpm/action-setup@v2.2.4
         with:
           version: 7
-
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Build
         run: pnpm run build
 
   publish:
     needs: build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [21.x]
+
     steps:
       - uses: actions/checkout@v2
-
       - uses: pnpm/action-setup@v2.2.4
         with:
           version: 7
-
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Build
         run: pnpm run build
-
       - name: Pack
         run: pnpm pack
-
       - name: Result
         run: ls -al ./dist
-
       - name: Publish to NPM
         run: pnpm publish --access public --tag latest --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Set package registry
         run: pnpm config set registry https://npm.pkg.github.com
-
       - name: Github package registry authentication
         run: pnpm set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
-
       - name: Npm registry authentication
         run: pnpm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-
       - name: Publish the package to Github package registry
         run: pnpm publish --access public --tag latest --no-git-checks
         env:
