@@ -19,13 +19,6 @@ const dir = path.resolve(__dirname, os.homedir());
 
 const sleep = (waitTimeInMs) => new Promise((resolve) => setTimeout(resolve, waitTimeInMs));
 
-const main = async () => {
-  await backupAndCopy();
-  await downloadAndUnpack();
-  await createDirIfNeeded();
-  await transferFiles();
-};
-
 const backupAndCopy = async () => {
   for (let i = 0; i < Math.min(aliases.length, copies.length); i++) {
     await backup(aliases[i], aliases[i]);
@@ -53,6 +46,13 @@ const createDirIfNeeded = async () => {
 
 const transferFiles = async () => {
   await transfer(dir);
+};
+
+const main = async () => {
+  await backupAndCopy();
+  await downloadAndUnpack();
+  await createDirIfNeeded();
+  await transferFiles();
 };
 
 export default main;
