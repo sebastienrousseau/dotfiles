@@ -390,9 +390,9 @@ Apache License (Version 2.0).
 [codacy-grade]: https://img.shields.io/codacy/grade/634cfc4de08e492ebcbb341631066241?style=for-the-badge "Codacy grade"
 [contributors-shield]: https://img.shields.io/github/contributors/sebastienrousseau/dotfiles.svg?style=for-the-badge "Contributors"
 
-[divider]: https://kura.pro/assets/elements/divider.svg "Divider"
+[divider]: https://kura.pro/common/images/elements/divider.svg "Divider"
 [download_button]: https://kura.pro/assets/buttons/button-secondary.svg "Download"
 [forks-shield]: https://img.shields.io/github/forks/sebastienrousseau/dotfiles.svg?style=for-the-badge "Forks"
 [getting_started]: https://kura.pro/assets/buttons/button-primary.svg "Getting Started"
 [license]: https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge\&color=ff69b4 "License"
-[love]: https://kura.pro/assets/shields/made-with-love.svg "Made with Love"
+[love]: https://kura.pro/common/images/shields/made-with-love.svg "Made with Love"
