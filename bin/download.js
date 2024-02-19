@@ -26,13 +26,17 @@ const download = async () => {
         await mv(version, `${destPath}/${version}`);
         fs.rmSync(version);
       } catch (err) {
+        /* eslint-disable no-console */
         console.error("Error during file download:", err);
+        /* eslint-enable no-console */
       }
     });
   });
 
   request.on("error", (err) => {
+    /* eslint-disable no-console */
     console.error("Error during file download:", err);
+    /* eslint-enable no-console */
   });
 };
 
