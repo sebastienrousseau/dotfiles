@@ -14,41 +14,43 @@ jobs:
 
     steps:
       - run: echo ${{github.ref}}
-
-      - uses: actions/checkout@v3
-
-      - uses: pnpm/action-setup@v2.2.4
+      - uses: actions/checkout@v2
+      - uses: pnpm/action-setup@v2.2.2
         with:
           version: 7
-
+      - name: Configure npm for publishing
+        run: pnpm config set registry "https://registry.npmjs.org/"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 16.x
           cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build
-        run: pnpm run build
+          registry-url: "https://registry.npmjs.org" # Specify npm registry URL here for setup-node
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
 
   publish:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
-      - uses: pnpm/action-setup@v2.2.4
+      - uses: pnpm/action-setup@v2.2.2
         with:
           version: 7
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build
-        run: pnpm run build
-
+      - name: Configure npm for publishing
+        run: pnpm config set registry "https://registry.npmjs.org/"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: "pnpm"
+          registry-url: "https://registry.npmjs.org" # Specify npm registry URL here for setup-node
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
       - name: Pack
         run: pnpm pack
 
