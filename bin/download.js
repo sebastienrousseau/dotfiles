@@ -20,7 +20,7 @@ async function download() {
   const mv = promisify(fs.rename);
 
   const request = https.get(
-    dotfile, response => {
+    dotfile, (response) => {
       // console.log("STATUS: " + response.statusCode);
       var headers = JSON.stringify(response.headers);
       // console.log("HEADERS: " + headers);
