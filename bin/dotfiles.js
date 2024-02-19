@@ -34,6 +34,7 @@ const downloadAndUnpack = async () => {
 };
 
 const createDirIfNeeded = async () => {
+  // eslint-disable-next-line no-useless-catch
   try {
     await fs.access(dir); // Check if directory exists asynchronously
   } catch (error) {
