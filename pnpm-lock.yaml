@@ -6,8 +6,8 @@ settings:
 
 devDependencies:
   '@types/node':
-    specifier: ^18.19.17
-    version: 18.19.17
+    specifier: ^20.11.19
+    version: 20.11.19
   compressing:
     specifier: ^1.10.0
     version: 1.10.0
@@ -15,11 +15,11 @@ devDependencies:
     specifier: ^0.1.2
     version: 0.1.2
   fs-extra:
-    specifier: 11.1.1
-    version: 11.1.1
+    specifier: 11.2.0
+    version: 11.2.0
   husky:
-    specifier: ^8.0.3
-    version: 8.0.3
+    specifier: ^9.0.11
+    version: 9.0.11
   jsmin:
     specifier: ^1.0.1
     version: 1.0.1
@@ -74,8 +74,8 @@ packages:
     dev: true
     optional: true
 
-  /@types/node@18.19.17:
-    resolution: {integrity: sha512-SzyGKgwPzuWp2SHhlpXKzCX0pIOfcI4V2eF37nNBJOhwlegQ83omtVQ1XxZpDE06V/d6AQvfQdPfnw0tRC//Ng==, tarball: https://registry.npmjs.org/@types/node/-/node-18.19.17.tgz}
+  /@types/node@20.11.19:
+    resolution: {integrity: sha512-7xMnVEcZFu0DikYjWOlRq7NTPETrm7teqUT2WkQjrTIkEgUyyGdWsj/Zg8bEJt5TNklzbPD1X3fqfsHw3SpapQ==, tarball: https://registry.npmjs.org/@types/node/-/node-20.11.19.tgz}
     dependencies:
       undici-types: 5.26.5
     dev: true
@@ -308,8 +308,8 @@ packages:
     resolution: {integrity: sha512-y6OAwoSIf7FyjMIv94u+b5rdheZEjzR63GTyZJm5qh4Bi+2YgwLCcI/fPFZkL5PSixOt6ZNKm+w+Hfp/Bciwow==, tarball: https://registry.npmjs.org/fs-constants/-/fs-constants-1.0.0.tgz}
     dev: true
 
-  /fs-extra@11.1.1:
-    resolution: {integrity: sha512-MGIE4HOvQCeUCzmlHs0vXpih4ysz4wg9qiSAu6cd42lVwPbTM1TjV7RusoyQqMmk/95gdQZX72u+YW+c3eEpFQ==, tarball: https://registry.npmjs.org/fs-extra/-/fs-extra-11.1.1.tgz}
+  /fs-extra@11.2.0:
+    resolution: {integrity: sha512-PmDi3uwK5nFuXh7XDTlVnS17xJS7vW36is2+w3xcv8SVxiB4NyATf4ctkVY5bkSjX0Y4nbvZCq1/EjtEyr9ktw==, tarball: https://registry.npmjs.org/fs-extra/-/fs-extra-11.2.0.tgz}
     engines: {node: '>=14.14'}
     dependencies:
       graceful-fs: 4.2.11
@@ -350,9 +350,9 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /husky@8.0.3:
-    resolution: {integrity: sha512-+dQSyqPh4x1hlO1swXBiNb2HzTDN1I2IGLQx1GrBuiqFJfoMrnZWwVmatvSiO+Iz8fBUnf+lekwNo4c2LlXItg==, tarball: https://registry.npmjs.org/husky/-/husky-8.0.3.tgz}
-    engines: {node: '>=14'}
+  /husky@9.0.11:
+    resolution: {integrity: sha512-AB6lFlbwwyIqMdHYhwPe+kjOC3Oc5P3nThEoW/AaO2BX3vJDjWPFxYLxokUZOo6RNX20He3AaT8sESs9NJcmEw==, tarball: https://registry.npmjs.org/husky/-/husky-9.0.11.tgz}
+    engines: {node: '>=18'}
     hasBin: true
     dev: true
 
