@@ -5,32 +5,37 @@
 * License: MIT
 */
 
-export const { promisify } = require("util");
+import { promisify } from "util";
+import fs from "fs";
+import os from "os";
+import path from "path";
+import { dotfile, version } from "./constants.js";
+import https from "https";
 
-// 🅳🅾🆆🅽🅻🅾🅰🅳 - Download function.
-async function download() {
+const destPath = path.resolve(__dirname, os.homedir(), "dotfiles_backup");
 
-  var fs = require("fs");
-  var os = require("os");
-  var path = require("path");
-  const { dotfile, version } = require("./constants.js");
-  var destPath = path.resolve(__dirname, os.homedir() + "/dotfiles_backup/");
-  const https = require("https");
-  const file = fs.createWriteStream(version);
-  const mv = promisify(fs.rename);
+const download = async () => {
+  try {
+    const writeFileAsync = promisify(fs.writeFile);
+    const renameAsync = promisify(fs.rename);
 
-  const request = https.get(
-    dotfile, (response) => {
-      // console.log("STATUS: " + response.statusCode);
-      var headers = JSON.stringify(response.headers);
-      // console.log("HEADERS: " + headers);
+    const file = fs.createWriteStream(version);
+
+    const request = https.get(dotfile, (response) => {
       response.pipe(file);
-      file.on("finish", () => {
+      file.on("finish", async () => {
         file.close();
-        mv(version, `${destPath}/${version}`);
+        await renameAsync(version, path.join(destPath, version));
         fs.rmSync(version);
       });
     });
-}
 
-module.exports = download;
+    request.on("error", (err) => {
+      console.error("Error downloading file:", err);
+    });
+  } catch (err) {
+    console.error("Error during file download:", err);
+  }
+};
+
+export default download;
