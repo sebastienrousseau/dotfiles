@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: ${{ env.MY_NPM_REGISTRY }}
-      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm install --frozen-lockfile
       - run: pnpm run build
 
   publish:
@@ -37,15 +37,15 @@ jobs:
         with:
           node-version: 20.x
           registry-url: ${{ env.MY_NPM_REGISTRY }}
-      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm install --frozen-lockfile # Only if necessary
       - name: Publish to NPM
         run: pnpm publish --access public --tag latest --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Configure for GitHub Package Registry
         run: |
-            pnpm config set registry https://npm.pkg.github.com
-            pnpm set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
+          pnpm config set registry https://npm.pkg.github.com
+          pnpm set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
       - name: Publish the package to GitHub Package Registry
         run: pnpm publish --access public --tag latest --no-git-checks
         env:
