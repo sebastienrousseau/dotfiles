@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: ${{ env.MY_NPM_REGISTRY }}
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile
       - run: pnpm run build
 
   publish:
@@ -37,7 +37,7 @@ jobs:
         with:
           node-version: 21.x
           registry-url: ${{ env.MY_NPM_REGISTRY }}
-      - run: pnpm install --frozen-lockfile # Only if necessary
+      - run: pnpm install --no-frozen-lockfile # Only if necessary
       - name: Publish to NPM
         run: pnpm publish --access public --tag latest --no-git-checks
         env:
