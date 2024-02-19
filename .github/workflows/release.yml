@@ -78,20 +78,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: 16
-          registry-url: "https://registry.npmjs.org"
-          scope: sebastienrousseau
-      - run: npm ci
-      - run: npm publish
+      - name: Install pnpm
+        run: npm install -g pnpm
+      - run: pnpm install
+      - run: pnpm publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
       - name: Set package registry
-        run: npm config set registry https://npm.pkg.github.com
+        run: pnpm config set registry https://npm.pkg.github.com
       - name: Github package registry authentication
-        run: npm set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
       - name: Npm registry authentication
-        run: npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+        run: pnpm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
       - name: Publish the package to Github and Npm package registries
-        run: npm publish --access=public
+        run: pnpm publish --access=public
