@@ -1,47 +1,73 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.468) - <https://dotfiles.io>
-# Made with ♥ in London, UK by @wwdseb
-# Copyright (c) 2015-2024. All rights reserved
-# License: MIT
+################################################################################
+# 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: configuration.aliases.sh
 # Version: 0.2.468
+# Author: @wwdseb
+# Copyright (c) 2015-2024. All rights reserved
+# Description: Script containing aliases to open configuration files in default
+# editor
 # Website: https://dotfiles.io
+# License: MIT
+################################################################################
 
-# 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂
+# Set default text editor
+EDITOR="${EDITOR:-vi}"
 
-# Alias to open the Apache configuration file in the default text editor
-alias apconf='${=EDITOR} /etc/apache2/apache2.conf'
+# Apache aliases
+# ------------------------------------------------------------------------------
 
-# Alias to open the Bash configuration file in the default text editor
-alias bshrc='${=EDITOR} $HOME/.bashrc'
+# Open Apache configuration file in default text editor
+alias edit_apache_config='${EDITOR} /etc/apache2/apache2.conf'
 
-# Alias to open the Bash profile in the default text editor
-alias bshp='${=EDITOR} $HOME/.bash_profile'
+# Bash aliases
+# ------------------------------------------------------------------------------
 
-# Alias to open the Docker Compose file in the default text editor
-alias dockcomp='${=EDITOR} docker-compose.yml'
+# Open Bash configuration file in default text editor
+alias edit_bashrc='${EDITOR} $HOME/.bashrc'
 
-# Alias to open the current directory in the default text editor
-alias eddir='${=EDITOR} .'
+# Open Bash profile in default text editor
+alias edit_bash_profile='${EDITOR} $HOME/.bash_profile'
 
-# Alias to open the Git configuration file in the default text editor
-alias gcfg='${=EDITOR} $HOME/.gitconfig'
+# Docker aliases
+# ------------------------------------------------------------------------------
 
-# Alias to open the Git ignore file in the default text editor
-alias gign='${=EDITOR} $HOME/.gitignore'
+# Open Docker Compose file in default text editor
+alias edit_docker_compose='${EDITOR} docker-compose.yml'
 
-# Alias to open the hosts file in the default text editor
-alias hosts='${=EDITOR} /etc/hosts'
+# General aliases
+# ------------------------------------------------------------------------------
 
-# Alias to open the Nginx configuration file in the default text editor
-alias ngconf='${=EDITOR} /etc/nginx/nginx.conf'
+# Open current directory in default text editor
+alias edit_current_directory='${EDITOR} .'
 
-# Alias to open the SSH configuration file in the default text editor
-alias sshconf='${=EDITOR} $HOME/.ssh/config'
+# Git aliases
+# ------------------------------------------------------------------------------
 
-# Alias to open the Zsh configuration file in the default text editor
-alias zshrc='${=EDITOR} $HOME/.zshrc'
+# Open Git configuration file in default text editor
+alias edit_git_config='${EDITOR} $HOME/.gitconfig'
 
-# Alias to open the Zsh profile in the default text editor
-alias zshp='${=EDITOR} $HOME/.zsh_profile'
+# Open Git ignore file in default text editor
+alias edit_git_ignore='${EDITOR} $HOME/.gitignore'
+
+# System config aliases
+# ------------------------------------------------------------------------------
+
+# Open hosts file in default text editor
+alias edit_hosts='${EDITOR} /etc/hosts'
+
+# Open Nginx configuration file in default text editor
+alias edit_nginx_config='${EDITOR} /etc/nginx/nginx.conf'
+
+# Open SSH configuration file in default text editor
+alias edit_ssh_config='${EDITOR} $HOME/.ssh/config'
+
+# Open Zsh configuration file in default text editor
+alias edit_zshrc='${EDITOR} $HOME/.zshrc'
+
+# Open Zsh profile in default text editor
+alias edit_zsh_profile='${EDITOR} $HOME/.zsh_profile'
+
+# Add blank lines between groups
+echo -e "\n\n"
