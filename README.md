@@ -1,17 +1,17 @@
-<!-- markdownlint-disable MD033 MD041 -->
+<!-- markdownlint-disable MD033 MD041 MD043 -->
 
 <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
 alt="dotfiles logo" width="261" align="right" />
 
-<!-- markdownlint-enable MD033 MD041 -->
+<!-- markdownlint-enable MD033 MD041 MD043 -->
 
 # Dotfiles (v0.2.468)
 
 Simply designed to fit your shell life 🐚
 
-<!-- markdownlint-disable MD033 MD041 -->
+<!-- markdownlint-disable MD033 MD041 MD043 -->
 <center>
-<!-- markdownlint-enable MD033 MD041 -->
+<!-- markdownlint-enable MD033 MD041 MD043 -->
 
 ![Dotfiles banner][banner]
 
@@ -25,9 +25,9 @@ Simply designed to fit your shell life 🐚
 • [Report Bug][17] • [Request Feature][17]
 • [Contributing Guidelines][05]
 
-<!-- markdownlint-disable MD033 MD041 -->
+<!-- markdownlint-disable MD033 MD041 MD043 -->
 </center>
-<!-- markdownlint-enable MD033 MD041 -->
+<!-- markdownlint-enable MD033 MD041 MD043 -->
 
 ![divider][divider]
 
@@ -43,18 +43,18 @@ directory allows you to easily setup your development environment across
 numerous computers and operating systems, ensuring consistency and
 productivity no matter where you work.
 
-<!-- markdownlint-disable MD033 MD041 -->
+<!-- markdownlint-disable MD033 MD041 MD043 -->
 <br>
 <center>
-<!-- markdownlint-enable MD033 MD041 -->
+<!-- markdownlint-enable MD033 MD041 MD043 -->
 
 [![Getting Started][getting_started]][getting-started-url]
 [![Download Dotfiles v0.2.468][download_button]][12]
 
-<!-- markdownlint-disable MD033 MD041 -->
+<!-- markdownlint-disable MD033 MD041 MD043 -->
 </center>
 <br />
-<!-- markdownlint-enable MD033 MD041 -->
+<!-- markdownlint-enable MD033 MD041 MD043 -->
 
 ## Features ✨
 
