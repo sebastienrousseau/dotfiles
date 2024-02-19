@@ -1,123 +1,131 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.468) - <https://dotfiles.io>
-# Made with ♥ in London, UK by @wwdseb
-# Copyright (c) 2015-2024. All rights reserved
-# License: MIT
+################################################################################
+# 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: default.aliases.sh
 # Version: 0.2.468
+# Author: @wwdseb
+# Copyright (c) 2015-2024. All rights reserved
+# Description: Script containing default shell aliases
 # Website: https://dotfiles.io
+# License: MIT
+################################################################################
 
-# 🅳🅴🅵🅰🆄🅻🆃 🅰🅻🅸🅰🆂🅴🆂
+# Function: set_default_aliases
+#
+# Description:
+#   Sets default shell aliases for enhanced shell usage.
+#
+# Arguments:
+#   None
+#
+# Notes:
+#   - Some aliases are designed for enhanced shell navigation and utility.
+#   - Ensure to validate that all aliases work as expected in the bash shell.
 
-## General aliases
+set_default_aliases() {
+    ## General aliases
+    # Shortcut for the `clear` command.
+    alias c="clear"
 
-# Shortcut for the `clear` command.
-alias c="clear"
+    # Display the current date and time.
+    alias da='date "+%Y-%m-%d %A %T %Z"'
 
-# Display the current date and time.
-alias da='date "+%Y-%m-%d %A %T %Z"'
+    # Shortcut for `pwd` which returns working directory name.
+    alias p='pwd'
 
-# Shortcut for `pwd` which returns working directory name.
-alias p='pwd'
+    # Display the $PATH variable on newlines.
+    alias path='echo ${PATH//:/\\n}'
 
-# Display the $PATH variable on newlines.
-alias path='echo ${PATH//:/\\n}'
+    # Reload the shell.
+    alias r='reload'
 
-# Reload the shell.
-alias r='reload'
+    # Prints the last 10 lines of a text or log file, and then waits for new
+    # additions to the file to print it in real time.
+    alias t='tail -f'
 
-# Prints the last 10 lines of a text or log file, and then waits for new
-# additions to the file to print it in real time.
-alias t='tail -f'
+    # Show the current week number.
+    alias wk='date +%V'
 
-# wk: Show the current week number.
-alias wk='date +%V'
+    ## Exit/shutdown aliases
+    # Shortcut for the `exit` command.
+    alias ':q'='quit'
 
-## Exit/shutdown aliases
+    # Shortcut for the `exit` command.
+    alias bye='quit'
 
-# Shortcut for the `exit` command.
-alias ':q'='quit'
+    # Shortcut for the `exit` command.
+    alias q='quit'
 
-# Shortcut for the `exit` command.
-alias bye='quit'
+    # Shortcut for the `exit` command.
+    alias x='quit'
 
-# Shortcut for the `exit` command.
-alias q='quit'
+    # Shortcut for the `exit` command.
+    alias quit='exit'
 
-# Shortcut for the `exit` command.
-alias x='quit'
+    # Shutdown the system.
+    alias halt='sudo /sbin/halt'
 
-# Shortcut for the `exit` command.
-alias quit='exit'
+    # Poweroff the system.
+    alias poweroff='sudo /sbin/shutdown'
 
-# Shutdown the system.
-alias halt='sudo /sbin/halt'
+    # Reboot the system.
+    alias reboot='sudo /sbin/reboot'
 
-# Poweroff the system.
-alias poweroff='sudo /sbin/shutdown'
+    ## Network aliases
+    # Append sudo to ifconfig (configure network interface parameters)
+    # command.
+    alias ifconfig='sudo ifconfig'
 
-# Reboot the system.
-alias reboot='sudo /sbin/reboot'
+    # Get network interface parameters for en0.
+    alias ipinfo='ipconfig getpacket en0'
 
-## Network aliases
+    # Show only active network listeners.
+    alias nls='sudo lsof -i -P | grep LISTEN'
 
-# Append sudo to ifconfig (configure network interface parameters)
-# command.
-alias ifconfig='sudo ifconfig'
+    # List of open ports.
+    alias op='sudo lsof -i -P'
 
-# Get network interface parameters for en0.
-alias ipinfo='ipconfig getpacket en0'
+    # Limit Ping to 5 ECHO_REQUEST packets.
+    alias ping='ping -c 5'
 
-# Show only active network listeners.
-alias nls='sudo lsof -i -P | grep LISTEN'
+    # List all listening ports.
+    alias ports='netstat -tulan'
 
-# List of open ports.
-alias op='sudo lsof -i -P'
+    # Start a simple HTTP server to serve the current directory on port 8000.
+    alias srv='python3 -m http.server 8000 --bind 127.0.0.1'
 
-# Limit Ping to 5 ECHO_REQUEST packets.
-alias ping='ping -c 5'
+    ## System monitoring aliases
+    # Allows the user to interactively monitor the system's vital resources
+    # or server's processes in real time.
+    alias top='sudo btop'
 
-# List all listening ports.
-alias ports='netstat -tulan'
+    # Remove all log files in /private/var/log/asl/.
+    alias spd='sudo rm -rf /private/var/log/asl/*'
 
-# Start a simple HTTP server.
-alias srv='python3 -m http.server'
+    ## Utility aliases
+    # Count the number of files in the current directory.
+    alias ctf='echo $(ls -1 | wc -l)'
 
-## System monitoring aliases
+    # Use compression when transferring data.
+    alias curl='curl --compressed'
 
-# Get the moon phase.
-alias moon='curl -s "wttr.in/?format=%m"'
+    # Quickly search for file.
+    alias qfind='find . -name '
 
-# Allows the user to interactively monitor the system's vital resources
-# or server's processes in real time.
-alias top='sudo btop'
+    # Reload the shell.
+    alias reload='exec $SHELL -l'
 
-# Remove all log files in /private/var/log/asl/.
-alias spd='sudo rm -rf /private/var/log/asl/*'
+    # Get the weather.
+    alias wth='curl -s "wttr.in/?format=3"'
 
-## Utility aliases
+    ## File system navigation aliases
+    # Clear the terminal screen and print the contents of the current
+    # directory.
+    alias clc='clear && ls -a'
 
-# Count the number of files in the current directory.
-alias ctf='echo $(ls -1 | wc -l)'
+    # Clear the terminal screen and print
+    alias clp='pwd'
+}
 
-# Use compression when transferring data.
-alias curl='curl --compressed'
-
-# Quickly search for file.
-alias qfind='find . -name '
-
-# Reload the shell.
-alias reload='exec $SHELL -l'
-
-# Get the weather.
-alias wth='curl -s "wttr.in/?format=3"'
-
-# File system navigation aliases
-
-# Clear the terminal screen and print the contents of the current
-# directory.
-alias clc='clear && ls -a'
-
-# Clear the terminal screen and print
-alias clp='pwd'
+set_default_aliases
