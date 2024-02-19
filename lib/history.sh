@@ -1,65 +1,91 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.468) - <https://dotfiles.io>
-# Made with ♥ in London, UK by @wwdseb
-# Copyright (c) 2015-2024. All rights reserved
-# License: MIT
+################################################################################
+# 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: history.sh
 # Version: 0.2.468
+# Author: @wwdseb
+# Copyright (c) 2015-2024. All rights reserved
+# Description: Script to manage shell history configuration and display
 # Website: https://dotfiles.io
+# License: MIT
+################################################################################
 
-# History wrapper
+# Function: dotfiles_history
+#
+# Description:
+#   Manages shell history configuration and display.
+#
+# Options:
+#   -c    Clears the history file and removes duplicates.
+#   -l    Lists history events. Accepts arguments similar to `fc` command.
+#
+# Further Reading:
+#   Zsh History Documentation: https://www.zsh.org/mla/users/2007/msg00366.html
+#   Bash History Builtins Documentation: https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html#Bash-Builtins
+
 function dotfiles_history {
   local clear_flag list_flag
   zparseopts -E c=clear_flag l=list_flag
 
   if [[ -n ${clear_flag} ]]; then
-    # If -c flag is provided, clobber the history file and remove duplicates
+    # Clear the history file and remove duplicates
     fc -W
     fc -R
-    echo "%F{magenta}History file deleted and duplicates removed. Reload the session to see its effects.%f" >&2
+    echo "History file deleted and duplicates removed. Reload the session to see its effects." >&2
   elif [[ -n ${list_flag} ]] || [[ $# -ne 0 ]]; then
     # If -l flag is provided or arguments are passed, run as if calling `fc` directly
     fc_output=$(builtin fc "$@")
     printf '%s\n' "$(tput setaf 5)$(tput sgr0)$(tput setaf 2)$(echo "${fc_output//$'\e'/$(tput setaf 2)}" | sed -E "s/^([[:space:]]*[0-9]+)/$(tput setaf 2)\1$(tput sgr0)/")" || true
   else
-    # Otherwise, ensure the history file has no duplicates and show all history events starting from 1
+    # Ensure the history file has no duplicates and show all history events starting from 1
     fc -W # Remove duplicates from the history file
     fc_output=$(builtin fc -li 1)
     printf '%s\n' "$(tput setaf 5)$(tput sgr0)$(tput setaf 2)$(echo "${fc_output//$'\e'/$(tput setaf 2)}" | sed -E "s/^([[:space:]]*[0-9]+)/$(tput setaf 2)\1$(tput sgr0)/")" || true
   fi
 }
 
-# Configure history
-configure_history() {
+# Function: configure_history
+#
+# Description:
+#   Configures shell history settings and aliases.
+#
+# Further Reading:
+#   Zsh Options Documentation: https://zsh.sourceforge.io/Doc/Release/Options.html
+#   Bash shopt Documentation: https://www.gnu.org/software/bash/manual/html_node/The-Shopt-Builtin.html
+
+function configure_history() {
 
   fc -W
 
-  # Lists all recently used commands.
+  # Alias to list recent commands
   alias h='dotfiles_history'
 
-  # Shortcut for the `history` command.
+  # Alias to view history
   alias history='dotfiles_history'
 
 }
 
-# Timestamp format
-case "${HIST_STAMPS:-}" in
-"mm/dd/yyyy") alias history='dotfiles_history -f' ;;
-"dd.mm.yyyy") alias history='dotfiles_history -E' ;;
-"yyyy-mm-dd") alias history='dotfiles_history -i' ;;
-"") alias history='dotfiles_history' ;;
-*) alias history='dotfiles_history -t ${HIST_STAMPS}' ;;
-esac
+# Zsh Config
+# ---------------------------------------------------------
+# Explanation of Zsh options:
+#   - hist_ignore_space: Removes command lines from the history list when the first character on the line is a space.
+#   - hist_no_store: Removes the history command from the history list when invoked.
+#   - hist_reduce_blanks: Removes superfluous blanks from each command line being added to the history list.
 
 export HISTFILE="${HOME}/.zsh_history" # History file
 export HISTCONTROL="ignoreboth"        # Ignore duplicate commands and commands that start with a space
 export HISTSIZE="10000"                # Number of commands to save in memory
 export SAVEHIST="1000"                 # Number of commands to save on disk
 
+# Bash Config
+# ---------------------------------------------------------
+# Explanation of Bash shopts:
+#   - histappend: Append to the history file, don't overwrite it.
+#   - histverify: Verify commands from history before executing them.
+#   - nocaseglob: Case insensitive globbing.
+
 if [[ -n "${ZSH_VERSION:-}" ]]; then
-  # echo "Running shell is zsh"
-  # Specifying some history options
   setopt always_to_end          # Move cursor to the end of a completed word.
   setopt append_history         # Sessions will append their history list to the history file, rather than replace it.
   setopt auto_cd                # cd to a directory if it's given without a command.
@@ -87,8 +113,6 @@ if [[ -n "${ZSH_VERSION:-}" ]]; then
   setopt transient_rprompt      # Display the right prompt only when the cursor is on the rightmost column.
 
 elif [[ -n "${BASH_VERSION}" ]]; then
-  # echo "Running shell is bash"
-  # Shopt settings
   shopt -s autocd                  # autocd - automatically cd to a directory when it is the only argument to a command
   shopt -s cdspell                 # cdspell - spell check the path when changing directories.
   shopt -s checkhash               # checkhash - check hash table for commands before running them.
