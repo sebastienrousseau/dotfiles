@@ -20,31 +20,31 @@ To use these aliases, integrate the script into your `.bashrc` or `.bash_profile
 
 ### Navigation Shortcuts
 
-- `-`: Go to the previous directory.
-- `..`, `...`, `....`, `.....`: Ascend one to four levels in the directory tree.
-- `~`: Navigate to the home directory.
+* `-`: Go to the previous directory.
+* `..`, `...`, `....`, `.....`: Ascend one to four levels in the directory tree.
+* `~`: Navigate to the home directory.
 
 ### Custom Directory Access
 
 Leverage aliases for quick access to frequently visited directories:
 
-- `app`: Applications directory
-- `cod`: Code directory
-- `des`: Desktop directory
-- `doc`: Documents directory
-- `dot`: Dotfiles directory
-- `dow`: Downloads directory
-- `mus`: Music directory
-- `pic`: Pictures directory
-- `vid`: Videos directory
+* `app`: Applications directory
+* `cod`: Code directory
+* `des`: Desktop directory
+* `doc`: Documents directory
+* `dot`: Dotfiles directory
+* `dow`: Downloads directory
+* `mus`: Music directory
+* `pic`: Pictures directory
+* `vid`: Videos directory
 
 ### System Directories
 
 Quickly access system directories:
 
-- `etc`: System configuration (`/etc`)
-- `var`: Variable files (`/var`)
-- `tmp`: Temporary files (`/tmp`)
+* `etc`: System configuration (`/etc`)
+* `var`: Variable files (`/var`)
+* `tmp`: Temporary files (`/tmp`)
 
 ### Enhanced Customization
 

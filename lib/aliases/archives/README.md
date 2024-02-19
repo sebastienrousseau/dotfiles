@@ -18,31 +18,31 @@ extract files and directories in various formats on a Unix-based system.
 
 The following compression formats are supported:
 
-- 7z
-- bzip2
-- gzip
-- jar
-- lz4
-- lzma
-- lzo
-- pigz
-- tar
-- xz
-- zstd
-- zip
+* 7z
+* bzip2
+* gzip
+* jar
+* lz4
+* lzma
+* lzo
+* pigz
+* tar
+* xz
+* zstd
+* zip
 
 These aliases enable users to compress or extract files and directories
 quickly by using simple commands. Here are examples for each operation:
 
-- To compress a directory to a 7z file: `compress_7z <archive_name.7z> <directory>`
-- To extract from a 7z file: `extract_7z <archive_name.7z>`
+* To compress a directory to a 7z file: `compress_7z <archive_name.7z> <directory>`
+* To extract from a 7z file: `extract_7z <archive_name.7z>`
 
 Similar commands apply for all supported formats, ensuring ease of use.
 
 **New Features:**
 
-- Defensive coding practices ensure aliases are only defined if the required archive programs are present, improving the script's robustness.
-- Enhanced portability with updates to support a wider range of archive formats and systems.
+* Defensive coding practices ensure aliases are only defined if the required archive programs are present, improving the script's robustness.
+* Enhanced portability with updates to support a wider range of archive formats and systems.
 
 Please note that some of the compression formats may require additional
 software to be installed on your system.
