@@ -7,6 +7,6 @@
 
 // 🅸🅽🅳🅴🆇 - Index loader.
 "use strict";
-var dotfiles = require("./dotfiles.js");
+import dotfiles from "./dotfiles.js";
 
 dotfiles();

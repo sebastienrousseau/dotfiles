@@ -14,46 +14,87 @@ import { aliases, copies } from "./constants.js";
 import fs from "fs/promises";
 import os from "os";
 import path from "path";
+import { createLogger, transports, format } from 'winston';
 
 const dir = path.resolve(__dirname, os.homedir());
+const logger = createLogger({
+  level: 'error',
+  format: format.combine(
+    format.timestamp(),
+    format.json()
+  ),
+  transports: [
+    new transports.Console(),
+    new transports.File({ filename: 'error.log' })
+  ]
+});
 
 const sleep = (waitTimeInMs) => new Promise((resolve) => setTimeout(resolve, waitTimeInMs));
 
 const backupAndCopy = async () => {
-  for (let i = 0; i < Math.min(aliases.length, copies.length); i++) {
-    await backup(aliases[i], aliases[i]);
-    await copy(copies[i], aliases[i]);
+  try {
+    for (let i = 0; i < Math.min(aliases.length, copies.length); i++) {
+      // Validate and sanitize input before passing it to backup and copy functions
+      const alias = validateAndSanitizeInput(aliases[i]);
+      const copyName = validateAndSanitizeInput(copies[i]);
+
+      // Call backup and copy functions with sanitized input
+      await backup(alias, alias);
+      await copy(copyName, alias);
+    }
+  } catch (error) {
+    logger.error(`Error in backupAndCopy: ${error.message}`);
   }
 };
 
+// Function to validate and sanitize input
+const validateAndSanitizeInput = (input) => {
+  return input.replace(/[^\w]/g, ''); // Example: Remove non-word characters
+};
+
 const downloadAndUnpack = async () => {
-  download(); // download the dotfiles
-  await sleep(2500); // wait for download to complete
-  unpack(); // unpack the downloaded file
-  await sleep(2500); // wait for unpack to complete
+  try {
+    download(); // download the dotfiles
+    await sleep(2500); // wait for download to complete
+    unpack(); // unpack the downloaded file
+    await sleep(2500); // wait for unpack to complete
+  } catch (error) {
+    logger.error(`Error in downloadAndUnpack: ${error.message}`);
+  }
 };
 
 const createDirIfNeeded = async () => {
-  const dir = path.resolve(__dirname, os.homedir()); // Ensure dir is a string representing a valid directory path
   try {
     await fs.access(dir); // Check if directory exists asynchronously
   } catch (error) {
     if (error.code === "ENOENT") { // If directory does not exist
-      await fs.mkdir(dir); // Create directory asynchronously
-      await sleep(2500); // wait for mkdir to complete
+      try {
+        await fs.mkdir(dir); // Create directory asynchronously
+        await sleep(2500); // wait for mkdir to complete
+      } catch (error) {
+        logger.error(`Error creating directory: ${error.message}`);
+      }
     }
   }
 };
 
 const transferFiles = async () => {
-  await transfer(dir);
+  try {
+    await transfer(dir);
+  } catch (error) {
+    logger.error(`Error in transferFiles: ${error.message}`);
+  }
 };
 
 const main = async () => {
-  await backupAndCopy();
-  await downloadAndUnpack();
-  await createDirIfNeeded();
-  await transferFiles();
+  try {
+    await backupAndCopy();
+    await downloadAndUnpack();
+    await createDirIfNeeded();
+    await transferFiles();
+  } catch (error) {
+    logger.error(`Error in main: ${error.message}`);
+  }
 };
 
 export default main;
