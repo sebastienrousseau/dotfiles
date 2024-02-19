@@ -14,22 +14,27 @@ import { aliases, copies } from "./constants.js";
 import fs from "fs/promises";
 import os from "os";
 import path from "path";
-import { createLogger, transports, format } from 'winston';
+import { createLogger, transports, format } from "winston";
 
 const dir = path.resolve(__dirname, os.homedir());
 const logger = createLogger({
-  level: 'error',
+  level: "error",
   format: format.combine(
     format.timestamp(),
     format.json()
   ),
   transports: [
     new transports.Console(),
-    new transports.File({ filename: 'error.log' })
+    new transports.File({ filename: "error.log" })
   ]
 });
 
 const sleep = (waitTimeInMs) => new Promise((resolve) => setTimeout(resolve, waitTimeInMs));
+
+// Function to validate and sanitize input
+const validateAndSanitizeInput = (input) => {
+  return input.replace(/[^\w]/g, ""); // Example: Remove non-word characters
+};
 
 const backupAndCopy = async () => {
   try {
@@ -45,11 +50,6 @@ const backupAndCopy = async () => {
   } catch (error) {
     logger.error(`Error in backupAndCopy: ${error.message}`);
   }
-};
-
-// Function to validate and sanitize input
-const validateAndSanitizeInput = (input) => {
-  return input.replace(/[^\w]/g, ''); // Example: Remove non-word characters
 };
 
 const downloadAndUnpack = async () => {
