@@ -1,5 +1,8 @@
 name: Release
 
+env:
+  MY_NPM_REGISTRY: https://registry.npmjs.org
+
 on:
   release:
     types: [published]
@@ -7,27 +10,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [16.x]
-
     steps:
-      - run: echo ${{github.ref}}
       - uses: actions/checkout@v2
       - uses: pnpm/action-setup@v2.2.2
         with:
           version: 7
-      - name: Configure npm for publishing
-        run: pnpm config set registry "https://registry.npmjs.org/"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
-          node-version: 16.x
+          node-version: ${{ matrix.node-version }}
           cache: "pnpm"
-          registry-url: "https://registry.npmjs.org" # Specify npm registry URL here for setup-node
+          registry-url: ${{ env.MY_NPM_REGISTRY }}
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
 
@@ -39,39 +35,22 @@ jobs:
       - uses: pnpm/action-setup@v2.2.2
         with:
           version: 7
-      - name: Configure npm for publishing
-        run: pnpm config set registry "https://registry.npmjs.org/"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js
         uses: actions/setup-node@v2
         with:
           node-version: 16.x
           cache: "pnpm"
-          registry-url: "https://registry.npmjs.org" # Specify npm registry URL here for setup-node
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run build
-      - name: Pack
-        run: pnpm pack
-
-      - name: Result
-        run: ls -al ./dist
-
+          registry-url: ${{ env.MY_NPM_REGISTRY }}
+      - run: pnpm install --frozen-lockfile # Only if necessary
       - name: Publish to NPM
         run: pnpm publish --access public --tag latest --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Set package registry
-        run: pnpm config set registry https://npm.pkg.github.com
-
-      - name: Github package registry authentication
-        run: pnpm set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Npm registry authentication
-        run: pnpm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish the package to Github package registry
+      - name: Configure for GitHub Package Registry
+        run: |
+          pnpm config set registry https://npm.pkg.github.com
+          pnpm set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish the package to GitHub Package Registry
         run: pnpm publish --access public --tag latest --no-git-checks
         env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
