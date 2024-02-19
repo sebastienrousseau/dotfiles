@@ -24,6 +24,8 @@
 #   - Ensure to validate that all aliases work as expected in the bash shell.
 
 set_default_aliases() {
+    fc -W
+
     ## General aliases
     # Shortcut for the `clear` command.
     alias c="clear"
@@ -65,6 +67,12 @@ set_default_aliases() {
 
     # Shutdown the system.
     alias halt='sudo /sbin/halt'
+
+    # Alias to list recent commands
+    alias h='dotfiles_history'
+
+    # Alias to view history
+    alias history='dotfiles_history'
 
     # Poweroff the system.
     alias poweroff='sudo /sbin/shutdown'

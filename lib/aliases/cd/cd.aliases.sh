@@ -22,11 +22,9 @@ VID_DIR="${HOME}/Videos"
 # Check if directory exists and change to it, listing contents optionally
 change_directory() {
   local path="$1"
-  local list_contents="${2:-false}" # Optional listing
 
   if [[ -d "${path}" ]]; then
     cd "${path}" || exit # Exit if cd fails
-    [[ "${list_contents}" == true ]] && ls "${path}" || exit
   else
     echo "Directory '${path}' does not exist."
   fi
