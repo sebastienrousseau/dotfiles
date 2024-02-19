@@ -26,7 +26,7 @@ change_directory() {
 
   if [[ -d "${path}" ]]; then
     cd "${path}" || exit # Exit if cd fails
-    [[ "${list_contents}" == true ]] && ls
+    [[ "${list_contents}" == true ]] && ls "${path}" || exit
   else
     echo "Directory '${path}' does not exist."
   fi
