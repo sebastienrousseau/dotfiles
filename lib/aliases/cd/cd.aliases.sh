@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Author: Sebastien Rousseau
-# Copyright (c) 2015-2023. All rights reserved
+# Copyright (c) 2015-2024. All rights reserved
 # Description: Sets aliases for the `cd` command.
 # License: MIT
 # Script: cd.aliases.sh
-# Version: 0.2.467
+# Version: 0.2.468
 # Website: https://dotfiles.io
 
 # 🅲🅳 🅰🅻🅸🅰🆂🅴🆂

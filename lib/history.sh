@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.467) - <https://dotfiles.io>
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.468) - <https://dotfiles.io>
 # Made with ♥ in London, UK by @wwdseb
-# Copyright (c) 2015-2023. All rights reserved
+# Copyright (c) 2015-2024. All rights reserved
 # License: MIT
 # Script: history.sh
-# Version: 0.2.467
+# Version: 0.2.468
 # Website: https://dotfiles.io
 
 # History wrapper
@@ -28,6 +28,19 @@ function dotfiles_history {
     fc_output=$(builtin fc -li 1)
     printf '%s\n' "$(tput setaf 5)$(tput sgr0)$(tput setaf 2)$(echo "${fc_output//$'\e'/$(tput setaf 2)}" | sed -E "s/^([[:space:]]*[0-9]+)/$(tput setaf 2)\1$(tput sgr0)/")" || true
   fi
+}
+
+# Configure history
+configure_history() {
+
+  fc -W
+
+  # Lists all recently used commands.
+  alias h='dotfiles_history'
+
+  # Shortcut for the `history` command.
+  alias history='dotfiles_history'
+
 }
 
 # Timestamp format
