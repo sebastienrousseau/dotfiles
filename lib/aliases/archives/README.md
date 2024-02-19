@@ -1,7 +1,11 @@
 <!-- markdownlint-disable MD033 MD041 MD043 -->
 
-<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
-alt="dotfiles logo" width="261" align="right" />
+<img
+  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+  alt="dotfiles logo"
+  width="261"
+  align="right"
+/>
 
 <!-- markdownlint-enable MD033 MD041 -->
 
@@ -41,8 +45,10 @@ Similar commands apply for all supported formats, ensuring ease of use.
 
 **New Features:**
 
-* Defensive coding practices ensure aliases are only defined if the required archive programs are present, improving the script's robustness.
-* Enhanced portability with updates to support a wider range of archive formats and systems.
+* Defensive coding practices ensure aliases are only defined if the required
+archive programs are present, improving the script's robustness.
+* Enhanced portability with updates to support a wider range of archive formats
+and systems.
 
 Please note that some of the compression formats may require additional
 software to be installed on your system.

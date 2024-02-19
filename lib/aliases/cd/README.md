@@ -1,6 +1,11 @@
 <!-- markdownlint-disable MD033 MD041 MD043 -->
 
-<img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg" alt="dotfiles logo" width="261" align="right" />
+<img
+  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+  alt="dotfiles logo"
+  width="261"
+  align="right"
+/>
 
 <!-- markdownlint-enable MD033 MD041 -->
 
@@ -12,7 +17,9 @@ Designed to seamlessly enhance your shell environment 🐚
 
 ## 🅲🅳 🅰🅻🅸🅰🆂🅴🆂
 
-This set of `cd` command aliases provides an intuitive and efficient way to navigate your filesystem. Incorporating dynamic error handling, optional directory listing, and customization for an improved command-line experience.
+This set of `cd` command aliases provides an intuitive and efficient way to
+navigate your filesystem. Incorporating dynamic error handling, optional
+directory listing, and customization for an improved command-line experience.
 
 ### Setup
 
@@ -48,8 +55,11 @@ Quickly access system directories:
 
 ### Enhanced Customization
 
-Customize directory paths through environment variables to suit your system's structure and preferences. Use concise aliases (`app`, `cod`, `des`, etc.) for efficient navigation.
+Customize directory paths through environment variables to suit your system's
+structure and preferences. Use concise aliases (`app`, `cod`, `des`, etc.) for
+efficient navigation.
 
-For a detailed guide on configuring and using these aliases, plus additional information on each command, visit our [documentation](https://dotfiles.io).
+For a detailed guide on configuring and using these aliases, plus additional
+information on each command, visit our [documentation](https://dotfiles.io).
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
