@@ -32,20 +32,17 @@ The following compression formats are supported:
 - zip
 
 These aliases enable users to compress or extract files and directories
-quickly by using simple commands.
+quickly by using simple commands. Here are examples for each operation:
 
-For example:
+- To compress a directory to a 7z file: `compress_7z <archive_name.7z> <directory>`
+- To extract from a 7z file: `extract_7z <archive_name.7z>`
 
-- `c7z` can be used to compress a whole directory (including
-  subdirectories) to a 7z file.
-- `e7z` can be used to extract a whole directory (including
-  subdirectories) from a 7z file.
+Similar commands apply for all supported formats, ensuring ease of use.
 
-Similarly, there are aliases for compressing and extracting files and
-directories in all supported formats.
+**New Features:**
 
-The aliases are designed to be easy to remember and use, and they should
-make the compression and extraction process much simpler for users.
+- Defensive coding practices ensure aliases are only defined if the required archive programs are present, improving the script's robustness.
+- Enhanced portability with updates to support a wider range of archive formats and systems.
 
 Please note that some of the compression formats may require additional
 software to be installed on your system.
