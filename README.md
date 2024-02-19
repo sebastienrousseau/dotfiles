@@ -3,7 +3,7 @@
 <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
 alt="dotfiles logo" width="261" align="right" />
 
-<!-- markdownlint-enable MD033 MD041 MD043 -->
+<!-- markdownlint-enable MD033 MD041 -->
 
 # Dotfiles (v0.2.468)
 
@@ -11,7 +11,7 @@ Simply designed to fit your shell life 🐚
 
 <!-- markdownlint-disable MD033 MD041 MD043 -->
 <center>
-<!-- markdownlint-enable MD033 MD041 MD043 -->
+<!-- markdownlint-enable MD033 MD041 -->
 
 ![Dotfiles banner][banner]
 
@@ -27,7 +27,7 @@ Simply designed to fit your shell life 🐚
 
 <!-- markdownlint-disable MD033 MD041 MD043 -->
 </center>
-<!-- markdownlint-enable MD033 MD041 MD043 -->
+<!-- markdownlint-enable MD033 MD041 -->
 
 ![divider][divider]
 
@@ -46,7 +46,7 @@ productivity no matter where you work.
 <!-- markdownlint-disable MD033 MD041 MD043 -->
 <br>
 <center>
-<!-- markdownlint-enable MD033 MD041 MD043 -->
+<!-- markdownlint-enable MD033 MD041 -->
 
 [![Getting Started][getting_started]][getting-started-url]
 [![Download Dotfiles v0.2.468][download_button]][12]
@@ -54,7 +54,7 @@ productivity no matter where you work.
 <!-- markdownlint-disable MD033 MD041 MD043 -->
 </center>
 <br />
-<!-- markdownlint-enable MD033 MD041 MD043 -->
+<!-- markdownlint-enable MD033 MD041 -->
 
 ## Features ✨
 
