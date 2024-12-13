@@ -3,9 +3,9 @@
 ################################################################################
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: configurations.sh
-# Version: 0.2.468
+# Version: 0.2.469
 # Author: @wwdseb
-# Copyright (c) 2015-2024. All rights reserved
+# Copyright (c) 2015-2025. All rights reserved
 # Description: Script to manage shell configurations
 # Website: https://dotfiles.io
 # License: MIT

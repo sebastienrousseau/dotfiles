@@ -3,9 +3,9 @@
 ################################################################################
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: archives.aliases.sh
-# Version: 0.2.468
+# Version: 0.2.469
 # Author: @wwdseb
-# Copyright (c) 2015-2024. All rights reserved
+# Copyright (c) 2015-2025. All rights reserved
 # Description:
 #   This script defines aliases for common archive operations. It provides
 #   shortcuts for compressing and extracting various types of archive files.

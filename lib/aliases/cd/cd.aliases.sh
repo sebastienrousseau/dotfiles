@@ -7,7 +7,7 @@
 # Description: Enhanced `cd` command aliases with checks, functions, and customization.
 # License: MIT
 # Script: cd.aliases.sh
-# Version: 0.2.468
+# Version: 0.2.469
 # Website: https://dotfiles.io
 
 # Usage:

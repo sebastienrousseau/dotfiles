@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.468) - <https://dotfiles.io>
-# Made with ♥ in London, UK by @wwdseb
-# Copyright (c) 2015-2024. All rights reserved
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.469) - <https://dotfiles.io>
+# Made with ♥ in London, UK by Sebastien Rousseau
+# Copyright (c) 2015-2025. All rights reserved
 # License: MIT
 
 # 🅹🅴🅺🆈🅻🅻 🅰🅻🅸🅰🆂🅴🆂
@@ -13,8 +13,8 @@ if command -v jekyll &>/dev/null; then
   #      1.1 Jekyll development aliases.
   #      1.2 Jekyll release aliases.
   #
-  # Made with ♥ in London, UK by @wwdseb
-  # Copyright (c) 2015-2024. All rights reserved
+  # Made with ♥ in London, UK by Sebastien Rousseau
+  # Copyright (c) 2015-2025. All rights reserved
   # Licensed under the MIT license
   #
 
