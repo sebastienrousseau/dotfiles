@@ -1,91 +1,107 @@
 #!/usr/bin/env bash
 
 ################################################################################
-# 🅳🅾🆃🅵🅸🅻🅴🆂
-# Script: chmod.aliases.sh
-# Version: 0.2.469
-# Author: @wwdseb
-# Copyright (c) 2015-2025. All rights reserved
-# Description: Enhanced chmod command aliases with safety features, input validation, and structured organization.
-# Website: https://dotfiles.io
+# 🅳🅾🆃🅵🅸🅻🅴🆂 - Change directory aliases
+# Made with ♥ by Sebastien Rousseau
 # License: MIT
+# Enhanced chmod command aliases with safety features, input validation, and structured organization.
 ################################################################################
 
-# Ensuring chmod command is available
+
+# Ensure chmod exists before proceeding
 if command -v chmod >/dev/null; then
 
-  # Validate input for permission and path
-  function validate_input() {
+  #-----------------------------------------------------------------------------
+  # Function: Validate input
+  # Description: Checks permission format and path validity.
+  #-----------------------------------------------------------------------------
+  validate_input() {
     local permission="$1"
     local path="$2"
-    # Validate permission pattern (e.g., numeric octal)
+
+    # Check permission format (e.g., numeric octal: ###)
     if ! [[ ${permission} =~ ^[0-7]{3}$ ]]; then
-      echo "Invalid permission format: ${permission}. Expected format: ### (e.g., 644)."
+      echo "Error: Invalid permission format '${permission}'. Expected format: ### (e.g., 644)."
       return 1
     fi
-    # Validate path existence
+
+    # Check if the path exists
     if ! [[ -e "${path}" ]]; then
-      echo "Path does not exist: ${path}."
+      echo "Error: Path does not exist: '${path}'."
       return 1
     fi
+
     return 0
   }
 
-  # Function to change permissions with confirmation for recursive changes
-  function change_permission() {
+  #-----------------------------------------------------------------------------
+  # Function: Change permissions
+  # Description: Applies chmod with validation and optional recursive handling.
+  #-----------------------------------------------------------------------------
+  change_permission() {
     local permission="$1"
     local path="$2"
-    local recursive="$3"
-    local confirm
+    local recursive="${3:-}"
 
-    # Validate inputs
+    # Validate input
     if ! validate_input "${permission}" "${path}"; then
       return 1
     fi
 
-    # Confirmation for recursive changes
+    # Handle recursive changes with confirmation
     if [[ "${recursive}" == "-R" ]]; then
-      read -rp "Confirm recursive change to ${permission} for ${path}? (y/N): " confirm
+      local count
+      count=$(find "${path}" 2>/dev/null | wc -l)
+      read -rp "Confirm recursive change to '${permission}' for '${path}' (${count} items)? (y/N): " confirm
       if [[ ${confirm} != [yY] ]]; then
         echo "Operation cancelled."
-        return
+        return 1
       fi
     fi
 
-    chmod "${recursive}" "${permission}" "${path}" && echo "Permissions set to ${permission} on ${path}"
+    # Apply permissions
+    chmod "${recursive}" "${permission}" "${path}" && \
+      echo "Permissions set to '${permission}' on '${path}'"
   }
 
-  # Alias definitions using the function for common permissions
-  alias perm000='change_permission 000'
-  alias perm400='change_permission 400'
-  alias perm444='change_permission 444'
-  alias perm600='change_permission 600'
-  alias perm644='change_permission 644'
-  alias perm666='change_permission 666'
-  alias perm755='change_permission 755'
-  alias perm764='change_permission 764'
-  alias perm777='change_permission 777'
+  #-----------------------------------------------------------------------------
+  # Common Permission Aliases
+  #-----------------------------------------------------------------------------
+  alias chmod_000='change_permission 000'  # No permissions
+  alias chmod_400='change_permission 400'  # Read-only for owner
+  alias chmod_444='change_permission 444'  # Read-only for all
+  alias chmod_600='change_permission 600'  # Read/write for owner
+  alias chmod_644='change_permission 644'  # Read/write for owner, read for others
+  alias chmod_666='change_permission 666'  # Read/write for all
+  alias chmod_755='change_permission 755'  # Full for owner, read/execute for others
+  alias chmod_764='change_permission 764'  # Full for owner, read/write for group
+  alias chmod_777='change_permission 777'  # Full permissions for all
 
-  # Shortcuts to set permissions for specific user types
-  alias u+x='chmod u+x' # u+x: Add execute permission for the owner of the file.
-  alias u-x='chmod u-x' # u-x: Remove execute permission for the owner of the file.
-  alias u+w='chmod u+w' # u+w: Add write permission for the owner of the file.
-  alias u-w='chmod u-w' # u-w: Remove write permission for the owner of the file.
-  alias u+r='chmod u+r' # u+r: Add read permission for the owner of the file.
-  alias u-r='chmod u-r' # u-r: Remove read permission for the owner of the file.
+  #-----------------------------------------------------------------------------
+  # User, Group, and Other Shortcuts
+  #-----------------------------------------------------------------------------
+  # User
+  alias chmod_u+x='chmod u+x'  # Add execute for owner
+  alias chmod_u-x='chmod u-x'  # Remove execute for owner
+  alias chmod_u+w='chmod u+w'  # Add write for owner
+  alias chmod_u-w='chmod u-w'  # Remove write for owner
+  alias chmod_u+r='chmod u+r'  # Add read for owner
+  alias chmod_u-r='chmod u-r'  # Remove read for owner
 
-  alias g+x='chmod g+x' # g+x: Add execute permission for the group owner of the file.
-  alias g-x='chmod g-x' # g-x: Remove execute permission for the group owner of the file.
-  alias g+w='chmod g+w' # g+w: Add write permission for the group owner of the file.
-  alias g-w='chmod g-w' # g-w: Remove write permission for the group owner of the file.
-  alias g+r='chmod g+r' # g+r: Add read permission for the group owner of the file.
-  alias g-r='chmod g-r' # g-r: Remove read permission for the group owner of the file.
+  # Group
+  alias chmod_g+x='chmod g+x'  # Add execute for group
+  alias chmod_g-x='chmod g-x'  # Remove execute for group
+  alias chmod_g+w='chmod g+w'  # Add write for group
+  alias chmod_g-w='chmod g-w'  # Remove write for group
+  alias chmod_g+r='chmod g+r'  # Add read for group
+  alias chmod_g-r='chmod g-r'  # Remove read for group
 
-  alias o+x='chmod o+x' # o+x: Add execute permission for others.
-  alias o-x='chmod o-x' # o-x: Remove execute permission for others.
-  alias o+w='chmod o+w' # o+w: Add write permission for others.
-  alias o-w='chmod o-w' # o-w: Remove write permission for others.
-  alias o+r='chmod o+r' # o+r: Add read permission for others.
-  alias o-r='chmod o-r' # o-r: Remove read permission for others.
+  # Others
+  alias chmod_o+x='chmod o+x'  # Add execute for others
+  alias chmod_o-x='chmod o-x'  # Remove execute for others
+  alias chmod_o+w='chmod o+w'  # Add write for others
+  alias chmod_o-w='chmod o-w'  # Remove write for others
+  alias chmod_o+r='chmod o+r'  # Add read for others
+  alias chmod_o-r='chmod o-r'  # Remove read for others
 
 fi
