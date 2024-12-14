@@ -9,7 +9,7 @@
 
 # Dotfiles (v0.2.469)
 
-**Seamlessly enhance your shell environment 🐚**
+Seamlessly enhance your shell environment 🐚
 
 ![Dotfiles banner][banner]
 
@@ -17,7 +17,9 @@
 
 ## 🚀 Introduction
 
-This repository includes a robust set of shell aliases and scripts designed to streamline your command-line experience. The `cd` aliases script simplifies filesystem navigation with:
+This repository includes a robust set of shell aliases and scripts designed to
+streamline your command-line experience. The `cd` aliases script simplifies
+filesystem navigation with:
 
 - **Dynamic error handling**
 - **Automatic directory listing**
@@ -40,7 +42,8 @@ This repository includes a robust set of shell aliases and scripts designed to s
 
 ### 📂 Custom Directory Access
 
-Quickly access frequently used directories with predefined shortcuts. You can customize these paths to fit your needs:
+Quickly access frequently used directories with predefined shortcuts. You can
+customize these paths to fit your needs:
 
 | Alias | Directory Path          | Description            |
 |-------|--------------------------|------------------------|
@@ -80,21 +83,22 @@ Effortlessly navigate to critical system directories:
 ## 📦 Installation
 
 1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/sebastienrousseau/dotfiles.git
-   ```
+   
+```bash
+git clone https://github.com/sebastienrousseau/dotfiles.git
+```
 
-2. **Source the script in your shell configuration**:
+1. **Source the script in your shell configuration**:
 
-   ```bash
-   echo 'source /path/to/dotfiles/cd.sh' >> ~/.bashrc
-   ```
+```bash
+echo 'source /path/to/dotfiles/cd.sh' >> ~/.bashrc
+```
 
-3. **Reload your shell**:
+1. **Reload your shell**:
 
-   ```bash
-   source ~/.bashrc
-   ```
+```bash
+source ~/.bashrc
+```
 
 ---
 
@@ -120,13 +124,15 @@ etc
 
 ## 📚 Documentation
 
-For advanced configuration and detailed usage examples, visit the [official documentation](https://dotfiles.io).
+For advanced configuration and detailed usage examples, visit the
+[official documentation](https://dotfiles.io).
 
 ---
 
 ## 🛡️ License
 
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
+This project is licensed under the
+[MIT License](https://opensource.org/licenses/MIT).
 
 ---
 
