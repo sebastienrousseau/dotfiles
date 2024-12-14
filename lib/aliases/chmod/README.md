@@ -9,7 +9,7 @@
 
 # Dotfiles (v0.2.469)
 
-**Simply designed to fit your shell life 🐚**
+Simply designed to fit your shell life 🐚
 
 ![Dotfiles banner][banner]
 
@@ -17,7 +17,10 @@
 
 ## 🚀 Introduction
 
-This script provides an enhanced set of shortcuts and functions for the `chmod` command, making it easier to manage file and directory permissions. With features like input validation, recursive confirmation, and user-friendly aliases, you can efficiently customize permissions for files and directories.
+This script provides an enhanced set of shortcuts and functions for the
+`chmod` command, making it easier to manage file and directory permissions.
+With features like input validation, recursive confirmation, and user-friendly
+aliases, you can efficiently customize permissions for files and directories.
 
 ---
 
@@ -27,23 +30,24 @@ This script provides an enhanced set of shortcuts and functions for the `chmod` 
 
 Quickly apply common permission settings with pre-defined aliases:
 
-| Alias        | Permissions      | Description                                                                 |
-|--------------|------------------|-----------------------------------------------------------------------------|
-| `chmod_000`  | `----------`     | No permissions for anyone                                                  |
-| `chmod_400`  | `r--------`      | Read-only for the owner                                                    |
-| `chmod_444`  | `r--r--r--`      | Read-only for everyone                                                     |
-| `chmod_600`  | `rw-------`      | Read/write for the owner                                                   |
-| `chmod_644`  | `rw-r--r--`      | Read/write for the owner, read-only for others                             |
-| `chmod_666`  | `rw-rw-rw-`      | Read/write for everyone                                                    |
-| `chmod_755`  | `rwxr-xr-x`      | Full permissions for the owner, read/execute for others                    |
-| `chmod_764`  | `rwxrw-r--`      | Full permissions for the owner, read/write for the group, read-only for others |
-| `chmod_777`  | `rwxrwxrwx`      | Full permissions for everyone                                              |
+| Alias        | Permissions      | Description                               |
+|--------------|------------------|-------------------------------------------|
+| `chmod_000`  | `----------`     | No permissions for anyone                 |
+| `chmod_400`  | `r--------`      | Read-only for the owner                   |
+| `chmod_444`  | `r--r--r--`      | Read-only for everyone                    |
+| `chmod_600`  | `rw-------`      | Read/write for the owner                  |
+| `chmod_644`  | `rw-r--r--`      | Read/write for the owner, read-only other |
+| `chmod_666`  | `rw-rw-rw-`      | Read/write for everyone                   |
+| `chmod_755`  | `rwxr-xr-x`      | Full owner, read/execute for others       |
+| `chmod_764`  | `rwxrw-r--`      | Full owner, read/write for the group,     |
+| `chmod_777`  | `rwxrwxrwx`      | Full permissions for everyone             |
 
 ---
 
 ### 🔧 Recursive Confirmation for Permissions
 
-The `change_permission` function allows you to recursively apply permissions with a confirmation prompt, displaying the number of items affected:
+The `change_permission` function allows you to recursively apply permissions
+with a confirmation prompt, displaying the number of items affected:
 
 ```bash
 change_permission 755 /path/to/directory -R
@@ -82,10 +86,10 @@ Fine-tune permissions for specific user groups (owner, group, or others):
 
 Set permissions for specific file types with ease:
 
-| Alias        | Description                                    |
-|--------------|------------------------------------------------|
-| `chmod_755d` | Set permissions of all directories to `rwxr-xr-x` |
-| `chmod_644f` | Set permissions of all files to `rw-r--r--`      |
+| Alias        | Description                                        |
+|--------------|----------------------------------------------------|
+| `chmod_755d` | Set permissions of all directories to `rwxr-xr-x`  |
+| `chmod_644f` | Set permissions of all files to `rw-r--r--`        |
 
 ---
 
@@ -140,7 +144,9 @@ Here are some examples of how to use the `chmod` aliases and functions:
 
 ## 🛡️ License
 
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). See the `LICENSE` file for more information.
+This project is licensed under the
+[MIT License](https://opensource.org/licenses/MIT). See the `LICENSE` file for
+more information.
 
 ---
 
