@@ -15,7 +15,8 @@ Simply designed to fit your shell life 🐚
 
 ## 🅰🆁🅲🅷🅸🆅🅴 🅰🅽🅳 🅲🅾🅼🅿🆁🅴🆂🆂🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂
 
-This module provides comprehensive tools for handling various archive and compression formats.
+This module provides comprehensive tools for handling various archive and
+compression formats.
 
 ### Universal Extract Function
 

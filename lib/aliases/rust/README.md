@@ -15,7 +15,8 @@ Simply designed to fit your shell life 🐚
 
 ## 🆁🆄🆂🆃🆄🅿 🅰🅽🅳 🅲🅰🆁🅶🅾 🅰🅻🅸🅰🆂🅴🆂
 
-This code provides a comprehensive set of aliases for Rust development using `cargo` and `rustup` commands.
+This code provides a comprehensive set of aliases for Rust development
+using `cargo` and `rustup` commands.
 
 ### Cargo Aliases
 
