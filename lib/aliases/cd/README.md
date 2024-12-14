@@ -1,65 +1,140 @@
 <!-- markdownlint-disable MD033 MD041 MD043 -->
-
 <img
   src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
-  alt="dotfiles logo"
+  alt="Dotfiles logo"
   width="66"
   align="right"
 />
-
 <!-- markdownlint-enable MD033 MD041 -->
 
 # Dotfiles (v0.2.469)
 
-Designed to seamlessly enhance your shell environment 🐚
+**Seamlessly enhance your shell environment 🐚**
 
 ![Dotfiles banner][banner]
 
-## 🅲🅳 🅰🅻🅸🅰🆂🅴🆂
+---
 
-This set of `cd` command aliases provides an intuitive and efficient way to
-navigate your filesystem. Incorporating dynamic error handling, optional
-directory listing, and customization for an improved command-line experience.
+## 🚀 Introduction
 
-### Setup
+This repository includes a robust set of shell aliases and scripts designed to streamline your command-line experience. The `cd` aliases script simplifies filesystem navigation with:
 
-To use these aliases, integrate the script into your `.bashrc` or `.bash_profile`.
+- **Dynamic error handling**
+- **Automatic directory listing**
+- **Customizable paths for frequent directories**
 
-### Navigation Shortcuts
+---
 
-* `-`: Go to the previous directory.
-* `..`, `...`, `....`, `.....`: Ascend one to four levels in the directory tree.
-* `~`: Navigate to the home directory.
+## 🛠️ Features
 
-### Custom Directory Access
+### 🌟 Navigation Shortcuts
 
-Leverage aliases for quick access to frequently visited directories:
+| Alias           | Description                           |
+|------------------|--------------------------------------|
+| `-`             | Switch to the previous directory      |
+| `..`, `...`     | Ascend one or two levels in the tree  |
+| `....`, `.....` | Ascend three or four levels           |
+| `hom`           | Navigate to the home directory (`~`)  |
 
-* `app`: Applications directory
-* `cod`: Code directory
-* `des`: Desktop directory
-* `doc`: Documents directory
-* `dot`: Dotfiles directory
-* `dow`: Downloads directory
-* `mus`: Music directory
-* `pic`: Pictures directory
-* `vid`: Videos directory
+---
 
-### System Directories
+### 📂 Custom Directory Access
 
-Quickly access system directories:
+Quickly access frequently used directories with predefined shortcuts. You can customize these paths to fit your needs:
 
-* `etc`: System configuration (`/etc`)
-* `var`: Variable files (`/var`)
-* `tmp`: Temporary files (`/tmp`)
+| Alias | Directory Path          | Description            |
+|-------|--------------------------|------------------------|
+| `app` | `${HOME}/Applications`  | Applications directory |
+| `cod` | `${HOME}/Code`          | Code directory         |
+| `des` | `${HOME}/Desktop`       | Desktop directory      |
+| `doc` | `${HOME}/Documents`     | Documents directory    |
+| `dot` | `${HOME}/.dotfiles`     | Dotfiles directory     |
+| `dow` | `${HOME}/Downloads`     | Downloads directory    |
+| `mus` | `${HOME}/Music`         | Music directory        |
+| `pic` | `${HOME}/Pictures`      | Pictures directory     |
+| `vid` | `${HOME}/Videos`        | Videos directory       |
 
-### Enhanced Customization
+---
 
-Customize directory paths through environment variables to suit your system's
-structure and preferences. Use concise aliases (`app`, `cod`, `des`, etc.) for
-efficient navigation.
+### 🔧 System Directories
 
-For a detailed guide on configuring and using these aliases, plus additional
-information on each command, visit our [documentation](https://dotfiles.io).
+Effortlessly navigate to critical system directories:
+
+| Alias | Directory Path | Description                    |
+|-------|----------------|--------------------------------|
+| `etc` | `/etc`         | System configuration directory |
+| `var` | `/var`         | Variable files directory       |
+| `tmp` | `/tmp`         | Temporary files directory      |
+
+---
+
+### ⚙️ Enhanced Customization
+
+- **Dynamic Directory Paths**: Customize aliases through environment variables
+- **Error Handling**: Provides clear messages for invalid directories
+- **Optional Directory Listing**: Automatically lists contents after navigation
+- **Tab Completion**: Supports custom tab completion for aliases
+
+---
+
+## 📦 Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/sebastienrousseau/dotfiles.git
+   ```
+
+2. **Source the script in your shell configuration**:
+
+   ```bash
+   echo 'source /path/to/dotfiles/cd.sh' >> ~/.bashrc
+   ```
+
+3. **Reload your shell**:
+
+   ```bash
+   source ~/.bashrc
+   ```
+
+---
+
+## 🧑‍💻 Usage
+
+Here are some examples of how you can use the `cd` aliases:
+
+```bash
+# Navigate to the Code directory
+cod
+
+# Ascend two levels in the directory tree
+...
+
+# Access the Documents directory
+doc
+
+# Navigate to the system configuration directory
+etc
+```
+
+---
+
+## 📚 Documentation
+
+For advanced configuration and detailed usage examples, visit the [official documentation](https://dotfiles.io).
+
+---
+
+## 🛡️ License
+
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
+
+---
+
+## 👨‍💻 Author
+
+Created with ♥ by [Sebastien Rousseau](https://sebastienrousseau.com)
+
+- Website: [https://sebastienrousseau.com](https://sebastienrousseau.com)
+- GitHub: [https://github.com/sebastienrousseau](https://github.com/sebastienrousseau)
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

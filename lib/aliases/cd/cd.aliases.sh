@@ -1,56 +1,43 @@
 #!/usr/bin/env bash
-
 ################################################################################
-# 🅳🅾🆃🅵🅸🅻🅴🆂
-# Author: Sebastien Rousseau
-# Copyright: 2015-2024. All rights reserved
-# Description: Enhanced `cd` command aliases with checks, functions, and customization.
+# 🅳🅾🆃🅵🅸🅻🅴🆂 - Change directory aliases
+# Made with ♥ by Sebastien Rousseau
 # License: MIT
-# Script: cd.aliases.sh
-# Version: 0.2.469
-# Website: https://dotfiles.io
+# This script provides functions and aliases to quickly change directories.
+################################################################################
 
-# Usage:
-#   Customize directory paths via variables and use aliases to navigate.
-#   Example: `cod` to go to the Code directory, `..` to go up one directory.
-
-# Configuration
-DOC_DIR="${HOME}/Documents"
-VID_DIR="${HOME}/Videos"
-# Add more configurable paths here
-
-# Check if directory exists and change to it, listing contents optionally
+#-----------------------------------------------------------------------------
+# Helper Functions
+#-----------------------------------------------------------------------------
+# Function to change directory with optional listing
 change_directory() {
-  local path="$1"
+    local path="$1"
+    local list_contents="${2:-false}"
 
-  if [[ -d "${path}" ]]; then
-    cd "${path}" || exit # Exit if cd fails
-  else
-    echo "Directory '${path}' does not exist."
-  fi
+    if [[ -d "${path}" ]]; then
+        cd "${path}" || { echo "Failed to change to directory: ${path}"; return 1; }
+        echo "Changed directory to: ${path}"
+        if [[ "${list_contents}" == "true" ]]; then
+            ls -lh --group-directories-first
+        fi
+    else
+        echo "Error: Directory '${path}' does not exist."
+        return 1
+    fi
 }
 
-# Parent Directory Shortcuts
-alias -- -='cd -'
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-alias .....='cd ../../../..'
+# Add tab completion for custom aliases
+_cd_alias_completion() {
+    local cur=${COMP_WORDS[COMP_CWORD]}
+    local dirs=("app" "cod" "des" "doc" "dot" "dow" "mus" "pic" "vid" "etc" "var" "tmp")
+    COMPREPLY=($(compgen -W "${dirs[*]}" -- "$cur"))
+}
+complete -F _cd_alias_completion app cod des doc dot dow mus pic vid etc var tmp
 
-# Home Directory Shortcut
-alias hom='change_directory "${HOME}" true'
-
-# Frequently Used Directories
-alias doc='change_directory "$DOC_DIR" true' # Documents
-alias vid='change_directory "$VID_DIR" true' # Videos
-# Define more aliases like the above for other directories
-
-# System Directories (consider checks for system-specific paths)
-alias etc='change_directory "/etc" true'
-alias var='change_directory "/var" true'
-alias tmp='change_directory "/tmp" true'
-
-# Frequently Used Directories with Improved Error Handling and Customization
+#-----------------------------------------------------------------------------
+# Frequently Used Directory Variables
+#-----------------------------------------------------------------------------
+HOME_DIR="${HOME}"
 APP_DIR="${HOME}/Applications"
 CODE_DIR="${HOME}/Code"
 DESK_DIR="${HOME}/Desktop"
@@ -61,13 +48,46 @@ MUSIC_DIR="${HOME}/Music"
 PICS_DIR="${HOME}/Pictures"
 VIDS_DIR="${HOME}/Videos"
 
-# Define functions for each alias with checks and optional ls
-alias app='change_directory "$APP_DIR" true' # Applications
-alias cod='change_directory "$CODE_DIR" true' # Code
-alias des='change_directory "$DESK_DIR" true' # Desktop
-alias doc='change_directory "$DOCS_DIR" true' # Documents
-alias dot='change_directory "$DOTF_DIR" true' # Dotfiles
-alias dow='change_directory "$DOWN_DIR" true' # Downloads
-alias mus='change_directory "$MUSIC_DIR" true' # Music
-alias pic='change_directory "$PICS_DIR" true' # Pictures
-alias vid='change_directory "$VIDS_DIR" true' # Videos
+#-----------------------------------------------------------------------------
+# Parent Directory Shortcuts
+#-----------------------------------------------------------------------------
+alias -- -='cd -'                            # Go to the previous directory
+alias ..='cd ..'                             # Go up one level
+alias ...='cd ../..'                         # Go up two levels
+alias ....='cd ../../..'                     # Go up three levels
+alias .....='cd ../../../..'                 # Go up four levels
+
+#-----------------------------------------------------------------------------
+# Home and Frequently Used Directories
+#-----------------------------------------------------------------------------
+alias app='change_directory "${APP_DIR}" true'    # Applications
+alias cod='change_directory "${CODE_DIR}" true'   # Code
+alias des='change_directory "${DESK_DIR}" true'   # Desktop
+alias doc='change_directory "${DOCS_DIR}" true'   # Documents
+alias dot='change_directory "${DOTF_DIR}" true'   # Dotfiles
+alias dow='change_directory "${DOWN_DIR}" true'   # Downloads
+alias hom='change_directory "${HOME_DIR}" true'   # Home Directory
+alias mus='change_directory "${MUSIC_DIR}" true'  # Music
+alias pic='change_directory "${PICS_DIR}" true'   # Pictures
+alias vid='change_directory "${VIDS_DIR}" true'   # Videos
+
+#-----------------------------------------------------------------------------
+# System Directories
+#-----------------------------------------------------------------------------
+if [[ -d "/etc" ]]; then
+    alias etc='change_directory "/etc" true'      # System configuration directory
+fi
+
+if [[ -d "/var" ]]; then
+    alias var='change_directory "/var" true'      # System variable data directory
+fi
+
+if [[ -d "/tmp" ]]; then
+    alias tmp='change_directory "/tmp" true'      # Temporary files directory
+fi
+
+#-----------------------------------------------------------------------------
+# Dynamic Features
+#-----------------------------------------------------------------------------
+# Export the function for use in subshells
+export -f change_directory
