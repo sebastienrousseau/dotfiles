@@ -2,17 +2,12 @@
 # 🅳🅾🆃🅵🅸🅻🅴🆂 - Archive and Compression Management
 # Made with ♥ by Sebastien Rousseau
 # License: MIT
-# This script provides functions and aliases for handling various archive formats.
 
 #-----------------------------------------------------------------------------
-# Helper Functions
+# Extract Function
 #-----------------------------------------------------------------------------
-# Check if a command exists
-command_exists() {
-    command -v "$1" >/dev/null 2>&1
-}
+# Archive and Compression Management
 
-# Extract various archive formats
 extract() {
     if [ -z "$1" ]; then
         echo "Usage: extract <archive_file>"
@@ -43,7 +38,9 @@ extract() {
     esac
 }
 
-# Compress large files with flexible format support
+#-----------------------------------------------------------------------------
+# Compress Function
+#-----------------------------------------------------------------------------
 compress_large() {
     if [ -z "$1" ] || [ -z "$2" ]; then
         echo "Usage: compress_large <format> <input_file> [output_file]"
@@ -71,73 +68,47 @@ compress_large() {
 }
 
 #-----------------------------------------------------------------------------
-# Aliases for Compression Tools
+# Aliases
 #-----------------------------------------------------------------------------
-# 7-Zip
-if command_exists 7z; then
-    alias a7z='7z a'                     # Create 7z archive
-    alias x7z='7z x'                     # Extract 7z archive
-    alias l7z='7z l'                     # List contents of 7z archive
-    alias t7z='7z t'                     # Test 7z archive integrity
-fi
+# 7-Zip Aliases
+alias a7z='7z a'          # Create 7z archive
+alias x7z='7z x'          # Extract 7z archive
 
-# Tar
-if command_exists tar; then
-    alias ctar='tar -cvf'                # Create tar archive
-    alias xtar='tar -xvf'                # Extract tar archive
-    alias ltar='tar -tvf'                # List contents of tar archive
-    alias ctgz='tar -zcvf'               # Create tar.gz archive
-    alias xtgz='tar -zxvf'               # Extract tar.gz archive
-    alias ctbz='tar -jcvf'               # Create tar.bz2 archive
-    alias xtbz='tar -jxvf'               # Extract tar.bz2 archive
-    alias ctxz='tar -Jcvf'               # Create tar.xz archive
-    alias xtxz='tar -Jxvf'               # Extract tar.xz archive
-    alias ctzst='tar --zstd -cvf'        # Create tar.zst archive
-    alias xtzst='tar --zstd -xvf'        # Extract tar.zst archive
-fi
+# Tar Aliases
+alias ctar='tar -cvf'     # Create tar archive
+alias xtar='tar -xvf'     # Extract tar archive
+alias ltar='tar -tvf'     # List tar archive contents
+alias ctgz='tar -zcvf'    # Create tar.gz archive
+alias xtgz='tar -zxvf'    # Extract tar.gz archive
+alias ctbz='tar -jcvf'    # Create tar.bz2 archive
+alias xtbz='tar -jxvf'    # Extract tar.bz2 archive
+alias ctxz='tar -Jcvf'    # Create tar.xz archive
+alias xtxz='tar -Jxvf'    # Extract tar.xz archive
+alias ctzst='tar --zstd -cvf' # Create tar.zst archive
+alias xtzst='tar --zstd -xvf' # Extract tar.zst archive
 
-# Zip
-if command_exists zip; then
-    alias czip='zip -r'                  # Create zip archive
-    alias xzip='unzip'                   # Extract zip archive
-    alias lzip='unzip -l'                # List contents of zip archive
-fi
+# Zip Aliases
+alias czip='zip -r'       # Create zip archive
+alias xzip='unzip'        # Extract zip archive
+alias lzip='unzip -l'     # List zip archive contents
 
-# Compression Tools
-if command_exists gzip; then
-    alias cgz='gzip -cv'                 # Compress with gzip
-    alias xgz='gzip -dv'                 # Extract gzip
-fi
+# Gzip Aliases
+alias cgz='gzip -cv'      # Compress with gzip
+alias xgz='gzip -dv'      # Extract gzip
 
-if command_exists bzip2; then
-    alias cbz='bzip2 -zk'                # Compress with bzip2
-    alias xbz='bzip2 -dk'                # Extract bzip2
-fi
+# Bzip2 Aliases
+alias cbz='bzip2 -zk'     # Compress with bzip2
+alias xbz='bzip2 -dk'     # Extract bzip2
 
-if command_exists xz; then
-    alias cxz='xz -z'                    # Compress with xz
-    alias xxz='xz -d'                    # Extract xz
-fi
+# XZ Aliases
+alias cxz='xz -z'         # Compress with xz
+alias xxz='xz -d'         # Extract xz
 
-if command_exists zstd; then
-    alias czst='zstd -z'                 # Compress with zstd
-    alias xzst='zstd -d'                 # Extract zstd
-fi
+# Zstd Aliases
+alias czst='zstd -z'      # Compress with zstd
+alias xzst='zstd -d'      # Extract zstd
 
-if command_exists lz4; then
-    alias clz4='lz4 -zc'                 # Compress with lz4
-    alias xlz4='lz4 -dc'                 # Extract lz4
-fi
+# LZ4 Aliases
+alias clz4='lz4 -zc'      # Compress with lz4
+alias xlz4='lz4 -dc'      # Extract lz4
 
-#-----------------------------------------------------------------------------
-# Tab Completion for Extract
-#-----------------------------------------------------------------------------
-_extract_completion() {
-    local cur=${COMP_WORDS[COMP_CWORD]}
-    COMPREPLY=($(compgen -f -X '!*.*(tar.bz2|tbz2|tar.gz|tgz|tar.xz|tar.zst|tar|bz2|gz|rar|zip|Z|7z|zst|xz|lz4)' -- "$cur"))
-}
-complete -F _extract_completion extract
-
-# Export functions for subshells
-export -f extract
-export -f compress_large

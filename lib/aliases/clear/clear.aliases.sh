@@ -4,7 +4,7 @@
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: clear.aliases.sh
 # Version: 0.2.469
-# Author: @wwdseb
+# Author: Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # Description: Enhances terminal interaction with aliases for clearing the screen,
 # navigating directories, and displaying directory contents in an organized manner.

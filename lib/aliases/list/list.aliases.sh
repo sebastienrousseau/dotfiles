@@ -1,86 +1,132 @@
 #!/usr/bin/env bash
-
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.469) - <https://dotfiles.io>
-# Made with ♥ in London, UK by Sebastien Rousseau
-# Copyright (c) 2015-2025. All rights reserved
+################################################################################
+# 🅳🅾🆃🅵🅸🅻🅴🆂
+# Script: list.sh
+# Version: 0.2.469
+# Author: Sebastien Rousseau (@wwdseb)
 # License: MIT
+#
+# Description:
+#   This script sets a set of aliases for file listing using `eza`.
+#   If `eza` is not found, it falls back to `ls` with approximate equivalents.
+#
+# Requested Aliases:
+#   alias ls='eza'                            # Basic replacement for ls
+#   alias l='eza'                             # 'l' should be the same as ls/eza
+#   alias ll='eza --long -a'                  # Long format, including hidden files
+#   alias llm='eza --long -a --sort=modified'# Long format, hidden files, sorted by mod date
+#   alias la='eza -a --group-directories-first' # Show all files, dirs first
+#   alias lx='eza -a --group-directories-first --extended' # All files, dirs first, extended attrs
+#   alias tree='eza --tree'                   # Tree view
+#   alias lS='eza --oneline'                  # One entry per line
+#
+# Additionally, 'l' is now identical to 'ls' rather than a custom format.
+################################################################################
 
-# 🅻🅸🆂🆃 🅰🅻🅸🅰🆂🅴🆂
+if command -v eza >/dev/null 2>&1; then
+    # eza is available
 
-# List hidden files.
-alias 'l.'='ls -dlhF .* | grep -v "^d"'
+    # @name ls
+    # @brief Basic replacement for ls using eza
+    # @description If eza is installed, ls calls eza.
+    # @example ls
+    alias ls='eza'
 
-# Size, show type, human readable.
-alias l='ls -lFh'
+    # @name l
+    # @brief Identical to ls/eza
+    # @description l should mirror ls exactly when eza is available.
+    # @example l
+    alias l='eza'
 
-# Display one file per line.
-alias l1='ls -1'
+    # @name ll
+    # @brief Long format including hidden files
+    # @description Uses `--long -a` for details and hidden files.
+    # @example ll
+    alias ll='eza --long -a'
 
-# All files, show type, human readable.
-alias la='ls -lAFh'
+    # @name llm
+    # @brief Long format, including hidden files, sorted by modification date
+    # @description Uses `--long -a --sort=modified`.
+    # @example llm
+    alias llm='eza --long -a --sort=modified'
 
-# List all files in alphabetical order.
-alias labc='ls -lap'
+    # @name la
+    # @brief Show all files, directories listed first
+    # @description Uses `-a --group-directories-first` to show hidden and group dirs first.
+    # @example la
+    alias la='eza -a --group-directories-first'
 
-# Count the number of lines in the file.
-alias lc='wc -l'
+    # @name lx
+    # @brief Show all files and extended attributes, directories first
+    # @description `-a --group-directories-first --extended`.
+    # @example lx
+    alias lx='eza -a --group-directories-first --extended'
 
-# List files by time, newest first.
-alias lct='ls -lcrh'
+    # @name tree
+    # @brief Tree view
+    # @description Uses `--tree` for a tree-like directory listing.
+    # @example tree
+    alias tree='eza --tree'
 
-# Sort by date, oldest first.
-alias ld='ls -ltrh'
+    # @name lS
+    # @brief One entry per line
+    # @description Uses `--oneline` to list files one per line.
+    # @example lS
+    alias lS='eza --oneline'
 
-# List directories only.
-alias ldir="ls -l | egrep '^d'"
+else
+    # eza not found, fallback to ls approximations
+    echo "Note: 'eza' not found. Using 'ls' fallback." >&2
+    echo "Install 'eza' for enhanced listing: https://github.com/eza-community/eza" >&2
 
-# List hidden files.
-alias ldot="l."
+    # @name ls (fallback)
+    # @brief Basic listing using ls
+    # @example ls
+    alias ls='ls'
 
-# List files by date, most recent last.
-alias left='ls -t -1'
+    # @name l (fallback)
+    # @brief Identical to ls
+    # @description l should mirror ls exactly when eza is not available.
+    # @example l
+    alias l='ls'
 
-# List files by date, most recent first.
-alias right='ls -t -1r'
+    # @name ll (fallback)
+    # @brief Long format including hidden files
+    # @description `-lA` shows long listing including hidden files.
+    # @example ll
+    alias ll='ls -lA'
 
-# List files only.
-alias lf="ls -l | egrep -v '^d'"
+    # @name llm (fallback)
+    # @brief Sort by modification time
+    # @description `ls -ltA` sorts by modification time, includes hidden with `-A`.
+    # @example llm
+    alias llm='ls -ltA'
 
-# Sort by size, largest first.
-alias lk='ls -lSrh'
+    # @name la (fallback)
+    # @brief Show all files
+    # @description `-a` shows hidden files. No directories-first in plain ls.
+    # @example la
+    alias la='ls -a'
 
-# Long list, show almost all, show type, human readable.
-alias ll='la'
+    # @name lx (fallback)
+    # @brief Show all files; extended attributes are not directly in ls
+    # @description `-la` shows long listing including hidden.
+    # @example lx
+    alias lx='ls -la'
 
-# List full path of all files in current directory.
-alias lla='ls -l -d $PWD/*'
+    # @name tree (fallback)
+    # @brief Tree view (approx.)
+    # @description If `tree` is installed, use it; otherwise `ls -R`.
+    # @example tree
+    if command -v tree >/dev/null 2>&1; then
+        alias tree='tree'
+    else
+        alias tree='ls -R'
+    fi
 
-# locale: List all available locales.
-alias locale='locale -a | grep UTF-8'
-
-# List all open ports.
-alias lp='sudo lsof -i -T -n'
-
-# Recursive list, show type, human readable.
-alias lr='ls -lRh'
-
-# Colorize the output.
-alias ls='ls --color'
-
-# Order Files Based on Last Modified Time and size.
-alias lS='ls -1FSsh'
-
-# List contents of directories in a tree-like format.
-alias lt="tree"
-
-# Sort by date, oldest first.
-alias lu='ls -lurh'
-
-# Wide list, show almost all, show type, human readable.
-alias lw='ls -xAh'
-
-# Sort by extension.
-alias lx='ls | sort -k 1,1 -t .'
-
-# Sort by size, smallest first.
-alias lz='ls -lSr'
+    # @name lS (fallback)
+    # @brief One entry per line
+    # @description `-1` lists files one per line.
+    # @example lS
+    alias lS='ls -1'
+fi

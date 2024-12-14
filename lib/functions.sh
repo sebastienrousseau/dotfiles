@@ -4,7 +4,7 @@
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: functions.sh
 # Version: 0.2.469
-# Author: @wwdseb
+# Author: Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # Description: Script to load custom executable functions
 # Website: https://dotfiles.io

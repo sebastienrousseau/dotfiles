@@ -4,7 +4,7 @@
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: history.sh
 # Version: 0.2.469
-# Author: @wwdseb
+# Author: Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # Description: Script to manage shell history configuration and display
 # Website: https://dotfiles.io
