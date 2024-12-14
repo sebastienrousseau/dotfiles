@@ -1,73 +1,193 @@
 " 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.469) - <https://dotfiles.io>
-" Copyright (c) Sebastien Rousseau 2022. All rights reserved
+" Made with ♥ in London, UK by Sebastien Rousseau
+" Copyright (c) 2015-2025. All rights reserved
 " License: MIT
 
-set autoindent                      " autoindent
-set autoread                        " auto-read
-set background=dark                 " background color (dark)
-set backspace=indent,eol,start      " backspace behavior (indent, eol, start)
-set backupdir=~/.vim/backups        " backup directory (~/.vim/backups)
-set cc=80                           " column count (80)
-set clipboard=unnamedplus           " clipboard support (unnamedplus)
-set cmdheight=1                     " command line height (1)
-set confirm                         " confirm before exiting
-set cursorline                      " cursorline support
-set encoding=utf-8                  " encoding support (utf-8)
-set expandtab                       " expandtab support
-set foldmethod=indent               " foldmethod support
-set foldnestmax=3                   " foldnestmax support (3)
-set gcr=a:blinkon0                  " disable blinking cursor (a:blinkon0)
-set hidden                          " hidden support
-set history=10000                   " history support (10000)
-set hlsearch                        " highlight search
-set ignorecase                      " ignorecase support
-set incsearch                       " incremental search
-set laststatus=2                    " laststatus support (2)
-set lazyredraw                      " lazyredraw support
-set linebreak                       " linebreak support
-set modelines=0                     " modelines support (0)
-set mouse=a                         " mouse support (all)
-set nobackup                        " nobackup support
-set nocompatible                    " nocompatible support
-set nocp                            " nocp support"
-set nofoldenable                    " nofoldenable support
-set nomodeline                      " nomodeline support
-set noswapfile                      " noswapfile support
-set nowb                            " nowb support"
-set nowrap                          " nowrap support
-set number                          " number support
-set ruler                           " ruler support"
-set scrolloff=3                     " scrolloff support (3)
-set shiftwidth=2                    " shiftwidth support (2)
-set showcmd                         " showcmd support
-set showmatch                       " showmatch support
-set showmode                        " showmode support"
-set showtabline=2                   " showtabline support (2)
-set sidescroll=1                    " sidescroll support (1)
-set sidescrolloff=15                " sidescrolloff support (15)
-set smartcase                       " smartcase support
-set smartindent                     " smartindent support
-set smarttab                        " smarttab support
-set softtabstop=2                   " softtabstop support (2)
-set spell                           " spell support
-set spelllang=en                    " spelllang support (en)
-set switchbuf=useopen               " switchbuf support (useopen)
-set t_Co=256                        " t_Co support (256)
-set tabstop=2                       " tabstop support (2)
-set textwidth=79                    " textwidth support (79)
-set title                           " title support
-set ttyfast                         " ttyfast support
-set visualbell                      " visualbell support
-set wildignore+=*.png,*.jpg,*.gif   " wildignore support (png, jpg, gif)
-set wildignore+=*DS_Store*          " wildignore support (DS_Store)
-set wildignore+=*sass-cache*        " wildignore support (sass-cache)
-set wildignore+=*vim/backups*       " wildignore support (vim/backups)
-set wildignore+=log/**              " wildignore support (log)
-set wildignore+=tmp/**              " wildignore support (tmp)
-set wildignore+=vendor/cache/**     " wildignore support (vendor/cache)
-set wildmenu                        " wildmenu support
-set wildmode=longest,list           " wildmode support (longest,list)
-set winwidth=79                     " winwidth support (79)
-set wrap                            " wrap support
-syntax enable                       " syntax support (enable)
-syntax on                           " syntax support (on)
+"-----------------------------------------------------------------------------
+" Plugin Manager: vim-plug
+"-----------------------------------------------------------------------------
+" Auto-install vim-plug if not present
+if empty(glob('~/.vim/autoload/plug.vim'))
+    silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    autocmd VimEnter * PlugInstall | source $MYVIMRC
+endif
+runtime autoload/plug.vim
+
+call plug#begin('~/.vim/plugged')
+
+" Core Functionality
+Plug 'preservim/nerdtree'                            " File explorer
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } } " Fuzzy finder
+Plug 'junegunn/fzf.vim'                             " FZF integration
+Plug 'easymotion/vim-easymotion'                    " Enhanced motion commands
+Plug 'mbbill/undotree'                              " Visual undo history
+
+" Editor Enhancement
+Plug 'jiangmiao/auto-pairs'                         " Auto-close pairs
+Plug 'tpope/vim-surround'                           " Surround text objects
+Plug 'tpope/vim-commentary'                         " Comment code
+Plug 'editorconfig/editorconfig-vim'                " EditorConfig support
+
+" Git Integration
+Plug 'tpope/vim-fugitive'                           " Git commands
+Plug 'airblade/vim-gitgutter'                       " Git diff in sign column
+
+" Language Support & Completion
+Plug 'neoclide/coc.nvim', {'branch': 'release'}     " Intellisense engine
+Plug 'sheerun/vim-polyglot'                         " Language pack
+Plug 'dense-analysis/ale'                           " Linting engine
+Plug 'rust-lang/rust.vim'                           " Rust support
+Plug 'fatih/vim-go'                                 " Go support
+Plug 'plasticboy/vim-markdown'                      " Markdown support
+
+" UI Enhancement
+Plug 'vim-airline/vim-airline'                      " Status line
+Plug 'vim-airline/vim-airline-themes'               " Airline themes
+Plug 'dracula/vim', { 'as': 'dracula' }             " Color scheme
+
+call plug#end()
+
+"-----------------------------------------------------------------------------
+" Terminal Settings
+"-----------------------------------------------------------------------------
+set t_Co=256                        " Use 256 colors
+let &t_ut=''                        " Clear background better
+if has('termguicolors')
+    set termguicolors              " Enable true colors
+endif
+
+"-----------------------------------------------------------------------------
+" General Settings
+"-----------------------------------------------------------------------------
+set nocompatible                    " Use Vim settings rather than Vi
+set encoding=utf-8                  " UTF-8 encoding
+set fileencoding=utf-8             " UTF-8 file encoding
+set history=10000                   " Command history
+set hidden                          " Allow hidden buffers
+set secure                          " Restrict unsafe commands
+set autoread                        " Auto-reload changed files
+set mouse=a                         " Enable mouse support
+set backspace=indent,eol,start     " Normal backspace behavior
+
+"-----------------------------------------------------------------------------
+" UI Configuration
+"-----------------------------------------------------------------------------
+set background=dark                 " Dark background
+colorscheme dracula                 " Use dracula theme
+
+set number                          " Show line numbers
+set relativenumber                  " Relative line numbers
+set cursorline                      " Highlight current line
+set ruler                           " Show cursor position
+set colorcolumn=80                  " Mark column 80
+set signcolumn=yes                  " Always show sign column
+set cmdheight=1                     " Command line height
+set laststatus=2                    " Always show status line
+set showcmd                         " Show command in progress
+set showmode                        " Show current mode
+set showmatch                       " Show matching brackets
+set title                          " Window title
+set visualbell                      " Visual bell
+set noerrorbells                   " No error bells
+set list                           " Show invisible characters
+set listchars=tab:>\ ,trail:-,nbsp:+ " Show invisible characters
+
+"-----------------------------------------------------------------------------
+" Editor Settings
+"-----------------------------------------------------------------------------
+set expandtab                       " Use spaces instead of tabs
+set tabstop=2                       " Spaces per tab
+set softtabstop=2                   " Spaces per tab in insert mode
+set shiftwidth=2                    " Spaces for autoindent
+set autoindent                      " Copy indent from current line
+set smartindent                     " Smart auto-indenting
+set wrap                           " Wrap lines
+set linebreak                      " Break lines at word boundary
+set textwidth=80                    " Text width
+
+"-----------------------------------------------------------------------------
+" Search Settings
+"-----------------------------------------------------------------------------
+set hlsearch                        " Highlight search results
+set incsearch                       " Incremental search
+set ignorecase                      " Case-insensitive search
+set smartcase                       " Smart case search
+set path+=**                        " Search down into subfolders
+
+"-----------------------------------------------------------------------------
+" File Management
+"-----------------------------------------------------------------------------
+set nobackup                        " No backup files
+set nowritebackup                   " No backup while editing
+set noswapfile                      " No swap files
+set undofile                        " Persistent undo
+set undodir=~/.vim/undodir         " Undo directory
+
+" Create undo directory if it doesn't exist
+if !isdirectory(&undodir)
+    call mkdir(&undodir, 'p', 0700)
+endif
+
+"-----------------------------------------------------------------------------
+" Airline Configuration
+"-----------------------------------------------------------------------------
+let g:airline_powerline_fonts = 0           " Disable powerline fonts
+let g:airline_symbols_ascii = 1             " Use ASCII symbols
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#formatter = 'unique_tail'
+let g:airline_skip_empty_sections = 1
+
+"-----------------------------------------------------------------------------
+" Key Mappings
+"-----------------------------------------------------------------------------
+let mapleader = " "                 " Set leader key to space
+
+" File operations
+nnoremap <Leader>w :w<CR>           " Quick save
+nnoremap <Leader>q :q<CR>           " Quick quit
+nnoremap <Leader>x :x<CR>           " Save and quit
+nnoremap <Leader>sv :source $MYVIMRC<CR> " Reload vimrc
+
+" Window navigation
+nnoremap <C-h> <C-w>h              " Move to left window
+nnoremap <C-j> <C-w>j              " Move to window below
+nnoremap <C-k> <C-w>k              " Move to window above
+nnoremap <C-l> <C-w>l              " Move to right window
+
+" Plugin mappings
+nnoremap <C-n> :NERDTreeToggle<CR>
+nnoremap <Leader>f :Files<CR>
+nnoremap <Leader>b :Buffers<CR>
+
+"-----------------------------------------------------------------------------
+" Plugin Settings
+"-----------------------------------------------------------------------------
+" NERDTree
+let NERDTreeShowHidden = 1
+
+" FZF
+let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.8 } }
+
+" ALE
+let g:ale_fix_on_save = 1
+let g:ale_linters = {
+\   'python': ['flake8', 'pylint'],
+\   'javascript': ['eslint'],
+\   'typescript': ['eslint'],
+\   'rust': ['analyzer']
+\}
+
+"-----------------------------------------------------------------------------
+" Auto Commands
+"-----------------------------------------------------------------------------
+if has("autocmd")
+    augroup FileTypeSpecific
+        autocmd!
+        autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
+        autocmd FileType json setlocal ts=2 sts=2 sw=2 expandtab
+        autocmd FileType markdown setlocal wrap linebreak nolist
+        autocmd FileType rust setlocal ts=4 sts=4 sw=4 expandtab
+        autocmd FileType go setlocal noexpandtab ts=4 sw=4
+    augroup END
+endif
