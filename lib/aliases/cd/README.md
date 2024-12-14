@@ -83,7 +83,7 @@ Effortlessly navigate to critical system directories:
 ## 📦 Installation
 
 1. **Clone the repository**:
-   
+
 ```bash
 git clone https://github.com/sebastienrousseau/dotfiles.git
 ```
