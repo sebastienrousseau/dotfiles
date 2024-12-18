@@ -23,7 +23,7 @@
 #   ShellCheck Documentation: https://github.com/koalaman/shellcheck
 
 load_paths() {
-  for path in "${HOME}"/.dotfiles/lib/paths/[!.#]*/*.sh; do
+  for path in "${HOME}"/.dotfiles/lib/paths/*.sh; do
     # shellcheck source=/dev/null
     source "${path}"
   done
