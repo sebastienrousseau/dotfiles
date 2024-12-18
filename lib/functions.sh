@@ -23,13 +23,24 @@
 #   ShellCheck Documentation: https://github.com/koalaman/shellcheck
 
 load_custom_functions() {
-  for function in "${HOME}"/.dotfiles/lib/functions/*.sh; do
-    # shellcheck source=/dev/null
-    source "${function}" || {
-      echo "Failed to source ${function}" >&2
-      return 1
-    }
-  done
+  local functions_dir="${HOME}/.dotfiles/lib/functions"
+
+  # Check if the directory exists
+  if [[ -d "$functions_dir" ]]; then
+    for function_file in "$functions_dir"/*.sh; do
+      if [[ -f "$function_file" ]]; then
+        # shellcheck source=/dev/null
+        source "$function_file" || {
+          echo "Error: Failed to source $function_file" >&2
+          return 1
+        }
+      fi
+    done
+  else
+    echo "Warning: Functions directory $functions_dir does not exist." >&2
+  fi
 }
 
+# Main Execution
+# ---------------------------------------------------------
 load_custom_functions
