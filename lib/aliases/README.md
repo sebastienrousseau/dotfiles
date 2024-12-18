@@ -1,5 +1,3 @@
-<!-- markdownlint-disable MD033 MD041 MD043 -->
-
 <img
   src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
   alt="dotfiles logo"
@@ -7,49 +5,53 @@
   align="right"
 />
 
-<!-- markdownlint-enable MD033 MD041 -->
-
 # Dotfiles (v0.2.469)
 
 Simply designed to fit your shell life 🐚
 
 ![Dotfiles banner][banner]
 
-- [Archives](archives/README.md) - Compress and extract files and
-  directories in various formats on a Unix-based system.
-- [Cd](cd/README.md) - Navigate the file system.
-- [Chmod](chmod/README.md) - Change the permissions of files and
-  directories.
-- [Clear](clear/README.md) - Clear the terminal screen.
-- [Configuration](configuration/README.md) - Configure the dotfiles.
-- [Default](default/README.md) - Manage the default shell.
-- [Dig](dig/README.md) - Query DNS name servers.
-- [Disk Usage](disk-usage/README.md) - Display the disk usage of files
-  and directories.
-- [Editor](editor/README.md) - Manage the default text editor.
-- [Find](find/README.md) - Search for files and directories.
-- [gCloud](gcloud/README.md) - Manage the Google Cloud SDK.
-- [Git](git/README.md) - Manage the Git version control system.
-- [GNU](gnu/README.md) - Manage the GNU core utilities.
-- [Heroku](heroku/README.md) - Manage the Heroku CLI.
-- [Interactive](interactive/README.md) - Manage the interactive shell.
-- [Jekyll](jekyll/README.md) - Manage the Jekyll static site generator.
-- [List](list/README.md) - List files and directories.
-- [macOS](macos/README.md) - Manage the macOS operating system.
-- [make](make/README.md) - Manage the GNU make utility.
-- [mkdir](mkdir/README.md) - Create directories.
-- [npm](npm/README.md) - Manage the Node.js package manager.
-- [permission](permission/README.md) - Manage the file permissions.
-- [pnpm](pnpm/README.md) - Manage the pnpm package manager.
-- [ps](ps/README.md) - Manage the process status.
-- [rsync](rsync/README.md) - Manage the rsync file transfer utility.
-- [rust](rust/README.md) - Manage the Rust programming language.
-- [subversion](subversion/README.md) - Manage the Subversion version
-  control system.
-- [sudo](sudo/README.md) - Manage the superuser.
-- [tmux](tmux/README.md) - Manage the tmux terminal multiplexer.
-- [update](update/README.md) - Help users update the dotfiles.
-- [uuid](uuid/README.md) - Help users generate UUIDs.
-- [wget](wget/README.md) - Manage the wget utility.
+This repository contains a structured set of directories and scripts to manage various shell configurations, aliases, and utilities. Below is the organized directory structure with detailed descriptions.
+
+## 🔧 Directory List
+
+<!-- markdownlint-disable MD013-->
+
+| Directory       | Description                                      | Link                      |
+| :-------------- | :----------------------------------------------- | :------------------------ |
+| `archives`      | Compress and extract files and directories.      | [View README](archives/README.md) |
+| `cd`            | Navigate the file system.                        | [View README](cd/README.md)       |
+| `chmod`         | Change file and directory permissions.           | [View README](chmod/README.md)    |
+| `clear`         | Clear the terminal screen.                       | [View README](clear/README.md)    |
+| `configuration` | Manage dotfiles and shell configurations.        | [View README](configuration/README.md) |
+| `default`       | Set up default shell aliases and configurations. | [View README](default/README.md)  |
+| `dig`           | Query DNS name servers.                          | [View README](dig/README.md)      |
+| `disk-usage`    | Display disk usage information.                  | [View README](disk-usage/README.md) |
+| `editor`        | Configure default text editors.                  | [View README](editor/README.md)   |
+| `find`          | Search files and directories using `find`.       | [View README](find/README.md)     |
+| `gcloud`        | Manage Google Cloud SDK tools.                   | [View README](gcloud/README.md)   |
+| `git`           | Manage Git aliases and configurations.           | [View README](git/README.md)      |
+| `gnu`           | Manage GNU core utilities.                       | [View README](gnu/README.md)      |
+| `heroku`        | Manage Heroku CLI.                               | [View README](heroku/README.md)   |
+| `interactive`   | Configure interactive shell behavior.            | [View README](interactive/README.md) |
+| `list`          | List files and directories.                      | [View README](list/README.md)     |
+| `macOS`         | Manage macOS-specific shell settings.            | [View README](macOS/README.md)    |
+| `make`          | Manage GNU Make aliases and utilities.           | [View README](make/README.md)     |
+| `mkdir`         | Create directories with custom options.          | [View README](mkdir/README.md)    |
+| `npm`           | Manage Node.js package manager aliases.          | [View README](npm/README.md)      |
+| `permission`    | Configure file and directory permissions.         | [View README](permission/README.md) |
+| `pnpm`          | Manage pnpm package manager aliases.             | [View README](pnpm/README.md)     |
+| `ps`            | Manage process status commands.                  | [View README](ps/README.md)       |
+| `python`        | Configure Python aliases and utilities.          | [View README](python/README.md)   |
+| `rsync`         | Configure rsync for efficient file transfers.    | [View README](rsync/README.md)    |
+| `rust`          | Manage Rust programming tools and configurations.| [View README](rust/README.md)     |
+| `subversion`    | Configure Subversion (SVN) version control.       | [View README](subversion/README.md) |
+| `sudo`          | Manage superuser operations.                     | [View README](sudo/README.md)     |
+| `tmux`          | Configure tmux terminal multiplexer.             | [View README](tmux/README.md)     |
+| `update`        | Update dotfiles and related configurations.       | [View README](update/README.md)   |
+| `uuid`          | Generate UUIDs for various use cases.            | [View README](uuid/README.md)     |
+| `wget`          | Manage wget command-line tool.                   | [View README](wget/README.md)     |
+
+<!-- markdownlint-enable MD013-->
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
