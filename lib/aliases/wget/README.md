@@ -3,13 +3,13 @@
 <img
   src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
   alt="dotfiles logo"
-  width="261"
+  width="66"
   align="right"
 />
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.468)
+# Dotfiles (v0.2.469)
 
 Simply designed to fit your shell life 🐚
 

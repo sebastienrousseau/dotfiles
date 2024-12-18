@@ -3,9 +3,9 @@
 ################################################################################
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: clear.aliases.sh
-# Version: 0.2.468
-# Author: @wwdseb
-# Copyright (c) 2015-2024. All rights reserved
+# Version: 0.2.469
+# Author: Sebastien Rousseau
+# Copyright (c) 2015-2025. All rights reserved
 # Description: Enhances terminal interaction with aliases for clearing the screen,
 # navigating directories, and displaying directory contents in an organized manner.
 # Website: https://dotfiles.io

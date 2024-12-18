@@ -1,39 +1,167 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.468) - <https://dotfiles.io>
-# Made with ♥ in London, UK by @wwdseb
-# Copyright (c) 2015-2024. All rights reserved
+################################################################################
+# 🅳🅾🆃🅵🅸🅻🅴🆂
+# Script: environment.sh
+# Version: 0.2.469
+# Author: Sebastien Rousseau
+# Copyright (c) 2015-2025. All rights reserved
+# Description: Configure system environment variables and load dotfiles
+# Website: https://dotfiles.io
 # License: MIT
+################################################################################
 
-## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set Dotfiles variable.
-HOSTNAME=$(hostname -f)          # hostname of the machine.
-INPUTRC=${HOME}/.inputrc         # set INPUTRC (so that .inputrc is respected)
-OS_ARCH=$(uname -m)              # machine hardware name.
-OS_NAME=$(uname)                 # operating system name.
-OS_VERSION=$(uname -r)           # operating system version number.
-SSL_CERT_FILE=${HOME}/cacert.pem # set the SSL_CERT_FILE environment variable.
-USER_LANGUAGE="en_GB.UTF-8"      # default language.
-USER=$(whoami)                   # current user name.
+#-----------------------------------------------------------------------------
+# Function: configure_system_info
+#
+# Description:
+#   Configures system-related environment variables.
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   0 on success, 1 on failure
+#-----------------------------------------------------------------------------
+configure_system_info() {
+    # System information
+    if ! HOSTNAME=$(hostname -f); then
+        echo "Warning: Could not determine hostname" >&2
+        return 1
+    fi
 
-## 🅴🆇🅿🅾🆁🆃🆂 - Export the variables.
-export ARCHFLAGS="-arch ${OS_ARCH}"     # archflags for the current machine.
-export DOTFILES_VERSION='0.2.468'       # version of the dotfiles.
-export DOTFILES="${HOME}"/.dotfiles/lib # path to the cross plaform dotfiles.
-export HOSTNAME=${HOSTNAME}             # hostname of the machine.
-export INPUTRC=${INPUTRC}               # set INPUTRC (so that .inputrc is respected)
-export LANG=${USER_LANGUAGE}            # default language.
-export LANGUAGE=${USER_LANGUAGE}        # default language.
-export LC_ALL=${USER_LANGUAGE}          # default language.
-export LC_CTYPE=${USER_LANGUAGE}        # default language.
-export OS_ARCH                          # machine hardware name.
-export OS_NAME                          # operating system name.
-export OS_VERSION                       # operating system version number.
-export SSL_CERT_FILE=${SSL_CERT_FILE}   # set the SSL_CERT_FILE environment variable.
-export TERM=xterm-256color              # default terminal color.
-export USER                             # current user name.
+    if ! OS_ARCH=$(uname -m); then
+        echo "Warning: Could not determine system architecture" >&2
+        return 1
+    fi
 
-## 🅻🅾🅰🅳🅴🆁🆂 - Load the dotfiles.
-for loaders in "${DOTFILES}"/*.sh; do
-  # shellcheck source=/dev/null
-  . "${loaders}"
-done
+    if ! OS_NAME=$(uname); then
+        echo "Warning: Could not determine operating system" >&2
+        return 1
+    fi
+
+    if ! OS_VERSION=$(uname -r); then
+        echo "Warning: Could not determine system version" >&2
+        return 1
+    fi
+
+    if ! USER=$(whoami); then
+        echo "Warning: Could not determine username" >&2
+        return 1
+    fi
+
+    # Export system variables
+    export HOSTNAME
+    export OS_ARCH
+    export OS_NAME
+    export OS_VERSION
+    export USER
+    export ARCHFLAGS="-arch ${OS_ARCH}"
+
+    return 0
+}
+
+#-----------------------------------------------------------------------------
+# Function: configure_locale_settings
+#
+# Description:
+#   Configures locale and language settings.
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   None
+#-----------------------------------------------------------------------------
+configure_locale_settings() {
+    # Default language settings
+    local USER_LANGUAGE="en_GB.UTF-8"
+
+    # Export locale variables
+    export LANG="${USER_LANGUAGE}"
+    export LANGUAGE="${USER_LANGUAGE}"
+    export LC_ALL="${USER_LANGUAGE}"
+    export LC_CTYPE="${USER_LANGUAGE}"
+}
+
+#-----------------------------------------------------------------------------
+# Function: configure_dotfiles_environment
+#
+# Description:
+#   Configures dotfiles-specific environment variables.
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   0 on success, 1 on failure
+#-----------------------------------------------------------------------------
+configure_dotfiles_environment() {
+    # Dotfiles configuration
+    export DOTFILES_VERSION='0.2.469'
+    export DOTFILES="${HOME}/.dotfiles/lib"
+
+    # Check if dotfiles directory exists
+    if [[ ! -d "${DOTFILES}" ]]; then
+        echo "Warning: Dotfiles directory not found: ${DOTFILES}" >&2
+        return 1
+    fi
+
+    # Additional environment settings
+    export INPUTRC="${HOME}/.inputrc"
+    export SSL_CERT_FILE="${HOME}/cacert.pem"
+    export TERM="xterm-256color"
+
+    return 0
+}
+
+#-----------------------------------------------------------------------------
+# Function: load_dotfiles
+#
+# Description:
+#   Loads all .sh files from the dotfiles directory.
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   0 on success, 1 if no files found
+#-----------------------------------------------------------------------------
+load_dotfiles() {
+    local loaders_pattern="${DOTFILES}/*.sh"
+    local found_files=0
+
+    # Check if any matching files exist
+    for loader in ${loaders_pattern}; do
+        if [[ -f "${loader}" ]]; then
+            found_files=1
+            # shellcheck source=/dev/null
+            if ! . "${loader}"; then
+                echo "Warning: Failed to load ${loader}" >&2
+            fi
+        fi
+    done
+
+    if [[ ${found_files} -eq 0 ]]; then
+        echo "Warning: No dotfiles found in ${DOTFILES}" >&2
+        return 1
+    fi
+
+    return 0
+}
+
+#-----------------------------------------------------------------------------
+# Main Execution
+#-----------------------------------------------------------------------------
+
+# Configure system information
+configure_system_info || echo "Warning: System information configuration failed" >&2
+
+# Configure locale settings
+configure_locale_settings
+
+# Configure dotfiles environment
+configure_dotfiles_environment || echo "Warning: Dotfiles environment configuration failed" >&2
+
+# Load dotfiles
+load_dotfiles || echo "Warning: Dotfiles loading failed" >&2

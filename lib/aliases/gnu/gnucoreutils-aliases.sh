@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.468) - <https://dotfiles.io>
-# Made with ♥ in London, UK by @wwdseb
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.469) - <https://dotfiles.io>
+# Made with ♥ in London, UK by Sebastien Rousseau
 # Copyright (c)' 2015-2023. All rights reserved
 # License: MIT
 

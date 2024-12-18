@@ -3,9 +3,9 @@
 ################################################################################
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: default.aliases.sh
-# Version: 0.2.468
-# Author: @wwdseb
-# Copyright (c) 2015-2024. All rights reserved
+# Version: 0.2.469
+# Author: Sebastien Rousseau
+# Copyright (c) 2015-2025. All rights reserved
 # Description: Script containing default shell aliases
 # Website: https://dotfiles.io
 # License: MIT

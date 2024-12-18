@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.468) - <https://dotfiles.io>
-# Made with ♥ in London, UK by @wwdseb
-# Copyright (c) 2015-2024. All rights reserved
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.469) - <https://dotfiles.io>
+# Made with ♥ in London, UK by Sebastien Rousseau
+# Copyright (c) 2015-2025. All rights reserved
 # License: MIT
 # Script: gcloud.aliases.sh
-# Version: 0.2.468
+# Version: 0.2.469
 # Website: https://dotfiles.io
 
 # 🅶🅲🅻🅾🆄🅳 🅰🅻🅸🅰🆂🅴🆂 - Google Cloud aliases.

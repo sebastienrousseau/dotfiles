@@ -3,13 +3,13 @@
 <img
   src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
   alt="dotfiles logo"
-  width="261"
+  width="66"
   align="right"
 />
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.468)
+# Dotfiles (v0.2.469)
 
 Simply designed to fit your shell life 🐚
 
@@ -53,7 +53,7 @@ productivity no matter where you work.
 <!-- markdownlint-enable MD033 MD041 -->
 
 [![Getting Started][getting_started]][getting-started-url]
-[![Download Dotfiles v0.2.468][download_button]][12]
+[![Download Dotfiles v0.2.469][download_button]][12]
 
 <!-- markdownlint-disable MD033 MD041 MD043 -->
 </center>
@@ -168,7 +168,7 @@ To read the documentation for Dotfiles, please visit:
 
 ### 1️⃣ Download Dotfiles
 
-You can download the latest version (v0.2.468) with the following
+You can download the latest version (v0.2.469) with the following
 options:
 
 - [**Manual download**][24] - **The easiest way to install Dotfiles.**
@@ -364,7 +364,7 @@ Apache License (Version 2.0).
 [09]: https://www.deepin.org/en/ "Deepin"
 [10]: https://devuan.org/ "Devuan"
 [11]: https://github.com/sebastienrousseau/dotfiles/docs "Documentation"
-[12]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.468.tar.gz "Download Dotfiles v0.2.468"
+[12]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.469.tar.gz "Download Dotfiles v0.2.469"
 [13]: https://github.com/sebastienrousseau/dotfiles/network/members "List of members"
 [14]: https://github.com/sebastienrousseau/dotfiles/graphs/contributors "List of contributors"
 [15]: https://git-scm.com/ "Git"

@@ -26,15 +26,15 @@
 	],
 	"description": "Dotfiles - A set of macOS / Linux and Windows configuration files - Simply designed to fit your shell life.",
 	"devDependencies": {
-		"@types/node": "^20.11.19",
-		"compressing": "^1.10.0",
-		"filesizes": "^0.1.2",
+		"@types/node": "22.10.2",
+		"compressing": "1.10.1",
+		"filesizes": "0.1.2",
 		"fs-extra": "11.2.0",
-		"husky": "^9.0.11",
+		"husky": "9.1.7",
 		"jsmin": "^1.0.1",
-		"rimraf": "^5.0.5",
-		"typescript": "^5.3.3",
-		"winston": "^3.11.0"
+		"rimraf": "6.0.1",
+		"typescript": "5.7.2",
+		"winston": "3.17.0"
 	},
 	"directories": {
 		"bin": "./bin",
@@ -42,7 +42,7 @@
 		"scripts": "./scripts"
 	},
 	"engines": {
-		"node": "^21.6.2"
+		"node": "^23.4.0"
 	},
 	"files": [
 		"dist/"
@@ -88,5 +88,5 @@
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"types": "./dist/bin/index.d.ts",
-	"version": "0.2.468"
+	"version": "0.2.469"
 }

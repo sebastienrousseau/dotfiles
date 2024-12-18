@@ -3,9 +3,9 @@
 ################################################################################
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: configuration.aliases.sh
-# Version: 0.2.468
-# Author: @wwdseb
-# Copyright (c) 2015-2024. All rights reserved
+# Version: 0.2.469
+# Author: Sebastien Rousseau
+# Copyright (c) 2015-2025. All rights reserved
 # Description: Script containing aliases to open configuration files in default
 # editor
 # Website: https://dotfiles.io
@@ -68,6 +68,3 @@ alias edit_zshrc='${EDITOR} $HOME/.zshrc'
 
 # Open Zsh profile in default text editor
 alias edit_zsh_profile='${EDITOR} $HOME/.zsh_profile'
-
-# Add blank lines between groups
-echo -e "\n\n"
