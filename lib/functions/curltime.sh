@@ -1,23 +1,63 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.469) - <https://dotfiles.io>
-# Made with ♥ in London, UK by Sebastien Rousseau
-# Copyright (c) 2015-2025. All rights reserved
+################################################################################
+# 🅳🅾🆃🅵🅸🅻🅴🆂 - Curl Timing Viewer (curltime)
+# Made with ♥ by Sebastien Rousseau
 # License: MIT
+#
+# Description:
+#   curltime is a function that measures and displays various timing metrics for
+#   an HTTP request made to a given URL using `curl`. It provides detailed
+#   information on DNS resolution time, connection time, and total transfer time.
+#
+# Usage:
+#   curltime [url]
+#   curltime --help
+#
+# Arguments:
+#   url         The URL for which to fetch timing metrics.
+#   --help      Displays this help menu and exits.
+#
+# Examples:
+#   curltime https://example.com
+#       # Displays the timing metrics for the given URL.
+#
+#   curltime --help
+#       # Displays the help menu.
+#
+################################################################################
 
-# https://dotfiles.io
-#
-# Description:  Mac OS X Dotfiles - Simply designed to fit your shell life.
-#
-# Made with ♥ in London, UK by Sebastien Rousseau
-# Copyright (c) 2015-2025. All rights reserved
-# Licensed under the MIT license
-#
-
-# Curl Time: Function to return the time it took to get a response from a given URL.
-## get the timings for a curl to a URL
-## usage: curltime $url
+# Function to display timing metrics for a given URL
 curltime() {
+  # Display help menu
+  if [[ "$1" == "--help" ]]; then
+    echo "curltime: Curl Timing Viewer"
+    echo
+    echo "Usage:"
+    echo "  curltime [url]"
+    echo "  curltime --help"
+    echo
+    echo "Arguments:"
+    echo "  url         The URL for which to fetch timing metrics."
+    echo "  --help      Displays this help menu and exits."
+    echo
+    echo "Examples:"
+    echo "  curltime https://example.com"
+    echo "      # Displays the timing metrics for the given URL."
+    echo
+    echo "  curltime --help"
+    echo "      # Displays the help menu."
+    echo
+    return 0
+  fi
+
+  # Check if a URL is provided
+  if [[ -z "$1" ]]; then
+    echo "[ERROR] No URL provided. Use 'curltime --help' for usage information." >&2
+    return 1
+  fi
+
+  # Fetch and display timing metrics for the URL
   curl -w "\n\
 ┌──────────────────────────────┐\n\
 │Time appconnect:    %{time_appconnect}s │\n\
@@ -29,5 +69,7 @@ curltime() {
 └──────────────────────────────┘\n\
 Time total:  %{time_total}s\n\n" -o /dev/null -s "$1"
 }
-alias cht="curltime"  # cht: Curl Time.
-alias chtm="curltime" # chtm: Curl Time.
+
+# Aliases for convenience
+alias cht="curltime"  # Alias for curltime
+alias chtm="curltime" # Alias for curltime

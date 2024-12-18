@@ -11,11 +11,10 @@
 # License: MIT
 ################################################################################
 
-## 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽🆂
-# Function: load_custom_configurations
+# Function: load_paths
 #
 # Description:
-#   Loads custom shell configurations from the specified directory.
+#   Loads all the paths from the specified directory.
 #
 # Arguments:
 #   None
@@ -23,11 +22,11 @@
 # Further Reading:
 #   ShellCheck Documentation: https://github.com/koalaman/shellcheck
 
-load_custom_configurations() {
-  for config in "${HOME}"/.dotfiles/lib/configurations/[!.#]*/*.sh; do
+load_paths() {
+  for path in "${HOME}"/.dotfiles/lib/paths/[!.#]*/*.sh; do
     # shellcheck source=/dev/null
-    source "${config}"
+    source "${path}"
   done
 }
 
-load_custom_configurations
+load_paths

@@ -29,7 +29,6 @@ export OS_NAME                          # operating system name.
 export OS_VERSION                       # operating system version number.
 export SSL_CERT_FILE=${SSL_CERT_FILE}   # set the SSL_CERT_FILE environment variable.
 export TERM=xterm-256color              # default terminal color.
-# export USER                             # current user name.
 
 ## 🅻🅾🅰🅳🅴🆁🆂 - Load the dotfiles.
 for loaders in "${DOTFILES}"/*.sh; do

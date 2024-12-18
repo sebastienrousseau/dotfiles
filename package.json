@@ -42,7 +42,7 @@
 		"scripts": "./scripts"
 	},
 	"engines": {
-		"node": "^21.6.2"
+		"node": "^23.4.0"
 	},
 	"files": [
 		"dist/"

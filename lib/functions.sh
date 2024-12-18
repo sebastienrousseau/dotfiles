@@ -23,9 +23,12 @@
 #   ShellCheck Documentation: https://github.com/koalaman/shellcheck
 
 load_custom_functions() {
-  for function in "${HOME}"/.dotfiles/lib/functions/[!.#]*.sh; do
+  for function in "${HOME}"/.dotfiles/lib/functions/*.sh; do
     # shellcheck source=/dev/null
-    source "${function}"
+    source "${function}" || {
+      echo "Failed to source ${function}" >&2
+      return 1
+    }
   done
 }
 

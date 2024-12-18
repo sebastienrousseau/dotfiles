@@ -68,6 +68,3 @@ alias edit_zshrc='${EDITOR} $HOME/.zshrc'
 
 # Open Zsh profile in default text editor
 alias edit_zsh_profile='${EDITOR} $HOME/.zsh_profile'
-
-# Add blank lines between groups
-echo -e "\n\n"

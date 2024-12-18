@@ -1,38 +1,78 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.469) - <https://dotfiles.io>
-# Made with ♥ in London, UK by Sebastien Rousseau
-# Copyright (c) 2015-2025. All rights reserved
+################################################################################
+# 🅳🅾🆃🅵🅸🅻🅴🆂 - Environment Detector (environment)
+# Made with ♥ by Sebastien Rousseau
 # License: MIT
+#
+# Description:
+#   environment is a function that detects the current operating system
+#   environment. It identifies whether the system is macOS, Linux, or Windows
+#   (including Cygwin and MING environments).
+#
+# Usage:
+#   environment
+#   environment --help
+#
+# Arguments:
+#   --help      Displays this help menu and exits.
+#
+# Examples:
+#   environment
+#       # Detects and displays the current operating system environment.
+#
+#   environment --help
+#       # Displays the help menu.
+#
+################################################################################
 
-# environment: Function to detect the current environment
+# Function to detect the current environment
 environment() {
-    # Define a fallback `OS`
-    LOCAL_OS="other"
+  # Display help menu
+  if [[ "$1" == "--help" ]]; then
+    echo "environment: Environment Detector"
+    echo
+    echo "Usage:"
+    echo "  environment"
+    echo "  environment --help"
+    echo
+    echo "Arguments:"
+    echo "  --help      Displays this help menu and exits."
+    echo
+    echo "Examples:"
+    echo "  environment"
+    echo "      # Detects and displays the current operating system environment."
+    echo
+    echo "  environment --help"
+    echo "      # Displays the help menu."
+    echo
+    return 0
+  fi
 
-    # Mac
-    if [[ "$(uname -s | grep -c Darwin)" -gt 0 ]] || true; then
-        LOCAL_OS="mac"
+  # Detect the environment
+  LOCAL_OS="other"  # Fallback OS
 
-    # Linux
-    elif [[ "$(uname -s | grep -c Linux)" -gt 0 ]] || true; then
-        LOCAL_OS="linux"
+  # macOS
+  if [[ "$(uname -s | grep -c Darwin)" -gt 0 ]]; then
+    LOCAL_OS="mac"
 
-    # Windows via MING
-    elif [[ "$(uname -s | grep -c MING)" -gt 0 ]] || true; then
-        LOCAL_OS="win"
+  # Linux
+  elif [[ "$(uname -s | grep -c Linux)" -gt 0 ]]; then
+    LOCAL_OS="linux"
 
-    # Cygwin
-    elif [[ "$(uname -s | grep -c Cygwin)" -gt 0 ]] || true; then
-        LOCAL_OS="win"
+  # Windows via MING
+  elif [[ "$(uname -s | grep -c MING)" -gt 0 ]]; then
+    LOCAL_OS="win"
 
-    # Cygwin via Babun
-    elif [[ "$(uname -s | grep -c CYGWIN)" -gt 0 ]] || true; then
-        LOCAL_OS="win"
+  # Cygwin
+  elif [[ "$(uname -s | grep -c Cygwin)" -gt 0 ]]; then
+    LOCAL_OS="win"
 
-    fi
+  # Cygwin via Babun
+  elif [[ "$(uname -s | grep -c CYGWIN)" -gt 0 ]]; then
+    LOCAL_OS="win"
+  fi
 
-    # Output the result
-    echo "${LOCAL_OS}"
-
+  # Output the result
+  echo "${LOCAL_OS}"
 }
