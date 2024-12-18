@@ -1,13 +1,9 @@
-<!-- markdownlint-disable MD033 MD041 MD043 -->
-
 <img
   src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
   alt="dotfiles logo"
   width="66"
   align="right"
 />
-
-<!-- markdownlint-enable MD033 MD041 -->
 
 # Dotfiles (v0.2.469)
 
@@ -24,54 +20,72 @@ The functions are organized by category and are listed below.
 
 <!-- markdownlint-disable MD013-->
 
-### Navigation elements
+### Navigation
 
-| Function | Description | Usage |
-| :--- | :--- | :--- |
-| `cdls` | Function to combine cd and ls. | `cdls <path>` |
-| `goto` | Function to change to the directory inputed. | `goto <path>` |
+| Function        | Description                            | Usage                |
+| :-------------- | :------------------------------------- | :------------------- |
+| `cdls`          | Combine `cd` and `ls` into one command. | `cdls <path>`       |
+| `goto`          | Change to the specified directory.     | `goto <path>`       |
 
-### Web Related Functions
+### API Utilities
 
-| Function | Description | Usage |
-| :--- | :--- | :--- |
-| `curlheader` | Function to return only a specific response header or all response headers for a given URL. | `curlheader <url> [<header>]` |
-| `curlstatus` | Function to return only the HTTP status code for a given URL. | `curlstatus <url>` |
-| `curltime` | Function to return only the time it took to execute a given URL. | `curltime <url>` |
-| `httpdebug` | Function to download a web page and show info on what took time. | `httpdebug <url>` |
-| `view-source` | Function to view the source code of a web page. | `view-source <url>` |
-| `whoisport` | Function to check if a port is open on a remote host. | `whoisport <host> <port>` |
+| Function        | Description                                      | Usage                    |
+| :-------------- | :----------------------------------------------- | :----------------------- |
+| `apihealth`     | Check API health status.           | `apihealth <url>`       |
+| `apilatency`    | Measure API latency.               | `apilatency <url>`      |
+| `apiload`       | Analyze API load.                  | `apiload <url>`         |
+| `curlheader`    | Fetch specific/all response headers for a URL.   | `curlheader <url> [<header>]` |
+| `curlstatus`    | Fetch HTTP status code for a URL.                | `curlstatus <url>`      |
+| `curltime`      | Measure time taken for a URL request.            | `curltime <url>`        |
+| `httpdebug`     | Debug HTTP requests and measure timings.         | `httpdebug <url>`       |
+| `whoisport`     | Check if a port is open on a remote host.        | `whoisport <host> <port>` |
 
-### System Info and Utilities Functions
+### File Operations
 
-| Function | Description | Usage |
-| :--- | :--- | :--- |
-| `environment` | Function to detect the current environment. | `environment` |
-| `extract` | Function to extract most know archives with one command. The supported file formats include: tar.bz2, tar.gz, bz2, rar, gz, tar, tbz2, tgz, zip, Z, and 7z. | `extract <file>` |
-| `filehead` | Function to display the first lines of a file. | `filehead <file>` |
-| `freespace` | Function to display the free space on the disk. | `freespace` |
-| `genpwd` | Function to generates a strong random password of 20 characters (similar to Apple) | `genpwd` |
-| `hidehiddenfiles` | Function to hide hidden files in Finder. | `hidehiddenfiles` |
-| `hostinfo` | Function to display useful host related information. | `hostinfo` |
-| `hstats` | Function to display Ze Shell history stats informaton (requires zsh). | `hstats` |
-| `keygen` | Function to generates SSH key pairs. | `keygen <name> <email>` |
-| `last` | List the modified files within 60 minutes. | `last` |
-| `logout` | Function to logout from OS X via the Terminal. | `logout` |
-| `lowercase` | Function to move filenames or directory names to lowercase. | `lowercase <file>` |
-| `matrix` | Function to Enable Matrix Effect in the terminal. | `matrix` |
-| `mount_read_only` | Function to mount a read-only disk image as read-write (OS X). | `mount_read_only <image>` |
-| `myproc` | Function to list processes owned by an user.` | `myproc` |
-| `prependpath` | Prepend $PATH without duplicates. | `prependpath <path>` |
-| `ql` | Function to open any file in MacOS Quicklook Preview mode. | `ql <file>` |
-| `rd` | Function to remove a directory and its files (OS X). | `rd <directory>` |
-| `remove_disk` | Spin down unneeded disk drives (OS X). | `remove_disk <disk>` |
-| `ren` | Function to rename files extension. | `ren <old> <new>` |
-| `showhiddenfiles` | Function to show hidden files in Finder. | `showhiddenfiles` |
-| `size` | Function to display the size of a file or total size of a directory. | `size <file>` |
-| `stopwatch` | Function to measure the time it takes to execute a program. | `stopwatch <program>` |
-| `uppercase` | Function to move filenames or directory names to uppercase. | `uppercase <file>` |
-| `vsc` | Function to open a file or folder in Visual Studio Code. | `vsc <file>` |
-| `zipf` | Function to zip a file. | `zipf <file>` |
+| Function         | Description                                      | Usage                     |
+| :--------------- | :----------------------------------------------- | :------------------------ |
+| `encode64`       | Encode data in Base64 format.      | `encode64 <input>`       |
+| `extract`        | Extract known archive formats.                  | `extract <file>`         |
+| `hexdump`        | Display a hexadecimal dump of a file. | `hexdump <file>`    |
+| `hiddenfiles`    | List hidden files in the current directory. | `hiddenfiles` |
+| `kebabcase`      | Convert filenames to kebab-case.   | `kebabcase <file>`       |
+| `lowercase`      | Convert filenames to lowercase.                 | `lowercase <file>`       |
+| `prependpath`    | Add a directory to the `$PATH` environment variable. | `prependpath <path>` |
+| `ren`            | Rename file extensions.                         | `ren <old> <new>`        |
+| `showhiddenfiles`| Show hidden files in Finder (macOS).            | `showhiddenfiles`        |
+| `snakecase`      | Convert filenames to snake_case.   | `snakecase <file>`       |
+| `titlecase`      | Convert filenames to Title Case.   | `titlecase <file>`       |
+| `uppercase`      | Convert filenames to uppercase.                 | `uppercase <file>`       |
+| `zipf`           | Zip a file.                                     | `zipf <file>`            |
+
+### System Information
+
+| Function         | Description                                      | Usage                     |
+| :--------------- | :----------------------------------------------- | :------------------------ |
+| `backup`         | Create system backups.             | `backup`                 |
+| `environment`    | Detect the current environment.                 | `environment`            |
+| `freespace`      | Display free disk space.                        | `freespace`              |
+| `hostinfo`       | Display host-related information.               | `hostinfo`               |
+| `last`           | List files modified within the last 60 minutes. | `last`                   |
+| `logout`         | Log out from the current session (macOS).       | `logout`                 |
+| `matrix`         | Enable matrix effect in the terminal.           | `matrix`                 |
+| `mount_read_only`| Mount a read-only disk image as read-write (macOS). | `mount_read_only <image>` |
+| `myproc`         | List processes owned by the user.               | `myproc`                 |
+| `size`           | Display size of a file or total directory size. | `size <file>`            |
+| `stopwatch`      | Measure execution time of a program.            | `stopwatch <program>`    |
+| `sysinfo`        | Display system information.        | `sysinfo`                |
+
+### Miscellaneous
+
+| Function         | Description                                      | Usage                     |
+| :--------------- | :----------------------------------------------- | :------------------------ |
+| `genpwd`         | Generate a strong random password.              | `genpwd`                 |
+| `keygen`         | Generate SSH key pairs.                         | `keygen <name> <email>`  |
+| `ql`             | Open any file in Quick Look preview (macOS).    | `ql <file>`              |
+| `rd`             | Remove a directory and its files (macOS).       | `rd <directory>`         |
+| `remove_disk`    | Spin down unneeded disk drives (macOS).         | `remove_disk <disk>`     |
+| `vscode`         | Open a file or folder in Visual Studio Code.    | `vscode <file>`          |
+| `view-source`    | View the source code of a web page.             | `view-source <url>`      |
 
 <!-- markdownlint-enable MD013-->
 
