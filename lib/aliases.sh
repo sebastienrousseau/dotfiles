@@ -4,7 +4,7 @@
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: aliases.sh
 # Version: 0.2.470
-# Author: @wwdseb
+# Author: Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # Description: Script to manage shell aliases
 # Website: https://dotfiles.io
@@ -40,11 +40,32 @@ remove_all_aliases() {
 #   ShellCheck Documentation: https://github.com/koalaman/shellcheck
 
 load_custom_aliases() {
-  for file in "${HOME}"/.dotfiles/lib/aliases/[!.#]*/*.sh; do
-    # shellcheck source=/dev/null
-    source "${file}"
+  local aliases_dir="${HOME}/.dotfiles/lib/aliases"
+
+  if [[ ! -d "${aliases_dir}" ]]; then
+    echo "Warning: Aliases directory not found: ${aliases_dir}" >&2
+    return 1
+  fi
+
+  # Count loaded files for reporting
+  local count=0
+
+  for file in "${aliases_dir}"/*/[!.#]*.sh; do
+    if [[ -f "${file}" ]]; then
+      # shellcheck source=/dev/null
+      source "${file}"
+      ((count++))
+    fi
   done
+
+  if [[ ${count} -eq 0 ]]; then
+    echo "Warning: No alias files found in ${aliases_dir}" >&2
+    return 0
+  fi
+
+  return 0
 }
 
+# Main execution
 remove_all_aliases
 load_custom_aliases
