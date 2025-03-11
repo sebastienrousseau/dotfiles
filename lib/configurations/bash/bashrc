@@ -71,17 +71,19 @@ configure_system_info() {
 #   None
 #
 # Returns:
-#   None
+#   0 on success
 #-----------------------------------------------------------------------------
 configure_locale_settings() {
-    # Default language settings
-    local USER_LANGUAGE="en_GB.UTF-8"
+    # Default language settings - use environment variable if set, otherwise default
+    local USER_LANGUAGE="${DOTFILES_LANG:-en_GB.UTF-8}"
 
     # Export locale variables
     export LANG="${USER_LANGUAGE}"
     export LANGUAGE="${USER_LANGUAGE}"
     export LC_ALL="${USER_LANGUAGE}"
     export LC_CTYPE="${USER_LANGUAGE}"
+
+    return 0
 }
 
 #-----------------------------------------------------------------------------
@@ -109,8 +111,18 @@ configure_dotfiles_environment() {
 
     # Additional environment settings
     export INPUTRC="${HOME}/.inputrc"
-    export SSL_CERT_FILE="${HOME}/cacert.pem"
-    export TERM="xterm-256color"
+
+    # Set SSL_CERT_FILE only if the file exists
+    if [[ -f "${HOME}/cacert.pem" ]]; then
+        export SSL_CERT_FILE="${HOME}/cacert.pem"
+    else
+        echo "Warning: SSL certificate file not found: ${HOME}/cacert.pem" >&2
+    fi
+
+    # Only set TERM if not already defined
+    if [[ -z "${TERM}" ]]; then
+        export TERM="xterm-256color"
+    fi
 
     return 0
 }
@@ -130,20 +142,27 @@ configure_dotfiles_environment() {
 load_dotfiles() {
     local loaders_pattern="${DOTFILES}/*.sh"
     local found_files=0
+    local load_errors=0
 
     # Check if any matching files exist
     for loader in ${loaders_pattern}; do
         if [[ -f "${loader}" ]]; then
             found_files=1
-            # shellcheck source=/dev/null
-            if ! . "${loader}"; then
+            # Load the file, capturing any errors
+            if ! source "${loader}"; then
                 echo "Warning: Failed to load ${loader}" >&2
+                load_errors=$((load_errors + 1))
             fi
         fi
     done
 
     if [[ ${found_files} -eq 0 ]]; then
         echo "Warning: No dotfiles found in ${DOTFILES}" >&2
+        return 1
+    fi
+
+    if [[ ${load_errors} -gt 0 ]]; then
+        echo "Warning: ${load_errors} files failed to load properly" >&2
         return 1
     fi
 
