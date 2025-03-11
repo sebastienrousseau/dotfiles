@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 ################################################################################
-# 🅳🅾🆃🅵🅸🅻🅴🆂
-# Script: environment.sh
+# 🅱🅰🆂🅷🆁🅲
+# File: bashrc
 # Version: 0.2.470
 # Author: Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
@@ -10,6 +10,36 @@
 # Website: https://dotfiles.io
 # License: MIT
 ################################################################################
+
+#-----------------------------------------------------------------------------
+# Function: check_required_tools
+#
+# Description:
+#   Verifies all required system tools are available.
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   0 if all tools are available, 1 otherwise
+#-----------------------------------------------------------------------------
+check_required_tools() {
+    local required_tools=("hostname" "uname" "whoami")
+    local missing_tools=()
+
+    for tool in "${required_tools[@]}"; do
+        if ! command -v "${tool}" &> /dev/null; then
+            missing_tools+=("${tool}")
+        fi
+    done
+
+    if [[ ${#missing_tools[@]} -gt 0 ]]; then
+        echo "Warning: The following required tools are missing: ${missing_tools[*]}" >&2
+        return 1
+    fi
+
+    return 0
+}
 
 #-----------------------------------------------------------------------------
 # Function: configure_system_info
@@ -25,7 +55,7 @@
 #-----------------------------------------------------------------------------
 configure_system_info() {
     # System information
-    if ! HOSTNAME=$(hostname -f); then
+    if ! HOSTNAME=$(hostname -f 2>/dev/null || hostname); then
         echo "Warning: Could not determine hostname" >&2
         return 1
     fi
@@ -106,7 +136,11 @@ configure_dotfiles_environment() {
     # Check if dotfiles directory exists
     if [[ ! -d "${DOTFILES}" ]]; then
         echo "Warning: Dotfiles directory not found: ${DOTFILES}" >&2
-        return 1
+        mkdir -p "${DOTFILES}" || {
+            echo "Error: Failed to create dotfiles directory: ${DOTFILES}" >&2
+            return 1
+        }
+        echo "Created dotfiles directory: ${DOTFILES}" >&2
     fi
 
     # Additional environment settings
@@ -115,13 +149,33 @@ configure_dotfiles_environment() {
     # Set SSL_CERT_FILE only if the file exists
     if [[ -f "${HOME}/cacert.pem" ]]; then
         export SSL_CERT_FILE="${HOME}/cacert.pem"
-    else
-        echo "Warning: SSL certificate file not found: ${HOME}/cacert.pem" >&2
     fi
 
     # Only set TERM if not already defined
     if [[ -z "${TERM}" ]]; then
         export TERM="xterm-256color"
+    fi
+
+    return 0
+}
+
+#-----------------------------------------------------------------------------
+# Function: check_shell_compatibility
+#
+# Description:
+#   Checks if the current shell is compatible with this script.
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   0 if compatible, 1 otherwise
+#-----------------------------------------------------------------------------
+check_shell_compatibility() {
+    # Check if we're running in bash
+    if [[ -z "${BASH_VERSION}" ]]; then
+        echo "Warning: This script is designed for bash, but appears to be running in a different shell" >&2
+        return 1
     fi
 
     return 0
@@ -137,9 +191,15 @@ configure_dotfiles_environment() {
 #   None
 #
 # Returns:
-#   0 on success, 1 if no files found
+#   0 on success, 1 if no files found or load errors
 #-----------------------------------------------------------------------------
 load_dotfiles() {
+    # Only proceed if the directory exists
+    if [[ ! -d "${DOTFILES}" ]]; then
+        echo "Notice: Dotfiles directory does not exist, skipping loading of dotfiles" >&2
+        return 1
+    fi
+
     local loaders_pattern="${DOTFILES}/*.sh"
     local found_files=0
     local load_errors=0
@@ -157,7 +217,7 @@ load_dotfiles() {
     done
 
     if [[ ${found_files} -eq 0 ]]; then
-        echo "Warning: No dotfiles found in ${DOTFILES}" >&2
+        echo "Notice: No dotfiles found in ${DOTFILES}" >&2
         return 1
     fi
 
@@ -173,6 +233,12 @@ load_dotfiles() {
 # Main Execution
 #-----------------------------------------------------------------------------
 
+# Check shell compatibility
+check_shell_compatibility || echo "Warning: Shell compatibility check failed, continuing anyway" >&2
+
+# Check required tools
+check_required_tools || echo "Warning: Some required tools are missing, functionality may be limited" >&2
+
 # Configure system information
 configure_system_info || echo "Warning: System information configuration failed" >&2
 
@@ -183,4 +249,4 @@ configure_locale_settings
 configure_dotfiles_environment || echo "Warning: Dotfiles environment configuration failed" >&2
 
 # Load dotfiles
-load_dotfiles || echo "Warning: Dotfiles loading failed" >&2
+load_dotfiles || echo "Notice: No dotfiles were loaded" >&2
