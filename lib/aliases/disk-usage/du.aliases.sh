@@ -5,7 +5,7 @@
 # Description: Sets Disk Usage Aliases
 # License: MIT
 # Script: du.aliases.sh
-# Version: 0.2.469
+# Version: 0.2.470
 # Website: https://dotfiles.io
 
 # 🅳🅸🆂🅺 🆄🆂🅰🅶🅴 🅰🅻🅸🅰🆂🅴🆂

@@ -7,7 +7,7 @@
 />
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.469)
+# Dotfiles (v0.2.470)
 
 Seamlessly enhance your shell environment 🐚
 

@@ -3,7 +3,7 @@
 ################################################################################
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: configurations.sh
-# Version: 0.2.469
+# Version: 0.2.470
 # Author: Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # Description: Script to manage shell configurations

@@ -3,7 +3,7 @@
 ################################################################################
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: environment.sh
-# Version: 0.2.469
+# Version: 0.2.470
 # Author: Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # Description: Configure system environment variables and load dotfiles
@@ -98,7 +98,7 @@ configure_locale_settings() {
 #-----------------------------------------------------------------------------
 configure_dotfiles_environment() {
     # Dotfiles configuration
-    export DOTFILES_VERSION='0.2.469'
+    export DOTFILES_VERSION='0.2.470'
     export DOTFILES="${HOME}/.dotfiles/lib"
 
     # Check if dotfiles directory exists

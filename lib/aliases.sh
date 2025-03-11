@@ -3,7 +3,7 @@
 ################################################################################
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: aliases.sh
-# Version: 0.2.469
+# Version: 0.2.470
 # Author: @wwdseb
 # Copyright (c) 2015-2025. All rights reserved
 # Description: Script to manage shell aliases
