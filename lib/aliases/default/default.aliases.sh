@@ -60,9 +60,6 @@ set_default_aliases() {
     alias q='quit'
 
     # Shortcut for the `exit` command.
-    alias x='quit'
-
-    # Shortcut for the `exit` command.
     alias quit='exit'
 
     # Shutdown the system.
