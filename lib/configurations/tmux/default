@@ -32,7 +32,11 @@ setw -g xterm-keys on       # Enable xterm keys
 set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'tmux-plugins/tmux-resurrect'
 set -g @plugin 'tmux-plugins/tmux-continuum'
-set -g @continuum-restore 'on'
 
-# Initialize TMUX plugin manager
+# Continuum settings
+set -g @continuum-restore 'on'
+set -g @continuum-save-interval '15'
+
+# Initialize TMUX plugin manager (keep this line at the very bottom)
+# shellcheck disable=SC2088
 run '~/.tmux/plugins/tpm/tpm'

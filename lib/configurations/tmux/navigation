@@ -45,6 +45,7 @@ bind C-c new-session                                                # create ses
 bind C-f command-prompt -p find-session 'switch-client -t %%'       # find session
 bind C-n command-prompt -p "New session name:" "new-session -s '%%'" # create named session
 bind C-s choose-tree -Zs                                            # show session tree
+bind I run-shell "$HOME/.tmux/plugins/tpm/bin/install_plugins"          # install tmux plugins
 bind K confirm-before -p "kill all sessions? (y/n)" kill-server     # kill all sessions
 bind P command-prompt -p "New session in dir:" "run-shell 'cd %% && tmux new-session -d -s $(basename %%)'" # create session in directory
 bind S command-prompt -p "Rename session:" "rename-session '%%'"    # rename session
@@ -103,6 +104,7 @@ cat <<'EOF' | less -R
   Prefix C-n : Create named session
   Prefix C-f : Find session
   Prefix C-s : Show session tree
+  Prefix I : Install tmux plugins
   Prefix K : Kill all sessions
   Prefix P : Create session in directory
   Prefix S : Rename session
@@ -123,10 +125,8 @@ cat <<'EOF' | less -R
 EOF" # display help menu
 
 bind m run "cut -c3- ~/.tmux.conf | sh -s _toggle_mouse"            # toggle mouse
-
 bind U run "cut -c3- ~/.tmux.conf | sh -s _urlview #{pane_id}"      # urlview
 
 # Unbind defaults we don't use
 unbind n                                                            # unbind default next-window
-
 unbind p                                                            # unbind default previous-window

@@ -8,29 +8,27 @@
 # 🆃🅼🆄🆇 🅰🅻🅸🅰🆂🅴🆂
 
 if command -v 'tmux' >/dev/null; then
+  # Basic commands
+  alias tm='tmux'                     # Start tmux
+  alias tma='tmux attach-session'     # Attach to last session
+  alias tmat='tmux attach-session -t' # Attach to specific session
 
-  # Start tmux.
-  alias tm='tmux'
+  # Session management
+  alias tmks='tmux kill-session -a'   # Kill all sessions except current
+  alias tmka='tmux kill-server'       # Kill all sessions (server)
+  alias tml='tmux list-sessions'      # List all sessions
 
-  # Attach to a tmux session.
-  alias tma="tmux attach-session"
+  # Creating sessions
+  alias tmn='tmux new-session'        # New unnamed session
+  alias tms='tmux new-session -s'     # New named session
 
-  # Attach to a tmux session with name.
-  alias tmat="tmux attach-session -t"
+  # Configuration
+  alias tmr='tmux source-file ~/.tmux.conf' # Reload config
 
-  # Kill all tmux sessions.
-  alias tmks='tmux kill-session -a'
+  # Windows and panes
+  alias tmls='tmux list-windows'      # List windows
+  alias tmlp='tmux list-panes'        # List panes
 
-  # List tmux sessions.
-  alias tml='tmux list-sessions'
-
-  # Start a new tmux session.
-  alias tmn="tmux new-session"
-
-  # Start a new tmux session with name.
-  alias tmns="tmux new -s"
-
-  # Start a new tmux session.
-  alias tms='tmux new-session -s'
-
+  # Status information
+  alias tmi='tmux info'               # Show tmux info
 fi
