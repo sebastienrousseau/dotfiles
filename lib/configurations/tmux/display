@@ -1,13 +1,9 @@
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.470) - <https://dotfiles.io>
-
 # Made with ♥ in London, UK by Sebastien Rousseau
-
 # Copyright (c) 2015-2025. All rights reserved
-
 # License: MIT
 
 ## 🅳🅸🆂🅿🅻🅰🆈
-
 bind -n C-l send-keys C-l \; run 'sleep 0.2' \; clear-history     # clear both screen and history
 set -g aggressive-resize on                                       # resize panes automatically when window is resized
 set -g base-index 1                                               # start windows numbering at 1
@@ -24,7 +20,7 @@ set -g visual-silence off                                         # disable visu
 setw -g allow-rename off                                          # disable window renaming
 setw -g automatic-rename off                                      # disable automatic window renaming
 setw -g mode-keys vi                                              # vi mode
-setw -g automatic-rename off                                      # rename window to reflect current program
-setw -g monitor-activity on                                      # disable monitor for activity
+# Removed duplicate: automatic-rename off is already set above
+setw -g monitor-activity on                                       # monitor for activity
 setw -g pane-base-index 1                                         # make pane numbering consistent with windows
 setw -g synchronize-panes off                                     # disable pane synchronization

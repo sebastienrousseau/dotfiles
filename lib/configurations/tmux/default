@@ -4,15 +4,35 @@
 # License: MIT
 
 ## 🅳🅴🅵🅰🆄🅻🆃
-set -g default-terminal "screen-256color"   # use 256 colors
-if 'infocmp -x tmux-256color > /dev/null 2>&1' 'set -g default-terminal "tmux-256color"'
+# Modern colors
+if-shell 'uname | grep -q Darwin' 'set -g default-terminal "xterm-256color"'
+if-shell 'uname | grep -q Linux' 'set -g default-terminal "tmux-256color"'
+set-option -sa terminal-overrides ",*256col*:Tc"
 
-bind C-a send-prefix -2     # GNU-Screen compatible prefix
+# Unbind the prefix and bind it to Ctrl-a like screen
+unbind C-b
+set -g prefix C-a
+bind C-a send-prefix
+
+# Use screen shortcut (prefix a) for toggling windows
+unbind -T prefix l
+bind-key -T prefix a last-window
+
+# Additional settings
+bind C-a send-prefix -2     # GNU-Screen compatible prefix (duplicate command, consider removing)
 set -g history-limit 102400 # Increase history limit
 set -g prefix2 C-a          # GNU-Screen compatible prefix
 set -g set-clipboard on     # Copy to system clipboard
-set -s escape-time 10       # Faster command sequences
-set -s focus-events on      # Enable mouse focus events
-set -sg repeat-time 600     # Increase repeat timeout
+set -g escape-time 10       # Faster command sequences (changed from -s to -g)
+set -g focus-events on      # Enable mouse focus events (changed from -s to -g)
+set -g repeat-time 600      # Increase repeat timeout (changed from -sg to -g)
 setw -g xterm-keys on       # Enable xterm keys
-setw -q -g utf8 on          # Expect UTF-8 (tmux < 2.2)
+
+# Plugin manager
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+set -g @continuum-restore 'on'
+
+# Initialize TMUX plugin manager
+run '~/.tmux/plugins/tpm/tpm'
