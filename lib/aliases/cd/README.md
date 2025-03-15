@@ -68,8 +68,8 @@ Create and manage persistent bookmarks for any directory:
 
 | Command             | Alias | Description                       |
 |---------------------|-------|-----------------------------------|
-| `bookmark [name]`   | `bm`  | Create/list bookmarks            |
-| `bookmark`          | `bml` | List all bookmarks               |
+| `bookmark [name]`   | `bm`  | Create bookmarks                 |
+| `bookmark_list`     | `bml` | List all bookmarks               |
 | `bookmark_update`   | `bmu` | Update existing bookmark         |
 | `bookmark_remove`   | `bmr` | Delete a bookmark                |
 | `goto <name>`       | `bmg` | Navigate to bookmarked directory |
@@ -178,6 +178,9 @@ mk ~/projects/new-project
 
 # Create a bookmark for current directory
 bm website
+
+# List all bookmarks
+bml
 
 # Navigate to a bookmarked directory
 bmg website
