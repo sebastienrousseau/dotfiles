@@ -151,7 +151,8 @@ cd_with_history() {
 
     # Check if the destination is a bookmark
     if [[ -f "${BOOKMARK_FILE}" ]]; then
-        local bookmark_dest=$(grep "^${dest}:" "${BOOKMARK_FILE}" | cut -d':' -f2)
+        local bookmark_dest
+        bookmark_dest=$(grep "^${dest}:" "${BOOKMARK_FILE}" | cut -d':' -f2)
         if [[ -n "${bookmark_dest}" ]]; then
             dest="${bookmark_dest}"
         fi
@@ -195,7 +196,7 @@ cd_with_history() {
     fi
 
     # Change directory
-    builtin cd "${dest}" 2>/dev/null
+    builtin cd "${dest}" 2>/dev/null || return 1
 
     # Check if cd was successful
     if [[ $? -ne 0 ]]; then
@@ -208,7 +209,8 @@ cd_with_history() {
 
     # List directory contents if enabled and not a large directory
     if [[ "${AUTO_LIST_AFTER_CD}" == "true" ]]; then
-        local item_count=$(count_dir_items "${PWD}")
+        local item_count
+        item_count=$(count_dir_items "${PWD}")
         if [[ ${item_count} -lt ${LARGE_DIR_THRESHOLD} ]]; then
             eval "${LS_CMD}"
         else
@@ -233,16 +235,22 @@ mkcd() {
     cd_with_history "$1"
 }
 
-# Bookmark management
+# List all bookmarks
+bookmark_list() {
+    if [[ -f "${BOOKMARK_FILE}" ]]; then
+        echo "Available bookmarks:"
+        cat "${BOOKMARK_FILE}" | sed 's/:/\t/' | column -t
+    else
+        echo "No bookmarks found."
+    fi
+}
+
+# Create a bookmark
 bookmark() {
     if [ -z "$1" ]; then
-        # List all bookmarks
-        if [[ -f "${BOOKMARK_FILE}" ]]; then
-            echo "Available bookmarks:"
-            cat "${BOOKMARK_FILE}" | sed 's/:/\t/' | column -t
-        else
-            echo "No bookmarks found."
-        fi
+        # Show usage and call the bookmark_list function
+        echo "Usage: bookmark <bookmark_name> [directory]"
+        bookmark_list
         return 0
     fi
 
@@ -289,7 +297,7 @@ bookmark() {
 
 # Update existing bookmark
 bookmark_update() {
-    if [ -z "$1" ]; then
+    if [[ -z "$1" ]]; then
         echo "Usage: bookmark_update <bookmark_name> [directory]"
         return 1
     fi
@@ -375,7 +383,8 @@ bookmark_remove() {
 goto() {
     if [ -z "$1" ]; then
         echo "Usage: goto <bookmark_name>"
-        bookmark  # List all bookmarks
+        # Just show usage without listing bookmarks to avoid platform-specific issues
+        echo "Use 'bml' or 'bookmark_list' to see available bookmarks"
         return 1
     fi
 
@@ -523,7 +532,7 @@ alias mk='mkcd'                               # Create and enter directory
 alias bm='bookmark'                           # Create bookmark
 alias bmu='bookmark_update'                   # Update bookmark
 alias bmr='bookmark_remove'                   # Remove bookmark
-alias bml='bookmark'                          # List bookmarks
+alias bml='bookmark_list'                     # List bookmarks (fixed from 'bookmark' to 'bookmark_list')
 alias bmg='goto'                              # Go to bookmark
 
 # Navigation shortcuts
@@ -597,7 +606,7 @@ cd_aliases_help() {
     echo "  bookmark_update, bmu <n> [dir] Update existing bookmark"
     echo "  bookmark_remove, bmr <n>       Remove a bookmark"
     echo "  goto, bmg <n>                  Go to bookmarked directory"
-    echo "  bookmark, bml                  List all bookmarks"
+    echo "  bookmark_list, bml             List all bookmarks"
     echo ""
     echo "HISTORY AND STACK:"
     echo "  dirhistory, dh              Show and navigate to recent directories"
