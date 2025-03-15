@@ -37,6 +37,7 @@ case "${DOTFILES_OS}" in
         # Default settings for other systems
         LS_COLOR_OPT=""
         LS_GROUP_DIRS=""
+        # shellcheck disable=SC2034
         SED_INPLACE="sed -i"
         ;;
 esac
@@ -99,7 +100,8 @@ safe_write_file() {
     local mode="${3:-w}" # Default to overwrite mode
 
     # Create directory if it doesn't exist
-    local dir=$(dirname "${file}")
+    local dir
+    dir=$(dirname "${file}")
     if [[ ! -d "${dir}" ]]; then
         mkdir -p "${dir}" 2>/dev/null || {
             echo "Error: Could not create directory ${dir}"
@@ -117,6 +119,7 @@ safe_write_file() {
     fi
 
     # Check if write was successful
+    # shellcheck disable="SC2181,2320"
     if [[ $? -ne 0 ]]; then
         echo "Error: Could not write to ${file}"
         return 1
@@ -132,8 +135,10 @@ count_dir_items() {
 
     # Use ls and wc instead of find to avoid fd compatibility issues
     if [[ "${SHOW_HIDDEN_FILES}" == "true" ]]; then
+        # shellcheck disable=SC2012
         count=$(ls -A "$dir" 2>/dev/null | wc -l | tr -d ' ')
     else
+        # shellcheck disable=SC2012
         count=$(ls "$dir" 2>/dev/null | wc -l | tr -d ' ')
     fi
 
@@ -239,6 +244,7 @@ mkcd() {
 bookmark_list() {
     if [[ -f "${BOOKMARK_FILE}" ]]; then
         echo "Available bookmarks:"
+        # shellcheck disable=SC2002
         cat "${BOOKMARK_FILE}" | sed 's/:/\t/' | column -t
     else
         echo "No bookmarks found."
@@ -397,7 +403,8 @@ goto() {
     fi
 
     # Get bookmark path
-    local dir=$(grep "^${name}:" "${BOOKMARK_FILE}" | cut -d':' -f2)
+    local dir
+    dir=$(grep "^${name}:" "${BOOKMARK_FILE}" | cut -d':' -f2)
 
     if [[ -z "${dir}" ]]; then
         echo "Bookmark '${name}' not found."
@@ -469,7 +476,8 @@ proj() {
 # Restore last working directory
 lwd() {
     if [[ -f "${LAST_DIR_FILE}" ]]; then
-        local last_dir=$(cat "${LAST_DIR_FILE}")
+        local last_dir
+        last_dir=$(cat "${LAST_DIR_FILE}")
 
         if [[ ! -d "${last_dir}" ]] || [[ ! -r "${last_dir}" ]] || [[ ! -x "${last_dir}" ]]; then
             echo "Last working directory no longer exists or is inaccessible."
@@ -496,16 +504,16 @@ alias .....='cd_with_history ../../../..'    # Go up four levels
 # Home and Frequently Used Directories
 #-----------------------------------------------------------------------------
 # Only create aliases for directories that exist
-[[ -d "${APP_DIR}" ]] && alias app="cd_with_history ${APP_DIR}"        # Applications
-[[ -d "${CODE_DIR}" ]] && alias cod="cd_with_history ${CODE_DIR}"      # Code
-[[ -d "${DESK_DIR}" ]] && alias dsk="cd_with_history ${DESK_DIR}"      # Desktop
-[[ -d "${DOCS_DIR}" ]] && alias doc="cd_with_history ${DOCS_DIR}"      # Documents
-[[ -d "${DOTF_DIR}" ]] && alias dot="cd_with_history ${DOTF_DIR}"      # Dotfiles
-[[ -d "${DOWN_DIR}" ]] && alias dwn="cd_with_history ${DOWN_DIR}"      # Downloads
-alias hom="cd_with_history ${HOME_DIR}"                                # Home Directory
-[[ -d "${MUSIC_DIR}" ]] && alias mus="cd_with_history ${MUSIC_DIR}"    # Music
-[[ -d "${PICS_DIR}" ]] && alias pic="cd_with_history ${PICS_DIR}"      # Pictures
-[[ -d "${VIDS_DIR}" ]] && alias vid="cd_with_history ${VIDS_DIR}"      # Videos
+[[ -d "${APP_DIR}" ]] && alias app='cd_with_history "${APP_DIR}"'     # Applications
+[[ -d "${CODE_DIR}" ]] && alias cod='cd_with_history "${CODE_DIR}"'   # Code
+[[ -d "${DESK_DIR}" ]] && alias dsk='cd_with_history "${DESK_DIR}"'   # Desktop
+[[ -d "${DOCS_DIR}" ]] && alias doc='cd_with_history "${DOCS_DIR}"'   # Documents
+[[ -d "${DOTF_DIR}" ]] && alias dot='cd_with_history "${DOTF_DIR}"'   # Dotfiles
+[[ -d "${DOWN_DIR}" ]] && alias dwn='cd_with_history "${DOWN_DIR}"'   # Downloads
+[[ -d "${DOWN_DIR}" ]] && alias hom='cd_with_history "${HOME_DIR}"'   # Home Directory
+[[ -d "${MUSIC_DIR}" ]] && alias mus='cd_with_history "${MUSIC_DIR}"' # Music
+[[ -d "${PICS_DIR}" ]] && alias pic='cd_with_history "${PICS_DIR}"'   # Pictures
+[[ -d "${VIDS_DIR}" ]] && alias vid='cd_with_history "${VIDS_DIR}"'   # Videos
 
 #-----------------------------------------------------------------------------
 # System Directories
@@ -560,6 +568,7 @@ _bookmark_complete() {
             mapfile -t COMPREPLY < <(compgen -W "$(_get_bookmarks)" -- "$curr_arg")
         else
             # Fallback for older bash versions
+            # shellcheck disable=SC2207
             COMPREPLY=( $(compgen -W "$(_get_bookmarks)" -- "$curr_arg") )
         fi
     fi
