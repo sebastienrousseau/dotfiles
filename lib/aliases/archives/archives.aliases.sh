@@ -24,7 +24,9 @@ extract() {
 
     # Handle filenames with spaces correctly
     local filename="$1"
+    # shellcheck disable="SC2034,SC2155"
     local dirname=$(dirname "$filename")
+    # shellcheck disable="SC2034,SC2155"
     local basename=$(basename "$filename")
 
     # Create extract directory for archives with multiple files
@@ -56,6 +58,7 @@ extract() {
     esac
 
     # Log successful extraction
+    # shellcheck disable=SC2181
     if [ $? -eq 0 ]; then
         echo "Successfully extracted $filename" | tee -a "$LOG_FILE"
     else
@@ -119,8 +122,9 @@ compress() {
     local output=""
 
     # If the last argument doesn't exist as a file or directory and has more than 1 argument
-    if [ $num_inputs -gt 1 ] && [ ! -e "${inputs[$num_inputs-1]}" ]; then
+    if [ "$num_inputs" -gt 1 ] && [ ! -e "${inputs[$num_inputs-1]}" ]; then
         output="${inputs[$num_inputs-1]}"
+        # shellcheck disable="SC2184,2086"
         unset inputs[$num_inputs-1]
     else
         # Default output name based on the first input
@@ -248,6 +252,7 @@ compress() {
     esac
 
     # Log result
+    # shellcheck disable=SC2181
     if [ $? -eq 0 ]; then
         echo "Successfully compressed to $output" | tee -a "$LOG_FILE"
     else
@@ -292,6 +297,7 @@ compress_large() {
 backup() {
     local target="$1"
     local format="${2:-tgz}"  # Default to tar.gz
+    # shellcheck disable=SC2155
     local timestamp=$(date +%Y%m%d-%H%M%S)
 
     if [ -z "$target" ]; then
@@ -305,6 +311,7 @@ backup() {
         return 1
     fi
 
+    # shellcheck disable=SC2155
     local basename=$(basename "$target")
     local output="${basename}-backup-${timestamp}"
 
@@ -318,6 +325,7 @@ backup() {
         *)    echo "Error: Unsupported backup format '$format'" && return 1 ;;
     esac
 
+    # shellcheck disable=SC2181
     if [ $? -eq 0 ]; then
         echo "Backup created: $output"
     fi
