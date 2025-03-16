@@ -1,20 +1,4 @@
-# Check if daemon is running
-caffeine_check_daemon() {
-  if [[ ! -f "$CAFFEINE_LOCKFILE" ]]; then
-    return 1
-  fi
-
-  local pid
-  pid=$(cat "$CAFFEINE_LOCKFILE" 2>/dev/null)
-
-  if [[ -z "$pid" ]] || ! kill -0 "$pid" 2>/dev/null; then
-    caffeine_log_warning "Stale lockfile found. Removing..."
-    rm -f "$CAFFEINE_LOCKFILE"
-    return 1
-  fi
-
-  return 0
-}
+#!/usr/bin/env bash
 
 ################################################################################
 # 🅳🅾🆃🅵🅸🅻🅴🆂 - Cross-Platform Caffeine Utility (caffeine)
@@ -83,6 +67,24 @@ caffeine_log_error() {
 
 caffeine_log_warning() {
   echo "[WARNING] $*" >&2
+}
+
+# Check if daemon is running
+caffeine_check_daemon() {
+  if [[ ! -f "$CAFFEINE_LOCKFILE" ]]; then
+    return 1
+  fi
+
+  local pid
+  pid=$(cat "$CAFFEINE_LOCKFILE" 2>/dev/null)
+
+  if [[ -z "$pid" ]] || ! kill -0 "$pid" 2>/dev/null; then
+    caffeine_log_warning "Stale lockfile found. Removing..."
+    rm -f "$CAFFEINE_LOCKFILE"
+    return 1
+  fi
+
+  return 0
 }
 
 # Start caffeine daemon specific to OS
@@ -219,7 +221,7 @@ caffeine_shutdown_daemon() {
   fi
 }
 
-  # Check if caffeine is active
+# Check if caffeine is active
 caffeine_check_active() {
   if [[ ! -f "$CAFFEINE_STATEFILE" ]]; then
     return 1
@@ -501,7 +503,7 @@ caffeine() {
       caffeine_show_help
       return 1
       ;;
-esac
+  esac
 }
 
 # If script is being run directly
