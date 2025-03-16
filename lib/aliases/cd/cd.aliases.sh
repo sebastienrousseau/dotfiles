@@ -204,6 +204,7 @@ cd_with_history() {
     builtin cd "${dest}" 2>/dev/null || return 1
 
     # Check if cd was successful
+    # shellcheck disable=SC2181
     if [[ $? -ne 0 ]]; then
         echo "Error: Failed to navigate to '${dest}'"
         return 1

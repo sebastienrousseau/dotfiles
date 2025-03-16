@@ -177,17 +177,17 @@ compress() {
             ZSTD_CLEVEL="$level" tar --zstd -cf "$output" "${inputs[@]}"
             ;;
         zip)
-            zip -r "$output" "${inputs[@]}" -$level
+            zip -r "$output" "${inputs[@]}" "-$level"
             ;;
         7z)
-            7z a -mx="$level" "$output" "${inputs[@]}"
+            7z a "-mx=$level" "$output" "${inputs[@]}"
             ;;
         gz)
             if [ ${#inputs[@]} -eq 1 ] && [ -f "${inputs[0]}" ]; then
                 if [ $has_pv -eq 1 ]; then
-                    pv "${inputs[0]}" | gzip -$level > "$output"
+                    pv "${inputs[0]}" | gzip "-$level" > "$output"
                 else
-                    gzip -c -$level "${inputs[0]}" > "$output"
+                    gzip -c "-$level" "${inputs[0]}" > "$output"
                 fi
             else
                 echo "Error: gzip compression requires a single input file" | tee -a "$LOG_FILE"
@@ -197,9 +197,9 @@ compress() {
         bz2)
             if [ ${#inputs[@]} -eq 1 ] && [ -f "${inputs[0]}" ]; then
                 if [ $has_pv -eq 1 ]; then
-                    pv "${inputs[0]}" | bzip2 -$level > "$output"
+                    pv "${inputs[0]}" | bzip2 "-$level" > "$output"
                 else
-                    bzip2 -c -$level "${inputs[0]}" > "$output"
+                    bzip2 -c "-$level" "${inputs[0]}" > "$output"
                 fi
             else
                 echo "Error: bzip2 compression requires a single input file" | tee -a "$LOG_FILE"
@@ -209,9 +209,9 @@ compress() {
         xz)
             if [ ${#inputs[@]} -eq 1 ] && [ -f "${inputs[0]}" ]; then
                 if [ $has_pv -eq 1 ]; then
-                    pv "${inputs[0]}" | xz -$level > "$output"
+                    pv "${inputs[0]}" | xz "-$level" > "$output"
                 else
-                    xz -c -$level "${inputs[0]}" > "$output"
+                    xz -c "-$level" "${inputs[0]}" > "$output"
                 fi
             else
                 echo "Error: xz compression requires a single input file" | tee -a "$LOG_FILE"
@@ -221,9 +221,9 @@ compress() {
         zst)
             if [ ${#inputs[@]} -eq 1 ] && [ -f "${inputs[0]}" ]; then
                 if [ $has_pv -eq 1 ]; then
-                    pv "${inputs[0]}" | zstd -$level > "$output"
+                    pv "${inputs[0]}" | zstd "-$level" > "$output"
                 else
-                    zstd -c -$level "${inputs[0]}" > "$output"
+                    zstd -c "-$level" "${inputs[0]}" > "$output"
                 fi
             else
                 echo "Error: zstd compression requires a single input file" | tee -a "$LOG_FILE"
@@ -233,9 +233,9 @@ compress() {
         lz4)
             if [ ${#inputs[@]} -eq 1 ] && [ -f "${inputs[0]}" ]; then
                 if [ $has_pv -eq 1 ]; then
-                    pv "${inputs[0]}" | lz4 -$level > "$output"
+                    pv "${inputs[0]}" | lz4 "-$level" > "$output"
                 else
-                    lz4 -c -$level "${inputs[0]}" > "$output"
+                    lz4 -c "-$level" "${inputs[0]}" > "$output"
                 fi
             else
                 echo "Error: lz4 compression requires a single input file" | tee -a "$LOG_FILE"
@@ -243,7 +243,7 @@ compress() {
             fi
             ;;
         rar)
-            rar a -m$level "$output" "${inputs[@]}"
+            rar a "-m$level" "$output" "${inputs[@]}"
             ;;
         *)
             echo "Error: Unsupported format '$format'" | tee -a "$LOG_FILE"
