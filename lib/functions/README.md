@@ -79,7 +79,7 @@ The functions are organized by category and are listed below.
 
 | Function         | Description                                      | Usage                     |
 | :--------------- | :----------------------------------------------- | :------------------------ |
-| `genpwd`         | Generate a strong random password.              | `genpwd`                 |
+| `genpass`       | Generate a strong random password with customizable blocks, separator, and length. | `genpass [num_blocks] [separator] [block_size]` |
 | `keygen`         | Generate SSH key pairs.                         | `keygen <name> <email>`  |
 | `ql`             | Open any file in Quick Look preview (macOS).    | `ql <file>`              |
 | `rd`             | Remove a directory and its files (macOS).       | `rd <directory>`         |
