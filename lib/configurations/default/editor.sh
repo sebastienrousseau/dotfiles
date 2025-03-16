@@ -91,20 +91,16 @@ configure_preferred_editors() {
 configure_editor_options() {
   # Set editor-specific options based on VISUAL
   case "${VISUAL}" in
-  vim | nvim)
-    # vim/neovim specific settings
-    export VIMINIT="source ${HOME}/.vimrc"
-    # Set vim to use colors if terminal supports it
-    if [[ -n "${TERM}" && "${TERM}" != "dumb" ]]; then
-      export VIMCOLOR="true"
-    fi
+  nvim)
+    # Set Neovim-specific configuration
+    export VIMINIT="source ${NVIM_INIT:-${HOME}/.config/nvim/init.lua}"
     ;;
   code | */code)
     # VS Code specific settings
     export VSCODE_EXTENSIONS="${HOME}/.vscode/extensions/"
     ;;
   emacs)
-    # emacs specific settings
+    # Emacs specific settings
     export EMACSLOADPATH="${HOME}/.emacs.d"
     ;;
   subl | */subl)
@@ -115,7 +111,6 @@ configure_editor_options() {
     # No specific settings for other editors
     ;;
   esac
-
   return 0
 }
 
