@@ -9,7 +9,16 @@
 
 if command -v 'tmux' >/dev/null; then
   # Basic commands
-  alias tm='tmux'                     # Start tmux
+  tm() {
+    if ! tmux has-session 2>/dev/null; then
+      # Start tmux and immediately source the config
+      tmux new-session -d \; source-file ~/.dotfiles/lib/configurations/tmux/tmux
+      tmux attach
+    else
+      tmux "$@"
+    fi
+  } # Start tmux
+
   alias tma='tmux attach-session'     # Attach to last session
   alias tmat='tmux attach-session -t' # Attach to specific session
 
@@ -23,7 +32,7 @@ if command -v 'tmux' >/dev/null; then
   alias tms='tmux new-session -s'     # New named session
 
   # Configuration
-  alias tmr='tmux source-file ~/.tmux.conf' # Reload config
+  alias tmr='tmux source ~/.dotfiles/lib/configurations/tmux/tmux' # Reload config
 
   # Windows and panes
   alias tmls='tmux list-windows'      # List windows
