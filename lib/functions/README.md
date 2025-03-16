@@ -81,6 +81,7 @@ echo 'source ~/dotfiles/index.sh' >> ~/.zshrc
 
 | Function | Description | Usage |
 |----------|-------------|-------|
+| `caffeine` | Prevent system from sleeping | `caffeine [command]` |
 | `environment` | Detect operating system environment | `environment` |
 | `freespace` | Clean purgeable disk space | `freespace [disk]` |
 | `hiddenfiles` | Toggle visibility of hidden files in Finder | `hiddenfiles [show|hide]` |
@@ -91,6 +92,25 @@ echo 'source ~/dotfiles/index.sh' >> ~/.zshrc
 | `myproc` | List processes owned by current user | `myproc` |
 | `stopwatch` | Simple terminal stopwatch | `stopwatch` |
 | `sysinfo` | Display system information with emoji OS icons | `sysinfo` |
+
+#### Caffeine Commands
+
+The `caffeine` utility prevents your system from sleeping or activating the screensaver.
+
+| Command | Description |
+|---------|-------------|
+| `caffeine daemon` | Start the caffeine daemon (creates a lockfile) |
+| `caffeine status` | Check if the daemon is running and active |
+| `caffeine query` | Same as status, but returns exit code instead of printing |
+| `caffeine start` | Start keeping the screen awake |
+| `caffeine stop` | Stop keeping the screen awake |
+| `caffeine toggle` | Toggle keeping the screen awake |
+| `caffeine shutdown` | Completely shut down the caffeine daemon |
+| `caffeine diagnostic` | Show diagnostic information |
+| `caffeine version` | Show version information |
+| `caffeine help` | Show help message |
+
+**Cross-Platform Support**: Works on macOS (using native `caffeinate`), Linux (using `xdg-screensaver` and `xset`), and Windows (using PowerShell simulated keypresses).
 
 ### 🔐 Security & Credentials
 
