@@ -40,7 +40,8 @@ if command -v chmod >/dev/null; then
   #-----------------------------------------------------------------------------
   create_backup() {
     local path="$1"
-    local backup_path="${path}.bak.$(date +%Y%m%d%H%M%S)"
+    local backup_path
+    backup_path="${path}.bak.$(date +%Y%m%d%H%M%S)"
 
     # Only backup files, not directories
     if [[ -f "${path}" ]]; then
@@ -152,66 +153,85 @@ if command -v chmod >/dev/null; then
   alias chmod_4755='change_permission 4755'  # Setuid + 755
 
   #-----------------------------------------------------------------------------
-  # Recursive Permission Aliases
+  # Recursive Permission Functions
   #-----------------------------------------------------------------------------
-  alias chmod_r_644='change_permission 644 "$@" -R'  # Recursive 644
-  alias chmod_r_755='change_permission 755 "$@" -R'  # Recursive 755
-  alias chmod_r_775='change_permission 775 "$@" -R'  # Recursive 775
+  chmod_r_644() {
+    change_permission 644 "$1" -R
+  }  # Recursive 644
+
+  chmod_r_755() {
+    change_permission 755 "$1" -R
+  }  # Recursive 755
+
+  chmod_r_775() {
+    change_permission 775 "$1" -R
+  }  # Recursive 775
 
   #-----------------------------------------------------------------------------
-  # Backup + Change Permission Aliases
+  # Backup + Change Permission Functions
   #-----------------------------------------------------------------------------
-  alias chmod_b_644='change_permission 644 "$@" "" true'  # 644 with backup
-  alias chmod_b_755='change_permission 755 "$@" "" true'  # 755 with backup
-  alias chmod_rb_644='change_permission 644 "$@" -R true'  # Recursive 644 with backup
-  alias chmod_rb_755='change_permission 755 "$@" -R true'  # Recursive 755 with backup
+  chmod_b_644() {
+    change_permission 644 "$1" "" true
+  }  # 644 with backup
+
+  chmod_b_755() {
+    change_permission 755 "$1" "" true
+  }  # 755 with backup
+
+  chmod_rb_644() {
+    change_permission 644 "$1" -R true
+  }  # Recursive 644 with backup
+
+  chmod_rb_755() {
+    change_permission 755 "$1" -R true
+  }  # Recursive 755 with backup
 
   #-----------------------------------------------------------------------------
-  # User, Group, and Other Symbolic Permission Aliases
+  # User, Group, and Other Symbolic Permission Functions
   #-----------------------------------------------------------------------------
   # User permissions
-  alias chmod_u+x='symbolic_permission u+x "$@"'  # Add execute for owner
-  alias chmod_u-x='symbolic_permission u-x "$@"'  # Remove execute for owner
-  alias chmod_u+w='symbolic_permission u+w "$@"'  # Add write for owner
-  alias chmod_u-w='symbolic_permission u-w "$@"'  # Remove write for owner
-  alias chmod_u+r='symbolic_permission u+r "$@"'  # Add read for owner
-  alias chmod_u-r='symbolic_permission u-r "$@"'  # Remove read for owner
+  chmod_u+x() { symbolic_permission u+x "$1"; }  # Add execute for owner
+  chmod_u-x() { symbolic_permission u-x "$1"; }  # Remove execute for owner
+  chmod_u+w() { symbolic_permission u+w "$1"; }  # Add write for owner
+  chmod_u-w() { symbolic_permission u-w "$1"; }  # Remove write for owner
+  chmod_u+r() { symbolic_permission u+r "$1"; }  # Add read for owner
+  chmod_u-r() { symbolic_permission u-r "$1"; }  # Remove read for owner
 
   # Group permissions
-  alias chmod_g+x='symbolic_permission g+x "$@"'  # Add execute for group
-  alias chmod_g-x='symbolic_permission g-x "$@"'  # Remove execute for group
-  alias chmod_g+w='symbolic_permission g+w "$@"'  # Add write for group
-  alias chmod_g-w='symbolic_permission g-w "$@"'  # Remove write for group
-  alias chmod_g+r='symbolic_permission g+r "$@"'  # Add read for group
-  alias chmod_g-r='symbolic_permission g-r "$@"'  # Remove read for group
+  chmod_g+x() { symbolic_permission g+x "$1"; }  # Add execute for group
+  chmod_g-x() { symbolic_permission g-x "$1"; }  # Remove execute for group
+  chmod_g+w() { symbolic_permission g+w "$1"; }  # Add write for group
+  chmod_g-w() { symbolic_permission g-w "$1"; }  # Remove write for group
+  chmod_g+r() { symbolic_permission g+r "$1"; }  # Add read for group
+  chmod_g-r() { symbolic_permission g-r "$1"; }  # Remove read for group
 
   # Others permissions
-  alias chmod_o+x='symbolic_permission o+x "$@"'  # Add execute for others
-  alias chmod_o-x='symbolic_permission o-x "$@"'  # Remove execute for others
-  alias chmod_o+w='symbolic_permission o+w "$@"'  # Add write for others
-  alias chmod_o-w='symbolic_permission o-w "$@"'  # Remove write for others
-  alias chmod_o+r='symbolic_permission o+r "$@"'  # Add read for others
-  alias chmod_o-r='symbolic_permission o-r "$@"'  # Remove read for others
+  chmod_o+x() { symbolic_permission o+x "$1"; }  # Add execute for others
+  chmod_o-x() { symbolic_permission o-x "$1"; }  # Remove execute for others
+  chmod_o+w() { symbolic_permission o+w "$1"; }  # Add write for others
+  chmod_o-w() { symbolic_permission o-w "$1"; }  # Remove write for others
+  chmod_o+r() { symbolic_permission o+r "$1"; }  # Add read for others
+  chmod_o-r() { symbolic_permission o-r "$1"; }  # Remove read for others
 
   # Combined permissions
-  alias chmod_a+x='symbolic_permission a+x "$@"'  # Add execute for all
-  alias chmod_a-x='symbolic_permission a-x "$@"'  # Remove execute for all
-  alias chmod_a+w='symbolic_permission a+w "$@"'  # Add write for all
-  alias chmod_a-w='symbolic_permission a-w "$@"'  # Remove write for all
-  alias chmod_a+r='symbolic_permission a+r "$@"'  # Add read for all
-  alias chmod_a-r='symbolic_permission a-r "$@"'  # Remove read for all
+  chmod_a+x() { symbolic_permission a+x "$1"; }  # Add execute for all
+  chmod_a-x() { symbolic_permission a-x "$1"; }  # Remove execute for all
+  chmod_a+w() { symbolic_permission a+w "$1"; }  # Add write for all
+  chmod_a-w() { symbolic_permission a-w "$1"; }  # Remove write for all
+  chmod_a+r() { symbolic_permission a+r "$1"; }  # Add read for all
+  chmod_a-r() { symbolic_permission a-r "$1"; }  # Remove read for all
 
   # Recursive symbolic permissions
-  alias chmod_ru+x='symbolic_permission u+x "$@" -R'  # Recursive add execute for owner
-  alias chmod_rg+x='symbolic_permission g+x "$@" -R'  # Recursive add execute for group
-  alias chmod_ro+x='symbolic_permission o+x "$@" -R'  # Recursive add execute for others
-  alias chmod_ra+x='symbolic_permission a+x "$@" -R'  # Recursive add execute for all
+  chmod_ru+x() { symbolic_permission u+x "$1" -R; }  # Recursive add execute for owner
+  chmod_rg+x() { symbolic_permission g+x "$1" -R; }  # Recursive add execute for group
+  chmod_ro+x() { symbolic_permission o+x "$1" -R; }  # Recursive add execute for others
+  chmod_ra+x() { symbolic_permission a+x "$1" -R; }  # Recursive add execute for all
 
   #-----------------------------------------------------------------------------
   # Helper functions and aliases
   #-----------------------------------------------------------------------------
   # Show permissions in octal format for a file/directory
-  # Extremely minimalist version using built-in shell features only
+  # Minimalist version using built-in shell features only
   show_permissions() {
     local path="$1"
     if [[ -e "${path}" ]]; then
@@ -260,13 +280,13 @@ CHMOD ALIASES USAGE:
     chmod_700, chmod_744, chmod_755, chmod_764, chmod_775, chmod_777,
     chmod_1755, chmod_2755, chmod_4755
 
-  Recursive Permission Aliases:
+  Recursive Permission Functions:
     chmod_r_644, chmod_r_755, chmod_r_775
 
-  Backup + Change Permission Aliases:
+  Backup + Change Permission Functions:
     chmod_b_644, chmod_b_755, chmod_rb_644, chmod_rb_755
 
-  Symbolic Permission Aliases:
+  Symbolic Permission Functions:
     User:   chmod_u+x, chmod_u-x, chmod_u+w, chmod_u-w, chmod_u+r, chmod_u-r
     Group:  chmod_g+x, chmod_g-x, chmod_g+w, chmod_g-w, chmod_g+r, chmod_g-r
     Others: chmod_o+x, chmod_o-x, chmod_o+w, chmod_o-w, chmod_o+r, chmod_o-r

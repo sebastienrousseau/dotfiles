@@ -194,7 +194,7 @@ compress gz -l 9 largefile.dat compressed.gz
 compress_large xz largefile.dat
 
 # Create a 7z archive with the alias
-c7z a -mx=9 archive.7z files/
+c7z archive.7z files/  # No additional parameters needed
 ```
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
