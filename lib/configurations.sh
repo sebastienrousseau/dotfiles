@@ -16,6 +16,7 @@
 #
 # Description:
 #   Loads custom shell configurations from the specified directory.
+#   Compatible with both Bash and Zsh shells.
 #
 # Arguments:
 #   None
@@ -28,38 +29,61 @@
 
 load_custom_configurations() {
   local config_dir="${HOME}/.dotfiles/lib/configurations"
-  local count=0
+  local loaded_count=0
   local verbose=${DOTFILES_VERBOSE:-0}
+  local ret=0
 
   # Check if the directory exists
   if [[ ! -d "${config_dir}" ]]; then
     echo "Warning: Configuration directory ${config_dir} does not exist." >&2
-    return 0  # Not considered a fatal error
+    return 0  # Not a critical error, return success
   fi
 
-  # Search for configuration files, handling no-match case
-  shopt -s nullglob
-  local config_files=("${config_dir}"/*/[!.#]*.sh)
-  shopt -u nullglob
-
-  if [[ ${#config_files[@]} -eq 0 ]]; then
-    (( verbose )) && echo "Info: No configuration files found in ${config_dir}" >&2
-    return 0
+  # Enable extended glob and nullglob for both shells
+  if [[ -n "${ZSH_VERSION:-}" ]]; then
+    setopt local_options nullglob extendedglob
+  elif [[ -n "${BASH_VERSION:-}" ]]; then
+    # Save current state
+    local globstate extglobstate
+    globstate=$(shopt -p nullglob)
+    extglobstate=$(shopt -p extglob)
+    shopt -s nullglob extglob
   fi
 
-  for config in "${config_files[@]}"; do
-    if [[ -f "${config}" ]]; then
-      # shellcheck source=/dev/null
-      source "${config}" || {
-        echo "Error: Failed to source ${config}" >&2
-        return 1
-      }
-      ((count++))
+  # Process configuration files in subdirectories
+  for config in "${config_dir}"/[!.#]*/*.sh; do
+    # Skip if not a regular file (handles case when no matches with nullglob)
+    [[ -f "${config}" ]] || continue
+
+    # Source the file with error handling
+    # shellcheck disable=SC1090
+    if ! source "${config}" 2>/dev/null; then
+      echo "Error: Failed to source ${config}" >&2
+      ret=1
+      continue
     fi
+
+    ((loaded_count++))
   done
 
-  (( verbose )) && echo "Successfully loaded ${count} configuration files."
-  return 0
+  # Restore globbing settings in Bash
+  if [[ -n "${BASH_VERSION:-}" ]]; then
+    eval "$globstate"
+    eval "$extglobstate"
+  fi
+
+  # Report status if verbose mode is enabled
+  if ((verbose)); then
+    if ((loaded_count > 0)); then
+      echo "Loaded $loaded_count configuration files from ${config_dir}"
+    else
+      echo "No configuration files found in ${config_dir}"
+    fi
+  fi
+
+  return $ret
 }
 
+# Main Execution
+# ---------------------------------------------------------
 load_custom_configurations

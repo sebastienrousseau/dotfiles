@@ -11,11 +11,11 @@
 # License: MIT
 ################################################################################
 
-## 🅿🅰🆃🅷🆂
 # Function: load_paths
 #
 # Description:
 #   Loads all the paths from the specified directory.
+#   Compatible with both Bash and Zsh shells.
 #
 # Arguments:
 #   None
@@ -28,38 +28,57 @@
 
 load_paths() {
   local paths_dir="${HOME}/.dotfiles/lib/paths"
-  local count=0
+  local loaded_count=0
   local verbose=${DOTFILES_VERBOSE:-0}
+  local ret=0
 
   # Check if the directory exists
-  if [[ ! -d "${paths_dir}" ]]; then
-    echo "Warning: Paths directory ${paths_dir} does not exist." >&2
-    return 0  # Not considered a fatal error
+  if [[ ! -d "$paths_dir" ]]; then
+    echo "Warning: Paths directory $paths_dir does not exist." >&2
+    return 0  # Not a critical error, return success
   fi
 
-  # Search for path files, handling no-match case
-  shopt -s nullglob
-  local path_files=("${paths_dir}"/[!.#]*.sh)
-  shopt -u nullglob
-
-  if [[ ${#path_files[@]} -eq 0 ]]; then
-    (( verbose )) && echo "Info: No path files found in ${paths_dir}" >&2
-    return 0
+  # Enable nullglob to handle empty directories
+  if [[ -n "${ZSH_VERSION:-}" ]]; then
+    setopt local_options nullglob
+  elif [[ -n "${BASH_VERSION:-}" ]]; then
+    # Save current state
+    local globstate
+    globstate=$(shopt -p nullglob)
+    shopt -s nullglob
   fi
 
-  for path_file in "${path_files[@]}"; do
-    if [[ -f "${path_file}" ]]; then
-      # shellcheck source=/dev/null
-      source "${path_file}" || {
-        echo "Error: Failed to source ${path_file}" >&2
-        return 1
-      }
-      ((count++))
+  # Load each path file
+  for path_file in "$paths_dir"/*.sh; do
+    # Skip if not a regular file (handles case when no .sh files exist with nullglob)
+    [[ -f "$path_file" ]] || continue
+
+    # Source the file with error handling
+    # shellcheck disable=SC1090
+    if ! source "$path_file" 2>/dev/null; then
+      echo "Error: Failed to source $path_file" >&2
+      ret=1
+      continue
     fi
+
+    ((loaded_count++))
   done
 
-  (( verbose )) && echo "Successfully loaded ${count} path files."
-  return 0
+  # Restore globbing settings in Bash
+  if [[ -n "${BASH_VERSION:-}" ]]; then
+    eval "$globstate"
+  fi
+
+  # Report status if verbose mode is enabled
+  if ((verbose)); then
+    if ((loaded_count > 0)); then
+      echo "Loaded $loaded_count path files from $paths_dir"
+    else
+      echo "No path files found in $paths_dir"
+    fi
+  fi
+
+  return $ret
 }
 
 # Main Execution

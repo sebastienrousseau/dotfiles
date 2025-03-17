@@ -11,11 +11,11 @@
 # License: MIT
 ################################################################################
 
-## 🅵🆄🅽🅲🆃🅸🅾🅽🆂
 # Function: load_custom_functions
 #
 # Description:
 #   Loads custom executable functions from the specified directory.
+#   Compatible with both Bash and Zsh shells.
 #
 # Arguments:
 #   None
@@ -28,38 +28,57 @@
 
 load_custom_functions() {
   local functions_dir="${HOME}/.dotfiles/lib/functions"
-  local count=0
+  local loaded_count=0
   local verbose=${DOTFILES_VERBOSE:-0}
+  local ret=0
 
   # Check if the directory exists
-  if [[ ! -d "${functions_dir}" ]]; then
-    echo "Warning: Functions directory ${functions_dir} does not exist." >&2
-    return 0  # Not considered a fatal error
+  if [[ ! -d "$functions_dir" ]]; then
+    echo "Warning: Functions directory $functions_dir does not exist." >&2
+    return 0  # Not a critical error, return success
   fi
 
-  # Search for function files, handling no-match case
-  shopt -s nullglob
-  local function_files=("${functions_dir}"/[!.#]*.sh)
-  shopt -u nullglob
-
-  if [[ ${#function_files[@]} -eq 0 ]]; then
-    (( verbose )) && echo "Info: No function files found in ${functions_dir}" >&2
-    return 0
+  # Enable nullglob to handle empty directories
+  if [[ -n "${ZSH_VERSION:-}" ]]; then
+    setopt local_options nullglob
+  elif [[ -n "${BASH_VERSION:-}" ]]; then
+    # Save current state
+    local globstate
+    globstate=$(shopt -p nullglob)
+    shopt -s nullglob
   fi
 
-  for function_file in "${function_files[@]}"; do
-    if [[ -f "${function_file}" ]]; then
-      # shellcheck source=/dev/null
-      source "${function_file}" || {
-        echo "Error: Failed to source ${function_file}" >&2
-        return 1
-      }
-      ((count++))
+  # Load each function file
+  for function_file in "$functions_dir"/*.sh; do
+    # Skip if not a regular file (handles case when no .sh files exist with nullglob)
+    [[ -f "$function_file" ]] || continue
+
+    # Source the file with error handling
+    # shellcheck disable=SC1090
+    if ! source "$function_file" 2>/dev/null; then
+      echo "Error: Failed to source $function_file" >&2
+      ret=1
+      continue
     fi
+
+    ((loaded_count++))
   done
 
-  (( verbose )) && echo "Successfully loaded ${count} function files."
-  return 0
+  # Restore globbing settings in Bash
+  if [[ -n "${BASH_VERSION:-}" ]]; then
+    eval "$globstate"
+  fi
+
+  # Report status if verbose mode is enabled
+  if ((verbose)); then
+    if ((loaded_count > 0)); then
+      echo "Loaded $loaded_count function files from $functions_dir"
+    else
+      echo "No function files found in $functions_dir"
+    fi
+  fi
+
+  return $ret
 }
 
 # Main Execution

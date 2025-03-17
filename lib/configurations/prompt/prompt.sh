@@ -223,7 +223,7 @@ configure_zsh_prompt() {
   setup_zsh_git
 
   # Set prompt with OS icon, name, emoji, current directory, and git status
-  PROMPT="%F{33} ${OS_ICON} ${OS_NAME} ${OS_EMOJI} %F{55}❭ %F{15}%~ \${vcs_info_msg_0_} %F{196}\$ %f"
+  PROMPT="%F{33} ${OS_ICON} ${OS_NAME} ${OS_EMOJI} %F{55}❭ %F{15}%~ ${vcs_info_msg_0_} %F{196}\$ %f"
 
   # Export prompt
   export PROMPT
