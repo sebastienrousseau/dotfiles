@@ -398,7 +398,8 @@ load_dotfiles_with_cache() {
     # This provides a simple way to bypass caching during development or troubleshooting
     if [[ "${DOTFILES_CACHE_DISABLE:-0}" -eq 1 ]]; then
         log_message 2 "Dotfiles caching is disabled, using standard loading"
-        return load_dotfiles
+        load_dotfiles
+        return $?
     fi
 
     # Cache settings
@@ -526,6 +527,7 @@ load_dotfiles() {
             found_files=1
             log_message 3 "Loading: $loader"
             # Load the file, capturing any errors
+            # shellcheck source=/dev/null
             if ! source "${loader}"; then
                 log_message 1 "Failed to load ${loader}"
                 load_errors=$((load_errors + 1))
