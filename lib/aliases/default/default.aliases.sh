@@ -3,7 +3,7 @@
 ################################################################################
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: default.aliases.sh
-# Version: 0.2.469
+# Version: 0.2.470
 # Author: Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # Description: Script containing default shell aliases
@@ -58,9 +58,6 @@ set_default_aliases() {
 
     # Shortcut for the `exit` command.
     alias q='quit'
-
-    # Shortcut for the `exit` command.
-    alias x='quit'
 
     # Shortcut for the `exit` command.
     alias quit='exit'

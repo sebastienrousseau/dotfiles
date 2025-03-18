@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.469) - <https://dotfiles.io>
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.470) - <https://dotfiles.io>
 # Made with ♥ in London, UK by Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # License: MIT
@@ -8,29 +8,36 @@
 # 🆃🅼🆄🆇 🅰🅻🅸🅰🆂🅴🆂
 
 if command -v 'tmux' >/dev/null; then
+  # Basic commands
+  tm() {
+    if ! tmux has-session 2>/dev/null; then
+      # Start tmux and immediately source the config
+      tmux new-session -d \; source-file ~/.dotfiles/lib/configurations/tmux/tmux
+      tmux attach
+    else
+      tmux "$@"
+    fi
+  } # Start tmux
 
-  # Start tmux.
-  alias tm='tmux'
+  alias tma='tmux attach-session'     # Attach to last session
+  alias tmat='tmux attach-session -t' # Attach to specific session
 
-  # Attach to a tmux session.
-  alias tma="tmux attach-session"
+  # Session management
+  alias tmks='tmux kill-session -a'   # Kill all sessions except current
+  alias tmka='tmux kill-server'       # Kill all sessions (server)
+  alias tml='tmux list-sessions'      # List all sessions
 
-  # Attach to a tmux session with name.
-  alias tmat="tmux attach-session -t"
+  # Creating sessions
+  alias tmn='tmux new-session'        # New unnamed session
+  alias tms='tmux new-session -s'     # New named session
 
-  # Kill all tmux sessions.
-  alias tmks='tmux kill-session -a'
+  # Configuration
+  alias tmr='tmux source ~/.dotfiles/lib/configurations/tmux/tmux' # Reload config
 
-  # List tmux sessions.
-  alias tml='tmux list-sessions'
+  # Windows and panes
+  alias tmls='tmux list-windows'      # List windows
+  alias tmlp='tmux list-panes'        # List panes
 
-  # Start a new tmux session.
-  alias tmn="tmux new-session"
-
-  # Start a new tmux session with name.
-  alias tmns="tmux new -s"
-
-  # Start a new tmux session.
-  alias tms='tmux new-session -s'
-
+  # Status information
+  alias tmi='tmux info'               # Show tmux info
 fi

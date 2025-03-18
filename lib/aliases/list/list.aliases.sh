@@ -2,8 +2,8 @@
 ################################################################################
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: list.sh
-# Version: 0.2.469
-# Author: Sebastien Rousseau (@wwdseb)
+# Version: 0.2.470
+# Author: Sebastien Rousseau (Sebastien Rousseau)
 # License: MIT
 #
 # Description:
