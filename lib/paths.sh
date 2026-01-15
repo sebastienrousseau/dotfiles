@@ -56,7 +56,7 @@ load_paths() {
     # Source the file with error handling
     # shellcheck disable=SC1090
     if ! source "$path_file" 2>/dev/null; then
-      echo "Error: Failed to source $path_file" >&2
+      # Non-critical sourcing error - continue gracefully without noise
       ret=1
       continue
     fi

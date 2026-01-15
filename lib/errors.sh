@@ -17,14 +17,16 @@ set -euo pipefail
 # Error Handling Constants
 #------------------------------------------------------------------------------
 
-export readonly ERROR_HANDLER_VERSION="0.2.471"
+ERROR_HANDLER_VERSION="0.2.471"
+export ERROR_HANDLER_VERSION
+readonly ERROR_HANDLER_VERSION
 readonly MAX_ERROR_DEPTH=10
 
 # Global state
-declare -g ERROR_COUNT=0
-declare -g WARNING_COUNT=0
-declare -ga CLEANUP_STACK=()
-declare -g SCRIPT_START_TIME="${SCRIPT_START_TIME:-$(date +%s)}"
+ERROR_COUNT=0
+WARNING_COUNT=0
+CLEANUP_STACK=()
+SCRIPT_START_TIME="${SCRIPT_START_TIME:-$(date +%s)}"
 
 #------------------------------------------------------------------------------
 # Logging Functions
@@ -401,35 +403,36 @@ init_error_handling() {
 }
 
 ################################################################################
-# Export public functions
+# Export public functions (Bash only); Zsh does not support exporting functions
 ################################################################################
-
-export -f error_log
-export -f warn_log
-export -f info_log
-export -f debug_log
-export -f error_report
-export -f warn_report
-export -f on_exit
-export -f execute_cleanup_stack
-export -f clear_cleanup_stack
-export -f setup_signal_handlers
-export -f try
-export -f catch
-export -f retry
-export -f timeout_exec
-export -f register_temp_file
-export -f register_temp_dir
-export -f register_background_process
-export -f push_context
-export -f pop_context
-export -f get_context
-export -f get_error_count
-export -f get_warning_count
-export -f reset_counters
-export -f get_runtime
-export -f assert
-export -f assert_equals
-export -f assert_file_exists
-export -f assert_file_not_exists
-export -f init_error_handling
+if [[ -n "${BASH_VERSION:-}" ]]; then
+  export -f error_log
+  export -f warn_log
+  export -f info_log
+  export -f debug_log
+  export -f error_report
+  export -f warn_report
+  export -f on_exit
+  export -f execute_cleanup_stack
+  export -f clear_cleanup_stack
+  export -f setup_signal_handlers
+  export -f try
+  export -f catch
+  export -f retry
+  export -f timeout_exec
+  export -f register_temp_file
+  export -f register_temp_dir
+  export -f register_background_process
+  export -f push_context
+  export -f pop_context
+  export -f get_context
+  export -f get_error_count
+  export -f get_warning_count
+  export -f reset_counters
+  export -f get_runtime
+  export -f assert
+  export -f assert_equals
+  export -f assert_file_exists
+  export -f assert_file_not_exists
+  export -f init_error_handling
+fi

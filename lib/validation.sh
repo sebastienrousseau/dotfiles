@@ -440,34 +440,35 @@ validate_any() {
 }
 
 ################################################################################
-# Export public functions
+# Export public functions (Bash only); Zsh does not support exporting functions
 ################################################################################
-
-export -f validate_not_empty
-export -f validate_pattern
-export -f validate_length
-export -f validate_alphanumeric
-export -f validate_identifier
-export -f validate_path
-export -f validate_filename
-export -f validate_integer
-export -f validate_positive_integer
-export -f validate_integer_range
-export -f validate_email
-export -f validate_url
-export -f validate_ipv4
-export -f validate_readable_file
-export -f validate_writable_file
-export -f validate_readable_directory
-export -f validate_writable_directory
-export -f validate_command_exists
-export -f trim_whitespace
-export -f to_lowercase
-export -f to_uppercase
-export -f escape_for_shell
-export -f sanitize_filename
-export -f sanitize_varname
-export -f validate_all
-export -f validate_any
-export -f validation_error
-export -f validation_warn
+if [[ -n "${BASH_VERSION:-}" ]]; then
+  export -f validate_not_empty
+  export -f validate_pattern
+  export -f validate_length
+  export -f validate_alphanumeric
+  export -f validate_identifier
+  export -f validate_path
+  export -f validate_filename
+  export -f validate_integer
+  export -f validate_positive_integer
+  export -f validate_integer_range
+  export -f validate_email
+  export -f validate_url
+  export -f validate_ipv4
+  export -f validate_readable_file
+  export -f validate_writable_file
+  export -f validate_readable_directory
+  export -f validate_writable_directory
+  export -f validate_command_exists
+  export -f trim_whitespace
+  export -f to_lowercase
+  export -f to_uppercase
+  export -f escape_for_shell
+  export -f sanitize_filename
+  export -f sanitize_varname
+  export -f validate_all
+  export -f validate_any
+  export -f validation_error
+  export -f validation_warn
+fi

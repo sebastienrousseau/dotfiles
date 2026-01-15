@@ -81,7 +81,7 @@ load_custom_aliases() {
     # Source the file with error handling
     # shellcheck disable=SC1090
     if ! source "${file}" 2>/dev/null; then
-      echo "Error: Failed to source ${file}" >&2
+      # Non-critical sourcing error - continue gracefully without noise
       ret=1
       continue
     fi

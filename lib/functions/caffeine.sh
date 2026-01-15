@@ -506,7 +506,11 @@ caffeine() {
   esac
 }
 
-# If script is being run directly
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  caffeine "$@"
+# If script is being run directly (Bash-only guard)
+# NOTE: This file is primarily meant to be sourced from interactive shells.
+# Referencing BASH_SOURCE in Zsh can trigger "parameter not set" errors.
+if [[ -n "${BASH_VERSION:-}" ]]; then
+  if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    caffeine "$@"
+  fi
 fi

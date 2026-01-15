@@ -397,29 +397,30 @@ check_compliance() {
 }
 
 ################################################################################
-# Export public functions
+# Export public functions (Bash only); Zsh does not support exporting functions
 ################################################################################
-
-export -f init_audit
-export -f audit_log
-export -f audit_event
-export -f audit_action
-export -f audit_security
-export -f audit_file_operation
-export -f audit_command
-export -f audit_package
-export -f audit_config_change
-export -f audit_summary
-export -f audit_recent
-export -f audit_recent_actions
-export -f audit_search
-export -f audit_by_user
-export -f audit_by_action
-export -f audit_security_events
-export -f rotate_audit_logs
-export -f archive_audit_logs
-export -f clean_audit_logs
-export -f generate_audit_report
-export -f start_audit_session
-export -f end_audit_session
-export -f check_compliance
+if [[ -n "${BASH_VERSION:-}" ]]; then
+  export -f init_audit
+  export -f audit_log
+  export -f audit_event
+  export -f audit_action
+  export -f audit_security
+  export -f audit_file_operation
+  export -f audit_command
+  export -f audit_package
+  export -f audit_config_change
+  export -f audit_summary
+  export -f audit_recent
+  export -f audit_recent_actions
+  export -f audit_search
+  export -f audit_by_user
+  export -f audit_by_action
+  export -f audit_security_events
+  export -f rotate_audit_logs
+  export -f archive_audit_logs
+  export -f clean_audit_logs
+  export -f generate_audit_report
+  export -f start_audit_session
+  export -f end_audit_session
+  export -f check_compliance
+fi

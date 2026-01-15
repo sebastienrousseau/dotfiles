@@ -345,23 +345,24 @@ run_all_security_checks() {
 }
 
 ################################################################################
-# Export public functions
+# Export public functions (Bash only); Zsh does not support exporting functions
 ################################################################################
-
-export -f harden_file_permissions
-export -f harden_directory_permissions
-export -f verify_script_syntax
-export -f verify_script_quality
-export -f check_sensitive_file_perms
-export -f check_for_secrets
-export -f verify_umask
-export -f sanitize_input
-export -f is_safe_string
-export -f check_not_root
-export -f create_secure_temp
-export -f secure_rm
-export -f log_security_event
-export -f run_all_security_checks
-export -f security_log
-export -f security_warn
-export -f security_error
+if [[ -n "${BASH_VERSION:-}" ]]; then
+  export -f harden_file_permissions
+  export -f harden_directory_permissions
+  export -f verify_script_syntax
+  export -f verify_script_quality
+  export -f check_sensitive_file_perms
+  export -f check_for_secrets
+  export -f verify_umask
+  export -f sanitize_input
+  export -f is_safe_string
+  export -f check_not_root
+  export -f create_secure_temp
+  export -f secure_rm
+  export -f log_security_event
+  export -f run_all_security_checks
+  export -f security_log
+  export -f security_warn
+  export -f security_error
+fi

@@ -281,7 +281,10 @@ security_audit() {
     echo ""
 }
 
-# Run if sourced directly
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    security_audit "$@"
+# Run if executed directly (Bash-only guard)
+# Referencing BASH_SOURCE in Zsh can trigger "parameter not set" errors.
+if [[ -n "${BASH_VERSION:-}" ]]; then
+    if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+        security_audit "$@"
+    fi
 fi
