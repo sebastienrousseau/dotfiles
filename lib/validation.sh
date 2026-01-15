@@ -247,8 +247,8 @@ validate_ipv4() {
     fi
     
     # Validate each octet is <= 255
-    local IFS='.'
-    local -a octets=($value)
+    local -a octets
+    IFS='.' read -ra octets <<< "$value"
     for octet in "${octets[@]}"; do
         if [[ $octet -gt 255 ]]; then
             validation_error "$field_name contains invalid octet (> 255): $octet"

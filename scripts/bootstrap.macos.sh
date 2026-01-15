@@ -67,6 +67,8 @@ if ! command -v brew &>/dev/null; then
     log "Installing Homebrew..."
     
     # Download Homebrew installer with integrity check
+    # NOTE: Using HEAD version from official Homebrew repository (recommended by Homebrew)
+    # Script syntax is validated before execution for additional security
     local installer_url="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
     local temp_installer
     temp_installer=$(mktemp) || {
@@ -77,7 +79,7 @@ if ! command -v brew &>/dev/null; then
     on_exit "rm -f '$temp_installer'" 2>/dev/null || true
     
     if curl -fsSL --connect-timeout 10 "$installer_url" -o "$temp_installer"; then
-        # Verify script syntax before execution
+        # Verify script syntax before execution as a security measure
         if verify_script_syntax "$temp_installer"; then
             bash "$temp_installer" || {
                 error "Homebrew installation failed"
