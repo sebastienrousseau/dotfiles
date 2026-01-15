@@ -1,0 +1,749 @@
+#!/usr/bin/env bash
+
+################################################################################
+# 🅱🅰🆂🅷🆁🅲
+# File: .bashrc
+# Version: 0.2.470
+# Author: Sebastien Rousseau
+# Copyright (c) 2015-2025. All rights reserved
+# Description: Configure system environment variables and load dotfiles
+# Website: https://dotfiles.io
+# License: MIT
+################################################################################
+
+# Environment variables that control behavior:
+# DOTFILES_VERBOSE=0|1|2|3      - Control verbosity (0=minimal, 1=warnings, 2=info, 3=debug)
+# DOTFILES_LOG_LEVEL=0|1|2|3    - Log level (0=errors, 1=warnings, 2=info, 3=debug)
+# DOTFILES_LOG_FILE=/path/file  - Optional log file path
+# DOTFILES_CACHE_DISABLE=0|1    - Set to 1 to disable dotfiles caching
+# DOTFILES_CACHE_TTL=86400      - Cache time-to-live in seconds (default 24 hours)
+# DOTFILES_LANG=en_GB.UTF-8     - Override default language setting
+
+#-----------------------------------------------------------------------------
+# Function: log_message
+#
+# Description:
+#   Logs a message with a specific level.
+#
+# Arguments:
+#   $1: Log level (0=ERROR, 1=WARN, 2=INFO, 3=DEBUG)
+#   $2: Message to log
+#
+# Returns:
+#   0 on success
+#-----------------------------------------------------------------------------
+log_message() {
+    local level="$1"
+    local message="$2"
+    local log_level="${DOTFILES_LOG_LEVEL:-1}"  # Default to WARN level
+    local log_file="${DOTFILES_LOG_FILE:-}"     # Default to no log file
+
+    # Only log if current level <= configured level
+    if [[ "$level" -le "$log_level" ]]; then
+        local level_text
+        case "$level" in
+            0) level_text="ERROR" ;;
+            1) level_text="WARN " ;;
+            2) level_text="INFO " ;;
+            3) level_text="DEBUG" ;;
+            *) level_text="?????" ;;
+        esac
+
+        local timestamp
+        timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+        local formatted_message="[$timestamp] [$level_text] $message"
+
+        # Always output errors and warnings to stderr
+        if [[ "$level" -le 1 ]]; then
+            echo "$formatted_message" >&2
+        fi
+
+        # Log to file if specified
+        if [[ -n "$log_file" ]]; then
+            echo "$formatted_message" >> "$log_file" 2>/dev/null || \
+                echo "[$timestamp] [ERROR] Failed to write to log file: $log_file" >&2
+        # Otherwise output to stderr based on verbosity
+        elif [[ "$level" -gt 1 ]]; then
+            local verbose="${DOTFILES_VERBOSE:-0}"
+            if [[ "$verbose" -ge "$level" ]]; then
+                echo "$formatted_message" >&2
+            fi
+        fi
+    fi
+
+    return 0
+}
+
+#-----------------------------------------------------------------------------
+# Function: check_required_tools
+#
+# Description:
+#   Verifies all required system tools are available.
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   0 if all tools are available, 1 otherwise
+#-----------------------------------------------------------------------------
+check_required_tools() {
+    local required_tools=("hostname" "uname" "whoami")
+    local missing_tools=()
+
+    for tool in "${required_tools[@]}"; do
+        if ! command -v "$tool" &> /dev/null; then
+            missing_tools+=("$tool")
+        fi
+    done
+
+    if [[ ${#missing_tools[@]} -gt 0 ]]; then
+        log_message 1 "The following required tools are missing: ${missing_tools[*]}"
+        return 1
+    fi
+
+    log_message 3 "All required tools are available"
+    return 0
+}
+
+#-----------------------------------------------------------------------------
+# Function: configure_system_info
+#
+# Description:
+#   Configures system-related environment variables.
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   0 on success, 1 on failure
+#-----------------------------------------------------------------------------
+configure_system_info() {
+    log_message 2 "Configuring system information"
+
+    # System information
+    if ! HOSTNAME=$(hostname -f 2>/dev/null || hostname); then
+        log_message 1 "Could not determine hostname"
+        return 1
+    fi
+
+    if ! OS_ARCH=$(uname -m); then
+        log_message 1 "Could not determine system architecture"
+        return 1
+    fi
+
+    if ! OS_NAME=$(uname); then
+        log_message 1 "Could not determine operating system"
+        return 1
+    fi
+
+    if ! OS_VERSION=$(uname -r); then
+        log_message 1 "Could not determine system version"
+        return 1
+    fi
+
+    if ! USER=$(whoami); then
+        log_message 1 "Could not determine username"
+        return 1
+    fi
+
+    # Export system variables
+    export HOSTNAME
+    export OS_ARCH
+    export OS_NAME
+    export OS_VERSION
+    export USER
+    export ARCHFLAGS="-arch ${OS_ARCH}"
+
+    log_message 3 "System information configured successfully"
+    log_message 3 "Hostname: $HOSTNAME"
+    log_message 3 "OS: $OS_NAME $OS_VERSION"
+    log_message 3 "Architecture: $OS_ARCH"
+    log_message 3 "User: $USER"
+
+    return 0
+}
+
+#-----------------------------------------------------------------------------
+# Function: configure_locale_settings
+#
+# Description:
+#   Configures locale and language settings.
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   0 on success
+#-----------------------------------------------------------------------------
+configure_locale_settings() {
+    log_message 2 "Configuring locale settings"
+
+    # Default language settings - use environment variable if set, otherwise default
+    local USER_LANGUAGE="${DOTFILES_LANG:-en_GB.UTF-8}"
+
+    # Export locale variables
+    export LANG="${USER_LANGUAGE}"
+    export LANGUAGE="${USER_LANGUAGE}"
+    export LC_ALL="${USER_LANGUAGE}"
+    export LC_CTYPE="${USER_LANGUAGE}"
+
+    log_message 3 "Locale settings configured to: $USER_LANGUAGE"
+    return 0
+}
+
+#-----------------------------------------------------------------------------
+# Function: configure_dotfiles_environment
+#
+# Description:
+#   Configures dotfiles-specific environment variables.
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   0 on success, 1 on failure
+#-----------------------------------------------------------------------------
+configure_dotfiles_environment() {
+    log_message 2 "Configuring dotfiles environment"
+
+    # Dotfiles configuration
+    export DOTFILES_VERSION='0.3.0'
+    export DOTFILES="${HOME}/.dotfiles/lib"
+
+    # Check if dotfiles directory exists
+    if [[ ! -d "${DOTFILES}" ]]; then
+        log_message 1 "Dotfiles directory not found: ${DOTFILES}"
+        if mkdir -p "${DOTFILES}"; then
+            log_message 2 "Created dotfiles directory: ${DOTFILES}"
+        else
+            log_message 0 "Failed to create dotfiles directory: ${DOTFILES}"
+            return 1
+        fi
+    fi
+
+    # Additional environment settings
+    export INPUTRC="${HOME}/.inputrc"
+
+    # Set SSL_CERT_FILE only if the file exists
+    if [[ -f "${HOME}/cacert.pem" ]]; then
+        export SSL_CERT_FILE="${HOME}/cacert.pem"
+        log_message 3 "Set SSL_CERT_FILE to ${SSL_CERT_FILE}"
+    fi
+
+    # Only set TERM if not already defined
+    if [[ -z "${TERM}" ]]; then
+        export TERM="xterm-256color"
+        log_message 3 "Set TERM to ${TERM}"
+    fi
+
+    log_message 3 "Dotfiles environment configured successfully"
+    return 0
+}
+
+#-----------------------------------------------------------------------------
+# Function: configure_bash_options
+#
+# Description:
+#   Configures Bash-specific options and settings.
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   0 on success
+#-----------------------------------------------------------------------------
+configure_bash_options() {
+    log_message 2 "Configuring Bash options"
+
+    # History configuration
+    # We use a comprehensive history setup to maximize usefulness while minimizing clutter
+    export HISTFILE="${HOME}/.bash_history"
+    # ignoreboth = ignorespace + ignoredups:
+    #   - ignorespace: don't save commands that start with space (for sensitive commands)
+    #   - ignoredups: don't save duplicate commands consecutively
+    # erasedups: remove all previous duplicate entries, not just consecutive ones
+    export HISTCONTROL="ignoreboth:erasedups"
+    # Large history size for better command recall, balanced with reasonable memory usage
+    export HISTSIZE=10000
+    export HISTFILESIZE=10000
+    # Ignore common commands that add noise to history
+    export HISTIGNORE="&:ls:[bf]g:exit:history:clear"
+    # Add timestamps to history for better tracking
+    # Format: 2023-04-15 14:30:45
+    export HISTTIMEFORMAT="%F %T "
+
+    # Shell options
+    # histappend preserves history across multiple terminal sessions
+    # without this, the last terminal to close would overwrite all others' history
+    shopt -s histappend
+    # histverify allows reviewing commands from history before execution
+    # useful for preventing accidental execution of recalled dangerous commands
+    shopt -s histverify
+    # cmdhist allows multi-line commands to be stored as a single history entry
+    # makes complex commands easier to recall and reuse
+    shopt -s cmdhist
+
+    # Optional features that may not be available on all Bash versions
+    # We redirect errors to /dev/null to handle older Bash versions gracefully
+    # autocd (Bash 4+) allows changing directories by typing the directory name without 'cd'
+    if shopt -s autocd 2>/dev/null; then
+        log_message 3 "Enabled autocd feature"
+    fi
+
+    # dirspell (Bash 4+) corrects minor spelling errors in directory names
+    if shopt -s dirspell 2>/dev/null; then
+        log_message 3 "Enabled dirspell feature"
+    fi
+
+    # cdspell corrects minor spelling errors in cd commands
+    shopt -s cdspell
+    # checkwinsize updates LINES and COLUMNS variables after each command
+    # ensures proper wrapping and display in resized terminals
+    shopt -s checkwinsize
+
+    # Set up readline for better command line editing
+    if bind '"\e[A": history-search-backward' 2>/dev/null; then
+        bind '"\e[B": history-search-forward' 2>/dev/null
+        bind '"\e[C": forward-char' 2>/dev/null
+        bind '"\e[D": backward-char' 2>/dev/null
+        log_message 3 "Configured enhanced readline key bindings"
+    else
+        log_message 2 "Skipped readline configuration (might be non-interactive or missing bind)"
+    fi
+
+    log_message 3 "Bash options configured successfully"
+    return 0
+}
+
+#-----------------------------------------------------------------------------
+# Function: configure_bash_completion
+#
+# Description:
+#   Configures Bash completion system.
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   0 on success
+#-----------------------------------------------------------------------------
+configure_bash_completion() {
+    log_message 2 "Configuring Bash completion"
+
+    # Enable programmable completion features
+    if ! shopt -oq posix; then
+        if [ -f /usr/share/bash-completion/bash_completion ]; then
+            # shellcheck source=/dev/null
+            . /usr/share/bash-completion/bash_completion
+            log_message 3 "Loaded bash-completion from /usr/share/bash-completion/bash_completion"
+        elif [ -f /etc/bash_completion ]; then
+            # shellcheck source=/dev/null
+            . /etc/bash_completion
+            log_message 3 "Loaded bash-completion from /etc/bash_completion"
+        else
+            # MacOS homebrew completion path
+            if [ -f /usr/local/etc/bash_completion ]; then
+                # shellcheck source=/dev/null
+                . /usr/local/etc/bash_completion
+                log_message 3 "Loaded bash-completion from homebrew location"
+            else
+                log_message 2 "No bash-completion file found"
+            fi
+        fi
+    else
+        log_message 2 "Skipped bash-completion (POSIX mode enabled)"
+    fi
+
+    log_message 3 "Bash completion configuration complete"
+    return 0
+}
+
+#-----------------------------------------------------------------------------
+# Function: check_shell_compatibility
+#
+# Description:
+#   Checks if the current shell is compatible with this script.
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   0 if compatible, 1 otherwise
+#-----------------------------------------------------------------------------
+check_shell_compatibility() {
+    # Check if we're running in bash
+    if [[ -z "${BASH_VERSION}" ]]; then
+        log_message 1 "This script is designed for bash, but appears to be running in a different shell"
+        return 1
+    fi
+
+    log_message 3 "Running in bash version $BASH_VERSION"
+    return 0
+}
+
+#-----------------------------------------------------------------------------
+# Function: load_dotfiles_with_cache
+#
+# Description:
+#   Loads all .sh files from the dotfiles directory with caching.
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   0 on success, 1 if no files found or load errors
+#-----------------------------------------------------------------------------
+load_dotfiles_with_cache() {
+    # Check if cache is disabled
+    # This provides a simple way to bypass caching during development or troubleshooting
+    if [[ "${DOTFILES_CACHE_DISABLE:-0}" -eq 1 ]]; then
+        log_message 2 "Dotfiles caching is disabled, using standard loading"
+        load_dotfiles
+        return $?
+    fi
+
+    # Cache settings
+    # We store the cache in the user's home directory for reliability and permission simplicity
+    # Using a hidden file to keep it out of normal directory listings
+    local cache_file="${HOME}/.bash_dotfiles_cache"
+    # Default 24-hour cache lifetime balances performance gain against staleness
+    # This is configurable to allow users to adjust based on how frequently they update dotfiles
+    local cache_ttl="${DOTFILES_CACHE_TTL:-86400}"  # Cache valid for 24 hours (in seconds) by default
+
+    log_message 2 "Checking dotfiles cache status"
+
+    # Check if cache exists and is fresh
+    local use_cache=0
+    if [[ -f "$cache_file" ]]; then
+        local cache_time
+        local current_time
+
+        # Get file modification time in a cross-platform way
+        # macOS (Darwin) and Linux have different stat command syntax
+        # This approach works on both without needing external tools
+        if [[ "$OS_NAME" == "Darwin" ]]; then
+            # macOS uses -f %m for file modification time in seconds since epoch
+            cache_time=$(stat -f %m "$cache_file")
+        else
+            # Linux and most others use -c %Y for the same information
+            cache_time=$(stat -c %Y "$cache_file")
+        fi
+
+        current_time=$(date +%s)
+
+        # Use cache if it's fresh enough
+        # Simple time comparison avoids unnecessary reprocessing of dotfiles
+        if (( current_time - cache_time < cache_ttl )); then
+            use_cache=1
+            log_message 2 "Using dotfiles cache (age: $((current_time - cache_time)) seconds)"
+        else
+            log_message 2 "Cache expired (age: $((current_time - cache_time)) seconds)"
+        fi
+    else
+        log_message 2 "No cache file exists yet"
+    fi
+
+    if [[ $use_cache -eq 1 ]]; then
+        log_message 3 "Loading from cache: $cache_file"
+        # shellcheck source=/dev/null
+        source "$cache_file"
+        return $?
+    else
+        # Only proceed if the directory exists
+        if [[ ! -d "${DOTFILES}" ]]; then
+            log_message 1 "Dotfiles directory does not exist, skipping loading of dotfiles"
+            return 1
+        fi
+
+        # Create a new cache file
+        log_message 2 "Generating new dotfiles cache"
+        echo "# Generated dotfiles cache $(date)" > "$cache_file"
+
+        local loaders_pattern="${DOTFILES}/*.sh"
+        local found_files=0
+        local load_errors=0
+
+        # Check if any matching files exist and add to cache
+        for loader in ${loaders_pattern}; do
+            if [[ -f "${loader}" ]]; then
+                found_files=1
+                log_message 3 "Adding to cache: $loader"
+                echo "# Source: $loader" >> "$cache_file"
+                cat "$loader" >> "$cache_file"
+                echo "" >> "$cache_file"
+            fi
+        done
+
+        if [[ ${found_files} -eq 0 ]]; then
+            log_message 1 "No dotfiles found in ${DOTFILES}"
+            rm -f "$cache_file"  # Remove empty cache
+            return 1
+        fi
+
+        # Source the newly created cache
+        log_message 3 "Loading newly created cache: $cache_file"
+        # shellcheck source=/dev/null
+        source "$cache_file"
+        local source_result=$?
+
+        if [[ $source_result -ne 0 ]]; then
+            log_message 0 "Error sourcing dotfiles cache"
+            return 1
+        fi
+
+        log_message 2 "Dotfiles loaded successfully from generated cache"
+        return 0
+    fi
+}
+
+#-----------------------------------------------------------------------------
+# Function: load_dotfiles
+#
+# Description:
+#   Loads all .sh files from the dotfiles directory without caching.
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   0 on success, 1 if no files found or load errors
+#-----------------------------------------------------------------------------
+load_dotfiles() {
+    log_message 2 "Loading dotfiles from directory (no cache)"
+
+    # Only proceed if the directory exists
+    if [[ ! -d "${DOTFILES}" ]]; then
+        log_message 1 "Dotfiles directory does not exist, skipping loading of dotfiles"
+        return 1
+    fi
+
+    local loaders_pattern="${DOTFILES}/*.sh"
+    local found_files=0
+    local load_errors=0
+
+    # Check if any matching files exist
+    for loader in ${loaders_pattern}; do
+        if [[ -f "${loader}" ]]; then
+            found_files=1
+            log_message 3 "Loading: $loader"
+            # Load the file, capturing any errors
+            # shellcheck source=/dev/null
+            if ! source "${loader}"; then
+                log_message 1 "Failed to load ${loader}"
+                load_errors=$((load_errors + 1))
+            fi
+        fi
+    done
+
+    if [[ ${found_files} -eq 0 ]]; then
+        log_message 1 "No dotfiles found in ${DOTFILES}"
+        return 1
+    fi
+
+    if [[ ${load_errors} -gt 0 ]]; then
+        log_message 1 "${load_errors} files failed to load properly"
+        return 1
+    fi
+
+    log_message 3 "All dotfiles loaded successfully"
+    return 0
+}
+
+#-----------------------------------------------------------------------------
+# Function: load_local_customizations
+#
+# Description:
+#   Loads local customizations if they exist.
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   0 on success, 1 if file doesn't exist or fails to load
+#-----------------------------------------------------------------------------
+load_local_customizations() {
+    local local_config="${HOME}/.bashrc.local"
+
+    log_message 2 "Checking for local customizations"
+
+    if [[ -f "${local_config}" ]]; then
+        log_message 3 "Loading local customizations from: $local_config"
+        # shellcheck source=/dev/null
+        if ! source "${local_config}"; then
+            log_message 1 "Failed to load local customizations from ${local_config}"
+            return 1
+        fi
+        log_message 3 "Local customizations loaded successfully"
+    else
+        log_message 3 "No local customizations file found"
+    fi
+
+    return 0
+}
+
+#-----------------------------------------------------------------------------
+# Function: clean_path
+#
+# Description:
+#   Removes duplicate entries from PATH
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   0 on success
+#-----------------------------------------------------------------------------
+clean_path() {
+    log_message 2 "Cleaning PATH (removing duplicates)"
+
+    local original_path="$PATH"
+
+    # Remove duplicates from PATH (similar to typeset -aU path in zsh)
+    # We use two methods with fallback for maximum compatibility
+    if command -v perl &>/dev/null; then
+        # Perl method is preferred because:
+        # 1. It's much faster for long PATHs
+        # 2. It handles all edge cases correctly
+        # 3. It's a one-liner that's easy to verify
+        # The approach uses a hash to track seen entries and only keeps first occurrence
+        PATH="$(perl -e 'print join(":", grep { not $seen{$_}++ } split(/:/, $ENV{PATH}))')"
+        log_message 3 "PATH cleaned using perl method"
+    else
+        # Fallback if perl isn't available - less efficient but works everywhere
+        # This pure bash approach is more portable but slower for long PATHs
+        local new_path=""
+        local IFS=":"
+        local dir
+        for dir in ${PATH}; do
+            # The case statement with surrounding colons prevents partial matches
+            # For example, /usr/bin wouldn't match /usr/bin/local
+            # The surrounding colons in the pattern ensure exact directory matching
+            case ":${new_path}:" in
+                *:"${dir}":*) ;;  # Already in new_path, skip it
+                *) new_path="${new_path:+${new_path}:}${dir}" ;;
+            esac
+        done
+        PATH="${new_path}"
+        log_message 3 "PATH cleaned using pure bash method"
+    fi
+    export PATH
+
+    # Calculate how many duplicates were removed
+    local orig_count
+    local new_count
+    orig_count=$(echo "$original_path" | tr ':' '\n' | wc -l)
+    new_count=$(echo "$PATH" | tr ':' '\n' | wc -l)
+    log_message 3 "Removed $((orig_count - new_count)) duplicate PATH entries"
+
+    return 0
+}
+
+#-----------------------------------------------------------------------------
+# Function: main
+#
+# Description:
+#   Main execution function with enhanced error handling.
+#
+# Arguments:
+#   None
+#
+# Returns:
+#   0 on success, non-zero on critical failures
+#-----------------------------------------------------------------------------
+main() {
+    # Track critical errors that should cause non-interactive shells to exit
+    local critical_error=0
+    local exit_code=0
+
+    # Check shell compatibility
+    # This is non-critical as other shells might have compatible features
+    if ! check_shell_compatibility; then
+        log_message 1 "Shell compatibility check failed, continuing anyway"
+    fi
+
+    # Check required tools
+    # This is non-critical as most functions can work with a subset of tools
+    if ! check_required_tools; then
+        log_message 1 "Some required tools are missing, functionality may be limited"
+    fi
+
+    # Configure system information (critical)
+    # This is critical because many other functions depend on system information
+    # Variables like OS_NAME are used for platform-specific behavior
+    if ! configure_system_info; then
+        log_message 0 "System information configuration failed"
+        critical_error=1
+    fi
+
+    # Configure locale settings
+    # This is non-critical and doesn't return an error code
+    configure_locale_settings
+
+    # Configure dotfiles environment (critical)
+    # This is critical because it sets up the DOTFILES path that later functions use
+    # Without this, we can't load any dotfiles
+    if ! configure_dotfiles_environment; then
+        log_message 0 "Dotfiles environment configuration failed"
+        critical_error=1
+    fi
+
+    # Configure Bash-specific options
+    # These are comfortable enhancements but not critical for operation
+    if ! configure_bash_options; then
+        log_message 1 "Bash options configuration failed"
+    fi
+
+    # Configure Bash completion
+    # This improves usability but isn't critical for shell operation
+    if ! configure_bash_completion; then
+        log_message 1 "Bash completion configuration failed"
+    fi
+
+    # Load dotfiles with caching
+    # This is the main purpose of the script, but we can continue if it fails
+    # A missing dotfiles directory might be intentional in some environments
+    if ! load_dotfiles_with_cache; then
+        log_message 1 "No dotfiles were loaded"
+    fi
+
+    # Clean PATH
+    # PATH cleaning is a nice-to-have optimization but not critical
+    if ! clean_path; then
+        log_message 1 "Failed to clean PATH"
+    fi
+
+    # Load local customizations
+    # Local customizations are optional, so this isn't critical
+    if ! load_local_customizations; then
+        log_message 1 "Failed to load local customizations"
+    fi
+
+    # Set exit code for critical errors
+    if [[ $critical_error -eq 1 ]]; then
+        # We handle interactive and non-interactive shells differently:
+        # - Interactive shells (like login terminals) should continue despite errors
+        #   to avoid preventing user login, but we set a variable to indicate the issue
+        # - Non-interactive shells (like in scripts) should fail properly with a
+        #   non-zero exit code to indicate problems to calling scripts
+        if [[ $- == *i* ]]; then
+            export BASHRC_CRITICAL_ERROR=1
+            log_message 0 "Critical errors occurred during bashrc initialization"
+        else
+            # For non-interactive shells, return error code
+            exit_code=1
+        fi
+    fi
+
+    log_message 2 "Bashrc initialization completed with status: $exit_code"
+    return $exit_code
+}
+
+# Execute main function and capture result
+main
+BASHRC_RESULT=$?
+
+# For non-interactive shells, propagate the error code
+if [[ $- != *i* ]]; then
+    log_message 3 "Non-interactive shell detected, propagating exit code: $BASHRC_RESULT"
+    exit $BASHRC_RESULT
+fi

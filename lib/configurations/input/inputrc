@@ -1,0 +1,23 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.470) - <https://dotfiles.io>
+# Made with ♥ in London, UK by Sebastien Rousseau
+# Copyright (c) 2015-2025. All rights reserved
+# License: MIT
+
+# 🅸🅽🅿🆄🆃🆁🅲 - Completion options.
+set colored-completion-prefix On # Color the common prefix
+set colored-stats On # Color the completion stats
+set completion-ignore-case on # Ignore case when completing
+set completion-prefix-display-length 1 # Show the first character of the common prefix
+set completion-query-items 200 # Show all completions
+set expand-tilde Off # Expand ~ to $HOME
+set horizontal-scroll-mode Off # Disable horizontal scrolling
+set mark-directories on # Mark directories with a slash
+set mark-modified-lines on # Mark modified lines with a *
+set mark-symlinked-directories On # Mark symlinked directories
+set mark-symlinked-directories on # Mark symlinks with a @
+set menu-complete-display-prefix On # Color the common prefix in menu-complete
+set page-completions on # Show completions in a pager
+set show-all-if-ambiguous on # Reduce tab completion key presses and show suggestions
+set show-all-if-ambiguous on # Show all completions if ambiguous
+set show-all-if-unmodified on # Show all completions if unmodified
+set visible-stats On # Append char to indicate type

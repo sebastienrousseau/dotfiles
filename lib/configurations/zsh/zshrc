@@ -1,0 +1,137 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.470) - <https://dotfiles.io>
+# Made with ♥ in London, UK by @sebastienrousseau
+# Copyright (c) 2015-2025. All rights reserved
+# License: MIT
+
+# Performance optimization - skip if not interactive
+[[ -o interactive ]] || return
+
+# Only source once if being re-sourced
+if [[ -v DOTFILES_SOURCED ]]; then
+  return
+fi
+export DOTFILES_SOURCED=1
+
+## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set Dotfiles variables
+export HOSTNAME="$(hostname)"                # More portable hostname command
+export INPUTRC="${HOME}/.inputrc"            # Set INPUTRC for readline
+export OS_ARCH="$(uname -m)"                 # Machine hardware name
+export OS_NAME="$(uname)"                    # Operating system name
+export OS_VERSION="$(uname -r)"              # OS version number
+export SSL_CERT_FILE="${HOME}/cacert.pem"    # SSL certificate file
+export USER_LANGUAGE="en_GB.UTF-8"           # Default language
+export ARCHFLAGS="-arch ${OS_ARCH}"          # Architecture flags
+export DOTFILES_VERSION='0.2.470'            # Dotfiles version
+export DOTFILES="${HOME}/.dotfiles/lib"      # Path to dotfiles
+export LANG="${USER_LANGUAGE}"               # Language settings
+export LANGUAGE="${USER_LANGUAGE}"
+export LC_ALL="${USER_LANGUAGE}"
+export LC_CTYPE="${USER_LANGUAGE}"
+export TERM="xterm-256color"                 # Terminal color support
+
+## 🆉🆂🅷 🆂🅿🅴🅲🅸🅵🅸🅲 - Zsh specific settings
+# History configuration
+HISTFILE="${HOME}/.zsh_history"
+HISTSIZE=10000
+SAVEHIST=10000
+setopt HIST_IGNORE_ALL_DUPS     # No duplicate entries
+setopt HIST_SAVE_NO_DUPS        # Don't save duplicates
+setopt HIST_IGNORE_SPACE        # Ignore commands with leading space
+setopt HIST_REDUCE_BLANKS       # Remove unnecessary blanks
+setopt EXTENDED_HISTORY         # Save timestamp and duration
+setopt SHARE_HISTORY            # Share history between sessions
+setopt APPEND_HISTORY           # Append to history file
+
+# Directory navigation
+setopt AUTO_CD                  # Change to dir without 'cd'
+setopt AUTO_PUSHD               # Push dirs to stack automatically
+setopt PUSHD_IGNORE_DUPS        # No duplicates in dir stack
+setopt PUSHD_SILENT             # Don't print dir stack
+
+# Key bindings - improved history search
+bindkey -e  # Use emacs key bindings
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey "^[[A" up-line-or-beginning-search  # Up arrow
+bindkey "^[[B" down-line-or-beginning-search  # Down arrow
+bindkey "^P" up-line-or-beginning-search    # Ctrl+P
+bindkey "^N" down-line-or-beginning-search  # Ctrl+N
+
+# Completion system
+autoload -Uz compinit
+# Only run compinit once a day for better performance
+if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
+fi
+
+# Completion styles - kept from your original
+zstyle ':completion:*' menu select    # Menu-driven completion
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' # Case insensitive
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"   # Colored completion
+zstyle ':completion:*' special-dirs true                  # Complete special directories
+zstyle ':completion:*' verbose yes                        # Verbose completion info
+
+# Enable colors
+autoload -Uz colors && colors
+
+# Disable autocorrection
+unsetopt correct_all
+
+## 🅻🅾🅰🅳🅴🆁🆂 - Load the dotfiles with caching for better performance
+_DOTFILES_CACHE="${HOME}/.zsh_dotfiles_cache"
+_DOTFILES_CACHE_TIME=86400  # 24 hours in seconds
+
+# Function to load dotfiles with caching - improves startup time
+load_dotfiles() {
+  local load_from_cache=0
+
+  # Check if cache exists and is recent
+  if [[ -f "${_DOTFILES_CACHE}" ]]; then
+    local cache_time=$(stat -c %Y "${_DOTFILES_CACHE}" 2>/dev/null || stat -f %m "${_DOTFILES_CACHE}" 2>/dev/null)
+    local current_time=$(date +%s)
+    if (( current_time - cache_time < _DOTFILES_CACHE_TIME )); then
+      load_from_cache=1
+    fi
+  fi
+
+  if (( load_from_cache )); then
+    source "${_DOTFILES_CACHE}"
+  else
+    # Generate new cache
+    echo "# Auto-generated dotfiles cache - $(date)" > "${_DOTFILES_CACHE}"
+
+    # Load each dotfile and cache the results
+    for loader in "${DOTFILES}"/*.sh; do
+      if [[ -f "$loader" ]]; then
+        echo "# Source: $loader" >> "${_DOTFILES_CACHE}"
+        cat "$loader" >> "${_DOTFILES_CACHE}"
+        echo "" >> "${_DOTFILES_CACHE}"
+      fi
+    done
+
+    # Now source the cache
+    source "${_DOTFILES_CACHE}"
+  fi
+}
+
+# Optional: Comment this line and uncomment the original loader if you prefer
+load_dotfiles
+
+# Original loader (uncomment if you don't want caching)
+# for loader in "${DOTFILES}"/*.sh; do
+#   if [[ -f "$loader" ]]; then
+#     # shellcheck source=/dev/null
+#     if ! . "$loader"; then
+#       echo "Warning: Failed to source $loader" >&2
+#     fi
+#   fi
+# done
+
+# Remove duplicates in zsh $PATH
+typeset -aU path
+
+# Load local customizations if they exist
+[[ -f "${HOME}/.zshrc.local" ]] && source "${HOME}/.zshrc.local"

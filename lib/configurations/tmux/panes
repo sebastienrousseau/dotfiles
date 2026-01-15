@@ -1,0 +1,10 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.470) - <https://dotfiles.io>
+# Made with ♥ in London, UK by Sebastien Rousseau
+# Copyright (c) 2015-2025. All rights reserved
+# License: MIT
+
+## 🅿🅰🅽🅴🆂
+set-option -g pane-base-index 1     # set first pane to index 1 (not 0) to map more to the keyboard layout
+bind-key q kill-pane                # kill pane without confirmation (comment is incorrect)
+bind -n M-c kill-pane \; select-layout      # kill pane and auto-adjust layout
+bind -n M-n split-window \; select-layout   # create new pane and auto-adjust layout

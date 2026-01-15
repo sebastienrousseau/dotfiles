@@ -1,0 +1,35 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.470) - <https://dotfiles.io>
+# Made with ♥ in London, UK by Sebastien Rousseau
+# Copyright (c) 2015-2025. All rights reserved
+# License: MIT
+
+# 🅽🅰🅽🅾🆁🅲
+
+# Display
+set atblanks # Display trailing blanks
+set autoindent # Indent new lines to the previous line's indentation
+set backup # Creates backups of your current file.
+set boldtext # Display bold text
+set bookstyle # Display bookstyle
+set casesensitive # Perform case-sensitive searches
+set constantshow # Constantly show the cursor position in the status bar
+set historylog # Log search and replace strings to `~/.nano_history`
+set functioncolor cyan # Color of function names
+set keycolor cyan # Color of the key bindings in the help menu
+set linenumbers # Show line numbers in front of the text
+set mouse # Enable mouse support
+set noconvert # Keep original end-of-line formatting
+set numbercolor yellow # Set the color of the line numbers
+set preserve # Preserve the XON `^Q` and XOFF `^S` keys for the terminal
+set showcursor # Show the cursor position
+set smarthome # Make the Home key smarter
+set softwrap # Enable soft wrapping
+set statuscolor black,yellow # Set the color of the status bar
+set tabsize 4 # Set the tab size to 4 spaces
+set tabstospaces # Convert typed tabs to spaces
+set trimblanks # Trim trailing whitespace on save
+set titlecolor white,red # Set the color of the title bar
+set whitespace "»⋅" # Show whitespace as dots
+set wordbounds # Detect word boundaries
+set wordchars "_" # Allow underscores in words
+set zap # Let `Backspace` and `Delete` keys erase a marked region

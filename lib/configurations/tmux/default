@@ -1,0 +1,42 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.470) - <https://dotfiles.io>
+# Made with ♥ in London, UK by Sebastien Rousseau
+# Copyright (c) 2015-2025. All rights reserved
+# License: MIT
+
+## 🅳🅴🅵🅰🆄🅻🆃
+# Modern colors
+if-shell 'uname | grep -q Darwin' 'set -g default-terminal "xterm-256color"'
+if-shell 'uname | grep -q Linux' 'set -g default-terminal "tmux-256color"'
+set-option -sa terminal-overrides ",*256col*:Tc"
+
+# Unbind the prefix and bind it to Ctrl-a like screen
+unbind C-b
+set -g prefix C-a
+bind C-a send-prefix
+
+# Use screen shortcut (prefix a) for toggling windows
+unbind -T prefix l
+bind-key -T prefix a last-window
+
+# Additional settings
+bind C-a send-prefix -2     # GNU-Screen compatible prefix (duplicate command, consider removing)
+set -g history-limit 102400 # Increase history limit
+set -g prefix2 C-a          # GNU-Screen compatible prefix
+set -g set-clipboard on     # Copy to system clipboard
+set -g escape-time 10       # Faster command sequences (changed from -s to -g)
+set -g focus-events on      # Enable mouse focus events (changed from -s to -g)
+set -g repeat-time 600      # Increase repeat timeout (changed from -sg to -g)
+setw -g xterm-keys on       # Enable xterm keys
+
+# Plugin manager
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+
+# Continuum settings
+set -g @continuum-restore 'on'
+set -g @continuum-save-interval '15'
+
+# Initialize TMUX plugin manager (keep this line at the very bottom)
+# shellcheck disable=SC2088
+run '~/.tmux/plugins/tpm/tpm'

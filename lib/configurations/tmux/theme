@@ -1,0 +1,29 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.470) - <https://dotfiles.io>
+# Made with ♥ in London, UK by Sebastien Rousseau
+# Copyright (c) 2015-2025. All rights reserved
+# License: MIT
+
+## 🆃🅷🅴🅼🅴
+
+# macOS version
+if-shell 'uname -s | grep -q Darwin' 'set -g status-left "#[bg=#007ACC] 🍎 macOS #S #[bg=#EB0000] #W #[bg=#14222A]"'
+
+# Linux version
+if-shell 'uname -s | grep -q Linux' 'set -g status-left "#[bg=#007ACC] 🐧 Linux #S #[bg=#EB0000] #W #[bg=#14222A]"'
+
+# Windows version
+if-shell 'uname -s | grep -q MINGW' 'set -g status-left "#[bg=#007ACC] 🪟 Windows #S #[bg=#EB0000] #W #[bg=#14222A]"'
+
+# Status bar customisation
+set -g status-bg "#2D1681"                                         # Status bar background color (purple)
+set -g status-fg "#FFFFFF"                                         # Status bar foreground color (text)
+set -g status-interval 5                                           # Status bar refresh interval in seconds
+set -g status-justify centre                                       # Status bar justification
+set -g status-left-length 50                                       # Status bar left length
+set -g status-right-length 50                                      # Status bar right length
+set -g status-right "#[fg=#FFFFFF] #[bg=#14222A] ⬛ #I #[bg=#007ACC] #H #[bg=#EB0000] %_d %B %I:%M%p "
+set -g window-status-current-format "#[bg=#2D1681]Dotfiles (v0.2.470)" # Current window status format
+set -g window-status-current-style "bg=#EB0000"                     # Current window status style
+set -g window-status-separator ""                                  # Window status separator
+set-window-option -g clock-mode-colour "#FFFFFF"                   # Clock mode color
+set-window-option -g clock-mode-style 24                           # Clock mode style (12, 24)

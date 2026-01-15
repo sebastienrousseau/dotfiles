@@ -1,0 +1,132 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.470) - <https://dotfiles.io>
+# Made with ♥ in London, UK by Sebastien Rousseau
+# Copyright (c) 2015-2025. All rights reserved
+# License: MIT
+
+## 🅽🅰🆅🅸🅶🅰🆃🅸🅾🅽
+# Window splitting
+bind - split-window -v                                              # split current window vertically
+bind '\' split-window -v -c "#{pane_current_path}"                  # split with current path vertically
+bind _ split-window -h                                              # split current window horizontally
+bind | split-window -h -c "#{pane_current_path}"                    # split with current path horizontally
+
+# Window navigation and management
+bind -r C-h previous-window                                         # select previous window
+bind -r C-l next-window                                             # select next window
+bind a last -t :                                                    # move to last active window
+bind N new-window                                                   # create window
+bind n command-prompt -p "New window name:" "new-window -n '%%'"    # create named window
+bind R command-prompt -p "Rename window:" "rename-window '%%'"      # rename window
+bind Tab last-window                                                # move to last active window
+bind X confirm-before -p "kill-window #W? (y/n)" kill-window        # kill window with confirmation
+
+# Pane navigation
+bind -r C-o rotate-window                                           # rotate panes
+bind -r h select-pane -L                                            # move left
+bind -r j select-pane -D                                            # move down
+bind -r k select-pane -U                                            # move up
+bind -r l select-pane -R                                            # move right
+bind -r z resize-pane -Z                                            # toggle pane zoom
+
+# Pane management
+bind + run 'cut -c3- ~/.tmux.conf | sh -s _maximize_pane "#{session_name}" #D' # maximize pane
+bind < swap-pane -U                                                 # swap pane with previous
+bind > swap-pane -D                                                 # swap pane with next
+
+# Pane resizing
+bind -r H resize-pane -L 5                                          # resize pane left
+bind -r J resize-pane -D 5                                          # resize pane down
+bind -r K resize-pane -U 5                                          # resize pane up
+bind -r L resize-pane -R 5                                          # resize pane right
+
+# Session management
+bind BTab switch-client -l                                          # move to last session
+bind C-c new-session                                                # create session
+bind C-f command-prompt -p find-session 'switch-client -t %%'       # find session
+bind C-n command-prompt -p "New session name:" "new-session -s '%%'" # create named session
+bind C-s choose-tree -Zs                                            # show session tree
+bind I run-shell "$HOME/.tmux/plugins/tpm/bin/install_plugins"          # install tmux plugins
+bind K confirm-before -p "kill all sessions? (y/n)" kill-server     # kill all sessions
+bind P command-prompt -p "New session in dir:" "run-shell 'cd %% && tmux new-session -d -s $(basename %%)'" # create session in directory
+bind S command-prompt -p "Rename session:" "rename-session '%%'"    # rename session
+
+# Copy mode and searching
+bind / command-prompt -p "search:" "copy-mode; send-keys -X search-forward \"%%%\"" # search forward
+bind F command-prompt -p "Copy file path:" "run-shell 'echo %% | pbcopy'" # copy file path
+bind J command-prompt -p "Jump to mark:" "select-pane -m; send-keys -X jump-to-mark M-%%%" # jump to mark
+bind M command-prompt -p "Mark position:" "select-pane -m; send-keys -X set-mark M-%%%" # mark position
+
+# Configuration
+bind e new-window -n tmux-config "cd $HOME/.dotfiles/lib/configurations/tmux/ && \${EDITOR:-vim} ."  # edit configuration directory
+bind r source-file ~/.tmux.conf \; display ".tmux.conf reloaded" \; \
+        source-file $HOME/.dotfiles/lib/configurations/tmux/default    \; \
+        source-file $HOME/.dotfiles/lib/configurations/tmux/display    \; \
+        source-file $HOME/.dotfiles/lib/configurations/tmux/linux      \; \
+        source-file $HOME/.dotfiles/lib/configurations/tmux/navigation \; \
+        source-file $HOME/.dotfiles/lib/configurations/tmux/panes      \; \
+        source-file $HOME/.dotfiles/lib/configurations/tmux/theme      \;  # reload all configurations
+
+# Utilities
+# Creates a scrollable help menu popup
+bind ? display-popup -E -w 80 -h 24 -T "Dotfiles (v0.2.470) KEYBINDINGS" "\
+cat <<'EOF' | less -R
+  WINDOW SPLITTING
+  Prefix - : Split window vertically
+  Prefix \\ : Split with current path vertically
+  Prefix _ : Split window horizontally
+  Prefix | : Split with current path horizontally
+
+  WINDOW NAVIGATION & MANAGEMENT
+  Prefix C-h : Previous window
+  Prefix C-l : Next window
+  Prefix a/Tab : Last active window
+  Prefix N : Create window
+  Prefix n : Create named window
+  Prefix R : Rename window
+  Prefix X : Kill window with confirmation
+
+  PANE NAVIGATION
+  Prefix C-o : Rotate panes
+  Prefix h/j/k/l : Move left/down/up/right
+  Prefix z : Toggle pane zoom
+
+  PANE MANAGEMENT
+  Prefix + : Maximize pane
+  Prefix < : Swap with previous pane
+  Prefix > : Swap with next pane
+
+  PANE RESIZING
+  Prefix H/J/K/L : Resize pane left/down/up/right
+
+  SESSION MANAGEMENT
+  Prefix BTab : Move to last session
+  Prefix C-c : Create session
+  Prefix C-n : Create named session
+  Prefix C-f : Find session
+  Prefix C-s : Show session tree
+  Prefix I : Install tmux plugins
+  Prefix K : Kill all sessions
+  Prefix P : Create session in directory
+  Prefix S : Rename session
+
+  COPY MODE & SEARCHING
+  Prefix / : Search forward
+  Prefix F : Copy file path
+  Prefix J : Jump to mark
+  Prefix M : Mark position
+
+  CONFIGURATION
+  Prefix e : Edit configuration
+  Prefix r : Reload configuration
+
+  UTILITIES
+  Prefix m : Toggle mouse mode
+  Prefix U : URLview
+EOF" # display help menu
+
+bind m run "cut -c3- ~/.tmux.conf | sh -s _toggle_mouse"            # toggle mouse
+bind U run "cut -c3- ~/.tmux.conf | sh -s _urlview #{pane_id}"      # urlview
+
+# Unbind defaults we don't use
+unbind n                                                            # unbind default next-window
+unbind p                                                            # unbind default previous-window

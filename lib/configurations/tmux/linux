@@ -1,0 +1,20 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.470) - <https://dotfiles.io>
+# Made with ♥ in London, UK by Sebastien Rousseau
+# Copyright (c) 2015-2025. All rights reserved
+# License: MIT
+
+## 🅻🅸🅽🆄🆇 🅾🅽🅻🆈
+# Remove duplicated scroll up binding
+# bind -n C-WheelUpPane select-pane -t= \; copy-mode -e \; send-keys -M # scroll up
+bind -n WheelDownPane select-pane -t= \; send-keys -M               # scroll down
+bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'select-pane -t=; copy-mode -e; send-keys -M'" # scroll up
+bind -T copy-mode-emacs C-WheelDownPane send-keys -X halfpage-down  # scroll down half page
+bind -T copy-mode-emacs C-WheelUpPane   send-keys -X halfpage-up    # scroll up half page
+bind -T copy-mode-vi    C-WheelDownPane send-keys -X halfpage-down  # scroll down half page
+bind -T copy-mode-vi    C-WheelUpPane   send-keys -X halfpage-up    # scroll up half page
+bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "xclip -selection c" # copy to system clipboard
+bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "xclip -in -selection clipboard" # copy to system clipboard
+set -g mouse on                                                     # enable mouse
+setw -g mode-keys vi                                                # vi mode
+# Move this line before the Enter binding to avoid unbinding after setting
+unbind -T copy-mode-vi Enter                                        # unbind default Enter

@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-01-15T11:34:47Z",
+  "profile": "default",
+  "hostname": "rousseau-mbp-m1",
+  "os": "Darwin",
+  "arch": "arm64",
+  "startup_times": {
+    "zsh_ms": 75,
+    "bash_ms": 1288
+  }
+}

@@ -1,0 +1,21 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.470) - <https://dotfiles.io>
+# Made with ♥ in London, UK by Sebastien Rousseau
+# Copyright (c) 2015-2025. All rights reserved
+# License: MIT
+
+# Reload configuration with 'r'
+bind r source-file ~/.tmux.conf \; display ".tmux.conf reloaded" \; \
+        source-file $HOME/.dotfiles/lib/configurations/tmux/default    \; \
+        source-file $HOME/.dotfiles/lib/configurations/tmux/display    \; \
+        source-file $HOME/.dotfiles/lib/configurations/tmux/linux      \; \
+        source-file $HOME/.dotfiles/lib/configurations/tmux/navigation \; \
+        source-file $HOME/.dotfiles/lib/configurations/tmux/panes      \; \
+        source-file $HOME/.dotfiles/lib/configurations/tmux/theme      \;
+
+# Initial loading of configuration files
+source-file $HOME/.dotfiles/lib/configurations/tmux/default
+source-file $HOME/.dotfiles/lib/configurations/tmux/display
+source-file $HOME/.dotfiles/lib/configurations/tmux/linux
+source-file $HOME/.dotfiles/lib/configurations/tmux/navigation
+source-file $HOME/.dotfiles/lib/configurations/tmux/panes
+source-file $HOME/.dotfiles/lib/configurations/tmux/theme

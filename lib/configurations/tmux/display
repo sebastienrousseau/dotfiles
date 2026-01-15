@@ -1,0 +1,26 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.470) - <https://dotfiles.io>
+# Made with ♥ in London, UK by Sebastien Rousseau
+# Copyright (c) 2015-2025. All rights reserved
+# License: MIT
+
+## 🅳🅸🆂🅿🅻🅰🆈
+bind -n C-l send-keys C-l \; run 'sleep 0.2' \; clear-history     # clear both screen and history
+set -g aggressive-resize on                                       # resize panes automatically when window is resized
+set -g base-index 1                                               # start windows numbering at 1
+set -g bell-action none                                           # disable bell
+set -g display-panes-time 800                                     # slightly longer pane indicators display time
+set -g display-time 1000                                          # slightly longer status messages display time
+set -g monitor-activity on                                        # monitor for activity
+set -g renumber-windows on                                        # renumber windows when a window is closed
+set -g set-titles off                                             # set terminal title
+set -g status-interval 10                                         # redraw status line every 10 seconds
+set -g visual-activity off                                        # disable visual activity
+set -g visual-bell off                                            # disable visual bell
+set -g visual-silence off                                         # disable visual silence
+setw -g allow-rename off                                          # disable window renaming
+setw -g automatic-rename off                                      # disable automatic window renaming
+setw -g mode-keys vi                                              # vi mode
+# Removed duplicate: automatic-rename off is already set above
+setw -g monitor-activity on                                       # monitor for activity
+setw -g pane-base-index 1                                         # make pane numbering consistent with windows
+setw -g synchronize-panes off                                     # disable pane synchronization

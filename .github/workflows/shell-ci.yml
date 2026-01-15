@@ -1,0 +1,326 @@
+name: Shell Configuration CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+    paths:
+      - '**.sh'
+      - '.zshrc'
+      - '.bashrc'
+      - '.profile'
+      - '.zshenv'
+      - '.zprofile'
+      - '.github/workflows/shell-ci.yml'
+  pull_request:
+    branches: [ main, master, develop ]
+    paths:
+      - '**.sh'
+      - '.zshrc'
+      - '.bashrc'
+      - '.profile'
+      - '.zshenv'
+      - '.zprofile'
+  workflow_dispatch:
+
+jobs:
+  self-check:
+    name: Self-Check Doctor Script
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate doctor.sh syntax
+        run: |
+          echo "::group::Doctor Script Syntax Check"
+          bash -n scripts/doctor.sh
+          echo "✓ Syntax valid"
+          echo "::endgroup::"
+
+      - name: ShellCheck doctor.sh
+        run: |
+          echo "::group::ShellCheck Doctor Script"
+          shellcheck scripts/doctor.sh
+          echo "✓ ShellCheck passed"
+          echo "::endgroup::"
+
+      - name: Check for hardcoded user paths in doctor.sh
+        run: |
+          echo "::group::Hardcoded Path Check"
+          if grep -E "/Users/[^/]+|/home/[^/]+" scripts/doctor.sh | grep -v "HOME"; then
+            echo "Error: Hardcoded user paths found in doctor.sh"
+            exit 1
+          fi
+          echo "✓ No hardcoded user paths"
+          echo "::endgroup::"
+
+      - name: Verify doctor.sh is executable
+        run: |
+          if [[ ! -x scripts/doctor.sh ]]; then
+            echo "Error: doctor.sh is not executable"
+            exit 1
+          fi
+          echo "✓ doctor.sh is executable"
+
+  shellcheck:
+    name: ShellCheck Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          severity: warning
+          ignore_paths: node_modules
+          ignore_names: .zshrc .bashrc
+
+      - name: ShellCheck for shell configs
+        run: |
+          # These files don't have .sh extension but need checking
+          shellcheck -s bash .bashrc .profile || true
+          shellcheck -s bash lib/**/*.sh scripts/**/*.sh
+
+  syntax-validation:
+    name: Syntax Validation
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        shell: [bash, zsh]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Zsh (Ubuntu only)
+        if: matrix.os == 'ubuntu-latest' && matrix.shell == 'zsh'
+        rumkdir -p $HOME/.dotfiles/lib
+          cp -r lib/* $HOME/.dotfiles/lib/
+          cp .zshrc $HOME/.zshrc || true
+          cp .bashrc $HOME/.bashrc || true
+          cp .profile $HOME/.profile || true
+          cp .zshenv $HOME/.zshenv || true
+          cp .zprofile $HOME/.zprofile || true
+
+      - name: Restore baseline metrics
+        uses: actions/cache@v3
+        with:
+          path: ~/.dotfiles/metrics
+          key: startup-metrics-${{ runner.os }}-${{ github.ref }}
+          restore-keys: |
+            startup-metrics-${{ runner.os }}-
+
+      - name: Test Zsh startup time
+        id: zsh-test
+        run: |
+          echo "::group::Zsh Startup Time"
+          TOTAL=0
+          for i in {1..3}; do
+            TIME=$(time zsh -ilc exit 2>&1 | grep -E "real|total" | awk '{print $NF}')
+            echo "Run $i: $TIME"
+            # Convert to ms
+            if [[ "$TIME" =~ ([0-9.]+)m([0-9.]+)s ]]; then
+              MS=$(awk "BEGIN {printf \"%.0f\", (${BASH_REMATCH[1]} * 60 + ${BASH_REMATCH[2]}) * 1000}")
+            elif [[ "$TIME" =~ ([0-9.]+)s ]]; then
+              MS=$(awk "BEGIN {printf \"%.0f\", ${BASH_REMATCH[1]} * 1000}")
+            fi
+            TOTAL=$((TOTAL + MS))
+          done
+          AVG=$((TOTAL / 3))
+          echo "Average: ${AVG}ms"
+          echo "zsh_ms=$AVG" >> $GITHUB_OUTPUT
+          echo "::endgroup::"
+
+      - name: Test Bash startup time
+        id: bash-test
+        run: |
+          echo "::group::Bash Startup Time"
+          TOTAL=0
+          for i in {1..3}; do
+            TIME=$(time bash -ilc exit 2>&1 | grep -E "real|total" | awk '{print $NF}')
+            echo "Run $i: $TIME"
+            if [[ "$TIME" =~ ([0-9.]+)m([0-9.]+)s ]]; then
+              MS=$(awk "BEGIN {printf \"%.0f\", (${BASH_REMATCH[1]} * 60 + ${BASH_REMATCH[2]}) * 1000}")
+            elif [[ "$TIME" =~ ([0-9.]+)s ]]; then
+              MS=$(awk "BEGIN {printf \"%.0f\", ${BASH_REMATCH[1]} * 1000}")
+            fi
+            TOTAL=$((TOTAL + MS))
+          done
+          AVG=$((TOTAL / 3))
+          echo "Average: ${AVG}ms"
+          echo "bash_ms=$AVG" >> $GITHUB_OUTPUT
+          echo "::endgroup::"
+
+      - name: Check for regression
+        run: |
+          echo "::group::Regression Check"
+          METRICS_FILE="$HOME/.dotfiles/metrics/startup.json"
+          
+          if [[ -f "$METRICS_FILE" ]]; then
+            BASELINE_ZSH=$(grep -o '"zsh_ms": [0-9]*' "$METRICS_FILE" | grep -o '[0-9]*')
+            BASELINE_BASH=$(grep -o '"bash_ms": [0-9]*' "$METRICS_FILE" | grep -o '[0-9]*')
+            
+            ZSH_CURRENT=${{ steps.zsh-test.outputs.zsh_ms }}
+            BASH_CURRENT=${{ steps.bash-test.outputs.bash_ms }}
+            
+            ZSH_DIFF=$((ZSH_CURRENT - BASELINE_ZSH))
+        profile: [ci, default]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Zsh (Ubuntu only)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - name: Setup test environment
+        run: |
+          mkdir -p $HOME/.dotfiles
+          cp -r . $HOME/.dotfiles/
+          chmod +x $HOME/.dotfiles/scripts/doctor.sh
+          chmod +x $HOME/.dotfiles/bin/dotfiles
+
+      - name: Run health check (audit mode for initial setup)
+        run: |
+          cd $HOME/.dotfiles
+          echo "::group::Health Check (Profile: ${{ matrix.profile }})"
+          ./scripts/doctor.sh --profile ${{ matrix.profile }} --audit || true
+          echo "::endgroup::"
+
+      - name: Run strict health check
+        if: matrix.profile == 'ci'
+        run: |
+          cd $HOME/.dotfiles
+          echo "::group::Strict Health Check"
+          ./scripts/doctor.sh --profile ci
+          echo "::endgroup::
+      - name: Save new baseline
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        run: |
+          mkdir -p $HOME/.dotfiles/metrics
+          cat > $HOME/.dotfiles/metrics/startup.json << EOF
+          {
+            "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "profile": "ci",
+            "hostname": "github-actions",
+            "os": "${{ runner.os }}",
+            "arch": "${{ runner.arch }}",
+            "startup_times": {
+              "zsh_ms": ${{ steps.zsh-test.outputs.zsh_ms }},
+              "bash_ms": ${{ steps.bash-test.outputs.bash_ms }}
+            }
+          }
+          EOF
+          echo "✓ Baseline saved
+    name: Startup Performance Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Zsh (Ubuntu only)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - name: Setup test environment
+        run: |
+          # Create minimal test environment
+          mkdir -p $HOME/.dotfiles/lib
+          cp -r lib/* $HOME/.dotfiles/lib/
+          cp .zshrc $HOME/.zshrc || true
+          cp .bashrc $HOME/.bashrc || true
+          cp .profile $HOME/.profile || true
+          cp .zshenv $HOME/.zshenv || true
+          cp .zprofile $HOME/.zprofile || true
+
+      - name: Test Zsh startup time
+        run: |
+          echo "::group::Zsh Startup Time"
+          for i in {1..3}; do
+            time zsh -ilc exit
+          done
+          echo "::endgroup::"
+
+      - name: Test Bash startup time
+        run: |
+          echo "::group::Bash Startup Time"
+          for i in {1..3}; do
+            time bash -ilc exit
+          done
+          echo "::endgroup::"
+
+  health-check:
+    name: Dotfiles Health Check
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Zsh (Ubuntu only)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - name: Setup test environment
+        run: |
+          mkdir -p $HOME/.dotfiles
+          cp -r . $HOME/.dotfiles/
+          chmod +x $HOME/.dotfiles/scripts/doctor.sh
+          chmod +x $HOME/.dotfiles/bin/dotfiles
+
+      - name: Run health check
+        run: |
+          cd $HOME/.dotfiles
+          ./scripts/doctor.sh || echo "Health check completed with warnings"
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for hardcoded secrets
+        run: |
+          echo "::group::Secret Detection"
+          # Look for common secret patterns
+          ! grep -r -E "(password|passwd|pwd|secret|api[_-]?key|token).*=.*['\"][^'\"]{20,}" \
+            --include="*.sh" \
+            --include=".zshrc" \
+            --include=".bashrc" \
+            --include=".profile" \
+            . || {
+              echo "Warning: Potential hardcoded secrets found"
+              exit 1
+            }
+          echo "::endgroup::"
+
+      - name: Check for hardcoded user paths
+        run: |
+          echo "::group::Hardcoded Path Detection"
+          # Look for hardcoded user paths
+          if grep -r -E "/Users/[^/]+|/home/[^/]+" \
+            --include="*.sh" \
+            --include=".zshrc" \
+            --include=".bashrc" \
+            . ; then
+            echo "Warning: Hardcoded user paths found. Use \$HOME instead."
+            exit 1
+          fi
+          echo "No hardcoded user paths found"
+          echo "::endgroup::"
+
+      - name: Check file permissions in repo
+        run: |
+          echo "::group::File Permissions Check"
+          # Ensure no files are world-writable
+          find . -type f -perm -002 | while read file; do
+            echo "Warning: World-writable file: $file"
+          done
+          echo "::endgroup::"
