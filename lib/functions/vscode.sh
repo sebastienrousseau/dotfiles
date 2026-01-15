@@ -5,28 +5,33 @@
 # Copyright (c) 2015-2025. All rights reserved
 # License: MIT
 
-# vsc: Function to open a file in Visual Studio Code.
-
-vsc() {
-  if [[ -z "$1" ]]; then
-    echo "Usage: vsc <file>"
-    return 1
-  fi
-
-  if [[ -f "$1" ]]; then
-    code "$1"
-  else
-    echo "File not found: $1"
-    return 1
-  fi
-}
-
+# Setup VS Code command based on OS
 if [[ "$(uname || true)" = "Darwin" ]]; then
-  alias code="/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code"
+  # macOS: create an alias to the VS Code CLI
+  alias code="/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code" 2>/dev/null || true
 elif [[ "$(uname || true)" = "Linux" ]]; then
-  alias code="code"
+  # Linux: code should be in PATH already
+  true
 fi
 
-alias vs="code"
-alias vsc="code"
-alias vscode="code"
+# Create convenient aliases for VS Code
+alias vs="code" 2>/dev/null || true
+alias vscode="code" 2>/dev/null || true
+
+# vsc: Function to open a file in Visual Studio Code
+# Only define if code command is available
+if command -v code &>/dev/null; then
+  vsc() {
+    if [[ -z "$1" ]]; then
+      echo "Usage: vsc <file>"
+      return 1
+    fi
+
+    if [[ -f "$1" ]]; then
+      code "$1"
+    else
+      echo "File not found: $1"
+      return 1
+    fi
+  }
+fi
