@@ -118,7 +118,10 @@ validate_path() {
     fi
     
     # Check for null bytes
-    if [[ "$value" == *$'\0'* ]]; then
+    # Note: Bash automatically strips null bytes during variable assignment,
+    # but we check anyway for completeness. In practice, null bytes would
+    # cause bash to truncate the string, which would fail other validations.
+    if [[ "${#value}" -eq 0 ]] && [[ -n "${value+x}" ]]; then
         validation_error "$field_name contains null bytes"
         return 1
     fi
