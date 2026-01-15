@@ -9,7 +9,11 @@
 
 <!-- markdownlint-enable MD033 MD041 -->
 
+<<<<<<< HEAD
 # Dotfiles (v0.2.470)
+=======
+# Dotfiles (v0.2.469)
+>>>>>>> 4b0694f (feat: v0.2.471 Product Hardening Release)
 
 Simply designed to fit your shell life 🐚
 

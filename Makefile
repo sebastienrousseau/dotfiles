@@ -3,7 +3,11 @@
 ################################################################################
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # File: Makefile
+<<<<<<< HEAD
 # Version: 0.2.470
+=======
+# Version: 0.2.471
+>>>>>>> 4b0694f (feat: v0.2.471 Product Hardening Release)
 # Author: Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # Description: Build automation for dotfiles installation and management

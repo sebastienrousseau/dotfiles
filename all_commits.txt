@@ -1,0 +1,840 @@
+4b0694f feat: v0.2.471 Product Hardening Release
+4bc217e [gitaliases] replace deprecated command (#58)
+e26d854 Merge pull request #57 from sebastienrousseau/0.2.470
+6b698cb fix(dotfiles): 🐛 Improve backup.sh script for better reliability and maintenance
+95b6634 build(dotfiles): 🚀 improved prompt.sh with robust logging, cross-shell compatibility, and enhanced terminal detection
+354d015 fix(dotfiles): :bug: fixed function calling pattern ensures proper control flow, particularly in how cached vs. direct loading works
+07d10d2 build(dotfiles): 🚀 enhanced .bashrc with logging, caching, and robust error handling
+570bf50 build(dotfiles): 🚀 optimized .zshrc with caching, lazy loading, and enhanced performance
+dae6d76 fix(dotfiles): :bug: optimization and fixes for bash and zsh
+965999b fix(dotfiles): :bug: Moving the shebang line (#!/usr/bin/env bash) to the top
+d704bb6 feat(dotfiles): 🚫 added cross-platform caffeine utility to prevent system sleep
+21fa961 docs(readme): 📚 updated functions documentation for clarity
+77fd70c build(dotfiles): 🔐 enhanced genpass function and updated documentation
+1eea2dd fix(dotfiles): 🐛 ensure tmux sources the config before displaying anything
+c2fe316 fix(dotfiles): 🐛 fix minor severity warnings
+5ec079e ```text build(dotfiles): 🔐 added comprehensive security aliases and documentation
+f544386 build(dotfiles): 🐳 added comprehensive Docker aliases for container workflows
+f9d2ebe fix(dotfiles): 🐛 fixed double quote to prevent globbing and word splitting
+67fb974 fix(dotfiles): :bug: fixed double quote to prevent globbing and word splitting
+f1e1d56 fix(dotfiles): 🐛 fix minor severity warnings
+7077b58 fix(dotfiles): :bug: fix minor severity warnings
+d532cd2 docs(readme): 📚 updated bookmark system documentation for clarity
+46169c1 refactor(dotfiles): 💥 fixed bookmark function to prevent ShellCheck SC2120 warning
+0b20195 fix(dotfiles): :art: improved cd aliases
+325ac13 refactor(dotfiles): :boom: removed x alias to prevent conflict with the `x` alias for extracting
+414e953 refactor(dotfiles): 🎨 refactored archives aliases
+9a7383d refactor(dotfiles): :art: refactored aliases
+7c9df65 build(dotfiles): 🔧 enhanced tmux files
+622ebc9 build(dotfiles): 🖥️ enhanced shell prompt with expanded OS indicators
+03a91e3 build(dotfiles): 💻 restructured shell prompt configuration system
+ff84563 build(dotfiles): 🔄 restructured colors and constants management system
+b73739c build(dotfiles): 🔧 enhanced .bashrc with robust configuration handling
+17d9e00 build(dotfiles): ➕ enhanced environment configuration system - Improved locale handling with DOTFILES_LANG environment variable - Added certificate file existence validation - Implemented conditional TERM setting - Standardized function return values - Enhanced dotfile loading with detailed error tracking - Replaced shellcheck suppressions with proper source commands - Added load error count and reporting
+cffffc9 build(dotfiles): ➕ upgraded path loading mechanism
+69c7c32 build(dotfiles): ➕ fortified history management system
+c37ab72 build(dotfiles): ➕ enhanced function loading mechanism
+d6bc21c build(dotfiles): ➕ enhanced configuration loading robustness
+f8780a3 build(dotfiles): ➕ improved alias management robustness
+d5265e3 build(dotfiles): :heavy_plus_sign: updated dependencies
+a4be36c feat(dotfiles): :art: v0.2.470
+c29191e Merge pull request #56 from sebastienrousseau/0.2.469
+9d607a1 docs(dotfiles): :memo: updated aliases README.md file
+af6ab49 docs(dotfiles): :memo: updated documentation and refactoring loaders
+535e36d refactor(dotfiles): :art: cleaning up paths directory
+57a2ec3 docs(dotfiles): :memo: add paths README.md
+5e48c9e docs(dotfiles): :memo: updating functions README.md and updates on deps
+16916da fix(dotfiles): :art: refactor functions and various optimisations
+b876a85 docs(dotfiles): 🐛 fix aliases issues
+44b1ae9 docs(dotfiles): 🐛 fix codacy issues
+b688072 docs(dotfiles): 🐛 fix codacy issues
+02a4b8a docs(dotfiles): :bug: fix codacy issues
+6f3318a fix(dotfiles): :bug: fix chmod.aliases.sh
+08cb525 fix(dotfiles): :bug: fix cd.aliases
+677db19 fix(dotfiles): :bug: fix codacy issues
+927be0c fix(dotfiles): :bug: fix release.yml and archives aliases
+88b7b3b fix(dotfiles): :bug: change logo width and rust aliases
+3b0a8a2 refactor(dotfiles): :art: optimizations on vimrc including themes, plugins
+25945a1 feat(dotfiles): :art: v0.2.469
+53de583 Merge pull request #55 from niamotullah/master
+da26a7a Update curlrc
+82d4d8d ci(dotfiles): :bug: use pnpm
+b7b7b3c ci(dotfiles): :bug: testing
+226da3e ci(dotfiles): :bug: added always-auth=true
+2e6149b fix(dotfiles): :bug: .npmrc
+be9b797 ci(dotfiles): :bug: remove lockfile
+76913c5 ci(dotfiles): :bug: use Node.js version 21.6.2
+801ec59 ci(dotfiles): :bug: change ci
+c503aa5 fix(dotfiles): :ambulance: critical revert
+75fdf60 ci(dotfiles): :bug: use pnpm install --no-frozen-lockfile
+fe4f614 ci(dotfiles): :bug: update workflow to use Node.js version 21.x
+bc853de ci(dotfiles): :bug: use Node.js version 20.x for building and Node.js version 21.x for publishing
+f2a5e13 ci(dotfiles): :bug: Add "^16.20.2"
+8527806 ci(dotfiles): :bug: add frozen-lockfile
+e5083a0 ci(dotfiles): :bug: updated dependencies
+99d5c5c ci(dotfiles): :bug: tweaks on ci
+fc3b277 ci(dotfiles): :ambulance: resolve the mismatch issue
+3f2cffb ci(dotfiles): :bug: change in job
+da55c45 ci(dotfiles): :bug: update workflow to use Node.js 20
+2a15753 ci(dotfiles): :bug: updated to 16.20.2
+f82ee9c fix(dotfiles): :bug: updated to node to 16.20.2
+2d17a9f ci(dotfiles): :bug: tweaking release ci
+aa27c1d ci(dotfiles): :art: minor tweaks
+0525210 ci(dotfiles): :fire: old config removal
+b3ef810 fix(dotfiles): :ambulance: minor fixes
+dd8ecca fix(dotfiles): :ambulance: button issues
+63fa7a0 fix(dotfiles): :ambulance: readme ui glitches
+fc45317 Merge pull request #53 from sebastienrousseau/0.2.468
+519c687 fix(dotfiles): :bug: Function Call Object Injection Sink and refactor import syntax in index.js
+781c5a0 fix(dotfiles): :bug: resolve the ESLint warning
+32517b2 fix(dotfiles): :bug: eslint-disable-next-line no-useless-catch
+a97ca09 fix(dotfiles): :bug: used before it was defined
+3e844d1 fix(dotfiles): :bug: disabling console error
+7d1563b fix(dotfiles): :bug: minor updates
+af27520 fix(dotfiles): :bug: Async function 'main' has a complexity of 5
+e28695c fix(dotfiles): :bug: Function Call Object Injection Sink
+1f656ae docs(dotfiles): :bug: documentation updates
+db5f6bd fix(dotfiles): :bug: use async file system methods and handle directory creation asynchronously
+bad88d2 fix(dotfiles): :bug: codacy warnings
+7c2efff docs(dotfiles): :memo: minor tweak
+78903aa fix(dotfiles): :bug: Expected parentheses around arrow function argument.
+c092a3d fix(dotfiles): :bug: minor history tweaks
+eafa67c fix(dotfiles): :ambulance: removed ls
+9c76735 fix(dotfiles): :bug: uses fs.promises.mkdir for asynchronous directory creation
+cde6ceb refactor(dotfiles): :art: Enhance terminal interaction with advanced clear screen functions
+6f74823 docs(dotfiles): :bug: disabling MD043
+1a6e9cf docs(dotfiles): :art: Disable MD043 rule and chmod.aliases.sh ehancements
+1d00e23 docs(dotfiles): :art: formatting markdown
+9b937e7 refactor(dotfiles): :art: Refactor cd aliases script and doc
+7ba9953 docs(dotfiles): :memo: Update README.md to reflect enhancements in archives.aliases.sh
+7c01be2 feat(dotfiles): :art: Add enhanced archive alias script
+59d1cf4 feat(dotfiles): :art: Organize configuration aliases script
+0cd7105 feat(dotfiles): :wrench: Added enhanced shell aliases with improved documentation and organisation
+6dec557 fix(dotfiles): :fire: removed uneeded file
+a051c6c fix(dotfiles): :bug: add code comments for path.sh
+5f73d98 fix(dotfiles): :bug: add code comments for configuration.sh
+c1d567c fix(dotfiles): :bug: update code comments for aliases.sh
+3d9c42a fix(dotfiles): :bug: updates on code comment structure
+385e21c fix(dotfiles): :art: Minor tweaks
+01b337e feat(dotfiles): :sparkles: 0.2.468
+3d91f71 Merge pull request #52 from sebastienrousseau/0.2.467
+0f39420 fix(dotfiles): :bug: minor tweaks
+c09e15a fix(dotfiles): :bug: rust aliases
+a89001a feat(dotfiles): :sparkles: v0.2.467
+18331bb Merge pull request #51 from sebastienrousseau/0.2.466
+74b62a6 fix(dotfiles): minor updates
+0bcf114 0.2.466
+9edaa2b Merge pull request #50 from sebastienrousseau/0.2.465
+23f820a chore(dotfiles): ci and document updates
+a5d1f19 chore(dotfiles): updated pnpm-lock
+3dd83bd fix(dotfiles): minor tweaks
+07a6a4c fix(dotfiles): updating macos aliases
+0b917e8 fix(dotfiles): [no-multiple-toplevel-headings] Don’t use multiple top level headings
+ad17203 fix(dotfiles): MD001/heading-increment/header-increment: Heading levels should only increment by one level at a time [Expected: h3; Actual: h4]
+983f3d0 fix(dotfiles): minor updates
+f1706cf fix(dotfiles): updated functions and various aliases
+6a6c0dc chore(dotfiles): cleaning up tmp functions
+89c5043 fix(dotfiles): normalizing headers
+f304d61 chore(dotfiles): cleaning up uuid
+3ff9b94 fix(dotfiles): This expands when defined
+0670649 fix(dotfiles): This expands when defined
+e089699 fix(dotfiles): This expands when defined
+b14c301 fix(dotfiles): This expands when defined
+206d6e2 feat(dotfiles): updated wget aliases
+237d336 feat(dotfiles): updated update and uuid aliases
+b8dc3b9 feat(dotfiles): updated tmux aliases
+5817e3a feat(dotfiles): updated sudo aliases
+483c320 feat(dotfiles): updated svn aliases
+43fff2a feat(dotfiles): updated rust and cargo  aliases
+9069cb8 feat(dotfiles): updated ps aliases
+9f1f4b5 feat(dotfiles): updated ps aliases
+4fcd0d3 fix(dotfiles): markdownlint_MD013
+39da6db fix(dotfiles): markdownlint_MD013
+35b6931 fix(dotfiles): markdownlint_MD013
+7e73302 fix(dotfiles): break outside single quotes if you just want to break the line.
+db7a364 fix(dotfiles):break outside single quotes if you just want to break the line.
+3491b8e fix(dotfiles): markdownlint_MD013
+28dafbb Merge branch 'master' into 0.2.465
+cc582b1 fix(dotfiles): markdownlint_MD013
+33a59db fix(dotfiles): markdownlint_MD013
+6e63ee8 fix(dotfiles): markdownlint_MD013
+8f48a1f fix(dotfiles): markdownlint_MD013
+c85d5e8 fix(dotfiles): markdownlint_MD013
+c715690 fix(dotfiles): markdownlint_MD013
+2e7f5e3 fix(dotfiles): markdownlint_MD013
+864cf7c fix(dotfiles): markdownlint_MD013
+ec71897 fix(dotfiles): markdownlint_MD013
+b079dfe feat(dotfiles): markdownlint_MD013
+0a89ef2 fix(dotfiles): markdownlint_MD013
+0fba7fd fix(dotfiles): markdownlint_MD013
+472d881 fix(dotfiles): markdownlint_MD013
+6c19e34 feat(dotfiles): documentation for heroku aliases
+dafe27c feat(dotfiles): adding some documentation
+9acbded fix(dotfiles): updated twitter name and gcloud aliases
+feb3861 feat(dotfiles): updated find aliases
+7068fbd feat(dotfiles): updated editor aliases
+d828dab feat(dotfiles): updated the disk usage aliases
+b6e1d8f feat(dotfiles): updated dig aliases
+d51d767 feat(dotfiles): updated default aliases
+a848e49 feat(dotfiles): updated configuration aliases and expanded the value of the EDITOR.
+69d2a1b feat(dotfiles): updated clear aliases
+df034c4 feat(dotfiles): v0.2.465
+57b1dbc v0.2.464
+a8d0b44 Merge pull request #49 from sebastienrousseau/0.2.464
+ed7f2fb feat(dotfiles): 0.2.464
+045a510 Merge pull request #48 from sebastienrousseau/0.2.463
+5e6dba6 fix(dotfiles): [no-duplicate-headings] Do not use headings with similar content (29:1)
+22fe74e fix(dotfiles): updated matrix
+d909813 fix(dotfiles): minor tweaks
+bc622b2 fix(dotfiles): remove issue
+d0b43e0 fix(dotfiles): fix to 0.2.463
+e01b6d1 feat(dotfiles): preparing v0.2.464
+54251ee Merge pull request #47 from guandalf/fix-readme
+dea0e16 Fix brew installation command
+87aea39 chore(deps):updated latest dependencies
+faf6547 0.2.463
+030bc45 fix(doc): updated content
+3b83ec8 fix(aliases): renamed navigation alias to cd
+00b324a  fix(aliases): updated detection logic for archives
+15d3471 fix(aliases): updated detection logic for clear
+a6ed66b fix(aliases): updated detection logic for dig
+7734145  fix(aliases): updated detection logic for du
+29d8d4b fix(aliases): updated detection logic for fd
+8648653 fix(aliases): updated detection logic for gcloud
+b2ba769 fix(aliases): updated git detection logic and refactoring
+bacd537 fix(aliases): updated gnucoreutils
+913b640 fix(aliases): updated detection logic for heroku
+651d0b7 fix(aliases): updated jekyll detection logic and refactoring
+756ab01 fix(aliases): renaming and updating detection logic for both chmod & ls
+8399d6a fix(aliases): updated pnpm detection logic
+5d2c586 fix(aliases): updated ps detection logic
+1f1975e fix(aliases): added rsync detection logic
+40920cc fix(aliases): updated rust and cargo detection logic
+4123bcf fix(alias): updated subversion detection logic
+d6954f2 fix(aliases): updated wget detection logic
+dcd6e88 fix(aliases): updated uuid detection logic
+fe34e49 fix(aliases): Only define tmux alias if tmux exists
+3ac163c Merge pull request #46 from sebastienrousseau/0.2.462
+1f17d29 fix(security): Expected: 80; Actual: 143
+c596bff fix(readme):Expected: 80; Actual: 143
+893617c fix(coreutils): removed prefix not required
+79c0300 fix(download): updated call where expression is not callable
+e981a25 fix(aliases): Update aliases
+1f3ffca fix(aliases): updated aliases
+e4e1137 fix(aliases): Subversion aliases
+e94f631 fix(aliases): NPM aliases
+5046591 fix(aliases): editor aliases
+e1fbc6a fix(aliases): updated disk usage aliases
+27802da fix(aliases): updated dig aliases
+3f624b6 fix(aliases): updated clear and configuration aliases
+2a167aa fix(archives): updated archives aliases
+a4831f4 Delete CNAME
+b524d34 Merge pull request #45 from sebastienrousseau/0.2.462
+c6a1255 del(docs): moved to by https://github.com/sebastienrousseau/dotfiles.github.io.git
+ff9a9a0 fix(rsync): fix missing shebang / 'shell' directive.
+49a8f80 fix(aliases): various tweaks and refactoring
+e1402fe fix(aliases): remove conflicting aliases
+616dcec fic(aliases): simplified gnu coreutils aliases
+72f43ba fix(functions): simplified `cdls` fn
+a9de27a fix(0.2.462): removed unused variables
+9e44da9 fix(0.2.462): various fixes and optimizations
+66bf3ab feat(aliases): organizing aliases and rules
+05ec451 feat(aliases):new aliases suite
+32ed7e9 fix(makefile): removed extraneous escape
+08e54a5 doc(alias): FR translations
+2039cbe doc(alias): FR translation
+c313636 doc(readme): FR translation
+f33ac2d doc(readme): title tweaks
+e1fd1c1 docs(readme):FR updates
+da3c316 doc(readme): FR translations
+2dcd30a doc(emojis): updated emoji calls
+ffa94fd doc(readme):content updates
+0c2b179 doc(readme): content updates
+869c7d3 upd(docs): style tweaks and content optimization
+ff7632e fix(docs): minor changes in frontmatter
+9b6a3ea fix(docs): content updates and updated lock file
+2c7a91e fix(commit): conflicted docs and grammar
+916bfb6 doc(readme): content updates
+c0b2876 doc(readme): content updates
+1d5a78b fix(svn): document updates by Chloé
+4a56cd3 doc(homepage): updated homepage and configs
+8d0dc02 fix(paths): updated paths and docs
+9153cfc fix(codacy): strings must use doublequote
+581c906 fix(codacy): strings must use doublequote
+eed108f fix(codacy): strings must use doublequote
+17faa36 fix(codacy): Strings must use doublequote
+047b235 fix(codacy):Found reference to undefined definition
+f7a74af fix(codacy): Unnecessary semicolon
+06764e9 fix(codacy): Unexpected console statement
+9fe9bc1 fix(codacy): Unnecessary semicolon
+a04bd9c fix(codacy): Unnecessary semicolon
+23c7528 fix(codacy): Found fs.existsSync with non literal argument at index 0
+8423673 fix(styling): minor styling tweaks
+c586c4c feat(ssh): added ssh gh script (WIP)
+d8ecc6e faet(vuepress):refactoring and optimization features
+985a1ff fix(doc): Expected: 80; Actual: 154
+f7ad78c fix(doc): Expected: 80; Actual: 143
+bf68d03 feat(gnu): updated to gnucoreutls-aliases.sh
+34b93b0 fix(gnu): various tweaks
+1c4641a feat(aliases): add new GNU aliases and fixed copyright dates
+b973eb6 doc(content):minor fixes
+44a5ee7 feat(vuepress): updated docs to new layout
+e1cde14 doc(pnpm): new documentation
+1cdba21 doc(codacy):new styling
+758f0e9 doc(codacy):styling fixes
+0eaf004 doc(codacy): fix styling
+cfd0663 doc(codacy):styling fixes
+4a286c3 fix(codacy): git aliases
+3eab7fe doc(codacy): styling
+d3685e5 doc(codacy):style fixes
+d8b289c doc(codacy): styling
+ad47048 doc(codacy): styling fixes
+eba1c3f fix(codacy): styling updates
+79465fd chore(node): upgraded to ^16.11.68
+f3dda15 doc(codacy):styling fixes
+356529c fix(codacy):length expected: 80
+0a58c91 fix(codacy):Expected: 80; Actual: 208
+17a3ff4 fix(codacy): Unnecessary block
+d12e86d fix(release): updated release
+447e1fb Merge pull request #44 from sebastienrousseau/0.2.461
+11c1ee8 fix(files): ensuring file exists
+01c7b56 fix(codacy): updated markdownlint issues
+bf7e471 fix(styling): codacy warning fixes
+45a90cb fix(codacy): updated Codacy Security Scan
+4da4b7f fix(codeql): upgraded to v2 as v1 will be deprecated on December 7th, 2022.
+e3b5ad0 0.2.461
+894a483 Update issue templates
+31f9574 Delete ISSUE-TEMPLATE.md
+2a3b3b3 Update CONTRIBUTING.md
+72c4c30 Update CODE-OF-CONDUCT.md
+910e136 Update SECURITY.md
+94fd321 v0.2.460
+84407ea Merge pull request #43 from sebastienrousseau/0.2.460
+dbf4ce1 v0.2.460
+7085b9e Merge pull request #42 from sebastienrousseau/0.2.460
+d1e1626 fix(scripts): renamed assemble to build for consistency
+7a244f9 fix(script): renamed assemble to build script for consistency
+16d6cf3 fix(download): switch to wget, curl not working
+bce86ce  fix(scripts): help script updates and makefile cleanup
+4680348 fix(scripts): copy script updates and inputrc reference
+06d9daf fix(backup): added missing `.dotfiles` directory
+2a89399 fix(release): added --no-git-checks
+cceb2ea v0.2.459
+23a39d6 v0.2.459
+048be15 Merge pull request #41 from sebastienrousseau/0.2.459
+fab023d doc(readme):  Markdown updates.
+10efe0b fix(assemble):changed scripts location
+672c551 fix(assemble): can't follow non-constant source. Use a directive to specify location
+54d0f93 fix(scripts): updated cleanup commands
+fafd19a feat(js): updating scripts
+fbfab3e fix(installers): sync help menus
+0ad4635 feat(scripts): added colors
+67fddba fix(scripts): updated help
+95ad667 fix(scripts): updated compile.sh and scripts
+005405a fix(constants): expressions don't expand in single quotes, use double quotes for that.
+4f8f5cf fix(make): simplified backup
+920b8d2 fix(colors): updating shell colors
+876ffd5 feat(installer):refactoring installation scripts
+25bcb5d fix(scripts): updated backup fixes
+55ef41b doc(readme): updated font references
+53dfebd fix(nanorc): simplified configuration
+1e050b7 fix(tmux): reverting to justify centre as not working in Debian 11
+81de483 feat(gemrc): added new configuration
+add8659 v0.2.459
+18b3d1c fix(tmux): added  the hostname
+b2150dd fix(linux): various bug fixing
+70cc8a8 fix(tmux): updated tmux configuration name
+9ffc818 v0.2.458
+18cfb10 Merge pull request #40 from sebastienrousseau/0.2.458
+3e1281e fix(scripts): cleanup bin folder
+f6121e0 fix(tweaks): minor changes
+d121c5b fix(js): function call object injection sink
+482f178 fix(js): function call object injection sink
+7d416b1 fix(codacy): function Call Object Injection Sink
+86eff54 fix(codacy): function Call Object Injection Sink
+3de59d0 fix(codacy):strings must use doublequote.
+0a1c637 fix(js): function call object injection sink
+bc1d8d8 fix(js): function call object injection sink
+58106ce feat(lib):refactoring shell to lib folder and updated dependencies
+470754e fix(tmux): renamed configs and updated JS
+4122f95 fix(tmux): updating tmux configs and npm script
+dee79c4 fix(git): added git aliases
+0b98d7c fix(upd): optimizing upd alias
+952d9aa fix(input): updated folder location
+25e79bc fix(tmux): updated scripts to reflex new configurations
+49ffffe feat(tmux):refactoring tmux
+2c8cddd feat(tmux):refactoring tmux
+6af4bed fix(bash): tmux not being called correctly
+946828a doc(readme): updated tree
+cf9feef fix(codacy): requires each line to end in a semicolon
+8450078 0.2.458
+0760d36 fix(main): relocated to correct index.js
+c22522a Merge pull request #39 from sebastienrousseau/0.2.457
+4782b69 chore(minify): added new js to minify
+5ff74e6 Update bin/constants.js
+3e7d002 Update bin/backup.js
+642316d Update bin/download.js
+7b8dced Update bin/download.js
+d0896c7 Update bin/download.js
+45655e4 Update bin/download.js
+d669472 Update bin/dotfiles.js
+3133097 Update bin/unpack.js
+0131337 Update bin/backup.js
+f62f5fc Update bin/download.js
+ec0d4ef Update bin/dotfiles.js
+80b88c1 Update bin/dotfiles.js
+680a585 Update bin/dotfiles.js
+ecf9a5a Update bin/transfer.js
+d2910cf Update bin/download.js
+84f85aa Update bin/dotfiles.js
+07d5d46 Update bin/copy.js
+bfed01b Update bin/transfer.js
+8586520 Update bin/unpack.js
+851ae79 fix(minify): updated script to reflect new directory + removed shell/index.js
+4c3aa13 fix(js): updated includes for JS installer
+27ebe62 doc(readme): removed global references and added nodejs installation
+a17d752 chore(version): v0.2.457 and clean up
+bc430a4 chore(js): added fs-extra and transfer fn
+a34682c feat(js): added unpack function and timer
+5a683d0 fix(download): removed version and add rmSync
+e8e50ce chore(installer): various updates
+728acc6 fix(ci): added pnpm pack
+34033a5 v0.2.456
+5d780f4 fix(npm): added --no-git-checks
+2f5a3e3 Merge pull request #38 from sebastienrousseau/0.2.456
+15587cd fix(ci):add build
+9625336 v0.2.456
+770b87f fix(ci): removed devDependencies
+356ace9 chore(release):v0.2.455
+9b19f86 Merge pull request #37 from sebastienrousseau/0.2.455
+2f93bd0 fix(ci): remove unused content
+bfa7faa chore(version): added 0.2.455
+609578e fix(pnpm): remove conflicting script
+14a6bea feat(ci): added changesets
+7f60b22 fix(tmux): removed right trailing
+0d5138d feat(cli): added logic for LSCOLORS
+a586d04 fix(js): 'require' is not defined
+d2523e5 v0.2.454
+ffd8a15 Merge pull request #36 from sebastienrousseau/0.2.454
+77611ef fix(codacy): found require("child_process"), switch to shelljs
+842a952 fix(js): removed unexpected console statement
+12f0e0d fix(js): changed error handling
+a6f650a doc(readme): minor content updates
+28e4a91 feat(installer): minor tweaks
+fdaacf5 feat(installer):added clean up method
+729aa2d fix(dotfiles.sh): updated installer
+c6e5c71 fix(installers): ensuring installation methods are consistent
+117e3f5 fix(package.json): removed duplicate field '//'
+5c9e6d3 fix(build): added clean script at the start of the build script
+b78fa55 feat(installer): working on optimizing installers routines
+a8aefcc fix(codacy):Strings must use doublequote.
+85b51ef fix(codacy):Strings must use doublequote.
+de7f394 fix(package): updated build script and added new rm:tmp script
+b4ba5bb fix(temp): renaming correctly temp files
+b8b1617 feat(gitignore): don't commit WIP functions (.wip)
+1d98127 fix(fn): remove wip functions
+b4ef35b feat(package.json): add jsmin function
+0e17964 feat(gitignore): don't commit non available functions (.na)
+a997b19 fix(tmux): Exit current tmux session from command line
+4f20353 fix(json): ensuring tsconfig is committed
+e2d9df4 feat(tmux): add dotfiles version
+0cfb264 fix(compile): added tsc --build --clean
+a5d4178 fix(fn): refactoring JS
+ea16003 fix(npmrc):removed comment
+064c847 fix(.gitignore): added tsconfig.tsbuildinfo
+c9e9262 fix(btn): changed color fill to #2F3A3E
+9388fa0 fix(doc): renaming image ref to getting_started
+5432951 doc(readme):fix getting started link
+2cc8ed6 feat(0.2.454): new version preps + fixes on python path variables for linux-gnu
+d5e83ab fix(ci): switch registry
+b0a96d2 feat(release): v0.2.453
+a232776 Merge pull request #35 from sebastienrousseau/v0.2.453
+a34e17d doc(dotfiles): moving aliases documentation to `docs` folder
+efe1724 fix(errors): updated codacy security scans
+182b12a fix(dotfiles): updated BACKUPDIR in function
+00adce3 fix(tmux): tmux server immediately exits on new session
+37f30d4 fix(zsh): initialize the completion system and rename zsh history
+49eabc5 fix(prompt): updated colors to bold high intensity and renaming color
+06b75aa doc(readme): fix pnpm command
+5b24177 fix(functions): renaming wip functions
+53819c4 feat(python): adding PYTHONIOENCODING
+45a99f4 fix(pnpm): updated path
+35d6f5a fix(node): specified node path correctly
+4fc9eda feat(mvn): add MAVEN_OPTS
+2f54797 feat(homebrew): add autoupdate daily
+d28baaa chg(inputrc): disabled expand ~ to $HOME
+86509a5 feat(ci): packages upgrades
+45326c2 fix(path): reverted to brew paths
+8b40df1 doc(readme): added reference to v0.2.453
+ba29114 doc(readme): updated buttons
+41ff4d7 img(buttons): added new buttons
+7495407 feat(v0.2.453): changing version number to v0.2.453
+d6733a8 fix(pnpm): remove double quotes
+d57bcc8 feat(python):added python path
+4d3ad63 fix(installer): corrected backup folder location for consistency with package.json scripts
+6de8a63 fix(readme): corrected backup folder name
+0aeaca2 img(logo): testing new banner layout
+c63e93e doc(README): minor content updates
+864d0f1 fix(tmux): updated date format to %_d %B to match Debian 11
+82fb230 doc(dotfiles): add description
+72eccdc v0.2.452
+f777193 fix(npmrc):added scope
+6960ff7 fix(.npmrc): added missing registry
+568a175 Merge pull request #34 from sebastienrousseau/feat/dotfiles
+62030cf fix(doc): [no-emphasis-as-heading] Don’t use emphasis to introduce a section, use a heading
+1c2752d fix(js): Unexpected console statement
+41ad598 fix(package): Cannot use import statement outside a module
+64c97bc fix(js): Strings must use double quote.
+2f30ebf feat(ci): various updates
+a364a90 fix(installer): updated fix for name clash
+0a27874 fix(makefile): removed name clash
+df1a778 feat(js): added wip JS
+0d7c374 deps(pnpm): updated to v7.13.0
+f7e6cfb fix(paths): optimised linux* paths
+6dc1082 Merge pull request #33 from sebastienrousseau/feat/dotfiles
+c7ce6c2 fix(shell): various optimizations and bug fixes
+25feba0 Merge pull request #32 from sebastienrousseau/feat/dotfiles
+1cbf750 doc(curlrc): removed doc until fully completed
+ef644a9 doc(curlrc): wip doc
+ed75818 fix(curlrc): expanding curlrc
+7517545 fix(variable): renamed to HOMEDIR
+924a533 fix(make): updated make file functions & disabling rps
+3a3eecb Merge pull request #31 from sebastienrousseau/feat/dotfiles
+f7d5607 fix(readme):[no-consecutive-blank-lines] Remove 1 line after node
+b8a5065 fix(path): various paths updates and optimization
+243db24 Merge pull request #30 from sebastienrousseau/feat/dotfiles
+0cf8ea2 del(coverall): unused ci script
+bc172c7 fix(readme): Found reference to undefined definition
+7ef7d34 fix(readme): Don’t add a trailing `?` to headings
+d21e95c fix(readme): [no-consecutive-blank-lines] Remove 1 line before node
+19c484d fix(codacy): ci
+efe6f50 fix(editor):Use [ -n .. ] instead of ! [ -z .. ].
+0148f12 fix(color):Error Prone issue
+d7538a7 fix(editor): Error Prone issue
+29e1b7d fix(prompt): Error Prone issue
+026f287 feat(dotfiles): refactoring and cleanup
+526edd4 Merge pull request #29 from sebastienrousseau/feat/dotfiles
+fb8b1a8 feat(installer): add start script
+3d49c67 feat(bin): updated shell installer (WIP)
+976442f Merge pull request #28 from sebastienrousseau/feat/dotfiles
+1a62276 feat(release): preparing beta v0.2.452
+027103e fix(ci): updated script
+484b206 fix(installer): updated backup for linux-gnu*
+0914fd1 fix(installer): removed use == for single bracket comparisons ([ ])
+5683280 fix(paths): corrected pnpm path for linux-gnu*
+e1827ad Merge pull request #27 from sebastienrousseau/feat/dotfiles
+c9f8e0a fix(dotfiles): added new aliases
+240b5da Merge pull request #26 from sebastienrousseau/feat/dotfiles
+520ee2c fix(build): wip dotfiles installer
+f5cce0a fix(aliases): changed file names
+8c248b9 Merge pull request #25 from sebastienrousseau/feat/dotfiles
+214dd35 fix(doc): minor tweaks on urls
+5b7b242 Merge pull request #24 from sebastienrousseau/feat/dotfiles
+c042a48 fix(fn): remove aliases that had positional parameters
+d44b420 fix(fn): Use '[:lower:]' to support accents and foreign alphabets.
+4009bff Merge pull request #23 from sebastienrousseau/feat/dotfiles
+900ad33 fix(dotfiles): various updates
+a1e1936 fix(ci): release
+765045b fix(ci): release script
+29b8e7c fix(ci) minor tweaks
+f8fa4ad fix(ci):testing release
+ea20626 feat(ci): preparing v0.2.451
+a35df2b fix(sitemap): updated time
+8acff5d fix(gh-pages): added new version
+6169f79 fix(ci) added version: 7
+eee60a6 fix(ci): added publish
+527d4ea fix(ci): remove temporarily actions
+2e51b5e fix(ci): updated script
+6012e26 fix(ci): minor tweaks
+4032d72 fix(pnpm): minor tweaks
+4d4d2bc fix(release): minor tweaks
+1043bb2 fix(badges): added missing links
+2ca1f11 Merge pull request #22 from sebastienrousseau/feature/zsh
+2ea1f28 doc(styles): fix styling
+39088fc fix(fn): $/${} is unnecessary on arithmetic variables.
+5fd8492 doc(readme): various tweaks
+2e23ab2 fix(ci): moving to pnpm
+65aa228 fix(plugin): fix quotes
+6608a4d fix(installer): remove colors
+0d4e732 fix(fn): Note that A && B || C is not if-then-else. C may run when A is true.
+26f4eeb fix(fn): Double quote array expansions to avoid re-splitting elements.
+cd2a13b fix(fn): remove $/${} is unnecessary on arithmetic variables
+d0216e3 fix(fn): ShellCheck only supports sh/bash/dash/ksh scripts.
+15e30d1 fix(fn): ShellCheck only supports sh/bash/dash/ksh scripts.
+457e1c6 doc(readme): fix badges
+de0d252 doc(readme): minor tweaks
+22c6eb4 fix(path):updated NVM path
+bb25a2d fix(path): updated ant and java paths
+b005724 feat(path): add variable to path
+4ed7030 fix(mvn): updated maven home
+e307aba fix(java): changed path
+f75159e fix(node): updated path
+bc6c7d2 fix(path): updated ruby path
+ab8d396 fix(path): minor tweaks
+dbb92c5 doc(dotfiles): updating documentation
+44382ec feat(dotfiles): added sizes on structure
+ecb939f fix(make): corrected clean option
+f111947 clean(dotfiles): cleaning up structure
+7e17241 fix(dotfiles): add noDS alias
+ec963bc fix(functions): refactoring files and cleaning up
+18a2546 fix(package.json): optimized scripts
+4a36e94 fix(dotfiles): pnpm installer scripts
+5372e5a fix(installer): refactoring installation process
+aa58493 fix(tmux): removed tmux from prompt
+0d2ad09 clean(dotfiles): remove unused devDependencies
+d14d718 feat(dotfiles): cleanup and optimization routines
+67fe70d fix(pnpm): updated PNPM_HOME
+4167450 fix(path): changed path structure
+c2506e7 fix(dotfiles): refactoring structure
+b704dfc fix(pnpm): changed dev deps
+ef1dbf8 fix(vimrc): tweaking vimrc and cleanup
+3801d75 fix(shell): cleanup prompt
+b309ac3 fix(tmux): cleanup tmux
+3ea41c8 fix(dotfiles): updating paths
+a43a63e fix(dotfiles): minor tweak on PS1
+66b1a16 fix(dotfiles): minor updates
+eef9b22 fix(dotfiles): prompt updates
+c5d5e2a feat(dotfiles): installer updates
+fb2ca09 fix(dotfiles): prompt changes
+e129c6e fix(dotfiles): removing breaking alias
+478ad98 fix(dotfiles): minor updates
+cf04b97 fix(functions): various fixes
+5d52644 fix(tmux): configuration tweaks
+e56c533 fix(dotfiles): linux optimization
+ed22cf6 fix(dotfiles) refactoring
+5e064e6 fix(dotfiles): updating bashrc and zshrc
+d465f79 feat(logo): new logo design and various updates
+e5866a5 fix(dotfiles): refactoring
+5919c7a fix(dotfiles): minor tweaks
+7b6dc4f fix(dotfiles) refactoring
+44aae00 fix(version): updated to v0.2.450
+f33f62f feat(dotfiles): various optimizations
+41b0b67 feat(zsh): simplified file
+a65215b Bump npm from 8.8.0 to 8.11.0 (#21)
+4c24d96 v0.2.449
+7c2eb41 Updated sitemap.xml
+f8114dc v0.2.448
+4004824 Merge branch 'master' of github.com:reedia/dotfiles
+f6ae1c8 v0.2.448
+3853f12 Create FUNDING.yml
+ad8eaee Various updates
+5cdc681 Fix minor bugs
+c69c267 Minor content updates
+78ec3f5 Minor content update
+f64edb3 fix -  Upgraded npm to 7.24.1 and structure refactoring
+0afa856 fix - Removed plugins folder
+6c77a24 fix - cd function and history file
+e67cc27 fix - various tweaks
+b62827c fix - Removed prependpath function from file
+d268c52 fix - various setup fixes (functions, config and path)
+5a8ed85 fix - Node version to v16.9.1 and fixed path
+3317b2f fix - node version to v14.17.3
+eab8fd8 fix - upgrading to latest npm
+d6d44af fix - Aliases
+1aeef87 fix - Sourcing alias plugins.
+3d77fe4 fix - Finsihing aliases plugin
+221e094 fix - Add subversion aliases, fixed homebrew docs
+b7de0ea fix - Warn when a line feed at the end of a file is missing.
+09b2753 fix - Warn when a line feed at the end of a file is missing.
+22e87a5 fix - Warn when a line feed at the end of a file is missing.
+9701ff3 fix - Warn when a line feed at the end of a file is missing.
+3a17528 fix - Warn when a line feed at the end of a file is missing.
+f73933f fix - Warn when a line feed at the end of a file is missing.
+e0d1080 fix - Warn when a line feed at the end of a file is missing.
+6e8c8c9 fix - Warn when a line feed at the end of a file is missing.
+bb1b8e6 fix - Warn when a line feed at the end of a file is missing.
+beedfa6 fix - Warn when a line feed at the end of a file is missing.
+c7417af fix - Warn when a line feed at the end of a file is missing.
+8441ee1 doc - Added README.md placeholder files
+777d47a doc - Added temporary README.md file
+df55f22 fix - Updated npm version and various optimisations
+895df81 fix - Directory structure changes
+45a82a2 fix - Renamed folder to gcloud
+0e5fa96 doc - Updated documentation on homebrew plugin
+d7edbd9 fix - homebrew aliases
+bd02040 fix - Added gcloud aliases and cleaning core ones
+291d2f0 fix - Warn when a line feed at the end of a file is missing.
+558a95f fix - Missing documantation
+f8e9aeb fix - Added aliases
+3643b5a fix - Updated Heroku and Jekyll aliases and documentation
+6b9d75e fix - Flagged: GPL-3.0-only in spdx-exceptions
+50fa139 fix - Switch to Github status badge
+1ff668b fix - [no-heading-punctuation] Don’t add a trailing `.` to headings.
+a1a79a8 fix - Invalid: lock file's npm@7.17.0 does not satisfy npm@^7.20.0
+7ca885f fix - Warn when a line feed at the end of a file is missing.
+a9cb600 fix - [no-heading-punctuation] Don’t add a trailing `.` to headings.
+8de4e47 fix - [no-heading-punctuation] Don’t add a trailing `.` to headings.
+ebbf73d fix - Warn when a line feed at the end of a file is missing.
+37ca69c fix - Warn when a line feed at the end of a file is missing.
+82ba90b fix - [ .. ] can't match globs. Use [[ .. ]] or grep.
+3917874 fix - Couldn't parse this shellcheck directive. Fix to allow more checks.
+f0573f6 fix - Couldn't parse this shellcheck directive. Fix to allow more checks.
+aabf63a fix - Expected '=' after directive key. Fix any mentioned problems and try again.
+b38b0de draft - Working on v0.2.447
+25d1224 fix - [unordered-list-marker-style] Marker style should be `-`
+f9f7420 fix - [no-file-name-irregular-characters] Do not use `_` in a file name
+53ed668 fix - [no-heading-punctuation] Don’t add a trailing `?` to headings
+9705d7f fix - [final-newline] Missing newline character at end of file
+673bae6 doc - Readme updates
+f8d9d6b fix - license updates
+a1c66b2 fix: upgrade npm from 7.16.0 to 7.17.0 (#16)
+38b005c Update SECURITY.md
+67f30ea Create SECURITY.md
+a18b265 Add Codacy badge (#15)
+ba9094d Create stale.yml
+0ecefea Create label.yml
+6ae39e8 Create codacy-analysis.yml
+96074e6 Delete codacy-analysis.yml
+daa13d9 Removed unused packages
+b6b405f Remove exit 1
+6331036 Removing Jest
+d6b1f53 Add first random test
+79f84c0 Update on npm
+7dc7d37 Add npm config set package-lock true
+e867d4c Debugging
+e0164be Add "mocha": "^8.4.0",
+6912951 Add mocha dep
+eb15e10 Added mocha test
+9ed9a73 Add package-lock = false
+e9bbb82 Add preinstall
+11a777a Merge branch 'master' of github.com:reedia/dotfiles
+0c5f55a Minor tweaks to get the workflow doing something
+ba461a0 Create node.js.yml
+d2916fd Delete npm-publish.yml
+3fed05f Add yarn.lock
+fd73a7a Close Lint issues
+ddf9d36 Update README.md
+577b157 Close Lint issues
+a634677 v0.2.445
+951eb7a Lint fix
+0d1ca51 Lint fixes
+221086a v0.2.443
+cd49eac Minor fixes
+d1bb50e Bump version
+944ab52 Add .npmrc
+7d256cf Create codacy-analysis.yml
+61fcb5e Update README.md
+be9d21f Create npm-publish.yml
+14dda26 Merge branch 'master' of github.com:reedia/dotfiles
+404ab96 Minor changes
+38102ce Updated to v2.0.2.440
+4801708 Zsh fixes (#14)
+b360aac Deleted wrong file
+6ea22a6 Fixing .zshrc extension
+5719bfa Releasing Dotfiles v0.2.409
+d7c6ff0 Added support for Ze Shell (zsh)
+e5780ac Merge pull request #13 from sebastienrousseau/zsh
+d035870 Minor updates
+0fdb39e Added final zshrx.zsh
+db163de Initial Ze Shell dotfiles commit
+571df66 Merge pull request #11 from gramtech/master
+4daf79d v0.2.117 Added specific ref to Java9, Java is now v10
+dbb7c28 Image optimisation
+6baaab3 Fixed spacing issue
+c7d5d73 Minified HTML and any CSS or JS included in the markup. Kept source file
+728bb22 Added Dotfiles, favicon and sitemap
+3bbb774 Adding README.md
+9df02ec Merge branch 'gh-pages' of github.com:reedia/dotfiles into gh-pages
+93340bb Added Global site tag
+631362b Create CNAME
+96ffa34 Delete .DS_Store
+56c1f6b Clearing
+7ad6b24 =Added gh-pages branch
+2133044 v0.2.115: Loading Dotfiles and added new clear screen and scroll-back alias
+d2b7cf4 v0.2.113 Minor updates
+4e3eb4b Merge pull request #10 from gramtech/master
+023f377 v0.2.111: Organised and Standardised bash_functions
+2bd16ac Removed 'function' keyword which improves portability and follows POSIX standards
+604f7af Grouped functions in generally better structure
+f2d0854 Grouping file and folder create and delete commands
+00e31bc v0.2.109: Added function to enable a matrix Effect in the terminal
+44a66ce v0.2.107: Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages
+ebeece7 v0.2.105: Bash files optimisation and new additions
+f2de0ef v0.2.103: Fixed commit messages
+3bfac66 v0.2.01: Fixes on Travis commit and testing 0.2 increment
+6c3580d v0.1.99: Testing $TRAVIS_COMMIT_MSG
+b344657 v0.1.97: Fixing TRAVIS_COMMIT_MSG
+3390925 v0.1.95: Added TRAVIS_COMMIT_MSG
+fc03247 v0.1.93: Added double quote to prevent globbing & word splitting.
+33fd6f9 Merge pull request #9 from gramtech/master
+89140b9 update version to 89
+7c19276 Merge branch 'master' of https://github.com/reedia/dotfiles
+a670c10 checks if tree is installed in /usr/local/bin, if not load bash function in .bash_profile
+c6f9999 Merge pull request #7 from gramtech/master
+e10c797 version change to 87
+4cc8811 v0.1.85
+0fc84f3 Merge pull request #6 from gramtech/master
+fac8b6e version update to 71
+6346193 .bashrc update to reflect name change of .bash_completion to .bash_load_completion
+da24652 Merge branch 'master' of https://github.com/reedia/dotfiles
+7fdcc0f .bashrc update to reflect name change of .bash_completion to .bash_load_completion
+3c387a0 Merge pull request #5 from gramtech/master
+049c67a If google-cloud-sdk is not available dont source it
+1e72abc updated version
+04401d8 fixed bug - when using bash-completion@2 it sources .bash_completion from ~/ cousing a continues loop loading this file so changed the name
+52c4e41 Merge pull request #4 from gramtech/master
+a256b22 removed colorpicker, not found on install
+d316057 removed a line
+b864487 adding notes from Perl install
+2d0f405 added virtualbox-extension-pack
+5e542fd version increment
+3f508d4 minor formatting fix
+4df5605 reverted to using standard bash completion as much better support in standard macOS setups, moved references and info to .bash_completion file
+f4a0d03 added sourcing of bash-completion
+769abc9 moved bash-completion option and instruction into seperate file
+9099eb0 Merge pull request #3 from gramtech/master
+498142d version update
+d04e8e5 commenting out the chsh command. Added more details around what it is
+3ef344f Merge branch 'master' of https://github.com/reedia/dotfiles
+3c46a43 v0.1.63
+a80a6b8 Merge branch 'master' of https://github.com/reedia/dotfiles
+33219ff v0.1.61
+c09a8b5 v0.1.59
+db94a5a v0.1.57
+65a9042 v0.1.55
+0623696 Added steps to 'fully integrate' bash install
+6ff79c5 added bash-completion@2 support when available (installed via brew)
+26d268b Merge pull request #2 from gramtech/master
+e17d356 update version to 0.1.40
+9f8c141 cleanup and neatup
+0b1d924 removed formula that does not exist
+a4afb58 fixed typo
+ad7c36c minor change removing 1 unknown formula
+749253c Merge remote-tracking branch 'upstream/master'
+8eb14b2 cleaned up formular / binary installs
+1a8cab8 added output to for when brew is already intalled
+9b78bdc commented depreciated Taps and added URLs for the respective git repos of each tap
+71a51d8 Merge pull request #1 from fossabot/master
+a27516e Add license scan report and status
+308650c Added ISSUE_TEMPLATE.md
+c896234 Minor documentation updates
+a2028ab Fixing naming conventions
+c59b75a Fixing npmjs conflict
+e976bd1 Fixed versionning
+016eb5e Added/Updated documents and preparing for NPMJS release
+4b14b28 Added ECMAScript 6 specific syntax condition. As it turns out as well you cannot use: esversion: 6 with esnext: true, so setting it to false.
+bde21f6 Added VSCode, IDEAs and Solium
+8cf0803 Added Logo
+5f2e747 Fix
+cb0ba4e Create GIT TAG
+e0a22a3 Added Release note
+6f52ead Minor fix
+e896415 Minor fixes
+758afa0 Minor fixes
+db77f4f Minor tweaks
+113a5d5 Fixed deployment scripts
+4beb309 Deployment scripts
+ded28c9 Update .travis.yml
+b396483 Update .travis.yml
+b7c7944 Update .travis.yml
+c4cec5e Update .travis.yml
+d61c615 Update .travis.yml
+b841acd Added brew configuration files
+edb1eae Optimisation and ShellCheck validation
+24a7d31 Minor updates
+e82ff74 Release update
+e5fa869 Delete .DS_Store
+f0a4493 Replacing editor to Atom
+2718fc7 Minor updates
+406369f Initial commit
+5008abd Initial commit

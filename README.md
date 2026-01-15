@@ -9,10 +9,19 @@
 
 <!-- markdownlint-enable MD033 MD041 -->
 
+<<<<<<< HEAD
 # Dotfiles (v0.2.470)
 
 Simply designed to fit your shell life 🐚
 
+=======
+# Dotfiles (v0.2.471)
+
+Simply designed to fit your shell life 🐚
+
+> **v0.2.471 - Product Hardening Release** 🔒 New security features, validation framework, and comprehensive audit trail.
+
+>>>>>>> 4b0694f (feat: v0.2.471 Product Hardening Release)
 <!-- markdownlint-disable MD033 MD041 MD043 -->
 <center>
 <!-- markdownlint-enable MD033 MD041 -->
