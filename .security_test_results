@@ -1,6 +1,0 @@
-FAIL: World-accessible dotfiles directory:   File: "/home/runner/work/dotfiles/dotfiles"
-    ID: 3e848193940666a Namelen: 255     Type: ext2/ext3
-Block size: 4096       Fundamental block size: 4096
-Blocks: Total: 18771278   Free: 4269508    Available: 4265412
-Inodes: Total: 9699328    Free: 8722506
-755
