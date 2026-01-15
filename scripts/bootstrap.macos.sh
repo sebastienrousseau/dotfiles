@@ -15,8 +15,8 @@ set -euo pipefail
 shopt -s failglob 2>/dev/null || true
 
 # Script root
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Source security modules
 if [[ -f "$DOTFILES_DIR/lib/security.sh" ]]; then

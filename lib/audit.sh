@@ -312,8 +312,8 @@ clean_audit_logs() {
     fi
     
     # Find and remove audit files older than keep_days
-    find "$AUDIT_DIR" -type f -name "*.log" -mtime +$keep_days -delete 2>/dev/null || true
-    find "$AUDIT_DIR" -type f -name "*.log.gz" -mtime +$keep_days -delete 2>/dev/null || true
+    find "$AUDIT_DIR" -type f -name "*.log" -mtime "+${keep_days}" -delete 2>/dev/null || true
+    find "$AUDIT_DIR" -type f -name "*.log.gz" -mtime "+${keep_days}" -delete 2>/dev/null || true
 }
 
 #------------------------------------------------------------------------------

@@ -17,7 +17,7 @@ set -euo pipefail
 # Error Handling Constants
 #------------------------------------------------------------------------------
 
-readonly ERROR_HANDLER_VERSION="0.2.471"
+export readonly ERROR_HANDLER_VERSION="0.2.471"
 readonly MAX_ERROR_DEPTH=10
 
 # Global state
