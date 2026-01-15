@@ -1,0 +1,44 @@
+{
+  "startup_time": {
+    "bash_fast_p50_ms": 300,
+    "bash_fast_p95_ms": 400,
+    "bash_normal_p50_ms": 500,
+    "bash_normal_p95_ms": 600,
+    "bash_normal_p99_ms": 700,
+    "zsh_p50_ms": 20,
+    "zsh_p95_ms": 30,
+    "threshold_regression_percent": 20,
+    "threshold_regression_ms": 50,
+    "notes": "Baselines based on macOS M1 with typical dotfiles load. Ubuntu/Intel may differ."
+  },
+  "system_info": {
+    "os": "macOS",
+    "arch": "arm64",
+    "shell": "bash 5.3.9 / zsh 5.9",
+    "measured_date": "2026-01-15"
+  },
+  "improvements": {
+    "cache_enabled": {
+      "description": "With ~/.bash_dotfiles_cache enabled",
+      "startup_reduction_percent": 50,
+      "expected_time_ms": 275
+    },
+    "lazy_loading": {
+      "description": "With lazy loading of heavy modules (nvm, pyenv, heroku)",
+      "startup_reduction_percent": 35,
+      "expected_time_ms": 325
+    },
+    "fast_profile": {
+      "description": "Using DOTFILES_STARTUP_MODE=fast",
+      "startup_reduction_percent": 60,
+      "expected_time_ms": 210
+    }
+  },
+  "regression_policy": {
+    "description": "Gate CI on startup time regressions",
+    "check_frequency": "on every push",
+    "fail_if": "p95 > baseline_p95 + threshold",
+    "threshold_formula": "max(+20%, +50ms)",
+    "acceptable_variance": "10% day-to-day variability normal"
+  }
+}

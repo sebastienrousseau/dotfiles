@@ -1,0 +1,120 @@
+On branch feature/v0.2.471-product-hardening
+You are currently cherry-picking commit 4b0694f.
+  (fix conflicts and run "git cherry-pick --continue")
+  (use "git cherry-pick --skip" to skip this patch)
+  (use "git cherry-pick --abort" to cancel the cherry-pick operation)
+
+Changes to be committed:
+	new file:   .github/workflows/shell-ci.yml
+	new file:   VERSION
+	new file:   bin/dotfiles
+	new file:   docs/ENHANCEMENTS_SUMMARY.md
+	new file:   docs/HEALTH_CHECK.md
+	new file:   docs/INDEX.md
+	new file:   docs/OPERATIONS.md
+	new file:   docs/OPTIONS_1_2_COMPLETION.md
+	new file:   docs/PHASES_A_B_S1_SUMMARY.md
+	new file:   docs/PHASE_A_M1_PLAN.md
+	new file:   docs/PHASE_D_COMPLETION.md
+	new file:   docs/PHASE_D_PERFORMANCE.md
+	new file:   docs/PHASE_D_STRATEGY.md
+	new file:   docs/PLATFORM_SUPPORT.md
+	new file:   docs/PROFILES_AND_METRICS.md
+	new file:   docs/QUICK_REFERENCE.md
+	new file:   docs/REFACTORING_2026-01-15.md
+	new file:   docs/S1_HISTORY_REFACTORING.md
+	new file:   docs/SECURITY.md
+	new file:   lib/aliases/01-core.sh
+	new file:   lib/aliases/02-productivity.sh
+	new file:   lib/aliases/03-utilities.sh
+	new file:   lib/aliases/04-development.sh
+	new file:   lib/aliases/05-cloud.sh
+	new file:   lib/aliases/06-system.sh
+	new file:   lib/audit.sh
+	new file:   lib/errors.sh
+	new file:   lib/functions/FUNCTIONS.md
+	new file:   lib/functions/compat.sh
+	new file:   lib/functions/lazy-load.sh
+	new file:   lib/functions/portable.sh
+	new file:   lib/functions/security-audit.sh
+	new file:   lib/functions/startup-profile.sh
+	new file:   lib/history/README.md
+	new file:   lib/history/backup.sh
+	new file:   lib/history/config.sh
+	new file:   lib/history/core.sh
+	new file:   lib/history/default.history.sh
+	new file:   lib/history/logging.sh
+	new file:   lib/history/utils.sh
+	new file:   lib/load-fast-path.sh
+	new file:   lib/security.sh
+	new file:   lib/validation.sh
+	new file:   metrics/baselines.json
+	new file:   metrics/startup.json
+	new file:   scripts/analyze-startup.sh
+	new file:   scripts/bootstrap.macos.sh
+	new file:   scripts/bootstrap.sh
+	new file:   scripts/bootstrap.ubuntu.sh
+	new file:   scripts/build/banner.sh
+	new file:   scripts/build/build.sh
+	new file:   scripts/build/clean.sh
+	new file:   scripts/build/compile.sh
+	new file:   scripts/doctor.sh
+	new file:   scripts/install/backup.sh
+	new file:   scripts/install/copy.sh
+	new file:   scripts/install/download.sh
+	new file:   scripts/install/unpack.sh
+	new file:   scripts/measure-startup.sh
+	new file:   scripts/profile-shell.sh
+	new file:   scripts/security-tests.sh
+	new file:   scripts/smoke-tests.sh
+	new file:   scripts/verify-integrity.sh
+	new file:   tmp_fc_search
+	new file:   tools/nodejs/.jshintrc
+	new file:   tools/nodejs/.npmrc
+	new file:   tools/nodejs/README.md
+	new file:   tools/nodejs/backup.js
+	new file:   tools/nodejs/constants.js
+	new file:   tools/nodejs/copy.js
+	new file:   tools/nodejs/dotfiles.js
+	new file:   tools/nodejs/download.js
+	new file:   tools/nodejs/index.js
+	new file:   tools/nodejs/package.json
+	new file:   tools/nodejs/pnpm-lock.yaml
+	new file:   tools/nodejs/transfer.js
+	new file:   tools/nodejs/tsconfig.json
+	new file:   tools/nodejs/unpack.js
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+	both added:      .github/CODE-OF-CONDUCT.md
+	both added:      .github/CONTRIBUTING.md
+	both added:      .github/SECURITY.md
+	both added:      .jshintrc
+	both added:      .npmrc
+	both added:      Makefile
+	both added:      README.md
+	both added:      bin/backup.js
+	both added:      bin/constants.js
+	both added:      bin/copy.js
+	both added:      bin/dotfiles.js
+	both added:      bin/download.js
+	both added:      bin/index.js
+	both added:      bin/transfer.js
+	both added:      bin/unpack.js
+	both added:      lib/aliases/git/git.aliases.sh
+	both added:      package.json
+	both added:      pnpm-lock.yaml
+	both added:      tsconfig.json
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	all_commits.txt
+	branch_info.txt
+	feature_status.txt
+	git_log.txt
+	git_status_check.txt
+	hardening_commit.txt
+	master_status.txt
+	remote_branches.txt
+	remote_master.txt
+

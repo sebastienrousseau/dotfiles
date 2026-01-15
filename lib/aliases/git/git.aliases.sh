@@ -296,7 +296,11 @@ if command -v git &>/dev/null; then
 
   # Publish the current branch by pushing it to the remote "origin", and
   # setting the current branch to track the upstream branch.
+<<<<<<< HEAD
   alias gpb='git push --set-upstream origin $(git branch --show-current)'
+=======
+  alias gpb='git push --set-upstream origin $(git current-branch)'
+>>>>>>> 4b0694f (feat: v0.2.471 Product Hardening Release)
 
   # Push local changes to the online repository.
   alias gpo='git push origin'
@@ -315,20 +319,32 @@ if command -v git &>/dev/null; then
   alias gpullm='git pull origin master'
 
   # Do a pull for just one branch.
+<<<<<<< HEAD
   alias gpullo='git pull origin $(git branch --show-current)'
+=======
+  alias gpullo='git pull origin $(git current-branch)'
+>>>>>>> 4b0694f (feat: v0.2.471 Product Hardening Release)
 
   # Update remote refs along with associated objects.
   alias gpush='git push'
 
   # Do a push for just one branch.
+<<<<<<< HEAD
   alias gpusho='git push origin $(git branch --show-current)'
+=======
+  alias gpusho='git push origin $(git current-branch)'
+>>>>>>> 4b0694f (feat: v0.2.471 Product Hardening Release)
 
   # For each remote branch, push it.
   alias gpushr='git remote | xargs -I% -n1 git push %'
 
   # Unpublish the current branch by deleting the remote version of the
   # current branch.
+<<<<<<< HEAD
   alias gunpub='git push origin :$(git branch --show-current)'
+=======
+  alias gunpub='git push origin :$(git current-branch)'
+>>>>>>> 4b0694f (feat: v0.2.471 Product Hardening Release)
 
   # Push current branch
   # alias gpcb='git push origin "$(git branch|grep '\*'|tr -d '* \n')"'

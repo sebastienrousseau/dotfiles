@@ -1,0 +1,8 @@
+A  lib/audit.sh
+A  lib/errors.sh
+A  lib/functions/security-audit.sh
+A  lib/security.sh
+A  lib/validation.sh
+A  scripts/security-tests.sh
+A  scripts/verify-integrity.sh
+?? security_files.txt

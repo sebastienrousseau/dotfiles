@@ -1,0 +1,245 @@
+#!/usr/bin/env bash
+
+################################################################################
+# 🅳🅾🆃🅵🅸🅻🅴🆂 CLI
+# File: bin/dotfiles
+# Version: 0.2.471
+# Author: Sebastien Rousseau
+# Copyright (c) 2015-2025. All rights reserved
+# Description: Unified CLI entrypoint for dotfiles management
+# Website: https://dotfiles.io
+# License: MIT
+################################################################################
+
+set -euo pipefail
+
+# Script root and dotfiles root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+SCRIPTS_DIR="${DOTFILES_ROOT}/scripts"
+
+# Color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+# Flags
+DRY_RUN=0
+VERBOSE=0
+YES_TO_ALL=0
+
+# Utility functions
+log_info() {
+    echo -e "${BLUE}ℹ${NC} $*"
+}
+
+log_success() {
+    echo -e "${GREEN}✓${NC} $*"
+}
+
+log_warn() {
+    echo -e "${YELLOW}⚠${NC} $*" >&2
+}
+
+log_error() {
+    echo -e "${RED}✗${NC} $*" >&2
+}
+
+print_header() {
+    echo ""
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}$*${NC}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+}
+
+cmd_help() {
+    cat << 'EOF'
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 🅳🅾🆃🅵🅸🅻🅴🆂 CLI v0.2.471 — Unified dotfiles management
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+USAGE
+    dotfiles <command> [options]
+
+COMMANDS
+    help              Show this help message
+    doctor            Run diagnostics and checks
+    bootstrap         Initialize dotfiles (idempotent)
+    update            Update dotfiles to latest version
+    status            Show dotfiles status and configuration
+    bench             Run startup performance benchmarks
+    export            Export system state for portability
+    version           Show version information
+
+OPTIONS
+    -h, --help        Show help for a command
+    -v, --verbose     Enable verbose output
+    --dry-run         Preview changes without applying
+    --yes, -y         Skip all confirmations (CI mode)
+
+EXAMPLES
+    dotfiles help                    # Show this help
+    dotfiles doctor                  # Check system health
+    dotfiles bootstrap --dry-run     # Preview bootstrap steps
+    dotfiles bootstrap --yes         # Bootstrap with no prompts
+    dotfiles bench --iterations 5    # Run 5 startup benchmarks
+    dotfiles export                  # Save system state snapshot
+
+DOCUMENTATION
+    For more information, see:
+    - docs/OPERATIONS.md - Operations handbook
+    - docs/PHASE_D_PERFORMANCE.md - Performance details
+    - README.md - Getting started guide
+
+EOF
+}
+
+cmd_doctor() {
+    print_header "System Diagnostics"
+    if [[ -f "${SCRIPTS_DIR}/doctor.sh" ]]; then
+        bash "${SCRIPTS_DIR}/doctor.sh" "$@"
+    else
+        log_warn "doctor.sh not found at ${SCRIPTS_DIR}/doctor.sh"
+        return 1
+    fi
+}
+
+cmd_bootstrap() {
+    print_header "Dotfiles Bootstrap"
+    [[ ${DRY_RUN} -eq 1 ]] && log_info "DRY-RUN mode (no changes will be made)"
+    
+    # Detect OS
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        OS="macos"
+        log_info "Detected macOS"
+    elif grep -qi ubuntu /etc/os-release 2>/dev/null; then
+        OS="ubuntu"
+        log_info "Detected Ubuntu"
+    else
+        log_error "Unsupported OS"
+        return 1
+    fi
+    
+    # Run OS-specific bootstrap
+    if [[ -f "${SCRIPTS_DIR}/bootstrap.${OS}.sh" ]]; then
+        bash "${SCRIPTS_DIR}/bootstrap.${OS}.sh"
+    fi
+    
+    # Run main bootstrap
+    if [[ -f "${SCRIPTS_DIR}/bootstrap.sh" ]]; then
+        bash "${SCRIPTS_DIR}/bootstrap.sh"
+    fi
+    
+    log_success "Bootstrap complete"
+}
+
+cmd_update() {
+    print_header "Updating Dotfiles"
+    cd "${DOTFILES_ROOT}" || exit 1
+    if git status &>/dev/null; then
+        log_info "Pulling latest changes..."
+        git pull origin main 2>/dev/null || git pull || log_warn "Could not pull from remote"
+        [[ -f "${HOME}/.bash_dotfiles_cache" ]] && rm -f "${HOME}/.bash_dotfiles_cache" && log_success "Cleared cache"
+        log_success "Update complete"
+    else
+        log_error "Not a git repository"
+        return 1
+    fi
+}
+
+cmd_status() {
+    print_header "Dotfiles Status"
+    [[ -f "${DOTFILES_ROOT}/VERSION" ]] && log_info "Version: $(cat "${DOTFILES_ROOT}/VERSION")"
+    
+    cd "${DOTFILES_ROOT}" || exit 1
+    if git status &>/dev/null; then
+        BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+        COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+        log_info "Branch: $BRANCH"
+        log_info "Commit: $COMMIT"
+        [[ $(git status --porcelain 2>/dev/null | wc -l) -eq 0 ]] && log_success "All changes committed" || log_warn "Uncommitted changes exist"
+    fi
+    
+    log_info "Shell: $SHELL"
+    log_info "OS: $(uname -s)"
+    log_info "Arch: $(uname -m)"
+    [[ -d "${DOTFILES_ROOT}/lib" ]] && log_info "Modules: $(find "${DOTFILES_ROOT}/lib" -name "*.sh" 2>/dev/null | wc -l)"
+    log_info "Aliases: $(alias 2>/dev/null | wc -l)"
+}
+
+cmd_bench() {
+    print_header "Startup Performance Benchmark"
+    local iterations=${1:-3}
+    log_info "Running $iterations iterations..."
+    if [[ -f "${SCRIPTS_DIR}/measure-startup.sh" ]]; then
+        bash "${SCRIPTS_DIR}/measure-startup.sh" "$iterations"
+    else
+        log_warn "measure-startup.sh not found"
+    fi
+}
+
+cmd_export() {
+    print_header "Exporting System State"
+    mkdir -p "${HOME}/.dotfiles/state"
+    local hostname=$(hostname -s)
+    local state_file="${HOME}/.dotfiles/state/${hostname}.json"
+    log_info "Creating system state snapshot..."
+    cat > "${state_file}" << EOF
+{
+  "hostname": "$(hostname)",
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "os": "$(uname -s)",
+  "arch": "$(uname -m)",
+  "shell": "$SHELL",
+  "dotfiles_version": "$(cat "${DOTFILES_ROOT}/VERSION" 2>/dev/null || echo 'unknown')"
+}
+EOF
+    log_success "System state exported to: $state_file"
+}
+
+cmd_version() {
+    [[ -f "${DOTFILES_ROOT}/VERSION" ]] && cat "${DOTFILES_ROOT}/VERSION" || echo "0.2.471"
+}
+
+main() {
+    local command="${1:-help}"
+    shift || true
+    
+    case "$command" in
+        doctor)
+            cmd_doctor "$@"
+            ;;
+        bootstrap)
+            cmd_bootstrap "$@"
+            ;;
+        update)
+            cmd_update "$@"
+            ;;
+        status)
+            cmd_status "$@"
+            ;;
+        bench)
+            cmd_bench "$@"
+            ;;
+        export)
+            cmd_export "$@"
+            ;;
+        version)
+            cmd_version
+            ;;
+        help|--help|-h)
+            cmd_help
+            ;;
+        *)
+            log_error "Unknown command: $command"
+            echo ""
+            cmd_help
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"
