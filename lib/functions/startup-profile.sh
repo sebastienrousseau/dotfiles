@@ -162,9 +162,10 @@ get_startup_info() {
 
 #-----------------------------------------------------------------------------
 # Export functions for use in .bashrc/.zshrc (Bash only)
+# Temporarily disabled - causes zsh to crash
 #-----------------------------------------------------------------------------
-if [[ -n "${BASH_VERSION:-}" ]]; then
-  export -f get_startup_mode 2>/dev/null || true
-  export -f should_load_module 2>/dev/null || true
-  export -f get_startup_info 2>/dev/null || true
-fi
+# if [[ -n "${BASH_VERSION:-}" ]]; then
+#   export -f get_startup_mode 2>/dev/null || true
+#   export -f should_load_module 2>/dev/null || true
+#   export -f get_startup_info 2>/dev/null || true
+# fi

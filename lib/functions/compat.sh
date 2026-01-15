@@ -198,14 +198,15 @@ get_shell() {
 }
 
 # Export all functions (Bash only - zsh doesn't support export -f)
-if [ -n "${BASH_VERSION:-}" ]; then
-    export -f is_macos is_linux is_ubuntu 2>/dev/null || true
-    export -f has_cmd ensure_cmd 2>/dev/null || true
-    export -f is_bash is_zsh 2>/dev/null || true
-    export -f path_prepend path_append path_remove path_dedupe 2>/dev/null || true
-    export -f source_if_exists ensure_file ensure_dir 2>/dev/null || true
-    export -f log_info log_warn log_error log_success 2>/dev/null || true
-    export -f lazy_load 2>/dev/null || true
-    export -f version_ge version_gt version_le version_lt 2>/dev/null || true
-    export -f json_get get_os get_arch get_shell 2>/dev/null || true
-fi
+# Temporarily disabled - causes zsh to crash
+# if [ -n "${BASH_VERSION:-}" ]; then
+#     export -f is_macos is_linux is_ubuntu 2>/dev/null || true
+#     export -f has_cmd ensure_cmd 2>/dev/null || true
+#     export -f is_bash is_zsh 2>/dev/null || true
+#     export -f path_prepend path_append path_remove path_dedupe 2>/dev/null || true
+#     export -f source_if_exists ensure_file ensure_dir 2>/dev/null || true
+#     export -f log_info log_warn log_error log_success 2>/dev/null || true
+#     export -f lazy_load 2>/dev/null || true
+#     export -f version_ge version_gt version_le version_lt 2>/dev/null || true
+#     export -f json_get get_os get_arch get_shell 2>/dev/null || true
+# fi
