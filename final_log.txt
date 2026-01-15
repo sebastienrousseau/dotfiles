@@ -1,0 +1,3 @@
+6aa1f26 feat: v0.2.471 Product Hardening Release - Comprehensive Security Framework
+4bc217e [gitaliases] replace deprecated command (#58)
+e26d854 Merge pull request #57 from sebastienrousseau/0.2.470

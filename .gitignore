@@ -127,3 +127,10 @@ lib-cov
 yarn.lock
 Gemfile.lock
 tsconfig.tsbuildinfo
+
+# Security and audit runtime files
+.dotfiles_audit/
+.dotfiles_audit_archive/
+.integrity_log
+.security_test_results
+.dotfiles_audit.log

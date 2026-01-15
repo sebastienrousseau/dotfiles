@@ -197,8 +197,11 @@ setup_lazy_modules() {
 }
 
 #-----------------------------------------------------------------------------
-# Export functions for use in .bashrc/.zshrc
+# Export functions for use in .bashrc/.zshrc (Bash only - zsh doesn't support export -f)
+# Temporarily disabled - causes zsh to crash
 #-----------------------------------------------------------------------------
-export -f lazy_load 2>/dev/null || true  # Bash only
-export -f lazy_load_alias 2>/dev/null || true  # Bash only
-export -f setup_lazy_modules 2>/dev/null || true  # Bash only
+# if [ -n "${BASH_VERSION:-}" ]; then
+#     export -f lazy_load 2>/dev/null || true
+#     export -f lazy_load_alias 2>/dev/null || true
+#     export -f setup_lazy_modules 2>/dev/null || true
+# fi

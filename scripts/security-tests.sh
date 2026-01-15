@@ -68,10 +68,13 @@ test_skip() {
 }
 
 test_info() {
-    if [[ "$COLORS_ENABLED" == "true" ]]; then
-        echo -e "${BLUE}ℹ${NC} $*"
-    else
-        echo "ℹ $*"
+    # Only show info messages in verbose mode or when not suppressed
+    if [[ "${VERBOSE:-false}" == "true" ]] || [[ "$COLORS_ENABLED" == "true" ]]; then
+        if [[ "$COLORS_ENABLED" == "true" ]]; then
+            echo -e "${BLUE}ℹ${NC} $*"
+        else
+            echo "ℹ $*"
+        fi
     fi
 }
 

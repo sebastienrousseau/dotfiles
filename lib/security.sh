@@ -25,6 +25,13 @@ readonly SECURE_UMASK="0077"
 readonly SECURE_FILE_PERMS="0600"
 readonly SECURE_DIR_PERMS="0700"
 
+# Detect OS type for stat command
+if [[ "$(uname -s)" == "Darwin" ]]; then
+    readonly STAT_FORMAT="-f %OLp"
+else
+    readonly STAT_FORMAT="-c %a"
+fi
+
 #------------------------------------------------------------------------------
 # Logging Functions
 #------------------------------------------------------------------------------
@@ -57,7 +64,7 @@ harden_file_permissions() {
     fi
     
     local current_perms
-    current_perms=$(stat -f "%OLp" "$file" 2>/dev/null || stat -c "%a" "$file" 2>/dev/null || echo "unknown")
+    current_perms=$(stat $STAT_FORMAT "$file" 2>/dev/null || echo "unknown")
     
     if [[ "$current_perms" != "$expected_perms" ]]; then
         security_warn "Fixing permissions for $file: $current_perms → $expected_perms"
@@ -78,7 +85,7 @@ harden_directory_permissions() {
     fi
     
     local current_perms
-    current_perms=$(stat -f "%OLp" "$dir" 2>/dev/null || stat -c "%a" "$dir" 2>/dev/null || echo "unknown")
+    current_perms=$(stat $STAT_FORMAT "$dir" 2>/dev/null || echo "unknown")
     
     if [[ "$current_perms" != "$expected_perms" ]]; then
         security_warn "Fixing permissions for $dir: $current_perms → $expected_perms"
@@ -151,7 +158,7 @@ check_sensitive_file_perms() {
     for file in "${sensitive_files[@]}"; do
         if [[ -e "$file" ]]; then
             local perms
-            perms=$(stat -f "%OLp" "$file" 2>/dev/null || stat -c "%a" "$file" 2>/dev/null || echo "unknown")
+            perms=$(stat $STAT_FORMAT "$file" 2>/dev/null || echo "unknown")
             
             # Check for world-readable/writable
             if [[ "$perms" == *"4"* ]] || [[ "$perms" == *"2"* ]]; then
@@ -338,23 +345,24 @@ run_all_security_checks() {
 }
 
 ################################################################################
-# Export public functions
+# Export public functions (Bash only); Zsh does not support exporting functions
 ################################################################################
-
-export -f harden_file_permissions
-export -f harden_directory_permissions
-export -f verify_script_syntax
-export -f verify_script_quality
-export -f check_sensitive_file_perms
-export -f check_for_secrets
-export -f verify_umask
-export -f sanitize_input
-export -f is_safe_string
-export -f check_not_root
-export -f create_secure_temp
-export -f secure_rm
-export -f log_security_event
-export -f run_all_security_checks
-export -f security_log
-export -f security_warn
-export -f security_error
+if [[ -n "${BASH_VERSION:-}" ]]; then
+  export -f harden_file_permissions
+  export -f harden_directory_permissions
+  export -f verify_script_syntax
+  export -f verify_script_quality
+  export -f check_sensitive_file_perms
+  export -f check_for_secrets
+  export -f verify_umask
+  export -f sanitize_input
+  export -f is_safe_string
+  export -f check_not_root
+  export -f create_secure_temp
+  export -f secure_rm
+  export -f log_security_event
+  export -f run_all_security_checks
+  export -f security_log
+  export -f security_warn
+  export -f security_error
+fi
