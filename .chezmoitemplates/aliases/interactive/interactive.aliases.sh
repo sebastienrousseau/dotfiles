@@ -28,17 +28,8 @@ alias bin='rm -fr ${HOME}/.Trash'
 
 # Other interactive aliases
 
-# chmod: Change file or directory permissions with verbose output.
-alias chmod='chmod -v'
-
-# chown: Change file or directory owner and group with verbose output.
-alias chown='chown -v'
-
 # diff: Compare and show differences between two files in unified format.
 alias diff='diff -u'
-
-# grep: Search for a pattern in files or output, showing line numbers and case-insensitively.
-alias grep='grep -n -i'
 
 # mkdir: Create a new directory, making parent directories as needed, with verbose output.
 alias mkdir='mkdir -pv'

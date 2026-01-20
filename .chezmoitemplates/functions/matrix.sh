@@ -18,18 +18,8 @@ RESET_COLOR='\033[0m'
 VERSION="1.0.0"
 
 # Logging functions
-log_info() {
-  echo "[INFO] $*"
-}
+VERSION="1.0.0"
 
-log_warning() {
-  echo "[WARNING] $*" >&2
-}
-
-log_error() {
-  echo "[ERROR] $*" >&2
-  exit 1
-}
 
 show_help() {
   cat << 'EOH'

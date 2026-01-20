@@ -85,7 +85,7 @@ if command -v gcloud &>/dev/null; then
 
   # Authorize Google Cloud access for the gcloud tool with Google user
   # credentials and set current account as active.
-  alias gcal='gcloud auth login'
+  # alias gcal='gcloud auth login' # Duplicate key gcal defined above
 
   # Display the current account's access token.
   alias gcapat='gcloud auth print-access-token'
@@ -219,13 +219,13 @@ if command -v gcloud &>/dev/null; then
   ## -------------------------------------------------------------------
 
   # Authenticate with Google Cloud.
-  alias gca='gcloud auth'
+  # alias gca='gcloud auth' # Conflicts with Git
 
   # Access to beta commands.
-  alias gcb='gcloud beta'
+  # alias gcb='gcloud beta' # Conflicts with Git
 
   # Manage Google Cloud Build.
-  alias gcb='gcloud builds'
+  alias gclb='gcloud builds'
 
   # Manage Compute Engine IP addresses.
   alias gcca='gcloud compute addresses'

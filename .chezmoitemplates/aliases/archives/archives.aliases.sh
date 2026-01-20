@@ -340,7 +340,7 @@ alias ltxz='tar -tJvf'               # List tar.xz archive contents
 alias ltzst='tar --zstd -tvf'        # List tar.zst archive contents
 alias lzip='unzip -l'                # List zip archive contents
 alias lrar='unrar l'                 # List rar archive contents
-alias la='list_archive'              # Generic list archive contents
+alias lar='list_archive'             # Generic list archive contents
 
 # 7-Zip Aliases
 alias c7z='7z a'                     # Create 7z archive
@@ -387,6 +387,6 @@ alias clz4='lz4 -zc'                 # Compress with lz4
 alias xlz4='lz4 -dc'                 # Extract lz4
 
 # Combined Aliases
-alias c='compress'                   # Generic compression function
-alias cl='compress_large'            # Legacy compress_large function
-alias b='backup'                     # Quick backup function
+alias ac='compress'                  # Generic compression (Archive Create)
+alias acl='compress_large'           # Legacy compress_large
+alias bak='backup'                   # Quick backup function

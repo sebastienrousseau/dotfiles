@@ -1,9 +1,6 @@
 # shellcheck shell=bash
 # 🅼🅰🅺🅴🅳🅸🆁 🅰🅻🅸🅰🆂🅴🆂
 
-# Make directory and cd into it.
-alias mcd='mkdir -pv && cd'
-
 # Make example directory with current date.
 alias mde='mkdir -pv "$(date +%Y%m%d)-example"'
 

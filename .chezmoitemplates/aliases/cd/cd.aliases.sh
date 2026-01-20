@@ -529,7 +529,7 @@ alias popd='popd && eval "${LS_CMD}"'         # Pop directory from stack and lis
 # Consistent Shorthand Aliases
 #-----------------------------------------------------------------------------
 alias cd='cd_with_history'                    # Override default cd command
-alias mk='mkcd'                               # Create and enter directory
+alias mcd='mkcd'                              # Create and enter directory
 
 # Bookmark management
 alias bm='bookmark'                           # Create bookmark

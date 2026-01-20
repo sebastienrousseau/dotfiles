@@ -21,8 +21,6 @@ set_default_aliases() {
     fc -W
 
     ## General aliases
-    # Shortcut for the `clear` command.
-    alias c="clear"
 
     # Display the current date and time.
     alias da='date "+%Y-%m-%d %A %T %Z"'
@@ -59,9 +57,6 @@ set_default_aliases() {
     # Shutdown the system.
     alias halt='sudo /sbin/halt'
 
-    # Alias to list recent commands
-    alias h='dotfiles_history'
-
     # Alias to view history
     alias history='dotfiles_history'
 
@@ -91,9 +86,6 @@ set_default_aliases() {
     # List all listening ports.
     alias ports='netstat -tulan'
 
-    # Start a simple HTTP server to serve the current directory on port 8000.
-    alias srv='python3 -m http.server 8000 --bind 127.0.0.1'
-
     ## System monitoring aliases
     # Allows the user to interactively monitor the system's vital resources
     # or server's processes in real time.
@@ -106,9 +98,6 @@ set_default_aliases() {
     # Count the number of files in the current directory.
     alias ctf='echo $(ls -1 | wc -l)'
 
-    # Use compression when transferring data.
-    alias curl='curl --compressed'
-
     # Quickly search for file.
     alias qfind='find . -name '
 
@@ -119,12 +108,6 @@ set_default_aliases() {
     alias wth='curl -s "wttr.in/?format=3"'
 
     ## File system navigation aliases
-    # Clear the terminal screen and print the contents of the current
-    # directory.
-    alias clc='clear && ls -a'
-
-    # Clear the terminal screen and print
-    alias clp='pwd'
 }
 
 set_default_aliases
