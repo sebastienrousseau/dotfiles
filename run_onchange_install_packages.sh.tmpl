@@ -38,3 +38,17 @@ fi
 echo "🪟 Windows detected. Checking winget..."
 # winget import ...
 {{- end }}
+
+# Vim-Plug Installation (Universal)
+if [ ! -f "$HOME/.vim/autoload/plug.vim" ]; then
+    echo "Installing vim-plug..."
+    curl -fLo "$HOME/.vim/autoload/plug.vim" --create-dirs \
+        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+fi
+
+# Vim Plugins Install/Update
+# This hash triggers re-run when .vimrc changes: {{ include "dot_vimrc" | sha256sum }}
+if command -v vim >/dev/null; then
+    echo "Updating Vim plugins..."
+    vim -es -u "$HOME/.vimrc" -i NONE -c "PlugInstall" -c "PlugClean!" -c "qa"
+fi

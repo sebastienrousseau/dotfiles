@@ -1,0 +1,28 @@
+# Nano Configuration
+set atblanks
+set autoindent
+set backup
+set boldtext
+set bookstyle
+set casesensitive
+set constantshow
+set historylog
+set functioncolor cyan
+set keycolor cyan
+set linenumbers
+set mouse
+set noconvert
+set numbercolor yellow
+set preserve
+set showcursor
+set smarthome
+set softwrap
+set statuscolor black,yellow
+set tabsize 4
+set tabstospaces
+set trimblanks
+set titlecolor white,red
+set whitespace "»⋅"
+set wordbounds
+set wordchars "_"
+set zap

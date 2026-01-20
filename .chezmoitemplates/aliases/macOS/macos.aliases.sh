@@ -1,58 +1,61 @@
-# 🅼🅰🅲🅾🆂 🅰🅻🅸🅰🆂🅴🆂
+# macOS Aliases
 
-# Recursively delete .DS_Store files.
-alias clds='find . -type f -name "*.DS_Store" -ls -delete'
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  
+  # --- Finder & Desktop ---
+  
+  # Recursively delete .DS_Store files with check
+  # alias clds='find . -type f -name "*.DS_Store" -ls -delete'
+  alias cleanup_dsstore='find . -type f -name "*.DS_Store" -ls -delete'
+  
+  alias emptytrash='rm -rf ~/.Trash/*'
+  
+  # Hide/Show Hidden Files
+  alias finder_hide='defaults write com.apple.finder ShowAllFiles FALSE; killall Finder'
+  alias finder_show='defaults write com.apple.finder ShowAllFiles TRUE; killall Finder'
+  
+  # Hide/Show Desktop Icons
+  alias desktop_hide='defaults write com.apple.finder CreateDesktop false; killall Finder'
+  alias desktop_show='defaults write com.apple.finder CreateDesktop true; killall Finder'
+  
+  # Open current directory in Finder
+  alias ofd='open $PWD'
+  
+  # --- System & Network ---
+  
+  alias lockscreen='/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend'
+  
+  # Wireless
+  alias wifi_on='networksetup -setairportpower en0 on'
+  alias wifi_off='networksetup -setairportpower en0 off'
 
-# Clean up LaunchServices to remove duplicates in the 'Open With' menu.
-alias clls='/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user && killall Finder'
+  # Disk Utilities
+  alias verify_perms='diskutil verifyPermissions /'
+  alias verify_volume='diskutil verifyVolume /'
 
-# Empty the Trash on all mounted volumes and the main HDD.
-alias emptytrash='rm -rf ~/.Trash/*'
+  # --- Development ---
+  
+  alias xcode='open -a Xcode'
+  alias iphone='open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app'
+  
+  # Clean Xcode DerivedData
+  alias cleanup_xcode='rm -rf ~/Library/Developer/Xcode/DerivedData/*'
+  
+  # --- Misc ---
+  
+  # Clean up LaunchServices to remove duplicates in the 'Open With' menu
+  alias cleanup_ls='
+    /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
+    -kill -r -domain local -domain system -domain user && \
+    killall Finder
+  '
 
-# Hide hidden files in Finder.
-alias finderHideHidden='defaults write com.apple.finder ShowAllFiles FALSE'
+  # Disable .DS_Store compilation on network stores
+  alias no_network_ds='defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true'
+  
+  alias safari_safe='open -a Safari --args -safe-mode'
+  
+  # Screensaver
+  alias screensaver='/System/Library/Frameworks/ScreenSaver.framework/Resources/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine -background'
 
-# Show hidden files in Finder.
-alias finderShowHidden='defaults write com.apple.finder ShowAllFiles TRUE'
-
-# Hide the Desktop icons.
-alias hideDesktopIcons='defaults write com.apple.finder CreateDesktop false && killall Finder'
-
-# Open the device simulators.
-alias iphone='open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app'
-
-# Lock the screen (when going AFK).
-alias lockScreen='/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend'
-
-# Disable .DS_Store files on network volumes
-alias noDS='defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true'
-
-# Open the current directory in a Finder window.
-alias ofd='open $PWD'
-
-# Purging Xcode DerivedData.
-alias purge='rm -rf ~/library/Developer/Xcode/DerivedData/*'
-
-# Launch Safari in Safe Mode.
-alias safariSafeMode='open -a Safari --args -safe-mode'
-
-# Show the Desktop icons.
-alias showDesktopIcons='defaults write com.apple.finder CreateDesktop true && killall Finder'
-
-# Run a screensaver on the Desktop.
-alias screensaverDesktop='/System/Library/Frameworks/ScreenSaver.framework/Resources/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine -background'
-
-# vp: Verify macOS Permissions.
-alias vp='diskutil verifyPermissions /'
-
-# vv: Verify macOS Volume.
-alias vv='diskutil verifyvolume /'
-
-# Turn Wi-Fi on.
-alias wifiOn='networksetup -setairportpower en0 on'
-
-# Turn Wi-Fi off.
-alias wifiOff='networksetup -setairportpower en0 off'
-
-# xcode: Launch XCode app in macOS.
-alias xcode='open -a xcode'
+fi
