@@ -2,7 +2,7 @@
 ################################################################################
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: history.sh
-# Version: 0.2.470
+# Version: 0.2.471
 # Author: Sebastien Rousseau
 # Enhanced by: ChatGPT
 # Description: Manages shell history configuration, deduplication, and sorting.

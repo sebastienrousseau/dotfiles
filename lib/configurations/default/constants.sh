@@ -3,7 +3,7 @@
 ################################################################################
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # File: constants.sh
-# Version: 0.2.470
+# Version: 0.2.471
 # Author: Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # Description: Define constants and variables for dotfiles configuration
@@ -29,7 +29,7 @@ configure_dotfiles_constants() {
     DF_DIR="${HOME}/.dotfiles/"             # Dotfiles directory.
     DF_BACKUPDIR="${HOME}/dotfiles_backup/" # Backup directory.
     DF_DOWNLOADDIR="${HOME}/Downloads"      # Download directory.
-    DF_VERSION="0.2.470"                    # Dotfiles Version number.
+    DF_VERSION="0.2.471"                    # Dotfiles Version number.
 
     # Create a timestamp for backup operations if needed
     # Uncomment the next line to enable timestamp generation

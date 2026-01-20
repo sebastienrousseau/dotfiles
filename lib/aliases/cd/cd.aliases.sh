@@ -2,7 +2,7 @@
 ################################################################################
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # Script: cd.aliases.sh
-# Version: 0.2.470
+# Version: 0.2.471
 # Author: Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # Description: This script provides enhanced functionality to quickly navigate directories.
@@ -13,7 +13,7 @@
 #-----------------------------------------------------------------------------
 # Script configuration and version
 #-----------------------------------------------------------------------------
-DOTFILES_VERSION="0.2.470"
+DOTFILES_VERSION="0.2.471"
 DOTFILES_LAST_UPDATED="2025-03-12"
 
 #-----------------------------------------------------------------------------

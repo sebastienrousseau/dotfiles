@@ -9,7 +9,7 @@
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.470)
+# Dotfiles (v0.2.471)
 
 Simply designed to fit your shell life 🐚
 
@@ -29,7 +29,7 @@ both **macOS** and **Linux** systems.
 
 ### Table of Contents
 
-- [Dotfiles (v0.2.470)](#dotfiles-v02470)
+- [Dotfiles (v0.2.471)](#dotfiles-v02470)
   - [🆂🅴🅲🆄🆁🅸🆃🆈 🅰🅻🅸🅰🆂🅴🆂](#-)
     - [Table of Contents](#table-of-contents)
   - [OpenSSL Aliases](#openssl-aliases)

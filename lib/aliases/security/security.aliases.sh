@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # security.aliases.sh
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.470) - <https://dotfiles.io>
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.471) - <https://dotfiles.io>
 # Made with ♥ in London, UK by Sebastien Rousseau
 # Copyright (c) 2015-2025.
 # License: MIT

@@ -5,7 +5,7 @@
   align="right"
 />
 
-# Dotfiles (v0.2.470)
+# Dotfiles (v0.2.471)
 
 Simply designed to fit your shell life 🐚
 

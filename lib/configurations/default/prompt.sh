@@ -3,7 +3,7 @@
 ################################################################################
 # 🅳🅾🆃🅵🅸🅻🅴🆂
 # File: prompt.sh
-# Version: 0.2.470
+# Version: 0.2.471
 # Author: Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # Description: Configure shell prompts for various environments

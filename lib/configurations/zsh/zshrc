@@ -1,4 +1,4 @@
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.470) - <https://dotfiles.io>
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.471) - <https://dotfiles.io>
 # Made with ♥ in London, UK by @sebastienrousseau
 # Copyright (c) 2015-2025. All rights reserved
 # License: MIT
@@ -21,7 +21,7 @@ export OS_VERSION="$(uname -r)"              # OS version number
 export SSL_CERT_FILE="${HOME}/cacert.pem"    # SSL certificate file
 export USER_LANGUAGE="en_GB.UTF-8"           # Default language
 export ARCHFLAGS="-arch ${OS_ARCH}"          # Architecture flags
-export DOTFILES_VERSION='0.2.470'            # Dotfiles version
+export DOTFILES_VERSION='0.2.471'            # Dotfiles version
 export DOTFILES="${HOME}/.dotfiles/lib"      # Path to dotfiles
 export LANG="${USER_LANGUAGE}"               # Language settings
 export LANGUAGE="${USER_LANGUAGE}"
@@ -82,17 +82,15 @@ unsetopt correct_all
 
 ## 🅻🅾🅰🅳🅴🆁🆂 - Load the dotfiles with caching for better performance
 _DOTFILES_CACHE="${HOME}/.zsh_dotfiles_cache"
-_DOTFILES_CACHE_TIME=86400  # 24 hours in seconds
 
 # Function to load dotfiles with caching - improves startup time
 load_dotfiles() {
   local load_from_cache=0
 
-  # Check if cache exists and is recent
+  # Check if cache exists
   if [[ -f "${_DOTFILES_CACHE}" ]]; then
-    local cache_time=$(stat -c %Y "${_DOTFILES_CACHE}" 2>/dev/null || stat -f %m "${_DOTFILES_CACHE}" 2>/dev/null)
-    local current_time=$(date +%s)
-    if (( current_time - cache_time < _DOTFILES_CACHE_TIME )); then
+    # Smart Cache: Check if any dotfile is newer than the cache
+    if [[ -z $(find "${DOTFILES}" -type f -newer "${_DOTFILES_CACHE}" -print -quit 2>/dev/null) ]]; then
       load_from_cache=1
     fi
   fi

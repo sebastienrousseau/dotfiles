@@ -1,4 +1,4 @@
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.470) - <https://dotfiles.io>
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.471) - <https://dotfiles.io>
 # Made with ♥ in London, UK by Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # License: MIT
@@ -68,7 +68,7 @@ bind r source-file ~/.tmux.conf \; display ".tmux.conf reloaded" \; \
 
 # Utilities
 # Creates a scrollable help menu popup
-bind ? display-popup -E -w 80 -h 24 -T "Dotfiles (v0.2.470) KEYBINDINGS" "\
+bind ? display-popup -E -w 80 -h 24 -T "Dotfiles (v0.2.471) KEYBINDINGS" "\
 cat <<'EOF' | less -R
   WINDOW SPLITTING
   Prefix - : Split window vertically
