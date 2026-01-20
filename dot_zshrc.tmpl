@@ -12,6 +12,11 @@ if [[ -v DOTFILES_SOURCED ]]; then
 fi
 export DOTFILES_SOURCED=1
 
+{{- /* Input Validation: Ensure crucial variables are set */ -}}
+{{- if not .chezmoi.homeDir -}}
+  {{- fail "Critical Error: .chezmoi.homeDir is not set!" -}}
+{{- end -}}
+
 {{- if eq .chezmoi.os "darwin" }}
 export FORCE_COLOR_OS="macOS"
 {{- else if eq .chezmoi.os "linux" }}
