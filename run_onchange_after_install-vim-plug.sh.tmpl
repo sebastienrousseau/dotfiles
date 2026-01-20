@@ -21,7 +21,7 @@ fi
 # This hash triggers re-run when .vimrc changes: {{ include "dot_vimrc" | sha256sum }}
 if command -v vim >/dev/null; then
     log_info "Updating Vim plugins..."
-    vim -es -u "$HOME/.vimrc" -i NONE -c "PlugInstall" -c "PlugClean!" -c "qa"
+    vim -es -u "$HOME/.vimrc" -i NONE -c "PlugInstall" -c "PlugClean!" -c "qa" || true
 fi
 
 log_info "Vim setup complete."
