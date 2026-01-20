@@ -133,3 +133,25 @@ typeset -aU path
 if command -v starship >/dev/null; then
   eval "$(starship init zsh)"
 fi
+
+# Zoxide (Smart Directory Jumper) - Replaces 'cd'
+if command -v zoxide >/dev/null; then
+  eval "$(zoxide init zsh)"
+  alias cd="z"
+fi
+
+# FZF (Fuzzy Finder)
+if command -v fzf >/dev/null; then
+  # Source auto-completion and key bindings
+  if [[ -f "/opt/homebrew/opt/fzf/shell/completion.zsh" ]]; then
+    source "/opt/homebrew/opt/fzf/shell/completion.zsh"
+  fi
+  if [[ -f "/opt/homebrew/opt/fzf/shell/key-bindings.zsh" ]]; then
+    source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
+  fi
+  
+  # Use fd/rg for fzf source if available
+  if command -v rg >/dev/null; then
+    export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
+  fi
+fi

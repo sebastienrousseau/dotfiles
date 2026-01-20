@@ -1,8 +1,7 @@
-tap "homebrew/bundle"
-tap "homebrew/core"
-tap "homebrew/cask"
-
-# Core Tools
+# Taps
+# homebrew/bundle - Deprecated
+# homebrew/core - Built-in
+# homebrew/cask - Built-in# Core Tools
 brew "git"
 brew "chezmoi"
 brew "starship"
