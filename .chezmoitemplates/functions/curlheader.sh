@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Description:
 #   curlheader is a function to fetch and display HTTP headers for a given URL.
 #   It can either display all headers or filter for a specific header by name.

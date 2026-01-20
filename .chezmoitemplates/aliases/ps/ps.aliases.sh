@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # 🅿🆂 🅰🅻🅸🅰🆂🅴🆂
 if command -v 'ps' >/dev/null; then
 

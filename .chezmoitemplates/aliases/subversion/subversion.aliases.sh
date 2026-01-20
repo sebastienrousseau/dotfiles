@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # 🆂🆄🅱🆅🅴🆁🆂🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂
 if command -v 'svn' >/dev/null; then
   alias sad='svn add'        # sad: Put new files and directories under version control.

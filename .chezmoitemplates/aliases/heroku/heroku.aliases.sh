@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # 🅷🅴🆁🅾🅺🆄 🅰🅻🅸🅰🆂🅴🆂 - Heroku aliases.
 if command -v heroku &>/dev/null; then
   # Sections:

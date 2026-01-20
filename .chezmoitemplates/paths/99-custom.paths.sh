@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Add Apple binaries and TeX Live to PATH
 export PATH="/Library/Apple/usr/bin:/Library/TeX/texbin:${PATH}"
 

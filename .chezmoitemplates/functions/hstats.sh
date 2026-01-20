@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Description:
 #   hstats is a utility function to display statistics about the most commonly
 #   used commands from the shell history. It shows the top 20 commands along

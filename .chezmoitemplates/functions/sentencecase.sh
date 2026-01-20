@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Description:
 #   sentencecase converts file or directory names to sentence case. It capitalizes
 #   the first character of the first word, while the rest of the characters are

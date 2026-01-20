@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 #-----------------------------------------------------------------------------
 # Archive and Compression Management
 

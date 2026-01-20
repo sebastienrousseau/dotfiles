@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 if command -v 'cargo' >/dev/null; then
     # Basic Commands
     alias cg='cargo'                             # Cargo shortcut

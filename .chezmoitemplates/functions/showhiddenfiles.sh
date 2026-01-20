@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Show hidden system and dotfile files
 showhiddenfiles() {
   defaults write com.apple.Finder AppleShowAllFiles YES

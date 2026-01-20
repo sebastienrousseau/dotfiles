@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Description:
 #   caffeine is a cross-platform utility to prevent the system from going to
 #   sleep or displaying a screensaver. It supports macOS, Linux, and Windows.

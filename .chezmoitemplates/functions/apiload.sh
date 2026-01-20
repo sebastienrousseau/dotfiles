@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 #
 # This script performs basic load testing on a specified API endpoint using
 # default utilities available in macOS, Linux, or Windows environments. It allows

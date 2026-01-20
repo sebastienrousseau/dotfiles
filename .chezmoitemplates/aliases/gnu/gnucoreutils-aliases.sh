@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # 🅶🅽🆄 🅲🅾🆁🅴🆄🆃🅸🅻🆂 🅰🅻🅸🅰🆂🅴🆂
 
 if command -v 'gdate' >/dev/null; then

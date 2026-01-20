@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # size: Function to check a file size
 size() {
   if [[ "$#" != 1 ]]; then

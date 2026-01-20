@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # 🅽🅿🅼 🅰🅻🅸🅰🆂🅴🆂
 if command -v npm &>/dev/null; then
   # Audit npm packages.

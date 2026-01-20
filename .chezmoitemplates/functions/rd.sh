@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # rd: Function to remove a directory and its files
 rd() {
   if [[ "$#" != 1 ]]; then

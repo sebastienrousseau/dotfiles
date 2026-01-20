@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 #
 # This script checks the health/status of one or multiple APIs by sending HTTP
 # requests to specified endpoints. It supports different HTTP methods, allows

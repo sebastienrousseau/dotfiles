@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Copyright (c) 2015-2025. All rights reserved
 # Description: Enhances terminal interaction with aliases for clearing the screen,
 # navigating directories, and displaying directory contents in an organized manner.

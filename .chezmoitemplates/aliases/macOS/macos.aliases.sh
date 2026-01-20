@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # macOS Aliases
 
 if [[ "$OSTYPE" == "darwin"* ]]; then

@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 #
 # Description:
 #   This script sets a set of aliases for file listing using `eza`.

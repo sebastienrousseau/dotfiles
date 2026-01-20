@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # VS Code Aliases
 
 if [[ "$(uname || true)" = "Darwin" ]]; then

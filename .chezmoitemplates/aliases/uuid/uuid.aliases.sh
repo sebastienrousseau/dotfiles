@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # 🆄🆄🅸🅳 🅰🅻🅸🅰🆂🅴🆂
 
 # uuid: Generate a UUID and copy it to the clipboard.

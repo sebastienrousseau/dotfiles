@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 #
 # This script displays basic system information in a style similar to neofetch,
 # but simpler. It attempts to detect OS, CPU, GPU, memory, etc.

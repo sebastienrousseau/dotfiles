@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Version: 0.2.471
 # Website: https://dotfiles.io
 

@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Description:
 #   freespace is a utility function to securely erase purgeable disk space with
 #   zeros on the selected disk using the `diskutil secureErase freespace` command.

@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Lazy Loaders for Heavy Tools
 
 # NVM (Node Version Manager)

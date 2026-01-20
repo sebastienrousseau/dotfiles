@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # vsc: Function to open a file in Visual Studio Code.
 
 vsc() {

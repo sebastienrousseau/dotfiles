@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # stopwatch: Function for a stopwatch
 stopwatch() {
   date1=$(gdate +%s)

@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Description:
 #   kebabcase converts file or directory names to kebab-case. All letters
 #   are lowercase and spaces or other non-alphanumeric characters are replaced

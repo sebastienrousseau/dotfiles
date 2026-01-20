@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Description:
 #   uppercase is a utility function that converts file or directory names to
 #   uppercase. It supports multiple arguments and provides informative messages

@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Description:
 #   genpass generates a strong random password with customizable blocks and
 #   a separator. Each block is 12 characters by default (high entropy).

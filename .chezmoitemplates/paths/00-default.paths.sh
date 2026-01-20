@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 export PATH=/usr/bin:"${PATH}"
 export PATH=/bin:"${PATH}"
 export PATH=/sbin:"${PATH}"

@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Description:
 #   last is a utility function to list recently modified files within a
 #   specified time range. By default, it lists files modified in the last 60

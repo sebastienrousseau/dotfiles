@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Description:
 #   hexdump is a utility function to display the contents of a file in a
 #   hex dump format. By default, it shows the entire file unless a line limit

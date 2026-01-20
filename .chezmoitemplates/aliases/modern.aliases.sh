@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Modern Tooling Aliases (Rust Replacements)
 
 # Eza (Replacement for ls)

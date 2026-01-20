@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # 🅼🅰🅺🅴🅳🅸🆁 🅰🅻🅸🅰🆂🅴🆂
 
 # Make directory and cd into it.

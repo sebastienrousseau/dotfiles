@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 #   A comprehensive cross-platform system update script for macOS, Linux, and
 #   Windows. It updates system software, programming tools, and cleans up resources.
 #

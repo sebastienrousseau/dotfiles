@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # 🆃🅼🆄🆇 🅰🅻🅸🅰🆂🅴🆂
 
 if command -v 'tmux' >/dev/null; then

@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # 🆂🆄🅳🅾 🅰🅻🅸🅰🆂🅴🆂
 
 # Execute a command as the superuser.
