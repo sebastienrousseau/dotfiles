@@ -10,11 +10,11 @@ These aliases are defined in `go.aliases.sh` and are automatically loaded by `ch
 
 ## ⚡ Aliases
 
-- `g` - Go shortcut
-- `gr` - `go run`
-- `gb` - `go build`
-- `gt` - `go test`
-- `gmt` - `go mod tidy`
-- `gget` - `go get`
+- `go` - Go shortcut
+- `gor` - `go run`
+- `gob` - `go build`
+- `got` - `go test`
+- `gomt` - `go mod tidy`
+- `goget` - `go get`
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

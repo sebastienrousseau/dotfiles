@@ -37,25 +37,25 @@ Supported formats:
 - `.arc`
 - `.dms`
 ### Advanced Compression Function
-The new `compress` function (shorthand `c`) provides a unified interface for all compression formats with support for compression levels and multiple files:
+The new `compress` function (shorthand `ac`) provides a unified interface for all compression formats with support for compression levels and multiple files:
 ```bash
 compress tgz file1 file2 directory output.tar.gz  # Create tar.gz with multiple inputs
 compress zip -l 9 important_files backup.zip      # Create zip with maximum compression level
 ```
 Supported formats: `tar`, `tgz`, `tbz2`, `txz`, `tzst`, `zip`, `7z`, `gz`, `bz2`, `xz`, `zst`, `lz4`, `rar`
 ### Quick Backup Function
-The `backup` (or shorthand `b`) function creates timestamped backups of files or directories:
+The `backup` (or shorthand `bak`) function creates timestamped backups of files or directories:
 ```bash
 backup important_folder            # Creates important_folder-backup-20250312-123045.tar.gz
 backup database.sql zip            # Creates database.sql-backup-20250312-123045.zip
 ```
 ### Archive Content Listing
-The `list_archive` (or shorthand `la`) function displays the contents of any supported archive:
+The `list_archive` (or shorthand `lar`) function displays the contents of any supported archive:
 ```bash
 list_archive backup.tar.gz         # Lists all files in the archive
 ```
 ### Large File Compression (Legacy)
-The `compress_large` (shorthand `cl`) function is maintained for backward compatibility:
+The `compress_large` (shorthand `acl`) function is maintained for backward compatibility:
 ```bash
 compress_large gz largefile.dat    # Creates largefile.dat.gz
 compress_large xz data.bin output.xz  # Specific output name
@@ -122,7 +122,7 @@ x archive.tar.gz
 # List contents of any archive
 list_archive archive.zip
 # or use the shorthand
-la archive.zip
+lar archive.zip
 # Create a tar.gz archive with multiple files
 compress tgz file1.txt file2.txt docs/ archive.tar.gz
 # Create a zip archive with maximum compression

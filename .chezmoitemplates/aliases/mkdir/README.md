@@ -11,7 +11,6 @@ These aliases are defined in `mkdir.aliases.sh` and are automatically loaded by 
 ## ⚡ Aliases
 
 This code provides a set of aliases for the `mkdir` command.
-- `mcd` Make directory and cd into it.
 - `mde` Make example directory with current date.
 - `md` Make directory.
 - `mdd` Make directory with date.

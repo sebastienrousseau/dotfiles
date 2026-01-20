@@ -54,10 +54,10 @@ During `chezmoi apply`, the main template `dot_config/shell/aliases.sh.tmpl`:
 | `gnu`           | Manage GNU core utilities.                       | [View README](gnu/README.md)      |
 | `heroku`        | Manage Heroku CLI.                               | [View README](heroku/README.md)   |
 | `interactive`   | Configure interactive shell behavior.            | [View README](interactive/README.md) |
-| `list`          | List files and directories.                      | [View README](list/README.md)     |
 | `macOS`         | Manage macOS-specific shell settings.            | [View README](macOS/README.md)    |
 | `make`          | Manage GNU Make aliases and utilities.           | [View README](make/README.md)     |
 | `mkdir`         | Create directories with custom options.          | [View README](mkdir/README.md)    |
+| `modern`        | Modern Rust-based tool replacements (ls, cat).   | [View README](modern/README.md)   |
 | `npm`           | Manage Node.js package manager aliases.          | [View README](npm/README.md)      |
 | `permission`    | Configure file and directory permissions.         | [View README](permission/README.md) |
 | `pnpm`          | Manage pnpm package manager aliases.             | [View README](pnpm/README.md)     |

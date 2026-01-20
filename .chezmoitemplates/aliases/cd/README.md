@@ -74,7 +74,7 @@ Track and navigate to recently visited directories:
 ### 🏗️ Advanced Navigation
 | Command          | Alias | Description                                |
 |------------------|-------|--------------------------------------------|
-| `mkcd <dir>`     | `mk`  | Create and immediately enter directory    |
+| `mkcd <dir>`     | `mcd` | Create and immediately enter directory    |
 | `proj`           | `pr`  | Navigate to project root (Git, npm, etc.) |
 | `pushd`          | `pd`  | Push directory onto stack                 |
 | `popd`           |       | Pop directory from stack                   |
@@ -125,7 +125,7 @@ source ~/.bashrc
 # Navigate to a directory with history tracking
 cd ~/projects/website
 # Create a new directory and navigate to it
-mk ~/projects/new-project
+mcd ~/projects/new-project
 # Create a bookmark for current directory
 bm website
 # List all bookmarks
@@ -135,7 +135,7 @@ bmg website
 # Find and navigate to project root
 pr
 # Create a directory structure and navigate to it
-mk ~/projects/app/src/components
+mcd ~/projects/app/src/components
 # View recent directory history
 dh
 # Return to previous working directory
