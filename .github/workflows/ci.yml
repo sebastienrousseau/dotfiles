@@ -22,9 +22,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Chezmoi
-        uses: chezmoi/chezmoi-action@v1
-        with:
-          version: latest
+        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
+        env:
+          BINDIR: ${{ runner.os == 'Windows' && '$HOME/bin' || '$HOME/.local/bin' }}
+
+      - name: Add to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Initialize Chezmoi
         run: chezmoi init
