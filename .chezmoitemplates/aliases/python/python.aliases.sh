@@ -14,6 +14,14 @@ export PYTHONUNBUFFERED=1                 # Force Python output to be unbuffered
 export PYENV_VIRTUALENV_DISABLE_PROMPT=1   # Disable virtualenv prompt modification
 
 # Frameworks and Applications
+# uv (Modern Python Package Manager)
+if command -v uv &>/dev/null; then
+  alias uvp='uv pip'
+  alias uvpi='uv pip install'
+  alias uvv='uv venv'
+  alias uvr='uv run'
+fi
+
 # Add Python 3.12 or the Homebrew Python to PATH
 if command -v /opt/homebrew/bin/python3 >/dev/null; then
     export PATH="/opt/homebrew/bin:${PATH}"

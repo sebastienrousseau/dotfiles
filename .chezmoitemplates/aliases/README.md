@@ -1,7 +1,5 @@
 <img
   src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
-  alt="dotfiles logo"
-  width="66"
   align="right"
 />
 
