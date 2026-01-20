@@ -26,14 +26,14 @@ def scan_file(filepath, kind):
         matches = re.findall(r"^([a-zA-Z0-9_-]+)\s*\(\)\s*\{", content, re.MULTILINE)
         for name in matches:
             record_definition(name, "function", filepath)
-            
+
         matches_kwd = re.findall(r"^function\s+([a-zA-Z0-9_-]+)", content, re.MULTILINE)
         for name in matches_kwd:
              record_definition(name, "function", filepath)
 
 def record_definition(name, kind, filepath):
     rel_path = os.path.relpath(filepath, BASE_DIR)
-    
+
     if name in definitions:
         prev_def = definitions[name]
         # Ignore if it's the exact same file (unlikely unless file parsed twice)
@@ -53,9 +53,9 @@ def record_definition(name, kind, filepath):
 
 def main():
     print(f"Scanning for collisions within {BASE_DIR}...")
-    
+
     # Scan Aliases
-    for root, dirs, files in os.walk(ALIASES_DIR):
+    for root, _, files in os.walk(ALIASES_DIR):
         for file in files:
             if file.endswith(".sh"):
                 scan_file(os.path.join(root, file), "alias")
