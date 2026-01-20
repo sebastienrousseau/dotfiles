@@ -1,0 +1,20 @@
+tap "homebrew/bundle"
+tap "homebrew/core"
+tap "homebrew/cask"
+
+# Core Tools
+brew "git"
+brew "chezmoi"
+brew "starship"
+brew "zsh"
+brew "jq"
+brew "ripgrep"
+brew "eza"
+brew "bat"
+brew "fzf"
+brew "zoxide"
+
+# Applications
+cask "visual-studio-code"
+cask "iterm2"
+cask "google-chrome"
