@@ -88,6 +88,31 @@ autoload -Uz colors && colors
 # Disable autocorrection
 unsetopt correct_all
 
+###############################
+# Performance: Auto-Zcompile  #
+###############################
+zcompile_many() {
+  local f
+  for f; do
+    # Compile if source is newer than .zwc or .zwc doesn't exist
+    if [[ -f "$f" ]]; then
+      if [[ ! -f "${f}.zwc" || "$f" -nt "${f}.zwc" ]]; then
+        zcompile "$f"
+      fi
+    fi
+  done
+}
+
+# Compile main config and generated files in background
+if [[ -o interactive ]]; then
+  (
+    zcompile_many "${HOME}/.zshrc" \
+                  "${HOME}/.config/dotfiles/aliases.sh" \
+                  "${HOME}/.config/dotfiles/paths.sh" \
+                  "${HOME}/.config/dotfiles/functions.sh" &!
+  )
+fi
+
 # Legacy Loader (Disabled in favor of Chezmoi Universal Config)
 # _DOTFILES_CACHE="${HOME}/.zsh_dotfiles_cache"
 # load_dotfiles() { ... }
@@ -103,3 +128,8 @@ typeset -aU path
 [[ -f "${HOME}/.config/dotfiles/paths.sh" ]] && source "${HOME}/.config/dotfiles/paths.sh"
 [[ -f "${HOME}/.config/dotfiles/functions.sh" ]] && source "${HOME}/.config/dotfiles/functions.sh"
 [[ -f "${HOME}/.config/dotfiles/aliases.sh" ]] && source "${HOME}/.config/dotfiles/aliases.sh"
+
+# Starship Prompt (High Performance)
+if command -v starship >/dev/null; then
+  eval "$(starship init zsh)"
+fi

@@ -1,0 +1,38 @@
+# Starship Configuration
+# https://starship.rs/config/
+
+add_newline = true
+
+[character]
+success_symbol = "[➜](bold green)"
+error_symbol = "[➜](bold red)"
+
+[package]
+disabled = true
+
+[git_branch]
+symbol = "🌱 "
+style = "bold yellow"
+
+[git_status]
+disabled = false
+style = "bold red"
+
+[hostname]
+ssh_only = false
+format = "[$hostname](bold blue) "
+disabled = false
+
+[username]
+style_user = "white bold"
+style_root = "black bold"
+format = "[$user]($style) "
+disabled = false
+
+[directory]
+truncation_length = 3
+truncation_symbol = "…/"
+
+[cmd_duration]
+min_time = 2000
+format = "took [$duration]($style) "
