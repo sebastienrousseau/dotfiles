@@ -7,8 +7,6 @@ These aliases are defined in `npm.aliases.sh` and are automatically loaded by `c
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a set of aliases for
 [npm](https://www.npmjs.com/) package manager.

@@ -7,8 +7,6 @@ These aliases are defined in `tmux.aliases.sh` and are automatically loaded by `
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 ## 🆃🅼🆄🆇 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽
 A comprehensive tmux configuration designed for productivity and ease of use. The configuration is organized in modular files for better maintainability:
 - **default**: Core settings and plugin configuration

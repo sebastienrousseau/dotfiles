@@ -7,8 +7,6 @@ These aliases are defined in `default.aliases.sh` and are automatically loaded b
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a set of command aliases to make common tasks and
 commands more convenient and faster to execute. These aliases range from

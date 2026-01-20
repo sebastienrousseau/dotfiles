@@ -8,7 +8,6 @@ These aliases are defined in `chmod.aliases.sh` and are automatically loaded by 
 ## ⚡ Aliases
 
 alt="Dotfiles logo"
-  width="66"
 ---
 ## 🚀 Introduction
 This script provides an enhanced set of shortcuts and functions for the

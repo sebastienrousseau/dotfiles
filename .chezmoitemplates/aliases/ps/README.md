@@ -7,8 +7,6 @@ These aliases are defined in `ps.aliases.sh` and are automatically loaded by `ch
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a set of aliases for
 [ps](https://www.gnu.org/software/ps/).

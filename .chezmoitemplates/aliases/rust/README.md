@@ -7,8 +7,6 @@ These aliases are defined in `rust.aliases.sh` and are automatically loaded by `
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a comprehensive set of aliases for Rust development
 using `cargo` and `rustup` commands.

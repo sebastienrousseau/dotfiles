@@ -7,8 +7,6 @@ These aliases are defined in `pnpm.aliases.sh` and are automatically loaded by `
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a set of aliases for [pnpm](https://pnpm.js.org/).
 - `pni` Initialize a new project.

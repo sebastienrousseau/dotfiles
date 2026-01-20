@@ -7,8 +7,6 @@ These aliases are defined in `uuid.aliases.sh` and are automatically loaded by `
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a set of aliases for the `uuidgen` command.
 - `uuid` Generate a UUID and copy it to the clipboard.

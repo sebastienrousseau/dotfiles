@@ -7,8 +7,6 @@ These aliases are defined in `clear.aliases.sh` and are automatically loaded by 
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a set of command aliases to make working with the
 terminal easier and more efficient. The following aliases are included:

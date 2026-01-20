@@ -7,8 +7,6 @@ These aliases are defined in `archives.aliases.sh` and are automatically loaded 
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This module provides comprehensive tools for handling various archive and
 compression formats.

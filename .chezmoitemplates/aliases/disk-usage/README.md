@@ -7,8 +7,6 @@ These aliases are defined in `disk-usage.aliases.sh` and are automatically loade
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a set of command aliases to help users manage disk
 usage on a Unix-based system.

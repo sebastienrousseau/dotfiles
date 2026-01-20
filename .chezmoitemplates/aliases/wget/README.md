@@ -7,8 +7,6 @@ These aliases are defined in `wget.aliases.sh` and are automatically loaded by `
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a set of aliases for the `wget` command.
 - `wg` wget.

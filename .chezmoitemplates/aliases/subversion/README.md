@@ -7,8 +7,6 @@ These aliases are defined in `subversion.aliases.sh` and are automatically loade
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a set of aliases for the Subversion command line.
 - `sad` Put new files and directories under version control.

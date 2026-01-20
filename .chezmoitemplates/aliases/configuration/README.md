@@ -7,8 +7,6 @@ These aliases are defined in `configuration.aliases.sh` and are automatically lo
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a set of command aliases to open important
 configuration files in default text editors quickly and easily. The

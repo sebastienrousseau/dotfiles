@@ -8,7 +8,6 @@ These aliases are defined in `cd.aliases.sh` and are automatically loaded by `ch
 ## ⚡ Aliases
 
 alt="Dotfiles logo"
-  width="66"
 Seamlessly enhance your shell environment 🐚
 ---
 ## 🚀 Introduction

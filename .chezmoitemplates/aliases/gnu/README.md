@@ -7,8 +7,6 @@ These aliases are defined in `gnu.aliases.sh` and are automatically loaded by `c
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This is a collection of aliases for the GNU Coreutils package, which is
 a set of standard Unix utilities often included in Linux distributions.

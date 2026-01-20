@@ -7,8 +7,6 @@ These aliases are defined in `interactive.aliases.sh` and are automatically load
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-width="66"
 
 This code provides a set of interactive aliases for common command line
 operations. The aliases are designed to simplify and enhance the user

@@ -7,8 +7,6 @@ These aliases are defined in `mkdir.aliases.sh` and are automatically loaded by 
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a set of aliases for the `mkdir` command.
 - `mcd` Make directory and cd into it.

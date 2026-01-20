@@ -7,8 +7,6 @@ These aliases are defined in `permission.aliases.sh` and are automatically loade
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a set of aliases for file permissions.
 - `000` Set permissions to no read, write, or execute for user, group,

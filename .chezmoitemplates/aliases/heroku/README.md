@@ -7,8 +7,6 @@ These aliases are defined in `heroku.aliases.sh` and are automatically loaded by
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This is a collection of aliases for the
 [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli).

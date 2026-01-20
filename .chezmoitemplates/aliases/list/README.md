@@ -7,8 +7,6 @@ These aliases are defined in `list.aliases.sh` and are automatically loaded by `
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 ---
 
 This script defines a set of aliases for enhanced file listing using `eza`, or

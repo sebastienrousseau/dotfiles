@@ -7,8 +7,6 @@ These aliases are defined in `sudo.aliases.sh` and are automatically loaded by `
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a set of aliases for the `sudo` command.
 - `root` Execute a command as the superuser.

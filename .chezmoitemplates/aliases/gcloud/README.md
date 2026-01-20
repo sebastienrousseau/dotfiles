@@ -7,8 +7,6 @@ These aliases are defined in `gcloud.aliases.sh` and are automatically loaded by
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a set of command aliases for managing various Google
 Cloud services, such as Compute Engine, Identity and Access Management,

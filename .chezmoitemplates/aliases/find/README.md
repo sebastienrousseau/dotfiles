@@ -7,8 +7,6 @@ These aliases are defined in `find.aliases.sh` and are automatically loaded by `
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a set of command aliases for the `fd` utility that is
 an alternative to the `find` command on Unix-based systems.

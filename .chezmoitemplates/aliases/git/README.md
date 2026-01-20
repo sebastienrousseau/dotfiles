@@ -7,8 +7,6 @@ These aliases are defined in `git.aliases.sh` and are automatically loaded by `c
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This is a collection of handy Git aliases that simplify and speed up
 common Git commands, making them shorter and more intuitive.

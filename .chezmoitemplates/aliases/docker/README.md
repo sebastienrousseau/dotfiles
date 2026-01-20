@@ -7,8 +7,6 @@ These aliases are defined in `docker.aliases.sh` and are automatically loaded by
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a comprehensive set of aliases for Docker development
 using `docker`, `docker-compose`, and Docker Swarm commands.

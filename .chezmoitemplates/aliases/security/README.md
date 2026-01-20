@@ -7,8 +7,6 @@ These aliases are defined in `security.aliases.sh` and are automatically loaded 
 
 ## ⚡ Aliases
 
-alt="dotfiles logo"
-  width="66"
 
 This code provides a comprehensive set of aliases and functions for
 enhanced security workflows using **OpenSSL**, **GnuPG (GPG)**, **SSH**,
