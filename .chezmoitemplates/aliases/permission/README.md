@@ -1,24 +1,16 @@
-<!-- markdownlint-disable MD033 MD041 MD043 -->
+# Permission Aliases
 
-<img
-  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
-  alt="dotfiles logo"
+Manage Permission aliases. Part of the **Universal Dotfiles** configuration.
+
+## 📖 Description
+These aliases are defined in `permission.aliases.sh` and are automatically loaded by `chezmoi`.
+
+## ⚡ Aliases
+
+alt="dotfiles logo"
   width="66"
-  align="right"
-/>
-
-<!-- markdownlint-enable MD033 MD041 -->
-
-# Dotfiles (v0.2.471)
-
-Simply designed to fit your shell life 🐚
-
-![Dotfiles banner][banner]
-
-## 🅿🅴🆁🅼🅸🆂🆂🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides a set of aliases for file permissions.
-
 - `000` Set permissions to no read, write, or execute for user, group,
   and others.
 - `400` Set permissions to no read or write, but allow execute for user
@@ -43,5 +35,3 @@ This code provides a set of aliases for file permissions.
 - `chown` Change file owner and group.
 - `chownr` Change file owner and group recursively.
 - `chownu` Change file owner and group recursively to the current user.
-
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

@@ -1,27 +1,18 @@
-<!-- markdownlint-disable MD033 MD041 MD043 -->
+# Disk-usage Aliases
 
-<img
-  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
-  alt="dotfiles logo"
+Manage Disk-usage aliases. Part of the **Universal Dotfiles** configuration.
+
+## 📖 Description
+These aliases are defined in `disk-usage.aliases.sh` and are automatically loaded by `chezmoi`.
+
+## ⚡ Aliases
+
+alt="dotfiles logo"
   width="66"
-  align="right"
-/>
-
-<!-- markdownlint-enable MD033 MD041 -->
-
-# Dotfiles (v0.2.471)
-
-Simply designed to fit your shell life 🐚
-
-![Dotfiles banner][banner]
-
-## 🅳🅸🆂🅺 🆄🆂🅰🅶🅴 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides a set of command aliases to help users manage disk
 usage on a Unix-based system.
-
 The following aliases are provided:
-
 - `du`: Display the disk usage of the current directory.
 - `du1`: Show the file size of files and directories in the current
   directory.
@@ -32,5 +23,3 @@ The following aliases are provided:
 - `dusym`: Show the file size of files and directories in the current
   directory, including symlinks.
 - `dut`: Show the total file size of the current directory.
-
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

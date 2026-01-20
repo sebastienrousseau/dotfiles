@@ -1,24 +1,16 @@
-<!-- markdownlint-disable MD033 MD041 MD043 -->
+# Pnpm Aliases
 
-<img
-  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
-  alt="dotfiles logo"
+Manage Pnpm aliases. Part of the **Universal Dotfiles** configuration.
+
+## 📖 Description
+These aliases are defined in `pnpm.aliases.sh` and are automatically loaded by `chezmoi`.
+
+## ⚡ Aliases
+
+alt="dotfiles logo"
   width="66"
-  align="right"
-/>
-
-<!-- markdownlint-enable MD033 MD041 -->
-
-# Dotfiles (v0.2.471)
-
-Simply designed to fit your shell life 🐚
-
-![Dotfiles banner][banner]
-
-## 🅿🅽🅿🅼 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides a set of aliases for [pnpm](https://pnpm.js.org/).
-
 - `pni` Initialize a new project.
 - `pnin` Install the project dependencies.
 - `pnb` Build the project.
@@ -49,5 +41,3 @@ This code provides a set of aliases for [pnpm](https://pnpm.js.org/).
 - `pnc` Create a new project.
 - `pnsv` Run the project in server mode.
 - `pnx` Shortcut to pnpx.
-
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

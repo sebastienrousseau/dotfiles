@@ -1,28 +1,20 @@
-<!-- markdownlint-disable MD033 MD041 MD043 -->
+# Gcloud Aliases
 
-<img
-  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
-  alt="dotfiles logo"
+Manage Gcloud aliases. Part of the **Universal Dotfiles** configuration.
+
+## 📖 Description
+These aliases are defined in `gcloud.aliases.sh` and are automatically loaded by `chezmoi`.
+
+## ⚡ Aliases
+
+alt="dotfiles logo"
   width="66"
-  align="right"
-/>
-
-<!-- markdownlint-enable MD033 MD041 -->
-
-# Dotfiles (v0.2.471)
-
-Simply designed to fit your shell life 🐚
-
-![Dotfiles banner][banner]
-
-## 🅶🅾🅾🅶🅻🅴 🅲🅻🅾🆄🅳 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides a set of command aliases for managing various Google
 Cloud services, such as Compute Engine, Identity and Access Management,
 and Cloud SQL. These aliases help streamline the process of managing
 Google Cloud resources by providing simple and memorable commands for
 common use cases.
-
 - `gca` authenticates with Google Cloud.
 - `gcb` accesses beta commands.
 - `gcb` manages Google Cloud Build.
@@ -59,5 +51,3 @@ common use cases.
 - `gcst` enables or disables Google Cloud services.
 - `gct` manages Google Cloud Tasks.
 - `gcu` manages Google Cloud App Engine.
-
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

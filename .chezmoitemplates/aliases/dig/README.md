@@ -1,28 +1,19 @@
-<!-- markdownlint-disable MD033 MD041 MD043 -->
+# Dig Aliases
 
-<img
-  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
-  alt="dotfiles logo"
+Manage Dig aliases. Part of the **Universal Dotfiles** configuration.
+
+## 📖 Description
+These aliases are defined in `dig.aliases.sh` and are automatically loaded by `chezmoi`.
+
+## ⚡ Aliases
+
+alt="dotfiles logo"
   width="66"
-  align="right"
-/>
-
-<!-- markdownlint-enable MD033 MD041 -->
-
-# Dotfiles (v0.2.471)
-
-Simply designed to fit your shell life 🐚
-
-![Dotfiles banner][banner]
-
-## 🅳🅸🅶 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides a set of command aliases to simplify working with DNS
 (Domain Name System) lookup using the dig command on a Unix-based system
 .
-
 The following aliases are included:
-
 - `d`: runs the dig command with default options.
 - `d4`: performs a DNS lookup for an IPv4 address.
 - `d6`: performs a DNS lookup for an IPv6 address.
@@ -33,5 +24,3 @@ The following aliases are included:
 - `ip6`: retrieves your public IPv6 address.
 - `ips`: retrieves your public IPv4 and IPv6 addresses.
 - `wip`: retrieves your public IP address.
-
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

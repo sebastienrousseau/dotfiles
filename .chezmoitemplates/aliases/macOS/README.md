@@ -1,24 +1,16 @@
-<!-- markdownlint-disable MD033 MD041 MD043 -->
+# Macos Aliases
 
-<img
-  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
-  alt="dotfiles logo"
+Manage Macos aliases. Part of the **Universal Dotfiles** configuration.
+
+## 📖 Description
+These aliases are defined in `macOS.aliases.sh` and are automatically loaded by `chezmoi`.
+
+## ⚡ Aliases
+
+alt="dotfiles logo"
   width="66"
-  align="right"
-/>
-
-<!-- markdownlint-enable MD033 MD041 -->
-
-# Dotfiles (v0.2.471)
-
-Simply designed to fit your shell life 🐚
-
-![Dotfiles banner][banner]
-
-## 🅼🅰🅲🅾🆂 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides a set of aliases for macOS.
-
 - `clds` Recursively delete .DS_Store files.
 - `clls`  Clean up LaunchServices to remove duplicates in the
   'Open With' menu.
@@ -38,5 +30,3 @@ This code provides a set of aliases for macOS.
 - `wifiOn` Turn on Wi-Fi.
 - `wifiOff` Turn off Wi-Fi.
 - `xcode` Launch XCode app in macOS.
-
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

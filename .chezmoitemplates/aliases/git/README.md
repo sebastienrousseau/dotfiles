@@ -1,25 +1,17 @@
-<!-- markdownlint-disable MD033 MD041 MD043 -->
+# Git Aliases
 
-<img
-  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
-  alt="dotfiles logo"
+Manage Git aliases. Part of the **Universal Dotfiles** configuration.
+
+## 📖 Description
+These aliases are defined in `git.aliases.sh` and are automatically loaded by `chezmoi`.
+
+## ⚡ Aliases
+
+alt="dotfiles logo"
   width="66"
-  align="right"
-/>
-
-<!-- markdownlint-enable MD033 MD041 -->
-
-# Dotfiles (v0.2.471)
-
-Simply designed to fit your shell life 🐚
-
-![Dotfiles banner][banner]
-
-## 🅶🅸🆃 🅰🅻🅸🅰🆂🅴🆂
 
 This is a collection of handy Git aliases that simplify and speed up
 common Git commands, making them shorter and more intuitive.
-
 - `gc` Commit command to automatically "add" changes from all known
   files
 - `gca` Amend the tip of the current branch rather than creating a new
@@ -149,5 +141,3 @@ common Git commands, making them shorter and more intuitive.
 - `gconfl` List all the settings.
 - `gconfr` Output remote origin from within a local repository.
 - `undopush` Undo the last push.
-
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

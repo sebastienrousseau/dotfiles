@@ -1,37 +1,26 @@
-<!-- markdownlint-disable MD033 MD041 MD043 -->
+# Gnu Aliases
 
-<img
-  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
-  alt="dotfiles logo"
+Manage Gnu aliases. Part of the **Universal Dotfiles** configuration.
+
+## 📖 Description
+These aliases are defined in `gnu.aliases.sh` and are automatically loaded by `chezmoi`.
+
+## ⚡ Aliases
+
+alt="dotfiles logo"
   width="66"
-  align="right"
-/>
-
-<!-- markdownlint-enable MD033 MD041 -->
-
-# Dotfiles (v0.2.471)
-
-Simply designed to fit your shell life 🐚
-
-![Dotfiles banner][banner]
-
-## 🅶🅽🆄 🅲🅾🆁🅴🆄🆃🅸🅻🆂 🅰🅻🅸🅰🆂🅴🆂
 
 This is a collection of aliases for the GNU Coreutils package, which is
 a set of standard Unix utilities often included in Linux distributions.
 These aliases allow for easier use of these utilities by providing
 shorthand commands that replace the full utility name with a shorter
 alias.
-
 The aliases in this collection cover a wide range of utilities, from
 basic file manipulation commands like "cp" and "rm" to more advanced
 text processing commands like "awk" and "sed". There are also aliases
 for various checksum and hash utilities like "md5sum" and "sha256sum".
 
-## 🅰🅻🅸🅰🆂🅴🆂
-
 ### Basic file management utilities
-
 - `basename` Strip directory and suffix from filenames.
 - `cp` Copy files and directories.
 - `dirname` Strip non-directory suffix from filenames.
@@ -49,9 +38,7 @@ for various checksum and hash utilities like "md5sum" and "sha256sum".
 - `rm` Remove files or directories.
 - `rmdir` Remove empty directories.
 - `unlink` Remove files or directories.
-
 ### File content manipulation utilities
-
 - `awk` Pattern scanning and processing language.
 - `cat` Concatenate and display files.
 - `csplit` Split a file into context-determined pieces.
@@ -69,9 +56,7 @@ for various checksum and hash utilities like "md5sum" and "sha256sum".
 - `split` Split a file into pieces.
 - `tail` Output the last part of files.
 - `tr` Translate or delete characters.
-
 ### File checksum and encryption utilities
-
 - `b2sum` Print or check BLAKE2 message digests.
 - `cksum` Print CRC checksum and byte counts.
 - `sha1sum` Print or check SHA1 message digests.
@@ -79,11 +64,7 @@ for various checksum and hash utilities like "md5sum" and "sha256sum".
 - `sha256sum` Print or check SHA256 message digests.
 - `sha384sum` Print or check SHA384 message digests.
 - `sha512sum` Print or check SHA512 message digests.
-
 ### Other file utilities
-
 - `base32` Print or convert base32 data.
 - `base64` Encode or decode base64 data.
 - `basenc` Encode or decode base64, base32,
-
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

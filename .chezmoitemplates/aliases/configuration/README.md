@@ -1,26 +1,18 @@
-<!-- markdownlint-disable MD033 MD041 MD043 -->
+# Configuration Aliases
 
-<img
-  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
-  alt="dotfiles logo"
+Manage Configuration aliases. Part of the **Universal Dotfiles** configuration.
+
+## 📖 Description
+These aliases are defined in `configuration.aliases.sh` and are automatically loaded by `chezmoi`.
+
+## ⚡ Aliases
+
+alt="dotfiles logo"
   width="66"
-  align="right"
-/>
-
-<!-- markdownlint-enable MD033 MD041 -->
-
-# Dotfiles (v0.2.471)
-
-Simply designed to fit your shell life 🐚
-
-![Dotfiles banner][banner]
-
-## 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides a set of command aliases to open important
 configuration files in default text editors quickly and easily. The
 following aliases are included:
-
 - `apconf` opens the Apache configuration file in the default text
   editor.
 - `bshrc` opens the Bash configuration file in the default text editor.
@@ -35,5 +27,3 @@ following aliases are included:
 - `sshconf` opens the SSH configuration file in the default text editor.
 - `zshrc` opens the Zsh configuration file in the default text editor.
 - `zshp` opens the Zsh profile in the default text editor.
-
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

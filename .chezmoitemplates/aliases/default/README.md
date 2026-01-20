@@ -1,28 +1,19 @@
-<!-- markdownlint-disable MD033 MD041 MD043 -->
+# Default Aliases
 
-<img
-  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
-  alt="dotfiles logo"
+Manage Default aliases. Part of the **Universal Dotfiles** configuration.
+
+## 📖 Description
+These aliases are defined in `default.aliases.sh` and are automatically loaded by `chezmoi`.
+
+## ⚡ Aliases
+
+alt="dotfiles logo"
   width="66"
-  align="right"
-/>
-
-<!-- markdownlint-enable MD033 MD041 -->
-
-# Dotfiles (v0.2.471)
-
-Simply designed to fit your shell life 🐚
-
-![Dotfiles banner][banner]
-
-## 🅳🅴🅵🅰🆄🅻🆃 🅰🅻🅸🅰🆂🅴🆂
 
 This code provides a set of command aliases to make common tasks and
 commands more convenient and faster to execute. These aliases range from
 general purpose to system monitoring and file system navigation.
-
 Some of the most useful aliases include:
-
 - `c`: shortcut for the `clear` command to clear the terminal screen.
 - `p`: shortcut for the `pwd` command to display the current working
   directory.
@@ -36,5 +27,3 @@ Some of the most useful aliases include:
 - `qfind`: quickly search for files.
 - `clc`: clear the terminal screen and print the contents of the current
   directory.
-
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
