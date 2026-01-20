@@ -2,11 +2,13 @@
 
 Manage Security aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `security.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
-
 
 This code provides a comprehensive set of aliases and functions for
 enhanced security workflows using **OpenSSL**, **GnuPG (GPG)**, **SSH**,
@@ -63,7 +65,6 @@ both **macOS** and **Linux** systems.
     - [Fail2ban Unban Example](#fail2ban-unban-example)
   - [License](#license)
 ---
-## OpenSSL Aliases
 ### Basic Commands
 - **`ssl`** — Shortcut for `openssl`
 - **`sslv`** — Show OpenSSL version
@@ -125,7 +126,6 @@ both **macOS** and **Linux** systems.
 ### Server Testing and Setup
 - **`sslserver <cert> <key> [port]`** — Run test TLS server
 ---
-## GPG Aliases
 ### Key Management
 - **`gpgk`** — List public keys
 - **`gpgks`** — List secret keys
@@ -166,7 +166,6 @@ both **macOS** and **Linux** systems.
 - **`gpgminexp`** — Minimal key export
 - **`gpgclean`** — Remove expired keys from keyring
 ---
-## SSH Aliases
 ### Key Management
 - **`sshkeyed25519 <comment>`** — Generate Ed25519 key
 - **`sshkeyrsa <comment>`** — Generate RSA-4096 key
@@ -193,7 +192,6 @@ both **macOS** and **Linux** systems.
 - **`sshkeyaudit`** — Audit SSH server config (3rd-party)
 - **`sshscan`** — Scan SSH auth methods with `nmap`
 ---
-## UFW (Uncomplicated Firewall) Aliases
 - **`fws`** — Show firewall status
 - **`fwsv`** — Verbose status
 - **`fwsn`** — Numbered status
@@ -303,3 +301,5 @@ f2bunban 203.0.113.42
 ---
 ## License
 [MIT License](https://opensource.org/licenses/MIT)
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

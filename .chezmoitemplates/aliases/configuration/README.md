@@ -2,11 +2,13 @@
 
 Manage Configuration aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `configuration.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
-
 
 This code provides a set of command aliases to open important
 configuration files in default text editors quickly and easily. The
@@ -25,3 +27,5 @@ following aliases are included:
 - `sshconf` opens the SSH configuration file in the default text editor.
 - `zshrc` opens the Zsh configuration file in the default text editor.
 - `zshp` opens the Zsh profile in the default text editor.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

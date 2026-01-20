@@ -2,11 +2,13 @@
 
 Manage Update aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `update.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
-
 
 This code provides a set of aliases for updating various software on
 macOS and Linux.
@@ -21,3 +23,5 @@ macOS and Linux.
 - `upd` updates Linux packages, cleans up package cache, updates pnpm
   packages, updates Rust stable toolchain, updates Ruby gems, updates
   Python packages, and updates Node.js packages.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

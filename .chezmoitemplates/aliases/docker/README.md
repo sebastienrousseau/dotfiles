@@ -2,15 +2,16 @@
 
 Manage Docker aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `docker.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
 
-
 This code provides a comprehensive set of aliases for Docker development
 using `docker`, `docker-compose`, and Docker Swarm commands.
-### Docker Core Aliases
 #### Basic Commands
 - `dk` - Docker shortcut
 - `dkv` - Show Docker version
@@ -89,7 +90,6 @@ using `docker`, `docker-compose`, and Docker Swarm commands.
 - `dkexp` - Export container's filesystem
 - `dkimp` - Import container filesystem
 - `dkscan` - Scan image for vulnerabilities
-### Docker Compose Aliases
 - `dc` - Docker Compose shortcut
 - `dcu` - Create and start containers
 - `dcud` - Create and start containers in background
@@ -115,7 +115,6 @@ using `docker`, `docker-compose`, and Docker Swarm commands.
 - `dcev` - Receive events from containers
 - `dctop` - Display running processes
 - `dcv` - Show Docker Compose version
-### Docker Swarm Aliases
 #### Swarm Management
 - `dksw` - Swarm shortcut
 - `dkswi` - Initialize Docker Swarm
@@ -174,3 +173,5 @@ dkrm $(dk ps -aq --filter status=exited) && dknp && dkrmi_dangling
 # Deploy or update a stack from a compose file
 dkstkd -c docker-compose.yml my-stack
 ```
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

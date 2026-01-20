@@ -2,11 +2,13 @@
 
 Manage Editor aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `editor.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
-
 
 This code provides a comprehensive set of command aliases for editing files using the editor configured in your environment. It works in conjunction with the editor configuration script (`editor.sh`) which automatically selects the best available editor on your system.
 ### Supported Editors
@@ -18,7 +20,6 @@ The following editors are supported with specialized aliases:
 - **Emacs** - Extensible, customizable text editor
 - **Sublime Text** - Sophisticated text editor for code
 - **Atom** - Hackable text editor for the 21st century
-### Common Editor Aliases
 These universal aliases work with any editor set by `editor.sh`:
 - `e` - Quick edit command
 - `edit` - Standard edit command
@@ -26,14 +27,11 @@ These universal aliases work with any editor set by `editor.sh`:
 - `mate` - TextMate-style command
 - `n` - Short edit alias
 - `v` - Vim-like edit alias
-### Editor-Specific Aliases
 Depending on which editor is selected by `editor.sh`, additional specialized aliases are automatically available:
-#### Neovim Aliases
 - `vi`, `vim` - Redirected to Neovim when it's the primary editor
 - `nvimrc` - Edit Neovim Vimscript configuration file
 - `nvimlua` - Edit Neovim Lua configuration file
 - `nvimconf` - Open Neovim configuration directory
-#### VS Code Aliases
 - `vsc` - Shorthand for VS Code
 - `vsca` - Add folder to current window
 - `vscd` - Compare two files
@@ -43,24 +41,19 @@ Depending on which editor is selected by `editor.sh`, additional specialized ali
 - `vsced` - Open with custom extensions directory
 - `vscex` - Install VS Code extension
 - `vsclist` - List installed extensions
-#### Vim Aliases
 - `vi` - Redirected to Vim when it's the primary editor
 - `vimrc` - Edit Vim configuration file
 - `vimconf` - Open Vim configuration directory
-#### Nano Aliases
 - `nanorc` - Edit Nano configuration file
 - `ne` - Enhanced Nano with line numbers and smooth scrolling
-#### Emacs Aliases
 - `em` - Shorthand for Emacs
 - `emacs-nw` - Run Emacs in terminal mode
 - `emacsc` - Launch Emacs client
 - `emacsrc` - Edit Emacs configuration file
 - `et` - Quick terminal-based Emacs
-#### Sublime Text Aliases
 - `st` - Launch Sublime Text
 - `stt` - Open current directory in Sublime Text
 - `stn` - Open in new Sublime Text window
-#### Atom Aliases
 - `a` - Launch Atom
 - `at` - Open current directory in Atom
 - `an` - Open in new Atom window
@@ -101,3 +94,5 @@ ne config.txt
 editrc git    # Edit git configuration
 editrc bash   # Edit bash configuration
 ```
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

@@ -2,15 +2,16 @@
 
 Manage Rust aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `rust.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
 
-
 This code provides a comprehensive set of aliases for Rust development
 using `cargo` and `rustup` commands.
-### Cargo Aliases
 #### Basic Commands
 - `cg` - Cargo shortcut
 - `cgn` - Create new binary project
@@ -71,7 +72,6 @@ using `cargo` and `rustup` commands.
 - `cgnb` - New binary from template
 - `cgnl` - New library from template
 - `cgnt` - New from custom template
-### Rustup Aliases
 #### Updates and Installation
 - `ru` - Update all toolchains
 - `rus` - Update stable toolchain
@@ -122,3 +122,5 @@ cgfa && cgd && cgdo
 # Check build for different architecture
 cgxw check --target aarch64-unknown-linux-gnu
 ```
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

@@ -2,16 +2,16 @@
 
 Manage Heroku aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `heroku.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
 
-
 This is a collection of aliases for the
 [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli).
-### 1. Heroku Core aliases
-#### 1.1 Heroku Access aliases
 - `hkk` Heroku CLI command shortcut.
 - `hka` Add new users to your app.
 - `hkau` Update existing collaborators on an team app.
@@ -32,7 +32,6 @@ This is a collection of aliases for the
 - `hku` Update the heroku CLI.
 - `hkulk` Unlock an app so any team member can join.
 - `hkw` Show which plugin a command is in
-#### 1.2 Heroku Add-ons aliases
 - `hkada` Attach an existing add-on resource to an app
 - `hkadc` Create a new add-on resource
 - `hkadd` Detach an existing add-on resource from an app
@@ -47,7 +46,6 @@ This is a collection of aliases for the
 - `hkads` List all available add-on services
 - `hkadu` Change add-on plan
 - `hkadw` Show provisioning status of the add-ons on the app
-#### 1.3 Heroku Apps aliases
 - `hkapc` Creates a new app
 - `hkape` View app errors
 - `hkapfav` List favorites apps
@@ -65,21 +63,18 @@ This is a collection of aliases for the
 - `hkapss` Set the stack of an app
 - `hkapt` Transfer applications to another user or team
 - `hkapulk` Unlock an app so any team member can join
-#### 1.4 Heroku Auth 2fa aliases
 - `hk2fa` Display the current logged in user
 - `hk2fad` Disables 2fa on account
 - `hk2fain` Login with your Heroku credentials
 - `hk2faout` Clears local login credentials and invalidates API session
 - `hk2fas` Check 2fa status
 - `hk2fat` Outputs current CLI authentication token
-#### 1.5 Heroku Authorizations aliases
 - `hkauc` Create a new OAuth authorization
 - `hkaui` Show an existing OAuth authorization
 - `hkaul` List OAuth authorizations.
 - `hkaur` Revoke OAuth authorization.
 - `hkauro` Updates an OAuth authorization token.
 - `hkauu` Updates an OAuth authorization
-#### 1.6 Heroku Build packs aliases
 - `hkbpac` Display autocomplete installation instructions
 - `hkbpad` Add new app build-pack, inserting into list of build-packs if
   necessary
@@ -89,7 +84,6 @@ This is a collection of aliases for the
 - `hkbpr` Remove a build-pack set on the app
 - `hkbps` Search for build-packs
 - `hkbpv` List versions of a build-pack.
-#### 1.7 Heroku Certs aliases
 - `hkca` Show ACM status for an app
 - `hkcad` Add an SSL certificate to an app
 - `hkcae` Enable ACM status for an app
@@ -102,7 +96,6 @@ This is a collection of aliases for the
 - `hkcl` List SSL certificates for an app
 - `hkcr` Remove an SSL certificate from an app
 - `hkcu` Update an SSL certificate on an app
-#### 1.8 Heroku ci aliases
 - `hkcicg` Get a CI config var
 - `hkcics` Set CI config vars
 - `hkcicu` Unset CI config vars
@@ -118,20 +111,17 @@ This is a collection of aliases for the
 - `hkcio` Open the Dashboard version of Heroku CI
 - `hkcir` Run tests against current directory
 - `hkcir2` Rerun tests against current directory
-#### 1.9 Heroku config aliases
 - `hkclc` Create a new OAuth client
 - `hkcli` Show details of an oauth client
 - `hkclk` Delete client by ID
 - `hkcll` List your OAuth clients
 - `hkcls` Rotate OAuth client secret
 - `hkclu` Update OAuth client.
-### 2. Heroku Configuration aliases
 - `hkcfe` Interactively edit config vars
 - `hkcfg` Display a single config value for an app
 - `hkcfs` Set one or more config vars
 - `hkcfu` Unset one or more config vars
 - `hkcfv` Display the config vars for an app
-#### 2.1 Heroku Container aliases
 - `hkct` Use containers to build and deploy Heroku apps
 - `hkctin` Log in to Heroku Container Registry
 - `hkctout` Log out from Heroku Container Registry
@@ -141,7 +131,6 @@ This is a collection of aliases for the
   app
 - `hkctrm` Remove the process type from your app
 - `hkctrun` Builds, then runs the docker image locally
-#### 2.2 Heroku Domains aliases
 - `hkdo` List domains for an app
 - `hkdoa` Add a domain to an app
 - `hkdoc` Remove all domains from an app
@@ -149,51 +138,40 @@ This is a collection of aliases for the
 - `hkdor` Remove a domain from an app
 - `hkdou` Update a domain to use a different SSL certificate on an app
 - `hkdow` Wait for domain to be active for an app
-#### 2.3 Heroku Drains aliases
 - `hkdr` Display the log drains of an app
 - `hkdra` Adds a log drain to an app
 - `hkdrr` Removes a log drain from an app
-#### 2.4 Heroku Dyno aliases
 - `hkdyk` Stop app dyno
 - `hkdyrz` Manage dyno sizes
 - `hkdyrs` Restart app dynos
 - `hkdysc` Scale dyno quantity up or down
 - `hkdyst` Stop app dyno
-#### 2.5 Heroku Features aliases
 - `hkfeat` List available app features
 - `hkfeatd` Disables an app feature
 - `hkfeate` Enables an app feature
 - `hkfeati` Display information about a feature
-#### 2.6 Heroku Git aliases
 - `hkgitc` Clones a heroku app to your local machine at DIRECTORY
   (defaults to app name)
 - `hkgitr` Adds a git remote to an app repo
-#### 2.7 Heroku Keys aliases
 - `hkk` Display your SSH keys
 - `hkka` Add an SSH key for a user
 - `hkkcl` Remove all SSH keys for current user
 - `hkkr` Remove an SSH key from the user
-#### 2.8 Heroku Labs aliases
 - `hklab` List experimental features
 - `hklabd` Disables an experimental feature
 - `hklabe` Enables an experimental feature
 - `hklabi` Show feature info
-### 3. Heroku Advanced aliases
-#### 3.1 Heroku Local aliases
 - `hkloc` Run heroku app locally
 - `hklocr` Run a one-off command
 - `hklocv` Display node-foreman version
 - `hkloclk` Prevent team members from joining an app
-#### 3.2 Heroku Maintenance aliases
 - `hkmt` Display the current maintenance status of app
 - `hkmtoff` Take the app out of maintenance mode
 - `hkmton` Put the app into maintenance mode
-#### 3.3 Heroku Members aliases
 - `hkmb` List members of a team
 - `hkmba` Adds a user to a team
 - `hkmbr` Removes a user from a team
 - `hkmbs` Sets a members role in a team.
-#### 3.4 Heroku Postgres aliases
 - `hkpg` Show database information
 - `hkpgb` Show table and index bloat in your database ordered by most
   wasteful
@@ -250,7 +228,6 @@ This is a collection of aliases for the
 - `hkpgvs` Show dead rows and whether an automatic vacuum is expected
   to be triggered
 - `hkpgww` Blocks until database is available
-#### 3.5 Heroku Pipelines aliases
 - `hkpipe` List pipelines you have access to
 - `hkpipea` Add this app to a pipeline
 - `hkpipec` Create a new pipeline
@@ -269,13 +246,11 @@ This is a collection of aliases for the
   repo)
 - `hkpipett` Transfer ownership of a pipeline
 - `hkpipeu` Update the app's stage in a pipeline
-#### 3.6 Heroku Plugins aliases
 - `hkplugs` List installed plugins
 - `hkplugsi` Installs a plugin into the CLI
 - `hkplugslk` Links a plugin into the CLI for development
 - `hkplugsui` Removes a plugin from the CLI
 - `hkplugsu` Update installed plugins
-#### 3.7 Heroku 'ps' aliases
 - `hkpsad` Disable web dyno autoscaling
 - `hkps` List dynos for an app
 - `hkpsae` Enable web dyno autoscaling
@@ -291,7 +266,6 @@ This is a collection of aliases for the
 - `hkpst` Manage dyno sizes
 - `hkpsw` Wait for all dynos to be running latest version after a
   release
-#### 3.8 Heroku redis aliases
 - `hkred` Gets information about redis
 - `hkredcli` Opens a redis prompt
 - `hkredcr` Display credentials information
@@ -305,21 +279,16 @@ This is a collection of aliases for the
 - `hkredt` Set the number of seconds to wait before killing idle
   connections
 - `hkredw` Wait for Redis instance to be available
-#### 3.9 Heroku Releases aliases
 - `hkrel` Display the releases for an app
 - `hkreli` View detailed information for a release
 - `hkrelo` View the release command output
 - `hkrelr` Rollback to a previous release
-#### 3.10.1 Heroku Spaces aliases
 - `hkrvae` Enable review apps and/or settings on an existing pipeline
 - `hkrvad` Disable review apps and/or settings on an existing pipeline
-#### 3.10.2 Heroku Run aliases
 - `hkrun` Run a one-off process inside a heroku dyno
 - `hkrund` Run a detached dyno, where output is sent to your logs
-#### 3.10.3 Heroku Sessions aliases
 - `hksessions` List your OAuth sessions
 - `hksessionsd` Delete (logout) OAuth session by ID
-#### 3.10.4 Heroku Spaces aliases
 - `hksp` List available spaces
 - `hkspc` Create a new space
 - `hkspd` Destroy a space
@@ -341,7 +310,6 @@ This is a collection of aliases for the
 - `hkspvu` Update VPN
 - `hkspvw` Wait for VPN Connection to be created
 - `hkspw` Wait for a space to be created
-#### 3.10.5 Heroku Webhooks aliases
 - `hkwh` List webhooks on an app
 - `hkwha` Add a webhook to an app
 - `hkwhdv` List webhook deliveries on an app
@@ -351,3 +319,5 @@ This is a collection of aliases for the
 - `hkwhi` Info for a webhook on an app
 - `hkwhr` Removes a webhook from an app
 - `hkwhu` Updates a webhook in an app
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

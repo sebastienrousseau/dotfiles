@@ -1,12 +1,14 @@
-# Gcloud Aliases
+# Google Cloud Aliases
 
-Manage Gcloud aliases. Part of the **Universal Dotfiles** configuration.
+Manage Google Cloud aliases. Part of the **Universal Dotfiles** configuration.
+
+![Dotfiles banner][banner]
 
 ## 📖 Description
+
 These aliases are defined in `gcloud.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
-
 
 This code provides a set of command aliases for managing various Google
 Cloud services, such as Compute Engine, Identity and Access Management,
@@ -49,3 +51,5 @@ common use cases.
 - `gcst` enables or disables Google Cloud services.
 - `gct` manages Google Cloud Tasks.
 - `gcu` manages Google Cloud App Engine.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

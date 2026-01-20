@@ -2,11 +2,13 @@
 
 Manage Subversion aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `subversion.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
-
 
 This code provides a set of aliases for the Subversion command line.
 - `sad` Put new files and directories under version control.
@@ -52,3 +54,5 @@ This code provides a set of aliases for the Subversion command line.
 - `sup` Bring changes from the repository into the working copy.
 - `supg` Upgrade the metadata storage format for a working copy.
 - `sxp` Create an unversioned copy of a tree.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

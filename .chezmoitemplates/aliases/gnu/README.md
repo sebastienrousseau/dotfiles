@@ -2,11 +2,13 @@
 
 Manage Gnu aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `gnu.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
-
 
 This is a collection of aliases for the GNU Coreutils package, which is
 a set of standard Unix utilities often included in Linux distributions.
@@ -66,3 +68,5 @@ for various checksum and hash utilities like "md5sum" and "sha256sum".
 - `base32` Print or convert base32 data.
 - `base64` Encode or decode base64 data.
 - `basenc` Encode or decode base64, base32,
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

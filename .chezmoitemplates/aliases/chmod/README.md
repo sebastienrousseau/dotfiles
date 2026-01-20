@@ -2,12 +2,14 @@
 
 Manage Chmod aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `chmod.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
 
-alt="Dotfiles logo"
 ---
 ## 🚀 Introduction
 This script provides an enhanced set of shortcuts and functions for the
@@ -16,7 +18,6 @@ With features like input validation, recursive confirmation, and user-friendly
 aliases, you can efficiently customize permissions for files and directories.
 ---
 ## 🛠️ Features
-### 🌟 Permission Aliases
 Quickly apply common permission settings with pre-defined aliases:
 | Alias        | Permissions      | Description                               |
 |--------------|------------------|-------------------------------------------|
@@ -60,7 +61,6 @@ Fine-tune permissions for specific user groups (owner, group, or others):
 | `chmod_o+r`   | Add read permission for others             |
 | `chmod_o-r`   | Remove read permission for others          |
 ---
-### 📄 Custom Aliases for File Types
 Set permissions for specific file types with ease:
 | Alias        | Description                                        |
 |--------------|----------------------------------------------------|
@@ -108,3 +108,5 @@ more information.
 Created with ♥ by [Sebastien Rousseau](https://sebastienrousseau.com)
 - Website: [https://sebastienrousseau.com](https://sebastienrousseau.com)
 - GitHub: [https://github.com/sebastienrousseau](https://github.com/sebastienrousseau)
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

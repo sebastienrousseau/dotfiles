@@ -2,11 +2,13 @@
 
 Manage Permission aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `permission.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
-
 
 This code provides a set of aliases for file permissions.
 - `000` Set permissions to no read, write, or execute for user, group,
@@ -33,3 +35,5 @@ This code provides a set of aliases for file permissions.
 - `chown` Change file owner and group.
 - `chownr` Change file owner and group recursively.
 - `chownu` Change file owner and group recursively to the current user.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

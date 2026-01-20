@@ -2,11 +2,13 @@
 
 Manage Default aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `default.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
-
 
 This code provides a set of command aliases to make common tasks and
 commands more convenient and faster to execute. These aliases range from
@@ -25,3 +27,5 @@ Some of the most useful aliases include:
 - `qfind`: quickly search for files.
 - `clc`: clear the terminal screen and print the contents of the current
   directory.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

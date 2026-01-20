@@ -2,13 +2,14 @@
 
 Manage Cd aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `cd.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
 
-alt="Dotfiles logo"
-Seamlessly enhance your shell environment 🐚
 ---
 ## 🚀 Introduction
 This repository includes a robust set of shell aliases and scripts designed to
@@ -174,3 +175,5 @@ This project is licensed under the
 Created with ♥ by [Sebastien Rousseau](https://sebastienrousseau.com)
 - Website: [https://sebastienrousseau.com](https://sebastienrousseau.com)
 - GitHub: [https://github.com/sebastienrousseau](https://github.com/sebastienrousseau)
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

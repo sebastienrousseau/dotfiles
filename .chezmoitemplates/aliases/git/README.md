@@ -2,11 +2,13 @@
 
 Manage Git aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `git.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
-
 
 This is a collection of handy Git aliases that simplify and speed up
 common Git commands, making them shorter and more intuitive.
@@ -139,3 +141,5 @@ common Git commands, making them shorter and more intuitive.
 - `gconfl` List all the settings.
 - `gconfr` Output remote origin from within a local repository.
 - `undopush` Undo the last push.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

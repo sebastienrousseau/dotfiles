@@ -2,11 +2,13 @@
 
 Manage Archives aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `archives.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
-
 
 This module provides comprehensive tools for handling various archive and
 compression formats.
@@ -59,11 +61,9 @@ compress_large gz largefile.dat    # Creates largefile.dat.gz
 compress_large xz data.bin output.xz  # Specific output name
 ```
 ### Archive Tools
-#### 7-Zip Aliases
 - `c7z` - Create 7z archive
 - `x7z` - Extract 7z archive
 - `l7z` - List contents
-#### Tar Aliases
 - `ctar` - Create tar archive
 - `xtar` - Extract tar archive
 - `ltar` - List contents
@@ -79,11 +79,9 @@ compress_large xz data.bin output.xz  # Specific output name
 - `ctzst` - Create tar.zst archive
 - `xtzst` - Extract tar.zst archive
 - `ltzst` - List tar.zst contents
-#### Zip Aliases
 - `czip` - Create zip archive
 - `xzip` - Extract zip archive
 - `lzip` - List contents
-#### RAR Aliases
 - `crar` - Create rar archive
 - `xrar` - Extract rar archive
 - `lrar` - List contents
@@ -140,3 +138,5 @@ compress_large xz largefile.dat
 # Create a 7z archive with the alias
 c7z archive.7z files/  # No additional parameters needed
 ```
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

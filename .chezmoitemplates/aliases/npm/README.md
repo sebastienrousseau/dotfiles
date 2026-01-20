@@ -2,11 +2,13 @@
 
 Manage Npm aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `npm.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
-
 
 This code provides a set of aliases for
 [npm](https://www.npmjs.com/) package manager.
@@ -27,3 +29,5 @@ This code provides a set of aliases for
 - `npu` Update npm package.
 - `npx` Exec npm package.
 - `npy` Why npm package.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

@@ -2,11 +2,13 @@
 
 Manage Find aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `find.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
-
 
 This code provides a set of command aliases for the `fd` utility that is
 an alternative to the `find` command on Unix-based systems.
@@ -30,3 +32,5 @@ Here are some of the available aliases:
 - `fdu` lists all files with exclusion rules.
 - `fdv` shows the version of `fd`.
 - `fdx` executes a command for each search result.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

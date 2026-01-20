@@ -2,7 +2,10 @@
 
 Manage Tmux aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `tmux.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
@@ -66,3 +69,5 @@ tmux
 Or use any of the provided aliases for common operations.
 ## License
 MIT
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

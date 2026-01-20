@@ -2,11 +2,13 @@
 
 Manage Pnpm aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `pnpm.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
-
 
 This code provides a set of aliases for [pnpm](https://pnpm.js.org/).
 - `pni` Initialize a new project.
@@ -39,3 +41,5 @@ This code provides a set of aliases for [pnpm](https://pnpm.js.org/).
 - `pnc` Create a new project.
 - `pnsv` Run the project in server mode.
 - `pnx` Shortcut to pnpx.
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

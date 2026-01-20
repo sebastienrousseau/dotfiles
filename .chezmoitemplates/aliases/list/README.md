@@ -2,7 +2,10 @@
 
 Manage List aliases. Part of the **Universal Dotfiles** configuration.
 
+![Dotfiles banner][banner]
+
 ## 📖 Description
+
 These aliases are defined in `list.aliases.sh` and are automatically loaded by `chezmoi`.
 
 ## ⚡ Aliases
@@ -82,3 +85,5 @@ For example, modify the default `tree` depth by editing:
 alias tree='eza --tree --level=2'
 ```
 ---
+
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
