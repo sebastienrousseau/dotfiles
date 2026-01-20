@@ -5,33 +5,34 @@
   align="right"
 />
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.471)
+# Dotfiles Functions (v0.2.471)
 
 > Simply designed to fit your shell life 🐚
 
-![Dotfiles banner](https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg)
+![Dotfiles banner][banner]
 
-A comprehensive collection of shell utilities and functions to enhance your productivity across macOS, Linux, and Windows environments. Made with ♥ by Sebastien Rousseau.
+A comprehensive collection of shell utilities and functions to enhance your productivity across macOS, Linux, and Windows environments.
 
-## 📋 Overview
+## 📖 How it Works
 
-Dotfiles provides a robust set of utilities for various tasks:
+Functions are defined as individual `.sh` files in this directory.
 
-- **API Testing & Monitoring** - Test API endpoints, measure latency, and perform load testing
-- **File Management** - Convert, rename, compress, and analyze files with ease
-- **System Information** - Track system performance and get detailed diagnostics
-- **Networking** - Debug HTTP requests and monitor connections
-- **Security** - Generate passwords and SSH keys with secure defaults
+During `chezmoi apply`, the main template `dot_config/shell/functions.sh.tmpl`:
+1. Scans this directory for `**/*.sh` files.
+2. Aggregates them into `~/.config/shell/functions.sh`.
+3. This file is sourced by `.zshrc`, making all functions immediately available.
 
-## 🚀 Installation
+## 🛠 Usage
 
-```bash
-# Clone the repository
-git clone https://github.com/sebastienrousseau/dotfiles.git
+### Adding a New Function
+1. Create a new `.sh` file (e.g., `myfunc.sh`).
+2. Add your function definition.
+3. Apply changes:
+   ```bash
+   chezmoi apply
+   ```
 
-# Source the files in your shell configuration (.bashrc, .zshrc, etc.)
-echo 'source ~/dotfiles/index.sh' >> ~/.zshrc
-```
+[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ## 🧰 Function Categories
 
