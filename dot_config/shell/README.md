@@ -36,14 +36,14 @@ This configuration uses `chezmoi`'s "run_onchange" scripts to keep your system i
 
 ### macOS
 Updates are handled via [Homebrew](https://brew.sh/).
-1. Edit `~/.local/share/chezmoi/dot_config/dotfiles/Brewfile`.
+1. Edit `~/.local/share/chezmoi/dot_config/shell/Brewfile`.
 2. Run `chezmoi apply`.
-   - This triggers `run_onchange_install_packages.sh.tmpl`, which runs `brew bundle`.
+   - This triggers `run_onchange_darwin_install-packages.sh.tmpl`, which runs `brew bundle`.
 
 ### Linux & WSL
 Updates are handled via `apt-get` (Ubuntu/Debian).
 1. Run `chezmoi apply`.
-   - This checks for package updates defined in `run_onchange_install_packages.sh.tmpl`.
+   - This checks for package updates defined in `run_onchange_linux_install-packages.sh.tmpl`.
 
 ### Vim Plugins
 1. Edit `~/.local/share/chezmoi/dot_vimrc`.
@@ -69,7 +69,7 @@ If you are migrating from an old `~/.dotfiles` setup:
 
 3. **Verify**:
    - Restart your shell.
-   - Check that `~/.config/dotfiles` exists (this is where the *generated* scripts live).
+   - Check that `~/.config/shell` exists (this is where the *generated* scripts live).
    - Check that `~/.local/share/chezmoi` exists (this is the *source*).
 
 4. **Clean Up**:
@@ -88,7 +88,7 @@ The configuration is managed in `~/.local/share/chezmoi`.
 ├── dot_tmux.conf           # Tmux configuration
 ├── run_onchange_...sh.tmpl # Package installation scripts
 ├── dot_config/
-│   ├── dotfiles/           # Main Config Directory
+│   ├── shell/           # Main Config Directory
 │   │   ├── aliases.sh.tmpl # Generates aliases.sh
 │   │   ├── paths.sh.tmpl   # Generates paths.sh
 │   │   └── functions.sh.tmpl # Generates functions.sh

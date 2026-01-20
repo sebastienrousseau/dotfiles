@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# run_onchange_linux_install-packages.sh.tmpl
+{{- if eq .chezmoi.os "linux" -}}
+
+# Strict error handling
+set -euo pipefail
+
+log_info() { echo -e "\n[INFO] $*"; }
+log_error() { echo -e "\n[ERROR] $*" >&2; }
+
+log_info "🐧 Linux: Starting setup..."
+
+if command -v apt-get >/dev/null; then
+  log_info "Updating packages..."
+  sudo apt-get update
+  # Add your packages here
+  # packages=(
+  #   curl
+  #   git
+  #   zsh
+  # )
+  # sudo apt-get install -y "${packages[@]}"
+fi
+
+log_info "🐧 Linux: Setup complete."
+{{- end -}}

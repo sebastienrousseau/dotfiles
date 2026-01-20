@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# run_onchange_after_install-vim-plug.sh.tmpl
+# Runs after package installation to setup Vim
+
+# Strict error handling
+set -euo pipefail
+
+log_info() { echo -e "\n[INFO] $*"; }
+
+log_info "Starting Vim setup..."
+
+# Vim-Plug Installation (Universal)
+if [ ! -f "$HOME/.vim/autoload/plug.vim" ]; then
+    log_info "Installing vim-plug..."
+    curl -fLo "$HOME/.vim/autoload/plug.vim" --create-dirs \
+        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+fi
+
+# Vim Plugins Install/Update
+# This hash triggers re-run when .vimrc changes: {{ include "dot_vimrc" | sha256sum }}
+if command -v vim >/dev/null; then
+    log_info "Updating Vim plugins..."
+    vim -es -u "$HOME/.vimrc" -i NONE -c "PlugInstall" -c "PlugClean!" -c "qa"
+fi
+
+log_info "Vim setup complete."

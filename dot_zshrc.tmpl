@@ -112,9 +112,9 @@ zcompile_many() {
 if [[ -o interactive ]]; then
   (
     zcompile_many "${HOME}/.zshrc" \
-                  "${HOME}/.config/dotfiles/aliases.sh" \
-                  "${HOME}/.config/dotfiles/paths.sh" \
-                  "${HOME}/.config/dotfiles/functions.sh" &!
+                  "${HOME}/.config/shell/aliases.sh" \
+                  "${HOME}/.config/shell/paths.sh" \
+                  "${HOME}/.config/shell/functions.sh" &!
   )
 fi
 
@@ -130,9 +130,9 @@ typeset -aU path
 [[ -f "${HOME}/.zshrc.local" ]] && source "${HOME}/.zshrc.local"
 
 # Load Chezmoi-managed Universal Aliases
-[[ -f "${HOME}/.config/dotfiles/paths.sh" ]] && source "${HOME}/.config/dotfiles/paths.sh"
-[[ -f "${HOME}/.config/dotfiles/functions.sh" ]] && source "${HOME}/.config/dotfiles/functions.sh"
-[[ -f "${HOME}/.config/dotfiles/aliases.sh" ]] && source "${HOME}/.config/dotfiles/aliases.sh"
+[[ -f "${HOME}/.config/shell/paths.sh" ]] && source "${HOME}/.config/shell/paths.sh"
+[[ -f "${HOME}/.config/shell/functions.sh" ]] && source "${HOME}/.config/shell/functions.sh"
+[[ -f "${HOME}/.config/shell/aliases.sh" ]] && source "${HOME}/.config/shell/aliases.sh"
 
 # Starship Prompt (High Performance)
 if command -v starship >/dev/null; then
