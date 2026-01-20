@@ -102,7 +102,7 @@ To install and use these dotfiles, you need:
 We use `chezmoi` for a one-line installation process. This will:
 1. Install `chezmoi`.
 2. Clone this repository.
-3. Install required packages (Homebrew/Apt).
+3. **Automatically** install required packages (via Homebrew on macOS or Apt on Linux).
 4. Apply configurations to your home directory.
 
 **Run the following command:**
