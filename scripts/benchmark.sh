@@ -14,7 +14,7 @@ if command -v hyperfine >/dev/null; then
 else
   log_info "Hyperfine not found. Using simple loop..."
   echo "Running 10 iterations of 'zsh -i -c exit'..."
-  for i in {1..10}; do
+  for _ in {1..10}; do
     time zsh -i -c exit
   done
 fi
