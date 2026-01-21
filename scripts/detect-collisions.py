@@ -66,7 +66,7 @@ def main():
                 scan_file(os.path.join(root, file), "alias")
 
     # Scan Functions
-    for root, dirs, files in os.walk(FUNCTIONS_DIR):
+    for root, _, files in os.walk(FUNCTIONS_DIR):
         for file in files:
             if file.endswith(".sh"):
                 scan_file(os.path.join(root, file), "function")
