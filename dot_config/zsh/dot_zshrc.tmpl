@@ -1,4 +1,4 @@
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.471) - <https://dotfiles.io>
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.472) - <https://dotfiles.io>
 # Made with ♥ in London, UK by @sebastienrousseau
 # Copyright (c) 2015-2025. All rights reserved
 # License: MIT
@@ -34,7 +34,7 @@ export OS_VERSION="$(uname -r)"              # OS version number
 export SSL_CERT_FILE="${HOME}/.local/share/cacert.pem"    # SSL certificate file
 export USER_LANGUAGE="en_GB.UTF-8"           # Default language
 export ARCHFLAGS="-arch ${OS_ARCH}"          # Architecture flags
-export DOTFILES_VERSION='0.2.471'            # Dotfiles version
+export DOTFILES_VERSION='0.2.472'            # Dotfiles version
 export DOTFILES="${HOME}/.dotfiles/lib"      # Path to dotfiles
 export LANG="${USER_LANGUAGE}"               # Language settings
 export LANGUAGE="${USER_LANGUAGE}"
@@ -167,9 +167,14 @@ fi
 # 20-49: Middleware (Exports, Options)
 # 50-89: Toolchain & Logic (Functions, Rust tools)
 # 90-99: UX (Aliases, Prompts)
-for config_file in "${HOME}/.config/shell/"*.sh(Nom); do
-  source "$config_file"
-done
+#
+# DISABLED: These files contain legacy configurations with invalid ripgrep flags
+# that cause "rg: error parsing flag -E: grep config error: unknown encoding: VGA|3D"
+# The 90-ux-aliases.sh file alone contains 178KB of aliases, many with deprecated flags.
+#
+# for config_file in "${HOME}/.config/shell/"*.sh(Nom); do
+#   source "$config_file"
+# done
 
 ## AI / Predictive Shell
 [[ -f "$HOME/.config/shell/custom/context_suggest.zsh" ]] && source "$HOME/.config/shell/custom/context_suggest.zsh"
