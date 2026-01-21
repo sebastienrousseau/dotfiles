@@ -106,7 +106,7 @@ This release transforms the dotfiles into a high-performance, universally compat
 #### Option A: Fresh Install (New Machines)
 If you are setting up a new machine, simply run the universal installer:
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.471/install.sh)"
 ```
 
 #### Option B: Migration (Upgrade from `master` / v1)
@@ -119,7 +119,7 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles
    ```
 2. **Run Installer**:
    ```bash
-   sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+   sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.471/install.sh)"
    ```
 3. **Resolve Conflicts**:
    - If prompted by `chezmoi` to overwrite files (e.g., `.zshrc`), select **overwrite** (or diff to check) as this release uses a new sourcing strategy.
