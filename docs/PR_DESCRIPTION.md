@@ -101,7 +101,29 @@ This release transforms the dotfiles into a high-performance, universally compat
 - **Functionality**: Local migration verified on macOS, Linux, and WSL.
 
 
-### 📦 Installation
+### 📦 Installation & Migration
+
+#### Option A: Fresh Install (New Machines)
+If you are setting up a new machine, simply run the universal installer:
 ```bash
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply sebastienrousseau
 ```
+
+#### Option B: Migration (Upgrade from `master` / v1)
+⚠️ **Important**: This release changes the architecture from direct symlinks to `chezmoi` templates. Functional backups are recommended.
+
+1. **Backup Legacy Configs**:
+   ```bash
+   mv ~/.zshrc ~/.zshrc.bak
+   mv ~/.config/nvim ~/.config/nvim.bak
+   ```
+2. **Run Installer**:
+   ```bash
+   sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply sebastienrousseau
+   ```
+3. **Resolve Conflicts**:
+   - If prompted by `chezmoi` to overwrite files (e.g., `.zshrc`), select **overwrite** (or diff to check) as this release uses a new sourcing strategy.
+4. **Restart Shell**:
+   ```bash
+   exec zsh
+   ```
