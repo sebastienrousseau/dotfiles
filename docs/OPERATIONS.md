@@ -1,92 +1,103 @@
 # Operational Guide
 
-This document outlines the standard workflows for maintaining and operating the dotfiles configuration.
+This document outlines the standard workflows to **Maintain**, **Update**, and **Operate** your dotfiles environment across all supported platforms.
 
-## 🔄 Daily Usage
+---
+
+## 🏗️ Platform-Specific Operations
+
+### 🍎 macOS
+**Primary Manager**: `Homebrew`
+
+- **Update System**:
+  ```bash
+  # Updates Dotfiles AND Homebrew packages
+  chezmoi update
+  ```
+  *Behind the scenes, this runs `brew bundle install` to match the `Brewfile.lock.json`.*
+
+- **Troubleshooting**:
+  - **Permission Issues**: `sudo chown -R $(whoami) $(brew --prefix)/*`
+  - **Drift**: Run `brew bundle cleanup` to remove unmanaged packages.
+
+### 🐧 Linux (Debian, Ubuntu, ZorinOS, Kali)
+**Primary Manager**: `apt-get` / `snap`
+
+- **Update System**:
+  ```bash
+  # 1. Update OS packages
+  sudo apt update && sudo apt upgrade -y
+  
+  # 2. Update Dotfiles
+  chezmoi update
+  ```
+  *Note: `chezmoi` on Linux focuses on configuration. Package updates are often best handled by the OS package manager to avoid `sudo` conflicts.*
+
+- **Troubleshooting**:
+  - **Font Issues**: If icons are missing, run `./provision/run_onchange_50-install-fonts.sh` manually.
+  - **ZorinOS/Gnome**: Custom keybindings may need `dconf load` if not applied automatically.
+
+### 🪟 Windows (WSL2)
+**Primary Manager**: `apt-get` (inside WSL)
+
+- **Update System**: Same as **Linux**.
+
+- **WSL Specifics**:
+  - **Access Windows Files**: Windows drives are mounted at `/mnt/c/`.
+  - **Clipboard**: The setup configures `win32yank.exe` automatically for clipboard sharing.
+  - **Performance**: We recommend keeping project files inside the Linux filesystem (`~/projects`), NOT in `/mnt/c/`, for 100x better IO performance.
+
+---
+
+## 🔄 Common Workflows
 
 ### Applying Changes
-To apply the latest configuration to your local machine:
+After editing any config file:
 ```bash
 chezmoi apply
 ```
-*Note: This will trigger the Audit Log (`~/.dotfiles_audit.log`).*
+*Triggers: `dot_zshrc` reload, audit logging.*
 
-### Updating from Remote
-To pull the latest changes from the repository and apply them:
+### Rolling Back
+If an update breaks your setup:
 ```bash
-chezmoi update
+cd ~/.local/share/chezmoi
+git reset --hard HEAD@{1}  # Go back 1 operation
+chezmoi apply
 ```
 
-## 🛠️ Development
+### Debugging
+If something feels slow or broken:
 
-### Adding a New File
-To start tracking a file with `chezmoi`:
-```bash
-chezmoi add ~/.config/path/to/file
-```
-
-### Editing Configuration
-To edit a tracked file (opens in your default editor):
-```bash
-chezmoi edit ~/.zshrc
-```
-
-### Testing Changes
-To see what changes `chezmoi` would apply without actually applying them:
-```bash
-chezmoi diff
-```
-
-## 📊 Monitoring & Performance
-
-### Audit Logs
-Every `chezmoi apply` event is logged. To view the history:
-```bash
-tail -f ~/.dotfiles_audit.log
-```
-
-### Performance Benchmarking
-To measure shell startup time against the <20ms target:
-```bash
-./scripts/benchmark.sh
-```
-
-## 🔐 Security & Identity
-
-### 1. Verify Git Signing
-Ensure generic Git operations are signed via SSH (System Key):
-```bash
-git config --get gpg.format  # Should differ "ssh"
-ssh-add -l                   # Should list your local key (~/.ssh/id_ed25519)
-```
+1. **Check Health**:
+   ```bash
+   dot doctor
+   ```
+2. **Verbose Mode**:
+   ```bash
+   DOTFILES_DEBUG=1 chezmoi apply
+   ```
 
 ---
 
-## 🧠 Memory & Sync (Atuin)
+## 🛠️ Tool-Specific Guides
 
-### Initial Setup
-To enable history sync across devices:
-```bash
-atuin login
-atuin import auto  # Import old history
-atuin sync
-```
+### 📦 Atuin (History Sync)
+- **Login**: `atuin login`
+- **Sync**: `atuin sync`
+- **Search**: `Ctrl-r` (Global history search)
 
-### Usage
-- **Ctrl-r**: Open history search.
-- **Up Arrow**: Filter history by current command.
+### 🚀 Zoxide (Smart CD)
+- **Jump**: `z project` matches `~/dev/project`
+- **Query**: `zi` (Interactive selection)
 
----
-
-## 🎨 Visual Tools Cheatsheet
-
-| Command | Tool | Action |
-|---|---|---|
-| `y` | **Yazi** | Open file manager. |
-| `zj` | **Zellij** | Launch terminal workspace. |
-| `lg` | **LazyGit** | Open Git TUI. |
+### 🌳 Yazi (File Manager)
+- **Open**: Type `y`
+- **Preview**: Spacebar to preview files
+- **Quit**: `q`
 
 ---
 
-## 🔐 Security
-Refer to [SECURITY.md](../.github/SECURITY.md) for vulnerability reporting and security policies.
+## 🔐 Security Policy
+- **GPG/SSH**: All commits are SSH signed.
+- **Audit Log**: Review `~/.dotfiles_audit.log` for a timeline of all changes applied to your system.
