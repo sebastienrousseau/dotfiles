@@ -53,18 +53,11 @@ To measure shell startup time against the <20ms target:
 
 ## 🔐 Security & Identity
 
-### 1. Verify 1Password Agent
-Ensure the core secrets manager is active:
-```bash
-op account get
-```
-*Should return your account details.*
-
-### 2. Verify Git Signing
-Ensure generic Git operations are signed via SSH + 1Password:
+### 1. Verify Git Signing
+Ensure generic Git operations are signed via SSH (System Key):
 ```bash
 git config --get gpg.format  # Should differ "ssh"
-ssh-add -l                   # Should list your 1Password key
+ssh-add -l                   # Should list your local key (~/.ssh/id_ed25519)
 ```
 
 ---

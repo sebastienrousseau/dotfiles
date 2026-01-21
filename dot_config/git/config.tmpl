@@ -1,13 +1,10 @@
 [user]
     name = Sebastien Rousseau
     email = seb@example.com
-    signingkey = {{ if eq .chezmoi.os "darwin" }}ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI...{{ else }}~/.ssh/id_ed25519.pub{{ end }}
+    signingkey = ~/.ssh/id_ed25519.pub
 
 [gpg]
     format = ssh
-
-[gpg "ssh"]
-    program = {{ if eq .chezmoi.os "darwin" }}/Applications/1Password.app/Contents/MacOS/op-ssh-sign{{ else }}opt/1Password/op-ssh-sign{{ end }}
 
 [commit]
     gpgsign = true
