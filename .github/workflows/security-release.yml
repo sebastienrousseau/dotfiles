@@ -1,0 +1,36 @@
+name: Security Release (SLSA & SBOM)
+
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      - name: Calculate Hash
+        id: hash
+        run: |
+          sha256sum dotfiles-sbom.spdx.json > sbom.sha256
+          echo "hash=$(cat sbom.sha256 | base64)" >> $GITHUB_OUTPUT
+
+    outputs:
+      sbom-path: ${{ steps.sbom.outputs.fileName }}
+      hash: ${{ steps.hash.outputs.hash }}
+
+  provenance:
+    name: Generate SLSA Provenance
+    needs: [sbom]
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.4.0
+    with:
+      base64-subjects: "${{ needs.sbom.outputs.hash }}"
+      upload-assets: true

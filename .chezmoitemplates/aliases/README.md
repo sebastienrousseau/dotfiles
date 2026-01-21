@@ -54,6 +54,8 @@ During `chezmoi apply`, the main template `dot_config/shell/aliases.sh.tmpl`:
 | `gnu`           | Manage GNU core utilities.                       | [View README](gnu/README.md)      |
 | `heroku`        | Manage Heroku CLI.                               | [View README](heroku/README.md)   |
 | `interactive`   | Configure interactive shell behavior.            | [View README](interactive/README.md) |
+| `kubernetes`    | Manage Kubernetes, Helm, and K9s aliases.        | [View README](kubernetes/README.md) |
+| `legal`         | License scanning and compliance tools.           | [View README](legal/README.md)      |
 | `macOS`         | Manage macOS-specific shell settings.            | [View README](macOS/README.md)    |
 | `make`          | Manage GNU Make aliases and utilities.           | [View README](make/README.md)     |
 | `mkdir`         | Create directories with custom options.          | [View README](mkdir/README.md)    |
@@ -65,6 +67,7 @@ During `chezmoi apply`, the main template `dot_config/shell/aliases.sh.tmpl`:
 | `python`        | Configure Python aliases and utilities.          | [View README](python/README.md)   |
 | `rsync`         | Configure rsync for efficient file transfers.    | [View README](rsync/README.md)    |
 | `rust`          | Manage Rust programming tools and configurations.| [View README](rust/README.md)     |
+| `security`      | Immutability and signing configuration.          | [View README](security/README.md) |
 | `subversion`    | Configure Subversion (SVN) version control.       | [View README](subversion/README.md) |
 | `sudo`          | Manage superuser operations.                     | [View README](sudo/README.md)     |
 | `tmux`          | Configure tmux terminal multiplexer.             | [View README](tmux/README.md)     |
