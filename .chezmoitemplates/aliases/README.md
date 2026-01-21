@@ -43,6 +43,7 @@ During `chezmoi apply`, the main template `dot_config/shell/aliases.sh.tmpl`:
 | `cd`            | Navigate the file system.                        | [View README](cd/README.md)       |
 | `chmod`         | Change file and directory permissions.           | [View README](chmod/README.md)    |
 | `clear`         | Clear the terminal screen.                       | [View README](clear/README.md)    |
+| `compliance`    | Regulatory compliance (SOC2) and privacy tools.  | [View README](compliance/README.md) |
 | `configuration` | Manage dotfiles and shell configurations.        | [View README](configuration/README.md) |
 | `default`       | Set up default shell aliases and configurations. | [View README](default/README.md)  |
 | `dig`           | Query DNS name servers.                          | [View README](dig/README.md)      |
