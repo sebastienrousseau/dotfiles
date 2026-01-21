@@ -3,6 +3,12 @@ export PATH=/usr/bin:"${PATH}"
 export PATH=/bin:"${PATH}"
 export PATH=/sbin:"${PATH}"
 
+# XDG Base Directory Standards
+export XDG_CONFIG_HOME="${HOME}/.config"
+export XDG_CACHE_HOME="${HOME}/.cache"
+export XDG_DATA_HOME="${HOME}/.local/share"
+export XDG_STATE_HOME="${HOME}/.local/state"
+
 # Homebrew paths
 export PATH=/opt/homebrew/bin:"${PATH}"
 export PATH=/opt/homebrew/sbin:"${PATH}"

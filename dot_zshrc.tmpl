@@ -151,6 +151,14 @@ typeset -aU path
 # Load local customizations if they exist
 [[ -f "${HOME}/.zshrc.local" ]] && source "${HOME}/.zshrc.local"
 
+# Vendor / Enterprise Hooks (Site-local overrides)
+# Supports drop-in configs from system management tools
+if [[ -d "/etc/dotfiles/defaults.d" ]]; then
+  for hook in /etc/dotfiles/defaults.d/*.sh(N); do
+    source "$hook"
+  done
+fi
+
 # Load Chezmoi-managed Universal Aliases
 [[ -f "${HOME}/.config/shell/paths.sh" ]] && source "${HOME}/.config/shell/paths.sh"
 [[ -f "${HOME}/.config/shell/functions.sh" ]] && source "${HOME}/.config/shell/functions.sh"
