@@ -13,7 +13,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a test user
-RUN useradd -m -s /bin/bash testuser
+# Create a test user with sudo rights for non-interactive install
+RUN useradd -m -s /bin/bash testuser && \
+    echo "testuser ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/testuser && \
+    chmod 0440 /etc/sudoers.d/testuser
 USER testuser
 WORKDIR /home/testuser
 
