@@ -6,10 +6,17 @@ Welcome to your universally compatible, high-performance dotfiles configuration,
 
 - **Universal Support**: Works seamlessly on macOS, Linux (Ubuntu/Debian), and Windows (WSL).
 - **Instant Startup**: Optimized with `zcompile` and lazy-loading for <10ms startup time.
-- **Modern Tooling**: Replaces legacy Unix tools with Rust-based alternatives (`eza`, `bat`, `ripgrep`, `zoxide`).
+- **Modern Core**: Replaces legacy Unix tools with Rust-based alternatives:
+    - `eza` (ls)
+    - `bat` (cat)
+    - `ripgrep` (grep)
+    - `zoxide` (cd)
+    - `atuin` (history)
+    - `yazi` (files)
+    - `zellij` (multiplexer)
 - **Starship Prompt**: A fast, customizable, cross-shell prompt.
 - **Optimized Vim**: `vim-plug` is managed automatically with performant lazy-loading logic.
-- **Modular Design**: Configuration is split into small, manageable templates in `~/.local/share/chezmoi`.
+- **Modular Design**: Configuration is split into small, manageable templates.
 
 ---
 
@@ -31,8 +38,6 @@ This command will:
 ---
 
 ## 🔄 How to Update
-
-This configuration uses `chezmoi`'s "run_onchange" scripts to keep your system in sync.
 
 ### macOS
 Updates are handled via [Homebrew](https://brew.sh/).
@@ -89,14 +94,14 @@ The configuration is managed in `~/.local/share/chezmoi`.
 ├── run_onchange_...sh.tmpl # Package installation scripts
 ├── dot_config/
 │   ├── shell/           # Main Config Directory
-│   │   ├── aliases.sh.tmpl # Generates aliases.sh
-│   │   ├── paths.sh.tmpl   # Generates paths.sh
+│   │   ├── aliases.sh.tmpl # Generates aliases.sh (Modular)
+│   │   ├── paths.sh.tmpl   # Generates paths.sh (Monolithic)
 │   │   └── functions.sh.tmpl # Generates functions.sh
 │   └── starship.toml.tmpl  # Starship configuration
 └── .chezmoitemplates/      # Reusable Logic
     ├── aliases/            # Alias definitions (grouped by tool)
     ├── functions/          # Shell functions
-    └── paths/              # Path definitions
+    └── paths/              # (Legacy) Path definitions
 ```
 
 ## 🛠 Usage

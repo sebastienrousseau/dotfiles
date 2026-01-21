@@ -79,9 +79,12 @@ We have replaced traditional Unix commands with modern, faster, and feature-rich
 |:---:|:---:|---|
 | `ls` | **[eza](https://eza.rocks/)** | A modern, maintained replacement for `ls` with icons and git integration. |
 | `cat` | **[bat](https://github.com/sharkdp/bat)** | A `cat` clone with syntax highlighting and Git integration. |
-| `grep` | **[ripgrep (rg)](https://github.com/BurntSushi/ripgrep)** | Line-oriented search tool that recursively searches your current directory. Faster than `grep`. |
+| `grep` | **[ripgrep (rg)](https://github.com/BurntSushi/ripgrep)** | Line-oriented search tool that recursively searches your current directory. |
 | `cd` | **[zoxide](https://github.com/ajeetdsouza/zoxide)** | A smarter `cd` command that remembers your frequently used directories. |
 | `find` | **[fd](https://github.com/sharkdp/fd)** | A simple, fast and user-friendly alternative to `find`. |
+| `history` | **[atuin](https://atuin.sh)** | Sync, search and backup shell history with E2E encryption. |
+| `ranger` | **[yazi](https://yazi-rs.github.io)** | Blazing fast terminal file manager written in Rust, based on async I/O. |
+| `tmux` | **[zellij](https://zellij.dev)** | A terminal workspace with batteries included (layout engine, floating panes). |
 | `vim` | **[NeoVim](https://neovim.io/)** | Hyperextensible Vim-based text editor (optional, config supports both). |
 
 *Note: The installation scripts will automatically attempt to install these tools via Homebrew (macOS) or Apt (Linux).*
@@ -131,13 +134,14 @@ The configuration is managed in `~/.local/share/chezmoi`. This is your "source" 
 ~/.local/share/chezmoi/
 ├── dot_zshenv              # Shell entry point (XDG Bootloader)
 ├── dot_config/             # XDG Base Config (Mapped to ~/.config)
+│   ├── atuin/              # Shell History (config.toml)
+│   ├── ghostty/            # Terminal Emulator (config)
+│   ├── git/                # Git Config (config)
+│   ├── yazi/               # File Manager (yazi.toml)
+│   ├── zellij/             # Multiplexer (config.kdl)
 │   ├── zsh/                # Zsh config (.zshrc)
-│   ├── tmux/               # Tmux config (tmux.conf)
-│   ├── vim/                # Vim config (vimrc)
 │   └── shell/              # Shared shell config (aliases, paths)
 ├── provision/              # Lifecycle scripts (install packages, fonts)
-│   ├── 10-packages...
-│   └── 50-fonts...
 ├── install.sh              # Universal Installer
 ├── README.md               # Documentation
 └── docs/                   # Detailed documentation
