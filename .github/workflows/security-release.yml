@@ -13,15 +13,31 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      sbom-path: ${{ steps.sbom.outputs.fileName }}
+      hash: ${{ steps.hash.outputs.hash }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate SBOM (SPDX)
+        id: sbom
+        uses: anchore/sbom-action@v0
+        with:
+          format: spdx-json
+          output-file: dotfiles-sbom.spdx.json
+
       - name: Calculate Hash
         id: hash
         run: |
           sha256sum dotfiles-sbom.spdx.json > sbom.sha256
           echo "hash=$(cat sbom.sha256 | base64)" >> $GITHUB_OUTPUT
 
-    outputs:
-      sbom-path: ${{ steps.sbom.outputs.fileName }}
-      hash: ${{ steps.hash.outputs.hash }}
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotfiles-sbom
+          path: dotfiles-sbom.spdx.json
 
   provenance:
     name: Generate SLSA Provenance

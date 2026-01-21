@@ -14,9 +14,9 @@ fi
 
 # Lightweight license check (using trivy as a modern proxy for compliance scanning)
 if command -v trivy &>/dev/null; then
-  alias license-scan='trivy fs . --scanners license'
+  alias scan-licenses='trivy fs . --scanners license'
 else
-  alias license-scan='echo "trivy not found. Installing via homebrew..." && brew install trivy && trivy fs . --scanners license'
+  alias scan-licenses='echo "trivy not found. Installing via homebrew..." && brew install trivy && trivy fs . --scanners license'
 fi
 
 # -----------------------------------------------------------------------------
