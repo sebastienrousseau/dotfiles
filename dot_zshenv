@@ -15,4 +15,4 @@ export NANORC="${XDG_CONFIG_HOME}/nano/nanorc"
 
 # Vim (Use VIMINIT to source the config file)
 # Use single quotes to prevent shell expansion (Vim will expand $XDG_CONFIG_HOME)
-export VIMINIT='source $XDG_CONFIG_HOME/vim/vimrc'
+# export VIMINIT='source $XDG_CONFIG_HOME/vim/vimrc'
