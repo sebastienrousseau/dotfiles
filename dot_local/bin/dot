@@ -1,0 +1,48 @@
+#!/bin/sh
+set -e
+
+# Dotfiles CLI Entry Point - v0.2.471
+
+COMMAND="$1"
+if [ -n "$1" ]; then
+    shift
+fi
+
+show_help() {
+    echo "Usage: dot [command]"
+    echo ""
+    echo "Commands:"
+    echo "  learn   Start the interactive tour of your new tools"
+    echo "  doctor  Check system health and configuration (chezmoi doctor)"
+    echo "  update  Pull latest changes and apply them (chezmoi update)"
+    echo "  help    Show this help message"
+}
+
+case "$COMMAND" in
+    learn)
+        # Execute the interactive tour
+        exec "$(dirname "$0")/tour" "$@"
+        ;;
+    doctor)
+        # Run Verification
+        echo "Running Dotfiles Doctor..."
+        exec chezmoi doctor
+        ;;
+    update)
+        # Update dotfiles
+        echo "Updating Dotfiles..."
+        exec chezmoi update
+        ;;
+    help|--help|-h)
+        show_help
+        ;;
+    *)
+        if [ -z "$COMMAND" ]; then
+            show_help
+        else
+            echo "Unknown command: $COMMAND"
+            echo "Try 'dot help' for usage."
+            exit 1
+        fi
+        ;;
+esac

@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # zsh_context_suggest.zsh
 #
 # Context Autosuggest for Predictive Shell

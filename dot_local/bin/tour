@@ -1,0 +1,86 @@
+#!/bin/sh
+# Interactive Tour using Gum
+# Part of Dotfiles v0.2.471
+
+if ! command -v gum >/dev/null; then
+    echo "Error: 'gum' is not installed."
+    echo "Run: brew install gum"
+    exit 1
+fi
+
+clear
+
+# Intro
+gum style \
+	--foreground 212 --border-foreground 212 --border double \
+	--align center --width 50 --margin "1 2" --padding "2 4" \
+	"Welcome to Your Predictive Shell" \
+    "v0.2.471"
+
+echo ""
+gum confirm "Ready to explore the Modern Core?" || exit 0
+clear
+
+# Slide 1: Modern Core Overview
+gum style \
+	--foreground 99 --border rounded --padding "1 2" --margin "1 2" \
+    "We have upgraded your shell with Rust-powered tools:" \
+    " " \
+    "• Atuin   - Magical History Search (Ctrl+R / Up)" \
+    "• Yazi    - Blazing Fast File Manager (yy)" \
+    "• Zellij  - Terminal Multiplexer (alt+n)" \
+    "• Ghostty - GPU Accelerated Terminal"
+
+echo ""
+gum confirm "Next: Atuin (History)" || exit 0
+clear
+
+# Slide 2: Atuin
+gum style \
+	--foreground 75 --border rounded --padding "1 2" --margin "1 2" \
+    "Atuin replaces your existing history." \
+    " " \
+    "🚀 Usage:" \
+    "Press 'Ctrl+R' or 'Up Arrow' to search." \
+    " " \
+    "💡 Pro Tip:" \
+    "Type natural language queries to fuzzy find past commands." \
+    "Your history is now synced and encrypted."
+
+echo ""
+gum confirm "Next: Yazi (File Manager)" || exit 0
+clear
+
+# Slide 3: Yazi
+gum style \
+	--foreground 214 --border rounded --padding "1 2" --margin "1 2" \
+    "Yazi is your new hyper-fast file manager." \
+    " " \
+    "🚀 Usage:" \
+    "Type 'yy' to launch." \
+    " " \
+    "💡 Features:" \
+    "- Instant startup" \
+    "- Image previews in terminal" \
+    "- Lua plugin support"
+
+echo ""
+gum confirm "Next: AI Features" || exit 0
+clear
+
+# Slide 4: AI
+gum style \
+	--foreground 150 --border rounded --padding "1 2" --margin "1 2" \
+    "Your Shell is now AI-Aware." \
+    " " \
+    "🧠 Error Analysis:" \
+    "Type '??' after a failed command to analyze it." \
+    " " \
+    "🤖 Context Suggest:" \
+    "Navigate to a project and run 'suggest' for tailored aliases."
+
+echo ""
+gum style \
+    --foreground 212 --margin "1 2" \
+    "You are all set! Enjoy your new environment."
+echo ""

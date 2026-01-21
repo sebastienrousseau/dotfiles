@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # error_analysis.zsh
 #
 # Error Analysis for Predictive Shell
@@ -5,7 +6,7 @@
 #
 
 analyze_last_error() {
-    local exit_code="$?"
+    # local exit_code="$?"  <-- unused
     local hist_entry
     
     # Get the last history entry (command that just ran)

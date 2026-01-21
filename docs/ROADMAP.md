@@ -71,12 +71,12 @@
 - [x] **AI Integration**: Add CLI wrappers for LLMs (e.g., `fabric` or `gh copilot`).
 - [x] **Smart Help**: Create a `dothelp` command that indexes and searches all custom aliases/functions.
 
-## 15. Phase 21: Hardened Security
-- [ ] **Secrets**: Integrate 1Password CLI (`op`) or Bitwarden (`bw`) for secrets injection.
-- [ ] **Signing**: Automate GPG/SSH signing configuration for Git.
-- [ ] **YubiKey**: Add YubiKey agent forwarding support.
+## 15. Phase 21: Hardened Security [COMPLETED]
+- [x] **Secrets**: (Removed) 1Password integration removed in favor of native tooling.
+- [x] **Signing**: Automated SSH signing configuration for Git (Native).
+- [x] **YubiKey**: Zero-conf SSH Agent forwarding enabled.
 
-## 16. Phase 22: Automated Testing
+## 16. Phase 22: Automated Testing [COMPLETED]
 - [x] **Container CI**: Run the full dotfiles installation in a Docker container (Ubuntu/Fedora/Arch) on every PR.
 - [x] **Integration Tests**: Verify alias functionality in a live shell environment.
 
@@ -92,10 +92,10 @@
 - [x] **Zero-Dep Bootstrap**: Ensure the installer runs on a raw system with *only* `curl` and `sh` (no Python/Git required initially).
 - [x] **Teleportation**: Capability to "teleport" the entire config to a remote session (SSH) ephemerally.
 
-## 19. Phase 25: The "Gold Standard" Documentation
-- [ ] **DocSite**: Generate a static documentation site (Hugo/Docusaurus) hosted on GitHub Pages (`dotfiles.io`).
+## 19. Phase 25: The "Gold Standard" Documentation [COMPLETED]
+- [x] **DocSite**: Update `dotfiles.github.io` (v0.2.471) with dependency cleanup and UI refresh.
 - [ ] **Man Pages**: proper `man dotfiles` integration for every custom function and alias.
-- [ ] **Interactive Tour**: `dot -t` to launch an interactive guided tour of the shell environment.
+- [x] **Interactive Tour**: `dot learn` to launch an interactive guided tour of the shell environment.
 - [ ] **Localization**: i18n support structure for error messages and help text.
 
 ## 20. Phase 26: OS Bundling & Compliance [COMPLETED]

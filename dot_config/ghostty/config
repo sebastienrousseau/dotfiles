@@ -35,7 +35,7 @@ window-vsync = true
 # Enterprise tweaks for Linux consistency
 gtk-titlebar = false
 # gtk-single-instance = true
-linux-cme-preedit-ime = true
+# linux-cme-preedit-ime = true
 
 ################
 # Typography   #
