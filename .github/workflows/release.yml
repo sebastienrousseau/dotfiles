@@ -11,6 +11,10 @@ on:
     branches:
       - main                      # Trigger on pull requests to the 'main' branch
 
+permissions:
+  contents: read
+  packages: write
+
 #-----------------------------------------------------------------------------
 # Jobs: Tasks executed as part of the release workflow
 #-----------------------------------------------------------------------------
