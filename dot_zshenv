@@ -1,0 +1,18 @@
+# XDG Base Directory Specification
+export XDG_CONFIG_HOME="${HOME}/.config"
+export XDG_CACHE_HOME="${HOME}/.cache"
+export XDG_DATA_HOME="${HOME}/.local/share"
+export XDG_STATE_HOME="${HOME}/.local/state"
+
+# Zsh
+export ZDOTDIR="${XDG_CONFIG_HOME}/zsh"
+
+# Tools
+export CURL_HOME="${XDG_CONFIG_HOME}/curl"
+export WGETRC="${XDG_CONFIG_HOME}/wget/wgetrc"
+export GEMRC="${XDG_CONFIG_HOME}/gem/gemrc"
+export NANORC="${XDG_CONFIG_HOME}/nano/nanorc"
+
+# Vim (Use VIMINIT to source the config file)
+# Use single quotes to prevent shell expansion (Vim will expand $XDG_CONFIG_HOME)
+# export VIMINIT='source $XDG_CONFIG_HOME/vim/vimrc'

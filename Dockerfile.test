@@ -1,0 +1,29 @@
+FROM ubuntu:26.04
+# Test env for Universal Installer
+# Simulates a raw machine
+LABEL version="0.2.471"
+LABEL description="Universal Dotfiles Installer Test Environment"
+
+# Install minimal deps (curl is standard, git usually too, but we ensure them)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    git \
+    sudo \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a test user
+# Create a test user with sudo rights for non-interactive install
+RUN useradd -m -s /bin/bash testuser && \
+    echo "testuser ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/testuser && \
+    chmod 0440 /etc/sudoers.d/testuser
+USER testuser
+WORKDIR /home/testuser
+
+# Copy installer (simulating curl download)
+COPY --chown=testuser:testuser install.sh .
+
+# Run installer
+# We expect this to fail if it tries to interact, so we might need non-interactive mode.
+# But install.sh currently just does standard checks.
+RUN chmod +x install.sh && ./install.sh

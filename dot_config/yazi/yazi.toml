@@ -1,0 +1,40 @@
+# Yazi Configuration (~/.config/yazi/yazi.toml)
+# A fast, async terminal file manager written in Rust.
+
+[manager]
+layout         = [1, 4, 3]
+sort_by        = "alphabetical"
+sort_sensitive = false
+sort_reverse   = false
+sort_dir_first = true
+linemode       = "size"
+show_hidden    = false
+show_symlink   = true
+
+[preview]
+tab_size       = 2
+max_width      = 600
+max_height     = 900
+cache_dir      = ""
+image_filter   = "lanczos3"
+image_quality  = 75
+sixel_fraction = 15
+
+[opener]
+edit = [
+    { run = 'nvim "$@"', block = true, desc = "Edit" },
+]
+play = [
+    { run = 'mpv "$@"', orphan = true, desc = "Play" },
+]
+open = [
+    { run = 'open "$@"', desc = "Open" },
+]
+
+[open]
+rules = [
+    { name = "*/", use = "edit" },
+    { mime = "text/*", use = "edit" },
+    { mime = "image/*", use = "open" },
+    { mime = "video/*", use = "play" },
+]

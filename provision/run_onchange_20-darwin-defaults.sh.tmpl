@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# macOS Defaults & Hardening Script
+# Applied via chezmoi on changes
+
+# Only run on macOS
+{{ if eq .chezmoi.os "darwin" -}}
+
+set -e
+
+echo "🍎 Applying macOS Defaults & Hardening..."
+
+# Close any open System Preferences panes, to prevent them from overriding
+# settings we’re about to change
+osascript -e 'tell application "System Preferences" to quit'
+
+# Helper to apply defaults and ignore errors (for sandboxed apps)
+apply_default() {
+    defaults write "$@" || echo "⚠️  Failed to set default: $1 $2 (Sandbox restriction?)"
+}
+
+# --- Security & Privacy ---
+# Require password immediately after sleep or screen saver begins
+apply_default com.apple.screensaver askForPassword -int 1
+apply_default com.apple.screensaver askForPasswordDelay -int 0
+
+# Disable the "Are you sure you want to open this application?" dialog
+apply_default com.apple.LaunchServices LSQuarantine -bool false
+
+# --- Finder ---
+# Show all filename extensions
+apply_default NSGlobalDomain AppleShowAllExtensions -bool true
+
+# Show hidden files by default
+apply_default com.apple.finder AppleShowAllFiles -bool true
+
+# Show status bar
+apply_default com.apple.finder ShowStatusBar -bool true
+
+# Show path bar
+apply_default com.apple.finder ShowPathbar -bool true
+
+# Keep folders on top when sorting by name
+apply_default com.apple.finder _FXSortFoldersFirst -bool true
+
+# Avoid creating .DS_Store files on network or USB volumes
+apply_default com.apple.desktopservices DSDontWriteNetworkStores -bool true
+apply_default com.apple.desktopservices DSDontWriteUSBStores -bool true
+
+# --- Dock ---
+# Minimize windows into their application’s icon
+apply_default com.apple.dock minimize-to-application -bool true
+
+# Don’t show recent applications in Dock
+apply_default com.apple.dock show-recents -bool false
+
+# Automatically hide and show the Dock
+apply_default com.apple.dock autohide -bool true
+
+# --- Safari ---
+# Enable the Develop menu and the Web Inspector in Safari
+# Note: Full Disk Access might be required for Safari preferences
+apply_default com.apple.Safari IncludeDevelopMenu -bool true
+apply_default com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
+apply_default com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
+
+# --- VS Code ---
+apply_default com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
+
+echo "✅ macOS defaults applied. Note: Some changes may require a logout/restart."
+{{ end -}}

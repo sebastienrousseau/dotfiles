@@ -1,0 +1,6 @@
+.config/dotfiles/_aliases
+.config/dotfiles/_aliases/**
+.DS_Store
+**/.DS_Store
+*.swp
+**/*.swp

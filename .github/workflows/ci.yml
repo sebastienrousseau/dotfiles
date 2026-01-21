@@ -1,0 +1,44 @@
+name: Dotfiles CI
+
+on:
+  push:
+    branches:
+      - master
+      - v0.2.471
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    
+    defaults:
+      run:
+        shell: bash
+
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Chezmoi
+        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
+        env:
+          BINDIR: ${{ runner.os == 'Windows' && '$HOME/bin' || '$HOME/.local/bin' }}
+
+      - name: Add to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Initialize Chezmoi
+        run: chezmoi init
+
+      - name: Verify Config (Dry Run)
+        run: chezmoi apply --verbose --dry-run

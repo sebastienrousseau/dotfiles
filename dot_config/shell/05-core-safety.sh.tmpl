@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# 05-safety.sh: Core Safety Settings
+# Part of the "Core Layer"
+
+# Set sane defaults for safety, though be careful with -e in interactive shell
+# Use 'set -o pipefail' to catch pipeline errors if supported
+if [[ -n "$BASH_VERSION" ]] || [[ -n "$ZSH_VERSION" ]]; then
+    set -o pipefail 2>/dev/null || true
+fi
+
+# Prevent file overwrite with redirection (force use of >|)
+set -o noclobber

@@ -1,44 +1,37 @@
-<!-- markdownlint-disable MD033 MD041 MD043 -->
+# Security Policy
 
-<img
-  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
-  alt="dotfiles logo"
-  width="66"
-  align="right"
-/>
+## Supported Versions
 
-<!-- markdownlint-enable MD033 MD041 -->
+Only the latest version of the dotfiles (main branch) is currently supported with security updates.
 
-# Dotfiles (v0.2.470)
+| Version | Supported          |
+| ------- | ------------------ |
+| v0.2.x  | :white_check_mark: |
+| < v0.2  | :x:                |
 
-Simply designed to fit your shell life 🐚
+## Reporting a Vulnerability
 
-![Dotfiles banner][banner]
+If you discover a security vulnerability within this repository, please report it via GitHub Issues or contact the maintainer directly.
 
-## Security
+We accept reports for:
+- Exposed secrets or credentials.
+- Insecure configuration patterns.
+- Vulnerabilities in custom scripts.
 
-We take the security of our software products and services seriously,
-which includes all source code repositories managed through our GitHub
-repositories.
+## Security Measures
 
-If you believe you have found a security vulnerability in any of our
-repository, please report it to us as described below.
+This repository employs several automated security measures:
 
-## Reporting Security Issues
+### Static Analysis
+- **CodeQL**: Automated security scanning for code vulnerabilities.
+- **ShellCheck**: Static analysis for shell scripts to prevent common pitfalls.
+- **Codacy**: Automated code quality and security review.
 
-Please include the requested information listed below (as much as you
-can provide) to help us better understand the nature and scope of the
-possible issue:
+### Permissions
+- **Least Privilege**: GitHub Actions workflow permissions are restricted to `contents: read` by default.
+- **Secrets Management**: No secrets are stored in plain text. Sensitive data should be managed via a password manager or `chezmoi`'s secret management features.
 
-* Type of issue (e.g. buffer overflow, SQL injection, cross-site scripting,
-  etc.)
-* Full paths of source file(s) related to the manifestation of the issue
-* The location of the affected source code (tag/branch/commit or direct URL)
-* Any special configuration required to reproduce the issue
-* Step-by-step instructions to reproduce the issue
-* Proof-of-concept or exploit code (if possible)
-* Impact of the issue, including how an attacker might exploit the issue
+## Integrity
 
-This information will help us triage your report more quickly.
-
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+- All commits are verified.
+- Dependency updates are reviewed.

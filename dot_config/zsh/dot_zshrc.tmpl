@@ -1,0 +1,208 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.471) - <https://dotfiles.io>
+# Made with ♥ in London, UK by @sebastienrousseau
+# Copyright (c) 2015-2025. All rights reserved
+# License: MIT
+
+# Performance optimization - skip if not interactive
+[[ -o interactive ]] || return
+
+# Only source once if being re-sourced (in the same shell scope)
+if [[ -v DOTFILES_SOURCED ]]; then
+  return
+fi
+DOTFILES_SOURCED=1
+
+{{- /* Input Validation: Ensure crucial variables are set */ -}}
+{{- if not .chezmoi.homeDir -}}
+  {{- fail "Critical Error: .chezmoi.homeDir is not set!" -}}
+{{- end -}}
+
+{{- if eq .chezmoi.os "darwin" }}
+export FORCE_COLOR_OS="macOS"
+{{- else if eq .chezmoi.os "linux" }}
+export FORCE_COLOR_OS="Linux"
+{{- else if eq .chezmoi.os "windows" }}
+export FORCE_COLOR_OS="Windows"
+{{- end }}
+
+## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set Dotfiles variables
+export HOSTNAME="$(hostname)"                # More portable hostname command
+export INPUTRC="${HOME}/.inputrc"            # Set INPUTRC for readline
+export OS_ARCH="$(uname -m)"                 # Machine hardware name
+export OS_NAME="$(uname)"                    # Operating system name
+export OS_VERSION="$(uname -r)"              # OS version number
+export SSL_CERT_FILE="${HOME}/.local/share/cacert.pem"    # SSL certificate file
+export USER_LANGUAGE="en_GB.UTF-8"           # Default language
+export ARCHFLAGS="-arch ${OS_ARCH}"          # Architecture flags
+export DOTFILES_VERSION='0.2.471'            # Dotfiles version
+export DOTFILES="${HOME}/.dotfiles/lib"      # Path to dotfiles
+export LANG="${USER_LANGUAGE}"               # Language settings
+export LANGUAGE="${USER_LANGUAGE}"
+export LC_ALL="${USER_LANGUAGE}"
+export LC_CTYPE="${USER_LANGUAGE}"
+export TERM="xterm-256color"                 # Terminal color support
+
+###############################
+# 📦 Plugin Manager: Zinit    #
+###############################
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+if [[ ! -f "$ZINIT_HOME/zinit.zsh" ]]; then
+   print -P "%F{33}▓▒░ %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} Initiative Plugin Manager (%F{33}zdharma-continuum/zinit%F{220})…%f"
+   command mkdir -p "$(dirname $ZINIT_HOME)" && command chmod g-rwX "$(dirname $ZINIT_HOME)"
+   command git clone https://github.com/zdharma-continuum/zinit "$ZINIT_HOME" && \
+      print -P "%F{33}▓▒░ %F{34}Installation successful.%f%b" || \
+      print -P "%F{160}▓▒░ The clone has failed.%f%b"
+fi
+
+source "$ZINIT_HOME/zinit.zsh"
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
+
+# Load Zsh Plugins (Async/Turbo mode)
+zinit light zsh-users/zsh-syntax-highlighting
+zinit light zsh-users/zsh-autosuggestions
+zinit light zsh-users/zsh-completions
+
+
+## 🆉🆂🅷 🆂🅿🅴🅲🅸🅵🅸🅲 - Zsh specific settings
+# History configuration
+HISTFILE="${HOME}/.zsh_history"
+HISTSIZE=10000
+SAVEHIST=10000
+setopt HIST_IGNORE_ALL_DUPS     # No duplicate entries
+setopt HIST_SAVE_NO_DUPS        # Don't save duplicates
+setopt HIST_EXPIRE_DUPS_FIRST   # Expire duplicates first
+setopt HIST_FIND_NO_DUPS        # Do not find duplicates in line editor
+setopt HIST_IGNORE_SPACE        # Ignore commands with leading space
+setopt HIST_REDUCE_BLANKS       # Remove unnecessary blanks
+setopt EXTENDED_HISTORY         # Save timestamp and duration
+setopt SHARE_HISTORY            # Share history between sessions
+setopt APPEND_HISTORY           # Append to history file
+
+# Directory navigation
+setopt AUTO_CD                  # Change to dir without 'cd'
+setopt AUTO_PUSHD               # Push dirs to stack automatically
+setopt PUSHD_IGNORE_DUPS        # No duplicates in dir stack
+setopt PUSHD_SILENT             # Don't print dir stack
+
+# Key bindings - improved history search
+bindkey -e  # Use emacs key bindings
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey "^[[A" up-line-or-beginning-search  # Up arrow
+bindkey "^[[B" down-line-or-beginning-search  # Down arrow
+bindkey "^P" up-line-or-beginning-search    # Ctrl+P
+bindkey "^N" down-line-or-beginning-search  # Ctrl+N
+
+# Completion system
+autoload -Uz compinit
+# Only run compinit once a day for better performance
+if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
+fi
+
+# Completion styles - kept from your original
+zstyle ':completion:*' menu select    # Menu-driven completion
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' # Case insensitive
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"   # Colored completion
+zstyle ':completion:*' special-dirs true                  # Complete special directories
+zstyle ':completion:*' verbose yes                        # Verbose completion info
+
+# Enable colors
+autoload -Uz colors && colors
+
+# Disable autocorrection
+unsetopt correct_all
+
+###############################
+# Performance: Auto-Zcompile  #
+###############################
+zcompile_many() {
+  local f
+  for f; do
+    # Compile if source is newer than .zwc or .zwc doesn't exist
+    if [[ -f "$f" ]]; then
+      if [[ ! -f "${f}.zwc" || "$f" -nt "${f}.zwc" ]]; then
+        zcompile "$f"
+      fi
+    fi
+  done
+}
+
+# Compile main config and generated files in background
+if [[ -o interactive ]]; then
+  (
+    zcompile_many "${HOME}/.zshrc" \
+                  "${HOME}/.config/shell/aliases.sh" \
+                  "${HOME}/.config/shell/paths.sh" \
+                  "${HOME}/.config/shell/functions.sh" &!
+  )
+fi
+
+# Legacy Loader (Disabled in favor of Chezmoi Universal Config)
+# _DOTFILES_CACHE="${HOME}/.zsh_dotfiles_cache"
+# load_dotfiles() { ... }
+# load_dotfiles
+
+# Remove duplicates in zsh $PATH
+typeset -aU path
+
+# Load local customizations if they exist
+[[ -f "${HOME}/.zshrc.local" ]] && source "${HOME}/.zshrc.local"
+
+# Vendor / Enterprise Hooks (Site-local overrides)
+# Supports drop-in configs from system management tools
+if [[ -d "/etc/dotfiles/defaults.d" ]]; then
+  for hook in /etc/dotfiles/defaults.d/*.sh(N); do
+    source "$hook"
+  done
+fi
+
+# Load Chezmoi-managed Universal Aliases
+# Load Chezmoi-managed Universal Configuration Layers (Lexical Order)
+# 00-19: Core (Paths, Safety)
+# 20-49: Middleware (Exports, Options)
+# 50-89: Toolchain & Logic (Functions, Rust tools)
+# 90-99: UX (Aliases, Prompts)
+for config_file in "${HOME}/.config/shell/"*.sh(Nom); do
+  source "$config_file"
+done
+
+## AI / Predictive Shell
+[[ -f "$HOME/.config/shell/custom/context_suggest.zsh" ]] && source "$HOME/.config/shell/custom/context_suggest.zsh"
+[[ -f "$HOME/.config/shell/custom/error_analysis.zsh" ]] && source "$HOME/.config/shell/custom/error_analysis.zsh"
+
+# Phase 33: Atuin (Memory Layer)
+if command -v atuin > /dev/null; then
+    eval "$(atuin init zsh)"
+fi
+
+# Starship Prompt (High Performance)
+if command -v starship >/dev/null; then
+  eval "$(starship init zsh)"
+fi
+
+# Zoxide (Smart Directory Jumper) - Replaces 'cd'
+if command -v zoxide >/dev/null; then
+  eval "$(zoxide init zsh)"
+  alias cd="z"
+fi
+
+# FZF (Fuzzy Finder)
+if command -v fzf >/dev/null; then
+  # Source auto-completion and key bindings
+  if [[ -f "/opt/homebrew/opt/fzf/shell/completion.zsh" ]]; then
+    source "/opt/homebrew/opt/fzf/shell/completion.zsh"
+  fi
+  if [[ -f "/opt/homebrew/opt/fzf/shell/key-bindings.zsh" ]]; then
+    source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
+  fi
+  
+  # Use fd/rg for fzf source if available
+  if command -v rg >/dev/null; then
+    export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
+  fi
+fi

@@ -1,0 +1,28 @@
+name: Docker CI
+
+on:
+  push:
+    branches: [ main, v0.2.471 ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  test-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: [ 'ubuntu:latest', 'debian:latest' ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test Installation in Docker
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/root/.local/share/chezmoi ${{ matrix.image }} /bin/bash -c "
+            apt-get update && apt-get install -y git curl &&
+            sh -c \"\$(curl -fsLS get.chezmoi.io)\" -- init --apply --source /root/.local/share/chezmoi &&
+            echo 'Chezmoi applied successfully'
+          "
