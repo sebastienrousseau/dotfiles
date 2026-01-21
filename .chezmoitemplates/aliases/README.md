@@ -51,6 +51,7 @@ During `chezmoi apply`, the main template `dot_config/shell/aliases.sh.tmpl`:
 | `disk-usage`    | Display disk usage information.                  | [View README](disk-usage/README.md) |
 | `editor`        | Configure default text editors.                  | [View README](editor/README.md)   |
 | `find`          | Search files and directories using `find`.       | [View README](find/README.md)     |
+| `fonts`         | Font cache management.                           | [View README](fonts/README.md)    |
 | `gcloud`        | Manage Google Cloud SDK tools.                   | [View README](gcloud/README.md)   |
 | `git`           | Manage Git aliases and configurations.           | [View README](git/README.md)      |
 | `gnu`           | Manage GNU core utilities.                       | [View README](gnu/README.md)      |
