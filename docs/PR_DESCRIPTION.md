@@ -47,6 +47,13 @@ v0.2.471 is not just "dotfiles" but a portable **Shell Distribution** managed by
   - **Renamed**: `dot_config/dotfiles` → `dot_config/shell` for semantic clarity.
   - **Moved**: `bin/` → `dot_local/bin/` for automatic path integration.
   - **Segregated**: Install scripts split by OS (Darwin/Linux) for cleaner logic.
+- **Layered Architecture**: Refactored shell config into explicit layers:
+  - `00-core`: Safety/Paths
+  - `50-logic`: Functions/Toolchain
+  - `90-ux`: Aliases/Theme
+- **Trust & Reproducibility**:
+  - **Pinned Formulae**: Generated `Brewfile.lock.json` for strictly reproducible macOS builds.
+  - **Binary Pinning**: `install.sh` now enforces specific version tags for initial bootstrap.
 ### 🔒 Security & Quality
 - **Conflict Resolution**: Detected and resolved **46 namespace collisions** across all alias modules (Git, Go, Archives, etc.) to ensure zero overlap.
 - **Git Safety**: Renamed colliding Go aliases (e.g., `gr` -> `gor`) to protect core Git commands.
