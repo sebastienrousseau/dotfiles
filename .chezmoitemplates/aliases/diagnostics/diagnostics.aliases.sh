@@ -1,29 +1,17 @@
-# shellcheck shell=bash
-# Diagnostics Aliases
+#!/usr/bin/env bash
+# Diagnostics & Self-Healing Aliases
 
-# JSON Processing (jq)
-if command -v jq &>/dev/null; then
-  alias j='jq'
-  alias jc='jq -C' # Colorize
-  alias jr='jq -r' # Raw output
-fi
+# Health Check
+alias doc='bash $HOME/.local/share/chezmoi/scripts/doctor.sh'
+alias dot-doctor='doc'
 
-# YAML Processing (yq)
-if command -v yq &>/dev/null; then
-  alias yq='yq'
-  alias yqr='yq eval -r' # Raw output
-  alias yqy='yq eval -P' # Pretty print
-fi
+# Drift Detection
+alias drift='chezmoi verify'
+alias dot-drift='drift'
 
-# Netcat (nc)
-if command -v nc &>/dev/null; then
-  alias nc='nc'
-  alias ncl='nc -l' # Listen mode
-  alias ncv='nc -v' # Verbose
-  alias ncz='nc -zv' # Scan ports
-fi
+# Auto-Repair (Sync)
+alias heal='chezmoi apply --verbose'
+alias dot-heal='heal'
 
-# Curlie (Modern curl)
-if command -v curlie &>/dev/null; then
-  alias curl='curlie'
-fi
+# Detailed Doctor (with debug info)
+alias doc-full='bash $HOME/.local/share/chezmoi/scripts/doctor.sh && echo "\n--- Path Info ---" && echo $PATH | tr ":" "\n"'

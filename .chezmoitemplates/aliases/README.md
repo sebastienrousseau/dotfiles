@@ -46,6 +46,7 @@ During `chezmoi apply`, the main template `dot_config/shell/aliases.sh.tmpl`:
 | `configuration` | Manage dotfiles and shell configurations.        | [View README](configuration/README.md) |
 | `default`       | Set up default shell aliases and configurations. | [View README](default/README.md)  |
 | `dig`           | Query DNS name servers.                          | [View README](dig/README.md)      |
+| `diagnostics`   | Self-healing and health checks (doctor, drift).  | [View README](diagnostics/README.md) |
 | `disk-usage`    | Display disk usage information.                  | [View README](disk-usage/README.md) |
 | `editor`        | Configure default text editors.                  | [View README](editor/README.md)   |
 | `find`          | Search files and directories using `find`.       | [View README](find/README.md)     |

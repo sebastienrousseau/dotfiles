@@ -1,25 +1,12 @@
 # Diagnostics Aliases
 
-Manage Diagnostic tool aliases (jq, yq, nc). Part of the **Universal Dotfiles** configuration.
+Tools for self-healing and system health checks.
 
-![Dotfiles banner][banner]
+## 🩺 Health & Repair
 
-## 📖 Description
-
-These aliases are defined in `diagnostics.aliases.sh` and are automatically loaded by `chezmoi`.
-
-## ⚡ Aliases
-
-### json (jq)
-- `j` - jq shortcut
-- `jc` - Colorized output
-- `jr` - Raw output
-
-### yaml (yq)
-- `yq` - yq shortcut
-
-### network (nc)
-- `ncl` - Listen mode
-- `ncz` - Port scan
-
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+| Alias | Description |
+|-------|-------------|
+| `doc`, `dot-doctor` | Run the system health check script (`doctor.sh`). |
+| `drift`, `dot-drift` | Verify if local files have drifted from the managed state (`chezmoi verify`). |
+| `heal`, `dot-heal` | Apply the managed state to repair drift (`chezmoi apply`). |
+| `doc-full` | Run doctor with extended path debugging info. |
