@@ -58,5 +58,13 @@ if ! command -v yazi >/dev/null; then
   log_info "Note: To install Yazi on Linux, use cargo: cargo install --locked yazi-fm"
 fi
 
+# Install Ghostty (Visual Layer)
+if ! command -v ghostty >/dev/null; then
+    log_info "Installing Ghostty..."
+    # Ghostty on Linux currently requires building from source or specific deb/rpm.
+    # For now, we point to the official guide to avoid breaking CI with a heavy build.
+    log_info "⚠️ Ghostty on Linux requires manual install or 'zig build'. See https://ghostty.org/docs/install/linux"
+fi
+
 log_info "🐧 Linux: Setup complete."
 {{- end -}}
