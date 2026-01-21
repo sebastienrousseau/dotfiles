@@ -1,0 +1,22 @@
+# Ghostty Configuration (~/.config/ghostty/config)
+# GPU-Accelerated Terminal
+
+# Appearance
+theme = catppuccin-mocha
+font-family = "RobotoMono Nerd Font" 
+font-size = 13
+cursor-style = block
+cursor-style-blink = false
+window-padding-x = 10
+window-padding-y = 10
+window-decoration = true
+macos-titlebar-style = transparent
+
+# Behavior
+copy-on-select = true
+mouse-hide-while-typing = true
+confirm-close-surface = false # Don't confirm when closing a tab/window
+shell-integration = zsh
+
+# Performance
+gpu-backend = auto

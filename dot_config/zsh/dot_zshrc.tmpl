@@ -166,9 +166,14 @@ fi
 [[ -f "${HOME}/.config/shell/functions.sh" ]] && source "${HOME}/.config/shell/functions.sh"
 [[ -f "${HOME}/.config/shell/aliases.sh" ]] && source "${HOME}/.config/shell/aliases.sh"
 
-## 🧠 Predictive Shell (AI v2)
-[[ -f "${HOME}/.config/shell/custom/context_suggest.zsh" ]] && source "${HOME}/.config/shell/custom/context_suggest.zsh"
-[[ -f "${HOME}/.config/shell/custom/error_analysis.zsh" ]] && source "${HOME}/.config/shell/custom/error_analysis.zsh"
+## AI / Predictive Shell
+[[ -f "$HOME/.config/shell/custom/context_suggest.zsh" ]] && source "$HOME/.config/shell/custom/context_suggest.zsh"
+[[ -f "$HOME/.config/shell/custom/error_analysis.zsh" ]] && source "$HOME/.config/shell/custom/error_analysis.zsh"
+
+# Phase 33: Atuin (Memory Layer)
+if command -v atuin > /dev/null; then
+    eval "$(atuin init zsh)"
+fi
 
 # Starship Prompt (High Performance)
 if command -v starship >/dev/null; then

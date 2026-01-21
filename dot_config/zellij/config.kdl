@@ -1,0 +1,33 @@
+// Zellij Configuration (~/.config/zellij/config.kdl)
+// Modern Terminal Multiplexer
+
+theme "catppuccin-mocha"
+default_layout "compact"
+mouse_mode true
+copy_on_select true
+scroll_buffer_size 10000
+
+// Keybindings (Tmux-like for familiarity)
+keybinds {
+    normal {
+        bind "Ctrl b" { SwitchToMode "Tmux"; }
+    }
+    tmux {
+        bind "n" { NewPane; SwitchToMode "Normal"; }
+        bind "-" { NewPane "Down"; SwitchToMode "Normal"; }
+        bind "|" { NewPane "Right"; SwitchToMode "Normal"; }
+        bind "z" { ToggleFocusFullscreen; SwitchToMode "Normal"; }
+        bind "c" { NewTab; SwitchToMode "Normal"; }
+        bind "1" { GoToTab 1; SwitchToMode "Normal"; }
+        bind "2" { GoToTab 2; SwitchToMode "Normal"; }
+        bind "3" { GoToTab 3; SwitchToMode "Normal"; }
+        bind "4" { GoToTab 4; SwitchToMode "Normal"; }
+        bind "Esc" { SwitchToMode "Normal"; }
+    }
+}
+
+ui {
+    pane_frames {
+        rounded_corners true
+    }
+}
