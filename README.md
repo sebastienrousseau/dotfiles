@@ -122,7 +122,7 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles
 After installation:
 1. **Restart your terminal.**
 2. You should see the `starship` prompt and have access to new aliases (e.g., try `l` for `eza`).
-3. View the **[Operational Guide](OPERATIONS.md)** for daily usage instructions.
+3. View the **[Operational Guide](docs/OPERATIONS.md)** for daily usage instructions.
 
 ![divider][divider]
 
