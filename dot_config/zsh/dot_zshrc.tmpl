@@ -162,9 +162,14 @@ if [[ -d "/etc/dotfiles/defaults.d" ]]; then
 fi
 
 # Load Chezmoi-managed Universal Aliases
-[[ -f "${HOME}/.config/shell/paths.sh" ]] && source "${HOME}/.config/shell/paths.sh"
-[[ -f "${HOME}/.config/shell/functions.sh" ]] && source "${HOME}/.config/shell/functions.sh"
-[[ -f "${HOME}/.config/shell/aliases.sh" ]] && source "${HOME}/.config/shell/aliases.sh"
+# Load Chezmoi-managed Universal Configuration Layers (Lexical Order)
+# 00-19: Core (Paths, Safety)
+# 20-49: Middleware (Exports, Options)
+# 50-89: Toolchain & Logic (Functions, Rust tools)
+# 90-99: UX (Aliases, Prompts)
+for config_file in "${HOME}/.config/shell/"*.sh(Nom); do
+  source "$config_file"
+done
 
 ## AI / Predictive Shell
 [[ -f "$HOME/.config/shell/custom/context_suggest.zsh" ]] && source "$HOME/.config/shell/custom/context_suggest.zsh"

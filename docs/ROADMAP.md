@@ -9,7 +9,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 > *This distribution aims for deterministic rebuilds: the same tag yields the same environment across machines.*
 
 - [ ] **Pinned Formulae**: Strict version locking for Homebrew bundle and Apt packages.
-- [ ] **Binary Locking**: Sha256 verification for all binary downloads in `install.sh`.
+- [ ] **Binary Locking**: Future versions may replace bootstrap download helpers with checksum-verified artifacts once a portable verification strategy is finalized.
 - [ ] **State Capture**: `chezmoi` templates that capture host-specific state for idempotence.
 - [ ] **Manifests**: Optional `Brewfile.lock` or equivalent for Linux.
 - [ ] **Cloud-Init (Phase 28)**: Generate `user-data` scripts for AWS/GCP bootstrapping.
