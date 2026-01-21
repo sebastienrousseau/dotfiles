@@ -129,14 +129,18 @@ The configuration is managed in `~/.local/share/chezmoi`. This is your "source" 
 
 ```
 ~/.local/share/chezmoi/
-├── dot_zshrc.tmpl          # Main Zsh configuration
-├── dot_vimrc               # Vim configuration
-├── dot_tmux.conf           # Tmux configuration
-├── run_onchange_...        # Installation scripts (Brewfile, Apt, etc.)
-├── dot_config/
-│   ├── shell/              # Core shell config (aliases, paths, functions)
-│   └── starship.toml.tmpl  # Prompt configuration
-└── SCRIPTS/                # Benchmark and maintenance scripts
+├── dot_zshenv              # Shell entry point (XDG Bootloader)
+├── dot_config/             # XDG Base Config (Mapped to ~/.config)
+│   ├── zsh/                # Zsh config (.zshrc)
+│   ├── tmux/               # Tmux config (tmux.conf)
+│   ├── vim/                # Vim config (vimrc)
+│   └── shell/              # Shared shell config (aliases, paths)
+├── provision/              # Lifecycle scripts (install packages, fonts)
+│   ├── 10-packages...
+│   └── 50-fonts...
+├── install.sh              # Universal Installer
+├── README.md               # Documentation
+└── docs/                   # Detailed documentation
 ```
 
 ## Usage 📖

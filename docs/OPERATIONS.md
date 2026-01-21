@@ -52,4 +52,4 @@ To measure shell startup time against the <20ms target:
 ```
 
 ## 🔐 Security
-Refer to [SECURITY.md](SECURITY.md) for vulnerability reporting and security policies.
+Refer to [SECURITY.md](../.github/SECURITY.md) for vulnerability reporting and security policies.
