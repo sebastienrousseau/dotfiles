@@ -56,6 +56,8 @@ During `chezmoi apply`, the main template `dot_config/shell/aliases.sh.tmpl`:
 | `git`           | Manage Git aliases and configurations.           | [View README](git/README.md)      |
 | `gnu`           | Manage GNU core utilities.                       | [View README](gnu/README.md)      |
 | `heroku`        | Manage Heroku CLI.                               | [View README](heroku/README.md)   |
+| `immutability`  | Lock/Unlock critical files (`chflags`/`chattr`). | [View README](immutability/README.md) |
+| `installer`     | Bootstrap and remote deployment tools.           | [View README](installer/README.md) |
 | `interactive`   | Configure interactive shell behavior.            | [View README](interactive/README.md) |
 | `kubernetes`    | Manage Kubernetes, Helm, and K9s aliases.        | [View README](kubernetes/README.md) |
 | `legal`         | License scanning and compliance tools.           | [View README](legal/README.md)      |
