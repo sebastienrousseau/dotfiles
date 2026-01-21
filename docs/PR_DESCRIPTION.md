@@ -7,20 +7,27 @@ feat(core): Rel v0.2.471 - Universal Config, Security & Performance
 
 This release transforms the dotfiles into a high-performance, universally compatible system managed by **chezmoi**.
 
-### ✨ Key Features
-- **Universal Support**: One codebase for macOS, Linux (Ubuntu/Debian), and Windows (WSL).
-- **Instant Startup**: Zsh startup time reduced to <20ms (Verified via `hyperfine`).
-- **Modern Tooling**:
+### 🏗️ Technical Architecture
+v0.2.471 is not just "dotfiles" but a portable **Shell Distribution** managed by `chezmoi` ("source of truth" in `~/.local/share/chezmoi`).
+
+- **XDG-First**: Configs strictly mapped to `~/.config/` (No `~/.foo` sprawl).
+- **Single Entrypoint**: `dot_zshenv` acts as an XDG bootloader for instant environment setup.
+- **Modern Toolchain**: Replaces classic Unix tools with high-performance Rust alternatives:
   - `ls` → `eza`
   - `cat` → `bat`
   - `grep` → `ripgrep`
-  - `cd` → `zoxide`
-  - `cd` → `zoxide`
-- **Neovim IDE**: Full IDE capability (LSP, DAP, Test) with `Lazy.nvim` management.
-- **Security**: Added standard `SECURITY.md` policy.
-- **Robustness**: Hardened package installation with `set -euo pipefail` and audit logging.
-- **Audit Logging**: Runtime logging of all `chezmoi apply` events to `~/.dotfiles_audit.log`.
-- **Documentation**: Comprehensive guides including `OPERATIONS.md`.
+  - `cd` → `zoxide` (Smart Directory Jumping)
+  - `history` → `atuin` (Syncable, Encrypted SQlite history)
+- **Predictive Shell**:
+  - **AI Strategy**: Context-aware autosuggestions coupled with optional local LLM integration (`ai_core`).
+  - **Error Analysis**: Smart wrappers to analyze command failures via `gh copilot` or local models.
+
+### 🛡️ Security Posture
+- **Hardened by Default**: Scripts run with `set -euo pipefail` to fail fast on errors.
+- **Supply Chain Safety**:
+  - **Pinned Install**: Installation commands are pinned to the specific release tag (`v0.2.471`) to prevent drift.
+  - **Zero-Trust**: No implicit reliance on `main` branch code in production.
+- **Audit Logging**: All `chezmoi` mutations are logged to `~/.dotfiles_audit.log` for day-2 operations review.
 
 ### 🛠️ Changes
 - **Migrated**:
