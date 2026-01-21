@@ -37,15 +37,12 @@ Simply designed to fit your shell life 🐚
 
 ## Overview 📖
 
-Dotfiles are a powerful set of configuration files for macOS, Linux, and
-Windows providing scripts and customized settings to streamline your
-workflow. These files are an essential tool for developers and users who
-want to modify their environment and applications to their exact needs.
+Dotfiles v0.2.471 transforms your shell into a **Trusted Platform**. It is a curated, high-performance distribution of configurations, managed by `chezmoi`.
 
-The Dotfiles library are combined into a single `lib` directory. This
-directory allows you to easily setup your development environment across
-numerous computers and operating systems, ensuring consistency and
-productivity no matter where you work.
+Unlike traditional "dotfile repos" that sprawl across your home directory, this project:
+1.  **Centralizes Truth**: All config lives in `~/.local/share/chezmoi` (XDG-compliant).
+2.  **Guarantees Reproducibility**: Binary-pinned installers and lockfiles ensure identical setups across machines.
+3.  **Prioritizes Security**: Default settings are hardened (`set -euo pipefail`), audits are logged, and secrets are strictly separated.
 
 <!-- markdownlint-disable MD033 MD041 MD043 -->
 <br>
