@@ -22,11 +22,17 @@ v0.2.471 is not just "dotfiles" but a portable **Shell Distribution** managed by
   - **AI Strategy**: Context-aware autosuggestions coupled with optional local LLM integration (`ai_core`).
   - **Error Analysis**: Smart wrappers to analyze command failures via `gh copilot` or local models.
 
+### 🚫 Non-Goals
+- **Not a Framework**: This is a curated distribution, not a plugin manager like Oh-My-Zsh.
+- **Not POSIX-Pure**: Prioritizes modern Zsh/Rust features over strict POSIX compliance.
+- **Not Minimal**: Optimizes for functionality and speed, not line-count minimalism.
+
 ### 🛡️ Security Posture
 - **Hardened by Default**: Scripts run with `set -euo pipefail` to fail fast on errors.
 - **Supply Chain Safety**:
   - **Pinned Install**: Installation commands are pinned to the specific release tag (`v0.2.471`) to prevent drift.
   - **Zero-Trust**: No implicit reliance on `main` branch code in production.
+- **Threat Model**: This project assumes a **trusted local machine** and focuses on supply-chain (pinned versions) and configuration safety (immutable history).
 - **Audit Logging**: All `chezmoi` mutations are logged to `~/.dotfiles_audit.log` for day-2 operations review.
 
 ### 🛠️ Changes
@@ -118,6 +124,7 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles
 
 #### Option B: Migration (Upgrade from `master` / v1)
 ⚠️ **Important**: This release changes the architecture from direct symlinks to `chezmoi` templates. Functional backups are recommended.
+**Compatibility Note**: Existing `chezmoi` users can simply run `chezmoi apply` to upgrade, but the full installer is recommended for major version jumps.
 
 1. **Backup Legacy Configs**:
    ```bash
