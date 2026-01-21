@@ -139,11 +139,19 @@
 - [x] **VoiceOps**: Experimental voice command integration via Whisper.
 - [x] **Error Analysis**: When a command fails, auto-query LLM for root cause and fix.
 
-## 27. Phase 33: Immutable Workstations
-- [ ] **NixOS Flakes**: Full port to NixOS flakes for truly reproducible system states.
-- [ ] **Silverblue/OSTree**: Support for immutable Linux distributions (Fedora Silverblue).
-- [ ] **System Snapshots**: Btrfs/ZFS snapshot integration before any config change.
-- [ ] **Rollback**: One-command `dot rollback` to revert to previous state.
+## 27. Phase 33: The "Memory Layer" (History v2) [HIGH PRIORITY]
+- [ ] **Atuin**: Replace Zsh history with SQLite-backed, syncable shell history.
+  - *Benefit*: End-to-end encrypted sync, search by exit code/duration.
+- [ ] **McFly**: Neural network-powered history search (alternative to fzf).
+
+## 28. Phase 34: The "Visual Layer" (TUI v2) [HIGH PRIORITY]
+- [ ] **Yazi**: Rust-based terminal file manager (replaces Ranger).
+  - *Benefit*: Instant startup, image previews (Sixel/Kitty), async I/O.
+- [ ] **Zellij**: Modern terminal multiplexer (replaces Tmux for new users).
+  - *Benefit*: Layout engine, floating panes, intuitive keybindings.
+- [ ] **Ghostty**: Configuration for the new GPU-accelerated terminal.
+
+## 29. Phase 35: Immutable Workstations
 
 ## 28. Phase 34: Cross-Compiler Toolchain
 - [ ] **Multi-Arch**: Auto-setup `qemu-user-static` for ARM64/AMD64 cross-compilation.
