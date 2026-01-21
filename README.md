@@ -112,7 +112,7 @@ We use `chezmoi` for a one-line installation process. This will:
 **Run the following command:**
 
 ```bash
-sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply sebastienrousseau
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 ```
 
 *Note: This will verify your system and prompt you for any necessary inputs.*

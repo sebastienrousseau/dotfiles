@@ -26,7 +26,7 @@ Welcome to your universally compatible, high-performance dotfiles configuration,
 To install these dotfiles on a new machine, simply run:
 
 ```bash
-sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply sebastienrousseau
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 ```
 
 This command will:
