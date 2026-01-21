@@ -18,61 +18,59 @@ return {
       "hrsh7th/cmp-nvim-lsp",
     },
     config = function()
-      -- 1. Ensure binaries are installed via Mason
-      require("mason-lspconfig").setup({
-        ensure_installed = { "bashls", "lua_ls", "basedpyright", "ruff" },
-      })
-      
-      -- 2. Setup servers using direct require to avoid 'lspconfig' module deprecation warning
+      -- 1. Setup capabilities for LSP
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
       
-      local function setup(server, opts)
-        local ok, config = pcall(require, "lspconfig.configs." .. server)
-        if not ok then
-           local lsp = require("lspconfig")
-           if lsp[server] then lsp[server].setup(opts) end
-           return
-        end
-        if config.setup then config.setup(opts) end
-      end
-
-      -- Lua
-      setup("lua_ls", {
-        capabilities = capabilities,
-        settings = {
-          Lua = {
-            diagnostics = { globals = { "vim" } },
-            workspace = { checkThirdParty = false },
-            telemetry = { enable = false },
-            hint = { enable = true },
-          },
+      -- 2. Setup mason-lspconfig with handlers (prevents automatic_enable errors)
+      require("mason-lspconfig").setup({
+        ensure_installed = { "bashls", "lua_ls", "basedpyright", "ruff" },
+        automatic_installation = false, -- Disable automatic installation to prevent errors
+        automatic_setup = false, -- CRITICAL: Disable automatic_enable feature that causes errors
+        handlers = {
+          -- Default handler for all servers
+          function(server_name)
+            require("lspconfig")[server_name].setup({
+              capabilities = capabilities,
+            })
+          end,
+          
+          -- Custom handler for lua_ls
+          ["lua_ls"] = function()
+            require("lspconfig").lua_ls.setup({
+              capabilities = capabilities,
+              settings = {
+                Lua = {
+                  diagnostics = { globals = { "vim" } },
+                  workspace = { checkThirdParty = false },
+                  telemetry = { enable = false },
+                  hint = { enable = true },
+                },
+              },
+            })
+          end,
+          
+          -- Custom handler for basedpyright
+          ["basedpyright"] = function()
+            require("lspconfig").basedpyright.setup({
+              capabilities = capabilities,
+              settings = {
+                basedpyright = {
+                  analysis = {
+                    typeCheckingMode = "basic",
+                    autoSearchPaths = true,
+                    useLibraryCodeForTypes = true,
+                    diagnosticMode = "openFilesOnly",
+                    inlayHints = {
+                      variableTypes = true,
+                      functionReturnTypes = true,
+                    },
+                  }
+                }
+              }
+            })
+          end,
         },
       })
-      
-      -- Python (basedpyright)
-      setup("basedpyright", {
-        capabilities = capabilities,
-        settings = {
-           basedpyright = {
-              analysis = {
-                 typeCheckingMode = "basic",
-                 autoSearchPaths = true,
-                 useLibraryCodeForTypes = true,
-                 diagnosticMode = "openFilesOnly",
-                 inlayHints = {
-                    variableTypes = true,
-                    functionReturnTypes = true,
-                 },
-              }
-           }
-        }
-      })
-      
-      -- Ruff (Linting)
-      setup("ruff", { capabilities = capabilities })
-      
-      -- Bash
-      setup("bashls", { capabilities = capabilities })
 
       -- Diagnostic Configuration
       vim.diagnostic.config({

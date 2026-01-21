@@ -4,13 +4,19 @@ return {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     event = { "BufReadPost", "BufNewFile" },
-    opts = {
-      ensure_installed = { "python", "markdown", "json", "toml", "yaml", "bash", "vim", "regex", "lua", "rust", "dockerfile" },
-      highlight = { enable = true },
-      indent = { enable = true },
-    },
-    config = function(_, opts)
-      require("nvim-treesitter.configs").setup(opts)
+    config = function()
+      -- Use correct module path (config, not configs)
+      local ok, ts_config = pcall(require, "nvim-treesitter.config")
+      if not ok then
+        -- Treesitter not installed yet, skip configuration
+        return
+      end
+      
+      ts_config.setup({
+        ensure_installed = { "python", "markdown", "json", "toml", "yaml", "bash", "vim", "regex", "lua", "rust", "dockerfile" },
+        highlight = { enable = true },
+        indent = { enable = true },
+      })
     end,
   },
 
