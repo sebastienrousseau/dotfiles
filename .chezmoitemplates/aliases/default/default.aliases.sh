@@ -58,7 +58,8 @@ set_default_aliases() {
     alias halt='sudo /sbin/halt'
 
     # Alias to view history
-    alias history='dotfiles_history'
+    # Alias to view history
+    # alias history='history 0' # Default shell history is sufficient
 
     # Poweroff the system.
     alias poweroff='sudo /sbin/shutdown'
