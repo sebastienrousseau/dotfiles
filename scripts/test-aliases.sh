@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# MIT License
+# Copyright (c) 2026 Sebastien Rousseau
+# See LICENSE file for details.
 
 # Script: test-aliases.sh
 # Description: Verifies disjoint alias files for syntax errors.
