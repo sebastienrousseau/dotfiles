@@ -26,7 +26,7 @@ fi
 
 # Helm
 if command -v helm &>/dev/null; then
-  alias h='helm'
+  # alias h='helm' # Reserved for history
   alias hi='helm install'
   alias hu='helm upgrade'
   alias hls='helm list'

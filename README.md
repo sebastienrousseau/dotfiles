@@ -66,6 +66,7 @@ productivity no matter where you work.
 - **Instant Startup**: Zsh startup time reduced to <20ms (Verified via `hyperfine`).
 - **Modern Tooling**: Replaces legacy Unix tools with Rust-based alternatives for better performance and UX.
 - **Security**: Hardened configurations with audit logging and strict error handling.
+- **Predictive Shell**: AI-powered context autosuggestions, error analysis, and local LLM integration.
 - **Modular Design**: Powered by `chezmoi` for seamless management and updates.
 
 ![divider][divider]

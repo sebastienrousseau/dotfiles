@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#
+# voice_ops.sh - Experimental Voice Operations
+#
+
+echo "VoiceOps is experimental and not yet fully implemented."
+echo "This feature will use Whisper for local speech-to-text."

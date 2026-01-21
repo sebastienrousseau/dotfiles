@@ -71,6 +71,8 @@ HISTSIZE=10000
 SAVEHIST=10000
 setopt HIST_IGNORE_ALL_DUPS     # No duplicate entries
 setopt HIST_SAVE_NO_DUPS        # Don't save duplicates
+setopt HIST_EXPIRE_DUPS_FIRST   # Expire duplicates first
+setopt HIST_FIND_NO_DUPS        # Do not find duplicates in line editor
 setopt HIST_IGNORE_SPACE        # Ignore commands with leading space
 setopt HIST_REDUCE_BLANKS       # Remove unnecessary blanks
 setopt EXTENDED_HISTORY         # Save timestamp and duration
@@ -163,6 +165,10 @@ fi
 [[ -f "${HOME}/.config/shell/paths.sh" ]] && source "${HOME}/.config/shell/paths.sh"
 [[ -f "${HOME}/.config/shell/functions.sh" ]] && source "${HOME}/.config/shell/functions.sh"
 [[ -f "${HOME}/.config/shell/aliases.sh" ]] && source "${HOME}/.config/shell/aliases.sh"
+
+## 🧠 Predictive Shell (AI v2)
+[[ -f "${HOME}/.config/shell/custom/context_suggest.zsh" ]] && source "${HOME}/.config/shell/custom/context_suggest.zsh"
+[[ -f "${HOME}/.config/shell/custom/error_analysis.zsh" ]] && source "${HOME}/.config/shell/custom/error_analysis.zsh"
 
 # Starship Prompt (High Performance)
 if command -v starship >/dev/null; then

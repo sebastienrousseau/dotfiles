@@ -25,12 +25,14 @@ if command -v apt-get >/dev/null; then
 
   $sudo_cmd apt-get update
   # Add your packages here
-  # packages=(
-  #   curl
-  #   git
-  #   zsh
-  # )
-  # sudo apt-get install -y "${packages[@]}"
+  packages=(
+    curl
+    git
+    zsh
+    unzip
+    fontconfig
+  )
+  $sudo_cmd apt-get install -y "${packages[@]}"
 fi
 
 log_info "🐧 Linux: Setup complete."
