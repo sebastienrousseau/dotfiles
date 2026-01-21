@@ -53,13 +53,18 @@ fi
 
 # 4. Initialize & Apply
 step "Applying Configuration..."
+
+# VERSION pinning for supply-chain security
+VERSION="v0.2.471"
+
 # If we are running from the repo itself, just apply
 if [ -d "$HOME/.local/share/chezmoi/.git" ]; then
     echo "   Applying from local source..."
     chezmoi apply
 else
-    echo "   Initializing from GitHub..."
-    chezmoi init --apply sebastienrousseau
+    echo "   Initializing from GitHub (Tag: $VERSION)..."
+    # STRICT MODE: We pin to the specific tag to avoid 'main' branch drift
+    chezmoi init --apply sebastienrousseau --branch "$VERSION"
 fi
 
 success
