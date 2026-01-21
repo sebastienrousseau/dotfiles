@@ -58,6 +58,7 @@ Simply design to fit your shell life
         inc_rename = false, -- enables an input dialog for inc-rename.nvim
         lsp_doc_border = true, -- add a border to hover docs and signature help
       },
+      notify = { enabled = false }, -- Fix: Allow nvim-notify to handle notifications directly
     }
   },
 

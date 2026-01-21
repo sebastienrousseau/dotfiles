@@ -147,16 +147,14 @@ return {
   -- Venv Selector (Python Env Management)
   {
     "linux-cultist/venv-selector.nvim",
-    branch = "regexp", -- Use the regexp branch for the latest stable version
+    branch = "main", -- Explicitly switch back to main
     dependencies = { "neovim/nvim-lspconfig", "nvim-telescope/telescope.nvim", "mfussenegger/nvim-dap-python" },
     cmd = "VenvSelect",
     keys = { { "<leader>cv", "<cmd>VenvSelect<cr>", desc = "Select VirtualEnv" } },
     opts = {
-        settings = {
-            options = {
-                notify_user_on_venv_activation = true,
-            },
-        },
+        name = { "venv", ".venv", "env", ".env" }, 
+        auto_refresh = false, -- Disable auto-scan to prevent home dir timeouts
+        dap_enabled = true,
     },
   },
 }
