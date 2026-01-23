@@ -1,0 +1,17 @@
+# uv global configuration
+
+# Use managed Python versions by default
+# This ensures reproducible environments rather than relying on system python
+python-preference = "managed"
+
+# Download Python versions automatically if missing
+python-downloads = "automatic"
+
+# Use symlinks for virtual environments (faster than copying)
+link-mode = "symlink"
+
+# Enable native TLS (performance)
+native-tls = true
+
+# Cache directory (optional, default is usually fine)
+# cache-dir = "/home/seb/.cache/uv"
