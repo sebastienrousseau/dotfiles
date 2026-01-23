@@ -46,17 +46,17 @@ This project aims to provide a reproducible and optimized development environmen
 ## Features ✨
 
 - **Shell:**
-    - **`zsh`** as the default shell, with a rich set of plugins managed by **`zinit`**.
+    - **`zsh`** configuration with a rich set of plugins managed by **`zinit`** (recommended default shell).
     - **`starship`** for a modern, fast, and customizable prompt.
     - **`fzf`** for fuzzy finding files, commands, and more.
     - **`zoxide`** for a smarter `cd` command that remembers your frequently used directories.
     - **`atuin`** for a powerful shell history with synchronization and search capabilities.
 - **Terminal:**
-    - **`zellij`** as a terminal workspace and multiplexer.
-    - **`ghostty`** as a fast, GPU-accelerated terminal emulator.
+    - **`zellij`** as a terminal workspace and multiplexer (manual install on Linux).
+    - **`ghostty`** as a fast, GPU-accelerated terminal emulator (manual install on Linux).
 - **Development:**
     - **Neovim (Nightly)** as the primary text editor, with a modern Lua-based configuration using `lazy.nvim`.
-    - **Go**, **Rust**, **Node.js**, and **Python** development environments managed by `go`, `rustup`, `fnm`, and `uv` respectively.
+    - **Go**, **Rust**, and **Python** development environments supported (Go/Rust require manual install on Linux; macOS via Brewfile).
     - A comprehensive set of LSPs, linters, and formatters managed by `mason.nvim`.
 - **CLI Tools:**
     - Modern replacements for core Unix utilities: `eza` (ls), `bat` (cat), `fd` (find), `ripgrep` (grep).
@@ -84,22 +84,22 @@ The `Brewfile` in this repository is the single source of truth for all dependen
 <details>
 <summary><strong>Debian / Ubuntu</strong></summary>
 
-The `provision/run_onchange_10-linux-packages.sh.tmpl` script will attempt to install most of the dependencies using `apt-get`, `curl`, and `cargo`.
+The `provision/run_onchange_10-linux-packages.sh.tmpl` script will attempt to install most of the dependencies using `apt-get`, `curl`, and verified GitHub release downloads. `cargo` is required for `delta`.
 
 ```bash
 # Update package list and install base dependencies
 sudo apt-get update
-sudo apt-get install -y git curl zsh golang-go build-essential ripgrep fd-find bat jq yq
+sudo apt-get install -y git curl zsh build-essential ripgrep fd-find bat jq yq
 
-# Install Rust to get cargo
+# Install Rust to get cargo (required for delta)
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-The following tools will be installed by the script:
+The following tools will be installed by the script (Linux):
 - `starship`, `zoxide`, `fzf`, `neovim` (nightly), `lazygit`, `atuin`, `zellij`, `delta` (via cargo), `uv`.
 
-The following tools need to be installed manually:
-- `ghostty`, `yazi`, `ollama`, `fabric`.
+The following tools need to be installed manually (Linux):
+- `ghostty`, `yazi`, `ollama`, `fabric`, `go`, `rustup` (if not already installed).
 
 </details>
 
@@ -242,7 +242,7 @@ Apache License (Version 2.0).
 [08]: https://www.debian.org/ "Debian"
 [09]: https://www.deepin.org/en/ "Deepin"
 [10]: https://devuan.org/ "Devuan"
-[11]: https://github.com/sebastienrousseau/dotfiles/docs "Documentation"
+[11]: https://github.com/sebastienrousseau/dotfiles/tree/master/docs "Documentation"
 [12]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.472.tar.gz "Download Dotfiles v0.2.472"
 [13]: https://github.com/sebastienrousseau/dotfiles/network/members "List of members"
 [14]: https://github.com/sebastienrousseau/dotfiles/graphs/contributors "List of contributors"
@@ -275,5 +275,4 @@ Apache License (Version 2.0).
 [getting_started]: https://kura.pro/common/images/buttons/button-primary.svg "Getting Started"
 [license]: https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge\&color=ff69b4 "License"
 [love]: https://kura.pro/common/images/shields/made-with-love.svg "Made with Love"
-
 
