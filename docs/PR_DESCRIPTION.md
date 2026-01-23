@@ -36,6 +36,16 @@ v0.2.472 is not just "dotfiles" but a portable **Shell Distribution** managed by
 - **Audit Logging**: All `chezmoi` mutations are logged to `~/.dotfiles_audit.log` for day-2 operations review.
 
 ### 🛠️ Changes
+- **Installer Hardening**:
+  - Verified and pinned `chezmoi` bootstrap downloads (SHA256).
+  - Linux provisioning now verifies release downloads (Starship, Zoxide, Neovim, Lazygit, Atuin, Zellij, UV).
+  - Added GitHub API auth support + fallback to direct release URLs.
+  - Configurable Neovim nightly checksum suffix via `NEOVIM_NIGHTLY_SHA_SUFFIX`.
+- **Shell Safety & Tests**:
+  - `fc -W` guarded for zsh only; bash uses `history -a`.
+  - Bash alias expansion enabled in generated aliases to make non-interactive tests reliable.
+- **Portability**:
+  - Removed hardcoded `/home/seb` paths from Neovim scripts.
 - **Migrated**:
   - Shell: `~/.zshrc` now sources generated templates from `~/.config/shell`.
   - Shell: `~/.zshrc` now sources generated templates from `~/.config/shell`.
