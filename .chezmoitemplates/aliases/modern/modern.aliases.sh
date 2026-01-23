@@ -3,19 +3,20 @@
 # Modern Tooling Aliases (Rust Replacements) & Listing
 
 # Eza (Replacement for ls) OR Fallback
+# Disabled because .zshrc handles this explicitly with better defaults
 if command -v eza >/dev/null; then
-  alias ls="eza --icons --group-directories-first"
-  alias ll="eza -alF --icons --group-directories-first"
-  alias la="eza -a --icons --group-directories-first"
-  alias lt="eza -aT --icons --group-directories-first"
+  : # alias ls="eza --icons --group-directories-first"
+  : # alias ll="eza -alF --icons --group-directories-first"
+  : # alias la="eza -a --icons --group-directories-first"
+  : # alias lt="eza -aT --icons --group-directories-first"
 else
   # Fallback to ls
-  alias ls='ls'
-  alias l='ls'
-  alias ll='ls -lA'
-  alias llm='ls -ltA'
-  alias la='ls -a'
-  alias lx='ls -la'
+  : # alias ls='ls'
+  : # alias l='ls'
+  : # alias ll='ls -lA'
+  : # alias llm='ls -ltA'
+  : # alias la='ls -a'
+  : # alias lx='ls -la'
 fi
 
 # Tree (or fallback)
@@ -32,7 +33,8 @@ fi
 
 # Ripgrep (Replacement for grep)
 if command -v rg >/dev/null; then
-  alias grep="rg"
+  # alias grep="rg" # Disabled: Breaks scripts
+  alias rg="rg"
 fi
 
 # Zoxide (Replacement for cd)

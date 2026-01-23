@@ -172,9 +172,31 @@ fi
 # that cause "rg: error parsing flag -E: grep config error: unknown encoding: VGA|3D"
 # The 90-ux-aliases.sh file alone contains 178KB of aliases, many with deprecated flags.
 #
-# for config_file in "${HOME}/.config/shell/"*.sh(Nom); do
-#   source "$config_file"
-# done
+# Optimized loading of core configurations
+if [[ -f "${HOME}/.config/shell/00-core-paths.sh" ]]; then
+  source "${HOME}/.config/shell/00-core-paths.sh"
+fi
+
+# Load Universal Aliases (Restored after fixing grep flags)
+if [[ -f "${HOME}/.config/shell/90-ux-aliases.sh" ]]; then
+  source "${HOME}/.config/shell/90-ux-aliases.sh"
+fi
+
+# Essential Aliases (since 90-ux-aliases.sh is disabled)
+if command -v bat >/dev/null; then
+  alias cat="bat"
+fi
+
+# Smart Alias Function (Colorize output when listing, standard behavior otherwise)
+alias_wrapper() {
+  if [[ $# -eq 0 ]]; then
+     builtin alias | bat -l sh --style=plain
+  else
+     builtin alias "$@"
+  fi
+}
+alias alias=alias_wrapper
+
 
 ## AI / Predictive Shell
 [[ -f "$HOME/.config/shell/custom/context_suggest.zsh" ]] && source "$HOME/.config/shell/custom/context_suggest.zsh"

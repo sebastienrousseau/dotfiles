@@ -184,6 +184,22 @@ For transparency into our release cycle and in striving to maintain backward com
 
 - See [Dotfiles Release][24] for a list of changes.
 
+## Troubleshooting & Fixes (PR #62) 🔧
+
+We have addressed several compatibility and configuration issues in this release:
+
+1.  **Shell Configuration**:
+    - Fixed Zsh not loading as the default shell in some terminal emulators.
+    - Resolved `ls`/`grep` alias conflicts causing syntax errors.
+    - Added smart `alias` wrapper for colorized output.
+2.  **Terminal Integration**:
+    - Fixed Ghostty monochrome theme by forcing `Xcode Dark`.
+    - Ensured `eza` icons and git integration render correctly.
+3.  **App Compatibility**:
+    - Resolved Atuin "Permission denied" errors by removing conflicting Snap packages.
+4.  **Drift Resolution**:
+    - Fixed Chezmoi drift in `provision/00-audit.sh`.
+
 ## Changelog ✅
 
 - [GitHub Releases][24] are used for changelogs.
