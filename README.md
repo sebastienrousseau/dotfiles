@@ -44,110 +44,108 @@ Unlike traditional "dotfile repos" that sprawl across your home directory, this 
 2.  **Guarantees Reproducibility**: Binary-pinned installers and lockfiles ensure identical setups across machines.
 3.  **Prioritizes Security**: Default settings are hardened (`set -euo pipefail`), audits are logged, and secrets are strictly separated.
 
-<!-- markdownlint-disable MD033 MD041 MD043 -->
-<br>
-<center>
-<!-- markdownlint-enable MD033 MD041 -->
-
-[![Getting Started][getting_started]][getting-started-url]
-[![Download Dotfiles v0.2.472][download_button]][12]
-
-<!-- markdownlint-disable MD033 MD041 MD043 -->
-</center>
-<br />
-<!-- markdownlint-enable MD033 MD041 -->
-
-## Features ✨
-
-- **Universal Support**: One codebase for macOS, Linux (Ubuntu/Debian), and Windows (WSL).
-- **Instant Startup**: Zsh startup time reduced to <20ms (Verified via `hyperfine`).
-- **Modern Tooling**: Replaces legacy Unix tools with Rust-based alternatives for better performance and UX.
-- **Security**: Hardened configurations with audit logging and strict error handling.
-- **Predictive Shell**: AI-powered context autosuggestions, error analysis, and local LLM integration.
-- **Modular Design**: Powered by `chezmoi` for seamless management and updates.
-- **System & Application Tuning**: Includes performance tuning for the kernel and browser optimization for a better developer experience.
-
 ![divider][divider]
 
-## Modern Tooling 🛠️
+## Prerequisites
 
-We have replaced traditional Unix commands with modern, faster, and feature-rich alternatives:
+Before you begin, ensure you have the following dependencies installed on your system.
 
-| Legacy Tool | Modern Replacement | Description |
-|:---:|:---:|---|
-| `ls` | **[eza](https://eza.rocks/)** | A modern, maintained replacement for `ls` with icons and git integration. |
-| `cat` | **[bat](https://github.com/sharkdp/bat)** | A `cat` clone with syntax highlighting and Git integration. |
-| `grep` | **[ripgrep (rg)](https://github.com/BurntSushi/ripgrep)** | Line-oriented search tool that recursively searches your current directory. |
-| `cd` | **[zoxide](https://github.com/ajeetdsouza/zoxide)** | A smarter `cd` command that remembers your frequently used directories. |
-| `find` | **[fd](https://github.com/sharkdp/fd)** | A simple, fast and user-friendly alternative to `find`. |
-| `history` | **[atuin](https://atuin.sh)** | Sync, search and backup shell history with E2E encryption. |
-| `ranger` | **[yazi](https://yazi-rs.github.io)** | Blazing fast terminal file manager written in Rust, based on async I/O. |
-| `vim` | **[NeoVim](https://neovim.io/)** | Hyperextensible Vim-based text editor with a modern, modular, and lazy-loaded configuration based on `lazy.nvim`. |
-| `tmux` | **[zellij](https://zellij.dev)** | A terminal workspace with batteries included (layout engine, floating panes). |
+### Generic Dependencies
+- **`git`**: For cloning the repository.
+- **`curl`**: For downloading the installer script.
+- **`zsh`**: As the default shell.
+- **A Nerd Font**: For proper icon rendering in the terminal. We recommend [FiraCode Nerd Font](https://www.nerdfonts.com/font-downloads).
 
-*Note: The installation scripts will automatically attempt to install these tools via Homebrew (macOS) or Apt (Linux).*
+### Platform-specific Instructions
+
+<details>
+<summary><strong>macOS</strong></summary>
+
+```bash
+# Install Homebrew if you don't have it already
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install dependencies
+brew install git curl zsh
+brew tap homebrew/cask-fonts
+brew install --cask font-firacode-nerd-font
+```
+</details>
+
+<details>
+<summary><strong>Debian / Ubuntu</strong></summary>
+
+```bash
+# Update package list and install dependencies
+sudo apt-get update
+sudo apt-get install -y git curl zsh
+
+# Install a Nerd Font (manual steps)
+echo "Please install a Nerd Font manually from https://www.nerdfonts.com/font-downloads"
+```
+</details>
+
+<details>
+<summary><strong>Arch Linux</strong></summary>
+
+```bash
+# Update package list and install dependencies
+sudo pacman -Syu git curl zsh
+
+# Install a Nerd Font
+sudo pacman -S ttf-fira-code
+```
+</details>
+
+<details>
+<summary><strong>Windows (WSL)</strong></summary>
+
+Follow the instructions for your chosen Linux distribution within WSL.
+</details>
 
 ![divider][divider]
 
 ## Getting Started 🚀
 
-### 1) Requirements
+### 1. One-line Installation (Recommended)
 
-To install and use these dotfiles, you need:
-
-- **Git**: To clone the repository.
-- **[Chezmoi](https://www.chezmoi.io/)**: The dotfile manager used to apply configurations.
-- **Nerd Font**: We recommend `Roboto Mono for Powerline` or any [Nerd Font](https://www.nerdfonts.com/) for proper icon rendering in the terminal.
-
-### 2) Installation
-
-We use `chezmoi` for a one-line installation process. This will:
-1. Install `chezmoi`.
-2. Clone this repository.
-3. **Automatically** install required packages (via Homebrew on macOS or Apt on Linux).
-4. Apply configurations to your home directory.
-
-**Run the following command:**
+This command will install `chezmoi` and apply the dotfiles.
 
 ```bash
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.472/install.sh)"
 ```
 
-*Note: This will verify your system and prompt you for any necessary inputs.*
+### 2. Manual Installation
 
-### 3) Post-Installation
+<details>
+<summary><strong>Manual installation steps</strong></summary>
 
-After installation:
-1. **Restart your terminal.**
-2. You should see the `starship` prompt and have access to new aliases (e.g., try `l` for `eza`).
-3. View the **[Operational Guide](docs/OPERATIONS.md)** for daily usage instructions.
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/sebastienrousseau/dotfiles.git ~/.local/share/chezmoi
+    ```
+
+2.  **Initialize `chezmoi`:**
+    ```bash
+    chezmoi init
+    ```
+
+3.  **Apply the dotfiles:**
+    ```bash
+    chezmoi apply
+    ```
+</details>
+
+### Post-Installation
+
+After installation, restart your terminal to apply the changes.
 
 ![divider][divider]
-
-## Structure 📂
-
-The configuration is managed in `~/.local/share/chezmoi`. This is your "source" of truth.
-
-```
-~/.local/share/chezmoi/
-├── dot_zshenv              # Shell entry point (XDG Bootloader)
-├── dot_config/             # XDG Base Config (Mapped to ~/.config)
-│   ├── atuin/              # Shell History (config.toml)
-│   ├── ghostty/            # Terminal Emulator (config)
-│   ├── git/                # Git Config (config)
-│   ├── yazi/               # File Manager (yazi.toml)
-│   ├── zellij/             # Multiplexer (config.kdl)
-│   ├── zsh/                # Zsh config (.zshrc)
-│   └── shell/              # Shared shell config (aliases, paths)
-├── provision/              # Lifecycle scripts (install packages, fonts)
-├── install.sh              # Universal Installer
-├── README.md               # Documentation
-└── docs/                   # Detailed documentation
-```
 
 ## Usage 📖
 
 ### Applying Changes
+
 After editing any file in `~/.local/share/chezmoi`, run:
 
 ```bash
@@ -160,7 +158,8 @@ To see what will change before applying:
 chezmoi diff
 ```
 
-### Updates
+### Updating
+
 To pull the latest changes from this repository:
 
 ```bash
@@ -169,41 +168,27 @@ chezmoi update
 
 ![divider][divider]
 
+## Troubleshooting
+
+<details>
+<summary><strong>Icons are not rendering correctly</strong></summary>
+This is likely an issue with your terminal font. Ensure you have installed a Nerd Font and configured your terminal to use it.
+</details>
+
+<details>
+<summary><strong>`chezmoi` command not found</strong></summary>
+If the `chezmoi` command is not found after installation, you may need to add `~/.local/bin` to your `PATH`. Add the following line to your `.zshrc` or `.bashrc`:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+</details>
+
+![divider][divider]
+
 ## Releases 🔗
 
 Releases are available on the [GitHub releases page][24].
-
-![divider][divider]
-
-## Semantic versioning policy 🚥
-
-For transparency into our release cycle and in striving to maintain backward compatibility, `Dotfiles` follows [Semantic Versioning][25].
-
-![divider][divider]
-
-## History
-
-- See [Dotfiles Release][24] for a list of changes.
-
-## Changelog ✅
-
-- [GitHub Releases][24] are used for changelogs.
-
-![divider][divider]
-
-## 📖 Code of Conduct
-
-We are committed to preserving and fostering a diverse, welcoming
-community. Please read our [Code of Conduct][04].
-
-![divider][divider]
-
-## ⭐️ Our Values
-
-- We believe perfection must consider everything.
-- We take our passion beyond code into our daily practices.
-- We are just obsessed about creating and delivering exceptional
-  solutions.
 
 ![divider][divider]
 
@@ -273,3 +258,4 @@ Apache License (Version 2.0).
 [getting_started]: https://kura.pro/common/images/buttons/button-primary.svg "Getting Started"
 [license]: https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge\&color=ff69b4 "License"
 [love]: https://kura.pro/common/images/shields/made-with-love.svg "Made with Love"
+
