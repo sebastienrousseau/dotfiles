@@ -39,24 +39,40 @@ Simply designed to fit your shell life 🐚
 
 Dotfiles v0.2.472 transforms your shell into a **Trusted Platform**. It is a curated, high-performance distribution of configurations, managed by `chezmoi`.
 
-Unlike traditional "dotfile repos" that sprawl across your home directory, this project:
-1.  **Centralizes Truth**: All config lives in `~/.local/share/chezmoi` (XDG-compliant).
-2.  **Guarantees Reproducibility**: Binary-pinned installers and lockfiles ensure identical setups across machines.
-3.  **Prioritizes Security**: Default settings are hardened (`set -euo pipefail`), audits are logged, and secrets are strictly separated.
+This project aims to provide a reproducible and optimized development environment for macOS, Linux, and Windows (via WSL).
+
+![divider][divider]
+
+## Features ✨
+
+- **Shell:**
+    - **`zsh`** as the default shell, with a rich set of plugins managed by **`zinit`**.
+    - **`starship`** for a modern, fast, and customizable prompt.
+    - **`fzf`** for fuzzy finding files, commands, and more.
+    - **`zoxide`** for a smarter `cd` command that remembers your frequently used directories.
+    - **`atuin`** for a powerful shell history with synchronization and search capabilities.
+- **Terminal:**
+    - **`zellij`** as a terminal workspace and multiplexer.
+    - **`ghostty`** as a fast, GPU-accelerated terminal emulator.
+- **Development:**
+    - **Neovim (Nightly)** as the primary text editor, with a modern Lua-based configuration using `lazy.nvim`.
+    - **Go**, **Rust**, **Node.js**, and **Python** development environments managed by `go`, `rustup`, `fnm`, and `uv` respectively.
+    - A comprehensive set of LSPs, linters, and formatters managed by `mason.nvim`.
+- **CLI Tools:**
+    - Modern replacements for core Unix utilities: `eza` (ls), `bat` (cat), `fd` (find), `ripgrep` (grep).
+    - **`lazygit`** and **`delta`** for an enhanced Git experience.
+    - A rich set of other CLI tools for networking, system monitoring, and more.
+- **AI Integration:**
+    - **`ollama`** for running large language models locally.
+    - **`fabric`** for augmenting humans using AI.
+- **System Tuning:**
+    - Performance tuning for the kernel and browser optimization for a better developer experience.
 
 ![divider][divider]
 
 ## Prerequisites
 
 Before you begin, ensure you have the following dependencies installed on your system.
-
-### Generic Dependencies
-- **`git`**: For cloning the repository.
-- **`curl`**: For downloading the installer script.
-- **`zsh`**: As the default shell.
-- **A Nerd Font**: For proper icon rendering in the terminal. We recommend [FiraCode Nerd Font](https://www.nerdfonts.com/font-downloads).
-
-### Platform-specific Instructions
 
 <details>
 <summary><strong>macOS</strong></summary>
@@ -66,9 +82,9 @@ Before you begin, ensure you have the following dependencies installed on your s
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # Install dependencies
-brew install git curl zsh
+brew install git curl zsh go starship zoxide fzf atuin zellij ghostty neovim lazygit delta tldr dust duf gping procs bottom hyperfine hexyl jq yq gum glow gh glab ollama fabric-cli uv
 brew tap homebrew/cask-fonts
-brew install --cask font-firacode-nerd-font
+brew install --cask font-fira-code-nerd-font
 ```
 </details>
 
@@ -78,7 +94,15 @@ brew install --cask font-firacode-nerd-font
 ```bash
 # Update package list and install dependencies
 sudo apt-get update
-sudo apt-get install -y git curl zsh
+sudo apt-get install -y git curl zsh golang-go build-essential
+
+# Install Starship
+curl -sS https://starship.rs/install.sh | sh
+
+# Install other tools (manual steps)
+echo "Please install the following tools manually:"
+echo "zoxide, fzf, atuin, zellij, ghostty, neovim (nightly), lazygit, delta, tldr, dust, duf, gping, procs, bottom, hyperfine, hexyl, jq, yq, gum, glow, gh, glab, ollama, fabric, uv"
+echo "You can find installation instructions on their respective websites."
 
 # Install a Nerd Font (manual steps)
 echo "Please install a Nerd Font manually from https://www.nerdfonts.com/font-downloads"
@@ -90,7 +114,11 @@ echo "Please install a Nerd Font manually from https://www.nerdfonts.com/font-do
 
 ```bash
 # Update package list and install dependencies
-sudo pacman -Syu git curl zsh
+sudo pacman -Syu git curl zsh go starship zoxide fzf atuin zellij neovim lazygit python-pipx
+pipx install git+https://github.com/dandavison/delta.git
+
+# Install other tools from AUR or other sources
+echo "Please install ghostty and other tools from the AUR or other sources."
 
 # Install a Nerd Font
 sudo pacman -S ttf-fira-code
@@ -234,7 +262,7 @@ Apache License (Version 2.0).
 [17]: https://github.com/sebastienrousseau/dotfiles/issues "Issues"
 [18]: https://www.kali.org/ "Kali Linux"
 [19]: https://www.gnu.org/software/make/ "GNU Make"
-[20]:https://www.npmjs.com/package/@sebastienrousseau/dotfiles "Dotfiles on NPM"
+[20]: https://www.npmjs.com/package/@sebastienrousseau/dotfiles "Dotfiles on NPM"
 [21]: https://pnpm.io "PnPM"
 [22]: https://pop.system76.com/ "Pop!_OS"
 [23]: https://q4os.org/ "Q4OS"
@@ -258,4 +286,5 @@ Apache License (Version 2.0).
 [getting_started]: https://kura.pro/common/images/buttons/button-primary.svg "Getting Started"
 [license]: https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge\&color=ff69b4 "License"
 [love]: https://kura.pro/common/images/shields/made-with-love.svg "Made with Love"
+
 
