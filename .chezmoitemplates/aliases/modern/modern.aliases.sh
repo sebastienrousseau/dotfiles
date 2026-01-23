@@ -25,6 +25,8 @@ fi
 # Bat (Replacement for cat)
 if command -v bat >/dev/null; then
   alias cat="bat"
+elif command -v batcat >/dev/null; then
+  alias cat="batcat"
 fi
 
 # Ripgrep: grep="rg" not aliased — breaks scripts expecting grep output format
