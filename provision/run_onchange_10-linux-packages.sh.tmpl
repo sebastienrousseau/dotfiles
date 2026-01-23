@@ -31,8 +31,53 @@ if command -v apt-get >/dev/null; then
     zsh
     unzip
     fontconfig
+    build-essential
+    ripgrep
+    fd-find
+    bat
+    jq
+    yq
   )
   $sudo_cmd apt-get install -y "${packages[@]}"
+fi
+
+# Install Starship
+if ! command -v starship >/dev/null; then
+  log_info "Installing Starship..."
+  curl -sS https://starship.rs/install.sh | sh -s -- -y
+fi
+
+# Install Zoxide
+if ! command -v zoxide >/dev/null; then
+  log_info "Installing Zoxide..."
+  curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+fi
+
+# Install FZF
+if ! command -v fzf >/dev/null; then
+  log_info "Installing FZF..."
+  git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+  ~/.fzf/install --all
+fi
+
+# Install Neovim (Nightly)
+if ! command -v nvim >/dev/null; then
+  log_info "Installing Neovim (Nightly)..."
+  curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz
+  tar xzvf nvim-linux64.tar.gz
+  sudo mv nvim-linux64 /opt/
+  sudo ln -sf /opt/nvim-linux64/bin/nvim /usr/local/bin/nvim
+  rm nvim-linux64.tar.gz
+fi
+
+# Install Lazygit
+if ! command -v lazygit >/dev/null; then
+  log_info "Installing Lazygit..."
+  LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+  curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
+  tar xf lazygit.tar.gz lazygit
+  sudo install lazygit /usr/local/bin
+  rm lazygit.tar.gz lazygit
 fi
 
 # Install Atuin (Shell History)
@@ -46,6 +91,18 @@ if ! command -v zellij >/dev/null; then
   log_info "Installing Zellij..."
   mkdir -p ~/.local/bin
   curl -L https://github.com/zellij-org/zellij/releases/latest/download/zellij-x86_64-unknown-linux-musl.tar.gz | tar xz -C ~/.local/bin zellij
+fi
+
+# Install Delta
+if ! command -v delta >/dev/null; then
+  log_info "Installing Delta..."
+  cargo install git-delta
+fi
+
+# Install UV
+if ! command -v uv >/dev/null; then
+  log_info "Installing UV..."
+  curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
 
 # Install Yazi (File Manager)

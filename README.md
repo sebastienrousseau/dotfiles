@@ -77,36 +77,30 @@ Before you begin, ensure you have the following dependencies installed on your s
 <details>
 <summary><strong>macOS</strong></summary>
 
-```bash
-# Install Homebrew if you don't have it already
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+The `Brewfile` in this repository is the single source of truth for all dependencies on macOS. The `provision/run_onchange_10-darwin-packages.sh.tmpl` script will automatically install all the necessary packages using `brew bundle`.
 
-# Install dependencies
-brew install git curl zsh go starship zoxide fzf atuin zellij ghostty neovim lazygit delta tldr dust duf gping procs bottom hyperfine hexyl jq yq gum glow gh glab ollama fabric-cli uv
-brew tap homebrew/cask-fonts
-brew install --cask font-fira-code-nerd-font
-```
 </details>
 
 <details>
 <summary><strong>Debian / Ubuntu</strong></summary>
 
+The `provision/run_onchange_10-linux-packages.sh.tmpl` script will attempt to install most of the dependencies using `apt-get`, `curl`, and `cargo`.
+
 ```bash
-# Update package list and install dependencies
+# Update package list and install base dependencies
 sudo apt-get update
-sudo apt-get install -y git curl zsh golang-go build-essential
+sudo apt-get install -y git curl zsh golang-go build-essential ripgrep fd-find bat jq yq
 
-# Install Starship
-curl -sS https://starship.rs/install.sh | sh
-
-# Install other tools (manual steps)
-echo "Please install the following tools manually:"
-echo "zoxide, fzf, atuin, zellij, ghostty, neovim (nightly), lazygit, delta, tldr, dust, duf, gping, procs, bottom, hyperfine, hexyl, jq, yq, gum, glow, gh, glab, ollama, fabric, uv"
-echo "You can find installation instructions on their respective websites."
-
-# Install a Nerd Font (manual steps)
-echo "Please install a Nerd Font manually from https://www.nerdfonts.com/font-downloads"
+# Install Rust to get cargo
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
+
+The following tools will be installed by the script:
+- `starship`, `zoxide`, `fzf`, `neovim` (nightly), `lazygit`, `atuin`, `zellij`, `delta` (via cargo), `uv`.
+
+The following tools need to be installed manually:
+- `ghostty`, `yazi`, `ollama`, `fabric`.
+
 </details>
 
 <details>
@@ -114,11 +108,11 @@ echo "Please install a Nerd Font manually from https://www.nerdfonts.com/font-do
 
 ```bash
 # Update package list and install dependencies
-sudo pacman -Syu git curl zsh go starship zoxide fzf atuin zellij neovim lazygit python-pipx
+sudo pacman -Syu git curl zsh go starship zoxide fzf atuin zellij neovim lazygit python-pipx ripgrep fd bat jq yq
 pipx install git+https://github.com/dandavison/delta.git
 
 # Install other tools from AUR or other sources
-echo "Please install ghostty and other tools from the AUR or other sources."
+echo "Please install ghostty, yazi, ollama, fabric and other tools from the AUR or other sources."
 
 # Install a Nerd Font
 sudo pacman -S ttf-fira-code
@@ -137,7 +131,7 @@ Follow the instructions for your chosen Linux distribution within WSL.
 
 ### 1. One-line Installation (Recommended)
 
-This command will install `chezmoi` and apply the dotfiles.
+This command will install `chezmoi` and apply the dotfiles. The installation script will also attempt to install all the necessary dependencies for your platform.
 
 ```bash
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.472/install.sh)"
@@ -153,14 +147,9 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles
     git clone https://github.com/sebastienrousseau/dotfiles.git ~/.local/share/chezmoi
     ```
 
-2.  **Initialize `chezmoi`:**
+2.  **Run the provisioning scripts:**
     ```bash
-    chezmoi init
-    ```
-
-3.  **Apply the dotfiles:**
-    ```bash
-    chezmoi apply
+    chezmoi apply --source ~/.local/share/chezmoi
     ```
 </details>
 
