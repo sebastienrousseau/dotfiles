@@ -2,7 +2,9 @@ name: Docker CI
 
 on:
   push:
-    branches: [ main, v0.2.471 ]
+    branches: [ main ]
+    tags:
+      - 'v*.*.*'
   pull_request:
     branches: [ main ]
 

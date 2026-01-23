@@ -55,7 +55,7 @@ cd ~/dotfiles
 # Update to Nightly (Required for plugins)
 ./scripts/upgrade_neovim_nightly.sh
 
-# Install Dependencies
+# Install Dependencies (for Debian/Ubuntu-based systems)
 sudo apt install build-essential ripgrep fd-find unzip
 
 # Launch
@@ -76,15 +76,19 @@ nvim
 ### System (`etc/sysctl.d/99-tuning.conf`)
 - Increased file descriptors for large monorepos.
 - TCP Fast Open and BBR congestion control enabled.
+- **To apply:** `sudo cp etc/sysctl.d/99-tuning.conf /etc/sysctl.d/`
 
 ### Browser (`etc/opt/chrome/policies/managed`)
 - Enforced "Memory Saver" mode.
 - Blocked third-party cookies by default.
 - Pre-installed dev extensions (uBlock, React DevTools, etc.).
+- **To apply:** `sudo cp -r etc/opt/chrome/policies/managed /etc/opt/chrome/policies/`
 
 ---
 
 ## 🤝 Contributing
+
+We welcome contributions! Please see the [contributing guidelines](.github/CONTRIBUTING.md) for more information.
 
 This setup is designed for **PR #62**.
 Please verify all scripts in a VM before running on production hardware.

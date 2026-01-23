@@ -1,44 +1,52 @@
-# Phase 8: Neovim IDE Walkthrough
+# Neovim IDE Guide
 
-## Completed Objectives
+## Features
 
-### 1. Installation (v0.10.3)
-- **Action**: Installed latest stable Neovim to `/opt/nvim-linux64` and linked to `~/.local/bin/nvim`.
-- **Verify**: Run `nvim --version` (should be v0.10.3+).
+### 1. Modern Core
+- **Installation**: Uses Neovim Nightly (v0.11+) for the latest features and plugin compatibility.
+- **Configuration**: A modular and lazy-loaded configuration based on `lazy.nvim`.
+- **UI**: A beautiful and functional UI with a dashboard, status line, buffer line, and file explorer.
+- **LSP**: Full LSP support for diagnostics, code actions, and more, managed by `mason.nvim`.
 
-### 2. Configuration (Restored & Enhanced)
-- **Action**: Restored your original modular configuration from `~/.config/nvim.bak`.
-- **Enhancement**: Added `avante.lua` to `lua/plugins/` (removed later).
-- **UI Upgrade**: Added `dressing.nvim` and `telescope-ui-select` for premium floating menus.
-- **Compatibility**: Upgraded Neovim to **Nightly (v0.11)** to support latest plugin versions.
+### 2. Language Support
+- **Rust**: Out-of-the-box support for Rust development with `rustaceanvim`.
+- **Python**: Full support for Python development with `basedpyright`, `ruff`, and `venv-selector`.
+- **Web**: Support for web development with `prettier` and `eslint`.
 
-### 3. Core Plugins (Restored)
-- **Originals**: `snacks.nvim`, `gitsigns`, `neo-tree`, `venv-selector`, etc. are all preserved.
-- **New**: `Avante.nvim` (AI Sidebar) added seamlessly.
+### 3. AI Integration
+- **Copilot**: `copilot.lua` for code completion. Run `:Copilot auth` to sign in.
+- **Copilot Chat**: AI sidebar for asking questions and getting help (`<leader>cc`).
 
-### 4. Language Support (LSP)
-- **Rust**: `rustaceanvim` (Auto-configured for Rust).
-- **Python**: `pyright` + `ruff` (Installed via Mason).
-- **General**: `mason.nvim` manages LSP servers. They install on first launch.
-
-### 5. AI Integration
-- **Copilot**: `copilot.lua` (Enabled). Run `:Copilot auth` to sign in.
-- **Copilot Chat**: AI sidebar (`<leader>cc`). Replaces Avante.
-
-### 6. VS Code Parity (New)
-- **Problem Panel**: `trouble.nvim` (`<leader>xx`).
-- **Search & Replace**: `nvim-spectre` (`<leader>S`).
-- **Auto-Pairs**: Automatically closes brackets.
-- **TODOs**: Highlights `TODO` and `FIXME`.
+### 4. VS Code Parity
+- **Problem Panel**: `trouble.nvim` for a VS Code-like problems panel (`<leader>xx`).
+- **Search & Replace**: `nvim-spectre` for project-wide search and replace (`<leader>S`).
+- **Auto-Pairs**: Automatically closes brackets and pairs.
+- **TODOs**: Highlights `TODO` and `FIXME` comments.
 - **Session**: Auto-restores your last session.
 
-## New Keybinds Cheat Sheet
+## Keybinds Cheat Sheet
 | Key | Action |
 | --- | --- |
 | `<Space>ff` | Find Files |
 | `<Space>fg` | Grep (Search) text |
+| `<Space>fb` | File browser |
+| `<Space>fp` | Projects |
 | `<Space>e` | Toggle File Explorer |
 | `<Space>a` | Add file to Harpoon |
 | `<Ctrl>e` | Open Harpoon menu |
 | `gd` | Go to Definition |
 | `gr` | Go to References |
+| `<leader>ca` | Code actions |
+| `<leader>cf` | Format code |
+| `<leader>cr` | Rename symbol |
+| `<leader>tt` | Toggle terminal |
+| `<leader>tn` | Test nearest |
+| `<leader>tf` | Test file |
+| `<leader>ts` | Test suite |
+| `<F5>` | Continue (Debug) |
+| `<F10>` | Step over (Debug) |
+| `<F11>` | Step into (Debug) |
+| `<F12>` | Step out (Debug) |
+| `<leader>cc` | Toggle Copilot Chat |
+| `<leader>xx` | Toggle Diagnostics (Trouble) |
+| `<leader>S` | Toggle Spectre (Search/Replace) |

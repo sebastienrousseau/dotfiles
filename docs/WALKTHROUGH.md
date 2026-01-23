@@ -1,4 +1,4 @@
-# Universal Configuration Walkthrough (v0.2.471)
+# Universal Configuration Walkthrough (v0.2.472)
 
 ## 🚀 Overview
 We have successfully transformed the dotfiles into a modern, **universal configuration** managed by `chezmoi`. This release establishes a secure, high-performance, and compliant foundation for macOS, Linux, and Windows.
@@ -33,11 +33,11 @@ We have successfully transformed the dotfiles into a modern, **universal configu
 | **Performance** | ✅ PASSED | **~16ms** Zsh startup time. |
 | **Drift** | ⚠️ VARIES | Minor state drift may be reported due to audit logs. |
 | **Drift** | ⚠️ VARIES | Minor state drift may be reported due to audit logs. |
-| **Docker** | ✅ PASSED | **Ubuntu 26.04** bootstrap verified (`dotfiles:0.2.471`). |
+| **Docker** | ✅ PASSED | **Ubuntu 26.04** bootstrap verified (`dotfiles:0.2.472`). |
 
 ## 📦 Artifacts
 - **Installer**: `curl -sL dotfiles.io/install.sh | sh`
-- **Package**: `dist/dotfiles-v0.2.471.tar.gz`
+- **Package**: `dist/dotfiles-v0.2.472.tar.gz`
 - **Docs**: Full `README.md`, `COMPLIANCE.md`, `OPERATIONS.md`.
 
 ## 🔮 Next Steps

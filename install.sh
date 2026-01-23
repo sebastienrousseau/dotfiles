@@ -79,7 +79,7 @@ fi
 step "Applying Configuration..."
 
 # VERSION pinning for supply-chain security
-VERSION="v0.2.471"
+VERSION="v0.2.472"
 
 # If we are running from the repo itself, just apply
 if [ -d "$HOME/.local/share/chezmoi/.git" ]; then

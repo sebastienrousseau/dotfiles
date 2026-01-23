@@ -1,7 +1,7 @@
 FROM ubuntu:26.04
 # Test env for Universal Installer
 # Simulates a raw machine
-LABEL version="0.2.471"
+LABEL version="0.2.472"
 LABEL description="Universal Dotfiles Installer Test Environment"
 
 # Install minimal deps (curl is standard, git usually too, but we ensure them)
