@@ -18,7 +18,11 @@
 #   - Ensure to validate that all aliases work as expected in the bash shell.
 
 set_default_aliases() {
-    fc -W
+    if [ -n "${ZSH_VERSION:-}" ]; then
+        fc -W >/dev/null 2>&1 || true
+    elif [ -n "${BASH_VERSION:-}" ]; then
+        history -a >/dev/null 2>&1 || true
+    fi
 
     ## General aliases
 

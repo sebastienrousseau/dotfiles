@@ -16,7 +16,7 @@ sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
 echo "Linking binary..."
 # Note: The folder name changed to nvim-linux-x86_64
 sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim
-sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /home/seb/.local/bin/nvim
+sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim "$HOME/.local/bin/nvim"
 
 echo "Done! Verifying..."
 /usr/local/bin/nvim --version

@@ -11,18 +11,96 @@ log_error() { echo -e "\n[ERROR] $*" >&2; }
 
 log_info "🐧 Linux: Starting setup..."
 
+sudo_cmd=""
+if [ "$(id -u)" -ne 0 ]; then
+  if command -v sudo >/dev/null; then
+    sudo_cmd="sudo"
+  else
+    log_error "This script requires root privileges or sudo for system installs."
+    exit 1
+  fi
+fi
+
+sha256_file() {
+  if command -v sha256sum >/dev/null; then
+    sha256sum "$1" | awk '{print $1}'
+  elif command -v shasum >/dev/null; then
+    shasum -a 256 "$1" | awk '{print $1}'
+  else
+    log_error "sha256sum or shasum is required for verified downloads."
+    exit 1
+  fi
+}
+
+download_and_verify_sha256() {
+  local url="$1"
+  local checksum_url="$2"
+  local dest="$3"
+  curl -fsSL -o "$dest" "$url"
+  curl -fsSL -o "${dest}.sha256" "$checksum_url"
+  local expected actual
+  expected="$(awk '{print $1}' "${dest}.sha256")"
+  actual="$(sha256_file "$dest")"
+  if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
+    log_error "Checksum verification failed for $dest."
+    exit 1
+  fi
+}
+
+github_release_json() {
+  local repo="$1"
+  local tag="${2:-latest}"
+  local auth_header=()
+  if [ -n "${GITHUB_TOKEN:-}" ]; then
+    auth_header=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
+  fi
+  if [ "$tag" = "latest" ]; then
+    curl -fsSL "${auth_header[@]}" "https://api.github.com/repos/$repo/releases/latest"
+  else
+    curl -fsSL "${auth_header[@]}" "https://api.github.com/repos/$repo/releases/tags/$tag"
+  fi
+}
+
+github_asset_url() {
+  local repo="$1"
+  local suffix="$2"
+  local tag="${3:-latest}"
+  local url
+  url="$(github_release_json "$repo" "$tag" 2>/dev/null | grep -oE "https://[^\"]+${suffix}" | head -n1)"
+  if [ -n "$url" ]; then
+    echo "$url"
+    return 0
+  fi
+
+  if [ "$tag" = "latest" ]; then
+    echo "https://github.com/${repo}/releases/latest/download/${suffix}"
+  else
+    echo "https://github.com/${repo}/releases/download/${tag}/${suffix}"
+  fi
+}
+
+install_from_tarball() {
+  local url="$1"
+  local checksum_url="$2"
+  local bin_name="$3"
+  local install_dir="$4"
+  local tmp_dir
+  tmp_dir="$(mktemp -d)"
+  download_and_verify_sha256 "$url" "$checksum_url" "$tmp_dir/archive.tar.gz"
+  tar -xzf "$tmp_dir/archive.tar.gz" -C "$tmp_dir"
+  if [ ! -f "$tmp_dir/$bin_name" ]; then
+    log_error "Expected binary $bin_name not found in archive."
+    rm -rf "$tmp_dir"
+    exit 1
+  fi
+  mkdir -p "$install_dir"
+  install -m 0755 "$tmp_dir/$bin_name" "$install_dir/$bin_name"
+  rm -rf "$tmp_dir"
+}
+
 if command -v apt-get >/dev/null; then
   log_info "Updating packages..."
   
-  # Check if we have sudo or if we're root
-  sudo_cmd=""
-  if command -v sudo >/dev/null; then
-    sudo_cmd="sudo"
-  elif [ "$(id -u)" -ne 0 ]; then
-    log_error "This script requires root privileges or sudo."
-    exit 1
-  fi
-
   $sudo_cmd apt-get update
   # Add your packages here
   packages=(
@@ -44,13 +122,29 @@ fi
 # Install Starship
 if ! command -v starship >/dev/null; then
   log_info "Installing Starship..."
-  curl -sS https://starship.rs/install.sh | sh -s -- -y
+  arch="$(uname -m)"
+  case "$arch" in
+    x86_64|amd64) target="x86_64-unknown-linux-gnu" ;;
+    aarch64|arm64) target="aarch64-unknown-linux-gnu" ;;
+    *) log_error "Unsupported arch for Starship: $arch"; exit 1 ;;
+  esac
+  url="$(github_asset_url "starship/starship" "${target}.tar.gz")"
+  sha_url="$(github_asset_url "starship/starship" "${target}.tar.gz.sha256")"
+  install_from_tarball "$url" "$sha_url" "starship" "$HOME/.local/bin"
 fi
 
 # Install Zoxide
 if ! command -v zoxide >/dev/null; then
   log_info "Installing Zoxide..."
-  curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+  arch="$(uname -m)"
+  case "$arch" in
+    x86_64|amd64) target="x86_64-unknown-linux-musl" ;;
+    aarch64|arm64) target="aarch64-unknown-linux-musl" ;;
+    *) log_error "Unsupported arch for Zoxide: $arch"; exit 1 ;;
+  esac
+  url="$(github_asset_url "ajeetdsouza/zoxide" "${target}.tar.gz")"
+  sha_url="$(github_asset_url "ajeetdsouza/zoxide" "${target}.tar.gz.sha256")"
+  install_from_tarball "$url" "$sha_url" "zoxide" "$HOME/.local/bin"
 fi
 
 # Install FZF
@@ -63,34 +157,70 @@ fi
 # Install Neovim (Nightly)
 if ! command -v nvim >/dev/null; then
   log_info "Installing Neovim (Nightly)..."
-  curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz
-  tar xzvf nvim-linux64.tar.gz
-  sudo mv nvim-linux64 /opt/
-  sudo ln -sf /opt/nvim-linux64/bin/nvim /usr/local/bin/nvim
-  rm nvim-linux64.tar.gz
+  neovim_sha_suffix="${NEOVIM_NIGHTLY_SHA_SUFFIX:-sha256sum}"
+  url="$(github_asset_url "neovim/neovim" "nvim-linux64.tar.gz" "nightly")"
+  sha_url="$(github_asset_url "neovim/neovim" "nvim-linux64.tar.gz.${neovim_sha_suffix}" "nightly")"
+  tmp_dir="$(mktemp -d)"
+  download_and_verify_sha256 "$url" "$sha_url" "$tmp_dir/nvim-linux64.tar.gz"
+  tar -xzf "$tmp_dir/nvim-linux64.tar.gz" -C "$tmp_dir"
+  $sudo_cmd rm -rf /opt/nvim-linux64
+  $sudo_cmd mv "$tmp_dir/nvim-linux64" /opt/
+  $sudo_cmd ln -sf /opt/nvim-linux64/bin/nvim /usr/local/bin/nvim
+  rm -rf "$tmp_dir"
 fi
 
 # Install Lazygit
 if ! command -v lazygit >/dev/null; then
   log_info "Installing Lazygit..."
-  LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
-  curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
-  tar xf lazygit.tar.gz lazygit
-  sudo install lazygit /usr/local/bin
-  rm lazygit.tar.gz lazygit
+  arch="$(uname -m)"
+  case "$arch" in
+    x86_64|amd64) target="Linux_x86_64" ;;
+    aarch64|arm64) target="Linux_arm64" ;;
+    *) log_error "Unsupported arch for Lazygit: $arch"; exit 1 ;;
+  esac
+  url="$(github_asset_url "jesseduffield/lazygit" "lazygit_${target}.tar.gz")"
+  sha_url="$(github_asset_url "jesseduffield/lazygit" "checksums.txt")"
+  tmp_dir="$(mktemp -d)"
+  curl -fsSL -o "$tmp_dir/lazygit.tar.gz" "$url"
+  curl -fsSL -o "$tmp_dir/checksums.txt" "$sha_url"
+  expected="$(awk -v f="$(basename "$url")" '$2==f {print $1}' "$tmp_dir/checksums.txt")"
+  actual="$(sha256_file "$tmp_dir/lazygit.tar.gz")"
+  if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
+    log_error "Checksum verification failed for Lazygit."
+    rm -rf "$tmp_dir"
+    exit 1
+  fi
+  tar xf "$tmp_dir/lazygit.tar.gz" -C "$tmp_dir" lazygit
+  $sudo_cmd install -m 0755 "$tmp_dir/lazygit" /usr/local/bin/lazygit
+  rm -rf "$tmp_dir"
 fi
 
 # Install Atuin (Shell History)
 if ! command -v atuin >/dev/null; then
   log_info "Installing Atuin..."
-  curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | sh
+  arch="$(uname -m)"
+  case "$arch" in
+    x86_64|amd64) target="x86_64-unknown-linux-gnu" ;;
+    aarch64|arm64) target="aarch64-unknown-linux-gnu" ;;
+    *) log_error "Unsupported arch for Atuin: $arch"; exit 1 ;;
+  esac
+  url="$(github_asset_url "atuinsh/atuin" "${target}.tar.gz")"
+  sha_url="$(github_asset_url "atuinsh/atuin" "${target}.tar.gz.sha256")"
+  install_from_tarball "$url" "$sha_url" "atuin" "$HOME/.local/bin"
 fi
 
 # Install Zellij (Multiplexer)
 if ! command -v zellij >/dev/null; then
   log_info "Installing Zellij..."
-  mkdir -p ~/.local/bin
-  curl -L https://github.com/zellij-org/zellij/releases/latest/download/zellij-x86_64-unknown-linux-musl.tar.gz | tar xz -C ~/.local/bin zellij
+  arch="$(uname -m)"
+  case "$arch" in
+    x86_64|amd64) target="x86_64-unknown-linux-musl" ;;
+    aarch64|arm64) target="aarch64-unknown-linux-musl" ;;
+    *) log_error "Unsupported arch for Zellij: $arch"; exit 1 ;;
+  esac
+  url="$(github_asset_url "zellij-org/zellij" "${target}.tar.gz")"
+  sha_url="$(github_asset_url "zellij-org/zellij" "${target}.tar.gz.sha256")"
+  install_from_tarball "$url" "$sha_url" "zellij" "$HOME/.local/bin"
 fi
 
 # Install Delta
@@ -102,7 +232,25 @@ fi
 # Install UV
 if ! command -v uv >/dev/null; then
   log_info "Installing UV..."
-  curl -LsSf https://astral.sh/uv/install.sh | sh
+  arch="$(uname -m)"
+  case "$arch" in
+    x86_64|amd64) target="x86_64-unknown-linux-gnu" ;;
+    aarch64|arm64) target="aarch64-unknown-linux-gnu" ;;
+    *) log_error "Unsupported arch for UV: $arch"; exit 1 ;;
+  esac
+  url="$(github_asset_url "astral-sh/uv" "${target}.tar.gz")"
+  sha_url="$(github_asset_url "astral-sh/uv" "${target}.tar.gz.sha256")"
+  tmp_dir="$(mktemp -d)"
+  download_and_verify_sha256 "$url" "$sha_url" "$tmp_dir/uv.tar.gz"
+  tar -xzf "$tmp_dir/uv.tar.gz" -C "$tmp_dir"
+  mkdir -p "$HOME/.local/bin"
+  if [ -f "$tmp_dir/uv" ]; then
+    install -m 0755 "$tmp_dir/uv" "$HOME/.local/bin/uv"
+  fi
+  if [ -f "$tmp_dir/uvx" ]; then
+    install -m 0755 "$tmp_dir/uvx" "$HOME/.local/bin/uvx"
+  fi
+  rm -rf "$tmp_dir"
 fi
 
 # Install Yazi (File Manager)
