@@ -3,27 +3,23 @@
 # Modern Tooling Aliases (Rust Replacements) & Listing
 
 # Eza (Replacement for ls) OR Fallback
-# Disabled because .zshrc handles this explicitly with better defaults
 if command -v eza >/dev/null; then
-  : # alias ls="eza --icons --group-directories-first"
-  : # alias ll="eza -alF --icons --group-directories-first"
-  : # alias la="eza -a --icons --group-directories-first"
-  : # alias lt="eza -aT --icons --group-directories-first"
+  alias ls="eza --icons --group-directories-first"
+  alias ll="eza -alF --icons --group-directories-first"
+  alias la="eza -a --icons --group-directories-first"
+  alias lt="eza -aT --icons --group-directories-first"
 else
   # Fallback to ls
-  : # alias ls='ls'
-  : # alias l='ls'
-  : # alias ll='ls -lA'
-  : # alias llm='ls -ltA'
-  : # alias la='ls -a'
-  : # alias lx='ls -la'
+  alias l='ls'
+  alias ll='ls -lA'
+  alias llm='ls -ltA'
+  alias la='ls -a'
+  alias lx='ls -la'
 fi
 
-# Tree (or fallback)
-if command -v tree >/dev/null; then
-    alias tree='tree'
-else
-    alias tree='ls -R'
+# Tree (fallback to ls -R if not installed)
+if ! command -v tree >/dev/null; then
+  alias tree='ls -R'
 fi
 
 # Bat (Replacement for cat)
@@ -31,11 +27,7 @@ if command -v bat >/dev/null; then
   alias cat="bat"
 fi
 
-# Ripgrep (Replacement for grep)
-if command -v rg >/dev/null; then
-  # alias grep="rg" # Disabled: Breaks scripts
-  alias rg="rg"
-fi
+# Ripgrep: grep="rg" not aliased — breaks scripts expecting grep output format
 
 # Zoxide (Replacement for cd)
 # Initialized in .zshrc via query
