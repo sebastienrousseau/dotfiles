@@ -11,6 +11,11 @@ log_error() { echo -e "\n[ERROR] $*" >&2; }
 
 log_info "🐧 Linux: Starting setup..."
 
+if [ -f "$HOME/.config/dotfiles/versions.env" ]; then
+  # shellcheck disable=SC1091
+  . "$HOME/.config/dotfiles/versions.env"
+fi
+
 sudo_cmd=""
 if [ "$(id -u)" -ne 0 ]; then
   if command -v sudo >/dev/null; then
@@ -79,6 +84,32 @@ github_asset_url() {
   fi
 }
 
+warn_unpinned() {
+  local name="$1"
+  local tag="$2"
+  local var_name="$3"
+  if [ "$tag" = "latest" ] || [ "$tag" = "nightly" ]; then
+    log_error "${name} uses moving tag '${tag}'. Pin by setting ${var_name}."
+    exit 1
+  fi
+}
+
+STARSHIP_TAG="${STARSHIP_TAG:-latest}"
+ZOXIDE_TAG="${ZOXIDE_TAG:-latest}"
+NEOVIM_TAG="${NEOVIM_TAG:-nightly}"
+LAZYGIT_TAG="${LAZYGIT_TAG:-latest}"
+ATUIN_TAG="${ATUIN_TAG:-latest}"
+ZELLIJ_TAG="${ZELLIJ_TAG:-latest}"
+UV_TAG="${UV_TAG:-latest}"
+
+warn_unpinned "Starship" "$STARSHIP_TAG" "STARSHIP_TAG"
+warn_unpinned "Zoxide" "$ZOXIDE_TAG" "ZOXIDE_TAG"
+warn_unpinned "Neovim" "$NEOVIM_TAG" "NEOVIM_TAG"
+warn_unpinned "Lazygit" "$LAZYGIT_TAG" "LAZYGIT_TAG"
+warn_unpinned "Atuin" "$ATUIN_TAG" "ATUIN_TAG"
+warn_unpinned "Zellij" "$ZELLIJ_TAG" "ZELLIJ_TAG"
+warn_unpinned "UV" "$UV_TAG" "UV_TAG"
+
 install_from_tarball() {
   local url="$1"
   local checksum_url="$2"
@@ -133,8 +164,8 @@ if ! command -v starship >/dev/null; then
     aarch64|arm64) target="aarch64-unknown-linux-gnu" ;;
     *) log_error "Unsupported arch for Starship: $arch"; exit 1 ;;
   esac
-  url="$(github_asset_url "starship/starship" "${target}.tar.gz")"
-  sha_url="$(github_asset_url "starship/starship" "${target}.tar.gz.sha256")"
+  url="$(github_asset_url "starship/starship" "${target}.tar.gz" "$STARSHIP_TAG")"
+  sha_url="$(github_asset_url "starship/starship" "${target}.tar.gz.sha256" "$STARSHIP_TAG")"
   install_from_tarball "$url" "$sha_url" "starship" "$HOME/.local/bin"
 fi
 
@@ -147,8 +178,8 @@ if ! command -v zoxide >/dev/null; then
     aarch64|arm64) target="aarch64-unknown-linux-musl" ;;
     *) log_error "Unsupported arch for Zoxide: $arch"; exit 1 ;;
   esac
-  url="$(github_asset_url "ajeetdsouza/zoxide" "${target}.tar.gz")"
-  sha_url="$(github_asset_url "ajeetdsouza/zoxide" "${target}.tar.gz.sha256")"
+  url="$(github_asset_url "ajeetdsouza/zoxide" "${target}.tar.gz" "$ZOXIDE_TAG")"
+  sha_url="$(github_asset_url "ajeetdsouza/zoxide" "${target}.tar.gz.sha256" "$ZOXIDE_TAG")"
   install_from_tarball "$url" "$sha_url" "zoxide" "$HOME/.local/bin"
 fi
 
@@ -176,8 +207,8 @@ fi
 if ! command -v nvim >/dev/null; then
   log_info "Installing Neovim (Nightly)..."
   neovim_sha_suffix="${NEOVIM_NIGHTLY_SHA_SUFFIX:-sha256sum}"
-  url="$(github_asset_url "neovim/neovim" "nvim-linux64.tar.gz" "nightly")"
-  sha_url="$(github_asset_url "neovim/neovim" "nvim-linux64.tar.gz.${neovim_sha_suffix}" "nightly")"
+  url="$(github_asset_url "neovim/neovim" "nvim-linux64.tar.gz" "$NEOVIM_TAG")"
+  sha_url="$(github_asset_url "neovim/neovim" "nvim-linux64.tar.gz.${neovim_sha_suffix}" "$NEOVIM_TAG")"
   tmp_dir="$(mktemp -d)"
   download_and_verify_sha256 "$url" "$sha_url" "$tmp_dir/nvim-linux64.tar.gz"
   tar -xzf "$tmp_dir/nvim-linux64.tar.gz" -C "$tmp_dir"
@@ -196,8 +227,8 @@ if ! command -v lazygit >/dev/null; then
     aarch64|arm64) target="Linux_arm64" ;;
     *) log_error "Unsupported arch for Lazygit: $arch"; exit 1 ;;
   esac
-  url="$(github_asset_url "jesseduffield/lazygit" "lazygit_${target}.tar.gz")"
-  sha_url="$(github_asset_url "jesseduffield/lazygit" "checksums.txt")"
+  url="$(github_asset_url "jesseduffield/lazygit" "lazygit_${target}.tar.gz" "$LAZYGIT_TAG")"
+  sha_url="$(github_asset_url "jesseduffield/lazygit" "checksums.txt" "$LAZYGIT_TAG")"
   tmp_dir="$(mktemp -d)"
   curl -fsSL -o "$tmp_dir/lazygit.tar.gz" "$url"
   curl -fsSL -o "$tmp_dir/checksums.txt" "$sha_url"
@@ -222,8 +253,8 @@ if ! command -v atuin >/dev/null; then
     aarch64|arm64) target="aarch64-unknown-linux-gnu" ;;
     *) log_error "Unsupported arch for Atuin: $arch"; exit 1 ;;
   esac
-  url="$(github_asset_url "atuinsh/atuin" "${target}.tar.gz")"
-  sha_url="$(github_asset_url "atuinsh/atuin" "${target}.tar.gz.sha256")"
+  url="$(github_asset_url "atuinsh/atuin" "${target}.tar.gz" "$ATUIN_TAG")"
+  sha_url="$(github_asset_url "atuinsh/atuin" "${target}.tar.gz.sha256" "$ATUIN_TAG")"
   install_from_tarball "$url" "$sha_url" "atuin" "$HOME/.local/bin"
 fi
 
@@ -236,15 +267,19 @@ if ! command -v zellij >/dev/null; then
     aarch64|arm64) target="aarch64-unknown-linux-musl" ;;
     *) log_error "Unsupported arch for Zellij: $arch"; exit 1 ;;
   esac
-  url="$(github_asset_url "zellij-org/zellij" "${target}.tar.gz")"
-  sha_url="$(github_asset_url "zellij-org/zellij" "${target}.tar.gz.sha256")"
+  url="$(github_asset_url "zellij-org/zellij" "${target}.tar.gz" "$ZELLIJ_TAG")"
+  sha_url="$(github_asset_url "zellij-org/zellij" "${target}.tar.gz.sha256" "$ZELLIJ_TAG")"
   install_from_tarball "$url" "$sha_url" "zellij" "$HOME/.local/bin"
 fi
 
 # Install Delta
 if ! command -v delta >/dev/null; then
   log_info "Installing Delta..."
-  cargo install git-delta
+  if command -v cargo >/dev/null; then
+    cargo install git-delta
+  else
+    log_info "Skipping Delta install: cargo not found."
+  fi
 fi
 
 # Install UV
@@ -256,8 +291,8 @@ if ! command -v uv >/dev/null; then
     aarch64|arm64) target="aarch64-unknown-linux-gnu" ;;
     *) log_error "Unsupported arch for UV: $arch"; exit 1 ;;
   esac
-  url="$(github_asset_url "astral-sh/uv" "${target}.tar.gz")"
-  sha_url="$(github_asset_url "astral-sh/uv" "${target}.tar.gz.sha256")"
+  url="$(github_asset_url "astral-sh/uv" "${target}.tar.gz" "$UV_TAG")"
+  sha_url="$(github_asset_url "astral-sh/uv" "${target}.tar.gz.sha256" "$UV_TAG")"
   tmp_dir="$(mktemp -d)"
   download_and_verify_sha256 "$url" "$sha_url" "$tmp_dir/uv.tar.gz"
   tar -xzf "$tmp_dir/uv.tar.gz" -C "$tmp_dir"

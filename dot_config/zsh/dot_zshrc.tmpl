@@ -190,16 +190,18 @@ fi
 # The 90-ux-aliases.sh file alone contains 178KB of aliases, many with deprecated flags.
 #
 # Optimized loading of core configurations
-if [[ -f "${HOME}/.config/shell/00-core-paths.sh" ]]; then
-  source "${HOME}/.config/shell/00-core-paths.sh"
-fi
+for core_layer in 00-core-paths 05-core-safety 50-logic-functions; do
+  if [[ -f "${HOME}/.config/shell/${core_layer}.sh" ]]; then
+    source "${HOME}/.config/shell/${core_layer}.sh"
+  fi
+done
 
 # Load Universal Aliases (Restored after fixing grep flags)
 if [[ -f "${HOME}/.config/shell/90-ux-aliases.sh" ]]; then
   source "${HOME}/.config/shell/90-ux-aliases.sh"
 fi
 
-# Essential Aliases (since 90-ux-aliases.sh is disabled)
+# Essential Aliases (fallback if 90-ux-aliases.sh is unavailable)
 if command -v bat >/dev/null; then
   alias cat="bat"
 fi

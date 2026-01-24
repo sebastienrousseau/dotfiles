@@ -5,8 +5,8 @@ return {
     build = ":TSUpdate",
     event = { "BufReadPost", "BufNewFile" },
     config = function()
-      -- Use correct module path (config, not configs)
-      local ok, ts_config = pcall(require, "nvim-treesitter.config")
+      -- Use correct module path (configs)
+      local ok, ts_config = pcall(require, "nvim-treesitter.configs")
       if not ok then
         -- Treesitter not installed yet, skip configuration
         return
