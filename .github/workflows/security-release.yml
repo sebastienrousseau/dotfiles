@@ -26,6 +26,7 @@ jobs:
         with:
           format: spdx-json
           output-file: dotfiles-sbom.spdx.json
+          upload-release-assets: false
 
       - name: Calculate Hash
         id: hash
