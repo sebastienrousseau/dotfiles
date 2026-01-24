@@ -53,7 +53,7 @@
 - [x] **Immutability**: Create script to lock/unlock critical files (`lock-configs`) <!-- id: 118 -->
 
 # Phase 27: Self-Healing & Diagnostics
-- [x] **Health Checks**: Create `dot doctor` script (`scripts/doctor.sh`) <!-- id: 121 -->
+- [x] **Health Checks**: Create `dot doctor` script (`scripts/diagnostics/doctor.sh`) <!-- id: 121 -->
 - [x] **Drift Detection**: Add `dot drift` alias for `chezmoi verify` <!-- id: 122 -->
 - [x] **Auto-Repair**: Add `dot heal` alias for interactive repair <!-- id: 123 -->
 
@@ -74,11 +74,11 @@
 # Phase 26: OS Bundling & Compliance
 - [x] **XDG**: Audit and enforce XDG Base Directory variables <!-- id: 132 -->
 - [x] **Vendor Hooks**: Implement `/etc/dotfiles/defaults.d` sourcing in shell init <!-- id: 133 -->
-- [x] **Bundling**: Create `scripts/package.sh` to generate release artifacts (.tar.gz, .deb structure) <!-- id: 134 -->
+- [x] **Bundling**: Create `scripts/core/package.sh` to generate release artifacts (.tar.gz, .deb structure) <!-- id: 134 -->
 
 # Phase 24: The Universal Installer (Zero-Dependency)
 - [x] **Installer**: Create `install.sh` (Zero-dep, TUI-like bootstrap) <!-- id: 135 -->
-- [x] **Teleport**: Create `scripts/teleport.sh` to push config to remote hosts <!-- id: 136 -->
+- [x] **Teleport**: Create `scripts/ops/teleport.sh` to push config to remote hosts <!-- id: 136 -->
 - [x] **Aliases**: Add `dot install` and `dot teleport` aliases <!-- id: 137 -->
 
 # Post-Release Hotfixes

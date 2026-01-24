@@ -21,7 +21,7 @@ echo ""
 help() {
 
   # shellcheck disable=SC1091
-  . "./scripts/banner.sh"
+  . "./scripts/core/banner.sh"
 
   cat <<EOF
 USAGE:

@@ -34,7 +34,7 @@ This document outlines the standard workflows to **Maintain**, **Update**, and *
   *Note: `chezmoi` on Linux focuses on configuration. Package updates are often best handled by the OS package manager to avoid `sudo` conflicts.*
 
 - **Troubleshooting**:
-  - **Font Issues**: If icons are missing, run `./provision/run_onchange_50-install-fonts.sh` manually.
+  - **Font Issues**: If icons are missing, run `./install/provision/run_onchange_50-install-fonts.sh` manually.
   - **ZorinOS/Gnome**: Custom keybindings may need `dconf load` if not applied automatically.
 
 ### 🪟 Windows (WSL2)

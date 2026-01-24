@@ -1,5 +1,5 @@
 # Multi-environment test for dotfiles README instructions
-# Usage: ./test-docker.sh (builds and runs all targets)
+# Usage: ./scripts/tests/test-docker.sh (builds and runs all targets)
 # Or:   docker build --target ubuntu-test -f Dockerfile.test .
 
 # =============================================================================

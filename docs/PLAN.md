@@ -96,7 +96,7 @@ Establish a "Trust Layer" for the dotfiles ecosystem, ensuring supply chain secu
 Enable the system to self-diagnose and repair configuration drift.
 
 ## Changes
-- **Scripts**: Created `scripts/doctor.sh` for system health checks.
+- **Scripts**: Created `scripts/diagnostics/doctor.sh` for system health checks.
 - **Aliases**: Added `dot doctor`, `dot drift` (`chezmoi verify`), and `dot heal` (`chezmoi apply`).
 
 # Phase 51: Regulatory Compliance [COMPLETED]
@@ -144,7 +144,7 @@ Prepare the dotfiles for system-wide deployment and ensure strict adherence to s
 ## Proposed Changes
 - **XDG Compliance**: Audit `00-default.paths.sh` to ensure all standard XDG variables are exported.
 - **Vendor Hooks**: Update `dot_zshrc.tmpl` to source system-level overrides from `/etc/dotfiles/defaults.d/` (Simulates "site-local" config).
-- **Bundling**: Create `scripts/package.sh` to create a distributable tarball and scaffold `.deb`/`.pkg` generation logic.
+- **Bundling**: Create `scripts/core/package.sh` to create a distributable tarball and scaffold `.deb`/`.pkg` generation logic.
 
 # Phase 24: The Universal Installer (Zero-Dependency) [COMPLETED]
 
@@ -158,4 +158,4 @@ Provide a frictionless, "one-curl" onboarding experience and capabilities to dep
     3.  Initializes the dotfiles repo.
     4.  Runs `chezmoi apply`.
     5.  Uses ANSI colors for a polished "TUI" feel.
-- **Teleportation**: `scripts/teleport.sh` using `chezmoi archive` piped to SSH to ephemeralize configs on remote servers (e.g., `dot teleport user@server`).
+- **Teleportation**: `scripts/ops/teleport.sh` using `chezmoi archive` piped to SSH to ephemeralize configs on remote servers (e.g., `dot teleport user@server`).

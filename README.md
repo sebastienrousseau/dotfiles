@@ -77,14 +77,14 @@ Before you begin, ensure you have the following dependencies installed on your s
 <details>
 <summary><strong>macOS</strong></summary>
 
-The `Brewfile` in this repository is the single source of truth for all dependencies on macOS. The `provision/run_onchange_10-darwin-packages.sh.tmpl` script will automatically install all the necessary packages using `brew bundle`.
+The `Brewfile` in this repository is the single source of truth for all dependencies on macOS. The `install/provision/run_onchange_10-darwin-packages.sh.tmpl` script will automatically install all the necessary packages using `brew bundle`.
 
 </details>
 
 <details>
 <summary><strong>Debian / Ubuntu</strong></summary>
 
-The `provision/run_onchange_10-linux-packages.sh.tmpl` script will attempt to install most of the dependencies using `apt-get`, `curl`, and verified GitHub release downloads. `cargo` is required for `delta`.
+The `install/provision/run_onchange_10-linux-packages.sh.tmpl` script will attempt to install most of the dependencies using `apt-get`, `curl`, and verified GitHub release downloads. `cargo` is required for `delta`.
 
 ```bash
 # Update package list and install base dependencies

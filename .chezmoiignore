@@ -4,4 +4,4 @@
 **/.DS_Store
 *.swp
 **/*.swp
-provision/00-audit.sh
+install/provision/run_before_00-audit.sh

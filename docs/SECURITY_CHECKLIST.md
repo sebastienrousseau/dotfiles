@@ -4,7 +4,7 @@ Use this checklist before cutting any new release (e.g., `v0.x.x`) to ensure sup
 
 ## 1. Supply Chain & Installer
 - [ ] **Pinned Version**: Update `install.sh` `VERSION` variable to match the release tag.
-- [ ] **Docs Sync**: Ensure `README.md` and `PR_DESCRIPTION.md` installer URLs point to the new tag (not `main`).
+- [ ] **Docs Sync**: Ensure `README.md` and `.github/PULL_REQUEST_TEMPLATE.md` installer URLs point to the new tag (not `main`).
 - [ ] **Clean Build**: Verify `install.sh` does not curl random scripts from third parties without pinning.
 
 ## 2. Secrets & Leak Prevention

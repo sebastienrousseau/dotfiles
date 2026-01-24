@@ -2,7 +2,7 @@
 # Immutability Aliases
 # Wrappers for the lock-configs script.
 
-script_path="${HOME}/.local/share/chezmoi/scripts/lock-configs.sh"
+script_path="${HOME}/.local/share/chezmoi/scripts/security/lock-configs.sh"
 
 if [[ -f "$script_path" ]]; then
     alias lock-configs="bash $script_path lock"

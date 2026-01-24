@@ -19,17 +19,17 @@ This branch delivers the v0.2.472 release set, including a full Neovim IDE confi
 - Added/updated system tuning and policy files (sysctl tuning and Chrome managed policies).
 
 ### Neovim IDE
-- Introduced a complete Neovim IDE configuration under `.config/nvim` (Lazy.nvim, plugins, LSP, UI, Rust/Python, Copilot, etc.).
+- Introduced a complete Neovim IDE configuration under `dot_config/nvim` (Lazy.nvim, plugins, LSP, UI, Rust/Python, Copilot, etc.).
 - Updated dot-config plugin overlays and added a dedicated Neovim guide.
 
 ### CI/Docker/Docs
-- Refreshed CI workflows and Docker test setup; added `test-docker.sh`.
+- Refreshed CI workflows and Docker test setup; added `scripts/tests/test-docker.sh`.
 - Updated README and release docs to align with the new architecture and workflows.
 
 ## Notable New Files
-- `.config/nvim/**` and `docs/neovim_ide_guide.md`
-- `scripts/install_neovim.sh`, `scripts/upgrade_neovim_nightly.sh`, `scripts/hide_menu_entries.sh`
-- `etc/sysctl.d/99-tuning.conf`, `etc/opt/chrome/policies/managed/*.json`
+- `dot_config/nvim/**` and `docs/neovim_ide_guide.md`
+- `install/helpers/install_neovim.sh`, `install/helpers/upgrade_neovim_nightly.sh`, `install/helpers/hide_menu_entries.sh`
+- `dot_etc/sysctl.d/99-tuning.conf`, `dot_etc/opt/chrome/policies/managed/*.json`
 - `dot_local/share/zsh/completions/.keep`
 
 ## Testing

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Test dotfiles README instructions across all environments using Docker
-# Usage: ./test-docker.sh [target...]
+# Usage: ./scripts/tests/test-docker.sh [target...]
 # Examples:
-#   ./test-docker.sh              # Run all tests
-#   ./test-docker.sh ubuntu-test  # Run only Ubuntu test
-#   ./test-docker.sh arch-test    # Run only Arch test
+#   ./scripts/tests/test-docker.sh              # Run all tests
+#   ./scripts/tests/test-docker.sh ubuntu-test  # Run only Ubuntu test
+#   ./scripts/tests/test-docker.sh arch-test    # Run only Arch test
 
 set -euo pipefail
 
