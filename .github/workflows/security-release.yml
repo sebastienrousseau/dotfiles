@@ -40,7 +40,7 @@ jobs:
         id: hash
         run: |
           sha256sum dotfiles-sbom.spdx.json > sbom.sha256
-          echo "hash=$(cat sbom.sha256 | base64)" >> $GITHUB_OUTPUT
+          echo "hash=$(cat sbom.sha256 | base64 -w 0)" >> $GITHUB_OUTPUT
 
       - name: Upload SBOM
         uses: actions/upload-artifact@v4
