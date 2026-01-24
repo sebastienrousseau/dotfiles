@@ -88,13 +88,18 @@ install_from_tarball() {
   tmp_dir="$(mktemp -d)"
   download_and_verify_sha256 "$url" "$checksum_url" "$tmp_dir/archive.tar.gz"
   tar -xzf "$tmp_dir/archive.tar.gz" -C "$tmp_dir"
-  if [ ! -f "$tmp_dir/$bin_name" ]; then
+  local bin_path
+  bin_path="$tmp_dir/$bin_name"
+  if [ ! -f "$bin_path" ]; then
+    bin_path="$(find "$tmp_dir" -type f -name "$bin_name" -perm -u+x 2>/dev/null | head -n1)"
+  fi
+  if [ -z "$bin_path" ] || [ ! -f "$bin_path" ]; then
     log_error "Expected binary $bin_name not found in archive."
     rm -rf "$tmp_dir"
     exit 1
   fi
   mkdir -p "$install_dir"
-  install -m 0755 "$tmp_dir/$bin_name" "$install_dir/$bin_name"
+  install -m 0755 "$bin_path" "$install_dir/$bin_name"
   rm -rf "$tmp_dir"
 }
 
@@ -150,8 +155,21 @@ fi
 # Install FZF
 if ! command -v fzf >/dev/null; then
   log_info "Installing FZF..."
-  git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-  ~/.fzf/install --all
+  if [ -d "${HOME}/.fzf" ]; then
+    if [ -x "${HOME}/.fzf/install" ]; then
+      if [ -d "${HOME}/.fzf/.git" ]; then
+        git -C "${HOME}/.fzf" pull --ff-only || true
+      else
+        log_info "Existing ~/.fzf found; skipping git clone."
+      fi
+      "${HOME}/.fzf/install" --all
+    else
+      log_error "Existing ~/.fzf without install script; skipping FZF install."
+    fi
+  else
+    git clone --depth 1 https://github.com/junegunn/fzf.git "${HOME}/.fzf"
+    "${HOME}/.fzf/install" --all
+  fi
 fi
 
 # Install Neovim (Nightly)
