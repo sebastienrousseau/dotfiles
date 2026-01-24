@@ -1,4 +1,4 @@
-# Universal Configuration Walkthrough (v0.2.471)
+# Universal Configuration Walkthrough (v0.2.472)
 
 ## 🚀 Overview
 We have successfully transformed the dotfiles into a modern, **universal configuration** managed by `chezmoi`. This release establishes a secure, high-performance, and compliant foundation for macOS, Linux, and Windows.
@@ -37,7 +37,7 @@ We have successfully transformed the dotfiles into a modern, **universal configu
 
 ## 📦 Artifacts
 - **Installer**: `curl -sL dotfiles.io/install.sh | sh`
-- **Package**: `dist/dotfiles-v0.2.471.tar.gz`
+- **Package**: `dist/dotfiles-v0.2.472.tar.gz`
 - **Docs**: Full `README.md`, `COMPLIANCE.md`, `OPERATIONS.md`.
 
 ## 🔮 Next Steps

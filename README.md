@@ -9,7 +9,7 @@
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.471)
+# Dotfiles (v0.2.472)
 
 Simply designed to fit your shell life 🐚
 
@@ -37,7 +37,7 @@ Simply designed to fit your shell life 🐚
 
 ## Overview 📖
 
-Dotfiles v0.2.471 transforms your shell into a **Trusted Platform**. It is a curated, high-performance distribution of configurations, managed by `chezmoi`.
+Dotfiles v0.2.472 transforms your shell into a **Trusted Platform**. It is a curated, high-performance distribution of configurations, managed by `chezmoi`.
 
 Unlike traditional "dotfile repos" that sprawl across your home directory, this project:
 1.  **Centralizes Truth**: All config lives in `~/.local/share/chezmoi` (XDG-compliant).
@@ -50,7 +50,7 @@ Unlike traditional "dotfile repos" that sprawl across your home directory, this 
 <!-- markdownlint-enable MD033 MD041 -->
 
 [![Getting Started][getting_started]][getting-started-url]
-[![Download Dotfiles v0.2.471][download_button]][12]
+[![Download Dotfiles v0.2.472][download_button]][12]
 
 <!-- markdownlint-disable MD033 MD041 MD043 -->
 </center>
@@ -109,7 +109,7 @@ We use `chezmoi` for a one-line installation process. This will:
 **Run the following command:**
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.471/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.472/install.sh)"
 ```
 
 *Note: This will verify your system and prompt you for any necessary inputs.*
@@ -240,7 +240,7 @@ Apache License (Version 2.0).
 [09]: https://www.deepin.org/en/ "Deepin"
 [10]: https://devuan.org/ "Devuan"
 [11]: https://github.com/sebastienrousseau/dotfiles/docs "Documentation"
-[12]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.471.tar.gz "Download Dotfiles v0.2.471"
+[12]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.472.tar.gz "Download Dotfiles v0.2.472"
 [13]: https://github.com/sebastienrousseau/dotfiles/network/members "List of members"
 [14]: https://github.com/sebastienrousseau/dotfiles/graphs/contributors "List of contributors"
 [15]: https://git-scm.com/ "Git"
