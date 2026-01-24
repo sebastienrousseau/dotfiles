@@ -269,7 +269,7 @@ Apache License (Version 2.0).
 [29]: https://zorinos.com/ "Zorin OS"
 [30]: https://www.zsh.org/ "Zsh"
 
-[getting-started-url]: https://github.com/sebastienrousseau/dotfiles#getting-started-
+[getting-started-url]: #getting-started-
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg "Banner of Dotfiles"
 [codacy-grade]: https://img.shields.io/codacy/grade/634cfc4de08e492ebcbb341631066241?style=for-the-badge "Codacy grade"
