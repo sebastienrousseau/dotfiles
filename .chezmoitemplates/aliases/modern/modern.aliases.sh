@@ -5,6 +5,7 @@
 # Eza (Replacement for ls) OR Fallback
 if command -v eza >/dev/null; then
   alias ls="eza --icons --group-directories-first"
+  alias l="ls"
   alias ll="eza -alF --icons --group-directories-first"
   alias la="eza -a --icons --group-directories-first"
   alias lt="eza -aT --icons --group-directories-first"
