@@ -41,7 +41,18 @@ Dotfiles v0.2.472 transforms your shell into a **Trusted Platform**. It is a cur
 
 This project aims to provide a reproducible and optimized development environment for macOS, Linux, and Windows (via WSL).
 
-![divider][divider]
+<!-- markdownlint-disable MD033 MD041 MD043 -->
+<br>
+<center>
+<!-- markdownlint-enable MD033 MD041 -->
+
+[![Getting Started][getting_started]][getting-started-url]
+[![Download Dotfiles v0.2.472][download_button]][12]
+
+<!-- markdownlint-disable MD033 MD041 MD043 -->
+</center>
+<br />
+<!-- markdownlint-enable MD033 MD041 -->
 
 ## Features ✨
 
@@ -107,12 +118,7 @@ The following tools need to be installed manually (Linux):
 <summary><strong>Arch Linux</strong></summary>
 
 ```bash
-# Update package list and install dependencies
-sudo pacman -Syu git curl zsh go starship zoxide fzf atuin zellij neovim lazygit python-pipx ripgrep fd bat jq yq
-pipx install git+https://github.com/dandavison/delta.git
-
-# Install other tools from AUR or other sources
-echo "Please install ghostty, yazi, ollama, fabric and other tools from the AUR or other sources."
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.472/install.sh)"
 
 # Install a Nerd Font
 sudo pacman -S ttf-fira-code
@@ -242,7 +248,7 @@ Apache License (Version 2.0).
 [08]: https://www.debian.org/ "Debian"
 [09]: https://www.deepin.org/en/ "Deepin"
 [10]: https://devuan.org/ "Devuan"
-[11]: https://github.com/sebastienrousseau/dotfiles/tree/master/docs "Documentation"
+[11]: https://github.com/sebastienrousseau/dotfiles/docs "Documentation"
 [12]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.472.tar.gz "Download Dotfiles v0.2.472"
 [13]: https://github.com/sebastienrousseau/dotfiles/network/members "List of members"
 [14]: https://github.com/sebastienrousseau/dotfiles/graphs/contributors "List of contributors"
@@ -275,4 +281,3 @@ Apache License (Version 2.0).
 [getting_started]: https://kura.pro/common/images/buttons/button-primary.svg "Getting Started"
 [license]: https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge\&color=ff69b4 "License"
 [love]: https://kura.pro/common/images/shields/made-with-love.svg "Made with Love"
-
