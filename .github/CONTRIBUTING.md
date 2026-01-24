@@ -9,7 +9,7 @@
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.471)
+# Dotfiles (v0.2.472)
 
 Simply designed to fit your shell life 🐚
 

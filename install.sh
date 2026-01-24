@@ -48,28 +48,50 @@ else
     BIN_DIR="$HOME/.local/bin"
     mkdir -p "$BIN_DIR"
     
-    # Binary Locking: Explicitly pinned version and checksum
-    # Version: 2.47.1 (matching our release for consistency, or latest stable)
-    # Using 2.47.1 as example, but likely we want the latest stable.
-    # Let's use a specific widely used version or dynamic check? 
-    # User asked for "Sha256 verification".
-    
+    # Binary Locking: Explicitly pinned version with SHA256 verification
     CHEZMOI_VERSION="2.47.1"
-    # SHA256 for linux_amd64 (We need arch detection logic for strict binary locking)
-    # This adds complexity. For now, let's stick to get.chezmoi.io but verify IT?
-    # No, better to use the official install script but pass a specific version?
-    # sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$BIN_DIR" -t v2.47.1
-    # But that doesn't verify the BINARY SHA.
-    
-    # Implementing a safer downloader that verifies CHECKSUMS.txt
     echo "   Installing chezmoi v${CHEZMOI_VERSION} (Verified)..."
-    # Fix: GitHub release binary naming convention might be different. 
-    # Actually, standard is: https://github.com/twpayne/chezmoi/releases/download/v2.47.1/chezmoi-linux-amd64
-    # uname -s is Linux, uname -m is x86_64. 
-    # We need to map x86_64 to amd64. 
-    # For now, relying on the fallback is safer if we can't do robust mapping in one line.
-    
-    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$BIN_DIR"
+
+    os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+    arch="$(uname -m)"
+    case "$arch" in
+      x86_64|amd64) arch="amd64" ;;
+      aarch64|arm64) arch="arm64" ;;
+      armv7l|armv7) arch="armv7" ;;
+      *) error "Unsupported architecture for verified chezmoi install: $arch" ;;
+    esac
+
+    case "$os" in
+      linux|darwin) ;;
+      *) error "Unsupported OS for verified chezmoi install: $os" ;;
+    esac
+
+    tarball="chezmoi_${CHEZMOI_VERSION}_${os}_${arch}.tar.gz"
+    checksums="chezmoi_${CHEZMOI_VERSION}_checksums.txt"
+    base_url="https://github.com/twpayne/chezmoi/releases/download/v${CHEZMOI_VERSION}"
+
+    tmp_dir="$(mktemp -d)"
+    trap 'rm -rf "$tmp_dir"' EXIT
+
+    curl -fsSL -o "$tmp_dir/$tarball" "$base_url/$tarball"
+    curl -fsSL -o "$tmp_dir/$checksums" "$base_url/$checksums"
+
+    if command -v sha256sum >/dev/null; then
+      expected="$(awk -v f="$tarball" '$2==f {print $1}' "$tmp_dir/$checksums")"
+      actual="$(sha256sum "$tmp_dir/$tarball" | awk '{print $1}')"
+    elif command -v shasum >/dev/null; then
+      expected="$(awk -v f="$tarball" '$2==f {print $1}' "$tmp_dir/$checksums")"
+      actual="$(shasum -a 256 "$tmp_dir/$tarball" | awk '{print $1}')"
+    else
+      error "sha256sum or shasum is required to verify chezmoi."
+    fi
+
+    if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
+      error "Checksum verification failed for chezmoi."
+    fi
+
+    tar -xzf "$tmp_dir/$tarball" -C "$tmp_dir"
+    install -m 0755 "$tmp_dir/chezmoi" "$BIN_DIR/chezmoi"
     
     # Critical: Add to PATH for the rest of the script to see it
     export PATH="$BIN_DIR:$PATH"
@@ -79,14 +101,18 @@ fi
 step "Applying Configuration..."
 
 # VERSION pinning for supply-chain security
-VERSION="v0.2.471"
+if [ -n "$1" ]; then
+  VERSION="$1"
+else
+  VERSION="v0.2.472"
+fi
 
 # If we are running from the repo itself, just apply
 if [ -d "$HOME/.local/share/chezmoi/.git" ]; then
     echo "   Applying from local source..."
     chezmoi apply
 else
-    echo "   Initializing from GitHub (Tag: $VERSION)..."
+    echo "   Initializing from GitHub (Branch/Tag: $VERSION)..."
     # STRICT MODE: We pin to the specific tag to avoid 'main' branch drift
     chezmoi init --apply sebastienrousseau --branch "$VERSION"
 fi

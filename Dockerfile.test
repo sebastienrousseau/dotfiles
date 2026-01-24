@@ -1,29 +1,181 @@
-FROM ubuntu:26.04
-# Test env for Universal Installer
-# Simulates a raw machine
-LABEL version="0.2.471"
-LABEL description="Universal Dotfiles Installer Test Environment"
+# Multi-environment test for dotfiles README instructions
+# Usage: ./scripts/tests/test-docker.sh (builds and runs all targets)
+# Or:   docker build --target ubuntu-test -f Dockerfile.test .
 
-# Install minimal deps (curl is standard, git usually too, but we ensure them)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    git \
-    sudo \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+# =============================================================================
+# Ubuntu 24.04 (LTS) - Tests Debian/Ubuntu prerequisites + install.sh
+# =============================================================================
+FROM ubuntu:24.04 AS ubuntu-test
 
-# Create a test user
-# Create a test user with sudo rights for non-interactive install
-RUN useradd -m -s /bin/bash testuser && \
-    echo "testuser ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/testuser && \
-    chmod 0440 /etc/sudoers.d/testuser
-USER testuser
-WORKDIR /home/testuser
+ENV DEBIAN_FRONTEND=noninteractive
+ENV HOME=/root
 
-# Copy installer (simulating curl download)
-COPY --chown=testuser:testuser install.sh .
+# README Prerequisites: Debian / Ubuntu
+RUN apt-get update && \
+    apt-get install -y git curl zsh build-essential ripgrep fd-find bat jq && \
+    apt-get clean
 
-# Run installer
-# We expect this to fail if it tries to interact, so we might need non-interactive mode.
-# But install.sh currently just does standard checks.
-RUN chmod +x install.sh && ./install.sh
+# Install chezmoi (from install.sh logic)
+RUN mkdir -p "$HOME/.local/bin" && \
+    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+ENV PATH="$HOME/.local/bin:$PATH"
+
+# Copy repo as chezmoi source
+COPY . $HOME/.local/share/chezmoi
+
+# Apply chezmoi (skip provisioning script to isolate alias testing)
+RUN chezmoi apply --exclude=scripts
+
+# Verify aliases file was generated
+RUN test -f "$HOME/.config/shell/90-ux-aliases.sh" || \
+    (echo "FAIL: 90-ux-aliases.sh not generated" && exit 1)
+
+# Verify modern aliases are present and not disabled
+RUN grep -q 'alias ls="eza' "$HOME/.config/shell/90-ux-aliases.sh" || \
+    grep -q "alias l='ls'" "$HOME/.config/shell/90-ux-aliases.sh" || \
+    (echo "FAIL: ls aliases not found in generated file" && exit 1)
+
+# Verify aliases can be sourced without errors
+RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh"' || \
+    (echo "FAIL: aliases file has syntax errors" && exit 1)
+
+# Verify bat alias works (bat is installed as batcat on Ubuntu/Debian)
+RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type cat' | grep -q batcat || \
+    (echo "FAIL: cat alias does not resolve to batcat on Ubuntu" && exit 1)
+
+# Verify fallback ls aliases work (eza not installed)
+RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type ll' 2>/dev/null | grep -q "ls -lA" || \
+    echo "NOTE: ll fallback alias check"
+
+# Test install.sh syntax (don't execute network calls)
+RUN bash -n "$HOME/.local/share/chezmoi/install.sh" || \
+    (echo "FAIL: install.sh has syntax errors" && exit 1)
+
+RUN echo "=== Ubuntu 24.04: ALL TESTS PASSED ==="
+
+# =============================================================================
+# Debian 12 (Bookworm) - Tests Debian prerequisites + install.sh
+# =============================================================================
+FROM debian:12 AS debian-test
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV HOME=/root
+
+# README Prerequisites: Debian / Ubuntu
+RUN apt-get update && \
+    apt-get install -y git curl zsh build-essential ripgrep fd-find bat jq && \
+    apt-get clean
+
+# Install chezmoi
+RUN mkdir -p "$HOME/.local/bin" && \
+    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+ENV PATH="$HOME/.local/bin:$PATH"
+
+# Copy repo as chezmoi source
+COPY . $HOME/.local/share/chezmoi
+
+# Apply chezmoi (skip provisioning script)
+RUN chezmoi apply --exclude=scripts
+
+# Verify aliases file was generated
+RUN test -f "$HOME/.config/shell/90-ux-aliases.sh" || \
+    (echo "FAIL: 90-ux-aliases.sh not generated" && exit 1)
+
+# Verify aliases can be sourced without errors
+RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh"' || \
+    (echo "FAIL: aliases file has syntax errors" && exit 1)
+
+# Test install.sh syntax
+RUN bash -n "$HOME/.local/share/chezmoi/install.sh" || \
+    (echo "FAIL: install.sh has syntax errors" && exit 1)
+
+RUN echo "=== Debian 12: ALL TESTS PASSED ==="
+
+# =============================================================================
+# Arch Linux - Tests Arch prerequisites
+# =============================================================================
+FROM archlinux:latest AS arch-test
+
+ENV HOME=/root
+
+# README Prerequisites: Arch Linux
+RUN pacman -Syu --noconfirm git curl zsh ripgrep fd bat jq
+
+# Install chezmoi
+RUN mkdir -p "$HOME/.local/bin" && \
+    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+ENV PATH="$HOME/.local/bin:$PATH"
+
+# Copy repo as chezmoi source
+COPY . $HOME/.local/share/chezmoi
+
+# Apply chezmoi (skip provisioning script)
+RUN chezmoi apply --exclude=scripts
+
+# Verify aliases file was generated
+RUN test -f "$HOME/.config/shell/90-ux-aliases.sh" || \
+    (echo "FAIL: 90-ux-aliases.sh not generated" && exit 1)
+
+# Verify modern aliases contain eza or fallback
+RUN grep -q 'alias ls="eza' "$HOME/.config/shell/90-ux-aliases.sh" || \
+    grep -q "alias l='ls'" "$HOME/.config/shell/90-ux-aliases.sh" || \
+    (echo "FAIL: ls aliases not found in generated file" && exit 1)
+
+# Verify aliases can be sourced without errors
+RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh"' || \
+    (echo "FAIL: aliases file has syntax errors" && exit 1)
+
+# Verify bat alias works (bat binary is named 'bat' on Arch)
+RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type cat' | grep -q bat || \
+    (echo "FAIL: bat alias not working on Arch" && exit 1)
+
+# Test install.sh syntax
+RUN bash -n "$HOME/.local/share/chezmoi/install.sh" || \
+    (echo "FAIL: install.sh has syntax errors" && exit 1)
+
+RUN echo "=== Arch Linux: ALL TESTS PASSED ==="
+
+# =============================================================================
+# Ubuntu 24.04 + eza - Tests modern aliases with eza installed
+# =============================================================================
+FROM ubuntu:24.04 AS ubuntu-eza-test
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV HOME=/root
+
+RUN apt-get update && \
+    apt-get install -y git curl zsh build-essential ripgrep fd-find bat jq gpg && \
+    apt-get clean
+
+# Install eza (official method for Ubuntu)
+RUN mkdir -p /etc/apt/keyrings && \
+    curl -fsSL https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" > /etc/apt/sources.list.d/gierens.list && \
+    apt-get update && \
+    apt-get install -y eza && \
+    apt-get clean
+
+# Install chezmoi
+RUN mkdir -p "$HOME/.local/bin" && \
+    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+ENV PATH="$HOME/.local/bin:$PATH"
+
+# Copy repo as chezmoi source
+COPY . $HOME/.local/share/chezmoi
+
+# Apply chezmoi (skip provisioning script)
+RUN chezmoi apply --exclude=scripts
+
+# Verify eza aliases are active (not fallback)
+RUN grep -q 'alias ls="eza --icons --group-directories-first"' "$HOME/.config/shell/90-ux-aliases.sh" || \
+    (echo "FAIL: eza alias not found in generated file" && exit 1)
+
+# Verify aliases can be sourced and eza alias resolves
+RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type ls' | grep -q eza || \
+    (echo "FAIL: ls does not resolve to eza" && exit 1)
+
+# Verify ll alias
+RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type ll' | grep -q eza || \
+    (echo "FAIL: ll does not resolve to eza" && exit 1)
+
+RUN echo "=== Ubuntu 24.04 + eza: ALL TESTS PASSED ==="

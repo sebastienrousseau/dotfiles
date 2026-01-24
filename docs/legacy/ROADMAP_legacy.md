@@ -54,7 +54,7 @@
 - [x] **Robust Error Handling**: PR #59 focused on strict error traps.
   - *Adaptation*: Ensure all `run_onchange` scripts use `set -e` and provide clear, actionable error messages on failure.
 
-## 11. Structural Optimizations (v0.2.471) [COMPLETED]
+## 11. Structural Optimizations (v0.2.472) [COMPLETED]
 - [x] **Semantic Organization**: Rename `dot_config/dotfiles` to `dot_config/shell` to better reflect its contents.
 - [x] **Script Installation**: Move `bin/` to `dot_local/bin/` for automatic PATH integration.
 - [x] **Cleanup**: Remove legacy `Makefile` and `package.json`.
@@ -93,7 +93,7 @@
 - [x] **Teleportation**: Capability to "teleport" the entire config to a remote session (SSH) ephemerally.
 
 ## 19. Phase 25: The "Gold Standard" Documentation [COMPLETED]
-- [x] **DocSite**: Update `dotfiles.github.io` (v0.2.471) with dependency cleanup and UI refresh.
+- [x] **DocSite**: Update `dotfiles.github.io` (v0.2.472) with dependency cleanup and UI refresh.
 - [ ] **Man Pages**: proper `man dotfiles` integration for every custom function and alias.
 - [x] **Interactive Tour**: `dot learn` to launch an interactive guided tour of the shell environment.
 - [ ] **Localization**: i18n support structure for error messages and help text.

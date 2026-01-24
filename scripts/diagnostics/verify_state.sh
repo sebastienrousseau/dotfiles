@@ -35,9 +35,9 @@ check_file ".chezmoitemplates/aliases/security/README.md"
 check_file ".chezmoitemplates/aliases/legal/README.md"
 
 # 2. Verify Scripts
-check_file "scripts/lock-configs.sh"
-check_file "scripts/detect-collisions.py"
-check_file "scripts/test-aliases.sh"
+check_file "scripts/security/lock-configs.sh"
+check_file "scripts/tools/detect-collisions.py"
+check_file "scripts/tests/test-aliases.sh"
 
 # 3. Verify Generated Config Content (Key Features)
 # Security

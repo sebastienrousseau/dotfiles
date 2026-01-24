@@ -1,7 +1,9 @@
 # Taps
 # homebrew/bundle - Deprecated
 # homebrew/core - Built-in
-# homebrew/cask - Built-in# Core Tools
+# homebrew/cask - Built-in
+
+# Core Tools
 brew "git"
 brew "chezmoi"
 brew "starship"
@@ -12,6 +14,26 @@ brew "eza"
 brew "bat"
 brew "fzf"
 brew "zoxide"
+brew "go"
+brew "neovim"
+brew "lazygit"
+brew "delta"
+brew "tldr"
+brew "dust"
+brew "duf"
+brew "gping"
+brew "procs"
+brew "bottom"
+brew "hyperfine"
+brew "hexyl"
+brew "yq"
+brew "gum"
+brew "glow"
+brew "gh"
+brew "glab"
+brew "ollama"
+brew "fabric-cli"
+brew "uv"
 
 # Applications
 cask "visual-studio-code"
