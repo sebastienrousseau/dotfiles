@@ -1,8 +1,3 @@
-# PR Title
-feat(core): Rel v0.2.472 - Universal Config, Security & Performance
-
-# PR Description
-
 ## 🚀 v0.2.472 Release: Universal Configuration
 
 This release transforms the dotfiles into a high-performance, universally compatible system managed by **chezmoi**.
@@ -37,7 +32,6 @@ v0.2.472 is not just "dotfiles" but a portable **Shell Distribution** managed by
 
 ### 🛠️ Changes
 - **Migrated**:
-  - Shell: `~/.zshrc` now sources generated templates from `~/.config/shell`.
   - Shell: `~/.zshrc` now sources generated templates from `~/.config/shell`.
   - Neovim: `~/.config/nvim` fully managed via Lua/Lazy.nvim.
   - Tmux: Modular config consolidated to `~/.local/share/chezmoi/dot_tmux.conf`.
