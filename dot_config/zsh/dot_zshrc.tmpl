@@ -207,7 +207,11 @@ fi
 # Smart Alias Function (Colorize output when listing, standard behavior otherwise)
 alias_wrapper() {
   if [[ $# -eq 0 ]]; then
-     builtin alias | bat -l sh --style=plain
+     if command -v bat >/dev/null; then
+       builtin alias | bat -l sh --style=plain
+     else
+       builtin alias
+     fi
   else
      builtin alias "$@"
   fi
