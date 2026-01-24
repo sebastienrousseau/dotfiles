@@ -4,6 +4,11 @@ on:
   release:
     types: [created]
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag to scan (e.g., v0.2.472)"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -20,6 +25,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
 
       - name: Generate SBOM (SPDX)
         id: sbom
