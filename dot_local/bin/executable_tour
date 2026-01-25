@@ -24,77 +24,102 @@ fi
 
 clear
 
-# Intro
+# Intro (match UI header style)
 gum style \
-	--foreground 212 --border-foreground 212 --border double \
-	--align center --width 50 --margin "1 2" --padding "2 4" \
-	"Welcome to Your Predictive Shell" \
-    "v0.2.474"
+    --foreground 212 --border-foreground 212 --border double \
+    --align center --width 62 --margin "1 2" --padding "1 2" \
+    "██████╗  ██████╗ ████████╗███████╗██╗██╗     ███████╗███████╗" \
+    "██╔══██╗██╔═══██╗╚══██╔══╝██╔════╝██║██║     ██╔════╝██╔════╝" \
+    "██║  ██║██║   ██║   ██║   █████╗  ██║██║     █████╗  ███████╗" \
+    "██║  ██║██║   ██║   ██║   ██╔══╝  ██║██║     ██╔══╝  ╚════██║" \
+    "██████╔╝╚██████╔╝   ██║   ██║     ██║███████╗███████╗███████║" \
+    "╚═════╝  ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝" \
+    "" \
+    "v0.2.474 · Infrastructure‑grade shell environment"
 
 echo ""
-gum confirm "Ready to explore the Modern Core?" || exit 0
+gum confirm "Ready to take a quick guided tour?" || exit 0
 clear
 
-# Slide 1: Modern Core Overview
+# Slide 1: Core workflow
 gum style \
-	--foreground 99 --border rounded --padding "1 2" --margin "1 2" \
-    "We have upgraded your shell with Rust-powered tools:" \
+    --foreground 99 --border rounded --padding "1 2" --margin "1 2" \
+    "Core workflow (safe + repeatable)" \
     " " \
-    "• Atuin   - Magical History Search (Ctrl+R / Up)" \
-    "• Yazi    - Blazing Fast File Manager (yy)" \
-    "• Zellij  - Terminal Multiplexer (alt+n)" \
-    "• Ghostty - GPU Accelerated Terminal"
+    "dot apply     # Apply your dotfiles" \
+    "dot update    # Pull + apply updates" \
+    "dot diff      # See local changes (excludes scripts)" \
+    "dot drift     # Snapshot config drift"
 
 echo ""
-gum confirm "Next: Atuin (History)" || exit 0
+gum confirm "Next: Diagnostics" || exit 0
 clear
 
-# Slide 2: Atuin
+# Slide 2: Diagnostics
 gum style \
-	--foreground 75 --border rounded --padding "1 2" --margin "1 2" \
-    "Atuin replaces your existing history." \
+    --foreground 75 --border rounded --padding "1 2" --margin "1 2" \
+    "Diagnostics & insight" \
     " " \
-    "🚀 Usage:" \
-    "Press 'Ctrl+R' or 'Up Arrow' to search." \
-    " " \
-    "💡 Pro Tip:" \
-    "Type natural language queries to fuzzy find past commands." \
-    "Your history is now synced and encrypted."
+    "dot doctor    # Health checks" \
+    "dot history   # Shell history analysis" \
+    "dot benchmark # Startup timing"
 
 echo ""
-gum confirm "Next: Yazi (File Manager)" || exit 0
+gum confirm "Next: Secrets" || exit 0
 clear
 
-# Slide 3: Yazi
+# Slide 3: Secrets
 gum style \
-	--foreground 214 --border rounded --padding "1 2" --margin "1 2" \
-    "Yazi is your new hyper-fast file manager." \
+    --foreground 214 --border rounded --padding "1 2" --margin "1 2" \
+    "Secrets (age)" \
     " " \
-    "🚀 Usage:" \
-    "Type 'yy' to launch." \
-    " " \
-    "💡 Features:" \
-    "- Instant startup" \
-    "- Image previews in terminal" \
-    "- Lua plugin support"
+    "dot secrets-init   # Create age key" \
+    "dot secrets        # Edit encrypted secrets" \
+    "dot secrets-create # Create encrypted file" \
+    "dot ssh-key        # Encrypt an SSH key locally"
 
 echo ""
-gum confirm "Next: AI Features" || exit 0
+gum confirm "Next: Security (opt‑in)" || exit 0
 clear
 
-# Slide 4: AI
+# Slide 4: Security (opt-in)
 gum style \
-	--foreground 150 --border rounded --padding "1 2" --margin "1 2" \
-    "Your Shell is now AI-Aware." \
+    --foreground 150 --border rounded --padding "1 2" --margin "1 2" \
+    "Security (opt‑in)" \
     " " \
-    "🧠 Error Analysis:" \
-    "Type '??' after a failed command to analyze it." \
+    "dot firewall     # Firewall hardening" \
+    "dot telemetry    # Disable OS telemetry" \
+    "dot dns-doh      # Enable DNS‑over‑HTTPS (Linux)" \
+    "dot lock-screen  # Idle lock settings" \
+    "dot usb-safety   # Disable automount" \
+    "dot encrypt-check # Disk encryption status"
+
+echo ""
+gum style \
+    --foreground 212 --border rounded --padding "1 2" --margin "1 2" \
+    "Themes & UX" \
     " " \
-    "🤖 Context Suggest:" \
-    "Navigate to a project and run 'suggest' for tailored aliases."
+    "dot theme      # Switch terminal theme" \
+    "dot wallpaper  # Apply wallpaper" \
+    "dot fonts      # Install Nerd Fonts" \
+    "dot keys       # Keybindings catalog" \
+    "dot tools      # Curated utilities"
+echo ""
+
+gum confirm "Next: Projects & Sandbox" || exit 0
+clear
+
+# Slide 5: Projects & Sandbox
+gum style \
+    --foreground 111 --border rounded --padding "1 2" --margin "1 2" \
+    "Projects & sandbox" \
+    " " \
+    "dot new <lang> <name>  # Templates: python, go, node" \
+    "dot sandbox            # Safe preview (Docker/Podman)" \
+    "dot edit               # Open source in editor"
 
 echo ""
 gum style \
     --foreground 212 --margin "1 2" \
-    "You are all set! Enjoy your new environment."
+    "You’re all set. Tip: run 'dot update' weekly to stay current."
 echo ""
