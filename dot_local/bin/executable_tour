@@ -4,7 +4,21 @@
 
 if ! command -v gum >/dev/null; then
     echo "Error: 'gum' is not installed."
-    echo "Run: brew install gum"
+    case "$(uname -s)" in
+        Darwin)
+            echo "Install: brew install gum"
+            ;;
+        Linux)
+            if command -v snap >/dev/null; then
+                echo "Install: sudo snap install gum --classic"
+            else
+                echo "Install: go install github.com/charmbracelet/gum@latest"
+            fi
+            ;;
+        *)
+            echo "Install gum from: https://github.com/charmbracelet/gum"
+            ;;
+    esac
     exit 1
 fi
 
