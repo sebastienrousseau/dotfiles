@@ -18,7 +18,6 @@ Conceptually: Git + templates + guarded scripts = a reproducible shell.
 
 ## Table of Contents
 
-- [Non-Goals](#non-goals)
 - [Why Dotfiles?](#why-dotfiles)
 - [Safety Guarantees](#safety-guarantees)
 - [Quick Start (60 seconds)](#quick-start-60-seconds)
@@ -33,10 +32,6 @@ Conceptually: Git + templates + guarded scripts = a reproducible shell.
 - [License](#license)
 
 ---
-
-## Non-Goals
-
-Dotfiles does not aim to be a beginner tutorial, a GUI-based setup tool, or a one-size-fits-all configuration.
 
 ## Why Dotfiles?
 
