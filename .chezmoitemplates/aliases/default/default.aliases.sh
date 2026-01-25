@@ -96,8 +96,18 @@ set_default_aliases() {
     # or server's processes in real time.
     alias top='sudo btop'
 
-    # Remove all log files in /private/var/log/asl/.
-    alias spd='sudo rm -rf /private/var/log/asl/*'
+    # Clear ASL logs (macOS) - requires confirmation
+    clear_asl_logs() {
+      if [[ "$(uname)" != "Darwin" ]]; then
+        echo "[ERROR] This command is macOS-only" >&2
+        return 1
+      fi
+      echo "[WARNING] This will delete all ASL logs in /private/var/log/asl/"
+      read -r -p "Continue? [y/N] " confirm
+      [[ "$confirm" == [yY]* ]] || { echo "Aborted."; return 1; }
+      sudo rm -rf /private/var/log/asl/* && echo "[INFO] ASL logs cleared."
+    }
+    alias clearasl='clear_asl_logs'
 
     ## Utility aliases
     # Count the number of files in the current directory.

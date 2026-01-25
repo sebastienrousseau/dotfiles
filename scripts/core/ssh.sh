@@ -33,6 +33,9 @@ fi
 # generate ssh key using ed25519 algorithm
 # https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
 # -C set email, -N empty passcode, -q quiet
+# WARNING: This creates an SSH key WITHOUT a passphrase for automation purposes.
+# For manual/interactive use, consider adding a passphrase for enhanced security.
+# See: https://security.stackexchange.com/questions/87044/
 ssh-keygen -q -t ed25519 -C "${EMAIL}" -f "${HOME}"/.ssh/id_ed25519 -N ""
 
 # start ssh-agent in the background
