@@ -249,6 +249,24 @@ Simply design to fit your shell life
   { "sainnhe/everforest", name = "everforest", lazy = true, priority = 1000 },
   { "rebelot/kanagawa.nvim", name = "kanagawa", lazy = true, priority = 1000 },
 
+  -----------------------------------------------------------------------------
+  -- Lazy Profiling
+  -----------------------------------------------------------------------------
+  {
+    "folke/lazy.nvim",
+    opts = {
+      profiling = {
+        loader = true,
+        require = true,
+      },
+    },
+  },
+
+  -----------------------------------------------------------------------------
+  -- Icon Sets
+  -----------------------------------------------------------------------------
+  { "nvim-tree/nvim-web-devicons", lazy = true },
+
   -- Theme Selector (Catppuccin as fallback)
   {
     "catppuccin/nvim",

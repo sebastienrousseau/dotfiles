@@ -138,6 +138,7 @@ dot tune      # Apply OS tuning (opt-in)
 dot secrets   # Edit encrypted secrets (age)
 dot upgrade   # Update flake, plugins, and dotfiles
 dot new       # Scaffold a project template (python/go/node)
+dot log-rotate # Rotate ~/.local/share/dotfiles.log
 ```
 
 ### Optional Nix Toolchain

@@ -23,3 +23,4 @@ This is intentionally small and practical.
 - `dot update` to pull and apply changes
 - `dot theme` to switch terminal themes
 - `dot new` to scaffold a project (python/go/node)
+- `dot log-rotate` to rotate `~/.local/share/dotfiles.log`

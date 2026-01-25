@@ -39,6 +39,7 @@ show_help() {
     echo "  learn      Start the interactive tour of your new tools"
     echo "  tools      Show dot utils overview"
     echo "  new        Create a new project from a template"
+    echo "  log-rotate  Rotate ~/.local/share/dotfiles.log"
     echo "  help       Show this help message"
 }
 
@@ -442,6 +443,19 @@ PY
             exit 1
         fi
         echo "Created $LANG project at $DEST"
+        ;;
+    log-rotate)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -z "$SRC_DIR" ]; then
+            echo "Dotfiles source not found."
+            exit 1
+        fi
+        if [ -f "$SRC_DIR/scripts/tools/log-rotate.sh" ]; then
+            exec bash "$SRC_DIR/scripts/tools/log-rotate.sh"
+        else
+            echo "Log rotation script not found."
+            exit 1
+        fi
         ;;
     help|--help|-h)
         show_help
