@@ -41,6 +41,7 @@ if command -v fnm >/dev/null; then
   if [[ ! -f "${ZSH_COMPLETIONS_DIR}/_fnm" ]]; then
     command fnm completions --shell zsh >| "${ZSH_COMPLETIONS_DIR}/_fnm"
   fi
+  eval "$(fnm env --use-on-cd)"
 fi
 autoload -Uz compinit
 if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
