@@ -266,11 +266,6 @@ Available themes:
 
 Screenshots live in `docs/themes/README.md` with a capture checklist.
 
-### Demo
-
-Capture checklist in `docs/demo/README.md`.
-
-![Demo](docs/demo/demo.gif)
 
 ### Wallpapers
 
