@@ -1,6 +1,6 @@
 # Architecture & Design
 
-v0.2.473 constitutes a portable **Shell Distribution** managed by `chezmoi`. This document outlines the core architectural decisions and system design.
+v0.2.474 constitutes a portable **Shell Distribution** managed by `chezmoi`. This document outlines the core architectural decisions and system design.
 
 ## 1. Core Philosophy
 
@@ -51,7 +51,7 @@ We replace distinct Unix legacy tools with high-performance Rust alternatives:
 
 - **Hardened Defaults**: Shell scripts run with `set -euo pipefail` to fail fast.
 - **Supply Chain Safety**:
-  - **Pinned Installation**: Installers reference specific Git tags (e.g., `v0.2.473`), not `main`.
+  - **Pinned Installation**: Installers reference specific Git tags (e.g., `v0.2.474`), not `main`.
   - **Immutable History**: Logic logic is version controlled and reviewable via `chezmoi diff`.
 - **Audit Logging**: All mutations are logged to `~/.dotfiles_audit.log`.
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 # Interactive Tour using Gum
-# Part of Dotfiles v0.2.473
+# Part of Dotfiles v0.2.474
 
 if ! command -v gum >/dev/null; then
     echo "Error: 'gum' is not installed."
@@ -15,7 +15,7 @@ gum style \
 	--foreground 212 --border-foreground 212 --border double \
 	--align center --width 50 --margin "1 2" --padding "2 4" \
 	"Welcome to Your Predictive Shell" \
-    "v0.2.473"
+    "v0.2.474"
 
 echo ""
 gum confirm "Ready to explore the Modern Core?" || exit 0
