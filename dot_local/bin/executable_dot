@@ -38,6 +38,7 @@ show_help() {
     echo "  docs       Show repo README"
     echo "  learn      Start the interactive tour of your new tools"
     echo "  tools      Show dot utils overview"
+    echo "  new        Create a new project from a template"
     echo "  help       Show this help message"
 }
 
@@ -377,6 +378,70 @@ case "$COMMAND" in
             echo "  dot keys       - Show keybindings catalog"
             echo "  dot learn      - Interactive tour"
         fi
+        ;;
+    new)
+        LANG="$1"
+        NAME="$2"
+        if [ -z "$LANG" ] || [ -z "$NAME" ]; then
+            echo "Usage: dot new <lang> <name>"
+            echo "Available templates: python, go, node"
+            exit 1
+        fi
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -z "$SRC_DIR" ]; then
+            echo "Dotfiles source not found."
+            exit 1
+        fi
+        TEMPLATE_DIR="$SRC_DIR/templates/projects/$LANG"
+        if [ ! -d "$TEMPLATE_DIR" ]; then
+            echo "Unknown template: $LANG"
+            echo "Available templates: python, go, node"
+            exit 1
+        fi
+        DEST="$PWD/$NAME"
+        if [ -e "$DEST" ]; then
+            echo "Destination exists: $DEST"
+            exit 1
+        fi
+        mkdir -p "$DEST"
+        cp -R "$TEMPLATE_DIR/." "$DEST"
+        find "$DEST" -depth -name "__PROJECT_NAME__" -print0 | while IFS= read -r -d '' path; do
+            parent="$(dirname "$path")"
+            mv "$path" "$parent/$NAME"
+        done
+        if command -v python3 >/dev/null 2>&1; then
+            find "$DEST" -type f -print0 | while IFS= read -r -d '' file; do
+                python3 - "$file" "$NAME" <<'PY'
+import sys
+
+path = sys.argv[1]
+name = sys.argv[2]
+with open(path, "r", encoding="utf-8") as f:
+    data = f.read()
+data = data.replace("__PROJECT_NAME__", name)
+with open(path, "w", encoding="utf-8") as f:
+    f.write(data)
+PY
+            done
+        elif command -v python >/dev/null 2>&1; then
+            find "$DEST" -type f -print0 | while IFS= read -r -d '' file; do
+                python - "$file" "$NAME" <<'PY'
+import sys
+
+path = sys.argv[1]
+name = sys.argv[2]
+with open(path, "r", encoding="utf-8") as f:
+    data = f.read()
+data = data.replace("__PROJECT_NAME__", name)
+with open(path, "w", encoding="utf-8") as f:
+    f.write(data)
+PY
+            done
+        else
+            echo "python3 is required to render templates."
+            exit 1
+        fi
+        echo "Created $LANG project at $DEST"
         ;;
     help|--help|-h)
         show_help

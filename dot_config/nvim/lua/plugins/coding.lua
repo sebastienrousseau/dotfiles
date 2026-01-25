@@ -155,7 +155,8 @@ return {
            find_files = { hidden = true },
          },
        })
-       pcall(telescope.load_extension, "fzf") 
+       pcall(telescope.load_extension, "fzf")
+       pcall(telescope.load_extension, "git_worktree")
     end
   },
   { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },

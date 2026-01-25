@@ -22,3 +22,4 @@ This is intentionally small and practical.
 - `dot doctor` for health checks
 - `dot update` to pull and apply changes
 - `dot theme` to switch terminal themes
+- `dot new` to scaffold a project (python/go/node)
