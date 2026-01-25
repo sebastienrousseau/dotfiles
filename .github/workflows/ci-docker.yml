@@ -28,6 +28,7 @@ jobs:
             export DEBIAN_FRONTEND=noninteractive
             export PATH=\"/root/.local/bin:\$PATH\"
             apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates &&
+            ln -s /root/.local/share/chezmoi /root/.dotfiles &&
             sh -c \"\$(curl -fsLS get.chezmoi.io)\" -- init --promptDefaults --no-tty --source /root/.local/share/chezmoi &&
             DOTFILES_NONINTERACTIVE=1 chezmoi apply --exclude=scripts --force --no-tty &&
             echo 'Chezmoi applied successfully'
