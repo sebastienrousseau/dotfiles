@@ -157,8 +157,8 @@ apihealth --help
 
 ## License
 
-MIT License © 2015-2025 Sebastien Rousseau
+MIT License © 2015-2026 Sebastien Rousseau
 
 ---
 
-Made with  in London, UK • [dotfiles.io](https://dotfiles.io)
+Made With ❤️ in London, United Kingdom • [dotfiles.io](https://dotfiles.io)

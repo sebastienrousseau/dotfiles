@@ -1,6 +1,8 @@
 # shellcheck shell=bash
-# Version: 0.2.472
+# Copyright (c) 2015-2026. All rights reserved.
+# Version: 0.2.475
 # Website: https://dotfiles.io
+# License: MIT
 
 # 🅵🅸🅽🅳 🅰🅻🅸🅰🆂🅴🆂
 
