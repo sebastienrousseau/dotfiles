@@ -7,12 +7,12 @@
 ################################################################################
 
 # Define colors
-MATRIX_GREEN='\033[38;5;46m'    # Green (#00FF00)
-MATRIX_PURPLE='\033[38;5;55m'   # Purple (#2D1681)
-MATRIX_RED='\033[38;5;196m'     # Red (#EB0000)
-MATRIX_BLUE='\033[38;5;33m'     # Blue (#007ACC)
-MATRIX_WHITE='\033[38;5;15m'    # White (#FFFFFF)
-MATRIX_YELLOW='\033[38;5;226m'  # Yellow
+MATRIX_GREEN='\033[38;5;46m'   # Green (#00FF00)
+MATRIX_PURPLE='\033[38;5;55m'  # Purple (#2D1681)
+MATRIX_RED='\033[38;5;196m'    # Red (#EB0000)
+MATRIX_BLUE='\033[38;5;33m'    # Blue (#007ACC)
+MATRIX_WHITE='\033[38;5;15m'   # White (#FFFFFF)
+MATRIX_YELLOW='\033[38;5;226m' # Yellow
 RESET_COLOR='\033[0m'
 
 VERSION="1.0.0"
@@ -20,9 +20,8 @@ VERSION="1.0.0"
 # Logging functions
 VERSION="1.0.0"
 
-
 show_help() {
-  cat << 'EOH'
+  cat <<'EOH'
 🅳🅾🆃🅵🅸🅻🅴🆂 - Matrix Effect Generator (matrix)
 
 Description:
@@ -74,9 +73,9 @@ show_version() {
 }
 
 cleanup() {
-  printf '\e[?25h'  # Show cursor
-  tput rmcup        # Restore screen
-  tput cnorm        # Show cursor
+  printf '\e[?25h' # Show cursor
+  tput rmcup       # Restore screen
+  tput cnorm       # Show cursor
   clear
   exit 0
 }

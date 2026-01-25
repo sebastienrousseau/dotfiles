@@ -27,12 +27,12 @@ fi
 # kubectx / kubens - context and namespace switcher
 if command -v kubectx &>/dev/null; then
   alias kctx='kubectx'
-  alias kctxc='kubectx -c'  # Current context
+  alias kctxc='kubectx -c' # Current context
 fi
 
 if command -v kubens &>/dev/null; then
   alias kn='kubens'
-  alias knc='kubens -c'  # Current namespace
+  alias knc='kubens -c' # Current namespace
 fi
 
 # stern - log tailer

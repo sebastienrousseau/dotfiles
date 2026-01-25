@@ -219,7 +219,7 @@ if [[ "$found_sensitive" == false ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no hardcoded sensitive data"
 else
-  ((TESTS_PASSED++))  # Might be false positive
+  ((TESTS_PASSED++)) # Might be false positive
   echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: review for sensitive data"
 fi
 

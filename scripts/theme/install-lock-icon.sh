@@ -16,9 +16,9 @@ case "$(uname -s)" in
     ;;
   Linux)
     if command -v swaylock >/dev/null; then
-      echo "Use: swaylock --image '$icon_path'" 
+      echo "Use: swaylock --image '$icon_path'"
     elif command -v i3lock >/dev/null; then
-      echo "Use: i3lock -i '$icon_path'" 
+      echo "Use: i3lock -i '$icon_path'"
     else
       echo "No supported lock screen tool found (swaylock/i3lock)." >&2
     fi

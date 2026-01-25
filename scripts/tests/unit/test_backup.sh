@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1090,SC1091
 # Unit tests for the backup function
 # Tests backup creation with various options and edge cases
 
@@ -63,7 +64,7 @@ fi
 test_start "backup_creates_directory"
 test_dir=$(mock_dir "backup_test")
 test_file="$test_dir/testfile.txt"
-echo "test content" > "$test_file"
+echo "test content" >"$test_file"
 export BACKUP_DIR="$test_dir/backups"
 
 output=$(backup "$test_file" 2>&1)
@@ -81,7 +82,7 @@ rm -rf "$test_dir"
 test_start "backup_creates_archive"
 test_dir=$(mock_dir "backup_test")
 test_file="$test_dir/testfile.txt"
-echo "test content" > "$test_file"
+echo "test content" >"$test_file"
 export BACKUP_DIR="$test_dir/backups"
 
 output=$(backup "$test_file" 2>&1)
@@ -103,7 +104,7 @@ rm -rf "$test_dir"
 test_start "backup_max_size_option"
 test_dir=$(mock_dir "backup_test")
 test_file="$test_dir/testfile.txt"
-echo "test content" > "$test_file"
+echo "test content" >"$test_file"
 export BACKUP_DIR="$test_dir/backups"
 
 output=$(backup --max-size 1K "$test_file" 2>&1)
@@ -116,7 +117,7 @@ rm -rf "$test_dir"
 test_start "backup_keep_option"
 test_dir=$(mock_dir "backup_test")
 test_file="$test_dir/testfile.txt"
-echo "test content" > "$test_file"
+echo "test content" >"$test_file"
 export BACKUP_DIR="$test_dir/backups"
 
 output=$(backup --keep 3 "$test_file" 2>&1)
@@ -129,7 +130,7 @@ rm -rf "$test_dir"
 test_start "backup_invalid_size_unit"
 test_dir=$(mock_dir "backup_test")
 test_file="$test_dir/testfile.txt"
-echo "test content" > "$test_file"
+echo "test content" >"$test_file"
 export BACKUP_DIR="$test_dir/backups"
 
 output=$(backup --max-size 100X "$test_file" 2>&1)
@@ -151,8 +152,8 @@ test_start "backup_multiple_files"
 test_dir=$(mock_dir "backup_test")
 test_file1="$test_dir/testfile1.txt"
 test_file2="$test_dir/testfile2.txt"
-echo "content 1" > "$test_file1"
-echo "content 2" > "$test_file2"
+echo "content 1" >"$test_file1"
+echo "content 2" >"$test_file2"
 export BACKUP_DIR="$test_dir/backups"
 
 output=$(backup "$test_file1" "$test_file2" 2>&1)
@@ -165,7 +166,7 @@ rm -rf "$test_dir"
 test_start "backup_info_messages"
 test_dir=$(mock_dir "backup_test")
 test_file="$test_dir/testfile.txt"
-echo "test content" > "$test_file"
+echo "test content" >"$test_file"
 export BACKUP_DIR="$test_dir/backups"
 
 output=$(backup "$test_file" 2>&1)
@@ -184,7 +185,7 @@ rm -rf "$test_dir"
 test_start "backup_retention"
 test_dir=$(mock_dir "backup_test")
 test_file="$test_dir/testfile.txt"
-echo "test content" > "$test_file"
+echo "test content" >"$test_file"
 export BACKUP_DIR="$test_dir/backups"
 
 # Create multiple backups
@@ -209,8 +210,8 @@ test_start "backup_directory"
 test_dir=$(mock_dir "backup_test")
 content_dir="$test_dir/content"
 mkdir -p "$content_dir"
-echo "file1" > "$content_dir/file1.txt"
-echo "file2" > "$content_dir/file2.txt"
+echo "file1" >"$content_dir/file1.txt"
+echo "file2" >"$content_dir/file2.txt"
 export BACKUP_DIR="$test_dir/backups"
 
 output=$(backup "$content_dir" 2>&1)

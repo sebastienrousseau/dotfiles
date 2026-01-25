@@ -6,7 +6,7 @@ THEME="${DOTFILES_ICON_THEME:-Papirus}"
 case "$(uname -s)" in
   Darwin)
     if command -v fileicon >/dev/null; then
-      echo "Use: fileicon set <path> <icon.icns> to apply custom icons." 
+      echo "Use: fileicon set <path> <icon.icns> to apply custom icons."
     else
       echo "fileicon not found. Install it via brew (brew install fileicon)." >&2
     fi

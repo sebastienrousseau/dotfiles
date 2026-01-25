@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1090,SC1091,SC2034
 # Unit tests for cd aliases and navigation functions
 # Tests directory navigation, bookmarks, and helper functions
 
@@ -76,7 +77,7 @@ if declare -f safe_write_file >/dev/null 2>&1; then
   safe_write_file "$test_file" "line1"
   safe_write_file "$test_file" "line2" "a"
 
-  line_count=$(wc -l < "$test_file" | tr -d ' ')
+  line_count=$(wc -l <"$test_file" | tr -d ' ')
   if [[ "$line_count" -eq 2 ]]; then
     ((TESTS_PASSED++))
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: append mode works"
@@ -183,7 +184,10 @@ fi
 # Test: bookmark with no args shows list/usage
 test_start "bookmark_no_args"
 if declare -f bookmark >/dev/null 2>&1; then
-  output=$(set +u; bookmark 2>&1)
+  output=$(
+    set +u
+    bookmark 2>&1
+  )
   if [[ "$output" == *"Usage"* ]] || [[ "$output" == *"bookmark"* ]] || [[ "$output" == *"No bookmarks"* ]]; then
     ((TESTS_PASSED++))
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: bookmark shows usage/list"

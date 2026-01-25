@@ -16,11 +16,10 @@
 #
 ################################################################################
 
-
 logout() {
   # Display help menu
   if [[ "$1" == "--help" ]]; then
-    cat << 'EOH'
+    cat <<'EOH'
 Cross-Platform Logout Utility (logout)
 
 Description:
@@ -60,8 +59,7 @@ EOH
     echo "Are you sure you want to log out? (y/n):"
     read -r response
     case "$response" in
-      [Yy]*)
-        ;;
+      [Yy]*) ;;
       *)
         log_info "Logout canceled."
         return 0

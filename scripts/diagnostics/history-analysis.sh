@@ -20,7 +20,7 @@ fi
 
 mkdir -p "$(dirname "$db")"
 
-python3 - <<'PY' "$histfile" "$db"
+python3 - "$histfile" "$db" <<'PY'
 import sys
 import sqlite3
 import re

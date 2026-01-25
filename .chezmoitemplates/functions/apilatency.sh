@@ -24,7 +24,7 @@ APILATENCY_VERSION="0.0.1"
 # Print usage information.
 #######################################
 apilatency_print_help() {
-    cat << EOF
+  cat <<EOF
 Usage: $APILATENCY_SCRIPT_NAME URL [COUNT] [INTERVAL]
 
 Arguments:
@@ -46,104 +46,104 @@ EOF
 # Print version information.
 #######################################
 apilatency_print_version() {
-    echo "$APILATENCY_SCRIPT_NAME version $APILATENCY_VERSION"
+  echo "$APILATENCY_SCRIPT_NAME version $APILATENCY_VERSION"
 }
 
 #######################################
 # Monitor API response time.
 #######################################
 apilatency_monitor() {
-    local url="$1"
-    local count="${2:-10}"
-    local interval="${3:-1}"
-    
-    echo -e "[INFO] Monitoring API latency for $url"
-    echo -e "[INFO] Total Requests: $count, Delay Between Requests: $interval seconds"
-    echo "Time,Response_Time"
-    
-    for ((i = 1; i <= count; i++)); do
-        local latency
-        latency=$(curl -s --connect-timeout 5 --max-time 30 -o /dev/null -w "%{time_total}" "$url")
-        echo "$(date '+%H:%M:%S'),$latency"
-        sleep "$interval"
-    done
-    
-    echo -e "\e[32m[SUCCESS]\e[0m Latency monitoring completed."
+  local url="$1"
+  local count="${2:-10}"
+  local interval="${3:-1}"
+
+  echo -e "[INFO] Monitoring API latency for $url"
+  echo -e "[INFO] Total Requests: $count, Delay Between Requests: $interval seconds"
+  echo "Time,Response_Time"
+
+  for ((i = 1; i <= count; i++)); do
+    local latency
+    latency=$(curl -s --connect-timeout 5 --max-time 30 -o /dev/null -w "%{time_total}" "$url")
+    echo "$(date '+%H:%M:%S'),$latency"
+    sleep "$interval"
+  done
+
+  echo -e "\e[32m[SUCCESS]\e[0m Latency monitoring completed."
 }
 
 #######################################
 # Parse command-line arguments.
 #######################################
 apilatency_parse_arguments() {
-    # First argument handling
-    case "${1:-}" in
-        -h|--help)
-            apilatency_print_help
-            return 2
-            ;;
-        -v|--version)
-            apilatency_print_version
-            return 2
-            ;;
-        "")
-            echo -e "\e[31m[ERROR]\e[0m Missing required URL argument."
-            apilatency_print_help
-            return 1
-            ;;
-    esac
+  # First argument handling
+  case "${1:-}" in
+    -h | --help)
+      apilatency_print_help
+      return 2
+      ;;
+    -v | --version)
+      apilatency_print_version
+      return 2
+      ;;
+    "")
+      echo -e "\e[31m[ERROR]\e[0m Missing required URL argument."
+      apilatency_print_help
+      return 1
+      ;;
+  esac
 
-    # Store arguments
-    local url="$1"
-    local count="${2:-10}"
-    local interval="${3:-1}"
+  # Store arguments
+  local url="$1"
+  local count="${2:-10}"
+  local interval="${3:-1}"
 
-    # Validate URL
-    if [[ ! "$url" =~ ^https?:// ]]; then
-        echo -e "\e[31m[ERROR]\e[0m Invalid URL format. Must start with http:// or https://"
-        return 1
-    fi
+  # Validate URL
+  if [[ ! "$url" =~ ^https?:// ]]; then
+    echo -e "\e[31m[ERROR]\e[0m Invalid URL format. Must start with http:// or https://"
+    return 1
+  fi
 
-    # Validate count
-    if ! [[ "$count" =~ ^[0-9]+$ ]]; then
-        echo -e "\e[31m[ERROR]\e[0m COUNT must be a positive integer."
-        return 1
-    fi
+  # Validate count
+  if ! [[ "$count" =~ ^[0-9]+$ ]]; then
+    echo -e "\e[31m[ERROR]\e[0m COUNT must be a positive integer."
+    return 1
+  fi
 
-    # Validate interval
-    if ! [[ "$interval" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-        echo -e "\e[31m[ERROR]\e[0m INTERVAL must be a positive number."
-        return 1
-    fi
+  # Validate interval
+  if ! [[ "$interval" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+    echo -e "\e[31m[ERROR]\e[0m INTERVAL must be a positive number."
+    return 1
+  fi
 
-    # Export variables for use in main function
-    URL="$url"
-    COUNT="$count"
-    INTERVAL="$interval"
-    
-    return 0
+  # Export variables for use in main function
+  URL="$url"
+  COUNT="$count"
+  INTERVAL="$interval"
+
+  return 0
 }
 
 #######################################
 # Main function.
 #######################################
 apilatency_main() {
-    apilatency_parse_arguments "$@"
-    local parse_result=$?
-    
-    case $parse_result in
-        0)  # Normal operation
-            apilatency_monitor "$URL" "$COUNT" "$INTERVAL"
-            ;;
-        2)  # Help or version was displayed
-            return 0
-            ;;
-        *)  # Error occurred
-            return 1
-            ;;
-    esac
+  apilatency_parse_arguments "$@"
+  local parse_result=$?
+
+  case $parse_result in
+    0) # Normal operation
+      apilatency_monitor "$URL" "$COUNT" "$INTERVAL"
+      ;;
+    2) # Help or version was displayed
+      return 0
+      ;;
+    *) # Error occurred
+      return 1
+      ;;
+  esac
 }
 
 # The main function that gets exported for use
 apilatency() {
-    apilatency_main "$@"
+  apilatency_main "$@"
 }

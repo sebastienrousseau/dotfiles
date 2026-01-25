@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1090,SC1091
 # Unit tests for the extract function
 # Tests archive extraction with various formats and edge cases
 
@@ -16,7 +17,10 @@ fi
 
 # Test: extract with --help flag shows help
 test_start "extract_help"
-output=$(set +u; extract --help 2>&1)
+output=$(
+  set +u
+  extract --help 2>&1
+)
 if [[ "$output" == *"Usage:"* && "$output" == *"extract"* ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: --help shows usage information"
@@ -27,18 +31,27 @@ fi
 
 # Test: extract with --help returns exit code 0
 test_start "extract_help_exit_code"
-(set +u; extract --help >/dev/null 2>&1)
+(
+  set +u
+  extract --help >/dev/null 2>&1
+)
 assert_equals "0" "$?" "exit code should be 0 for --help"
 
 # Test: extract with no arguments shows error
 test_start "extract_no_args"
-(set +u; extract 2>&1)
+(
+  set +u
+  extract 2>&1
+)
 exit_code=$?
 assert_equals "1" "$exit_code" "exit code should be 1 for no args"
 
 # Test: extract with no arguments shows error message
 test_start "extract_no_args_message"
-output=$(set +u; extract 2>&1)
+output=$(
+  set +u
+  extract 2>&1
+)
 if [[ "$output" == *"ERROR"* || "$output" == *"argument"* ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shows error message for no arguments"
@@ -78,7 +91,7 @@ if command -v tar >/dev/null 2>&1; then
   # Create a test directory and archive
   test_dir=$(mock_dir "extract_test")
   mkdir -p "$test_dir/content"
-  echo "test content" > "$test_dir/content/testfile.txt"
+  echo "test content" >"$test_dir/content/testfile.txt"
 
   # Create archive
   archive_file="$test_dir/test.tar.gz"
@@ -97,7 +110,7 @@ if command -v tar >/dev/null 2>&1; then
     ((TESTS_PASSED++))
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: tar.gz extraction works"
   else
-    ((TESTS_PASSED++))  # Pass anyway since the function may extract to current dir
+    ((TESTS_PASSED++)) # Pass anyway since the function may extract to current dir
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: tar.gz extraction attempted (format recognized)"
   fi
 
@@ -117,7 +130,7 @@ if [[ "$output" == *"cannot be extracted"* ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: unsupported extension handled"
 else
-  ((TESTS_PASSED++))  # Function handles it in some way
+  ((TESTS_PASSED++)) # Function handles it in some way
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: unsupported extension handled (format not recognized)"
 fi
 rm -f "${test_file}.unsupported"

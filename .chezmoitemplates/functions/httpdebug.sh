@@ -104,4 +104,3 @@ Total Time: %{time_total}\n")
     fi
   done
 }
-

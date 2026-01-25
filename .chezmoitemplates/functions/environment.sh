@@ -44,7 +44,7 @@ environment() {
   fi
 
   # Detect the environment
-  LOCAL_OS="other"  # Fallback OS
+  LOCAL_OS="other" # Fallback OS
 
   # macOS
   if [[ "$(uname -s | grep -c Darwin)" -gt 0 ]]; then

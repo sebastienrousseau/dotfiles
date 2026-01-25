@@ -23,10 +23,10 @@ if command -v git &>/dev/null; then
   alias gaa='git add --all'
   alias gad='git add .'
   alias gau='git add --update'
-  
+
   alias gcl='git clone'
   alias gin='git init'
-  
+
   alias gco='git checkout'
   alias gcb='git checkout -b'
   alias gdis='git checkout --' # changed from checkout to git checkout for safety checking
@@ -34,7 +34,7 @@ if command -v git &>/dev/null; then
   alias gmv='git mv'
   alias grm='git rm'
   alias grmc='git rm --cached'
-  
+
   alias gst='git status'
   alias gsts='git status --short'
   alias gstsb='git status --short --branch'
@@ -54,7 +54,7 @@ if command -v git &>/dev/null; then
   alias gcane='git commit --amend --no-edit'
   alias gcm='git commit --message '
   alias ci='git commit'
-  
+
   # --- Diff & History ---
   alias gd='git diff'
   alias gdch='git diff --name-status'
@@ -62,7 +62,7 @@ if command -v git &>/dev/null; then
   alias gdstaged='git diff --staged'
   alias gdcached='git diff --cached'
   alias gdstat='git diff --stat --ignore-space-change -r'
-  
+
   alias gl='git log --since="last month" --oneline'
   alias glg='git log --graph --all --oneline --decorate'
   alias glgg='git log --oneline --graph --full-history --all --color --decorate'
@@ -73,7 +73,7 @@ if command -v git &>/dev/null; then
   alias gldl='git log --date=local'
   alias glf='git log ORIG_HEAD.. --stat --no-merges'
   alias gll='git log --graph --topo-order --date=short --abbrev-commit --decorate --all --boundary --pretty=format:"%Cgreen%ad %Cred%h%Creset -%C(yellow)%d%Creset %s %Cblue[%cn]%Creset %Cblue%G?%Creset"'
-  
+
   # --- Branches ---
   alias gb='git branch'
   alias gbd='git branch -d'
@@ -83,7 +83,7 @@ if command -v git &>/dev/null; then
   alias gbrsb='git show-branch'
   alias gswb='git switch'
   alias br='git branch'
-  
+
   alias gcode='git checkout main && git branch --merged | xargs git branch --delete'
   alias gcom='git checkout main && git fetch origin --prune && git reset --hard origin/main'
   alias co='git checkout'
@@ -102,7 +102,7 @@ if command -v git &>/dev/null; then
   if command -v lazygit &>/dev/null; then
     alias lgui='lazygit'
   fi
-  
+
   alias gr='git remote'
   alias gra='git remote add'
   alias grall='git remote | xargs -L1 git push --all'
@@ -114,7 +114,7 @@ if command -v git &>/dev/null; then
   alias grevnc='git revert --no-commit'
   alias grb='git rebase'
   alias grbk='git reset --soft HEAD^'
-  
+
   alias grescl='git reset --hard HEAD~1 && git clean -fd'
   alias gresh='git reset --hard HEAD~1'
   alias gresp='git reset --hard && git clean -ffdx'

@@ -5,7 +5,7 @@ set -euo pipefail
 # Compare current benchmark with historical baseline
 RESULTS_DIR="${RESULTS_DIR:-$HOME/.local/share/dotfiles/benchmarks}"
 BASELINE_FILE="$RESULTS_DIR/baseline.json"
-REGRESSION_THRESHOLD=20  # Percentage increase to flag as regression
+REGRESSION_THRESHOLD=20 # Percentage increase to flag as regression
 
 check_regression() {
   local metric="$1" current="$2"
@@ -19,7 +19,7 @@ check_regression() {
   baseline=$(jq -r "select(.metric == \"$metric\") | .value" "$BASELINE_FILE" | tail -1)
 
   if [[ -n "$baseline" && "$baseline" != "null" ]]; then
-    local pct_change=$(( (current - baseline) * 100 / baseline ))
+    local pct_change=$(((current - baseline) * 100 / baseline))
     if [[ $pct_change -gt $REGRESSION_THRESHOLD ]]; then
       echo "REGRESSION: $metric increased by ${pct_change}% (baseline: ${baseline}ms, current: ${current}ms)"
       return 1
@@ -58,7 +58,7 @@ main() {
     if ! check_regression "$metric" "$value"; then
       ((regressions++))
     fi
-  done < "$latest"
+  done <"$latest"
 
   echo ""
   if [[ $regressions -gt 0 ]]; then

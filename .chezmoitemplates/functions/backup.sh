@@ -28,8 +28,8 @@
 backup() {
   # Default configuration
   BACKUP_DIR="${BACKUP_DIR:-./backups}"
-  MAX_SIZE="100M"   # Default max size before compression
-  KEEP=5             # Default number of backups to keep
+  MAX_SIZE="100M" # Default max size before compression
+  KEEP=5          # Default number of backups to keep
 
   # Parse arguments
   while [[ "$#" -gt 0 ]]; do
@@ -100,9 +100,9 @@ backup() {
   [[ $? -ne 0 ]] && return 1
 
   # Get file size in bytes using wc -c
-  FILE_SIZE=$(wc -c < "${TAR_PATH}")
+  FILE_SIZE=$(wc -c <"${TAR_PATH}")
 
-  if (( FILE_SIZE > MAX_BYTES )); then
+  if ((FILE_SIZE > MAX_BYTES)); then
     # Compress the backup
     if gzip "${TAR_PATH}"; then
       COMPRESSED_PATH="${TAR_PATH}.gz"
@@ -121,7 +121,7 @@ backup() {
   BACKUP_COUNT=${#BACKUPS[@]}
 
   # Only attempt removal if we actually have more backups than KEEP
-  if (( BACKUP_COUNT > KEEP )); then
+  if ((BACKUP_COUNT > KEEP)); then
     REMOVE_COUNT=$((BACKUP_COUNT - KEEP))
     OLD_BACKUPS=("${BACKUPS[@]:$KEEP:$REMOVE_COUNT}")
     for old_backup in "${OLD_BACKUPS[@]}"; do

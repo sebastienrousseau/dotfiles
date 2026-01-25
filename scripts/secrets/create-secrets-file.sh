@@ -26,8 +26,8 @@ mkdir -p "$(dirname "$OUT_FILE")"
 
 tmp_secrets="/tmp/.secrets.template.$$"
 tmp_recipient="/tmp/.secrets.recipient.$$"
-printf "%s\n" "# Add secrets as KEY=VALUE" "EXAMPLE_TOKEN=change_me" > "$tmp_secrets"
-printf "%s" "$recipient" > "$tmp_recipient"
+printf "%s\n" "# Add secrets as KEY=VALUE" "EXAMPLE_TOKEN=change_me" >"$tmp_secrets"
+printf "%s" "$recipient" >"$tmp_recipient"
 
 age -R "$tmp_recipient" -o "$OUT_FILE" "$tmp_secrets"
 

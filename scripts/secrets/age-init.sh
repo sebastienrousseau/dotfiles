@@ -22,7 +22,7 @@ fi
 
 recipient=$(age-keygen -y "$KEY_FILE")
 
-python3 - <<'PY' "$CONFIG_FILE" "$KEY_FILE" "$recipient"
+python3 - "$CONFIG_FILE" "$KEY_FILE" "$recipient" <<'PY'
 import sys
 from pathlib import Path
 

@@ -31,4 +31,3 @@ if command -v 'du' >/dev/null; then
   alias dut='dus'
 
 fi
-

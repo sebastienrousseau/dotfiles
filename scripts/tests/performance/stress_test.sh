@@ -14,7 +14,7 @@ stress_test_function() {
   echo "Stress testing $func_name ($ITERATIONS iterations)..."
 
   start=$(date +%s%3N)
-  for ((i=1; i<=ITERATIONS; i++)); do
+  for ((i = 1; i <= ITERATIONS; i++)); do
     eval "$test_cmd" >/dev/null 2>&1 || true
   done
   end=$(date +%s%3N)

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1090,SC1091
 # Unit tests for the genpass function
 # Tests password generation with various options
 
@@ -21,7 +22,10 @@ fi
 
 # Test: genpass with --help flag shows help
 test_start "genpass_help"
-output=$(set +u; genpass --help 2>&1)
+output=$(
+  set +u
+  genpass --help 2>&1
+)
 if [[ "$output" == *"Usage:"* || "$output" == *"genpass"* ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: --help shows usage information"
@@ -32,13 +36,19 @@ fi
 
 # Test: genpass with --help returns exit code 0
 test_start "genpass_help_exit_code"
-(set +u; genpass --help >/dev/null 2>&1)
+(
+  set +u
+  genpass --help >/dev/null 2>&1
+)
 assert_equals "0" "$?" "exit code should be 0 for --help"
 
 # Test: genpass default (no arguments) generates password
 test_start "genpass_default"
 if command -v openssl >/dev/null 2>&1; then
-  output=$(set +u; genpass 2>&1)
+  output=$(
+    set +u
+    genpass 2>&1
+  )
   if [[ "$output" == *"Generated password:"* ]]; then
     ((TESTS_PASSED++))
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: generates password with default settings"
@@ -55,7 +65,10 @@ fi
 # Test: genpass default generates 3 blocks
 test_start "genpass_default_blocks"
 if command -v openssl >/dev/null 2>&1; then
-  output=$(set +u; genpass 2>&1)
+  output=$(
+    set +u
+    genpass 2>&1
+  )
   # Extract password from output
   password=$(echo "$output" | grep "Generated password:" | sed 's/.*Generated password: //')
   # Count dashes (separators) - default should have 2 dashes for 3 blocks
@@ -65,7 +78,7 @@ if command -v openssl >/dev/null 2>&1; then
     ((TESTS_PASSED++))
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: default generates 3 blocks"
   else
-    ((TESTS_PASSED++))  # Acceptable variation
+    ((TESTS_PASSED++)) # Acceptable variation
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: password generated (block count may vary)"
   fi
 else
@@ -76,7 +89,10 @@ fi
 # Test: genpass with custom block count
 test_start "genpass_custom_blocks"
 if command -v openssl >/dev/null 2>&1; then
-  output=$(set +u; genpass 5 2>&1)
+  output=$(
+    set +u
+    genpass 5 2>&1
+  )
   password=$(echo "$output" | grep "Generated password:" | sed 's/.*Generated password: //')
   # 5 blocks should have 4 separators
   dash_count=$(echo "$password" | tr -cd '-' | wc -c | tr -d ' ')
@@ -85,7 +101,7 @@ if command -v openssl >/dev/null 2>&1; then
     ((TESTS_PASSED++))
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: generates 5 blocks correctly"
   else
-    ((TESTS_PASSED++))  # Function worked
+    ((TESTS_PASSED++)) # Function worked
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: password generated with custom blocks"
   fi
 else
@@ -96,7 +112,10 @@ fi
 # Test: genpass with single block
 test_start "genpass_single_block"
 if command -v openssl >/dev/null 2>&1; then
-  output=$(set +u; genpass 1 2>&1)
+  output=$(
+    set +u
+    genpass 1 2>&1
+  )
   password=$(echo "$output" | grep "Generated password:" | sed 's/.*Generated password: //')
   # Single block should have no separators
   dash_count=$(echo "$password" | tr -cd '-' | wc -c | tr -d ' ')
@@ -105,7 +124,7 @@ if command -v openssl >/dev/null 2>&1; then
     ((TESTS_PASSED++))
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: single block has no separator"
   else
-    ((TESTS_PASSED++))  # Function worked
+    ((TESTS_PASSED++)) # Function worked
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: password generated"
   fi
 else
@@ -116,7 +135,10 @@ fi
 # Test: genpass with custom separator
 test_start "genpass_custom_separator"
 if command -v openssl >/dev/null 2>&1; then
-  output=$(set +u; genpass 3 "/" 2>&1)
+  output=$(
+    set +u
+    genpass 3 "/" 2>&1
+  )
   password=$(echo "$output" | grep "Generated password:" | sed 's/.*Generated password: //')
 
   if [[ "$password" == *"/"* ]]; then
@@ -135,7 +157,10 @@ fi
 # Test: genpass with colon separator
 test_start "genpass_colon_separator"
 if command -v openssl >/dev/null 2>&1; then
-  output=$(set +u; genpass 2 ":" 2>&1)
+  output=$(
+    set +u
+    genpass 2 ":" 2>&1
+  )
   password=$(echo "$output" | grep "Generated password:" | sed 's/.*Generated password: //')
 
   if [[ "$password" == *":"* ]]; then
@@ -154,7 +179,10 @@ fi
 # Test: genpass returns exit code 0
 test_start "genpass_exit_code"
 if command -v openssl >/dev/null 2>&1; then
-  (set +u; genpass >/dev/null 2>&1)
+  (
+    set +u
+    genpass >/dev/null 2>&1
+  )
   assert_equals "0" "$?" "exit code should be 0"
 else
   ((TESTS_PASSED++))
@@ -164,7 +192,10 @@ fi
 # Test: genpass shows INFO message
 test_start "genpass_info_message"
 if command -v openssl >/dev/null 2>&1; then
-  output=$(set +u; genpass 2>&1)
+  output=$(
+    set +u
+    genpass 2>&1
+  )
   if [[ "$output" == *"INFO"* ]]; then
     ((TESTS_PASSED++))
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shows INFO message"
@@ -180,8 +211,14 @@ fi
 # Test: genpass passwords are unique
 test_start "genpass_unique_passwords"
 if command -v openssl >/dev/null 2>&1; then
-  pass1=$( (set +u; genpass 2>&1) | grep "Generated password:" | sed 's/.*Generated password: //')
-  pass2=$( (set +u; genpass 2>&1) | grep "Generated password:" | sed 's/.*Generated password: //')
+  pass1=$( (
+    set +u
+    genpass 2>&1
+  ) | grep "Generated password:" | sed 's/.*Generated password: //')
+  pass2=$( (
+    set +u
+    genpass 2>&1
+  ) | grep "Generated password:" | sed 's/.*Generated password: //')
 
   if [[ "$pass1" != "$pass2" ]]; then
     ((TESTS_PASSED++))
@@ -198,7 +235,10 @@ fi
 # Test: genpass password length with blocks
 test_start "genpass_password_length"
 if command -v openssl >/dev/null 2>&1; then
-  output=$(set +u; genpass 3 2>&1)
+  output=$(
+    set +u
+    genpass 3 2>&1
+  )
   password=$(echo "$output" | grep "Generated password:" | sed 's/.*Generated password: //')
   # Remove separators to count actual characters
   password_no_sep=$(echo "$password" | tr -d '-')
@@ -209,7 +249,7 @@ if command -v openssl >/dev/null 2>&1; then
     ((TESTS_PASSED++))
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: password length is appropriate ($length chars)"
   else
-    ((TESTS_PASSED++))  # Length varies based on implementation
+    ((TESTS_PASSED++)) # Length varies based on implementation
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: password generated with length $length"
   fi
 else
@@ -223,7 +263,10 @@ if command -v openssl >/dev/null 2>&1; then
   # Generate several passwords and check for special chars
   has_special=false
   for i in {1..5}; do
-    password=$( (set +u; genpass 2>&1) | grep "Generated password:" | sed 's/.*Generated password: //')
+    password=$( (
+      set +u
+      genpass 2>&1
+    ) | grep "Generated password:" | sed 's/.*Generated password: //')
     if [[ "$password" =~ [!@#\$%\^\&\*\(\)_\+\{\}\|:\<\>\?~\[\]\;\',./=-] ]]; then
       has_special=true
       break
@@ -234,7 +277,7 @@ if command -v openssl >/dev/null 2>&1; then
     ((TESTS_PASSED++))
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: includes special characters"
   else
-    ((TESTS_PASSED++))  # Might not always include special chars
+    ((TESTS_PASSED++)) # Might not always include special chars
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: password generated (special chars optional)"
   fi
 else

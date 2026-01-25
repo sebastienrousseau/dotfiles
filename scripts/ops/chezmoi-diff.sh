@@ -3,7 +3,7 @@ set -euo pipefail
 
 excludes=(scripts install tests)
 if [[ -n "${DOTFILES_CHEZMOI_DIFF_EXCLUDES:-}" ]]; then
-  IFS=',' read -r -a excludes <<< "${DOTFILES_CHEZMOI_DIFF_EXCLUDES}"
+  IFS=',' read -r -a excludes <<<"${DOTFILES_CHEZMOI_DIFF_EXCLUDES}"
 fi
 
 args=()

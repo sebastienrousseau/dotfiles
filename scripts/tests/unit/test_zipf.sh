@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1090,SC1091
 # Unit tests for zipf function
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -35,7 +36,7 @@ fi
 test_start "zipf_valid_directory"
 if type zipf &>/dev/null; then
   test_dir=$(mktemp -d)
-  echo "test" > "$test_dir/test.txt"
+  echo "test" >"$test_dir/test.txt"
 
   # Run zipf (may or may not create zip depending on implementation)
   zipf "$test_dir" 2>/dev/null || true

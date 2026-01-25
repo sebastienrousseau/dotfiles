@@ -35,9 +35,9 @@ kebabcase() {
     filename=$(basename "$file")
 
     # Convert to lowercase and replace non-alphanumeric chars (except '.') with hyphens
-    kc_filename=$(printf "%s" "$filename" \
-      | tr '[:upper:]' '[:lower:]' \
-      | sed 's/[^[:alnum:].]/-/g')
+    kc_filename=$(printf "%s" "$filename" |
+      tr '[:upper:]' '[:lower:]' |
+      sed 's/[^[:alnum:].]/-/g')
 
     # If already kebab-case, skip
     if [[ "$filename" == "$kc_filename" ]]; then

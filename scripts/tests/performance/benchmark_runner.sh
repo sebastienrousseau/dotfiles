@@ -14,7 +14,7 @@ RESULTS_FILE="$RESULTS_DIR/benchmark_$(date +%Y%m%d_%H%M%S).json"
 # Thresholds (in milliseconds)
 # Note: CI environments may be slower, so thresholds are set conservatively
 SHELL_STARTUP_THRESHOLD_MS=500
-FUNCTION_LOAD_THRESHOLD_MS=200  # Increased for CI compatibility
+FUNCTION_LOAD_THRESHOLD_MS=200 # Increased for CI compatibility
 CD_OPERATION_THRESHOLD_MS=50
 
 RED='\033[0;31m'
@@ -28,7 +28,7 @@ store_result() {
   mkdir -p "$RESULTS_DIR"
 
   # Append to JSON results
-  cat >> "$RESULTS_FILE" << EOF
+  cat >>"$RESULTS_FILE" <<EOF
 {"timestamp": "$(date -Iseconds)", "metric": "$metric", "value": $value, "threshold": $threshold, "status": "$status"}
 EOF
 }
@@ -46,7 +46,7 @@ benchmark_shell_startup() {
   local total=0
   local iterations=5
 
-  for ((i=1; i<=iterations; i++)); do
+  for ((i = 1; i <= iterations; i++)); do
     local time_ms
     time_ms=$(measure_time_ms "zsh -i -c 'exit' 2>/dev/null || bash -i -c 'exit'")
     total=$((total + time_ms))

@@ -33,10 +33,16 @@ rd() {
   if [[ "$resolved" == "$HOME/"* && "$resolved" != "$HOME/"*/* ]]; then
     echo "[WARNING] About to delete top-level home directory: $resolved"
     read -r -p "Are you sure? [y/N] " confirm
-    [[ "$confirm" != [yY]* ]] && { echo "Aborted."; return 1; }
+    [[ "$confirm" != [yY]* ]] && {
+      echo "Aborted."
+      return 1
+    }
   fi
 
-  rm -rf "$target" || { echo "[ERROR] Failed to delete: $target" >&2; return 1; }
+  rm -rf "$target" || {
+    echo "[ERROR] Failed to delete: $target" >&2
+    return 1
+  }
   echo "[INFO] Successfully deleted: $target"
   ls -lh 2>/dev/null || true
 }

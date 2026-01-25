@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1090,SC1091
 # Unit tests for the rd (remove directory) function
 # Tests for security safeguards against dangerous paths
 
@@ -43,7 +44,7 @@ test_start "rd_valid_directory"
 test_dir=$(mock_dir "rd_test")
 target_dir="$test_dir/to_remove"
 mkdir -p "$target_dir"
-echo "test" > "$target_dir/file.txt"
+echo "test" >"$target_dir/file.txt"
 
 # Save current directory and change to test_dir
 original_dir=$(pwd)
@@ -101,7 +102,7 @@ if [[ "$output" == *"ERROR"* || "$output" == *"dangerous"* || "$output" == *"ref
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: root path rejected (security)"
 else
-  ((TESTS_PASSED++))  # Pass for now, document the issue
+  ((TESTS_PASSED++)) # Pass for now, document the issue
   echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: WARNING - root path not explicitly rejected (security improvement needed)"
 fi
 
@@ -112,7 +113,7 @@ if [[ "$output" == *"ERROR"* || "$output" == *"dangerous"* || "$output" == *"ref
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: home directory rejected (security)"
 else
-  ((TESTS_PASSED++))  # Pass for now, document the issue
+  ((TESTS_PASSED++)) # Pass for now, document the issue
   echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: WARNING - home directory not explicitly rejected (security improvement needed)"
 fi
 
@@ -123,7 +124,7 @@ if [[ "$output" == *"ERROR"* || "$output" == *"dangerous"* || "$output" == *"ref
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: /etc rejected (security)"
 else
-  ((TESTS_PASSED++))  # Pass for now
+  ((TESTS_PASSED++)) # Pass for now
   echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: WARNING - /etc not explicitly rejected (security improvement needed)"
 fi
 
@@ -134,7 +135,7 @@ if [[ "$output" == *"ERROR"* || "$output" == *"dangerous"* || "$output" == *"ref
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: /usr rejected (security)"
 else
-  ((TESTS_PASSED++))  # Pass for now
+  ((TESTS_PASSED++)) # Pass for now
   echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: WARNING - /usr not explicitly rejected (security improvement needed)"
 fi
 
@@ -145,7 +146,7 @@ if [[ "$output" == *"ERROR"* || "$output" == *"dangerous"* || "$output" == *"ref
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: /var rejected (security)"
 else
-  ((TESTS_PASSED++))  # Pass for now
+  ((TESTS_PASSED++)) # Pass for now
   echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: WARNING - /var not explicitly rejected (security improvement needed)"
 fi
 
@@ -200,7 +201,7 @@ fi
 test_start "rd_file_instead_of_dir"
 test_dir=$(mock_dir "rd_test")
 test_file="$test_dir/file.txt"
-echo "test" > "$test_file"
+echo "test" >"$test_file"
 
 original_dir=$(pwd)
 cd "$test_dir"

@@ -21,59 +21,65 @@ Errors=0
 Warnings=0
 
 log_success() { echo -e "${GREEN} $1${NC}"; }
-log_fail() { echo -e "${RED} $1${NC}"; Errors=$((Errors + 1)); }
-log_warn() { echo -e "${YELLOW}️  $1${NC}"; Warnings=$((Warnings + 1)); }
+log_fail() {
+  echo -e "${RED} $1${NC}"
+  Errors=$((Errors + 1))
+}
+log_warn() {
+  echo -e "${YELLOW}️  $1${NC}"
+  Warnings=$((Warnings + 1))
+}
 
 # 1. Check Dependencies
 echo "Checking Core Dependencies..."
 for cmd in git curl chezmoi starship rg bat; do
-    if command -v "$cmd" &>/dev/null; then
-        log_success "Found $cmd: $(command -v "$cmd")"
-    else
-        log_fail "Missing $cmd"
-    fi
+  if command -v "$cmd" &>/dev/null; then
+    log_success "Found $cmd: $(command -v "$cmd")"
+  else
+    log_fail "Missing $cmd"
+  fi
 done
 
 # 2. Check XDG Compliance
 echo -e "\nChecking Environment..."
 if [[ -z "$XDG_CONFIG_HOME" ]]; then
-    log_warn "XDG_CONFIG_HOME is not set (Defaulting to ~/.config)"
+  log_warn "XDG_CONFIG_HOME is not set (Defaulting to ~/.config)"
 else
-    log_success "XDG_CONFIG_HOME=$XDG_CONFIG_HOME"
+  log_success "XDG_CONFIG_HOME=$XDG_CONFIG_HOME"
 fi
 
 if [[ -z "$PIPX_HOME" ]]; then
-    log_warn "PIPX_HOME is not set (Check paths configuration)"
+  log_warn "PIPX_HOME is not set (Check paths configuration)"
 else
-    log_success "PIPX_HOME=$PIPX_HOME"
+  log_success "PIPX_HOME=$PIPX_HOME"
 fi
 
 # 3. Check Chezmoi State
 echo -e "\nChecking Chezmoi State..."
 if chezmoi verify &>/dev/null; then
-    log_success "Chezmoi state is synchronized"
+  log_success "Chezmoi state is synchronized"
 else
-    log_fail "Chezmoi state has drifted (Run 'dot drift' to see details)"
+  log_fail "Chezmoi state has drifted (Run 'dot drift' to see details)"
 fi
 
 # 4. Check Critical Files
 echo -e "\nChecking Critical Files..."
 if [[ -f "$HOME/.zshrc" ]]; then
-    log_success "Found .zshrc"
+  log_success "Found .zshrc"
 else
-    log_fail "Missing .zshrc"
+  log_fail "Missing .zshrc"
 fi
 
 # Summary
 echo -e "\n-------------------------------------"
 if [[ $Errors -eq 0 ]]; then
-    if [[ $Warnings -eq 0 ]]; then
-        echo -e "${GREEN}All systems healthy! ${NC}"
-    else
-        echo -e "${YELLOW}System healthy with $Warnings warnings.${NC}"
-    fi
+  if [[ $Warnings -eq 0 ]]; then
+    echo -e "${GREEN}All systems healthy! ${NC}"
+  else
+    echo -e "${YELLOW}System healthy with $Warnings warnings.${NC}"
+  fi
 else
-    echo -e "${RED}Found $Errors errors and $Warnings warnings.${NC}"
-    echo "Run 'dot heal' to attempt auto-repair."
-    exit 1
+  echo -e "${RED}Found $Errors errors and $Warnings warnings.${NC}"
+  echo "Run 'dot heal' to attempt auto-repair."
+  exit 1
 fi

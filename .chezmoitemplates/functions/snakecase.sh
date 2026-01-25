@@ -35,9 +35,9 @@ snakecase() {
     filename=$(basename "$file")
 
     # Convert to lowercase and replace non-alphanumeric chars (except '.') with underscores
-    sc_filename=$(printf "%s" "$filename" \
-      | tr '[:upper:]' '[:lower:]' \
-      | sed 's/[^[:alnum:].]/_/g')
+    sc_filename=$(printf "%s" "$filename" |
+      tr '[:upper:]' '[:lower:]' |
+      sed 's/[^[:alnum:].]/_/g')
 
     # If already snake_case, skip
     if [[ "$filename" == "$sc_filename" ]]; then

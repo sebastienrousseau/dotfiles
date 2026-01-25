@@ -28,7 +28,7 @@ log_warning() { echo "[WARNING] $*" >&2; }
 keygen() {
   # Display help menu
   if [[ "$1" == "--help" ]]; then
-    cat << 'EOH'
+    cat <<'EOH'
 SSH Key Generator (keygen)
 
 Description:
@@ -166,16 +166,16 @@ EOH
 copy_to_clipboard() {
   local pub_key_file="$1"
   if command -v pbcopy &>/dev/null; then
-    pbcopy < "${pub_key_file}"
+    pbcopy <"${pub_key_file}"
     log_info "Public key copied to clipboard (macOS)."
   elif command -v xclip &>/dev/null; then
-    xclip -selection clipboard < "${pub_key_file}"
+    xclip -selection clipboard <"${pub_key_file}"
     log_info "Public key copied to clipboard (Linux)."
   elif command -v wl-copy &>/dev/null; then
-    wl-copy < "${pub_key_file}"
+    wl-copy <"${pub_key_file}"
     log_info "Public key copied to clipboard (Wayland)."
   elif command -v clip.exe &>/dev/null; then
-    clip.exe < "${pub_key_file}"
+    clip.exe <"${pub_key_file}"
     log_info "Public key copied to clipboard (Windows)."
   else
     log_warning "Clipboard tool not available. Public key not copied."

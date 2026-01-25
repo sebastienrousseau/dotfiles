@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034
 # Mock utilities for shell testing
 # Provides functions to create mock commands, files, and directories
 
@@ -30,7 +31,7 @@ mock_command() {
   fi
 
   local mock_script="$MOCK_BIN_DIR/$cmd_name"
-  cat > "$mock_script" << EOF
+  cat >"$mock_script" <<EOF
 #!/usr/bin/env bash
 echo "$output"
 exit $exit_code
@@ -53,7 +54,7 @@ mock_command_spy() {
   local mock_script="$MOCK_BIN_DIR/$cmd_name"
   local spy_file="$MOCK_BIN_DIR/${cmd_name}.spy"
 
-  cat > "$mock_script" << EOF
+  cat >"$mock_script" <<EOF
 #!/usr/bin/env bash
 echo "\$@" >> "$spy_file"
 echo "$output"
@@ -81,7 +82,7 @@ mock_call_count() {
   local cmd_name="$1"
   local spy_file="$MOCK_BIN_DIR/${cmd_name}.spy"
   if [[ -f "$spy_file" ]]; then
-    wc -l < "$spy_file" | tr -d ' '
+    wc -l <"$spy_file" | tr -d ' '
   else
     echo "0"
   fi
@@ -100,7 +101,7 @@ mock_file() {
     file=$(mktemp)
   fi
 
-  echo "$content" > "$file"
+  echo "$content" >"$file"
   MOCK_FILES+=("$file")
   echo "$file"
 }
@@ -125,14 +126,14 @@ mock_archive() {
   local temp_file="$temp_dir/test_file.txt"
   local archive
 
-  echo "$content" > "$temp_file"
+  echo "$content" >"$temp_file"
 
   case "$type" in
     tar)
       archive=$(mktemp -t archive.XXXXXX.tar)
       tar cf "$archive" -C "$temp_dir" test_file.txt
       ;;
-    tar.gz|tgz)
+    tar.gz | tgz)
       archive=$(mktemp -t archive.XXXXXX.tar.gz)
       tar czf "$archive" -C "$temp_dir" test_file.txt
       ;;
@@ -142,7 +143,7 @@ mock_archive() {
       ;;
     gz)
       archive=$(mktemp -t archive.XXXXXX.gz)
-      gzip -c "$temp_file" > "$archive"
+      gzip -c "$temp_file" >"$archive"
       ;;
     *)
       echo "Unsupported archive type: $type" >&2

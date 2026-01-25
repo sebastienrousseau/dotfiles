@@ -38,7 +38,7 @@ run_test_file() {
   results_line=$(grep "^RESULTS:" "$temp_results" | tail -1)
   if [[ -n "$results_line" ]]; then
     local run passed failed
-    IFS=':' read -r _ run passed failed <<< "$results_line"
+    IFS=':' read -r _ run passed failed <<<"$results_line"
     TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + run))
     TOTAL_TESTS_PASSED=$((TOTAL_TESTS_PASSED + passed))
     TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + failed))
@@ -49,7 +49,7 @@ run_test_file() {
 
 # Show usage
 usage() {
-  cat << EOF
+  cat <<EOF
 Dotfiles Test Runner
 
 Usage:
@@ -90,19 +90,19 @@ main() {
   # Parse arguments
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      -h|--help)
+      -h | --help)
         usage
         exit 0
         ;;
-      -v|--verbose)
+      -v | --verbose)
         verbose=1
         shift
         ;;
-      -i|--integration)
+      -i | --integration)
         run_integration=1
         shift
         ;;
-      -u|--unit-only)
+      -u | --unit-only)
         unit_only=1
         shift
         ;;

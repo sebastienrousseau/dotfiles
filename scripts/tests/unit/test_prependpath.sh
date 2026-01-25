@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1090,SC1091
 # Unit tests for prependpath function
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -39,7 +40,7 @@ fi
 test_start "prependpath_no_duplicate"
 if type prependpath &>/dev/null; then
   OLD_PATH="$PATH"
-  test_path="/usr/bin"  # Common path that likely exists
+  test_path="/usr/bin" # Common path that likely exists
   original_count=$(echo "$PATH" | tr ':' '\n' | grep -c "^${test_path}$" || echo 0)
 
   prependpath "$test_path" 2>/dev/null || true
