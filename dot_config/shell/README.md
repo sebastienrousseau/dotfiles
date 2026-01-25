@@ -140,8 +140,27 @@ dot upgrade   # Update flake, plugins, and dotfiles
 dot new       # Scaffold a project template (python/go/node)
 dot log-rotate # Rotate ~/.local/share/dotfiles.log
 dot
-dot 
-```
+dot
+dot doctor
+dot sandbox
+dot benchmark
+dot theme
+dot wallpaper
+dot ssh-key
+dot secrets-create
+dot fonts
+dot firewall
+dot telemetry
+dot dns-doh
+dot encrypt-check
+dot backup
+dot lock-screen
+dot usb-safety
+dot secrets-init
+dot edit
+dot docs
+dot learn
+dot help```
 
 ### Optional Nix Toolchain
 
