@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.474) - <https://dotfiles.io>
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.475) - <https://dotfiles.io>
 # Made with  in London, UK by Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # License: MIT

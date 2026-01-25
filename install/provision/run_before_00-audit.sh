@@ -7,7 +7,7 @@
 set -euo pipefail
 
 if [[ "${DOTFILES_AUDIT_LOG:-0}" == "1" ]]; then
-  AUDIT_LOG="${HOME}/.dotfiles_audit.log"
+  AUDIT_LOG="${HOME}/.local/share/dotfiles.log"
   TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
   USER_NAME="${USER:-$(whoami)}"
   HOST_NAME="${HOSTNAME:-$(hostname)}"

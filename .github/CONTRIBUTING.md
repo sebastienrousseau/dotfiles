@@ -9,7 +9,7 @@
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.473)
+# Dotfiles (v0.2.475)
 
 Simply designed to fit your shell life 
 
@@ -40,7 +40,7 @@ questions, etc.
 Warning us of a bug is possibly the single most valuable contribution
 you can make to Dotfiles.
 
-* Head [here](https://github.com/reedia/dotfiles/issues/new) to submit
+* Head [here](https://github.com/sebastienrousseau/dotfiles/issues/new) to submit
   a new issue.
 * Include a descriptive title that is straight to the point.
 * Write a detailed description on what the issue is all about.

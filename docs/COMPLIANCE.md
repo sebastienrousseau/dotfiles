@@ -11,7 +11,7 @@ This document maps the dotfiles configuration and tooling to standard regulatory
 | **CC6.1** | Logical Access Security | `zsh` restricted permissions, SSH key management via `1Password`/Agents. |
 | **CC6.8** | Unauthorized Code Protection | `enable-signing` enforces GPG/SSH signed commits. `slsa-framework` workflow. |
 | **CC8.1** | Change Management | All changes managed via git (Infrastructure as Code). `lock-configs` for immutability. |
-| **A1.2** | Audit Logs | `dotfiles_audit.log` tracks all configuration applications (`chezmoi apply`). |
+| **A1.2** | Audit Logs | `~/.local/share/dotfiles.log` tracks all configuration applications (`chezmoi apply`). |
 
 ### ISO 27001
 

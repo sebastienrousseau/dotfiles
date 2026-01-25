@@ -23,8 +23,8 @@ alias privacy-mode=privacy_mode_fn
 audit_fn() {
     echo " Configuration Audit Trail (Recent Changes)"
     echo "---------------------------------------------"
-    if [[ -f "$HOME/.dotfiles_audit.log" ]]; then
-        tail -n 20 "$HOME/.dotfiles_audit.log"
+    if [[ -f "$HOME/.local/share/dotfiles.log" ]]; then
+        tail -n 20 "$HOME/.local/share/dotfiles.log"
     else
         # Fallback to git log if custom audit log doesn't exist
         git -C "$HOME/.dotfiles" log --oneline -n 10 --format="%C(auto)%h %C(blue)%ad %C(reset)%s (%an)" --date=short

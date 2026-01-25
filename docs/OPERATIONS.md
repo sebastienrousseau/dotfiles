@@ -126,4 +126,4 @@ If something feels slow or broken:
 
 ## Security policy
 - **GPG/SSH**: All commits are SSH signed.
-- **Audit Log**: Review `~/.dotfiles_audit.log` for a timeline of all changes applied to your system.
+- **Audit Log**: Review `~/.local/share/dotfiles.log` for a timeline of all changes applied to your system.

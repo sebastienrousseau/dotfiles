@@ -5,7 +5,7 @@
 
 set -e
 
-VERSION="${1:-v0.2.474}"
+VERSION="${1:-v0.2.475}"
 DIST_DIR="dist"
 ARCHIVE_NAME="dotfiles-${VERSION}.tar.gz"
 

@@ -22,7 +22,7 @@ This release delivers a modern, universal configuration managed by `chezmoi` acr
 
 ### Self-healing and compliance
 - **Doctor**: `dot doctor` diagnoses drift, paths, and dependencies.
-- **Audit**: `logging` of all changes to `~/.dotfiles_audit.log`.
+- **Audit**: All changes logged to `~/.local/share/dotfiles.log`.
 - **Privacy**: `privacy-mode` alias disables telemetry.
 
 ## Verification
@@ -36,7 +36,7 @@ This release delivers a modern, universal configuration managed by `chezmoi` acr
 
 ## Artifacts
 - **Installer**: `curl -sL dotfiles.io/install.sh | sh`
-- **Package**: `dist/dotfiles-v0.2.474.tar.gz`
+- **Package**: `dist/dotfiles-v0.2.475.tar.gz`
 - **Docs**: Full `README.md`, `COMPLIANCE.md`, `OPERATIONS.md`.
 
 ## Next steps
