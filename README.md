@@ -59,9 +59,94 @@ This is **infrastructure**, not an ad-hoc shell script.
 > [!IMPORTANT]
 > The installer automatically backs up an existing `~/.dotfiles` directory and cleans up legacy configuration files. The installer **only** bootstraps `chezmoi` and applies this repo. OS packages are installed via Chezmoi hooks during the first apply.
 
-...
+```bash
+# Works on macOS, Linux, and WSL
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.474/install.sh)"
+exec zsh
+```
 
+For non‑interactive installs (servers/CI), add:
+```bash
+DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.474/install.sh)"
+```
+
+---
+
+## Documentation
+
+- [Installation Guide](docs/INSTALL.md) — prerequisites and supported platforms.
+- [Operations Guide](docs/OPERATIONS.md) — common workflows and platform notes.
+- [Security Guide](docs/SECURITY.md) — hardening matrix and logging.
+- [Secrets Guide](docs/SECRETS.md) — age setup and encrypted files.
+- [Tools Catalog](docs/TOOLS.md) — core tools and optional utilities.
+- [Dot Utils](docs/UTILS.md) — aliases and dot CLI helpers.
+- [Troubleshooting](docs/TROUBLESHOOTING.md) — fixes for common issues.
+
+---
+
+## Installation Details
+
+**Prerequisites**
+- Required: `git`, `curl`
+- Verification: `sha256sum` (Linux) or `shasum` (macOS)
+- Optional: Homebrew (macOS), `apt-get` (Linux/WSL), Nix (toolchain)
+
+**Updates**
+```bash
+dot update
+```
+
+**Non‑interactive apply**
+```bash
+DOTFILES_NONINTERACTIVE=1 dot apply
+```
+
+## How-to Guides
+
+- [Operations](docs/OPERATIONS.md)
+- [Secrets](docs/SECRETS.md)
+- [Security](docs/SECURITY.md)
+- [Troubleshooting](docs/TROUBLESHOOTING.md)
+
+---
+
+## Reference
+
+Use `dot --help` or `dot <command> --help` for inline docs.
+
+| Command | Description | Category |
+|---|---|---|
+| `dot apply` | Apply dotfiles (chezmoi apply) | Core |
+| `dot sync` | Alias of apply | Core |
+| `dot update` | Pull latest changes and apply | Core |
+| `dot diff` | Show chezmoi diff (excludes scripts) | Core |
+| `dot remove` | Safely remove a managed file | Core |
+| `dot upgrade` | Update flake, plugins, and dotfiles | Core |
+| `dot edit` | Open chezmoi source in editor | Core |
+| `dot docs` | Show repo README | Core |
+| `dot help` | Show help | Core |
+| `dot drift` | Drift dashboard (chezmoi status) | Diagnostics |
+| `dot history` | Shell history analysis | Diagnostics |
+| `dot doctor` | Check system health and configuration | Diagnostics |
+| `dot benchmark` | Shell startup benchmark | Diagnostics |
+| `dot theme` | Switch terminal theme (dark/light) | UX |
+| `dot wallpaper` | Apply a wallpaper from your library | UX |
+| `dot keys` | Show keybindings catalog | UX |
+| `dot learn` | Interactive tour of tools | UX |
+| `dot fonts` | Install Nerd Fonts | UX |
+| `dot sandbox` | Launch a safe sandbox preview | Tools |
+| `dot tools` | Show dot utils overview | Tools |
+| `dot new` | Create a new project from a template | Tools |
+| `dot log-rotate` | Rotate `~/.local/share/dotfiles.log` | Tools |
+| `dot secrets-init` | Initialize age key for secrets | Secrets |
+| `dot secrets` | Edit encrypted secrets | Secrets |
+| `dot secrets-create` | Create an encrypted secrets file | Secrets |
+| `dot ssh-key` | Encrypt an SSH key locally with age | Secrets |
 | `dot backup` | Create a compressed backup of your home directory | Security |
+| `dot firewall` | Apply firewall hardening (opt‑in) | Security |
+| `dot telemetry` | Disable OS telemetry (opt‑in) | Security |
+| `dot dns-doh` | Enable DNS‑over‑HTTPS (opt‑in) | Security |
+| `dot encrypt-check` | Check disk encryption status | Security |
 | `dot lock-screen` | Enforce lock screen idle settings (opt‑in) | Security |
 | `dot usb-safety` | Disable automount for removable media | Security |
 
@@ -92,7 +177,7 @@ All security changes are logged to `~/.local/share/dotfiles.log`.
 Nix is **optional**. The repo does **not** install the Nix daemon.
 
 - Use `nix develop` for a reproducible shell environment.
-- `dot tools` assumes Nix is already installed.
+- `dot tools` prints the curated utilities overview.
 - There is no toggle that replaces Brew/Apt with Nix automatically.
 
 ---
