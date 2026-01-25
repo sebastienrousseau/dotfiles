@@ -4,7 +4,7 @@
 
 # Dotfiles — a fast, idempotent shell environment in minutes
 
-[![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions) [![Version](https://img.shields.io/badge/Version-v0.2.473-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.473) [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge&color=ff69b4)](LICENSE) [![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases) [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
+[![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions) [![Version](https://img.shields.io/badge/Version-v0.2.473-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.473) [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE) [![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases) [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
 
 ---
 
@@ -18,8 +18,8 @@ Conceptually: Git + templates + guarded scripts = a reproducible shell.
 
 ## Table of Contents
 
-- [Why Dotfiles?](#why-dotfiles)
 - [Non-Goals](#non-goals)
+- [Why Dotfiles?](#why-dotfiles)
 - [Safety Guarantees](#safety-guarantees)
 - [Quick Start (60 seconds)](#quick-start-60-seconds)
 - [Documentation](#documentation)
@@ -34,20 +34,18 @@ Conceptually: Git + templates + guarded scripts = a reproducible shell.
 
 ---
 
+## Non-Goals
+
+Dotfiles does not aim to be a beginner tutorial, a GUI-based setup tool, or a one-size-fits-all configuration.
+
 ## Why Dotfiles?
 
-Many dotfile repositories prioritize personal convenience. Dotfiles optimizes for **daily use, reproducibility, and auditability.**
-
-Dotfiles is designed for developers who manage multiple machines and want a reproducible, auditable shell environment.
+Dotfiles takes a more infrastructure-oriented approach than many personal dotfile setups. It is designed for developers who manage multiple machines and value **daily usability, reproducibility, and auditability.**
 
 - **The Stack:** A tuned Zsh, Neovim, and tmux environment with sane defaults.
 - **Unified Control:** A single `dot` command to sync or upgrade your entire environment.
 - **Safety First:** Explicit opt-in for any system or security changes.
 - **Clean Slate:** Clear separation between source files, generated configs, and system state.
-
-## Non-Goals
-
-Dotfiles does not aim to be a beginner tutorial, a GUI-based setup tool, or a one-size-fits-all configuration.
 
 ## Safety Guarantees
 
@@ -55,7 +53,8 @@ This is **infrastructure**, not an ad-hoc shell script.
 
 - No destructive actions without explicit opt-in.
 - No background daemons installed automatically.
-- No system settings changed unless explicitly enabled via environment variables.
+- No system settings are changed by default.
+- Any system-level behavior must be explicitly enabled via environment variables.
 - All privileged actions are logged locally to `~/.local/share/dotfiles.log`.
 
 ---
@@ -88,7 +87,7 @@ exec zsh
 ## Documentation
 
 - **Installation Guide**: [docs/INSTALL.md](docs/INSTALL.md)
-- **CLI Reference**: [docs/TOOLS.md](docs/TOOLS.md)
+- **Tools Catalog**: [docs/TOOLS.md](docs/TOOLS.md)
 - **Security Audit**: [docs/SECURITY.md](docs/SECURITY.md)
 - **Architecture**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
