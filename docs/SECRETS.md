@@ -10,6 +10,8 @@ dot secrets-init
 
 This creates `~/.config/chezmoi/key.txt` and prints your public key.
 
+Ensure `age` is installed first (via brew/apt or your toolchain).
+
 ## Enable encryption in chezmoi
 
 Edit `~/.config/chezmoi/chezmoi.toml` (local only):
@@ -39,11 +41,14 @@ This edits `~/.config/chezmoi/encrypted_secrets.age` and applies on save.
 ## Create a new secrets file (first time)
 
 ```bash
-chezmoi edit --apply ~/.config/chezmoi/encrypted_secrets.age
+dot secrets-create
 ```
 
-Add key=value pairs, save, and chezmoi will store the encrypted file in your
-dotfiles source (never plaintext).
+Then edit:
+
+```bash
+dot secrets
+```
 
 ## Encrypt an SSH key (local-only)
 

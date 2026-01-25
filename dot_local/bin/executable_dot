@@ -22,6 +22,7 @@ show_help() {
     echo "  theme      Switch terminal theme (dark/light)"
     echo "  wallpaper  Apply a wallpaper from your library"
     echo "  ssh-key    Encrypt an SSH key locally with age"
+    echo "  secrets-create  Create an encrypted secrets file"
     echo "  secrets    Edit encrypted secrets (age)"
     echo "  secrets-init  Initialize age key for secrets"
     echo "  upgrade    Update flake, plugins, and dotfiles"
@@ -182,6 +183,19 @@ case "$COMMAND" in
         echo "Age key created at $KEY_FILE"
         echo "Public key:"
         age-keygen -y "$KEY_FILE"
+        ;;
+    secrets-create)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -z "$SRC_DIR" ]; then
+            echo "Dotfiles source not found."
+            exit 1
+        fi
+        if [ -f "$SRC_DIR/scripts/secrets/create-secrets-file.sh" ]; then
+            exec sh "$SRC_DIR/scripts/secrets/create-secrets-file.sh" "$@"
+        else
+            echo "Secrets creation script not found."
+            exit 1
+        fi
         ;;
     secrets)
         SECRETS_DIR="$HOME/.config/chezmoi"

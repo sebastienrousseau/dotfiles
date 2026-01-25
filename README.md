@@ -278,6 +278,13 @@ dot wallpaper
 
 Set a wallpaper from `~/Pictures/Wallpapers` (override with `DOTFILES_WALLPAPER_DIR`).
 
+### Secrets
+
+```bash
+dot secrets-create
+dot secrets
+```
+
 ### Personal Details (Git)
 
 This repo ships a `.chezmoi.toml.tmpl` with safe placeholders. Set your values
