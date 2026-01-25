@@ -33,16 +33,7 @@ Dotfiles is a cross-platform, Chezmoi-managed shell distribution that installs i
 - [Documentation](#documentation)
 - [Installation Details](#installation-details)
 - [Reference](#reference)
-  - [Configuration](#configuration)
-  - [Environment Variables](#environment-variables)
-  - [The dot CLI](#the-dot-cli)
-  - [Security Auditing (What Changes)](#security-auditing-what-changes)
-  - [Nix Integration](#nix-integration)
-  - [Install Guide](#install-guide)
-  - [Tools Catalog](#tools-catalog)
 - [How‑to Guides](#how-to-guides)
-  - [Add a new alias](#add-a-new-alias)
-  - [Commit changes safely](#commit-changes-safely)
 - [Architecture (How it Works)](#architecture-how-it-works)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
@@ -54,6 +45,8 @@ Dotfiles is a cross-platform, Chezmoi-managed shell distribution that installs i
 ## Why Dotfiles?
 
 Most repositories optimize for personal convenience. Dotfiles optimizes for **daily use, reproducibility, and auditability.**
+
+Dotfiles is designed for developers who manage multiple machines and want a reproducible, auditable shell environment.
 
 - **The Stack:** A tuned Zsh, Neovim, and tmux environment with sane defaults.
 - **Unified Control:** A single `dot` command to sync or upgrade your entire environment.
@@ -302,6 +295,8 @@ git push
 
 ## Architecture (How it Works)
 
+If Mermaid does not render, the flow is: `install.sh → Chezmoi → ~/.dotfiles → ~/.config + ~/.local`.
+
 ```mermaid
 flowchart LR
   A["install.sh"] --> B["Chezmoi"]
@@ -310,8 +305,6 @@ flowchart LR
   E["dot CLI"] --> B
   E --> F["scripts/*"]
 ```
-
-If Mermaid does not render, the flow is: `install.sh → Chezmoi → ~/.dotfiles → ~/.config + ~/.local`.
 
 **Repository layout**
 
