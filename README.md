@@ -300,6 +300,13 @@ DOTFILES_FIREWALL=1 dot firewall
 
 GPG agent defaults live in `~/.config/gnupg/gpg-agent.conf`.
 
+```bash
+DOTFILES_TELEMETRY=1 dot telemetry
+DOTFILES_DOH=1 dot dns-doh
+dot encrypt-check
+dot backup
+```
+
 ### Secrets
 
 ```bash

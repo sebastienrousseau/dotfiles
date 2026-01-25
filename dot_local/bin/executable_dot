@@ -25,6 +25,10 @@ show_help() {
     echo "  secrets-create  Create an encrypted secrets file"
     echo "  fonts      Install Nerd Fonts (JetBrainsMono by default)"
     echo "  firewall   Apply firewall hardening (opt-in)"
+    echo "  telemetry  Disable OS telemetry (opt-in)"
+    echo "  dns-doh    Enable DNS-over-HTTPS (opt-in)"
+    echo "  encrypt-check  Check disk encryption status"
+    echo "  backup     Create a compressed backup of your home"
     echo "  secrets    Edit encrypted secrets (age)"
     echo "  secrets-init  Initialize age key for secrets"
     echo "  upgrade    Update flake, plugins, and dotfiles"
@@ -178,6 +182,58 @@ case "$COMMAND" in
             exec sh "$SRC_DIR/scripts/security/firewall.sh" "$@"
         else
             echo "Firewall script not found."
+            exit 1
+        fi
+        ;;
+    telemetry)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -z "$SRC_DIR" ]; then
+            echo "Dotfiles source not found."
+            exit 1
+        fi
+        if [ -f "$SRC_DIR/scripts/security/telemetry-kill.sh" ]; then
+            exec sh "$SRC_DIR/scripts/security/telemetry-kill.sh" "$@"
+        else
+            echo "Telemetry script not found."
+            exit 1
+        fi
+        ;;
+    dns-doh)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -z "$SRC_DIR" ]; then
+            echo "Dotfiles source not found."
+            exit 1
+        fi
+        if [ -f "$SRC_DIR/scripts/security/dns-doh.sh" ]; then
+            exec sh "$SRC_DIR/scripts/security/dns-doh.sh" "$@"
+        else
+            echo "DNS DoH script not found."
+            exit 1
+        fi
+        ;;
+    encrypt-check)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -z "$SRC_DIR" ]; then
+            echo "Dotfiles source not found."
+            exit 1
+        fi
+        if [ -f "$SRC_DIR/scripts/security/encryption-check.sh" ]; then
+            exec sh "$SRC_DIR/scripts/security/encryption-check.sh" "$@"
+        else
+            echo "Encryption check script not found."
+            exit 1
+        fi
+        ;;
+    backup)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -z "$SRC_DIR" ]; then
+            echo "Dotfiles source not found."
+            exit 1
+        fi
+        if [ -f "$SRC_DIR/scripts/security/backup.sh" ]; then
+            exec sh "$SRC_DIR/scripts/security/backup.sh" "$@"
+        else
+            echo "Backup script not found."
             exit 1
         fi
         ;;
