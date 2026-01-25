@@ -29,6 +29,8 @@ show_help() {
     echo "  dns-doh    Enable DNS-over-HTTPS (opt-in)"
     echo "  encrypt-check  Check disk encryption status"
     echo "  backup     Create a compressed backup of your home"
+    echo "  lock-screen  Enforce lock screen idle settings (opt-in)"
+    echo "  usb-safety   Disable automount for removable media (opt-in)"
     echo "  secrets    Edit encrypted secrets (age)"
     echo "  secrets-init  Initialize age key for secrets"
     echo "  upgrade    Update flake, plugins, and dotfiles"
@@ -221,6 +223,32 @@ case "$COMMAND" in
             exec sh "$SRC_DIR/scripts/security/encryption-check.sh" "$@"
         else
             echo "Encryption check script not found."
+            exit 1
+        fi
+        ;;
+    lock-screen)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -z "$SRC_DIR" ]; then
+            echo "Dotfiles source not found."
+            exit 1
+        fi
+        if [ -f "$SRC_DIR/scripts/security/lock-screen.sh" ]; then
+            exec sh "$SRC_DIR/scripts/security/lock-screen.sh" "$@"
+        else
+            echo "Lock screen script not found."
+            exit 1
+        fi
+        ;;
+    usb-safety)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -z "$SRC_DIR" ]; then
+            echo "Dotfiles source not found."
+            exit 1
+        fi
+        if [ -f "$SRC_DIR/scripts/security/usb-safety.sh" ]; then
+            exec sh "$SRC_DIR/scripts/security/usb-safety.sh" "$@"
+        else
+            echo "USB safety script not found."
             exit 1
         fi
         ;;

@@ -305,6 +305,8 @@ DOTFILES_TELEMETRY=1 dot telemetry
 DOTFILES_DOH=1 dot dns-doh
 dot encrypt-check
 dot backup
+DOTFILES_LOCK=1 dot lock-screen
+DOTFILES_USB_SAFETY=1 dot usb-safety
 ```
 
 ### Secrets
