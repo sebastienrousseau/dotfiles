@@ -9,6 +9,9 @@
 # Set default text editor
 EDITOR="${EDITOR:-vi}"
 
+# Ensure dot CLI is available
+alias dot=~/.local/bin/dot
+
 # Apache aliases
 # ------------------------------------------------------------------------------
 

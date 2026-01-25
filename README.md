@@ -227,6 +227,27 @@ gui = true
 secrets = true
 ```
 
+### Personal Details (Git)
+
+This repo ships a `.chezmoi.toml.tmpl` with safe placeholders. Set your values
+locally (not committed) and re-apply:
+
+```bash
+chezmoi init --apply --promptDefaults
+```
+
+Or edit the config directly:
+
+```bash
+${EDITOR:-nano} ~/.config/chezmoi/chezmoi.toml
+```
+
+Fields to update:
+- `git_name`
+- `git_email`
+- `git_signingkey`
+- `git_signingformat` (ssh/gpg)
+
 ### DevContainer / Codespaces
 
 If you use VS Code or Codespaces, a minimal devcontainer is available:

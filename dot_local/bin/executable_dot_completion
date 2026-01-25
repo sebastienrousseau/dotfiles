@@ -1,0 +1,24 @@
+#compdef dot
+
+_dot() {
+  local -a commands
+  commands=(
+    sync
+    update
+    doctor
+    keys
+    tools
+    sandbox
+    benchmark
+    tune
+    secrets
+    secrets-init
+    upgrade
+    edit
+    docs
+    help
+  )
+  _describe 'command' commands
+}
+
+_dot "$@"

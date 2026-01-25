@@ -146,6 +146,26 @@ dot secrets-init
 dot secrets
 ```
 
+### Personal Details (Git)
+
+Set your Git identity in the local `chezmoi` config (not committed):
+
+```bash
+chezmoi init --apply --promptDefaults
+```
+
+Or edit directly:
+
+```bash
+${EDITOR:-nano} ~/.config/chezmoi/chezmoi.toml
+```
+
+Fields:
+- `git_name`
+- `git_email`
+- `git_signingkey`
+- `git_signingformat`
+
 ### Theme
 
 Set the theme in `.chezmoidata.toml`:

@@ -1,0 +1,9 @@
+sourceDir = "{{ .chezmoi.homeDir }}/.dotfiles"
+
+[data]
+profile = "{{ promptString "profile" "laptop" }}"
+theme = "{{ promptString "theme" "catppuccin-mocha" }}"
+git_name = "{{ promptString "git_name" "Your Name" }}"
+git_email = "{{ promptString "git_email" "you@example.com" }}"
+git_signingkey = "{{ promptString "git_signingkey" "~/.ssh/id_ed25519" }}"
+git_signingformat = "{{ promptString "git_signingformat" "ssh" }}"

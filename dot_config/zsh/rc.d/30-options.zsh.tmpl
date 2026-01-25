@@ -1,0 +1,63 @@
+# Zsh history and options
+HISTFILE="${HOME}/.zsh_history"
+HISTSIZE=10000
+SAVEHIST=10000
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_FIND_NO_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_REDUCE_BLANKS
+setopt EXTENDED_HISTORY
+setopt SHARE_HISTORY
+setopt APPEND_HISTORY
+
+setopt AUTO_CD
+setopt AUTO_PUSHD
+setopt PUSHD_IGNORE_DUPS
+setopt PUSHD_SILENT
+
+bindkey -e
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey "^[[A" up-line-or-beginning-search
+bindkey "^[[B" down-line-or-beginning-search
+bindkey "^P" up-line-or-beginning-search
+bindkey "^N" down-line-or-beginning-search
+
+ZSH_COMPLETIONS_DIR="${XDG_DATA_HOME:-${HOME}/.local/share}/zsh/completions"
+if [[ ! -d "${ZSH_COMPLETIONS_DIR}" ]]; then
+  command mkdir -p "${ZSH_COMPLETIONS_DIR}"
+fi
+if [[ -z ${fpath[(r)${ZSH_COMPLETIONS_DIR}]} ]]; then
+  fpath=("${ZSH_COMPLETIONS_DIR}" "${fpath[@]}")
+fi
+if [[ -f "${HOME}/.local/bin/executable_dot_completion" ]]; then
+  fpath=("${HOME}/.local/bin" "${fpath[@]}")
+fi
+if command -v fnm >/dev/null; then
+  if [[ ! -f "${ZSH_COMPLETIONS_DIR}/_fnm" ]]; then
+    command fnm completions --shell zsh >| "${ZSH_COMPLETIONS_DIR}/_fnm"
+  fi
+fi
+autoload -Uz compinit
+if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
+fi
+
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' special-dirs true
+zstyle ':completion:*' verbose yes
+
+autoload -Uz colors && colors
+unsetopt correct_all
+
+# fzf integration
+if [ -f "${HOME}/.fzf.zsh" ]; then
+  source "${HOME}/.fzf.zsh"
+fi

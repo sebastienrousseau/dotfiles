@@ -22,6 +22,8 @@ show_help() {
     echo "  secrets    Edit encrypted secrets (age)"
     echo "  secrets-init  Initialize age key for secrets"
     echo "  upgrade    Update flake, plugins, and dotfiles"
+    echo "  edit       Open chezmoi source in $EDITOR"
+    echo "  docs       Show repo README"
     echo "  learn      Start the interactive tour of your new tools"
     echo "  tools      Show dot utils overview"
     echo "  help       Show this help message"
@@ -159,6 +161,23 @@ case "$COMMAND" in
         if command -v nvim >/dev/null; then
             echo "Updating Neovim plugins..."
             nvim --headless "+Lazy! sync" +qa || true
+        fi
+        ;;
+    edit)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -z "$SRC_DIR" ]; then
+            echo "Dotfiles source not found."
+            exit 1
+        fi
+        exec chezmoi edit "$SRC_DIR"
+        ;;
+    docs)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/README.md" ]; then
+            exec cat "$SRC_DIR/README.md"
+        else
+            echo "README not found."
+            exit 1
         fi
         ;;
     update)

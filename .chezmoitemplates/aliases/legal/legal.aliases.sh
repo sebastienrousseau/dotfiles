@@ -16,7 +16,11 @@ fi
 if command -v trivy &>/dev/null; then
   alias scan-licenses='trivy fs . --scanners license'
 else
+{{- if eq .chezmoi.os "darwin" }}
   alias scan-licenses='echo "trivy not found. Installing via homebrew..." && brew install trivy && trivy fs . --scanners license'
+{{- else }}
+  alias scan-licenses='echo "trivy not found. Install trivy to use scan-licenses."'
+{{- end }}
 fi
 
 # -----------------------------------------------------------------------------
