@@ -13,7 +13,7 @@ return {
       end
       
       ts_config.setup({
-        ensure_installed = { "python", "markdown", "json", "toml", "yaml", "bash", "vim", "regex", "lua", "rust", "dockerfile" },
+        ensure_installed = { "python", "go", "markdown", "json", "toml", "yaml", "bash", "vim", "regex", "lua", "rust", "dockerfile" },
         highlight = { enable = true },
         indent = { enable = true },
       })
@@ -91,6 +91,16 @@ return {
       -- Signs
       vim.fn.sign_define('DapBreakpoint', {text='🔴', texthl='DapBreakpoint', linehl='', numhl=''})
       vim.fn.sign_define('DapStopped', {text='🟢', texthl='DapStopped', linehl='DapStopped', numhl='DapStopped'})
+    end,
+  },
+
+  -- Debugging (DAP + Go)
+  {
+    "leoluz/nvim-dap-go",
+    ft = { "go" },
+    dependencies = { "mfussenegger/nvim-dap" },
+    config = function()
+      require("dap-go").setup()
     end,
   },
 
