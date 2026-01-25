@@ -107,8 +107,10 @@ jobs:
       - name: Install Lua tooling
         run: |
           sudo apt-get update
-          sudo apt-get install -y lua5.1 luarocks luacheck cargo
+          sudo apt-get install -y lua5.1 luarocks cargo
           cargo install stylua || true
+          luarocks install luacheck
+          echo "$HOME/.luarocks/bin" >> $GITHUB_PATH
 
       - name: Run luacheck
         run: luacheck dot_config/nvim

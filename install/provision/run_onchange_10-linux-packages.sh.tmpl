@@ -158,9 +158,18 @@ if command -v apt-get >/dev/null; then
     lua5.1
     luajit
     luarocks
-    luacheck
   )
   $sudo_cmd apt-get install -y "${packages[@]}"
+fi
+
+# Install Luacheck (Lua linter)
+if ! command -v luacheck >/dev/null; then
+  if command -v luarocks >/dev/null; then
+    log_info "Installing Luacheck via luarocks..."
+    luarocks install luacheck || true
+  else
+    log_error "Luacheck not found and luarocks is missing. Install manually."
+  fi
 fi
 
 # Install Stylua (Lua formatter)
