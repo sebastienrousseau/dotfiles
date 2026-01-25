@@ -21,3 +21,4 @@ This is intentionally small and practical.
 ## System
 - `dot doctor` for health checks
 - `dot update` to pull and apply changes
+- `dot theme` to switch terminal themes

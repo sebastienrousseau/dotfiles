@@ -191,6 +191,7 @@ dot update    # Pull latest changes and apply
 dot tools     # Show dot utils
 dot keys      # Show keybindings
 dot tune      # Apply OS tuning (opt-in)
+dot theme     # Switch terminal theme (dark/light)
 dot secrets   # Edit encrypted secrets (age)
 dot upgrade   # Update flake, plugins, and dotfiles
 ```
@@ -217,7 +218,9 @@ You can customize what gets applied per host using `.chezmoidata.toml`:
 
 ```toml
 profile = "laptop"
-theme = "catppuccin-mocha"
+theme = "tokyonight-night"
+terminal_font_family = "JetBrains Mono"
+terminal_font_size = 12
 
 [features]
 zsh = true
@@ -226,6 +229,38 @@ tmux = true
 gui = true
 secrets = true
 ```
+
+### Theme Switching
+
+```bash
+dot theme list
+dot theme set catppuccin-latte
+dot theme toggle
+```
+
+Available themes:
+- `tokyonight-night` (best dark default)
+- `tokyonight-day` (best light default)
+- `tokyonight-storm`
+- `tokyonight-moon`
+- `dracula`
+- `gruvbox-dark`
+- `gruvbox-light`
+- `nord`
+- `onedark`
+- `onelight`
+- `solarized-dark`
+- `solarized-light`
+- `catppuccin-mocha`
+- `catppuccin-latte`
+- `rose-pine`
+- `rose-pine-moon`
+- `rose-pine-dawn`
+- `everforest-dark`
+- `everforest-light`
+- `kanagawa-wave`
+- `kanagawa-dragon`
+- `kanagawa-lotus`
 
 ### Personal Details (Git)
 

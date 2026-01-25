@@ -19,6 +19,7 @@ show_help() {
     echo "  sandbox    Launch a safe sandbox preview (Docker/Podman)"
     echo "  benchmark  Run shell startup benchmark"
     echo "  tune       Apply OS tuning (opt-in)"
+    echo "  theme      Switch terminal theme (dark/light)"
     echo "  secrets    Edit encrypted secrets (age)"
     echo "  secrets-init  Initialize age key for secrets"
     echo "  upgrade    Update flake, plugins, and dotfiles"
@@ -122,6 +123,19 @@ case "$COMMAND" in
                 exit 1
                 ;;
         esac
+        ;;
+    theme)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -z "$SRC_DIR" ]; then
+            echo "Dotfiles source not found."
+            exit 1
+        fi
+        if [ -f "$SRC_DIR/scripts/theme/switch.sh" ]; then
+            exec sh "$SRC_DIR/scripts/theme/switch.sh" "$@"
+        else
+            echo "Theme switcher not found."
+            exit 1
+        fi
         ;;
     secrets-init)
         SECRETS_DIR="$HOME/.config/chezmoi"
