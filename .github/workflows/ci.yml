@@ -17,6 +17,7 @@ jobs:
   test:
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -28,7 +29,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install Chezmoi
         run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
@@ -44,13 +45,25 @@ jobs:
       - name: Verify Config (Dry Run)
         run: chezmoi apply --verbose --dry-run
 
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+        with:
+          name: failure-logs-${{ matrix.os }}
+          path: |
+            ~/.local/share/chezmoi/.log
+            ~/.local/share/dotfiles.log
+            /tmp/*.log
+          retention-days: 7
+
   idempotency:
     name: Idempotency Test (Double-run)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install Chezmoi
         run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
@@ -77,15 +90,27 @@ jobs:
           fi
           echo "Idempotency check passed"
 
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+        with:
+          name: failure-logs-idempotency
+          path: |
+            ~/.local/share/chezmoi/.log
+            ~/.local/share/dotfiles.log
+            /tmp/*.log
+          retention-days: 7
+
   benchmark:
     name: Shell Startup Benchmark (Ubuntu)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y zsh hyperfine
@@ -107,15 +132,27 @@ jobs:
       - name: Benchmark (max 500ms)
         run: DOTFILES_BENCH_MAX_MS=500 bash ./scripts/tests/benchmark.sh
 
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+        with:
+          name: failure-logs-benchmark
+          path: |
+            ~/.local/share/chezmoi/.log
+            ~/.local/share/dotfiles.log
+            /tmp/*.log
+          retention-days: 7
+
   shellcheck:
     name: Shellcheck (Ubuntu)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install shellcheck + ripgrep
         run: sudo apt-get update && sudo apt-get install -y shellcheck ripgrep
@@ -130,38 +167,31 @@ jobs:
   shfmt:
     name: Shell Format Check (shfmt)
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    timeout-minutes: 10
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Install shfmt
         run: |
-          curl -sS https://webinstall.dev/shfmt | bash
+          curl -sS https://webi.sh/shfmt | sh
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Check shell script formatting
+      - name: Check shell formatting
         run: |
-          find . -name "*.sh" -type f | while read -r file; do
-            if ! shfmt -d -i 4 -ci "$file" >/dev/null 2>&1; then
-              echo "Formatting issue in: $file"
-              shfmt -d -i 4 -ci "$file" || true
-            fi
-          done
-          # Note: This is advisory only - not a hard failure for now
-          echo "Shell format check completed"
+          shfmt -d -i 2 -ci scripts/**/*.sh install.sh || {
+            echo "::error::Shell formatting issues found. Run 'shfmt -w -i 2 -ci' to fix."
+            exit 1
+          }
 
   gitleaks:
     name: Secrets Scan (Gitleaks)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
 
@@ -176,12 +206,13 @@ jobs:
   link-check:
     name: Link Rot Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install lychee
         run: |
@@ -204,12 +235,13 @@ jobs:
   lua-lint:
     name: Lua Lint (Ubuntu)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install Lua tooling
         run: |
@@ -229,16 +261,17 @@ jobs:
   nix-check:
     name: Nix Flake Check (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v14
+        uses: DeterminateSystems/nix-installer-action@de22e16c4711fca50c816cc9081563429d1cf563 # v10
 
       - name: Flake Check
         run: nix flake check ./nix
