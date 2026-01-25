@@ -108,7 +108,11 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v14
 
-      # Magic cache requires FlakeHub auth; disable by default to avoid noisy failures.
+      - name: Enable Nix Cache (optional)
+        if: env.FLAKEHUB_TOKEN != ''
+        env:
+          FLAKEHUB_TOKEN: ${{ secrets.FLAKEHUB_TOKEN }}
+        uses: DeterminateSystems/magic-nix-cache-action@v7
 
       - name: Flake Check
         run: nix flake check ./nix

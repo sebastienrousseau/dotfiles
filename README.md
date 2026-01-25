@@ -72,6 +72,7 @@ You get a tuned Zsh + Neovim + tmux stack with sane defaults, a single command t
 > The installer **only** bootstraps `chezmoi` and applies this repo. OS package installs happen via Chezmoi hooks on first apply.
 
 ```bash
+# Works on macOS, Linux, and WSL
 # 1) Install from the pinned release tag
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.473/install.sh)"
 
@@ -162,11 +163,11 @@ secrets = true
 | `DOTFILES_NONINTERACTIVE` | Non‑interactive install | `0` |
 | `DOTFILES_FONTS` | Install fonts during `dot upgrade` | `0` |
 | `DOTFILES_WALLPAPER_DIR` | Wallpaper directory | `~/Pictures/Wallpapers` |
-| `DOTFILES_FIREWALL` | Enable firewall hardening | unset |
-| `DOTFILES_TELEMETRY` | Disable telemetry | unset |
-| `DOTFILES_DOH` | Enable DNS‑over‑HTTPS | unset |
-| `DOTFILES_LOCK` | Enforce lock screen idle settings | unset |
-| `DOTFILES_USB_SAFETY` | Disable automount for removable media | unset |
+| `DOTFILES_FIREWALL` | Enable firewall hardening | `0` (disabled) |
+| `DOTFILES_TELEMETRY` | Disable telemetry | `0` (disabled) |
+| `DOTFILES_DOH` | Enable DNS‑over‑HTTPS | `0` (disabled) |
+| `DOTFILES_LOCK` | Enforce lock screen idle settings | `0` (disabled) |
+| `DOTFILES_USB_SAFETY` | Disable automount for removable media | `0` (disabled) |
 
 ### The `dot` CLI
 
