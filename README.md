@@ -35,7 +35,7 @@ Git + templates + guarded scripts = a reproducible shell.
 
 ## Why Dotfiles?
 
-Dotfiles takes a more infrastructure-oriented approach than many personal dotfile setups. It is designed for developers who manage multiple machines and value **daily usability, reproducibility, and auditability.**
+Dotfiles takes an infrastructure-oriented approach to managing dotfiles. It is designed for developers who manage multiple machines and value **daily usability, reproducibility, and auditability.**
 
 - **The Stack:** Zsh, Neovim, and tmux with sane defaults.
 - **Unified Control:** The `dot` CLI wraps common workflows such as syncing, upgrading, and managing secrets.
@@ -74,8 +74,6 @@ exec zsh
 
 > [!TIP]
 > Use `DOTFILES_NONINTERACTIVE=1` if you want a fully non‑interactive install.
-
- 
 
 ---
 
@@ -309,9 +307,6 @@ flowchart LR
 ```
 
 ---
-
----
- 
 
 ## Roadmap
 
