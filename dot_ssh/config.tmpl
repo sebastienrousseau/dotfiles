@@ -3,6 +3,10 @@
 Include ~/.ssh/config.d/*.conf
 
 Host *
+  # SSH multiplexing
+  ControlMaster auto
+  ControlPersist 10m
+  ControlPath ~/.ssh/cm/%r@%h:%p
   ServerAliveInterval 60
   ServerAliveCountMax 3
   HashKnownHosts yes
