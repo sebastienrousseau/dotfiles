@@ -2,7 +2,7 @@
   <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg" alt="Dotfiles logo" width="64" />
 </p>
 
-# Dotfiles — a fast, idempotent shell environment in minutes
+# Dotfiles — a fast, idempotent shell environment distribution in minutes
 
 [![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions) [![Version](https://img.shields.io/badge/Version-v0.2.473-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.473) [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE) [![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases) [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
 
@@ -37,9 +37,8 @@ Git + templates + guarded scripts = a reproducible shell.
 
 Dotfiles takes a more infrastructure-oriented approach than many personal dotfile setups. It is designed for developers who manage multiple machines and value **daily usability, reproducibility, and auditability.**
 
-- The `dot` CLI is a thin wrapper around common workflows such as syncing, upgrading, and managing secrets.
 - **The Stack:** A tuned Zsh, Neovim, and tmux environment with sane defaults.
-- **Unified Control:** A single `dot` command to sync or upgrade your entire environment.
+- **Unified Control:** The `dot` CLI wraps common workflows such as syncing, upgrading, and managing secrets.
 - **Safety First:** Explicit opt-in for any system or security changes.
 - **Clean Slate:** Clear separation between source files, generated configs, and system state.
 
@@ -58,7 +57,7 @@ This is **infrastructure**, not an ad-hoc shell script.
 ## Quick Start (60 seconds)
 
 > [!IMPORTANT]
-> The installer **only** bootstraps `chezmoi` and applies this repo. OS package installs happen via Chezmoi hooks on first apply.
+> The installer **only** bootstraps `chezmoi` and applies this repo. OS packages are installed via Chezmoi hooks during the first apply.
 
 ### 1. Install from a pinned release
 
@@ -76,7 +75,7 @@ exec zsh
 > [!TIP]
 > Use `DOTFILES_NONINTERACTIVE=1` if you want a fully non‑interactive install.
 
-<p align="right"><a href="#dotfiles--a-fast-idempotent-shell-environment-in-minutes">↑ Back to Top</a></p>
+<p align="right"><a href="#dotfiles--a-fast-idempotent-shell-environment-distribution-in-minutes">↑ Back to Top</a></p>
 
 ---
 
@@ -270,11 +269,7 @@ Nix is **optional**. The repo does **not** install the Nix daemon.
 
 See [docs/INSTALL.md](docs/INSTALL.md) for prerequisites, supported platforms, and the full install flow.
 
-### Tools Catalog
-
-See [docs/TOOLS.md](docs/TOOLS.md) for the list of included tools and alias conventions.
-
-<p align="right"><a href="#dotfiles--a-fast-idempotent-shell-environment-in-minutes">↑ Back to Top</a></p>
+<p align="right"><a href="#dotfiles--a-fast-idempotent-shell-environment-distribution-in-minutes">↑ Back to Top</a></p>
 
 ## Architecture (How it Works)
 
@@ -315,7 +310,7 @@ flowchart LR
 
 ---
 
-<p align="right"><a href="#dotfiles--a-fast-idempotent-shell-environment-in-minutes">↑ Back to Top</a></p>
+<p align="right"><a href="#dotfiles--a-fast-idempotent-shell-environment-distribution-in-minutes">↑ Back to Top</a></p>
 
 ---
 
