@@ -128,29 +128,29 @@ ensure_chezmoi_source() {
 if [ -d "$SOURCE_DIR/.git" ]; then
     echo "   Applying from local source: $SOURCE_DIR"
     ensure_chezmoi_source "$SOURCE_DIR"
-    APPLY_FLAGS=""
+    APPLY_FLAGS=()
     if [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]; then
-      APPLY_FLAGS="--force --no-tty"
+      APPLY_FLAGS=(--force --no-tty)
     fi
-    chezmoi apply $APPLY_FLAGS
+    chezmoi apply "${APPLY_FLAGS[@]}"
 elif [ -d "$LEGACY_SOURCE_DIR/.git" ]; then
     echo "   Applying from legacy source: $LEGACY_SOURCE_DIR"
     ensure_chezmoi_source "$LEGACY_SOURCE_DIR"
-    APPLY_FLAGS=""
+    APPLY_FLAGS=()
     if [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]; then
-      APPLY_FLAGS="--force --no-tty"
+      APPLY_FLAGS=(--force --no-tty)
     fi
-    chezmoi apply $APPLY_FLAGS
+    chezmoi apply "${APPLY_FLAGS[@]}"
 else
     echo "   Initializing from GitHub (Branch/Tag: $VERSION)..."
     # STRICT MODE: We pin to the specific tag to avoid 'main' branch drift
     git clone --branch "$VERSION" https://github.com/sebastienrousseau/dotfiles.git "$SOURCE_DIR"
     ensure_chezmoi_source "$SOURCE_DIR"
-    APPLY_FLAGS=""
+    APPLY_FLAGS=()
     if [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]; then
-      APPLY_FLAGS="--force --no-tty"
+      APPLY_FLAGS=(--force --no-tty)
     fi
-    chezmoi apply $APPLY_FLAGS
+    chezmoi apply "${APPLY_FLAGS[@]}"
 fi
 
 success

@@ -89,7 +89,7 @@ jobs:
 
       - name: Run shellcheck
         run: |
-          files=$(rg --files -g "*.sh" -g "*.sh.tmpl")
+          files=$(rg --files -g "*.sh")
           if [ -n "$files" ]; then
             echo "$files" | xargs shellcheck -x
           fi

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 set -e
 
 KEY_PATH="${1:-$HOME/.ssh/id_ed25519}"
