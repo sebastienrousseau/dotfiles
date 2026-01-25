@@ -278,7 +278,7 @@ Set a wallpaper from `~/Pictures/Wallpapers` (override with `DOTFILES_WALLPAPER_
 ### Fonts
 
 ```bash
-dot fonts JetBrainsMono FiraCode Iosevka
+dot fonts
 ```
 
 Installs Nerd Fonts and refreshes the font cache on Linux.

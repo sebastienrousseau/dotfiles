@@ -1,7 +1,8 @@
 #!/bin/sh
 set -e
 
-FONT_LIST="${*:-JetBrainsMono}"
+DEFAULT_FONTS="JetBrainsMono FiraCode Iosevka"
+FONT_LIST="${*:-$DEFAULT_FONTS}"
 
 install_linux() {
   font_name="$1"
