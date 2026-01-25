@@ -16,8 +16,8 @@ export PATH="/Applications/Topaz\ Photo\ AI.app/Contents/Resources/bin:/Applicat
 
 # Deduplicate PATH entries
 deduplicate_path() {
-    PATH=$(echo "$PATH" | awk -v RS=':' '!seen[$0]++ {ORS=(NR>1?":":"")} {print}')
-    export PATH
+  PATH=$(echo "$PATH" | awk -v RS=':' '!seen[$0]++ {ORS=(NR>1?":":"")} {print}')
+  export PATH
 }
 
 # Call the deduplication function

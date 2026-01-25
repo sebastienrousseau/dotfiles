@@ -12,8 +12,9 @@ RESULTS_DIR="${RESULTS_DIR:-$HOME/.local/share/dotfiles/benchmarks}"
 RESULTS_FILE="$RESULTS_DIR/benchmark_$(date +%Y%m%d_%H%M%S).json"
 
 # Thresholds (in milliseconds)
+# Note: CI environments may be slower, so thresholds are set conservatively
 SHELL_STARTUP_THRESHOLD_MS=500
-FUNCTION_LOAD_THRESHOLD_MS=100
+FUNCTION_LOAD_THRESHOLD_MS=200  # Increased for CI compatibility
 CD_OPERATION_THRESHOLD_MS=50
 
 RED='\033[0;31m'

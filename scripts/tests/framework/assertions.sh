@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034
 # Assertion library for shell tests
 # Provides a comprehensive set of assertion functions for testing shell scripts
 

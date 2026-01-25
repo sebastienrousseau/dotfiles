@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2012
 set -euo pipefail
 
 # Compare current benchmark with historical baseline

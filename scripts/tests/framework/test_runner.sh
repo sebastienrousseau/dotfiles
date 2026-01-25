@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1090,SC1091,SC2034
 # Main test runner for dotfiles test suite
 # Discovers and runs all test files, reports results
 

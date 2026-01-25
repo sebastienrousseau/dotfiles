@@ -6,5 +6,5 @@ export PIPX_BIN_DIR="${XDG_BIN_HOME:-$HOME/.local/bin}"
 
 # Ensure pipx bin is in PATH (if not already)
 if [[ ":$PATH:" != *":$PIPX_BIN_DIR:"* ]]; then
-    export PATH="${PIPX_BIN_DIR}:${PATH}"
+  export PATH="${PIPX_BIN_DIR}:${PATH}"
 fi
