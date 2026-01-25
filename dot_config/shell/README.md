@@ -215,6 +215,7 @@ Available themes:
 - `tokyonight-day` (best light default)
 - `tokyonight-storm`
 - `tokyonight-moon`
+- `catppuccin-mocha`
 - `dracula`
 - `gruvbox-dark`
 - `gruvbox-light`
