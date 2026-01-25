@@ -38,6 +38,8 @@ You get a tuned Zsh + Neovim + tmux stack with sane defaults, a single command t
   - [The dot CLI](#the-dot-cli)
   - [Security Auditing (What Changes)](#security-auditing-what-changes)
   - [Nix Integration](#nix-integration)
+  - [Install Guide](#install-guide)
+  - [Tools Catalog](#tools-catalog)
 - [How‑to Guides](#how-to-guides)
   - [Add a new alias](#add-a-new-alias)
   - [Commit changes safely](#commit-changes-safely)
@@ -232,6 +234,14 @@ Nix is **optional**. The repo does **not** install the Nix daemon.
 
 ---
 
+### Install Guide
+
+See [docs/INSTALL.md](docs/INSTALL.md) for prerequisites, supported platforms, and the full install flow.
+
+### Tools Catalog
+
+See [docs/TOOLS.md](docs/TOOLS.md) for the list of included tools and alias conventions.
+
 ## How‑to Guides
 
 ### Add a new alias
@@ -271,11 +281,11 @@ git push
 
 ```mermaid
 flowchart LR
-  A[install.sh] --> B[Chezmoi]
-  B --> C[~/.dotfiles (source)]
-  B --> D[~/.config + ~/.local (targets)]
-  E[dot CLI] --> B
-  E --> F[scripts/*]
+  A["install.sh"] --> B["Chezmoi"]
+  B --> C["~/.dotfiles (source)"]
+  B --> D["~/.config + ~/.local (targets)"]
+  E["dot CLI"] --> B
+  E --> F["scripts/*"]
 ```
 
 If Mermaid does not render, the flow is: `install.sh → Chezmoi → ~/.dotfiles → ~/.config + ~/.local`.
