@@ -108,8 +108,7 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v14
 
-      - name: Enable Nix Cache
-        uses: DeterminateSystems/magic-nix-cache-action@v7
+      # Magic cache requires FlakeHub auth; disable by default to avoid noisy failures.
 
       - name: Flake Check
         run: nix flake check ./nix
