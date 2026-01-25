@@ -336,6 +336,12 @@ case "$COMMAND" in
             echo "Updating Neovim plugins..."
             nvim --headless "+Lazy! sync" +qa || true
         fi
+        if [ "${DOTFILES_FONTS:-}" = "1" ]; then
+            if [ -f "$SRC_DIR/scripts/fonts/install-nerd-fonts.sh" ]; then
+                echo "Installing Nerd Fonts..."
+                sh "$SRC_DIR/scripts/fonts/install-nerd-fonts.sh"
+            fi
+        fi
         ;;
     edit)
         SRC_DIR="$(resolve_source_dir)"
