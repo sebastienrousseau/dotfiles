@@ -287,6 +287,11 @@ Installs Nerd Fonts and refreshes the font cache on Linux.
 
 Populate `~/.config/flatpak/flatpak.list` and re-run `chezmoi apply`.
 
+### Containers (Docker/Podman)
+
+Docker config template is managed at `~/.config/docker/config.json`.
+Podman defaults are managed at `~/.config/containers/containers.conf`.
+
 ### Secrets
 
 ```bash

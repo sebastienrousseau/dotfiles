@@ -153,6 +153,7 @@ if command -v apt-get >/dev/null; then
     yq
     hyperfine
     age
+    podman
   )
   $sudo_cmd apt-get install -y "${packages[@]}"
 fi
