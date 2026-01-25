@@ -24,8 +24,8 @@ return {
       -- 2. Setup mason-lspconfig with handlers (prevents automatic_enable errors)
       require("mason-lspconfig").setup({
         ensure_installed = { "bashls", "lua_ls", "basedpyright", "ruff" },
-        automatic_installation = false, -- Disable automatic installation to prevent errors
-        automatic_setup = false, -- CRITICAL: Disable automatic_enable feature that causes errors
+        automatic_installation = true,
+        automatic_setup = false, -- Disable automatic_enable feature that causes errors
         handlers = {
           -- Default handler for all servers
           function(server_name)
@@ -127,6 +127,10 @@ return {
       local cmp = require("cmp")
       local luasnip = require("luasnip")
       local lspkind = require("lspkind")
+
+      require("luasnip.loaders.from_lua").lazy_load({
+        paths = { vim.fn.stdpath("config") .. "/snippets" },
+      })
 
       cmp.setup({
         snippet = {

@@ -13,7 +13,7 @@ return {
       end
       
       ts_config.setup({
-        ensure_installed = { "python", "markdown", "json", "toml", "yaml", "bash", "vim", "regex", "lua", "rust", "dockerfile" },
+        ensure_installed = { "python", "go", "markdown", "json", "toml", "yaml", "bash", "vim", "regex", "lua", "rust", "dockerfile" },
         highlight = { enable = true },
         indent = { enable = true },
       })
@@ -94,6 +94,16 @@ return {
     end,
   },
 
+  -- Debugging (DAP + Go)
+  {
+    "leoluz/nvim-dap-go",
+    ft = { "go" },
+    dependencies = { "mfussenegger/nvim-dap" },
+    config = function()
+      require("dap-go").setup()
+    end,
+  },
+
   -- Linting (Nvim-Lint)
   {
     "mfussenegger/nvim-lint",
@@ -145,7 +155,8 @@ return {
            find_files = { hidden = true },
          },
        })
-       pcall(telescope.load_extension, "fzf") 
+       pcall(telescope.load_extension, "fzf")
+       pcall(telescope.load_extension, "git_worktree")
     end
   },
   { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },

@@ -1,3 +1,23 @@
+{{- $theme := default "catppuccin-mocha" .theme -}}
+{{- $status_bg := "#2D1681" -}}
+{{- $status_fg := "#FFFFFF" -}}
+{{- $accent_blue := "#007ACC" -}}
+{{- $accent_red := "#EB0000" -}}
+{{- $panel_bg := "#14222A" -}}
+{{- if eq $theme "catppuccin-mocha" -}}
+{{- $status_bg = "#1e1e2e" -}}
+{{- $status_fg = "#cdd6f4" -}}
+{{- $accent_blue = "#89b4fa" -}}
+{{- $accent_red = "#f38ba8" -}}
+{{- $panel_bg = "#181825" -}}
+{{- else if eq $theme "catppuccin-latte" -}}
+{{- $status_bg = "#eff1f5" -}}
+{{- $status_fg = "#4c4f69" -}}
+{{- $accent_blue = "#1e66f5" -}}
+{{- $accent_red = "#d20f39" -}}
+{{- $panel_bg = "#e6e9ef" -}}
+{{- end }}
+
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  TMUX CONFIGURATION (Universal)                                          ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
@@ -46,6 +66,8 @@ bind R command-prompt -p "Rename window:" "rename-window '%%'"
 bind X confirm-before -p "kill-window #W? (y/n)" kill-window
 
 # Splits (Current Path)
+bind % split-window -h -c "#{pane_current_path}"
+bind '"' split-window -v -c "#{pane_current_path}"
 bind '\' split-window -v -c "#{pane_current_path}"
 bind | split-window -h -c "#{pane_current_path}"
 bind - split-window -v
@@ -76,23 +98,23 @@ bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 
 # --- THEME & STATUS BAR ---
 
-set -g status-bg "#2D1681"
-set -g status-fg "#FFFFFF"
+set -g status-bg "{{ $status_bg }}"
+set -g status-fg "{{ $status_fg }}"
 set -g status-interval 5
 set -g status-justify centre
 set -g status-left-length 50
 set -g status-right-length 50
 
 # OS-Specific Status Left
-if-shell 'uname | grep -q Darwin' 'set -g status-left "#[bg=#007ACC] 🍎 macOS #S #[bg=#EB0000] #W #[bg=#14222A]"'
-if-shell 'uname | grep -q Linux' 'set -g status-left "#[bg=#007ACC] 🐧 Linux #S #[bg=#EB0000] #W #[bg=#14222A]"'
-if-shell 'uname | grep -q MINGW' 'set -g status-left "#[bg=#007ACC] 🪟 Windows #S #[bg=#EB0000] #W #[bg=#14222A]"'
+if-shell 'uname | grep -q Darwin' 'set -g status-left "#[bg={{ $accent_blue }}] 🍎 macOS #S #[bg={{ $accent_red }}] #W #[bg={{ $panel_bg }}]"'
+if-shell 'uname | grep -q Linux' 'set -g status-left "#[bg={{ $accent_blue }}] 🐧 Linux #S #[bg={{ $accent_red }}] #W #[bg={{ $panel_bg }}]"'
+if-shell 'uname | grep -q MINGW' 'set -g status-left "#[bg={{ $accent_blue }}] 🪟 Windows #S #[bg={{ $accent_red }}] #W #[bg={{ $panel_bg }}]"'
 
-set -g status-right "#[fg=#FFFFFF] #[bg=#14222A] ⬛ #I #[bg=#007ACC] #H #[bg=#EB0000] %_d %B %I:%M%p "
-set -g window-status-current-format "#[bg=#2D1681]Dotfiles (v0.2.472)"
-set -g window-status-current-style "bg=#EB0000"
+set -g status-right "#[fg={{ $status_fg }}] #[bg={{ $panel_bg }}] ⬛ #I #[bg={{ $accent_blue }}] #H #[bg={{ $accent_red }}] %_d %B %I:%M%p "
+set -g window-status-current-format "#[bg={{ $status_bg }}]Dotfiles (v0.2.473)"
+set -g window-status-current-style "bg={{ $accent_red }}"
 set -g window-status-separator ""
-set-window-option -g clock-mode-colour "#FFFFFF"
+set-window-option -g clock-mode-colour "{{ $status_fg }}"
 set-window-option -g clock-mode-style 24
 
 # --- LINUX SPECIFIC ---

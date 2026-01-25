@@ -92,6 +92,11 @@ if command -v git &>/dev/null; then
   alias gpoll='git push origin --all'
   alias gpull='git pull'
   alias gpush='git push'
+
+  # TUI Git
+  if command -v lazygit &>/dev/null; then
+    alias lg='lazygit'
+  fi
   
   alias gr='git remote'
   alias gra='git remote add'

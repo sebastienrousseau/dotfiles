@@ -26,11 +26,18 @@ analyze_last_error() {
     # We call it directly from the path or rely on PATH if configured
     if [[ -f "${HOME}/.local/bin/ai_core" ]]; then
          "${HOME}/.local/bin/ai_core" query "$prompt"
-    elif [[ -f "${HOME}/.local/share/chezmoi/dot_local/bin/ai_core" ]]; then
-         # Fallback for dev/testing location before chezmoi apply
-         "${HOME}/.local/share/chezmoi/dot_local/bin/ai_core" query "$prompt"
     else
-         echo "Error: ai_core wrapper not found."
+         local source_dir="${CHEZMOI_SOURCE_DIR:-${HOME}/.dotfiles}"
+         if [[ ! -d "$source_dir" && -d "${HOME}/.local/share/chezmoi" ]]; then
+             source_dir="${HOME}/.local/share/chezmoi"
+         fi
+
+         if [[ -f "${source_dir}/dot_local/bin/ai_core" ]]; then
+             # Fallback for dev/testing location before chezmoi apply
+             "${source_dir}/dot_local/bin/ai_core" query "$prompt"
+         else
+             echo "Error: ai_core wrapper not found."
+         fi
     fi
 }
 

@@ -1,0 +1,517 @@
+{{- $theme := default "tokyonight-night" .theme -}}
+{{- $fontFamily := default "JetBrains Mono" .terminal_font_family -}}
+{{- $fontSize := default 12 .terminal_font_size -}}
+
+font_family {{ $fontFamily }}
+font_size {{ $fontSize }}
+
+window_padding_width 16
+background_opacity 0.9
+
+{{- if eq $theme "tokyonight-night" }}
+background #1a1b26
+foreground #c0caf5
+selection_background #414868
+selection_foreground #c0caf5
+cursor #c0caf5
+
+color0  #15161e
+color1  #f7768e
+color2  #9ece6a
+color3  #e0af68
+color4  #7aa2f7
+color5  #bb9af7
+color6  #7dcfff
+color7  #a9b1d6
+color8  #414868
+color9  #ff899d
+color10 #9fe044
+color11 #faba4a
+color12 #8db0ff
+color13 #c7a9ff
+color14 #a4daff
+color15 #c0caf5
+{{- else if eq $theme "tokyonight-storm" }}
+background #24283b
+foreground #c0caf5
+selection_background #414868
+selection_foreground #c0caf5
+cursor #c0caf5
+
+color0  #1d202f
+color1  #f7768e
+color2  #9ece6a
+color3  #e0af68
+color4  #7aa2f7
+color5  #bb9af7
+color6  #7dcfff
+color7  #a9b1d6
+color8  #414868
+color9  #ff899d
+color10 #9fe044
+color11 #faba4a
+color12 #8db0ff
+color13 #c7a9ff
+color14 #a4daff
+color15 #c0caf5
+{{- else if eq $theme "tokyonight-moon" }}
+background #222436
+foreground #c8d3f5
+selection_background #444a73
+selection_foreground #c8d3f5
+cursor #c8d3f5
+
+color0  #1b1d2b
+color1  #ff757f
+color2  #c3e88d
+color3  #ffc777
+color4  #82aaff
+color5  #c099ff
+color6  #86e1fc
+color7  #828bb8
+color8  #444a73
+color9  #ff8d94
+color10 #c7fb6d
+color11 #ffd8ab
+color12 #9ab8ff
+color13 #caabff
+color14 #b2ebff
+color15 #c8d3f5
+{{- else if eq $theme "tokyonight-day" }}
+background #e1e2e7
+foreground #3760bf
+selection_background #a1a6c5
+selection_foreground #3760bf
+cursor #3760bf
+
+color0  #b4b5b9
+color1  #f52a65
+color2  #587539
+color3  #8c6c3e
+color4  #2e7de9
+color5  #9854f1
+color6  #007197
+color7  #6172b0
+color8  #a1a6c5
+color9  #ff4774
+color10 #5c8524
+color11 #a27629
+color12 #358aff
+color13 #a463ff
+color14 #007ea8
+color15 #3760bf
+{{- else if eq $theme "dracula" }}
+background #282a36
+foreground #f8f8f2
+selection_background #6272a4
+selection_foreground #f8f8f2
+cursor #f8f8f2
+
+color0  #21222c
+color1  #ff5555
+color2  #50fa7b
+color3  #f1fa8c
+color4  #bd93f9
+color5  #ff79c6
+color6  #8be9fd
+color7  #f8f8f2
+color8  #6272a4
+color9  #ff6e6e
+color10 #69ff94
+color11 #ffffa5
+color12 #d6acff
+color13 #ff92df
+color14 #a4ffff
+color15 #ffffff
+{{- else if eq $theme "gruvbox-dark" }}
+background #282828
+foreground #d5c4a1
+selection_background #665c54
+selection_foreground #d5c4a1
+cursor #d5c4a1
+
+color0  #282828
+color1  #fb4934
+color2  #b8bb26
+color3  #fabd2f
+color4  #83a598
+color5  #d3869b
+color6  #8ec07c
+color7  #d5c4a1
+color8  #665c54
+color9  #fb4934
+color10 #b8bb26
+color11 #fabd2f
+color12 #83a598
+color13 #d3869b
+color14 #8ec07c
+color15 #fbf1c7
+{{- else if eq $theme "gruvbox-light" }}
+background #fbf1c7
+foreground #504945
+selection_background #bdae93
+selection_foreground #504945
+cursor #504945
+
+color0  #fbf1c7
+color1  #9d0006
+color2  #79740e
+color3  #b57614
+color4  #076678
+color5  #8f3f71
+color6  #427b58
+color7  #504945
+color8  #bdae93
+color9  #9d0006
+color10 #79740e
+color11 #b57614
+color12 #076678
+color13 #8f3f71
+color14 #427b58
+color15 #282828
+{{- else if eq $theme "nord" }}
+background #2e3440
+foreground #d8dee9
+selection_background #4c566a
+selection_foreground #d8dee9
+cursor #d8dee9
+
+color0  #3b4252
+color1  #bf616a
+color2  #a3be8c
+color3  #ebcb8b
+color4  #81a1c1
+color5  #b48ead
+color6  #88c0d0
+color7  #e5e9f0
+color8  #4c566a
+color9  #bf616a
+color10 #a3be8c
+color11 #ebcb8b
+color12 #81a1c1
+color13 #b48ead
+color14 #8fbcbb
+color15 #eceff4
+{{- else if eq $theme "onedark" }}
+background #282c34
+foreground #abb2bf
+selection_background #545862
+selection_foreground #abb2bf
+cursor #abb2bf
+
+color0  #282c34
+color1  #e06c75
+color2  #98c379
+color3  #e5c07b
+color4  #61afef
+color5  #c678dd
+color6  #56b6c2
+color7  #abb2bf
+color8  #545862
+color9  #e06c75
+color10 #98c379
+color11 #e5c07b
+color12 #61afef
+color13 #c678dd
+color14 #56b6c2
+color15 #c8ccd4
+{{- else if eq $theme "onelight" }}
+background #fafafa
+foreground #383a42
+selection_background #a0a1a7
+selection_foreground #383a42
+cursor #383a42
+
+color0  #fafafa
+color1  #ca1243
+color2  #50a14f
+color3  #c18401
+color4  #4078f2
+color5  #a626a4
+color6  #0184bc
+color7  #383a42
+color8  #a0a1a7
+color9  #ca1243
+color10 #50a14f
+color11 #c18401
+color12 #4078f2
+color13 #a626a4
+color14 #0184bc
+color15 #090a0b
+{{- else if eq $theme "solarized-dark" }}
+background #002b36
+foreground #93a1a1
+selection_background #657b83
+selection_foreground #93a1a1
+cursor #93a1a1
+
+color0  #002b36
+color1  #dc322f
+color2  #859900
+color3  #b58900
+color4  #268bd2
+color5  #6c71c4
+color6  #2aa198
+color7  #93a1a1
+color8  #657b83
+color9  #dc322f
+color10 #859900
+color11 #b58900
+color12 #268bd2
+color13 #6c71c4
+color14 #2aa198
+color15 #fdf6e3
+{{- else if eq $theme "solarized-light" }}
+background #fdf6e3
+foreground #586e75
+selection_background #839496
+selection_foreground #586e75
+cursor #586e75
+
+color0  #fdf6e3
+color1  #dc322f
+color2  #859900
+color3  #b58900
+color4  #268bd2
+color5  #6c71c4
+color6  #2aa198
+color7  #586e75
+color8  #839496
+color9  #dc322f
+color10 #859900
+color11 #b58900
+color12 #268bd2
+color13 #6c71c4
+color14 #2aa198
+color15 #002b36
+{{- else if eq $theme "rose-pine" }}
+background #191724
+foreground #e0def4
+selection_background #2a273f
+selection_foreground #e0def4
+cursor #e0def4
+
+color0  #26233a
+color1  #eb6f92
+color2  #9ccfd8
+color3  #f6c177
+color4  #31748f
+color5  #c4a7e7
+color6  #9ccfd8
+color7  #e0def4
+color8  #6e6a86
+color9  #eb6f92
+color10 #9ccfd8
+color11 #f6c177
+color12 #31748f
+color13 #c4a7e7
+color14 #9ccfd8
+color15 #e0def4
+{{- else if eq $theme "rose-pine-dawn" }}
+background #faf4ed
+foreground #575279
+selection_background #f2e9e1
+selection_foreground #575279
+cursor #575279
+
+color0  #f2e9e1
+color1  #b4637a
+color2  #286983
+color3  #ea9d34
+color4  #56949f
+color5  #907aa9
+color6  #d7827e
+color7  #575279
+color8  #9893a5
+color9  #b4637a
+color10 #286983
+color11 #ea9d34
+color12 #56949f
+color13 #907aa9
+color14 #d7827e
+color15 #575279
+{{- else if eq $theme "rose-pine-moon" }}
+background #232136
+foreground #e0def4
+selection_background #393552
+selection_foreground #e0def4
+cursor #e0def4
+
+color0  #393552
+color1  #eb6f92
+color2  #9ccfd8
+color3  #f6c177
+color4  #3e8fb0
+color5  #c4a7e7
+color6  #9ccfd8
+color7  #e0def4
+color8  #6e6a86
+color9  #eb6f92
+color10 #9ccfd8
+color11 #f6c177
+color12 #3e8fb0
+color13 #c4a7e7
+color14 #9ccfd8
+color15 #e0def4
+{{- else if eq $theme "everforest-dark" }}
+background #2f383e
+foreground #d3c6aa
+selection_background #3c474d
+selection_foreground #d3c6aa
+cursor #d3c6aa
+
+color0  #4b565c
+color1  #e67e80
+color2  #a7c080
+color3  #dbbc7f
+color4  #7fbbb3
+color5  #d699b6
+color6  #83c092
+color7  #d3c6aa
+color8  #4b565c
+color9  #e67e80
+color10 #a7c080
+color11 #dbbc7f
+color12 #7fbbb3
+color13 #d699b6
+color14 #83c092
+color15 #d3c6aa
+{{- else if eq $theme "everforest-light" }}
+background #fdf6e3
+foreground #5c6a72
+selection_background #e6e2cc
+selection_foreground #5c6a72
+cursor #5c6a72
+
+color0  #829181
+color1  #f85552
+color2  #8da101
+color3  #dfa000
+color4  #3a94c5
+color5  #df69ba
+color6  #35a77c
+color7  #5c6a72
+color8  #829181
+color9  #f85552
+color10 #8da101
+color11 #dfa000
+color12 #3a94c5
+color13 #df69ba
+color14 #35a77c
+color15 #5c6a72
+{{- else if eq $theme "kanagawa-wave" }}
+background #1f1f28
+foreground #dcd7ba
+selection_background #2d4f67
+selection_foreground #dcd7ba
+cursor #dcd7ba
+
+color0  #1f1f28
+color1  #c34043
+color2  #76946a
+color3  #c0a36e
+color4  #7e9cd8
+color5  #957fb8
+color6  #6a9589
+color7  #dcd7ba
+color8  #2a2a37
+color9  #c34043
+color10 #76946a
+color11 #c0a36e
+color12 #7e9cd8
+color13 #957fb8
+color14 #6a9589
+color15 #dcd7ba
+{{- else if eq $theme "kanagawa-dragon" }}
+background #181616
+foreground #c8c093
+selection_background #223249
+selection_foreground #c8c093
+cursor #c8c093
+
+color0  #181616
+color1  #c4746e
+color2  #87a987
+color3  #c4b28a
+color4  #8ba4b0
+color5  #a292a3
+color6  #8ea4a2
+color7  #c8c093
+color8  #393836
+color9  #c4746e
+color10 #87a987
+color11 #c4b28a
+color12 #8ba4b0
+color13 #a292a3
+color14 #8ea4a2
+color15 #c8c093
+{{- else if eq $theme "kanagawa-lotus" }}
+background #f2ecbc
+foreground #545464
+selection_background #e2e0d1
+selection_foreground #545464
+cursor #545464
+
+color0  #e2e0d1
+color1  #c84053
+color2  #6f894e
+color3  #77713f
+color4  #4d699b
+color5  #b35b79
+color6  #597b75
+color7  #545464
+color8  #9f9997
+color9  #c84053
+color10 #6f894e
+color11 #77713f
+color12 #4d699b
+color13 #b35b79
+color14 #597b75
+color15 #545464
+{{- else if eq $theme "catppuccin-latte" }}
+background #eff1f5
+foreground #4c4f69
+selection_background #6c6f85
+selection_foreground #4c4f69
+cursor #4c4f69
+
+color0  #5c5f77
+color1  #d20f39
+color2  #40a02b
+color3  #df8e1d
+color4  #1e66f5
+color5  #ea76cb
+color6  #179299
+color7  #acb0be
+color8  #6c6f85
+color9  #d20f39
+color10 #40a02b
+color11 #df8e1d
+color12 #1e66f5
+color13 #ea76cb
+color14 #179299
+color15 #bcc0cc
+{{- else }}
+background #1e1e2e
+foreground #cdd6f4
+selection_background #585b70
+selection_foreground #cdd6f4
+cursor #cdd6f4
+
+color0  #45475a
+color1  #f38ba8
+color2  #a6e3a1
+color3  #f9e2af
+color4  #89b4fa
+color5  #f5c2e7
+color6  #94e2d5
+color7  #bac2de
+color8  #585b70
+color9  #f38ba8
+color10 #a6e3a1
+color11 #f9e2af
+color12 #89b4fa
+color13 #f5c2e7
+color14 #94e2d5
+color15 #a6adc8
+{{- end }}

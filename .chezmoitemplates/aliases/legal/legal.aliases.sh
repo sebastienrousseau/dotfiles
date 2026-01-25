@@ -16,7 +16,11 @@ fi
 if command -v trivy &>/dev/null; then
   alias scan-licenses='trivy fs . --scanners license'
 else
-  alias scan-licenses='echo "trivy not found. Installing via homebrew..." && brew install trivy && trivy fs . --scanners license'
+  if [ "$(uname -s)" = "Darwin" ] && command -v brew >/dev/null; then
+    alias scan-licenses='echo "trivy not found. Installing via homebrew..." && brew install trivy && trivy fs . --scanners license'
+  else
+    alias scan-licenses='echo "trivy not found. Install trivy to use scan-licenses."'
+  fi
 fi
 
 # -----------------------------------------------------------------------------

@@ -1,0 +1,26 @@
+# Dotfiles Sandbox (Laptop-safe preview)
+# Build: docker build -f tests/Dockerfile.sandbox -t dotfiles-sandbox .
+# Run:   docker run --rm -it dotfiles-sandbox
+
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV HOME=/root
+
+RUN apt-get update && \
+    apt-get install -y git curl zsh build-essential ripgrep fd-find bat jq && \
+    apt-get clean
+
+RUN mkdir -p "$HOME/.local/bin" && \
+    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+ENV PATH="$HOME/.local/bin:$PATH"
+
+COPY . "$HOME/.dotfiles"
+
+RUN mkdir -p "$HOME/.config/chezmoi" && \
+    printf 'sourceDir = "%s"\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml"
+
+# Skip provisioning scripts inside sandbox
+RUN chezmoi apply --exclude=scripts
+
+CMD ["zsh"]

@@ -151,6 +151,10 @@ if command -v apt-get >/dev/null; then
     bat
     jq
     yq
+    hyperfine
+    fastfetch
+    age
+    podman
   )
   $sudo_cmd apt-get install -y "${packages[@]}"
 fi

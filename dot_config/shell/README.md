@@ -26,7 +26,7 @@ Welcome to your universally compatible, high-performance dotfiles configuration,
 To install these dotfiles on a new machine, simply run:
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.472/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.473/install.sh)"
 ```
 
 This command will:
@@ -41,17 +41,24 @@ This command will:
 
 ### macOS
 Updates are handled via [Homebrew](https://brew.sh/).
-1. Edit `~/.local/share/chezmoi/dot_config/shell/Brewfile`.
+1. Edit `~/.dotfiles/dot_config/shell/Brewfile.cli` and `~/.dotfiles/dot_config/shell/Brewfile.cask`.
 2. Run `chezmoi apply`.
-   - This triggers `run_onchange_darwin_install-packages.sh.tmpl`, which runs `brew bundle`.
+   - This triggers `run_onchange_darwin_install-packages.sh.tmpl`, which runs `brew bundle` for CLI and GUI packages.
+   - Optional: `mas` installs App Store apps from `~/.config/mas/masapps.txt`.
+   - Optional: `duti` applies default app bindings from `~/.config/duti/defaults.duti`.
+
+### VS Code Extensions
+1. Edit `~/.config/vscode/extensions.txt`.
+2. Run `chezmoi apply` to install missing extensions (if `code` is available).
 
 ### Linux & WSL
 Updates are handled via `apt-get` (Ubuntu/Debian).
 1. Run `chezmoi apply`.
    - This checks for package updates defined in `run_onchange_linux_install-packages.sh.tmpl`.
+   - Optional Flatpak list is read from `~/.config/flatpak/flatpak.list`.
 
 ### Vim Plugins
-1. Edit `~/.local/share/chezmoi/dot_vimrc`.
+1. Edit `~/.dotfiles/dot_vimrc`.
 2. Run `chezmoi apply`.
    - This automatically runs `vim +PlugInstall +PlugClean +qa`.
 
@@ -69,13 +76,14 @@ If you are migrating from an old `~/.dotfiles` setup:
 
 2. **Initialize Chezmoi**:
    ```bash
-   chezmoi init --apply sebastienrousseau
+   git clone https://github.com/sebastienrousseau/dotfiles.git ~/.dotfiles
+   chezmoi apply
    ```
 
 3. **Verify**:
    - Restart your shell.
    - Check that `~/.config/shell` exists (this is where the *generated* scripts live).
-   - Check that `~/.local/share/chezmoi` exists (this is the *source*).
+   - Check that `~/.dotfiles` exists (this is the *source*).
 
 4. **Clean Up**:
    - Once verified, you can safely delete `~/.dotfiles.legacy` and `.zshrc.bak`.
@@ -84,10 +92,10 @@ If you are migrating from an old `~/.dotfiles` setup:
 
 ## 📂 Structure
 
-The configuration is managed in `~/.local/share/chezmoi`.
+The configuration is managed in `~/.dotfiles`.
 
 ```
-~/.local/share/chezmoi/
+~/.dotfiles/
 ├── dot_zshrc.tmpl          # Main Zsh configuration (template)
 ├── dot_vimrc               # Vim configuration
 ├── dot_tmux.conf           # Tmux configuration
@@ -107,7 +115,7 @@ The configuration is managed in `~/.local/share/chezmoi`.
 ## 🛠 Usage
 
 ### Applying Changes
-After editing any file in `~/.local/share/chezmoi`, apply the changes to your home directory:
+After editing any file in `~/.dotfiles`, apply the changes to your home directory:
 
 ```bash
 chezmoi apply
@@ -119,8 +127,117 @@ To see what will change before applying:
 chezmoi diff
 ```
 
+### Dot CLI
+
+```bash
+dot sync      # Apply dotfiles (chezmoi apply)
+dot update    # Pull latest changes and apply
+dot tools     # Show dot utils
+dot keys      # Show keybindings
+dot tune      # Apply OS tuning (opt-in)
+dot secrets   # Edit encrypted secrets (age)
+dot upgrade   # Update flake, plugins, and dotfiles
+dot new       # Scaffold a project template (python/go/node)
+dot log-rotate # Rotate ~/.local/share/dotfiles.log
+dot
+dot
+dot doctor
+dot sandbox
+dot benchmark
+dot theme
+dot wallpaper
+dot ssh-key
+dot secrets-create
+dot fonts
+dot firewall
+dot telemetry
+dot dns-doh
+dot encrypt-check
+dot backup
+dot lock-screen
+dot usb-safety
+dot secrets-init
+dot edit
+dot docs
+dot learn
+dot help```
+
+### Optional Nix Toolchain
+
+```bash
+cd ~/.dotfiles
+nix develop
+```
+
+### Secrets (age)
+
+```bash
+dot secrets-init
+dot secrets
+```
+
+### Personal Details (Git)
+
+Set your Git identity in the local `chezmoi` config (not committed):
+
+```bash
+chezmoi init --apply --promptDefaults
+```
+
+Or edit directly:
+
+```bash
+${EDITOR:-nano} ~/.config/chezmoi/chezmoi.toml
+```
+
+Fields:
+- `git_name`
+- `git_email`
+- `git_signingkey`
+- `git_signingformat`
+
+### Theme
+
+Set the theme in `.chezmoidata.toml`:
+
+```toml
+theme = "tokyonight-night"
+terminal_font_family = "JetBrains Mono"
+terminal_font_size = 12
+```
+
+Available themes:
+- `tokyonight-night` (best dark default)
+- `tokyonight-day` (best light default)
+- `tokyonight-storm`
+- `tokyonight-moon`
+- `dracula`
+- `gruvbox-dark`
+- `gruvbox-light`
+- `nord`
+- `onedark`
+- `onelight`
+- `solarized-dark`
+- `solarized-light`
+- `catppuccin-mocha`
+- `catppuccin-latte`
+- `rose-pine`
+- `rose-pine-moon`
+- `rose-pine-dawn`
+- `everforest-dark`
+- `everforest-light`
+- `kanagawa-wave`
+- `kanagawa-dragon`
+- `kanagawa-lotus`
+
+### DevContainer / Codespaces
+
+```
+.devcontainer/devcontainer.json
+```
+
 ### Adding New Aliases
-1. Navigate to `~/.local/share/chezmoi/.chezmoitemplates/aliases/`.
+1. Navigate to `~/.dotfiles/.chezmoitemplates/aliases/`.
 2. Create a new file (e.g., `mytool/mytool.aliases.sh`) or edit an existing one.
 3. Add your aliases.
 4. Run `chezmoi apply`.
@@ -128,7 +245,7 @@ chezmoi diff
 **Note:** Files in `macOS/` are only included on macOS systems.
 
 ### Adding New Functions
-1. Navigate to `~/.local/share/chezmoi/.chezmoitemplates/functions/`.
+1. Navigate to `~/.dotfiles/.chezmoitemplates/functions/`.
 2. Create a new `.sh` file.
 3. Define your function with a usage comment.
 4. Run `chezmoi apply`.

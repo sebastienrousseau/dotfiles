@@ -43,3 +43,70 @@ jobs:
 
       - name: Verify Config (Dry Run)
         run: chezmoi apply --verbose --dry-run
+
+  benchmark:
+    name: Shell Startup Benchmark (Ubuntu)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y zsh hyperfine
+
+      - name: Install Chezmoi
+        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
+
+      - name: Add to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Configure Chezmoi source
+        run: |
+          mkdir -p "$HOME/.config/chezmoi"
+          printf 'sourceDir = "%s"\n' "$GITHUB_WORKSPACE" > "$HOME/.config/chezmoi/chezmoi.toml"
+
+      - name: Apply dotfiles (no scripts)
+        run: chezmoi apply --exclude=scripts
+
+      - name: Benchmark (max 500ms)
+        run: DOTFILES_BENCH_MAX_MS=500 bash ./scripts/tests/benchmark.sh
+
+  shellcheck:
+    name: Shellcheck (Ubuntu)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck + ripgrep
+        run: sudo apt-get update && sudo apt-get install -y shellcheck ripgrep
+
+      - name: Run shellcheck
+        run: |
+          files=$(rg --files -g "*.sh")
+          if [ -n "$files" ]; then
+            echo "$files" | xargs shellcheck -x
+          fi
+
+  nix-check:
+    name: Nix Flake Check (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+
+      - name: Flake Check
+        run: nix flake check ./nix

@@ -1,283 +1,341 @@
-<!-- markdownlint-disable MD033 MD041 MD043 -->
+<p align="right">
+  <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg" alt="Dotfiles logo" width="64" />
+</p>
 
-<img
-  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
-  alt="dotfiles logo"
-  width="66"
-  align="right"
-/>
+# Dotfiles — a fast, idempotent shell environment distribution in minutes
 
-<!-- markdownlint-enable MD033 MD041 -->
+[![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions) [![Version](https://img.shields.io/badge/Version-v0.2.473-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.473) [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE) [![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases) [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
 
-# Dotfiles (v0.2.472)
+---
 
-Simply designed to fit your shell life 🐚
+## Elevator Pitch
 
-<!-- markdownlint-disable MD033 MD041 MD043 -->
-<center>
-<!-- markdownlint-enable MD033 MD041 -->
+Dotfiles is a cross-platform shell environment distribution managed by [Chezmoi](https://github.com/twpayne/chezmoi) that installs in minutes and keeps your development environment consistent across macOS, Linux, and WSL. It is **idempotent** by design: running it multiple times is safe, predictable, and produces the same result.
 
-![Dotfiles banner][banner]
+Git + templates + guarded scripts = a reproducible shell.
 
-[![Codacy][codacy-grade]][06]
-[![Contributors][contributors-shield]][14]
-[![Forks][forks-shield]][13]
-[![License][license]][02]
-[![Love][love]][00]
+---
 
-• [Website][00] • [Documentation][16]
-• [Report Bug][17] • [Request Feature][17]
-• [Contributing Guidelines][05]
+## Table of Contents
 
-<!-- markdownlint-disable MD033 MD041 MD043 -->
-</center>
-<!-- markdownlint-enable MD033 MD041 -->
+- [Why Dotfiles?](#why-dotfiles)
+- [Safety Guarantees](#safety-guarantees)
+- [Quick Start (60 seconds)](#quick-start-60-seconds)
+- [Documentation](#documentation)
+- [Installation Details](#installation-details)
+- [How-to Guides](#how-to-guides)
+- [Reference](#reference)
+- [Architecture (How it Works)](#architecture-how-it-works)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [Changelog](#changelog)
+- [License](#license)
 
-![divider][divider]
+---
 
-## Overview 📖
+## Why Dotfiles?
 
-Dotfiles v0.2.472 transforms your shell into a **Trusted Platform**. It is a curated, high-performance distribution of configurations, managed by `chezmoi`.
+Dotfiles takes an infrastructure-oriented approach to managing dotfiles. It is designed for developers who manage multiple machines and value **daily usability, reproducibility, and auditability.**
 
-This project aims to provide a reproducible and optimized development environment for macOS, Linux, and Windows (via WSL).
+- **The Stack:** Zsh, Neovim, and tmux with sane defaults.
+- **Unified Control:** The `dot` CLI wraps common workflows such as syncing, upgrading, and managing secrets.
+- **Safety First:** Explicit opt-in for any system or security changes.
+- **Clean Slate:** Clear separation between source files, generated configs, and system state.
 
-<!-- markdownlint-disable MD033 MD041 MD043 -->
-<br>
-<center>
-<!-- markdownlint-enable MD033 MD041 -->
+## Safety Guarantees
 
-[![Getting Started][getting_started]][getting-started-url]
-[![Download Dotfiles v0.2.472][download_button]][12]
+This is **infrastructure**, not an ad-hoc shell script.
 
-<!-- markdownlint-disable MD033 MD041 MD043 -->
-</center>
-<br />
-<!-- markdownlint-enable MD033 MD041 -->
+- No destructive actions without explicit opt-in.
+- No background daemons installed automatically.
+- No system settings are changed by default.
+- Any system-level behavior must be explicitly enabled via environment variables.
+- All privileged actions are logged locally to `~/.local/share/dotfiles.log`.
 
-## Features ✨
+---
 
-- **Shell:**
-    - **`zsh`** configuration with a rich set of plugins managed by **`zinit`** (recommended default shell).
-    - **`starship`** for a modern, fast, and customizable prompt.
-    - **`fzf`** for fuzzy finding files, commands, and more.
-    - **`zoxide`** for a smarter `cd` command that remembers your frequently used directories.
-    - **`atuin`** for a powerful shell history with synchronization and search capabilities.
-- **Terminal:**
-    - **`zellij`** as a terminal workspace and multiplexer (manual install on Linux).
-    - **`ghostty`** as a fast, GPU-accelerated terminal emulator (manual install on Linux).
-- **Development:**
-    - **Neovim (Nightly)** as the primary text editor, with a modern Lua-based configuration using `lazy.nvim`.
-    - **Go**, **Rust**, and **Python** development environments supported (Go/Rust require manual install on Linux; macOS via Brewfile).
-    - A comprehensive set of LSPs, linters, and formatters managed by `mason.nvim`.
-- **CLI Tools:**
-    - Modern replacements for core Unix utilities: `eza` (ls), `bat` (cat), `fd` (find), `ripgrep` (grep).
-    - **`lazygit`** and **`delta`** for an enhanced Git experience.
-    - A rich set of other CLI tools for networking, system monitoring, and more.
-- **AI Integration:**
-    - **`ollama`** for running large language models locally.
-    - **`fabric`** for augmenting humans using AI.
-- **System Tuning:**
-    - Performance tuning for the kernel and browser optimization for a better developer experience.
+## Quick Start (60 seconds)
 
-![divider][divider]
+> [!IMPORTANT]
+> The installer **only** bootstraps `chezmoi` and applies this repo. OS packages are installed via Chezmoi hooks during the first apply.
 
-## Prerequisites
-
-Before you begin, ensure you have the following dependencies installed on your system.
-
-<details>
-<summary><strong>macOS</strong></summary>
-
-The `Brewfile` in this repository is the single source of truth for all dependencies on macOS. The `install/provision/run_onchange_10-darwin-packages.sh.tmpl` script will automatically install all the necessary packages using `brew bundle`.
-
-</details>
-
-<details>
-<summary><strong>Debian / Ubuntu</strong></summary>
-
-The `install/provision/run_onchange_10-linux-packages.sh.tmpl` script will attempt to install most of the dependencies using `apt-get`, `curl`, and verified GitHub release downloads. `cargo` is required for `delta`.
+### 1. Install from a pinned release
 
 ```bash
-# Update package list and install base dependencies
-sudo apt-get update
-sudo apt-get install -y git curl zsh build-essential ripgrep fd-find bat jq yq
-
-# Install Rust to get cargo (required for delta)
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# Works on macOS, Linux, and WSL
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.473/install.sh)"
 ```
 
-The following tools will be installed by the script (Linux):
-- `starship`, `zoxide`, `fzf`, `neovim` (nightly), `lazygit`, `atuin`, `zellij`, `delta` (via cargo), `uv`.
-
-The following tools need to be installed manually (Linux):
-- `ghostty`, `yazi`, `ollama`, `fabric`, `go`, `rustup` (if not already installed).
-
-</details>
-
-<details>
-<summary><strong>Arch Linux</strong></summary>
+### 2. Restart your shell
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.472/install.sh)"
-
-# Install a Nerd Font
-sudo pacman -S ttf-fira-code
-```
-</details>
-
-<details>
-<summary><strong>Windows (WSL)</strong></summary>
-
-Follow the instructions for your chosen Linux distribution within WSL.
-</details>
-
-![divider][divider]
-
-## Getting Started 🚀
-
-### 1. One-line Installation (Recommended)
-
-This command will install `chezmoi` and apply the dotfiles. The installation script will also attempt to install all the necessary dependencies for your platform.
-
-```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.472/install.sh)"
+exec zsh
 ```
 
-### 2. Manual Installation
+> [!TIP]
+> Use `DOTFILES_NONINTERACTIVE=1` if you want a fully non‑interactive install.
 
-<details>
-<summary><strong>Manual installation steps</strong></summary>
+---
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/sebastienrousseau/dotfiles.git ~/.local/share/chezmoi
-    ```
+## Documentation
 
-2.  **Run the provisioning scripts:**
-    ```bash
-    chezmoi apply --source ~/.local/share/chezmoi
-    ```
-</details>
+- **Installation Guide**: [docs/INSTALL.md](docs/INSTALL.md)
+- **Tools Catalog**: [docs/TOOLS.md](docs/TOOLS.md)
+- **Security Audit**: [docs/SECURITY.md](docs/SECURITY.md)
+- **Architecture**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
-### Post-Installation
+---
 
-After installation, restart your terminal to apply the changes.
+## Installation Details
 
-![divider][divider]
+### Supported Platforms
 
-## Usage 📖
+- **macOS** (Homebrew)
+- **Ubuntu/Debian** (apt)
+- **WSL2** (Ubuntu/Debian)
 
-### Applying Changes
+> [!WARNING]
+> If you already have custom dotfiles, back them up first. Chezmoi is safe, but overwriting configs can still be disruptive.
 
-After editing any file in `~/.local/share/chezmoi`, run:
+### Dependencies
+
+| Type | Required | Optional (feature‑dependent) |
+|---|---|---|
+| Core | `git`, `curl` | — |
+| macOS | — | Homebrew (for Brewfile installs) |
+| Linux | — | `apt-get` (for package installs) |
+| Sandbox | — | Docker or Podman |
+| Nix toolchain | — | Nix (optional) |
+
+### What the installer does vs what Chezmoi does
+
+- **Installer**: installs Chezmoi (pinned + checksum verified) and applies this repo.
+- **Chezmoi hooks**: install OS packages, fonts, and optional apps defined in this repo.
+
+---
+
+## How-to Guides
+
+### Add a new alias
+
+1. Add a new alias file under:
+
+```
+~/.dotfiles/.chezmoitemplates/aliases/<category>/<name>.aliases.sh
+```
+
+2. Apply:
 
 ```bash
 chezmoi apply
 ```
 
-To see what will change before applying:
+### Commit changes safely
 
 ```bash
-chezmoi diff
+# Edit source files in ~/.dotfiles
+chezmoi apply
+
+# Review + commit
+cd ~/.dotfiles
+
+git status
+git add -A
+git commit -S -m "Describe your change"
+git push
 ```
 
-### Updating
+---
 
-To pull the latest changes from this repository:
+## Reference
+
+### Configuration
+
+**Chezmoi config (local, not committed)**
+
+```toml
+# ~/.config/chezmoi/chezmoi.toml
+sourceDir = "~/.dotfiles"
+
+encryption = "age" # optional
+
+[age]
+identity = "~/.config/chezmoi/key.txt"
+recipient = "age1..."
+```
+
+**Data file (template inputs)**
+
+```toml
+# ~/.dotfiles/.chezmoidata.toml
+profile = "laptop"               # laptop | server
+theme = "tokyonight-night"
+terminal_font_family = "JetBrains Mono"
+terminal_font_size = 12
+
+git_name = "Your Name"
+git_email = "you@example.com"
+git_signingkey = "~/.ssh/id_ed25519"
+git_signingformat = "ssh"
+
+[features]
+zsh = true
+nvim = true
+tmux = true
+gui = true
+secrets = true
+```
+
+### Environment Variables
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `DOTFILES_NONINTERACTIVE` | Non‑interactive install | `0` |
+| `DOTFILES_FONTS` | Install fonts during `dot upgrade` | `0` |
+| `DOTFILES_WALLPAPER_DIR` | Wallpaper directory | `~/Pictures/Wallpapers` |
+| `DOTFILES_FIREWALL` | Enable firewall hardening | `0` (disabled) |
+| `DOTFILES_TELEMETRY` | Disable telemetry | `0` (disabled) |
+| `DOTFILES_DOH` | Enable DNS‑over‑HTTPS | `0` (disabled) |
+| `DOTFILES_LOCK` | Enforce lock screen idle settings | `0` (disabled) |
+| `DOTFILES_USB_SAFETY` | Disable automount for removable media | `0` (disabled) |
+
+### The `dot` CLI
+
+> [!TIP]
+> Run `dot help` to see available commands.
+
+| Command | Description | Category |
+|---|---|---|
+| `dot sync` | Apply dotfiles (chezmoi apply) | Core |
+| `dot update` | Pull latest changes and apply them | Core |
+| `dot upgrade` | Update flake, plugins, and dotfiles | Core |
+| `dot tools` | Show dot utils overview | Tooling |
+| `dot keys` | Show keybindings catalog | Tooling |
+| `dot docs` | Show repo README | Tooling |
+| `dot new` | Scaffold a project template (python/go/node) | Tooling |
+| `dot benchmark` | Run shell startup benchmark | Tooling |
+| `dot sandbox` | Launch a sandbox preview (Docker/Podman) | Tooling |
+| `dot log-rotate` | Rotate ~/.local/share/dotfiles.log | Tooling |
+| `dot theme` | Switch terminal theme | Visuals |
+| `dot wallpaper` | Apply a wallpaper | Visuals |
+| `dot fonts` | Install Nerd Fonts | Visuals |
+| `dot secrets-init` | Initialize age key for secrets | Security |
+| `dot secrets-create` | Create encrypted secrets file | Security |
+| `dot secrets` | Edit encrypted secrets (age) | Security |
+| `dot ssh-key` | Encrypt an SSH key locally with age | Security |
+| `dot firewall` | Apply firewall hardening (opt‑in) | Security |
+| `dot telemetry` | Disable OS telemetry (opt‑in) | Security |
+| `dot dns-doh` | Enable DNS‑over‑HTTPS (opt‑in) | Security |
+| `dot encrypt-check` | Check disk encryption status | Security |
+| `dot backup` | Create a compressed backup | Security |
+| `dot lock-screen` | Enforce lock screen idle settings (opt‑in) | Security |
+| `dot usb-safety` | Disable automount for removable media | Security |
+
+**Examples**
 
 ```bash
-chezmoi update
+# Initialize secrets (prints a public key)
+DOTFILES_NONINTERACTIVE=1 dot secrets-init
+# Output: Age key created at ~/.config/chezmoi/key.txt
 ```
 
-![divider][divider]
+### Security Auditing (What Changes)
+
+These scripts are **opt‑in** and only run when the matching env var is set.
+All security changes are logged to `~/.local/share/dotfiles.log`.
+
+| Script | macOS changes | Linux changes |
+|---|---|---|
+| `dot firewall` | Enables macOS firewall + stealth mode via `socketfilterfw` | Configures UFW defaults + OpenSSH allow |
+| `dot telemetry` | Writes `DiagnosticMessagesHistory.plist` flags | Disables `whoopsie`, `apport`, `popularity-contest` |
+| `dot dns-doh` | No system change (browser‑level only) | Enables DoH via `resolvectl` and sets Cloudflare DNS |
+| `dot lock-screen` | `com.apple.screensaver` defaults + idleTime | GNOME `gsettings` lock + idle timeout |
+| `dot usb-safety` | No system change (manual UI) | GNOME `gsettings` automount off |
+| `dot encrypt-check` | Reads FileVault status via `fdesetup` | Detects LUKS via `lsblk` |
+
+### Nix Integration
+
+Nix is **optional**. The repo does **not** install the Nix daemon.
+
+- Use `nix develop` for a reproducible shell environment.
+- `dot tools` assumes Nix is already installed.
+- There is no toggle that replaces Brew/Apt with Nix automatically.
+
+---
+
+### Install Guide
+
+See [docs/INSTALL.md](docs/INSTALL.md) for prerequisites, supported platforms, and the full install flow.
+
+<p align="right"><a href="#dotfiles--a-fast-idempotent-shell-environment-distribution-in-minutes">↑ Back to Top</a></p>
+
+## Architecture (How it Works)
+
+If Mermaid does not render, the flow is: `install.sh → Chezmoi → ~/.dotfiles → ~/.config + ~/.local`.
+
+```mermaid
+flowchart LR
+  A["install.sh"] --> B["Chezmoi"]
+  B --> C["~/.dotfiles (source)"]
+  B --> D["~/.config + ~/.local (targets)"]
+  E["dot CLI"] --> B
+  E --> F["scripts/*"]
+```
+
+**Repository layout**
+
+```text
+~/.dotfiles/
+├── dot_config/                 # Maps to ~/.config/ (app configs)
+│   ├── nvim/                    # Neovim config (Lua)
+│   ├── zsh/                     # Zsh config (modular)
+│   ├── tmux/                    # Tmux config
+│   ├── shell/                   # Shell logic (aliases/functions/paths)
+│   ├── wezterm/ alacritty/ kitty/ ghostty/
+│   ├── btop/ fastfetch/ atuin/ yazi/ ...
+│   └── docker/ containers/ ...
+├── dot_local/                  # Maps to ~/.local/ (CLI tools)
+│   └── bin/                     # dot CLI + helpers
+├── dot_etc/                    # System configs (sudoers, sysctl, chrome policies; may require sudo)
+├── dot_ssh/                    # SSH config templates
+├── templates/                  # Project scaffolds used by `dot new`
+├── scripts/                    # Install, security, theme, diagnostics
+├── install/                    # Chezmoi run_onchange/run_before hooks
+├── nix/                        # Optional Nix shell environment
+├── docs/                       # Guides, keys, roadmap, architecture
+└── install.sh                  # Bootstrap installer
+```
+
+---
+
+## Roadmap
+
+Tracked via [GitHub issues](https://github.com/sebastienrousseau/dotfiles/issues) and [milestones](https://github.com/sebastienrousseau/dotfiles/milestones).
+
+---
+
+## Contributing
+
+Please read [CONTRIBUTING.md](.github/CONTRIBUTING.md) before opening a PR.
+
+Security issues: see [SECURITY.md](.github/SECURITY.md).
+
+---
 
 ## Troubleshooting
 
-<details>
-<summary><strong>Icons are not rendering correctly</strong></summary>
-This is likely an issue with your terminal font. Ensure you have installed a Nerd Font and configured your terminal to use it.
-</details>
+See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
-<details>
-<summary><strong>`chezmoi` command not found</strong></summary>
-If the `chezmoi` command is not found after installation, you may need to add `~/.local/bin` to your `PATH`. Add the following line to your `.zshrc` or `.bashrc`:
+---
 
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-```
-</details>
+## Changelog
 
-![divider][divider]
+See [CHANGELOG.md](CHANGELOG.md).
 
-## Releases 🔗
+---
 
-Releases are available on the [GitHub releases page][24].
+## License
 
-![divider][divider]
+This repo is licensed under the **MIT License**. See [LICENSE](LICENSE).
 
-## Contribution 🤝
-
-We welcome contributions to `Dotfiles`. Please see the
-[contributing guidelines](.github/CONTRIBUTING.md) for more information.
-
-Unless you explicitly state otherwise, any contribution intentionally
-submitted for inclusion in the work by you, as defined in the
-Apache-2.0 license, shall be dual licensed as above, without any
-additional terms or conditions.
-
-![divider][divider]
-
-## License 📝
-
-The project is licensed under the terms of both the MIT license and the
-Apache License (Version 2.0).
-
-- [Apache License, Version 2.0][01]
-- [MIT license][02]
-
-![divider][divider]
-
-[00]: https://dotfiles.io
-[01]: https://opensource.org/license/apache-2-0/ "Apache License, Version 2.0"
-[02]: https://opensource.org/licenses/MIT "The MIT License"
-[03]: https://www.gnu.org/software/bash/ "GNU Bash"
-[04]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CODE-OF-CONDUCT.md "Code of Conduct"
-[05]: https://github.com/sebastienrousseau/dotfiles/blob/master/.github/CONTRIBUTING.md "Contributing Guidelines"
-[06]:https://www.codacy.com/gh/sebastienrousseau/dotfiles/dashboard "Codacy"
-[07]: https://curl.se/ "cURL"
-[08]: https://www.debian.org/ "Debian"
-[09]: https://www.deepin.org/en/ "Deepin"
-[10]: https://devuan.org/ "Devuan"
-[11]: https://github.com/sebastienrousseau/dotfiles/docs "Documentation"
-[12]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.472.tar.gz "Download Dotfiles v0.2.472"
-[13]: https://github.com/sebastienrousseau/dotfiles/network/members "List of members"
-[14]: https://github.com/sebastienrousseau/dotfiles/graphs/contributors "List of contributors"
-[15]: https://git-scm.com/ "Git"
-[16]: https://github.com/sebastienrousseau/dotfiles "Dotfiles"
-[17]: https://github.com/sebastienrousseau/dotfiles/issues "Issues"
-[18]: https://www.kali.org/ "Kali Linux"
-[19]: https://www.gnu.org/software/make/ "GNU Make"
-[20]: https://www.npmjs.com/package/@sebastienrousseau/dotfiles "Dotfiles on NPM"
-[21]: https://pnpm.io "PnPM"
-[22]: https://pop.system76.com/ "Pop!_OS"
-[23]: https://q4os.org/ "Q4OS"
-[24]: https://github.com/sebastienrousseau/dotfiles/releases "Dotfiles Releases"
-[25]: http://semver.org/ "Semantic Versioning"
-[26]: https://www.gnu.org/software/shell/ "GNU Shell"
-[27]: https://ubuntu.com/ "Ubuntu"
-[28]: https://www.gnu.org/software/wget/ "GNU Wget"
-[29]: https://zorinos.com/ "Zorin OS"
-[30]: https://www.zsh.org/ "Zsh"
-
-[getting-started-url]: #getting-started-
-
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg "Banner of Dotfiles"
-[codacy-grade]: https://img.shields.io/codacy/grade/634cfc4de08e492ebcbb341631066241?style=for-the-badge "Codacy grade"
-[contributors-shield]: https://img.shields.io/github/contributors/sebastienrousseau/dotfiles.svg?style=for-the-badge "Contributors"
-
-[divider]: https://kura.pro/common/images/elements/divider.svg "Divider"
-[download_button]: https://kura.pro/common/images/buttons/button-secondary.svg "Download"
-[forks-shield]: https://img.shields.io/github/forks/sebastienrousseau/dotfiles.svg?style=for-the-badge "Forks"
-[getting_started]: https://kura.pro/common/images/buttons/button-primary.svg "Getting Started"
-[license]: https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge\&color=ff69b4 "License"
-[love]: https://kura.pro/common/images/shields/made-with-love.svg "Made with Love"
+Some bundled third‑party dependencies are GPL‑3.0; the LICENSE file lists them explicitly.

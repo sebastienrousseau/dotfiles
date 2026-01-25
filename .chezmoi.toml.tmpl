@@ -1,0 +1,18 @@
+sourceDir = "{{ .chezmoi.homeDir }}/.dotfiles"
+
+[data]
+profile = "{{ promptString "profile" "laptop" }}"
+theme = "{{ promptString "theme" "tokyonight-night" }}"
+git_name = "{{ promptString "git_name" "Your Name" }}"
+git_email = "{{ promptString "git_email" "you@example.com" }}"
+git_signingkey = "{{ promptString "git_signingkey" "~/.ssh/id_ed25519" }}"
+git_signingformat = "{{ promptString "git_signingformat" "ssh" }}"
+age_identity = "{{ promptString "age_identity" "~/.config/chezmoi/key.txt" }}"
+age_recipient = "{{ promptString "age_recipient" "" }}"
+
+# Optional: enable age encryption for secrets files
+# Uncomment if you want chezmoi to encrypt/decrypt automatically.
+# encryption = "age"
+# [age]
+# identity = "~/.config/chezmoi/key.txt"
+# recipient = "age1..."

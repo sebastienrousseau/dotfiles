@@ -1,0 +1,34 @@
+# Tokyonight (Night) theme for btop
+# Based on Tokyo Night palette
+
+# Main background
+bg = "#1a1b26"
+# Main text
+fg = "#c0caf5"
+
+# Titles and boxes
+title = "#7aa2f7"
+hi_fg = "#bb9af7"
+
+# Graphs
+selected_bg = "#24283b"
+selected_fg = "#c0caf5"
+
+# CPU
+cpu_box = "#7aa2f7"
+mem_box = "#9ece6a"
+net_box = "#7dcfff"
+proc_box = "#e0af68"
+
+# Graph colors
+cpu_graph = "#7aa2f7"
+mem_graph = "#9ece6a"
+net_graph = "#7dcfff"
+proc_graph = "#e0af68"
+
+# Status
+available = "#9ece6a"
+used = "#e0af68"
+free = "#7dcfff"
+warning = "#e0af68"
+critical = "#f7768e"

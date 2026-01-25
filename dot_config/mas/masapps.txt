@@ -1,0 +1,5 @@
+# Mac App Store apps to install (one per line).
+# Format: <App Name> <App ID>
+# Example:
+# Xcode 497799835
+# Pixelmator Pro 1289583905

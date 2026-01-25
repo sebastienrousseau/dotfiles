@@ -17,10 +17,19 @@ if ! command -v brew >/dev/null; then
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-# Brewfile hash: {{ include "dot_config/shell/Brewfile" | sha256sum }}
-if [ -f "$HOME/.config/shell/Brewfile" ]; then
-  log_info "Installing packages from Brewfile..."
-  brew bundle --file="$HOME/.config/shell/Brewfile"
+# Brewfile hash: {{ printf "%s%s" (include "dot_config/shell/Brewfile.cli") (include "dot_config/shell/Brewfile.cask") | sha256sum }}
+if [ -f "$HOME/.config/shell/Brewfile.cli" ]; then
+  log_info "Installing CLI packages from Brewfile.cli..."
+  brew bundle --file="$HOME/.config/shell/Brewfile.cli"
+else
+  log_error "Brewfile.cli not found."
+fi
+
+if [ -f "$HOME/.config/shell/Brewfile.cask" ]; then
+  log_info "Installing GUI packages from Brewfile.cask..."
+  brew bundle --file="$HOME/.config/shell/Brewfile.cask"
+else
+  log_error "Brewfile.cask not found."
 fi
 
 log_info " macOS: Setup complete."

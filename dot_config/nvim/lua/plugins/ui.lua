@@ -209,9 +209,11 @@ Simply design to fit your shell life
          { "<leader>c", group = "Code" },
          { "<leader>f", group = "Find/File" },
          { "<leader>p", group = "Python/Project" },
-         { "<leader>t", group = "Test/Terminal" },
-         { "<leader>b", group = "Debug/Buffer" },
-       },
+       { "<leader>t", group = "Test/Terminal" },
+       { "<leader>b", group = "Debug/Buffer" },
+       { "<leader>g", group = "Git" },
+       { "<leader>m", group = "Markdown" },
+     },
     },
   },
 
@@ -236,26 +238,149 @@ Simply design to fit your shell life
   -- LSP Kind icons
   { "onsails/lspkind.nvim", event = "VeryLazy" },
 
-  -- Theme
+  -- Theme Plugins (Loaded on demand)
+  { "folke/tokyonight.nvim", name = "tokyonight", lazy = true, priority = 1000 },
+  { "Mofiqul/dracula.nvim", name = "dracula", lazy = true, priority = 1000 },
+  { "ellisonleao/gruvbox.nvim", name = "gruvbox", lazy = true, priority = 1000 },
+  { "shaunsingh/nord.nvim", name = "nord", lazy = true, priority = 1000 },
+  { "navarasu/onedark.nvim", name = "onedark", lazy = true, priority = 1000 },
+  { "maxmx03/solarized.nvim", name = "solarized", lazy = true, priority = 1000 },
+  { "rose-pine/neovim", name = "rose-pine", lazy = true, priority = 1000 },
+  { "sainnhe/everforest", name = "everforest", lazy = true, priority = 1000 },
+  { "rebelot/kanagawa.nvim", name = "kanagawa", lazy = true, priority = 1000 },
+
+  -----------------------------------------------------------------------------
+  -- Lazy Profiling
+  -----------------------------------------------------------------------------
+  {
+    "folke/lazy.nvim",
+    opts = {
+      profiling = {
+        loader = true,
+        require = true,
+      },
+    },
+  },
+
+  -----------------------------------------------------------------------------
+  -- Icon Sets
+  -----------------------------------------------------------------------------
+  { "nvim-tree/nvim-web-devicons", lazy = true },
+
+  -- Theme Selector (Catppuccin as fallback)
   {
     "catppuccin/nvim",
     name = "catppuccin",
-    priority = 1000,
+    lazy = false,
+    priority = 1001,
     config = function()
-      require("catppuccin").setup({ 
-          flavour = "mocha", 
-          integrations = { 
-              nvimtree = true, 
-              notify = true, 
-              symbols_outline = true,
-              mason = true,
-              neotest = true,
-              noice = true,
-              gitsigns = true,
-              illuminate = true,
-              which_key = true,
-              scrollbar = true,
-          } 
+      local theme = vim.env.DOTFILES_THEME or "tokyonight-night"
+      local function load_theme(name)
+        local ok, lazy = pcall(require, "lazy")
+        if ok then
+          lazy.load({ plugins = { name } })
+        end
+      end
+
+      if theme:match("^tokyonight") then
+        load_theme("tokyonight")
+        local style = theme:gsub("tokyonight%-", "")
+        if style == theme then
+          style = "night"
+        end
+        require("tokyonight").setup({ style = style, light_style = "day" })
+        vim.cmd.colorscheme("tokyonight-" .. style)
+        return
+      end
+
+      if theme == "dracula" then
+        load_theme("dracula")
+        require("dracula").setup({})
+        vim.cmd.colorscheme("dracula")
+        return
+      end
+
+      if theme:match("^rose%-pine") then
+        load_theme("rose-pine")
+        if theme == "rose-pine-moon" then
+          vim.cmd.colorscheme("rose-pine-moon")
+        elseif theme == "rose-pine-dawn" then
+          vim.cmd.colorscheme("rose-pine-dawn")
+        else
+          vim.cmd.colorscheme("rose-pine")
+        end
+        return
+      end
+
+      if theme:match("^everforest") then
+        load_theme("everforest")
+        vim.g.everforest_background = "medium"
+        vim.o.background = (theme == "everforest-light") and "light" or "dark"
+        vim.cmd.colorscheme("everforest")
+        return
+      end
+
+      if theme:match("^kanagawa") then
+        load_theme("kanagawa")
+        local variant = "wave"
+        if theme == "kanagawa-dragon" then
+          variant = "dragon"
+        elseif theme == "kanagawa-lotus" then
+          variant = "lotus"
+        end
+        require("kanagawa").setup({ theme = variant })
+        vim.cmd.colorscheme("kanagawa")
+        return
+      end
+
+      if theme:match("^gruvbox") then
+        load_theme("gruvbox")
+        vim.o.background = (theme == "gruvbox-light") and "light" or "dark"
+        require("gruvbox").setup({ contrast = "hard" })
+        vim.cmd.colorscheme("gruvbox")
+        return
+      end
+
+      if theme == "nord" then
+        load_theme("nord")
+        require("nord").set()
+        return
+      end
+
+      if theme == "onedark" or theme == "onelight" then
+        load_theme("onedark")
+        require("onedark").setup({ style = (theme == "onelight") and "light" or "dark" })
+        vim.cmd.colorscheme("onedark")
+        return
+      end
+
+      if theme == "solarized-dark" or theme == "solarized-light" then
+        load_theme("solarized")
+        vim.o.background = (theme == "solarized-light") and "light" or "dark"
+        require("solarized").setup({})
+        vim.cmd.colorscheme("solarized")
+        return
+      end
+
+      load_theme("catppuccin")
+      local flavour = theme:match("catppuccin%-(%w+)")
+      if not flavour then
+        flavour = "mocha"
+      end
+      require("catppuccin").setup({
+        flavour = flavour,
+        integrations = {
+          nvimtree = true,
+          notify = true,
+          symbols_outline = true,
+          mason = true,
+          neotest = true,
+          noice = true,
+          gitsigns = true,
+          illuminate = true,
+          which_key = true,
+          scrollbar = true,
+        },
       })
       vim.cmd.colorscheme("catppuccin")
     end,

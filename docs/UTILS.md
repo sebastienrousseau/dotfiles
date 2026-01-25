@@ -1,0 +1,36 @@
+# Dot Utils
+
+Curated utilities surfaced through aliases, functions, and the `dot` CLI.
+This is intentionally small and practical.
+
+## Git
+- `g`, `ga`, `gco`, `gst`, `gl`, `gll` and related aliases
+- `lg` opens `lazygit` (if installed)
+
+## Search & Navigation
+- `rg` (ripgrep), `fd` (find)
+- `z <dir>` (zoxide jump)
+
+## JSON & Text
+- `jq` for JSON
+- `bat` for quick file previews
+
+## Network
+- `curlheader`, `curlstatus`, `curltime`, `httpdebug`
+
+## System
+- `dot doctor` for health checks
+- `dot update` to pull and apply changes
+- `dot theme` to switch terminal themes
+- `dot new` to scaffold a project (python/go/node)
+- `dot log-rotate` to rotate `~/.local/share/dotfiles.log`
+
+- `dot backup` to create a compressed backup
+- `dot encrypt-check` to check disk encryption status
+- `dot firewall` to apply firewall hardening (opt-in)
+- `dot telemetry` to disable telemetry (opt-in)
+- `dot dns-doh` to enable DNS-over-HTTPS (opt-in)
+- `dot lock-screen` to enforce lock screen idle settings
+- `dot usb-safety` to disable automount for removable media
+- `dot fonts` to install Nerd Fonts
+- `dot wallpaper` to apply a wallpaper

@@ -2,7 +2,7 @@
 # Diagnostics & Self-Healing Aliases
 
 # Health Check
-alias doc='bash $HOME/.local/share/chezmoi/scripts/diagnostics/doctor.sh'
+alias doc='bash $HOME/.dotfiles/scripts/diagnostics/doctor.sh'
 alias dot-doctor='doc'
 
 # Drift Detection
@@ -14,4 +14,4 @@ alias heal='chezmoi apply --verbose'
 alias dot-heal='heal'
 
 # Detailed Doctor (with debug info)
-alias doc-full='bash $HOME/.local/share/chezmoi/scripts/diagnostics/doctor.sh && echo "\n--- Path Info ---" && echo $PATH | tr ":" "\n"'
+alias doc-full='bash $HOME/.dotfiles/scripts/diagnostics/doctor.sh && echo "\n--- Path Info ---" && echo $PATH | tr ":" "\n"'

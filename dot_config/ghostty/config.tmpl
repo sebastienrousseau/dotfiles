@@ -1,0 +1,587 @@
+###############################################
+# Ghostty Configuration (v0.2.473)
+# Cross-Platform: macOS, Linux, WSL
+###############################################
+
+{{- $theme := default "tokyonight-night" .theme -}}
+{{- $fontFamily := default "JetBrains Mono" .terminal_font_family -}}
+{{- $fontSize := default 12 .terminal_font_size -}}
+
+##########
+# Theme  #
+##########
+# Managed by chezmoi from DOTFILES_THEME
+
+###############
+# Appearance  #
+###############
+background-opacity = 0.9
+background-blur = 10
+window-padding-x = 16
+window-padding-y = 12
+window-padding-balance = true
+window-padding-color = background
+unfocused-split-opacity = 0.95
+
+############
+# macOS UI #
+############
+macos-titlebar-style = tabs
+macos-option-as-alt = true
+window-colorspace = display-p3
+window-save-state = always
+window-vsync = true
+
+################
+#  Linux / WSL #
+################
+# Enterprise tweaks for Linux consistency
+gtk-titlebar = true
+# gtk-single-instance = true
+# linux-cme-preedit-ime = true
+
+################
+# Typography   #
+################
+# Primary: User preference (Apple Native)
+# Fallback logic is handled by Ghostty attempting the first found.
+font-family = "{{ $fontFamily }}"
+font-family = "JetBrains Mono"
+font-family = "Roboto Mono"
+
+font-size = {{ $fontSize }}
+adjust-cell-width = -1
+font-thicken = true
+font-thicken-strength = 1
+adjust-cell-height = 0
+adjust-font-baseline = 0
+
+#####################
+# Behaviour / UX    #
+#####################
+scrollback-limit = 100000
+working-directory = home
+window-inherit-working-directory = true
+shell-integration = zsh
+command = /usr/bin/zsh
+quit-after-last-window-closed = true
+
+################
+# Keybindings  #
+################
+keybind = cmd+shift+,=reload_config
+keybind = opt+super+left=previous_tab
+keybind = opt+super+right=next_tab
+# Linux/Windows friendly alternatives (using Alt/Ctrl)
+keybind = ctrl+shift+,=reload_config
+
+################
+# Colors       #
+################
+{{- if eq $theme "tokyonight-night" }}
+background = #1a1b26
+foreground = #c0caf5
+cursor-color = #c0caf5
+cursor-text = #1a1b26
+selection-background = #414868
+selection-foreground = #c0caf5
+palette = 0=#15161e
+palette = 1=#f7768e
+palette = 2=#9ece6a
+palette = 3=#e0af68
+palette = 4=#7aa2f7
+palette = 5=#bb9af7
+palette = 6=#7dcfff
+palette = 7=#a9b1d6
+palette = 8=#414868
+palette = 9=#ff899d
+palette = 10=#9fe044
+palette = 11=#faba4a
+palette = 12=#8db0ff
+palette = 13=#c7a9ff
+palette = 14=#a4daff
+palette = 15=#c0caf5
+{{- else if eq $theme "tokyonight-storm" }}
+background = #24283b
+foreground = #c0caf5
+cursor-color = #c0caf5
+cursor-text = #24283b
+selection-background = #414868
+selection-foreground = #c0caf5
+palette = 0=#1d202f
+palette = 1=#f7768e
+palette = 2=#9ece6a
+palette = 3=#e0af68
+palette = 4=#7aa2f7
+palette = 5=#bb9af7
+palette = 6=#7dcfff
+palette = 7=#a9b1d6
+palette = 8=#414868
+palette = 9=#ff899d
+palette = 10=#9fe044
+palette = 11=#faba4a
+palette = 12=#8db0ff
+palette = 13=#c7a9ff
+palette = 14=#a4daff
+palette = 15=#c0caf5
+{{- else if eq $theme "tokyonight-moon" }}
+background = #222436
+foreground = #c8d3f5
+cursor-color = #c8d3f5
+cursor-text = #222436
+selection-background = #444a73
+selection-foreground = #c8d3f5
+palette = 0=#1b1d2b
+palette = 1=#ff757f
+palette = 2=#c3e88d
+palette = 3=#ffc777
+palette = 4=#82aaff
+palette = 5=#c099ff
+palette = 6=#86e1fc
+palette = 7=#828bb8
+palette = 8=#444a73
+palette = 9=#ff8d94
+palette = 10=#c7fb6d
+palette = 11=#ffd8ab
+palette = 12=#9ab8ff
+palette = 13=#caabff
+palette = 14=#b2ebff
+palette = 15=#c8d3f5
+{{- else if eq $theme "tokyonight-day" }}
+background = #e1e2e7
+foreground = #3760bf
+cursor-color = #3760bf
+cursor-text = #e1e2e7
+selection-background = #a1a6c5
+selection-foreground = #3760bf
+palette = 0=#b4b5b9
+palette = 1=#f52a65
+palette = 2=#587539
+palette = 3=#8c6c3e
+palette = 4=#2e7de9
+palette = 5=#9854f1
+palette = 6=#007197
+palette = 7=#6172b0
+palette = 8=#a1a6c5
+palette = 9=#ff4774
+palette = 10=#5c8524
+palette = 11=#a27629
+palette = 12=#358aff
+palette = 13=#a463ff
+palette = 14=#007ea8
+palette = 15=#3760bf
+{{- else if eq $theme "dracula" }}
+background = #282a36
+foreground = #f8f8f2
+cursor-color = #f8f8f2
+cursor-text = #282a36
+selection-background = #6272a4
+selection-foreground = #f8f8f2
+palette = 0=#21222c
+palette = 1=#ff5555
+palette = 2=#50fa7b
+palette = 3=#f1fa8c
+palette = 4=#bd93f9
+palette = 5=#ff79c6
+palette = 6=#8be9fd
+palette = 7=#f8f8f2
+palette = 8=#6272a4
+palette = 9=#ff6e6e
+palette = 10=#69ff94
+palette = 11=#ffffa5
+palette = 12=#d6acff
+palette = 13=#ff92df
+palette = 14=#a4ffff
+palette = 15=#ffffff
+{{- else if eq $theme "gruvbox-dark" }}
+background = #282828
+foreground = #d5c4a1
+cursor-color = #d5c4a1
+cursor-text = #282828
+selection-background = #665c54
+selection-foreground = #d5c4a1
+palette = 0=#282828
+palette = 1=#fb4934
+palette = 2=#b8bb26
+palette = 3=#fabd2f
+palette = 4=#83a598
+palette = 5=#d3869b
+palette = 6=#8ec07c
+palette = 7=#d5c4a1
+palette = 8=#665c54
+palette = 9=#fb4934
+palette = 10=#b8bb26
+palette = 11=#fabd2f
+palette = 12=#83a598
+palette = 13=#d3869b
+palette = 14=#8ec07c
+palette = 15=#fbf1c7
+{{- else if eq $theme "gruvbox-light" }}
+background = #fbf1c7
+foreground = #504945
+cursor-color = #504945
+cursor-text = #fbf1c7
+selection-background = #bdae93
+selection-foreground = #504945
+palette = 0=#fbf1c7
+palette = 1=#9d0006
+palette = 2=#79740e
+palette = 3=#b57614
+palette = 4=#076678
+palette = 5=#8f3f71
+palette = 6=#427b58
+palette = 7=#504945
+palette = 8=#bdae93
+palette = 9=#9d0006
+palette = 10=#79740e
+palette = 11=#b57614
+palette = 12=#076678
+palette = 13=#8f3f71
+palette = 14=#427b58
+palette = 15=#282828
+{{- else if eq $theme "nord" }}
+background = #2e3440
+foreground = #d8dee9
+cursor-color = #d8dee9
+cursor-text = #2e3440
+selection-background = #4c566a
+selection-foreground = #d8dee9
+palette = 0=#3b4252
+palette = 1=#bf616a
+palette = 2=#a3be8c
+palette = 3=#ebcb8b
+palette = 4=#81a1c1
+palette = 5=#b48ead
+palette = 6=#88c0d0
+palette = 7=#e5e9f0
+palette = 8=#4c566a
+palette = 9=#bf616a
+palette = 10=#a3be8c
+palette = 11=#ebcb8b
+palette = 12=#81a1c1
+palette = 13=#b48ead
+palette = 14=#8fbcbb
+palette = 15=#eceff4
+{{- else if eq $theme "onedark" }}
+background = #282c34
+foreground = #abb2bf
+cursor-color = #abb2bf
+cursor-text = #282c34
+selection-background = #545862
+selection-foreground = #abb2bf
+palette = 0=#282c34
+palette = 1=#e06c75
+palette = 2=#98c379
+palette = 3=#e5c07b
+palette = 4=#61afef
+palette = 5=#c678dd
+palette = 6=#56b6c2
+palette = 7=#abb2bf
+palette = 8=#545862
+palette = 9=#e06c75
+palette = 10=#98c379
+palette = 11=#e5c07b
+palette = 12=#61afef
+palette = 13=#c678dd
+palette = 14=#56b6c2
+palette = 15=#c8ccd4
+{{- else if eq $theme "onelight" }}
+background = #fafafa
+foreground = #383a42
+cursor-color = #383a42
+cursor-text = #fafafa
+selection-background = #a0a1a7
+selection-foreground = #383a42
+palette = 0=#fafafa
+palette = 1=#ca1243
+palette = 2=#50a14f
+palette = 3=#c18401
+palette = 4=#4078f2
+palette = 5=#a626a4
+palette = 6=#0184bc
+palette = 7=#383a42
+palette = 8=#a0a1a7
+palette = 9=#ca1243
+palette = 10=#50a14f
+palette = 11=#c18401
+palette = 12=#4078f2
+palette = 13=#a626a4
+palette = 14=#0184bc
+palette = 15=#090a0b
+{{- else if eq $theme "solarized-dark" }}
+background = #002b36
+foreground = #93a1a1
+cursor-color = #93a1a1
+cursor-text = #002b36
+selection-background = #657b83
+selection-foreground = #93a1a1
+palette = 0=#002b36
+palette = 1=#dc322f
+palette = 2=#859900
+palette = 3=#b58900
+palette = 4=#268bd2
+palette = 5=#6c71c4
+palette = 6=#2aa198
+palette = 7=#93a1a1
+palette = 8=#657b83
+palette = 9=#dc322f
+palette = 10=#859900
+palette = 11=#b58900
+palette = 12=#268bd2
+palette = 13=#6c71c4
+palette = 14=#2aa198
+palette = 15=#fdf6e3
+{{- else if eq $theme "solarized-light" }}
+background = #fdf6e3
+foreground = #586e75
+cursor-color = #586e75
+cursor-text = #fdf6e3
+selection-background = #839496
+selection-foreground = #586e75
+palette = 0=#fdf6e3
+palette = 1=#dc322f
+palette = 2=#859900
+palette = 3=#b58900
+palette = 4=#268bd2
+palette = 5=#6c71c4
+palette = 6=#2aa198
+palette = 7=#586e75
+palette = 8=#839496
+palette = 9=#dc322f
+palette = 10=#859900
+palette = 11=#b58900
+palette = 12=#268bd2
+palette = 13=#6c71c4
+palette = 14=#2aa198
+palette = 15=#002b36
+{{- else if eq $theme "rose-pine" }}
+background = #191724
+foreground = #e0def4
+cursor-color = #e0def4
+cursor-text = #191724
+selection-background = #2a273f
+selection-foreground = #e0def4
+palette = 0=#26233a
+palette = 1=#eb6f92
+palette = 2=#9ccfd8
+palette = 3=#f6c177
+palette = 4=#31748f
+palette = 5=#c4a7e7
+palette = 6=#9ccfd8
+palette = 7=#e0def4
+palette = 8=#6e6a86
+palette = 9=#eb6f92
+palette = 10=#9ccfd8
+palette = 11=#f6c177
+palette = 12=#31748f
+palette = 13=#c4a7e7
+palette = 14=#9ccfd8
+palette = 15=#e0def4
+{{- else if eq $theme "rose-pine-dawn" }}
+background = #faf4ed
+foreground = #575279
+cursor-color = #575279
+cursor-text = #faf4ed
+selection-background = #f2e9e1
+selection-foreground = #575279
+palette = 0=#f2e9e1
+palette = 1=#b4637a
+palette = 2=#286983
+palette = 3=#ea9d34
+palette = 4=#56949f
+palette = 5=#907aa9
+palette = 6=#d7827e
+palette = 7=#575279
+palette = 8=#9893a5
+palette = 9=#b4637a
+palette = 10=#286983
+palette = 11=#ea9d34
+palette = 12=#56949f
+palette = 13=#907aa9
+palette = 14=#d7827e
+palette = 15=#575279
+{{- else if eq $theme "rose-pine-moon" }}
+background = #232136
+foreground = #e0def4
+cursor-color = #e0def4
+cursor-text = #232136
+selection-background = #393552
+selection-foreground = #e0def4
+palette = 0=#393552
+palette = 1=#eb6f92
+palette = 2=#9ccfd8
+palette = 3=#f6c177
+palette = 4=#3e8fb0
+palette = 5=#c4a7e7
+palette = 6=#9ccfd8
+palette = 7=#e0def4
+palette = 8=#6e6a86
+palette = 9=#eb6f92
+palette = 10=#9ccfd8
+palette = 11=#f6c177
+palette = 12=#3e8fb0
+palette = 13=#c4a7e7
+palette = 14=#9ccfd8
+palette = 15=#e0def4
+{{- else if eq $theme "everforest-dark" }}
+background = #2f383e
+foreground = #d3c6aa
+cursor-color = #d3c6aa
+cursor-text = #2f383e
+selection-background = #3c474d
+selection-foreground = #d3c6aa
+palette = 0=#4b565c
+palette = 1=#e67e80
+palette = 2=#a7c080
+palette = 3=#dbbc7f
+palette = 4=#7fbbb3
+palette = 5=#d699b6
+palette = 6=#83c092
+palette = 7=#d3c6aa
+palette = 8=#4b565c
+palette = 9=#e67e80
+palette = 10=#a7c080
+palette = 11=#dbbc7f
+palette = 12=#7fbbb3
+palette = 13=#d699b6
+palette = 14=#83c092
+palette = 15=#d3c6aa
+{{- else if eq $theme "everforest-light" }}
+background = #fdf6e3
+foreground = #5c6a72
+cursor-color = #5c6a72
+cursor-text = #fdf6e3
+selection-background = #e6e2cc
+selection-foreground = #5c6a72
+palette = 0=#829181
+palette = 1=#f85552
+palette = 2=#8da101
+palette = 3=#dfa000
+palette = 4=#3a94c5
+palette = 5=#df69ba
+palette = 6=#35a77c
+palette = 7=#5c6a72
+palette = 8=#829181
+palette = 9=#f85552
+palette = 10=#8da101
+palette = 11=#dfa000
+palette = 12=#3a94c5
+palette = 13=#df69ba
+palette = 14=#35a77c
+palette = 15=#5c6a72
+{{- else if eq $theme "kanagawa-wave" }}
+background = #1f1f28
+foreground = #dcd7ba
+cursor-color = #dcd7ba
+cursor-text = #1f1f28
+selection-background = #2d4f67
+selection-foreground = #dcd7ba
+palette = 0=#1f1f28
+palette = 1=#c34043
+palette = 2=#76946a
+palette = 3=#c0a36e
+palette = 4=#7e9cd8
+palette = 5=#957fb8
+palette = 6=#6a9589
+palette = 7=#dcd7ba
+palette = 8=#2a2a37
+palette = 9=#c34043
+palette = 10=#76946a
+palette = 11=#c0a36e
+palette = 12=#7e9cd8
+palette = 13=#957fb8
+palette = 14=#6a9589
+palette = 15=#dcd7ba
+{{- else if eq $theme "kanagawa-dragon" }}
+background = #181616
+foreground = #c8c093
+cursor-color = #c8c093
+cursor-text = #181616
+selection-background = #223249
+selection-foreground = #c8c093
+palette = 0=#181616
+palette = 1=#c4746e
+palette = 2=#87a987
+palette = 3=#c4b28a
+palette = 4=#8ba4b0
+palette = 5=#a292a3
+palette = 6=#8ea4a2
+palette = 7=#c8c093
+palette = 8=#393836
+palette = 9=#c4746e
+palette = 10=#87a987
+palette = 11=#c4b28a
+palette = 12=#8ba4b0
+palette = 13=#a292a3
+palette = 14=#8ea4a2
+palette = 15=#c8c093
+{{- else if eq $theme "kanagawa-lotus" }}
+background = #f2ecbc
+foreground = #545464
+cursor-color = #545464
+cursor-text = #f2ecbc
+selection-background = #e2e0d1
+selection-foreground = #545464
+palette = 0=#e2e0d1
+palette = 1=#c84053
+palette = 2=#6f894e
+palette = 3=#77713f
+palette = 4=#4d699b
+palette = 5=#b35b79
+palette = 6=#597b75
+palette = 7=#545464
+palette = 8=#9f9997
+palette = 9=#c84053
+palette = 10=#6f894e
+palette = 11=#77713f
+palette = 12=#4d699b
+palette = 13=#b35b79
+palette = 14=#597b75
+palette = 15=#545464
+{{- else if eq $theme "catppuccin-latte" }}
+background = #eff1f5
+foreground = #4c4f69
+cursor-color = #4c4f69
+cursor-text = #eff1f5
+selection-background = #6c6f85
+selection-foreground = #4c4f69
+palette = 0=#5c5f77
+palette = 1=#d20f39
+palette = 2=#40a02b
+palette = 3=#df8e1d
+palette = 4=#1e66f5
+palette = 5=#ea76cb
+palette = 6=#179299
+palette = 7=#acb0be
+palette = 8=#6c6f85
+palette = 9=#d20f39
+palette = 10=#40a02b
+palette = 11=#df8e1d
+palette = 12=#1e66f5
+palette = 13=#ea76cb
+palette = 14=#179299
+palette = 15=#bcc0cc
+{{- else }}
+background = #1e1e2e
+foreground = #cdd6f4
+cursor-color = #cdd6f4
+cursor-text = #1e1e2e
+selection-background = #585b70
+selection-foreground = #cdd6f4
+palette = 0=#45475a
+palette = 1=#f38ba8
+palette = 2=#a6e3a1
+palette = 3=#f9e2af
+palette = 4=#89b4fa
+palette = 5=#f5c2e7
+palette = 6=#94e2d5
+palette = 7=#bac2de
+palette = 8=#585b70
+palette = 9=#f38ba8
+palette = 10=#a6e3a1
+palette = 11=#f9e2af
+palette = 12=#89b4fa
+palette = 13=#f5c2e7
+palette = 14=#94e2d5
+palette = 15=#a6adc8
+{{- end }}

@@ -104,17 +104,53 @@ step "Applying Configuration..."
 if [ -n "$1" ]; then
   VERSION="$1"
 else
-  VERSION="v0.2.472"
+  VERSION="v0.2.473"
 fi
 
-# If we are running from the repo itself, just apply
-if [ -d "$HOME/.local/share/chezmoi/.git" ]; then
-    echo "   Applying from local source..."
-    chezmoi apply
+SOURCE_DIR="$HOME/.dotfiles"
+LEGACY_SOURCE_DIR="$HOME/.local/share/chezmoi"
+CHEZMOI_CONFIG_DIR="$HOME/.config/chezmoi"
+CHEZMOI_CONFIG_FILE="$CHEZMOI_CONFIG_DIR/chezmoi.toml"
+
+ensure_chezmoi_source() {
+    local dir="$1"
+    mkdir -p "$CHEZMOI_CONFIG_DIR"
+    if [ -f "$CHEZMOI_CONFIG_FILE" ]; then
+        if ! grep -q '^sourceDir' "$CHEZMOI_CONFIG_FILE"; then
+            printf '\nsourceDir = \"%s\"\\n' "$dir" >> "$CHEZMOI_CONFIG_FILE"
+        fi
+    else
+        printf 'sourceDir = \"%s\"\\n' "$dir" > "$CHEZMOI_CONFIG_FILE"
+    fi
+}
+
+# If we are running from a local source, just apply
+if [ -d "$SOURCE_DIR/.git" ]; then
+    echo "   Applying from local source: $SOURCE_DIR"
+    ensure_chezmoi_source "$SOURCE_DIR"
+    APPLY_FLAGS=()
+    if [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]; then
+      APPLY_FLAGS=(--force --no-tty)
+    fi
+    chezmoi apply "${APPLY_FLAGS[@]}"
+elif [ -d "$LEGACY_SOURCE_DIR/.git" ]; then
+    echo "   Applying from legacy source: $LEGACY_SOURCE_DIR"
+    ensure_chezmoi_source "$LEGACY_SOURCE_DIR"
+    APPLY_FLAGS=()
+    if [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]; then
+      APPLY_FLAGS=(--force --no-tty)
+    fi
+    chezmoi apply "${APPLY_FLAGS[@]}"
 else
     echo "   Initializing from GitHub (Branch/Tag: $VERSION)..."
     # STRICT MODE: We pin to the specific tag to avoid 'main' branch drift
-    chezmoi init --apply sebastienrousseau --branch "$VERSION"
+    git clone --branch "$VERSION" https://github.com/sebastienrousseau/dotfiles.git "$SOURCE_DIR"
+    ensure_chezmoi_source "$SOURCE_DIR"
+    APPLY_FLAGS=()
+    if [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]; then
+      APPLY_FLAGS=(--force --no-tty)
+    fi
+    chezmoi apply "${APPLY_FLAGS[@]}"
 fi
 
 success

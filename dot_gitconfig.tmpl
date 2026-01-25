@@ -1,0 +1,27 @@
+{{- $git_name := "" -}}
+{{- $git_email := "" -}}
+{{- $git_signingkey := "" -}}
+{{- $git_signingformat := "ssh" -}}
+{{- if hasKey . "git_name" }}{{- $git_name = index . "git_name" -}}{{- end -}}
+{{- if hasKey . "git_email" }}{{- $git_email = index . "git_email" -}}{{- end -}}
+{{- if hasKey . "git_signingkey" }}{{- $git_signingkey = index . "git_signingkey" -}}{{- end -}}
+{{- if hasKey . "git_signingformat" }}{{- $git_signingformat = index . "git_signingformat" -}}{{- end -}}
+
+[user]
+{{- if $git_name }}
+	name = {{ $git_name }}
+{{- end }}
+{{- if $git_email }}
+	email = {{ $git_email }}
+{{- end }}
+{{- if $git_signingkey }}
+	signingkey = {{ $git_signingkey }}
+{{- end }}
+
+{{- if $git_signingkey }}
+[commit]
+	gpgsign = true
+
+[gpg]
+	format = {{ $git_signingformat }}
+{{- end }}

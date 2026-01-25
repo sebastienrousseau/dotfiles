@@ -21,10 +21,12 @@ RUN mkdir -p "$HOME/.local/bin" && \
 ENV PATH="$HOME/.local/bin:$PATH"
 
 # Copy repo as chezmoi source
-COPY . $HOME/.local/share/chezmoi
+COPY . $HOME/.dotfiles
 
-# Apply chezmoi (skip provisioning script to isolate alias testing)
-RUN chezmoi apply --exclude=scripts
+# Configure chezmoi source and apply (skip provisioning script to isolate alias testing)
+RUN mkdir -p "$HOME/.config/chezmoi" && \
+    printf 'sourceDir = \"%s\"\\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml" && \
+    chezmoi apply --exclude=scripts
 
 # Verify aliases file was generated
 RUN test -f "$HOME/.config/shell/90-ux-aliases.sh" || \
@@ -48,7 +50,7 @@ RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type ll' 2>/dev/nu
     echo "NOTE: ll fallback alias check"
 
 # Test install.sh syntax (don't execute network calls)
-RUN bash -n "$HOME/.local/share/chezmoi/install.sh" || \
+RUN bash -n "$HOME/.dotfiles/install.sh" || \
     (echo "FAIL: install.sh has syntax errors" && exit 1)
 
 RUN echo "=== Ubuntu 24.04: ALL TESTS PASSED ==="
@@ -72,10 +74,12 @@ RUN mkdir -p "$HOME/.local/bin" && \
 ENV PATH="$HOME/.local/bin:$PATH"
 
 # Copy repo as chezmoi source
-COPY . $HOME/.local/share/chezmoi
+COPY . $HOME/.dotfiles
 
-# Apply chezmoi (skip provisioning script)
-RUN chezmoi apply --exclude=scripts
+# Configure chezmoi source and apply (skip provisioning script)
+RUN mkdir -p "$HOME/.config/chezmoi" && \
+    printf 'sourceDir = \"%s\"\\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml" && \
+    chezmoi apply --exclude=scripts
 
 # Verify aliases file was generated
 RUN test -f "$HOME/.config/shell/90-ux-aliases.sh" || \
@@ -86,7 +90,7 @@ RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh"' || \
     (echo "FAIL: aliases file has syntax errors" && exit 1)
 
 # Test install.sh syntax
-RUN bash -n "$HOME/.local/share/chezmoi/install.sh" || \
+RUN bash -n "$HOME/.dotfiles/install.sh" || \
     (echo "FAIL: install.sh has syntax errors" && exit 1)
 
 RUN echo "=== Debian 12: ALL TESTS PASSED ==="
@@ -107,10 +111,12 @@ RUN mkdir -p "$HOME/.local/bin" && \
 ENV PATH="$HOME/.local/bin:$PATH"
 
 # Copy repo as chezmoi source
-COPY . $HOME/.local/share/chezmoi
+COPY . $HOME/.dotfiles
 
-# Apply chezmoi (skip provisioning script)
-RUN chezmoi apply --exclude=scripts
+# Configure chezmoi source and apply (skip provisioning script)
+RUN mkdir -p "$HOME/.config/chezmoi" && \
+    printf 'sourceDir = \"%s\"\\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml" && \
+    chezmoi apply --exclude=scripts
 
 # Verify aliases file was generated
 RUN test -f "$HOME/.config/shell/90-ux-aliases.sh" || \
@@ -130,7 +136,7 @@ RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type cat' | grep -
     (echo "FAIL: bat alias not working on Arch" && exit 1)
 
 # Test install.sh syntax
-RUN bash -n "$HOME/.local/share/chezmoi/install.sh" || \
+RUN bash -n "$HOME/.dotfiles/install.sh" || \
     (echo "FAIL: install.sh has syntax errors" && exit 1)
 
 RUN echo "=== Arch Linux: ALL TESTS PASSED ==="
@@ -161,10 +167,12 @@ RUN mkdir -p "$HOME/.local/bin" && \
 ENV PATH="$HOME/.local/bin:$PATH"
 
 # Copy repo as chezmoi source
-COPY . $HOME/.local/share/chezmoi
+COPY . $HOME/.dotfiles
 
-# Apply chezmoi (skip provisioning script)
-RUN chezmoi apply --exclude=scripts
+# Configure chezmoi source and apply (skip provisioning script)
+RUN mkdir -p "$HOME/.config/chezmoi" && \
+    printf 'sourceDir = \"%s\"\\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml" && \
+    chezmoi apply --exclude=scripts
 
 # Verify eza aliases are active (not fallback)
 RUN grep -q 'alias ls="eza --icons --group-directories-first"' "$HOME/.config/shell/90-ux-aliases.sh" || \

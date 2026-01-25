@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.472) - <https://dotfiles.io>
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.473) - <https://dotfiles.io>
 # Made with ♥ in London, UK by Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # License: MIT
@@ -29,8 +29,7 @@ backup() {
     echo -e "${RED}  ✘${NC} Backup directory already exists."
   else
     echo -e "${GREEN}  ✔${NC} Creating backup directory '${GREEN}${DF_BACKUPDIR}${NC}'..."
-    mkdir -p "${DF_BACKUPDIR}"
-    if [[ $? -ne 0 ]]; then
+    if ! mkdir -p "${DF_BACKUPDIR}"; then
       echo -e "${RED}  ✘${NC} Failed to create backup directory. Exiting."
       return 1
     fi
@@ -38,8 +37,7 @@ backup() {
 
   # Create timestamped backup directory
   CURRENT_BACKUP_DIR="${DF_BACKUPDIR}/${DF_TIMESTAMP}"
-  mkdir -p "${CURRENT_BACKUP_DIR}"
-  if [[ $? -ne 0 ]]; then
+  if ! mkdir -p "${CURRENT_BACKUP_DIR}"; then
     echo -e "${RED}  ✘${NC} Failed to create timestamped backup directory. Exiting."
     return 1
   fi
@@ -47,13 +45,11 @@ backup() {
   # Backup existing Dotfiles directory.
   if [[ -d "${HOME}"/.dotfiles ]]; then
     echo -e "${GREEN}  ✔${NC} Backing up previous Dotfiles installation to '${GREEN}${CURRENT_BACKUP_DIR}/${DF}${NC}'..."
-    mkdir -p "${CURRENT_BACKUP_DIR}/${DF}"
-    if [[ $? -ne 0 ]]; then
+    if ! mkdir -p "${CURRENT_BACKUP_DIR}/${DF}"; then
       echo -e "${RED}  ✘${NC} Failed to create dotfiles backup directory. Skipping dotfiles backup."
     else
       # Use rsync instead of mv to preserve original until we know the backup succeeded
-      rsync -a "${DF_DOTFILESDIR}/" "${CURRENT_BACKUP_DIR}/${DF}/"
-      if [[ $? -ne 0 ]]; then
+      if ! rsync -a "${DF_DOTFILESDIR}/" "${CURRENT_BACKUP_DIR}/${DF}/"; then
         echo -e "${RED}  ✘${NC} Failed to backup dotfiles directory."
       fi
     fi
@@ -99,8 +95,7 @@ backup() {
   for file in ${FILES}; do
     if [[ -f "${HOME}/${file}" ]]; then
       echo -e "${GREEN}  ✔${NC} Backing up '${YELLOW}${file}${NC}'"
-      cp -f "${HOME}/${file}" "${CURRENT_BACKUP_DIR}/files/${file}"
-      if [[ $? -eq 0 ]]; then
+      if cp -f "${HOME}/${file}" "${CURRENT_BACKUP_DIR}/files/${file}"; then
         ((BACKUP_COUNT++))
       else
         echo -e "${RED}  ✘${NC} Failed to backup '${YELLOW}${file}${NC}'"
