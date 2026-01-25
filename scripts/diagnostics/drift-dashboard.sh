@@ -14,13 +14,13 @@ if [[ -z "$status" ]]; then
   exit 0
 fi
 
-echo "\nChanged files:"
+printf "\nChanged files:\n"
 printf '%s\n' "$status"
 
 count=$(printf '%s\n' "$status" | wc -l | tr -d ' ')
-echo "\nTotal: $count"
+printf "\nTotal: %s\n" "$count"
 
 if [[ "${DOTFILES_DRIFT_SHOW_DIFF:-0}" = "1" ]]; then
-  echo "\n--- Diff (excluding scripts/install/tests) ---"
+  printf "\n--- Diff (excluding scripts/install/tests) ---\n"
   chezmoi diff --exclude scripts --exclude install --exclude tests || true
 fi

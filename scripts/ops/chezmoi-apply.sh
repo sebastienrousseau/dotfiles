@@ -19,6 +19,6 @@ echo "Applying dotfiles..."
 chezmoi apply "${args[@]}"
 
 if [[ "${DOTFILES_CHEZMOI_STATUS:-1}" = "1" ]]; then
-  echo "\nStatus:"
+  printf "\nStatus:\n"
   chezmoi status || true
 fi
