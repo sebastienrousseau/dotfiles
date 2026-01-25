@@ -275,6 +275,14 @@ dot wallpaper
 
 Set a wallpaper from `~/Pictures/Wallpapers` (override with `DOTFILES_WALLPAPER_DIR`).
 
+### Fonts
+
+```bash
+dot fonts JetBrainsMono
+```
+
+Installs Nerd Fonts and refreshes the font cache on Linux.
+
 ### Secrets
 
 ```bash

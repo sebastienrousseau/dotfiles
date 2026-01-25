@@ -23,6 +23,7 @@ show_help() {
     echo "  wallpaper  Apply a wallpaper from your library"
     echo "  ssh-key    Encrypt an SSH key locally with age"
     echo "  secrets-create  Create an encrypted secrets file"
+    echo "  fonts      Install Nerd Fonts (JetBrainsMono by default)"
     echo "  secrets    Edit encrypted secrets (age)"
     echo "  secrets-init  Initialize age key for secrets"
     echo "  upgrade    Update flake, plugins, and dotfiles"
@@ -153,6 +154,19 @@ case "$COMMAND" in
             exit 1
         fi
         ;;
+    fonts)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -z "$SRC_DIR" ]; then
+            echo "Dotfiles source not found."
+            exit 1
+        fi
+        if [ -f "$SRC_DIR/scripts/fonts/install-nerd-fonts.sh" ]; then
+            exec sh "$SRC_DIR/scripts/fonts/install-nerd-fonts.sh" "$@"
+        else
+            echo "Font install script not found."
+            exit 1
+        fi
+        ;;
     ssh-key)
         SRC_DIR="$(resolve_source_dir)"
         if [ -z "$SRC_DIR" ]; then
@@ -215,6 +229,8 @@ case "$COMMAND" in
         if [ -f "$SRC_DIR/nix/flake.nix" ] && command -v nix >/dev/null; then
             echo "Updating Nix flake..."
             (cd "$SRC_DIR" && nix flake update) || true
+            echo "Running Nix garbage collection..."
+            nix-collect-garbage -d || true
         fi
         echo "Updating dotfiles..."
         chezmoi update || true
