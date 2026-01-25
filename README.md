@@ -10,7 +10,7 @@
 
 ## Elevator Pitch
 
-Dotfiles is a cross-platform, Chezmoi-managed shell environment that installs in minutes and keeps your shell environment consistent across macOS, Linux, and WSL. It is **idempotent** by design: running it multiple times is safe, predictable, and produces the same result.
+Dotfiles is a cross-platform, [Chezmoi](https://github.com/twpayne/chezmoi)-managed shell environment that installs in minutes and keeps your shell environment consistent across macOS, Linux, and WSL. It is **idempotent** by design: running it multiple times is safe, predictable, and produces the same result.
 
 Conceptually: Git + templates + guarded scripts = a reproducible shell.
 
@@ -236,8 +236,6 @@ Nix is **optional**. The repo does **not** install the Nix daemon.
 - `dot tools` assumes Nix is already installed.
 - There is no toggle that replaces Brew/Apt with Nix automatically.
 
-<p align="right"><a href="#dotfiles--a-fast-idempotent-shell-environment-in-minutes">↑ Back to Top</a></p>
-
 ---
 
 ### Install Guide
@@ -247,6 +245,8 @@ See [docs/INSTALL.md](docs/INSTALL.md) for prerequisites, supported platforms, a
 ### Tools Catalog
 
 See [docs/TOOLS.md](docs/TOOLS.md) for the list of included tools and alias conventions.
+
+<p align="right"><a href="#dotfiles--a-fast-idempotent-shell-environment-in-minutes">↑ Back to Top</a></p>
 
 ## How‑to Guides
 
