@@ -10,7 +10,7 @@
 
 ## Elevator Pitch
 
-Dotfiles is a cross-platform shell environment distribution managed by [Chezmoi](https://github.com/twpayne/chezmoi) that installs in minutes and keeps your environment consistent across macOS, Linux, and WSL. It is **idempotent** by design: running it multiple times is safe, predictable, and produces the same result.
+Dotfiles is a cross-platform shell environment distribution managed by [Chezmoi](https://github.com/twpayne/chezmoi) that installs in minutes and keeps your development environment consistent across macOS, Linux, and WSL. It is **idempotent** by design: running it multiple times is safe, predictable, and produces the same result.
 
 Git + templates + guarded scripts = a reproducible shell.
 
@@ -37,7 +37,7 @@ Git + templates + guarded scripts = a reproducible shell.
 
 Dotfiles takes a more infrastructure-oriented approach than many personal dotfile setups. It is designed for developers who manage multiple machines and value **daily usability, reproducibility, and auditability.**
 
-- **The Stack:** A tuned Zsh, Neovim, and tmux environment with sane defaults.
+- **The Stack:** Zsh, Neovim, and tmux with sane defaults.
 - **Unified Control:** The `dot` CLI wraps common workflows such as syncing, upgrading, and managing secrets.
 - **Safety First:** Explicit opt-in for any system or security changes.
 - **Clean Slate:** Clear separation between source files, generated configs, and system state.
@@ -75,7 +75,7 @@ exec zsh
 > [!TIP]
 > Use `DOTFILES_NONINTERACTIVE=1` if you want a fully non‑interactive install.
 
-<p align="right"><a href="#dotfiles--a-fast-idempotent-shell-environment-distribution-in-minutes">↑ Back to Top</a></p>
+ 
 
 ---
 
@@ -310,9 +310,8 @@ flowchart LR
 
 ---
 
-<p align="right"><a href="#dotfiles--a-fast-idempotent-shell-environment-distribution-in-minutes">↑ Back to Top</a></p>
-
 ---
+ 
 
 ## Roadmap
 
