@@ -262,6 +262,10 @@ Available themes:
 - `kanagawa-dragon`
 - `kanagawa-lotus`
 
+### Theme Gallery
+
+Screenshots live in `docs/themes/README.md` with a capture checklist.
+
 ### Personal Details (Git)
 
 This repo ships a `.chezmoi.toml.tmpl` with safe placeholders. Set your values

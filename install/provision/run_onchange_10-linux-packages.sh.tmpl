@@ -152,6 +152,7 @@ if command -v apt-get >/dev/null; then
     jq
     yq
     hyperfine
+    age
   )
   $sudo_cmd apt-get install -y "${packages[@]}"
 fi
