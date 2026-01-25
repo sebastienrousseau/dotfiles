@@ -48,3 +48,22 @@ stopwords = [
     "dummy",
     "fake",
 ]
+
+# Additional patterns to detect
+[[rules]]
+id = "aws-session-token"
+description = "AWS Session Token"
+regex = '''(?i)aws.{0,20}session.{0,20}token.{0,20}['"][0-9a-zA-Z/+=]{16,}['"]'''
+tags = ["aws", "token"]
+
+[[rules]]
+id = "gcp-api-key"
+description = "GCP API Key"
+regex = '''AIza[0-9A-Za-z\-_]{35}'''
+tags = ["gcp", "api"]
+
+[[rules]]
+id = "azure-connection-string"
+description = "Azure Connection String"
+regex = '''(?i)DefaultEndpointsProtocol=https;AccountName=[^;]+;AccountKey=[^;]+'''
+tags = ["azure", "connection"]
