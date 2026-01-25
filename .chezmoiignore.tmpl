@@ -28,3 +28,13 @@ nix/**
 .devcontainer/**
 
 .config/nvim/lazy-lock.json
+
+{{- if eq .chezmoi.os "darwin" }}
+.config/i3
+.config/i3/**
+{{- end }}
+
+{{- if eq .chezmoi.os "linux" }}
+Library
+Library/**
+{{- end }}

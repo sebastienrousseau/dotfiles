@@ -130,17 +130,20 @@ chezmoi diff
 ### Dot CLI
 
 ```bash
-dot sync      # Apply dotfiles (chezmoi apply)
-dot update    # Pull latest changes and apply
-dot tools     # Show dot utils
-dot keys      # Show keybindings
-dot tune      # Apply OS tuning (opt-in)
-dot secrets   # Edit encrypted secrets (age)
-dot upgrade   # Update flake, plugins, and dotfiles
-dot new       # Scaffold a project template (python/go/node)
+dot apply      # Apply dotfiles (chezmoi apply)
+dot sync       # Alias of apply
+dot update     # Pull latest changes and apply
+dot diff       # Show diff (excludes scripts/install/tests)
+dot remove     # Safely remove a managed file
+dot drift      # Drift dashboard (chezmoi status)
+dot history    # Shell history analysis
+dot tools      # Show dot utils
+dot keys       # Show keybindings
+dot tune       # Apply OS tuning (opt-in)
+dot secrets    # Edit encrypted secrets (age)
+dot upgrade    # Update flake, plugins, and dotfiles
+dot new        # Scaffold a project template (python/go/node)
 dot log-rotate # Rotate ~/.local/share/dotfiles.log
-dot
-dot
 dot doctor
 dot sandbox
 dot benchmark
@@ -160,7 +163,8 @@ dot secrets-init
 dot edit
 dot docs
 dot learn
-dot help```
+dot help
+```
 
 ### Optional Nix Toolchain
 

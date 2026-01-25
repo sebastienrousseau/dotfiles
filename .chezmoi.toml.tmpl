@@ -13,9 +13,11 @@ git_signingformat = "{{ promptString "git_signingformat" "ssh" }}"
 age_identity = "{{ $age_identity }}"
 age_recipient = "{{ $age_recipient }}"
 
-{{ if and (ne $age_identity "") (ne $age_recipient "") }}
+{{ if ne $age_identity "" }}
 encryption = "age"
 [age]
     identity = "{{ $age_identity }}"
+{{- if ne $age_recipient "" }}
     recipient = "{{ $age_recipient }}"
+{{- end }}
 {{ end }}

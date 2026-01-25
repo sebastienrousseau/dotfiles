@@ -3,8 +3,13 @@
 _dot() {
   local -a commands
   commands=(
+    apply
     sync
     update
+    diff
+    remove
+    drift
+    history
     doctor
     keys
     tools

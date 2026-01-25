@@ -16,14 +16,24 @@ This page lists the main tools and CLI conveniences provided by this repo.
 - ripgrep
 - fd
 - bat
+- lsd
+- duf
+- ncdu
+- htop
 
 ## Terminal UX
 
 - WezTerm / Alacritty / Kitty / Ghostty configs
 - btop
 - fastfetch
+- figlet
+- lolcat
+- cowsay
+- cmatrix
+- pipes
 - atuin
 - yazi
+- zsh bell sound/visual toggles
 
 ## Developer Utilities
 
@@ -53,3 +63,10 @@ Apply changes with:
 ```bash
 chezmoi apply
 ```
+
+## Visuals & Theme Helpers
+
+- Wallpaper sync/rotate scripts
+- Cursor and icon theming helpers (Linux)
+- Lock screen icon helper (Linux)
+- GRUB theme / boot logo helpers (Linux)
