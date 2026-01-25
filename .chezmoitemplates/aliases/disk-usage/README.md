@@ -4,11 +4,11 @@ Manage Disk-usage aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
-## 📖 Description
+## Description
 
 These aliases are defined in `disk-usage.aliases.sh` and are automatically loaded by `chezmoi`.
 
-## ⚡ Aliases
+## Aliases
 
 This code provides a set of command aliases to help users manage disk
 usage on a Unix-based system.

@@ -4,11 +4,11 @@ Manage Git aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
-## 📖 Description
+## Description
 
 These aliases are defined in `git.aliases.sh` and are automatically loaded by `chezmoi`.
 
-## ⚡ Aliases
+## Aliases
 
 This is a collection of handy Git aliases that simplify and speed up
 common Git commands, making them shorter and more intuitive.

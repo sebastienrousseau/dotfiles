@@ -2,7 +2,7 @@
 
 Tools for self-healing and system health checks.
 
-## 🩺 Health & Repair
+## Health & Repair
 
 | Alias | Description |
 |-------|-------------|

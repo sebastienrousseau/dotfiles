@@ -51,7 +51,7 @@ gen_notice_fn() {
         docker run --rm -v "$(pwd):/src" -w /src golang:latest \
             sh -c "go install github.com/google/go-licenses@latest && go-licenses report . --template /src/NOTICE.tpl > NOTICE"
     else
-        echo "⚠️  No supported package manager found for automatic NOTICE generation."
+        echo "️  No supported package manager found for automatic NOTICE generation."
     fi
 }
 alias gen-notice=gen_notice_fn
@@ -66,7 +66,7 @@ check_cla_fn() {
     echo "Checking PR checks for CLA status..."
     gh pr checks --watch
   else
-    echo "❌ GitHub CLI (gh) not found."
+    echo " GitHub CLI (gh) not found."
   fi
 }
 alias check-cla=check_cla_fn

@@ -7,13 +7,13 @@
 
 # Dotfiles Functions (v0.2.473)
 
-> Simply designed to fit your shell life 🐚
+> Simply designed to fit your shell life 
 
 ![Dotfiles banner][banner]
 
 A comprehensive collection of shell utilities and functions to enhance your productivity across macOS, Linux, and Windows environments.
 
-## 📖 How it Works
+## How it Works
 
 Functions are defined as individual `.sh` files in this directory.
 
@@ -22,7 +22,7 @@ During `chezmoi apply`, the main template `dot_config/shell/functions.sh.tmpl`:
 2. Aggregates them into `~/.config/shell/functions.sh`.
 3. This file is sourced by `.zshrc`, making all functions immediately available.
 
-## 🛠 Usage
+## Usage
 
 ### Adding a New Function
 1. Create a new `.sh` file (e.g., `myfunc.sh`).
@@ -34,9 +34,9 @@ During `chezmoi apply`, the main template `dot_config/shell/functions.sh.tmpl`:
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
-## 🧰 Function Categories
+## Function Categories
 
-### 🔍 API Testing & Monitoring
+### API Testing & Monitoring
 
 | Function | Description | Usage |
 |----------|-------------|-------|
@@ -45,7 +45,7 @@ During `chezmoi apply`, the main template `dot_config/shell/functions.sh.tmpl`:
 | `apiload` | Perform basic load testing on API endpoints | `apiload URL [REQUESTS] [DELAY]` |
 | `httpdebug` | Debug HTTP requests with detailed timing metrics | `httpdebug [options] [url]` |
 
-### 🌐 HTTP/Web Utilities
+### HTTP/Web Utilities
 
 | Function | Description | Usage |
 |----------|-------------|-------|
@@ -55,7 +55,7 @@ During `chezmoi apply`, the main template `dot_config/shell/functions.sh.tmpl`:
 | `view-source` | View the source code of a website | `view-source URL` |
 | `whoisport` | Find what process is using a specific port | `whoisport PORT` |
 
-### 📁 File Management
+### File Management
 
 | Function | Description | Usage |
 |----------|-------------|-------|
@@ -67,7 +67,7 @@ During `chezmoi apply`, the main template `dot_config/shell/functions.sh.tmpl`:
 | `size` | Check file or directory size | `size [file/directory]` |
 | `zipf` | Create ZIP archives | `zipf [folder]` |
 
-### 📄 File Naming Utilities
+### File Naming Utilities
 
 | Function | Description | Usage |
 |----------|-------------|-------|
@@ -78,7 +78,7 @@ During `chezmoi apply`, the main template `dot_config/shell/functions.sh.tmpl`:
 | `titlecase` | Convert filenames to Title Case | `titlecase <files...>` |
 | `uppercase` | Convert filenames to UPPERCASE | `uppercase <files...>` |
 
-### 🖥️ System Utilities
+###  System Utilities
 
 | Function | Description | Usage |
 |----------|-------------|-------|
@@ -113,14 +113,14 @@ The `caffeine` utility prevents your system from sleeping or activating the scre
 
 **Cross-Platform Support**: Works on macOS (using native `caffeinate`), Linux (using `xdg-screensaver` and `xset`), and Windows (using PowerShell simulated keypresses).
 
-### 🔐 Security & Credentials
+### Security & Credentials
 
 | Function | Description | Usage |
 |----------|-------------|-------|
 | `genpass` | Generate strong random passwords | `genpass [num_blocks] [separator]` |
 | `keygen` | Generate SSH key pairs with strong encryption | `keygen [name] [email] [type] [bits]` |
 
-### 📂 Navigation & Directory Management
+### Navigation & Directory Management
 
 | Function | Description | Usage |
 |----------|-------------|-------|
@@ -130,7 +130,7 @@ The `caffeine` utility prevents your system from sleeping or activating the scre
 | `rd` | Remove directory and its files | `rd [directory]` |
 | `remove_disk` | Safely eject disk | `remove_disk [disk]` |
 
-### 🪄 Miscellaneous
+### Miscellaneous
 
 | Function | Description | Usage |
 |----------|-------------|-------|
@@ -139,15 +139,15 @@ The `caffeine` utility prevents your system from sleeping or activating the scre
 | `ql` | Open file in macOS Quick Look | `ql [file]` |
 | `vscode` | Open file in Visual Studio Code | `vscode [file]` |
 
-## 🔧 Compatibility
+## Compatibility
 
 Most utilities work across platforms, with specific adaptations for:
 
-- 🍎 **macOS**: Full support with macOS-specific utilities
-- 🐧 **Linux**: Compatible with common Linux distributions
-- 🪟 **Windows**: Windows support via WSL, Cygwin, or Git Bash
+-  **macOS**: Full support with macOS-specific utilities
+-  **Linux**: Compatible with common Linux distributions
+-  **Windows**: Windows support via WSL, Cygwin, or Git Bash
 
-## 📖 Function Documentation
+## Function Documentation
 
 Each function includes comprehensive documentation accessible via the `--help` flag:
 
@@ -155,10 +155,10 @@ Each function includes comprehensive documentation accessible via the `--help` f
 apihealth --help
 ```
 
-## 📄 License
+## License
 
 MIT License © 2015-2025 Sebastien Rousseau
 
 ---
 
-Made with ♥ in London, UK • [dotfiles.io](https://dotfiles.io)
+Made with  in London, UK • [dotfiles.io](https://dotfiles.io)

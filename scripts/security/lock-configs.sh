@@ -28,16 +28,16 @@ else
         UNLOCK_CMD="sudo chattr -i"
         CHECK_CMD="lsattr"
     else
-        echo "❌ 'chattr' not found. Cannot set immutability on Linux without it."
+        echo " 'chattr' not found. Cannot set immutability on Linux without it."
         exit 1
     fi
 fi
 
 if [[ "$ACTION" == "lock" ]]; then
-    echo "🔒 Locking critical configuration files..."
+    echo " Locking critical configuration files..."
     CMD="$LOCK_CMD"
 elif [[ "$ACTION" == "unlock" ]]; then
-    echo "🔓 Unlocking critical configuration files..."
+    echo " Unlocking critical configuration files..."
     CMD="$UNLOCK_CMD"
 else
     echo "Usage: $0 [lock|unlock]"
@@ -47,7 +47,7 @@ fi
 for file in "${CRITICAL_FILES[@]}"; do
     if [[ -f "$file" ]]; then
         echo "Processing: $file"
-        $CMD "$file" || echo "⚠️ Failed to modify flags for $file (permission denied?)"
+        $CMD "$file" || echo "️ Failed to modify flags for $file (permission denied?)"
     fi
 done
 

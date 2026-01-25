@@ -4,11 +4,11 @@ Manage Find aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
-## 📖 Description
+## Description
 
 These aliases are defined in `find.aliases.sh` and are automatically loaded by `chezmoi`.
 
-## ⚡ Aliases
+## Aliases
 
 This code provides a set of command aliases for the `fd` utility that is
 an alternative to the `find` command on Unix-based systems.

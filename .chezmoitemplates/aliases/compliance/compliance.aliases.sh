@@ -12,7 +12,7 @@ privacy_mode_fn() {
     export GATSBY_TELEMETRY_DISABLED=1
     export NEXT_TELEMETRY_DISABLED=1
     
-    echo "🔒 Privacy Mode Enabled: Telemetry disabled for active session."
+    echo " Privacy Mode Enabled: Telemetry disabled for active session."
     echo "   (Dotnet, Homebrew, Azure, Stripe, Gatsby, Next.js)"
 }
 
@@ -21,7 +21,7 @@ alias privacy-mode=privacy_mode_fn
 # Audit Trail: View chezmoi application logs
 # (Assuming chezmoi logs are piped or we verify git history as the audit trail)
 audit_fn() {
-    echo "📜 Configuration Audit Trail (Recent Changes)"
+    echo " Configuration Audit Trail (Recent Changes)"
     echo "---------------------------------------------"
     if [[ -f "$HOME/.dotfiles_audit.log" ]]; then
         tail -n 20 "$HOME/.dotfiles_audit.log"

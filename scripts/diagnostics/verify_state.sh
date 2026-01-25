@@ -8,25 +8,25 @@
 
 set -e
 
-echo "🔍 Starting Final Environment Verification..."
+echo " Starting Final Environment Verification..."
 
 Errors=0
 
 check_file() {
     if [[ ! -f "$1" ]]; then
-        echo "❌ Missing file: $1"
+        echo " Missing file: $1"
         Errors=$((Errors + 1))
     else
-        echo "✅ Found file: $1"
+        echo " Found file: $1"
     fi
 }
 
 check_alias_in_config() {
     if ! grep -q "$1" "$HOME/.config/shell/aliases.sh"; then
-        echo "❌ Missing alias definition '$1' in built config"
+        echo " Missing alias definition '$1' in built config"
         Errors=$((Errors + 1))
     else
-        echo "✅ Verified alias: $1"
+        echo " Verified alias: $1"
     fi
 }
 
@@ -52,9 +52,9 @@ check_alias_in_config "add-headers"
 check_file ".github/workflows/security-release.yml"
 
 if [[ $Errors -eq 0 ]]; then
-    echo "🎉 Verification Passed! All systems nominal."
+    echo " Verification Passed! All systems nominal."
     exit 0
 else
-    echo "⚠️  Verification Failed with $Errors errors."
+    echo "️  Verification Failed with $Errors errors."
     exit 1
 fi

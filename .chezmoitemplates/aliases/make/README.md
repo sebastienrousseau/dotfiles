@@ -4,11 +4,11 @@ Manage Make aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
-## 📖 Description
+## Description
 
 These aliases are defined in `make.aliases.sh` and are automatically loaded by `chezmoi`.
 
-## ⚡ Aliases
+## Aliases
 
 This code provides a set of aliases for the `make` command.
 - `mk` - Make.

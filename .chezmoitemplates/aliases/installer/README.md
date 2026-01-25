@@ -2,7 +2,7 @@
 
 Tools for bootstrapping and remote deployment.
 
-## 🚀 Commands
+## Commands
 
 | Alias | Description |
 |-------|-------------|

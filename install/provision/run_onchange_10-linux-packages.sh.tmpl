@@ -9,7 +9,7 @@ set -euo pipefail
 log_info() { echo -e "\n[INFO] $*"; }
 log_error() { echo -e "\n[ERROR] $*" >&2; }
 
-log_info "🐧 Linux: Starting setup..."
+log_info " Linux: Starting setup..."
 
 if [ -f "$HOME/.config/dotfiles/versions.env" ]; then
   # shellcheck disable=SC1091
@@ -348,8 +348,8 @@ if ! command -v ghostty >/dev/null; then
     log_info "Installing Ghostty..."
     # Ghostty on Linux currently requires building from source or specific deb/rpm.
     # For now, we point to the official guide to avoid breaking CI with a heavy build.
-    log_info "⚠️ Ghostty on Linux requires manual install or 'zig build'. See https://ghostty.org/docs/install/linux"
+    log_info "️ Ghostty on Linux requires manual install or 'zig build'. See https://ghostty.org/docs/install/linux"
 fi
 
-log_info "🐧 Linux: Setup complete."
+log_info " Linux: Setup complete."
 {{- end -}}

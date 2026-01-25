@@ -9,7 +9,7 @@ VERSION="${1:-v0.2.474}"
 DIST_DIR="dist"
 ARCHIVE_NAME="dotfiles-${VERSION}.tar.gz"
 
-echo "📦 Packaging Dotfiles (${VERSION})..."
+echo " Packaging Dotfiles (${VERSION})..."
 
 # Create dist directory
 mkdir -p "$DIST_DIR"
@@ -42,5 +42,5 @@ else
     sha256sum "$DIST_DIR/$ARCHIVE_NAME" > "$DIST_DIR/${ARCHIVE_NAME}.sha256"
 fi
 
-echo "✅ Package created at ${DIST_DIR}/${ARCHIVE_NAME}"
+echo " Package created at ${DIST_DIR}/${ARCHIVE_NAME}"
 echo "   Size: $(du -h "$DIST_DIR/$ARCHIVE_NAME" | cut -f1)"

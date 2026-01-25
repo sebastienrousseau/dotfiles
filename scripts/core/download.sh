@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.474) - <https://dotfiles.io>
-# Made with ♥ in London, UK by Sebastien Rousseau
+# Made with  in London, UK by Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # License: MIT
 
@@ -15,7 +15,7 @@ export DF_DOTFILESDIR              # Exporting Location of dotfiles.
 ## 🅳🅾🆆🅽🅻🅾🅰🅳 - Download the dotfiles on your system.
 download() {
   # shellcheck disable=SC2154
-  echo "${RED}❭${NC} Downloading ${GREEN}Dotfiles v${DF_VERSION}${NC} on your system at ${GREEN}${DF_DOWNLOADDIR}${NC}..."
+  echo "${RED}${NC} Downloading ${GREEN}Dotfiles v${DF_VERSION}${NC} on your system at ${GREEN}${DF_DOWNLOADDIR}${NC}..."
 
   # Download the dotfiles with curl.
   # shellcheck disable=SC2154

@@ -2,7 +2,7 @@
 
 Tools for managing open source compliance, license scanning, and attribution.
 
-## ⚖️ Aliases
+##  Aliases
 
 ### License Scanning
 | Alias | Description | Type |
@@ -26,7 +26,7 @@ Tools for managing open source compliance, license scanning, and attribution.
 |-------|-------------|------|
 | `check-cla` | Watch GitHub PR checks (including CLA) | CLI (`gh`) |
 
-## 📦 Requirements
+## Requirements
 
 - **Docker**: For isolation of compliance tools.
 - **GitHub CLI (`gh`)**: For PR/CLA checking.

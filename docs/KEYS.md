@@ -1,4 +1,4 @@
-# Keybindings Catalog
+# Keybindings
 
 This is the single source of truth for navigation and muscle-memory shortcuts
 across the dotfiles stack. Keep this concise and consistent.

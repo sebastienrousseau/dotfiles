@@ -1,4 +1,4 @@
-# Dot Utils
+# Discover
 
 Curated utilities surfaced through aliases, functions, and the `dot` CLI.
 This is intentionally small and practical.
@@ -8,15 +8,15 @@ This is intentionally small and practical.
 - `lg` shows a graph log; `lgui` opens `lazygit` (if installed)
 - `gh` aliases in `~/.config/gh/config.yml`
 
-## Search & Navigation
+## Search
 - `rg` (ripgrep), `fd` (find)
 - `z <dir>` (zoxide jump)
 
-## JSON & Text
+## Text
 - `jq` for JSON
 - `bat` for quick file previews
 
-## Terminal UX
+## Terminal
 - `banner` for quick figlet-style banners
 - `rainbow` for lolcat-style output
 - `emoji` for an emoji picker (copies to clipboard)

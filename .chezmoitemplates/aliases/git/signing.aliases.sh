@@ -4,7 +4,7 @@
 
 # Enable Git Signing (Wizard)
 enable_signing_fn() {
-    echo "🔐 Git Signing Configuration Wizard"
+    echo " Git Signing Configuration Wizard"
     echo "-------------------------------------"
     echo "1) GPG (Standard)"
     echo "2) SSH (Modern/GitHub)"
@@ -19,9 +19,9 @@ enable_signing_fn() {
             if [[ -n "$key_id" ]]; then
                 git config --global user.signingkey "$key_id"
                 git config --global commit.gpgsign true
-                echo "✅ GPG signing enabled globally for key: $key_id"
+                echo " GPG signing enabled globally for key: $key_id"
             else
-                echo "❌ No key ID provided."
+                echo " No key ID provided."
             fi
             ;;
         2)
@@ -32,9 +32,9 @@ enable_signing_fn() {
                 git config --global gpg.format ssh
                 git config --global user.signingkey "$key_path"
                 git config --global commit.gpgsign true
-                echo "✅ SSH signing enabled globally using: $key_path"
+                echo " SSH signing enabled globally using: $key_path"
             else
-                echo "❌ Key file not found: $key_path"
+                echo " Key file not found: $key_path"
             fi
             ;;
         *)

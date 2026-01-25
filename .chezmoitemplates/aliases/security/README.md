@@ -2,7 +2,7 @@
 
 Tools for hardening the environment and managing configuration immutability.
 
-## 🔒 Immutability
+## Immutability
 
 | Alias | Description |
 |-------|-------------|
@@ -10,6 +10,6 @@ Tools for hardening the environment and managing configuration immutability.
 | `unlock-configs` | Unlocks critical files for editing. |
 | `check-locks` | Checks the lock status of critical files. |
 
-## 🔑 Git Signing
+## Git Signing
 
 (See [Git Aliases](../git/README.md) for signing configuration)

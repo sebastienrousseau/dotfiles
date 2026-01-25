@@ -4,11 +4,11 @@ Manage Heroku aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
-## 📖 Description
+## Description
 
 These aliases are defined in `heroku.aliases.sh` and are automatically loaded by `chezmoi`.
 
-## ⚡ Aliases
+## Aliases
 
 This is a collection of aliases for the
 [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli).

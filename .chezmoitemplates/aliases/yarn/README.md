@@ -4,11 +4,11 @@ Manage Yarn (JavaScript) aliases. Part of the **Universal Dotfiles** configurati
 
 ![Dotfiles banner][banner]
 
-## 📖 Description
+## Description
 
 These aliases are defined in `yarn.aliases.sh` and are automatically loaded by `chezmoi`.
 
-## ⚡ Aliases
+## Aliases
 
 - `y` - Yarn shortcut
 - `yi` - Install

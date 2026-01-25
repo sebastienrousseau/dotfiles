@@ -1,10 +1,10 @@
-# Product Roadmap: The Trusted Shell Platform
+# Roadmap
 
 This roadmap steers the project from a "feature-rich dotfiles repo" to an **Enterprise-Grade Shell Distribution**. The structure is organized by strategic pillars (**Trust**, **Predictability**, **Observability**) rather than linear phases, though the original 100-Phase vision is preserved within these categories.
 
 ---
 
-## 🏗️ Pillar 1: Reproducibility & Determinism (Highest ROI)
+## Reproducibility
 **Goal:** "Reproducible Shell Environments".
 > *This distribution aims for deterministic rebuilds: the same tag yields the same environment across machines.*
 
@@ -16,7 +16,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 - [ ] **Container Native (Phase 28)**: Base Docker image for devcontainers.
 - [ ] **Terraform Provider (Phase 28)**: Custom provider to provision dotfiles state.
 
-## 👁️ Pillar 2: First-Class Observability
+## Observability
 **Goal:** "Observable Shell Lifecycle".
 > *The shell is instrumented: failures, timing, and lifecycle events are visible by design.*
 
@@ -27,7 +27,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 - [ ] **System Status (Phase 39)**: Real-time resource usage, battery, and network stats.
 - [ ] **Update Manager (Phase 39)**: Visual interface for tool updates and migration.
 
-## 🔐 Pillar 3: Secrets & Trust Boundaries
+## Secrets
 **Goal:** "Explicit Secrets Model".
 > *Secrets are never committed; sensitive state is encrypted or host-local by default.*
 
@@ -38,7 +38,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 - [ ] **Hardware Enclaves (Phase 29)**: Support for Secure Enclave/TPM key storage.
 - [ ] **OIDC Auth (Phase 29)**: Keyless authentication via GitHub OIDC.
 
-## 🧱 Pillar 4: Layered Architecture & Toolchain
+## Toolchain
 **Goal:** "Composable Shell Layers".
 > *The distribution is layered: core safety is mandatory, advanced features are opt-in.*
 
@@ -50,7 +50,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
     - [ ] **Wasm Target**: WebAssembly toolchain setup.
     - [ ] **Embedded Dev**: Presets for Arduino/ESP32.
 
-## ⚙️ Pillar 5: Controlled Opt-In Features
+## Opt-in features
 **Goal:** "Explicit Feature Flags".
 > *Advanced features are gated behind explicit opt-in flags.*
 
@@ -61,7 +61,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
     - [ ] **Dependency Solving**: Semantic versioning for modules.
     - [ ] **Verified Publishers**: Cryptographic signing for "Official" modules.
 
-## 🛡️ Pillar 6: Threat Model & Safety
+## Safety
 **Goal:** "Documented Threat Model".
 > *Security decisions are driven by an explicit, documented threat model.*
 
@@ -73,7 +73,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
     - [ ] **PAM Modules**: Custom auth modules.
     - [ ] **Auditd Rules**: Pre-configured audit rules.
 
-## 🧪 Pillar 7: Self-Test & Validation
+## Validation
 **Goal:** "Self-Validating Environment".
 > *The environment can validate itself after installation or update.*
 
@@ -84,7 +84,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
     - [ ] **Network Simulation**: Simulate high latency/packet loss.
     - [ ] **Permission Fuzzing**: Verify strict umask behavior.
 
-## 📦 Pillar 8: Distribution Guarantees & Platform Support
+## Distribution
 **Goal:** "Supported Platforms Matrix".
 > *Only listed platforms are guaranteed to work; others are best-effort.*
 
@@ -99,7 +99,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 
 ---
 
-## 🔮 Future Horizons (Legacy Roadmap)
+## Future
 
 ### Domain-Specific Environments
 - [ ] **Data Science (Phase 38)**: Conda/Mamba, GPU Config, Jupyter.
@@ -125,7 +125,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 
 ---
 
-## 📜 Completed Milestones
+## Completed
 
 ### Core Foundations
 - [x] **Universal Config (Chezmoi) (Phase 1)**

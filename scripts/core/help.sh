@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.474) - <https://dotfiles.io>
-# Made with ♥ in London, UK by Sebastien Rousseau
+# Made with  in London, UK by Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # License: MIT
 
@@ -14,7 +14,7 @@ export DF_DOTFILESDIR              # Exporting Location of dotfiles.
 
 echo ""
 # shellcheck disable=SC2154
-echo "${RED}❭${NC} Starting help menu."
+echo "${RED}${NC} Starting help menu."
 echo ""
 
 ## 🅷🅴🅻🅿 🅼🅴🅽🆄 - Display help menu.

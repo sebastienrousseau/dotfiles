@@ -52,9 +52,9 @@ suggest_context_commands() {
     
     # Display suggestions
     if [[ ${#suggestions[@]} -gt 0 ]]; then
-        print -P "%F{cyan}💡 Context Suggestions:%f"
+        print -P "%F{cyan} Context Suggestions:%f"
         for cmd in "${suggestions[@]}"; do
-            print -P "  %F{green}➜%f $cmd"
+            print -P "  %F{green}%f $cmd"
         done
     else
         echo "No context-specific suggestions found for this directory."

@@ -4,11 +4,11 @@ Manage Infrastructure as Code aliases (Terraform, OpenTofu, Ansible). Part of th
 
 ![Dotfiles banner][banner]
 
-## 📖 Description
+## Description
 
 These aliases are defined in `terraform.aliases.sh` and are automatically loaded by `chezmoi`.
 
-## ⚡ Aliases
+## Aliases
 
 ### terraform
 - `tf` - Terraform shortcut

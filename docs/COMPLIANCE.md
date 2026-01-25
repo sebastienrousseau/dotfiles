@@ -1,8 +1,8 @@
-# Regulatory Compliance & Security Controls
+# Compliance
 
 This document maps the dotfiles configuration and tooling to standard regulatory frameworks (SOC 2, ISO 27001, GDPR).
 
-## 🛡️ Control Mappings
+## Controls
 
 ### SOC 2 Type II
 
@@ -28,7 +28,7 @@ This document maps the dotfiles configuration and tooling to standard regulatory
 | **Data Minimization** | Limit data collection | `privacy-mode` disables CLI telemetry (Dotnet, Brew, Functions). |
 | **Integrity** | Protect against tampering | `lock-configs` prevents unauthorized modification of shell history/config. |
 
-## 🔒 Security Features
+## Security
 
 ### Immutability
 Critical configuration files can be locked to prevent tampering:

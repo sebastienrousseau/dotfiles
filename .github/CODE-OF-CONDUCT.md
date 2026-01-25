@@ -11,7 +11,7 @@
 
 # Dotfiles (v0.2.473)
 
-Simply designed to fit your shell life 🐚
+Simply designed to fit your shell life 
 
 ![Dotfiles banner][banner]
 

@@ -106,9 +106,9 @@ set -g status-left-length 50
 set -g status-right-length 50
 
 # OS-Specific Status Left
-if-shell 'uname | grep -q Darwin' 'set -g status-left "#[bg={{ $accent_blue }}] 🍎 macOS #S #[bg={{ $accent_red }}] #W #[bg={{ $panel_bg }}]"'
-if-shell 'uname | grep -q Linux' 'set -g status-left "#[bg={{ $accent_blue }}] 🐧 Linux #S #[bg={{ $accent_red }}] #W #[bg={{ $panel_bg }}]"'
-if-shell 'uname | grep -q MINGW' 'set -g status-left "#[bg={{ $accent_blue }}] 🪟 Windows #S #[bg={{ $accent_red }}] #W #[bg={{ $panel_bg }}]"'
+if-shell 'uname | grep -q Darwin' 'set -g status-left "#[bg={{ $accent_blue }}]  macOS #S #[bg={{ $accent_red }}] #W #[bg={{ $panel_bg }}]"'
+if-shell 'uname | grep -q Linux' 'set -g status-left "#[bg={{ $accent_blue }}]  Linux #S #[bg={{ $accent_red }}] #W #[bg={{ $panel_bg }}]"'
+if-shell 'uname | grep -q MINGW' 'set -g status-left "#[bg={{ $accent_blue }}]  Windows #S #[bg={{ $accent_red }}] #W #[bg={{ $panel_bg }}]"'
 
 set -g status-right "#[fg={{ $status_fg }}] #[bg={{ $panel_bg }}] ⬛ #I #[bg={{ $accent_blue }}] #H #[bg={{ $accent_red }}] %_d %B %I:%M%p "
 set -g window-status-current-format "#[bg={{ $status_bg }}]Dotfiles (v0.2.474)"

@@ -24,7 +24,7 @@ fi
 
 mkdir -p "$FONT_DIR"
 
-echo "🎨 Installing Nerd Fonts ($FONT_VERSION) for $OS_TYPE..."
+echo " Installing Nerd Fonts ($FONT_VERSION) for $OS_TYPE..."
 
 for font in "${FONTS[@]}"; do
     # Check if font appears to be installed (simplistic check)
@@ -49,4 +49,4 @@ if command -v fc-cache >/dev/null; then
     fc-cache -f "$FONT_DIR"
 fi
 
-echo "✅ Nerd Fonts installed successfully!"
+echo " Nerd Fonts installed successfully!"

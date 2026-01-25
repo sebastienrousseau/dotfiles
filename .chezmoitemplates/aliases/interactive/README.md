@@ -4,11 +4,11 @@ Manage Interactive aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
-## 📖 Description
+## Description
 
 These aliases are defined in `interactive.aliases.sh` and are automatically loaded by `chezmoi`.
 
-## ⚡ Aliases
+## Aliases
 
 This code provides a set of interactive aliases for common command line
 operations. The aliases are designed to simplify and enhance the user

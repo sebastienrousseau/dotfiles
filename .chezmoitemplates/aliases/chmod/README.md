@@ -4,20 +4,20 @@ Manage Chmod aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
-## 📖 Description
+## Description
 
 These aliases are defined in `chmod.aliases.sh` and are automatically loaded by `chezmoi`.
 
-## ⚡ Aliases
+## Aliases
 
 ---
-## 🚀 Introduction
+## Introduction
 This script provides an enhanced set of shortcuts and functions for the
 `chmod` command, making it easier to manage file and directory permissions.
 With features like input validation, recursive confirmation, and user-friendly
 aliases, you can efficiently customize permissions for files and directories.
 ---
-## 🛠️ Features
+##  Features
 Quickly apply common permission settings with pre-defined aliases:
 | Alias        | Permissions      | Description                               |
 |--------------|------------------|-------------------------------------------|
@@ -31,14 +31,14 @@ Quickly apply common permission settings with pre-defined aliases:
 | `chmod_764`  | `rwxrw-r--`      | Full owner, read/write for the group,     |
 | `chmod_777`  | `rwxrwxrwx`      | Full permissions for everyone             |
 ---
-### 🔧 Recursive Confirmation for Permissions
+### Recursive Confirmation for Permissions
 The `change_permission` function allows you to recursively apply permissions
 with a confirmation prompt, displaying the number of items affected:
 ```bash
 change_permission 755 /path/to/directory -R
 ```
 ---
-### 📂 User, Group, and Others Shortcuts
+### User, Group, and Others Shortcuts
 Fine-tune permissions for specific user groups (owner, group, or others):
 | Alias         | Description                                |
 |---------------|--------------------------------------------|
@@ -67,7 +67,7 @@ Set permissions for specific file types with ease:
 | `chmod_755d` | Set permissions of all directories to `rwxr-xr-x`  |
 | `chmod_644f` | Set permissions of all files to `rw-r--r--`        |
 ---
-## 📦 Installation
+## Installation
 1. Clone this repository:
    ```bash
    git clone https://github.com/sebastienrousseau/dotfiles.git
@@ -81,7 +81,7 @@ Set permissions for specific file types with ease:
    source ~/.bashrc
    ```
 ---
-## 🧑‍💻 Usage
+## ‍ Usage
 Here are some examples of how to use the `chmod` aliases and functions:
 - Apply common permissions:
   ```bash
@@ -99,13 +99,13 @@ Here are some examples of how to use the `chmod` aliases and functions:
   change_permission 755 /path/to/directory -R
   ```
 ---
-## 🛡️ License
+##  License
 This project is licensed under the
 [MIT License](https://opensource.org/licenses/MIT). See the `LICENSE` file for
 more information.
 ---
-## 👨‍💻 Author
-Created with ♥ by [Sebastien Rousseau](https://sebastienrousseau.com)
+## ‍ Author
+Created with  by [Sebastien Rousseau](https://sebastienrousseau.com)
 - Website: [https://sebastienrousseau.com](https://sebastienrousseau.com)
 - GitHub: [https://github.com/sebastienrousseau](https://github.com/sebastienrousseau)
 

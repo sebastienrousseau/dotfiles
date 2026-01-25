@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.474) - <https://dotfiles.io>
-# Made with ♥ in London, UK by Sebastien Rousseau
+# Made with  in London, UK by Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # License: MIT
 
@@ -15,7 +15,7 @@ export DF_DOTFILESDIR              # Exporting Location of dotfiles.
 ## 🆄🅽🅿🅰🅲🅺 - Unpack the dotfiles on your system.
 unpack() {
   # shellcheck disable=SC2154
-  echo "${RED}❭${NC} Unpacking ${GREEN}Dotfiles v${VERSION}${NC}."
+  echo "${RED}${NC} Unpacking ${GREEN}Dotfiles v${VERSION}${NC}."
 
   # shellcheck disable=SC2154
   unzip -qq -u "${DF_DOWNLOADDIR}"/v"${DF_VERSION}".zip -d "${DF_DOWNLOADDIR}"

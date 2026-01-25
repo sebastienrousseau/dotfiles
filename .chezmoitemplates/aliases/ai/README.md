@@ -4,11 +4,11 @@ Manage AI & LLM aliases (GitHub Copilot, Ollama). Part of the **Universal Dotfil
 
 ![Dotfiles banner][banner]
 
-## 📖 Description
+## Description
 
 These aliases are defined in `ai.aliases.sh` and are automatically loaded by `chezmoi`.
 
-## ⚡ Aliases
+## Aliases
 
 ### GitHub Copilot
 - `ghcp` - Copilot shortcut

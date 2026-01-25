@@ -4,12 +4,12 @@ Manage Modern Tooling aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
-## 📖 Description
+## Description
 
 These aliases are defined in `modern.aliases.sh` and are automatically loaded by `chezmoi`.
 They provide modern replacements for legacy Unix tools (Rust-based).
 
-## ⚡ Aliases
+## Aliases
 
 ### File Listing (eza)
 If `eza` is installed (replacing `ls`):

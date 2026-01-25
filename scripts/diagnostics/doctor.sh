@@ -14,15 +14,15 @@ RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo "🩺 Dotfiles Doctor - System Diagnostics"
+echo " Dotfiles Doctor - System Diagnostics"
 echo "-------------------------------------"
 
 Errors=0
 Warnings=0
 
-log_success() { echo -e "${GREEN}✅ $1${NC}"; }
-log_fail() { echo -e "${RED}❌ $1${NC}"; Errors=$((Errors + 1)); }
-log_warn() { echo -e "${YELLOW}⚠️  $1${NC}"; Warnings=$((Warnings + 1)); }
+log_success() { echo -e "${GREEN} $1${NC}"; }
+log_fail() { echo -e "${RED} $1${NC}"; Errors=$((Errors + 1)); }
+log_warn() { echo -e "${YELLOW}️  $1${NC}"; Warnings=$((Warnings + 1)); }
 
 # 1. Check Dependencies
 echo "Checking Core Dependencies..."
@@ -68,7 +68,7 @@ fi
 echo -e "\n-------------------------------------"
 if [[ $Errors -eq 0 ]]; then
     if [[ $Warnings -eq 0 ]]; then
-        echo -e "${GREEN}All systems healthy! 🚀${NC}"
+        echo -e "${GREEN}All systems healthy! ${NC}"
     else
         echo -e "${YELLOW}System healthy with $Warnings warnings.${NC}"
     fi

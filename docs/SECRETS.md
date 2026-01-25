@@ -1,8 +1,8 @@
-# Secrets (age + chezmoi)
+# Secrets
 
 This repo supports encrypted secrets using `age` with `chezmoi`.
 
-## Initialize
+## Get started
 
 ```bash
 dot secrets-init
@@ -13,7 +13,7 @@ It also updates `~/.config/chezmoi/chezmoi.toml` with the age backend settings.
 
 Ensure `age` is installed first (via brew/apt or your toolchain).
 
-## Enable encryption in chezmoi
+## Enable encryption
 
 Edit `~/.config/chezmoi/chezmoi.toml` (local only):
 
@@ -31,7 +31,7 @@ You can also re-run:
 chezmoi init --apply --promptDefaults
 ```
 
-## Edit secrets
+## Edit
 
 ```bash
 dot secrets
@@ -39,7 +39,7 @@ dot secrets
 
 This edits `~/.config/chezmoi/encrypted_secrets.age` and applies on save.
 
-## Create a new secrets file (first time)
+## Create
 
 ```bash
 dot secrets-create
@@ -51,7 +51,7 @@ Then edit:
 dot secrets
 ```
 
-## Encrypt an SSH key (local-only)
+## Encrypt an SSH key
 
 ```bash
 dot ssh-key ~/.ssh/id_ed25519

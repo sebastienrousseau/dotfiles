@@ -1,8 +1,8 @@
-# Installation
+# Get started
 
 This guide describes the supported platforms, prerequisites, and the standard install path.
 
-## Supported Platforms
+## Supported platforms
 
 - macOS (Homebrew)
 - Ubuntu/Debian (apt)
@@ -21,20 +21,20 @@ Optional (feature‑dependent):
 - Nix (optional toolchain)
 - gum (required for `dot learn`)
 
-## Quick Install
+## Install
 
 ```bash
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.474/install.sh)"
 exec zsh
 ```
 
-## What happens during install
+## What happens
 
 - The installer downloads a pinned Chezmoi bootstrap and applies this repo.
 - Chezmoi hooks install OS packages, fonts, and optional apps.
 - The `dot` CLI becomes available in `~/.local/bin`.
 
-## Optional: gum (for `dot learn`)
+## Optional: gum
 
 macOS:
 ```bash
@@ -51,7 +51,7 @@ Linux (Go toolchain):
 go install github.com/charmbracelet/gum@latest
 ```
 
-## Updating
+## Update
 
 ```bash
 dot update

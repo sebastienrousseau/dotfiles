@@ -9,7 +9,7 @@ This page lists the main tools and CLI conveniences provided by this repo.
 - tmux (terminal multiplexer)
 - Neovim (editor)
 
-## Navigation & Search
+## Search
 
 - fzf
 - zoxide
@@ -21,7 +21,7 @@ This page lists the main tools and CLI conveniences provided by this repo.
 - ncdu
 - htop
 
-## Terminal UX
+## Terminal
 
 - WezTerm / Alacritty / Kitty / Ghostty configs
 - btop
@@ -35,7 +35,7 @@ This page lists the main tools and CLI conveniences provided by this repo.
 - yazi
 - zsh bell sound/visual toggles
 
-## Developer Utilities
+## Developer tools
 
 - Git helpers and sane defaults
 - Project templates (`dot new`)
@@ -43,7 +43,7 @@ This page lists the main tools and CLI conveniences provided by this repo.
 - Benchmarking (`dot benchmark`)
 - Lua tooling (`luacheck`, `stylua`, `luarocks`, `lua/luajit`)
 
-## Security (Opt‑in)
+## Security
 
 - Firewall hardening
 - Telemetry disable
@@ -65,7 +65,7 @@ Apply changes with:
 chezmoi apply
 ```
 
-## Visuals & Theme Helpers
+## Make it yours
 
 - Wallpaper sync/rotate scripts
 - Cursor and icon theming helpers (Linux)

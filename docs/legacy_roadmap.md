@@ -2,7 +2,7 @@
 
 This roadmap outlines the path to a high-performance, super-efficient development machine designed for Rust, Python, and AI on Linux (Zorin OS / T2 Mac hardware).
 
-## ✅ Phase 1: Foundation (Completed)
+## Phase 1: Foundation (Completed)
 - **Core Shell**: Zsh + Oh My Zsh.
 - **Modern Prompt**: Starship (hooked & active).
 - **Language Managers**: `rustup` (Rust) and `fnm` (Node.js).
@@ -15,7 +15,7 @@ This roadmap outlines the path to a high-performance, super-efficient developmen
 
 ---
 
-## ✅ Phase 2: Speed & Navigation (Completed)
+## Phase 2: Speed & Navigation (Completed)
 Focus: Reduce friction in filesystem navigation and build times.
 
 ### 1. Navigation
@@ -37,7 +37,7 @@ Focus: Reduce friction in filesystem navigation and build times.
 
 ---
 
-## ✅ Phase 3: AI Power User (Completed)
+## Phase 3: AI Power User (Completed)
 Focus: Integrate AI deeply into the workflow.
 
 - [x] **Fabric**: Open-source framework for augmenting humans using AI (installed via `cmd` path).
@@ -47,7 +47,7 @@ Focus: Integrate AI deeply into the workflow.
 
 ---
 
-## ✅ Phase 4: System Tuning & Hardening (Completed)
+## Phase 4: System Tuning & Hardening (Completed)
 Focus: Squeeze every ounce of performance and security from the hardware.
 
 - [x] **Kernel Tuning**: Increase file descriptor limits and optimize TCP stack for lower latency.
@@ -57,13 +57,13 @@ Focus: Squeeze every ounce of performance and security from the hardware.
 
 ---
 
-## ✅ Phase 5: Final Polish (Completed)
+## Phase 5: Final Polish (Completed)
 - [x] **Global UV Config**: Created `~/.config/uv/uv.toml` for managed python perference.
 - [x] **Roadmap Completion**: Verified all items are 100% complete.
 
 ---
 
-## 🚀 Maintenance & Updates
+## Maintenance & Updates
 - **Update System**: `sudo apt update && sudo apt upgrade`
 - **Update Rust**: `rustup update`
 - **Update Node**: `fnm install --lts`
@@ -72,7 +72,7 @@ Focus: Squeeze every ounce of performance and security from the hardware.
 
 ---
 
-## ✅ Phase 6: Desktop Environment (Completed)
+## Phase 6: Desktop Environment (Completed)
 Focus: Clean, bloat-free, and supercharged GNOME/Zorin experience.
 
 - [x] **Bloatware Removal**: Removed games (`aisleriot`, `mines`, etc.) and media apps (`rhythmbox`, `totem`).
@@ -86,7 +86,7 @@ Focus: Clean, bloat-free, and supercharged GNOME/Zorin experience.
 
 ---
 
-## ✅ Phase 7: Browser Optimization (Completed)
+## Phase 7: Browser Optimization (Completed)
 Focus: Chrome tuned for development and memory efficiency.
 
 - [x] **Settings**: Enable "Memory Saver" and "Energy Saver" via Managed Policies.
@@ -95,7 +95,7 @@ Focus: Chrome tuned for development and memory efficiency.
 
 ---
 
-## ✅ Phase 8: Neovim IDE (Completed)
+## Phase 8: Neovim IDE (Completed)
 Focus: Building a terminal-based IDE that rivals VS Code for Rust, Python, and AI.
 
 - [x] **Latest Version**: Installed Neovim v0.12.0-dev (Nightly) to resolve plugin stability issues.
@@ -125,7 +125,7 @@ Focus: Building a terminal-based IDE that rivals VS Code for Rust, Python, and A
 
 ---
 
-## 🏁 Phase 9: Repository Polish & PR #62 (In Progress)
+## Phase 9: Repository Polish & PR #62 (In Progress)
 Focus: Finalize the `dotfiles` repository for public consumption and sync the local "Gold Standard" environment.
 
 - [x] **Repository Sync**:

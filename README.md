@@ -8,7 +8,7 @@
 
 ---
 
-## Elevator Pitch
+## Overview
 
 Dotfiles is a cross-platform shell environment distribution managed by [Chezmoi](https://github.com/twpayne/chezmoi) that installs in minutes and keeps your development environment consistent across macOS, Linux, and WSL. It is **idempotent** by design: running it multiple times is safe, predictable, and produces the same result.
 
@@ -18,22 +18,22 @@ Git + templates + guarded scripts = a reproducible shell.
 
 ## Table of Contents
 
-- [Why Dotfiles?](#why-dotfiles)
-- [Safety Guarantees](#safety-guarantees)
-- [Quick Start (60 seconds)](#quick-start-60-seconds)
-- [Documentation](#documentation)
-- [Installation Details](#installation-details)
-- [How-to Guides](#how-to-guides)
+- [Why](#why)
+- [Safety](#safety)
+- [Get started](#get-started)
+- [Discover](#discover)
+- [Install details](#install-details)
+- [Make it yours](#make-it-yours)
 - [Reference](#reference)
-- [Architecture (How it Works)](#architecture-how-it-works)
+- [How it works](#how-it-works)
 - [Roadmap](#roadmap)
-- [Contributing](#contributing)
+- [Contribute](#contribute)
 - [Changelog](#changelog)
 - [License](#license)
 
 ---
 
-## Why Dotfiles?
+## Why
 
 Dotfiles takes an infrastructure-oriented approach to managing dotfiles. It is designed for developers who manage multiple machines and value **daily usability, reproducibility, and auditability.**
 
@@ -42,7 +42,7 @@ Dotfiles takes an infrastructure-oriented approach to managing dotfiles. It is d
 - **Safety First:** Explicit opt-in for any system or security changes.
 - **Clean Slate:** Clear separation between source files, generated configs, and system state.
 
-## Safety Guarantees
+## Safety
 
 This is **infrastructure**, not an ad-hoc shell script.
 
@@ -54,7 +54,7 @@ This is **infrastructure**, not an ad-hoc shell script.
 
 ---
 
-## Quick Start (60 seconds)
+## Get started
 
 > [!IMPORTANT]
 > The installer automatically backs up an existing `~/.dotfiles` directory and cleans up legacy configuration files. The installer **only** bootstraps `chezmoi` and applies this repo. OS packages are installed via Chezmoi hooks during the first apply.
@@ -72,7 +72,7 @@ DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/
 
 ---
 
-## Documentation
+## Discover
 
 - [Installation Guide](docs/INSTALL.md) — prerequisites and supported platforms.
 - [Operations Guide](docs/OPERATIONS.md) — common workflows and platform notes.
@@ -84,7 +84,7 @@ DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/
 
 ---
 
-## Installation Details
+## Install details
 
 **Prerequisites**
 - Required: `git`, `curl`
@@ -101,7 +101,7 @@ dot update
 DOTFILES_NONINTERACTIVE=1 dot apply
 ```
 
-## How-to Guides
+## Make it yours
 
 - [Operations](docs/OPERATIONS.md)
 - [Secrets](docs/SECRETS.md)
@@ -158,7 +158,7 @@ DOTFILES_NONINTERACTIVE=1 dot secrets-init
 # Output: Age key created at ~/.config/chezmoi/key.txt
 ```
 
-### Security Auditing (What Changes)
+### Security changes
 
 These scripts are **opt‑in** and only run when the matching env var is set.
 All security changes are logged to `~/.local/share/dotfiles.log`.
@@ -172,7 +172,7 @@ All security changes are logged to `~/.local/share/dotfiles.log`.
 | `dot usb-safety` | No system change (manual UI) | GNOME `gsettings` automount off |
 | `dot encrypt-check` | Reads FileVault status via `fdesetup` | Detects LUKS via `lsblk` |
 
-### Nix Integration
+### Nix
 
 Nix is **optional**. The repo does **not** install the Nix daemon.
 
@@ -182,13 +182,13 @@ Nix is **optional**. The repo does **not** install the Nix daemon.
 
 ---
 
-### Install Guide
+### Install guide
 
 See [docs/INSTALL.md](docs/INSTALL.md) for prerequisites, supported platforms, and the full install flow.
 
 <p align="right"><a href="#dotfiles--a-fast-idempotent-shell-environment-distribution-in-minutes">↑ Back to Top</a></p>
 
-## Architecture (How it Works)
+## How it works
 
 If Mermaid does not render, the flow is: `install.sh → Chezmoi → ~/.dotfiles → ~/.config + ~/.local`.
 
@@ -233,7 +233,7 @@ Tracked via [GitHub issues](https://github.com/sebastienrousseau/dotfiles/issues
 
 ---
 
-## Contributing
+## Contribute
 
 Please read [CONTRIBUTING.md](.github/CONTRIBUTING.md) before opening a PR.
 

@@ -2,13 +2,13 @@
 
 Tools for regulatory compliance and privacy enforcement.
 
-## 🛡️ Controls
+##  Controls
 
 | Alias | Description |
 |-------|-------------|
 | `privacy-mode` | Disables telemetry for CLI tools (Homebrew, Dotnet, Azure, etc.) for the current session. |
 | `dot-audit` | Displays the recent configuration audit trail (Git history or Audit log). |
 
-## 📚 Documentation
+## Documentation
 
 See [COMPLIANCE.md](../../../COMPLIANCE.md) for full SOC2/ISO control mappings.

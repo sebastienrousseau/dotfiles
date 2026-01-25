@@ -21,33 +21,33 @@ Simply design to fit your shell life
           ]],
           keys = {
             {
-              icon = "📂",
+              icon = "F",
               key = "f",
               desc = "Find File",
               action = ":lua Snacks.dashboard.pick('files')",
             },
-            { icon = "📝", key = "n", desc = "New File", action = ":ene | startinsert" },
+            { icon = "N", key = "n", desc = "New File", action = ":ene | startinsert" },
             {
-              icon = "🔎",
+              icon = "G",
               key = "g",
               desc = "Find Text",
               action = ":lua Snacks.dashboard.pick('live_grep')",
             },
             {
-              icon = "🕒",
+              icon = "R",
               key = "r",
               desc = "Recent Files",
               action = ":lua Snacks.dashboard.pick('oldfiles')",
             },
-            { icon = "🐍", key = "p", desc = "Select Env", action = ":VenvSelect" }, -- Fixed: Specific VS Code-like task
+            { icon = "P", key = "p", desc = "Select Env", action = ":VenvSelect" }, -- Fixed: Specific VS Code-like task
             {
-              icon = "⚙️",
+              icon = "C",
               key = "c",
               desc = "Config",
               action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})",
             },
-            { icon = "📦", key = "m", desc = "Manage Packages", action = ":Lazy" },
-            { icon = "❌", key = "q", desc = "Quit", action = ":qa" },
+            { icon = "M", key = "m", desc = "Manage Packages", action = ":Lazy" },
+            { icon = "Q", key = "q", desc = "Quit", action = ":qa" },
           },
         },
       },

@@ -4,14 +4,14 @@ Manage Cd aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
-## 📖 Description
+## Description
 
 These aliases are defined in `cd.aliases.sh` and are automatically loaded by `chezmoi`.
 
-## ⚡ Aliases
+## Aliases
 
 ---
-## 🚀 Introduction
+## Introduction
 This repository includes a robust set of shell aliases and scripts designed to
 streamline your command-line experience. The enhanced directory navigation system delivers:
 - **Smart directory history tracking**
@@ -23,8 +23,8 @@ streamline your command-line experience. The enhanced directory navigation syste
 - **Performance optimization for large directories**
 - **Enhanced security and validation**
 ---
-## 🛠️ Features
-### 🌟 Navigation Shortcuts
+##  Features
+### Navigation Shortcuts
 | Alias           | Description                           |
 |------------------|--------------------------------------|
 | `-`             | Switch to the previous directory      |
@@ -32,7 +32,7 @@ streamline your command-line experience. The enhanced directory navigation syste
 | `....`, `.....` | Ascend three or four levels           |
 | `hom`           | Navigate to the home directory (`~`)  |
 ---
-### 📂 Custom Directory Access
+### Custom Directory Access
 Quickly access frequently used directories with consistent shortcuts:
 | Alias | Directory Path          | Description            |
 |-------|--------------------------|------------------------|
@@ -46,7 +46,7 @@ Quickly access frequently used directories with consistent shortcuts:
 | `pic` | `${HOME}/Pictures`      | Pictures directory     |
 | `vid` | `${HOME}/Videos`        | Videos directory       |
 ---
-### 📌 Bookmark System
+### Bookmark System
 Create and manage persistent bookmarks for any directory:
 | Command             | Alias | Description                       |
 |---------------------|-------|-----------------------------------|
@@ -64,14 +64,14 @@ bmg work-project
 bml
 ```
 ---
-### 🕒 Directory History
+### Directory History
 Track and navigate to recently visited directories:
 | Command      | Alias | Description                         |
 |--------------|-------|-------------------------------------|
 | `dirhistory` | `dh`  | Show and navigate history          |
 | `lwd`        | `ld`  | Return to last working directory    |
 ---
-### 🏗️ Advanced Navigation
+###  Advanced Navigation
 | Command          | Alias | Description                                |
 |------------------|-------|--------------------------------------------|
 | `mkcd <dir>`     | `mcd` | Create and immediately enter directory    |
@@ -80,7 +80,7 @@ Track and navigate to recently visited directories:
 | `popd`           |       | Pop directory from stack                   |
 | `dirs`           |       | List directory stack with indices         |
 ---
-### 🔧 System Directories
+### System Directories
 Effortlessly navigate to critical system directories:
 | Alias | Directory Path | Description                    |
 |-------|----------------|--------------------------------|
@@ -89,7 +89,7 @@ Effortlessly navigate to critical system directories:
 | `tmp` | `/tmp`         | Temporary files directory      |
 | `usr` | `/usr`         | User programs directory        |
 ---
-### ⚙️ Enhanced Customization
+###  Enhanced Customization
 - **Cross-Platform Support**: Works on macOS, Linux, and other Unix-like systems
 - **Configurable Options**: Customize behavior through environment variables:
   ```bash
@@ -106,7 +106,7 @@ Effortlessly navigate to critical system directories:
 - **Help System**: Run `cdhelp` to view all available commands
 - **Version Tracking**: Run `cdversion` to display version information
 ---
-## 📦 Installation
+## Installation
 1. **Clone the repository**:
 ```bash
 git clone https://github.com/sebastienrousseau/dotfiles.git
@@ -120,7 +120,7 @@ echo 'source /path/to/dotfiles/cd.aliases.sh' >> ~/.bashrc
 source ~/.bashrc
 ```
 ---
-## 🧑‍💻 Usage Examples
+## ‍ Usage Examples
 ```bash
 # Navigate to a directory with history tracking
 cd ~/projects/website
@@ -150,29 +150,29 @@ cdversion
 cdhelp
 ```
 ---
-## 🛡️ Security Features
+##  Security Features
 The enhanced version includes improved security and validation:
 - **Directory Validation**: All directories are checked for existence and permissions before navigation
 - **Bookmark Validation**: Bookmark names are validated to prevent injection attacks
 - **Safe File Operations**: File operations use secure methods to prevent corruption
 - **Input Sanitation**: User inputs are validated before processing
 ---
-## 📋 Performance Optimizations
+## Performance Optimizations
 - **Large Directory Handling**: Automatic directory listing is skipped for large directories to avoid performance issues
 - **Improved Bookmark Storage**: Bookmarks are stored more efficiently
 - **Duplicate Prevention**: Directory history prevents duplicate entries
 - **Optimized File Operations**: File operations are optimized for speed and safety
 ---
-## 📚 Documentation
+## Documentation
 For advanced configuration and detailed usage examples, run `cdhelp` or visit the
 [official documentation](https://dotfiles.io).
 ---
-## 🛡️ License
+##  License
 This project is licensed under the
 [MIT License](https://opensource.org/licenses/MIT).
 ---
-## 👨‍💻 Author
-Created with ♥ by [Sebastien Rousseau](https://sebastienrousseau.com)
+## ‍ Author
+Created with  by [Sebastien Rousseau](https://sebastienrousseau.com)
 - Website: [https://sebastienrousseau.com](https://sebastienrousseau.com)
 - GitHub: [https://github.com/sebastienrousseau](https://github.com/sebastienrousseau)
 

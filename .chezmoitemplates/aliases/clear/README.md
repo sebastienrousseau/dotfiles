@@ -4,11 +4,11 @@ Manage Clear aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
-## 📖 Description
+## Description
 
 These aliases are defined in `clear.aliases.sh` and are automatically loaded by `chezmoi`.
 
-## ⚡ Aliases
+## Aliases
 
 This code provides a set of command aliases to make working with the
 terminal easier and more efficient. The following aliases are included:

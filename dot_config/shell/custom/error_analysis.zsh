@@ -18,7 +18,7 @@ analyze_last_error() {
         return 1
     fi
 
-    echo "🔍 Analyzing failure: '$hist_entry'"
+    echo " Analyzing failure: '$hist_entry'"
     
     local prompt="I ran the command: '$hist_entry' and it failed. Please explain why this might have happened and suggest a fix. Be concise."
     

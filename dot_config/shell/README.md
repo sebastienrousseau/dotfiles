@@ -1,8 +1,8 @@
-# Dotfiles (Universal Config)
+# Dotfiles
 
 Welcome to your universally compatible, high-performance dotfiles configuration, managed by [chezmoi](https://www.chezmoi.io/).
 
-## 🚀 Features
+## Discover
 
 - **Universal Support**: Works seamlessly on macOS, Linux (Ubuntu/Debian), and Windows (WSL).
 - **Instant Startup**: Optimized with `zcompile` and lazy-loading for <10ms startup time.
@@ -20,9 +20,9 @@ Welcome to your universally compatible, high-performance dotfiles configuration,
 
 ---
 
-## 📥 Installation
+## Get started
 
-### One-Line Bootstrap
+### Install
 To install these dotfiles on a new machine, simply run:
 
 ```bash
@@ -37,7 +37,7 @@ This command will:
 
 ---
 
-## 🔄 How to Update
+## Keep it current
 
 ### macOS
 Updates are handled via [Homebrew](https://brew.sh/).
@@ -47,24 +47,24 @@ Updates are handled via [Homebrew](https://brew.sh/).
    - Optional: `mas` installs App Store apps from `~/.config/mas/masapps.txt`.
    - Optional: `duti` applies default app bindings from `~/.config/duti/defaults.duti`.
 
-### VS Code Extensions
+### VS Code extensions
 1. Edit `~/.config/vscode/extensions.txt`.
 2. Run `chezmoi apply` to install missing extensions (if `code` is available).
 
-### Linux & WSL
+### Linux and WSL
 Updates are handled via `apt-get` (Ubuntu/Debian).
 1. Run `chezmoi apply`.
    - This checks for package updates defined in `run_onchange_linux_install-packages.sh.tmpl`.
    - Optional Flatpak list is read from `~/.config/flatpak/flatpak.list`.
 
-### Vim Plugins
+### Vim plugins
 1. Edit `~/.dotfiles/dot_vimrc`.
 2. Run `chezmoi apply`.
    - This automatically runs `vim +PlugInstall +PlugClean +qa`.
 
 ---
 
-## 🚚 Migration Guide (Legacy -> Chezmoi)
+## Migrate
 
 If you are migrating from an old `~/.dotfiles` setup:
 
@@ -90,7 +90,7 @@ If you are migrating from an old `~/.dotfiles` setup:
 
 ---
 
-## 📂 Structure
+## Structure
 
 The configuration is managed in `~/.dotfiles`.
 
@@ -112,9 +112,9 @@ The configuration is managed in `~/.dotfiles`.
     └── paths/              # (Legacy) Path definitions
 ```
 
-## 🛠 Usage
+## Use it
 
-### Applying Changes
+### Apply changes
 After editing any file in `~/.dotfiles`, apply the changes to your home directory:
 
 ```bash
@@ -166,21 +166,21 @@ dot learn     # Interactive tour (requires gum)
 dot help
 ```
 
-### Optional Nix Toolchain
+### Nix
 
 ```bash
 cd ~/.dotfiles
 nix develop
 ```
 
-### Secrets (age)
+### Secrets
 
 ```bash
 dot secrets-init
 dot secrets
 ```
 
-### Personal Details (Git)
+### Git identity
 
 Set your Git identity in the local `chezmoi` config (not committed):
 
@@ -200,7 +200,7 @@ Fields:
 - `git_signingkey`
 - `git_signingformat`
 
-### Theme
+### Make it yours
 
 Set the theme in `.chezmoidata.toml`:
 
@@ -235,13 +235,13 @@ Available themes:
 - `kanagawa-dragon`
 - `kanagawa-lotus`
 
-### DevContainer / Codespaces
+### DevContainer and Codespaces
 
 ```
 .devcontainer/devcontainer.json
 ```
 
-### Adding New Aliases
+### Add aliases
 1. Navigate to `~/.dotfiles/.chezmoitemplates/aliases/`.
 2. Create a new file (e.g., `mytool/mytool.aliases.sh`) or edit an existing one.
 3. Add your aliases.
@@ -249,15 +249,15 @@ Available themes:
 
 **Note:** Files in `macOS/` are only included on macOS systems.
 
-### Adding New Functions
+### Add functions
 1. Navigate to `~/.dotfiles/.chezmoitemplates/functions/`.
 2. Create a new `.sh` file.
 3. Define your function with a usage comment.
 4. Run `chezmoi apply`.
 
-## ⚡ Performance Tips
+## Performance
 - **Lazy Loading**: Heavy tools (like `nvm`, `rbenv`) are lazy-loaded. They only initialize when you type the command.
 - **Zcompile**: Your `.zshrc` and generated config files are automatically compiled to `.zwc` bytecode for faster parsing.
 
-## 🧪 Testing
+## Test
 This repository includes GitHub Actions CI to test the configuration on macOS, Ubuntu, and Windows for every Pull Request.

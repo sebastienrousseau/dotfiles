@@ -1,6 +1,6 @@
-# Neovim IDE Guide
+# Neovim
 
-## Features
+## Discover
 
 ### 1. Modern Core
 - **Installation**: Uses Neovim Nightly (v0.11+) for the latest features and plugin compatibility.
@@ -24,7 +24,7 @@
 - **TODOs**: Highlights `TODO` and `FIXME` comments.
 - **Session**: Auto-restores your last session.
 
-## Keybinds Cheat Sheet
+## Keybindings
 | Key | Action |
 | --- | --- |
 | `<Space>ff` | Find Files |

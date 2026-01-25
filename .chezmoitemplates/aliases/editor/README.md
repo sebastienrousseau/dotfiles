@@ -4,11 +4,11 @@ Manage Editor aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
-## 📖 Description
+## Description
 
 These aliases are defined in `editor.aliases.sh` and are automatically loaded by `chezmoi`.
 
-## ⚡ Aliases
+## Aliases
 
 This code provides a comprehensive set of command aliases for editing files using the editor configured in your environment. It works in conjunction with the editor configuration script (`editor.sh`) which automatically selects the best available editor on your system.
 ### Supported Editors

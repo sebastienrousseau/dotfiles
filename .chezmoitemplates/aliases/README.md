@@ -5,13 +5,13 @@
 
 # Dotfiles Aliases (v0.2.473)
 
-Simply designed to fit your shell life 🐚
+Simply designed to fit your shell life 
 
 ![Dotfiles banner][banner]
 
 This directory contains modular alias definitions managed by **chezmoi**.
 
-## 📖 How it Works
+## How it Works
 
 Aliases are split into small, manageable files (e.g., `git/git.aliases.sh`, `docker/docker.aliases.sh`).
 
@@ -20,7 +20,7 @@ During `chezmoi apply`, the main template `dot_config/shell/aliases.sh.tmpl`:
 2. Aggregates them into a single `~/.config/shell/aliases.sh` file.
 3. This aggregated file is sourced by your `.zshrc`.
 
-## 🛠 Usage
+## Usage
 
 ### Adding a New Alias
 1. Create a new directory or file (e.g., `mytool/mytool.aliases.sh`).
@@ -33,7 +33,7 @@ During `chezmoi apply`, the main template `dot_config/shell/aliases.sh.tmpl`:
    chezmoi apply
    ```
 
-## 🔧 Component List
+## Component List
 
 <!-- markdownlint-disable MD013-->
 

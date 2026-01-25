@@ -23,7 +23,7 @@ RESET='\033[0m'
 function print_step() {
     local step_msg="$1"
     echo
-    echo -e "${GREEN}❯ ${step_msg}${RESET}"
+    echo -e "${GREEN} ${step_msg}${RESET}"
 }
 
 # print_note: Prints a note message
@@ -35,7 +35,7 @@ function print_note() {
 # print_error: Prints an error message
 function print_error() {
     local error_msg="$1"
-    echo -e "${RED}❯ ERROR: ${error_msg}${RESET}" >&2
+    echo -e "${RED} ERROR: ${error_msg}${RESET}" >&2
 }
 
 # detect_os: Detects the operating system
@@ -278,7 +278,7 @@ function update_programming_tools() {
 function upd() {
     local os_name
     os_name="$(detect_os)"
-    echo -e "${GREEN}❯ Detected OS: ${os_name}${RESET}"
+    echo -e "${GREEN} Detected OS: ${os_name}${RESET}"
 
     # Run OS-specific updates
     case "${os_name}" in
@@ -291,7 +291,7 @@ function upd() {
     # Update development tools
     update_programming_tools
 
-    echo "✅ Installation complete – you're all set."
+    echo " Installation complete – you're all set."
 }
 
 #-------------------------------#
@@ -300,5 +300,5 @@ function upd() {
 
 # If the script is executed directly, inform the user about sourcing
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
-    echo -e "${GREEN}❯ Source this script and run 'upd' to start the update process.${RESET}"
+    echo -e "${GREEN} Source this script and run 'upd' to start the update process.${RESET}"
 fi

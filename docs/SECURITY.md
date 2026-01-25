@@ -1,14 +1,14 @@
-# Security Audit & Hardening Matrix
+# Security
 
 This document provides full transparency into how Dotfiles handles security and modifications.
 
-## Philosophy
+## Principles
 
 - **Opt-In Only**: No hardening is applied unless the `DOTFILES_` variables are set to `1`.
 - **Local Logging**: Actions are logged to `~/.local/share/dotfiles.log`. No telemetry.
 - **No Hidden Sudo**: Sudo is only requested for system managers (apt, etc) and never cached indefinitely.
 
-## Hardening Matrix
+## Hardening
 
 | Feature | Env Var | Action (macOS) | Action (Linux) |
 |---|---|---|---|
@@ -17,7 +17,7 @@ This document provides full transparency into how Dotfiles handles security and 
 | DNS-over-HTTPS | `DOTFILES_DOH` | Browser-level settings | Configures `resolvectl` |
 | Idle Security | `DOTFILES_LOCK` | Sets screensaver idle time | Sets GNOME/KDE idle-delay |
 
-## Secrets Management
+## Secrets
 
 Dotfiles uses **age** for encryption.
 
@@ -25,6 +25,6 @@ Dotfiles uses **age** for encryption.
 - **Storage**: Secrets are stored as `.age` encrypted files.
 - **Protection**: Private keys are never committed to the repo.
 
-## Reporting Vulnerabilities
+## Report an issue
 
 If you discover a security vulnerability, please do not open a public issue. Follow the instructions in the Security Policy.

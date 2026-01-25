@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.474) - <https://dotfiles.io>
-# Made with ♥ in London, UK by Sebastien Rousseau
+# Made with  in London, UK by Sebastien Rousseau
 # Copyright (c) 2015-2025. All rights reserved
 # License: MIT
 
@@ -13,11 +13,11 @@ clean() {
 
   echo ""
   # shellcheck disable=SC2154
-  echo "${RED}❭${NC} Starting Cleanup."
+  echo "${RED}${NC} Starting Cleanup."
   echo ""
 
   # shellcheck disable=SC2154
-  echo "${GREEN}  ✔${NC} Cleaning up installation files."
+  echo "${GREEN}  ${NC} Cleaning up installation files."
   rm -fr dist/
   rm -f tsconfig.tsbuildinfo
 

@@ -19,16 +19,16 @@ RESET='\033[0m'
 #######################################
 case "$(uname -s)" in
     Darwin)
-        emoji="🍎"
+        emoji=""
         ;;
     Linux)
-        emoji="🐧"
+        emoji=""
         ;;
     CYGWIN*|MINGW*|MSYS*)
-        emoji="🪟"
+        emoji=""
         ;;
     *)
-        emoji="🖥"
+        emoji=""
         ;;
 esac
 

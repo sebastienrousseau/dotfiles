@@ -1,12 +1,12 @@
-# Operational Guide
+# Discover
 
-This document outlines the standard workflows to **Maintain**, **Update**, and **Operate** your dotfiles environment across all supported platforms.
+This guide covers the core workflows to keep your dotfiles running well across platforms.
 
 ---
 
-## 🏗️ Platform-Specific Operations
+## Platforms
 
-### 🍎 macOS
+### macOS
 **Primary Manager**: `Homebrew`
 
 - **Update System**:
@@ -20,7 +20,7 @@ This document outlines the standard workflows to **Maintain**, **Update**, and *
   - **Permission Issues**: `sudo chown -R $(whoami) $(brew --prefix)/*`
   - **Drift**: Run `brew bundle cleanup` to remove unmanaged packages.
 
-### 🐧 Linux (Debian, Ubuntu, ZorinOS, Kali)
+### Linux (Debian, Ubuntu, ZorinOS, Kali)
 **Primary Manager**: `apt-get` / `snap`
 
 - **Update System**:
@@ -37,7 +37,7 @@ This document outlines the standard workflows to **Maintain**, **Update**, and *
   - **Font Issues**: If icons are missing, run `./install/provision/run_onchange_50-install-fonts.sh` manually.
   - **ZorinOS/Gnome**: Custom keybindings may need `dconf load` if not applied automatically.
 
-### 🪟 Windows (WSL2)
+### Windows (WSL2)
 **Primary Manager**: `apt-get` (inside WSL)
 
 - **Update System**: Same as **Linux**.
@@ -49,16 +49,16 @@ This document outlines the standard workflows to **Maintain**, **Update**, and *
 
 ---
 
-## 🔄 Common Workflows
+## Workflows
 
-### Applying Changes
+### Apply changes
 After editing any config file:
 ```bash
 dot apply
 ```
 *Triggers: `dot_zshrc` reload, audit logging.*
 
-### Rolling Back
+### Roll back
 If an update breaks your setup:
 ```bash
 cd ~/.dotfiles
@@ -66,7 +66,7 @@ git reset --hard HEAD@{1}  # Go back 1 operation
 chezmoi apply
 ```
 
-### Debugging
+### Debug
 If something feels slow or broken:
 
 1. **Check Health**:
@@ -80,9 +80,9 @@ If something feels slow or broken:
 
 ---
 
-## 🛠️ Tool-Specific Guides
+## Tools
 
-### 🎨 Visual Themes (Optional)
+### Make it yours
 - **Wallpaper rotation**:
   ```bash
   ~/.dotfiles/scripts/theme/wallpaper-rotate.sh --interval 300
@@ -108,22 +108,22 @@ If something feels slow or broken:
   sudo ~/.dotfiles/scripts/theme/install-boot-logo.sh --apply
   ```
 
-### 📦 Atuin (History Sync)
+### Atuin
 - **Login**: `atuin login`
 - **Sync**: `atuin sync`
 - **Search**: `Ctrl-r` (Global history search)
 
-### 🚀 Zoxide (Smart CD)
+### Zoxide
 - **Jump**: `z project` matches `~/dev/project`
 - **Query**: `zi` (Interactive selection)
 
-### 🌳 Yazi (File Manager)
+### Yazi
 - **Open**: Type `y`
 - **Preview**: Spacebar to preview files
 - **Quit**: `q`
 
 ---
 
-## 🔐 Security Policy
+## Security policy
 - **GPG/SSH**: All commits are SSH signed.
 - **Audit Log**: Review `~/.dotfiles_audit.log` for a timeline of all changes applied to your system.

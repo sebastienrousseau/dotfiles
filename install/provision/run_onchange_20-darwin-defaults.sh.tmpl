@@ -7,7 +7,7 @@
 
 set -e
 
-echo "🍎 Applying macOS Defaults & Hardening..."
+echo " Applying macOS Defaults & Hardening..."
 
 # Close any open System Preferences panes, to prevent them from overriding
 # settings we’re about to change
@@ -15,7 +15,7 @@ osascript -e 'tell application "System Preferences" to quit'
 
 # Helper to apply defaults and ignore errors (for sandboxed apps)
 apply_default() {
-    defaults write "$@" || echo "⚠️  Failed to set default: $1 $2 (Sandbox restriction?)"
+    defaults write "$@" || echo "️  Failed to set default: $1 $2 (Sandbox restriction?)"
 }
 
 # --- Security & Privacy ---
@@ -66,5 +66,5 @@ apply_default com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKi
 # --- VS Code ---
 apply_default com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
 
-echo "✅ macOS defaults applied. Note: Some changes may require a logout/restart."
+echo " macOS defaults applied. Note: Some changes may require a logout/restart."
 {{ end -}}

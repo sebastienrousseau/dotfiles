@@ -4,11 +4,11 @@ Manage Google Cloud aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
-## 📖 Description
+## Description
 
 These aliases are defined in `gcloud.aliases.sh` and are automatically loaded by `chezmoi`.
 
-## ⚡ Aliases
+## Aliases
 
 This code provides a set of command aliases for managing various Google
 Cloud services, such as Compute Engine, Identity and Access Management,

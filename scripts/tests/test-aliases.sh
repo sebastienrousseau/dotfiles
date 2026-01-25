@@ -15,9 +15,9 @@ ALIAS_DIR="$HOME/.dotfiles/.chezmoitemplates/aliases"
 find "$ALIAS_DIR" -name "*.aliases.sh" | while read -r file; do
   # Check for syntax errors using bash -n
   if bash -n "$file"; then
-    echo "✅ Checked: $(basename "$file")"
+    echo " Checked: $(basename "$file")"
   else
-    echo "❌ Syntax Error: $(basename "$file")"
+    echo " Syntax Error: $(basename "$file")"
     exit 1
   fi
 done

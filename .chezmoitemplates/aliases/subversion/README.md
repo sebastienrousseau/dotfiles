@@ -4,11 +4,11 @@ Manage Subversion aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
-## 📖 Description
+## Description
 
 These aliases are defined in `subversion.aliases.sh` and are automatically loaded by `chezmoi`.
 
-## ⚡ Aliases
+## Aliases
 
 This code provides a set of aliases for the Subversion command line.
 - `sad` Put new files and directories under version control.

@@ -1,8 +1,8 @@
-## 🚀 v0.2.474 Release: Universal Configuration
+## Release overview
 
 This release transforms the dotfiles into a high-performance, universally compatible system managed by **chezmoi**.
 
-### 🏗️ Technical Architecture
+### Architecture
 v0.2.474 is not just "dotfiles" but a portable **Shell Distribution** managed by `chezmoi` ("source of truth" in `~/.dotfiles`).
 
 - **XDG-First**: Configs strictly mapped to `~/.config/` (No `~/.foo` sprawl).
@@ -17,12 +17,12 @@ v0.2.474 is not just "dotfiles" but a portable **Shell Distribution** managed by
   - **AI Strategy**: Context-aware autosuggestions coupled with optional local LLM integration (`ai_core`).
   - **Error Analysis**: Smart wrappers to analyze command failures via `gh copilot` or local models.
 
-### 🚫 Non-Goals
+### Non-goals
 - **Not a Framework**: This is a curated distribution, not a plugin manager like Oh-My-Zsh.
 - **Not POSIX-Pure**: Prioritizes modern Zsh/Rust features over strict POSIX compliance.
 - **Not Minimal**: Optimizes for functionality and speed, not line-count minimalism.
 
-### 🛡️ Security Posture
+### Security
 - **Hardened by Default**: Scripts run with `set -euo pipefail` to fail fast on errors.
 - **Supply Chain Safety**:
   - **Pinned Install**: Installation commands are pinned to the specific release tag (`v0.2.474`) to prevent drift.
@@ -30,7 +30,7 @@ v0.2.474 is not just "dotfiles" but a portable **Shell Distribution** managed by
 - **Threat Model**: This project assumes a **trusted local machine** and focuses on supply-chain (pinned versions) and configuration safety (immutable history).
 - **Audit Logging**: All `chezmoi` mutations are logged to `~/.dotfiles_audit.log` for day-2 operations review.
 
-### 🛠️ Changes
+### Changes
 - **Migrated**:
   - Shell: `~/.zshrc` now sources generated templates from `~/.config/shell`.
   - Neovim: `~/.config/nvim` fully managed via Lua/Lazy.nvim.
@@ -48,21 +48,21 @@ v0.2.474 is not just "dotfiles" but a portable **Shell Distribution** managed by
 - **Trust & Reproducibility**:
   - **Pinned Formulae**: Generated `Brewfile.lock.json` for strictly reproducible macOS builds.
   - **Binary Pinning**: `install.sh` now enforces specific version tags for initial bootstrap.
-### 🔒 Security & Quality
+### Quality
 - **Conflict Resolution**: Detected and resolved **46 namespace collisions** across all alias modules (Git, Go, Archives, etc.) to ensure zero overlap.
 - **Git Safety**: Renamed colliding Go aliases (e.g., `gr` -> `gor`) to protect core Git commands.
 - **Modernization**: Merged `list` into `modern` for a cohesive Rust-based toolchain experience (`eza`, `bat`).
 - **Standardization**: Removed duplicate logging functions in favor of a shared utility.
 - **Documentation**: All 30+ component READMEs are now 100% accurate and verified.
 
-### 🛠️ Start-of-Art Toolchain
+### Toolchain
 - **Kubernetes**: Added `kubectl`, `helm`, `k9s` aliases.
 - **IaC**: Added `terraform`, `opentofu`, `ansible`.
 - **Languages**: Added ecosystem support for `go`, `yarn`, `uv` (modern Python).
 - **AI Integration**: Added wrappers for `gh copilot`, `fabric`, and local LLMs.
 - **Smart Help**: Introduced `dothelp` to strictly search and index custom functions.
 
-### 🤖 CI/CD & Testing
+### Testing
 
 - **Automated Testing**
   - Docker CI (`ci-docker.yml`) running on Ubuntu/Fedora/Arch.
@@ -108,14 +108,14 @@ v0.2.474 is not just "dotfiles" but a portable **Shell Distribution** managed by
   - **Bootstrap**: `install.sh` running via `curl | sh` with no dependencies.
   - **Teleport**: `dot teleport user@host` to ephemerally deploy configs via SSH.
 
-### 🧪 Verification
+### Verification
 - **Performance**: Benchmark script `scripts/benchmark.sh` confirms <20ms startup.
 - **Integration**: `test-aliases.sh` verified syntax of all 32 alias modules.
 - **Security**: **Zero Critical Vulnerabilities** (CodeQL & Dependabot clean).
 - **Functionality**: Local migration verified on macOS, Linux, and WSL.
 
 
-### 📦 Installation & Migration
+### Install and migrate
 
 #### Option A: Fresh Install (New Machines)
 If you are setting up a new machine, simply run the universal installer:
@@ -124,7 +124,7 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles
 ```
 
 #### Option B: Migration (Upgrade from `master` / v1)
-⚠️ **Important**: This release changes the architecture from direct symlinks to `chezmoi` templates. Functional backups are recommended.
+ **Important**: This release changes the architecture from direct symlinks to `chezmoi` templates. Functional backups are recommended.
 **Compatibility Note**: Existing `chezmoi` users can simply run `chezmoi apply` to upgrade, but the full installer is recommended for major version jumps.
 
 1. **Backup Legacy Configs**:
