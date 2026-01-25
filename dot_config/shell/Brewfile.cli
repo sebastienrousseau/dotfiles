@@ -38,3 +38,13 @@ brew "fastfetch"
 brew "ollama"
 brew "fabric-cli"
 brew "uv"
+
+# Kubernetes
+brew "kubectl"
+brew "kubectx"
+brew "stern"
+brew "kube-linter"
+brew "kubesec"
+brew "minikube"
+brew "k9s"
+brew "helm"

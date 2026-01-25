@@ -11,7 +11,7 @@
 
 # Dotfiles (v0.2.475)
 
-Simply designed to fit your shell life 
+Simply designed to fit your shell life
 
 ![Dotfiles banner][banner]
 
@@ -68,7 +68,7 @@ into the main repo.
 
 * Fork the repo.
 * Clone the repo **you forked** by running
-  `git clone https://github.com/sebastienrousseau/dotfiles.git`
+  `git clone https://github.com/<your-username>/dotfiles.git`
 
 #### Fixing an Issue
 
@@ -81,5 +81,66 @@ code to Dotfiles.
 * Include a title that is straight to the point.
 * Wait for someone to review the pull request, and then merge your pull
   request!
+
+## Pull Request Guidelines
+
+### Before Submitting
+
+1. **Test your changes** - Run `chezmoi apply` and verify everything works
+2. **Check for lint errors** - Run shellcheck on shell scripts
+3. **Update documentation** - If you add new features, update relevant docs
+4. **Follow existing patterns** - Look at how similar features are implemented
+
+### PR Title Format
+
+Use a clear, descriptive title:
+- `feat: add XYZ configuration`
+- `fix: resolve issue with ABC`
+- `docs: update installation guide`
+- `refactor: simplify alias loading`
+
+### PR Description
+
+Include:
+- **Summary**: What does this PR do?
+- **Motivation**: Why is this change needed?
+- **Testing**: How did you test the changes?
+- **Screenshots**: If applicable (especially for UI changes)
+
+### Review Process
+
+1. A maintainer will review your PR within a few days
+2. Address any requested changes
+3. Once approved, your PR will be merged
+
+## Development Setup
+
+```bash
+# Clone the repo
+git clone https://github.com/sebastienrousseau/dotfiles.git ~/.dotfiles
+
+# Create a feature branch
+cd ~/.dotfiles
+git checkout -b feat/my-feature
+
+# Make changes and test
+chezmoi apply
+
+# Commit and push
+git add .
+git commit -m "feat: add my feature"
+git push origin feat/my-feature
+```
+
+## Code Style
+
+- **Shell scripts**: Follow Google Shell Style Guide
+- **Use shellcheck**: All shell scripts should pass shellcheck
+- **Use `set -euo pipefail`**: For robust error handling
+- **Portable shebangs**: Use `#!/usr/bin/env bash`
+
+## Questions?
+
+Feel free to open an issue with the `question` label if you have any questions.
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

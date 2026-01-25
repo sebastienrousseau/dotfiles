@@ -1,1 +1,51 @@
-@sebastienrousseau/dotfiles
+# CODEOWNERS - Define code ownership for automatic review requests
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+* @sebastienrousseau
+
+# Core configuration files
+/.chezmoi*.toml @sebastienrousseau
+/.chezmoi*.tmpl @sebastienrousseau
+/install.sh @sebastienrousseau
+
+# Shell configuration
+/dot_config/shell/ @sebastienrousseau
+/dot_config/zsh/ @sebastienrousseau
+/dot_zshenv @sebastienrousseau
+/dot_zshrc @sebastienrousseau
+/dot_bashrc @sebastienrousseau
+/dot_profile @sebastienrousseau
+
+# Neovim configuration
+/dot_config/nvim/ @sebastienrousseau
+
+# Terminal emulator configs
+/dot_config/ghostty/ @sebastienrousseau
+/dot_config/alacritty/ @sebastienrousseau
+/dot_config/kitty/ @sebastienrousseau
+/dot_config/wezterm/ @sebastienrousseau
+
+# Git configuration
+/dot_config/git/ @sebastienrousseau
+/dot_gitconfig.tmpl @sebastienrousseau
+
+# Nix flake
+/nix/ @sebastienrousseau
+
+# Aliases and functions
+/.chezmoitemplates/aliases/ @sebastienrousseau
+/.chezmoitemplates/functions/ @sebastienrousseau
+
+# CI/CD workflows
+/.github/workflows/ @sebastienrousseau
+
+# Documentation
+/docs/ @sebastienrousseau
+/README.md @sebastienrousseau
+/CHANGELOG.md @sebastienrousseau
+
+# Security-sensitive files
+/.github/SECURITY.md @sebastienrousseau
+/dot_config/gnupg/ @sebastienrousseau
+/dot_ssh/ @sebastienrousseau
