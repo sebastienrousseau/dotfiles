@@ -266,6 +266,18 @@ Available themes:
 
 Screenshots live in `docs/themes/README.md` with a capture checklist.
 
+### Demo
+
+Capture checklist in `docs/demo/README.md`.
+
+### Wallpapers
+
+```bash
+dot wallpaper
+```
+
+Set a wallpaper from `~/Pictures/Wallpapers` (override with `DOTFILES_WALLPAPER_DIR`).
+
 ### Personal Details (Git)
 
 This repo ships a `.chezmoi.toml.tmpl` with safe placeholders. Set your values

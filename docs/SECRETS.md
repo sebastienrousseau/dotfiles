@@ -45,6 +45,21 @@ chezmoi edit --apply ~/.config/chezmoi/encrypted_secrets.age
 Add key=value pairs, save, and chezmoi will store the encrypted file in your
 dotfiles source (never plaintext).
 
+## Encrypt an SSH key (local-only)
+
+```bash
+dot ssh-key ~/.ssh/id_ed25519
+```
+
+This creates a local encrypted file at:
+`~/.config/chezmoi/encrypted_id_ed25519.age`
+
+If you want it tracked (encrypted) in your dotfiles, run:
+
+```bash
+chezmoi add --encrypt ~/.config/chezmoi/encrypted_id_ed25519.age
+```
+
 ## Notes
 - Keep `~/.config/chezmoi/key.txt` private.
 - You can share the public key for encrypting data.

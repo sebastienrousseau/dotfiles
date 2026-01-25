@@ -20,6 +20,8 @@ show_help() {
     echo "  benchmark  Run shell startup benchmark"
     echo "  tune       Apply OS tuning (opt-in)"
     echo "  theme      Switch terminal theme (dark/light)"
+    echo "  wallpaper  Apply a wallpaper from your library"
+    echo "  ssh-key    Encrypt an SSH key locally with age"
     echo "  secrets    Edit encrypted secrets (age)"
     echo "  secrets-init  Initialize age key for secrets"
     echo "  upgrade    Update flake, plugins, and dotfiles"
@@ -134,6 +136,32 @@ case "$COMMAND" in
             exec sh "$SRC_DIR/scripts/theme/switch.sh" "$@"
         else
             echo "Theme switcher not found."
+            exit 1
+        fi
+        ;;
+    wallpaper)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -z "$SRC_DIR" ]; then
+            echo "Dotfiles source not found."
+            exit 1
+        fi
+        if [ -f "$SRC_DIR/scripts/theme/wallpaper-sync.sh" ]; then
+            exec sh "$SRC_DIR/scripts/theme/wallpaper-sync.sh" "$@"
+        else
+            echo "Wallpaper script not found."
+            exit 1
+        fi
+        ;;
+    ssh-key)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -z "$SRC_DIR" ]; then
+            echo "Dotfiles source not found."
+            exit 1
+        fi
+        if [ -f "$SRC_DIR/scripts/secrets/encrypt-ssh-key.sh" ]; then
+            exec sh "$SRC_DIR/scripts/secrets/encrypt-ssh-key.sh" "$@"
+        else
+            echo "SSH key encryption script not found."
             exit 1
         fi
         ;;
