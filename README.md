@@ -10,9 +10,9 @@
 
 ## Elevator Pitch
 
-Dotfiles is a cross-platform shell environment managed by [Chezmoi](https://github.com/twpayne/chezmoi) that installs in minutes and keeps your shell environment consistent across macOS, Linux, and WSL. It is **idempotent** by design: running it multiple times is safe, predictable, and produces the same result.
+Dotfiles is a cross-platform shell environment distribution managed by [Chezmoi](https://github.com/twpayne/chezmoi) that installs in minutes and keeps your environment consistent across macOS, Linux, and WSL. It is **idempotent** by design: running it multiple times is safe, predictable, and produces the same result.
 
-Conceptually: Git + templates + guarded scripts = a reproducible shell.
+Git + templates + guarded scripts = a reproducible shell.
 
 ---
 
@@ -23,8 +23,8 @@ Conceptually: Git + templates + guarded scripts = a reproducible shell.
 - [Quick Start (60 seconds)](#quick-start-60-seconds)
 - [Documentation](#documentation)
 - [Installation Details](#installation-details)
-- [Reference](#reference)
 - [How-to Guides](#how-to-guides)
+- [Reference](#reference)
 - [Architecture (How it Works)](#architecture-how-it-works)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
@@ -37,6 +37,7 @@ Conceptually: Git + templates + guarded scripts = a reproducible shell.
 
 Dotfiles takes a more infrastructure-oriented approach than many personal dotfile setups. It is designed for developers who manage multiple machines and value **daily usability, reproducibility, and auditability.**
 
+- The `dot` CLI is a thin wrapper around common workflows such as syncing, upgrading, and managing secrets.
 - **The Stack:** A tuned Zsh, Neovim, and tmux environment with sane defaults.
 - **Unified Control:** A single `dot` command to sync or upgrade your entire environment.
 - **Safety First:** Explicit opt-in for any system or security changes.
@@ -113,6 +114,39 @@ exec zsh
 
 - **Installer**: installs Chezmoi (pinned + checksum verified) and applies this repo.
 - **Chezmoi hooks**: install OS packages, fonts, and optional apps defined in this repo.
+
+---
+
+## How-to Guides
+
+### Add a new alias
+
+1. Add a new alias file under:
+
+```
+~/.dotfiles/.chezmoitemplates/aliases/<category>/<name>.aliases.sh
+```
+
+2. Apply:
+
+```bash
+chezmoi apply
+```
+
+### Commit changes safely
+
+```bash
+# Edit source files in ~/.dotfiles
+chezmoi apply
+
+# Review + commit
+cd ~/.dotfiles
+
+git status
+git add -A
+git commit -S -m "Describe your change"
+git push
+```
 
 ---
 
@@ -241,39 +275,6 @@ See [docs/INSTALL.md](docs/INSTALL.md) for prerequisites, supported platforms, a
 See [docs/TOOLS.md](docs/TOOLS.md) for the list of included tools and alias conventions.
 
 <p align="right"><a href="#dotfiles--a-fast-idempotent-shell-environment-in-minutes">↑ Back to Top</a></p>
-
-## How-to Guides
-
-### Add a new alias
-
-1. Add a new alias file under:
-
-```
-~/.dotfiles/.chezmoitemplates/aliases/<category>/<name>.aliases.sh
-```
-
-2. Apply:
-
-```bash
-chezmoi apply
-```
-
-### Commit changes safely
-
-```bash
-# Edit source files in ~/.dotfiles
-chezmoi apply
-
-# Review + commit
-cd ~/.dotfiles
-
-git status
-git add -A
-git commit -S -m "Describe your change"
-git push
-```
-
----
 
 ## Architecture (How it Works)
 
