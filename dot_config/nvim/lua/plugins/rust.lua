@@ -6,8 +6,7 @@ return {
     config = function()
       vim.g.rustaceanvim = {
         -- Plugin configuration
-        tools = {
-        },
+        tools = {},
         -- LSP configuration
         server = {
           on_attach = function(_client, _bufnr)
@@ -16,15 +15,13 @@ return {
           end,
           default_settings = {
             -- rust-analyzer language server configuration
-            ['rust-analyzer'] = {
-            },
+            ["rust-analyzer"] = {},
           },
         },
         -- DAP configuration
-        dap = {
-        },
+        dap = {},
       }
-    end
+    end,
   },
   {
     "saecki/crates.nvim",

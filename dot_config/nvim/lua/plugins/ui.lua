@@ -20,18 +20,38 @@ return {
 Simply design to fit your shell life
           ]],
           keys = {
-            { icon = "📂", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
+            {
+              icon = "📂",
+              key = "f",
+              desc = "Find File",
+              action = ":lua Snacks.dashboard.pick('files')",
+            },
             { icon = "📝", key = "n", desc = "New File", action = ":ene | startinsert" },
-            { icon = "🔎", key = "g", desc = "Find Text", action = ":lua Snacks.dashboard.pick('live_grep')" },
-            { icon = "🕒", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
+            {
+              icon = "🔎",
+              key = "g",
+              desc = "Find Text",
+              action = ":lua Snacks.dashboard.pick('live_grep')",
+            },
+            {
+              icon = "🕒",
+              key = "r",
+              desc = "Recent Files",
+              action = ":lua Snacks.dashboard.pick('oldfiles')",
+            },
             { icon = "🐍", key = "p", desc = "Select Env", action = ":VenvSelect" }, -- Fixed: Specific VS Code-like task
-            { icon = "⚙️", key = "c", desc = "Config", action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})" },
+            {
+              icon = "⚙️",
+              key = "c",
+              desc = "Config",
+              action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})",
+            },
             { icon = "📦", key = "m", desc = "Manage Packages", action = ":Lazy" },
             { icon = "❌", key = "q", desc = "Quit", action = ":qa" },
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    },
   },
 
   -----------------------------------------------------------------------------
@@ -59,7 +79,7 @@ Simply design to fit your shell life
         lsp_doc_border = true, -- add a border to hover docs and signature help
       },
       notify = { enabled = false }, -- Fix: Allow nvim-notify to handle notifications directly
-    }
+    },
   },
 
   {
@@ -86,11 +106,11 @@ Simply design to fit your shell life
         update_focused_file = { enable = true, update_root = true },
         view = { width = 35, side = "left" },
         renderer = {
-            indent_markers = { enable = true },
-            icons = {
-                git_placement = "before",
-                show = { git = true, folder = true, file = true, folder_arrow = true }
-            }
+          indent_markers = { enable = true },
+          icons = {
+            git_placement = "before",
+            show = { git = true, folder = true, file = true, folder_arrow = true },
+          },
         },
         actions = { open_file = { quit_on_open = false } },
         git = { enable = true, ignore = false },
@@ -139,10 +159,10 @@ Simply design to fit your shell life
         always_show_bufferline = false,
         diagnostics = "nvim_lsp",
         diagnostics_indicator = function(_, _, diag)
-            local icons = { Error = " ", Warn = " ", Info = " " }
-            local ret = (diag.error and icons.Error .. diag.error .. " " or "")
+          local icons = { Error = " ", Warn = " ", Info = " " }
+          local ret = (diag.error and icons.Error .. diag.error .. " " or "")
             .. (diag.warning and icons.Warn .. diag.warning or "")
-            return vim.trim(ret)
+          return vim.trim(ret)
         end,
       },
     },
@@ -175,8 +195,8 @@ Simply design to fit your shell life
     event = { "BufReadPost", "BufNewFile" },
     main = "ibl",
     opts = {
-        indent = { char = "│" },
-        scope = { enabled = true, show_start = false, show_end = false },
+      indent = { char = "│" },
+      scope = { enabled = true, show_start = false, show_end = false },
     },
   },
 
@@ -187,10 +207,17 @@ Simply design to fit your shell life
     "petertriho/nvim-scrollbar",
     event = { "BufReadPost", "BufNewFile" },
     config = function()
-       require("scrollbar").setup({
-           handle = { color = "#504945" },
-           excluded_filetypes = { "cmp_menu", "cmp_docs", "notify", "noice", "prompt", "TelescopePrompt" },
-       })
+      require("scrollbar").setup({
+        handle = { color = "#504945" },
+        excluded_filetypes = {
+          "cmp_menu",
+          "cmp_docs",
+          "notify",
+          "noice",
+          "prompt",
+          "TelescopePrompt",
+        },
+      })
     end,
   },
 
@@ -205,15 +232,15 @@ Simply design to fit your shell life
       vim.o.timeoutlen = 300
     end,
     opts = {
-       spec = {
-         { "<leader>c", group = "Code" },
-         { "<leader>f", group = "Find/File" },
-         { "<leader>p", group = "Python/Project" },
-       { "<leader>t", group = "Test/Terminal" },
-       { "<leader>b", group = "Debug/Buffer" },
-       { "<leader>g", group = "Git" },
-       { "<leader>m", group = "Markdown" },
-     },
+      spec = {
+        { "<leader>c", group = "Code" },
+        { "<leader>f", group = "Find/File" },
+        { "<leader>p", group = "Python/Project" },
+        { "<leader>t", group = "Test/Terminal" },
+        { "<leader>b", group = "Debug/Buffer" },
+        { "<leader>g", group = "Git" },
+        { "<leader>m", group = "Markdown" },
+      },
     },
   },
 
@@ -223,8 +250,14 @@ Simply design to fit your shell life
   {
     "RRethy/vim-illuminate",
     event = { "BufReadPost", "BufNewFile" },
-    opts = { delay = 200, large_file_cutoff = 2000, large_file_overrides = { providers = { "lsp" } } },
-    config = function(_, opts) require("illuminate").configure(opts) end,
+    opts = {
+      delay = 200,
+      large_file_cutoff = 2000,
+      large_file_overrides = { providers = { "lsp" } },
+    },
+    config = function(_, opts)
+      require("illuminate").configure(opts)
+    end,
   },
 
   -- Symbols Outline

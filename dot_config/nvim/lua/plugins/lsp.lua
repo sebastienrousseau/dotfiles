@@ -8,7 +8,7 @@ return {
       require("mason").setup()
     end,
   },
-  
+
   -- Mason LSP Config + Manual Server Setup
   {
     "neovim/nvim-lspconfig",
@@ -20,7 +20,7 @@ return {
     config = function()
       -- 1. Setup capabilities for LSP
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
-      
+
       -- 2. Setup mason-lspconfig with handlers (prevents automatic_enable errors)
       require("mason-lspconfig").setup({
         ensure_installed = { "bashls", "lua_ls", "basedpyright", "ruff" },
@@ -33,7 +33,7 @@ return {
               capabilities = capabilities,
             })
           end,
-          
+
           -- Custom handler for lua_ls
           ["lua_ls"] = function()
             require("lspconfig").lua_ls.setup({
@@ -48,7 +48,7 @@ return {
               },
             })
           end,
-          
+
           -- Custom handler for basedpyright
           ["basedpyright"] = function()
             require("lspconfig").basedpyright.setup({
@@ -64,9 +64,9 @@ return {
                       variableTypes = true,
                       functionReturnTypes = true,
                     },
-                  }
-                }
-              }
+                  },
+                },
+              },
             })
           end,
         },
@@ -74,14 +74,14 @@ return {
 
       -- Diagnostic Configuration
       vim.diagnostic.config({
-         underline = true,
-         update_in_insert = false,
-         virtual_text = {
-            spacing = 4,
-            source = "if_many",
-            prefix = "●",
-         },
-         severity_sort = true,
+        underline = true,
+        update_in_insert = false,
+        virtual_text = {
+          spacing = 4,
+          source = "if_many",
+          prefix = "●",
+        },
+        severity_sort = true,
       })
     end,
   },
@@ -94,7 +94,9 @@ return {
     keys = {
       {
         "<leader>cf",
-        function() require("conform").format({ async = true, lsp_fallback = true }) end,
+        function()
+          require("conform").format({ async = true, lsp_fallback = true })
+        end,
         mode = "",
         desc = "Format Buffer",
       },
@@ -139,15 +141,15 @@ return {
           end,
         },
         window = {
-           completion = cmp.config.window.bordered(),
-           documentation = cmp.config.window.bordered(),
+          completion = cmp.config.window.bordered(),
+          documentation = cmp.config.window.bordered(),
         },
         formatting = {
-           format = lspkind.cmp_format({
-             mode = "symbol_text",
-             maxwidth = 50,
-             ellipsis_char = "...",
-           }),
+          format = lspkind.cmp_format({
+            mode = "symbol_text",
+            maxwidth = 50,
+            ellipsis_char = "...",
+          }),
         },
         mapping = cmp.mapping.preset.insert({
           ["<C-n>"] = cmp.mapping.select_next_item(),
@@ -157,22 +159,22 @@ return {
           ["<C-Space>"] = cmp.mapping.complete(),
           ["<CR>"] = cmp.mapping.confirm({ select = true }),
           ["<Tab>"] = cmp.mapping(function(fallback)
-             if cmp.visible() then
-               cmp.select_next_item()
-             elseif luasnip.expand_or_jumpable() then
-               luasnip.expand_or_jump()
-             else
-               fallback()
-             end
+            if cmp.visible() then
+              cmp.select_next_item()
+            elseif luasnip.expand_or_jumpable() then
+              luasnip.expand_or_jump()
+            else
+              fallback()
+            end
           end, { "i", "s" }),
           ["<S-Tab>"] = cmp.mapping(function(fallback)
-             if cmp.visible() then
-               cmp.select_prev_item()
-             elseif luasnip.jumpable(-1) then
-               luasnip.jump(-1)
-             else
-               fallback()
-             end
+            if cmp.visible() then
+              cmp.select_prev_item()
+            elseif luasnip.jumpable(-1) then
+              luasnip.jump(-1)
+            else
+              fallback()
+            end
           end, { "i", "s" }),
         }),
         sources = cmp.config.sources({
