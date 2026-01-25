@@ -166,7 +166,7 @@ fi
 if ! command -v luacheck >/dev/null; then
   if command -v luarocks >/dev/null; then
     log_info "Installing Luacheck via luarocks..."
-    luarocks install luacheck || true
+    luarocks install --local luacheck || true
   else
     log_error "Luacheck not found and luarocks is missing. Install manually."
   fi
