@@ -2,11 +2,11 @@ name: Docker CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
     tags:
       - 'v*.*.*'
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 permissions:
   contents: read
@@ -24,7 +24,11 @@ jobs:
       - name: Test Installation in Docker
         run: |
           docker run --rm -v ${{ github.workspace }}:/root/.local/share/chezmoi ${{ matrix.image }} /bin/bash -c "
-            apt-get update && apt-get install -y git curl &&
-            sh -c \"\$(curl -fsLS get.chezmoi.io)\" -- init --apply --source /root/.local/share/chezmoi &&
+            set -euo pipefail
+            export DEBIAN_FRONTEND=noninteractive
+            export PATH=\"/root/.local/bin:\$PATH\"
+            apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates &&
+            sh -c \"\$(curl -fsLS get.chezmoi.io)\" -- init --source /root/.local/share/chezmoi &&
+            DOTFILES_NONINTERACTIVE=1 chezmoi apply --exclude=scripts &&
             echo 'Chezmoi applied successfully'
           "
