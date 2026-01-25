@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1090,SC1091
+# shellcheck disable=SC1090,SC1091,SC2164
 # Unit tests for the rd (remove directory) function
 # Tests for security safeguards against dangerous paths
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../framework/assertions.sh"
 source "$SCRIPT_DIR/../framework/mocks.sh"
 
