@@ -292,6 +292,14 @@ Populate `~/.config/flatpak/flatpak.list` and re-run `chezmoi apply`.
 Docker config template is managed at `~/.config/docker/config.json`.
 Podman defaults are managed at `~/.config/containers/containers.conf`.
 
+### Security Hardening
+
+```bash
+DOTFILES_FIREWALL=1 dot firewall
+```
+
+GPG agent defaults live in `~/.config/gnupg/gpg-agent.conf`.
+
 ### Secrets
 
 ```bash

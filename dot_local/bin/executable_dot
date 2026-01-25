@@ -24,6 +24,7 @@ show_help() {
     echo "  ssh-key    Encrypt an SSH key locally with age"
     echo "  secrets-create  Create an encrypted secrets file"
     echo "  fonts      Install Nerd Fonts (JetBrainsMono by default)"
+    echo "  firewall   Apply firewall hardening (opt-in)"
     echo "  secrets    Edit encrypted secrets (age)"
     echo "  secrets-init  Initialize age key for secrets"
     echo "  upgrade    Update flake, plugins, and dotfiles"
@@ -164,6 +165,19 @@ case "$COMMAND" in
             exec sh "$SRC_DIR/scripts/fonts/install-nerd-fonts.sh" "$@"
         else
             echo "Font install script not found."
+            exit 1
+        fi
+        ;;
+    firewall)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -z "$SRC_DIR" ]; then
+            echo "Dotfiles source not found."
+            exit 1
+        fi
+        if [ -f "$SRC_DIR/scripts/security/firewall.sh" ]; then
+            exec sh "$SRC_DIR/scripts/security/firewall.sh" "$@"
+        else
+            echo "Firewall script not found."
             exit 1
         fi
         ;;
