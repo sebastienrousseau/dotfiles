@@ -155,8 +155,22 @@ if command -v apt-get >/dev/null; then
     fastfetch
     age
     podman
+    lua5.1
+    luajit
+    luarocks
+    luacheck
   )
   $sudo_cmd apt-get install -y "${packages[@]}"
+fi
+
+# Install Stylua (Lua formatter)
+if ! command -v stylua >/dev/null; then
+  if command -v cargo >/dev/null; then
+    log_info "Installing Stylua via cargo..."
+    cargo install stylua || true
+  else
+    log_error "Stylua not found and cargo is missing. Install stylua manually."
+  fi
 fi
 
 # Install Starship

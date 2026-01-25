@@ -1,0 +1,25 @@
+# Global gitignore (dotfiles)
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# Node
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Rust/Go
+/target/
+/bin/
+
+# Logs
+*.log
+
+# Editor
+.vscode/
+.idea/

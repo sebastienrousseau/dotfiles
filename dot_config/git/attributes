@@ -1,0 +1,12 @@
+# Global gitattributes (dotfiles)
+* text=auto
+
+# Normalize line endings for common text formats
+*.sh text eol=lf
+*.zsh text eol=lf
+*.lua text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.md text eol=lf

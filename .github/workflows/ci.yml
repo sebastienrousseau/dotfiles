@@ -94,6 +94,29 @@ jobs:
             echo "$files" | xargs shellcheck -x
           fi
 
+  lua-lint:
+    name: Lua Lint (Ubuntu)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Lua tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1 luarocks luacheck cargo
+          cargo install stylua || true
+
+      - name: Run luacheck
+        run: luacheck dot_config/nvim
+
+      - name: Run stylua (check)
+        run: |
+          stylua --check dot_config/nvim
+
   nix-check:
     name: Nix Flake Check (${{ matrix.os }})
     runs-on: ${{ matrix.os }}

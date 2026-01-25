@@ -41,6 +41,7 @@ This page lists the main tools and CLI conveniences provided by this repo.
 - Project templates (`dot new`)
 - Sandbox preview (`dot sandbox`)
 - Benchmarking (`dot benchmark`)
+- Lua tooling (`luacheck`, `stylua`, `luarocks`, `lua/luajit`)
 
 ## Security (Opt‑in)
 

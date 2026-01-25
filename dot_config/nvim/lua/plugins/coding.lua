@@ -57,12 +57,14 @@ return {
       "rcarriga/nvim-dap-ui", 
       "mfussenegger/nvim-dap-python", 
       "nvim-neotest/nvim-nio",
-      "theHamsta/nvim-dap-virtual-text" 
+      "theHamsta/nvim-dap-virtual-text",
+      "jbyuki/one-small-step-for-vimkind"
     },
     config = function()
       local dap = require("dap")
       local dapui = require("dapui")
       local dap_python = require("dap-python")
+      local osv = require("osv")
 
       -- Enhanced UI setup
       dapui.setup()
@@ -87,6 +89,19 @@ return {
       dap.listeners.after.event_initialized["dapui_config"] = function() dapui.open() end
       dap.listeners.before.event_terminated["dapui_config"] = function() dapui.close() end
       dap.listeners.before.event_exited["dapui_config"] = function() dapui.close() end
+
+      -- Local Lua debugger (OSV)
+      osv.setup({ port = 8086 })
+      dap.adapters.nlua = function(callback, config)
+        callback({ type = "server", host = config.host or "127.0.0.1", port = config.port or 8086 })
+      end
+      dap.configurations.lua = {
+        {
+          type = "nlua",
+          request = "attach",
+          name = "Attach to running Neovim instance",
+        },
+      }
 
       -- Signs
       vim.fn.sign_define('DapBreakpoint', {text='🔴', texthl='DapBreakpoint', linehl='', numhl=''})
@@ -139,7 +154,7 @@ return {
   -- Telescope (Fuzzy Finder)
   {
     "nvim-telescope/telescope.nvim",
-    dependencies = { "nvim-telescope/telescope-fzf-native.nvim" },
+    dependencies = { "nvim-telescope/telescope-fzf-native.nvim", "ThePrimeagen/git-worktree.nvim" },
     cmd = "Telescope",
     config = function()
        local telescope = require("telescope")
@@ -160,6 +175,12 @@ return {
     end
   },
   { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+  {
+    "ThePrimeagen/git-worktree.nvim",
+    config = function()
+      require("git-worktree").setup()
+    end,
+  },
 
   -- Venv Selector (Python Env Management)
   {

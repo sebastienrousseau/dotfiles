@@ -5,7 +5,8 @@ This is intentionally small and practical.
 
 ## Git
 - `g`, `ga`, `gco`, `gst`, `gl`, `gll` and related aliases
-- `lg` opens `lazygit` (if installed)
+- `lg` shows a graph log; `lgui` opens `lazygit` (if installed)
+- `gh` aliases in `~/.config/gh/config.yml`
 
 ## Search & Navigation
 - `rg` (ripgrep), `fd` (find)
