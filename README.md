@@ -2,17 +2,17 @@
   <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg" alt="Dotfiles logo" width="64" />
 </p>
 
-# Dotfiles — a fast, idempotent dev shell in minutes
+# Dotfiles — a fast, idempotent shell environment in minutes
 
-[![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions) [![Codacy](https://img.shields.io/codacy/grade/634cfc4de08e492ebcbb341631066241?style=for-the-badge)](https://www.codacy.com/gh/sebastienrousseau/dotfiles/dashboard) [![Version](https://img.shields.io/badge/Version-v0.2.473-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.473) [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge&color=ff69b4)](LICENSE) [![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases) [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits) [![Contributors](https://img.shields.io/github/contributors/sebastienrousseau/dotfiles.svg?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/graphs/contributors) [![Forks](https://img.shields.io/github/forks/sebastienrousseau/dotfiles.svg?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/network/members) [![Love](https://kura.pro/common/images/shields/made-with-love.svg)](https://dotfiles.io)
+[![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions) [![Version](https://img.shields.io/badge/Version-v0.2.473-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.473) [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge&color=ff69b4)](LICENSE) [![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases) [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
 
 ---
 
 ## Elevator Pitch
 
-Dotfiles is a cross-platform, Chezmoi-managed shell distribution that installs in minutes and keeps your development environment consistent across macOS, Linux, and WSL. It is **idempotent** by design: running it multiple times is safe, predictable, and produces the same result.
+Dotfiles is a cross-platform, Chezmoi-managed shell distribution that installs in minutes and keeps your shell environment consistent across macOS, Linux, and WSL. It is **idempotent** by design: running it multiple times is safe, predictable, and produces the same result.
 
-> **Conceptually:** Git + Templates + Guarded Scripts = A Reproducible Shell.
+Conceptually: Git + templates + guarded scripts = a reproducible shell.
 
 ---
 
@@ -35,7 +35,7 @@ Dotfiles is a cross-platform, Chezmoi-managed shell distribution that installs i
 
 ## Why Dotfiles?
 
-Most repositories optimize for personal convenience. Dotfiles optimizes for **daily use, reproducibility, and auditability.**
+Many dotfile repositories prioritize personal convenience. Dotfiles optimizes for **daily use, reproducibility, and auditability.**
 
 Dotfiles is designed for developers who manage multiple machines and want a reproducible, auditable shell environment.
 
@@ -43,6 +43,10 @@ Dotfiles is designed for developers who manage multiple machines and want a repr
 - **Unified Control:** A single `dot` command to sync or upgrade your entire environment.
 - **Safety First:** Explicit opt-in for any system or security changes.
 - **Clean Slate:** Clear separation between source files, generated configs, and system state.
+
+## Non-Goals
+
+Dotfiles does not aim to be a beginner tutorial, a GUI-based setup tool, or a one-size-fits-all configuration.
 
 ## Safety Guarantees
 
@@ -52,8 +56,6 @@ This is **infrastructure**, not an ad-hoc shell script.
 - No background daemons installed automatically.
 - No system settings changed unless explicitly enabled via environment variables.
 - All privileged actions are logged locally to `~/.local/share/dotfiles.log`.
-
-<p align="right"><a href="#dotfiles--a-fast-idempotent-dev-shell-in-minutes">↑ Back to Top</a></p>
 
 ---
 
@@ -78,7 +80,7 @@ exec zsh
 > [!TIP]
 > Use `DOTFILES_NONINTERACTIVE=1` if you want a fully non‑interactive install.
 
-<p align="right"><a href="#dotfiles--a-fast-idempotent-dev-shell-in-minutes">↑ Back to Top</a></p>
+<p align="right"><a href="#dotfiles--a-fast-idempotent-shell-environment-in-minutes">↑ Back to Top</a></p>
 
 ---
 
@@ -88,8 +90,6 @@ exec zsh
 - **CLI Reference**: [docs/TOOLS.md](docs/TOOLS.md)
 - **Security Audit**: [docs/SECURITY.md](docs/SECURITY.md)
 - **Architecture**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-
-<p align="right"><a href="#dotfiles--a-fast-idempotent-dev-shell-in-minutes">↑ Back to Top</a></p>
 
 ---
 
@@ -118,8 +118,6 @@ exec zsh
 
 - **Installer**: installs Chezmoi (pinned + checksum verified) and applies this repo.
 - **Chezmoi hooks**: install OS packages, fonts, and optional apps defined in this repo.
-
-<p align="right"><a href="#dotfiles--a-fast-idempotent-dev-shell-in-minutes">↑ Back to Top</a></p>
 
 ---
 
@@ -233,11 +231,11 @@ All security changes are logged to `~/.local/share/dotfiles.log`.
 
 Nix is **optional**. The repo does **not** install the Nix daemon.
 
-- Use `nix develop` for a reproducible dev shell.
+- Use `nix develop` for a reproducible shell environment.
 - `dot tools` assumes Nix is already installed.
 - There is no toggle that replaces Brew/Apt with Nix automatically.
 
-<p align="right"><a href="#dotfiles--a-fast-idempotent-dev-shell-in-minutes">↑ Back to Top</a></p>
+<p align="right"><a href="#dotfiles--a-fast-idempotent-shell-environment-in-minutes">↑ Back to Top</a></p>
 
 ---
 
@@ -280,8 +278,6 @@ git commit -S -m "Describe your change"
 git push
 ```
 
-<p align="right"><a href="#dotfiles--a-fast-idempotent-dev-shell-in-minutes">↑ Back to Top</a></p>
-
 ---
 
 ## Architecture (How it Works)
@@ -316,21 +312,20 @@ flowchart LR
 ├── templates/                  # Project scaffolds used by `dot new`
 ├── scripts/                    # Install, security, theme, diagnostics
 ├── install/                    # Chezmoi run_onchange/run_before hooks
-├── nix/                        # Optional Nix dev shell
+├── nix/                        # Optional Nix shell environment
 ├── docs/                       # Guides, keys, roadmap, architecture
 └── install.sh                  # Bootstrap installer
 ```
 
-<p align="right"><a href="#dotfiles--a-fast-idempotent-dev-shell-in-minutes">↑ Back to Top</a></p>
+---
+
+<p align="right"><a href="#dotfiles--a-fast-idempotent-shell-environment-in-minutes">↑ Back to Top</a></p>
 
 ---
 
 ## Roadmap
 
-- **Roadmap doc**: `docs/ROADMAP.md`
-- **Master plan**: `~/Roadmaps/dotfiles/roadmap.md` (local, not tracked)
-
-<p align="right"><a href="#dotfiles--a-fast-idempotent-dev-shell-in-minutes">↑ Back to Top</a></p>
+Tracked via GitHub issues and milestones.
 
 ---
 
@@ -340,23 +335,17 @@ Please read [CONTRIBUTING.md](.github/CONTRIBUTING.md) before opening a PR.
 
 Security issues: see [SECURITY.md](.github/SECURITY.md).
 
-<p align="right"><a href="#dotfiles--a-fast-idempotent-dev-shell-in-minutes">↑ Back to Top</a></p>
-
 ---
 
 ## Troubleshooting
 
 See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
-<p align="right"><a href="#dotfiles--a-fast-idempotent-dev-shell-in-minutes">↑ Back to Top</a></p>
-
 ---
 
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).
-
-<p align="right"><a href="#dotfiles--a-fast-idempotent-dev-shell-in-minutes">↑ Back to Top</a></p>
 
 ---
 
@@ -365,5 +354,3 @@ See [CHANGELOG.md](CHANGELOG.md).
 This repo is licensed under the **MIT License**. See [LICENSE](LICENSE).
 
 Some bundled third‑party dependencies are GPL‑3.0; the LICENSE file lists them explicitly.
-
-<p align="right"><a href="#dotfiles--a-fast-idempotent-dev-shell-in-minutes">↑ Back to Top</a></p>
