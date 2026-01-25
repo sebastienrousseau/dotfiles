@@ -19,6 +19,7 @@ Optional (feature‑dependent):
 - `apt-get` (Linux)
 - Docker or Podman (sandbox)
 - Nix (optional toolchain)
+- gum (required for `dot learn`)
 
 ## Quick Install
 
@@ -32,6 +33,23 @@ exec zsh
 - The installer downloads a pinned Chezmoi bootstrap and applies this repo.
 - Chezmoi hooks install OS packages, fonts, and optional apps.
 - The `dot` CLI becomes available in `~/.local/bin`.
+
+## Optional: gum (for `dot learn`)
+
+macOS:
+```bash
+brew install gum
+```
+
+Linux (snap):
+```bash
+sudo snap install gum --classic
+```
+
+Linux (Go toolchain):
+```bash
+go install github.com/charmbracelet/gum@latest
+```
 
 ## Updating
 

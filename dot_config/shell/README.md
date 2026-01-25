@@ -162,7 +162,7 @@ dot usb-safety
 dot secrets-init
 dot edit
 dot docs
-dot learn
+dot learn     # Interactive tour (requires gum)
 dot help
 ```
 

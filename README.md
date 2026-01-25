@@ -132,7 +132,7 @@ Use `dot --help` or `dot <command> --help` for inline docs.
 | `dot theme` | Switch terminal theme (dark/light) | UX |
 | `dot wallpaper` | Apply a wallpaper from your library | UX |
 | `dot keys` | Show keybindings catalog | UX |
-| `dot learn` | Interactive tour of tools | UX |
+| `dot learn` | Interactive tour of tools (requires `gum`) | UX |
 | `dot fonts` | Install Nerd Fonts | UX |
 | `dot sandbox` | Launch a safe sandbox preview | Tools |
 | `dot tools` | Show dot utils overview | Tools |
