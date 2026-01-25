@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.475) - <https://dotfiles.io>
-# Made with  in London, UK by Sebastien Rousseau
-# Copyright (c) 2015-2025. All rights reserved
+# Made With ❤️ in London, United Kingdom
+# Designed by Sebastien Rousseau
+# Copyright (c) 2015-2026. All rights reserved.
 # License: MIT
 
 ## 🅲🅻🅴🅰🅽 - Clean up.

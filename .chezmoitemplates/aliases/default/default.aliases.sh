@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2025. All rights reserved
+# Copyright (c) 2015-2026. All rights reserved.
 # Description: Script containing default shell aliases
 # Website: https://dotfiles.io
 # License: MIT
