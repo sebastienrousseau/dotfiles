@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Performance benchmark runner for shell functions
+# Measures execution time and memory usage
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(dirname "$(dirname "$(dirname "$SCRIPT_DIR")")")"
+RESULTS_FILE="${RESULTS_FILE:-/tmp/benchmark_results.json}"
+
+# Thresholds (in milliseconds)
+SHELL_STARTUP_THRESHOLD_MS=500
+FUNCTION_LOAD_THRESHOLD_MS=100
+CD_OPERATION_THRESHOLD_MS=50
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+measure_time_ms() {
+  local start end
+  start=$(date +%s%3N)
+  eval "$@" >/dev/null 2>&1
+  end=$(date +%s%3N)
+  echo $((end - start))
+}
+
+benchmark_shell_startup() {
+  echo "Benchmarking shell startup time..."
+  local total=0
+  local iterations=5
+
+  for ((i=1; i<=iterations; i++)); do
+    local time_ms
+    time_ms=$(measure_time_ms "zsh -i -c 'exit' 2>/dev/null || bash -i -c 'exit'")
+    total=$((total + time_ms))
+  done
+
+  local avg=$((total / iterations))
+
+  if [[ $avg -gt $SHELL_STARTUP_THRESHOLD_MS ]]; then
+    echo -e "${RED}✗ FAIL${NC}: Shell startup ${avg}ms exceeds threshold ${SHELL_STARTUP_THRESHOLD_MS}ms"
+    return 1
+  else
+    echo -e "${GREEN}✓ PASS${NC}: Shell startup ${avg}ms (threshold: ${SHELL_STARTUP_THRESHOLD_MS}ms)"
+    return 0
+  fi
+}
+
+benchmark_function_sourcing() {
+  echo "Benchmarking function file sourcing..."
+  local failures=0
+
+  for func_file in "$REPO_ROOT"/.chezmoitemplates/functions/*.sh; do
+    [[ -f "$func_file" ]] || continue
+    local name=$(basename "$func_file")
+    local time_ms
+    time_ms=$(measure_time_ms "source '$func_file'")
+
+    if [[ $time_ms -gt $FUNCTION_LOAD_THRESHOLD_MS ]]; then
+      echo -e "${YELLOW}⚠ WARN${NC}: $name took ${time_ms}ms to source"
+      ((failures++))
+    fi
+  done
+
+  if [[ $failures -eq 0 ]]; then
+    echo -e "${GREEN}✓ PASS${NC}: All functions load within threshold"
+  fi
+}
+
+benchmark_memory_usage() {
+  echo "Benchmarking memory usage..."
+
+  # Get baseline memory
+  local baseline
+  baseline=$(ps -o rss= -p $$ | tr -d ' ')
+
+  # Source all functions
+  for func_file in "$REPO_ROOT"/.chezmoitemplates/functions/*.sh; do
+    [[ -f "$func_file" ]] && source "$func_file" 2>/dev/null || true
+  done
+
+  # Get memory after loading
+  local after
+  after=$(ps -o rss= -p $$ | tr -d ' ')
+
+  local diff_kb=$((after - baseline))
+  local diff_mb=$((diff_kb / 1024))
+
+  echo "Memory increase after loading functions: ${diff_mb}MB (${diff_kb}KB)"
+
+  # Fail if memory usage exceeds 50MB
+  if [[ $diff_mb -gt 50 ]]; then
+    echo -e "${RED}✗ FAIL${NC}: Memory usage ${diff_mb}MB exceeds 50MB threshold"
+    return 1
+  else
+    echo -e "${GREEN}✓ PASS${NC}: Memory usage within acceptable limits"
+    return 0
+  fi
+}
+
+generate_report() {
+  echo ""
+  echo "╔═══════════════════════════════════════╗"
+  echo "║     Performance Benchmark Report      ║"
+  echo "╚═══════════════════════════════════════╝"
+  echo ""
+
+  benchmark_shell_startup
+  echo ""
+  benchmark_function_sourcing
+  echo ""
+  benchmark_memory_usage
+}
+
+main() {
+  generate_report
+}
+
+main "$@"
