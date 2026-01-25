@@ -104,7 +104,7 @@ step "Applying Configuration..."
 if [ -n "$1" ]; then
   VERSION="$1"
 else
-  VERSION="v0.2.472"
+  VERSION="v0.2.473"
 fi
 
 SOURCE_DIR="$HOME/.dotfiles"

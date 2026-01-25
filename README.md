@@ -9,7 +9,7 @@
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.472)
+# Dotfiles (v0.2.473)
 
 Simply designed to fit your shell life 🐚
 
@@ -37,7 +37,7 @@ Simply designed to fit your shell life 🐚
 
 ## Overview 📖
 
-Dotfiles v0.2.472 transforms your shell into a **Trusted Platform**. It is a curated, high-performance distribution of configurations, managed by `chezmoi`.
+Dotfiles v0.2.473 transforms your shell into a **Trusted Platform**. It is a curated, high-performance distribution of configurations, managed by `chezmoi`.
 
 This project aims to provide a reproducible and optimized development environment for macOS, Linux, and Windows (via WSL).
 
@@ -47,7 +47,7 @@ This project aims to provide a reproducible and optimized development environmen
 <!-- markdownlint-enable MD033 MD041 -->
 
 [![Getting Started][getting_started]][getting-started-url]
-[![Download Dotfiles v0.2.472][download_button]][12]
+[![Download Dotfiles v0.2.473][download_button]][12]
 
 <!-- markdownlint-disable MD033 MD041 MD043 -->
 </center>
@@ -124,7 +124,7 @@ The following tools need to be installed manually (Linux):
 <summary><strong>Arch Linux</strong></summary>
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.472/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.473/install.sh)"
 
 # Install a Nerd Font
 sudo pacman -S ttf-fira-code
@@ -146,7 +146,7 @@ Follow the instructions for your chosen Linux distribution within WSL.
 This command will install `chezmoi` and apply the dotfiles. The installation script will also attempt to install all the necessary dependencies for your platform.
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.472/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.473/install.sh)"
 ```
 
 ### 2. Manual Installation
@@ -210,6 +210,8 @@ dot secrets   # Edit encrypted secrets (age)
 dot upgrade   # Update flake, plugins, and dotfiles
 dot new       # Scaffold a project template (python/go/node)
 dot log-rotate # Rotate ~/.local/share/dotfiles.log
+dot
+dot 
 ```
 
 ### Optional Nix Toolchain
@@ -435,7 +437,7 @@ Apache License (Version 2.0).
 [09]: https://www.deepin.org/en/ "Deepin"
 [10]: https://devuan.org/ "Devuan"
 [11]: https://github.com/sebastienrousseau/dotfiles/docs "Documentation"
-[12]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.472.tar.gz "Download Dotfiles v0.2.472"
+[12]: https://github.com/sebastienrousseau/dotfiles/archive/refs/tags/v0.2.473.tar.gz "Download Dotfiles v0.2.473"
 [13]: https://github.com/sebastienrousseau/dotfiles/network/members "List of members"
 [14]: https://github.com/sebastienrousseau/dotfiles/graphs/contributors "List of contributors"
 [15]: https://git-scm.com/ "Git"

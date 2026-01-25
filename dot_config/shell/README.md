@@ -26,7 +26,7 @@ Welcome to your universally compatible, high-performance dotfiles configuration,
 To install these dotfiles on a new machine, simply run:
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.472/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.473/install.sh)"
 ```
 
 This command will:
@@ -139,6 +139,8 @@ dot secrets   # Edit encrypted secrets (age)
 dot upgrade   # Update flake, plugins, and dotfiles
 dot new       # Scaffold a project template (python/go/node)
 dot log-rotate # Rotate ~/.local/share/dotfiles.log
+dot
+dot 
 ```
 
 ### Optional Nix Toolchain

@@ -13,9 +13,23 @@ _dot() {
     tune
     secrets
     secrets-init
+    secrets-create
+    ssh-key
+    firewall
+    telemetry
+    dns-doh
+    encrypt-check
+    backup
+    lock-screen
+    usb-safety
+    fonts
+    wallpaper
+    theme
     upgrade
     edit
     docs
+    new
+    log-rotate
     help
   )
   _describe 'command' commands

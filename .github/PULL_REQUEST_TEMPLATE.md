@@ -1,10 +1,10 @@
 # PR Title
-feat(core): v0.2.472 release - shell UX fixes, provisioning hardening, and repo reorg
+feat(core): v0.2.473 release - shell UX fixes, provisioning hardening, and repo reorg
 
 # PR Description
 
 ## Summary
-This branch delivers the v0.2.472 release set with shell UX fixes, hardened Linux provisioning, and a repo reorganization that clarifies install/provision/scripts layout. It also addresses zsh completion handling, adds safe fzf/atuin installers, and tightens documentation links to the new structure.
+This branch delivers the v0.2.473 release set with shell UX fixes, hardened Linux provisioning, and a repo reorganization that clarifies install/provision/scripts layout. It also addresses zsh completion handling, adds safe fzf/atuin installers, and tightens documentation links to the new structure.
 
 ## Key Changes (vs master)
 

@@ -24,3 +24,13 @@ This is intentionally small and practical.
 - `dot theme` to switch terminal themes
 - `dot new` to scaffold a project (python/go/node)
 - `dot log-rotate` to rotate `~/.local/share/dotfiles.log`
+
+- `dot backup` to create a compressed backup
+- `dot encrypt-check` to check disk encryption status
+- `dot firewall` to apply firewall hardening (opt-in)
+- `dot telemetry` to disable telemetry (opt-in)
+- `dot dns-doh` to enable DNS-over-HTTPS (opt-in)
+- `dot lock-screen` to enforce lock screen idle settings
+- `dot usb-safety` to disable automount for removable media
+- `dot fonts` to install Nerd Fonts
+- `dot wallpaper` to apply a wallpaper

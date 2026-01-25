@@ -5,7 +5,7 @@
   align="right"
 />
 
-# Dotfiles Path Configuration (v0.2.472)
+# Dotfiles Path Configuration (v0.2.473)
 
 Simply designed to fit your shell life 🐚
 
