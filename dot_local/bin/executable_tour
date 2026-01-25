@@ -97,6 +97,10 @@ gum style \
     "dot encrypt-check # Disk encryption status"
 
 echo ""
+gum confirm "Next: Themes & UX" || exit 0
+clear
+
+# Slide 5: Themes & UX
 gum style \
     --foreground 212 --border rounded --padding "1 2" --margin "1 2" \
     "Themes & UX" \
@@ -106,12 +110,12 @@ gum style \
     "dot fonts      # Install Nerd Fonts" \
     "dot keys       # Keybindings catalog" \
     "dot tools      # Curated utilities"
-echo ""
 
+echo ""
 gum confirm "Next: Projects & Sandbox" || exit 0
 clear
 
-# Slide 5: Projects & Sandbox
+# Slide 6: Projects & Sandbox
 gum style \
     --foreground 111 --border rounded --padding "1 2" --margin "1 2" \
     "Projects & sandbox" \
