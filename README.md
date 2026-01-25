@@ -358,6 +358,6 @@ See [CHANGELOG.md](CHANGELOG.md).
 
 This repo is licensed under the **MIT License**. See [LICENSE](LICENSE).
 
-Third‑party dependencies may carry different licenses (e.g., GPL). See LICENSE for details.
+Some bundled third‑party dependencies are GPL‑3.0; the LICENSE file lists them explicitly.
 
 <p align="right"><a href="#dotfiles--a-fast-idempotent-dev-shell-in-minutes">↑ Back to Top</a></p>
