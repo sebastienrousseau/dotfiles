@@ -86,14 +86,15 @@ clear
 
 # Slide 4: Security (opt-in)
 gum style \
-    --foreground 150 --border rounded --padding "1 2" --margin "1 2" \
+    --foreground 150 --border double --padding "1 2" --margin "1 2" \
     "Security (opt‑in)" \
+    "Explicit by design. Nothing changes without your choice." \
     " " \
-    "dot firewall     # Firewall hardening" \
-    "dot telemetry    # Disable OS telemetry" \
-    "dot dns-doh      # Enable DNS‑over‑HTTPS (Linux)" \
-    "dot lock-screen  # Idle lock settings" \
-    "dot usb-safety   # Disable automount" \
+    "dot firewall      # Firewall hardening" \
+    "dot telemetry     # Disable OS telemetry" \
+    "dot dns-doh       # Enable DNS‑over‑HTTPS (Linux)" \
+    "dot lock-screen   # Idle lock settings" \
+    "dot usb-safety    # Disable automount" \
     "dot encrypt-check # Disk encryption status"
 
 echo ""
