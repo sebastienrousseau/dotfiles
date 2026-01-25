@@ -58,7 +58,7 @@ curlstatus() {
 
   # Fetch and display the HTTP status code
   echo "Fetching HTTP status code for URL: $1"
-  curl -k -s -o /dev/null -w "%{http_code}" "$1"
+  curl -k -s --connect-timeout 10 --max-time 30 -o /dev/null -w "%{http_code}" "$1"
   echo
 }
 

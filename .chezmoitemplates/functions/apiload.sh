@@ -61,7 +61,7 @@ apiload_load_test() {
     local fail_count=0
     
     for ((i = 1; i <= requests; i++)); do
-        response=$(curl -s -o /dev/null -w "%{http_code}" "$url")
+        response=$(curl -s --connect-timeout 5 --max-time 30 -o /dev/null -w "%{http_code}" "$url")
         if [[ "$response" -eq 200 ]]; then
             echo -e "\e[32m[Request $i]\e[0m Success (HTTP 200)"
             ((success_count++))

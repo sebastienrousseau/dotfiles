@@ -118,12 +118,14 @@ apihealthealth() {
     if [[ ${#curl_headers[@]} -gt 0 ]]; then
         response=$(curl -s -o /dev/null -w "%{http_code}" \
             -X "$method" \
+            --connect-timeout 10 \
             --max-time "$timeout" \
             "${curl_headers[@]}" \
             "$url" 2>/dev/null || echo "000")
     else
         response=$(curl -s -o /dev/null -w "%{http_code}" \
             -X "$method" \
+            --connect-timeout 10 \
             --max-time "$timeout" \
             "$url" 2>/dev/null || echo "000")
     fi

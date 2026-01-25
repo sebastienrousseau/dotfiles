@@ -73,8 +73,8 @@ else
     tmp_dir="$(mktemp -d)"
     trap 'rm -rf "$tmp_dir"' EXIT
 
-    curl -fsSL -o "$tmp_dir/$tarball" "$base_url/$tarball"
-    curl -fsSL -o "$tmp_dir/$checksums" "$base_url/$checksums"
+    curl -fsSL --connect-timeout 10 --max-time 120 -o "$tmp_dir/$tarball" "$base_url/$tarball"
+    curl -fsSL --connect-timeout 10 --max-time 30 -o "$tmp_dir/$checksums" "$base_url/$checksums"
 
     if command -v sha256sum >/dev/null; then
       expected="$(awk -v f="$tarball" '$2==f {print $1}' "$tmp_dir/$checksums")"

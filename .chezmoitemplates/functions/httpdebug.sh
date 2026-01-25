@@ -67,7 +67,7 @@ httpdebug() {
 
   # Perform HTTP request and measure timing
   echo "[INFO] Debugging HTTP request to: ${*}"
-  curl_output=$(/usr/bin/curl "$@" -o /dev/null -s -w "\
+  curl_output=$(/usr/bin/curl --connect-timeout 10 --max-time 30 "$@" -o /dev/null -s -w "\
 IP Address: %{remote_ip}\n\
 DNS Lookup: %{time_namelookup}\n\
 TCP Connection: %{time_connect}\n\

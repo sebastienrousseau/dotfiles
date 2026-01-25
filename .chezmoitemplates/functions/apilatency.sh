@@ -62,10 +62,8 @@ apilatency_monitor() {
     echo "Time,Response_Time"
     
     for ((i = 1; i <= count; i++)); do
-        local start=$(date +%s.%N)
-        curl -s -o /dev/null "$url"
-        local end=$(date +%s.%N)
-        local latency=$(echo "$end - $start" | bc)
+        local latency
+        latency=$(curl -s --connect-timeout 5 --max-time 30 -o /dev/null -w "%{time_total}" "$url")
         echo "$(date '+%H:%M:%S'),$latency"
         sleep "$interval"
     done
