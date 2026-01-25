@@ -2,7 +2,7 @@
 # Main test runner for dotfiles test suite
 # Discovers and runs all test files, reports results
 
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TESTS_DIR="$(dirname "$SCRIPT_DIR")"

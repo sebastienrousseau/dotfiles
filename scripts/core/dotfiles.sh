@@ -9,7 +9,13 @@
 ## 🅸🅼🅿🅾🆁🆃🆂 - Importing constants and functions.
 
 # shellcheck disable=SC1091
-. "./lib/configurations/default/constants.sh"
+CONSTANTS_FILE="./lib/configurations/default/constants.sh"
+if [[ -f "$CONSTANTS_FILE" ]]; then
+  source "$CONSTANTS_FILE"
+else
+  # Define fallback constants
+  DOTFILES_VERSION="${DOTFILES_VERSION:-0.2.475}"
+fi
 
 ## 🅼🅰🅸🅽 - Main function.
 

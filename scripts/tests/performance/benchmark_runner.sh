@@ -6,7 +6,10 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$(dirname "$(dirname "$SCRIPT_DIR")")")"
-RESULTS_FILE="${RESULTS_FILE:-/tmp/benchmark_results.json}"
+
+# Results storage for regression tracking
+RESULTS_DIR="${RESULTS_DIR:-$HOME/.local/share/dotfiles/benchmarks}"
+RESULTS_FILE="$RESULTS_DIR/benchmark_$(date +%Y%m%d_%H%M%S).json"
 
 # Thresholds (in milliseconds)
 SHELL_STARTUP_THRESHOLD_MS=500
@@ -17,6 +20,17 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
+
+# Store benchmark result in JSON format for regression tracking
+store_result() {
+  local metric="$1" value="$2" threshold="$3" status="$4"
+  mkdir -p "$RESULTS_DIR"
+
+  # Append to JSON results
+  cat >> "$RESULTS_FILE" << EOF
+{"timestamp": "$(date -Iseconds)", "metric": "$metric", "value": $value, "threshold": $threshold, "status": "$status"}
+EOF
+}
 
 measure_time_ms() {
   local start end
@@ -38,12 +52,17 @@ benchmark_shell_startup() {
   done
 
   local avg=$((total / iterations))
+  local status
 
   if [[ $avg -gt $SHELL_STARTUP_THRESHOLD_MS ]]; then
+    status="FAIL"
     echo -e "${RED}✗ FAIL${NC}: Shell startup ${avg}ms exceeds threshold ${SHELL_STARTUP_THRESHOLD_MS}ms"
+    store_result "shell_startup" "$avg" "$SHELL_STARTUP_THRESHOLD_MS" "$status"
     return 1
   else
+    status="PASS"
     echo -e "${GREEN}✓ PASS${NC}: Shell startup ${avg}ms (threshold: ${SHELL_STARTUP_THRESHOLD_MS}ms)"
+    store_result "shell_startup" "$avg" "$SHELL_STARTUP_THRESHOLD_MS" "$status"
     return 0
   fi
 }
@@ -87,15 +106,20 @@ benchmark_memory_usage() {
 
   local diff_kb=$((after - baseline))
   local diff_mb=$((diff_kb / 1024))
+  local status
 
   echo "Memory increase after loading functions: ${diff_mb}MB (${diff_kb}KB)"
 
   # Fail if memory usage exceeds 50MB
   if [[ $diff_mb -gt 50 ]]; then
+    status="FAIL"
     echo -e "${RED}✗ FAIL${NC}: Memory usage ${diff_mb}MB exceeds 50MB threshold"
+    store_result "memory_usage_kb" "$diff_kb" "51200" "$status"
     return 1
   else
+    status="PASS"
     echo -e "${GREEN}✓ PASS${NC}: Memory usage within acceptable limits"
+    store_result "memory_usage_kb" "$diff_kb" "51200" "$status"
     return 0
   fi
 }
