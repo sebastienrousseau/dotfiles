@@ -41,7 +41,7 @@ This command will:
 
 ### macOS
 Updates are handled via [Homebrew](https://brew.sh/).
-1. Edit `~/.local/share/chezmoi/dot_config/shell/Brewfile`.
+1. Edit `~/.dotfiles/dot_config/shell/Brewfile`.
 2. Run `chezmoi apply`.
    - This triggers `run_onchange_darwin_install-packages.sh.tmpl`, which runs `brew bundle`.
 
@@ -51,7 +51,7 @@ Updates are handled via `apt-get` (Ubuntu/Debian).
    - This checks for package updates defined in `run_onchange_linux_install-packages.sh.tmpl`.
 
 ### Vim Plugins
-1. Edit `~/.local/share/chezmoi/dot_vimrc`.
+1. Edit `~/.dotfiles/dot_vimrc`.
 2. Run `chezmoi apply`.
    - This automatically runs `vim +PlugInstall +PlugClean +qa`.
 
@@ -69,13 +69,14 @@ If you are migrating from an old `~/.dotfiles` setup:
 
 2. **Initialize Chezmoi**:
    ```bash
-   chezmoi init --apply sebastienrousseau
+   git clone https://github.com/sebastienrousseau/dotfiles.git ~/.dotfiles
+   chezmoi apply
    ```
 
 3. **Verify**:
    - Restart your shell.
    - Check that `~/.config/shell` exists (this is where the *generated* scripts live).
-   - Check that `~/.local/share/chezmoi` exists (this is the *source*).
+   - Check that `~/.dotfiles` exists (this is the *source*).
 
 4. **Clean Up**:
    - Once verified, you can safely delete `~/.dotfiles.legacy` and `.zshrc.bak`.
@@ -84,10 +85,10 @@ If you are migrating from an old `~/.dotfiles` setup:
 
 ## 📂 Structure
 
-The configuration is managed in `~/.local/share/chezmoi`.
+The configuration is managed in `~/.dotfiles`.
 
 ```
-~/.local/share/chezmoi/
+~/.dotfiles/
 ├── dot_zshrc.tmpl          # Main Zsh configuration (template)
 ├── dot_vimrc               # Vim configuration
 ├── dot_tmux.conf           # Tmux configuration
@@ -107,7 +108,7 @@ The configuration is managed in `~/.local/share/chezmoi`.
 ## 🛠 Usage
 
 ### Applying Changes
-After editing any file in `~/.local/share/chezmoi`, apply the changes to your home directory:
+After editing any file in `~/.dotfiles`, apply the changes to your home directory:
 
 ```bash
 chezmoi apply
@@ -119,8 +120,25 @@ To see what will change before applying:
 chezmoi diff
 ```
 
+### Dot CLI
+
+```bash
+dot sync      # Apply dotfiles (chezmoi apply)
+dot update    # Pull latest changes and apply
+dot tools     # Show dot utils
+dot keys      # Show keybindings
+dot tune      # Apply OS tuning (opt-in)
+```
+
+### Optional Nix Toolchain
+
+```bash
+cd ~/.dotfiles
+nix develop
+```
+
 ### Adding New Aliases
-1. Navigate to `~/.local/share/chezmoi/.chezmoitemplates/aliases/`.
+1. Navigate to `~/.dotfiles/.chezmoitemplates/aliases/`.
 2. Create a new file (e.g., `mytool/mytool.aliases.sh`) or edit an existing one.
 3. Add your aliases.
 4. Run `chezmoi apply`.
@@ -128,7 +146,7 @@ chezmoi diff
 **Note:** Files in `macOS/` are only included on macOS systems.
 
 ### Adding New Functions
-1. Navigate to `~/.local/share/chezmoi/.chezmoitemplates/functions/`.
+1. Navigate to `~/.dotfiles/.chezmoitemplates/functions/`.
 2. Create a new `.sh` file.
 3. Define your function with a usage comment.
 4. Run `chezmoi apply`.

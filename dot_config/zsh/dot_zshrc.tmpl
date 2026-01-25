@@ -25,6 +25,14 @@ export FORCE_COLOR_OS="Linux"
 export FORCE_COLOR_OS="Windows"
 {{- end }}
 
+{{- $profile := default "laptop" .profile -}}
+{{- $features := default (dict "zsh" true "nvim" true "tmux" true "gui" true "secrets" true) .features -}}
+{{- $enabled := list -}}
+{{- range $k, $v := $features }}{{- if $v }}{{- $enabled = append $enabled $k }}{{- end }}{{- end }}
+
+export DOTFILES_PROFILE="{{ $profile }}"
+export DOTFILES_FEATURES="{{ join "," $enabled }}"
+
 ## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set Dotfiles variables
 export HOSTNAME="$(hostname)"                # More portable hostname command
 export INPUTRC="${HOME}/.inputrc"            # Set INPUTRC for readline

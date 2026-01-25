@@ -3,7 +3,7 @@
 This release transforms the dotfiles into a high-performance, universally compatible system managed by **chezmoi**.
 
 ### 🏗️ Technical Architecture
-v0.2.472 is not just "dotfiles" but a portable **Shell Distribution** managed by `chezmoi` ("source of truth" in `~/.local/share/chezmoi`).
+v0.2.472 is not just "dotfiles" but a portable **Shell Distribution** managed by `chezmoi` ("source of truth" in `~/.dotfiles`).
 
 - **XDG-First**: Configs strictly mapped to `~/.config/` (No `~/.foo` sprawl).
 - **Single Entrypoint**: `dot_zshenv` acts as an XDG bootloader for instant environment setup.
@@ -34,7 +34,7 @@ v0.2.472 is not just "dotfiles" but a portable **Shell Distribution** managed by
 - **Migrated**:
   - Shell: `~/.zshrc` now sources generated templates from `~/.config/shell`.
   - Neovim: `~/.config/nvim` fully managed via Lua/Lazy.nvim.
-  - Tmux: Modular config consolidated to `~/.local/share/chezmoi/dot_tmux.conf`.
+  - Tmux: Modular config consolidated to `~/.dotfiles/dot_tmux.conf`.
 - **Packaging**:
   - `Brewfile` (macOS) and `apt-get` (Linux) handled automatically.
 - **Structural**:

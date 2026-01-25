@@ -4,3 +4,21 @@
 **/.DS_Store
 *.swp
 **/*.swp
+# Repo-only files and directories (do not apply into $HOME)
+Dockerfile.test
+.dockerignore
+.editorconfig
+.gitignore
+LICENSE
+README.md
+docs
+docs/**
+.github
+.github/**
+install
+install/**
+install.sh
+scripts
+scripts/**
+
+.config/nvim/lazy-lock.json

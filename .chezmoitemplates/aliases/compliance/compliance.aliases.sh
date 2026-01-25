@@ -27,7 +27,7 @@ audit_fn() {
         tail -n 20 "$HOME/.dotfiles_audit.log"
     else
         # Fallback to git log if custom audit log doesn't exist
-        git -C "$HOME/.local/share/chezmoi" log --oneline -n 10 --format="%C(auto)%h %C(blue)%ad %C(reset)%s (%an)" --date=short
+        git -C "$HOME/.dotfiles" log --oneline -n 10 --format="%C(auto)%h %C(blue)%ad %C(reset)%s (%an)" --date=short
     fi
 }
 

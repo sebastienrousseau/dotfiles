@@ -7,7 +7,7 @@ import os
 import re
 import sys
 
-BASE_DIR = os.path.expanduser("~/.local/share/chezmoi/.chezmoitemplates")
+BASE_DIR = os.path.expanduser("~/.dotfiles/.chezmoitemplates")
 ALIASES_DIR = os.path.join(BASE_DIR, "aliases")
 FUNCTIONS_DIR = os.path.join(BASE_DIR, "functions")
 

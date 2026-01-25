@@ -1,0 +1,8 @@
+profile = "laptop"
+
+[features]
+zsh = true
+nvim = true
+tmux = true
+gui = true
+secrets = true

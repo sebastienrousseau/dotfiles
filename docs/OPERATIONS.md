@@ -61,7 +61,7 @@ chezmoi apply
 ### Rolling Back
 If an update breaks your setup:
 ```bash
-cd ~/.local/share/chezmoi
+cd ~/.dotfiles
 git reset --hard HEAD@{1}  # Go back 1 operation
 chezmoi apply
 ```

@@ -150,12 +150,12 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/sebastienrousseau/dotfiles.git ~/.local/share/chezmoi
+    git clone https://github.com/sebastienrousseau/dotfiles.git ~/.dotfiles
     ```
 
 2.  **Run the provisioning scripts:**
     ```bash
-    chezmoi apply --source ~/.local/share/chezmoi
+    chezmoi apply
     ```
 </details>
 
@@ -169,7 +169,7 @@ After installation, restart your terminal to apply the changes.
 
 ### Applying Changes
 
-After editing any file in `~/.local/share/chezmoi`, run:
+After editing any file in `~/.dotfiles`, run:
 
 ```bash
 chezmoi apply
@@ -179,6 +179,42 @@ To see what will change before applying:
 
 ```bash
 chezmoi diff
+```
+
+### Dot CLI
+
+Common commands:
+
+```bash
+dot sync      # Apply dotfiles (chezmoi apply)
+dot update    # Pull latest changes and apply
+dot tools     # Show dot utils
+dot keys      # Show keybindings
+dot tune      # Apply OS tuning (opt-in)
+```
+
+### Optional Nix Toolchain
+
+If you want reproducible binaries without changing the `chezmoi` workflow:
+
+```bash
+cd ~/.dotfiles
+nix develop
+```
+
+### Profiles & Features
+
+You can customize what gets applied per host using `.chezmoidata.toml`:
+
+```toml
+profile = "laptop"
+
+[features]
+zsh = true
+nvim = true
+tmux = true
+gui = true
+secrets = true
 ```
 
 ### Updating

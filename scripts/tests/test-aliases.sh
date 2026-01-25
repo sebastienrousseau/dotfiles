@@ -10,7 +10,7 @@ set -e
 
 echo "Testing alias syntax..."
 
-ALIAS_DIR="$HOME/.local/share/chezmoi/.chezmoitemplates/aliases"
+ALIAS_DIR="$HOME/.dotfiles/.chezmoitemplates/aliases"
 
 find "$ALIAS_DIR" -name "*.aliases.sh" | while read -r file; do
   # Check for syntax errors using bash -n

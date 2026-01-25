@@ -13,7 +13,7 @@ v0.2.472 constitutes a portable **Shell Distribution** managed by `chezmoi`. Thi
 The repository follows standard `chezmoi` conventions:
 
 ```text
-~/.local/share/chezmoi/
+~/.dotfiles/
 ├── dot_config/          # Mapped to ~/.config/
 │   ├── atuin/           # Shell history
 │   ├── ghostty/         # Terminal emulator
