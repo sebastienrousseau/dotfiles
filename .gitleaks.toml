@@ -1,0 +1,50 @@
+# Gitleaks Configuration
+#
+# This file configures gitleaks to ignore known false positives.
+# These are example/placeholder secrets used in documentation.
+#
+# References:
+#   - Gitleaks: https://github.com/gitleaks/gitleaks
+
+title = "Dotfiles Gitleaks Configuration"
+
+[extend]
+# Use the default gitleaks config as a base
+useDefault = true
+
+# Allowlist patterns that are known false positives
+[allowlist]
+description = "Allowlisted patterns for documentation examples"
+
+# Example secrets used in documentation
+regexes = [
+    # Example hex values commonly used in documentation
+    '''cafebabe:deadbeef''',
+    '''cafebabe''',
+    '''deadbeef''',
+
+    # Example AWS keys with XXX indicating they're fake
+    '''AKIAIMNOJVGFDXXXE4OA''',
+
+    # Sidekiq enterprise example
+    '''BUNDLE_ENTERPRISE__CONTRIBSYS__COM''',
+]
+
+# Paths to ignore (documentation files with examples)
+paths = [
+    '''docs/.*\.md''',
+    '''\.github/.*\.md''',
+]
+
+# Specific commits to ignore (if needed)
+# commits = []
+
+# Stopwords - common words that appear in secrets but are not secrets
+stopwords = [
+    "example",
+    "test",
+    "sample",
+    "placeholder",
+    "dummy",
+    "fake",
+]

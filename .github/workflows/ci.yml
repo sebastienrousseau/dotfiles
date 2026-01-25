@@ -171,7 +171,7 @@ jobs:
           sudo mv gitleaks /usr/local/bin/
 
       - name: Run Gitleaks
-        run: gitleaks detect --source . --verbose --no-git
+        run: gitleaks detect --source . --verbose --no-git --config .gitleaks.toml
 
   link-check:
     name: Link Rot Check
