@@ -10,7 +10,7 @@
 
 ## Elevator Pitch
 
-Dotfiles is a cross-platform, [Chezmoi](https://github.com/twpayne/chezmoi)-managed shell environment that installs in minutes and keeps your shell environment consistent across macOS, Linux, and WSL. It is **idempotent** by design: running it multiple times is safe, predictable, and produces the same result.
+Dotfiles is a cross-platform shell environment managed by [Chezmoi](https://github.com/twpayne/chezmoi) that installs in minutes and keeps your shell environment consistent across macOS, Linux, and WSL. It is **idempotent** by design: running it multiple times is safe, predictable, and produces the same result.
 
 Conceptually: Git + templates + guarded scripts = a reproducible shell.
 
@@ -25,7 +25,7 @@ Conceptually: Git + templates + guarded scripts = a reproducible shell.
 - [Documentation](#documentation)
 - [Installation Details](#installation-details)
 - [Reference](#reference)
-- [How‑to Guides](#how-to-guides)
+- [How-to Guides](#how-to-guides)
 - [Architecture (How it Works)](#architecture-how-it-works)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
@@ -248,7 +248,7 @@ See [docs/TOOLS.md](docs/TOOLS.md) for the list of included tools and alias conv
 
 <p align="right"><a href="#dotfiles--a-fast-idempotent-shell-environment-in-minutes">↑ Back to Top</a></p>
 
-## How‑to Guides
+## How-to Guides
 
 ### Add a new alias
 
@@ -326,7 +326,7 @@ flowchart LR
 
 ## Roadmap
 
-Tracked via GitHub issues and milestones.
+Tracked via [GitHub issues](https://github.com/sebastienrousseau/dotfiles/issues) and [milestones](https://github.com/sebastienrousseau/dotfiles/milestones).
 
 ---
 
