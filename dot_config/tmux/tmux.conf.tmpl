@@ -66,6 +66,8 @@ bind R command-prompt -p "Rename window:" "rename-window '%%'"
 bind X confirm-before -p "kill-window #W? (y/n)" kill-window
 
 # Splits (Current Path)
+bind % split-window -h -c "#{pane_current_path}"
+bind '"' split-window -v -c "#{pane_current_path}"
 bind '\' split-window -v -c "#{pane_current_path}"
 bind | split-window -h -c "#{pane_current_path}"
 bind - split-window -v

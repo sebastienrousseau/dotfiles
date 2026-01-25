@@ -11,8 +11,10 @@ across the dotfiles stack. Keep this concise and consistent.
 - Prefix + r: Reload config
 - Prefix + N: New window
 - Prefix + a / Tab: Last window
-- Prefix + \\: Split vertical (current path)
-- Prefix + |: Split horizontal (current path)
+- Prefix + %: Split vertical (current path)
+- Prefix + ": Split horizontal (current path)
+- Prefix + \\: Split vertical (alt)
+- Prefix + |: Split horizontal (alt)
 - Prefix + h/j/k/l: Move between panes (vim-style)
 - Prefix + z: Toggle zoom pane
 - Prefix + H/J/K/L: Resize pane (left/down/up/right)
