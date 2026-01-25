@@ -10,8 +10,11 @@ else
   setopt NO_BEEP
 fi
 
-if [[ "$DOTFILES_BELL_VISUAL" == "1" ]]; then
-  setopt VISUAL_BELL
-else
-  unsetopt VISUAL_BELL
+# Some zsh builds don't include visualbell; guard to avoid startup errors.
+if (( $+options[visualbell] )); then
+  if [[ "$DOTFILES_BELL_VISUAL" == "1" ]]; then
+    setopt VISUALBELL
+  else
+    unsetopt VISUALBELL
+  fi
 fi
