@@ -10,7 +10,7 @@ return {
         },
         -- LSP configuration
         server = {
-          on_attach = function(client, bufnr)
+          on_attach = function(_client, _bufnr)
             -- You can Set keybindings here.
             -- rustaceanvim defaults are pretty good though.
           end,

@@ -85,12 +85,12 @@ Simply design to fit your shell life
         respect_buf_cwd = true,
         update_focused_file = { enable = true, update_root = true },
         view = { width = 35, side = "left" },
-        renderer = { 
+        renderer = {
             indent_markers = { enable = true },
-            icons = { 
+            icons = {
                 git_placement = "before",
-                show = { git = true, folder = true, file = true, folder_arrow = true } 
-            } 
+                show = { git = true, folder = true, file = true, folder_arrow = true }
+            }
         },
         actions = { open_file = { quit_on_open = false } },
         git = { enable = true, ignore = false },
@@ -226,7 +226,7 @@ Simply design to fit your shell life
     opts = { delay = 200, large_file_cutoff = 2000, large_file_overrides = { providers = { "lsp" } } },
     config = function(_, opts) require("illuminate").configure(opts) end,
   },
-  
+
   -- Symbols Outline
   {
     "simrat39/symbols-outline.nvim",
@@ -234,7 +234,7 @@ Simply design to fit your shell life
     keys = { { "<leader>cs", "<cmd>SymbolsOutline<cr>", desc = "Symbols Outline" } },
     config = true,
   },
-  
+
   -- LSP Kind icons
   { "onsails/lspkind.nvim", event = "VeryLazy" },
 

@@ -11,7 +11,7 @@ return {
         -- Treesitter not installed yet, skip configuration
         return
       end
-      
+
       ts_config.setup({
         ensure_installed = { "python", "go", "markdown", "json", "toml", "yaml", "bash", "vim", "regex", "lua", "rust", "dockerfile" },
         highlight = { enable = true },
@@ -53,9 +53,9 @@ return {
   -- Debugging (DAP + Python)
   {
     "mfussenegger/nvim-dap",
-    dependencies = { 
-      "rcarriga/nvim-dap-ui", 
-      "mfussenegger/nvim-dap-python", 
+    dependencies = {
+      "rcarriga/nvim-dap-ui",
+      "mfussenegger/nvim-dap-python",
       "nvim-neotest/nvim-nio",
       "theHamsta/nvim-dap-virtual-text",
       "jbyuki/one-small-step-for-vimkind"
@@ -81,7 +81,7 @@ return {
       else
          python_path = vim.fn.exepath("python3") or vim.fn.exepath("python")
       end
-      
+
       dap_python.setup(python_path)
       dap_python.test_runner = "pytest"
 
@@ -126,11 +126,11 @@ return {
     config = function()
       local lint = require("lint")
       lint.linters_by_ft = {
-        python = { "mypy", "codespell" }, 
+        python = { "mypy", "codespell" },
         markdown = { "codespell" },
         dockerfile = { "hadolint" },
       }
-      
+
       vim.api.nvim_create_autocmd({ "BufWritePost", "BufEnter", "InsertLeave" }, {
         group = vim.api.nvim_create_augroup("lint", { clear = true }),
         callback = function() lint.try_lint() end,
@@ -190,7 +190,7 @@ return {
     cmd = "VenvSelect",
     keys = { { "<leader>cv", "<cmd>VenvSelect<cr>", desc = "Select VirtualEnv" } },
     opts = {
-        name = { "venv", ".venv", "env", ".env" }, 
+        name = { "venv", ".venv", "env", ".env" },
         auto_refresh = false, -- Disable auto-scan to prevent home dir timeouts
         dap_enabled = true,
     },
