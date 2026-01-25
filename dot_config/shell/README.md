@@ -41,14 +41,15 @@ This command will:
 
 ### macOS
 Updates are handled via [Homebrew](https://brew.sh/).
-1. Edit `~/.dotfiles/dot_config/shell/Brewfile`.
+1. Edit `~/.dotfiles/dot_config/shell/Brewfile.cli` and `~/.dotfiles/dot_config/shell/Brewfile.cask`.
 2. Run `chezmoi apply`.
-   - This triggers `run_onchange_darwin_install-packages.sh.tmpl`, which runs `brew bundle`.
+   - This triggers `run_onchange_darwin_install-packages.sh.tmpl`, which runs `brew bundle` for CLI and GUI packages.
 
 ### Linux & WSL
 Updates are handled via `apt-get` (Ubuntu/Debian).
 1. Run `chezmoi apply`.
    - This checks for package updates defined in `run_onchange_linux_install-packages.sh.tmpl`.
+   - Optional Flatpak list is read from `~/.config/flatpak/flatpak.list`.
 
 ### Vim Plugins
 1. Edit `~/.dotfiles/dot_vimrc`.

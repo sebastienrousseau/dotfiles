@@ -1,9 +1,4 @@
-# Taps
-# homebrew/bundle - Deprecated
-# homebrew/core - Built-in
-# homebrew/cask - Built-in
-
-# Core Tools
+# Core CLI Tools
 brew "git"
 brew "chezmoi"
 brew "starship"
@@ -35,8 +30,3 @@ brew "glab"
 brew "ollama"
 brew "fabric-cli"
 brew "uv"
-
-# Applications
-cask "visual-studio-code"
-cask "iterm2"
-cask "google-chrome"

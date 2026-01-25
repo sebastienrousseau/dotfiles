@@ -93,3 +93,23 @@ jobs:
           if [ -n "$files" ]; then
             echo "$files" | xargs shellcheck -x
           fi
+
+  nix-check:
+    name: Nix Flake Check (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+
+      - name: Enable Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v7
+
+      - name: Flake Check
+        run: nix flake check

@@ -88,7 +88,7 @@ Before you begin, ensure you have the following dependencies installed on your s
 <details>
 <summary><strong>macOS</strong></summary>
 
-The `Brewfile` in this repository is the single source of truth for all dependencies on macOS. The `install/provision/run_onchange_10-darwin-packages.sh.tmpl` script will automatically install all the necessary packages using `brew bundle`.
+The `Brewfile.cli` and `Brewfile.cask` files in this repository are the source of truth for dependencies on macOS. The `install/provision/run_onchange_10-darwin-packages.sh.tmpl` script will automatically install all CLI and GUI packages using `brew bundle`.
 
 </details>
 
@@ -282,6 +282,10 @@ dot fonts JetBrainsMono
 ```
 
 Installs Nerd Fonts and refreshes the font cache on Linux.
+
+### Flatpak (Linux)
+
+Populate `~/.config/flatpak/flatpak.list` and re-run `chezmoi apply`.
 
 ### Secrets
 

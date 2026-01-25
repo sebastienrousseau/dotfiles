@@ -1,0 +1,4 @@
+# GUI Applications
+cask "visual-studio-code"
+cask "iterm2"
+cask "google-chrome"
