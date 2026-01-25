@@ -4,7 +4,7 @@
 
 # Dotfiles — a fast, idempotent shell environment distribution in minutes
 
-[![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions) [![Version](https://img.shields.io/badge/Version-v0.2.474-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.474) [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE) [![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases) [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
+[![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions) [![Version](https://img.shields.io/badge/Version-v0.2.475-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.475) [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE) [![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases) [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
 
 ---
 
@@ -61,13 +61,13 @@ This is **infrastructure**, not an ad-hoc shell script.
 
 ```bash
 # Works on macOS, Linux, and WSL
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.474/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.475/install.sh)"
 exec zsh
 ```
 
 For non‑interactive installs (servers/CI), add:
 ```bash
-DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.474/install.sh)"
+DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.475/install.sh)"
 ```
 
 ---
@@ -119,11 +119,15 @@ Use `dot --help` or `dot <command> --help` for inline docs.
 | `dot apply` | Apply dotfiles (chezmoi apply) | Core |
 | `dot sync` | Alias of apply | Core |
 | `dot update` | Pull latest changes and apply | Core |
+| `dot add` | Add a file to chezmoi source | Core |
 | `dot diff` | Show chezmoi diff (excludes scripts) | Core |
+| `dot status` | Show configuration drift | Core |
 | `dot remove` | Safely remove a managed file | Core |
+| `dot cd` | Print source directory path | Core |
 | `dot upgrade` | Update flake, plugins, and dotfiles | Core |
 | `dot edit` | Open chezmoi source in editor | Core |
 | `dot docs` | Show repo README | Core |
+| `dot --version` | Show version information | Core |
 | `dot help` | Show help | Core |
 | `dot drift` | Drift dashboard (chezmoi status) | Diagnostics |
 | `dot history` | Shell history analysis | Diagnostics |
@@ -135,7 +139,8 @@ Use `dot --help` or `dot <command> --help` for inline docs.
 | `dot learn` | Interactive tour of tools (requires `gum`) | UX |
 | `dot fonts` | Install Nerd Fonts | UX |
 | `dot sandbox` | Launch a safe sandbox preview | Tools |
-| `dot tools` | Show dot utils overview | Tools |
+| `dot tools` | Show tools or install via Nix | Tools |
+| `dot tools install` | Enter Nix development shell | Tools |
 | `dot new` | Create a new project from a template | Tools |
 | `dot log-rotate` | Rotate `~/.local/share/dotfiles.log` | Tools |
 | `dot secrets-init` | Initialize age key for secrets | Secrets |

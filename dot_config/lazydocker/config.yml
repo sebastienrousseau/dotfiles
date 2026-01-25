@@ -1,0 +1,186 @@
+# Lazydocker configuration
+#
+# This file configures lazydocker, a terminal UI for Docker.
+#
+# References:
+#   - Lazydocker: https://github.com/jesseduffield/lazydocker
+
+gui:
+  # Show scrollbar in panels
+  scrollHeight: 2
+
+  # Expand focused panel to take up full screen
+  expandFocusedSidePanel: false
+
+  # Theme
+  theme:
+    activeBorderColor:
+      - green
+      - bold
+    inactiveBorderColor:
+      - white
+    selectedLineBgColor:
+      - default
+    optionsTextColor:
+      - blue
+
+  # Show container and image IDs
+  showAllContainers: true
+
+  # Time format (golang format)
+  timeFormat: "2006-01-02 15:04:05"
+
+  # Show bottom line with keybindings
+  showBottomLine: true
+
+# Logs settings
+logs:
+  # Show timestamps in logs
+  timestamps: true
+
+  # Number of lines to show
+  tail: "300"
+
+  # Wrap long lines
+  wrap: true
+
+# Stats settings
+stats:
+  # Enable graphs
+  graphs:
+    - CPU
+    - Memory
+
+# Commandline templates
+commandTemplates:
+  # Default restart policy
+  restartPolicy: "unless-stopped"
+
+  # Default network mode
+  networkMode: "bridge"
+
+  # Default shell for exec
+  dockerCompose: "docker compose"
+
+  # Container shell
+  shell: "/bin/sh"
+
+# Key bindings
+keybinding:
+  universal:
+    quit: "q"
+    quit-alt1: "<c-c>"
+    return: "<escape>"
+    quitWithoutChangingDirectory: "Q"
+    togglePanel: "<tab>"
+    prevItem: "<up>"
+    nextItem: "<down>"
+    prevItem-alt: "k"
+    nextItem-alt: "j"
+    prevPage: ","
+    nextPage: "."
+    gotoTop: "<"
+    gotoBottom: ">"
+    scrollLeft: "H"
+    scrollRight: "L"
+    prevBlock: "<left>"
+    nextBlock: "<right>"
+    prevBlock-alt: "h"
+    nextBlock-alt: "l"
+    nextMatch: "n"
+    prevMatch: "N"
+    startSearch: "/"
+    optionMenu: "?"
+    optionMenu-alt1: "x"
+    select: "<space>"
+    remove: "d"
+    new: "n"
+    edit: "e"
+    openInBrowser: "o"
+    scrollUpMain: "<pgup>"
+    scrollDownMain: "<pgdown>"
+    scrollUpMain-alt1: "K"
+    scrollDownMain-alt1: "J"
+    scrollUpMain-alt2: "<c-u>"
+    scrollDownMain-alt2: "<c-d>"
+    executeCustomCommand: ":"
+    createRebaseOptionsMenu: "m"
+    refresh: "R"
+    nextTab: "]"
+    prevTab: "["
+
+  containers:
+    # Focus panel
+    focus: "C"
+    # Actions
+    stop: "s"
+    start: "u"
+    restart: "r"
+    rebuild: "R"
+    remove: "d"
+    removeWithVolumes: "D"
+    attach: "a"
+    viewLogs: "L"
+    exec: "e"
+    prune: "p"
+    # Navigation
+    nextContainer: "j"
+    prevContainer: "k"
+    firstContainer: "g"
+    lastContainer: "G"
+
+  images:
+    focus: "I"
+    remove: "d"
+    prune: "p"
+    filter: "/"
+
+  volumes:
+    focus: "V"
+    remove: "d"
+    prune: "p"
+
+  networks:
+    focus: "N"
+    remove: "d"
+    prune: "p"
+
+  services:
+    focus: "S"
+    viewLogs: "L"
+    restart: "r"
+    stop: "s"
+    start: "u"
+    rebuild: "R"
+    removeContainers: "d"
+
+# OS specific settings
+os:
+  # Command to open URLs
+  openCommand: "open {{filename}}"
+  openLinkCommand: "open {{link}}"
+
+# Custom commands accessible from containers menu
+customCommands:
+  containers:
+    - name: "bash shell"
+      attach: true
+      command: "docker exec -it {{ .Container.ID }} bash"
+      serviceNames: []
+
+    - name: "sh shell"
+      attach: true
+      command: "docker exec -it {{ .Container.ID }} sh"
+      serviceNames: []
+
+    - name: "View environment"
+      command: "docker exec {{ .Container.ID }} env"
+      serviceNames: []
+
+# Replacements allow you to customise displayed strings
+replacements:
+  imageNamePrefixes:
+    # Remove common registry prefixes for cleaner display
+    - "docker.io/library/"
+    - "ghcr.io/"
+    - "gcr.io/"

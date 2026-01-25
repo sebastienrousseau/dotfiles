@@ -50,10 +50,35 @@ setw -g allow-rename off
 setw -g automatic-rename off
 setw -g mode-keys vi
 
+# --- COPY MODE (Vim-style) ---
+
+# Enter copy mode with prefix + [
+bind [ copy-mode
+
+# Vim-style selection and yanking
+bind -T copy-mode-vi v send-keys -X begin-selection
+bind -T copy-mode-vi C-v send-keys -X rectangle-toggle
+bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel
+bind -T copy-mode-vi Escape send-keys -X cancel
+
+# Additional copy mode bindings
+bind -T copy-mode-vi H send-keys -X start-of-line
+bind -T copy-mode-vi L send-keys -X end-of-line
+
+# macOS clipboard integration
+if-shell 'uname | grep -q Darwin' {
+  bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"
+  bind -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "pbcopy"
+  bind ] run "pbpaste | tmux load-buffer - && tmux paste-buffer"
+}
+
 # --- KEY BINDINGS & NAVIGATION ---
 
 # Reload Config
-bind r source-file ~/.tmux.conf \; display ".tmux.conf reloaded"
+bind r source-file ~/.config/tmux/tmux.conf \; display "tmux.conf reloaded"
+
+# Sessionizer (fuzzy session switcher)
+bind f run-shell "~/.local/bin/tmux-sessionizer"
 
 # Window Management
 bind -r C-h previous-window
@@ -111,7 +136,7 @@ if-shell 'uname | grep -q Linux' 'set -g status-left "#[bg={{ $accent_blue }}]  
 if-shell 'uname | grep -q MINGW' 'set -g status-left "#[bg={{ $accent_blue }}]  Windows #S #[bg={{ $accent_red }}] #W #[bg={{ $panel_bg }}]"'
 
 set -g status-right "#[fg={{ $status_fg }}] #[bg={{ $panel_bg }}] ⬛ #I #[bg={{ $accent_blue }}] #H #[bg={{ $accent_red }}] %_d %B %I:%M%p "
-set -g window-status-current-format "#[bg={{ $status_bg }}]Dotfiles (v0.2.474)"
+set -g window-status-current-format "#[bg={{ $status_bg }}]Dotfiles (v0.2.475)"
 set -g window-status-current-style "bg={{ $accent_red }}"
 set -g window-status-separator ""
 set-window-option -g clock-mode-colour "{{ $status_fg }}"

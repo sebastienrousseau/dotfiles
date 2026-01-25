@@ -1,0 +1,177 @@
+" ~/.vimrc - Legacy Vim configuration
+"
+" This file provides a fallback for environments where Neovim is unavailable.
+" It mirrors essential settings from the Neovim configuration for consistency.
+"
+" Note: For the full experience, use Neovim with ~/.config/nvim/
+"
+" References:
+"   - Vim Documentation: https://vimhelp.org/
+
+" --- Basic Settings ---
+set nocompatible              " Disable Vi compatibility
+filetype plugin indent on     " Enable filetype detection, plugins, and indent
+syntax enable                 " Enable syntax highlighting
+
+" --- Encoding ---
+set encoding=utf-8            " Use UTF-8 encoding
+set fileencoding=utf-8        " Write UTF-8 files
+scriptencoding utf-8
+
+" --- Display ---
+set number                    " Show line numbers
+set relativenumber            " Show relative line numbers
+set cursorline                " Highlight current line
+set signcolumn=yes            " Always show sign column
+set showmatch                 " Highlight matching brackets
+set showcmd                   " Show partial command in status line
+set showmode                  " Show current mode
+set laststatus=2              " Always show status line
+set ruler                     " Show cursor position
+set scrolloff=8               " Keep 8 lines above/below cursor
+set sidescrolloff=8           " Keep 8 columns left/right of cursor
+set wrap                      " Wrap long lines
+set linebreak                 " Break at word boundaries
+set colorcolumn=80            " Show column marker at 80
+
+" --- Search ---
+set hlsearch                  " Highlight search results
+set incsearch                 " Incremental search
+set ignorecase                " Case-insensitive search
+set smartcase                 " Case-sensitive if uppercase present
+
+" --- Indentation ---
+set tabstop=4                 " Tab width
+set shiftwidth=4              " Indent width
+set softtabstop=4             " Soft tab width
+set expandtab                 " Use spaces instead of tabs
+set autoindent                " Copy indent from current line
+set smartindent               " Smart indentation
+set shiftround                " Round indent to multiple of shiftwidth
+
+" --- Editing ---
+set backspace=indent,eol,start " Allow backspace over everything
+set hidden                    " Allow hidden buffers
+set autoread                  " Reload files changed outside Vim
+set confirm                   " Confirm before closing unsaved buffers
+set mouse=a                   " Enable mouse support
+set clipboard=unnamedplus     " Use system clipboard
+set updatetime=300            " Faster completion
+set timeoutlen=500            " Faster key sequence timeout
+
+" --- Split Windows ---
+set splitbelow                " Horizontal splits below current
+set splitright                " Vertical splits to the right
+
+" --- Completion ---
+set wildmenu                  " Enhanced command-line completion
+set wildmode=longest:full,full
+set wildignorecase            " Case-insensitive filename completion
+set completeopt=menuone,noselect,preview
+
+" --- History and Undo ---
+set history=1000              " Command history
+set undolevels=1000           " Undo history
+if has('persistent_undo')
+    set undofile              " Persistent undo
+    set undodir=~/.local/state/vim/undo
+endif
+
+" --- Backup and Swap ---
+set nobackup                  " Disable backup files
+set nowritebackup             " Disable backup before overwriting
+set noswapfile                " Disable swap files
+
+" --- Performance ---
+set lazyredraw                " Do not redraw while executing macros
+set ttyfast                   " Fast terminal connection
+
+" --- Key Mappings ---
+" Set leader key to space
+let mapleader = " "
+let maplocalleader = " "
+
+" Clear search highlighting
+nnoremap <leader><space> :nohlsearch<CR>
+
+" Save file
+nnoremap <leader>w :write<CR>
+
+" Quit
+nnoremap <leader>q :quit<CR>
+
+" Window navigation
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+" Buffer navigation
+nnoremap <S-h> :bprevious<CR>
+nnoremap <S-l> :bnext<CR>
+
+" Move lines up/down in visual mode
+vnoremap J :move '>+1<CR>gv=gv
+vnoremap K :move '<-2<CR>gv=gv
+
+" Keep cursor centred when scrolling
+nnoremap <C-d> <C-d>zz
+nnoremap <C-u> <C-u>zz
+nnoremap n nzzzv
+nnoremap N Nzzzv
+
+" Better indenting in visual mode
+vnoremap < <gv
+vnoremap > >gv
+
+" --- File Type Settings ---
+augroup filetypes
+    autocmd!
+    " Python
+    autocmd FileType python setlocal tabstop=4 shiftwidth=4 expandtab
+    " JavaScript/TypeScript
+    autocmd FileType javascript,typescript,json setlocal tabstop=2 shiftwidth=2 expandtab
+    " YAML
+    autocmd FileType yaml setlocal tabstop=2 shiftwidth=2 expandtab
+    " Markdown
+    autocmd FileType markdown setlocal wrap linebreak spell
+    " Makefile
+    autocmd FileType make setlocal noexpandtab
+augroup END
+
+" --- Appearance ---
+" Use 24-bit colour if available
+if has('termguicolors')
+    set termguicolors
+endif
+
+" Set a default colourscheme (use a built-in one)
+try
+    colorscheme desert
+catch
+    " Fallback if colourscheme not available
+endtry
+
+" --- Status Line ---
+set statusline=
+set statusline+=%#PmenuSel#
+set statusline+=\ %f
+set statusline+=%m
+set statusline+=%=
+set statusline+=\ %y
+set statusline+=\ %{&fileencoding?&fileencoding:&encoding}
+set statusline+=\ %l:%c
+set statusline+=\ %p%%
+set statusline+=\
+
+" --- Netrw Configuration (File Browser) ---
+let g:netrw_banner = 0        " Disable banner
+let g:netrw_liststyle = 3     " Tree view
+let g:netrw_browse_split = 4  " Open in previous window
+let g:netrw_winsize = 25      " Window size
+let g:netrw_altv = 1          " Open splits to the right
+
+" --- Source local overrides ---
+if filereadable(expand("~/.vimrc.local"))
+    source ~/.vimrc.local
+endif

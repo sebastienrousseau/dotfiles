@@ -18,13 +18,13 @@ jobs:
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    
+        os: [ubuntu-24.04, ubuntu-22.04, macos-14, macos-13, windows-latest]
+
     defaults:
       run:
         shell: bash
-
 
     steps:
       - name: Checkout
@@ -43,6 +43,39 @@ jobs:
 
       - name: Verify Config (Dry Run)
         run: chezmoi apply --verbose --dry-run
+
+  idempotency:
+    name: Idempotency Test (Double-run)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Chezmoi
+        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
+
+      - name: Add to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Configure Chezmoi source
+        run: |
+          mkdir -p "$HOME/.config/chezmoi"
+          printf 'sourceDir = "%s"\n' "$GITHUB_WORKSPACE" > "$HOME/.config/chezmoi/chezmoi.toml"
+
+      - name: First apply (exclude scripts)
+        run: chezmoi apply --exclude=scripts --verbose
+
+      - name: Second apply (should be no-op)
+        run: |
+          OUTPUT=$(chezmoi apply --exclude=scripts --verbose 2>&1)
+          echo "$OUTPUT"
+          # Check if there are any changes (other than expected noise)
+          if echo "$OUTPUT" | grep -E "^(create|modify|remove)" | grep -v ".DS_Store"; then
+            echo "Error: Second apply made changes - not idempotent"
+            exit 1
+          fi
+          echo "Idempotency check passed"
 
   benchmark:
     name: Shell Startup Benchmark (Ubuntu)
@@ -93,6 +126,80 @@ jobs:
           if [ -n "$files" ]; then
             echo "$files" | xargs shellcheck -x
           fi
+
+  shfmt:
+    name: Shell Format Check (shfmt)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install shfmt
+        run: |
+          curl -sS https://webinstall.dev/shfmt | bash
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Check shell script formatting
+        run: |
+          find . -name "*.sh" -type f | while read -r file; do
+            if ! shfmt -d -i 4 -ci "$file" >/dev/null 2>&1; then
+              echo "Formatting issue in: $file"
+              shfmt -d -i 4 -ci "$file" || true
+            fi
+          done
+          # Note: This is advisory only - not a hard failure for now
+          echo "Shell format check completed"
+
+  gitleaks:
+    name: Secrets Scan (Gitleaks)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Gitleaks
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz | tar xz
+          sudo mv gitleaks /usr/local/bin/
+
+      - name: Run Gitleaks
+        run: gitleaks detect --source . --verbose --no-git
+
+  link-check:
+    name: Link Rot Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install lychee
+        run: |
+          curl -sSfL https://github.com/lycheeverse/lychee/releases/download/v0.15.1/lychee-v0.15.1-x86_64-unknown-linux-gnu.tar.gz | tar xz
+          sudo mv lychee /usr/local/bin/
+
+      - name: Check links in documentation
+        run: |
+          lychee --verbose --no-progress \
+            --exclude-path ./dot_config \
+            --exclude-path ./.git \
+            --exclude "localhost" \
+            --exclude "127.0.0.1" \
+            --exclude "example.com" \
+            --accept 200,204,301,302,403,429 \
+            --max-retries 3 \
+            --timeout 30 \
+            "**/*.md" || echo "Link check completed with warnings"
 
   lua-lint:
     name: Lua Lint (Ubuntu)

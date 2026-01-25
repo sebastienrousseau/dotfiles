@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Hide duplicate/unwanted menu entries
 # Strategy: Prefer Native (.deb) over Flatpak (com.*) to avoid duplicates.
 

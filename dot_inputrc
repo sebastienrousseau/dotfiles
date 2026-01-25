@@ -1,0 +1,110 @@
+# ~/.inputrc - Readline configuration
+#
+# This file configures GNU Readline, which is used by Bash and many
+# other command-line programs for line editing and history.
+#
+# References:
+#   - Readline Manual: https://tiswww.case.edu/php/chet/readline/rluserman.html
+
+# --- Basics ---
+# Use vi-style editing (comment out for emacs-style)
+# set editing-mode vi
+
+# Enable 8-bit input (allows UTF-8)
+set input-meta on
+set output-meta on
+set convert-meta off
+
+# Do not beep on ambiguous completion
+set bell-style none
+
+# --- Completion Settings ---
+# Ignore case when completing
+set completion-ignore-case on
+
+# Treat hyphens and underscores as equivalent
+set completion-map-case on
+
+# Show all matches when ambiguous (instead of beeping)
+set show-all-if-ambiguous on
+
+# Show all matches immediately on first Tab
+set show-all-if-unmodified on
+
+# Append a slash to completed directory names
+set mark-directories on
+set mark-symlinked-directories on
+
+# Display common prefix before cycling through matches
+set menu-complete-display-prefix on
+
+# Colour files by type when listing completions
+set colored-stats on
+
+# Colour completion prefix for clarity
+set colored-completion-prefix on
+
+# Show extra file information during completion (like ls -F)
+set visible-stats on
+
+# Skip hidden files unless the pattern explicitly begins with a dot
+set match-hidden-files off
+
+# Expand tilde to home directory
+set expand-tilde off
+
+# --- History Settings ---
+# Allow re-editing failed history substitution
+set revert-all-at-newline on
+
+# Enable incremental history search with up/down arrows
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+
+# Page up/down for history navigation
+"\e[5~": beginning-of-history
+"\e[6~": end-of-history
+
+# --- Key Bindings ---
+# Ctrl-Left/Right to move by word
+"\e[1;5D": backward-word
+"\e[1;5C": forward-word
+
+# Ctrl-Backspace to delete word backward
+"\C-h": backward-kill-word
+
+# Ctrl-Delete to delete word forward
+"\e[3;5~": kill-word
+
+# Home/End for beginning/end of line
+"\e[H": beginning-of-line
+"\e[F": end-of-line
+"\e[1~": beginning-of-line
+"\e[4~": end-of-line
+
+# Insert key toggles overwrite mode
+"\e[2~": overwrite-mode
+
+# Delete key deletes character under cursor
+"\e[3~": delete-char
+
+# --- Special Terminal Support ---
+# Handle terminals that send different escape sequences
+$if term=xterm
+    "\e[1;5A": history-search-backward
+    "\e[1;5B": history-search-forward
+$endif
+
+# --- Application-Specific Settings ---
+$if Bash
+    # Enable history expansion (! commands)
+    set history-preserve-point on
+
+    # Word boundaries include more characters
+    set skip-completed-text on
+$endif
+
+$if Python
+    # Python readline configuration
+    set blink-matching-paren on
+$endif

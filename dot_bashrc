@@ -1,0 +1,145 @@
+#!/bin/bash
+# shellcheck shell=bash
+#
+# ~/.bashrc - Bash interactive shell configuration
+#
+# This file is sourced for interactive non-login Bash shells.
+# It provides a fallback for environments where Zsh is unavailable.
+#
+# Loading order:
+#   1. ~/.bash_profile or ~/.profile (login shells)
+#   2. ~/.bashrc (this file, for interactive shells)
+#
+# References:
+#   - Bash Manual: https://www.gnu.org/software/bash/manual/
+
+# If not running interactively, exit early
+case $- in
+    *i*) ;;
+    *) return ;;
+esac
+
+# Prevent double-sourcing
+if [[ -n "$BASHRC_SOURCED" ]]; then
+    return 0
+fi
+export BASHRC_SOURCED=1
+
+# --- XDG Base Directory Specification ---
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+
+# --- Shell Options ---
+# Enable useful Bash options
+shopt -s histappend      # Append to history instead of overwriting
+shopt -s checkwinsize    # Update LINES and COLUMNS after each command
+shopt -s globstar        # Enable ** for recursive globbing
+shopt -s nocaseglob      # Case-insensitive globbing
+shopt -s cdspell         # Autocorrect minor spelling errors in cd
+shopt -s dirspell        # Autocorrect minor spelling errors in directory names
+shopt -s autocd          # Type directory name to cd into it
+shopt -s cmdhist         # Save multiline commands as single history entry
+shopt -s lithist         # Preserve newlines in history
+
+# --- History Configuration ---
+export HISTSIZE=50000
+export HISTFILESIZE=100000
+export HISTCONTROL="ignoreboth:erasedups"
+export HISTIGNORE="ls:cd:cd -:pwd:exit:date:* --help"
+export HISTTIMEFORMAT="%F %T "
+export HISTFILE="${XDG_STATE_HOME}/bash/history"
+
+# Create history directory if it does not exist
+[[ -d "${XDG_STATE_HOME}/bash" ]] || mkdir -p "${XDG_STATE_HOME}/bash"
+
+# --- Prompt Configuration ---
+# Set a simple but informative prompt
+if [[ -n "$SSH_CONNECTION" ]]; then
+    PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+else
+    PS1='\[\033[01;34m\]\w\[\033[00m\]\$ '
+fi
+
+# Use Starship prompt if available
+if command -v starship &>/dev/null; then
+    eval "$(starship init bash)"
+fi
+
+# --- Completion ---
+# Enable programmable completion
+if ! shopt -oq posix; then
+    if [[ -f /usr/share/bash-completion/bash_completion ]]; then
+        # shellcheck source=/dev/null
+        . /usr/share/bash-completion/bash_completion
+    elif [[ -f /etc/bash_completion ]]; then
+        # shellcheck source=/dev/null
+        . /etc/bash_completion
+    elif [[ -f /opt/homebrew/etc/profile.d/bash_completion.sh ]]; then
+        # shellcheck source=/dev/null
+        . /opt/homebrew/etc/profile.d/bash_completion.sh
+    fi
+fi
+
+# --- Source shell configuration ---
+# Load shared shell configuration (aliases, functions, paths)
+if [[ -d "${XDG_CONFIG_HOME}/shell" ]]; then
+    for file in "${XDG_CONFIG_HOME}/shell"/*.sh; do
+        if [[ -r "$file" ]]; then
+            # shellcheck source=/dev/null
+            . "$file"
+        fi
+    done
+    unset file
+fi
+
+# --- Tool Integration ---
+# Zoxide (smart cd)
+if command -v zoxide &>/dev/null; then
+    eval "$(zoxide init bash)"
+fi
+
+# FZF (fuzzy finder)
+if command -v fzf &>/dev/null; then
+    eval "$(fzf --bash 2>/dev/null)" || true
+fi
+
+# Atuin (shell history)
+if command -v atuin &>/dev/null; then
+    eval "$(atuin init bash --disable-up-arrow)" || true
+fi
+
+# direnv (directory environments)
+if command -v direnv &>/dev/null; then
+    eval "$(direnv hook bash)"
+fi
+
+# --- Core Aliases ---
+# These provide essential functionality even without full shell config
+alias ls='ls --color=auto'
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+alias ..='cd ..'
+alias ...='cd ../..'
+
+# Safety aliases
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# Editor aliases
+if command -v nvim &>/dev/null; then
+    alias vim='nvim'
+    alias vi='nvim'
+fi
+
+# --- Source local overrides ---
+if [[ -f "$HOME/.bashrc.local" ]]; then
+    # shellcheck source=/dev/null
+    . "$HOME/.bashrc.local"
+fi

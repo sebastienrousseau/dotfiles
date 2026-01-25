@@ -1,0 +1,175 @@
+! ~/.Xresources - X11 resource configuration
+!
+! This file configures X11 applications, including xterm, urxvt,
+! and other programs that read the X resource database.
+!
+! After modifying, run: xrdb -merge ~/.Xresources
+!
+! References:
+!   - X Resources: https://wiki.archlinux.org/title/X_resources
+
+! --- General Settings ---
+! Enable Xft font rendering
+Xft.antialias:  true
+Xft.autohint:   false
+Xft.hinting:    true
+Xft.hintstyle:  hintslight
+Xft.lcdfilter:  lcddefault
+Xft.rgba:       rgb
+Xft.dpi:        96
+
+! --- Cursor Theme ---
+Xcursor.theme:  Adwaita
+Xcursor.size:   24
+
+! --- Colour Scheme (Catppuccin Mocha) ---
+! Base colours
+#define base      #1e1e2e
+#define mantle    #181825
+#define crust     #11111b
+#define text      #cdd6f4
+#define subtext1  #bac2de
+#define subtext0  #a6adc8
+#define overlay2  #9399b2
+#define overlay1  #7f849c
+#define overlay0  #6c7086
+#define surface2  #585b70
+#define surface1  #45475a
+#define surface0  #313244
+
+! Accent colours
+#define rosewater #f5e0dc
+#define flamingo  #f2cdcd
+#define pink      #f5c2e7
+#define mauve     #cba6f7
+#define red       #f38ba8
+#define maroon    #eba0ac
+#define peach     #fab387
+#define yellow    #f9e2af
+#define green     #a6e3a1
+#define teal      #94e2d5
+#define sky       #89dceb
+#define sapphire  #74c7ec
+#define blue      #89b4fa
+#define lavender  #b4befe
+
+! Apply to all applications
+*background:    base
+*foreground:    text
+*cursorColor:   rosewater
+*highlightColor: surface0
+
+! Standard terminal colours (0-15)
+*color0:        surface1
+*color1:        red
+*color2:        green
+*color3:        yellow
+*color4:        blue
+*color5:        pink
+*color6:        teal
+*color7:        subtext1
+*color8:        surface2
+*color9:        red
+*color10:       green
+*color11:       yellow
+*color12:       blue
+*color13:       pink
+*color14:       teal
+*color15:       text
+
+! --- XTerm Configuration ---
+XTerm*termName:           xterm-256color
+XTerm*locale:             true
+XTerm*utf8:               2
+XTerm*utf8Fonts:          always
+XTerm*utf8Title:          true
+
+! Font
+XTerm*faceName:           JetBrainsMono Nerd Font
+XTerm*faceSize:           11
+XTerm*renderFont:         true
+XTerm*boldMode:           false
+XTerm*allowBoldFonts:     true
+
+! Appearance
+XTerm*background:         base
+XTerm*foreground:         text
+XTerm*cursorColor:        rosewater
+XTerm*cursorBlink:        false
+XTerm*scrollBar:          false
+XTerm*rightScrollBar:     false
+XTerm*internalBorder:     8
+XTerm*borderWidth:        0
+
+! Behaviour
+XTerm*loginShell:         true
+XTerm*saveLines:          10000
+XTerm*fastScroll:         true
+XTerm*jumpScroll:         true
+XTerm*multiScroll:        true
+XTerm*scrollTtyOutput:    false
+XTerm*scrollKey:          true
+
+! Clipboard
+XTerm*selectToClipboard:  true
+XTerm*disallowedWindowOps: 20,21,SetXprop
+
+! Key bindings
+XTerm*vt100.translations: #override \n\
+    Ctrl Shift <Key>C:    copy-selection(CLIPBOARD) \n\
+    Ctrl Shift <Key>V:    insert-selection(CLIPBOARD) \n\
+    Ctrl <Key>minus:      smaller-vt-font() \n\
+    Ctrl <Key>plus:       larger-vt-font() \n\
+    Ctrl <Key>0:          set-vt-font(d)
+
+! --- URxvt Configuration ---
+URxvt*termName:           rxvt-unicode-256color
+URxvt*scrollBar:          false
+URxvt*scrollstyle:        plain
+URxvt*saveLines:          10000
+URxvt*internalBorder:     8
+URxvt*externalBorder:     0
+URxvt*cursorBlink:        false
+URxvt*cursorUnderline:    false
+URxvt*urgentOnBell:       true
+URxvt*visualBell:         false
+
+! Font
+URxvt*font:               xft:JetBrainsMono Nerd Font:size=11
+URxvt*boldFont:           xft:JetBrainsMono Nerd Font:bold:size=11
+URxvt*italicFont:         xft:JetBrainsMono Nerd Font:italic:size=11
+URxvt*boldItalicFont:     xft:JetBrainsMono Nerd Font:bold:italic:size=11
+URxvt*letterSpace:        0
+URxvt*lineSpace:          0
+
+! Colours
+URxvt*depth:              32
+URxvt*background:         [95]base
+URxvt*foreground:         text
+URxvt*cursorColor:        rosewater
+URxvt*fading:             20
+URxvt*fadeColor:          base
+
+! Perl extensions
+URxvt*perl-ext-common:    default,url-select,clipboard,resize-font
+URxvt*url-select.launcher: xdg-open
+URxvt*url-select.underline: true
+
+! Key bindings
+URxvt*keysym.Shift-Control-C:   perl:clipboard:copy
+URxvt*keysym.Shift-Control-V:   perl:clipboard:paste
+URxvt*keysym.Control-Up:        \033[1;5A
+URxvt*keysym.Control-Down:      \033[1;5B
+URxvt*keysym.Control-Left:      \033[1;5D
+URxvt*keysym.Control-Right:     \033[1;5C
+
+! --- XScreenSaver Configuration ---
+xscreensaver.mode:              random
+xscreensaver.timeout:           0:05:00
+xscreensaver.cycle:             0:05:00
+xscreensaver.lockTimeout:       0:00:00
+xscreensaver.passwdTimeout:     0:00:30
+xscreensaver.dpmsEnabled:       true
+xscreensaver.dpmsStandby:       0:10:00
+xscreensaver.dpmsSuspend:       0:10:00
+xscreensaver.dpmsOff:           0:15:00

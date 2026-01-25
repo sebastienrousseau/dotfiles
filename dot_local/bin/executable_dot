@@ -1,7 +1,9 @@
 #!/bin/sh
 set -e
 
-# Dotfiles CLI Entry Point - v0.2.474
+# Dotfiles CLI Entry Point - v0.2.475
+
+VERSION="0.2.475"
 
 COMMAND="$1"
 if [ -n "$1" ]; then
@@ -11,41 +13,57 @@ fi
 show_help() {
     echo "Usage: dot [command]"
     echo ""
-    echo "Commands:"
-    echo "  apply      Apply dotfiles (chezmoi apply)"
-    echo "  sync       Apply dotfiles (alias of apply)"
-    echo "  update     Pull latest changes and apply them (chezmoi update)"
-    echo "  diff       Show chezmoi diff with exclusions"
-    echo "  remove     Safely remove a managed file"
-    echo "  drift      Drift dashboard (chezmoi status)"
-    echo "  history    Shell history analysis"
-    echo "  doctor     Check system health and configuration"
-    echo "  keys       Show keybindings catalog"
-    echo "  sandbox    Launch a safe sandbox preview (Docker/Podman)"
-    echo "  benchmark  Run shell startup benchmark"
-    echo "  tune       Apply OS tuning (opt-in)"
-    echo "  theme      Switch terminal theme (dark/light)"
-    echo "  wallpaper  Apply a wallpaper from your library"
-    echo "  ssh-key    Encrypt an SSH key locally with age"
-    echo "  secrets-create  Create an encrypted secrets file"
-    echo "  fonts      Install Nerd Fonts (JetBrainsMono by default)"
-    echo "  firewall   Apply firewall hardening (opt-in)"
-    echo "  telemetry  Disable OS telemetry (opt-in)"
-    echo "  dns-doh    Enable DNS-over-HTTPS (opt-in)"
-    echo "  encrypt-check  Check disk encryption status"
-    echo "  backup     Create a compressed backup of your home"
-    echo "  lock-screen  Enforce lock screen idle settings (opt-in)"
-    echo "  usb-safety   Disable automount for removable media (opt-in)"
-    echo "  secrets    Edit encrypted secrets (age)"
-    echo "  secrets-init  Initialize age key for secrets"
-    echo "  upgrade    Update flake, plugins, and dotfiles"
-    echo "  edit       Open chezmoi source in $EDITOR"
-    echo "  docs       Show repo README"
-    echo "  learn      Start the interactive tour of your new tools"
-    echo "  tools      Show dot utils overview"
-    echo "  new        Create a new project from a template"
+    echo "Core Commands:"
+    echo "  apply       Apply dotfiles (chezmoi apply)"
+    echo "  sync        Apply dotfiles (alias of apply)"
+    echo "  update      Pull latest changes and apply them (chezmoi update)"
+    echo "  add         Add a file to chezmoi source"
+    echo "  diff        Show chezmoi diff with exclusions"
+    echo "  status      Show configuration drift (chezmoi status)"
+    echo "  remove      Safely remove a managed file"
+    echo "  cd          Print source directory path (use: cd \$(dot cd))"
+    echo "  edit        Open chezmoi source in \$EDITOR"
+    echo ""
+    echo "Diagnostics:"
+    echo "  doctor      Check system health and configuration"
+    echo "  drift       Drift dashboard (detailed chezmoi status)"
+    echo "  history     Shell history analysis"
+    echo "  benchmark   Run shell startup benchmark"
+    echo ""
+    echo "Tools:"
+    echo "  tools       Show or install nix packages (dot tools [install])"
+    echo "  new         Create a new project from a template"
+    echo "  sandbox     Launch a safe sandbox preview (Docker/Podman)"
+    echo "  keys        Show keybindings catalog"
+    echo "  learn       Start the interactive tour of your new tools"
+    echo "  docs        Show repo README"
     echo "  log-rotate  Rotate ~/.local/share/dotfiles.log"
-    echo "  help       Show this help message"
+    echo ""
+    echo "Appearance:"
+    echo "  theme       Switch terminal theme (dark/light)"
+    echo "  wallpaper   Apply a wallpaper from your library"
+    echo "  fonts       Install Nerd Fonts (JetBrainsMono by default)"
+    echo "  tune        Apply OS tuning (opt-in)"
+    echo ""
+    echo "Secrets:"
+    echo "  secrets-init    Initialize age key for secrets"
+    echo "  secrets         Edit encrypted secrets (age)"
+    echo "  secrets-create  Create an encrypted secrets file"
+    echo "  ssh-key         Encrypt an SSH key locally with age"
+    echo ""
+    echo "Security (opt-in):"
+    echo "  backup        Create a compressed backup of your home"
+    echo "  encrypt-check Check disk encryption status"
+    echo "  firewall      Apply firewall hardening"
+    echo "  telemetry     Disable OS telemetry"
+    echo "  dns-doh       Enable DNS-over-HTTPS"
+    echo "  lock-screen   Enforce lock screen idle settings"
+    echo "  usb-safety    Disable automount for removable media"
+    echo ""
+    echo "Meta:"
+    echo "  upgrade     Update flake, plugins, and dotfiles"
+    echo "  --version   Show version information"
+    echo "  help        Show this help message"
 }
 
 resolve_source_dir() {
@@ -65,6 +83,14 @@ resolve_source_dir() {
 }
 
 case "$COMMAND" in
+    --version|-v|version)
+        echo "dot v${VERSION}"
+        echo "Dotfiles CLI - Cross-platform shell environment distribution"
+        echo ""
+        echo "Repository: https://github.com/sebastienrousseau/dotfiles"
+        echo "Managed by: chezmoi $(chezmoi --version 2>/dev/null | head -1 || echo 'not installed')"
+        exit 0
+        ;;
     apply)
         SRC_DIR="$(resolve_source_dir)"
         if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/ops/chezmoi-apply.sh" ]; then
@@ -75,6 +101,31 @@ case "$COMMAND" in
         ;;
     sync)
         exec "$0" apply "$@"
+        ;;
+    add)
+        # Add a file to chezmoi source
+        if [ -z "$1" ]; then
+            echo "Usage: dot add <file>"
+            echo ""
+            echo "Add a file to the chezmoi source directory."
+            echo "The file will be managed by chezmoi from now on."
+            exit 1
+        fi
+        exec chezmoi add "$@"
+        ;;
+    status)
+        # Show configuration drift
+        exec chezmoi status "$@"
+        ;;
+    cd)
+        # Print source directory path for use with: cd $(dot cd)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -n "$SRC_DIR" ]; then
+            echo "$SRC_DIR"
+        else
+            echo "Dotfiles source not found." >&2
+            exit 1
+        fi
         ;;
     learn)
         # Execute the interactive tour
@@ -425,10 +476,40 @@ case "$COMMAND" in
         ;;
     tools)
         SRC_DIR="$(resolve_source_dir)"
-        if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/docs/UTILS.md" ]; then
+        SUBCOMMAND="${1:-}"
+        if [ "$SUBCOMMAND" = "install" ]; then
+            # Install tools via nix
+            if ! command -v nix >/dev/null 2>&1; then
+                echo "Nix is not installed."
+                echo ""
+                echo "To install Nix, run:"
+                echo "  curl -L https://nixos.org/nix/install | sh"
+                echo ""
+                echo "Or use Homebrew/apt for individual tools."
+                exit 1
+            fi
+            shift
+            if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/nix/flake.nix" ]; then
+                echo "Entering Nix development shell..."
+                exec nix develop "$SRC_DIR/nix" "$@"
+            else
+                echo "Nix flake not found in source directory."
+                exit 1
+            fi
+        elif [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/docs/TOOLS.md" ]; then
+            exec cat "$SRC_DIR/docs/TOOLS.md"
+        elif [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/docs/UTILS.md" ]; then
             exec cat "$SRC_DIR/docs/UTILS.md"
         else
-            echo "Dot Utils:"
+            echo "Dot Tools:"
+            echo ""
+            echo "Usage: dot tools [command]"
+            echo ""
+            echo "Commands:"
+            echo "  (none)    Show tools documentation"
+            echo "  install   Enter Nix development shell with all tools"
+            echo ""
+            echo "Quick Reference:"
             echo "  dot sync       - Apply dotfiles"
             echo "  dot update     - Pull latest changes and apply"
             echo "  dot doctor     - Run health checks"
