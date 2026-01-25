@@ -2,10 +2,20 @@
 {{- $git_email := "" -}}
 {{- $git_signingkey := "" -}}
 {{- $git_signingformat := "ssh" -}}
+{{- $name := "" -}}
+{{- $email := "" -}}
+{{- $signingkey := "" -}}
 {{- if hasKey . "git_name" }}{{- $git_name = index . "git_name" -}}{{- end -}}
 {{- if hasKey . "git_email" }}{{- $git_email = index . "git_email" -}}{{- end -}}
 {{- if hasKey . "git_signingkey" }}{{- $git_signingkey = index . "git_signingkey" -}}{{- end -}}
 {{- if hasKey . "git_signingformat" }}{{- $git_signingformat = index . "git_signingformat" -}}{{- end -}}
+{{- if hasKey . "name" }}{{- $name = index . "name" -}}{{- end -}}
+{{- if hasKey . "email" }}{{- $email = index . "email" -}}{{- end -}}
+{{- if hasKey . "signingkey" }}{{- $signingkey = index . "signingkey" -}}{{- end -}}
+
+{{- if and (not $git_name) $name }}{{- $git_name = $name -}}{{- end -}}
+{{- if and (not $git_email) $email }}{{- $git_email = $email -}}{{- end -}}
+{{- if and (not $git_signingkey) $signingkey }}{{- $git_signingkey = $signingkey -}}{{- end -}}
 
 [user]
 {{- if $git_name }}
@@ -25,3 +35,39 @@
 [gpg]
 	format = {{ $git_signingformat }}
 {{- end }}
+
+[core]
+	excludesfile = {{ .chezmoi.homeDir }}/.config/git/ignore
+	attributesFile = {{ .chezmoi.homeDir }}/.config/git/attributes
+
+[fetch]
+	prune = true
+
+[push]
+	autoSetupRemote = true
+
+[pull]
+	rebase = true
+
+[rerere]
+	enabled = true
+
+[maintenance]
+	auto = true
+	strategy = incremental
+
+[worktree]
+	guessRemote = true
+
+[delta]
+	features = decorations
+	syntax-theme = TwoDark
+
+[diff]
+	colorMoved = default
+
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true

@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-# Dotfiles CLI Entry Point - v0.2.473
+# Dotfiles CLI Entry Point - v0.2.474
 
 COMMAND="$1"
 if [ -n "$1" ]; then
@@ -12,8 +12,13 @@ show_help() {
     echo "Usage: dot [command]"
     echo ""
     echo "Commands:"
-    echo "  sync       Apply dotfiles (chezmoi apply)"
+    echo "  apply      Apply dotfiles (chezmoi apply)"
+    echo "  sync       Apply dotfiles (alias of apply)"
     echo "  update     Pull latest changes and apply them (chezmoi update)"
+    echo "  diff       Show chezmoi diff with exclusions"
+    echo "  remove     Safely remove a managed file"
+    echo "  drift      Drift dashboard (chezmoi status)"
+    echo "  history    Shell history analysis"
     echo "  doctor     Check system health and configuration"
     echo "  keys       Show keybindings catalog"
     echo "  sandbox    Launch a safe sandbox preview (Docker/Podman)"
@@ -60,9 +65,16 @@ resolve_source_dir() {
 }
 
 case "$COMMAND" in
+    apply)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/ops/chezmoi-apply.sh" ]; then
+            exec bash "$SRC_DIR/scripts/ops/chezmoi-apply.sh" "$@"
+        else
+            exec chezmoi apply
+        fi
+        ;;
     sync)
-        echo "Applying Dotfiles..."
-        exec chezmoi apply
+        exec "$0" apply "$@"
         ;;
     learn)
         # Execute the interactive tour
@@ -281,22 +293,27 @@ case "$COMMAND" in
         fi
         ;;
     secrets-init)
-        SECRETS_DIR="$HOME/.config/chezmoi"
-        KEY_FILE="$SECRETS_DIR/key.txt"
-        mkdir -p "$SECRETS_DIR"
-        if [ -f "$KEY_FILE" ]; then
-            echo "Age key already exists: $KEY_FILE"
-            exit 0
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/secrets/age-init.sh" ]; then
+            exec bash "$SRC_DIR/scripts/secrets/age-init.sh"
+        else
+            SECRETS_DIR="$HOME/.config/chezmoi"
+            KEY_FILE="$SECRETS_DIR/key.txt"
+            mkdir -p "$SECRETS_DIR"
+            if [ -f "$KEY_FILE" ]; then
+                echo "Age key already exists: $KEY_FILE"
+                exit 0
+            fi
+            if ! command -v age-keygen >/dev/null; then
+                echo "age-keygen not found. Install 'age' first."
+                exit 1
+            fi
+            age-keygen -o "$KEY_FILE"
+            chmod 600 "$KEY_FILE"
+            echo "Age key created at $KEY_FILE"
+            echo "Public key:"
+            age-keygen -y "$KEY_FILE"
         fi
-        if ! command -v age-keygen >/dev/null; then
-            echo "age-keygen not found. Install 'age' first."
-            exit 1
-        fi
-        age-keygen -o "$KEY_FILE"
-        chmod 600 "$KEY_FILE"
-        echo "Age key created at $KEY_FILE"
-        echo "Public key:"
-        age-keygen -y "$KEY_FILE"
         ;;
     secrets-create)
         SRC_DIR="$(resolve_source_dir)"
@@ -364,8 +381,47 @@ case "$COMMAND" in
         ;;
     update)
         # Update dotfiles
-        echo "Updating Dotfiles..."
-        exec chezmoi update
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/ops/chezmoi-update.sh" ]; then
+            exec bash "$SRC_DIR/scripts/ops/chezmoi-update.sh" "$@"
+        else
+            echo "Updating Dotfiles..."
+            exec chezmoi update
+        fi
+        ;;
+    diff)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/ops/chezmoi-diff.sh" ]; then
+            exec bash "$SRC_DIR/scripts/ops/chezmoi-diff.sh" "$@"
+        else
+            exec chezmoi diff "$@"
+        fi
+        ;;
+    remove)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/ops/chezmoi-remove.sh" ]; then
+            exec bash "$SRC_DIR/scripts/ops/chezmoi-remove.sh" "$@"
+        else
+            echo "Remove helper not found."
+            exit 1
+        fi
+        ;;
+    drift)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/diagnostics/drift-dashboard.sh" ]; then
+            exec bash "$SRC_DIR/scripts/diagnostics/drift-dashboard.sh"
+        else
+            exec chezmoi status
+        fi
+        ;;
+    history)
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/diagnostics/history-analysis.sh" ]; then
+            exec bash "$SRC_DIR/scripts/diagnostics/history-analysis.sh"
+        else
+            echo "History analysis script not found."
+            exit 1
+        fi
         ;;
     tools)
         SRC_DIR="$(resolve_source_dir)"

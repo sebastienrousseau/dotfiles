@@ -38,6 +38,7 @@ if command -v git &>/dev/null; then
   alias gst='git status'
   alias gsts='git status --short'
   alias gstsb='git status --short --branch'
+  alias st='git status'
 
   alias gsta='git stash save '
   alias gstp='git stash pop'
@@ -52,6 +53,7 @@ if command -v git &>/dev/null; then
   alias gcam='git commit --amend --message '
   alias gcane='git commit --amend --no-edit'
   alias gcm='git commit --message '
+  alias ci='git commit'
   
   # --- Diff & History ---
   alias gd='git diff'
@@ -64,6 +66,7 @@ if command -v git &>/dev/null; then
   alias gl='git log --since="last month" --oneline'
   alias glg='git log --graph --all --oneline --decorate'
   alias glgg='git log --oneline --graph --full-history --all --color --decorate'
+  alias lg='git log --graph --oneline --decorate --all'
   alias glc='git log --oneline --reverse'
   alias gld='git log --since=1-day-ago'
   alias gldc='git log -1 --date-order --format=%cI'
@@ -79,9 +82,11 @@ if command -v git &>/dev/null; then
   alias gbrd='git branch -d -r'
   alias gbrsb='git show-branch'
   alias gswb='git switch'
+  alias br='git branch'
   
   alias gcode='git checkout main && git branch --merged | xargs git branch --delete'
   alias gcom='git checkout main && git fetch origin --prune && git reset --hard origin/main'
+  alias co='git checkout'
 
   # --- Remotes & Comparison ---
   alias gf='git fetch'
@@ -95,7 +100,7 @@ if command -v git &>/dev/null; then
 
   # TUI Git
   if command -v lazygit &>/dev/null; then
-    alias lg='lazygit'
+    alias lgui='lazygit'
   fi
   
   alias gr='git remote'

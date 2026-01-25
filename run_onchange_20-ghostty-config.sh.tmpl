@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+# run_onchange_20-ghostty-config.sh.tmpl
+# Ghostty config hash: {{ include "dot_config/ghostty/config.tmpl" | sha256sum }}
+{{- if eq .chezmoi.os "darwin" -}}
+
+set -euo pipefail
+
+SRC="${HOME}/.config/ghostty/config"
+DST="${HOME}/Library/Application Support/com.mitchellh.ghostty/config"
+
+if [[ -f "${SRC}" ]]; then
+  mkdir -p "$(dirname "${DST}")"
+  cp "${SRC}" "${DST}"
+fi
+{{- end -}}

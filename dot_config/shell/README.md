@@ -26,7 +26,7 @@ Welcome to your universally compatible, high-performance dotfiles configuration,
 To install these dotfiles on a new machine, simply run:
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.473/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.474/install.sh)"
 ```
 
 This command will:
@@ -130,17 +130,20 @@ chezmoi diff
 ### Dot CLI
 
 ```bash
-dot sync      # Apply dotfiles (chezmoi apply)
-dot update    # Pull latest changes and apply
-dot tools     # Show dot utils
-dot keys      # Show keybindings
-dot tune      # Apply OS tuning (opt-in)
-dot secrets   # Edit encrypted secrets (age)
-dot upgrade   # Update flake, plugins, and dotfiles
-dot new       # Scaffold a project template (python/go/node)
+dot apply      # Apply dotfiles (chezmoi apply)
+dot sync       # Alias of apply
+dot update     # Pull latest changes and apply
+dot diff       # Show diff (excludes scripts/install/tests)
+dot remove     # Safely remove a managed file
+dot drift      # Drift dashboard (chezmoi status)
+dot history    # Shell history analysis
+dot tools      # Show dot utils
+dot keys       # Show keybindings
+dot tune       # Apply OS tuning (opt-in)
+dot secrets    # Edit encrypted secrets (age)
+dot upgrade    # Update flake, plugins, and dotfiles
+dot new        # Scaffold a project template (python/go/node)
 dot log-rotate # Rotate ~/.local/share/dotfiles.log
-dot
-dot
 dot doctor
 dot sandbox
 dot benchmark
@@ -160,7 +163,8 @@ dot secrets-init
 dot edit
 dot docs
 dot learn
-dot help```
+dot help
+```
 
 ### Optional Nix Toolchain
 
@@ -211,6 +215,7 @@ Available themes:
 - `tokyonight-day` (best light default)
 - `tokyonight-storm`
 - `tokyonight-moon`
+- `catppuccin-mocha`
 - `dracula`
 - `gruvbox-dark`
 - `gruvbox-light`

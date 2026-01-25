@@ -54,7 +54,7 @@ This document outlines the standard workflows to **Maintain**, **Update**, and *
 ### Applying Changes
 After editing any config file:
 ```bash
-chezmoi apply
+dot apply
 ```
 *Triggers: `dot_zshrc` reload, audit logging.*
 
@@ -75,12 +75,38 @@ If something feels slow or broken:
    ```
 2. **Verbose Mode**:
    ```bash
-   DOTFILES_DEBUG=1 chezmoi apply
+   DOTFILES_DEBUG=1 dot apply
    ```
 
 ---
 
 ## 🛠️ Tool-Specific Guides
+
+### 🎨 Visual Themes (Optional)
+- **Wallpaper rotation**:
+  ```bash
+  ~/.dotfiles/scripts/theme/wallpaper-rotate.sh --interval 300
+  ```
+- **Cursor theme (Linux)**:
+  ```bash
+  DOTFILES_CURSOR_THEME=Papirus ~/.dotfiles/scripts/theme/install-cursors.sh
+  ```
+- **File icons (Linux/macOS)**:
+  ```bash
+  DOTFILES_ICON_THEME=Papirus ~/.dotfiles/scripts/theme/install-file-icons.sh
+  ```
+- **Lock icon (Linux)**:
+  ```bash
+  DOTFILES_LOCK_ICON=~/.config/dotfiles/lock/icon.png ~/.dotfiles/scripts/theme/install-lock-icon.sh
+  ```
+- **GRUB theme (Linux)**:
+  ```bash
+  sudo ~/.dotfiles/scripts/theme/install-grub-theme.sh --apply
+  ```
+- **Boot logo (Linux)**:
+  ```bash
+  sudo ~/.dotfiles/scripts/theme/install-boot-logo.sh --apply
+  ```
 
 ### 📦 Atuin (History Sync)
 - **Login**: `atuin login`

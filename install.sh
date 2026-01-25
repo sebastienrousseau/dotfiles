@@ -97,14 +97,22 @@ else
     export PATH="$BIN_DIR:$PATH"
 fi
 
-# 4. Initialize & Apply
+# 4. Backup existing dotfiles
+step "Backing up existing dotfiles..."
+if [ -d "$HOME/.dotfiles" ]; then
+    timestamp=$(date +"%Y%m%d_%H%M%S")
+    mv "$HOME/.dotfiles" "$HOME/.dotfiles.bak.$timestamp"
+    echo "   Backed up existing .dotfiles to .dotfiles.bak.$timestamp"
+fi
+
+# 5. Initialize & Apply
 step "Applying Configuration..."
 
 # VERSION pinning for supply-chain security
 if [ -n "$1" ]; then
   VERSION="$1"
 else
-  VERSION="v0.2.473"
+  VERSION="v0.2.474"
 fi
 
 SOURCE_DIR="$HOME/.dotfiles"
@@ -115,10 +123,9 @@ CHEZMOI_CONFIG_FILE="$CHEZMOI_CONFIG_DIR/chezmoi.toml"
 ensure_chezmoi_source() {
     local dir="$1"
     mkdir -p "$CHEZMOI_CONFIG_DIR"
-    if [ -f "$CHEZMOI_CONFIG_FILE" ]; then
-        if ! grep -q '^sourceDir' "$CHEZMOI_CONFIG_FILE"; then
-            printf '\nsourceDir = \"%s\"\\n' "$dir" >> "$CHEZMOI_CONFIG_FILE"
-        fi
+    if [ -f "$CHEZMOI_CONFIG_FILE" ] && grep -q '^sourceDir' "$CHEZMOI_CONFIG_FILE"; then
+        sed -i.bak "s,^sourceDir.*$,sourceDir = \"$dir\"," "$CHEZMOI_CONFIG_FILE"
+        rm -f "$CHEZMOI_CONFIG_FILE.bak"
     else
         printf 'sourceDir = \"%s\"\\n' "$dir" > "$CHEZMOI_CONFIG_FILE"
     fi
@@ -144,7 +151,8 @@ elif [ -d "$LEGACY_SOURCE_DIR/.git" ]; then
 else
     echo "   Initializing from GitHub (Branch/Tag: $VERSION)..."
     # STRICT MODE: We pin to the specific tag to avoid 'main' branch drift
-    git clone --branch "$VERSION" https://github.com/sebastienrousseau/dotfiles.git "$SOURCE_DIR"
+    git clone https://github.com/sebastienrousseau/dotfiles.git "$SOURCE_DIR"
+    (cd "$SOURCE_DIR" && git checkout "$VERSION")
     ensure_chezmoi_source "$SOURCE_DIR"
     APPLY_FLAGS=()
     if [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]; then

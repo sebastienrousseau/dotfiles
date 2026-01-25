@@ -4,7 +4,7 @@
 
 # Dotfiles — a fast, idempotent shell environment distribution in minutes
 
-[![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions) [![Version](https://img.shields.io/badge/Version-v0.2.473-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.473) [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE) [![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases) [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
+[![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions) [![Version](https://img.shields.io/badge/Version-v0.2.474-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.474) [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE) [![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases) [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
 
 ---
 
@@ -57,177 +57,11 @@ This is **infrastructure**, not an ad-hoc shell script.
 ## Quick Start (60 seconds)
 
 > [!IMPORTANT]
-> The installer **only** bootstraps `chezmoi` and applies this repo. OS packages are installed via Chezmoi hooks during the first apply.
+> The installer automatically backs up an existing `~/.dotfiles` directory and cleans up legacy configuration files. The installer **only** bootstraps `chezmoi` and applies this repo. OS packages are installed via Chezmoi hooks during the first apply.
 
-### 1. Install from a pinned release
+...
 
-```bash
-# Works on macOS, Linux, and WSL
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.473/install.sh)"
-```
-
-### 2. Restart your shell
-
-```bash
-exec zsh
-```
-
-> [!TIP]
-> Use `DOTFILES_NONINTERACTIVE=1` if you want a fully non‑interactive install.
-
----
-
-## Documentation
-
-- **Installation Guide**: [docs/INSTALL.md](docs/INSTALL.md)
-- **Tools Catalog**: [docs/TOOLS.md](docs/TOOLS.md)
-- **Security Audit**: [docs/SECURITY.md](docs/SECURITY.md)
-- **Architecture**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-
----
-
-## Installation Details
-
-### Supported Platforms
-
-- **macOS** (Homebrew)
-- **Ubuntu/Debian** (apt)
-- **WSL2** (Ubuntu/Debian)
-
-> [!WARNING]
-> If you already have custom dotfiles, back them up first. Chezmoi is safe, but overwriting configs can still be disruptive.
-
-### Dependencies
-
-| Type | Required | Optional (feature‑dependent) |
-|---|---|---|
-| Core | `git`, `curl` | — |
-| macOS | — | Homebrew (for Brewfile installs) |
-| Linux | — | `apt-get` (for package installs) |
-| Sandbox | — | Docker or Podman |
-| Nix toolchain | — | Nix (optional) |
-
-### What the installer does vs what Chezmoi does
-
-- **Installer**: installs Chezmoi (pinned + checksum verified) and applies this repo.
-- **Chezmoi hooks**: install OS packages, fonts, and optional apps defined in this repo.
-
----
-
-## How-to Guides
-
-### Add a new alias
-
-1. Add a new alias file under:
-
-```
-~/.dotfiles/.chezmoitemplates/aliases/<category>/<name>.aliases.sh
-```
-
-2. Apply:
-
-```bash
-chezmoi apply
-```
-
-### Commit changes safely
-
-```bash
-# Edit source files in ~/.dotfiles
-chezmoi apply
-
-# Review + commit
-cd ~/.dotfiles
-
-git status
-git add -A
-git commit -S -m "Describe your change"
-git push
-```
-
----
-
-## Reference
-
-### Configuration
-
-**Chezmoi config (local, not committed)**
-
-```toml
-# ~/.config/chezmoi/chezmoi.toml
-sourceDir = "~/.dotfiles"
-
-encryption = "age" # optional
-
-[age]
-identity = "~/.config/chezmoi/key.txt"
-recipient = "age1..."
-```
-
-**Data file (template inputs)**
-
-```toml
-# ~/.dotfiles/.chezmoidata.toml
-profile = "laptop"               # laptop | server
-theme = "tokyonight-night"
-terminal_font_family = "JetBrains Mono"
-terminal_font_size = 12
-
-git_name = "Your Name"
-git_email = "you@example.com"
-git_signingkey = "~/.ssh/id_ed25519"
-git_signingformat = "ssh"
-
-[features]
-zsh = true
-nvim = true
-tmux = true
-gui = true
-secrets = true
-```
-
-### Environment Variables
-
-| Variable | Purpose | Default |
-|---|---|---|
-| `DOTFILES_NONINTERACTIVE` | Non‑interactive install | `0` |
-| `DOTFILES_FONTS` | Install fonts during `dot upgrade` | `0` |
-| `DOTFILES_WALLPAPER_DIR` | Wallpaper directory | `~/Pictures/Wallpapers` |
-| `DOTFILES_FIREWALL` | Enable firewall hardening | `0` (disabled) |
-| `DOTFILES_TELEMETRY` | Disable telemetry | `0` (disabled) |
-| `DOTFILES_DOH` | Enable DNS‑over‑HTTPS | `0` (disabled) |
-| `DOTFILES_LOCK` | Enforce lock screen idle settings | `0` (disabled) |
-| `DOTFILES_USB_SAFETY` | Disable automount for removable media | `0` (disabled) |
-
-### The `dot` CLI
-
-> [!TIP]
-> Run `dot help` to see available commands.
-
-| Command | Description | Category |
-|---|---|---|
-| `dot sync` | Apply dotfiles (chezmoi apply) | Core |
-| `dot update` | Pull latest changes and apply them | Core |
-| `dot upgrade` | Update flake, plugins, and dotfiles | Core |
-| `dot tools` | Show dot utils overview | Tooling |
-| `dot keys` | Show keybindings catalog | Tooling |
-| `dot docs` | Show repo README | Tooling |
-| `dot new` | Scaffold a project template (python/go/node) | Tooling |
-| `dot benchmark` | Run shell startup benchmark | Tooling |
-| `dot sandbox` | Launch a sandbox preview (Docker/Podman) | Tooling |
-| `dot log-rotate` | Rotate ~/.local/share/dotfiles.log | Tooling |
-| `dot theme` | Switch terminal theme | Visuals |
-| `dot wallpaper` | Apply a wallpaper | Visuals |
-| `dot fonts` | Install Nerd Fonts | Visuals |
-| `dot secrets-init` | Initialize age key for secrets | Security |
-| `dot secrets-create` | Create encrypted secrets file | Security |
-| `dot secrets` | Edit encrypted secrets (age) | Security |
-| `dot ssh-key` | Encrypt an SSH key locally with age | Security |
-| `dot firewall` | Apply firewall hardening (opt‑in) | Security |
-| `dot telemetry` | Disable OS telemetry (opt‑in) | Security |
-| `dot dns-doh` | Enable DNS‑over‑HTTPS (opt‑in) | Security |
-| `dot encrypt-check` | Check disk encryption status | Security |
-| `dot backup` | Create a compressed backup | Security |
+| `dot backup` | Create a compressed backup of your home directory | Security |
 | `dot lock-screen` | Enforce lock screen idle settings (opt‑in) | Security |
 | `dot usb-safety` | Disable automount for removable media | Security |
 

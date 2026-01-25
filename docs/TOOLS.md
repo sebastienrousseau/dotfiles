@@ -16,14 +16,24 @@ This page lists the main tools and CLI conveniences provided by this repo.
 - ripgrep
 - fd
 - bat
+- lsd
+- duf
+- ncdu
+- htop
 
 ## Terminal UX
 
 - WezTerm / Alacritty / Kitty / Ghostty configs
 - btop
 - fastfetch
+- figlet
+- lolcat
+- cowsay
+- cmatrix
+- pipes
 - atuin
 - yazi
+- zsh bell sound/visual toggles
 
 ## Developer Utilities
 
@@ -31,6 +41,7 @@ This page lists the main tools and CLI conveniences provided by this repo.
 - Project templates (`dot new`)
 - Sandbox preview (`dot sandbox`)
 - Benchmarking (`dot benchmark`)
+- Lua tooling (`luacheck`, `stylua`, `luarocks`, `lua/luajit`)
 
 ## Security (Opt‑in)
 
@@ -53,3 +64,10 @@ Apply changes with:
 ```bash
 chezmoi apply
 ```
+
+## Visuals & Theme Helpers
+
+- Wallpaper sync/rotate scripts
+- Cursor and icon theming helpers (Linux)
+- Lock screen icon helper (Linux)
+- GRUB theme / boot logo helpers (Linux)

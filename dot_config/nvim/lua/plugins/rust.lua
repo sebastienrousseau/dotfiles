@@ -6,25 +6,22 @@ return {
     config = function()
       vim.g.rustaceanvim = {
         -- Plugin configuration
-        tools = {
-        },
+        tools = {},
         -- LSP configuration
         server = {
-          on_attach = function(client, bufnr)
+          on_attach = function(_client, _bufnr)
             -- You can Set keybindings here.
             -- rustaceanvim defaults are pretty good though.
           end,
           default_settings = {
             -- rust-analyzer language server configuration
-            ['rust-analyzer'] = {
-            },
+            ["rust-analyzer"] = {},
           },
         },
         -- DAP configuration
-        dap = {
-        },
+        dap = {},
       }
-    end
+    end,
   },
   {
     "saecki/crates.nvim",

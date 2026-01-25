@@ -1,0 +1,3 @@
+# Compatibility stub for tools expecting ~/.zshrc
+# Actual config lives in $ZDOTDIR (~/.config/zsh)
+source "${ZDOTDIR:-$HOME/.config/zsh}/.zshrc"
