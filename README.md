@@ -191,6 +191,8 @@ dot update    # Pull latest changes and apply
 dot tools     # Show dot utils
 dot keys      # Show keybindings
 dot tune      # Apply OS tuning (opt-in)
+dot secrets   # Edit encrypted secrets (age)
+dot upgrade   # Update flake, plugins, and dotfiles
 ```
 
 ### Optional Nix Toolchain
@@ -202,12 +204,20 @@ cd ~/.dotfiles
 nix develop
 ```
 
+### Secrets (age)
+
+```bash
+dot secrets-init
+dot secrets
+```
+
 ### Profiles & Features
 
 You can customize what gets applied per host using `.chezmoidata.toml`:
 
 ```toml
 profile = "laptop"
+theme = "catppuccin-mocha"
 
 [features]
 zsh = true
@@ -215,6 +225,14 @@ nvim = true
 tmux = true
 gui = true
 secrets = true
+```
+
+### DevContainer / Codespaces
+
+If you use VS Code or Codespaces, a minimal devcontainer is available:
+
+```
+.devcontainer/devcontainer.json
 ```
 
 ### Updating

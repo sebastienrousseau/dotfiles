@@ -1,4 +1,5 @@
 profile = "laptop"
+theme = "catppuccin-mocha"
 
 [features]
 zsh = true

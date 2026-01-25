@@ -20,5 +20,11 @@ install/**
 install.sh
 scripts
 scripts/**
+tests
+tests/**
+nix
+nix/**
+.devcontainer
+.devcontainer/**
 
 .config/nvim/lazy-lock.json

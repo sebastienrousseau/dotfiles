@@ -128,6 +128,8 @@ dot update    # Pull latest changes and apply
 dot tools     # Show dot utils
 dot keys      # Show keybindings
 dot tune      # Apply OS tuning (opt-in)
+dot secrets   # Edit encrypted secrets (age)
+dot upgrade   # Update flake, plugins, and dotfiles
 ```
 
 ### Optional Nix Toolchain
@@ -135,6 +137,27 @@ dot tune      # Apply OS tuning (opt-in)
 ```bash
 cd ~/.dotfiles
 nix develop
+```
+
+### Secrets (age)
+
+```bash
+dot secrets-init
+dot secrets
+```
+
+### Theme
+
+Set the theme in `.chezmoidata.toml`:
+
+```toml
+theme = "catppuccin-mocha"
+```
+
+### DevContainer / Codespaces
+
+```
+.devcontainer/devcontainer.json
 ```
 
 ### Adding New Aliases

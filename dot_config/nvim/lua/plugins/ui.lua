@@ -242,11 +242,17 @@ Simply design to fit your shell life
     name = "catppuccin",
     priority = 1000,
     config = function()
-      require("catppuccin").setup({ 
-          flavour = "mocha", 
-          integrations = { 
-              nvimtree = true, 
-              notify = true, 
+      local theme = vim.env.DOTFILES_THEME or "catppuccin-mocha"
+      local flavour = "mocha"
+      if theme == "catppuccin-latte" then
+        flavour = "latte"
+      end
+
+      require("catppuccin").setup({
+          flavour = flavour,
+          integrations = {
+              nvimtree = true,
+              notify = true,
               symbols_outline = true,
               mason = true,
               neotest = true,
@@ -255,7 +261,7 @@ Simply design to fit your shell life
               illuminate = true,
               which_key = true,
               scrollbar = true,
-          } 
+          }
       })
       vim.cmd.colorscheme("catppuccin")
     end,
