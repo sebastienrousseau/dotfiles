@@ -1,0 +1,4 @@
+# VS Code extensions (one per line).
+# Example:
+# ms-python.python
+# golang.Go

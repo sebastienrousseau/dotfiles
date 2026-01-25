@@ -44,6 +44,12 @@ Updates are handled via [Homebrew](https://brew.sh/).
 1. Edit `~/.dotfiles/dot_config/shell/Brewfile.cli` and `~/.dotfiles/dot_config/shell/Brewfile.cask`.
 2. Run `chezmoi apply`.
    - This triggers `run_onchange_darwin_install-packages.sh.tmpl`, which runs `brew bundle` for CLI and GUI packages.
+   - Optional: `mas` installs App Store apps from `~/.config/mas/masapps.txt`.
+   - Optional: `duti` applies default app bindings from `~/.config/duti/defaults.duti`.
+
+### VS Code Extensions
+1. Edit `~/.config/vscode/extensions.txt`.
+2. Run `chezmoi apply` to install missing extensions (if `code` is available).
 
 ### Linux & WSL
 Updates are handled via `apt-get` (Ubuntu/Debian).

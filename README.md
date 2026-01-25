@@ -90,6 +90,12 @@ Before you begin, ensure you have the following dependencies installed on your s
 
 The `Brewfile.cli` and `Brewfile.cask` files in this repository are the source of truth for dependencies on macOS. The `install/provision/run_onchange_10-darwin-packages.sh.tmpl` script will automatically install all CLI and GUI packages using `brew bundle`.
 
+Optional macOS extras:
+- **Mac App Store apps** via `mas` using `~/.config/mas/masapps.txt`.
+- **Default app bindings** via `duti` using `~/.config/duti/defaults.duti`.
+
+Apply changes with `chezmoi apply` after editing these files.
+
 </details>
 
 <details>
@@ -179,6 +185,14 @@ To see what will change before applying:
 
 ```bash
 chezmoi diff
+```
+
+### VS Code Extensions
+
+List extensions in `~/.config/vscode/extensions.txt` and run:
+
+```bash
+chezmoi apply
 ```
 
 ### Dot CLI
