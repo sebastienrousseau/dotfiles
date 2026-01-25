@@ -40,30 +40,32 @@ gum style \
     "$banner"
 
 echo ""
-gum confirm "Ready to take a quick guided tour?" || exit 0
+gum confirm "Start a quick tour?" || exit 0
 clear
 
-# Slide 1: Core workflow
+# Slide 1: Start here
 gum style \
     --foreground 99 --border rounded --padding "1 2" --margin "1 2" \
-    "Core workflow (safe + repeatable)" \
+    "Start here" \
+    "Apply your setup. Keep it repeatable." \
     " " \
-    "dot apply     # Apply your dotfiles" \
-    "dot update    # Pull + apply updates" \
-    "dot diff      # See local changes (excludes scripts)" \
-    "dot drift     # Snapshot config drift"
+    "dot apply   # Apply your dotfiles" \
+    "dot update  # Pull and apply updates" \
+    "dot diff    # Review local changes" \
+    "dot drift   # Snapshot config drift"
 
 echo ""
-gum confirm "Next: Diagnostics" || exit 0
+gum confirm "Next: Check health" || exit 0
 clear
 
 # Slide 2: Diagnostics
 gum style \
     --foreground 75 --border rounded --padding "1 2" --margin "1 2" \
-    "Diagnostics & insight" \
+    "Check health" \
+    "Know what’s working. See what needs attention." \
     " " \
     "dot doctor    # Health checks" \
-    "dot history   # Shell history analysis" \
+    "dot history   # History analysis" \
     "dot benchmark # Startup timing"
 
 echo ""
@@ -74,11 +76,12 @@ clear
 gum style \
     --foreground 214 --border rounded --padding "1 2" --margin "1 2" \
     "Secrets (age)" \
+    "Keep sensitive data local and encrypted." \
     " " \
-    "dot secrets-init   # Create age key" \
-    "dot secrets        # Edit encrypted secrets" \
-    "dot secrets-create # Create encrypted file" \
-    "dot ssh-key        # Encrypt an SSH key locally"
+    "dot secrets-init   # Create a key" \
+    "dot secrets        # Edit secrets" \
+    "dot secrets-create # New encrypted file" \
+    "dot ssh-key        # Encrypt an SSH key"
 
 echo ""
 gum confirm "Next: Security (opt‑in)" || exit 0
@@ -92,7 +95,7 @@ gum style \
     " " \
     "dot firewall      # Firewall hardening" \
     "dot telemetry     # Disable OS telemetry" \
-    "dot dns-doh       # Enable DNS‑over‑HTTPS (Linux)" \
+    "dot dns-doh       # DNS‑over‑HTTPS (Linux)" \
     "dot lock-screen   # Idle lock settings" \
     "dot usb-safety    # Disable automount" \
     "dot encrypt-check # Disk encryption status"
@@ -105,11 +108,12 @@ clear
 gum style \
     --foreground 212 --border rounded --padding "1 2" --margin "1 2" \
     "Themes & UX" \
+    "Make it yours without changing how it works." \
     " " \
-    "dot theme      # Switch terminal theme" \
+    "dot theme      # Switch theme" \
     "dot wallpaper  # Apply wallpaper" \
     "dot fonts      # Install Nerd Fonts" \
-    "dot keys       # Keybindings catalog" \
+    "dot keys       # Keybindings" \
     "dot tools      # Curated utilities"
 
 echo ""
@@ -120,6 +124,7 @@ clear
 gum style \
     --foreground 111 --border rounded --padding "1 2" --margin "1 2" \
     "Projects & sandbox" \
+    "Start quickly. Experiment safely." \
     " " \
     "dot new <lang> <name>  # Templates: python, go, node" \
     "dot sandbox            # Safe preview (Docker/Podman)" \
