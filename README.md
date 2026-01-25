@@ -19,18 +19,18 @@
 
 ## Elevator Pitch
 
-Dotfiles is a cross‑platform, Chezmoi‑managed shell distribution that installs in minutes and keeps your environment consistent across macOS, Linux, and WSL. It’s **idempotent** by design, so running it twice is safe, and it stays fast, predictable, and easy to maintain.
+Dotfiles is a cross-platform, Chezmoi-managed shell distribution that installs in minutes and keeps your development environment consistent across macOS, Linux, and WSL. It is **idempotent** by design: running it multiple times is safe, predictable, and produces the same result.
 
-## The Hook
-
-You get a tuned Zsh + Neovim + tmux stack with sane defaults, a single command to apply updates, and optional hardening tools when you want them. It’s designed for daily use first, with reproducibility and auditability baked in.
+> **Conceptually:** Git + Templates + Guarded Scripts = A Reproducible Shell.
 
 ---
 
 ## Table of Contents
 
-- [Key Features](#key-features)
+- [Why Dotfiles?](#why-dotfiles)
+- [Safety Guarantees](#safety-guarantees)
 - [Quick Start (60 seconds)](#quick-start-60-seconds)
+- [Documentation](#documentation)
 - [Installation Details](#installation-details)
 - [Reference](#reference)
   - [Configuration](#configuration)
@@ -51,16 +51,23 @@ You get a tuned Zsh + Neovim + tmux stack with sane defaults, a single command t
 
 ---
 
-## Key Features
+## Why Dotfiles?
 
-- **One‑command install** with a pinned release tag and checksum‑verified Chezmoi bootstrap.
-- **Chezmoi as source of truth** for all configuration, with XDG‑first paths.
-- **Fast shell UX**: Zsh + Starship + fzf + zoxide out of the box.
-- **Modern editor stack**: Neovim with LSP, formatters, linters, DAP, and testing.
-- **Opinionated terminal workflow**: tmux bindings + terminal configs (WezTerm, Alacritty, Kitty, Ghostty).
-- **Optional security hardening**: firewall, DoH, telemetry disable, lock‑screen enforcement, encryption checks.
-- **Developer utilities**: `dot` CLI for sync, upgrade, secrets, themes, templates, and more.
-- **Nix optional toolchain** for reproducible binaries without changing your Chezmoi workflow.
+Most repositories optimize for personal convenience. Dotfiles optimizes for **daily use, reproducibility, and auditability.**
+
+- **The Stack:** A tuned Zsh, Neovim, and tmux environment with sane defaults.
+- **Unified Control:** A single `dot` command to sync or upgrade your entire environment.
+- **Safety First:** Explicit opt-in for any system or security changes.
+- **Clean Slate:** Clear separation between source files, generated configs, and system state.
+
+## Safety Guarantees
+
+This is **infrastructure**, not an ad-hoc shell script.
+
+- No destructive actions without explicit opt-in.
+- No background daemons installed automatically.
+- No system settings changed unless explicitly enabled via environment variables.
+- All privileged actions are logged locally to `~/.local/share/dotfiles.log`.
 
 <p align="right"><a href="#dotfiles--a-fast-idempotent-dev-shell-in-minutes">↑ Back to Top</a></p>
 
@@ -71,17 +78,32 @@ You get a tuned Zsh + Neovim + tmux stack with sane defaults, a single command t
 > [!IMPORTANT]
 > The installer **only** bootstraps `chezmoi` and applies this repo. OS package installs happen via Chezmoi hooks on first apply.
 
+### 1. Install from a pinned release
+
 ```bash
 # Works on macOS, Linux, and WSL
-# 1) Install from the pinned release tag
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.473/install.sh)"
+```
 
-# 2) Restart your shell
+### 2. Restart your shell
+
+```bash
 exec zsh
 ```
 
 > [!TIP]
 > Use `DOTFILES_NONINTERACTIVE=1` if you want a fully non‑interactive install.
+
+<p align="right"><a href="#dotfiles--a-fast-idempotent-dev-shell-in-minutes">↑ Back to Top</a></p>
+
+---
+
+## Documentation
+
+- **Installation Guide**: [docs/INSTALL.md](docs/INSTALL.md)
+- **CLI Reference**: [docs/TOOLS.md](docs/TOOLS.md)
+- **Security Audit**: [docs/SECURITY.md](docs/SECURITY.md)
+- **Architecture**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 <p align="right"><a href="#dotfiles--a-fast-idempotent-dev-shell-in-minutes">↑ Back to Top</a></p>
 
