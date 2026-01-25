@@ -24,10 +24,14 @@ fi
 recipient="$(age-keygen -y "$AGE_KEY")"
 mkdir -p "$(dirname "$OUT_FILE")"
 
-cat <<'SECRETS' | age -R <(printf "%s" "$recipient") -o "$OUT_FILE"
-# Add secrets as KEY=VALUE
-EXAMPLE_TOKEN=change_me
-SECRETS
+tmp_secrets="/tmp/.secrets.template.$$"
+tmp_recipient="/tmp/.secrets.recipient.$$"
+printf "%s\n" "# Add secrets as KEY=VALUE" "EXAMPLE_TOKEN=change_me" > "$tmp_secrets"
+printf "%s" "$recipient" > "$tmp_recipient"
+
+age -R "$tmp_recipient" -o "$OUT_FILE" "$tmp_secrets"
+
+rm -f "$tmp_secrets" "$tmp_recipient"
 
 chmod 600 "$OUT_FILE"
 
