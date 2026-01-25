@@ -35,10 +35,19 @@ EOF
 
 measure_time_ms() {
   local start end
-  start=$(date +%s%3N)
-  eval "$@" >/dev/null 2>&1
-  end=$(date +%s%3N)
-  echo $((end - start))
+  # Use perl for portable millisecond timing (works on macOS and Linux)
+  if command -v perl >/dev/null 2>&1; then
+    start=$(perl -MTime::HiRes=time -e 'printf "%.0f\n", time * 1000')
+    "$@" >/dev/null 2>&1 || true
+    end=$(perl -MTime::HiRes=time -e 'printf "%.0f\n", time * 1000')
+    echo $((end - start))
+  else
+    # Fallback: use seconds only (less precise but portable)
+    start=$(date +%s)
+    "$@" >/dev/null 2>&1 || true
+    end=$(date +%s)
+    echo $(((end - start) * 1000))
+  fi
 }
 
 benchmark_shell_startup() {
