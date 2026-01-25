@@ -10,7 +10,7 @@
 
 ## Elevator Pitch
 
-Dotfiles is a cross-platform, Chezmoi-managed shell distribution that installs in minutes and keeps your shell environment consistent across macOS, Linux, and WSL. It is **idempotent** by design: running it multiple times is safe, predictable, and produces the same result.
+Dotfiles is a cross-platform, Chezmoi-managed shell environment that installs in minutes and keeps your shell environment consistent across macOS, Linux, and WSL. It is **idempotent** by design: running it multiple times is safe, predictable, and produces the same result.
 
 Conceptually: Git + templates + guarded scripts = a reproducible shell.
 
@@ -19,6 +19,7 @@ Conceptually: Git + templates + guarded scripts = a reproducible shell.
 ## Table of Contents
 
 - [Why Dotfiles?](#why-dotfiles)
+- [Non-Goals](#non-goals)
 - [Safety Guarantees](#safety-guarantees)
 - [Quick Start (60 seconds)](#quick-start-60-seconds)
 - [Documentation](#documentation)
