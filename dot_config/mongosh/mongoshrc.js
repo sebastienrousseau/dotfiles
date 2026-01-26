@@ -1,4 +1,4 @@
-/* global db, config, disableTelemetry, print, process */
+/* global db, config, disableTelemetry, process */
 // MongoDB Shell Configuration (~/.config/mongosh/mongoshrc.js)
 // https://www.mongodb.com/docs/mongodb-shell/reference/configure-shell-settings/
 
