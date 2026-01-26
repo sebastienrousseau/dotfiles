@@ -2,7 +2,7 @@
 
 # This script removes legacy files from the home directory.
 
-set -e
+set -euo pipefail
 
 FILES_TO_REMOVE=(
     "$HOME/aliases.txt"

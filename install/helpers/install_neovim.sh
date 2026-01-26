@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 sudo_cmd=""
 if [ "$(id -u)" -ne 0 ]; then

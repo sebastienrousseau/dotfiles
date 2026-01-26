@@ -3,7 +3,7 @@
 # Usage: sh -c "$(curl -fsSL https://dotfiles.io/install.sh)"
 # (or ./install.sh locally)
 
-set -e
+set -euo pipefail
 
 # ANSI Colors
 RED='\033[0;31m'
@@ -35,11 +35,78 @@ error() {
 step "Detecting Environment..."
 OS="$(uname -s)"
 ARCH="$(uname -m)"
+
+# Robust OS detection: set target_os for downstream use
+target_os="unknown"
+case "$OS" in
+  Darwin)
+    target_os="macos"
+    ;;
+  Linux)
+    # shellcheck disable=SC2250
+    if [ -f /proc/version ] && grep -qi 'microsoft\|WSL' /proc/version; then
+      target_os="wsl2"
+    elif [ -f /etc/os-release ]; then
+      # shellcheck disable=SC1091
+      . /etc/os-release
+      case "${ID:-}" in
+        ubuntu|debian|pop|linuxmint|elementary)
+          target_os="debian"
+          ;;
+        fedora|rhel|centos|rocky|alma)
+          target_os="fedora"
+          ;;
+        arch|manjaro|endeavouros)
+          target_os="arch"
+          ;;
+        *)
+          target_os="linux"
+          ;;
+      esac
+    else
+      target_os="linux"
+    fi
+    ;;
+esac
 echo "   OS: $OS"
 echo "   Arch: $ARCH"
+echo "   Target: $target_os"
 
-# 2. Check Prerequisites
+# 2. Check Prerequisites & Bootstrap Package Managers
 step "Checking Prerequisites..."
+
+# On macOS, ensure Homebrew is available before checking curl/git
+if [ "$target_os" = "macos" ] && ! command -v brew >/dev/null; then
+  echo "   Homebrew not found. Installing..."
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  # Add brew to PATH for Apple Silicon
+  if [ -x /opt/homebrew/bin/brew ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [ -x /usr/local/bin/brew ]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+  fi
+fi
+
+# On Linux, verify a package manager is available
+case "$target_os" in
+  debian|wsl2)
+    if ! command -v apt-get >/dev/null; then
+      error "apt-get is required on Debian/Ubuntu/WSL2."
+    fi
+    ;;
+  fedora)
+    if ! command -v dnf >/dev/null; then
+      error "dnf is required on Fedora/RHEL."
+    fi
+    ;;
+  arch)
+    if ! command -v pacman >/dev/null; then
+      error "pacman is required on Arch Linux."
+    fi
+    ;;
+  *) ;;
+esac
+
 if ! command -v curl >/dev/null; then error "curl is required."; fi
 if ! command -v git >/dev/null; then error "git is required."; fi
 
@@ -112,11 +179,7 @@ fi
 step "Applying Configuration..."
 
 # VERSION pinning for supply-chain security
-if [ -n "$1" ]; then
-  VERSION="$1"
-else
-  VERSION="v0.2.474"
-fi
+VERSION="${1:-v0.2.474}"
 
 SOURCE_DIR="$HOME/.dotfiles"
 LEGACY_SOURCE_DIR="$HOME/.local/share/chezmoi"

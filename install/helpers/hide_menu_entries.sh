@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Hide duplicate/unwanted menu entries
 # Strategy: Prefer Native (.deb) over Flatpak (com.*) to avoid duplicates.
+set -euo pipefail
 
 # Apps to HIDE (Flatpaks/Snaps/Other duplicates)
 HIDDEN_APPS=(

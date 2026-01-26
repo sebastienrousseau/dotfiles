@@ -1,5 +1,5 @@
-#!/bin/sh
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
 OUT_FILE="${1:-$HOME/.config/chezmoi/encrypted_secrets.env.age}"
 KEYRING_DIR="$HOME/.config/chezmoi"

@@ -19,7 +19,7 @@ fi
 # create default .ssh directory if it doesn’t exist
 # https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys
 if [[ ! -d "${HOME}/.ssh/" ]]; then
-  mkdir "${HOME}/.ssh/"
+  mkdir -p "${HOME}/.ssh/"
   chmod 700 "${HOME}/.ssh/"
 fi
 
@@ -42,9 +42,11 @@ ssh-keygen -q -t ed25519 -C "${EMAIL}" -f "${HOME}"/.ssh/id_ed25519 -N ""
 ssha="ssh-agent -s"
 eval "${ssha}"
 
-# Create config file if it doesn't exist
-touch ~/.ssh/config
-printf "Host *\n AddKeysToAgent yes\n UseKeychain yes\n IdentityFile ~/.ssh/id_ed25519" | tee ~/.ssh/config
+# Create config file if it doesn't exist; append only if not already configured
+if [ ! -f ~/.ssh/config ] || ! grep -q 'IdentityFile ~/.ssh/id_ed25519' ~/.ssh/config; then
+  printf "Host *\n AddKeysToAgent yes\n UseKeychain yes\n IdentityFile ~/.ssh/id_ed25519\n" >> ~/.ssh/config
+  chmod 600 ~/.ssh/config
+fi
 
 # add ssh key
 sudo ssh-add -K "${HOME}"/.ssh/id_ed25519

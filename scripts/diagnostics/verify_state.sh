@@ -6,7 +6,7 @@
 # Script: verify_state.sh
 # Description: Final verification of the dotfiles environment state.
 
-set -e
+set -euo pipefail
 
 echo " Starting Final Environment Verification..."
 

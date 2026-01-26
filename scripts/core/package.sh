@@ -3,7 +3,7 @@
 # Description: Bundles the dotfiles for distribution or backup.
 # Generates a standard .tar.gz archive and validates structure.
 
-set -e
+set -euo pipefail
 
 VERSION="${1:-v0.2.474}"
 DIST_DIR="dist"

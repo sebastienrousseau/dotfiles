@@ -135,10 +135,8 @@ install_from_tarball() {
 }
 
 if command -v apt-get >/dev/null; then
-  log_info "Updating packages..."
-  
+  log_info "Updating packages (apt)..."
   $sudo_cmd apt-get update
-  # Add your packages here
   packages=(
     curl
     git
@@ -160,6 +158,54 @@ if command -v apt-get >/dev/null; then
     luarocks
   )
   $sudo_cmd apt-get install -y "${packages[@]}"
+elif command -v dnf >/dev/null; then
+  log_info "Updating packages (dnf)..."
+  packages=(
+    curl
+    git
+    zsh
+    unzip
+    fontconfig
+    gcc
+    make
+    ripgrep
+    fd-find
+    bat
+    jq
+    yq
+    hyperfine
+    fastfetch
+    age
+    podman
+    lua
+    luajit
+    luarocks
+  )
+  $sudo_cmd dnf install -y "${packages[@]}"
+elif command -v pacman >/dev/null; then
+  log_info "Updating packages (pacman)..."
+  $sudo_cmd pacman -Syu --noconfirm
+  packages=(
+    curl
+    git
+    zsh
+    unzip
+    fontconfig
+    base-devel
+    ripgrep
+    fd
+    bat
+    jq
+    yq
+    hyperfine
+    fastfetch
+    age
+    podman
+    lua
+    luajit
+    luarocks
+  )
+  $sudo_cmd pacman -S --needed --noconfirm "${packages[@]}"
 fi
 
 # Install Luacheck (Lua linter)

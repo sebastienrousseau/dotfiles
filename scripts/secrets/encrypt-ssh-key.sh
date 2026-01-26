@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 KEY_PATH="${1:-$HOME/.ssh/id_ed25519}"
 OUT_FILE="${2:-$HOME/.config/chezmoi/encrypted_id_ed25519.age}"
