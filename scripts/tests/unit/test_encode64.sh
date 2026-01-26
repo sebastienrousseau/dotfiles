@@ -3,14 +3,16 @@
 # Unit tests for encode64/decode64 functions
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../framework/assertions.sh"
 
 # Source the function
-FUNC_FILE="$HOME/.dotfiles/.chezmoitemplates/functions/encode64.sh"
+FUNC_FILE="$REPO_ROOT/.chezmoitemplates/functions/encode64.sh"
 if [[ -f "$FUNC_FILE" ]]; then
   source "$FUNC_FILE"
 else
-  echo "SKIP: encode64.sh not found"
+  echo "SKIP: encode64.sh not found at $FUNC_FILE"
+  echo "RESULTS:0:0:0"
   exit 0
 fi
 
