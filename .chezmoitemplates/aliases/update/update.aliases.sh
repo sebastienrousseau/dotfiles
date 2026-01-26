@@ -59,7 +59,7 @@ function cmd_exists() {
 
 function update_mac() {
   print_step "Updating macOS system software"
-  if sudo /usr/sbin/softwareupdate -i -a | grep -q "No updates are available" || true; then
+  if sudo /usr/sbin/softwareupdate -i -a | grep -q "No updates are available"; then
     print_note "macOS is up-to-date."
   else
     print_note "macOS updates installed successfully."
@@ -68,7 +68,7 @@ function update_mac() {
   if cmd_exists brew; then
     print_step "Updating Homebrew packages"
     brew update >/dev/null
-    if brew upgrade | grep -q "already up-to-date" || true; then
+    if brew upgrade | grep -q "already up-to-date"; then
       print_note "Homebrew packages are already up-to-date."
     else
       print_note "Homebrew packages updated successfully."
@@ -81,7 +81,7 @@ function update_mac() {
   # Update App Store apps
   if cmd_exists mas; then
     print_step "Updating App Store apps"
-    if mas upgrade | grep -q "No updates available" || true; then
+    if mas upgrade | grep -q "No updates available"; then
       print_note "No App Store updates available."
     else
       print_note "App Store apps updated successfully."
@@ -170,7 +170,7 @@ function update_programming_tools() {
   if cmd_exists npm; then
     print_step "Updating npm global packages"
     npm_output=$(npm update -g 2>&1)
-    if echo "${npm_output}" | grep -q "up to date" || true; then
+    if echo "${npm_output}" | grep -q "up to date"; then
       print_note "npm global packages are already up to date."
     else
       print_note "npm global packages updated successfully."
@@ -181,7 +181,7 @@ function update_programming_tools() {
   if cmd_exists pnpm; then
     print_step "Updating pnpm global packages"
     pnpm_output=$(pnpm up -g 2>&1)
-    if echo "${pnpm_output}" | grep -q "Nothing to update" || true; then
+    if echo "${pnpm_output}" | grep -q "Nothing to update"; then
       print_note "pnpm global packages are already up to date."
     else
       print_note "pnpm global packages updated successfully."
@@ -192,7 +192,7 @@ function update_programming_tools() {
   if cmd_exists rustup; then
     print_step "Updating Rust toolchain"
     rust_output=$(rustup update stable 2>&1)
-    if echo "${rust_output}" | grep -q "unchanged" || true; then
+    if echo "${rust_output}" | grep -q "unchanged"; then
       print_note "Rust toolchain is already up to date."
     else
       print_note "Rust toolchain updated successfully."
@@ -203,7 +203,7 @@ function update_programming_tools() {
   if cmd_exists cargo; then
     print_step "Updating Cargo binaries"
     cargo_output=$(cargo install-update -a 2>&1)
-    if echo "${cargo_output}" | grep -q "All packages are up to date" || true; then
+    if echo "${cargo_output}" | grep -q "All packages are up to date"; then
       print_note "Cargo binaries are already up to date."
     else
       print_note "Cargo binaries updated successfully."
@@ -215,7 +215,7 @@ function update_programming_tools() {
     print_step "Updating RubyGems and installed gems"
     gem update --system >/dev/null 2>&1 && print_note "RubyGems system updated successfully."
     gem_output=$(gem update 2>&1)
-    if echo "${gem_output}" | grep -q "Nothing to update" || true; then
+    if echo "${gem_output}" | grep -q "Nothing to update"; then
       print_note "All Ruby gems are already up to date."
     else
       print_note "Ruby gems updated successfully."
@@ -228,7 +228,7 @@ function update_programming_tools() {
     print_step "Updating Homebrew packages"
     brew update >/dev/null
     brew_output=$(brew upgrade 2>&1)
-    if echo "${brew_output}" | grep -q "already up-to-date" || true; then
+    if echo "${brew_output}" | grep -q "already up-to-date"; then
       print_note "Homebrew packages are already up to date."
     else
       print_note "Homebrew packages updated successfully."
@@ -240,7 +240,7 @@ function update_programming_tools() {
   if cmd_exists go; then
     print_step "Checking for Go module updates"
     go_output=$(go list -u -m all 2>&1)
-    if echo "${go_output}" | grep -q "no updates" || true; then
+    if echo "${go_output}" | grep -q "no updates"; then
       print_note "All Go modules are already up to date."
     else
       go get -u all && print_note "Go modules updated successfully."
@@ -251,7 +251,7 @@ function update_programming_tools() {
   if cmd_exists deno; then
     print_step "Updating Deno runtime"
     deno_output=$(deno upgrade 2>&1)
-    if echo "${deno_output}" | grep -q "already up to date" || true; then
+    if echo "${deno_output}" | grep -q "already up to date"; then
       print_note "Deno is already up to date."
     else
       print_note "Deno updated successfully."
@@ -262,7 +262,7 @@ function update_programming_tools() {
   if cmd_exists code; then
     print_step "Updating Visual Studio Code extensions"
     vscode_output=$(code --list-extensions --show-versions 2>&1)
-    if echo "${vscode_output}" | grep -q "No updates available" || true; then
+    if echo "${vscode_output}" | grep -q "No updates available"; then
       print_note "All Visual Studio Code extensions are already up to date."
     else
       code --update-extensions && print_note "Visual Studio Code extensions updated successfully."

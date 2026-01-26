@@ -117,8 +117,11 @@ backup() {
     echo "[INFO] No compression required."
   fi
 
-  # Enforce backup retention
-  mapfile -t BACKUPS < <(ls -1t "${BACKUP_DIR}"/backup_*.tar* 2>/dev/null)
+  # Enforce backup retention (portable: avoids word-splitting on filenames with spaces)
+  local -a BACKUPS=()
+  while IFS= read -r -d '' f; do
+    BACKUPS+=("$f")
+  done < <(find "${BACKUP_DIR}" -maxdepth 1 -name 'backup_*.tar*' -print0 2>/dev/null | sort -zr)
   BACKUP_COUNT=${#BACKUPS[@]}
 
   # Only attempt removal if we actually have more backups than KEEP

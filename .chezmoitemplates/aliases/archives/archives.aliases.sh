@@ -8,20 +8,16 @@ extract() {
     return 1
   fi
 
+  # Initialize log file before first use
+  LOG_FILE=${ARCHIVE_LOG_FILE:-"$HOME/.archive_operations.log"}
+
   if [ ! -f "$1" ]; then
     echo "Error: '$1' is not a valid file" | tee -a "$LOG_FILE"
     return 1
   fi
 
-  # Create a log file if logging is enabled
-  LOG_FILE=${ARCHIVE_LOG_FILE:-"$HOME/.archive_operations.log"}
-
   # Handle filenames with spaces correctly
   local filename="$1"
-  # shellcheck disable="SC2034,SC2155"
-  local dirname=$(dirname "$filename")
-  # shellcheck disable="SC2034,SC2155"
-  local basename=$(basename "$filename")
 
   # Create extract directory for archives with multiple files
   if [ "$2" = "-d" ] && [ ! -z "$3" ]; then
@@ -118,7 +114,7 @@ compress() {
   # If the last argument doesn't exist as a file or directory and has more than 1 argument
   if [ "$num_inputs" -gt 1 ] && [ ! -e "${inputs[$num_inputs - 1]}" ]; then
     output="${inputs[$num_inputs - 1]}"
-    # shellcheck disable="SC2184,2086"
+    # shellcheck disable=SC2184,SC2086
     unset inputs[$num_inputs-1]
   else
     # Default output name based on the first input

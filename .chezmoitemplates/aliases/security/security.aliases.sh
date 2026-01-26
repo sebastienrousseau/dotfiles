@@ -459,15 +459,23 @@ if command -v gpg >/dev/null 2>&1; then
   alias gpgminexp='gpg --export-options export-minimal --export'
 
   function gpgclean() {
-    # Deletes expired keys from keyring
-    # NOTE: Ensure your grep/awk usage aligns with your local gpg output format
-    local EXPIRED
-    EXPIRED="$(gpg --list-keys 2>/dev/null | grep expired | awk '{print $2}')"
-    [[ -z "$EXPIRED" ]] && {
+    # Deletes expired keys from keyring using machine-readable output
+    local expired_keys=()
+    while IFS=: read -r type _ _ _ keyid _ _ _ _ _ _ flags _; do
+      if [[ "$type" == "pub" && "$flags" == *e* ]]; then
+        expired_keys+=("$keyid")
+      fi
+    done < <(gpg --list-keys --with-colons 2>/dev/null)
+
+    if [[ ${#expired_keys[@]} -eq 0 ]]; then
       echo "No expired keys found."
       return 0
-    }
-    sudo gpg --batch --yes --delete-keys "$EXPIRED"
+    fi
+
+    echo "Found ${#expired_keys[@]} expired key(s). Deleting..."
+    for keyid in "${expired_keys[@]}"; do
+      gpg --batch --yes --delete-keys "$keyid" && echo "Deleted key: $keyid"
+    done
   }
 fi
 
@@ -511,8 +519,8 @@ if command -v ssh >/dev/null 2>&1; then
   # Tunnels & Forwarding
   function sshtunl() {
     [[ -z "$1" || -z "$2" || -z "$3" || -z "$4" ]] && {
-      echo "Usage: sshtunl <local_port:host:remote_port> <ssh_host>"
-      echo "Example: sshtunl 8080:127.0.0.1:80 user@server"
+      echo "Usage: sshtunl <local_port> <host> <remote_port> <ssh_host>"
+      echo "Example: sshtunl 8080 127.0.0.1 80 user@server"
       return 1
     }
     ssh -L "$1:$2:$3" "$4"
@@ -520,8 +528,8 @@ if command -v ssh >/dev/null 2>&1; then
 
   function sshtunr() {
     [[ -z "$1" || -z "$2" || -z "$3" || -z "$4" ]] && {
-      echo "Usage: sshtunr <remote_port:host:local_port> <ssh_host>"
-      echo "Example: sshtunr 8080:127.0.0.1:80 user@server"
+      echo "Usage: sshtunr <remote_port> <host> <local_port> <ssh_host>"
+      echo "Example: sshtunr 8080 127.0.0.1 80 user@server"
       return 1
     }
     ssh -R "$1:$2:$3" "$4"

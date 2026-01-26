@@ -20,10 +20,20 @@
 #
 ################################################################################
 
-# Logging functions
-log_error() { echo "[ERROR] $*" >&2; }
-log_info() { echo "[INFO] $*"; }
-log_warning() { echo "[WARNING] $*" >&2; }
+# Source shared logging utilities if not already defined
+if ! declare -f log_error >/dev/null 2>&1; then
+  _keygen_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
+  if [[ -f "${_keygen_dir}/utils/logging.sh" ]]; then
+    # shellcheck source=utils/logging.sh
+    source "${_keygen_dir}/utils/logging.sh"
+  else
+    # Minimal fallback logging functions
+    log_error() { echo "[ERROR] $*" >&2; }
+    log_info() { echo "[INFO] $*"; }
+    log_warning() { echo "[WARNING] $*" >&2; }
+  fi
+  unset _keygen_dir
+fi
 
 keygen() {
   # Display help menu

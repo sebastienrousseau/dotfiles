@@ -112,13 +112,6 @@ safe_write_file() {
     echo "${content}" >|"${file}" 2>/dev/null
   fi
 
-  # Check if write was successful
-  # shellcheck disable="SC2181,2320"
-  if [[ $? -ne 0 ]]; then
-    echo "Error: Could not write to ${file}"
-    return 1
-  fi
-
   return 0
 }
 
@@ -197,13 +190,6 @@ cd_with_history() {
   # Change directory
   builtin cd "${dest}" 2>/dev/null || return 1
 
-  # Check if cd was successful
-  # shellcheck disable=SC2181
-  if [[ $? -ne 0 ]]; then
-    echo "Error: Failed to navigate to '${dest}'"
-    return 1
-  fi
-
   # Save last working directory
   safe_write_file "${LAST_DIR_FILE}" "${PWD}"
 
@@ -212,7 +198,11 @@ cd_with_history() {
     local item_count
     item_count=$(count_dir_items "${PWD}")
     if [[ ${item_count} -lt ${LARGE_DIR_THRESHOLD} ]]; then
-      eval "${LS_CMD}"
+      local -a _ls_args=(-lh)
+      [[ "${SHOW_HIDDEN_FILES}" == "true" ]] && _ls_args+=(-a)
+      [[ -n "${LS_COLOR_OPT}" && "${ENABLE_COLOR_OUTPUT}" == "true" ]] && _ls_args+=("${LS_COLOR_OPT}")
+      [[ -n "${LS_GROUP_DIRS}" && "${ENABLE_DIR_GROUPING}" == "true" ]] && _ls_args+=("${LS_GROUP_DIRS}")
+      ls "${_ls_args[@]}"
     else
       echo "Directory contains ${item_count} items. Skipping automatic listing."
       echo "Use 'ls' to list contents."
@@ -523,7 +513,7 @@ alias .....='cd_with_history ../../../..' # Go up four levels
 #-----------------------------------------------------------------------------
 alias dirs='dirs -v'                  # List directory stack with indices
 alias pd='pushd'                      # Push directory to stack
-alias popd='popd && eval "${LS_CMD}"' # Pop directory from stack and list contents
+alias popd='popd && ls -lh'           # Pop directory from stack and list contents
 
 #-----------------------------------------------------------------------------
 # Consistent Shorthand Aliases

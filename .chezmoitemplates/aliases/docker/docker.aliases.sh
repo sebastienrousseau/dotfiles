@@ -31,7 +31,7 @@ if command -v 'docker' &>/dev/null; then
   alias dkrd='docker run -d'
   alias dks='docker start'
   alias dstart='docker start'
-  alias dkst='docker stop'
+  alias dkstop='docker stop'
   alias dstop='docker stop'
   alias dkrs='docker restart'
   alias drestart='docker restart'

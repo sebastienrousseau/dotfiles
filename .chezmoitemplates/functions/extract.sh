@@ -24,6 +24,8 @@
 ################################################################################
 
 # Function to extract most known archive formats
+# Skip if extract() is already defined (e.g., by archives.aliases.sh)
+if ! declare -f extract >/dev/null 2>&1; then
 extract() {
   # Display help menu
   if [[ "$1" == "--help" ]]; then
@@ -81,3 +83,4 @@ extract() {
     return 1
   fi
 }
+fi # end guard
