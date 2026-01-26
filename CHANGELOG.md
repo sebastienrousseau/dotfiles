@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here.
 
-## v0.2.475
+## v0.2.474
 
 ### Added
 
@@ -77,7 +77,7 @@ All notable changes to this project are documented here.
 
 ### Changed
 
-- Updated all version references to v0.2.475
+- Updated all version references to v0.2.474
 - Made shebangs portable (`#!/usr/bin/env bash`)
 - Improved documentation with Apple-style clarity
 - Updated Brewfile.cli with Kubernetes tools

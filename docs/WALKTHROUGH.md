@@ -138,7 +138,7 @@ k9                  # Open k9s TUI
 | **Syntax** | PASSED | `install.sh`, `pkg.sh`, `teleport.sh` verified. |
 | **Performance** | PASSED | **~16ms** Zsh startup time. |
 | **Drift** | VARIES | Minor state drift may be reported due to audit logs. |
-| **Docker** | PASSED | **Ubuntu 26.04** bootstrap verified (`dotfiles:0.2.475`). |
+| **Docker** | PASSED | **Ubuntu 26.04** bootstrap verified (`dotfiles:0.2.474`). |
 
 ## Quick Reference Card
 
