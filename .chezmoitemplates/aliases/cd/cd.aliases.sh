@@ -109,7 +109,7 @@ safe_write_file() {
     echo "${content}" >>"${file}" 2>/dev/null
   else
     # Write mode
-    echo "${content}" >"${file}" 2>/dev/null
+    echo "${content}" >|"${file}" 2>/dev/null
   fi
 
   # Check if write was successful
