@@ -5,7 +5,7 @@
 This release transforms the dotfiles into a high-performance, cross-platform system managed by **chezmoi**.
 
 ### Architecture
-v0.2.474 is not just "dotfiles" but a portable **shell distribution** managed by `chezmoi` ("source of truth" in `~/.dotfiles`).
+v0.2.474 is a portable **shell distribution** managed by `chezmoi` (source of truth in `~/.dotfiles`).
 
 - **XDG-first**: Configs strictly mapped to `~/.config/` (no `~/.foo` sprawl).
 - **Single entrypoint**: `dot_zshenv` acts as an XDG bootloader for instant environment setup.
@@ -17,7 +17,7 @@ v0.2.474 is not just "dotfiles" but a portable **shell distribution** managed by
   - `history` → `atuin` (syncable, encrypted SQLite history)
 - **Predictive shell**:
   - **AI strategy**: Context-aware autosuggestions coupled with optional local LLM integration (`ai_core`).
-  - **Error analysis**: Wrappers analyze command failures via `gh copilot` or local models.
+  - **Error analysis**: Wrappers analyze command failures through `gh copilot` or local models.
 
 ### Non-goals
 - **Not a framework**: This is a curated distribution, not a plugin manager like Oh-My-Zsh.
@@ -30,19 +30,19 @@ v0.2.474 is not just "dotfiles" but a portable **shell distribution** managed by
   - **Pinned install**: Installation commands pin to the specific release tag (`v0.2.474`) to prevent drift.
   - **Zero-trust**: No implicit reliance on `main` branch code in production.
 - **Threat model**: This project assumes a **trusted local machine** and focuses on supply-chain (pinned versions) and configuration safety (immutable history).
-- **Audit logging**: The system logs all `chezmoi` mutations to `~/.local/share/dotfiles.log` for day-2 operations review.
+- **Audit logging**: Dotfiles logs all `chezmoi` mutations to `~/.local/share/dotfiles.log` for day-2 operations review.
 
 ### Changes
 - **Migrated**:
   - Shell: `~/.zshrc` now sources generated templates from `~/.config/shell`.
-  - Neovim: `~/.config/nvim` fully managed via Lua/Lazy.nvim.
+  - Neovim: `~/.config/nvim` fully managed through Lua/Lazy.nvim.
   - Tmux: Modular config consolidated to `~/.dotfiles/dot_tmux.conf`.
 - **Packaging**:
   - `Brewfile` (macOS) and `apt-get` (Linux) handled automatically.
 - **Structural**:
   - **Renamed**: `dot_config/dotfiles` → `dot_config/shell` for semantic clarity.
   - **Moved**: `bin/` → `dot_local/bin/` for automatic path integration.
-  - **Segregated**: Install scripts split by OS (Darwin/Linux) for cleaner logic.
+  - **Separated**: Install scripts split by OS (Darwin/Linux) for cleaner logic.
 - **Layered architecture**: Refactored shell config into explicit layers:
   - `00-core`: Safety/Paths
   - `50-logic`: Functions/Toolchain
@@ -52,7 +52,7 @@ v0.2.474 is not just "dotfiles" but a portable **shell distribution** managed by
   - **Binary pinning**: `install.sh` now enforces specific version tags for initial bootstrap.
 ### Quality
 - **Conflict resolution**: Detected and resolved **46 namespace collisions** across all alias modules (Git, Go, Archives, etc.) to ensure zero overlap.
-- **Git safety**: Renamed colliding Go aliases (e.g., `gr` -> `gor`) to protect core Git commands.
+- **Git safety**: Renamed colliding Go aliases (for example, `gr` -> `gor`) to protect core Git commands.
 - **Modernization**: Merged `list` into `modern` for a cohesive Rust-based toolchain experience (`eza`, `bat`).
 - **Standardization**: Removed duplicate logging functions in favor of a shared utility.
 - **Documentation**: All 30+ component READMEs now reflect current functionality.
@@ -107,8 +107,8 @@ v0.2.474 is not just "dotfiles" but a portable **shell distribution** managed by
   - **Standards**: Strict **XDG Base Directory** enforcement in `paths.sh`.
 
 - **The universal installer (zero-dep)**
-  - **Bootstrap**: `install.sh` runs via `curl | sh` with no dependencies.
-  - **Teleport**: `dot teleport user@host` deploys configs ephemerally via SSH.
+  - **Bootstrap**: `install.sh` runs through `curl | sh` with no dependencies.
+  - **Teleport**: `dot teleport user@host` deploys configs ephemerally through SSH.
 
 ### Verification
 - **Performance**: Benchmark script `scripts/benchmark.sh` confirms <20ms startup.
@@ -125,8 +125,10 @@ To set up a new machine, run the universal installer:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.474/install.sh)"
 ```
 
-#### Option B: Migration (upgrade from `master` / v1)
-> **Important:** This release changes the architecture from direct symlinks to `chezmoi` templates. Back up your configuration first.
+#### Option B: Migration (upgrade from earlier versions)
+
+> [!IMPORTANT]
+> This release changes the architecture from direct symlinks to `chezmoi` templates. Back up your configuration first.
 
 Existing `chezmoi` users can run `chezmoi apply` to upgrade, but the full installer works better for major version jumps.
 
@@ -140,7 +142,7 @@ Existing `chezmoi` users can run `chezmoi apply` to upgrade, but the full instal
    sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.474/install.sh)"
    ```
 3. **Resolve conflicts**:
-   - If `chezmoi` prompts you to overwrite files (e.g., `.zshrc`), select **overwrite** (or diff to check) because this release uses a new sourcing strategy.
+   - If `chezmoi` prompts you to overwrite files (for example, `.zshrc`), select **overwrite** (or diff to check) because this release uses a new sourcing strategy.
 4. **Restart shell**:
    ```bash
    exec zsh

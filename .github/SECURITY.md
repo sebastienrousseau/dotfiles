@@ -1,13 +1,13 @@
-# Security Policy
+# Security policy
 
-## Supported Versions
+## Supported versions
 
 | Version | Supported          |
 | ------- | ------------------ |
 | main    | :white_check_mark: |
 | < 1.0   | :x:                |
 
-## Vulnerability Severity Levels
+## Vulnerability severity levels
 
 We classify vulnerabilities using the following severity levels:
 
@@ -20,23 +20,23 @@ We classify vulnerabilities using the following severity levels:
 
 ## Response SLA
 
-We are committed to responding to security issues promptly:
+We respond to security issues promptly:
 
-| Severity | Initial Response | Resolution Target |
+| Severity | Initial response | Resolution target |
 | -------- | ---------------- | ----------------- |
 | Critical | 24 hours         | 48 hours          |
 | High     | 72 hours         | 7 days            |
 | Medium   | 5 business days  | 30 days           |
 | Low      | 10 business days | 90 days           |
 
-## Security Contact
+## Security contact
 
 For security-related inquiries:
 
 - **Primary**: GitHub Security Advisories (preferred)
 - **Email**: security@sebastienrousseau.com
 
-## Reporting a Vulnerability
+## Reporting a vulnerability
 
 Please use GitHub Security Advisories for private disclosure:
 
@@ -44,14 +44,14 @@ Please use GitHub Security Advisories for private disclosure:
 
 We'll acknowledge reports and provide a fix timeline when possible.
 
-## Responsible Disclosure Policy
+## Responsible disclosure policy
 
 We kindly ask security researchers to:
 
 1. **Report privately** - Use GitHub Security Advisories or email; do not open public issues
 2. **Provide details** - Include steps to reproduce, affected versions, and potential impact
 3. **Allow time** - Give us reasonable time to address the issue before public disclosure
-4. **Act in good faith** - Avoid accessing or modifying data that does not belong to you
+4. **Act in good faith** - Do not access or modify data that is not yours
 
 We commit to:
 

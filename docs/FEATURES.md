@@ -1,10 +1,10 @@
 # Feature flags
 
-This page documents the feature flags available in the dotfiles configuration.
+Feature flags let you enable or disable specific parts of the dotfiles configuration. They use the `.chezmoidata.toml` file and template conditions.
 
 ## Overview
 
-Feature flags use the `.chezmoidata.toml` file and template conditions. They let you enable or disable specific functionality based on your needs.
+You can toggle features based on your needs. For example, you might enable Docker aliases but leave Kubernetes tools off until you need them.
 
 ## Configuration file
 
@@ -80,7 +80,7 @@ Edit `~/.dotfiles/.chezmoidata.toml`:
 kubernetes = true
 ```
 
-Then apply:
+Then apply your changes:
 
 ```bash
 chezmoi apply
@@ -97,7 +97,7 @@ kubernetes = true
 
 ## Creating feature-gated configs
 
-In template files, use conditionals:
+In your template files, use conditionals:
 
 ```
 {{- if .features.kubernetes }}

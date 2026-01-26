@@ -1,6 +1,6 @@
 # Troubleshooting
 
-This page lists quick checks for common issues.
+Quick checks for common issues.
 
 ## Install and update
 

@@ -1,7 +1,6 @@
 # Discover utilities
 
-Curated utilities surfaced through aliases, functions, and the `dot` CLI.
-This is intentionally small and practical.
+These utilities are available through aliases, functions, and the `dot` CLI. The collection stays small and practical on purpose.
 
 ## Dot CLI
 
@@ -41,11 +40,15 @@ The `dot` command is your primary interface for managing dotfiles. Run `dot --ve
 
 ## Git
 
-- `g`, `ga`, `gco`, `gst`, `gl`, `gll` and related aliases
+You can use these shorthand aliases for everyday Git operations:
+
+- `g`, `ga`, `gco`, `gst`, `gl`, `gll`, and related aliases
 - `lg` shows a graph log; `lgui` opens `lazygit` (if installed)
 - `gh` aliases in `~/.config/gh/config.yml`
 
 ## Docker
+
+These Docker aliases help you manage containers and images:
 
 - `dco` for `docker compose`
 - `dps`, `dpsa` for container listing
@@ -56,6 +59,8 @@ The `dot` command is your primary interface for managing dotfiles. Run `dot --ve
 - `lzd` for lazydocker TUI
 
 ## Search
+
+You can search and navigate your filesystem with:
 
 - `rg` (ripgrep), `fd` (find)
 - `z <dir>` (zoxide jump)
@@ -74,6 +79,8 @@ The `dot` command is your primary interface for managing dotfiles. Run `dot --ve
 - `cmatrix` wrapper with defaults
 
 ## Network
+
+You can debug HTTP requests with:
 
 - `curlheader`, `curlstatus`, `curltime`, `httpdebug`
 

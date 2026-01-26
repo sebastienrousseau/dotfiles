@@ -1,15 +1,15 @@
-# Testing Strategy
+# Testing strategy
 
 ## Overview
 
-This repository uses a comprehensive multi-layer testing approach:
+This repository uses a multi-layer testing approach:
 - **Unit Tests**: Individual function validation
 - **Integration Tests**: System-wide behavior verification
 - **Performance Tests**: Resource efficiency benchmarks
 
-## Running Tests
+## Running tests
 
-### Quick Start
+### Quick start
 ```bash
 # Run all unit tests
 ./scripts/tests/framework/test_runner.sh
@@ -24,7 +24,7 @@ RUN_INTEGRATION=1 ./scripts/tests/framework/test_runner.sh
 ./scripts/tests/performance/benchmark_runner.sh
 ```
 
-## Test Structure
+## Test structure
 
 ```
 scripts/tests/
@@ -37,9 +37,9 @@ scripts/tests/
 └── performance/        # Benchmarks
 ```
 
-## Writing Tests
+## Writing tests
 
-### Test File Template
+### Test file template
 ```bash
 #!/usr/bin/env bash
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -56,7 +56,7 @@ test_start "function_no_args"
 assert_exit_code 1 "myfunction"
 ```
 
-### Available Assertions
+### Available assertions
 
 | Function | Description |
 |----------|-------------|
@@ -76,7 +76,7 @@ assert_exit_code 1 "myfunction"
 | `assert_not_empty value [msg]` | Assert string is not empty |
 | `assert_file_contains file needle [msg]` | Assert file contains text |
 
-### Mock Utilities
+### Mock utilities
 
 | Function | Description |
 |----------|-------------|
@@ -91,7 +91,7 @@ assert_exit_code 1 "myfunction"
 | `mock_env var_name value` | Set environment variable |
 | `mock_cleanup` | Clean up all mocks |
 
-## Coverage Goals
+## Coverage goals
 
 | Category | Target | Current |
 |----------|--------|---------|
@@ -99,14 +99,14 @@ assert_exit_code 1 "myfunction"
 | Scripts | >70% | ~75% |
 | Integration | >90% | ~95% |
 
-## CI Integration
+## CI integration
 
 Tests run automatically on:
-- Every push to main/master
+- Every push to main
 - Every pull request
 - Weekly scheduled runs (Monday 6 AM UTC)
 
-### GitHub Actions Example
+### GitHub Actions example
 
 ```yaml
 - name: Run Tests
@@ -123,7 +123,7 @@ Tests run automatically on:
     ./scripts/tests/performance/benchmark_runner.sh
 ```
 
-## Test Categories
+## Test categories
 
 ### Unit Tests (`scripts/tests/unit/`)
 
@@ -148,7 +148,7 @@ Measure resource efficiency:
 - **benchmark_runner.sh** - Shell startup and operation benchmarks
 - **stress_test.sh** - Load testing utilities
 
-## Environment Variables
+## Environment variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -157,7 +157,7 @@ Measure resource efficiency:
 | `REPO_ROOT` | Auto-detected | Repository root directory |
 | `TESTS_DIR` | Auto-detected | Tests directory |
 
-## Best Practices
+## Best practices
 
 1. **Isolation**: Each test should be independent
 2. **Cleanup**: Use mocks that auto-cleanup via traps
@@ -168,7 +168,7 @@ Measure resource efficiency:
 
 ## Troubleshooting
 
-### Tests Not Found
+### Tests not found
 
 Ensure test files match the pattern `test_*.sh` and are executable:
 
@@ -177,7 +177,7 @@ chmod +x scripts/tests/unit/test_*.sh
 chmod +x scripts/tests/integration/test_*.sh
 ```
 
-### Function Not Available
+### Function not available
 
 If a test shows "function not available", verify the source file exists:
 
@@ -185,6 +185,6 @@ If a test shows "function not available", verify the source file exists:
 ls -la .chezmoitemplates/functions/
 ```
 
-### Mock Cleanup Issues
+### Mock cleanup issues
 
 If mocks aren't cleaning up, ensure you're not running with `set -e` before mock operations that might fail.

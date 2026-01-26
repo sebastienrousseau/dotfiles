@@ -1,12 +1,12 @@
 # Screenshots gallery
 
-This page shows the visual appearance of the dotfiles across different themes and configurations.
+See how the dotfiles look across different themes and configurations.
 
 ## Theme gallery
 
 ### Catppuccin Mocha (default)
 
-The default theme is Catppuccin Mocha, a dark theme with warm, muted colors.
+The default theme, Catppuccin Mocha, gives you a dark palette with warm, muted colors.
 
 ```
 Terminal: Ghostty / WezTerm / Alacritty
@@ -80,7 +80,7 @@ Features:
 
 ## Prompt (Starship)
 
-The Starship prompt shows:
+Your Starship prompt displays:
 - Current directory
 - Git branch and status
 - Language versions (when relevant)
@@ -89,7 +89,7 @@ The Starship prompt shows:
 
 ## Neovim
 
-The Neovim configuration includes:
+Your Neovim configuration includes:
 - Catppuccin theme
 - Treesitter syntax highlighting
 - LSP integration
@@ -98,7 +98,7 @@ The Neovim configuration includes:
 
 ## tmux
 
-The tmux status bar shows:
+Your tmux status bar displays:
 - Session name
 - Current window
 - Host name

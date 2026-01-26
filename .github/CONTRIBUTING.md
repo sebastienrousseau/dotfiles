@@ -17,13 +17,11 @@ Designed to fit your shell life
 
 ## Contributing to Dotfiles
 
-Thank you for contributing to Dotfiles. There are a
-couple of ways to help out.
+Thank you for your interest in contributing to Dotfiles. Here are some ways you can help.
 
 ## Evangelize
 
-Tell people about Dotfiles. A bigger, more involved
-community makes for a better product. We welcome your feedback.
+Tell people about Dotfiles. A bigger, more involved community helps everyone. We welcome your feedback.
 
 ## How to contribute
 
@@ -36,11 +34,10 @@ If you encounter a bug that has not been filed yet, submit a
 bug report. Reporting a bug is one of the most valuable contributions
 you can make to Dotfiles.
 
-* Go to the [issue tracker](https://github.com/sebastienrousseau/dotfiles/issues/new) to submit
-  a new issue.
-* Include a descriptive title that is straight to the point.
-* Write a detailed description of the issue.
-* Wait for a maintainer to triage and label the issue.
+1. Go to the [issue tracker](https://github.com/sebastienrousseau/dotfiles/issues/new) to submit a new issue.
+2. Include a descriptive title that is straight to the point.
+3. Write a detailed description of the issue.
+4. Wait for a maintainer to triage and label the issue.
 
 ### Code contributions
 
@@ -52,26 +49,23 @@ Dotfiles.
 Filing feature requests is one of the most popular ways to contribute
 to Dotfiles.
 
-Want to code a feature yourself?
-Pull requests let you share your code, and we can merge it
-into the repo.
+Open a pull request to share your code, and we can merge it into the repository.
 
 #### Adding code
 
-* Fork the repo.
-* Clone the repo **you forked** by running
-  `git clone https://github.com/<your-username>/dotfiles.git`
+1. Fork the repository.
+2. Clone the repository **you forked** by running
+   `git clone https://github.com/<your-username>/dotfiles.git`
 
 #### Fixing an issue
 
 Found a solution to an issue? Here is how to submit your
 code to Dotfiles.
 
-* Fork the repo and refer above for how to set up the code.
-* Go to your local fork of the repo and open a new pull request.
-* Include a title that is straight to the point.
-* Wait for a maintainer to review and merge your pull
-  request.
+1. Fork the repository and refer above for how to set up the code.
+2. Go to your local fork and open a new pull request.
+3. Include a title that is straight to the point.
+4. Wait for a maintainer to review and merge your pull request.
 
 ## Pull request guidelines
 

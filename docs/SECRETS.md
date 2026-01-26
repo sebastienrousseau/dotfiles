@@ -1,6 +1,6 @@
 # Secrets
 
-This repo supports encrypted secrets using `age` with `chezmoi`.
+You can encrypt secrets using `age` with `chezmoi`.
 
 ## Get started
 
@@ -8,10 +8,10 @@ This repo supports encrypted secrets using `age` with `chezmoi`.
 dot secrets-init
 ```
 
-This creates `~/.config/chezmoi/key.txt` and prints your public key.
-It also updates `~/.config/chezmoi/chezmoi.toml` with the age backend settings.
+The command creates `~/.config/chezmoi/key.txt` and prints your public key. It also updates `~/.config/chezmoi/chezmoi.toml` with the `age` backend settings.
 
-Verify that `age` is installed first (via brew/apt or your toolchain).
+> [!IMPORTANT]
+> Verify that `age` is installed before running this command. You can install it through `brew`, `apt`, or your preferred toolchain.
 
 ## Enable encryption
 
@@ -31,15 +31,15 @@ You can also re-run:
 chezmoi init --apply --promptDefaults
 ```
 
-## Edit
+## Edit secrets
 
 ```bash
 dot secrets
 ```
 
-This edits `~/.config/chezmoi/encrypted_secrets.age` and applies on save.
+The command opens `~/.config/chezmoi/encrypted_secrets.age` for editing and applies changes when you save.
 
-## Create
+## Create secrets
 
 ```bash
 dot secrets-create
@@ -57,7 +57,7 @@ dot secrets
 dot ssh-key ~/.ssh/id_ed25519
 ```
 
-This creates a local encrypted file at:
+The command creates a local encrypted file at:
 `~/.config/chezmoi/encrypted_id_ed25519.age`
 
 If you want it tracked (encrypted) in your dotfiles, run:
@@ -66,8 +66,11 @@ If you want it tracked (encrypted) in your dotfiles, run:
 chezmoi add --encrypt ~/.config/chezmoi/encrypted_id_ed25519.age
 ```
 
-## Notes
-- Keep `~/.config/chezmoi/key.txt` private.
-- You can share the public key for encrypting data.
+## Important notes
+
+> [!WARNING]
+> Keep `~/.config/chezmoi/key.txt` private. Never commit this file to a public repository.
+
+- You can share the public key freely for encrypting data.
 - Consider rotating keys yearly (or after any potential leak).
-  Steps: generate a new key, update `chezmoi.toml`, re-encrypt secrets, delete old key.
+  To rotate: generate a new key, update `chezmoi.toml`, re-encrypt your secrets, and delete the old key.

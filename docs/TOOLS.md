@@ -1,6 +1,6 @@
 # Tools
 
-This page lists the main tools and CLI conveniences provided by this repo.
+These are the main tools and CLI conveniences included with Dotfiles.
 
 ## Core
 
@@ -18,7 +18,7 @@ This page lists the main tools and CLI conveniences provided by this repo.
 | fzf | Fuzzy finder |
 | zoxide | Smart directory jumping |
 | ripgrep | Fast text search |
-| fd | User-friendly find |
+| fd | Developer-friendly find |
 | bat | Cat with syntax highlighting |
 | eza | Modern ls replacement |
 | lsd | LSDeluxe file listing |

@@ -37,7 +37,7 @@ lock-configs  # Sets chflags uchg (macOS) or chattr +i (Linux)
 ```
 
 ### Forensic audit
-The system logs all `chezmoi` operations. View audit trails:
+Dotfiles logs all `chezmoi` operations. To view audit trails, run:
 ```bash
 dot audit
 ```

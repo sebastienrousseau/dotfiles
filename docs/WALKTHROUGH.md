@@ -25,7 +25,7 @@ dot status
 
 ### Step 2: Explore the shell
 
-The shell comes pre-configured with modern tools:
+Your shell comes pre-configured with modern tools:
 
 ```bash
 # Use zoxide for smart directory navigation
@@ -37,8 +37,8 @@ z -                 # Go back
 <Ctrl-T>            # Find files
 
 # Use modern tool replacements
-ls                  # Actually runs 'eza'
-cat file.txt        # Actually runs 'bat'
+ls                  # Runs 'eza'
+cat file.txt        # Runs 'bat'
 ```
 
 ### Step 3: Git workflow
@@ -115,7 +115,7 @@ k9                  # Open k9s TUI
 
 ## Universal installer
 
-- **Bootstrap**: `install.sh` enables one-line installation via `curl`.
+- **Bootstrap**: `install.sh` enables one-line installation through `curl`.
 - **Teleport**: `dot teleport user@host` pushes configs ephemerally to remote servers.
 - **Verification**: All syntax checks pass.
 
@@ -128,7 +128,7 @@ k9                  # Open k9s TUI
 ## Self-healing and compliance
 
 - **Doctor**: `dot doctor` diagnoses drift, paths, and dependencies.
-- **Audit**: The system logs all changes to `~/.local/share/dotfiles.log`.
+- **Audit**: Dotfiles logs all changes to `~/.local/share/dotfiles.log`.
 - **Privacy**: The `privacy-mode` alias disables telemetry.
 
 ## Verification
@@ -155,7 +155,7 @@ k9                  # Open k9s TUI
 
 ## Video tutorial
 
-A future release will include a video walkthrough. Until then, refer to this document and the individual tool documentation.
+A future release will include a video walkthrough. Until then, use this document and the individual tool documentation.
 
 ## Next steps
 

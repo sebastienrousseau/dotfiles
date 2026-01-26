@@ -1,12 +1,12 @@
 # Font configuration
 
-This page documents font setup, rendering, and the fonts included with the dotfiles.
+Learn about font setup, rendering, and the fonts included with these dotfiles.
 
 ## Recommended fonts
 
 ### Primary: JetBrains Mono Nerd Font
 
-The default font is JetBrains Mono with Nerd Font patches.
+Your default font is JetBrains Mono with Nerd Font patches.
 
 Features:
 - Designed for code readability
@@ -16,11 +16,11 @@ Features:
 
 ### Alternatives
 
-| Font | Style | Best For |
+| Font | Style | Best for |
 |------|-------|----------|
-| Fira Code | Modern | Ligature lovers |
-| Cascadia Code | Microsoft | VS Code users |
-| Hack | Classic | Traditional coders |
+| Fira Code | Modern | People who enjoy ligatures |
+| Cascadia Code | Microsoft | People who use VS Code |
+| Hack | Classic | People who prefer a classic look |
 | Source Code Pro | Adobe | Clean aesthetic |
 | Iosevka | Narrow | Small screens |
 
@@ -76,7 +76,7 @@ Nerd Font:
 
 ### Ambiguous characters
 
-The font configuration clearly distinguishes:
+The font configuration provides clear distinction between:
 
 ```
 0 vs O (zero vs capital O)
@@ -143,5 +143,5 @@ font_size 14.0
 ### Ligatures not working
 
 1. Enable ligatures in terminal settings
-2. Some terminals don't support ligatures (e.g., Terminal.app)
+2. Some terminals do not support ligatures (for example, Terminal.app)
 3. Try Ghostty, WezTerm, or Kitty

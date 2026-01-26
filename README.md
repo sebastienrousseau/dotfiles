@@ -16,16 +16,16 @@ Git + templates + guarded scripts = a reproducible shell.
 
 ---
 
-## Table of Contents
+## Table of contents
 
-- [Why Dotfiles](#why-dotfiles)
+- [Why dotfiles](#why-dotfiles)
 - [Safety](#safety)
-- [Get Started](#get-started)
+- [Get started](#get-started)
 - [Discover](#discover)
-- [Install Details](#install-details)
-- [Make It Yours](#make-it-yours)
+- [Install details](#install-details)
+- [Make it yours](#make-it-yours)
 - [Reference](#reference)
-- [How It Works](#how-it-works)
+- [How it works](#how-it-works)
 - [Roadmap](#roadmap)
 - [Contribute](#contribute)
 - [Changelog](#changelog)
@@ -33,7 +33,7 @@ Git + templates + guarded scripts = a reproducible shell.
 
 ---
 
-## Why Dotfiles
+## Why dotfiles
 
 Dotfiles takes an infrastructure‑oriented approach to managing your shell. It is designed for developers who work across multiple machines and value **daily usability, reproducibility, and auditability.**
 
@@ -47,17 +47,17 @@ Dotfiles takes an infrastructure‑oriented approach to managing your shell. It 
 This is **infrastructure**, not an ad‑hoc shell script.
 
 - No destructive actions without explicit opt‑in.
-- No background daemons are installed automatically.
-- No system settings are changed by default.
-- System‑level behaviour requires explicit opt‑in via environment variables.
-- All privileged actions are logged locally to `~/.local/share/dotfiles.log`.
+- No background daemons install automatically.
+- No system settings change by default.
+- System‑level behaviour requires explicit opt‑in through environment variables.
+- Dotfiles logs all privileged actions to `~/.local/share/dotfiles.log`.
 
 ---
 
-## Get Started
+## Get started
 
 > [!IMPORTANT]
-> The installer automatically backs up any existing `~/.dotfiles` directory and cleans up legacy configuration files. It **only** bootstraps `chezmoi` and applies this repo. OS packages are installed via Chezmoi hooks during the first apply.
+> The installer automatically backs up any existing `~/.dotfiles` directory and cleans up legacy configuration files. It **only** bootstraps `chezmoi` and applies this repo. OS packages install through Chezmoi hooks during the first apply.
 
 ```bash
 # Works on macOS, Linux, and WSL
@@ -84,7 +84,7 @@ DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/
 
 ---
 
-## Install Details
+## Install details
 
 **Prerequisites**
 - Required: `git`, `curl`
@@ -96,12 +96,12 @@ DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/
 dot update
 ```
 
-**Non‑Interactive Apply**
+**Non‑interactive apply**
 ```bash
 DOTFILES_NONINTERACTIVE=1 dot apply
 ```
 
-## Make It Yours
+## Make it yours
 
 - [Operations](docs/OPERATIONS.md)
 - [Secrets](docs/SECRETS.md)
@@ -139,7 +139,7 @@ Run `dot --help` or `dot <command> --help` for inline documentation.
 | `dot learn` | Interactive tour of tools (requires `gum`) | UX |
 | `dot fonts` | Install Nerd Fonts | UX |
 | `dot sandbox` | Launch a safe sandbox preview | Tools |
-| `dot tools` | Show tools or install via Nix | Tools |
+| `dot tools` | Show tools or install through Nix | Tools |
 | `dot tools install` | Enter Nix development shell | Tools |
 | `dot new` | Create a new project from a template | Tools |
 | `dot log-rotate` | Rotate `~/.local/share/dotfiles.log` | Tools |
@@ -163,7 +163,7 @@ DOTFILES_NONINTERACTIVE=1 dot secrets-init
 # Output: Age key created at ~/.config/chezmoi/key.txt
 ```
 
-### Security Changes
+### Security changes
 
 These scripts are **opt‑in** and run only when you set the matching environment variable.
 All security changes are logged to `~/.local/share/dotfiles.log`.
@@ -187,13 +187,13 @@ Nix is **optional**. The repo does **not** install the Nix daemon.
 
 ---
 
-### Install Guide
+### Install guide
 
 See [docs/INSTALL.md](docs/INSTALL.md) for prerequisites, supported platforms, and the full install flow.
 
 <p align="right"><a href="#dotfiles--your-shell-everywhere">↑ Back to Top</a></p>
 
-## How It Works
+## How it works
 
 If Mermaid does not render, the flow is: `install.sh` → `Chezmoi` → `~/.dotfiles` → `~/.config + ~/.local`.
 

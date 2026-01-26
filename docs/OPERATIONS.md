@@ -31,7 +31,8 @@ This guide covers the core workflows to keep your dotfiles running well across p
   # 2. Update Dotfiles
   chezmoi update
   ```
-  *Note: `chezmoi` on Linux focuses on configuration. Package updates are often best handled by the OS package manager to avoid `sudo` conflicts.*
+  > [!NOTE]
+  > On Linux, `chezmoi` focuses on configuration. Package updates work best with the OS package manager to avoid `sudo` conflicts.
 
 - **Troubleshooting**:
   - **Font issues**: If icons are missing, run `./install/provision/run_onchange_50-install-fonts.sh` manually.
@@ -44,7 +45,7 @@ This guide covers the core workflows to keep your dotfiles running well across p
 
 - **WSL specifics**:
   - **Access Windows files**: WSL mounts Windows drives at `/mnt/c/`.
-  - **Clipboard**: The setup configures `win32yank.exe` automatically for clipboard sharing.
+  - **Clipboard**: Dotfiles configures `win32yank.exe` automatically for clipboard sharing.
   - **Performance**: Keep project files inside the Linux filesystem (`~/projects`), NOT in `/mnt/c/`, for 100x better IO performance.
 
 ---
@@ -126,4 +127,4 @@ If something runs slow or appears broken:
 
 ## Security policy
 - **GPG/SSH**: All commits use SSH signing.
-- **Audit log**: Review `~/.local/share/dotfiles.log` for a timeline of all changes the system applied.
+- **Audit log**: Review `~/.local/share/dotfiles.log` for a timeline of all changes that Dotfiles applied.
