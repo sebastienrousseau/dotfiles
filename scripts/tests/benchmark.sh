@@ -59,7 +59,8 @@ if command -v zsh >/dev/null; then
 
   # Measure key init commands individually
   _bench_component() {
-    local label="$1"; shift
+    local label="$1"
+    shift
     local start end elapsed
     if command -v perl >/dev/null 2>&1; then
       start=$(perl -MTime::HiRes=time -e "printf \"%.0f\n\", time * 1000")
@@ -75,13 +76,13 @@ if command -v zsh >/dev/null; then
   }
 
   _bench_component "bare zsh (baseline)" "exit"
-  _bench_component "zinit + plugins"     "source \"\${XDG_DATA_HOME:-\$HOME/.local/share}/zinit/zinit.git/zinit.zsh\" 2>/dev/null; exit"
-  _bench_component "compinit"            "autoload -Uz compinit && compinit -C; exit"
-  _bench_component "starship init"       "command -v starship >/dev/null && eval \"\$(starship init zsh)\"; exit"
-  _bench_component "atuin init"          "command -v atuin >/dev/null && eval \"\$(atuin init zsh)\"; exit"
-  _bench_component "zoxide init"         "command -v zoxide >/dev/null && eval \"\$(zoxide init zsh)\"; exit"
-  _bench_component "fnm env"             "command -v fnm >/dev/null && eval \"\$(fnm env --use-on-cd)\"; exit"
-  _bench_component "fzf completions"     "[[ -f /opt/homebrew/opt/fzf/shell/completion.zsh ]] && source /opt/homebrew/opt/fzf/shell/completion.zsh; exit"
+  _bench_component "zinit + plugins" "source \"\${XDG_DATA_HOME:-\$HOME/.local/share}/zinit/zinit.git/zinit.zsh\" 2>/dev/null; exit"
+  _bench_component "compinit" "autoload -Uz compinit && compinit -C; exit"
+  _bench_component "starship init" "command -v starship >/dev/null && eval \"\$(starship init zsh)\"; exit"
+  _bench_component "atuin init" "command -v atuin >/dev/null && eval \"\$(atuin init zsh)\"; exit"
+  _bench_component "zoxide init" "command -v zoxide >/dev/null && eval \"\$(zoxide init zsh)\"; exit"
+  _bench_component "fnm env" "command -v fnm >/dev/null && eval \"\$(fnm env --use-on-cd)\"; exit"
+  _bench_component "fzf completions" "[[ -f /opt/homebrew/opt/fzf/shell/completion.zsh ]] && source /opt/homebrew/opt/fzf/shell/completion.zsh; exit"
 
   echo ""
   log_info "Component profiling complete."

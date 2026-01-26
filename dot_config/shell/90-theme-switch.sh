@@ -21,7 +21,7 @@ detect_theme_mode() {
           org.freedesktop.portal.Desktop \
           /org/freedesktop/portal/desktop \
           org.freedesktop.portal.Settings \
-          Read "org.freedesktop.appearance" "color-scheme" 2>/dev/null | \
+          Read "org.freedesktop.appearance" "color-scheme" 2>/dev/null |
           grep -o '[0-9]*$')"
         if [ "$scheme" = "1" ]; then
           export THEME_MODE="dark"

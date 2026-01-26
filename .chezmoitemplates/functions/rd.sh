@@ -29,8 +29,8 @@ rd() {
     if [[ -d "$dangerous" ]]; then
       resolved_dangerous="$(cd "$dangerous" 2>/dev/null && pwd -P)" || true
     fi
-    if [[ "$resolved" == "$dangerous" || "$resolved" == "$dangerous/" \
-       || "$resolved" == "$resolved_dangerous" || "$resolved" == "$resolved_dangerous/" ]]; then
+    if [[ "$resolved" == "$dangerous" || "$resolved" == "$dangerous/" ||
+      "$resolved" == "$resolved_dangerous" || "$resolved" == "$resolved_dangerous/" ]]; then
       echo "[ERROR] Refusing to delete protected path: $resolved" >&2
       return 1
     fi
