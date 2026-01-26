@@ -26,8 +26,14 @@ assert_true "type keygen &>/dev/null" "keygen function should exist"
 test_start "keygen_no_args"
 if type keygen &>/dev/null; then
   output=$(keygen 2>&1 || true)
-  # Should show usage or error
-  assert_true "[[ -n '$output' ]]" "no args should produce output"
+  # Should show usage or error - use direct check to avoid eval issues
+  if [[ -n "$output" ]]; then
+    ((TESTS_PASSED++)) || true
+    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no args should produce output"
+  else
+    ((TESTS_FAILED++)) || true
+    echo -e "  ${RED}✗${NC} $CURRENT_TEST: no args should produce output"
+  fi
 fi
 
 # Test help flag
