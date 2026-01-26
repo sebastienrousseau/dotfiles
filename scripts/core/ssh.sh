@@ -43,7 +43,7 @@ eval "$(ssh-agent -s)"
 
 # Create config file if it doesn't exist; append only if not already configured
 if [ ! -f ~/.ssh/config ] || ! grep -q 'IdentityFile ~/.ssh/id_ed25519' ~/.ssh/config; then
-  printf "Host *\n AddKeysToAgent yes\n UseKeychain yes\n IdentityFile ~/.ssh/id_ed25519\n" >> ~/.ssh/config
+  printf "Host *\n AddKeysToAgent yes\n UseKeychain yes\n IdentityFile ~/.ssh/id_ed25519\n" >>~/.ssh/config
   chmod 600 ~/.ssh/config
 fi
 

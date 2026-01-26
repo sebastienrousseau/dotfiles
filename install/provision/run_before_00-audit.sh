@@ -13,5 +13,5 @@ if [[ "${DOTFILES_AUDIT_LOG:-0}" == "1" ]]; then
   HOST_NAME="${HOSTNAME:-$(hostname)}"
 
   # Log the event
-  echo "[${TIMESTAMP}] User: ${USER_NAME}@${HOST_NAME} | Action: chezmoi apply | Status: Started" >> "${AUDIT_LOG}"
+  echo "[${TIMESTAMP}] User: ${USER_NAME}@${HOST_NAME} | Action: chezmoi apply | Status: Started" >>"${AUDIT_LOG}"
 fi

@@ -32,7 +32,10 @@ fi
 test_start "zipf_nonexistent_dir"
 if type zipf &>/dev/null; then
   # zipf returns non-zero for nonexistent paths (exit code varies by implementation)
-  result=$(zipf /nonexistent/path/12345 2>/dev/null; echo $?)
+  result=$(
+    zipf /nonexistent/path/12345 2>/dev/null
+    echo $?
+  )
   if [[ "$result" != "0" ]]; then
     ((TESTS_PASSED++)) || true
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: returns non-zero for nonexistent path"
