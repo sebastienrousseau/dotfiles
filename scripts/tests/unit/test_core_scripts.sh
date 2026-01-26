@@ -3,9 +3,10 @@
 # Unit tests for core scripts
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../framework/assertions.sh"
 
-CORE_DIR="$HOME/.dotfiles/scripts/core"
+CORE_DIR="$REPO_ROOT/scripts/core"
 
 echo "Testing core scripts..."
 

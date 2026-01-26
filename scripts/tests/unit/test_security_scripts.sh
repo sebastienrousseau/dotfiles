@@ -3,9 +3,10 @@
 # Unit tests for security scripts
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../framework/assertions.sh"
 
-SECURITY_DIR="$HOME/.dotfiles/scripts/security"
+SECURITY_DIR="$REPO_ROOT/scripts/security"
 
 echo "Testing security scripts..."
 

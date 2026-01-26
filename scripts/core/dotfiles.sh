@@ -8,7 +8,7 @@
 
 ## 🅸🅼🅿🅾🆁🆃🆂 - Importing constants and functions.
 
-# shellcheck disable=SC1091
+# shellcheck disable=SC1090,SC1091
 CONSTANTS_FILE="./lib/configurations/default/constants.sh"
 if [[ -f "$CONSTANTS_FILE" ]]; then
   source "$CONSTANTS_FILE"

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2015,SC2034
 # =============================================================================
 # Dotfiles Health Check Script
 # Verifies that dotfiles installation is functioning correctly

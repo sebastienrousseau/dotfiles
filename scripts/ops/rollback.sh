@@ -212,7 +212,7 @@ perform_rollback() {
   # Restore files
   local restored=0
   while IFS= read -r -d '' file; do
-    local rel_path="${file#$backup_path/}"
+    local rel_path="${file#"$backup_path"/}"
     local dest="$HOME/$rel_path"
 
     # Skip metadata file
@@ -299,7 +299,7 @@ restore_file() {
   local dry_run="${2:-0}"
 
   # Normalize path
-  file_path="${file_path#$HOME/}"
+  file_path="${file_path#"$HOME"/}"
   file_path="${file_path#./}"
   file_path="${file_path#~/}"
 
