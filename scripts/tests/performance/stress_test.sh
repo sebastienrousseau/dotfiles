@@ -1,10 +1,21 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1091
 set -euo pipefail
 
 # Stress test for shell functions
 # Tests behavior under repeated rapid invocation
 
 ITERATIONS="${1:-100}"
+
+# Portable millisecond timing function
+get_time_ms() {
+  if command -v perl >/dev/null 2>&1; then
+    perl -MTime::HiRes=time -e 'printf "%.0f\n", time * 1000'
+  else
+    # Fallback: seconds * 1000 (less precise)
+    echo $(($(date +%s) * 1000))
+  fi
+}
 
 stress_test_function() {
   local func_name="$1"
@@ -13,11 +24,11 @@ stress_test_function() {
 
   echo "Stress testing $func_name ($ITERATIONS iterations)..."
 
-  start=$(date +%s%3N)
+  start=$(get_time_ms)
   for ((i = 1; i <= ITERATIONS; i++)); do
     eval "$test_cmd" >/dev/null 2>&1 || true
   done
-  end=$(date +%s%3N)
+  end=$(get_time_ms)
 
   elapsed=$((end - start))
   local per_call=$((elapsed / ITERATIONS))

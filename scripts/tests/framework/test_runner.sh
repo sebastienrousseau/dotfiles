@@ -24,14 +24,9 @@ run_test_file() {
   echo "Running: $(basename "$test_file")"
   echo "─────────────────────────────────────"
 
-  # Run test in subshell, capture results
-  (
-    source "$SCRIPT_DIR/assertions.sh"
-    source "$SCRIPT_DIR/mocks.sh"
-    source "$test_file"
-    # Output counters at the end
-    echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
-  ) 2>&1 | tee "$temp_results"
+  # Run test as a separate process (not subshell with source)
+  # This avoids trap interference from double-sourcing framework files
+  bash "$test_file" 2>&1 | tee "$temp_results"
 
   # Parse results from output
   local results_line

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034
 # =============================================================================
 # Dotfiles Rollback Script - Self-Healing Configuration Recovery
 # Safely reverts failed dotfile applications with automatic backup
@@ -138,7 +139,7 @@ create_backup() {
   local backed_up=0
   for target in "${targets[@]}"; do
     if [[ -e "$target" ]]; then
-      local rel_path="${target#$HOME/}"
+      local rel_path="${target#"$HOME"/}"
       local dest_dir
       dest_dir=$(dirname "$backup_path/$rel_path")
       mkdir -p "$dest_dir"
