@@ -78,7 +78,11 @@ EOH
   fi
 
   # Ensure ~/.ssh directory exists
-  mkdir -p ~/.ssh && chmod 700 ~/.ssh || log_error "Failed to create ~/.ssh directory."
+  if ! mkdir -p ~/.ssh; then
+    log_error "Failed to create ~/.ssh directory."
+    return 1
+  fi
+  chmod 700 ~/.ssh
 
   # Collect inputs
   local name email key_type key_bits
