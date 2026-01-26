@@ -86,7 +86,7 @@ XTerm*utf8Title:          true
 
 ! Font
 XTerm*faceName:           JetBrainsMono Nerd Font
-XTerm*faceSize:           11
+XTerm*faceSize:           12
 XTerm*renderFont:         true
 XTerm*boldMode:           false
 XTerm*allowBoldFonts:     true
@@ -135,12 +135,12 @@ URxvt*urgentOnBell:       true
 URxvt*visualBell:         false
 
 ! Font
-URxvt*font:               xft:JetBrainsMono Nerd Font:size=11
-URxvt*boldFont:           xft:JetBrainsMono Nerd Font:bold:size=11
-URxvt*italicFont:         xft:JetBrainsMono Nerd Font:italic:size=11
-URxvt*boldItalicFont:     xft:JetBrainsMono Nerd Font:bold:italic:size=11
+URxvt*font:               xft:JetBrainsMono Nerd Font:size=12
+URxvt*boldFont:           xft:JetBrainsMono Nerd Font:bold:size=12
+URxvt*italicFont:         xft:JetBrainsMono Nerd Font:italic:size=12
+URxvt*boldItalicFont:     xft:JetBrainsMono Nerd Font:bold:italic:size=12
 URxvt*letterSpace:        0
-URxvt*lineSpace:          0
+URxvt*lineSpace:          4
 
 ! Colours
 URxvt*depth:              32

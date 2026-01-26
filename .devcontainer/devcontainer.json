@@ -1,12 +1,23 @@
 {
-  "name": "dotfiles",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y git curl zsh && sh -c \"$(curl -fsLS get.chezmoi.io)\" -- -b $HOME/.local/bin && $HOME/.local/bin/chezmoi apply --source $PWD --exclude scripts",
-  "customizations": {
-    "vscode": {
-      "settings": {
-        "terminal.integrated.defaultProfile.linux": "zsh"
-      }
-    }
-  }
+	"name": "Dotfiles Dev Environment",
+	"image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"installZsh": true,
+			"configureZshAsDefaultShell": true
+		}
+	},
+	"postCreateCommand": ".devcontainer/install-lite.sh",
+	"remoteUser": "vscode",
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "zsh"
+			}
+		}
+	},
+	"mounts": [
+		"source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,readonly",
+		"source=${localEnv:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,readonly"
+	]
 }

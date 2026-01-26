@@ -37,11 +37,20 @@ fi
 if [[ -f "${HOME}/.local/bin/executable_dot_completion" ]]; then
   fpath=("${HOME}/.local/bin" "${fpath[@]}")
 fi
+# Lazy-load fnm (Fast Node Manager)
+# Defers `fnm env` init until first use of node/npm/npx/fnm
 if command -v fnm >/dev/null; then
   if [[ ! -f "${ZSH_COMPLETIONS_DIR}/_fnm" ]]; then
     command fnm completions --shell zsh >| "${ZSH_COMPLETIONS_DIR}/_fnm"
   fi
-  eval "$(fnm env --use-on-cd)"
+  _lazy_load_fnm() {
+    unfunction node npm npx fnm _lazy_load_fnm 2>/dev/null
+    eval "$(command fnm env --use-on-cd)"
+  }
+  fnm() { _lazy_load_fnm; command fnm "$@"; }
+  node() { _lazy_load_fnm; command node "$@"; }
+  npm() { _lazy_load_fnm; command npm "$@"; }
+  npx() { _lazy_load_fnm; command npx "$@"; }
 fi
 autoload -Uz compinit
 if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
