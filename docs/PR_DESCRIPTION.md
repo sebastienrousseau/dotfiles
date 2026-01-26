@@ -1,3 +1,5 @@
+# Release Notes — v0.2.475
+
 ## Release overview
 
 This release transforms the dotfiles into a high-performance, universally compatible system managed by **chezmoi**.

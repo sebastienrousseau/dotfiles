@@ -303,6 +303,13 @@ restore_file() {
   file_path="${file_path#./}"
   file_path="${file_path#~/}"
 
+  # Validate against path traversal (e.g., "../../etc/passwd")
+  # Reject paths containing ".." components
+  if [[ "$file_path" == *".."* ]]; then
+    log_error "Path traversal detected in file path: $file_path"
+    return 1
+  fi
+
   local backup
   backup=$(get_latest_backup)
 
@@ -312,6 +319,28 @@ restore_file() {
   fi
 
   local source_file="$backup/$file_path"
+
+  # Verify resolved source path stays within the backup directory
+  local resolved_source
+  resolved_source="$(cd "$(dirname "$source_file")" 2>/dev/null && pwd)/$(basename "$source_file")" || {
+    log_error "Cannot resolve source path: $source_file"
+    return 1
+  }
+  if [[ "$resolved_source" != "$backup/"* ]]; then
+    log_error "Path traversal detected: resolved path escapes backup directory"
+    return 1
+  fi
+
+  # Verify resolved destination stays within HOME
+  local resolved_dest_dir
+  resolved_dest_dir="$(cd "$(dirname "$HOME/$file_path")" 2>/dev/null && pwd)" || {
+    log_error "Cannot resolve destination directory for: $file_path"
+    return 1
+  }
+  if [[ "$resolved_dest_dir" != "$HOME"* ]]; then
+    log_error "Path traversal detected: destination escapes HOME directory"
+    return 1
+  fi
 
   if [[ ! -f "$source_file" ]]; then
     log_error "File not found in backup: $file_path"

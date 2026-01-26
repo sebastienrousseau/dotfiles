@@ -1,4 +1,4 @@
-# Discover
+# Discover Utilities
 
 Curated utilities surfaced through aliases, functions, and the `dot` CLI.
 This is intentionally small and practical.

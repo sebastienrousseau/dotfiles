@@ -16,7 +16,14 @@ $sudo_cmd rm -rf /opt/nvim-linux64
 
 echo "Extracting new version..."
 # Ensure we use the absolute path to the downloaded file
-$sudo_cmd tar -C /opt -xzf "$HOME/nvim-linux64.tar.gz"
+if [ ! -f "$HOME/nvim-linux64.tar.gz" ]; then
+  echo "Error: $HOME/nvim-linux64.tar.gz not found."
+  exit 1
+fi
+if ! $sudo_cmd tar -C /opt -xzf "$HOME/nvim-linux64.tar.gz"; then
+  echo "Error: Failed to extract $HOME/nvim-linux64.tar.gz"
+  exit 1
+fi
 
 echo "Linking binary..."
 $sudo_cmd ln -sf /opt/nvim-linux64/bin/nvim /usr/local/bin/nvim

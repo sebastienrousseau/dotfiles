@@ -17,15 +17,24 @@ get_time_ms() {
   fi
 }
 
+# Note: This is test-only code. The eval below is necessary to execute
+# dynamically constructed test commands. Do not use with untrusted input.
 stress_test_function() {
   local func_name="$1"
   local test_cmd="$2"
   local start end elapsed
 
+  # Validate test_cmd is not empty
+  if [[ -z "$test_cmd" ]]; then
+    echo "  ERROR: empty test command for $func_name"
+    return 1
+  fi
+
   echo "Stress testing $func_name ($ITERATIONS iterations)..."
 
   start=$(get_time_ms)
   for ((i = 1; i <= ITERATIONS; i++)); do
+    # shellcheck disable=SC2086
     eval "$test_cmd" >/dev/null 2>&1 || true
   done
   end=$(get_time_ms)

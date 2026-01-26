@@ -2,6 +2,11 @@
 # shellcheck disable=SC2034
 # Assertion library for shell tests
 # Provides a comprehensive set of assertion functions for testing shell scripts
+#
+# Security note: This file uses eval to execute test commands and conditions.
+# This is intentional and necessary for the test assertion framework to work.
+# These functions are only used in test code and should never be called with
+# untrusted input. All eval calls carry a shellcheck disable directive.
 
 TESTS_RUN=0
 TESTS_PASSED=0
@@ -59,6 +64,7 @@ assert_exit_code() {
   local cmd="$*"
   local actual
   set +e
+  # shellcheck disable=SC2086
   eval "$cmd" </dev/null >/dev/null 2>&1
   actual=$?
   set -e
@@ -71,6 +77,7 @@ assert_output_contains() {
   shift
   local cmd="$*"
   local output
+  # shellcheck disable=SC2086
   output=$(eval "$cmd" 2>&1) || true
   if [[ "$output" == *"$needle"* ]]; then
     ((TESTS_PASSED++)) || true
@@ -90,6 +97,7 @@ assert_output_not_contains() {
   shift
   local cmd="$*"
   local output
+  # shellcheck disable=SC2086
   output=$(eval "$cmd" 2>&1) || true
   if [[ "$output" != *"$needle"* ]]; then
     ((TESTS_PASSED++)) || true
@@ -109,6 +117,7 @@ assert_output_matches() {
   shift
   local cmd="$*"
   local output
+  # shellcheck disable=SC2086
   output=$(eval "$cmd" 2>&1) || true
   if [[ "$output" =~ $pattern ]]; then
     ((TESTS_PASSED++)) || true
@@ -181,6 +190,7 @@ assert_dir_not_exists() {
 # Assert a condition is true
 assert_true() {
   local condition="$1" msg="${2:-condition should be true}"
+  # shellcheck disable=SC2086
   if eval "$condition"; then
     ((TESTS_PASSED++)) || true
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: $msg"
@@ -195,6 +205,7 @@ assert_true() {
 # Assert a condition is false
 assert_false() {
   local condition="$1" msg="${2:-condition should be false}"
+  # shellcheck disable=SC2086
   if ! eval "$condition"; then
     ((TESTS_PASSED++)) || true
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: $msg"

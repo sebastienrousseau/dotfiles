@@ -1,4 +1,4 @@
-# Discover
+# Discover Operations
 
 This guide covers the core workflows to keep your dotfiles running well across platforms.
 
