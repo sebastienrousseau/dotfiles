@@ -94,61 +94,62 @@ rm -rf "$test_dir"
 
 # Test: rd should reject root path (SECURITY)
 test_start "rd_reject_root"
-# DO NOT actually run rd on /
-# This test documents expected behavior after security fix
 output=$(rd "/" 2>&1) || true
-# Current behavior: function would try to delete /
-# Expected after fix: should reject with error
-if [[ "$output" == *"ERROR"* || "$output" == *"dangerous"* || "$output" == *"refuse"* ]]; then
+if [[ "$output" == *"ERROR"* ]] && [[ "$output" == *"protected"* || "$output" == *"Refusing"* ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: root path rejected (security)"
 else
-  ((TESTS_PASSED++)) # Pass for now, document the issue
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: WARNING - root path not explicitly rejected (security improvement needed)"
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: root path should be rejected as protected"
+  echo -e "    Output: $output"
 fi
 
 # Test: rd should reject home directory (SECURITY)
 test_start "rd_reject_home"
 output=$(rd "$HOME" 2>&1) || true
-if [[ "$output" == *"ERROR"* || "$output" == *"dangerous"* || "$output" == *"refuse"* ]]; then
+if [[ "$output" == *"ERROR"* ]] && [[ "$output" == *"protected"* || "$output" == *"Refusing"* ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: home directory rejected (security)"
 else
-  ((TESTS_PASSED++)) # Pass for now, document the issue
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: WARNING - home directory not explicitly rejected (security improvement needed)"
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: home directory should be rejected as protected"
+  echo -e "    Output: $output"
 fi
 
 # Test: rd should reject /etc (SECURITY)
 test_start "rd_reject_etc"
 output=$(rd "/etc" 2>&1) || true
-if [[ "$output" == *"ERROR"* || "$output" == *"dangerous"* || "$output" == *"refuse"* ]]; then
+if [[ "$output" == *"ERROR"* ]] && [[ "$output" == *"protected"* || "$output" == *"Refusing"* ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: /etc rejected (security)"
 else
-  ((TESTS_PASSED++)) # Pass for now
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: WARNING - /etc not explicitly rejected (security improvement needed)"
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: /etc should be rejected as protected"
+  echo -e "    Output: $output"
 fi
 
 # Test: rd should reject /usr (SECURITY)
 test_start "rd_reject_usr"
 output=$(rd "/usr" 2>&1) || true
-if [[ "$output" == *"ERROR"* || "$output" == *"dangerous"* || "$output" == *"refuse"* ]]; then
+if [[ "$output" == *"ERROR"* ]] && [[ "$output" == *"protected"* || "$output" == *"Refusing"* ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: /usr rejected (security)"
 else
-  ((TESTS_PASSED++)) # Pass for now
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: WARNING - /usr not explicitly rejected (security improvement needed)"
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: /usr should be rejected as protected"
+  echo -e "    Output: $output"
 fi
 
 # Test: rd should reject /var (SECURITY)
 test_start "rd_reject_var"
 output=$(rd "/var" 2>&1) || true
-if [[ "$output" == *"ERROR"* || "$output" == *"dangerous"* || "$output" == *"refuse"* ]]; then
+if [[ "$output" == *"ERROR"* ]] && [[ "$output" == *"protected"* || "$output" == *"Refusing"* ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: /var rejected (security)"
 else
-  ((TESTS_PASSED++)) # Pass for now
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: WARNING - /var not explicitly rejected (security improvement needed)"
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: /var should be rejected as protected"
+  echo -e "    Output: $output"
 fi
 
 # Test: rd should reject paths with .. traversal (SECURITY)

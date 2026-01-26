@@ -31,17 +31,23 @@ run_test_file() {
 
   # Run test as a separate process (not subshell with source)
   # This avoids trap interference from double-sourcing framework files
-  bash "$test_file" 2>&1 | tee "$temp_results"
+  local exit_status=0
+  bash "$test_file" 2>&1 | tee "$temp_results" || exit_status=$?
 
   # Parse results from output
   local results_line
-  results_line=$(grep "^RESULTS:" "$temp_results" | tail -1)
+  results_line=$(grep "^RESULTS:" "$temp_results" | tail -1) || true
   if [[ -n "$results_line" ]]; then
     local run passed failed
     IFS=':' read -r _ run passed failed <<<"$results_line"
     TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + run))
     TOTAL_TESTS_PASSED=$((TOTAL_TESTS_PASSED + passed))
     TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + failed))
+  elif [[ $exit_status -ne 0 ]]; then
+    # Test file crashed without producing RESULTS -- count as failure
+    echo -e "\033[0;31mERROR: $(basename "$test_file") crashed (exit $exit_status) without producing results\033[0m"
+    TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + 1))
+    TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + 1))
   fi
 
   rm -f "$temp_results"

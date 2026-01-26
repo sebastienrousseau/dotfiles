@@ -111,8 +111,8 @@ if command -v tar >/dev/null 2>&1; then
     ((TESTS_PASSED++))
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: tar.gz extraction works"
   else
-    ((TESTS_PASSED++)) # Pass anyway since the function may extract to current dir
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: tar.gz extraction attempted (format recognized)"
+    ((TESTS_FAILED++))
+    echo -e "  ${RED}✗${NC} $CURRENT_TEST: tar.gz extraction did not produce expected file"
   fi
 
   rm -rf "$test_dir"
@@ -127,12 +127,13 @@ test_start "extract_unsupported_extension"
 test_file=$(mock_file "test content")
 mv "$test_file" "${test_file}.unsupported"
 output=$(extract "${test_file}.unsupported" 2>&1)
-if [[ "$output" == *"cannot be extracted"* ]]; then
+if [[ "$output" == *"cannot be extracted"* ]] || [[ "$output" == *"ERROR"* ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: unsupported extension handled"
 else
-  ((TESTS_PASSED++)) # Function handles it in some way
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: unsupported extension handled (format not recognized)"
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should report unsupported extension"
+  echo -e "    Output: $output"
 fi
 rm -f "${test_file}.unsupported"
 

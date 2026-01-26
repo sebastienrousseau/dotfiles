@@ -137,14 +137,15 @@ export BACKUP_DIR="$test_dir/backups"
 output=$(backup --max-size 100X "$test_file" 2>&1)
 exit_code=$?
 
-# Should fail with invalid unit
-if [[ "$exit_code" -ne 0 ]] || [[ "$output" == *"Invalid unit"* ]] || [[ "$output" == *"ERROR"* ]]; then
+# Should fail or warn with invalid unit
+if [[ "$exit_code" -ne 0 ]] || [[ "$output" == *"Invalid unit"* ]] || [[ "$output" == *"ERROR"* ]] || [[ "$output" == *"WARNING"* ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: invalid size unit handled"
 else
-  # Function may accept it gracefully
-  ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: size unit processed (may be treated as bytes)"
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should reject or warn about invalid size unit '100X'"
+  echo -e "    Exit code: $exit_code"
+  echo -e "    Output: $output"
 fi
 rm -rf "$test_dir"
 

@@ -246,10 +246,15 @@ assert_not_empty() {
   fi
 }
 
-# Assert file contains text
+# Assert file contains text (uses fixed-string matching for safety)
 assert_file_contains() {
   local file="$1" needle="$2" msg="${3:-file should contain text}"
-  if [[ -f "$file" ]] && grep -q "$needle" "$file"; then
+  if [[ -z "$file" ]]; then
+    ((TESTS_FAILED++)) || true
+    echo -e "  ${RED}✗${NC} $CURRENT_TEST: $msg (no file path provided)"
+    return 1
+  fi
+  if [[ -f "$file" ]] && grep -qF "$needle" "$file"; then
     ((TESTS_PASSED++)) || true
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: $msg"
     return 0

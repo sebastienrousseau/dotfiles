@@ -39,8 +39,7 @@ fi
 ssh-keygen -q -t ed25519 -C "${EMAIL}" -f "${HOME}"/.ssh/id_ed25519 -N ""
 
 # start ssh-agent in the background
-ssha="ssh-agent -s"
-eval "${ssha}"
+eval "$(ssh-agent -s)"
 
 # Create config file if it doesn't exist; append only if not already configured
 if [ ! -f ~/.ssh/config ] || ! grep -q 'IdentityFile ~/.ssh/id_ed25519' ~/.ssh/config; then

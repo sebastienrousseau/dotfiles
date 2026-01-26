@@ -21,9 +21,16 @@ rd() {
   fi
 
   # Prevent catastrophic deletions
+  # Check both the literal path and the resolved (symlink-followed) path
+  # to handle macOS /etc -> /private/etc, /var -> /private/var, etc.
   local dangerous_paths=("/" "$HOME" "/etc" "/usr" "/var" "/opt" "/bin" "/sbin" "/lib" "/tmp" "/root")
   for dangerous in "${dangerous_paths[@]}"; do
-    if [[ "$resolved" == "$dangerous" || "$resolved" == "$dangerous/" ]]; then
+    local resolved_dangerous="$dangerous"
+    if [[ -d "$dangerous" ]]; then
+      resolved_dangerous="$(cd "$dangerous" 2>/dev/null && pwd -P)" || true
+    fi
+    if [[ "$resolved" == "$dangerous" || "$resolved" == "$dangerous/" \
+       || "$resolved" == "$resolved_dangerous" || "$resolved" == "$resolved_dangerous/" ]]; then
       echo "[ERROR] Refusing to delete protected path: $resolved" >&2
       return 1
     fi

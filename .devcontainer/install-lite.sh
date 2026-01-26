@@ -47,6 +47,8 @@ apt_install fd-find
 apt_install bat
 
 # zoxide
+# SECURITY NOTE: curl|sh is used for devcontainer convenience only.
+# Production installs should use the system package manager or a pinned binary.
 if command_exists zoxide; then
   info "zoxide is already installed"
 else
@@ -73,6 +75,8 @@ else
 fi
 
 # starship prompt
+# SECURITY NOTE: curl|sh is used for devcontainer convenience only.
+# Production installs should use the system package manager or a pinned binary.
 if command_exists starship; then
   info "starship is already installed"
 else

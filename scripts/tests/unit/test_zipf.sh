@@ -48,19 +48,26 @@ if type zipf &>/dev/null; then
   test_dir=$(mktemp -d)
   echo "test" >"$test_dir/test.txt"
 
-  # Run zipf (may or may not create zip depending on implementation)
+  # Run zipf and check if zip was created
   zipf "$test_dir" 2>/dev/null || true
+
+  if [[ -f "${test_dir}.zip" ]]; then
+    ((TESTS_PASSED++)) || true
+    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: zipf created archive"
+  else
+    ((TESTS_FAILED++)) || true
+    echo -e "  ${RED}✗${NC} $CURRENT_TEST: zipf should create a .zip archive"
+  fi
 
   # Cleanup
   rm -rf "$test_dir" "${test_dir}.zip" 2>/dev/null
-  assert_true "true" "zipf executed without crash"
 fi
 
 # Test help flag if supported
 test_start "zipf_help_flag"
 if type zipf &>/dev/null; then
   output=$(zipf --help 2>&1 || zipf -h 2>&1 || echo "no help")
-  assert_true "true" "help flag check completed"
+  assert_not_empty "$output" "help flag should produce output"
 fi
 
 print_summary

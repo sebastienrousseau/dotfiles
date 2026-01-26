@@ -23,8 +23,10 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Test Installation in Docker
+        env:
+          CONTAINER_IMAGE: ${{ matrix.image }}
         run: |
-          docker run --rm -v ${{ github.workspace }}:/root/.local/share/chezmoi ${{ matrix.image }} /bin/bash -c "
+          docker run --rm -v "${GITHUB_WORKSPACE}:/root/.local/share/chezmoi" "${CONTAINER_IMAGE}" /bin/bash -c "
             set -euo pipefail
             export DEBIAN_FRONTEND=noninteractive
             export PATH=\"/root/.local/bin:\$PATH\"
