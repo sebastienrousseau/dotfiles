@@ -1,22 +1,23 @@
+/* global db, config, disableTelemetry, prompt, print, process */
 // MongoDB Shell Configuration (~/.config/mongosh/mongoshrc.js)
 // https://www.mongodb.com/docs/mongodb-shell/reference/configure-shell-settings/
 
 // Prompt customization
 prompt = function() {
-  const db = db.getName();
+  const dbName = db.getName();
   const host = db.getMongo().getHost();
-  const user = db.runCommand({ connectionStatus: 1 }).authInfo?.authenticatedUsers[0]?.user || 'anonymous';
-  return `${user}@${host}/${db}> `;
+  const user = db.runCommand({ connectionStatus: 1 }).authInfo?.authenticatedUsers[0]?.user || "anonymous";
+  return `${user}@${host}/${dbName}> `;
 };
 
 // Editor for editing commands
-config.set('editor', process.env.EDITOR || 'vim');
+config.set("editor", process.env.EDITOR || "vim");
 
 // History settings
-config.set('historyLength', 10000);
+config.set("historyLength", 10000);
 
 // Enable pretty printing by default
-config.set('inspectDepth', 6);
+config.set("inspectDepth", 6);
 
 // Disable telemetry
 disableTelemetry();
@@ -27,9 +28,9 @@ function showCollections() {
 }
 
 function showDatabases() {
-  return db.adminCommand({ listDatabases: 1 }).databases.map(d => ({
+  return db.adminCommand({ listDatabases: 1 }).databases.map((d) => ({
     name: d.name,
-    size: (d.sizeOnDisk / 1024 / 1024).toFixed(2) + ' MB'
+    size: (d.sizeOnDisk / 1024 / 1024).toFixed(2) + " MB"
   }));
 }
 
@@ -54,13 +55,13 @@ function killOp(opId) {
 }
 
 // Print startup message
-print('');
-print('MongoDB Shell ready. Custom helpers available:');
-print('  showCollections() - List collections in current database');
-print('  showDatabases()   - List all databases with sizes');
-print('  findOne(coll)     - Find one document from collection');
-print('  countDocs(coll)   - Count documents in collection');
-print('  serverStatus()    - Get server status');
-print('  currentOps()      - Show current operations');
-print('  killOp(id)        - Kill an operation by ID');
-print('');
+print("");
+print("MongoDB Shell ready. Custom helpers available:");
+print("  showCollections() - List collections in current database");
+print("  showDatabases()   - List all databases with sizes");
+print("  findOne(coll)     - Find one document from collection");
+print("  countDocs(coll)   - Count documents in collection");
+print("  serverStatus()    - Get server status");
+print("  currentOps()      - Show current operations");
+print("  killOp(id)        - Kill an operation by ID");
+print("");
