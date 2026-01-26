@@ -69,5 +69,5 @@ chezmoi add --encrypt ~/.config/chezmoi/encrypted_id_ed25519.age
 ## Notes
 - Keep `~/.config/chezmoi/key.txt` private.
 - You can share the public key for encrypting data.
- - Consider rotating keys yearly (or after any potential leak).
-   Steps: generate a new key, update `chezmoi.toml`, re-encrypt secrets, delete old key.
+- Consider rotating keys yearly (or after any potential leak).
+  Steps: generate a new key, update `chezmoi.toml`, re-encrypt secrets, delete old key.
