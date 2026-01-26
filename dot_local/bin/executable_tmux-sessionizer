@@ -26,7 +26,6 @@ SESSIONIZER_DIRS="${TMUX_SESSIONIZER_DIRS:-$HOME/projects:$HOME/work:$HOME/src:$
 # Colours for output
 readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'
-readonly YELLOW='\033[0;33m'
 readonly NC='\033[0m' # No Colour
 
 log_error() {

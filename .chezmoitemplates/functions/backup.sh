@@ -83,7 +83,8 @@ backup() {
   convert_size_to_bytes() {
     local size_str="$1"
     local num="${size_str//[!0-9]/}"
-    local unit=$(echo "${size_str}" | sed 's/[0-9]//g' | tr '[:upper:]' '[:lower:]')
+    local unit
+    unit=$(echo "${size_str}" | sed 's/[0-9]//g' | tr '[:upper:]' '[:lower:]')
 
     case "$unit" in
       m) echo $((num * 1024 * 1024)) ;;
@@ -117,7 +118,7 @@ backup() {
   fi
 
   # Enforce backup retention
-  BACKUPS=($(ls -1t "${BACKUP_DIR}"/backup_*.tar* 2>/dev/null))
+  mapfile -t BACKUPS < <(ls -1t "${BACKUP_DIR}"/backup_*.tar* 2>/dev/null)
   BACKUP_COUNT=${#BACKUPS[@]}
 
   # Only attempt removal if we actually have more backups than KEEP

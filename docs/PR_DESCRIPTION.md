@@ -12,7 +12,7 @@ v0.2.475 is not just "dotfiles" but a portable **Shell Distribution** managed by
   - `cat` → `bat`
   - `grep` → `ripgrep`
   - `cd` → `zoxide` (Smart Directory Jumping)
-  - `history` → `atuin` (Syncable, Encrypted SQlite history)
+  - `history` → `atuin` (Syncable, Encrypted SQLite history)
 - **Predictive Shell**:
   - **AI Strategy**: Context-aware autosuggestions coupled with optional local LLM integration (`ai_core`).
   - **Error Analysis**: Smart wrappers to analyze command failures via `gh copilot` or local models.
