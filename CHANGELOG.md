@@ -1,26 +1,26 @@
 # Changelog
 
-All notable changes to this project are documented here.
+This file documents all notable changes to this project.
 
 ## v0.2.474
 
 ### Added
 
-- **Shell Configuration**
+- **Shell configuration**
   - Added `.profile` with POSIX-compatible login shell configuration
   - Added `.bashrc` fallback for non-Zsh environments
   - Added `.inputrc` with enhanced Readline configuration
   - Added `.vimrc` legacy support for environments without Neovim
   - Added `.Xresources` with X11 configuration and Catppuccin theme
 
-- **Database CLI Configuration**
+- **Database CLI configuration**
   - Added `.psqlrc` with enhanced PostgreSQL CLI configuration
   - Added `.sqliterc` with SQLite CLI settings
   - Added `mycli` configuration for MySQL CLI
   - Added `redis-cli` configuration
   - Added `mongosh` configuration for MongoDB Shell
 
-- **Kubernetes Tooling**
+- **Kubernetes tooling**
   - Added `kubectx` and `kubens` aliases for context/namespace switching
   - Added `stern` aliases for multi-pod log tailing
   - Added `kube-linter` aliases for manifest linting
@@ -28,7 +28,7 @@ All notable changes to this project are documented here.
   - Added `minikube` configuration and aliases
   - Enhanced Kubernetes aliases with comprehensive kubectl shortcuts
 
-- **Nix Integration**
+- **Nix integration**
   - Added `packages` output to Nix flake
   - Added `dot-utils` meta-package derivation
   - Added `tmux`, `eza`, `yq`, `age`, `gnupg` to package list
@@ -41,14 +41,14 @@ All notable changes to this project are documented here.
   - Added `dot cd` to print source directory path
   - Enhanced `dot tools` with `install` subcommand for Nix shell
 
-- **Docker Tooling**
+- **Docker tooling**
   - Added comprehensive Docker aliases (`dco`, `dprune`, `dlogsf`, `dexec`)
   - Added Docker Compose aliases (`dco` for `docker compose`)
   - Added Docker Buildx aliases for multi-platform builds
   - Added Lazydocker configuration (`config.yml`)
   - Added support for Dive and Hadolint
 
-- **Tmux Enhancements**
+- **Tmux enhancements**
   - Added vim-style copy bindings (`v` for selection, `y` for yank)
   - Added tmux-sessionizer script for fuzzy session switching
   - Updated clipboard integration for macOS and Linux

@@ -1,10 +1,10 @@
 # Aliases
 
-This page lists all shell aliases provided by the dotfiles.
+This page lists all shell aliases that the dotfiles provide.
 
 ## Organization
 
-Aliases are organized in `~/.dotfiles/.chezmoitemplates/aliases/` by category. Each category has its own directory containing a `<name>.aliases.sh` file.
+The repo organizes aliases in `~/.dotfiles/.chezmoitemplates/aliases/` by category. Each category has its own directory containing a `<name>.aliases.sh` file.
 
 ## Categories
 
@@ -73,7 +73,7 @@ Aliases are organized in `~/.dotfiles/.chezmoitemplates/aliases/` by category. E
 | `mk` | `minikube` | Minikube shorthand |
 | `k9` | `k9s` | Open k9s |
 
-### Modern Replacements
+### Modern replacements
 
 | Alias | Command | Description |
 |-------|---------|-------------|
@@ -83,7 +83,7 @@ Aliases are organized in `~/.dotfiles/.chezmoitemplates/aliases/` by category. E
 | `lt` | `eza --tree` | Tree view |
 | `cat` | `bat` | Syntax highlighted cat |
 
-### File Operations
+### File operations
 
 | Alias | Command | Description |
 |-------|---------|-------------|
@@ -108,7 +108,7 @@ Aliases are organized in `~/.dotfiles/.chezmoitemplates/aliases/` by category. E
 | `dotcd` | `cd ~/.dotfiles` | Go to dotfiles |
 | `dotedit` | `$EDITOR ~/.dotfiles` | Edit dotfiles |
 
-## Adding Custom Aliases
+## Adding custom aliases
 
 1. Create a new file in the appropriate category:
    ```bash

@@ -11,7 +11,7 @@ dot secrets-init
 This creates `~/.config/chezmoi/key.txt` and prints your public key.
 It also updates `~/.config/chezmoi/chezmoi.toml` with the age backend settings.
 
-Ensure `age` is installed first (via brew/apt or your toolchain).
+Verify that `age` is installed first (via brew/apt or your toolchain).
 
 ## Enable encryption
 

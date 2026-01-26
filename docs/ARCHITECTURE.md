@@ -1,14 +1,14 @@
 # How it works
 
-v0.2.474 constitutes a portable **Shell Distribution** managed by `chezmoi`. This document outlines the core architectural decisions and system design.
+v0.2.474 constitutes a portable **shell distribution** managed by `chezmoi`. This document outlines the core architectural decisions and system design.
 
 ## Core philosophy
 
-- **XDG-First**: configuration is strictly mapped to `~/.config/` (XDG Base Directory specification). We avoid `~/.foo` file sprawl in the home directory.
-- **Single Entrypoint**: `dot_zshenv` acts as the "Bootloader". It is loaded by Zsh immediately and sets up the environment (XDG variables, PATH) before any other initialization occurs.
-- **Zero-Dependency Bootstrap**: The installation process relies only on `curl` and `git` (and `chezmoi`, which it self-installs).
+- **XDG-first**: Configuration strictly maps to `~/.config/` (XDG Base Directory specification). We avoid `~/.foo` file sprawl in the home directory.
+- **Single entrypoint**: `dot_zshenv` acts as the bootloader. Zsh loads it immediately and sets up the environment (XDG variables, PATH) before any other initialization occurs.
+- **Zero-dependency bootstrap**: The installation process relies only on `curl` and `git` (and `chezmoi`, which the installer fetches automatically).
 
-## Architecture Diagram
+## Architecture diagram
 
 ```
                                     DOTFILES ARCHITECTURE
@@ -61,7 +61,7 @@ v0.2.474 constitutes a portable **Shell Distribution** managed by `chezmoi`. Thi
 
 ## Directory structure
 
-The repository follows standard `chezmoi` conventions:
+The repository follows standard `chezmoi` conventions.
 
 ```text
 ~/.dotfiles/
@@ -95,7 +95,7 @@ The repository follows standard `chezmoi` conventions:
 └── install.sh           # Universal bootstrapping script
 ```
 
-## Data Flow
+## Data flow
 
 ```
 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
@@ -126,7 +126,7 @@ We replace distinct Unix legacy tools with high-performance Rust alternatives:
 | :--- | :--- | :--- |
 | `ls` | `eza` | Modern file listing with git integration |
 | `cat` | `bat` | Syntax highlighted file viewing |
-| `grep` | `ripgrep` (`rg`) | Blazing fast search |
+| `grep` | `ripgrep` (`rg`) | High-performance search |
 | `cd` | `zoxide` | Smart directory jumping |
 | `history` | `atuin` | Syncable, encrypted SQLite history |
 | `find` | `fd` | User-friendly filesystem search |
@@ -135,18 +135,18 @@ We replace distinct Unix legacy tools with high-performance Rust alternatives:
 
 ## Predictive shell strategy
 
-- **AI Integration**: The shell is "AI Aware" via the `ai_core` wrapper.
+- **AI integration**: The shell integrates AI features via the `ai_core` wrapper.
 - **Autosuggestions**: Context-aware completion based on shell history.
-- **Error Analysis**: Hooks to send failed command context to local LLMs or GitHub Copilot for explanation.
+- **Error analysis**: Hooks send failed command context to local LLMs or GitHub Copilot for explanation.
 
 ## Security posture
 
-- **Hardened Defaults**: Shell scripts run with `set -euo pipefail` to fail fast.
-- **Supply Chain Safety**:
-  - **Pinned Installation**: Installers reference specific Git tags (e.g., `v0.2.474`), not `main`.
-  - **Immutable History**: Logic is version controlled and reviewable via `chezmoi diff`.
-- **Audit Logging**: All mutations are logged to `~/.local/share/dotfiles.log`.
-- **Encryption**: Sensitive data encrypted with `age`.
+- **Hardened defaults**: Shell scripts run with `set -euo pipefail` to fail fast.
+- **Supply chain safety**:
+  - **Pinned installation**: Installers reference specific Git tags (e.g., `v0.2.474`), not `main`.
+  - **Immutable history**: All logic stays version-controlled and reviewable via `chezmoi diff`.
+- **Audit logging**: The system logs all mutations to `~/.local/share/dotfiles.log`.
+- **Encryption**: `age` encrypts all sensitive data.
 
 ## Compatibility
 

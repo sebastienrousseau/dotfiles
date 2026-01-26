@@ -1,8 +1,8 @@
-# Font Configuration
+# Font configuration
 
 This page documents font setup, rendering, and the fonts included with the dotfiles.
 
-## Recommended Fonts
+## Recommended fonts
 
 ### Primary: JetBrains Mono Nerd Font
 
@@ -37,7 +37,7 @@ brew install --cask font-jetbrains-mono-nerd-font
 dot fonts install
 ```
 
-### Linux (Manual)
+### Linux (manual)
 
 ```bash
 # Download from Nerd Fonts
@@ -50,7 +50,7 @@ unzip JetBrainsMono.zip -d ~/.local/share/fonts/
 fc-cache -fv
 ```
 
-### Using the Font Patcher
+### Using the font patcher
 
 To patch your own fonts with Nerd Font glyphs:
 
@@ -59,9 +59,9 @@ To patch your own fonts with Nerd Font glyphs:
 ~/.dotfiles/scripts/fonts/patch-fonts.sh /path/to/font.ttf
 ```
 
-## Font Rendering
+## Font rendering
 
-### Sample Characters
+### Sample characters
 
 ```
 ABCDEFGHIJKLMNOPQRSTUVWXYZ
@@ -74,9 +74,9 @@ Powerline:
 Nerd Font:
 ```
 
-### Ambiguous Characters
+### Ambiguous characters
 
-Fonts are configured to clearly distinguish:
+The font configuration clearly distinguishes:
 
 ```
 0 vs O (zero vs capital O)
@@ -85,7 +85,7 @@ Fonts are configured to clearly distinguish:
 " vs " (straight vs curly quotes)
 ```
 
-## Terminal Configuration
+## Terminal configuration
 
 ### Ghostty
 
@@ -117,7 +117,7 @@ font_family JetBrains Mono Nerd Font
 font_size 14.0
 ```
 
-## Font Size Recommendations
+## Font size recommendations
 
 | Display | Size |
 |---------|------|
@@ -136,8 +136,8 @@ font_size 14.0
 
 ### Nerd Font icons missing
 
-1. Ensure you're using a Nerd Font variant
-2. Check that the terminal supports the Unicode range
+1. Verify you are using a Nerd Font variant
+2. Confirm the terminal supports the Unicode range
 3. Try a different Nerd Font
 
 ### Ligatures not working

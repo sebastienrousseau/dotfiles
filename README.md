@@ -16,7 +16,7 @@ Git + templates + guarded scripts = a reproducible shell.
 
 ---
 
-## Table of Contents
+## Table of contents
 
 - [Why](#why)
 - [Safety](#safety)
@@ -35,29 +35,29 @@ Git + templates + guarded scripts = a reproducible shell.
 
 ## Why
 
-Dotfiles takes an infrastructure-oriented approach to managing dotfiles. It is designed for developers who manage multiple machines and value **daily usability, reproducibility, and auditability.**
+Dotfiles takes an infrastructure-oriented approach to managing dotfiles. Designed for developers who manage multiple machines and value **daily usability, reproducibility, and auditability.**
 
-- **The Stack:** Zsh, Neovim, and tmux with sane defaults.
-- **Unified Control:** The `dot` CLI wraps common workflows such as syncing, upgrading, and managing secrets.
-- **Safety First:** Explicit opt-in for any system or security changes.
-- **Clean Slate:** Clear separation between source files, generated configs, and system state.
+- **The stack:** Zsh, Neovim, and tmux with sane defaults.
+- **Unified control:** The `dot` CLI wraps common workflows such as syncing, upgrading, and managing secrets.
+- **Safety first:** Explicit opt-in for any system or security changes.
+- **Clean slate:** Clear separation between source files, generated configs, and system state.
 
 ## Safety
 
 This is **infrastructure**, not an ad-hoc shell script.
 
 - No destructive actions without explicit opt-in.
-- No background daemons installed automatically.
-- No system settings are changed by default.
-- Any system-level behavior must be explicitly enabled via environment variables.
-- All privileged actions are logged locally to `~/.local/share/dotfiles.log`.
+- No background daemons install automatically.
+- No system settings change by default.
+- System-level behavior requires explicit opt-in via environment variables.
+- The system logs all privileged actions locally to `~/.local/share/dotfiles.log`.
 
 ---
 
 ## Get started
 
 > [!IMPORTANT]
-> The installer automatically backs up an existing `~/.dotfiles` directory and cleans up legacy configuration files. The installer **only** bootstraps `chezmoi` and applies this repo. OS packages are installed via Chezmoi hooks during the first apply.
+> The installer automatically backs up an existing `~/.dotfiles` directory and cleans up legacy configuration files. The installer **only** bootstraps `chezmoi` and applies this repo. Chezmoi hooks install OS packages during the first apply.
 
 ```bash
 # Works on macOS, Linux, and WSL
@@ -165,8 +165,8 @@ DOTFILES_NONINTERACTIVE=1 dot secrets-init
 
 ### Security changes
 
-These scripts are **opt‑in** and only run when the matching env var is set.
-All security changes are logged to `~/.local/share/dotfiles.log`.
+These scripts are **opt-in** and only run when the matching environment variable is set.
+The system logs all security changes to `~/.local/share/dotfiles.log`.
 
 | Script | macOS changes | Linux changes |
 |---|---|---|
@@ -181,9 +181,9 @@ All security changes are logged to `~/.local/share/dotfiles.log`.
 
 Nix is **optional**. The repo does **not** install the Nix daemon.
 
-- Use `nix develop` for a reproducible shell environment.
-- `dot tools` prints the curated utilities overview.
-- There is no toggle that replaces Brew/Apt with Nix automatically.
+- Run `nix develop` for a reproducible shell environment.
+- Run `dot tools` to print the curated utilities overview.
+- No toggle replaces Brew/Apt with Nix automatically.
 
 ---
 
@@ -195,7 +195,7 @@ See [docs/INSTALL.md](docs/INSTALL.md) for prerequisites, supported platforms, a
 
 ## How it works
 
-If Mermaid does not render, the flow is: `install.sh → Chezmoi → ~/.dotfiles → ~/.config + ~/.local`.
+If Mermaid does not render, the flow is: `install.sh` -> `Chezmoi` -> `~/.dotfiles` -> `~/.config + ~/.local`.
 
 ```mermaid
 flowchart LR
@@ -234,13 +234,13 @@ flowchart LR
 
 ## Roadmap
 
-Tracked via [GitHub issues](https://github.com/sebastienrousseau/dotfiles/issues) and [milestones](https://github.com/sebastienrousseau/dotfiles/milestones).
+Track progress via [GitHub issues](https://github.com/sebastienrousseau/dotfiles/issues) and [milestones](https://github.com/sebastienrousseau/dotfiles/milestones).
 
 ---
 
 ## Contribute
 
-Please read [CONTRIBUTING.md](.github/CONTRIBUTING.md) before opening a PR.
+Read [CONTRIBUTING.md](.github/CONTRIBUTING.md) before opening a PR.
 
 Security issues: see [SECURITY.md](.github/SECURITY.md).
 
@@ -260,6 +260,6 @@ See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
-This repo is licensed under the **MIT License**. See [LICENSE](LICENSE).
+This repo uses the **MIT License**. See [LICENSE](LICENSE).
 
-Some bundled third‑party dependencies are GPL‑3.0; the LICENSE file lists them explicitly.
+Some bundled third-party dependencies use GPL-3.0; the LICENSE file lists them explicitly.

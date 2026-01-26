@@ -11,87 +11,78 @@
 
 # Dotfiles (v0.2.474)
 
-Simply designed to fit your shell life
+Designed to fit your shell life
 
 ![Dotfiles banner][banner]
 
 ## Contributing to Dotfiles
 
-Thank you so much for wanting to contribute to Dotfiles! There are a
-couple ways to help out.
+Thank you for contributing to Dotfiles. There are a
+couple of ways to help out.
 
 ## Evangelize
 
-Just tell people about Dotfiles. We believe that a bigger, more involved
-community makes for a better product, and that better products make the
-world a better place. We can always use more feedback and learn from you.
+Tell people about Dotfiles. A bigger, more involved
+community makes for a better product. We welcome your feedback.
 
-## How to Contribute
+## How to contribute
 
-Please find down here, our guides for submitting issues and pull
+Below are the guides for submitting issues and pull
 requests.
 
-### Bug Reports
+### Bug reports
 
-If you encounter a bug that hasn't already been filled, please file a
-bug report. Let us know of things we should fix, things we should add,
-questions, etc.
-
-Warning us of a bug is possibly the single most valuable contribution
+If you encounter a bug that has not been filed yet, submit a
+bug report. Reporting a bug is one of the most valuable contributions
 you can make to Dotfiles.
 
-* Head [here](https://github.com/sebastienrousseau/dotfiles/issues/new) to submit
+* Go to the [issue tracker](https://github.com/sebastienrousseau/dotfiles/issues/new) to submit
   a new issue.
 * Include a descriptive title that is straight to the point.
-* Write a detailed description on what the issue is all about.
-* Wait for someone to get to the issue and add labels.
-* The issue will be fixed soon!
+* Write a detailed description of the issue.
+* Wait for a maintainer to triage and label the issue.
 
-### Code Contributions
+### Code contributions
 
-Contributing code is one of the more difficult ways to contribute to
+Contributing code is one of the more involved ways to contribute to
 Dotfiles.
 
-#### Feature Requests
+#### Feature requests
 
-Filling feature requests is one of the most popular ways to contribute
+Filing feature requests is one of the most popular ways to contribute
 to Dotfiles.
 
-Is there some feature request that you'd like to code up yourself? Is
-there a feature you asked for yourself that you'd like to code?
+Want to code a feature yourself?
+Pull requests let you share your code, and we can merge it
+into the repo.
 
-Here's how to contribute code for a new feature to Dotfiles. Pull
-requests allow you to share your own code with us, and we can merge it
-into the main repo.
-
-#### Adding Code
+#### Adding code
 
 * Fork the repo.
 * Clone the repo **you forked** by running
   `git clone https://github.com/<your-username>/dotfiles.git`
 
-#### Fixing an Issue
+#### Fixing an issue
 
-Have you found a solution to an issue? Here is how you can submit your
+Found a solution to an issue? Here is how to submit your
 code to Dotfiles.
 
-* Fork the repo, and refer above for how to change up code.
-* Head to your local fork of the repo, and click the "New Pull Request"
-  button.
+* Fork the repo and refer above for how to set up the code.
+* Go to your local fork of the repo and open a new pull request.
 * Include a title that is straight to the point.
-* Wait for someone to review the pull request, and then merge your pull
-  request!
+* Wait for a maintainer to review and merge your pull
+  request.
 
-## Pull Request Guidelines
+## Pull request guidelines
 
-### Before Submitting
+### Before submitting
 
 1. **Test your changes** - Run `chezmoi apply` and verify everything works
 2. **Check for lint errors** - Run shellcheck on shell scripts
 3. **Update documentation** - If you add new features, update relevant docs
 4. **Follow existing patterns** - Look at how similar features are implemented
 
-### PR Title Format
+### PR title format
 
 Use a clear, descriptive title:
 - `feat: add XYZ configuration`
@@ -99,7 +90,7 @@ Use a clear, descriptive title:
 - `docs: update installation guide`
 - `refactor: simplify alias loading`
 
-### PR Description
+### PR description
 
 Include:
 - **Summary**: What does this PR do?
@@ -107,13 +98,13 @@ Include:
 - **Testing**: How did you test the changes?
 - **Screenshots**: If applicable (especially for UI changes)
 
-### Review Process
+### Review process
 
-1. A maintainer will review your PR within a few days
+1. A maintainer reviews your PR within a few days
 2. Address any requested changes
-3. Once approved, your PR will be merged
+3. Once approved, a maintainer merges your PR
 
-## Development Setup
+## Development setup
 
 ```bash
 # Clone the repo
@@ -132,15 +123,15 @@ git commit -m "feat: add my feature"
 git push origin feat/my-feature
 ```
 
-## Code Style
+## Code style
 
-- **Shell scripts**: Follow Google Shell Style Guide
-- **Use shellcheck**: All shell scripts should pass shellcheck
+- **Shell scripts**: Follow the Google Shell Style Guide
+- **Use shellcheck**: All shell scripts must pass `shellcheck`
 - **Use `set -euo pipefail`**: For robust error handling
 - **Portable shebangs**: Use `#!/usr/bin/env bash`
 
 ## Questions?
 
-Feel free to open an issue with the `question` label if you have any questions.
+Open an issue with the `question` label if you have questions.
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg

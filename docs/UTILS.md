@@ -1,13 +1,13 @@
-# Discover Utilities
+# Discover utilities
 
 Curated utilities surfaced through aliases, functions, and the `dot` CLI.
 This is intentionally small and practical.
 
 ## Dot CLI
 
-The `dot` command is your primary interface for managing dotfiles. Use `dot --version` to check the installed version.
+The `dot` command is your primary interface for managing dotfiles. Run `dot --version` to check the installed version.
 
-### Core Commands
+### Core commands
 
 | Command | Description |
 |---------|-------------|

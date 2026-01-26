@@ -1,36 +1,36 @@
-# Release Notes — v0.2.474
+# Release notes — v0.2.474
 
 ## Release overview
 
-This release transforms the dotfiles into a high-performance, universally compatible system managed by **chezmoi**.
+This release transforms the dotfiles into a high-performance, cross-platform system managed by **chezmoi**.
 
 ### Architecture
-v0.2.474 is not just "dotfiles" but a portable **Shell Distribution** managed by `chezmoi` ("source of truth" in `~/.dotfiles`).
+v0.2.474 is not just "dotfiles" but a portable **shell distribution** managed by `chezmoi` ("source of truth" in `~/.dotfiles`).
 
-- **XDG-First**: Configs strictly mapped to `~/.config/` (No `~/.foo` sprawl).
-- **Single Entrypoint**: `dot_zshenv` acts as an XDG bootloader for instant environment setup.
-- **Modern Toolchain**: Replaces classic Unix tools with high-performance Rust alternatives:
+- **XDG-first**: Configs strictly mapped to `~/.config/` (no `~/.foo` sprawl).
+- **Single entrypoint**: `dot_zshenv` acts as an XDG bootloader for instant environment setup.
+- **Modern toolchain**: Replaces classic Unix tools with high-performance Rust alternatives:
   - `ls` → `eza`
   - `cat` → `bat`
   - `grep` → `ripgrep`
-  - `cd` → `zoxide` (Smart Directory Jumping)
-  - `history` → `atuin` (Syncable, Encrypted SQLite history)
-- **Predictive Shell**:
-  - **AI Strategy**: Context-aware autosuggestions coupled with optional local LLM integration (`ai_core`).
-  - **Error Analysis**: Smart wrappers to analyze command failures via `gh copilot` or local models.
+  - `cd` → `zoxide` (smart directory jumping)
+  - `history` → `atuin` (syncable, encrypted SQLite history)
+- **Predictive shell**:
+  - **AI strategy**: Context-aware autosuggestions coupled with optional local LLM integration (`ai_core`).
+  - **Error analysis**: Wrappers analyze command failures via `gh copilot` or local models.
 
 ### Non-goals
-- **Not a Framework**: This is a curated distribution, not a plugin manager like Oh-My-Zsh.
-- **Not POSIX-Pure**: Prioritizes modern Zsh/Rust features over strict POSIX compliance.
-- **Not Minimal**: Optimizes for functionality and speed, not line-count minimalism.
+- **Not a framework**: This is a curated distribution, not a plugin manager like Oh-My-Zsh.
+- **Not POSIX-pure**: Prioritizes modern Zsh/Rust features over strict POSIX compliance.
+- **Not minimal**: Optimizes for functionality and speed, not line-count minimalism.
 
 ### Security
-- **Hardened by Default**: Scripts run with `set -euo pipefail` to fail fast on errors.
-- **Supply Chain Safety**:
-  - **Pinned Install**: Installation commands are pinned to the specific release tag (`v0.2.474`) to prevent drift.
-  - **Zero-Trust**: No implicit reliance on `main` branch code in production.
-- **Threat Model**: This project assumes a **trusted local machine** and focuses on supply-chain (pinned versions) and configuration safety (immutable history).
-- **Audit Logging**: All `chezmoi` mutations are logged to `~/.local/share/dotfiles.log` for day-2 operations review.
+- **Hardened by default**: Scripts run with `set -euo pipefail` to fail fast on errors.
+- **Supply chain safety**:
+  - **Pinned install**: Installation commands pin to the specific release tag (`v0.2.474`) to prevent drift.
+  - **Zero-trust**: No implicit reliance on `main` branch code in production.
+- **Threat model**: This project assumes a **trusted local machine** and focuses on supply-chain (pinned versions) and configuration safety (immutable history).
+- **Audit logging**: The system logs all `chezmoi` mutations to `~/.local/share/dotfiles.log` for day-2 operations review.
 
 ### Changes
 - **Migrated**:
@@ -43,104 +43,105 @@ v0.2.474 is not just "dotfiles" but a portable **Shell Distribution** managed by
   - **Renamed**: `dot_config/dotfiles` → `dot_config/shell` for semantic clarity.
   - **Moved**: `bin/` → `dot_local/bin/` for automatic path integration.
   - **Segregated**: Install scripts split by OS (Darwin/Linux) for cleaner logic.
-- **Layered Architecture**: Refactored shell config into explicit layers:
+- **Layered architecture**: Refactored shell config into explicit layers:
   - `00-core`: Safety/Paths
   - `50-logic`: Functions/Toolchain
   - `90-ux`: Aliases/Theme
-- **Trust & Reproducibility**:
-  - **Pinned Formulae**: Generated `Brewfile.lock.json` for strictly reproducible macOS builds.
-  - **Binary Pinning**: `install.sh` now enforces specific version tags for initial bootstrap.
+- **Trust and reproducibility**:
+  - **Pinned formulae**: Generated `Brewfile.lock.json` for strictly reproducible macOS builds.
+  - **Binary pinning**: `install.sh` now enforces specific version tags for initial bootstrap.
 ### Quality
-- **Conflict Resolution**: Detected and resolved **46 namespace collisions** across all alias modules (Git, Go, Archives, etc.) to ensure zero overlap.
-- **Git Safety**: Renamed colliding Go aliases (e.g., `gr` -> `gor`) to protect core Git commands.
+- **Conflict resolution**: Detected and resolved **46 namespace collisions** across all alias modules (Git, Go, Archives, etc.) to ensure zero overlap.
+- **Git safety**: Renamed colliding Go aliases (e.g., `gr` -> `gor`) to protect core Git commands.
 - **Modernization**: Merged `list` into `modern` for a cohesive Rust-based toolchain experience (`eza`, `bat`).
 - **Standardization**: Removed duplicate logging functions in favor of a shared utility.
-- **Documentation**: All 30+ component READMEs are now 100% accurate and verified.
+- **Documentation**: All 30+ component READMEs now reflect current functionality.
 
 ### Toolchain
 - **Kubernetes**: Added `kubectl`, `helm`, `k9s` aliases.
 - **IaC**: Added `terraform`, `opentofu`, `ansible`.
 - **Languages**: Added ecosystem support for `go`, `yarn`, `uv` (modern Python).
-- **AI Integration**: Added wrappers for `gh copilot`, `fabric`, and local LLMs.
-- **Smart Help**: Introduced `dothelp` to strictly search and index custom functions.
+- **AI integration**: Added wrappers for `gh copilot`, `fabric`, and local LLMs.
+- **Smart help**: Added `dothelp` to search and index custom functions.
 
 ### Testing
 
-- **Automated Testing**
-  - Docker CI (`ci-docker.yml`) running on Ubuntu/Fedora/Arch.
-  - Integration tests for alias syntax (`test-aliases.sh`).
+- **Automated testing**
+  - Docker CI (`ci-docker.yml`) runs on Ubuntu/Fedora/Arch.
+  - Integration tests validate alias syntax (`test-aliases.sh`).
 
-- **Enterprise Core & Security (The Trust Layer)**
-  - **SLSA & SBOM**: `security-release.yml` generates SPDX SBOMs and SLSA Level 3 Provenance.
+- **Enterprise core and security (the trust layer)**
+  - **SLSA and SBOM**: `security-release.yml` generates SPDX SBOMs and SLSA Level 3 Provenance.
   - **Signing**: `enable-signing` wizard for GPG/SSH git signing.
-  - **Immutability**: `lock-configs` / `unlock-configs` to protect critical dotfiles (`chflags`/`chattr`).
+  - **Immutability**: `lock-configs` / `unlock-configs` protect critical dotfiles (`chflags`/`chattr`).
 
-- **Legal & Licensing**
+- **Legal and licensing**
   - **Compliance**: `scan-licenses` (FOSSology/Trivy), `check-cla` (GitHub checks).
   - **Attribution**: `add-headers` automation and `gen-notice` generation.
 
-- **Self-Healing & Diagnostics**
-  - **Health**: `dot doctor` script diagnoses environment (Dependencies, XDG, Paths).
+- **Self-healing and diagnostics**
+  - **Health**: `dot doctor` diagnoses environment (dependencies, XDG, paths).
   - **Repair**: `dot heal` / `dot drift` aliases for auto-repair and drift detection.
 
-- **Regulatory Compliance**
+- **Regulatory compliance**
   - **Documentation**: `COMPLIANCE.md` maps features to **SOC2 Type II** and **ISO 27001**.
   - **Privacy**: `privacy-mode` alias disables CLI telemetry for 7+ frameworks.
 
-- **macOS Deep Integration**
-  - **Hardening**: `defaults` script secures screensaver, firewall, and finder settings.
-  - **Optimization**: Configures Safari for dev, removes Dock clutter.
+- **macOS deep integration**
+  - **Hardening**: `defaults` script hardens screensaver, firewall, and Finder settings.
+  - **Optimization**: Configures Safari for development, removes Dock clutter.
 
-- **Font Typography**
+- **Font typography**
   - **Fonts**: Auto-installs `JetBrainsMono Nerd Font` and `Symbols Nerd Font`.
   - **Rendering**: Linux `fontconfig` XML for sub-pixel antialiasing.
 
-- **Phase 58: Editor Unification (The Grand Vim)** (Implemented)
+- **Phase 58: Editor unification** (implemented)
   - **Neovim IDE**: Full VS Code feature parity (Noice, Lualine, Gitsigns, Indent-Blankline).
-  - **Language Support**: Optimized for Rust (Rustaceanvim) and Python (BasedPyright/Ruff).
+  - **Language support**: Optimized for Rust (Rustaceanvim) and Python (BasedPyright/Ruff).
   - **Performance**: Lazy-loading architecture with `<30ms` startup.
-  - **CI/CD Fixes**: Resolved CodeQL alerts (removed legacy Node.js) and fixed Docker builds.
+  - **CI/CD fixes**: Resolved CodeQL alerts (removed legacy Node.js) and fixed Docker builds.
 
-- **OS Bundling & Compliance**
+- **OS bundling and compliance**
   - **Packaging**: `scripts/package.sh` generates versioned distribution tarballs.
   - **Enterprise**: `/etc/dotfiles/defaults.d` hooks for site-local config overrides.
   - **Standards**: Strict **XDG Base Directory** enforcement in `paths.sh`.
 
-- **The Universal Installer (Zero-Dep)**
-  - **Bootstrap**: `install.sh` running via `curl | sh` with no dependencies.
-  - **Teleport**: `dot teleport user@host` to ephemerally deploy configs via SSH.
+- **The universal installer (zero-dep)**
+  - **Bootstrap**: `install.sh` runs via `curl | sh` with no dependencies.
+  - **Teleport**: `dot teleport user@host` deploys configs ephemerally via SSH.
 
 ### Verification
 - **Performance**: Benchmark script `scripts/benchmark.sh` confirms <20ms startup.
-- **Integration**: `test-aliases.sh` verified syntax of all 32 alias modules.
-- **Security**: **Zero Critical Vulnerabilities** (CodeQL & Dependabot clean).
-- **Functionality**: Local migration verified on macOS, Linux, and WSL.
+- **Integration**: `test-aliases.sh` validates syntax of all 32 alias modules.
+- **Security**: **Zero critical vulnerabilities** (CodeQL and Dependabot clean).
+- **Functionality**: Local migration tested on macOS, Linux, and WSL.
 
 
 ### Install and migrate
 
-#### Option A: Fresh Install (New Machines)
-If you are setting up a new machine, simply run the universal installer:
+#### Option A: Fresh install (new machines)
+To set up a new machine, run the universal installer:
 ```bash
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.474/install.sh)"
 ```
 
-#### Option B: Migration (Upgrade from `master` / v1)
- **Important**: This release changes the architecture from direct symlinks to `chezmoi` templates. Functional backups are recommended.
-**Compatibility Note**: Existing `chezmoi` users can simply run `chezmoi apply` to upgrade, but the full installer is recommended for major version jumps.
+#### Option B: Migration (upgrade from `master` / v1)
+> **Important:** This release changes the architecture from direct symlinks to `chezmoi` templates. Back up your configuration first.
 
-1. **Backup Legacy Configs**:
+Existing `chezmoi` users can run `chezmoi apply` to upgrade, but the full installer works better for major version jumps.
+
+1. **Back up legacy configs**:
    ```bash
    mv ~/.zshrc ~/.zshrc.bak
    mv ~/.config/nvim ~/.config/nvim.bak
    ```
-2. **Run Installer**:
+2. **Run the installer**:
    ```bash
    sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.474/install.sh)"
    ```
-3. **Resolve Conflicts**:
-   - If prompted by `chezmoi` to overwrite files (e.g., `.zshrc`), select **overwrite** (or diff to check) as this release uses a new sourcing strategy.
-4. **Restart Shell**:
+3. **Resolve conflicts**:
+   - If `chezmoi` prompts you to overwrite files (e.g., `.zshrc`), select **overwrite** (or diff to check) because this release uses a new sourcing strategy.
+4. **Restart shell**:
    ```bash
    exec zsh
    ```

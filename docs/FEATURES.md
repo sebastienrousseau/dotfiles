@@ -1,14 +1,14 @@
-# Feature Flags
+# Feature flags
 
 This page documents the feature flags available in the dotfiles configuration.
 
 ## Overview
 
-Feature flags are controlled via the `.chezmoidata.toml` file and template conditions. They allow you to enable or disable specific functionality based on your needs.
+Feature flags use the `.chezmoidata.toml` file and template conditions. They let you enable or disable specific functionality based on your needs.
 
-## Configuration File
+## Configuration file
 
-Feature flags are set in `~/.dotfiles/.chezmoidata.toml`:
+Set feature flags in `~/.dotfiles/.chezmoidata.toml`:
 
 ```toml
 [features]
@@ -17,9 +17,9 @@ kubernetes = false
 nix = false
 ```
 
-## Available Features
+## Available features
 
-### Core Features
+### Core features
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -27,7 +27,7 @@ nix = false
 | `shell.bash_fallback` | `true` | Enable Bash fallback configuration |
 | `shell.starship` | `true` | Enable Starship prompt |
 
-### Editor Features
+### Editor features
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -35,7 +35,7 @@ nix = false
 | `editor.vim_fallback` | `true` | Enable Vim fallback configuration |
 | `editor.vscode` | `false` | Enable VS Code settings sync |
 
-### Terminal Features
+### Terminal features
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -45,7 +45,7 @@ nix = false
 | `terminal.kitty` | `false` | Enable Kitty configuration |
 | `terminal.tmux` | `true` | Enable tmux configuration |
 
-### Tool Features
+### Tool features
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -54,7 +54,7 @@ nix = false
 | `tools.git` | `true` | Enable Git configuration |
 | `tools.lazygit` | `true` | Enable Lazygit configuration |
 
-### Security Features
+### Security features
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -62,14 +62,14 @@ nix = false
 | `security.age` | `true` | Enable Age encryption |
 | `security.ssh` | `true` | Enable SSH configuration |
 
-### Optional Toolchains
+### Optional toolchains
 
 | Flag | Default | Description |
 |------|---------|-------------|
 | `toolchain.nix` | `false` | Enable Nix flake integration |
 | `toolchain.homebrew` | `true` | Enable Homebrew on macOS |
 
-## Enabling Features
+## Enabling features
 
 ### Via chezmoidata.toml
 
@@ -95,7 +95,7 @@ For machine-specific overrides, edit `~/.config/chezmoi/chezmoi.toml`:
 kubernetes = true
 ```
 
-## Creating Feature-Gated Configs
+## Creating feature-gated configs
 
 In template files, use conditionals:
 
@@ -105,6 +105,6 @@ In template files, use conditionals:
 {{- end }}
 ```
 
-## Checking Active Features
+## Checking active features
 
 Run `dot doctor` to see which features are currently enabled.

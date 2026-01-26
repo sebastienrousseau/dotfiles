@@ -25,23 +25,23 @@ This document maps the dotfiles configuration and tooling to standard regulatory
 
 | Requirement | Description | Dotfiles Implementation |
 | :--- | :--- | :--- |
-| **Data Minimization** | Limit data collection | `privacy-mode` disables CLI telemetry (Dotnet, Brew, Functions). |
+| **Data minimization** | Limit data collection | `privacy-mode` disables CLI telemetry (Dotnet, Brew, Functions). |
 | **Integrity** | Protect against tampering | `lock-configs` prevents unauthorized modification of shell history/config. |
 
 ## Security
 
 ### Immutability
-Critical configuration files can be locked to prevent tampering:
+Lock critical configuration files to prevent tampering:
 ```bash
 lock-configs  # Sets chflags uchg (macOS) or chattr +i (Linux)
 ```
 
-### Forensic Audit
-All `chezmoi` operations are logged. View audit trails:
+### Forensic audit
+The system logs all `chezmoi` operations. View audit trails:
 ```bash
 dot audit
 ```
 
-### Supply Chain Security
-- **SBOM**: Generated for every release (SPDX format).
+### Supply chain security
+- **SBOM**: The CI pipeline generates an SBOM for every release (SPDX format).
 - **Provenance**: SLSA Level 3 build attestation.

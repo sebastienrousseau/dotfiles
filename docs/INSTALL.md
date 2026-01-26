@@ -1,6 +1,6 @@
 # Get started
 
-This guide describes the supported platforms, prerequisites, and the standard install path.
+This guide covers supported platforms, prerequisites, and the standard install path.
 
 ## Supported platforms
 
@@ -60,7 +60,7 @@ nix profile install ~/.dotfiles/nix#dot-utils
 1. The installer downloads a pinned Chezmoi bootstrap and applies this repo.
 2. Chezmoi hooks install OS packages, fonts, and optional apps.
 3. The `dot` CLI becomes available in `~/.local/bin`.
-4. Shell configuration is symlinked to your home directory.
+4. Chezmoi symlinks shell configuration to your home directory.
 
 ## Post-install verification
 
@@ -77,7 +77,7 @@ dot help
 
 ## Optional: gum
 
-gum is required for interactive features like `dot learn`.
+`gum` is required for interactive features like `dot learn`.
 
 macOS:
 ```bash

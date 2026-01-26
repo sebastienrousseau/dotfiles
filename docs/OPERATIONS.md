@@ -1,4 +1,4 @@
-# Discover Operations
+# Discover operations
 
 This guide covers the core workflows to keep your dotfiles running well across platforms.
 
@@ -7,9 +7,9 @@ This guide covers the core workflows to keep your dotfiles running well across p
 ## Platforms
 
 ### macOS
-**Primary Manager**: `Homebrew`
+**Primary manager**: `Homebrew`
 
-- **Update System**:
+- **Update system**:
   ```bash
   # Updates Dotfiles AND Homebrew packages
   chezmoi update
@@ -17,13 +17,13 @@ This guide covers the core workflows to keep your dotfiles running well across p
   *Behind the scenes, this runs `brew bundle install` to match the `Brewfile.lock.json`.*
 
 - **Troubleshooting**:
-  - **Permission Issues**: `sudo chown -R $(whoami) $(brew --prefix)/*`
+  - **Permission issues**: `sudo chown -R $(whoami) $(brew --prefix)/*`
   - **Drift**: Run `brew bundle cleanup` to remove unmanaged packages.
 
 ### Linux (Debian, Ubuntu, ZorinOS, Kali)
-**Primary Manager**: `apt-get` / `snap`
+**Primary manager**: `apt-get` / `snap`
 
-- **Update System**:
+- **Update system**:
   ```bash
   # 1. Update OS packages
   sudo apt update && sudo apt upgrade -y
@@ -34,18 +34,18 @@ This guide covers the core workflows to keep your dotfiles running well across p
   *Note: `chezmoi` on Linux focuses on configuration. Package updates are often best handled by the OS package manager to avoid `sudo` conflicts.*
 
 - **Troubleshooting**:
-  - **Font Issues**: If icons are missing, run `./install/provision/run_onchange_50-install-fonts.sh` manually.
-  - **ZorinOS/Gnome**: Custom keybindings may need `dconf load` if not applied automatically.
+  - **Font issues**: If icons are missing, run `./install/provision/run_onchange_50-install-fonts.sh` manually.
+  - **ZorinOS/GNOME**: Custom keybindings may require `dconf load` if Chezmoi does not apply them automatically.
 
 ### Windows (WSL2)
-**Primary Manager**: `apt-get` (inside WSL)
+**Primary manager**: `apt-get` (inside WSL)
 
-- **Update System**: Same as **Linux**.
+- **Update system**: Same as **Linux**.
 
-- **WSL Specifics**:
-  - **Access Windows Files**: Windows drives are mounted at `/mnt/c/`.
+- **WSL specifics**:
+  - **Access Windows files**: WSL mounts Windows drives at `/mnt/c/`.
   - **Clipboard**: The setup configures `win32yank.exe` automatically for clipboard sharing.
-  - **Performance**: We recommend keeping project files inside the Linux filesystem (`~/projects`), NOT in `/mnt/c/`, for 100x better IO performance.
+  - **Performance**: Keep project files inside the Linux filesystem (`~/projects`), NOT in `/mnt/c/`, for 100x better IO performance.
 
 ---
 
@@ -59,7 +59,7 @@ dot apply
 *Triggers: `dot_zshrc` reload, audit logging.*
 
 ### Roll back
-If an update breaks your setup:
+If an update breaks your setup, revert:
 ```bash
 cd ~/.dotfiles
 git reset --hard HEAD@{1}  # Go back 1 operation
@@ -67,13 +67,13 @@ chezmoi apply
 ```
 
 ### Debug
-If something feels slow or broken:
+If something runs slow or appears broken:
 
-1. **Check Health**:
+1. **Check health**:
    ```bash
    dot doctor
    ```
-2. **Verbose Mode**:
+2. **Verbose mode**:
    ```bash
    DOTFILES_DEBUG=1 dot apply
    ```
@@ -125,5 +125,5 @@ If something feels slow or broken:
 ---
 
 ## Security policy
-- **GPG/SSH**: All commits are SSH signed.
-- **Audit Log**: Review `~/.local/share/dotfiles.log` for a timeline of all changes applied to your system.
+- **GPG/SSH**: All commits use SSH signing.
+- **Audit log**: Review `~/.local/share/dotfiles.log` for a timeline of all changes the system applied.

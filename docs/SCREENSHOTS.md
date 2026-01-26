@@ -1,12 +1,12 @@
-# Screenshots Gallery
+# Screenshots gallery
 
-This page showcases the visual appearance of the dotfiles across different themes and configurations.
+This page shows the visual appearance of the dotfiles across different themes and configurations.
 
-## Theme Gallery
+## Theme gallery
 
-### Catppuccin Mocha (Default)
+### Catppuccin Mocha (default)
 
-The default theme is Catppuccin Mocha, a soothing dark theme with warm colors.
+The default theme is Catppuccin Mocha, a dark theme with warm, muted colors.
 
 ```
 Terminal: Ghostty / WezTerm / Alacritty
@@ -20,7 +20,7 @@ Key colors:
 - Accent Blue: `#89b4fa`
 - Accent Red: `#f38ba8`
 
-### Catppuccin Latte (Light)
+### Catppuccin Latte (light)
 
 A light theme option for daytime use.
 
@@ -36,7 +36,7 @@ Key colors:
 - Accent Blue: `#1e66f5`
 - Accent Red: `#d20f39`
 
-## Terminal Configurations
+## Terminal configurations
 
 ### Ghostty
 
@@ -63,7 +63,7 @@ Features:
 Minimal, fast terminal.
 
 Features:
-- Blazing fast
+- Fast rendering
 - Simple YAML config
 - Vi mode
 - Cross-platform
@@ -104,7 +104,7 @@ The tmux status bar shows:
 - Host name
 - Date and time
 
-## Adding Screenshots
+## Adding screenshots
 
 To contribute screenshots:
 

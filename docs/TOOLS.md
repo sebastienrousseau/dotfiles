@@ -11,7 +11,7 @@ This page lists the main tools and CLI conveniences provided by this repo.
 | tmux | Terminal multiplexer |
 | Neovim | Modern Vim-based editor |
 
-## Search and Navigation
+## Search and navigation
 
 | Tool | Description |
 |------|-------------|
@@ -54,7 +54,7 @@ This page lists the main tools and CLI conveniences provided by this repo.
 | gh | GitHub CLI |
 | glab | GitLab CLI |
 
-## Data Processing
+## Data processing
 
 | Tool | Description |
 |------|-------------|
@@ -93,7 +93,7 @@ This page lists the main tools and CLI conveniences provided by this repo.
 | age | Modern encryption |
 | gnupg | OpenPGP implementation |
 
-## Developer Tools
+## Developer tools
 
 - Git helpers and sane defaults
 - Project templates (`dot new`)
@@ -101,7 +101,7 @@ This page lists the main tools and CLI conveniences provided by this repo.
 - Benchmarking (`dot benchmark`)
 - Lua tooling (`luacheck`, `stylua`, `luarocks`, `lua/luajit`)
 
-## Security Features
+## Security features
 
 - Firewall hardening
 - Telemetry disable
@@ -111,7 +111,7 @@ This page lists the main tools and CLI conveniences provided by this repo.
 
 ## Aliases
 
-Aliases are organized by category under:
+Aliases live in category directories under:
 
 ```
 ~/.dotfiles/.chezmoitemplates/aliases/<category>/<name>.aliases.sh

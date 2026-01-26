@@ -5,7 +5,7 @@ This page lists quick checks for common issues.
 ## Install and update
 
 **Problem:** Install script fails immediately
-- Ensure `git` and `curl` are installed.
+- Verify that `git` and `curl` are installed.
 - Check internet connectivity.
 - Try running with verbose output: `bash -x install.sh`
 
@@ -15,9 +15,9 @@ This page lists quick checks for common issues.
 - If hooks fail, check `~/.local/share/dotfiles.log` for details.
 
 **Problem:** Packages fail to install
-- macOS: Ensure Homebrew is installed and up to date (`brew update`)
+- macOS: Verify Homebrew is installed and up to date (`brew update`)
 - Linux: Run `sudo apt-get update` first
-- Check if you have sufficient permissions
+- Verify you have sufficient permissions
 
 ## Shell startup
 
@@ -29,7 +29,7 @@ This page lists quick checks for common issues.
 **Problem:** Aliases or functions not available
 - Run `chezmoi apply` to regenerate config files
 - Source your shell config: `source ~/.zshrc`
-- Check if the relevant tool is installed
+- Verify the relevant tool is installed
 
 **Problem:** Shell crashes on startup
 - Temporarily move `~/.zshrc` and retry to isolate the fault
@@ -44,7 +44,7 @@ This page lists quick checks for common issues.
 - Re-initialize with `dot secrets-init` if needed.
 
 **Problem:** Age encryption not working
-- Ensure `age` is installed: `command -v age`
+- Verify `age` is installed: `command -v age`
 - Check key permissions: `ls -la ~/.config/chezmoi/key.txt` (should be 600)
 
 ## Neovim
@@ -66,8 +66,8 @@ This page lists quick checks for common issues.
 - Re-apply dotfiles: `chezmoi apply`
 
 **Problem:** Delta (diff pager) not showing colors
-- Ensure `delta` is installed
-- Check terminal supports 256 colors
+- Verify `delta` is installed
+- Confirm your terminal supports 256 colors
 
 ## Kubernetes tools
 
@@ -77,14 +77,14 @@ This page lists quick checks for common issues.
 - Check kubeconfig: `echo $KUBECONFIG`
 
 **Problem:** Minikube won't start
-- Check Docker is running
+- Verify Docker is running
 - Try: `minikube delete && minikube start`
 - Check logs: `minikube logs`
 
 ## Performance
 
 **Problem:** High memory usage
-- Check for runaway processes: `htop` or `btop`
+- Look for runaway processes: `htop` or `btop`
 - Review shell history size in atuin config
 - Disable unused plugins
 

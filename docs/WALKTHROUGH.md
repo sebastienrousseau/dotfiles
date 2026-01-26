@@ -2,15 +2,15 @@
 
 ## Overview
 
-This release delivers a modern, universal configuration managed by `chezmoi` across macOS, Linux, and Windows.
+This release provides a modern, universal configuration that `chezmoi` manages across macOS, Linux, and Windows.
 
-## Demo Walkthrough
+## Demo walkthrough
 
 This guide walks you through the key features of the dotfiles after installation.
 
-### Step 1: Verify Installation
+### Step 1: Verify installation
 
-After running the installer, verify everything is working:
+After running the installer, verify that everything works:
 
 ```bash
 # Check dot CLI is available
@@ -23,9 +23,9 @@ dot doctor
 dot status
 ```
 
-### Step 2: Explore the Shell
+### Step 2: Explore the shell
 
-The shell is pre-configured with modern tools:
+The shell comes pre-configured with modern tools:
 
 ```bash
 # Use zoxide for smart directory navigation
@@ -41,9 +41,9 @@ ls                  # Actually runs 'eza'
 cat file.txt        # Actually runs 'bat'
 ```
 
-### Step 3: Git Workflow
+### Step 3: Git workflow
 
-Git is configured with helpful aliases:
+Git includes helpful aliases:
 
 ```bash
 # Quick status and log
@@ -58,7 +58,7 @@ gcm "message"       # git commit -m
 lgui
 ```
 
-### Step 4: Tmux Basics
+### Step 4: Tmux basics
 
 If tmux is running:
 
@@ -73,7 +73,7 @@ If tmux is running:
 
 ### Step 5: Neovim IDE
 
-Open Neovim and explore:
+Open Neovim:
 
 ```bash
 nvim .
@@ -85,9 +85,9 @@ nvim .
 <Space>e            # Toggle file tree
 ```
 
-### Step 6: Docker Workflow
+### Step 6: Docker workflow
 
-Docker aliases for efficiency:
+Docker aliases:
 
 ```bash
 dps                 # List running containers
@@ -98,7 +98,7 @@ lzd                 # Open lazydocker TUI
 
 ### Step 7: Kubernetes (if enabled)
 
-Kubernetes shortcuts:
+Kubernetes aliases:
 
 ```bash
 k get pods          # kubectl get pods
@@ -107,29 +107,29 @@ kn                  # Switch namespace
 k9                  # Open k9s TUI
 ```
 
-## Core Architecture
+## Core architecture
 
-- **Chezmoi**: Replaced legacy Makefiles/symlinks with a robust template engine.
-- **Universal Templates**: `run_onchange_*.sh.tmpl` scripts adapt to OS (Darwin/Linux) automatically.
-- **Performance**: Startup time validated at **~16ms** (Target: <20ms).
+- **Chezmoi**: Replaces legacy Makefiles and symlinks with a robust template engine.
+- **Universal templates**: `run_onchange_*.sh.tmpl` scripts adapt to OS (Darwin/Linux) automatically.
+- **Performance**: Startup time benchmarks at **~16ms** (target: <20ms).
 
-## Universal Installer
+## Universal installer
 
 - **Bootstrap**: `install.sh` enables one-line installation via `curl`.
 - **Teleport**: `dot teleport user@host` pushes configs ephemerally to remote servers.
-- **Verification**: Syntax checked and validated.
+- **Verification**: All syntax checks pass.
 
-## Deep Integration
+## Deep integration
 
-- **macOS**: `defaults` hardening (Screensaver, Firewall, Finder).
+- **macOS**: `defaults` hardening (screensaver, firewall, Finder).
 - **Fonts**: Auto-installation of `JetBrainsMono Nerd Font`.
-- **Compliance**: STRICT XDG Base Directory enforcement.
+- **Compliance**: Strict XDG Base Directory enforcement.
 
-## Self-Healing and Compliance
+## Self-healing and compliance
 
 - **Doctor**: `dot doctor` diagnoses drift, paths, and dependencies.
-- **Audit**: All changes logged to `~/.local/share/dotfiles.log`.
-- **Privacy**: `privacy-mode` alias disables telemetry.
+- **Audit**: The system logs all changes to `~/.local/share/dotfiles.log`.
+- **Privacy**: The `privacy-mode` alias disables telemetry.
 
 ## Verification
 
@@ -137,10 +137,10 @@ k9                  # Open k9s TUI
 | :--- | :--- | :--- |
 | **Syntax** | PASSED | `install.sh`, `pkg.sh`, `teleport.sh` verified. |
 | **Performance** | PASSED | **~16ms** Zsh startup time. |
-| **Drift** | VARIES | Minor state drift may be reported due to audit logs. |
+| **Drift** | VARIES | Audit logs may cause minor state drift reports. |
 | **Docker** | PASSED | **Ubuntu 26.04** bootstrap verified (`dotfiles:0.2.474`). |
 
-## Quick Reference Card
+## Quick reference card
 
 | Action | Command |
 |--------|---------|
@@ -153,11 +153,11 @@ k9                  # Open k9s TUI
 | New project | `dot new python myapp` |
 | Enter sandbox | `dot sandbox` |
 
-## Video Tutorial
+## Video tutorial
 
-A video walkthrough is planned for a future release. In the meantime, refer to this document and the individual tool documentation for guidance.
+A future release will include a video walkthrough. Until then, refer to this document and the individual tool documentation.
 
-## Next Steps
+## Next steps
 
 - Customize your shell prompt in `~/.config/starship.toml`
 - Add custom aliases in `~/.dotfiles/.chezmoitemplates/aliases/`
