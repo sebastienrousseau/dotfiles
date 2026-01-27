@@ -1,7 +1,0 @@
----
-- name: Converge
-  hosts: all
-  tasks:
-    - name: Print a message
-      ansible.builtin.debug:
-        msg: "Molecule scenario: __PROJECT_NAME__"

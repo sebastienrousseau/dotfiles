@@ -42,7 +42,7 @@
 - [x] **CLA**: Add CLA check aliases (`check-cla`) <!-- id: 113 -->
 - [x] **Notice**: Add attribution generation (`gen-notice`) <!-- id: 114 -->
 
-# Pull Request (v0.2.476)
+# Pull Request (v0.2.475)
 - [x] Commit and push changes <!-- id: 17 -->
 - [x] Update Pull Request (Completed via gh CLI) <!-- id: 18 -->
 - [x] **Verify PR Content**: Confirmed title and description on GitHub <!-- id: 67 -->

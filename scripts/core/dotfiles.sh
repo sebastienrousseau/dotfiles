@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.476) - <https://dotfiles.io>
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.475) - <https://dotfiles.io>
 # Made With ❤️ in London, United Kingdom
 # Designed by Sebastien Rousseau
 # Copyright (c) 2015-2026. All rights reserved.
@@ -14,7 +14,7 @@ if [[ -f "$CONSTANTS_FILE" ]]; then
   source "$CONSTANTS_FILE"
 else
   # Define fallback constants
-  DOTFILES_VERSION="${DOTFILES_VERSION:-0.2.476}"
+  DOTFILES_VERSION="${DOTFILES_VERSION:-0.2.475}"
 fi
 
 ## 🅼🅰🅸🅽 - Main function.
