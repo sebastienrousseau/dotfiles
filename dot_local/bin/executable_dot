@@ -3,7 +3,7 @@ set -e
 
 # Dotfiles CLI Entry Point - v0.2.476
 
-VERSION="0.2.475"
+VERSION="0.2.476"
 
 COMMAND="$1"
 if [ -n "$1" ]; then
