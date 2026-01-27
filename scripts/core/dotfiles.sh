@@ -14,7 +14,7 @@ if [[ -f "$CONSTANTS_FILE" ]]; then
   source "$CONSTANTS_FILE"
 else
   # Define fallback constants
-  DOTFILES_VERSION="${DOTFILES_VERSION:-0.2.475}"
+  DOTFILES_VERSION="${DOTFILES_VERSION:-0.2.476}"
 fi
 
 ## 🅼🅰🅸🅽 - Main function.
