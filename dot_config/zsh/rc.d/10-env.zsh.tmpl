@@ -7,23 +7,10 @@ export OS_VERSION="$(uname -r)"
 export SSL_CERT_FILE="${HOME}/.local/share/cacert.pem"
 export USER_LANGUAGE="en_GB.UTF-8"
 export ARCHFLAGS="-arch ${OS_ARCH}"
-export DOTFILES_VERSION='0.2.476'
+export DOTFILES_VERSION='0.2.472'
 export DOTFILES="${HOME}/.dotfiles/lib"
 export LANG="${USER_LANGUAGE}"
 export LANGUAGE="${USER_LANGUAGE}"
 export LC_ALL="${USER_LANGUAGE}"
 export LC_CTYPE="${USER_LANGUAGE}"
 export TERM="xterm-256color"
-
-# fnm multishell path for environments without /run/user/... access
-if [[ -z "${XDG_RUNTIME_DIR:-}" ]]; then
-  export XDG_RUNTIME_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/run"
-fi
-if [[ ! -d "${XDG_RUNTIME_DIR}" ]]; then
-  mkdir -p "${XDG_RUNTIME_DIR}" 2>/dev/null || true
-fi
-
-export FNM_MULTISHELL_PATH="${FNM_MULTISHELL_PATH:-${XDG_RUNTIME_DIR}/fnm_multishells}"
-if [[ ! -d "${FNM_MULTISHELL_PATH}" ]]; then
-  mkdir -p "${FNM_MULTISHELL_PATH}" 2>/dev/null || true
-fi

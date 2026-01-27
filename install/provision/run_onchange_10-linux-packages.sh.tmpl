@@ -162,19 +162,6 @@ if command -v apt-get >/dev/null; then
     luarocks
   )
   $sudo_cmd apt-get install -y "${packages[@]}"
-
-  optional_packages=(terraform terraform-docs tflint trivy packer vagrant ansible)
-  install_optional=()
-  for pkg in "${optional_packages[@]}"; do
-    if apt-cache show "$pkg" >/dev/null 2>&1; then
-      install_optional+=("$pkg")
-    else
-      log_info "Skipping optional package (apt): $pkg"
-    fi
-  done
-  if [ ${#install_optional[@]} -gt 0 ]; then
-    $sudo_cmd apt-get install -y "${install_optional[@]}"
-  fi
 elif command -v dnf >/dev/null; then
   log_info "Updating packages (dnf)..."
   packages=(
@@ -199,19 +186,6 @@ elif command -v dnf >/dev/null; then
     luarocks
   )
   $sudo_cmd dnf install -y "${packages[@]}"
-
-  optional_packages=(terraform terraform-docs tflint trivy packer vagrant ansible)
-  install_optional=()
-  for pkg in "${optional_packages[@]}"; do
-    if dnf list --available "$pkg" >/dev/null 2>&1; then
-      install_optional+=("$pkg")
-    else
-      log_info "Skipping optional package (dnf): $pkg"
-    fi
-  done
-  if [ ${#install_optional[@]} -gt 0 ]; then
-    $sudo_cmd dnf install -y "${install_optional[@]}"
-  fi
 elif command -v pacman >/dev/null; then
   log_info "Updating packages (pacman)..."
   $sudo_cmd pacman -Syu --noconfirm
@@ -236,19 +210,6 @@ elif command -v pacman >/dev/null; then
     luarocks
   )
   $sudo_cmd pacman -S --needed --noconfirm "${packages[@]}"
-
-  optional_packages=(terraform terraform-docs tflint trivy packer vagrant ansible)
-  install_optional=()
-  for pkg in "${optional_packages[@]}"; do
-    if pacman -Si "$pkg" >/dev/null 2>&1; then
-      install_optional+=("$pkg")
-    else
-      log_info "Skipping optional package (pacman): $pkg"
-    fi
-  done
-  if [ ${#install_optional[@]} -gt 0 ]; then
-    $sudo_cmd pacman -S --needed --noconfirm "${install_optional[@]}"
-  fi
 fi
 
 # Install Luacheck (Lua linter)

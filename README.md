@@ -66,13 +66,13 @@ This is **infrastructure**, not an ad‑hoc shell script.
 
 ```bash
 # Works on macOS, Linux, and WSL
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.476/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.475/install.sh)"
 exec zsh
 ```
 
 For non‑interactive installs (servers and CI):
 ```bash
-DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.476/install.sh)"
+DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.475/install.sh)"
 ```
 
 ---

@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 # Copyright (c) 2015-2026. All rights reserved.
-# Version: 0.2.476
+# Version: 0.2.475
 # Website: https://dotfiles.io
 # License: MIT
 
@@ -15,9 +15,7 @@ alias edit='${EDITOR}'
 alias editor='${EDITOR}'
 alias mate='${EDITOR}'
 alias n='${EDITOR}'
-if ! alias v >/dev/null 2>&1; then
-  alias v='${EDITOR}'
-fi
+alias v='${EDITOR}'
 
 # Editor-specific aliases based on the current EDITOR/VISUAL
 if [[ -n "${EDITOR}" ]]; then
@@ -59,9 +57,7 @@ if [[ -n "${EDITOR}" ]]; then
       ;;
     subl | */subl)
       # Sublime Text aliases
-      if ! alias st >/dev/null 2>&1; then
-        alias st="subl"
-      fi
+      alias st="subl"
       alias stt="subl ."  # Open current directory
       alias stn="subl -n" # Open in new window
       ;;

@@ -68,11 +68,9 @@ if command -v 'python3' >/dev/null; then
   alias unittest='python -m unittest' # Run unittest
 
   # Virtual Environment Management
-  alias venv='python -m venv'                # Create virtual environment
-  alias mkvenv='python -m venv .venv'        # Create .venv in current directory
-  alias mkvenvlocal='python -m venv ./venv'  # Create ./venv in current directory
-  alias venva='source ./.venv/bin/activate'  # Activate .venv
-  alias venvlocal='source ./venv/bin/activate' # Activate ./venv
+  alias venv='python -m venv'              # Create virtual environment
+  alias mkvenv='python -m venv ./venv'     # Create venv in current directory
+  alias venva='source ./venv/bin/activate' # Activate venv
   alias deact='deactivate'                 # Deactivate venv
   alias rmvenv='rm -rf ./venv'             # Remove venv
 
