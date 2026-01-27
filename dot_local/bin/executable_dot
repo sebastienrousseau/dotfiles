@@ -522,7 +522,7 @@ case "$COMMAND" in
         NAME="$2"
         if [ -z "$LANG" ] || [ -z "$NAME" ]; then
             echo "Usage: dot new <lang> <name>"
-            echo "Available templates: python, go, node"
+            echo "Available templates: python, go, node, packer, molecule"
             exit 1
         fi
         SRC_DIR="$(resolve_source_dir)"
@@ -533,7 +533,7 @@ case "$COMMAND" in
         TEMPLATE_DIR="$SRC_DIR/templates/projects/$LANG"
         if [ ! -d "$TEMPLATE_DIR" ]; then
             echo "Unknown template: $LANG"
-            echo "Available templates: python, go, node"
+            echo "Available templates: python, go, node, packer, molecule"
             exit 1
         fi
         DEST="$PWD/$NAME"

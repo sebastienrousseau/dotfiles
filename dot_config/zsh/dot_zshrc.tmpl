@@ -1,4 +1,4 @@
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.475) - <https://dotfiles.io>
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.476) - <https://dotfiles.io>
 # Made With ❤️ in London, United Kingdom
 # Designed by Sebastien Rousseau
 # Copyright (c) 2015-2026. All rights reserved.
@@ -100,7 +100,7 @@ fi
 # The 90-ux-aliases.sh file alone contains 178KB of aliases, many with deprecated flags.
 #
 # Optimized loading of core configurations
-for core_layer in 00-core-paths 05-core-safety 50-logic-functions; do
+for core_layer in 00-core-paths 05-core-safety 40-ls-colors 50-logic-functions; do
   if [[ -f "${HOME}/.config/shell/${core_layer}.sh" ]]; then
     source "${HOME}/.config/shell/${core_layer}.sh"
   fi
