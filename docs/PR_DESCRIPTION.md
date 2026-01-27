@@ -1,11 +1,11 @@
-# Release notes — v0.2.476
+# Release notes — v0.2.475
 
 ## Release overview
 
 This release transforms the dotfiles into a high-performance, cross-platform system managed by **chezmoi**.
 
 ### Architecture
-v0.2.476 is a portable **shell distribution** managed by `chezmoi` (source of truth in `~/.dotfiles`).
+v0.2.475 is a portable **shell distribution** managed by `chezmoi` (source of truth in `~/.dotfiles`).
 
 - **XDG-first**: Configs strictly mapped to `~/.config/` (no `~/.foo` sprawl).
 - **Single entrypoint**: `dot_zshenv` acts as an XDG bootloader for instant environment setup.
@@ -27,7 +27,7 @@ v0.2.476 is a portable **shell distribution** managed by `chezmoi` (source of tr
 ### Security
 - **Hardened by default**: Scripts run with `set -euo pipefail` to fail fast on errors.
 - **Supply chain safety**:
-  - **Pinned install**: Installation commands pin to the specific release tag (`v0.2.476`) to prevent drift.
+  - **Pinned install**: Installation commands pin to the specific release tag (`v0.2.475`) to prevent drift.
   - **Zero-trust**: No implicit reliance on `main` branch code in production.
 - **Threat model**: This project assumes a **trusted local machine** and focuses on supply-chain (pinned versions) and configuration safety (immutable history).
 - **Audit logging**: Dotfiles logs all `chezmoi` mutations to `~/.local/share/dotfiles.log` for day-2 operations review.
@@ -122,7 +122,7 @@ v0.2.476 is a portable **shell distribution** managed by `chezmoi` (source of tr
 #### Option A: Fresh install (new machines)
 To set up a new machine, run the universal installer:
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.476/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.475/install.sh)"
 ```
 
 #### Option B: Migration (upgrade from earlier versions)
@@ -139,7 +139,7 @@ Existing `chezmoi` users can run `chezmoi apply` to upgrade, but the full instal
    ```
 2. **Run the installer**:
    ```bash
-   sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.476/install.sh)"
+   sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.475/install.sh)"
    ```
 3. **Resolve conflicts**:
    - If `chezmoi` prompts you to overwrite files (for example, `.zshrc`), select **overwrite** (or diff to check) because this release uses a new sourcing strategy.

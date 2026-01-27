@@ -1,7 +1,0 @@
-[global]
-font=JetBrainsMono Nerd Font 10
-corner_radius=6
-
-[urgency_low]
-background="#1f1f28"
-foreground="#dcd7ba"

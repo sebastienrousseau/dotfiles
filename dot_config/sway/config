@@ -1,6 +1,0 @@
-# sway config (minimal)
-set $mod Mod4
-font pango:JetBrainsMono Nerd Font 10
-bindsym $mod+Return exec alacritty
-bindsym $mod+d exec rofi -show drun
-bindsym $mod+Shift+e exec "swaymsg exit"
