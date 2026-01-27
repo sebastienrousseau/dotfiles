@@ -41,10 +41,10 @@ set_theme() {
   fi
   tmp_file="$(mktemp)"
   if grep -q '^theme = ' "$DATA_FILE"; then
-    sed "s/^theme = .*/theme = \"$new_theme\"/" "$DATA_FILE" > "$tmp_file"
+    sed "s/^theme = .*/theme = \"$new_theme\"/" "$DATA_FILE" >"$tmp_file"
   else
-    cat "$DATA_FILE" > "$tmp_file"
-    echo "theme = \"$new_theme\"" >> "$tmp_file"
+    cat "$DATA_FILE" >"$tmp_file"
+    echo "theme = \"$new_theme\"" >>"$tmp_file"
   fi
   mv "$tmp_file" "$DATA_FILE"
   echo "Theme set to: $new_theme"
@@ -92,7 +92,7 @@ case "${1:-}" in
     best_dark="tokyonight-night"
     best_light="tokyonight-day"
     case "$current" in
-      catppuccin-mocha|tokyonight-night|tokyonight-storm|tokyonight-moon|dracula|gruvbox-dark|nord|onedark|solarized-dark|rose-pine|rose-pine-moon|everforest-dark|kanagawa-wave|kanagawa-dragon)
+      catppuccin-mocha | tokyonight-night | tokyonight-storm | tokyonight-moon | dracula | gruvbox-dark | nord | onedark | solarized-dark | rose-pine | rose-pine-moon | everforest-dark | kanagawa-wave | kanagawa-dragon)
         set_theme "$best_light"
         ;;
       *)

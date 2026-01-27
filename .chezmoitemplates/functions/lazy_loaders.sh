@@ -29,7 +29,7 @@ if command -v rbenv >/dev/null; then
     eval "$(rbenv init -)"
     "$@"
   }
-  
+
   alias rbenv="lazy_rbenv rbenv"
   alias ruby="lazy_rbenv ruby"
   alias gem="lazy_rbenv gem"
@@ -43,7 +43,7 @@ if [ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]; then
     source "$HOME/.sdkman/bin/sdkman-init.sh"
     "$@"
   }
-  
+
   alias sdk="lazy_sdk sdk"
   alias java="lazy_sdk java"
   alias gradle="lazy_sdk gradle"

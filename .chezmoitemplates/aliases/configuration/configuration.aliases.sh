@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2025. All rights reserved
+# Copyright (c) 2015-2026. All rights reserved.
 # Description: Script containing aliases to open configuration files in default
 # editor
 # Website: https://dotfiles.io

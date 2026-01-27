@@ -52,7 +52,7 @@ curltime() {
   fi
 
   # Fetch and display timing metrics for the URL
-  curl -w "\n\
+  curl --connect-timeout 10 --max-time 30 -w "\n\
 ┌──────────────────────────────┐\n\
 │Time appconnect:    %{time_appconnect}s │\n\
 │Time connect:       %{time_connect}s │\n\

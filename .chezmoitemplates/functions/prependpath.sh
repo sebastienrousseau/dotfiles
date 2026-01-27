@@ -9,7 +9,7 @@
 
 # prependpath: Prepend $PATH without duplicates
 prependpath() {
-    if ! echo "${PATH}" | tr ":" "\n" | grep -qx "$1"; then
-        PATH="$1:${PATH}"
-    fi
+  if ! echo "${PATH}" | tr ":" "\n" | grep -qx "$1"; then
+    PATH="$1:${PATH}"
+  fi
 }

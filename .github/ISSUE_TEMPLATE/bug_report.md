@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: ''
+labels: 'bug'
 assignees: ''
 
 ---
@@ -13,29 +13,24 @@ A clear and concise description of what the bug is.
 **To Reproduce**
 Steps to reproduce the behavior:
 
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+1. Run `dot ...`
+2. See error
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
+**Environment**
+
+- OS and version (e.g., macOS 14.2, Ubuntu 24.04, WSL2):
+- Shell (`echo $SHELL`):
+- Dotfiles version (`dot --version`):
+- Output of `dot doctor` (if available):
+
+**Logs**
+Include relevant output from `~/.local/share/dotfiles.log` if applicable.
+
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
-
-**Desktop (please complete the following information):**
-
-- OS
-- Browser
-- Version
-
-**Smartphone (please complete the following information):**
-
-- Device
-- OS
-- Browser
-- Version
 
 **Additional context**
 Add any other context about the problem here.

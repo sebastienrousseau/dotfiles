@@ -61,9 +61,9 @@ hstats() {
   echo "============================================"
   echo "Commonly Used Commands"
   echo "============================================"
-  echo "$history_output" | awk '{CMD[$1]++; count++;} END {for (a in CMD) printf "%-15s %s\n", CMD[a], a;}' \
-    | sort -nr \
-    | head -n20 \
-    | nl
+  echo "$history_output" | awk '{CMD[$1]++; count++;} END {for (a in CMD) printf "%-15s %s\n", CMD[a], a;}' |
+    sort -nr |
+    head -n20 |
+    nl
   echo "============================================"
 }

@@ -27,7 +27,17 @@ if [[ ! -d "$WALLPAPER_DIR" ]]; then
 fi
 
 pick_wallpaper() {
-  find "$WALLPAPER_DIR" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) | shuf -n 1
+  local files
+  mapfile -t files < <(find "$WALLPAPER_DIR" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \))
+  if [[ ${#files[@]} -eq 0 ]]; then
+    return 1
+  fi
+  if command -v shuf &>/dev/null; then
+    printf '%s\n' "${files[@]}" | shuf -n 1
+  else
+    # macOS fallback using $RANDOM
+    echo "${files[$RANDOM % ${#files[@]}]}"
+  fi
 }
 
 apply_wallpaper() {

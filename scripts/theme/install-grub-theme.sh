@@ -7,9 +7,9 @@ APPLY=0
 
 for arg in "$@"; do
   case "$arg" in
-    --apply) APPLY=1 ;; 
+    --apply) APPLY=1 ;;
   esac
- done
+done
 
 if [[ "$(uname -s)" != "Linux" ]]; then
   echo "GRUB theming is Linux-only." >&2
@@ -39,7 +39,7 @@ cp -R "$THEME_SRC/." "$THEME_DST"
 if grep -q '^GRUB_THEME=' /etc/default/grub; then
   sed -i.bak "s|^GRUB_THEME=.*|GRUB_THEME=\"$THEME_DST/theme.txt\"|" /etc/default/grub
 else
-  echo "GRUB_THEME=\"$THEME_DST/theme.txt\"" >> /etc/default/grub
+  echo "GRUB_THEME=\"$THEME_DST/theme.txt\"" >>/etc/default/grub
 fi
 
 if command -v update-grub >/dev/null; then

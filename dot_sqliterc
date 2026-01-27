@@ -1,0 +1,32 @@
+-- SQLite Configuration (~/.sqliterc)
+-- Applied automatically when sqlite3 starts
+
+-- Output formatting
+.mode column
+.headers on
+.separator ROW "\n"
+.nullvalue [NULL]
+
+-- Better prompt
+.prompt "sqlite> " "   ...> "
+
+-- Show timing information
+.timer on
+
+-- Enable foreign key support
+PRAGMA foreign_keys = ON;
+
+-- Better performance settings
+PRAGMA journal_mode = WAL;
+PRAGMA synchronous = NORMAL;
+PRAGMA cache_size = -64000;
+PRAGMA temp_store = MEMORY;
+
+-- Safety settings
+PRAGMA secure_delete = ON;
+
+-- Display width settings for common column sizes
+.width 8 20 20 40
+
+-- Echo commands before execution (helpful for scripts)
+-- .echo on

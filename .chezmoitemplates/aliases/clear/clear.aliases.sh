@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2025. All rights reserved
+# Copyright (c) 2015-2026. All rights reserved.
 # Description: Enhances terminal interaction with aliases for clearing the screen,
 # navigating directories, and displaying directory contents in an organized manner.
 # Website: https://dotfiles.io
@@ -11,44 +11,44 @@ WORKSPACE_DIR="${HOME}/workspace"
 
 # Validate directory existence
 function validate_dir() {
-    if [[ ! -d "$1" ]]; then
-        echo "Directory $1 not found."
-        return 1
-    fi
-    return 0
+  if [[ ! -d "$1" ]]; then
+    echo "Directory $1 not found."
+    return 1
+  fi
+  return 0
 }
 
 # Functions for aliases
 function cd_workspace() {
-    validate_dir "${WORKSPACE_DIR}" && cd "${WORKSPACE_DIR}" || return
+  validate_dir "${WORKSPACE_DIR}" && cd "${WORKSPACE_DIR}" || return
 }
 
 function clear_screen() {
-    clear
+  clear
 }
 
 function clear_list_current() {
-    clear && ls -a
+  clear && ls -a
 }
 
 function clear_pwd_list() {
-    clear && pwd && echo '' && ls -a && echo ''
+  clear && pwd && echo '' && ls -a && echo ''
 }
 
 function clear_pwd_tree() {
-    clear && pwd && echo '' && tree ./ && echo ''
+  clear && pwd && echo '' && tree ./ && echo ''
 }
 
 function clear_history() {
-    clear && history
+  clear && history
 }
 
 function print_working_dir() {
-    pwd
+  pwd
 }
 
 function clear_print_tree() {
-    clear && tree
+  clear && tree
 }
 
 # 🅲🅻🅴🅰🆁 🅰🅻🅸🅰🆂🅴🆂

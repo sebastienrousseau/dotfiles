@@ -20,11 +20,25 @@
 #
 ################################################################################
 
+# Source shared logging utilities if not already defined
+if ! declare -f log_error >/dev/null 2>&1; then
+  _keygen_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
+  if [[ -f "${_keygen_dir}/utils/logging.sh" ]]; then
+    # shellcheck source=utils/logging.sh
+    source "${_keygen_dir}/utils/logging.sh"
+  else
+    # Minimal fallback logging functions
+    log_error() { echo "[ERROR] $*" >&2; }
+    log_info() { echo "[INFO] $*"; }
+    log_warning() { echo "[WARNING] $*" >&2; }
+  fi
+  unset _keygen_dir
+fi
 
 keygen() {
   # Display help menu
   if [[ "$1" == "--help" ]]; then
-    cat << 'EOH'
+    cat <<'EOH'
 SSH Key Generator (keygen)
 
 Description:
@@ -74,7 +88,11 @@ EOH
   fi
 
   # Ensure ~/.ssh directory exists
-  mkdir -p -m 700 ~/.ssh || log_error "Failed to create ~/.ssh directory."
+  if ! mkdir -p ~/.ssh; then
+    log_error "Failed to create ~/.ssh directory."
+    return 1
+  fi
+  chmod 700 ~/.ssh
 
   # Collect inputs
   local name email key_type key_bits
@@ -162,16 +180,16 @@ EOH
 copy_to_clipboard() {
   local pub_key_file="$1"
   if command -v pbcopy &>/dev/null; then
-    pbcopy < "${pub_key_file}"
+    pbcopy <"${pub_key_file}"
     log_info "Public key copied to clipboard (macOS)."
   elif command -v xclip &>/dev/null; then
-    xclip -selection clipboard < "${pub_key_file}"
+    xclip -selection clipboard <"${pub_key_file}"
     log_info "Public key copied to clipboard (Linux)."
   elif command -v wl-copy &>/dev/null; then
-    wl-copy < "${pub_key_file}"
+    wl-copy <"${pub_key_file}"
     log_info "Public key copied to clipboard (Wayland)."
   elif command -v clip.exe &>/dev/null; then
-    clip.exe < "${pub_key_file}"
+    clip.exe <"${pub_key_file}"
     log_info "Public key copied to clipboard (Windows)."
   else
     log_warning "Clipboard tool not available. Public key not copied."

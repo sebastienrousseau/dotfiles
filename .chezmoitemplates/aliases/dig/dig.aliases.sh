@@ -1,6 +1,8 @@
 # shellcheck shell=bash
-# Version: 0.2.472
+# Copyright (c) 2015-2026. All rights reserved.
+# Version: 0.2.474
 # Website: https://dotfiles.io
+# License: MIT
 
 # 🅳🅸🅶 🅰🅻🅸🅰🆂🅴🆂
 if command -v dig &>/dev/null; then

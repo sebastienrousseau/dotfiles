@@ -1,0 +1,36 @@
+name: Performance Benchmarks
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    name: Performance Tests
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Run benchmarks
+        run: |
+          chmod +x scripts/tests/performance/*.sh
+          ./scripts/tests/performance/benchmark_runner.sh
+
+      - name: Check shell startup time
+        run: |
+          # Fail if startup exceeds 500ms
+          time_ms=$( { time zsh -i -c 'exit' 2>&1; } 2>&1 | grep real | sed 's/.*m//' | sed 's/s//' | awk '{print int($1 * 1000)}' )
+          if [[ $time_ms -gt 500 ]]; then
+            echo "::error::Shell startup time ${time_ms}ms exceeds 500ms threshold"
+            exit 1
+          fi

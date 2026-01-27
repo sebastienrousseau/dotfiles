@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.474) - <https://dotfiles.io>
-# Made with  in London, UK by Sebastien Rousseau
-# Copyright (c) 2015-2025. All rights reserved
+# Made With ❤️ in London, United Kingdom
+# Designed by Sebastien Rousseau
+# Copyright (c) 2015-2026. All rights reserved.
 # License: MIT
 
 ## 🆅🅰🆁🅸🅰🅱🅻🅴🆂 - Set Dotfiles variables.
-DF_DOTFILESDIR="${HOME}/.dotfiles"   # Location of dotfiles.
-DF_TIMESTAMP=$(date +"%Y%m%d_%H%M%S") # Timestamp for backup directory
+DF_DOTFILESDIR="${HOME}/.dotfiles"      # Location of dotfiles.
+DF_TIMESTAMP=$(date +"%Y%m%d_%H%M%S")   # Timestamp for backup directory
 DF_BACKUPDIR="${HOME}/.dotfiles_backup" # Base backup directory
-DF="dotfiles"                         # Directory name for dotfiles backup
+DF="dotfiles"                           # Directory name for dotfiles backup
 
 # ANSI color codes - defined here instead of relying on external file
 RED='\033[0;31m'
@@ -119,7 +120,7 @@ case "$1" in
   backup)
     backup
     ;;
-  help|--help|-h)
+  help | --help | -h)
     echo "Usage: $0 [command]"
     echo ""
     echo "Commands:"

@@ -53,9 +53,9 @@ EOF
   fi
 
   # Default parameters
-  local num_blocks="${1:-3}"        # Number of blocks (default: 3)
-  local separator="${2:--}"         # Separator between blocks (default: '-')
-  local block_size=12               # Length of each block (high-entropy default)
+  local num_blocks="${1:-3}" # Number of blocks (default: 3)
+  local separator="${2:--}"  # Separator between blocks (default: '-')
+  local block_size=12        # Length of each block (high-entropy default)
 
   # Define character set for high entropy
   local CHARSET="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+{}|:<>?~[];',./=-"

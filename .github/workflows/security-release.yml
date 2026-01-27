@@ -24,13 +24,13 @@ jobs:
       hash: ${{ steps.hash.outputs.hash }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           ref: ${{ inputs.release_tag || github.ref }}
 
       - name: Generate SBOM (SPDX)
         id: sbom
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@fc46e51e3b5cf8bcad4495e5df6a7d7c5b27850e # v0.17.2
         with:
           format: spdx-json
           output-file: dotfiles-sbom.spdx.json
@@ -43,7 +43,7 @@ jobs:
           echo "hash=$(cat sbom.sha256 | base64 -w 0)" >> $GITHUB_OUTPUT
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
           name: dotfiles-sbom
           path: dotfiles-sbom.spdx.json
@@ -55,7 +55,7 @@ jobs:
       actions: read
       id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@e9ba3fa1a22929e8bb4526f7e6e6aab6b3de6bd3 # v2.1.0
     with:
       base64-subjects: "${{ needs.sbom.outputs.hash }}"
       upload-assets: true

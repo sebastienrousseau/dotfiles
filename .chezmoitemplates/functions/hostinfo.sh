@@ -67,9 +67,9 @@ hostinfo() {
 
   # Fetch public IP address using a reliable service
   if command -v curl &>/dev/null; then
-    public_ip=$(curl -s https://api.ipify.org || echo "Not available")
+    public_ip=$(curl -s --connect-timeout 5 --max-time 10 https://api.ipify.org || echo "Not available")
   elif command -v wget &>/dev/null; then
-    public_ip=$(wget -qO- https://api.ipify.org || echo "Not available")
+    public_ip=$(wget -qO- --timeout=10 https://api.ipify.org || echo "Not available")
   fi
 
   # Fetch DNS configuration (macOS specific)

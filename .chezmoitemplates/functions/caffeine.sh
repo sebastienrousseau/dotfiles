@@ -32,7 +32,7 @@ caffeine_detect_os() {
     Linux*)
       echo "linux"
       ;;
-    CYGWIN*|MINGW*|MSYS*)
+    CYGWIN* | MINGW* | MSYS*)
       echo "windows"
       ;;
     *)
@@ -105,15 +105,15 @@ caffeine_start_daemon() {
       # Daemon isn't needed on macOS as we can use caffeinate directly
       caffeine_log_info "Using native caffeinate on macOS - no separate daemon needed"
       touch "$CAFFEINE_LOCKFILE"
-      echo "$$" > "$CAFFEINE_LOCKFILE"
+      echo "$$" >"$CAFFEINE_LOCKFILE"
       ;;
     linux)
       (
         # Fork a background process
         touch "$CAFFEINE_LOCKFILE"
-        echo "$$" > "$CAFFEINE_LOCKFILE"
+        echo "$$" >"$CAFFEINE_LOCKFILE"
         touch "$CAFFEINE_STATEFILE"
-        echo "inactive" > "$CAFFEINE_STATEFILE"
+        echo "inactive" >"$CAFFEINE_STATEFILE"
 
         # Monitor for state changes
         while true; do
@@ -127,7 +127,7 @@ caffeine_start_daemon() {
               if command -v xset &>/dev/null; then
                 xset s reset
               fi
-              sleep 30  # Reset every 30 seconds
+              sleep 30 # Reset every 30 seconds
             else
               # Just wait for state to change
               sleep 5
@@ -148,9 +148,9 @@ caffeine_start_daemon() {
       (
         # Fork a background PowerShell script
         touch "$CAFFEINE_LOCKFILE"
-        echo "$$" > "$CAFFEINE_LOCKFILE"
+        echo "$$" >"$CAFFEINE_LOCKFILE"
         touch "$CAFFEINE_STATEFILE"
-        echo "inactive" > "$CAFFEINE_STATEFILE"
+        echo "inactive" >"$CAFFEINE_STATEFILE"
 
         # Monitor for state changes using PowerShell in the background
         while true; do
@@ -159,7 +159,7 @@ caffeine_start_daemon() {
             if [[ "$current_state" == "active" ]]; then
               # Send a keypress to prevent sleep (F15 is typically unused)
               powershell.exe -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('{F15}')" &>/dev/null
-              sleep 60  # Send key every 60 seconds
+              sleep 60 # Send key every 60 seconds
             else
               # Just wait for state to change
               sleep 5
@@ -230,7 +230,7 @@ caffeine_check_active() {
       return 0
     else
       # Process not running, update state file
-      echo "inactive" > "$CAFFEINE_STATEFILE"
+      echo "inactive" >"$CAFFEINE_STATEFILE"
       return 1
     fi
   else
@@ -277,15 +277,15 @@ caffeine_start_caffeine() {
 
       # Verify process started successfully
       if kill -0 "$pid" 2>/dev/null; then
-        echo "$pid" > "$CAFFEINE_STATEFILE"
+        echo "$pid" >"$CAFFEINE_STATEFILE"
         caffeine_log_info "Screen will stay awake (PID: $pid)"
       else
         caffeine_log_error "Failed to start caffeinate process"
         return 1
       fi
       ;;
-    linux|windows)
-      echo "active" > "$CAFFEINE_STATEFILE"
+    linux | windows)
+      echo "active" >"$CAFFEINE_STATEFILE"
       caffeine_log_info "Screen will stay awake"
       ;;
     *)
@@ -311,14 +311,14 @@ caffeine_stop_caffeine() {
         else
           caffeine_log_warning "No active caffeinate process found"
         fi
-        echo "inactive" > "$CAFFEINE_STATEFILE"
+        echo "inactive" >"$CAFFEINE_STATEFILE"
       else
         caffeine_log_warning "Caffeine is not active"
       fi
       ;;
-    linux|windows)
+    linux | windows)
       if [[ -f "$CAFFEINE_STATEFILE" ]]; then
-        echo "inactive" > "$CAFFEINE_STATEFILE"
+        echo "inactive" >"$CAFFEINE_STATEFILE"
         caffeine_log_info "Screen can now sleep"
       else
         caffeine_log_warning "Caffeine is not active"
@@ -361,13 +361,13 @@ caffeine_show_status() {
 # Query status (exit code only)
 caffeine_query_status() {
   if ! caffeine_check_daemon; then
-    return 1  # Daemon not running
+    return 1 # Daemon not running
   fi
 
   if caffeine_check_active; then
-    return 0  # Active
+    return 0 # Active
   else
-    return 2  # Inactive
+    return 2 # Inactive
   fi
 }
 
@@ -423,7 +423,7 @@ caffeine_show_diagnostic() {
 
 # Show usage/help
 caffeine_show_help() {
-  cat << EOF
+  cat <<EOF
 Caffeine - Prevent your system from sleeping
 
 Usage:
@@ -462,34 +462,34 @@ caffeine() {
   fi
 
   case "$1" in
-    daemon|--daemon|-d)
+    daemon | --daemon | -d)
       caffeine_start_daemon
       ;;
-    status|--status|-s)
+    status | --status | -s)
       caffeine_show_status
       ;;
-    query|--query|-q)
+    query | --query | -q)
       caffeine_query_status
       ;;
-    start|--start)
+    start | --start)
       caffeine_start_caffeine
       ;;
-    stop|--stop)
+    stop | --stop)
       caffeine_stop_caffeine
       ;;
-    toggle|--toggle|-t)
+    toggle | --toggle | -t)
       caffeine_toggle_caffeine
       ;;
-    shutdown|--shutdown)
+    shutdown | --shutdown)
       caffeine_shutdown_daemon
       ;;
-    diagnostic|--diagnostic|-D)
+    diagnostic | --diagnostic | -D)
       caffeine_show_diagnostic
       ;;
-    version|--version|-v)
+    version | --version | -v)
       caffeine_show_version
       ;;
-    help|--help|-h)
+    help | --help | -h)
       caffeine_show_help
       ;;
     *)

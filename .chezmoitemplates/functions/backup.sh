@@ -28,8 +28,8 @@
 backup() {
   # Default configuration
   BACKUP_DIR="${BACKUP_DIR:-./backups}"
-  MAX_SIZE="100M"   # Default max size before compression
-  KEEP=5             # Default number of backups to keep
+  MAX_SIZE="100M" # Default max size before compression
+  KEEP=5          # Default number of backups to keep
 
   # Parse arguments
   while [[ "$#" -gt 0 ]]; do
@@ -83,7 +83,8 @@ backup() {
   convert_size_to_bytes() {
     local size_str="$1"
     local num="${size_str//[!0-9]/}"
-    local unit=$(echo "${size_str}" | sed 's/[0-9]//g' | tr '[:upper:]' '[:lower:]')
+    local unit
+    unit=$(echo "${size_str}" | sed 's/[0-9]//g' | tr '[:upper:]' '[:lower:]')
 
     case "$unit" in
       m) echo $((num * 1024 * 1024)) ;;
@@ -100,9 +101,9 @@ backup() {
   [[ $? -ne 0 ]] && return 1
 
   # Get file size in bytes using wc -c
-  FILE_SIZE=$(wc -c < "${TAR_PATH}")
+  FILE_SIZE=$(wc -c <"${TAR_PATH}")
 
-  if (( FILE_SIZE > MAX_BYTES )); then
+  if ((FILE_SIZE > MAX_BYTES)); then
     # Compress the backup
     if gzip "${TAR_PATH}"; then
       COMPRESSED_PATH="${TAR_PATH}.gz"
@@ -116,12 +117,15 @@ backup() {
     echo "[INFO] No compression required."
   fi
 
-  # Enforce backup retention
-  BACKUPS=($(ls -1t "${BACKUP_DIR}"/backup_*.tar* 2>/dev/null))
+  # Enforce backup retention (portable: avoids word-splitting on filenames with spaces)
+  local -a BACKUPS=()
+  while IFS= read -r -d '' f; do
+    BACKUPS+=("$f")
+  done < <(find "${BACKUP_DIR}" -maxdepth 1 -name 'backup_*.tar*' -print0 2>/dev/null | sort -zr)
   BACKUP_COUNT=${#BACKUPS[@]}
 
   # Only attempt removal if we actually have more backups than KEEP
-  if (( BACKUP_COUNT > KEEP )); then
+  if ((BACKUP_COUNT > KEEP)); then
     REMOVE_COUNT=$((BACKUP_COUNT - KEEP))
     OLD_BACKUPS=("${BACKUPS[@]:$KEEP:$REMOVE_COUNT}")
     for old_backup in "${OLD_BACKUPS[@]}"; do

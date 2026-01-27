@@ -1,0 +1,13 @@
+{
+  "cpus": "2",
+  "memory": "4096",
+  "driver": "docker",
+  "container-runtime": "docker",
+  "kubernetes-version": "stable",
+  "addons": [
+    "dashboard",
+    "metrics-server",
+    "ingress"
+  ],
+  "embed-certs": true
+}

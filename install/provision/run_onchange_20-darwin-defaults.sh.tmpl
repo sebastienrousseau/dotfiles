@@ -5,7 +5,7 @@
 # Only run on macOS
 {{ if eq .chezmoi.os "darwin" -}}
 
-set -e
+set -euo pipefail
 
 echo " Applying macOS Defaults & Hardening..."
 

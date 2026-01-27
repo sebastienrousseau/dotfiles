@@ -59,11 +59,11 @@ curlheader() {
   # Check if only a URL is provided
   if [[ -z "$2" ]]; then
     echo "Fetching all headers for URL: $1"
-    curl -k -s -D - "$1" -o /dev/null
+    curl -k -s --connect-timeout 10 --max-time 30 -D - "$1" -o /dev/null
   else
     # Fetch and filter for a specific header
     echo "Fetching '$1' header for URL: $2"
-    curl -k -s -D - "$2" -o /dev/null | grep -i "$1:"
+    curl -k -s --connect-timeout 10 --max-time 30 -D - "$2" -o /dev/null | grep -i "$1:"
   fi
 }
 

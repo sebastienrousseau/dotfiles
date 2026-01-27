@@ -1,5 +1,5 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
 # Cleanup any partial downloads
 rm -f nvim-linux-x86_64.tar.gz nvim-linux-x86_64.tar.gz.sha256sum nvim-linux64.tar.gz

@@ -1,14 +1,21 @@
 #!/usr/bin/env bash
 
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.474) - <https://dotfiles.io>
-# Made with  in London, UK by Sebastien Rousseau
-# Copyright (c) 2015-2025. All rights reserved
+# Made With ❤️ in London, United Kingdom
+# Designed by Sebastien Rousseau
+# Copyright (c) 2015-2026. All rights reserved.
 # License: MIT
 
 ## 🅸🅼🅿🅾🆁🆃🆂 - Importing constants and functions.
 
-# shellcheck disable=SC1091
-. "./lib/configurations/default/constants.sh"
+# shellcheck disable=SC1090,SC1091
+CONSTANTS_FILE="./lib/configurations/default/constants.sh"
+if [[ -f "$CONSTANTS_FILE" ]]; then
+  source "$CONSTANTS_FILE"
+else
+  # Define fallback constants
+  DOTFILES_VERSION="${DOTFILES_VERSION:-0.2.474}"
+fi
 
 ## 🅼🅰🅸🅽 - Main function.
 

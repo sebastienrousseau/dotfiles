@@ -9,7 +9,7 @@ if [[ ! -f "$EMOJI_FILE" ]]; then
 fi
 
 pick_with_fzf() {
-  fzf --prompt="emoji> " --height=40% --layout=reverse < "$EMOJI_FILE"
+  fzf --prompt="emoji> " --height=40% --layout=reverse <"$EMOJI_FILE"
 }
 
 pick_with_select() {

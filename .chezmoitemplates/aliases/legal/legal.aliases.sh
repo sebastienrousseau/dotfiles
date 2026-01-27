@@ -46,13 +46,13 @@ alias add-headers=add_headers_fn
 
 # Generate attribution report for Go projects (expandable to others)
 gen_notice_fn() {
-    echo "Generating NOTICE file for dependencies..."
-    if [ -f "go.mod" ]; then
-        docker run --rm -v "$(pwd):/src" -w /src golang:latest \
-            sh -c "go install github.com/google/go-licenses@latest && go-licenses report . --template /src/NOTICE.tpl > NOTICE"
-    else
-        echo "️  No supported package manager found for automatic NOTICE generation."
-    fi
+  echo "Generating NOTICE file for dependencies..."
+  if [ -f "go.mod" ]; then
+    docker run --rm -v "$(pwd):/src" -w /src golang:latest \
+      sh -c "go install github.com/google/go-licenses@latest && go-licenses report . --template /src/NOTICE.tpl > NOTICE"
+  else
+    echo "️  No supported package manager found for automatic NOTICE generation."
+  fi
 }
 alias gen-notice=gen_notice_fn
 

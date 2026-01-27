@@ -8,8 +8,8 @@ set -e
 TARGET="$1"
 
 if [[ -z "$TARGET" ]]; then
-    echo "Usage: $0 user@host"
-    exit 1
+  echo "Usage: $0 user@host"
+  exit 1
 fi
 
 echo " Teleporting dotfiles to ${TARGET}..."

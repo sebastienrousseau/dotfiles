@@ -16,9 +16,17 @@ case "$(uname -s)" in
     ;;
   Linux)
     if command -v lsblk >/dev/null; then
-      if lsblk -f | rg -i "crypto|luks" >/dev/null; then
-        echo "Encrypted block device detected (LUKS)."
-        exit 0
+      lsblk_output=$(lsblk -f)
+      if command -v rg >/dev/null; then
+        if echo "$lsblk_output" | rg -i "crypto|luks" >/dev/null; then
+          echo "Encrypted block device detected (LUKS)."
+          exit 0
+        fi
+      else
+        if echo "$lsblk_output" | grep -Ei "crypto|luks" >/dev/null; then
+          echo "Encrypted block device detected (LUKS)."
+          exit 0
+        fi
       fi
       echo "Warning: No LUKS/crypto volume detected."
       exit 1

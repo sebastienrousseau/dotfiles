@@ -9,6 +9,8 @@ on:
   pull_request:
     branches:
       - master
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly on Monday at 6 AM
 
 permissions:
   contents: read
@@ -17,18 +19,19 @@ jobs:
   test:
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    
+
     defaults:
       run:
         shell: bash
 
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install Chezmoi
         run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
@@ -44,15 +47,78 @@ jobs:
       - name: Verify Config (Dry Run)
         run: chezmoi apply --verbose --dry-run
 
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+        with:
+          name: failure-logs-${{ matrix.os }}
+          path: |
+            ~/.local/share/chezmoi/.log
+            ~/.local/share/dotfiles.log
+            /tmp/*.log
+          retention-days: 7
+
+  idempotency:
+    name: Idempotency Test (Double-run)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Install Chezmoi
+        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
+
+      - name: Add to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Configure Chezmoi source
+        run: |
+          mkdir -p "$HOME/.config/chezmoi"
+          printf 'sourceDir = "%s"\n' "$GITHUB_WORKSPACE" > "$HOME/.config/chezmoi/chezmoi.toml"
+
+      - name: First apply (exclude scripts)
+        run: chezmoi apply --exclude=scripts --verbose
+
+      - name: Second apply (should be no-op)
+        run: |
+          OUTPUT=$(chezmoi apply --exclude=scripts --verbose 2>&1)
+          echo "$OUTPUT"
+          # Check if there are any changes (other than expected noise)
+          if echo "$OUTPUT" | grep -E "^(create|modify|remove)" | grep -v ".DS_Store"; then
+            echo "Error: Second apply made changes - not idempotent"
+            exit 1
+          fi
+          echo "Idempotency check passed"
+
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+        with:
+          name: failure-logs-idempotency
+          path: |
+            ~/.local/share/chezmoi/.log
+            ~/.local/share/dotfiles.log
+            /tmp/*.log
+          retention-days: 7
+
   benchmark:
     name: Shell Startup Benchmark (Ubuntu)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-benchmark-${{ runner.os }}-zsh-hyperfine
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y zsh hyperfine
@@ -74,15 +140,33 @@ jobs:
       - name: Benchmark (max 500ms)
         run: DOTFILES_BENCH_MAX_MS=500 bash ./scripts/tests/benchmark.sh
 
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+        with:
+          name: failure-logs-benchmark
+          path: |
+            ~/.local/share/chezmoi/.log
+            ~/.local/share/dotfiles.log
+            /tmp/*.log
+          retention-days: 7
+
   shellcheck:
     name: Shellcheck (Ubuntu)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-shellcheck-${{ runner.os }}-shellcheck-ripgrep
 
       - name: Install shellcheck + ripgrep
         run: sudo apt-get update && sudo apt-get install -y shellcheck ripgrep
@@ -94,15 +178,103 @@ jobs:
             echo "$files" | xargs shellcheck -x
           fi
 
-  lua-lint:
-    name: Lua Lint (Ubuntu)
+  unit-tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Run unit tests
+        run: |
+          chmod +x scripts/tests/framework/*.sh
+          ./scripts/tests/framework/test_runner.sh
+      - name: Run integration tests
+        run: RUN_INTEGRATION=1 ./scripts/tests/framework/test_runner.sh
+
+  shfmt:
+    name: Shell Format Check (shfmt)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Install shfmt
+        run: |
+          curl -sS https://webi.sh/shfmt | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Check shell formatting
+        run: |
+          shfmt -d -i 2 -ci scripts/**/*.sh install.sh .chezmoitemplates/**/*.sh || {
+            echo "::error::Shell formatting issues found. Run 'shfmt -w -i 2 -ci' to fix."
+            exit 1
+          }
+
+  gitleaks:
+    name: Secrets Scan (Gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Install Gitleaks
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz | tar xz
+          sudo mv gitleaks /usr/local/bin/
+
+      - name: Run Gitleaks
+        run: gitleaks detect --source . --verbose --no-git --config .gitleaks.toml
+
+  link-check:
+    name: Link Rot Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Install lychee
+        run: |
+          curl -sSfL https://github.com/lycheeverse/lychee/releases/download/v0.15.1/lychee-v0.15.1-x86_64-unknown-linux-gnu.tar.gz | tar xz
+          sudo mv lychee /usr/local/bin/
+
+      - name: Check links in documentation
+        run: |
+          lychee --verbose --no-progress \
+            --exclude-path ./dot_config \
+            --exclude-path ./.git \
+            --exclude "localhost" \
+            --exclude "127.0.0.1" \
+            --exclude "example.com" \
+            --accept 200,204,301,302,403,429 \
+            --max-retries 3 \
+            --timeout 30 \
+            "**/*.md" || echo "Link check completed with warnings"
+
+  lua-lint:
+    name: Lua Lint (Ubuntu)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-lua-${{ runner.os }}-lua-luarocks-cargo
 
       - name: Install Lua tooling
         run: |
@@ -122,16 +294,17 @@ jobs:
   nix-check:
     name: Nix Flake Check (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v14
+        uses: DeterminateSystems/nix-installer-action@de22e16c4711fca50c816cc9081563429d1cf563 # v10
 
       - name: Flake Check
         run: nix flake check ./nix

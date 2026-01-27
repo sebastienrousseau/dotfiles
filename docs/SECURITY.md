@@ -1,6 +1,6 @@
 # Security
 
-This document provides full transparency into how Dotfiles handles security and modifications.
+Learn how Dotfiles handles security and system modifications.
 
 ## Principles
 

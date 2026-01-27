@@ -11,8 +11,12 @@ install_linux() {
   tmp_dir="$(mktemp -d)"
   url="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${font_name}.zip"
   echo "Downloading $font_name Nerd Font..."
-  curl -fL "$url" -o "$tmp_dir/${font_name}.zip"
-  unzip -o "$tmp_dir/${font_name}.zip" -d "$target_dir" >/dev/null
+  curl -fL --connect-timeout 10 --max-time 300 "$url" -o "$tmp_dir/${font_name}.zip"
+  if ! unzip -o "$tmp_dir/${font_name}.zip" -d "$target_dir" >/dev/null; then
+    echo "Error: Failed to unzip ${font_name}.zip" >&2
+    rm -rf "$tmp_dir"
+    return 1
+  fi
   rm -rf "$tmp_dir"
   if command -v fc-cache >/dev/null; then
     fc-cache -f "$target_dir"

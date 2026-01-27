@@ -6,9 +6,9 @@ APPLY=0
 
 for arg in "$@"; do
   case "$arg" in
-    --apply) APPLY=1 ;; 
+    --apply) APPLY=1 ;;
   esac
- done
+done
 
 if [[ "$(uname -s)" != "Linux" ]]; then
   echo "Boot logo customization is Linux-only." >&2
@@ -35,7 +35,7 @@ if command -v plymouth-set-default-theme >/dev/null; then
   theme_dir="/usr/share/plymouth/themes/dotfiles"
   mkdir -p "$theme_dir"
   cp "$logo_path" "$theme_dir/logo.png"
-  cat > "$theme_dir/dotfiles.plymouth" <<PLY
+  cat >"$theme_dir/dotfiles.plymouth" <<PLY
 [Plymouth Theme]
 Name=Dotfiles
 Description=Dotfiles boot splash
@@ -46,7 +46,7 @@ ImageDir=$theme_dir
 ScriptFile=$theme_dir/dotfiles.script
 PLY
 
-  cat > "$theme_dir/dotfiles.script" <<'SCRIPT'
+  cat >"$theme_dir/dotfiles.script" <<'SCRIPT'
 # Simple Plymouth script
 image = Image("logo.png");
 image.SetPosition(Window.GetX() + Window.GetWidth()/2 - image.GetWidth()/2,
@@ -54,7 +54,7 @@ image.SetPosition(Window.GetX() + Window.GetWidth()/2 - image.GetWidth()/2,
 SCRIPT
 
   plymouth-set-default-theme -R dotfiles
-  echo "Boot logo installed via Plymouth." 
+  echo "Boot logo installed via Plymouth."
 else
   echo "Plymouth not found. Install plymouth to apply boot logo." >&2
   exit 1

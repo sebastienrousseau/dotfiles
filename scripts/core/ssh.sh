@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.474) - <https://dotfiles.io>
-# Made with  in London, UK by Sebastien Rousseau
-# Copyright (c) 2015-2025. All rights reserved
+# Made With ❤️ in London, United Kingdom
+# Designed by Sebastien Rousseau
+# Copyright (c) 2015-2026. All rights reserved.
 # License: MIT
 
 ## 🆂🆂🅷 - Generate a new SSH key and add it to the ssh-agent
@@ -18,7 +19,7 @@ fi
 # create default .ssh directory if it doesn’t exist
 # https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys
 if [[ ! -d "${HOME}/.ssh/" ]]; then
-  mkdir "${HOME}/.ssh/"
+  mkdir -p "${HOME}/.ssh/"
   chmod 700 "${HOME}/.ssh/"
 fi
 
@@ -32,15 +33,19 @@ fi
 # generate ssh key using ed25519 algorithm
 # https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
 # -C set email, -N empty passcode, -q quiet
+# WARNING: This creates an SSH key WITHOUT a passphrase for automation purposes.
+# For manual/interactive use, consider adding a passphrase for enhanced security.
+# See: https://security.stackexchange.com/questions/87044/
 ssh-keygen -q -t ed25519 -C "${EMAIL}" -f "${HOME}"/.ssh/id_ed25519 -N ""
 
 # start ssh-agent in the background
-ssha="ssh-agent -s"
-eval "${ssha}"
+eval "$(ssh-agent -s)"
 
-# Create config file if it doesn't exist
-touch ~/.ssh/config
-printf "Host *\n AddKeysToAgent yes\n UseKeychain yes\n IdentityFile ~/.ssh/id_ed25519" | tee ~/.ssh/config
+# Create config file if it doesn't exist; append only if not already configured
+if [ ! -f ~/.ssh/config ] || ! grep -q 'IdentityFile ~/.ssh/id_ed25519' ~/.ssh/config; then
+  printf "Host *\n AddKeysToAgent yes\n UseKeychain yes\n IdentityFile ~/.ssh/id_ed25519\n" >>~/.ssh/config
+  chmod 600 ~/.ssh/config
+fi
 
 # add ssh key
 sudo ssh-add -K "${HOME}"/.ssh/id_ed25519

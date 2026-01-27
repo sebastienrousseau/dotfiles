@@ -1,6 +1,8 @@
 # shellcheck shell=bash
-# Version: 0.2.472
+# Copyright (c) 2015-2026. All rights reserved.
+# Version: 0.2.474
 # Website: https://dotfiles.io
+# License: MIT
 
 # 🅴🅳🅸🆃🅾🆁 🅰🅻🅸🅰🆂🅴🆂
 
@@ -18,7 +20,7 @@ alias v='${EDITOR}'
 # Editor-specific aliases based on the current EDITOR/VISUAL
 if [[ -n "${EDITOR}" ]]; then
   case "${EDITOR}" in
-    nvim|*/nvim)
+    nvim | */nvim)
       # Neovim aliases
       alias vi="nvim"
       alias vim="nvim"
@@ -26,7 +28,7 @@ if [[ -n "${EDITOR}" ]]; then
       alias nvimlua='nvim "${HOME}/.config/nvim/init.lua"'
       alias nvimconf='nvim "${HOME}/.config/nvim"'
       ;;
-    code|*/code)
+    code | */code)
       # VS Code aliases
       alias vsc="code"
       alias vsca="code --add"
@@ -38,28 +40,28 @@ if [[ -n "${EDITOR}" ]]; then
       alias vscex="code --install-extension"
       alias vsclist="code --list-extensions"
       ;;
-    nano|*/nano)
+    nano | */nano)
       # Nano aliases
       alias nanorc='nano "${HOME}/.nanorc"'
       # Enhanced nano with line numbers and smooth scrolling
       function nanoedit() { nano -l -S "$@"; }
       alias ne="nanoedit"
       ;;
-    emacs|*/emacs)
+    emacs | */emacs)
       # Emacs aliases
       alias em="emacs"
       alias emacs-nw="emacs -nw"
       alias emacsc="emacsclient"
       alias emacsrc="emacs ~/.emacs"
-      alias et="emacs -nw"  # Terminal mode
+      alias et="emacs -nw" # Terminal mode
       ;;
-    subl|*/subl)
+    subl | */subl)
       # Sublime Text aliases
       alias st="subl"
       alias stt="subl ."  # Open current directory
       alias stn="subl -n" # Open in new window
       ;;
-    atom|*/atom)
+    atom | */atom)
       # Atom aliases
       alias a="atom"
       alias at="atom ."
@@ -71,15 +73,15 @@ fi
 # Quick edit function to edit common configuration files
 function editrc() {
   case "$1" in
-    bash)     "${EDITOR}" "${HOME}/.bashrc" ;;
-    zsh)      "${EDITOR}" "${HOME}/.zshrc" ;;
-    vim)      "${EDITOR}" "${NVIM_INIT:-${HOME}/.config/nvim/init.lua}" ;;
-    nvim)     "${EDITOR}" "${NVIM_INIT:-${HOME}/.config/nvim/init.lua}" ;;
-    tmux)     "${EDITOR}" "${HOME}/.tmux.conf" ;;
-    git)      "${EDITOR}" "${HOME}/.gitconfig" ;;
-    ssh)      "${EDITOR}" "${HOME}/.ssh/config" ;;
-    alias)    "${EDITOR}" "${HOME}/.dotfiles/aliases" ;;
+    bash) "${EDITOR}" "${HOME}/.bashrc" ;;
+    zsh) "${EDITOR}" "${HOME}/.zshrc" ;;
+    vim) "${EDITOR}" "${NVIM_INIT:-${HOME}/.config/nvim/init.lua}" ;;
+    nvim) "${EDITOR}" "${NVIM_INIT:-${HOME}/.config/nvim/init.lua}" ;;
+    tmux) "${EDITOR}" "${HOME}/.tmux.conf" ;;
+    git) "${EDITOR}" "${HOME}/.gitconfig" ;;
+    ssh) "${EDITOR}" "${HOME}/.ssh/config" ;;
+    alias) "${EDITOR}" "${HOME}/.dotfiles/aliases" ;;
     dotfiles) "${EDITOR}" "${HOME}/.dotfiles" ;;
-    *)        echo "Usage: editrc [bash|zsh|vim|nvim|tmux|git|ssh|alias|dotfiles]" ;;
+    *) echo "Usage: editrc [bash|zsh|vim|nvim|tmux|git|ssh|alias|dotfiles]" ;;
   esac
 }

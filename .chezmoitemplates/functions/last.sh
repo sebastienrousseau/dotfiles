@@ -18,7 +18,6 @@
 #
 ################################################################################
 
-
 detect_tool() {
   if command -v /usr/bin/find &>/dev/null; then
     echo "find"
@@ -34,7 +33,7 @@ detect_tool() {
 last() {
   # Display help menu
   if [[ "$1" == "--help" ]]; then
-    cat << 'EOH'
+    cat <<'EOH'
 🅳🅾🆃🅵🅸🅻🅴🆂 - Recently Modified Files Viewer
 
 Description:

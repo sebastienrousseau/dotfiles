@@ -26,4 +26,4 @@ done
 
 mv "${LOG_FILE}" "${LOG_FILE}.1"
 gzip -f "${LOG_FILE}.1"
-: > "${LOG_FILE}"
+: >"${LOG_FILE}"
