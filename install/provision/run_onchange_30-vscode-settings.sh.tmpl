@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+# run_onchange_30-vscode-settings.sh.tmpl
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") -}}
+
+set -euo pipefail
+
+log_info() { echo -e "\n[INFO] $*"; }
+log_error() { echo -e "\n[ERROR] $*" >&2; }
+
+SRC_DIR="$HOME/.config/vscode"
+if [ ! -d "$SRC_DIR" ]; then
+  exit 0
+fi
+
+if [ "$(uname -s 2>/dev/null)" = "Darwin" ]; then
+  DEST_DIR="$HOME/Library/Application Support/Code/User"
+else
+  DEST_DIR="$HOME/.config/Code/User"
+fi
+
+mkdir -p "$DEST_DIR"
+
+if [ -f "$SRC_DIR/settings.json" ]; then
+  cp "$SRC_DIR/settings.json" "$DEST_DIR/settings.json"
+  log_info "VS Code settings updated."
+fi
+
+if [ -f "$SRC_DIR/keybindings.json" ]; then
+  cp "$SRC_DIR/keybindings.json" "$DEST_DIR/keybindings.json"
+  log_info "VS Code keybindings updated."
+fi
+
+{{- end -}}

@@ -36,10 +36,22 @@ export PATH="${HOME}/.node_modules/bin:${PATH}"
 # Lua (Luarocks)
 export PATH="${HOME}/.luarocks/bin:${PATH}"
 
-# 4. Applications (macOS Specifics from 99-custom)
-export PATH="/Library/Apple/usr/bin:/Library/TeX/texbin:${PATH}"
-export PATH="/Applications/Topaz Photo AI.app/Contents/Resources/bin:/Applications/Little Snitch.app/Contents/Components:/Applications/iTerm.app/Contents/Resources/utilities:${PATH}"
-export PATH="/Applications/Visual Studio Code.app/Contents/Resources/app/bin:${PATH}"
+# 4. Applications (macOS Specifics)
+if [[ "$(uname -s 2>/dev/null)" == "Darwin" ]]; then
+    export PATH="/Library/Apple/usr/bin:/Library/TeX/texbin:${PATH}"
+    if [[ -d "/Applications/Topaz Photo AI.app/Contents/Resources/bin" ]]; then
+        export PATH="/Applications/Topaz Photo AI.app/Contents/Resources/bin:${PATH}"
+    fi
+    if [[ -d "/Applications/Little Snitch.app/Contents/Components" ]]; then
+        export PATH="/Applications/Little Snitch.app/Contents/Components:${PATH}"
+    fi
+    if [[ -d "/Applications/iTerm.app/Contents/Resources/utilities" ]]; then
+        export PATH="/Applications/iTerm.app/Contents/Resources/utilities:${PATH}"
+    fi
+    if [[ -d "/Applications/Visual Studio Code.app/Contents/Resources/app/bin" ]]; then
+        export PATH="/Applications/Visual Studio Code.app/Contents/Resources/app/bin:${PATH}"
+    fi
+fi
 
 # 5. Local Bin (Highest Priority)
 export PATH="${HOME}/.local/bin:${PATH}"
