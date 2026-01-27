@@ -55,6 +55,21 @@ if ! command -v fnm >/dev/null; then
     npm() { _lazy_load_nvm; command npm "$@"; }
     npx() { _lazy_load_nvm; command npx "$@"; }
   fi
+else
+  # Lazy-load fnm (Fast Node Manager)
+  if [[ ! -f "${ZSH_COMPLETIONS_DIR}/_fnm" ]]; then
+    command fnm completions --shell zsh >| "${ZSH_COMPLETIONS_DIR}/_fnm"
+  fi
+  _lazy_load_fnm() {
+    unfunction node npm npx pnpm pnpx fnm _lazy_load_fnm 2>/dev/null
+    eval "$(command fnm env --use-on-cd --shell zsh --log-level quiet)"
+  }
+  fnm() { _lazy_load_fnm; command fnm "$@"; }
+  node() { _lazy_load_fnm; command node "$@"; }
+  npm() { _lazy_load_fnm; command npm "$@"; }
+  npx() { _lazy_load_fnm; command npx "$@"; }
+  pnpm() { _lazy_load_fnm; command pnpm "$@"; }
+  pnpx() { _lazy_load_fnm; command pnpx "$@"; }
 fi
 
 # Lazy-load SDKMAN
