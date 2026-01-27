@@ -37,10 +37,11 @@ Git + templates + guarded scripts = a reproducible shell.
 
 Dotfiles takes an infrastructure‑oriented approach to managing your shell. It is designed for developers who work across multiple machines and value **daily usability, reproducibility, and auditability.**
 
-- **The Stack.** Zsh, Neovim, and tmux — configured with sane defaults so you can start working immediately.
+- **The Stack.** Zsh, Neovim, tmux, and AI CLI tools — configured with sane defaults so you can start working immediately.
 - **Unified Control.** The `dot` CLI wraps common workflows such as syncing, upgrading, and managing secrets.
 - **Safety First.** Every system or security change requires explicit opt‑in.
 - **Clean Slate.** Source files, generated configs, and system state stay cleanly separated.
+
 
 ## Safety
 
