@@ -12,22 +12,29 @@ log_error() { echo -e "\\n[ERROR] $*" >&2; }
 log_info "🤖 Installing AI CLI tools via npm..."
 
 # Ensure fnm is available
-if ! command -v fnm >/dev/null; then
-  log_error "fnm not found. Installing fnm..."
+if ! command -v fnm >/dev/null 2>&1; then
+  log_info "fnm not found. Installing fnm..."
   curl -fsSL https://fnm.vercel.app/install | bash
-  export PATH="$HOME/.local/share/fnm:$PATH"
-  eval "$(fnm env --use-on-cd)"
 fi
 
-# Load fnm environment
-eval "$(fnm env --use-on-cd)" 2>/dev/null || true
+# Load fnm environment (try multiple locations)
+if [ -d "$HOME/.local/share/fnm" ]; then
+  export PATH="$HOME/.local/share/fnm:$PATH"
+fi
+
+if command -v fnm >/dev/null 2>&1; then
+  eval "$(fnm env --use-on-cd 2>/dev/null || fnm env 2>/dev/null || true)"
+else
+  log_error "fnm installation failed. Please install manually."
+  exit 1
+fi
 
 # Ensure Node.js is installed
-if ! command -v node >/dev/null; then
+if ! command -v node >/dev/null 2>&1; then
   log_info "Installing Node.js LTS via fnm..."
-  fnm install --lts
-  fnm use lts-latest
-  eval "$(fnm env --use-on-cd)"
+  fnm install --lts || fnm install 20
+  fnm use lts-latest 2>/dev/null || fnm use 20
+  eval "$(fnm env)"
 fi
 
 log_info "Node.js version: $(node --version)"
@@ -44,7 +51,7 @@ AI_TOOLS=(
 
 for tool in "${AI_TOOLS[@]}"; do
   log_info "Installing $tool..."
-  npm install -g "$tool" || log_error "Failed to install $tool (continuing...)"
+  npm install -g "$tool" 2>&1 || log_error "Failed to install $tool (continuing...)"
 done
 
 log_info "✅ AI CLI tools installation complete!"
