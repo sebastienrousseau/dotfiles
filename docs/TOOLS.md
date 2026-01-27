@@ -54,7 +54,19 @@ These are the main tools and CLI conveniences included with Dotfiles.
 | gh | GitHub CLI |
 | glab | GitLab CLI |
 
+## AI CLI Tools
+
+| Tool | NPM Package | Description |
+|------|-------------|-------------|
+| claude | @anthropic-ai/claude-code | Anthropic Claude CLI |
+| gemini | @google/gemini-cli | Google Gemini CLI |
+| codex | @openai/codex | OpenAI Codex CLI |
+| opencode | opencode-ai | OpenCode AI assistant |
+| droid | @factory/cli | Factory AI Droid |
+
+
 ## Data processing
+
 
 | Tool | Description |
 |------|-------------|

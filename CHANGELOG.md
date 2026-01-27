@@ -2,7 +2,25 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.476
+
+### Added
+
+- **AI CLI Tools (NPM-based)**
+  - Added `claude` (@anthropic-ai/claude-code) - Anthropic Claude CLI for AI-powered coding
+  - Added `gemini` (@google/gemini-cli) - Google Gemini CLI for terminal AI assistance
+  - Added `codex` (@openai/codex) - OpenAI Codex CLI for code generation and understanding
+  - Added `opencode` (opencode-ai) - OpenCode AI assistant with TUI
+  - Added `droid` (@factory/cli) - Factory AI Droid for intelligent code orchestration
+  - All tools installed globally via npm/fnm
+  - Auto-install fnm and Node.js LTS if not present
+
+### Changed
+
+- Updated all version references to v0.2.476
+
 ## v0.2.474
+
 
 ### Added
 

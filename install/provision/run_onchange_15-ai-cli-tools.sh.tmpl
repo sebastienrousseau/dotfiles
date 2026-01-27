@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+# run_onchange_15-ai-cli-tools.sh.tmpl
+{{- if eq .chezmoi.os "linux" -}}
+
+# Strict error handling
+set -euo pipefail
+
+log_info() { echo -e "\\n[INFO] $*"; }
+log_error() { echo -e "\\n[ERROR] $*" >&2; }
+
+log_info "🤖 Installing AI CLI tools via npm..."
+
+# Ensure fnm is available
+if ! command -v fnm >/dev/null; then
+  log_error "fnm not found. Installing fnm..."
+  curl -fsSL https://fnm.vercel.app/install | bash
+  export PATH="$HOME/.local/share/fnm:$PATH"
+  eval "$(fnm env --use-on-cd)"
+fi
+
+# Load fnm environment
+eval "$(fnm env --use-on-cd)" 2>/dev/null || true
+
+# Ensure Node.js is installed
+if ! command -v node >/dev/null; then
+  log_info "Installing Node.js LTS via fnm..."
+  fnm install --lts
+  fnm use lts-latest
+  eval "$(fnm env --use-on-cd)"
+fi
+
+log_info "Node.js version: $(node --version)"
+log_info "npm version: $(npm --version)"
+
+# Install AI CLI tools globally
+AI_TOOLS=(
+  "@anthropic-ai/claude-code"
+  "@google/gemini-cli"
+  "@openai/codex"
+  "opencode-ai"
+  "@factory/cli"
+)
+
+for tool in "${AI_TOOLS[@]}"; do
+  log_info "Installing $tool..."
+  npm install -g "$tool" || log_error "Failed to install $tool (continuing...)"
+done
+
+log_info "✅ AI CLI tools installation complete!"
+log_info ""
+log_info "Available commands:"
+log_info "  - claude   (Anthropic Claude CLI)"
+log_info "  - gemini   (Google Gemini CLI)"
+log_info "  - codex    (OpenAI Codex CLI)"
+log_info "  - opencode (OpenCode AI)"
+log_info "  - droid    (Factory AI Droid)"
+log_info ""
+log_info "Note: You may need to restart your shell or run 'eval \"\$(fnm env)\"'"
+
+{{- end -}}

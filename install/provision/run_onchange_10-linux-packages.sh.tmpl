@@ -101,6 +101,8 @@ LAZYGIT_TAG="${LAZYGIT_TAG:-latest}"
 ATUIN_TAG="${ATUIN_TAG:-latest}"
 ZELLIJ_TAG="${ZELLIJ_TAG:-latest}"
 UV_TAG="${UV_TAG:-latest}"
+AICHAT_TAG="${AICHAT_TAG:-latest}"
+MODS_TAG="${MODS_TAG:-latest}"
 
 warn_unpinned "Starship" "$STARSHIP_TAG" "STARSHIP_TAG"
 warn_unpinned "Zoxide" "$ZOXIDE_TAG" "ZOXIDE_TAG"
@@ -109,6 +111,8 @@ warn_unpinned "Lazygit" "$LAZYGIT_TAG" "LAZYGIT_TAG"
 warn_unpinned "Atuin" "$ATUIN_TAG" "ATUIN_TAG"
 warn_unpinned "Zellij" "$ZELLIJ_TAG" "ZELLIJ_TAG"
 warn_unpinned "UV" "$UV_TAG" "UV_TAG"
+warn_unpinned "AIChat" "$AICHAT_TAG" "AICHAT_TAG"
+warn_unpinned "Mods" "$MODS_TAG" "MODS_TAG"
 
 install_from_tarball() {
   local url="$1"
@@ -387,6 +391,60 @@ if ! command -v yazi >/dev/null; then
   # For now, we will skip auto-install on Linux if not present to avoid breakage, 
   # as it has complex dependencies. Providing a hint instead.
   log_info "Note: To install Yazi on Linux, use cargo: cargo install --locked yazi-fm"
+fi
+
+# Install AIChat (All-in-one LLM CLI)
+if ! command -v aichat >/dev/null; then
+  log_info "Installing AIChat..."
+  arch="$(uname -m)"
+  case "$arch" in
+    x86_64|amd64) target="x86_64-unknown-linux-musl" ;;
+    aarch64|arm64) target="aarch64-unknown-linux-musl" ;;
+    *) log_error "Unsupported arch for AIChat: $arch"; exit 1 ;;
+  esac
+  url="$(github_asset_url "sigoden/aichat" "aichat-${AICHAT_TAG}-${target}.tar.gz" "$AICHAT_TAG")"
+  sha_url="${url}.sha256"
+  install_from_tarball "$url" "$sha_url" "aichat" "$HOME/.local/bin"
+fi
+
+# Install Mods (Charm AI CLI)
+if ! command -v mods >/dev/null; then
+  log_info "Installing Mods..."
+  arch="$(uname -m)"
+  case "$arch" in
+    x86_64|amd64) target="Linux_x86_64" ;;
+    aarch64|arm64) target="Linux_arm64" ;;
+    *) log_error "Unsupported arch for Mods: $arch"; exit 1 ;;
+  esac
+  url="$(github_asset_url "charmbracelet/mods" "mods_${MODS_TAG}_${target}.tar.gz" "$MODS_TAG")"
+  sha_url="$(github_asset_url "charmbracelet/mods" "checksums.txt" "$MODS_TAG")"
+  tmp_dir="$(mktemp -d)"
+  curl -fsSL -o "$tmp_dir/mods.tar.gz" "$url"
+  curl -fsSL -o "$tmp_dir/checksums.txt" "$sha_url"
+  expected="$(awk -v f="$(basename "$url")" '$2==f {print $1}' "$tmp_dir/checksums.txt")"
+  actual="$(sha256_file "$tmp_dir/mods.tar.gz")"
+  if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
+    log_error "Checksum verification failed for Mods."
+    rm -rf "$tmp_dir"
+    exit 1
+  fi
+  tar xf "$tmp_dir/mods.tar.gz" -C "$tmp_dir" mods
+  install -m 0755 "$tmp_dir/mods" "$HOME/.local/bin/mods"
+  rm -rf "$tmp_dir"
+fi
+
+# Install Aider (AI Pair Programming)
+if ! command -v aider >/dev/null; then
+  log_info "Installing Aider..."
+  if command -v uv >/dev/null; then
+    # Use uv for faster installation
+    uv tool install aider-chat || log_error "Aider install via uv failed. Install manually with: pip install aider-chat"
+  elif command -v pip >/dev/null || command -v pip3 >/dev/null; then
+    # Fallback to pip
+    python3 -m pip install --user aider-chat || log_error "Aider install via pip failed."
+  else
+    log_info "Skipping Aider install: neither uv nor pip found."
+  fi
 fi
 
 # Install Ghostty (Visual Layer)

@@ -39,6 +39,10 @@ brew "ollama"
 brew "fabric-cli"
 brew "uv"
 
+# AI CLI Tools
+brew "aichat"
+brew "mods"
+
 # Kubernetes
 brew "kubectl"
 brew "kubectx"
@@ -48,3 +52,4 @@ brew "kubesec"
 brew "minikube"
 brew "k9s"
 brew "helm"
+
