@@ -37,15 +37,6 @@ fi
 if [[ -f "${HOME}/.local/bin/executable_dot_completion" ]]; then
   fpath=("${HOME}/.local/bin" "${fpath[@]}")
 fi
-# fnm (Fast Node Manager)
-# Initialize early so Node + corepack use the expected version.
-if command -v fnm >/dev/null; then
-  if [[ ! -f "${ZSH_COMPLETIONS_DIR}/_fnm" ]]; then
-    command fnm completions --shell zsh >| "${ZSH_COMPLETIONS_DIR}/_fnm"
-  fi
-  eval "$(command fnm env --use-on-cd 2>/dev/null || command fnm env 2>/dev/null)"
-fi
-
 # Lazy-load NVM (if fnm is not installed)
 if ! command -v fnm >/dev/null; then
   export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
