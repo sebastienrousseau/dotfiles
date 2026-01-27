@@ -55,6 +55,7 @@ if command -v fnm >/dev/null; then
   pnpx() { _lazy_load_fnm; command pnpx "$@"; }
 fi
 
+
 # Lazy-load NVM (if fnm is not installed)
 if ! command -v fnm >/dev/null; then
   export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
