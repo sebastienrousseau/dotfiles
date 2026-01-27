@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+# run_onchange_25-python-tools.sh.tmpl
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") -}}
+
+set -euo pipefail
+
+log_info() { echo -e "\n[INFO] $*"; }
+log_error() { echo -e "\n[ERROR] $*" >&2; }
+
+install_python_tool() {
+  local tool="$1"
+
+  if command -v uv >/dev/null 2>&1; then
+    log_info "Installing ${tool} via uv..."
+    uv tool install --upgrade "$tool" || log_error "Failed to install ${tool} via uv."
+    return 0
+  fi
+
+  if command -v pipx >/dev/null 2>&1; then
+    log_info "Installing ${tool} via pipx..."
+    pipx install --force "$tool" || log_error "Failed to install ${tool} via pipx."
+    return 0
+  fi
+
+  if command -v python3 >/dev/null 2>&1; then
+    log_info "Installing ${tool} via pip..."
+    python3 -m pip install --user -U "$tool" || log_error "Failed to install ${tool} via pip."
+    return 0
+  fi
+
+  log_error "No python installer found for ${tool}. Install manually."
+}
+
+log_info "Python tools: starting setup..."
+
+install_python_tool "ruff"
+install_python_tool "black"
+install_python_tool "basedpyright"
+install_python_tool "debugpy"
+install_python_tool "ipython"
+install_python_tool "poetry"
+install_python_tool "ansible-lint"
+install_python_tool "checkov"
+install_python_tool "molecule"
+
+{{- end -}}
