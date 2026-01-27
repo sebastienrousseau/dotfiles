@@ -1,0 +1,3 @@
+# Slack theme string
+# Apply in Slack: Preferences -> Themes -> Paste the line below
+# 1A1B26,1A1B26,CDD6F4,414868,7AA2F7,1F2335,CDD6F4,7AA2F7
