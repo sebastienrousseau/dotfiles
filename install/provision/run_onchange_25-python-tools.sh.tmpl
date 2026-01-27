@@ -6,26 +6,40 @@
 set -euo pipefail
 
 log_info() { echo -e "\n[INFO] $*"; }
+log_warn() { echo -e "\n[WARN] $*"; }
 log_error() { echo -e "\n[ERROR] $*" >&2; }
+
+if [ -f "$HOME/.config/dotfiles/versions.env" ]; then
+  # shellcheck disable=SC1091
+  . "$HOME/.config/dotfiles/versions.env"
+fi
 
 install_python_tool() {
   local tool="$1"
+  local version="$2"
+  local spec="$tool"
+
+  if [ -n "$version" ]; then
+    spec="${tool}==${version}"
+  else
+    log_warn "No pin set for ${tool}. Set ${tool^^}_VERSION in versions.env to pin."
+  fi
 
   if command -v uv >/dev/null 2>&1; then
-    log_info "Installing ${tool} via uv..."
-    uv tool install --upgrade "$tool" || log_error "Failed to install ${tool} via uv."
+    log_info "Installing ${spec} via uv..."
+    uv tool install --upgrade "$spec" || log_error "Failed to install ${spec} via uv."
     return 0
   fi
 
   if command -v pipx >/dev/null 2>&1; then
-    log_info "Installing ${tool} via pipx..."
-    pipx install --force "$tool" || log_error "Failed to install ${tool} via pipx."
+    log_info "Installing ${spec} via pipx..."
+    pipx install --force "$spec" || log_error "Failed to install ${spec} via pipx."
     return 0
   fi
 
   if command -v python3 >/dev/null 2>&1; then
-    log_info "Installing ${tool} via pip..."
-    python3 -m pip install --user -U "$tool" || log_error "Failed to install ${tool} via pip."
+    log_info "Installing ${spec} via pip..."
+    python3 -m pip install --user -U "$spec" || log_error "Failed to install ${spec} via pip."
     return 0
   fi
 
@@ -34,14 +48,14 @@ install_python_tool() {
 
 log_info "Python tools: starting setup..."
 
-install_python_tool "ruff"
-install_python_tool "black"
-install_python_tool "basedpyright"
-install_python_tool "debugpy"
-install_python_tool "ipython"
-install_python_tool "poetry"
-install_python_tool "ansible-lint"
-install_python_tool "checkov"
-install_python_tool "molecule"
+install_python_tool "ruff" "${RUFF_VERSION:-}"
+install_python_tool "black" "${BLACK_VERSION:-}"
+install_python_tool "basedpyright" "${BASEDPYRIGHT_VERSION:-}"
+install_python_tool "debugpy" "${DEBUGPY_VERSION:-}"
+install_python_tool "ipython" "${IPYTHON_VERSION:-}"
+install_python_tool "poetry" "${POETRY_VERSION:-}"
+install_python_tool "ansible-lint" "${ANSIBLE_LINT_VERSION:-}"
+install_python_tool "checkov" "${CHECKOV_VERSION:-}"
+install_python_tool "molecule" "${MOLECULE_VERSION:-}"
 
 {{- end -}}
