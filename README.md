@@ -2,15 +2,19 @@
   <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg" alt="Dotfiles logo" width="64" />
 </p>
 
-# Dotfiles — Your Shell, Everywhere
+# Dotfiles — A Fast, Idempotent Shell Environment
 
-[![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions) [![Version](https://img.shields.io/badge/Version-v0.2.476-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.476) [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE) [![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases) [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
+[![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions)
+[![Version](https://img.shields.io/badge/Version-v0.2.476-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.476)
+[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
+[![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases)
+[![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
 
 ---
 
 ## Overview
 
-Set up your entire development environment in minutes — and keep it identical across every machine you use. Dotfiles is a cross‑platform shell distribution managed by [Chezmoi](https://github.com/twpayne/chezmoi) that works on macOS, Linux, and WSL. It is **idempotent** by design: run it once or a hundred times, and the result is always the same.
+Set up your development environment in minutes and keep it consistent across every machine. Dotfiles is a cross‑platform shell distribution managed by [Chezmoi](https://github.com/twpayne/chezmoi) that works on macOS, Linux, and WSL. It is **idempotent** by design: run it once or a hundred times, and the result is always the same.
 
 Git + templates + guarded scripts = a reproducible shell.
 
@@ -37,7 +41,7 @@ Git + templates + guarded scripts = a reproducible shell.
 
 Dotfiles takes an infrastructure‑oriented approach to managing your shell. It is designed for developers who work across multiple machines and value **daily usability, reproducibility, and auditability.**
 
-- **The Stack.** Zsh, Neovim, tmux, and AI CLI tools — configured with sane defaults so you can start working immediately.
+- **The Stack.** Zsh, Neovim, tmux, and AI CLI tools configured with sane defaults so you can start working immediately.
 - **Unified Control.** The `dot` CLI wraps common workflows such as syncing, upgrading, and managing secrets.
 - **Safety First.** Every system or security change requires explicit opt‑in.
 - **Clean Slate.** Source files, generated configs, and system state stay cleanly separated.
@@ -50,7 +54,7 @@ This is **infrastructure**, not an ad‑hoc shell script.
 - No destructive actions without explicit opt‑in.
 - No background daemons install automatically.
 - No system settings change by default.
-- System‑level behaviour requires explicit opt‑in through environment variables.
+- System‑level behavior requires explicit opt‑in through environment variables.
 - Dotfiles logs all privileged actions to `~/.local/share/dotfiles.log`.
 
 ---
@@ -58,7 +62,7 @@ This is **infrastructure**, not an ad‑hoc shell script.
 ## Get started
 
 > [!IMPORTANT]
-> The installer automatically backs up any existing `~/.dotfiles` directory and cleans up legacy configuration files. It **only** bootstraps `chezmoi` and applies this repo. OS packages install through Chezmoi hooks during the first apply.
+> The installer automatically backs up any existing `~/.dotfiles` directory and cleans up legacy configuration files. It only bootstraps `chezmoi` and applies this repo. OS packages install through Chezmoi hooks during the first apply.
 
 ```bash
 # Works on macOS, Linux, and WSL
