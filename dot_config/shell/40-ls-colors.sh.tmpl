@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# Set ls colors with GNU/BSD detection
+# GNU coreutils: LS_COLORS via dircolors
+# BSD/macOS: LSCOLORS + CLICOLOR
+
+if command -v dircolors >/dev/null 2>&1; then
+  if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/dircolors" ]; then
+    # shellcheck disable=SC1090
+    eval "$(dircolors -b "${XDG_CONFIG_HOME:-$HOME/.config}/dircolors")"
+  else
+    # shellcheck disable=SC1090
+    eval "$(dircolors -b)"
+  fi
+else
+  case "$(uname -s 2>/dev/null)" in
+    Darwin*)
+      export CLICOLOR=1
+      export LSCOLORS="ExFxCxDxBxegedabagacad"
+      if command -v gdircolors >/dev/null 2>&1; then
+        # shellcheck disable=SC1090
+        eval "$(gdircolors -b)"
+      fi
+      ;;
+  esac
+fi
+
+# Ensure LS_COLORS is set for Zsh completion when only LSCOLORS exists
+if [ -z "${LS_COLORS:-}" ] && [ -n "${LSCOLORS:-}" ]; then
+  export LS_COLORS=""
+fi

@@ -1,0 +1,6 @@
+configuration {
+  modi: "drun,run";
+  show-icons: true;
+}
+
+@theme "gruvbox-dark"

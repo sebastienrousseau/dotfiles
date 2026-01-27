@@ -15,7 +15,7 @@ Welcome to your universally compatible, high-performance dotfiles configuration,
     - `yazi` (files)
     - `zellij` (multiplexer)
 - **Starship Prompt**: A fast, customizable, cross-shell prompt.
-- **Optimized Vim**: `vim-plug` is managed automatically with performant lazy-loading logic.
+- **Optimized Vim**: Vim settings are kept minimal and fast by default.
 - **Modular Design**: Configuration is split into small, manageable templates.
 
 ---
@@ -26,7 +26,7 @@ Welcome to your universally compatible, high-performance dotfiles configuration,
 To install these dotfiles on a new machine, simply run:
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.475/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.476/install.sh)"
 ```
 
 This command will:

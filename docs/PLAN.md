@@ -32,7 +32,6 @@ Implement structural improvements for better organization and maintainability, a
 - **Split**: `run_onchange_install_packages.sh.tmpl` into:
     - `run_onchange_darwin_install-packages.sh.tmpl` (Homebrew)
     - `run_onchange_linux_install-packages.sh.tmpl` (Apt)
-    - `run_onchange_after_install-vim-plug.sh.tmpl` (Universal)
 - **Reason**: Improves readability and maintainability.
 
 # Phase 18: Component Documentation Polish [COMPLETED]

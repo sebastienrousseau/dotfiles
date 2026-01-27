@@ -31,10 +31,22 @@ fi
 
 # Ensure Node.js is installed
 if ! command -v node >/dev/null 2>&1; then
-  log_info "Installing Node.js LTS via fnm..."
-  fnm install --lts || fnm install 20
-  fnm use lts-latest 2>/dev/null || fnm use 20
-  eval "$(fnm env)"
+  log_info "Installing Node.js v24 via fnm..."
+  fnm install 24 || fnm install --lts
+  fnm default 24 2>/dev/null || fnm default lts-latest 2>/dev/null || true
+  fnm use 24 2>/dev/null || fnm use lts-latest 2>/dev/null || true
+  eval "$(fnm env 2>/dev/null || true)"
+fi
+
+if command -v corepack >/dev/null 2>&1; then
+  corepack enable || true
+  if [ -f "$HOME/.config/dotfiles/versions.env" ]; then
+    # shellcheck disable=SC1091
+    . "$HOME/.config/dotfiles/versions.env"
+  fi
+  if [ -n "${PNPM_VERSION:-}" ]; then
+    corepack prepare "pnpm@${PNPM_VERSION}" --activate || true
+  fi
 fi
 
 log_info "Node.js version: $(node --version)"

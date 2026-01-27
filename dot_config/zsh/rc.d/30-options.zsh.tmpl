@@ -18,14 +18,14 @@ setopt PUSHD_IGNORE_DUPS
 setopt PUSHD_SILENT
 setopt NO_BEEP
 
-bindkey -e
+bindkey -v
 autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
-bindkey "^[[A" up-line-or-beginning-search
-bindkey "^[[B" down-line-or-beginning-search
-bindkey "^P" up-line-or-beginning-search
-bindkey "^N" down-line-or-beginning-search
+bindkey -M viins "^[[A" up-line-or-beginning-search
+bindkey -M viins "^[[B" down-line-or-beginning-search
+bindkey -M viins "^P" up-line-or-beginning-search
+bindkey -M viins "^N" down-line-or-beginning-search
 
 ZSH_COMPLETIONS_DIR="${XDG_DATA_HOME:-${HOME}/.local/share}/zsh/completions"
 if [[ ! -d "${ZSH_COMPLETIONS_DIR}" ]]; then
@@ -37,22 +37,35 @@ fi
 if [[ -f "${HOME}/.local/bin/executable_dot_completion" ]]; then
   fpath=("${HOME}/.local/bin" "${fpath[@]}")
 fi
-# Lazy-load fnm (Fast Node Manager)
-# Defers `fnm env` init until first use of node/npm/npx/pnpm/pnpx/fnm
-if command -v fnm >/dev/null; then
-  if [[ ! -f "${ZSH_COMPLETIONS_DIR}/_fnm" ]]; then
-    command fnm completions --shell zsh >| "${ZSH_COMPLETIONS_DIR}/_fnm"
+# Lazy-load NVM (if fnm is not installed)
+if ! command -v fnm >/dev/null; then
+  export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+  if [[ -s "${NVM_DIR}/nvm.sh" ]]; then
+    _lazy_load_nvm() {
+      unfunction node npm npx nvm _lazy_load_nvm 2>/dev/null
+      # shellcheck disable=SC1090
+      . "${NVM_DIR}/nvm.sh"
+      if [[ -s "${NVM_DIR}/bash_completion" ]]; then
+        # shellcheck disable=SC1090
+        . "${NVM_DIR}/bash_completion"
+      fi
+    }
+    nvm() { _lazy_load_nvm; nvm "$@"; }
+    node() { _lazy_load_nvm; command node "$@"; }
+    npm() { _lazy_load_nvm; command npm "$@"; }
+    npx() { _lazy_load_nvm; command npx "$@"; }
   fi
-  _lazy_load_fnm() {
-    unfunction node npm npx pnpm pnpx fnm _lazy_load_fnm 2>/dev/null
-    eval "$(command fnm env --use-on-cd)"
+fi
+
+# Lazy-load SDKMAN
+export SDKMAN_DIR="${SDKMAN_DIR:-$HOME/.sdkman}"
+if [[ -s "${SDKMAN_DIR}/bin/sdkman-init.sh" && -z "${functions[sdk]:-}" ]]; then
+  _lazy_load_sdkman() {
+    unfunction sdk _lazy_load_sdkman 2>/dev/null
+    # shellcheck disable=SC1090
+    . "${SDKMAN_DIR}/bin/sdkman-init.sh"
   }
-  fnm() { _lazy_load_fnm; command fnm "$@"; }
-  node() { _lazy_load_fnm; command node "$@"; }
-  npm() { _lazy_load_fnm; command npm "$@"; }
-  npx() { _lazy_load_fnm; command npx "$@"; }
-  pnpm() { _lazy_load_fnm; command pnpm "$@"; }
-  pnpx() { _lazy_load_fnm; command pnpx "$@"; }
+  sdk() { _lazy_load_sdkman; sdk "$@"; }
 fi
 autoload -Uz compinit
 if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
@@ -77,6 +90,11 @@ fi
 
 # Explicit fzf bindings (fallback if not already set by fzf)
 if command -v fzf >/dev/null; then
-  bindkey -s '^T' 'fzf^M'
-  bindkey -s '^R' 'fzf^M'
+  bindkey -M viins -s '^T' 'fzf^M'
+  bindkey -M viins -s '^R' 'fzf^M'
+fi
+
+# direnv (directory environments)
+if command -v direnv >/dev/null; then
+  eval "$(direnv hook zsh)"
 fi

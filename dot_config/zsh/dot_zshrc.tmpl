@@ -1,4 +1,4 @@
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.475) - <https://dotfiles.io>
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.476) - <https://dotfiles.io>
 # Made With ❤️ in London, United Kingdom
 # Designed by Sebastien Rousseau
 # Copyright (c) 2015-2026. All rights reserved.
@@ -100,11 +100,24 @@ fi
 # The 90-ux-aliases.sh file alone contains 178KB of aliases, many with deprecated flags.
 #
 # Optimized loading of core configurations
-for core_layer in 00-core-paths 05-core-safety 50-logic-functions; do
+for core_layer in 00-core-paths 05-core-safety 40-ls-colors 50-logic-functions; do
   if [[ -f "${HOME}/.config/shell/${core_layer}.sh" ]]; then
     source "${HOME}/.config/shell/${core_layer}.sh"
   fi
 done
+
+# fnm (Fast Node Manager)
+# Initialize after PATH is set so Node + corepack use the expected version.
+if command -v fnm >/dev/null; then
+  ZSH_COMPLETIONS_DIR="${XDG_DATA_HOME:-${HOME}/.local/share}/zsh/completions"
+  if [[ ! -d "${ZSH_COMPLETIONS_DIR}" ]]; then
+    command mkdir -p "${ZSH_COMPLETIONS_DIR}"
+  fi
+  if [[ ! -f "${ZSH_COMPLETIONS_DIR}/_fnm" ]]; then
+    command fnm completions --shell zsh >| "${ZSH_COMPLETIONS_DIR}/_fnm"
+  fi
+  eval "$(command fnm env --use-on-cd 2>/dev/null || command fnm env 2>/dev/null)"
+fi
 
 # Load Universal Aliases (Restored after fixing grep flags)
 if [[ -f "${HOME}/.config/shell/90-ux-aliases.sh" ]]; then
