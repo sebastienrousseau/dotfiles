@@ -101,9 +101,15 @@ LAZYGIT_TAG="${LAZYGIT_TAG:-latest}"
 ATUIN_TAG="${ATUIN_TAG:-latest}"
 ZELLIJ_TAG="${ZELLIJ_TAG:-latest}"
 UV_TAG="${UV_TAG:-latest}"
+TOPGRADE_TAG="${TOPGRADE_TAG:-latest}"
+MISE_TAG="${MISE_TAG:-latest}"
+YAZI_TAG="${YAZI_TAG:-latest}"
 AICHAT_TAG="${AICHAT_TAG:-latest}"
 MODS_TAG="${MODS_TAG:-latest}"
 
+warn_unpinned "Topgrade" "$TOPGRADE_TAG" "TOPGRADE_TAG"
+warn_unpinned "Mise" "$MISE_TAG" "MISE_TAG"
+warn_unpinned "Yazi" "$YAZI_TAG" "YAZI_TAG"
 warn_unpinned "Starship" "$STARSHIP_TAG" "STARSHIP_TAG"
 warn_unpinned "Zoxide" "$ZOXIDE_TAG" "ZOXIDE_TAG"
 warn_unpinned "Neovim" "$NEOVIM_TAG" "NEOVIM_TAG"
@@ -160,8 +166,26 @@ if command -v apt-get >/dev/null; then
     lua5.1
     luajit
     luarocks
+    tmux
+    pipx
+    ruby
+    ruby-dev
   )
   $sudo_cmd apt-get install -y "${packages[@]}"
+
+  # GitHub CLI (apt) — requires official repo
+  if ! command -v gh >/dev/null; then
+    if ! apt-cache show gh >/dev/null 2>&1; then
+      log_info "Adding GitHub CLI apt repository..."
+      $sudo_cmd mkdir -p /etc/apt/keyrings
+      curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+        | $sudo_cmd tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+        | $sudo_cmd tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+      $sudo_cmd apt-get update
+    fi
+    $sudo_cmd apt-get install -y gh || log_info "Skipping GitHub CLI install (apt)."
+  fi
 
   optional_packages=(terraform terraform-docs tflint trivy packer vagrant ansible)
   install_optional=()
@@ -197,6 +221,11 @@ elif command -v dnf >/dev/null; then
     lua
     luajit
     luarocks
+    tmux
+    pipx
+    ruby
+    ruby-devel
+    gh
   )
   $sudo_cmd dnf install -y "${packages[@]}"
 
@@ -234,6 +263,10 @@ elif command -v pacman >/dev/null; then
     lua
     luajit
     luarocks
+    tmux
+    pipx
+    ruby
+    github-cli
   )
   $sudo_cmd pacman -S --needed --noconfirm "${packages[@]}"
 
@@ -258,16 +291,6 @@ if ! command -v luacheck >/dev/null; then
     luarocks install --local luacheck || true
   else
     log_error "Luacheck not found and luarocks is missing. Install manually."
-  fi
-fi
-
-# Install Stylua (Lua formatter)
-if ! command -v stylua >/dev/null; then
-  if command -v cargo >/dev/null; then
-    log_info "Installing Stylua via cargo..."
-    cargo install stylua || true
-  else
-    log_error "Stylua not found and cargo is missing. Install stylua manually."
   fi
 fi
 
@@ -388,7 +411,34 @@ if ! command -v zellij >/dev/null; then
   install_from_tarball "$url" "$sha_url" "zellij" "$HOME/.local/bin"
 fi
 
-# Install Delta
+# Install Rustup
+if ! command -v rustup >/dev/null; then
+  log_info "Installing Rustup..."
+  curl -fsSL https://sh.rustup.rs | sh -s -- -y --no-modify-path
+  # Source cargo env for the rest of this script
+  # shellcheck disable=SC1091
+  . "${HOME}/.cargo/env"
+fi
+
+# Install cargo-install-update (needed for topgrade's cargo step)
+if command -v cargo >/dev/null; then
+  if ! cargo install --list 2>/dev/null | grep -q "^cargo-update "; then
+    log_info "Installing cargo-install-update..."
+    cargo install cargo-update || true
+  fi
+fi
+
+# Install Stylua (Lua formatter, requires cargo)
+if ! command -v stylua >/dev/null; then
+  if command -v cargo >/dev/null; then
+    log_info "Installing Stylua via cargo..."
+    cargo install stylua || true
+  else
+    log_error "Stylua not found and cargo is missing. Install stylua manually."
+  fi
+fi
+
+# Install Delta (requires cargo)
 if ! command -v delta >/dev/null; then
   log_info "Installing Delta..."
   if command -v cargo >/dev/null; then
@@ -422,14 +472,88 @@ if ! command -v uv >/dev/null; then
   rm -rf "$tmp_dir"
 fi
 
+# Install Topgrade
+if ! command -v topgrade >/dev/null; then
+  log_info "Installing Topgrade..."
+  arch="$(uname -m)"
+  case "$arch" in
+    x86_64|amd64) target="x86_64-unknown-linux-gnu" ;;
+    aarch64|arm64) target="aarch64-unknown-linux-gnu" ;;
+    *) log_error "Unsupported arch for Topgrade: $arch"; exit 1 ;;
+  esac
+  tag_num="${TOPGRADE_TAG#v}"
+  url="$(github_asset_url "topgrade-rs/topgrade" "topgrade-${tag_num}-${target}.tar.gz" "$TOPGRADE_TAG")"
+  sha_url="$(github_asset_url "topgrade-rs/topgrade" "topgrade-${tag_num}-${target}.tar.gz.sha256" "$TOPGRADE_TAG")"
+  install_from_tarball "$url" "$sha_url" "topgrade" "$HOME/.local/bin"
+fi
+
+# Install Mise
+if ! command -v mise >/dev/null; then
+  log_info "Installing Mise..."
+  arch="$(uname -m)"
+  case "$arch" in
+    x86_64|amd64) target="x64" ;;
+    aarch64|arm64) target="arm64" ;;
+    *) log_error "Unsupported arch for Mise: $arch"; exit 1 ;;
+  esac
+  url="$(github_asset_url "jdx/mise" "mise-${MISE_TAG}-linux-${target}.tar.gz" "$MISE_TAG")"
+  sha_url="$(github_asset_url "jdx/mise" "SHASUMS" "$MISE_TAG")"
+  tmp_dir="$(mktemp -d)"
+  curl -fsSL -o "$tmp_dir/mise.tar.gz" "$url"
+  curl -fsSL -o "$tmp_dir/SHASUMS" "$sha_url"
+  expected="$(awk -v f="$(basename "$url")" '$2~f {print $1}' "$tmp_dir/SHASUMS")"
+  actual="$(sha256_file "$tmp_dir/mise.tar.gz")"
+  if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
+    log_error "Checksum verification failed for Mise."
+    rm -rf "$tmp_dir"
+    exit 1
+  fi
+  tar -xzf "$tmp_dir/mise.tar.gz" -C "$tmp_dir"
+  bin_path="$(find "$tmp_dir" -type f -name "mise" -perm -u+x 2>/dev/null | head -n1)"
+  if [ -n "$bin_path" ]; then
+    mkdir -p "$HOME/.local/bin"
+    install -m 0755 "$bin_path" "$HOME/.local/bin/mise"
+  else
+    log_error "mise binary not found in archive."
+  fi
+  rm -rf "$tmp_dir"
+fi
+
 # Install Yazi (File Manager)
 if ! command -v yazi >/dev/null; then
   log_info "Installing Yazi..."
-  # Use a helper script or direct binary (simplified for reliability)
-  # Note: Yazi often requires a recent Rust toolchain or compiled binary.
-  # For now, we will skip auto-install on Linux if not present to avoid breakage, 
-  # as it has complex dependencies. Providing a hint instead.
-  log_info "Note: To install Yazi on Linux, use cargo: cargo install --locked yazi-fm"
+  arch="$(uname -m)"
+  case "$arch" in
+    x86_64|amd64) target="x86_64-unknown-linux-gnu" ;;
+    aarch64|arm64) target="aarch64-unknown-linux-gnu" ;;
+    *) log_error "Unsupported arch for Yazi: $arch"; exit 1 ;;
+  esac
+  url="$(github_asset_url "sxyazi/yazi" "yazi-${target}.zip" "$YAZI_TAG")"
+  sha_url="$(github_asset_url "sxyazi/yazi" "yazi-${target}.zip.sha256" "$YAZI_TAG")"
+  tmp_dir="$(mktemp -d)"
+  curl -fsSL -o "$tmp_dir/yazi.zip" "$url"
+  curl -fsSL -o "$tmp_dir/yazi.zip.sha256" "$sha_url"
+  expected="$(awk '{print $1}' "$tmp_dir/yazi.zip.sha256")"
+  actual="$(sha256_file "$tmp_dir/yazi.zip")"
+  if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
+    log_error "Checksum verification failed for Yazi."
+    rm -rf "$tmp_dir"
+    exit 1
+  fi
+  unzip -o "$tmp_dir/yazi.zip" -d "$tmp_dir"
+  bin_path="$(find "$tmp_dir" -type f -name "yazi" -perm -u+x 2>/dev/null | head -n1)"
+  if [ -n "$bin_path" ]; then
+    mkdir -p "$HOME/.local/bin"
+    install -m 0755 "$bin_path" "$HOME/.local/bin/yazi"
+    # Also install ya (yazi helper)
+    ya_path="$(find "$tmp_dir" -type f -name "ya" -perm -u+x 2>/dev/null | head -n1)"
+    if [ -n "$ya_path" ]; then
+      install -m 0755 "$ya_path" "$HOME/.local/bin/ya"
+    fi
+  else
+    log_error "yazi binary not found in archive."
+  fi
+  rm -rf "$tmp_dir"
 fi
 
 # Install AIChat (All-in-one LLM CLI)

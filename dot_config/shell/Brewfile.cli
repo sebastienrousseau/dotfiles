@@ -48,6 +48,15 @@ brew "vagrant"
 brew "ansible"
 brew "ansible-lint"
 
+# Update & runtime tooling
+brew "topgrade"
+brew "mise"
+brew "rustup"
+brew "tmux"
+brew "pipx"
+brew "ruby"
+brew "yazi"
+
 # AI CLI Tools
 brew "aichat"
 brew "mods"
