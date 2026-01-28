@@ -24,6 +24,7 @@ recipient=$(age-keygen -y "$KEY_FILE")
 
 python3 - "$CONFIG_FILE" "$KEY_FILE" "$recipient" <<'PY'
 import sys
+import json
 from pathlib import Path
 
 config_path = Path(sys.argv[1])
@@ -54,13 +55,13 @@ for line in lines:
             continue
         out.append(line)
 
-# Append updated config
+# Append updated config (use json.dumps for safe string escaping)
 out.append("")
 out.append("encryption = \"age\"")
 out.append("")
 out.append("[age]")
-out.append(f"identity = \"{key_file}\"")
-out.append(f"recipient = \"{recipient}\"")
+out.append(f"identity = {json.dumps(key_file)}")
+out.append(f"recipient = {json.dumps(recipient)}")
 
 config_path.write_text("\n".join(out).rstrip() + "\n", encoding="utf-8")
 PY

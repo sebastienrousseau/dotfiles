@@ -511,9 +511,9 @@ alias .....='cd_with_history ../../../..' # Go up four levels
 #-----------------------------------------------------------------------------
 # Directory Stack Management
 #-----------------------------------------------------------------------------
-alias dirs='dirs -v'                  # List directory stack with indices
-alias pd='pushd'                      # Push directory to stack
-alias popd='popd && ls -lh'           # Pop directory from stack and list contents
+alias dirs='dirs -v'        # List directory stack with indices
+alias pd='pushd'            # Push directory to stack
+alias popd='popd && ls -lh' # Pop directory from stack and list contents
 
 #-----------------------------------------------------------------------------
 # Consistent Shorthand Aliases

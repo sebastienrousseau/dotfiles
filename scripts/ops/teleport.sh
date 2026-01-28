@@ -16,8 +16,10 @@ echo " Teleporting dotfiles to ${TARGET}..."
 
 # 1. Archive the current state
 # 2. Pipe to SSH
-# 3. Extract in remote home directory
-chezmoi archive | ssh "$TARGET" "tar xz -C ~"
+# 3. Extract in remote home directory with safety flags
+#    --no-same-owner: don't try to preserve owner (non-root)
+#    --strip-components=0: don't strip path components
+chezmoi archive | ssh "$TARGET" 'tar xz -C "$HOME" --no-same-owner'
 
 echo " Teleport successful!"
 echo "   Note: Changes are applied to files, but shell may need restart or sourcing."

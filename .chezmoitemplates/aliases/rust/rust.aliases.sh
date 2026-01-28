@@ -75,10 +75,10 @@ fi
 # 🆁🆄🆂🆃🆄🅿 🅰🅻🅸🅰🆂🅴🆂
 if command -v 'rustup' >/dev/null; then
   # Updates and Installation
-  alias ru='rustup update'             # Update all toolchains
-  alias rus='rustup update stable'     # Update stable toolchain
+  alias ru='rustup update'               # Update all toolchains
+  alias rus='rustup update stable'       # Update stable toolchain
   alias rnightly='rustup update nightly' # Update nightly toolchain
-  alias rti='rustup toolchain install' # Install specific toolchain
+  alias rti='rustup toolchain install'   # Install specific toolchain
 
   # Components Management
   alias rca='rustup component add'    # Add component

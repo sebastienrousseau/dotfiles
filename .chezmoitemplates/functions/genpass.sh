@@ -57,6 +57,12 @@ EOF
   local separator="${2:--}"  # Separator between blocks (default: '-')
   local block_size=12        # Length of each block (high-entropy default)
 
+  # Validate num_blocks is a positive integer
+  if ! [[ "$num_blocks" =~ ^[0-9]+$ ]] || [[ "$num_blocks" -lt 1 ]] || [[ "$num_blocks" -gt 100 ]]; then
+    echo "[ERROR] num_blocks must be a number between 1 and 100." >&2
+    return 1
+  fi
+
   # Define character set for high entropy
   local CHARSET="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+{}|:<>?~[];',./=-"
 

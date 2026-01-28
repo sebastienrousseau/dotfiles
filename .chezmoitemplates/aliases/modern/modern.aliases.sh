@@ -1,5 +1,4 @@
 # shellcheck shell=bash
-#!/usr/bin/env bash
 # Modern Tooling Aliases (Rust Replacements) & Listing
 
 # Eza (Replacement for ls) OR Fallback

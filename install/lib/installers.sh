@@ -189,12 +189,11 @@ install_from_zip() {
 
 # Resolve architecture to a target triple fragment
 resolve_arch() {
-    local format="${1:-gnu}"
     local arch
     arch="$(uname -m)"
     case "$arch" in
-        x86_64|amd64) echo "x86_64" ;;
-        aarch64|arm64) echo "aarch64" ;;
+        x86_64 | amd64) echo "x86_64" ;;
+        aarch64 | arm64) echo "aarch64" ;;
         *) die "Unsupported architecture: $arch" ;;
     esac
 }

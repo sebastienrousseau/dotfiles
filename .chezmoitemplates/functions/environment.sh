@@ -47,11 +47,11 @@ environment() {
   local os_name
   os_name="$(uname -s)"
   case "$os_name" in
-    Darwin)          LOCAL_OS="mac" ;;
-    Linux)           LOCAL_OS="linux" ;;
-    MINGW*|MSYS*)    LOCAL_OS="win" ;;
-    Cygwin|CYGWIN*)  LOCAL_OS="win" ;;
-    *)               LOCAL_OS="other" ;;
+    Darwin) LOCAL_OS="mac" ;;
+    Linux) LOCAL_OS="linux" ;;
+    MINGW* | MSYS*) LOCAL_OS="win" ;;
+    Cygwin | CYGWIN*) LOCAL_OS="win" ;;
+    *) LOCAL_OS="other" ;;
   esac
 
   # Output the result

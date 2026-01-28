@@ -18,22 +18,77 @@ return {
       "nvim-neotest/nvim-nio",
     },
     keys = {
-      { "<leader>db", function() require("dap").toggle_breakpoint() end, desc = "Toggle Breakpoint" },
-      { "<leader>dc", function() require("dap").continue() end, desc = "Continue" },
-      { "<leader>di", function() require("dap").step_into() end, desc = "Step Into" },
-      { "<leader>do", function() require("dap").step_over() end, desc = "Step Over" },
-      { "<leader>dO", function() require("dap").step_out() end, desc = "Step Out" },
-      { "<leader>dr", function() require("dap").repl.open() end, desc = "Open REPL" },
-      { "<leader>dl", function() require("dap").run_last() end, desc = "Run Last" },
-      { "<leader>dt", function() require("dap").terminate() end, desc = "Terminate" },
-      { "<leader>du", function() require("dapui").toggle() end, desc = "Toggle DAP UI" },
+      {
+        "<leader>db",
+        function()
+          require("dap").toggle_breakpoint()
+        end,
+        desc = "Toggle Breakpoint",
+      },
+      {
+        "<leader>dc",
+        function()
+          require("dap").continue()
+        end,
+        desc = "Continue",
+      },
+      {
+        "<leader>di",
+        function()
+          require("dap").step_into()
+        end,
+        desc = "Step Into",
+      },
+      {
+        "<leader>do",
+        function()
+          require("dap").step_over()
+        end,
+        desc = "Step Over",
+      },
+      {
+        "<leader>dO",
+        function()
+          require("dap").step_out()
+        end,
+        desc = "Step Out",
+      },
+      {
+        "<leader>dr",
+        function()
+          require("dap").repl.open()
+        end,
+        desc = "Open REPL",
+      },
+      {
+        "<leader>dl",
+        function()
+          require("dap").run_last()
+        end,
+        desc = "Run Last",
+      },
+      {
+        "<leader>dt",
+        function()
+          require("dap").terminate()
+        end,
+        desc = "Terminate",
+      },
+      {
+        "<leader>du",
+        function()
+          require("dapui").toggle()
+        end,
+        desc = "Toggle DAP UI",
+      },
     },
     config = function()
       local dap = require("dap")
 
       -- JavaScript/TypeScript debugging with js-debug-adapter
       -- Requires: MasonInstall js-debug-adapter
-      local js_debug_path = vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js"
+      local js_debug_path = vim.fn.stdpath("data")
+        .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js"
 
       for _, adapter in ipairs({ "pwa-node", "pwa-chrome", "node-terminal" }) do
         dap.adapters[adapter] = {
@@ -132,8 +187,12 @@ return {
       })
 
       -- Auto open/close DAP UI on debug session lifecycle
-      local function open_dapui() dapui.open() end
-      local function close_dapui() dapui.close() end
+      local function open_dapui()
+        dapui.open()
+      end
+      local function close_dapui()
+        dapui.close()
+      end
 
       dap.listeners.after.event_initialized["dapui_config"] = open_dapui
       dap.listeners.before.event_terminated["dapui_config"] = close_dapui
