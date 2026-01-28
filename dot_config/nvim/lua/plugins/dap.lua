@@ -1,4 +1,12 @@
 -- Debug Adapter Protocol (DAP) Configuration
+
+-- Layout constants
+local SIDEBAR_WIDTH = 40
+local BOTTOM_PANEL_HEIGHT = 10
+local QUARTER_SIZE = 0.25
+local HALF_SIZE = 0.5
+local DEFAULT_DEV_SERVER_PORT = 3000
+
 return {
   -- DAP Core
   {
@@ -25,6 +33,8 @@ return {
 
       -- JavaScript/TypeScript debugging with js-debug-adapter
       -- Requires: MasonInstall js-debug-adapter
+      local js_debug_path = vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js"
+
       for _, adapter in ipairs({ "pwa-node", "pwa-chrome", "node-terminal" }) do
         dap.adapters[adapter] = {
           type = "server",
@@ -32,10 +42,7 @@ return {
           port = "${port}",
           executable = {
             command = "node",
-            args = {
-              vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js",
-              "${port}",
-            },
+            args = { js_debug_path, "${port}" },
           },
         }
       end
@@ -61,7 +68,7 @@ return {
             type = "pwa-chrome",
             request = "launch",
             name = "Launch Chrome",
-            url = "http://localhost:3000",
+            url = "http://localhost:" .. DEFAULT_DEV_SERVER_PORT,
             webRoot = "${workspaceFolder}",
           },
         }
@@ -85,7 +92,8 @@ return {
     "rcarriga/nvim-dap-ui",
     dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
     config = function()
-      local dap, dapui = require("dap"), require("dapui")
+      local dap = require("dap")
+      local dapui = require("dapui")
 
       dapui.setup({
         icons = { expanded = "▾", collapsed = "▸", current_frame = "▸" },
@@ -100,20 +108,20 @@ return {
         layouts = {
           {
             elements = {
-              { id = "scopes", size = 0.25 },
-              { id = "breakpoints", size = 0.25 },
-              { id = "stacks", size = 0.25 },
-              { id = "watches", size = 0.25 },
+              { id = "scopes", size = QUARTER_SIZE },
+              { id = "breakpoints", size = QUARTER_SIZE },
+              { id = "stacks", size = QUARTER_SIZE },
+              { id = "watches", size = QUARTER_SIZE },
             },
-            size = 40,
+            size = SIDEBAR_WIDTH,
             position = "left",
           },
           {
             elements = {
-              { id = "repl", size = 0.5 },
-              { id = "console", size = 0.5 },
+              { id = "repl", size = HALF_SIZE },
+              { id = "console", size = HALF_SIZE },
             },
-            size = 10,
+            size = BOTTOM_PANEL_HEIGHT,
             position = "bottom",
           },
         },
@@ -123,16 +131,13 @@ return {
         },
       })
 
-      -- Auto open/close DAP UI
-      dap.listeners.after.event_initialized["dapui_config"] = function()
-        dapui.open()
-      end
-      dap.listeners.before.event_terminated["dapui_config"] = function()
-        dapui.close()
-      end
-      dap.listeners.before.event_exited["dapui_config"] = function()
-        dapui.close()
-      end
+      -- Auto open/close DAP UI on debug session lifecycle
+      local function open_dapui() dapui.open() end
+      local function close_dapui() dapui.close() end
+
+      dap.listeners.after.event_initialized["dapui_config"] = open_dapui
+      dap.listeners.before.event_terminated["dapui_config"] = close_dapui
+      dap.listeners.before.event_exited["dapui_config"] = close_dapui
     end,
   },
 }

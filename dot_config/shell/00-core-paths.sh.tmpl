@@ -36,13 +36,16 @@ export PATH="${BUN_INSTALL}/bin:${PATH}"
 
 # Kubeconfig merge logic (merge all configs in ~/.kube/config.d/)
 if [[ -d "${HOME}/.kube/config.d" ]]; then
-    KUBECONFIG_EXTRA=""
+    kubeconfig_extra=""
     for conf in "${HOME}/.kube/config.d"/*; do
-        [[ -f "$conf" ]] && KUBECONFIG_EXTRA="${KUBECONFIG_EXTRA}:${conf}"
+        if [[ -f "$conf" ]]; then
+            kubeconfig_extra="${kubeconfig_extra}:${conf}"
+        fi
     done
-    if [[ -n "$KUBECONFIG_EXTRA" ]]; then
-        export KUBECONFIG="${HOME}/.kube/config${KUBECONFIG_EXTRA}"
+    if [[ -n "$kubeconfig_extra" ]]; then
+        export KUBECONFIG="${HOME}/.kube/config${kubeconfig_extra}"
     fi
+    unset kubeconfig_extra
 fi
 
 # Node.js (Global)

@@ -83,6 +83,68 @@ resolve_source_dir() {
     echo ""
 }
 
+# Helper functions for packages command
+show_system_package_managers() {
+    if command -v brew >/dev/null 2>&1; then
+        brew_version=$(brew --version | head -1)
+        brew_formulae=$(brew list --formula 2>/dev/null | wc -l | tr -d ' ')
+        brew_casks=$(brew list --cask 2>/dev/null | wc -l | tr -d ' ')
+        echo "  Homebrew: $brew_version"
+        echo "    Formulae: $brew_formulae"
+        echo "    Casks: $brew_casks"
+    fi
+    if command -v apt >/dev/null 2>&1; then
+        apt_version=$(apt --version 2>/dev/null | head -1 || echo 'installed')
+        apt_packages=$(dpkg -l 2>/dev/null | grep -c '^ii' || echo 'N/A')
+        echo "  APT: $apt_version"
+        echo "    Packages: $apt_packages"
+    fi
+    if command -v dnf >/dev/null 2>&1; then
+        echo "  DNF: $(dnf --version 2>/dev/null | head -1 || echo 'installed')"
+    fi
+    if command -v pacman >/dev/null 2>&1; then
+        pacman_packages=$(pacman -Q 2>/dev/null | wc -l | tr -d ' ')
+        echo "  Pacman: $(pacman --version | head -1)"
+        echo "    Packages: $pacman_packages"
+    fi
+    if command -v nix >/dev/null 2>&1; then
+        echo "  Nix: $(nix --version)"
+    fi
+}
+
+show_language_package_managers() {
+    if command -v npm >/dev/null 2>&1; then
+        npm_globals=$(npm list -g --depth=0 2>/dev/null | grep -c '├──\|└──' || echo 'N/A')
+        echo "  npm: $(npm --version)"
+        echo "    Global packages: $npm_globals"
+    fi
+    if command -v pnpm >/dev/null 2>&1; then
+        echo "  pnpm: $(pnpm --version)"
+    fi
+    if command -v bun >/dev/null 2>&1; then
+        echo "  Bun: $(bun --version)"
+    fi
+    if command -v cargo >/dev/null 2>&1; then
+        cargo_installed=$(cargo install --list 2>/dev/null | grep -c ':$' || echo 'N/A')
+        echo "  Cargo: $(cargo --version | cut -d' ' -f2)"
+        echo "    Installed: $cargo_installed"
+    fi
+    if command -v pip3 >/dev/null 2>&1; then
+        echo "  pip: $(pip3 --version | cut -d' ' -f2)"
+    fi
+    if command -v pipx >/dev/null 2>&1; then
+        pipx_installed=$(pipx list --short 2>/dev/null | wc -l | tr -d ' ')
+        echo "  pipx: $(pipx --version)"
+        echo "    Installed: $pipx_installed"
+    fi
+    if command -v gem >/dev/null 2>&1; then
+        echo "  RubyGems: $(gem --version)"
+    fi
+    if command -v go >/dev/null 2>&1; then
+        echo "  Go: $(go version | cut -d' ' -f3)"
+    fi
+}
+
 case "$COMMAND" in
     --version|-v|version)
         echo "dot v${VERSION}"
@@ -528,9 +590,9 @@ case "$COMMAND" in
         fi
         ;;
     new)
-        LANG="$1"
-        NAME="$2"
-        if [ -z "$LANG" ] || [ -z "$NAME" ]; then
+        TEMPLATE_LANG="$1"
+        PROJECT_NAME="$2"
+        if [ -z "$TEMPLATE_LANG" ] || [ -z "$PROJECT_NAME" ]; then
             echo "Usage: dot new <lang> <name>"
             echo "Available templates: python, go, node, packer, molecule"
             exit 1
@@ -540,13 +602,13 @@ case "$COMMAND" in
             echo "Dotfiles source not found."
             exit 1
         fi
-        TEMPLATE_DIR="$SRC_DIR/templates/projects/$LANG"
+        TEMPLATE_DIR="$SRC_DIR/templates/projects/$TEMPLATE_LANG"
         if [ ! -d "$TEMPLATE_DIR" ]; then
-            echo "Unknown template: $LANG"
+            echo "Unknown template: $TEMPLATE_LANG"
             echo "Available templates: python, go, node, packer, molecule"
             exit 1
         fi
-        DEST="$PWD/$NAME"
+        DEST="$PWD/$PROJECT_NAME"
         if [ -e "$DEST" ]; then
             echo "Destination exists: $DEST"
             exit 1
@@ -555,93 +617,41 @@ case "$COMMAND" in
         cp -R "$TEMPLATE_DIR/." "$DEST"
         find "$DEST" -depth -name "__PROJECT_NAME__" -print0 | while IFS= read -r -d '' path; do
             parent="$(dirname "$path")"
-            mv "$path" "$parent/$NAME"
+            mv "$path" "$parent/$PROJECT_NAME"
         done
+        # Determine Python interpreter
+        PYTHON_CMD=""
         if command -v python3 >/dev/null 2>&1; then
-            find "$DEST" -type f -print0 | while IFS= read -r -d '' file; do
-                python3 - "$file" "$NAME" <<'PY'
-import sys
-
-path = sys.argv[1]
-name = sys.argv[2]
-with open(path, "r", encoding="utf-8") as f:
-    data = f.read()
-data = data.replace("__PROJECT_NAME__", name)
-with open(path, "w", encoding="utf-8") as f:
-    f.write(data)
-PY
-            done
+            PYTHON_CMD="python3"
         elif command -v python >/dev/null 2>&1; then
-            find "$DEST" -type f -print0 | while IFS= read -r -d '' file; do
-                python - "$file" "$NAME" <<'PY'
-import sys
-
-path = sys.argv[1]
-name = sys.argv[2]
-with open(path, "r", encoding="utf-8") as f:
-    data = f.read()
-data = data.replace("__PROJECT_NAME__", name)
-with open(path, "w", encoding="utf-8") as f:
-    f.write(data)
-PY
-            done
+            PYTHON_CMD="python"
         else
             echo "python3 is required to render templates."
             exit 1
         fi
-        echo "Created $LANG project at $DEST"
+        # Render template placeholders
+        find "$DEST" -type f -print0 | while IFS= read -r -d '' file; do
+            $PYTHON_CMD - "$file" "$PROJECT_NAME" <<'PY'
+import sys
+
+path = sys.argv[1]
+name = sys.argv[2]
+with open(path, "r", encoding="utf-8") as f:
+    data = f.read()
+data = data.replace("__PROJECT_NAME__", name)
+with open(path, "w", encoding="utf-8") as f:
+    f.write(data)
+PY
+        done
+        echo "Created $TEMPLATE_LANG project at $DEST"
         ;;
     packages)
         echo "Package Managers:"
         echo ""
-        if command -v brew >/dev/null 2>&1; then
-            echo "  Homebrew: $(brew --version | head -1)"
-            echo "    Formulae: $(brew list --formula | wc -l | tr -d ' ')"
-            echo "    Casks: $(brew list --cask | wc -l | tr -d ' ')"
-        fi
-        if command -v apt >/dev/null 2>&1; then
-            echo "  APT: $(apt --version 2>/dev/null | head -1 || echo 'installed')"
-            echo "    Packages: $(dpkg -l 2>/dev/null | grep -c '^ii' || echo 'N/A')"
-        fi
-        if command -v dnf >/dev/null 2>&1; then
-            echo "  DNF: $(dnf --version 2>/dev/null | head -1 || echo 'installed')"
-        fi
-        if command -v pacman >/dev/null 2>&1; then
-            echo "  Pacman: $(pacman --version | head -1)"
-            echo "    Packages: $(pacman -Q 2>/dev/null | wc -l | tr -d ' ')"
-        fi
-        if command -v nix >/dev/null 2>&1; then
-            echo "  Nix: $(nix --version)"
-        fi
+        show_system_package_managers
         echo ""
         echo "Language Package Managers:"
-        if command -v npm >/dev/null 2>&1; then
-            echo "  npm: $(npm --version)"
-            echo "    Global packages: $(npm list -g --depth=0 2>/dev/null | grep -c '├──\|└──' || echo 'N/A')"
-        fi
-        if command -v pnpm >/dev/null 2>&1; then
-            echo "  pnpm: $(pnpm --version)"
-        fi
-        if command -v bun >/dev/null 2>&1; then
-            echo "  Bun: $(bun --version)"
-        fi
-        if command -v cargo >/dev/null 2>&1; then
-            echo "  Cargo: $(cargo --version | cut -d' ' -f2)"
-            echo "    Installed: $(cargo install --list 2>/dev/null | grep -c ':$' || echo 'N/A')"
-        fi
-        if command -v pip3 >/dev/null 2>&1; then
-            echo "  pip: $(pip3 --version | cut -d' ' -f2)"
-        fi
-        if command -v pipx >/dev/null 2>&1; then
-            echo "  pipx: $(pipx --version)"
-            echo "    Installed: $(pipx list --short 2>/dev/null | wc -l | tr -d ' ')"
-        fi
-        if command -v gem >/dev/null 2>&1; then
-            echo "  RubyGems: $(gem --version)"
-        fi
-        if command -v go >/dev/null 2>&1; then
-            echo "  Go: $(go version | cut -d' ' -f3)"
-        fi
+        show_language_package_managers
         ;;
     log-rotate)
         SRC_DIR="$(resolve_source_dir)"
