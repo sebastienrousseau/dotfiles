@@ -52,9 +52,42 @@ This file documents all notable changes to this project.
 - **Dot CLI**
   - Added `dot packages` command to list installed packages (#375)
 
+- **Testing**
+  - Added 14 security validation tests in `test_security_fixes.sh`
+  - Added unit tests for TOCTOU prevention, input validation, and safe parsing
+
 ### Changed
 
 - Updated all version references to v0.2.477
+- **CI/CD consolidation**
+  - Consolidated 5 workflow files into 3 (`ci.yml`, `codeql.yml`, `security-release.yml`)
+  - Implemented 5-stage pipeline: LINT → SECURITY → TEST → QUALITY → BENCHMARK
+  - Added consistent naming convention: `Category / Specifics`
+  - Added concurrency groups for faster PR feedback
+  - Merged Docker tests and benchmarks into main CI workflow
+
+### Fixed
+
+- **Security hardening (OWASP)**
+  - `mount_read_only.sh`: Input validation and secure temp file with `mktemp`
+  - `chezmoi-apply.sh`/`chezmoi-update.sh`: Safe flag parsing with `read -ra`
+  - `tmux-sessionizer`: Session name sanitization to prevent injection
+  - `install.sh`: Escaped sed metacharacters for safe pattern matching
+  - `teleport.sh`: Added tar safety flags (`--no-absolute-names`)
+  - `permission.aliases.sh`: Added warnings for overly permissive modes (666/777)
+  - `genpass.sh`: Numeric input validation
+  - `backup.sh`: Enhanced error handling for tar operations
+  - `age-init.sh`: Safe JSON output with `json.dumps`
+
+- **Cross-platform compatibility**
+  - `99-custom.paths.sh`: Added macOS guards and path existence checks
+  - `00-default.paths.sh`: Added darwin guard for Homebrew, Linuxbrew support
+  - `view-source.sh`: Plain curl command for portability
+  - `configuration.aliases.sh`: File existence checks before sourcing
+  - `install_neovim.sh`: Linux-only guard, user-local fallback when no sudo
+  - `upgrade_neovim_nightly.sh`: Platform guard, sudo fallback
+  - `run_before_00-audit.sh`: Container-safe hostname detection
+  - Removed hardcoded `/usr/bin` paths in `last.sh`, `hexdump.sh`, `httpdebug.sh`, `caffeine.sh`
 
 ## v0.2.476
 
