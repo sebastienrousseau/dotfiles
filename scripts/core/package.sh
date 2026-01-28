@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-VERSION="${1:-v0.2.475}"
+VERSION="${1:-v0.2.477}"
 DIST_DIR="dist"
 ARCHIVE_NAME="dotfiles-${VERSION}.tar.gz"
 

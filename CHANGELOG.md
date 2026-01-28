@@ -2,6 +2,26 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.477
+
+### Added
+
+- **Topgrade provisioning parity** across macOS, Linux, and WSL
+  - Added `topgrade`, `mise`, `rustup`, `tmux`, `pipx`, `ruby`, `yazi` to Brewfile.cli
+  - Added Linux binary installs for topgrade, mise, yazi with SHA256 verification
+  - Added rustup via official installer with `--no-modify-path`
+  - Added `cargo-install-update` for topgrade's cargo step
+  - Added `gh` (GitHub CLI) to Linux package managers
+  - Added `tmux`, `pipx`, `ruby` to Linux system packages
+  - Created `run_onchange_12-tmux-plugins.sh.tmpl` for tpm provisioning
+  - Added chezmoi-managed `topgrade.toml.tmpl` with platform-specific disable lists
+  - Moved stylua and delta installs after rustup so cargo is available
+  - Replaced yazi hint-only block with actual binary download
+
+### Changed
+
+- Updated all version references to v0.2.477
+
 ## v0.2.476
 
 ### Added

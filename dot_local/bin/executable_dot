@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
-# Dotfiles CLI Entry Point - v0.2.476
+# Dotfiles CLI Entry Point - v0.2.477
 
-VERSION="0.2.475"
+VERSION="0.2.477"
 
 COMMAND="$1"
 if [ -n "$1" ]; then
@@ -419,7 +419,16 @@ case "$COMMAND" in
             echo "Dotfiles source not found."
             exit 1
         fi
-        exec chezmoi edit "$SRC_DIR"
+        if [ -n "${EDITOR:-}" ]; then
+            exec "$EDITOR" "$SRC_DIR"
+        elif command -v nvim >/dev/null; then
+            exec nvim "$SRC_DIR"
+        elif command -v vim >/dev/null; then
+            exec vim "$SRC_DIR"
+        else
+            echo "No editor found. Set $EDITOR to open $SRC_DIR."
+            exit 1
+        fi
         ;;
     docs)
         SRC_DIR="$(resolve_source_dir)"
