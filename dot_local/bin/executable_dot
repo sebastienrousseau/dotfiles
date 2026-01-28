@@ -436,11 +436,20 @@ case "$COMMAND" in
         fi
         ;;
     new)
-        TEMPLATE_LANG="$1"
-        PROJECT_NAME="$2"
+        TEMPLATE_LANG="${1:-}"
+        PROJECT_NAME="${2:-}"
         if [ -z "$TEMPLATE_LANG" ] || [ -z "$PROJECT_NAME" ]; then
             echo "Usage: dot new <lang> <name>"
             echo "Available templates: python, go, node, packer, molecule"
+            exit 1
+        fi
+        # Validate inputs to prevent path traversal
+        if [[ ! "$TEMPLATE_LANG" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+            echo "Invalid template name: $TEMPLATE_LANG" >&2
+            exit 1
+        fi
+        if [[ ! "$PROJECT_NAME" =~ ^[a-zA-Z0-9_.-]+$ ]]; then
+            echo "Invalid project name: $PROJECT_NAME" >&2
             exit 1
         fi
         SRC_DIR="$(resolve_source_dir)"

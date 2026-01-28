@@ -14,14 +14,6 @@ export PATH="${HOME}/.node_modules/bin:${PATH}"
 # Application-specific paths
 export PATH="/Applications/Topaz\ Photo\ AI.app/Contents/Resources/bin:/Applications/Little\ Snitch.app/Contents/Components:/Applications/iTerm.app/Contents/Resources/utilities:${PATH}"
 
-# Deduplicate PATH entries
-deduplicate_path() {
-  PATH=$(echo "$PATH" | awk -v RS=':' '!seen[$0]++ {ORS=(NR>1?":":"")} {print}')
-  export PATH
-}
-
-# Call the deduplication function
+# Deduplicate PATH entries (single pass)
 PATH=$(echo "$PATH" | awk -v RS=':' '!seen[$0]++ {ORS=(NR>1?":":"")} {print}')
 export PATH
-
-deduplicate_path
