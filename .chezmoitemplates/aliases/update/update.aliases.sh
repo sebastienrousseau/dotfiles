@@ -296,6 +296,18 @@ function upd() {
   echo " Installation complete – you're all set."
 }
 
+# Run Topgrade if available, otherwise fall back to upd.
+function update() {
+  if cmd_exists topgrade; then
+    print_step "Running Topgrade"
+    topgrade "$@"
+    return $?
+  fi
+
+  print_note "Topgrade not found. Falling back to 'upd'."
+  upd "$@"
+}
+
 #-------------------------------#
 # Script Entry Point            #
 #-------------------------------#

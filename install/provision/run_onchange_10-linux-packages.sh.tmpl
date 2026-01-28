@@ -6,8 +6,12 @@
 # Strict error handling
 set -euo pipefail
 
-log_info() { echo -e "\n[INFO] $*"; }
-log_error() { echo -e "\n[ERROR] $*" >&2; }
+# Source shared libraries
+SCRIPT_DIR="{{ .chezmoi.sourceDir }}/install/lib"
+# shellcheck source=install/lib/logging.sh
+. "${SCRIPT_DIR}/logging.sh"
+# shellcheck source=install/lib/installers.sh
+. "${SCRIPT_DIR}/installers.sh"
 
 log_info " Linux: Starting setup..."
 
@@ -16,84 +20,9 @@ if [ -f "$HOME/.config/dotfiles/versions.env" ]; then
   . "$HOME/.config/dotfiles/versions.env"
 fi
 
-sudo_cmd=""
-if [ "$(id -u)" -ne 0 ]; then
-  if command -v sudo >/dev/null; then
-    sudo_cmd="sudo"
-  else
-    log_error "This script requires root privileges or sudo for system installs."
-    exit 1
-  fi
-fi
+sudo_cmd="$(resolve_sudo)"
 
-sha256_file() {
-  if command -v sha256sum >/dev/null; then
-    sha256sum "$1" | awk '{print $1}'
-  elif command -v shasum >/dev/null; then
-    shasum -a 256 "$1" | awk '{print $1}'
-  else
-    log_error "sha256sum or shasum is required for verified downloads."
-    exit 1
-  fi
-}
-
-download_and_verify_sha256() {
-  local url="$1"
-  local checksum_url="$2"
-  local dest="$3"
-  curl -fsSL -o "$dest" "$url"
-  curl -fsSL -o "${dest}.sha256" "$checksum_url"
-  local expected actual
-  expected="$(awk '{print $1}' "${dest}.sha256")"
-  actual="$(sha256_file "$dest")"
-  if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
-    log_error "Checksum verification failed for $dest."
-    exit 1
-  fi
-}
-
-github_release_json() {
-  local repo="$1"
-  local tag="${2:-latest}"
-  local auth_header=()
-  if [ -n "${GITHUB_TOKEN:-}" ]; then
-    auth_header=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
-  fi
-  if [ "$tag" = "latest" ]; then
-    curl -fsSL "${auth_header[@]}" "https://api.github.com/repos/$repo/releases/latest"
-  else
-    curl -fsSL "${auth_header[@]}" "https://api.github.com/repos/$repo/releases/tags/$tag"
-  fi
-}
-
-github_asset_url() {
-  local repo="$1"
-  local suffix="$2"
-  local tag="${3:-latest}"
-  local url
-  url="$(github_release_json "$repo" "$tag" 2>/dev/null | grep -oE "https://[^\"]+${suffix}" | head -n1)"
-  if [ -n "$url" ]; then
-    echo "$url"
-    return 0
-  fi
-
-  if [ "$tag" = "latest" ]; then
-    echo "https://github.com/${repo}/releases/latest/download/${suffix}"
-  else
-    echo "https://github.com/${repo}/releases/download/${tag}/${suffix}"
-  fi
-}
-
-warn_unpinned() {
-  local name="$1"
-  local tag="$2"
-  local var_name="$3"
-  if [ "$tag" = "latest" ] || [ "$tag" = "nightly" ]; then
-    log_error "${name} uses moving tag '${tag}'. Pin by setting ${var_name}."
-    exit 1
-  fi
-}
-
+# ── Version Pins ──────────────────────────────────────────────
 STARSHIP_TAG="${STARSHIP_TAG:-latest}"
 ZOXIDE_TAG="${ZOXIDE_TAG:-latest}"
 NEOVIM_TAG="${NEOVIM_TAG:-nightly}"
@@ -101,9 +30,15 @@ LAZYGIT_TAG="${LAZYGIT_TAG:-latest}"
 ATUIN_TAG="${ATUIN_TAG:-latest}"
 ZELLIJ_TAG="${ZELLIJ_TAG:-latest}"
 UV_TAG="${UV_TAG:-latest}"
+TOPGRADE_TAG="${TOPGRADE_TAG:-latest}"
+MISE_TAG="${MISE_TAG:-latest}"
+YAZI_TAG="${YAZI_TAG:-latest}"
 AICHAT_TAG="${AICHAT_TAG:-latest}"
 MODS_TAG="${MODS_TAG:-latest}"
 
+warn_unpinned "Topgrade" "$TOPGRADE_TAG" "TOPGRADE_TAG"
+warn_unpinned "Mise" "$MISE_TAG" "MISE_TAG"
+warn_unpinned "Yazi" "$YAZI_TAG" "YAZI_TAG"
 warn_unpinned "Starship" "$STARSHIP_TAG" "STARSHIP_TAG"
 warn_unpinned "Zoxide" "$ZOXIDE_TAG" "ZOXIDE_TAG"
 warn_unpinned "Neovim" "$NEOVIM_TAG" "NEOVIM_TAG"
@@ -114,54 +49,32 @@ warn_unpinned "UV" "$UV_TAG" "UV_TAG"
 warn_unpinned "AIChat" "$AICHAT_TAG" "AICHAT_TAG"
 warn_unpinned "Mods" "$MODS_TAG" "MODS_TAG"
 
-install_from_tarball() {
-  local url="$1"
-  local checksum_url="$2"
-  local bin_name="$3"
-  local install_dir="$4"
-  local tmp_dir
-  tmp_dir="$(mktemp -d)"
-  download_and_verify_sha256 "$url" "$checksum_url" "$tmp_dir/archive.tar.gz"
-  tar -xzf "$tmp_dir/archive.tar.gz" -C "$tmp_dir"
-  local bin_path
-  bin_path="$tmp_dir/$bin_name"
-  if [ ! -f "$bin_path" ]; then
-    bin_path="$(find "$tmp_dir" -type f -name "$bin_name" -perm -u+x 2>/dev/null | head -n1)"
-  fi
-  if [ -z "$bin_path" ] || [ ! -f "$bin_path" ]; then
-    log_error "Expected binary $bin_name not found in archive."
-    rm -rf "$tmp_dir"
-    exit 1
-  fi
-  mkdir -p "$install_dir"
-  install -m 0755 "$bin_path" "$install_dir/$bin_name"
-  rm -rf "$tmp_dir"
-}
+# ── System Packages ──────────────────────────────────────────
 
 if command -v apt-get >/dev/null; then
   log_info "Updating packages (apt)..."
   $sudo_cmd apt-get update
   packages=(
-    curl
-    git
-    zsh
-    unzip
-    fontconfig
-    build-essential
-    ripgrep
-    fd-find
-    bat
-    jq
-    yq
-    hyperfine
-    fastfetch
-    age
-    podman
-    lua5.1
-    luajit
-    luarocks
+    curl git zsh unzip fontconfig build-essential
+    ripgrep fd-find bat jq yq hyperfine fastfetch
+    age podman lua5.1 luajit luarocks
+    tmux pipx ruby ruby-dev gnupg
   )
   $sudo_cmd apt-get install -y "${packages[@]}"
+
+  # GitHub CLI (apt) — requires official repo
+  if ! command -v gh >/dev/null; then
+    if ! apt-cache show gh >/dev/null 2>&1; then
+      log_info "Adding GitHub CLI apt repository..."
+      $sudo_cmd mkdir -p /etc/apt/keyrings
+      curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+        | $sudo_cmd tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+        | $sudo_cmd tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+      $sudo_cmd apt-get update
+    fi
+    $sudo_cmd apt-get install -y gh || log_info "Skipping GitHub CLI install (apt)."
+  fi
 
   optional_packages=(terraform terraform-docs tflint trivy packer vagrant ansible)
   install_optional=()
@@ -175,28 +88,14 @@ if command -v apt-get >/dev/null; then
   if [ ${#install_optional[@]} -gt 0 ]; then
     $sudo_cmd apt-get install -y "${install_optional[@]}"
   fi
+
 elif command -v dnf >/dev/null; then
   log_info "Updating packages (dnf)..."
   packages=(
-    curl
-    git
-    zsh
-    unzip
-    fontconfig
-    gcc
-    make
-    ripgrep
-    fd-find
-    bat
-    jq
-    yq
-    hyperfine
-    fastfetch
-    age
-    podman
-    lua
-    luajit
-    luarocks
+    curl git zsh unzip fontconfig gcc make
+    ripgrep fd-find bat jq yq hyperfine fastfetch
+    age podman lua luajit luarocks
+    tmux pipx ruby ruby-devel gh gnupg2
   )
   $sudo_cmd dnf install -y "${packages[@]}"
 
@@ -212,28 +111,15 @@ elif command -v dnf >/dev/null; then
   if [ ${#install_optional[@]} -gt 0 ]; then
     $sudo_cmd dnf install -y "${install_optional[@]}"
   fi
+
 elif command -v pacman >/dev/null; then
   log_info "Updating packages (pacman)..."
   $sudo_cmd pacman -Syu --noconfirm
   packages=(
-    curl
-    git
-    zsh
-    unzip
-    fontconfig
-    base-devel
-    ripgrep
-    fd
-    bat
-    jq
-    yq
-    hyperfine
-    fastfetch
-    age
-    podman
-    lua
-    luajit
-    luarocks
+    curl git zsh unzip fontconfig base-devel
+    ripgrep fd bat jq yq hyperfine fastfetch
+    age podman lua luajit luarocks
+    tmux pipx ruby github-cli gnupg
   )
   $sudo_cmd pacman -S --needed --noconfirm "${packages[@]}"
 
@@ -251,67 +137,50 @@ elif command -v pacman >/dev/null; then
   fi
 fi
 
-# Install Luacheck (Lua linter)
+# ── Luacheck ─────────────────────────────────────────────────
+
 if ! command -v luacheck >/dev/null; then
   if command -v luarocks >/dev/null; then
     log_info "Installing Luacheck via luarocks..."
     luarocks install --local luacheck || true
   else
-    log_error "Luacheck not found and luarocks is missing. Install manually."
+    log_warn "Luacheck not found and luarocks is missing. Install manually."
   fi
 fi
 
-# Install Stylua (Lua formatter)
-if ! command -v stylua >/dev/null; then
-  if command -v cargo >/dev/null; then
-    log_info "Installing Stylua via cargo..."
-    cargo install stylua || true
-  else
-    log_error "Stylua not found and cargo is missing. Install stylua manually."
-  fi
-fi
+# ── Binary Tools (GitHub Releases) ───────────────────────────
 
-# Install Starship
+arch="$(resolve_arch)"
+
+# Starship
 if ! command -v starship >/dev/null; then
   log_info "Installing Starship..."
-  arch="$(uname -m)"
-  case "$arch" in
-    x86_64|amd64) target="x86_64-unknown-linux-gnu" ;;
-    aarch64|arm64) target="aarch64-unknown-linux-gnu" ;;
-    *) log_error "Unsupported arch for Starship: $arch"; exit 1 ;;
-  esac
+  target="${arch}-unknown-linux-gnu"
   url="$(github_asset_url "starship/starship" "${target}.tar.gz" "$STARSHIP_TAG")"
   sha_url="$(github_asset_url "starship/starship" "${target}.tar.gz.sha256" "$STARSHIP_TAG")"
   install_from_tarball "$url" "$sha_url" "starship" "$HOME/.local/bin"
 fi
 
-# Install Zoxide
+# Zoxide
 if ! command -v zoxide >/dev/null; then
   log_info "Installing Zoxide..."
-  arch="$(uname -m)"
-  case "$arch" in
-    x86_64|amd64) target="x86_64-unknown-linux-musl" ;;
-    aarch64|arm64) target="aarch64-unknown-linux-musl" ;;
-    *) log_error "Unsupported arch for Zoxide: $arch"; exit 1 ;;
-  esac
+  target="${arch}-unknown-linux-musl"
   url="$(github_asset_url "ajeetdsouza/zoxide" "${target}.tar.gz" "$ZOXIDE_TAG")"
   sha_url="$(github_asset_url "ajeetdsouza/zoxide" "${target}.tar.gz.sha256" "$ZOXIDE_TAG")"
   install_from_tarball "$url" "$sha_url" "zoxide" "$HOME/.local/bin"
 fi
 
-# Install FZF
+# FZF (git-based install)
 if ! command -v fzf >/dev/null; then
   log_info "Installing FZF..."
   if [ -d "${HOME}/.fzf" ]; then
     if [ -x "${HOME}/.fzf/install" ]; then
       if [ -d "${HOME}/.fzf/.git" ]; then
         git -C "${HOME}/.fzf" pull --ff-only || true
-      else
-        log_info "Existing ~/.fzf found; skipping git clone."
       fi
       "${HOME}/.fzf/install" --all
     else
-      log_error "Existing ~/.fzf without install script; skipping FZF install."
+      log_warn "Existing ~/.fzf without install script; skipping FZF install."
     fi
   else
     git clone --depth 1 https://github.com/junegunn/fzf.git "${HOME}/.fzf"
@@ -319,7 +188,7 @@ if ! command -v fzf >/dev/null; then
   fi
 fi
 
-# Install Neovim (Nightly)
+# Neovim (custom install to /opt)
 if ! command -v nvim >/dev/null; then
   log_info "Installing Neovim (Nightly)..."
   neovim_sha_suffix="${NEOVIM_NIGHTLY_SHA_SUFFIX:-sha256sum}"
@@ -334,164 +203,153 @@ if ! command -v nvim >/dev/null; then
   rm -rf "$tmp_dir"
 fi
 
-# Install Lazygit
+# Lazygit (uses checksums.txt)
 if ! command -v lazygit >/dev/null; then
   log_info "Installing Lazygit..."
-  arch="$(uname -m)"
   case "$arch" in
-    x86_64|amd64) target="Linux_x86_64" ;;
-    aarch64|arm64) target="Linux_arm64" ;;
-    *) log_error "Unsupported arch for Lazygit: $arch"; exit 1 ;;
+    x86_64)  target="Linux_x86_64" ;;
+    aarch64) target="Linux_arm64" ;;
   esac
   url="$(github_asset_url "jesseduffield/lazygit" "lazygit_${target}.tar.gz" "$LAZYGIT_TAG")"
   sha_url="$(github_asset_url "jesseduffield/lazygit" "checksums.txt" "$LAZYGIT_TAG")"
-  tmp_dir="$(mktemp -d)"
-  curl -fsSL -o "$tmp_dir/lazygit.tar.gz" "$url"
-  curl -fsSL -o "$tmp_dir/checksums.txt" "$sha_url"
-  expected="$(awk -v f="$(basename "$url")" '$2==f {print $1}' "$tmp_dir/checksums.txt")"
-  actual="$(sha256_file "$tmp_dir/lazygit.tar.gz")"
-  if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
-    log_error "Checksum verification failed for Lazygit."
-    rm -rf "$tmp_dir"
-    exit 1
-  fi
-  tar xf "$tmp_dir/lazygit.tar.gz" -C "$tmp_dir" lazygit
-  $sudo_cmd install -m 0755 "$tmp_dir/lazygit" /usr/local/bin/lazygit
-  rm -rf "$tmp_dir"
+  install_from_tarball_checksums "$url" "$sha_url" "lazygit" "$HOME/.local/bin"
 fi
 
-# Install Atuin (Shell History)
+# Atuin
 if ! command -v atuin >/dev/null; then
   log_info "Installing Atuin..."
-  arch="$(uname -m)"
-  case "$arch" in
-    x86_64|amd64) target="x86_64-unknown-linux-gnu" ;;
-    aarch64|arm64) target="aarch64-unknown-linux-gnu" ;;
-    *) log_error "Unsupported arch for Atuin: $arch"; exit 1 ;;
-  esac
+  target="${arch}-unknown-linux-gnu"
   url="$(github_asset_url "atuinsh/atuin" "${target}.tar.gz" "$ATUIN_TAG")"
   sha_url="$(github_asset_url "atuinsh/atuin" "${target}.tar.gz.sha256" "$ATUIN_TAG")"
   install_from_tarball "$url" "$sha_url" "atuin" "$HOME/.local/bin"
 fi
 
-# Install Zellij (Multiplexer)
+# Zellij
 if ! command -v zellij >/dev/null; then
   log_info "Installing Zellij..."
-  arch="$(uname -m)"
-  case "$arch" in
-    x86_64|amd64) target="x86_64-unknown-linux-musl" ;;
-    aarch64|arm64) target="aarch64-unknown-linux-musl" ;;
-    *) log_error "Unsupported arch for Zellij: $arch"; exit 1 ;;
-  esac
+  target="${arch}-unknown-linux-musl"
   url="$(github_asset_url "zellij-org/zellij" "${target}.tar.gz" "$ZELLIJ_TAG")"
   sha_url="$(github_asset_url "zellij-org/zellij" "${target}.tar.gz.sha256" "$ZELLIJ_TAG")"
   install_from_tarball "$url" "$sha_url" "zellij" "$HOME/.local/bin"
 fi
 
-# Install Delta
-if ! command -v delta >/dev/null; then
-  log_info "Installing Delta..."
+# ── Rust Toolchain ───────────────────────────────────────────
+
+if ! command -v rustup >/dev/null; then
+  log_info "Installing Rustup..."
+  curl -fsSL https://sh.rustup.rs | sh -s -- -y --no-modify-path
+  # shellcheck disable=SC1091
+  . "${HOME}/.cargo/env"
+fi
+
+if command -v cargo >/dev/null; then
+  if ! cargo install --list 2>/dev/null | grep -q "^cargo-update "; then
+    log_info "Installing cargo-install-update..."
+    cargo install cargo-update || true
+  fi
+fi
+
+if ! command -v stylua >/dev/null; then
   if command -v cargo >/dev/null; then
+    log_info "Installing Stylua via cargo..."
+    cargo install stylua || true
+  else
+    log_warn "Stylua not found and cargo is missing. Install stylua manually."
+  fi
+fi
+
+if ! command -v delta >/dev/null; then
+  if command -v cargo >/dev/null; then
+    log_info "Installing Delta via cargo..."
     cargo install git-delta
   else
     log_info "Skipping Delta install: cargo not found."
   fi
 fi
 
-# Install UV
+# ── Python/Go/AI Tools ──────────────────────────────────────
+
+# UV
 if ! command -v uv >/dev/null; then
   log_info "Installing UV..."
-  arch="$(uname -m)"
-  case "$arch" in
-    x86_64|amd64) target="x86_64-unknown-linux-gnu" ;;
-    aarch64|arm64) target="aarch64-unknown-linux-gnu" ;;
-    *) log_error "Unsupported arch for UV: $arch"; exit 1 ;;
-  esac
+  target="${arch}-unknown-linux-gnu"
   url="$(github_asset_url "astral-sh/uv" "${target}.tar.gz" "$UV_TAG")"
   sha_url="$(github_asset_url "astral-sh/uv" "${target}.tar.gz.sha256" "$UV_TAG")"
   tmp_dir="$(mktemp -d)"
   download_and_verify_sha256 "$url" "$sha_url" "$tmp_dir/uv.tar.gz"
   tar -xzf "$tmp_dir/uv.tar.gz" -C "$tmp_dir"
   mkdir -p "$HOME/.local/bin"
-  if [ -f "$tmp_dir/uv" ]; then
-    install -m 0755 "$tmp_dir/uv" "$HOME/.local/bin/uv"
-  fi
-  if [ -f "$tmp_dir/uvx" ]; then
-    install -m 0755 "$tmp_dir/uvx" "$HOME/.local/bin/uvx"
-  fi
+  find "$tmp_dir" -type f \( -name "uv" -o -name "uvx" \) -perm -u+x -exec install -m 0755 {} "$HOME/.local/bin/" \;
   rm -rf "$tmp_dir"
 fi
 
-# Install Yazi (File Manager)
-if ! command -v yazi >/dev/null; then
-  log_info "Installing Yazi..."
-  # Use a helper script or direct binary (simplified for reliability)
-  # Note: Yazi often requires a recent Rust toolchain or compiled binary.
-  # For now, we will skip auto-install on Linux if not present to avoid breakage, 
-  # as it has complex dependencies. Providing a hint instead.
-  log_info "Note: To install Yazi on Linux, use cargo: cargo install --locked yazi-fm"
+# Topgrade
+if ! command -v topgrade >/dev/null; then
+  log_info "Installing Topgrade..."
+  target="${arch}-unknown-linux-gnu"
+  tag_num="${TOPGRADE_TAG#v}"
+  url="$(github_asset_url "topgrade-rs/topgrade" "topgrade-${tag_num}-${target}.tar.gz" "$TOPGRADE_TAG")"
+  sha_url="$(github_asset_url "topgrade-rs/topgrade" "topgrade-${tag_num}-${target}.tar.gz.sha256" "$TOPGRADE_TAG")"
+  install_from_tarball "$url" "$sha_url" "topgrade" "$HOME/.local/bin"
 fi
 
-# Install AIChat (All-in-one LLM CLI)
+# Mise
+if ! command -v mise >/dev/null; then
+  log_info "Installing Mise..."
+  case "$arch" in
+    x86_64)  target="x64" ;;
+    aarch64) target="arm64" ;;
+  esac
+  url="$(github_asset_url "jdx/mise" "mise-${MISE_TAG}-linux-${target}.tar.gz" "$MISE_TAG")"
+  sha_url="$(github_asset_url "jdx/mise" "SHASUMS" "$MISE_TAG")"
+  install_from_tarball_checksums "$url" "$sha_url" "mise" "$HOME/.local/bin"
+fi
+
+# Yazi (zip archive with two binaries)
+if ! command -v yazi >/dev/null; then
+  log_info "Installing Yazi..."
+  target="${arch}-unknown-linux-gnu"
+  url="$(github_asset_url "sxyazi/yazi" "yazi-${target}.zip" "$YAZI_TAG")"
+  sha_url="$(github_asset_url "sxyazi/yazi" "yazi-${target}.zip.sha256" "$YAZI_TAG")"
+  install_from_zip "$url" "$sha_url" "$HOME/.local/bin" "yazi" "ya"
+fi
+
+# AIChat
 if ! command -v aichat >/dev/null; then
   log_info "Installing AIChat..."
-  arch="$(uname -m)"
-  case "$arch" in
-    x86_64|amd64) target="x86_64-unknown-linux-musl" ;;
-    aarch64|arm64) target="aarch64-unknown-linux-musl" ;;
-    *) log_error "Unsupported arch for AIChat: $arch"; exit 1 ;;
-  esac
+  target="${arch}-unknown-linux-musl"
   url="$(github_asset_url "sigoden/aichat" "aichat-${AICHAT_TAG}-${target}.tar.gz" "$AICHAT_TAG")"
   sha_url="${url}.sha256"
   install_from_tarball "$url" "$sha_url" "aichat" "$HOME/.local/bin"
 fi
 
-# Install Mods (Charm AI CLI)
+# Mods (uses checksums.txt)
 if ! command -v mods >/dev/null; then
   log_info "Installing Mods..."
-  arch="$(uname -m)"
   case "$arch" in
-    x86_64|amd64) target="Linux_x86_64" ;;
-    aarch64|arm64) target="Linux_arm64" ;;
-    *) log_error "Unsupported arch for Mods: $arch"; exit 1 ;;
+    x86_64)  target="Linux_x86_64" ;;
+    aarch64) target="Linux_arm64" ;;
   esac
   url="$(github_asset_url "charmbracelet/mods" "mods_${MODS_TAG}_${target}.tar.gz" "$MODS_TAG")"
   sha_url="$(github_asset_url "charmbracelet/mods" "checksums.txt" "$MODS_TAG")"
-  tmp_dir="$(mktemp -d)"
-  curl -fsSL -o "$tmp_dir/mods.tar.gz" "$url"
-  curl -fsSL -o "$tmp_dir/checksums.txt" "$sha_url"
-  expected="$(awk -v f="$(basename "$url")" '$2==f {print $1}' "$tmp_dir/checksums.txt")"
-  actual="$(sha256_file "$tmp_dir/mods.tar.gz")"
-  if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
-    log_error "Checksum verification failed for Mods."
-    rm -rf "$tmp_dir"
-    exit 1
-  fi
-  tar xf "$tmp_dir/mods.tar.gz" -C "$tmp_dir" mods
-  install -m 0755 "$tmp_dir/mods" "$HOME/.local/bin/mods"
-  rm -rf "$tmp_dir"
+  install_from_tarball_checksums "$url" "$sha_url" "mods" "$HOME/.local/bin"
 fi
 
-# Install Aider (AI Pair Programming)
+# Aider (Python-based)
 if ! command -v aider >/dev/null; then
   log_info "Installing Aider..."
   if command -v uv >/dev/null; then
-    # Use uv for faster installation
-    uv tool install aider-chat || log_error "Aider install via uv failed. Install manually with: pip install aider-chat"
-  elif command -v pip >/dev/null || command -v pip3 >/dev/null; then
-    # Fallback to pip
-    python3 -m pip install --user aider-chat || log_error "Aider install via pip failed."
+    uv tool install aider-chat || log_warn "Aider install via uv failed. Install manually with: pip install aider-chat"
+  elif command -v pip3 >/dev/null; then
+    python3 -m pip install --user aider-chat || log_warn "Aider install via pip failed."
   else
     log_info "Skipping Aider install: neither uv nor pip found."
   fi
 fi
 
-# Install Ghostty (Visual Layer)
+# Ghostty (manual install required on Linux)
 if ! command -v ghostty >/dev/null; then
-    log_info "Installing Ghostty..."
-    # Ghostty on Linux currently requires building from source or specific deb/rpm.
-    # For now, we point to the official guide to avoid breaking CI with a heavy build.
-    log_info "️ Ghostty on Linux requires manual install or 'zig build'. See https://ghostty.org/docs/install/linux"
+  log_info "Ghostty on Linux requires manual install. See https://ghostty.org/docs/install/linux"
 fi
 
 log_info " Linux: Setup complete."

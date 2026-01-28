@@ -23,7 +23,7 @@ return {
 
       -- 2. Setup mason-lspconfig with handlers (prevents automatic_enable errors)
       require("mason-lspconfig").setup({
-        ensure_installed = { "bashls", "lua_ls", "basedpyright", "ruff" },
+        ensure_installed = { "bashls", "lua_ls", "basedpyright", "ruff", "ts_ls" },
         automatic_installation = true,
         automatic_setup = false, -- Disable automatic_enable feature that causes errors
         handlers = {
@@ -44,6 +44,37 @@ return {
                   workspace = { checkThirdParty = false },
                   telemetry = { enable = false },
                   hint = { enable = true },
+                },
+              },
+            })
+          end,
+
+          -- Custom handler for ts_ls (TypeScript)
+          ["ts_ls"] = function()
+            require("lspconfig").ts_ls.setup({
+              capabilities = capabilities,
+              settings = {
+                typescript = {
+                  inlayHints = {
+                    includeInlayParameterNameHints = "all",
+                    includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                    includeInlayFunctionParameterTypeHints = true,
+                    includeInlayVariableTypeHints = true,
+                    includeInlayPropertyDeclarationTypeHints = true,
+                    includeInlayFunctionLikeReturnTypeHints = true,
+                    includeInlayEnumMemberValueHints = true,
+                  },
+                },
+                javascript = {
+                  inlayHints = {
+                    includeInlayParameterNameHints = "all",
+                    includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                    includeInlayFunctionParameterTypeHints = true,
+                    includeInlayVariableTypeHints = true,
+                    includeInlayPropertyDeclarationTypeHints = true,
+                    includeInlayFunctionLikeReturnTypeHints = true,
+                    includeInlayEnumMemberValueHints = true,
+                  },
                 },
               },
             })

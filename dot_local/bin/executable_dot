@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
-# Dotfiles CLI Entry Point - v0.2.476
+# Dotfiles CLI Entry Point - v0.2.477
 
-VERSION="0.2.476"
+VERSION="0.2.477"
 
 COMMAND="$1"
 if [ -n "$1" ]; then
@@ -62,6 +62,7 @@ show_help() {
     echo ""
     echo "Meta:"
     echo "  upgrade     Update flake, plugins, and dotfiles"
+    echo "  packages    List installed packages and package managers"
     echo "  --version   Show version information"
     echo "  help        Show this help message"
 }
@@ -82,6 +83,88 @@ resolve_source_dir() {
     echo ""
 }
 
+# Generic dispatcher: resolve source dir, find script, exec it.
+# Usage: run_script <relative-script-path> <not-found-label> [args...]
+run_script() {
+    local script_rel="$1"
+    local label="$2"
+    shift 2
+    local src_dir
+    src_dir="$(resolve_source_dir)"
+    if [ -z "$src_dir" ]; then
+        echo "Dotfiles source not found." >&2
+        exit 1
+    fi
+    if [ -f "$src_dir/$script_rel" ]; then
+        exec bash "$src_dir/$script_rel" "$@"
+    else
+        echo "$label not found." >&2
+        exit 1
+    fi
+}
+
+# Helper functions for packages command
+show_system_package_managers() {
+    if command -v brew >/dev/null 2>&1; then
+        brew_version=$(brew --version | head -1)
+        brew_formulae=$(brew list --formula 2>/dev/null | wc -l | tr -d ' ')
+        brew_casks=$(brew list --cask 2>/dev/null | wc -l | tr -d ' ')
+        echo "  Homebrew: $brew_version"
+        echo "    Formulae: $brew_formulae"
+        echo "    Casks: $brew_casks"
+    fi
+    if command -v apt >/dev/null 2>&1; then
+        apt_version=$(apt --version 2>/dev/null | head -1 || echo 'installed')
+        apt_packages=$(dpkg -l 2>/dev/null | grep -c '^ii' || echo 'N/A')
+        echo "  APT: $apt_version"
+        echo "    Packages: $apt_packages"
+    fi
+    if command -v dnf >/dev/null 2>&1; then
+        echo "  DNF: $(dnf --version 2>/dev/null | head -1 || echo 'installed')"
+    fi
+    if command -v pacman >/dev/null 2>&1; then
+        pacman_packages=$(pacman -Q 2>/dev/null | wc -l | tr -d ' ')
+        echo "  Pacman: $(pacman --version | head -1)"
+        echo "    Packages: $pacman_packages"
+    fi
+    if command -v nix >/dev/null 2>&1; then
+        echo "  Nix: $(nix --version)"
+    fi
+}
+
+show_language_package_managers() {
+    if command -v npm >/dev/null 2>&1; then
+        npm_globals=$(npm list -g --depth=0 2>/dev/null | grep -c '├──\|└──' || echo 'N/A')
+        echo "  npm: $(npm --version)"
+        echo "    Global packages: $npm_globals"
+    fi
+    if command -v pnpm >/dev/null 2>&1; then
+        echo "  pnpm: $(pnpm --version)"
+    fi
+    if command -v bun >/dev/null 2>&1; then
+        echo "  Bun: $(bun --version)"
+    fi
+    if command -v cargo >/dev/null 2>&1; then
+        cargo_installed=$(cargo install --list 2>/dev/null | grep -c ':$' || echo 'N/A')
+        echo "  Cargo: $(cargo --version | cut -d' ' -f2)"
+        echo "    Installed: $cargo_installed"
+    fi
+    if command -v pip3 >/dev/null 2>&1; then
+        echo "  pip: $(pip3 --version | cut -d' ' -f2)"
+    fi
+    if command -v pipx >/dev/null 2>&1; then
+        pipx_installed=$(pipx list --short 2>/dev/null | wc -l | tr -d ' ')
+        echo "  pipx: $(pipx --version)"
+        echo "    Installed: $pipx_installed"
+    fi
+    if command -v gem >/dev/null 2>&1; then
+        echo "  RubyGems: $(gem --version)"
+    fi
+    if command -v go >/dev/null 2>&1; then
+        echo "  Go: $(go version | cut -d' ' -f3)"
+    fi
+}
+
 case "$COMMAND" in
     --version|-v|version)
         echo "dot v${VERSION}"
@@ -95,9 +178,8 @@ case "$COMMAND" in
         SRC_DIR="$(resolve_source_dir)"
         if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/ops/chezmoi-apply.sh" ]; then
             exec bash "$SRC_DIR/scripts/ops/chezmoi-apply.sh" "$@"
-        else
-            exec chezmoi apply
         fi
+        exec chezmoi apply
         ;;
     sync)
         exec "$0" apply "$@"
@@ -136,9 +218,8 @@ case "$COMMAND" in
         SRC_DIR="$(resolve_source_dir)"
         if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/diagnostics/doctor.sh" ]; then
             exec bash "$SRC_DIR/scripts/diagnostics/doctor.sh"
-        else
-            exec chezmoi doctor
         fi
+        exec chezmoi doctor
         ;;
     keys)
         SRC_DIR="$(resolve_source_dir)"
@@ -172,15 +253,7 @@ case "$COMMAND" in
             exit 1
         fi
         ;;
-    benchmark)
-        SRC_DIR="$(resolve_source_dir)"
-        if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/tests/benchmark.sh" ]; then
-            exec bash "$SRC_DIR/scripts/tests/benchmark.sh"
-        else
-            echo "Benchmark script not found."
-            exit 1
-        fi
-        ;;
+    benchmark) run_script "scripts/tests/benchmark.sh" "Benchmark script" ;;
     tune)
         SRC_DIR="$(resolve_source_dir)"
         if [ -z "$SRC_DIR" ]; then
@@ -200,149 +273,17 @@ case "$COMMAND" in
                 ;;
         esac
         ;;
-    theme)
-        SRC_DIR="$(resolve_source_dir)"
-        if [ -z "$SRC_DIR" ]; then
-            echo "Dotfiles source not found."
-            exit 1
-        fi
-        if [ -f "$SRC_DIR/scripts/theme/switch.sh" ]; then
-            exec sh "$SRC_DIR/scripts/theme/switch.sh" "$@"
-        else
-            echo "Theme switcher not found."
-            exit 1
-        fi
-        ;;
-    wallpaper)
-        SRC_DIR="$(resolve_source_dir)"
-        if [ -z "$SRC_DIR" ]; then
-            echo "Dotfiles source not found."
-            exit 1
-        fi
-        if [ -f "$SRC_DIR/scripts/theme/wallpaper-sync.sh" ]; then
-            exec sh "$SRC_DIR/scripts/theme/wallpaper-sync.sh" "$@"
-        else
-            echo "Wallpaper script not found."
-            exit 1
-        fi
-        ;;
-    fonts)
-        SRC_DIR="$(resolve_source_dir)"
-        if [ -z "$SRC_DIR" ]; then
-            echo "Dotfiles source not found."
-            exit 1
-        fi
-        if [ -f "$SRC_DIR/scripts/fonts/install-nerd-fonts.sh" ]; then
-            exec sh "$SRC_DIR/scripts/fonts/install-nerd-fonts.sh" "$@"
-        else
-            echo "Font install script not found."
-            exit 1
-        fi
-        ;;
-    firewall)
-        SRC_DIR="$(resolve_source_dir)"
-        if [ -z "$SRC_DIR" ]; then
-            echo "Dotfiles source not found."
-            exit 1
-        fi
-        if [ -f "$SRC_DIR/scripts/security/firewall.sh" ]; then
-            exec sh "$SRC_DIR/scripts/security/firewall.sh" "$@"
-        else
-            echo "Firewall script not found."
-            exit 1
-        fi
-        ;;
-    telemetry)
-        SRC_DIR="$(resolve_source_dir)"
-        if [ -z "$SRC_DIR" ]; then
-            echo "Dotfiles source not found."
-            exit 1
-        fi
-        if [ -f "$SRC_DIR/scripts/security/telemetry-kill.sh" ]; then
-            exec sh "$SRC_DIR/scripts/security/telemetry-kill.sh" "$@"
-        else
-            echo "Telemetry script not found."
-            exit 1
-        fi
-        ;;
-    dns-doh)
-        SRC_DIR="$(resolve_source_dir)"
-        if [ -z "$SRC_DIR" ]; then
-            echo "Dotfiles source not found."
-            exit 1
-        fi
-        if [ -f "$SRC_DIR/scripts/security/dns-doh.sh" ]; then
-            exec sh "$SRC_DIR/scripts/security/dns-doh.sh" "$@"
-        else
-            echo "DNS DoH script not found."
-            exit 1
-        fi
-        ;;
-    encrypt-check)
-        SRC_DIR="$(resolve_source_dir)"
-        if [ -z "$SRC_DIR" ]; then
-            echo "Dotfiles source not found."
-            exit 1
-        fi
-        if [ -f "$SRC_DIR/scripts/security/encryption-check.sh" ]; then
-            exec sh "$SRC_DIR/scripts/security/encryption-check.sh" "$@"
-        else
-            echo "Encryption check script not found."
-            exit 1
-        fi
-        ;;
-    lock-screen)
-        SRC_DIR="$(resolve_source_dir)"
-        if [ -z "$SRC_DIR" ]; then
-            echo "Dotfiles source not found."
-            exit 1
-        fi
-        if [ -f "$SRC_DIR/scripts/security/lock-screen.sh" ]; then
-            exec sh "$SRC_DIR/scripts/security/lock-screen.sh" "$@"
-        else
-            echo "Lock screen script not found."
-            exit 1
-        fi
-        ;;
-    usb-safety)
-        SRC_DIR="$(resolve_source_dir)"
-        if [ -z "$SRC_DIR" ]; then
-            echo "Dotfiles source not found."
-            exit 1
-        fi
-        if [ -f "$SRC_DIR/scripts/security/usb-safety.sh" ]; then
-            exec sh "$SRC_DIR/scripts/security/usb-safety.sh" "$@"
-        else
-            echo "USB safety script not found."
-            exit 1
-        fi
-        ;;
-    backup)
-        SRC_DIR="$(resolve_source_dir)"
-        if [ -z "$SRC_DIR" ]; then
-            echo "Dotfiles source not found."
-            exit 1
-        fi
-        if [ -f "$SRC_DIR/scripts/security/backup.sh" ]; then
-            exec sh "$SRC_DIR/scripts/security/backup.sh" "$@"
-        else
-            echo "Backup script not found."
-            exit 1
-        fi
-        ;;
-    ssh-key)
-        SRC_DIR="$(resolve_source_dir)"
-        if [ -z "$SRC_DIR" ]; then
-            echo "Dotfiles source not found."
-            exit 1
-        fi
-        if [ -f "$SRC_DIR/scripts/secrets/encrypt-ssh-key.sh" ]; then
-            exec sh "$SRC_DIR/scripts/secrets/encrypt-ssh-key.sh" "$@"
-        else
-            echo "SSH key encryption script not found."
-            exit 1
-        fi
-        ;;
+    theme)     run_script "scripts/theme/switch.sh" "Theme switcher" "$@" ;;
+    wallpaper) run_script "scripts/theme/wallpaper-sync.sh" "Wallpaper script" "$@" ;;
+    fonts)     run_script "scripts/fonts/install-nerd-fonts.sh" "Font install script" "$@" ;;
+    firewall)      run_script "scripts/security/firewall.sh" "Firewall script" "$@" ;;
+    telemetry)     run_script "scripts/security/telemetry-kill.sh" "Telemetry script" "$@" ;;
+    dns-doh)       run_script "scripts/security/dns-doh.sh" "DNS DoH script" "$@" ;;
+    encrypt-check) run_script "scripts/security/encryption-check.sh" "Encryption check script" "$@" ;;
+    lock-screen)   run_script "scripts/security/lock-screen.sh" "Lock screen script" "$@" ;;
+    usb-safety)    run_script "scripts/security/usb-safety.sh" "USB safety script" "$@" ;;
+    backup)        run_script "scripts/security/backup.sh" "Backup script" "$@" ;;
+    ssh-key) run_script "scripts/secrets/encrypt-ssh-key.sh" "SSH key encryption script" "$@" ;;
     secrets-init)
         SRC_DIR="$(resolve_source_dir)"
         if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/secrets/age-init.sh" ]; then
@@ -366,19 +307,7 @@ case "$COMMAND" in
             age-keygen -y "$KEY_FILE"
         fi
         ;;
-    secrets-create)
-        SRC_DIR="$(resolve_source_dir)"
-        if [ -z "$SRC_DIR" ]; then
-            echo "Dotfiles source not found."
-            exit 1
-        fi
-        if [ -f "$SRC_DIR/scripts/secrets/create-secrets-file.sh" ]; then
-            exec sh "$SRC_DIR/scripts/secrets/create-secrets-file.sh" "$@"
-        else
-            echo "Secrets creation script not found."
-            exit 1
-        fi
-        ;;
+    secrets-create) run_script "scripts/secrets/create-secrets-file.sh" "Secrets creation script" "$@" ;;
     secrets)
         SECRETS_DIR="$HOME/.config/chezmoi"
         KEY_FILE="$SECRETS_DIR/key.txt"
@@ -440,49 +369,29 @@ case "$COMMAND" in
         fi
         ;;
     update)
-        # Update dotfiles
         SRC_DIR="$(resolve_source_dir)"
         if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/ops/chezmoi-update.sh" ]; then
             exec bash "$SRC_DIR/scripts/ops/chezmoi-update.sh" "$@"
-        else
-            echo "Updating Dotfiles..."
-            exec chezmoi update
         fi
+        echo "Updating Dotfiles..."
+        exec chezmoi update
         ;;
     diff)
         SRC_DIR="$(resolve_source_dir)"
         if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/ops/chezmoi-diff.sh" ]; then
             exec bash "$SRC_DIR/scripts/ops/chezmoi-diff.sh" "$@"
-        else
-            exec chezmoi diff "$@"
         fi
+        exec chezmoi diff "$@"
         ;;
-    remove)
-        SRC_DIR="$(resolve_source_dir)"
-        if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/ops/chezmoi-remove.sh" ]; then
-            exec bash "$SRC_DIR/scripts/ops/chezmoi-remove.sh" "$@"
-        else
-            echo "Remove helper not found."
-            exit 1
-        fi
-        ;;
+    remove) run_script "scripts/ops/chezmoi-remove.sh" "Remove helper" "$@" ;;
     drift)
         SRC_DIR="$(resolve_source_dir)"
         if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/diagnostics/drift-dashboard.sh" ]; then
             exec bash "$SRC_DIR/scripts/diagnostics/drift-dashboard.sh"
-        else
-            exec chezmoi status
         fi
+        exec chezmoi status
         ;;
-    history)
-        SRC_DIR="$(resolve_source_dir)"
-        if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/diagnostics/history-analysis.sh" ]; then
-            exec bash "$SRC_DIR/scripts/diagnostics/history-analysis.sh"
-        else
-            echo "History analysis script not found."
-            exit 1
-        fi
-        ;;
+    history) run_script "scripts/diagnostics/history-analysis.sh" "History analysis script" ;;
     tools)
         SRC_DIR="$(resolve_source_dir)"
         SUBCOMMAND="${1:-}"
@@ -527,11 +436,20 @@ case "$COMMAND" in
         fi
         ;;
     new)
-        LANG="$1"
-        NAME="$2"
-        if [ -z "$LANG" ] || [ -z "$NAME" ]; then
+        TEMPLATE_LANG="${1:-}"
+        PROJECT_NAME="${2:-}"
+        if [ -z "$TEMPLATE_LANG" ] || [ -z "$PROJECT_NAME" ]; then
             echo "Usage: dot new <lang> <name>"
             echo "Available templates: python, go, node, packer, molecule"
+            exit 1
+        fi
+        # Validate inputs to prevent path traversal
+        if [[ ! "$TEMPLATE_LANG" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+            echo "Invalid template name: $TEMPLATE_LANG" >&2
+            exit 1
+        fi
+        if [[ ! "$PROJECT_NAME" =~ ^[a-zA-Z0-9_.-]+$ ]]; then
+            echo "Invalid project name: $PROJECT_NAME" >&2
             exit 1
         fi
         SRC_DIR="$(resolve_source_dir)"
@@ -539,13 +457,13 @@ case "$COMMAND" in
             echo "Dotfiles source not found."
             exit 1
         fi
-        TEMPLATE_DIR="$SRC_DIR/templates/projects/$LANG"
+        TEMPLATE_DIR="$SRC_DIR/templates/projects/$TEMPLATE_LANG"
         if [ ! -d "$TEMPLATE_DIR" ]; then
-            echo "Unknown template: $LANG"
+            echo "Unknown template: $TEMPLATE_LANG"
             echo "Available templates: python, go, node, packer, molecule"
             exit 1
         fi
-        DEST="$PWD/$NAME"
+        DEST="$PWD/$PROJECT_NAME"
         if [ -e "$DEST" ]; then
             echo "Destination exists: $DEST"
             exit 1
@@ -554,55 +472,43 @@ case "$COMMAND" in
         cp -R "$TEMPLATE_DIR/." "$DEST"
         find "$DEST" -depth -name "__PROJECT_NAME__" -print0 | while IFS= read -r -d '' path; do
             parent="$(dirname "$path")"
-            mv "$path" "$parent/$NAME"
+            mv "$path" "$parent/$PROJECT_NAME"
         done
+        # Determine Python interpreter
+        PYTHON_CMD=""
         if command -v python3 >/dev/null 2>&1; then
-            find "$DEST" -type f -print0 | while IFS= read -r -d '' file; do
-                python3 - "$file" "$NAME" <<'PY'
-import sys
-
-path = sys.argv[1]
-name = sys.argv[2]
-with open(path, "r", encoding="utf-8") as f:
-    data = f.read()
-data = data.replace("__PROJECT_NAME__", name)
-with open(path, "w", encoding="utf-8") as f:
-    f.write(data)
-PY
-            done
+            PYTHON_CMD="python3"
         elif command -v python >/dev/null 2>&1; then
-            find "$DEST" -type f -print0 | while IFS= read -r -d '' file; do
-                python - "$file" "$NAME" <<'PY'
-import sys
-
-path = sys.argv[1]
-name = sys.argv[2]
-with open(path, "r", encoding="utf-8") as f:
-    data = f.read()
-data = data.replace("__PROJECT_NAME__", name)
-with open(path, "w", encoding="utf-8") as f:
-    f.write(data)
-PY
-            done
+            PYTHON_CMD="python"
         else
             echo "python3 is required to render templates."
             exit 1
         fi
-        echo "Created $LANG project at $DEST"
+        # Render template placeholders
+        find "$DEST" -type f -print0 | while IFS= read -r -d '' file; do
+            $PYTHON_CMD - "$file" "$PROJECT_NAME" <<'PY'
+import sys
+
+path = sys.argv[1]
+name = sys.argv[2]
+with open(path, "r", encoding="utf-8") as f:
+    data = f.read()
+data = data.replace("__PROJECT_NAME__", name)
+with open(path, "w", encoding="utf-8") as f:
+    f.write(data)
+PY
+        done
+        echo "Created $TEMPLATE_LANG project at $DEST"
         ;;
-    log-rotate)
-        SRC_DIR="$(resolve_source_dir)"
-        if [ -z "$SRC_DIR" ]; then
-            echo "Dotfiles source not found."
-            exit 1
-        fi
-        if [ -f "$SRC_DIR/scripts/tools/log-rotate.sh" ]; then
-            exec bash "$SRC_DIR/scripts/tools/log-rotate.sh"
-        else
-            echo "Log rotation script not found."
-            exit 1
-        fi
+    packages)
+        echo "Package Managers:"
+        echo ""
+        show_system_package_managers
+        echo ""
+        echo "Language Package Managers:"
+        show_language_package_managers
         ;;
+    log-rotate) run_script "scripts/tools/log-rotate.sh" "Log rotation script" ;;
     help|--help|-h)
         show_help
         ;;

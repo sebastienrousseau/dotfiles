@@ -43,29 +43,16 @@ environment() {
     return 0
   fi
 
-  # Detect the environment
-  LOCAL_OS="other" # Fallback OS
-
-  # macOS
-  if [[ "$(uname -s | grep -c Darwin)" -gt 0 ]]; then
-    LOCAL_OS="mac"
-
-  # Linux
-  elif [[ "$(uname -s | grep -c Linux)" -gt 0 ]]; then
-    LOCAL_OS="linux"
-
-  # Windows via MING
-  elif [[ "$(uname -s | grep -c MING)" -gt 0 ]]; then
-    LOCAL_OS="win"
-
-  # Cygwin
-  elif [[ "$(uname -s | grep -c Cygwin)" -gt 0 ]]; then
-    LOCAL_OS="win"
-
-  # Cygwin via Babun
-  elif [[ "$(uname -s | grep -c CYGWIN)" -gt 0 ]]; then
-    LOCAL_OS="win"
-  fi
+  # Detect the environment (single uname call)
+  local os_name
+  os_name="$(uname -s)"
+  case "$os_name" in
+    Darwin) LOCAL_OS="mac" ;;
+    Linux) LOCAL_OS="linux" ;;
+    MINGW* | MSYS*) LOCAL_OS="win" ;;
+    Cygwin | CYGWIN*) LOCAL_OS="win" ;;
+    *) LOCAL_OS="other" ;;
+  esac
 
   # Output the result
   echo "${LOCAL_OS}"

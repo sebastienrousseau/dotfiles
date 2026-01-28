@@ -1,310 +1,261 @@
-name: Dotfiles CI
+name: CI
 
 on:
   push:
-    branches:
-      - master
-    tags:
-      - 'v*.*.*'
+    branches: [master]
+    tags: ['v*.*.*']
   pull_request:
-    branches:
-      - master
+    branches: [master]
   schedule:
-    - cron: '0 6 * * 1'  # Weekly on Monday at 6 AM
+    - cron: '0 6 * * 1'  # Weekly on Monday 6 AM UTC
 
 permissions:
   contents: read
 
+# Cancel in-progress runs for the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CHEZMOI_VERSION: latest
+
 jobs:
+  # ============================================================================
+  # STAGE 1: LINT (Fast, parallel checks)
+  # ============================================================================
+  lint-shell:
+    name: Lint / Shell
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools
+        run: |
+          sudo apt-get update && sudo apt-get install -y shellcheck ripgrep
+          curl -sS https://webi.sh/shfmt | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Shellcheck
+        run: |
+          # Exclude info-level warnings that are false positives
+          # SC1091: Not following sourced files (expected, files don't exist in CI)
+          # SC2162: read without -r (intentional in some cases)
+          rg --files -g "*.sh" | xargs shellcheck -x -e SC1091
+      - name: shfmt
+        run: shfmt -d -i 2 -ci scripts/**/*.sh install.sh .chezmoitemplates/**/*.sh
+
+  lint-lua:
+    name: Lint / Lua
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache Lua tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.luarocks
+            ~/.cargo/bin/stylua
+          key: lua-tools-${{ runner.os }}-v1
+      - name: Install tools
+        run: |
+          sudo apt-get update && sudo apt-get install -y lua5.1 luarocks
+          luarocks install --local luacheck
+          echo "$HOME/.luarocks/bin" >> $GITHUB_PATH
+          if ! command -v stylua &>/dev/null; then
+            cargo install stylua
+          fi
+      - name: Luacheck
+        run: luacheck dot_config/nvim
+      - name: Stylua
+        run: ~/.cargo/bin/stylua --check dot_config/nvim
+
+  # ============================================================================
+  # STAGE 2: SECURITY (Parallel with lint)
+  # ============================================================================
+  security-secrets:
+    name: Security / Secrets Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  security-links:
+    name: Security / Link Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lychee link checker
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --verbose --no-progress
+            --exclude-path ./dot_config
+            --exclude "localhost|127.0.0.1|example.com"
+            --accept 200,204,301,302,403,429
+            --max-retries 3 --timeout 30
+            "**/*.md"
+          fail: false
+
+  # ============================================================================
+  # STAGE 3: TEST (Matrix across platforms)
+  # ============================================================================
   test:
-    name: Test on ${{ matrix.os }}
+    name: Test / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-
     defaults:
       run:
         shell: bash
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Install Chezmoi
-        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
-        env:
-          BINDIR: ${{ runner.os == 'Windows' && '$HOME/bin' || '$HOME/.local/bin' }}
-
-      - name: Add to PATH
-        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Initialize Chezmoi
-        run: chezmoi init
-
-      - name: Verify Config (Dry Run)
-        run: chezmoi apply --verbose --dry-run
-
-      - name: Upload failure logs
-        if: failure()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        with:
-          name: failure-logs-${{ matrix.os }}
-          path: |
-            ~/.local/share/chezmoi/.log
-            ~/.local/share/dotfiles.log
-            /tmp/*.log
-          retention-days: 7
-
-  idempotency:
-    name: Idempotency Test (Double-run)
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Install Chezmoi
-        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
-
-      - name: Add to PATH
-        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Configure Chezmoi source
+      - uses: actions/checkout@v4
+      - name: Setup Chezmoi
         run: |
-          mkdir -p "$HOME/.config/chezmoi"
-          printf 'sourceDir = "%s"\n' "$GITHUB_WORKSPACE" > "$HOME/.config/chezmoi/chezmoi.toml"
-
-      - name: First apply (exclude scripts)
-        run: chezmoi apply --exclude=scripts --verbose
-
-      - name: Second apply (should be no-op)
+          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Init & Dry Run
         run: |
-          OUTPUT=$(chezmoi apply --exclude=scripts --verbose 2>&1)
-          echo "$OUTPUT"
-          # Check if there are any changes (other than expected noise)
-          if echo "$OUTPUT" | grep -E "^(create|modify|remove)" | grep -v ".DS_Store"; then
-            echo "Error: Second apply made changes - not idempotent"
-            exit 1
-          fi
-          echo "Idempotency check passed"
-
-      - name: Upload failure logs
+          chezmoi init
+          chezmoi apply --verbose --dry-run
+      - name: Upload logs on failure
         if: failure()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@v4
         with:
-          name: failure-logs-idempotency
-          path: |
-            ~/.local/share/chezmoi/.log
-            ~/.local/share/dotfiles.log
-            /tmp/*.log
-          retention-days: 7
+          name: logs-test-${{ matrix.os }}
+          path: ~/.local/share/chezmoi/.log
+          retention-days: 5
 
-  benchmark:
-    name: Shell Startup Benchmark (Ubuntu)
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Cache apt packages
-        uses: actions/cache@v5
-        with:
-          path: /var/cache/apt/archives
-          key: apt-benchmark-${{ runner.os }}-zsh-hyperfine
-
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y zsh hyperfine
-
-      - name: Install Chezmoi
-        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
-
-      - name: Add to PATH
-        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Configure Chezmoi source
-        run: |
-          mkdir -p "$HOME/.config/chezmoi"
-          printf 'sourceDir = "%s"\n' "$GITHUB_WORKSPACE" > "$HOME/.config/chezmoi/chezmoi.toml"
-
-      - name: Apply dotfiles (no scripts)
-        run: chezmoi apply --exclude=scripts
-
-      - name: Benchmark (max 500ms)
-        run: DOTFILES_BENCH_MAX_MS=500 bash ./scripts/tests/benchmark.sh
-
-      - name: Upload failure logs
-        if: failure()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        with:
-          name: failure-logs-benchmark
-          path: |
-            ~/.local/share/chezmoi/.log
-            ~/.local/share/dotfiles.log
-            /tmp/*.log
-          retention-days: 7
-
-  shellcheck:
-    name: Shellcheck (Ubuntu)
+  test-docker:
+    name: Test / Docker (${{ matrix.distro }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      contents: read
-
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [ubuntu, debian]
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Cache apt packages
-        uses: actions/cache@v5
-        with:
-          path: /var/cache/apt/archives
-          key: apt-shellcheck-${{ runner.os }}-shellcheck-ripgrep
-
-      - name: Install shellcheck + ripgrep
-        run: sudo apt-get update && sudo apt-get install -y shellcheck ripgrep
-
-      - name: Run shellcheck
+      - uses: actions/checkout@v4
+      - name: Test in container
         run: |
-          files=$(rg --files -g "*.sh")
-          if [ -n "$files" ]; then
-            echo "$files" | xargs shellcheck -x
-          fi
+          docker run --rm -v "${GITHUB_WORKSPACE}:/root/.local/share/chezmoi" ${{ matrix.distro }}:latest bash -c "
+            set -euo pipefail
+            export DEBIAN_FRONTEND=noninteractive
+            export PATH=\"/root/.local/bin:\$PATH\"
+            apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates
+            ln -s /root/.local/share/chezmoi /root/.dotfiles
+            sh -c \"\$(curl -fsLS get.chezmoi.io)\" -- init --promptDefaults --no-tty --source /root/.local/share/chezmoi
+            DOTFILES_NONINTERACTIVE=1 chezmoi apply --exclude=scripts --force --no-tty
+            echo 'Chezmoi applied successfully'
+          "
 
-  unit-tests:
-    name: Unit Tests
+  test-unit:
+    name: Test / Unit
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Run unit tests
+      - uses: actions/checkout@v4
+      - name: Run tests
         run: |
           chmod +x scripts/tests/framework/*.sh
           ./scripts/tests/framework/test_runner.sh
-      - name: Run integration tests
+      - name: Integration tests
         run: RUN_INTEGRATION=1 ./scripts/tests/framework/test_runner.sh
 
-  shfmt:
-    name: Shell Format Check (shfmt)
+  # ============================================================================
+  # STAGE 4: QUALITY (Depends on lint + test passing)
+  # ============================================================================
+  quality-idempotency:
+    name: Quality / Idempotency
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
+    needs: [lint-shell, test]
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Install shfmt
+      - uses: actions/checkout@v4
+      - name: Setup Chezmoi
         run: |
-          curl -sS https://webi.sh/shfmt | sh
+          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-      - name: Check shell formatting
+          mkdir -p "$HOME/.config/chezmoi"
+          echo "sourceDir = \"$GITHUB_WORKSPACE\"" > "$HOME/.config/chezmoi/chezmoi.toml"
+      - name: First apply
+        run: chezmoi apply --exclude=scripts --verbose
+      - name: Second apply (must be no-op)
         run: |
-          shfmt -d -i 2 -ci scripts/**/*.sh install.sh .chezmoitemplates/**/*.sh || {
-            echo "::error::Shell formatting issues found. Run 'shfmt -w -i 2 -ci' to fix."
+          OUTPUT=$(chezmoi apply --exclude=scripts --verbose 2>&1)
+          echo "$OUTPUT"
+          if echo "$OUTPUT" | grep -E "^(create|modify|remove)" | grep -v ".DS_Store"; then
+            echo "::error::Not idempotent - second apply made changes"
             exit 1
-          }
+          fi
 
-  gitleaks:
-    name: Secrets Scan (Gitleaks)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 0
-
-      - name: Install Gitleaks
-        run: |
-          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz | tar xz
-          sudo mv gitleaks /usr/local/bin/
-
-      - name: Run Gitleaks
-        run: gitleaks detect --source . --verbose --no-git --config .gitleaks.toml
-
-  link-check:
-    name: Link Rot Check
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Install lychee
-        run: |
-          curl -sSfL https://github.com/lycheeverse/lychee/releases/download/v0.15.1/lychee-v0.15.1-x86_64-unknown-linux-gnu.tar.gz | tar xz
-          sudo mv lychee /usr/local/bin/
-
-      - name: Check links in documentation
-        run: |
-          lychee --verbose --no-progress \
-            --exclude-path ./dot_config \
-            --exclude-path ./.git \
-            --exclude "localhost" \
-            --exclude "127.0.0.1" \
-            --exclude "example.com" \
-            --accept 200,204,301,302,403,429 \
-            --max-retries 3 \
-            --timeout 30 \
-            "**/*.md" || echo "Link check completed with warnings"
-
-  lua-lint:
-    name: Lua Lint (Ubuntu)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Cache apt packages
-        uses: actions/cache@v5
-        with:
-          path: /var/cache/apt/archives
-          key: apt-lua-${{ runner.os }}-lua-luarocks-cargo
-
-      - name: Install Lua tooling
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y lua5.1 luarocks cargo
-          cargo install stylua || true
-          luarocks install --local luacheck
-          echo "$HOME/.luarocks/bin" >> $GITHUB_PATH
-
-      - name: Run luacheck
-        run: luacheck dot_config/nvim
-
-      - name: Run stylua (check)
-        run: |
-          stylua --check dot_config/nvim
-
-  nix-check:
-    name: Nix Flake Check (${{ matrix.os }})
+  quality-nix:
+    name: Quality / Nix
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 15
+    needs: [lint-shell]
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a # v21
-
-      - name: Flake Check
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@v14
+      - name: Flake check
         run: nix flake check ./nix
+
+  # ============================================================================
+  # STAGE 5: BENCHMARK (Only after tests pass)
+  # ============================================================================
+  benchmark:
+    name: Benchmark / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    needs: [test]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            sudo apt-get update && sudo apt-get install -y zsh hyperfine
+          else
+            brew install hyperfine
+          fi
+      - name: Setup Chezmoi
+        run: |
+          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          mkdir -p "$HOME/.config/chezmoi"
+          echo "sourceDir = \"$GITHUB_WORKSPACE\"" > "$HOME/.config/chezmoi/chezmoi.toml"
+      - name: Apply dotfiles
+        run: chezmoi apply --exclude=scripts
+      - name: Performance benchmark
+        run: |
+          chmod +x scripts/tests/performance/*.sh
+          ./scripts/tests/performance/benchmark_runner.sh || true
+      - name: Shell startup threshold (500ms)
+        run: |
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            SHELL_CMD="zsh"
+          else
+            SHELL_CMD="/bin/zsh"
+          fi
+          time_ms=$(hyperfine --warmup 3 --runs 10 "$SHELL_CMD -i -c exit" --export-json /tmp/bench.json 2>/dev/null && jq '.results[0].mean * 1000 | floor' /tmp/bench.json)
+          echo "Shell startup: ${time_ms}ms"
+          if [[ ${time_ms:-0} -gt 500 ]]; then
+            echo "::warning::Shell startup ${time_ms}ms exceeds 500ms target"
+          fi

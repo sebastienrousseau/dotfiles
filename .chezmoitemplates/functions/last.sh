@@ -85,7 +85,7 @@ EOH
   log_info "Listing files modified in the last ${minutes} minutes (using $tool):"
   case "$tool" in
     "find")
-      /usr/bin/find . -type f -mmin -"${minutes}"
+      command find . -type f -mmin -"${minutes}"
       ;;
     "fd")
       fd --type file --changed-within "${minutes}m"

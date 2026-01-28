@@ -48,20 +48,15 @@ hstats() {
     return 1
   fi
 
-  # Extract only the commands from history, removing timestamps or extra metadata
-  if [[ "$SHELL" =~ "zsh" ]]; then
-    # For zsh, use `fc -l` to get clean commands
-    history_output=$(fc -l 1 | awk '{$1=""; print $0}')
-  else
-    # For bash, use `history` directly
-    history_output=$(history | awk '{$1=""; print $0}')
-  fi
-
-  # Generate statistics
+  # Generate statistics (single awk pass, avoids intermediate variable)
   echo "============================================"
   echo "Commonly Used Commands"
   echo "============================================"
-  echo "$history_output" | awk '{CMD[$1]++; count++;} END {for (a in CMD) printf "%-15s %s\n", CMD[a], a;}' |
+  if [[ "$SHELL" =~ "zsh" ]]; then
+    fc -l 1
+  else
+    history
+  fi | awk '{CMD[$2]++} END {for (a in CMD) printf "%-15s %s\n", CMD[a], a}' |
     sort -nr |
     head -n20 |
     nl

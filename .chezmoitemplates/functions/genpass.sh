@@ -57,6 +57,12 @@ EOF
   local separator="${2:--}"  # Separator between blocks (default: '-')
   local block_size=12        # Length of each block (high-entropy default)
 
+  # Validate num_blocks is a positive integer
+  if ! [[ "$num_blocks" =~ ^[0-9]+$ ]] || [[ "$num_blocks" -lt 1 ]] || [[ "$num_blocks" -gt 100 ]]; then
+    echo "[ERROR] num_blocks must be a number between 1 and 100." >&2
+    return 1
+  fi
+
   # Define character set for high entropy
   local CHARSET="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+{}|:<>?~[];',./=-"
 
@@ -79,23 +85,21 @@ EOF
   # Output the password
   echo "[INFO] Generated password: ${password}"
 
-  # Copy to clipboard if possible (only in interactive TTY)
-  if [[ -t 1 ]]; then
-    if command -v pbcopy &>/dev/null; then
-      echo -n "${password}" | pbcopy
-      echo "[INFO] Password copied to clipboard (macOS)."
-    elif command -v xclip &>/dev/null && [[ -n "${DISPLAY:-}" ]]; then
-      echo -n "${password}" | xclip -selection clipboard
-      echo "[INFO] Password copied to clipboard (Linux)."
-    elif command -v wl-copy &>/dev/null && [[ -n "${WAYLAND_DISPLAY:-}" ]]; then
-      echo -n "${password}" | wl-copy
-      echo "[INFO] Password copied to clipboard (Linux with Wayland)."
-    elif command -v clip &>/dev/null; then
-      echo -n "${password}" | clip
-      echo "[INFO] Password copied to clipboard (Windows)."
-    else
-      echo "[WARNING] Clipboard tool not found. Password not copied to clipboard."
-    fi
+  # Copy to clipboard if possible
+  if command -v pbcopy &>/dev/null; then
+    echo -n "${password}" | pbcopy
+    echo "[INFO] Password copied to clipboard (macOS)."
+  elif command -v xclip &>/dev/null; then
+    echo -n "${password}" | xclip -selection clipboard
+    echo "[INFO] Password copied to clipboard (Linux)."
+  elif command -v wl-copy &>/dev/null; then
+    echo -n "${password}" | wl-copy
+    echo "[INFO] Password copied to clipboard (Linux with Wayland)."
+  elif command -v clip &>/dev/null; then
+    echo -n "${password}" | clip
+    echo "[INFO] Password copied to clipboard (Windows)."
+  else
+    echo "[WARNING] Clipboard tool not found. Password not copied to clipboard."
   fi
 
   return 0

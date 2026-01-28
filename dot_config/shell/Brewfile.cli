@@ -26,6 +26,7 @@ brew "procs"
 brew "bottom"
 brew "hyperfine"
 brew "age"
+brew "gnupg"
 brew "hexyl"
 brew "yq"
 brew "gum"
@@ -47,6 +48,15 @@ brew "packer"
 brew "vagrant"
 brew "ansible"
 brew "ansible-lint"
+
+# Update & runtime tooling
+brew "topgrade"
+brew "mise"
+brew "rustup"
+brew "tmux"
+brew "pipx"
+brew "ruby"
+brew "yazi"
 
 # AI CLI Tools
 brew "aichat"

@@ -3,8 +3,9 @@ set -euo pipefail
 
 args=()
 if [[ -n "${DOTFILES_CHEZMOI_APPLY_FLAGS:-}" ]]; then
-  # shellcheck disable=SC2206
-  args+=(${DOTFILES_CHEZMOI_APPLY_FLAGS})
+  # Safely parse space-separated flags into array
+  read -ra flag_array <<<"$DOTFILES_CHEZMOI_APPLY_FLAGS"
+  args+=("${flag_array[@]}")
 fi
 
 if [[ "${DOTFILES_CHEZMOI_VERBOSE:-0}" = "1" ]]; then

@@ -47,18 +47,17 @@ if ! command -v tmux &>/dev/null; then
     exit 1
 fi
 
-# Get list of directories to search
+# Get list of directories to search (as newline-separated list for safe iteration)
 get_search_dirs() {
-    local dirs=()
+    local paths
     IFS=':' read -ra paths <<< "$SESSIONIZER_DIRS"
     for path in "${paths[@]}"; do
         # Expand tilde
-        expanded_path="${path/#\~/$HOME}"
+        local expanded_path="${path/#\~/$HOME}"
         if [[ -d "$expanded_path" ]]; then
-            dirs+=("$expanded_path")
+            printf '%s\n' "$expanded_path"
         fi
     done
-    echo "${dirs[@]}"
 }
 
 # Get list of project directories
@@ -70,9 +69,10 @@ get_projects() {
         return
     fi
 
-    # Find directories (1-2 levels deep)
-    # shellcheck disable=SC2086
-    find $search_dirs -mindepth 1 -maxdepth 2 -type d 2>/dev/null | sort -u
+    # Find directories (1-2 levels deep) - iterate safely over newline-separated dirs
+    while IFS= read -r dir; do
+        find "$dir" -mindepth 1 -maxdepth 2 -type d 2>/dev/null
+    done <<< "$search_dirs" | sort -u
 }
 
 # Get list of existing tmux sessions
@@ -80,23 +80,26 @@ get_sessions() {
     tmux list-sessions -F "#{session_name}" 2>/dev/null || true
 }
 
-# Format session name from directory path
+# Format session name from directory path (sanitized for tmux)
 format_session_name() {
     local dir="$1"
     local name
 
-    # Get basename and replace dots with underscores
-    name=$(basename "$dir" | tr '.' '_')
+    # Get basename, replace dots with underscores, and strip unsafe chars
+    name=$(basename "$dir" | tr '.' '_' | tr -cd '[:alnum:]._-')
 
     # Remove leading numbers/dashes for cleaner names
-    name=$(echo "$name" | sed 's/^[0-9_-]*//')
+    name="${name##[0-9_-]}"
+    name="${name##[0-9_-]}"
+    name="${name##[0-9_-]}"
 
-    # If name is empty after cleanup, use full basename
+    # If name is empty after cleanup, use sanitized full basename
     if [[ -z "$name" ]]; then
-        name=$(basename "$dir")
+        name=$(basename "$dir" | tr -cd '[:alnum:]._-')
     fi
 
-    echo "$name"
+    # Limit length for safety
+    echo "${name:0:32}"
 }
 
 # Switch to or create a tmux session

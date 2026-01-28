@@ -2,6 +2,60 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.477
+
+### Added
+
+- **Topgrade provisioning parity** across macOS, Linux, and WSL
+  - Added `topgrade`, `mise`, `rustup`, `tmux`, `pipx`, `ruby`, `yazi` to Brewfile.cli
+  - Added Linux binary installs for topgrade, mise, yazi with SHA256 verification
+  - Added rustup via official installer with `--no-modify-path`
+  - Added `cargo-install-update` for topgrade's cargo step
+  - Added `gh` (GitHub CLI) to Linux package managers
+  - Added `tmux`, `pipx`, `ruby` to Linux system packages
+  - Created `run_onchange_12-tmux-plugins.sh.tmpl` for tpm provisioning
+  - Added chezmoi-managed `topgrade.toml.tmpl` with platform-specific disable lists
+  - Moved stylua and delta installs after rustup so cargo is available
+  - Replaced yazi hint-only block with actual binary download
+
+- **Security and GPG**
+  - Added `gnupg` to Brewfile.cli and Linux package lists (#381)
+  - Updated GPG agent cache TTL to 1 day (86400 seconds) (#392)
+
+- **Node.js tooling**
+  - Added `.npmrc` config with scoped registries support (#439)
+  - Added `.yarnrc.yml` for Yarn Berry configuration (#440)
+  - Added `.noderc` for Node REPL configuration (#271)
+  - Added `eslint_d` global install for fast linting (#441, #267)
+  - Added `prettier_d` global install for fast formatting (#442, #268)
+  - Added `typescript` and `typescript-language-server` global installs
+
+- **Bun**
+  - Added `bunfig.toml` configuration (#447, #273)
+  - Added Bun paths to core-paths
+
+- **Kubernetes**
+  - Added KUBECONFIG merge logic for `~/.kube/config.d/*` (#487, #313)
+  - Added `hm` alias for `helm` (#489, #315)
+  - Added K9s configuration with Catppuccin Mocha skin (#314)
+  - Added `kube-linter` to Brewfile.cli (#319)
+  - Added `kubesec` to Brewfile.cli (#318)
+
+- **Neovim**
+  - Added `ts_ls` (TypeScript) to mason-lspconfig ensure_installed (#269)
+  - Added DAP configuration with `js-debug-adapter` support (#270)
+
+- **macOS**
+  - Added Finder List View as default view mode (#511)
+  - Added Finder path bar, status bar, and folders-first sorting
+
+- **Dot CLI**
+  - Added `dot packages` command to list installed packages (#375)
+
+### Changed
+
+- Updated all version references to v0.2.477
+
 ## v0.2.476
 
 ### Added

@@ -179,7 +179,7 @@ fi
 step "Applying Configuration..."
 
 # VERSION pinning for supply-chain security
-VERSION="${1:-v0.2.476}"
+VERSION="${1:-v0.2.477}"
 
 SOURCE_DIR="$HOME/.dotfiles"
 LEGACY_SOURCE_DIR="$HOME/.local/share/chezmoi"
@@ -189,8 +189,11 @@ CHEZMOI_CONFIG_FILE="$CHEZMOI_CONFIG_DIR/chezmoi.toml"
 ensure_chezmoi_source() {
   local dir="$1"
   mkdir -p "$CHEZMOI_CONFIG_DIR"
+  # Escape sed metacharacters in replacement string
+  local escaped_dir
+  escaped_dir=$(printf '%s\n' "$dir" | sed -e 's/[\/&]/\\&/g')
   if [ -f "$CHEZMOI_CONFIG_FILE" ] && grep -q '^sourceDir' "$CHEZMOI_CONFIG_FILE"; then
-    sed -i.bak "s,^sourceDir.*$,sourceDir = \"$dir\"," "$CHEZMOI_CONFIG_FILE"
+    sed -i.bak "s,^sourceDir.*$,sourceDir = \"$escaped_dir\"," "$CHEZMOI_CONFIG_FILE"
     rm -f "$CHEZMOI_CONFIG_FILE.bak"
   else
     printf 'sourceDir = \"%s\"\\n' "$dir" >"$CHEZMOI_CONFIG_FILE"

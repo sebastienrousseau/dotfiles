@@ -55,9 +55,7 @@ fi
 
 # minikube
 if command -v minikube &>/dev/null; then
-  if ! alias mk >/dev/null 2>&1; then
-    alias mk='minikube'
-  fi
+  alias mk='minikube'
   alias mkstart='minikube start'
   alias mkstop='minikube stop'
   alias mkstatus='minikube status'
@@ -68,7 +66,7 @@ fi
 
 # Helm
 if command -v helm &>/dev/null; then
-  # alias h='helm' # Reserved for history
+  alias hm='helm'
   alias hi='helm install'
   alias hu='helm upgrade'
   alias hls='helm list'

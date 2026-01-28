@@ -1,19 +1,20 @@
 sourceDir = "{{ .chezmoi.homeDir }}/.dotfiles"
 
-[merge]
-    command = "vimdiff"
-
 {{ $age_identity := promptString "age_identity" "~/.config/chezmoi/key.txt" }}
 {{ $age_recipient := promptString "age_recipient" "" }}
 
 {{ if ne $age_identity "" }}
 encryption = "age"
+
 [age]
     identity = "{{ $age_identity }}"
 {{- if ne $age_recipient "" }}
     recipient = "{{ $age_recipient }}"
 {{- end }}
 {{ end }}
+
+[merge]
+    command = "vimdiff"
 
 [data]
 profile = "{{ promptString "profile" "laptop" }}"

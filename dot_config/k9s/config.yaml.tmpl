@@ -1,0 +1,65 @@
+# K9s configuration
+# Managed by chezmoi - edit source at ~/.dotfiles/dot_config/k9s/config.yaml.tmpl
+
+k9s:
+  # Refresh rate in seconds
+  refreshRate: 2
+
+  # Max rows in log view
+  maxConnRetry: 5
+
+  # Enable mouse support
+  enableMouse: false
+
+  # Headless mode (no header)
+  headless: false
+
+  # Log buffer size
+  logoless: false
+
+  # Crumbsless mode (no breadcrumbs)
+  crumbsless: false
+
+  # Read-only mode (disable delete, edit, etc.)
+  readOnly: false
+
+  # Disable pod CPU/Memory graphs
+  noIcons: false
+
+  # Logger configuration
+  logger:
+    tail: 100
+    buffer: 5000
+    sinceSeconds: -1
+    textWrap: false
+    showTime: false
+
+  # Current context (auto-detected)
+  currentContext: ""
+  currentCluster: ""
+
+  # Skin (Catppuccin Mocha)
+  ui:
+    skin: catppuccin-mocha
+    enableSkins: true
+
+  # Shell pod configuration
+  shellPod:
+    image: busybox:1.35.0
+    namespace: default
+    limits:
+      cpu: 100m
+      memory: 100Mi
+
+  # Image scanning
+  imageScans:
+    enable: false
+
+  # Thresholds for resource coloring
+  thresholds:
+    cpu:
+      critical: 90
+      warn: 70
+    memory:
+      critical: 90
+      warn: 70

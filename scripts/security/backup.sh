@@ -8,6 +8,10 @@ OUT="$BACKUP_DIR/dotfiles-backup-$STAMP.tgz"
 
 mkdir -p "$BACKUP_DIR"
 
-tar --exclude="$HOME/.cache" --exclude="$HOME/.local/share/Trash" -czf "$OUT" "$SRC_DIR"
+if ! tar --exclude="$HOME/.cache" --exclude="$HOME/.local/share/Trash" -czf "$OUT" "$SRC_DIR"; then
+  echo "[ERROR] Backup failed!" >&2
+  rm -f "$OUT"
+  exit 1
+fi
 
 echo "Backup written to: $OUT"
