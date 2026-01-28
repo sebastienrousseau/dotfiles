@@ -1,4 +1,4 @@
-name: Security Release (SLSA & SBOM)
+name: Release / Security Attestation
 
 on:
   release:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: "Release tag to scan (e.g., v0.2.473)"
+        description: "Release tag (e.g., v0.2.473)"
         required: true
         type: string
 
@@ -15,47 +15,44 @@ permissions:
 
 jobs:
   sbom:
-    name: Generate SBOM
+    name: Release / SBOM
     runs-on: ubuntu-latest
     permissions:
       contents: write
     outputs:
-      sbom-path: ${{ steps.sbom.outputs.fileName }}
       hash: ${{ steps.hash.outputs.hash }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.release_tag || github.ref }}
 
       - name: Generate SBOM (SPDX)
-        id: sbom
-        uses: anchore/sbom-action@fc46e51e3b5cf8bcad4495e5df6a7d7c5b27850e # v0.17.2
+        uses: anchore/sbom-action@v0
         with:
           format: spdx-json
           output-file: dotfiles-sbom.spdx.json
           upload-release-assets: false
 
-      - name: Calculate Hash
+      - name: Calculate hash
         id: hash
         run: |
           sha256sum dotfiles-sbom.spdx.json > sbom.sha256
-          echo "hash=$(cat sbom.sha256 | base64 -w 0)" >> $GITHUB_OUTPUT
+          echo "hash=$(base64 -w 0 sbom.sha256)" >> $GITHUB_OUTPUT
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@v4
         with:
           name: dotfiles-sbom
           path: dotfiles-sbom.spdx.json
 
   provenance:
-    name: Generate SLSA Provenance
+    name: Release / SLSA Provenance
     needs: [sbom]
     permissions:
       actions: read
       id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@e9ba3fa1a22929e8bb4526f7e6e6aab6b3de6bd3 # v2.1.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
     with:
       base64-subjects: "${{ needs.sbom.outputs.hash }}"
       upload-assets: true
