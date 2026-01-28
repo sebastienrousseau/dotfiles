@@ -30,6 +30,21 @@ export PATH="${HOME}/.cargo/bin:${PATH}"
 # Go
 export PATH="${HOME}/go/bin:${PATH}"
 
+# Bun
+export BUN_INSTALL="${HOME}/.bun"
+export PATH="${BUN_INSTALL}/bin:${PATH}"
+
+# Kubeconfig merge logic (merge all configs in ~/.kube/config.d/)
+if [[ -d "${HOME}/.kube/config.d" ]]; then
+    KUBECONFIG_EXTRA=""
+    for conf in "${HOME}/.kube/config.d"/*; do
+        [[ -f "$conf" ]] && KUBECONFIG_EXTRA="${KUBECONFIG_EXTRA}:${conf}"
+    done
+    if [[ -n "$KUBECONFIG_EXTRA" ]]; then
+        export KUBECONFIG="${HOME}/.kube/config${KUBECONFIG_EXTRA}"
+    fi
+fi
+
 # Node.js (Global)
 export PATH="${HOME}/.node_modules/bin:${PATH}"
 

@@ -22,6 +22,22 @@ defaults write -g KeyRepeat -int 2
 # Finder: show all filename extensions
 defaults write NSGlobalDomain AppleShowAllExtensions -bool true
 
+# Finder: use list view by default in all Finder windows
+# Four-letter codes for view modes: `icnv`, `clmv`, `glyv`, `Nlsv` (list)
+defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
+
+# Finder: show path bar
+defaults write com.apple.finder ShowPathbar -bool true
+
+# Finder: show status bar
+defaults write com.apple.finder ShowStatusBar -bool true
+
+# Finder: keep folders on top when sorting by name
+defaults write com.apple.finder _FXSortFoldersFirst -bool true
+
+# Restart Finder to apply changes
+killall Finder >/dev/null 2>&1 || true
+
 # Dock: reduce show/hide delay
 defaults write com.apple.dock autohide-delay -float 0
 defaults write com.apple.dock autohide-time-modifier -float 0.2

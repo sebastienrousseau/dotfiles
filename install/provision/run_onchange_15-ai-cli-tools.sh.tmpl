@@ -54,19 +54,39 @@ AI_TOOLS=(
   "@factory/cli"
 )
 
+# Install development tools globally
+DEV_TOOLS=(
+  "eslint_d"
+  "prettier_d"
+  "typescript"
+  "typescript-language-server"
+)
+
 for tool in "${AI_TOOLS[@]}"; do
   log_info "Installing $tool..."
   npm install -g "$tool" 2>&1 || log_error "Failed to install $tool (continuing...)"
 done
 
-log_info "✅ AI CLI tools installation complete!"
+log_info "🛠️ Installing development tools via npm..."
+
+for tool in "${DEV_TOOLS[@]}"; do
+  log_info "Installing $tool..."
+  npm install -g "$tool" 2>&1 || log_error "Failed to install $tool (continuing...)"
+done
+
+log_info "✅ AI CLI and dev tools installation complete!"
 log_info ""
 log_info "Available commands:"
-log_info "  - claude   (Anthropic Claude CLI)"
-log_info "  - gemini   (Google Gemini CLI)"
-log_info "  - codex    (OpenAI Codex CLI)"
-log_info "  - opencode (OpenCode AI)"
-log_info "  - droid    (Factory AI Droid)"
+log_info "  AI Tools:"
+log_info "    - claude   (Anthropic Claude CLI)"
+log_info "    - gemini   (Google Gemini CLI)"
+log_info "    - codex    (OpenAI Codex CLI)"
+log_info "    - opencode (OpenCode AI)"
+log_info "    - droid    (Factory AI Droid)"
+log_info "  Dev Tools:"
+log_info "    - eslint_d   (ESLint daemon for fast linting)"
+log_info "    - prettier_d (Prettier daemon for fast formatting)"
+log_info "    - tsserver   (TypeScript language server)"
 log_info ""
 log_info "Note: You may need to restart your shell or run 'eval \"\$(fnm env)\"'"
 

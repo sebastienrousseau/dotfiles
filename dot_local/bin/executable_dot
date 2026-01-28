@@ -62,6 +62,7 @@ show_help() {
     echo ""
     echo "Meta:"
     echo "  upgrade     Update flake, plugins, and dotfiles"
+    echo "  packages    List installed packages and package managers"
     echo "  --version   Show version information"
     echo "  help        Show this help message"
 }
@@ -589,6 +590,58 @@ PY
             exit 1
         fi
         echo "Created $LANG project at $DEST"
+        ;;
+    packages)
+        echo "Package Managers:"
+        echo ""
+        if command -v brew >/dev/null 2>&1; then
+            echo "  Homebrew: $(brew --version | head -1)"
+            echo "    Formulae: $(brew list --formula | wc -l | tr -d ' ')"
+            echo "    Casks: $(brew list --cask | wc -l | tr -d ' ')"
+        fi
+        if command -v apt >/dev/null 2>&1; then
+            echo "  APT: $(apt --version 2>/dev/null | head -1 || echo 'installed')"
+            echo "    Packages: $(dpkg -l 2>/dev/null | grep -c '^ii' || echo 'N/A')"
+        fi
+        if command -v dnf >/dev/null 2>&1; then
+            echo "  DNF: $(dnf --version 2>/dev/null | head -1 || echo 'installed')"
+        fi
+        if command -v pacman >/dev/null 2>&1; then
+            echo "  Pacman: $(pacman --version | head -1)"
+            echo "    Packages: $(pacman -Q 2>/dev/null | wc -l | tr -d ' ')"
+        fi
+        if command -v nix >/dev/null 2>&1; then
+            echo "  Nix: $(nix --version)"
+        fi
+        echo ""
+        echo "Language Package Managers:"
+        if command -v npm >/dev/null 2>&1; then
+            echo "  npm: $(npm --version)"
+            echo "    Global packages: $(npm list -g --depth=0 2>/dev/null | grep -c '├──\|└──' || echo 'N/A')"
+        fi
+        if command -v pnpm >/dev/null 2>&1; then
+            echo "  pnpm: $(pnpm --version)"
+        fi
+        if command -v bun >/dev/null 2>&1; then
+            echo "  Bun: $(bun --version)"
+        fi
+        if command -v cargo >/dev/null 2>&1; then
+            echo "  Cargo: $(cargo --version | cut -d' ' -f2)"
+            echo "    Installed: $(cargo install --list 2>/dev/null | grep -c ':$' || echo 'N/A')"
+        fi
+        if command -v pip3 >/dev/null 2>&1; then
+            echo "  pip: $(pip3 --version | cut -d' ' -f2)"
+        fi
+        if command -v pipx >/dev/null 2>&1; then
+            echo "  pipx: $(pipx --version)"
+            echo "    Installed: $(pipx list --short 2>/dev/null | wc -l | tr -d ' ')"
+        fi
+        if command -v gem >/dev/null 2>&1; then
+            echo "  RubyGems: $(gem --version)"
+        fi
+        if command -v go >/dev/null 2>&1; then
+            echo "  Go: $(go version | cut -d' ' -f3)"
+        fi
         ;;
     log-rotate)
         SRC_DIR="$(resolve_source_dir)"

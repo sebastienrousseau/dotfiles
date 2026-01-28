@@ -170,6 +170,7 @@ if command -v apt-get >/dev/null; then
     pipx
     ruby
     ruby-dev
+    gnupg
   )
   $sudo_cmd apt-get install -y "${packages[@]}"
 
@@ -226,6 +227,7 @@ elif command -v dnf >/dev/null; then
     ruby
     ruby-devel
     gh
+    gnupg2
   )
   $sudo_cmd dnf install -y "${packages[@]}"
 
@@ -267,6 +269,7 @@ elif command -v pacman >/dev/null; then
     pipx
     ruby
     github-cli
+    gnupg
   )
   $sudo_cmd pacman -S --needed --noconfirm "${packages[@]}"
 
