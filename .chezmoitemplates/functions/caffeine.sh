@@ -272,7 +272,7 @@ caffeine_start_caffeine() {
       # -d: prevent display from sleeping
       # -i: prevent system from idle sleeping
       # -s: prevent system from sleeping
-      /usr/bin/caffeinate -d -i -s &
+      caffeinate -d -i -s &
       local pid="$!"
 
       # Verify process started successfully

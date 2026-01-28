@@ -81,10 +81,10 @@ hexdump() {
   if [[ -z "$2" || "$2" == "--all" ]]; then
     # Show the entire file if no line limit or --all is specified
     echo "[INFO] Showing full file in hex dump format:"
-    /usr/bin/xxd -u -g 1 "$1"
+    xxd -u -g 1 "$1"
   else
     # Limit output to the specified number of lines
     echo "[INFO] Showing first $2 lines in hex dump format:"
-    /usr/bin/xxd -u -g 1 "$1" | /usr/bin/head -n "$2"
+    xxd -u -g 1 "$1" | head -n "$2"
   fi
 }
