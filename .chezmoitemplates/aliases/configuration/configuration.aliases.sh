@@ -16,7 +16,7 @@ alias dot=~/.local/bin/dot
 # ------------------------------------------------------------------------------
 
 # Open Apache configuration file in default text editor
-alias edit_apache_config='${EDITOR} /etc/apache2/apache2.conf'
+[[ -f /etc/apache2/apache2.conf ]] && alias edit_apache_config='${EDITOR} /etc/apache2/apache2.conf'
 
 # Bash aliases
 # ------------------------------------------------------------------------------
@@ -51,11 +51,11 @@ alias edit_git_ignore='${EDITOR} $HOME/.gitignore'
 # System config aliases
 # ------------------------------------------------------------------------------
 
-# Open hosts file in default text editor
-alias edit_hosts='${EDITOR} /etc/hosts'
+# Open hosts file in default text editor (cross-platform)
+[[ -f /etc/hosts ]] && alias edit_hosts='${EDITOR} /etc/hosts'
 
 # Open Nginx configuration file in default text editor
-alias edit_nginx_config='${EDITOR} /etc/nginx/nginx.conf'
+[[ -f /etc/nginx/nginx.conf ]] && alias edit_nginx_config='${EDITOR} /etc/nginx/nginx.conf'
 
 # Open SSH configuration file in default text editor
 alias edit_ssh_config='${EDITOR} $HOME/.ssh/config'
