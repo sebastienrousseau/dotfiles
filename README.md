@@ -211,6 +211,19 @@ flowchart LR
   E --> F["scripts/*"]
 ```
 
+### Shell startup flow
+
+```
+.zshenv ─▶ .zshrc ─▶ rc.d/{10..50} ─▶ shell/{00,05,40,50,90} ─▶ [precmd: 91-lazy] ─▶ tool init
+   │          │            │                    │                        │                   │
+   │          │            │                    │                        │                   ├─ atuin
+  XDG      zinit      options,            paths, safety,          tool-specific          ├─ starship
+  PATH     plugins    lazy fnm/nvm        functions,              aliases (deferred)     ├─ zoxide
+                                          core aliases (eager)                           └─ fzf
+```
+
+Core aliases (~40KB) load at startup. Tool-specific aliases (~137KB) load after the first prompt via a `precmd` hook — keeping shell startup fast while still providing full alias coverage. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full startup sequence and ordering conventions.
+
 **Repository Layout**
 
 ```text
