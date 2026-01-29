@@ -39,8 +39,10 @@ paths = [
     '''\.github/.*\.md''',
 ]
 
-# Specific commits to ignore (if needed)
-# commits = []
+# Specific commits to ignore (false positives from GPG public key fingerprint)
+commits = [
+    "c26337708b2c87e0f240c643d203da45eb687aff",
+]
 
 # Stopwords - common words that appear in secrets but are not secrets
 stopwords = [
