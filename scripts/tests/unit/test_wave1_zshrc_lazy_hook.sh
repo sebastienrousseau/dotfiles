@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1090,SC1091,SC2034
+# shellcheck disable=SC1090,SC1091,SC2034,SC2016
 # Unit tests for Wave 1: zshrc lazy alias loading hook and FNM fix
 set -euo pipefail
 
@@ -44,15 +44,17 @@ fi
 
 test_start "zshrc_core_loop_layers"
 # Verify the core loading loop includes the expected layers
+all_layers_found=true
 for layer in "00-core-paths" "05-core-safety" "40-ls-colors" "50-logic-functions" "90-ux-aliases"; do
   if ! grep -q "$layer" "$ZSHRC"; then
-    ((TESTS_FAILED++))
+    all_layers_found=false
+    ((TESTS_FAILED++)) || true
     echo -e "  ${RED}✗${NC} $CURRENT_TEST: missing layer $layer in core loop"
     break
   fi
 done
-if [[ $? -eq 0 ]] || grep -q "90-ux-aliases" "$ZSHRC"; then
-  ((TESTS_PASSED++))
+if [[ "$all_layers_found" == "true" ]]; then
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: all 5 core layers present in loading loop"
 fi
 
