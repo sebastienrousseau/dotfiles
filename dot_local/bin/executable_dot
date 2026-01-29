@@ -469,6 +469,16 @@ case "$COMMAND" in
             echo "Available templates: python, go, node, packer, molecule"
             exit 1
         fi
+        # Pre-flight: verify Python is available before creating any files
+        PYTHON_CMD=""
+        if command -v python3 >/dev/null 2>&1; then
+            PYTHON_CMD="python3"
+        elif command -v python >/dev/null 2>&1; then
+            PYTHON_CMD="python"
+        else
+            echo "python3 is required to render templates." >&2
+            exit 1
+        fi
         DEST="$PWD/$PROJECT_NAME"
         if [ -e "$DEST" ]; then
             echo "Destination exists: $DEST"
@@ -480,16 +490,6 @@ case "$COMMAND" in
             parent="$(dirname "$path")"
             mv "$path" "$parent/$PROJECT_NAME"
         done
-        # Determine Python interpreter
-        PYTHON_CMD=""
-        if command -v python3 >/dev/null 2>&1; then
-            PYTHON_CMD="python3"
-        elif command -v python >/dev/null 2>&1; then
-            PYTHON_CMD="python"
-        else
-            echo "python3 is required to render templates."
-            exit 1
-        fi
         # Render template placeholders
         find "$DEST" -type f -print0 | while IFS= read -r -d '' file; do
             $PYTHON_CMD - "$file" "$PROJECT_NAME" <<'PY'
