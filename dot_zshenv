@@ -4,6 +4,15 @@ export XDG_CACHE_HOME="${HOME}/.cache"
 export XDG_DATA_HOME="${HOME}/.local/share"
 export XDG_STATE_HOME="${HOME}/.local/state"
 
+# Essential PATH entries (available before .zshrc and plugin init)
+# Prevents tools like dot, chezmoi, and Homebrew from being missing during early init.
+if [[ -d "${HOME}/.local/bin" ]]; then
+  [[ ":${PATH}:" != *":${HOME}/.local/bin:"* ]] && export PATH="${HOME}/.local/bin:${PATH}"
+fi
+if [[ -d "/opt/homebrew/bin" ]]; then
+  [[ ":${PATH}:" != *":/opt/homebrew/bin:"* ]] && export PATH="/opt/homebrew/bin:${PATH}"
+fi
+
 # Zsh
 export ZDOTDIR="${XDG_CONFIG_HOME}/zsh"
 
