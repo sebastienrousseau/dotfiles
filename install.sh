@@ -205,7 +205,7 @@ fi
 step "Applying Configuration..."
 
 # VERSION pinning for supply-chain security
-VERSION="${1:-v0.2.477}"
+VERSION="${1:-v0.2.478}"
 
 SOURCE_DIR="$HOME/.dotfiles"
 LEGACY_SOURCE_DIR="$HOME/.local/share/chezmoi"

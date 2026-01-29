@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
-# Dotfiles CLI Entry Point - v0.2.477
+# Dotfiles CLI Entry Point - v0.2.478
 
-VERSION="0.2.477"
+VERSION="0.2.478"
 
 COMMAND="$1"
 if [ -n "$1" ]; then
