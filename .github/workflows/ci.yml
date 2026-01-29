@@ -122,7 +122,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup Chezmoi
         run: |
-          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -v ${{ env.CHEZMOI_VERSION }}
+          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -t v${{ env.CHEZMOI_VERSION }}
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Init & Dry Run
         run: |
@@ -154,7 +154,7 @@ jobs:
             export PATH=\"/root/.local/bin:\$PATH\"
             apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates
             ln -s /root/.local/share/chezmoi /root/.dotfiles
-            sh -c \"\$(curl -fsLS get.chezmoi.io)\" -- -v ${{ env.CHEZMOI_VERSION }} init --promptDefaults --no-tty --source /root/.local/share/chezmoi
+            sh -c \"\$(curl -fsLS get.chezmoi.io)\" -- -t v${{ env.CHEZMOI_VERSION }} init --promptDefaults --no-tty --source /root/.local/share/chezmoi
             DOTFILES_NONINTERACTIVE=1 chezmoi apply --exclude=scripts --force --no-tty
             echo 'Chezmoi applied successfully'
           "
@@ -184,7 +184,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup Chezmoi
         run: |
-          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -v ${{ env.CHEZMOI_VERSION }}
+          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -t v${{ env.CHEZMOI_VERSION }}
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           mkdir -p "$HOME/.config/chezmoi"
           echo "sourceDir = \"$GITHUB_WORKSPACE\"" > "$HOME/.config/chezmoi/chezmoi.toml"
@@ -237,7 +237,7 @@ jobs:
           fi
       - name: Setup Chezmoi
         run: |
-          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -v ${{ env.CHEZMOI_VERSION }}
+          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -t v${{ env.CHEZMOI_VERSION }}
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           mkdir -p "$HOME/.config/chezmoi"
           echo "sourceDir = \"$GITHUB_WORKSPACE\"" > "$HOME/.config/chezmoi/chezmoi.toml"

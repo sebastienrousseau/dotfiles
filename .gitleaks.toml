@@ -28,6 +28,9 @@ regexes = [
 
     # Sidekiq enterprise example
     '''BUNDLE_ENTERPRISE__CONTRIBSYS__COM''',
+
+    # GPG public key fingerprints used for signature verification (not secrets)
+    '''CHEZMOI_GPG_KEY=''',
 ]
 
 # Paths to ignore (documentation files with examples)

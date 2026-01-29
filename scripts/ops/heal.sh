@@ -106,7 +106,9 @@ create_pre_heal_backup() {
     local backup_path="$BACKUP_DIR/backup_${timestamp}_pre_heal"
     mkdir -p "$backup_path"
     for f in "$HOME/.bashrc" "$HOME/.zshrc" "$HOME/.profile"; do
-      [[ -f "$f" ]] && cp -a "$f" "$backup_path/" 2>/dev/null || true
+      if [[ -f "$f" ]]; then
+        cp -a "$f" "$backup_path/" 2>/dev/null || true
+      fi
     done
     log_info "Backup created at $backup_path"
   fi
