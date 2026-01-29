@@ -26,6 +26,9 @@ show_help() {
     echo ""
     echo "Diagnostics:"
     echo "  doctor      Check system health and configuration"
+    echo "  heal        Auto-repair common dotfiles issues"
+    echo "  health      Run comprehensive health check"
+    echo "  rollback    Rollback dotfiles to a previous state"
     echo "  drift       Drift dashboard (detailed chezmoi status)"
     echo "  history     Shell history analysis"
     echo "  benchmark   Run shell startup benchmark"
@@ -225,7 +228,7 @@ case "$COMMAND" in
         SRC_DIR="$(resolve_source_dir)"
         if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/docs/KEYS.md" ]; then
             if [ -n "$1" ]; then
-                rg -i --context 1 "$1" "$SRC_DIR/docs/KEYS.md" || true
+                rg -i --fixed-strings --context 1 "$1" "$SRC_DIR/docs/KEYS.md" || true
             else
                 exec cat "$SRC_DIR/docs/KEYS.md"
             fi
@@ -253,7 +256,10 @@ case "$COMMAND" in
             exit 1
         fi
         ;;
-    benchmark) run_script "scripts/tests/benchmark.sh" "Benchmark script" ;;
+    heal) run_script "scripts/ops/heal.sh" "Heal script" "$@" ;;
+    health|health-check) run_script "scripts/ops/health-check.sh" "Health check script" "$@" ;;
+    rollback) run_script "scripts/ops/rollback.sh" "Rollback script" "$@" ;;
+    benchmark) run_script "scripts/tests/benchmark.sh" "Benchmark script" "$@" ;;
     tune)
         SRC_DIR="$(resolve_source_dir)"
         if [ -z "$SRC_DIR" ]; then
@@ -391,7 +397,7 @@ case "$COMMAND" in
         fi
         exec chezmoi status
         ;;
-    history) run_script "scripts/diagnostics/history-analysis.sh" "History analysis script" ;;
+    history) run_script "scripts/diagnostics/history-analysis.sh" "History analysis script" "$@" ;;
     tools)
         SRC_DIR="$(resolve_source_dir)"
         SUBCOMMAND="${1:-}"
@@ -508,7 +514,7 @@ PY
         echo "Language Package Managers:"
         show_language_package_managers
         ;;
-    log-rotate) run_script "scripts/tools/log-rotate.sh" "Log rotation script" ;;
+    log-rotate) run_script "scripts/tools/log-rotate.sh" "Log rotation script" "$@" ;;
     help|--help|-h)
         show_help
         ;;
