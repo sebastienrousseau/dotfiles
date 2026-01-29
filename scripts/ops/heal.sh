@@ -140,11 +140,11 @@ install_package() {
   pkg_mgr=$(detect_pkg_manager)
 
   case "$pkg_mgr" in
-    brew)   brew install "$pkg" ;;
-    apt)    sudo apt-get install -y "$pkg" ;;
-    dnf)    sudo dnf install -y "$pkg" ;;
+    brew) brew install "$pkg" ;;
+    apt) sudo apt-get install -y "$pkg" ;;
+    dnf) sudo dnf install -y "$pkg" ;;
     pacman) sudo pacman -S --noconfirm "$pkg" ;;
-    nix)    nix-env -iA "nixpkgs.$pkg" ;;
+    nix) nix-env -iA "nixpkgs.$pkg" ;;
     *)
       log_error "No supported package manager found. Install '$pkg' manually."
       return 1
@@ -161,7 +161,7 @@ get_package_name() {
   case "$cmd" in
     rg)
       case "$pkg_mgr" in
-        apt|dnf) echo "ripgrep" ;;
+        apt | dnf) echo "ripgrep" ;;
         *) echo "ripgrep" ;;
       esac
       ;;

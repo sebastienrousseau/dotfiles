@@ -151,7 +151,7 @@ else
   if command -v gpg >/dev/null; then
     if curl -fsSL --connect-timeout 10 --max-time 30 -o "$tmp_dir/$checksums_sig" "$base_url/$checksums_sig" 2>/dev/null; then
       # Attempt to import the chezmoi signing key
-      CHEZMOI_GPG_KEY="FD93980B3D3173B6894CBB0A3C270B7E4E6B46F4"
+      CHEZMOI_GPG_KEY="FD93980B3D3173B6894CBB0A3C270B7E4E6B46F4" # gitleaks:allow (public GPG fingerprint, not a secret)
       if ! gpg --list-keys "$CHEZMOI_GPG_KEY" >/dev/null 2>&1; then
         gpg --keyserver hkps://keys.openpgp.org --recv-keys "$CHEZMOI_GPG_KEY" 2>/dev/null ||
           gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys "$CHEZMOI_GPG_KEY" 2>/dev/null || true
