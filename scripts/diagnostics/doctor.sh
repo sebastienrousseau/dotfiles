@@ -40,6 +40,15 @@ for cmd in git curl chezmoi starship rg bat; do
   fi
 done
 
+echo -e "\nChecking Optional AI CLIs..."
+for cmd in claude gemini sgpt ollama opencode; do
+  if command -v "$cmd" &>/dev/null; then
+    log_success "Found $cmd: $(command -v "$cmd")"
+  else
+    log_warn "Missing $cmd (optional)"
+  fi
+done
+
 # 2. Check XDG Compliance
 echo -e "\nChecking Environment..."
 if [[ -z "${XDG_CONFIG_HOME:-}" ]]; then

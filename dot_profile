@@ -64,6 +64,12 @@ case ":${PATH}:" in
     *) export PATH="${HOME}/.local/bin:${PATH}" ;;
 esac
 
+# Ensure ~/bin is in PATH
+case ":${PATH}:" in
+    *":${HOME}/bin:"*) ;;
+    *) export PATH="${HOME}/bin:${PATH}" ;;
+esac
+
 # Homebrew (macOS)
 if [ -d "/opt/homebrew/bin" ]; then
     case ":${PATH}:" in
