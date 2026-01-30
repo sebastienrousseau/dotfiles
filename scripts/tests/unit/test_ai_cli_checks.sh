@@ -15,8 +15,10 @@ pass() {
 check_contains() {
   local file="$1"
   local pattern="$2"
-  if ! rg -n --fixed-strings "$pattern" "$file" >/dev/null; then
-    fail "Missing pattern in $file: $pattern"
+  if command -v rg >/dev/null 2>&1; then
+    rg -n --fixed-strings "$pattern" "$file" >/dev/null || fail "Missing pattern in $file: $pattern"
+  else
+    grep -nF "$pattern" "$file" >/dev/null || fail "Missing pattern in $file: $pattern"
   fi
 }
 
