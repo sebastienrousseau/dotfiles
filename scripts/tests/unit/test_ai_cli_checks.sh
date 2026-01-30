@@ -39,7 +39,9 @@ check_contains "$APPLY_FILE" "check_ai_cli \"ollama\""
 check_contains "$DOC_FILE" "| sgpt | shell-gpt |"
 check_contains "$DOC_FILE" "| ollama | ollama |"
 
-# Python tools should include shell-gpt install
-check_contains "$PYTOOLS_FILE" "install_python_tool \"shell-gpt\""
+# Python tools should include key dev tools
+check_contains "$PYTOOLS_FILE" "install_python_tool \"pytest\""
+check_contains "$PYTOOLS_FILE" "install_python_tool \"bandit\""
+check_contains "$PYTOOLS_FILE" "install_python_tool \"mypy\""
 
 pass "AI CLI dependency checks and docs are wired"
