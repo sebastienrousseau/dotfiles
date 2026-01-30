@@ -6,22 +6,21 @@ if [ -n "${BASH_VERSION:-}" ]; then
   shopt -s expand_aliases
 fi
 
-{{- $coreCategories := list "cd" "clear" "configuration" "default" "diagnostics" "editor" "git" "interactive" "installer" "mkdir" "modern" "ps" "sudo" "compliance" }}
-{{- $globPattern := joinPath .chezmoi.sourceDir ".chezmoitemplates/aliases/**/*.aliases.sh" }}
-{{- $files := glob $globPattern }}
-{{- range $files }}
-  {{- $name := . }}
-  {{- $isCore := false }}
-  {{- range $coreCategories }}
-    {{- if contains (printf "/%s/" .) $name }}
-      {{- $isCore = true }}
-    {{- end }}
-  {{- end }}
-  {{- if and $isCore (not (contains "/macOS/" $name)) }}
-    {{- include $name }}
-    {{- "\n" }}
-  {{- end }}
-{{- end }}
+{{ $coreCategories := list "cd" "clear" "configuration" "default" "diagnostics" "editor" "git" "interactive" "installer" "mkdir" "modern" "ps" "sudo" "compliance" -}}
+{{ $globPattern := joinPath .chezmoi.sourceDir ".chezmoitemplates/aliases/**/*.aliases.sh" -}}
+{{ $files := glob $globPattern -}}
+{{ range $files -}}
+  {{ $name := . -}}
+  {{ $isCore := false -}}
+  {{ range $coreCategories -}}
+    {{ if contains (printf "/%s/" .) $name -}}
+      {{ $isCore = true -}}
+    {{ end -}}
+  {{ end -}}
+  {{ if and $isCore (not (contains "/macOS/" $name)) }}
+{{ include $name }}
+  {{ end -}}
+{{ end }}
 
 # OS-Specific Core Aliases
 
