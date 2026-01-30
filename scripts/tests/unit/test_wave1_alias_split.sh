@@ -62,7 +62,7 @@ assert_file_contains "$EAGER_TMPL" 'expand_aliases' "should enable expand_aliase
 
 # Count expected core categories (14)
 test_start "eager_template_has_14_core_categories"
-core_count=$(grep -oP '"[a-z]+"' "$EAGER_TMPL" | head -14 | wc -l)
+core_count=$(grep -oE '"[a-z]+"' "$EAGER_TMPL" | head -14 | wc -l)
 if [[ $core_count -eq 14 ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has 14 core categories"

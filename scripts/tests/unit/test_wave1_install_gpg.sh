@@ -58,7 +58,7 @@ assert_file_contains "$INSTALL_SCRIPT" "checksums.txt.sig" "should download chec
 
 test_start "install_chezmoi_version_pinned"
 # Verify version is a proper semver
-version=$(grep 'CHEZMOI_VERSION=' "$INSTALL_SCRIPT" | head -1 | grep -oP '"[0-9]+\.[0-9]+\.[0-9]+"' | tr -d '"')
+version=$(grep 'CHEZMOI_VERSION=' "$INSTALL_SCRIPT" | head -1 | grep -oE '"[0-9]+\.[0-9]+\.[0-9]+"' | tr -d '"')
 if [[ -n "$version" && "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: chezmoi version pinned to $version"
