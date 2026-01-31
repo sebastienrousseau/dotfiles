@@ -92,6 +92,8 @@ if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
 else
   compinit -C
 fi
+# Compile zcompdump to bytecode in background for faster subsequent loads
+{ [[ ! -f "${ZDOTDIR}/.zcompdump.zwc" || "${ZDOTDIR}/.zcompdump" -nt "${ZDOTDIR}/.zcompdump.zwc" ]] && zcompile "${ZDOTDIR}/.zcompdump" } &!
 
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'

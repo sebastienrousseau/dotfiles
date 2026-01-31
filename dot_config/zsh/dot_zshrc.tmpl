@@ -95,21 +95,20 @@ fi
 # 90-99: UX (Aliases, Prompts)
 #
 # Optimized loading of core configurations + eager aliases
-for core_layer in 00-core-paths 05-core-safety 40-ls-colors 50-logic-functions 90-ux-aliases; do
+for core_layer in 00-core-paths 05-core-safety 40-ls-colors 90-ux-aliases; do
   if [[ -f "${HOME}/.config/shell/${core_layer}.sh" ]]; then
     source "${HOME}/.config/shell/${core_layer}.sh"
   fi
 done
 
-# Deferred loading of tool-specific aliases (lazy — loads after first prompt)
-if [[ -f "${HOME}/.config/shell/91-ux-aliases-lazy.sh" ]]; then
-  _load_lazy_aliases() {
-    add-zsh-hook -d precmd _load_lazy_aliases
-    source "${HOME}/.config/shell/91-ux-aliases-lazy.sh"
-  }
-  autoload -Uz add-zsh-hook
-  add-zsh-hook precmd _load_lazy_aliases
-fi
+# Deferred loading of heavy layers (lazy — loads after first prompt)
+autoload -Uz add-zsh-hook
+_load_deferred_layers() {
+  add-zsh-hook -d precmd _load_deferred_layers
+  [[ -f "${HOME}/.config/shell/50-logic-functions.sh" ]] && source "${HOME}/.config/shell/50-logic-functions.sh"
+  [[ -f "${HOME}/.config/shell/91-ux-aliases-lazy.sh" ]] && source "${HOME}/.config/shell/91-ux-aliases-lazy.sh"
+}
+add-zsh-hook precmd _load_deferred_layers
 
 # Essential Aliases (fallback if 90-ux-aliases.sh is unavailable)
 if command -v bat >/dev/null; then
