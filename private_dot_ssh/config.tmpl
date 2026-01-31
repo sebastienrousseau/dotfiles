@@ -1,4 +1,10 @@
-# SSH Hardening Defaults
+# SSH Hardening Defaults - Managed by Chezmoi
+{{- $isWSL := false -}}
+{{- if eq .chezmoi.os "linux" -}}
+{{-   if (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
+{{-     $isWSL = true -}}
+{{-   end -}}
+{{- end }}
 # Include site-specific overrides
 Include ~/.ssh/config.d/*.conf
 
@@ -13,6 +19,10 @@ Host *
   VisualHostKey yes
   IdentitiesOnly yes
   AddKeysToAgent yes
+{{- if eq .chezmoi.os "darwin" }}
+  UseKeychain yes
+{{- end }}
+  IdentityFile ~/.ssh/id_ed25519
   KbdInteractiveAuthentication no
   PasswordAuthentication no
   PreferredAuthentications publickey
