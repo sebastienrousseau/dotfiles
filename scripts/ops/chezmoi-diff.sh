@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-excludes=(scripts install tests)
+excludes=(scripts)
 if [[ -n "${DOTFILES_CHEZMOI_DIFF_EXCLUDES:-}" ]]; then
   IFS=',' read -r -a excludes <<<"${DOTFILES_CHEZMOI_DIFF_EXCLUDES}"
 fi
