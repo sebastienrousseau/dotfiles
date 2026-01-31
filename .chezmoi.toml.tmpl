@@ -11,7 +11,7 @@ sourceDir = "{{ .chezmoi.homeDir }}/.dotfiles"
 {{ $age_recipient := promptString "age_recipient" "" }}
 
 # Conditional encryption block - only enable if age_identity is provided
-# Template control flow: {{ if ne $var "" }} = if variable not equal to empty string
+# Template control flow: "if ne $age_identity" checks if variable is not empty
 # This entire [age] section is only rendered if user provided an identity
 {{ if ne $age_identity "" }}
 encryption = "age"
