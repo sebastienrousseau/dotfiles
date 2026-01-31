@@ -3,13 +3,15 @@
 
 package dotfiles.security
 
+import rego.v1
+
 # Default deny
-default allow_commit = false
-default allow_file = false
-default allow_workflow = false
+default allow_commit := false
+default allow_file := false
+default allow_workflow := false
 
 # Allow commits that pass all security checks
-allow_commit {
+allow_commit if {
     no_hardcoded_secrets
     no_sensitive_files
     valid_file_permissions
@@ -17,7 +19,7 @@ allow_commit {
 }
 
 # Allow files that meet security criteria
-allow_file {
+allow_file if {
     input.file_path
     not forbidden_extensions[_] == file_extension(input.file_path)
     not contains_hardcoded_credentials
@@ -25,7 +27,7 @@ allow_file {
 }
 
 # Allow workflows that follow security best practices
-allow_workflow {
+allow_workflow if {
     input.workflow_path
     workflow_has_proper_permissions
     workflow_uses_pinned_actions
@@ -35,7 +37,7 @@ allow_workflow {
 # Security Rules
 
 # Check for hardcoded secrets
-no_hardcoded_secrets {
+no_hardcoded_secrets if {
     not contains(input.content, "password=")
     not contains(input.content, "token=")
     not contains(input.content, "secret=")
@@ -44,24 +46,24 @@ no_hardcoded_secrets {
 }
 
 # Check for sensitive files
-no_sensitive_files {
+no_sensitive_files if {
     not forbidden_files[_] == base_filename(input.file_path)
 }
 
 # Validate file permissions
-valid_file_permissions {
+valid_file_permissions if {
     input.file_mode
     input.file_mode <= 755
 }
 
-proper_file_permissions {
+proper_file_permissions if {
     input.file_path
     not endswith(input.file_path, ".key")
     not endswith(input.file_path, ".pem")
 }
 
 # Environment variable usage patterns
-proper_environment_usage {
+proper_environment_usage if {
     # Allow environment variable references
     not regex.match(`\$[A-Z_]+\s*=\s*["\'][^"\']*["\']`, input.content)
 
@@ -70,41 +72,43 @@ proper_environment_usage {
 }
 
 # Workflow security checks
-workflow_has_proper_permissions {
+workflow_has_proper_permissions if {
     input.workflow.permissions
     input.workflow.permissions.contents == "read"
 }
 
-workflow_uses_pinned_actions {
+workflow_uses_pinned_actions if {
     all_actions := [action |
-        action := input.workflow.jobs[_].steps[_].uses
+        some j, k
+        action := input.workflow.jobs[j].steps[k].uses
         action != null
     ]
 
     count([action |
-        action := all_actions[_]
+        some i
+        action := all_actions[i]
         not regex.match(`.*@v\d+\.\d+\.\d+$|.*@[a-f0-9]{40}$`, action)
     ]) == 0
 }
 
-workflow_has_security_scanning {
+workflow_has_security_scanning if {
     some i
     input.workflow.jobs[i].name
     contains(input.workflow.jobs[i].name, "Security")
 }
 
 # Helper functions
-file_extension(path) = ext {
+file_extension(path) := ext if {
     parts := split(path, ".")
     ext := parts[count(parts) - 1]
 }
 
-base_filename(path) = filename {
+base_filename(path) := filename if {
     parts := split(path, "/")
     filename := parts[count(parts) - 1]
 }
 
-contains_hardcoded_credentials {
+contains_hardcoded_credentials if {
     # Check for common credential patterns
     regex.match(`(?i)(password|pwd|secret|token|key|credential)\s*[=:]\s*["\']?[^"\'\s]+`, input.content)
 }
@@ -121,35 +125,35 @@ forbidden_files := {
 }
 
 # Test cases for validation
-test_allow_safe_file {
+test_allow_safe_file if {
     allow_file with input as {
         "file_path": "scripts/install.sh",
         "content": "#!/bin/bash\necho 'Installing packages'",
-        "file_mode": 644
+        "file_mode": 644,
     }
 }
 
-test_deny_secret_file {
+test_deny_secret_file if {
     not allow_file with input as {
         "file_path": "config/secret.key",
         "content": "secret_key_content",
-        "file_mode": 600
+        "file_mode": 600,
     }
 }
 
-test_deny_hardcoded_password {
+test_deny_hardcoded_password if {
     not no_hardcoded_secrets with input as {
-        "content": "password=secret123"
+        "content": "password=secret123",
     }
 }
 
-test_allow_environment_variable {
+test_allow_environment_variable if {
     no_hardcoded_secrets with input as {
-        "content": "DB_PASSWORD=${DB_PASSWORD:-default}"
+        "content": "DB_PASSWORD=${DB_PASSWORD:-default}",
     }
 }
 
-test_allow_secure_workflow {
+test_allow_secure_workflow if {
     allow_workflow with input as {
         "workflow_path": ".github/workflows/test.yml",
         "workflow": {
@@ -158,24 +162,24 @@ test_allow_secure_workflow {
                 "security": {
                     "name": "Security / Scan",
                     "steps": [
-                        {"uses": "actions/checkout@v4.1.2"}
-                    ]
-                }
-            }
-        }
+                        {"uses": "actions/checkout@v4.1.2"},
+                    ],
+                },
+            },
+        },
     }
 }
 
 # Security metrics and reporting
-security_score = score {
+security_score := score if {
     checks := [
         no_hardcoded_secrets,
         no_sensitive_files,
         valid_file_permissions,
-        proper_environment_usage
+        proper_environment_usage,
     ]
 
-    passed := count([check | check := checks[_]; check == true])
+    passed := count([check | some i; check := checks[i]; check == true])
     total := count(checks)
     score := (passed * 100) / total
 }
