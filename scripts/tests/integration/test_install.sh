@@ -104,14 +104,14 @@ else
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have version pinning"
 fi
 
-# Test: install.sh has checksum verification
-test_start "install_script_checksum"
-if grep -q "sha256" "$INSTALL_SCRIPT" || grep -q "checksum" "$INSTALL_SCRIPT"; then
+# Test: install.sh installs chezmoi via brew or get.chezmoi.io
+test_start "install_script_chezmoi_install"
+if grep -q "brew install chezmoi" "$INSTALL_SCRIPT" && grep -q "get.chezmoi.io" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has checksum verification"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: installs chezmoi via brew or get.chezmoi.io"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have checksum verification"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should install chezmoi via brew or get.chezmoi.io"
 fi
 
 # Test: install.sh creates backup
@@ -144,14 +144,14 @@ else
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should support non-interactive mode"
 fi
 
-# Test: install.sh cleans up temp files
+# Test: install.sh backs up managed dotfiles
 test_start "install_script_cleanup"
-if grep -q "trap" "$INSTALL_SCRIPT" || grep -q "rm -rf.*tmp" "$INSTALL_SCRIPT"; then
+if grep -q "chezmoi managed" "$INSTALL_SCRIPT" && grep -q "cp -a" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: cleans up temporary files"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: backs up managed dotfiles before overwriting"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should clean up temp files"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should back up managed dotfiles"
 fi
 
 # Test: install.sh uses HTTPS
@@ -164,14 +164,20 @@ else
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use HTTPS"
 fi
 
-# Test: install.sh supports multiple architectures
-test_start "install_script_multi_arch"
-if grep -q "amd64" "$INSTALL_SCRIPT" && grep -q "arm64" "$INSTALL_SCRIPT"; then
+# Test: install.sh detects multiple OS types
+test_start "install_script_multi_os"
+os_count=0
+for os_type in "debian" "fedora" "arch" "macos" "wsl2"; do
+  if grep -q "$os_type" "$INSTALL_SCRIPT"; then
+    os_count=$((os_count + 1))
+  fi
+done
+if [[ $os_count -ge 3 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: supports multiple architectures"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: detects $os_count OS types"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should support multiple architectures"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should detect multiple OS types"
 fi
 
 # Test: install.sh supports Linux
