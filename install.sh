@@ -114,95 +114,23 @@ if ! command -v git >/dev/null; then error "git is required."; fi
 step "Installing Chezmoi..."
 if command -v chezmoi >/dev/null; then
   echo "   chezmoi already installed: $(chezmoi --version)"
+elif command -v brew >/dev/null; then
+  echo "   Installing chezmoi via Homebrew..."
+  brew install chezmoi
 else
   BIN_DIR="$HOME/.local/bin"
   mkdir -p "$BIN_DIR"
 
-  # Binary Locking: Explicitly pinned version with SHA256 verification
-  CHEZMOI_VERSION="2.47.1"
-  echo "   Installing chezmoi v${CHEZMOI_VERSION} (Verified)..."
-
-  os="$(uname -s | tr '[:upper:]' '[:lower:]')"
-  arch="$(uname -m)"
-  case "$arch" in
-    x86_64 | amd64) arch="amd64" ;;
-    aarch64 | arm64) arch="arm64" ;;
-    armv7l | armv7) arch="armv7" ;;
-    *) error "Unsupported architecture for verified chezmoi install: $arch" ;;
-  esac
-
-  case "$os" in
-    linux | darwin) ;;
-    *) error "Unsupported OS for verified chezmoi install: $os" ;;
-  esac
-
-  tarball="chezmoi_${CHEZMOI_VERSION}_${os}_${arch}.tar.gz"
-  checksums="chezmoi_${CHEZMOI_VERSION}_checksums.txt"
-  base_url="https://github.com/twpayne/chezmoi/releases/download/v${CHEZMOI_VERSION}"
-
-  tmp_dir="$(mktemp -d)"
-  trap 'rm -rf "$tmp_dir"' EXIT
-
-  curl -fsSL --connect-timeout 10 --max-time 120 -o "$tmp_dir/$tarball" "$base_url/$tarball"
-  curl -fsSL --connect-timeout 10 --max-time 30 -o "$tmp_dir/$checksums" "$base_url/$checksums"
-
-  # GPG Signature Verification (graceful degradation)
-  checksums_sig="chezmoi_${CHEZMOI_VERSION}_checksums.txt.sig"
-  if command -v gpg >/dev/null; then
-    if curl -fsSL --connect-timeout 10 --max-time 30 -o "$tmp_dir/$checksums_sig" "$base_url/$checksums_sig" 2>/dev/null; then
-      # Attempt to import the chezmoi signing key
-      CHEZMOI_GPG_KEY="FD93980B3D3173B6894CBB0A3C270B7E4E6B46F4" # gitleaks:allow (public GPG fingerprint, not a secret)
-      if ! gpg --list-keys "$CHEZMOI_GPG_KEY" >/dev/null 2>&1; then
-        gpg --keyserver hkps://keys.openpgp.org --recv-keys "$CHEZMOI_GPG_KEY" 2>/dev/null ||
-          gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys "$CHEZMOI_GPG_KEY" 2>/dev/null || true
-      fi
-      if gpg --list-keys "$CHEZMOI_GPG_KEY" >/dev/null 2>&1; then
-        if gpg --verify "$tmp_dir/$checksums_sig" "$tmp_dir/$checksums" 2>/dev/null; then
-          echo "   GPG signature verified for checksums file."
-        else
-          error "GPG signature verification FAILED for chezmoi checksums. Aborting."
-        fi
-      else
-        echo "   WARNING: Could not import GPG signing key. Falling back to checksum-only verification."
-      fi
-    else
-      echo "   WARNING: GPG signature file not available. Falling back to checksum-only verification."
-    fi
-  else
-    echo "   NOTE: gpg not installed. Skipping signature verification (checksum-only)."
-  fi
-
-  if command -v sha256sum >/dev/null; then
-    expected="$(awk -v f="$tarball" '$2==f {print $1}' "$tmp_dir/$checksums")"
-    actual="$(sha256sum "$tmp_dir/$tarball" | awk '{print $1}')"
-  elif command -v shasum >/dev/null; then
-    expected="$(awk -v f="$tarball" '$2==f {print $1}' "$tmp_dir/$checksums")"
-    actual="$(shasum -a 256 "$tmp_dir/$tarball" | awk '{print $1}')"
-  else
-    error "sha256sum or shasum is required to verify chezmoi."
-  fi
-
-  if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
-    error "Checksum verification failed for chezmoi."
-  fi
-
-  tar -xzf "$tmp_dir/$tarball" -C "$tmp_dir"
-  install -m 0755 "$tmp_dir/chezmoi" "$BIN_DIR/chezmoi"
+  echo "   Installing chezmoi via binary download..."
+  sh -c "$(curl -fsSL https://get.chezmoi.io)" -- -b "$BIN_DIR" 2>/dev/null ||
+    error "Failed to install chezmoi."
 
   # Critical: Add to PATH for the rest of the script to see it
   export PATH="$BIN_DIR:$PATH"
 fi
 
-# 4. Backup existing dotfiles
-step "Backing up existing dotfiles..."
-if [ -d "$HOME/.dotfiles" ]; then
-  timestamp=$(date +"%Y%m%d_%H%M%S")
-  mv "$HOME/.dotfiles" "$HOME/.dotfiles.bak.$timestamp"
-  echo "   Backed up existing .dotfiles to .dotfiles.bak.$timestamp"
-fi
-
-# 5. Initialize & Apply
-step "Applying Configuration..."
+# 4. Prepare source directory
+step "Preparing source directory..."
 
 # VERSION pinning for supply-chain security
 VERSION="${1:-v0.2.478}"
@@ -222,9 +150,44 @@ ensure_chezmoi_source() {
     sed -i.bak "s,^sourceDir.*$,sourceDir = \"$escaped_dir\"," "$CHEZMOI_CONFIG_FILE"
     rm -f "$CHEZMOI_CONFIG_FILE.bak"
   else
-    printf 'sourceDir = \"%s\"\\n' "$dir" >"$CHEZMOI_CONFIG_FILE"
+    printf 'sourceDir = "%s"\n' "$dir" >"$CHEZMOI_CONFIG_FILE"
   fi
 }
+
+# 5. Backup existing dotfiles that chezmoi will overwrite
+step "Backing up existing dotfiles..."
+BACKUP_DIR="$HOME/.dotfiles.bak.$(date +"%Y%m%d_%H%M%S")"
+backup_count=0
+
+# Determine the source directory for chezmoi to diff against
+if [ -d "$SOURCE_DIR/.git" ]; then
+  ensure_chezmoi_source "$SOURCE_DIR"
+elif [ -d "$LEGACY_SOURCE_DIR/.git" ]; then
+  ensure_chezmoi_source "$LEGACY_SOURCE_DIR"
+fi
+
+# Back up any existing files that chezmoi would overwrite
+if command -v chezmoi >/dev/null && [ -f "$CHEZMOI_CONFIG_FILE" ]; then
+  while IFS= read -r file; do
+    [ -z "$file" ] && continue
+    if [ -e "$file" ]; then
+      rel="${file#"$HOME"/}"
+      mkdir -p "$BACKUP_DIR/$(dirname "$rel")"
+      cp -a "$file" "$BACKUP_DIR/$rel"
+      backup_count=$((backup_count + 1))
+    fi
+  done < <(chezmoi managed --path-style=absolute 2>/dev/null || true)
+fi
+
+if [ "$backup_count" -gt 0 ]; then
+  echo "   Backed up $backup_count files to $BACKUP_DIR"
+else
+  echo "   No existing dotfiles to back up."
+  rm -rf "$BACKUP_DIR" 2>/dev/null || true
+fi
+
+# 6. Initialize & Apply
+step "Applying Configuration..."
 
 # If we are running from a local source, just apply
 if [ -d "$SOURCE_DIR/.git" ]; then
@@ -236,8 +199,9 @@ if [ -d "$SOURCE_DIR/.git" ]; then
   fi
   chezmoi apply "${APPLY_FLAGS[@]}"
 elif [ -d "$LEGACY_SOURCE_DIR/.git" ]; then
-  echo "   Applying from legacy source: $LEGACY_SOURCE_DIR"
-  ensure_chezmoi_source "$LEGACY_SOURCE_DIR"
+  echo "   Migrating from legacy source: $LEGACY_SOURCE_DIR"
+  mv "$LEGACY_SOURCE_DIR" "$SOURCE_DIR"
+  ensure_chezmoi_source "$SOURCE_DIR"
   APPLY_FLAGS=()
   if [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]; then
     APPLY_FLAGS=(--force --no-tty)

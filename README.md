@@ -62,7 +62,7 @@ This is **infrastructure**, not an ad‑hoc shell script.
 ## Get started
 
 > [!IMPORTANT]
-> The installer automatically backs up any existing `~/.dotfiles` directory and cleans up legacy configuration files. It only bootstraps `chezmoi` and applies this repo. OS packages install through Chezmoi hooks during the first apply.
+> The installer automatically backs up any existing dotfiles that chezmoi will overwrite (to `~/.dotfiles.bak.<timestamp>/`). It bootstraps `chezmoi` and applies this repo. OS packages install through Chezmoi hooks during the first apply.
 
 ```bash
 # Works on macOS, Linux, and WSL
@@ -93,7 +93,6 @@ DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/
 
 **Prerequisites**
 - Required: `git`, `curl`
-- Verification: `sha256sum` (Linux) or `shasum` (macOS)
 - Optional: Homebrew (macOS), `apt-get` (Linux/WSL), Nix (toolchain)
 
 **Update**
