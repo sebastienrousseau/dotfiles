@@ -21,50 +21,44 @@ else
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use set -euo pipefail"
 fi
 
-# Test: install.sh has trap for cleanup
-test_start "install_trap_cleanup"
-if grep -q "trap" "$INSTALL_SCRIPT"; then
+# Test: install.sh checks for existing chezmoi before installing
+test_start "install_chezmoi_check"
+if grep -q 'command -v chezmoi' "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has trap for cleanup"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: checks for existing chezmoi"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have trap for cleanup"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should check for existing chezmoi"
 fi
 
-# Test: install.sh uses mktemp (not hardcoded temp paths)
-test_start "install_uses_mktemp"
-if grep -q "mktemp" "$INSTALL_SCRIPT"; then
+# Test: install.sh installs chezmoi via Homebrew when available
+test_start "install_chezmoi_brew"
+if grep -q 'brew install chezmoi' "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses mktemp for temp files"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: installs chezmoi via Homebrew when available"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use mktemp"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should install chezmoi via Homebrew"
 fi
 
-# Test: install.sh pins chezmoi version (not latest)
-test_start "install_chezmoi_version_pinned"
-if grep -q 'CHEZMOI_VERSION=' "$INSTALL_SCRIPT"; then
-  version=$(grep 'CHEZMOI_VERSION=' "$INSTALL_SCRIPT" | head -1 | cut -d'"' -f2)
-  if [[ -n "$version" ]] && [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    ((TESTS_PASSED++)) || true
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: chezmoi version pinned to $version"
-  else
-    ((TESTS_FAILED++)) || true
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: chezmoi version should be a valid semver"
-  fi
+# Test: install.sh falls back to get.chezmoi.io for binary install
+test_start "install_chezmoi_fallback"
+if grep -q 'get.chezmoi.io' "$INSTALL_SCRIPT"; then
+  ((TESTS_PASSED++)) || true
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: falls back to get.chezmoi.io"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should pin chezmoi version"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should fall back to get.chezmoi.io"
 fi
 
-# Test: install.sh has SHA256 verification
-test_start "install_checksum_verification"
-if grep -q "sha256sum\|shasum" "$INSTALL_SCRIPT" && grep -q "expected.*actual\|actual.*expected" "$INSTALL_SCRIPT"; then
+# Test: install.sh adds ~/.local/bin to PATH for fallback install
+test_start "install_path_update"
+if grep -q 'export PATH=.*local/bin' "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: performs checksum verification"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: adds ~/.local/bin to PATH"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should verify checksums"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should add ~/.local/bin to PATH"
 fi
 
 # Test: install.sh handles backup of existing .dotfiles
@@ -109,14 +103,14 @@ else
   echo -e "    $http_urls"
 fi
 
-# Test: install.sh uses connect-timeout for curl
-test_start "install_curl_timeout"
-if grep -q "\-\-connect-timeout" "$INSTALL_SCRIPT"; then
+# Test: install.sh backs up user dotfiles (not source repo)
+test_start "install_backup_user_dotfiles"
+if grep -q 'chezmoi managed' "$INSTALL_SCRIPT" && grep -q 'cp -a' "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses --connect-timeout for curl"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: backs up files chezmoi will overwrite"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use --connect-timeout"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should back up managed dotfiles"
 fi
 
 # Test: install.sh detects multiple OS types
@@ -158,14 +152,14 @@ else
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have ensure_chezmoi_source"
 fi
 
-# Test: install.sh handles missing architecture gracefully
-test_start "install_arch_error_handling"
-if grep -q 'Unsupported architecture' "$INSTALL_SCRIPT" || grep -q 'Unsupported.*arch' "$INSTALL_SCRIPT"; then
+# Test: install.sh handles legacy source migration
+test_start "install_legacy_migration"
+if grep -q 'Migrating from legacy source' "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: handles unsupported architectures"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: migrates legacy chezmoi source directory"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should handle unsupported architectures"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should handle legacy source migration"
 fi
 
 echo ""
