@@ -21,7 +21,8 @@ allow_commit if {
 # Allow files that meet security criteria
 allow_file if {
     input.file_path
-    not forbidden_extensions[_] == file_extension(input.file_path)
+    ext := file_extension(input.file_path)
+    not ext in forbidden_extensions
     not contains_hardcoded_credentials
     proper_file_permissions
 }
@@ -47,7 +48,8 @@ no_hardcoded_secrets if {
 
 # Check for sensitive files
 no_sensitive_files if {
-    not forbidden_files[_] == base_filename(input.file_path)
+    fname := base_filename(input.file_path)
+    not fname in forbidden_files
 }
 
 # Validate file permissions
