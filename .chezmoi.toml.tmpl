@@ -1,5 +1,5 @@
 # Source directory for dotfiles - uses chezmoi's built-in homeDir variable
-# Template syntax: {{ .chezmoi.homeDir }} accesses chezmoi's internal data
+# Template syntax: .chezmoi.homeDir accesses chezmoi's internal data
 sourceDir = "{{ .chezmoi.homeDir }}/.dotfiles"
 
 # Variable fallback - Age encryption variables with fallback chain:
@@ -17,11 +17,11 @@ sourceDir = "{{ .chezmoi.homeDir }}/.dotfiles"
 encryption = "age"
 
 [age]
-    # Variable interpolation: {{ $age_identity }} expands to the stored/prompted value
+    # Variable interpolation: $age_identity expands to the stored/prompted value
     identity = "{{ $age_identity }}"
 
     # Nested conditional with whitespace control
-    # {{- removes leading whitespace, preventing empty lines in output
+    # The dash suffix in template tags removes leading whitespace
     # Only adds recipient line if user provided a non-empty value
 {{- if ne $age_recipient "" }}
     recipient = "{{ $age_recipient }}"
