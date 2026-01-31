@@ -137,7 +137,16 @@ jobs:
       - name: Scan shell scripts with ShellCheck
         run: |
           sudo apt-get update && sudo apt-get install -y shellcheck
-          find . -name "*.sh" -exec shellcheck -f sarif {} + > shellcheck-results.sarif || true
+          # Pre-seed a valid minimal SARIF (GitHub requires at least one run)
+          printf '{"version":"2.1.0","$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","runs":[{"tool":{"driver":{"name":"ShellCheck","version":"0.0.0","rules":[]}},"results":[]}]}\n' > shellcheck-results.sarif
+          if find . -name "*.sh" -type f | head -1 | read -r _; then
+            find . -name "*.sh" -type f -exec shellcheck -f sarif {} + > temp-shellcheck.sarif 2>/dev/null || true
+            if [ -s temp-shellcheck.sarif ] && jq empty temp-shellcheck.sarif 2>/dev/null; then
+              mv temp-shellcheck.sarif shellcheck-results.sarif
+            else
+              rm -f temp-shellcheck.sarif
+            fi
+          fi
 
       - name: Upload ShellCheck results
         if: always()

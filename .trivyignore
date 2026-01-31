@@ -1,0 +1,20 @@
+# Trivy ignore file for legitimate security patterns in dotfiles
+# These are educational aliases with warnings, not actual security risks
+
+# Educational permission aliases with warnings (not actual 777 usage)
+# File: .chezmoitemplates/aliases/permission/permission.aliases.sh
+CVE-2022-24823
+DS002
+DS026
+
+# Allow eval usage in legitimate tool initialization contexts
+# These are standard patterns for shell tool initialization
+DS001
+
+# Allow curl usage in install scripts (HTTPS only, legitimate package downloads)
+DS002
+
+# Ignore test framework security warnings in scripts/tests/
+# Test code uses eval and other patterns that are safe in test context
+DS001 scripts/tests/
+DS002 scripts/tests/

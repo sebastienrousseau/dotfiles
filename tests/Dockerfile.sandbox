@@ -23,4 +23,12 @@ RUN mkdir -p "$HOME/.config/chezmoi" && \
 # Skip provisioning scripts inside sandbox
 RUN chezmoi apply --exclude=scripts
 
+# Create non-root user for container security (CKV_DOCKER_3)
+RUN useradd -m -d /home/sandbox -s /bin/zsh sandbox && \
+    cp -a /root/. /home/sandbox/ && \
+    chown -R sandbox:sandbox /home/sandbox
+
+USER sandbox
+ENV HOME=/home/sandbox
+
 CMD ["zsh"]

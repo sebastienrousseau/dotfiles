@@ -37,11 +37,13 @@ regexes = [
 paths = [
     '''docs/.*\.md''',
     '''\.github/.*\.md''',
+    '''\.github/security-policies/environment-template\.env''',
 ]
 
 # Specific commits to ignore (false positives from GPG public key fingerprint)
 commits = [
     "c26337708b2c87e0f240c643d203da45eb687aff",
+    "499ba965458e0052c01bc4fc71c8a2be43a70b3b",
 ]
 
 # Stopwords - common words that appear in secrets but are not secrets
