@@ -1,0 +1,3 @@
+# Always-available PATH bootstrap
+export PATH="/opt/homebrew/bin:$HOME/.local/bin:$HOME/.dotnet/tools:$PATH"
+[[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"

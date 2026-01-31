@@ -24,10 +24,10 @@ test_start "zshrc_loads_lazy_aliases"
 assert_file_contains "$ZSHRC" "91-ux-aliases-lazy" "should reference 91-ux-aliases-lazy"
 
 test_start "zshrc_uses_precmd_hook"
-assert_file_contains "$ZSHRC" "add-zsh-hook precmd _load_lazy_aliases" "should register precmd hook for lazy aliases"
+assert_file_contains "$ZSHRC" "add-zsh-hook precmd _load_deferred_layers" "should register precmd hook for deferred layers"
 
 test_start "zshrc_removes_hook_after_load"
-assert_file_contains "$ZSHRC" "add-zsh-hook -d precmd _load_lazy_aliases" "should deregister hook after loading"
+assert_file_contains "$ZSHRC" "add-zsh-hook -d precmd _load_deferred_layers" "should deregister hook after loading"
 
 test_start "zshrc_autoloads_add_zsh_hook"
 assert_file_contains "$ZSHRC" "autoload -Uz add-zsh-hook" "should autoload add-zsh-hook"
@@ -43,9 +43,10 @@ else
 fi
 
 test_start "zshrc_core_loop_layers"
-# Verify the core loading loop includes the expected layers
+# Verify the core loading loop includes the expected eager layers
+# (50-logic-functions is now deferred via precmd hook)
 all_layers_found=true
-for layer in "00-core-paths" "05-core-safety" "40-ls-colors" "50-logic-functions" "90-ux-aliases"; do
+for layer in "00-core-paths" "05-core-safety" "40-ls-colors" "90-ux-aliases"; do
   if ! grep -q "$layer" "$ZSHRC"; then
     all_layers_found=false
     ((TESTS_FAILED++)) || true
@@ -55,8 +56,11 @@ for layer in "00-core-paths" "05-core-safety" "40-ls-colors" "50-logic-functions
 done
 if [[ "$all_layers_found" == "true" ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: all 5 core layers present in loading loop"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: all 4 eager core layers present in loading loop"
 fi
+
+test_start "zshrc_deferred_logic_functions"
+assert_file_contains "$ZSHRC" "50-logic-functions" "50-logic-functions should be loaded via deferred hook"
 
 test_start "zshrc_interactive_guard"
 assert_file_contains "$ZSHRC" "[[ -o interactive ]] || return" "should skip non-interactive shells"
