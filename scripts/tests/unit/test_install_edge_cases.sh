@@ -135,13 +135,13 @@ else
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should detect at least 3 OS types, found $os_count"
 fi
 
-# Test: install.sh does not contain curl | sh (pipes to shell)
+# Test: install.sh does not contain curl | sh (pipes to shell) # gitleaks:allow
 test_start "install_no_curl_pipe_sh"
 # The Homebrew install line is a known pattern but uses /bin/bash -c, not pipe
-curl_pipe=$(grep 'curl.*|.*sh' "$INSTALL_SCRIPT" | grep -v "Homebrew" | grep -v "^#" || true)
+curl_pipe=$(grep 'curl.*|.*sh' "$INSTALL_SCRIPT" | grep -v "Homebrew" | grep -v "^#" || true) # gitleaks:allow
 if [[ -z "$curl_pipe" ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no unsafe curl|sh patterns"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no unsafe curl|sh patterns" # gitleaks:allow
 else
   ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: found curl piped to shell"

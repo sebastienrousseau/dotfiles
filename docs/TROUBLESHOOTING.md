@@ -88,6 +88,20 @@ Quick checks for common issues.
 - Review shell history size in atuin config
 - Disable unused plugins
 
+## Advanced Troubleshooting
+
+### WSL2 and Nix Integration Issues
+
+For complex WSL2 edge cases, Nix integration problems, and recovery procedures, see the comprehensive guide:
+**[WSL2 & Nix Troubleshooting Guide](WSL2_NIX_TROUBLESHOOTING.md)**
+
+This guide covers:
+- WSL2 filesystem and networking edge cases
+- Nix installation and flake management issues
+- Complete system recovery procedures
+- Performance optimization for WSL2/Nix environments
+- Cross-platform migration scenarios
+
 ## Still stuck
 
 Open an issue with:
@@ -95,3 +109,4 @@ Open an issue with:
 - Output of `dot doctor` (if available)
 - Relevant log snippets from `~/.local/share/dotfiles.log`
 - Steps to reproduce the issue
+- For WSL2/Nix issues: Include diagnostic report from the advanced guide
