@@ -60,6 +60,8 @@ These are the main tools and CLI conveniences included with Dotfiles.
 |------|-------------|-------------|
 | claude | @anthropic-ai/claude-code | Anthropic Claude CLI |
 | gemini | @google/gemini-cli | Google Gemini CLI |
+| sgpt | shell-gpt | OpenAI-compatible CLI (Shell GPT) |
+| ollama | ollama | Local LLM runtime and CLI |
 | codex | @openai/codex | OpenAI Codex CLI |
 | opencode | opencode-ai | OpenCode AI assistant |
 | droid | @factory/cli | Factory AI Droid |

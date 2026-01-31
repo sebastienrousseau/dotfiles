@@ -2,6 +2,35 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.478
+
+### Added
+
+- **Lazy alias loading** — Tool-specific aliases (~137KB across 35+ categories) now load after the first prompt via a `precmd` hook, keeping shell startup fast while retaining full alias coverage.
+- **GPG signature verification** in `install.sh` — Verifies chezmoi release checksums against the upstream GPG signature with graceful degradation when `gpg` is unavailable.
+- **Unit tests for all refactored scripts** — 100 new tests across 7 test files covering alias split, lazy hooks, FNM fix, PATH entries, GPG verification, CI pinning, gitleaks config, heal.sh fixes, and `dot new` Python guard.
+
+### Changed
+
+- **Alias split architecture** — Separated monolithic alias template into eager (`90-ux-aliases.sh`, 14 core categories) and lazy (`91-ux-aliases-lazy.sh`, 35+ tool categories).
+- **FNM triple initialization fixed** — Removed eager `eval "$(fnm env)"` from `.zshrc` and duplicate lazy-load block from `30-options.zsh`; single lazy-load via wrapper functions remains.
+- **CI chezmoi version pinned** to v2.47.1 with correct `-t` tag flag (was `-v`, which is invalid for `get.chezmoi.io`).
+- **`dot_zshenv` PATH entries** — Added idempotent `~/.local/bin` and `/opt/homebrew/bin` PATH guards so tools are available before `.zshrc` loads.
+- **`dot new` Python guard** — Moved Python pre-flight check before filesystem operations to avoid creating empty directories on failure.
+- Updated all version references to v0.2.478.
+
+### Fixed
+
+- **`heal.sh` SC2015** — Replaced `A && B || C` pattern with proper `if/then` to satisfy shellcheck.
+- **`heal.sh` shfmt formatting** — Fixed case branch spacing and pipe operator alignment.
+- **Gitleaks false positive** — Allowlisted chezmoi GPG public key fingerprint via inline annotation and commit SHA.
+
+### Documentation
+
+- Added shell startup flow (16 phases) to `ARCHITECTURE.md` with rc.d and shell/ load order tables.
+- Added alias system documentation covering eager/lazy split, glob ordering, and manifest convention.
+- Added startup flow diagram to `README.md`.
+
 ## v0.2.477
 
 ### Added

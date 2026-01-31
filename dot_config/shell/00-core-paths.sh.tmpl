@@ -61,6 +61,7 @@ export PATH="/Applications/Visual Studio Code.app/Contents/Resources/app/bin:${P
 
 # 5. Local Bin (Highest Priority)
 export PATH="${HOME}/.local/bin:${PATH}"
+export PATH="${HOME}/bin:${PATH}"
 
 # Deduplicate PATH (Keep first occurrence to maintain precedence)
 # Standard Zsh handles this with 'typeset -U path', but for bash compatibility/subshells:

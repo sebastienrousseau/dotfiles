@@ -52,6 +52,8 @@ brew "ansible-lint"
 # Update & runtime tooling
 brew "topgrade"
 brew "mise"
+brew "fnm"
+brew "python@3.12"
 brew "rustup"
 brew "tmux"
 brew "pipx"

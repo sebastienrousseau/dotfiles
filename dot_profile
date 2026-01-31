@@ -52,6 +52,12 @@ export LANG="${LANG:-en_US.UTF-8}"
 export LC_ALL="${LC_ALL:-en_US.UTF-8}"
 
 # --- PATH Configuration ---
+# Ensure ~/bin is in PATH (euxis tools)
+case ":${PATH}:" in
+    *":${HOME}/bin:"*) ;;
+    *) export PATH="${HOME}/bin:${PATH}" ;;
+esac
+
 # Ensure ~/.local/bin is in PATH (highest priority)
 case ":${PATH}:" in
     *":${HOME}/.local/bin:"*) ;;

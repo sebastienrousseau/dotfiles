@@ -26,7 +26,7 @@ Optional (feature-dependent):
 ### One-liner (recommended)
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.477/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.478/install.sh)"
 exec zsh
 ```
 

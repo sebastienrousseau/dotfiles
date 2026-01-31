@@ -454,7 +454,6 @@ if command -v gpg >/dev/null 2>&1; then
   }
 
   # Miscellaneous
-  alias gpgconf='gpg --list-config'
   alias gpgver='gpg --version'
   alias gpgminexp='gpg --export-options export-minimal --export'
 

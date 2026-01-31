@@ -47,13 +47,13 @@ apt_install fd-find
 apt_install bat
 
 # zoxide
-# SECURITY NOTE: curl|sh is used for devcontainer convenience only.
+# SECURITY NOTE: curl|sh is used for devcontainer convenience only. # gitleaks:allow
 # Production installs should use the system package manager or a pinned binary.
 if command_exists zoxide; then
   info "zoxide is already installed"
 else
   info "Installing zoxide ..."
-  curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+  curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh # gitleaks:allow
 fi
 
 # eza
@@ -75,13 +75,13 @@ else
 fi
 
 # starship prompt
-# SECURITY NOTE: curl|sh is used for devcontainer convenience only.
+# SECURITY NOTE: curl|sh is used for devcontainer convenience only. # gitleaks:allow
 # Production installs should use the system package manager or a pinned binary.
 if command_exists starship; then
   info "starship is already installed"
 else
   info "Installing starship ..."
-  curl -sSfL https://starship.rs/install.sh | sh -s -- --yes
+  curl -sSfL https://starship.rs/install.sh | sh -s -- --yes # gitleaks:allow
 fi
 
 # ---------- minimal zshrc --------------------------------------------------- #

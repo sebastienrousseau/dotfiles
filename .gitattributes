@@ -1,0 +1,4 @@
+*.cert filter=lfs diff=lfs merge=lfs -text
+*.crt filter=lfs diff=lfs merge=lfs -text
+*.pem filter=lfs diff=lfs merge=lfs -text
+*.{exe,dmg,pkg,deb,rpm,app,bin} filter=lfs diff=lfs merge=lfs -text

@@ -12,6 +12,13 @@ if [[ -z "$TARGET" ]]; then
   exit 1
 fi
 
+# Validate SSH target: must be user@host format, no shell metacharacters
+if [[ ! "$TARGET" =~ ^[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+$ ]]; then
+  echo "Invalid SSH target: $TARGET" >&2
+  echo "Expected format: user@hostname (alphanumeric, dots, hyphens, underscores only)" >&2
+  exit 1
+fi
+
 echo " Teleporting dotfiles to ${TARGET}..."
 
 # 1. Archive the current state

@@ -257,7 +257,10 @@ git_reset() {
   # Check for uncommitted changes
   if [[ -n "$(git status --porcelain)" ]]; then
     log_warn "Uncommitted changes detected"
-    if [[ "$FORCE" != "1" ]]; then
+    if [[ "$FORCE" == "1" ]]; then
+      git stash push -m "Auto-stash before rollback $(date +%Y%m%d_%H%M%S)"
+      log_success "Changes auto-stashed (use 'git stash pop' to recover)"
+    else
       read -rp "Stash changes? [y/N] " response
       if [[ "$response" =~ ^[Yy]$ ]]; then
         git stash push -m "Auto-stash before rollback $(date +%Y%m%d_%H%M%S)"

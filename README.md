@@ -5,7 +5,7 @@
 # Dotfiles — A Fast, Idempotent Shell Environment
 
 [![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions)
-[![Version](https://img.shields.io/badge/Version-v0.2.477-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.477)
+[![Version](https://img.shields.io/badge/Version-v0.2.478-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.478)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 [![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases)
 [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
@@ -66,13 +66,13 @@ This is **infrastructure**, not an ad‑hoc shell script.
 
 ```bash
 # Works on macOS, Linux, and WSL
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.477/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.478/install.sh)"
 exec zsh
 ```
 
 For non‑interactive installs (servers and CI):
 ```bash
-DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.477/install.sh)"
+DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.478/install.sh)"
 ```
 
 ---
@@ -210,6 +210,19 @@ flowchart LR
   E["dot CLI"] --> B
   E --> F["scripts/*"]
 ```
+
+### Shell startup flow
+
+```
+.zshenv ─▶ .zshrc ─▶ rc.d/{10..50} ─▶ shell/{00,05,40,50,90} ─▶ [precmd: 91-lazy] ─▶ tool init
+   │          │            │                    │                        │                   │
+   │          │            │                    │                        │                   ├─ atuin
+  XDG      zinit      options,            paths, safety,          tool-specific          ├─ starship
+  PATH     plugins    lazy fnm/nvm        functions,              aliases (deferred)     ├─ zoxide
+                                          core aliases (eager)                           └─ fzf
+```
+
+Core aliases (~40KB) load at startup. Tool-specific aliases (~137KB) load after the first prompt via a `precmd` hook — keeping shell startup fast while still providing full alias coverage. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full startup sequence and ordering conventions.
 
 **Repository Layout**
 

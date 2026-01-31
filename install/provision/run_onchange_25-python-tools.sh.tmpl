@@ -34,12 +34,28 @@ install_python_tool() {
 
 log_info "Python tools: starting setup..."
 
+# Linting & formatting
 install_python_tool "ruff"
 install_python_tool "black"
+
+# Type checking
 install_python_tool "basedpyright"
+install_python_tool "mypy"
+
+# Testing
+install_python_tool "pytest"
+install_python_tool "pytest-cov"
+
+# Security & auditing
+install_python_tool "bandit"
+install_python_tool "pip-audit"
+
+# Development
 install_python_tool "debugpy"
 install_python_tool "ipython"
 install_python_tool "poetry"
+
+# Infrastructure
 install_python_tool "ansible-lint"
 install_python_tool "checkov"
 install_python_tool "molecule"

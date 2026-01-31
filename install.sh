@@ -146,6 +146,32 @@ else
   curl -fsSL --connect-timeout 10 --max-time 120 -o "$tmp_dir/$tarball" "$base_url/$tarball"
   curl -fsSL --connect-timeout 10 --max-time 30 -o "$tmp_dir/$checksums" "$base_url/$checksums"
 
+  # GPG Signature Verification (graceful degradation)
+  checksums_sig="chezmoi_${CHEZMOI_VERSION}_checksums.txt.sig"
+  if command -v gpg >/dev/null; then
+    if curl -fsSL --connect-timeout 10 --max-time 30 -o "$tmp_dir/$checksums_sig" "$base_url/$checksums_sig" 2>/dev/null; then
+      # Attempt to import the chezmoi signing key
+      CHEZMOI_GPG_KEY="FD93980B3D3173B6894CBB0A3C270B7E4E6B46F4" # gitleaks:allow (public GPG fingerprint, not a secret)
+      if ! gpg --list-keys "$CHEZMOI_GPG_KEY" >/dev/null 2>&1; then
+        gpg --keyserver hkps://keys.openpgp.org --recv-keys "$CHEZMOI_GPG_KEY" 2>/dev/null ||
+          gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys "$CHEZMOI_GPG_KEY" 2>/dev/null || true
+      fi
+      if gpg --list-keys "$CHEZMOI_GPG_KEY" >/dev/null 2>&1; then
+        if gpg --verify "$tmp_dir/$checksums_sig" "$tmp_dir/$checksums" 2>/dev/null; then
+          echo "   GPG signature verified for checksums file."
+        else
+          error "GPG signature verification FAILED for chezmoi checksums. Aborting."
+        fi
+      else
+        echo "   WARNING: Could not import GPG signing key. Falling back to checksum-only verification."
+      fi
+    else
+      echo "   WARNING: GPG signature file not available. Falling back to checksum-only verification."
+    fi
+  else
+    echo "   NOTE: gpg not installed. Skipping signature verification (checksum-only)."
+  fi
+
   if command -v sha256sum >/dev/null; then
     expected="$(awk -v f="$tarball" '$2==f {print $1}' "$tmp_dir/$checksums")"
     actual="$(sha256sum "$tmp_dir/$tarball" | awk '{print $1}')"
@@ -179,7 +205,7 @@ fi
 step "Applying Configuration..."
 
 # VERSION pinning for supply-chain security
-VERSION="${1:-v0.2.477}"
+VERSION="${1:-v0.2.478}"
 
 SOURCE_DIR="$HOME/.dotfiles"
 LEGACY_SOURCE_DIR="$HOME/.local/share/chezmoi"

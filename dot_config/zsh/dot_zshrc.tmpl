@@ -1,4 +1,4 @@
-# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.477) - <https://dotfiles.io>
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.478) - <https://dotfiles.io>
 # Made With ❤️ in London, United Kingdom
 # Designed by Sebastien Rousseau
 # Copyright (c) 2015-2026. All rights reserved.
@@ -36,6 +36,23 @@ export DOTFILES_PROFILE="{{ $profile }}"
 export DOTFILES_FEATURES="{{ join "," $enabled }}"
 export DOTFILES_THEME="{{ $theme }}"
 
+# Cached eval helper — sources cached init scripts, regenerates when stale
+_SHELL_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+[[ -d "$_SHELL_CACHE" ]] || mkdir -p "$_SHELL_CACHE"
+
+_cached_eval() {
+  local label=$1; shift
+  local cache="$_SHELL_CACHE/${label}.zsh"
+  local bin="${commands[$1]}"
+  if [[ -f "$cache" ]] && [[ -z "$bin" || "$cache" -nt "$bin" ]]; then
+    source "$cache"
+  else
+    "$@" > "$cache" 2>/dev/null
+    source "$cache"
+    { zcompile "$cache" } &!
+  fi
+}
+
 ## 🆅🅰🆁🅸🅰🆁🅸🅰🅱🅻🅴🆂 - Core variables, plugins, and options
 ZSH_RC_DIR="${HOME}/.config/zsh/rc.d"
 if [[ -d "${ZSH_RC_DIR}" ]]; then
@@ -65,7 +82,13 @@ if [[ -o interactive ]]; then
     zcompile_many "${HOME}/.zshrc" \
                   "${HOME}/.config/shell/aliases.sh" \
                   "${HOME}/.config/shell/paths.sh" \
-                  "${HOME}/.config/shell/functions.sh" &!
+                  "${HOME}/.config/shell/functions.sh" \
+                  "${HOME}/.config/shell/00-core-paths.sh" \
+                  "${HOME}/.config/shell/05-core-safety.sh" \
+                  "${HOME}/.config/shell/40-ls-colors.sh" \
+                  "${HOME}/.config/shell/90-ux-aliases.sh" \
+                  /opt/homebrew/opt/fzf/shell/completion.zsh \
+                  /opt/homebrew/opt/fzf/shell/key-bindings.zsh &!
   )
 fi
 
@@ -88,41 +111,27 @@ if [[ -d "/etc/dotfiles/defaults.d" ]]; then
   done
 fi
 
-# Load Chezmoi-managed Universal Aliases
 # Load Chezmoi-managed Universal Configuration Layers (Lexical Order)
 # 00-19: Core (Paths, Safety)
 # 20-49: Middleware (Exports, Options)
 # 50-89: Toolchain & Logic (Functions, Rust tools)
 # 90-99: UX (Aliases, Prompts)
 #
-# DISABLED: These files contain legacy configurations with invalid ripgrep flags
-# that cause "rg: error parsing flag -E: grep config error: unknown encoding: VGA|3D"
-# The 90-ux-aliases.sh file alone contains 178KB of aliases, many with deprecated flags.
-#
-# Optimized loading of core configurations
-for core_layer in 00-core-paths 05-core-safety 40-ls-colors 50-logic-functions; do
+# Optimized loading of core configurations + eager aliases
+for core_layer in 00-core-paths 05-core-safety 40-ls-colors 90-ux-aliases; do
   if [[ -f "${HOME}/.config/shell/${core_layer}.sh" ]]; then
     source "${HOME}/.config/shell/${core_layer}.sh"
   fi
 done
 
-# fnm (Fast Node Manager)
-# Initialize after PATH is set so Node + corepack use the expected version.
-if command -v fnm >/dev/null; then
-  ZSH_COMPLETIONS_DIR="${XDG_DATA_HOME:-${HOME}/.local/share}/zsh/completions"
-  if [[ ! -d "${ZSH_COMPLETIONS_DIR}" ]]; then
-    command mkdir -p "${ZSH_COMPLETIONS_DIR}"
-  fi
-  if [[ ! -f "${ZSH_COMPLETIONS_DIR}/_fnm" ]]; then
-    command fnm completions --shell zsh >| "${ZSH_COMPLETIONS_DIR}/_fnm"
-  fi
-  eval "$(command fnm env --use-on-cd 2>/dev/null || command fnm env 2>/dev/null)"
-fi
-
-# Load Universal Aliases (Restored after fixing grep flags)
-if [[ -f "${HOME}/.config/shell/90-ux-aliases.sh" ]]; then
-  source "${HOME}/.config/shell/90-ux-aliases.sh"
-fi
+# Deferred loading of heavy layers (lazy — loads after first prompt)
+autoload -Uz add-zsh-hook
+_load_deferred_layers() {
+  add-zsh-hook -d precmd _load_deferred_layers
+  [[ -f "${HOME}/.config/shell/50-logic-functions.sh" ]] && source "${HOME}/.config/shell/50-logic-functions.sh"
+  [[ -f "${HOME}/.config/shell/91-ux-aliases-lazy.sh" ]] && source "${HOME}/.config/shell/91-ux-aliases-lazy.sh"
+}
+add-zsh-hook precmd _load_deferred_layers
 
 # Essential Aliases (fallback if 90-ux-aliases.sh is unavailable)
 if command -v bat >/dev/null; then
@@ -150,17 +159,17 @@ alias alias=alias_wrapper
 
 # Phase 33: Atuin (Memory Layer)
 if command -v atuin > /dev/null; then
-    eval "$(atuin init zsh)"
+    _cached_eval atuin-init atuin init zsh
 fi
 
 # Starship Prompt (High Performance)
 if command -v starship >/dev/null; then
-  eval "$(starship init zsh)"
+  _cached_eval starship-init starship init zsh
 fi
 
 # Zoxide (Smart Directory Jumper) - Replaces 'cd'
 if command -v zoxide >/dev/null; then
-  eval "$(zoxide init zsh)"
+  _cached_eval zoxide-init zoxide init zsh
 fi
 
 # FZF (Fuzzy Finder)

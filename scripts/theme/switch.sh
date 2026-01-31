@@ -39,6 +39,14 @@ set_theme() {
     echo "Theme name required."
     exit 1
   fi
+  # Validate theme name: only allow alphanumeric, hyphens, underscores
+  case "$new_theme" in
+    *[!a-zA-Z0-9_-]*)
+      echo "Invalid theme name: $new_theme" >&2
+      echo "Theme names may only contain letters, digits, hyphens, and underscores." >&2
+      exit 1
+      ;;
+  esac
   tmp_file="$(mktemp)"
   if grep -q '^theme = ' "$DATA_FILE"; then
     sed "s/^theme = .*/theme = \"$new_theme\"/" "$DATA_FILE" >"$tmp_file"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # run_onchange_15-ai-cli-tools.sh.tmpl
-{{- if eq .chezmoi.os "linux" -}}
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") -}}
 
 # Strict error handling
 set -euo pipefail
@@ -9,12 +9,17 @@ set -euo pipefail
 log_info() { echo -e "\\n[INFO] $*"; }
 log_error() { echo -e "\\n[ERROR] $*" >&2; }
 
-log_info "🤖 Installing AI CLI tools via npm..."
+log_info "Installing AI CLI tools via npm..."
 
 # Ensure fnm is available
 if ! command -v fnm >/dev/null 2>&1; then
+{{- if eq .chezmoi.os "darwin" }}
+  log_info "fnm not found. Install via: brew install fnm"
+  exit 1
+{{- else }}
   log_info "fnm not found. Installing fnm..."
   curl -fsSL https://fnm.vercel.app/install | bash
+{{- end }}
 fi
 
 # Load fnm environment (try multiple locations)

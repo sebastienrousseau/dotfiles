@@ -19,6 +19,22 @@ fi
 echo "Applying dotfiles..."
 chezmoi apply "${args[@]}"
 
+check_ai_cli() {
+  local name="$1"
+  local label="$2"
+  if ! command -v "$name" >/dev/null 2>&1; then
+    echo "NOT FOUND: $label"
+  fi
+}
+
+echo ""
+echo "AI provider CLI checks (optional):"
+check_ai_cli "claude" "claude (recommended — install to enable this provider)"
+check_ai_cli "gemini" "gemini (optional — install to enable this provider)"
+check_ai_cli "sgpt" "sgpt (optional — install to enable this provider)"
+check_ai_cli "ollama" "ollama (optional — install to enable this provider)"
+check_ai_cli "opencode" "opencode (optional — install to enable this provider)"
+
 if [[ "${DOTFILES_CHEZMOI_STATUS:-1}" = "1" ]]; then
   printf "\nStatus:\n"
   chezmoi status || true
