@@ -21,6 +21,13 @@ if ! command -v openssl >/dev/null 2>&1; then
   echo "Warning: openssl not available, some tests may fail"
 fi
 
+# Mock clipboard tools to prevent blocking in non-interactive environments
+mock_init
+mock_command "xclip" ""
+mock_command "wl-copy" ""
+mock_command "pbcopy" ""
+mock_command "clip" ""
+
 # Test: genpass with --help flag shows help
 test_start "genpass_help"
 output=$(
