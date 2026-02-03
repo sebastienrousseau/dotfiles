@@ -85,7 +85,7 @@ if [ "$target_os" = "macos" ] && ! command -v brew >/dev/null; then
   if [ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]; then
     read -r -p "   Continue with Homebrew installation? [y/N] " response
     case "$response" in
-      [yY][eE][sS]|[yY]) ;;
+      [yY][eE][sS] | [yY]) ;;
       *) error "Homebrew installation cancelled. Install manually: https://brew.sh" ;;
     esac
   fi
@@ -145,7 +145,7 @@ else
   fi
 
   # Basic validation: check it's a shell script and not suspiciously large
-  if [ "$(wc -c < "$CHEZMOI_INSTALLER")" -gt 102400 ]; then
+  if [ "$(wc -c <"$CHEZMOI_INSTALLER")" -gt 102400 ]; then
     rm -f "$CHEZMOI_INSTALLER"
     error "Chezmoi installer suspiciously large. Aborting for security."
   fi
@@ -157,7 +157,10 @@ else
 
   # Execute the verified installer
   sh "$CHEZMOI_INSTALLER" -- -b "$BIN_DIR" 2>/dev/null ||
-    { rm -f "$CHEZMOI_INSTALLER"; error "Failed to install chezmoi."; }
+    {
+      rm -f "$CHEZMOI_INSTALLER"
+      error "Failed to install chezmoi."
+    }
 
   rm -f "$CHEZMOI_INSTALLER"
 
