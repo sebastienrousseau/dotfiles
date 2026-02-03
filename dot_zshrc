@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Compatibility stub for tools expecting ~/.zshrc
 # Actual config lives in $ZDOTDIR (~/.config/zsh)
 

@@ -23,7 +23,8 @@ detect_theme_mode() {
       cache_age=$((now - $(stat -c %Y "$cache_file" 2>/dev/null || echo 0)))
     fi
     if [[ $cache_age -lt $cache_ttl ]]; then
-      export THEME_MODE="$(cat "$cache_file")"
+      THEME_MODE="$(cat "$cache_file")"
+      export THEME_MODE
       return
     fi
   fi
