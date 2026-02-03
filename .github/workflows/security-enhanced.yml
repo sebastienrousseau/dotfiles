@@ -295,7 +295,7 @@ jobs:
           subject-path: security-attestation.json
 
       - name: Upload security attestation
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-attestation-${{ github.sha }}
           path: security-attestation.json

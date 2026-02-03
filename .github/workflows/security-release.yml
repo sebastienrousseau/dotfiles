@@ -40,7 +40,7 @@ jobs:
           echo "hash=$(base64 -w 0 sbom.sha256)" >> $GITHUB_OUTPUT
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: dotfiles-sbom
           path: dotfiles-sbom.spdx.json

@@ -130,7 +130,7 @@ jobs:
           chezmoi apply --verbose --dry-run
       - name: Upload logs on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: logs-test-${{ matrix.os }}
           path: ~/.local/share/chezmoi/.log
