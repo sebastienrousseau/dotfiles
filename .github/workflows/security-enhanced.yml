@@ -290,7 +290,7 @@ jobs:
           EOF
 
       - name: Attest security scan
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v3
         with:
           subject-path: security-attestation.json
 
