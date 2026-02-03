@@ -35,17 +35,20 @@ export BUN_INSTALL="${HOME}/.bun"
 export PATH="${BUN_INSTALL}/bin:${PATH}"
 
 # Kubeconfig merge logic (merge all configs in ~/.kube/config.d/)
-if [[ -d "${HOME}/.kube/config.d" ]]; then
-    kubeconfig_extra=""
-    for conf in "${HOME}/.kube/config.d"/*; do
-        if [[ -f "$conf" ]]; then
-            kubeconfig_extra="${kubeconfig_extra}:${conf}"
+# Lazy loading: only process if kubectl is likely to be used
+if [[ -n "${KUBERNETES_SERVICE_HOST:-}" ]] || [[ -n "${KUBECONFIG:-}" ]] || command -v kubectl >/dev/null 2>&1; then
+    if [[ -d "${HOME}/.kube/config.d" ]]; then
+        kubeconfig_extra=""
+        for conf in "${HOME}/.kube/config.d"/*; do
+            if [[ -f "$conf" ]]; then
+                kubeconfig_extra="${kubeconfig_extra}:${conf}"
+            fi
+        done
+        if [[ -n "$kubeconfig_extra" ]]; then
+            export KUBECONFIG="${HOME}/.kube/config${kubeconfig_extra}"
         fi
-    done
-    if [[ -n "$kubeconfig_extra" ]]; then
-        export KUBECONFIG="${HOME}/.kube/config${kubeconfig_extra}"
+        unset kubeconfig_extra
     fi
-    unset kubeconfig_extra
 fi
 
 # Node.js (Global)
@@ -65,7 +68,23 @@ export PATH="${HOME}/bin:${PATH}"
 
 # Deduplicate PATH (Keep first occurrence to maintain precedence)
 # Standard Zsh handles this with 'typeset -U path', but for bash compatibility/subshells:
-if [ -z "$ZSH_VERSION" ]; then
-    PATH=$(echo "$PATH" | awk -v RS=':' '!seen[$0]++ {ORS=(NR>1?":":"")} {print}')
+if [ -z "${ZSH_VERSION:-}" ]; then
+    # Use native bash associative arrays for O(n) deduplication (bash 4+)
+    if [[ ${BASH_VERSION%%.*} -ge 4 ]]; then
+        declare -A _seen_paths
+        IFS=':' read -ra _path_array <<< "$PATH"
+        _new_path=""
+        for _dir in "${_path_array[@]}"; do
+            if [[ -n "$_dir" && -z "${_seen_paths[$_dir]:-}" ]]; then
+                _seen_paths[$_dir]=1
+                _new_path="${_new_path:+$_new_path:}$_dir"
+            fi
+        done
+        PATH="$_new_path"
+        unset _seen_paths _path_array _new_path _dir
+    else
+        # Fallback to awk for bash 3.x
+        PATH=$(echo "$PATH" | awk -v RS=':' '!seen[$0]++ {ORS=(NR>1?":":"")} {print}')
+    fi
     export PATH
 fi

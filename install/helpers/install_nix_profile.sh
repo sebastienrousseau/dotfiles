@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# SPDX-License-Identifier: MIT
+#
 # Install dotfiles utilities via Nix profile
 # Usage: ./install_nix_profile.sh [package]
 # Default package: dot-utils (all utilities)

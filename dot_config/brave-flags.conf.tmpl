@@ -1,0 +1,7 @@
+{{- if eq .chezmoi.os "linux" -}}
+--enable-gpu-rasterization
+--enable-zero-copy
+--enable-features=VaapiVideoDecodeLinuxGL,VaapiVideoEncoder,CanvasOopRasterization
+--disable-features=UseChromeOSDirectVideoDecoder
+--max-old-space-size=4096
+{{- end -}}

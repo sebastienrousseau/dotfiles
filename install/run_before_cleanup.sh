@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# SPDX-License-Identifier: MIT
+#
 # This script removes legacy files from the home directory.
 
 set -euo pipefail

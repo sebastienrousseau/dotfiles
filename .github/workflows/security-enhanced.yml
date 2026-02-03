@@ -82,7 +82,7 @@ jobs:
 
       - name: Upload Grype results to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: grype-results.sarif
           category: grype-analysis
@@ -102,7 +102,7 @@ jobs:
 
       - name: Upload Trivy results to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-results.sarif
           category: trivy-analysis
@@ -130,7 +130,7 @@ jobs:
 
       - name: Upload Checkov results to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: checkov-results.sarif
           category: checkov-analysis
@@ -151,7 +151,7 @@ jobs:
 
       - name: Upload ShellCheck results
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: shellcheck-results.sarif
           category: shellcheck-analysis
@@ -181,7 +181,7 @@ jobs:
 
       - name: Upload container scan results
         if: always() && hashFiles('**/Dockerfile*') != ''
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: container-scan.sarif
           category: container-analysis
@@ -290,12 +290,12 @@ jobs:
           EOF
 
       - name: Attest security scan
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v3
         with:
           subject-path: security-attestation.json
 
       - name: Upload security attestation
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-attestation-${{ github.sha }}
           path: security-attestation.json

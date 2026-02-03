@@ -1,7 +1,7 @@
 # shellcheck shell=bash
 # Description:
 #   keygen is a utility function to generate high-quality SSH key pairs with
-#   strong encryption and entropy. Supports ed25519, RSA, ECDSA, and DSA keys
+#   strong encryption and entropy. Supports ed25519, RSA, and ECDSA keys
 #   with configurable key lengths.
 #
 # Usage:
@@ -11,7 +11,7 @@
 # Arguments:
 #   name        The name for the SSH key (e.g., username, service name)
 #   email       The email address associated with the key
-#   type        Key type (ed25519, rsa, ecdsa, dsa). Default: ed25519
+#   type        Key type (ed25519, rsa, ecdsa). Default: ed25519
 #   bits        Key length in bits (RSA: 2048-8192, ECDSA: 256/384/521)
 #   --help      Displays this help menu and exits
 #
@@ -43,7 +43,7 @@ SSH Key Generator (keygen)
 
 Description:
   keygen is a utility function to generate high-quality SSH key pairs with
-  strong encryption and entropy. Supports ed25519, RSA, ECDSA, and DSA keys
+  strong encryption and entropy. Supports ed25519, RSA, and ECDSA keys
   with configurable key lengths.
 
 Usage:
@@ -54,11 +54,10 @@ Arguments:
   name        The name for the SSH key (e.g., username, service name).
               This name is used to create a unique file path for the key.
   email       The email address associated with the key.
-  type        Key type (ed25519, rsa, ecdsa, dsa). Default: ed25519.
+  type        Key type (ed25519, rsa, ecdsa). Default: ed25519.
   bits        Key length in bits:
              - RSA:   2048-8192 bits (default: 4096).
              - ECDSA: 256, 384, or 521 bits (default: 256).
-             - DSA:   1024, 2048, or 3072 bits (default: 3072).
              - ED25519: Fixed length.
   --help      Displays this help menu and exits.
 
@@ -74,9 +73,6 @@ Examples:
 
   keygen mykey myemail@example.com ecdsa 256
       # Generates a 256-bit ECDSA key pair named 'mykey'.
-
-  keygen mykey myemail@example.com dsa 1024
-      # Generates a 1024-bit DSA key pair named 'mykey'.
 
 Notes:
   - Keys are stored in ~/.ssh with the specified name.
@@ -101,7 +97,7 @@ EOH
     read -r name
     echo "Enter an email address associated with the key:"
     read -r email
-    echo "Enter key type (ed25519, rsa, ecdsa, dsa) [default: ed25519]:"
+    echo "Enter key type (ed25519, rsa, ecdsa) [default: ed25519]:"
     read -r key_type
     key_type="${key_type:-ed25519}"
 
@@ -109,8 +105,10 @@ EOH
       case "${key_type}" in
         "rsa") echo "Enter RSA key length (2048-8192) [default: 4096]:" && read -r key_bits ;;
         "ecdsa") echo "Enter ECDSA key length (256/384/521) [default: 256]:" && read -r key_bits ;;
-        "dsa") echo "Enter DSA key length (1024/2048/3072) [default: 3072]:" && read -r key_bits ;;
-        *) log_error "Invalid key type: ${key_type}" ;;
+        *)
+          log_error "Invalid key type: ${key_type}"
+          return 1
+          ;;
       esac
     fi
   elif [[ $# -ge 2 ]]; then
@@ -120,11 +118,18 @@ EOH
     key_bits="$4"
   else
     log_error "Usage: keygen [name] [email] [type] [bits] or keygen --help"
+    return 1
   fi
 
   # Validate inputs
-  [[ ! "${name}" =~ ^[a-zA-Z0-9_-]+$ ]] && log_error "Invalid name format. Only alphanumeric, _, and - are allowed."
-  [[ ! "${email}" =~ ^[^@]+@[^@]+\.[^@]+$ ]] && log_error "Invalid email format."
+  if [[ ! "${name}" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+    log_error "Invalid name format. Only alphanumeric, _, and - are allowed."
+    return 1
+  fi
+  if [[ ! "${email}" =~ ^[^@]+@[^@]+\.[^@]+$ ]]; then
+    log_error "Invalid email format."
+    return 1
+  fi
 
   # Key validation
   key_type="${key_type:-ed25519}"
@@ -132,22 +137,36 @@ EOH
     "ed25519") ;;
     "rsa")
       key_bits="${key_bits:-4096}"
-      [[ ! "${key_bits}" =~ ^[0-9]+$ ]] && log_error "RSA key length must be a number."
-      [[ "${key_bits}" -lt 2048 || "${key_bits}" -gt 8192 ]] && log_error "RSA key length must be between 2048 and 8192 bits."
+      if [[ ! "${key_bits}" =~ ^[0-9]+$ ]]; then
+        log_error "RSA key length must be a number."
+        return 1
+      fi
+      if [[ "${key_bits}" -lt 2048 || "${key_bits}" -gt 8192 ]]; then
+        log_error "RSA key length must be between 2048 and 8192 bits."
+        return 1
+      fi
       ;;
     "ecdsa")
       key_bits="${key_bits:-256}"
-      [[ ! "${key_bits}" =~ ^(256|384|521)$ ]] && log_error "ECDSA key length must be 256, 384, or 521 bits."
+      if [[ ! "${key_bits}" =~ ^(256|384|521)$ ]]; then
+        log_error "ECDSA key length must be 256, 384, or 521 bits."
+        return 1
+      fi
       ;;
-    "dsa")
-      key_bits="${key_bits:-3072}"
-      [[ ! "${key_bits}" =~ ^(1024|2048|3072)$ ]] && log_error "DSA key length must be 1024, 2048, or 3072 bits."
+    *)
+      log_error "Invalid key type: ${key_type}. Use 'ed25519', 'rsa', or 'ecdsa'."
+      return 1
       ;;
-    *) log_error "Invalid key type: ${key_type}. Use 'ed25519', 'rsa', 'ecdsa', or 'dsa'." ;;
   esac
 
   # Set file paths
   local key_path="${HOME}/.ssh/id_${key_type}_${name}"
+
+  # Check if key already exists
+  if [[ -f "${key_path}" ]]; then
+    log_warning "Key already exists at ${key_path}. Skipping generation."
+    return 0
+  fi
 
   # Generate key pair
   log_info "Generating ${key_type} SSH key named '${name}'..."
@@ -160,9 +179,15 @@ EOH
   # Set permissions
   chmod 600 "${key_path}" && chmod 644 "${key_path}.pub"
 
-  # Add to SSH agent
-  if ! ssh-add "${key_path}" &>/dev/null; then
-    log_warning "SSH agent not running. Start it and run 'ssh-add ${key_path}'."
+  # Add to SSH agent (use --apple-use-keychain on macOS)
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    if ! ssh-add --apple-use-keychain "${key_path}" &>/dev/null; then
+      log_warning "SSH agent not running. Start it and run 'ssh-add --apple-use-keychain ${key_path}'."
+    fi
+  else
+    if ! ssh-add "${key_path}" &>/dev/null; then
+      log_warning "SSH agent not running. Start it and run 'ssh-add ${key_path}'."
+    fi
   fi
 
   # Copy to clipboard

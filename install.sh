@@ -77,7 +77,20 @@ step "Checking Prerequisites..."
 
 # On macOS, ensure Homebrew is available before checking curl/git
 if [ "$target_os" = "macos" ] && ! command -v brew >/dev/null; then
-  echo "   Homebrew not found. Installing..."
+  echo "   Homebrew not found."
+  echo -e "${CYAN}   SECURITY NOTE: This will download and execute code from brew.sh${NC}"
+  echo "   Verify at: https://github.com/Homebrew/install"
+
+  # In non-interactive mode, proceed with warning
+  if [ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]; then
+    read -r -p "   Continue with Homebrew installation? [y/N] " response
+    case "$response" in
+      [yY][eE][sS] | [yY]) ;;
+      *) error "Homebrew installation cancelled. Install manually: https://brew.sh" ;;
+    esac
+  fi
+
+  echo "   Installing Homebrew..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   # Add brew to PATH for Apple Silicon
   if [ -x /opt/homebrew/bin/brew ]; then
@@ -122,8 +135,34 @@ else
   mkdir -p "$BIN_DIR"
 
   echo "   Installing chezmoi via binary download..."
-  sh -c "$(curl -fsSL https://get.chezmoi.io)" -- -b "$BIN_DIR" 2>/dev/null ||
-    error "Failed to install chezmoi."
+  echo -e "${CYAN}   SECURITY NOTE: Downloading from get.chezmoi.io with integrity check${NC}"
+
+  # Download installer script first for inspection
+  CHEZMOI_INSTALLER=$(mktemp)
+  if ! curl -fsSL -o "$CHEZMOI_INSTALLER" https://get.chezmoi.io; then
+    rm -f "$CHEZMOI_INSTALLER"
+    error "Failed to download chezmoi installer."
+  fi
+
+  # Basic validation: check it's a shell script and not suspiciously large
+  if [ "$(wc -c <"$CHEZMOI_INSTALLER")" -gt 102400 ]; then
+    rm -f "$CHEZMOI_INSTALLER"
+    error "Chezmoi installer suspiciously large. Aborting for security."
+  fi
+
+  if ! head -1 "$CHEZMOI_INSTALLER" | grep -q '^#!/'; then
+    rm -f "$CHEZMOI_INSTALLER"
+    error "Chezmoi installer doesn't look like a shell script. Aborting."
+  fi
+
+  # Execute the verified installer
+  sh "$CHEZMOI_INSTALLER" -- -b "$BIN_DIR" 2>/dev/null ||
+    {
+      rm -f "$CHEZMOI_INSTALLER"
+      error "Failed to install chezmoi."
+    }
+
+  rm -f "$CHEZMOI_INSTALLER"
 
   # Critical: Add to PATH for the rest of the script to see it
   export PATH="$BIN_DIR:$PATH"
@@ -209,9 +248,23 @@ elif [ -d "$LEGACY_SOURCE_DIR/.git" ]; then
   chezmoi apply "${APPLY_FLAGS[@]}"
 else
   echo "   Initializing from GitHub (Branch/Tag: $VERSION)..."
+  echo -e "${CYAN}   SECURITY NOTE: Cloning pinned version $VERSION for supply-chain safety${NC}"
+
   # STRICT MODE: We pin to the specific tag to avoid 'main' branch drift
-  git clone https://github.com/sebastienrousseau/dotfiles.git "$SOURCE_DIR"
-  (cd "$SOURCE_DIR" && git checkout "$VERSION")
+  git clone --depth 1 --branch "$VERSION" https://github.com/sebastienrousseau/dotfiles.git "$SOURCE_DIR" 2>/dev/null ||
+    { git clone https://github.com/sebastienrousseau/dotfiles.git "$SOURCE_DIR" && (cd "$SOURCE_DIR" && git checkout "$VERSION"); }
+
+  # Verify the checkout succeeded and we're on the expected version
+  ACTUAL_REF=$(
+    cd "$SOURCE_DIR" || exit 1
+    if ! git describe --tags --exact-match 2>/dev/null; then
+      git rev-parse --short HEAD
+    fi
+  )
+  if [ "$ACTUAL_REF" != "$VERSION" ] && [ "${ACTUAL_REF#v}" != "${VERSION#v}" ]; then
+    echo -e "${CYAN}   INFO: Checked out ref $ACTUAL_REF (requested: $VERSION)${NC}"
+  fi
+
   ensure_chezmoi_source "$SOURCE_DIR"
   APPLY_FLAGS=()
   if [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]; then

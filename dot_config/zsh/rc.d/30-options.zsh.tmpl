@@ -19,6 +19,11 @@ setopt PUSHD_SILENT
 setopt NO_BEEP
 
 bindkey -v
+
+# Fix: prevent auto-indent when pasting multi-line content (vi mode)
+autoload -Uz bracketed-paste-magic
+zle -N bracketed-paste bracketed-paste-magic
+
 autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search

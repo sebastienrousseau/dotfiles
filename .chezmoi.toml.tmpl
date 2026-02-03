@@ -1,13 +1,28 @@
+# Source directory for dotfiles - uses chezmoi's built-in homeDir variable
+# Template syntax: .chezmoi.homeDir accesses chezmoi's internal data
 sourceDir = "{{ .chezmoi.homeDir }}/.dotfiles"
 
+# Variable fallback - Age encryption variables with fallback chain:
+# promptString function behavior:
+# - If value exists in chezmoi data: use stored value
+# - If value doesn't exist: prompt user with default shown in quotes
+# - User response gets stored for future runs (no re-prompting)
 {{ $age_identity := promptString "age_identity" "~/.config/chezmoi/key.txt" }}
 {{ $age_recipient := promptString "age_recipient" "" }}
 
+# Conditional encryption block - only enable if age_identity is provided
+# Template control flow: "if ne $age_identity" checks if variable is not empty
+# This entire [age] section is only rendered if user provided an identity
 {{ if ne $age_identity "" }}
 encryption = "age"
 
 [age]
+    # Variable interpolation: $age_identity expands to the stored/prompted value
     identity = "{{ $age_identity }}"
+
+    # Nested conditional with whitespace control
+    # The dash suffix in template tags removes leading whitespace
+    # Only adds recipient line if user provided a non-empty value
 {{- if ne $age_recipient "" }}
     recipient = "{{ $age_recipient }}"
 {{- end }}
@@ -17,11 +32,22 @@ encryption = "age"
     command = "vimdiff"
 
 [data]
-profile = "{{ promptString "profile" "laptop" }}"
-theme = "{{ promptString "theme" "tokyonight-night" }}"
-git_name = "{{ promptString "git_name" "Your Name" }}"
-git_email = "{{ promptString "git_email" "you@example.com" }}"
-git_signingkey = "{{ promptString "git_signingkey" "~/.ssh/id_ed25519" }}"
-git_signingformat = "{{ promptString "git_signingformat" "ssh" }}"
+# User profile data with promptString fallback chains
+# promptString fallback mechanism:
+# 1. Check ~/.config/chezmoi/chezmoi.toml [data] section for existing value
+# 2. If found: use stored value (no prompting)
+# 3. If not found: prompt user with default value shown
+# 4. Store user response in chezmoi data for future template executions
+profile = "{{ promptString "profile" "laptop" }}"                    # Device type fallback
+theme = "{{ promptString "theme" "tokyonight-night" }}"              # Color scheme fallback
+git_name = "{{ promptString "git_name" "Your Name" }}"               # Git author name fallback
+git_email = "{{ promptString "git_email" "you@example.com" }}"       # Git author email fallback
+git_signingkey = "{{ promptString "git_signingkey" "~/.ssh/id_ed25519" }}" # Git signing key path fallback
+git_signingformat = "{{ promptString "git_signingformat" "ssh" }}"   # Git signing format fallback
+
+# Expose age variables in data section for use in other templates
+# Variable scope: $age_identity and $age_recipient defined at file top are accessible here
+# Data section variables become available as .age_identity and .age_recipient in other templates
+# This creates a bridge between template variables and chezmoi data
 age_identity = "{{ $age_identity }}"
 age_recipient = "{{ $age_recipient }}"

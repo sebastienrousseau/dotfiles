@@ -51,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Cache Lua tools
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.luarocks
@@ -130,7 +130,7 @@ jobs:
           chezmoi apply --verbose --dry-run
       - name: Upload logs on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: logs-test-${{ matrix.os }}
           path: ~/.local/share/chezmoi/.log
@@ -210,7 +210,7 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
-      - uses: DeterminateSystems/nix-installer-action@v14
+      - uses: DeterminateSystems/nix-installer-action@v21
       - name: Flake check
         run: nix flake check ./nix
 
