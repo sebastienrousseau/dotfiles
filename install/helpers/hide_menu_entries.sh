@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# SPDX-License-Identifier: MIT
+#
 # Hide duplicate/unwanted menu entries
 # Strategy: Prefer Native (.deb) over Flatpak (com.*) to avoid duplicates.
 set -euo pipefail

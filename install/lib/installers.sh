@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# SPDX-License-Identifier: MIT
+#
 # Shared installer functions for binary downloads with SHA256 verification.
 # Source this file after logging.sh.
+
+set -euo pipefail
 
 # Guard against double-sourcing
 if [[ -n "${_DOTFILES_INSTALLERS_LOADED:-}" ]]; then
