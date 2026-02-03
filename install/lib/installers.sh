@@ -74,7 +74,7 @@ github_asset_url() {
     local suffix="$2"
     local tag="${3:-latest}"
     local url
-    url="$(github_release_json "$repo" "$tag" 2>/dev/null | grep -oE "https://[^\"]+${suffix}" | head -n1)"
+    url="$(github_release_json "$repo" "$tag" 2>/dev/null | grep -oE "https://[^\"]+${suffix}" | head -n1 || true)"
     if [ -n "$url" ]; then
         echo "$url"
         return 0

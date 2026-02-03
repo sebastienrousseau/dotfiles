@@ -122,7 +122,12 @@ fi
 test_start "download_verify_matching"
 tmp_dir=$(mock_dir "verify_test")
 echo "test file content" >"$tmp_dir/test.bin"
-expected_hash=$(shasum -a 256 "$tmp_dir/test.bin" | awk '{print $1}')
+# Use sha256sum on Linux, shasum on macOS
+if command -v sha256sum >/dev/null 2>&1; then
+  expected_hash=$(sha256sum "$tmp_dir/test.bin" | awk '{print $1}')
+else
+  expected_hash=$(shasum -a 256 "$tmp_dir/test.bin" | awk '{print $1}')
+fi
 echo "$expected_hash  test.bin" >"$tmp_dir/test.bin.sha256"
 # Create mock curl that copies local files
 mock_init
