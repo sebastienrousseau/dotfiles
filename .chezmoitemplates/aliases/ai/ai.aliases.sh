@@ -18,4 +18,9 @@ if command -v ollama &>/dev/null; then
   alias ol='ollama'
   alias olr='ollama run'
   alias oll='ollama list'
+  alias ollama-status='ollama ps'
+  alias ollama-modelfile='ollama show --modelfile'
+  alias ollama-models='ollama list'
+  alias ollama-pull='ollama pull'
+  alias ollama-rm='ollama rm'
 fi
