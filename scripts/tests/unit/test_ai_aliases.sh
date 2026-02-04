@@ -148,11 +148,11 @@ rm -f /tmp/test_output
 mock_cleanup
 
 test_start "aliases_syntax_check"
-assert_exit_code 0 "bash -n '$ALIASES_FILE'" "AI aliases file should have valid bash syntax"
+assert_exit_code 0 "bash -n '$ALIASES_FILE'"
 
 test_start "aliases_shellcheck"
 if command -v shellcheck >/dev/null 2>&1; then
-    assert_exit_code 0 "shellcheck '$ALIASES_FILE'" "AI aliases file should pass shellcheck"
+    assert_exit_code 0 "shellcheck '$ALIASES_FILE'"
 else
     echo "SKIP: shellcheck not available"
 fi
