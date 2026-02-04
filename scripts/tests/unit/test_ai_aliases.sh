@@ -17,15 +17,16 @@ mock_init
 # Mock gh command as available
 mock_command "gh" "gh 2.42.0" 0
 
-# Source aliases in a subshell to avoid polluting environment
+# Source aliases in a subshell with expand_aliases enabled
 (
+  shopt -s expand_aliases
   export PATH="$MOCK_BIN_DIR:$PATH"
   source "$ALIASES_FILE"
 
-  # Check aliases are defined
-  type ghcp >/dev/null 2>&1 && echo "ghcp_defined"
-  type ghs >/dev/null 2>&1 && echo "ghs_defined"
-  type ghe >/dev/null 2>&1 && echo "ghe_defined"
+  # Check aliases are defined using alias command
+  alias ghcp >/dev/null 2>&1 && echo "ghcp_defined"
+  alias ghs >/dev/null 2>&1 && echo "ghs_defined"
+  alias ghe >/dev/null 2>&1 && echo "ghe_defined"
 ) > /tmp/test_output
 
 assert_file_contains "/tmp/test_output" "ghcp_defined" "ghcp alias should be defined when gh available"
@@ -40,13 +41,14 @@ mock_init
 # Don't create gh command, so command -v gh will fail
 
 (
+  shopt -s expand_aliases
   export PATH="$MOCK_BIN_DIR:$PATH"
   source "$ALIASES_FILE"
 
   # Check aliases are NOT defined
-  type ghcp >/dev/null 2>&1 || echo "ghcp_not_defined"
-  type ghs >/dev/null 2>&1 || echo "ghs_not_defined"
-  type ghe >/dev/null 2>&1 || echo "ghe_not_defined"
+  alias ghcp >/dev/null 2>&1 || echo "ghcp_not_defined"
+  alias ghs >/dev/null 2>&1 || echo "ghs_not_defined"
+  alias ghe >/dev/null 2>&1 || echo "ghe_not_defined"
 ) > /tmp/test_output
 
 assert_file_contains "/tmp/test_output" "ghcp_not_defined" "ghcp alias should not be defined when gh unavailable"
@@ -61,10 +63,11 @@ mock_init
 mock_command "fabric" "fabric v1.0.0" 0
 
 (
+  shopt -s expand_aliases
   export PATH="$MOCK_BIN_DIR:$PATH"
   source "$ALIASES_FILE"
 
-  type fab >/dev/null 2>&1 && echo "fab_defined"
+  alias fab >/dev/null 2>&1 && echo "fab_defined"
 ) > /tmp/test_output
 
 assert_file_contains "/tmp/test_output" "fab_defined" "fab alias should be defined when fabric available"
@@ -77,10 +80,11 @@ mock_init
 # Don't create fabric command
 
 (
+  shopt -s expand_aliases
   export PATH="$MOCK_BIN_DIR:$PATH"
   source "$ALIASES_FILE"
 
-  type fab >/dev/null 2>&1 || echo "fab_not_defined"
+  alias fab >/dev/null 2>&1 || echo "fab_not_defined"
 ) > /tmp/test_output
 
 assert_file_contains "/tmp/test_output" "fab_not_defined" "fab alias should not be defined when fabric unavailable"
@@ -93,15 +97,16 @@ mock_init
 mock_command "ollama" "ollama version 1.0.0" 0
 
 (
+  shopt -s expand_aliases
   export PATH="$MOCK_BIN_DIR:$PATH"
   source "$ALIASES_FILE"
 
-  type ol >/dev/null 2>&1 && echo "ol_defined"
-  type olr >/dev/null 2>&1 && echo "olr_defined"
-  type oll >/dev/null 2>&1 && echo "oll_defined"
-  type olp >/dev/null 2>&1 && echo "olp_defined"
-  type ollama-status >/dev/null 2>&1 && echo "ollama_status_defined"
-  type ollama-show >/dev/null 2>&1 && echo "ollama_show_defined"
+  alias ol >/dev/null 2>&1 && echo "ol_defined"
+  alias olr >/dev/null 2>&1 && echo "olr_defined"
+  alias oll >/dev/null 2>&1 && echo "oll_defined"
+  alias olp >/dev/null 2>&1 && echo "olp_defined"
+  alias ollama-status >/dev/null 2>&1 && echo "ollama_status_defined"
+  alias ollama-show >/dev/null 2>&1 && echo "ollama_show_defined"
 ) > /tmp/test_output
 
 assert_file_contains "/tmp/test_output" "ol_defined" "ol alias should be defined when ollama available"
@@ -119,15 +124,16 @@ mock_init
 # Don't create ollama command
 
 (
+  shopt -s expand_aliases
   export PATH="$MOCK_BIN_DIR:$PATH"
   source "$ALIASES_FILE"
 
-  type ol >/dev/null 2>&1 || echo "ol_not_defined"
-  type olr >/dev/null 2>&1 || echo "olr_not_defined"
-  type oll >/dev/null 2>&1 || echo "oll_not_defined"
-  type olp >/dev/null 2>&1 || echo "olp_not_defined"
-  type ollama-status >/dev/null 2>&1 || echo "ollama_status_not_defined"
-  type ollama-show >/dev/null 2>&1 || echo "ollama_show_not_defined"
+  alias ol >/dev/null 2>&1 || echo "ol_not_defined"
+  alias olr >/dev/null 2>&1 || echo "olr_not_defined"
+  alias oll >/dev/null 2>&1 || echo "oll_not_defined"
+  alias olp >/dev/null 2>&1 || echo "olp_not_defined"
+  alias ollama-status >/dev/null 2>&1 || echo "ollama_status_not_defined"
+  alias ollama-show >/dev/null 2>&1 || echo "ollama_show_not_defined"
 ) > /tmp/test_output
 
 assert_file_contains "/tmp/test_output" "ol_not_defined" "ol alias should not be defined when ollama unavailable"
