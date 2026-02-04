@@ -39,8 +39,9 @@ jobs:
         run: |
           # Exclude info-level warnings that are false positives
           # SC1091: Not following sourced files (expected, files don't exist in CI)
-          # SC2162: read without -r (intentional in some cases)
-          rg --files -g "*.sh" | xargs shellcheck -x -e SC1091
+          # SC2030: Modification of VAR is local (intentional in test subshells)
+          # SC2031: VAR was modified in a subshell (intentional in mock framework)
+          rg --files -g "*.sh" | xargs shellcheck -x -e SC1091 -e SC2030 -e SC2031
       - name: shfmt
         run: shfmt -d -i 2 -ci scripts/**/*.sh install.sh .chezmoitemplates/**/*.sh
 

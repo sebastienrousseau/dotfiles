@@ -1,73 +1,119 @@
-# Core CLI Tools
+# =============================================================================
+# Brewfile.cli - Core CLI Tools (Cross-Platform)
+# Optimized for performance and development workflows
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Core Utilities
+# -----------------------------------------------------------------------------
 brew "git"
 brew "chezmoi"
-brew "starship"
-brew "zsh"
 brew "jq"
+brew "yq"
 brew "ripgrep"
-brew "eza"
-brew "bat"
+brew "fd"
 brew "fzf"
+brew "bat"
+brew "eza"
+brew "dust"
+brew "duf"
+brew "tree"
+brew "trash"
+brew "rename"
+
+# -----------------------------------------------------------------------------
+# Shell & Prompt
+# -----------------------------------------------------------------------------
+brew "zsh"
+brew "starship"
 brew "zoxide"
-brew "go"
+brew "atuin"
+brew "direnv"
+
+# -----------------------------------------------------------------------------
+# Development
+# -----------------------------------------------------------------------------
 brew "neovim"
+brew "vim"
+brew "tmux"
+brew "lazygit"
+brew "git-delta"
+brew "gh"
+brew "glab"
+brew "shellcheck"
+brew "shfmt"
+
+# -----------------------------------------------------------------------------
+# Languages & Runtimes (managed by mise)
+# -----------------------------------------------------------------------------
+brew "mise"
+brew "uv"                    # Fast Python package manager
+brew "rustup"
+brew "go"
+
+# -----------------------------------------------------------------------------
+# Lua (for Neovim)
+# -----------------------------------------------------------------------------
 brew "lua"
 brew "luajit"
 brew "luarocks"
-brew "luacheck"
 brew "stylua"
-brew "lazygit"
-brew "delta"
-brew "tlrc"
-brew "dust"
-brew "duf"
-brew "gping"
+
+# -----------------------------------------------------------------------------
+# System Monitoring
+# -----------------------------------------------------------------------------
+brew "btop"
 brew "procs"
-brew "bottom"
+brew "gping"
 brew "hyperfine"
+brew "fastfetch"
+
+# -----------------------------------------------------------------------------
+# Security & Encryption
+# -----------------------------------------------------------------------------
 brew "age"
 brew "gnupg"
-brew "hexyl"
-brew "yq"
-brew "gum"
-brew "glow"
-brew "gh"
-brew "glab"
-brew "mas"
-brew "duti"
-brew "fastfetch"
+brew "pinentry-mac"
+brew "git-crypt"
+brew "mkcert"
+brew "lynis"
+
+# -----------------------------------------------------------------------------
+# AI & LLM Tools
+# -----------------------------------------------------------------------------
 brew "ollama"
-brew "fabric-ai"
-brew "uv"
-brew "terraform"
-brew "terraform-docs"
-brew "tflint"
-brew "trivy"
-brew "checkov"
-brew "ansible"
-brew "ansible-lint"
-
-# Update & runtime tooling
-brew "topgrade"
-brew "mise"
-brew "fnm"
-brew "python@3.12"
-brew "rustup"
-brew "tmux"
-brew "pipx"
-brew "ruby"
-brew "yazi"
-
-# AI CLI Tools
 brew "aichat"
 brew "mods"
+brew "fabric-ai"
 
-# Kubernetes
-brew "kubectl"
-brew "kubectx"
-brew "stern"
-brew "kube-linter"
-brew "kubeseal"
-brew "minikube"
-brew "k9s"
-brew "helm"
+# -----------------------------------------------------------------------------
+# File & Text Processing
+# -----------------------------------------------------------------------------
+brew "hexyl"
+brew "glow"
+brew "gum"
+brew "tlrc"
+brew "imagemagick"
+brew "ffmpeg"
+
+# -----------------------------------------------------------------------------
+# Networking
+# -----------------------------------------------------------------------------
+brew "curl"
+brew "wget"
+brew "httpie"
+brew "mtr"
+
+# -----------------------------------------------------------------------------
+# macOS Specific
+# -----------------------------------------------------------------------------
+brew "mas"
+brew "duti"
+brew "topgrade"
+
+# -----------------------------------------------------------------------------
+# Archive & Compression
+# -----------------------------------------------------------------------------
+brew "p7zip"
+brew "unar"
+brew "sevenzip"

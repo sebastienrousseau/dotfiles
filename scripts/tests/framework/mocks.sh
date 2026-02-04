@@ -13,6 +13,7 @@ MOCK_BIN_DIR=""
 # Initialize mock environment
 mock_init() {
   MOCK_BIN_DIR=$(mktemp -d)
+  export MOCK_BIN_DIR
   export PATH="$MOCK_BIN_DIR:$PATH"
   MOCK_COMMANDS=()
   MOCK_FILES=()
