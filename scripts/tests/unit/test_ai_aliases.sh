@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1090,SC1091,SC2034
+# shellcheck disable=SC1090,SC1091,SC2034,SC2030,SC2031
 # Test AI aliases functionality
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
