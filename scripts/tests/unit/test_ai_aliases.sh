@@ -38,12 +38,12 @@ mock_cleanup
 
 test_start "github_copilot_aliases_when_gh_unavailable"
 mock_init
-# Use isolated PATH with only mock bin dir (no gh command) to ensure real gh isn't found
+# Use empty mock dir as PATH to ensure real gh isn't found
+# (command -v, source, alias are builtins - don't need PATH)
 
 (
   shopt -s expand_aliases
-  # Isolate PATH to only mock dir - ensures real gh/fabric/ollama not found
-  export PATH="$MOCK_BIN_DIR:/usr/bin:/bin"
+  export PATH="$MOCK_BIN_DIR"
   source "$ALIASES_FILE"
 
   # Check aliases are NOT defined
@@ -78,11 +78,11 @@ mock_cleanup
 
 test_start "fabric_alias_when_fabric_unavailable"
 mock_init
-# Use isolated PATH to ensure real fabric isn't found
+# Use empty mock dir as PATH to ensure real fabric isn't found
 
 (
   shopt -s expand_aliases
-  export PATH="$MOCK_BIN_DIR:/usr/bin:/bin"
+  export PATH="$MOCK_BIN_DIR"
   source "$ALIASES_FILE"
 
   alias fab >/dev/null 2>&1 || echo "fab_not_defined"
@@ -122,11 +122,11 @@ mock_cleanup
 
 test_start "ollama_aliases_when_ollama_unavailable"
 mock_init
-# Use isolated PATH to ensure real ollama isn't found
+# Use empty mock dir as PATH to ensure real ollama isn't found
 
 (
   shopt -s expand_aliases
-  export PATH="$MOCK_BIN_DIR:/usr/bin:/bin"
+  export PATH="$MOCK_BIN_DIR"
   source "$ALIASES_FILE"
 
   alias ol >/dev/null 2>&1 || echo "ol_not_defined"
