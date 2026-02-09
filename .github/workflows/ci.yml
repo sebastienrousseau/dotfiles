@@ -179,29 +179,21 @@ jobs:
           fail: false
 
   # ============================================================================
-  # STAGE 3: TEST (Optimized matrix)
+  # STAGE 3: TEST (Optimized - Linux always, macOS on schedule/manual)
   # ============================================================================
-  test:
-    name: Test / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+  test-linux:
+    name: Test / Linux
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: changes
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    strategy:
-      fail-fast: false
-      matrix:
-        # Linux-only for PRs (cheapest), full matrix on schedule/manual
-        os: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' && fromJSON('["ubuntu-latest", "macos-latest"]') || fromJSON('["ubuntu-latest"]') }}
-    defaults:
-      run:
-        shell: bash
     steps:
       - uses: actions/checkout@v4
       - name: Cache Chezmoi
         uses: actions/cache@v4
         with:
           path: ~/.local/bin/chezmoi
-          key: chezmoi-${{ runner.os }}-${{ env.CHEZMOI_VERSION }}
+          key: chezmoi-Linux-${{ env.CHEZMOI_VERSION }}
       - name: Setup Chezmoi
         run: |
           if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
@@ -216,7 +208,39 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: logs-test-${{ matrix.os }}
+          name: logs-test-linux
+          path: ~/.local/share/chezmoi/.log
+          retention-days: 5
+
+  test-macos:
+    name: Test / macOS
+    runs-on: macos-latest
+    timeout-minutes: 15
+    needs: changes
+    # Only run macOS tests on schedule or manual trigger (expensive)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache Chezmoi
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/chezmoi
+          key: chezmoi-macOS-${{ env.CHEZMOI_VERSION }}
+      - name: Setup Chezmoi
+        run: |
+          if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
+            sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -t v${{ env.CHEZMOI_VERSION }}
+          fi
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Init & Dry Run
+        run: |
+          chezmoi init
+          chezmoi apply --verbose --dry-run
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-test-macos
           path: ~/.local/share/chezmoi/.log
           retention-days: 5
 
@@ -268,7 +292,7 @@ jobs:
     name: Quality / Idempotency
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [lint-shell, test]
+    needs: [lint-shell, test-linux]
     # Only run on full CI (schedule/manual) - idempotency is expensive
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
@@ -310,7 +334,7 @@ jobs:
     name: Benchmark / Linux
     runs-on: ubuntu-latest  # Linux only - cheaper than multi-OS
     timeout-minutes: 10
-    needs: [test]
+    needs: [test-linux]
     # Only run benchmarks on schedule or manual trigger
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:

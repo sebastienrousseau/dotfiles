@@ -11,6 +11,8 @@ significant architectural decisions made in this project.
 | [ADR-002](ADR-002-shell-performance.md) | Shell Performance Optimization Strategy | Accepted |
 | [ADR-003](ADR-003-security-first.md) | Security-First Approach | Accepted |
 | [ADR-004](ADR-004-cli-architecture.md) | Chezmoi + Custom CLI Wrapper Architecture | Accepted |
+| [ADR-005](ADR-005-chezmoi-choice.md) | Chezmoi as Dotfiles Manager | Accepted |
+| [ADR-006](ADR-006-shell-selection.md) | Zsh as Default Shell | Accepted |
 
 ## ADR Format
 
