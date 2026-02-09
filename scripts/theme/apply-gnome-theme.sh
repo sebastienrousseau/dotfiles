@@ -55,7 +55,6 @@ apply_catppuccin_theme() {
     local shell_theme=""
     local icon_theme=""
     local cursor_theme="Adwaita"
-    local is_dark="false"
     local color_scheme="prefer-light"
 
     case "$theme" in
@@ -64,7 +63,6 @@ apply_catppuccin_theme() {
             shell_theme="Catppuccin-Latte"
             icon_theme="Papirus-Light"
             cursor_theme="Catppuccin-Latte-Blue"
-            is_dark="false"
             color_scheme="prefer-light"
             ;;
         catppuccin-frappe)
@@ -72,7 +70,6 @@ apply_catppuccin_theme() {
             shell_theme="Catppuccin-Frappe"
             icon_theme="Papirus-Dark"
             cursor_theme="Catppuccin-Frappe-Blue"
-            is_dark="true"
             color_scheme="prefer-dark"
             ;;
         catppuccin-macchiato)
@@ -80,7 +77,6 @@ apply_catppuccin_theme() {
             shell_theme="Catppuccin-Macchiato"
             icon_theme="Papirus-Dark"
             cursor_theme="Catppuccin-Macchiato-Blue"
-            is_dark="true"
             color_scheme="prefer-dark"
             ;;
         catppuccin-mocha)
@@ -88,7 +84,6 @@ apply_catppuccin_theme() {
             shell_theme="Catppuccin-Mocha"
             icon_theme="Papirus-Dark"
             cursor_theme="Catppuccin-Mocha-Blue"
-            is_dark="true"
             color_scheme="prefer-dark"
             ;;
         *)
@@ -97,14 +92,12 @@ apply_catppuccin_theme() {
                 gtk_theme="Adwaita-dark"
                 shell_theme=""
                 icon_theme="Papirus-Dark"
-                is_dark="true"
-                color_scheme="prefer-dark"
+                    color_scheme="prefer-dark"
             else
                 gtk_theme="Adwaita"
                 shell_theme=""
                 icon_theme="Papirus"
-                is_dark="false"
-                color_scheme="prefer-light"
+                    color_scheme="prefer-light"
             fi
             ;;
     esac

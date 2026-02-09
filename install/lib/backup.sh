@@ -43,11 +43,8 @@ backup_managed_files() {
 }
 
 # Perform backup and report results
-# Arguments:
-#   $1 - Source directory (for chezmoi config)
 # Returns: 0 on success
 perform_backup() {
-  local source_dir="$1"
   local config_dir="$HOME/.config/chezmoi"
   local config_file="$config_dir/chezmoi.toml"
 

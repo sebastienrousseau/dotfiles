@@ -1,5 +1,5 @@
 profile = "laptop"
-theme = "tokyonight-day"
+theme = "catppuccin-mocha"
 terminal_font_family = "JetBrains Mono"
 terminal_font_size = 12
 name = ""

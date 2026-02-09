@@ -35,13 +35,6 @@ fi
 # Theme Database
 # =============================================================================
 
-# Theme families and their variants
-TOKYO_THEMES="tokyonight-day tokyonight-storm tokyonight-night tokyonight-moon"
-CATPPUCCIN_THEMES="catppuccin-latte catppuccin-frappe catppuccin-macchiato catppuccin-mocha"
-ROSE_PINE_THEMES="rose-pine rose-pine-moon rose-pine-dawn"
-KANAGAWA_THEMES="kanagawa-wave kanagawa-dragon kanagawa-lotus"
-OTHER_THEMES="dracula gruvbox-light gruvbox-dark nord onelight onedark solarized-light solarized-dark everforest-dark everforest-light"
-
 # Default preferences
 DEFAULT_DARK="catppuccin-mocha"
 DEFAULT_LIGHT="catppuccin-latte"

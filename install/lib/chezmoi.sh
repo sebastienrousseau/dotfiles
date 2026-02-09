@@ -143,7 +143,9 @@ init_chezmoi_from_git() {
 
   # Verify the checkout succeeded
   local actual_ref
-  actual_ref=$(cd "$source_dir" && git describe --tags --exact-match 2>/dev/null || git rev-parse --short HEAD)
+  if ! actual_ref=$(cd "$source_dir" && git describe --tags --exact-match 2>/dev/null); then
+    actual_ref=$(cd "$source_dir" && git rev-parse --short HEAD)
+  fi
 
   if [ "$actual_ref" != "$version" ] && [ "${actual_ref#v}" != "${version#v}" ]; then
     echo -e "${CYAN:-}   INFO: Checked out ref $actual_ref (requested: $version)${NC:-}"

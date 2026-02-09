@@ -4,7 +4,6 @@
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 THEME_DIR="$HOME/.themes"
 ICON_DIR="$HOME/.icons"
 TEMP_DIR="/tmp/catppuccin-install"
@@ -148,7 +147,7 @@ install_shell_themes() {
 
     # Install shell themes
     for variant in latte frappe macchiato mocha; do
-        theme_name="Catppuccin-$(echo "$variant" | sed 's/.*/\u&/')"
+        theme_name="Catppuccin-${variant^}"
         if [ -d "themes/$theme_name" ]; then
             log "Installing GNOME Shell theme $theme_name..."
             cp -r "themes/$theme_name" "$THEME_DIR/"
