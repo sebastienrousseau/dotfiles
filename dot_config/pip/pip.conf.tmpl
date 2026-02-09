@@ -1,6 +1,32 @@
 [global]
 disable-pip-version-check = true
 cache-dir = ~/.cache/pip
+timeout = 60
+retries = 3
 
 [install]
 use-pep517 = true
+compile = no
+progress-bar = on
+
+# Private PyPI index configuration
+# To configure a private index, add to ~/.config/chezmoi/chezmoi.toml:
+#   [data]
+#   pypi_index_url = "https://pypi.mycompany.com/simple/"
+#   pypi_token = "your-token"
+
+{{- if hasKey . "pypi_index_url" }}
+[global]
+index-url = {{ .pypi_index_url }}
+{{- if hasKey . "pypi_token" }}
+# Note: For token auth, use keyring or set PIP_INDEX_URL with embedded credentials
+# Or configure in ~/.netrc for the index host
+{{- end }}
+{{- end }}
+
+{{- if hasKey . "pypi_extra_index_url" }}
+extra-index-url = {{ .pypi_extra_index_url }}
+{{- end }}
+
+[freeze]
+timeout = 10

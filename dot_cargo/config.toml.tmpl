@@ -1,0 +1,68 @@
+# Cargo Configuration
+# Managed by chezmoi - https://github.com/sebastienrousseau/dotfiles
+
+[alias]
+# Common workflows
+b = "build"
+br = "build --release"
+c = "check"
+cl = "clippy"
+d = "doc --open"
+r = "run"
+rr = "run --release"
+t = "test"
+tr = "test --release"
+w = "watch -x check -x test"
+
+# Cargo extensions
+audit = "audit"
+outdated = "outdated"
+expand = "expand"
+tree = "tree"
+bloat = "bloat --release --crates"
+
+[build]
+# Use all available CPU cores
+jobs = -1
+# Incremental compilation for faster rebuilds
+incremental = true
+
+{{- if eq .chezmoi.os "darwin" }}
+# macOS: Use Apple's linker for faster linking
+[target.x86_64-apple-darwin]
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+
+[target.aarch64-apple-darwin]
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+{{- end }}
+
+{{- if eq .chezmoi.os "linux" }}
+# Linux: Use mold or lld for faster linking
+[target.x86_64-unknown-linux-gnu]
+linker = "clang"
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+
+[target.aarch64-unknown-linux-gnu]
+linker = "clang"
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+{{- end }}
+
+[net]
+# Retry failed downloads
+retry = 3
+# Use git CLI for fetching (more reliable with SSH)
+git-fetch-with-cli = true
+
+[term]
+# Colorful output
+color = "auto"
+# Progress bar
+progress.when = "auto"
+progress.width = 80
+
+[registries.crates-io]
+protocol = "sparse"
+
+# Uncomment to use sccache for distributed caching
+# [build]
+# rustc-wrapper = "sccache"

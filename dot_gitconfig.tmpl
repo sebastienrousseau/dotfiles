@@ -74,3 +74,21 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+
+# Credential helpers - platform specific
+{{- if eq .chezmoi.os "darwin" }}
+[credential]
+	helper = osxkeychain
+{{- else if eq .chezmoi.os "linux" }}
+[credential]
+	helper = cache --timeout=3600
+	helper = /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
+{{- end }}
+
+# GitHub specific credential helper
+[credential "https://github.com"]
+	helper = !gh auth git-credential
+
+# GitLab specific credential helper
+[credential "https://gitlab.com"]
+	helper = !glab auth git-credential
