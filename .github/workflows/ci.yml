@@ -315,24 +315,113 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
+
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y zsh hyperfine
+        run: sudo apt-get update && sudo apt-get install -y zsh hyperfine jq
+
       - name: Setup Chezmoi
         run: |
           sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -t v${{ env.CHEZMOI_VERSION }}
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           mkdir -p "$HOME/.config/chezmoi"
           echo "sourceDir = \"$GITHUB_WORKSPACE\"" > "$HOME/.config/chezmoi/chezmoi.toml"
+
       - name: Apply dotfiles
         run: chezmoi apply --exclude=scripts
+
       - name: Performance benchmark
         run: |
-          chmod +x scripts/tests/performance/*.sh
-          ./scripts/tests/performance/benchmark_runner.sh || true
-      - name: Shell startup threshold (500ms)
+          chmod +x scripts/tests/performance/*.sh 2>/dev/null || true
+          ./scripts/tests/performance/benchmark_runner.sh 2>/dev/null || true
+
+      - name: Shell startup benchmark with regression tracking
+        id: benchmark
         run: |
-          time_ms=$(hyperfine --warmup 3 --runs 10 "zsh -i -c exit" --export-json /tmp/bench.json 2>/dev/null && jq '.results[0].mean * 1000 | floor' /tmp/bench.json)
-          echo "Shell startup: ${time_ms}ms"
-          if [[ ${time_ms:-0} -gt 500 ]]; then
+          mkdir -p benchmark-results
+
+          # Run hyperfine benchmark
+          hyperfine --warmup 3 --runs 10 "zsh -i -c exit" \
+            --export-json benchmark-results/shell-startup.json \
+            --export-markdown benchmark-results/shell-startup.md
+
+          # Extract metrics
+          time_ms=$(jq '.results[0].mean * 1000 | floor' benchmark-results/shell-startup.json)
+          time_min=$(jq '.results[0].min * 1000 | floor' benchmark-results/shell-startup.json)
+          time_max=$(jq '.results[0].max * 1000 | floor' benchmark-results/shell-startup.json)
+          time_stddev=$(jq '.results[0].stddev * 1000 | floor' benchmark-results/shell-startup.json)
+
+          echo "time_ms=$time_ms" >> $GITHUB_OUTPUT
+          echo "time_min=$time_min" >> $GITHUB_OUTPUT
+          echo "time_max=$time_max" >> $GITHUB_OUTPUT
+
+          # Create regression tracking record
+          cat > benchmark-results/metrics.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "ref": "${{ github.ref }}",
+            "shell_startup": {
+              "mean_ms": $time_ms,
+              "min_ms": $time_min,
+              "max_ms": $time_max,
+              "stddev_ms": $time_stddev,
+              "threshold_ms": 500,
+              "passed": $([ $time_ms -le 500 ] && echo true || echo false)
+            }
+          }
+          EOF
+
+          echo "### Shell Startup Performance" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Mean | ${time_ms}ms |" >> $GITHUB_STEP_SUMMARY
+          echo "| Min | ${time_min}ms |" >> $GITHUB_STEP_SUMMARY
+          echo "| Max | ${time_max}ms |" >> $GITHUB_STEP_SUMMARY
+          echo "| Std Dev | ${time_stddev}ms |" >> $GITHUB_STEP_SUMMARY
+          echo "| Threshold | 500ms |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ $time_ms -gt 500 ]]; then
             echo "::warning::Shell startup ${time_ms}ms exceeds 500ms target"
+            echo "⚠️ **Performance regression detected**: ${time_ms}ms exceeds 500ms threshold" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **Performance OK**: ${time_ms}ms is within 500ms threshold" >> $GITHUB_STEP_SUMMARY
           fi
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ github.sha }}
+          path: benchmark-results/
+          retention-days: 90
+
+      - name: Comment on PR with benchmark results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const time_ms = '${{ steps.benchmark.outputs.time_ms }}';
+            const threshold = 500;
+            const status = parseInt(time_ms) <= threshold ? '✅' : '⚠️';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ${status} Shell Performance Benchmark
+
+              | Metric | Value |
+              |--------|-------|
+              | Startup Time | ${time_ms}ms |
+              | Threshold | ${threshold}ms |
+              | Status | ${parseInt(time_ms) <= threshold ? 'Passed' : 'Regression detected'} |
+
+              <details>
+              <summary>Benchmark Details</summary>
+
+              - Min: ${{ steps.benchmark.outputs.time_min }}ms
+              - Max: ${{ steps.benchmark.outputs.time_max }}ms
+              - Commit: ${{ github.sha }}
+              </details>`
+            })
