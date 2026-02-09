@@ -53,18 +53,20 @@ complexity in `.tmpl` files:
 
 ### Usage Pattern
 
-Instead of repetitive variable resolution:
-```go
-{{- $git_name := "" -}}
-{{- if hasKey . "git_name" }}{{- $git_name = index . "git_name" -}}{{- end -}}
-{{- if hasKey . "name" }}{{- $name = index . "name" -}}{{- end -}}
-{{- if and (not $git_name) $name }}{{- $git_name = $name -}}{{- end -}}
-```
+Instead of repetitive variable resolution (old pattern):
 
-Use the idiomatic `coalesce` pattern:
-```go
-{{- $git_name := coalesce (index . "git_name") (index . "name") "" -}}
-```
+    # Old verbose pattern - don't use
+    $git_name := ""
+    if hasKey . "git_name" then $git_name = .git_name
+    if hasKey . "name" then $git_name = .name
+    if (not $git_name) and $name then $git_name = $name
+
+Use the idiomatic `coalesce` pattern (recommended):
+
+    # New concise pattern - use this
+    $git_name := coalesce .git_name .name ""
+
+See actual implementation in `dot_gitconfig.tmpl` for working examples.
 
 ### Template Categories
 
