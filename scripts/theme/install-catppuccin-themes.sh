@@ -145,9 +145,9 @@ install_shell_themes() {
 
     cd catppuccin-gnome-shell
 
-    # Install shell themes
-    for variant in latte frappe macchiato mocha; do
-        theme_name="Catppuccin-${variant^}"
+    # Install shell themes (use explicit names for portability)
+    for variant in Latte Frappe Macchiato Mocha; do
+        theme_name="Catppuccin-${variant}"
         if [ -d "themes/$theme_name" ]; then
             log "Installing GNOME Shell theme $theme_name..."
             cp -r "themes/$theme_name" "$THEME_DIR/"

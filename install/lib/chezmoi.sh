@@ -138,13 +138,13 @@ init_chezmoi_from_git() {
   # Clone with specific tag for supply-chain security
   if ! git clone --depth 1 --branch "$version" "$repo_url" "$source_dir" 2>/dev/null; then
     git clone "$repo_url" "$source_dir"
-    (cd "$source_dir" && git checkout "$version")
+    git -C "$source_dir" checkout "$version"
   fi
 
-  # Verify the checkout succeeded
+  # Verify the checkout succeeded (use git -C to avoid && chaining)
   local actual_ref
-  if ! actual_ref=$(cd "$source_dir" && git describe --tags --exact-match 2>/dev/null); then
-    actual_ref=$(cd "$source_dir" && git rev-parse --short HEAD)
+  if ! actual_ref=$(git -C "$source_dir" describe --tags --exact-match 2>/dev/null); then
+    actual_ref=$(git -C "$source_dir" rev-parse --short HEAD)
   fi
 
   if [ "$actual_ref" != "$version" ] && [ "${actual_ref#v}" != "${version#v}" ]; then
