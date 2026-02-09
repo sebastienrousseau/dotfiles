@@ -1,0 +1,45 @@
+{{- /*
+  OS Detection Helper
+
+  Provides consistent OS and architecture detection variables.
+
+  Usage:
+    {{ template "os-detection" . }}
+    Then use: $is_macos, $is_linux, $is_wsl, $arch, etc.
+*/ -}}
+
+{{- $is_macos := eq .chezmoi.os "darwin" -}}
+{{- $is_linux := eq .chezmoi.os "linux" -}}
+{{- $is_windows := eq .chezmoi.os "windows" -}}
+
+{{- /* WSL detection */ -}}
+{{- $is_wsl := false -}}
+{{- if $is_linux -}}
+  {{- if or (env "WSL_DISTRO_NAME") (env "WSLENV") -}}
+    {{- $is_wsl = true -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Architecture */ -}}
+{{- $arch := .chezmoi.arch -}}
+{{- $is_arm64 := eq $arch "arm64" -}}
+{{- $is_amd64 := eq $arch "amd64" -}}
+
+{{- /* Homebrew paths */ -}}
+{{- $homebrew_prefix := "" -}}
+{{- if $is_macos -}}
+  {{- if $is_arm64 -}}
+    {{- $homebrew_prefix = "/opt/homebrew" -}}
+  {{- else -}}
+    {{- $homebrew_prefix = "/usr/local" -}}
+  {{- end -}}
+{{- else if $is_linux -}}
+  {{- $homebrew_prefix = "/home/linuxbrew/.linuxbrew" -}}
+{{- end -}}
+
+{{- /* Package manager detection */ -}}
+{{- $has_brew := stat (printf "%s/bin/brew" $homebrew_prefix) -}}
+{{- $has_nix := stat "/nix" -}}
+{{- $has_apt := stat "/usr/bin/apt" -}}
+{{- $has_dnf := stat "/usr/bin/dnf" -}}
+{{- $has_pacman := stat "/usr/bin/pacman" -}}

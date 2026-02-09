@@ -5,7 +5,7 @@
   align="right"
 />
 
-# Chezmoi Templates (v0.2.478)
+# Chezmoi Templates (v0.2.480)
 
 Simply designed to fit your shell life
 
@@ -25,13 +25,45 @@ This directory contains modular templates that are aggregated into the shell env
 │   ├── git/
 │   ├── kubernetes/
 │   └── ... (42 more)
-├── functions/        # 52 utility functions
+├── functions/        # Utility functions and template helpers
+│   ├── helpers/      # Reusable template patterns
+│   │   ├── feature-flags.tmpl   # Feature flag resolution
+│   │   ├── git-vars.tmpl        # Git variable helpers
+│   │   ├── os-detection.tmpl    # OS/platform detection
+│   │   └── path-utils.tmpl      # XDG and path utilities
 │   ├── utils/        # Common utilities (logging.sh)
 │   └── *.sh          # Individual function files
 └── paths/            # 3 priority-ordered PATH files
     ├── 00-default.paths.sh    # Base system paths
     ├── 05-pipx.paths.sh       # pipx paths
     └── 99-custom.paths.sh     # User custom paths
+```
+
+## Template Helpers
+
+The `functions/helpers/` directory contains reusable template patterns to reduce
+complexity in `.tmpl` files:
+
+| Helper | Purpose |
+|--------|---------|
+| `git-vars.tmpl` | Resolve git user/email/signing variables with fallbacks |
+| `feature-flags.tmpl` | Consistent feature flag resolution with defaults |
+| `os-detection.tmpl` | OS, architecture, and package manager detection |
+| `path-utils.tmpl` | XDG Base Directory and common tool paths |
+
+### Usage Pattern
+
+Instead of repetitive variable resolution:
+```go
+{{- $git_name := "" -}}
+{{- if hasKey . "git_name" }}{{- $git_name = index . "git_name" -}}{{- end -}}
+{{- if hasKey . "name" }}{{- $name = index . "name" -}}{{- end -}}
+{{- if and (not $git_name) $name }}{{- $git_name = $name -}}{{- end -}}
+```
+
+Use the idiomatic `coalesce` pattern:
+```go
+{{- $git_name := coalesce (index . "git_name") (index . "name") "" -}}
 ```
 
 ### Template Categories
