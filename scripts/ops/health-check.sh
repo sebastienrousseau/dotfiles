@@ -273,7 +273,7 @@ check_git_status() {
 check_dependencies() {
   log_info "Checking recommended dependencies..."
   local deps=(git curl zsh)
-  local optional_deps=(ripgrep fd bat fzf eza jq claude gemini sgpt ollama opencode)
+  local optional_deps=(ripgrep fd bat fzf eza jq claude gemini sgpt ollama opencode aider)
   local missing_required=0
   local missing_optional=0
 

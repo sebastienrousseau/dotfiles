@@ -41,7 +41,7 @@ for cmd in git curl chezmoi starship rg bat; do
 done
 
 echo -e "\nChecking Optional AI CLIs..."
-for cmd in claude gemini sgpt ollama opencode; do
+for cmd in claude gemini sgpt ollama opencode aider; do
   if command -v "$cmd" &>/dev/null; then
     log_success "Found $cmd: $(command -v "$cmd")"
   else
