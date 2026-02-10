@@ -24,8 +24,8 @@ fi
 recipient="$(age-keygen -y "$AGE_KEY")"
 mkdir -p "$(dirname "$OUT_FILE")"
 
-tmp_secrets="$(mktemp)" || exit 1
-tmp_recipient="$(mktemp)" || exit 1
+tmp_secrets="$(umask 077 && mktemp)" || exit 1
+tmp_recipient="$(umask 077 && mktemp)" || exit 1
 trap 'rm -f "$tmp_secrets" "$tmp_recipient"' EXIT
 
 printf "%s\n" "# Add secrets as KEY=VALUE" "EXAMPLE_TOKEN=change_me" >"$tmp_secrets"

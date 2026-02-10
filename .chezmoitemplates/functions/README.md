@@ -5,7 +5,7 @@
   align="right"
 />
 
-# Dotfiles Functions (v0.2.478)
+# Dotfiles Functions (v0.2.480)
 
 > Simply designed to fit your shell life 
 

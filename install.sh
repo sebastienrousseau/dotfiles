@@ -24,12 +24,16 @@ LEGACY_SOURCE_DIR="$HOME/.local/share/chezmoi"
 # Colors and Output
 # =============================================================================
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-BOLD='\033[1m'
-NC='\033[0m'
+if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
+  RED='\033[0;31m'
+  GREEN='\033[0;32m'
+  BLUE='\033[0;34m'
+  CYAN='\033[0;36m'
+  BOLD='\033[1m'
+  NC='\033[0m'
+else
+  RED='' GREEN='' BLUE='' CYAN='' BOLD='' NC=''
+fi
 
 step() { echo -e "${BLUE}==>${NC} ${BOLD}$1${NC}"; }
 success() { echo -e "${GREEN}==> Done!${NC}"; }

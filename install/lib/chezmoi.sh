@@ -34,7 +34,7 @@ install_chezmoi_binary() {
 
   # Download installer script first for inspection
   local installer
-  installer=$(mktemp)
+  installer=$(umask 077 && mktemp)
 
   if ! curl -fsSL -o "$installer" https://get.chezmoi.io; then
     rm -f "$installer"
@@ -126,7 +126,7 @@ ensure_chezmoi_source() {
     sed -i.bak "s,^sourceDir.*$,sourceDir = \"$escaped_dir\"," "$config_file"
     rm -f "$config_file.bak"
   else
-    printf 'sourceDir = "%s"\n' "$dir" > "$config_file"
+    printf 'sourceDir = "%s"\n' "$dir" >"$config_file"
   fi
 }
 

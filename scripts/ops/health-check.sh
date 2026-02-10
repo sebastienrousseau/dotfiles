@@ -19,8 +19,8 @@ VERBOSE=0
 JSON_OUTPUT=0
 EXIT_CODE=0
 
-# Colors (disabled if not a terminal or JSON mode)
-if [[ -t 1 ]] && [[ "$JSON_OUTPUT" != "1" ]]; then
+# Colors (disabled if not a terminal, JSON mode, or NO_COLOR set)
+if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]] && [[ "$JSON_OUTPUT" != "1" ]]; then
   RED='\033[0;31m'
   GREEN='\033[0;32m'
   YELLOW='\033[0;33m'

@@ -11,12 +11,16 @@ readonly REPO_ROOT
 readonly ENV_TEMPLATE="${REPO_ROOT}/.github/security-policies/environment-template.env"
 readonly ENV_LOCAL="${REPO_ROOT}/.env.local"
 
-# Color codes
-readonly RED='\033[0;31m'
-readonly GREEN='\033[0;32m'
-readonly YELLOW='\033[1;33m'
-readonly BLUE='\033[0;34m'
-readonly NC='\033[0m'
+# Color codes (respect NO_COLOR: https://no-color.org)
+if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
+  readonly RED='\033[0;31m'
+  readonly GREEN='\033[0;32m'
+  readonly YELLOW='\033[1;33m'
+  readonly BLUE='\033[0;34m'
+  readonly NC='\033[0m'
+else
+  readonly RED='' GREEN='' YELLOW='' BLUE='' NC=''
+fi
 
 # Help text
 show_help() {
