@@ -90,10 +90,28 @@ cmd_sandbox() {
 
 # Dispatch
 case "${1:-}" in
-  upgrade) shift; cmd_upgrade "$@" ;;
-  docs) shift; cmd_docs "$@" ;;
-  learn) shift; cmd_learn "$@" ;;
-  keys) shift; cmd_keys "$@" ;;
-  sandbox) shift; cmd_sandbox "$@" ;;
-  *) echo "Unknown meta command: ${1:-}" >&2; exit 1 ;;
+  upgrade)
+    shift
+    cmd_upgrade "$@"
+    ;;
+  docs)
+    shift
+    cmd_docs "$@"
+    ;;
+  learn)
+    shift
+    cmd_learn "$@"
+    ;;
+  keys)
+    shift
+    cmd_keys "$@"
+    ;;
+  sandbox)
+    shift
+    cmd_sandbox "$@"
+    ;;
+  *)
+    echo "Unknown meta command: ${1:-}" >&2
+    exit 1
+    ;;
 esac

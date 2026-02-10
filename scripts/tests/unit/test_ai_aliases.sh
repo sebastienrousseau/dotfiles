@@ -27,7 +27,7 @@ mock_command "gh" "gh 2.42.0" 0
   alias ghcp >/dev/null 2>&1 && echo "ghcp_defined"
   alias ghs >/dev/null 2>&1 && echo "ghs_defined"
   alias ghe >/dev/null 2>&1 && echo "ghe_defined"
-) > /tmp/test_output
+) >/tmp/test_output
 
 assert_file_contains "/tmp/test_output" "ghcp_defined" "ghcp alias should be defined when gh available"
 assert_file_contains "/tmp/test_output" "ghs_defined" "ghs alias should be defined when gh available"
@@ -50,7 +50,7 @@ mock_init
   alias ghcp >/dev/null 2>&1 || echo "ghcp_not_defined"
   alias ghs >/dev/null 2>&1 || echo "ghs_not_defined"
   alias ghe >/dev/null 2>&1 || echo "ghe_not_defined"
-) > /tmp/test_output
+) >/tmp/test_output
 
 assert_file_contains "/tmp/test_output" "ghcp_not_defined" "ghcp alias should not be defined when gh unavailable"
 assert_file_contains "/tmp/test_output" "ghs_not_defined" "ghs alias should not be defined when gh unavailable"
@@ -69,7 +69,7 @@ mock_command "fabric" "fabric v1.0.0" 0
   source "$ALIASES_FILE"
 
   alias fab >/dev/null 2>&1 && echo "fab_defined"
-) > /tmp/test_output
+) >/tmp/test_output
 
 assert_file_contains "/tmp/test_output" "fab_defined" "fab alias should be defined when fabric available"
 
@@ -86,7 +86,7 @@ mock_init
   source "$ALIASES_FILE"
 
   alias fab >/dev/null 2>&1 || echo "fab_not_defined"
-) > /tmp/test_output
+) >/tmp/test_output
 
 assert_file_contains "/tmp/test_output" "fab_not_defined" "fab alias should not be defined when fabric unavailable"
 
@@ -108,7 +108,7 @@ mock_command "ollama" "ollama version 1.0.0" 0
   alias olp >/dev/null 2>&1 && echo "olp_defined"
   alias ollama-status >/dev/null 2>&1 && echo "ollama_status_defined"
   alias ollama-show >/dev/null 2>&1 && echo "ollama_show_defined"
-) > /tmp/test_output
+) >/tmp/test_output
 
 assert_file_contains "/tmp/test_output" "ol_defined" "ol alias should be defined when ollama available"
 assert_file_contains "/tmp/test_output" "olr_defined" "olr alias should be defined when ollama available"
@@ -135,7 +135,7 @@ mock_init
   alias olp >/dev/null 2>&1 || echo "olp_not_defined"
   alias ollama-status >/dev/null 2>&1 || echo "ollama_status_not_defined"
   alias ollama-show >/dev/null 2>&1 || echo "ollama_show_not_defined"
-) > /tmp/test_output
+) >/tmp/test_output
 
 assert_file_contains "/tmp/test_output" "ol_not_defined" "ol alias should not be defined when ollama unavailable"
 assert_file_contains "/tmp/test_output" "olr_not_defined" "olr alias should not be defined when ollama unavailable"
@@ -152,7 +152,7 @@ assert_exit_code 0 "bash -n '$ALIASES_FILE'"
 
 test_start "aliases_shellcheck"
 if command -v shellcheck >/dev/null 2>&1; then
-    assert_exit_code 0 "shellcheck '$ALIASES_FILE'"
+  assert_exit_code 0 "shellcheck '$ALIASES_FILE'"
 else
-    echo "SKIP: shellcheck not available"
+  echo "SKIP: shellcheck not available"
 fi

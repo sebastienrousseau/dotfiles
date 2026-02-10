@@ -45,7 +45,7 @@ test_template_syntax() {
 
   local source_dir="${CHEZMOI_SOURCE_DIR:-$HOME/.dotfiles}"
   local templates
-  templates=$(find "$source_dir" -name "*.tmpl" -type f 2>/dev/null | head -50)
+  templates=$(find "$source_dir" -name "*.tmpl" -type f 2>/dev/null | head -50 || true)
 
   if [ -z "$templates" ]; then
     skip "No templates found"
@@ -144,7 +144,7 @@ test_template_output() {
     fi
 
     # Try to execute the template
-    if chezmoi execute-template < "$tmpl_path" >/dev/null 2>&1; then
+    if chezmoi execute-template <"$tmpl_path" >/dev/null 2>&1; then
       pass "Template $tmpl_name renders successfully"
     else
       fail "Template $tmpl_name failed to render"

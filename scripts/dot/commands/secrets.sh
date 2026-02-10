@@ -58,9 +58,24 @@ cmd_ssh_key() {
 
 # Dispatch
 case "${1:-}" in
-  secrets-init) shift; cmd_secrets_init "$@" ;;
-  secrets) shift; cmd_secrets "$@" ;;
-  secrets-create) shift; cmd_secrets_create "$@" ;;
-  ssh-key) shift; cmd_ssh_key "$@" ;;
-  *) echo "Unknown secrets command: ${1:-}" >&2; exit 1 ;;
+  secrets-init)
+    shift
+    cmd_secrets_init "$@"
+    ;;
+  secrets)
+    shift
+    cmd_secrets "$@"
+    ;;
+  secrets-create)
+    shift
+    cmd_secrets_create "$@"
+    ;;
+  ssh-key)
+    shift
+    cmd_ssh_key "$@"
+    ;;
+  *)
+    echo "Unknown secrets command: ${1:-}" >&2
+    exit 1
+    ;;
 esac

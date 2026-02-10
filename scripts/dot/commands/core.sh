@@ -87,14 +87,44 @@ cmd_edit() {
 
 # Dispatch
 case "${1:-}" in
-  apply) shift; cmd_apply "$@" ;;
-  sync) shift; cmd_sync "$@" ;;
-  update) shift; cmd_update "$@" ;;
-  add) shift; cmd_add "$@" ;;
-  diff) shift; cmd_diff "$@" ;;
-  status) shift; cmd_status "$@" ;;
-  remove) shift; cmd_remove "$@" ;;
-  cd) shift; cmd_cd "$@" ;;
-  edit) shift; cmd_edit "$@" ;;
-  *) echo "Unknown core command: ${1:-}" >&2; exit 1 ;;
+  apply)
+    shift
+    cmd_apply "$@"
+    ;;
+  sync)
+    shift
+    cmd_sync "$@"
+    ;;
+  update)
+    shift
+    cmd_update "$@"
+    ;;
+  add)
+    shift
+    cmd_add "$@"
+    ;;
+  diff)
+    shift
+    cmd_diff "$@"
+    ;;
+  status)
+    shift
+    cmd_status "$@"
+    ;;
+  remove)
+    shift
+    cmd_remove "$@"
+    ;;
+  cd)
+    shift
+    cmd_cd "$@"
+    ;;
+  edit)
+    shift
+    cmd_edit "$@"
+    ;;
+  *)
+    echo "Unknown core command: ${1:-}" >&2
+    exit 1
+    ;;
 esac

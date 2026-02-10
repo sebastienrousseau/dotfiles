@@ -33,7 +33,10 @@ NC='\033[0m'
 
 step() { echo -e "${BLUE}==>${NC} ${BOLD}$1${NC}"; }
 success() { echo -e "${GREEN}==> Done!${NC}"; }
-error() { echo -e "${RED}==> Error: $1${NC}"; exit 1; }
+error() {
+  echo -e "${RED}==> Error: $1${NC}"
+  exit 1
+}
 
 # =============================================================================
 # Banner
@@ -91,9 +94,9 @@ if [ "$LIBS_LOADED" = "0" ]; then
         elif [ -f /etc/os-release ]; then
           . /etc/os-release
           case "${ID:-}" in
-            ubuntu|debian|pop|linuxmint|elementary) target_os="debian" ;;
-            fedora|rhel|centos|rocky|alma) target_os="fedora" ;;
-            arch|manjaro|endeavouros) target_os="arch" ;;
+            ubuntu | debian | pop | linuxmint | elementary) target_os="debian" ;;
+            fedora | rhel | centos | rocky | alma) target_os="fedora" ;;
+            arch | manjaro | endeavouros) target_os="arch" ;;
             *) target_os="linux" ;;
           esac
         else
@@ -117,7 +120,7 @@ if [ "$LIBS_LOADED" = "0" ]; then
       if [ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]; then
         read -r -p "   Continue with Homebrew installation? [y/N] " response
         case "$response" in
-          [yY][eE][sS]|[yY]) ;;
+          [yY][eE][sS] | [yY]) ;;
           *) error "Homebrew installation cancelled." ;;
         esac
       fi
@@ -126,7 +129,7 @@ if [ "$LIBS_LOADED" = "0" ]; then
       [ -x /usr/local/bin/brew ] && eval "$(/usr/local/bin/brew shellenv)"
     fi
     case "$target_os" in
-      debian|wsl2) command -v apt-get >/dev/null || error "apt-get required" ;;
+      debian | wsl2) command -v apt-get >/dev/null || error "apt-get required" ;;
       fedora) command -v dnf >/dev/null || error "dnf required" ;;
       arch) command -v pacman >/dev/null || error "pacman required" ;;
     esac
@@ -145,10 +148,17 @@ if [ "$LIBS_LOADED" = "0" ]; then
     else
       local bin_dir="$HOME/.local/bin"
       mkdir -p "$bin_dir"
-      local installer; installer=$(mktemp)
+      local installer
+      installer=$(mktemp)
       curl -fsSL -o "$installer" https://get.chezmoi.io || error "Failed to download chezmoi"
-      [ "$(wc -c <"$installer")" -gt 102400 ] && { rm -f "$installer"; error "Installer too large"; }
-      sh "$installer" -- -b "$bin_dir" 2>/dev/null || { rm -f "$installer"; error "Failed to install chezmoi"; }
+      [ "$(wc -c <"$installer")" -gt 102400 ] && {
+        rm -f "$installer"
+        error "Installer too large"
+      }
+      sh "$installer" -- -b "$bin_dir" 2>/dev/null || {
+        rm -f "$installer"
+        error "Failed to install chezmoi"
+      }
       rm -f "$installer"
       export PATH="$bin_dir:$PATH"
     fi
@@ -158,7 +168,7 @@ if [ "$LIBS_LOADED" = "0" ]; then
     local dir="$1"
     local config_dir="$HOME/.config/chezmoi"
     mkdir -p "$config_dir"
-    printf 'sourceDir = "%s"\n' "$dir" > "$config_dir/chezmoi.toml"
+    printf 'sourceDir = "%s"\n' "$dir" >"$config_dir/chezmoi.toml"
   }
 
   perform_backup() {

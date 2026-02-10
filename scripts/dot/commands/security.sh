@@ -38,12 +38,36 @@ cmd_usb_safety() {
 
 # Dispatch
 case "${1:-}" in
-  backup) shift; cmd_backup "$@" ;;
-  encrypt-check) shift; cmd_encrypt_check "$@" ;;
-  firewall) shift; cmd_firewall "$@" ;;
-  telemetry) shift; cmd_telemetry "$@" ;;
-  dns-doh) shift; cmd_dns_doh "$@" ;;
-  lock-screen) shift; cmd_lock_screen "$@" ;;
-  usb-safety) shift; cmd_usb_safety "$@" ;;
-  *) echo "Unknown security command: ${1:-}" >&2; exit 1 ;;
+  backup)
+    shift
+    cmd_backup "$@"
+    ;;
+  encrypt-check)
+    shift
+    cmd_encrypt_check "$@"
+    ;;
+  firewall)
+    shift
+    cmd_firewall "$@"
+    ;;
+  telemetry)
+    shift
+    cmd_telemetry "$@"
+    ;;
+  dns-doh)
+    shift
+    cmd_dns_doh "$@"
+    ;;
+  lock-screen)
+    shift
+    cmd_lock_screen "$@"
+    ;;
+  usb-safety)
+    shift
+    cmd_usb_safety "$@"
+    ;;
+  *)
+    echo "Unknown security command: ${1:-}" >&2
+    exit 1
+    ;;
 esac

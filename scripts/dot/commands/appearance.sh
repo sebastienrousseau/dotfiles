@@ -40,9 +40,24 @@ cmd_tune() {
 
 # Dispatch
 case "${1:-}" in
-  theme) shift; cmd_theme "$@" ;;
-  wallpaper) shift; cmd_wallpaper "$@" ;;
-  fonts) shift; cmd_fonts "$@" ;;
-  tune) shift; cmd_tune "$@" ;;
-  *) echo "Unknown appearance command: ${1:-}" >&2; exit 1 ;;
+  theme)
+    shift
+    cmd_theme "$@"
+    ;;
+  wallpaper)
+    shift
+    cmd_wallpaper "$@"
+    ;;
+  fonts)
+    shift
+    cmd_fonts "$@"
+    ;;
+  tune)
+    shift
+    cmd_tune "$@"
+    ;;
+  *)
+    echo "Unknown appearance command: ${1:-}" >&2
+    exit 1
+    ;;
 esac

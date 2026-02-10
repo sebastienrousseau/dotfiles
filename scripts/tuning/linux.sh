@@ -135,7 +135,7 @@ apply_sysctl "net.ipv4.tcp_syncookies" "1"
 echo "Persisting settings to /etc/sysctl.d/99-dotfiles.conf..."
 
 if command -v sudo >/dev/null; then
-  sudo tee /etc/sysctl.d/99-dotfiles.conf >/dev/null << 'EOF'
+  sudo tee /etc/sysctl.d/99-dotfiles.conf >/dev/null <<'EOF'
 # Dotfiles system tuning - auto-generated
 # https://github.com/sebastienrousseau/dotfiles
 

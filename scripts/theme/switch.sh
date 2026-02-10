@@ -68,10 +68,12 @@ get_theme_family() {
 is_dark_theme() {
   theme="$1"
   case "$theme" in
-    *-night|*-storm|*-moon|*-mocha|*-frappe|*-macchiato|*-dark|*-wave|*-dragon|dracula|nord|onedark)
-      return 0 ;;
+    *-night | *-storm | *-moon | *-mocha | *-frappe | *-macchiato | *-dark | *-wave | *-dragon | dracula | nord | onedark)
+      return 0
+      ;;
     *)
-      return 1 ;;
+      return 1
+      ;;
   esac
 }
 

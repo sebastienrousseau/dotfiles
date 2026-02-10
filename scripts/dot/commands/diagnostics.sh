@@ -49,12 +49,36 @@ cmd_benchmark() {
 
 # Dispatch
 case "${1:-}" in
-  doctor) shift; cmd_doctor "$@" ;;
-  heal) shift; cmd_heal "$@" ;;
-  health|health-check) shift; cmd_health "$@" ;;
-  rollback) shift; cmd_rollback "$@" ;;
-  drift) shift; cmd_drift "$@" ;;
-  history) shift; cmd_history "$@" ;;
-  benchmark) shift; cmd_benchmark "$@" ;;
-  *) echo "Unknown diagnostics command: ${1:-}" >&2; exit 1 ;;
+  doctor)
+    shift
+    cmd_doctor "$@"
+    ;;
+  heal)
+    shift
+    cmd_heal "$@"
+    ;;
+  health | health-check)
+    shift
+    cmd_health "$@"
+    ;;
+  rollback)
+    shift
+    cmd_rollback "$@"
+    ;;
+  drift)
+    shift
+    cmd_drift "$@"
+    ;;
+  history)
+    shift
+    cmd_history "$@"
+    ;;
+  benchmark)
+    shift
+    cmd_benchmark "$@"
+    ;;
+  *)
+    echo "Unknown diagnostics command: ${1:-}" >&2
+    exit 1
+    ;;
 esac

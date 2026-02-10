@@ -205,9 +205,24 @@ cmd_log_rotate() {
 
 # Dispatch
 case "${1:-}" in
-  tools) shift; cmd_tools "$@" ;;
-  new) shift; cmd_new "$@" ;;
-  packages) shift; cmd_packages "$@" ;;
-  log-rotate) shift; cmd_log_rotate "$@" ;;
-  *) echo "Unknown tools command: ${1:-}" >&2; exit 1 ;;
+  tools)
+    shift
+    cmd_tools "$@"
+    ;;
+  new)
+    shift
+    cmd_new "$@"
+    ;;
+  packages)
+    shift
+    cmd_packages "$@"
+    ;;
+  log-rotate)
+    shift
+    cmd_log_rotate "$@"
+    ;;
+  *)
+    echo "Unknown tools command: ${1:-}" >&2
+    exit 1
+    ;;
 esac
