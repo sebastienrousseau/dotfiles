@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016,SC2317
+# SC2016: Single quotes are intentional for mock data containing literal $variables
+# SC2317: Function overrides are intentional for test mocking
 # Comprehensive Package Managers Tests
 # Achieves 100% line and branch coverage for package_managers.sh
 

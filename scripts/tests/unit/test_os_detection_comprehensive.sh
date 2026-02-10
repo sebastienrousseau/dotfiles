@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016
+# SC2016: Single quotes are intentional for mock data containing literal $variables
 # Comprehensive OS Detection Tests
 # Achieves 100% line and branch coverage for os_detection.sh
 
