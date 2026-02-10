@@ -29,44 +29,44 @@ if [[ -f "$TOOLS_MODULE" ]]; then
 
   if [[ -n "$python_line" && -n "$mkdir_line" ]]; then
     if [[ "$python_line" -lt "$mkdir_line" ]]; then
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
       echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: Python check (line $python_line) before mkdir (line $mkdir_line)"
     else
-      ((TESTS_FAILED++))
+      ((TESTS_FAILED++)) || true
       echo -e "  ${RED}✗${NC} $CURRENT_TEST: Python check should come before mkdir"
     fi
   elif [[ -n "$python_line" ]]; then
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: Python check present in new block"
   else
-    ((TESTS_FAILED++))
+    ((TESTS_FAILED++)) || true
     echo -e "  ${RED}✗${NC} $CURRENT_TEST: Python check not found in new block"
   fi
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: tools.sh module not found"
 fi
 
 test_start "python_error_to_stderr"
 # The error message should go to stderr (in tools.sh module)
 if [[ -f "$TOOLS_MODULE" ]] && grep -q 'python3.*required' "$TOOLS_MODULE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: Python requirement check present in tools module"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: Python error should be checked in tools module"
 fi
 
 test_start "dot_new_no_args_usage"
 set +e
-output=$(bash "$DOT_CLI" new 2>&1)
+output=$(CHEZMOI_SOURCE_DIR="$REPO_ROOT" bash "$DOT_CLI" new 2>&1)
 ec=$?
 set -e
 if [[ "$output" == *"Usage:"* ]] && [[ $ec -ne 0 ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: dot new with no args shows usage"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: dot new with no args should show usage (ec=$ec)"
 fi
 
