@@ -128,7 +128,7 @@ echo ""
 # Check 7: Timeouts and efficiency
 echo -e "${BLUE}7. Timeout and Efficiency Settings${NC}"
 if grep -q "timeout-minutes: [0-9]" "$REPO_ROOT/.github/workflows/ci.yml"; then
-  MAX_TIMEOUT=$(grep "timeout-minutes:" "$REPO_ROOT/.github/workflows/ci.yml" | \
+  MAX_TIMEOUT=$(grep "timeout-minutes:" "$REPO_ROOT/.github/workflows/ci.yml" |
     awk '{print $2}' | sort -n | tail -1)
   if [[ $MAX_TIMEOUT -le 15 ]]; then
     echo -e "  ${GREEN}✓${NC} Job timeouts properly configured (max: ${MAX_TIMEOUT}min)"
