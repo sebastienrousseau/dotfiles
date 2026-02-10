@@ -162,7 +162,8 @@ if [ "$LIBS_LOADED" = "0" ]; then
   }
 
   perform_backup() {
-    local backup_dir="$HOME/.dotfiles.bak.$(date +"%Y%m%d_%H%M%S")"
+    local backup_dir
+    backup_dir="$HOME/.dotfiles.bak.$(date +"%Y%m%d_%H%M%S")"
     local count=0
     if command -v chezmoi >/dev/null && [ -f "$HOME/.config/chezmoi/chezmoi.toml" ]; then
       while IFS= read -r file; do

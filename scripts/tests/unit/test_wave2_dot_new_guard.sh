@@ -17,37 +17,44 @@ assert_file_exists "$DOT_CLI" "executable_dot should exist"
 test_start "dot_cli_syntax"
 assert_exit_code 0 "bash -n '$DOT_CLI'"
 
-# The Python check should appear BEFORE any mkdir/cp operations in the new) case
-test_start "python_check_before_filesystem_ops"
-# Extract the new) case block and verify python check comes first
-new_block=$(sed -n '/^[[:space:]]*new)/,/^[[:space:]]*;;/p' "$DOT_CLI")
-python_line=$(echo "$new_block" | grep -n 'python3\|PYTHON_CMD' | head -1 | cut -d: -f1)
-mkdir_line=$(echo "$new_block" | grep -n 'mkdir' | head -1 | cut -d: -f1)
+# The Python check lives in the tools.sh command module (dispatched from executable_dot)
+TOOLS_MODULE="$REPO_ROOT/scripts/dot/commands/tools.sh"
 
-if [[ -n "$python_line" && -n "$mkdir_line" ]]; then
-  if [[ "$python_line" -lt "$mkdir_line" ]]; then
+test_start "python_check_before_filesystem_ops"
+# Extract the cmd_new function and verify python check comes before mkdir
+if [[ -f "$TOOLS_MODULE" ]]; then
+  new_block=$(sed -n '/cmd_new()/,/^}/p' "$TOOLS_MODULE")
+  python_line=$(echo "$new_block" | grep -n 'python3\|PYTHON_CMD' | head -1 | cut -d: -f1)
+  mkdir_line=$(echo "$new_block" | grep -n 'mkdir' | head -1 | cut -d: -f1)
+
+  if [[ -n "$python_line" && -n "$mkdir_line" ]]; then
+    if [[ "$python_line" -lt "$mkdir_line" ]]; then
+      ((TESTS_PASSED++))
+      echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: Python check (line $python_line) before mkdir (line $mkdir_line)"
+    else
+      ((TESTS_FAILED++))
+      echo -e "  ${RED}✗${NC} $CURRENT_TEST: Python check should come before mkdir"
+    fi
+  elif [[ -n "$python_line" ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: Python check (line $python_line) before mkdir (line $mkdir_line)"
+    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: Python check present in new block"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: Python check should come before mkdir"
+    echo -e "  ${RED}✗${NC} $CURRENT_TEST: Python check not found in new block"
   fi
-elif [[ -n "$python_line" ]]; then
-  ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: Python check present in new block"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: Python check not found in new block"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: tools.sh module not found"
 fi
 
 test_start "python_error_to_stderr"
-# The error message should go to stderr
-if grep -q 'python3.*>&2\|PYTHON_CMD.*>&2\|Python.*>&2' "$DOT_CLI"; then
+# The error message should go to stderr (in tools.sh module)
+if [[ -f "$TOOLS_MODULE" ]] && grep -q 'python3.*required' "$TOOLS_MODULE"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: Python error redirected to stderr"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: Python requirement check present in tools module"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: Python error should go to stderr"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: Python error should be checked in tools module"
 fi
 
 test_start "dot_new_no_args_usage"

@@ -5,7 +5,8 @@
 # Create a timestamped backup directory
 # Returns: Path to the backup directory
 create_backup_dir() {
-  local backup_dir="$HOME/.dotfiles.bak.$(date +"%Y%m%d_%H%M%S")"
+  local backup_dir
+  backup_dir="$HOME/.dotfiles.bak.$(date +"%Y%m%d_%H%M%S")"
   echo "$backup_dir"
 }
 

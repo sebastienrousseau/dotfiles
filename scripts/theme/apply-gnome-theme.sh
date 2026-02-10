@@ -226,7 +226,8 @@ apply_wallpaper() {
 
 # Function to backup current settings
 backup_settings() {
-    local backup_file="$HOME/.config/gnome-theme-backup-$(date +%Y%m%d-%H%M%S).dconf"
+    local backup_file
+    backup_file="$HOME/.config/gnome-theme-backup-$(date +%Y%m%d-%H%M%S).dconf"
 
     log "Backing up current GNOME settings to: $backup_file"
 
@@ -270,9 +271,12 @@ main() {
 
             case "$THEME_NAME" in
                 catppuccin-*)
-                    if [ -d "$HOME/.themes/Catppuccin-"* ]; then
-                        theme_exists=true
-                    fi
+                    for _d in "$HOME/.themes/Catppuccin-"*; do
+                        if [ -d "$_d" ]; then
+                            theme_exists=true
+                            break
+                        fi
+                    done
                     ;;
                 *)
                     theme_exists=true  # Assume Adwaita and other system themes exist

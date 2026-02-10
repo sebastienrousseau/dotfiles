@@ -24,6 +24,7 @@ install_chezmoi_brew() {
 # Install chezmoi via binary download
 # Arguments:
 #   $1 - Target binary directory (default: ~/.local/bin)
+# shellcheck disable=SC2120
 install_chezmoi_binary() {
   local bin_dir="${1:-$HOME/.local/bin}"
   mkdir -p "$bin_dir"

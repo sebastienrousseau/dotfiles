@@ -129,15 +129,25 @@ Simply design to fit your shell life
       options = {
         theme = (function()
           local theme = vim.env.DOTFILES_THEME or "catppuccin-mocha"
-          if theme:match("^tokyonight") then return "tokyonight"
-          elseif theme:match("^catppuccin") then return "catppuccin"
-          elseif theme:match("^rose%-pine") then return "rose-pine"
-          elseif theme:match("^gruvbox") then return "gruvbox"
-          elseif theme == "dracula" then return "dracula"
-          elseif theme == "nord" then return "nord"
-          elseif theme:match("^onedark") or theme == "onelight" then return "onedark"
-          elseif theme:match("^solarized") then return "solarized_dark"
-          else return "catppuccin" end
+          if theme:match("^tokyonight") then
+            return "tokyonight"
+          elseif theme:match("^catppuccin") then
+            return "catppuccin"
+          elseif theme:match("^rose%-pine") then
+            return "rose-pine"
+          elseif theme:match("^gruvbox") then
+            return "gruvbox"
+          elseif theme == "dracula" then
+            return "dracula"
+          elseif theme == "nord" then
+            return "nord"
+          elseif theme:match("^onedark") or theme == "onelight" then
+            return "onedark"
+          elseif theme:match("^solarized") then
+            return "solarized_dark"
+          else
+            return "catppuccin"
+          end
         end)(),
         globalstatus = true,
         component_separators = "|",

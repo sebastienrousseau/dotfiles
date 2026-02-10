@@ -56,7 +56,7 @@ install_gtk_themes() {
 
     # Install all variants
     for variant in Latte Frappe Macchiato Mocha; do
-        for accent in Blue; do  # Focus on blue accent for consistency
+        for accent in Blue Lavender; do  # Blue as primary, Lavender as alternative
             theme_name="Catppuccin-$variant-Standard-$accent"
             if [ "$variant" = "Latte" ]; then
                 theme_name="$theme_name-Light"
@@ -256,7 +256,7 @@ check_dependencies() {
     local missing_deps=()
 
     # Check required commands
-    for cmd in git; do
+    for cmd in git curl; do
         if ! command -v "$cmd" &> /dev/null; then
             missing_deps+=("$cmd")
         fi

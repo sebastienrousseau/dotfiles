@@ -21,7 +21,7 @@ test_start "install_chezmoi_already_installed"
 assert_file_contains "$INSTALL_SCRIPT" "chezmoi already installed" "should detect existing chezmoi"
 
 test_start "install_local_bin_path"
-assert_file_contains "$INSTALL_SCRIPT" 'BIN_DIR="$HOME/.local/bin"' "should install to ~/.local/bin as fallback"
+assert_file_contains "$INSTALL_SCRIPT" 'bin_dir="$HOME/.local/bin"' "should install to ~/.local/bin as fallback"
 
 test_start "install_version_pinned"
 # VERSION is used for the dotfiles tag, not chezmoi binary

@@ -61,12 +61,7 @@ map("n", "<leader>fg", ":Telescope live_grep<CR>", { desc = "Find text" })
 map("n", "<leader>fb", ":Telescope file_browser<CR>", { desc = "File browser" })
 map("n", "<leader>fp", ":Telescope project<CR>", { desc = "Projects" })
 map("n", "<leader>gw", ":Telescope git_worktree git_worktrees<CR>", { desc = "Worktrees" })
-map(
-  "n",
-  "<leader>gW",
-  ":Telescope git_worktree create_git_worktree<CR>",
-  { desc = "Create worktree" }
-)
+map("n", "<leader>gW", ":Telescope git_worktree create_git_worktree<CR>", { desc = "Create worktree" })
 
 -- Terminal (ToggleTerm)
 map("n", "<leader>tt", ":ToggleTerm direction=float<CR>", { desc = "Toggle terminal" })

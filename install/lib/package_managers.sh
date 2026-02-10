@@ -61,6 +61,7 @@ install_homebrew() {
 # Verify required package manager is available for the current OS
 # Returns: 0 if package manager is available, exits with error otherwise
 verify_package_manager() {
+  # shellcheck disable=SC2154  # target_os set by os_detection.sh
   case "$target_os" in
     debian|wsl2)
       if ! has_apt; then

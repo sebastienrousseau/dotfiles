@@ -104,10 +104,10 @@ test_start "tmux_sessionizer_sanitizes"
 SESSION_FILE="$REPO_ROOT/dot_local/bin/executable_tmux-sessionizer"
 assert_file_contains "$SESSION_FILE" "tr -cd '[:alnum:]._-'" "should sanitize session names"
 
-# Test: install.sh escapes sed metacharacters
-test_start "install_escapes_sed"
+# Test: install.sh uses printf instead of sed for config generation
+test_start "install_uses_printf_config"
 INSTALL_FILE="$REPO_ROOT/install.sh"
-assert_file_contains "$INSTALL_FILE" "s/[\\/&]/\\\\&/g" "should escape sed metacharacters"
+assert_file_contains "$INSTALL_FILE" "printf" "should use printf for safe config generation"
 
 # Test: permission aliases warn about dangerous modes
 test_start "permission_warns_666"

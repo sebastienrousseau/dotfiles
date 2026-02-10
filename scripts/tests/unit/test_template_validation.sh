@@ -54,7 +54,7 @@ test_template_syntax() {
 
   for tmpl in $templates; do
     run_test
-    local name="${tmpl#$source_dir/}"
+    local name="${tmpl#"$source_dir"/}"
 
     # Check for unbalanced template delimiters
     local open_count close_count
