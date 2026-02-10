@@ -59,7 +59,7 @@ jobs:
       nix: ${{ steps.filter.outputs.nix }}
       config: ${{ steps.filter.outputs.config }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -90,7 +90,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Cache tools
         uses: actions/cache@v4
         with:
@@ -120,7 +120,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.lua == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Cache Lua tools
         uses: actions/cache@v4
         with:
@@ -150,7 +150,7 @@ jobs:
     timeout-minutes: 5
     # Always run secrets scan on PRs and pushes
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Gitleaks
@@ -165,7 +165,7 @@ jobs:
     # Only run link check on schedule or manual trigger (saves minutes)
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Lychee link checker
         uses: lycheeverse/lychee-action@v2
         with:
@@ -188,7 +188,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Cache Chezmoi
         uses: actions/cache@v4
         with:
@@ -220,7 +220,7 @@ jobs:
     # Only run macOS tests on schedule or manual trigger (expensive)
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Cache Chezmoi
         uses: actions/cache@v4
         with:
@@ -256,7 +256,7 @@ jobs:
       matrix:
         distro: [ubuntu]  # Reduced from [ubuntu, debian] - debian is similar
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Test in container
         run: |
           docker run --rm -v "${GITHUB_WORKSPACE}:/root/.local/share/chezmoi" ${{ matrix.distro }}:latest bash -c "
@@ -277,7 +277,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Run tests
         run: |
           chmod +x scripts/tests/framework/*.sh
@@ -296,7 +296,7 @@ jobs:
     # Only run on full CI (schedule/manual) - idempotency is expensive
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup Chezmoi
         run: |
           sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -t v${{ env.CHEZMOI_VERSION }}
@@ -321,7 +321,7 @@ jobs:
     needs: [changes]
     if: needs.changes.outputs.nix == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: DeterminateSystems/nix-installer-action@v21
       - uses: DeterminateSystems/magic-nix-cache-action@v8
       - name: Flake check
@@ -338,7 +338,7 @@ jobs:
     # Only run benchmarks on schedule or manual trigger
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y zsh hyperfine jq
