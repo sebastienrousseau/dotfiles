@@ -64,7 +64,7 @@ scan_secrets() {
   local violations=0
 
   # Run gitleaks
-  if gitleaks detect --source="${REPO_ROOT}" --config="${REPO_ROOT}/.gitleaks.toml" --no-git >/dev/null 2>&1; then
+  if gitleaks detect --source="${REPO_ROOT}" --config="${REPO_ROOT}/config/gitleaks.toml" --no-git >/dev/null 2>&1; then
     log "INFO" "✅ No secrets detected by gitleaks"
   else
     log "WARN" "❌ Potential secrets detected by gitleaks"

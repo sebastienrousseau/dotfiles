@@ -54,6 +54,31 @@ install_chezmoi_binary() {
     return 1
   fi
 
+  # SHA256 checksum verification (graceful degradation if unavailable)
+  # Known checksum for get.chezmoi.io installer (update when installer changes)
+  local expected_checksum="${CHEZMOI_INSTALLER_SHA256:-}"
+  if [[ -n "$expected_checksum" ]]; then
+    local actual_checksum
+    if command -v sha256sum >/dev/null 2>&1; then
+      actual_checksum=$(sha256sum "$installer" | awk '{print $1}')
+    elif command -v shasum >/dev/null 2>&1; then
+      actual_checksum=$(shasum -a 256 "$installer" | awk '{print $1}')
+    else
+      echo -e "${CYAN:-}   INFO: No SHA256 tool available, skipping checksum verification${NC:-}"
+      actual_checksum=""
+    fi
+
+    if [[ -n "$actual_checksum" && "$actual_checksum" != "$expected_checksum" ]]; then
+      rm -f "$installer"
+      echo "Error: Chezmoi installer checksum mismatch. Aborting for security." >&2
+      echo "Expected: $expected_checksum" >&2
+      echo "Got:      $actual_checksum" >&2
+      return 1
+    elif [[ -n "$actual_checksum" ]]; then
+      echo -e "${CYAN:-}   Checksum verified: $actual_checksum${NC:-}"
+    fi
+  fi
+
   # Execute the verified installer
   if ! sh "$installer" -- -b "$bin_dir" 2>/dev/null; then
     rm -f "$installer"

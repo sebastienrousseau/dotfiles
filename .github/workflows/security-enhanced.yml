@@ -11,7 +11,7 @@ on:
       - 'scripts/security/**'
       - '.github/workflows/security*.yml'
       - '**/Dockerfile*'
-      - '.gitleaks.toml'
+      - 'config/gitleaks.toml'
       - '.github/security-policies/**'
   pull_request:
     branches: [master, main]
@@ -22,7 +22,7 @@ on:
       - 'scripts/security/**'
       - '.github/workflows/security*.yml'
       - '**/Dockerfile*'
-      - '.gitleaks.toml'
+      - 'config/gitleaks.toml'
       - '.github/security-policies/**'
   schedule:
     # Weekly security scan on Sunday 2 AM UTC (reduced from daily)

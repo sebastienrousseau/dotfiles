@@ -62,7 +62,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 # Ensure directories exist
-mkdir -p "$INSTALL_DIR" "$BIN_DIR" 2>/dev/null || $sudo_cmd mkdir -p "$INSTALL_DIR" "$BIN_DIR"
+mkdir -p "$INSTALL_DIR" "$BIN_DIR" 2>/dev/null || ${sudo_cmd:+$sudo_cmd} mkdir -p "$INSTALL_DIR" "$BIN_DIR"
 
 TARBALL="$HOME/nvim-linux64.tar.gz"
 CHECKSUM_FILE="$HOME/nvim-linux64.tar.gz.sha256sum"
@@ -103,10 +103,10 @@ else
 fi
 
 echo "Removing old version..."
-$sudo_cmd rm -rf "${INSTALL_DIR}/nvim-linux64" 2>/dev/null || true
+${sudo_cmd:+$sudo_cmd} rm -rf "${INSTALL_DIR}/nvim-linux64" 2>/dev/null || true
 
 echo "Extracting new version..."
-if ! $sudo_cmd tar -C "$INSTALL_DIR" -xzf "$TARBALL"; then
+if ! ${sudo_cmd:+$sudo_cmd} tar -C "$INSTALL_DIR" -xzf "$TARBALL"; then
   echo "[ERROR] Failed to extract $TARBALL" >&2
   exit 1
 fi
@@ -121,10 +121,10 @@ fi
 echo "Linking binary..."
 # Validate symlink target is the expected binary
 TARGET_LINK="${BIN_DIR}/nvim"
-$sudo_cmd ln -sf "$NVIM_BIN" "$TARGET_LINK"
+${sudo_cmd:+$sudo_cmd} ln -sf "$NVIM_BIN" "$TARGET_LINK"
 
 # Verify the symlink points to our binary
-LINK_TARGET=$($sudo_cmd readlink -f "$TARGET_LINK" 2>/dev/null || echo "")
+LINK_TARGET=$(${sudo_cmd:+$sudo_cmd} readlink -f "$TARGET_LINK" 2>/dev/null || echo "")
 if [ "$LINK_TARGET" != "$NVIM_BIN" ] && [ "$LINK_TARGET" != "$(readlink -f "$NVIM_BIN")" ]; then
   echo "[WARN] Symlink verification: expected $NVIM_BIN, got $LINK_TARGET" >&2
 fi
