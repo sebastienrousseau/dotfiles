@@ -27,3 +27,7 @@ Each ADR follows this structure:
 
 - [Documenting Architecture Decisions](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions)
 - [ADR Tools](https://github.com/npryce/adr-tools)
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

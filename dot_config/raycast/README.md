@@ -7,3 +7,7 @@ This directory stores Raycast preferences export/import files.
 3. Save the file here, then `chezmoi apply`.
 
 To restore, import the saved file from Raycast settings.
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

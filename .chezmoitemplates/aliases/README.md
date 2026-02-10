@@ -83,3 +83,7 @@ During `chezmoi apply`, the main template `dot_config/shell/aliases.sh.tmpl`:
 <!-- markdownlint-enable MD013-->
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

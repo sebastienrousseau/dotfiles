@@ -25,3 +25,7 @@ The following aliases are provided:
 - `dut`: Show the total file size of the current directory.
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

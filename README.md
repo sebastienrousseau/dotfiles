@@ -280,3 +280,11 @@ See [CHANGELOG.md](CHANGELOG.md).
 This project is licensed under the **MIT License**. See [LICENSE](LICENSE).
 
 Some bundled third‑party dependencies are licensed under GPL‑3.0; the LICENSE file lists them explicitly.
+
+---
+
+<div align="center">
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+
+</div>

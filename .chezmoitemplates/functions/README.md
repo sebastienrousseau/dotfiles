@@ -161,4 +161,6 @@ MIT License © 2015-2026 Sebastien Rousseau
 
 ---
 
-Made With ❤️ in London, United Kingdom • [dotfiles.io](https://dotfiles.io)
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

@@ -19,3 +19,7 @@ This code provides a set of aliases for
 - `psa` List all processes.
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

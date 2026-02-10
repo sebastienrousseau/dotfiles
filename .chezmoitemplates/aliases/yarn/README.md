@@ -18,3 +18,7 @@ These aliases are defined in `yarn.aliases.sh` and are automatically loaded by `
 - `ystem` - Start
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

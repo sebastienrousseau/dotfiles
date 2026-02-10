@@ -203,4 +203,6 @@ aliases/
 2. Update aggregation templates to handle subdirectories
 3. Validate no regression in shell loading performance
 
-Made With ❤️ in London, United Kingdom • [dotfiles.io](https://dotfiles.io)
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

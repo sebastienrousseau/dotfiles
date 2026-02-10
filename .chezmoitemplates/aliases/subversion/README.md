@@ -56,3 +56,7 @@ This code provides a set of aliases for the Subversion command line.
 - `sxp` Create an unversioned copy of a tree.
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

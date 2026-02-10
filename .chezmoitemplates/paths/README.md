@@ -45,3 +45,7 @@ Path configurations are split into priority-based files. `chezmoi` aggregates th
 <!-- markdownlint-enable MD013-->
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

@@ -5,3 +5,7 @@ Default path used by the script:
 
 Example:
 - swaylock --image ~/.config/dotfiles/lock/icon.png
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
