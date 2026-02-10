@@ -13,3 +13,7 @@ Host bastion
 Host internal-*
   ProxyJump bastion
 ```
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

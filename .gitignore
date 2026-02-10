@@ -1,5 +1,32 @@
 # Dotfiles - gitignore
-# v0.2.478
+# v0.2.480
+
+# Secrets & Credentials (never commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+id_rsa*
+id_ed25519*
+id_ecdsa*
+id_dsa*
+*.pub
+credentials.json
+service-account*.json
+token.json
+.secrets
+.secrets.*
+.secrets.baseline
+*.gpg
+!*.gpg.tmpl
+.password-store/
+.gnupg/
+.ssh/known_hosts
 
 # OS Artifacts
 .DS_Store
@@ -41,6 +68,17 @@ yarn-error.log*
 
 # Chezmoi
 .chezmoitemplates/**/.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
 
 # Machine-specific configs (local only, never pushed)
 dot_etc/machines/

@@ -11,3 +11,7 @@ nix develop
 
 This provides a dev shell with common tools (git, zsh, neovim, ripgrep, fd, bat,
 fzf, zoxide, lazygit, jq).
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

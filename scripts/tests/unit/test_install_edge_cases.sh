@@ -53,9 +53,9 @@ fi
 
 # Test: install.sh adds BIN_DIR to PATH for fallback install
 test_start "install_path_update"
-if grep -q 'BIN_DIR=.*local/bin' "$INSTALL_SCRIPT" && grep -q 'export PATH=.*BIN_DIR' "$INSTALL_SCRIPT"; then
+if grep -q 'bin_dir=.*local/bin' "$INSTALL_SCRIPT" && grep -q 'export PATH=.*bin_dir' "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: adds ~/.local/bin to PATH via BIN_DIR"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: adds ~/.local/bin to PATH via bin_dir"
 else
   ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should add ~/.local/bin to PATH"

@@ -2,6 +2,62 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.480
+
+### Added
+
+- **Catppuccin theme support** — Added all four Catppuccin flavours (latte, frappe, macchiato, mocha) with comprehensive theming across VS Code, Neovim, GTK 3/4, GNOME Shell, and Nix home-manager integration.
+- **AI pair programming** — Added `aider-chat` CLI tool for AI-powered code editing and pair programming sessions.
+- **Enhanced Python AI tools** — Added `shell-gpt` and `posting` to Python tools provisioning for improved CLI AI assistance.
+- **Git workflow improvements** — Added `git-absorb` for automatic fixup commits and intelligent commit history management.
+- **Template helper functions** — Added comprehensive chezmoi template helpers for feature flags, git variables, OS detection, and path utilities.
+
+### Changed
+
+- **Syntax highlighting performance** — Switched from `zsh-syntax-highlighting` to `fast-syntax-highlighting` for improved shell responsiveness.
+- **Technical debt reduction** — Achieved 10/10 technical debt score through modular installer refactoring with dedicated libraries for backup, chezmoi, OS detection, and package management.
+- **Documentation architecture** — Comprehensive documentation overhaul with centralized docs/README.md, helper function documentation, and improved template organization.
+- **Theme switching enhancement** — Enhanced `switch.sh` with family toggling between Tokyo Night and Catppuccin theme families.
+
+### Fixed
+
+- **Template processing** — Fixed undefined `$name` variable in README.md template that was causing `chezmoi apply` failures.
+- **Code quality** — Resolved all remaining Codacy static analysis warnings for improved code maintainability.
+- **CI optimization** — Optimized GitHub Actions workflows to reduce usage and cost.
+
+### Documentation
+
+- **ADR documentation** — Added comprehensive Architecture Decision Records (ADR-005 for chezmoi choice, ADR-006 for shell selection).
+- **Template validation** — Added comprehensive unit tests for template validation and processing.
+- **Theme documentation** — Added documentation for Catppuccin installation, GNOME theme application, and cross-platform theme switching.
+
+## v0.2.479
+
+### Added
+
+- **Cross-platform Brewfile** — Unified Brewfile with OS.mac?/OS.linux? platform detection for seamless package management across macOS, Linux, and WSL.
+- **Enhanced WSL detection** — Added DOTFILES_OS variable in zprofile for improved Windows Subsystem for Linux compatibility.
+- **AI shell tooling** — Added generic ollama aliases (ol, olr, oll, olp, ollama-status, ollama-show) for cross-platform AI model interaction.
+- **Homebrew optimization** — Added performance settings disabling analytics and auto-update for faster package operations.
+- **Language-specific PATH setup** — Enhanced PATH configuration for Go, Rust, .NET, and Python development environments.
+
+### Changed
+
+- **Platform-agnostic aliases** — Removed personal model-specific ollama functions, keeping only generic cross-platform aliases that work on any Ollama installation.
+- **Brewfile organization** — Reorganized Brewfile sections for clarity and removed platform-specific packages from cross-platform sections.
+- **Feature flags documentation** — Expanded FEATURES.md with comprehensive feature flag table, template processing examples, and troubleshooting guide.
+
+### Fixed
+
+- **Test framework reliability** — Resolved shellcheck warnings and mock export issues in unit test framework.
+- **CI compatibility** — Fixed alias tests to use proper `alias` command instead of `type`, enabled `shopt -s expand_aliases` in test subshells.
+- **PATH isolation** — Fixed unavailable command tests by using isolated PATH to ensure system commands aren't found during testing.
+
+### Documentation
+
+- **AI aliases documentation** — Updated documentation for ollama aliases and cross-platform AI tooling.
+- **Architecture notes** — Enhanced feature flag documentation with template processing explanation and runtime access patterns.
+
 ## v0.2.478
 
 ### Added

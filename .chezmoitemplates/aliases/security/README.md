@@ -13,3 +13,7 @@ Tools for hardening the environment and managing configuration immutability.
 ## Git Signing
 
 (See [Git Aliases](../git/README.md) for signing configuration)
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

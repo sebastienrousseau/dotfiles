@@ -3,7 +3,7 @@
   align="right"
 />
 
-# Dotfiles Aliases (v0.2.478)
+# Dotfiles Aliases (v0.2.480)
 
 Simply designed to fit your shell life 
 
@@ -83,3 +83,7 @@ During `chezmoi apply`, the main template `dot_config/shell/aliases.sh.tmpl`:
 <!-- markdownlint-enable MD013-->
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

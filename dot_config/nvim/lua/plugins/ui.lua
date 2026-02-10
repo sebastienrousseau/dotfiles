@@ -127,7 +127,28 @@ Simply design to fit your shell life
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {
       options = {
-        theme = "catppuccin",
+        theme = (function()
+          local theme = vim.env.DOTFILES_THEME or "catppuccin-mocha"
+          if theme:match("^tokyonight") then
+            return "tokyonight"
+          elseif theme:match("^catppuccin") then
+            return "catppuccin"
+          elseif theme:match("^rose%-pine") then
+            return "rose-pine"
+          elseif theme:match("^gruvbox") then
+            return "gruvbox"
+          elseif theme == "dracula" then
+            return "dracula"
+          elseif theme == "nord" then
+            return "nord"
+          elseif theme:match("^onedark") or theme == "onelight" then
+            return "onedark"
+          elseif theme:match("^solarized") then
+            return "solarized_dark"
+          else
+            return "catppuccin"
+          end
+        end)(),
         globalstatus = true,
         component_separators = "|",
         section_separators = { left = "", right = "" },
@@ -307,12 +328,110 @@ Simply design to fit your shell life
     lazy = false,
     priority = 1001,
     config = function()
-      local theme = vim.env.DOTFILES_THEME or "tokyonight-night"
+      local theme = vim.env.DOTFILES_THEME or "catppuccin-mocha"
       local function load_theme(name)
         local ok, lazy = pcall(require, "lazy")
         if ok then
           lazy.load({ plugins = { name } })
         end
+      end
+
+      -- Enhanced Catppuccin flavour detection and configuration
+      if theme:match("^catppuccin") then
+        load_theme("catppuccin")
+
+        -- Extract flavour from theme name (catppuccin-{flavour})
+        local flavour = theme:match("catppuccin%-(%w+)")
+        if not flavour or not vim.tbl_contains({ "latte", "frappe", "macchiato", "mocha" }, flavour) then
+          flavour = "mocha" -- Default fallback
+        end
+
+        require("catppuccin").setup({
+          flavour = flavour,
+          background = { -- Set background based on flavour
+            light = "latte",
+            dark = "mocha",
+          },
+          transparent_background = false,
+          show_end_of_buffer = false,
+          term_colors = true,
+          dim_inactive = {
+            enabled = true,
+            shade = "dark",
+            percentage = 0.15,
+          },
+          no_italic = false,
+          no_bold = false,
+          no_underline = false,
+          styles = {
+            comments = { "italic" },
+            conditionals = { "italic" },
+            loops = {},
+            functions = {},
+            keywords = {},
+            strings = {},
+            variables = {},
+            numbers = {},
+            booleans = {},
+            properties = {},
+            types = {},
+            operators = {},
+          },
+          color_overrides = {},
+          custom_highlights = {},
+          integrations = {
+            cmp = true,
+            gitsigns = true,
+            nvimtree = true,
+            treesitter = true,
+            notify = true,
+            mini = {
+              enabled = true,
+              indentscope_color = "",
+            },
+            symbols_outline = true,
+            mason = true,
+            neotest = true,
+            noice = true,
+            illuminate = { enabled = true, lsp = false },
+            which_key = true,
+            indent_blankline = { enabled = true, scope_color = "surface1", colored_indent_levels = false },
+            native_lsp = {
+              enabled = true,
+              virtual_text = {
+                errors = { "italic" },
+                hints = { "italic" },
+                warnings = { "italic" },
+                information = { "italic" },
+              },
+              underlines = {
+                errors = { "underline" },
+                hints = { "underline" },
+                warnings = { "underline" },
+                information = { "underline" },
+              },
+              inlay_hints = { background = true },
+            },
+            telescope = { enabled = true },
+            lsp_trouble = true,
+            fidget = true,
+            barbecue = { dim_dirname = true, bold_basename = true, dim_context = false, alt_background = false },
+            navic = { enabled = true, custom_bg = "NONE" },
+            dropbar = { enabled = true, color_mode = false },
+            bufferline = true,
+            dashboard = true,
+            flash = true,
+            harpoon = true,
+            leap = true,
+            markdown = true,
+            semantic_tokens = true,
+            treesitter_context = true,
+            ufo = true,
+          },
+        })
+
+        vim.cmd.colorscheme("catppuccin")
+        return
       end
 
       if theme:match("^tokyonight") then
@@ -395,13 +514,10 @@ Simply design to fit your shell life
         return
       end
 
+      -- Fallback to Catppuccin with mocha flavour
       load_theme("catppuccin")
-      local flavour = theme:match("catppuccin%-(%w+)")
-      if not flavour then
-        flavour = "mocha"
-      end
       require("catppuccin").setup({
-        flavour = flavour,
+        flavour = "mocha",
         integrations = {
           nvimtree = true,
           notify = true,
@@ -412,7 +528,7 @@ Simply design to fit your shell life
           gitsigns = true,
           illuminate = true,
           which_key = true,
-          scrollbar = true,
+          indent_blankline = { enabled = true, scope_color = "surface1", colored_indent_levels = false },
         },
       })
       vim.cmd.colorscheme("catppuccin")

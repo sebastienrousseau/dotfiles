@@ -140,3 +140,7 @@ c7z archive.7z files/  # No additional parameters needed
 ```
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

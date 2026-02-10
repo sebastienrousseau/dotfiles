@@ -143,3 +143,7 @@ common Git commands, making them shorter and more intuitive.
 - `undopush` Undo the last push.
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

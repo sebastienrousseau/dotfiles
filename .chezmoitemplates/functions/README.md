@@ -5,7 +5,7 @@
   align="right"
 />
 
-# Dotfiles Functions (v0.2.478)
+# Dotfiles Functions (v0.2.480)
 
 > Simply designed to fit your shell life 
 
@@ -161,4 +161,6 @@ MIT License © 2015-2026 Sebastien Rousseau
 
 ---
 
-Made With ❤️ in London, United Kingdom • [dotfiles.io](https://dotfiles.io)
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

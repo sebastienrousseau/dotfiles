@@ -12,3 +12,7 @@ Tools for regulatory compliance and privacy enforcement.
 ## Documentation
 
 See [COMPLIANCE.md](../../../COMPLIANCE.md) for full SOC2/ISO control mappings.
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

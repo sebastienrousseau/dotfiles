@@ -3,10 +3,26 @@ name: CodeQL
 on:
   push:
     branches: [master]
+    # Only run CodeQL when relevant files change
+    paths:
+      - '**.py'
+      - '**.js'
+      - '**.ts'
+      - '.github/workflows/**'
   pull_request:
     branches: [master]
+    paths:
+      - '**.py'
+      - '**.js'
+      - '**.ts'
+      - '.github/workflows/**'
   schedule:
-    - cron: '0 6 * * 1'  # Weekly with main CI
+    - cron: '0 6 * * 1'  # Weekly on Monday with main CI
+
+# Cancel in-progress runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -19,10 +35,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@v3
         with:
           languages: actions,python
       - name: Perform Analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@v3

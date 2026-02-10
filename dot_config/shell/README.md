@@ -26,7 +26,7 @@ Welcome to your universally compatible, high-performance dotfiles configuration,
 To install these dotfiles on a new machine, simply run:
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.478/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.480/install.sh)"
 ```
 
 This command will:
@@ -261,3 +261,7 @@ Available themes:
 
 ## Test
 This repository includes GitHub Actions CI to test the configuration on macOS, Ubuntu, and Windows for every Pull Request.
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

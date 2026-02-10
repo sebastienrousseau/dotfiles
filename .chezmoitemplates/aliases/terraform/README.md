@@ -26,3 +26,7 @@ These aliases are defined in `terraform.aliases.sh` and are automatically loaded
 - `anslint` - Ansible Lint
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

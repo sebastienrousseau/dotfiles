@@ -131,10 +131,7 @@ return {
       }
 
       -- Signs
-      vim.fn.sign_define(
-        "DapBreakpoint",
-        { text = "B", texthl = "DapBreakpoint", linehl = "", numhl = "" }
-      )
+      vim.fn.sign_define("DapBreakpoint", { text = "B", texthl = "DapBreakpoint", linehl = "", numhl = "" })
       vim.fn.sign_define(
         "DapStopped",
         { text = "S", texthl = "DapStopped", linehl = "DapStopped", numhl = "DapStopped" }

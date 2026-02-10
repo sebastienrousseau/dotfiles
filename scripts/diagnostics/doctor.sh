@@ -9,10 +9,15 @@
 
 set -euo pipefail
 
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+# Colors (respect NO_COLOR: https://no-color.org)
+if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
+  GREEN='\033[0;32m'
+  RED='\033[0;31m'
+  YELLOW='\033[1;33m'
+  NC='\033[0m'
+else
+  GREEN='' RED='' YELLOW='' NC=''
+fi
 
 echo " Dotfiles Doctor - System Diagnostics"
 echo "-------------------------------------"
@@ -41,7 +46,7 @@ for cmd in git curl chezmoi starship rg bat; do
 done
 
 echo -e "\nChecking Optional AI CLIs..."
-for cmd in claude gemini sgpt ollama opencode; do
+for cmd in claude gemini sgpt ollama opencode aider; do
   if command -v "$cmd" &>/dev/null; then
     log_success "Found $cmd: $(command -v "$cmd")"
   else

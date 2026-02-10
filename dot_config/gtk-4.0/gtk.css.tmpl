@@ -1,0 +1,309 @@
+{{- /* GTK-4.0 custom CSS for Catppuccin theming */ -}}
+{{- $theme := .theme -}}
+{{- $is_dark := false -}}
+{{- if or (hasSuffix $theme "-night") (hasSuffix $theme "-storm") (hasSuffix $theme "-moon") (hasSuffix $theme "-mocha") (hasSuffix $theme "-frappe") (hasSuffix $theme "-macchiato") (hasSuffix $theme "-dark") (hasSuffix $theme "-wave") (hasSuffix $theme "-dragon") (eq $theme "dracula") (eq $theme "nord") (eq $theme "onedark") -}}
+{{- $is_dark = true -}}
+{{- end -}}
+
+{{- $colors := dict -}}
+{{- if eq $theme "catppuccin-latte" -}}
+  {{- $colors = dict
+      "blue" "#1e66f5"
+      "red" "#d20f39"
+      "green" "#40a02b"
+      "yellow" "#df8e1d"
+      "text" "#4c4f69"
+      "subtext1" "#5c5f77"
+      "surface0" "#ccd0da"
+      "base" "#eff1f5"
+      "mantle" "#e6e9ef"
+      "crust" "#dce0e8"
+  -}}
+{{- else if eq $theme "catppuccin-frappe" -}}
+  {{- $colors = dict
+      "blue" "#8caaee"
+      "red" "#e78284"
+      "green" "#a6d189"
+      "yellow" "#e5c890"
+      "text" "#c6d0f5"
+      "subtext1" "#b5bfe2"
+      "surface0" "#414559"
+      "base" "#303446"
+      "mantle" "#292c3c"
+      "crust" "#232634"
+  -}}
+{{- else if eq $theme "catppuccin-macchiato" -}}
+  {{- $colors = dict
+      "blue" "#8aadf4"
+      "red" "#ed8796"
+      "green" "#a6da95"
+      "yellow" "#eed49f"
+      "text" "#cad3f5"
+      "subtext1" "#b8c0e0"
+      "surface0" "#363a4f"
+      "base" "#24273a"
+      "mantle" "#1e2030"
+      "crust" "#181926"
+  -}}
+{{- else if eq $theme "catppuccin-mocha" -}}
+  {{- $colors = dict
+      "blue" "#89b4fa"
+      "red" "#f38ba8"
+      "green" "#a6e3a1"
+      "yellow" "#f9e2af"
+      "text" "#cdd6f4"
+      "subtext1" "#bac2de"
+      "surface0" "#313244"
+      "base" "#1e1e2e"
+      "mantle" "#181825"
+      "crust" "#11111b"
+  -}}
+{{- end -}}
+
+/* GTK4 Custom Styling for {{ $theme }} */
+
+{{- if hasPrefix $theme "catppuccin-" }}
+/* Catppuccin GTK4 color scheme */
+@define-color accent_color {{ index $colors "blue" }};
+@define-color accent_bg_color {{ index $colors "blue" }};
+@define-color accent_fg_color {{ index $colors "base" }};
+
+@define-color destructive_color {{ index $colors "red" }};
+@define-color destructive_bg_color {{ index $colors "red" }};
+@define-color destructive_fg_color {{ index $colors "base" }};
+
+@define-color success_color {{ index $colors "green" }};
+@define-color success_bg_color {{ index $colors "green" }};
+@define-color success_fg_color {{ index $colors "base" }};
+
+@define-color warning_color {{ index $colors "yellow" }};
+@define-color warning_bg_color {{ index $colors "yellow" }};
+@define-color warning_fg_color {{ index $colors "base" }};
+
+@define-color window_bg_color {{ index $colors "base" }};
+@define-color window_fg_color {{ index $colors "text" }};
+@define-color view_bg_color {{ index $colors "base" }};
+@define-color view_fg_color {{ index $colors "text" }};
+
+@define-color headerbar_bg_color {{ index $colors "mantle" }};
+@define-color headerbar_fg_color {{ index $colors "text" }};
+
+@define-color card_bg_color {{ index $colors "surface0" }};
+@define-color card_fg_color {{ index $colors "text" }};
+
+@define-color popover_bg_color {{ index $colors "surface0" }};
+@define-color popover_fg_color {{ index $colors "text" }};
+
+{{- end }}
+
+/* Modern GTK4 styling */
+window {
+  border-radius: 12px;
+}
+
+.background {
+  border-radius: 12px;
+}
+
+/* Improved headerbar */
+headerbar {
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* Modern button styling */
+button {
+  border-radius: 8px;
+  transition: all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+button.suggested-action {
+  box-shadow: 0 2px 6px {{ if hasPrefix $theme "catppuccin-" }}{{ index $colors "blue" }}40{{ else }}#3584e440{{ end }};
+}
+
+button.destructive-action {
+  box-shadow: 0 2px 6px {{ if hasPrefix $theme "catppuccin-" }}{{ index $colors "red" }}40{{ else }}#e01b2440{{ end }};
+}
+
+/* Entry field improvements */
+entry {
+  border-radius: 8px;
+  transition: all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+entry:focus {
+  box-shadow: 0 0 0 2px {{ if hasPrefix $theme "catppuccin-" }}{{ index $colors "blue" }}{{ else }}#3584e4{{ end }},
+              0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: scale(1.01);
+}
+
+/* Switch improvements */
+switch {
+  border-radius: 20px;
+  transition: all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+switch slider {
+  border-radius: 50%;
+  transition: all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+switch:checked {
+  background: {{ if hasPrefix $theme "catppuccin-" }}{{ index $colors "blue" }}{{ else }}#3584e4{{ end }};
+  box-shadow: 0 0 8px {{ if hasPrefix $theme "catppuccin-" }}{{ index $colors "blue" }}40{{ else }}#3584e440{{ end }};
+}
+
+/* Progress bar improvements */
+progressbar {
+  border-radius: 10px;
+}
+
+progressbar > trough {
+  border-radius: 10px;
+  {{ if hasPrefix $theme "catppuccin-" }}
+  background-color: {{ index $colors "surface0" }};
+  {{ end }}
+}
+
+progressbar > trough > progress {
+  border-radius: 10px;
+  {{ if hasPrefix $theme "catppuccin-" }}
+  background: linear-gradient(90deg, {{ index $colors "blue" }}, {{ index $colors "blue" }}dd);
+  {{ end }}
+}
+
+/* Check and radio improvements */
+checkbutton check,
+radiobutton radio {
+  border-radius: 6px;
+  transition: all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+radiobutton radio {
+  border-radius: 50%;
+}
+
+checkbutton check:checked,
+radiobutton radio:checked {
+  {{ if hasPrefix $theme "catppuccin-" }}
+  background-color: {{ index $colors "blue" }};
+  box-shadow: 0 0 6px {{ index $colors "blue" }}40;
+  {{ end }}
+}
+
+/* Scrollbar improvements */
+scrollbar {
+  background: transparent;
+}
+
+scrollbar slider {
+  border-radius: 8px;
+  {{ if hasPrefix $theme "catppuccin-" }}
+  background-color: {{ index $colors "surface0" }};
+  {{ end }}
+  transition: all 200ms ease;
+}
+
+scrollbar slider:hover {
+  {{ if hasPrefix $theme "catppuccin-" }}
+  background-color: {{ index $colors "subtext1" }};
+  {{ end }}
+}
+
+/* Notebook tab improvements */
+notebook > header {
+  {{ if hasPrefix $theme "catppuccin-" }}
+  background-color: {{ index $colors "mantle" }};
+  {{ end }}
+}
+
+notebook > header > tabs > tab {
+  border-radius: 8px 8px 0 0;
+  {{ if hasPrefix $theme "catppuccin-" }}
+  background-color: {{ index $colors "surface0" }};
+  color: {{ index $colors "subtext1" }};
+  {{ end }}
+  transition: all 200ms ease;
+}
+
+notebook > header > tabs > tab:checked {
+  {{ if hasPrefix $theme "catppuccin-" }}
+  background-color: {{ index $colors "blue" }};
+  color: {{ index $colors "base" }};
+  {{ end }}
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Sidebar improvements */
+.sidebar {
+  {{ if hasPrefix $theme "catppuccin-" }}
+  background-color: {{ index $colors "mantle" }};
+  color: {{ index $colors "text" }};
+  {{ end }}
+  border-radius: 0 12px 12px 0;
+}
+
+.sidebar row {
+  border-radius: 6px;
+  transition: all 150ms ease;
+}
+
+.sidebar row:hover {
+  {{ if hasPrefix $theme "catppuccin-" }}
+  background-color: {{ index $colors "surface0" }};
+  {{ end }}
+}
+
+/* Popover improvements */
+popover {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  {{ if hasPrefix $theme "catppuccin-" }}
+  background-color: {{ index $colors "surface0" }};
+  {{ end }}
+}
+
+popover > contents {
+  border-radius: 12px;
+}
+
+/* Menu improvements */
+menubar > menuitem {
+  border-radius: 6px;
+  transition: all 150ms ease;
+}
+
+menu {
+  border-radius: 8px;
+  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.15);
+  {{ if hasPrefix $theme "catppuccin-" }}
+  background-color: {{ index $colors "surface0" }};
+  {{ end }}
+}
+
+menu > menuitem {
+  border-radius: 6px;
+  transition: all 150ms ease;
+}
+
+menu > menuitem:hover {
+  {{ if hasPrefix $theme "catppuccin-" }}
+  background-color: {{ index $colors "blue" }};
+  color: {{ index $colors "base" }};
+  {{ end }}
+}

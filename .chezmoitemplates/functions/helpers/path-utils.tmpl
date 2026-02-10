@@ -1,0 +1,24 @@
+{{- /*
+  Path Utilities Helper
+
+  Common path resolution and validation patterns.
+
+  Usage:
+    {{ template "path-utils" . }}
+    Then use: $home, $config_home, $data_home, $cache_home, etc.
+*/ -}}
+
+{{- $home := .chezmoi.homeDir -}}
+
+{{- /* XDG Base Directory paths */ -}}
+{{- $config_home := env "XDG_CONFIG_HOME" | default (printf "%s/.config" $home) -}}
+{{- $data_home := env "XDG_DATA_HOME" | default (printf "%s/.local/share" $home) -}}
+{{- $cache_home := env "XDG_CACHE_HOME" | default (printf "%s/.cache" $home) -}}
+{{- $state_home := env "XDG_STATE_HOME" | default (printf "%s/.local/state" $home) -}}
+{{- $bin_home := printf "%s/.local/bin" $home -}}
+
+{{- /* Common tool paths */ -}}
+{{- $cargo_home := env "CARGO_HOME" | default (printf "%s/.cargo" $home) -}}
+{{- $rustup_home := env "RUSTUP_HOME" | default (printf "%s/.rustup" $home) -}}
+{{- $gopath := env "GOPATH" | default (printf "%s/go" $home) -}}
+{{- $npm_prefix := env "NPM_CONFIG_PREFIX" | default (printf "%s/.node_modules" $home) -}}

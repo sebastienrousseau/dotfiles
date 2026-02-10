@@ -65,6 +65,7 @@ These are the main tools and CLI conveniences included with Dotfiles.
 | codex | @openai/codex | OpenAI Codex CLI |
 | opencode | opencode-ai | OpenCode AI assistant |
 | droid | @factory/cli | Factory AI Droid |
+| aider | aider-chat | Git-native AI pair programming |
 
 
 ## Data processing

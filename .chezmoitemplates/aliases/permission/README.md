@@ -37,3 +37,7 @@ This code provides a set of aliases for file permissions.
 - `chownu` Change file owner and group recursively to the current user.
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
