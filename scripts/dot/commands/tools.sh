@@ -2,7 +2,7 @@
 # Dotfiles CLI - Tools Commands
 # tools, new, packages, log-rotate
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh

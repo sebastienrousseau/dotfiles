@@ -2,7 +2,7 @@
 # Dotfiles CLI - Secrets Commands
 # secrets-init, secrets, secrets-create, ssh-key
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh

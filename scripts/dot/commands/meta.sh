@@ -2,7 +2,7 @@
 # Dotfiles CLI - Meta Commands
 # upgrade, docs, learn, keys, sandbox
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh

@@ -2,7 +2,7 @@
 # Dotfiles CLI - Security Commands
 # backup, encrypt-check, firewall, telemetry, dns-doh, lock-screen, usb-safety
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh
