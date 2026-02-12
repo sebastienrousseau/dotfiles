@@ -237,7 +237,18 @@ fi
 
 if ! command -v rustup >/dev/null; then
   log_info "Installing Rustup..."
-  curl -fsSL https://sh.rustup.rs | sh -s -- -y --no-modify-path
+  rustup_installer=$(mktemp)
+  if curl -fsSL -o "$rustup_installer" https://sh.rustup.rs; then
+    if [ "$(wc -c <"$rustup_installer")" -le 204800 ] && head -1 "$rustup_installer" | grep -q '^#!'; then
+      sh "$rustup_installer" -y --no-modify-path
+    else
+      log_error "Rustup installer failed validation. Install manually."
+    fi
+    rm -f "$rustup_installer"
+  else
+    rm -f "$rustup_installer"
+    log_error "Failed to download rustup installer."
+  fi
   # shellcheck disable=SC1091
   . "${HOME}/.cargo/env"
 fi

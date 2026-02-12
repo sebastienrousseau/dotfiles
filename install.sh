@@ -31,6 +31,24 @@ error() {
   exit 1
 }
 
+# Download a script, validate it, then execute it
+download_and_exec() {
+  local url="$1"; shift
+  local installer
+  installer=$(mktemp)
+  if ! curl -fsSL -o "$installer" "$url"; then
+    rm -f "$installer"; error "Failed to download installer from $url"
+  fi
+  if [ "$(wc -c <"$installer")" -gt 204800 ]; then
+    rm -f "$installer"; error "Installer from $url suspiciously large. Aborting."
+  fi
+  if ! head -1 "$installer" | grep -q '^#!'; then
+    rm -f "$installer"; error "Download from $url doesn't look like a shell script. Aborting."
+  fi
+  sh "$installer" "$@"
+  rm -f "$installer"
+}
+
 # 1. Detect Environment
 step "Detecting Environment..."
 OS="$(uname -s)"
@@ -91,7 +109,7 @@ if [ "$target_os" = "macos" ] && ! command -v brew >/dev/null; then
   fi
 
   echo "   Installing Homebrew..."
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  download_and_exec "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
   # Add brew to PATH for Apple Silicon
   if [ -x /opt/homebrew/bin/brew ]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -137,32 +155,7 @@ else
   echo "   Installing chezmoi via binary download..."
   echo -e "${CYAN}   SECURITY NOTE: Downloading from get.chezmoi.io with integrity check${NC}"
 
-  # Download installer script first for inspection
-  CHEZMOI_INSTALLER=$(mktemp)
-  if ! curl -fsSL -o "$CHEZMOI_INSTALLER" https://get.chezmoi.io; then
-    rm -f "$CHEZMOI_INSTALLER"
-    error "Failed to download chezmoi installer."
-  fi
-
-  # Basic validation: check it's a shell script and not suspiciously large
-  if [ "$(wc -c <"$CHEZMOI_INSTALLER")" -gt 102400 ]; then
-    rm -f "$CHEZMOI_INSTALLER"
-    error "Chezmoi installer suspiciously large. Aborting for security."
-  fi
-
-  if ! head -1 "$CHEZMOI_INSTALLER" | grep -q '^#!/'; then
-    rm -f "$CHEZMOI_INSTALLER"
-    error "Chezmoi installer doesn't look like a shell script. Aborting."
-  fi
-
-  # Execute the verified installer
-  sh "$CHEZMOI_INSTALLER" -- -b "$BIN_DIR" 2>/dev/null ||
-    {
-      rm -f "$CHEZMOI_INSTALLER"
-      error "Failed to install chezmoi."
-    }
-
-  rm -f "$CHEZMOI_INSTALLER"
+  download_and_exec "https://get.chezmoi.io" -- -b "$BIN_DIR"
 
   # Critical: Add to PATH for the rest of the script to see it
   export PATH="$BIN_DIR:$PATH"
@@ -186,8 +179,11 @@ ensure_chezmoi_source() {
   local escaped_dir
   escaped_dir=$(printf '%s\n' "$dir" | sed -e 's/[\/&]/\\&/g')
   if [ -f "$CHEZMOI_CONFIG_FILE" ] && grep -q '^sourceDir' "$CHEZMOI_CONFIG_FILE"; then
-    sed -i.bak "s,^sourceDir.*$,sourceDir = \"$escaped_dir\"," "$CHEZMOI_CONFIG_FILE"
-    rm -f "$CHEZMOI_CONFIG_FILE.bak"
+    if [ "$(uname -s)" = "Darwin" ]; then
+      sed -i '' "s,^sourceDir.*$,sourceDir = \"$escaped_dir\"," "$CHEZMOI_CONFIG_FILE"
+    else
+      sed -i "s,^sourceDir.*$,sourceDir = \"$escaped_dir\"," "$CHEZMOI_CONFIG_FILE"
+    fi
   else
     printf 'sourceDir = "%s"\n' "$dir" >"$CHEZMOI_CONFIG_FILE"
   fi

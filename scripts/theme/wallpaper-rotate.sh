@@ -28,7 +28,10 @@ fi
 
 pick_wallpaper() {
   local files
-  mapfile -t files < <(find "$WALLPAPER_DIR" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \))
+  files=()
+  while IFS= read -r line; do
+    files+=("$line")
+  done < <(find "$WALLPAPER_DIR" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \))
   if [[ ${#files[@]} -eq 0 ]]; then
     return 1
   fi

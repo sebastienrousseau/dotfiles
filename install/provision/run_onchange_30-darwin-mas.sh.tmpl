@@ -21,7 +21,10 @@ if [[ ! -f "${APPS_FILE}" ]]; then
   exit 0
 fi
 
-mapfile -t entries < <(grep -vE '^[[:space:]]*#|^[[:space:]]*$' "${APPS_FILE}" || true)
+entries=()
+while IFS= read -r line; do
+  entries+=("$line")
+done < <(grep -vE '^[[:space:]]*#|^[[:space:]]*$' "${APPS_FILE}" || true)
 if [[ ${#entries[@]} -eq 0 ]]; then
   echo "No MAS apps configured."
   exit 0

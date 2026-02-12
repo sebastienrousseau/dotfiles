@@ -53,7 +53,18 @@ if command_exists zoxide; then
   info "zoxide is already installed"
 else
   info "Installing zoxide ..."
-  curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh # gitleaks:allow
+  zoxide_installer=$(mktemp)
+  if curl -sSfL -o "$zoxide_installer" https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh; then # gitleaks:allow
+    if [ "$(wc -c <"$zoxide_installer")" -le 204800 ] && head -1 "$zoxide_installer" | grep -q '^#!'; then
+      sh "$zoxide_installer"
+    else
+      info "zoxide installer failed validation. Install manually."
+    fi
+    rm -f "$zoxide_installer"
+  else
+    rm -f "$zoxide_installer"
+    info "Failed to download zoxide installer."
+  fi
 fi
 
 # eza
@@ -81,7 +92,18 @@ if command_exists starship; then
   info "starship is already installed"
 else
   info "Installing starship ..."
-  curl -sSfL https://starship.rs/install.sh | sh -s -- --yes # gitleaks:allow
+  starship_installer=$(mktemp)
+  if curl -sSfL -o "$starship_installer" https://starship.rs/install.sh; then # gitleaks:allow
+    if [ "$(wc -c <"$starship_installer")" -le 204800 ] && head -1 "$starship_installer" | grep -q '^#!'; then
+      sh "$starship_installer" --yes
+    else
+      info "starship installer failed validation. Install manually."
+    fi
+    rm -f "$starship_installer"
+  else
+    rm -f "$starship_installer"
+    info "Failed to download starship installer."
+  fi
 fi
 
 # ---------- minimal zshrc --------------------------------------------------- #

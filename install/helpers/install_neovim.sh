@@ -123,9 +123,14 @@ echo "Linking binary..."
 TARGET_LINK="${BIN_DIR}/nvim"
 $sudo_cmd ln -sf "$NVIM_BIN" "$TARGET_LINK"
 
+# Portable readlink -f (fallback to realpath)
+portable_readlink() {
+  readlink -f "$1" 2>/dev/null || realpath "$1" 2>/dev/null || echo ""
+}
+
 # Verify the symlink points to our binary
-LINK_TARGET=$($sudo_cmd readlink -f "$TARGET_LINK" 2>/dev/null || echo "")
-if [ "$LINK_TARGET" != "$NVIM_BIN" ] && [ "$LINK_TARGET" != "$(readlink -f "$NVIM_BIN")" ]; then
+LINK_TARGET=$(portable_readlink "$TARGET_LINK")
+if [ "$LINK_TARGET" != "$NVIM_BIN" ] && [ "$LINK_TARGET" != "$(portable_readlink "$NVIM_BIN")" ]; then
   echo "[WARN] Symlink verification: expected $NVIM_BIN, got $LINK_TARGET" >&2
 fi
 

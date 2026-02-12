@@ -6,6 +6,9 @@
 # Strategy: Prefer Native (.deb) over Flatpak (com.*) to avoid duplicates.
 set -euo pipefail
 
+# This script only applies to Linux desktop environments
+[[ "$(uname -s)" != "Linux" ]] && exit 0
+
 # Apps to HIDE (Flatpaks/Snaps/Other duplicates)
 HIDDEN_APPS=(
   "vim.desktop"               # Prefer Neovim
