@@ -47,7 +47,7 @@ _cached_eval() {
   if [[ -f "$cache" ]] && [[ -z "$bin" || "$cache" -nt "$bin" ]]; then
     source "$cache"
   else
-    "$@" > "$cache" 2>/dev/null
+    "$@" >| "$cache" 2>/dev/null
     source "$cache"
     { zcompile "$cache" } &!
   fi
