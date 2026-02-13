@@ -23,3 +23,5 @@ __pycache__/
 # Editor
 .vscode/
 .idea/
+
+**/.claude/settings.local.json
