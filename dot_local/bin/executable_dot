@@ -49,6 +49,7 @@ Diagnostics:
   health         Run comprehensive health dashboard
   security-score Security assessment with grading
   rollback       Rollback dotfiles to a previous state
+  restore        Restore from backup or git ref
   drift          Drift dashboard (detailed chezmoi status)
   history        Shell history analysis
   benchmark      Run shell startup benchmark (--detailed, --profile)
@@ -130,7 +131,7 @@ case "$COMMAND" in
     ;;
 
   # Diagnostics
-  doctor|heal|health|health-check|security-score|rollback|drift|history|benchmark)
+  doctor|heal|health|health-check|security-score|rollback|restore|drift|history|benchmark)
     dispatch "diagnostics" "$COMMAND" "$@"
     ;;
 

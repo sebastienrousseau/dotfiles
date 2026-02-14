@@ -51,6 +51,10 @@ cmd_benchmark() {
   run_script "scripts/diagnostics/benchmark.sh" "Benchmark script" "$@"
 }
 
+cmd_restore() {
+  run_script "scripts/dot/commands/restore.sh" "Restore script" "$@"
+}
+
 # Dispatch
 case "${1:-}" in
   doctor)
@@ -84,6 +88,10 @@ case "${1:-}" in
   benchmark)
     shift
     cmd_benchmark "$@"
+    ;;
+  restore)
+    shift
+    cmd_restore "$@"
     ;;
   *)
     echo "Unknown diagnostics command: ${1:-}" >&2

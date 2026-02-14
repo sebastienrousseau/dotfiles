@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# JWT token decoder
+# Usage: jwt <token> | jwt (reads from stdin)
+
+set -euo pipefail
+
+decode_base64url() {
+  local input="$1"
+  # Add padding
+  local mod=$((${#input} % 4))
+  if [[ $mod -eq 2 ]]; then input="${input}=="; fi
+  if [[ $mod -eq 3 ]]; then input="${input}="; fi
+  # Convert URL-safe to standard base64
+  echo "$input" | tr '-_' '+/' | base64 -d 2>/dev/null || base64 -D <<< "$(echo "$input" | tr '-_' '+/')"
+}
+
+format_json() {
+  if command -v jq >/dev/null 2>&1; then
+    jq '.' 2>/dev/null || cat
+  elif command -v python3 >/dev/null 2>&1; then
+    python3 -m json.tool 2>/dev/null || cat
+  else
+    cat
+  fi
+}
+
+# Get token
+if [[ $# -gt 0 ]]; then
+  TOKEN="$1"
+else
+  read -r TOKEN
+fi
+
+# Remove 'Bearer ' prefix if present
+TOKEN="${TOKEN#Bearer }"
+TOKEN="${TOKEN#bearer }"
+
+# Split into parts
+IFS='.' read -ra PARTS <<< "$TOKEN"
+
+if [[ ${#PARTS[@]} -lt 2 ]]; then
+  echo "Error: Invalid JWT format"
+  exit 1
+fi
+
+echo "=== Header ==="
+decode_base64url "${PARTS[0]}" | format_json
+echo ""
+
+echo "=== Payload ==="
+PAYLOAD=$(decode_base64url "${PARTS[1]}")
+echo "$PAYLOAD" | format_json
+echo ""
+
+# Check expiration
+if command -v jq >/dev/null 2>&1; then
+  EXP=$(echo "$PAYLOAD" | jq -r '.exp // empty' 2>/dev/null)
+  IAT=$(echo "$PAYLOAD" | jq -r '.iat // empty' 2>/dev/null)
+
+  if [[ -n "$EXP" ]]; then
+    NOW=$(date +%s)
+    EXP_DATE=$(date -d "@$EXP" 2>/dev/null || date -r "$EXP" 2>/dev/null)
+    if [[ $EXP -lt $NOW ]]; then
+      echo "⚠️  Token EXPIRED at: $EXP_DATE"
+    else
+      echo "✓ Token expires at: $EXP_DATE"
+    fi
+  fi
+
+  if [[ -n "$IAT" ]]; then
+    IAT_DATE=$(date -d "@$IAT" 2>/dev/null || date -r "$IAT" 2>/dev/null)
+    echo "  Issued at: $IAT_DATE"
+  fi
+fi
+
+echo ""
+echo "=== Signature ==="
+echo "(${#PARTS[2]} characters, verification requires secret key)"

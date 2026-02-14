@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Base64 encoder/decoder
+# Usage: b64 [encode|decode] <string> | b64 [encode|decode] < file
+
+set -euo pipefail
+
+usage() {
+  echo "Usage: b64 [OPTIONS] [STRING]"
+  echo ""
+  echo "Options:"
+  echo "  -e, --encode    Encode to base64 (default)"
+  echo "  -d, --decode    Decode from base64"
+  echo "  -u, --url       Use URL-safe base64"
+  echo "  -h, --help      Show this help"
+  echo ""
+  echo "Examples:"
+  echo "  b64 'hello world'           # Encode string"
+  echo "  b64 -d 'aGVsbG8gd29ybGQ='   # Decode string"
+  echo "  cat file.bin | b64          # Encode file"
+  echo "  b64 -d < encoded.txt        # Decode file"
+}
+
+MODE="encode"
+URL_SAFE=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -e|--encode|encode) MODE="encode"; shift ;;
+    -d|--decode|decode) MODE="decode"; shift ;;
+    -u|--url) URL_SAFE=true; shift ;;
+    -h|--help) usage; exit 0 ;;
+    -*) echo "Unknown option: $1"; usage; exit 1 ;;
+    *) break ;;
+  esac
+done
+
+# Get input
+if [[ $# -gt 0 ]]; then
+  INPUT="$*"
+else
+  INPUT=$(cat)
+fi
+
+if [[ "$MODE" == "encode" ]]; then
+  if $URL_SAFE; then
+    echo -n "$INPUT" | base64 | tr '+/' '-_' | tr -d '='
+  else
+    echo -n "$INPUT" | base64
+  fi
+else
+  if $URL_SAFE; then
+    # Add padding back
+    INPUT=$(echo "$INPUT" | tr '-_' '+/')
+    MOD=$((${#INPUT} % 4))
+    if [[ $MOD -eq 2 ]]; then INPUT="${INPUT}=="; fi
+    if [[ $MOD -eq 3 ]]; then INPUT="${INPUT}="; fi
+  fi
+  echo "$INPUT" | base64 -d 2>/dev/null || base64 -D <<< "$INPUT"
+fi
