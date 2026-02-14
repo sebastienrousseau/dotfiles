@@ -14,11 +14,11 @@ GRAY='\033[0;90m'
 NC='\033[0m'
 
 # Parse arguments
+# shellcheck disable=SC2034  # VERBOSE reserved for future verbose output
 VERBOSE=false
 JSON_OUTPUT=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    # shellcheck disable=SC2034
     --verbose|-v) VERBOSE=true; shift ;;
     --json) JSON_OUTPUT=true; shift ;;
     *) shift ;;
