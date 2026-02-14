@@ -14,3 +14,7 @@ Recommended themes to capture:
 - rose-pine-dawn
 - kanagawa-wave
 - everforest-dark
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

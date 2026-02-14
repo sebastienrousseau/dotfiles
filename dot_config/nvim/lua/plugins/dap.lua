@@ -87,8 +87,7 @@ return {
 
       -- JavaScript/TypeScript debugging with js-debug-adapter
       -- Requires: MasonInstall js-debug-adapter
-      local js_debug_path = vim.fn.stdpath("data")
-        .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js"
+      local js_debug_path = vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js"
 
       for _, adapter in ipairs({ "pwa-node", "pwa-chrome", "node-terminal" }) do
         dap.adapters[adapter] = {

@@ -1,0 +1,38 @@
+{{- /*
+  Git Variable Resolution Helper
+
+  Resolves git-related variables with fallback support.
+  Checks for prefixed variables first (git_name), then falls back to generic (name).
+
+  Usage:
+    {{ template "git-vars" . }}
+    Then use: $git_name, $git_email, $git_signingkey, $git_signingformat
+*/ -}}
+
+{{- $git_name := "" -}}
+{{- $git_email := "" -}}
+{{- $git_signingkey := "" -}}
+{{- $git_signingformat := "ssh" -}}
+
+{{- /* Check for git-prefixed variables first */ -}}
+{{- if hasKey . "git_name" -}}
+  {{- $git_name = .git_name -}}
+{{- else if hasKey . "name" -}}
+  {{- $git_name = .name -}}
+{{- end -}}
+
+{{- if hasKey . "git_email" -}}
+  {{- $git_email = .git_email -}}
+{{- else if hasKey . "email" -}}
+  {{- $git_email = .email -}}
+{{- end -}}
+
+{{- if hasKey . "git_signingkey" -}}
+  {{- $git_signingkey = .git_signingkey -}}
+{{- else if hasKey . "signingkey" -}}
+  {{- $git_signingkey = .signingkey -}}
+{{- end -}}
+
+{{- if hasKey . "git_signingformat" -}}
+  {{- $git_signingformat = .git_signingformat -}}
+{{- end -}}

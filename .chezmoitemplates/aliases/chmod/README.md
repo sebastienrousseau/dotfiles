@@ -110,3 +110,7 @@ Created with  by [Sebastien Rousseau](https://sebastienrousseau.com)
 - GitHub: [https://github.com/sebastienrousseau](https://github.com/sebastienrousseau)
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

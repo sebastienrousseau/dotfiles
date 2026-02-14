@@ -43,3 +43,7 @@ This code provides a set of aliases for [pnpm](https://pnpm.js.org/).
 - `pnx` Shortcut to pnpx.
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

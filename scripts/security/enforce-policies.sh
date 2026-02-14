@@ -12,11 +12,15 @@ readonly REPO_ROOT
 readonly POLICIES_DIR="${REPO_ROOT}/.github/security-policies"
 readonly LOG_FILE="${REPO_ROOT}/.security-audit.log"
 
-# Color codes for output
-readonly RED='\033[0;31m'
-readonly GREEN='\033[0;32m'
-readonly YELLOW='\033[1;33m'
-readonly NC='\033[0m' # No Color
+# Color codes for output (respect NO_COLOR: https://no-color.org)
+if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
+  readonly RED='\033[0;31m'
+  readonly GREEN='\033[0;32m'
+  readonly YELLOW='\033[1;33m'
+  readonly NC='\033[0m'
+else
+  readonly RED='' GREEN='' YELLOW='' NC=''
+fi
 
 # Logging function
 log() {
@@ -64,7 +68,7 @@ scan_secrets() {
   local violations=0
 
   # Run gitleaks
-  if gitleaks detect --source="${REPO_ROOT}" --config="${REPO_ROOT}/.gitleaks.toml" --no-git >/dev/null 2>&1; then
+  if gitleaks detect --source="${REPO_ROOT}" --config="${REPO_ROOT}/config/gitleaks.toml" --no-git >/dev/null 2>&1; then
     log "INFO" "✅ No secrets detected by gitleaks"
   else
     log "WARN" "❌ Potential secrets detected by gitleaks"

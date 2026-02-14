@@ -2,27 +2,38 @@
 # Universal Dotfiles Installer (Zero-Dependency)
 # Usage: sh -c "$(curl -fsSL https://dotfiles.io/install.sh)"
 # (or ./install.sh locally)
+#
+# This installer uses modular libraries from install/lib/:
+#   - os_detection.sh    : OS and architecture detection
+#   - package_managers.sh: Package manager bootstrapping
+#   - backup.sh          : Dotfile backup functionality
+#   - chezmoi.sh         : Chezmoi installation and configuration
 
 set -euo pipefail
 
-# ANSI Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-BOLD='\033[1m'
-NC='\033[0m'
+# =============================================================================
+# Configuration
+# =============================================================================
 
-echo -e "${CYAN}${BOLD}"
-cat <<"EOF"
-   ___      _    _  _  _          
-  / _ \___ | |_ (_)| |(_) ___  ___ 
- / /_)/ _ \| __|| || || |/ _ \/ __|
-/ ___/ (_) | |_ | || || |  __/\__ \
-\/    \___/ \__||_||_||_|\___||___/
-           Universal Installer
-EOF
-echo -e "${NC}"
+VERSION="${1:-v0.2.480}"
+REPO_URL="https://github.com/sebastienrousseau/dotfiles.git"
+SOURCE_DIR="$HOME/.dotfiles"
+LEGACY_SOURCE_DIR="$HOME/.local/share/chezmoi"
+
+# =============================================================================
+# Colors and Output
+# =============================================================================
+
+if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
+  RED='\033[0;31m'
+  GREEN='\033[0;32m'
+  BLUE='\033[0;34m'
+  CYAN='\033[0;36m'
+  BOLD='\033[1m'
+  NC='\033[0m'
+else
+  RED='' GREEN='' BLUE='' CYAN='' BOLD='' NC=''
+fi
 
 step() { echo -e "${BLUE}==>${NC} ${BOLD}$1${NC}"; }
 success() { echo -e "${GREEN}==> Done!${NC}"; }
@@ -31,243 +42,214 @@ error() {
   exit 1
 }
 
-# Download a script, validate it, then execute it
-download_and_exec() {
-  local url="$1"; shift
-  local installer
-  installer=$(mktemp)
-  if ! curl -fsSL -o "$installer" "$url"; then
-    rm -f "$installer"; error "Failed to download installer from $url"
-  fi
-  if [ "$(wc -c <"$installer")" -gt 204800 ]; then
-    rm -f "$installer"; error "Installer from $url suspiciously large. Aborting."
-  fi
-  if ! head -1 "$installer" | grep -q '^#!'; then
-    rm -f "$installer"; error "Download from $url doesn't look like a shell script. Aborting."
-  fi
-  sh "$installer" "$@"
-  rm -f "$installer"
-}
+# =============================================================================
+# Banner
+# =============================================================================
 
-# 1. Detect Environment
-step "Detecting Environment..."
-OS="$(uname -s)"
-ARCH="$(uname -m)"
+echo -e "${CYAN}${BOLD}"
+cat <<"EOF"
+   ___      _    _  _  _
+  / _ \___ | |_ (_)| |(_) ___  ___
+ / /_)/ _ \| __|| || || |/ _ \/ __|
+/ ___/ (_) | |_ | || || |  __/\__ \
+\/    \___/ \__||_||_||_|\___||___/
+           Universal Installer
+EOF
+echo -e "${NC}"
 
-# Robust OS detection: set target_os for downstream use
-target_os="unknown"
-case "$OS" in
-  Darwin)
-    target_os="macos"
-    ;;
-  Linux)
-    # shellcheck disable=SC2250
-    if [ -f /proc/version ] && grep -qi 'microsoft\|WSL' /proc/version; then
-      target_os="wsl2"
-    elif [ -f /etc/os-release ]; then
-      # shellcheck disable=SC1091
-      . /etc/os-release
-      case "${ID:-}" in
-        ubuntu | debian | pop | linuxmint | elementary)
-          target_os="debian"
-          ;;
-        fedora | rhel | centos | rocky | alma)
-          target_os="fedora"
-          ;;
-        arch | manjaro | endeavouros)
-          target_os="arch"
-          ;;
-        *)
-          target_os="linux"
-          ;;
-      esac
-    else
-      target_os="linux"
-    fi
-    ;;
-esac
-echo "   OS: $OS"
-echo "   Arch: $ARCH"
-echo "   Target: $target_os"
+# =============================================================================
+# Library Loading
+# =============================================================================
 
-# 2. Check Prerequisites & Bootstrap Package Managers
-step "Checking Prerequisites..."
+# Determine script directory for library loading
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd)" || SCRIPT_DIR=""
+LIB_DIR="${SCRIPT_DIR}/install/lib"
 
-# On macOS, ensure Homebrew is available before checking curl/git
-if [ "$target_os" = "macos" ] && ! command -v brew >/dev/null; then
-  echo "   Homebrew not found."
-  echo -e "${CYAN}   SECURITY NOTE: This will download and execute code from brew.sh${NC}"
-  echo "   Verify at: https://github.com/Homebrew/install"
-
-  # In non-interactive mode, proceed with warning
-  if [ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]; then
-    read -r -p "   Continue with Homebrew installation? [y/N] " response
-    case "$response" in
-      [yY][eE][sS] | [yY]) ;;
-      *) error "Homebrew installation cancelled. Install manually: https://brew.sh" ;;
-    esac
-  fi
-
-  echo "   Installing Homebrew..."
-  download_and_exec "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
-  # Add brew to PATH for Apple Silicon
-  if [ -x /opt/homebrew/bin/brew ]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-  elif [ -x /usr/local/bin/brew ]; then
-    eval "$(/usr/local/bin/brew shellenv)"
-  fi
-fi
-
-# On Linux, verify a package manager is available
-case "$target_os" in
-  debian | wsl2)
-    if ! command -v apt-get >/dev/null; then
-      error "apt-get is required on Debian/Ubuntu/WSL2."
-    fi
-    ;;
-  fedora)
-    if ! command -v dnf >/dev/null; then
-      error "dnf is required on Fedora/RHEL."
-    fi
-    ;;
-  arch)
-    if ! command -v pacman >/dev/null; then
-      error "pacman is required on Arch Linux."
-    fi
-    ;;
-  *) ;;
-esac
-
-if ! command -v curl >/dev/null; then error "curl is required."; fi
-if ! command -v git >/dev/null; then error "git is required."; fi
-
-# 3. Install Chezmoi
-step "Installing Chezmoi..."
-if command -v chezmoi >/dev/null; then
-  echo "   chezmoi already installed: $(chezmoi --version)"
-elif command -v brew >/dev/null; then
-  echo "   Installing chezmoi via Homebrew..."
-  brew install chezmoi
+# Source libraries if available (for local installs)
+if [ -d "$LIB_DIR" ]; then
+  # shellcheck source=install/lib/os_detection.sh
+  source "$LIB_DIR/os_detection.sh"
+  # shellcheck source=install/lib/package_managers.sh
+  source "$LIB_DIR/package_managers.sh"
+  # shellcheck source=install/lib/backup.sh
+  source "$LIB_DIR/backup.sh"
+  # shellcheck source=install/lib/chezmoi.sh
+  source "$LIB_DIR/chezmoi.sh"
+  LIBS_LOADED=1
 else
-  BIN_DIR="$HOME/.local/bin"
-  mkdir -p "$BIN_DIR"
-
-  echo "   Installing chezmoi via binary download..."
-  echo -e "${CYAN}   SECURITY NOTE: Downloading from get.chezmoi.io with integrity check${NC}"
-
-  download_and_exec "https://get.chezmoi.io" -- -b "$BIN_DIR"
-
-  # Critical: Add to PATH for the rest of the script to see it
-  export PATH="$BIN_DIR:$PATH"
+  LIBS_LOADED=0
 fi
 
-# 4. Prepare source directory
-step "Preparing source directory..."
+# =============================================================================
+# Inline Functions (for remote install without libraries)
+# =============================================================================
 
-# VERSION pinning for supply-chain security
-VERSION="${1:-v0.2.478}"
+if [ "$LIBS_LOADED" = "0" ]; then
+  # Minimal inline implementations when libraries aren't available
+  detect_os() {
+    OS="$(uname -s)"
+    ARCH="$(uname -m)"
+    target_os="unknown"
+    case "$OS" in
+      Darwin) target_os="macos" ;;
+      Linux)
+        if [ -f /proc/version ] && grep -qi 'microsoft\|WSL' /proc/version; then
+          target_os="wsl2"
+        elif [ -f /etc/os-release ]; then
+          . /etc/os-release
+          case "${ID:-}" in
+            ubuntu | debian | pop | linuxmint | elementary) target_os="debian" ;;
+            fedora | rhel | centos | rocky | alma) target_os="fedora" ;;
+            arch | manjaro | endeavouros) target_os="arch" ;;
+            *) target_os="linux" ;;
+          esac
+        else
+          target_os="linux"
+        fi
+        ;;
+    esac
+    export OS ARCH target_os
+  }
 
-SOURCE_DIR="$HOME/.dotfiles"
-LEGACY_SOURCE_DIR="$HOME/.local/share/chezmoi"
-CHEZMOI_CONFIG_DIR="$HOME/.config/chezmoi"
-CHEZMOI_CONFIG_FILE="$CHEZMOI_CONFIG_DIR/chezmoi.toml"
+  print_os_info() {
+    echo "   OS: $OS"
+    echo "   Arch: $ARCH"
+    echo "   Target: $target_os"
+  }
 
-ensure_chezmoi_source() {
-  local dir="$1"
-  mkdir -p "$CHEZMOI_CONFIG_DIR"
-  # Escape sed metacharacters in replacement string
-  local escaped_dir
-  escaped_dir=$(printf '%s\n' "$dir" | sed -e 's/[\/&]/\\&/g')
-  if [ -f "$CHEZMOI_CONFIG_FILE" ] && grep -q '^sourceDir' "$CHEZMOI_CONFIG_FILE"; then
-    if [ "$(uname -s)" = "Darwin" ]; then
-      sed -i '' "s,^sourceDir.*$,sourceDir = \"$escaped_dir\"," "$CHEZMOI_CONFIG_FILE"
-    else
-      sed -i "s,^sourceDir.*$,sourceDir = \"$escaped_dir\"," "$CHEZMOI_CONFIG_FILE"
+  bootstrap_package_manager() {
+    if [ "$target_os" = "macos" ] && ! command -v brew >/dev/null; then
+      echo "   Homebrew not found."
+      echo -e "${CYAN}   SECURITY NOTE: This will download and execute code from brew.sh${NC}"
+      if [ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]; then
+        read -r -p "   Continue with Homebrew installation? [y/N] " response
+        case "$response" in
+          [yY][eE][sS] | [yY]) ;;
+          *) error "Homebrew installation cancelled." ;;
+        esac
+      fi
+      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      [ -x /opt/homebrew/bin/brew ] && eval "$(/opt/homebrew/bin/brew shellenv)"
+      [ -x /usr/local/bin/brew ] && eval "$(/usr/local/bin/brew shellenv)"
     fi
-  else
-    printf 'sourceDir = "%s"\n' "$dir" >"$CHEZMOI_CONFIG_FILE"
-  fi
-}
+    case "$target_os" in
+      debian | wsl2) command -v apt-get >/dev/null || error "apt-get required" ;;
+      fedora) command -v dnf >/dev/null || error "dnf required" ;;
+      arch) command -v pacman >/dev/null || error "pacman required" ;;
+    esac
+  }
 
-# 5. Backup existing dotfiles that chezmoi will overwrite
+  check_prerequisites() {
+    command -v curl >/dev/null || error "curl is required"
+    command -v git >/dev/null || error "git is required"
+  }
+
+  install_chezmoi() {
+    if command -v chezmoi >/dev/null; then
+      echo "   chezmoi already installed: $(chezmoi --version)"
+    elif command -v brew >/dev/null; then
+      brew install chezmoi
+    else
+      local bin_dir="$HOME/.local/bin"
+      mkdir -p "$bin_dir"
+      local installer
+      installer=$(mktemp)
+      curl -fsSL -o "$installer" https://get.chezmoi.io || error "Failed to download chezmoi"
+      [ "$(wc -c <"$installer")" -gt 102400 ] && {
+        rm -f "$installer"
+        error "Installer too large"
+      }
+      sh "$installer" -- -b "$bin_dir" 2>/dev/null || {
+        rm -f "$installer"
+        error "Failed to install chezmoi"
+      }
+      rm -f "$installer"
+      export PATH="$bin_dir:$PATH"
+    fi
+  }
+
+  ensure_chezmoi_source() {
+    local dir="$1"
+    local config_dir="$HOME/.config/chezmoi"
+    mkdir -p "$config_dir"
+    printf 'sourceDir = "%s"\n' "$dir" >"$config_dir/chezmoi.toml"
+  }
+
+  perform_backup() {
+    local backup_dir
+    backup_dir="$HOME/.dotfiles.bak.$(date +"%Y%m%d_%H%M%S")"
+    local count=0
+    if command -v chezmoi >/dev/null && [ -f "$HOME/.config/chezmoi/chezmoi.toml" ]; then
+      while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        if [ -e "$file" ]; then
+          local rel="${file#"$HOME"/}"
+          mkdir -p "$backup_dir/$(dirname "$rel")"
+          cp -a "$file" "$backup_dir/$rel"
+          count=$((count + 1))
+        fi
+      done < <(chezmoi managed --path-style=absolute 2>/dev/null || true)
+    fi
+    [ "$count" -gt 0 ] && echo "   Backed up $count files to $backup_dir" || echo "   No files to back up."
+  }
+fi
+
+# =============================================================================
+# Main Installation Flow
+# =============================================================================
+
+# Step 1: Detect Environment
+step "Detecting Environment..."
+detect_os
+print_os_info
+
+# Step 2: Bootstrap Package Managers
+step "Checking Prerequisites..."
+bootstrap_package_manager
+check_prerequisites
+
+# Step 3: Install Chezmoi
+step "Installing Chezmoi..."
+install_chezmoi
+
+# Step 4: Backup Existing Dotfiles
 step "Backing up existing dotfiles..."
-BACKUP_DIR="$HOME/.dotfiles.bak.$(date +"%Y%m%d_%H%M%S")"
-backup_count=0
-
-# Determine the source directory for chezmoi to diff against
 if [ -d "$SOURCE_DIR/.git" ]; then
   ensure_chezmoi_source "$SOURCE_DIR"
 elif [ -d "$LEGACY_SOURCE_DIR/.git" ]; then
   ensure_chezmoi_source "$LEGACY_SOURCE_DIR"
 fi
+perform_backup
 
-# Back up any existing files that chezmoi would overwrite
-if command -v chezmoi >/dev/null && [ -f "$CHEZMOI_CONFIG_FILE" ]; then
-  while IFS= read -r file; do
-    [ -z "$file" ] && continue
-    if [ -e "$file" ]; then
-      rel="${file#"$HOME"/}"
-      mkdir -p "$BACKUP_DIR/$(dirname "$rel")"
-      cp -a "$file" "$BACKUP_DIR/$rel"
-      backup_count=$((backup_count + 1))
-    fi
-  done < <(chezmoi managed --path-style=absolute 2>/dev/null || true)
-fi
-
-if [ "$backup_count" -gt 0 ]; then
-  echo "   Backed up $backup_count files to $BACKUP_DIR"
-else
-  echo "   No existing dotfiles to back up."
-  rm -rf "$BACKUP_DIR" 2>/dev/null || true
-fi
-
-# 6. Initialize & Apply
+# Step 5: Apply Configuration
 step "Applying Configuration..."
 
-# If we are running from a local source, just apply
+APPLY_FLAGS=()
+[ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ] && APPLY_FLAGS=(--force --no-tty)
+
 if [ -d "$SOURCE_DIR/.git" ]; then
   echo "   Applying from local source: $SOURCE_DIR"
   ensure_chezmoi_source "$SOURCE_DIR"
-  APPLY_FLAGS=()
-  if [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]; then
-    APPLY_FLAGS=(--force --no-tty)
-  fi
   chezmoi apply "${APPLY_FLAGS[@]}"
 elif [ -d "$LEGACY_SOURCE_DIR/.git" ]; then
   echo "   Migrating from legacy source: $LEGACY_SOURCE_DIR"
   mv "$LEGACY_SOURCE_DIR" "$SOURCE_DIR"
   ensure_chezmoi_source "$SOURCE_DIR"
-  APPLY_FLAGS=()
-  if [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]; then
-    APPLY_FLAGS=(--force --no-tty)
-  fi
   chezmoi apply "${APPLY_FLAGS[@]}"
 else
-  echo "   Initializing from GitHub (Branch/Tag: $VERSION)..."
-  echo -e "${CYAN}   SECURITY NOTE: Cloning pinned version $VERSION for supply-chain safety${NC}"
+  echo "   Initializing from GitHub (Version: $VERSION)..."
+  echo -e "${CYAN}   SECURITY NOTE: Cloning pinned version $VERSION${NC}"
 
-  # STRICT MODE: We pin to the specific tag to avoid 'main' branch drift
-  git clone --depth 1 --branch "$VERSION" https://github.com/sebastienrousseau/dotfiles.git "$SOURCE_DIR" 2>/dev/null ||
-    { git clone https://github.com/sebastienrousseau/dotfiles.git "$SOURCE_DIR" && (cd "$SOURCE_DIR" && git checkout "$VERSION"); }
-
-  # Verify the checkout succeeded and we're on the expected version
-  ACTUAL_REF=$(
-    cd "$SOURCE_DIR" || exit 1
-    if ! git describe --tags --exact-match 2>/dev/null; then
-      git rev-parse --short HEAD
-    fi
-  )
-  if [ "$ACTUAL_REF" != "$VERSION" ] && [ "${ACTUAL_REF#v}" != "${VERSION#v}" ]; then
-    echo -e "${CYAN}   INFO: Checked out ref $ACTUAL_REF (requested: $VERSION)${NC}"
-  fi
+  git clone --depth 1 --branch "$VERSION" "$REPO_URL" "$SOURCE_DIR" 2>/dev/null ||
+    { git clone "$REPO_URL" "$SOURCE_DIR" && (cd "$SOURCE_DIR" && git checkout "$VERSION"); }
 
   ensure_chezmoi_source "$SOURCE_DIR"
-  APPLY_FLAGS=()
-  if [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]; then
-    APPLY_FLAGS=(--force --no-tty)
-  fi
   chezmoi apply "${APPLY_FLAGS[@]}"
 fi
+
+# =============================================================================
+# Complete
+# =============================================================================
 
 success
 echo -e "${GREEN}Configuration loaded. Please restart your shell.${NC}"

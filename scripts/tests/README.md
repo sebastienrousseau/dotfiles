@@ -235,3 +235,7 @@ When adding new functions to the dotfiles:
 2. Test happy path and error conditions
 3. Include security-relevant test cases
 4. Run full test suite before committing
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

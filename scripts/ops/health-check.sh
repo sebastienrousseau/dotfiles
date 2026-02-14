@@ -19,8 +19,8 @@ VERBOSE=0
 JSON_OUTPUT=0
 EXIT_CODE=0
 
-# Colors (disabled if not a terminal or JSON mode)
-if [[ -t 1 ]] && [[ "$JSON_OUTPUT" != "1" ]]; then
+# Colors (disabled if not a terminal, JSON mode, or NO_COLOR set)
+if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]] && [[ "$JSON_OUTPUT" != "1" ]]; then
   RED='\033[0;31m'
   GREEN='\033[0;32m'
   YELLOW='\033[0;33m'
@@ -273,7 +273,7 @@ check_git_status() {
 check_dependencies() {
   log_info "Checking recommended dependencies..."
   local deps=(git curl zsh)
-  local optional_deps=(ripgrep fd bat fzf eza jq claude gemini sgpt ollama opencode)
+  local optional_deps=(ripgrep fd bat fzf eza jq claude gemini sgpt ollama opencode aider)
   local missing_required=0
   local missing_optional=0
 

@@ -9,3 +9,7 @@ packer init .
 packer validate .
 packer build .
 ```
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

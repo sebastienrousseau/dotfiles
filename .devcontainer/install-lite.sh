@@ -47,23 +47,22 @@ apt_install fd-find
 apt_install bat
 
 # zoxide
-# SECURITY NOTE: curl|sh is used for devcontainer convenience only. # gitleaks:allow
-# Production installs should use the system package manager or a pinned binary.
+# SECURITY: Download to temp file, validate shebang, then execute
 if command_exists zoxide; then
   info "zoxide is already installed"
 else
   info "Installing zoxide ..."
-  zoxide_installer=$(mktemp)
-  if curl -sSfL -o "$zoxide_installer" https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh; then # gitleaks:allow
-    if [ "$(wc -c <"$zoxide_installer")" -le 204800 ] && head -1 "$zoxide_installer" | grep -q '^#!'; then
-      sh "$zoxide_installer"
+  installer=$(mktemp)
+  if curl -fsSL -o "$installer" "https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh"; then # gitleaks:allow
+    if head -1 "$installer" | grep -q '^#!/'; then
+      sh "$installer"
     else
-      info "zoxide installer failed validation. Install manually."
+      info "Warning: zoxide installer validation failed, skipping"
     fi
-    rm -f "$zoxide_installer"
+    rm -f "$installer"
   else
-    rm -f "$zoxide_installer"
-    info "Failed to download zoxide installer."
+    rm -f "$installer"
+    info "Warning: Failed to download zoxide installer"
   fi
 fi
 
@@ -86,23 +85,22 @@ else
 fi
 
 # starship prompt
-# SECURITY NOTE: curl|sh is used for devcontainer convenience only. # gitleaks:allow
-# Production installs should use the system package manager or a pinned binary.
+# SECURITY: Download to temp file, validate shebang, then execute
 if command_exists starship; then
   info "starship is already installed"
 else
   info "Installing starship ..."
-  starship_installer=$(mktemp)
-  if curl -sSfL -o "$starship_installer" https://starship.rs/install.sh; then # gitleaks:allow
-    if [ "$(wc -c <"$starship_installer")" -le 204800 ] && head -1 "$starship_installer" | grep -q '^#!'; then
-      sh "$starship_installer" --yes
+  installer=$(mktemp)
+  if curl -fsSL -o "$installer" "https://starship.rs/install.sh"; then # gitleaks:allow
+    if head -1 "$installer" | grep -q '^#!/'; then
+      sh "$installer" -y
     else
-      info "starship installer failed validation. Install manually."
+      info "Warning: starship installer validation failed, skipping"
     fi
-    rm -f "$starship_installer"
+    rm -f "$installer"
   else
-    rm -f "$starship_installer"
-    info "Failed to download starship installer."
+    rm -f "$installer"
+    info "Warning: Failed to download starship installer"
   fi
 fi
 

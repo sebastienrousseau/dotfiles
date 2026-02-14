@@ -22,7 +22,7 @@ jobs:
     outputs:
       hash: ${{ steps.hash.outputs.hash }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.release_tag || github.ref }}
 
@@ -40,7 +40,7 @@ jobs:
           echo "hash=$(base64 -w 0 sbom.sha256)" >> $GITHUB_OUTPUT
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: dotfiles-sbom
           path: dotfiles-sbom.spdx.json
@@ -52,7 +52,7 @@ jobs:
       actions: read
       id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
     with:
       base64-subjects: "${{ needs.sbom.outputs.hash }}"
       upload-assets: true

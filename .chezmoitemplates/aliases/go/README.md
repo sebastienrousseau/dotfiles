@@ -18,3 +18,7 @@ These aliases are defined in `go.aliases.sh` and are automatically loaded by `ch
 - `goget` - `go get`
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

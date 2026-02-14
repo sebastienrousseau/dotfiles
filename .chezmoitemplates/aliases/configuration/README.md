@@ -29,3 +29,7 @@ following aliases are included:
 - `zshp` opens the Zsh profile in the default text editor.
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

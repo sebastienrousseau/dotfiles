@@ -71,3 +71,7 @@ Or use any of the provided aliases for common operations.
 MIT
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

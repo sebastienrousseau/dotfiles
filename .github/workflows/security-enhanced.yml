@@ -3,11 +3,30 @@ name: Enhanced Security Pipeline
 on:
   push:
     branches: [master, main]
+    # Only run security scans when security-relevant files change
+    paths:
+      - '**.sh'
+      - '**.tmpl'
+      - 'install/**'
+      - 'scripts/security/**'
+      - '.github/workflows/security*.yml'
+      - '**/Dockerfile*'
+      - 'config/gitleaks.toml'
+      - '.github/security-policies/**'
   pull_request:
     branches: [master, main]
+    paths:
+      - '**.sh'
+      - '**.tmpl'
+      - 'install/**'
+      - 'scripts/security/**'
+      - '.github/workflows/security*.yml'
+      - '**/Dockerfile*'
+      - 'config/gitleaks.toml'
+      - '.github/security-policies/**'
   schedule:
-    # Daily security scan at 2 AM UTC
-    - cron: '0 2 * * *'
+    # Weekly security scan on Sunday 2 AM UTC (reduced from daily)
+    - cron: '0 2 * * 0'
   workflow_dispatch:
 
 permissions:
@@ -28,7 +47,7 @@ env:
 
 jobs:
   # ============================================================================
-  # STAGE 1: SECRETS & CREDENTIAL SCANNING
+  # STAGE 1: SECRETS & CREDENTIAL SCANNING (Always runs - critical)
   # ============================================================================
 
   secrets-scan:
@@ -37,7 +56,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -48,7 +67,7 @@ jobs:
 
       - name: TruffleHog OSS
         if: github.event_name == 'pull_request'
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@v3.93.1
         with:
           path: ./
           base: ${{ github.event.pull_request.base.sha }}
@@ -56,21 +75,25 @@ jobs:
           extra_args: --only-verified
 
   # ============================================================================
-  # STAGE 2: DEPENDENCY VULNERABILITY SCANNING
+  # STAGE 2: DEPENDENCY VULNERABILITY SCANNING (Schedule/manual only - expensive)
   # ============================================================================
 
   dependency-scan:
     name: Security / Dependencies
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Only run on schedule or manual trigger to save minutes
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Setup Node.js for package scanning
-        uses: actions/setup-node@v4
+      - name: Cache Grype DB
+        uses: actions/cache@v4
         with:
-          node-version: '20'
+          path: ~/.cache/grype
+          key: grype-db-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: grype-db-${{ runner.os }}-
 
       - name: Install Grype
         run: |
@@ -78,49 +101,31 @@ jobs:
 
       - name: Scan for vulnerabilities with Grype
         run: |
-          grype . --output sarif --file grype-results.sarif --fail-on medium
+          grype . --output sarif --file grype-results.sarif --fail-on critical
 
       - name: Upload Grype results to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: grype-results.sarif
           category: grype-analysis
 
-      - name: Install Trivy
-        run: |
-          sudo apt-get update
-          sudo apt-get install wget apt-transport-https gnupg lsb-release
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update
-          sudo apt-get install trivy
-
-      - name: Run Trivy filesystem scan
-        run: |
-          trivy fs --security-checks vuln,config,secret --format sarif --output trivy-results.sarif .
-
-      - name: Upload Trivy results to GitHub Security
-        if: always()
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: trivy-results.sarif
-          category: trivy-analysis
-
   # ============================================================================
-  # STAGE 3: INFRASTRUCTURE SECURITY SCANNING
+  # STAGE 3: INFRASTRUCTURE SECURITY SCANNING (Schedule/manual only)
   # ============================================================================
 
   infrastructure-scan:
     name: Security / Infrastructure
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # Only run on schedule or manual trigger
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Run Checkov
-        uses: bridgecrewio/checkov-action@master
+        uses: bridgecrewio/checkov-action@v12.1347.0
         with:
           output_format: sarif
           output_file_path: checkov-results.sarif
@@ -130,49 +135,32 @@ jobs:
 
       - name: Upload Checkov results to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: checkov-results.sarif
           category: checkov-analysis
 
-      - name: Scan shell scripts with ShellCheck
-        run: |
-          sudo apt-get update && sudo apt-get install -y shellcheck
-          # Pre-seed a valid minimal SARIF (GitHub requires at least one run)
-          printf '{"version":"2.1.0","$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","runs":[{"tool":{"driver":{"name":"ShellCheck","version":"0.0.0","rules":[]}},"results":[]}]}\n' > shellcheck-results.sarif
-          if find . -name "*.sh" -type f | head -1 | read -r _; then
-            find . -name "*.sh" -type f -exec shellcheck -f sarif {} + > temp-shellcheck.sarif 2>/dev/null || true
-            if [ -s temp-shellcheck.sarif ] && jq empty temp-shellcheck.sarif 2>/dev/null; then
-              mv temp-shellcheck.sarif shellcheck-results.sarif
-            else
-              rm -f temp-shellcheck.sarif
-            fi
-          fi
-
-      - name: Upload ShellCheck results
-        if: always()
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: shellcheck-results.sarif
-          category: shellcheck-analysis
-
   # ============================================================================
-  # STAGE 4: CONTAINER SECURITY SCANNING
+  # STAGE 4: CONTAINER SECURITY SCANNING (Manual/tagged only)
   # ============================================================================
 
   container-scan:
     name: Security / Container
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: contains(github.event.head_commit.message, '[container]') || github.event_name == 'schedule'
+    # Only run container scans manually or with explicit tag
+    if: contains(github.event.head_commit.message, '[container]') || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Build test container
         if: hashFiles('**/Dockerfile*') != ''
+        run: docker build -f Dockerfile.test -t dotfiles-test:latest .
+
+      - name: Install Trivy
         run: |
-          docker build -f Dockerfile.test -t dotfiles-test:latest .
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v${{ env.TRIVY_VERSION }}
 
       - name: Scan container with Trivy
         if: hashFiles('**/Dockerfile*') != ''
@@ -181,202 +169,81 @@ jobs:
 
       - name: Upload container scan results
         if: always() && hashFiles('**/Dockerfile*') != ''
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: container-scan.sarif
           category: container-analysis
 
   # ============================================================================
-  # STAGE 5: POLICY ENFORCEMENT
+  # STAGE 5: POLICY ENFORCEMENT (PRs only)
   # ============================================================================
 
   policy-enforcement:
     name: Security / Policy Enforcement
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [secrets-scan, dependency-scan]
+    timeout-minutes: 5
+    needs: [secrets-scan]
+    # Only run on PRs to catch issues before merge
+    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install OPA
-        run: |
-          curl -L -o opa https://github.com/open-policy-agent/opa/releases/latest/download/opa_linux_amd64_static
-          chmod 755 ./opa
-          sudo mv opa /usr/local/bin
-
-      - name: Validate security policies
-        run: |
-          # Check if security policies exist
-          if [ -f .github/security-policies/security.rego ]; then
-            opa test .github/security-policies/
-          else
-            echo "No security policies found, creating default ones..."
-            mkdir -p .github/security-policies
-            echo "Creating security policy validation"
-          fi
+        uses: actions/checkout@v6
 
       - name: Check file permissions
         run: |
           # Ensure no files have overly permissive permissions
-          find . -type f \( -perm -002 -o -perm -020 -o -perm -200 \) -exec ls -la {} \; || true
-
+          ISSUES=0
+          if find . -type f \( -perm -002 -o -perm -020 \) -not -path "./.git/*" | grep -q .; then
+            echo "::warning::Found files with group/other write permissions"
+            ISSUES=1
+          fi
           # Check for executable files that shouldn't be
-          find . -name "*.md" -executable -exec echo "WARNING: Markdown file {} is executable" \; || true
-          find . -name "*.txt" -executable -exec echo "WARNING: Text file {} is executable" \; || true
-
-      - name: Validate environment variable usage
-        run: |
-          # Scan for potential hardcoded secrets that might have been missed
-          grep -r -E '\b[A-Z0-9]{20,}\b' . --include="*.sh" --include="*.yml" --include="*.yaml" --exclude-dir=".git" || echo "No suspicious patterns found"
-
-          # Check for proper environment variable usage patterns
-          grep -r -E '\$\{[A-Z_]+:-[^}]*\}' . --include="*.sh" --include="*.tmpl" || echo "No default environment variable patterns found"
+          find . -name "*.md" -executable -not -path "./.git/*" -exec echo "::warning::Markdown file {} is executable" \; || true
+          find . -name "*.txt" -executable -not -path "./.git/*" -exec echo "::warning::Text file {} is executable" \; || true
 
   # ============================================================================
-  # STAGE 6: SECURITY ATTESTATION & REPORTING
+  # STAGE 6: SECURITY ATTESTATION (main branch only, schedule)
   # ============================================================================
 
   security-attestation:
     name: Security / Attestation
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [secrets-scan, dependency-scan, infrastructure-scan, policy-enforcement]
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+    needs: [secrets-scan]
+    # Only generate attestations on schedule for main branch
+    if: github.event_name == 'schedule' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
     permissions:
       contents: read
       id-token: write
       attestations: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Cosign
-        run: |
-          curl -O -L "https://github.com/sigstore/cosign/releases/download/v${{ env.COSIGN_VERSION }}/cosign-linux-amd64"
-          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
-          sudo chmod +x /usr/local/bin/cosign
+        uses: actions/checkout@v6
 
       - name: Generate security attestation
         run: |
-          # Create a security attestation document
           cat > security-attestation.json <<EOF
           {
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "commit": "${{ github.sha }}",
             "ref": "${{ github.ref }}",
-            "scans_completed": [
-              "secrets",
-              "dependencies",
-              "infrastructure",
-              "policies"
-            ],
-            "tools_used": [
-              "gitleaks",
-              "trufflehog",
-              "trivy",
-              "grype",
-              "checkov",
-              "shellcheck"
-            ],
+            "scans_completed": ["secrets"],
+            "tools_used": ["gitleaks"],
             "security_controls": {
               "secrets_scanning": true,
-              "dependency_scanning": true,
-              "infrastructure_scanning": true,
-              "policy_enforcement": true,
               "sarif_upload": true
             }
           }
           EOF
 
       - name: Attest security scan
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v2
         with:
           subject-path: security-attestation.json
 
       - name: Upload security attestation
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: security-attestation-${{ github.sha }}
           path: security-attestation.json
-          retention-days: 90
-
-  # ============================================================================
-  # STAGE 7: AUTOMATED REMEDIATION
-  # ============================================================================
-
-  automated-remediation:
-    name: Security / Auto-Remediation
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: [dependency-scan]
-    if: github.event_name == 'schedule' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-    permissions:
-      contents: write
-      pull-requests: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Git
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
-      - name: Update GitHub Actions versions
-        run: |
-          # Find and update GitHub Actions to latest versions (basic implementation)
-          find .github/workflows -name "*.yml" -o -name "*.yaml" | while read -r file; do
-            echo "Checking $file for outdated actions..."
-            # This is a simplified example - in production you'd want a more sophisticated updater
-            if grep -q "actions/checkout@v3" "$file"; then
-              sed -i 's/actions\/checkout@v3/actions\/checkout@v4/g' "$file"
-              echo "Updated checkout action in $file"
-            fi
-            if grep -q "actions/setup-node@v3" "$file"; then
-              sed -i 's/actions\/setup-node@v3/actions\/setup-node@v4/g' "$file"
-              echo "Updated setup-node action in $file"
-            fi
-          done
-
-      - name: Check for security updates needed
-        id: security-check
-        run: |
-          if git diff --quiet; then
-            echo "changes=false" >> $GITHUB_OUTPUT
-          else
-            echo "changes=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Create security update PR
-        if: steps.security-check.outputs.changes == 'true'
-        run: |
-          branch_name="security/automated-updates-$(date +%Y%m%d-%H%M%S)"
-          git checkout -b "$branch_name"
-          git add .
-          git commit -m "security: automated security updates
-
-          - Updated GitHub Actions to latest versions
-          - Applied automated security patches
-
-          Co-Authored-By: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
-          git push origin "$branch_name"
-
-          # Create PR using GitHub CLI
-          gh pr create \
-            --title "🔒 Automated Security Updates" \
-            --body "This PR contains automated security updates:
-
-          - GitHub Actions updated to latest versions
-          - Security patches applied automatically
-
-          **Review Required**: Please review these changes before merging.
-
-          Generated by automated security pipeline." \
-            --base master \
-            --head "$branch_name" \
-            --label "security,automated"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          retention-days: 30

@@ -32,3 +32,7 @@ This code provides a set of aliases for macOS.
 - `xcode` Launch XCode app in macOS.
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

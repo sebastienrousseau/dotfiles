@@ -321,3 +321,7 @@ This is a collection of aliases for the
 - `hkwhu` Updates a webhook in an app
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

@@ -46,6 +46,7 @@ brew "vim"
 brew "tmux"
 brew "lazygit"
 brew "git-delta"
+brew "git-absorb"                # Auto-create fixup commits
 brew "gh"
 brew "glab"
 brew "shellcheck"

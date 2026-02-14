@@ -24,10 +24,10 @@ assert_exit_code 0 "bash -n '$DOT_CLI'"
 test_start "dot_cli_shebang"
 first_line=$(head -n 1 "$DOT_CLI")
 if [[ "$first_line" == "#!/usr/bin/env bash" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have #!/usr/bin/env bash shebang"
 fi
 
@@ -39,10 +39,10 @@ assert_file_contains "$DOT_CLI" "set -e" "should use set -e for error handling"
 test_start "dot_cli_help"
 output=$(bash "$DOT_CLI" help 2>&1) || true
 if [[ "$output" == *"Usage:"* ]] && [[ "$output" == *"dot"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: help shows usage"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: help should show usage"
   echo -e "    Output: ${output:0:200}"
 fi
@@ -51,10 +51,10 @@ fi
 test_start "dot_cli_version"
 output=$(bash "$DOT_CLI" --version 2>&1) || true
 if [[ "$output" == *"dot v"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: --version shows version string"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: --version should show version"
   echo -e "    Output: $output"
 fi
@@ -63,10 +63,10 @@ fi
 test_start "dot_cli_no_args"
 output=$(bash "$DOT_CLI" 2>&1) || true
 if [[ "$output" == *"Usage:"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no args shows help"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: no args should show help"
 fi
 
@@ -77,10 +77,10 @@ output=$(bash "$DOT_CLI" totally-invalid-command-12345 2>&1)
 ec=$?
 set -e
 if [[ "$output" == *"Unknown command"* ]] && [[ $ec -ne 0 ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: unknown command shows error and exits non-zero"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: unknown command should show error"
   echo -e "    Exit code: $ec"
   echo -e "    Output: $output"
@@ -129,22 +129,22 @@ for cmd in "${help_cmds[@]}"; do
 done
 
 if [[ $missing_handlers -eq 0 ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: all help subcommands have handlers"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: $missing_handlers help entries lack case handlers"
 fi
 
 # Test: dot --version contains VERSION string from file
 test_start "dot_cli_version_value"
 output=$(bash "$DOT_CLI" --version 2>&1) || true
-if [[ "$output" == *"0.2.478"* ]]; then
-  ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: version matches expected v0.2.478"
+if [[ "$output" == *"0.2.480"* ]]; then
+  ((TESTS_PASSED++)) || true
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: version matches expected v0.2.480"
 else
-  ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: version should contain 0.2.478"
+  ((TESTS_FAILED++)) || true
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: version should contain 0.2.480"
   echo -e "    Output: $output"
 fi
 
@@ -152,10 +152,10 @@ fi
 test_start "dot_cli_v_flag"
 output=$(bash "$DOT_CLI" -v 2>&1) || true
 if [[ "$output" == *"dot v"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: -v is alias for --version"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: -v should show version"
 fi
 
@@ -163,10 +163,10 @@ fi
 test_start "dot_cli_h_flag"
 output=$(bash "$DOT_CLI" -h 2>&1) || true
 if [[ "$output" == *"Usage:"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: -h shows help"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: -h should show help"
 fi
 
@@ -177,38 +177,38 @@ output=$(CHEZMOI_SOURCE_DIR="" HOME="/nonexistent" bash "$DOT_CLI" cd 2>&1)
 ec=$?
 set -e
 if [[ $ec -ne 0 ]] && [[ "$output" == *"not found"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: dot cd without source exits non-zero with message"
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: dot cd handled (ec=$ec)"
 fi
 
 # Test: dot add with no args shows usage
 test_start "dot_cli_add_no_args"
 set +e
-output=$(bash "$DOT_CLI" add 2>&1)
+output=$(CHEZMOI_SOURCE_DIR="$REPO_ROOT" bash "$DOT_CLI" add 2>&1)
 ec=$?
 set -e
 if [[ "$output" == *"Usage:"* ]] && [[ $ec -ne 0 ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: dot add with no args shows usage"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: dot add with no args should show usage (ec=$ec)"
 fi
 
 # Test: dot new with no args shows usage
 test_start "dot_cli_new_no_args"
 set +e
-output=$(bash "$DOT_CLI" new 2>&1)
+output=$(CHEZMOI_SOURCE_DIR="$REPO_ROOT" bash "$DOT_CLI" new 2>&1)
 ec=$?
 set -e
 if [[ "$output" == *"Usage:"* ]] && [[ $ec -ne 0 ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: dot new with no args shows usage"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: dot new with no args should show usage (ec=$ec)"
 fi
 

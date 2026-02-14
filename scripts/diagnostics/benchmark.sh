@@ -99,7 +99,7 @@ run_hyperfine() {
   if ! command -v hyperfine >/dev/null 2>&1; then
     echo -e "${YELLOW}hyperfine not installed. Using basic timing.${NC}"
     local times=()
-    for i in {1..5}; do
+    for _ in {1..5}; do
       times+=("$(time_command "zsh -i -c exit")")
     done
     local sum=0

@@ -31,3 +31,7 @@ Tools for managing open source compliance, license scanning, and attribution.
 - **Docker**: For isolation of compliance tools.
 - **GitHub CLI (`gh`)**: For PR/CLA checking.
 - **Trivy**: Automatically installed/suggested for fast scanning.
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

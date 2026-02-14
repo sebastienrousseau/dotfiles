@@ -34,3 +34,7 @@ Here are some of the available aliases:
 - `fdx` executes a command for each search result.
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

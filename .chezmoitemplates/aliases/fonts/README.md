@@ -12,3 +12,7 @@ Aliases for managing system fonts and caches.
 ## Installed Fonts
 - **JetBrainsMono Nerd Font**: Primary terminal font.
 - **Symbols Nerd Font**: Icon fallback.
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

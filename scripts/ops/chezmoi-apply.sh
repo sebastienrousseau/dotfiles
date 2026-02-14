@@ -34,6 +34,7 @@ check_ai_cli "gemini" "gemini (optional — install to enable this provider)"
 check_ai_cli "sgpt" "sgpt (optional — install to enable this provider)"
 check_ai_cli "ollama" "ollama (optional — install to enable this provider)"
 check_ai_cli "opencode" "opencode (optional — install to enable this provider)"
+check_ai_cli "aider" "aider (optional — AI pair programming)"
 
 if [[ "${DOTFILES_CHEZMOI_STATUS:-1}" = "1" ]]; then
   printf "\nStatus:\n"

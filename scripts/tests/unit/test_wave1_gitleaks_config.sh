@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../framework/assertions.sh"
 
-GITLEAKS_CONF="$REPO_ROOT/.gitleaks.toml"
+GITLEAKS_CONF="$REPO_ROOT/config/gitleaks.toml"
 
 echo "Testing Wave 1: gitleaks configuration..."
 

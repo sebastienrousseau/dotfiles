@@ -1,0 +1,51 @@
+# Rustfmt Configuration
+# Managed by chezmoi - https://github.com/sebastienrousseau/dotfiles
+# Reference: https://rust-lang.github.io/rustfmt/
+
+# Edition
+edition = "2021"
+
+# Formatting style
+max_width = 100
+hard_tabs = false
+tab_spaces = 4
+newline_style = "Auto"
+
+# Imports
+imports_granularity = "Module"
+group_imports = "StdExternalCrate"
+reorder_imports = true
+reorder_modules = true
+
+# Comments
+wrap_comments = true
+format_code_in_doc_comments = true
+doc_comment_code_block_width = 80
+normalize_comments = true
+normalize_doc_attributes = true
+
+# Expressions
+use_small_heuristics = "Default"
+fn_single_line = false
+where_single_line = false
+struct_lit_single_line = true
+trailing_comma = "Vertical"
+trailing_semicolon = true
+use_field_init_shorthand = true
+use_try_shorthand = true
+
+# Control flow
+match_arm_blocks = true
+match_arm_leading_pipes = "Never"
+match_block_trailing_comma = true
+force_multiline_blocks = false
+
+# Macros
+format_macro_matchers = true
+format_macro_bodies = true
+
+# Misc
+remove_nested_parens = true
+combine_control_expr = true
+overflow_delimited_expr = false
+hex_literal_case = "Upper"

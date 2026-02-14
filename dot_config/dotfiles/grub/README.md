@@ -5,3 +5,7 @@ Default path used by the script:
 
 Run:
 - sudo ~/.dotfiles/scripts/theme/install-grub-theme.sh --apply
+
+---
+
+Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)

@@ -10,7 +10,6 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
-GRAY='\033[0;90m'
 NC='\033[0m'
 
 # Parse arguments
@@ -34,8 +33,8 @@ add_points() {
   local points="$2"
   local max="$3"
   local description="$4"
-  local status="$5"
-  
+  # $5 is status (pass/fail/partial) - used for icon selection below
+
   TOTAL_POINTS=$((TOTAL_POINTS + points))
   MAX_POINTS=$((MAX_POINTS + max))
   CATEGORY_SCORES["$category"]=$((${CATEGORY_SCORES[$category]:-0} + points))

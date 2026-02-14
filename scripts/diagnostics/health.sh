@@ -14,6 +14,7 @@ GRAY='\033[0;90m'
 NC='\033[0m'
 
 # Parse arguments
+# shellcheck disable=SC2034  # VERBOSE is used for future verbose output
 VERBOSE=false
 JSON_OUTPUT=false
 while [[ $# -gt 0 ]]; do
@@ -25,6 +26,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Health check results
+# shellcheck disable=SC2034  # RESULTS used in check function
 declare -A RESULTS
 TOTAL_CHECKS=0
 PASSED_CHECKS=0

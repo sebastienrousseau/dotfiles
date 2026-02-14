@@ -3,7 +3,7 @@
 profile = "laptop"
 
 # Visual theme
-theme = "tokyonight-night"
+theme = "catppuccin-mocha"
 
 # Terminal settings
 terminal_font_family = "JetBrainsMono Nerd Font"

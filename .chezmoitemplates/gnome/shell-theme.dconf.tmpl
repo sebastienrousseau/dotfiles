@@ -1,0 +1,97 @@
+{{- /* GNOME Shell theme configuration via dconf */ -}}
+{{- $theme := .theme -}}
+{{- $is_dark := false -}}
+{{- if or (hasSuffix $theme "-night") (hasSuffix $theme "-storm") (hasSuffix $theme "-moon") (hasSuffix $theme "-mocha") (hasSuffix $theme "-frappe") (hasSuffix $theme "-macchiato") (hasSuffix $theme "-dark") (hasSuffix $theme "-wave") (hasSuffix $theme "-dragon") (eq $theme "dracula") (eq $theme "nord") (eq $theme "onedark") -}}
+{{- $is_dark = true -}}
+{{- end -}}
+
+{{- $shell_theme := "" -}}
+{{- $background_color := "" -}}
+{{- $accent_color := "" -}}
+
+{{- if hasPrefix $theme "catppuccin-" -}}
+  {{- if eq $theme "catppuccin-latte" -}}
+    {{- $shell_theme = "Catppuccin-Latte" -}}
+    {{- $background_color = "#eff1f5" -}}
+    {{- $accent_color = "#1e66f5" -}}
+  {{- else if eq $theme "catppuccin-frappe" -}}
+    {{- $shell_theme = "Catppuccin-Frappe" -}}
+    {{- $background_color = "#303446" -}}
+    {{- $accent_color = "#8caaee" -}}
+  {{- else if eq $theme "catppuccin-macchiato" -}}
+    {{- $shell_theme = "Catppuccin-Macchiato" -}}
+    {{- $background_color = "#24273a" -}}
+    {{- $accent_color = "#8aadf4" -}}
+  {{- else if eq $theme "catppuccin-mocha" -}}
+    {{- $shell_theme = "Catppuccin-Mocha" -}}
+    {{- $background_color = "#1e1e2e" -}}
+    {{- $accent_color = "#89b4fa" -}}
+  {{- end -}}
+{{- else -}}
+  {{- $shell_theme = "" -}}
+  {{- if $is_dark -}}
+    {{- $background_color = "#2d2d2d" -}}
+    {{- $accent_color = "#3584e4" -}}
+  {{- else -}}
+    {{- $background_color = "#fafafa" -}}
+    {{- $accent_color = "#3584e4" -}}
+  {{- end -}}
+{{- end -}}
+
+# GNOME Shell theme settings for {{ $theme }}
+# Apply with: dconf load /org/gnome/shell/ < shell-theme.dconf
+
+[/]
+enabled-extensions=['user-theme@gnome-shell-extensions.gcampax.github.com']
+
+[extensions/user-theme]
+{{- if $shell_theme }}
+name='{{ $shell_theme }}'
+{{- else }}
+name=''
+{{- end }}
+
+[/org/gnome/desktop/interface]
+{{- if hasPrefix $theme "catppuccin-" }}
+gtk-theme='{{ if eq $theme "catppuccin-latte" }}Catppuccin-Latte-Standard-Blue-Light{{ else if eq $theme "catppuccin-frappe" }}Catppuccin-Frappe-Standard-Blue-Dark{{ else if eq $theme "catppuccin-macchiato" }}Catppuccin-Macchiato-Standard-Blue-Dark{{ else }}Catppuccin-Mocha-Standard-Blue-Dark{{ end }}'
+{{- else }}
+gtk-theme='{{ if $is_dark }}Adwaita-dark{{ else }}Adwaita{{ end }}'
+{{- end }}
+icon-theme='{{ if $is_dark }}Papirus-Dark{{ else }}Papirus{{ end }}'
+cursor-theme='Adwaita'
+cursor-size=24
+font-name='Inter 10'
+document-font-name='Inter 10'
+monospace-font-name='JetBrains Mono 10'
+color-scheme='{{ if $is_dark }}prefer-dark{{ else }}prefer-light{{ end }}'
+enable-animations=true
+enable-hot-corners=true
+text-scaling-factor=1.0
+
+[/org/gnome/desktop/wm/preferences]
+theme='{{ if hasPrefix $theme "catppuccin-" }}{{ $shell_theme }}{{ else }}{{ if $is_dark }}Adwaita-dark{{ else }}Adwaita{{ end }}{{ end }}'
+button-layout='close,minimize,maximize:'
+titlebar-font='Inter Bold 10'
+
+[/org/gnome/mutter]
+dynamic-workspaces=true
+edge-tiling=true
+
+[/org/gnome/desktop/background]
+{{- if hasPrefix $theme "catppuccin-" }}
+picture-uri='file:///usr/share/backgrounds/catppuccin/{{ if eq $theme "catppuccin-latte" }}cat_latte.png{{ else if eq $theme "catppuccin-frappe" }}cat_frappe.png{{ else if eq $theme "catppuccin-macchiato" }}cat_macchiato.png{{ else }}cat_mocha.png{{ end }}'
+picture-uri-dark='file:///usr/share/backgrounds/catppuccin/{{ if eq $theme "catppuccin-latte" }}cat_latte.png{{ else if eq $theme "catppuccin-frappe" }}cat_frappe.png{{ else if eq $theme "catppuccin-macchiato" }}cat_macchiato.png{{ else }}cat_mocha.png{{ end }}'
+{{- end }}
+primary-color='{{ $background_color }}'
+secondary-color='{{ $accent_color }}'
+color-shading-type='solid'
+picture-options='zoom'
+
+[/org/gnome/desktop/screensaver]
+{{- if hasPrefix $theme "catppuccin-" }}
+picture-uri='file:///usr/share/backgrounds/catppuccin/{{ if eq $theme "catppuccin-latte" }}cat_latte.png{{ else if eq $theme "catppuccin-frappe" }}cat_frappe.png{{ else if eq $theme "catppuccin-macchiato" }}cat_macchiato.png{{ else }}cat_mocha.png{{ end }}'
+{{- end }}
+primary-color='{{ $background_color }}'
+secondary-color='{{ $accent_color }}'
+color-shading-type='solid'
+picture-options='zoom'
