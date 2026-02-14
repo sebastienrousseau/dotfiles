@@ -34,10 +34,10 @@ jobs:
           fi
           cat package.json
 
-      - name: Publish to npm
+      # Trusted Publishing with OIDC (no token required)
+      # Configure at: npmjs.com → Packages → @sebastienrousseau/dotfiles → Settings → Trusted publishing
+      - name: Publish to npm (OIDC Trusted Publishing)
         run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   publish-gpr:
     runs-on: ubuntu-latest
