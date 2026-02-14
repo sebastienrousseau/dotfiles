@@ -196,6 +196,8 @@ check_system() {
   if [[ "$(uname)" == "Darwin" ]]; then
     if /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate 2>/dev/null | grep -q enabled; then
       add_points "system" 5 5 "Firewall enabled" "pass"
+    elif pgrep -x "Little Snitch" >/dev/null 2>&1 || [[ -d "/Applications/Little Snitch.app" ]]; then
+      add_points "system" 5 5 "Firewall enabled (Little Snitch)" "pass"
     else
       add_points "system" 0 5 "Firewall enabled" "fail"
     fi
