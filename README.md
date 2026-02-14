@@ -5,7 +5,7 @@
 # Dotfiles — A Fast, Idempotent Shell Environment
 
 [![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions)
-[![Version](https://img.shields.io/badge/Version-v0.2.480-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.480)
+[![Version](https://img.shields.io/badge/Version-v0.2.481-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.481)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 [![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases)
 [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
@@ -66,13 +66,13 @@ This is **infrastructure**, not an ad‑hoc shell script.
 
 ```bash
 # Works on macOS, Linux, and WSL
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.480/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.481/install.sh)"
 exec zsh
 ```
 
 For non‑interactive installs (servers and CI):
 ```bash
-DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.480/install.sh)"
+DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.481/install.sh)"
 ```
 
 ---
@@ -136,7 +136,10 @@ Run `dot --help` or `dot <command> --help` for inline documentation.
 | `dot drift` | Drift dashboard (chezmoi status) | Diagnostics |
 | `dot history` | Shell history analysis | Diagnostics |
 | `dot doctor` | Check system health and configuration | Diagnostics |
-| `dot benchmark` | Shell startup benchmark | Diagnostics |
+| `dot health` | Comprehensive health dashboard (37 checks) | Diagnostics |
+| `dot security-score` | Security assessment with grading | Diagnostics |
+| `dot benchmark` | Shell startup benchmark (`--detailed`, `--profile`) | Diagnostics |
+| `dot restore` | Restore from backup or git ref | Diagnostics |
 | `dot theme` | Switch terminal theme (dark/light) | UX |
 | `dot wallpaper` | Apply a wallpaper from your library | UX |
 | `dot keys` | Show keybindings catalog | UX |
@@ -158,6 +161,27 @@ Run `dot --help` or `dot <command> --help` for inline documentation.
 | `dot encrypt-check` | Check disk encryption status | Security |
 | `dot lock-screen` | Enforce lock‑screen idle settings (opt‑in) | Security |
 | `dot usb-safety` | Disable automount for removable media | Security |
+
+### Developer CLI Tools
+
+These utilities are installed to `~/.local/bin/`:
+
+| Tool | Description |
+|------|-------------|
+| `jsonv` | JSON validator and formatter |
+| `yamlv` | YAML validator |
+| `epoch` | Unix timestamp converter |
+| `b64` | Base64 encoder/decoder |
+| `jwt` | JWT token decoder |
+| `hex` | Hex viewer/converter |
+| `regex` | Regex tester |
+| `lorem` | Lorem ipsum generator |
+| `uuid` | UUID generator |
+| `hash` | MD5/SHA hash calculator |
+| `ip` | Show public/local IP addresses |
+| `kill-port` | Kill process by port |
+| `extract` | Universal archive extraction |
+| `update` | Update all system packages |
 
 **Examples**
 
@@ -286,5 +310,10 @@ Some bundled third‑party dependencies are licensed under GPL‑3.0; the LICENS
 <div align="center">
 
 Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+
+---
+
+🎨 Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)**
+🚀 Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
 
 </div>
