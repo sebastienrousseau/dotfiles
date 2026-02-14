@@ -35,20 +35,25 @@ export BUN_INSTALL="${HOME}/.bun"
 export PATH="${BUN_INSTALL}/bin:${PATH}"
 
 # Kubeconfig merge logic (merge all configs in ~/.kube/config.d/)
-# Lazy loading: only process if kubectl is likely to be used
-if [[ -n "${KUBERNETES_SERVICE_HOST:-}" ]] || [[ -n "${KUBECONFIG:-}" ]] || command -v kubectl >/dev/null 2>&1; then
+# Lazy-loaded via kubectl wrapper to avoid startup cost
+_lazy_load_kubeconfig() {
     if [[ -d "${HOME}/.kube/config.d" ]]; then
-        kubeconfig_extra=""
+        local kubeconfig_extra=""
         for conf in "${HOME}/.kube/config.d"/*; do
-            if [[ -f "$conf" ]]; then
-                kubeconfig_extra="${kubeconfig_extra}:${conf}"
-            fi
+            [[ -f "$conf" ]] && kubeconfig_extra="${kubeconfig_extra}:${conf}"
         done
-        if [[ -n "$kubeconfig_extra" ]]; then
-            export KUBECONFIG="${HOME}/.kube/config${kubeconfig_extra}"
-        fi
-        unset kubeconfig_extra
+        [[ -n "$kubeconfig_extra" ]] && export KUBECONFIG="${HOME}/.kube/config${kubeconfig_extra}"
     fi
+    unfunction kubectl _lazy_load_kubeconfig 2>/dev/null
+    command kubectl "$@"
+}
+# Only wrap kubectl if config.d exists and kubectl is installed
+if [[ -d "${HOME}/.kube/config.d" ]]; then
+    kubectl() { _lazy_load_kubeconfig "$@"; }
+fi
+# Still honor explicit KUBECONFIG or in-cluster detection
+if [[ -n "${KUBERNETES_SERVICE_HOST:-}" ]] || [[ -n "${KUBECONFIG:-}" ]]; then
+    _lazy_load_kubeconfig --version >/dev/null 2>&1 || true
 fi
 
 # Node.js (Global)

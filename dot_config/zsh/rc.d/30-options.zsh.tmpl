@@ -114,17 +114,6 @@ zstyle ':completion:*' verbose yes
 autoload -Uz colors && colors
 unsetopt correct_all
 
-# fzf integration
-if [ -f "${HOME}/.fzf.zsh" ]; then
-  source "${HOME}/.fzf.zsh"
-fi
-
-# Explicit fzf bindings (fallback if not already set by fzf)
-if command -v fzf >/dev/null; then
-  bindkey -M viins -s '^T' 'fzf^M'
-  bindkey -M viins -s '^R' 'fzf^M'
-fi
-
 # direnv (directory environments)
 if command -v direnv >/dev/null; then
   _cached_eval direnv-hook direnv hook zsh

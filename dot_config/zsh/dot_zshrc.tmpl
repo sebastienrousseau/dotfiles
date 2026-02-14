@@ -86,9 +86,7 @@ if [[ -o interactive ]]; then
                   "${HOME}/.config/shell/00-core-paths.sh" \
                   "${HOME}/.config/shell/05-core-safety.sh" \
                   "${HOME}/.config/shell/40-ls-colors.sh" \
-                  "${HOME}/.config/shell/90-ux-aliases.sh" \
-                  /opt/homebrew/opt/fzf/shell/completion.zsh \
-                  /opt/homebrew/opt/fzf/shell/key-bindings.zsh &!
+                  "${HOME}/.config/shell/90-ux-aliases.sh" &!
   )
 fi
 
@@ -130,6 +128,10 @@ _load_deferred_layers() {
   add-zsh-hook -d precmd _load_deferred_layers
   [[ -f "${HOME}/.config/shell/50-logic-functions.sh" ]] && source "${HOME}/.config/shell/50-logic-functions.sh"
   [[ -f "${HOME}/.config/shell/91-ux-aliases-lazy.sh" ]] && source "${HOME}/.config/shell/91-ux-aliases-lazy.sh"
+  # AI / Predictive Shell (deferred for faster startup)
+  [[ -f "${HOME}/.config/shell/custom/context_suggest.zsh" ]] && source "${HOME}/.config/shell/custom/context_suggest.zsh"
+  [[ -f "${HOME}/.config/shell/custom/error_analysis.zsh" ]] && source "${HOME}/.config/shell/custom/error_analysis.zsh"
+  [[ -f "${HOME}/.config/shell/custom/ollama_functions.zsh" ]] && source "${HOME}/.config/shell/custom/ollama_functions.zsh"
 }
 add-zsh-hook precmd _load_deferred_layers
 
@@ -153,11 +155,6 @@ alias_wrapper() {
 alias alias=alias_wrapper
 
 
-## AI / Predictive Shell
-[[ -f "$HOME/.config/shell/custom/context_suggest.zsh" ]] && source "$HOME/.config/shell/custom/context_suggest.zsh"
-[[ -f "$HOME/.config/shell/custom/error_analysis.zsh" ]] && source "$HOME/.config/shell/custom/error_analysis.zsh"
-[[ -f "$HOME/.config/shell/custom/ollama_functions.zsh" ]] && source "$HOME/.config/shell/custom/ollama_functions.zsh"
-
 # Phase 33: Atuin (Memory Layer)
 if command -v atuin > /dev/null; then
     _cached_eval atuin-init atuin init zsh
@@ -173,16 +170,23 @@ if command -v zoxide >/dev/null; then
   _cached_eval zoxide-init zoxide init zsh
 fi
 
-# FZF (Fuzzy Finder)
+# FZF (Fuzzy Finder) - Cross-platform detection
 if command -v fzf >/dev/null; then
-  # Source auto-completion and key bindings
-  if [[ -f "/opt/homebrew/opt/fzf/shell/completion.zsh" ]]; then
-    source "/opt/homebrew/opt/fzf/shell/completion.zsh"
+  # Detect FZF shell integration path (Homebrew, apt, manual install)
+  local fzf_shell_dir=""
+  for dir in "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/fzf/shell" \
+             /usr/local/opt/fzf/shell \
+             /usr/share/fzf \
+             /usr/share/doc/fzf/examples \
+             "${HOME}/.fzf/shell"; do
+    [[ -d "$dir" ]] && { fzf_shell_dir="$dir"; break; }
+  done
+
+  if [[ -n "$fzf_shell_dir" ]]; then
+    [[ -f "${fzf_shell_dir}/completion.zsh" ]] && source "${fzf_shell_dir}/completion.zsh"
+    [[ -f "${fzf_shell_dir}/key-bindings.zsh" ]] && source "${fzf_shell_dir}/key-bindings.zsh"
   fi
-  if [[ -f "/opt/homebrew/opt/fzf/shell/key-bindings.zsh" ]]; then
-    source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
-  fi
-  
+
   # Use fd/rg for fzf source if available
   if command -v rg >/dev/null; then
     export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'

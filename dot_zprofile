@@ -48,21 +48,7 @@ if [[ -n "$HOMEBREW_PREFIX" ]]; then
 fi
 
 # -----------------------------------------------------------------------------
-# User Binaries
+# User Binaries (highest priority - set early for login shells)
+# Language-specific paths are consolidated in ~/.config/shell/00-core-paths.sh
 # -----------------------------------------------------------------------------
 export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
-
-# -----------------------------------------------------------------------------
-# Language-Specific Paths
-# -----------------------------------------------------------------------------
-# Go
-[[ -d "$HOME/go/bin" ]] && export PATH="$HOME/go/bin:$PATH"
-
-# Rust/Cargo
-[[ -d "$HOME/.cargo/bin" ]] && export PATH="$HOME/.cargo/bin:$PATH"
-
-# .NET
-[[ -d "$HOME/.dotnet/tools" ]] && export PATH="$HOME/.dotnet/tools:$PATH"
-
-# Python (uv/pip user installs)
-[[ -d "$HOME/.local/bin" ]] && export PATH="$HOME/.local/bin:$PATH"
