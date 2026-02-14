@@ -21,9 +21,18 @@ PROFILE=false
 COMPARE=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --detailed|-d) DETAILED=true; shift ;;
-    --profile|-p) PROFILE=true; shift ;;
-    --compare|-c) COMPARE=true; shift ;;
+    --detailed | -d)
+      DETAILED=true
+      shift
+      ;;
+    --profile | -p)
+      PROFILE=true
+      shift
+      ;;
+    --compare | -c)
+      COMPARE=true
+      shift
+      ;;
     *) shift ;;
   esac
 done
@@ -82,10 +91,10 @@ benchmark_components() {
       local tool_time
       case "$tool" in
         starship) tool_time=$(time_command "starship init zsh >/dev/null") ;;
-        atuin)    tool_time=$(time_command "atuin init zsh >/dev/null") ;;
-        zoxide)   tool_time=$(time_command "zoxide init zsh >/dev/null") ;;
-        fzf)      tool_time=$(time_command "true") ;; # FZF sourced from file
-        direnv)   tool_time=$(time_command "direnv hook zsh >/dev/null") ;;
+        atuin) tool_time=$(time_command "atuin init zsh >/dev/null") ;;
+        zoxide) tool_time=$(time_command "zoxide init zsh >/dev/null") ;;
+        fzf) tool_time=$(time_command "true") ;; # FZF sourced from file
+        direnv) tool_time=$(time_command "direnv hook zsh >/dev/null") ;;
       esac
       printf "%-35s %8s\n" "$tool init" "${tool_time}ms"
     fi

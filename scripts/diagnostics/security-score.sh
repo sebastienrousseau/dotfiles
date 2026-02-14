@@ -17,8 +17,14 @@ VERBOSE=false
 JSON_OUTPUT=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --verbose|-v) VERBOSE=true; shift ;;
-    --json) JSON_OUTPUT=true; shift ;;
+    --verbose | -v)
+      VERBOSE=true
+      shift
+      ;;
+    --json)
+      JSON_OUTPUT=true
+      shift
+      ;;
     *) shift ;;
   esac
 done
@@ -38,7 +44,7 @@ add_points() {
   TOTAL_POINTS=$((TOTAL_POINTS + points))
   MAX_POINTS=$((MAX_POINTS + max))
   CATEGORY_SCORES["$category"]=$((${CATEGORY_SCORES[$category]:-0} + points))
-  
+
   if ! $JSON_OUTPUT && $VERBOSE; then
     local icon
     if [[ $points -eq $max ]]; then
@@ -71,18 +77,18 @@ section() {
 
 check_encryption() {
   section "Encryption (30 pts max)"
-  
+
   # Age encryption tool
   if command -v age >/dev/null 2>&1; then
     add_points "encryption" 5 5 "Age encryption installed" "pass"
   else
     add_points "encryption" 0 5 "Age encryption installed" "fail"
   fi
-  
+
   # Age key exists
   if [[ -f "${HOME}/.config/chezmoi/key.txt" ]]; then
     add_points "encryption" 5 5 "Age encryption key present" "pass"
-    
+
     # Check key permissions
     local perms
     perms=$(stat -c "%a" "${HOME}/.config/chezmoi/key.txt" 2>/dev/null || stat -f "%OLp" "${HOME}/.config/chezmoi/key.txt" 2>/dev/null)
@@ -94,14 +100,14 @@ check_encryption() {
   else
     add_points "encryption" 0 10 "Age encryption configured" "fail"
   fi
-  
+
   # SOPS available
   if command -v sops >/dev/null 2>&1; then
     add_points "encryption" 5 5 "SOPS secrets manager" "pass"
   else
     add_points "encryption" 0 5 "SOPS secrets manager" "fail"
   fi
-  
+
   # GPG available
   if command -v gpg >/dev/null 2>&1 && gpg --list-secret-keys 2>/dev/null | grep -q sec; then
     add_points "encryption" 10 10 "GPG keys configured" "pass"
@@ -114,7 +120,7 @@ check_encryption() {
 
 check_ssh() {
   section "SSH Security (25 pts max)"
-  
+
   # SSH directory permissions
   if [[ -d "${HOME}/.ssh" ]]; then
     local ssh_perms
@@ -127,7 +133,7 @@ check_ssh() {
   else
     add_points "ssh" 0 5 "SSH directory exists" "fail"
   fi
-  
+
   # ED25519 key (preferred over RSA)
   if [[ -f "${HOME}/.ssh/id_ed25519" ]]; then
     add_points "ssh" 10 10 "ED25519 SSH key (modern)" "pass"
@@ -136,14 +142,14 @@ check_ssh() {
   else
     add_points "ssh" 0 10 "SSH key present" "fail"
   fi
-  
+
   # SSH agent
   if [[ -n "${SSH_AUTH_SOCK:-}" ]] || pgrep -x ssh-agent >/dev/null 2>&1; then
     add_points "ssh" 5 5 "SSH agent running" "pass"
   else
     add_points "ssh" 0 5 "SSH agent running" "fail"
   fi
-  
+
   # SSH config exists
   if [[ -f "${HOME}/.ssh/config" ]]; then
     add_points "ssh" 5 5 "SSH config present" "pass"
@@ -154,27 +160,27 @@ check_ssh() {
 
 check_git() {
   section "Git Security (20 pts max)"
-  
+
   # Git installed
   if ! command -v git >/dev/null 2>&1; then
     add_points "git" 0 20 "Git installed" "fail"
     return
   fi
-  
+
   # Commit signing
   if git config --global commit.gpgsign 2>/dev/null | grep -q true; then
     add_points "git" 10 10 "Commit signing enabled" "pass"
   else
     add_points "git" 0 10 "Commit signing enabled" "fail"
   fi
-  
+
   # User identity configured
   if git config --global user.email >/dev/null 2>&1 && git config --global user.name >/dev/null 2>&1; then
     add_points "git" 5 5 "Git identity configured" "pass"
   else
     add_points "git" 0 5 "Git identity configured" "fail"
   fi
-  
+
   # Credential helper
   if git config --global credential.helper >/dev/null 2>&1; then
     add_points "git" 5 5 "Credential helper configured" "pass"
@@ -185,7 +191,7 @@ check_git() {
 
 check_system() {
   section "System Security (15 pts max)"
-  
+
   # Firewall (macOS or Linux)
   if [[ "$(uname)" == "Darwin" ]]; then
     if /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate 2>/dev/null | grep -q enabled; then
@@ -246,7 +252,7 @@ check_system() {
 
 check_secrets() {
   section "Secrets Management (10 pts max)"
-  
+
   # No secrets in dotfiles repo
   if [[ -d "${HOME}/.dotfiles" ]]; then
     local secrets_found=false
@@ -254,7 +260,7 @@ check_secrets() {
     if grep -rE "(api_key|api_secret|password|token)\\s*=\\s*['\"][^'\"]+['\"]" "${HOME}/.dotfiles" --include="*.sh" --include="*.zsh" --include="*.toml" 2>/dev/null | grep -v "example\|template\|placeholder" | head -1; then
       secrets_found=true
     fi
-    
+
     if $secrets_found; then
       add_points "secrets" 0 5 "No hardcoded secrets" "fail"
     else
@@ -263,7 +269,7 @@ check_secrets() {
   else
     add_points "secrets" 5 5 "No hardcoded secrets" "pass"
   fi
-  
+
   # Environment variables for secrets
   if [[ -f "${HOME}/.config/secrets/api-keys.env" ]] || [[ -d "${HOME}/.config/secrets" ]]; then
     add_points "secrets" 5 5 "Secrets in dedicated location" "pass"
@@ -274,7 +280,7 @@ check_secrets() {
 
 print_summary() {
   local score=$((TOTAL_POINTS * 100 / MAX_POINTS))
-  
+
   if $JSON_OUTPUT; then
     echo "{"
     echo "  \"score\": $score,"
@@ -297,12 +303,12 @@ print_summary() {
   echo -e "\n${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
   echo -e "${CYAN}  Security Score${NC}"
   echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
-  
+
   # Score bar
   local bar_width=30
   local filled=$((score * bar_width / 100))
   local empty=$((bar_width - filled))
-  
+
   printf "  Score: ["
   if [[ $score -ge 80 ]]; then
     printf '%s' "${GREEN}"
@@ -315,7 +321,7 @@ print_summary() {
   printf '%s' "${NC}"
   printf "%${empty}s" | tr ' ' '░'
   printf "] "
-  
+
   # Grade
   local grade
   grade=$(get_grade $score)
@@ -323,16 +329,16 @@ print_summary() {
     A*) echo -e "${GREEN}${score}%  Grade: ${grade}${NC}" ;;
     B*) echo -e "${GREEN}${score}%  Grade: ${grade}${NC}" ;;
     C*) echo -e "${YELLOW}${score}%  Grade: ${grade}${NC}" ;;
-    *)  echo -e "${RED}${score}%  Grade: ${grade}${NC}" ;;
+    *) echo -e "${RED}${score}%  Grade: ${grade}${NC}" ;;
   esac
-  
+
   echo -e "\n  Points: ${TOTAL_POINTS}/${MAX_POINTS}"
   echo ""
-  
+
   # Recommendations
   if [[ $score -lt 100 ]]; then
     echo -e "${BLUE}Recommendations:${NC}"
-    
+
     if ! command -v age >/dev/null 2>&1; then
       echo "  • Install age for encryption: brew install age"
     fi
@@ -351,17 +357,28 @@ print_summary() {
 
 get_grade() {
   local score=$1
-  if [[ $score -ge 95 ]]; then echo "A+"
-  elif [[ $score -ge 90 ]]; then echo "A"
-  elif [[ $score -ge 85 ]]; then echo "A-"
-  elif [[ $score -ge 80 ]]; then echo "B+"
-  elif [[ $score -ge 75 ]]; then echo "B"
-  elif [[ $score -ge 70 ]]; then echo "B-"
-  elif [[ $score -ge 65 ]]; then echo "C+"
-  elif [[ $score -ge 60 ]]; then echo "C"
-  elif [[ $score -ge 55 ]]; then echo "C-"
-  elif [[ $score -ge 50 ]]; then echo "D"
-  else echo "F"
+  if [[ $score -ge 95 ]]; then
+    echo "A+"
+  elif [[ $score -ge 90 ]]; then
+    echo "A"
+  elif [[ $score -ge 85 ]]; then
+    echo "A-"
+  elif [[ $score -ge 80 ]]; then
+    echo "B+"
+  elif [[ $score -ge 75 ]]; then
+    echo "B"
+  elif [[ $score -ge 70 ]]; then
+    echo "B-"
+  elif [[ $score -ge 65 ]]; then
+    echo "C+"
+  elif [[ $score -ge 60 ]]; then
+    echo "C"
+  elif [[ $score -ge 55 ]]; then
+    echo "C-"
+  elif [[ $score -ge 50 ]]; then
+    echo "D"
+  else
+    echo "F"
   fi
 }
 

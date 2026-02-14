@@ -18,8 +18,14 @@ export VERBOSE=false
 JSON_OUTPUT=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --verbose|-v) VERBOSE=true; shift ;;
-    --json) JSON_OUTPUT=true; shift ;;
+    --verbose | -v)
+      VERBOSE=true
+      shift
+      ;;
+    --json)
+      JSON_OUTPUT=true
+      shift
+      ;;
     *) shift ;;
   esac
 done
@@ -35,9 +41,9 @@ check() {
   local name="$1"
   local status="$2"
   local message="${3:-}"
-  
+
   TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
-  
+
   case "$status" in
     pass)
       PASSED_CHECKS=$((PASSED_CHECKS + 1))
@@ -89,7 +95,7 @@ check_section() {
 run_checks() {
   # --- Dotfiles Core ---
   check_section "Dotfiles Core"
-  
+
   # Chezmoi
   if command -v chezmoi >/dev/null 2>&1; then
     check "Chezmoi installed" "pass"
@@ -102,7 +108,7 @@ run_checks() {
   else
     check "Chezmoi installed" "fail" "Not installed"
   fi
-  
+
   # Git
   if command -v git >/dev/null 2>&1; then
     check "Git installed" "pass"
@@ -117,7 +123,7 @@ run_checks() {
 
   # --- Shell ---
   check_section "Shell Environment"
-  
+
   # Zsh
   if command -v zsh >/dev/null 2>&1; then
     check "Zsh installed" "pass"
@@ -129,14 +135,14 @@ run_checks() {
   else
     check "Zsh installed" "fail"
   fi
-  
+
   # Zinit
   if [[ -d "${ZINIT_HOME:-$HOME/.local/share/zinit}" ]]; then
     check "Zinit plugin manager" "pass"
   else
     check "Zinit plugin manager" "warn" "Not found"
   fi
-  
+
   # Starship
   if command -v starship >/dev/null 2>&1; then
     check "Starship prompt" "pass"
@@ -146,7 +152,7 @@ run_checks() {
 
   # --- Development Tools ---
   check_section "Development Tools"
-  
+
   # Node.js
   if command -v node >/dev/null 2>&1; then
     local node_version
@@ -155,14 +161,14 @@ run_checks() {
   else
     check "Node.js" "warn" "Not installed"
   fi
-  
+
   # fnm
   if command -v fnm >/dev/null 2>&1; then
     check "fnm (Node version manager)" "pass"
   else
     check "fnm" "warn" "Not installed"
   fi
-  
+
   # Python
   if command -v python3 >/dev/null 2>&1; then
     local py_version
@@ -171,14 +177,14 @@ run_checks() {
   else
     check "Python" "warn" "Not installed"
   fi
-  
+
   # Rust
   if command -v rustc >/dev/null 2>&1; then
     check "Rust toolchain" "pass"
   else
     check "Rust toolchain" "warn" "Not installed"
   fi
-  
+
   # Go
   if command -v go >/dev/null 2>&1; then
     check "Go" "pass"
@@ -188,7 +194,7 @@ run_checks() {
 
   # --- CLI Tools ---
   check_section "CLI Tools"
-  
+
   local tools=("fzf" "ripgrep:rg" "fd" "bat" "eza" "zoxide" "atuin" "delta" "jq" "yq" "sops" "mise" "just" "zellij" "hyperfine")
   for tool in "${tools[@]}"; do
     local name="${tool%%:*}"
@@ -202,7 +208,7 @@ run_checks() {
 
   # --- Editors ---
   check_section "Editors"
-  
+
   if command -v nvim >/dev/null 2>&1; then
     check "Neovim" "pass"
     if [[ -d "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy" ]]; then
@@ -216,13 +222,13 @@ run_checks() {
 
   # --- Terminal ---
   check_section "Terminal"
-  
+
   if command -v ghostty >/dev/null 2>&1 || [[ -d "/Applications/Ghostty.app" ]]; then
     check "Ghostty terminal" "pass"
   else
     check "Ghostty terminal" "warn" "Not installed"
   fi
-  
+
   # Fonts - check both Linux and macOS font locations
   local font_found=false
   if fc-list 2>/dev/null | grep -qi "JetBrains"; then
@@ -241,7 +247,7 @@ run_checks() {
 
   # --- Security ---
   check_section "Security"
-  
+
   # Age encryption
   if command -v age >/dev/null 2>&1; then
     check "Age encryption" "pass"
@@ -253,14 +259,14 @@ run_checks() {
   else
     check "Age encryption" "warn" "Not installed"
   fi
-  
+
   # SSH
   if [[ -f "${HOME}/.ssh/id_ed25519" ]] || [[ -f "${HOME}/.ssh/id_rsa" ]]; then
     check "SSH keys present" "pass"
   else
     check "SSH keys present" "warn" "No keys found"
   fi
-  
+
   # GPG
   if command -v gpg >/dev/null 2>&1; then
     if gpg --list-secret-keys 2>/dev/null | grep -q sec; then
@@ -274,11 +280,11 @@ run_checks() {
 
   # --- Performance ---
   check_section "Performance"
-  
+
   # Shell startup time
   if command -v zsh >/dev/null 2>&1; then
     local startup_time
-    startup_time=$( { time zsh -i -c exit; } 2>&1 | grep real | awk '{print $2}' | sed 's/[ms]//g' )
+    startup_time=$({ time zsh -i -c exit; } 2>&1 | grep real | awk '{print $2}' | sed 's/[ms]//g')
     # Try to parse the time (handle different formats)
     if [[ -n "$startup_time" ]]; then
       # Simple check - if startup mentions 0m0, it's under 1 second
@@ -302,22 +308,22 @@ print_summary() {
   fi
 
   local score=$((PASSED_CHECKS * 100 / TOTAL_CHECKS))
-  
+
   echo -e "\n${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
   echo -e "${CYAN}  Summary${NC}"
   echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
-  
+
   echo -e "  Total checks:  ${TOTAL_CHECKS}"
   echo -e "  ${GREEN}Passed:${NC}        ${PASSED_CHECKS}"
   echo -e "  ${YELLOW}Warnings:${NC}      ${WARNINGS}"
   echo -e "  ${RED}Failures:${NC}      ${FAILURES}"
   echo ""
-  
+
   # Health score bar
   local bar_width=30
   local filled=$((score * bar_width / 100))
   local empty=$((bar_width - filled))
-  
+
   printf "  Health Score: ["
   if [[ $score -ge 80 ]]; then
     printf '%s' "${GREEN}"
@@ -330,7 +336,7 @@ print_summary() {
   printf '%s' "${NC}"
   printf "%${empty}s" | tr ' ' '░'
   printf "] %s%%\n\n" "${score}"
-  
+
   if [[ $score -ge 90 ]]; then
     echo -e "  ${GREEN}⚡ Excellent! Your dotfiles are in great shape.${NC}"
   elif [[ $score -ge 70 ]]; then
@@ -340,7 +346,7 @@ print_summary() {
   else
     echo -e "  ${RED}✗ Needs attention. Multiple issues found.${NC}"
   fi
-  
+
   echo ""
 }
 
