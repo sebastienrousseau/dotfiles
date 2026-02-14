@@ -12,7 +12,7 @@
 ###############################################
 
 {{- $theme := default "tokyonight-night" .theme -}}
-{{- $fontFamily := default "JetBrains Mono" .terminal_font_family -}}
+{{- $fontFamily := default "JetBrainsMono Nerd Font" .terminal_font_family -}}
 {{- $fontSize := default 12 .terminal_font_size -}}
 
 ##########
@@ -51,11 +51,10 @@ gtk-titlebar = true
 ################
 # Typography   #
 ################
-# Primary: User preference (Apple Native)
-# Fallback logic is handled by Ghostty attempting the first found.
+# Primary font from chezmoi config, with fallbacks
 font-family = "{{ $fontFamily }}"
 font-family = "JetBrains Mono"
-font-family = "Roboto Mono"
+font-family = "SF Mono"
 
 font-size = {{ $fontSize }}
 adjust-cell-width = -1

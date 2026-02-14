@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json.schemastore.org/gopls.json",
+  "ui.completion.usePlaceholders": true,
+  "ui.diagnostic.staticcheck": true,
+  "ui.diagnostic.analyses": {
+    "fieldalignment": true,
+    "nilness": true,
+    "shadow": true,
+    "unusedparams": true,
+    "unusedwrite": true,
+    "useany": true
+  },
+  "ui.semanticTokens": true,
+  "ui.codelenses": {
+    "gc_details": true,
+    "generate": true,
+    "regenerate_cgo": true,
+    "run_govulncheck": true,
+    "tidy": true,
+    "upgrade_dependency": true,
+    "vendor": true
+  },
+  "formatting.gofumpt": true,
+  "formatting.local": "github.com",
+  "build.directoryFilters": [
+    "-**/node_modules",
+    "-**/.git",
+    "-**/vendor"
+  ]
+}

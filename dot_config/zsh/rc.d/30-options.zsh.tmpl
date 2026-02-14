@@ -1,4 +1,7 @@
 # Zsh history and options
+# Set secure default umask (077 = owner only, 022 = standard)
+umask 022
+
 HISTFILE="${HOME}/.zsh_history"
 HISTSIZE=10000
 SAVEHIST=10000
@@ -113,17 +116,6 @@ zstyle ':completion:*' verbose yes
 
 autoload -Uz colors && colors
 unsetopt correct_all
-
-# fzf integration
-if [ -f "${HOME}/.fzf.zsh" ]; then
-  source "${HOME}/.fzf.zsh"
-fi
-
-# Explicit fzf bindings (fallback if not already set by fzf)
-if command -v fzf >/dev/null; then
-  bindkey -M viins -s '^T' 'fzf^M'
-  bindkey -M viins -s '^R' 'fzf^M'
-fi
 
 # direnv (directory environments)
 if command -v direnv >/dev/null; then

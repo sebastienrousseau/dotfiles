@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+# run_onchange_27-go-tools.sh.tmpl
+# Go toolchain and tools provisioning
+{{- if and (lookPath "go") (has "go" .features) }}
+
+set -euo pipefail
+
+log_info() { echo -e "\n[INFO] $*"; }
+log_warn() { echo -e "\n[WARN] $*"; }
+
+# Skip in containers unless explicitly enabled
+if [[ "${DOTFILES_CONTAINER:-0}" = "1" && "${DOTFILES_GO_IN_CONTAINER:-0}" != "1" ]]; then
+  log_info "Skipping Go tools in container environment"
+  exit 0
+fi
+
+log_info "Go tools: starting setup..."
+
+# Install Go tools
+install_go_tool() {
+  local tool="$1"
+  local package="$2"
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    log_info "Installing $tool..."
+    go install "$package" || log_warn "Failed to install $tool"
+  else
+    log_info "$tool already installed"
+  fi
+}
+
+# Essential Go tools
+log_info "Installing Go development tools..."
+
+# gopls - Go language server
+install_go_tool "gopls" "golang.org/x/tools/gopls@latest"
+
+# delve - Go debugger
+install_go_tool "dlv" "github.com/go-delve/delve/cmd/dlv@latest"
+
+# gofumpt - Stricter gofmt
+install_go_tool "gofumpt" "mvdan.cc/gofumpt@latest"
+
+# golangci-lint - Meta linter
+if ! command -v golangci-lint >/dev/null 2>&1; then
+  log_info "Installing golangci-lint..."
+  curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOBIN)" latest
+else
+  log_info "golangci-lint already installed"
+fi
+
+# Additional useful tools
+install_go_tool "goimports" "golang.org/x/tools/cmd/goimports@latest"
+install_go_tool "gomodifytags" "github.com/fatih/gomodifytags@latest"
+install_go_tool "impl" "github.com/josharian/impl@latest"
+install_go_tool "gotests" "github.com/cweill/gotests/gotests@latest"
+install_go_tool "goplay" "github.com/haya14busa/goplay/cmd/goplay@latest"
+
+# Copy golangci-lint config to home if not exists
+GOLANGCI_CONFIG="${HOME}/.golangci.yml"
+SOURCE_CONFIG="${HOME}/.config/go/golangci.yml"
+if [[ -f "$SOURCE_CONFIG" ]] && [[ ! -f "$GOLANGCI_CONFIG" ]]; then
+  log_info "Linking golangci-lint config..."
+  ln -sf "$SOURCE_CONFIG" "$GOLANGCI_CONFIG"
+fi
+
+log_info "Go tools setup complete!"
+
+{{- else }}
+# Go not available or not in features, skipping
+exit 0
+{{- end }}

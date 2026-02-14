@@ -245,6 +245,43 @@ jobs:
 
           echo "✅ Supply chain security check passed"
 
+  security-trufflehog:
+    name: Security / TruffleHog
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: TruffleHog Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified
+
+  security-sbom:
+    name: Security / SBOM Generation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate SBOM with Syft
+        uses: anchore/sbom-action@v0
+        with:
+          format: cyclonedx-json
+          output-file: sbom.cyclonedx.json
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.cyclonedx.json
+          retention-days: 30
+      - name: Scan SBOM with Grype
+        uses: anchore/scan-action@v6
+        with:
+          sbom: sbom.cyclonedx.json
+          fail-build: false
+          severity-cutoff: critical
+
   security-links:
     name: Security / Link Check
     runs-on: ubuntu-latest

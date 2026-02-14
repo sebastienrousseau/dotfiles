@@ -23,7 +23,11 @@ cmd_heal() {
 }
 
 cmd_health() {
-  run_script "scripts/ops/health-check.sh" "Health check script" "$@"
+  run_script "scripts/diagnostics/health.sh" "Health dashboard" "$@"
+}
+
+cmd_security_score() {
+  run_script "scripts/diagnostics/security-score.sh" "Security score" "$@"
 }
 
 cmd_rollback() {
@@ -44,7 +48,11 @@ cmd_history() {
 }
 
 cmd_benchmark() {
-  run_script "scripts/tests/benchmark.sh" "Benchmark script" "$@"
+  run_script "scripts/diagnostics/benchmark.sh" "Benchmark script" "$@"
+}
+
+cmd_restore() {
+  run_script "scripts/dot/commands/restore.sh" "Restore script" "$@"
 }
 
 # Dispatch
@@ -61,6 +69,10 @@ case "${1:-}" in
     shift
     cmd_health "$@"
     ;;
+  security-score)
+    shift
+    cmd_security_score "$@"
+    ;;
   rollback)
     shift
     cmd_rollback "$@"
@@ -76,6 +88,10 @@ case "${1:-}" in
   benchmark)
     shift
     cmd_benchmark "$@"
+    ;;
+  restore)
+    shift
+    cmd_restore "$@"
     ;;
   *)
     echo "Unknown diagnostics command: ${1:-}" >&2

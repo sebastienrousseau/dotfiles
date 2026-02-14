@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# Zig version manager - installs/updates zig to ~/.local/zig
+# Managed by chezmoi
+
+set -euo pipefail
+
+ZIG_DIR="$HOME/.local/zig"
+ZIG_VERSION="${1:-latest}"
+
+get_latest_version() {
+    curl -sf "https://ziglang.org/download/index.json" | jq -r 'keys | map(select(. != "master" and startswith("0."))) | sort_by(split(".") | map(tonumber)) | last'
+}
+
+get_download_url() {
+    local version="$1"
+    local arch
+    arch=$(uname -m)
+
+    case "$arch" in
+        x86_64)  arch="x86_64" ;;
+        aarch64) arch="aarch64" ;;
+        arm64)   arch="aarch64" ;;
+        *)       echo "Unsupported architecture: $arch" >&2; exit 1 ;;
+    esac
+
+    local os
+    os=$(uname -s | tr '[:upper:]' '[:lower:]')
+
+    if [[ "$version" == "master" ]]; then
+        curl -sf "https://ziglang.org/download/index.json" | jq -r ".master.\"${arch}-${os}\".tarball"
+    else
+        curl -sf "https://ziglang.org/download/index.json" | jq -r ".\"${version}\".\"${arch}-${os}\".tarball"
+    fi
+}
+
+install_zig() {
+    local version="$1"
+
+    if [[ "$version" == "latest" ]]; then
+        version=$(get_latest_version)
+    fi
+
+    echo "Installing Zig $version..."
+
+    local url
+    url=$(get_download_url "$version")
+
+    if [[ -z "$url" || "$url" == "null" ]]; then
+        echo "Error: Could not find download URL for Zig $version" >&2
+        exit 1
+    fi
+
+    local tmpdir
+    tmpdir=$(mktemp -d)
+    trap "rm -rf $tmpdir" EXIT
+
+    echo "Downloading from $url..."
+    curl -fSL "$url" -o "$tmpdir/zig.tar.xz"
+
+    echo "Extracting..."
+    rm -rf "$ZIG_DIR"
+    mkdir -p "$ZIG_DIR"
+    tar -xJf "$tmpdir/zig.tar.xz" -C "$ZIG_DIR" --strip-components=1
+
+    echo "Zig $version installed to $ZIG_DIR"
+    "$ZIG_DIR/zig" version
+}
+
+case "${1:-install}" in
+    install|latest|master|[0-9]*)
+        install_zig "$ZIG_VERSION"
+        ;;
+    version)
+        if [[ -x "$ZIG_DIR/zig" ]]; then
+            "$ZIG_DIR/zig" version
+        else
+            echo "Zig not installed"
+            exit 1
+        fi
+        ;;
+    *)
+        echo "Usage: zig-install [latest|master|<version>|version]"
+        echo "Examples:"
+        echo "  zig-install          # Install latest stable"
+        echo "  zig-install 0.14.0   # Install specific version"
+        echo "  zig-install master   # Install latest master"
+        echo "  zig-install version  # Show installed version"
+        ;;
+esac

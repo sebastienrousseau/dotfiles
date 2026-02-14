@@ -18,7 +18,18 @@ if ! command -v fnm >/dev/null 2>&1; then
   exit 1
 {{- else }}
   log_info "fnm not found. Installing fnm..."
-  curl -fsSL https://fnm.vercel.app/install | bash
+  fnm_installer=$(mktemp)
+  if curl -fsSL -o "$fnm_installer" https://fnm.vercel.app/install; then
+    if [ "$(wc -c <"$fnm_installer")" -le 204800 ] && head -1 "$fnm_installer" | grep -q '^#!'; then
+      bash "$fnm_installer"
+    else
+      log_error "fnm installer failed validation. Install manually."
+    fi
+    rm -f "$fnm_installer"
+  else
+    rm -f "$fnm_installer"
+    log_error "Failed to download fnm installer."
+  fi
 {{- end }}
 fi
 

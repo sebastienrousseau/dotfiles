@@ -41,7 +41,7 @@ dot fonts install
 
 ```bash
 # Download from Nerd Fonts
-wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/JetBrainsMono.zip
+wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/JetBrainsMono.zip
 
 # Extract to fonts directory
 unzip JetBrainsMono.zip -d ~/.local/share/fonts/

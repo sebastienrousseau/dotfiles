@@ -12,7 +12,10 @@ if [[ ! -f "${EXT_FILE}" ]]; then
   exit 0
 fi
 
-mapfile -t extensions < <(grep -vE '^[[:space:]]*#|^[[:space:]]*$' "${EXT_FILE}" || true)
+extensions=()
+while IFS= read -r line; do
+  extensions+=("$line")
+done < <(grep -vE '^[[:space:]]*#|^[[:space:]]*$' "${EXT_FILE}" || true)
 if [[ ${#extensions[@]} -eq 0 ]]; then
   echo "No VS Code extensions configured."
   exit 0
