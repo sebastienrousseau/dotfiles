@@ -1,0 +1,62 @@
+{
+  "name": "@sebastienrousseau/dotfiles",
+  "version": "0.2.481",
+  "description": "The Trusted Shell Platform — Universal dotfiles managed by Chezmoi. Features Bash & Zsh for macOS, Linux & WSL. Rust modern tooling & enterprise-grade security.",
+  "main": "install.sh",
+  "bin": {
+    "dotfiles-install": "./install.sh"
+  },
+  "scripts": {
+    "test": "bash -n install.sh && echo 'Syntax OK'",
+    "lint": "shellcheck install.sh scripts/**/*.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sebastienrousseau/dotfiles.git"
+  },
+  "keywords": [
+    "dotfiles",
+    "shell",
+    "zsh",
+    "bash",
+    "chezmoi",
+    "macos",
+    "linux",
+    "wsl",
+    "neovim",
+    "tmux",
+    "developer-tools",
+    "cli",
+    "automation",
+    "devops",
+    "security"
+  ],
+  "author": {
+    "name": "Sebastien Rousseau",
+    "email": "sebastian.rousseau@gmail.com",
+    "url": "https://sebastienrousseau.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sebastienrousseau/dotfiles/issues"
+  },
+  "homepage": "https://dotfiles.io/",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/sebastienrousseau"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "install.sh",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "docs/",
+    "dot_config/",
+    "dot_local/",
+    "scripts/",
+    "templates/"
+  ]
+}
