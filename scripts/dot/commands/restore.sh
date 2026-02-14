@@ -47,8 +47,8 @@ list_backups() {
   echo -e "${BLUE}Available Backups:${NC}"
   echo "─────────────────────────────────────────"
 
-  ls -lt "$BACKUP_DIR" 2>/dev/null | tail -n +2 | while read -r line; do
-    echo "  $line"
+  find "$BACKUP_DIR" -maxdepth 1 -type d -name "backup-*" -printf "%T@ %f\n" 2>/dev/null | sort -rn | cut -d' ' -f2- | while read -r backup; do
+    echo "  $backup"
   done
 
   echo ""
@@ -115,7 +115,8 @@ show_diff() {
 }
 
 create_backup() {
-  local backup_name="backup-$(date +%Y%m%d_%H%M%S)"
+  local backup_name
+  backup_name="backup-$(date +%Y%m%d_%H%M%S)"
   local backup_path="$BACKUP_DIR/$backup_name"
 
   mkdir -p "$backup_path"
@@ -147,7 +148,7 @@ restore_latest() {
   fi
 
   local latest
-  latest=$(ls -t "$BACKUP_DIR" 2>/dev/null | head -1)
+  latest=$(find "$BACKUP_DIR" -maxdepth 1 -type d -name "backup-*" -printf "%T@ %f\n" 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)
 
   if [[ -z "$latest" ]]; then
     log_error "No backups found"
@@ -157,9 +158,10 @@ restore_latest() {
   log_info "Restoring from: $latest"
 
   local backup_path="$BACKUP_DIR/$latest"
+  local target
   for item in "$backup_path"/*; do
     if [[ -e "$item" ]]; then
-      local target="$HOME/$(basename "$item")"
+      target="$HOME/$(basename "$item")"
       cp -r "$item" "$target"
       log_success "Restored: $(basename "$item")"
     fi
