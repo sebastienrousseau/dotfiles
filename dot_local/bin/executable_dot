@@ -3,7 +3,7 @@ set -e
 
 # Dotfiles CLI Entry Point - v0.2.478
 
-VERSION="0.2.478"
+VERSION="0.2.481"
 
 COMMAND="$1"
 if [ -n "$1" ]; then
@@ -25,13 +25,14 @@ show_help() {
     echo "  edit        Open chezmoi source in \$EDITOR"
     echo ""
     echo "Diagnostics:"
-    echo "  doctor      Check system health and configuration"
-    echo "  heal        Auto-repair common dotfiles issues"
-    echo "  health      Run comprehensive health check"
-    echo "  rollback    Rollback dotfiles to a previous state"
-    echo "  drift       Drift dashboard (detailed chezmoi status)"
-    echo "  history     Shell history analysis"
-    echo "  benchmark   Run shell startup benchmark"
+    echo "  doctor         Check system health and configuration"
+    echo "  heal           Auto-repair common dotfiles issues"
+    echo "  health         Run comprehensive health dashboard"
+    echo "  security-score Security assessment with scoring"
+    echo "  rollback       Rollback dotfiles to a previous state"
+    echo "  drift          Drift dashboard (detailed chezmoi status)"
+    echo "  history        Shell history analysis"
+    echo "  benchmark      Run shell startup benchmark (--detailed, --profile)"
     echo ""
     echo "Tools:"
     echo "  tools       Show or install nix packages (dot tools [install])"
@@ -257,9 +258,10 @@ case "$COMMAND" in
         fi
         ;;
     heal) run_script "scripts/ops/heal.sh" "Heal script" "$@" ;;
-    health|health-check) run_script "scripts/ops/health-check.sh" "Health check script" "$@" ;;
+    health|health-check) run_script "scripts/diagnostics/health.sh" "Health dashboard" "$@" ;;
+    security-score) run_script "scripts/diagnostics/security-score.sh" "Security score" "$@" ;;
     rollback) run_script "scripts/ops/rollback.sh" "Rollback script" "$@" ;;
-    benchmark) run_script "scripts/tests/benchmark.sh" "Benchmark script" "$@" ;;
+    benchmark) run_script "scripts/diagnostics/benchmark.sh" "Benchmark script" "$@" ;;
     tune)
         SRC_DIR="$(resolve_source_dir)"
         if [ -z "$SRC_DIR" ]; then

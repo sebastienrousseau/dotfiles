@@ -170,6 +170,11 @@ if command -v zoxide >/dev/null; then
   _cached_eval zoxide-init zoxide init zsh
 fi
 
+# Mise (Runtime Version Manager) - Replaces asdf/pyenv/nvm
+if command -v mise >/dev/null; then
+  _cached_eval mise-init mise activate zsh
+fi
+
 # FZF (Fuzzy Finder) - Cross-platform detection
 if command -v fzf >/dev/null; then
   # Detect FZF shell integration path (Homebrew, apt, manual install)

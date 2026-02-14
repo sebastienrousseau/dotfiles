@@ -1,0 +1,32 @@
+# Aider configuration
+# https://aider.chat/docs/config/options.html
+
+# Model settings
+model: claude-3-5-sonnet-latest
+edit-format: diff
+
+# Git settings
+auto-commits: true
+dirty-commits: false
+attribute-author: true
+attribute-commit-message: true
+
+# UI settings
+dark-mode: true
+pretty: true
+stream: true
+
+# Code settings
+auto-lint: true
+lint-cmd: "npm run lint"
+auto-test: false
+
+# File handling
+gitignore: true
+aiderignore: true
+
+# History
+restore-chat-history: true
+
+# Voice (if enabled)
+# voice-language: en

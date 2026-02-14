@@ -1,14 +1,118 @@
+# Active profile - change this to switch configurations
+# Options: minimal, laptop, workstation, server, devops
 profile = "laptop"
+
+# Visual theme
 theme = "tokyonight-night"
+
+# Terminal settings
 terminal_font_family = "JetBrainsMono Nerd Font"
 terminal_font_size = 12
+
+# Git identity (set via chezmoi init prompts)
 name = ""
 email = ""
 signingkey = ""
 
+# ============================================================================
+# Feature Flags (controlled by profile or override manually)
+# ============================================================================
 [features]
+# Core shell
 zsh = true
+starship = true
+
+# Editors
 nvim = true
+emacs = false
+
+# Terminal multiplexers
 tmux = true
+zellij = false
+
+# GUI applications
 gui = true
+
+# Secrets management
 secrets = true
+
+# Development tools
+nodejs = true
+python = true
+rust = true
+go = true
+docker = true
+
+# AI tools
+ai_tools = true
+
+# Cloud/DevOps tools
+kubernetes = true
+terraform = false
+aws = false
+
+# ============================================================================
+# Profile Definitions
+# ============================================================================
+
+# Minimal: Essential tools only (fast startup, low footprint)
+[profiles.minimal]
+description = "Essential tools for quick setup"
+features = ["zsh", "starship", "nvim"]
+install_fonts = false
+install_gui_apps = false
+
+# Laptop: Standard development setup
+[profiles.laptop]
+description = "Full development environment for personal laptop"
+features = ["zsh", "starship", "nvim", "tmux", "gui", "secrets", "nodejs", "python", "rust", "ai_tools"]
+install_fonts = true
+install_gui_apps = true
+
+# Workstation: Full power with extra tools
+[profiles.workstation]
+description = "Complete setup with all bells and whistles"
+features = ["zsh", "starship", "nvim", "tmux", "zellij", "gui", "secrets", "nodejs", "python", "rust", "go", "docker", "kubernetes", "ai_tools"]
+install_fonts = true
+install_gui_apps = true
+
+# Server: Headless, no GUI, optimized for remote work
+[profiles.server]
+description = "Headless server/remote environment"
+features = ["zsh", "starship", "nvim", "tmux", "secrets", "docker"]
+install_fonts = false
+install_gui_apps = false
+
+# DevOps: Infrastructure and cloud tools focus
+[profiles.devops]
+description = "Cloud and infrastructure focused"
+features = ["zsh", "starship", "nvim", "tmux", "secrets", "docker", "kubernetes", "terraform", "aws"]
+install_fonts = false
+install_gui_apps = false
+
+# ============================================================================
+# Tool-specific configuration
+# ============================================================================
+
+[tools]
+# Node.js version manager
+node_manager = "fnm"  # fnm, nvm, or mise
+default_node_version = "22"
+
+# Python version manager
+python_manager = "mise"  # pyenv, mise, or system
+
+# Secrets backend
+secrets_backend = "age"  # age, sops, or gpg
+
+# Shell benchmark threshold (ms)
+shell_startup_threshold = 200
+
+[tools.ai]
+# Default AI provider for CLI tools
+default_provider = "anthropic"
+# Available models
+claude_model = "claude-3-5-sonnet-latest"
+openai_model = "gpt-4-turbo-preview"
+# Local model for offline use
+local_model = "llama3.2"
