@@ -309,10 +309,6 @@ Some bundled third‑party dependencies are licensed under GPL‑3.0; the LICENS
 
 <div align="center">
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
-
----
-
 🎨 Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)**
 🚀 Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
 
