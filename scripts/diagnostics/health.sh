@@ -14,11 +14,11 @@ GRAY='\033[0;90m'
 NC='\033[0m'
 
 # Parse arguments
-# shellcheck disable=SC2034  # VERBOSE is used for future verbose output
 VERBOSE=false
 JSON_OUTPUT=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    # shellcheck disable=SC2034
     --verbose|-v) VERBOSE=true; shift ;;
     --json) JSON_OUTPUT=true; shift ;;
     *) shift ;;
@@ -26,7 +26,6 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Health check results
-# shellcheck disable=SC2034  # RESULTS used in check function
 declare -A RESULTS
 TOTAL_CHECKS=0
 PASSED_CHECKS=0
@@ -43,6 +42,7 @@ check() {
   case "$status" in
     pass)
       PASSED_CHECKS=$((PASSED_CHECKS + 1))
+      # shellcheck disable=SC2034
       RESULTS["$name"]="pass"
       if ! $JSON_OUTPUT; then
         printf "${GREEN}✓${NC} %-35s ${GREEN}OK${NC}\n" "$name"
@@ -50,6 +50,7 @@ check() {
       ;;
     warn)
       WARNINGS=$((WARNINGS + 1))
+      # shellcheck disable=SC2034
       RESULTS["$name"]="warn"
       if ! $JSON_OUTPUT; then
         printf "${YELLOW}⚠${NC} %-35s ${YELLOW}WARNING${NC}"
@@ -59,6 +60,7 @@ check() {
       ;;
     fail)
       FAILURES=$((FAILURES + 1))
+      # shellcheck disable=SC2034
       RESULTS["$name"]="fail"
       if ! $JSON_OUTPUT; then
         printf "${RED}✗${NC} %-35s ${RED}FAILED${NC}"
@@ -226,9 +228,9 @@ run_checks() {
   local font_found=false
   if fc-list 2>/dev/null | grep -qi "JetBrains"; then
     font_found=true
-  elif [[ -d "$HOME/Library/Fonts" ]] && ls "$HOME/Library/Fonts" 2>/dev/null | grep -qi jetbrains; then
+  elif [[ -d "$HOME/Library/Fonts" ]] && compgen -G "$HOME/Library/Fonts/"*[Jj]et[Bb]rains* >/dev/null 2>&1; then
     font_found=true
-  elif [[ -d "$HOME/.local/share/fonts" ]] && ls "$HOME/.local/share/fonts" 2>/dev/null | grep -qi jetbrains; then
+  elif [[ -d "$HOME/.local/share/fonts" ]] && compgen -G "$HOME/.local/share/fonts/"*[Jj]et[Bb]rains* >/dev/null 2>&1; then
     font_found=true
   fi
 
@@ -319,15 +321,16 @@ print_summary() {
   
   printf "  Health Score: ["
   if [[ $score -ge 80 ]]; then
-    printf "${GREEN}"
+    printf '%s' "${GREEN}"
   elif [[ $score -ge 60 ]]; then
-    printf "${YELLOW}"
+    printf '%s' "${YELLOW}"
   else
-    printf "${RED}"
+    printf '%s' "${RED}"
   fi
   printf "%${filled}s" | tr ' ' '█'
-  printf "${NC}%${empty}s" | tr ' ' '░'
-  printf "] ${score}%%\n\n"
+  printf '%s' "${NC}"
+  printf "%${empty}s" | tr ' ' '░'
+  printf "] %s%%\n\n" "${score}"
   
   if [[ $score -ge 90 ]]; then
     echo -e "  ${GREEN}⚡ Excellent! Your dotfiles are in great shape.${NC}"

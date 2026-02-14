@@ -305,14 +305,15 @@ print_summary() {
   
   printf "  Score: ["
   if [[ $score -ge 80 ]]; then
-    printf "${GREEN}"
+    printf '%s' "${GREEN}"
   elif [[ $score -ge 60 ]]; then
-    printf "${YELLOW}"
+    printf '%s' "${YELLOW}"
   else
-    printf "${RED}"
+    printf '%s' "${RED}"
   fi
   printf "%${filled}s" | tr ' ' '█'
-  printf "${NC}%${empty}s" | tr ' ' '░'
+  printf '%s' "${NC}"
+  printf "%${empty}s" | tr ' ' '░'
   printf "] "
   
   # Grade
