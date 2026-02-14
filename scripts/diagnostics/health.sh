@@ -13,9 +13,8 @@ CYAN='\033[0;36m'
 GRAY='\033[0;90m'
 NC='\033[0m'
 
-# Parse arguments
-# shellcheck disable=SC2034  # VERBOSE reserved for future verbose output
-VERBOSE=false
+# Parse arguments (VERBOSE exported for potential use by sourced scripts)
+export VERBOSE=false
 JSON_OUTPUT=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
