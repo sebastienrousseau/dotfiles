@@ -1,6 +1,6 @@
 profile = "laptop"
 theme = "tokyonight-night"
-terminal_font_family = "JetBrains Mono"
+terminal_font_family = "JetBrainsMono Nerd Font"
 terminal_font_size = 12
 name = ""
 email = ""
