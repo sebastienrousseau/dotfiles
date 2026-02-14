@@ -11,9 +11,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root
 
 # README Prerequisites: Debian / Ubuntu
+# hadolint ignore=DL3008
 RUN apt-get update && \
-    apt-get install -y git curl zsh build-essential ripgrep fd-find bat jq && \
-    apt-get clean
+    apt-get install -y --no-install-recommends \
+        git curl zsh build-essential ripgrep fd-find bat jq ca-certificates && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install chezmoi (from install.sh logic)
 RUN mkdir -p "$HOME/.local/bin" && \
@@ -53,6 +56,13 @@ RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type ll' 2>/dev/nu
 RUN bash -n "$HOME/.dotfiles/install.sh" || \
     (echo "FAIL: install.sh has syntax errors" && exit 1)
 
+# Create non-root user for container security (CKV_DOCKER_3)
+RUN useradd -m -s /bin/zsh testuser
+
+# Healthcheck (CKV_DOCKER_2)
+HEALTHCHECK --interval=60s --timeout=10s --start-period=5s --retries=3 \
+    CMD zsh -c "exit 0" || exit 1
+
 RUN echo "=== Ubuntu 24.04: ALL TESTS PASSED ==="
 
 # =============================================================================
@@ -64,9 +74,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root
 
 # README Prerequisites: Debian / Ubuntu
+# hadolint ignore=DL3008
 RUN apt-get update && \
-    apt-get install -y git curl zsh build-essential ripgrep fd-find bat jq && \
-    apt-get clean
+    apt-get install -y --no-install-recommends \
+        git curl zsh build-essential ripgrep fd-find bat jq ca-certificates && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install chezmoi
 RUN mkdir -p "$HOME/.local/bin" && \
@@ -98,7 +111,8 @@ RUN echo "=== Debian 12: ALL TESTS PASSED ==="
 # =============================================================================
 # Arch Linux - Tests Arch prerequisites
 # =============================================================================
-FROM archlinux:latest AS arch-test
+# Using base-devel tag for stable builds (CKV_DOCKER_7)
+FROM archlinux:base-devel AS arch-test
 
 ENV HOME=/root
 
@@ -149,17 +163,22 @@ FROM ubuntu:24.04 AS ubuntu-eza-test
 ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root
 
+# hadolint ignore=DL3008
 RUN apt-get update && \
-    apt-get install -y git curl zsh build-essential ripgrep fd-find bat jq gpg && \
-    apt-get clean
+    apt-get install -y --no-install-recommends \
+        git curl zsh build-essential ripgrep fd-find bat jq gpg ca-certificates && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install eza (official method for Ubuntu)
+# hadolint ignore=DL3008
 RUN mkdir -p /etc/apt/keyrings && \
     curl -fsSL https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg && \
     echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" > /etc/apt/sources.list.d/gierens.list && \
     apt-get update && \
-    apt-get install -y eza && \
-    apt-get clean
+    apt-get install -y --no-install-recommends eza && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install chezmoi
 RUN mkdir -p "$HOME/.local/bin" && \

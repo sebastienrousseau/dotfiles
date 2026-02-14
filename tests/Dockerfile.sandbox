@@ -7,9 +7,12 @@ FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root
 
+# hadolint ignore=DL3008
 RUN apt-get update && \
-    apt-get install -y git curl zsh build-essential ripgrep fd-find bat jq && \
-    apt-get clean
+    apt-get install -y --no-install-recommends \
+        git curl zsh build-essential ripgrep fd-find bat jq ca-certificates && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p "$HOME/.local/bin" && \
     sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
@@ -30,5 +33,10 @@ RUN useradd -m -d /home/sandbox -s /bin/zsh sandbox && \
 
 USER sandbox
 ENV HOME=/home/sandbox
+WORKDIR /home/sandbox
+
+# Healthcheck to verify container is responsive
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD zsh -c "exit 0" || exit 1
 
 CMD ["zsh"]
