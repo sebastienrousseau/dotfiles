@@ -33,15 +33,27 @@ backup_managed_files() {
     return
   fi
 
+  local managed_files
+  if ! managed_files=$(chezmoi managed --path-style=absolute 2>/dev/null); then
+    echo "Error: 'chezmoi managed' command failed. Unable to determine files to back up." >&2
+    # Return a negative number to indicate an error
+    echo "-1"
+    return
+  fi
+
   while IFS= read -r file; do
     [ -z "$file" ] && continue
     if [ -e "$file" ]; then
       local rel="${file#"$HOME"/}"
       mkdir -p "$backup_dir/$(dirname "$rel")"
-      cp -a "$file" "$backup_dir/$rel"
+      if ! cp -a "$file" "$backup_dir/$rel"; then
+        echo "Error: Failed to copy '$file' to backup directory." >&2
+        echo "-1"
+        return
+      fi
       backup_count=$((backup_count + 1))
     fi
-  done < <(chezmoi managed --path-style=absolute 2>/dev/null || true)
+  done <<< "$managed_files"
 
   echo "$backup_count"
 }
@@ -60,9 +72,12 @@ perform_backup() {
 
   if [ "$backup_count" -gt 0 ]; then
     echo "   Backed up $backup_count files to $backup_dir"
-  else
+  elif [ "$backup_count" -eq 0 ]; then
     echo "   No existing dotfiles to back up."
     rm -rf "$backup_dir" 2>/dev/null || true
+  else
+    # backup_count is negative, indicating an error
+    error "Backup failed. Please check the error messages above."
   fi
 
   return 0

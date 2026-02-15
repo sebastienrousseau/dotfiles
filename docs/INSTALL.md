@@ -26,7 +26,7 @@ Optional (feature-dependent):
 ### One-liner (recommended)
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.480/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 exec zsh
 ```
 
@@ -45,9 +45,12 @@ exec zsh
 
 ### Using Nix (alternative)
 
-If you have Nix with flakes enabled:
+If you have Nix with flakes enabled, you can enter a development shell after cloning the repository:
 
 ```bash
+# First, clone the repository if you haven't already
+git clone https://github.com/sebastienrousseau/dotfiles.git ~/.dotfiles
+
 # Enter development shell with all tools
 nix develop ~/.dotfiles/nix
 

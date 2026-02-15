@@ -10,7 +10,7 @@ This document defines the configuration management approach for this development
 
 **Role:** Source of truth for all managed dotfiles
 **Location:** `~/.dotfiles/` (chezmoi source directory)
-**Managed Files:** 209 files/directories
+**Managed Files:** See `chezmoi managed`
 
 Chezmoi handles:
 - Shell configurations (.bashrc, .zshrc, .profile, .zshenv, .zprofile)
@@ -58,7 +58,7 @@ Euxis is intentionally separate from chezmoi because:
 
 ```toml
 profile = "laptop"           # Machine profile
-theme = "tokyonight-night"   # Color scheme
+theme = "catppuccin-mocha"   # Color scheme
 terminal_font_family = "JetBrains Mono"
 terminal_font_size = 12
 
@@ -101,7 +101,7 @@ Machine-specific exclusions based on profile and features.
 
 ```bash
 # On new machine
-chezmoi init https://github.com/<user>/dotfiles.git
+chezmoi init https://github.com/sebastienrousseau/dotfiles.git
 chezmoi apply
 
 # On existing machine

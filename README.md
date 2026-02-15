@@ -5,7 +5,7 @@
 # Dotfiles — A Fast, Idempotent Shell Environment
 
 [![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions)
-[![Version](https://img.shields.io/badge/Version-v0.2.481-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.481)
+[![Version](https://img.shields.io/badge/Version-v0.2.482-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 [![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases)
 [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
@@ -66,13 +66,13 @@ This is **infrastructure**, not an ad‑hoc shell script.
 
 ```bash
 # Works on macOS, Linux, and WSL
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.481/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 exec zsh
 ```
 
 For non‑interactive installs (servers and CI):
 ```bash
-DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.481/install.sh)"
+DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 ```
 
 ---
@@ -136,19 +136,23 @@ Run `dot --help` or `dot <command> --help` for inline documentation.
 | `dot drift` | Drift dashboard (chezmoi status) | Diagnostics |
 | `dot history` | Shell history analysis | Diagnostics |
 | `dot doctor` | Check system health and configuration | Diagnostics |
+| `dot heal` | Auto-repair common dotfiles issues | Diagnostics |
 | `dot health` | Comprehensive health dashboard (37 checks) | Diagnostics |
 | `dot security-score` | Security assessment with grading | Diagnostics |
 | `dot benchmark` | Shell startup benchmark (`--detailed`, `--profile`) | Diagnostics |
 | `dot restore` | Restore from backup or git ref | Diagnostics |
+| `dot rollback` | Rollback dotfiles to a previous state | Diagnostics |
 | `dot theme` | Switch terminal theme (dark/light) | UX |
 | `dot wallpaper` | Apply a wallpaper from your library | UX |
 | `dot keys` | Show keybindings catalog | UX |
 | `dot learn` | Interactive tour of tools (requires `gum`) | UX |
 | `dot fonts` | Install Nerd Fonts | UX |
+| `dot tune` | Apply OS tuning (opt-in) | UX |
 | `dot sandbox` | Launch a safe sandbox preview | Tools |
 | `dot tools` | Show tools or install through Nix | Tools |
 | `dot tools install` | Enter Nix development shell | Tools |
 | `dot new` | Create a new project from a template | Tools |
+| `dot packages` | List installed packages | Tools |
 | `dot log-rotate` | Rotate `~/.local/share/dotfiles.log` | Tools |
 | `dot secrets-init` | Initialise age key for secrets | Secrets |
 | `dot secrets` | Edit encrypted secrets | Secrets |

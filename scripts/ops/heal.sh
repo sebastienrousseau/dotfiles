@@ -102,19 +102,26 @@ create_pre_heal_backup() {
   local rollback_script="$REPO_ROOT/scripts/ops/rollback.sh"
   if [[ -f "$rollback_script" ]]; then
     log_info "Creating backup before heal..."
-    bash "$rollback_script" backup --force 2>/dev/null || true
+    if ! bash "$rollback_script" backup --force; then
+      log_error "Pre-heal backup failed. Aborting."
+      exit 1
+    fi
   else
     # Minimal inline backup
+    log_warn "Rollback script not found. Performing minimal inline backup."
     local timestamp
     timestamp=$(date +"%Y%m%d_%H%M%S")
     local backup_path="$BACKUP_DIR/backup_${timestamp}_pre_heal"
     mkdir -p "$backup_path"
     for f in "$HOME/.bashrc" "$HOME/.zshrc" "$HOME/.profile"; do
       if [[ -f "$f" ]]; then
-        cp -a "$f" "$backup_path/" 2>/dev/null || true
+        if ! cp -a "$f" "$backup_path/"; then
+          log_error "Inline backup failed: Could not copy $f. Aborting."
+          exit 1
+        fi
       fi
     done
-    log_info "Backup created at $backup_path"
+    log_info "Minimal backup created at $backup_path"
   fi
 }
 
@@ -159,29 +166,16 @@ install_package() {
 # Map command names to package names per package manager
 get_package_name() {
   local cmd="$1"
-  local pkg_mgr
-  pkg_mgr=$(detect_pkg_manager)
-
   case "$cmd" in
-    rg)
-      case "$pkg_mgr" in
-        apt | dnf) echo "ripgrep" ;;
-        *) echo "ripgrep" ;;
-      esac
-      ;;
-    bat)
-      case "$pkg_mgr" in
-        apt) echo "bat" ;;
-        *) echo "bat" ;;
-      esac
-      ;;
+    rg) echo "ripgrep" ;;
+    bat) echo "bat" ;; # The package is usually called 'bat'
     *) echo "$cmd" ;;
   esac
 }
 
 heal_missing_dependencies() {
   log_step "Checking core dependencies"
-  local deps=(chezmoi starship rg bat)
+  local deps=(chezmoi starship rg) # 'bat' handled separately
   local missing=()
 
   for cmd in "${deps[@]}"; do
@@ -190,6 +184,12 @@ heal_missing_dependencies() {
       ISSUES_FOUND=$((ISSUES_FOUND + 1))
     fi
   done
+
+  # Special check for bat/batcat
+  if ! command -v bat >/dev/null 2>&1 && ! command -v batcat >/dev/null 2>&1; then
+    missing+=("bat")
+    ISSUES_FOUND=$((ISSUES_FOUND + 1))
+  fi
 
   if [[ ${#missing[@]} -eq 0 ]]; then
     log_success "All core dependencies present"

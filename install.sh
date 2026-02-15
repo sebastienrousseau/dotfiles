@@ -179,18 +179,44 @@ if [ "$LIBS_LOADED" = "0" ]; then
     local backup_dir
     backup_dir="$HOME/.dotfiles.bak.$(date +"%Y%m%d_%H%M%S")"
     local count=0
-    if command -v chezmoi >/dev/null && [ -f "$HOME/.config/chezmoi/chezmoi.toml" ]; then
-      while IFS= read -r file; do
-        [ -z "$file" ] && continue
-        if [ -e "$file" ]; then
-          local rel="${file#"$HOME"/}"
-          mkdir -p "$backup_dir/$(dirname "$rel")"
-          cp -a "$file" "$backup_dir/$rel"
-          count=$((count + 1))
-        fi
-      done < <(chezmoi managed --path-style=absolute 2>/dev/null || true)
+    
+    if ! command -v chezmoi >/dev/null || ! [ -f "$HOME/.config/chezmoi/chezmoi.toml" ]; then
+      echo "   chezmoi not found or not configured. Skipping backup."
+      return
     fi
-    [ "$count" -gt 0 ] && echo "   Backed up $count files to $backup_dir" || echo "   No files to back up."
+
+    local managed_files
+    if ! managed_files=$(chezmoi managed --path-style=absolute 2>/dev/null); then
+      error "Backup failed: 'chezmoi managed' command failed."
+      return 1
+    fi
+
+    if [ -z "$managed_files" ]; then
+      echo "   No existing dotfiles to back up."
+      return
+    fi
+    
+    mkdir -p "$backup_dir"
+    
+    while IFS= read -r file; do
+      [ -z "$file" ] && continue
+      if [ -e "$file" ]; then
+        local rel="${file#"$HOME"/}"
+        mkdir -p "$backup_dir/$(dirname "$rel")"
+        if ! cp -a "$file" "$backup_dir/$rel"; then
+          error "Backup failed: Could not copy $file"
+          return 1
+        fi
+        count=$((count + 1))
+      fi
+    done <<< "$managed_files"
+    
+    if [ "$count" -gt 0 ]; then
+      echo "   Backed up $count files to $backup_dir"
+    else
+      echo "   No existing dotfiles to back up."
+      rm -rf "$backup_dir" 2>/dev/null || true
+    fi
   }
 fi
 

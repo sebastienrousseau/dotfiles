@@ -12,7 +12,7 @@ This guide covers the core workflows to keep your dotfiles running well across p
 - **Update system**:
   ```bash
   # Updates Dotfiles AND Homebrew packages
-  chezmoi update
+  dot update
   ```
   *Behind the scenes, this runs `brew bundle install` to match the `Brewfile.lock.json`.*
 
@@ -29,13 +29,13 @@ This guide covers the core workflows to keep your dotfiles running well across p
   sudo apt update && sudo apt upgrade -y
   
   # 2. Update Dotfiles
-  chezmoi update
+  dot update
   ```
   > [!NOTE]
   > On Linux, `chezmoi` focuses on configuration. Package updates work best with the OS package manager to avoid `sudo` conflicts.
 
 - **Troubleshooting**:
-  - **Font issues**: If icons are missing, run `./install/provision/run_onchange_50-install-fonts.sh` manually.
+  - **Font issues**: If icons are missing, run `dot fonts` to reinstall them.
   - **ZorinOS/GNOME**: Custom keybindings may require `dconf load` if Chezmoi does not apply them automatically.
 
 ### Windows (WSL2)
@@ -60,11 +60,13 @@ dot apply
 *Triggers: `dot_zshrc` reload, audit logging.*
 
 ### Roll back
-If an update breaks your setup, revert:
+If an update breaks your setup, you can use the `dot rollback` command, which provides a guided rollback to a previous state.
+
+For a manual rollback:
 ```bash
 cd ~/.dotfiles
 git reset --hard HEAD@{1}  # Go back 1 operation
-chezmoi apply
+dot apply
 ```
 
 ### Debug

@@ -121,6 +121,7 @@ validate_config() {
   log_info "Validating environment configuration..."
 
   local issues=0
+  local error_output
 
   # Check if .env.local exists
   if [[ ! -f "$ENV_LOCAL" ]]; then
@@ -139,10 +140,11 @@ validate_config() {
 
   # Source and validate environment
   # shellcheck source=/dev/null
-  if source "$ENV_LOCAL" 2>/dev/null; then
+  if error_output=$(source "$ENV_LOCAL" 2>&1); then
     log_success ".env.local loads successfully"
   else
-    log_error ".env.local has syntax errors"
+    log_error ".env.local has syntax errors:"
+    echo "$error_output" | while IFS= read -r line; do echo "  $line"; done
     issues=$((issues + 1))
   fi
 
