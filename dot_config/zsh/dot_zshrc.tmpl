@@ -182,25 +182,23 @@ fi
 
 # FZF (Fuzzy Finder) - Cross-platform detection
 if command -v fzf >/dev/null; then
-  _cached_eval fzf-init-shell-integration bash -c '
-    # Detect FZF shell integration path (Homebrew, apt, manual install)
-    local fzf_shell_dir=""
-    for dir in "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/fzf/shell" \
-              /usr/local/opt/fzf/shell \
-              /usr/share/fzf \
-              /usr/share/doc/fzf/examples \
-              "${HOME}/.fzf/shell"; do
-      [[ -d "$dir" ]] && { fzf_shell_dir="$dir"; break; }
-    done
+  # Detect FZF shell integration path (Homebrew, apt, manual install)
+  local fzf_shell_dir=""
+  for dir in "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/fzf/shell" \
+             /usr/local/opt/fzf/shell \
+             /usr/share/fzf \
+             /usr/share/doc/fzf/examples \
+             "${HOME}/.fzf/shell"; do
+    [[ -d "$dir" ]] && { fzf_shell_dir="$dir"; break; }
+  done
 
-    if [[ -n "$fzf_shell_dir" ]]; then
-      [[ -f "${fzf_shell_dir}/completion.zsh" ]] && source "${fzf_shell_dir}/completion.zsh"
-      [[ -f "${fzf_shell_dir}/key-bindings.zsh" ]] && source "${fzf_shell_dir}/key-bindings.zsh"
-    fi
+  if [[ -n "$fzf_shell_dir" ]]; then
+    [[ -f "${fzf_shell_dir}/completion.zsh" ]] && source "${fzf_shell_dir}/completion.zsh"
+    [[ -f "${fzf_shell_dir}/key-bindings.zsh" ]] && source "${fzf_shell_dir}/key-bindings.zsh"
+  fi
 
-    # Use fd/rg for fzf source if available
-    if command -v rg >/dev/null; then
-      export FZF_DEFAULT_COMMAND='"'"'rg --files --no-ignore --hidden --follow --glob "!.git/*"'"'"'
-    fi
-  '
+  # Use fd/rg for fzf source if available
+  if command -v rg >/dev/null; then
+    export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
+  fi
 fi
