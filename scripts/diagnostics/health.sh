@@ -36,6 +36,9 @@ check() {
   local name="$1"
   local status="$2"
   local message="${3:-}"
+  local width=80
+  local name_width=60
+  local status_width=$((width - name_width))
 
   TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 
@@ -44,21 +47,21 @@ check() {
       PASSED_CHECKS=$((PASSED_CHECKS + 1))
       RESULTS["$name"]="pass"
       if ! $JSON_OUTPUT; then
-        ui_success "$name"
+        printf "  %s %-${name_width}s %s[%s]%s\n" "${GREEN}${SYMBOL_SUCCESS}${NORMAL}" "$name" "${GREEN}" "  OK   " "${NORMAL}"
       fi
       ;;
     warn)
       WARNINGS=$((WARNINGS + 1))
       RESULTS["$name"]="warn"
       if ! $JSON_OUTPUT; then
-        ui_warn "$name" "$message"
+        printf "  %s %-${name_width}s %s[%s]%s %s\n" "${YELLOW}${SYMBOL_WARN}${NORMAL}" "$name" "${YELLOW}" "WARNING" "${NORMAL}" "$message"
       fi
       ;;
     fail)
       FAILURES=$((FAILURES + 1))
       RESULTS["$name"]="fail"
       if ! $JSON_OUTPUT; then
-        ui_error "$name" "$message"
+        printf "  %s %-${name_width}s %s[%s]%s %s\n" "${RED}${SYMBOL_ERROR}${NORMAL}" "$name" "${RED}" "FAILED " "${NORMAL}" "$message"
       fi
       ;;
   esac

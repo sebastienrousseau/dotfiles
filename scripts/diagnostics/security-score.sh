@@ -36,6 +36,9 @@ add_points() {
   local max="$3"
   local description="$4"
   local status="$5"
+  local width=80
+  local name_width=60
+  local status_width=$((width - name_width))
 
   TOTAL_POINTS=$((TOTAL_POINTS + points))
   MAX_POINTS=$((MAX_POINTS + max))
@@ -43,9 +46,15 @@ add_points() {
 
   if ! $JSON_OUTPUT && $VERBOSE; then
     case "$status" in
-      pass) ui_success "$description" ;;
-      warn) ui_warn "$description" ;;
-      fail) ui_error "$description" ;;
+      pass)
+        printf "  %s %-${name_width}s %s[%s]%s\n" "${GREEN}${SYMBOL_SUCCESS}${NORMAL}" "$description" "${GREEN}" "  OK   " "${NORMAL}"
+        ;;
+      warn)
+        printf "  %s %-${name_width}s %s[%s]%s\n" "${YELLOW}${SYMBOL_WARN}${NORMAL}" "$description" "${YELLOW}" "WARNING" "${NORMAL}"
+        ;;
+      fail)
+        printf "  %s %-${name_width}s %s[%s]%s\n" "${RED}${SYMBOL_ERROR}${NORMAL}" "$description" "${RED}" "FAILED " "${NORMAL}"
+        ;;
     esac
   fi
 }
