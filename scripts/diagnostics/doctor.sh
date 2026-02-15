@@ -9,67 +9,60 @@
 
 set -euo pipefail
 
-# Colors (respect NO_COLOR: https://no-color.org)
-if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
-  GREEN='\033[0;32m'
-  RED='\033[0;31m'
-  YELLOW='\033[1;33m'
-  NC='\033[0m'
-else
-  GREEN='' RED='' YELLOW='' NC=''
-fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
-echo " Dotfiles Doctor - System Diagnostics"
-echo "-------------------------------------"
+ui_logo_dot "Dot Doctor • System Diagnostics"
 
 Errors=0
 Warnings=0
 
-log_success() { echo -e "${GREEN} $1${NC}"; }
+log_success() { ui_success "$@"; }
 log_fail() {
-  echo -e "${RED} $1${NC}"
+  ui_error "$@"
   Errors=$((Errors + 1))
 }
 log_warn() {
-  echo -e "${YELLOW}️  $1${NC}"
+  ui_warn "$@"
   Warnings=$((Warnings + 1))
 }
 
 # 1. Check Dependencies
-echo "Checking Core Dependencies..."
+ui_section "Core Dependencies"
 for cmd in git curl chezmoi starship rg bat; do
   if command -v "$cmd" &>/dev/null; then
-    log_success "Found $cmd: $(command -v "$cmd")"
+    log_success "Found $cmd" "$(command -v "$cmd")"
   else
     log_fail "Missing $cmd"
   fi
 done
 
-echo -e "\nChecking Optional AI CLIs..."
+ui_section "Optional AI CLIs"
 for cmd in claude gemini sgpt ollama opencode aider; do
   if command -v "$cmd" &>/dev/null; then
-    log_success "Found $cmd: $(command -v "$cmd")"
+    log_success "Found $cmd" "$(command -v "$cmd")"
   else
     log_warn "Missing $cmd (optional)"
   fi
 done
 
 # 2. Check XDG Compliance
-echo -e "\nChecking Environment..."
+ui_section "Environment"
 if [[ -z "${XDG_CONFIG_HOME:-}" ]]; then
   log_warn "XDG_CONFIG_HOME is not set (Defaulting to ~/.config)"
 else
-  log_success "XDG_CONFIG_HOME=$XDG_CONFIG_HOME"
+  log_success "XDG_CONFIG_HOME" "$XDG_CONFIG_HOME"
 fi
 
 if [[ -z "${PIPX_HOME:-}" ]]; then
   log_warn "PIPX_HOME is not set (Check paths configuration)"
 else
-  log_success "PIPX_HOME=$PIPX_HOME"
+  log_success "PIPX_HOME" "$PIPX_HOME"
 fi
 
 # 3. Check Chezmoi State
-echo -e "\nChecking Chezmoi State..."
+ui_section "Chezmoi State"
 if chezmoi verify &>/dev/null; then
   log_success "Chezmoi state is synchronized"
 else
@@ -77,7 +70,7 @@ else
 fi
 
 # 4. Check Critical Files
-echo -e "\nChecking Critical Files..."
+ui_section "Critical Files"
 if [[ -f "$HOME/.zshrc" ]]; then
   log_success "Found .zshrc"
 else
@@ -85,7 +78,7 @@ else
 fi
 
 # 5. Check for Broken Symlinks (Ghost Links)
-echo -e "\nChecking for Broken Symlinks..."
+ui_section "Broken Symlinks"
 broken_links=0
 while IFS= read -r -d '' link; do
   if [[ ! -e "$link" ]]; then
@@ -101,15 +94,15 @@ else
 fi
 
 # Summary
-echo -e "\n-------------------------------------"
+ui_section "Summary"
 if [[ $Errors -eq 0 ]]; then
   if [[ $Warnings -eq 0 ]]; then
-    echo -e "${GREEN}All systems healthy! ${NC}"
+    ui_success "All systems healthy!"
   else
-    echo -e "${YELLOW}System healthy with $Warnings warnings.${NC}"
+    ui_warn "System healthy with $Warnings warnings."
   fi
 else
-  echo -e "${RED}Found $Errors errors and $Warnings warnings.${NC}"
-  echo "Run 'dot heal' to attempt auto-repair."
+  ui_error "Found $Errors errors and $Warnings warnings."
+  ui_info "Run 'dot heal' to attempt auto-repair."
   exit 1
 fi

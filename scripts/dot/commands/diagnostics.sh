@@ -7,14 +7,16 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh
 source "$SCRIPT_DIR/../lib/utils.sh"
+# shellcheck source=../lib/ui.sh
+source "$SCRIPT_DIR/../lib/ui.sh"
 
 cmd_doctor() {
-  echo "Running Dotfiles Doctor..."
   local src_dir
   src_dir="$(resolve_source_dir)"
   if [ -n "$src_dir" ] && [ -f "$src_dir/scripts/diagnostics/doctor.sh" ]; then
     exec bash "$src_dir/scripts/diagnostics/doctor.sh" "$@"
   fi
+  ui_logo_dot "Dot Doctor • System Diagnostics"
   exec chezmoi doctor "$@"
 }
 
@@ -40,6 +42,7 @@ cmd_drift() {
   if [ -n "$src_dir" ] && [ -f "$src_dir/scripts/diagnostics/drift-dashboard.sh" ]; then
     exec bash "$src_dir/scripts/diagnostics/drift-dashboard.sh" "$@"
   fi
+  ui_logo_dot "Dot Drift • Dashboard"
   exec chezmoi status "$@"
 }
 
@@ -94,7 +97,7 @@ case "${1:-}" in
     cmd_restore "$@"
     ;;
   *)
-    echo "Unknown diagnostics command: ${1:-}" >&2
+    ui_error "Unknown diagnostics command: ${1:-}"
     exit 1
     ;;
 esac

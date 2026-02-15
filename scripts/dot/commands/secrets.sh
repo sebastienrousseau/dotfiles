@@ -7,6 +7,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh
 source "$SCRIPT_DIR/../lib/utils.sh"
+# shellcheck source=../lib/ui.sh
+source "$SCRIPT_DIR/../lib/ui.sh"
 
 cmd_secrets_init() {
   local src_dir
@@ -22,18 +24,22 @@ cmd_secrets_init() {
   mkdir -p "$secrets_dir"
 
   if [ -f "$key_file" ]; then
-    echo "Age key already exists: $key_file"
+    ui_logo_dot "Dot Secrets • Init"
+    ui_info "Age key already exists: $key_file"
     exit 0
   fi
 
   if ! has_command age-keygen; then
-    die "age-keygen not found. Install 'age' first."
+    ui_logo_dot "Dot Secrets • Init"
+    ui_error "age-keygen not found. Install 'age' first."
+    exit 1
   fi
 
+  ui_logo_dot "Dot Secrets • Init"
   age-keygen -o "$key_file"
   chmod 600 "$key_file"
-  echo "Age key created at $key_file"
-  echo "Public key:"
+  ui_success "Age key created at $key_file"
+  ui_info "Public key:"
   age-keygen -y "$key_file"
 }
 
@@ -42,9 +48,12 @@ cmd_secrets() {
   local key_file="$secrets_dir/key.txt"
 
   if [ ! -f "$key_file" ]; then
-    die "No age key found. Run: dot secrets-init"
+    ui_logo_dot "Dot Secrets • Edit"
+    ui_error "No age key found. Run: dot secrets-init"
+    exit 1
   fi
 
+  ui_logo_dot "Dot Secrets • Edit"
   exec chezmoi edit --apply "$HOME/.config/chezmoi/encrypted_secrets.age"
 }
 
@@ -75,7 +84,7 @@ case "${1:-}" in
     cmd_ssh_key "$@"
     ;;
   *)
-    echo "Unknown secrets command: ${1:-}" >&2
+    ui_error "Unknown secrets command: ${1:-}"
     exit 1
     ;;
 esac

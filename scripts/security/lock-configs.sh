@@ -7,7 +7,14 @@
 # Description: Toggles immutability flags on critical configuration files.
 # Usage: lock-configs [lock|unlock]
 
-set -e
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
+# shellcheck source=../dot/lib/ui.sh
+source "$REPO_ROOT/scripts/dot/lib/ui.sh"
+
+ui_logo_dot "Dot Lock Configs • Security"
 
 ACTION="${1:-lock}"
 CRITICAL_FILES=(
@@ -28,30 +35,30 @@ else
     UNLOCK_CMD="sudo chattr -i"
     CHECK_CMD="lsattr"
   else
-    echo " 'chattr' not found. Cannot set immutability on Linux without it."
+    ui_error "'chattr' not found. Cannot set immutability on Linux without it."
     exit 1
   fi
 fi
 
 if [[ "$ACTION" == "lock" ]]; then
-  echo " Locking critical configuration files..."
+  ui_info "Locking critical configuration files..."
   CMD="$LOCK_CMD"
 elif [[ "$ACTION" == "unlock" ]]; then
-  echo " Unlocking critical configuration files..."
+  ui_info "Unlocking critical configuration files..."
   CMD="$UNLOCK_CMD"
 else
-  echo "Usage: $0 [lock|unlock]"
+  ui_error "Usage: $0 [lock|unlock]"
   exit 1
 fi
 
 for file in "${CRITICAL_FILES[@]}"; do
   if [[ -f "$file" ]]; then
-    echo "Processing: $file"
-    $CMD "$file" || echo "️ Failed to modify flags for $file (permission denied?)"
+    ui_info "Processing: $file"
+    $CMD "$file" || ui_warn "Failed to modify flags for $file (permission denied?)"
   fi
 done
 
-echo "Done. Environment state:"
+ui_section "Environment State"
 for file in "${CRITICAL_FILES[@]}"; do
   [[ -f "$file" ]] && $CHECK_CMD "$file"
 done

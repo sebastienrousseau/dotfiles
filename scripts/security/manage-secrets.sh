@@ -11,72 +11,58 @@ readonly REPO_ROOT
 readonly ENV_TEMPLATE="${REPO_ROOT}/.github/security-policies/environment-template.env"
 readonly ENV_LOCAL="${REPO_ROOT}/.env.local"
 
-# Color codes (respect NO_COLOR: https://no-color.org)
-if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
-  readonly RED='\033[0;31m'
-  readonly GREEN='\033[0;32m'
-  readonly YELLOW='\033[1;33m'
-  readonly BLUE='\033[0;34m'
-  readonly NC='\033[0m'
-else
-  readonly RED='' GREEN='' YELLOW='' BLUE='' NC=''
-fi
+# shellcheck source=../dot/lib/ui.sh
+source "$REPO_ROOT/scripts/dot/lib/ui.sh"
 
 # Help text
 show_help() {
-  cat <<EOF
-Secure Configuration Management
-
-USAGE:
-    $0 <command> [options]
-
-COMMANDS:
-    init        Initialize secure environment configuration
-    validate    Validate environment variables and security
-    template    Show environment variable template
-    check       Check for hardcoded secrets
-    rotate      Help rotate secrets and tokens
-    clean       Clean temporary files and logs
-
-OPTIONS:
-    -h, --help     Show this help message
-    -v, --verbose  Verbose output
-    -f, --force    Force operations (use with caution)
-
-EXAMPLES:
-    $0 init                 # Initialize .env.local from template
-    $0 validate             # Validate current configuration
-    $0 check                # Scan for hardcoded secrets
-    $0 rotate github        # Guide for rotating GitHub tokens
-    $0 clean                # Clean up temporary files
-
-SECURITY NOTES:
-    - Never commit .env.local to version control
-    - Use different tokens for different environments
-    - Rotate secrets regularly (every 90 days)
-    - Use least-privilege principle
-EOF
+  ui_logo_dot "Dot Secrets • Manage"
+  ui_section "Usage"
+  ui_bullet "$0 <command> [options]"
+  ui_section "Commands"
+  ui_bullet "init        Initialize secure environment configuration"
+  ui_bullet "validate    Validate environment variables and security"
+  ui_bullet "template    Show environment variable template"
+  ui_bullet "check       Check for hardcoded secrets"
+  ui_bullet "rotate      Help rotate secrets and tokens"
+  ui_bullet "clean       Clean temporary files and logs"
+  ui_section "Options"
+  ui_bullet "-h, --help     Show this help message"
+  ui_bullet "-v, --verbose  Verbose output"
+  ui_bullet "-f, --force    Force operations (use with caution)"
+  ui_section "Examples"
+  ui_bullet "$0 init                 # Initialize .env.local from template"
+  ui_bullet "$0 validate             # Validate current configuration"
+  ui_bullet "$0 check                # Scan for hardcoded secrets"
+  ui_bullet "$0 rotate github        # Guide for rotating GitHub tokens"
+  ui_bullet "$0 clean                # Clean up temporary files"
+  ui_section "Security Notes"
+  ui_bullet "Never commit .env.local to version control"
+  ui_bullet "Use different tokens for different environments"
+  ui_bullet "Rotate secrets regularly (every 90 days)"
+  ui_bullet "Use least-privilege principle"
 }
 
 # Logging functions
 log_info() {
-  echo -e "${BLUE}[INFO]${NC} $*"
+  ui_info "$@"
 }
 
 log_success() {
-  echo -e "${GREEN}[SUCCESS]${NC} $*"
+  ui_success "$@"
 }
 
 log_warning() {
-  echo -e "${YELLOW}[WARNING]${NC} $*"
+  ui_warn "$@"
 }
 
 log_error() {
-  echo -e "${RED}[ERROR]${NC} $*"
+  ui_error "$@"
 }
 
 # Initialize environment configuration
 init_config() {
+  ui_logo_dot "Dot Secrets • Manage"
   local force_init=false
   if [[ "${1:-}" == "--force" ]]; then
     force_init=true
@@ -103,9 +89,9 @@ init_config() {
 
   log_success ".env.local created from template"
   log_info "Next steps:"
-  echo "  1. Edit .env.local and configure required variables"
-  echo "  2. Run '$0 validate' to check configuration"
-  echo "  3. Source the file: source .env.local"
+  ui_bullet "Edit .env.local and configure required variables"
+  ui_bullet "Run '$0 validate' to check configuration"
+  ui_bullet "Source the file: source .env.local"
 
   # Add to .gitignore if not present
   if [[ -f "${REPO_ROOT}/.gitignore" ]]; then
@@ -118,6 +104,7 @@ init_config() {
 
 # Validate environment configuration
 validate_config() {
+  ui_logo_dot "Dot Secrets • Manage"
   log_info "Validating environment configuration..."
 
   local issues=0
@@ -176,9 +163,9 @@ validate_config() {
 
 # Show template
 show_template() {
+  ui_logo_dot "Dot Secrets • Manage"
   if [[ -f "$ENV_TEMPLATE" ]]; then
     log_info "Environment variable template:"
-    echo "----------------------------------------"
     cat "$ENV_TEMPLATE"
   else
     log_error "Template file not found: $ENV_TEMPLATE"
@@ -188,6 +175,7 @@ show_template() {
 
 # Check for hardcoded secrets
 check_secrets() {
+  ui_logo_dot "Dot Secrets • Manage"
   log_info "Scanning for hardcoded secrets..."
 
   local violations=0

@@ -16,26 +16,15 @@ BACKUP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/backups"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
 ROLLBACK_LOG="$STATE_DIR/rollback.log"
 MAX_BACKUPS=10
-
-# Colors (respect NO_COLOR: https://no-color.org)
-if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
-  RED='\033[0;31m'
-  GREEN='\033[0;32m'
-  YELLOW='\033[0;33m'
-  BLUE='\033[0;34m'
-  BOLD='\033[1m'
-  NC='\033[0m'
-else
-  RED='' GREEN='' YELLOW='' BLUE='' BOLD='' NC=''
-fi
+# shellcheck source=../dot/lib/ui.sh
+source "$REPO_ROOT/scripts/dot/lib/ui.sh"
 
 # Logging
-log() { echo -e "$*"; }
-log_info() { log "${BLUE}[INFO]${NC} $*"; }
-log_success() { log "${GREEN}[OK]${NC} $*"; }
-log_warn() { log "${YELLOW}[WARN]${NC} $*"; }
-log_error() { log "${RED}[ERROR]${NC} $*"; }
-log_step() { log "\n${BOLD}==> $*${NC}"; }
+log_info() { ui_info "$@"; }
+log_success() { ui_success "$@"; }
+log_warn() { ui_warn "$@"; }
+log_error() { ui_error "$@"; }
+log_step() { ui_section "$@"; }
 
 # Persistent logging
 persist_log() {
@@ -457,6 +446,7 @@ main() {
     esac
   done
 
+  ui_logo_dot "Dot Rollback • Recovery"
   ensure_dirs
 
   case "$command" in
@@ -474,8 +464,9 @@ main() {
         exit 1
       fi
       if [[ "$FORCE" != "1" ]] && [[ "$DRY_RUN" != "1" ]]; then
-        read -rp "Rollback to $(basename "$latest")? [y/N] " response
-        [[ ! "$response" =~ ^[Yy]$ ]] && exit 0
+        if ! ui_ask "Rollback to $(basename "$latest")?"; then
+          exit 0
+        fi
       fi
       perform_rollback "$latest" "$DRY_RUN"
       ;;
@@ -492,15 +483,17 @@ main() {
         exit 1
       fi
       if [[ "$FORCE" != "1" ]] && [[ "$DRY_RUN" != "1" ]]; then
-        read -rp "Rollback to $(basename "$backup")? [y/N] " response
-        [[ ! "$response" =~ ^[Yy]$ ]] && exit 0
+        if ! ui_ask "Rollback to $(basename "$backup")?"; then
+          exit 0
+        fi
       fi
       perform_rollback "$backup" "$DRY_RUN"
       ;;
     git-reset)
       if [[ "$FORCE" != "1" ]] && [[ "$DRY_RUN" != "1" ]]; then
-        read -rp "Reset to last known good commit? [y/N] " response
-        [[ ! "$response" =~ ^[Yy]$ ]] && exit 0
+        if ! ui_ask "Reset to last known good commit?"; then
+          exit 0
+        fi
       fi
       git_reset "$DRY_RUN"
       ;;

@@ -9,12 +9,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
 # Parse arguments
-VERBOSE=false
+VERBOSE=true
 JSON_OUTPUT=false
+QUIET=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --verbose | -v)
-      VERBOSE=true
+    --quiet | -q)
+      QUIET=true
       shift
       ;;
     --json)
@@ -28,6 +29,9 @@ done
 # Scoring
 TOTAL_POINTS=0
 MAX_POINTS=0
+MAX_POINTS_EXPECTED=100
+CHECKS_DONE=0
+CHECKS_TOTAL=17
 declare -A CATEGORY_SCORES
 
 add_points() {
@@ -39,13 +43,16 @@ add_points() {
 
   TOTAL_POINTS=$((TOTAL_POINTS + points))
   MAX_POINTS=$((MAX_POINTS + max))
+  CHECKS_DONE=$((CHECKS_DONE + 1))
   CATEGORY_SCORES["$category"]=$((${CATEGORY_SCORES[$category]:-0} + points))
 
-  if ! $JSON_OUTPUT && $VERBOSE; then
+  if ! $JSON_OUTPUT; then
+    local detail="(+${points}/${max})"
     case "$status" in
-      pass) ui_success "$description" ;;
-      warn) ui_warn "$description" ;;
-      fail) ui_error "$description" ;;
+      pass) ui_success "$description" "$detail" ;;
+      warn) ui_warn "$description" "$detail" ;;
+      fail) ui_error "$description" "$detail" ;;
+      unknown) ui_warn "$description" "(unknown)" ;;
     esac
   fi
 }
@@ -53,7 +60,9 @@ add_points() {
 # === Security Checks ===
 
 check_encryption() {
-  ui_section "Encryption (30 pts max)"
+  if ! $JSON_OUTPUT; then
+    ui_section "Encryption (30 pts max)"
+  fi
 
   # Age encryption tool
   if command -v age >/dev/null 2>&1; then
@@ -95,7 +104,9 @@ check_encryption() {
 }
 
 check_ssh() {
-  ui_section "SSH Security (25 pts max)"
+  if ! $JSON_OUTPUT; then
+    ui_section "SSH Security (25 pts max)"
+  fi
 
   # SSH directory permissions
   if [[ -d "${HOME}/.ssh" ]]; then
@@ -135,7 +146,9 @@ check_ssh() {
 }
 
 check_git() {
-  ui_section "Git Security (20 pts max)"
+  if ! $JSON_OUTPUT; then
+    ui_section "Git Security (20 pts max)"
+  fi
 
   # Git installed
   if ! command -v git >/dev/null 2>&1; then
@@ -166,7 +179,9 @@ check_git() {
 }
 
 check_system() {
-  ui_section "System Security (15 pts max)"
+  if ! $JSON_OUTPUT; then
+    ui_section "System Security (15 pts max)"
+  fi
 
   # Firewall (macOS or Linux)
   if [[ "$(uname)" == "Darwin" ]]; then
@@ -199,7 +214,6 @@ check_system() {
     if fdesetup status 2>/dev/null | grep -q "FileVault is On"; then
       add_points "system" 10 10 "Disk encryption (FileVault)" "pass"
     else
-.
       add_points "system" 0 10 "Disk encryption (FileVault)" "fail"
     fi
   else
@@ -225,7 +239,9 @@ check_system() {
 }
 
 check_secrets() {
-  ui_section "Secrets Management (10 pts max)"
+  if ! $JSON_OUTPUT; then
+    ui_section "Secrets Management (10 pts max)"
+  fi
 
   if [[ -d "${HOME}/.dotfiles" ]]; then
     if grep -rE "(api_key|api_secret|password|token)\\s*=\\s*['\"][^'\"]+['\"]" "${HOME}/.dotfiles" --include="*.sh" --include="*.zsh" --include="*.toml" 2>/dev/null | grep -v "example\|template\|placeholder" | head -1; then
@@ -270,7 +286,15 @@ print_summary() {
 
   ui_section "Summary"
   ui_key_value "Total Points" "${TOTAL_POINTS}/${MAX_POINTS}"
-  ui_key_value "Security Score" "${score}%"
+  local bar
+  bar=$(ui_progress_bar "$score" 24)
+  if [[ $score -ge 90 ]]; then
+    ui_key_value "Security Score" "${GREEN}${bar}${NORMAL} ${score}%"
+  elif [[ $score -ge 70 ]]; then
+    ui_key_value "Security Score" "${YELLOW}${bar}${NORMAL} ${score}%"
+  else
+    ui_key_value "Security Score" "${RED}${bar}${NORMAL} ${score}%"
+  fi
   ui_key_value "Grade" "$(get_grade "$score")"
 
   printf "\n"
@@ -285,7 +309,12 @@ print_summary() {
 }
 
 # Main
-ui_header "Security Score Assessment"
+ui_logo_dot "Dot Security Score • Assessment"
+if ! $JSON_OUTPUT; then
+  if ! $QUIET; then
+    ui_info "Scoring your security posture across ${MAX_POINTS_EXPECTED} points."
+  fi
+fi
 check_encryption
 check_ssh
 check_git

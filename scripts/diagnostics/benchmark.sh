@@ -4,13 +4,9 @@
 
 set -euo pipefail
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-NC='\033[0m'
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
 BENCHMARK_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/benchmarks"
 mkdir -p "$BENCHMARK_DIR"
@@ -37,12 +33,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-print_header() {
-  echo -e "\n${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-  echo -e "${CYAN}  Shell Performance Benchmark${NC}"
-  echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
-}
-
 # Basic timing function
 time_command() {
   local start end
@@ -54,7 +44,7 @@ time_command() {
 
 # Per-component profiling using zprof
 run_zsh_profile() {
-  echo -e "${BLUE}Running Zsh profiler (zprof)...${NC}\n"
+  ui_section "Zsh Profiler (zprof)"
 
   zsh -c '
     zmodload zsh/zprof
@@ -66,7 +56,7 @@ run_zsh_profile() {
 
 # Benchmark individual components
 benchmark_components() {
-  echo -e "${BLUE}Per-Component Timing:${NC}\n"
+  ui_section "Per-Component Timing"
   printf "%-35s %8s\n" "Component" "Time (ms)"
   echo "───────────────────────────────────────────────"
 
@@ -106,18 +96,20 @@ benchmark_components() {
 # Run hyperfine benchmark
 run_hyperfine() {
   if ! command -v hyperfine >/dev/null 2>&1; then
-    echo -e "${YELLOW}hyperfine not installed. Using basic timing.${NC}"
+    ui_warn "hyperfine not installed. Using basic timing."
     local times=()
     for _ in {1..5}; do
       times+=("$(time_command "zsh -i -c exit")")
     done
     local sum=0
     for t in "${times[@]}"; do sum=$((sum + t)); done
-    echo -e "\n${GREEN}Average startup time: $((sum / 5))ms${NC}"
+    printf "\n"
+    ui_success "Average startup time" "$((sum / 5))ms"
     return
   fi
 
-  echo -e "\n${BLUE}Running hyperfine benchmark (10 runs, 3 warmup)...${NC}\n"
+  ui_section "Hyperfine Benchmark"
+  ui_info "10 runs with 3 warmups"
   hyperfine --warmup 3 --runs 10 --shell=none \
     --export-json "$BENCHMARK_DIR/latest.json" \
     'zsh -i -c exit'
@@ -131,20 +123,25 @@ run_hyperfine() {
     local max_ms
     max_ms=$(jq '.results[0].max * 1000 | floor' "$BENCHMARK_DIR/latest.json")
 
-    echo -e "\n${GREEN}Results:${NC}"
-    echo "  Mean: ${mean_ms}ms"
-    echo "  Min:  ${min_ms}ms"
-    echo "  Max:  ${max_ms}ms"
+    printf "\n"
+    ui_section "Results"
+    ui_key_value "Mean" "${mean_ms}ms"
+    ui_key_value "Min" "${min_ms}ms"
+    ui_key_value "Max" "${max_ms}ms"
 
     # Performance rating
     if [[ $mean_ms -lt 100 ]]; then
-      echo -e "\n${GREEN}⚡ Excellent (<100ms)${NC}"
+      printf "\n"
+      ui_success "Excellent (<100ms)"
     elif [[ $mean_ms -lt 200 ]]; then
-      echo -e "\n${GREEN}✓ Good (<200ms)${NC}"
+      printf "\n"
+      ui_success "Good (<200ms)"
     elif [[ $mean_ms -lt 500 ]]; then
-      echo -e "\n${YELLOW}⚠ Acceptable (<500ms)${NC}"
+      printf "\n"
+      ui_warn "Acceptable (<500ms)"
     else
-      echo -e "\n${RED}✗ Slow (>500ms) - optimization needed${NC}"
+      printf "\n"
+      ui_error "Slow (>500ms) - optimization needed"
     fi
 
     # Save with timestamp for history
@@ -154,13 +151,13 @@ run_hyperfine() {
 
 # Compare with previous benchmarks
 compare_benchmarks() {
-  echo -e "${BLUE}Benchmark History:${NC}\n"
+  ui_section "Benchmark History"
 
   local files
   files=$(find "$BENCHMARK_DIR" -name "*.json" -type f | sort -r | head -10)
 
   if [[ -z "$files" ]]; then
-    echo "No benchmark history found."
+    ui_info "No benchmark history found."
     return
   fi
 
@@ -182,7 +179,7 @@ compare_benchmarks() {
 }
 
 # Main execution
-print_header
+ui_logo_dot "Dot Benchmark • Performance"
 
 if $PROFILE; then
   run_zsh_profile
@@ -196,6 +193,7 @@ else
   run_hyperfine
 fi
 
-echo -e "\n${CYAN}Tip: Run 'dot benchmark --detailed' for per-component timing${NC}"
-echo -e "${CYAN}     Run 'dot benchmark --profile' for zprof analysis${NC}"
-echo -e "${CYAN}     Run 'dot benchmark --compare' for history${NC}\n"
+ui_section "Tips"
+ui_bullet "dot benchmark --detailed  (per-component timing)"
+ui_bullet "dot benchmark --profile   (zprof analysis)"
+ui_bullet "dot benchmark --compare   (history)"

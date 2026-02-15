@@ -12,15 +12,8 @@ readonly REPO_ROOT
 readonly POLICIES_DIR="${REPO_ROOT}/.github/security-policies"
 readonly LOG_FILE="${REPO_ROOT}/.security-audit.log"
 
-# Color codes for output (respect NO_COLOR: https://no-color.org)
-if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
-  readonly RED='\033[0;31m'
-  readonly GREEN='\033[0;32m'
-  readonly YELLOW='\033[1;33m'
-  readonly NC='\033[0m'
-else
-  readonly RED='' GREEN='' YELLOW='' NC=''
-fi
+# shellcheck source=../dot/lib/ui.sh
+source "$REPO_ROOT/scripts/dot/lib/ui.sh"
 
 # Logging function
 log() {
@@ -299,6 +292,7 @@ EOF
 
 # Main execution
 main() {
+  ui_logo_dot "Dot Security • Policies"
   log "INFO" "Starting security policy enforcement..."
 
   # Initialize log file
@@ -321,13 +315,13 @@ main() {
 
   # Final result
   if [[ $total_violations -eq 0 ]]; then
-    echo -e "${GREEN}✅ All security checks passed!${NC}"
+    ui_success "All security checks passed!"
     log "INFO" "Security policy enforcement completed successfully"
     exit 0
   else
-    echo -e "${RED}❌ Security policy enforcement failed with ${total_violations} violations${NC}"
-    echo -e "${YELLOW}📋 Check ${LOG_FILE} for details${NC}"
-    echo -e "${YELLOW}📋 Review security-report.md for summary${NC}"
+    ui_error "Security policy enforcement failed with ${total_violations} violations"
+    ui_warn "Check ${LOG_FILE} for details"
+    ui_warn "Review security-report.md for summary"
     log "ERROR" "Security policy enforcement failed with ${total_violations} violations"
     exit 1
   fi

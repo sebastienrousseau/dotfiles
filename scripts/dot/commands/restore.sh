@@ -4,56 +4,53 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
+# shellcheck source=../dot/lib/ui.sh
+source "$REPO_ROOT/scripts/dot/lib/ui.sh"
+
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
 BACKUP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/backups"
 CHEZMOI_SOURCE="${HOME}/.local/share/chezmoi"
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-log_info() { echo -e "${BLUE}[INFO]${NC} $*"; }
-log_warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $*" >&2; }
-log_success() { echo -e "${GREEN}[OK]${NC} $*"; }
+log_info() { ui_info "$@"; }
+log_warn() { ui_warn "$@"; }
+log_error() { ui_error "$@"; }
+log_success() { ui_success "$@"; }
 
 usage() {
-  echo "Usage: dot restore [OPTIONS]"
-  echo ""
-  echo "Options:"
-  echo "  --list, -l       List available backups"
-  echo "  --latest         Restore from latest backup"
-  echo "  --git <ref>      Restore from git ref (commit, tag, branch)"
-  echo "  --diff <ref>     Show diff between current and ref"
-  echo "  --dry-run        Show what would be restored"
-  echo "  -h, --help       Show this help"
-  echo ""
-  echo "Examples:"
-  echo "  dot restore --list"
-  echo "  dot restore --latest"
-  echo "  dot restore --git HEAD~1"
-  echo "  dot restore --git v0.2.470"
+  ui_logo_dot "Dot Restore • Recovery"
+  ui_section "Usage"
+  ui_bullet "dot restore [OPTIONS]"
+  ui_section "Options"
+  ui_bullet "--list, -l       List available backups"
+  ui_bullet "--latest         Restore from latest backup"
+  ui_bullet "--git <ref>      Restore from git ref (commit, tag, branch)"
+  ui_bullet "--diff <ref>     Show diff between current and ref"
+  ui_bullet "--dry-run        Show what would be restored"
+  ui_bullet "-h, --help       Show this help"
+  ui_section "Examples"
+  ui_bullet "dot restore --list"
+  ui_bullet "dot restore --latest"
+  ui_bullet "dot restore --git HEAD~1"
+  ui_bullet "dot restore --git v0.2.470"
 }
 
 list_backups() {
+  ui_logo_dot "Dot Restore • Recovery"
   if [[ ! -d "$BACKUP_DIR" ]]; then
     log_warn "No backups found at $BACKUP_DIR"
     return 1
   fi
 
-  echo -e "${BLUE}Available Backups:${NC}"
-  echo "─────────────────────────────────────────"
+  ui_section "Available Backups"
 
   find "$BACKUP_DIR" -maxdepth 1 -type d -name "backup-*" -printf "%T@ %f\n" 2>/dev/null | sort -rn | cut -d' ' -f2- | while read -r backup; do
     echo "  $backup"
   done
 
-  echo ""
-  echo -e "${BLUE}Git History (last 10):${NC}"
-  echo "─────────────────────────────────────────"
+  printf "\n"
+  ui_section "Git History (last 10)"
 
   if [[ -d "$DOTFILES_DIR/.git" ]]; then
     git -C "$DOTFILES_DIR" log --oneline -10
@@ -76,6 +73,7 @@ restore_from_git() {
     return 1
   fi
 
+  ui_logo_dot "Dot Restore • Recovery"
   log_info "Restoring from git ref: $ref"
 
   if $dry_run; then
@@ -111,6 +109,7 @@ show_diff() {
     return 1
   fi
 
+  ui_logo_dot "Dot Restore • Recovery"
   git -C "$source_dir" diff "$ref"
 }
 
@@ -142,6 +141,7 @@ create_backup() {
 }
 
 restore_latest() {
+  ui_logo_dot "Dot Restore • Recovery"
   if [[ ! -d "$BACKUP_DIR" ]]; then
     log_error "No backups found"
     return 1

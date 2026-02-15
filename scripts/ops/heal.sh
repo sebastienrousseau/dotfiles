@@ -15,27 +15,16 @@ DOTFILES_SOURCE="$REPO_ROOT"
 BACKUP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/backups"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
 HEAL_LOG="$STATE_DIR/heal.log"
-
-# Colors (respect NO_COLOR: https://no-color.org)
-if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
-  RED='\033[0;31m'
-  GREEN='\033[0;32m'
-  YELLOW='\033[0;33m'
-  BLUE='\033[0;34m'
-  BOLD='\033[1m'
-  NC='\033[0m'
-else
-  RED='' GREEN='' YELLOW='' BLUE='' BOLD='' NC=''
-fi
+# shellcheck source=../dot/lib/ui.sh
+source "$REPO_ROOT/scripts/dot/lib/ui.sh"
 
 # Logging
-log() { printf -- "%s\n" "$*"; }
-log_info() { log "${BLUE}[INFO]${NC} $*"; }
-log_success() { log "${GREEN}[OK]${NC} $*"; }
-log_warn() { log "${YELLOW}[WARN]${NC} $*"; }
-log_error() { log "${RED}[ERROR]${NC} $*"; }
-log_step() { log "\n${BOLD}==> $*${NC}"; }
-log_dry() { log "${YELLOW}[DRY-RUN]${NC} Would: $*"; }
+log_info() { ui_info "$@"; }
+log_success() { ui_success "$@"; }
+log_warn() { ui_warn "$@"; }
+log_error() { ui_error "$@"; }
+log_step() { ui_section "$@"; }
+log_dry() { ui_warn "DRY-RUN" "Would: $*"; }
 
 # Persistent logging
 persist_log() {
@@ -401,10 +390,7 @@ heal_missing_xdg_dirs() {
 # =============================================================================
 
 main() {
-  printf "\n"
-  printf "==========================================\n"
-  printf "     Dotfiles Heal - Auto-Repair\n"
-  printf "==========================================\n"
+  ui_logo_dot "Dot Heal • Auto-Repair"
 
   if [[ "$DRY_RUN" == "1" ]]; then
     log_info "Running in dry-run mode (no changes will be made)"
@@ -412,11 +398,9 @@ main() {
 
   # Confirm before making changes (unless --force or --dry-run)
   if [[ "$DRY_RUN" != "1" ]] && [[ "$FORCE" != "1" ]]; then
-    printf "\n"
     log_warn "This will attempt to auto-repair your dotfiles environment."
     log_info "A backup will be created before any changes are made."
-    read -rp "Continue? [y/N] " response
-    if [[ ! "$response" =~ ^[Yy]$ ]]; then
+    if ! ui_ask "Continue?"; then
       log_info "Aborted."
       exit 0
     fi
@@ -435,8 +419,7 @@ main() {
   heal_missing_xdg_dirs || true
 
   # Summary
-  printf "\n"
-  printf "==========================================\n"
+  ui_section "Summary"
   if [[ "$DRY_RUN" == "1" ]]; then
     if [[ $ISSUES_FOUND -eq 0 ]]; then
       log_success "No issues found. System is healthy."
@@ -454,7 +437,6 @@ main() {
       log_info "Try running 'dot doctor' for detailed diagnostics."
     fi
   fi
-  printf "==========================================\n"
 }
 
 main
