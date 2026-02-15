@@ -12,6 +12,16 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
+# Disable colors if not in a TTY or NO_COLOR is set
+if [[ -z "${NO_COLOR:-}" ]] && [[ ! -t 1 ]]; then
+  RED=''
+  GREEN=''
+  YELLOW=''
+  BLUE=''
+  CYAN=''
+  NC=''
+fi
+
 # Parse arguments
 VERBOSE=false
 JSON_OUTPUT=false
@@ -306,33 +316,9 @@ print_summary() {
   echo -e "${CYAN}  Security Score${NC}"
   echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
-  # Score bar
-  local bar_width=30
-  local filled=$((score * bar_width / 100))
-  local empty=$((bar_width - filled))
-
-  printf "  Score: ["
-  if [[ $score -ge 80 ]]; then
-    printf '%s' "${GREEN}"
-  elif [[ $score -ge 60 ]]; then
-    printf '%s' "${YELLOW}"
-  else
-    printf '%s' "${RED}"
-  fi
-  printf "%${filled}s" | tr ' ' '█'
-  printf '%s' "${NC}"
-  printf "%${empty}s" | tr ' ' '░'
-  printf "] "
-
-  # Grade
   local grade
-  grade=$(get_grade $score)
-  case "$grade" in
-    A*) echo -e "${GREEN}${score}%  Grade: ${grade}${NC}" ;;
-    B*) echo -e "${GREEN}${score}%  Grade: ${grade}${NC}" ;;
-    C*) echo -e "${YELLOW}${score}%  Grade: ${grade}${NC}" ;;
-    *) echo -e "${RED}${score}%  Grade: ${grade}${NC}" ;;
-  esac
+  grade=$(get_grade "$score")
+  printf "  Score: %s%%  Grade: %s\n" "$score" "$grade"
 
   echo -e "\n  Points: ${TOTAL_POINTS}/${MAX_POINTS}"
   echo ""
