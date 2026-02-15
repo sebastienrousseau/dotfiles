@@ -271,6 +271,13 @@ else
   chezmoi apply "${APPLY_FLAGS[@]}"
 fi
 
+# Step 6: Install Nerd Fonts
+step "Installing Nerd Fonts..."
+if [ -f "$SOURCE_DIR/scripts/fonts/install-nerd-fonts.sh" ]; then
+  sh "$SOURCE_DIR/scripts/fonts/install-nerd-fonts.sh"
+fi
+
+
 # =============================================================================
 # Complete
 # =============================================================================

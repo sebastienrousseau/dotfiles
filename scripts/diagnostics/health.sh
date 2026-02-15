@@ -4,27 +4,11 @@
 
 set -euo pipefail
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-GRAY='\033[0;90m'
-NC='\033[0m'
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../lib/ui.sh
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
-# Disable colors if not in a TTY or NO_COLOR is set
-if [[ -z "${NO_COLOR:-}" ]] && [[ ! -t 1 ]]; then
-  RED=''
-  GREEN=''
-  YELLOW=''
-  BLUE=''
-  CYAN=''
-  GRAY=''
-  NC=''
-fi
-
-# Parse arguments (VERBOSE exported for potential use by sourced scripts)
+# Parse arguments
 export VERBOSE=false
 JSON_OUTPUT=false
 while [[ $# -gt 0 ]]; do
@@ -58,59 +42,36 @@ check() {
   case "$status" in
     pass)
       PASSED_CHECKS=$((PASSED_CHECKS + 1))
-      # shellcheck disable=SC2034
       RESULTS["$name"]="pass"
       if ! $JSON_OUTPUT; then
-        printf "${GREEN}✓${NC} %-35s ${GREEN}OK${NC}\n" "$name"
+        ui_success "$name"
       fi
       ;;
     warn)
       WARNINGS=$((WARNINGS + 1))
-      # shellcheck disable=SC2034
       RESULTS["$name"]="warn"
       if ! $JSON_OUTPUT; then
-        printf "${YELLOW}⚠${NC} %-35s ${YELLOW}WARNING${NC}"
-        [[ -n "$message" ]] && printf " ${GRAY}%s${NC}" "$message"
-        printf "\n"
+        ui_warn "$name" "$message"
       fi
       ;;
     fail)
       FAILURES=$((FAILURES + 1))
-      # shellcheck disable=SC2034
       RESULTS["$name"]="fail"
       if ! $JSON_OUTPUT; then
-        printf "${RED}✗${NC} %-35s ${RED}FAILED${NC}"
-        [[ -n "$message" ]] && printf " ${GRAY}%s${NC}" "$message"
-        printf "\n"
+        ui_error "$name" "$message"
       fi
       ;;
   esac
 }
 
-print_header() {
-  if ! $JSON_OUTPUT; then
-    echo -e "\n${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${CYAN}  Dotfiles Health Dashboard${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
-  fi
-}
-
-check_section() {
-  if ! $JSON_OUTPUT; then
-    echo -e "\n${BLUE}▸ $1${NC}"
-    echo "───────────────────────────────────────────────"
-  fi
-}
-
 # === Core Checks ===
 run_checks() {
   # --- Dotfiles Core ---
-  check_section "Dotfiles Core"
+  ui_section "Dotfiles Core"
 
   # Chezmoi
   if command -v chezmoi >/dev/null 2>&1; then
     check "Chezmoi installed" "pass"
-    # Check if source dir exists
     if [[ -d "${HOME}/.local/share/chezmoi" ]] || [[ -d "${HOME}/.dotfiles" ]]; then
       check "Chezmoi source directory" "pass"
     else
@@ -133,7 +94,7 @@ run_checks() {
   fi
 
   # --- Shell ---
-  check_section "Shell Environment"
+  ui_section "Shell Environment"
 
   # Zsh
   if command -v zsh >/dev/null 2>&1; then
@@ -162,7 +123,7 @@ run_checks() {
   fi
 
   # --- Development Tools ---
-  check_section "Development Tools"
+  ui_section "Development Tools"
 
   # Node.js
   if command -v node >/dev/null 2>&1; then
@@ -171,13 +132,6 @@ run_checks() {
     check "Node.js ($node_version)" "pass"
   else
     check "Node.js" "warn" "Not installed"
-  fi
-
-  # fnm
-  if command -v fnm >/dev/null 2>&1; then
-    check "fnm (Node version manager)" "pass"
-  else
-    check "fnm" "warn" "Not installed"
   fi
 
   # Python
@@ -204,7 +158,7 @@ run_checks() {
   fi
 
   # --- CLI Tools ---
-  check_section "CLI Tools"
+  ui_section "CLI Tools"
 
   local tools=("fzf" "ripgrep:rg" "fd" "bat" "eza" "zoxide" "atuin" "delta" "jq" "yq" "sops" "mise" "just" "zellij" "hyperfine")
   for tool in "${tools[@]}"; do
@@ -218,7 +172,7 @@ run_checks() {
   done
 
   # --- Editors ---
-  check_section "Editors"
+  ui_section "Editors"
 
   if command -v nvim >/dev/null 2>&1; then
     check "Neovim" "pass"
@@ -232,7 +186,7 @@ run_checks() {
   fi
 
   # --- Terminal ---
-  check_section "Terminal"
+  ui_section "Terminal"
 
   if command -v ghostty >/dev/null 2>&1 || [[ -d "/Applications/Ghostty.app" ]]; then
     check "Ghostty terminal" "pass"
@@ -240,26 +194,15 @@ run_checks() {
     check "Ghostty terminal" "warn" "Not installed"
   fi
 
-  # Fonts - check both Linux and macOS font locations
-  local font_found=false
   if fc-list 2>/dev/null | grep -qi "JetBrains"; then
-    font_found=true
-  elif [[ -d "$HOME/Library/Fonts" ]] && compgen -G "$HOME/Library/Fonts/"*[Jj]et[Bb]rains* >/dev/null 2>&1; then
-    font_found=true
-  elif [[ -d "$HOME/.local/share/fonts" ]] && compgen -G "$HOME/.local/share/fonts/"*[Jj]et[Bb]rains* >/dev/null 2>&1; then
-    font_found=true
-  fi
-
-  if $font_found; then
     check "JetBrains Mono Nerd Font" "pass"
   else
     check "JetBrains Mono Nerd Font" "warn" "Not installed"
   fi
 
   # --- Security ---
-  check_section "Security"
+  ui_section "Security"
 
-  # Age encryption
   if command -v age >/dev/null 2>&1; then
     check "Age encryption" "pass"
     if [[ -f "${HOME}/.config/chezmoi/key.txt" ]]; then
@@ -271,14 +214,12 @@ run_checks() {
     check "Age encryption" "warn" "Not installed"
   fi
 
-  # SSH
   if [[ -f "${HOME}/.ssh/id_ed25519" ]] || [[ -f "${HOME}/.ssh/id_rsa" ]]; then
     check "SSH keys present" "pass"
   else
     check "SSH keys present" "warn" "No keys found"
   fi
 
-  # GPG
   if command -v gpg >/dev/null 2>&1; then
     if gpg --list-secret-keys 2>/dev/null | grep -q sec; then
       check "GPG keys" "pass"
@@ -290,15 +231,12 @@ run_checks() {
   fi
 
   # --- Performance ---
-  check_section "Performance"
+  ui_section "Performance"
 
-  # Shell startup time
   if command -v zsh >/dev/null 2>&1; then
     local startup_time
     startup_time=$({ time zsh -i -c exit; } 2>&1 | grep real | awk '{print $2}' | sed 's/[ms]//g')
-    # Try to parse the time (handle different formats)
     if [[ -n "$startup_time" ]]; then
-      # Simple check - if startup mentions 0m0, it's under 1 second
       check "Shell startup time" "pass"
     else
       check "Shell startup time" "warn" "Could not measure"
@@ -320,32 +258,28 @@ print_summary() {
 
   local score=$((PASSED_CHECKS * 100 / TOTAL_CHECKS))
 
-  echo -e "\n${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-  echo -e "${CYAN}  Summary${NC}"
-  echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+  ui_section "Summary"
+  ui_key_value "Total checks" "$TOTAL_CHECKS"
+  ui_key_value "Passed" "$PASSED_CHECKS"
+  ui_key_value "Warnings" "$WARNINGS"
+  ui_key_value "Failures" "$FAILURES"
+  printf "\n"
+  ui_key_value "Health Score" "${score}%"
 
-  echo -e "  Total checks:  ${TOTAL_CHECKS}"
-  echo -e "  ${GREEN}Passed:${NC}        ${PASSED_CHECKS}"
-  echo -e "  ${YELLOW}Warnings:${NC}      ${WARNINGS}"
-  echo -e "  ${RED}Failures:${NC}      ${FAILURES}"
-  echo ""
-
-  printf "  Health Score: %s%%\n\n" "$score"
-
+  printf "\n"
   if [[ $score -ge 90 ]]; then
-    echo -e "  ${GREEN}⚡ Excellent! Your dotfiles are in great shape.${NC}"
+    ui_info "⚡ Excellent! Your dotfiles are in great shape."
   elif [[ $score -ge 70 ]]; then
-    echo -e "  ${GREEN}✓ Good! Minor improvements possible.${NC}"
+    ui_info "✓ Good! Minor improvements possible."
   elif [[ $score -ge 50 ]]; then
-    echo -e "  ${YELLOW}⚠ Fair. Consider addressing warnings.${NC}"
+    ui_warn "Fair. Consider addressing warnings."
   else
-    echo -e "  ${RED}✗ Needs attention. Multiple issues found.${NC}"
+    ui_error "Needs attention. Multiple issues found."
   fi
-
-  echo ""
+  printf "\n"
 }
 
 # Main
-print_header
+ui_header "Dotfiles Health Dashboard"
 run_checks
 print_summary
