@@ -1,3 +1,8 @@
+# Source Nix profile to add Nix to the PATH
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi
+
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.482) - <https://dotfiles.io>
 # Made With ❤️ in London, United Kingdom
 # Designed by Sebastien Rousseau
