@@ -35,10 +35,10 @@ else
   RED='' GREEN='' BLUE='' CYAN='' BOLD='' NC=''
 fi
 
-step() { echo -e "${BLUE}==>${NC} ${BOLD}$1${NC}"; }
-success() { echo -e "${GREEN}==> Done!${NC}"; }
+step() { printf "%s==>%s %s%s%s\n" "${BLUE}" "${NC}" "${BOLD}" "$1" "${NC}"; }
+success() { printf "%s==> Done!%s\n" "${GREEN}" "${NC}"; }
 error() {
-  echo -e "${RED}==> Error: $1${NC}"
+  printf "%s==> Error: %s%s\n" "${RED}" "$1" "${NC}" >&2
   exit 1
 }
 
@@ -46,16 +46,14 @@ error() {
 # Banner
 # =============================================================================
 
-echo -e "${CYAN}${BOLD}"
-cat <<"EOF"
-   ___      _    _  _  _
-  / _ \___ | |_ (_)| |(_) ___  ___
- / /_)/ _ \| __|| || || |/ _ \/ __|
-/ ___/ (_) | |_ | || || |  __/\__ \
-\/    \___/ \__||_||_||_|\___||___/
-           Universal Installer
-EOF
-echo -e "${NC}"
+printf "%s%s\n" "${CYAN}" "${BOLD}"
+printf "   ___      _    _  _  _ \n"
+printf "  / _ \\___ | |_ (_)| |(_) ___  ___\n"
+printf " / /_)/ _ \\| __|| || || |/ _ \\/ __|\n"
+printf "/ ___/ (_) | |_ | || || |  __/\\__ \\\n"
+printf "\\/    \\___/ \\__|_||_||_|\___||___/\n"
+printf "           Universal Installer\n"
+printf "%s\n" "${NC}"
 
 # =============================================================================
 # Library Loading
@@ -112,15 +110,15 @@ if [ "$LIBS_LOADED" = "0" ]; then
   }
 
   print_os_info() {
-    echo "   OS: $OS"
-    echo "   Arch: $ARCH"
-    echo "   Target: $target_os"
+    printf "   OS: %s\n" "$OS"
+    printf "   Arch: %s\n" "$ARCH"
+    printf "   Target: %s\n" "$target_os"
   }
 
   bootstrap_package_manager() {
     if [ "$target_os" = "macos" ] && ! command -v brew >/dev/null; then
-      echo "   Homebrew not found."
-      echo -e "${CYAN}   SECURITY NOTE: This will download and execute code from brew.sh${NC}"
+      printf "   Homebrew not found.\n"
+      printf "%s   SECURITY NOTE: This will download and execute code from brew.sh%s\n" "${CYAN}" "${NC}"
       if [ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]; then
         read -r -p "   Continue with Homebrew installation? [y/N] " response
         case "$response" in
@@ -146,7 +144,7 @@ if [ "$LIBS_LOADED" = "0" ]; then
 
   install_chezmoi() {
     if command -v chezmoi >/dev/null; then
-      echo "   chezmoi already installed: $(chezmoi --version)"
+      printf "   chezmoi already installed: %s\n" "$(chezmoi --version)"
     elif command -v brew >/dev/null; then
       brew install chezmoi
     else
@@ -181,7 +179,7 @@ if [ "$LIBS_LOADED" = "0" ]; then
     local count=0
     
     if ! command -v chezmoi >/dev/null || ! [ -f "$HOME/.config/chezmoi/chezmoi.toml" ]; then
-      echo "   chezmoi not found or not configured. Skipping backup."
+      printf "   chezmoi not found or not configured. Skipping backup.\n"
       return
     fi
 
@@ -192,7 +190,7 @@ if [ "$LIBS_LOADED" = "0" ]; then
     fi
 
     if [ -z "$managed_files" ]; then
-      echo "   No existing dotfiles to back up."
+      printf "   No existing dotfiles to back up.\n"
       return
     fi
     
@@ -212,9 +210,9 @@ if [ "$LIBS_LOADED" = "0" ]; then
     done <<< "$managed_files"
     
     if [ "$count" -gt 0 ]; then
-      echo "   Backed up $count files to $backup_dir"
+      printf "   Backed up %s files to %s\n" "$count" "$backup_dir"
     else
-      echo "   No existing dotfiles to back up."
+      printf "   No existing dotfiles to back up.\n"
       rm -rf "$backup_dir" 2>/dev/null || true
     fi
   }
@@ -254,17 +252,17 @@ APPLY_FLAGS=()
 [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ] && APPLY_FLAGS=(--force --no-tty)
 
 if [ -d "$SOURCE_DIR/.git" ]; then
-  echo "   Applying from local source: $SOURCE_DIR"
+  printf "   Applying from local source: %s\n" "$SOURCE_DIR"
   ensure_chezmoi_source "$SOURCE_DIR"
   chezmoi apply "${APPLY_FLAGS[@]}"
 elif [ -d "$LEGACY_SOURCE_DIR/.git" ]; then
-  echo "   Migrating from legacy source: $LEGACY_SOURCE_DIR"
+  printf "   Migrating from legacy source: %s\n" "$LEGACY_SOURCE_DIR"
   mv "$LEGACY_SOURCE_DIR" "$SOURCE_DIR"
   ensure_chezmoi_source "$SOURCE_DIR"
   chezmoi apply "${APPLY_FLAGS[@]}"
 else
-  echo "   Initializing from GitHub (Version: $VERSION)..."
-  echo -e "${CYAN}   SECURITY NOTE: Cloning pinned version $VERSION${NC}"
+  printf "   Initializing from GitHub (Version: %s)...\n" "$VERSION"
+  printf "%s   SECURITY NOTE: Cloning pinned version %s%s\n" "${CYAN}" "$VERSION" "${NC}"
 
   git clone --depth 1 --branch "$VERSION" "$REPO_URL" "$SOURCE_DIR" 2>/dev/null ||
     { git clone "$REPO_URL" "$SOURCE_DIR" && (cd "$SOURCE_DIR" && git checkout "$VERSION"); }
@@ -278,4 +276,4 @@ fi
 # =============================================================================
 
 success
-echo -e "${GREEN}Configuration loaded. Please restart your shell.${NC}"
+printf "%sConfiguration loaded. Please restart your shell.%s\n" "${GREEN}" "${NC}"

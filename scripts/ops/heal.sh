@@ -29,7 +29,7 @@ else
 fi
 
 # Logging
-log() { echo -e "$*"; }
+log() { printf -- "%s\n" "$*"; }
 log_info() { log "${BLUE}[INFO]${NC} $*"; }
 log_success() { log "${GREEN}[OK]${NC} $*"; }
 log_warn() { log "${YELLOW}[WARN]${NC} $*"; }
@@ -51,24 +51,18 @@ ISSUES_FOUND=0
 CHEZMOI_APPLIED=0
 
 usage() {
-  cat <<EOF
-Dotfiles Heal - Auto-repair common issues
-
-Usage: $(basename "$0") [OPTIONS]
-
-Options:
-  -n, --dry-run   Preview what would be fixed without making changes
-  -f, --force     Skip confirmation prompts
-  -h, --help      Show this help message
-
-Repairs:
-  - Missing core dependencies (chezmoi, starship, rg, bat)
-  - Broken symlinks in \$HOME (depth 3)
-  - Chezmoi drift (re-applies dotfiles)
-  - Missing critical files (.zshrc, .bashrc, .profile)
-  - Missing XDG config directories
-
-EOF
+  printf "Dotfiles Heal - Auto-repair common issues\n\n"
+  printf "Usage: %s [OPTIONS]\n\n" "$(basename "$0")"
+  printf "Options:\n"
+  printf "  -n, --dry-run   Preview what would be fixed without making changes\n"
+  printf "  -f, --force     Skip confirmation prompts\n"
+  printf "  -h, --help      Show this help message\n\n"
+  printf "Repairs:\n"
+  printf "  - Missing core dependencies (chezmoi, starship, rg, bat)\n"
+  printf "  - Broken symlinks in \$HOME (depth 3)\n"
+  printf "  - Chezmoi drift (re-applies dotfiles)\n"
+  printf "  - Missing critical files (.zshrc, .bashrc, .profile)\n"
+  printf "  - Missing XDG config directories\n"
 }
 
 # Parse arguments
@@ -407,10 +401,10 @@ heal_missing_xdg_dirs() {
 # =============================================================================
 
 main() {
-  echo ""
-  echo "=========================================="
-  echo "     Dotfiles Heal - Auto-Repair"
-  echo "=========================================="
+  printf "\n"
+  printf "==========================================\n"
+  printf "     Dotfiles Heal - Auto-Repair\n"
+  printf "==========================================\n"
 
   if [[ "$DRY_RUN" == "1" ]]; then
     log_info "Running in dry-run mode (no changes will be made)"
@@ -418,7 +412,7 @@ main() {
 
   # Confirm before making changes (unless --force or --dry-run)
   if [[ "$DRY_RUN" != "1" ]] && [[ "$FORCE" != "1" ]]; then
-    echo ""
+    printf "\n"
     log_warn "This will attempt to auto-repair your dotfiles environment."
     log_info "A backup will be created before any changes are made."
     read -rp "Continue? [y/N] " response
@@ -441,8 +435,8 @@ main() {
   heal_missing_xdg_dirs || true
 
   # Summary
-  echo ""
-  echo "=========================================="
+  printf "\n"
+  printf "==========================================\n"
   if [[ "$DRY_RUN" == "1" ]]; then
     if [[ $ISSUES_FOUND -eq 0 ]]; then
       log_success "No issues found. System is healthy."
@@ -460,7 +454,7 @@ main() {
       log_info "Try running 'dot doctor' for detailed diagnostics."
     fi
   fi
-  echo "=========================================="
+  printf "==========================================\n"
 }
 
 main
