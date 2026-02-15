@@ -13,6 +13,17 @@ CYAN='\033[0;36m'
 GRAY='\033[0;90m'
 NC='\033[0m'
 
+# Disable colors if not in a TTY or NO_COLOR is set
+if [[ -z "${NO_COLOR:-}" ]] && [[ ! -t 1 ]]; then
+  RED=''
+  GREEN=''
+  YELLOW=''
+  BLUE=''
+  CYAN=''
+  GRAY=''
+  NC=''
+fi
+
 # Parse arguments (VERBOSE exported for potential use by sourced scripts)
 export VERBOSE=false
 JSON_OUTPUT=false
