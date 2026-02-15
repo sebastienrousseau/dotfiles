@@ -1,8 +1,29 @@
 # Starship Configuration
 # https://starship.rs/config/
 
-command_timeout = 5000
+# Inserts a blank line between shell prompts
 add_newline = true
+
+# Timeout for commands executed by starship (in milliseconds).
+command_timeout = 5000
+
+# Main prompt format
+format = """
+$os\
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_status\
+$aws\
+$gcloud\
+$docker\
+$memory_usage\
+$time\
+$line_break\
+$character"""
+
+# Catppuccin theme
 {{- $theme := default "catppuccin-mocha" .theme -}}
 {{- if eq $theme "catppuccin-latte" }}
 palette = "catppuccin_latte"
@@ -10,54 +31,123 @@ palette = "catppuccin_latte"
 palette = "catppuccin_mocha"
 {{- end }}
 
+# Character module
 [character]
 success_symbol = "[➜](bold green)"
 error_symbol = "[➜](bold red)"
 
+# OS module
+[os]
+disabled = false
+style = "bold blue"
+
+[os.symbols]
+Alpine = " Alpine"
+Amazon = " Amazon"
+Android = " Android"
+Arch = " Arch"
+Artix = " Artix"
+CentOS = " CentOS"
+Debian = " Debian"
+Fedora = " Fedora"
+FreeBSD = " FreeBSD"
+Gentoo = " Gentoo"
+Linux = " Linux"
+Macos = " macOS"
+Manjaro = " Manjaro"
+Mint = " Mint"
+NixOS = " NixOS"
+openSUSE = " openSUSE"
+Pop = " Pop!_OS"
+Raspbian = " Raspbian"
+Redhat = " Red Hat"
+SUSE = " SUSE"
+Ubuntu = " Ubuntu"
+Windows = " Windows"
+
+# Package module (disabled for performance)
 [package]
 disabled = true
 
+# Git branch module
 [git_branch]
-symbol = "> "
+symbol = ""
+format = "on [$symbol$branch]($style) "
 style = "bold yellow"
 
+# Git status module
 [git_status]
 disabled = false
 style = "bold red"
+conflicted = "⚔️ "
+ahead = "⇡"
+behind = "⇣"
+diverged = "⇕"
+untracked = " "
+stashed = " "
+modified = " "
+staged = '[++\($count\)](green)'
+renamed = "»"
+deleted = "✘"
 
+# Hostname module (disabled for a cleaner prompt)
 [hostname]
-ssh_only = false
-format = "[$hostname](bold blue) "
-disabled = false
+ssh_only = true
+format = "on [$hostname](bold blue) "
+disabled = true
 
+# Username module (disabled for a cleaner prompt)
 [username]
 style_user = "white bold"
 style_root = "black bold"
-format = "[$user]($style) "
-disabled = false
+format = "as [$user]($style) "
+disabled = true
 
+# Directory module
 [directory]
-truncation_length = 3
+truncation_length = 4
 truncation_symbol = "…/"
 
+# Command duration module
 [cmd_duration]
 min_time = 2000
 format = "took [$duration]($style) "
 
+# Local IP module (disabled for performance)
 [localip]
 disabled = true
 
-# ---------- Container-aware fallback ---------- #
-# When DOTFILES_CONTAINER=1, show a lightweight indicator so the user
-# knows they are inside a container.  Uses only ASCII-safe characters
-# to avoid rendering issues with missing Nerd Fonts.
+# Memory usage module
+[memory_usage]
+disabled = false
+threshold = -1
+symbol = ' '
+style = 'bold dimmed green'
+format = 'via [$symbol($ram - $ram_swap)]($style) '
 
+# Time module
+[time]
+disabled = false
+time_format = "%R"
+style = "bold yellow"
+format = "at [$time]($style) "
+
+# Cloud provider modules (disabled by default)
+[aws]
+disabled = true
+[gcloud]
+disabled = true
+[docker]
+disabled = true
+
+# Container-aware fallback
 [container]
 disabled = false
 symbol = "[ctr]"
 style = "bold dimmed blue"
 format = '[$symbol]($style) '
 
+# Environment variable modules for container detection
 [env_var.DOTFILES_CONTAINER]
 variable = "DOTFILES_CONTAINER"
 symbol = ""
@@ -70,6 +160,7 @@ symbol = ""
 style = "bold dimmed green"
 format = '[codespace]($style) '
 
+# Palettes for Catppuccin themes
 [palettes.catppuccin_mocha]
 rosewater = "#f5e0dc"
 flamingo = "#f2cdcd"
