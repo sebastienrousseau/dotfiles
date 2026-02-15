@@ -2,7 +2,7 @@
   <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg" alt="Dotfiles logo" width="64" />
 </p>
 
-# Dotfiles — A Fast, Idempotent Shell Environment
+# Your Development Environment. Perfected.
 
 [![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions)
 [![Version](https://img.shields.io/badge/Version-v0.2.482-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases)
@@ -12,111 +12,96 @@
 
 ---
 
-## Overview
+## One Command. Every Machine.
 
-Set up your development environment in minutes and keep it consistent across every machine. Dotfiles is a cross‑platform shell distribution managed by [Chezmoi](https://github.com/twpayne/chezmoi) that works on macOS, Linux, and WSL. It is **idempotent** by design: run it once or a hundred times, and the result is always the same.
+Your environment is your edge. It should move with you.
 
-Git + templates + guarded scripts = a reproducible shell.
+Dotfiles ends drift. It turns a fresh machine into your machine in minutes.
 
----
-
-## Table of contents
-
-- [Why dotfiles](#why-dotfiles)
-- [Safety](#safety)
-- [Get started](#get-started)
-- [Discover](#discover)
-- [Install details](#install-details)
-- [Make it yours](#make-it-yours)
-- [Reference](#reference)
-- [How it works](#how-it-works)
-- [Roadmap](#roadmap)
-- [Contribute](#contribute)
-- [Changelog](#changelog)
-- [License](#license)
+One command. Every machine. The same power, every time.
 
 ---
 
-## Why dotfiles
+## The Vision
 
-Dotfiles takes an infrastructure‑oriented approach to managing your shell. It is designed for developers who work across multiple machines and value **daily usability, reproducibility, and auditability.**
+Every developer deserves a shell that amplifies intelligence.
 
-- **The Stack.** Zsh, Neovim, tmux, and AI CLI tools configured with sane defaults so you can start working immediately.
-- **Unified Control.** The `dot` CLI wraps common workflows such as syncing, upgrading, and managing secrets.
-- **Safety First.** Every system or security change requires explicit opt‑in.
-- **Clean Slate.** Source files, generated configs, and system state stay cleanly separated.
+Not a maze. Not a reset. A multiplier.
 
+Dotfiles makes your environment portable, secure, and exact.
 
-## Safety
+### Why It Works
 
-This is **infrastructure**, not an ad‑hoc shell script.
+**Instant readiness.** Zsh, Neovim, tmux, and modern CLI tools arrive configured from the first keystroke.
 
-- No destructive actions without explicit opt‑in.
-- No background daemons install automatically.
-- No system settings change by default.
-- System‑level behavior requires explicit opt‑in through environment variables.
-- Dotfiles logs all privileged actions to `~/.local/share/dotfiles.log`.
+**One command control.** The `dot` CLI runs updates, secrets, security, and themes from one place.
+
+**Safety by design.** Nothing destructive runs without consent. Every privileged change is logged.
+
+**Clean source.** Generated files stay separate. Your source stays clean.
+
 
 ---
 
-## Get started
+## Your Environment. Instantly.
 
-> [!IMPORTANT]
-> The installer automatically backs up any existing dotfiles that chezmoi will overwrite (to `~/.dotfiles.bak.<timestamp>/`). It bootstraps `chezmoi` and applies this repo. OS packages install through Chezmoi hooks during the first apply.
+Run this once:
 
 ```bash
-# Works on macOS, Linux, and WSL
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 exec zsh
 ```
 
-For non‑interactive installs (servers and CI):
+Your entire development environment. Configured. Secured. Ready.
+
+**Works everywhere:** macOS, Linux, WSL. No exceptions.
+
+### For Teams and CI
+
 ```bash
 DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 ```
 
----
+### What Just Happened?
 
-## Discover
+Dotfiles backs up your current state, boots Chezmoi, applies your environment, and runs verified OS hooks.
 
-- [Installation Guide](docs/INSTALL.md) — Prerequisites and supported platforms.
-- [Operations Guide](docs/OPERATIONS.md) — Common workflows and platform notes.
-- [Security Guide](docs/SECURITY.md) — Hardening matrix and logging.
-- [Secrets Guide](docs/SECRETS.md) — Age setup and encrypted files.
-- [Tools Catalog](docs/TOOLS.md) — Core tools and optional utilities.
-- [Dot Utils](docs/UTILS.md) — Aliases and dot CLI helpers.
-- [Troubleshooting](docs/TROUBLESHOOTING.md) — Fixes for common issues.
+No destruction. No surprises. No downtime.
 
 ---
 
-## Install details
+## Master Your Environment
 
-**Prerequisites**
-- Required: `git`, `curl`
-- Optional: Homebrew (macOS), `apt-get` (Linux/WSL), Nix (toolchain)
-
-**Update**
+### Stay Current
 ```bash
 dot update
 ```
+Pull the latest improvements. Apply them instantly. Stay current.
 
-**Non‑interactive apply**
+### Go Deeper
+
+**[Operations Guide](docs/OPERATIONS.md)** — Workflows across platforms
+**[Security Guide](docs/SECURITY.md)** — Hardening without friction
+**[Secrets Guide](docs/SECRETS.md)** — Age encryption, made clear
+**[Tools Catalog](docs/TOOLS.md)** — The tools that multiply output
+**[Utilities Guide](docs/UTILS.md)** — Aliases that save hours
+**[Troubleshooting](docs/TROUBLESHOOTING.md)** — Fixes that stick
+
+### For Teams and Automation
 ```bash
 DOTFILES_NONINTERACTIVE=1 dot apply
 ```
+Perfect for servers, CI/CD, and team onboarding.
 
-## Make it yours
-
-- [Operations](docs/OPERATIONS.md)
-- [Secrets](docs/SECRETS.md)
-- [Security](docs/SECURITY.md)
-- [Troubleshooting](docs/TROUBLESHOOTING.md)
+**Prerequisites:** `git` and `curl`. Everything else is handled.
 
 ---
 
-## Reference
+## Your New Superpower: The `dot` CLI
 
-Run `dot --help` or `dot <command> --help` for inline documentation.
+**One command. Full control.** Every aspect of your environment from one interface.
+
+Run `dot --help` or `dot <command> --help` for complete documentation.
 
 | Command | Description | Category |
 |---|---|---|
@@ -195,10 +180,10 @@ DOTFILES_NONINTERACTIVE=1 dot secrets-init
 # Output: Age key created at ~/.config/chezmoi/key.txt
 ```
 
-### Security changes
+### Security That Doesn't Get in Your Way
 
-These scripts are **opt‑in** and run only when you set the matching environment variable.
-All security changes are logged to `~/.local/share/dotfiles.log`.
+Every security enhancement is opt-in. Your machine, your choice, your control.
+All changes are logged to `~/.local/share/dotfiles.log`.
 
 | Script | macOS | Linux |
 |---|---|---|
@@ -209,25 +194,22 @@ All security changes are logged to `~/.local/share/dotfiles.log`.
 | `dot usb-safety` | No system change (manual UI) | GNOME `gsettings` automount off |
 | `dot encrypt-check` | Reads FileVault status via `fdesetup` | Detects LUKS via `lsblk` |
 
-### Nix
+### Nix: Reproducibility When You Want It
 
-Nix is **optional**. The repo does **not** install the Nix daemon.
+Nix support is **completely optional.** We never install the daemon without your explicit choice.
 
-- Use `nix develop` to enter a reproducible shell environment.
-- Use `dot tools` to see the curated utilities overview.
-- No toggle replaces Homebrew or Apt with Nix automatically.
+**When you're ready:**
+- `nix develop` — Enter a perfectly reproducible shell environment
+- `dot tools` — Explore our curated utility collection
+- Full coexistence with Homebrew, Apt, and other package managers
 
 ---
 
-### Install guide
+## The Architecture of Elegance
 
-See [docs/INSTALL.md](docs/INSTALL.md) for prerequisites, supported platforms, and the full install flow.
+**Simple on the surface. Sophisticated underneath.**
 
-<p align="right"><a href="#dotfiles--your-shell-everywhere">↑ Back to Top</a></p>
-
-## How it works
-
-If Mermaid does not render, the flow is: `install.sh` → `Chezmoi` → `~/.dotfiles` → `~/.config + ~/.local`.
+Here's how we achieve the impossible: perfect environment management with zero complexity for you.
 
 ```mermaid
 flowchart LR
@@ -238,7 +220,9 @@ flowchart LR
   E --> F["scripts/*"]
 ```
 
-### Shell startup flow
+### Lightning Fast. Always.
+
+**Our shell startup is obsessively optimized:**
 
 ```
 .zshenv ─▶ .zshrc ─▶ rc.d/{10..50} ─▶ shell/{00,05,40,50,90} ─▶ [precmd: 91-lazy] ─▶ tool init
@@ -249,65 +233,67 @@ flowchart LR
                                           core aliases (eager)                           └─ fzf
 ```
 
-Core aliases (~40KB) load at startup. Tool-specific aliases (~137KB) load after the first prompt via a `precmd` hook — keeping shell startup fast while still providing full alias coverage. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full startup sequence and ordering conventions.
+**The secret:** Core aliases (~40KB) load instantly. Heavy tooling (~137KB of aliases) loads after your first prompt. You get immediate responsiveness *and* complete functionality.
 
-**Repository Layout**
+*Fast enough for impatient developers. Complete enough for power users.*
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the complete engineering behind this magic.
+
+### Everything in Its Place
+
+**Perfectly organized. Logically structured. Instantly understandable.**
 
 ```text
 ~/.dotfiles/
-├── dot_config/                 # Maps to ~/.config/ (app configs)
-│   ├── nvim/                    # Neovim config (Lua)
-│   ├── zsh/                     # Zsh config (modular)
-│   ├── tmux/                    # Tmux config
-│   ├── shell/                   # Shell logic (aliases, functions, paths)
-│   ├── wezterm/ alacritty/ kitty/ ghostty/
-│   ├── btop/ fastfetch/ atuin/ yazi/ ...
-│   └── docker/ containers/ ...
-├── dot_local/                  # Maps to ~/.local/ (CLI tools)
-│   └── bin/                     # dot CLI and helpers
-├── dot_etc/                    # System configs (sudoers, sysctl, Chrome policies; may require sudo)
-├── dot_ssh/                    # SSH config templates
-├── templates/                  # Project scaffolds used by `dot new`
-├── scripts/                    # Install, security, theme, diagnostics
-├── install/                    # Chezmoi run_onchange and run_before hooks
-├── nix/                        # Optional Nix shell environment
-├── docs/                       # Guides, keys, roadmap, architecture
-└── install.sh                  # Bootstrap installer
+├── dot_config/                 # Your app configurations (~/.config/)
+│   ├── nvim/                    # Neovim: Lua-powered editing perfection
+│   ├── zsh/                     # Zsh: Modular shell intelligence
+│   ├── tmux/                    # Tmux: Terminal multiplexing mastery
+│   ├── shell/                   # Shell logic: aliases, functions, paths
+│   ├── wezterm/ alacritty/ kitty/ ghostty/ # Terminal choices
+│   ├── btop/ fastfetch/ atuin/ yazi/ ...   # Productivity tools
+│   └── docker/ containers/ ...              # Container tooling
+├── dot_local/                  # Your personal binaries (~/.local/)
+│   └── bin/                     # dot CLI and helper utilities
+├── dot_etc/                    # System-level configurations
+├── dot_ssh/                    # SSH configuration templates
+├── templates/                  # Project scaffolds for `dot new`
+├── scripts/                    # Installation, security, themes, diagnostics
+├── install/                    # Chezmoi lifecycle hooks
+├── nix/                        # Optional Nix development environment
+├── docs/                       # Complete documentation suite
+└── install.sh                  # The magic begins here
 ```
 
----
-
-## Roadmap
-
-Track progress on [GitHub Issues](https://github.com/sebastienrousseau/dotfiles/issues) and [Milestones](https://github.com/sebastienrousseau/dotfiles/milestones).
+*Clean separation. No pollution. Total clarity.*
 
 ---
 
-## Contribute
+## Join the Evolution
 
-Please read [CONTRIBUTING.md](.github/CONTRIBUTING.md) before opening a pull request.
+**This is just the beginning.** Track our roadmap on [GitHub Issues](https://github.com/sebastienrousseau/dotfiles/issues) and [Milestones](https://github.com/sebastienrousseau/dotfiles/milestones).
 
-For security issues, see [SECURITY.md](.github/SECURITY.md).
+### Make It Better
+
+**Every great tool is built by its community.** Read [CONTRIBUTING.md](.github/CONTRIBUTING.md) and help us perfect the developer experience.
+
+**Found something sensitive?** See [SECURITY.md](.github/SECURITY.md) for responsible disclosure.
+
+### Need Help?
+
+**Every problem has a solution.** Check [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for fixes to common issues.
+
+### Stay Updated
+
+**Never miss an improvement.** See [CHANGELOG.md](CHANGELOG.md) for the complete evolution story.
 
 ---
 
-## Troubleshooting
+## Open Source, Open Future
 
-See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+**MIT Licensed.** See [LICENSE](LICENSE) for complete terms.
 
----
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md).
-
----
-
-## License
-
-This project is licensed under the **MIT License**. See [LICENSE](LICENSE).
-
-Some bundled third‑party dependencies are licensed under GPL‑3.0; the LICENSE file lists them explicitly.
+*Some bundled utilities are GPL-3.0 licensed — full details in LICENSE file.*
 
 ---
 
