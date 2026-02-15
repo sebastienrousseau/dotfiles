@@ -14,9 +14,14 @@ autoload -Uz _zinit
 
 # Load Zsh Plugins (Turbo mode - deferred loading, pinned to stable releases)
 # fast-syntax-highlighting: Better performance than zsh-syntax-highlighting
-zinit ice wait lucid
+zinit ice wait lucid pick"async.zsh" src"fast-syntax-highlighting.plugin.zsh"
 zinit light zdharma-continuum/fast-syntax-highlighting
+
 zinit ice wait lucid ver"v0.7.1" atload"_zsh_autosuggest_start"
 zinit light zsh-users/zsh-autosuggestions
-zinit ice wait lucid ver"0.35.0" blockf atpull"zinit creinstall -q ."
+
+zinit ice wait lucid ver"0.35.0" blockf atpull"zinit creinstall -q ." atinit"zpcompinit"
 zinit light zsh-users/zsh-completions
+
+zinit ice wait lucid
+zinit light Aloxaf/fzf-tab
