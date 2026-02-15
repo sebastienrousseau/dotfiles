@@ -35,10 +35,10 @@ else
   RED='' GREEN='' BLUE='' CYAN='' BOLD='' NC=''
 fi
 
-step() { echo -e "${BLUE}==>${NC} ${BOLD}$1${NC}"; }
-success() { echo -e "${GREEN}==> Done!${NC}"; }
+step() { printf "%s==>%s %s%s%s\n" "${BLUE}" "${NC}" "${BOLD}" "$1" "${NC}"; }
+success() { printf "%s==> Done!%s\n" "${GREEN}" "${NC}"; }
 error() {
-  echo -e "${RED}==> Error: $1${NC}"
+  printf "%s==> Error: %s%s\n" "${RED}" "$1" "${NC}" >&2
   exit 1
 }
 
@@ -46,16 +46,14 @@ error() {
 # Banner
 # =============================================================================
 
-echo -e "${CYAN}${BOLD}"
-cat <<"EOF"
-   ___      _    _  _  _
-  / _ \___ | |_ (_)| |(_) ___  ___
- / /_)/ _ \| __|| || || |/ _ \/ __|
-/ ___/ (_) | |_ | || || |  __/\__ \
-\/    \___/ \__||_||_||_|\___||___/
-           Universal Installer
-EOF
-echo -e "${NC}"
+printf "%s%s\n" "${CYAN}" "${BOLD}"
+printf "   ___      _    _  _  _ \n"
+printf "  / _ \\___ | |_ (_)| |(_) ___  ___\n"
+printf " / /_)/ _ \\| __|| || || |/ _ \\/ __|\n"
+printf "/ ___/ (_) | |_ | || || |  __/\\__ \\\n"
+printf "\\/    \\___/ \\__|_||_||_|\___||___/\n"
+printf "           Universal Installer\n"
+printf "%s\n" "${NC}"
 
 # =============================================================================
 # Library Loading
@@ -91,41 +89,41 @@ if [ "$LIBS_LOADED" = "0" ]; then
     ARCH="$(uname -m)"
     target_os="unknown"
     case "$OS" in
-      Darwin) target_os="macos" ;;
-      Linux)
-        if [ -f /proc/version ] && grep -qi 'microsoft\|WSL' /proc/version; then
-          target_os="wsl2"
-        elif [ -f /etc/os-release ]; then
-          . /etc/os-release
-          case "${ID:-}" in
-            ubuntu | debian | pop | linuxmint | elementary) target_os="debian" ;;
-            fedora | rhel | centos | rocky | alma) target_os="fedora" ;;
-            arch | manjaro | endeavouros) target_os="arch" ;;
-            *) target_os="linux" ;;
-          esac
-        else
-          target_os="linux"
-        fi
-        ;;
+    Darwin) target_os="macos" ;;
+    Linux)
+      if [ -f /proc/version ] && grep -qi 'microsoft\|WSL' /proc/version; then
+        target_os="wsl2"
+      elif [ -f /etc/os-release ]; then
+        . /etc/os-release
+        case "${ID:-}" in
+        ubuntu | debian | pop | linuxmint | elementary) target_os="debian" ;;
+        fedora | rhel | centos | rocky | alma) target_os="fedora" ;;
+        arch | manjaro | endeavouros) target_os="arch" ;;
+        *) target_os="linux" ;;
+        esac
+      else
+        target_os="linux"
+      fi
+      ;;
     esac
     export OS ARCH target_os
   }
 
   print_os_info() {
-    echo "   OS: $OS"
-    echo "   Arch: $ARCH"
-    echo "   Target: $target_os"
+    printf "   OS: %s\n" "$OS"
+    printf "   Arch: %s\n" "$ARCH"
+    printf "   Target: %s\n" "$target_os"
   }
 
   bootstrap_package_manager() {
     if [ "$target_os" = "macos" ] && ! command -v brew >/dev/null; then
-      echo "   Homebrew not found."
-      echo -e "${CYAN}   SECURITY NOTE: This will download and execute code from brew.sh${NC}"
+      printf "   Homebrew not found.\n"
+      printf "%s   SECURITY NOTE: This will download and execute code from brew.sh%s\n" "${CYAN}" "${NC}"
       if [ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]; then
         read -r -p "   Continue with Homebrew installation? [y/N] " response
         case "$response" in
-          [yY][eE][sS] | [yY]) ;;
-          *) error "Homebrew installation cancelled." ;;
+        [yY][eE][sS] | [yY]) ;;
+        *) error "Homebrew installation cancelled." ;;
         esac
       fi
       /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -133,9 +131,9 @@ if [ "$LIBS_LOADED" = "0" ]; then
       [ -x /usr/local/bin/brew ] && eval "$(/usr/local/bin/brew shellenv)"
     fi
     case "$target_os" in
-      debian | wsl2) command -v apt-get >/dev/null || error "apt-get required" ;;
-      fedora) command -v dnf >/dev/null || error "dnf required" ;;
-      arch) command -v pacman >/dev/null || error "pacman required" ;;
+    debian | wsl2) command -v apt-get >/dev/null || error "apt-get required" ;;
+    fedora) command -v dnf >/dev/null || error "dnf required" ;;
+    arch) command -v pacman >/dev/null || error "pacman required" ;;
     esac
   }
 
@@ -146,7 +144,7 @@ if [ "$LIBS_LOADED" = "0" ]; then
 
   install_chezmoi() {
     if command -v chezmoi >/dev/null; then
-      echo "   chezmoi already installed: $(chezmoi --version)"
+      printf "   chezmoi already installed: %s\n" "$(chezmoi --version)"
     elif command -v brew >/dev/null; then
       brew install chezmoi
     else
@@ -179,18 +177,44 @@ if [ "$LIBS_LOADED" = "0" ]; then
     local backup_dir
     backup_dir="$HOME/.dotfiles.bak.$(date +"%Y%m%d_%H%M%S")"
     local count=0
-    if command -v chezmoi >/dev/null && [ -f "$HOME/.config/chezmoi/chezmoi.toml" ]; then
-      while IFS= read -r file; do
-        [ -z "$file" ] && continue
-        if [ -e "$file" ]; then
-          local rel="${file#"$HOME"/}"
-          mkdir -p "$backup_dir/$(dirname "$rel")"
-          cp -a "$file" "$backup_dir/$rel"
-          count=$((count + 1))
-        fi
-      done < <(chezmoi managed --path-style=absolute 2>/dev/null || true)
+
+    if ! command -v chezmoi >/dev/null || ! [ -f "$HOME/.config/chezmoi/chezmoi.toml" ]; then
+      printf "   chezmoi not found or not configured. Skipping backup.\n"
+      return
     fi
-    [ "$count" -gt 0 ] && echo "   Backed up $count files to $backup_dir" || echo "   No files to back up."
+
+    local managed_files
+    if ! managed_files=$(chezmoi managed --path-style=absolute 2>/dev/null); then
+      error "Backup failed: 'chezmoi managed' command failed."
+      return 1
+    fi
+
+    if [ -z "$managed_files" ]; then
+      printf "   No existing dotfiles to back up.\n"
+      return
+    fi
+
+    mkdir -p "$backup_dir"
+
+    while IFS= read -r file; do
+      [ -z "$file" ] && continue
+      if [ -e "$file" ]; then
+        local rel="${file#"$HOME"/}"
+        mkdir -p "$backup_dir/$(dirname "$rel")"
+        if ! cp -a "$file" "$backup_dir/$rel"; then
+          error "Backup failed: Could not copy $file"
+          return 1
+        fi
+        count=$((count + 1))
+      fi
+    done <<<"$managed_files"
+
+    if [ "$count" -gt 0 ]; then
+      printf "   Backed up %s files to %s\n" "$count" "$backup_dir"
+    else
+      printf "   No existing dotfiles to back up.\n"
+      rm -rf "$backup_dir" 2>/dev/null || true
+    fi
   }
 fi
 
@@ -228,17 +252,17 @@ APPLY_FLAGS=()
 [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ] && APPLY_FLAGS=(--force --no-tty)
 
 if [ -d "$SOURCE_DIR/.git" ]; then
-  echo "   Applying from local source: $SOURCE_DIR"
+  printf "   Applying from local source: %s\n" "$SOURCE_DIR"
   ensure_chezmoi_source "$SOURCE_DIR"
   chezmoi apply "${APPLY_FLAGS[@]}"
 elif [ -d "$LEGACY_SOURCE_DIR/.git" ]; then
-  echo "   Migrating from legacy source: $LEGACY_SOURCE_DIR"
+  printf "   Migrating from legacy source: %s\n" "$LEGACY_SOURCE_DIR"
   mv "$LEGACY_SOURCE_DIR" "$SOURCE_DIR"
   ensure_chezmoi_source "$SOURCE_DIR"
   chezmoi apply "${APPLY_FLAGS[@]}"
 else
-  echo "   Initializing from GitHub (Version: $VERSION)..."
-  echo -e "${CYAN}   SECURITY NOTE: Cloning pinned version $VERSION${NC}"
+  printf "   Initializing from GitHub (Version: %s)...\n" "$VERSION"
+  printf "%s   SECURITY NOTE: Cloning pinned version %s%s\n" "${CYAN}" "$VERSION" "${NC}"
 
   git clone --depth 1 --branch "$VERSION" "$REPO_URL" "$SOURCE_DIR" 2>/dev/null ||
     { git clone "$REPO_URL" "$SOURCE_DIR" && (cd "$SOURCE_DIR" && git checkout "$VERSION"); }
@@ -247,9 +271,16 @@ else
   chezmoi apply "${APPLY_FLAGS[@]}"
 fi
 
+# Step 6: Install Nerd Fonts
+step "Installing Nerd Fonts..."
+if [ -f "$SOURCE_DIR/scripts/fonts/install-nerd-fonts.sh" ]; then
+  sh "$SOURCE_DIR/scripts/fonts/install-nerd-fonts.sh"
+fi
+
+
 # =============================================================================
 # Complete
 # =============================================================================
 
 success
-echo -e "${GREEN}Configuration loaded. Please restart your shell.${NC}"
+printf "%sConfiguration loaded. Please restart your shell.%s\n" "${GREEN}" "${NC}"

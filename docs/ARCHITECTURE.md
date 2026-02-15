@@ -1,13 +1,13 @@
-# How it works
+# How It Works
 
-v0.2.480 constitutes a portable **shell distribution** that `chezmoi` manages. This document outlines the core architectural decisions and system design.
+v0.2.482 is a portable **shell distribution** managed by `chezmoi`. This document captures the architectural decisions that make it predictable, fast, and safe.
 
-## Core philosophy
+## Core Philosophy
 
-- **XDG-first**: Configuration strictly maps to `~/.config/` (XDG Base Directory specification). This approach avoids `~/.foo` file sprawl in the home directory.
-- **Single entrypoint**: `dot_zshenv` acts as the bootloader. Zsh loads it immediately and sets up the environment (XDG variables, PATH) before any other initialization runs.
-- **Zero-dependency bootstrap**: The installation process relies only on `curl` and `git` (and `chezmoi`, which the installer fetches automatically).
-- **Lazy-by-default**: Heavy tooling (fnm, nvm, SDKMAN, tool-specific aliases) is deferred until first use or after the first prompt to keep shell startup fast.
+- **XDG-first**: Config lives in `~/.config/`. Your home stays clean.
+- **Single entrypoint**: `dot_zshenv` is the bootloader. Zsh loads it first to set XDG and PATH before anything else.
+- **Zero-dependency bootstrap**: Install with `curl` and `git`. Chezmoi is fetched automatically.
+- **Lazy-by-default**: Heavy tools load after the first prompt. Startup stays fast.
 
 ## Architecture diagram
 
@@ -135,16 +135,16 @@ dot_zshenv                          # Phase 0: XDG vars, essential PATH (~/.loca
         ├─▶ shell/00-core-paths    # Phase 7: Full PATH construction
         ├─▶ shell/05-core-safety   # Phase 8: Safety defaults (umask, etc.)
         ├─▶ shell/40-ls-colors     # Phase 9: LS_COLORS
-        ├─▶ shell/50-logic-funcs   # Phase 10: Shell functions (60+)
-        ├─▶ shell/90-ux-aliases    # Phase 11: Core aliases (eager, ~40KB)
+        ├─▶ shell/90-ux-aliases    # Phase 10: Core aliases (eager, ~40KB)
         │
-        ├─▶ [precmd hook]          # Phase 12: Lazy-load tool aliases (~137KB, after first prompt)
-        │     └─▶ shell/91-ux-aliases-lazy
+        ├─▶ [precmd hook]          # Phase 11: Lazy-load heavy logic
+        │     ├─▶ shell/50-logic-funcs   # Shell functions (60+)
+        │     └─▶ shell/91-ux-aliases-lazy   # Tool aliases (~137KB)
         │
-        ├─▶ atuin init             # Phase 13: Shell history
-        ├─▶ starship init          # Phase 14: Prompt
-        ├─▶ zoxide init            # Phase 15: Smart cd
-        └─▶ fzf init               # Phase 16: Fuzzy finder
+        ├─▶ atuin init             # Phase 12: Shell history
+        ├─▶ starship init          # Phase 13: Prompt
+        ├─▶ zoxide init            # Phase 14: Smart cd
+        └─▶ fzf init               # Phase 15: Fuzzy finder
 ```
 
 ### rc.d load order
@@ -153,6 +153,7 @@ Files under `~/.config/zsh/rc.d/` are sourced in **glob order** (alphabetical by
 
 | Range | Purpose | Examples |
 |-------|---------|---------|
+| `05-*` | SSH Agent | `05-ssh-agent.zsh` |
 | `10-*` | Environment variables, exports | `10-env.zsh` |
 | `20-*` | Plugin manager bootstrap | `20-zinit.zsh` |
 | `30-*` | Shell options, lazy-loaders | `30-options.zsh` |
@@ -217,7 +218,7 @@ Dotfiles replaces legacy Unix tools with high-performance Rust alternatives:
 
 - **Hardened defaults**: Shell scripts run with `set -euo pipefail` to fail fast.
 - **Supply chain safety**:
-  - **Pinned installation**: Installers reference specific Git tags (for example, `v0.2.480`), not `main`.
+  - **Pinned installation**: Installers reference specific Git tags (for example, `v0.2.482`), not `main`.
   - **Immutable history**: All logic stays version-controlled and reviewable through `chezmoi diff`.
 - **Audit logging**: Dotfiles logs all mutations to `~/.local/share/dotfiles.log`.
 - **Encryption**: `age` encrypts all sensitive data.

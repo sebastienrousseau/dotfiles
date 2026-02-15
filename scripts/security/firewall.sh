@@ -1,15 +1,22 @@
-#!/bin/sh
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-if [ "${DOTFILES_FIREWALL:-}" != "1" ]; then
-  echo "Firewall script is disabled by default."
-  echo "Re-run with DOTFILES_FIREWALL=1 to apply."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
+# shellcheck source=../dot/lib/ui.sh
+source "$REPO_ROOT/scripts/dot/lib/ui.sh"
+
+ui_logo_dot "Dot Firewall • Security"
+
+if [[ "${DOTFILES_FIREWALL:-}" != "1" ]]; then
+  ui_warn "Firewall script is disabled by default."
+  ui_info "Re-run with DOTFILES_FIREWALL=1 to apply."
   exit 1
 fi
 
 case "$(uname -s)" in
   Darwin)
-    echo "Enabling macOS firewall..."
+    ui_info "Enabling macOS firewall..."
     sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
     sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setallowsigned on
     sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setallowsignedapp on
@@ -17,18 +24,18 @@ case "$(uname -s)" in
     ;;
   Linux)
     if command -v ufw >/dev/null; then
-      echo "Enabling UFW..."
+      ui_info "Enabling UFW..."
       sudo ufw default deny incoming
       sudo ufw default allow outgoing
       sudo ufw allow OpenSSH
       sudo ufw --force enable
     else
-      echo "ufw not installed. Install ufw and re-run."
+      ui_error "ufw not installed. Install ufw and re-run."
       exit 1
     fi
     ;;
   *)
-    echo "Unsupported OS for firewall setup."
+    ui_error "Unsupported OS for firewall setup."
     exit 1
     ;;
 esac

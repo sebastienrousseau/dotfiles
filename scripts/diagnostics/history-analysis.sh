@@ -1,16 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
+
 histfile="${HISTFILE:-$HOME/.zsh_history}"
 db="${DOTFILES_HISTORY_DB:-$HOME/.local/share/dotfiles/history.sqlite}"
 
+ui_logo_dot "Dot History • Analysis"
+
 if [[ ! -f "$histfile" ]]; then
-  echo "History file not found: $histfile" >&2
+  ui_error "History file not found: $histfile"
   exit 1
 fi
 
 if ! command -v python3 >/dev/null; then
-  echo "python3 not found. Falling back to hstats if available." >&2
+  ui_warn "python3 not found. Falling back to hstats if available."
   if command -v hstats >/dev/null; then
     hstats
     exit 0
@@ -50,9 +56,7 @@ with histfile.open("r", encoding="utf-8", errors="ignore") as f:
 
 conn.commit()
 
-print("=== History Analysis ===")
-
-print("\nTop commands:")
+print("Top commands:")
 for row in cur.execute("""
     SELECT substr(cmd, 1, instr(cmd || ' ', ' ') - 1) AS base, COUNT(*)
     FROM history

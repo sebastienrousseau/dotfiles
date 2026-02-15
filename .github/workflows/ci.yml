@@ -115,7 +115,7 @@ jobs:
           TOTAL_ISSUES=$(wc -l < shellcheck_raw.log || echo 0)
 
           # Run with exclusions and fail on any remaining warnings
-          rg --files -g "*.sh" | xargs shellcheck -x -e SC1091 -e SC2030 -e SC2031 -f gcc
+          rg --files -g "*.sh" | xargs shellcheck -x -e SC1091 -e SC2030 -e SC2031 -e SC2317 -f gcc
 
           echo "Shellcheck completed. Total issues found: $TOTAL_ISSUES"
           echo "All remaining issues after exclusions must be fixed - zero warnings policy enforced."

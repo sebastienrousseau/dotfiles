@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
+# shellcheck source=../dot/lib/ui.sh
+source "$REPO_ROOT/scripts/dot/lib/ui.sh"
+
 if [[ $# -lt 1 ]]; then
-  echo "Usage: dot remove <path> [--source] [--dry-run]" >&2
+  ui_error "Usage: dot remove <path> [--source] [--dry-run]"
   exit 1
 fi
 
@@ -25,7 +30,7 @@ for arg in "$@"; do
 done
 
 if [[ ${#paths[@]} -eq 0 ]]; then
-  echo "No path provided." >&2
+  ui_error "No path provided."
   exit 1
 fi
 
@@ -33,10 +38,10 @@ if [[ $remove_source -eq 0 ]]; then
   args+=("--keep-source")
 fi
 
-printf "About to run: chezmoi remove %s %s\n" "${args[*]}" "${paths[*]}"
-read -r -p "Proceed? [y/N] " confirm
-if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-  echo "Aborted."
+ui_logo_dot "Dot Remove • Chezmoi"
+ui_info "About to run: chezmoi remove ${args[*]} ${paths[*]}"
+if ! ui_ask "Proceed?"; then
+  ui_info "Aborted."
   exit 1
 fi
 

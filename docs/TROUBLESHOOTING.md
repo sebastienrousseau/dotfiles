@@ -1,13 +1,13 @@
 # Troubleshooting
 
-Quick checks for common issues.
+Fast checks for common issues.
 
-## Install and update
+## Install And Update
 
 **Problem:** Install script fails immediately
 - Verify that `git` and `curl` are installed.
 - Check internet connectivity.
-- Try running with verbose output: `bash -x install.sh`
+- Run with verbose output: `bash -x install.sh`
 
 **Problem:** Chezmoi apply fails
 - Re-run `chezmoi apply` to re-sync state.
@@ -19,7 +19,7 @@ Quick checks for common issues.
 - Linux: Run `sudo apt-get update` first
 - Verify you have sufficient permissions
 
-## Shell startup
+## Shell Startup
 
 **Problem:** Shell is slow to start
 - Run `dot benchmark` to measure startup time
@@ -36,7 +36,7 @@ Quick checks for common issues.
 - Check for syntax errors: `zsh -n ~/.zshrc`
 - Review recent changes: `chezmoi diff`
 
-## Secrets and encryption
+## Secrets And Encryption
 
 **Problem:** Encrypted files fail to decrypt
 - Confirm `~/.config/chezmoi/key.txt` exists.
@@ -69,7 +69,7 @@ Quick checks for common issues.
 - Verify `delta` is installed
 - Confirm your terminal supports 256 colors
 
-## Kubernetes tools
+## Kubernetes Tools
 
 **Problem:** kubectl context issues
 - List contexts: `kubectl config get-contexts`
@@ -102,7 +102,7 @@ This guide covers:
 - Performance optimization for WSL2/Nix environments
 - Cross-platform migration scenarios
 
-## Still stuck
+## Still Stuck
 
 Open an issue with:
 - OS + version

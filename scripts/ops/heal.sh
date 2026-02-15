@@ -15,27 +15,16 @@ DOTFILES_SOURCE="$REPO_ROOT"
 BACKUP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/backups"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
 HEAL_LOG="$STATE_DIR/heal.log"
-
-# Colors (respect NO_COLOR: https://no-color.org)
-if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
-  RED='\033[0;31m'
-  GREEN='\033[0;32m'
-  YELLOW='\033[0;33m'
-  BLUE='\033[0;34m'
-  BOLD='\033[1m'
-  NC='\033[0m'
-else
-  RED='' GREEN='' YELLOW='' BLUE='' BOLD='' NC=''
-fi
+# shellcheck source=../dot/lib/ui.sh
+source "$REPO_ROOT/scripts/dot/lib/ui.sh"
 
 # Logging
-log() { echo -e "$*"; }
-log_info() { log "${BLUE}[INFO]${NC} $*"; }
-log_success() { log "${GREEN}[OK]${NC} $*"; }
-log_warn() { log "${YELLOW}[WARN]${NC} $*"; }
-log_error() { log "${RED}[ERROR]${NC} $*"; }
-log_step() { log "\n${BOLD}==> $*${NC}"; }
-log_dry() { log "${YELLOW}[DRY-RUN]${NC} Would: $*"; }
+log_info() { ui_info "$@"; }
+log_success() { ui_success "$@"; }
+log_warn() { ui_warn "$@"; }
+log_error() { ui_error "$@"; }
+log_step() { ui_section "$@"; }
+log_dry() { ui_warn "DRY-RUN" "Would: $*"; }
 
 # Persistent logging
 persist_log() {
@@ -51,46 +40,40 @@ ISSUES_FOUND=0
 CHEZMOI_APPLIED=0
 
 usage() {
-  cat <<EOF
-Dotfiles Heal - Auto-repair common issues
-
-Usage: $(basename "$0") [OPTIONS]
-
-Options:
-  -n, --dry-run   Preview what would be fixed without making changes
-  -f, --force     Skip confirmation prompts
-  -h, --help      Show this help message
-
-Repairs:
-  - Missing core dependencies (chezmoi, starship, rg, bat)
-  - Broken symlinks in \$HOME (depth 3)
-  - Chezmoi drift (re-applies dotfiles)
-  - Missing critical files (.zshrc, .bashrc, .profile)
-  - Missing XDG config directories
-
-EOF
+  printf "Dotfiles Heal - Auto-repair common issues\n\n"
+  printf "Usage: %s [OPTIONS]\n\n" "$(basename "$0")"
+  printf "Options:\n"
+  printf "  -n, --dry-run   Preview what would be fixed without making changes\n"
+  printf "  -f, --force     Skip confirmation prompts\n"
+  printf "  -h, --help      Show this help message\n\n"
+  printf "Repairs:\n"
+  printf "  - Missing core dependencies (chezmoi, starship, rg, bat)\n"
+  printf "  - Broken symlinks in \$HOME (depth 3)\n"
+  printf "  - Chezmoi drift (re-applies dotfiles)\n"
+  printf "  - Missing critical files (.zshrc, .bashrc, .profile)\n"
+  printf "  - Missing XDG config directories\n"
 }
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -n | --dry-run)
-      DRY_RUN=1
-      shift
-      ;;
-    -f | --force)
-      FORCE=1
-      shift
-      ;;
-    -h | --help)
-      usage
-      exit 0
-      ;;
-    *)
-      log_error "Unknown option: $1"
-      usage
-      exit 1
-      ;;
+  -n | --dry-run)
+    DRY_RUN=1
+    shift
+    ;;
+  -f | --force)
+    FORCE=1
+    shift
+    ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    log_error "Unknown option: $1"
+    usage
+    exit 1
+    ;;
   esac
 done
 
@@ -102,19 +85,26 @@ create_pre_heal_backup() {
   local rollback_script="$REPO_ROOT/scripts/ops/rollback.sh"
   if [[ -f "$rollback_script" ]]; then
     log_info "Creating backup before heal..."
-    bash "$rollback_script" backup --force 2>/dev/null || true
+    if ! bash "$rollback_script" backup --force; then
+      log_error "Pre-heal backup failed. Aborting."
+      exit 1
+    fi
   else
     # Minimal inline backup
+    log_warn "Rollback script not found. Performing minimal inline backup."
     local timestamp
     timestamp=$(date +"%Y%m%d_%H%M%S")
     local backup_path="$BACKUP_DIR/backup_${timestamp}_pre_heal"
     mkdir -p "$backup_path"
     for f in "$HOME/.bashrc" "$HOME/.zshrc" "$HOME/.profile"; do
       if [[ -f "$f" ]]; then
-        cp -a "$f" "$backup_path/" 2>/dev/null || true
+        if ! cp -a "$f" "$backup_path/"; then
+          log_error "Inline backup failed: Could not copy $f. Aborting."
+          exit 1
+        fi
       fi
     done
-    log_info "Backup created at $backup_path"
+    log_info "Minimal backup created at $backup_path"
   fi
 }
 
@@ -144,44 +134,31 @@ install_package() {
   pkg_mgr=$(detect_pkg_manager)
 
   case "$pkg_mgr" in
-    brew) brew install "$pkg" ;;
-    apt) sudo apt-get install -y "$pkg" ;;
-    dnf) sudo dnf install -y "$pkg" ;;
-    pacman) sudo pacman -S --noconfirm "$pkg" ;;
-    nix) nix-env -iA "nixpkgs.$pkg" ;;
-    *)
-      log_error "No supported package manager found. Install '$pkg' manually."
-      return 1
-      ;;
+  brew) brew install "$pkg" ;;
+  apt) sudo apt-get install -y "$pkg" ;;
+  dnf) sudo dnf install -y "$pkg" ;;
+  pacman) sudo pacman -S --noconfirm "$pkg" ;;
+  nix) nix-env -iA "nixpkgs.$pkg" ;;
+  *)
+    log_error "No supported package manager found. Install '$pkg' manually."
+    return 1
+    ;;
   esac
 }
 
 # Map command names to package names per package manager
 get_package_name() {
   local cmd="$1"
-  local pkg_mgr
-  pkg_mgr=$(detect_pkg_manager)
-
   case "$cmd" in
-    rg)
-      case "$pkg_mgr" in
-        apt | dnf) echo "ripgrep" ;;
-        *) echo "ripgrep" ;;
-      esac
-      ;;
-    bat)
-      case "$pkg_mgr" in
-        apt) echo "bat" ;;
-        *) echo "bat" ;;
-      esac
-      ;;
-    *) echo "$cmd" ;;
+  rg) echo "ripgrep" ;;
+  bat) echo "bat" ;; # The package is usually called 'bat'
+  *) echo "$cmd" ;;
   esac
 }
 
 heal_missing_dependencies() {
   log_step "Checking core dependencies"
-  local deps=(chezmoi starship rg bat)
+  local deps=(chezmoi starship rg) # 'bat' handled separately
   local missing=()
 
   for cmd in "${deps[@]}"; do
@@ -190,6 +167,12 @@ heal_missing_dependencies() {
       ISSUES_FOUND=$((ISSUES_FOUND + 1))
     fi
   done
+
+  # Special check for bat/batcat
+  if ! command -v bat >/dev/null 2>&1 && ! command -v batcat >/dev/null 2>&1; then
+    missing+=("bat")
+    ISSUES_FOUND=$((ISSUES_FOUND + 1))
+  fi
 
   if [[ ${#missing[@]} -eq 0 ]]; then
     log_success "All core dependencies present"
@@ -407,10 +390,7 @@ heal_missing_xdg_dirs() {
 # =============================================================================
 
 main() {
-  echo ""
-  echo "=========================================="
-  echo "     Dotfiles Heal - Auto-Repair"
-  echo "=========================================="
+  ui_logo_dot "Dot Heal • Auto-Repair"
 
   if [[ "$DRY_RUN" == "1" ]]; then
     log_info "Running in dry-run mode (no changes will be made)"
@@ -418,11 +398,9 @@ main() {
 
   # Confirm before making changes (unless --force or --dry-run)
   if [[ "$DRY_RUN" != "1" ]] && [[ "$FORCE" != "1" ]]; then
-    echo ""
     log_warn "This will attempt to auto-repair your dotfiles environment."
     log_info "A backup will be created before any changes are made."
-    read -rp "Continue? [y/N] " response
-    if [[ ! "$response" =~ ^[Yy]$ ]]; then
+    if ! ui_ask "Continue?"; then
       log_info "Aborted."
       exit 0
     fi
@@ -441,8 +419,7 @@ main() {
   heal_missing_xdg_dirs || true
 
   # Summary
-  echo ""
-  echo "=========================================="
+  ui_section "Summary"
   if [[ "$DRY_RUN" == "1" ]]; then
     if [[ $ISSUES_FOUND -eq 0 ]]; then
       log_success "No issues found. System is healthy."
@@ -460,7 +437,6 @@ main() {
       log_info "Try running 'dot doctor' for detailed diagnostics."
     fi
   fi
-  echo "=========================================="
 }
 
 main

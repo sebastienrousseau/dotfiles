@@ -29,6 +29,8 @@
               zsh
               neovim
               tmux
+              starship
+              nushell
 
               # Search & Navigation
               ripgrep
@@ -37,6 +39,7 @@
               fzf
               zoxide
               eza
+              atuin
 
               # Git tools
               lazygit
@@ -45,6 +48,12 @@
               # Data processing
               jq
               yq
+              just
+              shellcheck
+              hyperfine
+
+              # AI
+              shell-gpt
 
               # Security
               age
@@ -69,6 +78,8 @@
               zsh
               neovim
               tmux
+              starship
+              nushell
 
               # Search & Navigation
               ripgrep
@@ -77,6 +88,7 @@
               fzf
               zoxide
               eza
+              atuin
 
               # Git tools
               lazygit
@@ -85,6 +97,12 @@
               # Data processing
               jq
               yq
+              just
+              shellcheck
+              hyperfine
+
+              # AI
+              shell-gpt
 
               # Security
               age

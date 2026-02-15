@@ -7,29 +7,36 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh
 source "$SCRIPT_DIR/../lib/utils.sh"
+# shellcheck source=../lib/ui.sh
+source "$SCRIPT_DIR/../lib/ui.sh"
 
 cmd_upgrade() {
   local src_dir
   src_dir="$(require_source_dir)"
 
+  ui_logo_dot "Dot Upgrade • Meta"
   if [ -f "$src_dir/nix/flake.nix" ] && has_command nix; then
-    echo "Updating Nix flake..."
+    ui_section "Nix"
+    ui_info "Updating Nix flake..."
     (cd "$src_dir" && nix flake update) || true
-    echo "Running Nix garbage collection..."
+    ui_info "Running Nix garbage collection..."
     nix-collect-garbage -d || true
   fi
 
-  echo "Updating dotfiles..."
+  ui_section "Dotfiles"
+  ui_info "Updating dotfiles..."
   chezmoi update || true
 
   if has_command nvim; then
-    echo "Updating Neovim plugins..."
+    ui_section "Neovim"
+    ui_info "Updating Neovim plugins..."
     nvim --headless "+Lazy! sync" +qa || true
   fi
 
   if [ "${DOTFILES_FONTS:-}" = "1" ]; then
     if [ -f "$src_dir/scripts/fonts/install-nerd-fonts.sh" ]; then
-      echo "Installing Nerd Fonts..."
+      ui_section "Fonts"
+      ui_info "Installing Nerd Fonts..."
       sh "$src_dir/scripts/fonts/install-nerd-fonts.sh"
     fi
   fi
@@ -40,6 +47,7 @@ cmd_docs() {
   src_dir="$(resolve_source_dir)"
 
   if [ -n "$src_dir" ] && [ -f "$src_dir/README.md" ]; then
+    ui_logo_dot "Dot Docs • Meta"
     exec cat "$src_dir/README.md"
   else
     die "README not found."
@@ -61,6 +69,7 @@ cmd_keys() {
   src_dir="$(resolve_source_dir)"
 
   if [ -n "$src_dir" ] && [ -f "$src_dir/docs/KEYS.md" ]; then
+    ui_logo_dot "Dot Keys • Meta"
     if [ -n "$1" ]; then
       rg -i --fixed-strings --context 1 "$1" "$src_dir/docs/KEYS.md" || true
     else
@@ -76,11 +85,13 @@ cmd_sandbox() {
   src_dir="$(require_source_dir)"
 
   if has_command docker; then
-    echo "Launching sandbox via Docker..."
+    ui_logo_dot "Dot Sandbox • Meta"
+    ui_info "Launching sandbox via Docker..."
     docker build -f "$src_dir/tests/Dockerfile.sandbox" -t dotfiles-sandbox "$src_dir"
     exec docker run --rm -it dotfiles-sandbox
   elif has_command podman; then
-    echo "Launching sandbox via Podman..."
+    ui_logo_dot "Dot Sandbox • Meta"
+    ui_info "Launching sandbox via Podman..."
     podman build -f "$src_dir/tests/Dockerfile.sandbox" -t dotfiles-sandbox "$src_dir"
     exec podman run --rm -it dotfiles-sandbox
   else
@@ -111,7 +122,7 @@ case "${1:-}" in
     cmd_sandbox "$@"
     ;;
   *)
-    echo "Unknown meta command: ${1:-}" >&2
+    ui_error "Unknown meta command: ${1:-}"
     exit 1
     ;;
 esac

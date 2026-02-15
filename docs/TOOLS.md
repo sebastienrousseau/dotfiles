@@ -1,6 +1,6 @@
 # Tools
 
-These are the main tools and CLI conveniences included with Dotfiles.
+Dotfiles manages and integrates the tools below. For the default Nix set, see `nix/flake.nix`.
 
 ## Core
 
@@ -10,6 +10,7 @@ These are the main tools and CLI conveniences included with Dotfiles.
 | Starship | Cross-shell prompt |
 | tmux | Terminal multiplexer |
 | Neovim | Modern Vim-based editor |
+| Nushell | A modern, structured shell |
 
 ## Search and navigation
 
@@ -115,6 +116,14 @@ These are the main tools and CLI conveniences included with Dotfiles.
 - Sandbox preview (`dot sandbox`)
 - Benchmarking (`dot benchmark`)
 - Lua tooling (`luacheck`, `stylua`, `luarocks`, `lua/luajit`)
+
+## Scripting & Development
+
+| Tool | Description |
+|---|---|
+| just | A command runner |
+| shellcheck | A static analysis tool for shell scripts |
+| hyperfine | A command-line benchmarking tool |
 
 ## Security features
 

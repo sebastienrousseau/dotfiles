@@ -7,6 +7,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh
 source "$SCRIPT_DIR/../lib/utils.sh"
+# shellcheck source=../lib/ui.sh
+source "$SCRIPT_DIR/../lib/ui.sh"
 
 cmd_backup() {
   run_script "scripts/security/backup.sh" "Backup script" "$@"
@@ -67,7 +69,7 @@ case "${1:-}" in
     cmd_usb_safety "$@"
     ;;
   *)
-    echo "Unknown security command: ${1:-}" >&2
+    ui_error "Unknown security command: ${1:-}"
     exit 1
     ;;
 esac

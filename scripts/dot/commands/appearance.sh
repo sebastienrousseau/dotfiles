@@ -7,6 +7,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh
 source "$SCRIPT_DIR/../lib/utils.sh"
+# shellcheck source=../lib/ui.sh
+source "$SCRIPT_DIR/../lib/ui.sh"
 
 cmd_theme() {
   run_script "scripts/theme/switch.sh" "Theme switcher" "$@"
@@ -26,13 +28,16 @@ cmd_tune() {
 
   case "$(uname -s)" in
     Darwin)
+      ui_logo_dot "Dot Tune • Appearance"
       exec bash "$src_dir/scripts/tuning/macos.sh" "$@"
       ;;
     Linux)
+      ui_logo_dot "Dot Tune • Appearance"
       exec bash "$src_dir/scripts/tuning/linux.sh" "$@"
       ;;
     *)
-      echo "OS tuning not supported on this platform."
+      ui_logo_dot "Dot Tune • Appearance"
+      ui_error "OS tuning not supported on this platform."
       exit 1
       ;;
   esac
@@ -57,7 +62,7 @@ case "${1:-}" in
     cmd_tune "$@"
     ;;
   *)
-    echo "Unknown appearance command: ${1:-}" >&2
+    ui_error "Unknown appearance command: ${1:-}"
     exit 1
     ;;
 esac

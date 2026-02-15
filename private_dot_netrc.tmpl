@@ -1,17 +1,4 @@
-# ~/.netrc - Machine credentials for network services
-# Managed by chezmoi - https://github.com/sebastienrousseau/dotfiles
-# This file should have permissions 600 (readable only by owner)
-#
-# SECURITY: This template supports chezmoi secrets integration.
-# Configure tokens in ~/.config/chezmoi/chezmoi.toml or use age encryption.
-#
-# Format:
-#   machine <hostname>
-#   login <username>
-#   password <token>
-
 {{- if hasKey . "github_token" }}
-# GitHub API access
 machine github.com
 login {{ .chezmoi.username }}
 password {{ .github_token }}
@@ -22,20 +9,13 @@ password {{ .github_token }}
 {{- end }}
 
 {{- if hasKey . "gitlab_token" }}
-# GitLab API access
 machine gitlab.com
 login {{ .chezmoi.username }}
 password {{ .gitlab_token }}
 {{- end }}
 
 {{- if hasKey . "huggingface_token" }}
-# Hugging Face API access
 machine huggingface.co
 login {{ .chezmoi.username }}
 password {{ .huggingface_token }}
 {{- end }}
-
-# Add additional machine credentials below as needed
-# machine example.com
-# login myuser
-# password mytoken

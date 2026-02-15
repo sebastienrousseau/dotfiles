@@ -2,8 +2,6 @@
 # https://mise.jdx.dev/
 
 [settings]
-# Automatically activate when entering directory
-auto_activate = true
 # Install missing tools automatically
 auto_install = true
 # Use verbose output

@@ -13,34 +13,24 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 CHEZMOI_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi"
 DOTFILES_SOURCE="${HOME}/.dotfiles"
+# shellcheck source=../dot/lib/ui.sh
+source "$REPO_ROOT/scripts/dot/lib/ui.sh"
 
 # Output control
 VERBOSE=0
 JSON_OUTPUT=0
 EXIT_CODE=0
 
-# Colors (disabled if not a terminal, JSON mode, or NO_COLOR set)
-if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]] && [[ "$JSON_OUTPUT" != "1" ]]; then
-  RED='\033[0;31m'
-  GREEN='\033[0;32m'
-  YELLOW='\033[0;33m'
-  BLUE='\033[0;34m'
-  BOLD='\033[1m'
-  NC='\033[0m'
-else
-  RED='' GREEN='' YELLOW='' BLUE='' BOLD='' NC=''
-fi
-
 # Results collection for JSON
 declare -a RESULTS=()
 
-log_info() { [[ "$VERBOSE" == "1" ]] && echo -e "${BLUE}[INFO]${NC} $*" || true; }
-log_pass() { echo -e "${GREEN}[PASS]${NC} $*"; }
+log_info() { [[ "$VERBOSE" == "1" ]] && ui_info "$*" || true; }
+log_pass() { ui_success "$*"; }
 log_fail() {
-  echo -e "${RED}[FAIL]${NC} $*"
+  ui_error "$*"
   EXIT_CODE=1
 }
-log_warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
+log_warn() { ui_warn "$*"; }
 
 add_result() {
   local name="$1" status="$2" message="${3:-}"
@@ -59,20 +49,25 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     -h | --help)
-      echo "Usage: $(basename "$0") [OPTIONS]"
-      echo ""
-      echo "Options:"
-      echo "  -v, --verbose    Show detailed output"
-      echo "  -j, --json       Output results as JSON"
-      echo "  -h, --help       Show this help message"
+      ui_logo_dot "Dot Health Check • Ops"
+      ui_section "Usage"
+      ui_bullet "$(basename "$0") [OPTIONS]"
+      ui_section "Options"
+      ui_bullet "-v, --verbose    Show detailed output"
+      ui_bullet "-j, --json       Output results as JSON"
+      ui_bullet "-h, --help       Show this help message"
       exit 0
       ;;
     *)
-      echo "Unknown option: $1"
+      ui_error "Unknown option: $1"
       exit 1
       ;;
   esac
 done
+
+if [[ "$JSON_OUTPUT" != "1" ]]; then
+  ui_logo_dot "Dot Health Check • Ops"
+fi
 
 # =============================================================================
 # Health Check Functions

@@ -1,6 +1,6 @@
-# Discover operations
+# Operations
 
-This guide covers the core workflows to keep your dotfiles running well across platforms.
+This guide gives you the core workflows to keep Dotfiles fast, clean, and aligned across platforms.
 
 ---
 
@@ -12,7 +12,7 @@ This guide covers the core workflows to keep your dotfiles running well across p
 - **Update system**:
   ```bash
   # Updates Dotfiles AND Homebrew packages
-  chezmoi update
+  dot update
   ```
   *Behind the scenes, this runs `brew bundle install` to match the `Brewfile.lock.json`.*
 
@@ -29,13 +29,13 @@ This guide covers the core workflows to keep your dotfiles running well across p
   sudo apt update && sudo apt upgrade -y
   
   # 2. Update Dotfiles
-  chezmoi update
+  dot update
   ```
   > [!NOTE]
   > On Linux, `chezmoi` focuses on configuration. Package updates work best with the OS package manager to avoid `sudo` conflicts.
 
 - **Troubleshooting**:
-  - **Font issues**: If icons are missing, run `./install/provision/run_onchange_50-install-fonts.sh` manually.
+  - **Font issues**: If icons are missing, run `dot fonts` to reinstall them.
   - **ZorinOS/GNOME**: Custom keybindings may require `dconf load` if Chezmoi does not apply them automatically.
 
 ### Windows (WSL2)
@@ -52,23 +52,25 @@ This guide covers the core workflows to keep your dotfiles running well across p
 
 ## Workflows
 
-### Apply changes
+### Apply Changes
 After editing any config file:
 ```bash
 dot apply
 ```
 *Triggers: `dot_zshrc` reload, audit logging.*
 
-### Roll back
-If an update breaks your setup, revert:
+### Roll Back
+If an update breaks your setup, use `dot rollback` for a guided return to a known state.
+
+For a manual rollback:
 ```bash
 cd ~/.dotfiles
 git reset --hard HEAD@{1}  # Go back 1 operation
-chezmoi apply
+dot apply
 ```
 
 ### Debug
-If something runs slow or appears broken:
+If something slows down or looks off:
 
 1. **Check health**:
    ```bash
@@ -83,7 +85,7 @@ If something runs slow or appears broken:
 
 ## Tools
 
-### Make it yours
+### Make It Yours
 - **Wallpaper rotation**:
   ```bash
   ~/.dotfiles/scripts/theme/wallpaper-rotate.sh --interval 300
@@ -125,6 +127,6 @@ If something runs slow or appears broken:
 
 ---
 
-## Security policy
+## Security Policy
 - **GPG/SSH**: All commits use SSH signing.
 - **Audit log**: Review `~/.local/share/dotfiles.log` for a timeline of all changes that Dotfiles applied.

@@ -6,6 +6,12 @@ export XDG_STATE_HOME="${HOME}/.local/state"
 
 # Essential PATH entries (available before .zshrc and plugin init)
 # Prevents tools like dot, chezmoi, and Homebrew from being missing during early init.
+
+# Nix
+if [[ -d "/nix/var/nix/profiles/default/bin" ]]; then
+  [[ ":${PATH}:" != *":/nix/var/nix/profiles/default/bin:"* ]] && export PATH="/nix/var/nix/profiles/default/bin:${PATH}"
+fi
+
 if [[ -d "${HOME}/.local/bin" ]]; then
   [[ ":${PATH}:" != *":${HOME}/.local/bin:"* ]] && export PATH="${HOME}/.local/bin:${PATH}"
 fi

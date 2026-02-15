@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Dotfiles CLI Entry Point - v0.2.481
+# Dotfiles CLI Entry Point - v0.2.482
 # Modular architecture with command handlers in scripts/dot/commands/
 
 set -e
 
-VERSION="0.2.481"
+VERSION="0.2.482"
 
 COMMAND="$1"
 if [ -n "$1" ]; then
@@ -28,8 +28,79 @@ resolve_source_dir() {
   echo ""
 }
 
+load_ui() {
+  local src_dir
+  src_dir="$(resolve_source_dir)"
+  if [ -n "$src_dir" ] && [ -f "$src_dir/scripts/dot/lib/ui.sh" ]; then
+    # shellcheck source=/dev/null
+    source "$src_dir/scripts/dot/lib/ui.sh"
+    return 0
+  fi
+  return 1
+}
+
 show_help() {
-  cat <<'EOF'
+  if load_ui; then
+    ui_logo_dot "Dot • Command Reference"
+    ui_section "Core"
+    ui_bullet "apply       Apply dotfiles (chezmoi apply)"
+    ui_bullet "sync        Apply dotfiles (alias of apply)"
+    ui_bullet "update      Pull latest changes and apply them (chezmoi update)"
+    ui_bullet "add         Add a file to chezmoi source"
+    ui_bullet "diff        Show chezmoi diff with exclusions"
+    ui_bullet "status      Show configuration drift (chezmoi status)"
+    ui_bullet "remove      Safely remove a managed file"
+    ui_bullet "cd          Print source directory path (use: cd $(dot cd))"
+    ui_bullet "edit        Open chezmoi source in $EDITOR"
+
+    ui_section "Diagnostics"
+    ui_bullet "doctor         Check system health and configuration"
+    ui_bullet "heal           Auto-repair common dotfiles issues"
+    ui_bullet "health         Run comprehensive health dashboard"
+    ui_bullet "security-score Security assessment with grading"
+    ui_bullet "rollback       Rollback dotfiles to a previous state"
+    ui_bullet "restore        Restore from backup or git ref"
+    ui_bullet "drift          Drift dashboard (detailed chezmoi status)"
+    ui_bullet "history        Shell history analysis"
+    ui_bullet "benchmark      Run shell startup benchmark (--detailed, --profile)"
+
+    ui_section "Tools"
+    ui_bullet "tools       Show or install nix packages (dot tools [install])"
+    ui_bullet "new         Create a new project from a template"
+    ui_bullet "sandbox     Launch a safe sandbox preview (Docker/Podman)"
+    ui_bullet "keys        Show keybindings catalog"
+    ui_bullet "learn       Start the interactive tour of your new tools"
+    ui_bullet "docs        Show repo README"
+    ui_bullet "log-rotate  Rotate ~/.local/share/dotfiles.log"
+
+    ui_section "Appearance"
+    ui_bullet "theme       Switch terminal theme (dark/light)"
+    ui_bullet "wallpaper   Apply a wallpaper from your library"
+    ui_bullet "fonts       Install Nerd Fonts (JetBrainsMono by default)"
+    ui_bullet "tune        Apply OS tuning (opt-in)"
+
+    ui_section "Secrets"
+    ui_bullet "secrets-init    Initialize age key for secrets"
+    ui_bullet "secrets         Edit encrypted secrets (age)"
+    ui_bullet "secrets-create  Create an encrypted secrets file"
+    ui_bullet "ssh-key         Encrypt an SSH key locally with age"
+
+    ui_section "Security (opt-in)"
+    ui_bullet "backup        Create a compressed backup of your home"
+    ui_bullet "encrypt-check Check disk encryption status"
+    ui_bullet "firewall      Apply firewall hardening"
+    ui_bullet "telemetry     Disable OS telemetry"
+    ui_bullet "dns-doh       Enable DNS-over-HTTPS"
+    ui_bullet "lock-screen   Enforce lock screen idle settings"
+    ui_bullet "usb-safety    Disable automount for removable media"
+
+    ui_section "Meta"
+    ui_bullet "upgrade     Update flake, plugins, and dotfiles"
+    ui_bullet "packages    List installed packages and package managers"
+    ui_bullet "--version   Show version information"
+    ui_bullet "help        Show this help message"
+  else
+    cat <<'EOF'
 Usage: dot [command]
 
 Core Commands:
@@ -90,6 +161,7 @@ Meta:
   --version   Show version information
   help        Show this help message
 EOF
+  fi
 }
 
 # Dispatch to command module
@@ -117,11 +189,19 @@ dispatch() {
 case "$COMMAND" in
   # Version
   --version|-v|version)
-    echo "dot v${VERSION}"
-    echo "Dotfiles CLI - Cross-platform shell environment distribution"
-    echo ""
-    echo "Repository: https://github.com/sebastienrousseau/dotfiles"
-    echo "Managed by: chezmoi $(chezmoi --version 2>/dev/null | head -1 || echo 'not installed')"
+    if load_ui; then
+      ui_logo_dot "Dot • Version"
+      ui_key_value "Version" "v${VERSION}"
+      ui_key_value "Description" "Dotfiles CLI - Cross-platform shell environment distribution"
+      ui_key_value "Repository" "https://github.com/sebastienrousseau/dotfiles"
+      ui_key_value "Chezmoi" "$(chezmoi --version 2>/dev/null | head -1 || echo 'not installed')"
+    else
+      echo "dot v${VERSION}"
+      echo "Dotfiles CLI - Cross-platform shell environment distribution"
+      echo ""
+      echo "Repository: https://github.com/sebastienrousseau/dotfiles"
+      echo "Managed by: chezmoi $(chezmoi --version 2>/dev/null | head -1 || echo 'not installed')"
+    fi
     exit 0
     ;;
 
@@ -170,8 +250,14 @@ case "$COMMAND" in
     if [ -z "$COMMAND" ]; then
       show_help
     else
-      echo "Unknown command: $COMMAND"
-      echo "Try 'dot help' for usage."
+      if load_ui; then
+        ui_logo_dot "Dot • Error"
+        ui_error "Unknown command: $COMMAND"
+        ui_info "Try 'dot help' for usage."
+      else
+        echo "Unknown command: $COMMAND"
+        echo "Try 'dot help' for usage."
+      fi
       exit 1
     fi
     ;;
