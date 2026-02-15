@@ -5,7 +5,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../dot/lib/ui.sh
+# shellcheck source=../lib/ui.sh
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
 # Parse arguments
@@ -44,21 +44,21 @@ check() {
       PASSED_CHECKS=$((PASSED_CHECKS + 1))
       RESULTS["$name"]="pass"
       if ! $JSON_OUTPUT; then
-        printf "  %s %-35s %s\n" "${GREEN}${SYMBOL_SUCCESS}${NORMAL}" "$name" "${GREEN}OK${NORMAL}"
+        ui_success "$name"
       fi
       ;;
     warn)
       WARNINGS=$((WARNINGS + 1))
       RESULTS["$name"]="warn"
       if ! $JSON_OUTPUT; then
-        printf "  %s %-35s %s %s\n" "${YELLOW}${SYMBOL_WARN}${NORMAL}" "$name" "${YELLOW}WARNING${NORMAL}" "$message"
+        ui_warn "$name" "$message"
       fi
       ;;
     fail)
       FAILURES=$((FAILURES + 1))
       RESULTS["$name"]="fail"
       if ! $JSON_OUTPUT; then
-        printf "  %s %-35s %s %s\n" "${RED}${SYMBOL_ERROR}${NORMAL}" "$name" "${RED}FAILED${NORMAL}" "$message"
+        ui_error "$name" "$message"
       fi
       ;;
   esac
@@ -280,9 +280,6 @@ print_summary() {
 }
 
 # Main
-ui_box_start "${BLUE}" "Dotfiles Health Dashboard"
-ui_spinner_start "Running health checks..."
+ui_header "Dotfiles Health Dashboard"
 run_checks
-ui_spinner_stop
 print_summary
-ui_box_end "${BLUE}"
