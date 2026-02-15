@@ -3,7 +3,6 @@
 # Provides functions for consistent, visually appealing output.
 
 # --- Colors and Styles ---
-# Use tput for wider compatibility and to respect terminal capabilities.
 if command -v tput >/dev/null && tput setaf 1 >/dev/null 2>&1; then
   BOLD=$(tput bold)
   UNDERLINE=$(tput smul)
@@ -33,7 +32,6 @@ else
 fi
 
 # --- Symbols ---
-# Uses Unicode symbols with ASCII fallbacks for wider compatibility.
 if [[ "$(locale charmap)" == "UTF-8" ]]; then
   SYMBOL_SUCCESS="✓"
   SYMBOL_ERROR="✗"
@@ -41,6 +39,12 @@ if [[ "$(locale charmap)" == "UTF-8" ]]; then
   SYMBOL_INFO="›"
   SYMBOL_ARROW="→"
   SYMBOL_BULLET="•"
+  BOX_TOP_LEFT="┌"
+  BOX_TOP_RIGHT="┐"
+  BOX_BOTTOM_LEFT="└"
+  BOX_BOTTOM_RIGHT="┘"
+  BOX_HORIZONTAL="─"
+  BOX_VERTICAL="│"
 else
   SYMBOL_SUCCESS="OK"
   SYMBOL_ERROR="ERR"
@@ -48,78 +52,49 @@ else
   SYMBOL_INFO=">"
   SYMBOL_ARROW="->"
   SYMBOL_BULLET="*"
+  BOX_TOP_LEFT="+"
+  BOX_TOP_RIGHT="+"
+  BOX_BOTTOM_LEFT="+"
+  BOX_BOTTOM_RIGHT="+"
+  BOX_HORIZONTAL="-"
+  BOX_VERTICAL="|"
 fi
 
 # --- UI Functions ---
 
-# ui_header <text>
-# Prints a main header with a border.
 ui_header() {
   local text=" $1 "
-  local width=${#text}
-  local border
-  border=$(printf "%${width}s" | tr ' ' '─')
-  printf "
-%s┌%s┐%s
-" "${BOLD}${BLUE}" "$border" "${NORMAL}"
-  printf "%s│%s│%s
-" "${BOLD}${BLUE}" "$text" "${NORMAL}"
-  printf "%s└%s┘%s
-" "${BOLD}${BLUE}" "$border" "${NORMAL}"
+  printf "\n%s%s%s\n" "${BOLD}${BLUE}" "$text" "${NORMAL}"
 }
 
-# ui_section <text>
-# Prints a section header.
 ui_section() {
-  printf "
-%s%s%s
-" "${BOLD}${CYAN}" "$1" "${NORMAL}"
+  printf "\n%s%s%s\n" "${BOLD}${CYAN}" "$1" "${NORMAL}"
 }
 
-# ui_key_value <key> <value>
-# Prints a key-value pair with aligned formatting.
 ui_key_value() {
-  printf "  %-20s: %s
-" "$1" "$2"
+  printf "  %-20s: %s\n" "$1" "$2"
 }
 
-# ui_success <text>
-# Prints a success message.
 ui_success() {
-  printf "%s %s %s
-" "${GREEN}${SYMBOL_SUCCESS}${NORMAL}" "$@"
+  printf "%s %s %s\n" "${GREEN}${SYMBOL_SUCCESS}${NORMAL}" "$@"
 }
 
-# ui_error <text>
-# Prints an error message.
 ui_error() {
-  printf "%s %s %s
-" "${RED}${SYMBOL_ERROR}${NORMAL}" "$@" >&2
+  printf "%s %s %s\n" "${RED}${SYMBOL_ERROR}${NORMAL}" "$@" >&2
 }
 
-# ui_warn <text>
-# Prints a warning message.
 ui_warn() {
-  printf "%s %s %s
-" "${YELLOW}${SYMBOL_WARN}${NORMAL}" "$@"
+  printf "%s %s %s\n" "${YELLOW}${SYMBOL_WARN}${NORMAL}" "$@"
 }
 
-# ui_info <text>
-# Prints an informational message.
 ui_info() {
-  printf "%s %s %s
-" "${GRAY}${SYMBOL_INFO}${NORMAL}" "$@"
+  printf "%s %s %s\n" "${GRAY}${SYMBOL_INFO}${NORMAL}" "$@"
 }
 
-# ui_bullet <text>
-# Prints a bullet point.
 ui_bullet() {
-  printf "  %s %s
-" "${GRAY}${SYMBOL_BULLET}${NORMAL}" "$@"
+  printf "  %s %s\n" "${GRAY}${SYMBOL_BULLET}${NORMAL}" "$@"
 }
 
-# ui_ask <prompt>
-# Prompts the user for confirmation. Returns 0 for yes, 1 for no.
 ui_ask() {
   local prompt="$1"
   while true; do
@@ -127,38 +102,55 @@ ui_ask() {
     case "$reply" in
       [Yy]*) return 0 ;;
       [Nn]*|"") return 1 ;;
-      *) printf "Please answer yes or no.
-" ;;
+      *) printf "Please answer yes or no.\n" ;;
     esac
   done
 }
 
-# ui_spinner_start <text>
-# Starts a spinner for a long-running command.
 ui_spinner_start() {
   local text="$1"
   (
     while true; do
       for char in "⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏"; do
-        printf "%s %s %s" "${BLUE}${char}${NORMAL}" "$text"
+        printf "\r%s %s %s" "${BLUE}${char}${NORMAL}" "$text"
         sleep 0.1
       done
     done
   ) &
   SPINNER_PID=$!
-  # Hide cursor
   tput civis
 }
 
-# ui_spinner_stop
-# Stops the spinner.
 ui_spinner_stop() {
   if [[ -n "$SPINNER_PID" ]]; then
     kill "$SPINNER_PID"
-    # Clear the line
-    printf "\033[K"
-    # Show cursor
+    printf "\r\033[K"
     tput cnorm
     SPINNER_PID=""
   fi
+}
+
+# ui_box <color> <title>
+# Draws a box with a title
+ui_box_start() {
+    local color="$1"
+    local title="$2"
+    local width
+    width=$(tput cols)
+    local title_len=${#title}
+    local padding=$(( (width - title_len - 2) / 2 ))
+    printf "%s%s" "$color" "$BOX_TOP_LEFT"
+    for ((i=0; i<padding; i++)); do printf "%s" "$BOX_HORIZONTAL"; done
+    printf " %s " "$title"
+    for ((i=0; i<padding; i++)); do printf "%s" "$BOX_HORIZONTAL"; done
+    printf "%s%s\n" "$BOX_TOP_RIGHT" "$NORMAL"
+}
+
+ui_box_end() {
+    local color="$1"
+    local width
+    width=$(tput cols)
+    printf "%s%s" "$color" "$BOX_BOTTOM_LEFT"
+    for ((i=0; i<width-2; i++)); do printf "%s" "$BOX_HORIZONTAL"; done
+    printf "%s%s\n" "$BOX_BOTTOM_RIGHT" "$NORMAL"
 }
