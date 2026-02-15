@@ -1,8 +1,8 @@
-# Get started
+# Get Started
 
-This guide covers supported platforms, prerequisites, and the standard install path.
+This guide shows the supported platforms, prerequisites, and the standard install path.
 
-## Supported platforms
+## Supported Platforms
 
 - macOS (Homebrew)
 - Ubuntu/Debian (apt)
@@ -23,14 +23,14 @@ Optional (feature-dependent):
 
 ## Install
 
-### One-liner (recommended)
+### One-Liner (Recommended)
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
 exec zsh
 ```
 
-### Manual installation
+### Manual Installation
 
 ```bash
 # Clone the repository
@@ -43,9 +43,9 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply sebastienrousseau/dotfiles
 exec zsh
 ```
 
-### Using Nix (alternative)
+### Using Nix (Alternative)
 
-If you have Nix with flakes enabled, you can enter a development shell after cloning the repository:
+If you have Nix with flakes enabled, enter a development shell after cloning the repository:
 
 ```bash
 # First, clone the repository if you haven't already
@@ -58,14 +58,14 @@ nix develop ~/.dotfiles/nix
 nix profile install ~/.dotfiles/nix#dot-utils
 ```
 
-## What happens
+## What Happens
 
 1. The installer downloads a pinned Chezmoi bootstrap and applies this repo.
 2. Chezmoi hooks install OS packages, fonts, and optional apps.
 3. The `dot` CLI becomes available in `~/.local/bin`.
 4. Chezmoi symlinks shell configuration to your home directory.
 
-## Post-install verification
+## Post-Install Verification
 
 ```bash
 # Check dot CLI is available

@@ -1,13 +1,13 @@
-# How it works
+# How It Works
 
-v0.2.482 constitutes a portable **shell distribution** that `chezmoi` manages. This document outlines the core architectural decisions and system design.
+v0.2.482 is a portable **shell distribution** managed by `chezmoi`. This document captures the architectural decisions that make it predictable, fast, and safe.
 
-## Core philosophy
+## Core Philosophy
 
-- **XDG-first**: Configuration strictly maps to `~/.config/` (XDG Base Directory specification). This approach avoids `~/.foo` file sprawl in the home directory.
-- **Single entrypoint**: `dot_zshenv` acts as the bootloader. Zsh loads it immediately and sets up the environment (XDG variables, PATH) before any other initialization runs.
-- **Zero-dependency bootstrap**: The installation process relies only on `curl` and `git` (and `chezmoi`, which the installer fetches automatically).
-- **Lazy-by-default**: Heavy tooling (fnm, nvm, SDKMAN, tool-specific aliases) is deferred until first use or after the first prompt to keep shell startup fast.
+- **XDG-first**: Config lives in `~/.config/`. Your home stays clean.
+- **Single entrypoint**: `dot_zshenv` is the bootloader. Zsh loads it first to set XDG and PATH before anything else.
+- **Zero-dependency bootstrap**: Install with `curl` and `git`. Chezmoi is fetched automatically.
+- **Lazy-by-default**: Heavy tools load after the first prompt. Startup stays fast.
 
 ## Architecture diagram
 

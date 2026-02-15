@@ -2,6 +2,12 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.482
+
+### Changed
+
+- **Version synchronization** — Updated all version references across documentation to v0.2.482 for consistency.
+
 ## v0.2.480
 
 ### Added

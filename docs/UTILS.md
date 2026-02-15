@@ -1,10 +1,10 @@
-# Discover utilities
+# Utilities
 
-These utilities are available through aliases, functions, and the `dot` CLI. The collection stays small and practical on purpose.
+These utilities live behind aliases, functions, and the `dot` CLI. The set stays small on purpose.
 
 ## Dot CLI
 
-The `dot` command is your primary interface for managing dotfiles. Run `dot --version` to check the installed version.
+The `dot` command is the primary interface for managing dotfiles. Run `dot --version` to check the installed version.
 
 ### Core commands
 
@@ -40,7 +40,7 @@ The `dot` command is your primary interface for managing dotfiles. Run `dot --ve
 
 ## Git
 
-You can use these shorthand aliases for everyday Git operations:
+Use these shorthand aliases for everyday Git operations:
 
 - `g`, `ga`, `gco`, `gst`, `gl`, `gll`, and related aliases
 - `lg` shows a graph log; `lgui` opens `lazygit` (if installed)
@@ -48,7 +48,7 @@ You can use these shorthand aliases for everyday Git operations:
 
 ## Docker
 
-These Docker aliases help you manage containers and images:
+These Docker aliases manage containers and images:
 
 - `dco` for `docker compose`
 - `dps`, `dpsa` for container listing
@@ -60,7 +60,7 @@ These Docker aliases help you manage containers and images:
 
 ## Search
 
-You can search and navigate your filesystem with:
+Search and navigate your filesystem with:
 
 - `rg` (ripgrep), `fd` (find)
 - `z <dir>` (zoxide jump)
@@ -80,7 +80,7 @@ You can search and navigate your filesystem with:
 
 ## Network
 
-You can debug HTTP requests with:
+Debug HTTP requests with:
 
 - `curlheader`, `curlstatus`, `curltime`, `httpdebug`
 

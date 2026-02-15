@@ -48,7 +48,7 @@ Dotfiles makes your environment portable, secure, and exact.
 Run this once:
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
 exec zsh
 ```
 
@@ -59,7 +59,7 @@ Your entire development environment. Configured. Secured. Ready.
 ### For Teams and CI
 
 ```bash
-DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
 ```
 
 ### What Just Happened?

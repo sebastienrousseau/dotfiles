@@ -2,7 +2,7 @@
 
 <div align="center">
 
-**A modern, cross-platform shell environment built for developers.**
+**A cross‑platform shell environment that ships as one system.**
 
 [Quick Start](#quick-start) · [Features](#features) · [Architecture](#architecture) · [Security](#security) · [Contributing](#contributing)
 
@@ -12,17 +12,17 @@
 
 ## Overview
 
-Welcome to the dotfiles documentation. This guide will help you install, configure, and customize your development environment across macOS, Linux, and WSL.
+This documentation shows you how to install, configure, and evolve your environment across macOS, Linux, and WSL.
 
-### What You'll Get
+### What You Get
 
 | Feature | Description |
 |---------|-------------|
-| 🚀 **Fast Shell** | Zsh with lazy loading, <500ms startup |
+| 🚀 **Fast Shell** | Zsh with lazy loading and rapid startup |
 | 🔧 **Modern Tools** | Neovim, tmux, starship, fzf, ripgrep |
-| 🔐 **Security First** | Encrypted secrets, credential management |
-| 🎨 **Beautiful UI** | Nerd Fonts, themes, consistent styling |
-| 📦 **Cross-Platform** | macOS, Linux, WSL2 support |
+| 🔐 **Security First** | Encrypted secrets and credential management |
+| 🎨 **Clean UI** | Nerd Fonts, themes, consistent styling |
+| 📦 **Cross‑Platform** | macOS, Linux, WSL2 support |
 
 ---
 

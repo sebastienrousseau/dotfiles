@@ -1,30 +1,32 @@
 # Security
 
-Learn how Dotfiles handles security and system modifications.
+Security is never negotiable.
 
-## Principles
+Dotfiles enforces security-first design with complete transparency in all system modifications.
 
-- **Opt-In Only**: No hardening is applied unless the `DOTFILES_` variables are set to `1`.
-- **Local Logging**: Actions are logged to `~/.local/share/dotfiles.log`. No telemetry.
-- **No Hidden Sudo**: Sudo is only requested for system managers (apt, etc) and never cached indefinitely.
+## Security Principles
 
-## Hardening
+- **Opt-In Only**: Enable hardening explicitly via `DOTFILES_` environment variables.
+- **Local Logging**: All actions log to `~/.local/share/dotfiles.log` with zero telemetry.
+- **Transparent Privileges**: Sudo requests occur only for system package managers and expire immediately.
 
-| Feature | Env Var | Action (macOS) | Action (Linux) |
+## System Hardening
+
+| Feature | Environment Variable | macOS Implementation | Linux Implementation |
 |---|---|---|---|
-| Firewall | `DOTFILES_FIREWALL` | Enables `socketfilterfw` + Stealth Mode | Configures UFW |
-| Telemetry | `DOTFILES_TELEMETRY` | Disables Diagnostic plists | Disables `whoopsie`/`apport` |
-| DNS-over-HTTPS | `DOTFILES_DOH` | Browser-level settings | Configures `resolvectl` |
-| Idle Security | `DOTFILES_LOCK` | Sets screensaver idle time | Sets GNOME/KDE idle-delay |
+| Firewall | `DOTFILES_FIREWALL=1` | Activates `socketfilterfw` with Stealth Mode | Configures UFW with restrictive rules |
+| Telemetry Blocking | `DOTFILES_TELEMETRY=1` | Disables all Diagnostic plists | Removes `whoopsie` and `apport` |
+| DNS-over-HTTPS | `DOTFILES_DOH=1` | Enforces browser-level DoH | Configures `resolvectl` for system DoH |
+| Idle Lock | `DOTFILES_LOCK=1` | Enforces screensaver timeout | Sets GNOME/KDE idle-delay |
 
-## Secrets
+## Secret Management
 
-Dotfiles uses **age** for encryption.
+Dotfiles employs **age** encryption for all sensitive data.
 
-- **Initialization**: `dot secrets-init` creates a key at `~/.config/chezmoi/key.txt`.
-- **Storage**: Secrets are stored as `.age` encrypted files.
-- **Protection**: Private keys are never committed to the repo.
+- **Key Generation**: Run `dot secrets-init` to create your encryption key at `~/.config/chezmoi/key.txt`.
+- **Encrypted Storage**: All secrets persist as `.age` encrypted files in the repository.
+- **Key Protection**: Never commit private keys to version control.
 
-## Report an issue
+## Vulnerability Reporting
 
-If you discover a security vulnerability, please do not open a public issue. Follow the instructions in the Security Policy.
+**DO NOT** open public issues for security vulnerabilities. Report via GitHub Security Advisories or the Security Policy guidelines.

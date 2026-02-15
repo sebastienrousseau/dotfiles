@@ -1,9 +1,6 @@
 # Tools
 
-> [!NOTE]
-> This is a comprehensive list of tools that these dotfiles can manage or integrate with. For the list of tools that are installed by default in the Nix environment, please refer to the `nix/flake.nix` file.
-
-These are the main tools and CLI conveniences included with Dotfiles.
+Dotfiles manages and integrates the tools below. For the default Nix set, see `nix/flake.nix`.
 
 ## Core
 

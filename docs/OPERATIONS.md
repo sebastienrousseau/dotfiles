@@ -1,6 +1,6 @@
-# Discover operations
+# Operations
 
-This guide covers the core workflows to keep your dotfiles running well across platforms.
+This guide gives you the core workflows to keep Dotfiles fast, clean, and aligned across platforms.
 
 ---
 
@@ -52,15 +52,15 @@ This guide covers the core workflows to keep your dotfiles running well across p
 
 ## Workflows
 
-### Apply changes
+### Apply Changes
 After editing any config file:
 ```bash
 dot apply
 ```
 *Triggers: `dot_zshrc` reload, audit logging.*
 
-### Roll back
-If an update breaks your setup, you can use the `dot rollback` command, which provides a guided rollback to a previous state.
+### Roll Back
+If an update breaks your setup, use `dot rollback` for a guided return to a known state.
 
 For a manual rollback:
 ```bash
@@ -70,7 +70,7 @@ dot apply
 ```
 
 ### Debug
-If something runs slow or appears broken:
+If something slows down or looks off:
 
 1. **Check health**:
    ```bash
@@ -85,7 +85,7 @@ If something runs slow or appears broken:
 
 ## Tools
 
-### Make it yours
+### Make It Yours
 - **Wallpaper rotation**:
   ```bash
   ~/.dotfiles/scripts/theme/wallpaper-rotate.sh --interval 300
@@ -127,6 +127,6 @@ If something runs slow or appears broken:
 
 ---
 
-## Security policy
+## Security Policy
 - **GPG/SSH**: All commits use SSH signing.
 - **Audit log**: Review `~/.local/share/dotfiles.log` for a timeline of all changes that Dotfiles applied.
