@@ -29,6 +29,7 @@
               zsh
               neovim
               tmux
+              starship
               nushell
 
               # Search & Navigation
@@ -77,6 +78,7 @@
               zsh
               neovim
               tmux
+              starship
               nushell
 
               # Search & Navigation
