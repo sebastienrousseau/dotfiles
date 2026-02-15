@@ -68,23 +68,23 @@ usage() {
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -n | --dry-run)
-      DRY_RUN=1
-      shift
-      ;;
-    -f | --force)
-      FORCE=1
-      shift
-      ;;
-    -h | --help)
-      usage
-      exit 0
-      ;;
-    *)
-      log_error "Unknown option: $1"
-      usage
-      exit 1
-      ;;
+  -n | --dry-run)
+    DRY_RUN=1
+    shift
+    ;;
+  -f | --force)
+    FORCE=1
+    shift
+    ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    log_error "Unknown option: $1"
+    usage
+    exit 1
+    ;;
   esac
 done
 
@@ -145,15 +145,15 @@ install_package() {
   pkg_mgr=$(detect_pkg_manager)
 
   case "$pkg_mgr" in
-    brew) brew install "$pkg" ;;
-    apt) sudo apt-get install -y "$pkg" ;;
-    dnf) sudo dnf install -y "$pkg" ;;
-    pacman) sudo pacman -S --noconfirm "$pkg" ;;
-    nix) nix-env -iA "nixpkgs.$pkg" ;;
-    *)
-      log_error "No supported package manager found. Install '$pkg' manually."
-      return 1
-      ;;
+  brew) brew install "$pkg" ;;
+  apt) sudo apt-get install -y "$pkg" ;;
+  dnf) sudo dnf install -y "$pkg" ;;
+  pacman) sudo pacman -S --noconfirm "$pkg" ;;
+  nix) nix-env -iA "nixpkgs.$pkg" ;;
+  *)
+    log_error "No supported package manager found. Install '$pkg' manually."
+    return 1
+    ;;
   esac
 }
 
@@ -161,9 +161,9 @@ install_package() {
 get_package_name() {
   local cmd="$1"
   case "$cmd" in
-    rg) echo "ripgrep" ;;
-    bat) echo "bat" ;; # The package is usually called 'bat'
-    *) echo "$cmd" ;;
+  rg) echo "ripgrep" ;;
+  bat) echo "bat" ;; # The package is usually called 'bat'
+  *) echo "$cmd" ;;
   esac
 }
 

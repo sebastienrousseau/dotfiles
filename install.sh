@@ -89,22 +89,22 @@ if [ "$LIBS_LOADED" = "0" ]; then
     ARCH="$(uname -m)"
     target_os="unknown"
     case "$OS" in
-      Darwin) target_os="macos" ;;
-      Linux)
-        if [ -f /proc/version ] && grep -qi 'microsoft\|WSL' /proc/version; then
-          target_os="wsl2"
-        elif [ -f /etc/os-release ]; then
-          . /etc/os-release
-          case "${ID:-}" in
-            ubuntu | debian | pop | linuxmint | elementary) target_os="debian" ;;
-            fedora | rhel | centos | rocky | alma) target_os="fedora" ;;
-            arch | manjaro | endeavouros) target_os="arch" ;;
-            *) target_os="linux" ;;
-          esac
-        else
-          target_os="linux"
-        fi
-        ;;
+    Darwin) target_os="macos" ;;
+    Linux)
+      if [ -f /proc/version ] && grep -qi 'microsoft\|WSL' /proc/version; then
+        target_os="wsl2"
+      elif [ -f /etc/os-release ]; then
+        . /etc/os-release
+        case "${ID:-}" in
+        ubuntu | debian | pop | linuxmint | elementary) target_os="debian" ;;
+        fedora | rhel | centos | rocky | alma) target_os="fedora" ;;
+        arch | manjaro | endeavouros) target_os="arch" ;;
+        *) target_os="linux" ;;
+        esac
+      else
+        target_os="linux"
+      fi
+      ;;
     esac
     export OS ARCH target_os
   }
@@ -122,8 +122,8 @@ if [ "$LIBS_LOADED" = "0" ]; then
       if [ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]; then
         read -r -p "   Continue with Homebrew installation? [y/N] " response
         case "$response" in
-          [yY][eE][sS] | [yY]) ;;
-          *) error "Homebrew installation cancelled." ;;
+        [yY][eE][sS] | [yY]) ;;
+        *) error "Homebrew installation cancelled." ;;
         esac
       fi
       /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -131,9 +131,9 @@ if [ "$LIBS_LOADED" = "0" ]; then
       [ -x /usr/local/bin/brew ] && eval "$(/usr/local/bin/brew shellenv)"
     fi
     case "$target_os" in
-      debian | wsl2) command -v apt-get >/dev/null || error "apt-get required" ;;
-      fedora) command -v dnf >/dev/null || error "dnf required" ;;
-      arch) command -v pacman >/dev/null || error "pacman required" ;;
+    debian | wsl2) command -v apt-get >/dev/null || error "apt-get required" ;;
+    fedora) command -v dnf >/dev/null || error "dnf required" ;;
+    arch) command -v pacman >/dev/null || error "pacman required" ;;
     esac
   }
 
@@ -177,7 +177,7 @@ if [ "$LIBS_LOADED" = "0" ]; then
     local backup_dir
     backup_dir="$HOME/.dotfiles.bak.$(date +"%Y%m%d_%H%M%S")"
     local count=0
-    
+
     if ! command -v chezmoi >/dev/null || ! [ -f "$HOME/.config/chezmoi/chezmoi.toml" ]; then
       printf "   chezmoi not found or not configured. Skipping backup.\n"
       return
@@ -193,9 +193,9 @@ if [ "$LIBS_LOADED" = "0" ]; then
       printf "   No existing dotfiles to back up.\n"
       return
     fi
-    
+
     mkdir -p "$backup_dir"
-    
+
     while IFS= read -r file; do
       [ -z "$file" ] && continue
       if [ -e "$file" ]; then
@@ -207,8 +207,8 @@ if [ "$LIBS_LOADED" = "0" ]; then
         fi
         count=$((count + 1))
       fi
-    done <<< "$managed_files"
-    
+    done <<<"$managed_files"
+
     if [ "$count" -gt 0 ]; then
       printf "   Backed up %s files to %s\n" "$count" "$backup_dir"
     else
