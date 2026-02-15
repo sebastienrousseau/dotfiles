@@ -330,36 +330,7 @@ print_summary() {
   echo -e "  ${RED}Failures:${NC}      ${FAILURES}"
   echo ""
 
-  # Health score bar
-  local bar_width=30
-  local filled_count=$((score * bar_width / 100))
-  
-  printf "  Health Score: ["
-  
-  # Determine color based on score
-  local bar_color
-  if [[ $score -ge 90 ]]; then
-    bar_color="${GREEN}"
-  elif [[ $score -ge 70 ]]; then
-    bar_color="${YELLOW}"
-  else
-    bar_color="${RED}"
-  fi
-  
-  # Print filled part of the bar
-  printf "%s" "$bar_color"
-  for ((i = 0; i < filled_count; i++)); do
-    printf "■"
-  done
-  
-  # Print empty part of the bar
-  printf "%s" "${NC}"
-  for ((i = filled_count; i < bar_width; i++)); do
-    printf "□"
-  done
-  
-  # Print the percentage score with color
-  printf "] %s%s%%%s\n\n" "$bar_color" "$score" "${NC}"
+  printf "  Health Score: %s%%\n\n" "$score"
 
   if [[ $score -ge 90 ]]; then
     echo -e "  ${GREEN}⚡ Excellent! Your dotfiles are in great shape.${NC}"
