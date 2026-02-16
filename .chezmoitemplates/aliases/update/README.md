@@ -8,13 +8,26 @@ Manage Update aliases. Part of the **Universal Dotfiles** configuration.
 
 These aliases are defined in `update.aliases.sh` and are automatically loaded by `chezmoi`.
 
-## Aliases
+## Usage
 
-This code provides a set of aliases for updating various software on
-macOS and Linux.
-### macOS / Linux / Windows
-- `update` runs Topgrade when installed; otherwise it falls back to `upd`.
-- `upd` performs a cross-platform system + dev tool update routine.
+Run `update` to update your system. This uses [Topgrade](https://github.com/topgrade-rs/topgrade) as the primary update tool, which handles:
+
+- System packages (apt, dnf, pacman, brew)
+- Language tools (rustup, cargo, npm, pip via uv, gem)
+- Runtime managers (mise, fnm)
+- Applications (snap, flatpak, VS Code extensions)
+- Dotfiles (chezmoi)
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `update` | Runs Topgrade (primary). Falls back to `upd` if Topgrade is not installed. |
+| `upd` | Manual cross-platform update routine (fallback only). |
+
+### Configuration
+
+Topgrade is configured via `~/.config/topgrade/topgrade.toml`. See [topgrade documentation](https://github.com/topgrade-rs/topgrade#configuration) for options.
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 

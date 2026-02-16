@@ -4,39 +4,24 @@
 {{- if eq .chezmoi.os "darwin" }}
 disable = ["vim", "node", "containers", "flatpak", "snap"]
 {{- else }}
-disable = ["vim", "node", "containers", "firmware"]
+disable = ["vim", "node", "containers", "firmware", "fwupd"]
 {{- end }}
 pre_sudo = true
-
-[pre_commands]
-
-[post_commands]
+cleanup = true
+skip_notify = true
 
 [commands]
+{{- if eq .chezmoi.os "linux" }}
 "Open WebUI" = "sudo /usr/local/bin/update-open-webui.sh"
-
-[python]
-
-[brew]
+{{- end }}
 
 [linux]
+autoremove = true
 
-[git]
+[pip]
+# Use uv for faster pip updates (installed via pipx/mise)
+mode = "uv"
 
-[chezmoi]
-
-[mise]
-
-[npm]
-
-[vim]
-
-[firmware]
-
-[flatpak]
-
-[containers]
-
-[rustup]
-
-[vscode]
+[cargo]
+# Use cargo-install-update for installed crates
+cargo_update = true

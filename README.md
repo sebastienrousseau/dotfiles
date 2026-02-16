@@ -170,7 +170,7 @@ These utilities are installed to `~/.local/bin/`:
 | `ip` | Show public/local IP addresses |
 | `kill-port` | Kill process by port |
 | `extract` | Universal archive extraction |
-| `update` | Update all system packages |
+| `update` | Update system via Topgrade |
 
 **Examples**
 
