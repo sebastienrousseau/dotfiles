@@ -260,7 +260,7 @@ run_checks() {
     check "Ghostty terminal" "warn" "Not installed"
   fi
 
-  if fc-list 2>/dev/null | grep -qi "JetBrains"; then
+  if fc-list 2>/dev/null | grep -ci "JetBrains" >/dev/null; then
     check "JetBrains Mono Nerd Font" "pass"
   else
     check "JetBrains Mono Nerd Font" "warn" "Not installed" "fix_jb_font"
