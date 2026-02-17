@@ -125,7 +125,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Run Checkov
-        uses: bridgecrewio/checkov-action@v12.1347.0
+        uses: bridgecrewio/checkov-action@v12.3082.0
         with:
           output_format: sarif
           output_file_path: checkov-results.sarif
