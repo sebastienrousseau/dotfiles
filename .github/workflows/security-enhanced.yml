@@ -67,7 +67,7 @@ jobs:
 
       - name: TruffleHog OSS
         if: github.event_name == 'pull_request'
-        uses: trufflesecurity/trufflehog@v3.93.1
+        uses: trufflesecurity/trufflehog@v3.93.3
         with:
           path: ./
           base: ${{ github.event.pull_request.base.sha }}
