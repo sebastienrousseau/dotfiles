@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue
+
+  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+    range="$local_sha"
+  else
+    range="$remote_sha..$local_sha"
+  fi
+
+  for c in $(git rev-list "$range"); do
+    if ! git verify-commit "$c" >/dev/null 2>&1; then
+      echo "Blocked: unsigned commit $c"
+      exit 1
+    fi
+  done
+done
