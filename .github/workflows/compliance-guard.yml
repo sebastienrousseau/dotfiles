@@ -38,7 +38,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Checkout with full history
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -121,15 +121,13 @@ jobs:
             echo "unsigned=0" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Signature enforcement (advisory)
+      - name: Signature enforcement (required)
         run: |
-          # Currently advisory - set to 'exit 1' to enforce
-          echo "Signature verification complete (advisory mode)"
-          # To enforce: uncomment the following
-          # if [[ "${{ steps.verify.outputs.unsigned }}" -gt 0 ]]; then
-          #   echo "::error::Unsigned commits are not allowed"
-          #   exit 1
-          # fi
+          echo "Signature verification complete (required mode)"
+          if [[ "${{ steps.verify.outputs.unsigned }}" -gt 0 ]]; then
+            echo "::error::Unsigned commits are not allowed"
+            exit 1
+          fi
 
   # ============================================================================
   # Insecure Pattern Scanner
@@ -140,7 +138,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Check for insecure curl flags
         run: |
@@ -223,7 +221,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Install ShellCheck
         run: sudo apt-get install -y shellcheck
@@ -287,7 +285,7 @@ jobs:
     # Only run if Dockerfiles exist
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Check for Dockerfiles
         id: check-dockerfiles
@@ -300,7 +298,7 @@ jobs:
 
       - name: Run Hadolint
         if: steps.check-dockerfiles.outputs.found == 'true'
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf # v3.1.0
         with:
           dockerfile: "**/Dockerfile*"
           failure-threshold: warning
