@@ -58,3 +58,6 @@ This backlog tracks repo-level security and platform hardening work aligned with
   - Remaining: enforce this workflow as a required status check in repository branch/rulesets settings.
 - [ ] Extend template security baselines for `dot new` (lockfiles, CI defaults, scanning).
 - [ ] Add MCP operations hardening (`dot mcp doctor`, scoped server policies, token checks).
+  - Progress:
+    - Added `dot mcp doctor` command routed through `scripts/dot/commands/meta.sh`.
+    - Added MCP diagnostics script `scripts/diagnostics/mcp-doctor.sh` with JSON/env/scope checks.
