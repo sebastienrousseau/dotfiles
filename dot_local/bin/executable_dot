@@ -29,6 +29,78 @@ resolve_source_dir() {
 }
 
 show_help() {
+  if command -v gum >/dev/null 2>&1 && [[ -t 1 ]]; then
+    gum style --foreground 212 --bold "Dotfiles CLI"
+    printf "\n"
+    gum style --bold "Usage"
+    printf "  dot [command]\n\n"
+
+    gum style --bold "Core Commands"
+    printf "  %-10s %s\n" "apply" "Apply dotfiles (chezmoi apply)"
+    printf "  %-10s %s\n" "sync" "Apply dotfiles (alias of apply)"
+    printf "  %-10s %s\n" "update" "Pull latest changes and apply them (chezmoi update)"
+    printf "  %-10s %s\n" "add" "Add a file to chezmoi source"
+    printf "  %-10s %s\n" "diff" "Show chezmoi diff with exclusions"
+    printf "  %-10s %s\n" "status" "Show configuration drift (chezmoi status)"
+    printf "  %-10s %s\n" "remove" "Safely remove a managed file"
+    printf "  %-10s %s\n" "cd" "Print source directory path (use: cd $(dot cd))"
+    printf "  %-10s %s\n" "edit" "Open chezmoi source in \$EDITOR"
+    printf "\n"
+
+    gum style --bold "Diagnostics"
+    printf "  %-15s %s\n" "doctor" "Check system health and configuration"
+    printf "  %-15s %s\n" "heal" "Auto-repair common dotfiles issues"
+    printf "  %-15s %s\n" "health" "Run comprehensive health dashboard"
+    printf "  %-15s %s\n" "security-score" "Security assessment with grading"
+    printf "  %-15s %s\n" "rollback" "Rollback dotfiles to a previous state"
+    printf "  %-15s %s\n" "restore" "Restore from backup or git ref"
+    printf "  %-15s %s\n" "drift" "Drift dashboard (detailed chezmoi status)"
+    printf "  %-15s %s\n" "history" "Shell history analysis"
+    printf "  %-15s %s\n" "benchmark" "Run shell startup benchmark (--detailed, --profile)"
+    printf "\n"
+
+    gum style --bold "Tools"
+    printf "  %-10s %s\n" "tools" "Show or install nix packages (dot tools [install])"
+    printf "  %-10s %s\n" "new" "Create a new project from a template"
+    printf "  %-10s %s\n" "sandbox" "Launch a safe sandbox preview (Docker/Podman)"
+    printf "  %-10s %s\n" "keys" "Show keybindings catalog"
+    printf "  %-10s %s\n" "learn" "Start the interactive tour of your new tools"
+    printf "  %-10s %s\n" "docs" "Show repo README"
+    printf "  %-10s %s\n" "log-rotate" "Rotate ~/.local/share/dotfiles.log"
+    printf "\n"
+
+    gum style --bold "Appearance"
+    printf "  %-10s %s\n" "theme" "Switch terminal theme (dark/light)"
+    printf "  %-10s %s\n" "wallpaper" "Apply a wallpaper from your library"
+    printf "  %-10s %s\n" "fonts" "Install Nerd Fonts (JetBrainsMono by default)"
+    printf "  %-10s %s\n" "tune" "Apply OS tuning (opt-in)"
+    printf "\n"
+
+    gum style --bold "Secrets"
+    printf "  %-15s %s\n" "secrets-init" "Initialize age key for secrets"
+    printf "  %-15s %s\n" "secrets" "Edit encrypted secrets (age)"
+    printf "  %-15s %s\n" "secrets-create" "Create an encrypted secrets file"
+    printf "  %-15s %s\n" "ssh-key" "Encrypt an SSH key locally with age"
+    printf "\n"
+
+    gum style --bold "Security (opt-in)"
+    printf "  %-12s %s\n" "backup" "Create a compressed backup of your home"
+    printf "  %-12s %s\n" "encrypt-check" "Check disk encryption status"
+    printf "  %-12s %s\n" "firewall" "Apply firewall hardening"
+    printf "  %-12s %s\n" "telemetry" "Disable OS telemetry"
+    printf "  %-12s %s\n" "dns-doh" "Enable DNS-over-HTTPS"
+    printf "  %-12s %s\n" "lock-screen" "Enforce lock screen idle settings"
+    printf "  %-12s %s\n" "usb-safety" "Disable automount for removable media"
+    printf "\n"
+
+    gum style --bold "Meta"
+    printf "  %-10s %s\n" "upgrade" "Update flake, plugins, and dotfiles"
+    printf "  %-10s %s\n" "packages" "List installed packages and package managers"
+    printf "  %-10s %s\n" "--version" "Show version information"
+    printf "  %-10s %s\n" "help" "Show this help message"
+    return
+  fi
+
   cat <<'EOF'
 Usage: dot [command]
 
