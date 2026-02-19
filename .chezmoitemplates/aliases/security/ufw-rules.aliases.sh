@@ -2,6 +2,7 @@
 # UFW (Uncomplicated Firewall) Aliases
 [[ -n "${_UFW_RULES_LOADED:-}" ]] && return 0
 _UFW_RULES_LOADED=1
+command -v ufw >/dev/null 2>&1 || return 0
 
 # Basic Commands
 alias fws='sudo ufw status'

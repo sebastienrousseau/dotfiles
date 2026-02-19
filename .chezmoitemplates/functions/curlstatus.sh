@@ -33,7 +33,6 @@ curlstatus() {
     echo
     echo "Aliases:"
     echo "  alias cs='curlstatus'       # Alias for curlstatus"
-    echo "  alias cst='curlstatus'      # Alias for curlstatus"
     echo "  alias httpcode='curlstatus' # Alias for curlstatus"
     echo
     echo "Arguments:"
@@ -64,5 +63,4 @@ curlstatus() {
 
 # Aliases for convenience
 alias cs='curlstatus'       # Alias for curlstatus
-alias cst='curlstatus'      # Alias for curlstatus
 alias httpcode='curlstatus' # Alias for curlstatus

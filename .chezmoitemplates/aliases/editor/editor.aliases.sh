@@ -12,9 +12,11 @@
 # Common editor aliases that work with any editor
 alias e='${EDITOR}'
 alias edit='${EDITOR}'
-alias editor='${EDITOR}'
-alias mate='${EDITOR}'
-alias n='${EDITOR}'
+if [[ "${DOTFILES_LEGACY_EDITOR_ALIASES:-0}" == "1" ]]; then
+  alias editor='${EDITOR}'
+  alias mate='${EDITOR}'
+  alias n='${EDITOR}'
+fi
 if ! alias v >/dev/null 2>&1; then
   alias v='${EDITOR}'
 fi
