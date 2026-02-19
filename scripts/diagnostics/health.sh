@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-# Colors
+# Colors (fallback when gum is unavailable)
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -36,6 +36,47 @@ TOTAL_CHECKS=0
 PASSED_CHECKS=0
 WARNINGS=0
 FAILURES=0
+use_ui=0
+if command -v gum >/dev/null 2>&1 && [[ -t 1 ]]; then
+  use_ui=1
+fi
+
+header() {
+  local text="$1"
+  if $JSON_OUTPUT; then
+    return
+  fi
+  if [[ "$use_ui" = "1" ]]; then
+    gum style --foreground 212 --bold "$text"
+  else
+    echo -e "${CYAN}${text}${NC}"
+  fi
+}
+
+section() {
+  local text="$1"
+  if $JSON_OUTPUT; then
+    return
+  fi
+  if [[ "$use_ui" = "1" ]]; then
+    gum style --foreground 212 --bold "$text"
+  else
+    echo -e "\n${BLUE}▸ $text${NC}"
+  fi
+}
+
+format_status() {
+  local symbol="$1"
+  local name="$2"
+  local status="$3"
+  local message="${4:-}"
+  local width=35
+  if [[ -n "$message" ]]; then
+    printf "  %-2s %-*s %-8s %s\n" "$symbol" "$width" "$name" "$status" "$message"
+  else
+    printf "  %-2s %-*s %-8s\n" "$symbol" "$width" "$name" "$status"
+  fi
+}
 
 check() {
   local name="$1"
@@ -50,7 +91,11 @@ check() {
       # shellcheck disable=SC2034
       RESULTS["$name"]="pass"
       if ! $JSON_OUTPUT; then
-        printf "${GREEN}✓${NC} %-35s ${GREEN}OK${NC}\n" "$name"
+        if [[ "$use_ui" = "1" ]]; then
+          format_status "✓" "$name" "OK"
+        else
+          printf "${GREEN}✓${NC} %-35s ${GREEN}OK${NC}\n" "$name"
+        fi
       fi
       ;;
     warn)
@@ -58,9 +103,13 @@ check() {
       # shellcheck disable=SC2034
       RESULTS["$name"]="warn"
       if ! $JSON_OUTPUT; then
-        printf "${YELLOW}⚠${NC} %-35s ${YELLOW}WARNING${NC}"
-        [[ -n "$message" ]] && printf " ${GRAY}%s${NC}" "$message"
-        printf "\n"
+        if [[ "$use_ui" = "1" ]]; then
+          format_status "⚠" "$name" "WARNING" "$message"
+        else
+          printf "${YELLOW}⚠${NC} %-35s ${YELLOW}WARNING${NC}"
+          [[ -n "$message" ]] && printf " ${GRAY}%s${NC}" "$message"
+          printf "\n"
+        fi
       fi
       ;;
     fail)
@@ -68,9 +117,13 @@ check() {
       # shellcheck disable=SC2034
       RESULTS["$name"]="fail"
       if ! $JSON_OUTPUT; then
-        printf "${RED}✗${NC} %-35s ${RED}FAILED${NC}"
-        [[ -n "$message" ]] && printf " ${GRAY}%s${NC}" "$message"
-        printf "\n"
+        if [[ "$use_ui" = "1" ]]; then
+          format_status "✗" "$name" "FAILED" "$message"
+        else
+          printf "${RED}✗${NC} %-35s ${RED}FAILED${NC}"
+          [[ -n "$message" ]] && printf " ${GRAY}%s${NC}" "$message"
+          printf "\n"
+        fi
       fi
       ;;
   esac
@@ -78,16 +131,21 @@ check() {
 
 print_header() {
   if ! $JSON_OUTPUT; then
-    echo -e "\n${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${CYAN}  Dotfiles Health Dashboard${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+    echo ""
+    header "Dotfiles Health Dashboard"
+    echo ""
   fi
 }
 
 check_section() {
   if ! $JSON_OUTPUT; then
-    echo -e "\n${BLUE}▸ $1${NC}"
-    echo "───────────────────────────────────────────────"
+    echo ""
+    section "$1"
+    if [[ "$use_ui" = "1" ]]; then
+      :
+    else
+      echo "───────────────────────────────────────────────"
+    fi
   fi
 }
 
@@ -309,14 +367,21 @@ print_summary() {
 
   local score=$((PASSED_CHECKS * 100 / TOTAL_CHECKS))
 
-  echo -e "\n${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-  echo -e "${CYAN}  Summary${NC}"
-  echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+  echo ""
+  header "Summary"
+  echo ""
 
-  echo -e "  Total checks:  ${TOTAL_CHECKS}"
-  echo -e "  ${GREEN}Passed:${NC}        ${PASSED_CHECKS}"
-  echo -e "  ${YELLOW}Warnings:${NC}      ${WARNINGS}"
-  echo -e "  ${RED}Failures:${NC}      ${FAILURES}"
+  if [[ "$use_ui" = "1" ]]; then
+    printf "  %-12s %s\n" "Total checks:" "${TOTAL_CHECKS}"
+    printf "  %-12s %s\n" "Passed:" "$(gum style --foreground 2 "$PASSED_CHECKS")"
+    printf "  %-12s %s\n" "Warnings:" "$(gum style --foreground 3 "$WARNINGS")"
+    printf "  %-12s %s\n" "Failures:" "$(gum style --foreground 1 "$FAILURES")"
+  else
+    echo -e "  Total checks:  ${TOTAL_CHECKS}"
+    echo -e "  ${GREEN}Passed:${NC}        ${PASSED_CHECKS}"
+    echo -e "  ${YELLOW}Warnings:${NC}      ${WARNINGS}"
+    echo -e "  ${RED}Failures:${NC}      ${FAILURES}"
+  fi
   echo ""
 
   # Health score bar
@@ -324,18 +389,35 @@ print_summary() {
   local filled=$((score * bar_width / 100))
   local empty=$((bar_width - filled))
 
-  printf "  Health Score: ["
-  if [[ $score -ge 80 ]]; then
-    printf '%s' "${GREEN}"
-  elif [[ $score -ge 60 ]]; then
-    printf '%s' "${YELLOW}"
+  if [[ "$use_ui" = "1" ]]; then
+    local filled_bar empty_bar bar_color
+    filled_bar=$(printf "%${filled}s" | tr ' ' '█')
+    empty_bar=$(printf "%${empty}s" | tr ' ' '░')
+    if [[ $score -ge 80 ]]; then
+      bar_color=2
+    elif [[ $score -ge 60 ]]; then
+      bar_color=3
+    else
+      bar_color=1
+    fi
+    printf "  Health Score: [%s%s] %s%%\n\n" \
+      "$(gum style --foreground "$bar_color" "$filled_bar")" \
+      "$empty_bar" \
+      "$score"
   else
-    printf '%s' "${RED}"
+    printf "  Health Score: ["
+    if [[ $score -ge 80 ]]; then
+      printf '%s' "${GREEN}"
+    elif [[ $score -ge 60 ]]; then
+      printf '%s' "${YELLOW}"
+    else
+      printf '%s' "${RED}"
+    fi
+    printf "%${filled}s" | tr ' ' '█'
+    printf '%s' "${NC}"
+    printf "%${empty}s" | tr ' ' '░'
+    printf "] %s%%\n\n" "${score}"
   fi
-  printf "%${filled}s" | tr ' ' '█'
-  printf '%s' "${NC}"
-  printf "%${empty}s" | tr ' ' '░'
-  printf "] %s%%\n\n" "${score}"
 
   if [[ $score -ge 90 ]]; then
     echo -e "  ${GREEN}⚡ Excellent! Your dotfiles are in great shape.${NC}"
