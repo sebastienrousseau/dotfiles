@@ -47,9 +47,14 @@ This backlog tracks repo-level security and platform hardening work aligned with
 - [ ] Add a reusable workflow layer to reduce duplicated security/test logic across workflows.
   - Progress:
     - Added reusable shell lint workflow: `.github/workflows/reusable-shell-lint.yml`.
+    - Added reusable secrets scan workflow: `.github/workflows/reusable-secrets-scan.yml`.
     - Wired as a caller in:
       - `.github/workflows/ci.yml` (`Lint / Shell`)
       - `.github/workflows/compliance-guard.yml` (`Portability Shell Lint`)
+      - `.github/workflows/ci.yml` (`Security / Secrets Scan`)
+      - `.github/workflows/security-enhanced.yml` (`Security / Secrets Detection`)
+    - Added workflow-dispatch guard script to prevent accidental full-history gitleaks scans:
+      - `scripts/ci/guard-gitleaks-checkout.sh`
 - [ ] Pin devcontainer base image by digest and add prebuild automation for Codespaces.
   - Progress:
     - Pinned `.devcontainer/devcontainer.json` image to immutable digest.

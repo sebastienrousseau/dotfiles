@@ -63,23 +63,25 @@ jobs:
 
   secrets-scan:
     name: Security / Secrets Detection
+    uses: ./.github/workflows/reusable-secrets-scan.yml
+    with:
+      run_guard: true
+      run_additional_patterns: false
+    secrets:
+      github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  secrets-trufflehog:
+    name: Security / TruffleHog OSS
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    needs: [secrets-scan]
+    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
-          # Scan current revision content to avoid noisy findings from legacy history.
-          fetch-depth: 1
-          fetch-tags: false
-
-      - name: Run gitleaks
-        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+          fetch-depth: 0
       - name: TruffleHog OSS
-        if: github.event_name == 'pull_request'
         uses: trufflesecurity/trufflehog@6961f2bace57ab32b23b3ba40f8f420f6bc7e004 # v3.93.3
         with:
           path: ./
