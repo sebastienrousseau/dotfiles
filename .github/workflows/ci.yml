@@ -156,7 +156,7 @@ jobs:
       run_guard: true
       run_additional_patterns: true
     secrets:
-      github_token: ${{ secrets.GITHUB_TOKEN }}
+      gh_token: ${{ secrets.GITHUB_TOKEN }}
 
   security-dependencies:
     name: Security / Dependency Audit
