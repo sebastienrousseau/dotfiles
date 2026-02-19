@@ -68,7 +68,7 @@ jobs:
       run_guard: true
       run_additional_patterns: false
     secrets:
-      github_token: ${{ secrets.GITHUB_TOKEN }}
+      gh_token: ${{ secrets.GITHUB_TOKEN }}
 
   secrets-trufflehog:
     name: Security / TruffleHog OSS
