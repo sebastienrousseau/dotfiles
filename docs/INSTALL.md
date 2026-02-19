@@ -23,10 +23,12 @@ Optional (feature-dependent):
 
 ## Install
 
-### One-liner (recommended)
+### Quick install (recommended)
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.484/install.sh)"
+git clone https://github.com/sebastienrousseau/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+./install.sh
 exec zsh
 ```
 
@@ -36,8 +38,28 @@ exec zsh
 # Clone the repository
 git clone https://github.com/sebastienrousseau/dotfiles.git ~/.dotfiles
 
-# Install chezmoi and apply
-sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply sebastienrousseau/dotfiles
+# Install chezmoi (verified release asset + checksum)
+VERSION="2.47.1"
+OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
+ARCH="$(uname -m)"
+case "$ARCH" in
+  x86_64|amd64) ARCH="amd64" ;;
+  arm64|aarch64) ARCH="arm64" ;;
+esac
+ASSET="chezmoi_${VERSION}_${OS}_${ARCH}.tar.gz"
+BASE_URL="https://github.com/twpayne/chezmoi/releases/download/v${VERSION}"
+curl -fsSLO "$BASE_URL/checksums.txt"
+curl -fsSLO "$BASE_URL/$ASSET"
+if command -v sha256sum >/dev/null 2>&1; then
+  grep -E "[[:space:]]${ASSET}$" checksums.txt | sha256sum -c -
+else
+  grep -E "[[:space:]]${ASSET}$" checksums.txt | shasum -a 256 -c -
+fi
+tar -xzf "$ASSET" chezmoi
+install -m 755 chezmoi "$HOME/.local/bin/chezmoi"
+
+# Apply dotfiles
+~/.local/bin/chezmoi init --apply sebastienrousseau/dotfiles
 
 # Restart shell
 exec zsh

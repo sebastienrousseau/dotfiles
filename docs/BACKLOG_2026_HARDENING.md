@@ -26,18 +26,19 @@ This backlog tracks repo-level security and platform hardening work aligned with
     - `.github/workflows/codeql.yml`
     - `.github/workflows/compliance-guard.yml`
     - `.github/workflows/cross-platform-test.yml`
-- [ ] Pin remaining workflows to full commit SHAs.
-  - Scope:
+- [x] Pin remaining workflows to full commit SHAs.
+  - Implemented in:
     - `.github/workflows/nightly.yml`
     - `.github/workflows/update-deps.yml`
     - `.github/workflows/sync-versions.yml`
     - `.github/workflows/npm-publish.yml`
 - [x] Enforce cryptographic signature policy for commits in CI (move from advisory to blocking).
   - Implemented in `.github/workflows/compliance-guard.yml`.
-- [ ] Replace `curl | sh` bootstrap patterns in CI/docs with checksum/signature-verified installers.
-  - Scope:
+- [x] Replace `curl | sh` bootstrap patterns in CI/docs with checksum/signature-verified installers.
+  - Implemented in:
     - `.github/workflows/ci.yml`
     - `.github/workflows/nightly.yml`
+    - `scripts/ci/install-chezmoi-verified.sh`
     - `docs/INSTALL.md`
     - `scripts/dot/commands/tools.sh`
 

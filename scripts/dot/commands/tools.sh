@@ -87,7 +87,8 @@ cmd_tools() {
       ui_err "Nix" "not installed"
       echo ""
       ui_header "Install Nix"
-      echo "  curl -L https://nixos.org/nix/install | sh"
+      echo "  Follow the verified installer instructions:"
+      echo "  https://nixos.org/download/"
       echo ""
       ui_info "Or" "use Homebrew/apt for individual tools"
       exit 1

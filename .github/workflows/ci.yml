@@ -111,11 +111,7 @@ jobs:
           key: shell-tools-${{ runner.os }}-v3
       - name: Install tools
         run: |
-          sudo apt-get update && sudo apt-get install -y shellcheck ripgrep
-          if ! command -v shfmt &>/dev/null; then
-            curl -sS https://webi.sh/shfmt | sh
-          fi
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          sudo apt-get update && sudo apt-get install -y shellcheck ripgrep shfmt
       - name: Shellcheck (zero-warning policy)
         run: |
           # ZERO-WARNING POLICY: No exclusions except for CI-specific false positives
@@ -334,7 +330,7 @@ jobs:
       - name: Setup Chezmoi
         run: |
           if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
-            sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -t v${{ env.CHEZMOI_VERSION }}
+            bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
           fi
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Init & Dry Run
@@ -366,7 +362,7 @@ jobs:
       - name: Setup Chezmoi
         run: |
           if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
-            sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -t v${{ env.CHEZMOI_VERSION }}
+            bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
           fi
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Init & Dry Run
@@ -402,7 +398,8 @@ jobs:
             export PATH=\"/root/.local/bin:\$PATH\"
             apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates
             ln -s /root/.local/share/chezmoi /root/.dotfiles
-            sh -c \"\$(curl -fsLS get.chezmoi.io)\" -- -t v${{ env.CHEZMOI_VERSION }} init --promptDefaults --no-tty --source /root/.local/share/chezmoi
+            bash /root/.local/share/chezmoi/scripts/ci/install-chezmoi-verified.sh \"${{ env.CHEZMOI_VERSION }}\" \"/root/.local/bin\"
+            chezmoi init --promptDefaults --no-tty --source /root/.local/share/chezmoi
             DOTFILES_NONINTERACTIVE=1 chezmoi apply --exclude=scripts --force --no-tty
             echo 'Chezmoi applied successfully'
           "
@@ -470,7 +467,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Setup Chezmoi
         run: |
-          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -t v${{ env.CHEZMOI_VERSION }}
+          bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           mkdir -p "$HOME/.config/chezmoi"
           echo "sourceDir = \"$GITHUB_WORKSPACE\"" > "$HOME/.config/chezmoi/chezmoi.toml"
@@ -516,7 +513,7 @@ jobs:
 
       - name: Setup Chezmoi
         run: |
-          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -t v${{ env.CHEZMOI_VERSION }}
+          bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           mkdir -p "$HOME/.config/chezmoi"
           echo "sourceDir = \"$GITHUB_WORKSPACE\"" > "$HOME/.config/chezmoi/chezmoi.toml"
