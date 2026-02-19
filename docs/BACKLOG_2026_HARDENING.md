@@ -41,6 +41,10 @@ This backlog tracks repo-level security and platform hardening work aligned with
     - `scripts/ci/install-chezmoi-verified.sh`
     - `docs/INSTALL.md`
     - `scripts/dot/commands/tools.sh`
+- [x] Prevent unsigned bot commit attempts on protected `master` in version sync automation.
+  - Implemented in `.github/workflows/sync-versions.yml`:
+    - Added verify-only protected branch job (`Verify Version Sync (Protected Branch)`).
+    - Restricted auto-sync commit job to non-master branches.
 
 ## P2 (Planned)
 

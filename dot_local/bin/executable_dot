@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Dotfiles CLI Entry Point - v0.2.485
+# Dotfiles CLI Entry Point - v0.2.486
 # Modular architecture with command handlers in scripts/dot/commands/
 
 set -e
@@ -76,6 +76,7 @@ show_help() {
     cmd_line "rollback" "Rollback dotfiles to a previous state"
     cmd_line "restore" "Restore from backup or git ref"
     cmd_line "drift" "Drift dashboard (detailed chezmoi status)"
+    cmd_line "verify" "Run post-merge verification checks"
     cmd_line "history" "Shell history analysis"
     cmd_line "benchmark" "Run shell startup benchmark (--detailed, --profile)"
 
@@ -141,6 +142,7 @@ Diagnostics:
   rollback       Rollback dotfiles to a previous state
   restore        Restore from backup or git ref
   drift          Drift dashboard (detailed chezmoi status)
+  verify         Run post-merge verification checks
   history        Shell history analysis
   benchmark      Run shell startup benchmark (--detailed, --profile)
 
@@ -231,7 +233,7 @@ case "$COMMAND" in
     ;;
 
   # Diagnostics
-  doctor|heal|health|health-check|security-score|rollback|restore|drift|history|benchmark)
+  doctor|heal|health|health-check|security-score|rollback|restore|drift|verify|history|benchmark)
     dispatch "diagnostics" "$COMMAND" "$@"
     ;;
 

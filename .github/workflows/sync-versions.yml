@@ -46,9 +46,25 @@ jobs:
       - name: Verify versions
         run: ./scripts/version-sync.sh --verify
 
+  verify-protected:
+    name: Verify Version Sync (Protected Branch)
+    if: github.event_name != 'pull_request' && github.ref_name == 'master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq ripgrep
+
+      - name: Verify versions (no auto-commit on protected branch)
+        run: ./scripts/version-sync.sh --verify
+
   sync:
     name: Sync Version Numbers
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && github.ref_name != 'master'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
