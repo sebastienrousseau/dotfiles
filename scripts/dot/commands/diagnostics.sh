@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Dotfiles CLI - Diagnostics Commands
-# doctor, heal, health, rollback, drift, history, benchmark
+# doctor, heal, health, rollback, drift, history, benchmark, verify
 
 set -euo pipefail
 
@@ -53,6 +53,10 @@ cmd_benchmark() {
   run_script "scripts/diagnostics/benchmark.sh" "Benchmark script" "$@"
 }
 
+cmd_verify() {
+  run_script "scripts/diagnostics/verify.sh" "Verify script" "$@"
+}
+
 cmd_restore() {
   run_script "scripts/dot/commands/restore.sh" "Restore script" "$@"
 }
@@ -90,6 +94,10 @@ case "${1:-}" in
   benchmark)
     shift
     cmd_benchmark "$@"
+    ;;
+  verify)
+    shift
+    cmd_verify "$@"
     ;;
   restore)
     shift
