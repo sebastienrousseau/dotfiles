@@ -16,6 +16,13 @@ on:
       - '**.js'
       - '**.ts'
       - '.github/workflows/**'
+  merge_group:
+    branches: [master]
+    paths:
+      - '**.py'
+      - '**.js'
+      - '**.ts'
+      - '.github/workflows/**'
   schedule:
     - cron: '0 6 * * 1'  # Weekly on Monday with main CI
 

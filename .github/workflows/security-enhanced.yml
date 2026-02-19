@@ -24,6 +24,17 @@ on:
       - '**/Dockerfile*'
       - 'config/gitleaks.toml'
       - '.github/security-policies/**'
+  merge_group:
+    branches: [master, main]
+    paths:
+      - '**.sh'
+      - '**.tmpl'
+      - 'install/**'
+      - 'scripts/security/**'
+      - '.github/workflows/security*.yml'
+      - '**/Dockerfile*'
+      - 'config/gitleaks.toml'
+      - '.github/security-policies/**'
   schedule:
     # Weekly security scan on Sunday 2 AM UTC (reduced from daily)
     - cron: '0 2 * * 0'

@@ -7,6 +7,8 @@ name: Compliance Guard
 on:
   pull_request:
     branches: [master]
+  merge_group:
+    branches: [master]
   push:
     branches: [master]
     paths:

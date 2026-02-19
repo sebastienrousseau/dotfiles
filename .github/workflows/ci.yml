@@ -29,6 +29,19 @@ on:
       - '.github/workflows/ci.yml'
       - '!**.md'
       - '!docs/**'
+  merge_group:
+    branches: [master]
+    paths:
+      - '**.sh'
+      - '**.tmpl'
+      - '.chezmoitemplates/**'
+      - 'dot_*/**'
+      - 'install/**'
+      - 'scripts/**'
+      - 'nix/**'
+      - '.github/workflows/ci.yml'
+      - '!**.md'
+      - '!docs/**'
   schedule:
     - cron: '0 6 * * 1'  # Weekly on Monday 6 AM UTC
   # Allow manual trigger for full CI

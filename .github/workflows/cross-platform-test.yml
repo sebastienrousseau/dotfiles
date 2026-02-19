@@ -20,6 +20,14 @@ on:
       - '**.zsh'
       - '.chezmoitemplates/**'
       - 'scripts/**'
+  merge_group:
+    branches: [master]
+    paths:
+      - '**.sh'
+      - '**.bash'
+      - '**.zsh'
+      - '.chezmoitemplates/**'
+      - 'scripts/**'
   # Weekly check for tool version drift
   schedule:
     - cron: '0 7 * * 0'  # Sunday 7 AM UTC

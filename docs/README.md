@@ -65,6 +65,7 @@ Welcome to the dotfiles documentation. This guide will help you install, configu
 ### Reference
 - [Roadmap](ROADMAP.md) — Future plans and priorities
 - [Legacy Roadmap](LEGACY_ROADMAP.md) — Historical context
+- [2026 Hardening Backlog](BACKLOG_2026_HARDENING.md) — Prioritized implementation plan
 
 ---
 
