@@ -139,12 +139,12 @@ fi
 # Test: dot --version contains VERSION string from file
 test_start "dot_cli_version_value"
 output=$(bash "$DOT_CLI" --version 2>&1) || true
-if [[ "$output" == *"0.2.480"* ]]; then
+if [[ "$output" == *"0.2.482"* ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: version matches expected v0.2.480"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: version matches expected v0.2.482"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: version should contain 0.2.480"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: version should contain 0.2.482"
   echo -e "    Output: $output"
 fi
 

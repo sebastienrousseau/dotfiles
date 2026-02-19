@@ -3,7 +3,7 @@
   align="right"
 />
 
-# Dotfiles Aliases (v0.2.480)
+# Dotfiles Aliases (v0.2.482)
 
 Simply designed to fit your shell life 
 
