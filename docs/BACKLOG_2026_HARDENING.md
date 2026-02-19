@@ -49,8 +49,10 @@ This backlog tracks repo-level security and platform hardening work aligned with
   - Progress:
     - Pinned `.devcontainer/devcontainer.json` image to immutable digest.
     - Added Dependabot `devcontainers` ecosystem updates in `.github/dependabot.yml`.
+    - Added automated prebuild workflow in `.github/workflows/devcontainer-prebuild.yml` (GHCR-backed cached image).
+    - Added CI-safe config `.devcontainer/devcontainer.ci.json` for non-interactive prebuild runs.
   - Remaining:
-    - Configure Codespaces prebuild automation in repository settings.
+    - Optionally configure native Codespaces prebuild settings in repository UI to complement workflow prebuilds.
 - [ ] Add attestation verification against release assets as a required status check.
   - Progress: verification gate implemented in `.github/workflows/security-release.yml`.
   - Remaining: enforce this workflow as a required status check in repository branch/rulesets settings.
