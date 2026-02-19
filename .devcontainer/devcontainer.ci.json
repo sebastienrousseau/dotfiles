@@ -1,0 +1,12 @@
+{
+  "name": "Dotfiles Dev Environment (CI)",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu@sha256:3dcb059253b2ebb44de3936620e1cff3dadcd2c1c982d579081ca8128c1eb319",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true
+    }
+  },
+  "postCreateCommand": ".devcontainer/install-lite.sh",
+  "remoteUser": "vscode"
+}

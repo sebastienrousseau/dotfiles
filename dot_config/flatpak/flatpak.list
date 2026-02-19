@@ -1,0 +1,4 @@
+# Flatpak apps to install (one per line). Example:
+# com.spotify.Client
+# org.mozilla.firefox
+# com.visualstudio.code

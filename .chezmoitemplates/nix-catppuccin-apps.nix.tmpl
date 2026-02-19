@@ -1,0 +1,322 @@
+{{- $theme := default "catppuccin-mocha" .theme -}}
+{{- $catppuccinVariant := "mocha" -}}
+{{- if eq $theme "catppuccin-latte" -}}
+{{- $catppuccinVariant = "latte" -}}
+{{- else if eq $theme "catppuccin-frappe" -}}
+{{- $catppuccinVariant = "frappe" -}}
+{{- else if eq $theme "catppuccin-macchiato" -}}
+{{- $catppuccinVariant = "macchiato" -}}
+{{- else if eq $theme "catppuccin-mocha" -}}
+{{- $catppuccinVariant = "mocha" -}}
+{{- end -}}
+# Individual Catppuccin application configurations
+# Theme: {{ $theme }} ({{ $catppuccinVariant }})
+{ config, pkgs, ... }:
+
+{
+  # Terminal Emulators
+  programs.alacritty = {
+    enable = true;
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+    };
+    settings = {
+      font = {
+        size = {{ default 12 .terminal_font_size }};
+        normal.family = "{{ default "JetBrains Mono" .terminal_font_family }}";
+      };
+      window = {
+        padding = { x = 16; y = 12; };
+        opacity = 0.9;
+      };
+    };
+  };
+
+  programs.kitty = {
+    enable = false; # Set to true to enable
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+    };
+    font = {
+      size = {{ default 12 .terminal_font_size }};
+      name = "{{ default "JetBrains Mono" .terminal_font_family }}";
+    };
+    settings = {
+      window_padding_width = "16";
+      background_opacity = "0.9";
+    };
+  };
+
+  programs.foot = {
+    enable = false; # Set to true to enable
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+    };
+    settings = {
+      main = {
+        font = "{{ default "JetBrains Mono" .terminal_font_family }}:size={{ default 12 .terminal_font_size }}";
+        pad = "16x12";
+      };
+    };
+  };
+
+  # Shell and Prompt
+  programs.zsh = {
+    enable = true;
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+    };
+    enableCompletion = true;
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
+  };
+
+  programs.bash = {
+    enable = true;
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+    };
+  };
+
+  programs.fish = {
+    enable = false; # Set to true to enable
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+    };
+  };
+
+  programs.starship = {
+    enable = true;
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+    };
+    settings = {
+      # Additional starship configuration
+      command_timeout = 500;
+      add_newline = true;
+    };
+  };
+
+  # Text Editors
+  programs.neovim = {
+    enable = true;
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+    };
+    plugins = with pkgs.vimPlugins; [
+      catppuccin-nvim
+    ];
+    extraLuaConfig = ''
+      require("catppuccin").setup({
+        flavour = "{{ $catppuccinVariant }}",
+        background = {
+{{- if eq $catppuccinVariant "latte" }}
+          light = "latte",
+          dark = "mocha",
+{{- else }}
+          light = "latte",
+          dark = "{{ $catppuccinVariant }}",
+{{- end }}
+        },
+        transparent_background = false,
+        show_end_of_buffer = false,
+        term_colors = true,
+        integrations = {
+          cmp = true,
+          gitsigns = true,
+          nvimtree = true,
+          treesitter = true,
+          telescope = true,
+          notify = true,
+          mini = { enabled = true },
+        },
+      })
+      vim.cmd.colorscheme("catppuccin-{{ $catppuccinVariant }}")
+    '';
+  };
+
+  programs.helix = {
+    enable = false; # Set to true to enable
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+    };
+  };
+
+  # Terminal Multiplexer
+  programs.tmux = {
+    enable = true;
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+    };
+    terminal = "tmux-256color";
+    historyLimit = 50000;
+    keyMode = "vi";
+    mouse = true;
+    escapeTime = 10;
+    plugins = with pkgs.tmuxPlugins; [
+      sensible
+      yank
+      resurrect
+      continuum
+      {
+        plugin = catppuccin;
+        extraConfig = ''
+          set -g @catppuccin_flavour '{{ $catppuccinVariant }}'
+          set -g @catppuccin_window_tabs_enabled on
+          set -g @catppuccin_date_time "%H:%M"
+        '';
+      }
+    ];
+  };
+
+  # Git Tools
+  programs.git = {
+    enable = true;
+    delta = {
+      enable = true;
+      catppuccin = {
+        enable = true;
+        flavor = "{{ $catppuccinVariant }}";
+      };
+    };
+  };
+
+  programs.lazygit = {
+    enable = true;
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+    };
+  };
+
+  # File Utilities
+  programs.bat = {
+    enable = true;
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+    };
+  };
+
+  programs.bottom = {
+    enable = false; # Set to true to enable
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+    };
+  };
+
+  programs.k9s = {
+    enable = false; # Set to true to enable
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+    };
+  };
+
+  programs.yazi = {
+    enable = false; # Set to true to enable
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+    };
+  };
+
+  # Fuzzy Finder
+  programs.fzf = {
+    enable = true;
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+    };
+    enableZshIntegration = true;
+    enableBashIntegration = true;
+  };
+
+  # Window Manager Themes (uncomment as needed)
+
+  # Hyprland
+  # wayland.windowManager.hyprland = {
+  #   enable = false;
+  #   catppuccin = {
+  #     enable = true;
+  #     flavor = "{{ $catppuccinVariant }}";
+  #   };
+  # };
+
+  # Sway
+  # wayland.windowManager.sway = {
+  #   enable = false;
+  #   catppuccin = {
+  #     enable = true;
+  #     flavor = "{{ $catppuccinVariant }}";
+  #   };
+  # };
+
+  # i3
+  # xsession.windowManager.i3 = {
+  #   enable = false;
+  #   catppuccin = {
+  #     enable = true;
+  #     flavor = "{{ $catppuccinVariant }}";
+  #   };
+  # };
+
+  # Desktop Environment Theming
+  gtk = {
+    enable = true;
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+      accent = "blue";
+      size = "standard";
+      tweaks = [ "rimless" ];
+    };
+  };
+
+  qt = {
+    enable = true;
+    platformTheme = "gtk";
+    style.name = "adwaita{{ if eq $catppuccinVariant "latte" }}{{ else }}-dark{{ end }}";
+  };
+
+  # Cursor Theme
+  home.pointerCursor = {
+    name = "catppuccin-{{ $catppuccinVariant }}-blue-cursors";
+    package = pkgs.catppuccin-cursors.{{ $catppuccinVariant }}Blue;
+    size = 24;
+    gtk.enable = true;
+    x11.enable = true;
+  };
+
+  # Additional Packages
+  home.packages = with pkgs; [
+    # Catppuccin themes and tools
+    catppuccin-gtk
+    catppuccin-papirus-folders
+    papirus-icon-theme
+
+    # Font packages
+    {{ default "jetbrains-mono" .terminal_font_family | lower | replace " " "-" }}
+    nerdfonts
+    font-awesome
+  ];
+
+  # Environment Variables
+  home.sessionVariables = {
+    CATPPUCCIN_FLAVOR = "{{ $catppuccinVariant }}";
+    DOTFILES_THEME = "{{ $theme }}";
+    TERMINAL_FONT_FAMILY = "{{ default "JetBrains Mono" .terminal_font_family }}";
+    TERMINAL_FONT_SIZE = "{{ default 12 .terminal_font_size }}";
+  };
+}

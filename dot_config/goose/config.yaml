@@ -1,0 +1,29 @@
+# Goose AI agent configuration
+# https://github.com/block/goose
+
+# Default provider
+provider: anthropic
+
+# Provider configurations
+providers:
+  anthropic:
+    model: claude-3-5-sonnet-latest
+    max_tokens: 8192
+  
+  openai:
+    model: gpt-4-turbo-preview
+    max_tokens: 4096
+  
+  ollama:
+    model: llama3.2
+    host: http://localhost:11434
+
+# Extensions/Toolkits
+toolkits:
+  - developer
+  - computeruse
+  - github
+
+# Behavior
+auto_approve_tools: false
+show_tool_calls: true

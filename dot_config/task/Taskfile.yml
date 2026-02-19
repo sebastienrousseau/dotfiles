@@ -1,0 +1,86 @@
+# Taskfile for go-task
+# https://taskfile.dev/
+
+version: '3'
+
+vars:
+  PROJECT: '{{.PROJECT | default "project"}}'
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  # Development
+  dev:
+    desc: Run development server
+    cmds:
+      - npm run dev
+
+  build:
+    desc: Build for production
+    cmds:
+      - npm run build
+
+  test:
+    desc: Run tests
+    cmds:
+      - npm test
+
+  lint:
+    desc: Lint code
+    cmds:
+      - npm run lint
+
+  fmt:
+    desc: Format code
+    cmds:
+      - npm run format
+
+  # Docker
+  docker:build:
+    desc: Build docker image
+    cmds:
+      - docker build -t {{.PROJECT}}:latest .
+
+  docker:run:
+    desc: Run docker container
+    cmds:
+      - docker run -it --rm {{.PROJECT}}:latest
+
+  # Dotfiles
+  dots:apply:
+    desc: Apply dotfiles
+    cmds:
+      - chezmoi apply
+
+  dots:update:
+    desc: Update dotfiles
+    cmds:
+      - chezmoi update
+
+  dots:diff:
+    desc: Show dotfiles diff
+    cmds:
+      - chezmoi diff
+
+  dots:bench:
+    desc: Benchmark shell startup
+    cmds:
+      - ~/.dotfiles/scripts/diagnostics/benchmark.sh
+
+  # System maintenance
+  update:
+    desc: Update all package managers
+    cmds:
+      - brew update && brew upgrade
+      - npm update -g
+      - rustup update
+
+  clean:
+    desc: Clean system caches
+    cmds:
+      - brew cleanup -s
+      - npm cache clean --force
+      - docker system prune -f

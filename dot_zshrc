@@ -1,0 +1,21 @@
+# shellcheck shell=bash
+# Compatibility stub for tools expecting ~/.zshrc
+# Actual config lives in $ZDOTDIR (~/.config/zsh)
+
+# Security: Validate ZDOTDIR is under $HOME to prevent path traversal
+_zdotdir="${ZDOTDIR:-$HOME/.config/zsh}"
+case "$_zdotdir" in
+  "$HOME"/*|"$HOME")
+    # Safe path under home directory
+    ;;
+  *)
+    # Reject paths outside home directory
+    echo "[WARN] ZDOTDIR '$_zdotdir' is outside HOME, using default" >&2
+    _zdotdir="$HOME/.config/zsh"
+    ;;
+esac
+
+if [[ -f "$_zdotdir/.zshrc" ]]; then
+  source "$_zdotdir/.zshrc"
+fi
+unset _zdotdir

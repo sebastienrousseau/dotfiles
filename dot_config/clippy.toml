@@ -1,0 +1,55 @@
+# Clippy Configuration
+# Managed by chezmoi - https://github.com/sebastienrousseau/dotfiles
+# Reference: https://doc.rust-lang.org/clippy/configuration.html
+
+# Cognitive complexity threshold (default: 25)
+cognitive-complexity-threshold = 30
+
+# Maximum number of lines in a function (default: 100)
+too-many-lines-threshold = 150
+
+# Maximum number of arguments a function can have (default: 7)
+too-many-arguments-threshold = 8
+
+# Type complexity threshold (default: 250)
+type-complexity-threshold = 300
+
+# Minimum number of struct fields for the 'unreadable_literal' lint (default: 4)
+unreadable-literal-lint-fractions = true
+
+# MSRV - Minimum Supported Rust Version
+msrv = "1.75.0"
+
+# Allowed names for variables
+allowed-idents-below-min-chars = ["i", "j", "k", "n", "x", "y", "z", "id", "ok", "rx", "tx"]
+
+# Documentation requirements
+missing-docs-in-crate-items = false
+
+# Arithmetic side effects
+arithmetic-side-effects-allowed = []
+
+# Disallowed macros
+disallowed-macros = []
+
+# Disallowed methods
+disallowed-methods = []
+
+# Disallowed types
+disallowed-types = []
+
+# Standard macro braces
+standard-macro-braces = []
+
+# Avoid breaking semicolons
+avoid-breaking-exported-api = true
+
+# Allow expect and unwrap in tests
+allow-expect-in-tests = true
+allow-unwrap-in-tests = true
+
+# Verbose bit masks
+verbose-bit-mask-threshold = 1
+
+# Allow print statements in tests
+allow-print-in-tests = true

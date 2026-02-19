@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+# Regex tester
+# Usage: regex <pattern> <string> | regex -f <pattern> <file>
+
+set -euo pipefail
+
+usage() {
+  echo "Usage: regex [OPTIONS] <pattern> [string|file]"
+  echo ""
+  echo "Options:"
+  echo "  -f, --file       Test against file contents"
+  echo "  -g, --global     Find all matches"
+  echo "  -i, --ignore     Case insensitive"
+  echo "  -m, --multiline  Multiline mode"
+  echo "  -c, --color      Colorize matches"
+  echo "  -h, --help       Show this help"
+  echo ""
+  echo "Examples:"
+  echo "  regex '[0-9]+' 'abc123def'      # Test pattern"
+  echo "  regex -g '[a-z]+' 'hello world' # Find all"
+  echo "  regex -f '^#' config.txt        # Test file"
+}
+
+FILE_MODE=false
+GLOBAL=false
+IGNORE_CASE=""
+COLOR=true
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -f|--file) FILE_MODE=true; shift ;;
+    -g|--global) GLOBAL=true; shift ;;
+    -i|--ignore) IGNORE_CASE="-i"; shift ;;
+    -c|--color) COLOR=true; shift ;;
+    --no-color) COLOR=false; shift ;;
+    -h|--help) usage; exit 0 ;;
+    -*) echo "Unknown option: $1"; usage; exit 1 ;;
+    *) break ;;
+  esac
+done
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit 1
+fi
+
+PATTERN="$1"
+shift
+
+# Get input
+if $FILE_MODE; then
+  if [[ $# -lt 1 ]] || [[ ! -f "$1" ]]; then
+    echo "Error: File required for -f mode"
+    exit 1
+  fi
+  INPUT=$(cat "$1")
+elif [[ $# -gt 0 ]]; then
+  INPUT="$*"
+else
+  INPUT=$(cat)
+fi
+
+# Color settings
+if $COLOR; then
+  GREP_COLOR="--color=always"
+else
+  GREP_COLOR="--color=never"
+fi
+
+# Test and show matches
+echo "Pattern: $PATTERN"
+echo "---"
+
+if $GLOBAL; then
+  # Find all matches
+  if echo "$INPUT" | grep -oE $IGNORE_CASE "$PATTERN" $GREP_COLOR; then
+    echo "---"
+    MATCH_COUNT=$(echo "$INPUT" | grep -oE $IGNORE_CASE "$PATTERN" | wc -l)
+    echo "✓ Found $MATCH_COUNT match(es)"
+  else
+    echo "✗ No matches found"
+    exit 1
+  fi
+else
+  # Test if pattern matches
+  if echo "$INPUT" | grep -qE $IGNORE_CASE "$PATTERN"; then
+    echo "$INPUT" | grep -E $IGNORE_CASE "$PATTERN" $GREP_COLOR
+    echo "---"
+    echo "✓ Pattern matches"
+  else
+    echo "$INPUT"
+    echo "---"
+    echo "✗ Pattern does not match"
+    exit 1
+  fi
+fi

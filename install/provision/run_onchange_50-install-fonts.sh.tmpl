@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Install Nerd Fonts (JetBrainsMono & Symbols)
+# This script runs when the checksum of this file changes (user triggered or manual update)
+
+set -euo pipefail
+
+FONT_VERSION="v3.4.0"
+NERD_FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/${FONT_VERSION}"
+
+# Define fonts to install
+FONTS=(
+    "JetBrainsMono"
+    "NerdFontsSymbolsOnly"
+)
+
+# Detect OS and set font directory
+if [[ "$(uname)" == "Darwin" ]]; then
+    FONT_DIR="$HOME/Library/Fonts"
+    OS_TYPE="macOS"
+else
+    FONT_DIR="$HOME/.local/share/fonts"
+    OS_TYPE="Linux"
+fi
+
+mkdir -p "$FONT_DIR"
+
+echo " Installing Nerd Fonts ($FONT_VERSION) for $OS_TYPE..."
+
+for font in "${FONTS[@]}"; do
+    # Check if font appears to be installed (simplistic check)
+    # Ideally we'd check specifically for the font file, but files inside zip vary.
+    # We'll rely on the zip name marker or just overwrite.
+    
+    echo "   -> Downloading $font..."
+    curl -fLo "/tmp/${font}.zip" "${NERD_FONT_URL}/${font}.zip"
+    
+    echo "   -> Extracting..."
+    unzip -o -q "/tmp/${font}.zip" -d "$FONT_DIR"
+    
+    rm "/tmp/${font}.zip"
+done
+
+# Cleanup Windows compatible files if they exist (optional, mostly for cleanliness)
+rm -f "$FONT_DIR/"*Windows Compatible.ttf* 2>/dev/null || true
+
+# Update font cache
+if command -v fc-cache >/dev/null; then
+    echo "   -> Updating font cache..."
+    fc-cache -f "$FONT_DIR"
+fi
+
+echo " Nerd Fonts installed successfully!"

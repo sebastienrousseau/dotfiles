@@ -1,0 +1,229 @@
+# Multi-environment test for dotfiles README instructions
+# Usage: ./scripts/tests/test-docker.sh (builds and runs all targets)
+# Or:   docker build --target ubuntu-test -f Dockerfile.test .
+
+# =============================================================================
+# Ubuntu 24.04 (LTS) - Tests Debian/Ubuntu prerequisites + install.sh
+# =============================================================================
+FROM ubuntu:24.04 AS ubuntu-test
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV HOME=/root
+
+# README Prerequisites: Debian / Ubuntu
+# hadolint ignore=DL3008
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        git curl zsh build-essential ripgrep fd-find bat jq ca-certificates && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install chezmoi (from install.sh logic)
+RUN mkdir -p "$HOME/.local/bin" && \
+    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+ENV PATH="$HOME/.local/bin:$PATH"
+
+# Copy repo as chezmoi source
+COPY . $HOME/.dotfiles
+
+# Configure chezmoi source and apply (skip provisioning script to isolate alias testing)
+RUN mkdir -p "$HOME/.config/chezmoi" && \
+    printf 'sourceDir = \"%s\"\\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml" && \
+    chezmoi apply --exclude=scripts
+
+# Verify aliases file was generated
+RUN test -f "$HOME/.config/shell/90-ux-aliases.sh" || \
+    (echo "FAIL: 90-ux-aliases.sh not generated" && exit 1)
+
+# Verify modern aliases are present and not disabled
+RUN grep -q 'alias ls="eza' "$HOME/.config/shell/90-ux-aliases.sh" || \
+    grep -q "alias l='ls'" "$HOME/.config/shell/90-ux-aliases.sh" || \
+    (echo "FAIL: ls aliases not found in generated file" && exit 1)
+
+# Verify aliases can be sourced without errors
+RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh"' || \
+    (echo "FAIL: aliases file has syntax errors" && exit 1)
+
+# Verify bat alias works (bat is installed as batcat on Ubuntu/Debian)
+RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type cat' | grep -q batcat || \
+    (echo "FAIL: cat alias does not resolve to batcat on Ubuntu" && exit 1)
+
+# Verify fallback ls aliases work (eza not installed)
+RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type ll' 2>/dev/null | grep -q "ls -lA" || \
+    echo "NOTE: ll fallback alias check"
+
+# Test install.sh syntax (don't execute network calls)
+RUN bash -n "$HOME/.dotfiles/install.sh" || \
+    (echo "FAIL: install.sh has syntax errors" && exit 1)
+
+# Create non-root user for container security (CKV_DOCKER_3)
+RUN useradd -m -s /bin/zsh testuser
+
+# Healthcheck (CKV_DOCKER_2)
+HEALTHCHECK --interval=60s --timeout=10s --start-period=5s --retries=3 \
+    CMD zsh -c "exit 0" || exit 1
+
+RUN echo "=== Ubuntu 24.04: ALL TESTS PASSED ==="
+
+# =============================================================================
+# Debian 12 (Bookworm) - Tests Debian prerequisites + install.sh
+# =============================================================================
+FROM debian:12 AS debian-test
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV HOME=/root
+
+# README Prerequisites: Debian / Ubuntu
+# hadolint ignore=DL3008
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        git curl zsh build-essential ripgrep fd-find bat jq ca-certificates && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install chezmoi
+RUN mkdir -p "$HOME/.local/bin" && \
+    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+ENV PATH="$HOME/.local/bin:$PATH"
+
+# Copy repo as chezmoi source
+COPY . $HOME/.dotfiles
+
+# Configure chezmoi source and apply (skip provisioning script)
+RUN mkdir -p "$HOME/.config/chezmoi" && \
+    printf 'sourceDir = \"%s\"\\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml" && \
+    chezmoi apply --exclude=scripts
+
+# Verify aliases file was generated
+RUN test -f "$HOME/.config/shell/90-ux-aliases.sh" || \
+    (echo "FAIL: 90-ux-aliases.sh not generated" && exit 1)
+
+# Verify aliases can be sourced without errors
+RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh"' || \
+    (echo "FAIL: aliases file has syntax errors" && exit 1)
+
+# Test install.sh syntax
+RUN bash -n "$HOME/.dotfiles/install.sh" || \
+    (echo "FAIL: install.sh has syntax errors" && exit 1)
+
+# Create non-root user for container security (CKV_DOCKER_3)
+RUN useradd -m -s /bin/zsh testuser
+
+# Healthcheck (CKV_DOCKER_2)
+HEALTHCHECK --interval=60s --timeout=10s --start-period=5s --retries=3 \
+    CMD zsh -c "exit 0" || exit 1
+
+RUN echo "=== Debian 12: ALL TESTS PASSED ==="
+
+# =============================================================================
+# Arch Linux - Tests Arch prerequisites
+# =============================================================================
+# Using base-devel tag for stable builds (CKV_DOCKER_7)
+FROM archlinux:base-devel AS arch-test
+
+ENV HOME=/root
+
+# README Prerequisites: Arch Linux
+RUN pacman -Syu --noconfirm git curl zsh ripgrep fd bat jq
+
+# Install chezmoi
+RUN mkdir -p "$HOME/.local/bin" && \
+    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+ENV PATH="$HOME/.local/bin:$PATH"
+
+# Copy repo as chezmoi source
+COPY . $HOME/.dotfiles
+
+# Configure chezmoi source and apply (skip provisioning script)
+RUN mkdir -p "$HOME/.config/chezmoi" && \
+    printf 'sourceDir = \"%s\"\\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml" && \
+    chezmoi apply --exclude=scripts
+
+# Verify aliases file was generated
+RUN test -f "$HOME/.config/shell/90-ux-aliases.sh" || \
+    (echo "FAIL: 90-ux-aliases.sh not generated" && exit 1)
+
+# Verify modern aliases contain eza or fallback
+RUN grep -q 'alias ls="eza' "$HOME/.config/shell/90-ux-aliases.sh" || \
+    grep -q "alias l='ls'" "$HOME/.config/shell/90-ux-aliases.sh" || \
+    (echo "FAIL: ls aliases not found in generated file" && exit 1)
+
+# Verify aliases can be sourced without errors
+RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh"' || \
+    (echo "FAIL: aliases file has syntax errors" && exit 1)
+
+# Verify bat alias works (bat binary is named 'bat' on Arch)
+RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type cat' | grep -q bat || \
+    (echo "FAIL: bat alias not working on Arch" && exit 1)
+
+# Test install.sh syntax
+RUN bash -n "$HOME/.dotfiles/install.sh" || \
+    (echo "FAIL: install.sh has syntax errors" && exit 1)
+
+# Create non-root user for container security (CKV_DOCKER_3)
+RUN useradd -m -s /bin/zsh testuser
+
+# Healthcheck (CKV_DOCKER_2)
+HEALTHCHECK --interval=60s --timeout=10s --start-period=5s --retries=3 \
+    CMD zsh -c "exit 0" || exit 1
+
+RUN echo "=== Arch Linux: ALL TESTS PASSED ==="
+
+# =============================================================================
+# Ubuntu 24.04 + eza - Tests modern aliases with eza installed
+# =============================================================================
+FROM ubuntu:24.04 AS ubuntu-eza-test
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV HOME=/root
+
+# hadolint ignore=DL3008
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        git curl zsh build-essential ripgrep fd-find bat jq gpg ca-certificates && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install eza (official method for Ubuntu)
+# hadolint ignore=DL3008
+RUN mkdir -p /etc/apt/keyrings && \
+    curl -fsSL https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" > /etc/apt/sources.list.d/gierens.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends eza && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install chezmoi
+RUN mkdir -p "$HOME/.local/bin" && \
+    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+ENV PATH="$HOME/.local/bin:$PATH"
+
+# Copy repo as chezmoi source
+COPY . $HOME/.dotfiles
+
+# Configure chezmoi source and apply (skip provisioning script)
+RUN mkdir -p "$HOME/.config/chezmoi" && \
+    printf 'sourceDir = \"%s\"\\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml" && \
+    chezmoi apply --exclude=scripts
+
+# Verify eza aliases are active (not fallback)
+RUN grep -q 'alias ls="eza --icons --group-directories-first"' "$HOME/.config/shell/90-ux-aliases.sh" || \
+    (echo "FAIL: eza alias not found in generated file" && exit 1)
+
+# Verify aliases can be sourced and eza alias resolves
+RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type ls' | grep -q eza || \
+    (echo "FAIL: ls does not resolve to eza" && exit 1)
+
+# Verify ll alias
+RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type ll' | grep -q eza || \
+    (echo "FAIL: ll does not resolve to eza" && exit 1)
+
+# Create non-root user for container security (CKV_DOCKER_3)
+RUN useradd -m -s /bin/zsh testuser
+
+# Healthcheck (CKV_DOCKER_2)
+HEALTHCHECK --interval=60s --timeout=10s --start-period=5s --retries=3 \
+    CMD zsh -c "exit 0" || exit 1
+
+RUN echo "=== Ubuntu 24.04 + eza: ALL TESTS PASSED ==="

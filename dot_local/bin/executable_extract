@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# Universal archive extraction
+# Usage: extract <file> [destination]
+
+set -euo pipefail
+
+if [[ $# -lt 1 ]]; then
+  echo "Usage: extract <file> [destination]"
+  echo "Supported formats: tar, tar.gz, tar.bz2, tar.xz, tar.zst, gz, bz2, xz, zst, zip, rar, 7z, deb, rpm"
+  exit 1
+fi
+
+FILE="$1"
+DEST="${2:-.}"
+
+if [[ ! -f "$FILE" ]]; then
+  echo "Error: File not found: $FILE"
+  exit 1
+fi
+
+# Create destination if needed
+mkdir -p "$DEST"
+
+echo "Extracting: $FILE"
+
+case "$FILE" in
+  *.tar.bz2|*.tbz2)
+    tar xjf "$FILE" -C "$DEST"
+    ;;
+  *.tar.gz|*.tgz)
+    tar xzf "$FILE" -C "$DEST"
+    ;;
+  *.tar.xz|*.txz)
+    tar xJf "$FILE" -C "$DEST"
+    ;;
+  *.tar.zst|*.tzst)
+    tar --zstd -xf "$FILE" -C "$DEST"
+    ;;
+  *.tar)
+    tar xf "$FILE" -C "$DEST"
+    ;;
+  *.bz2)
+    bunzip2 -k "$FILE"
+    ;;
+  *.gz)
+    gunzip -k "$FILE"
+    ;;
+  *.xz)
+    unxz -k "$FILE"
+    ;;
+  *.zst)
+    unzstd -k "$FILE"
+    ;;
+  *.zip|*.jar|*.war|*.ear)
+    unzip -q "$FILE" -d "$DEST"
+    ;;
+  *.rar)
+    if command -v unrar >/dev/null 2>&1; then
+      unrar x "$FILE" "$DEST/"
+    elif command -v 7z >/dev/null 2>&1; then
+      7z x "$FILE" -o"$DEST"
+    else
+      echo "Error: unrar or 7z required for .rar files"
+      exit 1
+    fi
+    ;;
+  *.7z)
+    if command -v 7z >/dev/null 2>&1; then
+      7z x "$FILE" -o"$DEST"
+    else
+      echo "Error: 7z required for .7z files"
+      exit 1
+    fi
+    ;;
+  *.deb)
+    if command -v dpkg-deb >/dev/null 2>&1; then
+      dpkg-deb -x "$FILE" "$DEST"
+    elif command -v ar >/dev/null 2>&1; then
+      cd "$DEST" && ar x "$FILE"
+    else
+      echo "Error: dpkg-deb or ar required for .deb files"
+      exit 1
+    fi
+    ;;
+  *.rpm)
+    if command -v rpm2cpio >/dev/null 2>&1; then
+      cd "$DEST" && rpm2cpio "$FILE" | cpio -idmv
+    else
+      echo "Error: rpm2cpio required for .rpm files"
+      exit 1
+    fi
+    ;;
+  *.Z)
+    uncompress "$FILE"
+    ;;
+  *.lzma)
+    unlzma -k "$FILE"
+    ;;
+  *.lz4)
+    lz4 -d "$FILE"
+    ;;
+  *)
+    echo "Error: Unknown archive format: $FILE"
+    exit 1
+    ;;
+esac
+
+echo "Extracted to: $DEST"

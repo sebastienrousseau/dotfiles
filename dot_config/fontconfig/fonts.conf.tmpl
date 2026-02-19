@@ -1,0 +1,44 @@
+{{ if eq .chezmoi.os "linux" -}}
+<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<fontconfig>
+  <!-- Antialiasing -->
+  <match target="font">
+    <edit mode="assign" name="antialias">
+      <bool>true</bool>
+    </edit>
+  </match>
+
+  <!-- Hinting -->
+  <match target="font">
+    <edit mode="assign" name="hinting">
+      <bool>true</bool>
+    </edit>
+  </match>
+
+  <!-- Hint Style -->
+  <match target="font">
+    <edit mode="assign" name="hintstyle">
+      <const>hintslight</const>
+    </edit>
+  </match>
+
+  <!-- LCD Filter -->
+  <match target="font">
+    <edit mode="assign" name="lcdfilter">
+      <const>lcddefault</const>
+    </edit>
+  </match>
+
+  <!-- Default Monospace Font -->
+  <alias>
+    <family>monospace</family>
+    <prefer>
+      <family>JetBrainsMono Nerd Font</family>
+      <family>Symbols Nerd Font</family>
+      <family>Noto Color Emoji</family>
+    </prefer>
+  </alias>
+
+</fontconfig>
+{{ end -}}

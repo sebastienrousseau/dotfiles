@@ -1,0 +1,194 @@
+{{- $theme := default "catppuccin-mocha" .theme -}}
+{{- $isCatppuccin := or (eq $theme "catppuccin-latte") (eq $theme "catppuccin-frappe") (eq $theme "catppuccin-macchiato") (eq $theme "catppuccin-mocha") -}}
+{{- $isTokyonight := or (eq $theme "tokyonight-day") (eq $theme "tokyonight-storm") (eq $theme "tokyonight-night") (eq $theme "tokyonight-moon") -}}
+{{- $isRosePine := or (eq $theme "rose-pine") (eq $theme "rose-pine-moon") (eq $theme "rose-pine-dawn") -}}
+# Nix home-manager theme configuration
+# Auto-generated for theme: {{ $theme }}
+{ config, pkgs, lib, ... }:
+
+{{- if $isCatppuccin }}
+
+let
+  catppuccinVariant =
+{{- if eq $theme "catppuccin-latte" }}
+    "latte";
+{{- else if eq $theme "catppuccin-frappe" }}
+    "frappe";
+{{- else if eq $theme "catppuccin-macchiato" }}
+    "macchiato";
+{{- else }}
+    "mocha";
+{{- end }}
+in
+
+{
+  imports = [
+    <catppuccin/modules/home-manager>
+  ];
+
+  catppuccin = {
+    enable = true;
+    flavor = catppuccinVariant;
+  };
+
+  # Terminal applications
+  programs = {
+    alacritty.catppuccin.enable = true;
+    kitty.catppuccin.enable = true;
+    foot.catppuccin.enable = true;
+
+    # Shell and prompt
+    zsh.catppuccin.enable = true;
+    bash.catppuccin.enable = true;
+    fish.catppuccin.enable = true;
+    starship.catppuccin.enable = true;
+
+    # Development tools
+    neovim.catppuccin.enable = true;
+    helix.catppuccin.enable = true;
+    tmux.catppuccin.enable = true;
+
+    # Git tools
+    git.delta.catppuccin.enable = true;
+    lazygit.catppuccin.enable = true;
+
+    # File utilities
+    bat.catppuccin.enable = true;
+    bottom.catppuccin.enable = true;
+    k9s.catppuccin.enable = true;
+    yazi.catppuccin.enable = true;
+
+    # Fuzzy finder
+    fzf.catppuccin.enable = true;
+  };
+
+  # Window manager themes (enable as needed)
+  # wayland.windowManager.hyprland.catppuccin.enable = true;
+  # wayland.windowManager.sway.catppuccin.enable = true;
+  # xsession.windowManager.i3.catppuccin.enable = true;
+
+  # GTK theme
+  gtk.catppuccin = {
+    enable = true;
+    flavor = catppuccinVariant;
+    accent = "blue";
+    size = "standard";
+    tweaks = [ "rimless" ];
+  };
+
+  # Cursor theme
+  home.pointerCursor = {
+    name = "catppuccin-${catppuccinVariant}-blue-cursors";
+    package = pkgs.catppuccin-cursors."${catppuccinVariant}Blue";
+    size = 24;
+    gtk.enable = true;
+    x11.enable = true;
+  };
+
+{{- else if $isTokyonight }}
+
+{
+  # Tokyo Night theme configuration
+  # Note: Tokyo Night doesn't have native Nix home-manager integration
+  # Manual configuration required for most applications
+
+  # Neovim with Tokyo Night
+  programs.neovim = {
+    plugins = with pkgs.vimPlugins; [
+      tokyonight-nvim
+    ];
+    extraLuaConfig = ''
+      require("tokyonight").setup({
+        style = "{{ if eq $theme "tokyonight-day" }}day{{ else if eq $theme "tokyonight-storm" }}storm{{ else if eq $theme "tokyonight-moon" }}moon{{ else }}night{{ end }}",
+        transparent = false,
+        terminal_colors = true,
+        styles = {
+          comments = { italic = true },
+          keywords = { italic = true },
+          functions = {},
+          variables = {},
+        },
+      })
+      vim.cmd.colorscheme("tokyonight-{{ if eq $theme "tokyonight-day" }}day{{ else if eq $theme "tokyonight-storm" }}storm{{ else if eq $theme "tokyonight-moon" }}moon{{ else }}night{{ end }}")
+    '';
+  };
+
+  # Environment variables
+  home.sessionVariables = {
+    TOKYONIGHT_VARIANT = "{{ if eq $theme "tokyonight-day" }}day{{ else if eq $theme "tokyonight-storm" }}storm{{ else if eq $theme "tokyonight-moon" }}moon{{ else }}night{{ end }}";
+    DOTFILES_THEME = "{{ $theme }}";
+  };
+
+{{- else if $isRosePine }}
+
+{
+  # Rose Pine theme configuration
+  # Note: Rose Pine doesn't have comprehensive Nix home-manager integration
+  # Manual configuration required for most applications
+
+  # Neovim with Rose Pine
+  programs.neovim = {
+    plugins = with pkgs.vimPlugins; [
+      rose-pine
+    ];
+    extraLuaConfig = ''
+      require("rose-pine").setup({
+        variant = "{{ if eq $theme "rose-pine-dawn" }}dawn{{ else if eq $theme "rose-pine-moon" }}moon{{ else }}main{{ end }}",
+        dark_variant = "{{ if eq $theme "rose-pine-moon" }}moon{{ else }}main{{ end }}",
+        bold_vert_split = false,
+        dim_nc_background = false,
+        disable_background = false,
+        disable_float_background = false,
+        groups = {
+          background = 'base',
+          panel = 'surface',
+          border = 'highlight_med',
+          comment = 'muted',
+          link = 'iris',
+          punctuation = 'subtle',
+        },
+      })
+      vim.cmd.colorscheme("rose-pine{{ if eq $theme "rose-pine-dawn" }}-dawn{{ else if eq $theme "rose-pine-moon" }}-moon{{ end }}")
+    '';
+  };
+
+  # Environment variables
+  home.sessionVariables = {
+    ROSE_PINE_VARIANT = "{{ if eq $theme "rose-pine-dawn" }}dawn{{ else if eq $theme "rose-pine-moon" }}moon{{ else }}main{{ end }}";
+    DOTFILES_THEME = "{{ $theme }}";
+  };
+
+{{- else }}
+
+{
+  # Generic/other theme configuration
+  # Manual configuration required for theme: {{ $theme }}
+
+  # Environment variables
+  home.sessionVariables = {
+    DOTFILES_THEME = "{{ $theme }}";
+  };
+
+{{- end }}
+
+  # Common configuration for all themes
+  home.sessionVariables = {
+    DOTFILES_THEME = "{{ $theme }}";
+    TERMINAL_FONT_FAMILY = "{{ default "JetBrains Mono" .terminal_font_family }}";
+    TERMINAL_FONT_SIZE = "{{ default 12 .terminal_font_size }}";
+  };
+
+  # Font configuration
+  fonts.fontconfig.enable = true;
+  home.packages = with pkgs; [
+    # Core fonts
+    {{ default "jetbrains-mono" .terminal_font_family | lower | replace " " "-" }}
+    nerdfonts
+    font-awesome
+
+    # Additional UI fonts
+    inter
+    source-sans-pro
+    source-code-pro
+  ];
+}

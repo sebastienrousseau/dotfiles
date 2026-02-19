@@ -1,0 +1,6 @@
+# Always-available PATH bootstrap (includes system paths to allow skipping /etc/zprofile path_helper)
+export PATH="/opt/homebrew/bin:$HOME/.local/bin:$HOME/.dotnet/tools:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+[[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
+
+# Skip /etc/zprofile (path_helper ~3ms) and /etc/zshrc (terminfo ~10ms) — we handle both
+setopt NO_GLOBAL_RCS

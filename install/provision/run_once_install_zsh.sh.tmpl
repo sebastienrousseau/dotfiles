@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+# run_once_install_zsh.sh.tmpl
+# Opt-in default shell change. Set DOTFILES_SET_ZSH=1 to enable.
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") -}}
+
+set -euo pipefail
+
+log_info() { echo -e "\n[INFO] $*"; }
+log_error() { echo -e "\n[ERROR] $*" >&2; }
+
+if ! command -v zsh >/dev/null 2>&1; then
+  log_info "Zsh is not installed. Skipping default shell setup."
+  exit 0
+fi
+
+if [ "${DOTFILES_SET_ZSH:-0}" != "1" ]; then
+  log_info "Default shell change disabled (set DOTFILES_SET_ZSH=1 to enable)."
+  exit 0
+fi
+
+zsh_path="$(command -v zsh)"
+
+if [ -w /etc/shells ]; then
+  if ! grep -qx "$zsh_path" /etc/shells; then
+    echo "$zsh_path" >> /etc/shells
+  fi
+elif command -v sudo >/dev/null 2>&1; then
+  if ! grep -qx "$zsh_path" /etc/shells; then
+    echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null
+  fi
+else
+  log_error "Cannot update /etc/shells (no write access and sudo missing)."
+fi
+
+if [ "${SHELL:-}" != "$zsh_path" ]; then
+  if chsh -s "$zsh_path" "$USER"; then
+    log_info "Default shell set to zsh for $USER."
+  else
+    log_error "Failed to set default shell. You can run: chsh -s $zsh_path"
+  fi
+fi
+
+{{- end -}}

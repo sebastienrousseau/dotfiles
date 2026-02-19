@@ -1,0 +1,39 @@
+# Delve debugger configuration
+# https://github.com/go-delve/delve/blob/master/Documentation/cli/README.md
+
+# Aliases for common commands
+aliases:
+  # Navigation
+  ll: "list"
+  bt: "stack"
+  # Breakpoints
+  bp: "breakpoints"
+  # Variables
+  lv: "locals"
+  av: "args"
+  # Execution
+  c: "continue"
+  n: "next"
+  s: "step"
+  so: "stepout"
+  # Info
+  gs: "goroutines"
+  gt: "goroutine"
+
+# Source list settings
+source-list-line-color: 34
+source-list-arrow-color: 33
+source-list-keyword-color: 31
+
+# Substitute source paths (useful for remote debugging)
+# substitute-path:
+#   - {from: "/build/path", to: "/local/path"}
+
+# Max string length to display
+max-string-len: 256
+
+# Max array values to display
+max-array-values: 128
+
+# Show goroutine current location
+show-location-expr: true

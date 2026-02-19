@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Kill process running on specified port
+# Usage: kill-port <port> [--force]
+
+set -euo pipefail
+
+if [[ $# -lt 1 ]]; then
+  echo "Usage: kill-port <port> [--force]"
+  echo "Example: kill-port 3000"
+  exit 1
+fi
+
+PORT="$1"
+FORCE=false
+[[ "${2:-}" == "--force" || "${2:-}" == "-f" ]] && FORCE=true
+
+# Validate port number
+if ! [[ "$PORT" =~ ^[0-9]+$ ]] || [[ "$PORT" -lt 1 ]] || [[ "$PORT" -gt 65535 ]]; then
+  echo "Error: Invalid port number: $PORT"
+  exit 1
+fi
+
+# Find process using the port
+find_pid() {
+  if command -v lsof >/dev/null 2>&1; then
+    lsof -ti ":$PORT" 2>/dev/null
+  elif command -v ss >/dev/null 2>&1; then
+    ss -tlnp "sport = :$PORT" 2>/dev/null | awk 'NR>1 {match($0, /pid=([0-9]+)/, a); print a[1]}'
+  elif command -v netstat >/dev/null 2>&1; then
+    netstat -tlnp 2>/dev/null | awk -v port=":$PORT" '$4 ~ port {split($7, a, "/"); print a[1]}'
+  else
+    echo "Error: No supported tool found (lsof, ss, or netstat required)"
+    exit 1
+  fi
+}
+
+PIDS=$(find_pid)
+
+if [[ -z "$PIDS" ]]; then
+  echo "No process found on port $PORT"
+  exit 0
+fi
+
+echo "Found process(es) on port $PORT:"
+for pid in $PIDS; do
+  ps -p "$pid" -o pid,comm,args --no-headers 2>/dev/null || echo "  PID: $pid"
+done
+
+if $FORCE; then
+  SIGNAL="-9"
+  echo "Force killing..."
+else
+  SIGNAL="-15"
+  echo "Sending SIGTERM..."
+fi
+
+for pid in $PIDS; do
+  kill $SIGNAL "$pid" 2>/dev/null && echo "Killed PID $pid" || echo "Failed to kill PID $pid"
+done
