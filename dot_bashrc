@@ -119,6 +119,12 @@ if [[ -d "${XDG_CONFIG_HOME}/shell" ]]; then
 fi
 
 # --- Tool Integration ---
+# Mise (runtime version manager) - MUST be early to ensure mise tools take PATH priority
+# mise prepends its shims to PATH, so Python/Node/etc. from mise override Homebrew versions
+if command -v mise &>/dev/null; then
+    _safe_eval_init "mise" "$(mise activate bash 2>/dev/null)" || true
+fi
+
 # Zoxide (smart cd)
 if command -v zoxide &>/dev/null; then
     _safe_eval_init "zoxide" "$(zoxide init bash 2>/dev/null)" || true

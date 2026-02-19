@@ -96,6 +96,13 @@ export HISTCONTROL="ignoreboth:erasedups"
 # --- Security ---
 umask 022
 
+# --- Mise (Runtime Version Manager) ---
+# Activate mise AFTER all PATH setup to ensure mise-managed tools take priority.
+# mise prepends its shims to PATH, so Python/Node/etc. from mise override system versions.
+if command -v mise >/dev/null 2>&1; then
+    eval "$(mise activate bash 2>/dev/null)" || true
+fi
+
 # --- Source Bash-specific configuration ---
 # When running Bash interactively, source .bashrc
 if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ]; then
