@@ -46,6 +46,11 @@ This backlog tracks repo-level security and platform hardening work aligned with
 
 - [ ] Add a reusable workflow layer to reduce duplicated security/test logic across workflows.
 - [ ] Pin devcontainer base image by digest and add prebuild automation for Codespaces.
+  - Progress:
+    - Pinned `.devcontainer/devcontainer.json` image to immutable digest.
+    - Added Dependabot `devcontainers` ecosystem updates in `.github/dependabot.yml`.
+  - Remaining:
+    - Configure Codespaces prebuild automation in repository settings.
 - [ ] Add attestation verification against release assets as a required status check.
   - Progress: verification gate implemented in `.github/workflows/security-release.yml`.
   - Remaining: enforce this workflow as a required status check in repository branch/rulesets settings.
