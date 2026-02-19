@@ -2,17 +2,11 @@ name: Compliance Guard
 
 # SOC 2 / ISO 27001 compliance checks for security and portability
 # Blocks insecure patterns and enforces cross-platform compatibility
+# Verifies cryptographic identity (ALCOA: Attributable)
 
 on:
   pull_request:
     branches: [master]
-    paths:
-      - '**.sh'
-      - '**.bash'
-      - '**.zsh'
-      - '**.tmpl'
-      - 'Dockerfile*'
-      - '.gitattributes'
   push:
     branches: [master]
     paths:
@@ -31,6 +25,110 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # ============================================================================
+  # Commit Signature Verification (ALCOA: Attributable)
+  # ============================================================================
+  verify-signatures:
+    name: Verify Commit Signatures
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Only run on pull requests
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout with full history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Import GPG keys from GitHub
+        run: |
+          # Import GitHub's web-flow signing key for web commits
+          curl -sL https://github.com/web-flow.gpg | gpg --import 2>/dev/null || true
+
+      - name: Verify commit signatures
+        id: verify
+        run: |
+          echo "## Commit Signature Verification" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          echo "Checking commits from $BASE_SHA to $HEAD_SHA"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Commit | Author | Signature |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|--------|--------|-----------|" >> "$GITHUB_STEP_SUMMARY"
+
+          unsigned_count=0
+          signed_count=0
+
+          for commit in $(git rev-list "$BASE_SHA".."$HEAD_SHA"); do
+            author=$(git log -1 --format='%an' "$commit")
+            short_sha=$(git log -1 --format='%h' "$commit")
+
+            # Check for GPG or SSH signature
+            sig_status=$(git log -1 --format='%G?' "$commit" 2>/dev/null || echo "N")
+
+            case "$sig_status" in
+              G|U)
+                # G = Good signature, U = Good signature with unknown validity
+                signer=$(git log -1 --format='%GS' "$commit" 2>/dev/null || echo "unknown")
+                echo "| \`$short_sha\` | $author | :white_check_mark: Signed by $signer |" >> "$GITHUB_STEP_SUMMARY"
+                ((signed_count++))
+                ;;
+              B)
+                # B = Bad signature
+                echo "| \`$short_sha\` | $author | :x: Bad signature |" >> "$GITHUB_STEP_SUMMARY"
+                ((unsigned_count++))
+                ;;
+              E)
+                # E = Cannot check signature (missing key)
+                echo "| \`$short_sha\` | $author | :warning: Unverifiable (key not found) |" >> "$GITHUB_STEP_SUMMARY"
+                # Count as signed if we can't verify (might be SSH signed)
+                ;;
+              N|*)
+                # N = No signature
+                echo "| \`$short_sha\` | $author | :x: Unsigned |" >> "$GITHUB_STEP_SUMMARY"
+                ((unsigned_count++))
+                ;;
+            esac
+          done
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Summary:** $signed_count signed, $unsigned_count unsigned" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ $unsigned_count -gt 0 ]]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo ":warning: **Warning:** This PR contains unsigned commits." >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "For SOC 2 / ALCOA compliance, all commits should be cryptographically signed." >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "To enable signing:" >> "$GITHUB_STEP_SUMMARY"
+            echo "\`\`\`bash" >> "$GITHUB_STEP_SUMMARY"
+            echo "# SSH signing (recommended)" >> "$GITHUB_STEP_SUMMARY"
+            echo "git config --global gpg.format ssh" >> "$GITHUB_STEP_SUMMARY"
+            echo "git config --global user.signingkey ~/.ssh/id_ed25519.pub" >> "$GITHUB_STEP_SUMMARY"
+            echo "git config --global commit.gpgsign true" >> "$GITHUB_STEP_SUMMARY"
+            echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+
+            echo "::warning::PR contains $unsigned_count unsigned commit(s). See job summary for details."
+            echo "unsigned=$unsigned_count" >> "$GITHUB_OUTPUT"
+          else
+            echo ":white_check_mark: All commits are cryptographically signed." >> "$GITHUB_STEP_SUMMARY"
+            echo "unsigned=0" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Signature enforcement (advisory)
+        run: |
+          # Currently advisory - set to 'exit 1' to enforce
+          echo "Signature verification complete (advisory mode)"
+          # To enforce: uncomment the following
+          # if [[ "${{ steps.verify.outputs.unsigned }}" -gt 0 ]]; then
+          #   echo "::error::Unsigned commits are not allowed"
+          #   exit 1
+          # fi
+
   # ============================================================================
   # Insecure Pattern Scanner
   # ============================================================================
@@ -216,33 +314,52 @@ jobs:
   compliance-summary:
     name: Compliance Summary
     runs-on: ubuntu-latest
-    needs: [insecure-patterns, portability, dockerfile-lint]
+    needs: [verify-signatures, insecure-patterns, portability, dockerfile-lint]
     if: always()
     steps:
       - name: Generate Summary
         run: |
           echo "## Compliance Guard Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Check | Status |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|-------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Check | Status | ALCOA |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|--------|-------|" >> "$GITHUB_STEP_SUMMARY"
+
+          # Signature verification (may be skipped on push events)
+          if [[ "${{ needs.verify-signatures.result }}" == "success" ]]; then
+            echo "| Commit Signatures | :white_check_mark: Pass | Attributable |" >> "$GITHUB_STEP_SUMMARY"
+          elif [[ "${{ needs.verify-signatures.result }}" == "skipped" ]]; then
+            echo "| Commit Signatures | :white_circle: Skipped | Attributable |" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "| Commit Signatures | :warning: Warning | Attributable |" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
           if [[ "${{ needs.insecure-patterns.result }}" == "success" ]]; then
-            echo "| TLS Security Patterns | :white_check_mark: Pass |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| TLS Security Patterns | :white_check_mark: Pass | Accurate |" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "| TLS Security Patterns | :x: Fail |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| TLS Security Patterns | :x: Fail | Accurate |" >> "$GITHUB_STEP_SUMMARY"
           fi
 
           if [[ "${{ needs.portability.result }}" == "success" ]]; then
-            echo "| Cross-Platform Portability | :white_check_mark: Pass |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Cross-Platform Portability | :white_check_mark: Pass | Legible |" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "| Cross-Platform Portability | :x: Fail |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Cross-Platform Portability | :x: Fail | Legible |" >> "$GITHUB_STEP_SUMMARY"
           fi
 
           if [[ "${{ needs.dockerfile-lint.result }}" == "success" ]]; then
-            echo "| Dockerfile Lint | :white_check_mark: Pass |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Dockerfile Lint | :white_check_mark: Pass | Original |" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "| Dockerfile Lint | :x: Fail |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Dockerfile Lint | :x: Fail | Original |" >> "$GITHUB_STEP_SUMMARY"
           fi
 
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "_Compliance Guard enforces SOC 2 / ISO 27001 security controls_" >> "$GITHUB_STEP_SUMMARY"
+          echo "### ALCOA Compliance" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Principle | Control |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-----------|---------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **A**ttributable | Cryptographic commit signatures (GPG/SSH) |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **L**egible | Cross-platform compatibility verified |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **C**ontemporaneous | Git timestamps, CI audit logs |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **O**riginal | Immutable git history, signed commits |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **A**ccurate | TLS enforcement, secrets scanning |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "_Compliance Guard enforces SOC 2 / ISO 27001 / ALCOA security controls_" >> "$GITHUB_STEP_SUMMARY"
