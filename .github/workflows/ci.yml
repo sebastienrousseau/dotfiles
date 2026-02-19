@@ -160,6 +160,9 @@ jobs:
           # Secrets scanning should validate the current revision, not historical refs.
           fetch-depth: 1
           fetch-tags: false
+      - name: Guard gitleaks history mode
+        if: github.event_name == 'workflow_dispatch'
+        run: bash scripts/ci/guard-gitleaks-checkout.sh
       - name: Gitleaks (zero-tolerance secrets policy)
         uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
         env:
