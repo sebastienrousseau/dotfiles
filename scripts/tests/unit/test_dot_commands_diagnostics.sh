@@ -64,6 +64,16 @@ else
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define drift command"
 fi
 
+# Test: defines verify command
+test_start "diagnostics_defines_verify"
+if grep -q "cmd_verify\|dot_verify\|verify" "$DIAG_FILE" 2>/dev/null; then
+  ((TESTS_PASSED++))
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines verify command"
+else
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define verify command"
+fi
+
 # Test: defines security-score command
 test_start "diagnostics_defines_security_score"
 if grep -q "security.score\|security_score\|securityscore" "$DIAG_FILE" 2>/dev/null; then

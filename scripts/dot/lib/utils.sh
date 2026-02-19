@@ -165,6 +165,9 @@ dot_command_summary() {
     benchmark)
       echo "Measure shell startup performance."
       ;;
+    verify)
+      echo "Run post-merge verification checks."
+      ;;
     tools)
       echo "Browse or install toolchain components."
       ;;

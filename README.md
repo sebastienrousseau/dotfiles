@@ -136,6 +136,7 @@ Run `dot --help` or `dot <command> --help` for inline documentation.
 | `dot drift` | Drift dashboard (chezmoi status) | Diagnostics |
 | `dot history` | Shell history analysis | Diagnostics |
 | `dot doctor` | Check system health and configuration | Diagnostics |
+| `dot verify` | Post-merge verification (`dot doctor`, `dot status`, `chezmoi diff`) | Diagnostics |
 | `dot health` | Comprehensive health dashboard (37 checks) | Diagnostics |
 | `dot security-score` | Security assessment with grading | Diagnostics |
 | `dot benchmark` | Shell startup benchmark (`--detailed`, `--profile`) | Diagnostics |

@@ -74,7 +74,11 @@ If something runs slow or appears broken:
    ```bash
    dot doctor
    ```
-2. **Verbose mode**:
+2. **Run post-merge verification**:
+   ```bash
+   dot verify
+   ```
+3. **Verbose mode**:
    ```bash
    DOTFILES_DEBUG=1 dot apply
    ```
