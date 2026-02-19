@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Show public and local IP addresses
-# Usage: ip [--json]
+# Usage: myip [--json]
 
 set -euo pipefail
 

@@ -178,7 +178,7 @@ These utilities are installed to `~/.local/bin/`:
 | `lorem` | Lorem ipsum generator |
 | `uuid` | UUID generator |
 | `hash` | MD5/SHA hash calculator |
-| `ip` | Show public/local IP addresses |
+| `myip` | Show public/local IP addresses |
 | `kill-port` | Kill process by port |
 | `extract` | Universal archive extraction |
 | `update` | Update all system packages |
