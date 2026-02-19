@@ -2,6 +2,26 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.483
+
+### Added
+
+- **Signed-commit guardrails** — Added signed pre-push hook tooling under `scripts/git-hooks/` and integrated compliance checks for cryptographic signatures.
+- **Module coverage gate** — Added `scripts/tests/framework/module_coverage.sh` and CI enforcement for `>=95%` module coverage (current: `100%`).
+- **Expanded unit coverage** — Added focused unit tests for CI config validation and demo recording modules.
+
+### Changed
+
+- **CLI presentation refresh** — Restored styled `dot` UX with ASCII logo, improved help layout, aligned command columns, and green command highlighting.
+- **Documentation sync** — Updated README/docs/version references to `v0.2.483` and refreshed compliance/testing metrics.
+- **Release hardening baseline** — Brought over selected security/compliance/test commits from `feat/v0.2.482` onto `master`.
+
+### Fixed
+
+- **`dot add` strict-mode bug** — Fixed unbound argument handling when running `dot add` without arguments.
+- **Test-suite stability** — Resolved brittle and environment-sensitive unit tests; full unit suite now passes (`1046` tests, `0` failures).
+- **Template/test runner compatibility** — Fixed framework output and compatibility issues in validation tests.
+
 ## v0.2.480
 
 ### Added

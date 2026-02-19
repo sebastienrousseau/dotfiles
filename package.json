@@ -1,6 +1,6 @@
 {
   "name": "@sebastienrousseau/dotfiles",
-  "version": "0.2.482",
+  "version": "0.2.483",
   "description": "The Trusted Shell Platform — Universal dotfiles managed by Chezmoi. Features Bash & Zsh for macOS, Linux & WSL. Rust modern tooling & enterprise-grade security.",
   "main": "install.sh",
   "bin": {

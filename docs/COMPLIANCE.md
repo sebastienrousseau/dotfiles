@@ -36,7 +36,7 @@ This document describes the compliance, security, and cross-platform compatibili
 | **A.12.6.1** | Technical Vulnerability Management | Gitleaks, TruffleHog secrets scanning |
 | **A.13.1.1** | Network Controls | TLS enforcement (no `curl -k`) |
 | **A.14.2.5** | Secure Engineering | ShellCheck, cross-platform testing |
-| **A.14.2.8** | System Security Testing | 102% test coverage, weekly scans |
+| **A.14.2.8** | System Security Testing | Module coverage gate (>=95%, currently 100%), weekly scans |
 
 ### GDPR / HIPAA (Privacy)
 
@@ -311,7 +311,7 @@ Enable "Require signed commits" in repository settings:
 | Alias templates | 97 | Tested |
 | Function templates | 52 | Tested |
 | **Total modules** | **211** | - |
-| **Test files** | **216** | **102%** |
+| **Test files** | **218** | **Module coverage: 100% (threshold >=95%)** |
 
 ### Test Framework
 
@@ -322,7 +322,7 @@ scripts/tests/
 │   ├── mocks.sh         # Mock functions
 │   └── test_runner.sh   # Test executor
 └── unit/
-    └── test_*.sh        # 216 unit tests
+    └── test_*.sh        # 218 unit test files
 ```
 
 ### Running Tests

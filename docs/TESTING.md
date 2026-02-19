@@ -95,9 +95,15 @@ assert_exit_code 1 "myfunction"
 
 | Category | Target | Current |
 |----------|--------|---------|
-| Functions | >80% | ~85% |
-| Scripts | >70% | ~75% |
+| Module coverage (scripts/) | >=95% | 100% (62/62) |
+| Unit test pass rate | 100% | 100% |
 | Integration | >90% | ~95% |
+
+CI enforces module coverage via:
+
+```bash
+MIN_COVERAGE=95 ./scripts/tests/framework/module_coverage.sh
+```
 
 ## CI integration
 
