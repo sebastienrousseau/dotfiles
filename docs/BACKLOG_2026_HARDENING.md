@@ -47,5 +47,7 @@ This backlog tracks repo-level security and platform hardening work aligned with
 - [ ] Add a reusable workflow layer to reduce duplicated security/test logic across workflows.
 - [ ] Pin devcontainer base image by digest and add prebuild automation for Codespaces.
 - [ ] Add attestation verification against release assets as a required status check.
+  - Progress: verification gate implemented in `.github/workflows/security-release.yml`.
+  - Remaining: enforce this workflow as a required status check in repository branch/rulesets settings.
 - [ ] Extend template security baselines for `dot new` (lockfiles, CI defaults, scanning).
 - [ ] Add MCP operations hardening (`dot mcp doctor`, scoped server policies, token checks).

@@ -106,3 +106,21 @@ jobs:
             exit 1
           fi
           echo "Release provenance asset verified"
+
+      - name: Install verification dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Verify SBOM attestation cryptographically
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh attestation verify dotfiles-sbom.spdx.json --repo "${REPO}" --format json >/tmp/attestation-verify.json
+          if ! jq -e 'length > 0' /tmp/attestation-verify.json >/dev/null; then
+            echo "::error::No valid attestations were returned for dotfiles-sbom.spdx.json"
+            exit 1
+          fi
+          echo "SBOM attestation verified"
