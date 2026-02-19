@@ -477,7 +477,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: DeterminateSystems/nix-installer-action@v21
-      - uses: DeterminateSystems/magic-nix-cache-action@v8
+      - uses: DeterminateSystems/magic-nix-cache-action@v13
       - name: Flake check
         run: nix flake check ./nix
 
@@ -576,7 +576,7 @@ jobs:
 
       - name: Comment on PR with benchmark results
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const time_ms = '${{ steps.benchmark.outputs.time_ms }}';
