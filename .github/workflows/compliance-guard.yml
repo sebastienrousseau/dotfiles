@@ -305,6 +305,7 @@ jobs:
           for dockerfile in "${dockerfiles[@]}"; do
             echo "Linting $dockerfile"
             docker run --rm -i hadolint/hadolint:v2.12.0-alpine \
+              hadolint \
               -t warning \
               --ignore DL3008 \
               --ignore DL3013 \
