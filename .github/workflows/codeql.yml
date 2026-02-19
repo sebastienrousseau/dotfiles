@@ -44,8 +44,8 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@f5c2471be782132e47a6e6f9c725e56730d6e9a3 # v3
+        uses: github/codeql-action/init@9e907b5e64f6b83e7804b09294d44122997950d6 # v4.32.3
         with:
           languages: actions,python
       - name: Perform Analysis
-        uses: github/codeql-action/analyze@f5c2471be782132e47a6e6f9c725e56730d6e9a3 # v3
+        uses: github/codeql-action/analyze@9e907b5e64f6b83e7804b09294d44122997950d6 # v4.32.3
