@@ -67,4 +67,4 @@ curlheader() {
 }
 
 # Aliases for convenience
-alias chd='curlheader'  # Alias for curlheader
+alias chd='curlheader' # Alias for curlheader
