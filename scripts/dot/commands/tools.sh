@@ -235,6 +235,7 @@ cmd_tools() {
     ui_ok "dot sync" "Apply dotfiles"
     ui_ok "dot update" "Pull latest changes and apply"
     ui_ok "dot doctor" "Run health checks"
+    ui_ok "dot verify" "Run post-merge verification checks"
     ui_ok "dot keys" "Show keybindings catalog"
     ui_ok "dot learn" "Interactive tour"
   fi

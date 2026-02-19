@@ -66,6 +66,7 @@ Welcome to the dotfiles documentation. This guide will help you install, configu
 - [Roadmap](ROADMAP.md) — Future plans and priorities
 - [Legacy Roadmap](LEGACY_ROADMAP.md) — Historical context
 - [2026 Hardening Backlog](BACKLOG_2026_HARDENING.md) — Prioritized implementation plan
+- [Milestone v0.2.487 Scope](MILESTONE_v0.2.487.md) — Concrete scoped deliverables
 
 ---
 
@@ -98,6 +99,7 @@ After installation, run these commands to explore:
 ```bash
 dot help          # Show all available commands
 dot doctor        # Check system health
+dot verify        # Post-merge verification checks
 dot learn         # Interactive tour
 dot keys          # View keybindings
 ```

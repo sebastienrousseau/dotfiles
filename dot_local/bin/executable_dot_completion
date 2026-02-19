@@ -15,6 +15,7 @@ _dot() {
     'remove:Safely remove a managed file'
     'cd:Print source directory path'
     'drift:Drift dashboard (detailed chezmoi status)'
+    'verify:Run post-merge verification checks'
     'history:Shell history analysis'
     'doctor:Check system health and configuration'
     'heal:Auto-repair common dotfiles issues'
