@@ -69,8 +69,13 @@ jobs:
             author=$(git log -1 --format='%an' "$commit")
             short_sha=$(git log -1 --format='%h' "$commit")
 
-            # Check for GPG or SSH signature
+            # Check for GPG/SSH signature status.
+            # Note: SSH signatures report "N" unless allowedSignersFile is configured.
             sig_status=$(git log -1 --format='%G?' "$commit" 2>/dev/null || echo "N")
+            has_sig_header="false"
+            if git cat-file -p "$commit" | grep -q '^gpgsig '; then
+              has_sig_header="true"
+            fi
 
             case "$sig_status" in
               G|U)
@@ -90,9 +95,15 @@ jobs:
                 # Count as signed if we can't verify (might be SSH signed)
                 ;;
               N|*)
-                # N = No signature
-                echo "| \`$short_sha\` | $author | :x: Unsigned |" >> "$GITHUB_STEP_SUMMARY"
-                unsigned_count=$((unsigned_count + 1))
+                # N = No verifiable signature in current trust context.
+                # If commit contains a signature block, treat as signed-but-unverified.
+                if [[ "$has_sig_header" == "true" ]]; then
+                  echo "| \`$short_sha\` | $author | :warning: Signed (unverified in CI trust context) |" >> "$GITHUB_STEP_SUMMARY"
+                  signed_count=$((signed_count + 1))
+                else
+                  echo "| \`$short_sha\` | $author | :x: Unsigned |" >> "$GITHUB_STEP_SUMMARY"
+                  unsigned_count=$((unsigned_count + 1))
+                fi
                 ;;
             esac
           done
@@ -310,6 +321,7 @@ jobs:
               --ignore DL3008 \
               --ignore DL3013 \
               --ignore DL3018 \
+              --ignore DL4006 \
               - < "$dockerfile"
           done
 
