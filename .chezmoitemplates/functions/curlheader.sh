@@ -41,7 +41,6 @@ curlheader() {
     echo
     echo "Aliases:"
     echo "  alias chd='curlheader'  # Alias for curlheader"
-    echo "  alias chdr='curlheader' # Alias for curlheader"
     echo
     echo "Examples:"
     echo "  curlheader https://example.com"
@@ -69,4 +68,3 @@ curlheader() {
 
 # Aliases for convenience
 alias chd='curlheader'  # Alias for curlheader
-alias chdr='curlheader' # Alias for curlheader

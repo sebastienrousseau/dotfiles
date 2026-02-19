@@ -2,6 +2,7 @@
 # Nmap Scanning Aliases
 [[ -n "${_NMAP_SCANNING_LOADED:-}" ]] && return 0
 _NMAP_SCANNING_LOADED=1
+command -v nmap >/dev/null 2>&1 || return 0
 
 alias nms='nmap -sS'
 alias nma='nmap -A'

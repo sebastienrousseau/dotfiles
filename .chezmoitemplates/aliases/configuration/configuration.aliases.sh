@@ -9,8 +9,10 @@
 # Set default text editor
 EDITOR="${EDITOR:-vi}"
 
-# Ensure dot CLI is available
-alias dot=~/.local/bin/dot
+# Ensure dot CLI is available without forcing a stale hardcoded path.
+if ! command -v dot >/dev/null 2>&1 && [[ -x "$HOME/.local/bin/dot" ]]; then
+  alias dot="$HOME/.local/bin/dot"
+fi
 
 # Apache aliases
 # ------------------------------------------------------------------------------

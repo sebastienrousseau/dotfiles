@@ -12,12 +12,13 @@ fi
 {{ range $files -}}
   {{ $name := . -}}
   {{ $isCore := false -}}
+  {{ $isHerokuSubmodule := and (contains "/heroku/" $name) (contains "heroku-" (base $name)) -}}
   {{ range $coreCategories -}}
     {{ if contains (printf "/%s/" .) $name -}}
       {{ $isCore = true -}}
     {{ end -}}
   {{ end -}}
-  {{ if and (not $isCore) (not (contains "/macOS/" $name)) }}
+  {{ if and (not $isCore) (not (contains "/macOS/" $name)) (not $isHerokuSubmodule) }}
 {{ include $name }}
   {{ end -}}
 {{ end }}
