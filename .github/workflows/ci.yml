@@ -276,7 +276,7 @@ jobs:
           path: sbom.cyclonedx.json
           retention-days: 30
       - name: Scan SBOM with Grype
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           sbom: sbom.cyclonedx.json
           fail-build: false
