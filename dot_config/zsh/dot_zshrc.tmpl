@@ -173,6 +173,10 @@ fi
 # Mise (Runtime Version Manager) - Replaces asdf/pyenv/nvm
 if command -v mise >/dev/null; then
   _cached_eval mise-init mise activate zsh
+  mise_shims="${MISE_SHIMS_DIR:-$HOME/.local/share/mise/shims}"
+  if [[ ":$PATH:" != *":${mise_shims}:"* ]]; then
+    export PATH="${mise_shims}:$PATH"
+  fi
 fi
 
 # FZF (Fuzzy Finder) - Cross-platform detection
