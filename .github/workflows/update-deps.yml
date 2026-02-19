@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -72,7 +72,10 @@ jobs:
           echo "Checking GitHub Actions..."
           for action in "actions/checkout" "actions/upload-artifact" "actions/cache"; do
             name=$(echo "$action" | cut -d'/' -f2)
-            current=$(grep -oP "${action}@v\K[0-9]+" .github/workflows/*.yml 2>/dev/null | sort -u | head -1 || echo "unknown")
+            current=$(grep -hE "uses: ${action}@.*# v[0-9]+" .github/workflows/*.yml 2>/dev/null | sed -E 's/.*# v([0-9]+).*/\1/' | sort -u | head -1 || true)
+            if [[ -z "$current" ]]; then
+              current="unknown"
+            fi
             latest=$(curl -s "https://api.github.com/repos/${action}/releases/latest" | jq -r '.tag_name' | sed 's/^v//')
             if [[ "$latest" != "$current" && "$latest" != "null" && -n "$current" ]]; then
               UPDATES="${UPDATES}${name}: v${current} -> v${latest}\n"
@@ -144,10 +147,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Setup Neovim
-        uses: rhysd/action-setup-vim@v1
+        uses: rhysd/action-setup-vim@19e3dd31a84dbc2c5445d65e9b363f616cab96c1 # v1
         with:
           neovim: true
           version: stable

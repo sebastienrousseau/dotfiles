@@ -249,7 +249,7 @@ verify_version_consistency() {
 
     # Extract all version references from the file
     local versions_in_file
-    versions_in_file=($(rg -o "v?$VERSION_PATTERN" "$file" | sort -u))
+    mapfile -t versions_in_file < <(rg -o "v?$VERSION_PATTERN" "$file" | sort -u)
 
     for version in "${versions_in_file[@]}"; do
       # Remove 'v' prefix if present for comparison

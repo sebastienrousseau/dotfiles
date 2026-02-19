@@ -28,7 +28,13 @@ for m in "${modules[@]}"; do
   flat="${flat//-/_}"
   base_u="${base//-/_}"
 
-  if rg -q "${base}|${base_u}|${flat}|test_.*${base}" "$TESTS_DIR/unit" -g "test_*.sh"; then
+  if command -v rg >/dev/null 2>&1; then
+    matcher=(rg -q "${base}|${base_u}|${flat}|test_.*${base}" "$TESTS_DIR/unit" -g "test_*.sh")
+  else
+    matcher=(grep -R -E -q "${base}|${base_u}|${flat}|test_.*${base}" "$TESTS_DIR/unit")
+  fi
+
+  if "${matcher[@]}"; then
     covered=$((covered + 1))
   else
     missing+=("$m")

@@ -13,7 +13,10 @@ case "$(uname -s)" in
     if command -v fdesetup >/dev/null; then
       status=$(fdesetup status || true)
       echo "$status"
-      echo "$status" | grep -qi "FileVault is On" && { ui_ok "FileVault" "On"; exit 0; }
+      echo "$status" | grep -qi "FileVault is On" && {
+        ui_ok "FileVault" "On"
+        exit 0
+      }
       ui_warn "FileVault" "appears to be off"
       exit 1
     else

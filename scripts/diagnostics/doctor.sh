@@ -13,16 +13,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
-# Colors (respect NO_COLOR: https://no-color.org)
-if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
-  GREEN='\033[0;32m'
-  RED='\033[0;31m'
-  YELLOW='\033[1;33m'
-  NC='\033[0m'
-else
-  GREEN='' RED='' YELLOW='' NC=''
-fi
-
 ui_init
 ui_header "Dotfiles Doctor"
 echo ""
@@ -31,8 +21,14 @@ Errors=0
 Warnings=0
 
 log_success() { ui_ok "$1" "${2:-}"; }
-log_fail() { ui_err "$1" "${2:-}"; Errors=$((Errors + 1)); }
-log_warn() { ui_warn "$1" "${2:-}"; Warnings=$((Warnings + 1)); }
+log_fail() {
+  ui_err "$1" "${2:-}"
+  Errors=$((Errors + 1))
+}
+log_warn() {
+  ui_warn "$1" "${2:-}"
+  Warnings=$((Warnings + 1))
+}
 
 # 1. Check Dependencies
 ui_header "Core Dependencies"

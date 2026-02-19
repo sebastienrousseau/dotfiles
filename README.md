@@ -143,6 +143,7 @@ Run `dot --help` or `dot <command> --help` for inline documentation.
 | `dot theme` | Switch terminal theme (dark/light) | UX |
 | `dot wallpaper` | Apply a wallpaper from your library | UX |
 | `dot keys` | Show keybindings catalog | UX |
+| `dot mcp` | Inspect MCP server security and configuration | UX |
 | `dot learn` | Interactive tour of tools (requires `gum`) | UX |
 | `dot fonts` | Install Nerd Fonts | UX |
 | `dot sandbox` | Launch a safe sandbox preview | Tools |

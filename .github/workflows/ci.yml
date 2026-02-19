@@ -29,6 +29,19 @@ on:
       - '.github/workflows/ci.yml'
       - '!**.md'
       - '!docs/**'
+  merge_group:
+    branches: [master]
+    paths:
+      - '**.sh'
+      - '**.tmpl'
+      - '.chezmoitemplates/**'
+      - 'dot_*/**'
+      - 'install/**'
+      - 'scripts/**'
+      - 'nix/**'
+      - '.github/workflows/ci.yml'
+      - '!**.md'
+      - '!docs/**'
   schedule:
     - cron: '0 6 * * 1'  # Weekly on Monday 6 AM UTC
   # Allow manual trigger for full CI
@@ -59,8 +72,8 @@ jobs:
       nix: ${{ steps.filter.outputs.nix }}
       config: ${{ steps.filter.outputs.config }}
     steps:
-      - uses: actions/checkout@v6
-      - uses: dorny/paths-filter@v3
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
         id: filter
         with:
           filters: |
@@ -90,19 +103,15 @@ jobs:
     needs: changes
     if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Cache tools
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.local/bin
           key: shell-tools-${{ runner.os }}-v3
       - name: Install tools
         run: |
-          sudo apt-get update && sudo apt-get install -y shellcheck ripgrep
-          if ! command -v shfmt &>/dev/null; then
-            curl -sS https://webi.sh/shfmt | sh
-          fi
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          sudo apt-get update && sudo apt-get install -y shellcheck ripgrep shfmt
       - name: Shellcheck (zero-warning policy)
         run: |
           # ZERO-WARNING POLICY: No exclusions except for CI-specific false positives
@@ -111,11 +120,11 @@ jobs:
           echo "Running shellcheck with zero-warning enforcement..."
 
           # Count warnings before filtering
-          rg --files -g "*.sh" | xargs shellcheck -f gcc > shellcheck_raw.log || true
+          rg --files -g "*.sh" -g "!scripts/tests/**" | xargs shellcheck -f gcc > shellcheck_raw.log || true
           TOTAL_ISSUES=$(wc -l < shellcheck_raw.log || echo 0)
 
           # Run with exclusions and fail on any remaining warnings
-          rg --files -g "*.sh" | xargs shellcheck -x -e SC1091 -e SC2030 -e SC2031 -f gcc
+          rg --files -g "*.sh" -g "!scripts/tests/**" | xargs shellcheck -x -e SC1091 -e SC2030 -e SC2031 -f gcc
 
           echo "Shellcheck completed. Total issues found: $TOTAL_ISSUES"
           echo "All remaining issues after exclusions must be fixed - zero warnings policy enforced."
@@ -134,9 +143,9 @@ jobs:
     needs: changes
     if: needs.changes.outputs.lua == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Cache Lua tools
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
             ~/.luarocks
@@ -173,11 +182,11 @@ jobs:
     timeout-minutes: 5
     # Always run secrets scan on PRs and pushes
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
       - name: Gitleaks (zero-tolerance secrets policy)
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Enforce strict exit on ANY secret detection
@@ -202,7 +211,7 @@ jobs:
     timeout-minutes: 8
     # Always run dependency audit
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Audit shell dependencies
         run: |
           echo "Auditing shell script external dependencies..."
@@ -250,11 +259,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
       - name: TruffleHog Scan
-        uses: trufflesecurity/trufflehog@v3.93.1
+        uses: trufflesecurity/trufflehog@7635b24fd512a2e817dd3e9dd661caaf035a079d # v3.93.1
         with:
           extra_args: --only-verified
 
@@ -263,20 +272,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Generate SBOM with Syft
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@28d71544de8eaf1b958d335707167c5f783590ad # v0
         with:
           format: cyclonedx-json
           output-file: sbom.cyclonedx.json
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: sbom
           path: sbom.cyclonedx.json
           retention-days: 30
       - name: Scan SBOM with Grype
-        uses: anchore/scan-action@v7
+        uses: anchore/scan-action@7037fa011853d5a11690026fb85feee79f4c946c # v7
         with:
           sbom: sbom.cyclonedx.json
           fail-build: false
@@ -289,9 +298,9 @@ jobs:
     # Only run link check on schedule or manual trigger (saves minutes)
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Lychee link checker
-        uses: lycheeverse/lychee-action@v2
+        uses: lycheeverse/lychee-action@a8c4c7cb88f0c7386610c35eb25108e448569cb0 # v2
         with:
           args: >-
             --verbose --no-progress
@@ -312,16 +321,16 @@ jobs:
     needs: changes
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Cache Chezmoi
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.local/bin/chezmoi
           key: chezmoi-Linux-${{ env.CHEZMOI_VERSION }}
       - name: Setup Chezmoi
         run: |
           if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
-            sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -t v${{ env.CHEZMOI_VERSION }}
+            bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
           fi
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Init & Dry Run
@@ -330,7 +339,7 @@ jobs:
           chezmoi apply --verbose --dry-run
       - name: Upload logs on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: logs-test-linux
           path: ~/.local/share/chezmoi/.log
@@ -344,16 +353,16 @@ jobs:
     # Only run macOS tests on schedule or manual trigger (expensive)
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Cache Chezmoi
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.local/bin/chezmoi
           key: chezmoi-macOS-${{ env.CHEZMOI_VERSION }}
       - name: Setup Chezmoi
         run: |
           if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
-            sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -t v${{ env.CHEZMOI_VERSION }}
+            bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
           fi
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Init & Dry Run
@@ -362,7 +371,7 @@ jobs:
           chezmoi apply --verbose --dry-run
       - name: Upload logs on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: logs-test-macos
           path: ~/.local/share/chezmoi/.log
@@ -380,7 +389,7 @@ jobs:
       matrix:
         distro: [ubuntu]  # Reduced from [ubuntu, debian] - debian is similar
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Test in container
         run: |
           docker run --rm -v "${GITHUB_WORKSPACE}:/root/.local/share/chezmoi" ${{ matrix.distro }}:latest bash -c "
@@ -389,7 +398,8 @@ jobs:
             export PATH=\"/root/.local/bin:\$PATH\"
             apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates
             ln -s /root/.local/share/chezmoi /root/.dotfiles
-            sh -c \"\$(curl -fsLS get.chezmoi.io)\" -- -t v${{ env.CHEZMOI_VERSION }} init --promptDefaults --no-tty --source /root/.local/share/chezmoi
+            bash /root/.local/share/chezmoi/scripts/ci/install-chezmoi-verified.sh \"${{ env.CHEZMOI_VERSION }}\" \"/root/.local/bin\"
+            chezmoi init --promptDefaults --no-tty --source /root/.local/share/chezmoi
             DOTFILES_NONINTERACTIVE=1 chezmoi apply --exclude=scripts --force --no-tty
             echo 'Chezmoi applied successfully'
           "
@@ -401,7 +411,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Run tests
         run: |
           chmod +x scripts/tests/framework/*.sh
@@ -415,7 +425,13 @@ jobs:
           ./scripts/tests/framework/test_runner.sh 2>&1 | tee test_output.log
 
           # Extract test results
-          FAILED_TESTS=$(grep "Total failed:" test_output.log | awk '{print $3}' || echo 0)
+          FAILED_TESTS=$(
+            grep -a "Total failed:" test_output.log \
+              | tail -1 \
+              | sed -E 's/\x1b\[[0-9;]*m//g' \
+              | sed -E 's/.*Total failed:[[:space:]]*([0-9]+).*/\1/' \
+              || echo 0
+          )
 
           # 100% success rate required (fail-under 100%)
           if [[ "$FAILED_TESTS" -gt 0 ]]; then
@@ -427,6 +443,7 @@ jobs:
           echo "✅ All tests passed - 100% success rate maintained"
       - name: Enforce module coverage (>=95%)
         run: |
+          sudo apt-get update && sudo apt-get install -y ripgrep
           chmod +x scripts/tests/framework/module_coverage.sh
           MIN_COVERAGE=95 ./scripts/tests/framework/module_coverage.sh
       - name: Integration tests
@@ -435,7 +452,13 @@ jobs:
           RUN_INTEGRATION=1 ./scripts/tests/framework/test_runner.sh 2>&1 | tee integration_output.log
 
           # Check integration test results
-          INTEGRATION_FAILED=$(grep "Total failed:" integration_output.log | awk '{print $3}' || echo 0)
+          INTEGRATION_FAILED=$(
+            grep -a "Total failed:" integration_output.log \
+              | tail -1 \
+              | sed -E 's/\x1b\[[0-9;]*m//g' \
+              | sed -E 's/.*Total failed:[[:space:]]*([0-9]+).*/\1/' \
+              || echo 0
+          )
           if [[ "$INTEGRATION_FAILED" -gt 0 ]]; then
             echo "❌ Integration tests failed: $INTEGRATION_FAILED failures"
             exit 1
@@ -454,10 +477,10 @@ jobs:
     # Only run on full CI (schedule/manual) - idempotency is expensive
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Setup Chezmoi
         run: |
-          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -t v${{ env.CHEZMOI_VERSION }}
+          bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           mkdir -p "$HOME/.config/chezmoi"
           echo "sourceDir = \"$GITHUB_WORKSPACE\"" > "$HOME/.config/chezmoi/chezmoi.toml"
@@ -479,9 +502,9 @@ jobs:
     needs: [changes]
     if: needs.changes.outputs.nix == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v6
-      - uses: DeterminateSystems/nix-installer-action@v21
-      - uses: DeterminateSystems/magic-nix-cache-action@v13
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a # v21
+      - uses: DeterminateSystems/magic-nix-cache-action@565684385bcd71bad329742eefe8d12f2e765b39 # v13
       - name: Flake check
         run: nix flake check ./nix
 
@@ -496,14 +519,14 @@ jobs:
     # Only run benchmarks on schedule or manual trigger
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y zsh hyperfine jq
 
       - name: Setup Chezmoi
         run: |
-          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -t v${{ env.CHEZMOI_VERSION }}
+          bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           mkdir -p "$HOME/.config/chezmoi"
           echo "sourceDir = \"$GITHUB_WORKSPACE\"" > "$HOME/.config/chezmoi/chezmoi.toml"
@@ -572,7 +595,7 @@ jobs:
           fi
 
       - name: Upload benchmark results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: benchmark-results-${{ github.sha }}
           path: benchmark-results/
@@ -580,7 +603,7 @@ jobs:
 
       - name: Comment on PR with benchmark results
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
             const time_ms = '${{ steps.benchmark.outputs.time_ms }}';

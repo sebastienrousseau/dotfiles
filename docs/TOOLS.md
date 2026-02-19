@@ -123,6 +123,7 @@ These are the main tools and CLI conveniences included with Dotfiles.
 - DNS-over-HTTPS (Linux)
 - Lock-screen enforcement
 - Encryption checks
+- MCP configuration diagnostics (`dot mcp doctor`)
 
 ## Aliases
 

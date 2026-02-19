@@ -26,7 +26,7 @@ fi
 
 # Test: defines help command
 test_start "meta_defines_help"
-if grep -qE "cmd_docs|cmd_learn|cmd_keys|cmd_upgrade|cmd_sandbox" "$META_FILE" 2>/dev/null; then
+if grep -qE "cmd_docs|cmd_learn|cmd_keys|cmd_upgrade|cmd_sandbox|cmd_mcp" "$META_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines meta command functions"
 else
@@ -36,7 +36,7 @@ fi
 
 # Test: defines version command
 test_start "meta_defines_version"
-if grep -qE "case .*\\{1,\\}|upgrade\\)|docs\\)|learn\\)|keys\\)|sandbox\\)" "$META_FILE" 2>/dev/null; then
+if grep -qE "case .*\\{1,\\}|upgrade\\)|docs\\)|learn\\)|keys\\)|sandbox\\)|mcp\\)" "$META_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines dispatch cases"
 else
@@ -46,7 +46,7 @@ fi
 
 # Test: defines log-rotate command
 test_start "meta_defines_log_rotate"
-if grep -qE "cmd_upgrade|cmd_docs|cmd_learn|cmd_keys|cmd_sandbox" "$META_FILE" 2>/dev/null; then
+if grep -qE "cmd_upgrade|cmd_docs|cmd_learn|cmd_keys|cmd_sandbox|cmd_mcp" "$META_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: command handlers present"
 else

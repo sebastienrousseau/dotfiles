@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Dotfiles CLI - Meta Commands
-# upgrade, docs, learn, keys, sandbox
+# upgrade, docs, learn, keys, sandbox, mcp
 
 set -euo pipefail
 
@@ -90,6 +90,20 @@ cmd_sandbox() {
   fi
 }
 
+cmd_mcp() {
+  local subcommand="${1:-doctor}"
+  shift || true
+  case "$subcommand" in
+    doctor)
+      run_script "scripts/diagnostics/mcp-doctor.sh" "MCP doctor script" "$@"
+      ;;
+    *)
+      echo "Usage: dot mcp [doctor]" >&2
+      exit 1
+      ;;
+  esac
+}
+
 # Dispatch
 case "${1:-}" in
   upgrade)
@@ -111,6 +125,10 @@ case "${1:-}" in
   sandbox)
     shift
     cmd_sandbox "$@"
+    ;;
+  mcp)
+    shift
+    cmd_mcp "$@"
     ;;
   *)
     echo "Unknown meta command: ${1:-}" >&2

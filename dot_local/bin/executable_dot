@@ -81,6 +81,7 @@ show_help() {
     cmd_line "new" "Create a new project from a template"
     cmd_line "sandbox" "Launch a safe sandbox preview (Docker/Podman)"
     cmd_line "keys" "Show keybindings catalog"
+    cmd_line "mcp" "Inspect MCP server security and configuration"
     cmd_line "learn" "Start the interactive tour of your new tools"
     cmd_line "docs" "Show repo README"
     cmd_line "log-rotate" "Rotate ~/.local/share/dotfiles.log"
@@ -142,6 +143,7 @@ Tools:
   new         Create a new project from a template
   sandbox     Launch a safe sandbox preview (Docker/Podman)
   keys        Show keybindings catalog
+  mcp         Inspect MCP server security and configuration
   learn       Start the interactive tour of your new tools
   docs        Show repo README
   log-rotate  Rotate ~/.local/share/dotfiles.log
@@ -248,7 +250,7 @@ case "$COMMAND" in
     ;;
 
   # Meta
-  upgrade|docs|learn|keys|sandbox)
+  upgrade|docs|learn|keys|sandbox|mcp)
     dispatch "meta" "$COMMAND" "$@"
     ;;
 

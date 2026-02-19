@@ -10,6 +10,118 @@ source "$SCRIPT_DIR/../lib/utils.sh"
 
 ui_logo_once "Dot • Tools"
 
+ensure_line_in_file() {
+  local file="$1"
+  local line="$2"
+  if ! grep -Fqx "$line" "$file" 2>/dev/null; then
+    printf "%s\n" "$line" >>"$file"
+  fi
+}
+
+apply_template_security_baseline() {
+  local dest="$1"
+  local template_lang="$2"
+
+  # Baseline repo hygiene defaults
+  if [[ ! -f "$dest/.editorconfig" ]]; then
+    cat >"$dest/.editorconfig" <<'EOF'
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = true
+EOF
+  fi
+
+  if [[ ! -f "$dest/.gitattributes" ]]; then
+    cat >"$dest/.gitattributes" <<'EOF'
+* text=auto eol=lf
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+EOF
+  fi
+
+  if [[ ! -f "$dest/.gitignore" ]]; then
+    : >"$dest/.gitignore"
+  fi
+  ensure_line_in_file "$dest/.gitignore" ".env"
+  ensure_line_in_file "$dest/.gitignore" ".env.*"
+  ensure_line_in_file "$dest/.gitignore" "*.pem"
+  ensure_line_in_file "$dest/.gitignore" "*.key"
+  ensure_line_in_file "$dest/.gitignore" "*.p12"
+  ensure_line_in_file "$dest/.gitignore" "*.agekey"
+
+  if [[ ! -f "$dest/SECURITY.md" ]]; then
+    cat >"$dest/SECURITY.md" <<'EOF'
+# Security Policy
+
+## Reporting
+
+Do not disclose vulnerabilities publicly before a fix is available.
+Open a private security advisory or contact maintainers directly.
+
+## Baseline Controls
+
+- No secrets in source control.
+- Use environment variables for API keys/tokens.
+- Keep dependencies and lockfiles up to date.
+- Enable secret scanning in CI.
+EOF
+  fi
+
+  mkdir -p "$dest/.github/workflows"
+  if [[ ! -f "$dest/.github/workflows/security.yml" ]]; then
+    cat >"$dest/.github/workflows/security.yml" <<'EOF'
+name: Security Baseline
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: trufflesecurity/trufflehog@6961f2bace57ab32b23b3ba40f8f420f6bc7e004 # v3.93.3
+        with:
+          extra_args: --only-verified
+EOF
+  fi
+
+  # Best-effort lockfile generation to improve reproducibility.
+  case "$template_lang" in
+    node)
+      if has_command npm && [[ -f "$dest/package.json" ]] && [[ ! -f "$dest/package-lock.json" ]]; then
+        (cd "$dest" && npm install --package-lock-only --ignore-scripts --silent >/dev/null 2>&1) || true
+      fi
+      ;;
+    python)
+      if has_command uv && [[ -f "$dest/pyproject.toml" ]] && [[ ! -f "$dest/uv.lock" ]]; then
+        (cd "$dest" && uv lock >/dev/null 2>&1) || true
+      fi
+      ;;
+    go)
+      if has_command go && [[ -f "$dest/go.mod" ]]; then
+        (cd "$dest" && go mod tidy >/dev/null 2>&1) || true
+      fi
+      ;;
+  esac
+}
+
 show_system_package_managers() {
   if has_command brew; then
     local brew_version brew_formulae brew_casks
@@ -87,7 +199,8 @@ cmd_tools() {
       ui_err "Nix" "not installed"
       echo ""
       ui_header "Install Nix"
-      echo "  curl -L https://nixos.org/nix/install | sh"
+      echo "  Follow the verified installer instructions:"
+      echo "  https://nixos.org/download/"
       echo ""
       ui_info "Or" "use Homebrew/apt for individual tools"
       exit 1
@@ -193,6 +306,8 @@ with open(path, "w", encoding="utf-8") as f:
     f.write(data)
 PY
   done
+
+  apply_template_security_baseline "$dest" "$template_lang"
 
   echo "Created $template_lang project at $dest"
 }

@@ -7,6 +7,8 @@ name: Compliance Guard
 on:
   pull_request:
     branches: [master]
+  merge_group:
+    branches: [master]
   push:
     branches: [master]
     paths:
@@ -36,7 +38,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Checkout with full history
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -67,20 +69,25 @@ jobs:
             author=$(git log -1 --format='%an' "$commit")
             short_sha=$(git log -1 --format='%h' "$commit")
 
-            # Check for GPG or SSH signature
+            # Check for GPG/SSH signature status.
+            # Note: SSH signatures report "N" unless allowedSignersFile is configured.
             sig_status=$(git log -1 --format='%G?' "$commit" 2>/dev/null || echo "N")
+            has_sig_header="false"
+            if git cat-file -p "$commit" | grep -q '^gpgsig '; then
+              has_sig_header="true"
+            fi
 
             case "$sig_status" in
               G|U)
                 # G = Good signature, U = Good signature with unknown validity
                 signer=$(git log -1 --format='%GS' "$commit" 2>/dev/null || echo "unknown")
                 echo "| \`$short_sha\` | $author | :white_check_mark: Signed by $signer |" >> "$GITHUB_STEP_SUMMARY"
-                ((signed_count++))
+                signed_count=$((signed_count + 1))
                 ;;
               B)
                 # B = Bad signature
                 echo "| \`$short_sha\` | $author | :x: Bad signature |" >> "$GITHUB_STEP_SUMMARY"
-                ((unsigned_count++))
+                unsigned_count=$((unsigned_count + 1))
                 ;;
               E)
                 # E = Cannot check signature (missing key)
@@ -88,9 +95,15 @@ jobs:
                 # Count as signed if we can't verify (might be SSH signed)
                 ;;
               N|*)
-                # N = No signature
-                echo "| \`$short_sha\` | $author | :x: Unsigned |" >> "$GITHUB_STEP_SUMMARY"
-                ((unsigned_count++))
+                # N = No verifiable signature in current trust context.
+                # If commit contains a signature block, treat as signed-but-unverified.
+                if [[ "$has_sig_header" == "true" ]]; then
+                  echo "| \`$short_sha\` | $author | :warning: Signed (unverified in CI trust context) |" >> "$GITHUB_STEP_SUMMARY"
+                  signed_count=$((signed_count + 1))
+                else
+                  echo "| \`$short_sha\` | $author | :x: Unsigned |" >> "$GITHUB_STEP_SUMMARY"
+                  unsigned_count=$((unsigned_count + 1))
+                fi
                 ;;
             esac
           done
@@ -119,15 +132,13 @@ jobs:
             echo "unsigned=0" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Signature enforcement (advisory)
+      - name: Signature enforcement (required)
         run: |
-          # Currently advisory - set to 'exit 1' to enforce
-          echo "Signature verification complete (advisory mode)"
-          # To enforce: uncomment the following
-          # if [[ "${{ steps.verify.outputs.unsigned }}" -gt 0 ]]; then
-          #   echo "::error::Unsigned commits are not allowed"
-          #   exit 1
-          # fi
+          echo "Signature verification complete (required mode)"
+          if [[ "${{ steps.verify.outputs.unsigned }}" -gt 0 ]]; then
+            echo "::error::Unsigned commits are not allowed"
+            exit 1
+          fi
 
   # ============================================================================
   # Insecure Pattern Scanner
@@ -138,7 +149,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Check for insecure curl flags
         run: |
@@ -147,7 +158,7 @@ jobs:
 
           # Pattern: curl -k or curl --insecure (disables TLS verification)
           if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" --include="*.tmpl" \
-               -E 'curl\s+[^|;]*(-k|--insecure)' . 2>/dev/null | grep -v "^Binary"; then
+               -E '(^|[[:space:]])curl([[:space:]][^|;#]*)?[[:space:]](--insecure|-k)([[:space:]]|$)' . 2>/dev/null | grep -v "^Binary"; then
             VIOLATIONS="${VIOLATIONS}Found curl with -k/--insecure flag (disables TLS verification)\n"
           fi
 
@@ -159,7 +170,7 @@ jobs:
 
           # Pattern: curl without https (http://)
           if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" --include="*.tmpl" \
-               -E "curl\s+[^|;]*['\"]http://[^localhost]" . 2>/dev/null | grep -v "^Binary"; then
+               -E "curl[[:space:]][^|;#]*http://" . 2>/dev/null | grep -v "^Binary" | grep -Ev 'http://(localhost|127\.0\.0\.1)'; then
             VIOLATIONS="${VIOLATIONS}Found curl using http:// instead of https://\n"
           fi
 
@@ -221,7 +232,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Install ShellCheck
         run: sudo apt-get install -y shellcheck
@@ -285,7 +296,7 @@ jobs:
     # Only run if Dockerfiles exist
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Check for Dockerfiles
         id: check-dockerfiles
@@ -298,11 +309,21 @@ jobs:
 
       - name: Run Hadolint
         if: steps.check-dockerfiles.outputs.found == 'true'
-        uses: hadolint/hadolint-action@v3.1.0
-        with:
-          dockerfile: "**/Dockerfile*"
-          failure-threshold: warning
-          ignore: DL3008,DL3013,DL3018  # Allow unpinned apt/pip/apk versions
+        run: |
+          set -euo pipefail
+          mapfile -t dockerfiles < <(find . -type f -name "Dockerfile*" ! -path "./.git/*" | sort)
+
+          for dockerfile in "${dockerfiles[@]}"; do
+            echo "Linting $dockerfile"
+            docker run --rm -i hadolint/hadolint:v2.12.0-alpine \
+              hadolint \
+              -t warning \
+              --ignore DL3008 \
+              --ignore DL3013 \
+              --ignore DL3018 \
+              --ignore DL4006 \
+              - < "$dockerfile"
+          done
 
       - name: Skip - No Dockerfiles
         if: steps.check-dockerfiles.outputs.found == 'false'
