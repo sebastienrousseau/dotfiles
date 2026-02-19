@@ -98,10 +98,14 @@ cmd_tools() {
       ui_err "Nix flake" "not found in source directory"
       exit 1
     fi
-  elif [ -n "$src_dir" ] && [ -f "$src_dir/docs/TOOLS.md" ]; then
-    exec cat "$src_dir/docs/TOOLS.md"
-  elif [ -n "$src_dir" ] && [ -f "$src_dir/docs/UTILS.md" ]; then
-    exec cat "$src_dir/docs/UTILS.md"
+  elif [ "$subcommand" = "docs" ]; then
+    if [ -n "$src_dir" ] && [ -f "$src_dir/docs/TOOLS.md" ]; then
+      exec cat "$src_dir/docs/TOOLS.md"
+    elif [ -n "$src_dir" ] && [ -f "$src_dir/docs/UTILS.md" ]; then
+      exec cat "$src_dir/docs/UTILS.md"
+    fi
+    ui_err "Docs" "TOOLS.md not found"
+    exit 1
   else
     ui_header "Dot Tools"
     echo ""
@@ -110,6 +114,7 @@ cmd_tools() {
     ui_header "Commands"
     ui_ok "(none)" "Show tools documentation"
     ui_ok "install" "Enter Nix development shell with all tools"
+    ui_ok "docs" "Show full tools markdown documentation"
     echo ""
     ui_header "Quick Reference"
     ui_ok "dot sync" "Apply dotfiles"

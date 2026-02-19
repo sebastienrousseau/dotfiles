@@ -52,7 +52,15 @@ cmd_diff() {
 }
 
 cmd_status() {
-  exec chezmoi status "$@"
+  local out
+  out="$(chezmoi status "$@" || true)"
+  if [[ -z "$out" ]]; then
+    ui_header "Dotfiles Status"
+    ui_ok "Clean" "no local drift detected"
+  else
+    ui_header "Dotfiles Status"
+    printf "%s\n" "$out"
+  fi
 }
 
 cmd_remove() {

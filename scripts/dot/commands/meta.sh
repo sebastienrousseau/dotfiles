@@ -61,8 +61,8 @@ cmd_keys() {
   src_dir="$(resolve_source_dir)"
 
   if [ -n "$src_dir" ] && [ -f "$src_dir/docs/KEYS.md" ]; then
-    if [ -n "$1" ]; then
-      rg -i --fixed-strings --context 1 "$1" "$src_dir/docs/KEYS.md" || true
+    if [ -n "${1:-}" ]; then
+      rg -i --fixed-strings --context 1 "${1:-}" "$src_dir/docs/KEYS.md" || true
     else
       exec cat "$src_dir/docs/KEYS.md"
     fi
