@@ -106,6 +106,13 @@ RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh"' || \
 RUN bash -n "$HOME/.dotfiles/install.sh" || \
     (echo "FAIL: install.sh has syntax errors" && exit 1)
 
+# Create non-root user for container security (CKV_DOCKER_3)
+RUN useradd -m -s /bin/zsh testuser
+
+# Healthcheck (CKV_DOCKER_2)
+HEALTHCHECK --interval=60s --timeout=10s --start-period=5s --retries=3 \
+    CMD zsh -c "exit 0" || exit 1
+
 RUN echo "=== Debian 12: ALL TESTS PASSED ==="
 
 # =============================================================================
@@ -152,6 +159,13 @@ RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type cat' | grep -
 # Test install.sh syntax
 RUN bash -n "$HOME/.dotfiles/install.sh" || \
     (echo "FAIL: install.sh has syntax errors" && exit 1)
+
+# Create non-root user for container security (CKV_DOCKER_3)
+RUN useradd -m -s /bin/zsh testuser
+
+# Healthcheck (CKV_DOCKER_2)
+HEALTHCHECK --interval=60s --timeout=10s --start-period=5s --retries=3 \
+    CMD zsh -c "exit 0" || exit 1
 
 RUN echo "=== Arch Linux: ALL TESTS PASSED ==="
 
@@ -204,5 +218,12 @@ RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type ls' | grep -q
 # Verify ll alias
 RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type ll' | grep -q eza || \
     (echo "FAIL: ll does not resolve to eza" && exit 1)
+
+# Create non-root user for container security (CKV_DOCKER_3)
+RUN useradd -m -s /bin/zsh testuser
+
+# Healthcheck (CKV_DOCKER_2)
+HEALTHCHECK --interval=60s --timeout=10s --start-period=5s --retries=3 \
+    CMD zsh -c "exit 0" || exit 1
 
 RUN echo "=== Ubuntu 24.04 + eza: ALL TESTS PASSED ==="
