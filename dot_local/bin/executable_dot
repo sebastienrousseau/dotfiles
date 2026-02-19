@@ -32,10 +32,10 @@ show_help() {
   if command -v gum >/dev/null 2>&1 && [[ -t 1 ]]; then
     gum style --foreground 212 --bold "Dotfiles CLI"
     printf "\n"
-    gum style --bold "Usage"
+    gum style --foreground 212 --bold "Usage"
     printf "  %s\n\n" "$(gum style --foreground 2 "dot") [command]"
 
-    gum style --bold "Core Commands"
+    gum style --foreground 212 --bold "Core Commands"
     printf "  %-10s %s\n" "$(gum style --foreground 2 apply)" "Apply dotfiles (chezmoi apply)"
     printf "  %-10s %s\n" "$(gum style --foreground 2 sync)" "Apply dotfiles (alias of apply)"
     printf "  %-10s %s\n" "$(gum style --foreground 2 update)" "Pull latest changes and apply them (chezmoi update)"
@@ -47,7 +47,7 @@ show_help() {
     printf "  %-10s %s\n" "$(gum style --foreground 2 edit)" "Open chezmoi source in \$EDITOR"
     printf "\n"
 
-    gum style --bold "Diagnostics"
+    gum style --foreground 212 --bold "Diagnostics"
     printf "  %-15s %s\n" "$(gum style --foreground 2 doctor)" "Check system health and configuration"
     printf "  %-15s %s\n" "$(gum style --foreground 2 heal)" "Auto-repair common dotfiles issues"
     printf "  %-15s %s\n" "$(gum style --foreground 2 health)" "Run comprehensive health dashboard"
@@ -59,7 +59,7 @@ show_help() {
     printf "  %-15s %s\n" "$(gum style --foreground 2 benchmark)" "Run shell startup benchmark (--detailed, --profile)"
     printf "\n"
 
-    gum style --bold "Tools"
+    gum style --foreground 212 --bold "Tools"
     printf "  %-10s %s\n" "$(gum style --foreground 2 tools)" "Show or install nix packages (dot tools [install])"
     printf "  %-10s %s\n" "$(gum style --foreground 2 new)" "Create a new project from a template"
     printf "  %-10s %s\n" "$(gum style --foreground 2 sandbox)" "Launch a safe sandbox preview (Docker/Podman)"
@@ -69,21 +69,21 @@ show_help() {
     printf "  %-10s %s\n" "$(gum style --foreground 2 log-rotate)" "Rotate ~/.local/share/dotfiles.log"
     printf "\n"
 
-    gum style --bold "Appearance"
+    gum style --foreground 212 --bold "Appearance"
     printf "  %-10s %s\n" "$(gum style --foreground 2 theme)" "Switch terminal theme (dark/light)"
     printf "  %-10s %s\n" "$(gum style --foreground 2 wallpaper)" "Apply a wallpaper from your library"
     printf "  %-10s %s\n" "$(gum style --foreground 2 fonts)" "Install Nerd Fonts (JetBrainsMono by default)"
     printf "  %-10s %s\n" "$(gum style --foreground 2 tune)" "Apply OS tuning (opt-in)"
     printf "\n"
 
-    gum style --bold "Secrets"
+    gum style --foreground 212 --bold "Secrets"
     printf "  %-15s %s\n" "$(gum style --foreground 2 secrets-init)" "Initialize age key for secrets"
     printf "  %-15s %s\n" "$(gum style --foreground 2 secrets)" "Edit encrypted secrets (age)"
     printf "  %-15s %s\n" "$(gum style --foreground 2 secrets-create)" "Create an encrypted secrets file"
     printf "  %-15s %s\n" "$(gum style --foreground 2 ssh-key)" "Encrypt an SSH key locally with age"
     printf "\n"
 
-    gum style --bold "Security (opt-in)"
+    gum style --foreground 212 --bold "Security (opt-in)"
     printf "  %-12s %s\n" "$(gum style --foreground 2 backup)" "Create a compressed backup of your home"
     printf "  %-12s %s\n" "$(gum style --foreground 2 encrypt-check)" "Check disk encryption status"
     printf "  %-12s %s\n" "$(gum style --foreground 2 firewall)" "Apply firewall hardening"
@@ -93,7 +93,7 @@ show_help() {
     printf "  %-12s %s\n" "$(gum style --foreground 2 usb-safety)" "Disable automount for removable media"
     printf "\n"
 
-    gum style --bold "Meta"
+    gum style --foreground 212 --bold "Meta"
     printf "  %-10s %s\n" "$(gum style --foreground 2 upgrade)" "Update flake, plugins, and dotfiles"
     printf "  %-10s %s\n" "$(gum style --foreground 2 packages)" "List installed packages and package managers"
     printf "  %-10s %s\n" "$(gum style --foreground 2 -- --version)" "Show version information"
