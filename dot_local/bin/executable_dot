@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Dotfiles CLI Entry Point - v0.2.483
+# Dotfiles CLI Entry Point - v0.2.484
 # Modular architecture with command handlers in scripts/dot/commands/
 
 set -e
 
-VERSION="0.2.483"
+VERSION="0.2.484"
 
 COMMAND="$1"
 if [ -n "$1" ]; then

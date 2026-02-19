@@ -2,6 +2,18 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.484
+
+### Fixed
+
+- **`dot tools` output** — Default `dot tools` now renders styled CLI output instead of dumping raw markdown.
+- **`dot status` visibility** — `dot status` now shows a styled `Clean` state when no drift is present.
+- **`dot keys` arg handling** — Fixed strict-mode unbound variable failure when no search argument is passed.
+
+### Changed
+
+- **Release synchronization** — Updated README/docs/version references to `v0.2.484` so the published release includes the latest command UX fixes.
+
 ## v0.2.483
 
 ### Added

@@ -1,6 +1,6 @@
 # How it works
 
-v0.2.483 constitutes a portable **shell distribution** that `chezmoi` manages. This document outlines the core architectural decisions and system design.
+v0.2.484 constitutes a portable **shell distribution** that `chezmoi` manages. This document outlines the core architectural decisions and system design.
 
 ## Core philosophy
 
@@ -217,7 +217,7 @@ Dotfiles replaces legacy Unix tools with high-performance Rust alternatives:
 
 - **Hardened defaults**: Shell scripts run with `set -euo pipefail` to fail fast.
 - **Supply chain safety**:
-  - **Pinned installation**: Installers reference specific Git tags (for example, `v0.2.483`), not `main`.
+  - **Pinned installation**: Installers reference specific Git tags (for example, `v0.2.484`), not `main`.
   - **Immutable history**: All logic stays version-controlled and reviewable through `chezmoi diff`.
 - **Audit logging**: Dotfiles logs all mutations to `~/.local/share/dotfiles.log`.
 - **Encryption**: `age` encrypts all sensitive data.

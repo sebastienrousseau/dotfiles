@@ -73,15 +73,15 @@ The system recognizes and updates these patterns:
 
 #### README.md
 ```markdown
-[![Version](https://img.shields.io/badge/Version-v0.2.483-blue?style=for-the-badge)]
+[![Version](https://img.shields.io/badge/Version-v0.2.484-blue?style=for-the-badge)]
 ```
 
 #### Documentation Files
 ```markdown
-**Version**: v0.2.483
-**Dotfiles Version**: v0.2.483
-Version: v0.2.483
-version 0.2.483
+**Version**: v0.2.484
+**Dotfiles Version**: v0.2.484
+Version: v0.2.484
+version 0.2.484
 ```
 
 ## Integration Points
@@ -115,7 +115,7 @@ Version changes in `package.json` automatically trigger synchronization:
 ```json
 {
   "name": "@sebastienrousseau/dotfiles",
-  "version": "0.2.483",  // Changes here trigger sync
+  "version": "0.2.484",  // Changes here trigger sync
   "scripts": {
     "version-sync": "./scripts/version-sync.sh",
     "version-verify": "./scripts/version-sync.sh --verify"
@@ -339,6 +339,6 @@ gh workflow run sync-versions.yml --ref feature-branch
 ---
 
 **Last Updated**: 2026-02-15
-**Version**: v0.2.483
+**Version**: v0.2.484
 **Maintainer**: Principal Automation Engineer
 **Status**: Production Ready ✅
