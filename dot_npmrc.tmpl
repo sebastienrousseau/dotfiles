@@ -1,0 +1,46 @@
+# npm configuration
+# Managed by chezmoi - edit source at ~/.dotfiles/dot_npmrc.tmpl
+
+# Global packages location (keep out of system directories)
+prefix={{ .chezmoi.homeDir }}/.node_modules
+
+# Registry (default)
+registry=https://registry.npmjs.org/
+
+# Scoped registries (uncomment and configure as needed)
+# @mycompany:registry=https://npm.mycompany.com/
+# @github:registry=https://npm.pkg.github.com/
+
+# Security
+audit=true
+audit-level=moderate
+
+# Performance
+prefer-offline=true
+progress=false
+
+# Behavior
+save-exact=true
+engine-strict=false
+fund=false
+
+# Init defaults
+init-author-name={{ .chezmoi.username }}
+init-license=MIT
+init-version=0.1.0
+
+# Authentication tokens (configured via chezmoi secrets)
+# To set tokens, add them to ~/.config/chezmoi/chezmoi.toml:
+#   [data]
+#   npm_token = "npm_xxxx"
+#   github_npm_token = "ghp_xxxx"
+
+{{- if hasKey . "npm_token" }}
+# npm registry auth token
+//registry.npmjs.org/:_authToken={{ .npm_token }}
+{{- end }}
+
+{{- if hasKey . "github_npm_token" }}
+# GitHub Packages auth token
+//npm.pkg.github.com/:_authToken={{ .github_npm_token }}
+{{- end }}

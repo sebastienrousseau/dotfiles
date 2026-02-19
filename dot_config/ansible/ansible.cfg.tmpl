@@ -1,0 +1,11 @@
+[defaults]
+inventory = ./inventory
+retry_files_enabled = False
+host_key_checking = False
+stdout_callback = yaml
+nocows = 1
+
+[privilege_escalation]
+become = True
+become_method = sudo
+become_ask_pass = False

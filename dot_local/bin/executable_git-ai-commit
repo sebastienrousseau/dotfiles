@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+# git-ai-commit - Generate commit messages using AI
+# Managed by chezmoi - https://github.com/sebastienrousseau/dotfiles
+#
+# Usage: git ai-commit [--provider <provider>] [--edit]
+#   --provider: claude, gemini, sgpt, ollama (auto-detected if not specified)
+#   --edit: Open editor to modify the generated message before committing
+
+set -euo pipefail
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+EDIT_MODE=false
+PROVIDER=""
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --provider|-p)
+      PROVIDER="$2"
+      shift 2
+      ;;
+    --edit|-e)
+      EDIT_MODE=true
+      shift
+      ;;
+    --help|-h)
+      echo "Usage: git ai-commit [--provider <provider>] [--edit]"
+      echo ""
+      echo "Options:"
+      echo "  --provider, -p  AI provider: claude, gemini, sgpt, ollama, aider"
+      echo "  --edit, -e      Open editor to modify generated message"
+      echo ""
+      echo "Environment:"
+      echo "  GIT_AI_PROVIDER  Default AI provider"
+      exit 0
+      ;;
+    *)
+      echo -e "${RED}Unknown option: $1${NC}"
+      exit 1
+      ;;
+  esac
+done
+
+# Auto-detect provider if not specified
+detect_provider() {
+  if [[ -n "${GIT_AI_PROVIDER:-}" ]]; then
+    echo "$GIT_AI_PROVIDER"
+  elif command -v claude >/dev/null 2>&1; then
+    echo "claude"
+  elif command -v aider >/dev/null 2>&1; then
+    echo "aider"
+  elif command -v gemini >/dev/null 2>&1; then
+    echo "gemini"
+  elif command -v sgpt >/dev/null 2>&1; then
+    echo "sgpt"
+  elif command -v ollama >/dev/null 2>&1; then
+    echo "ollama"
+  else
+    echo ""
+  fi
+}
+
+PROVIDER="${PROVIDER:-$(detect_provider)}"
+
+if [[ -z "$PROVIDER" ]]; then
+  echo -e "${RED}Error: No AI provider found. Install claude, gemini, sgpt, aider, or ollama.${NC}"
+  exit 1
+fi
+
+# Check if there are staged changes
+if ! git diff --cached --quiet; then
+  DIFF=$(git diff --cached --stat)
+  DIFF_CONTENT=$(git diff --cached)
+else
+  echo -e "${YELLOW}No staged changes. Stage changes with 'git add' first.${NC}"
+  exit 1
+fi
+
+echo -e "${BLUE}Generating commit message using ${PROVIDER}...${NC}"
+
+# Prompt for commit message generation
+PROMPT="Generate a concise, conventional commit message for the following git diff.
+
+Rules:
+1. Use conventional commits format: type(scope): description
+2. Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore
+3. Keep the first line under 72 characters
+4. Add a blank line and bullet points for details if needed
+5. Focus on WHAT changed and WHY, not HOW
+
+Diff summary:
+$DIFF
+
+Diff content:
+$DIFF_CONTENT
+
+Return ONLY the commit message, no explanations or markdown formatting."
+
+# Generate message based on provider
+case "$PROVIDER" in
+  claude)
+    MESSAGE=$(echo "$PROMPT" | claude --print 2>/dev/null || echo "")
+    ;;
+  aider)
+    MESSAGE=$(echo "$PROMPT" | aider --message "$PROMPT" --no-git --yes 2>/dev/null | tail -20 || echo "")
+    ;;
+  gemini)
+    MESSAGE=$(echo "$PROMPT" | gemini 2>/dev/null || echo "")
+    ;;
+  sgpt)
+    MESSAGE=$(sgpt "$PROMPT" 2>/dev/null || echo "")
+    ;;
+  ollama)
+    MODEL="${OLLAMA_MODEL:-llama3.2}"
+    MESSAGE=$(echo "$PROMPT" | ollama run "$MODEL" 2>/dev/null || echo "")
+    ;;
+  *)
+    echo -e "${RED}Unknown provider: $PROVIDER${NC}"
+    exit 1
+    ;;
+esac
+
+# Clean up the message
+MESSAGE=$(echo "$MESSAGE" | sed 's/^```[a-z]*//g' | sed 's/```$//g' | sed '/^$/d' | head -20)
+
+if [[ -z "$MESSAGE" ]]; then
+  echo -e "${RED}Failed to generate commit message.${NC}"
+  exit 1
+fi
+
+echo -e "${GREEN}Generated commit message:${NC}"
+echo "---"
+echo "$MESSAGE"
+echo "---"
+
+if [[ "$EDIT_MODE" == "true" ]]; then
+  # Create temp file for editing
+  TMPFILE=$(mktemp)
+  echo "$MESSAGE" > "$TMPFILE"
+  ${EDITOR:-vim} "$TMPFILE"
+  MESSAGE=$(cat "$TMPFILE")
+  rm -f "$TMPFILE"
+fi
+
+# Confirm and commit
+echo ""
+read -p "Commit with this message? [Y/n] " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY ]]; then
+  git commit -m "$MESSAGE"
+  echo -e "${GREEN}Committed successfully!${NC}"
+else
+  echo -e "${YELLOW}Commit cancelled.${NC}"
+fi

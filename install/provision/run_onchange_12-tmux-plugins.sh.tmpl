@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# run_onchange_12-tmux-plugins.sh.tmpl
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") }}
+
+set -euo pipefail
+
+TPM_DIR="${HOME}/.tmux/plugins/tpm"
+if [ ! -d "${TPM_DIR}" ]; then
+  echo "[INFO] Installing Tmux Plugin Manager (tpm)..."
+  git clone https://github.com/tmux-plugins/tpm "${TPM_DIR}"
+fi
+{{- end }}

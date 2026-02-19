@@ -1,0 +1,11 @@
+# VS Code extensions (one per line).
+# Theme Extensions - Required for Catppuccin theme switching
+Catppuccin.catppuccin-vsc
+Catppuccin.catppuccin-vsc-icons
+
+# Additional recommended extensions for theme support
+enkia.tokyo-night
+
+# Development Extensions (examples)
+# ms-python.python
+# golang.Go

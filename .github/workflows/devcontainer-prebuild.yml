@@ -1,0 +1,58 @@
+name: Devcontainer Prebuild
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.devcontainer/**'
+      - '.github/workflows/devcontainer-prebuild.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - '.devcontainer/**'
+      - '.github/workflows/devcontainer-prebuild.yml'
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Devcontainer Image
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare CI devcontainer config
+        run: cp .devcontainer/devcontainer.ci.json .devcontainer/devcontainer.json
+
+      - name: Pre-build devcontainer image
+        uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 # v0.3
+        with:
+          # devcontainers/ci requires a standard filename for configFile.
+          configFile: .devcontainer/devcontainer.json
+          imageName: ghcr.io/${{ github.repository_owner }}/dotfiles-devcontainer
+          cacheFrom: ghcr.io/${{ github.repository_owner }}/dotfiles-devcontainer
+          push: filter
+          refFilterForPush: refs/heads/master
+          eventFilterForPush: push,workflow_dispatch,schedule
+          runCmd: |
+            zsh --version
+            git --version

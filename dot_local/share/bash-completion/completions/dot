@@ -1,0 +1,54 @@
+#!/bin/bash
+# Bash completion for the dot CLI
+# Source this file or place in /etc/bash_completion.d/ or ~/.local/share/bash-completion/completions/
+
+_dot_completions() {
+    local cur prev commands
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    # Main commands
+    commands="apply sync update add diff status remove cd drift history doctor keys tools sandbox benchmark tune secrets secrets-init secrets-create ssh-key firewall telemetry dns-doh encrypt-check backup lock-screen usb-safety fonts wallpaper theme upgrade edit docs new log-rotate learn --version help"
+
+    # Subcommand completions
+    case "${prev}" in
+        dot)
+            COMPREPLY=( $(compgen -W "${commands}" -- "${cur}") )
+            return 0
+            ;;
+        add)
+            # Complete file paths
+            COMPREPLY=( $(compgen -f -- "${cur}") )
+            return 0
+            ;;
+        new)
+            # Complete template types
+            local templates="python go node"
+            COMPREPLY=( $(compgen -W "${templates}" -- "${cur}") )
+            return 0
+            ;;
+        tools)
+            # Complete tools subcommands
+            local subcommands="install"
+            COMPREPLY=( $(compgen -W "${subcommands}" -- "${cur}") )
+            return 0
+            ;;
+        theme)
+            # Complete theme options
+            local themes="dark light"
+            COMPREPLY=( $(compgen -W "${themes}" -- "${cur}") )
+            return 0
+            ;;
+        keys)
+            # Allow any search term
+            return 0
+            ;;
+        *)
+            COMPREPLY=( $(compgen -W "${commands}" -- "${cur}") )
+            return 0
+            ;;
+    esac
+}
+
+complete -F _dot_completions dot

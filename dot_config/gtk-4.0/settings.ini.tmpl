@@ -1,0 +1,21 @@
+{{- /* GTK-4.0 Settings with Catppuccin theme support */ -}}
+{{- $theme := .theme -}}
+{{- $is_dark := false -}}
+{{- if or (hasSuffix $theme "-night") (hasSuffix $theme "-storm") (hasSuffix $theme "-moon") (hasSuffix $theme "-mocha") (hasSuffix $theme "-frappe") (hasSuffix $theme "-macchiato") (hasSuffix $theme "-dark") (hasSuffix $theme "-wave") (hasSuffix $theme "-dragon") (eq $theme "dracula") (eq $theme "nord") (eq $theme "onedark") -}}
+{{- $is_dark = true -}}
+{{- end -}}
+
+[Settings]
+gtk-application-prefer-dark-theme={{ if $is_dark }}1{{ else }}0{{ end }}
+gtk-cursor-theme-name=Adwaita
+gtk-cursor-theme-size=24
+gtk-font-name=Inter 10
+gtk-icon-theme-name={{ if $is_dark }}Papirus-Dark{{ else }}Papirus{{ end }}
+gtk-theme-name={{ if hasPrefix $theme "catppuccin-" }}{{ if eq $theme "catppuccin-latte" }}Catppuccin-Latte-Standard-Blue-Light{{ else if eq $theme "catppuccin-frappe" }}Catppuccin-Frappe-Standard-Blue-Dark{{ else if eq $theme "catppuccin-macchiato" }}Catppuccin-Macchiato-Standard-Blue-Dark{{ else }}Catppuccin-Mocha-Standard-Blue-Dark{{ end }}{{ else }}{{ if $is_dark }}Adwaita-dark{{ else }}Adwaita{{ end }}{{ end }}
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle=hintfull
+gtk-xft-rgba=rgb
+gtk-enable-animations=1
+gtk-primary-button-warps-slider=1
+gtk-decoration-layout=close,minimize,maximize:

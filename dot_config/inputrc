@@ -1,0 +1,2 @@
+# Disable terminal bell
+set bell-style none

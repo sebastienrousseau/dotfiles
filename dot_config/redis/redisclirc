@@ -1,0 +1,41 @@
+# Redis CLI Configuration (~/.config/redis/redisclirc)
+# Sourced by redis-cli via REDISCLI_RCFILE environment variable
+
+# History file location
+# Set via: export REDISCLI_HISTFILE=~/.local/share/redis/history
+
+# Note: redis-cli has limited configuration options.
+# Most customization is done via environment variables:
+#
+# REDISCLI_HISTFILE - History file location
+# REDISCLI_AUTH - Default password (not recommended, use --askpass)
+# REDISCLI_CLUSTER_SLAVES - Show slave nodes in cluster commands
+#
+# Common usage patterns:
+#
+# Connect to local Redis:
+#   redis-cli
+#
+# Connect to remote Redis:
+#   redis-cli -h hostname -p 6379
+#
+# Connect with authentication:
+#   redis-cli --askpass
+#
+# Run command and exit:
+#   redis-cli PING
+#
+# Monitor all commands:
+#   redis-cli MONITOR
+#
+# Get server info:
+#   redis-cli INFO
+#
+# Cluster mode:
+#   redis-cli -c -h hostname
+
+# Useful aliases (defined in shell aliases):
+# alias redis='redis-cli'
+# alias redis-info='redis-cli INFO'
+# alias redis-keys='redis-cli --scan'
+# alias redis-monitor='redis-cli MONITOR'

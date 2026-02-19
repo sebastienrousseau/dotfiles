@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# JSON validator and formatter
+# Usage: jsonv <file> | jsonv (reads stdin) | jsonv --format <file>
+
+set -euo pipefail
+
+FORMAT=false
+QUIET=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -f|--format) FORMAT=true; shift ;;
+    -q|--quiet) QUIET=true; shift ;;
+    -*) echo "Unknown option: $1"; exit 1 ;;
+    *) break ;;
+  esac
+done
+
+validate_json() {
+  local input="$1"
+  if command -v jq >/dev/null 2>&1; then
+    if $FORMAT; then
+      jq '.' <<< "$input"
+    else
+      jq -e '.' <<< "$input" >/dev/null 2>&1
+    fi
+  elif command -v python3 >/dev/null 2>&1; then
+    if $FORMAT; then
+      python3 -m json.tool <<< "$input"
+    else
+      python3 -c "import json; json.loads('''$input''')" 2>/dev/null
+    fi
+  else
+    echo "Error: jq or python3 required"
+    exit 1
+  fi
+}
+
+# Read input
+if [[ $# -gt 0 ]] && [[ -f "$1" ]]; then
+  INPUT=$(cat "$1")
+  SOURCE="$1"
+else
+  INPUT=$(cat)
+  SOURCE="stdin"
+fi
+
+if validate_json "$INPUT"; then
+  $QUIET || echo "✓ Valid JSON ($SOURCE)"
+  exit 0
+else
+  echo "✗ Invalid JSON ($SOURCE)"
+  exit 1
+fi

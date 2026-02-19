@@ -1,0 +1,23 @@
+gui:
+  theme:
+    activeBorderColor:
+      - green
+      - bold
+    inactiveBorderColor:
+      - white
+    optionsTextColor:
+      - blue
+    selectedLineBgColor:
+      - default
+  showFileTree: true
+  showRandomTip: false
+  border: single
+
+git:
+  paging:
+    colorArg: always
+    pager: delta --dark --paging=never
+
+keybinding:
+  universal:
+    quit: q

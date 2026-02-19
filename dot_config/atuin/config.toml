@@ -1,0 +1,23 @@
+# Atuin Configuration (~/.config/atuin/config.toml)
+# https://atuin.sh/docs/config
+
+# Core
+db_path = "~/.local/share/atuin/history.db"
+key_path = "~/.local/share/atuin/key"
+session_path = "~/.local/share/atuin/session"
+
+# Sync
+auto_sync = true
+sync_frequency = "10m"
+sync_address = "https://api.atuin.sh"
+
+# UI
+style = "compact"
+inline_height = 20
+show_preview = true
+enter_accept = true
+
+# Search
+search_mode = "fuzzy"
+filter_mode = "global" # Search across all sessions/directories by default
+workspaces = true

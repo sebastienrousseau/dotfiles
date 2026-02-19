@@ -1,0 +1,110 @@
+#!/bin/sh
+# shellcheck shell=sh
+#
+# ~/.profile - Login shell configuration (POSIX-compatible)
+#
+# This file is sourced by login shells for environment setup.
+# It provides a fallback for non-Zsh environments and ensures
+# consistent behaviour across sh, bash, and dash.
+#
+# Loading order:
+#   1. /etc/profile (system)
+#   2. ~/.profile (this file)
+#   3. ~/.bashrc (if running Bash interactively)
+#
+# References:
+#   - POSIX Shell: https://pubs.opengroup.org/onlinepubs/9699919799/utilities/sh.html
+#   - XDG Base Directory: https://specifications.freedesktop.org/basedir-spec/latest/
+
+# Prevent double-sourcing
+if [ -n "$PROFILE_SOURCED" ]; then
+    return 0 2>/dev/null || exit 0
+fi
+export PROFILE_SOURCED=1
+
+# --- XDG Base Directory Specification ---
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+
+# --- Editor Configuration ---
+if command -v nvim >/dev/null 2>&1; then
+    export EDITOR="nvim"
+    export VISUAL="nvim"
+elif command -v vim >/dev/null 2>&1; then
+    export EDITOR="vim"
+    export VISUAL="vim"
+else
+    export EDITOR="vi"
+    export VISUAL="vi"
+fi
+
+# --- Pager Configuration ---
+if command -v less >/dev/null 2>&1; then
+    export PAGER="less"
+    export LESS="-R -F -X -i -M -S -x4"
+    export LESSHISTFILE="${XDG_STATE_HOME}/less/history"
+fi
+
+# --- Locale Configuration ---
+export LANG="${LANG:-en_US.UTF-8}"
+export LC_ALL="${LC_ALL:-en_US.UTF-8}"
+
+# --- PATH Configuration ---
+# Ensure ~/bin is in PATH (euxis tools)
+case ":${PATH}:" in
+    *":${HOME}/bin:"*) ;;
+    *) export PATH="${HOME}/bin:${PATH}" ;;
+esac
+
+# Ensure ~/.local/bin is in PATH (highest priority)
+case ":${PATH}:" in
+    *":${HOME}/.local/bin:"*) ;;
+    *) export PATH="${HOME}/.local/bin:${PATH}" ;;
+esac
+
+# Homebrew (macOS)
+if [ -d "/opt/homebrew/bin" ]; then
+    case ":${PATH}:" in
+        *":/opt/homebrew/bin:"*) ;;
+        *) export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}" ;;
+    esac
+fi
+
+# Cargo (Rust)
+if [ -d "${HOME}/.cargo/bin" ]; then
+    case ":${PATH}:" in
+        *":${HOME}/.cargo/bin:"*) ;;
+        *) export PATH="${HOME}/.cargo/bin:${PATH}" ;;
+    esac
+fi
+
+# Go
+if [ -d "${HOME}/go/bin" ]; then
+    case ":${PATH}:" in
+        *":${HOME}/go/bin:"*) ;;
+        *) export PATH="${HOME}/go/bin:${PATH}" ;;
+    esac
+fi
+
+# --- History Configuration ---
+export HISTSIZE=10000
+export HISTFILESIZE=20000
+export HISTCONTROL="ignoreboth:erasedups"
+
+# --- Security ---
+umask 022
+
+# --- Source Bash-specific configuration ---
+# When running Bash interactively, source .bashrc
+if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ]; then
+    # shellcheck source=/dev/null
+    . "$HOME/.bashrc"
+fi
+
+# --- Source local overrides ---
+if [ -f "$HOME/.profile.local" ]; then
+    # shellcheck source=/dev/null
+    . "$HOME/.profile.local"
+fi

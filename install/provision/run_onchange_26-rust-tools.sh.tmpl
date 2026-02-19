@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+
+# run_onchange_26-rust-tools.sh.tmpl
+# Rust toolchain and tools provisioning
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") }}
+
+set -euo pipefail
+
+log_info() { echo -e "\n[INFO] $*"; }
+log_warn() { echo -e "\n[WARN] $*"; }
+log_error() { echo -e "\n[ERROR] $*" >&2; }
+
+# Skip in containers unless explicitly enabled
+if [[ "${DOTFILES_CONTAINER:-0}" = "1" && "${DOTFILES_RUST_IN_CONTAINER:-0}" != "1" ]]; then
+  log_info "Skipping Rust tools in container environment"
+  exit 0
+fi
+
+# Check if rustup is available
+if ! command -v rustup >/dev/null 2>&1; then
+  log_warn "rustup not found. Install rustup first: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+  exit 0
+fi
+
+log_info "Rust tools: starting setup..."
+
+# Update rustup and toolchain
+log_info "Updating rustup and stable toolchain..."
+rustup update stable --no-self-update 2>/dev/null || rustup update stable
+
+# Install essential components
+log_info "Installing Rust components..."
+COMPONENTS=(
+  "clippy"        # Linter
+  "rustfmt"       # Formatter
+  "rust-src"      # Source code for rust-analyzer
+  "rust-analyzer" # LSP server
+)
+
+for component in "${COMPONENTS[@]}"; do
+  if ! rustup component list --installed | grep -q "^${component}"; then
+    log_info "Installing component: ${component}"
+    rustup component add "$component" || log_warn "Failed to install ${component}"
+  fi
+done
+
+# Install cargo tools via cargo install
+install_cargo_tool() {
+  local tool="$1"
+  local package="${2:-$1}"
+
+  if command -v "$tool" >/dev/null 2>&1; then
+    log_info "${tool} already installed"
+    return 0
+  fi
+
+  log_info "Installing ${tool}..."
+  cargo install "$package" --locked 2>/dev/null || cargo install "$package" || log_warn "Failed to install ${tool}"
+}
+
+# Essential cargo tools
+log_info "Installing cargo tools..."
+
+# cargo-edit: Add/remove/upgrade dependencies from CLI
+install_cargo_tool "cargo-add" "cargo-edit"
+
+# cargo-watch: Watch for changes and run commands
+install_cargo_tool "cargo-watch" "cargo-watch"
+
+# cargo-audit: Security vulnerability scanner
+install_cargo_tool "cargo-audit" "cargo-audit"
+
+# cargo-outdated: Check for outdated dependencies
+install_cargo_tool "cargo-outdated" "cargo-outdated"
+
+# cargo-expand: Expand macros for debugging
+install_cargo_tool "cargo-expand" "cargo-expand"
+
+# cargo-nextest: Faster test runner
+install_cargo_tool "cargo-nextest" "cargo-nextest"
+
+# cargo-deny: Lint dependencies for licenses, security, etc
+install_cargo_tool "cargo-deny" "cargo-deny"
+
+# Optional: sccache for distributed caching (large download)
+if [[ "${DOTFILES_RUST_SCCACHE:-0}" = "1" ]]; then
+  install_cargo_tool "sccache" "sccache"
+fi
+
+# Optional: cross-compilation tools
+if [[ "${DOTFILES_RUST_CROSS:-0}" = "1" ]]; then
+  install_cargo_tool "cross" "cross"
+  install_cargo_tool "cargo-zigbuild" "cargo-zigbuild"
+fi
+
+log_info "Rust tools setup complete!"
+
+{{- end }}
