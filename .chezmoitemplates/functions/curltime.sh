@@ -66,4 +66,3 @@ Time total:  %{time_total}s\n\n" -o /dev/null -s "$1"
 
 # Aliases for convenience
 alias cht="curltime"  # Alias for curltime
-alias chtm="curltime" # Alias for curltime
