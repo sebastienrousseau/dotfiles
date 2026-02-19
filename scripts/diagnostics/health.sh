@@ -4,6 +4,10 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
+
 # Colors (fallback when gum is unavailable)
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -36,10 +40,8 @@ TOTAL_CHECKS=0
 PASSED_CHECKS=0
 WARNINGS=0
 FAILURES=0
-use_ui=0
-if command -v gum >/dev/null 2>&1 && [[ -t 1 ]]; then
-  use_ui=1
-fi
+ui_init
+use_ui="$UI_ENABLED"
 
 header() {
   local text="$1"
@@ -47,7 +49,7 @@ header() {
     return
   fi
   if [[ "$use_ui" = "1" ]]; then
-    gum style --foreground 212 --bold "$text"
+    ui_header "$text"
   else
     echo -e "${CYAN}${text}${NC}"
   fi
@@ -59,22 +61,9 @@ section() {
     return
   fi
   if [[ "$use_ui" = "1" ]]; then
-    gum style --foreground 212 --bold "$text"
+    ui_section "$text"
   else
     echo -e "\n${BLUE}▸ $text${NC}"
-  fi
-}
-
-format_status() {
-  local symbol="$1"
-  local name="$2"
-  local status="$3"
-  local message="${4:-}"
-  local width=35
-  if [[ -n "$message" ]]; then
-    printf "  %-2s %-*s %-8s %s\n" "$symbol" "$width" "$name" "$status" "$message"
-  else
-    printf "  %-2s %-*s %-8s\n" "$symbol" "$width" "$name" "$status"
   fi
 }
 
@@ -92,7 +81,7 @@ check() {
       RESULTS["$name"]="pass"
       if ! $JSON_OUTPUT; then
         if [[ "$use_ui" = "1" ]]; then
-          format_status "✓" "$name" "OK"
+          ui_ok "$name"
         else
           printf "${GREEN}✓${NC} %-35s ${GREEN}OK${NC}\n" "$name"
         fi
@@ -104,7 +93,7 @@ check() {
       RESULTS["$name"]="warn"
       if ! $JSON_OUTPUT; then
         if [[ "$use_ui" = "1" ]]; then
-          format_status "⚠" "$name" "WARNING" "$message"
+          ui_warn "$name" "$message"
         else
           printf "${YELLOW}⚠${NC} %-35s ${YELLOW}WARNING${NC}"
           [[ -n "$message" ]] && printf " ${GRAY}%s${NC}" "$message"
@@ -118,7 +107,7 @@ check() {
       RESULTS["$name"]="fail"
       if ! $JSON_OUTPUT; then
         if [[ "$use_ui" = "1" ]]; then
-          format_status "✗" "$name" "FAILED" "$message"
+          ui_err "$name" "$message"
         else
           printf "${RED}✗${NC} %-35s ${RED}FAILED${NC}"
           [[ -n "$message" ]] && printf " ${GRAY}%s${NC}" "$message"

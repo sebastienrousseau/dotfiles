@@ -4,21 +4,19 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../lib/ui.sh
+source "$SCRIPT_DIR/../lib/ui.sh"
+
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
 BACKUP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/backups"
 CHEZMOI_SOURCE="${HOME}/.local/share/chezmoi"
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-log_info() { echo -e "${BLUE}[INFO]${NC} $*"; }
-log_warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $*" >&2; }
-log_success() { echo -e "${GREEN}[OK]${NC} $*"; }
+ui_init
+log_info() { ui_info "$*"; }
+log_warn() { ui_warn "$*"; }
+log_error() { ui_err "$*"; }
+log_success() { ui_ok "$*"; }
 
 usage() {
   echo "Usage: dot restore [OPTIONS]"
@@ -44,7 +42,7 @@ list_backups() {
     return 1
   fi
 
-  echo -e "${BLUE}Available Backups:${NC}"
+  ui_header "Available Backups"
   echo "─────────────────────────────────────────"
 
   find "$BACKUP_DIR" -maxdepth 1 -type d -name "backup-*" -printf "%T@ %f\n" 2>/dev/null | sort -rn | cut -d' ' -f2- | while read -r backup; do
@@ -52,7 +50,8 @@ list_backups() {
   done
 
   echo ""
-  echo -e "${BLUE}Git History (last 10):${NC}"
+  echo ""
+  ui_header "Git History (last 10)"
   echo "─────────────────────────────────────────"
 
   if [[ -d "$DOTFILES_DIR/.git" ]]; then

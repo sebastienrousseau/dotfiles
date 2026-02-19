@@ -13,23 +13,23 @@ cmd_upgrade() {
   src_dir="$(require_source_dir)"
 
   if [ -f "$src_dir/nix/flake.nix" ] && has_command nix; then
-    echo "Updating Nix flake..."
+    ui_info "Updating Nix flake"
     (cd "$src_dir" && nix flake update) || true
-    echo "Running Nix garbage collection..."
+    ui_info "Running Nix garbage collection"
     nix-collect-garbage -d || true
   fi
 
-  echo "Updating dotfiles..."
+  ui_info "Updating dotfiles"
   chezmoi update || true
 
   if has_command nvim; then
-    echo "Updating Neovim plugins..."
+    ui_info "Updating Neovim plugins"
     nvim --headless "+Lazy! sync" +qa || true
   fi
 
   if [ "${DOTFILES_FONTS:-}" = "1" ]; then
     if [ -f "$src_dir/scripts/fonts/install-nerd-fonts.sh" ]; then
-      echo "Installing Nerd Fonts..."
+      ui_info "Installing Nerd Fonts"
       sh "$src_dir/scripts/fonts/install-nerd-fonts.sh"
     fi
   fi
@@ -76,11 +76,11 @@ cmd_sandbox() {
   src_dir="$(require_source_dir)"
 
   if has_command docker; then
-    echo "Launching sandbox via Docker..."
+    ui_info "Launching sandbox via Docker"
     docker build -f "$src_dir/tests/Dockerfile.sandbox" -t dotfiles-sandbox "$src_dir"
     exec docker run --rm -it dotfiles-sandbox
   elif has_command podman; then
-    echo "Launching sandbox via Podman..."
+    ui_info "Launching sandbox via Podman"
     podman build -f "$src_dir/tests/Dockerfile.sandbox" -t dotfiles-sandbox "$src_dir"
     exec podman run --rm -it dotfiles-sandbox
   else

@@ -22,7 +22,7 @@ cmd_secrets_init() {
   mkdir -p "$secrets_dir"
 
   if [ -f "$key_file" ]; then
-    echo "Age key already exists: $key_file"
+    ui_info "Age key already exists: $key_file"
     exit 0
   fi
 
@@ -32,8 +32,8 @@ cmd_secrets_init() {
 
   age-keygen -o "$key_file"
   chmod 600 "$key_file"
-  echo "Age key created at $key_file"
-  echo "Public key:"
+  ui_ok "Age key created" "$key_file"
+  ui_header "Public key"
   age-keygen -y "$key_file"
 }
 

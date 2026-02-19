@@ -4,6 +4,10 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -37,10 +41,12 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+ui_init
+
 print_header() {
-  echo -e "\n${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-  echo -e "${CYAN}  Shell Performance Benchmark${NC}"
-  echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+  echo ""
+  ui_header "Shell Performance Benchmark"
+  echo ""
 }
 
 # Basic timing function
@@ -54,7 +60,8 @@ time_command() {
 
 # Per-component profiling using zprof
 run_zsh_profile() {
-  echo -e "${BLUE}Running Zsh profiler (zprof)...${NC}\n"
+  ui_header "Zsh profiler (zprof)"
+  echo ""
 
   zsh -c '
     zmodload zsh/zprof
@@ -66,7 +73,8 @@ run_zsh_profile() {
 
 # Benchmark individual components
 benchmark_components() {
-  echo -e "${BLUE}Per-Component Timing:${NC}\n"
+  ui_header "Per-Component Timing"
+  echo ""
   printf "%-35s %8s\n" "Component" "Time (ms)"
   echo "───────────────────────────────────────────────"
 
@@ -106,18 +114,28 @@ benchmark_components() {
 # Run hyperfine benchmark
 run_hyperfine() {
   if ! command -v hyperfine >/dev/null 2>&1; then
-    echo -e "${YELLOW}hyperfine not installed. Using basic timing.${NC}"
+    if [[ "$UI_ENABLED" = "1" ]]; then
+      ui_warn "hyperfine" "not installed, using basic timing"
+    else
+      echo -e "${YELLOW}hyperfine not installed. Using basic timing.${NC}"
+    fi
     local times=()
     for _ in {1..5}; do
       times+=("$(time_command "zsh -i -c exit")")
     done
     local sum=0
     for t in "${times[@]}"; do sum=$((sum + t)); done
-    echo -e "\n${GREEN}Average startup time: $((sum / 5))ms${NC}"
+    if [[ "$UI_ENABLED" = "1" ]]; then
+      ui_ok "Average startup time" "$((sum / 5))ms"
+    else
+      echo -e "\n${GREEN}Average startup time: $((sum / 5))ms${NC}"
+    fi
     return
   fi
 
-  echo -e "\n${BLUE}Running hyperfine benchmark (10 runs, 3 warmup)...${NC}\n"
+  echo ""
+  ui_header "Running hyperfine benchmark"
+  echo ""
   hyperfine --warmup 3 --runs 10 --shell=none \
     --export-json "$BENCHMARK_DIR/latest.json" \
     'zsh -i -c exit'
@@ -131,20 +149,43 @@ run_hyperfine() {
     local max_ms
     max_ms=$(jq '.results[0].max * 1000 | floor' "$BENCHMARK_DIR/latest.json")
 
-    echo -e "\n${GREEN}Results:${NC}"
-    echo "  Mean: ${mean_ms}ms"
-    echo "  Min:  ${min_ms}ms"
-    echo "  Max:  ${max_ms}ms"
+    echo ""
+    ui_header "Results"
+    if [[ "$UI_ENABLED" = "1" ]]; then
+      ui_kv "Mean:" "${mean_ms}ms"
+      ui_kv "Min:" "${min_ms}ms"
+      ui_kv "Max:" "${max_ms}ms"
+    else
+      echo "  Mean: ${mean_ms}ms"
+      echo "  Min:  ${min_ms}ms"
+      echo "  Max:  ${max_ms}ms"
+    fi
 
     # Performance rating
     if [[ $mean_ms -lt 100 ]]; then
-      echo -e "\n${GREEN}⚡ Excellent (<100ms)${NC}"
+      if [[ "$UI_ENABLED" = "1" ]]; then
+        ui_ok "Performance" "Excellent (<100ms)"
+      else
+        echo -e "\n${GREEN}⚡ Excellent (<100ms)${NC}"
+      fi
     elif [[ $mean_ms -lt 200 ]]; then
-      echo -e "\n${GREEN}✓ Good (<200ms)${NC}"
+      if [[ "$UI_ENABLED" = "1" ]]; then
+        ui_ok "Performance" "Good (<200ms)"
+      else
+        echo -e "\n${GREEN}✓ Good (<200ms)${NC}"
+      fi
     elif [[ $mean_ms -lt 500 ]]; then
-      echo -e "\n${YELLOW}⚠ Acceptable (<500ms)${NC}"
+      if [[ "$UI_ENABLED" = "1" ]]; then
+        ui_warn "Performance" "Acceptable (<500ms)"
+      else
+        echo -e "\n${YELLOW}⚠ Acceptable (<500ms)${NC}"
+      fi
     else
-      echo -e "\n${RED}✗ Slow (>500ms) - optimization needed${NC}"
+      if [[ "$UI_ENABLED" = "1" ]]; then
+        ui_err "Performance" "Slow (>500ms)"
+      else
+        echo -e "\n${RED}✗ Slow (>500ms) - optimization needed${NC}"
+      fi
     fi
 
     # Save with timestamp for history
@@ -154,7 +195,8 @@ run_hyperfine() {
 
 # Compare with previous benchmarks
 compare_benchmarks() {
-  echo -e "${BLUE}Benchmark History:${NC}\n"
+  ui_header "Benchmark History"
+  echo ""
 
   local files
   files=$(find "$BENCHMARK_DIR" -name "*.json" -type f | sort -r | head -10)
@@ -196,6 +238,12 @@ else
   run_hyperfine
 fi
 
-echo -e "\n${CYAN}Tip: Run 'dot benchmark --detailed' for per-component timing${NC}"
-echo -e "${CYAN}     Run 'dot benchmark --profile' for zprof analysis${NC}"
+if [[ "$UI_ENABLED" = "1" ]]; then
+  echo ""
+  ui_info "Tip" "dot benchmark --detailed"
+  ui_info "Tip" "dot benchmark --profile"
+else
+  echo -e "\n${CYAN}Tip: Run 'dot benchmark --detailed' for per-component timing${NC}"
+  echo -e "${CYAN}     Run 'dot benchmark --profile' for zprof analysis${NC}"
+fi
 echo -e "${CYAN}     Run 'dot benchmark --compare' for history${NC}\n"

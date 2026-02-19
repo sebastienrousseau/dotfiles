@@ -4,6 +4,10 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -29,6 +33,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+ui_init
+
 # Scoring
 TOTAL_POINTS=0
 MAX_POINTS=0
@@ -48,28 +54,35 @@ add_points() {
   if ! $JSON_OUTPUT && $VERBOSE; then
     local icon
     if [[ $points -eq $max ]]; then
-      icon="${GREEN}✓${NC}"
+      icon="✓"
     elif [[ $points -gt 0 ]]; then
-      icon="${YELLOW}◐${NC}"
+      icon="◐"
     else
-      icon="${RED}✗${NC}"
+      icon="✗"
     fi
-    printf "  $icon %-40s %d/%d pts\n" "$description" "$points" "$max"
+    if [[ "$UI_ENABLED" = "1" ]]; then
+      ui_status "$icon" "$description" "$points/$max pts"
+    else
+      printf "  ${icon} %-40s %d/%d pts\n" "$description" "$points" "$max"
+    fi
   fi
 }
 
 print_header() {
   if ! $JSON_OUTPUT; then
-    echo -e "\n${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${CYAN}  Security Score Assessment${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+    echo ""
+    ui_header "Security Score Assessment"
+    echo ""
   fi
 }
 
 section() {
   if ! $JSON_OUTPUT; then
-    echo -e "\n${BLUE}▸ $1${NC}"
-    echo "───────────────────────────────────────────────"
+    echo ""
+    ui_section "$1"
+    if [[ "$UI_ENABLED" != "1" ]]; then
+      echo "───────────────────────────────────────────────"
+    fi
   fi
 }
 
@@ -300,9 +313,9 @@ print_summary() {
     return
   fi
 
-  echo -e "\n${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-  echo -e "${CYAN}  Security Score${NC}"
-  echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+  echo ""
+  ui_header "Security Score"
+  echo ""
 
   # Score bar
   local bar_width=30
@@ -337,7 +350,7 @@ print_summary() {
 
   # Recommendations
   if [[ $score -lt 100 ]]; then
-    echo -e "${BLUE}Recommendations:${NC}"
+    ui_header "Recommendations"
 
     if ! command -v age >/dev/null 2>&1; then
       echo "  • Install age for encryption: brew install age"

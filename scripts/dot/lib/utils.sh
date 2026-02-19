@@ -2,6 +2,10 @@
 # Dotfiles CLI Utilities
 # Shared functions for dot command modules
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=ui.sh
+source "$SCRIPT_DIR/ui.sh"
+
 # Resolve the dotfiles source directory
 resolve_source_dir() {
   if [ -n "${CHEZMOI_SOURCE_DIR:-}" ] && [ -d "$CHEZMOI_SOURCE_DIR" ]; then
@@ -57,16 +61,16 @@ has_command() {
 
 # Print error message and exit
 die() {
-  echo "Error: $1" >&2
+  ui_err "$1" >&2
   exit "${2:-1}"
 }
 
 # Print warning message
 warn() {
-  echo "Warning: $1" >&2
+  ui_warn "$1" >&2
 }
 
 # Print info message
 info() {
-  echo "$1"
+  ui_info "$1"
 }

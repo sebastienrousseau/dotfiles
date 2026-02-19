@@ -9,6 +9,10 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
+
 # Colors (respect NO_COLOR: https://no-color.org)
 if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
   GREEN='\033[0;32m'
@@ -19,97 +23,98 @@ else
   GREEN='' RED='' YELLOW='' NC=''
 fi
 
-echo " Dotfiles Doctor - System Diagnostics"
-echo "-------------------------------------"
+ui_init
+ui_header "Dotfiles Doctor"
+echo ""
 
 Errors=0
 Warnings=0
 
-log_success() { echo -e "${GREEN} $1${NC}"; }
-log_fail() {
-  echo -e "${RED} $1${NC}"
-  Errors=$((Errors + 1))
-}
-log_warn() {
-  echo -e "${YELLOW}️  $1${NC}"
-  Warnings=$((Warnings + 1))
-}
+log_success() { ui_ok "$1" "${2:-}"; }
+log_fail() { ui_err "$1" "${2:-}"; Errors=$((Errors + 1)); }
+log_warn() { ui_warn "$1" "${2:-}"; Warnings=$((Warnings + 1)); }
 
 # 1. Check Dependencies
-echo "Checking Core Dependencies..."
+ui_header "Core Dependencies"
 for cmd in git curl chezmoi starship rg bat; do
   if command -v "$cmd" &>/dev/null; then
-    log_success "Found $cmd: $(command -v "$cmd")"
+    log_success "$cmd" "$(command -v "$cmd")"
   else
-    log_fail "Missing $cmd"
+    log_fail "$cmd" "Missing"
   fi
 done
 
-echo -e "\nChecking Optional AI CLIs..."
+echo ""
+ui_header "Optional AI CLIs"
 for cmd in claude gemini sgpt ollama opencode aider; do
   if command -v "$cmd" &>/dev/null; then
-    log_success "Found $cmd: $(command -v "$cmd")"
+    log_success "$cmd" "$(command -v "$cmd")"
   else
-    log_warn "Missing $cmd (optional)"
+    log_warn "$cmd" "optional"
   fi
 done
 
 # 2. Check XDG Compliance
-echo -e "\nChecking Environment..."
+echo ""
+ui_header "Environment"
 if [[ -z "${XDG_CONFIG_HOME:-}" ]]; then
-  log_warn "XDG_CONFIG_HOME is not set (Defaulting to ~/.config)"
+  log_warn "XDG_CONFIG_HOME" "Defaulting to ~/.config"
 else
-  log_success "XDG_CONFIG_HOME=$XDG_CONFIG_HOME"
+  log_success "XDG_CONFIG_HOME" "$XDG_CONFIG_HOME"
 fi
 
 if [[ -z "${PIPX_HOME:-}" ]]; then
-  log_warn "PIPX_HOME is not set (Check paths configuration)"
+  log_warn "PIPX_HOME" "Check paths configuration"
 else
-  log_success "PIPX_HOME=$PIPX_HOME"
+  log_success "PIPX_HOME" "$PIPX_HOME"
 fi
 
 # 3. Check Chezmoi State
-echo -e "\nChecking Chezmoi State..."
+echo ""
+ui_header "Chezmoi State"
 if chezmoi verify &>/dev/null; then
-  log_success "Chezmoi state is synchronized"
+  log_success "Chezmoi state" "synchronized"
 else
-  log_fail "Chezmoi state has drifted (Run 'dot drift' to see details)"
+  log_fail "Chezmoi state" "drifted (run 'dot drift')"
 fi
 
 # 4. Check Critical Files
-echo -e "\nChecking Critical Files..."
+echo ""
+ui_header "Critical Files"
 if [[ -f "$HOME/.zshrc" ]]; then
-  log_success "Found .zshrc"
+  log_success ".zshrc" "present"
 else
-  log_fail "Missing .zshrc"
+  log_fail ".zshrc" "missing"
 fi
 
 # 5. Check for Broken Symlinks (Ghost Links)
-echo -e "\nChecking for Broken Symlinks..."
+echo ""
+ui_header "Broken Symlinks"
 broken_links=0
 while IFS= read -r -d '' link; do
   if [[ ! -e "$link" ]]; then
-    log_warn "Broken symlink: $link -> $(readlink "$link")"
+    log_warn "Broken symlink" "$link -> $(readlink "$link")"
     broken_links=$((broken_links + 1))
   fi
 done < <(find "$HOME" -maxdepth 3 -type l -print0 2>/dev/null)
 
 if [[ $broken_links -eq 0 ]]; then
-  log_success "No broken symlinks found"
+  log_success "Broken symlinks" "none"
 else
-  log_warn "$broken_links broken symlink(s) detected"
+  log_warn "Broken symlinks" "$broken_links detected"
 fi
 
 # Summary
-echo -e "\n-------------------------------------"
+echo ""
+ui_header "Summary"
 if [[ $Errors -eq 0 ]]; then
   if [[ $Warnings -eq 0 ]]; then
-    echo -e "${GREEN}All systems healthy! ${NC}"
+    ui_ok "All systems healthy"
   else
-    echo -e "${YELLOW}System healthy with $Warnings warnings.${NC}"
+    ui_warn "System healthy" "$Warnings warnings"
   fi
 else
-  echo -e "${RED}Found $Errors errors and $Warnings warnings.${NC}"
+  ui_err "Issues found" "$Errors errors, $Warnings warnings"
   echo "Run 'dot heal' to attempt auto-repair."
   exit 1
 fi

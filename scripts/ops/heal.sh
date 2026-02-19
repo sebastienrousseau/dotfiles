@@ -10,6 +10,8 @@ set -euo pipefail
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
 REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 DOTFILES_SOURCE="$REPO_ROOT"
 BACKUP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/backups"
@@ -29,13 +31,14 @@ else
 fi
 
 # Logging
+ui_init
 log() { echo -e "$*"; }
-log_info() { log "${BLUE}[INFO]${NC} $*"; }
-log_success() { log "${GREEN}[OK]${NC} $*"; }
-log_warn() { log "${YELLOW}[WARN]${NC} $*"; }
-log_error() { log "${RED}[ERROR]${NC} $*"; }
-log_step() { log "\n${BOLD}==> $*${NC}"; }
-log_dry() { log "${YELLOW}[DRY-RUN]${NC} Would: $*"; }
+log_info() { ui_info "$*"; }
+log_success() { ui_ok "$*"; }
+log_warn() { ui_warn "$*"; }
+log_error() { ui_err "$*"; }
+log_step() { echo ""; ui_header "$*"; }
+log_dry() { ui_warn "DRY-RUN" "Would: $*"; }
 
 # Persistent logging
 persist_log() {

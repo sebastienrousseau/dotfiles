@@ -82,20 +82,20 @@ cmd_tools() {
 
   if [ "$subcommand" = "install" ]; then
     if ! has_command nix; then
-      echo "Nix is not installed."
+      ui_err "Nix" "not installed"
       echo ""
-      echo "To install Nix, run:"
+      ui_header "Install Nix"
       echo "  curl -L https://nixos.org/nix/install | sh"
       echo ""
-      echo "Or use Homebrew/apt for individual tools."
+      ui_info "Or" "use Homebrew/apt for individual tools"
       exit 1
     fi
     shift
     if [ -n "$src_dir" ] && [ -f "$src_dir/nix/flake.nix" ]; then
-      echo "Entering Nix development shell..."
+      ui_info "Entering" "Nix development shell"
       exec nix develop "$src_dir/nix" "$@"
     else
-      echo "Nix flake not found in source directory."
+      ui_err "Nix flake" "not found in source directory"
       exit 1
     fi
   elif [ -n "$src_dir" ] && [ -f "$src_dir/docs/TOOLS.md" ]; then
@@ -103,20 +103,20 @@ cmd_tools() {
   elif [ -n "$src_dir" ] && [ -f "$src_dir/docs/UTILS.md" ]; then
     exec cat "$src_dir/docs/UTILS.md"
   else
-    echo "Dot Tools:"
+    ui_header "Dot Tools"
     echo ""
-    echo "Usage: dot tools [command]"
+    ui_info "Usage" "dot tools [command]"
     echo ""
-    echo "Commands:"
-    echo "  (none)    Show tools documentation"
-    echo "  install   Enter Nix development shell with all tools"
+    ui_header "Commands"
+    ui_ok "(none)" "Show tools documentation"
+    ui_ok "install" "Enter Nix development shell with all tools"
     echo ""
-    echo "Quick Reference:"
-    echo "  dot sync       - Apply dotfiles"
-    echo "  dot update     - Pull latest changes and apply"
-    echo "  dot doctor     - Run health checks"
-    echo "  dot keys       - Show keybindings catalog"
-    echo "  dot learn      - Interactive tour"
+    ui_header "Quick Reference"
+    ui_ok "dot sync" "Apply dotfiles"
+    ui_ok "dot update" "Pull latest changes and apply"
+    ui_ok "dot doctor" "Run health checks"
+    ui_ok "dot keys" "Show keybindings catalog"
+    ui_ok "dot learn" "Interactive tour"
   fi
 }
 
@@ -191,11 +191,11 @@ PY
 }
 
 cmd_packages() {
-  echo "Package Managers:"
+  ui_header "Package Managers"
   echo ""
   show_system_package_managers
   echo ""
-  echo "Language Package Managers:"
+  ui_header "Language Package Managers"
   show_language_package_managers
 }
 
