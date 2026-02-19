@@ -1,10 +1,17 @@
-#!/bin/sh
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
+
+ui_init
+ui_header "Wallpaper Sync"
 
 WALLPAPER_DIR="${DOTFILES_WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
 
 if [ ! -d "$WALLPAPER_DIR" ]; then
-  echo "Wallpaper directory not found: $WALLPAPER_DIR"
+  ui_err "Wallpaper directory" "not found: $WALLPAPER_DIR"
   exit 1
 fi
 
@@ -14,7 +21,7 @@ pick_wallpaper() {
 
 WALLPAPER="$(pick_wallpaper)"
 if [ -z "$WALLPAPER" ]; then
-  echo "No wallpapers found in $WALLPAPER_DIR"
+  ui_err "No wallpapers found" "$WALLPAPER_DIR"
   exit 1
 fi
 
@@ -24,19 +31,21 @@ case "$(uname -s)" in
     ;;
   Linux)
     if command -v feh >/dev/null; then
+      ui_info "Applying" "feh --bg-fill"
       feh --bg-fill "$WALLPAPER"
     elif command -v swaybg >/dev/null; then
+      ui_info "Applying" "swaybg -m fill"
       pkill swaybg || true
       swaybg -i "$WALLPAPER" -m fill &
     else
-      echo "No supported wallpaper setter found (feh/swaybg)."
+      ui_err "Wallpaper setter" "not found (feh/swaybg)"
       exit 1
     fi
     ;;
   *)
-    echo "Wallpaper sync not supported on this OS."
+    ui_err "Unsupported OS" "wallpaper sync"
     exit 1
     ;;
 esac
 
-printf "Wallpaper applied: %s\n" "$WALLPAPER"
+ui_ok "Wallpaper applied" "$WALLPAPER"

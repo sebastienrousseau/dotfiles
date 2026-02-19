@@ -3,17 +3,24 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
+
+ui_init
+ui_header "macOS Tuning"
+
 if [[ "${DOTFILES_TUNING:-0}" != "1" ]]; then
-  echo "Tuning is disabled. Re-run with DOTFILES_TUNING=1 to apply."
+  ui_warn "Tuning" "disabled. Re-run with DOTFILES_TUNING=1"
   exit 0
 fi
 
 if [[ "${DOTFILES_PROFILE:-}" != "laptop" && "${DOTFILES_PROFILE:-}" != "desktop" && "${DOTFILES_PROFILE:-}" != "server" ]]; then
-  echo "DOTFILES_PROFILE is not set to a known profile. Aborting."
+  ui_err "DOTFILES_PROFILE" "not set to known profile"
   exit 1
 fi
 
-echo "Applying macOS tuning..."
+ui_info "Applying" "macOS tuning"
 
 # Faster key repeat (requires logout/login to fully apply)
 defaults write -g InitialKeyRepeat -int 15
@@ -43,4 +50,4 @@ defaults write com.apple.dock autohide-delay -float 0
 defaults write com.apple.dock autohide-time-modifier -float 0.2
 killall Dock >/dev/null 2>&1 || true
 
-echo "macOS tuning complete."
+ui_ok "macOS tuning" "complete"

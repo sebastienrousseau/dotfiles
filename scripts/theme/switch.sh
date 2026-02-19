@@ -1,7 +1,13 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Theme Switcher - Supports Tokyo Night and Catppuccin theme families
 # Usage: dot theme [list|set <name>|toggle|family]
-set -e
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
+
+ui_init
 
 resolve_source_dir() {
   if [ -n "${CHEZMOI_SOURCE_DIR:-}" ] && [ -d "$CHEZMOI_SOURCE_DIR" ]; then
@@ -21,13 +27,13 @@ resolve_source_dir() {
 
 SRC_DIR="$(resolve_source_dir)"
 if [ -z "$SRC_DIR" ]; then
-  echo "Dotfiles source not found."
+  ui_err "Dotfiles source" "not found"
   exit 1
 fi
 
 DATA_FILE="$SRC_DIR/.chezmoidata.toml"
 if [ ! -f "$DATA_FILE" ]; then
-  echo "Missing $DATA_FILE"
+  ui_err "Missing" "$DATA_FILE"
   exit 1
 fi
 
@@ -80,14 +86,14 @@ is_dark_theme() {
 set_theme() {
   new_theme="$1"
   if [ -z "$new_theme" ]; then
-    echo "Theme name required."
+    ui_err "Theme" "name required"
     exit 1
   fi
   # Validate theme name: only allow alphanumeric, hyphens, underscores
   case "$new_theme" in
     *[!a-zA-Z0-9_-]*)
-      echo "Invalid theme name: $new_theme" >&2
-      echo "Theme names may only contain letters, digits, hyphens, and underscores." >&2
+      ui_err "Invalid theme name" "$new_theme" >&2
+      ui_info "Allowed" "letters, digits, hyphens, underscores" >&2
       exit 1
       ;;
   esac
@@ -100,47 +106,47 @@ set_theme() {
     echo "theme = \"$new_theme\"" >>"$tmp_file"
   fi
   mv "$tmp_file" "$DATA_FILE"
-  echo "Theme set to: $new_theme"
-  echo "Applying dotfiles..."
+  ui_ok "Theme set" "$new_theme"
+  ui_info "Applying" "dotfiles"
   chezmoi apply --force 2>/dev/null || chezmoi apply
 }
 
 list_themes() {
-  echo "=== Catppuccin (Recommended) ==="
-  echo "  catppuccin-latte      (light)"
-  echo "  catppuccin-frappe     (dark - muted)"
-  echo "  catppuccin-macchiato  (dark - balanced)"
-  echo "  catppuccin-mocha      (dark - rich)"
+  ui_header "Catppuccin (Recommended)"
+  ui_ok "catppuccin-latte" "(light)"
+  ui_ok "catppuccin-frappe" "(dark - muted)"
+  ui_ok "catppuccin-macchiato" "(dark - balanced)"
+  ui_ok "catppuccin-mocha" "(dark - rich)"
   echo ""
-  echo "=== Tokyo Night ==="
-  echo "  tokyonight-day        (light)"
-  echo "  tokyonight-storm      (dark - muted)"
-  echo "  tokyonight-night      (dark - default)"
-  echo "  tokyonight-moon       (dark - softer)"
+  ui_header "Tokyo Night"
+  ui_ok "tokyonight-day" "(light)"
+  ui_ok "tokyonight-storm" "(dark - muted)"
+  ui_ok "tokyonight-night" "(dark - default)"
+  ui_ok "tokyonight-moon" "(dark - softer)"
   echo ""
-  echo "=== Rose Pine ==="
-  echo "  rose-pine             (dark)"
-  echo "  rose-pine-moon        (dark - softer)"
-  echo "  rose-pine-dawn        (light)"
+  ui_header "Rose Pine"
+  ui_ok "rose-pine" "(dark)"
+  ui_ok "rose-pine-moon" "(dark - softer)"
+  ui_ok "rose-pine-dawn" "(light)"
   echo ""
-  echo "=== Kanagawa ==="
-  echo "  kanagawa-wave         (dark - default)"
-  echo "  kanagawa-dragon       (dark - vibrant)"
-  echo "  kanagawa-lotus        (light)"
+  ui_header "Kanagawa"
+  ui_ok "kanagawa-wave" "(dark - default)"
+  ui_ok "kanagawa-dragon" "(dark - vibrant)"
+  ui_ok "kanagawa-lotus" "(light)"
   echo ""
-  echo "=== Other ==="
-  echo "  dracula               (dark)"
-  echo "  gruvbox-light         (light)"
-  echo "  gruvbox-dark          (dark)"
-  echo "  nord                  (dark)"
-  echo "  onelight              (light)"
-  echo "  onedark               (dark)"
-  echo "  solarized-light       (light)"
-  echo "  solarized-dark        (dark)"
-  echo "  everforest-light      (light)"
-  echo "  everforest-dark       (dark)"
+  ui_header "Other"
+  ui_ok "dracula" "(dark)"
+  ui_ok "gruvbox-light" "(light)"
+  ui_ok "gruvbox-dark" "(dark)"
+  ui_ok "nord" "(dark)"
+  ui_ok "onelight" "(light)"
+  ui_ok "onedark" "(dark)"
+  ui_ok "solarized-light" "(light)"
+  ui_ok "solarized-dark" "(dark)"
+  ui_ok "everforest-light" "(light)"
+  ui_ok "everforest-dark" "(dark)"
   echo ""
-  echo "Current theme: $(current_theme)"
+  ui_info "Current theme" "$(current_theme)"
 }
 
 # Toggle between light and dark within the same family, or switch families
@@ -206,7 +212,7 @@ show_current() {
   else
     mode="light"
   fi
-  echo "Current: $current ($family, $mode)"
+  ui_info "Current" "$current ($family, $mode)"
 }
 
 # =============================================================================
@@ -231,20 +237,21 @@ case "${1:-}" in
     show_current
     ;;
   "")
-    echo "Usage: dot theme [command]"
+    ui_header "Usage"
+    ui_info "dot theme" "[command]"
     echo ""
-    echo "Commands:"
-    echo "  list      Show all available themes"
-    echo "  set NAME  Set theme to NAME"
-    echo "  toggle    Toggle between light/dark within current family"
-    echo "  family    Switch between Tokyo Night and Catppuccin families"
-    echo "  current   Show current theme info"
+    ui_header "Commands"
+    ui_ok "list" "Show all available themes"
+    ui_ok "set NAME" "Set theme to NAME"
+    ui_ok "toggle" "Toggle between light/dark within current family"
+    ui_ok "family" "Switch between Tokyo Night and Catppuccin families"
+    ui_ok "current" "Show current theme info"
     echo ""
     show_current
     ;;
   *)
-    echo "Unknown theme command: $1"
-    echo "Usage: dot theme [list|set <name>|toggle|family|current]"
+    ui_err "Unknown theme command" "$1"
+    ui_info "Usage" "dot theme [list|set <name>|toggle|family|current]"
     exit 1
     ;;
 esac

@@ -7,38 +7,45 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
+
+ui_init
+ui_header "Linux Tuning"
+
 if [[ "${DOTFILES_TUNING:-0}" != "1" ]]; then
-  echo "Tuning is disabled. Re-run with DOTFILES_TUNING=1 to apply."
+  ui_warn "Tuning" "disabled. Re-run with DOTFILES_TUNING=1"
   exit 0
 fi
 
 PROFILE="${DOTFILES_PROFILE:-laptop}"
 
 if [[ "$PROFILE" != "laptop" && "$PROFILE" != "desktop" && "$PROFILE" != "server" ]]; then
-  echo "DOTFILES_PROFILE must be: laptop, desktop, or server. Got: $PROFILE"
+  ui_err "DOTFILES_PROFILE" "must be laptop, desktop, or server (got: $PROFILE)"
   exit 1
 fi
 
-echo "Applying Linux tuning for profile: $PROFILE"
+ui_info "Applying tuning" "$PROFILE profile"
 
 apply_sysctl() {
   local key="$1"
   local value="$2"
   if command -v sudo >/dev/null; then
-    echo "  Setting $key = $value"
-    sudo sysctl -w "$key=$value" >/dev/null 2>&1 || echo "  Warning: Failed to set $key"
+    ui_info "Setting" "$key = $value"
+    sudo sysctl -w "$key=$value" >/dev/null 2>&1 || ui_warn "Failed to set" "$key"
   fi
 }
 
 if ! command -v sudo >/dev/null; then
-  echo "sudo not available; skipping sysctl tuning."
+  ui_warn "sudo" "not available; skipping sysctl tuning"
   exit 0
 fi
 
 # =============================================================================
 # File System Tuning
 # =============================================================================
-echo "Configuring file system settings..."
+ui_header "File system settings"
 
 # Increase inotify watchers for IDEs and file sync tools
 apply_sysctl "fs.inotify.max_user_watches" "524288"
@@ -50,7 +57,7 @@ apply_sysctl "fs.file-max" "2097152"
 # =============================================================================
 # Memory Tuning - vm.swappiness
 # =============================================================================
-echo "Configuring memory settings..."
+ui_header "Memory settings"
 
 case "$PROFILE" in
   laptop)
@@ -79,7 +86,7 @@ esac
 # =============================================================================
 # Network Tuning - TCP Keepalive
 # =============================================================================
-echo "Configuring TCP keepalive settings..."
+ui_header "TCP keepalive settings"
 
 # TCP keepalive: Detect dead connections faster
 # Default: 7200s (2 hours) - we reduce to 60s for faster detection
@@ -113,7 +120,7 @@ apply_sysctl "net.ipv4.tcp_fin_timeout" "15"
 # =============================================================================
 # Security Tuning
 # =============================================================================
-echo "Configuring security settings..."
+ui_header "Security settings"
 
 # Disable IP source routing
 apply_sysctl "net.ipv4.conf.all.accept_source_route" "0"
@@ -132,7 +139,7 @@ apply_sysctl "net.ipv4.tcp_syncookies" "1"
 # =============================================================================
 # Persist Settings
 # =============================================================================
-echo "Persisting settings to /etc/sysctl.d/99-dotfiles.conf..."
+ui_header "Persisting sysctl settings"
 
 if command -v sudo >/dev/null; then
   sudo tee /etc/sysctl.d/99-dotfiles.conf >/dev/null <<'EOF'
@@ -171,5 +178,5 @@ net.ipv4.tcp_syncookies = 1
 EOF
 fi
 
-echo "Linux tuning complete for profile: $PROFILE"
-echo "Note: Some settings require a reboot to take full effect."
+ui_ok "Linux tuning complete" "$PROFILE profile"
+ui_info "Note" "Some settings require a reboot"

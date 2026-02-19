@@ -1,5 +1,12 @@
-#!/bin/sh
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
+
+ui_init
+ui_header "Nerd Fonts"
 
 DEFAULT_FONTS="JetBrainsMono FiraCode Iosevka"
 FONT_LIST="${*:-$DEFAULT_FONTS}"
@@ -10,10 +17,10 @@ install_linux() {
   mkdir -p "$target_dir"
   tmp_dir="$(mktemp -d)"
   url="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${font_name}.zip"
-  echo "Downloading $font_name Nerd Font..."
+  ui_info "Downloading" "$font_name Nerd Font"
   curl -fL --connect-timeout 10 --max-time 300 "$url" -o "$tmp_dir/${font_name}.zip"
   if ! unzip -o "$tmp_dir/${font_name}.zip" -d "$target_dir" >/dev/null; then
-    echo "Error: Failed to unzip ${font_name}.zip" >&2
+    ui_err "Unzip failed" "${font_name}.zip" >&2
     rm -rf "$tmp_dir"
     return 1
   fi
@@ -21,7 +28,7 @@ install_linux() {
   if command -v fc-cache >/dev/null; then
     fc-cache -f "$target_dir"
   fi
-  echo "Installed to: $target_dir"
+  ui_ok "Installed" "$target_dir"
 }
 
 install_macos() {
@@ -36,7 +43,7 @@ install_macos() {
     esac
     brew install --cask "font-${cask_name}-nerd-font" || true
   else
-    echo "Homebrew not found. Install font manually."
+    ui_err "Homebrew" "not found. Install font manually."
     exit 1
   fi
 }
@@ -53,7 +60,7 @@ case "$(uname -s)" in
     done
     ;;
   *)
-    echo "Unsupported OS for font install."
+    ui_err "Unsupported OS" "font install"
     exit 1
     ;;
 esac
