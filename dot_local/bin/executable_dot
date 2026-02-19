@@ -4,7 +4,7 @@
 
 set -e
 
-VERSION="0.2.485"
+VERSION="0.2.486"
 
 COMMAND="$1"
 if [ -n "$1" ]; then
