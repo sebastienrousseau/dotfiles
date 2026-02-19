@@ -1,0 +1,21 @@
+{{- if hasKey . "github_token" }}
+machine github.com
+login {{ .chezmoi.username }}
+password {{ .github_token }}
+
+machine api.github.com
+login {{ .chezmoi.username }}
+password {{ .github_token }}
+{{- end }}
+
+{{- if hasKey . "gitlab_token" }}
+machine gitlab.com
+login {{ .chezmoi.username }}
+password {{ .gitlab_token }}
+{{- end }}
+
+{{- if hasKey . "huggingface_token" }}
+machine huggingface.co
+login {{ .chezmoi.username }}
+password {{ .huggingface_token }}
+{{- end }}

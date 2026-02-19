@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC1090,SC1091
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
+source "$SCRIPT_DIR/../framework/assertions.sh"
+
+SCRIPT_FILE="$REPO_ROOT/scripts/ci/validate-ci-config.sh"
+
+test_start "script_exists"
+assert_file_exists "$SCRIPT_FILE" "validate-ci-config script should exist"
+
+test_start "script_valid_syntax"
+if bash -n "$SCRIPT_FILE" 2>/dev/null; then
+  ((TESTS_PASSED++))
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: syntax is valid"
+else
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: syntax is invalid"
+fi
+
+test_start "script_contains_coverage_check"
+assert_output_contains "100% coverage requirement" "cat \"$SCRIPT_FILE\""
+
+echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

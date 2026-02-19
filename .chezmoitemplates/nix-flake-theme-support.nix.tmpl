@@ -1,0 +1,171 @@
+{{- $theme := default "catppuccin-mocha" .theme -}}
+{{- $isCatppuccin := or (eq $theme "catppuccin-latte") (eq $theme "catppuccin-frappe") (eq $theme "catppuccin-macchiato") (eq $theme "catppuccin-mocha") -}}
+# Nix flake theme support configuration
+# Theme: {{ $theme }}
+{
+  description = "Dotfiles with theme support for {{ $theme }}";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+{{- if $isCatppuccin }}
+    catppuccin.url = "github:catppuccin/nix";
+{{- end }}
+  };
+
+  outputs = { self, nixpkgs, home-manager{{- if $isCatppuccin }}, catppuccin{{- end }}, ... }@inputs:
+    let
+      system = "x86_64-linux"; # Change to your system
+      pkgs = nixpkgs.legacyPackages.${system};
+    in
+    {
+      homeConfigurations = {
+        "{{ .chezmoi.username | default "user" }}" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          modules = [
+{{- if $isCatppuccin }}
+            catppuccin.homeManagerModules.catppuccin
+{{- end }}
+            {
+              home = {
+                username = "{{ .chezmoi.username | default "user" }}";
+                homeDirectory = "{{ .chezmoi.homeDir | default "/home/user" }}";
+                stateVersion = "{{ .nix_state_version | default "24.05" }}";
+              };
+
+{{- if $isCatppuccin }}
+              # Import the generated theme configuration
+              imports = [ ./nix-catppuccin-config.nix ];
+{{- else }}
+              # Import the generated theme configuration
+              imports = [ ./nix-home-manager-theme.nix ];
+{{- end }}
+
+              # Core programs
+              programs.home-manager.enable = true;
+
+              # Git configuration
+              programs.git = {
+                enable = true;
+                userName = "{{ .name | default "Your Name" }}";
+                userEmail = "{{ .email | default "your.email@example.com" }}";
+{{- if .signingkey }}
+                signing = {
+                  key = "{{ .signingkey }}";
+                  signByDefault = true;
+                };
+{{- end }}
+              };
+
+              # Shell configuration
+              programs.zsh = {
+                enable = {{ if .features.zsh }}true{{ else }}false{{ end }};
+                enableCompletion = true;
+                autosuggestion.enable = true;
+                syntaxHighlighting.enable = true;
+              };
+
+              # Terminal applications
+              programs.alacritty = {
+                enable = true;
+                settings = {
+                  font = {
+                    size = {{ default 12 .terminal_font_size }};
+                    normal.family = "{{ default "JetBrains Mono" .terminal_font_family }}";
+                  };
+                  window = {
+                    padding = { x = 16; y = 12; };
+                    opacity = 0.9;
+                  };
+                };
+              };
+
+{{- if .features.tmux }}
+              # Tmux configuration
+              programs.tmux = {
+                enable = true;
+                terminal = "tmux-256color";
+                historyLimit = 50000;
+                keyMode = "vi";
+                mouse = true;
+                escapeTime = 10;
+                plugins = with pkgs.tmuxPlugins; [
+                  sensible
+                  yank
+                  resurrect
+                  continuum
+                ];
+              };
+{{- end }}
+
+{{- if .features.nvim }}
+              # Neovim configuration
+              programs.neovim = {
+                enable = true;
+                defaultEditor = true;
+                viAlias = true;
+                vimAlias = true;
+                vimdiffAlias = true;
+              };
+{{- end }}
+
+              # Development packages
+              home.packages = with pkgs; [
+                # Core utilities
+                ripgrep
+                fd
+                bat
+                fzf
+                zoxide
+                eza
+                git
+                lazygit
+                delta
+                jq
+                yq
+
+                # Security tools
+                age
+                gnupg
+
+                # Theme-specific packages
+{{- if $isCatppuccin }}
+                catppuccin-gtk
+                catppuccin-cursors.mochaBlue
+{{- end }}
+              ];
+
+              # Environment variables
+              home.sessionVariables = {
+                DOTFILES_THEME = "{{ $theme }}";
+                TERMINAL_FONT_FAMILY = "{{ default "JetBrains Mono" .terminal_font_family }}";
+                TERMINAL_FONT_SIZE = "{{ default 12 .terminal_font_size }}";
+              };
+            }
+          ];
+        };
+      };
+
+      # Development shell for theme testing
+      devShells.${system}.default = pkgs.mkShell {
+        buildInputs = with pkgs; [
+          home-manager
+          git
+          chezmoi
+{{- if $isCatppuccin }}
+          catppuccin-gtk
+{{- end }}
+        ];
+
+        shellHook = ''
+          echo "🎨 Theme development environment for {{ $theme }}"
+          echo "Available commands:"
+          echo "  home-manager switch --flake .#{{ .chezmoi.username | default "user" }}"
+          echo "  chezmoi apply"
+        '';
+      };
+    };
+}

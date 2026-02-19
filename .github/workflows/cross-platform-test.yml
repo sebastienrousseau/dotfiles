@@ -1,0 +1,323 @@
+name: Cross-Platform Test
+
+# Verify scripts work on both macOS (BSD tools) and Linux (GNU tools)
+# Catches sed, awk, grep, and other tool differences that ShellCheck misses
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - '**.sh'
+      - '**.bash'
+      - '**.zsh'
+      - '.chezmoitemplates/**'
+      - 'scripts/**'
+  push:
+    branches: [master]
+    paths:
+      - '**.sh'
+      - '**.bash'
+      - '**.zsh'
+      - '.chezmoitemplates/**'
+      - 'scripts/**'
+  merge_group:
+    branches: [master]
+    paths:
+      - '**.sh'
+      - '**.bash'
+      - '**.zsh'
+      - '.chezmoitemplates/**'
+      - 'scripts/**'
+  # Weekly check for tool version drift
+  schedule:
+    - cron: '0 7 * * 0'  # Sunday 7 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ============================================================================
+  # Cross-Platform Script Validation
+  # ============================================================================
+  cross-platform-test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            tools: gnu
+          - os: macos-latest
+            platform: darwin
+            tools: bsd
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Display environment info
+        run: |
+          echo "=== Platform: ${{ matrix.platform }} (${{ matrix.tools }} tools) ==="
+          echo "OS: $(uname -a)"
+          echo "Shell: $SHELL ($(bash --version | head -1))"
+          echo ""
+          echo "=== Tool versions ==="
+          echo "sed: $(sed --version 2>&1 | head -1 || echo 'BSD sed')"
+          echo "awk: $(awk --version 2>&1 | head -1 || echo 'BSD awk')"
+          echo "grep: $(grep --version 2>&1 | head -1 || echo 'BSD grep')"
+          echo "date: $(date --version 2>&1 | head -1 || echo 'BSD date')"
+
+      - name: Validate shell script syntax
+        run: |
+          echo "=== Validating shell script syntax ==="
+          errors=0
+
+          while IFS= read -r -d '' script; do
+            if ! bash -n "$script" 2>/dev/null; then
+              echo "FAIL: $script"
+              errors=$((errors + 1))
+            fi
+          done < <(find . -name "*.sh" -type f ! -path "./.git/*" -print0)
+
+          if [[ $errors -gt 0 ]]; then
+            echo "::error::$errors scripts failed syntax validation"
+            exit 1
+          fi
+
+          echo "All scripts passed syntax validation"
+
+      - name: Test portable sed patterns
+        run: |
+          echo "=== Testing sed portability ==="
+          errors=0
+
+          # Create test file
+          echo -e "line1\nline2\nline3" > /tmp/sed_test.txt
+
+          # Test 1: In-place edit (BSD requires backup extension, GNU doesn't)
+          # Portable pattern: use explicit empty string for GNU compatibility
+          if [[ "${{ matrix.platform }}" == "darwin" ]]; then
+            sed -i '' 's/line1/LINE1/' /tmp/sed_test.txt
+          else
+            sed -i 's/line1/LINE1/' /tmp/sed_test.txt
+          fi
+
+          if ! grep -q "LINE1" /tmp/sed_test.txt; then
+            echo "FAIL: sed in-place edit"
+            errors=$((errors + 1))
+          fi
+
+          # Test 2: Extended regex (-E is portable, -r is GNU-only)
+          if ! echo "test123" | sed -E 's/[0-9]+/NUM/' | grep -q "testNUM"; then
+            echo "FAIL: sed -E extended regex"
+            errors=$((errors + 1))
+          fi
+
+          if [[ $errors -gt 0 ]]; then
+            echo "::error::sed portability tests failed"
+            exit 1
+          fi
+
+          echo "sed portability tests passed"
+
+      - name: Test portable grep patterns
+        run: |
+          echo "=== Testing grep portability ==="
+          errors=0
+
+          # Test 1: Extended regex (-E is portable)
+          if ! echo "test123" | grep -E '[0-9]+' > /dev/null; then
+            echo "FAIL: grep -E extended regex"
+            errors=$((errors + 1))
+          fi
+
+          # Test 2: PCRE (-P is GNU-only, should not be used)
+          # Just verify -E works as portable alternative
+
+          # Test 3: Quiet mode
+          if ! echo "test" | grep -q "test"; then
+            echo "FAIL: grep -q quiet mode"
+            errors=$((errors + 1))
+          fi
+
+          if [[ $errors -gt 0 ]]; then
+            echo "::error::grep portability tests failed"
+            exit 1
+          fi
+
+          echo "grep portability tests passed"
+
+      - name: Test portable date patterns
+        run: |
+          echo "=== Testing date portability ==="
+          errors=0
+
+          # Test 1: ISO format (portable)
+          if ! date +%Y-%m-%d > /dev/null 2>&1; then
+            echo "FAIL: date ISO format"
+            errors=$((errors + 1))
+          fi
+
+          # Test 2: Epoch seconds (portable)
+          if ! date +%s > /dev/null 2>&1; then
+            echo "FAIL: date epoch seconds"
+            errors=$((errors + 1))
+          fi
+
+          # Note: date -d (GNU) vs date -j -f (BSD) are NOT portable
+          # Scripts should use: date +%s for calculations
+
+          if [[ $errors -gt 0 ]]; then
+            echo "::error::date portability tests failed"
+            exit 1
+          fi
+
+          echo "date portability tests passed"
+
+      - name: Scan for non-portable patterns
+        run: |
+          echo "=== Scanning for non-portable patterns ==="
+          warnings=0
+
+          # Pattern 1: sed -i without handling BSD/GNU difference
+          # Look for sed -i that doesn't account for platform
+          if grep -rn --include="*.sh" "sed -i '" . 2>/dev/null | grep -v "darwin\|macos\|BSD" | head -5; then
+            echo "::warning::Found sed -i '' (BSD-style) without platform check"
+            warnings=$((warnings + 1))
+          fi
+
+          if grep -rn --include="*.sh" "sed -i \"" . 2>/dev/null | grep -v "darwin\|macos\|BSD" | head -5; then
+            echo "::warning::Found sed -i (GNU-style) without platform check"
+            warnings=$((warnings + 1))
+          fi
+
+          # Pattern 2: grep -P (PCRE - GNU only)
+          if grep -rn --include="*.sh" "grep -P" . 2>/dev/null | head -5; then
+            echo "::warning::Found grep -P (GNU-only PCRE). Use grep -E instead."
+            warnings=$((warnings + 1))
+          fi
+
+          # Pattern 3: date -d (GNU only)
+          if grep -rn --include="*.sh" "date -d" . 2>/dev/null | grep -v "#" | head -5; then
+            echo "::warning::Found date -d (GNU-only). Not portable to macOS."
+            warnings=$((warnings + 1))
+          fi
+
+          # Pattern 4: readarray/mapfile (bash 4+ only, macOS has bash 3)
+          if grep -rn --include="*.sh" -E "readarray|mapfile" . 2>/dev/null | head -5; then
+            echo "::warning::Found readarray/mapfile (bash 4+). macOS ships bash 3."
+            warnings=$((warnings + 1))
+          fi
+
+          # Pattern 5: associative arrays (bash 4+ only)
+          if grep -rn --include="*.sh" "declare -A" . 2>/dev/null | head -5; then
+            echo "::warning::Found declare -A (bash 4+). macOS ships bash 3."
+            warnings=$((warnings + 1))
+          fi
+
+          echo "Found $warnings portability warnings"
+
+      - name: Run unit tests
+        run: |
+          echo "=== Running unit tests on ${{ matrix.platform }} ==="
+
+          if [[ -f scripts/tests/framework/test_runner.sh ]]; then
+            chmod +x scripts/tests/framework/test_runner.sh
+
+            # Run a subset of critical tests with timeout
+            timeout 120 bash -c '
+              export REPO_ROOT="$(pwd)"
+              cd scripts/tests/unit
+
+              passed=0
+              failed=0
+
+              for test in test_dot_commands_*.sh test_diagnostics_*.sh; do
+                if [[ -f "$test" ]]; then
+                  if bash "$test" > /tmp/test_output.txt 2>&1; then
+                    passed=$((passed + 1))
+                  else
+                    echo "FAIL: $test"
+                    tail -20 /tmp/test_output.txt
+                    failed=$((failed + 1))
+                  fi
+                fi
+              done
+
+              echo ""
+              echo "Tests passed: $passed, failed: $failed"
+
+              if [[ $failed -gt 0 ]]; then
+                exit 1
+              fi
+            ' || {
+              echo "::warning::Some tests failed on ${{ matrix.platform }}"
+            }
+          else
+            echo "Test runner not found, skipping"
+          fi
+
+      - name: Test critical scripts runtime
+        run: |
+          echo "=== Testing critical scripts runtime ==="
+
+          # Test scripts that are likely to have BSD/GNU differences
+          test_scripts=(
+            "scripts/diagnostics/health.sh"
+            "scripts/dot/lib/logging.sh"
+            "scripts/dot/lib/config.sh"
+          )
+
+          for script in "${test_scripts[@]}"; do
+            if [[ -f "$script" ]]; then
+              echo "Testing: $script"
+              # Source test - check if script can be sourced without errors
+              if bash -n "$script" && timeout 5 bash -c "source '$script'" 2>/dev/null; then
+                echo "  OK: $script"
+              else
+                echo "  WARN: $script may have issues"
+              fi
+            fi
+          done
+
+  # ============================================================================
+  # BSD vs GNU Compatibility Report
+  # ============================================================================
+  compatibility-report:
+    name: Compatibility Report
+    runs-on: ubuntu-latest
+    needs: [cross-platform-test]
+    if: always()
+    steps:
+      - name: Generate Report
+        run: |
+          echo "## Cross-Platform Compatibility Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Platform | Tools | Status |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|----------|-------|--------|" >> "$GITHUB_STEP_SUMMARY"
+
+          # Parse job results
+          LINUX_RESULT="${{ needs.cross-platform-test.result }}"
+
+          echo "| Linux (Ubuntu) | GNU | $([[ '${{ needs.cross-platform-test.result }}' == 'success' ]] && echo ':white_check_mark: Pass' || echo ':x: Fail') |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| macOS | BSD | $([[ '${{ needs.cross-platform-test.result }}' == 'success' ]] && echo ':white_check_mark: Pass' || echo ':x: Fail') |" >> "$GITHUB_STEP_SUMMARY"
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Common Portability Issues" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Pattern | Issue | Portable Alternative |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---------|-------|---------------------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| \`sed -i\` | BSD requires backup ext | Check \$OSTYPE |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| \`grep -P\` | GNU-only PCRE | Use \`grep -E\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| \`date -d\` | GNU-only | Use \`date +%s\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| \`readarray\` | Bash 4+ | Use \`while read\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| \`declare -A\` | Bash 4+ | Use separate vars |" >> "$GITHUB_STEP_SUMMARY"

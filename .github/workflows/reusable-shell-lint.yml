@@ -1,0 +1,92 @@
+name: Reusable Shell Lint
+
+on:
+  workflow_call:
+    inputs:
+      include_tests:
+        description: Include shell files under scripts/tests.
+        required: false
+        default: false
+        type: boolean
+      shellcheck_severity:
+        description: ShellCheck severity level (error, warning, info, style).
+        required: false
+        default: error
+        type: string
+      shellcheck_excludes:
+        description: Comma-separated ShellCheck exclude codes.
+        required: false
+        default: "SC1091,SC2030,SC2031"
+        type: string
+      fail_on_shellcheck:
+        description: Fail job on ShellCheck findings.
+        required: false
+        default: true
+        type: boolean
+      run_shfmt:
+        description: Run shfmt formatting check.
+        required: false
+        default: false
+        type: boolean
+      shfmt_targets:
+        description: Space-separated shfmt targets.
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  shell-lint:
+    name: Shell Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Install tools
+        run: |
+          sudo apt-get update && sudo apt-get install -y shellcheck ripgrep shfmt
+
+      - name: ShellCheck
+        run: |
+          set -euo pipefail
+          echo "Running ShellCheck..."
+
+          if [[ "${{ inputs.include_tests }}" == "true" ]]; then
+            mapfile -t files < <(rg --files -g "*.sh")
+          else
+            mapfile -t files < <(rg --files -g "*.sh" -g "!scripts/tests/**")
+          fi
+
+          if [[ "${#files[@]}" -eq 0 ]]; then
+            echo "No shell files found."
+            exit 0
+          fi
+
+          set +e
+          shellcheck -x -S "${{ inputs.shellcheck_severity }}" \
+            -e "${{ inputs.shellcheck_excludes }}" \
+            -f gcc "${files[@]}"
+          shellcheck_ec=$?
+          set -e
+
+          if [[ "$shellcheck_ec" -ne 0 ]]; then
+            if [[ "${{ inputs.fail_on_shellcheck }}" == "true" ]]; then
+              echo "::error::ShellCheck found issues."
+              exit "$shellcheck_ec"
+            fi
+            echo "::warning::ShellCheck found issues (non-blocking mode)."
+          fi
+
+      - name: shfmt
+        if: inputs.run_shfmt == true
+        run: |
+          set -euo pipefail
+          if [[ -z "${{ inputs.shfmt_targets }}" ]]; then
+            echo "No shfmt targets provided, skipping."
+            exit 0
+          fi
+          # shellcheck disable=SC2086
+          shfmt -d -i 2 -ci ${{ inputs.shfmt_targets }}

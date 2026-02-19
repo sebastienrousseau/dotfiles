@@ -1,0 +1,104 @@
+# Justfile for common development tasks
+# https://github.com/casey/just
+
+# Default recipe - show help
+default:
+    @just --list
+
+# === Development ===
+
+# Run development server
+dev:
+    npm run dev
+
+# Build for production
+build:
+    npm run build
+
+# Run tests
+test:
+    npm test
+
+# Run tests with coverage
+test-cov:
+    npm run test:coverage
+
+# Lint code
+lint:
+    npm run lint
+
+# Format code
+fmt:
+    npm run format
+
+# === Git Shortcuts ===
+
+# Quick commit with message
+commit msg:
+    git add -A && git commit -m "{{msg}}"
+
+# Push to current branch
+push:
+    git push origin $(git branch --show-current)
+
+# Pull and rebase
+sync:
+    git pull --rebase origin $(git branch --show-current)
+
+# === Docker ===
+
+# Build docker image
+docker-build:
+    docker build -t $(basename $(pwd)):latest .
+
+# Run docker container
+docker-run:
+    docker run -it --rm $(basename $(pwd)):latest
+
+# === Dotfiles ===
+
+# Apply dotfiles
+dots-apply:
+    chezmoi apply
+
+# Update dotfiles from source
+dots-update:
+    chezmoi update
+
+# Check dotfiles diff
+dots-diff:
+    chezmoi diff
+
+# Benchmark shell startup
+dots-bench:
+    ~/.dotfiles/scripts/diagnostics/benchmark.sh
+
+# Run dotfiles health check
+dots-health:
+    dot health
+
+# === System ===
+
+# Update all package managers
+update-all:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo "Updating Homebrew..."
+    brew update && brew upgrade
+    echo "Updating npm global packages..."
+    npm update -g
+    echo "Updating Rust..."
+    rustup update
+    echo "Done!"
+
+# Clean system caches
+clean:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo "Cleaning brew..."
+    brew cleanup -s
+    echo "Cleaning npm..."
+    npm cache clean --force
+    echo "Cleaning docker..."
+    docker system prune -f 2>/dev/null || true
+    echo "Done!"

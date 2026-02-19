@@ -1,0 +1,41 @@
+# mise (runtime manager) configuration
+# https://mise.jdx.dev/
+
+[settings]
+# Install missing tools automatically
+auto_install = true
+# Use verbose output
+verbose = false
+
+[tools]
+# Node.js - use fnm for faster switching
+# node = "lts"
+
+# Python
+python = ["3.12", "3.11"]
+
+# Go
+go = "latest"
+
+# Rust (via rustup)
+# rust = "stable"
+
+# Ruby
+ruby = "3.3"
+
+# Java
+java = "21"
+
+# Deno
+deno = "latest"
+
+# Bun
+bun = "latest"
+
+# Task runners
+task = "latest"
+just = "latest"
+
+[env]
+# Environment variables to set
+MISE_EXPERIMENTAL = "1"

@@ -1,0 +1,76 @@
+# Gitleaks Configuration
+#
+# This file configures gitleaks to ignore known false positives.
+# These are example/placeholder secrets used in documentation.
+#
+# References:
+#   - Gitleaks: https://github.com/gitleaks/gitleaks
+
+title = "Dotfiles Gitleaks Configuration"
+
+[extend]
+# Use the default gitleaks config as a base
+useDefault = true
+
+# Allowlist patterns that are known false positives
+[allowlist]
+description = "Allowlisted patterns for documentation examples"
+
+# Example secrets used in documentation
+regexes = [
+    # Example hex values commonly used in documentation
+    '''cafebabe:deadbeef''',
+    '''cafebabe''',
+    '''deadbeef''',
+
+    # Example AWS keys with XXX indicating they're fake
+    '''AKIAIMNOJVGFDXXXE4OA''',
+
+    # Sidekiq enterprise example
+    '''BUNDLE_ENTERPRISE__CONTRIBSYS__COM''',
+
+    # GPG public key fingerprints used for signature verification (not secrets)
+    '''CHEZMOI_GPG_KEY=''',
+]
+
+# Paths to ignore (documentation files with examples)
+paths = [
+    '''docs/.*\.md''',
+    '''\.github/.*\.md''',
+    '''\.github/security-policies/environment-template\.env''',
+]
+
+# Specific commits to ignore (false positives from GPG public key fingerprint)
+commits = [
+    "c26337708b2c87e0f240c643d203da45eb687aff",
+    "499ba965458e0052c01bc4fc71c8a2be43a70b3b",
+]
+
+# Stopwords - common words that appear in secrets but are not secrets
+stopwords = [
+    "example",
+    "test",
+    "sample",
+    "placeholder",
+    "dummy",
+    "fake",
+]
+
+# Additional patterns to detect
+[[rules]]
+id = "aws-session-token"
+description = "AWS Session Token"
+regex = '''(?i)aws.{0,20}session.{0,20}token.{0,20}['"][0-9a-zA-Z/+=]{16,}['"]'''
+tags = ["aws", "token"]
+
+[[rules]]
+id = "gcp-api-key"
+description = "GCP API Key"
+regex = '''AIza[0-9A-Za-z\-_]{35}'''
+tags = ["gcp", "api"]
+
+[[rules]]
+id = "azure-connection-string"
+description = "Azure Connection String"
+regex = '''(?i)DefaultEndpointsProtocol=https;AccountName=[^;]+;AccountKey=[^;]+'''
+tags = ["azure", "connection"]

@@ -1,0 +1,42 @@
+# Dotfiles Sandbox (Laptop-safe preview)
+# Build: docker build -f tests/Dockerfile.sandbox -t dotfiles-sandbox .
+# Run:   docker run --rm -it dotfiles-sandbox
+
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV HOME=/root
+
+# hadolint ignore=DL3008
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        git curl zsh build-essential ripgrep fd-find bat jq ca-certificates && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p "$HOME/.local/bin" && \
+    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+ENV PATH="$HOME/.local/bin:$PATH"
+
+COPY . "$HOME/.dotfiles"
+
+RUN mkdir -p "$HOME/.config/chezmoi" && \
+    printf 'sourceDir = "%s"\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml"
+
+# Skip provisioning scripts inside sandbox
+RUN chezmoi apply --exclude=scripts
+
+# Create non-root user for container security (CKV_DOCKER_3)
+RUN useradd -m -d /home/sandbox -s /bin/zsh sandbox && \
+    cp -a /root/. /home/sandbox/ && \
+    chown -R sandbox:sandbox /home/sandbox
+
+USER sandbox
+ENV HOME=/home/sandbox
+WORKDIR /home/sandbox
+
+# Healthcheck to verify container is responsive
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD zsh -c "exit 0" || exit 1
+
+CMD ["zsh"]

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  exit 0
+fi
+
+if ! command -v mas >/dev/null 2>&1; then
+  echo "mas not installed; skipping Mac App Store apps."
+  exit 0
+fi
+
+if ! mas account >/dev/null 2>&1; then
+  echo "mas not signed in; run 'mas signin <apple-id>' and re-apply."
+  exit 0
+fi
+
+APPS_FILE="${HOME}/.config/mas/masapps.txt"
+if [[ ! -f "${APPS_FILE}" ]]; then
+  echo "No MAS app list found at ${APPS_FILE}."
+  exit 0
+fi
+
+entries=()
+while IFS= read -r line; do
+  entries+=("$line")
+done < <(grep -vE '^[[:space:]]*#|^[[:space:]]*$' "${APPS_FILE}" || true)
+if [[ ${#entries[@]} -eq 0 ]]; then
+  echo "No MAS apps configured."
+  exit 0
+fi
+
+for entry in "${entries[@]}"; do
+  app_id="$(awk '{print $NF}' <<<"${entry}")"
+  if [[ "${app_id}" =~ ^[0-9]+$ ]]; then
+    mas install "${app_id}" || true
+  else
+    echo "Skipping invalid MAS entry: ${entry}"
+  fi
+done

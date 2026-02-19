@@ -1,0 +1,96 @@
+{{- /* ============================================================================
+     Git Configuration Template
+
+     This template resolves git-related variables with fallback support:
+     - Checks git_* prefixed variables first
+     - Falls back to generic variables (name, email, signingkey)
+
+     Required chezmoi data:
+     - git_name or name: Git user name
+     - git_email or email: Git user email
+     - git_signingkey or signingkey: SSH/GPG signing key (optional)
+     - git_signingformat: Signing format, defaults to "ssh"
+     ============================================================================ */ -}}
+
+{{- /* Resolve git variables with fallback */ -}}
+{{- $git_name := coalesce (index . "git_name") (index . "name") "" -}}
+{{- $git_email := coalesce (index . "git_email") (index . "email") "" -}}
+{{- $git_signingkey := coalesce (index . "git_signingkey") (index . "signingkey") "" -}}
+{{- $git_signingformat := coalesce (index . "git_signingformat") "ssh" -}}
+
+[user]
+{{- if $git_name }}
+	name = {{ $git_name }}
+{{- end }}
+{{- if $git_email }}
+	email = {{ $git_email }}
+{{- end }}
+{{- if $git_signingkey }}
+	signingkey = {{ $git_signingkey }}
+{{- end }}
+
+{{- if $git_signingkey }}
+
+[commit]
+	gpgsign = true
+
+[gpg]
+	format = {{ $git_signingformat }}
+
+[gpg "ssh"]
+	allowedSignersFile = {{ .chezmoi.homeDir }}/.ssh/allowed_signers
+{{- end }}
+
+[core]
+	excludesfile = {{ .chezmoi.homeDir }}/.config/git/ignore
+	attributesFile = {{ .chezmoi.homeDir }}/.config/git/attributes
+
+[fetch]
+	prune = true
+
+[push]
+	autoSetupRemote = true
+
+[pull]
+	rebase = true
+
+[rerere]
+	enabled = true
+
+[maintenance]
+	auto = true
+	strategy = incremental
+
+[worktree]
+	guessRemote = true
+
+[delta]
+	features = decorations
+	syntax-theme = TwoDark
+
+[diff]
+	colorMoved = default
+
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+
+{{- /* Platform-specific credential helpers */ -}}
+{{- if eq .chezmoi.os "darwin" }}
+
+[credential]
+	helper = osxkeychain
+{{- else if eq .chezmoi.os "linux" }}
+
+[credential]
+	helper = cache --timeout=3600
+	helper = /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
+{{- end }}
+
+[credential "https://github.com"]
+	helper = !gh auth git-credential
+
+[credential "https://gitlab.com"]
+	helper = !glab auth git-credential

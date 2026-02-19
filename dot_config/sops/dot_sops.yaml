@@ -1,0 +1,23 @@
+# SOPS configuration for encrypted secrets
+# https://github.com/getsops/sops
+
+creation_rules:
+  # Environment files
+  - path_regex: \.env\.encrypted$
+    age: >-
+      # Add your age public key here after running: age-keygen
+      # age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+  # API keys and tokens
+  - path_regex: secrets/.*\.yaml$
+    age: >-
+      # age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+  # SSH keys (use chezmoi's native encryption instead for these)
+  # - path_regex: ssh/.*$
+  #   age: >-
+  #     age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Store age keys in standard location
+# Keys should be at: ~/.config/sops/age/keys.txt
+# Generate with: age-keygen -o ~/.config/sops/age/keys.txt

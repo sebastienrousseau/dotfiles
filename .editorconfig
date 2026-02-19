@@ -1,0 +1,47 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.482) - https://dotfiles.io
+# Made With ❤️ in London, United Kingdom
+# Designed by Sebastien Rousseau
+# Copyright (c) 2015-2026. All rights reserved.
+# License: MIT
+
+#
+# http://editorconfig.org
+#
+# An .editorconfig file describes minor formatting tweaks
+#   to apply to text files to ensure consistent formatting
+#   in a project with multiple developers.
+#
+# Plugins exist to allow editors / IDEs to automatically apply
+#   these tweaks to a project when an .editorconfig file is
+#   found in the project's root directory.
+#
+# Plugins
+#   Sublime - https://packagecontrol.io/packages/EditorConfig
+#   IntelliJ - https://plugins.jetbrains.com/plugin/7294
+#   (most other IDEs/Editors - Google it)
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+[{configure,configure.*,config.*,*.{sh,yml,yaml}}]
+indent_size = 2
+indent_style = space
+
+[{makefile.vc,nmake.opt}]
+end_of_line = crlf
+indent_style = tab
+
+[Makefile]
+indent_style = tab
+
+[*.json]
+indent_style = tab

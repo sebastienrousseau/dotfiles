@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Show public and local IP addresses
+# Usage: myip [--json]
+
+set -euo pipefail
+
+JSON_OUTPUT=false
+[[ "${1:-}" == "--json" ]] && JSON_OUTPUT=true
+
+# Get public IP
+get_public_ip() {
+  curl -s --max-time 5 https://api.ipify.org 2>/dev/null ||
+    curl -s --max-time 5 https://ifconfig.me 2>/dev/null ||
+    curl -s --max-time 5 https://icanhazip.com 2>/dev/null ||
+    echo "unavailable"
+}
+
+# Get local IP
+get_local_ip() {
+  if command -v ip >/dev/null 2>&1; then
+    ip route get 1 2>/dev/null | awk '{print $7; exit}'
+  elif command -v ifconfig >/dev/null 2>&1; then
+    ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1
+  else
+    hostname -I 2>/dev/null | awk '{print $1}' || echo "unavailable"
+  fi
+}
+
+PUBLIC_IP=$(get_public_ip)
+LOCAL_IP=$(get_local_ip)
+
+if $JSON_OUTPUT; then
+  echo "{\"public\": \"$PUBLIC_IP\", \"local\": \"$LOCAL_IP\"}"
+else
+  echo "Public IP:  $PUBLIC_IP"
+  echo "Local IP:   $LOCAL_IP"
+fi

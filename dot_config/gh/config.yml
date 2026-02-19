@@ -1,0 +1,12 @@
+aliases:
+    co: pr checkout
+    pv: pr view --web
+    prc: pr create
+    prw: pr view --web
+    prl: pr list
+    rel: release list
+    repo: repo view --web
+    issuec: issue create
+    issuel: issue list
+    issuev: issue view
+version: "1"

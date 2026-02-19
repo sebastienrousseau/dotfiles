@@ -1,0 +1,41 @@
+# SSH Hardening Defaults - Managed by Chezmoi
+{{- $isWSL := false -}}
+{{- if eq .chezmoi.os "linux" -}}
+{{-   if (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
+{{-     $isWSL = true -}}
+{{-   end -}}
+{{- end }}
+# Include site-specific overrides
+Include ~/.ssh/config.d/*.conf
+
+Host *
+  # SSH multiplexing
+  ControlMaster auto
+  ControlPersist 10m
+  ControlPath ~/.ssh/cm/%r@%h:%p
+  ServerAliveInterval 60
+  ServerAliveCountMax 3
+  HashKnownHosts yes
+  VisualHostKey yes
+  IdentitiesOnly yes
+  AddKeysToAgent yes
+{{- if eq .chezmoi.os "darwin" }}
+  UseKeychain yes
+{{- end }}
+  IdentityFile ~/.ssh/id_ed25519
+  KbdInteractiveAuthentication no
+  PasswordAuthentication no
+  PreferredAuthentications publickey
+  PubkeyAuthentication yes
+  Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com
+  KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org
+  HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256
+
+# Example Jump Host (override in ~/.ssh/config.d/*.conf)
+# Host bastion
+#   HostName bastion.example.com
+#   User your_user
+#   IdentityFile ~/.ssh/id_ed25519
+#
+# Host internal-*
+#   ProxyJump bastion

@@ -1,0 +1,187 @@
+#!/usr/bin/env bash
+# tmux-sessionizer - Fuzzy session switcher for tmux
+#
+# This script provides a fuzzy-finder interface for switching between
+# tmux sessions and creating new sessions from project directories.
+#
+# Usage:
+#   tmux-sessionizer [directory]
+#
+# If no directory is provided, uses fzf to select from:
+#   - Existing tmux sessions
+#   - Project directories from configured paths
+#
+# Configuration:
+#   Set TMUX_SESSIONIZER_DIRS to customise search paths (colon-separated)
+#   Default: ~/projects:~/work:~/src:~/.dotfiles
+#
+# References:
+#   - ThePrimeagen's original: https://github.com/ThePrimeagen/.dotfiles
+
+set -euo pipefail
+
+# Configuration
+SESSIONIZER_DIRS="${TMUX_SESSIONIZER_DIRS:-$HOME/projects:$HOME/work:$HOME/src:$HOME/.dotfiles}"
+
+# Colours for output
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly NC='\033[0m' # No Colour
+
+log_error() {
+    echo -e "${RED}Error:${NC} $1" >&2
+}
+
+log_info() {
+    echo -e "${GREEN}Info:${NC} $1"
+}
+
+# Check dependencies
+if ! command -v fzf &>/dev/null; then
+    log_error "fzf is required but not installed."
+    exit 1
+fi
+
+if ! command -v tmux &>/dev/null; then
+    log_error "tmux is required but not installed."
+    exit 1
+fi
+
+# Get list of directories to search (as newline-separated list for safe iteration)
+get_search_dirs() {
+    local paths
+    IFS=':' read -ra paths <<< "$SESSIONIZER_DIRS"
+    for path in "${paths[@]}"; do
+        # Expand tilde
+        local expanded_path="${path/#\~/$HOME}"
+        if [[ -d "$expanded_path" ]]; then
+            printf '%s\n' "$expanded_path"
+        fi
+    done
+}
+
+# Get list of project directories
+get_projects() {
+    local search_dirs
+    search_dirs=$(get_search_dirs)
+
+    if [[ -z "$search_dirs" ]]; then
+        return
+    fi
+
+    # Find directories (1-2 levels deep) - iterate safely over newline-separated dirs
+    while IFS= read -r dir; do
+        find "$dir" -mindepth 1 -maxdepth 2 -type d 2>/dev/null
+    done <<< "$search_dirs" | sort -u
+}
+
+# Get list of existing tmux sessions
+get_sessions() {
+    tmux list-sessions -F "#{session_name}" 2>/dev/null || true
+}
+
+# Format session name from directory path (sanitized for tmux)
+format_session_name() {
+    local dir="$1"
+    local name
+
+    # Get basename, replace dots with underscores, and strip unsafe chars
+    name=$(basename "$dir" | tr '.' '_' | tr -cd '[:alnum:]._-')
+
+    # Remove leading numbers/dashes for cleaner names
+    name="${name##[0-9_-]}"
+    name="${name##[0-9_-]}"
+    name="${name##[0-9_-]}"
+
+    # If name is empty after cleanup, use sanitized full basename
+    if [[ -z "$name" ]]; then
+        name=$(basename "$dir" | tr -cd '[:alnum:]._-')
+    fi
+
+    # Limit length for safety
+    echo "${name:0:32}"
+}
+
+# Switch to or create a tmux session
+switch_to_session() {
+    local selected="$1"
+    local session_name
+
+    if [[ -z "$selected" ]]; then
+        log_error "No selection made."
+        exit 0
+    fi
+
+    # Check if selection is an existing session
+    if tmux has-session -t="$selected" 2>/dev/null; then
+        session_name="$selected"
+    else
+        # It's a directory - create or switch to session
+        if [[ ! -d "$selected" ]]; then
+            log_error "Directory does not exist: $selected"
+            exit 1
+        fi
+
+        session_name=$(format_session_name "$selected")
+
+        # Create session if it doesn't exist
+        if ! tmux has-session -t="$session_name" 2>/dev/null; then
+            tmux new-session -ds "$session_name" -c "$selected"
+            log_info "Created new session: $session_name"
+        fi
+    fi
+
+    # Switch to the session
+    if [[ -z "${TMUX:-}" ]]; then
+        # Not inside tmux - attach directly
+        tmux attach-session -t "$session_name"
+    else
+        # Inside tmux - switch client
+        tmux switch-client -t "$session_name"
+    fi
+}
+
+# Main function
+main() {
+    local selected
+
+    # If argument provided, use it directly
+    if [[ $# -eq 1 ]]; then
+        selected="$1"
+    else
+        # Build selection list: existing sessions + project directories
+        local sessions projects combined
+
+        sessions=$(get_sessions)
+        projects=$(get_projects)
+
+        # Combine and deduplicate
+        if [[ -n "$sessions" ]] && [[ -n "$projects" ]]; then
+            combined=$(printf "%s\n%s" "$sessions" "$projects" | sort -u)
+        elif [[ -n "$sessions" ]]; then
+            combined="$sessions"
+        elif [[ -n "$projects" ]]; then
+            combined="$projects"
+        else
+            log_error "No sessions or project directories found."
+            exit 1
+        fi
+
+        # Use fzf for selection
+        selected=$(echo "$combined" | fzf \
+            --height=50% \
+            --layout=reverse \
+            --border=rounded \
+            --prompt="Session > " \
+            --header="Select a session or directory" \
+            --preview='if [ -d {} ]; then ls -la {}; else tmux capture-pane -pt {} -p 2>/dev/null | head -20; fi' \
+            --preview-window=right:50%:wrap \
+            --bind='ctrl-d:preview-page-down' \
+            --bind='ctrl-u:preview-page-up' \
+        ) || exit 0
+    fi
+
+    switch_to_session "$selected"
+}
+
+main "$@"

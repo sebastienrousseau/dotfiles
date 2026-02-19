@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# Lorem ipsum text generator
+# Usage: lorem [words|sentences|paragraphs] [count]
+
+set -euo pipefail
+
+# Lorem ipsum word pool
+WORDS=(
+  "lorem" "ipsum" "dolor" "sit" "amet" "consectetur" "adipiscing" "elit"
+  "sed" "do" "eiusmod" "tempor" "incididunt" "ut" "labore" "et" "dolore"
+  "magna" "aliqua" "enim" "ad" "minim" "veniam" "quis" "nostrud"
+  "exercitation" "ullamco" "laboris" "nisi" "aliquip" "ex" "ea" "commodo"
+  "consequat" "duis" "aute" "irure" "in" "reprehenderit" "voluptate"
+  "velit" "esse" "cillum" "fugiat" "nulla" "pariatur" "excepteur" "sint"
+  "occaecat" "cupidatat" "non" "proident" "sunt" "culpa" "qui" "officia"
+  "deserunt" "mollit" "anim" "id" "est" "laborum" "perspiciatis" "unde"
+  "omnis" "iste" "natus" "error" "voluptatem" "accusantium" "doloremque"
+  "laudantium" "totam" "rem" "aperiam" "eaque" "ipsa" "quae" "ab" "illo"
+  "inventore" "veritatis" "quasi" "architecto" "beatae" "vitae" "dicta"
+  "explicabo" "nemo" "ipsam" "quia" "voluptas" "aspernatur" "aut" "odit"
+  "fugit" "consequuntur" "magni" "dolores" "eos" "ratione" "sequi"
+  "nesciunt" "neque" "porro" "quisquam" "dolorem" "adipisci" "numquam"
+  "eius" "modi" "tempora" "incidunt" "magnam" "quaerat"
+)
+
+random_word() {
+  echo "${WORDS[$RANDOM % ${#WORDS[@]}]}"
+}
+
+generate_sentence() {
+  local word_count=$((RANDOM % 10 + 5))
+  local sentence=""
+  for ((i = 0; i < word_count; i++)); do
+    if [[ $i -eq 0 ]]; then
+      word=$(random_word)
+      sentence="${word^}"
+    else
+      sentence="$sentence $(random_word)"
+    fi
+  done
+  echo "$sentence."
+}
+
+generate_paragraph() {
+  local sentence_count=$((RANDOM % 4 + 3))
+  local paragraph=""
+  for ((i = 0; i < sentence_count; i++)); do
+    if [[ $i -eq 0 ]]; then
+      paragraph=$(generate_sentence)
+    else
+      paragraph="$paragraph $(generate_sentence)"
+    fi
+  done
+  echo "$paragraph"
+}
+
+# Parse arguments
+TYPE="${1:-paragraphs}"
+COUNT="${2:-1}"
+
+case "$TYPE" in
+  w|word|words)
+    for ((i = 0; i < COUNT; i++)); do
+      if [[ $i -eq 0 ]]; then
+        word=$(random_word)
+        echo -n "${word^}"
+      else
+        echo -n " $(random_word)"
+      fi
+    done
+    echo
+    ;;
+  s|sentence|sentences)
+    for ((i = 0; i < COUNT; i++)); do
+      generate_sentence
+    done
+    ;;
+  p|paragraph|paragraphs)
+    for ((i = 0; i < COUNT; i++)); do
+      generate_paragraph
+      [[ $i -lt $((COUNT - 1)) ]] && echo
+    done
+    ;;
+  -h|--help)
+    echo "Usage: lorem [type] [count]"
+    echo ""
+    echo "Types:"
+    echo "  words, w        Generate words"
+    echo "  sentences, s    Generate sentences"
+    echo "  paragraphs, p   Generate paragraphs (default)"
+    echo ""
+    echo "Examples:"
+    echo "  lorem               # 1 paragraph"
+    echo "  lorem p 3           # 3 paragraphs"
+    echo "  lorem words 10      # 10 words"
+    echo "  lorem sentences 5   # 5 sentences"
+    ;;
+  *)
+    echo "Unknown type: $TYPE"
+    echo "Use: words, sentences, or paragraphs"
+    exit 1
+    ;;
+esac

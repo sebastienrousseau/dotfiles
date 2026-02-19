@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# YAML validator
+# Usage: yamlv <file> | yamlv (reads stdin)
+
+set -euo pipefail
+
+QUIET=false
+[[ "${1:-}" == "-q" || "${1:-}" == "--quiet" ]] && { QUIET=true; shift; }
+
+validate_yaml() {
+  local input="$1"
+  if command -v yq >/dev/null 2>&1; then
+    yq -e '.' <<< "$input" >/dev/null 2>&1
+  elif command -v python3 >/dev/null 2>&1; then
+    python3 -c "import yaml; yaml.safe_load('''$input''')" 2>/dev/null
+  elif command -v ruby >/dev/null 2>&1; then
+    ruby -ryaml -e "YAML.safe_load(STDIN.read)" <<< "$input" 2>/dev/null
+  else
+    echo "Error: yq, python3+pyyaml, or ruby required"
+    exit 1
+  fi
+}
+
+# Read input
+if [[ $# -gt 0 ]] && [[ -f "$1" ]]; then
+  INPUT=$(cat "$1")
+  SOURCE="$1"
+else
+  INPUT=$(cat)
+  SOURCE="stdin"
+fi
+
+if validate_yaml "$INPUT"; then
+  $QUIET || echo "✓ Valid YAML ($SOURCE)"
+  exit 0
+else
+  echo "✗ Invalid YAML ($SOURCE)"
+  exit 1
+fi

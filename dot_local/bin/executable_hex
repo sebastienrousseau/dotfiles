@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# Hex viewer/converter
+# Usage: hex <file> | hex -e <string> | hex -d <hex>
+
+set -euo pipefail
+
+usage() {
+  echo "Usage: hex [OPTIONS] [INPUT]"
+  echo ""
+  echo "Options:"
+  echo "  -e, --encode    Convert string to hex"
+  echo "  -d, --decode    Convert hex to string"
+  echo "  -c, --color     Colorize output"
+  echo "  -n, --length N  Bytes per line (default: 16)"
+  echo "  -h, --help      Show this help"
+  echo ""
+  echo "Examples:"
+  echo "  hex file.bin           # View file in hex"
+  echo "  hex -e 'hello'         # String to hex"
+  echo "  hex -d '68656c6c6f'    # Hex to string"
+  echo "  cat file | hex         # View stdin in hex"
+}
+
+MODE="view"
+COLOR=false
+BYTES_PER_LINE=16
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -e|--encode) MODE="encode"; shift ;;
+    -d|--decode) MODE="decode"; shift ;;
+    -c|--color) COLOR=true; shift ;;
+    -n|--length) BYTES_PER_LINE="$2"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    -*) echo "Unknown option: $1"; usage; exit 1 ;;
+    *) break ;;
+  esac
+done
+
+case "$MODE" in
+  encode)
+    INPUT="${1:-}"
+    [[ -z "$INPUT" ]] && read -r INPUT
+    echo -n "$INPUT" | xxd -p | tr -d '\n'
+    echo
+    ;;
+
+  decode)
+    INPUT="${1:-}"
+    [[ -z "$INPUT" ]] && read -r INPUT
+    # Remove spaces and newlines
+    INPUT=$(echo "$INPUT" | tr -d ' \n')
+    echo "$INPUT" | xxd -r -p
+    echo
+    ;;
+
+  view)
+    if [[ $# -gt 0 ]] && [[ -f "$1" ]]; then
+      INPUT_FILE="$1"
+    else
+      INPUT_FILE="-"
+    fi
+
+    if command -v xxd >/dev/null 2>&1; then
+      if $COLOR && command -v bat >/dev/null 2>&1; then
+        xxd -c "$BYTES_PER_LINE" "$INPUT_FILE" | bat --language=xxd --style=plain
+      else
+        xxd -c "$BYTES_PER_LINE" "$INPUT_FILE"
+      fi
+    elif command -v hexdump >/dev/null 2>&1; then
+      hexdump -C "$INPUT_FILE"
+    elif command -v od >/dev/null 2>&1; then
+      od -A x -t x1z -v "$INPUT_FILE"
+    else
+      echo "Error: xxd, hexdump, or od required"
+      exit 1
+    fi
+    ;;
+esac

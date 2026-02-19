@@ -1,0 +1,66 @@
+{{- /* GTK-3.0 Settings with Catppuccin theme support */ -}}
+{{- $theme := .theme -}}
+{{- $is_dark := false -}}
+{{- if or (hasSuffix $theme "-night") (hasSuffix $theme "-storm") (hasSuffix $theme "-moon") (hasSuffix $theme "-mocha") (hasSuffix $theme "-frappe") (hasSuffix $theme "-macchiato") (hasSuffix $theme "-dark") (hasSuffix $theme "-wave") (hasSuffix $theme "-dragon") (eq $theme "dracula") (eq $theme "nord") (eq $theme "onedark") -}}
+{{- $is_dark = true -}}
+{{- end -}}
+
+{{- $gtk_theme := "" -}}
+{{- $icon_theme := "" -}}
+{{- $cursor_theme := "Adwaita" -}}
+
+{{- if hasPrefix $theme "catppuccin-" -}}
+  {{- if eq $theme "catppuccin-latte" -}}
+    {{- $gtk_theme = "Catppuccin-Latte-Standard-Blue-Light" -}}
+    {{- $icon_theme = "Papirus-Light" -}}
+  {{- else if eq $theme "catppuccin-frappe" -}}
+    {{- $gtk_theme = "Catppuccin-Frappe-Standard-Blue-Dark" -}}
+    {{- $icon_theme = "Papirus-Dark" -}}
+  {{- else if eq $theme "catppuccin-macchiato" -}}
+    {{- $gtk_theme = "Catppuccin-Macchiato-Standard-Blue-Dark" -}}
+    {{- $icon_theme = "Papirus-Dark" -}}
+  {{- else if eq $theme "catppuccin-mocha" -}}
+    {{- $gtk_theme = "Catppuccin-Mocha-Standard-Blue-Dark" -}}
+    {{- $icon_theme = "Papirus-Dark" -}}
+  {{- else -}}
+    {{- $gtk_theme = "Catppuccin-Mocha-Standard-Blue-Dark" -}}
+    {{- $icon_theme = "Papirus-Dark" -}}
+  {{- end -}}
+{{- else if hasPrefix $theme "tokyonight-" -}}
+  {{- if $is_dark -}}
+    {{- $gtk_theme = "Adwaita-dark" -}}
+    {{- $icon_theme = "Papirus-Dark" -}}
+  {{- else -}}
+    {{- $gtk_theme = "Adwaita" -}}
+    {{- $icon_theme = "Papirus-Light" -}}
+  {{- end -}}
+{{- else -}}
+  {{- if $is_dark -}}
+    {{- $gtk_theme = "Adwaita-dark" -}}
+    {{- $icon_theme = "Papirus-Dark" -}}
+  {{- else -}}
+    {{- $gtk_theme = "Adwaita" -}}
+    {{- $icon_theme = "Papirus" -}}
+  {{- end -}}
+{{- end -}}
+
+[Settings]
+gtk-theme-name={{ $gtk_theme }}
+gtk-icon-theme-name={{ $icon_theme }}
+gtk-font-name=Inter 10
+gtk-cursor-theme-name={{ $cursor_theme }}
+gtk-cursor-theme-size=24
+gtk-toolbar-style=GTK_TOOLBAR_BOTH
+gtk-toolbar-icon-size=GTK_ICON_SIZE_LARGE_TOOLBAR
+gtk-button-images=1
+gtk-menu-images=1
+gtk-enable-event-sounds=1
+gtk-enable-input-feedback-sounds=0
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle=hintfull
+gtk-xft-rgba=rgb
+gtk-application-prefer-dark-theme={{ if $is_dark }}1{{ else }}0{{ end }}
+gtk-enable-animations=1
+gtk-primary-button-warps-slider=1
+gtk-decoration-layout=close,minimize,maximize:

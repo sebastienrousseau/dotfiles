@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+{{- if eq .chezmoi.os "linux" -}}
+set -euo pipefail
+
+log_info() { echo -e "\n[INFO] $*"; }
+log_error() { echo -e "\n[ERROR] $*" >&2; }
+
+FLATPAK_LIST="$HOME/.config/flatpak/flatpak.list"
+
+if ! command -v flatpak >/dev/null; then
+  log_info "flatpak not found. Skipping Flatpak apps."
+  exit 0
+fi
+
+if [ ! -f "$FLATPAK_LIST" ]; then
+  log_error "Flatpak list not found: $FLATPAK_LIST"
+  exit 0
+fi
+
+log_info "Adding Flathub remote (if missing)..."
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || true
+
+apps=$(grep -vE '^#|^$' "$FLATPAK_LIST" || true)
+if [ -z "$apps" ]; then
+  log_info "No Flatpak apps listed."
+  exit 0
+fi
+
+log_info "Installing Flatpak apps..."
+# shellcheck disable=SC2086
+flatpak install -y flathub $apps
+
+log_info "Flatpak apps installed."
+{{- end -}}

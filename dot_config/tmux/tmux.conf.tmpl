@@ -1,0 +1,181 @@
+{{- $theme := default "catppuccin-mocha" .theme -}}
+{{- $status_bg := "#2D1681" -}}
+{{- $status_fg := "#FFFFFF" -}}
+{{- $accent_blue := "#007ACC" -}}
+{{- $accent_red := "#EB0000" -}}
+{{- $panel_bg := "#14222A" -}}
+{{- if eq $theme "catppuccin-mocha" -}}
+{{- $status_bg = "#1e1e2e" -}}
+{{- $status_fg = "#cdd6f4" -}}
+{{- $accent_blue = "#89b4fa" -}}
+{{- $accent_red = "#f38ba8" -}}
+{{- $panel_bg = "#181825" -}}
+{{- else if eq $theme "catppuccin-latte" -}}
+{{- $status_bg = "#eff1f5" -}}
+{{- $status_fg = "#4c4f69" -}}
+{{- $accent_blue = "#1e66f5" -}}
+{{- $accent_red = "#d20f39" -}}
+{{- $panel_bg = "#e6e9ef" -}}
+{{- end }}
+
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║  TMUX CONFIGURATION (Universal)                                          ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+
+# --- GENERAL SETTINGS ---
+set -g default-terminal "xterm-256color"
+if-shell 'uname | grep -q Linux' 'set -g default-terminal "tmux-256color"'
+set-option -sa terminal-overrides ",*256col*:Tc"
+
+unbind C-b
+set -g prefix C-a
+bind C-a send-prefix
+
+set -g mouse on
+set -g history-limit 102400
+set -g set-clipboard on
+set -g escape-time 10
+set -g focus-events on
+set -g repeat-time 600
+setw -g xterm-keys on
+set -g base-index 1
+setw -g pane-base-index 1
+set -g renumber-windows on
+set -g aggressive-resize on
+set -g monitor-activity on
+set -g visual-activity off
+set -g visual-bell off
+set -g visual-silence off
+setw -g allow-rename off
+setw -g automatic-rename off
+setw -g mode-keys vi
+
+# --- COPY MODE (Vim-style) ---
+
+# Enter copy mode with prefix + [
+bind [ copy-mode
+
+# Vim-style selection and yanking
+bind -T copy-mode-vi v send-keys -X begin-selection
+bind -T copy-mode-vi C-v send-keys -X rectangle-toggle
+bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel
+bind -T copy-mode-vi Escape send-keys -X cancel
+
+# Additional copy mode bindings
+bind -T copy-mode-vi H send-keys -X start-of-line
+bind -T copy-mode-vi L send-keys -X end-of-line
+
+# macOS clipboard integration
+if-shell 'uname | grep -q Darwin' {
+  bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"
+  bind -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "pbcopy"
+  bind ] run "pbpaste | tmux load-buffer - && tmux paste-buffer"
+}
+
+# --- SMART NAVIGATION (Neovim + Tmux) ---
+# Seamless C-h/j/k/l navigation between Neovim splits and Tmux panes.
+# When the active pane runs Neovim, keys are forwarded to it; otherwise
+# Tmux handles pane selection directly.
+is_vim="ps -o state= -o comm= -t '#{pane_tty}' \
+  | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|l?n?vim?x?|fzf)(diff)?$'"
+
+bind -n C-h if-shell "$is_vim" "send-keys C-h" "select-pane -L"
+bind -n C-j if-shell "$is_vim" "send-keys C-j" "select-pane -D"
+bind -n C-k if-shell "$is_vim" "send-keys C-k" "select-pane -U"
+bind -n C-l if-shell "$is_vim" "send-keys C-l" "select-pane -R"
+
+# Restore C-h/j/k/l in copy-mode-vi so scrolling / cursor movement
+# is not intercepted by the smart-navigation bindings above.
+bind -T copy-mode-vi C-h select-pane -L
+bind -T copy-mode-vi C-j select-pane -D
+bind -T copy-mode-vi C-k select-pane -U
+bind -T copy-mode-vi C-l select-pane -R
+
+# --- KEY BINDINGS & NAVIGATION ---
+
+# Reload Config
+bind r source-file ~/.config/tmux/tmux.conf \; display "tmux.conf reloaded"
+
+# Sessionizer (fuzzy session switcher)
+bind f run-shell "~/.local/bin/tmux-sessionizer"
+
+# Window Management
+bind -r C-h previous-window
+bind -r C-l next-window
+bind a last-window
+bind Tab last-window
+bind N new-window
+bind n command-prompt -p "New window name:" "new-window -n '%%'"
+bind R command-prompt -p "Rename window:" "rename-window '%%'"
+bind X confirm-before -p "kill-window #W? (y/n)" kill-window
+
+# Splits (Current Path)
+bind % split-window -h -c "#{pane_current_path}"
+bind '"' split-window -v -c "#{pane_current_path}"
+bind '\' split-window -v -c "#{pane_current_path}"
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v
+bind _ split-window -h
+
+# Pane Navigation (Vim-style)
+bind -r h select-pane -L
+bind -r j select-pane -D
+bind -r k select-pane -U
+bind -r l select-pane -R
+bind -r z resize-pane -Z
+
+# Pane Resizing
+bind -r H resize-pane -L 5
+bind -r J resize-pane -D 5
+bind -r K resize-pane -U 5
+bind -r L resize-pane -R 5
+
+# Pane Movement
+bind < swap-pane -U
+bind > swap-pane -D
+bind q kill-pane
+
+# Session Management
+bind C-c new-session
+bind C-f command-prompt -p find-session 'switch-client -t %%'
+bind K confirm-before -p "kill all sessions? (y/n)" kill-server
+
+# --- THEME & STATUS BAR ---
+
+set -g status-bg "{{ $status_bg }}"
+set -g status-fg "{{ $status_fg }}"
+set -g status-interval 5
+set -g status-justify centre
+set -g status-left-length 50
+set -g status-right-length 50
+
+# OS-Specific Status Left
+if-shell 'uname | grep -q Darwin' 'set -g status-left "#[bg={{ $accent_blue }}]  macOS #S #[bg={{ $accent_red }}] #W #[bg={{ $panel_bg }}]"'
+if-shell 'uname | grep -q Linux' 'set -g status-left "#[bg={{ $accent_blue }}]  Linux #S #[bg={{ $accent_red }}] #W #[bg={{ $panel_bg }}]"'
+if-shell 'uname | grep -q MINGW' 'set -g status-left "#[bg={{ $accent_blue }}]  Windows #S #[bg={{ $accent_red }}] #W #[bg={{ $panel_bg }}]"'
+
+set -g status-right "#[fg={{ $status_fg }}] #[bg={{ $panel_bg }}] ⬛ #I #[bg={{ $accent_blue }}] #H #[bg={{ $accent_red }}] %_d %B %I:%M%p "
+set -g window-status-current-format "#[bg={{ $status_bg }}]Dotfiles (v0.2.480)"
+set -g window-status-current-style "bg={{ $accent_red }}"
+set -g window-status-separator ""
+set-window-option -g clock-mode-colour "{{ $status_fg }}"
+set-window-option -g clock-mode-style 24
+
+# --- LINUX SPECIFIC ---
+if-shell 'uname | grep -q Linux' {
+  bind -n WheelDownPane select-pane -t= \; send-keys -M
+  bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'select-pane -t=; copy-mode -e; send-keys -M'"
+  bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "xclip -selection c"
+  bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "xclip -in -selection clipboard"
+}
+
+# --- PLUGINS (TPM) ---
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+
+set -g @continuum-restore 'on'
+set -g @continuum-save-interval '15'
+
+# Initialize TMUX plugin manager
+run '~/.tmux/plugins/tpm/tpm'

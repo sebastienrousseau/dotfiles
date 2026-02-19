@@ -1,0 +1,67 @@
+# MyCLI Configuration (~/.config/mycli/myclirc)
+# https://www.mycli.net/config
+
+[main]
+# Smart completion (auto-suggest table names, columns, etc.)
+smart_completion = True
+
+# Multi-line mode
+multi_line = False
+
+# Use Vi mode
+key_bindings = emacs
+
+# Auto-refresh completions after each query
+auto_refresh_completions = True
+
+# Table format (ascii, simple, fancy_grid, etc.)
+table_format = fancy_grid
+
+# Syntax highlighting style
+syntax_style = monokai
+
+# Show query execution time
+timing = True
+
+# Log queries to file
+log_file = ~/.local/share/mycli/log
+log_level = WARNING
+
+# History file
+history_file = ~/.local/share/mycli/history
+
+# Enable pager for long output
+enable_pager = True
+pager = less -SRXF
+
+# Warn before running destructive commands
+destructive_warning = True
+
+# Keyword casing
+keyword_casing = upper
+
+# Auto-vertical output when row too wide
+auto_vertical_output = True
+
+# Prompt format
+prompt = '\t \u@\h:\d> '
+prompt_continuation = '-> '
+
+# Show bottom toolbar
+show_bottom_toolbar = True
+
+[colors]
+# Override default colors
+completion-menu.completion.current = 'bg:#00aaaa #000000'
+completion-menu.completion = 'bg:#008888 #ffffff'
+completion-menu.meta.completion.current = 'bg:#00aaaa #000000'
+completion-menu.meta.completion = 'bg:#00aaaa #ffffff'
+
+[favorite_queries]
+# Shortcut queries (use \f <name> to run)
+show_status = SHOW GLOBAL STATUS
+show_vars = SHOW GLOBAL VARIABLES
+show_proc = SHOW FULL PROCESSLIST
+show_dbs = SHOW DATABASES
+show_tables = SHOW TABLES
+show_create = SHOW CREATE TABLE

@@ -1,0 +1,85 @@
+# Dotfiles - gitignore
+# v0.2.480
+
+# Secrets & Credentials (never commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+id_rsa*
+id_ed25519*
+id_ecdsa*
+id_dsa*
+*.pub
+credentials.json
+service-account*.json
+token.json
+.secrets
+.secrets.*
+.secrets.baseline
+*.gpg
+!*.gpg.tmpl
+.password-store/
+.gnupg/
+.ssh/known_hosts
+
+# OS Artifacts
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.Trash-*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Archives
+*.tgz
+*.tar.gz
+*.zip
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Logs
+*.log
+logs/
+
+# Build/Dist
+dist/
+build/
+debug/
+
+# Node (Partial support for scripts)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Chezmoi
+.chezmoitemplates/**/.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Machine-specific configs (local only, never pushed)
+dot_etc/machines/
+install/provision/run_onchange_60-macbookair9-1-zorinos.sh.tmpl

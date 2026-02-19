@@ -1,0 +1,207 @@
+# =============================================================================
+# Brewfile - Unified Cross-Platform Package Management
+# Optimized for performance and development workflows
+# =============================================================================
+# Usage: brew bundle --file=~/.config/shell/Brewfile
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Taps
+# -----------------------------------------------------------------------------
+tap "homebrew/bundle"
+tap "homebrew/services"
+
+# -----------------------------------------------------------------------------
+# Core Utilities (Cross-Platform)
+# -----------------------------------------------------------------------------
+brew "git"
+brew "chezmoi"
+brew "jq"
+brew "yq"
+brew "ripgrep"
+brew "fd"
+brew "fzf"
+brew "bat"
+brew "eza"
+brew "dust"
+brew "duf"
+brew "tree"
+brew "trash"
+brew "rename"
+
+# -----------------------------------------------------------------------------
+# Shell & Prompt (Cross-Platform)
+# -----------------------------------------------------------------------------
+brew "zsh"
+brew "starship"
+brew "zoxide"
+brew "atuin"
+brew "direnv"
+
+# -----------------------------------------------------------------------------
+# Development (Cross-Platform)
+# -----------------------------------------------------------------------------
+brew "neovim"
+brew "vim"
+brew "tmux"
+brew "lazygit"
+brew "git-delta"
+brew "git-absorb"                # Auto-create fixup commits
+brew "gh"
+brew "glab"
+brew "shellcheck"
+brew "shfmt"
+
+# -----------------------------------------------------------------------------
+# Languages & Runtimes (Cross-Platform)
+# -----------------------------------------------------------------------------
+brew "mise"                    # Universal version manager
+brew "uv"                      # Fast Python package manager
+brew "rustup"
+brew "go"
+
+# -----------------------------------------------------------------------------
+# Lua (for Neovim) (Cross-Platform)
+# -----------------------------------------------------------------------------
+brew "lua"
+brew "luajit"
+brew "luarocks"
+brew "stylua"
+
+# -----------------------------------------------------------------------------
+# System Monitoring (Cross-Platform)
+# -----------------------------------------------------------------------------
+brew "btop"
+brew "procs"
+brew "gping"
+brew "hyperfine"
+brew "fastfetch"
+
+# -----------------------------------------------------------------------------
+# Security & Encryption (Cross-Platform)
+# -----------------------------------------------------------------------------
+brew "age"
+brew "gnupg"
+brew "git-crypt"
+brew "mkcert"
+brew "lynis"
+
+# -----------------------------------------------------------------------------
+# AI & LLM Tools (Cross-Platform)
+# -----------------------------------------------------------------------------
+brew "ollama"
+brew "aichat"
+brew "mods"
+brew "fabric-ai"
+
+# -----------------------------------------------------------------------------
+# File & Text Processing (Cross-Platform)
+# -----------------------------------------------------------------------------
+brew "hexyl"
+brew "glow"
+brew "gum"
+brew "tlrc"
+brew "imagemagick"
+brew "ffmpeg"
+
+# -----------------------------------------------------------------------------
+# Networking (Cross-Platform)
+# -----------------------------------------------------------------------------
+brew "curl"
+brew "wget"
+brew "httpie"
+brew "mtr"
+
+# -----------------------------------------------------------------------------
+# Archive & Compression (Cross-Platform)
+# -----------------------------------------------------------------------------
+brew "p7zip"
+brew "unar"
+brew "sevenzip"
+
+# =============================================================================
+# macOS Only
+# =============================================================================
+if OS.mac?
+  # macOS Specific CLI Tools
+  brew "mas"                   # Mac App Store CLI
+  brew "duti"                  # Default app handler
+  brew "topgrade"              # Universal updater
+  brew "pinentry-mac"          # GPG pinentry for macOS
+
+  # -------------------------------------------------------------------------
+  # GUI Applications (Casks) - macOS Only
+  # -------------------------------------------------------------------------
+
+  # Terminals
+  cask "ghostty"
+  cask "warp"
+  cask "iterm2"
+
+  # Editors & IDEs
+  cask "visual-studio-code"
+  cask "zed"
+
+  # Browsers
+  cask "google-chrome"
+
+  # Productivity
+  cask "raycast"
+  cask "cleanmymac"
+  cask "cleanshot"
+  cask "copyclip"
+  cask "pdf-squeezer"
+  cask "imageoptim"
+  cask "the-unarchiver"
+  cask "betterzip"
+
+  # System Utilities
+  cask "karabiner-elements"
+  cask "jordanbaird-ice"
+  cask "aldente"
+  cask "topnotch"
+  cask "little-snitch"
+
+  # Development
+  cask "github"
+  cask "devutils"
+  cask "1password-cli"
+
+  # AI Tools
+  cask "claude-code"
+
+  # Design
+  cask "colorsnapper"
+  cask "sketch"
+
+  # Media
+  cask "vlc"
+
+  # Cloud & Sync
+  cask "dropbox"
+
+  # Communication
+  cask "zoom"
+
+  # Backup
+  cask "carbon-copy-cloner"
+
+  # Fonts
+  cask "font-meslo-lg-nerd-font"
+  cask "font-victor-mono"
+  cask "font-roboto-mono-for-powerline"
+
+  # Optional: LaTeX (large ~4GB, uncomment if needed)
+  # cask "mactex"
+end
+
+# =============================================================================
+# Linux / WSL
+# =============================================================================
+if OS.linux?
+  # Universal updater (also useful on Linux/WSL)
+  brew "topgrade"
+
+  # Linux-specific GPG pinentry
+  brew "pinentry"
+end

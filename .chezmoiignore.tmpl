@@ -1,0 +1,50 @@
+.git
+.git/**
+.config/dotfiles/_aliases
+.config/dotfiles/_aliases/**
+.DS_Store
+**/.DS_Store
+*.swp
+**/*.swp
+# Repo-only files and directories (do not apply into $HOME)
+CHANGELOG.md
+TODO.md
+Dockerfile.test
+.dockerignore
+.editorconfig
+.gitignore
+LICENSE
+README.md
+docs
+docs/**
+.github
+.github/**
+install
+install/**
+install.sh
+scripts
+scripts/**
+templates
+templates/**
+tests
+tests/**
+nix
+nix/**
+.devcontainer
+.devcontainer/**
+
+# Local secrets (never committed)
+.profile.local
+.env.local
+
+.config/nvim/lazy-lock.json
+
+{{- if eq .chezmoi.os "darwin" }}
+.config/i3
+.config/i3/**
+{{- end }}
+
+{{- if eq .chezmoi.os "linux" }}
+Library
+Library/**
+{{- end }}

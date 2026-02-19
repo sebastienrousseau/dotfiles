@@ -1,0 +1,42 @@
+# Topgrade configuration (managed by chezmoi)
+
+[misc]
+{{- if eq .chezmoi.os "darwin" }}
+disable = ["vim", "node", "containers", "flatpak", "snap"]
+{{- else }}
+disable = ["vim", "node", "containers", "firmware"]
+{{- end }}
+pre_sudo = true
+
+[pre_commands]
+
+[post_commands]
+
+[commands]
+"Open WebUI" = "sudo /usr/local/bin/update-open-webui.sh"
+
+[python]
+
+[brew]
+
+[linux]
+
+[git]
+
+[chezmoi]
+
+[mise]
+
+[npm]
+
+[vim]
+
+[firmware]
+
+[flatpak]
+
+[containers]
+
+[rustup]
+
+[vscode]
