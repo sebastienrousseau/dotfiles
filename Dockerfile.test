@@ -68,7 +68,7 @@ RUN echo "=== Ubuntu 24.04: ALL TESTS PASSED ==="
 # =============================================================================
 # Debian 12 (Bookworm) - Tests Debian prerequisites + install.sh
 # =============================================================================
-FROM debian:12 AS debian-test
+FROM debian:13 AS debian-test
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root
