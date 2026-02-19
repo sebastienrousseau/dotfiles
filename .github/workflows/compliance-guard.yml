@@ -1,0 +1,248 @@
+name: Compliance Guard
+
+# SOC 2 / ISO 27001 compliance checks for security and portability
+# Blocks insecure patterns and enforces cross-platform compatibility
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - '**.sh'
+      - '**.bash'
+      - '**.zsh'
+      - '**.tmpl'
+      - 'Dockerfile*'
+      - '.gitattributes'
+  push:
+    branches: [master]
+    paths:
+      - '**.sh'
+      - '**.bash'
+      - '**.zsh'
+      - '**.tmpl'
+      - 'Dockerfile*'
+      - '.gitattributes'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ============================================================================
+  # Insecure Pattern Scanner
+  # ============================================================================
+  insecure-patterns:
+    name: Scan for Insecure Patterns
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check for insecure curl flags
+        run: |
+          echo "Scanning for insecure curl commands..."
+          VIOLATIONS=""
+
+          # Pattern: curl -k or curl --insecure (disables TLS verification)
+          if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" --include="*.tmpl" \
+               -E 'curl\s+[^|;]*(-k|--insecure)' . 2>/dev/null | grep -v "^Binary"; then
+            VIOLATIONS="${VIOLATIONS}Found curl with -k/--insecure flag (disables TLS verification)\n"
+          fi
+
+          # Pattern: wget --no-check-certificate
+          if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" --include="*.tmpl" \
+               -E 'wget\s+[^|;]*--no-check-certificate' . 2>/dev/null | grep -v "^Binary"; then
+            VIOLATIONS="${VIOLATIONS}Found wget with --no-check-certificate flag\n"
+          fi
+
+          # Pattern: curl without https (http://)
+          if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" --include="*.tmpl" \
+               -E "curl\s+[^|;]*['\"]http://[^localhost]" . 2>/dev/null | grep -v "^Binary"; then
+            VIOLATIONS="${VIOLATIONS}Found curl using http:// instead of https://\n"
+          fi
+
+          if [[ -n "$VIOLATIONS" ]]; then
+            echo "::error::TLS Security Violations Found"
+            echo -e "$VIOLATIONS"
+            echo ""
+            echo "Fix: Remove -k/--insecure flags and use https:// URLs"
+            exit 1
+          fi
+
+          echo "No insecure TLS patterns found"
+
+      - name: Check for hardcoded credentials patterns
+        run: |
+          echo "Scanning for potential hardcoded credentials..."
+          VIOLATIONS=""
+
+          # Pattern: password=, secret=, api_key= with literal values
+          if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" \
+               -iE "(password|secret|api_key|apikey|token)\s*=\s*['\"][^$\{]" . 2>/dev/null \
+               | grep -v "example" | grep -v "placeholder" | grep -v "^Binary"; then
+            VIOLATIONS="${VIOLATIONS}Potential hardcoded credentials found\n"
+          fi
+
+          if [[ -n "$VIOLATIONS" ]]; then
+            echo "::warning::Potential credential patterns detected - please verify"
+            echo -e "$VIOLATIONS"
+          fi
+
+          echo "Credential scan complete"
+
+      - name: Check for dangerous chmod patterns
+        run: |
+          echo "Scanning for dangerous permission patterns..."
+
+          # Pattern: chmod 777 or chmod -R 777 (world-writable)
+          if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" \
+               -E 'chmod\s+(-R\s+)?777' . 2>/dev/null | grep -v "^Binary" | grep -v "#"; then
+            echo "::error::Found chmod 777 (world-writable) - security risk"
+            exit 1
+          fi
+
+          # Pattern: chmod 666 (world-writable files)
+          if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" \
+               -E 'chmod\s+(-R\s+)?666' . 2>/dev/null | grep -v "^Binary" | grep -v "#"; then
+            echo "::error::Found chmod 666 (world-writable) - security risk"
+            exit 1
+          fi
+
+          echo "No dangerous permission patterns found"
+
+  # ============================================================================
+  # Cross-Platform Portability Check
+  # ============================================================================
+  portability:
+    name: Cross-Platform Portability
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck with portability warnings
+        run: |
+          echo "Running ShellCheck for portability..."
+
+          # Find all shell scripts and run shellcheck
+          find . -name "*.sh" -type f ! -path "*/tests/*" ! -path "./.git/*" -print0 | \
+            xargs -0 -r shellcheck -S warning -e SC1090,SC1091,SC2034 --format=gcc || {
+              echo "::warning::ShellCheck found issues - review above"
+            }
+
+          echo "ShellCheck complete"
+
+      - name: Check for hardcoded user paths
+        run: |
+          echo "Scanning for hardcoded user paths..."
+
+          # Pattern: /home/username/ or /Users/username/ (not /home/linuxbrew)
+          if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" \
+               -E '/home/[a-z]+[a-z0-9_-]*/|/Users/[A-Za-z]+/' . 2>/dev/null \
+               | grep -v "linuxbrew" | grep -v "sandbox" | grep -v ".git" \
+               | grep -v "tests/" | grep -v "^Binary"; then
+            echo "::warning::Hardcoded user paths found - consider using \$HOME or ~"
+          fi
+
+          echo "Path check complete"
+
+      - name: Verify .gitattributes line endings
+        run: |
+          echo "Checking .gitattributes configuration..."
+
+          if [[ ! -f .gitattributes ]]; then
+            echo "::error::.gitattributes file missing"
+            exit 1
+          fi
+
+          # Check for text=auto
+          if ! grep -q "text=auto" .gitattributes; then
+            echo "::error::.gitattributes missing 'text=auto' for line ending normalization"
+            exit 1
+          fi
+
+          # Check for shell script LF enforcement
+          if ! grep -qE '^\*\.sh.*eol=lf' .gitattributes; then
+            echo "::error::.gitattributes missing LF enforcement for .sh files"
+            exit 1
+          fi
+
+          echo ".gitattributes properly configured"
+
+  # ============================================================================
+  # Dockerfile Linting (Hadolint)
+  # ============================================================================
+  dockerfile-lint:
+    name: Dockerfile Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Only run if Dockerfiles exist
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check for Dockerfiles
+        id: check-dockerfiles
+        run: |
+          if find . -name "Dockerfile*" -type f | grep -q .; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run Hadolint
+        if: steps.check-dockerfiles.outputs.found == 'true'
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: "**/Dockerfile*"
+          failure-threshold: warning
+          ignore: DL3008,DL3013,DL3018  # Allow unpinned apt/pip/apk versions
+
+      - name: Skip - No Dockerfiles
+        if: steps.check-dockerfiles.outputs.found == 'false'
+        run: echo "No Dockerfiles found - skipping"
+
+  # ============================================================================
+  # Summary Report
+  # ============================================================================
+  compliance-summary:
+    name: Compliance Summary
+    runs-on: ubuntu-latest
+    needs: [insecure-patterns, portability, dockerfile-lint]
+    if: always()
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "## Compliance Guard Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Check | Status |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|--------|" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "${{ needs.insecure-patterns.result }}" == "success" ]]; then
+            echo "| TLS Security Patterns | :white_check_mark: Pass |" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "| TLS Security Patterns | :x: Fail |" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [[ "${{ needs.portability.result }}" == "success" ]]; then
+            echo "| Cross-Platform Portability | :white_check_mark: Pass |" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "| Cross-Platform Portability | :x: Fail |" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [[ "${{ needs.dockerfile-lint.result }}" == "success" ]]; then
+            echo "| Dockerfile Lint | :white_check_mark: Pass |" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "| Dockerfile Lint | :x: Fail |" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "_Compliance Guard enforces SOC 2 / ISO 27001 security controls_" >> "$GITHUB_STEP_SUMMARY"
