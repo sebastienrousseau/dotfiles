@@ -84,7 +84,7 @@ jobs:
           while IFS= read -r -d '' script; do
             if ! bash -n "$script" 2>/dev/null; then
               echo "FAIL: $script"
-              ((errors++))
+              errors=$((errors + 1))
             fi
           done < <(find . -name "*.sh" -type f ! -path "./.git/*" -print0)
 
@@ -113,13 +113,13 @@ jobs:
 
           if ! grep -q "LINE1" /tmp/sed_test.txt; then
             echo "FAIL: sed in-place edit"
-            ((errors++))
+            errors=$((errors + 1))
           fi
 
           # Test 2: Extended regex (-E is portable, -r is GNU-only)
           if ! echo "test123" | sed -E 's/[0-9]+/NUM/' | grep -q "testNUM"; then
             echo "FAIL: sed -E extended regex"
-            ((errors++))
+            errors=$((errors + 1))
           fi
 
           if [[ $errors -gt 0 ]]; then
@@ -137,7 +137,7 @@ jobs:
           # Test 1: Extended regex (-E is portable)
           if ! echo "test123" | grep -E '[0-9]+' > /dev/null; then
             echo "FAIL: grep -E extended regex"
-            ((errors++))
+            errors=$((errors + 1))
           fi
 
           # Test 2: PCRE (-P is GNU-only, should not be used)
@@ -146,7 +146,7 @@ jobs:
           # Test 3: Quiet mode
           if ! echo "test" | grep -q "test"; then
             echo "FAIL: grep -q quiet mode"
-            ((errors++))
+            errors=$((errors + 1))
           fi
 
           if [[ $errors -gt 0 ]]; then
@@ -164,13 +164,13 @@ jobs:
           # Test 1: ISO format (portable)
           if ! date +%Y-%m-%d > /dev/null 2>&1; then
             echo "FAIL: date ISO format"
-            ((errors++))
+            errors=$((errors + 1))
           fi
 
           # Test 2: Epoch seconds (portable)
           if ! date +%s > /dev/null 2>&1; then
             echo "FAIL: date epoch seconds"
-            ((errors++))
+            errors=$((errors + 1))
           fi
 
           # Note: date -d (GNU) vs date -j -f (BSD) are NOT portable
@@ -192,36 +192,36 @@ jobs:
           # Look for sed -i that doesn't account for platform
           if grep -rn --include="*.sh" "sed -i '" . 2>/dev/null | grep -v "darwin\|macos\|BSD" | head -5; then
             echo "::warning::Found sed -i '' (BSD-style) without platform check"
-            ((warnings++))
+            warnings=$((warnings + 1))
           fi
 
           if grep -rn --include="*.sh" "sed -i \"" . 2>/dev/null | grep -v "darwin\|macos\|BSD" | head -5; then
             echo "::warning::Found sed -i (GNU-style) without platform check"
-            ((warnings++))
+            warnings=$((warnings + 1))
           fi
 
           # Pattern 2: grep -P (PCRE - GNU only)
           if grep -rn --include="*.sh" "grep -P" . 2>/dev/null | head -5; then
             echo "::warning::Found grep -P (GNU-only PCRE). Use grep -E instead."
-            ((warnings++))
+            warnings=$((warnings + 1))
           fi
 
           # Pattern 3: date -d (GNU only)
           if grep -rn --include="*.sh" "date -d" . 2>/dev/null | grep -v "#" | head -5; then
             echo "::warning::Found date -d (GNU-only). Not portable to macOS."
-            ((warnings++))
+            warnings=$((warnings + 1))
           fi
 
           # Pattern 4: readarray/mapfile (bash 4+ only, macOS has bash 3)
           if grep -rn --include="*.sh" -E "readarray|mapfile" . 2>/dev/null | head -5; then
             echo "::warning::Found readarray/mapfile (bash 4+). macOS ships bash 3."
-            ((warnings++))
+            warnings=$((warnings + 1))
           fi
 
           # Pattern 5: associative arrays (bash 4+ only)
           if grep -rn --include="*.sh" "declare -A" . 2>/dev/null | head -5; then
             echo "::warning::Found declare -A (bash 4+). macOS ships bash 3."
-            ((warnings++))
+            warnings=$((warnings + 1))
           fi
 
           echo "Found $warnings portability warnings"
@@ -244,11 +244,11 @@ jobs:
               for test in test_dot_commands_*.sh test_diagnostics_*.sh; do
                 if [[ -f "$test" ]]; then
                   if bash "$test" > /tmp/test_output.txt 2>&1; then
-                    ((passed++))
+                    passed=$((passed + 1))
                   else
                     echo "FAIL: $test"
                     tail -20 /tmp/test_output.txt
-                    ((failed++))
+                    failed=$((failed + 1))
                   fi
                 fi
               done

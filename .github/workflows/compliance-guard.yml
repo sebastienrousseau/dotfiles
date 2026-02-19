@@ -77,12 +77,12 @@ jobs:
                 # G = Good signature, U = Good signature with unknown validity
                 signer=$(git log -1 --format='%GS' "$commit" 2>/dev/null || echo "unknown")
                 echo "| \`$short_sha\` | $author | :white_check_mark: Signed by $signer |" >> "$GITHUB_STEP_SUMMARY"
-                ((signed_count++))
+                signed_count=$((signed_count + 1))
                 ;;
               B)
                 # B = Bad signature
                 echo "| \`$short_sha\` | $author | :x: Bad signature |" >> "$GITHUB_STEP_SUMMARY"
-                ((unsigned_count++))
+                unsigned_count=$((unsigned_count + 1))
                 ;;
               E)
                 # E = Cannot check signature (missing key)
@@ -92,7 +92,7 @@ jobs:
               N|*)
                 # N = No signature
                 echo "| \`$short_sha\` | $author | :x: Unsigned |" >> "$GITHUB_STEP_SUMMARY"
-                ((unsigned_count++))
+                unsigned_count=$((unsigned_count + 1))
                 ;;
             esac
           done
@@ -147,7 +147,7 @@ jobs:
 
           # Pattern: curl -k or curl --insecure (disables TLS verification)
           if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" --include="*.tmpl" \
-               -E 'curl\s+[^|;]*(-k|--insecure)' . 2>/dev/null | grep -v "^Binary"; then
+               -E '(^|[[:space:]])curl([[:space:]][^|;#]*)?[[:space:]](--insecure|-k)([[:space:]]|$)' . 2>/dev/null | grep -v "^Binary"; then
             VIOLATIONS="${VIOLATIONS}Found curl with -k/--insecure flag (disables TLS verification)\n"
           fi
 
@@ -159,7 +159,7 @@ jobs:
 
           # Pattern: curl without https (http://)
           if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" --include="*.tmpl" \
-               -E "curl\s+[^|;]*['\"]http://[^localhost]" . 2>/dev/null | grep -v "^Binary"; then
+               -E "curl[[:space:]][^|;#]*http://" . 2>/dev/null | grep -v "^Binary" | grep -Ev 'http://(localhost|127\.0\.0\.1)'; then
             VIOLATIONS="${VIOLATIONS}Found curl using http:// instead of https://\n"
           fi
 
@@ -298,11 +298,19 @@ jobs:
 
       - name: Run Hadolint
         if: steps.check-dockerfiles.outputs.found == 'true'
-        uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf # v3.1.0
-        with:
-          dockerfile: "**/Dockerfile*"
-          failure-threshold: warning
-          ignore: DL3008,DL3013,DL3018  # Allow unpinned apt/pip/apk versions
+        run: |
+          set -euo pipefail
+          mapfile -t dockerfiles < <(find . -type f -name "Dockerfile*" ! -path "./.git/*" | sort)
+
+          for dockerfile in "${dockerfiles[@]}"; do
+            echo "Linting $dockerfile"
+            docker run --rm -i hadolint/hadolint:v2.12.0-alpine \
+              -t warning \
+              --ignore DL3008 \
+              --ignore DL3013 \
+              --ignore DL3018 \
+              - < "$dockerfile"
+          done
 
       - name: Skip - No Dockerfiles
         if: steps.check-dockerfiles.outputs.found == 'false'

@@ -31,12 +31,16 @@ case "$ARCH" in
 esac
 
 ASSET="chezmoi_${VERSION}_${OS}_${ARCH}.tar.gz"
+CHECKSUMS_ASSET="chezmoi_${VERSION}_checksums.txt"
 BASE_URL="https://github.com/twpayne/chezmoi/releases/download/v${VERSION}"
 
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
-curl -fsSL -o "$TMP_DIR/checksums.txt" "$BASE_URL/checksums.txt"
+# Support both old and new checksum filenames.
+if ! curl -fsSL -o "$TMP_DIR/checksums.txt" "$BASE_URL/$CHECKSUMS_ASSET"; then
+  curl -fsSL -o "$TMP_DIR/checksums.txt" "$BASE_URL/checksums.txt"
+fi
 curl -fsSL -o "$TMP_DIR/$ASSET" "$BASE_URL/$ASSET"
 
 CHECKSUM_LINE="$(grep -E "[[:space:]]${ASSET}$" "$TMP_DIR/checksums.txt" | head -n1 || true)"

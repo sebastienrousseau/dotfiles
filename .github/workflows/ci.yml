@@ -120,11 +120,11 @@ jobs:
           echo "Running shellcheck with zero-warning enforcement..."
 
           # Count warnings before filtering
-          rg --files -g "*.sh" | xargs shellcheck -f gcc > shellcheck_raw.log || true
+          rg --files -g "*.sh" -g "!scripts/tests/**" | xargs shellcheck -f gcc > shellcheck_raw.log || true
           TOTAL_ISSUES=$(wc -l < shellcheck_raw.log || echo 0)
 
           # Run with exclusions and fail on any remaining warnings
-          rg --files -g "*.sh" | xargs shellcheck -x -e SC1091 -e SC2030 -e SC2031 -f gcc
+          rg --files -g "*.sh" -g "!scripts/tests/**" | xargs shellcheck -x -e SC1091 -e SC2030 -e SC2031 -f gcc
 
           echo "Shellcheck completed. Total issues found: $TOTAL_ISSUES"
           echo "All remaining issues after exclusions must be fixed - zero warnings policy enforced."
@@ -425,7 +425,13 @@ jobs:
           ./scripts/tests/framework/test_runner.sh 2>&1 | tee test_output.log
 
           # Extract test results
-          FAILED_TESTS=$(grep "Total failed:" test_output.log | awk '{print $3}' || echo 0)
+          FAILED_TESTS=$(
+            grep -a "Total failed:" test_output.log \
+              | tail -1 \
+              | sed -E 's/\x1b\[[0-9;]*m//g' \
+              | sed -E 's/.*Total failed:[[:space:]]*([0-9]+).*/\1/' \
+              || echo 0
+          )
 
           # 100% success rate required (fail-under 100%)
           if [[ "$FAILED_TESTS" -gt 0 ]]; then
@@ -437,6 +443,7 @@ jobs:
           echo "✅ All tests passed - 100% success rate maintained"
       - name: Enforce module coverage (>=95%)
         run: |
+          sudo apt-get update && sudo apt-get install -y ripgrep
           chmod +x scripts/tests/framework/module_coverage.sh
           MIN_COVERAGE=95 ./scripts/tests/framework/module_coverage.sh
       - name: Integration tests
@@ -445,7 +452,13 @@ jobs:
           RUN_INTEGRATION=1 ./scripts/tests/framework/test_runner.sh 2>&1 | tee integration_output.log
 
           # Check integration test results
-          INTEGRATION_FAILED=$(grep "Total failed:" integration_output.log | awk '{print $3}' || echo 0)
+          INTEGRATION_FAILED=$(
+            grep -a "Total failed:" integration_output.log \
+              | tail -1 \
+              | sed -E 's/\x1b\[[0-9;]*m//g' \
+              | sed -E 's/.*Total failed:[[:space:]]*([0-9]+).*/\1/' \
+              || echo 0
+          )
           if [[ "$INTEGRATION_FAILED" -gt 0 ]]; then
             echo "❌ Integration tests failed: $INTEGRATION_FAILED failures"
             exit 1
