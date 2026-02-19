@@ -14,8 +14,14 @@ Errors=0
 Warnings=0
 
 log_success() { ui_ok "$1" "${2:-}"; }
-log_fail() { ui_err "$1" "${2:-}"; Errors=$((Errors + 1)); }
-log_warn() { ui_warn "$1" "${2:-}"; Warnings=$((Warnings + 1)); }
+log_fail() {
+  ui_err "$1" "${2:-}"
+  Errors=$((Errors + 1))
+}
+log_warn() {
+  ui_warn "$1" "${2:-}"
+  Warnings=$((Warnings + 1))
+}
 
 MCP_CONFIG="${MCP_CONFIG:-$HOME/.config/claude/mcp_servers.json}"
 if [[ ! -f "$MCP_CONFIG" && -f "$HOME/.dotfiles/dot_config/claude/mcp_servers.json" ]]; then

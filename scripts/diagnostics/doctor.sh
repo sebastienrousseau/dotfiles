@@ -21,8 +21,14 @@ Errors=0
 Warnings=0
 
 log_success() { ui_ok "$1" "${2:-}"; }
-log_fail() { ui_err "$1" "${2:-}"; Errors=$((Errors + 1)); }
-log_warn() { ui_warn "$1" "${2:-}"; Warnings=$((Warnings + 1)); }
+log_fail() {
+  ui_err "$1" "${2:-}"
+  Errors=$((Errors + 1))
+}
+log_warn() {
+  ui_warn "$1" "${2:-}"
+  Warnings=$((Warnings + 1))
+}
 
 # 1. Check Dependencies
 ui_header "Core Dependencies"

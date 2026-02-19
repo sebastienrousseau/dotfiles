@@ -38,7 +38,10 @@ log_info() { ui_info "$*"; }
 log_success() { ui_ok "$*"; }
 log_warn() { ui_warn "$*"; }
 log_error() { ui_err "$*"; }
-log_step() { echo ""; ui_header "$*"; }
+log_step() {
+  echo ""
+  ui_header "$*"
+}
 
 # Persistent logging
 persist_log() {
