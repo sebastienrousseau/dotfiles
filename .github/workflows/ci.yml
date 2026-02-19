@@ -151,34 +151,12 @@ jobs:
   # ============================================================================
   security-secrets:
     name: Security / Secrets Scan
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    # Always run secrets scan on PRs and pushes
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-        with:
-          # Secrets scanning should validate the current revision, not historical refs.
-          fetch-depth: 1
-          fetch-tags: false
-      - name: Gitleaks (zero-tolerance secrets policy)
-        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Enforce strict exit on ANY secret detection
-          GITLEAKS_ENABLE_SUMMARY: true
-      - name: Additional secret patterns
-        run: |
-          echo "Running additional security patterns scan..."
-          # Check for common patterns that might be missed
-          rg -i "api[_-]?key|secret|password|token" --type sh || true
-
-          # Ensure no hardcoded credentials in config files
-          ! rg -i "(password|secret|key)\s*[:=]\s*['\"][^'\"]{8,}" dot_config/ || {
-            echo "❌ Potential hardcoded credentials found in config files"
-            exit 1
-          }
-
-          echo "✅ Additional security scan completed"
+    uses: ./.github/workflows/reusable-secrets-scan.yml
+    with:
+      run_guard: true
+      run_additional_patterns: true
+    secrets:
+      github_token: ${{ secrets.GITHUB_TOKEN }}
 
   security-dependencies:
     name: Security / Dependency Audit
