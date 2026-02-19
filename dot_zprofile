@@ -52,3 +52,12 @@ fi
 # Language-specific paths are consolidated in ~/.config/shell/00-core-paths.sh
 # -----------------------------------------------------------------------------
 export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
+
+# -----------------------------------------------------------------------------
+# Mise (Runtime Version Manager) - MUST be after Homebrew PATH setup
+# This ensures mise-managed tools (Python, Node, etc.) take priority over
+# Homebrew-installed versions. mise prepends its shims to PATH.
+# -----------------------------------------------------------------------------
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi

@@ -119,15 +119,14 @@ jobs:
             echo "unsigned=0" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Signature enforcement (advisory)
+      - name: Signature enforcement
         run: |
-          # Currently advisory - set to 'exit 1' to enforce
-          echo "Signature verification complete (advisory mode)"
-          # To enforce: uncomment the following
-          # if [[ "${{ steps.verify.outputs.unsigned }}" -gt 0 ]]; then
-          #   echo "::error::Unsigned commits are not allowed"
-          #   exit 1
-          # fi
+          # Strict enforcement: PRs with unsigned commits will fail
+          if [[ "${{ steps.verify.outputs.unsigned }}" -gt 0 ]]; then
+            echo "::error::Unsigned commits are not allowed. All commits must be cryptographically signed (GPG or SSH)."
+            exit 1
+          fi
+          echo "Signature verification passed: all commits are signed"
 
   # ============================================================================
   # Insecure Pattern Scanner
