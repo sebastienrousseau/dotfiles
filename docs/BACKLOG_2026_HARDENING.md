@@ -57,6 +57,10 @@ This backlog tracks repo-level security and platform hardening work aligned with
   - Progress: verification gate implemented in `.github/workflows/security-release.yml`.
   - Remaining: enforce this workflow as a required status check in repository branch/rulesets settings.
 - [ ] Extend template security baselines for `dot new` (lockfiles, CI defaults, scanning).
+  - Progress:
+    - `dot new` now applies baseline files: `.editorconfig`, `.gitattributes`, `SECURITY.md`.
+    - `dot new` now creates a pinned secret-scanning workflow: `.github/workflows/security.yml`.
+    - `dot new` now performs best-effort lockfile generation for Node/Python/Go when tooling is available.
 - [ ] Add MCP operations hardening (`dot mcp doctor`, scoped server policies, token checks).
   - Progress:
     - Added `dot mcp doctor` command routed through `scripts/dot/commands/meta.sh`.
