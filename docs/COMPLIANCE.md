@@ -243,9 +243,61 @@ pre-commit install --hook-type pre-push
 
 | Requirement | Implementation |
 |-------------|----------------|
-| Signed commits | GPG/SSH signing |
+| Signed commits | GPG/SSH signing (cryptographically verified) |
 | Conventional format | `feat:`, `fix:`, `docs:` prefixes |
 | Co-author attribution | AI contributions attributed |
+
+### Cryptographic Identity Verification (ALCOA: Attributable)
+
+For SOC 2 compliance, the "Attributable" principle requires that all changes are linked to a **verified cryptographic identity**, not just a username.
+
+**Enforcement layers:**
+
+| Layer | Mechanism | Status |
+|-------|-----------|--------|
+| Local | Pre-push hook blocks unsigned commits | Enforced |
+| CI | `compliance-guard.yml` verifies signatures | Advisory |
+| GitHub | Branch protection (optional) | Configurable |
+
+**Pre-push hook location:** `scripts/git-hooks/pre-push`
+
+```bash
+# The hook verifies each commit before push:
+for c in $(git rev-list "$range"); do
+  if ! git verify-commit "$c" >/dev/null 2>&1; then
+    echo "Blocked: unsigned commit $c"
+    exit 1
+  fi
+done
+```
+
+**Setup signing:**
+
+```bash
+# SSH signing (recommended)
+git config --global gpg.format ssh
+git config --global user.signingkey ~/.ssh/id_ed25519.pub
+git config --global commit.gpgsign true
+
+# GPG signing (alternative)
+git config --global user.signingkey <YOUR_GPG_KEY_ID>
+git config --global commit.gpgsign true
+
+# Or use the dotfiles alias:
+enable-signing ssh  # or: enable-signing gpg
+```
+
+**Install pre-push hook:**
+
+```bash
+cp scripts/git-hooks/pre-push .git/hooks/pre-push
+chmod +x .git/hooks/pre-push
+```
+
+**GitHub Branch Protection (recommended):**
+
+Enable "Require signed commits" in repository settings:
+`Settings > Branches > Branch protection rules > Require signed commits`
 
 ---
 
