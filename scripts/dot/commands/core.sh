@@ -32,7 +32,7 @@ cmd_update() {
 }
 
 cmd_add() {
-  if [ -z "$1" ]; then
+  if [ -z "${1:-}" ]; then
     echo "Usage: dot add <file>"
     echo ""
     echo "Add a file to the chezmoi source directory."
