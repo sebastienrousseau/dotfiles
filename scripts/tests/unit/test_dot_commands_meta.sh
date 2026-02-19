@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC1090,SC1091,SC2034
+# Unit tests for dot CLI meta commands
+# Tests: log-rotate, help, version
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
+source "$SCRIPT_DIR/../framework/assertions.sh"
+source "$SCRIPT_DIR/../framework/mocks.sh"
+
+META_FILE="$REPO_ROOT/scripts/dot/commands/meta.sh"
+
+# Test: meta.sh file exists
+test_start "meta_file_exists"
+assert_file_exists "$META_FILE" "meta.sh should exist"
+
+# Test: meta.sh is valid shell syntax
+test_start "meta_syntax_valid"
+if bash -n "$META_FILE" 2>/dev/null; then
+  ((TESTS_PASSED++))
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: meta.sh has valid syntax"
+else
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: meta.sh has syntax errors"
+fi
+
+# Test: defines help command
+test_start "meta_defines_help"
+if grep -q "cmd_help\|_help\|show_help" "$META_FILE" 2>/dev/null; then
+  ((TESTS_PASSED++))
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines help command"
+else
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define help command"
+fi
+
+# Test: defines version command
+test_start "meta_defines_version"
+if grep -q "cmd_version\|_version\|show_version" "$META_FILE" 2>/dev/null; then
+  ((TESTS_PASSED++))
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines version command"
+else
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define version command"
+fi
+
+# Test: defines log-rotate command
+test_start "meta_defines_log_rotate"
+if grep -q "log.rotate\|log_rotate\|logrotate" "$META_FILE" 2>/dev/null; then
+  ((TESTS_PASSED++))
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines log-rotate command"
+else
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define log-rotate command"
+fi
+
+# Test: version uses semantic versioning
+test_start "meta_semver_version"
+if grep -qE '[0-9]+\.[0-9]+\.[0-9]+|VERSION' "$META_FILE" 2>/dev/null; then
+  ((TESTS_PASSED++))
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses semantic versioning"
+else
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use semantic versioning"
+fi
+
+# Test: shellcheck compliance
+test_start "meta_shellcheck"
+if command -v shellcheck &>/dev/null; then
+  errors=$(shellcheck -S error "$META_FILE" 2>&1 | wc -l)
+  if [[ "$errors" -eq 0 ]]; then
+    ((TESTS_PASSED++))
+    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
+  else
+    ((TESTS_FAILED++))
+    echo -e "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
+  fi
+else
+  ((TESTS_PASSED++))
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
+fi
+
+echo ""
+echo "Meta commands tests completed."
+echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

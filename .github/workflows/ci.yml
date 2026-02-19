@@ -202,7 +202,7 @@ jobs:
     timeout-minutes: 8
     # Always run dependency audit
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Audit shell dependencies
         run: |
           echo "Auditing shell script external dependencies..."
@@ -250,11 +250,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: TruffleHog Scan
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@v3.93.1
         with:
           extra_args: --only-verified
 
@@ -263,7 +263,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Generate SBOM with Syft
         uses: anchore/sbom-action@v0
         with:
