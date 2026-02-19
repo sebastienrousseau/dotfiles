@@ -8,6 +8,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh
 source "$SCRIPT_DIR/../lib/utils.sh"
 
+ui_logo_once "Dot • Tools"
+
 show_system_package_managers() {
   if has_command brew; then
     local brew_version brew_formulae brew_casks

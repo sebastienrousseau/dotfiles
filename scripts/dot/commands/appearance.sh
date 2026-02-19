@@ -8,6 +8,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh
 source "$SCRIPT_DIR/../lib/utils.sh"
 
+ui_logo_once "Dot • Appearance"
+
 cmd_theme() {
   run_script "scripts/theme/switch.sh" "Theme switcher" "$@"
 }

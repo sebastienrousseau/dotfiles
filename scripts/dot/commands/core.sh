@@ -8,6 +8,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh
 source "$SCRIPT_DIR/../lib/utils.sh"
 
+if [[ "${1:-}" != "cd" ]]; then
+  ui_logo_once "Dot • Core"
+fi
+
 cmd_apply() {
   local src_dir
   src_dir="$(resolve_source_dir)"

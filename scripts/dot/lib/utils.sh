@@ -74,3 +74,21 @@ warn() {
 info() {
   ui_info "$1"
 }
+
+# Print the dot logo once per process for interactive sessions.
+ui_logo_once() {
+  local title="${1:-Dot}"
+  ui_init
+  if [[ "${DOTFILES_SHOW_LOGO:-1}" != "1" ]]; then
+    return
+  fi
+  if [[ ! -t 1 ]]; then
+    return
+  fi
+  if [[ "${DOTFILES_LOGO_PRINTED:-0}" = "1" ]]; then
+    return
+  fi
+  ui_logo_dot "$title"
+  DOTFILES_LOGO_PRINTED=1
+  export DOTFILES_LOGO_PRINTED
+}
