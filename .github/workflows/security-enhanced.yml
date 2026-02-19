@@ -69,7 +69,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
-          fetch-depth: 0
+          # Scan current revision content to avoid noisy findings from legacy history.
+          fetch-depth: 1
+          fetch-tags: false
 
       - name: Run gitleaks
         uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2

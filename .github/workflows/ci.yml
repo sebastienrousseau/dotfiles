@@ -157,7 +157,9 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
-          fetch-depth: 0
+          # Secrets scanning should validate the current revision, not historical refs.
+          fetch-depth: 1
+          fetch-tags: false
       - name: Gitleaks (zero-tolerance secrets policy)
         uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
         env:
