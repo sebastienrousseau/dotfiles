@@ -9,6 +9,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 VERSION_PATTERN='[0-9]+\.[0-9]+\.[0-9]+'
+SED_VERSION_PATTERN='[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*'
 BACKUP_DIR="$PROJECT_ROOT/.version-sync-backup"
 EXCLUDE_FILES=(
   "CHANGELOG.md"
@@ -30,19 +31,19 @@ NC='\033[0m' # No Color
 
 # Functions
 log_info() {
-  echo -e "${BLUE}[INFO]${NC} $*"
+  echo -e "${BLUE}[INFO]${NC} $*" >&2
 }
 
 log_success() {
-  echo -e "${GREEN}[SUCCESS]${NC} $*"
+  echo -e "${GREEN}[SUCCESS]${NC} $*" >&2
 }
 
 log_warning() {
-  echo -e "${YELLOW}[WARNING]${NC} $*"
+  echo -e "${YELLOW}[WARNING]${NC} $*" >&2
 }
 
 log_error() {
-  echo -e "${RED}[ERROR]${NC} $*"
+  echo -e "${RED}[ERROR]${NC} $*" >&2
 }
 
 show_help() {
@@ -141,6 +142,17 @@ find_version_files() {
   rm -f "$temp_file"
 }
 
+sed_in_place() {
+  local file="$1"
+  shift
+
+  if sed --version >/dev/null 2>&1; then
+    sed -E -i "$@" "$file"
+  else
+    sed -E -i '' "$@" "$file"
+  fi
+}
+
 create_backup() {
   local files=("$@")
 
@@ -191,17 +203,18 @@ update_version_references() {
     # Update various version reference patterns
     case "$(basename "$file")" in
       "README.md")
-        # Update version badge specifically
-        sed -i "s|Version-v$VERSION_PATTERN|Version-v$target_version|g" "$temp_file"
+        # Update badge and release link versions.
+        sed_in_place "$temp_file" \
+          -e "s|Version-v$SED_VERSION_PATTERN|Version-v$target_version|g" \
+          -e "s|/releases/tag/v$SED_VERSION_PATTERN|/releases/tag/v$target_version|g"
         ;;
       *)
-        # Update general patterns in other files
-        sed -i \
-          -e "s|Version.*v$VERSION_PATTERN|Version**: v$target_version|g" \
-          -e "s|Dotfiles Version.*v$VERSION_PATTERN|Dotfiles Version**: v$target_version|g" \
-          -e "s|\*\*Version\*\*:.*v$VERSION_PATTERN|**Version**: v$target_version|g" \
-          -e "s|version.*$VERSION_PATTERN|version $target_version|g" \
-          "$temp_file"
+        # Update explicit markdown version labels only.
+        sed_in_place "$temp_file" \
+          -e "s|(\*\*Version\*\*:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
+          -e "s|(\*\*Dotfiles Version\*\*:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
+          -e "s|(Version:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
+          -e "s|(Dotfiles Version:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g"
         ;;
     esac
 
@@ -210,7 +223,7 @@ update_version_references() {
       if [[ "$dry_run" == "true" ]]; then
         log_info "Would update: $file"
         # Show diff preview
-        diff -u "$file" "$temp_file" | head -20 || true
+        diff -u "$file" "$temp_file" | head -20 >&2 || true
       else
         mv "$temp_file" "$file"
         log_success "Updated: $file"
@@ -228,7 +241,7 @@ update_version_references() {
     log_success "Updated $changes_made files out of $files_processed processed"
   fi
 
-  return $changes_made
+  echo "$changes_made"
 }
 
 verify_version_consistency() {
@@ -247,9 +260,26 @@ verify_version_consistency() {
 
     total_checked=$((total_checked + 1))
 
-    # Extract all version references from the file
-    local versions_in_file
-    mapfile -t versions_in_file < <(rg -o "v?$VERSION_PATTERN" "$file" | sort -u)
+    # Extract only dotfiles-targeted version references (ignore unrelated tool versions).
+    local versions_in_file=()
+    while IFS= read -r match; do
+      while IFS= read -r version; do
+        versions_in_file+=("$version")
+      done < <(printf "%s\n" "$match" | rg -o "v?$VERSION_PATTERN" || true)
+    done < <(
+      rg -o \
+        -e "Version-v$VERSION_PATTERN" \
+        -e "/releases/tag/v$VERSION_PATTERN" \
+        -e "\\*\\*Version\\*\\*:[[:space:]]*v?$VERSION_PATTERN" \
+        -e "\\*\\*Dotfiles Version\\*\\*:[[:space:]]*v?$VERSION_PATTERN" \
+        -e "(^|[[:space:]])Version:[[:space:]]*v?$VERSION_PATTERN" \
+        -e "(^|[[:space:]])Dotfiles Version:[[:space:]]*v?$VERSION_PATTERN" \
+        "$file" 2>/dev/null || true
+    )
+
+    if [[ ${#versions_in_file[@]} -eq 0 ]]; then
+      continue
+    fi
 
     for version in "${versions_in_file[@]}"; do
       # Remove 'v' prefix if present for comparison
@@ -354,8 +384,9 @@ main() {
   fi
 
   # Update version references
-  if update_version_references "$target_version" "$dry_run" "${version_files[@]}"; then
-    local changes_made=$?
+  local changes_made
+  changes_made="$(update_version_references "$target_version" "$dry_run" "${version_files[@]}")"
+  if [[ "$changes_made" =~ ^[0-9]+$ ]]; then
 
     if [[ $changes_made -gt 0 || "$force_sync" == "true" ]]; then
       if [[ "$dry_run" == "false" ]]; then
