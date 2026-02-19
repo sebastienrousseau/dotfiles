@@ -40,10 +40,13 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Prepare CI devcontainer config
+        run: cp .devcontainer/devcontainer.ci.json .devcontainer/devcontainer.json
+
       - name: Pre-build devcontainer image
         uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 # v0.3
         with:
-          # devcontainers/ci requires a standard filename when configFile is provided.
+          # devcontainers/ci requires a standard filename for configFile.
           configFile: .devcontainer/devcontainer.json
           imageName: ghcr.io/${{ github.repository_owner }}/dotfiles-devcontainer
           cacheFrom: ghcr.io/${{ github.repository_owner }}/dotfiles-devcontainer
