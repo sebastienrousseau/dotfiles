@@ -8,7 +8,11 @@ alias root='s'
 alias s='sudo -i'
 
 # Execute a command as the superuser.
-alias su='sudo su'
+if [[ "${DOTFILES_ENABLE_SU_ALIAS:-0}" == "1" ]]; then
+  alias su='sudo su'
+fi
 
-# Execute a command as the superuser.
-alias sudo='s'
+# Risky command shadowing aliases are opt-in.
+if [[ "${DOTFILES_ENABLE_SUDO_ALIAS:-0}" == "1" ]]; then
+  alias sudo='s'
+fi

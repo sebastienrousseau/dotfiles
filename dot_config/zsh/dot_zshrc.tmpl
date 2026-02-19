@@ -140,19 +140,21 @@ if command -v bat >/dev/null; then
   alias cat="bat"
 fi
 
-# Smart Alias Function (Colorize output when listing, standard behavior otherwise)
-alias_wrapper() {
-  if [[ $# -eq 0 ]]; then
-     if command -v bat >/dev/null; then
-       builtin alias | bat -l sh --style=plain
-     else
-       builtin alias
-     fi
-  else
-     builtin alias "$@"
-  fi
-}
-alias alias=alias_wrapper
+# Smart Alias Function (opt-in; avoids overriding builtin `alias` by default)
+if [[ "${DOTFILES_ALIAS_WRAPPER:-0}" == "1" ]]; then
+  alias_wrapper() {
+    if [[ $# -eq 0 ]]; then
+      if command -v bat >/dev/null; then
+        builtin alias | bat -l sh --style=plain
+      else
+        builtin alias
+      fi
+    else
+      builtin alias "$@"
+    fi
+  }
+  alias alias=alias_wrapper
+fi
 
 
 # Phase 33: Atuin (Memory Layer)

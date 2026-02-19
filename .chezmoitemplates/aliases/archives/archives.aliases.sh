@@ -335,7 +335,9 @@ alias ltbz='tar -tjvf'        # List tar.bz2 archive contents
 alias ltxz='tar -tJvf'        # List tar.xz archive contents
 alias ltzst='tar --zstd -tvf' # List tar.zst archive contents
 alias lzip='unzip -l'         # List zip archive contents
-alias lrar='unrar l'          # List rar archive contents
+if command -v unrar >/dev/null 2>&1; then
+  alias lrar='unrar l' # List rar archive contents
+fi
 alias lar='list_archive'      # Generic list archive contents
 
 # 7-Zip Aliases
@@ -359,8 +361,12 @@ alias czip='zip -r' # Create zip archive
 alias xzip='unzip'  # Extract zip archive
 
 # RAR Aliases
-alias crar='rar a'   # Create rar archive
-alias xrar='unrar x' # Extract rar archive
+if command -v rar >/dev/null 2>&1; then
+  alias crar='rar a' # Create rar archive
+fi
+if command -v unrar >/dev/null 2>&1; then
+  alias xrar='unrar x' # Extract rar archive
+fi
 
 # Gzip Aliases
 alias cgz='gzip -cv' # Compress with gzip
