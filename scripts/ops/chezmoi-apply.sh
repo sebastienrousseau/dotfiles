@@ -21,6 +21,27 @@ if command -v gum >/dev/null 2>&1 && [[ -t 1 ]]; then
   use_ui=1
 fi
 
+header() {
+  local text="$1"
+  if [[ "$use_ui" = "1" ]]; then
+    gum style --foreground 212 --bold "$text"
+  else
+    echo "$text"
+  fi
+}
+
+format_status() {
+  local symbol="$1"
+  local label="$2"
+  local detail="$3"
+  local width=20
+  if [[ -n "$detail" ]]; then
+    printf "  %-2s %-*s %s\n" "$symbol" "$width" "$label" "$detail"
+  else
+    printf "  %-2s %s\n" "$symbol" "$label"
+  fi
+}
+
 run_step() {
   local title="$1"
   shift
@@ -28,12 +49,12 @@ run_step() {
   out="$(mktemp)"
   if [[ "$use_ui" = "1" ]]; then
     if gum spin --spinner dot --title "$title" -- "$@" >"$out" 2>&1; then
-      printf "  ✓ %s\n" "$title"
+      format_status "✓" "$title" ""
       if [[ "${DOTFILES_CHEZMOI_VERBOSE:-0}" = "1" ]] && [[ -s "$out" ]]; then
         cat "$out"
       fi
     else
-      printf "  ✗ %s\n" "$title"
+      format_status "✗" "$title" ""
       cat "$out"
       rm -f "$out"
       exit 1
@@ -53,7 +74,7 @@ run_step() {
   rm -f "$out"
 }
 
-echo "Applying dotfiles..."
+header "Applying dotfiles"
 run_step "Chezmoi apply" chezmoi apply "${args[@]}"
 
 check_ai_cli() {
@@ -65,43 +86,44 @@ check_ai_cli() {
 }
 
 echo ""
-echo "AI provider CLI checks (optional):"
+header "AI provider CLI checks (optional)"
 if command -v claude >/dev/null 2>&1; then
-  printf "  ✓ claude\n"
+  format_status "✓" "claude" ""
 else
-  printf "  ✗ claude (recommended — install to enable this provider)\n"
+  format_status "✗" "claude" "recommended — install to enable this provider"
 fi
 if command -v gemini >/dev/null 2>&1; then
-  printf "  ✓ gemini\n"
+  format_status "✓" "gemini" ""
 else
-  printf "  ✗ gemini (optional — install to enable this provider)\n"
+  format_status "✗" "gemini" "optional — install to enable this provider"
 fi
 if command -v sgpt >/dev/null 2>&1; then
-  printf "  ✓ sgpt\n"
+  format_status "✓" "sgpt" ""
 else
-  printf "  ✗ sgpt (optional — install to enable this provider)\n"
+  format_status "✗" "sgpt" "optional — install to enable this provider"
 fi
 if command -v ollama >/dev/null 2>&1; then
-  printf "  ✓ ollama\n"
+  format_status "✓" "ollama" ""
 else
-  printf "  ✗ ollama (optional — install to enable this provider)\n"
+  format_status "✗" "ollama" "optional — install to enable this provider"
 fi
 if command -v opencode >/dev/null 2>&1; then
-  printf "  ✓ opencode\n"
+  format_status "✓" "opencode" ""
 else
-  printf "  ✗ opencode (optional — install to enable this provider)\n"
+  format_status "✗" "opencode" "optional — install to enable this provider"
 fi
 if command -v aider >/dev/null 2>&1; then
-  printf "  ✓ aider\n"
+  format_status "✓" "aider" ""
 else
-  printf "  ✗ aider (optional — AI pair programming)\n"
+  format_status "✗" "aider" "optional — AI pair programming"
 fi
 
 if [[ "${DOTFILES_CHEZMOI_STATUS:-1}" = "1" ]]; then
-  printf "\nStatus:\n"
+  printf "\n"
+  header "Status"
   status_out="$(chezmoi status || true)"
   if [[ -z "$status_out" ]]; then
-    printf "  ✓ Clean\n"
+    format_status "✓" "Clean" ""
   else
     printf "%s\n" "$status_out"
   fi
