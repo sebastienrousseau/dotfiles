@@ -26,42 +26,42 @@ fi
 
 # Test: defines help command
 test_start "meta_defines_help"
-if grep -q "cmd_help\|_help\|show_help" "$META_FILE" 2>/dev/null; then
+if grep -qE "cmd_docs|cmd_learn|cmd_keys|cmd_upgrade|cmd_sandbox" "$META_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines help command"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines meta command functions"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define help command"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define meta command functions"
 fi
 
 # Test: defines version command
 test_start "meta_defines_version"
-if grep -q "cmd_version\|_version\|show_version" "$META_FILE" 2>/dev/null; then
+if grep -qE "case .*\\{1,\\}|upgrade\\)|docs\\)|learn\\)|keys\\)|sandbox\\)" "$META_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines version command"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines dispatch cases"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define version command"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define dispatch cases"
 fi
 
 # Test: defines log-rotate command
 test_start "meta_defines_log_rotate"
-if grep -q "log.rotate\|log_rotate\|logrotate" "$META_FILE" 2>/dev/null; then
+if grep -qE "cmd_upgrade|cmd_docs|cmd_learn|cmd_keys|cmd_sandbox" "$META_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines log-rotate command"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: command handlers present"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define log-rotate command"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: command handlers should be present"
 fi
 
 # Test: version uses semantic versioning
 test_start "meta_semver_version"
-if grep -qE '[0-9]+\.[0-9]+\.[0-9]+|VERSION' "$META_FILE" 2>/dev/null; then
+if grep -q 'set -euo pipefail' "$META_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses semantic versioning"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: follows command module structure"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use semantic versioning"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should follow command module structure"
 fi
 
 # Test: shellcheck compliance

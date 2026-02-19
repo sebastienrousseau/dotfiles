@@ -25,7 +25,7 @@ fi
 
 # Test: defines restore function
 test_start "restore_defines_function"
-if grep -qE 'cmd_restore|_restore' "$RESTORE_FILE" 2>/dev/null; then
+if grep -qE 'restore_from_git|restore_latest|list_backups|usage' "$RESTORE_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines restore function"
 else

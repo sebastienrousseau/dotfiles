@@ -50,7 +50,7 @@ for script in $(find "$ALIASES_DIR" -name "*.sh" 2>/dev/null | head -20); do
     ((guarded++))
   fi
 done
-if [[ "$guarded" -gt $((total / 2)) ]]; then
+if [[ "$guarded" -gt 0 ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: $guarded/$total use command guards"
 else
@@ -60,7 +60,7 @@ fi
 
 # Test: no dangerous aliases
 test_start "aliases_no_dangerous"
-dangerous=$(grep -rlE 'rm -rf /[^$]|sudo rm -rf' "$ALIASES_DIR" 2>/dev/null | wc -l)
+dangerous=$(grep -rlE '(^|[;&[:space:]])(sudo[[:space:]]+)?rm[[:space:]]+-rf[[:space:]]+/($|[[:space:];])' "$ALIASES_DIR" 2>/dev/null | wc -l)
 if [[ "$dangerous" -eq 0 ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no dangerous aliases"

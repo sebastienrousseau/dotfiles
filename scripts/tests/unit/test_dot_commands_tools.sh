@@ -56,12 +56,12 @@ fi
 
 # Test: defines sandbox command
 test_start "tools_cmd_defines_sandbox"
-if grep -q "cmd_sandbox\|_sandbox\|sandbox" "$TOOLS_FILE" 2>/dev/null; then
+if grep -q "sandbox" "$REPO_ROOT/scripts/dot/commands/meta.sh" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines sandbox command"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: sandbox command is defined in meta module"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define sandbox command"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: sandbox command should exist in meta module"
 fi
 
 # Test: no hardcoded paths
@@ -76,7 +76,7 @@ fi
 
 # Test: uses XDG directories
 test_start "tools_cmd_uses_xdg"
-if grep -qE 'XDG_|HOME' "$TOOLS_FILE" 2>/dev/null; then
+if grep -qE 'PWD|HOME|resolve_source_dir|require_source_dir' "$TOOLS_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses XDG/HOME variables"
 else

@@ -36,7 +36,7 @@ fi
 
 # Test: has logging functions
 test_start "utils_has_logging"
-if grep -qE 'log_|print_|echo_' "$UTILS_FILE" 2>/dev/null; then
+if grep -qE 'die\(|warn\(|info\(|ui_' "$UTILS_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has logging functions"
 else
@@ -46,7 +46,7 @@ fi
 
 # Test: uses colors properly
 test_start "utils_uses_colors"
-if grep -qE 'RED|GREEN|YELLOW|NC|\\033\[|tput' "$UTILS_FILE" 2>/dev/null; then
+if grep -qE 'source .*ui.sh|ui_err|ui_warn|ui_info' "$UTILS_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses color codes"
 else

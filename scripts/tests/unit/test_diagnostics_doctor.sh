@@ -25,7 +25,7 @@ fi
 
 # Test: defines diagnostic functions
 test_start "doctor_defines_diagnostics"
-if grep -qE 'diagnose|check_|verify_' "$DOCTOR_FILE" 2>/dev/null; then
+if grep -qE 'check_|command -v|chezmoi status|ui_header' "$DOCTOR_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines diagnostic functions"
 else

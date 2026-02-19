@@ -11,7 +11,8 @@ assert_dir_exists "$ALIASES_DIR" "aliases directory should exist"
 
 test_start "alias_files_valid"
 invalid=0
-for f in "$ALIASES_DIR"/*.sh 2>/dev/null; do
+shopt -s nullglob
+for f in "$ALIASES_DIR"/*.sh; do
   [[ -f "$f" ]] && ! bash -n "$f" 2>/dev/null && ((invalid++))
 done
 if [[ "$invalid" -eq 0 ]]; then

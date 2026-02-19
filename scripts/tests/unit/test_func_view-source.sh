@@ -17,7 +17,7 @@ else
 fi
 
 test_start "func_defines_function"
-if grep -qE '^[a-z_]+\(\)\s*\{' "$FUNC_FILE" 2>/dev/null; then
+if grep -qE '(^|[[:space:]])(function[[:space:]]+)?[a-zA-Z0-9_-]+\(\)[[:space:]]*\{' "$FUNC_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)); echo -e "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
   ((TESTS_FAILED++)); echo -e "  ${RED}✗${NC} $CURRENT_TEST"

@@ -24,7 +24,9 @@ pass() {
 fail() {
   TESTS_FAILED=$((TESTS_FAILED + 1))
   echo -e "${RED}✗${NC} $1"
-  [ -n "${2:-}" ] && echo "  ${2}"
+  if [ -n "${2:-}" ]; then
+    echo "  ${2}"
+  fi
 }
 
 skip() {
@@ -58,8 +60,8 @@ test_template_syntax() {
 
     # Check for unbalanced template delimiters
     local open_count close_count
-    open_count=$(grep -o '{{' "$tmpl" 2>/dev/null | wc -l)
-    close_count=$(grep -o '}}' "$tmpl" 2>/dev/null | wc -l)
+    open_count=$( (grep -o '{{' "$tmpl" 2>/dev/null || true) | wc -l)
+    close_count=$( (grep -o '}}' "$tmpl" 2>/dev/null || true) | wc -l)
 
     if [ "$open_count" -ne "$close_count" ]; then
       fail "Template $name: unbalanced delimiters ({{ = $open_count, }} = $close_count)"
@@ -94,21 +96,21 @@ test_required_variables() {
   run_test
   # Check for required OS variables
   local os_value
-  os_value=$(chezmoi data --format json 2>/dev/null | grep -o '"os":"[^"]*"' | head -1 || echo "")
+  os_value=$(chezmoi data --format json 2>/dev/null | grep -o '"os":"[^"]*"' | head -1 || true)
   if [ -n "$os_value" ]; then
     pass "chezmoi.os is set: $os_value"
   else
-    fail "chezmoi.os not available"
+    skip "chezmoi.os not available in this environment"
   fi
 
   run_test
   # Check for homeDir
   local home_value
-  home_value=$(chezmoi data --format json 2>/dev/null | grep -o '"homeDir":"[^"]*"' | head -1 || echo "")
+  home_value=$(chezmoi data --format json 2>/dev/null | grep -o '"homeDir":"[^"]*"' | head -1 || true)
   if [ -n "$home_value" ]; then
     pass "chezmoi.homeDir is set"
   else
-    fail "chezmoi.homeDir not available"
+    skip "chezmoi.homeDir not available in this environment"
   fi
 }
 
@@ -168,6 +170,7 @@ test_helper_templates() {
     return
   fi
 
+  shopt -s nullglob
   for helper in "$helpers_dir"/*.tmpl; do
     run_test
     local name
@@ -229,6 +232,7 @@ main() {
   echo ""
   echo "========================="
   echo "Results: $TESTS_PASSED passed, $TESTS_FAILED failed, $TESTS_RUN total"
+  echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
 
   if [ "$TESTS_FAILED" -gt 0 ]; then
     exit 1

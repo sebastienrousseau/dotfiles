@@ -425,6 +425,10 @@ jobs:
           fi
 
           echo "✅ All tests passed - 100% success rate maintained"
+      - name: Enforce module coverage (>=95%)
+        run: |
+          chmod +x scripts/tests/framework/module_coverage.sh
+          MIN_COVERAGE=95 ./scripts/tests/framework/module_coverage.sh
       - name: Integration tests
         run: |
           echo "Running integration tests..."

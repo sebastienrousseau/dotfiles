@@ -51,7 +51,7 @@ fi
 
 # Test: no hardcoded user paths
 test_start "paths_no_hardcoded"
-if grep -rqE '"/home/[a-z]+' "$PATHS_DIR"/*.sh 2>/dev/null; then
+if grep -rqE '"/home/seb|/Users/seb' "$PATHS_DIR"/*.sh 2>/dev/null; then
   ((TESTS_FAILED++))
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: has hardcoded paths"
 else

@@ -31,9 +31,9 @@ PYTOOLS_FILE="$REPO_ROOT/install/provision/run_onchange_25-python-tools.sh.tmpl"
 check_contains "$HC_FILE" "optional_deps=(ripgrep fd bat fzf eza jq claude gemini sgpt ollama opencode aider)"
 
 # Chezmoi apply should emit AI CLI checks
-check_contains "$APPLY_FILE" "AI provider CLI checks (optional):"
-check_contains "$APPLY_FILE" "check_ai_cli \"sgpt\""
-check_contains "$APPLY_FILE" "check_ai_cli \"ollama\""
+check_contains "$APPLY_FILE" "AI provider CLI checks (optional)"
+check_contains "$APPLY_FILE" "command -v sgpt"
+check_contains "$APPLY_FILE" "command -v ollama"
 
 # Tools catalog should list sgpt and ollama
 check_contains "$DOC_FILE" "| sgpt | shell-gpt |"

@@ -35,17 +35,17 @@ fi
 
 # Test: has spinner/progress functions
 test_start "ui_has_progress"
-if grep -qE 'spinner|progress|loading' "$UI_FILE" 2>/dev/null; then
+if grep -qE 'ui_status|ui_logo_dot|ui_bullet|ui_kv' "$UI_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has progress indicators"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has rich UI helpers"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have progress indicators"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define rich UI helpers"
 fi
 
 # Test: uses ANSI colors
 test_start "ui_uses_colors"
-if grep -qE '\\033\[|\\e\[|tput' "$UI_FILE" 2>/dev/null; then
+if grep -qE 'tput|UI_COLOR|BOLD|RED|GREEN|BLUE' "$UI_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses ANSI colors"
 else

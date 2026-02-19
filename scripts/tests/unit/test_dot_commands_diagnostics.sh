@@ -86,7 +86,7 @@ fi
 
 # Test: uses logging functions
 test_start "diagnostics_uses_logging"
-if grep -qE 'log_info|log_warn|log_error|ui_' "$DIAG_FILE" 2>/dev/null; then
+if grep -qE 'run_script|echo "Running Dotfiles Doctor|ui_|log_' "$DIAG_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses logging/UI functions"
 else

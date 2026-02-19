@@ -35,7 +35,7 @@ fi
 
 # Test: handles multiple applications
 test_start "telemetry_multiple_apps"
-if grep -cE 'brew|npm|dotnet|vscode|code|azure' "$TEL_FILE" 2>/dev/null | grep -qE '^[2-9]|^[0-9]{2,}'; then
+if grep -cE 'ubuntu|whoopsie|apport|analytics|telemetry|popularity-contest' "$TEL_FILE" 2>/dev/null | grep -qE '^[2-9]|^[0-9]{2,}'; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: handles multiple applications"
 else

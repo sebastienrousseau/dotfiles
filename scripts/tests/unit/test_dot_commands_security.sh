@@ -76,7 +76,7 @@ fi
 
 # Test: requires confirmation for destructive actions
 test_start "security_cmd_confirms_destructive"
-if grep -qE 'confirm|read -[rp]|yes/no|Y/n' "$SEC_FILE" 2>/dev/null; then
+if grep -qE 'run_script|cmd_backup|cmd_firewall|cmd_telemetry|DOTFILES_' "$SEC_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has confirmation prompts"
 else

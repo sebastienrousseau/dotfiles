@@ -36,7 +36,8 @@ fi
 # Test: all hook files have valid syntax
 test_start "hooks_all_valid_syntax"
 invalid=0
-for script in "$HOOKS_DIR"/*.sh "$HOOKS_DIR"/hooks/* 2>/dev/null; do
+shopt -s nullglob
+for script in "$HOOKS_DIR"/*.sh "$HOOKS_DIR"/hooks/*; do
   if [[ -f "$script" ]] && ! bash -n "$script" 2>/dev/null; then
     ((invalid++))
   fi
