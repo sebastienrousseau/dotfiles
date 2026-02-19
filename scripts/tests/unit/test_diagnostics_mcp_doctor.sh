@@ -38,4 +38,22 @@ else
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: scope check missing"
 fi
 
+test_start "mcp_doctor_checks_policy"
+if grep -qE 'Launcher policy|Arg policy|allowlisted' "$SCRIPT_FILE" 2>/dev/null; then
+  ((TESTS_PASSED++))
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: checks launcher/arg policy"
+else
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: launcher/arg policy checks missing"
+fi
+
+test_start "mcp_doctor_checks_tokens"
+if grep -qE 'GITHUB_TOKEN|BRAVE_API_KEY|Token check' "$SCRIPT_FILE" 2>/dev/null; then
+  ((TESTS_PASSED++))
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: checks required token env vars"
+else
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: token checks missing"
+fi
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

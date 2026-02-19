@@ -65,3 +65,4 @@ This backlog tracks repo-level security and platform hardening work aligned with
   - Progress:
     - Added `dot mcp doctor` command routed through `scripts/dot/commands/meta.sh`.
     - Added MCP diagnostics script `scripts/diagnostics/mcp-doctor.sh` with JSON/env/scope checks.
+    - Added MCP launcher/arg policy checks and required token checks (`GITHUB_TOKEN`, `BRAVE_API_KEY`).
