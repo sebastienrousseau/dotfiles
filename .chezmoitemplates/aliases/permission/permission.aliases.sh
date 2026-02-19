@@ -20,7 +20,8 @@ if command -v chmod &>/dev/null; then
   alias 644='chmod -R 644'
 
   # Set permissions to read and write for all. (CAUTION: world-writable)
-  alias 666='echo "WARNING: 666 makes files world-writable" && chmod -R 666'
+  # Disabled by default due to security risk - uncomment if explicitly needed
+  # alias 666='echo "WARNING: 666 makes files world-writable" && chmod -R 666'
 
   # Set permissions to read, write, and execute for user, but only read
   # and execute for group and others.
@@ -31,7 +32,8 @@ if command -v chmod &>/dev/null; then
   alias 764='chmod -R 764'
 
   # Set permissions to read, write, and execute for all. (CAUTION: world-writable+executable)
-  alias 777='echo "WARNING: 777 makes files world-writable and executable" && chmod -R 777'
+  # Disabled by default due to security risk - uncomment if explicitly needed
+  # alias 777='echo "WARNING: 777 makes files world-writable and executable" && chmod -R 777'
 
   # Change group ownership of files or directories.
   alias chgrp='chgrp -v'

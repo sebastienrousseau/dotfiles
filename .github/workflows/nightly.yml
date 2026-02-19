@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Check Chezmoi updates
         id: chezmoi
@@ -108,7 +108,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, macos-13]  # Include older macOS
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Cache Chezmoi
         uses: actions/cache@v4
@@ -156,7 +156,7 @@ jobs:
     timeout-minutes: 15
     continue-on-error: true  # Beta tools may fail
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Test with latest shellcheck
         run: |
@@ -203,7 +203,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0  # Full history for comprehensive scan
 
@@ -262,7 +262,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install dependencies
         run: |
