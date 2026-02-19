@@ -1,0 +1,33 @@
+# Bun configuration
+# Managed by chezmoi - edit source at ~/.dotfiles/dot_config/bun/bunfig.toml.tmpl
+# Documentation: https://bun.sh/docs/runtime/bunfig
+
+[install]
+# Use a shared global cache
+globalBinDir = "{{ .chezmoi.homeDir }}/.bun/bin"
+
+# Prefer offline mode when possible
+prefer = "offline"
+
+# Auto-install peer dependencies
+peer = true
+
+# Registry (default)
+registry = "https://registry.npmjs.org/"
+
+# Scoped registries (uncomment and configure as needed)
+# [install.scopes]
+# "@mycompany" = { token = "$NPM_TOKEN", url = "https://npm.mycompany.com/" }
+
+[run]
+# Silence the bun install/update messages during bun run
+silent = false
+
+[test]
+# Test configuration
+coverage = false
+coverageDir = "coverage"
+
+[telemetry]
+# Disable telemetry
+enabled = false

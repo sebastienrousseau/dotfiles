@@ -1,0 +1,54 @@
+# =============================================================================
+# .zprofile - Login shell configuration (runs once per login)
+# Cross-platform: macOS (Apple Silicon/Intel), Linux, and WSL
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Platform Detection
+# -----------------------------------------------------------------------------
+export DOTFILES_OS="unknown"
+if [[ "$OSTYPE" == darwin* ]]; then
+  export DOTFILES_OS="macos"
+elif [[ -f /proc/version ]] && grep -qi microsoft /proc/version 2>/dev/null; then
+  export DOTFILES_OS="wsl"
+elif [[ "$OSTYPE" == linux* ]]; then
+  export DOTFILES_OS="linux"
+fi
+
+# -----------------------------------------------------------------------------
+# Homebrew Setup (Cross-Platform)
+# -----------------------------------------------------------------------------
+if [[ -f /opt/homebrew/bin/brew ]]; then
+  # macOS Apple Silicon
+  export HOMEBREW_PREFIX="/opt/homebrew"
+elif [[ -f /usr/local/bin/brew ]]; then
+  # macOS Intel
+  export HOMEBREW_PREFIX="/usr/local"
+elif [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+  # Linux / WSL
+  export HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
+fi
+
+if [[ -n "$HOMEBREW_PREFIX" ]]; then
+  export HOMEBREW_CELLAR="${HOMEBREW_PREFIX}/Cellar"
+  export HOMEBREW_REPOSITORY="${HOMEBREW_PREFIX}"
+  export PATH="${HOMEBREW_PREFIX}/bin:${HOMEBREW_PREFIX}/sbin:${PATH}"
+  export MANPATH="${HOMEBREW_PREFIX}/share/man${MANPATH+:$MANPATH}:"
+  export INFOPATH="${HOMEBREW_PREFIX}/share/info:${INFOPATH:-}"
+
+  # Performance & Privacy Settings
+  export HOMEBREW_NO_ANALYTICS=1              # Disable telemetry
+  export HOMEBREW_NO_AUTO_UPDATE=1            # Manual updates only
+  export HOMEBREW_AUTO_UPDATE_SECS=86400      # Max once per day if enabled
+  export HOMEBREW_NO_INSTALL_CLEANUP=1        # Don't auto-cleanup
+  export HOMEBREW_NO_ENV_HINTS=1              # No hints in output
+  export HOMEBREW_BAT=1                       # Use bat for syntax highlighting
+  export HOMEBREW_CURL_RETRIES=3              # Retry failed downloads
+  export HOMEBREW_FAIL_LOG_LINES=30           # More context on failures
+fi
+
+# -----------------------------------------------------------------------------
+# User Binaries (highest priority - set early for login shells)
+# Language-specific paths are consolidated in ~/.config/shell/00-core-paths.sh
+# -----------------------------------------------------------------------------
+export PATH="$HOME/bin:$HOME/.local/bin:$PATH"

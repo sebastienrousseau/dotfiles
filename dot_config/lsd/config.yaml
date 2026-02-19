@@ -1,0 +1,19 @@
+# lsd configuration (dotfiles)
+classic: false
+blocks:
+  - permission
+  - user
+  - group
+  - size
+  - date
+  - name
+color:
+  when: auto
+  theme: default
+icons:
+  when: auto
+  theme: fancy
+date: relative
+sorting:
+  column: name
+  dir-grouping: first

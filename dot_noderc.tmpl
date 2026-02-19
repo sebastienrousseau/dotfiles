@@ -1,0 +1,48 @@
+// Node.js REPL configuration
+// Managed by chezmoi - edit source at ~/.dotfiles/dot_noderc.tmpl
+
+// Enable syntax highlighting and better formatting
+process.env.NODE_REPL_HISTORY_SIZE = '10000';
+
+// Custom REPL prompt
+const os = require('os');
+
+// Format memory usage
+const formatMem = (bytes) => {
+  const mb = bytes / 1024 / 1024;
+  return `${mb.toFixed(1)}MB`;
+};
+
+// Extend REPL context with useful utilities
+module.exports = {
+  // Custom prompt showing Node version
+  prompt: `node(${process.version})> `,
+
+  // Enable experimental REPL await
+  useColors: true,
+
+  // Preview mode for better UX
+  preview: true,
+
+  // History file location (XDG compliant)
+  historyPath: `${os.homedir()}/.local/share/node_repl_history`,
+
+  // Setup function runs when REPL starts
+  setupFunction: (repl) => {
+    // Add helpers to context
+    repl.context.mem = () => {
+      const usage = process.memoryUsage();
+      console.log(`Heap: ${formatMem(usage.heapUsed)} / ${formatMem(usage.heapTotal)}`);
+      console.log(`RSS: ${formatMem(usage.rss)}`);
+    };
+
+    repl.context.cls = () => {
+      console.clear();
+    };
+
+    // Quick require shortcuts
+    repl.context.fs = require('fs');
+    repl.context.path = require('path');
+    repl.context.util = require('util');
+  },
+};

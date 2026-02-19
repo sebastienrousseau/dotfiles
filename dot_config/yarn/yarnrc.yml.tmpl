@@ -1,0 +1,36 @@
+# Yarn Berry (v2+) configuration
+# Managed by chezmoi - edit source at ~/.dotfiles/dot_config/yarn/yarnrc.yml.tmpl
+
+# Use node-modules linker for compatibility (PnP is default but breaks some tools)
+nodeLinker: node-modules
+
+# Enable global cache for faster installs
+enableGlobalCache: true
+
+# Telemetry
+enableTelemetry: false
+
+# Compression level for archives (0-9, default 6)
+compressionLevel: mixed
+
+# HTTP settings
+httpTimeout: 60000
+httpRetry: 3
+
+# Default init settings
+initScope: ""
+
+# Log filters (reduce noise)
+logFilters:
+  - code: YN0002
+    level: discard
+  - code: YN0060
+    level: discard
+  - code: YN0006
+    level: discard
+
+# Scoped registries (uncomment and configure as needed)
+# npmScopes:
+#   mycompany:
+#     npmRegistryServer: "https://npm.mycompany.com/"
+#     npmAuthToken: "${NPM_TOKEN:-}"

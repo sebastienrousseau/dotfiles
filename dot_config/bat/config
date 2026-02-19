@@ -1,0 +1,8 @@
+# Bat configuration (dotfiles)
+# See: https://github.com/sharkdp/bat
+
+--theme="TwoDark"
+--style="numbers,changes,header"
+--paging=auto
+--tabs=2
+--italic-text=always

@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# UUID generator
+# Usage: uuid [count] [--upper] [--no-dashes]
+
+set -euo pipefail
+
+COUNT=1
+UPPER=false
+NO_DASHES=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -u|--upper) UPPER=true; shift ;;
+    -n|--no-dashes) NO_DASHES=true; shift ;;
+    -h|--help)
+      echo "Usage: uuid [count] [OPTIONS]"
+      echo ""
+      echo "Options:"
+      echo "  -u, --upper       Uppercase output"
+      echo "  -n, --no-dashes   Remove dashes"
+      echo "  -h, --help        Show this help"
+      echo ""
+      echo "Examples:"
+      echo "  uuid          # Generate 1 UUID"
+      echo "  uuid 5        # Generate 5 UUIDs"
+      echo "  uuid -u       # Uppercase UUID"
+      exit 0
+      ;;
+    [0-9]*) COUNT="$1"; shift ;;
+    *) echo "Unknown option: $1"; exit 1 ;;
+  esac
+done
+
+generate_uuid() {
+  local uuid
+  if command -v uuidgen >/dev/null 2>&1; then
+    uuid=$(uuidgen)
+  elif [[ -f /proc/sys/kernel/random/uuid ]]; then
+    uuid=$(cat /proc/sys/kernel/random/uuid)
+  else
+    # Fallback: generate using random data
+    uuid=$(od -x /dev/urandom | head -1 | awk '{OFS="-"; print $2$3,$4,$5,$6,$7$8$9}')
+  fi
+
+  # Convert to lowercase first
+  uuid=$(echo "$uuid" | tr '[:upper:]' '[:lower:]')
+
+  # Apply transformations
+  $NO_DASHES && uuid=$(echo "$uuid" | tr -d '-')
+  $UPPER && uuid=$(echo "$uuid" | tr '[:lower:]' '[:upper:]')
+
+  echo "$uuid"
+}
+
+for ((i = 0; i < COUNT; i++)); do
+  generate_uuid
+done

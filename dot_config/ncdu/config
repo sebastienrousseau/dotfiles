@@ -1,0 +1,12 @@
+# ncdu configuration (dotfiles)
+# Excludes to keep scans tidy
+exclude=/proc
+exclude=/sys
+exclude=/dev
+exclude=/run
+exclude=/Volumes
+exclude=*.o
+exclude=*.pyc
+exclude=*.class
+exclude=node_modules
+exclude=.git

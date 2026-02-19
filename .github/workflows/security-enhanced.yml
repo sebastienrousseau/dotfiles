@@ -1,0 +1,260 @@
+name: Enhanced Security Pipeline
+
+on:
+  push:
+    branches: [master, main]
+    # Only run security scans when security-relevant files change
+    paths:
+      - '**.sh'
+      - '**.tmpl'
+      - 'install/**'
+      - 'scripts/security/**'
+      - '.github/workflows/security*.yml'
+      - '**/Dockerfile*'
+      - 'config/gitleaks.toml'
+      - '.github/security-policies/**'
+  pull_request:
+    branches: [master, main]
+    paths:
+      - '**.sh'
+      - '**.tmpl'
+      - 'install/**'
+      - 'scripts/security/**'
+      - '.github/workflows/security*.yml'
+      - '**/Dockerfile*'
+      - 'config/gitleaks.toml'
+      - '.github/security-policies/**'
+  merge_group:
+    branches: [master, main]
+    paths:
+      - '**.sh'
+      - '**.tmpl'
+      - 'install/**'
+      - 'scripts/security/**'
+      - '.github/workflows/security*.yml'
+      - '**/Dockerfile*'
+      - 'config/gitleaks.toml'
+      - '.github/security-policies/**'
+  schedule:
+    # Weekly security scan on Sunday 2 AM UTC (reduced from daily)
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+# Cancel in-progress runs for the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Security scanning tool versions
+  TRIVY_VERSION: "0.50.1"
+  COSIGN_VERSION: "2.2.3"
+  GRYPE_VERSION: "0.74.7"
+
+jobs:
+  # ============================================================================
+  # STAGE 1: SECRETS & CREDENTIAL SCANNING (Always runs - critical)
+  # ============================================================================
+
+  secrets-scan:
+    name: Security / Secrets Detection
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: TruffleHog OSS
+        if: github.event_name == 'pull_request'
+        uses: trufflesecurity/trufflehog@6961f2bace57ab32b23b3ba40f8f420f6bc7e004 # v3.93.3
+        with:
+          path: ./
+          base: ${{ github.event.pull_request.base.sha }}
+          head: ${{ github.event.pull_request.head.sha }}
+          extra_args: --only-verified
+
+  # ============================================================================
+  # STAGE 2: DEPENDENCY VULNERABILITY SCANNING (Schedule/manual only - expensive)
+  # ============================================================================
+
+  dependency-scan:
+    name: Security / Dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Only run on schedule or manual trigger to save minutes
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Cache Grype DB
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.cache/grype
+          key: grype-db-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: grype-db-${{ runner.os }}-
+
+      - name: Install Grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin v${{ env.GRYPE_VERSION }}
+
+      - name: Scan for vulnerabilities with Grype
+        run: |
+          grype . --output sarif --file grype-results.sarif --fail-on critical
+
+      - name: Upload Grype results to GitHub Security
+        if: always()
+        uses: github/codeql-action/upload-sarif@f5c2471be782132e47a6e6f9c725e56730d6e9a3 # v3
+        with:
+          sarif_file: grype-results.sarif
+          category: grype-analysis
+
+  # ============================================================================
+  # STAGE 3: INFRASTRUCTURE SECURITY SCANNING (Schedule/manual only)
+  # ============================================================================
+
+  infrastructure-scan:
+    name: Security / Infrastructure
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Only run on schedule or manual trigger
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@81ec5eb0ef150170f3bda7759e3878fa1a5bd413 # v12.3082.0
+        with:
+          output_format: sarif
+          output_file_path: checkov-results.sarif
+          framework: dockerfile,yaml,secrets
+          quiet: true
+          soft_fail: true
+
+      - name: Upload Checkov results to GitHub Security
+        if: always()
+        uses: github/codeql-action/upload-sarif@f5c2471be782132e47a6e6f9c725e56730d6e9a3 # v3
+        with:
+          sarif_file: checkov-results.sarif
+          category: checkov-analysis
+
+  # ============================================================================
+  # STAGE 4: CONTAINER SECURITY SCANNING (Manual/tagged only)
+  # ============================================================================
+
+  container-scan:
+    name: Security / Container
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Only run container scans manually or with explicit tag
+    if: contains(github.event.head_commit.message, '[container]') || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Build test container
+        if: hashFiles('**/Dockerfile*') != ''
+        run: docker build -f Dockerfile.test -t dotfiles-test:latest .
+
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v${{ env.TRIVY_VERSION }}
+
+      - name: Scan container with Trivy
+        if: hashFiles('**/Dockerfile*') != ''
+        run: |
+          trivy image --security-checks vuln,config,secret --format sarif --output container-scan.sarif dotfiles-test:latest
+
+      - name: Upload container scan results
+        if: always() && hashFiles('**/Dockerfile*') != ''
+        uses: github/codeql-action/upload-sarif@f5c2471be782132e47a6e6f9c725e56730d6e9a3 # v3
+        with:
+          sarif_file: container-scan.sarif
+          category: container-analysis
+
+  # ============================================================================
+  # STAGE 5: POLICY ENFORCEMENT (PRs only)
+  # ============================================================================
+
+  policy-enforcement:
+    name: Security / Policy Enforcement
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [secrets-scan]
+    # Only run on PRs to catch issues before merge
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Check file permissions
+        run: |
+          # Ensure no files have overly permissive permissions
+          ISSUES=0
+          if find . -type f \( -perm -002 -o -perm -020 \) -not -path "./.git/*" | grep -q .; then
+            echo "::warning::Found files with group/other write permissions"
+            ISSUES=1
+          fi
+          # Check for executable files that shouldn't be
+          find . -name "*.md" -executable -not -path "./.git/*" -exec echo "::warning::Markdown file {} is executable" \; || true
+          find . -name "*.txt" -executable -not -path "./.git/*" -exec echo "::warning::Text file {} is executable" \; || true
+
+  # ============================================================================
+  # STAGE 6: SECURITY ATTESTATION (main branch only, schedule)
+  # ============================================================================
+
+  security-attestation:
+    name: Security / Attestation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [secrets-scan]
+    # Only generate attestations on schedule for main branch
+    if: github.event_name == 'schedule' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Generate security attestation
+        run: |
+          cat > security-attestation.json <<EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "ref": "${{ github.ref }}",
+            "scans_completed": ["secrets"],
+            "tools_used": ["gitleaks"],
+            "security_controls": {
+              "secrets_scanning": true,
+              "sarif_upload": true
+            }
+          }
+          EOF
+
+      - name: Attest security scan
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-path: security-attestation.json
+
+      - name: Upload security attestation
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: security-attestation-${{ github.sha }}
+          path: security-attestation.json
+          retention-days: 30

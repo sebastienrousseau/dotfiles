@@ -1,0 +1,97 @@
+name: Sync Versions
+
+on:
+  push:
+    branches: [master, 'feat/v*']
+    paths:
+      - '**/*.md'
+      - 'package.json'
+      - 'scripts/version-sync.sh'
+      - 'docs/VERSION_SYNC.md'
+  pull_request:
+    branches: [master]
+    paths:
+      - '**/*.md'
+      - 'package.json'
+      - 'scripts/version-sync.sh'
+      - 'docs/VERSION_SYNC.md'
+  workflow_dispatch:
+    inputs:
+      target_version:
+        description: 'Target version to sync (defaults to package.json)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify Version Sync
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq ripgrep
+
+      - name: Verify versions
+        run: ./scripts/version-sync.sh --verify
+
+  sync:
+    name: Sync Version Numbers
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq ripgrep
+
+      - name: Determine target version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ github.event.inputs.target_version }}" ]]; then
+            TARGET_VERSION="${{ github.event.inputs.target_version }}"
+          else
+            TARGET_VERSION="$(jq -r '.version' package.json)"
+          fi
+          echo "target_version=$TARGET_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Target version: $TARGET_VERSION"
+
+      - name: Sync versions
+        run: |
+          TARGET_VERSION="${{ steps.version.outputs.target_version }}"
+          if [[ -n "$TARGET_VERSION" ]]; then
+            ./scripts/version-sync.sh "$TARGET_VERSION"
+          else
+            ./scripts/version-sync.sh
+          fi
+
+      - name: Commit changes
+        run: |
+          if git diff --quiet; then
+            echo "No version changes to commit."
+            exit 0
+          fi
+
+          TARGET_VERSION="${{ steps.version.outputs.target_version }}"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          git add -A
+          git commit -m "chore: sync version references to v${TARGET_VERSION}"
+          git push origin "${{ github.ref_name }}"

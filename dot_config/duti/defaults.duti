@@ -1,0 +1,5 @@
+# Default app bindings for macOS (duti).
+# Format: <bundle-id> <UTI> <role>
+# Example:
+# com.google.Chrome public.html all
+# com.microsoft.VSCode public.plain-text all

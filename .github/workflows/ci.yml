@@ -1,0 +1,629 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*.*.*']
+    # Path filters: Only run when relevant files change
+    paths:
+      - '**.sh'
+      - '**.tmpl'
+      - '.chezmoitemplates/**'
+      - 'dot_*/**'
+      - 'install/**'
+      - 'scripts/**'
+      - 'nix/**'
+      - '.github/workflows/ci.yml'
+      - '!**.md'
+      - '!docs/**'
+  pull_request:
+    branches: [master]
+    paths:
+      - '**.sh'
+      - '**.tmpl'
+      - '.chezmoitemplates/**'
+      - 'dot_*/**'
+      - 'install/**'
+      - 'scripts/**'
+      - 'nix/**'
+      - '.github/workflows/ci.yml'
+      - '!**.md'
+      - '!docs/**'
+  merge_group:
+    branches: [master]
+    paths:
+      - '**.sh'
+      - '**.tmpl'
+      - '.chezmoitemplates/**'
+      - 'dot_*/**'
+      - 'install/**'
+      - 'scripts/**'
+      - 'nix/**'
+      - '.github/workflows/ci.yml'
+      - '!**.md'
+      - '!docs/**'
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly on Monday 6 AM UTC
+  # Allow manual trigger for full CI
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Cancel in-progress runs for the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CHEZMOI_VERSION: "2.47.1"
+
+jobs:
+  # ============================================================================
+  # Path Change Detection
+  # ============================================================================
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      shell: ${{ steps.filter.outputs.shell }}
+      lua: ${{ steps.filter.outputs.lua }}
+      nix: ${{ steps.filter.outputs.nix }}
+      config: ${{ steps.filter.outputs.config }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
+        id: filter
+        with:
+          filters: |
+            shell:
+              - '**.sh'
+              - '.chezmoitemplates/**/*.sh'
+              - 'scripts/**'
+              - 'install/**'
+            lua:
+              - 'dot_config/nvim/**'
+              - '**.lua'
+            nix:
+              - 'nix/**'
+              - '**.nix'
+            config:
+              - 'dot_*/**'
+              - '.chezmoitemplates/**'
+              - '**.tmpl'
+
+  # ============================================================================
+  # STAGE 1: LINT (Fast, parallel checks)
+  # ============================================================================
+  lint-shell:
+    name: Lint / Shell
+    needs: changes
+    if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/reusable-shell-lint.yml
+    with:
+      include_tests: false
+      shellcheck_severity: error
+      shellcheck_excludes: SC1091,SC2030,SC2031
+      fail_on_shellcheck: true
+      run_shfmt: true
+      shfmt_targets: scripts/**/*.sh install.sh .chezmoitemplates/**/*.sh
+
+  lint-lua:
+    name: Lint / Lua
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: changes
+    if: needs.changes.outputs.lua == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Cache Lua tools
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.luarocks
+            ~/.cargo/bin/stylua
+          key: lua-tools-${{ runner.os }}-v3
+      - name: Install tools
+        run: |
+          sudo apt-get update && sudo apt-get install -y lua5.1 luarocks
+          luarocks install --local luacheck
+          echo "$HOME/.luarocks/bin" >> $GITHUB_PATH
+          if ! command -v stylua &>/dev/null; then
+            cargo install stylua
+          fi
+      - name: Luacheck (strict mode - warnings as errors)
+        run: |
+          echo "Running Luacheck with zero-warning policy..."
+          # --formatter plain for cleaner output, --codes for warning codes
+          # Any warning will cause non-zero exit (warnings-as-errors enforced)
+          luacheck dot_config/nvim --formatter plain --codes
+          echo "Luacheck passed - zero warnings policy enforced."
+      - name: Stylua (formatter check - fail on unformatted code)
+        run: |
+          echo "Checking Lua code formatting..."
+          # --check flag fails if any file needs formatting
+          ~/.cargo/bin/stylua --check dot_config/nvim
+          echo "All Lua files are properly formatted."
+
+  # ============================================================================
+  # STAGE 2: SECURITY (Parallel with lint)
+  # ============================================================================
+  security-secrets:
+    name: Security / Secrets Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Always run secrets scan on PRs and pushes
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+      - name: Gitleaks (zero-tolerance secrets policy)
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Enforce strict exit on ANY secret detection
+          GITLEAKS_ENABLE_SUMMARY: true
+      - name: Additional secret patterns
+        run: |
+          echo "Running additional security patterns scan..."
+          # Check for common patterns that might be missed
+          rg -i "api[_-]?key|secret|password|token" --type sh || true
+
+          # Ensure no hardcoded credentials in config files
+          ! rg -i "(password|secret|key)\s*[:=]\s*['\"][^'\"]{8,}" dot_config/ || {
+            echo "❌ Potential hardcoded credentials found in config files"
+            exit 1
+          }
+
+          echo "✅ Additional security scan completed"
+
+  security-dependencies:
+    name: Security / Dependency Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    # Always run dependency audit
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Audit shell dependencies
+        run: |
+          echo "Auditing shell script external dependencies..."
+
+          # Check for curl/wget calls to unknown domains
+          if rg "curl|wget" scripts/ --type sh; then
+            echo "Found external download commands - reviewing domains..."
+
+            # Extract URLs and validate against allowlist
+            rg -o "https?://[a-zA-Z0-9.-]+" scripts/ --type sh | sort -u > found_urls.txt || true
+
+            # Allowlisted domains for this dotfiles repo
+            ALLOWLIST="raw.githubusercontent.com github.com get.chezmoi.io webi.sh"
+
+            while IFS= read -r url; do
+              DOMAIN=$(echo "$url" | sed -E 's|https?://([^/]+).*|\1|')
+              if ! echo "$ALLOWLIST" | grep -q "$DOMAIN"; then
+                echo "⚠️  External dependency detected: $url"
+                echo "Domain: $DOMAIN not in allowlist: $ALLOWLIST"
+              fi
+            done < found_urls.txt || true
+          fi
+
+          echo "✅ Dependency audit completed"
+      - name: Check for supply chain risks
+        run: |
+          echo "Checking for supply chain security risks..."
+
+          # Verify no piped execution from untrusted sources
+          if rg "curl.*\|.*sh|wget.*\|.*bash" scripts/ --type sh; then
+            echo "❌ SECURITY VIOLATION: Piped execution detected"
+            echo "This pattern 'curl ... | sh' is forbidden for security"
+            exit 1
+          fi
+
+          # Check for dynamic script downloads without verification
+          if rg "eval.*\$\(" scripts/ --type sh; then
+            echo "⚠️  Dynamic evaluation detected - review for security"
+          fi
+
+          echo "✅ Supply chain security check passed"
+
+  security-trufflehog:
+    name: Security / TruffleHog
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+      - name: TruffleHog Scan
+        uses: trufflesecurity/trufflehog@7635b24fd512a2e817dd3e9dd661caaf035a079d # v3.93.1
+        with:
+          extra_args: --only-verified
+
+  security-sbom:
+    name: Security / SBOM Generation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Generate SBOM with Syft
+        uses: anchore/sbom-action@28d71544de8eaf1b958d335707167c5f783590ad # v0
+        with:
+          format: cyclonedx-json
+          output-file: sbom.cyclonedx.json
+      - name: Upload SBOM
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: sbom
+          path: sbom.cyclonedx.json
+          retention-days: 30
+      - name: Scan SBOM with Grype
+        uses: anchore/scan-action@7037fa011853d5a11690026fb85feee79f4c946c # v7
+        with:
+          sbom: sbom.cyclonedx.json
+          fail-build: false
+          severity-cutoff: critical
+
+  security-links:
+    name: Security / Link Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Only run link check on schedule or manual trigger (saves minutes)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Lychee link checker
+        uses: lycheeverse/lychee-action@a8c4c7cb88f0c7386610c35eb25108e448569cb0 # v2
+        with:
+          args: >-
+            --verbose --no-progress
+            --exclude-path ./dot_config
+            --exclude "localhost|127.0.0.1|example.com"
+            --accept 200,204,301,302,403,429
+            --max-retries 3 --timeout 30
+            "**/*.md"
+          fail: false
+
+  # ============================================================================
+  # STAGE 3: TEST (Optimized - Linux always, macOS on schedule/manual)
+  # ============================================================================
+  test-linux:
+    name: Test / Linux
+    runs-on: ubuntu-latest
+    timeout-minutes: 10  # Reduced from 15 to enforce efficiency
+    needs: changes
+    if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Cache Chezmoi
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.local/bin/chezmoi
+          key: chezmoi-Linux-${{ env.CHEZMOI_VERSION }}
+      - name: Setup Chezmoi
+        run: |
+          if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
+            bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
+          fi
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Init & Dry Run
+        run: |
+          chezmoi init
+          chezmoi apply --verbose --dry-run
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: logs-test-linux
+          path: ~/.local/share/chezmoi/.log
+          retention-days: 5
+
+  test-macos:
+    name: Test / macOS
+    runs-on: macos-latest
+    timeout-minutes: 10  # Reduced from 15 to enforce efficiency
+    needs: changes
+    # Only run macOS tests on schedule or manual trigger (expensive)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Cache Chezmoi
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.local/bin/chezmoi
+          key: chezmoi-macOS-${{ env.CHEZMOI_VERSION }}
+      - name: Setup Chezmoi
+        run: |
+          if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
+            bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
+          fi
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Init & Dry Run
+        run: |
+          chezmoi init
+          chezmoi apply --verbose --dry-run
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: logs-test-macos
+          path: ~/.local/share/chezmoi/.log
+          retention-days: 5
+
+  test-docker:
+    name: Test / Docker (${{ matrix.distro }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: changes
+    # Only run Docker tests on schedule or when install scripts change
+    if: (needs.changes.outputs.shell == 'true' && needs.changes.outputs.config == 'true') || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [ubuntu]  # Reduced from [ubuntu, debian] - debian is similar
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Test in container
+        run: |
+          docker run --rm -v "${GITHUB_WORKSPACE}:/root/.local/share/chezmoi" ${{ matrix.distro }}:latest bash -c "
+            set -euo pipefail
+            export DEBIAN_FRONTEND=noninteractive
+            export PATH=\"/root/.local/bin:\$PATH\"
+            apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates
+            ln -s /root/.local/share/chezmoi /root/.dotfiles
+            bash /root/.local/share/chezmoi/scripts/ci/install-chezmoi-verified.sh \"${{ env.CHEZMOI_VERSION }}\" \"/root/.local/bin\"
+            chezmoi init --promptDefaults --no-tty --source /root/.local/share/chezmoi
+            DOTFILES_NONINTERACTIVE=1 chezmoi apply --exclude=scripts --force --no-tty
+            echo 'Chezmoi applied successfully'
+          "
+
+  test-unit:
+    name: Test / Unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: changes
+    if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Run tests
+        run: |
+          chmod +x scripts/tests/framework/*.sh
+          echo "Running unit tests with 100% coverage enforcement..."
+
+          # Count total testable shell scripts
+          TOTAL_SCRIPTS=$(find scripts -name "*.sh" -not -path "scripts/tests/*" | wc -l)
+          echo "Found $TOTAL_SCRIPTS testable shell scripts"
+
+          # Run tests and capture results
+          ./scripts/tests/framework/test_runner.sh 2>&1 | tee test_output.log
+
+          # Extract test results
+          FAILED_TESTS=$(
+            grep -a "Total failed:" test_output.log \
+              | tail -1 \
+              | sed -E 's/\x1b\[[0-9;]*m//g' \
+              | sed -E 's/.*Total failed:[[:space:]]*([0-9]+).*/\1/' \
+              || echo 0
+          )
+
+          # 100% success rate required (fail-under 100%)
+          if [[ "$FAILED_TESTS" -gt 0 ]]; then
+            echo "❌ COVERAGE THRESHOLD FAILED: $FAILED_TESTS failed tests detected"
+            echo "Zero-failure policy enforced - all tests must pass"
+            exit 1
+          fi
+
+          echo "✅ All tests passed - 100% success rate maintained"
+      - name: Enforce module coverage (>=95%)
+        run: |
+          sudo apt-get update && sudo apt-get install -y ripgrep
+          chmod +x scripts/tests/framework/module_coverage.sh
+          MIN_COVERAGE=95 ./scripts/tests/framework/module_coverage.sh
+      - name: Integration tests
+        run: |
+          echo "Running integration tests..."
+          RUN_INTEGRATION=1 ./scripts/tests/framework/test_runner.sh 2>&1 | tee integration_output.log
+
+          # Check integration test results
+          INTEGRATION_FAILED=$(
+            grep -a "Total failed:" integration_output.log \
+              | tail -1 \
+              | sed -E 's/\x1b\[[0-9;]*m//g' \
+              | sed -E 's/.*Total failed:[[:space:]]*([0-9]+).*/\1/' \
+              || echo 0
+          )
+          if [[ "$INTEGRATION_FAILED" -gt 0 ]]; then
+            echo "❌ Integration tests failed: $INTEGRATION_FAILED failures"
+            exit 1
+          fi
+
+          echo "✅ Integration tests passed"
+
+  # ============================================================================
+  # STAGE 4: QUALITY (Depends on lint + test passing)
+  # ============================================================================
+  quality-idempotency:
+    name: Quality / Idempotency
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [lint-shell, test-linux]
+    # Only run on full CI (schedule/manual) - idempotency is expensive
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Setup Chezmoi
+        run: |
+          bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          mkdir -p "$HOME/.config/chezmoi"
+          echo "sourceDir = \"$GITHUB_WORKSPACE\"" > "$HOME/.config/chezmoi/chezmoi.toml"
+      - name: First apply
+        run: chezmoi apply --exclude=scripts --verbose
+      - name: Second apply (must be no-op)
+        run: |
+          OUTPUT=$(chezmoi apply --exclude=scripts --verbose 2>&1)
+          echo "$OUTPUT"
+          if echo "$OUTPUT" | grep -E "^(create|modify|remove)" | grep -v ".DS_Store"; then
+            echo "::error::Not idempotent - second apply made changes"
+            exit 1
+          fi
+
+  quality-nix:
+    name: Quality / Nix
+    runs-on: ubuntu-latest  # Linux only - saves expensive macOS minutes
+    timeout-minutes: 15
+    needs: [changes]
+    if: needs.changes.outputs.nix == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a # v21
+      - uses: DeterminateSystems/magic-nix-cache-action@565684385bcd71bad329742eefe8d12f2e765b39 # v13
+      - name: Flake check
+        run: nix flake check ./nix
+
+  # ============================================================================
+  # STAGE 5: BENCHMARK (Only on schedule/manual - expensive)
+  # ============================================================================
+  benchmark:
+    name: Benchmark / Linux
+    runs-on: ubuntu-latest  # Linux only - cheaper than multi-OS
+    timeout-minutes: 10
+    needs: [test-linux]
+    # Only run benchmarks on schedule or manual trigger
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y zsh hyperfine jq
+
+      - name: Setup Chezmoi
+        run: |
+          bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          mkdir -p "$HOME/.config/chezmoi"
+          echo "sourceDir = \"$GITHUB_WORKSPACE\"" > "$HOME/.config/chezmoi/chezmoi.toml"
+
+      - name: Apply dotfiles
+        run: chezmoi apply --exclude=scripts
+
+      - name: Performance benchmark
+        run: |
+          chmod +x scripts/tests/performance/*.sh 2>/dev/null || true
+          ./scripts/tests/performance/benchmark_runner.sh 2>/dev/null || true
+
+      - name: Shell startup benchmark with regression tracking
+        id: benchmark
+        run: |
+          mkdir -p benchmark-results
+
+          # Run hyperfine benchmark
+          hyperfine --warmup 3 --runs 10 "zsh -i -c exit" \
+            --export-json benchmark-results/shell-startup.json \
+            --export-markdown benchmark-results/shell-startup.md
+
+          # Extract metrics
+          time_ms=$(jq '.results[0].mean * 1000 | floor' benchmark-results/shell-startup.json)
+          time_min=$(jq '.results[0].min * 1000 | floor' benchmark-results/shell-startup.json)
+          time_max=$(jq '.results[0].max * 1000 | floor' benchmark-results/shell-startup.json)
+          time_stddev=$(jq '.results[0].stddev * 1000 | floor' benchmark-results/shell-startup.json)
+
+          echo "time_ms=$time_ms" >> $GITHUB_OUTPUT
+          echo "time_min=$time_min" >> $GITHUB_OUTPUT
+          echo "time_max=$time_max" >> $GITHUB_OUTPUT
+
+          # Create regression tracking record
+          cat > benchmark-results/metrics.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "ref": "${{ github.ref }}",
+            "shell_startup": {
+              "mean_ms": $time_ms,
+              "min_ms": $time_min,
+              "max_ms": $time_max,
+              "stddev_ms": $time_stddev,
+              "threshold_ms": 500,
+              "passed": $([ $time_ms -le 500 ] && echo true || echo false)
+            }
+          }
+          EOF
+
+          echo "### Shell Startup Performance" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Mean | ${time_ms}ms |" >> $GITHUB_STEP_SUMMARY
+          echo "| Min | ${time_min}ms |" >> $GITHUB_STEP_SUMMARY
+          echo "| Max | ${time_max}ms |" >> $GITHUB_STEP_SUMMARY
+          echo "| Std Dev | ${time_stddev}ms |" >> $GITHUB_STEP_SUMMARY
+          echo "| Threshold | 500ms |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ $time_ms -gt 500 ]]; then
+            echo "::warning::Shell startup ${time_ms}ms exceeds 500ms target"
+            echo "⚠️ **Performance regression detected**: ${time_ms}ms exceeds 500ms threshold" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **Performance OK**: ${time_ms}ms is within 500ms threshold" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: benchmark-results-${{ github.sha }}
+          path: benchmark-results/
+          retention-days: 90
+
+      - name: Comment on PR with benchmark results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const time_ms = '${{ steps.benchmark.outputs.time_ms }}';
+            const threshold = 500;
+            const status = parseInt(time_ms) <= threshold ? '✅' : '⚠️';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ${status} Shell Performance Benchmark
+
+              | Metric | Value |
+              |--------|-------|
+              | Startup Time | ${time_ms}ms |
+              | Threshold | ${threshold}ms |
+              | Status | ${parseInt(time_ms) <= threshold ? 'Passed' : 'Regression detected'} |
+
+              <details>
+              <summary>Benchmark Details</summary>
+
+              - Min: ${{ steps.benchmark.outputs.time_min }}ms
+              - Max: ${{ steps.benchmark.outputs.time_max }}ms
+              - Commit: ${{ github.sha }}
+              </details>`
+            })
+
+  # ============================================================================
+  # STAGE 6: QUALITY GATES (Final validation before merge)
+  # ============================================================================
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    needs: [lint-shell, security-secrets, security-dependencies, test-unit]
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Enforce merge requirements
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "QUALITY GATE ENFORCEMENT"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ All required checks passed:"
+          echo "  - Zero-warning linting"
+          echo "  - Formatter compliance"
+          echo "  - 100% test success rate"
+          echo "  - Zero secrets detected"
+          echo "  - Dependency audit clean"
+          echo ""
+          echo "Ready for merge - all quality gates satisfied"

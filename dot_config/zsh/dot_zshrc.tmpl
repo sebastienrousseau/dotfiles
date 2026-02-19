@@ -1,0 +1,203 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v0.2.480) - <https://dotfiles.io>
+# Made With ❤️ in London, United Kingdom
+# Designed by Sebastien Rousseau
+# Copyright (c) 2015-2026. All rights reserved.
+# License: MIT
+
+# Performance optimization - skip if not interactive
+[[ -o interactive ]] || return
+
+# Only source once if being re-sourced (in the same shell scope)
+if [[ -v DOTFILES_SOURCED ]]; then
+  return
+fi
+DOTFILES_SOURCED=1
+
+{{- /* Input Validation: Ensure crucial variables are set */ -}}
+{{- if not .chezmoi.homeDir -}}
+  {{- fail "Critical Error: .chezmoi.homeDir is not set!" -}}
+{{- end -}}
+
+{{- if eq .chezmoi.os "darwin" }}
+export FORCE_COLOR_OS="macOS"
+{{- else if eq .chezmoi.os "linux" }}
+export FORCE_COLOR_OS="Linux"
+{{- else if eq .chezmoi.os "windows" }}
+export FORCE_COLOR_OS="Windows"
+{{- end }}
+
+{{- $profile := default "laptop" .profile -}}
+{{- $features := default (dict "zsh" true "nvim" true "tmux" true "gui" true "secrets" true) .features -}}
+{{- $theme := default "catppuccin-mocha" .theme -}}
+{{- $enabled := list -}}
+{{- range $k, $v := $features }}{{- if $v }}{{- $enabled = append $enabled $k }}{{- end }}{{- end }}
+
+export DOTFILES_PROFILE="{{ $profile }}"
+export DOTFILES_FEATURES="{{ join "," $enabled }}"
+export DOTFILES_THEME="{{ $theme }}"
+
+# Cached eval helper — sources cached init scripts, regenerates when stale
+_SHELL_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+[[ -d "$_SHELL_CACHE" ]] || mkdir -p "$_SHELL_CACHE"
+
+_cached_eval() {
+  local label=$1; shift
+  local cache="$_SHELL_CACHE/${label}.zsh"
+  local bin="${commands[$1]}"
+  if [[ -f "$cache" ]] && [[ -z "$bin" || "$cache" -nt "$bin" ]]; then
+    source "$cache"
+  else
+    "$@" >| "$cache" 2>/dev/null
+    source "$cache"
+    { zcompile "$cache" } &!
+  fi
+}
+
+## 🆅🅰🆁🅸🅰🆁🅸🅰🅱🅻🅴🆂 - Core variables, plugins, and options
+ZSH_RC_DIR="${HOME}/.config/zsh/rc.d"
+if [[ -d "${ZSH_RC_DIR}" ]]; then
+  for rc_file in "${ZSH_RC_DIR}"/**/*.zsh(N); do
+    source "${rc_file}"
+  done
+fi
+
+###############################
+# Performance: Auto-Zcompile  #
+###############################
+zcompile_many() {
+  local f
+  for f; do
+    # Compile if source is newer than .zwc or .zwc doesn't exist
+    if [[ -f "$f" ]]; then
+      if [[ ! -f "${f}.zwc" || "$f" -nt "${f}.zwc" ]]; then
+        zcompile "$f"
+      fi
+    fi
+  done
+}
+
+# Compile main config and generated files in background
+if [[ -o interactive ]]; then
+  (
+    zcompile_many "${HOME}/.zshrc" \
+                  "${HOME}/.config/shell/aliases.sh" \
+                  "${HOME}/.config/shell/paths.sh" \
+                  "${HOME}/.config/shell/functions.sh" \
+                  "${HOME}/.config/shell/00-core-paths.sh" \
+                  "${HOME}/.config/shell/05-core-safety.sh" \
+                  "${HOME}/.config/shell/40-ls-colors.sh" \
+                  "${HOME}/.config/shell/90-ux-aliases.sh" &!
+  )
+fi
+
+# Legacy Loader (Disabled in favor of Chezmoi Universal Config)
+# _DOTFILES_CACHE="${HOME}/.zsh_dotfiles_cache"
+# load_dotfiles() { ... }
+# load_dotfiles
+
+# Remove duplicates in zsh $PATH
+typeset -aU path
+
+# Load local customizations if they exist
+[[ -f "${HOME}/.zshrc.local" ]] && source "${HOME}/.zshrc.local"
+
+# Vendor / Enterprise Hooks (Site-local overrides)
+# Supports drop-in configs from system management tools
+if [[ -d "/etc/dotfiles/defaults.d" ]]; then
+  for hook in /etc/dotfiles/defaults.d/*.sh(N); do
+    source "$hook"
+  done
+fi
+
+# Load Chezmoi-managed Universal Configuration Layers (Lexical Order)
+# 00-19: Core (Paths, Safety)
+# 20-49: Middleware (Exports, Options)
+# 50-89: Toolchain & Logic (Functions, Rust tools)
+# 90-99: UX (Aliases, Prompts)
+#
+# Optimized loading of core configurations + eager aliases
+for core_layer in 00-core-paths 05-core-safety 40-ls-colors 90-ux-aliases; do
+  if [[ -f "${HOME}/.config/shell/${core_layer}.sh" ]]; then
+    source "${HOME}/.config/shell/${core_layer}.sh"
+  fi
+done
+
+# Deferred loading of heavy layers (lazy — loads after first prompt)
+autoload -Uz add-zsh-hook
+_load_deferred_layers() {
+  add-zsh-hook -d precmd _load_deferred_layers
+  [[ -f "${HOME}/.config/shell/50-logic-functions.sh" ]] && source "${HOME}/.config/shell/50-logic-functions.sh"
+  [[ -f "${HOME}/.config/shell/91-ux-aliases-lazy.sh" ]] && source "${HOME}/.config/shell/91-ux-aliases-lazy.sh"
+  # AI / Predictive Shell (deferred for faster startup)
+  [[ -f "${HOME}/.config/shell/custom/context_suggest.zsh" ]] && source "${HOME}/.config/shell/custom/context_suggest.zsh"
+  [[ -f "${HOME}/.config/shell/custom/error_analysis.zsh" ]] && source "${HOME}/.config/shell/custom/error_analysis.zsh"
+  [[ -f "${HOME}/.config/shell/custom/ollama_functions.zsh" ]] && source "${HOME}/.config/shell/custom/ollama_functions.zsh"
+}
+add-zsh-hook precmd _load_deferred_layers
+
+# Essential Aliases (fallback if 90-ux-aliases.sh is unavailable)
+if command -v bat >/dev/null; then
+  alias cat="bat"
+fi
+
+# Smart Alias Function (Colorize output when listing, standard behavior otherwise)
+alias_wrapper() {
+  if [[ $# -eq 0 ]]; then
+     if command -v bat >/dev/null; then
+       builtin alias | bat -l sh --style=plain
+     else
+       builtin alias
+     fi
+  else
+     builtin alias "$@"
+  fi
+}
+alias alias=alias_wrapper
+
+
+# Phase 33: Atuin (Memory Layer)
+if command -v atuin > /dev/null; then
+    _cached_eval atuin-init atuin init zsh
+fi
+
+# Starship Prompt (High Performance)
+if command -v starship >/dev/null; then
+  _cached_eval starship-init starship init zsh
+fi
+
+# Zoxide (Smart Directory Jumper) - Replaces 'cd'
+if command -v zoxide >/dev/null; then
+  _cached_eval zoxide-init zoxide init zsh
+fi
+
+# Mise (Runtime Version Manager) - Replaces asdf/pyenv/nvm
+if command -v mise >/dev/null; then
+  _cached_eval mise-init mise activate zsh
+  mise_shims="${MISE_SHIMS_DIR:-$HOME/.local/share/mise/shims}"
+  if [[ ":$PATH:" != *":${mise_shims}:"* ]]; then
+    export PATH="${mise_shims}:$PATH"
+  fi
+fi
+
+# FZF (Fuzzy Finder) - Cross-platform detection
+if command -v fzf >/dev/null; then
+  # Detect FZF shell integration path (Homebrew, apt, manual install)
+  local fzf_shell_dir=""
+  for dir in "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/fzf/shell" \
+             /usr/local/opt/fzf/shell \
+             /usr/share/fzf \
+             /usr/share/doc/fzf/examples \
+             "${HOME}/.fzf/shell"; do
+    [[ -d "$dir" ]] && { fzf_shell_dir="$dir"; break; }
+  done
+
+  if [[ -n "$fzf_shell_dir" ]]; then
+    [[ -f "${fzf_shell_dir}/completion.zsh" ]] && source "${fzf_shell_dir}/completion.zsh"
+    [[ -f "${fzf_shell_dir}/key-bindings.zsh" ]] && source "${fzf_shell_dir}/key-bindings.zsh"
+  fi
+
+  # Use fd/rg for fzf source if available
+  if command -v rg >/dev/null; then
+    export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
+  fi
+fi

@@ -1,0 +1,229 @@
+{{- $theme := default "catppuccin-mocha" .theme -}}
+{{- $catppuccinVariant := "mocha" -}}
+{{- if eq $theme "catppuccin-latte" -}}
+{{- $catppuccinVariant = "latte" -}}
+{{- else if eq $theme "catppuccin-frappe" -}}
+{{- $catppuccinVariant = "frappe" -}}
+{{- else if eq $theme "catppuccin-macchiato" -}}
+{{- $catppuccinVariant = "macchiato" -}}
+{{- else if eq $theme "catppuccin-mocha" -}}
+{{- $catppuccinVariant = "mocha" -}}
+{{- end -}}
+# Nix home-manager Catppuccin theme configuration
+# Generated for theme: {{ $theme }}
+# Catppuccin variant: {{ $catppuccinVariant }}
+{ config, pkgs, ... }:
+
+{
+  # Enable Catppuccin theme support
+  catppuccin = {
+    enable = true;
+    flavor = "{{ $catppuccinVariant }}";
+  };
+
+  # Terminal emulators
+  programs.alacritty = {
+    enable = true;
+    catppuccin.enable = true;
+    settings = {
+      font = {
+        size = {{ default 12 .terminal_font_size }};
+        normal.family = "{{ default "JetBrains Mono" .terminal_font_family }}";
+      };
+      window = {
+        padding = { x = 16; y = 12; };
+        opacity = 0.9;
+      };
+    };
+  };
+
+  programs.kitty = {
+    enable = false; # Enable if using kitty
+    catppuccin.enable = true;
+    font = {
+      size = {{ default 12 .terminal_font_size }};
+      name = "{{ default "JetBrains Mono" .terminal_font_family }}";
+    };
+  };
+
+  programs.wezterm = {
+    enable = false; # Enable if using wezterm
+    catppuccin.enable = true;
+  };
+
+  # Shell and prompt
+  programs.zsh.catppuccin.enable = true;
+  programs.bash.catppuccin.enable = true;
+  programs.fish.catppuccin.enable = true;
+
+  programs.starship = {
+    enable = true;
+    catppuccin.enable = true;
+  };
+
+  # Development tools
+  programs.neovim = {
+    enable = true;
+    catppuccin.enable = true;
+    plugins = with pkgs.vimPlugins; [
+      catppuccin-nvim
+    ];
+    extraLuaConfig = ''
+      -- Catppuccin configuration
+      require("catppuccin").setup({
+        flavour = "{{ $catppuccinVariant }}", -- latte, frappe, macchiato, mocha
+        background = {
+{{- if eq $catppuccinVariant "latte" }}
+          light = "latte",
+          dark = "mocha",
+{{- else }}
+          light = "latte",
+          dark = "{{ $catppuccinVariant }}",
+{{- end }}
+        },
+        transparent_background = false,
+        show_end_of_buffer = false,
+        term_colors = true,
+        dim_inactive = {
+          enabled = false,
+          shade = "dark",
+          percentage = 0.15,
+        },
+        no_italic = false,
+        no_bold = false,
+        no_underline = false,
+        styles = {
+          comments = { "italic" },
+          conditionals = { "italic" },
+          loops = {},
+          functions = {},
+          keywords = {},
+          strings = {},
+          variables = {},
+          numbers = {},
+          booleans = {},
+          properties = {},
+          types = {},
+          operators = {},
+        },
+        color_overrides = {},
+        custom_highlights = {},
+        integrations = {
+          cmp = true,
+          gitsigns = true,
+          nvimtree = true,
+          treesitter = true,
+          notify = false,
+          mini = {
+            enabled = true,
+            indentscope_color = "",
+          },
+        },
+      })
+
+      vim.cmd.colorscheme("catppuccin-{{ $catppuccinVariant }}")
+    '';
+  };
+
+  programs.helix = {
+    enable = false; # Enable if using helix
+    catppuccin.enable = true;
+  };
+
+  programs.tmux = {
+    enable = true;
+    catppuccin.enable = true;
+  };
+
+  # Git tools
+  programs.git = {
+    enable = true;
+    delta = {
+      enable = true;
+      catppuccin.enable = true;
+    };
+  };
+
+  programs.lazygit = {
+    enable = true;
+    catppuccin.enable = true;
+  };
+
+  # File managers and utilities
+  programs.bat = {
+    enable = true;
+    catppuccin.enable = true;
+  };
+
+  programs.bottom = {
+    enable = false; # Enable if using btm/bottom
+    catppuccin.enable = true;
+  };
+
+  programs.k9s = {
+    enable = false; # Enable if using k9s
+    catppuccin.enable = true;
+  };
+
+  programs.yazi = {
+    enable = false; # Enable if using yazi
+    catppuccin.enable = true;
+  };
+
+  # Fuzzy finder
+  programs.fzf = {
+    enable = true;
+    catppuccin.enable = true;
+  };
+
+  # Window manager integrations (uncomment as needed)
+  # wayland.windowManager.hyprland.catppuccin.enable = true;
+  # wayland.windowManager.sway.catppuccin.enable = true;
+  # xsession.windowManager.i3.catppuccin.enable = true;
+
+  # GTK theme
+  gtk = {
+    enable = true;
+    catppuccin = {
+      enable = true;
+      flavor = "{{ $catppuccinVariant }}";
+      accent = "blue";
+      size = "standard";
+      tweaks = [ "rimless" ];
+    };
+  };
+
+  # Qt theme
+  qt = {
+    enable = true;
+    platformTheme = "gtk";
+    style.name = "adwaita-dark";
+  };
+
+  # Cursor theme
+  home.pointerCursor = {
+    name = "Catppuccin-{{ title $catppuccinVariant }}-Blue-Cursors";
+    package = pkgs.catppuccin-cursors.{{ $catppuccinVariant }}Blue;
+    size = 24;
+    gtk.enable = true;
+    x11.enable = true;
+  };
+
+  # Icon theme
+  home.packages = with pkgs; [
+    catppuccin-papirus-folders
+    papirus-icon-theme
+  ];
+
+  # Additional Catppuccin packages
+  home.packages = with pkgs; [
+    # Catppuccin variants for various applications
+    (catppuccin.override { variant = "{{ $catppuccinVariant }}"; })
+  ];
+
+  # Environment variables for theme detection
+  home.sessionVariables = {
+    CATPPUCCIN_FLAVOR = "{{ $catppuccinVariant }}";
+    DOTFILES_THEME = "{{ $theme }}";
+  };
+}

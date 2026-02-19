@@ -1,0 +1,123 @@
+{
+  // Theme Configuration - Dynamically set based on chezmoi theme variable
+{{- if eq .theme "catppuccin-latte" }}
+  "workbench.colorTheme": "Catppuccin Latte",
+  "workbench.preferredDarkColorTheme": "Catppuccin Mocha",
+  "workbench.preferredLightColorTheme": "Catppuccin Latte",
+{{- else if eq .theme "catppuccin-frappe" }}
+  "workbench.colorTheme": "Catppuccin Frappé",
+  "workbench.preferredDarkColorTheme": "Catppuccin Frappé",
+  "workbench.preferredLightColorTheme": "Catppuccin Latte",
+{{- else if eq .theme "catppuccin-macchiato" }}
+  "workbench.colorTheme": "Catppuccin Macchiato",
+  "workbench.preferredDarkColorTheme": "Catppuccin Macchiato",
+  "workbench.preferredLightColorTheme": "Catppuccin Latte",
+{{- else if eq .theme "catppuccin-mocha" }}
+  "workbench.colorTheme": "Catppuccin Mocha",
+  "workbench.preferredDarkColorTheme": "Catppuccin Mocha",
+  "workbench.preferredLightColorTheme": "Catppuccin Latte",
+{{- else if hasPrefix .theme "tokyonight-" }}
+  // Tokyo Night theme fallback
+{{- if eq .theme "tokyonight-day" }}
+  "workbench.colorTheme": "Tokyo Night Light",
+  "workbench.preferredLightColorTheme": "Tokyo Night Light",
+  "workbench.preferredDarkColorTheme": "Tokyo Night",
+{{- else }}
+  "workbench.colorTheme": "Tokyo Night",
+  "workbench.preferredDarkColorTheme": "Tokyo Night",
+  "workbench.preferredLightColorTheme": "Tokyo Night Light",
+{{- end }}
+{{- else }}
+  // Default to Catppuccin Mocha for unknown themes
+  "workbench.colorTheme": "Catppuccin Mocha",
+  "workbench.preferredDarkColorTheme": "Catppuccin Mocha",
+  "workbench.preferredLightColorTheme": "Catppuccin Latte",
+{{- end }}
+
+  // Icon Theme - Use Catppuccin icons when available
+  "workbench.iconTheme": "catppuccin-perfect",
+
+  // Product Icon Theme
+  "workbench.productIconTheme": "catppuccin-perfect",
+
+  // Terminal Integration - Match system theme
+  "terminal.integrated.minimumContrastRatio": 4.5,
+{{- if or (hasPrefix .theme "catppuccin-") (eq .theme "catppuccin-latte") }}
+  "terminal.integrated.drawBoldTextInBrightColors": false,
+{{- else }}
+  "terminal.integrated.drawBoldTextInBrightColors": true,
+{{- end }}
+
+  // Font Configuration - Use system terminal font
+  "editor.fontFamily": "{{ .terminal_font_family }}, 'Fira Code', 'JetBrains Mono', Consolas, 'Courier New', monospace",
+  "editor.fontSize": {{ .terminal_font_size }},
+  "editor.fontLigatures": true,
+  "terminal.integrated.fontFamily": "{{ .terminal_font_family }}",
+  "terminal.integrated.fontSize": {{ .terminal_font_size }},
+
+  // Editor Configuration
+  "editor.semanticHighlighting.enabled": true,
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.renderWhitespace": "boundary",
+  "editor.rulers": [80, 120],
+
+  // Window Configuration
+  "window.autoDetectColorScheme": false,
+  "window.titleBarStyle": "custom",
+{{- if hasPrefix .theme "catppuccin-" }}
+  "workbench.colorCustomizations": {
+{{- if eq .theme "catppuccin-latte" }}
+    "titleBar.activeBackground": "#eff1f5",
+    "titleBar.activeForeground": "#4c4f69"
+{{- else if eq .theme "catppuccin-frappe" }}
+    "titleBar.activeBackground": "#303446",
+    "titleBar.activeForeground": "#c6d0f5"
+{{- else if eq .theme "catppuccin-macchiato" }}
+    "titleBar.activeBackground": "#24273a",
+    "titleBar.activeForeground": "#cad3f5"
+{{- else if eq .theme "catppuccin-mocha" }}
+    "titleBar.activeBackground": "#1e1e2e",
+    "titleBar.activeForeground": "#cdd6f4"
+{{- end }}
+  },
+{{- end }}
+
+  // File Explorer
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "explorer.compactFolders": false,
+
+  // Git Integration
+  "git.autofetch": true,
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "scm.diffDecorationsGutter": "all",
+
+  // Extensions Configuration
+  "extensions.autoUpdate": true,
+  "extensions.ignoreRecommendations": false,
+
+  // Telemetry
+  "telemetry.telemetryLevel": "off",
+
+  // Security
+  "security.workspace.trust.untrustedFiles": "prompt",
+
+  // Files
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+
+  // Search
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.git": true
+  }
+}
