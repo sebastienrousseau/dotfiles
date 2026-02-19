@@ -58,6 +58,13 @@ repos:
       - id: detect-private-key
         exclude: \.pub$  # Allow public keys
 
+  # Dockerfile linting
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint
+        args: ['--ignore', 'DL3008', '--ignore', 'DL3013', '--ignore', 'DL3018']
+
   # Custom security policy enforcement
   - repo: local
     hooks:
@@ -75,3 +82,17 @@ repos:
         language: script
         pass_filenames: false
         files: \.env\.local$
+
+      - id: insecure-tls-check
+        name: Block Insecure TLS Patterns
+        entry: bash -c 'if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" -E "curl\s+[^|;]*(-k|--insecure)|wget\s+[^|;]*--no-check-certificate" . 2>/dev/null | grep -v "^Binary"; then echo "ERROR: Insecure TLS patterns found (curl -k or wget --no-check-certificate)"; exit 1; fi'
+        language: system
+        pass_filenames: false
+        types: [shell]
+
+      - id: dangerous-chmod-check
+        name: Block Dangerous Permissions
+        entry: bash -c 'if grep -rn --include="*.sh" -E "chmod\s+(-R\s+)?(777|666)" . 2>/dev/null | grep -v "^Binary" | grep -v "^#"; then echo "ERROR: Dangerous chmod patterns found (777 or 666)"; exit 1; fi'
+        language: system
+        pass_filenames: false
+        types: [shell]
