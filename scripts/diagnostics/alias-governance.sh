@@ -100,7 +100,7 @@ fi
 # 4) Deprecation window enforcement
 if [[ -f "$deprecations_file" ]]; then
   expired_hits=0
-  while IFS=$'\t' read -r alias_name replacement remove_in note; do
+  while IFS=$'\t' read -r alias_name replacement remove_in; do
     [[ -z "${alias_name:-}" ]] && continue
     [[ "${alias_name:0:1}" == "#" ]] && continue
     if version_ge "$repo_version" "$remove_in"; then
@@ -118,7 +118,7 @@ if [[ -f "$deprecations_file" ]]; then
         expired_hits=$((expired_hits + 1))
       fi
     fi
-  done <"$deprecations_file"
+  done < <(cut -f1-3 "$deprecations_file")
   if [[ $expired_hits -gt 0 ]]; then
     errors=$((errors + 1))
   else
