@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Update AI provider CLIs (npm + pipx) using mise-managed runtimes.
+#
+# - npm globals: claude, gemini, codex, opencode, etc.
+# - pipx: sgpt, aider, etc.
+
+set -euo pipefail
+
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+log_section() { echo -e "\n${CYAN}━━━ $1 ━━━${NC}"; }
+log_success() { echo -e "${GREEN}✓${NC} $1"; }
+log_skip() { echo -e "${YELLOW}○${NC} $1 (skipped)"; }
+
+# NPM global packages (via mise-managed Node)
+if command -v mise >/dev/null 2>&1; then
+  log_section "NPM (global)"
+  mise exec node -- npm update -g
+  log_success "NPM globals updated"
+else
+  log_skip "NPM globals (mise not available)"
+fi
+
+# Pipx packages (sgpt, aider, etc.)
+if command -v pipx >/dev/null 2>&1; then
+  log_section "Pipx"
+  pipx upgrade --all
+  log_success "Pipx packages updated"
+else
+  log_skip "Pipx (not installed)"
+fi
+
+# Ollama (Linux/macOS install script)
+if command -v ollama >/dev/null 2>&1; then
+  log_section "Ollama"
+  curl -fsSL https://ollama.com/install.sh | sh
+  log_success "Ollama updated"
+else
+  log_skip "Ollama (not installed)"
+fi
+
+# LM Studio runtime (CLI-managed)
+if command -v lms >/dev/null 2>&1; then
+  log_section "LM Studio Runtime"
+  lms runtime update
+  log_success "LM Studio runtime updated"
+else
+  log_skip "LM Studio runtime (lms not found)"
+fi
+
+# LM Studio app updates are handled in-app or by re-downloading the app.
+if command -v lms >/dev/null 2>&1; then
+  log_section "LM Studio App"
+  echo "LM Studio app updates are done in-app or via the download page."
+fi
+
+echo -e "\n${GREEN}AI CLI update complete!${NC}"
