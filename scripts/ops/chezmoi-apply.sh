@@ -55,6 +55,12 @@ run_step() {
 }
 
 ui_header "Applying dotfiles"
+if [[ "${DOTFILES_ALIAS_STRICT_MODE:-0}" == "1" ]]; then
+  governance_script="$SCRIPT_DIR/../diagnostics/alias-governance.sh"
+  if [[ -f "$governance_script" ]]; then
+    run_step "Alias governance (strict)" env DOTFILES_ALIAS_POLICY=strict bash "$governance_script"
+  fi
+fi
 run_step "Chezmoi apply" chezmoi apply "${args[@]}"
 
 check_ai_cli() {

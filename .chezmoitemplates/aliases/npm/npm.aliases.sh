@@ -47,7 +47,7 @@ if command -v npm &>/dev/null; then
   alias npu='npm update'
 
   # Exec npm package.
-  alias npx='npm exec'
+  alias npexec='npm exec'
 
   # Why npm package.
   alias npy='npm why'

@@ -1,11 +1,14 @@
 # shellcheck shell=bash
 # 🆂🆄🅳🅾 🅰🅻🅸🅰🆂🅴🆂
 
-# Execute a command as the superuser.
-alias root='s'
+# Canonical superuser shell alias.
+alias sudoi='sudo -i'
 
-# Execute a command as the superuser.
-alias s='sudo -i'
+# Optional short alias; disabled by default to avoid collisions with other
+# command families (e.g. svn `s*` mnemonics).
+if [[ "${DOTFILES_ENABLE_SHORT_SUDO:-0}" == "1" ]]; then
+  alias s='sudoi'
+fi
 
 # Execute a command as the superuser.
 if [[ "${DOTFILES_ENABLE_SU_ALIAS:-0}" == "1" ]]; then
@@ -14,5 +17,5 @@ fi
 
 # Risky command shadowing aliases are opt-in.
 if [[ "${DOTFILES_ENABLE_SUDO_ALIAS:-0}" == "1" ]]; then
-  alias sudo='s'
+  alias sudo='sudoi'
 fi

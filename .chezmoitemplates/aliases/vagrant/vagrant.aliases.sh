@@ -2,5 +2,5 @@
 # Vagrant aliases
 
 if command -v vagrant &>/dev/null; then
-  alias v='vagrant'
+  alias vg='vagrant'
 fi

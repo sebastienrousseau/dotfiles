@@ -8,20 +8,31 @@
 
 # Start a local FOSSology instance for deep scan
 if command -v docker &>/dev/null; then
-  alias fossology-start='docker run -d -p 8081:80 --name fossology fossology/fossology && echo "FOSSology started at http://localhost:8081"'
+  fossology-start() {
+    local port="${FOSSOLOGY_PORT:-8081}"
+    docker run -d -p "${port}:80" --name fossology fossology/fossology &&
+      echo "FOSSology started at http://localhost:${port}"
+  }
   alias fossology-stop='docker stop fossology && docker rm fossology'
 fi
 
 # Lightweight license check (using trivy as a modern proxy for compliance scanning)
-if command -v trivy &>/dev/null; then
-  alias scan-licenses='trivy fs . --scanners license'
-else
-  if [ "$(uname -s)" = "Darwin" ] && command -v brew >/dev/null; then
-    alias scan-licenses='echo "trivy not found. Installing via homebrew..." && brew install trivy && trivy fs . --scanners license'
-  else
-    alias scan-licenses='echo "trivy not found. Install trivy to use scan-licenses."'
+scan_licenses_fn() {
+  if command -v trivy &>/dev/null; then
+    trivy fs . --scanners license
+    return
   fi
-fi
+
+  if [ "$(uname -s)" = "Darwin" ] && command -v brew >/dev/null; then
+    echo "trivy not found. Installing via homebrew..."
+    brew install trivy && trivy fs . --scanners license
+    return
+  fi
+
+  echo "trivy not found. Install trivy to use scan-licenses."
+  return 1
+}
+alias scan-licenses='scan_licenses_fn'
 
 # -----------------------------------------------------------------------------
 # Copyright Headers (add-headers)

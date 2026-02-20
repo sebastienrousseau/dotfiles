@@ -2,11 +2,11 @@
 # Diagnostics & Self-Healing Aliases
 
 # Health Check
-alias doc='bash $HOME/.dotfiles/scripts/diagnostics/doctor.sh'
-alias dot-doctor='doc'
+alias dotdoc='bash $HOME/.dotfiles/scripts/diagnostics/doctor.sh'
+alias dot-doctor='dotdoc'
 
 # Detailed Doctor (with debug info)
-alias doc-full='bash $HOME/.dotfiles/scripts/diagnostics/doctor.sh && echo "\n--- Path Info ---" && echo $PATH | tr ":" "\n"'
+alias dotdoc-full='bash $HOME/.dotfiles/scripts/diagnostics/doctor.sh && echo "\n--- Path Info ---" && echo $PATH | tr ":" "\n"'
 
 if command -v chezmoi &>/dev/null; then
   # Drift Detection
@@ -23,4 +23,9 @@ if command -v chezmoi &>/dev/null; then
   alias cdiff='dot diff'
   alias crem='dot remove'
   alias cdrift='dot drift'
+  alias ca='chezmoi apply'
+  alias ce='chezmoi edit'
+  cdot() {
+    cd "$(chezmoi source-path)" || return 1
+  }
 fi

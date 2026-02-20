@@ -149,11 +149,13 @@ Run `dot --help` or `dot <command> --help` for inline documentation.
 | `dot fonts` | Install Nerd Fonts | UX |
 | `dot sandbox` | Launch a safe sandbox preview | Tools |
 | `dot tools` | Show tools or install through Nix | Tools |
+| `dot aliases` | List/search/explain alias definitions | Tools |
 | `dot tools install` | Enter Nix development shell | Tools |
 | `dot new` | Create a new project from a template | Tools |
 | `dot log-rotate` | Rotate `~/.local/share/dotfiles.log` | Tools |
 | `dot secrets-init` | Initialise age key for secrets | Secrets |
-| `dot secrets` | Edit encrypted secrets | Secrets |
+| `dot secrets` | Manage secrets (`edit|set|get|list|load|provider`) | Secrets |
+| `dot env load <bucket>` | Emit shell exports for a secrets bucket | Secrets |
 | `dot secrets-create` | Create an encrypted secrets file | Secrets |
 | `dot ssh-key` | Encrypt an SSH key locally with age | Secrets |
 | `dot backup` | Create a compressed backup of your home directory | Security |
@@ -163,6 +165,18 @@ Run `dot --help` or `dot <command> --help` for inline documentation.
 | `dot encrypt-check` | Check disk encryption status | Security |
 | `dot lock-screen` | Enforce lock‑screen idle settings (opt‑in) | Security |
 | `dot usb-safety` | Disable automount for removable media | Security |
+
+### Alias Modes (2026)
+
+- `DOTFILES_ALIAS_PROFILE=standard` (default): balanced alias set.
+- `DOTFILES_ALIAS_PROFILE=minimal`: trims heavy cloud/security/AI packs.
+- `DOTFILES_ALIAS_PROFILE=full`: loads all alias packs.
+- `DOTFILES_ALIAS_ECOSYSTEMS=all` (default): load all ecosystem alias families.
+- `DOTFILES_ALIAS_ECOSYSTEMS=python,node`: only load selected ecosystems (valid tags: `python,node,rust,network,legacy`).
+- `DOTFILES_ENABLE_CD_ALIAS=1`: opt-in override for `cd` -> `cd_with_history`.
+- `DOTFILES_SECURITY_MODE=strict`: enables high-impact security aliases (for example UFW mutation aliases).
+- `DOTFILES_ENABLE_DANGEROUS_ALIASES=1`: opt-in destructive aliases (`git reset --hard`, trash purge, force-push helpers).
+- `DOTFILES_ALIAS_POLICY=strict`: fail alias governance on duplicate names and expired deprecated aliases (enabled by default in CI).
 
 ### Developer CLI Tools
 
@@ -191,6 +205,13 @@ These utilities are installed to `~/.local/bin/`:
 # Initialise secrets (prints a public key)
 DOTFILES_NONINTERACTIVE=1 dot secrets-init
 # Output: Age key created at ~/.config/chezmoi/key.txt
+
+# Store and retrieve a secret via the configured provider
+dot secrets set GEMINI_API_KEY
+dot secrets get GEMINI_API_KEY --raw
+
+# Load the AI bucket into your current shell
+eval "$(dot env load ai)"
 ```
 
 ### Security changes

@@ -6,21 +6,44 @@ if [ -n "${BASH_VERSION:-}" ]; then
   shopt -s expand_aliases
 fi
 
-{{ $coreCategories := list "cd" "clear" "configuration" "default" "diagnostics" "editor" "git" "interactive" "installer" "mkdir" "modern" "ps" "sudo" "compliance" -}}
+{{ $coreCategories := list "archives" "cd" "clear" "configuration" "default" "diagnostics" "disk-usage" "docker" "editor" "git" "interactive" "installer" "mkdir" "modern" "ps" "rsync" "sudo" "system" "compliance" -}}
+{{ $aliasProfile := lower (default "standard" (env "DOTFILES_ALIAS_PROFILE")) -}}
+{{ $aliasBuckets := default (dict) .aliases.buckets -}}
 {{ $globPattern := joinPath .chezmoi.sourceDir ".chezmoitemplates/aliases/**/*.aliases.sh" -}}
 {{ $files := glob $globPattern -}}
 {{ range $files -}}
   {{ $name := . -}}
   {{ $isCore := false -}}
+  {{ $bucketEnabled := true -}}
+  {{ if contains "/system/" $name -}}
+    {{ $bucketEnabled = default true (index $aliasBuckets "system") -}}
+  {{ end -}}
+  {{ if contains "/subversion/" $name -}}
+    {{ $bucketEnabled = default true (index $aliasBuckets "svn") -}}
+  {{ end -}}
+  {{ $isCoreMinimalExcluded := or (contains "/interactive/" $name) (contains "/sudo/" $name) -}}
+  {{ $includeByProfile := true -}}
+  {{ if and (eq $aliasProfile "minimal") $isCoreMinimalExcluded -}}
+    {{ $includeByProfile = false -}}
+  {{ end -}}
   {{ range $coreCategories -}}
     {{ if contains (printf "/%s/" .) $name -}}
       {{ $isCore = true -}}
     {{ end -}}
   {{ end -}}
-  {{ if and $isCore (not (contains "/macOS/" $name)) }}
+  {{ if and $isCore (not (contains "/macOS/" $name)) (not (contains "/archives/" $name)) $includeByProfile $bucketEnabled }}
 {{ include $name }}
   {{ end -}}
 {{ end }}
+
+# Archive aliases loaded last among core aliases so extraction shortcuts
+# take precedence over earlier generic shims.
+{{- range $files -}}
+  {{- $name := . -}}
+  {{- if and (contains "/archives/" $name) (not (contains "/macOS/" $name)) }}
+{{ include $name }}
+  {{- end -}}
+{{- end }}
 
 # OS-Specific Core Aliases
 

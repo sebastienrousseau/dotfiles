@@ -6,23 +6,15 @@ if command -v 'gdate' >/dev/null; then
   # Strip directory and suffix from filenames.
   alias basename=basename
 
-  # Copy files and directories.
-  alias cp=cp
 
   # Strip non-directory suffix from filenames.
   alias dirname=dirname
 
-  # Create links between files.
-  alias ln=ln
 
   # Print the name of the link.
   alias loname=loname
 
-  # List directory contents.
-  alias ls=ls
 
-  # Create directories.
-  alias mkdir=mkdir
 
   # Make named pipes (FIFOs).
   alias mkfifo=mkfifo
@@ -30,8 +22,6 @@ if command -v 'gdate' >/dev/null; then
   # Make block or character special files.
   alias mknod=mknod
 
-  # Move or rename files or directories.
-  alias mv=mv
 
   # Check file name validity and portability.
   alias pathchk=pathchk
@@ -45,8 +35,6 @@ if command -v 'gdate' >/dev/null; then
   # Print the resolved physical path of the specified path.
   alias realpath=realpath
 
-  # Remove files or directories.
-  alias rm=rm
 
   # Remove empty directories.
   alias rmdir=rmdir
@@ -59,8 +47,6 @@ if command -v 'gdate' >/dev/null; then
   # Pattern scanning and processing language.
   alias awk=awk
 
-  # Concatenate and display files.
-  alias cat=cat
 
   # Split a file into context-determined pieces.
   alias csplit=csplit
@@ -68,8 +54,6 @@ if command -v 'gdate' >/dev/null; then
   # Remove sections from each line of files.
   alias cut=cut
 
-  # Compare files line by line.
-  alias diff=diff
 
   # Wrap each input line to fit in specified width.
   alias fold=fold

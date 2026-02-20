@@ -28,13 +28,31 @@ export FORCE_COLOR_OS="Windows"
 
 {{- $profile := default "laptop" .profile -}}
 {{- $features := default (dict "zsh" true "nvim" true "tmux" true "gui" true "secrets" true) .features -}}
+{{- $aliasBuckets := default (dict "system" true "svn" true) .aliases.buckets -}}
+{{- $aliasPolicy := default (dict "strict_mode" false) .aliases.policy -}}
+{{- $secretsPolicy := default (dict "provider" "auto" "auto_load" true) .secrets.policy -}}
+{{- $secretsBuckets := default (dict) .secrets.buckets -}}
 {{- $theme := default "catppuccin-mocha" .theme -}}
 {{- $enabled := list -}}
 {{- range $k, $v := $features }}{{- if $v }}{{- $enabled = append $enabled $k }}{{- end }}{{- end }}
+{{- $enabledBuckets := list -}}
+{{- range $k, $v := $aliasBuckets }}{{- if $v }}{{- $enabledBuckets = append $enabledBuckets $k }}{{- end }}{{- end }}
+{{- $secretBucketNames := list -}}
+{{- range $k, $_ := $secretsBuckets }}{{- $secretBucketNames = append $secretBucketNames $k }}{{- end }}
 
 export DOTFILES_PROFILE="{{ $profile }}"
 export DOTFILES_FEATURES="{{ join "," $enabled }}"
+export DOTFILES_ALIAS_BUCKETS="{{ join "," $enabledBuckets }}"
+export DOTFILES_ALIAS_STRICT_MODE="{{ if (default false (index $aliasPolicy "strict_mode")) }}1{{ else }}0{{ end }}"
+export DOTFILES_SECRETS_PROVIDER="{{ default "auto" (index $secretsPolicy "provider") }}"
+export DOTFILES_SECRETS_AUTO_LOAD="{{ if (default true (index $secretsPolicy "auto_load")) }}1{{ else }}0{{ end }}"
+export DOTFILES_SECRETS_BUCKET_NAMES="{{ join "," $secretBucketNames }}"
 export DOTFILES_THEME="{{ $theme }}"
+
+# Ensure gpg/pinentry can prompt correctly in TTY/headless sessions.
+if command -v gpg >/dev/null 2>&1; then
+  export GPG_TTY="$(tty)"
+fi
 
 # Cached eval helper — sources cached init scripts, regenerates when stale
 _SHELL_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
@@ -116,7 +134,7 @@ fi
 # 90-99: UX (Aliases, Prompts)
 #
 # Optimized loading of core configurations + eager aliases
-for core_layer in 00-core-paths 05-core-safety 40-ls-colors 90-ux-aliases; do
+for core_layer in 00-core-paths 05-core-safety 10-secrets 40-ls-colors 90-ux-aliases; do
   if [[ -f "${HOME}/.config/shell/${core_layer}.sh" ]]; then
     source "${HOME}/.config/shell/${core_layer}.sh"
   fi

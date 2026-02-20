@@ -3,7 +3,7 @@
   align="right"
 />
 
-# Dotfiles Aliases (v0.2.482)
+# Dotfiles Aliases
 
 Simply designed to fit your shell life 
 
@@ -35,51 +35,98 @@ During `chezmoi apply`, the main template `dot_config/shell/aliases.sh.tmpl`:
 
 ## Component List
 
-<!-- markdownlint-disable MD013-->
+Aliases are grouped and alphabetized for easier discovery.
 
-| Directory       | Description                                      | Link                      |
-| :-------------- | :----------------------------------------------- | :------------------------ |
-| `archives`      | Compress and extract files and directories.      | [View README](archives/README.md) |
-| `cd`            | Navigate the file system.                        | [View README](cd/README.md)       |
-| `chmod`         | Change file and directory permissions.           | [View README](chmod/README.md)    |
-| `clear`         | Clear the terminal screen.                       | [View README](clear/README.md)    |
-| `compliance`    | Regulatory compliance (SOC2) and privacy tools.  | [View README](compliance/README.md) |
-| `configuration` | Manage dotfiles and shell configurations.        | [View README](configuration/README.md) |
-| `default`       | Set up default shell aliases and configurations. | [View README](default/README.md)  |
-| `dig`           | Query DNS name servers.                          | [View README](dig/README.md)      |
-| `diagnostics`   | Self-healing and health checks (doctor, drift).  | [View README](diagnostics/README.md) |
-| `disk-usage`    | Display disk usage information.                  | [View README](disk-usage/README.md) |
-| `editor`        | Configure default text editors.                  | [View README](editor/README.md)   |
-| `find`          | Search files and directories using `find`.       | [View README](find/README.md)     |
-| `fonts`         | Font cache management.                           | [View README](fonts/README.md)    |
-| `gcloud`        | Manage Google Cloud SDK tools.                   | [View README](gcloud/README.md)   |
-| `git`           | Manage Git aliases and configurations.           | [View README](git/README.md)      |
-| `gnu`           | Manage GNU core utilities.                       | [View README](gnu/README.md)      |
-| `heroku`        | Manage Heroku CLI.                               | [View README](heroku/README.md)   |
-| `installer`     | Bootstrap and remote deployment tools.           | [View README](installer/README.md) |
-| `interactive`   | Configure interactive shell behavior.            | [View README](interactive/README.md) |
-| `kubernetes`    | Manage Kubernetes, Helm, and K9s aliases.        | [View README](kubernetes/README.md) |
-| `legal`         | License scanning and compliance tools.           | [View README](legal/README.md)      |
-| `macOS`         | Manage macOS-specific shell settings.            | [View README](macOS/README.md)    |
-| `make`          | Manage GNU Make aliases and utilities.           | [View README](make/README.md)     |
-| `mkdir`         | Create directories with custom options.          | [View README](mkdir/README.md)    |
-| `modern`        | Modern Rust-based tool replacements (ls, cat).   | [View README](modern/README.md)   |
-| `npm`           | Manage Node.js package manager aliases.          | [View README](npm/README.md)      |
-| `permission`    | Configure file and directory permissions.         | [View README](permission/README.md) |
-| `pnpm`          | Manage pnpm package manager aliases.             | [View README](pnpm/README.md)     |
-| `ps`            | Manage process status commands.                  | [View README](ps/README.md)       |
-| `python`        | Configure Python aliases and utilities.          | [View README](python/README.md)   |
-| `rsync`         | Configure rsync for efficient file transfers.    | [View README](rsync/README.md)    |
-| `rust`          | Manage Rust programming tools and configurations.| [View README](rust/README.md)     |
-| `security`      | Immutability and signing configuration.          | [View README](security/README.md) |
-| `subversion`    | Configure Subversion (SVN) version control.       | [View README](subversion/README.md) |
-| `sudo`          | Manage superuser operations.                     | [View README](sudo/README.md)     |
-| `tmux`          | Configure tmux terminal multiplexer.             | [View README](tmux/README.md)     |
-| `update`        | Update dotfiles and related configurations.       | [View README](update/README.md)   |
-| `uuid`          | Generate UUIDs for various use cases.            | [View README](uuid/README.md)     |
-| `wget`          | Manage wget command-line tool.                   | [View README](wget/README.md)     |
+### Core
+- [archives](archives/README.md)
+- [cd](cd/README.md)
+- [chmod](chmod/README.md)
+- [clear](clear/README.md)
+- [configuration](configuration/README.md)
+- [default](default/README.md)
+- [diagnostics](diagnostics/README.md)
+- [disk-usage](disk-usage/README.md)
+- [docker](docker/README.md)
+- [editor](editor/README.md)
+- [find](find/README.md)
+- [git](git/README.md)
+- [gnu](gnu/README.md)
+- [installer](installer/README.md)
+- [interactive](interactive/README.md)
+- [make](make/README.md)
+- [mkdir](mkdir/README.md)
+- [modern](modern/README.md)
+- [ps](ps/README.md)
+- [rsync](rsync/README.md)
+- [sudo](sudo/README.md)
+- [system](system/README.md)
+- [tmux](tmux/README.md)
+- [update](update/README.md)
+- [uuid](uuid/README.md)
 
-<!-- markdownlint-enable MD013-->
+### Ecosystems
+- [ai](ai/README.md)
+- [benchmarks](benchmarks/README.md)
+- [gcloud](gcloud/README.md)
+- [go](go/README.md)
+- [kubernetes](kubernetes/README.md)
+- [lua](lua/README.md)
+- [npm](npm/README.md)
+- [pnpm](pnpm/README.md)
+- [python](python/README.md)
+- [rust](rust/README.md)
+- [terraform](terraform/README.md)
+- [vagrant](vagrant/README.md)
+- [wget](wget/README.md)
+- [yarn](yarn/README.md)
+
+### Security, Compliance, and Governance
+- [compliance](compliance/README.md)
+- [dig](dig/README.md)
+- [fonts](fonts/README.md)
+- [legal](legal/README.md)
+- [permission](permission/README.md)
+- [security](security/README.md)
+- [subversion](subversion/README.md)
+
+### Platform Specific
+- [macOS](macOS/README.md)
+
+## Performance Profiles
+
+The alias loader supports startup performance tuning:
+
+- `DOTFILES_ALIAS_PROFILE=minimal`: skip heavy groups (AI, benchmarks, some infra/security modules).
+- `DOTFILES_ALIAS_ECOSYSTEMS=python,node,rust,network,legacy`: load only selected ecosystem groups.
+- default behavior (`all` + `standard`) loads the full alias set.
+
+## Per-Machine Bucket Toggles
+
+Alias buckets can be enabled/disabled in data to fit each host:
+
+```toml
+# ~/.config/chezmoi/chezmoi.toml
+[data.aliases.buckets]
+system = true
+svn = false
+```
+
+Defaults live in `.chezmoidata.toml` under `[aliases.buckets]`.
+
+## Strict Policy Mode
+
+You can enforce stricter alias safety and governance:
+
+```toml
+# ~/.config/chezmoi/chezmoi.toml
+[data.aliases.policy]
+strict_mode = true
+```
+
+When enabled:
+- destructive aliases require explicit `YES` confirmation
+- `chezmoi apply` runs alias governance in strict mode before applying
+- destructive actions are logged to `~/.dotfiles_destruction.log` (override with `DOTFILES_DESTRUCTIVE_LOG`)
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 

@@ -418,6 +418,14 @@ jobs:
           fi
 
           echo "✅ Integration tests passed"
+      - name: Strict-mode apply path checks
+        env:
+          DOTFILES_ALIAS_STRICT_MODE: "1"
+        run: |
+          echo "Running strict-mode apply path checks..."
+          REPO_ROOT="$PWD" bash scripts/tests/unit/test_alias_strict_mode.sh
+          REPO_ROOT="$PWD" bash scripts/tests/unit/test_ops_chezmoi_apply.sh
+          REPO_ROOT="$PWD" bash scripts/tests/unit/test_install_lib_chezmoi.sh
 
   # ============================================================================
   # STAGE 4: QUALITY (Depends on lint + test passing)

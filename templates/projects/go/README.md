@@ -4,4 +4,4 @@ Minimal Go project scaffold.
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [Sebastien Rousseau](https://sebastienrousseau.com)

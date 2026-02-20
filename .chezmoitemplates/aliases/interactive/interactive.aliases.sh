@@ -7,7 +7,7 @@ if [[ "${DOTFILES_SAFE_ALIASES:-0}" == "1" ]]; then
   alias cp="cp -vi"
 
   # del: Remove files or directories interactively (ask before each removal) with verbose output, recursively.
-  alias del="rm -rfvi"
+  alias del='dot_confirm_destructive "rm -rfvi (del)" && rm -rfvi'
 
   # ln: Create symbolic links interactively (ask before overwrite) with verbose output.
   alias ln='ln -vi'
@@ -18,12 +18,9 @@ if [[ "${DOTFILES_SAFE_ALIASES:-0}" == "1" ]]; then
   # rm: Remove files or directories interactively (ask before each removal) with verbose output.
   alias rm='rm -vi'
 
-  # zap: Alias for 'rm', removes files or directories interactively (ask before each removal) with verbose output.
-  alias zap='rm -vi'
-
   # Trash manipulation alias
   # bin: Remove all files in the trash directory (user's .Trash) forcefully and recursively.
-  alias bin='rm -fr ${HOME}/.Trash'
+  alias bin='dot_confirm_destructive "rm -fr ${HOME}/.Trash" && rm -fr ${HOME}/.Trash'
 
   # Other interactive aliases
   # diff: Compare and show differences between two files in unified format.

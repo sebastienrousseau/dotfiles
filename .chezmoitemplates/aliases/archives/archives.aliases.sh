@@ -324,6 +324,11 @@ backup() {
 #-----------------------------------------------------------------------------
 # Aliases
 #-----------------------------------------------------------------------------
+# Optional interactive cleanup alias (kept in archive bucket by convention).
+if [[ "${DOTFILES_SAFE_ALIASES:-0}" == "1" ]]; then
+  alias zap='dot_confirm_destructive "rm -vi (zap)" && rm -vi'
+fi
+
 # Extract Aliases
 alias x='extract' # Extract any supported archive
 

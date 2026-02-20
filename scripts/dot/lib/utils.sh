@@ -171,6 +171,9 @@ dot_command_summary() {
     tools)
       echo "Browse or install toolchain components."
       ;;
+    aliases)
+      echo "List, search, and explain configured aliases."
+      ;;
     new)
       echo "Create a new project from templates."
       ;;
@@ -196,7 +199,10 @@ dot_command_summary() {
       echo "Initialize age key for encrypted secrets."
       ;;
     secrets)
-      echo "Edit encrypted dotfiles secrets."
+      echo "Manage secrets (set/get/list/load/provider)."
+      ;;
+    env)
+      echo "Load secret buckets into shell exports."
       ;;
     secrets-create)
       echo "Create a new encrypted secrets file."

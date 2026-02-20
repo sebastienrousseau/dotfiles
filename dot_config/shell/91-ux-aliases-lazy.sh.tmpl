@@ -6,19 +6,49 @@ if [ -n "${BASH_VERSION:-}" ]; then
   shopt -s expand_aliases
 fi
 
-{{ $coreCategories := list "cd" "clear" "configuration" "default" "diagnostics" "editor" "git" "interactive" "installer" "mkdir" "modern" "ps" "sudo" "compliance" -}}
+{{ $coreCategories := list "archives" "cd" "clear" "configuration" "default" "diagnostics" "disk-usage" "docker" "editor" "git" "interactive" "installer" "mkdir" "modern" "ps" "rsync" "sudo" "system" "compliance" -}}
+{{ $aliasProfile := lower (default "standard" (env "DOTFILES_ALIAS_PROFILE")) -}}
+{{ $ecosystems := lower (default "all" (env "DOTFILES_ALIAS_ECOSYSTEMS")) -}}
+{{ $aliasBuckets := default (dict) .aliases.buckets -}}
 {{ $globPattern := joinPath .chezmoi.sourceDir ".chezmoitemplates/aliases/**/*.aliases.sh" -}}
 {{ $files := glob $globPattern -}}
 {{ range $files -}}
   {{ $name := . -}}
   {{ $isCore := false -}}
-  {{ $isHerokuSubmodule := and (contains "/heroku/" $name) (contains "heroku-" (base $name)) -}}
+  {{ $bucketEnabled := true -}}
+  {{ if contains "/system/" $name -}}
+    {{ $bucketEnabled = default true (index $aliasBuckets "system") -}}
+  {{ end -}}
+  {{ if contains "/subversion/" $name -}}
+    {{ $bucketEnabled = default true (index $aliasBuckets "svn") -}}
+  {{ end -}}
+  {{ $isPython := contains "/python/" $name -}}
+  {{ $isNode := or (contains "/npm/" $name) (contains "/pnpm/" $name) (contains "/yarn/" $name) -}}
+  {{ $isRust := contains "/rust/" $name -}}
+  {{ $isNetwork := or (contains "/dig/" $name) (contains "/security/" $name) -}}
+  {{ $isLegacy := or (contains "/subversion/" $name) (contains "/vagrant/" $name) -}}
+  {{ $isEcosystem := or $isPython (or $isNode (or $isRust (or $isNetwork $isLegacy))) -}}
+  {{ $ecosystemEnabled := true -}}
+  {{ if not (eq $ecosystems "all") -}}
+    {{ $ecosystemEnabled = false -}}
+    {{ if and $isPython (contains "python" $ecosystems) -}}{{ $ecosystemEnabled = true -}}{{ end -}}
+    {{ if and $isNode (contains "node" $ecosystems) -}}{{ $ecosystemEnabled = true -}}{{ end -}}
+    {{ if and $isRust (contains "rust" $ecosystems) -}}{{ $ecosystemEnabled = true -}}{{ end -}}
+    {{ if and $isNetwork (contains "network" $ecosystems) -}}{{ $ecosystemEnabled = true -}}{{ end -}}
+    {{ if and $isLegacy (contains "legacy" $ecosystems) -}}{{ $ecosystemEnabled = true -}}{{ end -}}
+  {{ end -}}
+  {{ $isHeavy := or (contains "/security/" $name) (contains "/docker/" $name) (contains "/kubernetes/" $name) (contains "/terraform/" $name) (contains "/gcloud/" $name) -}}
+  {{ $isMinimalExcluded := or $isHeavy (contains "/ai/" $name) (contains "/benchmarks/" $name) -}}
+  {{ $includeByProfile := true -}}
+  {{ if and (eq $aliasProfile "minimal") $isMinimalExcluded -}}
+    {{ $includeByProfile = false -}}
+  {{ end -}}
   {{ range $coreCategories -}}
     {{ if contains (printf "/%s/" .) $name -}}
       {{ $isCore = true -}}
     {{ end -}}
   {{ end -}}
-  {{ if and (not $isCore) (not (contains "/macOS/" $name)) (not $isHerokuSubmodule) }}
+  {{ if and (not $isCore) (not (contains "/macOS/" $name)) $includeByProfile (or (not $isEcosystem) $ecosystemEnabled) $bucketEnabled }}
 {{ include $name }}
   {{ end -}}
 {{ end }}

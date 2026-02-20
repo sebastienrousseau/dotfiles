@@ -9,7 +9,7 @@ _dot_completions() {
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
     # Main commands
-    commands="apply sync update add diff status remove cd drift verify history doctor keys tools sandbox benchmark tune secrets secrets-init secrets-create ssh-key firewall telemetry dns-doh encrypt-check backup lock-screen usb-safety fonts wallpaper theme upgrade edit docs new log-rotate learn --version help"
+    commands="apply sync update add diff status remove cd drift verify history doctor keys tools aliases sandbox benchmark tune secrets env secrets-init secrets-create ssh-key firewall telemetry dns-doh encrypt-check backup lock-screen usb-safety fonts wallpaper theme upgrade edit docs new log-rotate learn --version help"
 
     # Subcommand completions
     case "${prev}" in
@@ -31,6 +31,24 @@ _dot_completions() {
         tools)
             # Complete tools subcommands
             local subcommands="install"
+            COMPREPLY=( $(compgen -W "${subcommands}" -- "${cur}") )
+            return 0
+            ;;
+        aliases)
+            # Complete alias inspection subcommands
+            local subcommands="list search why stats tiers"
+            COMPREPLY=( $(compgen -W "${subcommands}" -- "${cur}") )
+            return 0
+            ;;
+        secrets)
+            # Complete secrets subcommands
+            local subcommands="edit set get list load provider"
+            COMPREPLY=( $(compgen -W "${subcommands}" -- "${cur}") )
+            return 0
+            ;;
+        env)
+            # Complete env subcommands
+            local subcommands="load"
             COMPREPLY=( $(compgen -W "${subcommands}" -- "${cur}") )
             return 0
             ;;

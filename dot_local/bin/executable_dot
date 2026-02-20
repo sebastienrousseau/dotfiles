@@ -82,6 +82,7 @@ show_help() {
 
     ui_section "Tools"
     cmd_line "tools" "Show or install nix packages (dot tools [install])"
+    cmd_line "aliases" "List/search/explain aliases and tiers (dot aliases ...)"
     cmd_line "new" "Create a new project from a template"
     cmd_line "sandbox" "Launch a safe sandbox preview (Docker/Podman)"
     cmd_line "keys" "Show keybindings catalog"
@@ -98,7 +99,8 @@ show_help() {
 
     ui_section "Secrets"
     cmd_line "secrets-init" "Initialize age key for secrets"
-    cmd_line "secrets" "Edit encrypted secrets (age)"
+    cmd_line "secrets" "Manage secrets (edit|set|get|list|load|provider)"
+    cmd_line "env" "Print export lines from secret buckets (dot env load <bucket>)"
     cmd_line "secrets-create" "Create an encrypted secrets file"
     cmd_line "ssh-key" "Encrypt an SSH key locally with age"
 
@@ -148,6 +150,7 @@ Diagnostics:
 
 Tools:
   tools       Show or install nix packages (dot tools [install])
+  aliases     List/search/explain aliases and tiers (dot aliases ...)
   new         Create a new project from a template
   sandbox     Launch a safe sandbox preview (Docker/Podman)
   keys        Show keybindings catalog
@@ -164,7 +167,8 @@ Appearance:
 
 Secrets:
   secrets-init    Initialize age key for secrets
-  secrets         Edit encrypted secrets (age)
+  secrets         Manage secrets (edit|set|get|list|load|provider)
+  env             Print export lines from secret buckets (dot env load <bucket>)
   secrets-create  Create an encrypted secrets file
   ssh-key         Encrypt an SSH key locally with age
 
@@ -238,7 +242,7 @@ case "$COMMAND" in
     ;;
 
   # Tools
-  tools|new|packages|log-rotate)
+  tools|aliases|new|packages|log-rotate)
     dispatch "tools" "$COMMAND" "$@"
     ;;
 
@@ -248,7 +252,7 @@ case "$COMMAND" in
     ;;
 
   # Secrets
-  secrets-init|secrets|secrets-create|ssh-key)
+  secrets-init|secrets|secrets-create|ssh-key|env)
     dispatch "secrets" "$COMMAND" "$@"
     ;;
 

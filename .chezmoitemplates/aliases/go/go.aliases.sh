@@ -2,7 +2,6 @@
 # Go Aliases
 
 if command -v go &>/dev/null; then
-  alias go='go'
   alias gor='go run'
   alias gob='go build'
   alias got='go test'
@@ -10,8 +9,8 @@ if command -v go &>/dev/null; then
   alias gocv='go coverage'
   alias gofmt='go fmt'
   alias govet='go vet'
+  alias gom='go mod tidy'
   alias gomod='go mod'
-  alias gomt='go mod tidy'
   alias gomv='go mod vendor'
   alias goget='go get'
   alias goinstall='go install'
