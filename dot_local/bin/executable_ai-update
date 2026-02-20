@@ -18,7 +18,7 @@ log_skip() { echo -e "${YELLOW}○${NC} $1 (skipped)"; }
 # NPM global packages (via mise-managed Node)
 if command -v mise >/dev/null 2>&1; then
   log_section "NPM (global)"
-  mise exec node -- npm update -g
+  mise exec node -- npm update -g --audit=false
   log_success "NPM globals updated"
 else
   log_skip "NPM globals (mise not available)"
@@ -73,10 +73,19 @@ if command -v ollama >/dev/null 2>&1; then
     return 0
   fi
   echo "Running Ollama installer (may prompt for sudo)..."
-  if ! curl -fsSL https://ollama.com/install.sh | sh; then
+  installer_log="$(mktemp)"
+  if ! curl -fsSL https://ollama.com/install.sh | sh 2>&1 | tee "$installer_log"; then
+    rm -f "$installer_log"
     echo "ERROR: Ollama install script failed" >&2
     exit 1
   fi
+  if grep -q "unknown header" "$installer_log"; then
+    rm -f "$installer_log"
+    echo "ERROR: Ollama installer reported an invalid archive (zstd unknown header)." >&2
+    echo "       Try rerunning: curl -fsSL https://ollama.com/install.sh | sh" >&2
+    exit 1
+  fi
+  rm -f "$installer_log"
 
   # Post-checks to ensure install succeeded
   echo "Validating Ollama install..."
