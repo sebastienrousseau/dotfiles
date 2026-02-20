@@ -36,6 +36,7 @@ fi
 # Ollama (Linux/macOS install script)
 if command -v ollama >/dev/null 2>&1; then
   log_section "Ollama"
+  echo "Preparing Ollama update..."
 
   # Preflight: verify the download is a valid zstd archive before install
   if [[ "$(uname -s)" == "Linux" ]]; then
@@ -46,19 +47,23 @@ if command -v ollama >/dev/null 2>&1; then
       *) ollama_arch="" ;;
     esac
     if [[ -n "$ollama_arch" ]]; then
+      echo "Verifying Ollama download for linux-${ollama_arch}..."
       tmp_tar="$(mktemp)"
       trap 'rm -f "$tmp_tar"' EXIT
       tar_url="https://ollama.com/download/ollama-linux-${ollama_arch}.tar.zst"
+      echo "Downloading $tar_url"
       if ! curl -fsSL "$tar_url" -o "$tmp_tar"; then
         echo "ERROR: failed to download Ollama tarball" >&2
         exit 1
       fi
+      echo "Checking archive integrity..."
       if ! zstd -t "$tmp_tar" >/dev/null 2>&1; then
         echo "ERROR: downloaded Ollama tarball is invalid" >&2
         exit 1
       fi
       rm -f "$tmp_tar"
       trap - EXIT
+      echo "Download verified."
     fi
   fi
 
@@ -67,12 +72,14 @@ if command -v ollama >/dev/null 2>&1; then
     log_skip "Ollama (no TTY for sudo). Run: curl -fsSL https://ollama.com/install.sh | sh"
     return 0
   fi
+  echo "Running Ollama installer (may prompt for sudo)..."
   if ! curl -fsSL https://ollama.com/install.sh | sh; then
     echo "ERROR: Ollama install script failed" >&2
     exit 1
   fi
 
   # Post-checks to ensure install succeeded
+  echo "Validating Ollama install..."
   if ! command -v ollama >/dev/null 2>&1; then
     echo "ERROR: ollama is not on PATH after install" >&2
     exit 1
