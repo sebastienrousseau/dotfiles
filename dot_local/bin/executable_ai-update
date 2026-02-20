@@ -63,6 +63,10 @@ if command -v ollama >/dev/null 2>&1; then
   fi
 
   # Install/update
+  if ! [[ -t 0 ]]; then
+    log_skip "Ollama (no TTY for sudo). Run: curl -fsSL https://ollama.com/install.sh | sh"
+    return 0
+  fi
   if ! curl -fsSL https://ollama.com/install.sh | sh; then
     echo "ERROR: Ollama install script failed" >&2
     exit 1
