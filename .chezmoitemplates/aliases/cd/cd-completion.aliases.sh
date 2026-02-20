@@ -43,6 +43,11 @@ if [[ -n "${ZSH_VERSION:-}" ]]; then
   [[ -n "${_CD_COMPLETION_LOADED_ZSH:-}" ]] && return 0
   _CD_COMPLETION_LOADED_ZSH=1
 
+  # compdef is only available after compinit; skip quietly if not ready.
+  if ! command -v compdef >/dev/null 2>&1; then
+    return 0
+  fi
+
   _get_bookmarks() {
     if [[ -f "${BOOKMARK_FILE}" ]]; then
       cut -d':' -f1 "${BOOKMARK_FILE}"
