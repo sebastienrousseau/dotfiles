@@ -36,7 +36,54 @@ fi
 # Ollama (Linux/macOS install script)
 if command -v ollama >/dev/null 2>&1; then
   log_section "Ollama"
-  curl -fsSL https://ollama.com/install.sh | sh
+
+  # Preflight: verify the download is a valid zstd archive before install
+  if [[ "$(uname -s)" == "Linux" ]]; then
+    arch="$(uname -m)"
+    case "$arch" in
+      x86_64|amd64) ollama_arch="amd64" ;;
+      aarch64|arm64) ollama_arch="arm64" ;;
+      *) ollama_arch="" ;;
+    esac
+    if [[ -n "$ollama_arch" ]]; then
+      tmp_tar="$(mktemp)"
+      trap 'rm -f "$tmp_tar"' EXIT
+      tar_url="https://ollama.com/download/ollama-linux-${ollama_arch}.tar.zst"
+      if ! curl -fsSL "$tar_url" -o "$tmp_tar"; then
+        echo "ERROR: failed to download Ollama tarball" >&2
+        exit 1
+      fi
+      if ! zstd -t "$tmp_tar" >/dev/null 2>&1; then
+        echo "ERROR: downloaded Ollama tarball is invalid" >&2
+        exit 1
+      fi
+      rm -f "$tmp_tar"
+      trap - EXIT
+    fi
+  fi
+
+  # Install/update
+  if ! curl -fsSL https://ollama.com/install.sh | sh; then
+    echo "ERROR: Ollama install script failed" >&2
+    exit 1
+  fi
+
+  # Post-checks to ensure install succeeded
+  if ! command -v ollama >/dev/null 2>&1; then
+    echo "ERROR: ollama is not on PATH after install" >&2
+    exit 1
+  fi
+  if ! ollama --version >/dev/null 2>&1; then
+    echo "ERROR: ollama did not report a version after install" >&2
+    exit 1
+  fi
+  if command -v systemctl >/dev/null 2>&1; then
+    if ! systemctl is-active --quiet ollama; then
+      echo "ERROR: ollama service is not active after install" >&2
+      exit 1
+    fi
+  fi
+
   log_success "Ollama updated"
 else
   log_skip "Ollama (not installed)"
