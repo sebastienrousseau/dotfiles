@@ -55,9 +55,7 @@ if [[ -n "${ZSH_VERSION:-}" ]]; then
   }
 
   _bookmark_complete_zsh() {
-    local -a bookmarks
-    bookmarks=(${(f)$(_get_bookmarks)})
-    compadd -a bookmarks
+    compadd -Q -- ${(f)$(_get_bookmarks)}
   }
 
   compdef _bookmark_complete_zsh goto
