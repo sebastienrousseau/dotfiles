@@ -26,5 +26,5 @@ rg -n \
   -e '^[[:space:]]*alias[[:space:]]+[A-Za-z0-9_.:-]+=' \
   -e '^[[:space:]]*[^#"'\'']*&&[[:space:]]*alias[[:space:]]+[A-Za-z0-9_.:-]+=' \
   "$src_dir/.chezmoitemplates/aliases" \
-  "$src_dir/.chezmoitemplates/functions" \
-  | sed -E 's#^([^:]+):([0-9]+):.*alias[[:space:]]+([A-Za-z0-9_.:-]+)=(.*)$#\3\t\4\t\1\t\2#'
+  "$src_dir/.chezmoitemplates/functions" |
+  sed -E 's#^([^:]+):([0-9]+):.*alias[[:space:]]+([A-Za-z0-9_.:-]+)=(.*)$#\3\t\4\t\1\t\2#'

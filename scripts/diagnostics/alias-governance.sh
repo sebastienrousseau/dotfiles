@@ -70,16 +70,16 @@ fi
 # 2) Risky overrides must be gated
 while IFS=$'\t' read -r name _value file _line; do
   case "$name" in
-    cd|sudo|su|cp|mv|rm|mkdir|alias)
-      # GNU coreutils aliases are intentionally centralized overrides.
-      if [[ "$file" == *"/aliases/gnu/"* ]]; then
-        continue
-      fi
-      if ! rg -q 'DOTFILES_(ENABLE|SAFE|ALIAS)' "$file"; then
-        echo "ERROR: risky override '$name' in $file is not gated by a DOTFILES_* flag"
-        errors=$((errors + 1))
-      fi
-      ;;
+  cd | sudo | su | cp | mv | rm | mkdir | alias)
+    # GNU coreutils aliases are intentionally centralized overrides.
+    if [[ "$file" == *"/aliases/gnu/"* ]]; then
+      continue
+    fi
+    if ! rg -q 'DOTFILES_(ENABLE|SAFE|ALIAS)' "$file"; then
+      echo "ERROR: risky override '$name' in $file is not gated by a DOTFILES_* flag"
+      errors=$((errors + 1))
+    fi
+    ;;
   esac
 done <"$tmp_manifest"
 
