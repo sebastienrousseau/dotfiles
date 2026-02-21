@@ -31,9 +31,10 @@ export FORCE_COLOR_OS="Windows"
 
 {{- $profile := default "laptop" .profile -}}
 {{- $features := default (dict "zsh" true "nvim" true "tmux" true "gui" true "secrets" true) .features -}}
-{{- $aliasBuckets := default (dict "system" true "svn" true) .aliases.buckets -}}
-{{- $aliasPolicy := default (dict "strict_mode" false) .aliases.policy -}}
-{{- $aliasProfile := lower (default "standard" .aliases.profile) -}}
+{{- $aliasesConfig := default (dict) .aliases -}}
+{{- $aliasBuckets := default (dict "system" true "svn" true) (index $aliasesConfig "buckets") -}}
+{{- $aliasPolicy := default (dict "strict_mode" false) (index $aliasesConfig "policy") -}}
+{{- $aliasProfile := lower (default "standard" (index $aliasesConfig "profile")) -}}
 {{- $secretsPolicy := default (dict "provider" "auto" "auto_load" true) .secrets.policy -}}
 {{- $secretsBuckets := default (dict) .secrets.buckets -}}
 {{- $theme := default "catppuccin-mocha" .theme -}}
