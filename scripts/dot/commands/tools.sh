@@ -309,6 +309,14 @@ cmd_aliases() {
       ' "$histfile" | sort -nr | head -20
       rm -f "$tmp_aliases"
       ;;
+    cheatsheet)
+      ui_header "Alias Cheatsheet"
+      local src_dir out
+      src_dir="$(require_source_dir)"
+      out="$src_dir/docs/ALIASES_CHEATSHEET.md"
+      bash "$src_dir/scripts/diagnostics/aliases-cheatsheet.sh" > "$out"
+      ui_ok "Generated" "$out"
+      ;;
     tiers)
       local profile ecosystems security_mode dangerous buckets
       profile="${DOTFILES_ALIAS_PROFILE:-standard}"
@@ -372,6 +380,53 @@ cmd_aliases() {
       die "Unknown aliases subcommand: $subcommand"
       ;;
   esac
+}
+
+cmd_alias_check() {
+  ui_header "Alias Check"
+  echo ""
+
+  local alias_file="${HOME}/.config/shell/90-ux-aliases.sh"
+  local zshrc_file="${HOME}/.config/zsh/.zshrc"
+  local auto_ls_file="${HOME}/.config/shell/custom/auto_ls.zsh"
+  local missing=0
+
+  if [[ -f "$alias_file" ]]; then
+    ui_ok "Aliases file" "$alias_file"
+  else
+    ui_err "Aliases file missing" "$alias_file"
+    missing=1
+  fi
+
+  local required_aliases=(c q e l ll la lr lra lt lta h a d _ i)
+  local a
+  for a in "${required_aliases[@]}"; do
+    if grep -Eq "^[[:space:]]*alias[[:space:]]+${a}=" "$alias_file" 2>/dev/null; then
+      ui_ok "alias ${a}" "present"
+    else
+      ui_warn "alias ${a}" "missing"
+      missing=1
+    fi
+  done
+
+  if [[ -f "$auto_ls_file" ]]; then
+    ui_ok "auto-ls hook" "$auto_ls_file"
+  else
+    ui_warn "auto-ls hook" "missing"
+  fi
+
+  if [[ -f "$zshrc_file" ]] && rg -q "auto_ls.zsh" "$zshrc_file"; then
+    ui_ok "auto-ls sourced" "$zshrc_file"
+  else
+    ui_warn "auto-ls sourced" "not referenced in zshrc"
+  fi
+
+  echo ""
+  if [[ "$missing" -eq 1 ]]; then
+    ui_warn "Result" "Some aliases are missing; re-run 'chezmoi apply' and open a new shell."
+    return 1
+  fi
+  ui_ok "Result" "All core aliases present"
 }
 
 cmd_tools() {
@@ -516,6 +571,10 @@ case "${1:-}" in
   tools)
     shift
     cmd_tools "$@"
+    ;;
+  alias-check)
+    shift
+    cmd_alias_check "$@"
     ;;
   new)
     shift

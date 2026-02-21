@@ -255,19 +255,7 @@ fi
 
 # Ultimate fallback: provide function shims if aliases still missing.
 if ! alias c >/dev/null 2>&1; then
-  c() { clear; }
-  q() { exit; }
-  e() { "${EDITOR:-nano}" "$@"; }
-  h() { history; }
-  l() { command -v eza >/dev/null 2>&1 && eza --sort Name --icons --group-directories-first "$@" || command ls "$@"; }
-  ll() { command -v eza >/dev/null 2>&1 && eza -alF --sort Name --icons --group-directories-first "$@" || command ls -lA "$@"; }
-  la() { command -v eza >/dev/null 2>&1 && eza -a --sort Name --icons --group-directories-first "$@" || command ls -a "$@"; }
-  lt() { command -v eza >/dev/null 2>&1 && eza -aT --sort Name --icons --group-directories-first "$@" || command ls -R "$@"; }
-  lr() { command -v eza >/dev/null 2>&1 && eza -alF --recurse --sort Name --icons --group-directories-first "$@" || command ls -lAR "$@"; }
-  lra() { command -v eza >/dev/null 2>&1 && eza -alF --recurse --all --sort Name --icons --group-directories-first "$@" || command ls -lAR "$@"; }
-  lta() { command -v eza >/dev/null 2>&1 && eza -aT --all --sort Name --icons --group-directories-first "$@" || command ls -aR "$@"; }
-  d() { command -v dot >/dev/null 2>&1 && dot "$@" || command -v docker >/dev/null 2>&1 && docker "$@"; }
-  i() { command -v epoch >/dev/null 2>&1 && epoch "$@"; }
-  a() { command -v ai_core >/dev/null 2>&1 && ai_core query "$@"; }
-  _() { sudo "$@"; }
+  if command -v _dotfiles_alias_shims >/dev/null 2>&1; then
+    _dotfiles_alias_shims
+  fi
 fi

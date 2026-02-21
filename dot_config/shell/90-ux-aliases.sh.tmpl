@@ -9,7 +9,7 @@ if [ -n "${ZSH_VERSION:-}" ]; then
   setopt aliases
 fi
 
-{{ $coreCategories := list "archives" "cd" "clear" "configuration" "default" "diagnostics" "disk-usage" "docker" "editor" "git" "interactive" "installer" "mkdir" "modern" "ps" "rsync" "sudo" "system" "compliance" -}}
+{{ $coreCategories := list "archives" "cd" "clear" "configuration" "default" "diagnostics" "disk-usage" "editor" "git" "interactive" "installer" "mkdir" "modern" "ps" "rsync" "sudo" "system" "compliance" -}}
 {{ $aliasProfile := lower (default "standard" (env "DOTFILES_ALIAS_PROFILE")) -}}
 {{ $aliasBuckets := default (dict) .aliases.buckets -}}
 {{ $globPattern := joinPath .chezmoi.sourceDir ".chezmoitemplates/aliases/**/*.aliases.sh" -}}
@@ -49,23 +49,29 @@ fi
 {{- end }}
 
 # Zsh fallback: if alias expansion is disabled, provide function shims.
+_dotfiles_alias_shims() {
+  [[ -n "${_DOTFILES_ALIAS_SHIMS_LOADED:-}" ]] && return 0
+  _DOTFILES_ALIAS_SHIMS_LOADED=1
+  c() { clear_screen; }
+  q() { exit; }
+  e() { "${EDITOR:-nano}" "$@"; }
+  h() { history; }
+  l() { dot_ls "$@"; }
+  ll() { dot_ll "$@"; }
+  la() { dot_la "$@"; }
+  lt() { dot_lt "$@"; }
+  lr() { dot_lr "$@"; }
+  lra() { dot_lra "$@"; }
+  lta() { dot_lta "$@"; }
+  d() { command -v dot >/dev/null 2>&1 && dot "$@" || command -v docker >/dev/null 2>&1 && docker "$@"; }
+  i() { command -v epoch >/dev/null 2>&1 && epoch "$@"; }
+  a() { command -v ai_core >/dev/null 2>&1 && ai_core query "$@"; }
+  _() { sudo "$@"; }
+}
+
 if [ -n "${ZSH_VERSION:-}" ]; then
-  if ! setopt | grep -q '^aliases$'; then
-    c() { clear_screen; }
-    q() { exit; }
-    e() { "${EDITOR:-nano}" "$@"; }
-    h() { history; }
-    l() { dot_ls "$@"; }
-    ll() { dot_ll "$@"; }
-    la() { dot_la "$@"; }
-    lt() { dot_lt "$@"; }
-    lr() { dot_lr "$@"; }
-    lra() { dot_lra "$@"; }
-    lta() { dot_lta "$@"; }
-    d() { command -v dot >/dev/null 2>&1 && dot "$@" || command -v docker >/dev/null 2>&1 && docker "$@"; }
-    i() { command -v epoch >/dev/null 2>&1 && epoch "$@"; }
-    a() { command -v ai_core >/dev/null 2>&1 && ai_core query "$@"; }
-    _() { sudo "$@"; }
+  if ! setopt | grep -q '^aliases$' || [[ "${DOTFILES_FORCE_ALIAS_SHIMS:-0}" == "1" ]]; then
+    _dotfiles_alias_shims
   fi
 fi
 

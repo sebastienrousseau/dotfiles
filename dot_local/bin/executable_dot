@@ -83,6 +83,8 @@ show_help() {
     ui_section "Tools"
     cmd_line "tools" "Show or install nix packages (dot tools [install])"
     cmd_line "aliases" "List/search/explain aliases and tiers (dot aliases ...)"
+    cmd_line "alias-check" "Verify core alias set is present"
+    cmd_line "aliases cheatsheet" "Generate alias cheatsheet markdown"
     cmd_line "new" "Create a new project from a template"
     cmd_line "sandbox" "Launch a safe sandbox preview (Docker/Podman)"
     cmd_line "keys" "Show keybindings catalog"
@@ -148,9 +150,11 @@ Diagnostics:
   history        Shell history analysis
   benchmark      Run shell startup benchmark (--detailed, --profile)
 
-Tools:
+  Tools:
   tools       Show or install nix packages (dot tools [install])
   aliases     List/search/explain aliases and tiers (dot aliases ...)
+  alias-check Verify core alias set is present
+  aliases cheatsheet Generate alias cheatsheet markdown
   new         Create a new project from a template
   sandbox     Launch a safe sandbox preview (Docker/Podman)
   keys        Show keybindings catalog
@@ -242,7 +246,7 @@ case "$COMMAND" in
     ;;
 
   # Tools
-  tools|aliases|new|packages|log-rotate)
+  tools|aliases|alias-check|new|packages|log-rotate)
     dispatch "tools" "$COMMAND" "$@"
     ;;
 
