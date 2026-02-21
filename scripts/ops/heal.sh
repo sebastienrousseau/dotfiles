@@ -46,7 +46,7 @@ log_dry() { ui_warn "DRY-RUN" "Would: $*"; }
 # Persistent logging
 persist_log() {
   mkdir -p "$STATE_DIR"
-  echo "[$(date -Iseconds)] $*" >>"$HEAL_LOG"
+  echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*" >>"$HEAL_LOG"
 }
 
 # Options

@@ -385,7 +385,7 @@ main() {
 
   if [[ "$JSON_OUTPUT" == "1" ]]; then
     echo "{"
-    echo "  \"timestamp\": \"$(date -Iseconds)\","
+    echo "  \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\","
     echo "  \"exit_code\": $EXIT_CODE,"
     echo "  \"results\": ["
     local first=1
