@@ -171,28 +171,10 @@ for core_layer in 00-core-paths 05-core-safety 10-secrets 40-ls-colors 90-ux-ali
   fi
 done
 
-# Deferred loading of heavy layers (lazy — loads after first prompt)
-autoload -Uz add-zsh-hook
-_load_deferred_layers() {
-  add-zsh-hook -d precmd _load_deferred_layers
-  [[ -f "${HOME}/.config/shell/50-logic-functions.sh" ]] && source "${HOME}/.config/shell/50-logic-functions.sh"
-  [[ -f "${HOME}/.config/shell/91-ux-aliases-lazy.sh" ]] && source "${HOME}/.config/shell/91-ux-aliases-lazy.sh"
-  # AI / Predictive Shell (deferred for faster startup)
-  [[ -f "${HOME}/.config/shell/custom/context_suggest.zsh" ]] && source "${HOME}/.config/shell/custom/context_suggest.zsh"
-  [[ -f "${HOME}/.config/shell/custom/error_analysis.zsh" ]] && source "${HOME}/.config/shell/custom/error_analysis.zsh"
-  [[ -f "${HOME}/.config/shell/custom/ollama_functions.zsh" ]] && source "${HOME}/.config/shell/custom/ollama_functions.zsh"
-  [[ -f "${HOME}/.config/shell/custom/auto_ls.zsh" ]] && source "${HOME}/.config/shell/custom/auto_ls.zsh"
-}
-add-zsh-hook precmd _load_deferred_layers
-
-# Safety: re-enable aliases at each prompt (guards against later noaliases).
-_dotfiles_force_aliases() {
-  setopt aliases
-}
-add-zsh-hook precmd _dotfiles_force_aliases
-
 # Essential Aliases (fallback if 90-ux-aliases.sh is unavailable)
-if command -v bat >/dev/null; then
+# Cache bat availability to avoid repeated checks
+if command -v bat >/dev/null 2>&1; then
+  _HAS_BAT=1
   alias cat="bat"
 fi
 
@@ -200,7 +182,7 @@ fi
 if [[ "${DOTFILES_ALIAS_WRAPPER:-0}" == "1" ]]; then
   alias_wrapper() {
     if [[ $# -eq 0 ]]; then
-      if command -v bat >/dev/null; then
+      if [[ -n "${_HAS_BAT:-}" ]]; then
         builtin alias | bat -l sh --style=plain
       else
         builtin alias
@@ -212,66 +194,58 @@ if [[ "${DOTFILES_ALIAS_WRAPPER:-0}" == "1" ]]; then
   alias alias=alias_wrapper
 fi
 
-# Ensure aliases are enabled and core alias file is loaded in interactive shells.
-if ! setopt | grep -q '^aliases$'; then
-  setopt aliases
-fi
-if ! alias c >/dev/null 2>&1 && [[ -f "${HOME}/.config/shell/90-ux-aliases.sh" ]]; then
-  source "${HOME}/.config/shell/90-ux-aliases.sh"
-fi
+# Consolidated deferred initialization (single precmd hook for all lazy loading)
+# Performance: Single hook reduces overhead vs multiple add-zsh-hook calls
+autoload -Uz add-zsh-hook
+_dotfiles_deferred_init() {
+  add-zsh-hook -d precmd _dotfiles_deferred_init
 
+  # === Phase 1: Deferred shell layers ===
+  [[ -f "${HOME}/.config/shell/50-logic-functions.sh" ]] && source "${HOME}/.config/shell/50-logic-functions.sh"
+  [[ -f "${HOME}/.config/shell/91-ux-aliases-lazy.sh" ]] && source "${HOME}/.config/shell/91-ux-aliases-lazy.sh"
+  # AI / Predictive Shell
+  [[ -f "${HOME}/.config/shell/custom/context_suggest.zsh" ]] && source "${HOME}/.config/shell/custom/context_suggest.zsh"
+  [[ -f "${HOME}/.config/shell/custom/error_analysis.zsh" ]] && source "${HOME}/.config/shell/custom/error_analysis.zsh"
+  [[ -f "${HOME}/.config/shell/custom/ollama_functions.zsh" ]] && source "${HOME}/.config/shell/custom/ollama_functions.zsh"
+  [[ -f "${HOME}/.config/shell/custom/auto_ls.zsh" ]] && source "${HOME}/.config/shell/custom/auto_ls.zsh"
 
-_dotfiles_lazy_tool_init() {
-  add-zsh-hook -d precmd _dotfiles_lazy_tool_init
+  # === Phase 2: Tool initialization (with cached eval) ===
+  # Atuin (shell history)
+  command -v atuin >/dev/null 2>&1 && _cached_eval atuin-init atuin init zsh
 
-  # Phase 33: Atuin (Memory Layer)
-  if command -v atuin > /dev/null; then
-      _cached_eval atuin-init atuin init zsh
-  fi
+  # Starship (prompt)
+  command -v starship >/dev/null 2>&1 && _cached_eval starship-init starship init zsh
 
-  # Starship Prompt (High Performance)
-  if command -v starship >/dev/null; then
-    _cached_eval starship-init starship init zsh
-  fi
+  # Zoxide (smart cd)
+  command -v zoxide >/dev/null 2>&1 && _cached_eval zoxide-init zoxide init zsh
 
-  # Zoxide (Smart Directory Jumper) - Replaces 'cd'
-  if command -v zoxide >/dev/null; then
-    _cached_eval zoxide-init zoxide init zsh
-  fi
-
-  # Mise (Runtime Version Manager) - Replaces asdf/pyenv/nvm
-  if command -v mise >/dev/null; then
+  # Mise (runtime version manager)
+  if command -v mise >/dev/null 2>&1; then
     _cached_eval mise-init mise activate zsh
-    mise_shims="${MISE_SHIMS_DIR:-$HOME/.local/share/mise/shims}"
-    if [[ ":$PATH:" != *":${mise_shims}:"* ]]; then
-      export PATH="${mise_shims}:$PATH"
-    fi
+    local mise_shims="${MISE_SHIMS_DIR:-$HOME/.local/share/mise/shims}"
+    [[ ":$PATH:" != *":${mise_shims}:"* ]] && export PATH="${mise_shims}:$PATH"
   fi
 
-  # FZF (Fuzzy Finder) - Cross-platform detection
-  if command -v fzf >/dev/null; then
-    # Detect FZF shell integration path (Homebrew, apt, manual install)
+  # FZF (fuzzy finder) - cross-platform path detection
+  if command -v fzf >/dev/null 2>&1; then
     local fzf_shell_dir=""
     for dir in "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/fzf/shell" \
-               /usr/local/opt/fzf/shell \
-               /usr/share/fzf \
-               /usr/share/doc/fzf/examples \
-               "${HOME}/.fzf/shell"; do
+               /usr/local/opt/fzf/shell /usr/share/fzf \
+               /usr/share/doc/fzf/examples "${HOME}/.fzf/shell"; do
       [[ -d "$dir" ]] && { fzf_shell_dir="$dir"; break; }
     done
-
     if [[ -n "$fzf_shell_dir" ]]; then
       [[ -f "${fzf_shell_dir}/completion.zsh" ]] && source "${fzf_shell_dir}/completion.zsh"
       [[ -f "${fzf_shell_dir}/key-bindings.zsh" ]] && source "${fzf_shell_dir}/key-bindings.zsh"
     fi
-
-    # Use fd/rg for fzf source if available
-    if command -v rg >/dev/null; then
-      export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
-    fi
+    # Use rg for fzf if available
+    command -v rg >/dev/null 2>&1 && export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
   fi
+
+  # Re-enable aliases (guard against noaliases)
+  setopt aliases
 }
-add-zsh-hook precmd _dotfiles_lazy_tool_init
+add-zsh-hook precmd _dotfiles_deferred_init
 
 # Async update notifications (shown once per shell)
 _dotfiles_update_notice() {
@@ -295,14 +269,6 @@ _dotfiles_update_notice() {
   fi
 }
 _dotfiles_update_notice
-
-# Final guard: ensure aliases are enabled and core alias file is loaded.
-if ! setopt | grep -q '^aliases$'; then
-  setopt aliases
-fi
-if ! alias c >/dev/null 2>&1 && [[ -f "${HOME}/.config/shell/90-ux-aliases.sh" ]]; then
-  source "${HOME}/.config/shell/90-ux-aliases.sh"
-fi
 
 # Cleanup legacy debug log (from alias tracing).
 if [[ -f "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/alias-debug.log" ]]; then
