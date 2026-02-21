@@ -1,22 +1,26 @@
 #!/usr/bin/env bash
-# tmux-sessionizer - Fuzzy session switcher for tmux
-#
-# This script provides a fuzzy-finder interface for switching between
-# tmux sessions and creating new sessions from project directories.
-#
-# Usage:
-#   tmux-sessionizer [directory]
-#
-# If no directory is provided, uses fzf to select from:
-#   - Existing tmux sessions
-#   - Project directories from configured paths
-#
-# Configuration:
-#   Set TMUX_SESSIONIZER_DIRS to customise search paths (colon-separated)
-#   Default: ~/projects:~/work:~/src:~/.dotfiles
-#
-# References:
-#   - ThePrimeagen's original: https://github.com/ThePrimeagen/.dotfiles
+## Tmux Sessionizer — Fuzzy session switcher for tmux.
+##
+## Provides a fuzzy-finder interface for switching between tmux sessions
+## and creating new sessions from project directories.
+##
+## # Requirements
+## - tmux: Terminal multiplexer
+## - fzf: Fuzzy finder for selection
+##
+## # Usage
+## tmux-sessionizer                     # Interactive selection
+## tmux-sessionizer /path/to/project    # Create/switch to session
+##
+## # Configuration
+## Set TMUX_SESSIONIZER_DIRS to customize search paths (colon-separated)
+## Default: ~/projects:~/work:~/src:~/.dotfiles
+##
+## # Platform Notes
+## - All platforms: Requires tmux and fzf
+##
+## # References
+## Based on ThePrimeagen's tmux-sessionizer
 
 set -euo pipefail
 

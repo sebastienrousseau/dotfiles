@@ -1,4 +1,24 @@
 #!/usr/bin/env bash
+## Base64 Transcoder — Encode and decode base64 with URL-safe support.
+##
+## Supports standard and URL-safe base64 encoding/decoding modes.
+## Handles both command-line arguments and stdin input.
+##
+## # Requirements
+## - base64: Core utility (coreutils or macOS built-in)
+## - tr: For URL-safe character translation
+##
+## # Usage
+## b64 "string"                # Encode string to base64
+## b64 -d "encoded"            # Decode base64 string
+## b64 -u "string"             # URL-safe encode
+## b64 -d -u "encoded"         # URL-safe decode
+## echo "data" | b64           # Encode from stdin
+##
+## # Platform Notes
+## - macOS: Uses base64 -D for decode
+## - Linux: Uses base64 -d for decode
+
 set -euo pipefail
 
 # --- UI Theme ---

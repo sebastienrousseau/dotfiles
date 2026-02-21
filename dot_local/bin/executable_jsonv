@@ -1,6 +1,21 @@
 #!/usr/bin/env bash
-# JSON validator and formatter
-# Usage: jsonv <file> | jsonv (reads stdin) | jsonv --format <file>
+## JSON Validator — Validate and optionally format JSON data.
+##
+## Validates JSON syntax and reports success or failure.
+## Supports formatting output and quiet mode for scripts.
+##
+## # Requirements
+## - jq: Primary JSON processor (recommended)
+## - python3: Fallback JSON validator
+##
+## # Usage
+## jsonv file.json             # Validate JSON file
+## jsonv < file.json           # Validate from stdin
+## jsonv -f file.json          # Validate and format
+## jsonv -q file.json          # Quiet mode (exit code only)
+##
+## # Platform Notes
+## - All platforms: Requires jq or python3
 
 set -euo pipefail
 
@@ -46,9 +61,9 @@ else
 fi
 
 if validate_json "$INPUT"; then
-  $QUIET || echo "✓ Valid JSON ($SOURCE)"
+  $QUIET || echo "Valid JSON ($SOURCE)"
   exit 0
 else
-  echo "✗ Invalid JSON ($SOURCE)"
+  echo "Invalid JSON ($SOURCE)"
   exit 1
 fi

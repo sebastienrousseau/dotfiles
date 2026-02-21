@@ -1,7 +1,32 @@
 #!/usr/bin/env bash
-# Theme Switcher - Supports Tokyo Night and Catppuccin theme families
-# Usage: dot theme [list|set <name>|toggle|family]
+## Theme Switcher — Switch between theme families and light/dark modes.
+##
+## Supports Tokyo Night, Catppuccin, Rose Pine, Kanagawa, and other
+## popular theme families. Updates chezmoi data and applies changes.
+##
+## # Requirements
+## - chezmoi: Dotfiles manager
+## - sed: For updating theme configuration
+##
+## # Usage
+## dot theme list              # Show all available themes
+## dot theme set NAME          # Set theme to NAME
+## dot theme toggle            # Toggle light/dark within family
+## dot theme family            # Switch between theme families
+## dot theme current           # Show current theme info
+##
+## # Platform Notes
+## - All platforms: Updates chezmoi configuration
+
 set -euo pipefail
+
+# Cleanup function for temp files
+cleanup() {
+  if [[ -n "${tmp_file:-}" ]] && [[ -f "$tmp_file" ]]; then
+    rm -f "$tmp_file"
+  fi
+}
+trap cleanup EXIT
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh

@@ -1,6 +1,21 @@
 #!/usr/bin/env bash
-# Lorem ipsum text generator
-# Usage: lorem [words|sentences|paragraphs] [count]
+## Lorem Ipsum Generator — Generate placeholder text.
+##
+## Generates lorem ipsum text in words, sentences, or paragraphs.
+## Useful for testing layouts and content rendering.
+##
+## # Requirements
+## - bash 4+: For array operations
+##
+## # Usage
+## lorem                       # 1 paragraph
+## lorem p 3                   # 3 paragraphs
+## lorem words 10              # 10 words
+## lorem sentences 5           # 5 sentences
+## lorem w 50                  # 50 words (short form)
+##
+## # Platform Notes
+## - All platforms: Pure bash implementation
 
 set -euo pipefail
 

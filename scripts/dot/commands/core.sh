@@ -1,6 +1,26 @@
 #!/usr/bin/env bash
-# Dotfiles CLI - Core Commands
-# apply, sync, update, add, diff, status, remove, cd, edit
+## Dotfiles Core Commands — Core chezmoi operations for the dot CLI.
+##
+## Provides apply, sync, update, add, diff, status, remove, cd, and edit
+## commands for managing dotfiles through the unified dot interface.
+##
+## # Requirements
+## - chezmoi: Dotfiles manager
+## - bash 4+: Shell interpreter
+##
+## # Usage
+## dot apply                   # Apply dotfiles
+## dot sync                    # Alias for apply
+## dot update                  # Pull and apply updates
+## dot add <file>              # Add file to chezmoi
+## dot diff                    # Show pending changes
+## dot status                  # Show configuration drift
+## dot remove <file>           # Remove managed file
+## dot cd                      # Print source directory
+## dot edit                    # Open source in editor
+##
+## # Platform Notes
+## - All platforms: Full chezmoi support
 
 set -euo pipefail
 

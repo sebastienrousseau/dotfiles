@@ -1,3 +1,20 @@
+#!/usr/bin/env bash
+## Dot Completion — Zsh completion for the dot CLI.
+##
+## Provides tab completion for all dot commands in zsh.
+## Source this file or place in a directory in $fpath.
+##
+## # Requirements
+## - zsh: Shell with completion system
+##
+## # Usage
+## # Add to .zshrc:
+## source ~/.local/bin/dot_completion
+## # Or place in fpath directory
+##
+## # Platform Notes
+## - All platforms: Zsh only
+
 #compdef dot
 
 # Zsh completion for the dot CLI
