@@ -20,13 +20,13 @@ CURLSTATUS_FN="$REPO_ROOT/.chezmoitemplates/functions/curlstatus.sh"
 CURLTIME_FN="$REPO_ROOT/.chezmoitemplates/functions/curltime.sh"
 CURLHEADER_FN="$REPO_ROOT/.chezmoitemplates/functions/curlheader.sh"
 
-test_start "lazy_template_heroku_submodule_exclusion"
-if grep -q "isHerokuSubmodule" "$LAZY_TEMPLATE"; then
+test_start "lazy_template_ecosystem_filtering"
+if grep -q "DOTFILES_ALIAS_ECOSYSTEMS" "$LAZY_TEMPLATE"; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: lazy template excludes heroku submodule files"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: lazy template supports ecosystem filtering"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: missing heroku submodule exclusion"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: missing ecosystem filtering support"
 fi
 
 test_start "interactive_safe_aliases_flag"

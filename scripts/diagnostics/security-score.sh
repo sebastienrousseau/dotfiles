@@ -1,20 +1,48 @@
 #!/usr/bin/env bash
-# Security Score Assessment
-# Usage: dot security-score [--verbose|-v] [--json]
+## Security Score Assessment.
+##
+## Evaluates system security posture across encryption, SSH, Git, system
+## hardening, and secrets management. Returns a letter grade (A+ to F) with
+## actionable recommendations.
+##
+## # Usage
+## dot security-score [--verbose|-v] [--json] [--quiet|-q]
+##
+## # Dependencies
+## - age: Encryption tool check
+## - sops: Secrets manager check
+## - gpg: Key management check
+## - git: Commit signing verification
+##
+## # Platform Notes
+## - macOS: Checks socketfilterfw, FileVault, Little Snitch
+## - Linux: Checks ufw/firewalld, LUKS encryption
+## - WSL: Checks host encryption, virtualization detection
+##
+## # Security
+## Does not modify system state. Read-only checks only.
+##
+## # Idempotency
+## Safe to run repeatedly. No side effects.
 
 set -euo pipefail
+set +o xtrace 2>/dev/null || true
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
 # Parse arguments
-VERBOSE=false
+VERBOSE=true
 JSON_OUTPUT=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --verbose | -v)
       VERBOSE=true
+      shift
+      ;;
+    --quiet | -q)
+      VERBOSE=false
       shift
       ;;
     --json)
@@ -26,6 +54,10 @@ while [[ $# -gt 0 ]]; do
 done
 
 ui_init
+NC="${NORMAL}"
+RED="${RED:-}"
+GREEN="${GREEN:-}"
+YELLOW="${YELLOW:-}"
 
 # Scoring
 TOTAL_POINTS=0
@@ -37,7 +69,6 @@ add_points() {
   local points="$2"
   local max="$3"
   local description="$4"
-  # $5 is status (pass/fail/partial) - used for icon selection below
 
   TOTAL_POINTS=$((TOTAL_POINTS + points))
   MAX_POINTS=$((MAX_POINTS + max))
@@ -45,17 +76,21 @@ add_points() {
 
   if ! $JSON_OUTPUT && $VERBOSE; then
     local icon
+    local color=""
     if [[ $points -eq $max ]]; then
       icon="✓"
+      color="$GREEN"
     elif [[ $points -gt 0 ]]; then
       icon="◐"
+      color="$YELLOW"
     else
       icon="✗"
+      color="$RED"
     fi
     if [[ "$UI_ENABLED" = "1" ]]; then
-      ui_status "$icon" "$description" "$points/$max pts"
+      ui_status "$icon" "$description" "$points/$max pts" "$color"
     else
-      printf "  ${icon} %-40s %d/%d pts\n" "$description" "$points" "$max"
+      printf "  %s %-40s %d/%d pts\n" "$icon" "$description" "$points" "$max"
     fi
   fi
 }
@@ -85,41 +120,41 @@ check_encryption() {
 
   # Age encryption tool
   if command -v age >/dev/null 2>&1; then
-    add_points "encryption" 5 5 "Age encryption installed" "pass"
+    add_points "encryption" 5 5 "Age encryption installed"
   else
-    add_points "encryption" 0 5 "Age encryption installed" "fail"
+    add_points "encryption" 0 5 "Age encryption installed"
   fi
 
   # Age key exists
   if [[ -f "${HOME}/.config/chezmoi/key.txt" ]]; then
-    add_points "encryption" 5 5 "Age encryption key present" "pass"
+    add_points "encryption" 5 5 "Age encryption key present"
 
     # Check key permissions
     local perms
     perms=$(stat -c "%a" "${HOME}/.config/chezmoi/key.txt" 2>/dev/null || stat -f "%OLp" "${HOME}/.config/chezmoi/key.txt" 2>/dev/null)
     if [[ "$perms" == "600" ]]; then
-      add_points "encryption" 5 5 "Key file permissions (600)" "pass"
+      add_points "encryption" 5 5 "Key file permissions (600)"
     else
-      add_points "encryption" 2 5 "Key file permissions (600)" "partial"
+      add_points "encryption" 2 5 "Key file permissions (600)"
     fi
   else
-    add_points "encryption" 0 10 "Age encryption configured" "fail"
+    add_points "encryption" 0 10 "Age encryption configured"
   fi
 
   # SOPS available
   if command -v sops >/dev/null 2>&1; then
-    add_points "encryption" 5 5 "SOPS secrets manager" "pass"
+    add_points "encryption" 5 5 "SOPS secrets manager"
   else
-    add_points "encryption" 0 5 "SOPS secrets manager" "fail"
+    add_points "encryption" 0 5 "SOPS secrets manager"
   fi
 
   # GPG available
   if command -v gpg >/dev/null 2>&1 && gpg --list-secret-keys 2>/dev/null | grep -q sec; then
-    add_points "encryption" 10 10 "GPG keys configured" "pass"
+    add_points "encryption" 10 10 "GPG keys configured"
   elif command -v gpg >/dev/null 2>&1; then
-    add_points "encryption" 3 10 "GPG keys configured" "partial"
+    add_points "encryption" 3 10 "GPG keys configured"
   else
-    add_points "encryption" 0 10 "GPG keys configured" "fail"
+    add_points "encryption" 0 10 "GPG keys configured"
   fi
 }
 
@@ -131,35 +166,35 @@ check_ssh() {
     local ssh_perms
     ssh_perms=$(stat -c "%a" "${HOME}/.ssh" 2>/dev/null || stat -f "%OLp" "${HOME}/.ssh" 2>/dev/null)
     if [[ "$ssh_perms" == "700" ]]; then
-      add_points "ssh" 5 5 "SSH directory permissions (700)" "pass"
+      add_points "ssh" 5 5 "SSH directory permissions (700)"
     else
-      add_points "ssh" 2 5 "SSH directory permissions (700)" "partial"
+      add_points "ssh" 2 5 "SSH directory permissions (700)"
     fi
   else
-    add_points "ssh" 0 5 "SSH directory exists" "fail"
+    add_points "ssh" 0 5 "SSH directory exists"
   fi
 
   # ED25519 key (preferred over RSA)
   if [[ -f "${HOME}/.ssh/id_ed25519" ]]; then
-    add_points "ssh" 10 10 "ED25519 SSH key (modern)" "pass"
+    add_points "ssh" 10 10 "ED25519 SSH key (modern)"
   elif [[ -f "${HOME}/.ssh/id_rsa" ]]; then
-    add_points "ssh" 5 10 "SSH key present (RSA)" "partial"
+    add_points "ssh" 5 10 "SSH key present (RSA)"
   else
-    add_points "ssh" 0 10 "SSH key present" "fail"
+    add_points "ssh" 0 10 "SSH key present"
   fi
 
   # SSH agent
   if [[ -n "${SSH_AUTH_SOCK:-}" ]] || pgrep -x ssh-agent >/dev/null 2>&1; then
-    add_points "ssh" 5 5 "SSH agent running" "pass"
+    add_points "ssh" 5 5 "SSH agent running"
   else
-    add_points "ssh" 0 5 "SSH agent running" "fail"
+    add_points "ssh" 0 5 "SSH agent running"
   fi
 
   # SSH config exists
   if [[ -f "${HOME}/.ssh/config" ]]; then
-    add_points "ssh" 5 5 "SSH config present" "pass"
+    add_points "ssh" 5 5 "SSH config present"
   else
-    add_points "ssh" 2 5 "SSH config present" "partial"
+    add_points "ssh" 2 5 "SSH config present"
   fi
 }
 
@@ -168,29 +203,29 @@ check_git() {
 
   # Git installed
   if ! command -v git >/dev/null 2>&1; then
-    add_points "git" 0 20 "Git installed" "fail"
+    add_points "git" 0 20 "Git installed"
     return
   fi
 
   # Commit signing
   if git config --global commit.gpgsign 2>/dev/null | grep -q true; then
-    add_points "git" 10 10 "Commit signing enabled" "pass"
+    add_points "git" 10 10 "Commit signing enabled"
   else
-    add_points "git" 0 10 "Commit signing enabled" "fail"
+    add_points "git" 0 10 "Commit signing enabled"
   fi
 
   # User identity configured
   if git config --global user.email >/dev/null 2>&1 && git config --global user.name >/dev/null 2>&1; then
-    add_points "git" 5 5 "Git identity configured" "pass"
+    add_points "git" 5 5 "Git identity configured"
   else
-    add_points "git" 0 5 "Git identity configured" "fail"
+    add_points "git" 0 5 "Git identity configured"
   fi
 
   # Credential helper
   if git config --global credential.helper >/dev/null 2>&1; then
-    add_points "git" 5 5 "Credential helper configured" "pass"
+    add_points "git" 5 5 "Credential helper configured"
   else
-    add_points "git" 0 5 "Credential helper configured" "fail"
+    add_points "git" 0 5 "Credential helper configured"
   fi
 }
 
@@ -200,11 +235,11 @@ check_system() {
   # Firewall (macOS or Linux)
   if [[ "$(uname)" == "Darwin" ]]; then
     if /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate 2>/dev/null | grep -q enabled; then
-      add_points "system" 5 5 "Firewall enabled" "pass"
+      add_points "system" 5 5 "Firewall enabled"
     elif pgrep -x "Little Snitch" >/dev/null 2>&1 || [[ -d "/Applications/Little Snitch.app" ]]; then
-      add_points "system" 5 5 "Firewall enabled (Little Snitch)" "pass"
+      add_points "system" 5 5 "Firewall enabled (Little Snitch)"
     else
-      add_points "system" 0 5 "Firewall enabled" "fail"
+      add_points "system" 0 5 "Firewall enabled"
     fi
   else
     # Check ufw via systemctl (doesn't need sudo) or sudo ufw status
@@ -218,41 +253,41 @@ check_system() {
     fi
 
     if $fw_enabled; then
-      add_points "system" 5 5 "Firewall enabled" "pass"
+      add_points "system" 5 5 "Firewall enabled"
     else
-      add_points "system" 0 5 "Firewall enabled" "fail"
+      add_points "system" 0 5 "Firewall enabled"
     fi
   fi
 
   # Disk encryption (LUKS, FileVault, or ecryptfs)
   if [[ "$(uname)" == "Darwin" ]]; then
     if fdesetup status 2>/dev/null | grep -q "FileVault is On"; then
-      add_points "system" 10 10 "Disk encryption (FileVault)" "pass"
+      add_points "system" 10 10 "Disk encryption (FileVault)"
     else
-      add_points "system" 0 10 "Disk encryption (FileVault)" "fail"
+      add_points "system" 0 10 "Disk encryption (FileVault)"
     fi
   else
     local encryption_found=false
     # Check LUKS
     if lsblk 2>/dev/null | grep -q crypt || [[ -d /sys/block/dm-0 ]]; then
       encryption_found=true
-      add_points "system" 10 10 "Disk encryption (LUKS)" "pass"
+      add_points "system" 10 10 "Disk encryption (LUKS)"
     # Check Apple T2 chip (hardware SSD encryption)
     elif lspci 2>/dev/null | grep -qi "T2.*Secure Enclave"; then
       encryption_found=true
-      add_points "system" 10 10 "Hardware encryption (Apple T2)" "pass"
+      add_points "system" 10 10 "Hardware encryption (Apple T2)"
     # Check ecryptfs (encrypted home)
     elif mount 2>/dev/null | grep -q ecryptfs || [[ -d "$HOME/.ecryptfs" ]]; then
       encryption_found=true
-      add_points "system" 10 10 "Home encryption (ecryptfs)" "pass"
+      add_points "system" 10 10 "Home encryption (ecryptfs)"
     # Check if running in encrypted VM/container
     elif [[ -f /sys/class/dmi/id/product_name ]] && grep -qiE "virtual|vmware|kvm|qemu" /sys/class/dmi/id/product_name 2>/dev/null; then
       encryption_found=true
-      add_points "system" 10 10 "Virtualized (host encryption)" "pass"
+      add_points "system" 10 10 "Virtualized (host encryption)"
     fi
 
     if ! $encryption_found; then
-      add_points "system" 0 10 "Disk encryption" "unknown"
+      add_points "system" 0 10 "Disk encryption"
     fi
   fi
 }
@@ -263,25 +298,29 @@ check_secrets() {
   # No secrets in dotfiles repo
   if [[ -d "${HOME}/.dotfiles" ]]; then
     local secrets_found=false
-    # Check for common secret patterns
-    if grep -rE "(api_key|api_secret|password|token)\\s*=\\s*['\"][^'\"]+['\"]" "${HOME}/.dotfiles" --include="*.sh" --include="*.zsh" --include="*.toml" 2>/dev/null | grep -v "example\|template\|placeholder" | head -1; then
+    local match=""
+    # Check for common secret patterns, ignore templates/placeholders and variable expansions.
+    match=$(grep -rE "(api_key|api_secret|password|token)[[:space:]]*=[[:space:]]*['\"][^'\"]+['\"]" \
+      "${HOME}/.dotfiles" --include="*.sh" --include="*.zsh" --include="*.toml" 2>/dev/null |
+      grep -v "example\\|template\\|placeholder" | grep -F -v "\${" | head -1 || true)
+    if [[ -n "$match" ]]; then
       secrets_found=true
     fi
 
     if $secrets_found; then
-      add_points "secrets" 0 5 "No hardcoded secrets" "fail"
+      add_points "secrets" 0 5 "No hardcoded secrets"
     else
-      add_points "secrets" 5 5 "No hardcoded secrets" "pass"
+      add_points "secrets" 5 5 "No hardcoded secrets"
     fi
   else
-    add_points "secrets" 5 5 "No hardcoded secrets" "pass"
+    add_points "secrets" 5 5 "No hardcoded secrets"
   fi
 
   # Environment variables for secrets
   if [[ -f "${HOME}/.config/secrets/api-keys.env" ]] || [[ -d "${HOME}/.config/secrets" ]]; then
-    add_points "secrets" 5 5 "Secrets in dedicated location" "pass"
+    add_points "secrets" 5 5 "Secrets in dedicated location"
   else
-    add_points "secrets" 2 5 "Secrets management setup" "partial"
+    add_points "secrets" 2 5 "Secrets management setup"
   fi
 }
 
@@ -311,12 +350,16 @@ print_summary() {
   ui_header "Security Score"
   echo ""
 
-  # Score bar
-  local bar_width=30
+  local bar_width=28
   local filled=$((score * bar_width / 100))
   local empty=$((bar_width - filled))
+  local block="█"
+  local pad="░"
 
-  printf "  Score: ["
+  local grade
+  grade=$(get_grade $score)
+
+  printf "  Score: "
   if [[ $score -ge 80 ]]; then
     printf '%s' "${GREEN}"
   elif [[ $score -ge 60 ]]; then
@@ -324,20 +367,10 @@ print_summary() {
   else
     printf '%s' "${RED}"
   fi
-  printf "%${filled}s" | tr ' ' '█'
+  printf "%${filled}s" | tr ' ' "$block"
   printf '%s' "${NC}"
-  printf "%${empty}s" | tr ' ' '░'
-  printf "] "
-
-  # Grade
-  local grade
-  grade=$(get_grade $score)
-  case "$grade" in
-    A*) echo -e "${GREEN}${score}%  Grade: ${grade}${NC}" ;;
-    B*) echo -e "${GREEN}${score}%  Grade: ${grade}${NC}" ;;
-    C*) echo -e "${YELLOW}${score}%  Grade: ${grade}${NC}" ;;
-    *) echo -e "${RED}${score}%  Grade: ${grade}${NC}" ;;
-  esac
+  printf "%${empty}s" | tr ' ' "$pad"
+  printf " %s%%  Grade: %s\n" "${score}" "${grade}"
 
   echo -e "\n  Points: ${TOTAL_POINTS}/${MAX_POINTS}"
   echo ""
@@ -345,18 +378,17 @@ print_summary() {
   # Recommendations
   if [[ $score -lt 100 ]]; then
     ui_header "Recommendations"
-
     if ! command -v age >/dev/null 2>&1; then
-      echo "  • Install age for encryption: brew install age"
+      ui_bullet "Install age for encryption: brew install age"
     fi
     if ! command -v sops >/dev/null 2>&1; then
-      echo "  • Install SOPS for secrets: brew install sops"
+      ui_bullet "Install SOPS for secrets: brew install sops"
     fi
     if ! git config --global commit.gpgsign 2>/dev/null | grep -q true; then
-      echo "  • Enable commit signing: git config --global commit.gpgsign true"
+      ui_bullet "Enable commit signing: git config --global commit.gpgsign true"
     fi
     if [[ ! -f "${HOME}/.ssh/id_ed25519" ]]; then
-      echo "  • Generate ED25519 SSH key: ssh-keygen -t ed25519"
+      ui_bullet "Generate ED25519 SSH key: ssh-keygen -t ed25519"
     fi
     echo ""
   fi

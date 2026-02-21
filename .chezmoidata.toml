@@ -116,3 +116,36 @@ claude_model = "claude-3-5-sonnet-latest"
 openai_model = "gpt-4-turbo-preview"
 # Local model for offline use
 local_model = "llama3.2"
+
+# ============================================================================
+# Alias Buckets (per-machine toggle support)
+# ============================================================================
+#
+# Override these in ~/.config/chezmoi/chezmoi.toml under [data.aliases.buckets]
+# to enable/disable alias groups per host.
+#
+# Example:
+# [data.aliases.buckets]
+# system = false
+# svn = false
+[aliases.buckets]
+system = true
+svn = true
+
+[aliases.policy]
+# When true:
+# - destructive aliases require explicit confirmation
+# - chezmoi apply runs alias governance in strict mode first
+strict_mode = false
+
+# ============================================================================
+# Secrets Policy & Buckets
+# ============================================================================
+[secrets.policy]
+# auto | macos-keychain | pass | plain-enc
+provider = "auto"
+auto_load = true
+
+[secrets.buckets]
+ai = ["GEMINI_API_KEY", "CLAUDE_API_KEY", "OPENAI_API_KEY"]
+infra = ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "GITHUB_TOKEN"]

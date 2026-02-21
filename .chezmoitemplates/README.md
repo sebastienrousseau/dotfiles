@@ -5,9 +5,9 @@
   align="right"
 />
 
-# Chezmoi Templates (v0.2.482)
+# Chezmoi Templates (v0.2.487)
 
-Simply designed to fit your shell life
+Modular shell configuration for macOS, Linux, and WSL.
 
 ![Dotfiles banner](https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg)
 

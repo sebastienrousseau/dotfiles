@@ -140,12 +140,20 @@ ensure_chezmoi_source() {
 apply_chezmoi() {
   local source_dir="$1"
   local non_interactive="${2:-0}"
+  local governance_script
 
   ensure_chezmoi_source "$source_dir"
 
   local apply_flags=()
   if [ "$non_interactive" = "1" ]; then
     apply_flags=(--force --no-tty)
+  fi
+
+  if [ "${DOTFILES_ALIAS_STRICT_MODE:-0}" = "1" ]; then
+    governance_script="$source_dir/scripts/diagnostics/alias-governance.sh"
+    if [ -f "$governance_script" ]; then
+      DOTFILES_ALIAS_POLICY=strict bash "$governance_script"
+    fi
   fi
 
   chezmoi apply "${apply_flags[@]}"

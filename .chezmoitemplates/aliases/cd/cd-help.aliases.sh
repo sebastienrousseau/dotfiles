@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 # CD Navigation - Help and Documentation
-[[ -n "${_CD_HELP_LOADED:-}" ]] && return 0
+[[ -n "${_CD_HELP_LOADED:-}" ]] && :
 _CD_HELP_LOADED=1
 
 # Display help information

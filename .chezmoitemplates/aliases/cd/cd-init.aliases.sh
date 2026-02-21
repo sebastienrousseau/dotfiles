@@ -1,11 +1,16 @@
 # shellcheck shell=bash
 # CD Navigation - Initialization
-[[ -n "${_CD_INIT_LOADED:-}" ]] && return 0
+[[ -n "${_CD_INIT_LOADED:-}" ]] && :
 _CD_INIT_LOADED=1
 
 # Consistent Shorthand Aliases
-alias cd='cd_with_history' # Override default cd command
-alias mcd='mkcd'           # Create and enter directory
+# Keep `cd` override opt-in to avoid surprising behavior in scripts/sessions.
+if [[ "${DOTFILES_ENABLE_CD_ALIAS:-0}" == "1" ]]; then
+  alias cd='cd_with_history' # Override default cd command
+else
+  alias cdh='cd_with_history' # Explicit enhanced cd helper
+fi
+alias mcd='mkcd' # Create and enter directory
 
 # Bookmark management
 alias bm='bookmark'         # Create bookmark

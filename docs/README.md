@@ -40,6 +40,7 @@ Welcome to the dotfiles documentation. This guide will help you install, configu
 
 ### Configuration
 - [Aliases Reference](ALIASES.md) — Shell aliases and shortcuts
+- [Alias Deprecations](ALIASES_DEPRECATIONS.md) — Legacy aliases and removals
 - [Keybindings](KEYS.md) — Keyboard shortcuts catalog
 - [Tools Reference](TOOLS.md) — Installed tools and utilities
 - [Utilities](UTILS.md) — Helper scripts and functions
@@ -99,6 +100,8 @@ After installation, run these commands to explore:
 ```bash
 dot help          # Show all available commands
 dot doctor        # Check system health
+dot scorecard     # Unified health/security/performance view
+dot perf          # Predictable startup profiling
 dot verify        # Post-merge verification checks
 dot learn         # Interactive tour
 dot keys          # View keybindings
@@ -191,7 +194,7 @@ dot <command> [args]
      ├── diagnostics.sh # doctor, heal, benchmark
      ├── tools.sh       # tools, new, packages
      ├── appearance.sh  # theme, fonts, wallpaper
-     ├── secrets.sh     # secrets-init, secrets
+     ├── secrets.sh     # secrets-init, secrets, env load
      ├── security.sh    # firewall, backup, encrypt
      └── meta.sh        # upgrade, docs, learn
 ```
@@ -206,11 +209,12 @@ Security is a core principle, not an afterthought.
 
 ```bash
 dot secrets-init    # Initialize age encryption
-dot secrets         # Edit encrypted secrets
+dot secrets         # Manage secrets (edit|set|get|list|load|provider)
+dot env load ai     # Print export lines for ai bucket
 dot ssh-key         # Encrypt SSH keys
 ```
 
-Secrets are encrypted with [age](https://age-encryption.org/) and never stored in plaintext.
+Secrets use provider-aware storage (macOS Keychain, `pass`, or age-encrypted fallback) and never store plaintext in-repo.
 
 ### Credential Management
 
@@ -267,6 +271,6 @@ RUN_INTEGRATION=1 ./scripts/tests/framework/test_runner.sh  # Integration
 
 **[Back to Top](#dotfiles-documentation)**
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [Sebastien Rousseau](https://sebastienrousseau.com)
 
 </div>

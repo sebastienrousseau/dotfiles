@@ -1,13 +1,46 @@
 #!/usr/bin/env bash
-# Universal Dotfiles Installer (Zero-Dependency)
-# Usage: sh -c "$(curl -fsSL https://dotfiles.io/install.sh)"
-# (or ./install.sh locally)
-#
-# This installer uses modular libraries from install/lib/:
-#   - os_detection.sh    : OS and architecture detection
-#   - package_managers.sh: Package manager bootstrapping
-#   - backup.sh          : Dotfile backup functionality
-#   - chezmoi.sh         : Chezmoi installation and configuration
+## Universal Dotfiles Installer.
+##
+## Bootstrap dotfiles environment from scratch with zero dependencies beyond
+## curl and git. Detects OS, installs Chezmoi, backs up existing dotfiles,
+## and applies the configuration.
+##
+## # Usage
+## sh -c "$(curl -fsSL https://dotfiles.io/install.sh)"
+## ./install.sh [version]
+## DOTFILES_NONINTERACTIVE=1 ./install.sh
+##
+## # Dependencies
+## - curl: Download installer (required)
+## - git: Clone repository (required)
+##
+## # Modular Libraries
+## | Library | Purpose |
+## |---------|---------|
+## | install/lib/os_detection.sh | OS and architecture detection |
+## | install/lib/package_managers.sh | Homebrew, apt bootstrapping |
+## | install/lib/backup.sh | Existing dotfile backup |
+## | install/lib/chezmoi.sh | Chezmoi install and config |
+##
+## # Platform Notes
+## ### Platform: macOS
+## - Installs Homebrew if missing
+## - Supports Apple Silicon and Intel
+##
+## ### Platform: Linux
+## - Supports Debian/Ubuntu (apt)
+## - Auto-detects package manager
+##
+## ### Platform: WSL
+## - Full Linux support
+## - Handles Windows filesystem interop
+##
+## # Security
+## - Verifies Chezmoi checksum before install
+## - Backs up existing files to ~/.dotfiles.bak.<timestamp>
+##
+## # Idempotency
+## Safe to run repeatedly. Skips already-installed components.
 
 set -euo pipefail
 
@@ -15,7 +48,7 @@ set -euo pipefail
 # Configuration
 # =============================================================================
 
-VERSION="${1:-v0.2.482}"
+VERSION="${1:-v0.2.487}"
 REPO_URL="https://github.com/sebastienrousseau/dotfiles.git"
 SOURCE_DIR="$HOME/.dotfiles"
 LEGACY_SOURCE_DIR="$HOME/.local/share/chezmoi"

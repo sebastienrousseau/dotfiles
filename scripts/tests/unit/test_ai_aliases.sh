@@ -106,7 +106,6 @@ mock_command "ollama" "ollama version 1.0.0" 0
   alias olr >/dev/null 2>&1 && echo "olr_defined"
   alias oll >/dev/null 2>&1 && echo "oll_defined"
   alias olp >/dev/null 2>&1 && echo "olp_defined"
-  alias ollama-status >/dev/null 2>&1 && echo "ollama_status_defined"
   alias ollama-show >/dev/null 2>&1 && echo "ollama_show_defined"
 ) >/tmp/test_output
 
@@ -114,7 +113,6 @@ assert_file_contains "/tmp/test_output" "ol_defined" "ol alias should be defined
 assert_file_contains "/tmp/test_output" "olr_defined" "olr alias should be defined when ollama available"
 assert_file_contains "/tmp/test_output" "oll_defined" "oll alias should be defined when ollama available"
 assert_file_contains "/tmp/test_output" "olp_defined" "olp alias should be defined when ollama available"
-assert_file_contains "/tmp/test_output" "ollama_status_defined" "ollama-status alias should be defined when ollama available"
 assert_file_contains "/tmp/test_output" "ollama_show_defined" "ollama-show alias should be defined when ollama available"
 
 rm -f /tmp/test_output
@@ -133,7 +131,6 @@ mock_init
   alias olr >/dev/null 2>&1 || echo "olr_not_defined"
   alias oll >/dev/null 2>&1 || echo "oll_not_defined"
   alias olp >/dev/null 2>&1 || echo "olp_not_defined"
-  alias ollama-status >/dev/null 2>&1 || echo "ollama_status_not_defined"
   alias ollama-show >/dev/null 2>&1 || echo "ollama_show_not_defined"
 ) >/tmp/test_output
 
@@ -141,7 +138,6 @@ assert_file_contains "/tmp/test_output" "ol_not_defined" "ol alias should not be
 assert_file_contains "/tmp/test_output" "olr_not_defined" "olr alias should not be defined when ollama unavailable"
 assert_file_contains "/tmp/test_output" "oll_not_defined" "oll alias should not be defined when ollama unavailable"
 assert_file_contains "/tmp/test_output" "olp_not_defined" "olp alias should not be defined when ollama unavailable"
-assert_file_contains "/tmp/test_output" "ollama_status_not_defined" "ollama-status alias should not be defined when ollama unavailable"
 assert_file_contains "/tmp/test_output" "ollama_show_not_defined" "ollama-show alias should not be defined when ollama unavailable"
 
 rm -f /tmp/test_output

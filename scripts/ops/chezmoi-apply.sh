@@ -55,7 +55,23 @@ run_step() {
 }
 
 ui_header "Applying dotfiles"
+if [[ "${DOTFILES_ALIAS_STRICT_MODE:-0}" == "1" ]]; then
+  governance_script="$SCRIPT_DIR/../diagnostics/alias-governance.sh"
+  if [[ -f "$governance_script" ]]; then
+    run_step "Alias governance (strict)" env DOTFILES_ALIAS_POLICY=strict bash "$governance_script"
+  fi
+fi
 run_step "Chezmoi apply" chezmoi apply "${args[@]}"
+
+if [[ "${DOTFILES_SNAPSHOT_ON_APPLY:-1}" = "1" ]]; then
+  snapshot_script="$SCRIPT_DIR/../diagnostics/snapshot.sh"
+  snapshot_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/snapshots"
+  snapshot_file="${snapshot_dir}/baseline.json"
+  if [[ -f "$snapshot_script" && ! -f "$snapshot_file" ]]; then
+    mkdir -p "$snapshot_dir"
+    bash "$snapshot_script" --baseline >/dev/null 2>&1 || true
+  fi
+fi
 
 check_ai_cli() {
   local name="$1"

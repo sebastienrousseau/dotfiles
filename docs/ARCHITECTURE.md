@@ -1,13 +1,13 @@
 # How it works
 
-v0.2.485 constitutes a portable **shell distribution** that `chezmoi` manages. This document outlines the core architectural decisions and system design.
+A portable **shell distribution** managed by Chezmoi (dotfiles manager with Git-backed source state). This document covers core architecture and design.
 
-## Core philosophy
+## Core Philosophy
 
-- **XDG-first**: Configuration strictly maps to `~/.config/` (XDG Base Directory specification). This approach avoids `~/.foo` file sprawl in the home directory.
-- **Single entrypoint**: `dot_zshenv` acts as the bootloader. Zsh loads it immediately and sets up the environment (XDG variables, PATH) before any other initialization runs.
-- **Zero-dependency bootstrap**: The installation process relies only on `curl` and `git` (and `chezmoi`, which the installer fetches automatically).
-- **Lazy-by-default**: Heavy tooling (fnm, nvm, SDKMAN, tool-specific aliases) is deferred until first use or after the first prompt to keep shell startup fast.
+- **XDG-first** — Configuration maps to `~/.config/` per the XDG Base Directory spec. No `~/.foo` sprawl.
+- **Single entrypoint** — `dot_zshenv` boots the environment. Zsh loads it first, setting XDG variables and PATH before other init.
+- **Zero-dependency bootstrap** — Installation needs only `curl` and `git`. Chezmoi downloads automatically.
+- **Lazy-by-default** — Heavy tools (fnm, nvm, SDKMAN, tool-specific aliases) defer until first use or after the first prompt.
 
 ## Architecture diagram
 

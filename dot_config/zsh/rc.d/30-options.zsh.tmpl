@@ -98,6 +98,35 @@ fi
 autoload -Uz compinit add-zsh-hook
 _deferred_compinit() {
   add-zsh-hook -d precmd _deferred_compinit
+  local _zinit_completions="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/completions"
+  if [[ -d "$_zinit_completions" ]]; then
+    local _c
+    for _c in "$_zinit_completions"/_*; do
+      [[ -L "$_c" && ! -e "$_c" ]] && rm -f "$_c"
+    done
+  fi
+  local _compdump="${ZDOTDIR}/.zcompdump"
+  if [[ -f "$_compdump" ]]; then
+    local _missing=""
+    local _line
+    while IFS= read -r _line; do
+      [[ "$_line" == "#files:"* ]] || continue
+      _line="${_line#\#files: }"
+      local -a _files
+      _files=(${(z)_line})
+      local _f
+      for _f in "${_files[@]}"; do
+        if [[ ! -e "$_f" ]]; then
+          _missing=1
+          break
+        fi
+      done
+      [[ -n "$_missing" ]] && break
+    done < "$_compdump"
+    if [[ -n "$_missing" ]]; then
+      rm -f "$_compdump" "${_compdump}.zwc"
+    fi
+  fi
   if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
     compinit
   else

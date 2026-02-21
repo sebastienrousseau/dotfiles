@@ -9,7 +9,14 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   # alias clds='find . -type f -name "*.DS_Store" -ls -delete'
   alias cleanup_dsstore='find . -type f -name "*.DS_Store" -ls -delete'
 
-  alias emptytrash='rm -rf ~/.Trash/*'
+  emptytrash() {
+    if [[ "${DOTFILES_ENABLE_DANGEROUS_ALIASES:-0}" != "1" ]]; then
+      echo "Refusing to empty trash: set DOTFILES_ENABLE_DANGEROUS_ALIASES=1" >&2
+      return 1
+    fi
+    dot_confirm_destructive "rm -rf ${HOME}/.Trash/* (emptytrash)" || return 1
+    rm -rf "${HOME}/.Trash/"*
+  }
 
   # Hide/Show Hidden Files
   alias finder_hide='defaults write com.apple.finder ShowAllFiles FALSE; killall Finder'
@@ -40,7 +47,12 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   alias iphone='open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app'
 
   # Clean Xcode DerivedData
-  alias cleanup_xcode='rm -rf ~/Library/Developer/Xcode/DerivedData/*'
+  if [[ "${DOTFILES_ENABLE_DANGEROUS_ALIASES:-0}" == "1" ]]; then
+    cleanup_xcode() {
+      dot_confirm_destructive "rm -rf ~/Library/Developer/Xcode/DerivedData/*" || return 1
+      rm -rf ~/Library/Developer/Xcode/DerivedData/*
+    }
+  fi
 
   # --- Misc ---
 

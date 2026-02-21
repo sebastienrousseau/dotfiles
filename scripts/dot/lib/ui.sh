@@ -1,5 +1,27 @@
 #!/usr/bin/env bash
-# Dotfiles CLI UI Helpers
+## Dotfiles CLI UI Helpers.
+##
+## Provides terminal UI primitives for consistent output formatting across
+## all dot CLI commands. Detects gum availability, color support, and UTF-8
+## capability to render appropriate output.
+##
+## # Dependencies
+## - gum (optional): Enhanced TUI rendering
+## - tput (coreutils): Color detection
+##
+## # Platform Notes
+## - macOS: Full support via Homebrew gum
+## - Linux: Full support via snap/go installed gum
+## - WSL: Works with Windows Terminal color passthrough
+##
+## # Usage
+## source "$SCRIPT_DIR/lib/ui.sh"
+## ui_init
+## ui_header "Section Title"
+## ui_ok "Operation succeeded"
+##
+## # Idempotency
+## Safe to source multiple times. ui_init() is guarded.
 
 UI_ENABLED=0
 UI_INITED=0

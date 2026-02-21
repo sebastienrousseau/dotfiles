@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 # CD Navigation - Bookmark Functions
-[[ -n "${_CD_BOOKMARKS_LOADED:-}" ]] && return 0
+[[ -n "${_CD_BOOKMARKS_LOADED:-}" ]] && :
 _CD_BOOKMARKS_LOADED=1
 
 # List all bookmarks

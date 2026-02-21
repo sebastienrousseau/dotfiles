@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 # CD Navigation - Configuration and Variables
-[[ -n "${_CD_CONFIG_LOADED:-}" ]] && return 0
+[[ -n "${_CD_CONFIG_LOADED:-}" ]] && :
 _CD_CONFIG_LOADED=1
 
 # Script configuration and version (exported: used by other cd-*.aliases.sh modules)

@@ -4,12 +4,14 @@
 [settings]
 # Install missing tools automatically
 auto_install = true
+# Ensure mise tool paths/shims are placed ahead of system PATH
+activate_aggressive = true
 # Use verbose output
 verbose = false
 
 [tools]
-# Node.js - use fnm for faster switching
-# node = "lts"
+# Node.js
+node = "lts"
 
 # Python
 python = ["3.12", "3.11"]

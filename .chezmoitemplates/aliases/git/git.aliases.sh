@@ -10,6 +10,32 @@
 
 if command -v git &>/dev/null; then
 
+  git_default_branch() {
+    git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's#^origin/##'
+  }
+
+  git_primary_branch() {
+    local b
+    b="$(git_default_branch)"
+    if [[ -n "$b" ]]; then
+      printf "%s\n" "$b"
+      return
+    fi
+    if git show-ref --verify --quiet refs/heads/main; then
+      printf "main\n"
+      return
+    fi
+    if git show-ref --verify --quiet refs/heads/master; then
+      printf "master\n"
+      return
+    fi
+    printf "main\n"
+  }
+
+  git_current_branch() {
+    git branch --show-current 2>/dev/null || git rev-parse --abbrev-ref HEAD 2>/dev/null
+  }
+
   # --- Core ---
   alias g='git'
   alias gconfdiff='git config alias.dcolor "diff --color-words"'
@@ -38,9 +64,8 @@ if command -v git &>/dev/null; then
   alias gst='git status'
   alias gsts='git status --short'
   alias gstsb='git status --short --branch'
-  alias st='git status'
 
-  alias gsta='git stash save '
+  alias gsta='git stash push -m '
   alias gstp='git stash pop'
   alias gstd='git stash drop'
 
@@ -82,21 +107,36 @@ if command -v git &>/dev/null; then
   alias gbrd='git branch -d -r'
   alias gbrsb='git show-branch'
   alias gswb='git switch'
-  alias br='git branch'
 
-  alias gcode='git checkout main && git branch --merged | xargs git branch --delete'
-  alias gcom='git checkout main && git fetch origin --prune && git reset --hard origin/main'
-  alias co='git checkout'
+  gcode() {
+    local branch
+    branch="$(git_primary_branch)"
+    git checkout "$branch" && git branch --merged | xargs git branch --delete
+  }
+  if [[ "${DOTFILES_ENABLE_DANGEROUS_ALIASES:-0}" == "1" ]]; then
+    gcom() {
+      local branch
+      branch="$(git_primary_branch)"
+      dot_confirm_destructive "git checkout ${branch} && git fetch --prune && git reset --hard origin/${branch}" || return 1
+      git checkout "$branch" && git fetch origin --prune && git reset --hard "origin/$branch"
+    }
+  fi
 
   # --- Remotes & Comparison ---
   alias gf='git fetch'
   alias gp='git pull'
   alias gph='git push'
   alias gpo='git push origin'
-  alias gpb='git push --set-upstream origin $(git branch --show-current)'
+  gpb() {
+    local branch
+    branch="$(git_current_branch)"
+    if [[ -z "$branch" ]]; then
+      echo "Unable to determine current branch." >&2
+      return 1
+    fi
+    git push --set-upstream origin "$branch"
+  }
   alias gpoll='git push origin --all'
-  alias gpull='git pull'
-  alias gpush='git push'
 
   # TUI Git
   if command -v lazygit &>/dev/null; then
@@ -115,9 +155,20 @@ if command -v git &>/dev/null; then
   alias grb='git rebase'
   alias grbk='git reset --soft HEAD^'
 
-  alias grescl='git reset --hard HEAD~1 && git clean -fd'
-  alias gresh='git reset --hard HEAD~1'
-  alias gresp='git reset --hard && git clean -ffdx'
+  if [[ "${DOTFILES_ENABLE_DANGEROUS_ALIASES:-0}" == "1" ]]; then
+    grescl() {
+      dot_confirm_destructive "git reset --hard HEAD~1 && git clean -fd" || return 1
+      git reset --hard HEAD~1 && git clean -fd
+    }
+    gresh() {
+      dot_confirm_destructive "git reset --hard HEAD~1" || return 1
+      git reset --hard HEAD~1
+    }
+    gresp() {
+      dot_confirm_destructive "git reset --hard && git clean -ffd" || return 1
+      git reset --hard && git clean -ffd
+    }
+  fi
   alias gress='git reset --soft HEAD~1'
 
   # --- Submodules ---
@@ -132,6 +183,11 @@ if command -v git &>/dev/null; then
   # --- Tools ---
   alias gg='git grep'
   alias gbs='git bisect'
-  alias undopush="git push -f origin HEAD^:master"
+  if [[ "${DOTFILES_ENABLE_DANGEROUS_ALIASES:-0}" == "1" ]]; then
+    undopush() {
+      dot_confirm_destructive "git push -f origin HEAD^:master" || return 1
+      git push -f origin HEAD^:master
+    }
+  fi
 
 fi
