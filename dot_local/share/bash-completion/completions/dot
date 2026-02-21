@@ -9,7 +9,7 @@ _dot_completions() {
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
     # Main commands
-    commands="apply sync update add diff status remove cd drift verify history doctor keys tools aliases sandbox benchmark tune secrets env secrets-init secrets-create ssh-key firewall telemetry dns-doh encrypt-check backup lock-screen usb-safety fonts wallpaper theme upgrade edit docs new log-rotate learn --version help"
+    commands="apply sync update add diff status remove cd drift verify history doctor heal health security-score scorecard perf conflicts locks snapshot keys tools aliases sandbox benchmark tune secrets env secrets-init secrets-create ssh-key firewall telemetry dns-doh encrypt-check backup lock-screen usb-safety fonts wallpaper theme upgrade edit docs new log-rotate setup learn --version help"
 
     # Subcommand completions
     case "${prev}" in

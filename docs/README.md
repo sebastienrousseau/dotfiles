@@ -100,6 +100,8 @@ After installation, run these commands to explore:
 ```bash
 dot help          # Show all available commands
 dot doctor        # Check system health
+dot scorecard     # Unified health/security/performance view
+dot perf          # Predictable startup profiling
 dot verify        # Post-merge verification checks
 dot learn         # Interactive tour
 dot keys          # View keybindings

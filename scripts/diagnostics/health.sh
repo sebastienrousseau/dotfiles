@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Dotfiles Health Check Dashboard
-# Usage: dot health [--verbose|-v] [--json]
+# Usage: dot health [--verbose|-v] [--json] [--fix] [--force]
 
 set -euo pipefail
 
@@ -20,10 +20,20 @@ NC='\033[0m'
 # Parse arguments (VERBOSE exported for potential use by sourced scripts)
 export VERBOSE=false
 JSON_OUTPUT=false
+APPLY_FIX=false
+FORCE_FIX=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --verbose | -v)
       VERBOSE=true
+      shift
+      ;;
+    --fix)
+      APPLY_FIX=true
+      shift
+      ;;
+    --force)
+      FORCE_FIX=true
       shift
       ;;
     --json)
@@ -33,6 +43,15 @@ while [[ $# -gt 0 ]]; do
     *) shift ;;
   esac
 done
+
+reset_stats() {
+  unset RESULTS
+  declare -A RESULTS
+  TOTAL_CHECKS=0
+  PASSED_CHECKS=0
+  WARNINGS=0
+  FAILURES=0
+}
 
 # Health check results
 declare -A RESULTS
@@ -419,9 +438,33 @@ print_summary() {
   fi
 
   echo ""
+  if [[ $WARNINGS -gt 0 || $FAILURES -gt 0 ]]; then
+    echo -e "  ${CYAN}Tip:${NC} Run 'dot health --fix' to auto-repair common issues."
+    echo ""
+  fi
 }
 
 # Main
 print_header
 run_checks
+if $APPLY_FIX; then
+  if ! $JSON_OUTPUT; then
+    header "Auto-Remediation"
+    echo ""
+  fi
+  heal_script="$SCRIPT_DIR/../ops/heal.sh"
+  if [[ -f "$heal_script" ]]; then
+    if $FORCE_FIX; then
+      bash "$heal_script" --force || true
+    else
+      bash "$heal_script" || true
+    fi
+  else
+    if ! $JSON_OUTPUT; then
+      echo -e "${YELLOW}⚠${NC} heal.sh not found, skipping auto-fix."
+    fi
+  fi
+  reset_stats
+  run_checks
+fi
 print_summary

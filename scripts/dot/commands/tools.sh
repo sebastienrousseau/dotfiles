@@ -204,6 +204,10 @@ emit_alias_manifest() {
   bash "$manifest"
 }
 
+cmd_setup() {
+  run_script "scripts/ops/setup.sh" "Setup script" "$@"
+}
+
 cmd_aliases() {
   local subcommand="${1:-list}"
   shift || true
@@ -587,6 +591,10 @@ case "${1:-}" in
   log-rotate)
     shift
     cmd_log_rotate "$@"
+    ;;
+  setup)
+    shift
+    cmd_setup "$@"
     ;;
   aliases)
     shift

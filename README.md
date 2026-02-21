@@ -59,6 +59,17 @@ This is **infrastructure**, not an ad‑hoc shell script.
 
 ---
 
+## Verification (CI Seal)
+
+Every change is verified across macOS and Linux CI with security scanners, lint, and unit tests. Locally, you can validate your machine in one pass:
+
+```bash
+dot scorecard
+dot verify
+```
+
+---
+
 ## Get started
 
 > [!IMPORTANT]
@@ -139,6 +150,11 @@ Run `dot --help` or `dot <command> --help` for inline documentation.
 | `dot verify` | Post-merge verification (`dot doctor`, `dot status`, `chezmoi diff`) | Diagnostics |
 | `dot health` | Comprehensive health dashboard (37 checks) | Diagnostics |
 | `dot security-score` | Security assessment with grading | Diagnostics |
+| `dot scorecard` | Unified health/security/performance scorecard | Diagnostics |
+| `dot perf` | Predictable startup profiling (3-run average) | Diagnostics |
+| `dot conflicts` | Report alias/command conflicts | Diagnostics |
+| `dot locks` | Show version locks for key tools | Diagnostics |
+| `dot snapshot` | Capture baseline system snapshot | Diagnostics |
 | `dot benchmark` | Shell startup benchmark (`--detailed`, `--profile`) | Diagnostics |
 | `dot restore` | Restore from backup or git ref | Diagnostics |
 | `dot theme` | Switch terminal theme (dark/light) | UX |
@@ -153,6 +169,7 @@ Run `dot --help` or `dot <command> --help` for inline documentation.
 | `dot tools install` | Enter Nix development shell | Tools |
 | `dot new` | Create a new project from a template | Tools |
 | `dot log-rotate` | Rotate `~/.local/share/dotfiles.log` | Tools |
+| `dot setup` | Interactive setup (profile, features, secrets) | Tools |
 | `dot secrets-init` | Initialise age key for secrets | Secrets |
 | `dot secrets` | Manage secrets (`edit|set|get|list|load|provider`) | Secrets |
 | `dot env load <bucket>` | Emit shell exports for a secrets bucket | Secrets |

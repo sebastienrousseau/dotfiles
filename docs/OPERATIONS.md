@@ -59,6 +59,12 @@ dot apply
 ```
 *Triggers: `dot_zshrc` reload, audit logging.*
 
+### Async updates
+Run updates in the background and get a status banner on the next shell launch:
+```bash
+dot update --async
+```
+
 ### Roll back
 If an update breaks your setup, revert:
 ```bash
@@ -74,17 +80,28 @@ If something runs slow or appears broken:
    ```bash
    dot doctor
    ```
-2. **Run post-merge verification**:
+   ```bash
+   dot health --fix
+   ```
+2. **Scorecard**:
+   ```bash
+   dot scorecard
+   ```
+3. **Startup profiling**:
+   ```bash
+   dot perf --profile
+   ```
+4. **Run post-merge verification**:
    ```bash
    dot verify
    ```
-3. **Inspect alias behavior**:
+5. **Inspect alias behavior**:
    ```bash
    dot aliases list
    dot aliases why dprune
    DOTFILES_ALIAS_POLICY=strict bash ~/.dotfiles/scripts/diagnostics/alias-governance.sh
    ```
-4. **Verbose mode**:
+6. **Verbose mode**:
    ```bash
    DOTFILES_DEBUG=1 dot apply
    ```

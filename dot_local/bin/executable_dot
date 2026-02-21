@@ -71,8 +71,13 @@ show_help() {
     ui_section "Diagnostics"
     cmd_line "doctor" "Check system health and configuration"
     cmd_line "heal" "Auto-repair common dotfiles issues"
-    cmd_line "health" "Run comprehensive health dashboard"
+    cmd_line "health" "Run comprehensive health dashboard (--fix supported)"
     cmd_line "security-score" "Security assessment with grading"
+    cmd_line "scorecard" "Unified health/security/performance scorecard"
+    cmd_line "perf" "Predictable startup profiling (3-run average)"
+    cmd_line "conflicts" "Report alias/command conflicts"
+    cmd_line "locks" "Show version locks for key tools"
+    cmd_line "snapshot" "Capture baseline system snapshot"
     cmd_line "rollback" "Rollback dotfiles to a previous state"
     cmd_line "restore" "Restore from backup or git ref"
     cmd_line "drift" "Drift dashboard (detailed chezmoi status)"
@@ -92,6 +97,7 @@ show_help() {
     cmd_line "learn" "Start the interactive tour of your new tools"
     cmd_line "docs" "Show repo README"
     cmd_line "log-rotate" "Rotate ~/.local/share/dotfiles.log"
+    cmd_line "setup" "Interactive setup (profile, features, secrets)"
 
     ui_section "Appearance"
     cmd_line "theme" "Switch terminal theme (dark/light)"
@@ -141,8 +147,13 @@ Core Commands:
 Diagnostics:
   doctor         Check system health and configuration
   heal           Auto-repair common dotfiles issues
-  health         Run comprehensive health dashboard
+  health         Run comprehensive health dashboard (--fix supported)
   security-score Security assessment with grading
+  scorecard      Unified health/security/performance scorecard
+  perf           Predictable startup profiling (3-run average)
+  conflicts      Report alias/command conflicts
+  locks          Show version locks for key tools
+  snapshot       Capture baseline system snapshot
   rollback       Rollback dotfiles to a previous state
   restore        Restore from backup or git ref
   drift          Drift dashboard (detailed chezmoi status)
@@ -162,6 +173,7 @@ Diagnostics:
   learn       Start the interactive tour of your new tools
   docs        Show repo README
   log-rotate  Rotate ~/.local/share/dotfiles.log
+  setup       Interactive setup (profile, features, secrets)
 
 Appearance:
   theme       Switch terminal theme (dark/light)
@@ -241,12 +253,12 @@ case "$COMMAND" in
     ;;
 
   # Diagnostics
-  doctor|heal|health|health-check|security-score|rollback|restore|drift|verify|history|benchmark)
+  doctor|heal|health|health-check|security-score|scorecard|perf|conflicts|locks|snapshot|rollback|restore|drift|verify|history|benchmark)
     dispatch "diagnostics" "$COMMAND" "$@"
     ;;
 
   # Tools
-  tools|aliases|alias-check|new|packages|log-rotate)
+  tools|aliases|alias-check|new|packages|log-rotate|setup)
     dispatch "tools" "$COMMAND" "$@"
     ;;
 

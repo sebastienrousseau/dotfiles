@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Dotfiles CLI - Diagnostics Commands
-# doctor, heal, health, rollback, drift, history, benchmark, verify
+# doctor, heal, health, rollback, drift, history, benchmark, verify, perf, scorecard, conflicts, locks, snapshot
 
 set -euo pipefail
 
@@ -30,6 +30,26 @@ cmd_health() {
 
 cmd_security_score() {
   run_script "scripts/diagnostics/security-score.sh" "Security score" "$@"
+}
+
+cmd_scorecard() {
+  run_script "scripts/diagnostics/scorecard.sh" "Scorecard" "$@"
+}
+
+cmd_perf() {
+  run_script "scripts/diagnostics/perf.sh" "Performance profiling" "$@"
+}
+
+cmd_conflicts() {
+  run_script "scripts/diagnostics/conflicts.sh" "Conflicts report" "$@"
+}
+
+cmd_locks() {
+  run_script "scripts/diagnostics/version-locks.sh" "Version locks" "$@"
+}
+
+cmd_snapshot() {
+  run_script "scripts/diagnostics/snapshot.sh" "Snapshot" "$@"
 }
 
 cmd_rollback() {
@@ -78,6 +98,26 @@ case "${1:-}" in
   security-score)
     shift
     cmd_security_score "$@"
+    ;;
+  scorecard)
+    shift
+    cmd_scorecard "$@"
+    ;;
+  perf)
+    shift
+    cmd_perf "$@"
+    ;;
+  conflicts)
+    shift
+    cmd_conflicts "$@"
+    ;;
+  locks)
+    shift
+    cmd_locks "$@"
+    ;;
+  snapshot)
+    shift
+    cmd_snapshot "$@"
     ;;
   rollback)
     shift
