@@ -25,7 +25,7 @@ core_aliases=(c q e h _ i l ll la lr lra lt lta a d)
 
 tmp_manifest="$(mktemp)"
 trap 'rm -f "$tmp_manifest"' EXIT
-bash "$manifest" > "$tmp_manifest"
+bash "$manifest" >"$tmp_manifest"
 
 pick_alias() {
   local name="$1"
@@ -35,7 +35,10 @@ pick_alias() {
   while [[ $# -gt 0 ]]; do
     pattern="$1"
     value="$(awk -F$'\t' -v key="$name" -v pat="$pattern" '$1==key && $3 ~ pat {print $2; exit}' "$tmp_manifest")"
-    [[ -n "$value" ]] && { printf '%s\n' "$value"; return 0; }
+    [[ -n "$value" ]] && {
+      printf '%s\n' "$value"
+      return 0
+    }
     shift
   done
   value="$(awk -F$'\t' -v key="$name" '$1==key {print $2; exit}' "$tmp_manifest")"
