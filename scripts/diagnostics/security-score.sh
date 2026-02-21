@@ -9,12 +9,18 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
 # Parse arguments
-VERBOSE=false
+VERBOSE=true
 JSON_OUTPUT=false
+QUIET=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --verbose | -v)
       VERBOSE=true
+      shift
+      ;;
+    --quiet | -q)
+      QUIET=true
+      VERBOSE=false
       shift
       ;;
     --json)
@@ -26,8 +32,11 @@ while [[ $# -gt 0 ]]; do
 done
 
 ui_init
-set +x
+set +o xtrace 2>/dev/null || true
 NC="${NORMAL}"
+RED="${RED:-}"
+GREEN="${GREEN:-}"
+YELLOW="${YELLOW:-}"
 
 # Scoring
 TOTAL_POINTS=0
@@ -57,7 +66,7 @@ add_points() {
     if [[ "$UI_ENABLED" = "1" ]]; then
       ui_status "$icon" "$description" "$points/$max pts"
     else
-      printf "  ${icon} %-40s %d/%d pts\n" "$description" "$points" "$max"
+      printf "  %s %-40s %d/%d pts\n" "$icon" "$description" "$points" "$max"
     fi
   fi
 }
@@ -265,8 +274,12 @@ check_secrets() {
   # No secrets in dotfiles repo
   if [[ -d "${HOME}/.dotfiles" ]]; then
     local secrets_found=false
-    # Check for common secret patterns
-    if grep -rE "(api_key|api_secret|password|token)\\s*=\\s*['\"][^'\"]+['\"]" "${HOME}/.dotfiles" --include="*.sh" --include="*.zsh" --include="*.toml" 2>/dev/null | grep -v "example\|template\|placeholder" | head -1; then
+    local match=""
+    # Check for common secret patterns, ignore templates/placeholders and variable expansions.
+    match=$(grep -rE "(api_key|api_secret|password|token)[[:space:]]*=[[:space:]]*['\"][^'\"]+['\"]" \
+      "${HOME}/.dotfiles" --include="*.sh" --include="*.zsh" --include="*.toml" 2>/dev/null | \
+      grep -v "example\\|template\\|placeholder" | grep -F -v '${' | head -1 || true)
+    if [[ -n "$match" ]]; then
       secrets_found=true
     fi
 
@@ -313,33 +326,31 @@ print_summary() {
   ui_header "Security Score"
   echo ""
 
-  # Score bar
-  local bar_width=30
+  local bar_width=28
   local filled=$((score * bar_width / 100))
   local empty=$((bar_width - filled))
+  local block="#"
+  local pad="."
 
-  printf "  Score: ["
-  if [[ $score -ge 80 ]]; then
-    printf '%s' "${GREEN}"
-  elif [[ $score -ge 60 ]]; then
-    printf '%s' "${YELLOW}"
-  else
-    printf '%s' "${RED}"
-  fi
-  printf "%${filled}s" | tr ' ' '█'
-  printf '%s' "${NC}"
-  printf "%${empty}s" | tr ' ' '░'
-  printf "] "
-
-  # Grade
   local grade
   grade=$(get_grade $score)
-  case "$grade" in
-    A*) echo -e "${GREEN}${score}%  Grade: ${grade}${NC}" ;;
-    B*) echo -e "${GREEN}${score}%  Grade: ${grade}${NC}" ;;
-    C*) echo -e "${YELLOW}${score}%  Grade: ${grade}${NC}" ;;
-    *) echo -e "${RED}${score}%  Grade: ${grade}${NC}" ;;
-  esac
+
+  if [[ "$UI_ENABLED" = "1" ]]; then
+    ui_kv "Score" "${score}% (Grade: ${grade})"
+  else
+    printf "  Score: ["
+    if [[ $score -ge 80 ]]; then
+      printf '%s' "${GREEN}"
+    elif [[ $score -ge 60 ]]; then
+      printf '%s' "${YELLOW}"
+    else
+      printf '%s' "${RED}"
+    fi
+    printf "%${filled}s" | tr ' ' "$block"
+    printf '%s' "${NC}"
+    printf "%${empty}s" | tr ' ' "$pad"
+    printf "] %s%%  Grade: %s\n" "${score}" "${grade}"
+  fi
 
   echo -e "\n  Points: ${TOTAL_POINTS}/${MAX_POINTS}"
   echo ""
@@ -347,18 +358,17 @@ print_summary() {
   # Recommendations
   if [[ $score -lt 100 ]]; then
     ui_header "Recommendations"
-
     if ! command -v age >/dev/null 2>&1; then
-      echo "  • Install age for encryption: brew install age"
+      ui_bullet "Install age for encryption: brew install age"
     fi
     if ! command -v sops >/dev/null 2>&1; then
-      echo "  • Install SOPS for secrets: brew install sops"
+      ui_bullet "Install SOPS for secrets: brew install sops"
     fi
     if ! git config --global commit.gpgsign 2>/dev/null | grep -q true; then
-      echo "  • Enable commit signing: git config --global commit.gpgsign true"
+      ui_bullet "Enable commit signing: git config --global commit.gpgsign true"
     fi
     if [[ ! -f "${HOME}/.ssh/id_ed25519" ]]; then
-      echo "  • Generate ED25519 SSH key: ssh-keygen -t ed25519"
+      ui_bullet "Generate ED25519 SSH key: ssh-keygen -t ed25519"
     fi
     echo ""
   fi
