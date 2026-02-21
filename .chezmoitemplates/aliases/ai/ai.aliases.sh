@@ -72,3 +72,10 @@ if command -v sgpt &>/dev/null; then
   alias aic='sgpt --code'
   alias aie='sgpt --shell'
 fi
+
+# ai_core wrapper (fast query shortcut)
+if command -v ai_core &>/dev/null; then
+  if ! alias a >/dev/null 2>&1; then
+    alias a='ai_core query'
+  fi
+fi

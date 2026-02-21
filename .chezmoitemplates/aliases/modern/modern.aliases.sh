@@ -4,7 +4,7 @@
 # Runtime-select listing backend to avoid duplicate static alias definitions.
 dot_ls() {
   if command -v eza >/dev/null; then
-    eza --icons --group-directories-first "$@"
+    eza --sort Name --icons --group-directories-first "$@"
   else
     command ls "$@"
   fi
@@ -12,7 +12,7 @@ dot_ls() {
 
 dot_ll() {
   if command -v eza >/dev/null; then
-    eza -alF --icons --group-directories-first "$@"
+    eza -alF --sort Name --icons --group-directories-first "$@"
   else
     command ls -lA "$@"
   fi
@@ -20,7 +20,7 @@ dot_ll() {
 
 dot_la() {
   if command -v eza >/dev/null; then
-    eza -a --icons --group-directories-first "$@"
+    eza -a --sort Name --icons --group-directories-first "$@"
   else
     command ls -a "$@"
   fi
@@ -28,16 +28,44 @@ dot_la() {
 
 dot_lt() {
   if command -v eza >/dev/null; then
-    eza -aT --icons --group-directories-first "$@"
+    eza -aT --sort Name --icons --group-directories-first "$@"
   else
     command ls -R "$@"
   fi
 }
 
+dot_lr() {
+  if command -v eza >/dev/null; then
+    eza -alF --recurse --sort Name --icons --group-directories-first "$@"
+  else
+    command ls -lAR "$@"
+  fi
+}
+
+dot_lra() {
+  if command -v eza >/dev/null; then
+    eza -alF --recurse --all --sort Name --icons --group-directories-first "$@"
+  else
+    command ls -lAR "$@"
+  fi
+}
+
+dot_lta() {
+  if command -v eza >/dev/null; then
+    eza -aT --all --sort Name --icons --group-directories-first "$@"
+  else
+    command ls -aR "$@"
+  fi
+}
+
 alias ls='dot_ls'
+alias l='dot_ls'
 alias ll='dot_ll'
 alias la='dot_la'
 alias lt='dot_lt'
+alias lr='dot_lr'
+alias lra='dot_lra'
+alias lta='dot_lta'
 alias llm='command ls -ltA'
 alias lx='command ls -la'
 

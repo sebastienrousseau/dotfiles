@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 # CD Navigation - Parent Directory and Common Location Shortcuts
-[[ -n "${_CD_SHORTCUTS_LOADED:-}" ]] && return 0
+[[ -n "${_CD_SHORTCUTS_LOADED:-}" ]] && :
 _CD_SHORTCUTS_LOADED=1
 
 # Parent Directory Shortcuts

@@ -1,7 +1,7 @@
 # shellcheck shell=bash
 if [[ -n "${BASH_VERSION:-}" ]]; then
   # CD Navigation - Tab Completion
-  [[ -n "${_CD_COMPLETION_LOADED:-}" ]] && return 0
+  [[ -n "${_CD_COMPLETION_LOADED:-}" ]] && :
   _CD_COMPLETION_LOADED=1
 
   # Helper to list all bookmark names
@@ -40,7 +40,7 @@ fi
 
 if [[ -n "${ZSH_VERSION:-}" ]]; then
   # CD Navigation - Tab Completion (zsh)
-  [[ -n "${_CD_COMPLETION_LOADED_ZSH:-}" ]] && return 0
+  [[ -n "${_CD_COMPLETION_LOADED_ZSH:-}" ]] && :
   _CD_COMPLETION_LOADED_ZSH=1
 
   # compdef is only available after compinit; skip quietly if not ready.

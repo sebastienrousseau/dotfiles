@@ -9,7 +9,7 @@
 # to set up EDITOR, VISUAL, and other editor environment variables.
 
 # Common editor aliases that work with any editor
-alias e='${EDITOR}'
+alias e='${EDITOR:-nano}'
 if [[ "${DOTFILES_LEGACY_EDITOR_ALIASES:-0}" == "1" ]]; then
   alias editor='${EDITOR}'
 fi

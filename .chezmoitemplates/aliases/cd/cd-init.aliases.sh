@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 # CD Navigation - Initialization
-[[ -n "${_CD_INIT_LOADED:-}" ]] && return 0
+[[ -n "${_CD_INIT_LOADED:-}" ]] && :
 _CD_INIT_LOADED=1
 
 # Consistent Shorthand Aliases

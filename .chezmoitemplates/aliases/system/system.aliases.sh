@@ -9,6 +9,14 @@ alias p='pwd'
 alias path='echo ${PATH//:/\\n}'
 alias wth='curl -s "wttr.in/?format=3"'
 
+# Convenience shortcuts
+if command -v dot >/dev/null 2>&1; then
+  alias d='dot'
+fi
+if command -v epoch >/dev/null 2>&1; then
+  alias i='epoch'
+fi
+
 # Process helpers
 if command -v ps >/dev/null 2>&1; then
   alias pid='ps -f'

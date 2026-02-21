@@ -7,6 +7,9 @@
 # Performance optimization - skip if not interactive
 [[ -o interactive ]] || return
 
+# Ensure aliases are enabled in zsh sessions.
+setopt aliases
+
 # Only source once if being re-sourced (in the same shell scope)
 if [[ -v DOTFILES_SOURCED ]]; then
   return
@@ -150,8 +153,15 @@ _load_deferred_layers() {
   [[ -f "${HOME}/.config/shell/custom/context_suggest.zsh" ]] && source "${HOME}/.config/shell/custom/context_suggest.zsh"
   [[ -f "${HOME}/.config/shell/custom/error_analysis.zsh" ]] && source "${HOME}/.config/shell/custom/error_analysis.zsh"
   [[ -f "${HOME}/.config/shell/custom/ollama_functions.zsh" ]] && source "${HOME}/.config/shell/custom/ollama_functions.zsh"
+  [[ -f "${HOME}/.config/shell/custom/auto_ls.zsh" ]] && source "${HOME}/.config/shell/custom/auto_ls.zsh"
 }
 add-zsh-hook precmd _load_deferred_layers
+
+# Safety: re-enable aliases at each prompt (guards against later noaliases).
+_dotfiles_force_aliases() {
+  setopt aliases
+}
+add-zsh-hook precmd _dotfiles_force_aliases
 
 # Essential Aliases (fallback if 90-ux-aliases.sh is unavailable)
 if command -v bat >/dev/null; then
@@ -172,6 +182,14 @@ if [[ "${DOTFILES_ALIAS_WRAPPER:-0}" == "1" ]]; then
     fi
   }
   alias alias=alias_wrapper
+fi
+
+# Ensure aliases are enabled and core alias file is loaded in interactive shells.
+if ! setopt | grep -q '^aliases$'; then
+  setopt aliases
+fi
+if ! alias c >/dev/null 2>&1 && [[ -f "${HOME}/.config/shell/90-ux-aliases.sh" ]]; then
+  source "${HOME}/.config/shell/90-ux-aliases.sh"
 fi
 
 
@@ -220,4 +238,36 @@ if command -v fzf >/dev/null; then
   if command -v rg >/dev/null; then
     export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
   fi
+fi
+
+# Final guard: ensure aliases are enabled and core alias file is loaded.
+if ! setopt | grep -q '^aliases$'; then
+  setopt aliases
+fi
+if ! alias c >/dev/null 2>&1 && [[ -f "${HOME}/.config/shell/90-ux-aliases.sh" ]]; then
+  source "${HOME}/.config/shell/90-ux-aliases.sh"
+fi
+
+# Cleanup legacy debug log (from alias tracing).
+if [[ -f "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/alias-debug.log" ]]; then
+  command rm -f "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/alias-debug.log" 2>/dev/null || true
+fi
+
+# Ultimate fallback: provide function shims if aliases still missing.
+if ! alias c >/dev/null 2>&1; then
+  c() { clear; }
+  q() { exit; }
+  e() { "${EDITOR:-nano}" "$@"; }
+  h() { history; }
+  l() { command -v eza >/dev/null 2>&1 && eza --sort Name --icons --group-directories-first "$@" || command ls "$@"; }
+  ll() { command -v eza >/dev/null 2>&1 && eza -alF --sort Name --icons --group-directories-first "$@" || command ls -lA "$@"; }
+  la() { command -v eza >/dev/null 2>&1 && eza -a --sort Name --icons --group-directories-first "$@" || command ls -a "$@"; }
+  lt() { command -v eza >/dev/null 2>&1 && eza -aT --sort Name --icons --group-directories-first "$@" || command ls -R "$@"; }
+  lr() { command -v eza >/dev/null 2>&1 && eza -alF --recurse --sort Name --icons --group-directories-first "$@" || command ls -lAR "$@"; }
+  lra() { command -v eza >/dev/null 2>&1 && eza -alF --recurse --all --sort Name --icons --group-directories-first "$@" || command ls -lAR "$@"; }
+  lta() { command -v eza >/dev/null 2>&1 && eza -aT --all --sort Name --icons --group-directories-first "$@" || command ls -aR "$@"; }
+  d() { command -v dot >/dev/null 2>&1 && dot "$@" || command -v docker >/dev/null 2>&1 && docker "$@"; }
+  i() { command -v epoch >/dev/null 2>&1 && epoch "$@"; }
+  a() { command -v ai_core >/dev/null 2>&1 && ai_core query "$@"; }
+  _() { sudo "$@"; }
 fi
