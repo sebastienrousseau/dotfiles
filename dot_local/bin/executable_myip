@@ -1,6 +1,20 @@
 #!/usr/bin/env bash
-# Show public and local IP addresses
-# Usage: myip [--json]
+## My IP — Display public and local IP addresses.
+##
+## Queries external services for public IP and inspects
+## network interfaces for local IP address.
+##
+## # Requirements
+## - curl: For external IP lookup
+## - ip or ifconfig: For local IP detection
+##
+## # Usage
+## myip                        # Show both IPs
+## myip --json                 # JSON output format
+##
+## # Platform Notes
+## - Linux: Uses ip route or ifconfig
+## - macOS: Uses ifconfig
 
 set -euo pipefail
 

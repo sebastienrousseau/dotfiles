@@ -1,6 +1,23 @@
 #!/usr/bin/env bash
-# Hex viewer/converter
-# Usage: hex <file> | hex -e <string> | hex -d <hex>
+## Hex Viewer — View files in hexadecimal or convert strings to/from hex.
+##
+## Multi-mode hex utility supporting file viewing, string encoding,
+## and hex decoding. Colorized output available with bat.
+##
+## # Requirements
+## - xxd: Primary hex converter (vim package)
+## - hexdump or od: Fallback converters
+## - bat (optional): For colorized output
+##
+## # Usage
+## hex file.bin               # View file in hex
+## hex -e "hello"             # String to hex
+## hex -d "68656c6c6f"        # Hex to string
+## cat file | hex             # View stdin in hex
+## hex -c -n 32 file.bin      # Colorized, 32 bytes per line
+##
+## # Platform Notes
+## - All platforms: Requires xxd, hexdump, or od
 
 set -euo pipefail
 

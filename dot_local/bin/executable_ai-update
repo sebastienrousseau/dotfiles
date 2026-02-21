@@ -1,9 +1,21 @@
 #!/usr/bin/env bash
-#
-# Euxis AI Workflow Updater (2026 Cross-Platform Edition)
-# Optimized for: macOS, ZorinOS/Linux, and WSL
-#
-# Logic: Detects environment-specific managers (APT/Brew/Binary) automatically.
+## AI Update — Euxis AI workflow updater for cross-platform environments.
+##
+## Updates all AI-related tools and runtimes including mise, npm globals,
+## pipx tools, Ollama, and LM Studio. Auto-detects installation methods.
+##
+## # Requirements
+## - curl: For downloading updates
+## - sudo: For system-level updates (Linux)
+## - zstd: For Ollama archive extraction (Linux)
+##
+## # Usage
+## ai-update                   # Update all AI tools
+##
+## # Platform Notes
+## - macOS: Updates via Homebrew where applicable
+## - Linux: Updates via APT, manual binaries, or pipx
+## - WSL: Full Linux support
 
 set -euo pipefail
 
@@ -19,14 +31,14 @@ BOLD='\033[1m'
 
 # --- UI Components ---
 log_header() {
-    echo -e "\n${BOLD}${PURPLE}󱐋 Updating AI Environment${NC}"
-    echo -e "${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "\n${BOLD}${PURPLE}Updating AI Environment${NC}"
+    echo -e "${GRAY}-----------------------------------------------------------${NC}"
 }
 
-step() { echo -ne "${CYAN}➜${NC} ${BOLD}$1...${NC} "; }
+step() { echo -ne "${CYAN}->${NC} ${BOLD}$1...${NC} "; }
 ok() { echo -e "${GREEN}done${NC}"; }
 skip() { echo -e "${YELLOW}skipped${NC} ${GRAY}($1)${NC}"; }
-err() { echo -e "${RED}error${NC}\n   ${RED}󱈸 $1${NC}"; }
+err() { echo -e "${RED}error${NC}\n   ${RED}$1${NC}"; }
 
 # --- Initialization ---
 log_header
@@ -134,8 +146,8 @@ if command -v lms >/dev/null 2>&1; then
 fi
 
 # --- 4. Final Summary ---
-echo -e "${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${GREEN}${BOLD}󰄬 Euxis Environment Ready${NC}"
+echo -e "${GRAY}-----------------------------------------------------------${NC}"
+echo -e "${GREEN}${BOLD}Euxis Environment Ready${NC}"
 
 # Clean Table-style Version Report
 printf "\n${BOLD}%-12s %s${NC}\n" "System" "Version"

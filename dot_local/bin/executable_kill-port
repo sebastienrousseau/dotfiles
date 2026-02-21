@@ -1,6 +1,22 @@
 #!/usr/bin/env bash
-# Kill process running on specified port
-# Usage: kill-port <port> [--force]
+## Kill Port — Terminate processes listening on a specified port.
+##
+## Finds and kills processes bound to a given port number.
+## Supports both graceful (SIGTERM) and forced (SIGKILL) termination.
+##
+## # Requirements
+## - lsof, ss, or netstat: For finding processes
+## - kill: For process termination
+## - ps: For process information display
+##
+## # Usage
+## kill-port 3000              # Kill process on port 3000
+## kill-port 8080 --force      # Force kill (SIGKILL)
+## kill-port 443               # May require sudo for privileged ports
+##
+## # Platform Notes
+## - Linux: Uses lsof or ss
+## - macOS: Uses lsof
 
 set -euo pipefail
 

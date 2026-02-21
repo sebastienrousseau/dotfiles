@@ -1,6 +1,24 @@
 #!/usr/bin/env bash
-# UUID generator
-# Usage: uuid [count] [--upper] [--no-dashes]
+## UUID Generator — Generate random UUIDs (v4).
+##
+## Generates one or more random UUIDs with optional formatting.
+## Supports uppercase output and dash removal.
+##
+## # Requirements
+## - uuidgen: Primary generator (util-linux or macOS)
+## - /proc/sys/kernel/random/uuid: Linux kernel fallback
+## - od + /dev/urandom: Universal fallback
+##
+## # Usage
+## uuid                        # Generate 1 UUID
+## uuid 5                      # Generate 5 UUIDs
+## uuid -u                     # Uppercase UUID
+## uuid -n                     # No dashes (compact format)
+## uuid 3 -u -n                # 3 uppercase compact UUIDs
+##
+## # Platform Notes
+## - Linux: Uses uuidgen or kernel random
+## - macOS: Uses uuidgen
 
 set -euo pipefail
 

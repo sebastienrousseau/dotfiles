@@ -1,8 +1,29 @@
-#!/bin/bash
-# Catppuccin GNOME Theme Installation Script
-# Installs Catppuccin GTK themes, icon themes, and shell themes
+#!/usr/bin/env bash
+## Catppuccin Theme Installer — Install Catppuccin themes for GNOME.
+##
+## Downloads and installs GTK themes, icon themes, cursor themes,
+## GNOME Shell themes, and wallpapers from Catppuccin repositories.
+##
+## # Requirements
+## - git: For cloning theme repositories
+## - curl: For downloading assets
+## - gnome-tweaks (optional): For applying themes
+## - gnome-extensions (optional): For shell themes
+##
+## # Usage
+## install-catppuccin-themes.sh           # Install all components
+## install-catppuccin-themes.sh gtk       # GTK themes only
+## install-catppuccin-themes.sh icons     # Icon themes only
+## install-catppuccin-themes.sh cursors   # Cursor themes only
+## install-catppuccin-themes.sh shell     # GNOME Shell themes only
+## install-catppuccin-themes.sh wallpapers # Wallpapers only
+## install-catppuccin-themes.sh refresh   # Refresh theme cache
+##
+## # Platform Notes
+## - Linux/GNOME: Full support
+## - Other DEs: GTK themes may work, shell themes require GNOME
 
-set -e
+set -euo pipefail
 
 THEME_DIR="$HOME/.themes"
 ICON_DIR="$HOME/.icons"
