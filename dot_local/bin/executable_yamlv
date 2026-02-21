@@ -1,6 +1,21 @@
 #!/usr/bin/env bash
-# YAML validator
-# Usage: yamlv <file> | yamlv (reads stdin)
+## YAML Validator — Validate YAML syntax.
+##
+## Validates YAML syntax and reports success or failure.
+## Supports quiet mode for scripting.
+##
+## # Requirements
+## - yq: Primary YAML processor (recommended)
+## - python3 + pyyaml: Fallback validator
+## - ruby + yaml: Secondary fallback
+##
+## # Usage
+## yamlv file.yaml             # Validate YAML file
+## yamlv < file.yaml           # Validate from stdin
+## yamlv -q file.yaml          # Quiet mode (exit code only)
+##
+## # Platform Notes
+## - All platforms: Requires yq, python3+pyyaml, or ruby
 
 set -euo pipefail
 
@@ -31,9 +46,9 @@ else
 fi
 
 if validate_yaml "$INPUT"; then
-  $QUIET || echo "✓ Valid YAML ($SOURCE)"
+  $QUIET || echo "Valid YAML ($SOURCE)"
   exit 0
 else
-  echo "✗ Invalid YAML ($SOURCE)"
+  echo "Invalid YAML ($SOURCE)"
   exit 1
 fi

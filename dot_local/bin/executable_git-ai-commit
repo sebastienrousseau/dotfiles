@@ -1,10 +1,25 @@
 #!/usr/bin/env bash
-# git-ai-commit - Generate commit messages using AI
-# Managed by chezmoi - https://github.com/sebastienrousseau/dotfiles
-#
-# Usage: git ai-commit [--provider <provider>] [--edit]
-#   --provider: claude, gemini, sgpt, ollama (auto-detected if not specified)
-#   --edit: Open editor to modify the generated message before committing
+## Git AI Commit — Generate commit messages using AI.
+##
+## Analyzes staged changes and generates conventional commit messages
+## using various AI providers. Supports interactive editing.
+##
+## # Requirements
+## - git: Version control
+## - One of: claude, gemini, sgpt, aider, ollama
+##
+## # Usage
+## git ai-commit                       # Auto-detect provider
+## git ai-commit --provider claude     # Use Claude
+## git ai-commit --edit                # Edit before committing
+## git ai-commit -p ollama -e          # Ollama with edit
+##
+## # Configuration
+## Set GIT_AI_PROVIDER to set default provider
+## Set OLLAMA_MODEL for custom Ollama model (default: llama3.2)
+##
+## # Platform Notes
+## - All platforms: Requires git and an AI CLI tool
 
 set -euo pipefail
 

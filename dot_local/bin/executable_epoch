@@ -1,4 +1,22 @@
 #!/usr/bin/env bash
+## Epoch Converter — Convert between Unix timestamps and human-readable dates.
+##
+## Bidirectional conversion between epoch timestamps and date strings.
+## Supports both seconds and milliseconds precision.
+##
+## # Requirements
+## - date: Core utility (coreutils or macOS built-in)
+##
+## # Usage
+## epoch                       # Show current epoch time
+## epoch -m                    # Show current epoch in milliseconds
+## epoch 1234567890            # Convert epoch to date
+## epoch -r "2024-01-15"       # Convert date string to epoch
+##
+## # Platform Notes
+## - Linux: Uses date -d for parsing
+## - macOS: Uses date -j -f for parsing
+
 set -euo pipefail
 
 # --- UI Theme ---

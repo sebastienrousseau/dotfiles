@@ -1,4 +1,25 @@
 #!/usr/bin/env bash
+## Extract — Universal archive extraction utility.
+##
+## Automatically detects archive format and extracts contents.
+## Supports tar, zip, 7z, rar, and compressed variants.
+##
+## # Requirements
+## - tar: For tar archives
+## - unzip: For zip/jar files
+## - zstd: For zstd-compressed archives
+## - 7z (optional): For 7z and rar files
+## - unrar (optional): Alternative rar extractor
+##
+## # Usage
+## extract archive.tar.gz              # Extract to current dir
+## extract archive.zip ./output        # Extract to output dir
+## extract file.tar.zst               # Handles zstd compression
+##
+## # Platform Notes
+## - Linux: Full support with appropriate packages
+## - macOS: Install p7zip and zstd via Homebrew
+
 set -euo pipefail
 
 # --- UI Theme ---
@@ -18,7 +39,7 @@ fi
 
 mkdir -p "$DEST"
 
-echo -e "${PURPLE}󰛒 Extracting${NC} ${BOLD}$FILE${NC} ${GRAY}➜${NC} ${BOLD}$DEST${NC}"
+echo -e "${PURPLE}Extracting${NC} ${BOLD}$FILE${NC} ${GRAY}->${NC} ${BOLD}$DEST${NC}"
 
 extract_tar_zst() {
   if tar --help 2>/dev/null | grep -q -- '--zstd'; then

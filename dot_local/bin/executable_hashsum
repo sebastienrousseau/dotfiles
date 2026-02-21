@@ -1,4 +1,24 @@
 #!/usr/bin/env bash
+## Hash Calculator — Compute cryptographic hashes of strings or files.
+##
+## Supports MD5, SHA1, SHA256, and SHA512 algorithms.
+## Can verify hashes and show all algorithms at once.
+##
+## # Requirements
+## - md5sum/sha*sum (Linux) or shasum/md5 (macOS)
+##
+## # Usage
+## hashsum "string"            # SHA256 of string (default)
+## hashsum -f file.txt         # SHA256 of file
+## hashsum -a "string"         # All algorithms
+## hashsum -c HASH "string"    # Verify hash matches
+## hashsum -1 "string"         # SHA1 hash
+## hashsum -5 "string"         # SHA512 hash
+##
+## # Platform Notes
+## - Linux: Uses md5sum, sha*sum
+## - macOS: Uses md5 -q, shasum -a
+
 set -euo pipefail
 
 # --- UI Theme ---
@@ -97,10 +117,10 @@ if $CHECK_MODE; then
   COMPUTED_LOWER=$(echo "$COMPUTED" | tr '[:upper:]' '[:lower:]')
 
   if [[ "$EXPECTED_LOWER" == "$COMPUTED_LOWER" ]]; then
-    echo -e "${GREEN}✓${NC} Hash matches"
+    echo -e "${GREEN}Hash matches${NC}"
     exit 0
   else
-    echo -e "${RED}✗${NC} Hash mismatch"
+    echo -e "${RED}Hash mismatch${NC}"
     echo "  Expected: $EXPECTED"
     echo "  Got:      $COMPUTED"
     exit 1
