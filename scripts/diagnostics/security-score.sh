@@ -342,7 +342,7 @@ print_summary() {
   local grade
   grade=$(get_grade $score)
 
-  printf "  Score: ["
+  printf "  Score: "
   if [[ $score -ge 80 ]]; then
     printf '%s' "${GREEN}"
   elif [[ $score -ge 60 ]]; then
@@ -353,7 +353,7 @@ print_summary() {
   printf "%${filled}s" | tr ' ' "$block"
   printf '%s' "${NC}"
   printf "%${empty}s" | tr ' ' "$pad"
-  printf "] %s%%  Grade: %s\n" "${score}" "${grade}"
+  printf " %s%%  Grade: %s\n" "${score}" "${grade}"
 
   echo -e "\n  Points: ${TOTAL_POINTS}/${MAX_POINTS}"
   echo ""
