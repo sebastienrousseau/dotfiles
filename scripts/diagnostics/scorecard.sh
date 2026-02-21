@@ -9,6 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
 ui_init
+set +x
 
 if ! command -v python3 >/dev/null 2>&1; then
   ui_err "python3" "required for scorecard"
@@ -20,9 +21,19 @@ if [[ "${1:-}" == "--json" ]]; then
   JSON_OUTPUT=true
 fi
 
-health_json=$(bash "$SCRIPT_DIR/health.sh" --json)
-security_json=$(bash "$SCRIPT_DIR/security-score.sh" --json)
-perf_json=$(bash "$SCRIPT_DIR/perf.sh" --json)
+extract_json() {
+  # strip any leading noise before the JSON payload
+  awk 'BEGIN{p=0} /^[[:space:]]*[{]/{p=1} p{print}'
+}
+
+health_json=$(env -u SHELLOPTS bash "$SCRIPT_DIR/health.sh" --json 2>/dev/null | extract_json)
+security_json=$(env -u SHELLOPTS bash "$SCRIPT_DIR/security-score.sh" --json 2>/dev/null | extract_json)
+perf_json=$(env -u SHELLOPTS bash "$SCRIPT_DIR/perf.sh" --json 2>/dev/null | extract_json)
+
+if [[ -z "$health_json" || -z "$security_json" || -z "$perf_json" ]]; then
+  ui_err "scorecard" "failed to collect JSON metrics"
+  exit 1
+fi
 
 health_score=$(python3 -c 'import json,sys; j=json.loads(sys.stdin.read()); print(j.get("score",0))' <<<"$health_json")
 health_warnings=$(python3 -c 'import json,sys; j=json.loads(sys.stdin.read()); print(j.get("warnings",0))' <<<"$health_json")
