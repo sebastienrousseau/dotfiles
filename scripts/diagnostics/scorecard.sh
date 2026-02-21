@@ -24,54 +24,13 @@ health_json=$(bash "$SCRIPT_DIR/health.sh" --json)
 security_json=$(bash "$SCRIPT_DIR/security-score.sh" --json)
 perf_json=$(bash "$SCRIPT_DIR/perf.sh" --json)
 
-health_score=$(python3 - <<'PY'
-import json,sys
-j=json.loads(sys.stdin.read())
-print(j.get('score',0))
-PY
-<<<"$health_json")
-
-health_warnings=$(python3 - <<'PY'
-import json,sys
-j=json.loads(sys.stdin.read())
-print(j.get('warnings',0))
-PY
-<<<"$health_json")
-
-health_failures=$(python3 - <<'PY'
-import json,sys
-j=json.loads(sys.stdin.read())
-print(j.get('failures',0))
-PY
-<<<"$health_json")
-
-security_score=$(python3 - <<'PY'
-import json,sys
-j=json.loads(sys.stdin.read())
-print(j.get('score',0))
-PY
-<<<"$security_json")
-
-perf_score=$(python3 - <<'PY'
-import json,sys
-j=json.loads(sys.stdin.read())
-print(j.get('score',0))
-PY
-<<<"$perf_json")
-
-perf_mean=$(python3 - <<'PY'
-import json,sys
-j=json.loads(sys.stdin.read())
-print(j.get('mean_ms',0))
-PY
-<<<"$perf_json")
-
-perf_target=$(python3 - <<'PY'
-import json,sys
-j=json.loads(sys.stdin.read())
-print(j.get('target_ms',0))
-PY
-<<<"$perf_json")
+health_score=$(python3 -c 'import json,sys; j=json.loads(sys.stdin.read()); print(j.get("score",0))' <<<"$health_json")
+health_warnings=$(python3 -c 'import json,sys; j=json.loads(sys.stdin.read()); print(j.get("warnings",0))' <<<"$health_json")
+health_failures=$(python3 -c 'import json,sys; j=json.loads(sys.stdin.read()); print(j.get("failures",0))' <<<"$health_json")
+security_score=$(python3 -c 'import json,sys; j=json.loads(sys.stdin.read()); print(j.get("score",0))' <<<"$security_json")
+perf_score=$(python3 -c 'import json,sys; j=json.loads(sys.stdin.read()); print(j.get("score",0))' <<<"$perf_json")
+perf_mean=$(python3 -c 'import json,sys; j=json.loads(sys.stdin.read()); print(j.get("mean_ms",0))' <<<"$perf_json")
+perf_target=$(python3 -c 'import json,sys; j=json.loads(sys.stdin.read()); print(j.get("target_ms",0))' <<<"$perf_json")
 
 # Drift count
 if command -v chezmoi >/dev/null 2>&1; then

@@ -38,7 +38,7 @@ if $ASYNC; then
     run_update
     echo $? >"$STATUS_FILE"
   } >"$LOG_FILE" 2>&1 &
-  echo "$(date -Iseconds)" >"$NOTICE_FILE"
+  date -Iseconds >"$NOTICE_FILE"
   disown || true
   exit 0
 fi

@@ -54,7 +54,7 @@ fi
 
 ui_section "Alias shadows real commands"
 shadow_found=false
-while IFS=$'\t' read -r name value line; do
+while IFS=$'\t' read -r name value _; do
   if command -v "$name" >/dev/null 2>&1; then
     shadow_found=true
     ui_warn "Shadow" "${name} -> ${value} (also command)"
