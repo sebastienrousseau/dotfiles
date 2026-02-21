@@ -45,8 +45,8 @@ set -euo pipefail
 
 VERSION="0.2.488"
 
-COMMAND="$1"
-if [ -n "$1" ]; then
+COMMAND="${1:-}"
+if [ -n "${1:-}" ]; then
   shift
 fi
 
