@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 # CD Navigation - Utility Functions
-[[ -n "${_CD_UTILS_LOADED:-}" ]] && return 0
+[[ -n "${_CD_UTILS_LOADED:-}" ]] && :
 _CD_UTILS_LOADED=1
 
 # Safely create or modify files

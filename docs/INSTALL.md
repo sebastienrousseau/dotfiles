@@ -1,29 +1,30 @@
-# Get started
+# Installation
 
-This guide covers supported platforms, prerequisites, and the standard install path.
+Supported platforms, prerequisites, and install paths.
 
-## Supported platforms
+## Supported Platforms
 
-- macOS (Homebrew)
-- Ubuntu/Debian (apt)
-- WSL2 (Ubuntu/Debian)
+| Platform | Package Manager |
+|----------|-----------------|
+| macOS | Homebrew |
+| Ubuntu/Debian | apt |
+| WSL2 | apt (Ubuntu/Debian) |
 
 ## Prerequisites
 
-Required:
+**Required:**
 - `git`
 - `curl`
 
-Optional (feature-dependent):
-- Homebrew (macOS)
-- `apt-get` (Linux)
-- Docker or Podman (sandbox)
-- Nix (optional toolchain)
-- gum (required for `dot learn`)
+**Optional:**
+- Homebrew (macOS package management)
+- Docker or Podman (sandbox preview)
+- Nix (reproducible toolchain)
+- `gum` (interactive features like `dot learn`)
 
 ## Install
 
-### Quick install (recommended)
+### Quick Install (Recommended)
 
 ```bash
 git clone https://github.com/sebastienrousseau/dotfiles.git ~/.dotfiles
@@ -32,7 +33,7 @@ cd ~/.dotfiles
 exec zsh
 ```
 
-### Manual installation
+### Manual Installation
 
 ```bash
 # Clone the repository
@@ -65,9 +66,9 @@ install -m 755 chezmoi "$HOME/.local/bin/chezmoi"
 exec zsh
 ```
 
-### Using Nix (alternative)
+### Using Nix (Alternative)
 
-If you have Nix with flakes enabled:
+> **Platform:** Requires Nix with flakes enabled.
 
 ```bash
 # Enter development shell with all tools
@@ -77,14 +78,14 @@ nix develop ~/.dotfiles/nix
 nix profile install ~/.dotfiles/nix#dot-utils
 ```
 
-## What happens
+## What Happens
 
-1. The installer downloads a pinned Chezmoi bootstrap and applies this repo.
+1. Installer downloads a pinned Chezmoi binary and applies this repo.
 2. Chezmoi hooks install OS packages, fonts, and optional apps.
-3. The `dot` CLI becomes available in `~/.local/bin`.
+3. The `dot` CLI installs to `~/.local/bin`.
 4. Chezmoi symlinks shell configuration to your home directory.
 
-## Post-install verification
+## Post-Install Verification
 
 ```bash
 # Check dot CLI is available
@@ -99,22 +100,22 @@ dot help
 
 ## Optional: gum
 
-`gum` is required for interactive features like `dot learn`.
+`gum` enables interactive features like `dot learn`.
 
-macOS:
-```bash
-brew install gum
-```
+> **macOS:**
+> ```bash
+> brew install gum
+> ```
 
-Linux (snap):
-```bash
-sudo snap install gum --classic
-```
+> **Linux (snap):**
+> ```bash
+> sudo snap install gum --classic
+> ```
 
-Linux (Go toolchain):
-```bash
-go install github.com/charmbracelet/gum@latest
-```
+> **Linux (Go):**
+> ```bash
+> go install github.com/charmbracelet/gum@latest
+> ```
 
 ## Update
 

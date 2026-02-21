@@ -9,58 +9,52 @@
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.480)
+# Dotfiles (v0.2.487)
 
-Designed to fit your shell life
+A portable shell distribution for macOS, Linux, and WSL.
 
 ![Dotfiles banner][banner]
 
-## Contributing to Dotfiles
+## Contributing
 
-Thank you for your interest in contributing to Dotfiles. Here are some ways you can help.
+Ways to contribute to Dotfiles.
 
-## Evangelize
+## Spread the Word
 
-Tell people about Dotfiles. A bigger, more involved community helps everyone. We welcome your feedback.
+Share Dotfiles with others. A larger community benefits everyone.
 
-## How to contribute
+## How to Contribute
 
-Below are the guides for submitting issues and pull
-requests.
+Guides for submitting issues and pull requests.
 
-### Bug reports
+### Bug Reports
 
-If you encounter a bug that has not been filed yet, submit a
-bug report. Reporting a bug is one of the most valuable contributions
-you can make to Dotfiles.
+Found a bug? File a report. Bug reports are high-value contributions.
 
 1. Go to the [issue tracker](https://github.com/sebastienrousseau/dotfiles/issues/new) to submit a new issue.
 2. Include a descriptive title that is straight to the point.
 3. Write a detailed description of the issue.
 4. Wait for a maintainer to triage and label the issue.
 
-### Code contributions
+### Code Contributions
 
-Contributing code is one of the more involved ways to contribute to
-Dotfiles.
+Code contributions require more involvement but have high impact.
 
-#### Feature requests
+#### Feature Requests
 
-Filing feature requests is one of the most popular ways to contribute
-to Dotfiles.
+Open a pull request to share your code.
 
-Open a pull request to share your code, and we can merge it into the repository.
-
-#### Adding code
+#### Adding Code
 
 1. Fork the repository.
-2. Clone the repository **you forked** by running
-   `git clone https://github.com/<your-username>/dotfiles.git`
+2. Clone your fork:
+   ```bash
+   git clone https://github.com/<your-username>/dotfiles.git
+   ```
 
-#### Fixing an issue
+#### Fixing an Issue
 
-Found a solution to an issue? Here is how to submit your
-code to Dotfiles.
+Found a solution? Submit your fix.
 
 1. Fork the repository and refer above for how to set up the code.
 2. Go to your local fork and open a new pull request.

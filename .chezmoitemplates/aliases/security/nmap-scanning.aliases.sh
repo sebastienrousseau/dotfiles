@@ -4,13 +4,9 @@
 _NMAP_SCANNING_LOADED=1
 command -v nmap >/dev/null 2>&1 || return 0
 
-alias nms='nmap -sS'
-alias nma='nmap -A'
-alias nmv='nmap -sV'
-alias nmo='nmap -O'
-alias nmp='nmap -Pn'
-alias nmfast='nmap -F'
-alias nmping='nmap -sn'
+# NOTE:
+# Nmap aliases were consolidated into `system/system.aliases.sh`
+# so runtime diagnostics aliases live in a single module.
 
 function nmscript() {
   [[ -z "$1" || -z "$2" ]] && {
@@ -19,6 +15,3 @@ function nmscript() {
   }
   nmap --script "$1" "$2"
 }
-
-alias nmvuln='nmap --script vuln'
-alias nmall='nmap -A -T4 -p-'

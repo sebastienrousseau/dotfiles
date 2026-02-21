@@ -1,15 +1,12 @@
 # shellcheck shell=bash
 # Copyright (c) 2015-2026. All rights reserved.
-# Version: 0.2.482
 # Website: https://dotfiles.io
 # License: MIT
 
 # 🅳🅸🅶 🅰🅻🅸🅰🆂🅴🆂
 if command -v dig &>/dev/null; then
-  # d: Run the dig command with the default options.
-  if ! alias d >/dev/null 2>&1; then
-    alias d='dig'
-  fi
+  # dg: Run the dig command with the default options.
+  alias dg='dig'
 
   # d4: Perform a DNS lookup for an IPv4 address.
   alias d4='dig +short -4'
@@ -34,8 +31,5 @@ if command -v dig &>/dev/null; then
 
   # ips: Get your public IPv4 and IPv6 addresses.
   alias ips='ip4; ip6'
-
-  # wip: Get your public IP address.
-  alias wip='dig +short myip.opendns.com @resolver1.opendns.com'
 
 fi

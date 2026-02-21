@@ -113,7 +113,13 @@ These are the main tools and CLI conveniences included with Dotfiles.
 - Git helpers and sane defaults
 - Project templates (`dot new`)
 - Sandbox preview (`dot sandbox`)
+- Interactive setup (`dot setup`)
 - Benchmarking (`dot benchmark`)
+- Scorecard (`dot scorecard`)
+- Startup profiling (`dot perf`)
+- Conflict report (`dot conflicts`)
+- Version locks (`dot locks`)
+- Snapshot baseline (`dot snapshot`)
 - Lua tooling (`luacheck`, `stylua`, `luarocks`, `lua/luajit`)
 
 ## Security features

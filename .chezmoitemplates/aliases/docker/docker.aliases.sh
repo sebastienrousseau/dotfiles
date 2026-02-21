@@ -15,7 +15,6 @@ if command -v 'docker' &>/dev/null; then
 
   # --- Core ---
   alias d='docker'
-  alias dk='docker'
   alias dkv='docker version'
   alias dki='docker info'
   alias dkl='docker login'
@@ -23,44 +22,25 @@ if command -v 'docker' &>/dev/null; then
 
   # --- Containers ---
   alias dkps='docker ps'
-  alias dps='docker ps'
-  alias dpsa='docker ps -a'
+  alias dps='docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
   alias dkpsa='docker ps -a'
   alias dkr='docker run'
   alias dkri='docker run -it'
   alias dkrd='docker run -d'
   alias dks='docker start'
-  alias dstart='docker start'
   alias dkstop='docker stop'
-  alias dstop='docker stop'
   alias dkrs='docker restart'
-  alias drestart='docker restart'
   alias dkp='docker pause'
   alias dkup='docker unpause'
   alias dkrm='docker rm'
-  alias drm='docker rm'
-  alias dkrma='docker rm $(docker ps -aq) 2>/dev/null || true'
-  alias drma='docker rm $(docker ps -aq) 2>/dev/null || true'
   alias dkrmf='docker rm -f'
-  alias drmf='docker rm -f'
 
   alias dkin='docker inspect'
-  alias dinspect='docker inspect'
-  alias dklg='docker logs'
-  alias dlogs='docker logs'
   alias dklf='docker logs -f'
-  alias dlogsf='docker logs -f'
-  alias dl='docker logs -f'
   alias dkt='docker top'
-  alias dtop='docker top'
   alias dkst='docker stats'
-  alias dstats='docker stats'
   alias dkdf='docker diff'
   alias dkpl='docker pull'
-  alias dpull='docker pull'
-  alias dkex='docker exec'
-  alias dkeit='docker exec -it'
-  alias dexec='docker exec -it'
   alias dex='docker exec -it'
 
   alias dkcp='docker cp'
@@ -69,71 +49,45 @@ if command -v 'docker' &>/dev/null; then
 
   # --- Images ---
   alias dkim='docker images'
-  alias dim='docker images'
-  alias dkia='docker images -a'
-  alias dima='docker images -a'
+  alias dkima='docker images -a'
   alias dkb='docker build'
-  alias dbuild='docker build'
   alias dkbt='docker build -t'
   alias dkpu='docker push'
-  alias dpush='docker push'
   alias dkrmi='docker rmi'
-  alias drmi='docker rmi'
   alias dkh='docker history'
-  alias dhist='docker history'
   alias dksv='docker save'
-  alias dsave='docker save'
   alias dkld='docker load'
-  alias dload='docker load'
-  alias dkprune='docker system prune'
-  alias dprune='docker system prune'
-  alias dkprunea='docker system prune -a'
-  alias dprunea='docker system prune -a'
-  alias dprunev='docker system prune --volumes'
-  alias dpruneaf='docker system prune -af --volumes'
-  alias dkrmi_dangling='docker rmi $(docker images -f "dangling=true" -q) 2>/dev/null || true'
-  alias drmid='docker rmi $(docker images -f "dangling=true" -q) 2>/dev/null || true'
+  alias dksp='docker system prune'
+  dpruneaf() {
+    dot_confirm_destructive "docker system prune -af --volumes" || return 1
+    docker system prune -af --volumes
+  }
 
   # --- Volumes ---
   alias dkvl='docker volume'
-  alias dvol='docker volume'
   alias dkvls='docker volume ls'
-  alias dvolls='docker volume ls'
   alias dkvc='docker volume create'
-  alias dvolcreate='docker volume create'
   alias dkvi='docker volume inspect'
-  alias dvolinspect='docker volume inspect'
   alias dkvrm='docker volume rm'
-  alias dvolrm='docker volume rm'
   alias dkvp='docker volume prune'
   alias dvprune='docker volume prune -f'
 
   # --- Networks ---
   alias dkn='docker network'
-  alias dnet='docker network'
   alias dknls='docker network ls'
-  alias dnetls='docker network ls'
   alias dknc='docker network create'
-  alias dnetcreate='docker network create'
   alias dkni='docker network inspect'
-  alias dnetinspect='docker network inspect'
   alias dknrm='docker network rm'
-  alias dnetrm='docker network rm'
   alias dknp='docker network prune'
-  alias dnprune='docker network prune -f'
   alias dkncon='docker network connect'
   alias dkndis='docker network disconnect'
 
   # --- System ---
   alias dksys='docker system'
   alias dksdf='docker system df'
-  alias ddf='docker system df'
   alias ddfv='docker system df -v'
   alias dksev='docker system events'
-  alias devents='docker system events'
   alias dksi='docker system info'
-  alias dksp='docker system prune'
-  alias dkspa='docker system prune -a'
   alias dkcon='docker context'
 
   # Individual cleanup
@@ -169,6 +123,7 @@ if command -v 'docker' &>/dev/null; then
 
   # Remove all containers (including running)
   drmall() {
+    dot_confirm_destructive "docker rm -f all containers" || return 1
     local containers
     containers=$(docker ps -aq)
     if [[ -n "$containers" ]]; then
@@ -182,6 +137,7 @@ if command -v 'docker' &>/dev/null; then
 
   # Remove all images
   drmiall() {
+    dot_confirm_destructive "docker rmi -f all images" || return 1
     local images
     images=$(docker images -q)
     if [[ -n "$images" ]]; then
@@ -239,31 +195,10 @@ if command -v 'docker' &>/dev/null; then
   alias dcrm='docker compose rm'
   alias dcstop='docker compose stop'
   alias dcup='docker compose up'
-  alias dcupb='docker compose up --build'
   alias dcupd='docker compose up -d'
-  alias dcupdb='docker compose up -d --build'
-  alias dcdown='docker compose down'
+  alias dcupb='docker compose up -d --build'
+  alias dcdn='docker compose down'
   alias dcdownv='docker compose down -v'
-fi
-
-# --- Docker Compose (legacy docker-compose) ---
-if command -v 'docker-compose' &>/dev/null; then
-  alias dc='docker-compose'
-  alias dcu='docker-compose up'
-  alias dcud='docker-compose up -d'
-  alias dcd='docker-compose down'
-  alias dcdv='docker-compose down -v'
-  alias dcrs='docker-compose restart'
-  alias dcs='docker-compose stop'
-  alias dcsta='docker-compose start'
-  alias dcex='docker-compose exec'
-  alias dcbuild='docker-compose build'
-  alias dcpush='docker-compose push'
-  alias dcrun='docker-compose run'
-  alias dci='docker-compose images'
-  alias dck='docker-compose kill'
-  alias dccfg='docker-compose config'
-  alias dctop='docker-compose top'
 fi
 
 # --- Docker Swarm ---
@@ -281,6 +216,7 @@ if command -v 'docker' &>/dev/null && docker swarm &>/dev/null 2>&1; then
   alias dksrvps='docker service ps'
   alias dksrvl='docker service logs'
   alias dksrvu='docker service update'
+  alias dksrvu-force='docker service update --force'
   alias dksrvrm='docker service rm'
 
   alias dkstk='docker stack'

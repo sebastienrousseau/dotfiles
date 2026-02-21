@@ -18,6 +18,7 @@ The following status checks **MUST** pass before merge is allowed:
 - `gitleaks` - Advanced secret detection
 - `checkov` - Infrastructure security scan
 - `dependency-check` - Known vulnerability scan
+- `security-attestation` - Build provenance attestation (SLSA)
 
 ## Branch Protection Settings
 
@@ -33,6 +34,7 @@ protection_rules:
         - "lint-lua"
         - "security-secrets"
         - "security-dependencies"
+        - "security-attestation"
         - "test-unit"
         - "quality-gate"
     enforce_admins: true

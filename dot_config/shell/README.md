@@ -264,4 +264,4 @@ This repository includes GitHub Actions CI to test the configuration on macOS, U
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [Sebastien Rousseau](https://sebastienrousseau.com)
