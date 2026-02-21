@@ -60,15 +60,16 @@ assert_file_contains "$EAGER_TMPL" 'glob $globPattern' "should discover aliases 
 test_start "eager_template_has_bash_compat"
 assert_file_contains "$EAGER_TMPL" 'expand_aliases' "should enable expand_aliases for bash compatibility"
 
-# Count expected core categories (14)
-test_start "eager_template_has_14_core_categories"
-core_count=$(grep -oE '"[a-z]+"' "$EAGER_TMPL" | head -14 | wc -l)
-if [[ $core_count -eq 14 ]]; then
+# Count expected core categories from list definition
+test_start "eager_template_has_core_categories_count"
+core_line=$(grep -m 1 'coreCategories' "$EAGER_TMPL")
+core_count=$(printf "%s" "$core_line" | grep -oE '"[a-z-]+"' | wc -l)
+if [[ $core_count -eq 18 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has 14 core categories"
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has 18 core categories"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: expected 14 core categories, found $core_count"
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: expected 18 core categories, found $core_count"
 fi
 
 # --- Lazy template (91) ---
