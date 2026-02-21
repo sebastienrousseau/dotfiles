@@ -1,4 +1,38 @@
 #!/usr/bin/env bash
+## Configure system firewall with secure defaults.
+##
+## Enables firewall with deny-by-default policy and minimal exceptions.
+## Requires explicit opt-in via DOTFILES_FIREWALL=1 to prevent accidental
+## lockouts.
+##
+## # Usage
+## DOTFILES_FIREWALL=1 dot firewall
+##
+## # Dependencies
+## - macOS: socketfilterfw (built-in)
+## - Linux: ufw (Uncomplicated Firewall)
+##
+## # Platform Notes
+## ### Platform: macOS
+## - Enables Application Firewall via socketfilterfw
+## - Enables stealth mode (no ICMP responses)
+## - Allows signed applications
+##
+## ### Platform: Linux
+## - Configures UFW with deny incoming / allow outgoing
+## - Allows OpenSSH to prevent lockout
+## - Requires ufw package installed
+##
+## # Security
+## **Requires sudo.** All changes logged to dotfiles.log.
+##
+## # Side Effects
+## - Modifies system firewall rules
+## - May block existing connections
+##
+## # Idempotency
+## Safe to run repeatedly. Applies same rules each time.
+
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

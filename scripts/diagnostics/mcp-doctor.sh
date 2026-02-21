@@ -1,10 +1,45 @@
 #!/usr/bin/env bash
-# MCP configuration diagnostics and hardening checks.
+## MCP configuration diagnostics and hardening checks.
+##
+## Validates MCP (Model Context Protocol) server configurations for security
+## policy compliance: launcher allowlist, filesystem scope, token requirements.
+##
+## # Usage
+## dot mcp [--strict]
+##
+## # Options
+## --strict: Treat policy warnings as errors (for CI enforcement)
+##
+## # Dependencies
+## - jq: JSON parsing (optional but recommended)
+##
+## # Checks Performed
+## | Check | Description |
+## |-------|-------------|
+## | Launcher policy | Only npx/node/uvx allowed |
+## | Filesystem scope | No broad access (/, /home, /Users) |
+## | Arg policy | No wildcards or --unsafe flags |
+## | Token check | Required tokens set (GITHUB_TOKEN, BRAVE_API_KEY) |
+## | Env placeholders | All ${VAR} references resolved |
+##
+## # Exit Codes
+## - 0: All checks passed
+## - 1: Errors found (or warnings in strict mode)
+
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
+
+# Parse arguments
+STRICT_MODE=0
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --strict) STRICT_MODE=1; shift ;;
+    *) shift ;;
+  esac
+done
 
 ui_init
 ui_header "MCP Doctor"
@@ -21,6 +56,8 @@ log_fail() {
 log_warn() {
   ui_warn "$1" "${2:-}"
   Warnings=$((Warnings + 1))
+  # In strict mode, warnings become errors
+  [[ "$STRICT_MODE" -eq 1 ]] && Errors=$((Errors + 1))
 }
 
 MCP_CONFIG="${MCP_CONFIG:-$HOME/.config/claude/mcp_servers.json}"
@@ -130,7 +167,12 @@ if [[ "$Errors" -eq 0 ]]; then
   if [[ "$Warnings" -eq 0 ]]; then
     ui_ok "MCP configuration healthy"
   else
-    ui_warn "MCP configuration healthy" "$Warnings warnings"
+    if [[ "$STRICT_MODE" -eq 1 ]]; then
+      ui_err "MCP issues found" "$Warnings policy warnings (strict mode)"
+      exit 1
+    else
+      ui_warn "MCP configuration healthy" "$Warnings warnings"
+    fi
   fi
 else
   ui_err "MCP issues found" "$Errors errors, $Warnings warnings"

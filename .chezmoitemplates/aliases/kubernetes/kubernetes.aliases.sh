@@ -55,7 +55,7 @@ fi
 
 # minikube
 if command -v minikube &>/dev/null; then
-  alias mk='minikube'
+  alias mkg='minikube'
   alias mkstart='minikube start'
   alias mkstop='minikube stop'
   alias mkstatus='minikube status'

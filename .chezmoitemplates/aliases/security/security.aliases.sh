@@ -5,6 +5,9 @@
 [[ -n "${_SECURITY_ALIASES_LOADED:-}" ]] && return 0
 _SECURITY_ALIASES_LOADED=1
 
+# `strict` enables high-impact aliases (firewall mutation, etc.).
+_DOTFILES_SECURITY_MODE="${DOTFILES_SECURITY_MODE:-standard}"
+
 # Get the directory containing this script
 _SECURITY_ALIASES_DIR="${BASH_SOURCE[0]%/*}"
 
@@ -53,8 +56,8 @@ if command -v ssh >/dev/null 2>&1; then
   done
 fi
 
-# UFW aliases
-if command -v ufw >/dev/null 2>&1; then
+# UFW aliases (Linux-only)
+if [[ "${OSTYPE:-}" == linux* ]] && command -v ufw >/dev/null 2>&1 && [[ "${_DOTFILES_SECURITY_MODE}" == "strict" ]]; then
   # shellcheck source=/dev/null
   [[ -f "${_SECURITY_ALIASES_DIR}/ufw-rules.aliases.sh" ]] && source "${_SECURITY_ALIASES_DIR}/ufw-rules.aliases.sh"
 fi
@@ -73,4 +76,4 @@ fi
 # shellcheck source=/dev/null
 [[ -f "${_SECURITY_ALIASES_DIR}/security-audit.aliases.sh" ]] && source "${_SECURITY_ALIASES_DIR}/security-audit.aliases.sh"
 
-unset _module _SECURITY_ALIASES_DIR
+unset _module _SECURITY_ALIASES_DIR _DOTFILES_SECURITY_MODE

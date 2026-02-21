@@ -16,10 +16,18 @@ export PYENV_VIRTUALENV_DISABLE_PROMPT=1 # Disable virtualenv prompt modificatio
 # Frameworks and Applications
 # uv (Modern Python Package Manager)
 if command -v uv &>/dev/null; then
+  alias uva='uv add'
+  alias uvc='uv pip compile'
+  alias uvi='uv init'
+  alias uvl='uv lock'
   alias uvp='uv pip'
   alias uvpi='uv pip install'
-  alias uvv='uv venv'
+  alias uvra='uv run --all'
   alias uvr='uv run'
+  alias uvsa='source .venv/bin/activate'
+  alias uvs='uv sync'
+  alias uvt='uv tree'
+  alias uvv='uv venv'
 fi
 
 # Add Python 3.12 or the Homebrew Python to PATH
@@ -60,6 +68,8 @@ if command -v 'python3' >/dev/null; then
   alias black='python -m black' # Code formatting with black
   alias mypy='python -m mypy'   # Static type checking
   alias ruff='python -m ruff'   # Fast Python linter
+  alias rf='ruff check --fix'   # Ruff auto-fix lint pass
+  alias rfmt='ruff format'      # Ruff formatter
 
   # Testing
   alias pytest='python -m pytest'     # Run tests

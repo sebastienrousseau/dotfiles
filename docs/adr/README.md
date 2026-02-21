@@ -30,4 +30,4 @@ Each ADR follows this structure:
 
 ---
 
-Made with ❤️ by [](https://github.com/sebastienrousseau)
+Made with ❤️ by [](https://sebastienrousseau.com)

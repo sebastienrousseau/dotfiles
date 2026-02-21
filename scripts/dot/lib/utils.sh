@@ -150,6 +150,21 @@ dot_command_summary() {
     security-score)
       echo "Calculate and print security posture score."
       ;;
+    scorecard)
+      echo "Show unified health, security, and performance scorecard."
+      ;;
+    perf)
+      echo "Profile shell startup performance (3-run average)."
+      ;;
+    conflicts)
+      echo "Report alias and command conflicts."
+      ;;
+    locks)
+      echo "Show version locks for key tools."
+      ;;
+    snapshot)
+      echo "Capture a baseline system snapshot."
+      ;;
     rollback)
       echo "Rollback dotfiles state to a prior point."
       ;;
@@ -171,6 +186,9 @@ dot_command_summary() {
     tools)
       echo "Browse or install toolchain components."
       ;;
+    aliases)
+      echo "List, search, and explain configured aliases."
+      ;;
     new)
       echo "Create a new project from templates."
       ;;
@@ -179,6 +197,9 @@ dot_command_summary() {
       ;;
     log-rotate)
       echo "Rotate dotfiles local log files."
+      ;;
+    setup)
+      echo "Interactive setup for profiles, features, and secrets."
       ;;
     theme)
       echo "Switch terminal appearance theme."
@@ -196,7 +217,10 @@ dot_command_summary() {
       echo "Initialize age key for encrypted secrets."
       ;;
     secrets)
-      echo "Edit encrypted dotfiles secrets."
+      echo "Manage secrets (set/get/list/load/provider)."
+      ;;
+    env)
+      echo "Load secret buckets into shell exports."
       ;;
     secrets-create)
       echo "Create a new encrypted secrets file."

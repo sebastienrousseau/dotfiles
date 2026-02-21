@@ -14,4 +14,4 @@ fzf, zoxide, lazygit, jq).
 
 ---
 
-Made with ❤️ by [](https://github.com/sebastienrousseau)
+Made with ❤️ by [](https://sebastienrousseau.com)

@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# --- UI Theme ---
+CYAN='\033[38;5;86m'
+GREEN='\033[38;5;84m'
+RED='\033[38;5;203m'
+GRAY='\033[38;5;244m'
+NC='\033[0m'
+
+usage() {
+  echo "Usage: hashsum [options] [input]"
+  echo "  -m, --md5       MD5"
+  echo "  -1, --sha1      SHA1"
+  echo "  -2, --sha256    SHA256 (default)"
+  echo "  -5, --sha512    SHA512"
+  echo "  -a, --all       Show all hashes"
+  echo "  -f, --file      Hash a file"
+  echo "  -c, --check     Verify hash (expects: -c <hash> <input>)"
+  echo "  -h, --help      Show help"
+  echo ""
+  echo "Note: This tool was renamed from 'hash' to avoid shell builtin collisions."
+}
+
+get_cmd() {
+  case "$1" in
+    md5)
+      command -v md5sum >/dev/null && echo "md5sum" || echo "md5 -q"
+      ;;
+    sha1)
+      command -v sha1sum >/dev/null && echo "sha1sum" || echo "shasum -a 1"
+      ;;
+    sha256)
+      command -v sha256sum >/dev/null && echo "sha256sum" || echo "shasum -a 256"
+      ;;
+    sha512)
+      command -v sha512sum >/dev/null && echo "sha512sum" || echo "shasum -a 512"
+      ;;
+    *)
+      echo "openssl $1 -r"
+      ;;
+  esac
+}
+
+ALGO="sha256"
+FILE_MODE=false
+CHECK_MODE=false
+ALL_MODE=false
+EXPECTED=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -m|--md5) ALGO="md5"; shift ;;
+    -1|--sha1) ALGO="sha1"; shift ;;
+    -2|--sha256) ALGO="sha256"; shift ;;
+    -5|--sha512) ALGO="sha512"; shift ;;
+    -a|--all) ALL_MODE=true; shift ;;
+    -f|--file) FILE_MODE=true; shift ;;
+    -c|--check) CHECK_MODE=true; EXPECTED="$2"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    -*) echo "Unknown option: $1"; usage; exit 1 ;;
+    *) break ;;
+  esac
+done
+
+compute() {
+  local cmd
+  cmd=$(get_cmd "$1")
+  if $FILE_MODE; then
+    $cmd "$2" | awk '{print $1}'
+  else
+    echo -n "$2" | $cmd | awk '{print $1}'
+  fi
+}
+
+if [[ $# -gt 0 ]]; then
+  INPUT="$1"
+else
+  read -r INPUT
+fi
+
+if $FILE_MODE && [[ ! -f "$INPUT" ]]; then
+  echo "File not found: $INPUT"
+  exit 1
+fi
+
+if $ALL_MODE; then
+  for a in md5 sha1 sha256 sha512; do
+    printf "${CYAN}%-8s${NC} %s\n" "$a:" "$(compute "$a" "$INPUT")"
+  done
+  exit 0
+fi
+
+if $CHECK_MODE; then
+  COMPUTED=$(compute "$ALGO" "$INPUT")
+  EXPECTED_LOWER=$(echo "$EXPECTED" | tr '[:upper:]' '[:lower:]')
+  COMPUTED_LOWER=$(echo "$COMPUTED" | tr '[:upper:]' '[:lower:]')
+
+  if [[ "$EXPECTED_LOWER" == "$COMPUTED_LOWER" ]]; then
+    echo -e "${GREEN}✓${NC} Hash matches"
+    exit 0
+  else
+    echo -e "${RED}✗${NC} Hash mismatch"
+    echo "  Expected: $EXPECTED"
+    echo "  Got:      $COMPUTED"
+    exit 1
+  fi
+fi
+
+compute "$ALGO" "$INPUT"

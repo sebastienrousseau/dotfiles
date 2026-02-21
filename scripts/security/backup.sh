@@ -1,4 +1,34 @@
 #!/usr/bin/env bash
+## Create compressed backup of home directory.
+##
+## Archives the home directory (excluding cache and trash) to a timestamped
+## .tgz file. Supports custom source and destination directories via
+## environment variables.
+##
+## # Usage
+## dot backup
+## DOTFILES_BACKUP_DIR=/mnt/backup dot backup
+##
+## # Dependencies
+## - tar: Archive creation
+##
+## # Environment Variables
+## | Variable | Default | Description |
+## |----------|---------|-------------|
+## | DOTFILES_BACKUP_DIR | ~/.backups | Backup destination |
+## | DOTFILES_BACKUP_SRC | ~/ | Source directory |
+##
+## # Platform Notes
+## - macOS: Uses BSD tar
+## - Linux: Uses GNU tar
+## - WSL: Backup stored in Linux filesystem for performance
+##
+## # Security
+## Does not encrypt backups. Use age/gpg for sensitive data.
+##
+## # Idempotency
+## Creates new timestamped backup on each run.
+
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

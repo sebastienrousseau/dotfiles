@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 # CD Navigation - Core Functions (cd_with_history, mkcd)
-[[ -n "${_CD_CORE_LOADED:-}" ]] && return 0
+[[ -n "${_CD_CORE_LOADED:-}" ]] && :
 _CD_CORE_LOADED=1
 
 # Build the ls command based on configuration

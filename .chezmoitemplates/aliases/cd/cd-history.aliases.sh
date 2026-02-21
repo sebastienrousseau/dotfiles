@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 # CD Navigation - Directory History
-[[ -n "${_CD_HISTORY_LOADED:-}" ]] && return 0
+[[ -n "${_CD_HISTORY_LOADED:-}" ]] && :
 _CD_HISTORY_LOADED=1
 
 # Directory history navigation
