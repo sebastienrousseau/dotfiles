@@ -1,10 +1,49 @@
 #!/usr/bin/env bash
-# Dotfiles CLI Entry Point - v0.2.487
-# Modular architecture with command handlers in scripts/dot/commands/
+## Dotfiles CLI Entry Point — Orchestrates all dotfiles operations.
+##
+## The `dot` command is the unified interface for managing your shell environment.
+## It dispatches to modular command handlers for core operations, diagnostics,
+## security, secrets, and appearance management.
+##
+## # Requirements
+## - chezmoi: Dotfiles manager (auto-detected)
+## - bash 4+: Shell interpreter
+##
+## # Usage
+## dot [command] [args...]
+## dot help                    # Show all commands
+## dot apply                   # Apply dotfiles
+## dot doctor                  # Check system health
+## dot secrets set KEY         # Store a secret
+##
+## # Architecture
+## Commands are dispatched to modular handlers in scripts/dot/commands/:
+## | Module       | Commands                                    |
+## |--------------|---------------------------------------------|
+## | core.sh      | apply, sync, update, add, diff, status      |
+## | diagnostics  | doctor, health, benchmark, verify           |
+## | tools.sh     | aliases, new, packages, setup               |
+## | secrets.sh   | secrets-init, secrets, env                  |
+## | security.sh  | firewall, telemetry, backup                 |
+## | appearance   | theme, wallpaper, fonts                     |
+##
+## # Platform Notes
+## - macOS: Full support (Homebrew integration)
+## - Linux: Full support (apt, dnf, pacman)
+## - WSL: Full support (Windows interop)
+##
+## # Idempotency
+## Safe to invoke repeatedly. All subcommands are idempotent.
+##
+## # Variables
+## | Variable           | Description                    |
+## |--------------------|--------------------------------|
+## | CHEZMOI_SOURCE_DIR | Override source directory      |
+## | DOTFILES_VERSION   | Current version                |
 
-set -e
+set -euo pipefail
 
-VERSION="0.2.487"
+VERSION="0.2.488"
 
 COMMAND="$1"
 if [ -n "$1" ]; then

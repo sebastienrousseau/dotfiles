@@ -1,6 +1,20 @@
 #!/usr/bin/env bash
-# Regex tester
-# Usage: regex <pattern> <string> | regex -f <pattern> <file>
+## Regex Tester — Test regular expressions against strings or files.
+##
+## Interactive regex testing with match highlighting.
+## Supports case-insensitive and global matching modes.
+##
+## # Requirements
+## - grep: Extended regex support (GNU or BSD)
+##
+## # Usage
+## regex '[0-9]+' 'abc123def'      # Test pattern
+## regex -g '[a-z]+' 'hello world' # Find all matches
+## regex -f '^#' config.txt        # Test against file
+## regex -i 'error' log.txt        # Case insensitive
+##
+## # Platform Notes
+## - All platforms: Uses grep -E (extended regex)
 
 set -euo pipefail
 
@@ -76,9 +90,9 @@ if $GLOBAL; then
   if echo "$INPUT" | grep -oE $IGNORE_CASE "$PATTERN" $GREP_COLOR; then
     echo "---"
     MATCH_COUNT=$(echo "$INPUT" | grep -oE $IGNORE_CASE "$PATTERN" | wc -l)
-    echo "✓ Found $MATCH_COUNT match(es)"
+    echo "Found $MATCH_COUNT match(es)"
   else
-    echo "✗ No matches found"
+    echo "No matches found"
     exit 1
   fi
 else
@@ -86,11 +100,11 @@ else
   if echo "$INPUT" | grep -qE $IGNORE_CASE "$PATTERN"; then
     echo "$INPUT" | grep -E $IGNORE_CASE "$PATTERN" $GREP_COLOR
     echo "---"
-    echo "✓ Pattern matches"
+    echo "Pattern matches"
   else
     echo "$INPUT"
     echo "---"
-    echo "✗ Pattern does not match"
+    echo "Pattern does not match"
     exit 1
   fi
 fi

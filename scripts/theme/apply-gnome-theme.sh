@@ -1,10 +1,27 @@
-#!/bin/bash
-# GNOME Theme Applicator - Applies Catppuccin themes to GNOME desktop
-# Usage: apply-gnome-theme.sh <theme-name>
+#!/usr/bin/env bash
+## Apply GNOME Theme — Apply Catppuccin themes to GNOME desktop.
+##
+## Configures GTK theme, icon theme, cursor theme, shell theme,
+## fonts, and wallpaper using gsettings.
+##
+## # Requirements
+## - gsettings: GNOME settings tool
+## - gnome-extensions (optional): For shell themes
+## - User Themes extension (optional): For custom shell themes
+##
+## # Usage
+## apply-gnome-theme.sh catppuccin-mocha     # Apply dark theme
+## apply-gnome-theme.sh catppuccin-latte     # Apply light theme
+## apply-gnome-theme.sh current              # Show current theme
+## apply-gnome-theme.sh backup               # Backup current settings
+##
+## # Platform Notes
+## - GNOME 42+: Full color-scheme support
+## - Older GNOME: Color scheme setting skipped
 
-set -e
+set -euo pipefail
 
-THEME_NAME="$1"
+THEME_NAME="${1:-}"
 
 if [ -z "$THEME_NAME" ]; then
   echo "Usage: $0 <theme-name>"
