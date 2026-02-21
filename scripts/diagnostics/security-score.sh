@@ -3,6 +3,7 @@
 # Usage: dot security-score [--verbose|-v] [--json]
 
 set -euo pipefail
+set +o xtrace 2>/dev/null || true
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
@@ -32,7 +33,6 @@ while [[ $# -gt 0 ]]; do
 done
 
 ui_init
-set +o xtrace 2>/dev/null || true
 NC="${NORMAL}"
 RED="${RED:-}"
 GREEN="${GREEN:-}"
@@ -48,7 +48,7 @@ add_points() {
   local points="$2"
   local max="$3"
   local description="$4"
-  # $5 is status (pass/fail/partial) - used for icon selection below
+  local status="${5:-}"
 
   TOTAL_POINTS=$((TOTAL_POINTS + points))
   MAX_POINTS=$((MAX_POINTS + max))
@@ -56,15 +56,22 @@ add_points() {
 
   if ! $JSON_OUTPUT && $VERBOSE; then
     local icon
+    local color=""
     if [[ $points -eq $max ]]; then
       icon="✓"
+      color="$GREEN"
+      status="pass"
     elif [[ $points -gt 0 ]]; then
       icon="◐"
+      color="$YELLOW"
+      status="partial"
     else
       icon="✗"
+      color="$RED"
+      status="fail"
     fi
     if [[ "$UI_ENABLED" = "1" ]]; then
-      ui_status "$icon" "$description" "$points/$max pts"
+      ui_status "$icon" "$description" "$points/$max pts" "$color"
     else
       printf "  %s %-40s %d/%d pts\n" "$icon" "$description" "$points" "$max"
     fi
@@ -335,22 +342,18 @@ print_summary() {
   local grade
   grade=$(get_grade $score)
 
-  if [[ "$UI_ENABLED" = "1" ]]; then
-    ui_kv "Score" "${score}% (Grade: ${grade})"
+  printf "  Score: ["
+  if [[ $score -ge 80 ]]; then
+    printf '%s' "${GREEN}"
+  elif [[ $score -ge 60 ]]; then
+    printf '%s' "${YELLOW}"
   else
-    printf "  Score: ["
-    if [[ $score -ge 80 ]]; then
-      printf '%s' "${GREEN}"
-    elif [[ $score -ge 60 ]]; then
-      printf '%s' "${YELLOW}"
-    else
-      printf '%s' "${RED}"
-    fi
-    printf "%${filled}s" | tr ' ' "$block"
-    printf '%s' "${NC}"
-    printf "%${empty}s" | tr ' ' "$pad"
-    printf "] %s%%  Grade: %s\n" "${score}" "${grade}"
+    printf '%s' "${RED}"
   fi
+  printf "%${filled}s" | tr ' ' "$block"
+  printf '%s' "${NC}"
+  printf "%${empty}s" | tr ' ' "$pad"
+  printf "] %s%%  Grade: %s\n" "${score}" "${grade}"
 
   echo -e "\n  Points: ${TOTAL_POINTS}/${MAX_POINTS}"
   echo ""
