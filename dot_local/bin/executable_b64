@@ -1,23 +1,26 @@
 #!/usr/bin/env bash
-# Base64 encoder/decoder
-# Usage: b64 [encode|decode] <string> | b64 [encode|decode] < file
-
 set -euo pipefail
 
+# --- UI Theme ---
+CYAN='\033[38;5;86m'
+PURPLE='\033[38;5;141m'
+GREEN='\033[38;5;84m'
+GRAY='\033[38;5;244m'
+NC='\033[0m'
+BOLD='\033[1m'
+
+log_header() {
+  echo -e "${BOLD}${PURPLE}󰇧 Base64 Transcoder${NC} ${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+}
+
 usage() {
-  echo "Usage: b64 [OPTIONS] [STRING]"
-  echo ""
-  echo "Options:"
-  echo "  -e, --encode    Encode to base64 (default)"
-  echo "  -d, --decode    Decode from base64"
-  echo "  -u, --url       Use URL-safe base64"
-  echo "  -h, --help      Show this help"
-  echo ""
-  echo "Examples:"
-  echo "  b64 'hello world'           # Encode string"
-  echo "  b64 -d 'aGVsbG8gd29ybGQ='   # Decode string"
-  echo "  cat file.bin | b64          # Encode file"
-  echo "  b64 -d < encoded.txt        # Decode file"
+  log_header
+  echo -e "Usage: b64 [options] [string]"
+  echo -e "Options:"
+  echo -e "  -e, --encode    ${GRAY}Encode to base64 (default)${NC}"
+  echo -e "  -d, --decode    ${GRAY}Decode from base64${NC}"
+  echo -e "  -u, --url       ${GRAY}URL-safe mode${NC}"
+  exit 0
 }
 
 MODE="encode"
@@ -28,18 +31,12 @@ while [[ $# -gt 0 ]]; do
     -e|--encode|encode) MODE="encode"; shift ;;
     -d|--decode|decode) MODE="decode"; shift ;;
     -u|--url) URL_SAFE=true; shift ;;
-    -h|--help) usage; exit 0 ;;
-    -*) echo "Unknown option: $1"; usage; exit 1 ;;
+    -h|--help) usage ;;
     *) break ;;
   esac
 done
 
-# Get input
-if [[ $# -gt 0 ]]; then
-  INPUT="$*"
-else
-  INPUT=$(cat)
-fi
+INPUT="${*:-$(cat)}"
 
 if [[ "$MODE" == "encode" ]]; then
   if $URL_SAFE; then
@@ -49,11 +46,8 @@ if [[ "$MODE" == "encode" ]]; then
   fi
 else
   if $URL_SAFE; then
-    # Add padding back
     INPUT=$(echo "$INPUT" | tr '-_' '+/')
-    MOD=$((${#INPUT} % 4))
-    if [[ $MOD -eq 2 ]]; then INPUT="${INPUT}=="; fi
-    if [[ $MOD -eq 3 ]]; then INPUT="${INPUT}="; fi
+    while [[ $(( ${#INPUT} % 4 )) -ne 0 ]]; do INPUT="${INPUT}="; done
   fi
-  echo "$INPUT" | base64 -d 2>/dev/null || base64 -D <<< "$INPUT"
+  echo "$INPUT" | base64 -d 2>/dev/null || echo "$INPUT" | base64 -D
 fi

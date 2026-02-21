@@ -2,7 +2,7 @@
 # CD Navigation - Main loader
 # Loads all CD navigation submodules in dependency order
 
-[[ -n "${_CD_ALIASES_LOADED:-}" ]] && return 0
+[[ -n "${_CD_ALIASES_LOADED:-}" ]] && :
 _CD_ALIASES_LOADED=1
 
 # Get the directory containing this script

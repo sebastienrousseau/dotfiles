@@ -56,10 +56,9 @@ function clear_print_tree() {
 # Alias definitions
 alias cdw='cd_workspace'
 alias c='clear_screen'
-alias clc='clear_list_current'
+alias cls='clear_list_current'
 alias cpl='clear_pwd_list'
 alias cplt='clear_pwd_tree'
 alias clh='clear_history'
-alias cl='clear_screen'
 alias clp='print_working_dir'
 alias clt='clear_print_tree'

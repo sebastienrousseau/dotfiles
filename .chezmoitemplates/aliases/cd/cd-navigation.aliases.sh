@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 # CD Navigation - Project Navigation and Last Working Directory
-[[ -n "${_CD_NAVIGATION_LOADED:-}" ]] && return 0
+[[ -n "${_CD_NAVIGATION_LOADED:-}" ]] && :
 _CD_NAVIGATION_LOADED=1
 
 # Find and navigate to project root (git, npm, etc.)

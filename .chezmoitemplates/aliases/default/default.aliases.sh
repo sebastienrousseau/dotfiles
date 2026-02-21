@@ -29,12 +29,6 @@ set_default_aliases() {
   # Display the current date and time.
   alias da='date "+%Y-%m-%d %A %T %Z"'
 
-  # Shortcut for `pwd` which returns working directory name.
-  alias p='pwd'
-
-  # Display the $PATH variable on newlines.
-  alias path='echo ${PATH//:/\\n}'
-
   # Reload the shell.
   alias r='reload'
 
@@ -50,26 +44,23 @@ set_default_aliases() {
   alias ':q'='quit'
 
   # Shortcut for the `exit` command.
-  alias bye='quit'
-
-  # Shortcut for the `exit` command.
   alias q='quit'
 
   # Shortcut for the `exit` command.
   alias quit='exit'
 
-  # Shutdown the system.
-  alias halt='sudo /sbin/halt'
+  # Shutdown the system (portable form).
+  alias halt='sudo shutdown -h now'
 
-  # Alias to view history
-  alias h='history'
-  alias history='fc -il 1' # Show history with ISO 8601 timestamps
+  if [ -n "${ZSH_VERSION:-}" ]; then
+    alias history='fc -il 1' # Show history with ISO 8601 timestamps (zsh)
+  fi
 
-  # Poweroff the system.
-  alias poweroff='sudo /sbin/shutdown'
+  # Poweroff the system (portable syntax).
+  alias poweroff='sudo shutdown -h now'
 
-  # Reboot the system.
-  alias reboot='sudo /sbin/reboot'
+  # Reboot the system (portable syntax).
+  alias reboot='sudo shutdown -r now'
 
   ## Network aliases
   # Append sudo to ifconfig (configure network interface parameters)
@@ -79,22 +70,8 @@ set_default_aliases() {
   # Get network interface parameters for en0.
   alias ipinfo='ipconfig getpacket en0'
 
-  # Show only active network listeners.
-  alias nls='sudo lsof -i -P | grep LISTEN'
-
-  # List of open ports.
-  alias op='sudo lsof -i -P'
-
   # Limit Ping to 5 ECHO_REQUEST packets.
   alias ping='ping -c 5'
-
-  # List all listening ports.
-  alias ports='netstat -tulan'
-
-  ## System monitoring aliases
-  # Allows the user to interactively monitor the system's vital resources
-  # or server's processes in real time.
-  alias top='sudo btop'
 
   # Clear ASL logs (macOS) - requires confirmation
   clear_asl_logs() {
@@ -122,8 +99,15 @@ set_default_aliases() {
   # Reload the shell.
   alias reload='exec $SHELL -l'
 
-  # Get the weather.
-  alias wth='curl -s "wttr.in/?format=3"'
+  # WSL clipboard bridge (only when native macOS clipboard tools are absent).
+  if [[ "${OSTYPE:-}" == linux* ]] && command -v clip.exe >/dev/null 2>&1; then
+    if ! command -v pbcopy >/dev/null 2>&1; then
+      pbcopy() { clip.exe; }
+    fi
+    if ! command -v pbpaste >/dev/null 2>&1 && command -v powershell.exe >/dev/null 2>&1; then
+      pbpaste() { powershell.exe -NoProfile -Command "Get-Clipboard" | tr -d '\r'; }
+    fi
+  fi
 
   ## File system navigation aliases
 }

@@ -12,10 +12,12 @@ if command -v 'cargo' >/dev/null; then
   alias cgr='cg run'              # Run debug
   alias cgrr='cg run --release'   # Run release
   alias cgw='cg watch'            # Watch and rebuild
+  alias cw='cargo watch -x run'   # Live run loop
 
   # Testing and Benchmarking
   alias cgt='cg test'                      # Run tests
   alias cgtr='cg test --release'           # Run tests in release mode
+  alias cnt='cargo nextest run'            # Faster nextest runner
   alias cgbh='cg bench'                    # Run benchmarks
   alias cgta='cg test --all'               # Test all targets
   alias cgtt='cg test -- --test-threads=1' # Single threaded tests
@@ -25,9 +27,11 @@ if command -v 'cargo' >/dev/null; then
   alias cgcl='cg clean'     # Clean build artifacts
   alias cgcy='cg clippy'    # Run clippy lints
   alias cgf='cg fmt'        # Format code
+  alias cnfmt='cargo +nightly fmt' # Nightly format
   alias cgfa='cg fmt --all' # Format all code
   alias cgfx='cg fix'       # Auto-fix code issues
   alias cgaud='cg audit'    # Security vulnerabilities check
+  alias cnclip='cargo +nightly clippy' # Nightly clippy
 
   # Documentation
   alias cgd='cg doc --open'                    # Build and open documentation
@@ -38,6 +42,7 @@ if command -v 'cargo' >/dev/null; then
   alias cga='cg add'        # Add dependency
   alias cgad='cg add --dev' # Add dev dependency
   alias cgu='cg update'     # Update dependencies
+  alias cup='cargo update'  # Update dependencies (short form)
   alias cgo='cg outdated'   # Check outdated dependencies
   alias cgv='cg vendor'     # Vendor dependencies
   alias cgtree='cg tree'    # Display dependency tree

@@ -238,4 +238,4 @@ When adding new functions to the dotfiles:
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [Sebastien Rousseau](https://sebastienrousseau.com)

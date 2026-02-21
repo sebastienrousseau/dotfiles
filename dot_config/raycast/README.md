@@ -10,4 +10,4 @@ To restore, import the saved file from Raycast settings.
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [Sebastien Rousseau](https://sebastienrousseau.com)

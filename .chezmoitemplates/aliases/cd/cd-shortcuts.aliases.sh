@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 # CD Navigation - Parent Directory and Common Location Shortcuts
-[[ -n "${_CD_SHORTCUTS_LOADED:-}" ]] && return 0
+[[ -n "${_CD_SHORTCUTS_LOADED:-}" ]] && :
 _CD_SHORTCUTS_LOADED=1
 
 # Parent Directory Shortcuts
@@ -16,7 +16,7 @@ alias .....='cd_with_history ../../../..' # Go up four levels
 [[ -d "${CODE_DIR}" ]] && alias cod='cd_with_history "${CODE_DIR}"'   # Code
 [[ -d "${DESK_DIR}" ]] && alias dsk='cd_with_history "${DESK_DIR}"'   # Desktop
 [[ -d "${DOCS_DIR}" ]] && alias doc='cd_with_history "${DOCS_DIR}"'   # Documents
-[[ -d "${DOTF_DIR}" ]] && alias dot='cd_with_history "${DOTF_DIR}"'   # Dotfiles
+[[ -d "${DOTF_DIR}" ]] && alias dotf='cd_with_history "${DOTF_DIR}"'  # Dotfiles
 [[ -d "${DOWN_DIR}" ]] && alias dwn='cd_with_history "${DOWN_DIR}"'   # Downloads
 [[ -d "${DOWN_DIR}" ]] && alias hom='cd_with_history "${HOME_DIR}"'   # Home Directory
 [[ -d "${MUSIC_DIR}" ]] && alias mus='cd_with_history "${MUSIC_DIR}"' # Music

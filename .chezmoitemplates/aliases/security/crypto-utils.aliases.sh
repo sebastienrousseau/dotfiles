@@ -4,18 +4,42 @@
 _CRYPTO_UTILS_LOADED=1
 
 # Hashing Utilities (with fallback for macOS)
-if command -v sha256sum >/dev/null 2>&1; then
-  alias sha256='sha256sum'
-  alias sha1='sha1sum'
-  alias sha512='sha512sum'
-  alias md5='md5sum'
-elif command -v shasum >/dev/null 2>&1; then
-  # macOS default
-  alias sha256='shasum -a 256'
-  alias sha1='shasum -a 1'
-  alias sha512='shasum -a 512'
-  alias md5='md5' # macOS has `md5` by default
-fi
+dot_hash_sha256() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$@"
+  else
+    shasum -a 256 "$@"
+  fi
+}
+
+dot_hash_sha1() {
+  if command -v sha1sum >/dev/null 2>&1; then
+    sha1sum "$@"
+  else
+    shasum -a 1 "$@"
+  fi
+}
+
+dot_hash_sha512() {
+  if command -v sha512sum >/dev/null 2>&1; then
+    sha512sum "$@"
+  else
+    shasum -a 512 "$@"
+  fi
+}
+
+dot_hash_md5() {
+  if command -v md5sum >/dev/null 2>&1; then
+    md5sum "$@"
+  else
+    md5 "$@"
+  fi
+}
+
+alias sha256='dot_hash_sha256'
+alias sha1='dot_hash_sha1'
+alias sha512='dot_hash_sha512'
+alias md5='dot_hash_md5'
 
 # Password Generation
 if command -v pwgen >/dev/null 2>&1; then

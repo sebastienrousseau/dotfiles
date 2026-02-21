@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 # CD Navigation - Directory Stack Management
-[[ -n "${_CD_STACK_LOADED:-}" ]] && return 0
+[[ -n "${_CD_STACK_LOADED:-}" ]] && :
 _CD_STACK_LOADED=1
 
 alias dirs='dirs -v'        # List directory stack with indices
