@@ -1,6 +1,40 @@
 #!/usr/bin/env bash
-# Enhanced Shell Benchmark with Per-Component Profiling
-# Usage: dot benchmark [--detailed|--profile|--compare]
+## Shell Performance Benchmark.
+##
+## Measures shell startup time with per-component profiling. Uses hyperfine
+## for statistical accuracy or falls back to basic timing. Tracks history
+## for regression detection.
+##
+## # Usage
+## dot benchmark                    # Basic startup timing
+## dot benchmark --detailed         # Per-component breakdown
+## dot benchmark --profile          # zprof analysis
+## dot benchmark --compare          # Compare with history
+##
+## # Dependencies
+## - python3: Millisecond timing (required)
+## - hyperfine: Statistical benchmarking (optional, falls back to basic)
+## - jq: JSON parsing for results (optional)
+## - zsh: Target shell (required)
+##
+## # Metrics
+## | Rating | Threshold | Description |
+## |--------|-----------|-------------|
+## | Excellent | <100ms | Instant response |
+## | Good | <200ms | Responsive |
+## | Acceptable | <500ms | Noticeable delay |
+## | Slow | >500ms | Optimization needed |
+##
+## # Platform Notes
+## - macOS: Full support
+## - Linux: Full support
+## - WSL: May show higher times due to filesystem overhead
+##
+## # Output Files
+## Benchmarks saved to ~/.local/share/dotfiles/benchmarks/
+##
+## # Idempotency
+## Safe to run repeatedly. Creates timestamped history files.
 
 set -euo pipefail
 

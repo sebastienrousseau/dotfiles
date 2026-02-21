@@ -5,7 +5,7 @@
 
 # Dotfiles Aliases
 
-Simply designed to fit your shell life 
+Modular alias definitions for 46 functional domains. 
 
 ![Dotfiles banner][banner]
 
