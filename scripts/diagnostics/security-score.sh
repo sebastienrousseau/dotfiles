@@ -336,8 +336,8 @@ print_summary() {
   local bar_width=28
   local filled=$((score * bar_width / 100))
   local empty=$((bar_width - filled))
-  local block="#"
-  local pad="."
+  local block="█"
+  local pad="░"
 
   local grade
   grade=$(get_grade $score)
