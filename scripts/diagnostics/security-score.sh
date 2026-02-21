@@ -26,6 +26,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 ui_init
+set +x
+NC="${NORMAL}"
 
 # Scoring
 TOTAL_POINTS=0
