@@ -1,23 +1,11 @@
 #!/usr/bin/env bash
-# Epoch time converter
-# Usage: epoch [timestamp] | epoch -r <date>
-
 set -euo pipefail
 
-usage() {
-  echo "Usage: epoch [OPTIONS] [VALUE]"
-  echo ""
-  echo "Options:"
-  echo "  -r, --reverse    Convert date string to epoch"
-  echo "  -m, --millis     Use milliseconds precision"
-  echo "  -h, --help       Show this help"
-  echo ""
-  echo "Examples:"
-  echo "  epoch                  # Current epoch time"
-  echo "  epoch 1234567890       # Convert epoch to date"
-  echo "  epoch -r '2024-01-01'  # Convert date to epoch"
-  echo "  epoch -m               # Current epoch in milliseconds"
-}
+# --- UI Theme ---
+PURPLE='\033[38;5;141m'
+CYAN='\033[38;5;86m'
+GRAY='\033[38;5;244m'
+NC='\033[0m'
 
 REVERSE=false
 MILLIS=false
@@ -26,37 +14,25 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     -r|--reverse) REVERSE=true; shift ;;
     -m|--millis) MILLIS=true; shift ;;
-    -h|--help) usage; exit 0 ;;
-    -*) echo "Unknown option: $1"; usage; exit 1 ;;
+    -h|--help)
+      echo -e "${PURPLE}epoch${NC} ${GRAY}convert to/from unix time${NC}"
+      echo "Usage: epoch [options] [value]"
+      echo "  -r, --reverse   Convert date string to epoch"
+      echo "  -m, --millis    Use milliseconds"
+      exit 0
+      ;;
     *) break ;;
   esac
 done
 
 if $REVERSE; then
-  # Convert date to epoch
-  DATE_STR="${1:-}"
-  if [[ -z "$DATE_STR" ]]; then
-    echo "Error: Date string required for reverse conversion"
-    exit 1
-  fi
-  if $MILLIS; then
-    date -d "$DATE_STR" +%s%3N 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE_STR" +%s000 2>/dev/null
-  else
-    date -d "$DATE_STR" +%s 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE_STR" +%s 2>/dev/null
-  fi
+  STR="${1:-}"
+  [[ -z "$STR" ]] && exit 1
+  date -d "$STR" +%s 2>/dev/null || date -j -f "%Y-%m-%d" "$STR" +%s 2>/dev/null
 elif [[ $# -gt 0 ]]; then
-  # Convert epoch to date
   EPOCH="$1"
-  # Handle milliseconds
-  if [[ ${#EPOCH} -gt 10 ]]; then
-    EPOCH=$((EPOCH / 1000))
-  fi
+  [[ ${#EPOCH} -gt 10 ]] && EPOCH=$((EPOCH / 1000))
   date -d "@$EPOCH" 2>/dev/null || date -r "$EPOCH" 2>/dev/null
 else
-  # Current time
-  if $MILLIS; then
-    date +%s%3N 2>/dev/null || echo "$(date +%s)000"
-  else
-    date +%s
-  fi
+  $MILLIS && date +%s%3N || date +%s
 fi

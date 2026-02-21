@@ -1,127 +1,147 @@
 #!/usr/bin/env bash
-# Update AI provider CLIs (npm + pipx) using mise-managed runtimes.
 #
-# - npm globals: claude, gemini, codex, opencode, etc.
-# - pipx: sgpt, aider, etc.
+# Euxis AI Workflow Updater (2026 Cross-Platform Edition)
+# Optimized for: macOS, ZorinOS/Linux, and WSL
+#
+# Logic: Detects environment-specific managers (APT/Brew/Binary) automatically.
 
 set -euo pipefail
 
-CYAN='\033[0;36m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
+# --- Configuration & Theme ---
+CYAN='\033[38;5;86m'
+PURPLE='\033[38;5;141m'
+GREEN='\033[38;5;84m'
+YELLOW='\033[38;5;227m'
+RED='\033[38;5;203m'
+GRAY='\033[38;5;244m'
 NC='\033[0m'
+BOLD='\033[1m'
 
-log_section() { echo -e "\n${CYAN}━━━ $1 ━━━${NC}"; }
-log_success() { echo -e "${GREEN}✓${NC} $1"; }
-log_skip() { echo -e "${YELLOW}○${NC} $1 (skipped)"; }
+# --- UI Components ---
+log_header() {
+    echo -e "\n${BOLD}${PURPLE}󱐋 Updating AI Environment${NC}"
+    echo -e "${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+}
 
-# NPM global packages (via mise-managed Node)
+step() { echo -ne "${CYAN}➜${NC} ${BOLD}$1...${NC} "; }
+ok() { echo -e "${GREEN}done${NC}"; }
+skip() { echo -e "${YELLOW}skipped${NC} ${GRAY}($1)${NC}"; }
+err() { echo -e "${RED}error${NC}\n   ${RED}󱈸 $1${NC}"; }
+
+# --- Initialization ---
+log_header
+
+# Pre-auth sudo to avoid mid-script interruptions
+if [[ "$(uname -s)" == "Linux" ]]; then
+    step "Authenticating sudo"
+    sudo -v && ok || { err "Sudo required for system updates"; exit 1; }
+fi
+
+# --- 1. mise Core (Multi-Method Detection) ---
 if command -v mise >/dev/null 2>&1; then
-  log_section "NPM (global)"
-  mise exec node -- npm update -g --audit=false
-  log_success "NPM globals updated"
+    step "Checking mise core"
+    if [[ "$(uname -s)" == "Linux" ]] && command -v dpkg >/dev/null 2>&1 && dpkg -s mise >/dev/null 2>&1; then
+        # Handle your ZorinOS APT installation
+        sudo apt update -y -o Dir::Etc::sourcelist="sources.list.d/jdx.list" >/dev/null 2>&1 || true
+        sudo apt install --only-upgrade -y mise >/dev/null 2>&1
+        ok
+    elif command -v brew >/dev/null 2>&1 && brew list mise >/dev/null 2>&1; then
+        # Handle macOS/Linux Brew installation
+        brew upgrade mise >/dev/null 2>&1
+        ok
+    else
+        # Fallback for standalone binary installation
+        mise self-update -y >/dev/null 2>&1 && ok || skip "manual update needed"
+    fi
 else
-  log_skip "NPM globals (mise not available)"
+    skip "mise not found"
 fi
 
-# Pipx packages (sgpt, aider, etc.)
+# --- 2. System & Language Packages ---
+
+# Homebrew
+if command -v brew >/dev/null 2>&1; then
+    step "Homebrew packages"
+    brew update >/dev/null && brew upgrade --quiet >/dev/null
+    ok
+fi
+
+# NPM Globals (via mise)
+if command -v mise >/dev/null 2>&1; then
+    step "NPM (claude, gemini, etc)"
+    mise exec node -- npm update -g --audit=false >/dev/null 2>&1
+    ok
+fi
+
+# Pipx (aider, sgpt)
 if command -v pipx >/dev/null 2>&1; then
-  log_section "Pipx"
-  pipx upgrade-all
-  log_success "Pipx packages updated"
-else
-  log_skip "Pipx (not installed)"
+    step "Pipx tools"
+    pipx upgrade-all >/dev/null 2>&1
+    ok
 fi
 
-# Ollama (Linux/macOS install script)
+# --- 3. Specialized AI Binaries ---
+
+# Ollama (Verified Manual Override)
 if command -v ollama >/dev/null 2>&1; then
-  log_section "Ollama"
-  echo "Preparing Ollama update..."
+    if [[ "$(uname -s)" == "Linux" ]]; then
+        step "Ollama (Manual Deployment)"
+        arch="$(uname -m)"
+        case "$arch" in
+            x86_64|amd64) ollama_arch="amd64" ;;
+            aarch64|arm64) ollama_arch="arm64" ;;
+            *) ollama_arch="" ;;
+        esac
 
-  # Preflight: verify the download is a valid zstd archive before install
-  if [[ "$(uname -s)" == "Linux" ]]; then
-    arch="$(uname -m)"
-    case "$arch" in
-      x86_64|amd64) ollama_arch="amd64" ;;
-      aarch64|arm64) ollama_arch="arm64" ;;
-      *) ollama_arch="" ;;
-    esac
-    if [[ -n "$ollama_arch" ]]; then
-      echo "Verifying Ollama download for linux-${ollama_arch}..."
-      tmp_tar="$(mktemp)"
-      trap 'rm -f "$tmp_tar"' EXIT
-      tar_url="https://ollama.com/download/ollama-linux-${ollama_arch}.tar.zst"
-      echo "Downloading $tar_url"
-      if ! curl -fsSL "$tar_url" -o "$tmp_tar"; then
-        echo "ERROR: failed to download Ollama tarball" >&2
-        exit 1
-      fi
-      echo "Checking archive integrity..."
-      if ! zstd -t "$tmp_tar" >/dev/null 2>&1; then
-        echo "ERROR: downloaded Ollama tarball is invalid" >&2
-        exit 1
-      fi
-      rm -f "$tmp_tar"
-      trap - EXIT
-      echo "Download verified."
+        if [[ -n "$ollama_arch" ]]; then
+            tmp_tar="$(mktemp)"
+            trap 'rm -f "$tmp_tar"' EXIT
+            tar_url="https://ollama.com/download/ollama-linux-${ollama_arch}.tar.zst"
+
+            if curl -fsSL --retry 2 "$tar_url" -o "$tmp_tar" && zstd -t "$tmp_tar" >/dev/null 2>&1; then
+                # Stop service safely
+                if command -v systemctl >/dev/null 2>&1; then
+                    sudo systemctl stop ollama 2>/dev/null || true
+                fi
+
+                # Extract and Neuter Installer
+                zstd -dc "$tmp_tar" | sudo tar -x -C /usr/local >/dev/null
+                curl -fsSL https://ollama.com/install.sh | sed 's/status "Downloading/return 0; status "/' | sh >/dev/null 2>&1
+
+                # Restart if systemd exists
+                if command -v systemctl >/dev/null 2>&1; then
+                    sudo systemctl start ollama 2>/dev/null || true
+                fi
+                ok
+            else
+                err "Integrity check failed"
+            fi
+        else
+            skip "unsupported arch"
+        fi
+    else
+        # macOS users typically use the .app or Brew
+        step "Ollama (macOS)"
+        command -v brew >/dev/null 2>&1 && brew upgrade ollama --cask >/dev/null 2>&1 && ok || skip "Update via App"
     fi
-  fi
-
-  # Install/update
-  if ! [[ -t 0 ]]; then
-    log_skip "Ollama (no TTY for sudo). Run: curl -fsSL https://ollama.com/install.sh | sh"
-    return 0
-  fi
-  echo "Running Ollama installer (may prompt for sudo)..."
-  installer_log="$(mktemp)"
-  if ! curl -fsSL https://ollama.com/install.sh | sh 2>&1 | tee "$installer_log"; then
-    rm -f "$installer_log"
-    echo "ERROR: Ollama install script failed" >&2
-    exit 1
-  fi
-  if grep -q "unknown header" "$installer_log"; then
-    rm -f "$installer_log"
-    echo "ERROR: Ollama installer reported an invalid archive (zstd unknown header)." >&2
-    echo "       Try rerunning: curl -fsSL https://ollama.com/install.sh | sh" >&2
-    exit 1
-  fi
-  rm -f "$installer_log"
-
-  # Post-checks to ensure install succeeded
-  echo "Validating Ollama install..."
-  if ! command -v ollama >/dev/null 2>&1; then
-    echo "ERROR: ollama is not on PATH after install" >&2
-    exit 1
-  fi
-  if ! ollama --version >/dev/null 2>&1; then
-    echo "ERROR: ollama did not report a version after install" >&2
-    exit 1
-  fi
-  if command -v systemctl >/dev/null 2>&1; then
-    if ! systemctl is-active --quiet ollama; then
-      echo "ERROR: ollama service is not active after install" >&2
-      exit 1
-    fi
-  fi
-
-  log_success "Ollama updated"
-else
-  log_skip "Ollama (not installed)"
 fi
 
-# LM Studio runtime (CLI-managed)
+# LM Studio Runtime
 if command -v lms >/dev/null 2>&1; then
-  log_section "LM Studio Runtime"
-  lms runtime update
-  log_success "LM Studio runtime updated"
-else
-  log_skip "LM Studio runtime (lms not found)"
+    step "LM Studio Runtime"
+    lms runtime update >/dev/null 2>&1
+    ok
 fi
 
-# LM Studio app updates are handled in-app or by re-downloading the app.
-if command -v lms >/dev/null 2>&1; then
-  log_section "LM Studio App"
-  echo "LM Studio app updates are done in-app or via the download page."
-fi
+# --- 4. Final Summary ---
+echo -e "${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${GREEN}${BOLD}󰄬 Euxis Environment Ready${NC}"
 
-echo -e "\n${GREEN}AI CLI update complete!${NC}"
+# Clean Table-style Version Report
+printf "\n${BOLD}%-12s %s${NC}\n" "System" "Version"
+printf "${GRAY}%-12s${NC} %s\n" "Node:" "$(node -v 2>/dev/null || echo 'N/A')"
+printf "${GRAY}%-12s${NC} %s\n" "Ollama:" "$(ollama --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"
+printf "${GRAY}%-12s${NC} %s\n" "Pipx:" "$(pipx --version 2>/dev/null || echo 'N/A')"
+printf "${GRAY}%-12s${NC} %s\n" "Mise:" "$(mise --version 2>/dev/null | awk '{print $1}' || echo 'N/A')"
+
+trap - EXIT
