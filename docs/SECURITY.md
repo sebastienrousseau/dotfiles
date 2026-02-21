@@ -1,12 +1,12 @@
 # Security
 
-Learn how Dotfiles handles security and system modifications.
+How Dotfiles handles security and system modifications.
 
-## Principles
+## Core Principles
 
-- **Opt-In Only**: No hardening is applied unless the `DOTFILES_` variables are set to `1`.
-- **Local Logging**: Actions are logged to `~/.local/share/dotfiles.log`. No telemetry.
-- **No Hidden Sudo**: Sudo is only requested for system managers (apt, etc) and never cached indefinitely.
+- **Opt-In Only** — No hardening applies unless `DOTFILES_*` variables are set to `1`.
+- **Local Logging** — All actions log to `~/.local/share/dotfiles.log`. No telemetry.
+- **No Hidden Sudo** — Sudo requests only for package managers. Never cached indefinitely.
 
 ## Hardening
 

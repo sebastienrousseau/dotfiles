@@ -1,6 +1,29 @@
 #!/usr/bin/env bash
-# Security Score Assessment
-# Usage: dot security-score [--verbose|-v] [--json]
+## Security Score Assessment.
+##
+## Evaluates system security posture across encryption, SSH, Git, system
+## hardening, and secrets management. Returns a letter grade (A+ to F) with
+## actionable recommendations.
+##
+## # Usage
+## dot security-score [--verbose|-v] [--json] [--quiet|-q]
+##
+## # Dependencies
+## - age: Encryption tool check
+## - sops: Secrets manager check
+## - gpg: Key management check
+## - git: Commit signing verification
+##
+## # Platform Notes
+## - macOS: Checks socketfilterfw, FileVault, Little Snitch
+## - Linux: Checks ufw/firewalld, LUKS encryption
+## - WSL: Checks host encryption, virtualization detection
+##
+## # Security
+## Does not modify system state. Read-only checks only.
+##
+## # Idempotency
+## Safe to run repeatedly. No side effects.
 
 set -euo pipefail
 set +o xtrace 2>/dev/null || true

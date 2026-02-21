@@ -1,6 +1,33 @@
 #!/usr/bin/env bash
-# Secure Configuration Management Script
-# Helps manage environment variables and secrets securely
+## Secure Configuration Management.
+##
+## Manages environment variables and secrets across local development.
+## Provides init, validate, rotate, and audit capabilities for credentials.
+##
+## # Usage
+## manage-secrets.sh init           # Create .env.local from template
+## manage-secrets.sh validate       # Check configuration integrity
+## manage-secrets.sh check          # Scan for hardcoded secrets
+## manage-secrets.sh rotate github  # Secret rotation guide
+## manage-secrets.sh clean          # Remove temporary files
+##
+## # Dependencies
+## - stat: Permission checking
+## - grep: Pattern matching
+## - find: File discovery
+##
+## # Platform Notes
+## - macOS: Uses BSD stat syntax
+## - Linux: Uses GNU stat syntax
+## - WSL: Works with Linux filesystem permissions
+##
+## # Security
+## - Creates .env.local with 600 permissions
+## - Automatically adds .env.local to .gitignore
+## - Never commits secrets to version control
+##
+## # Idempotency
+## Safe to run repeatedly. init requires --force to overwrite.
 
 set -euo pipefail
 

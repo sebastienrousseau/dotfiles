@@ -1,6 +1,6 @@
-# Secrets
+# Secrets Management
 
-Dotfiles supports provider-agnostic secret management through `dot secrets`.
+Provider-agnostic secret management via `dot secrets`. Supports macOS Keychain, `pass`, and age-encrypted local storage.
 
 ## Providers
 
@@ -71,8 +71,8 @@ dot ssh-key ~/.ssh/id_ed25519
 
 This creates a local encrypted file, which you can add to chezmoi with `chezmoi add --encrypt` if needed.
 
-## Important Notes
+## Security Notes
 
-- Never commit `~/.config/chezmoi/key.txt`.
-- Keep secret values out of shell history when possible.
-- Rotate keys and credentials periodically.
+- **Never commit** `~/.config/chezmoi/key.txt` to version control.
+- **Avoid shell history exposure** — use `dot secrets set` which prompts securely.
+- **Rotate credentials** on a regular schedule.

@@ -5,7 +5,7 @@
 # Dotfiles — A Fast, Idempotent Shell Environment
 
 [![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions)
-[![Version](https://img.shields.io/badge/Version-v0.2.486-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.486)
+[![Version](https://img.shields.io/badge/Version-v0.2.487-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.487)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 [![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases)
 [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
@@ -14,7 +14,7 @@
 
 ## Overview
 
-Set up your development environment in minutes and keep it consistent across every machine. Dotfiles is a cross‑platform shell distribution managed by [Chezmoi](https://github.com/twpayne/chezmoi) that works on macOS, Linux, and WSL. It is **idempotent** by design: run it once or a hundred times, and the result is always the same.
+Configure your development environment once, deploy it everywhere. Dotfiles is a cross‑platform shell distribution managed by [Chezmoi](https://github.com/twpayne/chezmoi) — the dotfiles manager that tracks source state in Git. Works on macOS, Linux, and WSL. **Idempotent** by design: run it once or a hundred times, the result stays the same.
 
 Git + templates + guarded scripts = a reproducible shell.
 
@@ -39,23 +39,23 @@ Git + templates + guarded scripts = a reproducible shell.
 
 ## Why dotfiles
 
-Dotfiles takes an infrastructure‑oriented approach to managing your shell. It is designed for developers who work across multiple machines and value **daily usability, reproducibility, and auditability.**
+Dotfiles treats your shell as infrastructure. Built for developers who work across multiple machines and demand **usability, reproducibility, and auditability.**
 
-- **The Stack.** Zsh, Neovim, tmux, and AI CLI tools configured with sane defaults so you can start working immediately.
-- **Unified Control.** The `dot` CLI wraps common workflows such as syncing, upgrading, and managing secrets.
-- **Safety First.** Every system or security change requires explicit opt‑in.
-- **Clean Slate.** Source files, generated configs, and system state stay cleanly separated.
+- **The Stack.** Zsh, Neovim, tmux, and AI CLI tools with production-ready defaults.
+- **Unified Control.** The `dot` CLI handles syncing, upgrades, and secrets in one place.
+- **Safety First.** System and security changes require explicit opt‑in.
+- **Clean Slate.** Source files, generated configs, and system state remain separated.
 
 
 ## Safety
 
-This is **infrastructure**, not an ad‑hoc shell script.
+This is **infrastructure**, not an ad‑hoc script.
 
-- No destructive actions without explicit opt‑in.
-- No background daemons install automatically.
-- No system settings change by default.
-- System‑level behavior requires explicit opt‑in through environment variables.
-- Dotfiles logs all privileged actions to `~/.local/share/dotfiles.log`.
+- **No destructive actions** without explicit opt‑in.
+- **No background daemons** install automatically.
+- **No system settings** change by default.
+- System‑level behavior requires opt‑in via environment variables.
+- All privileged actions log to `~/.local/share/dotfiles.log`.
 
 ---
 
@@ -77,13 +77,13 @@ dot verify
 
 ```bash
 # Works on macOS, Linux, and WSL
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.486/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.487/install.sh)"
 exec zsh
 ```
 
 For non‑interactive installs (servers and CI):
 ```bash
-DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.486/install.sh)"
+DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.487/install.sh)"
 ```
 
 ---

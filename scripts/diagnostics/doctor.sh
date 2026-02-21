@@ -1,11 +1,31 @@
 #!/usr/bin/env bash
-# MIT License
-# Copyright (c) 2026 Sebastien Rousseau
-# See LICENSE file for details.
-
-# Script: doctor.sh
-# Description: Diagnostics tool for the dotfiles environment.
-# Checks dependencies, paths, and configuration integrity.
+## Dotfiles Doctor.
+##
+## Diagnoses dotfiles environment health by checking dependencies, paths,
+## and configuration integrity. Reports errors, warnings, and suggests
+## remediation steps.
+##
+## # Usage
+## dot doctor
+##
+## # Dependencies
+## - chezmoi: Dotfiles manager (required)
+## - starship: Prompt (optional)
+## - rg, bat: Modern CLI tools (optional)
+##
+## # Platform Notes
+## - macOS: Checks Homebrew-installed tools
+## - Linux: Checks apt/nix-installed tools
+## - WSL: Checks Windows interop paths
+##
+## # Exit Codes
+## - 0: All checks passed (may have warnings)
+## - 1: Critical errors detected
+##
+## # Idempotency
+## Safe to run repeatedly. Read-only checks.
+##
+## MIT License - Copyright (c) 2026 Sebastien Rousseau
 
 set -euo pipefail
 
