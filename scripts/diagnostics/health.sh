@@ -45,8 +45,6 @@ while [[ $# -gt 0 ]]; do
 done
 
 reset_stats() {
-  unset RESULTS
-  declare -A RESULTS
   TOTAL_CHECKS=0
   PASSED_CHECKS=0
   WARNINGS=0
@@ -54,7 +52,6 @@ reset_stats() {
 }
 
 # Health check results
-declare -A RESULTS
 TOTAL_CHECKS=0
 PASSED_CHECKS=0
 WARNINGS=0
@@ -97,7 +94,6 @@ check() {
     pass)
       PASSED_CHECKS=$((PASSED_CHECKS + 1))
       # shellcheck disable=SC2034
-      RESULTS["$name"]="pass"
       if ! $JSON_OUTPUT; then
         if [[ "$use_ui" = "1" ]]; then
           ui_ok "$name"
@@ -109,7 +105,6 @@ check() {
     warn)
       WARNINGS=$((WARNINGS + 1))
       # shellcheck disable=SC2034
-      RESULTS["$name"]="warn"
       if ! $JSON_OUTPUT; then
         if [[ "$use_ui" = "1" ]]; then
           ui_warn "$name" "$message"
@@ -123,7 +118,6 @@ check() {
     fail)
       FAILURES=$((FAILURES + 1))
       # shellcheck disable=SC2034
-      RESULTS["$name"]="fail"
       if ! $JSON_OUTPUT; then
         if [[ "$use_ui" = "1" ]]; then
           ui_err "$name" "$message"
