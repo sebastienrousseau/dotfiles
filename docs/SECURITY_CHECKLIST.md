@@ -29,7 +29,13 @@ Use this checklist before cutting any new release (e.g., `v0.x.x`) to ensure sup
 
 Run `dot mcp` to validate all MCP server configurations pass security checks.
 
-## 6. Final Verification
+## 6. Release Attestation
+- [ ] **SBOM Generation**: Verify `dotfiles-sbom.spdx.json` is generated in release workflow.
+- [ ] **Attestation Signing**: Confirm `actions/attest-build-provenance` signs the release artifacts.
+- [ ] **Attestation Verification**: Verify with `gh attestation verify <artifact> --repo sebastienrousseau/dotfiles`.
+- [ ] **Branch Protection**: Ensure `security-attestation` is a required status check on master.
+
+## 7. Final Verification
 - [ ] **Docker Test**: Run `docker build -f Dockerfile.test .` to verify clean install.
 - [ ] **Doctor**: Run `dot doctor` locally.
 - [ ] **MCP Check**: Run `dot mcp` to verify MCP configuration.
