@@ -1,6 +1,25 @@
 #!/usr/bin/env bash
-# Update all system packages and tools
-# Usage: update [--all|--brew|--apt|--npm|--cargo|--pip]
+## System Update — Update all system packages and tools.
+##
+## Comprehensive update utility for multiple package managers.
+## Supports selective updates and combined operations.
+##
+## # Requirements
+## - Various package managers (auto-detected)
+## - sudo: For system package updates
+##
+## # Usage
+## update                      # Update all detected managers
+## update --brew               # Update Homebrew only
+## update --apt                # Update APT only
+## update --npm                # Update NPM globals only
+## update --cargo              # Update Rust packages
+## update --pip                # Update Python packages
+##
+## # Platform Notes
+## - macOS: Updates Homebrew, npm, cargo, pip
+## - Linux: Updates apt/dnf, npm, cargo, pip
+## - Also checks chezmoi dotfiles status
 
 set -euo pipefail
 
@@ -9,9 +28,9 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-log_section() { echo -e "\n${CYAN}━━━ $1 ━━━${NC}"; }
-log_success() { echo -e "${GREEN}✓${NC} $1"; }
-log_skip() { echo -e "${YELLOW}○${NC} $1 (skipped)"; }
+log_section() { echo -e "\n${CYAN}--- $1 ---${NC}"; }
+log_success() { echo -e "${GREEN}Done:${NC} $1"; }
+log_skip() { echo -e "${YELLOW}Skipped:${NC} $1"; }
 
 # Parse arguments
 UPDATE_ALL=true

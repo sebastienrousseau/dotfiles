@@ -1,6 +1,23 @@
 #!/usr/bin/env bash
-# Zig version manager - installs/updates zig to ~/.local/zig
-# Managed by chezmoi
+## Zig Install — Zig version manager and installer.
+##
+## Downloads and installs Zig to ~/.local/zig from official releases.
+## Supports specific versions, latest stable, and master builds.
+##
+## # Requirements
+## - curl: For downloading releases
+## - jq: For parsing release metadata
+## - tar + xz: For extraction
+##
+## # Usage
+## zig-install                 # Install latest stable
+## zig-install 0.14.0          # Install specific version
+## zig-install master          # Install latest master
+## zig-install version         # Show installed version
+##
+## # Platform Notes
+## - Linux: x86_64 and aarch64 supported
+## - macOS: x86_64 and arm64 (aarch64) supported
 
 set -euo pipefail
 

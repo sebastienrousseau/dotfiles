@@ -1,10 +1,28 @@
 #!/usr/bin/env bash
-#
-# ai_core.sh - Central wrapper for AI operations in the Predictive Shell
-# Part of the "Predictive Shell" (AI v2) implementation
-#
+## AI Core — Central wrapper for AI operations in the Predictive Shell.
+##
+## Manages local LLM (llamafile) and fallback to GitHub Copilot CLI.
+## Handles model downloading, server management, and query routing.
+##
+## # Requirements
+## - curl: For downloading models and API requests
+## - nc (netcat): For checking server availability
+## - jq: For parsing JSON responses
+## - llamafile (optional): Local LLM server
+## - gh copilot (optional): GitHub Copilot CLI fallback
+##
+## # Usage
+## ai_core status              # Check AI subsystem status
+## ai_core download            # Download local LLM model (~4GB)
+## ai_core start               # Start local LLM server
+## ai_core query "prompt"      # Query the AI (auto-selects provider)
+##
+## # Platform Notes
+## - Linux/macOS: Full support
+## - WSL: Supported with llamafile or Copilot
+## - Model stored in $XDG_DATA_HOME/ai/models/
 
-set -e
+set -euo pipefail
 
 # Configuration
 LLAMAFILE_URL="https://huggingface.co/jart/inexpensive-llm/resolve/main/llamafile-server-0.1-llava-v1.5-7b-q4"
@@ -60,7 +78,7 @@ status() {
     else
         echo "Local LLM: Not installed"
     fi
-    
+
     # Check for other providers
     if command -v gh &> /dev/null && gh copilot --version &> /dev/null; then
          echo "GitHub Copilot CLI: Available"
@@ -74,7 +92,7 @@ start_server() {
     if ! check_local_llm; then
         download_model || return 1
     fi
-    
+
     echo "Starting Local LLM Server..."
     "$MODEL_PATH" --server --nobrowser --port "$SERVER_PORT" &
     echo "Server started on port $SERVER_PORT"
@@ -84,7 +102,7 @@ start_server() {
 # Usage: ai_core query "Your prompt here"
 query() {
     local prompt="$1"
-    
+
     # Priority 1: Local LLM Server if running
     if nc -z localhost "$SERVER_PORT" 2>/dev/null; then
          # Simple curl based query to llamafile standard endpoint
@@ -94,7 +112,7 @@ query() {
             -d "{\"prompt\": \"$prompt\", \"n_predict\": 128}" | jq -r .content
          return
     fi
-    
+
     # Priority 2: GitHub Copilot CLI
     if command -v gh &> /dev/null && gh copilot --version &> /dev/null; then
         # Use gh copilot explain/suggest
@@ -104,7 +122,7 @@ query() {
         gh copilot explain "$prompt"
         return
     fi
-    
+
     echo "No AI provider available. Run 'ai_core start' or install GitHub Copilot CLI."
 }
 

@@ -48,7 +48,7 @@ set -euo pipefail
 # Configuration
 # =============================================================================
 
-VERSION="${1:-v0.2.487}"
+VERSION="${1:-v0.2.488}"
 REPO_URL="https://github.com/sebastienrousseau/dotfiles.git"
 SOURCE_DIR="$HOME/.dotfiles"
 LEGACY_SOURCE_DIR="$HOME/.local/share/chezmoi"

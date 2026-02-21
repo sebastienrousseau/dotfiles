@@ -1,10 +1,25 @@
 #!/usr/bin/env bash
-# git-ai-diff - AI-powered diff analysis and review
-# Managed by chezmoi - https://github.com/sebastienrousseau/dotfiles
-#
-# Usage: git ai-diff [<commit>] [--provider <provider>]
-#   <commit>: Compare against this commit (default: HEAD)
-#   --provider: claude, gemini, sgpt, ollama (auto-detected if not specified)
+## Git AI Diff — AI-powered diff analysis and code review.
+##
+## Analyzes git diffs using AI to provide summaries, identify issues,
+## and suggest improvements. Supports multiple AI providers.
+##
+## # Requirements
+## - git: Version control
+## - One of: claude, gemini, sgpt, aider, ollama
+##
+## # Usage
+## git ai-diff                         # Review working changes vs HEAD
+## git ai-diff HEAD~3                   # Compare against 3 commits ago
+## git ai-diff --staged                 # Review staged changes only
+## git ai-diff --provider claude        # Use specific provider
+##
+## # Configuration
+## Set GIT_AI_PROVIDER to set default provider
+## Set OLLAMA_MODEL for custom Ollama model (default: llama3.2)
+##
+## # Platform Notes
+## - All platforms: Requires git and an AI CLI tool
 
 set -euo pipefail
 
