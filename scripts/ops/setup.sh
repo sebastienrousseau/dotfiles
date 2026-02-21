@@ -16,7 +16,8 @@ BACKUP_FILE="$CONFIG_DIR/chezmoi.toml.bak.$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$CONFIG_DIR"
 
 choose() {
-  local prompt="$1"; shift
+  local prompt="$1"
+  shift
   if command -v gum >/dev/null 2>&1; then
     gum choose --cursor.foreground=212 --selected.foreground=212 --header "$prompt" "$@"
   else
