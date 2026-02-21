@@ -104,8 +104,8 @@ assert_file_contains "$LAZY_TMPL" 'glob $globPattern' "should discover aliases v
 
 # Verify both templates use the same coreCategories list
 test_start "templates_share_core_categories"
-eager_cats=$(grep 'coreCategories' "$EAGER_TMPL" | head -1)
-lazy_cats=$(grep 'coreCategories' "$LAZY_TMPL" | head -1)
+eager_cats=$(grep 'coreCategories' "$EAGER_TMPL" | head -1 || true)
+lazy_cats=$(grep 'coreCategories' "$LAZY_TMPL" | head -1 || true)
 if [[ "$eager_cats" == "$lazy_cats" ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: eager and lazy templates use identical coreCategories"
@@ -118,8 +118,8 @@ fi
 
 # Verify both templates use the same glob pattern
 test_start "templates_share_glob_pattern"
-eager_glob=$(grep 'globPattern' "$EAGER_TMPL" | head -1)
-lazy_glob=$(grep 'globPattern' "$LAZY_TMPL" | head -1)
+eager_glob=$(grep 'globPattern' "$EAGER_TMPL" | head -1 || true)
+lazy_glob=$(grep 'globPattern' "$LAZY_TMPL" | head -1 || true)
 if [[ "$eager_glob" == "$lazy_glob" ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: eager and lazy templates use identical globPattern"

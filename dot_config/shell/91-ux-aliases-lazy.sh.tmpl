@@ -6,7 +6,7 @@ if [ -n "${BASH_VERSION:-}" ]; then
   shopt -s expand_aliases
 fi
 
-{{ $coreCategories := list "archives" "cd" "clear" "configuration" "default" "diagnostics" "disk-usage" "docker" "editor" "git" "interactive" "installer" "mkdir" "modern" "ps" "rsync" "sudo" "system" "compliance" -}}
+{{ $coreCategories := list "archives" "cd" "clear" "configuration" "default" "diagnostics" "disk-usage" "editor" "git" "interactive" "installer" "mkdir" "modern" "ps" "rsync" "sudo" "system" "compliance" -}}
 {{ $aliasProfile := lower (default "standard" (env "DOTFILES_ALIAS_PROFILE")) -}}
 {{ $ecosystems := lower (default "all" (env "DOTFILES_ALIAS_ECOSYSTEMS")) -}}
 {{ $aliasBuckets := default (dict) .aliases.buckets -}}
