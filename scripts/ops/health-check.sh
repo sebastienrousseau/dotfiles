@@ -1,10 +1,44 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2015,SC2034
-# =============================================================================
-# Dotfiles Health Check Script
-# Verifies that dotfiles installation is functioning correctly
-# Usage: ./scripts/ops/health-check.sh [--verbose] [--json]
-# =============================================================================
+## Dotfiles Health Check.
+##
+## Comprehensive verification of dotfiles installation, configuration, and
+## runtime health. Runs 10 diagnostic checks covering chezmoi state, shell
+## performance, symlink integrity, and dependency availability.
+##
+## # Usage
+## dot health
+## ./scripts/ops/health-check.sh [--verbose|-v] [--json|-j]
+##
+## # Dependencies
+## - chezmoi: State verification (optional, graceful skip)
+## - git: Repository status (optional)
+##
+## # Checks Performed
+## | Check | Description |
+## |-------|-------------|
+## | chezmoi_installed | Chezmoi binary in PATH |
+## | dotfiles_source | ~/.dotfiles exists with .git |
+## | chezmoi_config | ~/.config/chezmoi/chezmoi.toml |
+## | critical_files | .bashrc, .zshrc, .profile |
+## | config_directories | ~/.config/shell, nvim, git |
+## | dependencies | git, curl, zsh (required), AI CLIs (optional) |
+## | chezmoi_status | Managed files in sync |
+## | git_status | Working tree clean |
+## | symlinks | No broken symlinks in ~ |
+## | shell_performance | Startup under 500ms |
+##
+## # Platform Notes
+## - macOS: Full support
+## - Linux: Full support
+## - WSL: Full support
+##
+## # Exit Codes
+## - 0: All critical checks passed
+## - 1: One or more critical checks failed
+##
+## # Idempotency
+## Safe to run repeatedly. Read-only checks.
 
 set -euo pipefail
 
