@@ -5,22 +5,34 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=ui.sh
 source "$SCRIPT_DIR/ui.sh"
+# shellcheck source=platform.sh
+source "$SCRIPT_DIR/platform.sh"
+
+_DOT_SOURCE_DIR_CACHE=""
 
 # Resolve the dotfiles source directory
 resolve_source_dir() {
+  if [[ -n "${_DOT_SOURCE_DIR_CACHE:-}" ]] && [[ -d "$_DOT_SOURCE_DIR_CACHE" ]]; then
+    printf "%s\n" "$_DOT_SOURCE_DIR_CACHE"
+    return
+  fi
+
   if [ -n "${CHEZMOI_SOURCE_DIR:-}" ] && [ -d "$CHEZMOI_SOURCE_DIR" ]; then
-    echo "$CHEZMOI_SOURCE_DIR"
+    _DOT_SOURCE_DIR_CACHE="$CHEZMOI_SOURCE_DIR"
+    printf "%s\n" "$_DOT_SOURCE_DIR_CACHE"
     return
   fi
   if [ -d "$HOME/.dotfiles" ]; then
-    echo "$HOME/.dotfiles"
+    _DOT_SOURCE_DIR_CACHE="$HOME/.dotfiles"
+    printf "%s\n" "$_DOT_SOURCE_DIR_CACHE"
     return
   fi
   if [ -d "$HOME/.local/share/chezmoi" ]; then
-    echo "$HOME/.local/share/chezmoi"
+    _DOT_SOURCE_DIR_CACHE="$HOME/.local/share/chezmoi"
+    printf "%s\n" "$_DOT_SOURCE_DIR_CACHE"
     return
   fi
-  echo ""
+  printf "%s\n" ""
 }
 
 # Generic dispatcher: resolve source dir, find script, exec it.

@@ -160,52 +160,12 @@ jobs:
 
   security-dependencies:
     name: Security / Dependency Audit
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
-    # Always run dependency audit
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Audit shell dependencies
-        run: |
-          echo "Auditing shell script external dependencies..."
-
-          # Check for curl/wget calls to unknown domains
-          if rg "curl|wget" scripts/ --type sh; then
-            echo "Found external download commands - reviewing domains..."
-
-            # Extract URLs and validate against allowlist
-            rg -o "https?://[a-zA-Z0-9.-]+" scripts/ --type sh | sort -u > found_urls.txt || true
-
-            # Allowlisted domains for this dotfiles repo
-            ALLOWLIST="raw.githubusercontent.com github.com get.chezmoi.io webi.sh"
-
-            while IFS= read -r url; do
-              DOMAIN=$(echo "$url" | sed -E 's|https?://([^/]+).*|\1|')
-              if ! echo "$ALLOWLIST" | grep -q "$DOMAIN"; then
-                echo "⚠️  External dependency detected: $url"
-                echo "Domain: $DOMAIN not in allowlist: $ALLOWLIST"
-              fi
-            done < found_urls.txt || true
-          fi
-
-          echo "✅ Dependency audit completed"
-      - name: Check for supply chain risks
-        run: |
-          echo "Checking for supply chain security risks..."
-
-          # Verify no piped execution from untrusted sources
-          if rg "curl.*\|.*sh|wget.*\|.*bash" scripts/ --type sh; then
-            echo "❌ SECURITY VIOLATION: Piped execution detected"
-            echo "This pattern 'curl ... | sh' is forbidden for security"
-            exit 1
-          fi
-
-          # Check for dynamic script downloads without verification
-          if rg "eval.*\$\(" scripts/ --type sh; then
-            echo "⚠️  Dynamic evaluation detected - review for security"
-          fi
-
-          echo "✅ Supply chain security check passed"
+    uses: ./.github/workflows/reusable-security-baseline.yml
+    with:
+      run_dependency_audit: true
+      run_supply_chain_checks: true
+      run_permission_audit: false
+      script_scan_root: scripts/
 
   security-trufflehog:
     name: Security / TruffleHog
@@ -231,6 +191,9 @@ jobs:
         with:
           format: cyclonedx-json
           output-file: sbom.cyclonedx.json
+          # CI only needs artifact upload; release attachment is handled in
+          # security-release.yml where permissions are elevated intentionally.
+          upload-release-assets: false
       - name: Upload SBOM
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
@@ -359,73 +322,14 @@ jobs:
 
   test-unit:
     name: Test / Unit
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
     needs: changes
     if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Run tests
-        run: |
-          chmod +x scripts/tests/framework/*.sh
-          echo "Running unit tests with 100% coverage enforcement..."
-
-          # Count total testable shell scripts
-          TOTAL_SCRIPTS=$(find scripts -name "*.sh" -not -path "scripts/tests/*" | wc -l)
-          echo "Found $TOTAL_SCRIPTS testable shell scripts"
-
-          # Run tests and capture results
-          ./scripts/tests/framework/test_runner.sh 2>&1 | tee test_output.log
-
-          # Extract test results
-          FAILED_TESTS=$(
-            grep -a "Total failed:" test_output.log \
-              | tail -1 \
-              | sed -E 's/\x1b\[[0-9;]*m//g' \
-              | sed -E 's/.*Total failed:[[:space:]]*([0-9]+).*/\1/' \
-              || echo 0
-          )
-
-          # 100% success rate required (fail-under 100%)
-          if [[ "$FAILED_TESTS" -gt 0 ]]; then
-            echo "❌ COVERAGE THRESHOLD FAILED: $FAILED_TESTS failed tests detected"
-            echo "Zero-failure policy enforced - all tests must pass"
-            exit 1
-          fi
-
-          echo "✅ All tests passed - 100% success rate maintained"
-      - name: Enforce module coverage (>=95%)
-        run: |
-          sudo apt-get update && sudo apt-get install -y ripgrep
-          chmod +x scripts/tests/framework/module_coverage.sh
-          MIN_COVERAGE=95 ./scripts/tests/framework/module_coverage.sh
-      - name: Integration tests
-        run: |
-          echo "Running integration tests..."
-          RUN_INTEGRATION=1 ./scripts/tests/framework/test_runner.sh 2>&1 | tee integration_output.log
-
-          # Check integration test results
-          INTEGRATION_FAILED=$(
-            grep -a "Total failed:" integration_output.log \
-              | tail -1 \
-              | sed -E 's/\x1b\[[0-9;]*m//g' \
-              | sed -E 's/.*Total failed:[[:space:]]*([0-9]+).*/\1/' \
-              || echo 0
-          )
-          if [[ "$INTEGRATION_FAILED" -gt 0 ]]; then
-            echo "❌ Integration tests failed: $INTEGRATION_FAILED failures"
-            exit 1
-          fi
-
-          echo "✅ Integration tests passed"
-      - name: Strict-mode apply path checks
-        env:
-          DOTFILES_ALIAS_STRICT_MODE: "1"
-        run: |
-          echo "Running strict-mode apply path checks..."
-          REPO_ROOT="$PWD" bash scripts/tests/unit/test_alias_strict_mode.sh
-          REPO_ROOT="$PWD" bash scripts/tests/unit/test_ops_chezmoi_apply.sh
-          REPO_ROOT="$PWD" bash scripts/tests/unit/test_install_lib_chezmoi.sh
+    uses: ./.github/workflows/reusable-test-suite.yml
+    with:
+      min_coverage: "95"
+      run_integration: true
+      run_strict_checks: true
+      timeout_minutes: 10
 
   # ============================================================================
   # STAGE 4: QUALITY (Depends on lint + test passing)

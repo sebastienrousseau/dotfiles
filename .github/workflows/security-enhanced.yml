@@ -195,26 +195,14 @@ jobs:
 
   policy-enforcement:
     name: Security / Policy Enforcement
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+    uses: ./.github/workflows/reusable-security-baseline.yml
     needs: [secrets-scan]
     # Only run on PRs to catch issues before merge
     if: github.event_name == 'pull_request'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
-      - name: Check file permissions
-        run: |
-          # Ensure no files have overly permissive permissions
-          ISSUES=0
-          if find . -type f \( -perm -002 -o -perm -020 \) -not -path "./.git/*" | grep -q .; then
-            echo "::warning::Found files with group/other write permissions"
-            ISSUES=1
-          fi
-          # Check for executable files that shouldn't be
-          find . -name "*.md" -executable -not -path "./.git/*" -exec echo "::warning::Markdown file {} is executable" \; || true
-          find . -name "*.txt" -executable -not -path "./.git/*" -exec echo "::warning::Text file {} is executable" \; || true
+    with:
+      run_dependency_audit: false
+      run_supply_chain_checks: false
+      run_permission_audit: true
 
   # ============================================================================
   # STAGE 6: SECURITY ATTESTATION (main branch only, schedule)

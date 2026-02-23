@@ -5,7 +5,7 @@
 # Dotfiles — A Fast, Idempotent Shell Environment
 
 [![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions)
-[![Version](https://img.shields.io/badge/Version-v0.2.488-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.488)
+[![Version](https://img.shields.io/badge/Version-v0.2.489-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.489)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 [![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases)
 [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
@@ -77,14 +77,27 @@ dot verify
 
 ```bash
 # Works on macOS, Linux, and WSL
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.488/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.489/install.sh)"
 exec zsh
 ```
 
 For non‑interactive installs (servers and CI):
 ```bash
-DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.488/install.sh)"
+DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.489/install.sh)"
 ```
+
+### 60-second onboarding
+
+```bash
+dot doctor     # health + platform parity checks
+dot apply      # apply managed config
+dot scorecard  # UX + security + performance snapshot
+```
+
+What “done” looks like:
+- `dot` resolves to `~/.local/bin/dot`
+- doctor summary reports no critical errors
+- shell startup remains responsive after `exec zsh`
 
 ---
 
@@ -115,6 +128,28 @@ dot update
 ```bash
 DOTFILES_NONINTERACTIVE=1 dot apply
 ```
+
+### Upgrade-safe apply flow
+
+When pulling a new release, use this sequence:
+
+```bash
+git pull
+DOTFILES_NONINTERACTIVE=1 dot apply --force
+dot doctor
+```
+
+`dot apply` now runs post-apply validation automatically to:
+- remove stale read-only zsh cache files (`*.zwc`)
+- verify `dot` resolves to `~/.local/bin/dot` in a fresh login shell
+
+After apply, reload your current session:
+
+```bash
+exec zsh
+```
+
+Or restart the terminal to pick up alias/function updates.
 
 ## Make it yours
 
