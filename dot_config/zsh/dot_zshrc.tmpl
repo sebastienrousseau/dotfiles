@@ -39,7 +39,7 @@ export DOTFILES_THEME="{{ $theme }}"
 : ${DOTFILES_FAST:=0}
 : ${DOTFILES_ULTRA_FAST:=0}
 : ${DOTFILES_AI:=0}
-: ${DOTFILES_ALIAS_STRICT_MODE:={{ if .strict_mode }}1{{ else }}0{{ end }}}
+: ${DOTFILES_ALIAS_STRICT_MODE:={{ if (default false .strict_mode) }}1{{ else }}0{{ end }}}
 : ${DOTFILES_ULTRA_FAST_PROMPT:=1}
 : ${DOTFILES_LAYERS_LOAD:=ondemand}
 : ${DOTFILES_LAYERS_PREWARM:=system,text,api}
@@ -244,7 +244,6 @@ if [[ "${DOTFILES_FAST}" != "1" ]]; then
 
   # Optional background prewarm for heavy layers (idle after first prompt)
   _dotfiles_schedule_heavy_layers() {
-    _dotfiles_del_precmd _dotfiles_schedule_heavy_layers
     if [[ "${DOTFILES_LAYERS_LOAD}" == "background" ]]; then
       if [[ -n "${ZSH_EXECUTION_STRING:-}" ]]; then
           (sleep 1; _dotfiles_load_heavy_layers_stage1; _dotfiles_load_heavy_layers_stage2; _dotfiles_prewarm_groups) &!
@@ -257,7 +256,21 @@ if [[ "${DOTFILES_FAST}" != "1" ]]; then
       fi
     fi
   }
-  _dotfiles_add_precmd _dotfiles_schedule_heavy_layers
+  # Compatibility: use add-zsh-hook when available (tests rely on this)
+  autoload -Uz add-zsh-hook
+  _load_deferred_layers() {
+    if (( ${+functions[add-zsh-hook]} )); then
+      add-zsh-hook -d precmd _load_deferred_layers
+    else
+      _dotfiles_del_precmd _load_deferred_layers
+    fi
+    _dotfiles_schedule_heavy_layers
+  }
+  if (( ${+functions[add-zsh-hook]} )); then
+    add-zsh-hook precmd _load_deferred_layers
+  else
+    _dotfiles_add_precmd _load_deferred_layers
+  fi
 
   # Capture existing command_not_found handler (if any)
   if (( ${+functions[command_not_found_handler]} )); then
