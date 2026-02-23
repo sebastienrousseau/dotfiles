@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -e
+
+# Measure time to load heavy layers in a fresh interactive shell
+# Usage: dot-load-benchmark [runs]
+
+RUNS=${1:-5}
+TOTAL=0
+
+printf "dot load benchmark (runs=%s)\n" "$RUNS"
+
+for i in $(seq 1 "$RUNS"); do
+  ms=$(zsh -i -c '
+    zmodload zsh/datetime
+    if (( ${+functions[_dotfiles_load_heavy_layers]} )); then
+      t0=$EPOCHREALTIME
+      _dotfiles_load_heavy_layers
+      t1=$EPOCHREALTIME
+      echo $(( (t1 - t0) * 1000.0 ))
+    else
+      echo 0
+    fi
+  ')
+  printf "  run %s: %0.1f ms\n" "$i" "$ms"
+  TOTAL=$(awk -v a="$TOTAL" -v b="$ms" 'BEGIN {print a+b}')
+
+done
+
+AVG=$(awk -v total="$TOTAL" -v n="$RUNS" 'BEGIN {print total/n}')
+
+echo "avg: ${AVG} ms"
