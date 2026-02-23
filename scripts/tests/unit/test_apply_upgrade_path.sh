@@ -33,7 +33,7 @@ check_contains "$APPLY_FILE" "post-apply-repair.sh"
 check_contains "$APPLY_FILE" "Run 'exec zsh' or restart your terminal"
 
 check_contains "$CONFIG_ALIASES" "unalias dot 2>/dev/null || true"
-check_contains "$CONFIG_ALIASES" 'alias dot="$HOME/.local/bin/dot"'
+check_contains "$CONFIG_ALIASES" "alias dot=\"\$HOME/.local/bin/dot\""
 
 if bash -n "$REPAIR_FILE" 2>/dev/null; then
   pass "apply upgrade path checks are wired"
