@@ -197,8 +197,8 @@ fi
 # Consolidated deferred initialization (single precmd hook for all lazy loading)
 # Performance: Single hook reduces overhead vs multiple add-zsh-hook calls
 autoload -Uz add-zsh-hook
-_dotfiles_deferred_init() {
-  add-zsh-hook -d precmd _dotfiles_deferred_init
+_load_deferred_layers() {
+  add-zsh-hook -d precmd _load_deferred_layers
 
   # === Phase 1: Deferred shell layers ===
   [[ -f "${HOME}/.config/shell/50-logic-functions.sh" ]] && source "${HOME}/.config/shell/50-logic-functions.sh"
@@ -245,7 +245,10 @@ _dotfiles_deferred_init() {
   # Re-enable aliases (guard against noaliases)
   setopt aliases
 }
-add-zsh-hook precmd _dotfiles_deferred_init
+add-zsh-hook precmd _load_deferred_layers
+
+# Backward-compatible internal alias for tooling that references old function.
+_dotfiles_deferred_init() { _load_deferred_layers "$@"; }
 
 # Async update notifications (shown once per shell)
 _dotfiles_update_notice() {

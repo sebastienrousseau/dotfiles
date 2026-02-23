@@ -180,8 +180,8 @@ Core Commands:
   diff        Show chezmoi diff with exclusions
   status      Show configuration drift (chezmoi status)
   remove      Safely remove a managed file
-  cd          Print source directory path (use: cd $(dot cd))
-  edit        Open chezmoi source in $EDITOR
+  cd          Print source directory path (use: cd \$(dot cd))
+  edit        Open chezmoi source in \$EDITOR
 
 Diagnostics:
   doctor         Check system health and configuration
