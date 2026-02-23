@@ -359,73 +359,14 @@ jobs:
 
   test-unit:
     name: Test / Unit
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
     needs: changes
     if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Run tests
-        run: |
-          chmod +x scripts/tests/framework/*.sh
-          echo "Running unit tests with 100% coverage enforcement..."
-
-          # Count total testable shell scripts
-          TOTAL_SCRIPTS=$(find scripts -name "*.sh" -not -path "scripts/tests/*" | wc -l)
-          echo "Found $TOTAL_SCRIPTS testable shell scripts"
-
-          # Run tests and capture results
-          ./scripts/tests/framework/test_runner.sh 2>&1 | tee test_output.log
-
-          # Extract test results
-          FAILED_TESTS=$(
-            grep -a "Total failed:" test_output.log \
-              | tail -1 \
-              | sed -E 's/\x1b\[[0-9;]*m//g' \
-              | sed -E 's/.*Total failed:[[:space:]]*([0-9]+).*/\1/' \
-              || echo 0
-          )
-
-          # 100% success rate required (fail-under 100%)
-          if [[ "$FAILED_TESTS" -gt 0 ]]; then
-            echo "❌ COVERAGE THRESHOLD FAILED: $FAILED_TESTS failed tests detected"
-            echo "Zero-failure policy enforced - all tests must pass"
-            exit 1
-          fi
-
-          echo "✅ All tests passed - 100% success rate maintained"
-      - name: Enforce module coverage (>=95%)
-        run: |
-          sudo apt-get update && sudo apt-get install -y ripgrep
-          chmod +x scripts/tests/framework/module_coverage.sh
-          MIN_COVERAGE=95 ./scripts/tests/framework/module_coverage.sh
-      - name: Integration tests
-        run: |
-          echo "Running integration tests..."
-          RUN_INTEGRATION=1 ./scripts/tests/framework/test_runner.sh 2>&1 | tee integration_output.log
-
-          # Check integration test results
-          INTEGRATION_FAILED=$(
-            grep -a "Total failed:" integration_output.log \
-              | tail -1 \
-              | sed -E 's/\x1b\[[0-9;]*m//g' \
-              | sed -E 's/.*Total failed:[[:space:]]*([0-9]+).*/\1/' \
-              || echo 0
-          )
-          if [[ "$INTEGRATION_FAILED" -gt 0 ]]; then
-            echo "❌ Integration tests failed: $INTEGRATION_FAILED failures"
-            exit 1
-          fi
-
-          echo "✅ Integration tests passed"
-      - name: Strict-mode apply path checks
-        env:
-          DOTFILES_ALIAS_STRICT_MODE: "1"
-        run: |
-          echo "Running strict-mode apply path checks..."
-          REPO_ROOT="$PWD" bash scripts/tests/unit/test_alias_strict_mode.sh
-          REPO_ROOT="$PWD" bash scripts/tests/unit/test_ops_chezmoi_apply.sh
-          REPO_ROOT="$PWD" bash scripts/tests/unit/test_install_lib_chezmoi.sh
+    uses: ./.github/workflows/reusable-test-suite.yml
+    with:
+      min_coverage: "95"
+      run_integration: true
+      run_strict_checks: true
+      timeout_minutes: 10
 
   # ============================================================================
   # STAGE 4: QUALITY (Depends on lint + test passing)
