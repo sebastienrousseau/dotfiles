@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
-args=()
+args=("$@")
 if [[ -n "${DOTFILES_CHEZMOI_APPLY_FLAGS:-}" ]]; then
   # Safely parse space-separated flags into array
   read -ra flag_array <<<"$DOTFILES_CHEZMOI_APPLY_FLAGS"
@@ -18,6 +18,20 @@ fi
 
 if [[ "${DOTFILES_CHEZMOI_KEEP_GOING:-0}" = "1" ]]; then
   args+=("--keep-going")
+fi
+
+has_flag() {
+  local needle="$1"
+  local arg
+  for arg in "${args[@]}"; do
+    [[ "$arg" == "$needle" ]] && return 0
+  done
+  return 1
+}
+
+# In non-interactive runs, prevent TTY prompts from blocking apply.
+if [[ "${DOTFILES_NONINTERACTIVE:-0}" == "1" ]] && ! has_flag "--force"; then
+  args+=("--force")
 fi
 
 ui_init
@@ -124,3 +138,14 @@ if [[ "${DOTFILES_CHEZMOI_STATUS:-1}" = "1" ]]; then
     printf "%s\n" "$status_out"
   fi
 fi
+
+if [[ "${DOTFILES_POST_APPLY_REPAIR:-1}" = "1" ]]; then
+  post_apply_script="$SCRIPT_DIR/post-apply-repair.sh"
+  if [[ -f "$post_apply_script" ]]; then
+    printf "\n"
+    bash "$post_apply_script" || true
+  fi
+fi
+
+printf "\n"
+ui_info "Shell reload" "Run 'exec zsh' or restart your terminal to reload aliases/functions."

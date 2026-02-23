@@ -140,6 +140,24 @@ Test individual functions in isolation:
 - **test_genpass.sh** - Password generation function
 - **test_rd.sh** - Directory removal function (with security tests)
 - **test_cd_aliases.sh** - Directory navigation aliases
+- **test_apply_upgrade_path.sh** - Apply flow regression checks (non-interactive force, post-apply hook, shell reload notice)
+- **test_post_apply_repair.sh** - Branch coverage for post-apply validation and auto-repair paths
+
+### Upgrade-path verification
+
+Run the targeted suite for apply/upgrade behavior:
+
+```bash
+bash scripts/tests/unit/test_apply_upgrade_path.sh
+bash scripts/tests/unit/test_post_apply_repair.sh
+bash scripts/tests/unit/test_ops_chezmoi_apply.sh
+```
+
+These tests cover success, warning, and failure branches for:
+- stale `.zwc` cache detection and repair
+- `dot` CLI binary presence and zsh resolution checks
+- alias-collision detection messaging
+- non-interactive apply guardrails and reload instructions
 
 ### Integration Tests (`scripts/tests/integration/`)
 
