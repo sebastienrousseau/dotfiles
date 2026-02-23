@@ -131,7 +131,8 @@ elif command -v brew >/dev/null; then
   echo "   Installing chezmoi via Homebrew..."
   brew install chezmoi
 else
-  BIN_DIR="$HOME/.local/bin"
+  bin_dir="$HOME/.local/bin"
+  BIN_DIR="$bin_dir"
   mkdir -p "$BIN_DIR"
 
   echo "   Installing chezmoi via binary download..."
@@ -165,7 +166,7 @@ else
   rm -f "$CHEZMOI_INSTALLER"
 
   # Critical: Add to PATH for the rest of the script to see it
-  export PATH="$BIN_DIR:$PATH"
+  export PATH="$bin_dir:$PATH"
 fi
 
 # 4. Prepare source directory
