@@ -117,27 +117,6 @@ The feature flag system uses a **fail-safe default** approach:
 - **Enabled features**: Include additional configurations and may load more shell plugins
 - **Disabled features**: Reduce startup time and memory usage by excluding unnecessary components
 
-### Runtime Toggles
-
-Some performance controls are runtime toggles (no `chezmoi apply` required):
-
-- `DOTFILES_STARTUP_MODE=full|fast|ultra` — Select a startup profile in one variable.
-- `DOTFILES_FAST=1` — Skip heavy startup work (plugins, completions, AI helpers, prompt tooling).
-- `DOTFILES_ULTRA_FAST=1` — Minimal init (no rc.d, plugins, completions, or prompt tooling).
-- `DOTFILES_ULTRA_FAST_PROMPT=1` — Use a minimal prompt in ultra-fast mode.
-- `DOTFILES_DEFER_ZINIT=0` — Load Zinit immediately (opt-out of deferred init).
-- `DOTFILES_DEFER_ZINIT_MODE=preexec|precmd` — Choose when deferred Zinit runs (default: `preexec`).
-- `DOTFILES_ENABLE_COLORS=1` — Enable Zsh `colors` (defines `$fg`/`$bg` variables).
-- `DOTFILES_AI=1` — Enable AI helper scripts (context suggestions and error analysis).
-- `DOTFILES_ENABLE_COMPINIT=1` — Enable completions (compinit). Defaults to on for `laptop`/`desktop` profiles, off otherwise.
-- `DOTFILES_DEFER_COMPINIT=1` — Run compinit on first command (preexec).
-- `DOTFILES_DEFER_TOOLS=1` — Run tool init (atuin/starship/zoxide/fzf) on first command (preexec).
-  
-Heavy layers (functions/extra aliases) load on demand the first time an unknown command is used.
-Set `DOTFILES_LAYERS_LOAD=background` to prewarm heavy layers after the first prompt without blocking the first command.
-You can also run `dot load --background` to prewarm them immediately.
-- `DOTFILES_LAYERS_PREWARM=system,text,api` — Comma-separated group list to prewarm (default: `system,text,api`).
-
 ### Template Resolution
 
 Feature flags are resolved during chezmoi template processing, not at runtime. This means:
@@ -184,4 +163,4 @@ secrets = true
 ---
 
 **Last Updated**: 2026-01-31
-**Dotfiles Version**: v0.2.490
+**Dotfiles Version**: v0.2.489
