@@ -37,6 +37,7 @@ Welcome to the dotfiles documentation. This guide will help you install, configu
 - [Architecture](ARCHITECTURE.md) — System design and structure
 - [Operations Guide](OPERATIONS.md) — Daily usage and maintenance
 - [Troubleshooting](TROUBLESHOOTING.md) — Common issues and solutions
+- [Euxis 2026 Review](EUXIS_2026_REVIEW.md) — Performance, UX, and parity roadmap
 
 ### Configuration
 - [Aliases Reference](ALIASES.md) — Shell aliases and shortcuts

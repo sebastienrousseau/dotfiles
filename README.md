@@ -86,6 +86,19 @@ For non‑interactive installs (servers and CI):
 DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.488/install.sh)"
 ```
 
+### 60-second onboarding
+
+```bash
+dot doctor     # health + platform parity checks
+dot apply      # apply managed config
+dot scorecard  # UX + security + performance snapshot
+```
+
+What “done” looks like:
+- `dot` resolves to `~/.local/bin/dot`
+- doctor summary reports no critical errors
+- shell startup remains responsive after `exec zsh`
+
 ---
 
 ## Discover

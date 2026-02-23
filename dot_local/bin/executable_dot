@@ -166,10 +166,10 @@ show_help() {
     cmd_line "--version" "Show version information"
     cmd_line "help" "Show this help message"
   else
-    cat <<EOF
+    cat <<'EOF' | sed "s/__DOT_VERSION__/${VERSION}/g"
 Usage: dot [command]
 
-Version: v${VERSION}
+Version: v__DOT_VERSION__
 Summary: Manage and maintain your dotfiles environment.
 
 Core Commands:
