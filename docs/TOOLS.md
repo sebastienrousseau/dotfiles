@@ -56,6 +56,8 @@ These are the main tools and CLI conveniences included with Dotfiles.
 
 ## AI CLI Tools
 
+See [AI Integrations](AI.md) for opt-in setup patterns and privacy notes.
+
 | Tool | NPM Package | Description |
 |------|-------------|-------------|
 | claude | @anthropic-ai/claude-code | Anthropic Claude CLI |

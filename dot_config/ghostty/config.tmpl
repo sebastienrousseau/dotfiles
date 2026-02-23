@@ -7,12 +7,12 @@
 # ╚═════╝  ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝
 #
 # Simply design to fit your shell life
-# Ghostty Configuration (v0.2.480)
+# Ghostty Configuration (v0.2.490)
 # Cross-Platform: macOS, Linux, WSL
 ###############################################
 
 {{- $theme := default "tokyonight-night" .theme -}}
-{{- $fontFamily := default "JetBrainsMono Nerd Font" .terminal_font_family -}}
+{{- $fontFamily := default "JetBrains Mono" .terminal_font_family -}}
 {{- $fontSize := default 12 .terminal_font_size -}}
 
 ##########
@@ -51,10 +51,11 @@ gtk-titlebar = true
 ################
 # Typography   #
 ################
-# Primary font from chezmoi config, with fallbacks
+# Primary: User preference (Apple Native)
+# Fallback logic is handled by Ghostty attempting the first found.
 font-family = "{{ $fontFamily }}"
 font-family = "JetBrains Mono"
-font-family = "SF Mono"
+font-family = "Roboto Mono"
 
 font-size = {{ $fontSize }}
 adjust-cell-width = -1
