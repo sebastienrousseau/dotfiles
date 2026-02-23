@@ -1,0 +1,104 @@
+name: Reusable Security Baseline
+
+on:
+  workflow_call:
+    inputs:
+      run_dependency_audit:
+        description: Audit shell scripts for external download dependencies.
+        required: false
+        type: boolean
+        default: true
+      run_supply_chain_checks:
+        description: Enforce supply-chain safety checks for shell scripts.
+        required: false
+        type: boolean
+        default: true
+      run_permission_audit:
+        description: Audit repository file permissions for risky settings.
+        required: false
+        type: boolean
+        default: false
+      script_scan_root:
+        description: Root path to scan for shell script checks.
+        required: false
+        type: string
+        default: scripts/
+
+jobs:
+  security-baseline:
+    name: Security Baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Audit shell dependencies
+        if: inputs.run_dependency_audit
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          target_root="${{ inputs.script_scan_root }}"
+          echo "Auditing shell script external dependencies under ${target_root}..."
+
+          if rg "curl|wget" "${target_root}" --type sh; then
+            echo "Found external download commands; validating domains..."
+            tmp_urls="$(mktemp)"
+            rg -o "https?://[a-zA-Z0-9.-]+" "${target_root}" --type sh | sort -u > "${tmp_urls}" || true
+
+            allowlist_regex='^(raw\.githubusercontent\.com|github\.com|get\.chezmoi\.io|webi\.sh)$'
+            while IFS= read -r url; do
+              domain="${url#http://}"
+              domain="${domain#https://}"
+              domain="${domain%%/*}"
+              if [[ -n "${domain}" ]] && ! [[ "${domain}" =~ ${allowlist_regex} ]]; then
+                echo "::warning::External dependency detected: ${url} (domain ${domain} not in allowlist)"
+              fi
+            done < "${tmp_urls}"
+            rm -f "${tmp_urls}"
+          fi
+
+          echo "Dependency audit completed."
+
+      - name: Supply chain checks
+        if: inputs.run_supply_chain_checks
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          target_root="${{ inputs.script_scan_root }}"
+          echo "Checking for supply-chain security risks under ${target_root}..."
+
+          if rg "curl.*\|.*sh|wget.*\|.*bash" "${target_root}" --type sh; then
+            echo "SECURITY VIOLATION: Piped execution detected (curl|sh / wget|bash)."
+            exit 1
+          fi
+
+          if rg "eval.*\$\(" "${target_root}" --type sh; then
+            echo "::warning::Dynamic evaluation detected; review for security risk."
+          fi
+
+          echo "Supply chain checks passed."
+
+      - name: Permission audit
+        if: inputs.run_permission_audit
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Auditing repository file permissions..."
+          issues=0
+
+          if find . -type f \( -perm -002 -o -perm -020 \) -not -path "./.git/*" | grep -q .; then
+            echo "::warning::Found files with group/other write permissions."
+            issues=1
+          fi
+
+          find . -name "*.md" -executable -not -path "./.git/*" -exec echo "::warning::Markdown file {} is executable" \; || true
+          find . -name "*.txt" -executable -not -path "./.git/*" -exec echo "::warning::Text file {} is executable" \; || true
+
+          if [[ "${issues}" -eq 1 ]]; then
+            echo "Permission audit reported warnings."
+          else
+            echo "Permission audit passed."
+          fi
