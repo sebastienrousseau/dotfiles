@@ -96,6 +96,15 @@ jobs:
           path: dependency_updates.md
           retention-days: 30
 
+  nightly-test-suite:
+    name: Nightly / Test Suite
+    uses: ./.github/workflows/reusable-test-suite.yml
+    with:
+      min_coverage: "95"
+      run_integration: false
+      run_strict_checks: false
+      timeout_minutes: 12
+
   # ============================================================================
   # EXTENDED COMPATIBILITY TESTING
   # ============================================================================
