@@ -13,6 +13,7 @@ Quick checks for common issues.
 - Re-run `chezmoi apply` to re-sync state.
 - Check for merge conflicts: `chezmoi diff`
 - If hooks fail, check `~/.local/share/dotfiles.log` for details.
+- For non-interactive sessions, force apply to avoid TTY prompts: `DOTFILES_NONINTERACTIVE=1 dot apply --force`
 
 **Problem:** Packages fail to install
 - macOS: Verify Homebrew is installed and up to date (`brew update`)
@@ -30,6 +31,19 @@ Quick checks for common issues.
 - Run `chezmoi apply` to regenerate config files
 - Source your shell config: `source ~/.zshrc`
 - Verify the relevant tool is installed
+
+**Problem:** `dot doctor` prints a directory listing instead of diagnostics
+- This usually means `dot` was shadowed by a navigation alias in the current shell session.
+- Check resolution: `type -a dot`
+- Fix current session: `unalias dot 2>/dev/null || true && exec zsh`
+- Validate after reload: `dot doctor`
+
+**Problem:** Zsh reports it cannot write `.zwc` files
+- Cause: stale read-only zsh cache files after an upgrade.
+- Remove stale caches:
+  - `find ~/.config/shell ~/.config/zsh -type f -name '*.zwc' -delete`
+- Reload shell: `exec zsh`
+- Re-run health checks: `dot doctor`
 
 **Problem:** Shell crashes on startup
 - Temporarily move `~/.zshrc` and retry to isolate the fault
