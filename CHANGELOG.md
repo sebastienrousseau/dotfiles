@@ -2,113 +2,25 @@
 
 This file documents all notable changes to this project.
 
-## v0.2.485
+## v0.2.490
 
 ### Added
 
-- **2026 hardening backlog** — Added `docs/BACKLOG_2026_HARDENING.md` with prioritized security and reliability upgrades.
-- **Devcontainer prebuild pipeline** — Added `.github/workflows/devcontainer-prebuild.yml` with GHCR prebuild support.
-- **MCP diagnostics coverage** — Added `scripts/diagnostics/mcp-doctor.sh` with dedicated unit tests.
+- **Fast mode** — `DOTFILES_FAST=1` skips heavy startup work for the quickest first prompt.
+- **Runtime toggles** — `DOTFILES_DEFER_ZINIT` and `DOTFILES_ENABLE_COLORS` controls.
+- **Ultra-fast mode** — `DOTFILES_ULTRA_FAST=1` runs a minimal init path.
+- **Minimal prompt** — `DOTFILES_ULTRA_FAST_PROMPT=1` keeps the ultra-fast prompt lightweight.
+- **AI opt-in** — `DOTFILES_AI=1` enables AI helper scripts.
 
 ### Changed
 
-- **CI and compliance workflows** — Hardened CI checks, fixed workflow reliability, and improved shell lint/test behavior across jobs.
-- **Supply-chain installer checks** — Updated `scripts/ci/install-chezmoi-verified.sh` to support current release checksum asset naming.
-- **Release documentation sync** — Updated README/docs install/tag references and version stamps to `v0.2.485`.
-
-### Fixed
-
-- **Devcontainer build stability** — Fixed CI config usage and mount behavior for non-interactive GitHub runners.
-- **Compliance guard stability** — Fixed hadolint invocation, insecure pattern detection regexes, and signature-check handling for SSH-signed commits.
-- **Unit/coverage enforcement** — Fixed ANSI-safe test failure parsing and module coverage prerequisites in CI.
-
-## v0.2.484
-
-### Fixed
-
-- **`dot tools` output** — Default `dot tools` now renders styled CLI output instead of dumping raw markdown.
-- **`dot status` visibility** — `dot status` now shows a styled `Clean` state when no drift is present.
-- **`dot keys` arg handling** — Fixed strict-mode unbound variable failure when no search argument is passed.
-
-### Changed
-
-- **Release synchronization** — Updated README/docs/version references to `v0.2.484` so the published release includes the latest command UX fixes.
-
-## v0.2.483
-
-### Added
-
-- **Signed-commit guardrails** — Added signed pre-push hook tooling under `scripts/git-hooks/` and integrated compliance checks for cryptographic signatures.
-- **Module coverage gate** — Added `scripts/tests/framework/module_coverage.sh` and CI enforcement for `>=95%` module coverage (current: `100%`).
-- **Expanded unit coverage** — Added focused unit tests for CI config validation and demo recording modules.
-
-### Changed
-
-- **CLI presentation refresh** — Restored styled `dot` UX with ASCII logo, improved help layout, aligned command columns, and green command highlighting.
-- **Documentation sync** — Updated README/docs/version references to `v0.2.483` and refreshed compliance/testing metrics.
-- **Release hardening baseline** — Brought over selected security/compliance/test commits from `feat/v0.2.482` onto `master`.
-
-### Fixed
-
-- **`dot add` strict-mode bug** — Fixed unbound argument handling when running `dot add` without arguments.
-- **Test-suite stability** — Resolved brittle and environment-sensitive unit tests; full unit suite now passes (`1046` tests, `0` failures).
-- **Template/test runner compatibility** — Fixed framework output and compatibility issues in validation tests.
-
-## v0.2.480
-
-### Added
-
-- **Catppuccin theme support** — Added all four Catppuccin flavours (latte, frappe, macchiato, mocha) with comprehensive theming across VS Code, Neovim, GTK 3/4, GNOME Shell, and Nix home-manager integration.
-- **AI pair programming** — Added `aider-chat` CLI tool for AI-powered code editing and pair programming sessions.
-- **Enhanced Python AI tools** — Added `shell-gpt` and `posting` to Python tools provisioning for improved CLI AI assistance.
-- **Git workflow improvements** — Added `git-absorb` for automatic fixup commits and intelligent commit history management.
-- **Template helper functions** — Added comprehensive chezmoi template helpers for feature flags, git variables, OS detection, and path utilities.
-
-### Changed
-
-- **Syntax highlighting performance** — Switched from `zsh-syntax-highlighting` to `fast-syntax-highlighting` for improved shell responsiveness.
-- **Technical debt reduction** — Achieved 10/10 technical debt score through modular installer refactoring with dedicated libraries for backup, chezmoi, OS detection, and package management.
-- **Documentation architecture** — Comprehensive documentation overhaul with centralized docs/README.md, helper function documentation, and improved template organization.
-- **Theme switching enhancement** — Enhanced `switch.sh` with family toggling between Tokyo Night and Catppuccin theme families.
-
-### Fixed
-
-- **Template processing** — Fixed undefined `$name` variable in README.md template that was causing `chezmoi apply` failures.
-- **Code quality** — Resolved all remaining Codacy static analysis warnings for improved code maintainability.
-- **CI optimization** — Optimized GitHub Actions workflows to reduce usage and cost.
+- **Deferred tool init** — Atuin, Starship, Zoxide, and FZF now load after the first prompt.
+- **Zinit bootstrap** — Deferred by default to reduce first-prompt latency.
+- Updated all version references to v0.2.490.
 
 ### Documentation
 
-- **ADR documentation** — Added comprehensive Architecture Decision Records (ADR-005 for chezmoi choice, ADR-006 for shell selection).
-- **Template validation** — Added comprehensive unit tests for template validation and processing.
-- **Theme documentation** — Added documentation for Catppuccin installation, GNOME theme application, and cross-platform theme switching.
-
-## v0.2.479
-
-### Added
-
-- **Cross-platform Brewfile** — Unified Brewfile with OS.mac?/OS.linux? platform detection for seamless package management across macOS, Linux, and WSL.
-- **Enhanced WSL detection** — Added DOTFILES_OS variable in zprofile for improved Windows Subsystem for Linux compatibility.
-- **AI shell tooling** — Added generic ollama aliases (ol, olr, oll, olp, ollama-status, ollama-show) for cross-platform AI model interaction.
-- **Homebrew optimization** — Added performance settings disabling analytics and auto-update for faster package operations.
-- **Language-specific PATH setup** — Enhanced PATH configuration for Go, Rust, .NET, and Python development environments.
-
-### Changed
-
-- **Platform-agnostic aliases** — Removed personal model-specific ollama functions, keeping only generic cross-platform aliases that work on any Ollama installation.
-- **Brewfile organization** — Reorganized Brewfile sections for clarity and removed platform-specific packages from cross-platform sections.
-- **Feature flags documentation** — Expanded FEATURES.md with comprehensive feature flag table, template processing examples, and troubleshooting guide.
-
-### Fixed
-
-- **Test framework reliability** — Resolved shellcheck warnings and mock export issues in unit test framework.
-- **CI compatibility** — Fixed alias tests to use proper `alias` command instead of `type`, enabled `shopt -s expand_aliases` in test subshells.
-- **PATH isolation** — Fixed unavailable command tests by using isolated PATH to ensure system commands aren't found during testing.
-
-### Documentation
-
-- **AI aliases documentation** — Updated documentation for ollama aliases and cross-platform AI tooling.
-- **Architecture notes** — Enhanced feature flag documentation with template processing explanation and runtime access patterns.
+- Added performance mode guidance and updated benchmark wording to reflect real-world variance.
 
 ## v0.2.478
 

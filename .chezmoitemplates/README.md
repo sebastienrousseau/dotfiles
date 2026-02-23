@@ -5,9 +5,9 @@
   align="right"
 />
 
-# Chezmoi Templates (v0.2.487)
+# Chezmoi Templates (v0.2.490)
 
-Modular shell configuration for macOS, Linux, and WSL.
+Simply designed to fit your shell life
 
 ![Dotfiles banner](https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg)
 
@@ -25,12 +25,7 @@ This directory contains modular templates that are aggregated into the shell env
 │   ├── git/
 │   ├── kubernetes/
 │   └── ... (42 more)
-├── functions/        # Utility functions and template helpers
-│   ├── helpers/      # Reusable template patterns
-│   │   ├── feature-flags.tmpl   # Feature flag resolution
-│   │   ├── git-vars.tmpl        # Git variable helpers
-│   │   ├── os-detection.tmpl    # OS/platform detection
-│   │   └── path-utils.tmpl      # XDG and path utilities
+├── functions/        # 52 utility functions
 │   ├── utils/        # Common utilities (logging.sh)
 │   └── *.sh          # Individual function files
 └── paths/            # 3 priority-ordered PATH files
@@ -38,35 +33,6 @@ This directory contains modular templates that are aggregated into the shell env
     ├── 05-pipx.paths.sh       # pipx paths
     └── 99-custom.paths.sh     # User custom paths
 ```
-
-## Template Helpers
-
-The `functions/helpers/` directory contains reusable template patterns to reduce
-complexity in `.tmpl` files:
-
-| Helper | Purpose |
-|--------|---------|
-| `git-vars.tmpl` | Resolve git user/email/signing variables with fallbacks |
-| `feature-flags.tmpl` | Consistent feature flag resolution with defaults |
-| `os-detection.tmpl` | OS, architecture, and package manager detection |
-| `path-utils.tmpl` | XDG Base Directory and common tool paths |
-
-### Usage Pattern
-
-Instead of repetitive variable resolution (old pattern):
-
-    # Old verbose pattern - don't use
-    $git_name := ""
-    if hasKey . "git_name" then $git_name = .git_name
-    if hasKey . "name" then $git_name = .name
-    if (not $git_name) and $name then $git_name = $name
-
-Use the idiomatic `coalesce` pattern (recommended):
-
-    # New concise pattern - use this
-    $git_name := coalesce .git_name .name ""
-
-See actual implementation in `dot_gitconfig.tmpl` for working examples.
 
 ### Template Categories
 
@@ -203,6 +169,4 @@ aliases/
 2. Update aggregation templates to handle subdirectories
 3. Validate no regression in shell loading performance
 
----
-
-Made with ❤️ by [](https://github.com/sebastienrousseau)
+Made With ❤️ in London, United Kingdom • [dotfiles.io](https://dotfiles.io)

@@ -5,7 +5,7 @@
   align="right"
 />
 
-# Dotfiles Path Configuration (v0.2.482)
+# Dotfiles Path Configuration (v0.2.490)
 
 Simply designed to fit your shell life 
 
@@ -45,7 +45,3 @@ Path configurations are split into priority-based files. `chezmoi` aggregates th
 <!-- markdownlint-enable MD013-->
 
 [banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
-
----
-
-Made with ❤️ by [](https://github.com/sebastienrousseau)

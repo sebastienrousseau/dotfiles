@@ -5,7 +5,7 @@
 # Dotfiles — A Fast, Idempotent Shell Environment
 
 [![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions)
-[![Version](https://img.shields.io/badge/Version-v0.2.489-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.489)
+[![Version](https://img.shields.io/badge/Version-v0.2.490-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.490)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 [![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases)
 [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
@@ -14,7 +14,7 @@
 
 ## Overview
 
-Configure your development environment once, deploy it everywhere. Dotfiles is a cross‑platform shell distribution managed by [Chezmoi](https://github.com/twpayne/chezmoi) — the dotfiles manager that tracks source state in Git. Works on macOS, Linux, and WSL. **Idempotent** by design: run it once or a hundred times, the result stays the same.
+Set up your development environment in minutes and keep it consistent across every machine. Dotfiles is a cross‑platform shell distribution managed by [Chezmoi](https://github.com/twpayne/chezmoi) that works on macOS, Linux, and WSL. It is **idempotent** by design: run it once or a hundred times, and the result is always the same.
 
 Git + templates + guarded scripts = a reproducible shell.
 
@@ -39,34 +39,24 @@ Git + templates + guarded scripts = a reproducible shell.
 
 ## Why dotfiles
 
-Dotfiles treats your shell as infrastructure. Built for developers who work across multiple machines and demand **usability, reproducibility, and auditability.**
+Dotfiles takes an infrastructure‑oriented approach to managing your shell. It is designed for developers who work across multiple machines and value **daily usability, reproducibility, and auditability.**
 
-- **The Stack.** Zsh, Neovim, tmux, and AI CLI tools with production-ready defaults.
-- **Unified Control.** The `dot` CLI handles syncing, upgrades, and secrets in one place.
-- **Safety First.** System and security changes require explicit opt‑in.
-- **Clean Slate.** Source files, generated configs, and system state remain separated.
+- **The Stack.** Zsh, Neovim, tmux, and AI CLI tools configured with sane defaults so you can start working immediately.
+- **Unified Control.** The `dot` CLI wraps common workflows such as syncing, upgrading, and managing secrets.
+- **Safety First.** Every system or security change requires explicit opt‑in.
+- **Clean Slate.** Source files, generated configs, and system state stay cleanly separated.
 
 
 ## Safety
 
-This is **infrastructure**, not an ad‑hoc script.
+This is **infrastructure**, not an ad‑hoc shell script.
 
-- **No destructive actions** without explicit opt‑in.
-- **No background daemons** install automatically.
-- **No system settings** change by default.
-- System‑level behavior requires opt‑in via environment variables.
-- All privileged actions log to `~/.local/share/dotfiles.log`.
-
----
-
-## Verification (CI Seal)
-
-Every change is verified across macOS and Linux CI with security scanners, lint, and unit tests. Locally, you can validate your machine in one pass:
-
-```bash
-dot scorecard
-dot verify
-```
+- No destructive actions without explicit opt‑in.
+- No background daemons install automatically.
+- No system settings change by default.
+- System‑level behavior requires explicit opt‑in through environment variables.
+- Dotfiles logs all privileged actions to `~/.local/share/dotfiles.log`.
+- AI helpers are **opt‑in** and disabled by default (`DOTFILES_AI=1` to enable).
 
 ---
 
@@ -77,27 +67,14 @@ dot verify
 
 ```bash
 # Works on macOS, Linux, and WSL
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.489/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.490/install.sh)"
 exec zsh
 ```
 
 For non‑interactive installs (servers and CI):
 ```bash
-DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.489/install.sh)"
+DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.490/install.sh)"
 ```
-
-### 60-second onboarding
-
-```bash
-dot doctor     # health + platform parity checks
-dot apply      # apply managed config
-dot scorecard  # UX + security + performance snapshot
-```
-
-What “done” looks like:
-- `dot` resolves to `~/.local/bin/dot`
-- doctor summary reports no critical errors
-- shell startup remains responsive after `exec zsh`
 
 ---
 
@@ -108,6 +85,7 @@ What “done” looks like:
 - [Security Guide](docs/SECURITY.md) — Hardening matrix and logging.
 - [Secrets Guide](docs/SECRETS.md) — Age setup and encrypted files.
 - [Tools Catalog](docs/TOOLS.md) — Core tools and optional utilities.
+- [AI Integrations](docs/AI.md) — Optional AI helpers and privacy notes.
 - [Dot Utils](docs/UTILS.md) — Aliases and dot CLI helpers.
 - [Troubleshooting](docs/TROUBLESHOOTING.md) — Fixes for common issues.
 
@@ -129,27 +107,46 @@ dot update
 DOTFILES_NONINTERACTIVE=1 dot apply
 ```
 
-### Upgrade-safe apply flow
+## Performance modes
 
-When pulling a new release, use this sequence:
-
-```bash
-git pull
-DOTFILES_NONINTERACTIVE=1 dot apply --force
-dot doctor
-```
-
-`dot apply` now runs post-apply validation automatically to:
-- remove stale read-only zsh cache files (`*.zwc`)
-- verify `dot` resolves to `~/.local/bin/dot` in a fresh login shell
-
-After apply, reload your current session:
+Dotfiles prioritizes a **fast first prompt** while keeping features available after the first render.
+If you need the fastest possible shell, enable the fast path:
 
 ```bash
-exec zsh
+DOTFILES_FAST=1 exec zsh
 ```
 
-Or restart the terminal to pick up alias/function updates.
+Fast mode skips heavy startup work (plugins, advanced completions, AI helpers, and prompt tooling) while keeping core paths and safety checks intact.
+
+You can also select a startup mode with a single variable:
+
+```bash
+DOTFILES_STARTUP_MODE=fast exec zsh
+```
+
+For the absolute minimum startup overhead, use ultra-fast mode:
+
+```bash
+DOTFILES_ULTRA_FAST=1 exec zsh
+```
+
+Ultra-fast mode is intentionally minimal (no rc.d, plugins, completions, or prompt tooling).
+
+### Deferred hooks
+
+To push first-prompt latency even lower, you can move more work to the first command:
+
+```bash
+export DOTFILES_DEFER_COMPINIT=1
+export DOTFILES_DEFER_TOOLS=1
+export DOTFILES_DEFER_ZINIT_MODE=preexec
+```
+
+To prewarm heavy layers without blocking your first command:
+
+```bash
+export DOTFILES_LAYERS_LOAD=background
+```
 
 ## Make it yours
 
@@ -182,32 +179,21 @@ Run `dot --help` or `dot <command> --help` for inline documentation.
 | `dot drift` | Drift dashboard (chezmoi status) | Diagnostics |
 | `dot history` | Shell history analysis | Diagnostics |
 | `dot doctor` | Check system health and configuration | Diagnostics |
-| `dot verify` | Post-merge verification (`dot doctor`, `dot status`, `chezmoi diff`) | Diagnostics |
-| `dot health` | Comprehensive health dashboard (37 checks) | Diagnostics |
-| `dot security-score` | Security assessment with grading | Diagnostics |
-| `dot scorecard` | Unified health/security/performance scorecard | Diagnostics |
-| `dot perf` | Predictable startup profiling (3-run average) | Diagnostics |
-| `dot conflicts` | Report alias/command conflicts | Diagnostics |
-| `dot locks` | Show version locks for key tools | Diagnostics |
-| `dot snapshot` | Capture baseline system snapshot | Diagnostics |
-| `dot benchmark` | Shell startup benchmark (`--detailed`, `--profile`) | Diagnostics |
-| `dot restore` | Restore from backup or git ref | Diagnostics |
+| `dot benchmark` | Shell startup benchmark | Diagnostics |
+| `dot perf` | Show performance mode + quick timing (`--json`, `--precmd`) | Diagnostics |
 | `dot theme` | Switch terminal theme (dark/light) | UX |
 | `dot wallpaper` | Apply a wallpaper from your library | UX |
 | `dot keys` | Show keybindings catalog | UX |
-| `dot mcp` | Inspect MCP server security and configuration | UX |
 | `dot learn` | Interactive tour of tools (requires `gum`) | UX |
 | `dot fonts` | Install Nerd Fonts | UX |
 | `dot sandbox` | Launch a safe sandbox preview | Tools |
 | `dot tools` | Show tools or install through Nix | Tools |
-| `dot aliases` | List/search/explain alias definitions | Tools |
 | `dot tools install` | Enter Nix development shell | Tools |
+| `dot ai` | Show AI helper status (opt-in) | Tools |
 | `dot new` | Create a new project from a template | Tools |
 | `dot log-rotate` | Rotate `~/.local/share/dotfiles.log` | Tools |
-| `dot setup` | Interactive setup (profile, features, secrets) | Tools |
 | `dot secrets-init` | Initialise age key for secrets | Secrets |
-| `dot secrets` | Manage secrets (`edit|set|get|list|load|provider`) | Secrets |
-| `dot env load <bucket>` | Emit shell exports for a secrets bucket | Secrets |
+| `dot secrets` | Edit encrypted secrets | Secrets |
 | `dot secrets-create` | Create an encrypted secrets file | Secrets |
 | `dot ssh-key` | Encrypt an SSH key locally with age | Secrets |
 | `dot backup` | Create a compressed backup of your home directory | Security |
@@ -218,52 +204,12 @@ Run `dot --help` or `dot <command> --help` for inline documentation.
 | `dot lock-screen` | Enforce lock‑screen idle settings (opt‑in) | Security |
 | `dot usb-safety` | Disable automount for removable media | Security |
 
-### Alias Modes (2026)
-
-- `DOTFILES_ALIAS_PROFILE=standard` (default): balanced alias set.
-- `DOTFILES_ALIAS_PROFILE=minimal`: trims heavy cloud/security/AI packs.
-- `DOTFILES_ALIAS_PROFILE=full`: loads all alias packs.
-- `DOTFILES_ALIAS_ECOSYSTEMS=all` (default): load all ecosystem alias families.
-- `DOTFILES_ALIAS_ECOSYSTEMS=python,node`: only load selected ecosystems (valid tags: `python,node,rust,network,legacy`).
-- `DOTFILES_ENABLE_CD_ALIAS=1`: opt-in override for `cd` -> `cd_with_history`.
-- `DOTFILES_SECURITY_MODE=strict`: enables high-impact security aliases (for example UFW mutation aliases).
-- `DOTFILES_ENABLE_DANGEROUS_ALIASES=1`: opt-in destructive aliases (`git reset --hard`, trash purge, force-push helpers).
-- `DOTFILES_ALIAS_POLICY=strict`: fail alias governance on duplicate names and expired deprecated aliases (enabled by default in CI).
-
-### Developer CLI Tools
-
-These utilities are installed to `~/.local/bin/`:
-
-| Tool | Description |
-|------|-------------|
-| `jsonv` | JSON validator and formatter |
-| `yamlv` | YAML validator |
-| `epoch` | Unix timestamp converter |
-| `b64` | Base64 encoder/decoder |
-| `jwt` | JWT token decoder |
-| `hex` | Hex viewer/converter |
-| `regex` | Regex tester |
-| `lorem` | Lorem ipsum generator |
-| `uuid` | UUID generator |
-| `hash` | MD5/SHA hash calculator |
-| `myip` | Show public/local IP addresses |
-| `kill-port` | Kill process by port |
-| `extract` | Universal archive extraction |
-| `update` | Update all system packages |
-
 **Examples**
 
 ```bash
 # Initialise secrets (prints a public key)
 DOTFILES_NONINTERACTIVE=1 dot secrets-init
 # Output: Age key created at ~/.config/chezmoi/key.txt
-
-# Store and retrieve a secret via the configured provider
-dot secrets set GEMINI_API_KEY
-dot secrets get GEMINI_API_KEY --raw
-
-# Load the AI bucket into your current shell
-eval "$(dot env load ai)"
 ```
 
 ### Security changes
@@ -379,12 +325,3 @@ See [CHANGELOG.md](CHANGELOG.md).
 This project is licensed under the **MIT License**. See [LICENSE](LICENSE).
 
 Some bundled third‑party dependencies are licensed under GPL‑3.0; the LICENSE file lists them explicitly.
-
----
-
-<div align="center">
-
-🎨 Designed by **[](https://sebastienrousseau.com/)**
-🚀 Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
-
-</div>

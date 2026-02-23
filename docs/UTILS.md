@@ -27,6 +27,8 @@ The `dot` command is your primary interface for managing dotfiles. Run `dot --ve
 | `dot drift` | Detailed configuration drift dashboard |
 | `dot history` | Analyse shell history |
 | `dot benchmark` | Measure shell startup time |
+| `dot perf` | Show performance mode + quick timing (`--json`, `--precmd`) |
+| `dot ai` | Show AI helper status (opt-in) |
 
 ### Tools
 

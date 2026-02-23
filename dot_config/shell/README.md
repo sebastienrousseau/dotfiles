@@ -5,7 +5,7 @@ Welcome to your universally compatible, high-performance dotfiles configuration,
 ## Discover
 
 - **Universal Support**: Works seamlessly on macOS, Linux (Ubuntu/Debian), and Windows (WSL).
-- **Instant Startup**: Optimized with `zcompile` and lazy-loading for <10ms startup time.
+- **Fast Startup**: Optimized with `zcompile` and lazy-loading. Benchmarks vary by machine; use `DOTFILES_FAST=1` for the quickest first prompt.
 - **Modern Core**: Replaces legacy Unix tools with Rust-based alternatives:
     - `eza` (ls)
     - `bat` (cat)
@@ -26,7 +26,7 @@ Welcome to your universally compatible, high-performance dotfiles configuration,
 To install these dotfiles on a new machine, simply run:
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.482/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.490/install.sh)"
 ```
 
 This command will:
@@ -258,10 +258,10 @@ Available themes:
 ## Performance
 - **Lazy Loading**: Heavy tools (like `nvm`, `rbenv`) are lazy-loaded. They only initialize when you type the command.
 - **Zcompile**: Your `.zshrc` and generated config files are automatically compiled to `.zwc` bytecode for faster parsing.
+- **Fast Mode**: Set `DOTFILES_FAST=1` to skip heavy startup work (plugins, completions, prompt tooling, AI helpers) for the quickest possible first prompt.
+- **Ultra-Fast Mode**: Set `DOTFILES_ULTRA_FAST=1` for minimal init (no rc.d, plugins, completions, or prompt tooling).
+- **Perf Mode**: `dot perf --precmd` measures first-prompt work (precmd hooks).
+- **Deferred Hooks**: Use `DOTFILES_DEFER_COMPINIT=1`, `DOTFILES_DEFER_TOOLS=1`, and `DOTFILES_DEFER_ZINIT_MODE=preexec` to move work after the first command.
 
 ## Test
 This repository includes GitHub Actions CI to test the configuration on macOS, Ubuntu, and Windows for every Pull Request.
-
----
-
-Made with ❤️ by [](https://sebastienrousseau.com)

@@ -1,5 +1,6 @@
 # shellcheck shell=bash
 # Copyright (c) 2015-2026. All rights reserved.
+# Version: 0.2.490
 # Website: https://dotfiles.io
 # License: MIT
 
@@ -26,7 +27,7 @@ if command -v fd &>/dev/null; then
   alias fdf='fd --follow'
 
   # List all files with help.
-  alias fdhelp='fd --help'
+  alias fdh='fd --help'
 
   # List all files, including hidden files.
   alias fdh='fd --hidden'
@@ -48,5 +49,8 @@ if command -v fd &>/dev/null; then
 
   # Execute a command for each search result.
   alias fdx='fd --exec'
+
+  # Use fd as a replacement for find.
+  alias find='fd'
 
 fi
