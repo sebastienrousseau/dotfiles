@@ -4,12 +4,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
+# shellcheck source=../dot/lib/platform.sh
+source "$SCRIPT_DIR/../dot/lib/platform.sh"
 
 ui_init
 ui_header "Encryption Check"
 
-case "$(uname -s)" in
-  Darwin)
+case "$(dot_platform_id)" in
+  macos)
     if command -v fdesetup >/dev/null; then
       status=$(fdesetup status || true)
       echo "$status"
@@ -24,7 +26,7 @@ case "$(uname -s)" in
       exit 1
     fi
     ;;
-  Linux)
+  linux | wsl)
     if command -v lsblk >/dev/null; then
       lsblk_output=$(lsblk -f)
       if command -v rg >/dev/null; then

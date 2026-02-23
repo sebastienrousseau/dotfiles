@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
+# shellcheck source=../dot/lib/platform.sh
+source "$SCRIPT_DIR/../dot/lib/platform.sh"
 
 ui_init
 ui_header "DNS-over-HTTPS"
@@ -14,8 +16,8 @@ if [ "${DOTFILES_DOH:-}" != "1" ]; then
   exit 1
 fi
 
-case "$(uname -s)" in
-  Linux)
+case "$(dot_platform_id)" in
+  linux | wsl)
     if command -v resolvectl >/dev/null; then
       ui_info "Enabling" "systemd-resolved DoH (Cloudflare)"
       sudo resolvectl dns-over-https on
@@ -25,7 +27,7 @@ case "$(uname -s)" in
       exit 1
     fi
     ;;
-  Darwin)
+  macos)
     ui_info "Configure" "DoH in your browser"
     exit 0
     ;;

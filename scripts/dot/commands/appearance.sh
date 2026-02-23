@@ -24,13 +24,15 @@ cmd_fonts() {
 
 cmd_tune() {
   local src_dir
+  local platform
   src_dir="$(require_source_dir)"
+  platform="$(dot_platform_id)"
 
-  case "$(uname -s)" in
-    Darwin)
+  case "$platform" in
+    macos)
       exec bash "$src_dir/scripts/tuning/macos.sh" "$@"
       ;;
-    Linux)
+    linux | wsl)
       exec bash "$src_dir/scripts/tuning/linux.sh" "$@"
       ;;
     *)
