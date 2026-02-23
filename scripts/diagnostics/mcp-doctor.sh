@@ -36,7 +36,10 @@ source "$SCRIPT_DIR/../dot/lib/ui.sh"
 STRICT_MODE=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --strict) STRICT_MODE=1; shift ;;
+    --strict)
+      STRICT_MODE=1
+      shift
+      ;;
     *) shift ;;
   esac
 done
