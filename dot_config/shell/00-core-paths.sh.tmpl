@@ -27,36 +27,43 @@
 ## # Idempotency
 ## Safe to source multiple times. Deduplicates PATH entries.
 
+# Helper: prepend path if directory exists and isn't already in PATH
+path_prepend() {
+    local dir="$1"
+    [[ -n "$dir" && -d "$dir" ]] || return 0
+    case ":$PATH:" in
+        *":$dir:"*) return 0 ;;
+        *) PATH="$dir:${PATH}" ;;
+    esac
+}
+
 # 1. System Paths (Prepend, but will be pushed down by later prepends)
-export PATH="/usr/bin:/bin:/usr/sbin:/sbin:${PATH}"
+PATH="/usr/bin:/bin:/usr/sbin:/sbin:${PATH}"
 
 # 2. Homebrew Paths (Prepend -> Higher Priority)
-if [[ -d "/opt/homebrew/bin" ]]; then
-    export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}"
-fi
+path_prepend "/opt/homebrew/sbin"
+path_prepend "/opt/homebrew/bin"
 
 # 3. Language Runtimes
 # Ruby (Homebrew)
-if [[ -d "/opt/homebrew/opt/ruby/bin" ]]; then
-    export PATH="/opt/homebrew/opt/ruby/bin:${PATH}"
-fi
+path_prepend "/opt/homebrew/opt/ruby/bin"
 # Ruby (User Gems)
-export PATH="${HOME}/.gem/ruby/bin:${PATH}"
+path_prepend "${HOME}/.gem/ruby/bin"
 
 # Python (Pipx)
 export PIPX_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/pipx"
 export PIPX_BIN_DIR="${XDG_BIN_HOME:-$HOME/.local/bin}"
-export PATH="${PIPX_BIN_DIR}:${PATH}"
+path_prepend "${PIPX_BIN_DIR}"
 
 # Rust (Cargo)
-export PATH="${HOME}/.cargo/bin:${PATH}"
+path_prepend "${HOME}/.cargo/bin"
 
 # Go
-export PATH="${HOME}/go/bin:${PATH}"
+path_prepend "${HOME}/go/bin"
 
 # Bun
 export BUN_INSTALL="${HOME}/.bun"
-export PATH="${BUN_INSTALL}/bin:${PATH}"
+path_prepend "${BUN_INSTALL}/bin"
 
 # Kubeconfig merge logic (merge all configs in ~/.kube/config.d/)
 # Lazy-loaded via kubectl wrapper to avoid startup cost
@@ -81,19 +88,24 @@ if [[ -n "${KUBERNETES_SERVICE_HOST:-}" ]] || [[ -n "${KUBECONFIG:-}" ]]; then
 fi
 
 # Node.js (Global)
-export PATH="${HOME}/.node_modules/bin:${PATH}"
+path_prepend "${HOME}/.node_modules/bin"
 
 # Lua (Luarocks)
-export PATH="${HOME}/.luarocks/bin:${PATH}"
+path_prepend "${HOME}/.luarocks/bin"
 
 # 4. Applications (macOS Specifics from 99-custom)
-export PATH="/Library/Apple/usr/bin:/Library/TeX/texbin:${PATH}"
-export PATH="/Applications/Topaz Photo AI.app/Contents/Resources/bin:/Applications/Little Snitch.app/Contents/Components:/Applications/iTerm.app/Contents/Resources/utilities:${PATH}"
-export PATH="/Applications/Visual Studio Code.app/Contents/Resources/app/bin:${PATH}"
+{{- if eq .chezmoi.os "darwin" }}
+path_prepend "/Library/Apple/usr/bin"
+path_prepend "/Library/TeX/texbin"
+path_prepend "/Applications/Topaz Photo AI.app/Contents/Resources/bin"
+path_prepend "/Applications/Little Snitch.app/Contents/Components"
+path_prepend "/Applications/iTerm.app/Contents/Resources/utilities"
+path_prepend "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+{{- end }}
 
 # 5. Local Bin (Highest Priority)
-export PATH="${HOME}/.local/bin:${PATH}"
-export PATH="${HOME}/bin:${PATH}"
+path_prepend "${HOME}/.local/bin"
+path_prepend "${HOME}/bin"
 
 # Deduplicate PATH (Keep first occurrence to maintain precedence)
 # Standard Zsh handles this with 'typeset -U path', but for bash compatibility/subshells:
