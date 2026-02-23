@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+import os
+import pty
+import select
+import sys
+import time
+import re
+
+RUNS = int(sys.argv[1]) if len(sys.argv) > 1 else 3
+TIMEOUT = float(sys.argv[2]) if len(sys.argv) > 2 else 10.0
+
+MARK = "__PTY_READY__"
+END = "__STATUS_END__"
+
+print(f"dot load readiness benchmark (pty) runs={RUNS}, timeout={TIMEOUT}s")
+
+
+def read_until(fd, pattern, timeout):
+    buf = ""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        r, _, _ = select.select([fd], [], [], 0.1)
+        if fd in r:
+            try:
+                data = os.read(fd, 4096).decode(errors="ignore")
+            except OSError:
+                break
+            buf += data
+            if pattern.search(buf):
+                return buf
+    return None
+
+
+def run_once():
+    pid, fd = pty.fork()
+    if pid == 0:
+        os.execvp("zsh", ["zsh", "-i"])
+
+    os.write(fd, f"echo {MARK}\n".encode())
+    if read_until(fd, re.compile(MARK), TIMEOUT) is None:
+        os.write(fd, b"exit\n")
+        os.waitpid(pid, 0)
+        return None
+
+    os.write(fd, b"dot load --background\n")
+    t0 = time.perf_counter()
+
+    status_re = re.compile(END)
+    ready = False
+    while (time.perf_counter() - t0) < TIMEOUT:
+        os.write(fd, f"dot load --status; echo {END}\n".encode())
+        out = read_until(fd, status_re, TIMEOUT)
+        if out and "ready" in out:
+            ready = True
+            break
+        time.sleep(0.2)
+
+    os.write(fd, b"exit\n")
+    os.waitpid(pid, 0)
+
+    if not ready:
+        return None
+    return (time.perf_counter() - t0) * 1000.0
+
+
+vals = []
+for i in range(1, RUNS + 1):
+    ms = run_once()
+    if ms is None:
+        print(f"  run {i}: timeout")
+        continue
+    vals.append(ms)
+    print(f"  run {i}: {ms:.1f} ms")
+
+if vals:
+    avg = sum(vals) / len(vals)
+    print(f"avg: {avg:.2f} ms")
