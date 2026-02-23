@@ -9,8 +9,9 @@
 # Set default text editor
 EDITOR="${EDITOR:-vi}"
 
-# Ensure dot CLI is available without forcing a stale hardcoded path.
-if ! command -v dot >/dev/null 2>&1 && [[ -x "$HOME/.local/bin/dot" ]]; then
+# Reserve `dot` for the CLI so navigation shortcuts do not shadow it.
+if [[ -x "$HOME/.local/bin/dot" ]]; then
+  unalias dot 2>/dev/null || true
   alias dot="$HOME/.local/bin/dot"
 fi
 

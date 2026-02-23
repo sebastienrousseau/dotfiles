@@ -59,12 +59,32 @@ dot apply
 ```
 *Triggers: `dot_zshrc` reload, audit logging.*
 
+### Upgrade-safe apply (recommended)
+After updating to a new version:
+
+```bash
+git pull
+DOTFILES_NONINTERACTIVE=1 dot apply --force
+dot doctor
+```
+
+`dot apply` includes post-apply checks that:
+- remove stale read-only zsh cache files (`~/.config/shell/*.zwc`, `~/.config/zsh/**/*.zwc`)
+- validate that `dot` resolves to `~/.local/bin/dot` in a fresh login shell
+
+Final step for the current terminal session:
+
+```bash
+exec zsh
+```
+
+If you prefer, restart the terminal instead.
+
 ### Async updates
 Run updates in the background and get a status banner on the next shell launch:
 ```bash
 dot update --async
 ```
-
 ### Roll back
 If an update breaks your setup, revert:
 ```bash
