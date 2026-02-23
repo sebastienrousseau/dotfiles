@@ -116,6 +116,28 @@ dot update
 DOTFILES_NONINTERACTIVE=1 dot apply
 ```
 
+### Upgrade-safe apply flow
+
+When pulling a new release, use this sequence:
+
+```bash
+git pull
+DOTFILES_NONINTERACTIVE=1 dot apply --force
+dot doctor
+```
+
+`dot apply` now runs post-apply validation automatically to:
+- remove stale read-only zsh cache files (`*.zwc`)
+- verify `dot` resolves to `~/.local/bin/dot` in a fresh login shell
+
+After apply, reload your current session:
+
+```bash
+exec zsh
+```
+
+Or restart the terminal to pick up alias/function updates.
+
 ## Make it yours
 
 - [Operations](docs/OPERATIONS.md)
