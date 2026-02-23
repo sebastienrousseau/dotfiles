@@ -43,7 +43,7 @@
 
 set -euo pipefail
 
-VERSION="0.2.488"
+VERSION="0.2.489"
 
 COMMAND="${1:-}"
 if [ -n "${1:-}" ]; then
