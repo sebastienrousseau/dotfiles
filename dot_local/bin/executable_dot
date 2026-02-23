@@ -328,6 +328,12 @@ PY
             echo "  python3 not found; run: zsh -i -c exit"
         fi
         ;;
+    load-bench)
+        command dot-load-benchmark "$@"
+        ;;
+    load-bench-pty)
+        command dot-load-benchmark-pty "$@"
+        ;;
     ai)
         echo "AI helpers (opt-in)"
         echo "  DOTFILES_AI=${DOTFILES_AI:-0}"

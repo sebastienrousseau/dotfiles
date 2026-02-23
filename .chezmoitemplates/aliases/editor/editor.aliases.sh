@@ -19,13 +19,18 @@ if ! alias v >/dev/null 2>&1; then
   alias v='${EDITOR}'
 fi
 
+# Legacy editor aliases are opt-in.
+: "${DOTFILES_LEGACY_EDITOR_ALIASES:=0}"
+
 # Editor-specific aliases based on the current EDITOR/VISUAL
 if [[ -n "${EDITOR}" ]]; then
   case "${EDITOR}" in
     nvim | */nvim)
       # Neovim aliases
-      alias vi="nvim"
-      alias vim="nvim"
+      if [[ "${DOTFILES_LEGACY_EDITOR_ALIASES}" == "1" ]]; then
+        alias vi="nvim"
+        alias vim="nvim"
+      fi
       alias nvimrc='nvim "${HOME}/.config/nvim/init.lua"'
       alias nvimlua='nvim "${HOME}/.config/nvim/init.lua"'
       alias nvimconf='nvim "${HOME}/.config/nvim"'
@@ -47,29 +52,37 @@ if [[ -n "${EDITOR}" ]]; then
       alias nanorc='nano "${HOME}/.nanorc"'
       # Enhanced nano with line numbers and smooth scrolling
       function nanoedit() { nano -l -S "$@"; }
-      alias ne="nanoedit"
+      if [[ "${DOTFILES_LEGACY_EDITOR_ALIASES}" == "1" ]]; then
+        alias ne="nanoedit"
+      fi
       ;;
     emacs | */emacs)
       # Emacs aliases
-      alias em="emacs"
       alias emacs-nw="emacs -nw"
       alias emacsc="emacsclient"
       alias emacsrc="emacs ~/.emacs"
-      alias et="emacs -nw" # Terminal mode
+      if [[ "${DOTFILES_LEGACY_EDITOR_ALIASES}" == "1" ]]; then
+        alias em="emacs"
+        alias et="emacs -nw" # Terminal mode
+      fi
       ;;
     subl | */subl)
       # Sublime Text aliases
-      if ! alias st >/dev/null 2>&1; then
-        alias st="subl"
+      if [[ "${DOTFILES_LEGACY_EDITOR_ALIASES}" == "1" ]]; then
+        if ! alias st >/dev/null 2>&1; then
+          alias st="subl"
+        fi
       fi
       alias stt="subl ."  # Open current directory
       alias stn="subl -n" # Open in new window
       ;;
     atom | */atom)
       # Atom aliases
-      alias a="atom"
-      alias at="atom ."
-      alias an="atom -n"
+      if [[ "${DOTFILES_LEGACY_EDITOR_ALIASES}" == "1" ]]; then
+        alias a="atom"
+        alias at="atom ."
+        alias an="atom -n"
+      fi
       ;;
   esac
 fi
