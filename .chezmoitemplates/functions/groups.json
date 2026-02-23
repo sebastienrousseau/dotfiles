@@ -1,0 +1,71 @@
+{
+  "api": [
+    "apihealth.sh",
+    "apilatency.sh",
+    "apiload.sh"
+  ],
+  "curl": [
+    "curlheader.sh",
+    "curlstatus.sh",
+    "curltime.sh",
+    "httpdebug.sh"
+  ],
+  "text": [
+    "encode64.sh",
+    "kebabcase.sh",
+    "lowercase.sh",
+    "sentencecase.sh",
+    "snakecase.sh",
+    "titlecase.sh",
+    "uppercase.sh"
+  ],
+  "system": [
+    "environment.sh",
+    "freespace.sh",
+    "hostinfo.sh",
+    "myproc.sh",
+    "sysinfo.sh",
+    "whoisport.sh",
+    "hstats.sh"
+  ],
+  "files": [
+    "backup.sh",
+    "extract.sh",
+    "hexdump.sh",
+    "hiddenfiles.sh",
+    "showhiddenfiles.sh",
+    "size.sh",
+    "zipf.sh",
+    "ren.sh",
+    "rd.sh",
+    "remove_disk.sh"
+  ],
+  "interactive": [
+    "banner.sh",
+    "emoji.sh",
+    "matrix.sh",
+    "cmatrix.sh",
+    "rainbow.sh",
+    "stopwatch.sh"
+  ],
+  "nav": [
+    "cdls.sh",
+    "goto.sh",
+    "ql.sh"
+  ],
+  "security": [
+    "genpass.sh",
+    "keygen.sh",
+    "mount_read_only.sh"
+  ],
+  "misc": [
+    "dothelp.sh",
+    "view-source.sh",
+    "last.sh",
+    "pipes.sh",
+    "prependpath.sh",
+    "caffeine.sh",
+    "logout.sh",
+    "lazy_loaders.sh"
+  ]
+}
