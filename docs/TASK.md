@@ -3,7 +3,7 @@
 ... [Completed Phases 2-16 Unchanged] ...
 
 # Phase 16: Final Release Verification
-- [x] **Benchmark**: Verify startup <20ms <!-- id: 84 -->
+- [x] **Benchmark**: Verify startup target (<20ms fast mode) <!-- id: 84 -->
 - [x] **Templates**: Verify syntax validity <!-- id: 85 -->
 - [x] **PR Update**: Set final title and description <!-- id: 86 -->
 
@@ -42,7 +42,7 @@
 - [x] **CLA**: Add CLA check aliases (`check-cla`) <!-- id: 113 -->
 - [x] **Notice**: Add attribution generation (`gen-notice`) <!-- id: 114 -->
 
-# Pull Request (v0.2.485)
+# Pull Request (v0.2.490)
 - [x] Commit and push changes <!-- id: 17 -->
 - [x] Update Pull Request (Completed via gh CLI) <!-- id: 18 -->
 - [x] **Verify PR Content**: Confirmed title and description on GitHub <!-- id: 67 -->

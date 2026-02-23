@@ -111,7 +111,7 @@ k9                  # Open k9s TUI
 
 - **Chezmoi**: Replaces legacy Makefiles and symlinks with a robust template engine.
 - **Universal templates**: `run_onchange_*.sh.tmpl` scripts adapt to OS (Darwin/Linux) automatically.
-- **Performance**: Startup time benchmarks at **~16ms** (target: <20ms).
+- **Performance**: Startup time varies by machine. Run `dot benchmark` for your numbers; `DOTFILES_FAST=1` yields the quickest first prompt.
 
 ## Universal installer
 
@@ -136,9 +136,9 @@ k9                  # Open k9s TUI
 | Test | Status | Notes |
 | :--- | :--- | :--- |
 | **Syntax** | PASSED | `install.sh`, `pkg.sh`, `teleport.sh` verified. |
-| **Performance** | PASSED | **~16ms** Zsh startup time. |
+| **Performance** | PASSED | `dot benchmark` reports your local Zsh startup time. |
 | **Drift** | VARIES | Audit logs may cause minor state drift reports. |
-| **Docker** | PASSED | **Ubuntu 26.04** bootstrap verified (`dotfiles:0.2.485`). |
+| **Docker** | PASSED | **Ubuntu 26.04** bootstrap verified (`dotfiles:0.2.490`). |
 
 ## Quick reference card
 

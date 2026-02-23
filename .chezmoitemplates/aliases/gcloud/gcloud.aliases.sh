@@ -1,5 +1,6 @@
 # shellcheck shell=bash
 # Copyright (c) 2015-2026. All rights reserved.
+# Version: 0.2.490
 # Website: https://dotfiles.io
 # License: MIT
 
@@ -132,13 +133,13 @@ if command -v gcloud &>/dev/null; then
   ## -------------------------------------------------------------------
 
   # Create a cluster to run GKE containers.
-  alias gckcc='gcloud container clusters create'
+  alias gcccc='gcloud container clusters create'
 
   # Update kubeconfig to get kubectl to use a GKE cluster.
   alias gcccg='gcloud container clusters get-credentials'
 
   # List clusters for running GKE containers.
-  alias gckcl='gcloud container clusters list'
+  alias gcccl='gcloud container clusters list'
 
   # List tag and digest metadata for a container image.
   alias gccil='gcloud container images list-tags'
@@ -234,6 +235,8 @@ if command -v gcloud &>/dev/null; then
   # Create a new virtual machine instance.
   alias gccc='gcloud compute instances create'
 
+  # Connect to a virtual machine instance by using SSH.
+  alias gcco='gcloud compute ssh'
 
   # Set default project to current directory name.
   alias gcd='gcloud config set project $(gcloud projects list --format="value(projectId)" --filter="name:${PWD##\*/}")'
@@ -254,7 +257,7 @@ if command -v gcloud &>/dev/null; then
   alias gcf='gcloud functions'
 
   # Manage Google Cloud Compute Engine instances.
-  alias gcompute='gcloud compute instances'
+  alias gci='gcloud compute instances'
 
   # Manage Google Cloud Identity and Access Management.
   alias gcic='gcloud iam'
@@ -262,6 +265,8 @@ if command -v gcloud &>/dev/null; then
   # Manage Google Cloud IoT Core.
   alias gcir='gcloud iot'
 
+  # List all configurations.
+  alias gck='gcloud config configurations list'
 
   # Manage Google Cloud KMS.
   alias gcki='gcloud kms'
@@ -279,7 +284,7 @@ if command -v gcloud &>/dev/null; then
   alias gcp='gcloud projects'
 
   # Delete a Google Cloud project.
-  alias gcpdel='gcloud projects delete'
+  alias gcpd='gcloud projects delete'
 
   # Display details for a Compute Engine IP address.
   alias gcpha='gcloud compute addresses describe'

@@ -1,21 +1,6 @@
-#!/usr/bin/env bash
-## Interactive Tour — Guided introduction to dotfiles features.
-##
-## Interactive walkthrough using gum for a visually appealing
-## introduction to the dotfiles system and its capabilities.
-##
-## # Requirements
-## - gum: Charmbracelet's TUI library for interactive prompts
-##
-## # Usage
-## tour                        # Start the interactive tour
-## dot learn                   # Alias via dot CLI
-##
-## # Platform Notes
-## - macOS: Install with 'brew install gum'
-## - Linux: Install via snap or go install
-
-set -euo pipefail
+#!/bin/sh
+# Interactive Tour using Gum
+# Part of Dotfiles v0.2.490
 
 if ! command -v gum >/dev/null; then
     echo "Error: 'gum' is not installed."
@@ -40,9 +25,14 @@ fi
 clear
 
 # Intro (match UI header style)
-banner='DOTFILES
+banner='██████╗  ██████╗ ████████╗███████╗██╗██╗     ███████╗███████╗
+██╔══██╗██╔═══██╗╚══██╔══╝██╔════╝██║██║     ██╔════╝██╔════╝
+██║  ██║██║   ██║   ██║   █████╗  ██║██║     █████╗  ███████╗
+██║  ██║██║   ██║   ██║   ██╔══╝  ██║██║     ██╔══╝  ╚════██║
+██████╔╝╚██████╔╝   ██║   ██║     ██║███████╗███████╗███████║
+╚═════╝  ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝
 
-v0.2.480 - Infrastructure-grade shell environment'
+v0.2.490 · Infrastructure‑grade shell environment'
 
 gum style \
     --foreground 212 --border-foreground 212 --border double \
@@ -72,7 +62,7 @@ clear
 gum style \
     --foreground 75 --border rounded --padding "1 2" --margin "1 2" \
     "Check health" \
-    "Know what's working. See what needs attention." \
+    "Know what’s working. See what needs attention." \
     " " \
     "dot doctor    # Health checks" \
     "dot history   # History analysis" \
@@ -94,18 +84,18 @@ gum style \
     "dot ssh-key        # Encrypt an SSH key"
 
 echo ""
-gum confirm "Next: Security (opt-in)" || exit 0
+gum confirm "Next: Security (opt‑in)" || exit 0
 clear
 
 # Slide 4: Security (opt-in)
 gum style \
     --foreground 150 --border double --padding "1 2" --margin "1 2" \
-    "Security (opt-in)" \
+    "Security (opt‑in)" \
     "Explicit by design. Nothing changes without your choice." \
     " " \
     "dot firewall      # Firewall hardening" \
     "dot telemetry     # Disable OS telemetry" \
-    "dot dns-doh       # DNS-over-HTTPS (Linux)" \
+    "dot dns-doh       # DNS‑over‑HTTPS (Linux)" \
     "dot lock-screen   # Idle lock settings" \
     "dot usb-safety    # Disable automount" \
     "dot encrypt-check # Disk encryption status"
@@ -143,5 +133,5 @@ gum style \
 echo ""
 gum style \
     --foreground 212 --margin "1 2" \
-    "You're all set. Tip: run 'dot update' weekly to stay current."
+    "You’re all set. Tip: run 'dot update' weekly to stay current."
 echo ""

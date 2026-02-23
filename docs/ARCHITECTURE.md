@@ -1,13 +1,15 @@
 # How it works
 
-A portable **shell distribution** managed by Chezmoi (dotfiles manager with Git-backed source state). This document covers core architecture and design.
+v0.2.490 constitutes a portable **shell distribution** that `chezmoi` manages. This document outlines the core architectural decisions and system design.
 
-## Core Philosophy
+## Core philosophy
 
-- **XDG-first** — Configuration maps to `~/.config/` per the XDG Base Directory spec. No `~/.foo` sprawl.
-- **Single entrypoint** — `dot_zshenv` boots the environment. Zsh loads it first, setting XDG variables and PATH before other init.
-- **Zero-dependency bootstrap** — Installation needs only `curl` and `git`. Chezmoi downloads automatically.
-- **Lazy-by-default** — Heavy tools (fnm, nvm, SDKMAN, tool-specific aliases) defer until first use or after the first prompt.
+- **XDG-first**: Configuration strictly maps to `~/.config/` (XDG Base Directory specification). This approach avoids `~/.foo` file sprawl in the home directory.
+- **Single entrypoint**: `dot_zshenv` acts as the bootloader. Zsh loads it immediately and sets up the environment (XDG variables, PATH) before any other initialization runs.
+- **Zero-dependency bootstrap**: The installation process relies only on `curl` and `git` (and `chezmoi`, which the installer fetches automatically).
+- **Lazy-by-default**: Heavy tooling (fnm, nvm, SDKMAN, tool-specific aliases) is deferred until first use or after the first prompt to keep shell startup fast.
+- **Fast mode**: `DOTFILES_FAST=1` skips optional tooling (plugins, completions, AI helpers, prompt tooling) for the quickest first prompt.
+- **Ultra-fast mode**: `DOTFILES_ULTRA_FAST=1` runs a minimal init path (no rc.d, plugins, completions, or prompt tooling).
 
 ## Architecture diagram
 
@@ -217,7 +219,7 @@ Dotfiles replaces legacy Unix tools with high-performance Rust alternatives:
 
 - **Hardened defaults**: Shell scripts run with `set -euo pipefail` to fail fast.
 - **Supply chain safety**:
-  - **Pinned installation**: Installers reference specific Git tags (for example, `v0.2.485`), not `main`.
+  - **Pinned installation**: Installers reference specific Git tags (for example, `v0.2.490`), not `main`.
   - **Immutable history**: All logic stays version-controlled and reviewable through `chezmoi diff`.
 - **Audit logging**: Dotfiles logs all mutations to `~/.local/share/dotfiles.log`.
 - **Encryption**: `age` encrypts all sensitive data.

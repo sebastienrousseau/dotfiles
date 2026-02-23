@@ -1,5 +1,6 @@
 # shellcheck shell=bash
 # Copyright (c) 2015-2026. All rights reserved.
+# Version: 0.2.490
 # Website: https://dotfiles.io
 # License: MIT
 
@@ -9,44 +10,25 @@
 # to set up EDITOR, VISUAL, and other editor environment variables.
 
 # Common editor aliases that work with any editor
-alias e='${EDITOR:-nano}'
-if [[ "${DOTFILES_LEGACY_EDITOR_ALIASES:-0}" == "1" ]]; then
-  alias editor='${EDITOR}'
-fi
+alias e='${EDITOR}'
+alias edit='${EDITOR}'
+alias editor='${EDITOR}'
+alias mate='${EDITOR}'
+alias n='${EDITOR}'
 if ! alias v >/dev/null 2>&1; then
   alias v='${EDITOR}'
 fi
-
-# Set vi/vim fallback once (avoids duplicate alias definitions in governance).
-dot_editor_cmd() {
-  if command -v nvim >/dev/null 2>&1; then
-    nvim "$@"
-    return
-  fi
-  if command -v vim >/dev/null 2>&1; then
-    vim "$@"
-    return
-  fi
-  "${EDITOR:-vi}" "$@"
-}
-alias vim='dot_editor_cmd'
-
-vconf() {
-  cd "${HOME}/.config/nvim" 2>/dev/null || cd "${HOME}/.vim" 2>/dev/null || return 1
-}
 
 # Editor-specific aliases based on the current EDITOR/VISUAL
 if [[ -n "${EDITOR}" ]]; then
   case "${EDITOR}" in
     nvim | */nvim)
       # Neovim aliases
+      alias vi="nvim"
+      alias vim="nvim"
       alias nvimrc='nvim "${HOME}/.config/nvim/init.lua"'
+      alias nvimlua='nvim "${HOME}/.config/nvim/init.lua"'
       alias nvimconf='nvim "${HOME}/.config/nvim"'
-      ;;
-    vim | */vim)
-      # Vim aliases
-      alias vimrc='vim "${HOME}/.vimrc"'
-      alias vimconf='vim "${HOME}/.vim"'
       ;;
     code | */code)
       # VS Code aliases
@@ -77,7 +59,9 @@ if [[ -n "${EDITOR}" ]]; then
       ;;
     subl | */subl)
       # Sublime Text aliases
-      alias sublcmd="subl"
+      if ! alias st >/dev/null 2>&1; then
+        alias st="subl"
+      fi
       alias stt="subl ."  # Open current directory
       alias stn="subl -n" # Open in new window
       ;;
