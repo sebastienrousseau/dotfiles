@@ -1,0 +1,102 @@
+name: Reusable Test Suite
+
+on:
+  workflow_call:
+    inputs:
+      min_coverage:
+        description: Minimum module coverage percentage.
+        required: false
+        default: "95"
+        type: string
+      run_integration:
+        description: Run integration tests after unit tests.
+        required: false
+        default: true
+        type: boolean
+      run_strict_checks:
+        description: Run strict apply path checks.
+        required: false
+        default: true
+        type: boolean
+      timeout_minutes:
+        description: Job timeout in minutes.
+        required: false
+        default: 10
+        type: number
+
+permissions:
+  contents: read
+
+jobs:
+  test-suite:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Unit tests (zero-failure policy)
+        run: |
+          set -euo pipefail
+          chmod +x scripts/tests/framework/*.sh
+          echo "Running unit tests with 100% coverage enforcement..."
+
+          TOTAL_SCRIPTS="$(find scripts -name "*.sh" -not -path "scripts/tests/*" | wc -l)"
+          echo "Found $TOTAL_SCRIPTS testable shell scripts"
+
+          ./scripts/tests/framework/test_runner.sh 2>&1 | tee test_output.log
+
+          FAILED_TESTS="$(
+            grep -a "Total failed:" test_output.log \
+              | tail -1 \
+              | sed -E 's/\x1b\[[0-9;]*m//g' \
+              | sed -E 's/.*Total failed:[[:space:]]*([0-9]+).*/\1/' \
+              || echo 0
+          )"
+
+          if [[ "$FAILED_TESTS" -gt 0 ]]; then
+            echo "❌ COVERAGE THRESHOLD FAILED: $FAILED_TESTS failed tests detected"
+            echo "Zero-failure policy enforced - all tests must pass"
+            exit 1
+          fi
+
+          echo "✅ All tests passed - 100% success rate maintained"
+
+      - name: Enforce module coverage
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y ripgrep
+          chmod +x scripts/tests/framework/module_coverage.sh
+          MIN_COVERAGE="${{ inputs.min_coverage }}" ./scripts/tests/framework/module_coverage.sh
+
+      - name: Integration tests
+        if: inputs.run_integration == true
+        run: |
+          set -euo pipefail
+          echo "Running integration tests..."
+          RUN_INTEGRATION=1 ./scripts/tests/framework/test_runner.sh 2>&1 | tee integration_output.log
+
+          INTEGRATION_FAILED="$(
+            grep -a "Total failed:" integration_output.log \
+              | tail -1 \
+              | sed -E 's/\x1b\[[0-9;]*m//g' \
+              | sed -E 's/.*Total failed:[[:space:]]*([0-9]+).*/\1/' \
+              || echo 0
+          )"
+          if [[ "$INTEGRATION_FAILED" -gt 0 ]]; then
+            echo "❌ Integration tests failed: $INTEGRATION_FAILED failures"
+            exit 1
+          fi
+
+          echo "✅ Integration tests passed"
+
+      - name: Strict-mode apply path checks
+        if: inputs.run_strict_checks == true
+        env:
+          DOTFILES_ALIAS_STRICT_MODE: "1"
+        run: |
+          set -euo pipefail
+          echo "Running strict-mode apply path checks..."
+          REPO_ROOT="$PWD" bash scripts/tests/unit/test_alias_strict_mode.sh
+          REPO_ROOT="$PWD" bash scripts/tests/unit/test_ops_chezmoi_apply.sh
+          REPO_ROOT="$PWD" bash scripts/tests/unit/test_install_lib_chezmoi.sh
