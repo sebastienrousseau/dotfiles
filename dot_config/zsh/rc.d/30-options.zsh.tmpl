@@ -1,7 +1,4 @@
 # Zsh history and options
-# Set secure default umask (077 = owner only, 022 = standard)
-umask 022
-
 HISTFILE="${HOME}/.zsh_history"
 HISTSIZE=10000
 SAVEHIST=10000
@@ -47,7 +44,7 @@ if [[ -f "${HOME}/.local/bin/executable_dot_completion" ]]; then
 fi
 # fnm (Fast Node Manager)
 # Initialize early so Node + corepack use the expected version.
-if command -v fnm >/dev/null; then
+if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]] && command -v fnm >/dev/null; then
   if [[ ! -f "${ZSH_COMPLETIONS_DIR}/_fnm" ]]; then
     command fnm completions --shell zsh >| "${ZSH_COMPLETIONS_DIR}/_fnm"
   fi
@@ -65,7 +62,7 @@ fi
 
 
 # Lazy-load NVM (if fnm is not installed)
-if ! command -v fnm >/dev/null; then
+if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]] && ! command -v fnm >/dev/null; then
   export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
   if [[ -s "${NVM_DIR}/nvm.sh" ]]; then
     _lazy_load_nvm() {
@@ -86,7 +83,7 @@ fi
 
 # Lazy-load SDKMAN
 export SDKMAN_DIR="${SDKMAN_DIR:-$HOME/.sdkman}"
-if [[ -s "${SDKMAN_DIR}/bin/sdkman-init.sh" && -z "${functions[sdk]:-}" ]]; then
+if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]] && [[ -s "${SDKMAN_DIR}/bin/sdkman-init.sh" && -z "${functions[sdk]:-}" ]]; then
   _lazy_load_sdkman() {
     unfunction sdk _lazy_load_sdkman 2>/dev/null
     # shellcheck disable=SC1090
@@ -94,59 +91,72 @@ if [[ -s "${SDKMAN_DIR}/bin/sdkman-init.sh" && -z "${functions[sdk]:-}" ]]; then
   }
   sdk() { _lazy_load_sdkman; sdk "$@"; }
 fi
-# Defer compinit to first prompt — saves ~37ms off startup
-autoload -Uz compinit add-zsh-hook
-_deferred_compinit() {
-  add-zsh-hook -d precmd _deferred_compinit
-  local _zinit_completions="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/completions"
-  if [[ -d "$_zinit_completions" ]]; then
-    local _c
-    for _c in "$_zinit_completions"/_*; do
-      [[ -L "$_c" && ! -e "$_c" ]] && rm -f "$_c"
-    done
-  fi
-  local _compdump="${ZDOTDIR}/.zcompdump"
-  if [[ -f "$_compdump" ]]; then
-    local _missing=""
-    local _line
-    while IFS= read -r _line; do
-      [[ "$_line" == "#files:"* ]] || continue
-      _line="${_line#\#files: }"
-      local -a _files
-      _files=(${(z)_line})
-      local _f
-      for _f in "${_files[@]}"; do
-        if [[ ! -e "$_f" ]]; then
-          _missing=1
-          break
-        fi
-      done
-      [[ -n "$_missing" ]] && break
-    done < "$_compdump"
-    if [[ -n "$_missing" ]]; then
-      rm -f "$_compdump" "${_compdump}.zwc"
+# Defer compinit to first prompt — opt-in for max performance
+: ${DOTFILES_ENABLE_COMPINIT:=0}
+: ${DOTFILES_DEFER_COMPINIT:=1}
+if [[ "${DOTFILES_ENABLE_COMPINIT}" == "1" ]] && [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]]; then
+  autoload -Uz compinit
+  _deferred_compinit() {
+    if [[ "${DOTFILES_DEFER_COMPINIT}" == "1" ]]; then
+      _dotfiles_del_preexec _deferred_compinit
+    else
+      _dotfiles_del_precmd _deferred_compinit
     fi
-  fi
-  if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
-    compinit
+    if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
+      compinit
+    else
+      compinit -C
+    fi
+    # Compile zcompdump to bytecode in background for faster subsequent loads
+    { [[ ! -f "${ZDOTDIR}/.zcompdump.zwc" || "${ZDOTDIR}/.zcompdump" -nt "${ZDOTDIR}/.zcompdump.zwc" ]] && zcompile "${ZDOTDIR}/.zcompdump" } &!
+  }
+  if [[ "${DOTFILES_DEFER_COMPINIT}" == "1" ]]; then
+    _dotfiles_add_preexec _deferred_compinit
   else
-    compinit -C
+    _dotfiles_add_precmd _deferred_compinit
   fi
-  # Compile zcompdump to bytecode in background for faster subsequent loads
-  { [[ ! -f "${ZDOTDIR}/.zcompdump.zwc" || "${ZDOTDIR}/.zcompdump" -nt "${ZDOTDIR}/.zcompdump.zwc" ]] && zcompile "${ZDOTDIR}/.zcompdump" } &!
-}
-add-zsh-hook precmd _deferred_compinit
 
-zstyle ':completion:*' menu select
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
-zstyle ':completion:*' special-dirs true
-zstyle ':completion:*' verbose yes
+  zstyle ':completion:*' menu select
+  zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+  zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+  zstyle ':completion:*' special-dirs true
+  zstyle ':completion:*' verbose yes
+fi
 
-autoload -Uz colors && colors
+# Colors (opt-in; enables $fg/$bg variables)
+: ${DOTFILES_ENABLE_COLORS:=0}
+if [[ "${DOTFILES_ENABLE_COLORS}" == "1" ]]; then
+  : ${DOTFILES_DEFER_COLORS:=1}
+  if [[ "${DOTFILES_DEFER_COLORS}" == "1" ]]; then
+    _dotfiles_colors_zle_init() {
+      zle -D zle-line-init
+      # Skip when running -c (no prompt)
+      [[ -n "${ZSH_EXECUTION_STRING:-}" ]] && return 0
+      autoload -Uz colors && colors
+    }
+    zle -N zle-line-init _dotfiles_colors_zle_init
+  else
+    autoload -Uz colors && colors
+  fi
+fi
 unsetopt correct_all
 
+# fzf integration
+if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]]; then
+  if [[ -f "${HOME}/.config/fzf/fzf.zsh" ]]; then
+    source "${HOME}/.config/fzf/fzf.zsh"
+  elif [[ -f "${HOME}/.fzf.zsh" ]]; then
+    source "${HOME}/.fzf.zsh"
+  fi
+fi
+
+# Explicit fzf bindings (fallback if not already set by fzf)
+if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]] && command -v fzf >/dev/null; then
+  bindkey -M viins -s '^T' 'fzf^M'
+  bindkey -M viins -s '^R' 'fzf^M'
+fi
+
 # direnv (directory environments)
-if command -v direnv >/dev/null; then
+if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]] && command -v direnv >/dev/null; then
   _cached_eval direnv-hook direnv hook zsh
 fi
