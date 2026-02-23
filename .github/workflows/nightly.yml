@@ -90,7 +90,7 @@ jobs:
           fi
 
       - name: Upload dependency report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: dependency-report-${{ github.run_number }}
           path: dependency_updates.md
@@ -247,7 +247,7 @@ jobs:
           echo "✅ Supply chain analysis completed"
 
       - name: Upload security artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: security-extended-${{ github.run_number }}
           path: |
@@ -326,7 +326,7 @@ jobs:
           fi
 
       - name: Upload performance history
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: performance-history-${{ github.run_number }}
           path: benchmark-history/
@@ -366,7 +366,7 @@ jobs:
           echo "Nightly testing completed at $(date -u)"
 
       - name: Upload summary
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: nightly-summary-${{ github.run_number }}
           path: summary.md
