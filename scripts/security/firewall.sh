@@ -38,6 +38,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
+# shellcheck source=../dot/lib/platform.sh
+source "$SCRIPT_DIR/../dot/lib/platform.sh"
 
 ui_init
 ui_header "Firewall"
@@ -48,15 +50,15 @@ if [ "${DOTFILES_FIREWALL:-}" != "1" ]; then
   exit 1
 fi
 
-case "$(uname -s)" in
-  Darwin)
+case "$(dot_platform_id)" in
+  macos)
     ui_info "Enabling" "macOS firewall"
     sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
     sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setallowsigned on
     sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setallowsignedapp on
     sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setstealthmode on
     ;;
-  Linux)
+  linux | wsl)
     if command -v ufw >/dev/null; then
       ui_info "Enabling" "UFW"
       sudo ufw default deny incoming
