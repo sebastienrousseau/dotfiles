@@ -232,7 +232,7 @@ jobs:
           format: cyclonedx-json
           output-file: sbom.cyclonedx.json
       - name: Upload SBOM
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: sbom
           path: sbom.cyclonedx.json
@@ -292,7 +292,7 @@ jobs:
           chezmoi apply --verbose --dry-run
       - name: Upload logs on failure
         if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: logs-test-linux
           path: ~/.local/share/chezmoi/.log
@@ -324,7 +324,7 @@ jobs:
           chezmoi apply --verbose --dry-run
       - name: Upload logs on failure
         if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: logs-test-macos
           path: ~/.local/share/chezmoi/.log
@@ -556,7 +556,7 @@ jobs:
           fi
 
       - name: Upload benchmark results
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: benchmark-results-${{ github.sha }}
           path: benchmark-results/
