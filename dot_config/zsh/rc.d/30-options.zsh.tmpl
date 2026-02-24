@@ -42,54 +42,61 @@ fi
 if [[ -f "${HOME}/.local/bin/executable_dot_completion" ]]; then
   fpath=("${HOME}/.local/bin" "${fpath[@]}")
 fi
-# fnm (Fast Node Manager)
-# Initialize early so Node + corepack use the expected version.
+# Generic lazy-load helper function
+# Usage: _dotfiles_lazy_load <loader_name> <init_command> <commands...>
+# Example: _dotfiles_lazy_load fnm 'eval "$(fnm env)"' fnm node npm npx
+_dotfiles_lazy_load() {
+  local loader_name="$1"
+  local init_cmd="$2"
+  shift 2
+  local cmds=("$@")
+  local loader_fn="_lazy_load_${loader_name}"
+
+  # Create the loader function
+  eval "${loader_fn}() {
+    unfunction ${cmds[*]} ${loader_fn} 2>/dev/null
+    ${init_cmd}
+  }"
+
+  # Create wrapper functions for each command
+  local cmd
+  for cmd in "${cmds[@]}"; do
+    if [[ "$cmd" == "$loader_name" ]]; then
+      # For the main tool, call itself after loading
+      eval "${cmd}() { ${loader_fn}; ${cmd} \"\$@\"; }"
+    else
+      # For related commands, use 'command' to call the real binary
+      eval "${cmd}() { ${loader_fn}; command ${cmd} \"\$@\"; }"
+    fi
+  done
+}
+
+# fnm (Fast Node Manager) - Initialize early for Node + corepack
 if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]] && command -v fnm >/dev/null; then
   if [[ ! -f "${ZSH_COMPLETIONS_DIR}/_fnm" ]]; then
     command fnm completions --shell zsh >| "${ZSH_COMPLETIONS_DIR}/_fnm"
   fi
-  _lazy_load_fnm() {
-    unfunction node npm npx pnpm pnpx fnm _lazy_load_fnm 2>/dev/null
-    eval "$(command fnm env --use-on-cd --shell zsh --log-level quiet)"
-  }
-  fnm() { _lazy_load_fnm; command fnm "$@"; }
-  node() { _lazy_load_fnm; command node "$@"; }
-  npm() { _lazy_load_fnm; command npm "$@"; }
-  npx() { _lazy_load_fnm; command npx "$@"; }
-  pnpm() { _lazy_load_fnm; command pnpm "$@"; }
-  pnpx() { _lazy_load_fnm; command pnpx "$@"; }
+  _dotfiles_lazy_load fnm \
+    'eval "$(command fnm env --use-on-cd --shell zsh --log-level quiet)"' \
+    fnm node npm npx pnpm pnpx
 fi
 
-
-# Lazy-load NVM (if fnm is not installed)
+# NVM (fallback if fnm not installed)
 if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]] && ! command -v fnm >/dev/null; then
   export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
   if [[ -s "${NVM_DIR}/nvm.sh" ]]; then
-    _lazy_load_nvm() {
-      unfunction node npm npx nvm _lazy_load_nvm 2>/dev/null
-      # shellcheck disable=SC1090
-      . "${NVM_DIR}/nvm.sh"
-      if [[ -s "${NVM_DIR}/bash_completion" ]]; then
-        # shellcheck disable=SC1090
-        . "${NVM_DIR}/bash_completion"
-      fi
-    }
-    nvm() { _lazy_load_nvm; nvm "$@"; }
-    node() { _lazy_load_nvm; command node "$@"; }
-    npm() { _lazy_load_nvm; command npm "$@"; }
-    npx() { _lazy_load_nvm; command npx "$@"; }
+    _dotfiles_lazy_load nvm \
+      '. "${NVM_DIR}/nvm.sh"; [[ -s "${NVM_DIR}/bash_completion" ]] && . "${NVM_DIR}/bash_completion"' \
+      nvm node npm npx
   fi
 fi
 
-# Lazy-load SDKMAN
+# SDKMAN (Java/Kotlin/Gradle)
 export SDKMAN_DIR="${SDKMAN_DIR:-$HOME/.sdkman}"
 if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]] && [[ -s "${SDKMAN_DIR}/bin/sdkman-init.sh" && -z "${functions[sdk]:-}" ]]; then
-  _lazy_load_sdkman() {
-    unfunction sdk _lazy_load_sdkman 2>/dev/null
-    # shellcheck disable=SC1090
-    . "${SDKMAN_DIR}/bin/sdkman-init.sh"
-  }
-  sdk() { _lazy_load_sdkman; sdk "$@"; }
+  _dotfiles_lazy_load sdkman \
+    '. "${SDKMAN_DIR}/bin/sdkman-init.sh"' \
+    sdk
 fi
 # Defer compinit to first prompt — opt-in for max performance
 : ${DOTFILES_ENABLE_COMPINIT:=0}
