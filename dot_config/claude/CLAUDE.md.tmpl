@@ -2,12 +2,22 @@
 
 ## Project Context
 
-This is a personal development environment. I value:
+{{- if eq .profile "work" }}
+This is a **corporate development environment**. Strict compliance required.
+{{- else }}
+This is a personal development environment.
+{{- end }}
+
+I value:
 
 - **Correctness over speed** - Take time to understand before acting
 - **Minimal changes** - Don't refactor unless asked
 - **Security-first** - Never commit secrets, validate inputs
 - **Unix philosophy** - Small, composable tools
+{{- if eq .profile "work" }}
+- **Compliance** - Follow company security policies
+- **Audit trail** - Document all significant changes
+{{- end }}
 
 ## Coding Standards
 
@@ -23,6 +33,10 @@ This is a personal development environment. I value:
 - Use conventional commits: `feat:`, `fix:`, `docs:`, `refactor:`
 - Keep commits atomic and focused
 - Include `Co-Authored-By` when AI-assisted
+{{- if eq .profile "work" }}
+- Reference ticket numbers in commits (e.g., `JIRA-123`)
+- Never force push to shared branches
+{{- end }}
 
 ### Documentation
 - Keep docs close to code
@@ -35,11 +49,14 @@ This is a personal development environment. I value:
 - **Editor**: Neovim (Lua config)
 - **Dotfiles**: Managed by chezmoi
 - **Package managers**: Homebrew (macOS), apt (Linux)
+{{- if eq .profile "work" }}
+- **Context**: Corporate environment
+{{- end }}
 
 ## Preferences
 
-- Dark theme (Tokyo Night)
-- Monospace fonts with ligatures (JetBrains Mono, Fira Code)
+- Dark theme ({{ .theme | default "Tokyo Night" }})
+- Monospace fonts with ligatures ({{ .terminal_font_family | default "JetBrains Mono" }})
 - Keyboard-driven workflows
 - Terminal-first development
 
@@ -49,3 +66,19 @@ This is a personal development environment. I value:
 - Create README files proactively
 - Over-engineer simple tasks
 - Make assumptions about intent - ask instead
+{{- if eq .profile "work" }}
+- Access or modify files outside the project scope
+- Make network requests without explicit approval
+- Store credentials in plain text
+- Bypass security controls or pre-commit hooks
+{{- end }}
+
+{{- if eq .profile "work" }}
+
+## Compliance Requirements
+
+- All code changes must be reviewed before merge
+- Sensitive data must be encrypted at rest
+- API keys and secrets managed via approved systems only
+- Follow principle of least privilege
+{{- end }}

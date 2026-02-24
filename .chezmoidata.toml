@@ -90,6 +90,15 @@ features = ["zsh", "starship", "nvim", "tmux", "secrets", "docker", "kubernetes"
 install_fonts = false
 install_gui_apps = false
 
+# Work: Corporate environment with stricter policies
+[profiles.work]
+description = "Corporate/enterprise environment with compliance focus"
+features = ["zsh", "starship", "nvim", "tmux", "secrets", "nodejs", "python", "docker", "kubernetes", "ai_tools"]
+install_fonts = true
+install_gui_apps = true
+ai_strict_mode = true
+require_signed_commits = true
+
 # ============================================================================
 # Tool-specific configuration
 # ============================================================================

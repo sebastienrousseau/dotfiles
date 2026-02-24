@@ -1,0 +1,104 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/claude-code/main/schemas/settings.json",
+  "preferences": {
+{{- if eq .profile "work" }}
+    "autoApproveReadOperations": false,
+    "autoApproveBashCommands": false,
+    "autoApproveWriteOperations": false,
+{{- else }}
+    "autoApproveReadOperations": true,
+    "autoApproveBashCommands": false,
+    "autoApproveWriteOperations": false,
+{{- end }}
+    "verboseOutput": false
+  },
+  "permissions": {
+    "allow": [
+{{- if eq .profile "work" }}
+      "Read({{ "{{" }} cwd {{ "}}" }}/**)",
+      "Glob({{ "{{" }} cwd {{ "}}" }}/**)",
+      "Grep({{ "{{" }} cwd {{ "}}" }}/**)",
+      "Bash(git status)",
+      "Bash(git diff)",
+      "Bash(git log *)"
+{{- else }}
+      "Read(**)",
+      "Glob(**)",
+      "Grep(**)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)"
+{{- end }}
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Bash(* > /dev/*)",
+      "Bash(curl * | sh)",
+      "Bash(wget * | sh)"
+{{- if eq .profile "work" }},
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(ssh *)",
+      "Bash(scp *)",
+      "Bash(* | nc *)",
+      "Read(/etc/*)",
+      "Read(~/.ssh/*)",
+      "Read(~/.aws/*)",
+      "Read(**/.env*)"
+{{- end }}
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"systemMessage\": \"Dotfiles environment ready. Profile: {{ .profile }}\"}'",
+            "timeout": 5,
+            "statusMessage": "Initializing dotfiles environment..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | xargs -I{} sh -c 'case \"{}\" in *.sh|*.bash|*.zsh) command -v shellcheck >/dev/null && shellcheck -x \"{}\" 2>&1 | head -20 || true ;; esac'",
+            "timeout": 10,
+            "statusMessage": "Checking shell syntax...",
+            "async": true
+          }
+        ]
+      }
+    ]
+{{- if eq .profile "work" }},
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command' | grep -qE '(curl|wget|ssh|nc|ncat|netcat|telnet)' && echo '{\"decision\": \"block\", \"reason\": \"Network commands require explicit approval in work mode\"}' || echo '{\"decision\": \"allow\"}'",
+            "timeout": 5,
+            "statusMessage": "Validating command..."
+          }
+        ]
+      }
+    ]
+{{- end }}
+  },
+  "memory": {
+    "enabled": true,
+    "projectInstructions": "~/.config/claude/CLAUDE.md"
+  }
+}

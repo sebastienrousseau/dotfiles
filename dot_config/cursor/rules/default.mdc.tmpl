@@ -1,0 +1,86 @@
+---
+description: Default rules for all projects
+globs:
+  - "**/*"
+---
+
+# Cursor AI Rules
+
+{{- if eq .profile "work" }}
+> **CORPORATE ENVIRONMENT** - Strict compliance mode enabled
+{{- end }}
+
+## General Principles
+
+1. **Understand before acting** - Read the relevant code before making changes
+2. **Minimal changes** - Only modify what's necessary
+3. **Preserve style** - Match existing code conventions
+4. **Security first** - Never hardcode secrets or credentials
+{{- if eq .profile "work" }}
+5. **Compliance** - Follow company policies and standards
+6. **Audit trail** - All changes must be traceable
+{{- end }}
+
+## Code Quality
+
+- Follow language-specific best practices
+- Write self-documenting code; add comments only when logic isn't obvious
+- Prefer composition over inheritance
+- Keep functions small and focused
+{{- if eq .profile "work" }}
+- All public APIs must have documentation
+- Error messages must be actionable
+{{- end }}
+
+## Shell Scripts
+
+- Always use `shellcheck` compliance
+- Quote variables: `"$var"`
+- Use `set -euo pipefail` for scripts
+- Prefer `[[ ]]` over `[ ]`
+
+## Git
+
+- Sign commits when configured
+- Use conventional commit format
+- Keep commits atomic
+{{- if eq .profile "work" }}
+- Include ticket reference (e.g., JIRA-123)
+- Never force push to main/master
+- Require PR reviews before merge
+{{- end }}
+
+## Testing
+
+- Write tests for new functionality
+- Don't break existing tests
+- Prefer integration tests over unit tests for complex logic
+{{- if eq .profile "work" }}
+- Minimum 80% code coverage for new code
+- Security tests required for auth/data handling
+{{- end }}
+
+## What NOT to do
+
+- Don't add unnecessary dependencies
+- Don't refactor working code unless asked
+- Don't add comments that just repeat the code
+- Don't create files unless necessary
+{{- if eq .profile "work" }}
+- Don't access external URLs without approval
+- Don't store secrets in code or configs
+- Don't bypass CI/CD pipelines
+- Don't modify infrastructure without review
+{{- end }}
+
+{{- if eq .profile "work" }}
+
+## Compliance Checklist
+
+Before submitting code:
+- [ ] No hardcoded credentials
+- [ ] No PII/sensitive data in logs
+- [ ] Input validation on all external data
+- [ ] Error handling doesn't leak internal details
+- [ ] Dependencies are from approved sources
+{{- end }}

@@ -1,0 +1,119 @@
+---
+description: TypeScript and JavaScript development rules
+globs:
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.mjs"
+  - "**/*.cjs"
+  - "**/package.json"
+  - "**/tsconfig.json"
+---
+
+# TypeScript/JavaScript Rules
+
+## Type Safety
+
+- Prefer `strict: true` in tsconfig.json
+- Avoid `any` - use `unknown` and narrow with type guards
+- Use explicit return types for public functions
+- Prefer interfaces for object shapes, types for unions/intersections
+
+```typescript
+// Good
+function processUser(user: User): ProcessedUser {
+  return { ...user, processed: true };
+}
+
+// Avoid
+function processUser(user: any): any {
+  return { ...user, processed: true };
+}
+```
+
+## Modern Syntax
+
+- Use ES modules (`import`/`export`) over CommonJS
+- Prefer `const` over `let`, never use `var`
+- Use optional chaining (`?.`) and nullish coalescing (`??`)
+- Use template literals over string concatenation
+
+## Async Patterns
+
+- Prefer `async/await` over `.then()` chains
+- Always handle errors with try/catch or `.catch()`
+- Use `Promise.all()` for parallel operations
+
+```typescript
+// Good
+const [users, posts] = await Promise.all([
+  fetchUsers(),
+  fetchPosts()
+]);
+
+// Avoid
+const users = await fetchUsers();
+const posts = await fetchPosts();
+```
+
+## Error Handling
+
+- Create custom error classes for domain errors
+- Include context in error messages
+- Never swallow errors silently
+
+```typescript
+class ValidationError extends Error {
+  constructor(public field: string, message: string) {
+    super(`${field}: ${message}`);
+    this.name = 'ValidationError';
+  }
+}
+```
+
+## React (TSX/JSX)
+
+- Use functional components with hooks
+- Prefer named exports for components
+- Use `React.FC` sparingly (prefer explicit props)
+- Memoize expensive computations with `useMemo`/`useCallback`
+
+```typescript
+// Good
+interface ButtonProps {
+  onClick: () => void;
+  children: React.ReactNode;
+}
+
+export function Button({ onClick, children }: ButtonProps) {
+  return <button onClick={onClick}>{children}</button>;
+}
+```
+
+## Imports
+
+- Group imports: external, internal, relative, types
+- Use path aliases when configured (`@/components`)
+- Avoid circular dependencies
+
+## Testing
+
+- Use descriptive test names
+- Follow AAA pattern: Arrange, Act, Assert
+- Mock external dependencies, not internal modules
+- Prefer integration tests for complex logic
+
+## Dependencies
+
+- Keep dependencies minimal
+- Prefer well-maintained packages with types
+- Pin versions in production (`package-lock.json`)
+- Audit regularly (`npm audit`)
+
+## Performance
+
+- Use `React.lazy()` for code splitting
+- Avoid inline object/array literals in JSX props
+- Use `key` props correctly in lists
+- Profile before optimizing

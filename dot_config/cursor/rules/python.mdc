@@ -1,0 +1,150 @@
+---
+description: Python development rules
+globs:
+  - "**/*.py"
+  - "**/pyproject.toml"
+  - "**/setup.py"
+  - "**/requirements*.txt"
+  - "**/*.pyi"
+---
+
+# Python Rules
+
+## Style Guide
+
+- Follow PEP 8 for style
+- Use PEP 484 type hints for all public functions
+- Maximum line length: 88 characters (Black default)
+- Use snake_case for functions/variables, PascalCase for classes
+
+## Type Hints
+
+- Always annotate public function signatures
+- Use `from __future__ import annotations` for forward refs
+- Prefer `list[str]` over `List[str]` (Python 3.9+)
+- Use `Optional[T]` or `T | None` for nullable types
+
+```python
+from __future__ import annotations
+
+def process_items(items: list[str], limit: int | None = None) -> dict[str, int]:
+    """Process items and return counts."""
+    ...
+```
+
+## Imports
+
+- Group: stdlib, third-party, local (separated by blank lines)
+- Use absolute imports over relative
+- Avoid `from module import *`
+- Use `if TYPE_CHECKING:` for type-only imports
+
+```python
+import os
+from pathlib import Path
+
+import requests
+from pydantic import BaseModel
+
+from myapp.core import config
+```
+
+## Error Handling
+
+- Use specific exception types, not bare `except:`
+- Create custom exceptions for domain errors
+- Include context in exception messages
+- Use `raise ... from err` for exception chaining
+
+```python
+class ValidationError(Exception):
+    def __init__(self, field: str, message: str):
+        super().__init__(f"{field}: {message}")
+        self.field = field
+
+try:
+    process(data)
+except KeyError as err:
+    raise ValidationError("data", f"Missing key: {err}") from err
+```
+
+## Functions
+
+- Keep functions small and focused
+- Use keyword arguments for optional parameters
+- Return early to reduce nesting
+- Use dataclasses or Pydantic for structured data
+
+```python
+from dataclasses import dataclass
+
+@dataclass
+class User:
+    id: int
+    name: str
+    email: str | None = None
+```
+
+## Async
+
+- Use `async/await` for I/O-bound operations
+- Prefer `asyncio.gather()` for parallel tasks
+- Use `asyncio.TaskGroup` (Python 3.11+) for structured concurrency
+- Handle cancellation gracefully
+
+```python
+async def fetch_all(urls: list[str]) -> list[Response]:
+    async with asyncio.TaskGroup() as tg:
+        tasks = [tg.create_task(fetch(url)) for url in urls]
+    return [t.result() for t in tasks]
+```
+
+## Testing
+
+- Use pytest over unittest
+- Name tests descriptively: `test_<function>_<scenario>_<expected>`
+- Use fixtures for setup/teardown
+- Prefer `pytest.raises` for exception testing
+
+```python
+def test_validate_email_invalid_format_raises_error():
+    with pytest.raises(ValidationError, match="Invalid email"):
+        validate_email("not-an-email")
+```
+
+## Dependencies
+
+- Use `pyproject.toml` for project config
+- Pin dependencies with `uv.lock` or `poetry.lock`
+- Separate dev dependencies from production
+- Use virtual environments (`venv`, `uv`, or `poetry`)
+
+## Linting & Formatting
+
+- Use `ruff` for linting (fast, comprehensive)
+- Use `black` or `ruff format` for formatting
+- Use `mypy` for type checking
+- Configure in `pyproject.toml`
+
+```toml
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+strict = true
+```
+
+## Performance
+
+- Use generators for large sequences
+- Prefer list comprehensions over `map()`/`filter()`
+- Use `functools.cache` for expensive pure functions
+- Profile before optimizing (`cProfile`, `py-spy`)
+
+## Security
+
+- Never use `eval()` or `exec()` on untrusted input
+- Validate all external input
+- Use parameterized queries for SQL
+- Keep secrets out of code (use env vars)
