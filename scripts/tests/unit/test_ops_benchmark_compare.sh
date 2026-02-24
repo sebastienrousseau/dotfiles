@@ -109,7 +109,7 @@ test_start "benchmark_compare_features_list"
 features_found=0
 for feature in "Syntax highlighting" "Autosuggestions" "Fuzzy finder" "Git integration"; do
   if grep -q "$feature" "$BENCHMARK_FILE"; then
-    ((features_found++))
+    ((features_found++)) || true
   fi
 done
 if [[ $features_found -ge 4 ]]; then
