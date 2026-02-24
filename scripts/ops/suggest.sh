@@ -23,9 +23,9 @@ ui_init
 # =============================================================================
 
 HISTORY_FILE="${HISTFILE:-$HOME/.zsh_history}"
-MIN_FREQUENCY=5          # Minimum command frequency to suggest alias
-MIN_LENGTH=10            # Minimum command length to consider
-MAX_SUGGESTIONS=10       # Maximum suggestions per category
+MIN_FREQUENCY=5    # Minimum command frequency to suggest alias
+MIN_LENGTH=10      # Minimum command length to consider
+MAX_SUGGESTIONS=10 # Maximum suggestions per category
 
 # =============================================================================
 # History Analysis
@@ -46,13 +46,13 @@ analyze_history() {
     sed -n 's/^: [0-9]*:[0-9]*;//p' "$hist_file"
   else
     cat "$hist_file"
-  fi | \
+  fi |
     # Remove leading/trailing whitespace
-    sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | \
+    sed 's/^[[:space:]]*//;s/[[:space:]]*$//' |
     # Filter out very short commands
-    awk "length > $MIN_LENGTH" | \
+    awk "length > $MIN_LENGTH" |
     # Count frequency
-    sort | uniq -c | sort -rn | \
+    sort | uniq -c | sort -rn |
     # Filter by minimum frequency
     awk -v min="$min_freq" '$1 >= min {$1=""; print substr($0,2)}'
 }
@@ -92,7 +92,7 @@ suggest_aliases() {
 
     # Skip common short commands
     case "$base_cmd" in
-      cd|ls|git|vim|cat|echo|exit|clear|pwd) continue ;;
+      cd | ls | git | vim | cat | echo | exit | clear | pwd) continue ;;
     esac
 
     # Generate alias suggestion
@@ -130,7 +130,7 @@ suggest_aliases() {
       "npm run"*)
         alias_name="nr"
         ;;
-      "python -m pytest"*|"pytest"*)
+      "python -m pytest"* | "pytest"*)
         alias_name="pt"
         ;;
       "cargo build"*)
@@ -145,7 +145,7 @@ suggest_aliases() {
       *)
         # Generate alias from first letters
         local words
-        read -ra words <<< "$cmd"
+        read -ra words <<<"$cmd"
         if [[ ${#words[@]} -ge 2 ]]; then
           alias_name=""
           for word in "${words[@]:0:3}"; do
@@ -270,7 +270,7 @@ suggest_config() {
 
   # Check shell startup time
   local startup_time
-  startup_time=$( { time zsh -i -c exit; } 2>&1 | grep real | sed 's/real[[:space:]]*//' | sed 's/s$//' )
+  startup_time=$({ time zsh -i -c exit; } 2>&1 | grep real | sed 's/real[[:space:]]*//' | sed 's/s$//')
 
   if command -v bc >/dev/null 2>&1; then
     # Convert to milliseconds if possible
@@ -371,9 +371,9 @@ suggest_profile() {
   echo ""
 
   # Determine recommended profile
-  if [[ " ${detected_features[*]} " =~ " kubernetes " ]] || \
-     [[ " ${detected_features[*]} " =~ " terraform " ]] || \
-     [[ " ${detected_features[*]} " =~ " aws " ]]; then
+  if [[ " ${detected_features[*]} " =~ " kubernetes " ]] ||
+    [[ " ${detected_features[*]} " =~ " terraform " ]] ||
+    [[ " ${detected_features[*]} " =~ " aws " ]]; then
     recommended_profile="devops"
   elif [[ ${#detected_features[@]} -ge 5 ]]; then
     recommended_profile="workstation"
@@ -450,7 +450,7 @@ main() {
   local category="${1:-all}"
 
   case "$category" in
-    -h|--help)
+    -h | --help)
       show_help
       ;;
     aliases)

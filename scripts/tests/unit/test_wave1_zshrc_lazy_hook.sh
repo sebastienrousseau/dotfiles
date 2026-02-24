@@ -68,40 +68,26 @@ assert_file_contains "$ZSHRC" "[[ -o interactive ]] || return" "should skip non-
 test_start "zshrc_source_guard"
 assert_file_contains "$ZSHRC" "DOTFILES_SOURCED" "should guard against double-sourcing"
 
-# --- 30-options.zsh FNM fix ---
+# --- 30-options.zsh lazy-load helper ---
 
 test_start "options_exists"
 assert_file_exists "$OPTIONS" "30-options.zsh.tmpl should exist"
 
 test_start "options_fnm_lazy_load"
-assert_file_contains "$OPTIONS" "_lazy_load_fnm" "should define _lazy_load_fnm function"
+# Check for generic lazy-load helper usage with fnm
+assert_file_contains "$OPTIONS" "_dotfiles_lazy_load fnm" "should use _dotfiles_lazy_load helper for fnm"
 
-test_start "options_fnm_lazy_wrapper"
-# fnm should be wrapped as lazy-load function
-if grep -q 'fnm() { _lazy_load_fnm; command fnm' "$OPTIONS"; then
-  ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: fnm has lazy-load wrapper"
-else
-  ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: fnm should have lazy-load wrapper"
-fi
+test_start "options_lazy_load_helper"
+# Verify the generic lazy-load helper is defined
+assert_file_contains "$OPTIONS" "_dotfiles_lazy_load()" "should define _dotfiles_lazy_load helper function"
 
-test_start "options_node_lazy_wrapper"
-assert_file_contains "$OPTIONS" 'node() { _lazy_load_fnm' "node should trigger fnm lazy load"
-
-test_start "options_no_duplicate_fnm_lazy"
-# Count how many _lazy_load_fnm function definitions exist (should be exactly 1)
-fnm_defs=$(grep -c '_lazy_load_fnm()' "$OPTIONS" || true)
-if [[ "$fnm_defs" -eq 1 ]]; then
-  ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: exactly one _lazy_load_fnm definition"
-else
-  ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: expected 1 _lazy_load_fnm definition, found $fnm_defs"
-fi
+test_start "options_fnm_commands"
+# fnm lazy load should include node, npm, npx commands
+assert_file_contains "$OPTIONS" "fnm node npm npx" "fnm lazy load should include node npm npx"
 
 test_start "options_nvm_fallback"
-assert_file_contains "$OPTIONS" '_lazy_load_nvm' "should have NVM fallback when fnm unavailable"
+# Check for NVM fallback when fnm unavailable
+assert_file_contains "$OPTIONS" '_dotfiles_lazy_load nvm' "should have NVM fallback when fnm unavailable"
 
 test_start "options_nvm_requires_no_fnm"
 # NVM should only load if fnm is NOT available

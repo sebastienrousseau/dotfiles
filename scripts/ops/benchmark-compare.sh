@@ -54,7 +54,7 @@ measure_startup() {
   # Create isolated config
   local tmp_zshrc
   tmp_zshrc=$(mktemp)
-  echo "$config" > "$tmp_zshrc"
+  echo "$config" >"$tmp_zshrc"
 
   # Warmup runs
   for _ in $(seq 1 "$WARMUP"); do
@@ -79,8 +79,8 @@ measure_startup() {
   local max=0
   for t in "${times[@]}"; do
     sum=$(echo "$sum + $t" | bc)
-    if (( $(echo "$t < $min" | bc -l) )); then min=$t; fi
-    if (( $(echo "$t > $max" | bc -l) )); then max=$t; fi
+    if (($(echo "$t < $min" | bc -l))); then min=$t; fi
+    if (($(echo "$t > $max" | bc -l))); then max=$t; fi
   done
   local mean
   mean=$(echo "scale=1; $sum / ${#times[@]}" | bc)
@@ -163,7 +163,7 @@ benchmark_startup() {
 
   local our_mean=""
   for result in "${results[@]}"; do
-    IFS='|' read -r name mean min max <<< "$result"
+    IFS='|' read -r name mean min max <<<"$result"
     if [[ "$name" == "This dotfiles" ]]; then
       our_mean="$mean"
       printf "  %s%-20s%s %s%10s%s %10s %10s\n" "$GREEN" "$name" "$NORMAL" "$GREEN" "$mean" "$NORMAL" "$min" "$max"
@@ -180,7 +180,7 @@ benchmark_startup() {
 
   local minimal_mean=""
   for result in "${results[@]}"; do
-    IFS='|' read -r name mean _ _ <<< "$result"
+    IFS='|' read -r name mean _ _ <<<"$result"
     if [[ "$name" == "Minimal zsh" ]]; then
       minimal_mean="$mean"
       break
@@ -195,9 +195,9 @@ benchmark_startup() {
 
     ui_kv "Overhead vs minimal:" "${overhead}ms (+${overhead_pct}%)"
 
-    if (( $(echo "$our_mean < 100" | bc -l) )); then
+    if (($(echo "$our_mean < 100" | bc -l))); then
       ui_ok "Performance" "Startup under 100ms - excellent!"
-    elif (( $(echo "$our_mean < 200" | bc -l) )); then
+    elif (($(echo "$our_mean < 200" | bc -l))); then
       ui_ok "Performance" "Startup under 200ms - good"
     else
       ui_warn "Performance" "Consider enabling DOTFILES_FAST=1"
@@ -298,11 +298,11 @@ benchmark_memory() {
   printf "  %-20s %12s %12s\n" "-------------" "--------" "--------"
 
   for config in "${configs[@]}"; do
-    IFS='|' read -r name zshrc <<< "$config"
+    IFS='|' read -r name zshrc <<<"$config"
 
     local tmp_zshrc
     tmp_zshrc=$(mktemp)
-    echo "$zshrc" > "$tmp_zshrc"
+    echo "$zshrc" >"$tmp_zshrc"
 
     # Start a shell and measure its memory
     local mem_info
@@ -314,7 +314,7 @@ benchmark_memory() {
     )
 
     local rss vsz
-    read -r rss vsz <<< "$mem_info"
+    read -r rss vsz <<<"$mem_info"
 
     rm -f "$tmp_zshrc"
 
@@ -341,7 +341,7 @@ generate_report() {
 
   local report_file="$BENCHMARK_DIR/report-$(date +%Y%m%d).md"
 
-  cat > "$report_file" <<EOF
+  cat >"$report_file" <<EOF
 # Dotfiles Benchmark Report
 
 Generated: $(date '+%Y-%m-%d %H:%M:%S')
@@ -438,7 +438,7 @@ main() {
   local cmd="${1:-startup}"
 
   case "$cmd" in
-    -h|--help|help)
+    -h | --help | help)
       show_help
       ;;
     startup)

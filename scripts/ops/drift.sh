@@ -56,13 +56,13 @@ analyze_drift() {
 
     # Determine change type
     case "$status_code" in
-      "MM"|" M"|"M ")
+      "MM" | " M" | "M ")
         ((modified++))
         ;;
-      "A "|" A")
+      "A " | " A")
         ((added++))
         ;;
-      "D "|" D")
+      "D " | " D")
         ((deleted++))
         ;;
       "R"*)
@@ -74,15 +74,15 @@ analyze_drift() {
     local severity="info"
     case "$file_path" in
       # Critical: Security-sensitive files
-      *.ssh/*|*/.gnupg/*|*secrets*|*.env|*credentials*|*token*)
+      *.ssh/* | */.gnupg/* | *secrets* | *.env | *credentials* | *token*)
         severity="critical"
         ;;
       # Warning: Shell configuration
-      *.zshrc*|*.bashrc*|*.profile|*/shell/*|*/zsh/*)
+      *.zshrc* | *.bashrc* | *.profile | */shell/* | */zsh/*)
         severity="warning"
         ;;
       # Safe: Editor/tool configs
-      */.config/nvim/*|*/.config/git/*|*/.config/starship*|*/themes/*)
+      */.config/nvim/* | */.config/git/* | */.config/starship* | */themes/*)
         severity="safe"
         ;;
       # Info: Everything else
@@ -98,7 +98,7 @@ analyze_drift() {
       *) info_files+=("$status_code|$file_path") ;;
     esac
 
-  done <<< "$status_output"
+  done <<<"$status_output"
 
   # Export results
   echo "DRIFT_MODIFIED=$modified"
@@ -112,10 +112,10 @@ analyze_drift() {
   echo "DRIFT_SAFE=${#safe_files[@]}"
 
   # Store file lists for later use
-  printf '%s\n' "${critical_files[@]}" > /tmp/drift_critical.$$
-  printf '%s\n' "${warning_files[@]}" > /tmp/drift_warning.$$
-  printf '%s\n' "${info_files[@]}" > /tmp/drift_info.$$
-  printf '%s\n' "${safe_files[@]}" > /tmp/drift_safe.$$
+  printf '%s\n' "${critical_files[@]}" >/tmp/drift_critical.$$
+  printf '%s\n' "${warning_files[@]}" >/tmp/drift_warning.$$
+  printf '%s\n' "${info_files[@]}" >/tmp/drift_info.$$
+  printf '%s\n' "${safe_files[@]}" >/tmp/drift_safe.$$
 }
 
 # Get remediation suggestion for a specific drift
@@ -128,10 +128,10 @@ get_remediation() {
   local auto_safe=0
 
   case "$status_code" in
-    "MM"|" M"|"M ")
+    "MM" | " M" | "M ")
       # File modified locally
       case "$file_path" in
-        */.zshrc.local|*/.gitconfig.local|*/local/*)
+        */.zshrc.local | */.gitconfig.local | */local/*)
           action="Keep local changes (expected)"
           command="chezmoi add \"$file_path\""
           auto_safe=1
@@ -145,12 +145,12 @@ get_remediation() {
     "A ")
       # New file in target (not in source)
       case "$file_path" in
-        */cache/*|*/tmp/*|*/.cache/*|*__pycache__*)
+        */cache/* | */tmp/* | */.cache/* | *__pycache__*)
           action="Ignore (cache file)"
           command="# Add to .chezmoiignore"
           auto_safe=1
           ;;
-        *.log|*.swp|*.swo|*~)
+        *.log | *.swp | *.swo | *~)
           action="Ignore (temporary file)"
           command="# Add to .chezmoiignore"
           auto_safe=1
@@ -234,7 +234,7 @@ cmd_check() {
     while IFS='|' read -r code path; do
       [[ -z "$path" ]] && continue
       printf "    %s%s%s %s\n" "$RED" "$code" "$NORMAL" "$path"
-    done < /tmp/drift_critical.$$
+    done </tmp/drift_critical.$$
     echo ""
   fi
 
@@ -243,7 +243,7 @@ cmd_check() {
     while IFS='|' read -r code path; do
       [[ -z "$path" ]] && continue
       printf "    %s%s%s %s\n" "$YELLOW" "$code" "$NORMAL" "$path"
-    done < /tmp/drift_warning.$$
+    done </tmp/drift_warning.$$
     echo ""
   fi
 
@@ -253,7 +253,7 @@ cmd_check() {
       while IFS='|' read -r code path; do
         [[ -z "$path" ]] && continue
         printf "    %s%s%s %s\n" "$CYAN" "$code" "$NORMAL" "$path"
-      done < /tmp/drift_info.$$
+      done </tmp/drift_info.$$
     else
       head -5 /tmp/drift_info.$$ | while IFS='|' read -r code path; do
         [[ -z "$path" ]] && continue
@@ -317,19 +317,19 @@ cmd_report() {
     case "$filter" in
       critical)
         case "$file_path" in
-          *.ssh/*|*/.gnupg/*|*secrets*|*.env|*credentials*|*token*) ;;
+          *.ssh/* | */.gnupg/* | *secrets* | *.env | *credentials* | *token*) ;;
           *) continue ;;
         esac
         ;;
       warning)
         case "$file_path" in
-          *.zshrc*|*.bashrc*|*.profile|*/shell/*|*/zsh/*) ;;
+          *.zshrc* | *.bashrc* | *.profile | */shell/* | */zsh/*) ;;
           *) continue ;;
         esac
         ;;
       safe)
         case "$file_path" in
-          */.config/nvim/*|*/.config/git/*|*/.config/starship*|*/themes/*) ;;
+          */.config/nvim/* | */.config/git/* | */.config/starship* | */themes/*) ;;
           *) continue ;;
         esac
         ;;
@@ -357,7 +357,7 @@ cmd_report() {
       echo ""
     fi
 
-  done <<< "$status_output"
+  done <<<"$status_output"
 }
 
 cmd_fix() {
@@ -392,14 +392,14 @@ cmd_fix() {
     local should_fix=0
 
     case "$mode" in
-      --safe|safe)
+      --safe | safe)
         # Only fix auto-safe items
         [[ "$AUTO_SAFE" -eq 1 ]] && should_fix=1
         ;;
-      --all|all)
+      --all | all)
         # Fix everything except critical
         case "$file_path" in
-          *.ssh/*|*/.gnupg/*|*secrets*|*.env|*credentials*|*token*)
+          *.ssh/* | */.gnupg/* | *secrets* | *.env | *credentials* | *token*)
             should_fix=0
             ;;
           *)
@@ -407,11 +407,11 @@ cmd_fix() {
             ;;
         esac
         ;;
-      --force|force)
+      --force | force)
         # Fix everything
         should_fix=1
         ;;
-      interactive|*)
+      interactive | *)
         # Interactive mode with gum if available
         if [[ "$UI_ENABLED" -eq 1 ]]; then
           echo ""
@@ -451,7 +451,7 @@ cmd_fix() {
             ui_err "Failed" "$file_path"
           fi
           ;;
-        "MM"|" M"|"M ")
+        "MM" | " M" | "M ")
           # Modified - apply source version
           if chezmoi apply "$file_path" 2>/dev/null; then
             ui_ok "Applied" "$file_path"
@@ -469,7 +469,7 @@ cmd_fix() {
       ((skipped++))
     fi
 
-  done <<< "$status_output"
+  done <<<"$status_output"
 
   echo ""
   ui_section "Summary"
@@ -504,7 +504,7 @@ cmd_watch() {
 
       # Log drift events
       mkdir -p "$(dirname "$DRIFT_LOG")"
-      echo "[$timestamp] Drift detected: $count files" >> "$DRIFT_LOG"
+      echo "[$timestamp] Drift detected: $count files" >>"$DRIFT_LOG"
     fi
 
     sleep 60
@@ -564,7 +564,7 @@ main() {
   shift || true
 
   case "$cmd" in
-    -h|--help|help)
+    -h | --help | help)
       show_help
       ;;
     check)
