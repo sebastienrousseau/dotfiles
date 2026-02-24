@@ -1,0 +1,72 @@
+---
+description: Shell script specific rules
+globs:
+  - "**/*.sh"
+  - "**/*.bash"
+  - "**/*.zsh"
+  - "**/dot_*"
+  - "**/*.tmpl"
+---
+
+# Shell Script Rules
+
+## Standards
+
+- Target Bash 4+ or Zsh 5+
+- Use `shellcheck` for linting
+- Follow Google Shell Style Guide
+
+## Syntax
+
+```bash
+# Good
+if [[ -n "$var" ]]; then
+  echo "set"
+fi
+
+# Bad
+if [ -n $var ]; then
+  echo "set"
+fi
+```
+
+## Error Handling
+
+```bash
+# For scripts
+set -euo pipefail
+
+# For functions in interactive shells
+command_that_may_fail || {
+  echo "Error: command failed" >&2
+  return 1
+}
+```
+
+## Variable Quoting
+
+- Always quote: `"$var"`, `"${array[@]}"`
+- Exception: arithmetic context `$(( var + 1 ))`
+
+## Command Substitution
+
+```bash
+# Preferred
+result="$(command)"
+
+# Avoid (legacy)
+result=`command`
+```
+
+## Performance
+
+- Use built-ins over external commands when possible
+- Prefer `[[ ]]` over `[ ]` (faster in bash/zsh)
+- Use `command -v` not `which`
+- Avoid subshells in loops
+
+## Chezmoi Templates
+
+- Use `.tmpl` extension for templated files
+- Access data via `{{ .chezmoi.* }}` or `{{ .data.* }}`
+- Use `{{- -}}` to trim whitespace
