@@ -5,66 +5,84 @@
 # macOS: reads AppleInterfaceStyle from user defaults
 # Linux: checks DBUS org.freedesktop.portal.Settings color-scheme
 #
-# Performance: Caches result for 1 hour to avoid system calls on every shell startup
+# Performance: Caches result for 1 hour. Uses fast file existence check
+# before any timestamp comparisons to minimize system calls.
 
 detect_theme_mode() {
   local cache_file="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles_theme_mode"
   local cache_ttl=3600  # 1 hour in seconds
 
-  # Check if cache exists and is fresh
+  # Fast path: if cache exists, check if it's fresh
   if [[ -f "$cache_file" ]]; then
-    local cache_age
+    # Use zsh's EPOCHSECONDS if available (no subprocess), else date
     local now
-    now=$(date +%s)
-    # macOS uses -f %m, Linux uses -c %Y for mtime
-    if [[ "$(uname -s)" == "Darwin" ]]; then
-      cache_age=$((now - $(stat -f %m "$cache_file" 2>/dev/null || echo 0)))
+    if [[ -n "${EPOCHSECONDS:-}" ]]; then
+      now=$EPOCHSECONDS
+    elif [[ -n "${ZSH_VERSION:-}" ]]; then
+      # zsh can load datetime module
+      zmodload -F zsh/datetime b:strftime p:EPOCHSECONDS 2>/dev/null
+      now=${EPOCHSECONDS:-$(date +%s)}
     else
-      cache_age=$((now - $(stat -c %Y "$cache_file" 2>/dev/null || echo 0)))
+      now=$(date +%s)
     fi
-    if [[ $cache_age -lt $cache_ttl ]]; then
-      THEME_MODE="$(cat "$cache_file")"
+
+    # Get file mtime - use zsh stat module if available
+    local mtime
+    if [[ -n "${ZSH_VERSION:-}" ]]; then
+      zmodload -F zsh/stat b:zstat 2>/dev/null
+      if (( ${+functions[zstat]} )) || (( ${+builtins[zstat]} )); then
+        mtime=$(zstat +mtime "$cache_file" 2>/dev/null)
+      fi
+    fi
+
+    # Fallback to external stat if zsh module unavailable
+    if [[ -z "${mtime:-}" ]]; then
+      case "${OSTYPE:-$(uname -s)}" in
+        darwin*|Darwin) mtime=$(stat -f %m "$cache_file" 2>/dev/null || echo 0) ;;
+        *) mtime=$(stat -c %Y "$cache_file" 2>/dev/null || echo 0) ;;
+      esac
+    fi
+
+    if (( now - mtime < cache_ttl )); then
+      THEME_MODE="$(<"$cache_file")"
       export THEME_MODE
-      return
+      return 0
     fi
   fi
 
   # Ensure cache directory exists
-  mkdir -p "$(dirname "$cache_file")"
+  [[ -d "${cache_file%/*}" ]] || mkdir -p "${cache_file%/*}"
 
-  case "$(uname -s)" in
-    Darwin)
-      if defaults read -g AppleInterfaceStyle >/dev/null 2>&1; then
-        export THEME_MODE="dark"
+  # Detect theme based on OS
+  case "${OSTYPE:-$(uname -s)}" in
+    darwin*|Darwin)
+      if defaults read -g AppleInterfaceStyle &>/dev/null; then
+        THEME_MODE="dark"
       else
-        export THEME_MODE="light"
+        THEME_MODE="light"
       fi
       ;;
-    Linux)
-      if command -v busctl >/dev/null 2>&1; then
+    linux*|Linux)
+      if command -v busctl &>/dev/null; then
         local scheme
         scheme="$(busctl --user get-property \
           org.freedesktop.portal.Desktop \
           /org/freedesktop/portal/desktop \
           org.freedesktop.portal.Settings \
           Read "org.freedesktop.appearance" "color-scheme" 2>/dev/null |
-          grep -o '[0-9]*$')"
-        if [ "$scheme" = "1" ]; then
-          export THEME_MODE="dark"
-        else
-          export THEME_MODE="light"
-        fi
+          grep -o '[0-9]*$')" || true
+        [[ "$scheme" == "1" ]] && THEME_MODE="dark" || THEME_MODE="light"
       else
-        export THEME_MODE="dark"
+        THEME_MODE="dark"  # Default for headless Linux
       fi
       ;;
     *)
-      export THEME_MODE="dark"
+      THEME_MODE="dark"
       ;;
   esac
 
-  # Cache the result
-  echo "$THEME_MODE" > "$cache_file"
+  export THEME_MODE
+  printf '%s' "$THEME_MODE" > "$cache_file"
 }
 
 detect_theme_mode

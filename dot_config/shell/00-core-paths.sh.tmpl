@@ -21,8 +21,8 @@
 ## - Windows PATH inherited via interop
 ##
 ## # Dependencies
-## - Bash 4+ for associative array PATH deduplication
-## - Falls back to awk for Bash 3.x
+## - Bash 4+ required (released 2009, standard on modern systems)
+## - Zsh 5+ (uses native typeset -U for deduplication)
 ##
 ## # Idempotency
 ## Safe to source multiple times. Deduplicates PATH entries.
@@ -108,24 +108,19 @@ path_prepend "${HOME}/.local/bin"
 path_prepend "${HOME}/bin"
 
 # Deduplicate PATH (Keep first occurrence to maintain precedence)
-# Standard Zsh handles this with 'typeset -U path', but for bash compatibility/subshells:
-if [ -z "${ZSH_VERSION:-}" ]; then
-    # Use native bash associative arrays for O(n) deduplication (bash 4+)
-    if [[ ${BASH_VERSION%%.*} -ge 4 ]]; then
-        declare -A _seen_paths
-        IFS=':' read -ra _path_array <<< "$PATH"
-        _new_path=""
-        for _dir in "${_path_array[@]}"; do
-            if [[ -n "$_dir" && -z "${_seen_paths[$_dir]:-}" ]]; then
-                _seen_paths[$_dir]=1
-                _new_path="${_new_path:+$_new_path:}$_dir"
-            fi
-        done
-        PATH="$_new_path"
-        unset _seen_paths _path_array _new_path _dir
-    else
-        # Fallback to awk for bash 3.x
-        PATH=$(echo "$PATH" | awk -v RS=':' '!seen[$0]++ {ORS=(NR>1?":":"")} {print}')
-    fi
+# Zsh handles this with 'typeset -U path', Bash needs manual dedup
+if [[ -z "${ZSH_VERSION:-}" ]]; then
+    # Bash 4+ associative arrays for O(n) deduplication
+    declare -A _seen_paths
+    IFS=':' read -ra _path_array <<< "$PATH"
+    _new_path=""
+    for _dir in "${_path_array[@]}"; do
+        if [[ -n "$_dir" && -z "${_seen_paths[$_dir]:-}" ]]; then
+            _seen_paths[$_dir]=1
+            _new_path="${_new_path:+$_new_path:}$_dir"
+        fi
+    done
+    PATH="$_new_path"
+    unset _seen_paths _path_array _new_path _dir
     export PATH
 fi
