@@ -5,9 +5,10 @@
 # Dotfiles — A Fast, Idempotent Shell Environment
 
 [![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions)
-[![Version](https://img.shields.io/badge/Version-v0.2.490-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.490)
+[![Version](https://img.shields.io/badge/Version-v0.2.491-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.491)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
-[![Release Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases)
+[![Startup](https://img.shields.io/badge/Startup-<50ms-brightgreen?style=for-the-badge)](docs/CLI_REFERENCE.md)
+[![Features](https://img.shields.io/badge/Features-16%2F16-blueviolet?style=for-the-badge)](docs/EXAMPLES.md)
 [![Last Commit](https://img.shields.io/github/last-commit/sebastienrousseau/dotfiles?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/commits)
 
 ---
@@ -47,6 +48,24 @@ Dotfiles takes an infrastructure‑oriented approach to managing your shell. It 
 - **Clean Slate.** Source files, generated configs, and system state stay cleanly separated.
 
 
+## Key Features
+
+| Feature | This Dotfiles | Oh My Zsh | Prezto |
+|---------|:-------------:|:---------:|:------:|
+| Startup Time | **<50ms** | ~200ms | ~150ms |
+| Syntax Highlighting | Yes | Yes | Yes |
+| Autosuggestions | Yes | Yes | Yes |
+| AI Integration (Claude/Copilot) | Yes | No | No |
+| Secrets Management (age) | Yes | No | No |
+| Multi-machine Profiles | Yes | No | No |
+| Smart Drift Detection | Yes | No | No |
+| Lazy Plugin Loading | Yes | No | No |
+| Self-healing Config | Yes | No | No |
+
+Run `dot benchmark features` for a complete comparison.
+
+---
+
 ## Safety
 
 This is **infrastructure**, not an ad‑hoc shell script.
@@ -67,13 +86,13 @@ This is **infrastructure**, not an ad‑hoc shell script.
 
 ```bash
 # Works on macOS, Linux, and WSL
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.490/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.491/install.sh)"
 exec zsh
 ```
 
 For non‑interactive installs (servers and CI):
 ```bash
-DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.490/install.sh)"
+DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.491/install.sh)"
 ```
 
 ---
@@ -81,12 +100,14 @@ DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/
 ## Discover
 
 - [Installation Guide](docs/INSTALL.md) — Prerequisites and supported platforms.
+- [CLI Reference](docs/CLI_REFERENCE.md) — Complete command documentation.
+- [Configuration Examples](docs/EXAMPLES.md) — Ready-to-use configurations.
 - [Operations Guide](docs/OPERATIONS.md) — Common workflows and platform notes.
 - [Security Guide](docs/SECURITY.md) — Hardening matrix and logging.
 - [Secrets Guide](docs/SECRETS.md) — Age setup and encrypted files.
 - [Tools Catalog](docs/TOOLS.md) — Core tools and optional utilities.
 - [AI Integrations](docs/AI.md) — Optional AI helpers and privacy notes.
-- [Dot Utils](docs/UTILS.md) — Aliases and dot CLI helpers.
+- [Migration Guide](docs/MIGRATION.md) — From Stow, yadm, or bare Git.
 - [Troubleshooting](docs/TROUBLESHOOTING.md) — Fixes for common issues.
 
 ---
@@ -176,10 +197,13 @@ Run `dot --help` or `dot <command> --help` for inline documentation.
 | `dot docs` | Show repo README | Core |
 | `dot --version` | Show version information | Core |
 | `dot help` | Show help | Core |
-| `dot drift` | Drift dashboard (chezmoi status) | Diagnostics |
+| `dot setup` | Interactive setup wizard | Setup |
+| `dot drift` | Smart drift detection with auto-remediation | Diagnostics |
+| `dot suggest` | AI-powered configuration suggestions | Diagnostics |
 | `dot history` | Shell history analysis | Diagnostics |
 | `dot doctor` | Check system health and configuration | Diagnostics |
-| `dot benchmark` | Shell startup benchmark | Diagnostics |
+| `dot heal` | Auto-repair common issues | Diagnostics |
+| `dot benchmark` | Competitive benchmark suite | Diagnostics |
 | `dot perf` | Show performance mode + quick timing (`--json`, `--precmd`) | Diagnostics |
 | `dot theme` | Switch terminal theme (dark/light) | UX |
 | `dot wallpaper` | Apply a wallpaper from your library | UX |
