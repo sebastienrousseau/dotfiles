@@ -5,7 +5,7 @@
 # Dotfiles — A Fast, Idempotent Shell Environment
 
 [![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/actions)
-[![Version](https://img.shields.io/badge/Version-v0.2.491-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.491)
+[![Version](https://img.shields.io/badge/Version-v0.2.490-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.490)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 [![Startup](https://img.shields.io/badge/Startup-<50ms-brightgreen?style=for-the-badge)](docs/CLI_REFERENCE.md)
 [![Features](https://img.shields.io/badge/Features-16%2F16-blueviolet?style=for-the-badge)](docs/EXAMPLES.md)
