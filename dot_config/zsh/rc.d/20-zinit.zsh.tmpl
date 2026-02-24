@@ -29,7 +29,12 @@ _dotfiles_zinit_init() {
 # Defer Zinit init for faster first prompt (opt-out by setting DOTFILES_DEFER_ZINIT=0)
 : ${DOTFILES_DEFER_ZINIT:=1}
 : ${DOTFILES_DEFER_ZINIT_MODE:=preexec}
-if [[ "${DOTFILES_DEFER_ZINIT}" == "1" ]]; then
+
+# When running via `zsh -c 'command'`, preexec hooks don't fire, so load zinit immediately
+# ZSH_EXECUTION_STRING is set when zsh is invoked with -c
+if [[ -n "${ZSH_EXECUTION_STRING:-}" ]]; then
+  _dotfiles_zinit_init
+elif [[ "${DOTFILES_DEFER_ZINIT}" == "1" ]]; then
   _dotfiles_zinit_deferred() {
     if [[ "${DOTFILES_DEFER_ZINIT_MODE}" == "preexec" ]]; then
       _dotfiles_del_preexec _dotfiles_zinit_deferred
