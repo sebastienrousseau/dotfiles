@@ -8,6 +8,10 @@
 # - Minimal zsh (baseline)
 # - Fish shell (reference)
 
+# shellcheck disable=SC2016
+# SC2016: Variables in single quotes are intentional - these are shell snippets
+# that should expand when sourced, not when defined.
+
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
