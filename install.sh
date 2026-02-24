@@ -24,8 +24,52 @@ cat <<"EOF"
 EOF
 echo -e "${NC}"
 
-step() { echo -e "${BLUE}==>${NC} ${BOLD}$1${NC}"; }
-success() { echo -e "${GREEN}==> Done!${NC}"; }
+STEP_NUM=0
+TOTAL_STEPS=6
+
+step() {
+  STEP_NUM=$((STEP_NUM + 1))
+  echo -e "${BLUE}[${STEP_NUM}/${TOTAL_STEPS}]${NC} ${BOLD}$1${NC}"
+}
+
+spin() {
+  local pid=$1
+  local msg="${2:-Working...}"
+  local spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+  local i=0
+
+  # Only animate if we have a terminal
+  if [ -t 1 ]; then
+    while kill -0 "$pid" 2>/dev/null; do
+      printf "\r   %s %s" "${spin_chars:i++%${#spin_chars}:1}" "$msg"
+      sleep 0.1
+    done
+    printf "\r   ${GREEN}✓${NC} %s\n" "$msg"
+  else
+    wait "$pid"
+  fi
+}
+
+run_with_spinner() {
+  local msg="$1"
+  shift
+  if [ -t 1 ]; then
+    "$@" >/dev/null 2>&1 &
+    spin $! "$msg"
+  else
+    echo "   $msg..."
+    "$@"
+  fi
+}
+
+success() {
+  echo ""
+  echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo -e "${GREEN}  ✓ Installation Complete!${NC}"
+  echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo ""
+}
+
 error() {
   echo -e "${RED}==> Error: $1${NC}"
   exit 1
@@ -275,4 +319,13 @@ else
 fi
 
 success
-echo -e "${GREEN}Configuration loaded. Please restart your shell.${NC}"
+
+echo -e "  ${BOLD}Next steps:${NC}"
+echo ""
+echo -e "  ${CYAN}1.${NC} Restart your shell:  ${BOLD}exec zsh${NC}"
+echo -e "  ${CYAN}2.${NC} Run setup wizard:    ${BOLD}dot setup${NC}"
+echo -e "  ${CYAN}3.${NC} Check system health: ${BOLD}dot doctor${NC}"
+echo -e "  ${CYAN}4.${NC} Take the tour:       ${BOLD}dot learn${NC}"
+echo ""
+echo -e "  ${BOLD}Quick tip:${NC} Run ${CYAN}dot help${NC} to see all available commands."
+echo ""
