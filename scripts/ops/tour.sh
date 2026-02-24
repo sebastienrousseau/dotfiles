@@ -45,7 +45,6 @@ show_page_header() {
   ui_logo_dot "Interactive Tour"
 
   # Progress indicator
-  local progress=$((CURRENT_PAGE * 100 / TOTAL_PAGES))
   if [[ "$UI_COLOR" = "1" ]]; then
     printf "  %s[%d/%d]%s %s\n\n" "$GRAY" "$((CURRENT_PAGE + 1))" "$TOTAL_PAGES" "$NORMAL" "$title"
   else

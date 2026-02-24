@@ -21,16 +21,6 @@ ui_init
 # =============================================================================
 
 DRIFT_LOG="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/drift.log"
-DRIFT_IGNORE="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/drift-ignore"
-
-# Severity levels
-declare -A SEVERITY_COLORS
-SEVERITY_COLORS=(
-  [critical]="$RED"
-  [warning]="$YELLOW"
-  [info]="$CYAN"
-  [safe]="$GREEN"
-)
 
 # =============================================================================
 # Drift Analysis

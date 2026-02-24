@@ -21,7 +21,6 @@ ui_init
 # =============================================================================
 
 BENCHMARK_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/benchmarks"
-BENCHMARK_RESULTS="$BENCHMARK_DIR/results-$(date +%Y%m%d-%H%M%S).json"
 ITERATIONS=10
 WARMUP=3
 
