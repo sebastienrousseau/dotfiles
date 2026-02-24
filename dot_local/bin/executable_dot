@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
-# Dotfiles CLI Entry Point - v0.2.490
+# Dotfiles CLI Entry Point - v0.2.491
 
-VERSION="0.2.490"
+VERSION="0.2.491"
 
 COMMAND="$1"
 if [ -n "$1" ]; then
@@ -24,12 +24,14 @@ show_help() {
     echo "  cd          Print source directory path (use: cd \$(dot cd))"
     echo "  edit        Open chezmoi source in \$EDITOR"
     echo ""
-    echo "Diagnostics:"
+    echo "Setup & Diagnostics:"
+    echo "  setup       Interactive setup wizard"
     echo "  doctor      Check system health and configuration"
     echo "  heal        Auto-repair common dotfiles issues"
     echo "  health      Run comprehensive health check"
     echo "  rollback    Rollback dotfiles to a previous state"
-    echo "  drift       Drift dashboard (detailed chezmoi status)"
+    echo "  drift       Smart drift detection with auto-remediation"
+    echo "  suggest     AI-powered suggestions for improvements"
     echo "  history     Shell history analysis"
     echo "  benchmark   Run shell startup benchmark"
     echo "  perf        Show current performance mode and quick timing (--json, --precmd)"
@@ -221,6 +223,7 @@ case "$COMMAND" in
         # Execute the interactive tour
         exec "$(dirname "$0")/tour" "$@"
         ;;
+    setup) run_script "scripts/ops/setup.sh" "Setup wizard" "$@" ;;
     doctor)
         echo "Running Dotfiles Doctor..."
         SRC_DIR="$(resolve_source_dir)"
@@ -481,11 +484,14 @@ PY
     remove) run_script "scripts/ops/chezmoi-remove.sh" "Remove helper" "$@" ;;
     drift)
         SRC_DIR="$(resolve_source_dir)"
-        if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/diagnostics/drift-dashboard.sh" ]; then
+        if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/ops/drift.sh" ]; then
+            exec bash "$SRC_DIR/scripts/ops/drift.sh" "$@"
+        elif [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/diagnostics/drift-dashboard.sh" ]; then
             exec bash "$SRC_DIR/scripts/diagnostics/drift-dashboard.sh"
         fi
         exec chezmoi status
         ;;
+    suggest) run_script "scripts/ops/suggest.sh" "Suggest script" "$@" ;;
     history) run_script "scripts/diagnostics/history-analysis.sh" "History analysis script" "$@" ;;
     tools)
         SRC_DIR="$(resolve_source_dir)"

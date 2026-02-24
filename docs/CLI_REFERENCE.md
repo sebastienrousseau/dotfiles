@@ -7,7 +7,7 @@ Complete reference for all `dot` commands with examples, options, and exit codes
 | Category | Commands |
 |----------|----------|
 | **Core** | `apply`, `sync`, `update`, `diff`, `status`, `add`, `remove`, `edit` |
-| **Setup** | `setup`, `doctor`, `heal`, `learn` |
+| **Setup** | `setup`, `doctor`, `heal`, `learn`, `suggest` |
 | **Tools** | `tools`, `new`, `packages`, `devcontainer` |
 | **Appearance** | `theme`, `fonts`, `wallpaper` |
 | **Security** | `secrets`, `secrets-init`, `ssh-key`, `backup`, `firewall` |
@@ -203,6 +203,72 @@ Start interactive tour of dotfiles features.
 
 ```bash
 dot learn
+```
+
+---
+
+### `dot suggest`
+
+AI-powered suggestions for dotfiles optimization.
+
+```bash
+dot suggest [CATEGORY]
+```
+
+**Categories:**
+- `aliases`: Suggest aliases for frequent commands
+- `tools`: Suggest modern tool replacements
+- `config`: Check configuration for issues
+- `profile`: Recommend optimal profile
+- `ai`: AI-enhanced suggestions (requires Claude/Copilot)
+- `all`: Run all suggestion categories (default)
+
+**Examples:**
+```bash
+dot suggest              # Run all suggestions
+dot suggest aliases      # Only alias suggestions
+dot suggest tools        # Only tool suggestions
+```
+
+---
+
+### `dot drift`
+
+Smart drift detection with automatic remediation.
+
+```bash
+dot drift [COMMAND] [OPTIONS]
+```
+
+**Commands:**
+- `check`: Analyze drift and show summary (default)
+- `report`: Detailed report with remediation suggestions
+- `fix`: Apply fixes to drifted files
+- `watch`: Continuous monitoring mode
+
+**Options for 'report':**
+- `--critical`: Only show critical (security) files
+- `--warning`: Only show warning (shell config) files
+- `--safe`: Only show safe (low-risk) files
+
+**Options for 'fix':**
+- `--safe`: Only fix auto-safe changes
+- `--all`: Fix all except critical files
+- `--force`: Fix everything (use with caution!)
+
+**Severity Levels:**
+- Critical: Security files (.ssh, .gnupg, secrets)
+- Warning: Shell configuration (.zshrc, .bashrc)
+- Info: General configuration files
+- Safe: Editor/tool configs (auto-fixable)
+
+**Examples:**
+```bash
+dot drift                    # Check for drift
+dot drift report             # Full report with suggestions
+dot drift report --critical  # Only security-sensitive files
+dot drift fix --safe         # Auto-fix safe changes only
+dot drift watch              # Continuous monitoring
 ```
 
 ---
