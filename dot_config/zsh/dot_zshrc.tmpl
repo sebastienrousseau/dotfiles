@@ -318,41 +318,44 @@ if [[ "${DOTFILES_FAST}" != "1" ]]; then
     return 127
   }
 
-  # dot load: force heavy layers now
-  unalias dot 2>/dev/null
-  functions[dot]='
-    if [[ "$1" == "load" ]]; then
-      if [[ "$2" == "--background" ]]; then
-        DOTFILES_LAYERS_LOAD=background
-        _dotfiles_schedule_heavy_layers
-        return 0
-      fi
-      if [[ "$2" == "--status" ]]; then
-        if [[ "$3" == "--watch" ]]; then
-          local _timeout="${4:-5}"
-          local _t0=$EPOCHREALTIME
-          if [[ "${DOTFILES_LAYERS_LOAD_STATE:-idle}" == "idle" ]]; then
-            _dotfiles_load_heavy_layers
-          fi
-          while [[ "${DOTFILES_LAYERS_LOAD_STATE:-idle}" != "ready" ]]; do
-            sleep 0.1
-            if [[ -n "${_timeout}" && "${_timeout}" != "0" ]]; then
-              local _t1=$EPOCHREALTIME
-              if (( (_t1 - _t0) >= _timeout )); then
-                print -r -- "timeout"
-                return 124
-              fi
-            fi
-          done
+  # dot load: force heavy layers now (opt-in, avoids shadowing dot CLI)
+  : ${DOTFILES_DOT_WRAPPER:=0}
+  if [[ "${DOTFILES_DOT_WRAPPER}" == "1" ]]; then
+    unalias dot 2>/dev/null
+    functions[dot]='
+      if [[ "$1" == "load" ]]; then
+        if [[ "$2" == "--background" ]]; then
+          DOTFILES_LAYERS_LOAD=background
+          _dotfiles_schedule_heavy_layers
+          return 0
         fi
-        print -r -- "${DOTFILES_LAYERS_LOAD_STATE:-idle}"
+        if [[ "$2" == "--status" ]]; then
+          if [[ "$3" == "--watch" ]]; then
+            local _timeout="${4:-5}"
+            local _t0=$EPOCHREALTIME
+            if [[ "${DOTFILES_LAYERS_LOAD_STATE:-idle}" == "idle" ]]; then
+              _dotfiles_load_heavy_layers
+            fi
+            while [[ "${DOTFILES_LAYERS_LOAD_STATE:-idle}" != "ready" ]]; do
+              sleep 0.1
+              if [[ -n "${_timeout}" && "${_timeout}" != "0" ]]; then
+                local _t1=$EPOCHREALTIME
+                if (( (_t1 - _t0) >= _timeout )); then
+                  print -r -- "timeout"
+                  return 124
+                fi
+              fi
+            done
+          fi
+          print -r -- "${DOTFILES_LAYERS_LOAD_STATE:-idle}"
+          return 0
+        fi
+        _dotfiles_load_heavy_layers
         return 0
       fi
-      _dotfiles_load_heavy_layers
-      return 0
-    fi
-    command dot "$@"
-  '
+      command dot "$@"
+    '
+  fi
 fi
 
 # Essential Aliases (fallback if 90-ux-aliases.sh is unavailable)
