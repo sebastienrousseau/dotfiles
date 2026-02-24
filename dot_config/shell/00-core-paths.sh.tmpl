@@ -27,14 +27,15 @@
 ## # Idempotency
 ## Safe to source multiple times. Deduplicates PATH entries.
 
-# Helper: prepend path if directory exists and isn't already in PATH
+# Helper: prepend path to front (moves if already present)
 path_prepend() {
     local dir="$1"
     [[ -n "$dir" && -d "$dir" ]] || return 0
-    case ":$PATH:" in
-        *":$dir:"*) return 0 ;;
-        *) PATH="$dir:${PATH}" ;;
-    esac
+    # Remove existing occurrence, then prepend
+    PATH="${PATH/#$dir:/}"       # Remove from start
+    PATH="${PATH//:$dir:/:}"     # Remove from middle
+    PATH="${PATH/%:$dir/}"       # Remove from end
+    PATH="$dir:${PATH}"
 }
 
 # 1. System Paths (Prepend, but will be pushed down by later prepends)
