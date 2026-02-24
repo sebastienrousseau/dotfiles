@@ -11,9 +11,11 @@ assert_file_exists "$SCRIPT_FILE" "script should exist"
 
 test_start "script_valid_syntax"
 if bash -n "$SCRIPT_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++)); echo -e "  ${GREEN}✓${NC} $CURRENT_TEST"
+  ((TESTS_PASSED++))
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
-  ((TESTS_FAILED++)); echo -e "  ${RED}✗${NC} $CURRENT_TEST"
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
