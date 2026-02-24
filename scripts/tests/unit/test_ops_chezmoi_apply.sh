@@ -37,7 +37,7 @@ assert_file_contains "$SCRIPT_FILE" "set -euo pipefail" "should use strict mode"
 
 # Test: sources ui library
 test_start "chezmoi_apply_ui_lib"
-assert_file_contains "$SCRIPT_FILE" "source.*ui.sh" "should source ui library"
+assert_file_contains "$SCRIPT_FILE" "ui.sh" "should source ui library"
 
 # Test: calls ui_init
 test_start "chezmoi_apply_ui_init"

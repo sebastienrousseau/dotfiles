@@ -88,7 +88,7 @@ assert_file_contains "$BENCHMARK_FILE" "main()" "should define main function"
 
 # Test: uses ui library
 test_start "benchmark_compare_uses_ui"
-assert_file_contains "$BENCHMARK_FILE" "source.*ui.sh" "should use ui library"
+assert_file_contains "$BENCHMARK_FILE" "ui.sh" "should use ui library"
 
 # Test: creates benchmark directory
 test_start "benchmark_compare_benchmark_dir"

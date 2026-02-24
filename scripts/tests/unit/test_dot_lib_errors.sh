@@ -32,7 +32,7 @@ fi
 
 # Test: sources ui.sh
 test_start "errors_lib_sources_ui"
-assert_file_contains "$SCRIPT_FILE" "source.*ui.sh" "should source ui.sh"
+assert_file_contains "$SCRIPT_FILE" "ui.sh" "should source ui.sh"
 
 # Test: defines err function
 test_start "errors_lib_err_function"

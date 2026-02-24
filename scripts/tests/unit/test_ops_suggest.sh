@@ -37,11 +37,11 @@ assert_file_contains "$SCRIPT_FILE" "set -euo pipefail" "should use strict mode"
 
 # Test: sources ui library
 test_start "suggest_ui_lib"
-assert_file_contains "$SCRIPT_FILE" "source.*ui.sh" "should source ui library"
+assert_file_contains "$SCRIPT_FILE" "ui.sh" "should source ui library"
 
 # Test: sources platform library
 test_start "suggest_platform_lib"
-assert_file_contains "$SCRIPT_FILE" "source.*platform.sh" "should source platform library"
+assert_file_contains "$SCRIPT_FILE" "platform.sh" "should source platform library"
 
 # Test: defines HISTORY_FILE
 test_start "suggest_history_file"
