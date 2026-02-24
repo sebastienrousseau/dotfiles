@@ -273,6 +273,37 @@ dot drift watch              # Continuous monitoring
 
 ---
 
+### `dot benchmark`
+
+Comprehensive benchmark suite comparing against competitors.
+
+```bash
+dot benchmark [COMMAND]
+```
+
+**Commands:**
+- `startup`: Measure shell startup time (default)
+- `features`: Compare feature completeness
+- `memory`: Compare memory usage
+- `report`: Generate markdown report
+- `all`: Run all benchmarks
+
+**Competitors Compared:**
+- Oh My Zsh (if installed)
+- Prezto (if installed)
+- Fish shell (if installed)
+- Minimal zsh (baseline)
+
+**Examples:**
+```bash
+dot benchmark              # Run startup benchmark
+dot benchmark features     # Compare features
+dot benchmark all          # Run all benchmarks
+dot benchmark report       # Generate report
+```
+
+---
+
 ## Tools Commands
 
 ### `dot tools`
