@@ -46,14 +46,39 @@ EOF
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --init) MODE="vscode"; shift ;;
-    --codespaces) MODE="codespaces"; shift ;;
-    --gitpod) MODE="gitpod"; shift ;;
-    --image) IMAGE="$2"; shift 2 ;;
-    --repo) DOTFILES_REPO="$2"; shift 2 ;;
-    -h|--help) show_help; exit 0 ;;
-    -*) echo "Unknown option: $1"; show_help; exit 1 ;;
-    *) OUTPUT_DIR="$1"; shift ;;
+    --init)
+      MODE="vscode"
+      shift
+      ;;
+    --codespaces)
+      MODE="codespaces"
+      shift
+      ;;
+    --gitpod)
+      MODE="gitpod"
+      shift
+      ;;
+    --image)
+      IMAGE="$2"
+      shift 2
+      ;;
+    --repo)
+      DOTFILES_REPO="$2"
+      shift 2
+      ;;
+    -h | --help)
+      show_help
+      exit 0
+      ;;
+    -*)
+      echo "Unknown option: $1"
+      show_help
+      exit 1
+      ;;
+    *)
+      OUTPUT_DIR="$1"
+      shift
+      ;;
   esac
 done
 
@@ -69,7 +94,7 @@ generate_vscode() {
   echo ""
 
   # devcontainer.json
-  cat > "$dir/devcontainer.json" <<EOF
+  cat >"$dir/devcontainer.json" <<EOF
 {
   "name": "Development Environment",
   "image": "$IMAGE",
@@ -121,7 +146,7 @@ EOF
   ui_ok "Created" "$dir/devcontainer.json"
 
   # Optional Dockerfile for customization
-  cat > "$dir/Dockerfile" <<EOF
+  cat >"$dir/Dockerfile" <<EOF
 # Custom Dev Container
 # Uncomment and modify to customize the base image
 
@@ -155,7 +180,7 @@ generate_codespaces() {
   ui_header "Generating GitHub Codespaces Configuration"
   echo ""
 
-  cat > "$dir/devcontainer.json" <<EOF
+  cat >"$dir/devcontainer.json" <<EOF
 {
   "name": "GitHub Codespaces",
   "image": "$IMAGE",
@@ -224,7 +249,7 @@ generate_gitpod() {
   ui_header "Generating Gitpod Configuration"
   echo ""
 
-  cat > ".gitpod.yml" <<EOF
+  cat >".gitpod.yml" <<EOF
 # Gitpod configuration
 # https://www.gitpod.io/docs/references/gitpod-yml
 
@@ -255,7 +280,7 @@ EOF
 
   ui_ok "Created" ".gitpod.yml"
 
-  cat > ".gitpod.Dockerfile" <<EOF
+  cat >".gitpod.Dockerfile" <<EOF
 FROM gitpod/workspace-full
 
 # Install zsh and common tools

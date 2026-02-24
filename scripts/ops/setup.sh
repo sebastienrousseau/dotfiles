@@ -27,7 +27,10 @@ TOTAL_STEPS=6
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --quick|-q) QUICK_MODE=1; shift ;;
+    --quick | -q)
+      QUICK_MODE=1
+      shift
+      ;;
     *) shift ;;
   esac
 done
@@ -214,20 +217,36 @@ step_features() {
   # Set defaults based on profile
   case "$PROFILE" in
     minimal)
-      FEAT_ZSH=true; FEAT_NVIM=false; FEAT_TMUX=false
-      FEAT_GUI=false; FEAT_SECRETS=false; FEAT_AI=false
+      FEAT_ZSH=true
+      FEAT_NVIM=false
+      FEAT_TMUX=false
+      FEAT_GUI=false
+      FEAT_SECRETS=false
+      FEAT_AI=false
       ;;
     server)
-      FEAT_ZSH=true; FEAT_NVIM=true; FEAT_TMUX=true
-      FEAT_GUI=false; FEAT_SECRETS=true; FEAT_AI=false
+      FEAT_ZSH=true
+      FEAT_NVIM=true
+      FEAT_TMUX=true
+      FEAT_GUI=false
+      FEAT_SECRETS=true
+      FEAT_AI=false
       ;;
     work)
-      FEAT_ZSH=true; FEAT_NVIM=true; FEAT_TMUX=true
-      FEAT_GUI=true; FEAT_SECRETS=true; FEAT_AI=true
+      FEAT_ZSH=true
+      FEAT_NVIM=true
+      FEAT_TMUX=true
+      FEAT_GUI=true
+      FEAT_SECRETS=true
+      FEAT_AI=true
       ;;
     *)
-      FEAT_ZSH=true; FEAT_NVIM=true; FEAT_TMUX=true
-      FEAT_GUI=true; FEAT_SECRETS=true; FEAT_AI=true
+      FEAT_ZSH=true
+      FEAT_NVIM=true
+      FEAT_TMUX=true
+      FEAT_GUI=true
+      FEAT_SECRETS=true
+      FEAT_AI=true
       ;;
   esac
 

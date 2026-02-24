@@ -94,7 +94,7 @@ test_start "options_nvm_requires_no_fnm"
 assert_file_contains "$OPTIONS" '! command -v fnm' "NVM block should be guarded by fnm absence"
 
 test_start "options_sdkman_lazy"
-assert_file_contains "$OPTIONS" '_lazy_load_sdkman' "should have SDKMAN lazy loader"
+assert_file_contains "$OPTIONS" '_dotfiles_lazy_load sdkman' "should have SDKMAN lazy loader"
 
 echo ""
 echo "Wave 1 zshrc lazy hook and FNM fix tests completed."
