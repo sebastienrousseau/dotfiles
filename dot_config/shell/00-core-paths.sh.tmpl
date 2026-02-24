@@ -28,7 +28,13 @@
 ## Safe to source multiple times. Deduplicates PATH entries.
 
 # Helper: prepend path to front (moves if already present)
-path_prepend() {
+# Zsh-optimized version using array operations when available
+if [[ -n "${ZSH_VERSION:-}" ]]; then
+  path_prepend() {
+    [[ -d "$1" ]] && path=("$1" ${path:#$1})
+  }
+else
+  path_prepend() {
     local dir="$1"
     [[ -n "$dir" && -d "$dir" ]] || return 0
     # Remove existing occurrence, then prepend
@@ -36,7 +42,8 @@ path_prepend() {
     PATH="${PATH//:$dir:/:}"     # Remove from middle
     PATH="${PATH/%:$dir/}"       # Remove from end
     PATH="$dir:${PATH}"
-}
+  }
+fi
 
 # 1. System Paths (Prepend, but will be pushed down by later prepends)
 PATH="/usr/bin:/bin:/usr/sbin:/sbin:${PATH}"

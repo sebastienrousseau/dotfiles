@@ -1,6 +1,9 @@
 # SSH agent: auto-start and load key
 # Only runs when SSH_AUTH_SOCK is unset (no agent running)
 
+# Skip in FAST mode (defer to first SSH usage)
+[[ "${DOTFILES_FAST:-0}" == "1" ]] && return 0
+
 if [[ -z "$SSH_AUTH_SOCK" ]]; then
   eval "$(ssh-agent -s)" > /dev/null
 

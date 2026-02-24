@@ -39,6 +39,7 @@ export DOTFILES_THEME="{{ $theme }}"
 : ${DOTFILES_STARTUP_MODE:=full}
 : ${DOTFILES_FAST:=0}
 : ${DOTFILES_ULTRA_FAST:=0}
+: ${DOTFILES_INSTANT:=0}
 : ${DOTFILES_AI:=0}
 : ${DOTFILES_ALIAS_STRICT_MODE:={{ if $strict_mode }}1{{ else }}0{{ end }}}
 : ${DOTFILES_ULTRA_FAST_PROMPT:=1}
@@ -61,6 +62,40 @@ if [[ "${DOTFILES_FAST}" == "0" ]] && [[ "${DOTFILES_ULTRA_FAST}" == "0" ]]; the
     DOTFILES_ULTRA_FAST=1
     DOTFILES_FAST=1
   fi
+fi
+
+# Instant mode: ≤10ms with core functionality (essential aliases, PATH)
+if [[ "${DOTFILES_INSTANT}" == "1" ]]; then
+  # Minimal PATH (inline, no function calls)
+  path=($HOME/bin $HOME/.local/bin $HOME/.cargo/bin /usr/local/bin /usr/bin /bin)
+  [[ -d /opt/homebrew/bin ]] && path=(/opt/homebrew/bin $path)
+  typeset -aU path
+
+  # Essential aliases (inline for speed, full file is ~80KB)
+  if command -v eza >/dev/null 2>&1; then
+    alias ls='eza --sort Name --icons --group-directories-first'
+    alias ll='eza -alF --sort Name --icons --group-directories-first'
+    alias la='eza -a --sort Name --icons --group-directories-first'
+    alias l='eza --sort Name --icons --group-directories-first'
+  else
+    alias ls='ls --color=auto'
+    alias ll='ls -lAh'
+    alias la='ls -A'
+    alias l='ls'
+  fi
+  alias ..='cd ..'
+  alias ...='cd ../..'
+  alias grep='grep --color=auto'
+  command -v bat >/dev/null 2>&1 && alias cat='bat'
+
+  # Minimal prompt
+  PROMPT='%n@%m:%~%# '
+  RPROMPT=''
+
+  # No hooks in instant mode
+  precmd_functions=()
+  preexec_functions=()
+  return
 fi
 
 # Ultra-fast mode: minimal init (skip rc.d, plugins, prompts, AI, completions)
@@ -156,7 +191,9 @@ if [[ -o interactive ]]; then
                   "${HOME}/.config/shell/40-ls-colors.sh" \
                   "${HOME}/.config/shell/90-ux-aliases.sh" \
                   /opt/homebrew/opt/fzf/shell/completion.zsh \
-                  /opt/homebrew/opt/fzf/shell/key-bindings.zsh &!
+                  /opt/homebrew/opt/fzf/shell/key-bindings.zsh
+    # Pre-compile rc.d files for faster startup
+    zcompile_many "${HOME}/.config/zsh/rc.d"/*.zsh(N) &!
   )
 fi
 
