@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2034
+# shellcheck disable=SC2034,SC2016
 # Memory usage benchmarks for shell environment
 # Tracks memory footprint of shell initialization
 set -euo pipefail
