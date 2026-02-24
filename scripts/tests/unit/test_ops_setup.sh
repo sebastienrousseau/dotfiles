@@ -24,10 +24,10 @@ assert_exit_code 0 "bash -n '$SCRIPT_FILE'"
 test_start "setup_shebang"
 first_line=$(head -n 1 "$SCRIPT_FILE")
 if [[ "$first_line" == "#!/usr/bin/env bash" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have #!/usr/bin/env bash"
 fi
 
@@ -42,10 +42,10 @@ assert_file_contains "$SCRIPT_FILE" "ui.sh" "should source ui library"
 # Test: supports quick mode
 test_start "setup_quick_mode"
 if grep -q -- '--quick' "$SCRIPT_FILE" || grep -q "QUICK_MODE" "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: supports quick mode"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should support quick mode"
 fi
 
@@ -72,10 +72,10 @@ assert_file_contains "$SCRIPT_FILE" "gum" "should use gum when available"
 # Test: falls back without gum
 test_start "setup_fallback"
 if grep -q "command -v gum" "$SCRIPT_FILE" && grep -q "else" "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: falls back without gum"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should fall back without gum"
 fi
 
@@ -90,10 +90,10 @@ assert_file_contains "$SCRIPT_FILE" "XDG_CONFIG_HOME" "should use XDG config hom
 # Test: tracks setup steps
 test_start "setup_steps"
 if grep -q "CURRENT_STEP" "$SCRIPT_FILE" && grep -q "TOTAL_STEPS" "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: tracks setup steps"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should track setup steps"
 fi
 

@@ -16,30 +16,30 @@ assert_file_exists "$DRIFT_FILE" "drift-dashboard.sh should exist"
 # Test: drift-dashboard.sh is valid shell syntax
 test_start "drift_syntax_valid"
 if bash -n "$DRIFT_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 
 # Test: detects drift
 test_start "drift_detects_changes"
 if grep -qE 'drift|diff|changed|modified' "$DRIFT_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: detects drift"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should detect drift"
 fi
 
 # Test: uses chezmoi
 test_start "drift_uses_chezmoi"
 if grep -q 'chezmoi' "$DRIFT_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses chezmoi"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use chezmoi"
 fi
 
@@ -48,14 +48,14 @@ test_start "drift_shellcheck"
 if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$DRIFT_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
-    ((TESTS_FAILED++))
+    ((TESTS_FAILED++)) || true
     echo -e "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available"
 fi
 

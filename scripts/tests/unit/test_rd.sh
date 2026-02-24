@@ -26,10 +26,10 @@ assert_equals "1" "$exit_code" "exit code should be 1 for no args"
 test_start "rd_no_args_message"
 output=$(rd 2>&1)
 if [[ "$output" == *"ERROR"* || "$output" == *"argument"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shows error message for no arguments"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should show error message for no arguments"
   echo -e "    Output: $output"
 fi
@@ -57,10 +57,10 @@ exit_code=$?
 cd "$original_dir"
 
 if [[ ! -d "$target_dir" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: directory was removed"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: directory should be removed"
 fi
 rm -rf "$test_dir"
@@ -79,10 +79,10 @@ output=$(rd "to_remove" 2>&1)
 cd "$original_dir"
 
 if [[ "$output" == *"INFO"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shows INFO message"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should show INFO message"
   echo -e "    Output: $output"
 fi
@@ -96,10 +96,10 @@ rm -rf "$test_dir"
 test_start "rd_reject_root"
 output=$(rd "/" 2>&1) || true
 if [[ "$output" == *"ERROR"* ]] && [[ "$output" == *"protected"* || "$output" == *"Refusing"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: root path rejected (security)"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: root path should be rejected as protected"
   echo -e "    Output: $output"
 fi
@@ -108,10 +108,10 @@ fi
 test_start "rd_reject_home"
 output=$(rd "$HOME" 2>&1) || true
 if [[ "$output" == *"ERROR"* ]] && [[ "$output" == *"protected"* || "$output" == *"Refusing"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: home directory rejected (security)"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: home directory should be rejected as protected"
   echo -e "    Output: $output"
 fi
@@ -120,10 +120,10 @@ fi
 test_start "rd_reject_etc"
 output=$(rd "/etc" 2>&1) || true
 if [[ "$output" == *"ERROR"* ]] && [[ "$output" == *"protected"* || "$output" == *"Refusing"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: /etc rejected (security)"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: /etc should be rejected as protected"
   echo -e "    Output: $output"
 fi
@@ -132,10 +132,10 @@ fi
 test_start "rd_reject_usr"
 output=$(rd "/usr" 2>&1) || true
 if [[ "$output" == *"ERROR"* ]] && [[ "$output" == *"protected"* || "$output" == *"Refusing"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: /usr rejected (security)"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: /usr should be rejected as protected"
   echo -e "    Output: $output"
 fi
@@ -144,10 +144,10 @@ fi
 test_start "rd_reject_var"
 output=$(rd "/var" 2>&1) || true
 if [[ "$output" == *"ERROR"* ]] && [[ "$output" == *"protected"* || "$output" == *"Refusing"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: /var rejected (security)"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: /var should be rejected as protected"
   echo -e "    Output: $output"
 fi
@@ -166,10 +166,10 @@ output=$(rd "../../.." 2>&1) || true
 cd "$original_dir"
 
 if [[ "$output" == *"ERROR"* || "$output" == *"dangerous"* || -d "$test_dir" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: path traversal handled"
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: path traversal behavior documented"
 fi
 rm -rf "$test_dir" 2>/dev/null || true
@@ -179,10 +179,10 @@ test_start "rd_nonexistent"
 output=$(rd "/nonexistent/path/that/does/not/exist" 2>&1)
 # Function behavior with nonexistent paths
 if [[ "$output" == *"INFO"* ]] || [[ "$output" == *"ERROR"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: nonexistent path handled"
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: nonexistent path processed"
 fi
 
@@ -192,10 +192,10 @@ output=$(rd "" 2>&1)
 exit_code=$?
 # Should treat empty string as error
 if [[ "$exit_code" -ne 0 ]] || [[ "$output" == *"ERROR"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: empty string handled as error"
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: empty string processed"
 fi
 
@@ -214,10 +214,10 @@ cd "$original_dir"
 
 # rd uses rm -rf which handles files too
 if [[ ! -f "$test_file" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: file was removed (rm -rf handles files)"
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: file handling documented"
 fi
 rm -rf "$test_dir"

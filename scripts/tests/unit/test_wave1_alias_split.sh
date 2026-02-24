@@ -20,10 +20,10 @@ assert_file_exists "$EAGER_TMPL" "90-ux-aliases.sh.tmpl should exist"
 test_start "eager_template_has_shebang"
 first_line=$(head -n 1 "$EAGER_TMPL")
 if [[ "$first_line" == "#!/usr/bin/env bash" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have #!/usr/bin/env bash shebang"
 fi
 
@@ -65,10 +65,10 @@ test_start "eager_template_has_core_categories_count"
 core_line=$(grep -m 1 'coreCategories' "$EAGER_TMPL")
 core_count=$(printf "%s" "$core_line" | grep -oE '"[a-z-]+"' | wc -l)
 if [[ $core_count -eq 18 ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has 18 core categories"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: expected 18 core categories, found $core_count"
 fi
 
@@ -80,10 +80,10 @@ assert_file_exists "$LAZY_TMPL" "91-ux-aliases-lazy.sh.tmpl should exist"
 test_start "lazy_template_has_shebang"
 first_line=$(head -n 1 "$LAZY_TMPL")
 if [[ "$first_line" == "#!/usr/bin/env bash" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have #!/usr/bin/env bash shebang"
 fi
 
@@ -107,10 +107,10 @@ test_start "templates_share_core_categories"
 eager_cats=$(grep 'coreCategories' "$EAGER_TMPL" | head -1 || true)
 lazy_cats=$(grep 'coreCategories' "$LAZY_TMPL" | head -1 || true)
 if [[ "$eager_cats" == "$lazy_cats" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: eager and lazy templates use identical coreCategories"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: coreCategories differ between templates"
   echo -e "    Eager: $eager_cats"
   echo -e "    Lazy:  $lazy_cats"
@@ -121,10 +121,10 @@ test_start "templates_share_glob_pattern"
 eager_glob=$(grep 'globPattern' "$EAGER_TMPL" | head -1 || true)
 lazy_glob=$(grep 'globPattern' "$LAZY_TMPL" | head -1 || true)
 if [[ "$eager_glob" == "$lazy_glob" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: eager and lazy templates use identical globPattern"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: globPattern differs between templates"
 fi
 

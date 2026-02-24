@@ -16,40 +16,40 @@ assert_file_exists "$CHEZMOI_LIB" "chezmoi.sh should exist"
 # Test: chezmoi.sh is valid shell syntax
 test_start "chezmoi_lib_syntax"
 if bash -n "$CHEZMOI_LIB" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: valid shell syntax"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 
 # Test: defines install function
 test_start "chezmoi_lib_install_func"
 if grep -qE 'install_chezmoi|chezmoi_install' "$CHEZMOI_LIB" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines install function"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define install function"
 fi
 
 # Test: uses official install method
 test_start "chezmoi_lib_official_install"
 if grep -qE 'get.chezmoi.io|chezmoi/chezmoi' "$CHEZMOI_LIB" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses official install method"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use official install"
 fi
 
 # Test: checks for existing installation
 test_start "chezmoi_lib_checks_existing"
 if grep -qE 'command -v chezmoi|which chezmoi' "$CHEZMOI_LIB" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: checks for existing installation"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should check existing install"
 fi
 
@@ -58,14 +58,14 @@ test_start "chezmoi_lib_shellcheck"
 if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$CHEZMOI_LIB" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
-    ((TESTS_FAILED++))
+    ((TESTS_FAILED++)) || true
     echo -e "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available"
 fi
 

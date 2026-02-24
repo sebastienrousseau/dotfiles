@@ -24,10 +24,10 @@ assert_exit_code 0 "bash -n '$SCRIPT_FILE'"
 test_start "suggest_shebang"
 first_line=$(head -n 1 "$SCRIPT_FILE")
 if [[ "$first_line" == "#!/usr/bin/env bash" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have #!/usr/bin/env bash"
 fi
 
@@ -70,10 +70,10 @@ assert_file_contains "$SCRIPT_FILE" "suggest_aliases()" "should define suggest_a
 # Test: handles zsh history format
 test_start "suggest_zsh_format"
 if grep -q ": \[0-9\]" "$SCRIPT_FILE" || grep -q "extended history" "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: handles zsh history format"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should handle zsh history format"
 fi
 

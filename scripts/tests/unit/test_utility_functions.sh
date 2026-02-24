@@ -25,10 +25,10 @@ test_start "hostinfo_help"
 if type hostinfo &>/dev/null; then
   output=$(hostinfo --help 2>&1)
   if [[ "$output" == *"Usage:"* ]]; then
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: --help shows usage"
   else
-    ((TESTS_FAILED++))
+    ((TESTS_FAILED++)) || true
     echo -e "  ${RED}✗${NC} $CURRENT_TEST: --help should show usage"
   fi
 fi
@@ -46,10 +46,10 @@ if type hostinfo &>/dev/null; then
   output=$(timeout 5 bash -c 'source "'"$FUNCS_DIR/hostinfo.sh"'" && hostinfo' 2>&1)
   set -e
   if [[ "$output" == *"Username"* ]]; then
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: output contains Username"
   else
-    ((TESTS_FAILED++))
+    ((TESTS_FAILED++)) || true
     echo -e "  ${RED}✗${NC} $CURRENT_TEST: output should contain Username"
     echo -e "    Output: ${output:0:200}"
   fi
@@ -61,10 +61,10 @@ if type hostinfo &>/dev/null; then
   output=$(timeout 5 bash -c 'source "'"$FUNCS_DIR/hostinfo.sh"'" && hostinfo' 2>&1)
   set -e
   if [[ "$output" == *"Hostname"* ]]; then
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: output contains Hostname"
   else
-    ((TESTS_FAILED++))
+    ((TESTS_FAILED++)) || true
     echo -e "  ${RED}✗${NC} $CURRENT_TEST: output should contain Hostname"
   fi
 fi
@@ -93,10 +93,10 @@ if type size &>/dev/null; then
   echo "test content" >"$test_dir/test.txt"
   output=$(size "$test_dir/test.txt" 2>&1) || true
   if [[ "$output" == *"INFO"* ]] || [[ "$output" == *"bytes"* ]] || [[ "$output" == *"size"* ]]; then
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shows size information"
   else
-    ((TESTS_FAILED++))
+    ((TESTS_FAILED++)) || true
     echo -e "  ${RED}✗${NC} $CURRENT_TEST: should show size information"
     echo -e "    Output: $output"
   fi
@@ -120,10 +120,10 @@ if type banner &>/dev/null; then
   ec=$?
   set -e
   if [[ $ec -ne 0 ]] || [[ "$output" == *"not found"* ]] || [[ "$output" == *"ERROR"* ]]; then
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: graceful error when script missing"
   else
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: banner handled missing script"
   fi
 fi

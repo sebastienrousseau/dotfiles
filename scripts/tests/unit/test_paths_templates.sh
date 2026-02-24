@@ -16,10 +16,10 @@ assert_dir_exists "$PATHS_DIR" "paths directory should exist"
 # Test: default paths file exists
 test_start "paths_default_exists"
 if [[ -f "$PATHS_DIR/00-default.paths.sh" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: default paths exists"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: default paths should exist"
 fi
 
@@ -32,30 +32,30 @@ for script in "$PATHS_DIR"/*.sh; do
   fi
 done
 if [[ "$invalid" -eq 0 ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: all paths files valid"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: $invalid files invalid"
 fi
 
 # Test: sets PATH variable
 test_start "paths_sets_path"
 if grep -rqE 'PATH=|path_prepend|export PATH' "$PATHS_DIR"/*.sh 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: sets PATH variable"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should set PATH variable"
 fi
 
 # Test: no hardcoded user paths
 test_start "paths_no_hardcoded"
 if grep -rqE '"/home/seb|/Users/seb' "$PATHS_DIR"/*.sh 2>/dev/null; then
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: has hardcoded paths"
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no hardcoded paths"
 fi
 

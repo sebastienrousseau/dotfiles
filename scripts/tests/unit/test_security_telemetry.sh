@@ -16,30 +16,30 @@ assert_file_exists "$TEL_FILE" "telemetry-kill.sh should exist"
 # Test: telemetry-kill.sh is valid shell syntax
 test_start "telemetry_syntax_valid"
 if bash -n "$TEL_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: telemetry-kill.sh has valid syntax"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: telemetry-kill.sh has syntax errors"
 fi
 
 # Test: disables telemetry
 test_start "telemetry_disables"
 if grep -qE 'telemetry|tracking|analytics|disable' "$TEL_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: disables telemetry"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should disable telemetry"
 fi
 
 # Test: handles multiple applications
 test_start "telemetry_multiple_apps"
 if grep -cE 'ubuntu|whoopsie|apport|analytics|telemetry|popularity-contest' "$TEL_FILE" 2>/dev/null | grep -qE '^[2-9]|^[0-9]{2,}'; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: handles multiple applications"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should handle multiple applications"
 fi
 
@@ -48,14 +48,14 @@ test_start "telemetry_shellcheck"
 if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$TEL_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
-    ((TESTS_FAILED++))
+    ((TESTS_FAILED++)) || true
     echo -e "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
 fi
 

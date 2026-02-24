@@ -35,10 +35,10 @@ assert_file_contains "$ZSHRC" "autoload -Uz add-zsh-hook" "should autoload add-z
 test_start "zshrc_no_eager_fnm_eval"
 # There should be no eager `eval "$(fnm env` in the zshrc outside of 30-options
 if grep -q 'eval "$(fnm env' "$ZSHRC" 2>/dev/null; then
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: zshrc should not eagerly eval fnm env"
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no eager fnm eval in zshrc"
 fi
 

@@ -24,10 +24,10 @@ assert_exit_code 0 "bash -n '$SCRIPT_FILE'"
 test_start "post_apply_repair_shebang"
 first_line=$(head -n 1 "$SCRIPT_FILE")
 if [[ "$first_line" == "#!/usr/bin/env bash" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have #!/usr/bin/env bash"
 fi
 

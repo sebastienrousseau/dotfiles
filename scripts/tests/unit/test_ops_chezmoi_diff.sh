@@ -24,10 +24,10 @@ assert_exit_code 0 "bash -n '$SCRIPT_FILE'"
 test_start "chezmoi_diff_shebang"
 first_line=$(head -n 1 "$SCRIPT_FILE")
 if [[ "$first_line" == "#!/usr/bin/env bash" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have #!/usr/bin/env bash"
 fi
 
@@ -50,20 +50,20 @@ assert_file_contains "$SCRIPT_FILE" "DOTFILES_CHEZMOI_DIFF_EXCLUDES" "should sup
 # Test: passes arguments through
 test_start "chezmoi_diff_pass_args"
 if grep -q '"\$@"' "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: passes through arguments"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should pass through arguments"
 fi
 
 # Test: uses --exclude flag
 test_start "chezmoi_diff_exclude_flag"
 if grep -q -- '--exclude' "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses --exclude flag"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use --exclude flag"
 fi
 

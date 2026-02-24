@@ -21,19 +21,19 @@ assert_file_exists "$MANIFEST_SCRIPT" "alias manifest script should exist"
 
 test_start "alias_governance_syntax"
 if bash -n "$GOVERNANCE_SCRIPT" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 
 test_start "alias_manifest_syntax"
 if bash -n "$MANIFEST_SCRIPT" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 

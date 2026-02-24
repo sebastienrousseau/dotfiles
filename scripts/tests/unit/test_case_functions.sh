@@ -39,10 +39,10 @@ set +e
 output=$(snakecase "/nonexistent/file_12345.txt" 2>&1)
 set -e
 if [[ "$output" == *"ERROR"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: reports error for nonexistent file"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should report error for nonexistent file"
 fi
 
@@ -51,10 +51,10 @@ test_dir=$(mock_dir "case_test")
 touch "$test_dir/already_snake.txt"
 output=$(snakecase "$test_dir/already_snake.txt" 2>&1)
 if [[ "$output" == *"already"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: skips already snake_case file"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should skip already snake_case file"
 fi
 rm -rf "$test_dir"
@@ -64,10 +64,10 @@ test_dir=$(mock_dir "case_test")
 touch "$test_dir/Hello World.txt"
 snakecase "$test_dir/Hello World.txt" >/dev/null 2>&1
 if [[ -f "$test_dir/hello_world.txt" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: converts 'Hello World.txt' to 'hello_world.txt'"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should convert to snake_case"
 fi
 rm -rf "$test_dir"
@@ -89,10 +89,10 @@ test_dir=$(mock_dir "case_test")
 touch "$test_dir/Hello World.txt"
 kebabcase "$test_dir/Hello World.txt" >/dev/null 2>&1
 if [[ -f "$test_dir/hello-world.txt" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: converts 'Hello World.txt' to 'hello-world.txt'"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should convert to kebab-case"
 fi
 rm -rf "$test_dir"
@@ -114,10 +114,10 @@ test_dir=$(mock_dir "case_test")
 touch "$test_dir/hello.txt"
 uppercase "$test_dir/hello.txt" >/dev/null 2>&1
 if [[ -f "$test_dir/HELLO.TXT" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: converts 'hello.txt' to 'HELLO.TXT'"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should convert to uppercase"
 fi
 rm -rf "$test_dir"
@@ -127,10 +127,10 @@ test_dir=$(mock_dir "case_test")
 touch "$test_dir/HELLO.TXT"
 output=$(uppercase "$test_dir/HELLO.TXT" 2>&1)
 if [[ "$output" == *"already"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: skips already uppercase file"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should skip already uppercase file"
 fi
 rm -rf "$test_dir"
@@ -152,10 +152,10 @@ test_dir=$(mock_dir "case_test")
 touch "$test_dir/HELLO.TXT"
 lowercase "$test_dir/HELLO.TXT" >/dev/null 2>&1
 if [[ -f "$test_dir/hello.txt" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: converts 'HELLO.TXT' to 'hello.txt'"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should convert to lowercase"
 fi
 rm -rf "$test_dir"
@@ -177,10 +177,10 @@ test_dir=$(mock_dir "case_test")
 touch "$test_dir/hello.txt"
 titlecase "$test_dir/hello.txt" >/dev/null 2>&1
 if [[ -f "$test_dir/Hello.txt" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: converts 'hello.txt' to 'Hello.txt'"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should convert to title case"
 fi
 rm -rf "$test_dir"
@@ -202,10 +202,10 @@ test_dir=$(mock_dir "case_test")
 touch "$test_dir/hELLO.txt"
 sentencecase "$test_dir/hELLO.txt" >/dev/null 2>&1
 if [[ -f "$test_dir/Hello.txt" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: converts 'hELLO.txt' to 'Hello.txt'"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should convert to sentence case"
 fi
 rm -rf "$test_dir"
@@ -226,10 +226,10 @@ for func in snakecase kebabcase uppercase lowercase titlecase sentencecase; do
   fi
 done
 if [[ "$all_ok" == true ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: all case functions report error for nonexistent files"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: some case functions did not report error"
 fi
 

@@ -23,10 +23,10 @@ assert_exit_code 0 "bash -n '$BENCHMARK_FILE'"
 # Test: has executable permission
 test_start "benchmark_compare_executable"
 if [[ -x "$BENCHMARK_FILE" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: file is executable"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: file should be executable"
 fi
 
@@ -97,10 +97,10 @@ assert_file_contains "$BENCHMARK_FILE" "BENCHMARK_DIR" "should define benchmark 
 # Test: calculates mean, min, max statistics
 test_start "benchmark_compare_statistics"
 if grep -q "mean" "$BENCHMARK_FILE" && grep -q "min" "$BENCHMARK_FILE" && grep -q "max" "$BENCHMARK_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: calculates mean/min/max statistics"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should calculate mean/min/max statistics"
 fi
 
@@ -113,10 +113,10 @@ for feature in "Syntax highlighting" "Autosuggestions" "Fuzzy finder" "Git integ
   fi
 done
 if [[ $features_found -ge 4 ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: tracks multiple features for comparison"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should track multiple features"
 fi
 
@@ -127,10 +127,10 @@ assert_file_contains "$BENCHMARK_FILE" "ps -o rss" "should use ps for memory mea
 # Test: performance thresholds defined
 test_start "benchmark_compare_thresholds"
 if grep -qE '(100|200)' "$BENCHMARK_FILE" && grep -q "Performance" "$BENCHMARK_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines performance thresholds"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define performance thresholds"
 fi
 
@@ -141,10 +141,10 @@ output=$(bash "$BENCHMARK_FILE" help 2>&1)
 ec=$?
 set -e
 if [[ "$output" == *"Usage:"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: help shows usage"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: help should show usage"
 fi
 

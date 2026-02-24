@@ -24,10 +24,10 @@ assert_exit_code 0 "bash -n '$SCRIPT_FILE'"
 test_start "devcontainer_shebang"
 first_line=$(head -n 1 "$SCRIPT_FILE")
 if [[ "$first_line" == "#!/usr/bin/env bash" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have #!/usr/bin/env bash"
 fi
 
@@ -42,30 +42,30 @@ assert_file_contains "$SCRIPT_FILE" "ui.sh" "should source ui library"
 # Test: supports init mode
 test_start "devcontainer_init"
 if grep -q -- '--init' "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: supports --init mode"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should support --init mode"
 fi
 
 # Test: supports codespaces mode
 test_start "devcontainer_codespaces"
 if grep -q -- '--codespaces' "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: supports --codespaces mode"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should support --codespaces mode"
 fi
 
 # Test: supports gitpod mode
 test_start "devcontainer_gitpod"
 if grep -q -- '--gitpod' "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: supports --gitpod mode"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should support --gitpod mode"
 fi
 
@@ -76,30 +76,30 @@ assert_file_contains "$SCRIPT_FILE" "show_help()" "should define show_help funct
 # Test: has help option
 test_start "devcontainer_help_option"
 if grep -q -- '--help' "$SCRIPT_FILE" || grep -q -- '-h' "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has help option"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have help option"
 fi
 
 # Test: supports custom image
 test_start "devcontainer_custom_image"
 if grep -q -- '--image' "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: supports custom image"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should support custom image"
 fi
 
 # Test: supports custom repo
 test_start "devcontainer_custom_repo"
 if grep -q -- '--repo' "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: supports custom repo"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should support custom repo"
 fi
 

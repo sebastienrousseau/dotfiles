@@ -16,40 +16,40 @@ assert_file_exists "$ENC_FILE" "encryption-check.sh should exist"
 # Test: encryption-check.sh is valid shell syntax
 test_start "encryption_syntax_valid"
 if bash -n "$ENC_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: encryption-check.sh has valid syntax"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: encryption-check.sh has syntax errors"
 fi
 
 # Test: checks disk encryption
 test_start "encryption_checks_disk"
 if grep -qE 'filevault|luks|bitlocker|encrypt|crypt' "$ENC_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: checks disk encryption"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should check disk encryption"
 fi
 
 # Test: supports multiple platforms
 test_start "encryption_multiplatform"
 if grep -qE 'darwin|linux|macos|Linux' "$ENC_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: supports multiple platforms"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should support multiple platforms"
 fi
 
 # Test: reports encryption status
 test_start "encryption_reports_status"
 if grep -qE 'enabled|disabled|encrypted|not encrypted|status' "$ENC_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: reports encryption status"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should report encryption status"
 fi
 
@@ -58,14 +58,14 @@ test_start "encryption_shellcheck"
 if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$ENC_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
-    ((TESTS_FAILED++))
+    ((TESTS_FAILED++)) || true
     echo -e "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
 fi
 

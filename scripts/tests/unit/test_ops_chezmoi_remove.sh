@@ -24,10 +24,10 @@ assert_exit_code 0 "bash -n '$SCRIPT_FILE'"
 test_start "chezmoi_remove_shebang"
 first_line=$(head -n 1 "$SCRIPT_FILE")
 if [[ "$first_line" == "#!/usr/bin/env bash" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have #!/usr/bin/env bash"
 fi
 
@@ -42,30 +42,30 @@ assert_file_contains "$SCRIPT_FILE" "Usage:" "should show usage"
 # Test: requires path argument
 test_start "chezmoi_remove_requires_path"
 if grep -qE '\$# -lt 1' "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: requires path argument"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should require path argument"
 fi
 
 # Test: supports --source flag
 test_start "chezmoi_remove_source_flag"
 if grep -q -- '--source' "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: supports --source flag"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should support --source flag"
 fi
 
 # Test: supports --dry-run flag
 test_start "chezmoi_remove_dry_run"
 if grep -q -- '--dry-run' "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: supports --dry-run flag"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should support --dry-run flag"
 fi
 
@@ -84,10 +84,10 @@ assert_file_contains "$SCRIPT_FILE" "Aborted" "should support abort"
 # Test: uses --keep-source by default
 test_start "chezmoi_remove_keep_source"
 if grep -q -- '--keep-source' "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses --keep-source by default"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use --keep-source by default"
 fi
 

@@ -16,40 +16,40 @@ assert_file_exists "$VERSION_FILE" "version-sync.sh should exist"
 # Test: version-sync.sh is valid shell syntax
 test_start "version_sync_syntax"
 if bash -n "$VERSION_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 
 # Test: reads from package.json
 test_start "version_sync_reads_package"
 if grep -qE 'package\.json|jq.*version' "$VERSION_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: reads package.json"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should read package.json"
 fi
 
 # Test: supports verify mode
 test_start "version_sync_verify_mode"
 if grep -qE 'verify|--verify|-v' "$VERSION_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: supports verify mode"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should support verify mode"
 fi
 
 # Test: uses semver format
 test_start "version_sync_semver"
 if grep -qE '[0-9]+\.[0-9]+\.[0-9]+|semver|version' "$VERSION_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses semver format"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use semver format"
 fi
 
@@ -58,14 +58,14 @@ test_start "version_sync_shellcheck"
 if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$VERSION_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
     echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
-    ((TESTS_FAILED++))
+    ((TESTS_FAILED++)) || true
     echo -e "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available"
 fi
 

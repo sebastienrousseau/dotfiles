@@ -24,10 +24,10 @@ assert_exit_code 0 "bash -n '$SCRIPT_FILE'"
 test_start "health_check_shebang"
 first_line=$(head -n 1 "$SCRIPT_FILE")
 if [[ "$first_line" == "#!/usr/bin/env bash" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have #!/usr/bin/env bash"
 fi
 
@@ -38,20 +38,20 @@ assert_file_contains "$SCRIPT_FILE" "set -euo pipefail" "should use strict mode"
 # Test: supports verbose mode
 test_start "health_check_verbose"
 if grep -q -- '--verbose' "$SCRIPT_FILE" || grep -q -- '-v' "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: supports verbose mode"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should support verbose mode"
 fi
 
 # Test: supports JSON output
 test_start "health_check_json"
 if grep -q -- '--json' "$SCRIPT_FILE" || grep -q "JSON_OUTPUT" "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: supports JSON output"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should support JSON output"
 fi
 
@@ -66,20 +66,20 @@ assert_file_contains "$SCRIPT_FILE" "DOTFILES_SOURCE" "should check dotfiles sou
 # Test: checks critical files
 test_start "health_check_critical_files"
 if grep -q ".zshrc" "$SCRIPT_FILE" || grep -q ".bashrc" "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: checks critical files"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should check critical files"
 fi
 
 # Test: defines log functions
 test_start "health_check_log_functions"
 if grep -q "log_pass()" "$SCRIPT_FILE" && grep -q "log_fail()" "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines log functions"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define log functions"
 fi
 
@@ -94,10 +94,10 @@ assert_file_contains "$SCRIPT_FILE" "add_result()" "should define add_result fun
 # Test: has help option
 test_start "health_check_help"
 if grep -q -- '--help' "$SCRIPT_FILE" || grep -q -- '-h' "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has help option"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have help option"
 fi
 
@@ -116,10 +116,10 @@ assert_file_contains "$SCRIPT_FILE" "NO_COLOR" "should respect NO_COLOR"
 # Test: defines color variables
 test_start "health_check_colors"
 if grep -q "RED=" "$SCRIPT_FILE" && grep -q "GREEN=" "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines color variables"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define color variables"
 fi
 
@@ -130,10 +130,10 @@ assert_file_contains "$SCRIPT_FILE" "EXIT_CODE" "should track exit code"
 # Test: has documentation header
 test_start "health_check_documentation"
 if grep -q "^##" "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has documentation header"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have documentation header"
 fi
 

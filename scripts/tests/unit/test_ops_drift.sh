@@ -24,10 +24,10 @@ assert_exit_code 0 "bash -n '$SCRIPT_FILE'"
 test_start "drift_shebang"
 first_line=$(head -n 1 "$SCRIPT_FILE")
 if [[ "$first_line" == "#!/usr/bin/env bash" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have #!/usr/bin/env bash"
 fi
 
@@ -50,30 +50,30 @@ assert_file_contains "$SCRIPT_FILE" "chezmoi status" "should use chezmoi status"
 # Test: categorizes by severity
 test_start "drift_severity_categories"
 if grep -q "critical" "$SCRIPT_FILE" && grep -q "warning" "$SCRIPT_FILE" && grep -q "safe" "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: categorizes by severity"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should categorize by severity"
 fi
 
 # Test: tracks file types
 test_start "drift_file_types"
 if grep -q "modified" "$SCRIPT_FILE" && grep -q "added" "$SCRIPT_FILE" && grep -q "deleted" "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: tracks file types (modified/added/deleted)"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should track file types"
 fi
 
 # Test: detects security-sensitive files
 test_start "drift_security_files"
 if grep -q ".ssh" "$SCRIPT_FILE" && grep -q "secrets" "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: detects security-sensitive files"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should detect security-sensitive files"
 fi
 
@@ -88,20 +88,20 @@ assert_file_contains "$SCRIPT_FILE" "DRIFT_LOG=" "should define drift log file"
 # Test: exports drift statistics
 test_start "drift_statistics"
 if grep -q "DRIFT_MODIFIED" "$SCRIPT_FILE" && grep -q "DRIFT_TOTAL" "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: exports drift statistics"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should export drift statistics"
 fi
 
 # Test: handles shell configuration files
 test_start "drift_shell_config"
 if grep -q ".zshrc" "$SCRIPT_FILE" || grep -q ".bashrc" "$SCRIPT_FILE"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: handles shell configuration files"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   echo -e "  ${RED}✗${NC} $CURRENT_TEST: should handle shell configuration files"
 fi
 
