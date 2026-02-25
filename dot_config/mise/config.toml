@@ -13,7 +13,7 @@ ruby.compile = false
 
 [tools]
 # Node.js
-node = "lts"
+node = ["lts", "24"]
 
 # Python
 python = ["3.12", "3.11"]
@@ -35,6 +35,13 @@ deno = "latest"
 
 # Bun
 bun = "latest"
+
+# CLI Tools
+eza = "latest"
+bat = "latest"
+ripgrep = "latest"
+"npm:@anthropic-ai/claude-code" = "latest"
+"npm:@google/gemini-cli" = "latest"
 
 # Task runners
 task = "latest"
