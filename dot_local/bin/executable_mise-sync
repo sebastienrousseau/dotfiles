@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+## Mise Sync — Syncs mise shims to ~/.local/bin
+##
+## This script ensures that all applications managed by mise are accessible
+## via ~/.local/bin as symbolic links to their shims.
+##
+## # Usage
+## mise-sync
+
+set -euo pipefail
+
+CYAN='[0;36m'
+GREEN='[0;32m'
+YELLOW='[1;33m'
+NC='[0m'
+
+SHIMS_DIR="$HOME/.local/share/mise/shims"
+BIN_DIR="$HOME/.local/bin"
+
+log_info() { echo -e "${CYAN}[INFO]${NC} $*"; }
+log_success() { echo -e "${GREEN}[OK]${NC} $*"; }
+
+if [ ! -d "$SHIMS_DIR" ]; then
+    echo "Mise shims directory not found at $SHIMS_DIR"
+    exit 0
+fi
+
+mkdir -p "$BIN_DIR"
+
+log_info "Syncing mise shims to $BIN_DIR..."
+
+# Create links for existing shims
+count=0
+for shim in "$SHIMS_DIR"/*; do
+    if [ -x "$shim" ] && [ ! -d "$shim" ]; then
+        name=$(basename "$shim")
+        if [ ! -e "$BIN_DIR/$name" ]; then
+            ln -s "$shim" "$BIN_DIR/$name"
+            echo "  Linked: $name"
+            ((count++))
+        fi
+    fi
+done
+
+# Clean up broken links that point to the shims directory
+cleanup_count=0
+for link in "$BIN_DIR"/*; do
+    if [ -L "$link" ] && [ ! -e "$link" ]; then
+        target=$(readlink "$link")
+        if [[ "$target" == "$SHIMS_DIR/"* ]]; then
+            echo "  Removed broken link: $(basename "$link")"
+            rm "$link"
+            ((cleanup_count++))
+        fi
+    fi
+done
+
+if [ $count -gt 0 ] || [ $cleanup_count -gt 0 ]; then
+    log_success "Mise shims sync complete ($count links created, $cleanup_count broken links removed)."
+else
+    log_success "Mise shims are already in sync."
+fi
