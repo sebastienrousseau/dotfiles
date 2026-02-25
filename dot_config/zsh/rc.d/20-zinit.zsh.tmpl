@@ -29,15 +29,25 @@ _dotfiles_zinit_init() {
 # Defer Zinit init for faster first prompt (opt-out by setting DOTFILES_DEFER_ZINIT=0)
 : ${DOTFILES_DEFER_ZINIT:=1}
 : ${DOTFILES_DEFER_ZINIT_MODE:=preexec}
+
 if [[ "${DOTFILES_DEFER_ZINIT}" == "1" ]]; then
+  # Stub to auto-load zinit on first call (e.g. by topgrade)
+  zinit() {
+    unfunction zinit
+    _dotfiles_zinit_init
+    zinit "$@"
+  }
+
   _dotfiles_zinit_deferred() {
     if [[ "${DOTFILES_DEFER_ZINIT_MODE}" == "preexec" ]]; then
       _dotfiles_del_preexec _dotfiles_zinit_deferred
     else
       _dotfiles_del_precmd _dotfiles_zinit_deferred
     fi
-    _dotfiles_zinit_init
+    # If zinit was already loaded via the stub, this is a no-op
+    (( ${+functions[zinit]} )) && [[ "$(whence -w zinit)" == "zinit: function" ]] || _dotfiles_zinit_init
   }
+
   if [[ "${DOTFILES_DEFER_ZINIT_MODE}" == "preexec" ]]; then
     _dotfiles_add_preexec _dotfiles_zinit_deferred
   else

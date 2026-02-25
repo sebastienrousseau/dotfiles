@@ -8,6 +8,8 @@ auto_install = true
 activate_aggressive = true
 # Use verbose output
 verbose = false
+# Use precompiled ruby binaries (silences 2026.8.0 warning)
+ruby.compile = false
 
 [tools]
 # Node.js
