@@ -129,8 +129,7 @@ if command -v ollama >/dev/null 2>&1; then
                     # Extract
                     zstd -dc "$tmp_tar" | sudo tar -x -C /usr/local >/dev/null
                     
-                    # Neuter the installer script (don't run the full install.sh which repeats downloads)
-                    # Just ensure permissions and service are okay
+                    # Ensure permissions
                     sudo chmod +x /usr/local/bin/ollama
 
                     # Restart if systemd exists
@@ -164,17 +163,21 @@ fi
 echo -e "${GRAY}-----------------------------------------------------------${NC}"
 echo -e "${GREEN}${BOLD}Euxis Environment Ready${NC}"
 
-# Clean Table-style Version Report
-printf "
-${BOLD}             ${NC}
-" "System" "Version"
+# Version Report
+echo -e "
+${BOLD}System Version Status:${NC}"
+node_ver=$(node -v 2>/dev/null || echo 'N/A')
+ollama_ver=$(ollama --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')
+pipx_ver=$(pipx --version 2>/dev/null || echo 'N/A')
+mise_ver=$(mise --version 2>/dev/null | awk '{print $1}' || echo 'N/A')
+
 printf "${GRAY}            ${NC} 
-" "Node:" "$(node -v 2>/dev/null || echo 'N/A')"
+" "Node:" "$node_ver"
 printf "${GRAY}            ${NC} 
-" "Ollama:" "$(ollama --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"
+" "Ollama:" "$ollama_ver"
 printf "${GRAY}            ${NC} 
-" "Pipx:" "$(pipx --version 2>/dev/null || echo 'N/A')"
+" "Pipx:" "$pipx_ver"
 printf "${GRAY}            ${NC} 
-" "Mise:" "$(mise --version 2>/dev/null | awk '{print $1}' || echo 'N/A')"
+" "Mise:" "$mise_ver"
 
 trap - EXIT
