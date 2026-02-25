@@ -109,9 +109,9 @@ if command -v ollama >/dev/null 2>&1; then
 
         if [[ -n "$ollama_arch" ]]; then
             # Check for updates by comparing local vs remote version
-            current_ver="$(ollama --version | awk '{print $NF}')"
+            current_ver="$(ollama --version | awk '{print $NF}' | tr -d '[:space:]')"
             # This is a bit slow but safer than downloading every time
-            latest_ver="$(curl -fsSL -I https://github.com/ollama/ollama/releases/latest | grep -i location | sed 's/.*\/v//;s///')"
+            latest_ver="$(curl -fsSL -I https://github.com/ollama/ollama/releases/latest | grep -i location | sed 's/.*\/v//;s///' | tr -d '[:space:]')"
             
             if [[ "$current_ver" == "$latest_ver" ]]; then
                 skip "already up to date"
@@ -166,18 +166,13 @@ echo -e "${GREEN}${BOLD}Euxis Environment Ready${NC}"
 # Version Report
 echo -e "
 ${BOLD}System Version Status:${NC}"
-node_ver=$(node -v 2>/dev/null || echo 'N/A')
-ollama_ver=$(ollama --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')
-pipx_ver=$(pipx --version 2>/dev/null || echo 'N/A')
-mise_ver=$(mise --version 2>/dev/null | awk '{print $1}' || echo 'N/A')
-
 printf "${GRAY}            ${NC} 
-" "Node:" "$node_ver"
+" "Node:" "$(node -v 2>/dev/null || echo 'N/A')"
 printf "${GRAY}            ${NC} 
-" "Ollama:" "$ollama_ver"
+" "Ollama:" "$(ollama --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"
 printf "${GRAY}            ${NC} 
-" "Pipx:" "$pipx_ver"
+" "Pipx:" "$(pipx --version 2>/dev/null || echo 'N/A')"
 printf "${GRAY}            ${NC} 
-" "Mise:" "$mise_ver"
+" "Mise:" "$(mise --version 2>/dev/null | awk '{print $1}' || echo 'N/A')"
 
 trap - EXIT
