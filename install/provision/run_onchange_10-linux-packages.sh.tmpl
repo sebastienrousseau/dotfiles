@@ -28,7 +28,9 @@ ZOXIDE_TAG="${ZOXIDE_TAG:-latest}"
 NEOVIM_TAG="${NEOVIM_TAG:-nightly}"
 LAZYGIT_TAG="${LAZYGIT_TAG:-latest}"
 ATUIN_TAG="${ATUIN_TAG:-latest}"
+{{ if .features.zellij -}}
 ZELLIJ_TAG="${ZELLIJ_TAG:-latest}"
+{{- end }}
 UV_TAG="${UV_TAG:-latest}"
 TOPGRADE_TAG="${TOPGRADE_TAG:-latest}"
 MISE_TAG="${MISE_TAG:-latest}"
@@ -44,7 +46,9 @@ warn_unpinned "Zoxide" "$ZOXIDE_TAG" "ZOXIDE_TAG"
 warn_unpinned "Neovim" "$NEOVIM_TAG" "NEOVIM_TAG"
 warn_unpinned "Lazygit" "$LAZYGIT_TAG" "LAZYGIT_TAG"
 warn_unpinned "Atuin" "$ATUIN_TAG" "ATUIN_TAG"
+{{ if .features.zellij -}}
 warn_unpinned "Zellij" "$ZELLIJ_TAG" "ZELLIJ_TAG"
+{{- end }}
 warn_unpinned "UV" "$UV_TAG" "UV_TAG"
 warn_unpinned "AIChat" "$AICHAT_TAG" "AICHAT_TAG"
 warn_unpinned "Mods" "$MODS_TAG" "MODS_TAG"
@@ -224,6 +228,7 @@ if ! command -v atuin >/dev/null; then
   install_from_tarball "$url" "$sha_url" "atuin" "$HOME/.local/bin"
 fi
 
+{{ if .features.zellij -}}
 # Zellij
 if ! command -v zellij >/dev/null; then
   log_info "Installing Zellij..."
@@ -232,6 +237,7 @@ if ! command -v zellij >/dev/null; then
   sha_url="$(github_asset_url "zellij-org/zellij" "${target}.tar.gz.sha256" "$ZELLIJ_TAG")"
   install_from_tarball "$url" "$sha_url" "zellij" "$HOME/.local/bin"
 fi
+{{- end }}
 
 # ── Rust Toolchain ───────────────────────────────────────────
 
