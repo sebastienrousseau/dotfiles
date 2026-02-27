@@ -38,7 +38,7 @@ install_homebrew() {
   fi
 
   echo "   Homebrew not found."
-  echo -e "${CYAN:-}   SECURITY NOTE: This will download and execute code from brew.sh${NC:-}"
+  printf '%b\n' "${CYAN:-}   SECURITY NOTE: This will download and execute code from brew.sh${NC:-}"
   echo "   Verify at: https://github.com/Homebrew/install"
 
   # In non-interactive mode, proceed with warning
