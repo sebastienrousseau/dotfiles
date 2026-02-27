@@ -305,19 +305,6 @@ Simply design to fit your shell life
   { "rebelot/kanagawa.nvim", name = "kanagawa", lazy = true, priority = 1000 },
 
   -----------------------------------------------------------------------------
-  -- Lazy Profiling
-  -----------------------------------------------------------------------------
-  {
-    "folke/lazy.nvim",
-    opts = {
-      profiling = {
-        loader = true,
-        require = true,
-      },
-    },
-  },
-
-  -----------------------------------------------------------------------------
   -- Icon Sets
   -----------------------------------------------------------------------------
   { "nvim-tree/nvim-web-devicons", lazy = true },
