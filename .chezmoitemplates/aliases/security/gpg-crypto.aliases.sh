@@ -4,7 +4,7 @@
 _GPG_CRYPTO_LOADED=1
 
 # Encryption & Decryption
-function gpgencrypt() {
+gpgencrypt() {
   [[ -z "$1" || -z "$2" ]] && {
     echo "Usage: gpgencrypt <recipient> <file>"
     return 1
@@ -12,7 +12,7 @@ function gpgencrypt() {
   gpg --encrypt --recipient "$1" "$2"
 }
 
-function gpgesign() {
+gpgesign() {
   [[ -z "$1" || -z "$2" ]] && {
     echo "Usage: gpgesign <recipient> <file>"
     return 1

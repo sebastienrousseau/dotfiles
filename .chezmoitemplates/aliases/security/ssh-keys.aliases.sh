@@ -3,7 +3,7 @@
 [[ -n "${_SSH_KEYS_LOADED:-}" ]] && return 0
 _SSH_KEYS_LOADED=1
 
-function sshkeyed25519() {
+sshkeyed25519() {
   [[ -z "$1" ]] && {
     echo "Usage: sshkeyed25519 <comment/email>"
     return 1
@@ -11,7 +11,7 @@ function sshkeyed25519() {
   ssh-keygen -t ed25519 -C "$1"
 }
 
-function sshkeyrsa() {
+sshkeyrsa() {
   [[ -z "$1" ]] && {
     echo "Usage: sshkeyrsa <comment/email>"
     return 1
@@ -27,7 +27,7 @@ alias sshagentdel='ssh-add -d'
 alias sshagentdelall='ssh-add -D'
 
 # Security Checks
-function sshfp() {
+sshfp() {
   [[ -z "$1" ]] && {
     echo "Usage: sshfp <key_file>"
     return 1
@@ -35,7 +35,7 @@ function sshfp() {
   ssh-keygen -l -f "$1"
 }
 
-function sshfpsha256() {
+sshfpsha256() {
   [[ -z "$1" ]] && {
     echo "Usage: sshfpsha256 <key_file>"
     return 1

@@ -10,7 +10,7 @@
 WORKSPACE_DIR="${HOME}/workspace"
 
 # Validate directory existence
-function validate_dir() {
+validate_dir() {
   if [[ ! -d "$1" ]]; then
     echo "Directory $1 not found."
     return 1
@@ -19,35 +19,35 @@ function validate_dir() {
 }
 
 # Functions for aliases
-function cd_workspace() {
+cd_workspace() {
   validate_dir "${WORKSPACE_DIR}" && cd "${WORKSPACE_DIR}" || return
 }
 
-function clear_screen() {
+clear_screen() {
   clear
 }
 
-function clear_list_current() {
+clear_list_current() {
   clear && ls -a
 }
 
-function clear_pwd_list() {
+clear_pwd_list() {
   clear && pwd && echo '' && ls -a && echo ''
 }
 
-function clear_pwd_tree() {
+clear_pwd_tree() {
   clear && pwd && echo '' && tree ./ && echo ''
 }
 
-function clear_history() {
+clear_history() {
   clear && history
 }
 
-function print_working_dir() {
+print_working_dir() {
   pwd
 }
 
-function clear_print_tree() {
+clear_print_tree() {
   clear && tree
 }
 

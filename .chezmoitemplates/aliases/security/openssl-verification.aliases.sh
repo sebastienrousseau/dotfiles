@@ -3,7 +3,7 @@
 [[ -n "${_OPENSSL_VERIFICATION_LOADED:-}" ]] && return 0
 _OPENSSL_VERIFICATION_LOADED=1
 
-function sslverify() {
+sslverify() {
   [[ -z "$1" ]] && {
     echo "Usage: sslverify <certificate_file> [more_files]"
     return 1
@@ -11,7 +11,7 @@ function sslverify() {
   openssl verify "$@"
 }
 
-function sslverifycapath() {
+sslverifycapath() {
   [[ -z "$1" ]] && {
     echo "Usage: sslverifycapath <certificate_file> [more_files]"
     return 1
@@ -19,7 +19,7 @@ function sslverifycapath() {
   openssl verify -CApath /etc/ssl/certs/ "$@"
 }
 
-function sslcrl() {
+sslcrl() {
   [[ -z "$1" ]] && {
     echo "Usage: sslcrl <crl_file>"
     return 1
