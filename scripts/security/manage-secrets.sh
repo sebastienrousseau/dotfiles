@@ -87,19 +87,19 @@ EOF
 
 # Logging functions
 log_info() {
-  echo -e "${BLUE}[INFO]${NC} $*"
+  printf '%b\n' "${BLUE}[INFO]${NC} $*"
 }
 
 log_success() {
-  echo -e "${GREEN}[SUCCESS]${NC} $*"
+  printf '%b\n' "${GREEN}[SUCCESS]${NC} $*"
 }
 
 log_warning() {
-  echo -e "${YELLOW}[WARNING]${NC} $*"
+  printf '%b\n' "${YELLOW}[WARNING]${NC} $*"
 }
 
 log_error() {
-  echo -e "${RED}[ERROR]${NC} $*"
+  printf '%b\n' "${RED}[ERROR]${NC} $*"
 }
 
 # Initialize environment configuration

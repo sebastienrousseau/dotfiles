@@ -372,7 +372,7 @@ print_summary() {
   printf "%${empty}s" | tr ' ' "$pad"
   printf " %s%%  Grade: %s\n" "${score}" "${grade}"
 
-  echo -e "\n  Points: ${TOTAL_POINTS}/${MAX_POINTS}"
+  printf '%b\n' "\n  Points: ${TOTAL_POINTS}/${MAX_POINTS}"
   echo ""
 
   # Recommendations
