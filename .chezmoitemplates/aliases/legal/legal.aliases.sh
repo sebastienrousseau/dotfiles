@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+# shellcheck shell=bash
 # Legal & Licensing Aliases
 # Tools for license compliance, headers, and attribution.
 
