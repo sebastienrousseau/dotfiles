@@ -394,6 +394,9 @@ if [[ "${DOTFILES_FAST}" != "1" ]]; then
       _dotfiles_del_precmd _dotfiles_deferred_tools
     fi
 
+    # Mise (Universal Version Manager)
+    command -v mise >/dev/null 2>&1 && _cached_eval mise-init mise activate zsh
+
     # Phase 33: Atuin (Memory Layer)
     command -v atuin >/dev/null 2>&1 && _cached_eval atuin-init atuin init zsh
 
