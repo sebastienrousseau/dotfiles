@@ -191,13 +191,6 @@ return {
     end,
   },
   { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
-  {
-    "ThePrimeagen/git-worktree.nvim",
-    config = function()
-      require("git-worktree").setup()
-    end,
-  },
-
   -- Venv Selector (Python Env Management)
   {
     "linux-cultist/venv-selector.nvim",
