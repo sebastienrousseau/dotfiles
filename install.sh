@@ -13,7 +13,7 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-echo -e "${CYAN}${BOLD}"
+printf '%b\n' "${CYAN}${BOLD}"
 cat <<"EOF"
    ___      _    _  _  _          
   / _ \___ | |_ (_)| |(_) ___  ___ 
@@ -22,12 +22,12 @@ cat <<"EOF"
 \/    \___/ \__||_||_||_|\___||___/
            Universal Installer
 EOF
-echo -e "${NC}"
+printf '%b\n' "${NC}"
 
-step() { echo -e "${BLUE}==>${NC} ${BOLD}$1${NC}"; }
-success() { echo -e "${GREEN}==> Done!${NC}"; }
+step() { printf '%b\n' "${BLUE}==>${NC} ${BOLD}$1${NC}"; }
+success() { printf '%b\n' "${GREEN}==> Done!${NC}"; }
 error() {
-  echo -e "${RED}==> Error: $1${NC}"
+  printf '%b\n' "${RED}==> Error: $1${NC}"
   exit 1
 }
 
@@ -109,7 +109,7 @@ step "Checking Prerequisites..."
 # On macOS, ensure Homebrew is available before checking curl/git
 if [ "$target_os" = "macos" ] && ! command -v brew >/dev/null; then
   echo "   Homebrew not found."
-  echo -e "${CYAN}   SECURITY NOTE: This will download and execute code from brew.sh${NC}"
+  printf '%b\n' "${CYAN}   SECURITY NOTE: This will download and execute code from brew.sh${NC}"
   echo "   Verify at: https://github.com/Homebrew/install"
 
   # In non-interactive mode, proceed with warning
@@ -167,7 +167,7 @@ else
   mkdir -p "$BIN_DIR"
 
   echo "   Installing chezmoi via binary download..."
-  echo -e "${CYAN}   SECURITY NOTE: Downloading from get.chezmoi.io with integrity check${NC}"
+  printf '%b\n' "${CYAN}   SECURITY NOTE: Downloading from get.chezmoi.io with integrity check${NC}"
 
   # Download installer script first for inspection
   CHEZMOI_INSTALLER=$(umask 077 && mktemp)
@@ -280,7 +280,7 @@ elif [ -d "$LEGACY_SOURCE_DIR/.git" ]; then
   chezmoi apply "${APPLY_FLAGS[@]}"
 else
   echo "   Initializing from GitHub (Branch/Tag: $VERSION)..."
-  echo -e "${CYAN}   SECURITY NOTE: Cloning pinned version $VERSION for supply-chain safety${NC}"
+  printf '%b\n' "${CYAN}   SECURITY NOTE: Cloning pinned version $VERSION for supply-chain safety${NC}"
 
   # STRICT MODE: We pin to the specific tag to avoid 'main' branch drift
   git clone --depth 1 --branch "$VERSION" https://github.com/sebastienrousseau/dotfiles.git "$SOURCE_DIR" 2>/dev/null ||
@@ -294,7 +294,7 @@ else
     fi
   )
   if [ "$ACTUAL_REF" != "$VERSION" ] && [ "${ACTUAL_REF#v}" != "${VERSION#v}" ]; then
-    echo -e "${CYAN}   INFO: Checked out ref $ACTUAL_REF (requested: $VERSION)${NC}"
+    printf '%b\n' "${CYAN}   INFO: Checked out ref $ACTUAL_REF (requested: $VERSION)${NC}"
   fi
 
   ensure_chezmoi_source "$SOURCE_DIR"
@@ -306,4 +306,4 @@ else
 fi
 
 success
-echo -e "${GREEN}Configuration loaded. Please restart your shell.${NC}"
+printf '%b\n' "${GREEN}Configuration loaded. Please restart your shell.${NC}"

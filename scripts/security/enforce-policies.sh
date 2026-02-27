@@ -321,13 +321,13 @@ main() {
 
   # Final result
   if [[ $total_violations -eq 0 ]]; then
-    echo -e "${GREEN}✅ All security checks passed!${NC}"
+    printf '%b\n' "${GREEN}✅ All security checks passed!${NC}"
     log "INFO" "Security policy enforcement completed successfully"
     exit 0
   else
-    echo -e "${RED}❌ Security policy enforcement failed with ${total_violations} violations${NC}"
-    echo -e "${YELLOW}📋 Check ${LOG_FILE} for details${NC}"
-    echo -e "${YELLOW}📋 Review security-report.md for summary${NC}"
+    printf '%b\n' "${RED}❌ Security policy enforcement failed with ${total_violations} violations${NC}"
+    printf '%b\n' "${YELLOW}📋 Check ${LOG_FILE} for details${NC}"
+    printf '%b\n' "${YELLOW}📋 Review security-report.md for summary${NC}"
     log "ERROR" "Security policy enforcement failed with ${total_violations} violations"
     exit 1
   fi

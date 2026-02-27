@@ -33,7 +33,7 @@ install_chezmoi_binary() {
   mkdir -p "$bin_dir"
 
   echo "   Installing chezmoi via binary download..."
-  echo -e "${CYAN:-}   SECURITY NOTE: Downloading from get.chezmoi.io with integrity check${NC:-}"
+  printf '%b\n' "${CYAN:-}   SECURITY NOTE: Downloading from get.chezmoi.io with integrity check${NC:-}"
 
   # Download installer script first for inspection
   local installer
@@ -68,7 +68,7 @@ install_chezmoi_binary() {
     elif command -v shasum >/dev/null 2>&1; then
       actual_checksum=$(shasum -a 256 "$installer" | awk '{print $1}')
     else
-      echo -e "${CYAN:-}   INFO: No SHA256 tool available, skipping checksum verification${NC:-}"
+      printf '%b\n' "${CYAN:-}   INFO: No SHA256 tool available, skipping checksum verification${NC:-}"
       actual_checksum=""
     fi
 
@@ -79,7 +79,7 @@ install_chezmoi_binary() {
       echo "Got:      $actual_checksum" >&2
       return 1
     elif [[ -n "$actual_checksum" ]]; then
-      echo -e "${CYAN:-}   Checksum verified: $actual_checksum${NC:-}"
+      printf '%b\n' "${CYAN:-}   Checksum verified: $actual_checksum${NC:-}"
     fi
   fi
 
@@ -170,7 +170,7 @@ init_chezmoi_from_git() {
   local version="$3"
 
   echo "   Initializing from GitHub (Branch/Tag: $version)..."
-  echo -e "${CYAN:-}   SECURITY NOTE: Cloning pinned version $version for supply-chain safety${NC:-}"
+  printf '%b\n' "${CYAN:-}   SECURITY NOTE: Cloning pinned version $version for supply-chain safety${NC:-}"
 
   # Clone with specific tag for supply-chain security
   if ! git clone --depth 1 --branch "$version" "$repo_url" "$source_dir" 2>/dev/null; then
@@ -185,6 +185,6 @@ init_chezmoi_from_git() {
   fi
 
   if [ "$actual_ref" != "$version" ] && [ "${actual_ref#v}" != "${version#v}" ]; then
-    echo -e "${CYAN:-}   INFO: Checked out ref $actual_ref (requested: $version)${NC:-}"
+    printf '%b\n' "${CYAN:-}   INFO: Checked out ref $actual_ref (requested: $version)${NC:-}"
   fi
 }

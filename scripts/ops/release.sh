@@ -165,7 +165,7 @@ main() {
 
   # ── Step 2: Bump version ──────────────────────────────────────
   log_step "Bump version in package.json"
-  sed -i "s/\"version\": \"${current_version}\"/\"version\": \"${new_version}\"/" "$PROJECT_ROOT/package.json"
+  sed -i.bak "s/\"version\": \"${current_version}\"/\"version\": \"${new_version}\"/" "$PROJECT_ROOT/package.json" && rm -f "$PROJECT_ROOT/package.json.bak"
   log_success "package.json: $current_version → $new_version"
 
   # ── Step 3: Sync versions across docs ─────────────────────────
@@ -185,13 +185,13 @@ main() {
 
   if [[ -f "$changelog" ]]; then
     # Insert new version header after the first "# Changelog" line
-    sed -i "/^## v${current_version}/i\\
+    sed -i.bak "/^## v${current_version}/i\\
 ## v${new_version} (${today})\\
 \\
 ### Changed\\
 \\
 - Version bump to v${new_version}.\\
-" "$changelog"
+" "$changelog" && rm -f "$changelog.bak"
     log_success "Added v${new_version} section to CHANGELOG.md"
   else
     log_warn "CHANGELOG.md not found, skipping"
