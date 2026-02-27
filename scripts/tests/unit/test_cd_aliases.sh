@@ -8,13 +8,18 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../framework/assertions.sh"
 source "$SCRIPT_DIR/../framework/mocks.sh"
 
-# Source the aliases file being tested
-ALIAS_FILE="$REPO_ROOT/.chezmoitemplates/aliases/cd/cd.aliases.sh"
+# Source the aliases files being tested
+ALIAS_DIR="$REPO_ROOT/.chezmoitemplates/aliases/cd"
+ALIAS_FILE="$ALIAS_DIR/cd.aliases.sh"
 if [[ -f "$ALIAS_FILE" ]]; then
   # Reset some variables to avoid side effects
   RESTORE_LAST_DIR=false
   AUTO_LIST_AFTER_CD=false
   source "$ALIAS_FILE"
+  # Source modular alias files (stack, init, help)
+  for mod in "$ALIAS_DIR"/cd-{stack,init,help}.aliases.sh; do
+    [[ -f "$mod" ]] && source "$mod"
+  done
 else
   echo "Warning: cd.aliases.sh not found at $ALIAS_FILE"
 fi

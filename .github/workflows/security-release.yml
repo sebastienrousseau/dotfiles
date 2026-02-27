@@ -98,11 +98,11 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          gh api "repos/${REPO}/releases/tags/${RELEASE_TAG}" --jq '.assets[].name' > /tmp/release-assets.txt
-          if ! grep -E '\.intoto\.jsonl$' /tmp/release-assets.txt >/dev/null; then
+          gh api "repos/${REPO}/releases/tags/${RELEASE_TAG}" --jq '.assets[].name' > "$RUNNER_TEMP/release-assets.txt"
+          if ! grep -E '\.intoto\.jsonl$' "$RUNNER_TEMP/release-assets.txt" >/dev/null; then
             echo "::error::No SLSA provenance asset (*.intoto.jsonl) found in release assets"
             echo "Assets found:"
-            cat /tmp/release-assets.txt
+            cat "$RUNNER_TEMP/release-assets.txt"
             exit 1
           fi
           echo "Release provenance asset verified"
@@ -118,8 +118,8 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          gh attestation verify dotfiles-sbom.spdx.json --repo "${REPO}" --format json >/tmp/attestation-verify.json
-          if ! jq -e 'length > 0' /tmp/attestation-verify.json >/dev/null; then
+          gh attestation verify dotfiles-sbom.spdx.json --repo "${REPO}" --format json >"$RUNNER_TEMP/attestation-verify.json"
+          if ! jq -e 'length > 0' "$RUNNER_TEMP/attestation-verify.json" >/dev/null; then
             echo "::error::No valid attestations were returned for dotfiles-sbom.spdx.json"
             exit 1
           fi
