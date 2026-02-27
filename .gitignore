@@ -42,6 +42,11 @@ yarn-error.log*
 # Chezmoi
 .chezmoitemplates/**/.DS_Store
 
+# Secrets / local environment (never pushed)
+.env
+.env.*
+!.env.example
+
 # Machine-specific configs (local only, never pushed)
 dot_etc/machines/
 install/provision/run_onchange_60-macbookair9-1-zorinos.sh.tmpl

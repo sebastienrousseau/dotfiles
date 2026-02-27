@@ -1,67 +1,148 @@
 #compdef dot
-# Zsh completion for the dot CLI
-# Loaded automatically via fpath from ~/.local/share/zsh/completions/
+
+# Zsh completion for the dot CLI (dotfiles manager)
+# Installed to: ~/.local/share/zsh/completions/_dot
 
 _dot() {
   local -a commands
+
   commands=(
-    'apply:Apply dotfiles (chezmoi apply)'
+    # Core
+    'apply:Apply dotfiles via chezmoi'
     'sync:Apply dotfiles (alias of apply)'
-    'update:Pull latest changes and apply'
+    'update:Pull latest changes and apply them'
     'add:Add a file to chezmoi source'
     'diff:Show chezmoi diff with exclusions'
     'status:Show configuration drift'
     'remove:Safely remove a managed file'
     'cd:Print source directory path'
-    'drift:Drift dashboard (detailed chezmoi status)'
-    'verify:Run post-merge verification checks'
-    'history:Shell history analysis'
+    'edit:Open chezmoi source in \$EDITOR'
+
+    # Diagnostics
     'doctor:Check system health and configuration'
     'heal:Auto-repair common dotfiles issues'
     'health:Run comprehensive health check'
     'scorecard:Unified health/security/performance scorecard'
-    'perf:Predictable startup profiling'
+    'rollback:Rollback dotfiles to a previous state'
+    'drift:Drift dashboard (detailed chezmoi status)'
+    'history:Shell history analysis'
+    'benchmark:Run shell startup benchmark'
+    'perf:Show performance mode and timing'
+    'load:Preload heavy shell layers'
+    'load-bench:Measure time to heavy-layer readiness'
+    'load-bench-pty:Measure background prewarm via PTY'
+    'ai:Show AI helper status'
     'conflicts:Report alias/command conflicts'
     'locks:Show version locks for key tools'
     'snapshot:Capture baseline system snapshot'
-    'rollback:Rollback dotfiles to a previous state'
-    'keys:Show keybindings catalog'
+    'verify:Run post-merge verification checks'
+
+    # Tools
     'tools:Show or install nix packages'
-    'aliases:List/search/explain aliases and tiers'
+    'new:Create a new project from a template'
     'sandbox:Launch a safe sandbox preview'
-    'benchmark:Run shell startup benchmark'
-    'load:Preload heavy shell layers'
-    'load-bench:Measure time to heavy-layer readiness'
-    'load-bench-pty:Measure background prewarm readiness via PTY'
-    'ai:Show AI helper status (opt-in)'
-    'tune:Apply OS tuning (opt-in)'
-    'secrets:Manage secrets (edit|set|get|list|load|provider)'
-    'env:Load environment buckets from managed secrets'
+    'keys:Show keybindings catalog'
+    'aliases:List/search/explain aliases and tiers'
+    'learn:Start the interactive tour'
+    'docs:Show repo README'
+    'log-rotate:Rotate dotfiles log'
+    'setup:Interactive setup (profile, features, secrets)'
+
+    # Appearance
+    'theme:Switch terminal theme'
+    'wallpaper:Apply a wallpaper'
+    'fonts:Install Nerd Fonts'
+    'tune:Apply OS tuning'
+
+    # Secrets
     'secrets-init:Initialize age key for secrets'
+    'secrets:Manage secrets (edit|set|get|list|load|provider)'
     'secrets-create:Create an encrypted secrets file'
-    'ssh-key:Encrypt an SSH key locally with age'
-    'firewall:Apply firewall hardening (opt-in)'
-    'telemetry:Disable OS telemetry (opt-in)'
-    'dns-doh:Enable DNS-over-HTTPS (opt-in)'
+    'ssh-key:Encrypt an SSH key with age'
+    'ssh-cert:Manage short-lived SSH certificates'
+    'env:Load environment buckets from managed secrets'
+
+    # Security
+    'backup:Create a compressed backup of home'
     'encrypt-check:Check disk encryption status'
-    'backup:Create a compressed backup of your home'
+    'firewall:Apply firewall hardening'
+    'telemetry:Disable OS telemetry'
+    'dns-doh:Enable DNS-over-HTTPS'
     'lock-screen:Enforce lock screen idle settings'
     'usb-safety:Disable automount for removable media'
-    'fonts:Install Nerd Fonts'
-    'wallpaper:Apply a wallpaper from your library'
-    'theme:Switch terminal theme (dark/light)'
-    'packages:List installed packages and package managers'
+
+    # Meta
     'upgrade:Update flake, plugins, and dotfiles'
-    'edit:Open chezmoi source in editor'
-    'docs:Show repo README'
-    'new:Create a new project from a template'
-    'log-rotate:Rotate ~/.local/share/dotfiles.log'
-    'setup:Interactive setup (profile, features, secrets)'
-    'learn:Start the interactive tour'
+    'packages:List installed packages'
     '--version:Show version information'
-    'help:Show this help message'
+    'help:Show help message'
   )
-  _describe 'command' commands
+
+  _arguments -C \
+    '1:command:->cmds' \
+    '*::arg:->args'
+
+  case "$state" in
+    cmds)
+      _describe -t commands 'dot command' commands
+      ;;
+    args)
+      case "$words[1]" in
+        new)
+          if (( CURRENT == 2 )); then
+            local -a templates=(python go node packer molecule)
+            _describe -t templates 'project template' templates
+          else
+            _files
+          fi
+          ;;
+        add|remove)
+          _files
+          ;;
+        keys)
+          _message 'search pattern (optional)'
+          ;;
+        perf)
+          local -a perf_opts=('--json:Output as JSON' '--precmd:Include precmd hooks')
+          _describe -t options 'perf option' perf_opts
+          ;;
+        load)
+          local -a load_opts=('--background:Load in background' '--status:Show load status')
+          _describe -t options 'load option' load_opts
+          ;;
+        tools)
+          local -a tool_cmds=('install:Enter Nix development shell')
+          _describe -t subcommands 'tools subcommand' tool_cmds
+          ;;
+        theme)
+          local -a themes=(dark light)
+          _describe -t themes 'theme mode' themes
+          ;;
+        ssh-cert)
+          local -a cert_cmds=(
+            'issue:Request a short-lived SSH certificate'
+            'status:Show current certificate status'
+            'revoke:Revoke an active certificate'
+          )
+          _describe -t subcommands 'ssh-cert subcommand' cert_cmds
+          ;;
+        secrets)
+          local -a secrets_cmds=(
+            'edit:Edit encrypted secrets'
+            'set:Set a secret value'
+            'get:Get a secret value'
+            'list:List secret keys'
+            'load:Load secrets into environment'
+            'provider:Show/switch secrets provider'
+          )
+          _describe -t subcommands 'secrets subcommand' secrets_cmds
+          ;;
+        *)
+          _default
+          ;;
+      esac
+      ;;
+  esac
 }
 
 _dot "$@"

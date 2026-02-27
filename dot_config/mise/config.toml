@@ -21,8 +21,8 @@ python = ["3.12", "3.11"]
 # Go
 go = "latest"
 
-# Rust (via rustup)
-# rust = "stable"
+# Rust
+rust = "latest"
 
 # Ruby
 ruby = "3.3"
@@ -36,11 +36,27 @@ deno = "latest"
 # Bun
 bun = "latest"
 
+# Zig
+zig = "latest"
+
 # CLI Tools
-eza = "latest"
+atuin = "latest"
 bat = "latest"
+codex = "latest"
+eza = "latest"
+gping = "latest"
 ripgrep = "latest"
-"pipx:uv" = "latest"
+ruff = "latest"
+yazi = "latest"
+zellij = "latest"
+zoxide = "latest"
+
+# Python tools
+poetry = "latest"
+uv = "latest"
+"pipx:aider-chat" = "latest"
+
+# AI tools
 "npm:@anthropic-ai/claude-code" = "latest"
 "npm:@google/gemini-cli" = "latest"
 
