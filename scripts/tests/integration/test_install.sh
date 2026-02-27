@@ -229,6 +229,28 @@ else
   echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: review for sensitive data"
 fi
 
+# Test: install.sh --help flag
+test_start "install_help_flag"
+help_output=$(bash "$INSTALL_SCRIPT" --help 2>&1) || true
+if echo "$help_output" | grep -q "Usage"; then
+  ((TESTS_PASSED++))
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: --help shows usage information"
+else
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: --help should show usage information"
+fi
+
+test_start "install_help_exit_code"
+bash "$INSTALL_SCRIPT" --help >/dev/null 2>&1
+help_exit=$?
+if [[ "$help_exit" -eq 0 ]]; then
+  ((TESTS_PASSED++))
+  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: --help exits with code 0"
+else
+  ((TESTS_FAILED++))
+  echo -e "  ${RED}✗${NC} $CURRENT_TEST: --help should exit with code 0 (got $help_exit)"
+fi
+
 echo ""
 echo "Integration tests for install.sh completed."
 echo ""
