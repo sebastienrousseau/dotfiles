@@ -116,7 +116,9 @@ jobs:
         run: |
           echo "::notice::Checking Nix format - will fail on any unformatted code"
           (cd nix && nix fmt .)
-          if ! git diff --exit-code -- nix/; then
+          # Ignore flake.lock changes (generated during fmt if not committed)
+          git checkout -- nix/flake.lock 2>/dev/null || true
+          if ! git diff --exit-code -- 'nix/*.nix'; then
             echo "::error::Nix formatting check failed - code is not properly formatted"
             exit 1
           fi
