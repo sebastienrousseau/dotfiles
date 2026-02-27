@@ -50,9 +50,8 @@ map("n", "<leader>pr", ":w<CR>:!python3 %<CR>", { desc = "Run Python file" })
 map("n", "<leader>pi", ":VenvSelect<CR>", { desc = "Select Python Env" })
 map("n", "<leader>pt", ":!pytest<CR>", { desc = "Run Pytest" })
 
--- LSP (Global fallback, though logic primarily handled by specific plugins)
+-- LSP (Global fallback; <leader>cf owned by conform.nvim in plugins/lsp.lua)
 map("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code actions" })
-map("n", "<leader>cf", vim.lsp.buf.format, { desc = "Format code" })
 map("n", "<leader>cr", vim.lsp.buf.rename, { desc = "Rename symbol" })
 
 -- Telescope
@@ -67,16 +66,7 @@ map("n", "<leader>gW", ":Telescope git_worktree create_git_worktree<CR>", { desc
 map("n", "<leader>tt", ":ToggleTerm direction=float<CR>", { desc = "Toggle terminal" })
 map("t", "<Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
--- Testing (Neotest)
-map("n", "<leader>tn", function()
-  require("neotest").run.run()
-end, { desc = "Test nearest" })
-map("n", "<leader>tf", function()
-  require("neotest").run.run(vim.fn.expand("%"))
-end, { desc = "Test file" })
-map("n", "<leader>ts", function()
-  require("neotest").run.run(vim.fn.getcwd())
-end, { desc = "Test suite" })
+-- Testing keymaps owned by neotest in plugins/coding.lua
 
 -- Debugging (DAP)
 map("n", "<F5>", function()

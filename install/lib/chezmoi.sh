@@ -38,6 +38,8 @@ install_chezmoi_binary() {
   # Download installer script first for inspection
   local installer
   installer=$(umask 077 && mktemp)
+  # shellcheck disable=SC2064
+  trap "rm -f '$installer'" RETURN
 
   if ! curl -fsSL -o "$installer" https://get.chezmoi.io; then
     rm -f "$installer"
