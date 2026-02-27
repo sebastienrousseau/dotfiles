@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 ## Security Score Assessment.
 ##
 ## Evaluates system security posture across encryption, SSH, Git, system

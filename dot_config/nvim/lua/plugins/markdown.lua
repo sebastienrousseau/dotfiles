@@ -1,3 +1,4 @@
+-- Copyright (c) 2015-2026 . All rights reserved.
 return {
   {
     "iamcco/markdown-preview.nvim",

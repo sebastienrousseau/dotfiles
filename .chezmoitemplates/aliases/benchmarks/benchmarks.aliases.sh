@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # Benchmarking aliases
 
 if command -v hyperfine &>/dev/null; then

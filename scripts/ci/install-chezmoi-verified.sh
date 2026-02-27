@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # Install a pinned Chezmoi release with checksum verification.
 set -euo pipefail
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 
 # run_before_00-audit.sh
 # Audit logging disabled by default.

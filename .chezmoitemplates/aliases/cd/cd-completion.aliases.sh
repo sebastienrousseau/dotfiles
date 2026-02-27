@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 if [[ -n "${BASH_VERSION:-}" ]]; then
   # CD Navigation - Tab Completion
   [[ -n "${_CD_COMPLETION_LOADED:-}" ]] && :

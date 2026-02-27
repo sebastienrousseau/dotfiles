@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # Description: This script provides enhanced functionality to quickly navigate directories.
 # Website: https://dotfiles.io
 # License: MIT

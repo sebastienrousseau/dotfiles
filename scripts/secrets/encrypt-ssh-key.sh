@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 set -euo pipefail
 
 KEY_PATH="${1:-$HOME/.ssh/id_ed25519}"

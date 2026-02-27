@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # CD Navigation - Initialization
 [[ -n "${_CD_INIT_LOADED:-}" ]] && :
 _CD_INIT_LOADED=1

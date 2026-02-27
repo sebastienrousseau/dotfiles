@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # Lua REPL helpers
 
 if command -v lua >/dev/null; then

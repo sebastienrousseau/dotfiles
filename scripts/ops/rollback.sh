@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # shellcheck disable=SC2034
 # =============================================================================
 # Dotfiles Rollback Script - Self-Healing Configuration Recovery

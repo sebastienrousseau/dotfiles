@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # Shell Performance Profiling
 # Usage: dot perf [--json] [--profile] [--runs N] [--target MS]
 

@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # GPG Encryption & Decryption, Signing & Verification
 [[ -n "${_GPG_CRYPTO_LOADED:-}" ]] && return 0
 _GPG_CRYPTO_LOADED=1

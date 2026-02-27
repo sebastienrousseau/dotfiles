@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # OpenSSL Key Operations
 [[ -n "${_OPENSSL_KEYS_LOADED:-}" ]] && return 0
 _OPENSSL_KEYS_LOADED=1

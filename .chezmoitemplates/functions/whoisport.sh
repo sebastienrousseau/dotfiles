@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # whoisport: Function to find what is currently using a port.
 whoisport() {
   port=$1

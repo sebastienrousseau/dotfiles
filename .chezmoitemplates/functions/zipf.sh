@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # zipf: Function to create a ZIP archive of a folder
 zipf() {
   if [[ "$#" != 1 ]]; then

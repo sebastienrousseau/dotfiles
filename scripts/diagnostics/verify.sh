@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # Dotfiles post-merge verification checks
 # Runs doctor + status + diff checks and exits non-zero on issues.
 

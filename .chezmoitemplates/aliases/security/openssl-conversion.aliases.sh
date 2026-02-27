@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # OpenSSL Conversion Operations
 [[ -n "${_OPENSSL_CONVERSION_LOADED:-}" ]] && return 0
 _OPENSSL_CONVERSION_LOADED=1

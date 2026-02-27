@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # Template Validation Tests
 # Validates chezmoi template output correctness and required variables
 

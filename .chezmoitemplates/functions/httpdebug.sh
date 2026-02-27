@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # Description:
 #   httpdebug is a utility function to debug HTTP requests by measuring the
 #   timing of various stages of the request process in milliseconds. This

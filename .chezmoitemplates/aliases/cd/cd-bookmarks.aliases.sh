@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # CD Navigation - Bookmark Functions
 [[ -n "${_CD_BOOKMARKS_LOADED:-}" ]] && :
 _CD_BOOKMARKS_LOADED=1

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # Emit alias manifest as TSV:
 # name<TAB>value<TAB>file<TAB>line
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # Script: teleport.sh
 # Description: Deploys dotfiles to a remote host ephemerally.
 # Usage: ./teleport.sh user@hostname

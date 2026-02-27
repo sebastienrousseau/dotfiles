@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # CI Configuration Validation Script
 # Verifies that all zero-warning policy components are properly configured
 

@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # Description:
 #   hostinfo is a utility function to display detailed information about the
 #   current host in a structured table format. This includes system stats,

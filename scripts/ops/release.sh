@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # =============================================================================
 # Dotfiles Release Script
 # Orchestrates a new release: version bump, changelog, tag, and push

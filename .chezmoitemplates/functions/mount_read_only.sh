@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # mount_read_only: Function to mount a read-only disk image as read-write
 mount_read_only() {
   local disk_image="$1"

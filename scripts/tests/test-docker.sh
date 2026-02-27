@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # Test dotfiles README instructions across all environments using Docker
 # Usage: ./scripts/tests/test-docker.sh [target...]
 # Examples:

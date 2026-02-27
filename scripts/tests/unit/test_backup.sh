@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2012,SC2034
 # Unit tests for the backup function
 # Tests backup creation with various options and edge cases

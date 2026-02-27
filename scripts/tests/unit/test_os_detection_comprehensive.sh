@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
 # Stable OS detection coverage tests (environment-compatible)
 

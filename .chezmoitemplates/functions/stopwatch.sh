@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # stopwatch: Function for a stopwatch
 # Platform: Uses GNU date (gdate on macOS, date on Linux)
 stopwatch() {

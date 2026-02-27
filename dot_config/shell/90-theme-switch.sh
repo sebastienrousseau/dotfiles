@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # Detect system appearance (dark/light) and export THEME_MODE
 # Consumed by starship, bat, delta, fzf, and other theme-aware tools
 #

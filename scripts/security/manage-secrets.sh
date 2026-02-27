@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 ## Secure Configuration Management.
 ##
 ## Manages environment variables and secrets across local development.

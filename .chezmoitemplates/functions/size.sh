@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # size: Function to check a file size
 # Platform: macOS uses stat -f, Linux uses stat -c
 size() {

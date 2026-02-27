@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034,SC2016
 # Unit tests for Wave 1: Eager/Lazy alias split (90/91 templates)
 set -euo pipefail

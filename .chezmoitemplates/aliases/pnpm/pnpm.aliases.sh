@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # 🅿🅽🅿🅼 🅰🅻🅸🅰🆂🅴🆂
 if command -v 'pnpm' >/dev/null; then
   # Add a dependency to the project.

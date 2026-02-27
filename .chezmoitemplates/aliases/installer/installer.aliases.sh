@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # Installer & Teleport Aliases
 
 # Run the local installer (self-update/bootstrap)

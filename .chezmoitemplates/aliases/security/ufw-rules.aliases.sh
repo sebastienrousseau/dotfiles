@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # UFW (Uncomplicated Firewall) Aliases
 [[ -n "${_UFW_RULES_LOADED:-}" ]] && return 0
 _UFW_RULES_LOADED=1

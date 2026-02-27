@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 # Universal Dotfiles Installer (Zero-Dependency)
 # Usage: sh -c "$(curl -fsSL https://dotfiles.io/install.sh)"
 # (or ./install.sh locally)

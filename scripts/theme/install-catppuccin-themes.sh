@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
 ## Catppuccin Theme Installer — Install Catppuccin themes for GNOME.
 ##
 ## Downloads and installs GTK themes, icon themes, cursor themes,
