@@ -37,19 +37,19 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 log() {
-  echo -e "${BLUE}[GNOME]${NC} $1"
+  printf '%b\n' "${BLUE}[GNOME]${NC} $1"
 }
 
 warn() {
-  echo -e "${YELLOW}[WARN]${NC} $1"
+  printf '%b\n' "${YELLOW}[WARN]${NC} $1"
 }
 
 error() {
-  echo -e "${RED}[ERROR]${NC} $1"
+  printf '%b\n' "${RED}[ERROR]${NC} $1"
 }
 
 success() {
-  echo -e "${GREEN}[SUCCESS]${NC} $1"
+  printf '%b\n' "${GREEN}[SUCCESS]${NC} $1"
 }
 
 # Check if we're running GNOME

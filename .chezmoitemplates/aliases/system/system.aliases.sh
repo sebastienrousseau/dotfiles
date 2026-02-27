@@ -29,7 +29,11 @@ if command -v lsof >/dev/null 2>&1; then
   alias nls='sudo lsof -i -P | grep LISTEN'
   alias op='sudo lsof -i -P'
 fi
-alias ports='netstat -tulan'
+if command -v ss >/dev/null 2>&1; then
+  alias ports='ss -tulan'
+else
+  alias ports='netstat -tulan'
+fi
 alias top='sudo btop'
 
 # Public IP helper via DNS (kept here for consolidated system diagnostics).
