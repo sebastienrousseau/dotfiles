@@ -77,7 +77,7 @@ cleanup() {
   tput rmcup       # Restore screen
   tput cnorm       # Show cursor
   clear
-  exit 0
+  return 0
 }
 
 matrix() {

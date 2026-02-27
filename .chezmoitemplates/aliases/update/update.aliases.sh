@@ -20,26 +20,26 @@ RESET='\033[0m'
 #-------------------------------#
 
 # print_step: Prints a step message
-function print_step() {
+print_step() {
   local step_msg="$1"
   echo
-  echo -e "${GREEN} ${step_msg}${RESET}"
+  printf '%b\n' "${GREEN} ${step_msg}${RESET}"
 }
 
 # print_note: Prints a note message
-function print_note() {
+print_note() {
   local note_msg="$1"
-  echo -e "${BLUE}${note_msg}${RESET}"
+  printf '%b\n' "${BLUE}${note_msg}${RESET}"
 }
 
 # print_error: Prints an error message
-function print_error() {
+print_error() {
   local error_msg="$1"
-  echo -e "${RED} ERROR: ${error_msg}${RESET}" >&2
+  printf '%b\n' "${RED} ERROR: ${error_msg}${RESET}" >&2
 }
 
 # detect_os: Detects the operating system
-function detect_os() {
+detect_os() {
   case "$(uname -s)" in
     Darwin*) echo "macOS" ;;
     Linux*) echo "Linux" ;;
@@ -49,7 +49,7 @@ function detect_os() {
 }
 
 # cmd_exists: Checks if a command exists
-function cmd_exists() {
+cmd_exists() {
   command -v "$1" >/dev/null 2>&1
 }
 
@@ -57,7 +57,7 @@ function cmd_exists() {
 # macOS Update Functions        #
 #-------------------------------#
 
-function update_mac() {
+update_mac() {
   print_step "Updating macOS system software"
   if sudo /usr/sbin/softwareupdate -i -a | grep -q "No updates are available"; then
     print_note "macOS is up-to-date."
@@ -93,7 +93,7 @@ function update_mac() {
 # Linux Update Functions        #
 #-------------------------------#
 
-function update_linux() {
+update_linux() {
   if cmd_exists apt-get; then
     print_step "Updating Linux packages with apt"
     sudo apt-get update
@@ -138,7 +138,7 @@ function update_linux() {
 # Windows Update Functions      #
 #-------------------------------#
 
-function update_windows() {
+update_windows() {
   print_step "Updating Windows packages"
 
   if cmd_exists choco; then
@@ -165,7 +165,7 @@ function update_windows() {
 # Programming Environment Tools #
 #-------------------------------#
 
-function update_programming_tools() {
+update_programming_tools() {
   # npm
   if cmd_exists npm; then
     print_step "Updating npm global packages"
@@ -274,10 +274,10 @@ function update_programming_tools() {
 # Main Update Function          #
 #-------------------------------#
 
-function upd() {
+upd() {
   local os_name
   os_name="$(detect_os)"
-  echo -e "${GREEN} Detected OS: ${os_name}${RESET}"
+  printf '%b\n' "${GREEN} Detected OS: ${os_name}${RESET}"
 
   # Run OS-specific updates
   case "${os_name}" in
@@ -297,7 +297,7 @@ function upd() {
 }
 
 # Run Topgrade if available, otherwise fall back to upd.
-function update() {
+update() {
   if cmd_exists topgrade; then
     print_step "Running Topgrade"
     topgrade "$@"
@@ -314,5 +314,5 @@ function update() {
 
 # If the script is executed directly, inform the user about sourcing
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
-  echo -e "${GREEN} Source this script and run 'upd' to start the update process.${RESET}"
+  printf '%b\n' "${GREEN} Source this script and run 'upd' to start the update process.${RESET}"
 fi

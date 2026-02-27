@@ -54,8 +54,8 @@ apiload_load_test() {
   local requests="${2:-100}"
   local delay="${3:-0.1}"
 
-  echo -e "[INFO] Running load test on $url"
-  echo -e "[INFO] Total Requests: $requests, Delay Between Requests: $delay seconds"
+  printf '%b\n' "[INFO] Running load test on $url"
+  printf '%b\n' "[INFO] Total Requests: $requests, Delay Between Requests: $delay seconds"
 
   local success_count=0
   local fail_count=0
@@ -63,22 +63,22 @@ apiload_load_test() {
   for ((i = 1; i <= requests; i++)); do
     response=$(curl -s --connect-timeout 5 --max-time 30 -o /dev/null -w "%{http_code}" "$url")
     if [[ "$response" -eq 200 ]]; then
-      echo -e "\e[32m[Request $i]\e[0m Success (HTTP 200)"
+      printf '%b\n' "\e[32m[Request $i]\e[0m Success (HTTP 200)"
       ((success_count++))
     else
-      echo -e "\e[31m[Request $i]\e[0m Failed (HTTP $response)"
+      printf '%b\n' "\e[31m[Request $i]\e[0m Failed (HTTP $response)"
       ((fail_count++))
     fi
     sleep "$delay"
   done
 
-  echo -e "\n[SUMMARY]"
-  echo -e "Total Requests: $requests"
-  echo -e "Successful: \e[32m$success_count\e[0m"
-  echo -e "Failed: \e[31m$fail_count\e[0m"
-  echo -e "Success Rate: $(((success_count * 100) / requests))%"
+  printf '%b\n' "\n[SUMMARY]"
+  printf '%b\n' "Total Requests: $requests"
+  printf '%b\n' "Successful: \e[32m$success_count\e[0m"
+  printf '%b\n' "Failed: \e[31m$fail_count\e[0m"
+  printf '%b\n' "Success Rate: $(((success_count * 100) / requests))%"
 
-  echo -e "\n\e[32m[SUCCESS]\e[0m Load test completed."
+  printf '%b\n' "\n\e[32m[SUCCESS]\e[0m Load test completed."
 }
 
 #######################################
@@ -96,7 +96,7 @@ apiload_parse_arguments() {
       return 2
       ;;
     "")
-      echo -e "\e[31m[ERROR]\e[0m Missing required URL argument."
+      printf '%b\n' "\e[31m[ERROR]\e[0m Missing required URL argument."
       apiload_print_help
       return 1
       ;;
@@ -109,19 +109,19 @@ apiload_parse_arguments() {
 
   # Validate URL
   if [[ ! "$url" =~ ^https?:// ]]; then
-    echo -e "\e[31m[ERROR]\e[0m Invalid URL format. Must start with http:// or https://"
+    printf '%b\n' "\e[31m[ERROR]\e[0m Invalid URL format. Must start with http:// or https://"
     return 1
   fi
 
   # Validate requests
   if ! [[ "$requests" =~ ^[0-9]+$ ]]; then
-    echo -e "\e[31m[ERROR]\e[0m REQUESTS must be a positive integer."
+    printf '%b\n' "\e[31m[ERROR]\e[0m REQUESTS must be a positive integer."
     return 1
   fi
 
   # Validate delay
   if ! [[ "$delay" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-    echo -e "\e[31m[ERROR]\e[0m DELAY must be a positive number."
+    printf '%b\n' "\e[31m[ERROR]\e[0m DELAY must be a positive number."
     return 1
   fi
 

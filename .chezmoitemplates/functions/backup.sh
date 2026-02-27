@@ -27,9 +27,9 @@
 
 backup() {
   # Default configuration
-  BACKUP_DIR="${BACKUP_DIR:-./backups}"
-  MAX_SIZE="100M" # Default max size before compression
-  KEEP=5          # Default number of backups to keep
+  local BACKUP_DIR="${BACKUP_DIR:-./backups}"
+  local MAX_SIZE="100M" # Default max size before compression
+  local KEEP=5          # Default number of backups to keep
 
   # Parse arguments
   while [[ "$#" -gt 0 ]]; do

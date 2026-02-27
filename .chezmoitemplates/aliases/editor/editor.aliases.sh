@@ -51,7 +51,7 @@ if [[ -n "${EDITOR}" ]]; then
       # Nano aliases
       alias nanorc='nano "${HOME}/.nanorc"'
       # Enhanced nano with line numbers and smooth scrolling
-      function nanoedit() { nano -l -S "$@"; }
+      nanoedit() { nano -l -S "$@"; }
       if [[ "${DOTFILES_LEGACY_EDITOR_ALIASES}" == "1" ]]; then
         alias ne="nanoedit"
       fi
@@ -76,19 +76,11 @@ if [[ -n "${EDITOR}" ]]; then
       alias stt="subl ."  # Open current directory
       alias stn="subl -n" # Open in new window
       ;;
-    atom | */atom)
-      # Atom aliases
-      if [[ "${DOTFILES_LEGACY_EDITOR_ALIASES}" == "1" ]]; then
-        alias a="atom"
-        alias at="atom ."
-        alias an="atom -n"
-      fi
-      ;;
   esac
 fi
 
 # Quick edit function to edit common configuration files
-function editrc() {
+editrc() {
   case "$1" in
     bash) "${EDITOR}" "${HOME}/.bashrc" ;;
     zsh) "${EDITOR}" "${HOME}/.zshrc" ;;
