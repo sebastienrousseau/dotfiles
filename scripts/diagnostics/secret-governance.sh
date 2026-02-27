@@ -24,7 +24,7 @@ staged_content() {
 }
 
 violations=0
-tmp_content="$(mktemp)"
+tmp_content="$(umask 077 && mktemp)"
 trap 'rm -f "$tmp_content"' EXIT
 staged_content >"$tmp_content"
 

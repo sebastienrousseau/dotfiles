@@ -116,7 +116,7 @@ if command -v ollama >/dev/null 2>&1; then
             if [[ "$current_ver" == "$latest_ver" ]]; then
                 skip "already up to date"
             else
-                tmp_tar="$(mktemp)"
+                tmp_tar="$(umask 077 && mktemp)"
                 trap 'rm -f "$tmp_tar"' EXIT
                 tar_url="https://ollama.com/download/ollama-linux-${ollama_arch}.tar.zst"
 

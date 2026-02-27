@@ -40,7 +40,7 @@ run_step() {
   local title="$1"
   shift
   local out
-  out="$(mktemp)"
+  out="$(umask 077 && mktemp)"
   if [[ "$UI_ENABLED" = "1" ]]; then
     if gum spin --spinner dot --title "$title" -- "$@" >"$out" 2>&1; then
       ui_ok "$title"

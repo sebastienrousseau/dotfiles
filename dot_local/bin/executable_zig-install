@@ -68,8 +68,8 @@ install_zig() {
     fi
 
     local tmpdir
-    tmpdir=$(mktemp -d)
-    trap "rm -rf $tmpdir" EXIT
+    tmpdir=$(umask 077 && mktemp -d)
+    trap "rm -rf \"\$tmpdir\"" EXIT
 
     echo "Downloading from $url..."
     curl -fSL "$url" -o "$tmpdir/zig.tar.xz"

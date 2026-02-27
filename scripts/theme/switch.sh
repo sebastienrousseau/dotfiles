@@ -123,7 +123,7 @@ set_theme() {
       ;;
   esac
 
-  tmp_file="$(mktemp)"
+  tmp_file="$(umask 077 && mktemp)"
   if grep -q '^theme = ' "$DATA_FILE"; then
     sed "s/^theme = .*/theme = \"$new_theme\"/" "$DATA_FILE" >"$tmp_file"
   else
