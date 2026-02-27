@@ -19,5 +19,16 @@ enter_accept = true
 
 # Search
 search_mode = "fuzzy"
-filter_mode = "global" # Search across all sessions/directories by default
+filter_mode = "global"
 workspaces = true
+
+# Privacy: skip commands that may contain secrets
+history_filter = [
+  "^export (SECRET|TOKEN|PASSWORD|API_KEY|AWS_)",
+  "^PASSWORD=",
+  "^ssh-keygen",
+]
+
+# Skip ephemeral directories
+secrets_filter = true
+network_timeout = 30

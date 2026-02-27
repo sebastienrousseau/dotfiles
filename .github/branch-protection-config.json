@@ -1,0 +1,54 @@
+{
+  "description": "Branch protection configuration for dotfiles repository v0.2.480",
+  "enforcement": "strict",
+  "rules": {
+    "master": {
+      "protection": {
+        "required_status_checks": {
+          "strict": true,
+          "checks": [
+            "Lint / Shell (Zero Warnings)",
+            "Lint / Lua (Zero Warnings)",
+            "Lint / Nix (Zero Warnings)",
+            "Security / Secrets Scan",
+            "Security / Dependency Audit",
+            "Security / Infrastructure Scan",
+            "Test / ubuntu-latest",
+            "Test / macos-latest",
+            "Test / Unit Tests (100% Coverage)",
+            "Test / Integration",
+            "Type Check / Strict Mode",
+            "Merge Gate"
+          ]
+        },
+        "enforce_admins": true,
+        "required_pull_request_reviews": {
+          "required_approving_review_count": 1,
+          "dismiss_stale_reviews": true,
+          "require_code_owner_reviews": true,
+          "require_last_push_approval": true
+        },
+        "restrictions": null,
+        "required_linear_history": true,
+        "allow_force_pushes": false,
+        "allow_deletions": false,
+        "required_conversation_resolution": true,
+        "lock_allows_fork_sync": false
+      }
+    }
+  },
+  "additional_enforcement": {
+    "security_policy": {
+      "no_bypass_security_checks": true,
+      "require_signed_commits": true,
+      "block_force_push": true,
+      "require_up_to_date_branches": true
+    },
+    "quality_gates": {
+      "fail_on_warnings": true,
+      "require_format_compliance": true,
+      "enforce_coverage_threshold": true,
+      "block_vulnerable_dependencies": true
+    }
+  }
+}
