@@ -62,6 +62,26 @@ detect_files = ["package.json", ".node-version"]
 format = "[$symbol($version)]($style) "
 symbol = "go "
 
+# ---------- Docker context ---------- #
+[docker_context]
+format = "[$symbol$context]($style) "
+symbol = "docker "
+only_with_files = true
+detect_files = ["docker-compose.yml", "docker-compose.yaml", "Dockerfile"]
+
+# ---------- Shell nesting level ---------- #
+[shlvl]
+disabled = false
+threshold = 2
+symbol = "↕ "
+format = "[$symbol$shlvl]($style) "
+
+# ---------- Exit status ---------- #
+[status]
+disabled = false
+format = "[$symbol$status]($style) "
+symbol = "✘ "
+
 # ---------- Kubernetes context ---------- #
 [kubernetes]
 disabled = false

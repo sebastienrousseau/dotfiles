@@ -4,7 +4,7 @@
 _OPENSSL_SERVER_LOADED=1
 
 # CA Operations
-function sslca() {
+sslca() {
   # Typically requires a CA config file. Adjust as needed.
   openssl ca "$@"
 }
@@ -13,7 +13,7 @@ function sslca() {
 alias sslspeed='openssl speed'
 
 # Server Testing and Setup
-function sslserver() {
+sslserver() {
   if [[ -z "$1" || -z "$2" ]]; then
     echo "Usage: sslserver <cert_file> <key_file> [port]"
     echo "Default port: 4433"

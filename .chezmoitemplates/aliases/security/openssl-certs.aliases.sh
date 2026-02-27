@@ -5,7 +5,7 @@ _OPENSSL_CERTS_LOADED=1
 
 alias sslx509='openssl x509' # X.509 certificate utility
 
-function sslx509info() {
+sslx509info() {
   [[ -z "$1" ]] && {
     echo "Usage: sslx509info <certificate_file>"
     return 1
@@ -13,7 +13,7 @@ function sslx509info() {
   openssl x509 -in "$1" -text -noout
 }
 
-function sslx509fp() {
+sslx509fp() {
   [[ -z "$1" ]] && {
     echo "Usage: sslx509fp <certificate_file>"
     return 1
@@ -21,7 +21,7 @@ function sslx509fp() {
   openssl x509 -in "$1" -fingerprint -noout
 }
 
-function sslx509dates() {
+sslx509dates() {
   [[ -z "$1" ]] && {
     echo "Usage: sslx509dates <certificate_file>"
     return 1
@@ -29,7 +29,7 @@ function sslx509dates() {
   openssl x509 -in "$1" -dates -noout
 }
 
-function sslx509subject() {
+sslx509subject() {
   [[ -z "$1" ]] && {
     echo "Usage: sslx509subject <certificate_file>"
     return 1
@@ -37,7 +37,7 @@ function sslx509subject() {
   openssl x509 -in "$1" -subject -noout
 }
 
-function sslx509issuer() {
+sslx509issuer() {
   [[ -z "$1" ]] && {
     echo "Usage: sslx509issuer <certificate_file>"
     return 1
@@ -45,7 +45,7 @@ function sslx509issuer() {
   openssl x509 -in "$1" -issuer -noout
 }
 
-function sslx509check() {
+sslx509check() {
   [[ -z "$1" ]] && {
     echo "Usage: sslx509check <certificate_file>"
     return 1
@@ -53,7 +53,7 @@ function sslx509check() {
   openssl x509 -purpose -in "$1" -noout
 }
 
-function sslx509extract() {
+sslx509extract() {
   [[ -z "$1" || -z "$2" || -z "$3" ]] && {
     echo "Usage: sslx509extract <in_cert> <out_format> <out_file>"
     echo "Example: sslx509extract cert.pem DER cert.der"

@@ -7,7 +7,7 @@ alias gpgfp='gpg --fingerprint'
 alias gpgcheck='gpg --check-signatures'
 alias gpgsig='gpg --list-signatures'
 
-function gpgtrust() {
+gpgtrust() {
   [[ -z "$1" ]] && {
     echo "Usage: gpgtrust <key_id>"
     return 1
@@ -15,7 +15,7 @@ function gpgtrust() {
   gpg --edit-key "$1" trust quit
 }
 
-function gpgclean() {
+gpgclean() {
   # Deletes expired keys from keyring using machine-readable output
   local expired_keys=()
   while IFS=: read -r type _ _ _ keyid _ _ _ _ _ _ flags _; do

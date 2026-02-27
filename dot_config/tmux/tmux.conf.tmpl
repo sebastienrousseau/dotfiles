@@ -135,6 +135,9 @@ bind < swap-pane -U
 bind > swap-pane -D
 bind q kill-pane
 
+# Toggle synchronize-panes (type in all panes simultaneously)
+bind S setw synchronize-panes \; display "Sync panes: #{?synchronize-panes,ON,OFF}"
+
 # Session Management
 bind C-c new-session
 bind C-f command-prompt -p find-session 'switch-client -t %%'
