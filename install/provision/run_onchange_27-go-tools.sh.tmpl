@@ -6,8 +6,8 @@
 
 set -euo pipefail
 
-log_info() { echo -e "\n[INFO] $*"; }
-log_warn() { echo -e "\n[WARN] $*"; }
+log_info() { printf '\n[INFO] %s\n' "$*"; }
+log_warn() { printf '\n[WARN] %s\n' "$*"; }
 
 # Skip in containers unless explicitly enabled
 if [[ "${DOTFILES_CONTAINER:-0}" = "1" && "${DOTFILES_GO_IN_CONTAINER:-0}" != "1" ]]; then
@@ -42,12 +42,7 @@ install_go_tool "dlv" "github.com/go-delve/delve/cmd/dlv@latest"
 install_go_tool "gofumpt" "mvdan.cc/gofumpt@latest"
 
 # golangci-lint - Meta linter
-if ! command -v golangci-lint >/dev/null 2>&1; then
-  log_info "Installing golangci-lint..."
-  curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOBIN)" latest
-else
-  log_info "golangci-lint already installed"
-fi
+install_go_tool "golangci-lint" "github.com/golangci/golangci-lint/cmd/golangci-lint@latest"
 
 # Additional useful tools
 install_go_tool "goimports" "golang.org/x/tools/cmd/goimports@latest"
