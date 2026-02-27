@@ -5,6 +5,29 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
+# Help flag
+case "${1:-}" in
+  -h | --help)
+    cat <<HELP
+chezmoi-apply.sh - Apply dotfiles with enhanced diagnostics
+
+Usage:
+  dot apply [OPTIONS] [-- CHEZMOI_ARGS]
+
+Environment Variables:
+  DOTFILES_CHEZMOI_APPLY_FLAGS    Extra flags for chezmoi apply
+  DOTFILES_CHEZMOI_VERBOSE=1      Enable verbose output
+  DOTFILES_CHEZMOI_KEEP_GOING=1   Continue on errors
+  DOTFILES_NONINTERACTIVE=1       Force non-interactive mode
+  DOTFILES_ALIAS_STRICT_MODE=1    Run alias governance checks
+  DOTFILES_SNAPSHOT_ON_APPLY=1    Create baseline snapshot (default)
+  DOTFILES_POST_APPLY_REPAIR=1   Run post-apply repairs (default)
+  DOTFILES_CHEZMOI_STATUS=1      Show status after apply (default)
+HELP
+    exit 0
+    ;;
+esac
+
 args=("$@")
 if [[ -n "${DOTFILES_CHEZMOI_APPLY_FLAGS:-}" ]]; then
   # Safely parse space-separated flags into array
