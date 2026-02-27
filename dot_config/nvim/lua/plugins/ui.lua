@@ -254,6 +254,7 @@ Simply design to fit your shell life
     end,
     opts = {
       spec = {
+        { "<leader>a", group = "AI" },
         { "<leader>c", group = "Code" },
         { "<leader>f", group = "Find/File" },
         { "<leader>p", group = "Python/Project" },
