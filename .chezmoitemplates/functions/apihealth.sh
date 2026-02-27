@@ -79,7 +79,7 @@ print_version() {
 #######################################
 check_dependencies() {
   if ! command -v curl >/dev/null 2>&1; then
-    echo -e "\e[31m[ERROR]\e[0m Required command 'curl' is not installed."
+    printf '%b\n' "\e[31m[ERROR]\e[0m Required command 'curl' is not installed."
     return 1
   fi
   return 0
@@ -102,8 +102,8 @@ apihealthealth() {
   local timeout="${4:-$DEFAULT_TIMEOUT}"
   local curl_headers=()
 
-  echo -e "[INFO] Testing API health: $url"
-  echo -e "[INFO] Method: $method, Expected Status: $expect_status, Timeout: ${timeout}s"
+  printf '%b\n' "[INFO] Testing API health: $url"
+  printf '%b\n' "[INFO] Method: $method, Expected Status: $expect_status, Timeout: ${timeout}s"
 
   # Build curl headers array
   if [[ ${#HEADERS[@]} -gt 0 ]]; then
@@ -130,13 +130,13 @@ apihealthealth() {
   fi
 
   if [[ "$response" -eq "$expect_status" ]]; then
-    echo -e "\e[32m[SUCCESS]\e[0m API is healthy (Status: $response)"
+    printf '%b\n' "\e[32m[SUCCESS]\e[0m API is healthy (Status: $response)"
     return 0
   elif [[ "$response" -eq "000" ]]; then
-    echo -e "\e[31m[ERROR]\e[0m API health check failed (No response)"
+    printf '%b\n' "\e[31m[ERROR]\e[0m API health check failed (No response)"
     return 1
   else
-    echo -e "\e[31m[ERROR]\e[0m API health check failed (Status: $response)"
+    printf '%b\n' "\e[31m[ERROR]\e[0m API health check failed (Status: $response)"
     return 1
   fi
 }
@@ -171,7 +171,7 @@ parse_arguments() {
           METHOD="$2"
           shift 2
         else
-          echo -e "\e[31m[ERROR]\e[0m --method requires a non-empty option argument."
+          printf '%b\n' "\e[31m[ERROR]\e[0m --method requires a non-empty option argument."
           return 1
         fi
         ;;
@@ -180,38 +180,38 @@ parse_arguments() {
           EXPECT_STATUS="$2"
           shift 2
         else
-          echo -e "\e[31m[ERROR]\e[0m --expect requires a non-empty option argument."
+          printf '%b\n' "\e[31m[ERROR]\e[0m --expect requires a non-empty option argument."
           return 1
         fi
         ;;
       -H | --header)
         if [[ -n "${2:-}" && ! "$2" =~ ^- ]]; then
           if [[ ! "$2" =~ ^[^:]+:[[:space:]]*[^[:space:]]+.*$ ]]; then
-            echo -e "\e[31m[ERROR]\e[0m Invalid header format: '$2'. Expected 'Key: Value'"
+            printf '%b\n' "\e[31m[ERROR]\e[0m Invalid header format: '$2'. Expected 'Key: Value'"
             return 1
           fi
           HEADERS+=("$2")
           shift 2
         else
-          echo -e "\e[31m[ERROR]\e[0m --header requires a non-empty option argument."
+          printf '%b\n' "\e[31m[ERROR]\e[0m --header requires a non-empty option argument."
           return 1
         fi
         ;;
       -t | --timeout)
         if [[ -n "${2:-}" && ! "$2" =~ ^- ]]; then
           if ! [[ "$2" =~ ^[0-9]+$ ]]; then
-            echo -e "\e[31m[ERROR]\e[0m Timeout must be a positive integer."
+            printf '%b\n' "\e[31m[ERROR]\e[0m Timeout must be a positive integer."
             return 1
           fi
           TIMEOUT="$2"
           shift 2
         else
-          echo -e "\e[31m[ERROR]\e[0m --timeout requires a non-empty option argument."
+          printf '%b\n' "\e[31m[ERROR]\e[0m --timeout requires a non-empty option argument."
           return 1
         fi
         ;;
       -*)
-        echo -e "\e[31m[ERROR]\e[0m Unknown option: $1"
+        printf '%b\n' "\e[31m[ERROR]\e[0m Unknown option: $1"
         print_help
         return 1
         ;;
@@ -224,7 +224,7 @@ parse_arguments() {
 
   # Validate URLs provided
   if [[ ${#URLS[@]} -eq 0 ]]; then
-    echo -e "\e[31m[ERROR]\e[0m No URLs provided."
+    printf '%b\n' "\e[31m[ERROR]\e[0m No URLs provided."
     print_help
     return 1
   fi
@@ -258,9 +258,9 @@ apihealth_main() {
   done
 
   if [[ "$overall_status" -eq 0 ]]; then
-    echo -e "\e[32mAll API health checks passed successfully.\e[0m"
+    printf '%b\n' "\e[32mAll API health checks passed successfully.\e[0m"
   else
-    echo -e "\e[31mSome API health checks failed.\e[0m"
+    printf '%b\n' "\e[31mSome API health checks failed.\e[0m"
   fi
 
   return "$overall_status"

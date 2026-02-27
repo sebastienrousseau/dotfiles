@@ -13,17 +13,17 @@ else
 fi
 
 log_info() {
-  echo -e "${BLUE}[INFO]${NC} $1"
+  printf '%b\n' "${BLUE}[INFO]${NC} $1"
 }
 
 log_success() {
-  echo -e "${GREEN}[SUCCESS]${NC} $1"
+  printf '%b\n' "${GREEN}[SUCCESS]${NC} $1"
 }
 
 log_warning() {
-  echo -e "${YELLOW}[WARN]${NC} $1"
+  printf '%b\n' "${YELLOW}[WARN]${NC} $1"
 }
 
 log_error() {
-  echo -e "${RED}[ERROR]${NC} $1" >&2
+  printf '%b\n' "${RED}[ERROR]${NC} $1" >&2
 }
