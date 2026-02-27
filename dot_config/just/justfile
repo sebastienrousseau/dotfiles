@@ -77,6 +77,24 @@ dots-bench:
 dots-health:
     dot health
 
+# === Quality ===
+
+# Run pre-commit hooks on all files
+pre-commit:
+    pre-commit run --all-files
+
+# Validate chezmoi templates
+validate-templates:
+    chezmoi execute-template < /dev/null && echo "Templates OK"
+
+# Sync Neovim plugins
+nvim-update:
+    nvim --headless "+Lazy! sync" +qa
+
+# Cut a release (patch by default)
+release bump="patch":
+    ~/.dotfiles/scripts/ops/release.sh {{bump}}
+
 # === System ===
 
 # Update all package managers
