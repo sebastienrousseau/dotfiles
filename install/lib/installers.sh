@@ -15,7 +15,7 @@ _DOTFILES_INSTALLERS_LOADED=1
 
 # Resolve sudo command (empty string if already root)
 resolve_sudo() {
-  if [ "$(id -u)" -ne 0 ]; then
+  if [[ "$(id -u)" -ne 0 ]]; then
     if command -v sudo >/dev/null; then
       echo "sudo"
     else
@@ -48,7 +48,7 @@ download_and_verify_sha256() {
   local expected actual
   expected="$(awk '{print $1}' "${dest}.sha256")"
   actual="$(sha256_file "$dest")"
-  if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
+  if [[ -z "$expected" ]] || [[ "$expected" != "$actual" ]]; then
     die "Checksum verification failed for $dest."
   fi
 }
@@ -58,10 +58,10 @@ github_release_json() {
   local repo="$1"
   local tag="${2:-latest}"
   local auth_header=()
-  if [ -n "${GITHUB_TOKEN:-}" ]; then
+  if [[ -n "${GITHUB_TOKEN:-}" ]]; then
     auth_header=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
   fi
-  if [ "$tag" = "latest" ]; then
+  if [[ "$tag" = "latest" ]]; then
     curl -fsSL "${auth_header[@]}" "https://api.github.com/repos/$repo/releases/latest"
   else
     curl -fsSL "${auth_header[@]}" "https://api.github.com/repos/$repo/releases/tags/$tag"
@@ -75,11 +75,11 @@ github_asset_url() {
   local tag="${3:-latest}"
   local url
   url="$(github_release_json "$repo" "$tag" 2>/dev/null | grep -oE "https://[^\"]+${suffix}" | head -n1 || true)"
-  if [ -n "$url" ]; then
+  if [[ -n "$url" ]]; then
     echo "$url"
     return 0
   fi
-  if [ "$tag" = "latest" ]; then
+  if [[ "$tag" = "latest" ]]; then
     echo "https://github.com/${repo}/releases/latest/download/${suffix}"
   else
     echo "https://github.com/${repo}/releases/download/${tag}/${suffix}"
@@ -91,7 +91,7 @@ warn_unpinned() {
   local name="$1"
   local tag="$2"
   local var_name="$3"
-  if [ "$tag" = "latest" ] || [ "$tag" = "nightly" ]; then
+  if [[ "$tag" = "latest" ]] || [[ "$tag" = "nightly" ]]; then
     die "${name} uses moving tag '${tag}'. Pin by setting ${var_name}."
   fi
 }
@@ -110,10 +110,10 @@ install_from_tarball() {
 
   local bin_path
   bin_path="$tmp_dir/$bin_name"
-  if [ ! -f "$bin_path" ]; then
+  if [[ ! -f "$bin_path" ]]; then
     bin_path="$(find "$tmp_dir" -type f -name "$bin_name" -perm -u+x 2>/dev/null | head -n1)"
   fi
-  if [ -z "$bin_path" ] || [ ! -f "$bin_path" ]; then
+  if [[ -z "$bin_path" ]] || [[ ! -f "$bin_path" ]]; then
     rm -rf "$tmp_dir"
     die "Expected binary $bin_name not found in archive."
   fi
@@ -137,7 +137,7 @@ install_from_tarball_checksums() {
   local expected actual
   expected="$(awk -v f="$(basename "$url")" '$2==f {print $1}' "$tmp_dir/checksums.txt")"
   actual="$(sha256_file "$tmp_dir/archive.tar.gz")"
-  if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
+  if [[ -z "$expected" ]] || [[ "$expected" != "$actual" ]]; then
     rm -rf "$tmp_dir"
     die "Checksum verification failed for $bin_name."
   fi
@@ -145,10 +145,10 @@ install_from_tarball_checksums() {
 
   local bin_path
   bin_path="$(find "$tmp_dir" -type f -name "$bin_name" -perm -u+x 2>/dev/null | head -n1)"
-  if [ -z "$bin_path" ]; then
+  if [[ -z "$bin_path" ]]; then
     bin_path="$tmp_dir/$bin_name"
   fi
-  if [ ! -f "$bin_path" ]; then
+  if [[ ! -f "$bin_path" ]]; then
     rm -rf "$tmp_dir"
     die "Expected binary $bin_name not found in archive."
   fi
@@ -173,7 +173,7 @@ install_from_zip() {
   local expected actual
   expected="$(awk '{print $1}' "$tmp_dir/archive.zip.sha256")"
   actual="$(sha256_file "$tmp_dir/archive.zip")"
-  if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
+  if [[ -z "$expected" ]] || [[ "$expected" != "$actual" ]]; then
     rm -rf "$tmp_dir"
     die "Checksum verification failed for zip archive."
   fi
@@ -183,7 +183,7 @@ install_from_zip() {
   local bin_name bin_path
   for bin_name in "${bin_names[@]}"; do
     bin_path="$(find "$tmp_dir" -type f -name "$bin_name" -perm -u+x 2>/dev/null | head -n1)"
-    if [ -n "$bin_path" ]; then
+    if [[ -n "$bin_path" ]]; then
       install -m 0755 "$bin_path" "$install_dir/$bin_name"
     else
       log_warn "$bin_name not found in zip archive."

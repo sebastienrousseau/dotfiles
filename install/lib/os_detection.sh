@@ -19,9 +19,9 @@ detect_os() {
       target_os="macos"
       ;;
     Linux)
-      if [ -f /proc/version ] && grep -qi 'microsoft\|WSL' /proc/version; then
+      if [[ -f /proc/version ]] && grep -qi 'microsoft\|WSL' /proc/version; then
         target_os="wsl2"
-      elif [ -f /etc/os-release ]; then
+      elif [[ -f /etc/os-release ]]; then
         # shellcheck disable=SC1091
         . /etc/os-release
         case "${ID:-}" in
@@ -49,32 +49,32 @@ detect_os() {
 
 # Check if running on macOS
 is_macos() {
-  [ "$target_os" = "macos" ]
+  [[ "$target_os" = "macos" ]]
 }
 
 # Check if running on Linux (any variant)
 is_linux() {
-  [ "$OS" = "Linux" ]
+  [[ "$OS" = "Linux" ]]
 }
 
 # Check if running in WSL2
 is_wsl() {
-  [ "$target_os" = "wsl2" ]
+  [[ "$target_os" = "wsl2" ]]
 }
 
 # Check if running on Debian-based system
 is_debian() {
-  [ "$target_os" = "debian" ] || [ "$target_os" = "wsl2" ]
+  [[ "$target_os" = "debian" ]] || [[ "$target_os" = "wsl2" ]]
 }
 
 # Check if running on Fedora-based system
 is_fedora() {
-  [ "$target_os" = "fedora" ]
+  [[ "$target_os" = "fedora" ]]
 }
 
 # Check if running on Arch-based system
 is_arch() {
-  [ "$target_os" = "arch" ]
+  [[ "$target_os" = "arch" ]]
 }
 
 # Print detected OS information

@@ -44,7 +44,7 @@ install_homebrew() {
   echo "   Verify at: https://github.com/Homebrew/install"
 
   # In non-interactive mode, proceed with warning
-  if [ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]; then
+  if [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]]; then
     read -r -p "   Continue with Homebrew installation? [y/N] " response
     case "$response" in
       [yY][eE][sS]|[yY]) ;;
@@ -56,9 +56,9 @@ install_homebrew() {
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
   # Add brew to PATH for Apple Silicon
-  if [ -x /opt/homebrew/bin/brew ]; then
+  if [[ -x /opt/homebrew/bin/brew ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
-  elif [ -x /usr/local/bin/brew ]; then
+  elif [[ -x /usr/local/bin/brew ]]; then
     eval "$(/usr/local/bin/brew shellenv)"
   fi
 }
@@ -93,7 +93,7 @@ verify_package_manager() {
 # Bootstrap package manager for the current OS
 # This ensures the appropriate package manager is available
 bootstrap_package_manager() {
-  if [ "$target_os" = "macos" ]; then
+  if [[ "$target_os" = "macos" ]]; then
     if ! install_homebrew; then
       echo "Error: Homebrew installation cancelled. Install manually: https://brew.sh" >&2
       return 1
@@ -115,7 +115,7 @@ check_prerequisites() {
     missing+=("git")
   fi
 
-  if [ ${#missing[@]} -gt 0 ]; then
+  if [[ ${#missing[@]} -gt 0 ]]; then
     echo "Error: Missing required commands: ${missing[*]}" >&2
     return 1
   fi
