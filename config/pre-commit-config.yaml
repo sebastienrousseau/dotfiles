@@ -1,25 +1,25 @@
 repos:
   # Shell script linting and formatting
   - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: v0.9.0
+    rev: v0.11.0
     hooks:
       - id: shellcheck
         args: ["-x", "-e", "SC1091"]  # Exclude sourced file warnings in CI
 
   - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.7.0-1
+    rev: v3.12.0-2
     hooks:
       - id: shfmt
         args: ["-i", "2", "-ci"]
 
   # Security scanning
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.18.0
+    rev: v8.30.0
     hooks:
       - id: gitleaks
 
   - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
+    rev: v1.5.0
     hooks:
       - id: detect-secrets
         args: ['--baseline', '.secrets.baseline']
@@ -32,7 +32,7 @@ repos:
 
   # Infrastructure security
   - repo: https://github.com/bridgecrewio/checkov
-    rev: 3.2.25
+    rev: 3.2.506
     hooks:
       - id: checkov
         args: [
@@ -44,7 +44,7 @@ repos:
 
   # File validation and formatting
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -60,7 +60,7 @@ repos:
 
   # Conventional commit message validation
   - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v3.6.0
+    rev: v4.4.0
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
@@ -68,7 +68,7 @@ repos:
 
   # Dockerfile linting
   - repo: https://github.com/hadolint/hadolint
-    rev: v2.12.0
+    rev: v2.14.0
     hooks:
       - id: hadolint
         args: ['--ignore', 'DL3008', '--ignore', 'DL3013', '--ignore', 'DL3018']

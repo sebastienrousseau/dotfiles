@@ -43,6 +43,7 @@ instrument_script() {
     echo '#!/usr/bin/env bash'
     echo '# INSTRUMENTED VERSION FOR COVERAGE'
     echo "COVERAGE_LOG=\"$COVERAGE_DIR/line_coverage.log\""
+    # shellcheck disable=SC2016 -- single quotes intentional: output literal shell code
     echo 'track_line() { echo "$(basename "$1"):$2" >> "$COVERAGE_LOG"; }'
     echo 'track_branch() { echo "$(basename "$1"):$2:$3" >> "$COVERAGE_DIR/branch_coverage.log"; }'
     echo 'track_function() { echo "$(basename "$1"):$2" >> "$COVERAGE_DIR/function_coverage.log"; }'
