@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1090,SC1091
+# shellcheck disable=SC1090,SC1091,SC2030,SC2031
 # Integration tests for scripts/ops/rollback.sh
 # Tests backup creation, restore, cleanup, and path traversal protection
+# SC2030/SC2031: subshell env overrides (HOME, XDG_*) are intentional
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../framework/assertions.sh"
@@ -65,7 +66,6 @@ fi
 
 SANDBOX_HOME=$(mktemp -d)
 SANDBOX_BACKUP_DIR="$SANDBOX_HOME/.local/share/dotfiles/backups"
-SANDBOX_STATE_DIR="$SANDBOX_HOME/.local/state/dotfiles"
 trap 'rm -rf "$SANDBOX_HOME"' EXIT
 
 # Create fake dotfiles in the sandbox HOME
