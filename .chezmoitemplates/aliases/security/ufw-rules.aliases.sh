@@ -14,7 +14,7 @@ alias fwds='sudo ufw default deny incoming'
 alias fwda='sudo ufw default allow outgoing'
 
 # Rule Management
-function fwallow() {
+fwallow() {
   [[ -z "$1" ]] && {
     echo "Usage: fwallow <service_or_port>"
     return 1
@@ -22,7 +22,7 @@ function fwallow() {
   sudo ufw allow "$1"
 }
 
-function fwallowproto() {
+fwallowproto() {
   [[ -z "$1" || -z "$2" || -z "$3" ]] && {
     echo "Usage: fwallowproto <protocol> <from_IP> <to_IP>"
     return 1
@@ -30,7 +30,7 @@ function fwallowproto() {
   sudo ufw allow proto "$1" from "$2" to "$3"
 }
 
-function fwdeny() {
+fwdeny() {
   [[ -z "$1" ]] && {
     echo "Usage: fwdeny <service_or_port>"
     return 1
@@ -38,7 +38,7 @@ function fwdeny() {
   sudo ufw deny "$1"
 }
 
-function fwdenyproto() {
+fwdenyproto() {
   [[ -z "$1" || -z "$2" || -z "$3" ]] && {
     echo "Usage: fwdenyproto <protocol> <from_IP> <to_IP>"
     return 1
@@ -46,7 +46,7 @@ function fwdenyproto() {
   sudo ufw deny proto "$1" from "$2" to "$3"
 }
 
-function fwdelete() {
+fwdelete() {
   [[ -z "$1" ]] && {
     echo "Usage: fwdelete <rule>"
     return 1
@@ -54,7 +54,7 @@ function fwdelete() {
   sudo ufw delete "$1"
 }
 
-function fwdeln() {
+fwdeln() {
   [[ -z "$1" ]] && {
     echo "Usage: fwdeln <rule_number>"
     return 1
@@ -62,7 +62,7 @@ function fwdeln() {
   sudo ufw delete "$1"
 }
 
-function fwlog() {
+fwlog() {
   [[ -z "$1" ]] && {
     echo "Usage: fwlog <off|low|medium|high|full>"
     return 1

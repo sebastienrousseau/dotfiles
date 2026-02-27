@@ -8,7 +8,7 @@ command -v nmap >/dev/null 2>&1 || return 0
 # Nmap aliases were consolidated into `system/system.aliases.sh`
 # so runtime diagnostics aliases live in a single module.
 
-function nmscript() {
+nmscript() {
   [[ -z "$1" || -z "$2" ]] && {
     echo "Usage: nmscript <script_name> <target>"
     return 1
