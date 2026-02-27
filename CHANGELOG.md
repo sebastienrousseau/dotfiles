@@ -2,7 +2,7 @@
 
 This file documents all notable changes to this project.
 
-## v0.2.490
+## v0.2.491
 
 ### Added
 
@@ -16,7 +16,7 @@ This file documents all notable changes to this project.
 
 - **Deferred tool init** — Atuin, Starship, Zoxide, and FZF now load after the first prompt.
 - **Zinit bootstrap** — Deferred by default to reduce first-prompt latency.
-- Updated all version references to v0.2.490.
+- Updated all version references to v0.2.491.
 
 ### Documentation
 

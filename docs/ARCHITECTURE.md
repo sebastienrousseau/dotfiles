@@ -1,6 +1,6 @@
 # How it works
 
-v0.2.490 constitutes a portable **shell distribution** that `chezmoi` manages. This document outlines the core architectural decisions and system design.
+v0.2.491 constitutes a portable **shell distribution** that `chezmoi` manages. This document outlines the core architectural decisions and system design.
 
 ## Core philosophy
 
@@ -239,7 +239,7 @@ The `node_manager` setting uses Go template conditionals in `30-options.zsh.tmpl
 
 - **Hardened defaults**: Shell scripts run with `set -euo pipefail` to fail fast.
 - **Supply chain safety**:
-  - **Pinned installation**: Installers reference specific Git tags (for example, `v0.2.490`), not `main`.
+  - **Pinned installation**: Installers reference specific Git tags (for example, `v0.2.491`), not `main`.
   - **Immutable history**: All logic stays version-controlled and reviewable through `chezmoi diff`.
 - **Audit logging**: Dotfiles logs all mutations to `~/.local/share/dotfiles.log`.
 - **Encryption**: `age` encrypts all sensitive data.
