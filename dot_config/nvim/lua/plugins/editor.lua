@@ -47,13 +47,9 @@ return {
       size = 20,
     })
 
-    -- Custom keybindings for toggling a floating terminal:
-    -- <leader>ft toggles the floating terminal.
-    vim.api.nvim_set_keymap(
-      "n", -- Mode: normal
-      "<leader>ft", -- Key combination
-      "<Cmd>ToggleTerm direction=float<CR>", -- Command to execute
-      { noremap = true, silent = true } -- Options: no recursive mapping, silent execution
-    )
+    vim.keymap.set("n", "<leader>ft", "<Cmd>ToggleTerm direction=float<CR>", {
+      desc = "Float terminal",
+      silent = true,
+    })
   end,
 }

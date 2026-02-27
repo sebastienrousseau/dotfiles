@@ -58,6 +58,14 @@ repos:
       - id: detect-private-key
         exclude: \.pub$  # Allow public keys
 
+  # Conventional commit message validation
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.6.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: [feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert]
+
   # Dockerfile linting
   - repo: https://github.com/hadolint/hadolint
     rev: v2.12.0
