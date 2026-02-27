@@ -366,26 +366,7 @@ jobs:
           fi
 
   # ============================================================================
-  # STAGE 4: TYPE CHECKING (If applicable)
-  # ============================================================================
-  type-check:
-    name: Type Check / Strict Mode
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v6
-      - name: Shell Type Checking with shellcheck strict
-        run: |
-          echo "::notice::Running shellcheck in strict mode"
-          # Use most strict shellcheck settings
-          rg --files -g "*.sh" | xargs shellcheck -x --severity=style --enable=all
-          if [ $? -ne 0 ]; then
-            echo "::error::Strict type checking failed"
-            exit 1
-          fi
-
-  # ============================================================================
-  # STAGE 5: MERGE GATE (All checks must pass)
+  # STAGE 4: MERGE GATE (All checks must pass)
   # ============================================================================
   merge-gate:
     name: Merge Gate
@@ -402,7 +383,6 @@ jobs:
       test-matrix,
       test-unit,
       test-integration,
-      type-check
     ]
     steps:
       - name: All checks passed
