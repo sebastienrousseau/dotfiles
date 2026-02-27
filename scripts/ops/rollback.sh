@@ -161,7 +161,7 @@ create_backup() {
       dest_dir=$(dirname "$backup_path/$rel_path")
       mkdir -p "$dest_dir"
       cp -a "$target" "$backup_path/$rel_path" 2>/dev/null || true
-      ((backed_up++))
+      ((backed_up++)) || true
       [[ "$VERBOSE" == "1" ]] && log_info "Backed up: $rel_path"
     fi
   done
@@ -242,7 +242,7 @@ perform_rollback() {
       dest_dir=$(dirname "$dest")
       mkdir -p "$dest_dir"
       cp -a "$file" "$dest"
-      ((restored++))
+      ((restored++)) || true
       [[ "$VERBOSE" == "1" ]] && log_info "Restored: $rel_path"
     fi
   done < <(find "$backup_path" -type f -print0)
