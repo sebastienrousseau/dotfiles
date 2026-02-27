@@ -62,7 +62,7 @@ if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]
   pnpx() { _lazy_load_fnm; command pnpx "$@"; }
 fi
 {{- end }}
-{{- /* When node_manager = "mise", Node.js is handled by mise activate in dot_zshrc.tmpl */ -}}
+{{- /* When node_manager = "mise", Node.js is handled by mise activate in dot_zshrc.tmpl */}}
 
 # Tool completions — generate once into ZSH_COMPLETIONS_DIR
 if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]]; then
