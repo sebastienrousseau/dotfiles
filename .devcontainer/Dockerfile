@@ -18,7 +18,6 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
     shellcheck \
     tmux \
     unzip \
-    wget \
     zsh \
     && rm -rf /var/lib/apt/lists/*
 
@@ -30,11 +29,11 @@ RUN sh -c "$(curl -fsSL https://starship.rs/install.sh)" -- -y
 
 # Install eza (modern ls)
 RUN mkdir -p /etc/apt/keyrings \
-    && wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc \
-       | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg \
+    && curl -fsSL https://raw.githubusercontent.com/eza-community/eza/main/deb.asc \
+        | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg \
     && echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" \
-       | tee /etc/apt/sources.list.d/gierens.list >/dev/null \
-    && apt-get update -qq && apt-get install -y eza \
+        | tee /etc/apt/sources.list.d/gierens.list >/dev/null \
+    && apt-get update -qq && apt-get install -y --no-install-recommends eza \
     && rm -rf /var/lib/apt/lists/*
 
 # Install zoxide
@@ -45,5 +44,5 @@ RUN curl -fsSL https://mise.jdx.dev/install.sh | sh \
     && ln -sf /root/.local/bin/mise /usr/local/bin/mise
 
 # fd-find and bat are named differently on Debian/Ubuntu
-RUN ln -sf /usr/bin/fdfind /usr/local/bin/fd 2>/dev/null || true \
-    && ln -sf /usr/bin/batcat /usr/local/bin/bat 2>/dev/null || true
+RUN ln -sf /usr/bin/fdfind /usr/local/bin/fd 2>/dev/null || true
+RUN ln -sf /usr/bin/batcat /usr/local/bin/bat 2>/dev/null || true
