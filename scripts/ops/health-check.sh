@@ -68,13 +68,13 @@ fi
 # Results collection for JSON
 declare -a RESULTS=()
 
-log_info() { [[ "$VERBOSE" == "1" ]] && echo -e "${BLUE}[INFO]${NC} $*" || true; }
-log_pass() { echo -e "${GREEN}[PASS]${NC} $*"; }
+log_info() { [[ "$VERBOSE" == "1" ]] && printf '%b\n' "${BLUE}[INFO]${NC} $*" || true; }
+log_pass() { printf '%b\n' "${GREEN}[PASS]${NC} $*"; }
 log_fail() {
-  echo -e "${RED}[FAIL]${NC} $*"
+  printf '%b\n' "${RED}[FAIL]${NC} $*"
   EXIT_CODE=1
 }
-log_warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
+log_warn() { printf '%b\n' "${YELLOW}[WARN]${NC} $*"; }
 
 add_result() {
   local name="$1" status="$2" message="${3:-}"
@@ -401,9 +401,9 @@ main() {
     echo ""
     echo "=========================================="
     if [[ $EXIT_CODE -eq 0 ]]; then
-      echo -e "${GREEN}${BOLD}Health Check: PASSED${NC}"
+      printf '%b\n' "${GREEN}${BOLD}Health Check: PASSED${NC}"
     else
-      echo -e "${RED}${BOLD}Health Check: FAILED${NC}"
+      printf '%b\n' "${RED}${BOLD}Health Check: FAILED${NC}"
     fi
     echo "=========================================="
   fi

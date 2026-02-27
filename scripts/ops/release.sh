@@ -18,11 +18,11 @@ else
   RED='' GREEN='' YELLOW='' BLUE='' BOLD='' NC=''
 fi
 
-log_info() { echo -e "${BLUE}[INFO]${NC} $*"; }
-log_success() { echo -e "${GREEN}[OK]${NC} $*"; }
-log_warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $*" >&2; }
-log_step() { echo -e "\n${BOLD}── $* ──${NC}"; }
+log_info() { printf '%b\n' "${BLUE}[INFO]${NC} $*"; }
+log_success() { printf '%b\n' "${GREEN}[OK]${NC} $*"; }
+log_warn() { printf '%b\n' "${YELLOW}[WARN]${NC} $*"; }
+log_error() { printf '%b\n' "${RED}[ERROR]${NC} $*" >&2; }
+log_step() { printf '%b\n' "\n${BOLD}── $* ──${NC}"; }
 
 usage() {
   cat <<EOF
@@ -113,7 +113,7 @@ main() {
   current_version=$(get_version)
   new_version=$(bump_version "$current_version" "$bump_type")
 
-  echo -e "${BOLD}Dotfiles Release${NC}"
+  printf '%b\n' "${BOLD}Dotfiles Release${NC}"
   echo "  Current:  v${current_version}"
   echo "  Next:     v${new_version} (${bump_type})"
   echo ""

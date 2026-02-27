@@ -63,12 +63,12 @@ set_default_aliases() {
   alias reboot='sudo shutdown -r now'
 
   ## Network aliases
-  # Append sudo to ifconfig (configure network interface parameters)
-  # command.
-  alias ifconfig='sudo ifconfig'
-
-  # Get network interface parameters for en0.
-  alias ipinfo='ipconfig getpacket en0'
+  # Prefer `ip` on Linux, fall back to ifconfig on macOS
+  if command -v ip >/dev/null 2>&1; then
+    alias ipinfo='ip -br addr'
+  elif [[ "$(uname)" == "Darwin" ]]; then
+    alias ipinfo='ipconfig getpacket en0'
+  fi
 
   # Limit Ping to 5 ECHO_REQUEST packets.
   alias ping='ping -c 5'
