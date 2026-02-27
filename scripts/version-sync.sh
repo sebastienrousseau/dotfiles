@@ -47,7 +47,7 @@ log_error() {
 }
 
 show_help() {
-  cat << EOF
+  cat <<EOF
 Version Synchronization Script
 
 USAGE:
@@ -123,11 +123,11 @@ find_version_files() {
 
   # Find all markdown files with version patterns
   cd "$PROJECT_ROOT"
-  rg -l "v?$VERSION_PATTERN" --type md > "$temp_file" 2>/dev/null || true
+  rg -l "v?$VERSION_PATTERN" --type md >"$temp_file" 2>/dev/null || true
 
   # Add known files that should be checked even if they don't have versions yet
-  echo "README.md" >> "$temp_file"
-  echo "docs/FEATURES.md" >> "$temp_file"
+  echo "README.md" >>"$temp_file"
+  echo "docs/FEATURES.md" >>"$temp_file"
 
   # Remove duplicates and filter existing files
   sort -u "$temp_file" | while IFS= read -r file; do
@@ -310,19 +310,19 @@ main() {
   # Parse arguments
   while [[ $# -gt 0 ]]; do
     case $1 in
-      -h|--help)
+      -h | --help)
         show_help
         exit 0
         ;;
-      -d|--dry-run)
+      -d | --dry-run)
         dry_run="true"
         shift
         ;;
-      -v|--verify)
+      -v | --verify)
         verify_only="true"
         shift
         ;;
-      -b|--backup)
+      -b | --backup)
         create_backup_flag="true"
         shift
         ;;
@@ -330,7 +330,7 @@ main() {
         create_backup_flag="false"
         shift
         ;;
-      -f|--force)
+      -f | --force)
         force_sync="true"
         shift
         ;;
@@ -383,6 +383,45 @@ main() {
     create_backup "${version_files[@]}"
   fi
 
+  # Sync chezmoidata.toml (single source of truth for template files)
+  local chezmoidata="$PROJECT_ROOT/.chezmoidata.toml"
+  if [[ -f "$chezmoidata" ]]; then
+    if [[ "$dry_run" == "true" ]]; then
+      log_info "Would update .chezmoidata.toml: dotfiles_version = \"$target_version\""
+    else
+      sed_in_place "$chezmoidata" \
+        "s|^dotfiles_version = \"$SED_VERSION_PATTERN\"|dotfiles_version = \"$target_version\"|"
+      log_success "Updated .chezmoidata.toml"
+    fi
+  fi
+
+  # Sync non-template script files that embed the version
+  local script_files=(
+    "dot_local/bin/executable_dot"
+    "dot_local/bin/executable_tour"
+    "install.sh"
+  )
+  for script_file in "${script_files[@]}"; do
+    local full_path="$PROJECT_ROOT/$script_file"
+    if [[ -f "$full_path" ]]; then
+      local temp_file
+      temp_file=$(umask 077 && mktemp)
+      cp "$full_path" "$temp_file"
+      sed_in_place "$temp_file" "s|v$SED_VERSION_PATTERN|v$target_version|g"
+      sed_in_place "$temp_file" "s|\"$SED_VERSION_PATTERN\"|\"$target_version\"|g"
+      if ! cmp -s "$full_path" "$temp_file"; then
+        if [[ "$dry_run" == "true" ]]; then
+          log_info "Would update: $script_file"
+        else
+          mv "$temp_file" "$full_path"
+          log_success "Updated: $script_file"
+        fi
+      else
+        rm -f "$temp_file"
+      fi
+    fi
+  done
+
   # Update version references
   local changes_made
   changes_made="$(update_version_references "$target_version" "$dry_run" "${version_files[@]}")"
@@ -395,7 +434,7 @@ main() {
           log_success "Version synchronization completed successfully"
 
           # Show summary
-          cat << EOF
+          cat <<EOF
 
 ═══════════════════════════════════════
 Version Sync Summary
@@ -421,12 +460,12 @@ EOF
 }
 
 # Ensure we have required tools
-if ! command -v jq &> /dev/null; then
+if ! command -v jq &>/dev/null; then
   log_error "jq is required but not installed"
   exit 1
 fi
 
-if ! command -v rg &> /dev/null; then
+if ! command -v rg &>/dev/null; then
   log_error "ripgrep (rg) is required but not installed"
   exit 1
 fi
