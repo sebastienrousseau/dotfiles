@@ -113,7 +113,7 @@ shell_startup_threshold = 200
 # Default AI provider for CLI tools
 default_provider = "anthropic"
 # Available models
-claude_model = "claude-sonnet-4-5-20250929"
+claude_model = "claude-opus-4-6"
 openai_model = "gpt-4o"
 # Local model for offline use
 local_model = "llama3.2"
