@@ -1,23 +1,51 @@
 {
 	"name": "Dotfiles Dev Environment",
-	"image": "mcr.microsoft.com/devcontainers/base:ubuntu@sha256:3dcb059253b2ebb44de3936620e1cff3dadcd2c1c982d579081ca8128c1eb319",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": ".."
+	},
 	"features": {
 		"ghcr.io/devcontainers/features/common-utils:2": {
 			"installZsh": true,
 			"configureZshAsDefaultShell": true
-		}
+		},
+		"ghcr.io/devcontainers/features/git:1": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {}
 	},
-	"postCreateCommand": ".devcontainer/install-lite.sh",
+	"postCreateCommand": ".devcontainer/install-full.sh",
 	"remoteUser": "vscode",
+	"containerEnv": {
+		"DOTFILES_PROFILE": "server",
+		"DOTFILES_NONINTERACTIVE": "1",
+		"DOTFILES_CONTAINER": "1"
+	},
 	"customizations": {
 		"vscode": {
 			"settings": {
-				"terminal.integrated.defaultProfile.linux": "zsh"
+				"terminal.integrated.defaultProfile.linux": "zsh",
+				"editor.fontFamily": "JetBrainsMono Nerd Font, monospace",
+				"editor.formatOnSave": true
+			},
+			"extensions": [
+				"foxundermoon.shell-format",
+				"timonwong.shellcheck",
+				"EditorConfig.EditorConfig"
+			]
+		},
+		"codespaces": {
+			"repositories": {
+				"sebastienrousseau/dotfiles": {
+					"permissions": {
+						"contents": "read"
+					}
+				}
 			}
 		}
 	},
 	"mounts": [
 		"source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,readonly",
 		"source=${localEnv:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,readonly"
-	]
+	],
+	"forwardPorts": [],
+	"shutdownAction": "stopContainer"
 }

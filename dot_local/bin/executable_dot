@@ -58,6 +58,7 @@ show_help() {
     echo "  secrets         Edit encrypted secrets (age)"
     echo "  secrets-create  Create an encrypted secrets file"
     echo "  ssh-key         Encrypt an SSH key locally with age"
+    echo "  ssh-cert        Manage short-lived SSH certificates (issue/status/revoke)"
     echo ""
     echo "Security (opt-in):"
     echo "  backup        Create a compressed backup of your home"
@@ -386,6 +387,7 @@ PY
     usb-safety)    run_script "scripts/security/usb-safety.sh" "USB safety script" "$@" ;;
     backup)        run_script "scripts/security/backup.sh" "Backup script" "$@" ;;
     ssh-key) run_script "scripts/secrets/encrypt-ssh-key.sh" "SSH key encryption script" "$@" ;;
+    ssh-cert) run_script "scripts/security/ssh-cert.sh" "SSH certificate script" "$@" ;;
     secrets-init)
         SRC_DIR="$(resolve_source_dir)"
         if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/secrets/age-init.sh" ]; then
