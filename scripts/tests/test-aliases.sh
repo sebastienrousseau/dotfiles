@@ -6,20 +6,26 @@
 # Script: test-aliases.sh
 # Description: Verifies disjoint alias files for syntax errors.
 
-set -e
+set -euo pipefail
 
 echo "Testing alias syntax..."
 
 ALIAS_DIR="$HOME/.dotfiles/.chezmoitemplates/aliases"
+fail=0
 
-find "$ALIAS_DIR" -name "*.aliases.sh" | while read -r file; do
-  # Check for syntax errors using bash -n
+# Use process substitution so the while loop runs in the main shell,
+# allowing the fail variable to propagate correctly.
+while IFS= read -r file; do
   if bash -n "$file"; then
     echo " Checked: $(basename "$file")"
   else
     echo " Syntax Error: $(basename "$file")"
-    exit 1
+    fail=1
   fi
-done
+done < <(find "$ALIAS_DIR" -name "*.aliases.sh")
+
+if [[ "$fail" -ne 0 ]]; then
+  exit 1
+fi
 
 echo "All alias files passed syntax check."
