@@ -1,0 +1,10 @@
+
+# <type>: <subject> (max 50 chars)
+#
+# Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore
+#
+# Body: explain WHAT and WHY (not HOW) — wrap at 72 chars
+#
+# Footer: reference issues, breaking changes
+# Fixes #123
+# BREAKING CHANGE: description
