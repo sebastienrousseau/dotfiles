@@ -1,3 +1,4 @@
+// Copyright (c) 2015-2026 . All rights reserved.
 // Minimal Firefox user.js defaults (review before use).
 /* global user_pref */
 user_pref("browser.startup.page", 3);
