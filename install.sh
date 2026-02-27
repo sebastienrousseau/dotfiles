@@ -31,6 +31,37 @@ error() {
   exit 1
 }
 
+# Help flag
+case "${1:-}" in
+  -h | --help | help)
+    cat <<HELP
+Dotfiles Universal Installer
+
+Usage:
+  ./install.sh [VERSION]
+  sh -c "\$(curl -fsSL https://dotfiles.io/install.sh)"
+
+Arguments:
+  VERSION    Git tag to install (default: v0.2.490)
+
+Environment Variables:
+  DOTFILES_NONINTERACTIVE=1    Skip interactive prompts
+
+Steps performed:
+  1. Detect OS and architecture
+  2. Install system package manager (Homebrew/apt/dnf/pacman)
+  3. Install chezmoi (verified download)
+  4. Clone dotfiles repository
+  5. Apply dotfiles via chezmoi
+HELP
+    exit 0
+    ;;
+esac
+
+# Cleanup on unexpected exit
+_install_cleanup() { rm -f "${CHEZMOI_INSTALLER:-}"; }
+trap _install_cleanup EXIT
+
 # 1. Detect Environment
 step "Detecting Environment..."
 OS="$(uname -s)"
