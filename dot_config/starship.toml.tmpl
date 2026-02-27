@@ -44,6 +44,42 @@ truncation_symbol = "…/"
 min_time = 2000
 format = "took [$duration]($style) "
 
+# ---------- Language version indicators ---------- #
+[rust]
+format = "[$symbol($version)]($style) "
+symbol = "rs "
+
+[python]
+format = "[$symbol$pyenv_prefix($version)( \\($virtualenv\\))]($style) "
+symbol = "py "
+
+[nodejs]
+format = "[$symbol($version)]($style) "
+symbol = "node "
+detect_files = ["package.json", ".node-version"]
+
+[golang]
+format = "[$symbol($version)]($style) "
+symbol = "go "
+
+# ---------- Kubernetes context ---------- #
+[kubernetes]
+disabled = false
+format = "[$symbol$context( \\($namespace\\))]($style) "
+symbol = "k8s "
+style = "bold cyan"
+detect_files = ["k8s", "kubernetes", "Tiltfile"]
+detect_folders = ["charts", "kustomize"]
+[kubernetes.context_aliases]
+"arn:aws:eks:.*:.*:cluster/(?P<name>.*)" = "$name"
+
+# ---------- Nix shell indicator ---------- #
+[nix_shell]
+disabled = false
+format = "[$symbol$state( \\($name\\))]($style) "
+symbol = "nix "
+style = "bold blue"
+
 # ---------- Container-aware fallback ---------- #
 # When DOTFILES_CONTAINER=1, show a lightweight indicator so the user
 # knows they are inside a container.  Uses only ASCII-safe characters

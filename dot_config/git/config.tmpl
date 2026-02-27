@@ -34,24 +34,37 @@
 
 [gpg]
     format = {{ $git_signingformat }}
+
+[gpg "ssh"]
+    allowedSignersFile = {{ .chezmoi.homeDir }}/.ssh/allowed_signers
 {{- end }}
+
+[init]
+    defaultBranch = main
 
 [core]
     editor = vim
     excludesfile = {{ .chezmoi.homeDir }}/.config/git/ignore
     attributesFile = {{ .chezmoi.homeDir }}/.config/git/attributes
 
-[init]
-    defaultBranch = main
-
 [fetch]
     prune = true
+    fsckObjects = true
+
+[transfer]
+    fsckObjects = true
+
+[receive]
+    fsckObjects = true
 
 [push]
     autoSetupRemote = true
 
 [pull]
     rebase = true
+
+[merge]
+    verifySignatures = false
 
 [rerere]
     enabled = true
