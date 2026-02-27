@@ -7,8 +7,7 @@ _CD_BOOKMARKS_LOADED=1
 bookmark_list() {
   if [[ -f "${BOOKMARK_FILE}" ]]; then
     echo "Available bookmarks:"
-    # shellcheck disable=SC2002
-    cat "${BOOKMARK_FILE}" | sed 's/:/\t/' | column -t
+    sed 's/:/\t/' < "${BOOKMARK_FILE}" | column -t
   else
     echo "No bookmarks found."
   fi

@@ -55,7 +55,7 @@ encode64() {
   # Encode input to base64
   if [[ $# -eq 0 ]]; then
     # Process input from stdin
-    cat | base64
+    base64
   else
     # Process input from arguments
     printf '%s' "$1" | base64
@@ -89,7 +89,7 @@ decode64() {
   # Decode input from base64
   if [[ $# -eq 0 ]]; then
     # Process input from stdin
-    cat | base64 --decode
+    base64 --decode
   else
     # Process input from arguments
     printf '%s\n' "$1" | base64 --decode

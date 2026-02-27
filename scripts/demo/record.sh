@@ -1,5 +1,5 @@
-#!/bin/sh
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
 OUT="${1:-$HOME/.dotfiles/docs/demo/demo.gif}"
 DURATION="${DURATION:-30}"
