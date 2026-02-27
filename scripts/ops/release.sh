@@ -18,11 +18,11 @@ else
   RED='' GREEN='' YELLOW='' BLUE='' BOLD='' NC=''
 fi
 
-log_info()    { echo -e "${BLUE}[INFO]${NC} $*"; }
+log_info() { echo -e "${BLUE}[INFO]${NC} $*"; }
 log_success() { echo -e "${GREEN}[OK]${NC} $*"; }
-log_warn()    { echo -e "${YELLOW}[WARN]${NC} $*"; }
-log_error()   { echo -e "${RED}[ERROR]${NC} $*" >&2; }
-log_step()    { echo -e "\n${BOLD}── $* ──${NC}"; }
+log_warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
+log_error() { echo -e "${RED}[ERROR]${NC} $*" >&2; }
+log_step() { echo -e "\n${BOLD}── $* ──${NC}"; }
 
 usage() {
   cat <<EOF
@@ -63,12 +63,18 @@ get_version() {
 bump_version() {
   local current="$1" bump_type="$2"
   local major minor patch
-  IFS='.' read -r major minor patch <<< "$current"
+  IFS='.' read -r major minor patch <<<"$current"
 
   case "$bump_type" in
     patch) patch=$((patch + 1)) ;;
-    minor) minor=$((minor + 1)); patch=0 ;;
-    *)     log_error "Unknown bump type: $bump_type"; exit 1 ;;
+    minor)
+      minor=$((minor + 1))
+      patch=0
+      ;;
+    *)
+      log_error "Unknown bump type: $bump_type"
+      exit 1
+      ;;
   esac
 
   echo "${major}.${minor}.${patch}"
@@ -81,10 +87,23 @@ main() {
   # Parse arguments
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      patch|minor)   bump_type="$1"; shift ;;
-      -n|--dry-run)  dry_run=1; shift ;;
-      -h|--help)     usage; exit 0 ;;
-      *)             log_error "Unknown argument: $1"; usage; exit 1 ;;
+      patch | minor)
+        bump_type="$1"
+        shift
+        ;;
+      -n | --dry-run)
+        dry_run=1
+        shift
+        ;;
+      -h | --help)
+        usage
+        exit 0
+        ;;
+      *)
+        log_error "Unknown argument: $1"
+        usage
+        exit 1
+        ;;
     esac
   done
 
