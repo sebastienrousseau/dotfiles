@@ -20,7 +20,7 @@ extract() {
   local filename="$1"
 
   # Create extract directory for archives with multiple files
-  if [ "$2" = "-d" ] && [ ! -z "$3" ]; then
+  if [ "$2" = "-d" ] && [ -n "$3" ]; then
     mkdir -p "$3"
     cd "$3" || return 1
   fi

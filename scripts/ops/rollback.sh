@@ -40,7 +40,7 @@ fi
 
 # Logging
 ui_init
-log() { echo -e "$*"; }
+log() { printf '%b\n' "$*"; }
 log_info() { ui_info "$*"; }
 log_success() { ui_ok "$*"; }
 log_warn() { ui_warn "$*"; }
