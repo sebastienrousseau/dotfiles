@@ -115,7 +115,7 @@ jobs:
       - name: Nix Format Check (Fail on Unformatted)
         run: |
           echo "::notice::Checking Nix format - will fail on any unformatted code"
-          nix fmt ./nix
+          (cd nix && nix fmt .)
           if ! git diff --exit-code -- nix/; then
             echo "::error::Nix formatting check failed - code is not properly formatted"
             exit 1
