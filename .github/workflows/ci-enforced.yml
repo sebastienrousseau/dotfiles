@@ -84,8 +84,8 @@ jobs:
           sudo apt-get update && sudo apt-get install -y lua5.1 luarocks
           luarocks install --local luacheck
           echo "$HOME/.luarocks/bin" >> $GITHUB_PATH
-          # Install stylua with version pinning
-          cargo install stylua --version "0.20.0"
+          # Install stylua with version pinning (skip if cached)
+          [[ -x ~/.cargo/bin/stylua ]] || cargo install stylua --version "0.20.0"
       - name: Luacheck (Zero Warnings Enforced)
         run: |
           echo "::notice::Enforcing zero-warning policy for luacheck"
@@ -115,8 +115,8 @@ jobs:
       - name: Nix Format Check (Fail on Unformatted)
         run: |
           echo "::notice::Checking Nix format - will fail on any unformatted code"
-          nix fmt ./nix --check
-          if [ $? -ne 0 ]; then
+          nix fmt ./nix
+          if ! git diff --exit-code -- nix/; then
             echo "::error::Nix formatting check failed - code is not properly formatted"
             exit 1
           fi
