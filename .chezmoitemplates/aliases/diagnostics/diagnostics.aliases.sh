@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+# shellcheck shell=bash
 # Diagnostics & Self-Healing Aliases
 
 # Health Check

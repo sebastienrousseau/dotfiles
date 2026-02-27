@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+# shellcheck shell=bash
 # Git Signing & Security Aliases
 # Simplifies GPG/SSH signing configuration.
 
