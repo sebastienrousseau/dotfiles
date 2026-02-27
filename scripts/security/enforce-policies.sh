@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # Security Policy Enforcement Script
 # This script enforces security policies across the dotfiles repository
 

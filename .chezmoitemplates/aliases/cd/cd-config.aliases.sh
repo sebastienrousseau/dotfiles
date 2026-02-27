@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # CD Navigation - Configuration and Variables
 [[ -n "${_CD_CONFIG_LOADED:-}" ]] && :
 _CD_CONFIG_LOADED=1

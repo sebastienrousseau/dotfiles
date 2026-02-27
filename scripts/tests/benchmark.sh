@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 
 # standard-benchmarks.sh
 # Measures shell startup time (total and per-component).

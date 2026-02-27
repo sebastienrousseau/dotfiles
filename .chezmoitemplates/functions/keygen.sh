@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # Description:
 #   keygen is a utility function to generate high-quality SSH key pairs with
 #   strong encryption and entropy. Supports ed25519, RSA, and ECDSA keys

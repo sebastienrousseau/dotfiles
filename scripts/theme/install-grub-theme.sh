@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 set -euo pipefail
 
 THEME_SRC="${DOTFILES_GRUB_THEME_DIR:-$HOME/.config/dotfiles/grub/theme}"

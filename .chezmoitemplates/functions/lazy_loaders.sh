@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # Lazy Loaders for Heavy Tools
 
 # NVM (Node Version Manager)

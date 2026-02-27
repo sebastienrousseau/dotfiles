@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # Version Synchronization Script
 # Synchronizes version numbers across all markdown files with package.json
 # Used by CI/CD and available for local testing

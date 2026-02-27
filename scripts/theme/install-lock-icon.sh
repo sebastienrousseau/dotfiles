@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 set -euo pipefail
 
 icon_path="${DOTFILES_LOCK_ICON:-$HOME/.config/dotfiles/lock/icon.png}"

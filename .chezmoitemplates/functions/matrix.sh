@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # Description:
 #   matrix is a utility function to generate Matrix-style effects in the terminal
 #   with customizable colors. It supports multiple color themes and a rainbow
