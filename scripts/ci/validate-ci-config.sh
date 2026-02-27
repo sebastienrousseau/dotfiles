@@ -7,16 +7,17 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+# Colors for output (respect NO_COLOR: https://no-color.org)
+if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
+  RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[0;33m'
+  BLUE='\033[0;34m' NC='\033[0m'
+else
+  RED='' GREEN='' YELLOW='' BLUE='' NC=''
+fi
 
-echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${BLUE}      CI CONFIGURATION VALIDATOR      ${NC}"
-echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+printf '%b\n' "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+printf '%b\n' "${BLUE}      CI CONFIGURATION VALIDATOR      ${NC}"
+printf '%b\n' "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
 ERRORS=0
@@ -28,10 +29,10 @@ check_file_exists() {
   local description="$2"
 
   if [[ -f "$file" ]]; then
-    echo -e "  ${GREEN}✓${NC} $description"
+    printf '%b\n' "  ${GREEN}✓${NC} $description"
     return 0
   else
-    echo -e "  ${RED}✗${NC} $description"
+    printf '%b\n' "  ${RED}✗${NC} $description"
     ((ERRORS++))
     return 1
   fi
@@ -43,10 +44,10 @@ check_pattern_in_file() {
   local description="$3"
 
   if [[ -f "$file" ]] && grep -q "$pattern" "$file"; then
-    echo -e "  ${GREEN}✓${NC} $description"
+    printf '%b\n' "  ${GREEN}✓${NC} $description"
     return 0
   else
-    echo -e "  ${RED}✗${NC} $description"
+    printf '%b\n' "  ${RED}✗${NC} $description"
     ((ERRORS++))
     return 1
   fi
@@ -58,17 +59,17 @@ warn_if_pattern() {
   local description="$3"
 
   if [[ -f "$file" ]] && grep -q "$pattern" "$file"; then
-    echo -e "  ${YELLOW}⚠${NC} $description"
+    printf '%b\n' "  ${YELLOW}⚠${NC} $description"
     ((WARNINGS++))
     return 1
   else
-    echo -e "  ${GREEN}✓${NC} $description"
+    printf '%b\n' "  ${GREEN}✓${NC} $description"
     return 0
   fi
 }
 
 # Check 1: Core CI files exist
-echo -e "${BLUE}1. Core CI Files${NC}"
+printf '%b\n' "${BLUE}1. Core CI Files${NC}"
 check_file_exists "$REPO_ROOT/.github/workflows/ci.yml" "Main CI workflow exists"
 check_file_exists "$REPO_ROOT/.github/workflows/nightly.yml" "Nightly workflow exists"
 check_file_exists "$REPO_ROOT/.github/workflows/security-enhanced.yml" "Security workflow exists"
@@ -76,7 +77,7 @@ check_file_exists "$REPO_ROOT/config/pre-commit-config.yaml" "Pre-commit configu
 echo ""
 
 # Check 2: Zero-warning enforcement
-echo -e "${BLUE}2. Zero-Warning Policy Enforcement${NC}"
+printf '%b\n' "${BLUE}2. Zero-Warning Policy Enforcement${NC}"
 check_pattern_in_file "$REPO_ROOT/.github/workflows/ci.yml" "zero-warning" "Zero-warning policy documented"
 check_pattern_in_file "$REPO_ROOT/.github/workflows/ci.yml" "fail on unformatted code" "Formatter failure enforced"
 check_pattern_in_file "$REPO_ROOT/.github/workflows/ci.yml" "warnings-as-errors" "Warnings treated as errors"
@@ -87,20 +88,20 @@ warn_if_pattern "$REPO_ROOT/.github/workflows/ci.yml" "shellcheck.*||.*true" "Sh
 echo ""
 
 # Check 3: Test coverage requirements
-echo -e "${BLUE}3. Test Coverage Requirements${NC}"
+printf '%b\n' "${BLUE}3. Test Coverage Requirements${NC}"
 check_pattern_in_file "$REPO_ROOT/.github/workflows/ci.yml" "100%" "100% coverage requirement"
 check_pattern_in_file "$REPO_ROOT/.github/workflows/ci.yml" "fail-under" "Coverage threshold enforcement"
 
 if [[ -f "$REPO_ROOT/scripts/tests/framework/test_runner.sh" ]]; then
-  echo -e "  ${GREEN}✓${NC} Test framework exists"
+  printf '%b\n' "  ${GREEN}✓${NC} Test framework exists"
 else
-  echo -e "  ${RED}✗${NC} Test framework missing"
+  printf '%b\n' "  ${RED}✗${NC} Test framework missing"
   ((ERRORS++))
 fi
 echo ""
 
 # Check 4: Security scanning
-echo -e "${BLUE}4. Security Scanning Configuration${NC}"
+printf '%b\n' "${BLUE}4. Security Scanning Configuration${NC}"
 check_pattern_in_file "$REPO_ROOT/.github/workflows/ci.yml" "security-secrets" "Secret scanning enabled"
 check_pattern_in_file "$REPO_ROOT/.github/workflows/ci.yml" "security-dependencies" "Dependency audit enabled"
 check_pattern_in_file "$REPO_ROOT/config/pre-commit-config.yaml" "gitleaks" "Pre-commit secret scanning"
@@ -112,32 +113,32 @@ warn_if_pattern "$REPO_ROOT/.github/workflows/ci.yml" "wget.*|.*bash" "Dangerous
 echo ""
 
 # Check 5: Performance monitoring
-echo -e "${BLUE}5. Performance Monitoring${NC}"
+printf '%b\n' "${BLUE}5. Performance Monitoring${NC}"
 check_pattern_in_file "$REPO_ROOT/.github/workflows/ci.yml" "benchmark" "Performance benchmarking enabled"
 check_pattern_in_file "$REPO_ROOT/.github/workflows/ci.yml" "500ms" "Shell startup threshold defined"
 check_pattern_in_file "$REPO_ROOT/.github/workflows/nightly.yml" "performance-tracking" "Nightly performance tracking"
 echo ""
 
 # Check 6: Multi-OS support
-echo -e "${BLUE}6. Multi-OS Testing${NC}"
+printf '%b\n' "${BLUE}6. Multi-OS Testing${NC}"
 check_pattern_in_file "$REPO_ROOT/.github/workflows/ci.yml" "ubuntu-latest" "Linux testing enabled"
 check_pattern_in_file "$REPO_ROOT/.github/workflows/ci.yml" "macos-latest" "macOS testing enabled"
 check_pattern_in_file "$REPO_ROOT/.github/workflows/nightly.yml" "matrix:" "OS matrix testing configured"
 echo ""
 
 # Check 7: Timeouts and efficiency
-echo -e "${BLUE}7. Timeout and Efficiency Settings${NC}"
+printf '%b\n' "${BLUE}7. Timeout and Efficiency Settings${NC}"
 if grep -q "timeout-minutes: [0-9]" "$REPO_ROOT/.github/workflows/ci.yml"; then
   MAX_TIMEOUT=$(grep "timeout-minutes:" "$REPO_ROOT/.github/workflows/ci.yml" |
     awk '{print $2}' | sort -n | tail -1)
   if [[ $MAX_TIMEOUT -le 15 ]]; then
-    echo -e "  ${GREEN}✓${NC} Job timeouts properly configured (max: ${MAX_TIMEOUT}min)"
+    printf '%b\n' "  ${GREEN}✓${NC} Job timeouts properly configured (max: ${MAX_TIMEOUT}min)"
   else
-    echo -e "  ${YELLOW}⚠${NC} Some jobs have long timeouts (max: ${MAX_TIMEOUT}min)"
+    printf '%b\n' "  ${YELLOW}⚠${NC} Some jobs have long timeouts (max: ${MAX_TIMEOUT}min)"
     ((WARNINGS++))
   fi
 else
-  echo -e "  ${RED}✗${NC} No timeout configuration found"
+  printf '%b\n' "  ${RED}✗${NC} No timeout configuration found"
   ((ERRORS++))
 fi
 
@@ -145,7 +146,7 @@ check_pattern_in_file "$REPO_ROOT/.github/workflows/ci.yml" "cache" "Dependency 
 echo ""
 
 # Check 8: Branch protection readiness
-echo -e "${BLUE}8. Branch Protection Readiness${NC}"
+printf '%b\n' "${BLUE}8. Branch Protection Readiness${NC}"
 check_file_exists "$REPO_ROOT/.github/BRANCH_PROTECTION.md" "Branch protection documentation"
 check_pattern_in_file "$REPO_ROOT/.github/workflows/ci.yml" "quality-gate" "Quality gate job defined"
 
@@ -160,44 +161,44 @@ REQUIRED_CHECKS=(
 
 for check in "${REQUIRED_CHECKS[@]}"; do
   if grep -q "name:.*$check" "$REPO_ROOT/.github/workflows/ci.yml"; then
-    echo -e "  ${GREEN}✓${NC} Required check '$check' defined"
+    printf '%b\n' "  ${GREEN}✓${NC} Required check '$check' defined"
   else
-    echo -e "  ${RED}✗${NC} Required check '$check' missing"
+    printf '%b\n' "  ${RED}✗${NC} Required check '$check' missing"
     ((ERRORS++))
   fi
 done
 echo ""
 
 # Check 9: Nightly extended testing
-echo -e "${BLUE}9. Nightly Extended Testing${NC}"
+printf '%b\n' "${BLUE}9. Nightly Extended Testing${NC}"
 if [[ -f "$REPO_ROOT/.github/workflows/nightly.yml" ]]; then
   check_pattern_in_file "$REPO_ROOT/.github/workflows/nightly.yml" "dependency-updates" "Dependency monitoring"
   check_pattern_in_file "$REPO_ROOT/.github/workflows/nightly.yml" "beta-tools-test" "Beta tool testing"
   check_pattern_in_file "$REPO_ROOT/.github/workflows/nightly.yml" "security-extended" "Extended security scanning"
   check_pattern_in_file "$REPO_ROOT/.github/workflows/nightly.yml" "cron:" "Scheduled execution"
 else
-  echo -e "  ${RED}✗${NC} Nightly workflow missing"
+  printf '%b\n' "  ${RED}✗${NC} Nightly workflow missing"
   ((ERRORS++))
 fi
 echo ""
 
 # Final summary
-echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${BLUE}           VALIDATION SUMMARY         ${NC}"
-echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+printf '%b\n' "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+printf '%b\n' "${BLUE}           VALIDATION SUMMARY         ${NC}"
+printf '%b\n' "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
 if [[ $ERRORS -eq 0 ]] && [[ $WARNINGS -eq 0 ]]; then
-  echo -e "${GREEN}✅ PERFECT: CI configuration fully compliant${NC}"
+  printf '%b\n' "${GREEN}✅ PERFECT: CI configuration fully compliant${NC}"
   echo "   - Zero-warning policy properly enforced"
   echo "   - All security gates configured"
   echo "   - Performance monitoring active"
   echo "   - Ready for branch protection"
 elif [[ $ERRORS -eq 0 ]]; then
-  echo -e "${YELLOW}⚠️  GOOD: CI mostly compliant with $WARNINGS warning(s)${NC}"
+  printf '%b\n' "${YELLOW}⚠️  GOOD: CI mostly compliant with $WARNINGS warning(s)${NC}"
   echo "   - Core functionality working"
   echo "   - Minor improvements recommended"
 else
-  echo -e "${RED}❌ ISSUES: CI configuration has $ERRORS error(s) and $WARNINGS warning(s)${NC}"
+  printf '%b\n' "${RED}❌ ISSUES: CI configuration has $ERRORS error(s) and $WARNINGS warning(s)${NC}"
   echo "   - Critical fixes required before deployment"
 fi
 

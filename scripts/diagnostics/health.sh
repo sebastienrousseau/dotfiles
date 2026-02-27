@@ -8,14 +8,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
-# Colors (fallback when gum is unavailable)
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-GRAY='\033[0;90m'
-NC='\033[0m'
+# Colors (fallback when gum is unavailable; respect NO_COLOR)
+if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
+  RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m'
+  BLUE='\033[0;34m' CYAN='\033[0;36m' GRAY='\033[0;90m' NC='\033[0m'
+else
+  RED='' GREEN='' YELLOW='' BLUE='' CYAN='' GRAY='' NC=''
+fi
 
 # Parse arguments (VERBOSE exported for potential use by sourced scripts)
 export VERBOSE=false
@@ -67,7 +66,7 @@ header() {
   if [[ "$use_ui" = "1" ]]; then
     ui_header "$text"
   else
-    echo -e "${CYAN}${text}${NC}"
+    printf '%b\n' "${CYAN}${text}${NC}"
   fi
 }
 
@@ -79,7 +78,7 @@ section() {
   if [[ "$use_ui" = "1" ]]; then
     ui_section "$text"
   else
-    echo -e "\n${BLUE}▸ $text${NC}"
+    printf '%b\n' "\n${BLUE}▸ $text${NC}"
   fi
 }
 
@@ -379,10 +378,10 @@ print_summary() {
     printf "  %-12s %s\n" "Warnings:" "$(gum style --foreground 3 "$WARNINGS")"
     printf "  %-12s %s\n" "Failures:" "$(gum style --foreground 1 "$FAILURES")"
   else
-    echo -e "  Total checks:  ${TOTAL_CHECKS}"
-    echo -e "  ${GREEN}Passed:${NC}        ${PASSED_CHECKS}"
-    echo -e "  ${YELLOW}Warnings:${NC}      ${WARNINGS}"
-    echo -e "  ${RED}Failures:${NC}      ${FAILURES}"
+    printf '%b\n' "  Total checks:  ${TOTAL_CHECKS}"
+    printf '%b\n' "  ${GREEN}Passed:${NC}        ${PASSED_CHECKS}"
+    printf '%b\n' "  ${YELLOW}Warnings:${NC}      ${WARNINGS}"
+    printf '%b\n' "  ${RED}Failures:${NC}      ${FAILURES}"
   fi
   echo ""
 
@@ -422,18 +421,18 @@ print_summary() {
   fi
 
   if [[ $score -ge 90 ]]; then
-    echo -e "  ${GREEN}⚡ Excellent! Your dotfiles are in great shape.${NC}"
+    printf '%b\n' "  ${GREEN}⚡ Excellent! Your dotfiles are in great shape.${NC}"
   elif [[ $score -ge 70 ]]; then
-    echo -e "  ${GREEN}✓ Good! Minor improvements possible.${NC}"
+    printf '%b\n' "  ${GREEN}✓ Good! Minor improvements possible.${NC}"
   elif [[ $score -ge 50 ]]; then
-    echo -e "  ${YELLOW}⚠ Fair. Consider addressing warnings.${NC}"
+    printf '%b\n' "  ${YELLOW}⚠ Fair. Consider addressing warnings.${NC}"
   else
-    echo -e "  ${RED}✗ Needs attention. Multiple issues found.${NC}"
+    printf '%b\n' "  ${RED}✗ Needs attention. Multiple issues found.${NC}"
   fi
 
   echo ""
   if [[ $WARNINGS -gt 0 || $FAILURES -gt 0 ]]; then
-    echo -e "  ${CYAN}Tip:${NC} Run 'dot health --fix' to auto-repair common issues."
+    printf '%b\n' "  ${CYAN}Tip:${NC} Run 'dot health --fix' to auto-repair common issues."
     echo ""
   fi
 }
@@ -455,7 +454,7 @@ if $APPLY_FIX; then
     fi
   else
     if ! $JSON_OUTPUT; then
-      echo -e "${YELLOW}⚠${NC} heal.sh not found, skipping auto-fix."
+      printf '%b\n' "${YELLOW}⚠${NC} heal.sh not found, skipping auto-fix."
     fi
   fi
   reset_stats

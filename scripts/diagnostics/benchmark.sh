@@ -143,7 +143,7 @@ run_hyperfine() {
     if [[ "$UI_ENABLED" = "1" ]]; then
       ui_warn "hyperfine" "not installed, using basic timing"
     else
-      echo -e "${YELLOW}hyperfine not installed. Using basic timing.${NC}"
+      printf '%b\n' "${YELLOW}hyperfine not installed. Using basic timing.${NC}"
     fi
     local times=()
     for _ in {1..5}; do
@@ -154,7 +154,7 @@ run_hyperfine() {
     if [[ "$UI_ENABLED" = "1" ]]; then
       ui_ok "Average startup time" "$((sum / 5))ms"
     else
-      echo -e "\n${GREEN}Average startup time: $((sum / 5))ms${NC}"
+      printf '%b\n' "\n${GREEN}Average startup time: $((sum / 5))ms${NC}"
     fi
     return
   fi
@@ -192,25 +192,25 @@ run_hyperfine() {
       if [[ "$UI_ENABLED" = "1" ]]; then
         ui_ok "Performance" "Excellent (<100ms)"
       else
-        echo -e "\n${GREEN}⚡ Excellent (<100ms)${NC}"
+        printf '%b\n' "\n${GREEN}⚡ Excellent (<100ms)${NC}"
       fi
     elif [[ $mean_ms -lt 200 ]]; then
       if [[ "$UI_ENABLED" = "1" ]]; then
         ui_ok "Performance" "Good (<200ms)"
       else
-        echo -e "\n${GREEN}✓ Good (<200ms)${NC}"
+        printf '%b\n' "\n${GREEN}✓ Good (<200ms)${NC}"
       fi
     elif [[ $mean_ms -lt 500 ]]; then
       if [[ "$UI_ENABLED" = "1" ]]; then
         ui_warn "Performance" "Acceptable (<500ms)"
       else
-        echo -e "\n${YELLOW}⚠ Acceptable (<500ms)${NC}"
+        printf '%b\n' "\n${YELLOW}⚠ Acceptable (<500ms)${NC}"
       fi
     else
       if [[ "$UI_ENABLED" = "1" ]]; then
         ui_err "Performance" "Slow (>500ms)"
       else
-        echo -e "\n${RED}✗ Slow (>500ms) - optimization needed${NC}"
+        printf '%b\n' "\n${RED}✗ Slow (>500ms) - optimization needed${NC}"
       fi
     fi
 
@@ -269,7 +269,7 @@ if [[ "$UI_ENABLED" = "1" ]]; then
   ui_info "Tip" "dot benchmark --detailed"
   ui_info "Tip" "dot benchmark --profile"
 else
-  echo -e "\n${CYAN}Tip: Run 'dot benchmark --detailed' for per-component timing${NC}"
-  echo -e "${CYAN}     Run 'dot benchmark --profile' for zprof analysis${NC}"
+  printf '%b\n' "\n${CYAN}Tip: Run 'dot benchmark --detailed' for per-component timing${NC}"
+  printf '%b\n' "${CYAN}     Run 'dot benchmark --profile' for zprof analysis${NC}"
 fi
-echo -e "${CYAN}     Run 'dot benchmark --compare' for history${NC}\n"
+printf '%b\n' "${CYAN}     Run 'dot benchmark --compare' for history${NC}\n"
