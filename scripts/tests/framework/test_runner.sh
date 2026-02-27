@@ -45,7 +45,7 @@ run_test_file() {
     TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + failed))
   elif [[ $exit_status -ne 0 ]]; then
     # Test file crashed without producing RESULTS -- count as failure
-    echo -e "\033[0;31mERROR: $(basename "$test_file") crashed (exit $exit_status) without producing results\033[0m"
+    printf '%b\n' "\033[0;31mERROR: $(basename "$test_file") crashed (exit $exit_status) without producing results\033[0m"
     TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + 1))
     TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + 1))
   fi
@@ -175,9 +175,9 @@ main() {
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo "FINAL SUMMARY"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo -e "Total tests run: $TOTAL_TESTS_RUN"
-  echo -e "\033[0;32mTotal passed: $TOTAL_TESTS_PASSED\033[0m"
-  echo -e "\033[0;31mTotal failed: $TOTAL_TESTS_FAILED\033[0m"
+  printf '%b\n' "Total tests run: $TOTAL_TESTS_RUN"
+  printf '%b\n' "\033[0;32mTotal passed: $TOTAL_TESTS_PASSED\033[0m"
+  printf '%b\n' "\033[0;31mTotal failed: $TOTAL_TESTS_FAILED\033[0m"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
   if [[ $TOTAL_TESTS_FAILED -gt 0 ]]; then

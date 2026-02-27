@@ -64,7 +64,7 @@ if [[ "$(uname -s)" = "Darwin" ]]; then
 
 elif [[ "$(uname -s)" = "Linux" ]]; then
   # OS
-  if [ -f /etc/os-release ]; then
+  if [[ -f /etc/os-release ]]; then
     os=$(awk -F= '/^PRETTY_NAME/{print $2}' /etc/os-release 2>/dev/null | tr -d \")
   else
     os=$(uname -s)
@@ -91,7 +91,7 @@ elif [[ "$(uname -s)" = "Linux" ]]; then
 
   # Memory
   mem_total_kb=$(grep MemTotal /proc/meminfo 2>/dev/null | awk '{print $2}')
-  if [ -n "${mem_total_kb:-}" ]; then
+  if [[ -n "${mem_total_kb:-}" ]]; then
     memory=$(awk "BEGIN {printf \"%.1fGiB\",$mem_total_kb/1024/1024}")
   else
     memory="Unknown"

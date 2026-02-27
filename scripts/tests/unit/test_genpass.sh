@@ -36,10 +36,10 @@ output=$(
 )
 if [[ "$output" == *"Usage:"* || "$output" == *"genpass"* ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: --help shows usage information"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --help shows usage information"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: --help should show usage information"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: --help should show usage information"
 fi
 
 # Test: genpass with --help returns exit code 0
@@ -59,15 +59,15 @@ if command -v openssl >/dev/null 2>&1; then
   )
   if [[ "$output" == *"Generated password:"* ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: generates password with default settings"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: generates password with default settings"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: should generate password"
-    echo -e "    Output: $output"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should generate password"
+    printf '%b\n' "    Output: $output"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
 # Test: genpass default generates 3 blocks
@@ -84,14 +84,14 @@ if command -v openssl >/dev/null 2>&1; then
 
   if [[ "$dash_count" -eq 2 ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: default generates 3 blocks"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: default generates 3 blocks"
   else
     ((TESTS_PASSED++)) # Acceptable variation
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: password generated (block count may vary)"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: password generated (block count may vary)"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
 # Test: genpass with custom block count
@@ -107,14 +107,14 @@ if command -v openssl >/dev/null 2>&1; then
 
   if [[ "$dash_count" -eq 4 ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: generates 5 blocks correctly"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: generates 5 blocks correctly"
   else
     ((TESTS_PASSED++)) # Function worked
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: password generated with custom blocks"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: password generated with custom blocks"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
 # Test: genpass with single block
@@ -130,14 +130,14 @@ if command -v openssl >/dev/null 2>&1; then
 
   if [[ "$dash_count" -eq 0 ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: single block has no separator"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: single block has no separator"
   else
     ((TESTS_PASSED++)) # Function worked
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: password generated"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: password generated"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
 # Test: genpass with custom separator
@@ -151,15 +151,15 @@ if command -v openssl >/dev/null 2>&1; then
 
   if [[ "$password" == *"/"* ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses custom separator '/'"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses custom separator '/'"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use custom separator"
-    echo -e "    Password: $password"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should use custom separator"
+    printf '%b\n' "    Password: $password"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
 # Test: genpass with colon separator
@@ -173,15 +173,15 @@ if command -v openssl >/dev/null 2>&1; then
 
   if [[ "$password" == *":"* ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses colon separator"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses colon separator"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use colon separator"
-    echo -e "    Password: $password"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should use colon separator"
+    printf '%b\n' "    Password: $password"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
 # Test: genpass returns exit code 0
@@ -194,7 +194,7 @@ if command -v openssl >/dev/null 2>&1; then
   assert_equals "0" "$?" "exit code should be 0"
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
 # Test: genpass shows INFO message
@@ -206,14 +206,14 @@ if command -v openssl >/dev/null 2>&1; then
   )
   if [[ "$output" == *"INFO"* ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shows INFO message"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shows INFO message"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: should show INFO message"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show INFO message"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
 # Test: genpass passwords are unique
@@ -230,14 +230,14 @@ if command -v openssl >/dev/null 2>&1; then
 
   if [[ "$pass1" != "$pass2" ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: generates unique passwords"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: generates unique passwords"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: passwords should be unique"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: passwords should be unique"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
 # Test: genpass password length with blocks
@@ -255,14 +255,14 @@ if command -v openssl >/dev/null 2>&1; then
   # 3 blocks * 12 chars = 36 chars (per default block_size)
   if [[ "$length" -ge 30 && "$length" -le 40 ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: password length is appropriate ($length chars)"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: password length is appropriate ($length chars)"
   else
     ((TESTS_PASSED++)) # Length varies based on implementation
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: password generated with length $length"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: password generated with length $length"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
 # Test: genpass contains special characters (high entropy)
@@ -283,14 +283,14 @@ if command -v openssl >/dev/null 2>&1; then
 
   if [[ "$has_special" == true ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: includes special characters"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: includes special characters"
   else
     ((TESTS_PASSED++)) # Might not always include special chars
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: password generated (special chars optional)"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: password generated (special chars optional)"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
 echo ""

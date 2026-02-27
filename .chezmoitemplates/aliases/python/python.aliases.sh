@@ -93,7 +93,7 @@ if command -v 'python3' >/dev/null; then
 
   # Utility Functions
   python_speed() {
-    if [ $# -eq 0 ]; then
+    if [[ $# -eq 0 ]]; then
       echo "Usage: python_speed 'Python code here'"
       return 1
     fi
@@ -101,7 +101,7 @@ if command -v 'python3' >/dev/null; then
   }
 
   python_profile() {
-    if [ $# -eq 0 ]; then
+    if [[ $# -eq 0 ]]; then
       echo "Usage: python_profile script.py"
       return 1
     fi
@@ -109,7 +109,7 @@ if command -v 'python3' >/dev/null; then
   }
 
   python_debug() {
-    if [ $# -eq 0 ]; then
+    if [[ $# -eq 0 ]]; then
       echo "Usage: python_debug script.py"
       return 1
     fi
@@ -123,7 +123,7 @@ if command -v 'python3' >/dev/null; then
 
   # Project Templates
   python_new_project() {
-    if [ $# -eq 0 ]; then
+    if [[ $# -eq 0 ]]; then
       echo "Usage: python_new_project project_name"
       return 1
     fi
@@ -144,7 +144,7 @@ if command -v 'python3' >/dev/null; then
     printf '%b\n' "\nPip Version:"
     pip --version
     printf '%b\n' "\nVirtual Environment:"
-    if [ -n "$VIRTUAL_ENV" ]; then
+    if [[ -n "$VIRTUAL_ENV" ]]; then
       echo "Active: $VIRTUAL_ENV"
     else
       echo "None active"

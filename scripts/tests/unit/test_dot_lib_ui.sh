@@ -17,40 +17,40 @@ assert_file_exists "$UI_FILE" "ui.sh should exist"
 test_start "ui_syntax_valid"
 if bash -n "$UI_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: ui.sh has valid syntax"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: ui.sh has valid syntax"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: ui.sh has syntax errors"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: ui.sh has syntax errors"
 fi
 
 # Test: defines UI functions
 test_start "ui_defines_functions"
 if grep -qE 'ui_|print_|show_' "$UI_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines UI functions"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines UI functions"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define UI functions"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define UI functions"
 fi
 
 # Test: has spinner/progress functions
 test_start "ui_has_progress"
 if grep -qE 'ui_status|ui_logo_dot|ui_bullet|ui_kv' "$UI_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has rich UI helpers"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has rich UI helpers"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define rich UI helpers"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define rich UI helpers"
 fi
 
 # Test: uses ANSI colors
 test_start "ui_uses_colors"
 if grep -qE 'tput|UI_COLOR|BOLD|RED|GREEN|BLUE' "$UI_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses ANSI colors"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses ANSI colors"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use ANSI colors"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should use ANSI colors"
 fi
 
 # Test: shellcheck compliance
@@ -59,14 +59,14 @@ if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$UI_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available"
 fi
 
 echo ""

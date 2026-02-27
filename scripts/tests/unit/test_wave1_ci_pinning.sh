@@ -21,39 +21,39 @@ test_start "ci_chezmoi_version_pinned"
 # Verify the version is a proper semver (not 'latest')
 if grep -q 'CHEZMOI_VERSION:.*"[0-9]' "$CI_FILE"; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: CHEZMOI_VERSION is pinned to a semver"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: CHEZMOI_VERSION is pinned to a semver"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: CHEZMOI_VERSION should be pinned to a semver"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: CHEZMOI_VERSION should be pinned to a semver"
 fi
 
 test_start "ci_chezmoi_not_latest"
 if grep -q 'CHEZMOI_VERSION.*latest' "$CI_FILE" 2>/dev/null; then
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: CHEZMOI_VERSION should not be 'latest'"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: CHEZMOI_VERSION should not be 'latest'"
 else
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: CHEZMOI_VERSION is not 'latest'"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: CHEZMOI_VERSION is not 'latest'"
 fi
 
 test_start "ci_chezmoi_uses_tag_flag"
 # get.chezmoi.io uses -t flag, not -v
 if grep -q 'get.chezmoi.io.*-v ' "$CI_FILE" 2>/dev/null; then
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: get.chezmoi.io should use -t flag, not -v"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: get.chezmoi.io should use -t flag, not -v"
 else
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: get.chezmoi.io does not use incorrect -v flag"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: get.chezmoi.io does not use incorrect -v flag"
 fi
 
 test_start "ci_chezmoi_installer_uses_env_version"
 # CI should install chezmoi with the pinned CHEZMOI_VERSION env variable.
 if grep -q 'install-chezmoi-verified.sh.*CHEZMOI_VERSION' "$CI_FILE"; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: install script uses pinned CHEZMOI_VERSION env variable"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: install script uses pinned CHEZMOI_VERSION env variable"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: install script should use pinned CHEZMOI_VERSION env variable"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: install script should use pinned CHEZMOI_VERSION env variable"
 fi
 
 echo ""

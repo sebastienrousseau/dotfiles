@@ -13,10 +13,10 @@ assert_file_exists "$SCRIPT_FILE" "validate-ci-config script should exist"
 test_start "script_valid_syntax"
 if bash -n "$SCRIPT_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: syntax is valid"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: syntax is valid"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: syntax is invalid"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax is invalid"
 fi
 
 test_start "script_contains_coverage_check"

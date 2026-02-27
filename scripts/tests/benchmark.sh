@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-log_info() { echo -e "\n[INFO] $*"; }
+log_info() { printf '%b\n' "\n[INFO] $*"; }
 
 MAX_MS="${DOTFILES_BENCH_MAX_MS:-}"
 

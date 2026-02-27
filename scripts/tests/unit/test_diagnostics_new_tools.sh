@@ -24,10 +24,10 @@ for file in "${SCRIPTS[@]}"; do
   test_start "script_valid_syntax"
   if bash -n "$file" 2>/dev/null; then
     ((TESTS_PASSED++)) || true
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
   else
     ((TESTS_FAILED++)) || true
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: syntax error"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax error"
   fi
 done
 

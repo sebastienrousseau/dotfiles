@@ -26,10 +26,10 @@ if type hostinfo &>/dev/null; then
   output=$(hostinfo --help 2>&1)
   if [[ "$output" == *"Usage:"* ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: --help shows usage"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --help shows usage"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: --help should show usage"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: --help should show usage"
   fi
 fi
 
@@ -47,11 +47,11 @@ if type hostinfo &>/dev/null; then
   set -e
   if [[ "$output" == *"Username"* ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: output contains Username"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: output contains Username"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: output should contain Username"
-    echo -e "    Output: ${output:0:200}"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: output should contain Username"
+    printf '%b\n' "    Output: ${output:0:200}"
   fi
 fi
 
@@ -62,10 +62,10 @@ if type hostinfo &>/dev/null; then
   set -e
   if [[ "$output" == *"Hostname"* ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: output contains Hostname"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: output contains Hostname"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: output should contain Hostname"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: output should contain Hostname"
   fi
 fi
 
@@ -94,11 +94,11 @@ if type size &>/dev/null; then
   output=$(size "$test_dir/test.txt" 2>&1) || true
   if [[ "$output" == *"INFO"* ]] || [[ "$output" == *"bytes"* ]] || [[ "$output" == *"size"* ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shows size information"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shows size information"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: should show size information"
-    echo -e "    Output: $output"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show size information"
+    printf '%b\n' "    Output: $output"
   fi
   rm -rf "$test_dir"
 fi
@@ -121,10 +121,10 @@ if type banner &>/dev/null; then
   set -e
   if [[ $ec -ne 0 ]] || [[ "$output" == *"not found"* ]] || [[ "$output" == *"ERROR"* ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: graceful error when script missing"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: graceful error when script missing"
   else
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: banner handled missing script"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: banner handled missing script"
   fi
 fi
 

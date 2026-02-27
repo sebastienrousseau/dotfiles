@@ -31,11 +31,11 @@ test_start "log_info_output"
 output=$(bash -c 'source "'"$LOGGING_FILE"'"; log_info "test message"' 2>&1)
 if [[ "$output" == *"[INFO]"* && "$output" == *"test message"* ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: log_info shows INFO prefix"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: log_info shows INFO prefix"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: log_info should show INFO prefix"
-  echo -e "    Output: $output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: log_info should show INFO prefix"
+  printf '%b\n' "    Output: $output"
 fi
 
 # Test: log_warn outputs with WARN prefix to stderr
@@ -43,11 +43,11 @@ test_start "log_warn_output"
 output=$(bash -c 'source "'"$LOGGING_FILE"'"; log_warn "warn msg"' 2>&1)
 if [[ "$output" == *"[WARN]"* && "$output" == *"warn msg"* ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: log_warn shows WARN prefix"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: log_warn shows WARN prefix"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: log_warn should show WARN prefix"
-  echo -e "    Output: $output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: log_warn should show WARN prefix"
+  printf '%b\n' "    Output: $output"
 fi
 
 # Test: log_error outputs with ERROR prefix to stderr
@@ -55,11 +55,11 @@ test_start "log_error_output"
 output=$(bash -c 'source "'"$LOGGING_FILE"'"; log_error "err msg"' 2>&1)
 if [[ "$output" == *"[ERROR]"* && "$output" == *"err msg"* ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: log_error shows ERROR prefix"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: log_error shows ERROR prefix"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: log_error should show ERROR prefix"
-  echo -e "    Output: $output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: log_error should show ERROR prefix"
+  printf '%b\n' "    Output: $output"
 fi
 
 # Test: die exits with code 1
@@ -71,11 +71,11 @@ test_start "die_error_output"
 output=$(bash -c 'source "'"$LOGGING_FILE"'"; die "fatal error"' 2>&1) || true
 if [[ "$output" == *"[ERROR]"* && "$output" == *"fatal error"* ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: die shows ERROR prefix"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: die shows ERROR prefix"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: die should show ERROR prefix"
-  echo -e "    Output: $output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: die should show ERROR prefix"
+  printf '%b\n' "    Output: $output"
 fi
 
 # Test: double-sourcing is idempotent
@@ -87,10 +87,10 @@ output=$(bash -c '
 ' 2>&1)
 if [[ "$output" == *"still works"* ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: double-sourcing is safe"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: double-sourcing is safe"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: double-sourcing should be safe"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: double-sourcing should be safe"
 fi
 
 print_summary

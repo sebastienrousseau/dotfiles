@@ -29,10 +29,10 @@ if type keygen &>/dev/null; then
   # Should show usage or error - use direct check to avoid eval issues
   if [[ -n "$output" ]]; then
     ((TESTS_PASSED++)) || true
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no args should produce output"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no args should produce output"
   else
     ((TESTS_FAILED++)) || true
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: no args should produce output"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: no args should produce output"
   fi
 fi
 
@@ -50,10 +50,10 @@ if type keygen &>/dev/null; then
   # Check for error messages (case insensitive)
   if echo "$result" | grep -iqE "(error|invalid|unknown|usage)"; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: invalid type shows error message"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: invalid type shows error message"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: should show error for invalid type"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show error for invalid type"
   fi
 fi
 
