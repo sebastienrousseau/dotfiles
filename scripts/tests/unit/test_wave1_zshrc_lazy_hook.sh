@@ -105,8 +105,8 @@ test_start "options_nvm_fallback"
 assert_file_contains "$OPTIONS" '_lazy_load_nvm' "should have NVM fallback when fnm unavailable"
 
 test_start "options_nvm_requires_no_fnm"
-# NVM should only load if fnm is NOT available
-assert_file_contains "$OPTIONS" '! command -v fnm' "NVM block should be guarded by fnm absence"
+# NVM block should be gated by Go template conditional (node_manager selection)
+assert_file_contains "$OPTIONS" 'if eq $node_mgr "nvm"' "NVM block should be guarded by template conditional"
 
 test_start "options_sdkman_lazy"
 assert_file_contains "$OPTIONS" '_lazy_load_sdkman' "should have SDKMAN lazy loader"
