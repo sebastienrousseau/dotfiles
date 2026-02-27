@@ -39,9 +39,6 @@ fi
 if [[ -z ${fpath[(r)${ZSH_COMPLETIONS_DIR}]} ]]; then
   fpath=("${ZSH_COMPLETIONS_DIR}" "${fpath[@]}")
 fi
-if [[ -f "${HOME}/.local/bin/executable_dot_completion" ]]; then
-  fpath=("${HOME}/.local/bin" "${fpath[@]}")
-fi
 # fnm (Fast Node Manager)
 # Initialize early so Node + corepack use the expected version.
 if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]] && command -v fnm >/dev/null; then

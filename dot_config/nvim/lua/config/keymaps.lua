@@ -68,9 +68,15 @@ map("n", "<leader>tt", ":ToggleTerm direction=float<CR>", { desc = "Toggle termi
 map("t", "<Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
 -- Testing (Neotest)
-map("n", "<leader>tn", ":TestNearest<CR>", { desc = "Test nearest" })
-map("n", "<leader>tf", ":TestFile<CR>", { desc = "Test file" })
-map("n", "<leader>ts", ":TestSuite<CR>", { desc = "Test suite" })
+map("n", "<leader>tn", function()
+  require("neotest").run.run()
+end, { desc = "Test nearest" })
+map("n", "<leader>tf", function()
+  require("neotest").run.run(vim.fn.expand("%"))
+end, { desc = "Test file" })
+map("n", "<leader>ts", function()
+  require("neotest").run.run(vim.fn.getcwd())
+end, { desc = "Test suite" })
 
 -- Debugging (DAP)
 map("n", "<F5>", function()
