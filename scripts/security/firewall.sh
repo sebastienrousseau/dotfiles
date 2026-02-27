@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 ## Configure system firewall with secure defaults.
 ##
 ## Enables firewall with deny-by-default policy and minimal exceptions.

@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # 🅽🅿🅼 🅰🅻🅸🅰🆂🅴🆂
 if command -v npm &>/dev/null; then
   # Audit npm packages.

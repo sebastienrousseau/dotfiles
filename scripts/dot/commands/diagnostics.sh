@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # Dotfiles CLI - Diagnostics Commands
 # doctor, heal, health, rollback, drift, history, benchmark, verify, perf, scorecard, conflicts, locks, snapshot
 

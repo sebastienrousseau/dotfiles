@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # view-source: Function to view the source of a website.
 view-source() {
   if ! command -v curl &>/dev/null; then

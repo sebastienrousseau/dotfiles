@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 if command -v 'cargo' >/dev/null; then
   # Basic Commands
   alias cg='cargo'          # Cargo shortcut

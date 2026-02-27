@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # VS Code Aliases
 
 if command -v code &>/dev/null || [[ -x "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" ]]; then

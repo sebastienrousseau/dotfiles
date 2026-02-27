@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # shellcheck disable=SC2034
 # =============================================================================
 # Dotfiles Heal Script - Auto-repair common dotfiles issues

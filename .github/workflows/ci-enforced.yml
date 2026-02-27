@@ -159,7 +159,7 @@ jobs:
           RG_PATTERN=""
           for ext in "${EXTENSIONS[@]}"; do
             if [ -n "$RG_PATTERN" ]; then
-              RG_PATTERN="$RG_PATTERN|"
+              RG_PATTERN="$RG_PATTERN,"
             fi
             RG_PATTERN="$RG_PATTERN*.$ext"
           done

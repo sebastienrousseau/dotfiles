@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 #
 # Description:
 #   Configuration file for Python development environment, including aliases,

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # shellcheck disable=SC1091
 set -euo pipefail
 
