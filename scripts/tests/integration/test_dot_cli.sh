@@ -63,7 +63,7 @@ fi
 # ── dot cd ───────────────────────────────────────────────────────
 
 test_start "dot_cd_output"
-cd_output=$(bash "$DOT_CLI" cd 2>&1)
+cd_output=$(CHEZMOI_SOURCE_DIR="$REPO_ROOT" bash "$DOT_CLI" cd 2>&1)
 if [[ -d "$cd_output" ]]; then
   ((TESTS_PASSED++))
   echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: dot cd outputs a valid directory"
