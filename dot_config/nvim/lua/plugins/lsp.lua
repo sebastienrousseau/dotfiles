@@ -21,11 +21,10 @@ return {
       -- 1. Setup capabilities for LSP
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      -- 2. Setup mason-lspconfig with handlers (prevents automatic_enable errors)
+      -- 2. Setup mason-lspconfig with custom handlers per server
       require("mason-lspconfig").setup({
         ensure_installed = { "bashls", "lua_ls", "basedpyright", "ruff", "ts_ls" },
         automatic_installation = true,
-        automatic_setup = false, -- Disable automatic_enable feature that causes errors
         handlers = {
           -- Default handler for all servers
           function(server_name)

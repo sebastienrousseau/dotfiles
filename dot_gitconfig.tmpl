@@ -42,6 +42,34 @@
 	allowedSignersFile = {{ .chezmoi.homeDir }}/.ssh/allowed_signers
 {{- end }}
 
+[alias]
+	st = status -sb
+	d = diff
+	dc = diff --cached
+	ds = diff --stat
+	c = commit
+	cm = commit -m
+	ca = commit --amend --no-edit
+	br = branch -vv
+	bra = branch -a
+	l = log --oneline --decorate -20
+	lg = log --graph --oneline --all --decorate
+	lo = log --oneline
+	rb = rebase
+	rbc = rebase --continue
+	rba = rebase --abort
+	ss = stash
+	sl = stash list
+	sp = stash pop
+	cp = cherry-pick
+	p = pull --rebase
+	ps = push
+	psf = push --force-with-lease
+	unstage = reset HEAD --
+	wt = worktree
+	wta = worktree add
+	wtl = worktree list
+
 [column]
 	ui = auto
 
