@@ -101,7 +101,7 @@ jobs:
           errors=0
 
           # Create test file
-          echo -e "line1\nline2\nline3" > /tmp/sed_test.txt
+          printf 'line1\nline2\nline3\n' > /tmp/sed_test.txt
 
           # Test 1: In-place edit (BSD requires backup extension, GNU doesn't)
           # Portable pattern: use explicit empty string for GNU compatibility
@@ -273,8 +273,8 @@ jobs:
           # Test scripts that are likely to have BSD/GNU differences
           test_scripts=(
             "scripts/diagnostics/health.sh"
-            "scripts/dot/lib/logging.sh"
-            "scripts/dot/lib/config.sh"
+            "scripts/dot/lib/ui.sh"
+            "scripts/dot/lib/utils.sh"
           )
 
           for script in "${test_scripts[@]}"; do
