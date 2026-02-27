@@ -43,7 +43,7 @@ Usage:
   sh -c "\$(curl -fsSL https://dotfiles.io/install.sh)"
 
 Arguments:
-  VERSION    Git tag to install (default: v0.2.490)
+  VERSION    Git tag to install (default: v0.2.491)
 
 Environment Variables:
   DOTFILES_NONINTERACTIVE=1    Skip interactive prompts
@@ -205,7 +205,7 @@ fi
 step "Preparing source directory..."
 
 # VERSION pinning for supply-chain security
-VERSION="${1:-v0.2.490}"
+VERSION="${1:-v0.2.491}"
 
 SOURCE_DIR="$HOME/.dotfiles"
 LEGACY_SOURCE_DIR="$HOME/.local/share/chezmoi"
