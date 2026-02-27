@@ -33,9 +33,12 @@ nix/**
 .devcontainer
 .devcontainer/**
 
-# Local secrets (never committed)
+# Local secrets and machine-specific overrides (never committed)
 .profile.local
 .env.local
+.ssh/config.local
+.config/chezmoi/chezmoi.local.toml
+.config/git/config-work
 
 .config/nvim/lazy-lock.json
 
