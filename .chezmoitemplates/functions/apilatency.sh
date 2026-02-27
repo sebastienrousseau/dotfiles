@@ -57,8 +57,8 @@ apilatency_monitor() {
   local count="${2:-10}"
   local interval="${3:-1}"
 
-  echo -e "[INFO] Monitoring API latency for $url"
-  echo -e "[INFO] Total Requests: $count, Delay Between Requests: $interval seconds"
+  printf '%b\n' "[INFO] Monitoring API latency for $url"
+  printf '%b\n' "[INFO] Total Requests: $count, Delay Between Requests: $interval seconds"
   echo "Time,Response_Time"
 
   for ((i = 1; i <= count; i++)); do
@@ -68,7 +68,7 @@ apilatency_monitor() {
     sleep "$interval"
   done
 
-  echo -e "\e[32m[SUCCESS]\e[0m Latency monitoring completed."
+  printf '%b\n' "\e[32m[SUCCESS]\e[0m Latency monitoring completed."
 }
 
 #######################################
@@ -86,7 +86,7 @@ apilatency_parse_arguments() {
       return 2
       ;;
     "")
-      echo -e "\e[31m[ERROR]\e[0m Missing required URL argument."
+      printf '%b\n' "\e[31m[ERROR]\e[0m Missing required URL argument."
       apilatency_print_help
       return 1
       ;;
@@ -99,19 +99,19 @@ apilatency_parse_arguments() {
 
   # Validate URL
   if [[ ! "$url" =~ ^https?:// ]]; then
-    echo -e "\e[31m[ERROR]\e[0m Invalid URL format. Must start with http:// or https://"
+    printf '%b\n' "\e[31m[ERROR]\e[0m Invalid URL format. Must start with http:// or https://"
     return 1
   fi
 
   # Validate count
   if ! [[ "$count" =~ ^[0-9]+$ ]]; then
-    echo -e "\e[31m[ERROR]\e[0m COUNT must be a positive integer."
+    printf '%b\n' "\e[31m[ERROR]\e[0m COUNT must be a positive integer."
     return 1
   fi
 
   # Validate interval
   if ! [[ "$interval" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-    echo -e "\e[31m[ERROR]\e[0m INTERVAL must be a positive number."
+    printf '%b\n' "\e[31m[ERROR]\e[0m INTERVAL must be a positive number."
     return 1
   fi
 

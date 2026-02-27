@@ -141,15 +141,15 @@ if command -v 'python3' >/dev/null; then
   python_info() {
     echo "Python Version:"
     python --version
-    echo -e "\nPip Version:"
+    printf '%b\n' "\nPip Version:"
     pip --version
-    echo -e "\nVirtual Environment:"
+    printf '%b\n' "\nVirtual Environment:"
     if [ -n "$VIRTUAL_ENV" ]; then
       echo "Active: $VIRTUAL_ENV"
     else
       echo "None active"
     fi
-    echo -e "\nInstalled Packages:"
+    printf '%b\n' "\nInstalled Packages:"
     pip list
   }
 fi
