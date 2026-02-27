@@ -27,7 +27,7 @@ set -euo pipefail
 
 THEME_DIR="$HOME/.themes"
 ICON_DIR="$HOME/.icons"
-TEMP_DIR="/tmp/catppuccin-install"
+TEMP_DIR="$(mktemp -d)"
 
 # Colors for output (respect NO_COLOR: https://no-color.org)
 if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
@@ -54,7 +54,8 @@ success() {
 }
 
 # Create directories
-mkdir -p "$THEME_DIR" "$ICON_DIR" "$TEMP_DIR"
+mkdir -p "$THEME_DIR" "$ICON_DIR"
+trap 'rm -rf "$TEMP_DIR"' EXIT
 
 # Check if git is available
 if ! command -v git &>/dev/null; then
