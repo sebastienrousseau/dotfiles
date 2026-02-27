@@ -82,19 +82,13 @@ return {
       "jbyuki/one-small-step-for-vimkind",
     },
     config = function()
-      local dap = require("dap")
-      local dapui = require("dapui")
       local dap_python = require("dap-python")
       local osv = require("osv")
 
-      -- Enhanced UI setup
-      dapui.setup()
+      -- DAP UI setup and listeners are in dap.lua (avoid duplication)
       require("nvim-dap-virtual-text").setup()
 
-      -- Python path resolution (Robust for Venv/System)
-      -- 1. Check for VIRTUAL_ENV env var
-      -- 2. Check for .venv directory
-      -- 3. Fallback to specific masonry path (if installed) or system python
+      -- Python path resolution
       local venv_path = os.getenv("VIRTUAL_ENV")
       local python_path
       if venv_path then
@@ -106,18 +100,8 @@ return {
       dap_python.setup(python_path)
       dap_python.test_runner = "pytest"
 
-      -- Auto-open UI
-      dap.listeners.after.event_initialized["dapui_config"] = function()
-        dapui.open()
-      end
-      dap.listeners.before.event_terminated["dapui_config"] = function()
-        dapui.close()
-      end
-      dap.listeners.before.event_exited["dapui_config"] = function()
-        dapui.close()
-      end
-
       -- Local Lua debugger (OSV)
+      local dap = require("dap")
       osv.setup({ port = 8086 })
       dap.adapters.nlua = function(callback, config)
         callback({ type = "server", host = config.host or "127.0.0.1", port = config.port or 8086 })
