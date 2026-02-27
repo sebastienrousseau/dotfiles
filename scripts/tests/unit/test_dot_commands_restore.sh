@@ -17,30 +17,30 @@ assert_file_exists "$RESTORE_FILE" "restore.sh should exist"
 test_start "restore_syntax_valid"
 if bash -n "$RESTORE_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 
 # Test: defines restore function
 test_start "restore_defines_function"
 if grep -qE 'restore_from_git|restore_latest|list_backups|usage' "$RESTORE_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines restore function"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines restore function"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define restore"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define restore"
 fi
 
 # Test: requires backup source
 test_start "restore_requires_backup"
 if grep -qE 'backup|archive|tar|restore' "$RESTORE_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: works with backups"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: works with backups"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should work with backups"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should work with backups"
 fi
 
 # Test: shellcheck compliance
@@ -49,14 +49,14 @@ if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$RESTORE_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available"
 fi
 
 echo ""

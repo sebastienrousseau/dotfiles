@@ -17,59 +17,59 @@ assert_dir_exists "$SECRETS_DIR" "secrets directory should exist"
 test_start "secrets_age_init_exists"
 if [[ -f "$SECRETS_DIR/age-init.sh" ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: age-init.sh exists"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: age-init.sh exists"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: age-init.sh should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: age-init.sh should exist"
 fi
 
 test_start "secrets_age_init_syntax"
 if [[ -f "$SECRETS_DIR/age-init.sh" ]] && bash -n "$SECRETS_DIR/age-init.sh" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 
 # Test: create-secrets-file.sh exists
 test_start "secrets_create_exists"
 if [[ -f "$SECRETS_DIR/create-secrets-file.sh" ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: create-secrets-file.sh exists"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: create-secrets-file.sh exists"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: create-secrets-file.sh should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: create-secrets-file.sh should exist"
 fi
 
 # Test: encrypt-ssh-key.sh exists
 test_start "secrets_encrypt_ssh_exists"
 if [[ -f "$SECRETS_DIR/encrypt-ssh-key.sh" ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: encrypt-ssh-key.sh exists"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: encrypt-ssh-key.sh exists"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: encrypt-ssh-key.sh should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: encrypt-ssh-key.sh should exist"
 fi
 
 # Test: uses age encryption
 test_start "secrets_uses_age"
 if grep -rqE 'age|\.age' "$SECRETS_DIR"/*.sh 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses age encryption"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses age encryption"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use age encryption"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should use age encryption"
 fi
 
 # Test: uses secure permissions
 test_start "secrets_secure_perms"
 if grep -rqE 'chmod [0-7]*00|chmod 600|chmod 700' "$SECRETS_DIR"/*.sh 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses secure permissions"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses secure permissions"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use secure permissions"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should use secure permissions"
 fi
 
 # Test: all scripts have valid syntax
@@ -82,10 +82,10 @@ for script in "$SECRETS_DIR"/*.sh; do
 done
 if [[ "$invalid" -eq 0 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: all scripts valid"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: all scripts valid"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: $invalid scripts invalid"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $invalid scripts invalid"
 fi
 
 echo ""

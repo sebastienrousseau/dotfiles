@@ -17,20 +17,20 @@ assert_dir_exists "$HOOKS_DIR" "git-hooks directory should exist"
 test_start "hooks_install_exists"
 if [[ -f "$HOOKS_DIR/install.sh" ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: install.sh exists"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: install.sh exists"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: install.sh should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: install.sh should exist"
 fi
 
 # Test: install.sh valid syntax
 test_start "hooks_install_syntax"
 if [[ -f "$HOOKS_DIR/install.sh" ]] && bash -n "$HOOKS_DIR/install.sh" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: install.sh valid syntax"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: install.sh valid syntax"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: install.sh syntax errors"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: install.sh syntax errors"
 fi
 
 # Test: all hook files have valid syntax
@@ -44,30 +44,30 @@ for script in "$HOOKS_DIR"/*.sh "$HOOKS_DIR"/hooks/*; do
 done
 if [[ "$invalid" -eq 0 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: all hook files valid"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: all hook files valid"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: $invalid files invalid"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $invalid files invalid"
 fi
 
 # Test: installs hooks to .git/hooks
 test_start "hooks_installs_to_git"
 if [[ -f "$HOOKS_DIR/install.sh" ]] && grep -qE '\.git/hooks|git.*hooks' "$HOOKS_DIR/install.sh" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: installs to .git/hooks"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: installs to .git/hooks"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should install to .git/hooks"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should install to .git/hooks"
 fi
 
 # Test: pre-commit or pre-push hooks exist
 test_start "hooks_standard_hooks"
 if find "$HOOKS_DIR" -name "pre-*" -o -name "commit-msg" 2>/dev/null | grep -q .; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: standard hooks exist"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: standard hooks exist"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have standard hooks"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have standard hooks"
 fi
 
 echo ""

@@ -35,11 +35,11 @@ output=$(bash -c '
 # sha256 of "hello world\n" is known
 if [[ -n "$output" && ${#output} -eq 64 ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: sha256_file returns 64-char hash"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: sha256_file returns 64-char hash"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: sha256_file should return 64-char hash"
-  echo -e "    Output: $output (length: ${#output})"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: sha256_file should return 64-char hash"
+  printf '%b\n' "    Output: $output (length: ${#output})"
 fi
 
 # Test: resolve_arch returns valid architecture
@@ -51,11 +51,11 @@ output=$(bash -c '
 ')
 if [[ "$output" == "x86_64" || "$output" == "aarch64" ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: resolve_arch returns $output"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: resolve_arch returns $output"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: resolve_arch should return x86_64 or aarch64"
-  echo -e "    Output: $output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: resolve_arch should return x86_64 or aarch64"
+  printf '%b\n' "    Output: $output"
 fi
 
 # Test: resolve_sudo returns empty or "sudo"
@@ -67,11 +67,11 @@ output=$(bash -c '
 ')
 if [[ -z "$output" || "$output" == "sudo" ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: resolve_sudo returns '$output'"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: resolve_sudo returns '$output'"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: resolve_sudo should return empty or 'sudo'"
-  echo -e "    Output: $output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: resolve_sudo should return empty or 'sudo'"
+  printf '%b\n' "    Output: $output"
 fi
 
 # Test: warn_unpinned dies on "latest" tag
@@ -95,11 +95,11 @@ output=$(bash -c '
 ' 2>/dev/null)
 if [[ "$output" == *"github.com"* && "$output" == *"v1.0.0"* && "$output" == *"binary-linux.tar.gz"* ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: github_asset_url returns correct tagged URL"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: github_asset_url returns correct tagged URL"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: github_asset_url should construct tagged URL"
-  echo -e "    Output: $output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: github_asset_url should construct tagged URL"
+  printf '%b\n' "    Output: $output"
 fi
 
 # Test: github_asset_url constructs fallback URL for latest release
@@ -111,11 +111,11 @@ output=$(bash -c '
 ' 2>/dev/null)
 if [[ "$output" == *"github.com/owner/repo/releases/latest/download/binary.tar.gz"* ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: github_asset_url returns correct latest URL"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: github_asset_url returns correct latest URL"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: github_asset_url should construct latest URL"
-  echo -e "    Output: $output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: github_asset_url should construct latest URL"
+  printf '%b\n' "    Output: $output"
 fi
 
 # Test: download_and_verify_sha256 verifies matching checksum
@@ -158,11 +158,11 @@ result=$(bash -c '
 ' 2>&1) || true
 if [[ "$result" == *"OK"* ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: verify succeeds with matching checksum"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: verify succeeds with matching checksum"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: verify should succeed with matching checksum"
-  echo -e "    Output: $result"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: verify should succeed with matching checksum"
+  printf '%b\n' "    Output: $result"
 fi
 
 # Test: double-sourcing installers is idempotent

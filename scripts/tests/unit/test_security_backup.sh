@@ -17,40 +17,40 @@ assert_file_exists "$BACKUP_FILE" "backup.sh should exist"
 test_start "sec_backup_syntax_valid"
 if bash -n "$BACKUP_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: backup.sh has valid syntax"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: backup.sh has valid syntax"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: backup.sh has syntax errors"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: backup.sh has syntax errors"
 fi
 
 # Test: creates backup archives
 test_start "sec_backup_creates_archive"
 if grep -qE 'tar|zip|archive|backup' "$BACKUP_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: creates backup archives"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: creates backup archives"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should create backup archives"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should create backup archives"
 fi
 
 # Test: timestamps backups
 test_start "sec_backup_timestamps"
 if grep -qE 'date|timestamp|\+%Y|\+%s' "$BACKUP_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: timestamps backups"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: timestamps backups"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should timestamp backups"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should timestamp backups"
 fi
 
 # Test: no dangerous rm commands
 test_start "sec_backup_safe_rm"
 if grep -qE 'rm -rf /[^$]' "$BACKUP_FILE" 2>/dev/null; then
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: has dangerous rm commands"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has dangerous rm commands"
 else
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no dangerous rm commands"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no dangerous rm commands"
 fi
 
 # Test: shellcheck compliance
@@ -59,14 +59,14 @@ if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$BACKUP_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
 fi
 
 echo ""

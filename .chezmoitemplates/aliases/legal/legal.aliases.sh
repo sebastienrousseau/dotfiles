@@ -23,7 +23,7 @@ scan_licenses_fn() {
     return
   fi
 
-  if [ "$(uname -s)" = "Darwin" ] && command -v brew >/dev/null; then
+  if [[ "$(uname -s)" = "Darwin" ]] && command -v brew >/dev/null; then
     echo "trivy not found. Installing via homebrew..."
     brew install trivy && trivy fs . --scanners license
     return
@@ -58,7 +58,7 @@ alias add-headers=add_headers_fn
 # Generate attribution report for Go projects (expandable to others)
 gen_notice_fn() {
   echo "Generating NOTICE file for dependencies..."
-  if [ -f "go.mod" ]; then
+  if [[ -f "go.mod" ]]; then
     docker run --rm -v "$(pwd):/src" -w /src golang:latest \
       sh -c "go install github.com/google/go-licenses@latest && go-licenses report . --template /src/NOTICE.tpl > NOTICE"
   else

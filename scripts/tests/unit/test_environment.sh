@@ -33,11 +33,11 @@ test_start "environment_valid_output"
 result=$(environment 2>/dev/null)
 if [[ "$result" == "mac" || "$result" == "linux" || "$result" == "win" || "$result" == "other" ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: returns valid OS ($result)"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: returns valid OS ($result)"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should return mac/linux/win/other"
-  echo -e "    Actual: $result"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should return mac/linux/win/other"
+  printf '%b\n' "    Actual: $result"
 fi
 
 # Test: environment --help shows help
@@ -45,10 +45,10 @@ test_start "environment_help"
 output=$(environment --help 2>&1)
 if [[ "$output" == *"Environment Detector"* ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: --help shows help text"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --help shows help text"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: --help should show help text"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: --help should show help text"
 fi
 
 # Test: environment uses case statement (no repeated uname calls)
@@ -62,7 +62,7 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
   assert_equals "mac" "$result" "should return 'mac' on macOS"
 else
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (not macOS)"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (not macOS)"
 fi
 
 # Test: on Linux, environment returns "linux"
@@ -72,7 +72,7 @@ if [[ "$(uname -s)" == "Linux" ]]; then
   assert_equals "linux" "$result" "should return 'linux' on Linux"
 else
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (not Linux)"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (not Linux)"
 fi
 
 print_summary

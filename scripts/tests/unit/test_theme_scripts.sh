@@ -17,19 +17,19 @@ assert_dir_exists "$THEME_DIR" "theme directory should exist"
 test_start "theme_switch_exists"
 if [[ -f "$THEME_DIR/switch.sh" ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: switch.sh exists"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: switch.sh exists"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: switch.sh should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: switch.sh should exist"
 fi
 
 test_start "theme_switch_syntax"
 if [[ -f "$THEME_DIR/switch.sh" ]] && bash -n "$THEME_DIR/switch.sh" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: switch.sh valid syntax"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: switch.sh valid syntax"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: switch.sh syntax errors"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: switch.sh syntax errors"
 fi
 
 # Test: wallpaper scripts exist
@@ -37,20 +37,20 @@ test_start "theme_wallpaper_exists"
 wallpaper_count=$(find "$THEME_DIR" -name "wallpaper*.sh" 2>/dev/null | wc -l)
 if [[ "$wallpaper_count" -gt 0 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: wallpaper scripts exist ($wallpaper_count)"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: wallpaper scripts exist ($wallpaper_count)"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: wallpaper scripts should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: wallpaper scripts should exist"
 fi
 
 # Test: install-catppuccin-themes.sh exists
 test_start "theme_catppuccin_exists"
 if [[ -f "$THEME_DIR/install-catppuccin-themes.sh" ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: catppuccin theme script exists"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: catppuccin theme script exists"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: catppuccin script should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: catppuccin script should exist"
 fi
 
 # Test: all theme scripts have valid syntax
@@ -64,20 +64,20 @@ for script in "$THEME_DIR"/*.sh; do
 done
 if [[ "$invalid" -eq 0 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: all theme scripts valid"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: all theme scripts valid"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: $invalid scripts have errors"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $invalid scripts have errors"
 fi
 
 # Test: no hardcoded paths
 test_start "theme_no_hardcoded_paths"
 if grep -rqE '"/home/[a-z]+' "$THEME_DIR"/*.sh 2>/dev/null; then
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: has hardcoded paths"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has hardcoded paths"
 else
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no hardcoded paths"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no hardcoded paths"
 fi
 
 echo ""

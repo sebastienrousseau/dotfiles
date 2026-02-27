@@ -17,50 +17,50 @@ assert_file_exists "$HEALTH_FILE" "health.sh should exist"
 test_start "health_syntax_valid"
 if bash -n "$HEALTH_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: health.sh has valid syntax"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: health.sh has valid syntax"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: health.sh has syntax errors"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: health.sh has syntax errors"
 fi
 
 # Test: defines health check functions
 test_start "health_defines_check_functions"
 if grep -qE 'check_|run_check|health_check' "$HEALTH_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines check functions"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines check functions"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define check functions"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define check functions"
 fi
 
 # Test: checks for required tools
 test_start "health_checks_tools"
 if grep -qE 'command -v|which|type' "$HEALTH_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: checks for tool availability"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: checks for tool availability"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should check for tool availability"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should check for tool availability"
 fi
 
 # Test: provides pass/fail output
 test_start "health_provides_status"
 if grep -qE 'PASS|FAIL|OK|ERROR|✓|✗' "$HEALTH_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: provides pass/fail status"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: provides pass/fail status"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should provide pass/fail status"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should provide pass/fail status"
 fi
 
 # Test: no hardcoded paths
 test_start "health_no_hardcoded_paths"
 if grep -qE '"/home/[a-z]+' "$HEALTH_FILE" 2>/dev/null; then
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should not have hardcoded paths"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should not have hardcoded paths"
 else
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no hardcoded paths"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no hardcoded paths"
 fi
 
 # Test: shellcheck compliance
@@ -69,14 +69,14 @@ if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$HEALTH_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
 fi
 
 echo ""

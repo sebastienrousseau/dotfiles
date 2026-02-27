@@ -3,12 +3,12 @@
 
 # NVM (Node Version Manager)
 # Lazy load nvm only when nvm, node, npm, or yarn is called
-if [ -s "$HOME/.nvm/nvm.sh" ]; then
+if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
   lazy_nvm() {
     unset -f nvm node npm yarn npx
     export NVM_DIR="$HOME/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    if [ -s "$NVM_DIR/bash_completion" ]; then
+    [[ -s "$NVM_DIR/nvm.sh" ]] && \. "$NVM_DIR/nvm.sh"
+    if [[ -s "$NVM_DIR/bash_completion" ]]; then
       \. "$NVM_DIR/bash_completion"
     fi
     # Execute the command that triggered the load
@@ -37,7 +37,7 @@ if command -v rbenv >/dev/null; then
 fi
 
 # SDKMAN (Java/Groovy/Scala Version Manager)
-if [ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]; then
+if [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]]; then
   lazy_sdk() {
     unset -f sdk java gradle mvn kotlin
     source "$HOME/.sdkman/bin/sdkman-init.sh"

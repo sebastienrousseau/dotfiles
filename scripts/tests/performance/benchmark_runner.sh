@@ -67,12 +67,12 @@ benchmark_shell_startup() {
 
   if [[ $avg -gt $SHELL_STARTUP_THRESHOLD_MS ]]; then
     status="FAIL"
-    echo -e "${RED}✗ FAIL${NC}: Shell startup ${avg}ms exceeds threshold ${SHELL_STARTUP_THRESHOLD_MS}ms"
+    printf '%b\n' "${RED}✗ FAIL${NC}: Shell startup ${avg}ms exceeds threshold ${SHELL_STARTUP_THRESHOLD_MS}ms"
     store_result "shell_startup" "$avg" "$SHELL_STARTUP_THRESHOLD_MS" "$status"
     return 1
   else
     status="PASS"
-    echo -e "${GREEN}✓ PASS${NC}: Shell startup ${avg}ms (threshold: ${SHELL_STARTUP_THRESHOLD_MS}ms)"
+    printf '%b\n' "${GREEN}✓ PASS${NC}: Shell startup ${avg}ms (threshold: ${SHELL_STARTUP_THRESHOLD_MS}ms)"
     store_result "shell_startup" "$avg" "$SHELL_STARTUP_THRESHOLD_MS" "$status"
     return 0
   fi
@@ -89,13 +89,13 @@ benchmark_function_sourcing() {
     time_ms=$(measure_time_ms "source '$func_file'")
 
     if [[ $time_ms -gt $FUNCTION_LOAD_THRESHOLD_MS ]]; then
-      echo -e "${YELLOW}⚠ WARN${NC}: $name took ${time_ms}ms to source"
+      printf '%b\n' "${YELLOW}⚠ WARN${NC}: $name took ${time_ms}ms to source"
       ((failures++))
     fi
   done
 
   if [[ $failures -eq 0 ]]; then
-    echo -e "${GREEN}✓ PASS${NC}: All functions load within threshold"
+    printf '%b\n' "${GREEN}✓ PASS${NC}: All functions load within threshold"
   fi
 }
 
@@ -124,12 +124,12 @@ benchmark_memory_usage() {
   # Fail if memory usage exceeds 50MB
   if [[ $diff_mb -gt 50 ]]; then
     status="FAIL"
-    echo -e "${RED}✗ FAIL${NC}: Memory usage ${diff_mb}MB exceeds 50MB threshold"
+    printf '%b\n' "${RED}✗ FAIL${NC}: Memory usage ${diff_mb}MB exceeds 50MB threshold"
     store_result "memory_usage_kb" "$diff_kb" "51200" "$status"
     return 1
   else
     status="PASS"
-    echo -e "${GREEN}✓ PASS${NC}: Memory usage within acceptable limits"
+    printf '%b\n' "${GREEN}✓ PASS${NC}: Memory usage within acceptable limits"
     store_result "memory_usage_kb" "$diff_kb" "51200" "$status"
     return 0
   fi

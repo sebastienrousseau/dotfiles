@@ -212,7 +212,7 @@ cd_with_history() {
 
 # Create directory and navigate to it
 mkcd() {
-  if [ -z "$1" ]; then
+  if [[ -z "$1" ]]; then
     echo "Usage: mkcd <directory_name>"
     return 1
   fi
@@ -238,7 +238,7 @@ bookmark_list() {
 
 # Create a bookmark
 bookmark() {
-  if [ -z "$1" ]; then
+  if [[ -z "$1" ]]; then
     # Show usage and call the bookmark_list function
     echo "Usage: bookmark <bookmark_name> [directory]"
     bookmark_list
@@ -339,7 +339,7 @@ bookmark_update() {
 
 # Remove bookmark
 bookmark_remove() {
-  if [ -z "$1" ]; then
+  if [[ -z "$1" ]]; then
     echo "Usage: bookmark_remove <bookmark_name>"
     return 1
   fi
@@ -372,7 +372,7 @@ bookmark_remove() {
 
 # Go to bookmark
 goto() {
-  if [ -z "$1" ]; then
+  if [[ -z "$1" ]]; then
     echo "Usage: goto <bookmark_name>"
     # Just show usage without listing bookmarks to avoid platform-specific issues
     echo "Use 'bml' or 'bookmark_list' to see available bookmarks"

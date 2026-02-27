@@ -23,10 +23,10 @@ fi
 test_start "safe_write_file_exists"
 if declare -f safe_write_file >/dev/null 2>&1; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: safe_write_file function exists"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: safe_write_file function exists"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: safe_write_file function should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: safe_write_file function should exist"
 fi
 
 # Test: safe_write_file creates file
@@ -38,15 +38,15 @@ if declare -f safe_write_file >/dev/null 2>&1; then
 
   if [[ -f "$test_file" ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: safe_write_file creates file"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: safe_write_file creates file"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: file should be created"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: file should be created"
   fi
   rm -rf "$test_dir"
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
 fi
 
 # Test: safe_write_file writes content
@@ -59,15 +59,15 @@ if declare -f safe_write_file >/dev/null 2>&1; then
   content=$(cat "$test_file" 2>/dev/null)
   if [[ "$content" == "expected content" ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: correct content written"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: correct content written"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: content should match"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: content should match"
   fi
   rm -rf "$test_dir"
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
 fi
 
 # Test: safe_write_file append mode
@@ -81,25 +81,25 @@ if declare -f safe_write_file >/dev/null 2>&1; then
   line_count=$(wc -l <"$test_file" | tr -d ' ')
   if [[ "$line_count" -eq 2 ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: append mode works"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: append mode works"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have 2 lines"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have 2 lines"
   fi
   rm -rf "$test_dir"
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
 fi
 
 # Test: count_dir_items function exists
 test_start "count_dir_items_exists"
 if declare -f count_dir_items >/dev/null 2>&1; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: count_dir_items function exists"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: count_dir_items function exists"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: count_dir_items function should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: count_dir_items function should exist"
 fi
 
 # Test: count_dir_items counts correctly
@@ -113,25 +113,25 @@ if declare -f count_dir_items >/dev/null 2>&1; then
   count=$(count_dir_items "$test_dir")
   if [[ "$count" -eq 3 ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: counts 3 items correctly"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: counts 3 items correctly"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: should count 3, got $count"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should count 3, got $count"
   fi
   rm -rf "$test_dir"
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
 fi
 
 # Test: mkcd function exists
 test_start "mkcd_exists"
 if declare -f mkcd >/dev/null 2>&1; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: mkcd function exists"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: mkcd function exists"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: mkcd function should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: mkcd function should exist"
 fi
 
 # Test: mkcd with no arguments shows error
@@ -141,14 +141,14 @@ if declare -f mkcd >/dev/null 2>&1; then
   exit_code=$?
   if [[ "$exit_code" -eq 1 ]] || [[ "$output" == *"Usage"* ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: mkcd shows usage with no args"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: mkcd shows usage with no args"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: should show usage"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show usage"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
 fi
 
 # Test: mkcd creates directory
@@ -161,25 +161,25 @@ if declare -f mkcd >/dev/null 2>&1; then
 
   if [[ -d "$new_dir" ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: mkcd creates directory"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: mkcd creates directory"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: directory should be created"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: directory should be created"
   fi
   rm -rf "$test_dir"
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
 fi
 
 # Test: bookmark function exists
 test_start "bookmark_exists"
 if declare -f bookmark >/dev/null 2>&1; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: bookmark function exists"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: bookmark function exists"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: bookmark function should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: bookmark function should exist"
 fi
 
 # Test: bookmark with no args shows list/usage
@@ -191,15 +191,15 @@ if declare -f bookmark >/dev/null 2>&1; then
   )
   if [[ "$output" == *"Usage"* ]] || [[ "$output" == *"bookmark"* ]] || [[ "$output" == *"No bookmarks"* ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: bookmark shows usage/list"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: bookmark shows usage/list"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: should show usage or list"
-    echo -e "    Output: $output"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show usage or list"
+    printf '%b\n' "    Output: $output"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
 fi
 
 # Test: bookmark rejects invalid names
@@ -209,24 +209,24 @@ if declare -f bookmark >/dev/null 2>&1; then
   exit_code=$?
   if [[ "$exit_code" -ne 0 ]] || [[ "$output" == *"Error"* ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: rejects invalid bookmark names"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: rejects invalid bookmark names"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: should reject invalid names"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should reject invalid names"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
 fi
 
 # Test: goto function exists
 test_start "goto_exists"
 if declare -f goto >/dev/null 2>&1; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: goto function exists"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: goto function exists"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: goto function should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: goto function should exist"
 fi
 
 # Test: goto with no args shows usage
@@ -236,14 +236,14 @@ if declare -f goto >/dev/null 2>&1; then
   exit_code=$?
   if [[ "$exit_code" -eq 1 ]] || [[ "$output" == *"Usage"* ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: goto shows usage with no args"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: goto shows usage with no args"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: should show usage"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show usage"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
 fi
 
 # Test: goto with nonexistent bookmark shows error
@@ -253,24 +253,24 @@ if declare -f goto >/dev/null 2>&1; then
   exit_code=$?
   if [[ "$exit_code" -ne 0 ]] || [[ "$output" == *"not found"* ]] || [[ "$output" == *"No bookmarks"* ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: goto handles nonexistent bookmark"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: goto handles nonexistent bookmark"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: should handle nonexistent bookmark"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should handle nonexistent bookmark"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
 fi
 
 # Test: proj function exists
 test_start "proj_exists"
 if declare -f proj >/dev/null 2>&1; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: proj function exists"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: proj function exists"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: proj function should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: proj function should exist"
 fi
 
 # Test: cd_with_history validates directory
@@ -280,24 +280,24 @@ if declare -f cd_with_history >/dev/null 2>&1; then
   exit_code=$?
   if [[ "$exit_code" -ne 0 ]] || [[ "$output" == *"Error"* ]] || [[ "$output" == *"not found"* ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: validates directory exists"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: validates directory exists"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: should validate directory"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should validate directory"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
 fi
 
 # Test: cd_aliases_help function exists
 test_start "cd_aliases_help_exists"
 if declare -f cd_aliases_help >/dev/null 2>&1; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: cd_aliases_help function exists"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: cd_aliases_help function exists"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: cd_aliases_help function should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: cd_aliases_help function should exist"
 fi
 
 # Test: cd_aliases_help shows documentation
@@ -306,24 +306,24 @@ if declare -f cd_aliases_help >/dev/null 2>&1; then
   output=$(cd_aliases_help 2>&1)
   if [[ "$output" == *"NAVIGATION"* ]] || [[ "$output" == *"BOOKMARK"* ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: help shows documentation"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: help shows documentation"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: should show documentation"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show documentation"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
 fi
 
 # Test: cd_aliases_version function exists
 test_start "cd_aliases_version_exists"
 if declare -f cd_aliases_version >/dev/null 2>&1; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: cd_aliases_version function exists"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: cd_aliases_version function exists"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: cd_aliases_version function should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: cd_aliases_version function should exist"
 fi
 
 # Test: cd_aliases_version shows version
@@ -332,34 +332,34 @@ if declare -f cd_aliases_version >/dev/null 2>&1; then
   output=$(cd_aliases_version 2>&1)
   if [[ "$output" == *"v"* ]] || [[ "$output" =~ [0-9]+\.[0-9]+ ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: version shows version number"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: version shows version number"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: should show version"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show version"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
 fi
 
 # Test: DOTFILES_VERSION is set
 test_start "dotfiles_version_set"
 if [[ -n "${DOTFILES_VERSION:-}" ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: DOTFILES_VERSION is set ($DOTFILES_VERSION)"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: DOTFILES_VERSION is set ($DOTFILES_VERSION)"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: DOTFILES_VERSION should be set"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: DOTFILES_VERSION should be set"
 fi
 
 # Test: OS detection works
 test_start "os_detection"
 if [[ -n "${DOTFILES_OS:-}" ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: OS detected ($DOTFILES_OS)"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: OS detected ($DOTFILES_OS)"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: DOTFILES_OS should be set"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: DOTFILES_OS should be set"
 fi
 
 echo ""

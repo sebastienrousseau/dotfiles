@@ -43,6 +43,12 @@ nix/**
 
 .config/nvim/lazy-lock.json
 
+# Feature-gated configs
+{{- if not .features.zellij }}
+.config/zellij
+.config/zellij/**
+{{- end }}
+
 {{- if eq .chezmoi.os "darwin" }}
 .config/i3
 .config/i3/**

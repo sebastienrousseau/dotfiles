@@ -17,10 +17,10 @@ assert_file_exists "$INSTALL_SCRIPT" "install.sh should exist"
 test_start "install_script_executable"
 if [[ -x "$INSTALL_SCRIPT" ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: install.sh is executable"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: install.sh is executable"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: install.sh should be executable"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: install.sh should be executable"
 fi
 
 # Test: install.sh has shebang
@@ -28,140 +28,140 @@ test_start "install_script_shebang"
 first_line=$(head -n 1 "$INSTALL_SCRIPT")
 if [[ "$first_line" == "#!/"* ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have shebang"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have shebang"
 fi
 
 # Test: install.sh uses set -e
 test_start "install_script_set_e"
 if grep -q "set -e" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses set -e for error handling"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses set -e for error handling"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use set -e"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should use set -e"
 fi
 
 # Test: install.sh defines step function
 test_start "install_script_step_function"
 if grep -q "step()" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines step function"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines step function"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define step function"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define step function"
 fi
 
 # Test: install.sh defines error function
 test_start "install_script_error_function"
 if grep -q "error()" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines error function"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines error function"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define error function"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define error function"
 fi
 
 # Test: install.sh checks for curl
 test_start "install_script_curl_check"
 if grep -q "curl" "$INSTALL_SCRIPT" && grep -q "command -v curl" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: checks for curl dependency"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: checks for curl dependency"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should check for curl"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should check for curl"
 fi
 
 # Test: install.sh checks for git
 test_start "install_script_git_check"
 if grep -q "git" "$INSTALL_SCRIPT" && grep -q "command -v git" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: checks for git dependency"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: checks for git dependency"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should check for git"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should check for git"
 fi
 
 # Test: install.sh detects OS
 test_start "install_script_os_detection"
 if grep -q "uname" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: detects OS using uname"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: detects OS using uname"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should detect OS"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should detect OS"
 fi
 
 # Test: install.sh has version pinning
 test_start "install_script_version_pin"
 if grep -q "CHEZMOI_VERSION" "$INSTALL_SCRIPT" || grep -q "VERSION=" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has version pinning for security"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has version pinning for security"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have version pinning"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have version pinning"
 fi
 
 # Test: install.sh installs chezmoi via brew or get.chezmoi.io
 test_start "install_script_chezmoi_install"
 if grep -q "brew install chezmoi" "$INSTALL_SCRIPT" && grep -q "get.chezmoi.io" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: installs chezmoi via brew or get.chezmoi.io"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: installs chezmoi via brew or get.chezmoi.io"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should install chezmoi via brew or get.chezmoi.io"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should install chezmoi via brew or get.chezmoi.io"
 fi
 
 # Test: install.sh creates backup
 test_start "install_script_backup"
 if grep -q "backup" "$INSTALL_SCRIPT" || grep -q "\.bak" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: creates backup of existing files"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: creates backup of existing files"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should backup existing files"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should backup existing files"
 fi
 
 # Test: install.sh uses chezmoi
 test_start "install_script_chezmoi"
 if grep -q "chezmoi" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses chezmoi for dotfile management"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses chezmoi for dotfile management"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use chezmoi"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should use chezmoi"
 fi
 
 # Test: install.sh handles non-interactive mode
 test_start "install_script_noninteractive"
 if grep -q "NONINTERACTIVE" "$INSTALL_SCRIPT" || grep -q "force" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: supports non-interactive mode"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: supports non-interactive mode"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should support non-interactive mode"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should support non-interactive mode"
 fi
 
 # Test: install.sh backs up managed dotfiles
 test_start "install_script_cleanup"
 if grep -q "chezmoi managed" "$INSTALL_SCRIPT" && grep -q "cp -a" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: backs up managed dotfiles before overwriting"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: backs up managed dotfiles before overwriting"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should back up managed dotfiles"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should back up managed dotfiles"
 fi
 
 # Test: install.sh uses HTTPS
 test_start "install_script_https"
 if grep -q "https://" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses HTTPS for downloads"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses HTTPS for downloads"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use HTTPS"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should use HTTPS"
 fi
 
 # Test: install.sh detects multiple OS types
@@ -174,40 +174,40 @@ for os_type in "debian" "fedora" "arch" "macos" "wsl2"; do
 done
 if [[ $os_count -ge 3 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: detects $os_count OS types"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: detects $os_count OS types"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should detect multiple OS types"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should detect multiple OS types"
 fi
 
 # Test: install.sh supports Linux
 test_start "install_script_linux"
 if grep -q "linux" "$INSTALL_SCRIPT" || grep -q "Linux" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: supports Linux"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: supports Linux"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should support Linux"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should support Linux"
 fi
 
 # Test: install.sh supports macOS
 test_start "install_script_macos"
 if grep -q "darwin" "$INSTALL_SCRIPT" || grep -q "Darwin" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: supports macOS"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: supports macOS"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should support macOS"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should support macOS"
 fi
 
 # Test: Dry run syntax check
 test_start "install_script_syntax"
 if bash -n "$INSTALL_SCRIPT" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: script has valid bash syntax"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: script has valid bash syntax"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: script has syntax errors"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: script has syntax errors"
 fi
 
 # Test: No hardcoded sensitive paths in install
@@ -223,10 +223,10 @@ done
 
 if [[ "$found_sensitive" == false ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no hardcoded sensitive data"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no hardcoded sensitive data"
 else
   ((TESTS_PASSED++)) # Might be false positive
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: review for sensitive data"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: review for sensitive data"
 fi
 
 # Test: install.sh --help flag
@@ -234,10 +234,10 @@ test_start "install_help_flag"
 help_output=$(bash "$INSTALL_SCRIPT" --help 2>&1) || true
 if echo "$help_output" | grep -q "Usage"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: --help shows usage information"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --help shows usage information"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: --help should show usage information"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: --help should show usage information"
 fi
 
 test_start "install_help_exit_code"
@@ -245,10 +245,10 @@ bash "$INSTALL_SCRIPT" --help >/dev/null 2>&1
 help_exit=$?
 if [[ "$help_exit" -eq 0 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: --help exits with code 0"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --help exits with code 0"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: --help should exit with code 0 (got $help_exit)"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: --help should exit with code 0 (got $help_exit)"
 fi
 
 echo ""

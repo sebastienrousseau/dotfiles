@@ -18,70 +18,70 @@ assert_file_exists "$SEC_FILE" "security.sh should exist"
 test_start "security_cmd_syntax_valid"
 if bash -n "$SEC_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: security.sh has valid syntax"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: security.sh has valid syntax"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: security.sh has syntax errors"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: security.sh has syntax errors"
 fi
 
 # Test: defines firewall command
 test_start "security_cmd_defines_firewall"
 if grep -q "cmd_firewall\|_firewall\|firewall" "$SEC_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines firewall command"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines firewall command"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define firewall command"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define firewall command"
 fi
 
 # Test: defines backup command
 test_start "security_cmd_defines_backup"
 if grep -q "cmd_backup\|_backup\|backup" "$SEC_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines backup command"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines backup command"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define backup command"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define backup command"
 fi
 
 # Test: defines telemetry command
 test_start "security_cmd_defines_telemetry"
 if grep -q "cmd_telemetry\|telemetry" "$SEC_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines telemetry command"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines telemetry command"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define telemetry command"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define telemetry command"
 fi
 
 # Test: defines encrypt-check command
 test_start "security_cmd_defines_encrypt_check"
 if grep -q "encrypt.check\|encrypt_check\|encryptcheck" "$SEC_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines encrypt-check command"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines encrypt-check command"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define encrypt-check command"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define encrypt-check command"
 fi
 
 # Test: no dangerous commands
 test_start "security_cmd_no_dangerous_rm"
 if grep -qE 'rm -rf /[^$]' "$SEC_FILE" 2>/dev/null; then
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: has dangerous rm -rf commands"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has dangerous rm -rf commands"
 else
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no dangerous rm commands"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no dangerous rm commands"
 fi
 
 # Test: requires confirmation for destructive actions
 test_start "security_cmd_confirms_destructive"
 if grep -qE 'run_script|cmd_backup|cmd_firewall|cmd_telemetry|DOTFILES_' "$SEC_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has confirmation prompts"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has confirmation prompts"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have confirmation for destructive actions"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have confirmation for destructive actions"
 fi
 
 # Test: uses sudo appropriately
@@ -90,14 +90,14 @@ if grep -q "sudo" "$SEC_FILE" 2>/dev/null; then
   # Check if sudo is used with proper checks
   if grep -qE 'command -v sudo|which sudo|\$EUID' "$SEC_FILE" 2>/dev/null; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: sudo usage has proper checks"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: sudo usage has proper checks"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: sudo should have availability check"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: sudo should have availability check"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no sudo usage (OK)"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no sudo usage (OK)"
 fi
 
 # Test: shellcheck compliance
@@ -106,14 +106,14 @@ if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$SEC_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
 fi
 
 echo ""
