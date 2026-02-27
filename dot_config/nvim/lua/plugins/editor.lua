@@ -46,6 +46,5 @@ return {
       -- Set the terminal size (this can also be a function returning a size).
       size = 20,
     })
-
   end,
 }
