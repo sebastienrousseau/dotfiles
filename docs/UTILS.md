@@ -101,6 +101,7 @@ You can debug HTTP requests with:
 - `dot dns-doh` to enable DNS-over-HTTPS
 - `dot lock-screen` to enforce lock screen idle settings
 - `dot usb-safety` to disable automount for removable media
+- `dot ssh-cert` to manage short-lived SSH certificates (issue/status/revoke)
 
 ## Fonts
 

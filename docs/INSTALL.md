@@ -55,6 +55,22 @@ nix develop ~/.dotfiles/nix
 nix profile install ~/.dotfiles/nix#dot-utils
 ```
 
+### Using GitHub Codespaces or devcontainers
+
+```bash
+# Codespaces: auto-detects .devcontainer/devcontainer.json
+# The postCreateCommand runs install-full.sh automatically
+
+# Local devcontainer (VS Code Remote Containers):
+# 1. Open repo in devcontainer
+# 2. postCreateCommand provisions dotfiles with server profile
+```
+
+Container environment variables:
+
+- `DOTFILES_PROFILE=server` — headless server profile (no GUI tools)
+- `DOTFILES_NONINTERACTIVE=1` — non-interactive chezmoi apply
+
 ## What happens
 
 1. The installer downloads a pinned Chezmoi bootstrap and applies this repo.

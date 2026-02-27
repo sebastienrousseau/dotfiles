@@ -172,6 +172,14 @@ Files under `~/.config/shell/` are sourced explicitly by `dot_zshrc` in lexical 
 | `50-89` | Toolchain: functions | `50-logic-functions.sh` |
 | `90-99` | UX: aliases, prompts | `90-ux-aliases.sh` (eager), `91-ux-aliases-lazy.sh` (deferred) |
 
+### Tab completion
+
+The `dot` CLI provides zsh completions with subcommand-specific argument completion:
+
+- **File**: `~/.local/share/zsh/completions/_dot`
+- **Features**: Command descriptions, subcommand arguments (e.g., `dot new <template>`), flag completion (e.g., `dot perf --json`)
+- **Tool completions**: gh, just, chezmoi, kubectl, atuin, mise — generated once into `$ZSH_COMPLETIONS_DIR`
+
 ### Alias system
 
 Aliases are defined in `.chezmoitemplates/aliases/` with one directory per category:
@@ -208,6 +216,18 @@ Dotfiles replaces legacy Unix tools with high-performance Rust alternatives:
 | `find` | `fd` | Developer-friendly filesystem search |
 | `vim` | `neovim` | Lua-extensible IDE |
 | `diff` | `delta` | Syntax-highlighted diffs |
+
+### Runtime version management
+
+**mise** replaces legacy per-language version managers:
+
+| Legacy | Replacement | Controlled by |
+| :--- | :--- | :--- |
+| `nvm` / `fnm` | `mise` | `.chezmoidata.toml` `tools.node_manager` |
+| `pyenv` | `mise` | `~/.config/mise/config.toml` |
+| `rbenv` | `mise` | `~/.config/mise/config.toml` |
+
+The `node_manager` setting uses Go template conditionals in `30-options.zsh.tmpl` to select between `mise` (default), `fnm`, or `nvm`.
 
 ## Predictive shell strategy
 
