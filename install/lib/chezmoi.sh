@@ -5,6 +5,8 @@
 # Chezmoi Installation Library
 # Handles chezmoi binary installation and configuration
 
+set -euo pipefail
+
 # Check if chezmoi is installed
 has_chezmoi() {
   command -v chezmoi >/dev/null 2>&1
