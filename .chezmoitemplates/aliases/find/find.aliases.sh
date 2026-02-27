@@ -30,7 +30,7 @@ if command -v fd &>/dev/null; then
   alias fdh='fd --help'
 
   # List all files, including hidden files.
-  alias fdh='fd --hidden'
+  alias fdH='fd --hidden'
 
   # List all files with glob.
   alias fdn='fd --glob'

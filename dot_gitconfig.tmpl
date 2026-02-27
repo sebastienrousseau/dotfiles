@@ -47,12 +47,22 @@
 
 [fetch]
 	prune = true
+	fsckObjects = true
+
+[transfer]
+	fsckObjects = true
+
+[receive]
+	fsckObjects = true
 
 [push]
 	autoSetupRemote = true
 
 [pull]
 	rebase = true
+
+[merge]
+	verifySignatures = false
 
 [rerere]
 	enabled = true

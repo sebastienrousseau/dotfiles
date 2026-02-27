@@ -89,7 +89,7 @@ dot_secrets_store_plain_enc() {
     return 1
   }
   dot_secrets_ensure_layout
-  tmp_rec="$(mktemp)"
+  tmp_rec="$(umask 077 && mktemp)"
   file="$DOT_SECRETS_STORE_DIR/${key}.age"
   trap 'rm -f "$tmp_rec"' RETURN
   age-keygen -y "$DOT_SECRETS_AGE_KEY" >"$tmp_rec"

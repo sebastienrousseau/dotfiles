@@ -13,7 +13,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
-DOTFILES_SOURCE="${HOME}/.dotfiles"
+# Resolve symlinks for consistent path handling
+if command -v realpath >/dev/null 2>&1; then
+  DOTFILES_SOURCE="$(realpath "${HOME}/.dotfiles" 2>/dev/null || echo "${HOME}/.dotfiles")"
+elif command -v readlink >/dev/null 2>&1; then
+  DOTFILES_SOURCE="$(readlink -f "${HOME}/.dotfiles" 2>/dev/null || echo "${HOME}/.dotfiles")"
+else
+  DOTFILES_SOURCE="${HOME}/.dotfiles"
+fi
 BACKUP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/backups"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
 ROLLBACK_LOG="$STATE_DIR/rollback.log"

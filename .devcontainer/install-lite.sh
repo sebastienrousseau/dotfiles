@@ -52,7 +52,7 @@ if command_exists zoxide; then
   info "zoxide is already installed"
 else
   info "Installing zoxide ..."
-  installer=$(mktemp)
+  installer=$(umask 077 && mktemp)
   if curl -fsSL -o "$installer" "https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh"; then # gitleaks:allow
     if head -1 "$installer" | grep -q '^#!/'; then
       sh "$installer"
@@ -90,7 +90,7 @@ if command_exists starship; then
   info "starship is already installed"
 else
   info "Installing starship ..."
-  installer=$(mktemp)
+  installer=$(umask 077 && mktemp)
   if curl -fsSL -o "$installer" "https://starship.rs/install.sh"; then # gitleaks:allow
     if head -1 "$installer" | grep -q '^#!/'; then
       sh "$installer" -y
