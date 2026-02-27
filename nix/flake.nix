@@ -7,7 +7,8 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
   };
 
-  outputs = { self, nixpkgs }:
+  outputs =
+    { self, nixpkgs }:
     let
       systems = [
         "x86_64-linux"
@@ -19,7 +20,8 @@
     in
     {
       # Development shell for interactive use
-      devShells = forAllSystems (system:
+      devShells = forAllSystems (
+        system:
         let
           pkgs = import nixpkgs { inherit system; };
         in
@@ -66,12 +68,11 @@
       );
 
       # Formatter for `nix fmt`
-      formatter = forAllSystems (system:
-        (import nixpkgs { inherit system; }).nixfmt-rfc-style
-      );
+      formatter = forAllSystems (system: (import nixpkgs { inherit system; }).nixfmt-rfc-style);
 
       # Packages output for `nix profile install`
-      packages = forAllSystems (system:
+      packages = forAllSystems (
+        system:
         let
           pkgs = import nixpkgs { inherit system; };
         in
