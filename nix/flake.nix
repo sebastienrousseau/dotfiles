@@ -65,6 +65,11 @@
         }
       );
 
+      # Formatter for `nix fmt`
+      formatter = forAllSystems (system:
+        (import nixpkgs { inherit system; }).nixfmt-rfc-style
+      );
+
       # Packages output for `nix profile install`
       packages = forAllSystems (system:
         let
