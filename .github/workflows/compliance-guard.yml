@@ -176,7 +176,7 @@ jobs:
 
           if [[ -n "$VIOLATIONS" ]]; then
             echo "::error::TLS Security Violations Found"
-            echo -e "$VIOLATIONS"
+            printf '%b\n' "$VIOLATIONS"
             echo ""
             echo "Fix: Remove -k/--insecure flags and use https:// URLs"
             exit 1
@@ -198,7 +198,7 @@ jobs:
 
           if [[ -n "$VIOLATIONS" ]]; then
             echo "::warning::Potential credential patterns detected - please verify"
-            echo -e "$VIOLATIONS"
+            printf '%b\n' "$VIOLATIONS"
           fi
 
           echo "Credential scan complete"
