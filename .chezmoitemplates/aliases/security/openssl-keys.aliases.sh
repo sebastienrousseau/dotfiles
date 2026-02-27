@@ -3,7 +3,7 @@
 [[ -n "${_OPENSSL_KEYS_LOADED:-}" ]] && return 0
 _OPENSSL_KEYS_LOADED=1
 
-function sslgenrsa() {
+sslgenrsa() {
   [[ -z "$1" ]] && {
     echo "Usage: sslgenrsa <key_file> [size]"
     echo "Default size: 2048"
@@ -12,7 +12,7 @@ function sslgenrsa() {
   openssl genrsa -out "$1" "${2:-2048}"
 }
 
-function sslgenpkey() {
+sslgenpkey() {
   [[ -z "$1" || -z "$2" ]] && {
     echo "Usage: sslgenpkey <algorithm> <key_out>"
     echo "Example: sslgenpkey RSA mykey.pem"
@@ -21,7 +21,7 @@ function sslgenpkey() {
   openssl genpkey -algorithm "$1" -out "$2"
 }
 
-function sslecparam() {
+sslecparam() {
   [[ -z "$1" || -z "$2" ]] && {
     echo "Usage: sslecparam <curve_name> <out_key>"
     echo "Example: sslecparam prime256v1 eckey.pem"
@@ -30,7 +30,7 @@ function sslecparam() {
   openssl ecparam -name "$1" -genkey -out "$2"
 }
 
-function sslrsa() {
+sslrsa() {
   [[ -z "$1" ]] && {
     echo "Usage: sslrsa <rsa_private_key_file>"
     return 1
@@ -38,7 +38,7 @@ function sslrsa() {
   openssl rsa -in "$1" -check
 }
 
-function sslrsainfo() {
+sslrsainfo() {
   [[ -z "$1" ]] && {
     echo "Usage: sslrsainfo <rsa_private_key_file>"
     return 1
@@ -46,7 +46,7 @@ function sslrsainfo() {
   openssl rsa -in "$1" -text -noout
 }
 
-function sslrsapub() {
+sslrsapub() {
   [[ -z "$1" || -z "$2" ]] && {
     echo "Usage: sslrsapub <rsa_private_key_file> <pub_key_out>"
     return 1
@@ -54,7 +54,7 @@ function sslrsapub() {
   openssl rsa -in "$1" -pubout -out "$2"
 }
 
-function sslpkey() {
+sslpkey() {
   [[ -z "$1" ]] && {
     echo "Usage: sslpkey <key_file> [additional_params]"
     return 1

@@ -43,10 +43,19 @@
               # Git tools
               lazygit
               delta
+              gh
 
               # Data processing
               jq
               yq
+
+              # Dev tools
+              chezmoi
+              starship
+              shellcheck
+              shfmt
+              just
+              direnv
 
               # Security
               age
@@ -83,10 +92,19 @@
               # Git tools
               lazygit
               delta
+              gh
 
               # Data processing
               jq
               yq
+
+              # Dev tools
+              chezmoi
+              starship
+              shellcheck
+              shfmt
+              just
+              direnv
 
               # Security
               age

@@ -5,7 +5,7 @@ _OPENSSL_CSR_LOADED=1
 
 alias sslreq='openssl req'
 
-function sslreqnew() {
+sslreqnew() {
   [[ -z "$1" || -z "$2" ]] && {
     echo "Usage: sslreqnew <key_out> <csr_out>"
     return 1
@@ -13,7 +13,7 @@ function sslreqnew() {
   openssl req -new -nodes -keyout "$1" -out "$2"
 }
 
-function sslreqinfo() {
+sslreqinfo() {
   [[ -z "$1" ]] && {
     echo "Usage: sslreqinfo <csr_file>"
     return 1
@@ -21,7 +21,7 @@ function sslreqinfo() {
   openssl req -in "$1" -text -noout
 }
 
-function sslreqverify() {
+sslreqverify() {
   [[ -z "$1" ]] && {
     echo "Usage: sslreqverify <csr_file>"
     return 1
