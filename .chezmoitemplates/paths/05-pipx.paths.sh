@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+# shellcheck shell=bash
 # Pipx Configuration
 # Explicitly set home and bin dirs to avoid "spaces in path" warnings and ensure XDG compliance
 export PIPX_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/pipx"
