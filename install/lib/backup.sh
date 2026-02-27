@@ -30,14 +30,14 @@ backup_managed_files() {
     return
   fi
 
-  if [ ! -f "$config_file" ]; then
+  if [[ ! -f "$config_file" ]]; then
     echo "0"
     return
   fi
 
   while IFS= read -r file; do
-    [ -z "$file" ] && continue
-    if [ -e "$file" ]; then
+    [[ -z "$file" ]] && continue
+    if [[ -e "$file" ]]; then
       local rel="${file#"$HOME"/}"
       mkdir -p "$backup_dir/$(dirname "$rel")"
       cp -a "$file" "$backup_dir/$rel"
@@ -60,7 +60,7 @@ perform_backup() {
   local backup_count
   backup_count="$(backup_managed_files "$backup_dir" "$config_file")"
 
-  if [ "$backup_count" -gt 0 ]; then
+  if [[ "$backup_count" -gt 0 ]]; then
     echo "   Backed up $backup_count files to $backup_dir"
   else
     echo "   No existing dotfiles to back up."
@@ -76,7 +76,7 @@ perform_backup() {
 restore_backup() {
   local backup_dir="$1"
 
-  if [ ! -d "$backup_dir" ]; then
+  if [[ ! -d "$backup_dir" ]]; then
     echo "Error: Backup directory not found: $backup_dir" >&2
     return 1
   fi
@@ -99,7 +99,7 @@ list_backups() {
   local backups
   backups=$(find "$HOME" -maxdepth 1 -type d -name ".dotfiles.bak.*" 2>/dev/null | sort -r)
 
-  if [ -z "$backups" ]; then
+  if [[ -z "$backups" ]]; then
     echo "No backups found."
     return 0
   fi

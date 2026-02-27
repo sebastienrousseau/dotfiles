@@ -75,9 +75,9 @@ case "$OS" in
     ;;
   Linux)
     # shellcheck disable=SC2250
-    if [ -f /proc/version ] && grep -qi 'microsoft\|WSL' /proc/version; then
+    if [[ -f /proc/version ]] && grep -qi 'microsoft\|WSL' /proc/version; then
       target_os="wsl2"
-    elif [ -f /etc/os-release ]; then
+    elif [[ -f /etc/os-release ]]; then
       # shellcheck disable=SC1091
       . /etc/os-release
       case "${ID:-}" in
@@ -107,13 +107,13 @@ echo "   Target: $target_os"
 step "Checking Prerequisites..."
 
 # On macOS, ensure Homebrew is available before checking curl/git
-if [ "$target_os" = "macos" ] && ! command -v brew >/dev/null; then
+if [[ "$target_os" = "macos" ]] && ! command -v brew >/dev/null; then
   echo "   Homebrew not found."
   printf '%b\n' "${CYAN}   SECURITY NOTE: This will download and execute code from brew.sh${NC}"
   echo "   Verify at: https://github.com/Homebrew/install"
 
   # In non-interactive mode, proceed with warning
-  if [ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]; then
+  if [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]]; then
     read -r -p "   Continue with Homebrew installation? [y/N] " response
     case "$response" in
       [yY][eE][sS] | [yY]) ;;
@@ -124,9 +124,9 @@ if [ "$target_os" = "macos" ] && ! command -v brew >/dev/null; then
   echo "   Installing Homebrew..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   # Add brew to PATH for Apple Silicon
-  if [ -x /opt/homebrew/bin/brew ]; then
+  if [[ -x /opt/homebrew/bin/brew ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
-  elif [ -x /usr/local/bin/brew ]; then
+  elif [[ -x /usr/local/bin/brew ]]; then
     eval "$(/usr/local/bin/brew shellenv)"
   fi
 fi
@@ -177,7 +177,7 @@ else
   fi
 
   # Basic validation: check it's a shell script and not suspiciously large
-  if [ "$(wc -c <"$CHEZMOI_INSTALLER")" -gt 102400 ]; then
+  if [[ "$(wc -c <"$CHEZMOI_INSTALLER")" -gt 102400 ]]; then
     rm -f "$CHEZMOI_INSTALLER"
     error "Chezmoi installer suspiciously large. Aborting for security."
   fi
@@ -217,7 +217,7 @@ ensure_chezmoi_source() {
   # Escape sed metacharacters in replacement string
   local escaped_dir
   escaped_dir=$(printf '%s\n' "$dir" | sed -e 's/[\/&]/\\&/g')
-  if [ -f "$CHEZMOI_CONFIG_FILE" ] && grep -q '^sourceDir' "$CHEZMOI_CONFIG_FILE"; then
+  if [[ -f "$CHEZMOI_CONFIG_FILE" ]] && grep -q '^sourceDir' "$CHEZMOI_CONFIG_FILE"; then
     sed -i.bak "s,^sourceDir.*$,sourceDir = \"$escaped_dir\"," "$CHEZMOI_CONFIG_FILE"
     rm -f "$CHEZMOI_CONFIG_FILE.bak"
   else
@@ -231,17 +231,17 @@ BACKUP_DIR="$HOME/.dotfiles.bak.$(date +"%Y%m%d_%H%M%S")"
 backup_count=0
 
 # Determine the source directory for chezmoi to diff against
-if [ -d "$SOURCE_DIR/.git" ]; then
+if [[ -d "$SOURCE_DIR/.git" ]]; then
   ensure_chezmoi_source "$SOURCE_DIR"
-elif [ -d "$LEGACY_SOURCE_DIR/.git" ]; then
+elif [[ -d "$LEGACY_SOURCE_DIR/.git" ]]; then
   ensure_chezmoi_source "$LEGACY_SOURCE_DIR"
 fi
 
 # Back up any existing files that chezmoi would overwrite
-if command -v chezmoi >/dev/null && [ -f "$CHEZMOI_CONFIG_FILE" ]; then
+if command -v chezmoi >/dev/null && [[ -f "$CHEZMOI_CONFIG_FILE" ]]; then
   while IFS= read -r file; do
-    [ -z "$file" ] && continue
-    if [ -e "$file" ]; then
+    [[ -z "$file" ]] && continue
+    if [[ -e "$file" ]]; then
       rel="${file#"$HOME"/}"
       mkdir -p "$BACKUP_DIR/$(dirname "$rel")"
       cp -a "$file" "$BACKUP_DIR/$rel"
@@ -250,7 +250,7 @@ if command -v chezmoi >/dev/null && [ -f "$CHEZMOI_CONFIG_FILE" ]; then
   done < <(chezmoi managed --path-style=absolute 2>/dev/null || true)
 fi
 
-if [ "$backup_count" -gt 0 ]; then
+if [[ "$backup_count" -gt 0 ]]; then
   echo "   Backed up $backup_count files to $BACKUP_DIR"
 else
   echo "   No existing dotfiles to back up."
@@ -261,20 +261,20 @@ fi
 step "Applying Configuration..."
 
 # If we are running from a local source, just apply
-if [ -d "$SOURCE_DIR/.git" ]; then
+if [[ -d "$SOURCE_DIR/.git" ]]; then
   echo "   Applying from local source: $SOURCE_DIR"
   ensure_chezmoi_source "$SOURCE_DIR"
   APPLY_FLAGS=()
-  if [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]; then
+  if [[ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]]; then
     APPLY_FLAGS=(--force --no-tty)
   fi
   chezmoi apply "${APPLY_FLAGS[@]}"
-elif [ -d "$LEGACY_SOURCE_DIR/.git" ]; then
+elif [[ -d "$LEGACY_SOURCE_DIR/.git" ]]; then
   echo "   Migrating from legacy source: $LEGACY_SOURCE_DIR"
   mv "$LEGACY_SOURCE_DIR" "$SOURCE_DIR"
   ensure_chezmoi_source "$SOURCE_DIR"
   APPLY_FLAGS=()
-  if [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]; then
+  if [[ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]]; then
     APPLY_FLAGS=(--force --no-tty)
   fi
   chezmoi apply "${APPLY_FLAGS[@]}"
@@ -293,13 +293,13 @@ else
       git rev-parse --short HEAD
     fi
   )
-  if [ "$ACTUAL_REF" != "$VERSION" ] && [ "${ACTUAL_REF#v}" != "${VERSION#v}" ]; then
+  if [[ "$ACTUAL_REF" != "$VERSION" ]] && [[ "${ACTUAL_REF#v}" != "${VERSION#v}" ]]; then
     printf '%b\n' "${CYAN}   INFO: Checked out ref $ACTUAL_REF (requested: $VERSION)${NC}"
   fi
 
   ensure_chezmoi_source "$SOURCE_DIR"
   APPLY_FLAGS=()
-  if [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]; then
+  if [[ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]]; then
     APPLY_FLAGS=(--force --no-tty)
   fi
   chezmoi apply "${APPLY_FLAGS[@]}"

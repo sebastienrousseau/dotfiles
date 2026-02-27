@@ -50,7 +50,7 @@ install_chezmoi_binary() {
   fi
 
   # Basic validation: check it's a shell script and not suspiciously large
-  if [ "$(wc -c <"$installer")" -gt 102400 ]; then
+  if [[ "$(wc -c <"$installer")" -gt 102400 ]]; then
     rm -f "$installer"
     echo "Error: Chezmoi installer suspiciously large. Aborting for security." >&2
     return 1
@@ -129,7 +129,7 @@ ensure_chezmoi_source() {
   local escaped_dir
   escaped_dir=$(printf '%s\n' "$dir" | sed -e 's/[\/&]/\\&/g')
 
-  if [ -f "$config_file" ] && grep -q '^sourceDir' "$config_file"; then
+  if [[ -f "$config_file" ]] && grep -q '^sourceDir' "$config_file"; then
     sed -i.bak "s,^sourceDir.*$,sourceDir = \"$escaped_dir\"," "$config_file"
     rm -f "$config_file.bak"
   else
@@ -149,13 +149,13 @@ apply_chezmoi() {
   ensure_chezmoi_source "$source_dir"
 
   local apply_flags=()
-  if [ "$non_interactive" = "1" ]; then
+  if [[ "$non_interactive" = "1" ]]; then
     apply_flags=(--force --no-tty)
   fi
 
-  if [ "${DOTFILES_ALIAS_STRICT_MODE:-0}" = "1" ]; then
+  if [[ "${DOTFILES_ALIAS_STRICT_MODE:-0}" = "1" ]]; then
     governance_script="$source_dir/scripts/diagnostics/alias-governance.sh"
-    if [ -f "$governance_script" ]; then
+    if [[ -f "$governance_script" ]]; then
       DOTFILES_ALIAS_POLICY=strict bash "$governance_script"
     fi
   fi
@@ -188,7 +188,7 @@ init_chezmoi_from_git() {
     actual_ref=$(git -C "$source_dir" rev-parse --short HEAD)
   fi
 
-  if [ "$actual_ref" != "$version" ] && [ "${actual_ref#v}" != "${version#v}" ]; then
+  if [[ "$actual_ref" != "$version" ]] && [[ "${actual_ref#v}" != "${version#v}" ]]; then
     printf '%b\n' "${CYAN:-}   INFO: Checked out ref $actual_ref (requested: $version)${NC:-}"
   fi
 }
