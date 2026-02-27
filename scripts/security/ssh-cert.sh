@@ -26,9 +26,12 @@ CA_PROVISIONER="${SSH_CERT_CA_PROVISIONER:-}"
 
 # ---------- helpers -------------------------------------------------------- #
 
-info()  { printf '\033[1;34m[ssh-cert]\033[0m %s\n' "$*"; }
-warn()  { printf '\033[1;33m[ssh-cert]\033[0m %s\n' "$*" >&2; }
-error() { printf '\033[1;31m[ssh-cert]\033[0m %s\n' "$*" >&2; exit 1; }
+info() { printf '\033[1;34m[ssh-cert]\033[0m %s\n' "$*"; }
+warn() { printf '\033[1;33m[ssh-cert]\033[0m %s\n' "$*" >&2; }
+error() {
+  printf '\033[1;31m[ssh-cert]\033[0m %s\n' "$*" >&2
+  exit 1
+}
 
 check_key() {
   if [[ ! -f "$KEY_FILE" ]]; then
@@ -44,8 +47,14 @@ cmd_issue() {
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --ttl) ttl="$2"; shift 2 ;;
-      --principal) principal="$2"; shift 2 ;;
+      --ttl)
+        ttl="$2"
+        shift 2
+        ;;
+      --principal)
+        principal="$2"
+        shift 2
+        ;;
       *) error "Unknown option: $1" ;;
     esac
   done
@@ -133,11 +142,11 @@ cmd_status() {
     expiry_epoch=$(date -d "$valid_to" +%s 2>/dev/null || date -j -f "%Y-%m-%dT%H:%M:%S" "$valid_to" +%s 2>/dev/null || echo 0)
     local now_epoch
     now_epoch=$(date +%s)
-    if (( expiry_epoch > 0 && expiry_epoch < now_epoch )); then
+    if ((expiry_epoch > 0 && expiry_epoch < now_epoch)); then
       warn "Certificate has EXPIRED"
       return 1
     else
-      local remaining=$(( (expiry_epoch - now_epoch) / 3600 ))
+      local remaining=$(((expiry_epoch - now_epoch) / 3600))
       info "Certificate valid for ~${remaining}h"
     fi
   fi
@@ -168,7 +177,7 @@ subcommand="${1:-}"
 shift 2>/dev/null || true
 
 case "$subcommand" in
-  issue)  cmd_issue "$@" ;;
+  issue) cmd_issue "$@" ;;
   status) cmd_status ;;
   revoke) cmd_revoke ;;
   *)
