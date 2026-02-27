@@ -38,10 +38,10 @@ if type zipf &>/dev/null; then
   )
   if [[ "$result" != "0" ]]; then
     ((TESTS_PASSED++)) || true
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: returns non-zero for nonexistent path"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: returns non-zero for nonexistent path"
   else
     ((TESTS_FAILED++)) || true
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: should fail for nonexistent path"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should fail for nonexistent path"
   fi
 fi
 
@@ -56,10 +56,10 @@ if type zipf &>/dev/null; then
 
   if [[ -f "${test_dir}.zip" ]]; then
     ((TESTS_PASSED++)) || true
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: zipf created archive"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: zipf created archive"
   else
     ((TESTS_FAILED++)) || true
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: zipf should create a .zip archive"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: zipf should create a .zip archive"
   fi
 
   # Cleanup

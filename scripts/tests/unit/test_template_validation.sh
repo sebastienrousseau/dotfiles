@@ -18,19 +18,19 @@ TESTS_FAILED=0
 # Test utilities
 pass() {
   TESTS_PASSED=$((TESTS_PASSED + 1))
-  echo -e "${GREEN}✓${NC} $1"
+  printf '%b\n' "${GREEN}✓${NC} $1"
 }
 
 fail() {
   TESTS_FAILED=$((TESTS_FAILED + 1))
-  echo -e "${RED}✗${NC} $1"
+  printf '%b\n' "${RED}✗${NC} $1"
   if [ -n "${2:-}" ]; then
     echo "  ${2}"
   fi
 }
 
 skip() {
-  echo -e "${YELLOW}○${NC} $1 (skipped)"
+  printf '%b\n' "${YELLOW}○${NC} $1 (skipped)"
 }
 
 run_test() {

@@ -21,10 +21,10 @@ test_start "eager_template_has_shebang"
 first_line=$(head -n 1 "$EAGER_TMPL")
 if [[ "$first_line" == "#!/usr/bin/env bash" ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have #!/usr/bin/env bash shebang"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have #!/usr/bin/env bash shebang"
 fi
 
 test_start "eager_template_defines_core_categories"
@@ -66,10 +66,10 @@ core_line=$(grep -m 1 'coreCategories' "$EAGER_TMPL")
 core_count=$(printf "%s" "$core_line" | grep -oE '"[a-z-]+"' | wc -l)
 if [[ $core_count -eq 18 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has 18 core categories"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has 18 core categories"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: expected 18 core categories, found $core_count"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected 18 core categories, found $core_count"
 fi
 
 # --- Lazy template (91) ---
@@ -81,10 +81,10 @@ test_start "lazy_template_has_shebang"
 first_line=$(head -n 1 "$LAZY_TMPL")
 if [[ "$first_line" == "#!/usr/bin/env bash" ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should have #!/usr/bin/env bash shebang"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have #!/usr/bin/env bash shebang"
 fi
 
 test_start "lazy_template_defines_core_categories"
@@ -108,12 +108,12 @@ eager_cats=$(grep 'coreCategories' "$EAGER_TMPL" | head -1 || true)
 lazy_cats=$(grep 'coreCategories' "$LAZY_TMPL" | head -1 || true)
 if [[ "$eager_cats" == "$lazy_cats" ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: eager and lazy templates use identical coreCategories"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: eager and lazy templates use identical coreCategories"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: coreCategories differ between templates"
-  echo -e "    Eager: $eager_cats"
-  echo -e "    Lazy:  $lazy_cats"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: coreCategories differ between templates"
+  printf '%b\n' "    Eager: $eager_cats"
+  printf '%b\n' "    Lazy:  $lazy_cats"
 fi
 
 # Verify both templates use the same glob pattern
@@ -122,10 +122,10 @@ eager_glob=$(grep 'globPattern' "$EAGER_TMPL" | head -1 || true)
 lazy_glob=$(grep 'globPattern' "$LAZY_TMPL" | head -1 || true)
 if [[ "$eager_glob" == "$lazy_glob" ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: eager and lazy templates use identical globPattern"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: eager and lazy templates use identical globPattern"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: globPattern differs between templates"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: globPattern differs between templates"
 fi
 
 echo ""

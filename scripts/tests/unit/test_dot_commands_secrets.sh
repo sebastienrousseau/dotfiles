@@ -18,70 +18,70 @@ assert_file_exists "$SECRETS_FILE" "secrets.sh should exist"
 test_start "secrets_cmd_syntax_valid"
 if bash -n "$SECRETS_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: secrets.sh has valid syntax"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: secrets.sh has valid syntax"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: secrets.sh has syntax errors"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: secrets.sh has syntax errors"
 fi
 
 # Test: defines secrets command
 test_start "secrets_cmd_defines_secrets"
 if grep -q "cmd_secrets\|_secrets" "$SECRETS_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines secrets command"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines secrets command"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define secrets command"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define secrets command"
 fi
 
 # Test: defines secrets-init command
 test_start "secrets_cmd_defines_init"
 if grep -q "secrets.init\|secrets_init\|secretsinit" "$SECRETS_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines secrets-init command"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines secrets-init command"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define secrets-init command"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define secrets-init command"
 fi
 
 # Test: defines ssh-key command
 test_start "secrets_cmd_defines_ssh_key"
 if grep -q "ssh.key\|ssh_key\|sshkey" "$SECRETS_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines ssh-key command"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines ssh-key command"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define ssh-key command"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define ssh-key command"
 fi
 
 # Test: uses secure file permissions
 test_start "secrets_cmd_secure_permissions"
 if grep -qE 'chmod [0-7]*00|chmod 600|chmod 700' "$SECRETS_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses secure file permissions"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses secure file permissions"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use secure file permissions (600/700)"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should use secure file permissions (600/700)"
 fi
 
 # Test: no secrets in plain text
 test_start "secrets_cmd_no_plaintext_secrets"
 if grep -qE '(password|secret|token)\s*=\s*["\047][^$][^"\047]+["\047]' "$SECRETS_FILE" 2>/dev/null; then
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: may contain plaintext secrets"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: may contain plaintext secrets"
 else
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no plaintext secrets"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no plaintext secrets"
 fi
 
 # Test: uses age for encryption
 test_start "secrets_cmd_uses_age"
 if grep -qE 'age|\.age|chezmoi.*encrypt' "$SECRETS_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: uses age encryption"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses age encryption"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should use age encryption"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should use age encryption"
 fi
 
 # Test: shellcheck compliance
@@ -90,14 +90,14 @@ if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$SECRETS_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
 fi
 
 echo ""

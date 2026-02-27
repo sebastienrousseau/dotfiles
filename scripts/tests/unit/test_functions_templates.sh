@@ -18,10 +18,10 @@ test_start "functions_file_count"
 count=$(find "$FUNCS_DIR" -name "*.sh" 2>/dev/null | wc -l)
 if [[ "$count" -gt 5 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: found $count function files"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: found $count function files"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: expected >5 function files, found $count"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected >5 function files, found $count"
 fi
 
 # Test: all function files have valid syntax
@@ -34,20 +34,20 @@ for script in $(find "$FUNCS_DIR" -name "*.sh" 2>/dev/null); do
 done
 if [[ "$invalid" -eq 0 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: all function files valid"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: all function files valid"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: $invalid files invalid"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $invalid files invalid"
 fi
 
 # Test: backup.sh function exists
 test_start "functions_backup_exists"
 if [[ -f "$FUNCS_DIR/backup.sh" ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: backup.sh exists"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: backup.sh exists"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: backup.sh should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: backup.sh should exist"
 fi
 
 # Test: functions define actual functions
@@ -60,20 +60,20 @@ for script in $(find "$FUNCS_DIR" -name "*.sh" 2>/dev/null | head -10); do
 done
 if [[ "$defined" -gt 3 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: $defined files define functions"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $defined files define functions"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: only $defined define functions"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: only $defined define functions"
 fi
 
 # Test: no hardcoded paths
 test_start "functions_no_hardcoded"
 if grep -rqE '"/home/[a-z]+' "$FUNCS_DIR"/*.sh 2>/dev/null; then
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: has hardcoded paths"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has hardcoded paths"
 else
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no hardcoded paths"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no hardcoded paths"
 fi
 
 echo ""

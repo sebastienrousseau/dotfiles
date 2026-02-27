@@ -27,11 +27,11 @@ test_start "backup_no_args_message"
 output=$(backup 2>&1)
 if [[ "$output" == *"ERROR"* && "$output" == *"provide"* ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shows error message for no arguments"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shows error message for no arguments"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should show error message for no arguments"
-  echo -e "    Output: $output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show error message for no arguments"
+  printf '%b\n' "    Output: $output"
 fi
 
 # Test: backup with nonexistent file
@@ -54,11 +54,11 @@ test_start "backup_unknown_option_message"
 output=$(backup --unknown-option 2>&1)
 if [[ "$output" == *"ERROR"* && "$output" == *"Unknown option"* ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shows error for unknown option"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shows error for unknown option"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should show error for unknown option"
-  echo -e "    Output: $output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show error for unknown option"
+  printf '%b\n' "    Output: $output"
 fi
 
 # Test: backup creates backup directory if not exists
@@ -72,10 +72,10 @@ output=$(backup "$test_file" 2>&1)
 
 if [[ -d "$BACKUP_DIR" ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: backup directory created"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: backup directory created"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: backup directory should be created"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: backup directory should be created"
 fi
 rm -rf "$test_dir"
 
@@ -93,11 +93,11 @@ exit_code=$?
 backup_files=$(ls "$BACKUP_DIR"/backup_*.tar* 2>/dev/null | wc -l | tr -d ' ')
 if [[ "$backup_files" -gt 0 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: backup archive created"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: backup archive created"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: backup archive should be created"
-  echo -e "    Output: $output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: backup archive should be created"
+  printf '%b\n' "    Output: $output"
 fi
 rm -rf "$test_dir"
 
@@ -140,12 +140,12 @@ exit_code=$?
 # Should fail or warn with invalid unit
 if [[ "$exit_code" -ne 0 ]] || [[ "$output" == *"Invalid unit"* ]] || [[ "$output" == *"ERROR"* ]] || [[ "$output" == *"WARNING"* ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: invalid size unit handled"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: invalid size unit handled"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should reject or warn about invalid size unit '100X'"
-  echo -e "    Exit code: $exit_code"
-  echo -e "    Output: $output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should reject or warn about invalid size unit '100X'"
+  printf '%b\n' "    Exit code: $exit_code"
+  printf '%b\n' "    Output: $output"
 fi
 rm -rf "$test_dir"
 
@@ -175,11 +175,11 @@ output=$(backup "$test_file" 2>&1)
 
 if [[ "$output" == *"INFO"* ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shows INFO messages"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shows INFO messages"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should show INFO messages"
-  echo -e "    Output: $output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show INFO messages"
+  printf '%b\n' "    Output: $output"
 fi
 rm -rf "$test_dir"
 
@@ -200,10 +200,10 @@ backup_count=$(ls "$BACKUP_DIR"/backup_*.tar* 2>/dev/null | wc -l | tr -d ' ')
 
 if [[ "$backup_count" -le 2 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: backup retention works (kept $backup_count)"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: backup retention works (kept $backup_count)"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should keep only 2 backups, found $backup_count"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should keep only 2 backups, found $backup_count"
 fi
 rm -rf "$test_dir"
 

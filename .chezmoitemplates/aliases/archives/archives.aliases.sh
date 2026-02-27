@@ -3,7 +3,7 @@
 # Archive and Compression Management
 
 extract() {
-  if [ -z "$1" ]; then
+  if [[ -z "$1" ]]; then
     echo "Usage: extract <archive_file>"
     return 1
   fi
@@ -11,7 +11,7 @@ extract() {
   # Initialize log file before first use
   LOG_FILE=${ARCHIVE_LOG_FILE:-"$HOME/.archive_operations.log"}
 
-  if [ ! -f "$1" ]; then
+  if [[ ! -f "$1" ]]; then
     echo "Error: '$1' is not a valid file" | tee -a "$LOG_FILE"
     return 1
   fi
@@ -20,7 +20,7 @@ extract() {
   local filename="$1"
 
   # Create extract directory for archives with multiple files
-  if [ "$2" = "-d" ] && [ -n "$3" ]; then
+  if [[ "$2" = "-d" ]] && [[ -n "$3" ]]; then
     mkdir -p "$3"
     cd "$3" || return 1
   fi
@@ -49,7 +49,7 @@ extract() {
 
   # Log successful extraction
   # shellcheck disable=SC2181
-  if [ $? -eq 0 ]; then
+  if [[ $? -eq 0 ]]; then
     echo "Successfully extracted $filename" | tee -a "$LOG_FILE"
   else
     echo "Failed to extract $filename" | tee -a "$LOG_FILE"
@@ -60,12 +60,12 @@ extract() {
 # List Archive Contents Function
 #-----------------------------------------------------------------------------
 list_archive() {
-  if [ -z "$1" ]; then
+  if [[ -z "$1" ]]; then
     echo "Usage: list_archive <archive_file>"
     return 1
   fi
 
-  if [ ! -f "$1" ]; then
+  if [[ ! -f "$1" ]]; then
     echo "Error: '$1' is not a valid file"
     return 1
   fi
@@ -89,7 +89,7 @@ list_archive() {
 # Compress Function with Progress
 #-----------------------------------------------------------------------------
 compress() {
-  if [ -z "$1" ] || [ -z "$2" ]; then
+  if [[ -z "$1" ]] || [[ -z "$2" ]]; then
     echo "Usage: compress <format> <input_files...> [output_file]"
     echo "Formats: tar, tgz, tbz2, txz, tzst, zip, 7z, gz, bz2, xz, zst, lz4, rar"
     echo "Options: -l <1-9> compression level (if supported by format)"
@@ -101,7 +101,7 @@ compress() {
 
   # Check for compression level option
   local level=6 # Default compression level
-  if [ "$1" = "-l" ]; then
+  if [[ "$1" = "-l" ]]; then
     level="$2"
     shift 2
   fi
@@ -112,7 +112,7 @@ compress() {
   local output=""
 
   # If the last argument doesn't exist as a file or directory and has more than 1 argument
-  if [ "$num_inputs" -gt 1 ] && [ ! -e "${inputs[$num_inputs - 1]}" ]; then
+  if [[ "$num_inputs" -gt 1 ]] && [[ ! -e "${inputs[$num_inputs - 1]}" ]]; then
     output="${inputs[$num_inputs - 1]}"
     # shellcheck disable=SC2184,SC2086
     unset inputs[$num_inputs-1]
@@ -151,7 +151,7 @@ compress() {
       tar -cf "$output" "${inputs[@]}"
       ;;
     tgz)
-      if [ $has_pv -eq 1 ] && [ ${#inputs[@]} -eq 1 ] && [ -f "${inputs[0]}" ]; then
+      if [[ $has_pv -eq 1 ]] && [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
         pv "${inputs[0]}" | tar -cz -f "$output" -C "$(dirname "${inputs[0]}")" "$(basename "${inputs[0]}")"
       else
         tar -czf "$output" "${inputs[@]}"
@@ -173,8 +173,8 @@ compress() {
       7z a "-mx=$level" "$output" "${inputs[@]}"
       ;;
     gz)
-      if [ ${#inputs[@]} -eq 1 ] && [ -f "${inputs[0]}" ]; then
-        if [ $has_pv -eq 1 ]; then
+      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
+        if [[ $has_pv -eq 1 ]]; then
           pv "${inputs[0]}" | gzip "-$level" >"$output"
         else
           gzip -c "-$level" "${inputs[0]}" >"$output"
@@ -185,8 +185,8 @@ compress() {
       fi
       ;;
     bz2)
-      if [ ${#inputs[@]} -eq 1 ] && [ -f "${inputs[0]}" ]; then
-        if [ $has_pv -eq 1 ]; then
+      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
+        if [[ $has_pv -eq 1 ]]; then
           pv "${inputs[0]}" | bzip2 "-$level" >"$output"
         else
           bzip2 -c "-$level" "${inputs[0]}" >"$output"
@@ -197,8 +197,8 @@ compress() {
       fi
       ;;
     xz)
-      if [ ${#inputs[@]} -eq 1 ] && [ -f "${inputs[0]}" ]; then
-        if [ $has_pv -eq 1 ]; then
+      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
+        if [[ $has_pv -eq 1 ]]; then
           pv "${inputs[0]}" | xz "-$level" >"$output"
         else
           xz -c "-$level" "${inputs[0]}" >"$output"
@@ -209,8 +209,8 @@ compress() {
       fi
       ;;
     zst)
-      if [ ${#inputs[@]} -eq 1 ] && [ -f "${inputs[0]}" ]; then
-        if [ $has_pv -eq 1 ]; then
+      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
+        if [[ $has_pv -eq 1 ]]; then
           pv "${inputs[0]}" | zstd "-$level" >"$output"
         else
           zstd -c "-$level" "${inputs[0]}" >"$output"
@@ -221,8 +221,8 @@ compress() {
       fi
       ;;
     lz4)
-      if [ ${#inputs[@]} -eq 1 ] && [ -f "${inputs[0]}" ]; then
-        if [ $has_pv -eq 1 ]; then
+      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
+        if [[ $has_pv -eq 1 ]]; then
           pv "${inputs[0]}" | lz4 "-$level" >"$output"
         else
           lz4 -c "-$level" "${inputs[0]}" >"$output"
@@ -243,7 +243,7 @@ compress() {
 
   # Log result
   # shellcheck disable=SC2181
-  if [ $? -eq 0 ]; then
+  if [[ $? -eq 0 ]]; then
     echo "Successfully compressed to $output" | tee -a "$LOG_FILE"
   else
     echo "Failed to compress to $output" | tee -a "$LOG_FILE"
@@ -255,7 +255,7 @@ compress() {
 # Compress Large Files Function (Preserved for backward compatibility)
 #-----------------------------------------------------------------------------
 compress_large() {
-  if [ -z "$1" ] || [ -z "$2" ]; then
+  if [[ -z "$1" ]] || [[ -z "$2" ]]; then
     echo "Usage: compress_large <format> <input_file> [output_file]"
     echo "Note: Consider using the more powerful 'compress' function instead"
     return 1
@@ -265,7 +265,7 @@ compress_large() {
   local input="$2"
   local output="${3:-${input}.${format}}"
 
-  if [ ! -f "$input" ]; then
+  if [[ ! -f "$input" ]]; then
     echo "Error: '$input' is not a valid file"
     return 1
   fi
@@ -290,13 +290,13 @@ backup() {
   # shellcheck disable=SC2155
   local timestamp=$(date +%Y%m%d-%H%M%S)
 
-  if [ -z "$target" ]; then
+  if [[ -z "$target" ]]; then
     echo "Usage: backup <file_or_directory> [format]"
     echo "Available formats: tgz (default), tbz2, txz, tzst, zip, 7z"
     return 1
   fi
 
-  if [ ! -e "$target" ]; then
+  if [[ ! -e "$target" ]]; then
     echo "Error: '$target' does not exist"
     return 1
   fi
@@ -316,7 +316,7 @@ backup() {
   esac
 
   # shellcheck disable=SC2181
-  if [ $? -eq 0 ]; then
+  if [[ $? -eq 0 ]]; then
     echo "Backup created: $output"
   fi
 }

@@ -24,25 +24,25 @@ if [ $# -gt 0 ]; then
   TARGETS=("$@")
 fi
 
-echo -e "${BLUE}${BOLD}Testing dotfiles across ${#TARGETS[@]} environment(s)${NC}"
+printf '%b\n' "${BLUE}${BOLD}Testing dotfiles across ${#TARGETS[@]} environment(s)${NC}"
 echo ""
 
 for target in "${TARGETS[@]}"; do
-  echo -e "${BLUE}==> Building: ${BOLD}${target}${NC}"
+  printf '%b\n' "${BLUE}==> Building: ${BOLD}${target}${NC}"
   if docker build --target "$target" -f Dockerfile.test -t "dotfiles-test:${target}" . 2>&1; then
-    echo -e "${GREEN}==> PASSED: ${target}${NC}"
+    printf '%b\n' "${GREEN}==> PASSED: ${target}${NC}"
     PASSED=$((PASSED + 1))
   else
-    echo -e "${RED}==> FAILED: ${target}${NC}"
+    printf '%b\n' "${RED}==> FAILED: ${target}${NC}"
     FAILED=$((FAILED + 1))
     FAILURES+=("$target")
   fi
   echo ""
 done
 
-echo -e "${BOLD}Results: ${GREEN}${PASSED} passed${NC}, ${RED}${FAILED} failed${NC} (${#TARGETS[@]} total)"
+printf '%b\n' "${BOLD}Results: ${GREEN}${PASSED} passed${NC}, ${RED}${FAILED} failed${NC} (${#TARGETS[@]} total)"
 
 if [ ${FAILED} -gt 0 ]; then
-  echo -e "${RED}Failed targets: ${FAILURES[*]}${NC}"
+  printf '%b\n' "${RED}Failed targets: ${FAILURES[*]}${NC}"
   exit 1
 fi

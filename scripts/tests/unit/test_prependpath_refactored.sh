@@ -28,11 +28,11 @@ result=$(bash -c '
 ')
 if [[ "$result" == "/opt/new:/usr/bin:/bin" ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: prepends new directory"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: prepends new directory"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should prepend new directory"
-  echo -e "    Actual: $result"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should prepend new directory"
+  printf '%b\n' "    Actual: $result"
 fi
 
 # Test: prependpath does not duplicate existing directory
@@ -45,11 +45,11 @@ result=$(bash -c '
 ')
 if [[ "$result" == "/usr/bin:/bin" ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: does not duplicate existing path"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: does not duplicate existing path"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should not duplicate existing path"
-  echo -e "    Actual: $result"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should not duplicate existing path"
+  printf '%b\n' "    Actual: $result"
 fi
 
 # Test: prependpath handles path as substring correctly
@@ -62,11 +62,11 @@ result=$(bash -c '
 ')
 if [[ "$result" == "/usr/bi:/usr/bin:/bin" ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: partial match not treated as duplicate"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: partial match not treated as duplicate"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: partial match should not be treated as duplicate"
-  echo -e "    Actual: $result"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: partial match should not be treated as duplicate"
+  printf '%b\n' "    Actual: $result"
 fi
 
 # Test: prependpath handles empty PATH
@@ -79,11 +79,11 @@ result=$(bash -c '
 ')
 if [[ "$result" == "/usr/bin:" ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: handles empty PATH"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: handles empty PATH"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should handle empty PATH"
-  echo -e "    Actual: $result"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should handle empty PATH"
+  printf '%b\n' "    Actual: $result"
 fi
 
 print_summary

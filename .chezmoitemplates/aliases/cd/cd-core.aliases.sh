@@ -95,7 +95,7 @@ cd_with_history() {
 
 # Create directory and navigate to it
 mkcd() {
-  if [ -z "$1" ]; then
+  if [[ -z "$1" ]]; then
     echo "Usage: mkcd <directory_name>"
     return 1
   fi

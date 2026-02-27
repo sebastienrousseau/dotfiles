@@ -36,10 +36,10 @@ test_start "zshrc_no_eager_fnm_eval"
 # There should be no eager `eval "$(fnm env` in the zshrc outside of 30-options
 if grep -q 'eval "$(fnm env' "$ZSHRC" 2>/dev/null; then
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: zshrc should not eagerly eval fnm env"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: zshrc should not eagerly eval fnm env"
 else
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no eager fnm eval in zshrc"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no eager fnm eval in zshrc"
 fi
 
 test_start "zshrc_core_loop_layers"
@@ -50,13 +50,13 @@ for layer in "00-core-paths" "05-core-safety" "40-ls-colors" "90-ux-aliases"; do
   if ! grep -q "$layer" "$ZSHRC"; then
     all_layers_found=false
     ((TESTS_FAILED++)) || true
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: missing layer $layer in core loop"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: missing layer $layer in core loop"
     break
   fi
 done
 if [[ "$all_layers_found" == "true" ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: all 4 eager core layers present in loading loop"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: all 4 eager core layers present in loading loop"
 fi
 
 test_start "zshrc_deferred_logic_functions"
@@ -80,10 +80,10 @@ test_start "options_fnm_lazy_wrapper"
 # fnm should be wrapped as lazy-load function
 if grep -q 'fnm() { _lazy_load_fnm; command fnm' "$OPTIONS"; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: fnm has lazy-load wrapper"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: fnm has lazy-load wrapper"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: fnm should have lazy-load wrapper"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: fnm should have lazy-load wrapper"
 fi
 
 test_start "options_node_lazy_wrapper"
@@ -94,10 +94,10 @@ test_start "options_no_duplicate_fnm_lazy"
 fnm_defs=$(grep -c '_lazy_load_fnm()' "$OPTIONS" || true)
 if [[ "$fnm_defs" -eq 1 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: exactly one _lazy_load_fnm definition"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: exactly one _lazy_load_fnm definition"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: expected 1 _lazy_load_fnm definition, found $fnm_defs"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected 1 _lazy_load_fnm definition, found $fnm_defs"
 fi
 
 test_start "options_nvm_fallback"
