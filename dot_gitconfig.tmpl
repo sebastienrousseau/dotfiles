@@ -33,6 +33,7 @@
 
 [commit]
 	gpgsign = true
+	template = {{ .chezmoi.homeDir }}/.config/git/commit-template
 
 [gpg]
 	format = {{ $git_signingformat }}
@@ -40,6 +41,15 @@
 [gpg "ssh"]
 	allowedSignersFile = {{ .chezmoi.homeDir }}/.ssh/allowed_signers
 {{- end }}
+
+[column]
+	ui = auto
+
+[branch]
+	sort = -committerdate
+
+[tag]
+	sort = -version:refname
 
 [init]
 	defaultBranch = main
@@ -83,6 +93,7 @@
 
 [diff]
 	colorMoved = default
+	algorithm = histogram
 
 [filter "lfs"]
 	clean = git-lfs clean -- %f
