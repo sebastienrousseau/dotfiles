@@ -5,6 +5,8 @@
 # Backup Library
 # Handles backup of existing dotfiles before chezmoi applies changes
 
+set -euo pipefail
+
 # Create a timestamped backup directory
 # Returns: Path to the backup directory
 create_backup_dir() {

@@ -7,7 +7,7 @@
 # Description: Toggles immutability flags on critical configuration files.
 # Usage: lock-configs [lock|unlock]
 
-set -e
+set -euo pipefail
 
 ACTION="${1:-lock}"
 CRITICAL_FILES=(

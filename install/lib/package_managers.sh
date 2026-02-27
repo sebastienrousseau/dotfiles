@@ -5,6 +5,8 @@
 # Package Manager Library
 # Handles package manager detection and bootstrapping
 
+set -euo pipefail
+
 # Source dependencies
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=os_detection.sh
