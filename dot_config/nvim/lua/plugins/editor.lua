@@ -47,9 +47,5 @@ return {
       size = 20,
     })
 
-    vim.keymap.set("n", "<leader>ft", "<Cmd>ToggleTerm direction=float<CR>", {
-      desc = "Float terminal",
-      silent = true,
-    })
   end,
 }
