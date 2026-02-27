@@ -19,7 +19,7 @@ if [[ ! -x "$manifest_script" ]]; then
   exit 1
 fi
 
-tmp_manifest="$(mktemp)"
+tmp_manifest="$(umask 077 && mktemp)"
 trap 'rm -f "$tmp_manifest"' EXIT
 
 bash "$manifest_script" >"$tmp_manifest"

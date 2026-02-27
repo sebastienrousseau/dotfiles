@@ -156,7 +156,7 @@ echo "---"
 
 if [[ "$EDIT_MODE" == "true" ]]; then
   # Create temp file for editing
-  TMPFILE=$(mktemp)
+  TMPFILE=$(umask 077 && mktemp)
   echo "$MESSAGE" > "$TMPFILE"
   ${EDITOR:-vim} "$TMPFILE"
   MESSAGE=$(cat "$TMPFILE")

@@ -23,7 +23,7 @@ HEADER
 # Core list we care about (preserve ordering).
 core_aliases=(c q e h _ i l ll la lr lra lt lta a d)
 
-tmp_manifest="$(mktemp)"
+tmp_manifest="$(umask 077 && mktemp)"
 trap 'rm -f "$tmp_manifest"' EXIT
 bash "$manifest" >"$tmp_manifest"
 

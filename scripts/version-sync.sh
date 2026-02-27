@@ -117,7 +117,7 @@ validate_version() {
 
 find_version_files() {
   local temp_file
-  temp_file=$(mktemp)
+  temp_file=$(umask 077 && mktemp)
 
   log_info "Scanning for markdown files with version references..."
 
@@ -197,7 +197,7 @@ update_version_references() {
 
     # Create temporary file for changes
     local temp_file
-    temp_file=$(mktemp)
+    temp_file=$(umask 077 && mktemp)
     cp "$file" "$temp_file"
 
     # Update various version reference patterns

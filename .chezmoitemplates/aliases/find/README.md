@@ -25,7 +25,7 @@ Here are some of the available aliases:
 - `fde` lists all files with a specified extension.
 - `fdf` lists all files while following symbolic links.
 - `fdh` shows help for `fd`.
-- `fdh` lists all files, including hidden files.
+- `fdH` lists all files, including hidden files.
 - `fdn` lists all files that match a specified glob.
 - `fdo` lists all files with owner information.
 - `fds` lists all files with size.

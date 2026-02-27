@@ -76,19 +76,26 @@ show_help() {
 }
 
 resolve_source_dir() {
+    local dir=""
     if [ -n "${CHEZMOI_SOURCE_DIR:-}" ] && [ -d "$CHEZMOI_SOURCE_DIR" ]; then
-        echo "$CHEZMOI_SOURCE_DIR"
-        return
+        dir="$CHEZMOI_SOURCE_DIR"
+    elif [ -d "$HOME/.dotfiles" ]; then
+        dir="$HOME/.dotfiles"
+    elif [ -d "$HOME/.local/share/chezmoi" ]; then
+        dir="$HOME/.local/share/chezmoi"
     fi
-    if [ -d "$HOME/.dotfiles" ]; then
-        echo "$HOME/.dotfiles"
-        return
+    # Resolve symlinks for consistent path handling
+    if [ -n "$dir" ]; then
+        if command -v realpath >/dev/null 2>&1; then
+            realpath "$dir"
+        elif command -v readlink >/dev/null 2>&1; then
+            readlink -f "$dir"
+        else
+            echo "$dir"
+        fi
+    else
+        echo ""
     fi
-    if [ -d "$HOME/.local/share/chezmoi" ]; then
-        echo "$HOME/.local/share/chezmoi"
-        return
-    fi
-    echo ""
 }
 
 # Generic dispatcher: resolve source dir, find script, exec it.

@@ -294,7 +294,7 @@ cmd_aliases() {
       ui_info "History file" "$histfile"
       echo ""
       local tmp_aliases
-      tmp_aliases="$(mktemp)"
+      tmp_aliases="$(umask 077 && mktemp)"
       emit_alias_manifest | awk -F'\t' '{print $1}' | sort -u >"$tmp_aliases"
       awk -v aliases_file="$tmp_aliases" '
         BEGIN {

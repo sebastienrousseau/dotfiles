@@ -8,7 +8,7 @@ alias mde='mkdir -pv "$(date +%Y%m%d)-example"'
 alias md='mkdir -v'
 
 # Make directory with date.
-alias mdd='mkdir -pv $(date +%Y%m%d) && cd $(date +%Y%m%d)'
+alias mdd='mkdir -pv "$(date +%Y%m%d)" && cd "$(date +%Y%m%d)"'
 
 # Make notes directory with current date.
 alias mdn='mkdir -pv "$(date +%Y%m%d)-notes"'
@@ -17,4 +17,4 @@ alias mdn='mkdir -pv "$(date +%Y%m%d)-notes"'
 alias mdw='mkdir -pv "$(date +%Y%m%d)-work"'
 
 # Make directory with time.
-alias mdt='mkdir -pv $(date +%H%M%S)'
+alias mdt='mkdir -pv "$(date +%H%M%S)"'
