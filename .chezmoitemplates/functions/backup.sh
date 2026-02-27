@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # Description:
 #   backup is a utility that creates timestamped backups of files and directories.
 #   It can automatically compress large backups and maintains a configurable

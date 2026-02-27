@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # Description:
 #   lowercase is a utility function that converts file or directory names to
 #   lowercase. It supports multiple arguments and provides informative messages

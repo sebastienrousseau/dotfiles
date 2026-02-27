@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # Security Audit Tools (Lynis, Fail2ban)
 [[ -n "${_SECURITY_AUDIT_LOADED:-}" ]] && return 0
 _SECURITY_AUDIT_LOADED=1

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 ## Dotfiles Core Commands — Core chezmoi operations for the dot CLI.
 ##
 ## Provides apply, sync, update, add, diff, status, remove, cd, and edit

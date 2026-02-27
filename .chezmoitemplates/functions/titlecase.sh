@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # Description:
 #   titlecase is a utility function that converts file or directory names to
 #   title case. It capitalizes the first character and lowercases all subsequent

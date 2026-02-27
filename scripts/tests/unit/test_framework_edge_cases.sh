@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
 # Unit tests for the test framework itself (assertions.sh edge cases)
 # Ensures assertion functions handle empty strings, special chars, etc.

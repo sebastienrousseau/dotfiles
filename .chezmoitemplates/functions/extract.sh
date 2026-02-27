@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # Description:
 #   extract is a function to extract most known archive formats with a single
 #   command. It supports various archive types like .tar, .zip, .gz, .7z, and more.

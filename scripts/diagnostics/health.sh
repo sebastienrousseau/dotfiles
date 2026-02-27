@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # Dotfiles Health Check Dashboard
 # Usage: dot health [--verbose|-v] [--json] [--fix] [--force]
 

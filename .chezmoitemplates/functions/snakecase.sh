@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # Description:
 #   snakecase converts file or directory names to snake_case. All letters
 #   are lowercase and spaces or other non-alphanumeric characters are replaced

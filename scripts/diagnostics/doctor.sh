@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 ## Dotfiles Doctor.
 ##
 ## Diagnoses dotfiles environment health by checking dependencies, paths,

@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 #
 # This script monitors the response time of an API endpoint over a specified
 # number of requests and interval.

@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # OpenSSL CSR (Certificate Signing Request) Operations
 [[ -n "${_OPENSSL_CSR_LOADED:-}" ]] && return 0
 _OPENSSL_CSR_LOADED=1

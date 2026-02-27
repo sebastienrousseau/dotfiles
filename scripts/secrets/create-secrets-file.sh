@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 set -euo pipefail
 
 OUT_FILE="${1:-$HOME/.config/chezmoi/encrypted_secrets.env.age}"
