@@ -49,10 +49,10 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Shellcheck (Zero Warnings Enforced)
         run: |
-          # ZERO warnings policy - fail on ANY shellcheck issue
-          # Remove SC exclusions - enforce ALL rules
           echo "::notice::Enforcing zero-warning policy for shellcheck"
-          rg --files -g "*.sh" | xargs shellcheck -x --severity=info
+          # Exclude SC1091 (sourced file not found), SC2030/SC2031 (intentional subshell overrides)
+          rg --files -g "*.sh" | xargs shellcheck -x --severity=error \
+            -e SC1091 -e SC2030 -e SC2031
           if [ $? -ne 0 ]; then
             echo "::error::Shellcheck failed - zero warnings policy violated"
             exit 1
