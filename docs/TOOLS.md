@@ -124,6 +124,14 @@ See [AI Integrations](AI.md) for opt-in setup patterns and privacy notes.
 - Snapshot baseline (`dot snapshot`)
 - Lua tooling (`luacheck`, `stylua`, `luarocks`, `lua/luajit`)
 
+## Version management
+
+**mise** is the default runtime version manager, consolidating Node.js, Python, Go, Rust, Ruby, and more into a single tool.
+
+- **Configuration**: `~/.config/mise/config.toml` (auto-install enabled)
+- **Node.js manager**: Controlled by `.chezmoidata.toml` `tools.node_manager` (default: `mise`; alternatives: `fnm`, `nvm`)
+- **Shell activation**: `eval "$(mise activate zsh)"` via `_cached_eval` for zero-overhead startup
+
 ## Security features
 
 - Firewall hardening
@@ -132,6 +140,16 @@ See [AI Integrations](AI.md) for opt-in setup patterns and privacy notes.
 - Lock-screen enforcement
 - Encryption checks
 - MCP configuration diagnostics (`dot mcp doctor`)
+- Short-lived SSH certificates (`dot ssh-cert`)
+
+## Container support
+
+Devcontainer and GitHub Codespaces configurations for cloud-based development:
+
+- **Config**: `.devcontainer/devcontainer.json` with custom Dockerfile
+- **Bootstrap**: `.devcontainer/install-full.sh` — full chezmoi apply with server profile
+- **Lite mode**: `.devcontainer/install-lite.sh` — minimal setup for CI
+- **Pre-built tools**: chezmoi, mise, starship, bat, fd, fzf, ripgrep, neovim, eza, zoxide
 
 ## Aliases
 
