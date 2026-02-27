@@ -1,24 +1,6 @@
-#!/usr/bin/env bash
-## Dot Completion — Zsh completion for the dot CLI.
-##
-## Provides tab completion for all dot commands in zsh.
-## Source this file or place in a directory in $fpath.
-##
-## # Requirements
-## - zsh: Shell with completion system
-##
-## # Usage
-## # Add to .zshrc:
-## source ~/.local/bin/dot_completion
-## # Or place in fpath directory
-##
-## # Platform Notes
-## - All platforms: Zsh only
-
 #compdef dot
-
 # Zsh completion for the dot CLI
-# Source this file or place in a directory in $fpath
+# Loaded automatically via fpath from ~/.local/share/zsh/completions/
 
 _dot() {
   local -a commands
@@ -48,6 +30,10 @@ _dot() {
     'aliases:List/search/explain aliases and tiers'
     'sandbox:Launch a safe sandbox preview'
     'benchmark:Run shell startup benchmark'
+    'load:Preload heavy shell layers'
+    'load-bench:Measure time to heavy-layer readiness'
+    'load-bench-pty:Measure background prewarm readiness via PTY'
+    'ai:Show AI helper status (opt-in)'
     'tune:Apply OS tuning (opt-in)'
     'secrets:Manage secrets (edit|set|get|list|load|provider)'
     'env:Load environment buckets from managed secrets'
