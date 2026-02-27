@@ -8,20 +8,20 @@
 analyze_last_error() {
     # local exit_code="$?"  <-- unused
     local hist_entry
-    
+
     # Get the last history entry (command that just ran)
     # fc -ln -1 returns the commands from the last 1 event
     hist_entry=$(fc -ln -1)
-    
+
     if [[ -z "$hist_entry" ]]; then
         echo "No history found to analyze."
         return 1
     fi
 
     echo " Analyzing failure: '$hist_entry'"
-    
+
     local prompt="I ran the command: '$hist_entry' and it failed. Please explain why this might have happened and suggest a fix. Be concise."
-    
+
     # Call the ai_core wrapper
     # We call it directly from the path or rely on PATH if configured
     if [[ -f "${HOME}/.local/bin/ai_core" ]]; then

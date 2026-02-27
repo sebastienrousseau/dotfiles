@@ -2,7 +2,7 @@
 # https://aider.chat/docs/config/options.html
 
 # Model settings
-model: claude-sonnet-4-5-20250929
+model: claude-opus-4-6
 edit-format: diff
 
 # Git settings

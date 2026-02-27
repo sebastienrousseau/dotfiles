@@ -84,7 +84,7 @@ jobs:
 
           if [[ -n "$UPDATES" ]]; then
             echo "has_updates=true" >> $GITHUB_OUTPUT
-            echo -e "Updates found:\n$UPDATES"
+            printf 'Updates found:\n%b' "$UPDATES"
           else
             echo "has_updates=false" >> $GITHUB_OUTPUT
             echo "No updates found"
