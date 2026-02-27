@@ -7,7 +7,10 @@ fi
 if command -v fzf >/dev/null 2>&1; then
   # Only initialize in an interactive TTY
   if [[ -o interactive ]] && [[ -t 1 ]]; then
-    if fzf --help 2>/dev/null | grep -q -- '--zsh'; then
+    # Use _cached_eval when available (sourced from zshrc), else direct init
+    if (( ${+functions[_cached_eval]} )); then
+      _cached_eval fzf-init fzf --zsh
+    elif fzf --help 2>/dev/null | grep -q -- '--zsh'; then
       source <(fzf --zsh)
     else
       # Fallback for older fzf builds without --zsh
@@ -21,6 +24,13 @@ if command -v fzf >/dev/null 2>&1; then
       elif [[ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]]; then
         source /usr/share/doc/fzf/examples/key-bindings.zsh
       fi
+    fi
+
+    # Use fd/rg for fzf source if available
+    if command -v rg >/dev/null 2>&1; then
+      export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
+    elif command -v fd >/dev/null 2>&1; then
+      export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
     fi
   fi
 fi

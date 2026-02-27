@@ -403,14 +403,11 @@ if [[ "${DOTFILES_FAST}" != "1" ]]; then
     # Zoxide (Smart Directory Jumper) - Replaces 'cd'
     command -v zoxide >/dev/null 2>&1 && _cached_eval zoxide-init zoxide init zsh
 
-    # FZF (Fuzzy Finder)
-    if command -v fzf >/dev/null 2>&1; then
-      # Source auto-completion and key bindings
+    # FZF: init handled by ~/.config/fzf/fzf.zsh (sourced from rc.d/30-options)
+    # Homebrew-only fallback for systems where fzf.zsh isn't deployed
+    if command -v fzf >/dev/null 2>&1 && [[ ! -f "${HOME}/.config/fzf/fzf.zsh" ]]; then
       [[ -f "/opt/homebrew/opt/fzf/shell/completion.zsh" ]] && source "/opt/homebrew/opt/fzf/shell/completion.zsh"
       [[ -f "/opt/homebrew/opt/fzf/shell/key-bindings.zsh" ]] && source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
-
-      # Use fd/rg for fzf source if available
-      command -v rg >/dev/null 2>&1 && export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
     fi
   }
   if [[ "${DOTFILES_DEFER_TOOLS}" == "1" ]]; then
