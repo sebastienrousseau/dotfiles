@@ -41,6 +41,9 @@
 	allowedSignersFile = {{ .chezmoi.homeDir }}/.ssh/allowed_signers
 {{- end }}
 
+[init]
+	defaultBranch = main
+
 [core]
 	excludesfile = {{ .chezmoi.homeDir }}/.config/git/ignore
 	attributesFile = {{ .chezmoi.homeDir }}/.config/git/attributes
@@ -104,3 +107,8 @@
 
 [credential "https://gitlab.com"]
 	helper = !glab auth git-credential
+
+# Include work-specific config when inside ~/work/ repos
+# Create ~/.config/git/config-work with [user] overrides as needed
+[includeIf "gitdir:~/work/"]
+	path = {{ .chezmoi.homeDir }}/.config/git/config-work
