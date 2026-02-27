@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+# shellcheck shell=bash
 # Compliance & Privacy Aliases
 
 # Privacy Mode: Disables telemetry for common CLI tools

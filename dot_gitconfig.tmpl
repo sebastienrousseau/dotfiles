@@ -98,12 +98,17 @@
 
 [push]
 	autoSetupRemote = true
+	followTags = true
 
 [pull]
 	rebase = true
 
+[rebase]
+	autoStash = true
+
 [merge]
 	verifySignatures = false
+	conflictstyle = zdiff3
 
 [rerere]
 	enabled = true

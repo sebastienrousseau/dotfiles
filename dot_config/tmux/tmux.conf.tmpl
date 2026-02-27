@@ -161,8 +161,8 @@ set -g status-right "#[fg={{ $status_fg }}] #[bg={{ $panel_bg }}] ⬛ #I #[bg={{
 set -g window-status-current-format "#[bg={{ $status_bg }}]Dotfiles (v{{ .dotfiles_version }})"
 set -g window-status-current-style "bg={{ $accent_red }}"
 set -g window-status-separator ""
-set-window-option -g clock-mode-colour "{{ $status_fg }}"
-set-window-option -g clock-mode-style 24
+setw -g clock-mode-colour "{{ $status_fg }}"
+setw -g clock-mode-style 24
 
 # --- LINUX SPECIFIC ---
 if-shell 'uname | grep -q Linux' {

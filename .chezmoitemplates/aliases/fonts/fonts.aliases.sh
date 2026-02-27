@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+# shellcheck shell=bash
 # Font Management Aliases
 
 # List installed fonts (if fc-list available)

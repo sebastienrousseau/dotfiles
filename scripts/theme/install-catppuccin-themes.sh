@@ -67,15 +67,15 @@ fi
 install_gtk_themes() {
   log "Installing Catppuccin GTK themes..."
 
-  cd "$TEMP_DIR"
+  cd "$TEMP_DIR" || return 1
 
   if [ ! -d "catppuccin-gtk" ]; then
     git clone https://github.com/catppuccin/gtk.git catppuccin-gtk
   else
-    cd catppuccin-gtk && git pull && cd ..
+    git -C catppuccin-gtk pull
   fi
 
-  cd catppuccin-gtk
+  cd catppuccin-gtk || return 1
 
   # Install all variants
   for variant in Latte Frappe Macchiato Mocha; do
@@ -102,15 +102,15 @@ install_gtk_themes() {
 install_papirus_icons() {
   log "Installing Papirus icon themes..."
 
-  cd "$TEMP_DIR"
+  cd "$TEMP_DIR" || return 1
 
   if [ ! -d "papirus-icon-theme" ]; then
     git clone https://github.com/PapirusDevelopmentTeam/papirus-icon-theme.git
   else
-    cd papirus-icon-theme && git pull && cd ..
+    git -C papirus-icon-theme pull
   fi
 
-  cd papirus-icon-theme
+  cd papirus-icon-theme || return 1
 
   # Install Papirus variants
   for variant in Papirus Papirus-Dark Papirus-Light; do
@@ -126,15 +126,15 @@ install_papirus_icons() {
 install_catppuccin_cursors() {
   log "Installing Catppuccin cursor themes..."
 
-  cd "$TEMP_DIR"
+  cd "$TEMP_DIR" || return 1
 
   if [ ! -d "catppuccin-cursors" ]; then
     git clone https://github.com/catppuccin/cursors.git catppuccin-cursors
   else
-    cd catppuccin-cursors && git pull && cd ..
+    git -C catppuccin-cursors pull
   fi
 
-  cd catppuccin-cursors
+  cd catppuccin-cursors || return 1
 
   # Install cursor themes for each variant
   for variant in Catppuccin-Latte-* Catppuccin-Frappe-* Catppuccin-Macchiato-* Catppuccin-Mocha-*; do
@@ -158,15 +158,15 @@ install_shell_themes() {
     fi
   fi
 
-  cd "$TEMP_DIR"
+  cd "$TEMP_DIR" || return 1
 
   if [ ! -d "catppuccin-gnome-shell" ]; then
     git clone https://github.com/catppuccin/gnome.git catppuccin-gnome-shell
   else
-    cd catppuccin-gnome-shell && git pull && cd ..
+    git -C catppuccin-gnome-shell pull
   fi
 
-  cd catppuccin-gnome-shell
+  cd catppuccin-gnome-shell || return 1
 
   # Install shell themes (use explicit names for portability)
   for variant in Latte Frappe Macchiato Mocha; do
@@ -198,15 +198,15 @@ install_wallpapers() {
     mkdir -p "$wallpaper_dir"
   fi
 
-  cd "$TEMP_DIR"
+  cd "$TEMP_DIR" || return 1
 
   if [ ! -d "catppuccin-wallpapers" ]; then
     git clone https://github.com/catppuccin/wallpapers.git catppuccin-wallpapers
   else
-    cd catppuccin-wallpapers && git pull && cd ..
+    git -C catppuccin-wallpapers pull
   fi
 
-  cd catppuccin-wallpapers
+  cd catppuccin-wallpapers || return 1
 
   # Copy wallpapers
   for variant in latte frappe macchiato mocha; do

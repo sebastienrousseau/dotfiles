@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+# shellcheck shell=bash
 # Installer & Teleport Aliases
 
 # Run the local installer (self-update/bootstrap)
