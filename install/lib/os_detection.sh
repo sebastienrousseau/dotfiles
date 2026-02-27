@@ -5,6 +5,8 @@
 # OS Detection Library
 # Provides consistent OS and architecture detection across the installer
 
+set -euo pipefail
+
 # Detect operating system and set target_os variable
 # Sets: OS, ARCH, target_os
 detect_os() {

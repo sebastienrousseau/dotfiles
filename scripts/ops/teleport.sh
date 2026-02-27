@@ -3,7 +3,7 @@
 # Description: Deploys dotfiles to a remote host ephemerally.
 # Usage: ./teleport.sh user@hostname
 
-set -e
+set -euo pipefail
 
 TARGET="$1"
 
