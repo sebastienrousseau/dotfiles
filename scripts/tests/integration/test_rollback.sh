@@ -70,9 +70,9 @@ trap 'rm -rf "$SANDBOX_HOME"' EXIT
 
 # Create fake dotfiles in the sandbox HOME
 mkdir -p "$SANDBOX_HOME/.config/shell"
-echo "# test bashrc" > "$SANDBOX_HOME/.bashrc"
-echo "# test zshrc" > "$SANDBOX_HOME/.zshrc"
-echo "# test shell config" > "$SANDBOX_HOME/.config/shell/test.sh"
+echo "# test bashrc" >"$SANDBOX_HOME/.bashrc"
+echo "# test zshrc" >"$SANDBOX_HOME/.zshrc"
+echo "# test shell config" >"$SANDBOX_HOME/.config/shell/test.sh"
 
 test_start "rollback_backup_creates_directory"
 # Run backup with sandbox HOME — we need to override HOME and backup dir
@@ -82,7 +82,7 @@ test_start "rollback_backup_creates_directory"
   export XDG_STATE_HOME="$SANDBOX_HOME/.local/state"
   # Source just the functions we need by running backup with --force
   bash "$ROLLBACK_SCRIPT" backup --force 2>&1
-) > /dev/null 2>&1 || true
+) >/dev/null 2>&1 || true
 
 if [[ -d "$SANDBOX_BACKUP_DIR" ]]; then
   ((TESTS_PASSED++))
@@ -121,7 +121,7 @@ original_bashrc=$(cat "$SANDBOX_HOME/.bashrc")
   export XDG_DATA_HOME="$SANDBOX_HOME/.local/share"
   export XDG_STATE_HOME="$SANDBOX_HOME/.local/state"
   bash "$ROLLBACK_SCRIPT" rollback --force --dry-run 2>&1
-) > /dev/null 2>&1 || true
+) >/dev/null 2>&1 || true
 current_bashrc=$(cat "$SANDBOX_HOME/.bashrc")
 assert_equals "$original_bashrc" "$current_bashrc" "dry-run should not modify files"
 

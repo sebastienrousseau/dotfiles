@@ -7,13 +7,14 @@
 _dircolors_cache="${XDG_CACHE_HOME:-$HOME/.cache}/shell/dircolors.sh"
 
 _dircolors_cached_eval() {
-  local cmd="$1"; shift
+  local cmd="$1"
+  shift
   if [ -f "$_dircolors_cache" ]; then
     # shellcheck disable=SC1090
     . "$_dircolors_cache"
   else
     mkdir -p "$(dirname "$_dircolors_cache")"
-    "$cmd" "$@" > "$_dircolors_cache" 2>/dev/null
+    "$cmd" "$@" >"$_dircolors_cache" 2>/dev/null
     # shellcheck disable=SC1090
     . "$_dircolors_cache"
   fi
