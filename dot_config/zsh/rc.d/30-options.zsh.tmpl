@@ -60,6 +60,20 @@ if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]
 fi
 
 
+# Tool completions — generate once into ZSH_COMPLETIONS_DIR
+if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]]; then
+  [[ ! -f "${ZSH_COMPLETIONS_DIR}/_gh" ]] && command -v gh >/dev/null &&
+    command gh completion -s zsh >| "${ZSH_COMPLETIONS_DIR}/_gh"
+  [[ ! -f "${ZSH_COMPLETIONS_DIR}/_just" ]] && command -v just >/dev/null &&
+    command just --completions zsh >| "${ZSH_COMPLETIONS_DIR}/_just"
+  [[ ! -f "${ZSH_COMPLETIONS_DIR}/_chezmoi" ]] && command -v chezmoi >/dev/null &&
+    command chezmoi completion zsh >| "${ZSH_COMPLETIONS_DIR}/_chezmoi"
+  [[ ! -f "${ZSH_COMPLETIONS_DIR}/_kubectl" ]] && command -v kubectl >/dev/null &&
+    command kubectl completion zsh >| "${ZSH_COMPLETIONS_DIR}/_kubectl"
+  [[ ! -f "${ZSH_COMPLETIONS_DIR}/_atuin" ]] && command -v atuin >/dev/null &&
+    command atuin gen-completions --shell zsh --out-dir "${ZSH_COMPLETIONS_DIR}" 2>/dev/null
+fi
+
 # Lazy-load NVM (if fnm is not installed)
 if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]] && ! command -v fnm >/dev/null; then
   export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
