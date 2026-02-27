@@ -15,7 +15,7 @@ install_linux() {
   font_name="$1"
   target_dir="$HOME/.local/share/fonts/${font_name}NerdFont"
   mkdir -p "$target_dir"
-  tmp_dir="$(mktemp -d)"
+  tmp_dir="$(umask 077 && mktemp -d)"
   # shellcheck disable=SC2064
   trap "rm -rf '$tmp_dir'" RETURN
   url="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${font_name}.zip"

@@ -27,7 +27,7 @@ set -euo pipefail
 
 THEME_DIR="$HOME/.themes"
 ICON_DIR="$HOME/.icons"
-TEMP_DIR="$(mktemp -d)"
+TEMP_DIR="$(umask 077 && mktemp -d)"
 
 # Colors for output (respect NO_COLOR: https://no-color.org)
 if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then

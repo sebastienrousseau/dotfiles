@@ -6,9 +6,9 @@
 
 set -euo pipefail
 
-log_info() { echo -e "\n[INFO] $*"; }
-log_warn() { echo -e "\n[WARN] $*"; }
-log_error() { echo -e "\n[ERROR] $*" >&2; }
+log_info() { printf '\n[INFO] %s\n' "$*"; }
+log_warn() { printf '\n[WARN] %s\n' "$*"; }
+log_error() { printf '\n[ERROR] %s\n' "$*" >&2; }
 
 # Skip in containers unless explicitly enabled
 if [[ "${DOTFILES_CONTAINER:-0}" = "1" && "${DOTFILES_RUST_IN_CONTAINER:-0}" != "1" ]]; then
