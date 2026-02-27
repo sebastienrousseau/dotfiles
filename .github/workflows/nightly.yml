@@ -325,13 +325,25 @@ jobs:
           }
           EOF
 
-          # Check for regressions
+          # Enforce performance budgets — fail on regression
+          FAILED=0
           if [[ $STARTUP_TIME -gt 500 ]]; then
-            echo "::warning::Shell startup regression: ${STARTUP_TIME}ms > 500ms"
+            echo "::error::Shell startup regression: ${STARTUP_TIME}ms exceeds 500ms budget"
+            FAILED=1
+          else
+            echo "::notice::Shell startup OK: ${STARTUP_TIME}ms (budget: 500ms)"
           fi
 
           if [[ $CHEZMOI_TIME -gt 2000 ]]; then
-            echo "::warning::Chezmoi performance regression: ${CHEZMOI_TIME}ms > 2000ms"
+            echo "::error::Chezmoi apply regression: ${CHEZMOI_TIME}ms exceeds 2000ms budget"
+            FAILED=1
+          else
+            echo "::notice::Chezmoi apply OK: ${CHEZMOI_TIME}ms (budget: 2000ms)"
+          fi
+
+          if [[ $FAILED -eq 1 ]]; then
+            echo "Performance budget exceeded — see errors above"
+            exit 1
           fi
 
       - name: Upload performance history

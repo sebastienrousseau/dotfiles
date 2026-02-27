@@ -40,6 +40,7 @@ bun = "latest"
 eza = "latest"
 bat = "latest"
 ripgrep = "latest"
+"pipx:uv" = "latest"
 "npm:@anthropic-ai/claude-code" = "latest"
 "npm:@google/gemini-cli" = "latest"
 
