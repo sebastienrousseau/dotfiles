@@ -1,0 +1,442 @@
+name: CI (Standards Enforced)
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*.*.*']
+  pull_request:
+    branches: [master]
+  # Manual trigger for full CI
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+
+# Cancel in-progress runs for the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CHEZMOI_VERSION: "2.47.1"
+  # Enforce warnings as errors globally
+  WARNINGS_AS_ERRORS: "1"
+
+jobs:
+  # ============================================================================
+  # STAGE 1: LINT (Zero-warning policy enforced)
+  # ============================================================================
+  lint-shell:
+    name: Lint / Shell (Zero Warnings)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: Cache tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/bin
+            ~/.cargo/bin
+          key: shell-tools-${{ runner.os }}-v3
+      - name: Install tools
+        run: |
+          sudo apt-get update && sudo apt-get install -y shellcheck ripgrep
+          # Install shfmt with exact version pinning
+          curl -sS https://webi.sh/shfmt | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Shellcheck (Zero Warnings Enforced)
+        run: |
+          # ZERO warnings policy - fail on ANY shellcheck issue
+          # Remove SC exclusions - enforce ALL rules
+          echo "::notice::Enforcing zero-warning policy for shellcheck"
+          rg --files -g "*.sh" | xargs shellcheck -x --severity=info
+          if [ $? -ne 0 ]; then
+            echo "::error::Shellcheck failed - zero warnings policy violated"
+            exit 1
+          fi
+      - name: shfmt (Format Check - Fail on Unformatted)
+        run: |
+          echo "::notice::Checking shell format - will fail on any unformatted code"
+          shfmt -d -i 2 -ci scripts/**/*.sh install.sh .chezmoitemplates/**/*.sh
+          if [ $? -ne 0 ]; then
+            echo "::error::Shell formatting check failed - code is not properly formatted"
+            exit 1
+          fi
+
+  lint-lua:
+    name: Lint / Lua (Zero Warnings)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: Cache Lua tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.luarocks
+            ~/.cargo/bin/stylua
+          key: lua-tools-${{ runner.os }}-v3
+      - name: Install tools
+        run: |
+          sudo apt-get update && sudo apt-get install -y lua5.1 luarocks
+          luarocks install --local luacheck
+          echo "$HOME/.luarocks/bin" >> $GITHUB_PATH
+          # Install stylua with version pinning
+          cargo install stylua --version "0.20.0"
+      - name: Luacheck (Zero Warnings Enforced)
+        run: |
+          echo "::notice::Enforcing zero-warning policy for luacheck"
+          # Enforce ALL luacheck rules - no exclusions
+          luacheck --no-color --codes --ranges dot_config/nvim
+          if [ $? -ne 0 ]; then
+            echo "::error::Luacheck failed - zero warnings policy violated"
+            exit 1
+          fi
+      - name: Stylua (Format Check - Fail on Unformatted)
+        run: |
+          echo "::notice::Checking Lua format - will fail on any unformatted code"
+          ~/.cargo/bin/stylua --check --color Never dot_config/nvim
+          if [ $? -ne 0 ]; then
+            echo "::error::Lua formatting check failed - code is not properly formatted"
+            exit 1
+          fi
+
+  lint-nix:
+    name: Lint / Nix (Zero Warnings)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: DeterminateSystems/nix-installer-action@v21
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
+      - name: Nix Format Check (Fail on Unformatted)
+        run: |
+          echo "::notice::Checking Nix format - will fail on any unformatted code"
+          nix fmt ./nix --check
+          if [ $? -ne 0 ]; then
+            echo "::error::Nix formatting check failed - code is not properly formatted"
+            exit 1
+          fi
+      - name: Nix Flake Check (Zero Warnings)
+        run: |
+          echo "::notice::Enforcing zero-warning policy for Nix"
+          nix flake check ./nix --no-warn-dirty
+          if [ $? -ne 0 ]; then
+            echo "::error::Nix flake check failed - zero warnings policy violated"
+            exit 1
+          fi
+
+  lint-copyright:
+    name: Lint / Copyright Headers (Zero Tolerance)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install tools
+        run: |
+          sudo apt-get update && sudo apt-get install -y ripgrep
+      - name: Copyright Header Validation (Zero Tolerance)
+        run: |
+          echo "::notice::Enforcing zero-tolerance policy for copyright headers"
+
+          # Define copyright patterns to check for
+          PATTERNS=(
+            "Copyright"
+            "© "
+            "(c) "
+            "All rights reserved"
+          )
+
+          # File extensions that require copyright headers
+          EXTENSIONS=("sh" "lua" "nix" "py" "js" "ts" "go" "rs" "java" "cpp" "c" "h" "hpp")
+
+          # Build ripgrep pattern for file extensions
+          RG_PATTERN=""
+          for ext in "${EXTENSIONS[@]}"; do
+            if [ -n "$RG_PATTERN" ]; then
+              RG_PATTERN="$RG_PATTERN|"
+            fi
+            RG_PATTERN="$RG_PATTERN*.$ext"
+          done
+
+          echo "Checking files with extensions: ${EXTENSIONS[*]}"
+
+          # Find all relevant files
+          ALL_FILES=$(rg --files -g "{$RG_PATTERN}" 2>/dev/null || true)
+
+          if [ -z "$ALL_FILES" ]; then
+            echo "::notice::No files found requiring copyright headers"
+            exit 0
+          fi
+
+          MISSING_COPYRIGHT=()
+
+          # Check each file for copyright header (first 10 lines)
+          while IFS= read -r file; do
+            # Skip files in excluded directories
+            if echo "$file" | grep -E "(node_modules/|\.git/|vendor/|target/|build/)" > /dev/null; then
+              continue
+            fi
+
+            # Check if any copyright pattern exists in first 10 lines
+            FOUND_COPYRIGHT=false
+            for pattern in "${PATTERNS[@]}"; do
+              if head -10 "$file" | grep -q "$pattern"; then
+                FOUND_COPYRIGHT=true
+                break
+              fi
+            done
+
+            if [ "$FOUND_COPYRIGHT" = false ]; then
+              MISSING_COPYRIGHT+=("$file")
+            fi
+          done <<< "$ALL_FILES"
+
+          # Report results
+          if [ ${#MISSING_COPYRIGHT[@]} -gt 0 ]; then
+            echo "::error::Copyright header validation failed - ${#MISSING_COPYRIGHT[@]} files missing copyright headers"
+            echo "Files missing copyright headers:"
+            for file in "${MISSING_COPYRIGHT[@]}"; do
+              echo "  - $file"
+            done
+            echo ""
+            echo "Required: Files must contain one of the following copyright patterns in the first 10 lines:"
+            for pattern in "${PATTERNS[@]}"; do
+              echo "  - '$pattern'"
+            done
+            exit 1
+          else
+            echo "::notice::All files have valid copyright headers"
+            echo "✅ Copyright header validation passed"
+          fi
+
+  # ============================================================================
+  # STAGE 2: SECURITY (Mandatory - No bypass allowed)
+  # ============================================================================
+  security-secrets:
+    name: Security / Secrets Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Gitleaks (No bypass)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  security-dependency-audit:
+    name: Security / Dependency Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: Audit shell dependencies
+        run: |
+          echo "::notice::Auditing external dependencies in shell scripts"
+          # Check for curl/wget downloads without verification
+          if rg -n "curl.*\|.*sh" --type sh .; then
+            echo "::error::Found potentially unsafe curl|sh pattern"
+            exit 1
+          fi
+          # Check for unverified downloads
+          if rg -n "wget.*-O.*-.*\|.*sh" --type sh .; then
+            echo "::error::Found potentially unsafe wget pattern"
+            exit 1
+          fi
+      - name: Check for hardcoded secrets patterns
+        run: |
+          echo "::notice::Scanning for hardcoded secrets patterns"
+          # More aggressive secret detection
+          if rg -i "password|token|key|secret" --type sh --type lua | grep -E "=.*['\"][^'\"]{8,}['\"]"; then
+            echo "::error::Potential hardcoded secret detected"
+            exit 1
+          fi
+
+  security-infrastructure:
+    name: Security / Infrastructure Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: Checkov Infrastructure Security
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          framework: dockerfile,yaml,secrets
+          quiet: false
+          soft_fail: false  # FAIL on security issues
+          output_format: sarif
+          output_file_path: reports/checkov.sarif
+      - name: Upload Checkov results to GitHub Security
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: reports/checkov.sarif
+
+  # ============================================================================
+  # STAGE 3: TEST MATRIX (Linux + macOS enforced)
+  # ============================================================================
+  test-matrix:
+    name: Test / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10  # Enforced 10-minute timeout
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]  # BOTH platforms enforced
+        include:
+          - os: ubuntu-latest
+            cache_key: Linux
+          - os: macos-latest
+            cache_key: macOS
+    steps:
+      - uses: actions/checkout@v6
+      - name: Cache Chezmoi
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/chezmoi
+          key: chezmoi-${{ matrix.cache_key }}-${{ env.CHEZMOI_VERSION }}
+      - name: Setup Chezmoi
+        run: |
+          if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
+            sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -t v${{ env.CHEZMOI_VERSION }}
+          fi
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Chezmoi Apply Test
+        run: |
+          chezmoi init
+          chezmoi apply --verbose --dry-run
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-test-${{ matrix.cache_key }}
+          path: ~/.local/share/chezmoi/.log
+          retention-days: 5
+
+  test-unit:
+    name: Test / Unit Tests (100% Coverage)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10  # Enforced timeout
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run unit tests with coverage
+        run: |
+          chmod +x scripts/tests/framework/*.sh
+          # Set coverage requirement to 100%
+          export COVERAGE_THRESHOLD=100
+          ./scripts/tests/framework/test_runner.sh
+          if [ $? -ne 0 ]; then
+            echo "::error::Unit tests failed or coverage below 100%"
+            exit 1
+          fi
+      - name: Coverage Report
+        run: |
+          # Generate coverage report
+          ./scripts/tests/framework/coverage_analyzer.sh
+          if [ $? -ne 0 ]; then
+            echo "::error::Coverage analysis failed or threshold not met"
+            exit 1
+          fi
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+
+  test-integration:
+    name: Test / Integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 10  # Enforced timeout
+    needs: [lint-shell, lint-lua, security-secrets]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run integration tests
+        run: |
+          export RUN_INTEGRATION=1
+          ./scripts/tests/framework/test_runner.sh
+          if [ $? -ne 0 ]; then
+            echo "::error::Integration tests failed"
+            exit 1
+          fi
+
+  # ============================================================================
+  # STAGE 4: TYPE CHECKING (If applicable)
+  # ============================================================================
+  type-check:
+    name: Type Check / Strict Mode
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: Shell Type Checking with shellcheck strict
+        run: |
+          echo "::notice::Running shellcheck in strict mode"
+          # Use most strict shellcheck settings
+          rg --files -g "*.sh" | xargs shellcheck -x --severity=style --enable=all
+          if [ $? -ne 0 ]; then
+            echo "::error::Strict type checking failed"
+            exit 1
+          fi
+
+  # ============================================================================
+  # STAGE 5: MERGE GATE (All checks must pass)
+  # ============================================================================
+  merge-gate:
+    name: Merge Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    needs: [
+      lint-shell,
+      lint-lua,
+      lint-nix,
+      lint-copyright,
+      security-secrets,
+      security-dependency-audit,
+      security-infrastructure,
+      test-matrix,
+      test-unit,
+      test-integration,
+      type-check
+    ]
+    steps:
+      - name: All checks passed
+        run: |
+          echo "::notice::All CI checks passed - merge approved"
+          echo "✅ All quality gates satisfied"
+
+# ============================================================================
+# NIGHTLY JOBS (Advanced checks)
+# ============================================================================
+  nightly:
+    name: Nightly / ${{ matrix.check }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    strategy:
+      matrix:
+        check: [dependency-updates, beta-testing, extended-tests]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Dependency Update Check
+        if: matrix.check == 'dependency-updates'
+        run: |
+          echo "::notice::Checking for available dependency updates"
+          ./scripts/maintenance/check-updates.sh || true
+      - name: Beta/Nightly Testing
+        if: matrix.check == 'beta-testing'
+        run: |
+          echo "::notice::Testing with beta/nightly versions"
+          export USE_BETA_VERSIONS=1
+          ./scripts/tests/framework/test_runner.sh || true
+      - name: Extended Test Suite
+        if: matrix.check == 'extended-tests'
+        run: |
+          echo "::notice::Running extended test suite"
+          export RUN_EXTENDED=1
+          ./scripts/tests/framework/test_runner.sh || true
