@@ -88,6 +88,7 @@ DOTFILES_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/
 - [AI Integrations](docs/AI.md) — Optional AI helpers and privacy notes.
 - [Dot Utils](docs/UTILS.md) — Aliases and dot CLI helpers.
 - [Troubleshooting](docs/TROUBLESHOOTING.md) — Fixes for common issues.
+- [Architecture](docs/ARCHITECTURE.md) — Shell startup, caching, and design decisions.
 
 ---
 
@@ -203,6 +204,7 @@ Run `dot --help` or `dot <command> --help` for inline documentation.
 | `dot encrypt-check` | Check disk encryption status | Security |
 | `dot lock-screen` | Enforce lock‑screen idle settings (opt‑in) | Security |
 | `dot usb-safety` | Disable automount for removable media | Security |
+| `dot ssh-cert` | Manage short‑lived SSH certificates (issue/status/revoke) | Security |
 
 **Examples**
 
