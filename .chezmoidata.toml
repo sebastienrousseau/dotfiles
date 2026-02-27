@@ -97,7 +97,7 @@ install_gui_apps = false
 
 [tools]
 # Node.js version manager
-node_manager = "fnm"  # fnm, nvm, or mise
+node_manager = "mise"  # mise, fnm, or nvm
 default_node_version = "22"
 
 # Python version manager

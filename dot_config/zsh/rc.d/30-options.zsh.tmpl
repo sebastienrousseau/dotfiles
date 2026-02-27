@@ -41,6 +41,9 @@ fi
 if [[ -z ${fpath[(r)${ZSH_COMPLETIONS_DIR}]} ]]; then
   fpath=("${ZSH_COMPLETIONS_DIR}" "${fpath[@]}")
 fi
+{{- /* Node.js version manager: configured via .chezmoidata.toml tools.node_manager */ -}}
+{{- $node_mgr := default "mise" .tools.node_manager -}}
+{{- if eq $node_mgr "fnm" }}
 # fnm (Fast Node Manager)
 # Initialize early so Node + corepack use the expected version.
 if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]] && command -v fnm >/dev/null; then
@@ -58,7 +61,8 @@ if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]
   pnpm() { _lazy_load_fnm; command pnpm "$@"; }
   pnpx() { _lazy_load_fnm; command pnpx "$@"; }
 fi
-
+{{- end }}
+{{- /* When node_manager = "mise", Node.js is handled by mise activate in dot_zshrc.tmpl */ -}}
 
 # Tool completions — generate once into ZSH_COMPLETIONS_DIR
 if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]]; then
@@ -72,11 +76,14 @@ if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]
     command kubectl completion zsh >| "${ZSH_COMPLETIONS_DIR}/_kubectl"
   [[ ! -f "${ZSH_COMPLETIONS_DIR}/_atuin" ]] && command -v atuin >/dev/null &&
     command atuin gen-completions --shell zsh --out-dir "${ZSH_COMPLETIONS_DIR}" 2>/dev/null
+  [[ ! -f "${ZSH_COMPLETIONS_DIR}/_mise" ]] && command -v mise >/dev/null &&
+    command mise completions zsh >| "${ZSH_COMPLETIONS_DIR}/_mise" 2>/dev/null
 fi
 
-# Lazy-load NVM (if fnm is not installed)
-if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]] && ! command -v fnm >/dev/null; then
-  export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+{{- if eq $node_mgr "nvm" }}
+# Lazy-load NVM
+export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]]; then
   if [[ -s "${NVM_DIR}/nvm.sh" ]]; then
     _lazy_load_nvm() {
       unfunction node npm npx nvm _lazy_load_nvm 2>/dev/null
@@ -93,6 +100,7 @@ if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]
     npx() { _lazy_load_nvm; command npx "$@"; }
   fi
 fi
+{{- end }}
 
 # Lazy-load SDKMAN
 export SDKMAN_DIR="${SDKMAN_DIR:-$HOME/.sdkman}"
