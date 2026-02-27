@@ -111,8 +111,7 @@ analyze_coverage() {
 
   # Count covered lines
   local covered_lines
-  covered_lines=$(grep -c "^$script_name:" "$COVERAGE_DIR/line_coverage.log" 2>/dev/null || echo "0")
-  covered_lines=$(echo "$covered_lines" | sort -u | wc -l)
+  covered_lines=$(grep "^$script_name:" "$COVERAGE_DIR/line_coverage.log" 2>/dev/null | sort -u | wc -l || echo "0")
 
   # Calculate coverage percentage
   local coverage_percentage
@@ -144,8 +143,8 @@ analyze_coverage() {
 
   echo
 
-  # Return coverage percentage for scripting
-  return $coverage_percentage
+  # Store coverage percentage for caller (exit codes are limited to 0-255)
+  _COVERAGE_RESULT=$coverage_percentage
 }
 
 # Generate coverage report for multiple scripts
@@ -161,7 +160,7 @@ generate_report() {
   for script in "${scripts[@]}"; do
     if [[ -f "$script" ]]; then
       analyze_coverage "$script"
-      local script_coverage=$?
+      local script_coverage=$_COVERAGE_RESULT
       total_coverage=$((total_coverage + script_coverage))
       ((script_count++))
       echo "----------------------------------------"
@@ -269,7 +268,7 @@ main() {
       local total_coverage=0 script_count=0 failed_count=0
       for script in "${scripts[@]}"; do
         if analyze_coverage "$script"; then
-          local script_coverage=$?
+          local script_coverage=$_COVERAGE_RESULT
           total_coverage=$((total_coverage + script_coverage))
           ((script_count++))
           if [[ $script_coverage -lt $threshold ]]; then

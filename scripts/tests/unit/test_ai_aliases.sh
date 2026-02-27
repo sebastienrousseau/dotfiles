@@ -27,13 +27,13 @@ mock_command "gh" "gh 2.42.0" 0
   alias ghcp >/dev/null 2>&1 && echo "ghcp_defined"
   alias ghs >/dev/null 2>&1 && echo "ghs_defined"
   alias ghe >/dev/null 2>&1 && echo "ghe_defined"
-) >/tmp/test_output
+) >${TMPDIR:-/tmp}/test_ai_aliases_$$
 
-assert_file_contains "/tmp/test_output" "ghcp_defined" "ghcp alias should be defined when gh available"
-assert_file_contains "/tmp/test_output" "ghs_defined" "ghs alias should be defined when gh available"
-assert_file_contains "/tmp/test_output" "ghe_defined" "ghe alias should be defined when gh available"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "ghcp_defined" "ghcp alias should be defined when gh available"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "ghs_defined" "ghs alias should be defined when gh available"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "ghe_defined" "ghe alias should be defined when gh available"
 
-rm -f /tmp/test_output
+rm -f ${TMPDIR:-/tmp}/test_ai_aliases_$$
 mock_cleanup
 
 test_start "github_copilot_aliases_when_gh_unavailable"
@@ -50,13 +50,13 @@ mock_init
   alias ghcp >/dev/null 2>&1 || echo "ghcp_not_defined"
   alias ghs >/dev/null 2>&1 || echo "ghs_not_defined"
   alias ghe >/dev/null 2>&1 || echo "ghe_not_defined"
-) >/tmp/test_output
+) >${TMPDIR:-/tmp}/test_ai_aliases_$$
 
-assert_file_contains "/tmp/test_output" "ghcp_not_defined" "ghcp alias should not be defined when gh unavailable"
-assert_file_contains "/tmp/test_output" "ghs_not_defined" "ghs alias should not be defined when gh unavailable"
-assert_file_contains "/tmp/test_output" "ghe_not_defined" "ghe alias should not be defined when gh unavailable"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "ghcp_not_defined" "ghcp alias should not be defined when gh unavailable"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "ghs_not_defined" "ghs alias should not be defined when gh unavailable"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "ghe_not_defined" "ghe alias should not be defined when gh unavailable"
 
-rm -f /tmp/test_output
+rm -f ${TMPDIR:-/tmp}/test_ai_aliases_$$
 mock_cleanup
 
 test_start "fabric_alias_when_fabric_available"
@@ -69,11 +69,11 @@ mock_command "fabric" "fabric v1.0.0" 0
   source "$ALIASES_FILE"
 
   alias fab >/dev/null 2>&1 && echo "fab_defined"
-) >/tmp/test_output
+) >${TMPDIR:-/tmp}/test_ai_aliases_$$
 
-assert_file_contains "/tmp/test_output" "fab_defined" "fab alias should be defined when fabric available"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "fab_defined" "fab alias should be defined when fabric available"
 
-rm -f /tmp/test_output
+rm -f ${TMPDIR:-/tmp}/test_ai_aliases_$$
 mock_cleanup
 
 test_start "fabric_alias_when_fabric_unavailable"
@@ -86,11 +86,11 @@ mock_init
   source "$ALIASES_FILE"
 
   alias fab >/dev/null 2>&1 || echo "fab_not_defined"
-) >/tmp/test_output
+) >${TMPDIR:-/tmp}/test_ai_aliases_$$
 
-assert_file_contains "/tmp/test_output" "fab_not_defined" "fab alias should not be defined when fabric unavailable"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "fab_not_defined" "fab alias should not be defined when fabric unavailable"
 
-rm -f /tmp/test_output
+rm -f ${TMPDIR:-/tmp}/test_ai_aliases_$$
 mock_cleanup
 
 test_start "ollama_aliases_when_ollama_available"
@@ -107,15 +107,15 @@ mock_command "ollama" "ollama version 1.0.0" 0
   alias oll >/dev/null 2>&1 && echo "oll_defined"
   alias olp >/dev/null 2>&1 && echo "olp_defined"
   alias ollama-show >/dev/null 2>&1 && echo "ollama_show_defined"
-) >/tmp/test_output
+) >${TMPDIR:-/tmp}/test_ai_aliases_$$
 
-assert_file_contains "/tmp/test_output" "ol_defined" "ol alias should be defined when ollama available"
-assert_file_contains "/tmp/test_output" "olr_defined" "olr alias should be defined when ollama available"
-assert_file_contains "/tmp/test_output" "oll_defined" "oll alias should be defined when ollama available"
-assert_file_contains "/tmp/test_output" "olp_defined" "olp alias should be defined when ollama available"
-assert_file_contains "/tmp/test_output" "ollama_show_defined" "ollama-show alias should be defined when ollama available"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "ol_defined" "ol alias should be defined when ollama available"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "olr_defined" "olr alias should be defined when ollama available"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "oll_defined" "oll alias should be defined when ollama available"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "olp_defined" "olp alias should be defined when ollama available"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "ollama_show_defined" "ollama-show alias should be defined when ollama available"
 
-rm -f /tmp/test_output
+rm -f ${TMPDIR:-/tmp}/test_ai_aliases_$$
 mock_cleanup
 
 test_start "ollama_aliases_when_ollama_unavailable"
@@ -132,15 +132,15 @@ mock_init
   alias oll >/dev/null 2>&1 || echo "oll_not_defined"
   alias olp >/dev/null 2>&1 || echo "olp_not_defined"
   alias ollama-show >/dev/null 2>&1 || echo "ollama_show_not_defined"
-) >/tmp/test_output
+) >${TMPDIR:-/tmp}/test_ai_aliases_$$
 
-assert_file_contains "/tmp/test_output" "ol_not_defined" "ol alias should not be defined when ollama unavailable"
-assert_file_contains "/tmp/test_output" "olr_not_defined" "olr alias should not be defined when ollama unavailable"
-assert_file_contains "/tmp/test_output" "oll_not_defined" "oll alias should not be defined when ollama unavailable"
-assert_file_contains "/tmp/test_output" "olp_not_defined" "olp alias should not be defined when ollama unavailable"
-assert_file_contains "/tmp/test_output" "ollama_show_not_defined" "ollama-show alias should not be defined when ollama unavailable"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "ol_not_defined" "ol alias should not be defined when ollama unavailable"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "olr_not_defined" "olr alias should not be defined when ollama unavailable"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "oll_not_defined" "oll alias should not be defined when ollama unavailable"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "olp_not_defined" "olp alias should not be defined when ollama unavailable"
+assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "ollama_show_not_defined" "ollama-show alias should not be defined when ollama unavailable"
 
-rm -f /tmp/test_output
+rm -f ${TMPDIR:-/tmp}/test_ai_aliases_$$
 mock_cleanup
 
 test_start "aliases_syntax_check"
