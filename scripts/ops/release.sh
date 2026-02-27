@@ -32,8 +32,8 @@ Dotfiles Release Tool
 Usage: $(basename "$0") [BUMP_TYPE] [OPTIONS]
 
 Bump Types:
-  patch         Increment patch version (0.2.490 → 0.2.491) [default]
-  minor         Increment minor version (0.2.490 → 0.3.0)
+  patch         Increment patch version (0.2.491 → 0.2.491) [default]
+  minor         Increment minor version (0.2.491 → 0.3.0)
 
 Options:
   -n, --dry-run   Show what would be done without making changes
