@@ -23,10 +23,10 @@ CURLHEADER_FN="$REPO_ROOT/.chezmoitemplates/functions/curlheader.sh"
 test_start "lazy_template_ecosystem_filtering"
 if grep -q "DOTFILES_ALIAS_ECOSYSTEMS" "$LAZY_TEMPLATE"; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: lazy template supports ecosystem filtering"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: lazy template supports ecosystem filtering"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: missing ecosystem filtering support"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: missing ecosystem filtering support"
 fi
 
 test_start "interactive_safe_aliases_flag"
@@ -50,28 +50,28 @@ assert_file_contains "$EDITOR_ALIASES" "DOTFILES_LEGACY_EDITOR_ALIASES" "legacy 
 test_start "curlstatus_deduplicated_aliases"
 if grep -q "alias cst=" "$CURLSTATUS_FN"; then
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: cst alias should be removed"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: cst alias should be removed"
 else
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: redundant cst alias removed"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: redundant cst alias removed"
 fi
 
 test_start "curltime_deduplicated_aliases"
 if grep -q "alias chtm=" "$CURLTIME_FN"; then
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: chtm alias should be removed"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: chtm alias should be removed"
 else
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: redundant chtm alias removed"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: redundant chtm alias removed"
 fi
 
 test_start "curlheader_deduplicated_aliases"
 if grep -q "alias chdr=" "$CURLHEADER_FN"; then
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: chdr alias should be removed"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: chdr alias should be removed"
 else
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: redundant chdr alias removed"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: redundant chdr alias removed"
 fi
 
 echo ""

@@ -17,20 +17,20 @@ assert_file_exists "$VERIFY_FILE" "verify_state.sh should exist"
 test_start "verify_syntax_valid"
 if bash -n "$VERIFY_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 
 # Test: verifies state
 test_start "verify_checks_state"
 if grep -qE 'verify|check|state|valid' "$VERIFY_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: verifies state"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: verifies state"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should verify state"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should verify state"
 fi
 
 # Test: shellcheck compliance
@@ -39,14 +39,14 @@ if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$VERIFY_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available"
 fi
 
 echo ""

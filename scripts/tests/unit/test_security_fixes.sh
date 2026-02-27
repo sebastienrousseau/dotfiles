@@ -21,11 +21,11 @@ result=$(bash -c '
 ')
 if [[ "$result" == *"No disk image specified"* ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: rejects empty argument"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: rejects empty argument"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should reject empty argument"
-  echo -e "    Actual: $result"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should reject empty argument"
+  printf '%b\n' "    Actual: $result"
 fi
 
 # Test: mount_read_only rejects missing file
@@ -36,11 +36,11 @@ result=$(bash -c '
 ')
 if [[ "$result" == *"Disk image not found"* ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: rejects missing file"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: rejects missing file"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should reject missing file"
-  echo -e "    Actual: $result"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should reject missing file"
+  printf '%b\n' "    Actual: $result"
 fi
 
 # Test: genpass validates numeric input
@@ -52,11 +52,11 @@ result=$(bash -c '
 ' 2>&1)
 if [[ "$result" == *"must be a number"* ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: rejects non-numeric input"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: rejects non-numeric input"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should reject non-numeric input"
-  echo -e "    Actual: $result"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should reject non-numeric input"
+  printf '%b\n' "    Actual: $result"
 fi
 
 # Test: genpass rejects out-of-range values
@@ -67,11 +67,11 @@ result=$(bash -c '
 ' 2>&1)
 if [[ "$result" == *"must be a number between 1 and 100"* ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: rejects out of range input"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: rejects out of range input"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should reject out of range input"
-  echo -e "    Actual: $result"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should reject out of range input"
+  printf '%b\n' "    Actual: $result"
 fi
 
 # Test: genpass accepts valid input
@@ -82,11 +82,11 @@ result=$(bash -c '
 ' 2>&1)
 if [[ "$result" == *"Generated password"* ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: accepts valid numeric input"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: accepts valid numeric input"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should accept valid numeric input"
-  echo -e "    Actual: $result"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should accept valid numeric input"
+  printf '%b\n' "    Actual: $result"
 fi
 
 # Test: chezmoi-apply.sh uses read for safe parsing

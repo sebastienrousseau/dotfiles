@@ -40,7 +40,7 @@ if command -v zsh >/dev/null 2>&1; then
 else
   test_start "secrets_autoload_zsh"
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: zsh not available, skipped"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: zsh not available, skipped"
 fi
 
 rm -rf "$tmp_stub_dir"

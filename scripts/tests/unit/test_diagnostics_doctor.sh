@@ -17,40 +17,40 @@ assert_file_exists "$DOCTOR_FILE" "doctor.sh should exist"
 test_start "doctor_syntax_valid"
 if bash -n "$DOCTOR_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: doctor.sh has valid syntax"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: doctor.sh has valid syntax"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: doctor.sh has syntax errors"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: doctor.sh has syntax errors"
 fi
 
 # Test: defines diagnostic functions
 test_start "doctor_defines_diagnostics"
 if grep -qE 'check_|command -v|chezmoi status|ui_header' "$DOCTOR_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines diagnostic functions"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines diagnostic functions"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define diagnostic functions"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define diagnostic functions"
 fi
 
 # Test: checks system configuration
 test_start "doctor_checks_config"
 if grep -qE 'config|chezmoi|\$HOME' "$DOCTOR_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: checks system configuration"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: checks system configuration"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should check system configuration"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should check system configuration"
 fi
 
 # Test: provides remediation suggestions
 test_start "doctor_provides_remediation"
 if grep -qE 'fix|suggest|recommend|try|run' "$DOCTOR_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: provides remediation suggestions"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: provides remediation suggestions"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should provide remediation suggestions"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should provide remediation suggestions"
 fi
 
 # Test: shellcheck compliance
@@ -59,14 +59,14 @@ if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$DOCTOR_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
 fi
 
 echo ""

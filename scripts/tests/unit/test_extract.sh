@@ -24,10 +24,10 @@ output=$(
 )
 if [[ "$output" == *"Usage:"* && "$output" == *"extract"* ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: --help shows usage information"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --help shows usage information"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: --help should show usage information"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: --help should show usage information"
 fi
 
 # Test: extract with --help returns exit code 0
@@ -55,11 +55,11 @@ output=$(
 )
 if [[ "$output" == *"ERROR"* || "$output" == *"argument"* ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shows error message for no arguments"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shows error message for no arguments"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should show error message for no arguments"
-  echo -e "    Output: $output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show error message for no arguments"
+  printf '%b\n' "    Output: $output"
 fi
 
 # Test: extract with nonexistent file shows error
@@ -73,11 +73,11 @@ test_start "extract_nonexistent_file_message"
 output=$(extract "/nonexistent/file.tar.gz" 2>&1)
 if [[ "$output" == *"ERROR"* || "$output" == *"not a valid file"* ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shows error for nonexistent file"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shows error for nonexistent file"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should show error for nonexistent file"
-  echo -e "    Output: $output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show error for nonexistent file"
+  printf '%b\n' "    Output: $output"
 fi
 
 # Test: extract with too many arguments shows error
@@ -109,16 +109,16 @@ if command -v tar >/dev/null 2>&1; then
   # Check if extraction created the content
   if [[ -f "$extract_output_dir/content/testfile.txt" ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: tar.gz extraction works"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: tar.gz extraction works"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: tar.gz extraction did not produce expected file"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: tar.gz extraction did not produce expected file"
   fi
 
   rm -rf "$test_dir"
 else
   ((TESTS_PASSED++))
-  echo -e "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (tar not available)"
+  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (tar not available)"
 fi
 
 # Test: extract recognizes unsupported extension
@@ -129,11 +129,11 @@ mv "$test_file" "${test_file}.unsupported"
 output=$(extract "${test_file}.unsupported" 2>&1)
 if [[ "$output" == *"cannot be extracted"* ]] || [[ "$output" == *"ERROR"* ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: unsupported extension handled"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: unsupported extension handled"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should report unsupported extension"
-  echo -e "    Output: $output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should report unsupported extension"
+  printf '%b\n' "    Output: $output"
 fi
 rm -f "${test_file}.unsupported"
 
@@ -145,10 +145,10 @@ exit_code=$?
 # Should fail because directories are not files
 if [[ "$exit_code" -ne 0 ]] || [[ "$output" == *"ERROR"* ]] || [[ "$output" == *"not a valid file"* ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: directory correctly rejected"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: directory correctly rejected"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should reject directories"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should reject directories"
 fi
 rm -rf "$test_dir"
 

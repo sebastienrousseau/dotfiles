@@ -18,10 +18,10 @@ test_start "aliases_file_count"
 count=$(find "$ALIASES_DIR" -name "*.sh" 2>/dev/null | wc -l)
 if [[ "$count" -gt 10 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: found $count alias files"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: found $count alias files"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: expected >10 alias files, found $count"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected >10 alias files, found $count"
 fi
 
 # Test: all alias files have valid syntax
@@ -34,10 +34,10 @@ for script in $(find "$ALIASES_DIR" -name "*.sh" 2>/dev/null); do
 done
 if [[ "$invalid" -eq 0 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: all alias files valid"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: all alias files valid"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: $invalid files invalid"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $invalid files invalid"
 fi
 
 # Test: aliases use proper guards
@@ -52,10 +52,10 @@ for script in $(find "$ALIASES_DIR" -name "*.sh" 2>/dev/null | head -20); do
 done
 if [[ "$guarded" -gt 0 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: $guarded/$total use command guards"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $guarded/$total use command guards"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: only $guarded/$total use guards"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: only $guarded/$total use guards"
 fi
 
 # Test: no dangerous aliases
@@ -63,30 +63,30 @@ test_start "aliases_no_dangerous"
 dangerous=$(grep -rlE '(^|[;&[:space:]])(sudo[[:space:]]+)?rm[[:space:]]+-rf[[:space:]]+/($|[[:space:];])' "$ALIASES_DIR" 2>/dev/null | wc -l)
 if [[ "$dangerous" -eq 0 ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: no dangerous aliases"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no dangerous aliases"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: $dangerous files have dangerous aliases"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $dangerous files have dangerous aliases"
 fi
 
 # Test: docker aliases exist
 test_start "aliases_docker_exists"
 if [[ -d "$ALIASES_DIR/docker" ]] || [[ -f "$ALIASES_DIR/docker.aliases.sh" ]]; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: docker aliases exist"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: docker aliases exist"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: docker aliases should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: docker aliases should exist"
 fi
 
 # Test: git aliases exist
 test_start "aliases_git_exists"
 if find "$ALIASES_DIR" -name "*git*" 2>/dev/null | grep -q .; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: git aliases exist"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: git aliases exist"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: git aliases should exist"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: git aliases should exist"
 fi
 
 echo ""

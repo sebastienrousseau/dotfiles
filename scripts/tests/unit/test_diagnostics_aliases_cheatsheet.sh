@@ -27,10 +27,10 @@ chmod +x "$tmp_src/scripts/diagnostics/aliases-manifest.sh"
 output="$(CHEZMOI_SOURCE_DIR="$tmp_src" bash "$CHEATSHEET_SCRIPT" 2>&1 || true)"
 if [[ "$output" == *"# Alias Cheatsheet"* ]] && [[ "$output" == *"- \`c\`"* ]]; then
   ((TESTS_PASSED++)) || true
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: emits markdown cheatsheet"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: emits markdown cheatsheet"
 else
   ((TESTS_FAILED++)) || true
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: expected markdown output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected markdown output"
   echo "$output"
 fi
 rm -rf "$tmp_src"

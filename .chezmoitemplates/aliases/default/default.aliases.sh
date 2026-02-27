@@ -18,9 +18,9 @@
 #   - Ensure to validate that all aliases work as expected in the bash shell.
 
 set_default_aliases() {
-  if [ -n "${ZSH_VERSION:-}" ]; then
+  if [[ -n "${ZSH_VERSION:-}" ]]; then
     fc -W >/dev/null 2>&1 || true
-  elif [ -n "${BASH_VERSION:-}" ]; then
+  elif [[ -n "${BASH_VERSION:-}" ]]; then
     history -a >/dev/null 2>&1 || true
   fi
 
@@ -52,7 +52,7 @@ set_default_aliases() {
   # Shutdown the system (portable form).
   alias halt='sudo shutdown -h now'
 
-  if [ -n "${ZSH_VERSION:-}" ]; then
+  if [[ -n "${ZSH_VERSION:-}" ]]; then
     alias history='fc -il 1' # Show history with ISO 8601 timestamps (zsh)
   fi
 

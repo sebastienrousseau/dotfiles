@@ -11,17 +11,17 @@ assert_file_exists "$LIB_FILE" "os_detection.sh should exist"
 
 test_start "lib_valid_syntax"
 if bash -n "$LIB_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++)); echo -e "  ${GREEN}✓${NC} $CURRENT_TEST"
+  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
-  ((TESTS_FAILED++)); echo -e "  ${RED}✗${NC} $CURRENT_TEST"
+  ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
 test_start "lib_shellcheck"
 if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$LIB_FILE" 2>&1 | wc -l)
-  [[ "$errors" -eq 0 ]] && { ((TESTS_PASSED++)); echo -e "  ${GREEN}✓${NC} $CURRENT_TEST"; } || { ((TESTS_FAILED++)); echo -e "  ${RED}✗${NC} $CURRENT_TEST"; }
+  [[ "$errors" -eq 0 ]] && { ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"; } || { ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"; }
 else
-  ((TESTS_PASSED++)); echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: skipped"
+  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped"
 fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

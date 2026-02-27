@@ -15,10 +15,10 @@ assert_file_exists "$VERIFY_FILE" "verify.sh should exist"
 test_start "verify_command_syntax_valid"
 if bash -n "$VERIFY_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 
 test_start "verify_runs_dot_doctor"

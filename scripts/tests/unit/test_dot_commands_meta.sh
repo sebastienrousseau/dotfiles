@@ -18,50 +18,50 @@ assert_file_exists "$META_FILE" "meta.sh should exist"
 test_start "meta_syntax_valid"
 if bash -n "$META_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: meta.sh has valid syntax"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: meta.sh has valid syntax"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: meta.sh has syntax errors"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: meta.sh has syntax errors"
 fi
 
 # Test: defines help command
 test_start "meta_defines_help"
 if grep -qE "cmd_docs|cmd_learn|cmd_keys|cmd_upgrade|cmd_sandbox|cmd_mcp" "$META_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines meta command functions"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines meta command functions"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define meta command functions"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define meta command functions"
 fi
 
 # Test: defines version command
 test_start "meta_defines_version"
 if grep -qE "case .*\\{1,\\}|upgrade\\)|docs\\)|learn\\)|keys\\)|sandbox\\)|mcp\\)" "$META_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: defines dispatch cases"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines dispatch cases"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should define dispatch cases"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define dispatch cases"
 fi
 
 # Test: defines log-rotate command
 test_start "meta_defines_log_rotate"
 if grep -qE "cmd_upgrade|cmd_docs|cmd_learn|cmd_keys|cmd_sandbox|cmd_mcp" "$META_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: command handlers present"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: command handlers present"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: command handlers should be present"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: command handlers should be present"
 fi
 
 # Test: version uses semantic versioning
 test_start "meta_semver_version"
 if grep -q 'set -euo pipefail' "$META_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: follows command module structure"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: follows command module structure"
 else
   ((TESTS_FAILED++))
-  echo -e "  ${RED}✗${NC} $CURRENT_TEST: should follow command module structure"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should follow command module structure"
 fi
 
 # Test: shellcheck compliance
@@ -70,14 +70,14 @@ if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$META_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
     ((TESTS_PASSED++))
-    echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
     ((TESTS_FAILED++))
-    echo -e "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else
   ((TESTS_PASSED++))
-  echo -e "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
 fi
 
 echo ""
