@@ -101,17 +101,17 @@ jobs:
           errors=0
 
           # Create test file
-          printf 'line1\nline2\nline3\n' > /tmp/sed_test.txt
+          printf 'line1\nline2\nline3\n' > "$RUNNER_TEMP/sed_test.txt"
 
           # Test 1: In-place edit (BSD requires backup extension, GNU doesn't)
           # Portable pattern: use explicit empty string for GNU compatibility
           if [[ "${{ matrix.platform }}" == "darwin" ]]; then
-            sed -i '' 's/line1/LINE1/' /tmp/sed_test.txt
+            sed -i '' 's/line1/LINE1/' "$RUNNER_TEMP/sed_test.txt"
           else
-            sed -i 's/line1/LINE1/' /tmp/sed_test.txt
+            sed -i 's/line1/LINE1/' "$RUNNER_TEMP/sed_test.txt"
           fi
 
-          if ! grep -q "LINE1" /tmp/sed_test.txt; then
+          if ! grep -q "LINE1" "$RUNNER_TEMP/sed_test.txt"; then
             echo "FAIL: sed in-place edit"
             errors=$((errors + 1))
           fi
@@ -243,11 +243,11 @@ jobs:
 
               for test in test_dot_commands_*.sh test_diagnostics_*.sh; do
                 if [[ -f "$test" ]]; then
-                  if bash "$test" > /tmp/test_output.txt 2>&1; then
+                  if bash "$test" > "$RUNNER_TEMP/test_output.txt" 2>&1; then
                     passed=$((passed + 1))
                   else
                     echo "FAIL: $test"
-                    tail -20 /tmp/test_output.txt
+                    tail -20 "$RUNNER_TEMP/test_output.txt"
                     failed=$((failed + 1))
                   fi
                 fi
