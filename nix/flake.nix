@@ -1,6 +1,8 @@
 {
   description = "Dotfiles optional toolchain (Nix)";
 
+  # NOTE: Run `nix flake update` to generate/refresh flake.lock, then commit it
+  # for reproducible builds. Pin to a stable release channel for determinism.
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
   };

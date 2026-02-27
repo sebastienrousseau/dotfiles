@@ -34,7 +34,7 @@ ASSET="chezmoi_${VERSION}_${OS}_${ARCH}.tar.gz"
 CHECKSUMS_ASSET="chezmoi_${VERSION}_checksums.txt"
 BASE_URL="https://github.com/twpayne/chezmoi/releases/download/v${VERSION}"
 
-TMP_DIR="$(mktemp -d)"
+TMP_DIR="$(umask 077 && mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 # Support both old and new checksum filenames.

@@ -48,7 +48,8 @@ if [[ -n "$HOMEBREW_PREFIX" ]]; then
 fi
 
 # -----------------------------------------------------------------------------
-# User Binaries (highest priority - set early for login shells)
-# Language-specific paths are consolidated in ~/.config/shell/00-core-paths.sh
+# User Binaries
+# NOTE: ~/.local/bin is set in .zshenv (earliest); ~/bin and language-specific
+# paths are consolidated in ~/.config/shell/00-core-paths.sh.
+# No additional PATH manipulation needed here.
 # -----------------------------------------------------------------------------
-export PATH="$HOME/bin:$HOME/.local/bin:$PATH"

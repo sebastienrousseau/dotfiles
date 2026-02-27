@@ -351,7 +351,7 @@ if [[ "${DOTFILES_FAST}" != "1" ]]; then
       _dotfiles_load_heavy_layers
       return 0
     fi
-    command dot "$@"
+    "$HOME/.local/bin/dot" "$@"
   '
 fi
 

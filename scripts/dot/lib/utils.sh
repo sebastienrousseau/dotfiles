@@ -17,22 +17,27 @@ resolve_source_dir() {
     return
   fi
 
+  local dir=""
   if [ -n "${CHEZMOI_SOURCE_DIR:-}" ] && [ -d "$CHEZMOI_SOURCE_DIR" ]; then
-    _DOT_SOURCE_DIR_CACHE="$CHEZMOI_SOURCE_DIR"
-    printf "%s\n" "$_DOT_SOURCE_DIR_CACHE"
-    return
+    dir="$CHEZMOI_SOURCE_DIR"
+  elif [ -d "$HOME/.dotfiles" ]; then
+    dir="$HOME/.dotfiles"
+  elif [ -d "$HOME/.local/share/chezmoi" ]; then
+    dir="$HOME/.local/share/chezmoi"
   fi
-  if [ -d "$HOME/.dotfiles" ]; then
-    _DOT_SOURCE_DIR_CACHE="$HOME/.dotfiles"
-    printf "%s\n" "$_DOT_SOURCE_DIR_CACHE"
-    return
+
+  if [ -n "$dir" ]; then
+    # Resolve symlinks for consistent path handling
+    if command -v realpath >/dev/null 2>&1; then
+      dir="$(realpath "$dir")"
+    elif command -v readlink >/dev/null 2>&1; then
+      dir="$(readlink -f "$dir")"
+    fi
+    _DOT_SOURCE_DIR_CACHE="$dir"
+    printf "%s\n" "$dir"
+  else
+    printf "%s\n" ""
   fi
-  if [ -d "$HOME/.local/share/chezmoi" ]; then
-    _DOT_SOURCE_DIR_CACHE="$HOME/.local/share/chezmoi"
-    printf "%s\n" "$_DOT_SOURCE_DIR_CACHE"
-    return
-  fi
-  printf "%s\n" ""
 }
 
 # Generic dispatcher: resolve source dir, find script, exec it.

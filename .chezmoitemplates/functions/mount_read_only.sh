@@ -15,7 +15,7 @@ mount_read_only() {
 
   # Create secure temporary shadow file
   local shadow_file
-  shadow_file="$(mktemp)" || return 1
+  shadow_file="$(umask 077 && mktemp)" || return 1
   trap 'rm -f "$shadow_file"' RETURN
 
   hdiutil attach "$disk_image" -shadow "$shadow_file" -noverify

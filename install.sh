@@ -139,7 +139,7 @@ else
   echo -e "${CYAN}   SECURITY NOTE: Downloading from get.chezmoi.io with integrity check${NC}"
 
   # Download installer script first for inspection
-  CHEZMOI_INSTALLER=$(mktemp)
+  CHEZMOI_INSTALLER=$(umask 077 && mktemp)
   if ! curl -fsSL -o "$CHEZMOI_INSTALLER" https://get.chezmoi.io; then
     rm -f "$CHEZMOI_INSTALLER"
     error "Failed to download chezmoi installer."
