@@ -95,9 +95,9 @@ for cmd in zsh fish nu starship; do
     log_success "$cmd" "$(get_cmd_path "$cmd")"
   else
     if [[ "$cmd" == "nu" || "$cmd" == "fish" ]]; then
-       log_warn "$cmd" "Optional but recommended for 2026 stack"
+      log_warn "$cmd" "Optional but recommended for 2026 stack"
     else
-       log_fail "$cmd" "Missing"
+      log_fail "$cmd" "Missing"
     fi
   fi
 done
@@ -118,7 +118,11 @@ for cmd in pueue wasmtime nix sops age; do
   if check_cmd "$cmd"; then
     log_success "$cmd" "$(get_cmd_path "$cmd")"
   else
-    log_warn "$cmd" "Frontier tool missing"
+    if [[ "$cmd" == "nix" ]]; then
+      log_warn "$cmd" "Frontier tool missing (run: curl -L https://nixos.org/nix/install | sh)"
+    else
+      log_warn "$cmd" "Frontier tool missing"
+    fi
   fi
 done
 

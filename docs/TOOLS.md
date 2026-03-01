@@ -84,10 +84,14 @@ Integrated AI helpers for the terminal.
 
 *Detailed guide available in [AI.md](AI.md).*
 
-*   **Aider**: Git-native AI pair programming.
-*   **Claude CLI**: Anthropic's high-speed assistant.
-*   **Gemini CLI**: Google's multi-modal CLI tool.
-*   **Mods/Fabric**: Pipeline-friendly AI processing.
+| Tool | Alternative | Description |
+| :--- | :--- | :--- |
+| **Aider** | aider | Git-native AI pair programming. |
+| **Claude CLI** | claude | Anthropic's high-speed assistant. |
+| **Gemini CLI** | gemini | Google's multi-modal CLI tool. |
+| | sgpt | shell-gpt |
+| | ollama | ollama |
+| **Mods/Fabric** | mods | Pipeline-friendly AI processing. |
 
 ---
 

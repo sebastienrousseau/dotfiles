@@ -38,9 +38,9 @@ install_macos() {
     brew tap homebrew/cask-fonts >/dev/null 2>&1 || true
     cask_name="$(printf "%s" "$font_name" | tr '[:upper:]' '[:lower:]')"
     case "$cask_name" in
-      jetbrainsmono) cask_name="jetbrains-mono" ;;
-      firacode) cask_name="fira-code" ;;
-      iosevka) cask_name="iosevka" ;;
+    jetbrainsmono) cask_name="jetbrains-mono" ;;
+    firacode) cask_name="fira-code" ;;
+    iosevka) cask_name="iosevka" ;;
     esac
     brew install --cask "font-${cask_name}-nerd-font" || true
   else
@@ -50,18 +50,18 @@ install_macos() {
 }
 
 case "$(uname -s)" in
-  Linux)
-    for font in $FONT_LIST; do
-      install_linux "$font"
-    done
-    ;;
-  Darwin)
-    for font in $FONT_LIST; do
-      install_macos "$font"
-    done
-    ;;
-  *)
-    ui_err "Unsupported OS" "font install"
-    exit 1
-    ;;
+Linux)
+  for font in $FONT_LIST; do
+    install_linux "$font"
+  done
+  ;;
+Darwin)
+  for font in $FONT_LIST; do
+    install_macos "$font"
+  done
+  ;;
+*)
+  ui_err "Unsupported OS" "font install"
+  exit 1
+  ;;
 esac
