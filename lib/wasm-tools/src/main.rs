@@ -1,3 +1,4 @@
+// Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 use std::time::SystemTime;
 
 fn main() {
@@ -6,5 +7,5 @@ fn main() {
         .expect("Time went backwards")
         .as_secs();
     
-    println!("{"status": "ok", "timestamp": {}, "engine": "wasm"}", now);
+    println!("{\"status\": \"ok\", \"timestamp\": {}, \"engine\": \"wasm\"}", now);
 }
