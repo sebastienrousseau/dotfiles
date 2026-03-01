@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Wrapper to run Wasm modules natively via wasmtime
+
+WASM_FILE="${HOME}/.local/bin/wasm/example.wat"
+
+if command -v wasmtime >/dev/null 2>&1; then
+    # Run the WebAssembly module
+    wasmtime "$WASM_FILE" "$@"
+else
+    echo "wasmtime is not installed. Please install it to execute .wasm utility scripts."
+    exit 1
+fi

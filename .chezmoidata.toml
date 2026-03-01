@@ -9,6 +9,7 @@ theme = "catppuccin-mocha"
 # Terminal settings
 terminal_font_family = "JetBrainsMono Nerd Font"
 terminal_font_size = 12
+default_shell = "fish" # zsh, fish, or nu
 
 # Git identity (set via chezmoi init prompts)
 name = ""
@@ -21,6 +22,8 @@ signingkey = ""
 [features]
 # Core shell
 zsh = true
+fish = true
+nushell = true
 starship = true
 
 # Editors
@@ -59,35 +62,35 @@ aws = false
 # Minimal: Essential tools only (fast startup, low footprint)
 [profiles.minimal]
 description = "Essential tools for quick setup"
-features = ["zsh", "starship", "nvim"]
+features = ["zsh", "fish", "starship", "nvim"]
 install_fonts = false
 install_gui_apps = false
 
 # Laptop: Standard development setup
 [profiles.laptop]
 description = "Full development environment for personal laptop"
-features = ["zsh", "starship", "nvim", "tmux", "gui", "secrets", "nodejs", "python", "rust", "ai_tools"]
+features = ["zsh", "fish", "nushell", "starship", "nvim", "tmux", "gui", "secrets", "nodejs", "python", "rust", "ai_tools"]
 install_fonts = true
 install_gui_apps = true
 
 # Workstation: Full power with extra tools
 [profiles.workstation]
 description = "Complete setup with all bells and whistles"
-features = ["zsh", "starship", "nvim", "tmux", "zellij", "gui", "secrets", "nodejs", "python", "rust", "go", "docker", "kubernetes", "ai_tools"]
+features = ["zsh", "fish", "nushell", "starship", "nvim", "tmux", "zellij", "gui", "secrets", "nodejs", "python", "rust", "go", "docker", "kubernetes", "ai_tools"]
 install_fonts = true
 install_gui_apps = true
 
 # Server: Headless, no GUI, optimized for remote work
 [profiles.server]
 description = "Headless server/remote environment"
-features = ["zsh", "starship", "nvim", "tmux", "secrets", "docker"]
+features = ["zsh", "fish", "starship", "nvim", "tmux", "secrets", "docker"]
 install_fonts = false
 install_gui_apps = false
 
 # DevOps: Infrastructure and cloud tools focus
 [profiles.devops]
 description = "Cloud and infrastructure focused"
-features = ["zsh", "starship", "nvim", "tmux", "secrets", "docker", "kubernetes", "terraform", "aws"]
+features = ["zsh", "fish", "starship", "nvim", "tmux", "secrets", "docker", "kubernetes", "terraform", "aws"]
 install_fonts = false
 install_gui_apps = false
 

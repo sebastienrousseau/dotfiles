@@ -1,0 +1,33 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v{{ .dotfiles_version }}) - <https://dotfiles.io>
+# Made With ❤️ in London, United Kingdom
+# Designed by Sebastien Rousseau
+# Copyright (c) 2015-2026. All rights reserved.
+# License: MIT
+
+# Tool Initialization
+if status is-interactive
+    # Mise (Universal Version Manager)
+    if command -v mise >/dev/null
+        mise activate fish | source
+    end
+
+    # Atuin (Memory Layer)
+    if command -v atuin >/dev/null
+        atuin init fish | source
+    end
+
+    # Starship Prompt (High Performance)
+    if command -v starship >/dev/null
+        starship init fish | source
+    end
+
+    # Zoxide (Smart Directory Jumper) - Replaces 'cd'
+    if command -v zoxide >/dev/null
+        zoxide init fish | source
+    end
+
+    # FZF (Fuzzy Finder)
+    if command -v fzf >/dev/null
+        fzf --fish | source
+    end
+end
