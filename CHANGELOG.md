@@ -2,6 +2,26 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.492
+
+### Added
+
+- **2026 Frontier Stack** — Full support for Fish (Autoloading) and Nushell (Structured Data).
+- **Deterministic Portability** — Nix Flakes integration for bit-for-bit identical environments.
+- **Async Task Management** — Integrated Pueue daemon for non-blocking background operations.
+- **Local AI RAG** — `dot-ai` semantic search over your dotfiles configuration.
+- **Wasm Runtime** — Wasmtime support for ultra-fast, pre-compiled Rust/Zig tools.
+- **One-Command Provisioner** — `dot-bootstrap` for instant environment setup on clean servers.
+- **OS Theme Sync** — `dot theme sync` to match OS appearance (macOS/GNOME).
+- **Yazi Synergy** — `yy` wrapper for "cd-on-exit" directory navigation.
+
+### Changed
+
+- **Fish Shell** — Transitioned from monolithic aliases to a dynamic function autoloading pipeline.
+- **Starship** — Added async indicators for background tasks and Nix environments.
+- **Diagnostics** — `dot doctor` and `dot heal` are now mise-aware and 2026-stack compatible.
+- **Neovim** — Migrated IDE toolchain (LSPs/Linters) into the Nix Flake.
+
 ## v0.2.491
 
 ### Added
