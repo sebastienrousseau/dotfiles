@@ -44,6 +44,17 @@
             sops
             age
 
+            # Neovim LSP & IDE Tooling
+            lua-language-server
+            nil # Nix LSP
+            marksman # Markdown LSP
+            taplo # Markdown linter
+            stylua
+            shellcheck
+            shfmt
+            nodePackages.typescript-language-server
+            nodePackages.prettier
+
             # Configuration management
             chezmoi
             mise
