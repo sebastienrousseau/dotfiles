@@ -360,7 +360,67 @@ heal_chezmoi_drift() {
 }
 
 heal_missing_critical_files() {
-  # ... existing check ...
+  log_step "Checking critical files"
+  local critical_files=(
+    "$HOME/.zshrc"
+    "$HOME/.bashrc"
+    "$HOME/.profile"
+  )
+  local missing=()
+
+  for file in "${critical_files[@]}"; do
+    if [[ ! -f "$file" ]] && [[ ! -L "$file" ]]; then
+      missing+=("$file")
+      ISSUES_FOUND=$((ISSUES_FOUND + 1))
+    fi
+  done
+
+  if [[ ${#missing[@]} -eq 0 ]]; then
+    log_success "All critical shell configs present"
+    return 0
+  fi
+
+  log_warn "Missing critical files: ${missing[*]}"
+
+  if ! command -v chezmoi >/dev/null 2>&1; then
+    log_error "chezmoi not available to regenerate files"
+    return 1
+  fi
+
+  if [[ "$DRY_RUN" == "1" ]]; then
+    log_dry "run 'chezmoi apply --force' to regenerate missing files"
+  elif [[ "$CHEZMOI_APPLIED" == "1" ]]; then
+    log_info "chezmoi already re-applied during drift repair, verifying files..."
+    local restored=0
+    for file in "${missing[@]}"; do
+      if [[ -f "$file" ]] || [[ -L "$file" ]]; then
+        log_success "Restored (via earlier apply): $file"
+        restored=$((restored + 1))
+      else
+        log_warn "Still missing after apply: $file"
+      fi
+    done
+    FIXES_APPLIED=$((FIXES_APPLIED + restored))
+  else
+    log_info "Re-applying chezmoi to regenerate missing files..."
+    if chezmoi apply --force; then
+      CHEZMOI_APPLIED=1
+      # Verify files were restored
+      local restored=0
+      for file in "${missing[@]}"; do
+        if [[ -f "$file" ]] || [[ -L "$file" ]]; then
+          log_success "Restored: $file"
+          restored=$((restored + 1))
+        else
+          log_warn "Still missing after apply: $file"
+        fi
+      done
+      FIXES_APPLIED=$((FIXES_APPLIED + restored))
+      persist_log "HEAL: regenerated $restored critical file(s)"
+    else
+      log_error "Chezmoi apply failed"
+    fi
+  fi
 }
 
 heal_mise_tools() {
