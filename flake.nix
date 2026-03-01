@@ -59,6 +59,8 @@
             # Configuration management
             chezmoi
             mise
+            direnv
+            nix-direnv
 
             # Advanced tools
             pueue

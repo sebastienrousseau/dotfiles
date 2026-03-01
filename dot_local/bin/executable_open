@@ -4,6 +4,17 @@
 
 target="${1:-.}"
 
+# Helper for rich feedback if TTY is present
+log_info() {
+    if [ -t 1 ] && command -v gum >/dev/null 2>&1; then
+        gum style --foreground 39 "󰀶 Opening: $1"
+    else
+        echo "open: $1"
+    fi
+}
+
+log_info "$target"
+
 case "$(uname -s)" in
     Darwin)
         open "$target"
