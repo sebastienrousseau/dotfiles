@@ -190,23 +190,40 @@ get_package_name() {
 heal_missing_dependencies() {
   log_step "Checking core dependencies"
   local deps=(chezmoi starship rg bat)
-  local frontier_deps=(nu pueue wasmtime sops)
+  # Use explicit mise registry names for frontier tools
+  local frontier_deps=("nushell" "pueue" "wasmtime" "sops")
   local missing=()
   local missing_frontier=()
 
   for cmd in "${deps[@]}"; do
+    # Map command to mise tool name if different
+    local tool=$cmd
     if ! command -v "$cmd" >/dev/null 2>&1; then
       missing+=("$cmd")
       ISSUES_FOUND=$((ISSUES_FOUND + 1))
     fi
   done
 
-  for cmd in "${frontier_deps[@]}"; do
-    if ! command -v "$cmd" >/dev/null 2>&1; then
-      missing_frontier+=("$cmd")
-      ISSUES_FOUND=$((ISSUES_FOUND + 1))
-    fi
-  done
+  # Special check for 'nu' vs 'nushell'
+  if ! command -v nu >/dev/null 2>&1; then
+    missing_frontier+=("nushell")
+    ISSUES_FOUND=$((ISSUES_FOUND + 1))
+  fi
+  # Pueue check
+  if ! command -v pueue >/dev/null 2>&1; then
+    missing_frontier+=("pueue")
+    ISSUES_FOUND=$((ISSUES_FOUND + 1))
+  fi
+  # Wasmtime check
+  if ! command -v wasmtime >/dev/null 2>&1; then
+    missing_frontier+=("wasmtime")
+    ISSUES_FOUND=$((ISSUES_FOUND + 1))
+  fi
+  # SOPS check
+  if ! command -v sops >/dev/null 2>&1; then
+    missing_frontier+=("sops")
+    ISSUES_FOUND=$((ISSUES_FOUND + 1))
+  fi
 
   if [[ ${#missing[@]} -eq 0 ]] && [[ ${#missing_frontier[@]} -eq 0 ]]; then
     log_success "All dependencies present"
@@ -227,15 +244,22 @@ heal_missing_dependencies() {
   # Try mise for frontier tools if available
   if command -v mise >/dev/null 2>&1 && [[ ${#missing_frontier[@]} -gt 0 ]]; then
     for cmd in "${missing_frontier[@]}"; do
+      local mise_name=$cmd
+      # Map to specific aqua providers if registry lookup is failing
+      case "$cmd" in
+        nushell) mise_name="aqua:nushell/nushell" ;;
+        pueue)   mise_name="aqua:Nukesor/pueue/pueue" ;;
+      esac
+
       if [[ "$DRY_RUN" == "1" ]]; then
-        log_dry "install '$cmd' via mise"
+        log_dry "install '$mise_name' via mise"
       else
-        log_info "Installing $cmd via mise..."
-        if mise use -g "$cmd@latest"; then
+        log_info "Installing $mise_name via mise..."
+        if mise use -g "$mise_name"; then
           log_success "Installed $cmd via mise"
           FIXES_APPLIED=$((FIXES_APPLIED + 1))
           persist_log "HEAL: installed $cmd via mise"
-          # Remove from missing list so we don't try system pkg manager
+          # Filter it out of the missing list
           missing_frontier=(${missing_frontier[@]/$cmd})
         fi
       fi
@@ -281,7 +305,7 @@ heal_broken_symlinks() {
   done < <(find "$HOME" -maxdepth 3 -type l -print0 2>/dev/null)
 
   # Special handling for common transient/app locks that dot doctor reported
-  local lock_patterns=("SingletonLock" "SingletonCookie")
+  local lock_patterns=("SingletonLock" "SingletonCookie" "euxis")
   
   if [[ ${#broken[@]} -eq 0 ]]; then
     log_success "No broken symlinks found"
