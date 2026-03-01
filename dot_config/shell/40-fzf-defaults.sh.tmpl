@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v{{ .dotfiles_version }})
+# FZF Shared Configuration for all shells (Zsh, Bash, Fish)
+
+# Set FZF defaults to use 'fd' for speed and 'bat' for previews
+export FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+
+# Sublime FZF Colors (Catppuccin Mocha)
+export FZF_DEFAULT_OPTS=" 
+--color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 
+--color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc 
+--color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 
+--multi --layout=reverse --border --height=40% 
+--preview-window='right:60%:wrap' 
+--preview 'if [ -d {} ]; then eza --tree --level 2 --icons {} | head -200; else bat --style=numbers --color=always --line-range :500 {} 2>/dev/null || cat {} | head -500; fi'"

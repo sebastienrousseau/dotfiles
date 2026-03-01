@@ -1,0 +1,33 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v{{ .dotfiles_version }}) - <https://dotfiles.io>
+# Made With ❤️ in London, United Kingdom
+# Designed by 
+# Copyright (c) 2015-2026. All rights reserved.
+# License: MIT
+
+# Performance optimization - skip if not interactive
+status is-interactive; or return
+
+# Only source once
+if set -q FISH_CONFIG_SOURCED
+    return
+end
+set -g FISH_CONFIG_SOURCED 1
+
+{{- /* Input Validation: Ensure crucial variables are set */ -}}
+{{- if not .chezmoi.homeDir -}}
+  {{- fail "Critical Error: .chezmoi.homeDir is not set!" -}}
+{{- end -}}
+
+# Load local customizations if they exist
+if test -f "$HOME/.config/fish/config.fish.local"
+    source "$HOME/.config/fish/config.fish.local"
+end
+
+# Ensure LS_COLORS is set for fish
+if test -f "$HOME/.config/shell/40-ls-colors.sh"
+    # This might need translation if it uses export
+    # But often fish handles LS_COLORS if it's already in env
+end
+
+# Welcome message
+set -g fish_greeting ""

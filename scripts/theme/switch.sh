@@ -233,12 +233,48 @@ switch_family() {
 show_current() {
   current="$(current_theme)"
   family="$(get_theme_family "$current")"
-  if is_dark_theme "$current"; then
+  if is_dark_theme "$current" 2>/dev/null; then
     mode="dark"
   else
     mode="light"
   fi
   ui_info "Current" "$current ($family, $mode)"
+}
+
+# Detect system appearance (Dark/Light) and sync dotfiles
+sync_theme() {
+  local os_mode="dark" # Default fallback
+  case "$(uname -s)" in
+    Darwin)
+      if defaults read -g AppleInterfaceStyle >/dev/null 2>&1; then
+        os_mode="dark"
+      else
+        os_mode="light"
+      fi
+      ;;
+    Linux)
+      if command -v gsettings >/dev/null 2>&1; then
+        # Check GNOME color scheme
+        scheme=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")
+        if [[ "$scheme" == "prefer-light" ]]; then
+          os_mode="light"
+        else
+          os_mode="dark"
+        fi
+      fi
+      ;;
+  esac
+
+  current="$(current_theme)"
+  if is_dark_theme "$current" && [[ "$os_mode" == "light" ]]; then
+    ui_info "Sync" "System is light, switching dotfiles to light..."
+    toggle_theme
+  elif ! is_dark_theme "$current" && [[ "$os_mode" == "dark" ]]; then
+    ui_info "Sync" "System is dark, switching dotfiles to dark..."
+    toggle_theme
+  else
+    ui_ok "Sync" "Dotfiles already match system ($os_mode mode)"
+  fi
 }
 
 # =============================================================================
@@ -255,6 +291,9 @@ case "${1:-}" in
     ;;
   toggle)
     toggle_theme
+    ;;
+  sync)
+    sync_theme
     ;;
   family)
     switch_family

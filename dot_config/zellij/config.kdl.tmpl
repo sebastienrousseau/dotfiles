@@ -2,7 +2,7 @@
 // Modern terminal multiplexer alternative to tmux
 
 theme "catppuccin-mocha"
-default_shell "zsh"
+default_shell "{{ default "zsh" .default_shell }}"
 default_layout "compact"
 mouse_mode true
 scroll_buffer_size 50000
