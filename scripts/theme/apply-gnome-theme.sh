@@ -77,48 +77,48 @@ apply_catppuccin_theme() {
   local color_scheme="prefer-light"
 
   case "$theme" in
-  catppuccin-latte)
-    gtk_theme="Catppuccin-Latte-Standard-Blue-Light"
-    shell_theme="Catppuccin-Latte"
-    icon_theme="Papirus-Light"
-    cursor_theme="Catppuccin-Latte-Blue"
-    color_scheme="prefer-light"
-    ;;
-  catppuccin-frappe)
-    gtk_theme="Catppuccin-Frappe-Standard-Blue-Dark"
-    shell_theme="Catppuccin-Frappe"
-    icon_theme="Papirus-Dark"
-    cursor_theme="Catppuccin-Frappe-Blue"
-    color_scheme="prefer-dark"
-    ;;
-  catppuccin-macchiato)
-    gtk_theme="Catppuccin-Macchiato-Standard-Blue-Dark"
-    shell_theme="Catppuccin-Macchiato"
-    icon_theme="Papirus-Dark"
-    cursor_theme="Catppuccin-Macchiato-Blue"
-    color_scheme="prefer-dark"
-    ;;
-  catppuccin-mocha)
-    gtk_theme="Catppuccin-Mocha-Standard-Blue-Dark"
-    shell_theme="Catppuccin-Mocha"
-    icon_theme="Papirus-Dark"
-    cursor_theme="Catppuccin-Mocha-Blue"
-    color_scheme="prefer-dark"
-    ;;
-  *)
-    # Non-Catppuccin themes - use fallback
-    if [[ "$theme" == *"-dark"* ]] || [[ "$theme" == *"-night"* ]] || [[ "$theme" == *"-storm"* ]] || [[ "$theme" == *"-moon"* ]] || [[ "$theme" == *"-mocha"* ]]; then
-      gtk_theme="Adwaita-dark"
-      shell_theme=""
-      icon_theme="Papirus-Dark"
-      color_scheme="prefer-dark"
-    else
-      gtk_theme="Adwaita"
-      shell_theme=""
-      icon_theme="Papirus"
+    catppuccin-latte)
+      gtk_theme="Catppuccin-Latte-Standard-Blue-Light"
+      shell_theme="Catppuccin-Latte"
+      icon_theme="Papirus-Light"
+      cursor_theme="Catppuccin-Latte-Blue"
       color_scheme="prefer-light"
-    fi
-    ;;
+      ;;
+    catppuccin-frappe)
+      gtk_theme="Catppuccin-Frappe-Standard-Blue-Dark"
+      shell_theme="Catppuccin-Frappe"
+      icon_theme="Papirus-Dark"
+      cursor_theme="Catppuccin-Frappe-Blue"
+      color_scheme="prefer-dark"
+      ;;
+    catppuccin-macchiato)
+      gtk_theme="Catppuccin-Macchiato-Standard-Blue-Dark"
+      shell_theme="Catppuccin-Macchiato"
+      icon_theme="Papirus-Dark"
+      cursor_theme="Catppuccin-Macchiato-Blue"
+      color_scheme="prefer-dark"
+      ;;
+    catppuccin-mocha)
+      gtk_theme="Catppuccin-Mocha-Standard-Blue-Dark"
+      shell_theme="Catppuccin-Mocha"
+      icon_theme="Papirus-Dark"
+      cursor_theme="Catppuccin-Mocha-Blue"
+      color_scheme="prefer-dark"
+      ;;
+    *)
+      # Non-Catppuccin themes - use fallback
+      if [[ "$theme" == *"-dark"* ]] || [[ "$theme" == *"-night"* ]] || [[ "$theme" == *"-storm"* ]] || [[ "$theme" == *"-moon"* ]] || [[ "$theme" == *"-mocha"* ]]; then
+        gtk_theme="Adwaita-dark"
+        shell_theme=""
+        icon_theme="Papirus-Dark"
+        color_scheme="prefer-dark"
+      else
+        gtk_theme="Adwaita"
+        shell_theme=""
+        icon_theme="Papirus"
+        color_scheme="prefer-light"
+      fi
+      ;;
   esac
 
   log "Applying GNOME theme: $theme"
@@ -198,36 +198,36 @@ apply_wallpaper() {
   # Check for system wallpapers first
   if [ -d "/usr/share/backgrounds/catppuccin" ]; then
     case "$theme" in
-    catppuccin-latte)
-      wallpaper_path="/usr/share/backgrounds/catppuccin/cat_latte.png"
-      ;;
-    catppuccin-frappe)
-      wallpaper_path="/usr/share/backgrounds/catppuccin/cat_frappe.png"
-      ;;
-    catppuccin-macchiato)
-      wallpaper_path="/usr/share/backgrounds/catppuccin/cat_macchiato.png"
-      ;;
-    catppuccin-mocha)
-      wallpaper_path="/usr/share/backgrounds/catppuccin/cat_mocha.png"
-      ;;
+      catppuccin-latte)
+        wallpaper_path="/usr/share/backgrounds/catppuccin/cat_latte.png"
+        ;;
+      catppuccin-frappe)
+        wallpaper_path="/usr/share/backgrounds/catppuccin/cat_frappe.png"
+        ;;
+      catppuccin-macchiato)
+        wallpaper_path="/usr/share/backgrounds/catppuccin/cat_macchiato.png"
+        ;;
+      catppuccin-mocha)
+        wallpaper_path="/usr/share/backgrounds/catppuccin/cat_mocha.png"
+        ;;
     esac
   fi
 
   # Fallback to user wallpapers
   if [ ! -f "$wallpaper_path" ] && [ -d "$HOME/.local/share/backgrounds/catppuccin" ]; then
     case "$theme" in
-    catppuccin-latte)
-      wallpaper_path="$HOME/.local/share/backgrounds/catppuccin/cat_latte.png"
-      ;;
-    catppuccin-frappe)
-      wallpaper_path="$HOME/.local/share/backgrounds/catppuccin/cat_frappe.png"
-      ;;
-    catppuccin-macchiato)
-      wallpaper_path="$HOME/.local/share/backgrounds/catppuccin/cat_macchiato.png"
-      ;;
-    catppuccin-mocha)
-      wallpaper_path="$HOME/.local/share/backgrounds/catppuccin/cat_mocha.png"
-      ;;
+      catppuccin-latte)
+        wallpaper_path="$HOME/.local/share/backgrounds/catppuccin/cat_latte.png"
+        ;;
+      catppuccin-frappe)
+        wallpaper_path="$HOME/.local/share/backgrounds/catppuccin/cat_frappe.png"
+        ;;
+      catppuccin-macchiato)
+        wallpaper_path="$HOME/.local/share/backgrounds/catppuccin/cat_macchiato.png"
+        ;;
+      catppuccin-mocha)
+        wallpaper_path="$HOME/.local/share/backgrounds/catppuccin/cat_mocha.png"
+        ;;
     esac
   fi
 
@@ -278,38 +278,38 @@ main() {
   check_gsettings
 
   case "$THEME_NAME" in
-  current)
-    show_current_theme
-    ;;
-  backup)
-    backup_settings
-    ;;
-  *)
-    # Check if theme files exist
-    theme_exists=false
-
-    case "$THEME_NAME" in
-    catppuccin-*)
-      for _d in "$HOME/.themes/Catppuccin-"*; do
-        if [ -d "$_d" ]; then
-          theme_exists=true
-          break
-        fi
-      done
+    current)
+      show_current_theme
+      ;;
+    backup)
+      backup_settings
       ;;
     *)
-      theme_exists=true # Assume Adwaita and other system themes exist
+      # Check if theme files exist
+      theme_exists=false
+
+      case "$THEME_NAME" in
+        catppuccin-*)
+          for _d in "$HOME/.themes/Catppuccin-"*; do
+            if [ -d "$_d" ]; then
+              theme_exists=true
+              break
+            fi
+          done
+          ;;
+        *)
+          theme_exists=true # Assume Adwaita and other system themes exist
+          ;;
+      esac
+
+      if [ "$theme_exists" = "false" ]; then
+        warn "Catppuccin themes not found. Installing them first..."
+        "$HOME/.dotfiles/scripts/theme/install-catppuccin-themes.sh"
+      fi
+
+      backup_settings
+      apply_catppuccin_theme "$THEME_NAME"
       ;;
-    esac
-
-    if [ "$theme_exists" = "false" ]; then
-      warn "Catppuccin themes not found. Installing them first..."
-      "$HOME/.dotfiles/scripts/theme/install-catppuccin-themes.sh"
-    fi
-
-    backup_settings
-    apply_catppuccin_theme "$THEME_NAME"
-    ;;
   esac
 }
 

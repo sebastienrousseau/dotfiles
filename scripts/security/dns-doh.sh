@@ -18,22 +18,22 @@ if [ "${DOTFILES_DOH:-}" != "1" ]; then
 fi
 
 case "$(dot_platform_id)" in
-linux | wsl)
-  if command -v resolvectl >/dev/null; then
-    ui_info "Enabling" "systemd-resolved DoH (Cloudflare)"
-    sudo resolvectl dns-over-https on
-    sudo resolvectl dns 1.1.1.1 1.0.0.1
-  else
-    ui_err "systemd-resolved" "not detected"
+  linux | wsl)
+    if command -v resolvectl >/dev/null; then
+      ui_info "Enabling" "systemd-resolved DoH (Cloudflare)"
+      sudo resolvectl dns-over-https on
+      sudo resolvectl dns 1.1.1.1 1.0.0.1
+    else
+      ui_err "systemd-resolved" "not detected"
+      exit 1
+    fi
+    ;;
+  macos)
+    ui_info "Configure" "DoH in your browser"
+    exit 0
+    ;;
+  *)
+    ui_err "Unsupported OS" "DoH config"
     exit 1
-  fi
-  ;;
-macos)
-  ui_info "Configure" "DoH in your browser"
-  exit 0
-  ;;
-*)
-  ui_err "Unsupported OS" "DoH config"
-  exit 1
-  ;;
+    ;;
 esac

@@ -18,22 +18,22 @@ if [ "${DOTFILES_USB_SAFETY:-}" != "1" ]; then
 fi
 
 case "$(dot_platform_id)" in
-linux | wsl)
-  if command -v gsettings >/dev/null; then
-    ui_info "Disabling" "GNOME automount for removable media"
-    gsettings set org.gnome.desktop.media-handling automount false || true
-    gsettings set org.gnome.desktop.media-handling automount-open false || true
-  else
-    ui_err "gsettings" "not found"
+  linux | wsl)
+    if command -v gsettings >/dev/null; then
+      ui_info "Disabling" "GNOME automount for removable media"
+      gsettings set org.gnome.desktop.media-handling automount false || true
+      gsettings set org.gnome.desktop.media-handling automount-open false || true
+    else
+      ui_err "gsettings" "not found"
+      exit 1
+    fi
+    ;;
+  macos)
+    ui_info "macOS" "no CLI toggle for USB automount"
+    ui_info "Use" "System Settings > General > Login Items > External disks"
+    ;;
+  *)
+    ui_err "Unsupported OS" "USB safety"
     exit 1
-  fi
-  ;;
-macos)
-  ui_info "macOS" "no CLI toggle for USB automount"
-  ui_info "Use" "System Settings > General > Login Items > External disks"
-  ;;
-*)
-  ui_err "Unsupported OS" "USB safety"
-  exit 1
-  ;;
+    ;;
 esac

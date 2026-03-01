@@ -85,27 +85,27 @@ add_result() {
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case "$1" in
-  -v | --verbose)
-    VERBOSE=1
-    shift
-    ;;
-  -j | --json)
-    JSON_OUTPUT=1
-    shift
-    ;;
-  -h | --help)
-    echo "Usage: $(basename "$0") [OPTIONS]"
-    echo ""
-    echo "Options:"
-    echo "  -v, --verbose    Show detailed output"
-    echo "  -j, --json       Output results as JSON"
-    echo "  -h, --help       Show this help message"
-    exit 0
-    ;;
-  *)
-    echo "Unknown option: $1"
-    exit 1
-    ;;
+    -v | --verbose)
+      VERBOSE=1
+      shift
+      ;;
+    -j | --json)
+      JSON_OUTPUT=1
+      shift
+      ;;
+    -h | --help)
+      echo "Usage: $(basename "$0") [OPTIONS]"
+      echo ""
+      echo "Options:"
+      echo "  -v, --verbose    Show detailed output"
+      echo "  -j, --json       Output results as JSON"
+      echo "  -h, --help       Show this help message"
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
   esac
 done
 
