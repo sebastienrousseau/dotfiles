@@ -110,13 +110,13 @@ dot_secrets_set() {
   [[ -n "$key" ]] || return 1
   provider="$(dot_secrets_provider)"
   case "$provider" in
-    macos-keychain) dot_secrets_store_macos "$key" "$value" ;;
-    pass) dot_secrets_store_pass "$key" "$value" ;;
-    plain-enc) dot_secrets_store_plain_enc "$key" "$value" ;;
-    *)
-      echo "No supported secrets provider detected." >&2
-      return 1
-      ;;
+  macos-keychain) dot_secrets_store_macos "$key" "$value" ;;
+  pass) dot_secrets_store_pass "$key" "$value" ;;
+  plain-enc) dot_secrets_store_plain_enc "$key" "$value" ;;
+  *)
+    echo "No supported secrets provider detected." >&2
+    return 1
+    ;;
   esac
   dot_secrets_index_add "$key"
 }
@@ -126,10 +126,10 @@ dot_secrets_get() {
   [[ -n "$key" ]] || return 1
   provider="$(dot_secrets_provider)"
   case "$provider" in
-    macos-keychain) dot_secrets_get_macos "$key" ;;
-    pass) dot_secrets_get_pass "$key" ;;
-    plain-enc) dot_secrets_get_plain_enc "$key" ;;
-    *) return 1 ;;
+  macos-keychain) dot_secrets_get_macos "$key" ;;
+  pass) dot_secrets_get_pass "$key" ;;
+  plain-enc) dot_secrets_get_plain_enc "$key" ;;
+  *) return 1 ;;
   esac
 }
 

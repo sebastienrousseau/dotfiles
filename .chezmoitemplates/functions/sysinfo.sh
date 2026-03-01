@@ -23,18 +23,18 @@ fi
 # Detect platform and choose an emoji.
 #######################################
 case "$(uname -s)" in
-  Darwin)
-    emoji=""
-    ;;
-  Linux)
-    emoji=""
-    ;;
-  CYGWIN* | MINGW* | MSYS*)
-    emoji=""
-    ;;
-  *)
-    emoji=""
-    ;;
+Darwin)
+  emoji=""
+  ;;
+Linux)
+  emoji=""
+  ;;
+CYGWIN* | MINGW* | MSYS*)
+  emoji=""
+  ;;
+*)
+  emoji=""
+  ;;
 esac
 
 hostname=$(hostname)

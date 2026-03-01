@@ -274,8 +274,8 @@ rotate_secrets() {
   fi
 
   case "$service" in
-    "github")
-      cat <<'EOF'
+  "github")
+    cat <<'EOF'
 GitHub Token Rotation Guide:
 
 1. Create new Personal Access Token:
@@ -303,9 +303,9 @@ GitHub Token Rotation Guide:
    - Run: scripts/security/manage-secrets.sh validate
    - Test repository operations
 EOF
-      ;;
-    "aws")
-      cat <<'EOF'
+    ;;
+  "aws")
+    cat <<'EOF'
 AWS Access Key Rotation Guide:
 
 1. Create new access key:
@@ -332,9 +332,9 @@ AWS Access Key Rotation Guide:
    - Implement least privilege access
    - Enable CloudTrail logging
 EOF
-      ;;
-    "ssh")
-      cat <<'EOF'
+    ;;
+  "ssh")
+    cat <<'EOF'
 SSH Key Rotation Guide:
 
 1. Generate new SSH key:
@@ -361,12 +361,12 @@ SSH Key Rotation Guide:
    - Remove from local ~/.ssh/
    - Remove from SSH agent
 EOF
-      ;;
-    *)
-      log_error "Unknown service: $service"
-      log_info "Available services: github, aws, gcp, ssh"
-      return 1
-      ;;
+    ;;
+  *)
+    log_error "Unknown service: $service"
+    log_info "Available services: github, aws, gcp, ssh"
+    return 1
+    ;;
   esac
 }
 
@@ -407,33 +407,33 @@ main() {
   shift || true
 
   case "$command" in
-    "init")
-      init_config "$@"
-      ;;
-    "validate")
-      validate_config
-      ;;
-    "template")
-      show_template
-      ;;
-    "check")
-      check_secrets
-      ;;
-    "rotate")
-      rotate_secrets "$@"
-      ;;
-    "clean")
-      clean_files
-      ;;
-    "-h" | "--help" | "help" | "")
-      show_help
-      ;;
-    *)
-      log_error "Unknown command: $command"
-      echo ""
-      show_help
-      exit 1
-      ;;
+  "init")
+    init_config "$@"
+    ;;
+  "validate")
+    validate_config
+    ;;
+  "template")
+    show_template
+    ;;
+  "check")
+    check_secrets
+    ;;
+  "rotate")
+    rotate_secrets "$@"
+    ;;
+  "clean")
+    clean_files
+    ;;
+  "-h" | "--help" | "help" | "")
+    show_help
+    ;;
+  *)
+    log_error "Unknown command: $command"
+    echo ""
+    show_help
+    exit 1
+    ;;
   esac
 }
 

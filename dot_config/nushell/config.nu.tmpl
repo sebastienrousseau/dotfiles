@@ -25,6 +25,14 @@ source ~/.cache/starship/init.nu
 # Source dot CLI completions
 source ~/.config/nushell/completions.nu
 
+# Auto-start Pueue daemon if not running
+if (which pueued | length) > 0 {
+    let status = (do -i { pueue status } | complete)
+    if $status.exit_code != 0 {
+        pueued -d
+    }
+}
+
 # Aliases - simple structured wrappers
 alias l = ls -l
 alias ll = ls -la
