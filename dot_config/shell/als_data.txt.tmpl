@@ -1,0 +1,65 @@
+{{- /* Generate Instant-Load Command List for ALS */ -}}
+{{- $templateDir := .chezmoi.sourceDir -}}
+{{- $aliasFiles := glob (joinPath $templateDir ".chezmoitemplates/aliases/**/*.aliases.sh") -}}
+{{- $db := list -}}
+
+{{- range $aliasFiles -}}
+  {{- $category := base (dir .) -}}
+  {{- if eq $category "aliases" }}{{ $category = base . | replace ".aliases.sh" "" }}{{ end -}}
+  {{- $category = title $category -}}
+  
+  {{- $fileContent := include . -}}
+  {{- $lastComment := "" -}}
+  
+  {{- range (splitList "\n" $fileContent) -}}
+    {{- $line := trim . -}}
+    
+    {{- if (hasPrefix "#" $line) -}}
+      {{- $comment := $line | trimPrefix "#" | trim -}}
+      {{- if and (not (contains "shellcheck" $comment)) (not (contains "Copyright" $comment)) -}}
+        {{- $lastComment = $comment -}}
+      {{- end -}}
+    {{- else if (hasPrefix "alias " $line) -}}
+      {{- $working := $line | replace "alias " "" -}}
+      {{- $parts := splitList "=" $working -}}
+      
+      {{- if (ge (len $parts) 2) -}}
+        {{- $name := index $parts 0 | trim -}}
+        {{- $rest := slice $parts 1 | join "=" -}}
+        
+        {{- $cmdDesc := splitList "#" $rest -}}
+        {{- $cmd := index $cmdDesc 0 | trim | trimPrefix "'" | trimSuffix "'" | trimPrefix "\"" | trimSuffix "\"" | trim -}}
+        
+        {{- $desc := "" -}}
+        {{- if (ge (len $cmdDesc) 2) -}}
+          {{- $desc = slice $cmdDesc 1 | join "#" | trim -}}
+        {{- else -}}
+          {{- $desc = $lastComment -}}
+        {{- end -}}
+        
+        {{- if eq $desc "" }}{{ $desc = "Shell command" }}{{ end -}}
+
+        {{- if and (ne $name "") (ne $cmd "") -}}
+          {{- $entry := printf "%s|%s|%s|%s" $category $name $cmd $desc -}}
+          {{- $db = append $db $entry -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* ANSI Escape Codes (Real Bytes) */ -}}
+{{- $esc := "\x1b" -}}
+{{- $magenta := printf "%s[35m" $esc -}}
+{{- $cyan := printf "%s[36m" $esc -}}
+{{- $dim := printf "%s[90m" $esc -}}
+{{- $reset := printf "%s[0m" $esc -}}
+
+{{- range (sortAlpha $db) -}}
+  {{- $p := splitList "|" . -}}
+  {{- $cat := index $p 0 -}}
+  {{- $name := index $p 1 -}}
+  {{- $cmd := index $p 2 -}}
+  {{- $desc := index $p 3 -}}
+  {{- printf "%s[%s]%s %s%s%s: %s %s— %s%s |SEP|%s|SEP|%s\n" $magenta $cat $reset $cyan $name $reset $cmd $dim $desc $reset $cmd $name -}}
+{{- end -}}
