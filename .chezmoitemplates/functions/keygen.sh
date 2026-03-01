@@ -104,12 +104,12 @@ EOH
 
     if [[ "${key_type}" != "ed25519" ]]; then
       case "${key_type}" in
-      "rsa") echo "Enter RSA key length (2048-8192) [default: 4096]:" && read -r key_bits ;;
-      "ecdsa") echo "Enter ECDSA key length (256/384/521) [default: 256]:" && read -r key_bits ;;
-      *)
-        log_error "Invalid key type: ${key_type}"
-        return 1
-        ;;
+        "rsa") echo "Enter RSA key length (2048-8192) [default: 4096]:" && read -r key_bits ;;
+        "ecdsa") echo "Enter ECDSA key length (256/384/521) [default: 256]:" && read -r key_bits ;;
+        *)
+          log_error "Invalid key type: ${key_type}"
+          return 1
+          ;;
       esac
     fi
   elif [[ $# -ge 2 ]]; then
@@ -135,29 +135,29 @@ EOH
   # Key validation
   key_type="${key_type:-ed25519}"
   case "${key_type}" in
-  "ed25519") ;;
-  "rsa")
-    key_bits="${key_bits:-4096}"
-    if [[ ! "${key_bits}" =~ ^[0-9]+$ ]]; then
-      log_error "RSA key length must be a number."
+    "ed25519") ;;
+    "rsa")
+      key_bits="${key_bits:-4096}"
+      if [[ ! "${key_bits}" =~ ^[0-9]+$ ]]; then
+        log_error "RSA key length must be a number."
+        return 1
+      fi
+      if [[ "${key_bits}" -lt 2048 || "${key_bits}" -gt 8192 ]]; then
+        log_error "RSA key length must be between 2048 and 8192 bits."
+        return 1
+      fi
+      ;;
+    "ecdsa")
+      key_bits="${key_bits:-256}"
+      if [[ ! "${key_bits}" =~ ^(256|384|521)$ ]]; then
+        log_error "ECDSA key length must be 256, 384, or 521 bits."
+        return 1
+      fi
+      ;;
+    *)
+      log_error "Invalid key type: ${key_type}. Use 'ed25519', 'rsa', or 'ecdsa'."
       return 1
-    fi
-    if [[ "${key_bits}" -lt 2048 || "${key_bits}" -gt 8192 ]]; then
-      log_error "RSA key length must be between 2048 and 8192 bits."
-      return 1
-    fi
-    ;;
-  "ecdsa")
-    key_bits="${key_bits:-256}"
-    if [[ ! "${key_bits}" =~ ^(256|384|521)$ ]]; then
-      log_error "ECDSA key length must be 256, 384, or 521 bits."
-      return 1
-    fi
-    ;;
-  *)
-    log_error "Invalid key type: ${key_type}. Use 'ed25519', 'rsa', or 'ecdsa'."
-    return 1
-    ;;
+      ;;
   esac
 
   # Set file paths

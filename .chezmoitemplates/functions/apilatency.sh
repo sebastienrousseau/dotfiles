@@ -78,19 +78,19 @@ apilatency_monitor() {
 apilatency_parse_arguments() {
   # First argument handling
   case "${1:-}" in
-  -h | --help)
-    apilatency_print_help
-    return 2
-    ;;
-  -v | --version)
-    apilatency_print_version
-    return 2
-    ;;
-  "")
-    printf '%b\n' "\e[31m[ERROR]\e[0m Missing required URL argument."
-    apilatency_print_help
-    return 1
-    ;;
+    -h | --help)
+      apilatency_print_help
+      return 2
+      ;;
+    -v | --version)
+      apilatency_print_version
+      return 2
+      ;;
+    "")
+      printf '%b\n' "\e[31m[ERROR]\e[0m Missing required URL argument."
+      apilatency_print_help
+      return 1
+      ;;
   esac
 
   # Store arguments
@@ -132,15 +132,15 @@ apilatency_main() {
   local parse_result=$?
 
   case $parse_result in
-  0) # Normal operation
-    apilatency_monitor "$URL" "$COUNT" "$INTERVAL"
-    ;;
-  2) # Help or version was displayed
-    return 0
-    ;;
-  *) # Error occurred
-    return 1
-    ;;
+    0) # Normal operation
+      apilatency_monitor "$URL" "$COUNT" "$INTERVAL"
+      ;;
+    2) # Help or version was displayed
+      return 0
+      ;;
+    *) # Error occurred
+      return 1
+      ;;
   esac
 }
 

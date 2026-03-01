@@ -88,19 +88,19 @@ apiload_load_test() {
 apiload_parse_arguments() {
   # First argument handling
   case "${1:-}" in
-  -h | --help)
-    apiload_print_help
-    return 2
-    ;;
-  -v | --version)
-    apiload_print_version
-    return 2
-    ;;
-  "")
-    printf '%b\n' "\e[31m[ERROR]\e[0m Missing required URL argument."
-    apiload_print_help
-    return 1
-    ;;
+    -h | --help)
+      apiload_print_help
+      return 2
+      ;;
+    -v | --version)
+      apiload_print_version
+      return 2
+      ;;
+    "")
+      printf '%b\n' "\e[31m[ERROR]\e[0m Missing required URL argument."
+      apiload_print_help
+      return 1
+      ;;
   esac
 
   # Store arguments
@@ -142,15 +142,15 @@ apiload_main() {
   local parse_result=$?
 
   case $parse_result in
-  0) # Normal operation
-    apiload_load_test "$URL" "$REQUESTS" "$DELAY"
-    ;;
-  2) # Help or version was displayed
-    return 0
-    ;;
-  *) # Error occurred
-    return 1
-    ;;
+    0) # Normal operation
+      apiload_load_test "$URL" "$REQUESTS" "$DELAY"
+      ;;
+    2) # Help or version was displayed
+      return 0
+      ;;
+    *) # Error occurred
+      return 1
+      ;;
   esac
 }
 
