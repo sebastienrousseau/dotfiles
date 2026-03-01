@@ -34,8 +34,8 @@ error() {
 
 # Help flag
 case "${1:-}" in
-  -h | --help | help)
-    cat <<HELP
+-h | --help | help)
+  cat <<HELP
 Dotfiles Universal Installer
 
 Usage:
@@ -55,8 +55,8 @@ Steps performed:
   4. Clone dotfiles repository
   5. Apply dotfiles via chezmoi
 HELP
-    exit 0
-    ;;
+  exit 0
+  ;;
 esac
 
 # Cleanup on unexpected exit
@@ -71,34 +71,34 @@ ARCH="$(uname -m)"
 # Robust OS detection: set target_os for downstream use
 target_os="unknown"
 case "$OS" in
-  Darwin)
-    target_os="macos"
-    ;;
-  Linux)
-    # shellcheck disable=SC2250
-    if [[ -f /proc/version ]] && grep -qi 'microsoft\|WSL' /proc/version; then
-      target_os="wsl2"
-    elif [[ -f /etc/os-release ]]; then
-      # shellcheck disable=SC1091
-      . /etc/os-release
-      case "${ID:-}" in
-        ubuntu | debian | pop | linuxmint | elementary)
-          target_os="debian"
-          ;;
-        fedora | rhel | centos | rocky | alma)
-          target_os="fedora"
-          ;;
-        arch | manjaro | endeavouros)
-          target_os="arch"
-          ;;
-        *)
-          target_os="linux"
-          ;;
-      esac
-    else
+Darwin)
+  target_os="macos"
+  ;;
+Linux)
+  # shellcheck disable=SC2250
+  if [[ -f /proc/version ]] && grep -qi 'microsoft\|WSL' /proc/version; then
+    target_os="wsl2"
+  elif [[ -f /etc/os-release ]]; then
+    # shellcheck disable=SC1091
+    . /etc/os-release
+    case "${ID:-}" in
+    ubuntu | debian | pop | linuxmint | elementary)
+      target_os="debian"
+      ;;
+    fedora | rhel | centos | rocky | alma)
+      target_os="fedora"
+      ;;
+    arch | manjaro | endeavouros)
+      target_os="arch"
+      ;;
+    *)
       target_os="linux"
-    fi
-    ;;
+      ;;
+    esac
+  else
+    target_os="linux"
+  fi
+  ;;
 esac
 echo "   OS: $OS"
 echo "   Arch: $ARCH"
@@ -117,8 +117,8 @@ if [[ "$target_os" = "macos" ]] && ! command -v brew >/dev/null; then
   if [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]]; then
     read -r -p "   Continue with Homebrew installation? [y/N] " response
     case "$response" in
-      [yY][eE][sS] | [yY]) ;;
-      *) error "Homebrew installation cancelled. Install manually: https://brew.sh" ;;
+    [yY][eE][sS] | [yY]) ;;
+    *) error "Homebrew installation cancelled. Install manually: https://brew.sh" ;;
     esac
   fi
 
@@ -134,22 +134,22 @@ fi
 
 # On Linux, verify a package manager is available
 case "$target_os" in
-  debian | wsl2)
-    if ! command -v apt-get >/dev/null; then
-      error "apt-get is required on Debian/Ubuntu/WSL2."
-    fi
-    ;;
-  fedora)
-    if ! command -v dnf >/dev/null; then
-      error "dnf is required on Fedora/RHEL."
-    fi
-    ;;
-  arch)
-    if ! command -v pacman >/dev/null; then
-      error "pacman is required on Arch Linux."
-    fi
-    ;;
-  *) ;;
+debian | wsl2)
+  if ! command -v apt-get >/dev/null; then
+    error "apt-get is required on Debian/Ubuntu/WSL2."
+  fi
+  ;;
+fedora)
+  if ! command -v dnf >/dev/null; then
+    error "dnf is required on Fedora/RHEL."
+  fi
+  ;;
+arch)
+  if ! command -v pacman >/dev/null; then
+    error "pacman is required on Arch Linux."
+  fi
+  ;;
+*) ;;
 esac
 
 if ! command -v curl >/dev/null; then error "curl is required."; fi

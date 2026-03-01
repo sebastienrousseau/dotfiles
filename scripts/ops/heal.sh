@@ -82,23 +82,23 @@ EOF
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -n | --dry-run)
-      DRY_RUN=1
-      shift
-      ;;
-    -f | --force)
-      FORCE=1
-      shift
-      ;;
-    -h | --help)
-      usage
-      exit 0
-      ;;
-    *)
-      log_error "Unknown option: $1"
-      usage
-      exit 1
-      ;;
+  -n | --dry-run)
+    DRY_RUN=1
+    shift
+    ;;
+  -f | --force)
+    FORCE=1
+    shift
+    ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    log_error "Unknown option: $1"
+    usage
+    exit 1
+    ;;
   esac
 done
 
@@ -152,15 +152,15 @@ install_package() {
   pkg_mgr=$(detect_pkg_manager)
 
   case "$pkg_mgr" in
-    brew) brew install "$pkg" ;;
-    apt) sudo apt-get install -y "$pkg" ;;
-    dnf) sudo dnf install -y "$pkg" ;;
-    pacman) sudo pacman -S --noconfirm "$pkg" ;;
-    nix) nix-env -iA "nixpkgs.$pkg" ;;
-    *)
-      log_error "No supported package manager found. Install '$pkg' manually."
-      return 1
-      ;;
+  brew) brew install "$pkg" ;;
+  apt) sudo apt-get install -y "$pkg" ;;
+  dnf) sudo dnf install -y "$pkg" ;;
+  pacman) sudo pacman -S --noconfirm "$pkg" ;;
+  nix) nix-env -iA "nixpkgs.$pkg" ;;
+  *)
+    log_error "No supported package manager found. Install '$pkg' manually."
+    return 1
+    ;;
   esac
 }
 
@@ -171,19 +171,19 @@ get_package_name() {
   pkg_mgr=$(detect_pkg_manager)
 
   case "$cmd" in
-    rg)
-      case "$pkg_mgr" in
-        apt | dnf) echo "ripgrep" ;;
-        *) echo "ripgrep" ;;
-      esac
-      ;;
-    bat)
-      case "$pkg_mgr" in
-        apt) echo "bat" ;;
-        *) echo "bat" ;;
-      esac
-      ;;
-    *) echo "$cmd" ;;
+  rg)
+    case "$pkg_mgr" in
+    apt | dnf) echo "ripgrep" ;;
+    *) echo "ripgrep" ;;
+    esac
+    ;;
+  bat)
+    case "$pkg_mgr" in
+    apt) echo "bat" ;;
+    *) echo "bat" ;;
+    esac
+    ;;
+  *) echo "$cmd" ;;
   esac
 }
 
@@ -247,8 +247,8 @@ heal_missing_dependencies() {
       local mise_name=$cmd
       # Map to specific aqua providers if registry lookup is failing
       case "$cmd" in
-        nushell) mise_name="aqua:nushell/nushell" ;;
-        pueue)   mise_name="aqua:Nukesor/pueue/pueue" ;;
+      nushell) mise_name="aqua:nushell/nushell" ;;
+      pueue) mise_name="aqua:Nukesor/pueue/pueue" ;;
       esac
 
       if [[ "$DRY_RUN" == "1" ]]; then
@@ -260,7 +260,7 @@ heal_missing_dependencies() {
           FIXES_APPLIED=$((FIXES_APPLIED + 1))
           persist_log "HEAL: installed $cmd via mise"
           # Filter it out of the missing list
-          missing_frontier=(${missing_frontier[@]/$cmd})
+          missing_frontier=(${missing_frontier[@]/$cmd/})
         fi
       fi
     done
@@ -306,7 +306,7 @@ heal_broken_symlinks() {
 
   # Special handling for common transient/app locks that dot doctor reported
   local lock_patterns=("SingletonLock" "SingletonCookie" "euxis")
-  
+
   if [[ ${#broken[@]} -eq 0 ]]; then
     log_success "No broken symlinks found"
     return 0
@@ -319,11 +319,14 @@ heal_broken_symlinks() {
     local target
     target=$(readlink "$link" 2>/dev/null || echo "unknown")
     local filename=$(basename "$link")
-    
+
     # Auto-fix lock files without prompt if they are clearly broken
     local is_lock=0
     for pat in "${lock_patterns[@]}"; do
-      if [[ "$filename" == *"$pat"* ]]; then is_lock=1; break; fi
+      if [[ "$filename" == *"$pat"* ]]; then
+        is_lock=1
+        break
+      fi
     done
 
     if [[ "$DRY_RUN" == "1" ]]; then
@@ -460,6 +463,12 @@ heal_mise_tools() {
     log_info "Running 'mise install'..."
     if mise install; then
       log_success "Mise tools verified"
+
+      # Start pueue daemon if it was just installed but not running
+      if command -v pueued >/dev/null && ! pueue status >/dev/null 2>&1; then
+        log_info "Starting pueue daemon..."
+        pueued -d
+      fi
     else
       log_warn "Mise install had issues"
     fi

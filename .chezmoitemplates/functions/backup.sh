@@ -35,22 +35,22 @@ backup() {
   # Parse arguments
   while [[ "$#" -gt 0 ]]; do
     case "$1" in
-      --max-size)
-        MAX_SIZE="$2"
-        shift 2
-        ;;
-      --keep)
-        KEEP="$2"
-        shift 2
-        ;;
-      -*)
-        echo "[ERROR] Unknown option: $1" >&2
-        return 1
-        ;;
-      *)
-        # Once we hit a non-option, break to treat all remaining as files/dirs
-        break
-        ;;
+    --max-size)
+      MAX_SIZE="$2"
+      shift 2
+      ;;
+    --keep)
+      KEEP="$2"
+      shift 2
+      ;;
+    -*)
+      echo "[ERROR] Unknown option: $1" >&2
+      return 1
+      ;;
+    *)
+      # Once we hit a non-option, break to treat all remaining as files/dirs
+      break
+      ;;
     esac
   done
 
@@ -88,13 +88,13 @@ backup() {
     unit=$(echo "${size_str}" | sed 's/[0-9]//g' | tr '[:upper:]' '[:lower:]')
 
     case "$unit" in
-      m) echo $((num * 1024 * 1024)) ;;
-      k) echo $((num * 1024)) ;;
-      "") echo "${num}" ;; # No unit means bytes
-      *)
-        echo "[ERROR] Invalid unit in --max-size. Use M for megabytes, K for kilobytes, or no unit for bytes." >&2
-        return 1
-        ;;
+    m) echo $((num * 1024 * 1024)) ;;
+    k) echo $((num * 1024)) ;;
+    "") echo "${num}" ;; # No unit means bytes
+    *)
+      echo "[ERROR] Invalid unit in --max-size. Use M for megabytes, K for kilobytes, or no unit for bytes." >&2
+      return 1
+      ;;
     esac
   }
 

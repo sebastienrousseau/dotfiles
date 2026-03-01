@@ -104,41 +104,41 @@ matrix() {
   # Parse options
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --color)
-        case "$2" in
-          green) color="$MATRIX_GREEN" ;;
-          purple) color="$MATRIX_PURPLE" ;;
-          red) color="$MATRIX_RED" ;;
-          blue) color="$MATRIX_BLUE" ;;
-          white) color="$MATRIX_WHITE" ;;
-          yellow) color="$MATRIX_YELLOW" ;;
-          *) log_error "Invalid color: '$2'. Use 'matrix --help' for available colors." ;;
-        esac
-        shift 2
-        ;;
-      --rainbow)
-        rainbow=true
-        shift
-        ;;
-      --slow)
-        speed=0.1
-        shift
-        ;;
-      --fast)
-        speed=0.02
-        shift
-        ;;
-      --help)
-        show_help
-        return 0
-        ;;
-      --version)
-        show_version
-        return 0
-        ;;
-      *)
-        log_error "Unknown option: '$1'. Use 'matrix --help' for usage information."
-        ;;
+    --color)
+      case "$2" in
+      green) color="$MATRIX_GREEN" ;;
+      purple) color="$MATRIX_PURPLE" ;;
+      red) color="$MATRIX_RED" ;;
+      blue) color="$MATRIX_BLUE" ;;
+      white) color="$MATRIX_WHITE" ;;
+      yellow) color="$MATRIX_YELLOW" ;;
+      *) log_error "Invalid color: '$2'. Use 'matrix --help' for available colors." ;;
+      esac
+      shift 2
+      ;;
+    --rainbow)
+      rainbow=true
+      shift
+      ;;
+    --slow)
+      speed=0.1
+      shift
+      ;;
+    --fast)
+      speed=0.02
+      shift
+      ;;
+    --help)
+      show_help
+      return 0
+      ;;
+    --version)
+      show_version
+      return 0
+      ;;
+    *)
+      log_error "Unknown option: '$1'. Use 'matrix --help' for usage information."
+      ;;
     esac
   done
 

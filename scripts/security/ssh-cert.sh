@@ -47,15 +47,15 @@ cmd_issue() {
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --ttl)
-        ttl="$2"
-        shift 2
-        ;;
-      --principal)
-        principal="$2"
-        shift 2
-        ;;
-      *) error "Unknown option: $1" ;;
+    --ttl)
+      ttl="$2"
+      shift 2
+      ;;
+    --principal)
+      principal="$2"
+      shift 2
+      ;;
+    *) error "Unknown option: $1" ;;
     esac
   done
 
@@ -177,21 +177,21 @@ subcommand="${1:-}"
 shift 2>/dev/null || true
 
 case "$subcommand" in
-  issue) cmd_issue "$@" ;;
-  status) cmd_status ;;
-  revoke) cmd_revoke ;;
-  *)
-    echo "Usage: dot ssh-cert <command>"
-    echo ""
-    echo "Commands:"
-    echo "  issue   [--ttl 16h] [--principal user]  Request a short-lived certificate"
-    echo "  status                                   Show current certificate status"
-    echo "  revoke                                   Revoke and remove certificate"
-    echo ""
-    echo "Environment:"
-    echo "  SSH_CERT_CA_URL          step-ca server URL (enables Smallstep mode)"
-    echo "  SSH_CERT_CA_PROVISIONER  step-ca provisioner name"
-    echo "  SSH_CERT_TTL             Certificate lifetime (default: 16h)"
-    echo "  SSH_CERT_PRINCIPAL       Certificate principal (default: \$USER)"
-    ;;
+issue) cmd_issue "$@" ;;
+status) cmd_status ;;
+revoke) cmd_revoke ;;
+*)
+  echo "Usage: dot ssh-cert <command>"
+  echo ""
+  echo "Commands:"
+  echo "  issue   [--ttl 16h] [--principal user]  Request a short-lived certificate"
+  echo "  status                                   Show current certificate status"
+  echo "  revoke                                   Revoke and remove certificate"
+  echo ""
+  echo "Environment:"
+  echo "  SSH_CERT_CA_URL          step-ca server URL (enables Smallstep mode)"
+  echo "  SSH_CERT_CA_PROVISIONER  step-ca provisioner name"
+  echo "  SSH_CERT_TTL             Certificate lifetime (default: 16h)"
+  echo "  SSH_CERT_PRINCIPAL       Certificate principal (default: \$USER)"
+  ;;
 esac

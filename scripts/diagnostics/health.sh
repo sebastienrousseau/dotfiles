@@ -24,23 +24,23 @@ APPLY_FIX=false
 FORCE_FIX=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --verbose | -v)
-      VERBOSE=true
-      shift
-      ;;
-    --fix)
-      APPLY_FIX=true
-      shift
-      ;;
-    --force)
-      FORCE_FIX=true
-      shift
-      ;;
-    --json)
-      JSON_OUTPUT=true
-      shift
-      ;;
-    *) shift ;;
+  --verbose | -v)
+    VERBOSE=true
+    shift
+    ;;
+  --fix)
+    APPLY_FIX=true
+    shift
+    ;;
+  --force)
+    FORCE_FIX=true
+    shift
+    ;;
+  --json)
+    JSON_OUTPUT=true
+    shift
+    ;;
+  *) shift ;;
   esac
 done
 
@@ -91,43 +91,43 @@ check() {
   TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 
   case "$status" in
-    pass)
-      PASSED_CHECKS=$((PASSED_CHECKS + 1))
-      # shellcheck disable=SC2034
-      if ! $JSON_OUTPUT; then
-        if [[ "$use_ui" = "1" ]]; then
-          ui_ok "$name"
-        else
-          printf "${GREEN}✓${NC} %-35s ${GREEN}OK${NC}\n" "$name"
-        fi
+  pass)
+    PASSED_CHECKS=$((PASSED_CHECKS + 1))
+    # shellcheck disable=SC2034
+    if ! $JSON_OUTPUT; then
+      if [[ "$use_ui" = "1" ]]; then
+        ui_ok "$name"
+      else
+        printf "${GREEN}✓${NC} %-35s ${GREEN}OK${NC}\n" "$name"
       fi
-      ;;
-    warn)
-      WARNINGS=$((WARNINGS + 1))
-      # shellcheck disable=SC2034
-      if ! $JSON_OUTPUT; then
-        if [[ "$use_ui" = "1" ]]; then
-          ui_warn "$name" "$message"
-        else
-          printf "${YELLOW}⚠${NC} %-35s ${YELLOW}WARNING${NC}"
-          [[ -n "$message" ]] && printf " ${GRAY}%s${NC}" "$message"
-          printf "\n"
-        fi
+    fi
+    ;;
+  warn)
+    WARNINGS=$((WARNINGS + 1))
+    # shellcheck disable=SC2034
+    if ! $JSON_OUTPUT; then
+      if [[ "$use_ui" = "1" ]]; then
+        ui_warn "$name" "$message"
+      else
+        printf "${YELLOW}⚠${NC} %-35s ${YELLOW}WARNING${NC}"
+        [[ -n "$message" ]] && printf " ${GRAY}%s${NC}" "$message"
+        printf "\n"
       fi
-      ;;
-    fail)
-      FAILURES=$((FAILURES + 1))
-      # shellcheck disable=SC2034
-      if ! $JSON_OUTPUT; then
-        if [[ "$use_ui" = "1" ]]; then
-          ui_err "$name" "$message"
-        else
-          printf "${RED}✗${NC} %-35s ${RED}FAILED${NC}"
-          [[ -n "$message" ]] && printf " ${GRAY}%s${NC}" "$message"
-          printf "\n"
-        fi
+    fi
+    ;;
+  fail)
+    FAILURES=$((FAILURES + 1))
+    # shellcheck disable=SC2034
+    if ! $JSON_OUTPUT; then
+      if [[ "$use_ui" = "1" ]]; then
+        ui_err "$name" "$message"
+      else
+        printf "${RED}✗${NC} %-35s ${RED}FAILED${NC}"
+        [[ -n "$message" ]] && printf " ${GRAY}%s${NC}" "$message"
+        printf "\n"
       fi
-      ;;
+    fi
+    ;;
   esac
 }
 

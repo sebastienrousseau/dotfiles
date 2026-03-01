@@ -86,26 +86,26 @@ current_theme() {
 get_theme_family() {
   theme="$1"
   case "$theme" in
-    tokyonight-*) echo "tokyonight" ;;
-    catppuccin-*) echo "catppuccin" ;;
-    rose-pine*) echo "rose-pine" ;;
-    kanagawa-*) echo "kanagawa" ;;
-    gruvbox-*) echo "gruvbox" ;;
-    solarized-*) echo "solarized" ;;
-    everforest-*) echo "everforest" ;;
-    *) echo "other" ;;
+  tokyonight-*) echo "tokyonight" ;;
+  catppuccin-*) echo "catppuccin" ;;
+  rose-pine*) echo "rose-pine" ;;
+  kanagawa-*) echo "kanagawa" ;;
+  gruvbox-*) echo "gruvbox" ;;
+  solarized-*) echo "solarized" ;;
+  everforest-*) echo "everforest" ;;
+  *) echo "other" ;;
   esac
 }
 
 is_dark_theme() {
   theme="$1"
   case "$theme" in
-    *-night | *-storm | *-moon | *-mocha | *-frappe | *-macchiato | *-dark | *-wave | *-dragon | dracula | nord | onedark)
-      return 0
-      ;;
-    *)
-      return 1
-      ;;
+  *-night | *-storm | *-moon | *-mocha | *-frappe | *-macchiato | *-dark | *-wave | *-dragon | dracula | nord | onedark)
+    return 0
+    ;;
+  *)
+    return 1
+    ;;
   esac
 }
 
@@ -117,11 +117,11 @@ set_theme() {
   fi
   # Validate theme name: only allow alphanumeric, hyphens, underscores
   case "$new_theme" in
-    *[!a-zA-Z0-9_-]*)
-      ui_err "Invalid theme name" "$new_theme" >&2
-      ui_info "Allowed" "letters, digits, hyphens, underscores" >&2
-      exit 1
-      ;;
+  *[!a-zA-Z0-9_-]*)
+    ui_err "Invalid theme name" "$new_theme" >&2
+    ui_info "Allowed" "letters, digits, hyphens, underscores" >&2
+    exit 1
+    ;;
   esac
 
   tmp_file="$(umask 077 && mktemp)"
@@ -183,26 +183,26 @@ toggle_theme() {
   if is_dark_theme "$current"; then
     # Currently dark, switch to light variant
     case "$family" in
-      tokyonight) set_theme "$TOKYO_LIGHT" ;;
-      catppuccin) set_theme "$CATPPUCCIN_LIGHT" ;;
-      rose-pine) set_theme "rose-pine-dawn" ;;
-      kanagawa) set_theme "kanagawa-lotus" ;;
-      gruvbox) set_theme "gruvbox-light" ;;
-      solarized) set_theme "solarized-light" ;;
-      everforest) set_theme "everforest-light" ;;
-      *) set_theme "$DEFAULT_LIGHT" ;;
+    tokyonight) set_theme "$TOKYO_LIGHT" ;;
+    catppuccin) set_theme "$CATPPUCCIN_LIGHT" ;;
+    rose-pine) set_theme "rose-pine-dawn" ;;
+    kanagawa) set_theme "kanagawa-lotus" ;;
+    gruvbox) set_theme "gruvbox-light" ;;
+    solarized) set_theme "solarized-light" ;;
+    everforest) set_theme "everforest-light" ;;
+    *) set_theme "$DEFAULT_LIGHT" ;;
     esac
   else
     # Currently light, switch to dark variant
     case "$family" in
-      tokyonight) set_theme "$TOKYO_DARK" ;;
-      catppuccin) set_theme "$CATPPUCCIN_DARK" ;;
-      rose-pine) set_theme "rose-pine" ;;
-      kanagawa) set_theme "kanagawa-wave" ;;
-      gruvbox) set_theme "gruvbox-dark" ;;
-      solarized) set_theme "solarized-dark" ;;
-      everforest) set_theme "everforest-dark" ;;
-      *) set_theme "$DEFAULT_DARK" ;;
+    tokyonight) set_theme "$TOKYO_DARK" ;;
+    catppuccin) set_theme "$CATPPUCCIN_DARK" ;;
+    rose-pine) set_theme "rose-pine" ;;
+    kanagawa) set_theme "kanagawa-wave" ;;
+    gruvbox) set_theme "gruvbox-dark" ;;
+    solarized) set_theme "solarized-dark" ;;
+    everforest) set_theme "everforest-dark" ;;
+    *) set_theme "$DEFAULT_DARK" ;;
     esac
   fi
 }
@@ -215,16 +215,16 @@ switch_family() {
   if is_dark_theme "$current"; then
     # Stay in dark mode, switch family
     case "$family" in
-      tokyonight) set_theme "$CATPPUCCIN_DARK" ;;
-      catppuccin) set_theme "$TOKYO_DARK" ;;
-      *) set_theme "$CATPPUCCIN_DARK" ;;
+    tokyonight) set_theme "$CATPPUCCIN_DARK" ;;
+    catppuccin) set_theme "$TOKYO_DARK" ;;
+    *) set_theme "$CATPPUCCIN_DARK" ;;
     esac
   else
     # Stay in light mode, switch family
     case "$family" in
-      tokyonight) set_theme "$CATPPUCCIN_LIGHT" ;;
-      catppuccin) set_theme "$TOKYO_LIGHT" ;;
-      *) set_theme "$CATPPUCCIN_LIGHT" ;;
+    tokyonight) set_theme "$CATPPUCCIN_LIGHT" ;;
+    catppuccin) set_theme "$TOKYO_LIGHT" ;;
+    *) set_theme "$CATPPUCCIN_LIGHT" ;;
     esac
   fi
 }
@@ -245,24 +245,24 @@ show_current() {
 sync_theme() {
   local os_mode="dark" # Default fallback
   case "$(uname -s)" in
-    Darwin)
-      if defaults read -g AppleInterfaceStyle >/dev/null 2>&1; then
-        os_mode="dark"
-      else
+  Darwin)
+    if defaults read -g AppleInterfaceStyle >/dev/null 2>&1; then
+      os_mode="dark"
+    else
+      os_mode="light"
+    fi
+    ;;
+  Linux)
+    if command -v gsettings >/dev/null 2>&1; then
+      # Check GNOME color scheme
+      scheme=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")
+      if [[ "$scheme" == "prefer-light" ]]; then
         os_mode="light"
+      else
+        os_mode="dark"
       fi
-      ;;
-    Linux)
-      if command -v gsettings >/dev/null 2>&1; then
-        # Check GNOME color scheme
-        scheme=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")
-        if [[ "$scheme" == "prefer-light" ]]; then
-          os_mode="light"
-        else
-          os_mode="dark"
-        fi
-      fi
-      ;;
+    fi
+    ;;
   esac
 
   current="$(current_theme)"
@@ -282,41 +282,41 @@ sync_theme() {
 # =============================================================================
 
 case "${1:-}" in
-  list)
-    list_themes
-    ;;
-  set)
-    shift
-    set_theme "$1"
-    ;;
-  toggle)
-    toggle_theme
-    ;;
-  sync)
-    sync_theme
-    ;;
-  family)
-    switch_family
-    ;;
-  current)
-    show_current
-    ;;
-  "")
-    ui_header "Usage"
-    ui_info "dot theme" "[command]"
-    echo ""
-    ui_header "Commands"
-    ui_ok "list" "Show all available themes"
-    ui_ok "set NAME" "Set theme to NAME"
-    ui_ok "toggle" "Toggle between light/dark within current family"
-    ui_ok "family" "Switch between Tokyo Night and Catppuccin families"
-    ui_ok "current" "Show current theme info"
-    echo ""
-    show_current
-    ;;
-  *)
-    ui_err "Unknown theme command" "$1"
-    ui_info "Usage" "dot theme [list|set <name>|toggle|family|current]"
-    exit 1
-    ;;
+list)
+  list_themes
+  ;;
+set)
+  shift
+  set_theme "$1"
+  ;;
+toggle)
+  toggle_theme
+  ;;
+sync)
+  sync_theme
+  ;;
+family)
+  switch_family
+  ;;
+current)
+  show_current
+  ;;
+"")
+  ui_header "Usage"
+  ui_info "dot theme" "[command]"
+  echo ""
+  ui_header "Commands"
+  ui_ok "list" "Show all available themes"
+  ui_ok "set NAME" "Set theme to NAME"
+  ui_ok "toggle" "Toggle between light/dark within current family"
+  ui_ok "family" "Switch between Tokyo Night and Catppuccin families"
+  ui_ok "current" "Show current theme info"
+  echo ""
+  show_current
+  ;;
+*)
+  ui_err "Unknown theme command" "$1"
+  ui_info "Usage" "dot theme [list|set <name>|toggle|family|current]"
+  exit 1
+  ;;
 esac
