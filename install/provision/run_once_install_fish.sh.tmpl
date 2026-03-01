@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+# run_once_install_fish.sh.tmpl
+# Opt-in default shell change. Set DOTFILES_SET_FISH=1 to enable.
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") -}}
+
+set -euo pipefail
+
+log_info() { printf '
+[INFO] %s
+' "$*"; }
+log_error() { printf '
+[ERROR] %s
+' "$*" >&2; }
+
+if ! command -v fish >/dev/null 2>&1; then
+  log_info "Fish is not installed. Skipping default shell setup."
+  exit 0
+fi
+
+if [ "${DOTFILES_SET_FISH:-0}" != "1" ]; then
+  log_info "Default shell change disabled (set DOTFILES_SET_FISH=1 to enable)."
+  exit 0
+fi
+
+fish_path="$(command -v fish)"
+
+if [ -w /etc/shells ]; then
+  if ! grep -qx "$fish_path" /etc/shells; then
+    echo "$fish_path" >> /etc/shells
+  fi
+elif command -v sudo >/dev/null 2>&1; then
+  if ! grep -qx "$fish_path" /etc/shells; then
+    echo "$fish_path" | sudo tee -a /etc/shells >/dev/null
+  fi
+else
+  log_error "Cannot update /etc/shells (no write access and sudo missing)."
+fi
+
+if [ "${SHELL:-}" != "$fish_path" ]; then
+  if chsh -s "$fish_path" "$USER"; then
+    log_info "Default shell set to fish for $USER."
+  else
+    log_error "Failed to set default shell. You can run: chsh -s $fish_path"
+  fi
+fi
+
+{{- end -}}

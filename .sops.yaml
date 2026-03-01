@@ -1,0 +1,18 @@
+# .sops.yaml
+# Define which keys should be used to encrypt files matching certain patterns.
+
+# 1. Age keys (declarative & modern)
+# You should add your public key here (e.g. from `age-keygen -y ~/.config/sops/age/keys.txt`)
+# keys:
+#   - &admin_key age1... (Replace with your public key)
+
+# 2. Creation rules
+creation_rules:
+  - path_regex: .*\.sops\.ya?ml$
+    key_groups:
+      - age:
+          - age1zl7q96eavv58p7m5vj9fcljuzx3mms3lpgf0shqsw5p8p9mue3yqgqsw04 # Example placeholder admin key
+  - path_regex: secrets/.*\.json$
+    key_groups:
+      - age:
+          - age1zl7q96eavv58p7m5vj9fcljuzx3mms3lpgf0shqsw5p8p9mue3yqgqsw04

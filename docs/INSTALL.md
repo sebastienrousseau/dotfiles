@@ -23,11 +23,36 @@ Optional (feature-dependent):
 
 ## Install
 
-### One-liner (recommended)
+### 1. The Instant Install
+Works on macOS, Linux, and WSL2:
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.491/install.sh)"
-exec zsh
+# Works on macOS, Linux, and WSL2
+sh -c "$(curl -fsSL https://dotfiles.io/install.sh)"
+```
+
+### 2. Post-Install Shell Selection
+By default, the installer assumes Zsh. You can choose your preferred shell in `~/.dotfiles/.chezmoidata.toml`:
+
+```toml
+[data]
+default_shell = "fish"  # Options: "zsh", "fish", "nu"
+```
+
+Then apply the change:
+```bash
+dot apply
+```
+
+### 3. Feature Gating
+Customize your installation by toggling features in `.chezmoidata.toml`:
+
+```toml
+[features]
+zsh = true
+fish = true
+nushell = true
+nix = true
 ```
 
 ### Manual installation

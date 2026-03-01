@@ -1,0 +1,40 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v{{ .dotfiles_version }}) - Task Runner
+# <https://dotfiles.io>
+
+# Default task: list all commands
+default:
+    @just --list
+
+# Apply dotfiles configuration
+apply:
+    chezmoi apply --force
+
+# Update dependencies and tools
+update:
+    topgrade
+
+# -----------------------------------------------------------------------------
+# WebAssembly (Wasm) Tools
+# -----------------------------------------------------------------------------
+
+# Compile the Rust system utility to Wasm
+wasm-build:
+    cd lib/wasm-tools && cargo build --target wasm32-wasi --release
+    mkdir -p dot_local/bin/wasm
+    cp lib/wasm-tools/target/wasm32-wasi/release/dot-sys.wasm dot_local/bin/wasm/dot-sys.wasm
+
+# Run the compiled Wasm tool
+wasm-run:
+    wasmtime dot_local/bin/wasm/dot-sys.wasm
+
+# -----------------------------------------------------------------------------
+# Secrets & Security
+# -----------------------------------------------------------------------------
+
+# Encrypt a secret file using SOPS
+encrypt-secret secret_path:
+    sops --encrypt --in-place {{ "{{" }}secret_path{{ "}}" }}
+
+# Decrypt a secret file using SOPS
+decrypt-secret secret_path:
+    sops --decrypt --in-place {{ "{{" }}secret_path{{ "}}" }}

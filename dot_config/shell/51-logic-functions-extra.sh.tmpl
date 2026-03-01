@@ -26,3 +26,39 @@ __DOTFILES_EOF__
 
 {{ end }}
 {{ end }}
+
+# Pueue Background Task Wrappers (2026 Strategy)
+# Use these for long-running blocking tasks.
+if command -v pueue >/dev/null 2>&1; then
+    # silent-run: Submit a command to pueue and forget about it.
+    silent-run() {
+        local cmd="$*"
+        if [[ -z "$cmd" ]]; then
+            echo "Usage: silent-run <command>"
+            return 1
+        fi
+        pueue add -- "$cmd"
+    }
+
+    # notify-run: Submit a command and notify when done.
+    notify-run() {
+        local cmd="$*"
+        if [[ -z "$cmd" ]]; then
+            echo "Usage: notify-run <command>"
+            return 1
+        fi
+        local task_id
+        task_id=$(pueue add --print-id -- "$cmd")
+        echo "Task $task_id submitted: $cmd"
+        (pueue wait "$task_id" && echo "✅ Task $task_id finished: $cmd") &!
+    }
+
+    # bg-upgrade: Background upgrade of all package managers.
+    bg-upgrade() {
+        echo "🚀 Starting background upgrades (Homebrew, Nix, Chezmoi)..."
+        if command -v brew >/dev/null; then silent-run "brew upgrade"; fi
+        if command -v nix >/dev/null; then silent-run "nix flake update"; fi
+        silent-run "chezmoi update"
+        echo "Check status with 'pueue status'"
+    }
+fi

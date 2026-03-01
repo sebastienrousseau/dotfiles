@@ -1,0 +1,48 @@
+# Fish completion for 'dot' CLI
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v{{ .dotfiles_version }})
+
+# Disable file completions for subcommands
+complete -c dot -f
+
+# Core Commands
+complete -c dot -n "__fish_use_subcommand" -a apply -d "Apply dotfiles configuration"
+complete -c dot -n "__fish_use_subcommand" -a sync -d "Alias of apply"
+complete -c dot -n "__fish_use_subcommand" -a update -d "Pull latest changes and apply"
+complete -c dot -n "__fish_use_subcommand" -a add -d "Add a file to chezmoi source"
+complete -c dot -n "__fish_use_subcommand" -a diff -d "Show chezmoi diff with exclusions"
+complete -c dot -n "__fish_use_subcommand" -a status -d "Show configuration drift"
+complete -c dot -n "__fish_use_subcommand" -a remove -d "Safely remove a managed file"
+complete -c dot -n "__fish_use_subcommand" -a cd -d "Print source directory path"
+complete -c dot -n "__fish_use_subcommand" -a edit -d "Open chezmoi source in $EDITOR"
+
+# Diagnostics
+complete -c dot -n "__fish_use_subcommand" -a doctor -d "Check system health and configuration"
+complete -c dot -n "__fish_use_subcommand" -a heal -d "Auto-repair common dotfiles issues"
+complete -c dot -n "__fish_use_subcommand" -a health -d "Run comprehensive health check"
+complete -c dot -n "__fish_use_subcommand" -a drift -d "Drift dashboard"
+complete -c dot -n "__fish_use_subcommand" -a history -d "Shell history analysis"
+complete -c dot -n "__fish_use_subcommand" -a benchmark -d "Run shell startup benchmark"
+complete -c dot -n "__fish_use_subcommand" -a perf -d "Show current performance mode"
+complete -c dot -n "__fish_use_subcommand" -a ai -d "Show AI helper status"
+
+# Tools
+complete -c dot -n "__fish_use_subcommand" -a tools -d "Show or install nix packages"
+complete -c dot -n "__fish_use_subcommand" -a new -d "Create a new project from a template"
+complete -c dot -n "__fish_use_subcommand" -a sandbox -d "Launch a safe sandbox preview"
+complete -c dot -n "__fish_use_subcommand" -a keys -d "Show keybindings catalog"
+complete -c dot -n "__fish_use_subcommand" -a learn -d "Interactive tour"
+complete -c dot -n "__fish_use_subcommand" -a docs -d "Show repo README"
+
+# Appearance
+complete -c dot -n "__fish_use_subcommand" -a theme -d "Switch terminal theme (dark/light)"
+complete -c dot -n "__fish_use_subcommand" -a wallpaper -d "Apply a wallpaper"
+complete -c dot -n "__fish_use_subcommand" -a fonts -d "Install Nerd Fonts"
+
+# Secrets & Security
+complete -c dot -n "__fish_use_subcommand" -a secrets-init -d "Initialize age key for secrets"
+complete -c dot -n "__fish_use_subcommand" -a secrets -d "Edit encrypted secrets"
+complete -c dot -n "__fish_use_subcommand" -a upgrade -d "Update flake, plugins, and dotfiles"
+
+# Meta
+complete -c dot -n "__fish_use_subcommand" -a --version -d "Show version"
+complete -c dot -n "__fish_use_subcommand" -a help -d "Show help"
