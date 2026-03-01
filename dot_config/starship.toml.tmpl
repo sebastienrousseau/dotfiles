@@ -100,6 +100,21 @@ format = "[$symbol$state( \\($name\\))]($style) "
 symbol = "nix "
 style = "bold blue"
 
+# ---------- Direnv indicator ---------- #
+[direnv]
+disabled = false
+symbol = "▼ "
+style = "bold yellow"
+format = "[$symbol$loaded/$allowed]($style) "
+
+# ---------- Pueue Tasks (Background daemon) ---------- #
+[custom.pueue]
+command = "pueue status -j 2>/dev/null | jq -r '.tasks | to_entries | map(select(.value.status == \"Running\" or .value.status == \"Queued\")) | length' 2>/dev/null"
+when = "command -v pueue >/dev/null && command -v jq >/dev/null && [ \"$(pueue status -j 2>/dev/null | jq -r '.tasks | to_entries | map(select(.value.status == \"Running\" or .value.status == \"Queued\")) | length' 2>/dev/null)\" != \"0\" ]"
+symbol = "⚙ "
+style = "bold purple"
+format = "[$symbol$output]($style) "
+
 # ---------- Container-aware fallback ---------- #
 # When DOTFILES_CONTAINER=1, show a lightweight indicator so the user
 # knows they are inside a container.  Uses only ASCII-safe characters

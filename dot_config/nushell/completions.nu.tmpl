@@ -1,0 +1,37 @@
+# Nushell completions for 'dot' CLI
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v{{ .dotfiles_version }})
+
+export extern dot [
+    command?: string@dot_commands # The command to execute
+    ...args: string             # Arguments to the command
+]
+
+def dot_commands [] {
+    [
+        { value: "apply", description: "Apply dotfiles (chezmoi apply)" }
+        { value: "sync", description: "Apply dotfiles (alias of apply)" }
+        { value: "update", description: "Pull latest changes and apply" }
+        { value: "add", description: "Add a file to chezmoi source" }
+        { value: "diff", description: "Show chezmoi diff" }
+        { value: "status", description: "Show configuration drift" }
+        { value: "remove", description: "Safely remove a managed file" }
+        { value: "cd", description: "Print source directory path" }
+        { value: "edit", description: "Open chezmoi source in $EDITOR" }
+        { value: "doctor", description: "Check system health" }
+        { value: "heal", description: "Auto-repair issues" }
+        { value: "health", description: "Run health check" }
+        { value: "drift", description: "Drift dashboard" }
+        { value: "history", description: "History analysis" }
+        { value: "benchmark", description: "Startup benchmark" }
+        { value: "perf", description: "Show performance mode" }
+        { value: "theme", description: "Switch terminal theme" }
+        { value: "wallpaper", description: "Apply a wallpaper" }
+        { value: "fonts", description: "Install Nerd Fonts" }
+        { value: "secrets-init", description: "Init age key" }
+        { value: "secrets", description: "Edit encrypted secrets" }
+        { value: "upgrade", description: "Update all tools" }
+        { value: "tools", description: "Show tools catalog" }
+        { value: "new", description: "Create new project" }
+        { value: "docs", description: "Show README" }
+    ]
+}

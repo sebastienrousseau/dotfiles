@@ -1,173 +1,110 @@
-# Tools
+# 🛠️ The Sublime Tool Catalog
 
-These are the main tools and CLI conveniences included with Dotfiles.
+Welcome to the definitive collection of high-performance tools integrated into your dotfiles. This catalog categorizes every utility by its role in your workflow, focusing on **speed, ergonomics, and 2026-ready innovation**.
 
-## Core
+---
 
-| Tool | Description |
-|------|-------------|
-| Zsh | Shell |
-| Starship | Cross-shell prompt |
-| tmux | Terminal multiplexer |
-| Neovim | Modern Vim-based editor |
+## 🐚 Core Shells
+The engines that power your terminal experience.
 
-## Search and navigation
+| Icon | Tool | Purpose | Key Feature |
+| :--- | :--- | :--- | :--- |
+| ⚡ | **Zsh** | The Daily Driver | Modular `rc.d` architecture with advanced lazy-loading. |
+| 🐟 | **Fish** | The Friendly Shell | **Zero-cost startup** via dynamic alias-to-function autoloading. |
+| 📊 | **Nushell** | The Data Shell | Structured data pipelines. Think SQL meets Bash. |
+| 🚀 | **Starship** | The Universal Prompt | Ultra-fast, cross-shell prompt with async background task indicators. |
 
-| Tool | Description |
-|------|-------------|
-| fzf | Fuzzy finder |
-| zoxide | Smart directory jumping |
-| ripgrep | Fast text search |
-| fd | Developer-friendly find |
-| bat | Cat with syntax highlighting |
-| eza | Modern ls replacement |
-| lsd | LSDeluxe file listing |
-| duf | Disk usage utility |
-| ncdu | NCurses disk usage |
-| htop | Process viewer |
-| btop | Resource monitor |
+---
 
-## Terminal
+## 🏗️ Infrastructure & Portability
+Ensuring your environment is deterministic and reproducible anywhere.
 
-| Tool | Description |
-|------|-------------|
-| WezTerm | GPU-accelerated terminal |
-| Alacritty | Fast terminal |
-| Kitty | Feature-rich terminal |
-| Ghostty | Native terminal |
-| fastfetch | System info |
-| figlet | ASCII banners |
-| lolcat | Rainbow output |
-| cowsay | ASCII cow messages |
-| cmatrix | Matrix screensaver |
-| pipes | Pipe screensaver |
-| atuin | Shell history sync |
-| yazi | Terminal file manager |
+| Icon | Tool | Category | Description |
+| :--- | :--- | :--- | :--- |
+| ❄️ | **Nix Flakes** | Deterministic Ops | Bit-for-bit identical environments via `flake.nix`. |
+| 🏠 | **Chezmoi** | Dotfiles Manager | Secure, template-based configuration management. |
+| 🪄 | **Direnv** | Env Management | Instant environment injection when you `cd` into a directory. |
+| 📦 | **Mise** | Runtime Manager | Polyglot version manager (Node, Python, Rust, Go, etc.). |
 
-## Git
+---
 
-| Tool | Description |
-|------|-------------|
-| git | Version control |
-| lazygit | Terminal UI for Git |
-| delta | Syntax-highlighted diffs |
-| gh | GitHub CLI |
-| glab | GitLab CLI |
+## ⚡ 2026 Next-Gen Frontier
+Cutting-edge utilities for the ultimate power user.
 
-## AI CLI Tools
+| Icon | Tool | Purpose | Why it's Sublime |
+| :--- | :--- | :--- | :--- |
+| ⚙️ | **Pueue** | Async Daemon | Offload long-running tasks (upgrades, builds) to a background queue. |
+| 🧠 | **Dot-AI (RAG)** | AI Assistant | Local semantic search over your own dotfiles using ripgrep + LLMs. |
+| 💎 | **Wasmtime** | Wasm Runtime | Run pre-compiled Rust/Zig tools as ultra-fast WebAssembly modules. |
+| 🔐 | **SOPS** | Secrets Ops | Declarative, encrypted secrets management integrated with Nix. |
 
-See [AI Integrations](AI.md) for opt-in setup patterns and privacy notes.
+---
 
-| Tool | NPM Package | Description |
-|------|-------------|-------------|
-| claude | @anthropic-ai/claude-code | Anthropic Claude CLI |
-| gemini | @google/gemini-cli | Google Gemini CLI |
-| sgpt | shell-gpt | OpenAI-compatible CLI (Shell GPT) |
-| ollama | ollama | Local LLM runtime and CLI |
-| codex | @openai/codex | OpenAI Codex CLI |
-| opencode | opencode-ai | OpenCode AI assistant |
-| droid | @factory/cli | Factory AI Droid |
-| aider | aider-chat | Git-native AI pair programming |
+## 📂 Navigation & Discovery
+Stop searching, start finding.
 
+| Icon | Tool | Description | Pro Tip |
+| :--- | :--- | :--- | :--- |
+| 🦖 | **Yazi** | Terminal File Manager | Use `yy` to instantly `cd` on exit. |
+| 🔍 | **Ripgrep (rg)** | Fast Text Search | The gold standard for code searching. |
+| 📁 | **fd** | Simple Find | Faster and more intuitive than the legacy `find`. |
+| 🗺️ | **Zoxide** | Smart Jump | Replaces `cd` with a fuzzy-learning navigation engine. |
+| 🔭 | **fzf** | Fuzzy Finder | Interactive filtering for everything (files, history, git). |
 
-## Data processing
+---
 
+## 📝 Modern CLI Replacements
+Rust-powered upgrades for classic Unix commands.
 
-| Tool | Description |
-|------|-------------|
-| jq | JSON processor |
-| yq | YAML processor |
-| hexyl | Hex viewer |
+| Classic | Modern Replacement | Why? |
+| :--- | :--- | :--- |
+| `ls` | **eza** | Icons, git status integration, and better colors. |
+| `cat` | **bat** | Syntax highlighting and Git integration. |
+| `top` | **btop** | Stunning visual dashboards for system resources. |
+| `df` | **duf** | User-friendly disk usage overview. |
+| `du` | **dust** | Instant visual breakdown of folder sizes. |
+| `ps` | **procs** | Modern process tracking with better columns. |
 
-## Kubernetes
+---
 
-| Tool | Description |
-|------|-------------|
-| kubectl | Kubernetes CLI |
-| kubectx | Context switcher |
-| kubens | Namespace switcher |
-| k9s | Kubernetes TUI |
-| stern | Multi-pod log tailer |
-| kube-linter | Manifest linter |
-| kubesec | Security scanner |
-| minikube | Local Kubernetes |
-| helm | Package manager |
+## 🎨 Terminal Ecosystem
+Where you spend your time.
 
-## Database CLIs
+| Tool | Style | Platform |
+| :--- | :--- | :--- |
+| **Ghostty** | Native / GPU | macOS, Linux |
+| **Zellij** | Modern Multiplexer | Cross-platform (layout-aware) |
+| **Tmux** | Classic Multiplexer | The reliable standard |
+| **Fastfetch** | System Info | Fast, modern system summary |
 
-| Tool | Description |
-|------|-------------|
-| psql | PostgreSQL CLI |
-| mycli | MySQL CLI with autocomplete |
-| sqlite3 | SQLite CLI |
-| redis-cli | Redis CLI |
-| mongosh | MongoDB Shell |
+---
 
-## Security
+## 🤖 AI Pair Programming
+Integrated AI helpers for the terminal.
 
-| Tool | Description |
-|------|-------------|
-| age | Modern encryption |
-| gnupg | OpenPGP implementation |
+*Detailed guide available in [AI.md](AI.md).*
 
-## Developer tools
+*   **Aider**: Git-native AI pair programming.
+*   **Claude CLI**: Anthropic's high-speed assistant.
+*   **Gemini CLI**: Google's multi-modal CLI tool.
+*   **Mods/Fabric**: Pipeline-friendly AI processing.
 
-- Git helpers and sane defaults
-- Project templates (`dot new`)
-- Sandbox preview (`dot sandbox`)
-- Interactive setup (`dot setup`)
-- Benchmarking (`dot benchmark`)
-- Scorecard (`dot scorecard`)
-- Startup profiling (`dot perf`)
-- Conflict report (`dot conflicts`)
-- Version locks (`dot locks`)
-- Snapshot baseline (`dot snapshot`)
-- Lua tooling (`luacheck`, `stylua`, `luarocks`, `lua/luajit`)
+---
 
-## Version management
+## 🛠️ Developer Toolchain
+*   **Neovim**: Hyper-optimized Lua-based configuration.
+*   **Lazygit**: The best TUI for Git workflows.
+*   **Delta**: Beautiful, syntax-highlighted side-by-side diffs.
+*   **Just**: Modern task runner (replaces complex Makefiles).
 
-**mise** is the default runtime version manager, consolidating Node.js, Python, Go, Rust, Ruby, and more into a single tool.
+---
 
-- **Configuration**: `~/.config/mise/config.toml` (auto-install enabled)
-- **Node.js manager**: Controlled by `.chezmoidata.toml` `tools.node_manager` (default: `mise`; alternatives: `fnm`, `nvm`)
-- **Shell activation**: `eval "$(mise activate zsh)"` via `_cached_eval` for zero-overhead startup
+## 🔐 Security & Secrets
+*   **Age**: Modern, small encryption tool.
+*   **GnuPG**: The standard for PGP.
+*   **Sops**: Secret editing with automatic encryption.
 
-## Security features
+---
 
-- Firewall hardening
-- Telemetry disable
-- DNS-over-HTTPS (Linux)
-- Lock-screen enforcement
-- Encryption checks
-- MCP configuration diagnostics (`dot mcp doctor`)
-- Short-lived SSH certificates (`dot ssh-cert`)
-
-## Container support
-
-Devcontainer and GitHub Codespaces configurations for cloud-based development:
-
-- **Config**: `.devcontainer/devcontainer.json` with custom Dockerfile
-- **Bootstrap**: `.devcontainer/install-full.sh` — full chezmoi apply with server profile
-- **Lite mode**: `.devcontainer/install-lite.sh` — minimal setup for CI
-- **Pre-built tools**: chezmoi, mise, starship, bat, fd, fzf, ripgrep, neovim, eza, zoxide
-
-## Aliases
-
-Aliases live in category directories under:
-
-```
-~/.dotfiles/.chezmoitemplates/aliases/<category>/<name>.aliases.sh
-```
-
-Apply changes with:
-
-```bash
-chezmoi apply
-```
-
-## Make it yours
-
-- Wallpaper sync/rotate scripts
-- Cursor and icon theming helpers (Linux)
-- Lock screen icon helper (Linux)
-- GRUB theme / boot logo helpers (Linux)
+**Last Updated**: 2026-03-01
+**Dotfiles Version**: v{{ .dotfiles_version }}

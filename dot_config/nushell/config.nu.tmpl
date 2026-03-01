@@ -1,0 +1,71 @@
+# 🅳🅾🆃🅵🅸🅻🅴🆂 (v{{ .dotfiles_version }}) - Nushell Config
+# <https://dotfiles.io>
+
+$env.config = {
+    show_banner: false,
+    table: {
+        mode: rounded
+    },
+    completions: {
+        case_sensitive: false,
+        quick: true,
+        partial: true,
+        algorithm: "prefix"
+    },
+    history: {
+        max_size: 100000,
+        sync_on_enter: true,
+        file_format: "sqlite"
+    }
+}
+
+# Source Starship Prompt
+source ~/.cache/starship/init.nu
+
+# Source dot CLI completions
+source ~/.config/nushell/completions.nu
+
+# Aliases - simple structured wrappers
+alias l = ls -l
+alias ll = ls -la
+alias la = ls -a
+alias c = clear
+alias q = exit
+alias g = git
+
+# Yazi integration to cd on quit
+def --env yy [...args] {
+	let tmp = (mktemp -t "yazi-cwd.XXXXXX")
+	yazi ...$args --cwd-file $tmp
+	let cwd = (open $tmp)
+	if $cwd != "" and $cwd != $env.PWD {
+		cd $cwd
+	}
+	rm -fp $tmp
+}
+
+# Pueue Background Task Wrappers (Nushell Style)
+def silent-run [cmd: string] {
+    pueue add -- $cmd
+}
+
+def notify-run [cmd: string] {
+    let task_id = (pueue add --print-id -- $cmd)
+    echo $"Task ($task_id) submitted: ($cmd)"
+    # Nu doesn't have background shells like bash, but we can call bash
+    bash -c $"pueue wait ($task_id) && echo '✅ Task ($task_id) finished: ($cmd)' &"
+}
+
+def bg-upgrade [] {
+    echo "🚀 Starting background upgrades..."
+    if (which brew | length) > 0 { silent-run "brew upgrade" }
+    if (which nix | length) > 0 { silent-run "nix flake update" }
+    silent-run "chezmoi update"
+    echo "Check status with 'pueue status'"
+}
+
+# Data pipelines examples for productivity
+def "find ports" [] {
+    sys host | get name
+    # Example command to show how nu handles data
+}

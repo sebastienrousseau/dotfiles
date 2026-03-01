@@ -56,14 +56,46 @@ log_warn() {
 log_info() { ui_info "$1" "${2:-}"; }
 
 # 1. Check Dependencies
-ui_header "Core Dependencies"
-for cmd in git curl chezmoi starship rg bat; do
+ui_header "Core Shells"
+for cmd in zsh fish nu starship; do
+  if command -v "$cmd" &>/dev/null; then
+    log_success "$cmd" "$(command -v "$cmd")"
+  else
+    if [[ "$cmd" == "nu" || "$cmd" == "fish" ]]; then
+       log_warn "$cmd" "Optional but recommended for 2026 stack"
+    else
+       log_fail "$cmd" "Missing"
+    fi
+  fi
+done
+
+echo ""
+ui_header "Modern CLI Tools"
+for cmd in rg bat chezmoi fzf zoxide atuin yazi zellij; do
   if command -v "$cmd" &>/dev/null; then
     log_success "$cmd" "$(command -v "$cmd")"
   else
     log_fail "$cmd" "Missing"
   fi
 done
+
+echo ""
+ui_header "The 2026 Frontier"
+for cmd in pueue wasmtime nix sops age; do
+  if command -v "$cmd" &>/dev/null; then
+    log_success "$cmd" "$(command -v "$cmd")"
+  else
+    log_warn "$cmd" "Frontier tool missing"
+  fi
+done
+
+if command -v pueue >/dev/null 2>&1; then
+  if pueue status >/dev/null 2>&1; then
+    log_success "pueue daemon" "running"
+  else
+    log_warn "pueue daemon" "not running (run 'pueued -d')"
+  fi
+fi
 
 echo ""
 ui_header "Optional AI CLIs"
