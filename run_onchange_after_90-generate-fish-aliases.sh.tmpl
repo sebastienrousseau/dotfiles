@@ -33,7 +33,24 @@ grep '^alias ' "$ALIASES_FILE" | while read -r line; do
     if [[ -z "$name" || "$name" == *" "* || "$name" == *"/"* ]]; then
         continue
     fi
-    
+
+    # Skip fish reserved keywords and builtin names that must not be shadowed
+    case "$name" in
+        _|and|or|not|builtin|command|exec|if|else|switch|while|for|in|begin|end|break|continue|return|function|set|test|true|false|time|path|cat)
+            continue
+            ;;
+    esac
+
+    # Skip aliases containing bash-specific syntax (parameter expansion, etc.)
+    if [[ "$cmd" == *'${'* || "$cmd" == *'$(('* ]]; then
+        continue
+    fi
+
+    # Skip aliases that call dot_* helper functions (bash-only, not available in fish)
+    if [[ "$cmd" == dot_* ]]; then
+        continue
+    fi
+
     # Write the autoloaded function
     # We use a heredoc to create the function file
     cat <<EOF > "${FISH_FUNCS_DIR}/${name}.fish"
@@ -44,7 +61,33 @@ end
 EOF
 done
 
-# Ensure explicit shims for fish
+# Ensure explicit shims for fish (fish-native replacements for bash-incompatible aliases)
+
+# "path" is a fish builtin — provide the alias as "show-path" instead
+cat <<'EOF' > "$FISH_FUNCS_DIR/show-path.fish"
+function show-path --description 'Print PATH entries, one per line'
+    string split : $PATH
+end
+EOF
+# Remove stale path.fish if it exists from a previous run
+rm -f "$FISH_FUNCS_DIR/path.fish"
+
+# "cat" is used by fish internals — only delegate to bat for interactive use
+cat <<'EOF' > "$FISH_FUNCS_DIR/cat.fish"
+function cat --wraps=bat --description 'Cat with syntax highlighting'
+    if not isatty stdout
+        # Non-interactive (pipe, command substitution) — use real cat
+        command cat $argv
+    else if command -v bat >/dev/null 2>&1
+        bat $argv
+    else if command -v batcat >/dev/null 2>&1
+        batcat $argv
+    else
+        command cat $argv
+    end
+end
+EOF
+
 cat <<'EOF' > "$FISH_FUNCS_DIR/l.fish"
 function l --wraps=ls --description 'List contents of directory'
     if command -v eza >/dev/null 2>&1
