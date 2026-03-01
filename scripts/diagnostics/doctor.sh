@@ -89,8 +89,16 @@ get_cmd_path() {
 }
 
 # 1. Check Dependencies
+if command -v gum >/dev/null 2>&1; then
+  gum style --foreground 212 --border-foreground 212 --border double --align center --width 50 "Dotfiles Doctor"
+  echo ""
+fi
+
 ui_header "Core Shells"
 for cmd in zsh fish nu starship; do
+  if command -v gum >/dev/null 2>&1; then
+    gum spin --spinner dot --title "Checking $cmd..." -- sleep 0.1
+  fi
   if check_cmd "$cmd"; then
     log_success "$cmd" "$(get_cmd_path "$cmd")"
   else

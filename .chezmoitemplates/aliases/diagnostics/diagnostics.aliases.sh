@@ -7,7 +7,7 @@ alias dotdoc='bash $HOME/.dotfiles/scripts/diagnostics/doctor.sh'
 alias dot-doctor='dotdoc'
 
 # Detailed Doctor (with debug info)
-alias dotdoc-full='bash $HOME/.dotfiles/scripts/diagnostics/doctor.sh && echo "\n--- Path Info ---" && echo $PATH | tr ":" "\n"'
+alias dotdoc-full='bash $HOME/.dotfiles/scripts/diagnostics/doctor.sh && echo "\n--- Path Info ---" && echo $PATH | tr ":" "\n" | glow -'
 
 if command -v chezmoi &>/dev/null; then
   # Drift Detection

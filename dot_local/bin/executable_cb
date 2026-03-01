@@ -1,0 +1,23 @@
+#!/bin/sh
+# Universal clipboard integration (cb)
+# Supports macOS (pbcopy), Linux (xclip/wl-copy), and WSL (clip.exe)
+
+case "$(uname -s)" in
+    Darwin)
+        if [ -t 0 ]; then pbpaste; else pbcopy; fi
+        ;;
+    Linux)
+        if grep -qi microsoft /proc/version 2>/dev/null; then
+            # WSL
+            if [ -t 0 ]; then
+                powershell.exe -command "Get-Clipboard" | tr -d ''
+            else
+                clip.exe
+            fi
+        elif [ -n "$WAYLAND_DISPLAY" ]; then
+            if [ -t 0 ]; then wl-paste; else wl-copy; fi
+        else
+            if [ -t 0 ]; then xclip -selection clipboard -o; else xclip -selection clipboard; fi
+        fi
+        ;;
+esac

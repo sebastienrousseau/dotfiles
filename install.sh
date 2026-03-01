@@ -14,8 +14,38 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-printf '%b\n' "${CYAN}${BOLD}"
-cat <<"EOF"
+# 2. Check Prerequisites & Bootstrap Package Managers
+step "Checking Prerequisites..."
+
+# Bootstrap gum for a better UI if available or install it
+bootstrap_gum() {
+  if command -v gum >/dev/null 2>&1; then return 0; fi
+  
+  echo "   Bootstrapping UI components (gum)..."
+  if [[ "$OS" == "Darwin" ]] && command -v brew >/dev/null; then
+    brew install gum >/dev/null 2>&1
+  elif [[ "$target_os" == "debian" || "$target_os" == "wsl2" ]]; then
+    sudo mkdir -p /etc/apt/keyrings
+    curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
+    sudo apt-get update && sudo apt-get install gum -y >/dev/null 2>&1
+  fi
+}
+bootstrap_gum || true
+
+if command -v gum >/dev/null 2>&1; then
+  gum style \
+    --foreground 212 --border-foreground 212 --border double \
+    --align center --width 50 --margin "1 2" --padding "2 4" \
+    "   ___      _    _  _  _          " \
+    "  / _ \___ | |_ (_)| |(_) ___  ___ " \
+    " / /_)/ _ \| __|| || || |/ _ \/ __|" \
+    "/ ___/ (_) | |_ | || || |  __/\__ \ " \
+    "\/    \___/ \__||_||_||_|\___||___/" \
+    "           Universal Installer"
+else
+  printf '%b\n' "${CYAN}${BOLD}"
+  cat <<"EOF"
    ___      _    _  _  _          
   / _ \___ | |_ (_)| |(_) ___  ___ 
  / /_)/ _ \| __|| || || |/ _ \/ __|
@@ -23,89 +53,8 @@ cat <<"EOF"
 \/    \___/ \__||_||_||_|\___||___/
            Universal Installer
 EOF
-printf '%b\n' "${NC}"
-
-step() { printf '%b\n' "${BLUE}==>${NC} ${BOLD}$1${NC}"; }
-success() { printf '%b\n' "${GREEN}==> Done!${NC}"; }
-error() {
-  printf '%b\n' "${RED}==> Error: $1${NC}"
-  exit 1
-}
-
-# Help flag
-case "${1:-}" in
-  -h | --help | help)
-    cat <<HELP
-Dotfiles Universal Installer
-
-Usage:
-  ./install.sh [VERSION]
-  sh -c "\$(curl -fsSL https://dotfiles.io/install.sh)"
-
-Arguments:
-  VERSION    Git tag to install (default: v0.2.491)
-
-Environment Variables:
-  DOTFILES_NONINTERACTIVE=1    Skip interactive prompts
-
-Steps performed:
-  1. Detect OS and architecture
-  2. Install system package manager (Homebrew/apt/dnf/pacman)
-  3. Install chezmoi (verified download)
-  4. Clone dotfiles repository
-  5. Apply dotfiles via chezmoi
-HELP
-    exit 0
-    ;;
-esac
-
-# Cleanup on unexpected exit
-_install_cleanup() { rm -f "${CHEZMOI_INSTALLER:-}"; }
-trap _install_cleanup EXIT
-
-# 1. Detect Environment
-step "Detecting Environment..."
-OS="$(uname -s)"
-ARCH="$(uname -m)"
-
-# Robust OS detection: set target_os for downstream use
-target_os="unknown"
-case "$OS" in
-  Darwin)
-    target_os="macos"
-    ;;
-  Linux)
-    # shellcheck disable=SC2250
-    if [[ -f /proc/version ]] && grep -qi 'microsoft\|WSL' /proc/version; then
-      target_os="wsl2"
-    elif [[ -f /etc/os-release ]]; then
-      # shellcheck disable=SC1091
-      . /etc/os-release
-      case "${ID:-}" in
-        ubuntu | debian | pop | linuxmint | elementary)
-          target_os="debian"
-          ;;
-        fedora | rhel | centos | rocky | alma)
-          target_os="fedora"
-          ;;
-        arch | manjaro | endeavouros)
-          target_os="arch"
-          ;;
-        *)
-          target_os="linux"
-          ;;
-      esac
-    else
-      target_os="linux"
-    fi
-    ;;
-esac
-echo "   OS: $OS"
-echo "   Arch: $ARCH"
-echo "   Target: $target_os"
-
-# 2. Check Prerequisites & Bootstrap Package Managers
-step "Checking Prerequisites..."
+  printf '%b\n' "${NC}"
+fi
 
 # On macOS, ensure Homebrew is available before checking curl/git
 if [[ "$target_os" = "macos" ]] && ! command -v brew >/dev/null; then

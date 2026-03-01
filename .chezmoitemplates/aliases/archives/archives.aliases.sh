@@ -331,7 +331,7 @@ if [[ "${DOTFILES_SAFE_ALIASES:-0}" == "1" ]]; then
 fi
 
 # Extract Aliases
-alias x='extract' # Extract any supported archive
+alias x='extract' # Extract any supported archive (using universal extract script)
 
 # List Content Aliases
 alias l7z='7z l'              # List 7z archive contents
