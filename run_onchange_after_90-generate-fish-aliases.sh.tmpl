@@ -56,7 +56,7 @@ grep '^alias ' "$ALIASES_FILE" | while read -r line; do
 
     # Skip fish reserved keywords and builtin names that must not be shadowed
     case "$name" in
-        _|and|or|not|builtin|command|exec|if|else|switch|while|for|in|begin|end|break|continue|return|function|set|test|true|false|time|path|cat|ls|update-fonts)
+        _|and|or|not|builtin|command|exec|if|else|switch|while|for|in|begin|end|break|continue|return|function|set|test|true|false|time|path|cat|ls|update-fonts|c|d|h|q)
             continue
             ;;
     esac
