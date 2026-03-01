@@ -11,14 +11,14 @@ if [[ "${DOTFILES_ENABLE_CD_ALIAS:-0}" == "1" ]]; then
 else
   alias cdh='cd_with_history' # Explicit enhanced cd helper
 fi
-alias mcd='mkcd' # Create and enter directory
+alias mcd='mkdir -p "$1" && cd "$1"' # Create and enter directory
 
 # Bookmark management
-alias bm='bookmark'         # Create bookmark
-alias bmu='bookmark_update' # Update bookmark
-alias bmr='bookmark_remove' # Remove bookmark
-alias bml='bookmark_list'   # List bookmarks (fixed from 'bookmark' to 'bookmark_list')
-alias bmg='goto'            # Go to bookmark
+alias bm='bm add'            # Create bookmark
+alias bmu='bm update'         # Update bookmark
+alias bmr='bm remove'         # Remove bookmark
+alias bml='bm list'           # List bookmarks
+alias bmg='cd "$(bm goto $1)"' # Go to bookmark (requires shell cd)
 
 # Navigation shortcuts
 alias dh='dirhistory' # Show directory history
