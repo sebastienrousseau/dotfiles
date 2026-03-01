@@ -1,2 +1,8 @@
 [tools]
 opencode = "latest"
+atuin = "latest"
+zoxide = "latest"
+starship = "latest"
+"aqua:charmbracelet/gum" = "latest"
+"aqua:charmbracelet/glow" = "latest"
+"aqua:charmbracelet/mods" = "latest"
