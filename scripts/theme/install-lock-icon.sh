@@ -11,20 +11,20 @@ if [[ ! -f "$icon_path" ]]; then
 fi
 
 case "$(uname -s)" in
-Darwin)
-  echo "Lock icon customization is not supported via script on macOS." >&2
-  exit 0
-  ;;
-Linux)
-  if command -v swaylock >/dev/null; then
-    echo "Use: swaylock --image '$icon_path'"
-  elif command -v i3lock >/dev/null; then
-    echo "Use: i3lock -i '$icon_path'"
-  else
-    echo "No supported lock screen tool found (swaylock/i3lock)." >&2
-  fi
-  ;;
-*)
-  echo "Unsupported OS for lock icon." >&2
-  ;;
+  Darwin)
+    echo "Lock icon customization is not supported via script on macOS." >&2
+    exit 0
+    ;;
+  Linux)
+    if command -v swaylock >/dev/null; then
+      echo "Use: swaylock --image '$icon_path'"
+    elif command -v i3lock >/dev/null; then
+      echo "Use: i3lock -i '$icon_path'"
+    else
+      echo "No supported lock screen tool found (swaylock/i3lock)." >&2
+    fi
+    ;;
+  *)
+    echo "Unsupported OS for lock icon." >&2
+    ;;
 esac

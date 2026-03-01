@@ -8,8 +8,8 @@ source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
 # Help flag
 case "${1:-}" in
--h | --help)
-  cat <<HELP
+  -h | --help)
+    cat <<HELP
 chezmoi-apply.sh - Apply dotfiles with enhanced diagnostics
 
 Usage:
@@ -25,8 +25,8 @@ Environment Variables:
   DOTFILES_POST_APPLY_REPAIR=1   Run post-apply repairs (default)
   DOTFILES_CHEZMOI_STATUS=1      Show status after apply (default)
 HELP
-  exit 0
-  ;;
+    exit 0
+    ;;
 esac
 
 args=("$@")

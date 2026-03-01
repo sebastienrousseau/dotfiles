@@ -85,17 +85,17 @@ EOH
   # Find and list modified files
   log_info "Listing files modified in the last ${minutes} minutes (using $tool):"
   case "$tool" in
-  "find")
-    command find . -type f -mmin -"${minutes}"
-    ;;
-  "fd")
-    fd --type file --changed-within "${minutes}m"
-    ;;
-  "rg")
-    rg --type file --changed-within "${minutes}m"
-    ;;
-  *)
-    log_error "Unknown tool detected."
-    ;;
+    "find")
+      command find . -type f -mmin -"${minutes}"
+      ;;
+    "fd")
+      fd --type file --changed-within "${minutes}m"
+      ;;
+    "rg")
+      rg --type file --changed-within "${minutes}m"
+      ;;
+    *)
+      log_error "Unknown tool detected."
+      ;;
   esac
 }

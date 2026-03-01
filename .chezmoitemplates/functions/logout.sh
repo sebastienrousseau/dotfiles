@@ -60,11 +60,11 @@ EOH
     echo "Are you sure you want to log out? (y/n):"
     read -r response
     case "$response" in
-    [Yy]*) ;;
-    *)
-      log_info "Logout canceled."
-      return 0
-      ;;
+      [Yy]*) ;;
+      *)
+        log_info "Logout canceled."
+        return 0
+        ;;
     esac
   fi
 
@@ -73,31 +73,31 @@ EOH
   os=$(uname | tr '[:upper:]' '[:lower:]')
 
   case "$os" in
-  "darwin")
-    log_info "Logging out from macOS..."
-    if ! osascript -e 'tell application "System Events" to log out'; then
-      log_error "Failed to log out using AppleScript. Try logging out manually."
-    fi
-    ;;
-  "linux")
-    log_info "Logging out from Linux..."
-    if command -v gnome-session-quit &>/dev/null; then
-      gnome-session-quit --logout --no-prompt
-    elif command -v loginctl &>/dev/null; then
-      loginctl terminate-user "$USER"
-    else
-      log_error "Unable to determine logout method for your Linux system. Try logging out manually."
-    fi
-    ;;
-  "msys" | "cygwin" | "mingw"*)
-    log_info "Logging out from Windows..."
-    if ! shutdown /l; then
-      log_error "Failed to log out from Windows. Try logging out manually."
-    fi
-    ;;
-  *)
-    log_error "Unsupported operating system: $os"
-    ;;
+    "darwin")
+      log_info "Logging out from macOS..."
+      if ! osascript -e 'tell application "System Events" to log out'; then
+        log_error "Failed to log out using AppleScript. Try logging out manually."
+      fi
+      ;;
+    "linux")
+      log_info "Logging out from Linux..."
+      if command -v gnome-session-quit &>/dev/null; then
+        gnome-session-quit --logout --no-prompt
+      elif command -v loginctl &>/dev/null; then
+        loginctl terminate-user "$USER"
+      else
+        log_error "Unable to determine logout method for your Linux system. Try logging out manually."
+      fi
+      ;;
+    "msys" | "cygwin" | "mingw"*)
+      log_info "Logging out from Windows..."
+      if ! shutdown /l; then
+        log_error "Failed to log out from Windows. Try logging out manually."
+      fi
+      ;;
+    *)
+      log_error "Unsupported operating system: $os"
+      ;;
   esac
 
   return 0
