@@ -26,8 +26,8 @@ grep '^alias ' "$ALIASES_FILE" | while read -r line; do
     name="${definition%%=*}"
     cmd="${definition#*=}"
     
-    # Clean up the command (remove surrounding quotes)
-    cmd=$(echo "$cmd" | sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//')
+    # Clean up the command (remove surrounding quotes and trim whitespace)
+    cmd=$(echo "$cmd" | sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
     
     # Skip invalid or unsafe names
     if [[ -z "$name" || "$name" == *" "* || "$name" == *"/"* ]]; then
@@ -36,7 +36,7 @@ grep '^alias ' "$ALIASES_FILE" | while read -r line; do
 
     # Skip fish reserved keywords and builtin names that must not be shadowed
     case "$name" in
-        _|and|or|not|builtin|command|exec|if|else|switch|while|for|in|begin|end|break|continue|return|function|set|test|true|false|time|path|cat)
+        _|and|or|not|builtin|command|exec|if|else|switch|while|for|in|begin|end|break|continue|return|function|set|test|true|false|time|path|cat|ls)
             continue
             ;;
     esac
@@ -124,6 +124,46 @@ function lt --wraps=ls --description 'List contents of directory in tree format'
         eza -aT --sort Name --icons --group-directories-first $argv
     else
         ls -R $argv
+    end
+end
+EOF
+
+cat <<'EOF' > "$FISH_FUNCS_DIR/ls.fish"
+function ls --description 'List contents of directory'
+    if command -v eza >/dev/null 2>&1
+        eza --sort Name --icons --group-directories-first $argv
+    else
+        command ls $argv
+    end
+end
+EOF
+
+cat <<'EOF' > "$FISH_FUNCS_DIR/lr.fish"
+function lr --wraps=ls --description 'List contents of directory recursively'
+    if command -v eza >/dev/null 2>&1
+        eza -alF --recurse --sort Name --icons --group-directories-first $argv
+    else
+        ls -lAR $argv
+    end
+end
+EOF
+
+cat <<'EOF' > "$FISH_FUNCS_DIR/lra.fish"
+function lra --wraps=ls --description 'List contents of directory recursively including hidden files'
+    if command -v eza >/dev/null 2>&1
+        eza -alF --recurse --all --sort Name --icons --group-directories-first $argv
+    else
+        ls -lAR $argv
+    end
+end
+EOF
+
+cat <<'EOF' > "$FISH_FUNCS_DIR/lta.fish"
+function lta --wraps=ls --description 'List contents of directory in tree format including hidden files'
+    if command -v eza >/dev/null 2>&1
+        eza -aT --all --sort Name --icons --group-directories-first $argv
+    else
+        ls -aR $argv
     end
 end
 EOF
