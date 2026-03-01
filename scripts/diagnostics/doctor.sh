@@ -55,11 +55,44 @@ log_warn() {
 
 log_info() { ui_info "$1" "${2:-}"; }
 
+# Helper to check command (mise-aware)
+check_cmd() {
+  local cmd="$1"
+  if command -v "$cmd" &>/dev/null; then
+    return 0
+  fi
+  # Fallback: check if installed via mise
+  if command -v mise &>/dev/null; then
+    # Search for common names or aqua names
+    if mise ls --installed 2>/dev/null | grep -qE "($cmd|aqua:.*$cmd)"; then
+      return 0
+    fi
+  fi
+  return 1
+}
+
+get_cmd_path() {
+  local cmd="$1"
+  if command -v "$cmd" &>/dev/null; then
+    command -v "$cmd"
+  elif command -v mise &>/dev/null; then
+    # Try to find the actual install path with better precision
+    local bin_path=$(mise bin-paths 2>/dev/null | grep -E "/$cmd(/|$)" | head -n 1)
+    if [ -n "$bin_path" ]; then
+      echo "$bin_path/$cmd"
+    else
+      echo "$cmd"
+    fi
+  else
+    echo "$cmd"
+  fi
+}
+
 # 1. Check Dependencies
 ui_header "Core Shells"
 for cmd in zsh fish nu starship; do
-  if command -v "$cmd" &>/dev/null; then
-    log_success "$cmd" "$(command -v "$cmd")"
+  if check_cmd "$cmd"; then
+    log_success "$cmd" "$(get_cmd_path "$cmd")"
   else
     if [[ "$cmd" == "nu" || "$cmd" == "fish" ]]; then
        log_warn "$cmd" "Optional but recommended for 2026 stack"
@@ -72,8 +105,8 @@ done
 echo ""
 ui_header "Modern CLI Tools"
 for cmd in rg bat chezmoi fzf zoxide atuin yazi zellij; do
-  if command -v "$cmd" &>/dev/null; then
-    log_success "$cmd" "$(command -v "$cmd")"
+  if check_cmd "$cmd"; then
+    log_success "$cmd" "$(get_cmd_path "$cmd")"
   else
     log_fail "$cmd" "Missing"
   fi
@@ -82,15 +115,15 @@ done
 echo ""
 ui_header "The 2026 Frontier"
 for cmd in pueue wasmtime nix sops age; do
-  if command -v "$cmd" &>/dev/null; then
-    log_success "$cmd" "$(command -v "$cmd")"
+  if check_cmd "$cmd"; then
+    log_success "$cmd" "$(get_cmd_path "$cmd")"
   else
     log_warn "$cmd" "Frontier tool missing"
   fi
 done
 
-if command -v pueue >/dev/null 2>&1; then
-  if pueue status >/dev/null 2>&1; then
+if check_cmd pueue; then
+  if "$(get_cmd_path pueue)" status >/dev/null 2>&1; then
     log_success "pueue daemon" "running"
   else
     log_warn "pueue daemon" "not running (run 'pueued -d')"
