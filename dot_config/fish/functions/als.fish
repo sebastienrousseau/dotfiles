@@ -22,11 +22,24 @@ function als --description 'List aliases and scripts with high-fidelity TUI (gum
                 if test (count $parts) -ge 3
                     set -l name $parts[2]
                     set -l cmd_str $parts[3..-1]
-                    # Join cmd parts and clean up leading/trailing quotes
-                    set -l clean_cmd (string join " " $cmd_str | string replace -r "^'|'\$" "")
-                    # Remove any internal tabs to keep 2 columns
+                    
+                    # 1. Join parts and remove trailing comments
+                    set -l clean_cmd (string join " " $cmd_str | string replace -r '#.*$' '')
+                    
+                    # 2. Trim whitespace
+                    set clean_cmd (string trim "$clean_cmd")
+                    
+                    # 3. Strip leading/trailing quotes (repeatedly if nested)
+                    set clean_cmd (string replace -r "^'|'\$" "" "$clean_cmd")
+                    set clean_cmd (string replace -r "^'|'\$" "" "$clean_cmd")
+                    set clean_cmd (string replace -r "^\"|\"\$" "" "$clean_cmd")
+                    
+                    # 4. Remove any internal tabs to keep exactly 2 columns
                     set clean_cmd (string replace -a "$tab" " " "$clean_cmd")
-                    printf "%s\t%s\n" "$name" "$clean_cmd"
+                    
+                    if test -n "$name"; and test -n "$clean_cmd"
+                        printf "%s\t%s\n" "$name" "$clean_cmd"
+                    end
                 end
             end
             
@@ -43,7 +56,7 @@ function als --description 'List aliases and scripts with high-fidelity TUI (gum
                 end
             end
         end | while read -l line
-            # Count elements when split by tab. Should be exactly 2.
+            # Strict validation: ensure exactly 2 columns by counting tabs
             set -l split_line (string split "$tab" "$line")
             if test (count $split_line) -eq 2
                 echo "$line"
@@ -51,6 +64,7 @@ function als --description 'List aliases and scripts with high-fidelity TUI (gum
         end | "$gum_cmd" table --separator "$tab" --print --columns "Command,Source/Definition" --widths 15,60 \
             --border rounded --border.foreground 212 --header.foreground 212
     else
+        # Fallback if gum is not available
         alias
         if test -d ~/.local/bin
             ls ~/.local/bin
