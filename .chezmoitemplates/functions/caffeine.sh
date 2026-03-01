@@ -27,18 +27,18 @@ CAFFEINE_STATEFILE="${CAFFEINE_CONFIG_DIR}/caffeine.state"
 # Detect OS
 caffeine_detect_os() {
   case "$(uname -s)" in
-  Darwin*)
-    echo "macos"
-    ;;
-  Linux*)
-    echo "linux"
-    ;;
-  CYGWIN* | MINGW* | MSYS*)
-    echo "windows"
-    ;;
-  *)
-    echo "unknown"
-    ;;
+    Darwin*)
+      echo "macos"
+      ;;
+    Linux*)
+      echo "linux"
+      ;;
+    CYGWIN* | MINGW* | MSYS*)
+      echo "windows"
+      ;;
+    *)
+      echo "unknown"
+      ;;
   esac
 }
 
@@ -102,85 +102,85 @@ caffeine_start_daemon() {
 
   # Start daemon based on OS
   case "$OS" in
-  macos)
-    # Daemon isn't needed on macOS as we can use caffeinate directly
-    caffeine_log_info "Using native caffeinate on macOS - no separate daemon needed"
-    touch "$CAFFEINE_LOCKFILE"
-    echo "$$" >"$CAFFEINE_LOCKFILE"
-    ;;
-  linux)
-    (
-      # Fork a background process
+    macos)
+      # Daemon isn't needed on macOS as we can use caffeinate directly
+      caffeine_log_info "Using native caffeinate on macOS - no separate daemon needed"
       touch "$CAFFEINE_LOCKFILE"
       echo "$$" >"$CAFFEINE_LOCKFILE"
-      touch "$CAFFEINE_STATEFILE"
-      echo "inactive" >"$CAFFEINE_STATEFILE"
+      ;;
+    linux)
+      (
+        # Fork a background process
+        touch "$CAFFEINE_LOCKFILE"
+        echo "$$" >"$CAFFEINE_LOCKFILE"
+        touch "$CAFFEINE_STATEFILE"
+        echo "inactive" >"$CAFFEINE_STATEFILE"
 
-      # Monitor for state changes
-      while true; do
-        if [[ -f "$CAFFEINE_STATEFILE" ]]; then
-          current_state=$(cat "$CAFFEINE_STATEFILE")
-          if [[ "$current_state" == "active" ]]; then
-            # Keep inhibiting screen sleep while in active state
-            if command -v xdg-screensaver &>/dev/null; then
-              xdg-screensaver reset
+        # Monitor for state changes
+        while true; do
+          if [[ -f "$CAFFEINE_STATEFILE" ]]; then
+            current_state=$(cat "$CAFFEINE_STATEFILE")
+            if [[ "$current_state" == "active" ]]; then
+              # Keep inhibiting screen sleep while in active state
+              if command -v xdg-screensaver &>/dev/null; then
+                xdg-screensaver reset
+              fi
+              if command -v xset &>/dev/null; then
+                xset s reset
+              fi
+              sleep 30 # Reset every 30 seconds
+            else
+              # Just wait for state to change
+              sleep 5
             fi
-            if command -v xset &>/dev/null; then
-              xset s reset
+          else
+            # Statefile was removed, exit
+            break
+          fi
+        done
+
+        # Clean up if daemon is stopped
+        rm -f "$CAFFEINE_LOCKFILE" "$CAFFEINE_STATEFILE"
+      ) &
+      disown
+      caffeine_log_info "Caffeine daemon started (PID: $!)"
+      ;;
+    windows)
+      (
+        # Fork a background PowerShell script
+        touch "$CAFFEINE_LOCKFILE"
+        echo "$$" >"$CAFFEINE_LOCKFILE"
+        touch "$CAFFEINE_STATEFILE"
+        echo "inactive" >"$CAFFEINE_STATEFILE"
+
+        # Monitor for state changes using PowerShell in the background
+        while true; do
+          if [[ -f "$CAFFEINE_STATEFILE" ]]; then
+            current_state=$(cat "$CAFFEINE_STATEFILE")
+            if [[ "$current_state" == "active" ]]; then
+              # Send a keypress to prevent sleep (F15 is typically unused)
+              powershell.exe -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('{F15}')" &>/dev/null
+              sleep 60 # Send key every 60 seconds
+            else
+              # Just wait for state to change
+              sleep 5
             fi
-            sleep 30 # Reset every 30 seconds
           else
-            # Just wait for state to change
-            sleep 5
+            # Statefile was removed, exit
+            break
           fi
-        else
-          # Statefile was removed, exit
-          break
-        fi
-      done
+        done
 
-      # Clean up if daemon is stopped
-      rm -f "$CAFFEINE_LOCKFILE" "$CAFFEINE_STATEFILE"
-    ) &
-    disown
-    caffeine_log_info "Caffeine daemon started (PID: $!)"
-    ;;
-  windows)
-    (
-      # Fork a background PowerShell script
-      touch "$CAFFEINE_LOCKFILE"
-      echo "$$" >"$CAFFEINE_LOCKFILE"
-      touch "$CAFFEINE_STATEFILE"
-      echo "inactive" >"$CAFFEINE_STATEFILE"
-
-      # Monitor for state changes using PowerShell in the background
-      while true; do
-        if [[ -f "$CAFFEINE_STATEFILE" ]]; then
-          current_state=$(cat "$CAFFEINE_STATEFILE")
-          if [[ "$current_state" == "active" ]]; then
-            # Send a keypress to prevent sleep (F15 is typically unused)
-            powershell.exe -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('{F15}')" &>/dev/null
-            sleep 60 # Send key every 60 seconds
-          else
-            # Just wait for state to change
-            sleep 5
-          fi
-        else
-          # Statefile was removed, exit
-          break
-        fi
-      done
-
-      # Clean up if daemon is stopped
-      rm -f "$CAFFEINE_LOCKFILE" "$CAFFEINE_STATEFILE"
-    ) &
-    disown
-    caffeine_log_info "Caffeine daemon started (PID: $!)"
-    ;;
-  *)
-    caffeine_log_error "Unsupported operating system"
-    return 1
-    ;;
+        # Clean up if daemon is stopped
+        rm -f "$CAFFEINE_LOCKFILE" "$CAFFEINE_STATEFILE"
+      ) &
+      disown
+      caffeine_log_info "Caffeine daemon started (PID: $!)"
+      ;;
+    *)
+      caffeine_log_error "Unsupported operating system"
+      return 1
+      ;;
   esac
 
   return 0
@@ -259,40 +259,40 @@ caffeine_start_caffeine() {
 
   # Start based on OS
   case "$OS" in
-  macos)
-    # If an existing caffeinate process is running, kill it
-    if [[ -f "$CAFFEINE_STATEFILE" ]]; then
-      local pid
-      pid=$(cat "$CAFFEINE_STATEFILE" 2>/dev/null)
-      if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
-        kill "$pid" 2>/dev/null
+    macos)
+      # If an existing caffeinate process is running, kill it
+      if [[ -f "$CAFFEINE_STATEFILE" ]]; then
+        local pid
+        pid=$(cat "$CAFFEINE_STATEFILE" 2>/dev/null)
+        if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+          kill "$pid" 2>/dev/null
+        fi
       fi
-    fi
 
-    # Start a new caffeinate process with appropriate flags
-    # -d: prevent display from sleeping
-    # -i: prevent system from idle sleeping
-    # -s: prevent system from sleeping
-    caffeinate -d -i -s &
-    local pid="$!"
+      # Start a new caffeinate process with appropriate flags
+      # -d: prevent display from sleeping
+      # -i: prevent system from idle sleeping
+      # -s: prevent system from sleeping
+      caffeinate -d -i -s &
+      local pid="$!"
 
-    # Verify process started successfully
-    if kill -0 "$pid" 2>/dev/null; then
-      echo "$pid" >"$CAFFEINE_STATEFILE"
-      caffeine_log_info "Screen will stay awake (PID: $pid)"
-    else
-      caffeine_log_error "Failed to start caffeinate process"
+      # Verify process started successfully
+      if kill -0 "$pid" 2>/dev/null; then
+        echo "$pid" >"$CAFFEINE_STATEFILE"
+        caffeine_log_info "Screen will stay awake (PID: $pid)"
+      else
+        caffeine_log_error "Failed to start caffeinate process"
+        return 1
+      fi
+      ;;
+    linux | windows)
+      echo "active" >"$CAFFEINE_STATEFILE"
+      caffeine_log_info "Screen will stay awake"
+      ;;
+    *)
+      caffeine_log_error "Unsupported operating system"
       return 1
-    fi
-    ;;
-  linux | windows)
-    echo "active" >"$CAFFEINE_STATEFILE"
-    caffeine_log_info "Screen will stay awake"
-    ;;
-  *)
-    caffeine_log_error "Unsupported operating system"
-    return 1
-    ;;
+      ;;
   esac
 
   return 0
@@ -302,33 +302,33 @@ caffeine_start_caffeine() {
 caffeine_stop_caffeine() {
   # Check if caffeine is active
   case "$OS" in
-  macos)
-    if [[ -f "$CAFFEINE_STATEFILE" ]]; then
-      local pid
-      pid=$(cat "$CAFFEINE_STATEFILE" 2>/dev/null)
-      if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
-        kill "$pid" 2>/dev/null
-        caffeine_log_info "Screen can now sleep (stopped PID: $pid)"
+    macos)
+      if [[ -f "$CAFFEINE_STATEFILE" ]]; then
+        local pid
+        pid=$(cat "$CAFFEINE_STATEFILE" 2>/dev/null)
+        if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+          kill "$pid" 2>/dev/null
+          caffeine_log_info "Screen can now sleep (stopped PID: $pid)"
+        else
+          caffeine_log_warning "No active caffeinate process found"
+        fi
+        echo "inactive" >"$CAFFEINE_STATEFILE"
       else
-        caffeine_log_warning "No active caffeinate process found"
+        caffeine_log_warning "Caffeine is not active"
       fi
-      echo "inactive" >"$CAFFEINE_STATEFILE"
-    else
-      caffeine_log_warning "Caffeine is not active"
-    fi
-    ;;
-  linux | windows)
-    if [[ -f "$CAFFEINE_STATEFILE" ]]; then
-      echo "inactive" >"$CAFFEINE_STATEFILE"
-      caffeine_log_info "Screen can now sleep"
-    else
-      caffeine_log_warning "Caffeine is not active"
-    fi
-    ;;
-  *)
-    caffeine_log_error "Unsupported operating system"
-    return 1
-    ;;
+      ;;
+    linux | windows)
+      if [[ -f "$CAFFEINE_STATEFILE" ]]; then
+        echo "inactive" >"$CAFFEINE_STATEFILE"
+        caffeine_log_info "Screen can now sleep"
+      else
+        caffeine_log_warning "Caffeine is not active"
+      fi
+      ;;
+    *)
+      caffeine_log_error "Unsupported operating system"
+      return 1
+      ;;
   esac
 
   return 0
@@ -392,14 +392,14 @@ caffeine_show_diagnostic() {
   echo -n "Caffeine State: "
   if caffeine_check_active; then
     case "$OS" in
-    macos)
-      local pid
-      pid=$(cat "$CAFFEINE_STATEFILE" 2>/dev/null)
-      echo "Active (PID: $pid)"
-      ;;
-    *)
-      echo "Active"
-      ;;
+      macos)
+        local pid
+        pid=$(cat "$CAFFEINE_STATEFILE" 2>/dev/null)
+        echo "Active (PID: $pid)"
+        ;;
+      *)
+        echo "Active"
+        ;;
     esac
   else
     echo "Inactive"
@@ -407,16 +407,16 @@ caffeine_show_diagnostic() {
 
   echo "Dependencies:"
   case "$OS" in
-  macos)
-    echo "  caffeinate: $(command -v /usr/bin/caffeinate &>/dev/null && echo "Found" || echo "Not Found")"
-    ;;
-  linux)
-    echo "  xdg-screensaver: $(command -v xdg-screensaver &>/dev/null && echo "Found" || echo "Not Found")"
-    echo "  xset: $(command -v xset &>/dev/null && echo "Found" || echo "Not Found")"
-    ;;
-  windows)
-    echo "  PowerShell: $(command -v powershell.exe &>/dev/null && echo "Found" || echo "Not Found")"
-    ;;
+    macos)
+      echo "  caffeinate: $(command -v /usr/bin/caffeinate &>/dev/null && echo "Found" || echo "Not Found")"
+      ;;
+    linux)
+      echo "  xdg-screensaver: $(command -v xdg-screensaver &>/dev/null && echo "Found" || echo "Not Found")"
+      echo "  xset: $(command -v xset &>/dev/null && echo "Found" || echo "Not Found")"
+      ;;
+    windows)
+      echo "  PowerShell: $(command -v powershell.exe &>/dev/null && echo "Found" || echo "Not Found")"
+      ;;
   esac
 
   echo "==============================="
@@ -463,41 +463,41 @@ caffeine() {
   fi
 
   case "$1" in
-  daemon | --daemon | -d)
-    caffeine_start_daemon
-    ;;
-  status | --status | -s)
-    caffeine_show_status
-    ;;
-  query | --query | -q)
-    caffeine_query_status
-    ;;
-  start | --start)
-    caffeine_start_caffeine
-    ;;
-  stop | --stop)
-    caffeine_stop_caffeine
-    ;;
-  toggle | --toggle | -t)
-    caffeine_toggle_caffeine
-    ;;
-  shutdown | --shutdown)
-    caffeine_shutdown_daemon
-    ;;
-  diagnostic | --diagnostic | -D)
-    caffeine_show_diagnostic
-    ;;
-  version | --version | -v)
-    caffeine_show_version
-    ;;
-  help | --help | -h)
-    caffeine_show_help
-    ;;
-  *)
-    caffeine_log_error "Unknown command: $1"
-    caffeine_show_help
-    return 1
-    ;;
+    daemon | --daemon | -d)
+      caffeine_start_daemon
+      ;;
+    status | --status | -s)
+      caffeine_show_status
+      ;;
+    query | --query | -q)
+      caffeine_query_status
+      ;;
+    start | --start)
+      caffeine_start_caffeine
+      ;;
+    stop | --stop)
+      caffeine_stop_caffeine
+      ;;
+    toggle | --toggle | -t)
+      caffeine_toggle_caffeine
+      ;;
+    shutdown | --shutdown)
+      caffeine_shutdown_daemon
+      ;;
+    diagnostic | --diagnostic | -D)
+      caffeine_show_diagnostic
+      ;;
+    version | --version | -v)
+      caffeine_show_version
+      ;;
+    help | --help | -h)
+      caffeine_show_help
+      ;;
+    *)
+      caffeine_log_error "Unknown command: $1"
+      caffeine_show_help
+      return 1
+      ;;
   esac
 }
 

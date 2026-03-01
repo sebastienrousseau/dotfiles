@@ -451,94 +451,94 @@ main() {
   # Parse global options
   while [[ $# -gt 0 ]]; do
     case "$1" in
-    -f | --force)
-      FORCE=1
-      shift
-      ;;
-    -n | --dry-run)
-      DRY_RUN=1
-      shift
-      ;;
-    -v | --verbose)
-      VERBOSE=1
-      shift
-      ;;
-    -h | --help)
-      usage
-      exit 0
-      ;;
-    *) break ;;
+      -f | --force)
+        FORCE=1
+        shift
+        ;;
+      -n | --dry-run)
+        DRY_RUN=1
+        shift
+        ;;
+      -v | --verbose)
+        VERBOSE=1
+        shift
+        ;;
+      -h | --help)
+        usage
+        exit 0
+        ;;
+      *) break ;;
     esac
   done
 
   ensure_dirs
 
   case "$command" in
-  status)
-    show_status
-    ;;
-  backup)
-    create_backup "manual"
-    ;;
-  rollback)
-    local latest
-    latest=$(get_latest_backup)
-    if [[ -z "$latest" ]]; then
-      log_error "No backups available for rollback"
+    status)
+      show_status
+      ;;
+    backup)
+      create_backup "manual"
+      ;;
+    rollback)
+      local latest
+      latest=$(get_latest_backup)
+      if [[ -z "$latest" ]]; then
+        log_error "No backups available for rollback"
+        exit 1
+      fi
+      if [[ "$FORCE" != "1" ]] && [[ "$DRY_RUN" != "1" ]]; then
+        read -rp "Rollback to $(basename "$latest")? [y/N] " response
+        [[ ! "$response" =~ ^[Yy]$ ]] && exit 0
+      fi
+      perform_rollback "$latest" "$DRY_RUN"
+      ;;
+    rollback-to)
+      local index="${1:-}"
+      if [[ -z "$index" ]] || ! [[ "$index" =~ ^[0-9]+$ ]]; then
+        log_error "Please specify a backup number (see 'status' command)"
+        exit 1
+      fi
+      local backup
+      backup=$(get_backup_by_index "$index")
+      if [[ -z "$backup" ]]; then
+        log_error "Backup #$index not found"
+        exit 1
+      fi
+      if [[ "$FORCE" != "1" ]] && [[ "$DRY_RUN" != "1" ]]; then
+        read -rp "Rollback to $(basename "$backup")? [y/N] " response
+        [[ ! "$response" =~ ^[Yy]$ ]] && exit 0
+      fi
+      perform_rollback "$backup" "$DRY_RUN"
+      ;;
+    git-reset)
+      if [[ "$FORCE" != "1" ]] && [[ "$DRY_RUN" != "1" ]]; then
+        read -rp "Reset to last known good commit? [y/N] " response
+        [[ ! "$response" =~ ^[Yy]$ ]] && exit 0
+      fi
+      git_reset "$DRY_RUN"
+      ;;
+    restore)
+      local file="${1:-}"
+      if [[ -z "$file" ]]; then
+        log_error "Please specify a file to restore"
+        exit 1
+      fi
+      restore_file "$file" "$DRY_RUN"
+      ;;
+    clean)
+      log_info "Cleaning old backups (keeping last $MAX_BACKUPS)..."
+      cleanup_old_backups
+      log_success "Cleanup complete"
+      ;;
+    -h | --help | help)
+      usage
+      ;;
+    *)
+      log_error "Unknown command: $command"
+      usage
       exit 1
-    fi
-    if [[ "$FORCE" != "1" ]] && [[ "$DRY_RUN" != "1" ]]; then
-      read -rp "Rollback to $(basename "$latest")? [y/N] " response
-      [[ ! "$response" =~ ^[Yy]$ ]] && exit 0
-    fi
-    perform_rollback "$latest" "$DRY_RUN"
-    ;;
-  rollback-to)
-    local index="${1:-}"
-    if [[ -z "$index" ]] || ! [[ "$index" =~ ^[0-9]+$ ]]; then
-      log_error "Please specify a backup number (see 'status' command)"
-      exit 1
-    fi
-    local backup
-    backup=$(get_backup_by_index "$index")
-    if [[ -z "$backup" ]]; then
-      log_error "Backup #$index not found"
-      exit 1
-    fi
-    if [[ "$FORCE" != "1" ]] && [[ "$DRY_RUN" != "1" ]]; then
-      read -rp "Rollback to $(basename "$backup")? [y/N] " response
-      [[ ! "$response" =~ ^[Yy]$ ]] && exit 0
-    fi
-    perform_rollback "$backup" "$DRY_RUN"
-    ;;
-  git-reset)
-    if [[ "$FORCE" != "1" ]] && [[ "$DRY_RUN" != "1" ]]; then
-      read -rp "Reset to last known good commit? [y/N] " response
-      [[ ! "$response" =~ ^[Yy]$ ]] && exit 0
-    fi
-    git_reset "$DRY_RUN"
-    ;;
-  restore)
-    local file="${1:-}"
-    if [[ -z "$file" ]]; then
-      log_error "Please specify a file to restore"
-      exit 1
-    fi
-    restore_file "$file" "$DRY_RUN"
-    ;;
-  clean)
-    log_info "Cleaning old backups (keeping last $MAX_BACKUPS)..."
-    cleanup_old_backups
-    log_success "Cleanup complete"
-    ;;
-  -h | --help | help)
-    usage
-    ;;
-  *)
-    log_error "Unknown command: $command"
-    usage
-    exit 1
-    ;;
+      ;;
   esac
 }
 

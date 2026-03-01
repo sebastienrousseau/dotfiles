@@ -7,7 +7,7 @@ APPLY=0
 
 for arg in "$@"; do
   case "$arg" in
-  --apply) APPLY=1 ;;
+    --apply) APPLY=1 ;;
   esac
 done
 

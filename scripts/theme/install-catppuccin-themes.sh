@@ -327,44 +327,44 @@ main() {
 
 # Handle script arguments
 case "${1:-install}" in
-install | "")
-  main
-  ;;
-gtk)
-  install_gtk_themes
-  refresh_gtk
-  ;;
-icons)
-  install_papirus_icons
-  refresh_gtk
-  ;;
-cursors)
-  install_catppuccin_cursors
-  ;;
-shell)
-  install_shell_themes
-  ;;
-wallpapers)
-  install_wallpapers
-  ;;
-refresh)
-  refresh_gtk
-  ;;
-help)
-  echo "Usage: $0 [install|gtk|icons|cursors|shell|wallpapers|refresh|help]"
-  echo ""
-  echo "  install     Install all Catppuccin theme components (default)"
-  echo "  gtk         Install only GTK themes"
-  echo "  icons       Install only icon themes"
-  echo "  cursors     Install only cursor themes"
-  echo "  shell       Install only GNOME Shell themes"
-  echo "  wallpapers  Install only wallpapers"
-  echo "  refresh     Refresh theme cache"
-  echo "  help        Show this help message"
-  ;;
-*)
-  error "Unknown option: $1"
-  echo "Use '$0 help' for usage information."
-  exit 1
-  ;;
+  install | "")
+    main
+    ;;
+  gtk)
+    install_gtk_themes
+    refresh_gtk
+    ;;
+  icons)
+    install_papirus_icons
+    refresh_gtk
+    ;;
+  cursors)
+    install_catppuccin_cursors
+    ;;
+  shell)
+    install_shell_themes
+    ;;
+  wallpapers)
+    install_wallpapers
+    ;;
+  refresh)
+    refresh_gtk
+    ;;
+  help)
+    echo "Usage: $0 [install|gtk|icons|cursors|shell|wallpapers|refresh|help]"
+    echo ""
+    echo "  install     Install all Catppuccin theme components (default)"
+    echo "  gtk         Install only GTK themes"
+    echo "  icons       Install only icon themes"
+    echo "  cursors     Install only cursor themes"
+    echo "  shell       Install only GNOME Shell themes"
+    echo "  wallpapers  Install only wallpapers"
+    echo "  refresh     Refresh theme cache"
+    echo "  help        Show this help message"
+    ;;
+  *)
+    error "Unknown option: $1"
+    echo "Use '$0 help' for usage information."
+    exit 1
+    ;;
 esac

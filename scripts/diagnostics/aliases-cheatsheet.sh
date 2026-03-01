@@ -48,15 +48,15 @@ pick_alias() {
 
 for a in "${core_aliases[@]}"; do
   case "$a" in
-  a)
-    line="$(pick_alias "$a" "/ai/")"
-    ;;
-  d)
-    line="$(pick_alias "$a" "/system/" "/configuration/" "/docker/")"
-    ;;
-  *)
-    line="$(pick_alias "$a")"
-    ;;
+    a)
+      line="$(pick_alias "$a" "/ai/")"
+      ;;
+    d)
+      line="$(pick_alias "$a" "/system/" "/configuration/" "/docker/")"
+      ;;
+    *)
+      line="$(pick_alias "$a")"
+      ;;
   esac
   if [[ -n "$line" ]]; then
     printf '%s\n' "- \`$a\` $line"

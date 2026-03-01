@@ -52,27 +52,27 @@ if [ "${DOTFILES_FIREWALL:-}" != "1" ]; then
 fi
 
 case "$(dot_platform_id)" in
-macos)
-  ui_info "Enabling" "macOS firewall"
-  sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
-  sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setallowsigned on
-  sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setallowsignedapp on
-  sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setstealthmode on
-  ;;
-linux | wsl)
-  if command -v ufw >/dev/null; then
-    ui_info "Enabling" "UFW"
-    sudo ufw default deny incoming
-    sudo ufw default allow outgoing
-    sudo ufw allow OpenSSH
-    sudo ufw --force enable
-  else
-    ui_err "ufw" "not installed; re-run after install"
+  macos)
+    ui_info "Enabling" "macOS firewall"
+    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
+    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setallowsigned on
+    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setallowsignedapp on
+    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setstealthmode on
+    ;;
+  linux | wsl)
+    if command -v ufw >/dev/null; then
+      ui_info "Enabling" "UFW"
+      sudo ufw default deny incoming
+      sudo ufw default allow outgoing
+      sudo ufw allow OpenSSH
+      sudo ufw --force enable
+    else
+      ui_err "ufw" "not installed; re-run after install"
+      exit 1
+    fi
+    ;;
+  *)
+    ui_err "Unsupported OS" "firewall setup"
     exit 1
-  fi
-  ;;
-*)
-  ui_err "Unsupported OS" "firewall setup"
-  exit 1
-  ;;
+    ;;
 esac

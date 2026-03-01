@@ -8,17 +8,17 @@ ONCE=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-  --interval)
-    INTERVAL="$2"
-    shift 2
-    ;;
-  --once)
-    ONCE=1
-    shift
-    ;;
-  *)
-    shift
-    ;;
+    --interval)
+      INTERVAL="$2"
+      shift 2
+      ;;
+    --once)
+      ONCE=1
+      shift
+      ;;
+    *)
+      shift
+      ;;
   esac
 done
 
@@ -47,24 +47,24 @@ pick_wallpaper() {
 apply_wallpaper() {
   local wp="$1"
   case "$(uname -s)" in
-  Darwin)
-    osascript -e "tell application \"System Events\" to set picture of every desktop to POSIX file \"$wp\"" || true
-    ;;
-  Linux)
-    if command -v feh >/dev/null; then
-      feh --bg-fill "$wp"
-    elif command -v swaybg >/dev/null; then
-      pkill swaybg || true
-      swaybg -i "$wp" -m fill &
-    else
-      echo "No supported wallpaper setter found (feh/swaybg)." >&2
+    Darwin)
+      osascript -e "tell application \"System Events\" to set picture of every desktop to POSIX file \"$wp\"" || true
+      ;;
+    Linux)
+      if command -v feh >/dev/null; then
+        feh --bg-fill "$wp"
+      elif command -v swaybg >/dev/null; then
+        pkill swaybg || true
+        swaybg -i "$wp" -m fill &
+      else
+        echo "No supported wallpaper setter found (feh/swaybg)." >&2
+        return 1
+      fi
+      ;;
+    *)
+      echo "Wallpaper rotation not supported on this OS." >&2
       return 1
-    fi
-    ;;
-  *)
-    echo "Wallpaper rotation not supported on this OS." >&2
-    return 1
-    ;;
+      ;;
   esac
 }
 

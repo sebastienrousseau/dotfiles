@@ -24,25 +24,25 @@ MAX_MS="${DOTFILES_PERF_MAX_MS:-1000}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-  --json)
-    JSON_OUTPUT=true
-    shift
-    ;;
-  --profile)
-    PROFILE=true
-    shift
-    ;;
-  --runs)
-    RUNS="${2:-3}"
-    shift 2
-    ;;
-  --target)
-    TARGET_MS="${2:-$TARGET_MS}"
-    shift 2
-    ;;
-  *)
-    shift
-    ;;
+    --json)
+      JSON_OUTPUT=true
+      shift
+      ;;
+    --profile)
+      PROFILE=true
+      shift
+      ;;
+    --runs)
+      RUNS="${2:-3}"
+      shift 2
+      ;;
+    --target)
+      TARGET_MS="${2:-$TARGET_MS}"
+      shift 2
+      ;;
+    *)
+      shift
+      ;;
   esac
 done
 

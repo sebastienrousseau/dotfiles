@@ -15,15 +15,15 @@ BASELINE=false
 FORCE=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
-  --baseline)
-    BASELINE=true
-    shift
-    ;;
-  --force)
-    FORCE=true
-    shift
-    ;;
-  *) shift ;;
+    --baseline)
+      BASELINE=true
+      shift
+      ;;
+    --force)
+      FORCE=true
+      shift
+      ;;
+    *) shift ;;
   esac
 done
 

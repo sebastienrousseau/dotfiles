@@ -61,27 +61,27 @@ apply_sysctl "fs.file-max" "2097152"
 ui_header "Memory settings"
 
 case "$PROFILE" in
-laptop)
-  # Laptop: Balance between RAM and battery (moderate swappiness)
-  apply_sysctl "vm.swappiness" "10"
-  apply_sysctl "vm.vfs_cache_pressure" "50"
-  apply_sysctl "vm.dirty_ratio" "15"
-  apply_sysctl "vm.dirty_background_ratio" "5"
-  ;;
-desktop)
-  # Desktop: Prefer RAM over swap (low swappiness, more RAM usage)
-  apply_sysctl "vm.swappiness" "5"
-  apply_sysctl "vm.vfs_cache_pressure" "50"
-  apply_sysctl "vm.dirty_ratio" "20"
-  apply_sysctl "vm.dirty_background_ratio" "5"
-  ;;
-server)
-  # Server: Minimal swapping for consistent performance
-  apply_sysctl "vm.swappiness" "1"
-  apply_sysctl "vm.vfs_cache_pressure" "100"
-  apply_sysctl "vm.dirty_ratio" "10"
-  apply_sysctl "vm.dirty_background_ratio" "3"
-  ;;
+  laptop)
+    # Laptop: Balance between RAM and battery (moderate swappiness)
+    apply_sysctl "vm.swappiness" "10"
+    apply_sysctl "vm.vfs_cache_pressure" "50"
+    apply_sysctl "vm.dirty_ratio" "15"
+    apply_sysctl "vm.dirty_background_ratio" "5"
+    ;;
+  desktop)
+    # Desktop: Prefer RAM over swap (low swappiness, more RAM usage)
+    apply_sysctl "vm.swappiness" "5"
+    apply_sysctl "vm.vfs_cache_pressure" "50"
+    apply_sysctl "vm.dirty_ratio" "20"
+    apply_sysctl "vm.dirty_background_ratio" "5"
+    ;;
+  server)
+    # Server: Minimal swapping for consistent performance
+    apply_sysctl "vm.swappiness" "1"
+    apply_sysctl "vm.vfs_cache_pressure" "100"
+    apply_sysctl "vm.dirty_ratio" "10"
+    apply_sysctl "vm.dirty_background_ratio" "3"
+    ;;
 esac
 
 # =============================================================================

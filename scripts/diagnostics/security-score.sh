@@ -38,19 +38,19 @@ VERBOSE=true
 JSON_OUTPUT=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
-  --verbose | -v)
-    VERBOSE=true
-    shift
-    ;;
-  --quiet | -q)
-    VERBOSE=false
-    shift
-    ;;
-  --json)
-    JSON_OUTPUT=true
-    shift
-    ;;
-  *) shift ;;
+    --verbose | -v)
+      VERBOSE=true
+      shift
+      ;;
+    --quiet | -q)
+      VERBOSE=false
+      shift
+      ;;
+    --json)
+      JSON_OUTPUT=true
+      shift
+      ;;
+    *) shift ;;
   esac
 done
 

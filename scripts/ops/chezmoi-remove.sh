@@ -13,15 +13,15 @@ paths=()
 
 for arg in "$@"; do
   case "$arg" in
-  --source)
-    remove_source=1
-    ;;
-  --dry-run)
-    args+=("--dry-run")
-    ;;
-  *)
-    paths+=("$arg")
-    ;;
+    --source)
+      remove_source=1
+      ;;
+    --dry-run)
+      args+=("--dry-run")
+      ;;
+    *)
+      paths+=("$arg")
+      ;;
   esac
 done
 

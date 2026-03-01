@@ -87,13 +87,13 @@ Total Time: %{time_total}\n")
     description=""
 
     case "$metric" in
-    "IP Address") description="IP address of the server" ;;
-    "DNS Lookup") description="Time to resolve the domain name to an IP address" ;;
-    "TCP Connection") description="Time to establish a TCP connection to the server" ;;
-    "SSL Handshake") description="Time to complete the SSL/TLS handshake (if applicable)" ;;
-    "Server Processing") description="Time from connection to server readiness to transfer data" ;;
-    "Time to First Byte") description="Time until the first byte of the response is received" ;;
-    "Total Time") description="Total time for the request, including all stages" ;;
+      "IP Address") description="IP address of the server" ;;
+      "DNS Lookup") description="Time to resolve the domain name to an IP address" ;;
+      "TCP Connection") description="Time to establish a TCP connection to the server" ;;
+      "SSL Handshake") description="Time to complete the SSL/TLS handshake (if applicable)" ;;
+      "Server Processing") description="Time from connection to server readiness to transfer data" ;;
+      "Time to First Byte") description="Time until the first byte of the response is received" ;;
+      "Total Time") description="Total time for the request, including all stages" ;;
     esac
 
     if [[ "$metric" == "IP Address" ]]; then

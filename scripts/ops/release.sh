@@ -67,15 +67,15 @@ bump_version() {
   IFS='.' read -r major minor patch <<<"$current"
 
   case "$bump_type" in
-  patch) patch=$((patch + 1)) ;;
-  minor)
-    minor=$((minor + 1))
-    patch=0
-    ;;
-  *)
-    log_error "Unknown bump type: $bump_type"
-    exit 1
-    ;;
+    patch) patch=$((patch + 1)) ;;
+    minor)
+      minor=$((minor + 1))
+      patch=0
+      ;;
+    *)
+      log_error "Unknown bump type: $bump_type"
+      exit 1
+      ;;
   esac
 
   echo "${major}.${minor}.${patch}"
@@ -88,23 +88,23 @@ main() {
   # Parse arguments
   while [[ $# -gt 0 ]]; do
     case "$1" in
-    patch | minor)
-      bump_type="$1"
-      shift
-      ;;
-    -n | --dry-run)
-      dry_run=1
-      shift
-      ;;
-    -h | --help)
-      usage
-      exit 0
-      ;;
-    *)
-      log_error "Unknown argument: $1"
-      usage
-      exit 1
-      ;;
+      patch | minor)
+        bump_type="$1"
+        shift
+        ;;
+      -n | --dry-run)
+        dry_run=1
+        shift
+        ;;
+      -h | --help)
+        usage
+        exit 0
+        ;;
+      *)
+        log_error "Unknown argument: $1"
+        usage
+        exit 1
+        ;;
     esac
   done
 

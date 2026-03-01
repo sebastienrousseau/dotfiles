@@ -27,26 +27,26 @@ if [ -z "$WALLPAPER" ]; then
 fi
 
 case "$(uname -s)" in
-Darwin)
-  osascript -e "tell application \"System Events\" to set picture of every desktop to POSIX file \"$WALLPAPER\"" || true
-  ;;
-Linux)
-  if command -v feh >/dev/null; then
-    ui_info "Applying" "feh --bg-fill"
-    feh --bg-fill "$WALLPAPER"
-  elif command -v swaybg >/dev/null; then
-    ui_info "Applying" "swaybg -m fill"
-    pkill swaybg || true
-    swaybg -i "$WALLPAPER" -m fill &
-  else
-    ui_err "Wallpaper setter" "not found (feh/swaybg)"
+  Darwin)
+    osascript -e "tell application \"System Events\" to set picture of every desktop to POSIX file \"$WALLPAPER\"" || true
+    ;;
+  Linux)
+    if command -v feh >/dev/null; then
+      ui_info "Applying" "feh --bg-fill"
+      feh --bg-fill "$WALLPAPER"
+    elif command -v swaybg >/dev/null; then
+      ui_info "Applying" "swaybg -m fill"
+      pkill swaybg || true
+      swaybg -i "$WALLPAPER" -m fill &
+    else
+      ui_err "Wallpaper setter" "not found (feh/swaybg)"
+      exit 1
+    fi
+    ;;
+  *)
+    ui_err "Unsupported OS" "wallpaper sync"
     exit 1
-  fi
-  ;;
-*)
-  ui_err "Unsupported OS" "wallpaper sync"
-  exit 1
-  ;;
+    ;;
 esac
 
 ui_ok "Wallpaper applied" "$WALLPAPER"

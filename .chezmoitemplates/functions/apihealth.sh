@@ -159,67 +159,67 @@ parse_arguments() {
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
-    -h | --help)
-      print_help
-      return 2 # Special return code for help/version display
-      ;;
-    -v | --version)
-      print_version
-      return 2 # Special return code for help/version display
-      ;;
-    -m | --method)
-      if [[ -n "${2:-}" && ! "$2" =~ ^- ]]; then
-        METHOD="$2"
-        shift 2
-      else
-        printf '%b\n' "\e[31m[ERROR]\e[0m --method requires a non-empty option argument."
-        return 1
-      fi
-      ;;
-    -e | --expect)
-      if [[ -n "${2:-}" && ! "$2" =~ ^- ]]; then
-        EXPECT_STATUS="$2"
-        shift 2
-      else
-        printf '%b\n' "\e[31m[ERROR]\e[0m --expect requires a non-empty option argument."
-        return 1
-      fi
-      ;;
-    -H | --header)
-      if [[ -n "${2:-}" && ! "$2" =~ ^- ]]; then
-        if [[ ! "$2" =~ ^[^:]+:[[:space:]]*[^[:space:]]+.*$ ]]; then
-          printf '%b\n' "\e[31m[ERROR]\e[0m Invalid header format: '$2'. Expected 'Key: Value'"
+      -h | --help)
+        print_help
+        return 2 # Special return code for help/version display
+        ;;
+      -v | --version)
+        print_version
+        return 2 # Special return code for help/version display
+        ;;
+      -m | --method)
+        if [[ -n "${2:-}" && ! "$2" =~ ^- ]]; then
+          METHOD="$2"
+          shift 2
+        else
+          printf '%b\n' "\e[31m[ERROR]\e[0m --method requires a non-empty option argument."
           return 1
         fi
-        HEADERS+=("$2")
-        shift 2
-      else
-        printf '%b\n' "\e[31m[ERROR]\e[0m --header requires a non-empty option argument."
-        return 1
-      fi
-      ;;
-    -t | --timeout)
-      if [[ -n "${2:-}" && ! "$2" =~ ^- ]]; then
-        if ! [[ "$2" =~ ^[0-9]+$ ]]; then
-          printf '%b\n' "\e[31m[ERROR]\e[0m Timeout must be a positive integer."
+        ;;
+      -e | --expect)
+        if [[ -n "${2:-}" && ! "$2" =~ ^- ]]; then
+          EXPECT_STATUS="$2"
+          shift 2
+        else
+          printf '%b\n' "\e[31m[ERROR]\e[0m --expect requires a non-empty option argument."
           return 1
         fi
-        TIMEOUT="$2"
-        shift 2
-      else
-        printf '%b\n' "\e[31m[ERROR]\e[0m --timeout requires a non-empty option argument."
+        ;;
+      -H | --header)
+        if [[ -n "${2:-}" && ! "$2" =~ ^- ]]; then
+          if [[ ! "$2" =~ ^[^:]+:[[:space:]]*[^[:space:]]+.*$ ]]; then
+            printf '%b\n' "\e[31m[ERROR]\e[0m Invalid header format: '$2'. Expected 'Key: Value'"
+            return 1
+          fi
+          HEADERS+=("$2")
+          shift 2
+        else
+          printf '%b\n' "\e[31m[ERROR]\e[0m --header requires a non-empty option argument."
+          return 1
+        fi
+        ;;
+      -t | --timeout)
+        if [[ -n "${2:-}" && ! "$2" =~ ^- ]]; then
+          if ! [[ "$2" =~ ^[0-9]+$ ]]; then
+            printf '%b\n' "\e[31m[ERROR]\e[0m Timeout must be a positive integer."
+            return 1
+          fi
+          TIMEOUT="$2"
+          shift 2
+        else
+          printf '%b\n' "\e[31m[ERROR]\e[0m --timeout requires a non-empty option argument."
+          return 1
+        fi
+        ;;
+      -*)
+        printf '%b\n' "\e[31m[ERROR]\e[0m Unknown option: $1"
+        print_help
         return 1
-      fi
-      ;;
-    -*)
-      printf '%b\n' "\e[31m[ERROR]\e[0m Unknown option: $1"
-      print_help
-      return 1
-      ;;
-    *)
-      URLS+=("$1")
-      shift
-      ;;
+        ;;
+      *)
+        URLS+=("$1")
+        shift
+        ;;
     esac
   done
 
