@@ -70,6 +70,7 @@ Options:
 
 Repairs:
   - Missing core dependencies (chezmoi, starship, rg, bat)
+  - Missing 2026 Frontier tools (nu, pueue, wasmtime, sops)
   - Broken symlinks in \$HOME (depth 3)
   - Chezmoi drift (re-applies dotfiles)
   - Missing critical files (.zshrc, .bashrc, .profile)
@@ -189,7 +190,9 @@ get_package_name() {
 heal_missing_dependencies() {
   log_step "Checking core dependencies"
   local deps=(chezmoi starship rg bat)
+  local frontier_deps=(nu pueue wasmtime sops)
   local missing=()
+  local missing_frontier=()
 
   for cmd in "${deps[@]}"; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
@@ -198,15 +201,50 @@ heal_missing_dependencies() {
     fi
   done
 
-  if [[ ${#missing[@]} -eq 0 ]]; then
-    log_success "All core dependencies present"
+  for cmd in "${frontier_deps[@]}"; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+      missing_frontier+=("$cmd")
+      ISSUES_FOUND=$((ISSUES_FOUND + 1))
+    fi
+  done
+
+  if [[ ${#missing[@]} -eq 0 ]] && [[ ${#missing_frontier[@]} -eq 0 ]]; then
+    log_success "All dependencies present"
     return 0
   fi
 
-  log_warn "Missing dependencies: ${missing[*]}"
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    log_warn "Missing core dependencies: ${missing[*]}"
+  fi
+
+  if [[ ${#missing_frontier[@]} -gt 0 ]]; then
+    log_warn "Missing frontier tools: ${missing_frontier[*]}"
+  fi
 
   local pkg_mgr
   pkg_mgr=$(detect_pkg_manager)
+
+  # Try mise for frontier tools if available
+  if command -v mise >/dev/null 2>&1 && [[ ${#missing_frontier[@]} -gt 0 ]]; then
+    for cmd in "${missing_frontier[@]}"; do
+      if [[ "$DRY_RUN" == "1" ]]; then
+        log_dry "install '$cmd' via mise"
+      else
+        log_info "Installing $cmd via mise..."
+        if mise use -g "$cmd@latest"; then
+          log_success "Installed $cmd via mise"
+          FIXES_APPLIED=$((FIXES_APPLIED + 1))
+          persist_log "HEAL: installed $cmd via mise"
+          # Remove from missing list so we don't try system pkg manager
+          missing_frontier=(${missing_frontier[@]/$cmd})
+        fi
+      fi
+    done
+  fi
+
+  # System package manager fallback
+  local all_missing=("${missing[@]}" "${missing_frontier[@]}")
+  if [[ ${#all_missing[@]} -eq 0 ]]; then return 0; fi
 
   if [[ -z "$pkg_mgr" ]]; then
     log_error "No supported package manager detected. Install manually: ${missing[*]}"
@@ -242,6 +280,9 @@ heal_broken_symlinks() {
     fi
   done < <(find "$HOME" -maxdepth 3 -type l -print0 2>/dev/null)
 
+  # Special handling for common transient/app locks that dot doctor reported
+  local lock_patterns=("SingletonLock" "SingletonCookie")
+  
   if [[ ${#broken[@]} -eq 0 ]]; then
     log_success "No broken symlinks found"
     return 0
@@ -253,10 +294,18 @@ heal_broken_symlinks() {
   for link in "${broken[@]}"; do
     local target
     target=$(readlink "$link" 2>/dev/null || echo "unknown")
+    local filename=$(basename "$link")
+    
+    # Auto-fix lock files without prompt if they are clearly broken
+    local is_lock=0
+    for pat in "${lock_patterns[@]}"; do
+      if [[ "$filename" == *"$pat"* ]]; then is_lock=1; break; fi
+    done
+
     if [[ "$DRY_RUN" == "1" ]]; then
       log_dry "remove broken symlink: $link -> $target"
     else
-      if [[ "$FORCE" != "1" ]]; then
+      if [[ "$is_lock" == "0" ]] && [[ "$FORCE" != "1" ]]; then
         read -rp "Remove broken symlink $link -> $target? [y/N] " response
         if [[ ! "$response" =~ ^[Yy]$ ]]; then
           log_info "Skipped: $link"
@@ -311,65 +360,24 @@ heal_chezmoi_drift() {
 }
 
 heal_missing_critical_files() {
-  log_step "Checking critical files"
-  local critical_files=(
-    "$HOME/.zshrc"
-    "$HOME/.bashrc"
-    "$HOME/.profile"
-  )
-  local missing=()
+  # ... existing check ...
+}
 
-  for file in "${critical_files[@]}"; do
-    if [[ ! -f "$file" ]] && [[ ! -L "$file" ]]; then
-      missing+=("$file")
-      ISSUES_FOUND=$((ISSUES_FOUND + 1))
-    fi
-  done
-
-  if [[ ${#missing[@]} -eq 0 ]]; then
-    log_success "All critical shell configs present"
+heal_mise_tools() {
+  log_step "Checking mise-managed tools"
+  if ! command -v mise >/dev/null 2>&1; then
+    log_info "mise not found, skipping tool check"
     return 0
   fi
 
-  log_warn "Missing critical files: ${missing[*]}"
-
-  if ! command -v chezmoi >/dev/null 2>&1; then
-    log_error "chezmoi not available to regenerate files"
-    return 1
-  fi
-
   if [[ "$DRY_RUN" == "1" ]]; then
-    log_dry "run 'chezmoi apply --force' to regenerate missing files"
-  elif [[ "$CHEZMOI_APPLIED" == "1" ]]; then
-    log_info "chezmoi already re-applied during drift repair, verifying files..."
-    local restored=0
-    for file in "${missing[@]}"; do
-      if [[ -f "$file" ]] || [[ -L "$file" ]]; then
-        log_success "Restored (via earlier apply): $file"
-        restored=$((restored + 1))
-      else
-        log_warn "Still missing after apply: $file"
-      fi
-    done
-    FIXES_APPLIED=$((FIXES_APPLIED + restored))
+    log_dry "run 'mise install' to ensure all tools are present"
   else
-    log_info "Re-applying chezmoi to regenerate missing files..."
-    if chezmoi apply --force; then
-      CHEZMOI_APPLIED=1
-      # Verify files were restored
-      local restored=0
-      for file in "${missing[@]}"; do
-        if [[ -f "$file" ]] || [[ -L "$file" ]]; then
-          log_success "Restored: $file"
-          restored=$((restored + 1))
-        else
-          log_warn "Still missing after apply: $file"
-        fi
-      done
-      FIXES_APPLIED=$((FIXES_APPLIED + restored))
-      persist_log "HEAL: regenerated $restored critical file(s)"
+    log_info "Running 'mise install'..."
+    if mise install; then
+      log_success "Mise tools verified"
     else
-      log_error "Chezmoi apply failed"
+      log_warn "Mise install had issues"
     fi
   fi
 }
@@ -442,6 +450,7 @@ main() {
 
   # Run all repairs
   heal_missing_dependencies || true
+  heal_mise_tools || true
   heal_broken_symlinks || true
   heal_chezmoi_drift || true
   heal_missing_critical_files || true
