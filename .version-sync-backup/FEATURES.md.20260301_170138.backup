@@ -20,6 +20,8 @@ secrets = true
 | Flag | Default | Purpose | Dependencies | Impact |
 |------|---------|---------|--------------|---------|
 | `zsh` | `true` | Enable Zsh shell configuration and optimizations | - | Controls Zsh-specific configs, aliases, and shell enhancements |
+| `fish` | `true` | Enable Fish shell configuration and optimizations | - | Controls Fish-specific configs, aliases, and shell enhancements |
+| `nushell` | `true` | Enable Nushell configuration for structured data pipelines | - | Controls Nushell setup, plugins, and environment |
 | `nvim` | `true` | Enable Neovim editor configuration | - | Manages Neovim configs, plugins, and editor-specific settings |
 | `tmux` | `true` | Enable tmux terminal multiplexer configuration | - | Controls tmux configs, key bindings, and session management |
 | `gui` | `true` | Enable GUI application configurations | Desktop environment | Manages GUI app configs, window managers, and desktop settings |
