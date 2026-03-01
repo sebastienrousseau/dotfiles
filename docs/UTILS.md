@@ -80,6 +80,21 @@ You can search and navigate your filesystem with:
 - `pipes` for a terminal screensaver
 - `cmatrix` wrapper with defaults
 
+## Universal Scripts
+
+A suite of high-performance POSIX scripts located in `~/.local/bin` for seamless cross-platform interoperability (macOS, Linux, WSL).
+
+| Command | Description |
+|---------|-------------|
+| `als` | High-fidelity interactive Command Intelligence Explorer (categorized alias/script viewer) |
+| `cb` | Universal clipboard utility (detects `pbcopy`/`pbpaste`, `xclip`/`wl-copy`, or `clip.exe`) |
+| `open` | Universal file/URL opener (maps to `open`, `xdg-open`, or `explorer.exe`) |
+| `notify` | Universal desktop notifications (`osascript`, `notify-send`, or `powershell`) |
+| `extract` | Universal archive extractor with robust format support and `gum` UI feedback |
+| `up <n>` | Navigate up `n` directory levels |
+| `bm` | Directory bookmarking tool (`add`, `goto`, `list`, `remove`, `update`) |
+| `win` | WSL-specific shim for intelligently running Windows binaries with translated paths |
+
 ## Network
 
 You can debug HTTP requests with:
