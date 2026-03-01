@@ -72,6 +72,8 @@
             mods
             thefuck
             carapace
+            wl-clipboard
+            xclip
           ];
 
           shellHook = ''
