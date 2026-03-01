@@ -63,6 +63,13 @@
             # Advanced tools
             pueue
             wasmtime
+
+            # Modern Terminal UI & AI (Charmbracelet + Productivity)
+            gum
+            glow
+            mods
+            thefuck
+            carapace
           ];
 
           shellHook = ''

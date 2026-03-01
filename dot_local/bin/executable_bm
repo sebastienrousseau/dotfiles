@@ -1,0 +1,56 @@
+#!/bin/sh
+# Universal directory bookmarking with history support
+# Works across Bash, Zsh, and Fish
+
+BOOKMARKS_FILE="$HOME/.config/shell/bookmarks"
+mkdir -p "$(dirname "$BOOKMARKS_FILE")"
+touch "$BOOKMARKS_FILE"
+
+if [ -z "$1" ]; then
+    echo "Usage: bm <add|goto|list|remove|update> [name]"
+    exit 1
+fi
+
+action=$1
+name=$2
+
+case "$action" in
+    add)
+        if [ -z "$name" ]; then echo "Usage: bm add <name>"; exit 1; fi
+        echo "$name $(pwd)" >> "$BOOKMARKS_FILE"
+        echo "Bookmark '$name' added for $(pwd)"
+        ;;
+    goto)
+        if [ -z "$name" ]; then echo "Usage: bm goto <name>"; exit 1; fi
+        target=$(grep "^$name " "$BOOKMARKS_FILE" | cut -d' ' -f2-)
+        if [ -n "$target" ] && [ -d "$target" ]; then
+            # We output the target path, the shell alias/function must handle the cd
+            echo "$target"
+        else
+            echo "Bookmark '$name' not found or invalid directory" >&2
+            exit 1
+        fi
+        ;;
+    list)
+        if command -v gum >/dev/null 2>&1; then
+          cat "$BOOKMARKS_FILE" | gum table --columns Name,Path
+        else
+          cat "$BOOKMARKS_FILE"
+        fi
+        ;;
+    remove)
+        if [ -z "$name" ]; then echo "Usage: bm remove <name>"; exit 1; fi
+        sed -i.bak "/^$name /d" "$BOOKMARKS_FILE" && rm -f "$BOOKMARKS_FILE.bak"
+        echo "Bookmark '$name' removed"
+        ;;
+    update)
+        if [ -z "$name" ]; then echo "Usage: bm update <name>"; exit 1; fi
+        sed -i.bak "/^$name /d" "$BOOKMARKS_FILE" && rm -f "$BOOKMARKS_FILE.bak"
+        echo "$name $(pwd)" >> "$BOOKMARKS_FILE"
+        echo "Bookmark '$name' updated to $(pwd)"
+        ;;
+    *)
+        echo "Unknown action: $action"
+        exit 1
+        ;;
+esac

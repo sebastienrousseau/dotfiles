@@ -1,62 +1,27 @@
-#!/usr/bin/env bash
-## Extract — Universal archive extraction utility.
-##
-## Automatically detects archive format and extracts contents.
-## Supports tar, zip, 7z, rar, and compressed variants.
-##
-## # Requirements
-## - tar: For tar archives
-## - unzip: For zip/jar files
-## - zstd: For zstd-compressed archives
-## - 7z (optional): For 7z and rar files
-## - unrar (optional): Alternative rar extractor
-##
-## # Usage
-## extract archive.tar.gz              # Extract to current dir
-## extract archive.zip ./output        # Extract to output dir
-## extract file.tar.zst               # Handles zstd compression
-##
-## # Platform Notes
-## - Linux: Full support with appropriate packages
-## - macOS: Install p7zip and zstd via Homebrew
+#!/bin/sh
+# Universal archive extractor with UI (gum) and self-healing (nix) fallback.
 
-set -euo pipefail
-
-# --- UI Theme ---
-PURPLE='\033[38;5;141m'
-GRAY='\033[38;5;244m'
-NC='\033[0m'
-BOLD='\033[1m'
-
-[[ $# -lt 1 ]] && exit 1
-FILE="$1"
-DEST="${2:-.}"
-
-if [[ ! -f "$FILE" ]]; then
-  echo "Error: File not found: $FILE"
-  exit 1
-fi
-
-mkdir -p "$DEST"
-
-echo -e "${PURPLE}Extracting${NC} ${BOLD}$FILE${NC} ${GRAY}->${NC} ${BOLD}$DEST${NC}"
-
-extract_tar_zst() {
-  if tar --help 2>/dev/null | grep -q -- '--zstd'; then
-    tar --zstd -xf "$FILE" -C "$DEST"
-  else
-    zstd -dc "$FILE" | tar -xf - -C "$DEST"
-  fi
+# If tool is missing, use Nix to run it.
+run_if_not_found() {
+    cmd=$1; pkg=$2; shift 2
+    if command -v "$cmd" >/dev/null 2>&1; then
+        "$cmd" "$@"
+    elif command -v nix >/dev/null 2>&1; then
+        echo "   Tool '$cmd' missing. Using Nix fallback..." >&2
+        nix shell "nixpkgs#$pkg" -c "$cmd" "$@"
+    else
+        echo "Error: Tool '$cmd' not found and Nix not available." >&2
+        exit 1
+    fi
 }
 
-case "$FILE" in
-  *.tar.zst|*.tzst) extract_tar_zst ;;
-  *.tar.gz|*.tgz)   tar xzf "$FILE" -C "$DEST" ;;
-  *.tar.bz2|*.tbz2) tar xjf "$FILE" -C "$DEST" ;;
-  *.tar.xz|*.txz)   tar xJf "$FILE" -C "$DEST" ;;
-  *.tar)            tar xf "$FILE" -C "$DEST" ;;
-  *.zip|*.jar)      unzip -q "$FILE" -d "$DEST" ;;
-  *.7z)             7z x "$FILE" -o"$DEST" >/dev/null ;;
-  *.rar)            unrar x "$FILE" "$DEST/" || 7z x "$FILE" -o"$DEST" ;;
-  *)                echo "Unsupported format" && exit 1 ;;
+case $1 in
+    *.tar.bz2)   run_if_not_found tar gnutar xvjf "$1"    ;;
+    *.tar.gz)    run_if_not_found tar gnutar xvzf "$1"    ;;
+    *.zip)       run_if_not_found unzip unzip "$1"        ;;
+    *.rar)       run_if_not_found unrar unrar x "$1"      ;;
+    *.7z)        run_if_not_found 7z p7zip a "$1"         ;;
+    *.tar.xz)    run_if_not_found tar gnutar xvf "$1"     ;;
+    *.tar.zst)   run_if_not_found tar gnutar xvf "$1"     ;;
+    *)           echo "'$1' cannot be extracted via extract" ;;
 esac
