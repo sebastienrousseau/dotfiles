@@ -1,73 +1,46 @@
-function als --description 'List aliases and scripts with high-fidelity TUI (gum)'
-    # Find gum cmd
+function als --description 'Instant-Load High-Fidelity Command Explorer'
+    set -l data_file "$HOME/.config/shell/als_data.txt"
+    
+    if not test -f "$data_file"
+        echo "Error: Command data not found. Please run 'chezmoi apply'."
+        return 1
+    end
+
+    # Find gum cmd robustly
     set -l gum_cmd (command -v gum 2>/dev/null)
     if test -z "$gum_cmd"
-        # Try to find gum in mise managed paths if not in PATH
         for f in $HOME/.local/share/mise/installs/aqua-charmbracelet-gum/*/gum*/gum
-            if test -x "$f"
-                set gum_cmd "$f"
-                break
-            end
+            if test -x "$f"; set gum_cmd "$f"; break; end
         end
     end
-    
-    if test -n "$gum_cmd"
-        set -l tab (printf "\t")
+
+    if test -z "$gum_cmd"
+        echo "Error: 'gum' not found. Please ensure mise tools are installed."
+        return 1
+    end
+
+    # Search Interface (Near-Instant)
+    set -l selected ("$gum_cmd" filter --placeholder "Search categories, aliases, or descriptions..." \
+        --indicator "󰁔" --indicator.foreground 212 \
+        --match.foreground 212 --text.foreground 255 --height 20 < "$data_file")
+
+    if test -n "$selected"
+        # Extract metadata from hidden fields
+        set -l parts (string split "|SEP|" "$selected")
+        set -l final_cmd $parts[2]
+        set -l final_name $parts[3]
         
-        begin
-            # Get fish aliases
-            alias | while read -l line
-                # Format: alias name command
-                set -l parts (string split -m 2 " " "$line")
-                if test (count $parts) -ge 3
-                    set -l name $parts[2]
-                    set -l cmd_str $parts[3..-1]
-                    
-                    # 1. Join parts and remove trailing comments
-                    set -l clean_cmd (string join " " $cmd_str | string replace -r '#.*$' '')
-                    
-                    # 2. Trim whitespace
-                    set clean_cmd (string trim "$clean_cmd")
-                    
-                    # 3. Strip leading/trailing quotes (repeatedly if nested)
-                    set clean_cmd (string replace -r "^'|'\$" "" "$clean_cmd")
-                    set clean_cmd (string replace -r "^'|'\$" "" "$clean_cmd")
-                    set clean_cmd (string replace -r "^\"|\"\$" "" "$clean_cmd")
-                    
-                    # 4. Remove any internal tabs to keep exactly 2 columns
-                    set clean_cmd (string replace -a "$tab" " " "$clean_cmd")
-                    
-                    if test -n "$name"; and test -n "$clean_cmd"
-                        printf "%s\t%s\n" "$name" "$clean_cmd"
-                    end
-                end
-            end
-            
-            # Get universal scripts
-            if test -d ~/.local/bin
-                for f in ~/.local/bin/*
-                    set -l fname (basename $f)
-                    if string match -q "executable_*" "$fname"
-                        set -l name (string replace "executable_" "" "$fname")
-                        printf "%s\t%s\n" "$name" "Script in ~/.local/bin"
-                    elif string match -q "up" "$fname"; or string match -q "extract" "$fname"; or string match -q "bm" "$fname"; or string match -q "cb" "$fname"; or string match -q "open" "$fname"; or string match -q "notify" "$fname"; or string match -q "win" "$fname"
-                         printf "%s\t%s\n" "$fname" "Universal Script"
-                    end
-                end
-            end
-        end | while read -l line
-            # Strict validation: ensure exactly 2 columns by counting tabs
-            set -l split_line (string split "$tab" "$line")
-            if test (count $split_line) -eq 2
-                echo "$line"
-            end
-        end | "$gum_cmd" table --separator "$tab" --print --columns "Command,Source/Definition" --widths 15,60 \
-            --border rounded --border.foreground 212 --header.foreground 212
-    else
-        # Fallback if gum is not available
-        alias
-        if test -d ~/.local/bin
-            ls ~/.local/bin
-        end
+        # Clean the display string for the detail view (remove ANSI and SEP)
+        set -l clean_display (echo "$selected" | sed 's/\x1b\[[0-9;]*m//g' | sed 's/|SEP|.*$//' | string trim)
+
+        echo ""
+        "$gum_cmd" style --foreground 212 --border rounded --border-foreground 212 --padding "1 2" \
+            "󰄬 COMMAND INTELLIGENCE" \
+            "  Identity: $final_name" \
+            "  Exec:     $final_cmd" \
+            "  Details:  $clean_display"
+        
+        echo "$final_cmd" | cb >/dev/null 2>&1
+        "$gum_cmd" style --foreground 240 "  󱉊 Copied to clipboard"
     end
 end
