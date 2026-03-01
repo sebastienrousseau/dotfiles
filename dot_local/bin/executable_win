@@ -1,0 +1,24 @@
+#!/bin/sh
+# WSL-specific Windows Interop shim (win)
+# Intelligently handles path translation using wslpath
+
+if ! grep -qi microsoft /proc/version 2>/dev/null; then
+    echo "This script is only for WSL systems." >&2
+    exit 1
+fi
+
+cmd="$1"
+shift || { echo "Usage: win <windows_command> [args]"; exit 1; }
+
+# Translate paths in arguments
+args=""
+for arg in "$@"; do
+    if [ -e "$arg" ]; then
+        translated=$(wslpath -w "$arg" 2>/dev/null || echo "$arg")
+        args="$args "$translated""
+    else
+        args="$args "$arg""
+    fi
+done
+
+eval "$cmd $args"

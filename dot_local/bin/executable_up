@@ -1,0 +1,21 @@
+#!/bin/sh
+# Universal directory navigation with history support
+# Works across Bash, Zsh, and Fish
+
+levels=$1
+target=".."
+
+case "$levels" in
+    2) target="../.." ;;
+    3) target="../../.." ;;
+    4) target="../../../../.." ;;
+    5) target="../../../../../.." ;;
+    *) target=".." ;;
+esac
+
+# If cd_with_history (a dotfiles function) is available, use it.
+# Since this script runs in a subshell, we can't easily call parent functions.
+# Instead, we just output the target or rely on the shell's own history.
+
+cd "$target" || exit 1
+$SHELL
