@@ -26,6 +26,13 @@ if status is-interactive
         zoxide init fish | source
     end
 
+    # Pueue Daemon (Background Task Manager)
+    if command -v pueue >/dev/null; and not pueue status >/dev/null 2>&1
+        if command -v pueued >/dev/null
+            pueued -d >/dev/null 2>&1
+        end
+    end
+
     # FZF (Fuzzy Finder)
     if command -v fzf >/dev/null
         fzf --fish | source
