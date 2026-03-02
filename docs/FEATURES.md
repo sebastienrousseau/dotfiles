@@ -165,4 +165,4 @@ secrets = true
 ---
 
 **Last Updated**: 2026-01-31
-**Dotfiles Version**: v0.2.491
+**Dotfiles Version**: v0.2.492
