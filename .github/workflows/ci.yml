@@ -223,7 +223,7 @@ jobs:
           # security-release.yml where permissions are elevated intentionally.
           upload-release-assets: false
       - name: Upload SBOM
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: sbom
           path: sbom.cyclonedx.json
@@ -283,7 +283,7 @@ jobs:
           chezmoi apply --verbose --dry-run
       - name: Upload logs on failure
         if: failure()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: logs-test-linux
           path: ~/.local/share/chezmoi/.log
@@ -315,7 +315,7 @@ jobs:
           chezmoi apply --verbose --dry-run
       - name: Upload logs on failure
         if: failure()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: logs-test-macos
           path: ~/.local/share/chezmoi/.log
@@ -488,7 +488,7 @@ jobs:
           fi
 
       - name: Upload benchmark results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: benchmark-results-${{ github.sha }}
           path: benchmark-results/

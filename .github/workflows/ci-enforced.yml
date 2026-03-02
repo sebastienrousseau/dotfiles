@@ -314,7 +314,7 @@ jobs:
           chezmoi apply --verbose --dry-run
       - name: Upload failure logs
         if: failure()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: logs-test-${{ matrix.cache_key }}
           path: ~/.local/share/chezmoi/.log
@@ -345,7 +345,7 @@ jobs:
             exit 1
           fi
       - name: Upload coverage reports
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: coverage-report
           path: coverage/
