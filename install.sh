@@ -154,7 +154,7 @@ fi
 step "Preparing source directory..."
 
 # VERSION pinning for supply-chain security
-VERSION="${1:-v0.2.491}"
+VERSION="${1:-v0.2.492}"
 
 SOURCE_DIR="$HOME/.dotfiles"
 LEGACY_SOURCE_DIR="$HOME/.local/share/chezmoi"

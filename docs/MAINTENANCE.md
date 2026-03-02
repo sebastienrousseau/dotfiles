@@ -25,7 +25,7 @@ Verification commands:
 ```bash
 git verify-commit HEAD
 gh run list --workflow ci.yml --branch master --limit 1
-gh release view v0.2.485 --json tagName,targetCommitish,url
+gh release view v0.2.492 --json tagName,targetCommitish,url
 ```
 
 ## Release Closeout Checklist
