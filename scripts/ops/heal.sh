@@ -130,6 +130,21 @@ create_pre_heal_backup() {
 # Repair Functions
 # =============================================================================
 
+# Helper to check command (mise-aware, mirrors doctor.sh)
+check_cmd() {
+  local cmd="$1"
+  if command -v "$cmd" &>/dev/null; then
+    return 0
+  fi
+  # Fallback: check if installed via mise
+  if command -v mise &>/dev/null; then
+    if mise ls --installed 2>/dev/null | grep -qE "($cmd|aqua:.*$cmd)"; then
+      return 0
+    fi
+  fi
+  return 1
+}
+
 detect_pkg_manager() {
   if command -v brew >/dev/null 2>&1; then
     echo "brew"
@@ -196,31 +211,27 @@ heal_missing_dependencies() {
   local missing_frontier=()
 
   for cmd in "${deps[@]}"; do
-    # Map command to mise tool name if different
-    local tool=$cmd
-    if ! command -v "$cmd" >/dev/null 2>&1; then
+    if ! check_cmd "$cmd"; then
       missing+=("$cmd")
       ISSUES_FOUND=$((ISSUES_FOUND + 1))
     fi
   done
 
-  # Special check for 'nu' vs 'nushell'
-  if ! command -v nu >/dev/null 2>&1; then
+  # Frontier tools: check using check_cmd (mise-aware)
+  # 'nu' is the binary name for nushell
+  if ! check_cmd "nu"; then
     missing_frontier+=("nushell")
     ISSUES_FOUND=$((ISSUES_FOUND + 1))
   fi
-  # Pueue check
-  if ! command -v pueue >/dev/null 2>&1; then
+  if ! check_cmd "pueue"; then
     missing_frontier+=("pueue")
     ISSUES_FOUND=$((ISSUES_FOUND + 1))
   fi
-  # Wasmtime check
-  if ! command -v wasmtime >/dev/null 2>&1; then
+  if ! check_cmd "wasmtime"; then
     missing_frontier+=("wasmtime")
     ISSUES_FOUND=$((ISSUES_FOUND + 1))
   fi
-  # SOPS check
-  if ! command -v sops >/dev/null 2>&1; then
+  if ! check_cmd "sops"; then
     missing_frontier+=("sops")
     ISSUES_FOUND=$((ISSUES_FOUND + 1))
   fi
