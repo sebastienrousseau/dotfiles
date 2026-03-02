@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Chezmoi-managed dotfiles for macOS, Linux, and WSL. Version `0.2.491`.
+Chezmoi-managed dotfiles for macOS, Linux, and WSL. Version `0.2.492`.
 
 ## Key Commands
 
