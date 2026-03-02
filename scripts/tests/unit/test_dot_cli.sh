@@ -139,13 +139,14 @@ fi
 
 # Test: dot --version contains VERSION string from file
 test_start "dot_cli_version_value"
+EXPECTED_VERSION=$(jq -r '.version' "$REPO_ROOT/package.json")
 output=$(bash "$DOT_CLI" --version 2>&1) || true
-if [[ "$output" == *"0.2.491"* ]]; then
+if [[ "$output" == *"$EXPECTED_VERSION"* ]]; then
   ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: version matches expected v0.2.491"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: version matches expected v$EXPECTED_VERSION"
 else
   ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: version should contain 0.2.491"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: version should contain $EXPECTED_VERSION"
   printf '%b\n' "    Output: $output"
 fi
 

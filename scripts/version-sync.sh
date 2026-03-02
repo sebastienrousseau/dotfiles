@@ -19,7 +19,6 @@ EXCLUDE_FILES=(
   "docs/LEGACY_ROADMAP.md"
   "docs/PLAN.md"
   "docs/VERSION_SYNC.md"
-  "docs/WALKTHROUGH.md"
   "docs/WSL2_NIX_TROUBLESHOOTING.md"
 )
 
@@ -130,6 +129,7 @@ find_version_files() {
   # Add known files that should be checked even if they don't have versions yet
   echo "README.md" >>"$temp_file"
   echo "docs/FEATURES.md" >>"$temp_file"
+  echo "docs/COPYRIGHT" >>"$temp_file"
 
   # Remove duplicates and filter existing files
   sort -u "$temp_file" | while IFS= read -r file; do
@@ -194,8 +194,11 @@ update_version_references() {
       continue
     fi
 
-    files_processed=$((files_processed + 1))
-    log_info "Processing: $file"
+    # Skip milestone and other historical files
+    if [[ "$(basename "$file")" == MILESTONE_* ]]; then
+      log_info "Skipping historical file: $file"
+      continue
+    fi
 
     # Create temporary file for changes
     local temp_file
@@ -208,15 +211,23 @@ update_version_references() {
         # Update badge and release link versions.
         sed_in_place "$temp_file" \
           -e "s|Version-v$SED_VERSION_PATTERN|Version-v$target_version|g" \
-          -e "s|/releases/tag/v$SED_VERSION_PATTERN|/releases/tag/v$target_version|g"
+          -e "s|/releases/tag/v$SED_VERSION_PATTERN|/releases/tag/v$target_version|g" \
+          -e "s|/dotfiles/v$SED_VERSION_PATTERN/|/dotfiles/v$target_version/|g"
         ;;
       *)
-        # Update explicit markdown version labels only.
+        # Update explicit markdown version labels, backticks, and parentheses.
+        # Skip lines containing MILESTONE.
         sed_in_place "$temp_file" \
-          -e "s|(\*\*Version\*\*:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
-          -e "s|(\*\*Dotfiles Version\*\*:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
-          -e "s|(Version:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
-          -e "s|(Dotfiles Version:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g"
+          -e "/MILESTONE/!s|(\*\*Version\*\*:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
+          -e "/MILESTONE/!s|(\*\*Dotfiles Version\*\*:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
+          -e "/MILESTONE/!s|(Version:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
+          -e "/MILESTONE/!s|(Dotfiles Version:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
+          -e "/MILESTONE/!s|Version[[:space:]]*\`v?$SED_VERSION_PATTERN\`|Version \`$target_version\`|g" \
+          -e "/MILESTONE/!s|\(v$SED_VERSION_PATTERN\)|\(v$target_version\)|g" \
+          -e "/MILESTONE/!s|/v$SED_VERSION_PATTERN/|/v$target_version/|g" \
+          -e "/MILESTONE/!s|\bv$SED_VERSION_PATTERN\b|v$target_version|g" \
+          -e "/MILESTONE/!s|dotfiles:v?$SED_VERSION_PATTERN|dotfiles:$target_version|g" \
+          -e "/MILESTONE/!s|notes — v$SED_VERSION_PATTERN|notes — v$target_version|g"
         ;;
     esac
 
@@ -227,7 +238,8 @@ update_version_references() {
         # Show diff preview
         diff -u "$file" "$temp_file" | head -20 >&2 || true
       else
-        mv "$temp_file" "$file"
+        # Use cat to preserve permissions and ownership
+        cat "$temp_file" > "$file"
         log_success "Updated: $file"
       fi
       changes_made=$((changes_made + 1))
@@ -269,14 +281,20 @@ verify_version_consistency() {
         versions_in_file+=("$version")
       done < <(printf "%s\n" "$match" | rg -o "v?$VERSION_PATTERN" || true)
     done < <(
-      rg -o \
+      rg -v "MILESTONE" "$file" 2>/dev/null | rg -o \
         -e "Version-v$VERSION_PATTERN" \
         -e "/releases/tag/v$VERSION_PATTERN" \
+        -e "/dotfiles/v$VERSION_PATTERN/" \
         -e "\\*\\*Version\\*\\*:[[:space:]]*v?$VERSION_PATTERN" \
         -e "\\*\\*Dotfiles Version\\*\\*:[[:space:]]*v?$VERSION_PATTERN" \
         -e "(^|[[:space:]])Version:[[:space:]]*v?$VERSION_PATTERN" \
         -e "(^|[[:space:]])Dotfiles Version:[[:space:]]*v?$VERSION_PATTERN" \
-        "$file" 2>/dev/null || true
+        -e "Version[[:space:]]*\`v?$VERSION_PATTERN\`" \
+        -e "\\(v$VERSION_PATTERN\\)" \
+        -e "/v$VERSION_PATTERN/" \
+        -e "v$VERSION_PATTERN\\b" \
+        -e "dotfiles:v?$VERSION_PATTERN" \
+        -e "notes — v$VERSION_PATTERN" || true
     )
 
     if [[ ${#versions_in_file[@]} -eq 0 ]]; then
@@ -415,7 +433,8 @@ main() {
         if [[ "$dry_run" == "true" ]]; then
           log_info "Would update: $script_file"
         else
-          mv "$temp_file" "$full_path"
+          # Use cat to preserve permissions and ownership
+          cat "$temp_file" > "$full_path"
           log_success "Updated: $script_file"
         fi
       else

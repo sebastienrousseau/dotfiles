@@ -26,14 +26,21 @@ log_error() { printf '%b\n' "${RED}[ERROR]${NC} $*" >&2; }
 log_step() { printf '%b\n' "\n${BOLD}── $* ──${NC}"; }
 
 usage() {
+  local current
+  current=$(get_version)
+  local next_patch
+  next_patch=$(bump_version "$current" "patch")
+  local next_minor
+  next_minor=$(bump_version "$current" "minor")
+
   cat <<EOF
 Dotfiles Release Tool
 
 Usage: $(basename "$0") [BUMP_TYPE] [OPTIONS]
 
 Bump Types:
-  patch         Increment patch version (0.2.491 → 0.2.491) [default]
-  minor         Increment minor version (0.2.491 → 0.3.0)
+  patch         Increment patch version ($current → $next_patch) [default]
+  minor         Increment minor version ($current → $next_minor)
 
 Options:
   -n, --dry-run   Show what would be done without making changes

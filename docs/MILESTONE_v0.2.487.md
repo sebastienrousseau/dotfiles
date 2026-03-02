@@ -1,4 +1,4 @@
-# Milestone v0.2.487 Scope
+# Milestone v0.2.492 Scope
 
 This milestone keeps scope intentionally small and operationally focused.
 
