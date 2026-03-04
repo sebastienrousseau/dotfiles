@@ -19,8 +19,10 @@ $env.config = {
     }
 }
 
-# Source Starship Prompt
-source ~/.cache/starship/init.nu
+# Source Shell Tool Integrations
+source ~/.cache/nushell/starship.nu
+if (ls ~/.cache/nushell/zoxide.nu | length) > 0 { source ~/.cache/nushell/zoxide.nu }
+if (ls ~/.cache/nushell/atuin.nu | length) > 0 { source ~/.cache/nushell/atuin.nu }
 
 # Source dot CLI completions
 source ~/.config/nushell/completions.nu
