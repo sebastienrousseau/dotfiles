@@ -218,6 +218,9 @@ for root in "$HOME/.config" "$HOME/.local/bin" "$HOME/.local/share" "$HOME/.ssh"
   [[ -d "$root" ]] || continue
   checked_roots=$((checked_roots + 1))
   while IFS= read -r -d '' link; do
+    # Skip known false positives (e.g., Chrome lock files in backups)
+    [[ "$link" == *"google-chrome-backup"* ]] && continue
+
     if [[ ! -e "$link" ]]; then
       log_warn "Broken symlink" "$link -> $(readlink "$link")"
       broken_links=$((broken_links + 1))
