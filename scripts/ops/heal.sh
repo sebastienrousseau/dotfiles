@@ -315,6 +315,9 @@ heal_broken_symlinks() {
   local broken=()
 
   while IFS= read -r -d '' link; do
+    # Skip known false positives (e.g., Chrome lock files in backups)
+    [[ "$link" == *"google-chrome-backup"* ]] && continue
+
     if [[ ! -e "$link" ]]; then
       broken+=("$link")
     fi
