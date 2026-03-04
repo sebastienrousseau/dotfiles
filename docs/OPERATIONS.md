@@ -93,6 +93,24 @@ git reset --hard HEAD@{1}  # Go back 1 operation
 chezmoi apply
 ```
 
+### Offline / Air-Gapped Mode
+If you need to install dotfiles on a system without network access:
+```bash
+# 1. On a connected machine, bundle your setup:
+dot bundle ~/Downloads
+
+# 2. Transfer the archive to the offline machine, then:
+tar --zstd -xf dotfiles_offline_bundle_*.tar.zst -P
+cd ~/.dotfiles
+./install.sh --force
+```
+
+### Pre-warm Caches
+To eliminate shell startup latency by instantly regenerating all tool caches:
+```bash
+dot prewarm
+```
+
 ### Debug
 If something runs slow or appears broken:
 
@@ -103,25 +121,34 @@ If something runs slow or appears broken:
    ```bash
    dot health --fix
    ```
-2. **Scorecard**:
+2. **Smoke Test**:
+   ```bash
+   dot smoke-test
+   ```
+3. **Scorecard**:
    ```bash
    dot scorecard
    ```
-3. **Startup profiling**:
+4. **Chaos Testing (Self-Healing Verification)**:
+   ```bash
+   dot chaos --force
+   dot heal
+   ```
+5. **Startup profiling**:
    ```bash
    dot perf --profile
    ```
-4. **Run post-merge verification**:
+6. **Run post-merge verification**:
    ```bash
    dot verify
    ```
-5. **Inspect alias behavior**:
+7. **Inspect alias behavior**:
    ```bash
    dot aliases list
    dot aliases why dprune
    DOTFILES_ALIAS_POLICY=strict bash ~/.dotfiles/scripts/diagnostics/alias-governance.sh
    ```
-6. **Verbose mode**:
+8. **Verbose mode**:
    ```bash
    DOTFILES_DEBUG=1 dot apply
    ```
