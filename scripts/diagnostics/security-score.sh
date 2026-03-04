@@ -89,10 +89,11 @@ add_points() {
       icon="✗"
       color="$RED"
     fi
+    
     if [[ "$UI_ENABLED" = "1" ]]; then
-      ui_status "$icon" "$description" "$points/$max pts" "$color"
+      ui_status "$icon" "[OK]" "$description" "$points/$max pts" "$color"
     else
-      printf "  %s %-40s %d/%d pts\n" "$icon" "$description" "$points" "$max"
+      ui_bullet "$description ($points/$max pts)"
     fi
   fi
 }
@@ -355,12 +356,8 @@ print_summary() {
   local bar_width=28
   local filled=$((score * bar_width / 100))
   local empty=$((bar_width - filled))
-  local block="▮"
+  local block="#"
   local pad="-"
-
-  if [[ "${DOTFILES_ACCESSIBILITY:-0}" == "1" ]]; then
-    block="#"
-  fi
 
   local grade
   grade=$(get_grade $score)
