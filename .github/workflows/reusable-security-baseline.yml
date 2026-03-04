@@ -24,6 +24,9 @@ on:
         type: string
         default: scripts/
 
+permissions:
+  contents: read
+
 jobs:
   security-baseline:
     name: Security Baseline
