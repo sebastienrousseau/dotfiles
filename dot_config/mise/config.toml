@@ -54,9 +54,10 @@ zellij = "latest"
 zoxide = "latest"
 
 # Python tools
-# poetry = "latest"
+poetry = "latest"
 uv = "latest"
 "pipx:aider-chat" = "latest"
+"pipx:shell-gpt" = "latest"
 
 # AI tools
 "npm:@anthropic-ai/claude-code" = "latest"
