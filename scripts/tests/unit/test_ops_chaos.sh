@@ -15,6 +15,13 @@ test_start "chaos_syntax"
 assert_exit_code 0 "bash -n '$TEST_SCRIPT'"
 
 test_start "chaos_requires_force"
-assert_file_contains "$TEST_SCRIPT" "--force" "should require --force flag"
+output=$(bash "$TEST_SCRIPT" 2>&1 || true)
+if echo "$output" | grep -q "To run, execute"; then
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: requires --force flag"
+else
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: failed to require --force flag"
+fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
