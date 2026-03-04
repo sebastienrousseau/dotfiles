@@ -11,6 +11,16 @@ exec zsh
 
 This enables the local helper scripts (context suggestions and error analysis) without installing any AI tools.
 
+## Unified Identity Context
+
+To ensure consistent responses across different AI providers, we use a centralized identity file:
+`~/.config/ai/identity.md`
+
+This file contains your professional profile, coding style preferences, and workspace context. Managed aliases for `aider` and `claude` automatically reference this file to provide high-quality, tailored assistance.
+
+### Management
+Edit the source at `~/.dotfiles/dot_config/ai/identity.md` to update your preferences globally.
+
 ## Optional AI CLI tools
 
 These tools are **not** installed automatically. Install only what you want:
