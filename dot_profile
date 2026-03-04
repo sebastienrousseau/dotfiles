@@ -108,3 +108,6 @@ if [ -f "$HOME/.profile.local" ]; then
     # shellcheck source=/dev/null
     . "$HOME/.profile.local"
 fi
+
+# Nix
+if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then . "${HOME}/.nix-profile/etc/profile.d/nix.sh"; fi
