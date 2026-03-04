@@ -111,42 +111,47 @@ if [[ "${DOTFILES_SNAPSHOT_ON_APPLY:-1}" = "1" ]]; then
   fi
 fi
 
-check_ai_cli() {
-  local name="$1"
-  local label="$2"
-  if ! command -v "$name" >/dev/null 2>&1; then
-    echo "NOT FOUND: $label"
+check_cmd() {
+  local cmd="$1"
+  if command -v "$cmd" &>/dev/null; then
+    return 0
   fi
+  if command -v mise &>/dev/null; then
+    if mise ls --installed 2>/dev/null | grep -qE "($cmd|aqua:.*$cmd)"; then
+      return 0
+    fi
+  fi
+  return 1
 }
 
 echo ""
 ui_header "AI provider CLI checks (optional)"
-if command -v claude >/dev/null 2>&1; then
+if check_cmd "claude"; then
   ui_ok "claude"
 else
   ui_err "claude" "recommended — install to enable this provider"
 fi
-if command -v gemini >/dev/null 2>&1; then
+if check_cmd "gemini"; then
   ui_ok "gemini"
 else
   ui_err "gemini" "optional — install to enable this provider"
 fi
-if command -v sgpt >/dev/null 2>&1; then
+if check_cmd "sgpt"; then
   ui_ok "sgpt"
 else
   ui_err "sgpt" "optional — install to enable this provider"
 fi
-if command -v ollama >/dev/null 2>&1; then
+if check_cmd "ollama"; then
   ui_ok "ollama"
 else
   ui_err "ollama" "optional — install to enable this provider"
 fi
-if command -v opencode >/dev/null 2>&1; then
+if check_cmd "opencode"; then
   ui_ok "opencode"
 else
   ui_err "opencode" "optional — install to enable this provider"
 fi
-if command -v aider >/dev/null 2>&1; then
+if check_cmd "aider"; then
   ui_ok "aider"
 else
   ui_err "aider" "optional — AI pair programming"

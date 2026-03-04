@@ -13,12 +13,6 @@
 # References:
 #   - Bash Manual: https://www.gnu.org/software/bash/manual/
 
-# If not running interactively, exit early
-case $- in
-    *i*) ;;
-    *) return ;;
-esac
-
 # Prevent double-sourcing
 if [[ -n "$BASHRC_SOURCED" ]]; then
     return 0
@@ -30,6 +24,12 @@ export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+
+# If not running interactively, exit early
+case $- in
+    *i*) ;;
+    *) return ;;
+esac
 
 # --- Shell Options ---
 # Enable useful Bash options
