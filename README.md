@@ -27,6 +27,17 @@
 
 Dotfiles is a **high-performance, idempotent shell distribution** designed for developers who demand speed, security, and reproducibility. Managed by [Chezmoi](https://github.com/twpayne/chezmoi), it provides a curated infrastructure that evolves with you across **macOS, Linux, and WSL2**.
 
+### 🛡️ Why "Trusted Shell"?
+
+Unlike standard dotfile repos, this platform is built with a **Security-First** mindset.
+
+| Feature | Standard Dotfiles | Your Trusted Shell |
+| :--- | :--- | :--- |
+| **Telemetry** | Often Enabled | Disabled by Default |
+| **Backups** | Manual/None | Automatic (~/.dotfiles.bak) |
+| **Third-party scripts** | Auto-run on install | Explicit Opt-in only |
+| **Secrets** | Plaintext/Environment | Encrypted via Age/SOPS |
+
 ---
 
 ## 🚀 The 2026 Next-Gen Frontier
@@ -41,6 +52,8 @@ While others are still configuring Bash, we are building the future.
 ---
 
 ## 🏗️ Architecture
+
+**Reliable by Design**: Run once or a hundred times, the result is always the same.
 
 ```mermaid
 graph TD
@@ -115,6 +128,12 @@ sh -c "$(curl -fsSL https://dotfiles.io/install.sh)"
 - **Audit Logs**: Every `dot` command is logged for traceability.
 - **Telemetry Disabling**: Privacy-first OS tuning out of the box.
 </details>
+
+---
+
+## 👤 Built by Sebastien Rousseau
+
+With a background in **Post-Quantum Cryptography** and **Finance**, Sebastien designed this platform to meet the highest standards of safety, predictability, and performance. This repository represents a decade of professional terminal optimization refined for the 2026 engineering landscape.
 
 ---
 
