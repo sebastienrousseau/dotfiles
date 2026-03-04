@@ -5,110 +5,116 @@
 <h1 align="center">.dotfiles</h1>
 
 <p align="center">
-  <strong>The Ultimate, 2026-Ready Shell Distribution for Power Users</strong>
+  <strong>Stop wasting hours re-configuring your environment. Get a world-class developer experience on any machine in 60 seconds.</strong>
 </p>
 
 <p align="center">
   <a href="https://github.com/sebastienrousseau/dotfiles/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge&logo=github" alt="Build" /></a>
   <a href="https://github.com/sebastienrousseau/dotfiles/releases/tag/v{{ .dotfiles_version }}"><img src="https://img.shields.io/badge/Version-v{{ .dotfiles_version }}-blue?style=for-the-badge" alt="Version" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="License" /></a>
   <a href="https://github.com/sebastienrousseau/dotfiles/releases"><img src="https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge" alt="Downloads" /></a>
+  <a href="https://codespaces.new/sebastienrousseau/dotfiles"><img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces" /></a>
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/docs/themes/hero-shot.png" alt="Dotfiles Hero Shot" width="800" style="border-radius: 10px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);" />
+  <br>
+  <em>The Sublime Terminal Experience: Neovim + Catppuccin + Starship</em>
 </p>
 
 ---
 
 ## ✨ Overview
 
-Dotfiles is a **high-performance, idempotent shell distribution** designed for developers who demand speed, security, and reproducibility. Managed by [Chezmoi](https://github.com/twpayne/chezmoi), it provides a sublime terminal experience across **macOS, Linux, and WSL2**.
-
-It's not just a collection of configs—it's a **curated infrastructure** that evolves with you.
+Dotfiles is a **high-performance, idempotent shell distribution** designed for developers who demand speed, security, and reproducibility. Managed by [Chezmoi](https://github.com/twpayne/chezmoi), it provides a curated infrastructure that evolves with you across **macOS, Linux, and WSL2**.
 
 ---
 
 ## 🚀 The 2026 Next-Gen Frontier
 
-While others are still configuring Bash, we are building the future. This repository includes:
+While others are still configuring Bash, we are building the future.
 
-*   🏎️ **Zero-Cost Shell Startup**: Advanced `_cached_eval` logic for Zsh, Bash, and Fish, bypassing repetitive tool initializations for near-instant boot times.
+*   🏎️ **Zero-Cost Shell Startup**: Advanced `_cached_eval` logic for Zsh, Bash, and Fish, bypassing initializations for near-instant boot times.
 *   ❄️ **Nix & Home Manager**: Declarative user environments with full Home Manager support for bit-for-bit identical setups.
-*   📊 **Nushell (Data-Driven)**: Process system data as structured tables, not just strings.
 *   🧠 **Unified AI Experience**: Centralized identity context (`~/.config/ai/identity.md`) shared across Claude, Gemini, and Aider.
-*   ⚙️ **Pueue (Async Daemon)**: Offload heavy tasks (upgrades, builds) to a background queue with native Systemd integration.
-*   💎 **WebAssembly (Wasm)**: Run ultra-fast, pre-compiled tools via `wasmtime`.
+*   🛡️ **Self-Healing**: Automated `dot heal` logic that detects and repairs configuration drift and broken dependencies.
 
 ---
 
-## 📦 Features at a Glance
+## 🏗️ Architecture
 
-| Category | Highlights |
-| :--- | :--- |
-| **Shells** | **Zsh** (Daily), **Fish** (Performance), **Nushell** (Data) |
-| **Editors** | **Neovim** (Lua-powered), **Vim** (Legacy-compatible) |
-| **UX** | **Starship** (Prompt), **Zoxide** (Jump), **Atuin** (History), **fzf** (Fuzzy) |
-| **Discovery** | **Yazi** (Files), **fd** (Find), **Ripgrep** (Search) |
-| **Tools** | **Mise** (Runtimes), **Pueue** (Async), **Delta** (Diffs), **Lazygit** (Git TUI) |
-| **Security** | **Age** (Enc), **Sops** (Secrets), **Firewall** (Hardening), **Key Rotation** |
+```mermaid
+graph TD
+    A[User Shell] --> B{dot CLI}
+    B --> C[Diagnostics: dot doctor/smoke-test]
+    B --> D[Maintenance: dot update/prewarm]
+    B --> E[Lifecycle: dot apply/rollback]
+    D --> F[Chezmoi Source]
+    F --> G[Zsh/Fish/Bash Configs]
+    F --> H[Tool Runtimes: Mise/Nix]
+    G --> I[~/.cache/shell: Fast-Init]
+```
 
 ---
 
-## ⚡ Quick Start
+## 🛠️ Getting Started
 
-> [!IMPORTANT]
-> The installer automatically backs up any existing dotfiles to `~/.dotfiles.bak.<timestamp>/`.
+### ✅ Pre-flight Checklist
+Before installing, ensure your system meets these minimal requirements:
+- [ ] **Git** 2.30+ installed (`command -v git`)
+- [ ] **Curl** installed (`command -v curl`)
+- [ ] **SSH Key** configured in GitHub (for signed commits)
+- [ ] **Internet Access** (for initial bootstrap)
 
-### 1. The Instant Install
-Works on macOS, Linux, and WSL2:
-
+### ⚡ Instant Install
 ```bash
 sh -c "$(curl -fsSL https://dotfiles.io/install.sh)"
 ```
 
-### 2. Enter the Ecosystem
-Once installed, use the `dot` CLI to manage your world:
-
-```bash
-dot update    # Sync everything (Git + Chezmoi + Nix + Plugins)
-dot tools     # Explore the curated tool catalog
-dot-ai "How do I..." # Ask your local AI about your configuration
-```
-
 ---
 
-## 🛠️ Portability: Nix & Direnv
+## ⌨️ The `dot` CLI Showcase
 
-For the ultimate "reproducible" experience, we use **Nix Flakes**. Typing `cd ~/.dotfiles` instantly injects a perfect, pre-compiled toolchain into your shell.
-
-```bash
-# Enter the deterministic shell
-nix develop
-```
-
----
-
-## 🏁 Performance Modes
-
-| Mode | Environment Variable | Best For |
+| Command | Action | Why you'll love it |
 | :--- | :--- | :--- |
-| **Standard** | (Default) | Full-featured daily driver. |
-| **Fast** | `DOTFILES_FAST=1` | High-speed setup with essential tools. |
-| **Ultra** | `DOTFILES_ULTRA_FAST=1` | Minimalist startup (< 1ms) for high-frequency work. |
+| `dot apply` | Propagate changes | Instant synchronization of all configs |
+| `dot update` | Pull & Pre-warm | Updates everything and primes your shell cache |
+| `dot doctor` | Health Check | Validates paths, versions, and security |
+| `dot smoke-test` | Verify Toolchain | Ensures Rust, Go, and AI tools are functional |
+| `dot bundle` | Offline Archive | Create a zero-network portable environment |
 
 ---
 
-## 📚 Documentation Deep-Dives
+## 📦 Features & Details
 
-- [📂 Tools Catalog](docs/TOOLS.md) — Comprehensive list of all integrated packages.
-- [🏛️ Architecture](docs/ARCHITECTURE.md) — How the shell startup, caching, and templates work.
-- [🔐 Security & Secrets](docs/SECRETS.md) — Hardening, encryption, and Age/Sops setup.
-- [🧠 AI Integrations](docs/AI.md) — Setting up Claude, Gemini, and Aider.
-- [⚙️ Operations](docs/OPERATIONS.md) — Daily workflows and maintenance.
-- [🆘 Troubleshooting](docs/TROUBLESHOOTING.md) — Common fixes and platform notes.
+<details>
+<summary><b>🐚 Shells & Modern UX</b></summary>
 
----
+- **Zsh**: Primary shell with modular deferred loading.
+- **Fish**: High-performance shell with `_cached_eval` logic.
+- **Nushell**: Structured data processing via shell pipelines.
+- **Starship**: Fast, cross-shell prompt showing only what you need.
+- **Zoxide**: Smarter `cd` command that learns your habits.
+- **Atuin**: Magically searchable shell history across all machines.
+</details>
 
-## 🤝 Contributing
+<details>
+<summary><b>🛠️ Development & Runtimes</b></summary>
 
-Contributions are welcome! Please read our [Contributing Guide](.github/CONTRIBUTING.md) and [Code of Conduct](.github/CODE_OF_CONDUCT.md).
+- **Mise**: Polyglot runtime manager (Node, Python, Go, Rust).
+- **Nix Flakes**: Declarative, reproducible toolchains.
+- **Home Manager**: Full environment state management.
+- **Pueue**: Offload long-running tasks to a background daemon.
+- **Wasmtime**: Run ultra-fast WebAssembly-based CLI tools.
+</details>
+
+<details>
+<summary><b>🔐 Security & Hardening</b></summary>
+
+- **Age & SOPS**: Enterprise-grade secret encryption.
+- **Signed Commits**: Enforced SSH/GPG signing for every change.
+- **Audit Logs**: Every `dot` command is logged for traceability.
+- **Telemetry Disabling**: Privacy-first OS tuning out of the box.
+</details>
 
 ---
 
