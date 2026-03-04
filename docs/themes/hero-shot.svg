@@ -14,7 +14,7 @@
   <circle cx="80" cy="35" r="6" fill="#a6e3a1" /> <!-- Green -->
   
   <!-- Title -->
-  <text x="400" y="38" font-family="JetBrains Mono, monospace" font-size="12" fill="#bac2de" text-anchor="middle">seb — .dotfiles — zsh</text>
+  <text x="400" y="38" font-family="JetBrains Mono, monospace" font-size="12" fill="#bac2de" text-anchor="middle">seb — .dotfiles — zsh — 🔒 high-compliance</text>
 
   <!-- Mock Terminal Content -->
   <g font-family="JetBrains Mono, monospace" font-size="14">
@@ -24,34 +24,34 @@
     <text x="160" y="80" fill="#f5c2e7" font-weight="bold">on  feat/v0.2.493</text>
     
     <text x="40" y="110" fill="#cdd6f4">➜ dot --version</text>
-    <text x="40" y="130" fill="#a6e3a1">.dotfiles v0.2.493 (2026 Edition)</text>
+    <text x="40" y="130" fill="#a6e3a1">.dotfiles v0.2.493 — Battle-tested in high-compliance environments</text>
 
-    <!-- dot doctor output -->
-    <text x="40" y="170" fill="#cdd6f4">➜ dot doctor</text>
-    <text x="40" y="195" fill="#f9e2af">Running Dotfiles Doctor...</text>
+    <!-- dot verify output -->
+    <text x="40" y="170" fill="#cdd6f4">➜ dot verify --security</text>
+    <text x="40" y="195" fill="#f9e2af">Running security baseline verification...</text>
     
-    <!-- Checklist items -->
-    <text x="40" y="225" fill="#a6e3a1">  ✓ zsh</text>
-    <text x="250" y="225" fill="#585b70">/usr/bin/zsh</text>
+    <!-- Compliance items -->
+    <text x="40" y="225" fill="#a6e3a1">  ✓ GPG Signature Enforced</text>
+    <text x="350" y="225" fill="#585b70">[STRATEGY: PASS]</text>
     
-    <text x="40" y="245" fill="#a6e3a1">  ✓ starship</text>
-    <text x="250" y="245" fill="#585b70">~/.local/bin/starship</text>
+    <text x="40" y="245" fill="#a6e3a1">  ✓ Secret Encryption (Age/SOPS)</text>
+    <text x="350" y="245" fill="#585b70">[AUDIT: SECURE]</text>
     
-    <text x="40" y="265" fill="#a6e3a1">  ✓ nvim</text>
-    <text x="250" y="265" fill="#585b70">/usr/bin/nvim</text>
+    <text x="40" y="265" fill="#a6e3a1">  ✓ Hardware Enclave Bridge</text>
+    <text x="350" y="265" fill="#585b70">[TPM/ENCLAVE: OK]</text>
     
-    <text x="40" y="285" fill="#a6e3a1">  ✓ mise</text>
-    <text x="250" y="285" fill="#585b70">~/.local/bin/mise</text>
+    <text x="40" y="285" fill="#a6e3a1">  ✓ Zero-Telemetry Baseline</text>
+    <text x="350" y="285" fill="#585b70">[PRIVACY: ACTIVE]</text>
 
     <!-- Success Footer -->
-    <text x="40" y="320" fill="#a6e3a1" font-weight="bold">Summary</text>
-    <text x="40" y="340" fill="#a6e3a1">  ✓ All systems healthy</text>
+    <text x="40" y="325" fill="#a6e3a1" font-weight="bold">System Integrity</text>
+    <text x="40" y="345" fill="#a6e3a1">  ✓ All compliance gates passed</text>
 
     <!-- New prompt -->
-    <text x="40" y="380" fill="#89b4fa">λ</text>
-    <text x="60" y="380" fill="#cdd6f4">~/.dotfiles</text>
-    <text x="160" y="380" fill="#f5c2e7" font-weight="bold">on  feat/v0.2.493</text>
-    <rect x="330" y="368" width="8" height="18" fill="#cdd6f4">
+    <text x="40" y="385" fill="#89b4fa">λ</text>
+    <text x="60" y="385" fill="#cdd6f4">~/.dotfiles</text>
+    <text x="160" y="385" fill="#f5c2e7" font-weight="bold">on  feat/v0.2.493</text>
+    <rect x="330" y="373" width="8" height="18" fill="#cdd6f4">
       <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite" />
     </rect>
   </g>
