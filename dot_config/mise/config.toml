@@ -13,16 +13,18 @@ ruby.compile = false
 
 [tools]
 # Node.js
-node = ["lts", "24"]
+node = ["lts", "24", "25"]
 
 # Python
-python = ["3.12", "3.11"]
+python = ["3.12", "3.11", "3.14"]
 
 # Go
 go = "latest"
+"go:github.com/charmbracelet/crush" = "latest"
 
 # Rust
 rust = "latest"
+"cargo:zellij" = "latest"
 
 # Ruby
 ruby = "3.3"
@@ -52,13 +54,15 @@ zellij = "latest"
 zoxide = "latest"
 
 # Python tools
-poetry = "latest"
+# poetry = "latest"
 uv = "latest"
 "pipx:aider-chat" = "latest"
 
 # AI tools
 "npm:@anthropic-ai/claude-code" = "latest"
 "npm:@google/gemini-cli" = "latest"
+"npm:codex-cli" = "latest"
+"npm:opencode-ai" = "latest"
 
 # Task runners
 task = "latest"
