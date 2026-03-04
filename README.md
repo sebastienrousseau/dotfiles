@@ -29,14 +29,15 @@ Dotfiles is a **high-performance, idempotent shell distribution** designed for d
 
 ### 🛡️ Why "Trusted Shell"?
 
-Unlike standard dotfile repos, this platform is built with a **Security-First** mindset.
+Unlike standard dotfile repos or frameworks like Oh-My-Zsh, this platform is built for **Enterprise-Grade reliability**.
 
-| Feature | Standard Dotfiles | Your Trusted Shell |
+| Feature | Standard Frameworks | Your Trusted Shell |
 | :--- | :--- | :--- |
-| **Telemetry** | Often Enabled | Disabled by Default |
-| **Backups** | Manual/None | Automatic (~/.dotfiles.bak) |
-| **Third-party scripts** | Auto-run on install | Explicit Opt-in only |
-| **Secrets** | Plaintext/Environment | Encrypted via Age/SOPS |
+| **Telemetry** | Often Enabled | **Disabled by Default** |
+| **Backups** | Manual/None | **Atomic & Automatic** (`~/.dotfiles.bak`) |
+| **Secrets** | Plaintext Env Vars | **Encrypted via Age/SOPS** |
+| **Runtimes** | System-wide / Manual | **Isolated via Mise & Nix** |
+| **Verification** | None | **Built-in `smoke-test` & `doctor`** |
 
 ---
 
@@ -131,9 +132,8 @@ sh -c "$(curl -fsSL https://dotfiles.io/install.sh)"
 
 ---
 
-## 👤 Built by Sebastien Rousseau
-
-With a background in **Post-Quantum Cryptography** and **Finance**, Sebastien designed this platform to meet the highest standards of safety, predictability, and performance. This repository represents a decade of professional terminal optimization refined for the 2026 engineering landscape.
+**THE ARCHITECT** ᛫ [Sebastien Rousseau](https://sebastienrousseau.com)  
+**THE ENGINE** ᛞ [EUXIS](https://euxis.co) ᛫ Enterprise Unified Execution Intelligence System
 
 ---
 
