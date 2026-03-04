@@ -44,6 +44,8 @@ show_help() {
     echo "  doctor      Check system health and configuration"
     echo "  heal        Auto-repair common dotfiles issues"
     echo "  health      Run comprehensive health check"
+    echo "  smoke-test  Run automated toolchain verification"
+    echo "  chaos       Simulate config corruption to test self-healing"
     echo "  rollback    Rollback dotfiles to a previous state"
     echo "  drift       Drift dashboard (detailed chezmoi status)"
     echo "  history     Shell history analysis"
@@ -287,6 +289,8 @@ case "$COMMAND" in
         ;;
     heal) run_script "scripts/ops/heal.sh" "Heal script" "$@" ;;
     health|health-check) run_script "scripts/ops/health-check.sh" "Health check script" "$@" ;;
+    smoke-test) run_script "scripts/diagnostics/smoke-test.sh" "Smoke test script" "$@" ;;
+    chaos) run_script "scripts/ops/chaos.sh" "Chaos engineering script" "$@" ;;
     rollback) run_script "scripts/ops/rollback.sh" "Rollback script" "$@" ;;
     benchmark) run_script "scripts/tests/benchmark.sh" "Benchmark script" "$@" ;;
     perf)
