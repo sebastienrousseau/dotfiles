@@ -55,12 +55,15 @@ dot_secrets_index_list() {
 }
 
 dot_secrets_store_macos() {
-  local key="$1" value="$2" service="${DOT_SECRETS_SERVICE_PREFIX}.${key}"
+  local key="$1"
+  local value="$2"
+  local service="${DOT_SECRETS_SERVICE_PREFIX}.${key}"
   security add-generic-password -U -a "${USER:-dotfiles}" -s "$service" -w "$value" >/dev/null
 }
 
 dot_secrets_get_macos() {
-  local key="$1" service="${DOT_SECRETS_SERVICE_PREFIX}.${key}"
+  local key="$1"
+  local service="${DOT_SECRETS_SERVICE_PREFIX}.${key}"
   security find-generic-password -a "${USER:-dotfiles}" -s "$service" -w 2>/dev/null || return 1
 }
 
@@ -99,7 +102,8 @@ dot_secrets_store_plain_enc() {
 }
 
 dot_secrets_get_plain_enc() {
-  local key="$1" file="$DOT_SECRETS_STORE_DIR/${key}.age"
+  local key="$1"
+  local file="$DOT_SECRETS_STORE_DIR/${key}.age"
   [[ -f "$DOT_SECRETS_AGE_KEY" ]] || return 1
   [[ -f "$file" ]] || return 1
   age -d -i "$DOT_SECRETS_AGE_KEY" "$file" 2>/dev/null || return 1

@@ -32,8 +32,10 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 # shellcheck source=../dot/lib/platform.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/platform.sh"
 
 ui_init
@@ -77,7 +79,8 @@ get_cmd_path() {
     command -v "$cmd"
   elif command -v mise &>/dev/null; then
     # Try to find the actual install path with better precision
-    local bin_path=$(mise bin-paths 2>/dev/null | grep -E "/$cmd(/|$)" | head -n 1)
+    local bin_path
+    bin_path=$(mise bin-paths 2>/dev/null | grep -E "/$cmd(/|$)" | head -n 1)
     if [ -n "$bin_path" ]; then
       echo "$bin_path/$cmd"
     else

@@ -5,6 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # shellcheck source=../lib/secrets_provider.sh
+# shellcheck disable=SC1091
 source "$REPO_ROOT/scripts/lib/secrets_provider.sh"
 
 STRICT="${DOTFILES_ALIAS_STRICT_MODE:-${DOTFILES_SECRETS_STRICT_MODE:-0}}"
