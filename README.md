@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/sebastienrousseau/dotfiles/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge&logo=github" alt="Build" /></a>
-  <a href="https://github.com/sebastienrousseau/dotfiles/releases/tag/v{{ .dotfiles_version }}"><img src="https://img.shields.io/badge/Version-v{{ .dotfiles_version }}-blue?style=for-the-badge" alt="Version" /></a>
+  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.493-blue?style=for-the-badge" alt="Version" /></a>
   <a href="https://github.com/sebastienrousseau/dotfiles/releases"><img src="https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge" alt="Downloads" /></a>
   <a href="https://codespaces.new/sebastienrousseau/dotfiles"><img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces" /></a>
 </p>
@@ -18,7 +18,7 @@
 <p align="center">
   <img src="docs/themes/hero-shot.svg" alt="Dotfiles Hero Shot" width="800" style="border-radius: 10px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);" />
   <br>
-  <em>The Sublime Terminal Experience: Neovim + Catppuccin + Starship</em>
+  <em><strong>Sublime Aesthetics</strong>: Neovim + Catppuccin + Starship — Optimized for Rust and Fintech workflows.</em>
 </p>
 
 ---
