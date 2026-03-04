@@ -89,7 +89,7 @@ add_points() {
       icon="✗"
       color="$RED"
     fi
-    
+
     if [[ "$UI_ENABLED" = "1" ]]; then
       ui_status "$icon" "[OK]" "$description" "$points/$max pts" "$color"
     else
