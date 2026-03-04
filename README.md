@@ -18,7 +18,7 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/docs/themes/hero-shot.svg" alt="Dotfiles Hero Shot" width="800" style="border-radius: 10px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);" />
   <br>
-  <em><strong>Sublime Aesthetics</strong>: Neovim + Catppuccin + Starship — Optimized for Rust and Fintech workflows.</em>
+  <em><strong>Sublime Aesthetics</strong>: Neovim + Catppuccin + Starship — Battle-tested in high-compliance environments.</em>
 </p>
 
 ---
