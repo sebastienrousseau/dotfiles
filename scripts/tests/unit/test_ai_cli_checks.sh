@@ -33,8 +33,8 @@ check_contains "$HC_FILE" "optional_deps=(ripgrep fd bat fzf eza jq claude gemin
 
 # Chezmoi apply should emit AI CLI checks
 check_contains "$APPLY_FILE" "AI provider CLI checks (optional)"
-check_contains "$APPLY_FILE" "command -v sgpt"
-check_contains "$APPLY_FILE" "command -v ollama"
+check_contains "$APPLY_FILE" "check_cmd \"sgpt\""
+check_contains "$APPLY_FILE" "check_cmd \"ollama\""
 
 # Tools catalog should list sgpt and ollama
 check_contains "$DOC_FILE" "| sgpt | shell-gpt |"
@@ -46,3 +46,4 @@ check_contains "$PYTOOLS_FILE" "install_python_tool \"bandit\""
 check_contains "$PYTOOLS_FILE" "install_python_tool \"mypy\""
 
 pass "AI CLI dependency checks and docs are wired"
+echo "RESULTS:1:1:0"
