@@ -11,6 +11,8 @@ def dot_commands [] {
         { value: "apply", description: "Apply dotfiles (chezmoi apply)" }
         { value: "sync", description: "Apply dotfiles (alias of apply)" }
         { value: "update", description: "Pull latest changes and apply" }
+        { value: "clean-cache", description: "Clear shell caches" }
+        { value: "prewarm", description: "Regenerate shell caches" }
         { value: "add", description: "Add a file to chezmoi source" }
         { value: "diff", description: "Show chezmoi diff" }
         { value: "status", description: "Show configuration drift" }
@@ -20,6 +22,9 @@ def dot_commands [] {
         { value: "doctor", description: "Check system health" }
         { value: "heal", description: "Auto-repair issues" }
         { value: "health", description: "Run health check" }
+        { value: "smoke-test", description: "Toolchain verification" }
+        { value: "chaos", description: "Simulate corruption" }
+        { value: "bundle", description: "Create offline archive" }
         { value: "drift", description: "Drift dashboard" }
         { value: "history", description: "History analysis" }
         { value: "benchmark", description: "Startup benchmark" }
