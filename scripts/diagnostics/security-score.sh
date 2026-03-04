@@ -355,8 +355,12 @@ print_summary() {
   local bar_width=28
   local filled=$((score * bar_width / 100))
   local empty=$((bar_width - filled))
-  local block="#"
+  local block="▮"
   local pad="-"
+
+  if [[ "${DOTFILES_ACCESSIBILITY:-0}" == "1" ]]; then
+    block="#"
+  fi
 
   local grade
   grade=$(get_grade $score)
@@ -424,6 +428,9 @@ get_grade() {
 }
 
 # Main
+export LANG="${LANG:-en_US.UTF-8}"
+export LC_ALL="${LC_ALL:-en_US.UTF-8}"
+
 print_header
 check_encryption
 check_ssh
