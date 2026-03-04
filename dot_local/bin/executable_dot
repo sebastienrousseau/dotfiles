@@ -296,7 +296,9 @@ case "$COMMAND" in
     health|health-check) run_script "scripts/ops/health-check.sh" "Health check script" "$@" ;;
     smoke-test) run_script "scripts/diagnostics/smoke-test.sh" "Smoke test script" "$@" ;;
     verify) run_script "scripts/diagnostics/verify.sh" "Verification script" "$@" ;;
+    security-score) run_script "scripts/diagnostics/security-score.sh" "Security score script" "$@" ;;
     scorecard) run_script "scripts/diagnostics/scorecard.sh" "Scorecard script" "$@" ;;
+
     snapshot) run_script "scripts/diagnostics/snapshot.sh" "Snapshot script" "$@" ;;
     chaos) run_script "scripts/ops/chaos.sh" "Chaos engineering script" "$@" ;;
     bundle) run_script "scripts/ops/bundle.sh" "Offline bundle script" "$@" ;;
