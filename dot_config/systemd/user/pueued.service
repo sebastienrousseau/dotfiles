@@ -1,0 +1,12 @@
+[Unit]
+Description=Pueue Daemon - CLI process scheduler and manager
+After=network.target
+
+[Service]
+Restart=always
+ExecStart=%h/.local/share/mise/shims/pueued
+ExecReload=%h/.local/share/mise/shims/pueued
+Environment=PATH=%h/.local/share/mise/shims:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+
+[Install]
+WantedBy=default.target

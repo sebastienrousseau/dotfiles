@@ -20,7 +20,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 **Goal:** "Observable Shell Lifecycle".
 > *The shell is instrumented: failures, timing, and lifecycle events are visible by design.*
 
-- [ ] **Audit Structuring**: JSON-structured logging for bootstrap and provisioning events.
+- [x] **Audit Structuring**: JSON-structured logging for bootstrap and provisioning events.
 - [ ] **Debug Modes**: First-class support for `DOTFILES_DEBUG=1` and `DOTFILES_TRACE=1`.
 - [ ] **Telemetry (Local)**: Granular startup timing breakdown (init vs plugins vs prompt).
 - [ ] **Health Dashboard (Phase 39)**: CLI view of system "health" metrics.
@@ -77,9 +77,9 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 **Goal:** "Self-Validating Environment".
 > *The environment can validate itself after installation or update.*
 
-- [ ] **Smoke Tests**: Automated verification of key aliases (`ls`, `git`, `docker`).
+- [x] **Smoke Tests**: Automated verification of key aliases (`ls`, `git`, `docker`).
 - [ ] **CI Validation**: GitHub Actions workflow to boot and verify the shell syntax.
-- [ ] **Chaos Engineering (Phase 41)**:
+- [x] **Chaos Engineering (Phase 41)**:
     - [ ] **Config Chaos**: Randomly corrupt config files to test recovery.
     - [ ] **Network Simulation**: Simulate high latency/packet loss.
     - [ ] **Permission Fuzzing**: Verify strict umask behavior.
@@ -94,7 +94,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
     - [ ] **WinGet**: Declarative package management.
     - [ ] **WSL Bridge**: Seamless interop.
 - [ ] **Linux Deep Integration (Phase 55)**:
-    - [ ] **Systemd User Units**: User service management.
+    - [x] **Systemd User Units**: User service management.
     - [ ] **Desktop Envs**: GNOME/KDE/Sway configs.
 
 ---
