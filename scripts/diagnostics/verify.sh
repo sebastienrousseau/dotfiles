@@ -68,11 +68,11 @@ run_step() {
 }
 
 if dot_bin="$(resolve_dot_bin)"; then
-  run_step "dot doctor" "$dot_bin" doctor
-  run_step "dot status" "$dot_bin" status
-  
   if [[ $RUN_SECURITY -eq 1 ]]; then
     run_step "security-score" "$dot_bin" security-score
+  else
+    run_step "dot doctor" "$dot_bin" doctor
+    run_step "dot status" "$dot_bin" status
   fi
 else
   # shellcheck disable=SC1091
