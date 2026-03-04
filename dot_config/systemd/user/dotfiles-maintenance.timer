@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Dotfiles Maintenance Weekly
+Documentation=https://github.com/sebastienrousseau/dotfiles
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+RandomizedDelaySec=1h
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,8 @@
+[Unit]
+Description=Dotfiles Maintenance Service
+Documentation=https://github.com/sebastienrousseau/dotfiles
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/dot clean-cache
+Environment=PATH=%h/.local/share/mise/shims:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
