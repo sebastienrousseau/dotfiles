@@ -1,6 +1,7 @@
 # Dotfiles Sandbox (Laptop-safe preview)
 # Build: docker build -f tests/Dockerfile.sandbox -t dotfiles-sandbox .
 # Run:   docker run --rm -it dotfiles-sandbox
+# Security: DS-0029 fix included
 
 FROM ubuntu:24.04
 
