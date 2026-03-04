@@ -62,33 +62,36 @@ else
     PS1='\[\033[01;34m\]\w\[\033[00m\]\$ '
 fi
 
-# --- Safe eval wrapper for tool initialization ---
-# Validates output before eval to mitigate supply chain attacks
-_safe_eval_init() {
-    local tool="$1"
-    local init_output="$2"
+# --- Safe and cached eval wrapper for tool initialization ---
+_SHELL_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/bash"
+[[ -d "$_SHELL_CACHE" ]] || mkdir -p "$_SHELL_CACHE"
 
-    # Reject if output contains suspicious patterns indicating malicious payloads
-    # Note: We allow legitimate patterns like 'eval -- "$(...)"' used by tools
-    # Only block actual dangerous patterns: network downloads, reverse shells, etc.
-    if [[ "$init_output" =~ (curl[[:space:]].*\|[[:space:]]*(ba)?sh|wget[[:space:]].*\|[[:space:]]*(ba)?sh|nc[[:space:]]+-e|\/dev\/tcp\/|base64[[:space:]]+-d[[:space:]]*\|) ]]; then
-        echo "[WARN] Suspicious output from $tool init, skipping" >&2
-        return 1
+_cached_eval() {
+    local label="$1"; shift
+    local cache="$_SHELL_CACHE/${label}.bash"
+    local bin_name="$1"
+    local bin=$(command -v "$bin_name")
+
+    if [[ -f "$cache" ]] && [[ -z "$bin" || "$cache" -nt "$bin" ]]; then
+        source "$cache"
+    else
+        local init_output
+        init_output=$("$@" 2>/dev/null)
+        
+        # Reject if output contains suspicious patterns indicating malicious payloads
+        if [[ "$init_output" =~ (curl[[:space:]].*\|[[:space:]]*(ba)?sh|wget[[:space:]].*\|[[:space:]]*(ba)?sh|nc[[:space:]]+-e|\/dev\/tcp\/|base64[[:space:]]+-d[[:space:]]*\|) ]]; then
+            echo "[WARN] Suspicious output from $label init, skipping" >&2
+            return 1
+        fi
+
+        echo "$init_output" > "$cache"
+        source "$cache"
     fi
-
-    # Reject if output is unusually large (>100KB suggests tampering)
-    if [[ ${#init_output} -gt 102400 ]]; then
-        echo "[WARN] Unusually large output from $tool init, skipping" >&2
-        return 1
-    fi
-
-    # Safe to eval
-    eval "$init_output"
 }
 
 # Use Starship prompt if available
 if command -v starship &>/dev/null; then
-    _safe_eval_init "starship" "$(starship init bash 2>/dev/null)" || true
+    _cached_eval "starship-init" starship init bash || true
 fi
 
 # --- Completion ---
@@ -121,22 +124,22 @@ fi
 # --- Tool Integration ---
 # Zoxide (smart cd)
 if command -v zoxide &>/dev/null; then
-    _safe_eval_init "zoxide" "$(zoxide init bash 2>/dev/null)" || true
+    _cached_eval "zoxide-init" zoxide init bash || true
 fi
 
 # FZF (fuzzy finder)
 if command -v fzf &>/dev/null; then
-    _safe_eval_init "fzf" "$(fzf --bash 2>/dev/null)" || true
+    _cached_eval "fzf-init" fzf --bash || true
 fi
 
 # Atuin (shell history)
 if command -v atuin &>/dev/null; then
-    _safe_eval_init "atuin" "$(atuin init bash --disable-up-arrow 2>/dev/null)" || true
+    _cached_eval "atuin-init" atuin init bash --disable-up-arrow || true
 fi
 
 # direnv (directory environments)
 if command -v direnv &>/dev/null; then
-    _safe_eval_init "direnv" "$(direnv hook bash 2>/dev/null)" || true
+    _cached_eval "direnv-init" direnv hook bash || true
 fi
 
 # --- Core Aliases ---
