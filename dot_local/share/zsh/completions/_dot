@@ -11,6 +11,8 @@ _dot() {
     'apply:Apply dotfiles via chezmoi'
     'sync:Apply dotfiles (alias of apply)'
     'update:Pull latest changes and apply them'
+    'clean-cache:Clear shell initialization caches'
+    'prewarm:Regenerate shell caches for ultra-fast startup'
     'add:Add a file to chezmoi source'
     'diff:Show chezmoi diff with exclusions'
     'status:Show configuration drift'
@@ -22,6 +24,8 @@ _dot() {
     'doctor:Check system health and configuration'
     'heal:Auto-repair common dotfiles issues'
     'health:Run comprehensive health check'
+    'smoke-test:Run automated toolchain verification'
+    'chaos:Simulate config corruption to test self-healing'
     'scorecard:Unified health/security/performance scorecard'
     'rollback:Rollback dotfiles to a previous state'
     'drift:Drift dashboard (detailed chezmoi status)'
@@ -64,6 +68,7 @@ _dot() {
 
     # Security
     'backup:Create a compressed backup of home'
+    'bundle:Create offline archive of dotfiles environment'
     'encrypt-check:Check disk encryption status'
     'firewall:Apply firewall hardening'
     'telemetry:Disable OS telemetry'
@@ -89,14 +94,14 @@ _dot() {
     args)
       case "$words[1]" in
         new)
-          if (( CURRENT == 2 )); then
+          if ((CURRENT == 2)); then
             local -a templates=(python go node packer molecule)
             _describe -t templates 'project template' templates
           else
             _files
           fi
           ;;
-        add|remove)
+        add | remove)
           _files
           ;;
         keys)
