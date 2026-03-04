@@ -159,11 +159,9 @@ ui_logo_dot() {
   if [[ "${DOTFILES_ACCESSIBILITY:-0}" == "1" ]]; then
     printf "DOTFILES\n"
   elif [[ "$UI_UTF8" = "1" ]]; then
-    printf "%s┏━ ┏━┃━┏┛%s\n" "${BOLD}${BLUE}" "${NORMAL}"
-    printf "%s┃ ┃┃ ┃ ┃ %s\n" "${BOLD}${CYAN}" "${NORMAL}"
-    printf "%s━━ ━━┛ ┛%s\n" "${BOLD}${MAGENTA}" "${NORMAL}"
+    printf "%s◈ DOTFILES %s\n" "${BOLD}${BLUE}" "${NORMAL}"
   else
-    printf "%sDOT%s\n" "${BOLD}${BLUE}" "${NORMAL}"
+    printf "%sDOTFILES%s\n" "${BOLD}${BLUE}" "${NORMAL}"
   fi
   if [[ -n "$title" ]]; then
     if [[ "$UI_COLOR" = "1" ]]; then
