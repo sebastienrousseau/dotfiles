@@ -44,10 +44,19 @@ ui_init() {
     return
   fi
 
-  if command -v gum >/dev/null 2>&1 && [[ -t 1 ]]; then
-    UI_ENABLED=1
-  else
+  if [[ "${DOTFILES_ACCESSIBILITY:-0}" == "1" ]]; then
     UI_ENABLED=0
+    UI_UTF8=0
+  else
+    if command -v gum >/dev/null 2>&1 && [[ -t 1 ]]; then
+      UI_ENABLED=1
+    else
+      UI_ENABLED=0
+    fi
+
+    if [[ "$(locale charmap 2>/dev/null || true)" = "UTF-8" ]]; then
+      UI_UTF8=1
+    fi
   fi
 
   if [[ -t 1 ]] && [[ -z "${NO_COLOR:-}" ]] && command -v tput >/dev/null 2>&1 && tput setaf 1 >/dev/null 2>&1; then
@@ -63,10 +72,6 @@ ui_init() {
     GRAY="$(tput setaf 8)"
   fi
 
-  if [[ "$(locale charmap 2>/dev/null || true)" = "UTF-8" ]]; then
-    UI_UTF8=1
-  fi
-
   UI_INITED=1
 }
 
@@ -78,7 +83,7 @@ ui_header() {
   elif [[ "$UI_COLOR" = "1" ]]; then
     printf "%s%s%s\n" "${BOLD}${BLUE}" "$text" "$NORMAL"
   else
-    echo "$text"
+    echo "--- $text ---"
   fi
 }
 
@@ -90,38 +95,44 @@ ui_section() {
   elif [[ "$UI_COLOR" = "1" ]]; then
     printf "%s%s%s\n" "${BOLD}${CYAN}" "$text" "$NORMAL"
   else
-    echo "$text"
+    echo "== $text =="
   fi
 }
 
 ui_status() {
   local symbol="$1"
-  local label="$2"
-  local detail="${3:-}"
-  local color="${4:-}"
+  local alt_symbol="$2"
+  local label="$3"
+  local detail="${4:-}"
+  local color="${5:-}"
   local width=35
   ui_init
 
-  if [[ "$UI_COLOR" = "1" ]] && [[ -n "$color" ]]; then
-    symbol="${color}${symbol}${NORMAL}"
+  local disp_symbol="$symbol"
+  if [[ "${DOTFILES_ACCESSIBILITY:-0}" == "1" ]]; then
+    disp_symbol="$alt_symbol"
+  elif [[ "$UI_COLOR" = "1" ]] && [[ -n "$color" ]]; then
+    disp_symbol="${color}${symbol}${NORMAL}"
   fi
 
   if [[ -n "$detail" ]]; then
-    printf "  %-2b %-*s %s\n" "$symbol" "$width" "$label" "$detail"
+    printf "  %-6b %-*s %s\n" "$disp_symbol" "$width" "$label" "$detail"
   else
-    printf "  %-2b %s\n" "$symbol" "$label"
+    printf "  %-6b %s\n" "$disp_symbol" "$label"
   fi
 }
 
-ui_ok() { ui_status "✓" "$1" "${2:-}" "$GREEN"; }
-ui_warn() { ui_status "⚠" "$1" "${2:-}" "$YELLOW"; }
-ui_err() { ui_status "✗" "$1" "${2:-}" "$RED"; }
-ui_info() { ui_status "•" "$1" "${2:-}" "$GRAY"; }
+ui_ok() { ui_status "✓" "[OK]" "$1" "${2:-}" "$GREEN"; }
+ui_warn() { ui_status "⚠" "[WARN]" "$1" "${2:-}" "$YELLOW"; }
+ui_err() { ui_status "✗" "[FAIL]" "$1" "${2:-}" "$RED"; }
+ui_info() { ui_status "•" "[INFO]" "$1" "${2:-}" "$GRAY"; }
 
 ui_bullet() {
   local text="$1"
   ui_init
-  if [[ "$UI_COLOR" = "1" ]]; then
+  if [[ "${DOTFILES_ACCESSIBILITY:-0}" == "1" ]]; then
+    printf "  * %s\n" "$text"
+  elif [[ "$UI_COLOR" = "1" ]]; then
     printf "  %b %s\n" "${GRAY}•${NORMAL}" "$text"
   else
     printf "  - %s\n" "$text"
@@ -145,7 +156,9 @@ ui_logo_dot() {
   local title="${1:-}"
   ui_init
   printf "\n"
-  if [[ "$UI_UTF8" = "1" ]]; then
+  if [[ "${DOTFILES_ACCESSIBILITY:-0}" == "1" ]]; then
+    printf "DOTFILES\n"
+  elif [[ "$UI_UTF8" = "1" ]]; then
     printf "%s┏━ ┏━┃━┏┛%s\n" "${BOLD}${BLUE}" "${NORMAL}"
     printf "%s┃ ┃┃ ┃ ┃ %s\n" "${BOLD}${CYAN}" "${NORMAL}"
     printf "%s━━ ━━┛ ┛%s\n" "${BOLD}${MAGENTA}" "${NORMAL}"
