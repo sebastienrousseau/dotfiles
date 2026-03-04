@@ -72,7 +72,7 @@ if dot_bin="$(resolve_dot_bin)"; then
   run_step "dot status" "$dot_bin" status
   
   if [[ $RUN_SECURITY -eq 1 ]]; then
-    run_step "security-score" "$dot_bin" security-score --quiet
+    run_step "security-score" "$dot_bin" security-score
   fi
 else
   # shellcheck disable=SC1091
