@@ -10,6 +10,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
 ui_init
@@ -123,6 +124,7 @@ apply_sysctl "net.ipv4.tcp_fin_timeout" "15"
 # =============================================================================
 ui_header "Security settings"
 
+# shellcheck disable=SC1091
 # Disable IP source routing
 apply_sysctl "net.ipv4.conf.all.accept_source_route" "0"
 apply_sysctl "net.ipv4.conf.default.accept_source_route" "0"

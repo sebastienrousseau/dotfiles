@@ -7,6 +7,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
 ui_init
@@ -70,7 +71,9 @@ calc_score() {
 run_profile() {
   zsh -c '
     zmodload zsh/zprof
+# shellcheck disable=SC1091
     source ~/.zshenv 2>/dev/null
+# shellcheck disable=SC1091
     source ~/.config/zsh/.zshrc 2>/dev/null
     zprof
   ' 2>/dev/null | head -20

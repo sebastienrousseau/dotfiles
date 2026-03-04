@@ -47,3 +47,4 @@ check_contains "$PYTOOLS_FILE" "install_python_tool \"mypy\""
 
 pass "AI CLI dependency checks and docs are wired"
 echo "RESULTS:1:1:0"
+echo "RESULTS:1:1:0"

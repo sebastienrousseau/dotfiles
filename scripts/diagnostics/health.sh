@@ -7,6 +7,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
 # Colors (fallback when gum is unavailable; respect NO_COLOR)
@@ -159,10 +160,13 @@ run_checks() {
   # Chezmoi
   if command -v chezmoi >/dev/null 2>&1; then
     check "Chezmoi installed" "pass"
+# shellcheck disable=SC1091
     # Check if source dir exists
     if [[ -d "${HOME}/.local/share/chezmoi" ]] || [[ -d "${HOME}/.dotfiles" ]]; then
+# shellcheck disable=SC1091
       check "Chezmoi source directory" "pass"
     else
+# shellcheck disable=SC1091
       check "Chezmoi source directory" "fail" "Not found"
     fi
   else

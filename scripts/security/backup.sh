@@ -3,6 +3,7 @@
 ## Create compressed backup of home directory.
 ##
 ## Archives the home directory (excluding cache and trash) to a timestamped
+# shellcheck disable=SC1091
 ## .tgz file. Supports custom source and destination directories via
 ## environment variables.
 ##
@@ -34,6 +35,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
 ui_init

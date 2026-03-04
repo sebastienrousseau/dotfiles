@@ -19,6 +19,7 @@
 ## | Check | Description |
 ## |-------|-------------|
 ## | chezmoi_installed | Chezmoi binary in PATH |
+# shellcheck disable=SC1091
 ## | dotfiles_source | ~/.dotfiles exists with .git |
 ## | chezmoi_config | ~/.config/chezmoi/chezmoi.toml |
 ## | critical_files | .bashrc, .zshrc, .profile |
@@ -129,6 +130,7 @@ check_chezmoi_installed() {
 }
 
 check_dotfiles_source() {
+# shellcheck disable=SC1091
   log_info "Checking dotfiles source directory..."
   if [[ -d "$DOTFILES_SOURCE" ]]; then
     if [[ -d "$DOTFILES_SOURCE/.git" ]]; then
@@ -374,6 +376,7 @@ main() {
 
   # Run all checks
   check_chezmoi_installed || true
+# shellcheck disable=SC1091
   check_dotfiles_source || true
   check_chezmoi_config || true
   check_critical_files || true

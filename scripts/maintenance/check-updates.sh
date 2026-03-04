@@ -90,10 +90,12 @@ check_security_tools_updates() {
 }
 
 generate_summary() {
-  echo "=== Update Summary ===" >>"$REPORT_DIR/updates.txt"
-  echo "Generated: $(date -Iseconds)" >>"$REPORT_DIR/updates.txt"
-  echo "Repository: $REPO_ROOT" >>"$REPORT_DIR/updates.txt"
-  echo "" >>"$REPORT_DIR/updates.txt"
+  {
+    echo "=== Update Summary ==="
+    echo "Generated: $(date -Iseconds)"
+    echo "Repository: $REPO_ROOT"
+    echo ""
+  } >>"$REPORT_DIR/updates.txt"
 
   # Count potential updates (simplified heuristic)
   local update_count
@@ -112,7 +114,7 @@ main() {
   echo "Checking for available updates..."
 
   # Clear previous report
-  >"$REPORT_DIR/updates.txt"
+  true >"$REPORT_DIR/updates.txt"
 
   check_chezmoi_updates
   check_precommit_updates

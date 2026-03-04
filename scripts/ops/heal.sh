@@ -12,6 +12,7 @@ set -euo pipefail
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 DOTFILES_SOURCE="$REPO_ROOT"
@@ -271,7 +272,11 @@ heal_missing_dependencies() {
           FIXES_APPLIED=$((FIXES_APPLIED + 1))
           persist_log "HEAL: installed $cmd via mise"
           # Filter it out of the missing list
-          missing_frontier=(${missing_frontier[@]/$cmd/})
+          local temp_list=()
+          for item in "${missing_frontier[@]}"; do
+            [[ "$item" != "$cmd" ]] && temp_list+=("$item")
+          done
+          missing_frontier=("${temp_list[@]}")
         fi
       fi
     done
@@ -329,7 +334,8 @@ heal_broken_symlinks() {
   for link in "${broken[@]}"; do
     local target
     target=$(readlink "$link" 2>/dev/null || echo "unknown")
-    local filename=$(basename "$link")
+    local filename
+    filename=$(basename "$link")
 
     # Auto-fix lock files without prompt if they are clearly broken
     local is_lock=0

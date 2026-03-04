@@ -41,6 +41,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
 BENCHMARK_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/benchmarks"
@@ -92,7 +93,9 @@ run_zsh_profile() {
 
   zsh -c '
     zmodload zsh/zprof
+# shellcheck disable=SC1091
     source ~/.zshenv 2>/dev/null
+# shellcheck disable=SC1091
     source ~/.config/zsh/.zshrc 2>/dev/null
     zprof
   ' 2>/dev/null | head -30
@@ -107,16 +110,19 @@ benchmark_components() {
 
   # zshenv (bootloader)
   local zshenv_time
+# shellcheck disable=SC1091
   zshenv_time=$(time_command "zsh -c 'source ~/.zshenv 2>/dev/null; exit'")
   printf "%-35s %8s\n" "zshenv (bootloader)" "${zshenv_time}ms"
 
   # Core shell options
   local options_time
+# shellcheck disable=SC1091
   options_time=$(time_command "zsh -c 'source ~/.config/zsh/rc.d/30-options.zsh 2>/dev/null; exit'" 2>/dev/null || echo "N/A")
   printf "%-35s %8s\n" "rc.d/30-options.zsh" "${options_time}ms"
 
   # Zinit plugins
   local zinit_time
+# shellcheck disable=SC1091
   zinit_time=$(time_command "zsh -c 'source ~/.config/zsh/rc.d/20-zinit.zsh 2>/dev/null; exit'" 2>/dev/null || echo "N/A")
   printf "%-35s %8s\n" "rc.d/20-zinit.zsh (plugins)" "${zinit_time}ms"
 
