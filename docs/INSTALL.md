@@ -80,6 +80,23 @@ nix develop ~/.dotfiles/nix
 nix profile install ~/.dotfiles/nix#dot-utils
 ```
 
+### Offline / Air-Gapped Installation
+
+If you need to install dotfiles on a system without network access:
+
+1. **On a connected machine**, bundle your setup (including your `mise` cache):
+   ```bash
+   dot bundle ~/Downloads
+   ```
+2. **Transfer** the `dotfiles_offline_bundle_*.tar.zst` archive to the offline machine.
+3. **On the offline machine**, unpack and install:
+   ```bash
+   tar --zstd -xf dotfiles_offline_bundle_*.tar.zst -P
+   cd ~/.dotfiles
+   ./install.sh --force
+   ```
+   *The installer will automatically detect the bundled state and bypass all network calls.*
+
 ### Using GitHub Codespaces or devcontainers
 
 ```bash
