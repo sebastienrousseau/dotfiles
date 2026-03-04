@@ -16,6 +16,14 @@ echo ""
 
 failures=0
 dot_bin=""
+RUN_SECURITY=0
+
+# Parse arguments
+for arg in "$@"; do
+  case "$arg" in
+    --security) RUN_SECURITY=1 ;;
+  esac
+done
 
 resolve_dot_bin() {
   if command -v dot >/dev/null 2>&1; then
@@ -62,6 +70,10 @@ run_step() {
 if dot_bin="$(resolve_dot_bin)"; then
   run_step "dot doctor" "$dot_bin" doctor
   run_step "dot status" "$dot_bin" status
+  
+  if [[ $RUN_SECURITY -eq 1 ]]; then
+    run_step "security-score" "$dot_bin" security-score --quiet
+  fi
 else
   # shellcheck disable=SC1091
   ui_err "dot binary" "not found in PATH, ~/.local/bin, or source tree"
