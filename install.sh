@@ -31,7 +31,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.492)
+  version       The version (tag or branch) to install (default: v0.2.493)
 
 Options:
   --help        Show this help message
@@ -41,7 +41,7 @@ EOF
 }
 
 main() {
-  local version="${1:-v0.2.492}"
+  local version="${1:-v0.2.493}"
 
   if [[ "$version" == "--help" ]]; then
     show_help

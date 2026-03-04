@@ -21,7 +21,7 @@ step() { printf '%b
 error() { printf '%b
 ' "${RED}==> Error: $1${NC}"; exit 1; }
 
-step "Starting Deterministic Bootstrap (v0.2.492 Frontier)"
+step "Starting Deterministic Bootstrap (v0.2.493 Frontier)"
 
 # 1. Install Nix (if not present)
 if ! command -v nix >/dev/null 2>&1; then
