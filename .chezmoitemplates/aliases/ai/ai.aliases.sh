@@ -4,12 +4,12 @@
 
 # Aider (AI Pair Programming)
 if command -v aider &>/dev/null; then
-  _aider_ctx="--read ~/.config/ai/identity.md"
-  alias aid="aider $_aider_ctx"
-  alias aida="aider $_aider_ctx --chat-mode ask"
-  alias aidc="aider $_aider_ctx --chat-mode code"
-  alias aidw="aider $_aider_ctx --watch-files"
-  unset _aider_ctx
+  # Note: Use a fixed path for the identity file to avoid shellcheck warnings
+  # and ensure it resolves correctly in different shells.
+  alias aid='aider --read ~/.config/ai/identity.md'
+  alias aida='aider --read ~/.config/ai/identity.md --chat-mode ask'
+  alias aidc='aider --read ~/.config/ai/identity.md --chat-mode code'
+  alias aidw='aider --read ~/.config/ai/identity.md --watch-files'
 fi
 
 # Claude Code
