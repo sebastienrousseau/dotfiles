@@ -29,11 +29,11 @@ It's not just a collection of configs—it's a **curated infrastructure** that e
 
 While others are still configuring Bash, we are building the future. This repository includes:
 
-*   🏎️ **Zero-Cost Shell Startup**: Autoloading Fish functions and Zsh lazy-loading for sub-5ms boot times.
-*   ❄️ **Nix Flakes Integration**: Bit-for-bit identical environments for ultimate portability.
+*   🏎️ **Zero-Cost Shell Startup**: Advanced `_cached_eval` logic for Zsh, Bash, and Fish, bypassing repetitive tool initializations for near-instant boot times.
+*   ❄️ **Nix & Home Manager**: Declarative user environments with full Home Manager support for bit-for-bit identical setups.
 *   📊 **Nushell (Data-Driven)**: Process system data as structured tables, not just strings.
-*   🧠 **Local AI RAG**: A local semantic search (`dot-ai`) that knows your dotfiles better than you do.
-*   ⚙️ **Pueue (Async Daemon)**: Offload heavy tasks (upgrades, builds) to a background queue.
+*   🧠 **Unified AI Experience**: Centralized identity context (`~/.config/ai/identity.md`) shared across Claude, Gemini, and Aider.
+*   ⚙️ **Pueue (Async Daemon)**: Offload heavy tasks (upgrades, builds) to a background queue with native Systemd integration.
 *   💎 **WebAssembly (Wasm)**: Run ultra-fast, pre-compiled tools via `wasmtime`.
 
 ---

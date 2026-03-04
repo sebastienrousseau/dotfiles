@@ -24,8 +24,22 @@ secrets = true
 | `nushell` | `true` | Enable Nushell configuration for structured data pipelines | - | Controls Nushell setup, plugins, and environment |
 | `nvim` | `true` | Enable Neovim editor configuration | - | Manages Neovim configs, plugins, and editor-specific settings |
 | `tmux` | `true` | Enable tmux terminal multiplexer configuration | - | Controls tmux configs, key bindings, and session management |
+| `zellij` | `false` | Enable Zellij terminal workspace configuration | - | Controls Zellij layouts, themes, and keybindings |
 | `gui` | `true` | Enable GUI application configurations | Desktop environment | Manages GUI app configs, window managers, and desktop settings |
 | `secrets` | `true` | Enable secrets management and encryption tools | GPG, Age, SSH keys | Controls access to encrypted configs and secure credential storage |
+| `ai_tools` | `true` | Enable AI CLI tool integrations and identity context | - | Manages AI tool aliases and unified context |
+| `alias_wrapper` | `false` | Enable robust alias hardening and validation | - | Opt-in safety wrappers for destructive commands |
+
+## Validation & Observability
+
+The `dot` CLI provides high-level commands for system validation:
+
+- **`dot smoke-test`**: Rapidly verifies that all core toolchains (Rust, Go, AI) are functional and returning valid versions.
+- **`dot chaos`**: (Warning: Destructive) Intentionally corrupts configurations to verify the self-healing capabilities of `dot heal`.
+- **`dot health`**: Comprehensive system diagnostic across paths, files, and dependencies.
+
+### Structured Logging
+Set `export DOTFILES_JSON_LOG=1` to enable JSON-structured output for all bootstrap and provisioning events, ideal for enterprise auditing.
 
 ## How Feature Flags Work
 
