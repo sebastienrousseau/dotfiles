@@ -110,19 +110,19 @@ benchmark_components() {
 
   # zshenv (bootloader)
   local zshenv_time
-# shellcheck disable=SC1091
+  # shellcheck disable=SC1091
   zshenv_time=$(time_command "zsh -c 'source ~/.zshenv 2>/dev/null; exit'")
   printf "%-35s %8s\n" "zshenv (bootloader)" "${zshenv_time}ms"
 
   # Core shell options
   local options_time
-# shellcheck disable=SC1091
+  # shellcheck disable=SC1091
   options_time=$(time_command "zsh -c 'source ~/.config/zsh/rc.d/30-options.zsh 2>/dev/null; exit'" 2>/dev/null || echo "N/A")
   printf "%-35s %8s\n" "rc.d/30-options.zsh" "${options_time}ms"
 
   # Zinit plugins
   local zinit_time
-# shellcheck disable=SC1091
+  # shellcheck disable=SC1091
   zinit_time=$(time_command "zsh -c 'source ~/.config/zsh/rc.d/20-zinit.zsh 2>/dev/null; exit'" 2>/dev/null || echo "N/A")
   printf "%-35s %8s\n" "rc.d/20-zinit.zsh (plugins)" "${zinit_time}ms"
 

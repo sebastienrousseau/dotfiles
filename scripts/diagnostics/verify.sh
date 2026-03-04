@@ -63,7 +63,7 @@ if dot_bin="$(resolve_dot_bin)"; then
   run_step "dot doctor" "$dot_bin" doctor
   run_step "dot status" "$dot_bin" status
 else
-# shellcheck disable=SC1091
+  # shellcheck disable=SC1091
   ui_err "dot binary" "not found in PATH, ~/.local/bin, or source tree"
   failures=$((failures + 1))
 fi
