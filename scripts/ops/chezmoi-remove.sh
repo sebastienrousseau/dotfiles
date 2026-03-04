@@ -30,6 +30,7 @@ if [[ ${#paths[@]} -eq 0 ]]; then
   exit 1
 fi
 
+# shellcheck disable=SC1091
 if [[ $remove_source -eq 0 ]]; then
   args+=("--keep-source")
 fi
