@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-# Dotfiles CLI Entry Point - v0.2.492
+# Dotfiles CLI Entry Point - v0.2.493
 
 # Ensure XDG Base Directory variables are set
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -13,7 +13,7 @@ export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 export PIPX_HOME="${XDG_DATA_HOME}/pipx"
 export PIPX_BIN_DIR="${HOME}/.local/bin"
 
-VERSION="0.2.492"
+VERSION="0.2.493"
 
 COMMAND="$1"
 if [ -n "$1" ]; then

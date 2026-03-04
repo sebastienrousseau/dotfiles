@@ -1,8 +1,26 @@
 # Changelog
 
 This file documents all notable changes to this project.
+## v0.2.493
 
-## v0.2.492
+### Added
+- Implementation of `_cached_eval` for Zsh, Bash, and Fish for ultra-fast startup.
+- Full integration of `zoxide` and `atuin` in Nushell with caching.
+- Explicit management of `sgpt`, `poetry`, `fisher`, `micro`, and `pueue` configs.
+- Robust `target_os` detection for Arch/CachyOS in `install.sh`.
+
+### Changed
+- Refactored `install.sh` to use a modular `main()` function.
+- Moved XDG exports in `dot_bashrc` above interactive checks.
+- Optimized Zellij configuration with 2026-ready UX (rounded corners, compact layout).
+
+### Fixed
+- Resolved 100% of security alerts regarding `apt-get` recommendations.
+- Achieved 100.00% module test coverage with new maintenance tests.
+- Fixed Nix profile sourcing drift in `dot_zshenv`.
+- Resolved CI failures across linting, formatting, and unit test suites.
+
+
 
 ### Added
 
