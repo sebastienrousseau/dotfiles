@@ -19,9 +19,9 @@ warm_tool() {
   local ext="$4"
 
   local cache_file="$CACHE_DIR/$shell/$tool-init.$ext"
-  
+
   if command -v "$tool" >/dev/null 2>&1; then
-    eval "$cmd" > "$cache_file" 2>/dev/null || true
+    eval "$cmd" >"$cache_file" 2>/dev/null || true
     ui_ok "$tool" "Cached for $shell"
   fi
 }
@@ -52,15 +52,15 @@ warm_tool "direnv" "direnv hook fish" "fish" "fish"
 
 ui_section "Nushell"
 if command -v starship >/dev/null 2>&1; then
-  starship init nu > "$CACHE_DIR/nushell/starship.nu" 2>/dev/null || true
+  starship init nu >"$CACHE_DIR/nushell/starship.nu" 2>/dev/null || true
   ui_ok "starship" "Cached for nushell"
 fi
 if command -v zoxide >/dev/null 2>&1; then
-  zoxide init nushell > "$CACHE_DIR/nushell/zoxide.nu" 2>/dev/null || true
+  zoxide init nushell >"$CACHE_DIR/nushell/zoxide.nu" 2>/dev/null || true
   ui_ok "zoxide" "Cached for nushell"
 fi
 if command -v atuin >/dev/null 2>&1; then
-  atuin init nu > "$CACHE_DIR/nushell/atuin.nu" 2>/dev/null || true
+  atuin init nu >"$CACHE_DIR/nushell/atuin.nu" 2>/dev/null || true
   ui_ok "atuin" "Cached for nushell"
 fi
 

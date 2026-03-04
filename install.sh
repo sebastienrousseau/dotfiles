@@ -137,16 +137,16 @@ EOF
 
   # Detect Offline/Bundled Execution
   if [[ -f "$SOURCE_DIR/mise.toml" ]] && [[ ! -d "$SOURCE_DIR/.git" ]]; then
-      echo "   Running in Offline/Bundled Mode..."
-      export DOTFILES_OFFLINE=1
-      ensure_chezmoi_source "$SOURCE_DIR"
-      APPLY_FLAGS=()
-      if [[ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]]; then
-        APPLY_FLAGS=(--force --no-tty)
-      fi
-      chezmoi apply "${APPLY_FLAGS[@]}"
-      success "Offline configuration loaded. Please restart your shell."
-      exit 0
+    echo "   Running in Offline/Bundled Mode..."
+    export DOTFILES_OFFLINE=1
+    ensure_chezmoi_source "$SOURCE_DIR"
+    APPLY_FLAGS=()
+    if [[ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]]; then
+      APPLY_FLAGS=(--force --no-tty)
+    fi
+    chezmoi apply "${APPLY_FLAGS[@]}"
+    success "Offline configuration loaded. Please restart your shell."
+    exit 0
   fi
 
   # On Linux, verify a package manager is available
