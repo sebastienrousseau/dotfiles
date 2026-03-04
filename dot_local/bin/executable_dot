@@ -45,6 +45,9 @@ show_help() {
     echo "  doctor      Check system health and configuration"
     echo "  heal        Auto-repair common dotfiles issues"
     echo "  health      Run comprehensive health check"
+    echo "  verify      Run security and integrity verification"
+    echo "  scorecard   System health and security scorecard"
+    echo "  snapshot    Capture baseline system snapshot"
     echo "  smoke-test  Run automated toolchain verification"
     echo "  chaos       Simulate config corruption to test self-healing"
     echo "  bundle      Create offline archive of dotfiles environment"
@@ -292,6 +295,9 @@ case "$COMMAND" in
     heal) run_script "scripts/ops/heal.sh" "Heal script" "$@" ;;
     health|health-check) run_script "scripts/ops/health-check.sh" "Health check script" "$@" ;;
     smoke-test) run_script "scripts/diagnostics/smoke-test.sh" "Smoke test script" "$@" ;;
+    verify) run_script "scripts/diagnostics/verify.sh" "Verification script" "$@" ;;
+    scorecard) run_script "scripts/diagnostics/scorecard.sh" "Scorecard script" "$@" ;;
+    snapshot) run_script "scripts/diagnostics/snapshot.sh" "Snapshot script" "$@" ;;
     chaos) run_script "scripts/ops/chaos.sh" "Chaos engineering script" "$@" ;;
     bundle) run_script "scripts/ops/bundle.sh" "Offline bundle script" "$@" ;;
     rollback) run_script "scripts/ops/rollback.sh" "Rollback script" "$@" ;;
