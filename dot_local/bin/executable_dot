@@ -13,6 +13,11 @@ export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 export PIPX_HOME="${XDG_DATA_HOME}/pipx"
 export PIPX_BIN_DIR="${HOME}/.local/bin"
 
+# Ensure Nix is in PATH if installed
+if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
+    . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
+fi
+
 VERSION="0.2.493"
 
 COMMAND="$1"
