@@ -8,6 +8,8 @@ complete -c dot -f
 complete -c dot -n "__fish_use_subcommand" -a apply -d "Apply dotfiles configuration"
 complete -c dot -n "__fish_use_subcommand" -a sync -d "Alias of apply"
 complete -c dot -n "__fish_use_subcommand" -a update -d "Pull latest changes and apply"
+complete -c dot -n "__fish_use_subcommand" -a clean-cache -d "Clear shell initialization caches"
+complete -c dot -n "__fish_use_subcommand" -a prewarm -d "Regenerate shell caches for ultra-fast startup"
 complete -c dot -n "__fish_use_subcommand" -a add -d "Add a file to chezmoi source"
 complete -c dot -n "__fish_use_subcommand" -a diff -d "Show chezmoi diff with exclusions"
 complete -c dot -n "__fish_use_subcommand" -a status -d "Show configuration drift"
@@ -19,6 +21,8 @@ complete -c dot -n "__fish_use_subcommand" -a edit -d "Open chezmoi source in $E
 complete -c dot -n "__fish_use_subcommand" -a doctor -d "Check system health and configuration"
 complete -c dot -n "__fish_use_subcommand" -a heal -d "Auto-repair common dotfiles issues"
 complete -c dot -n "__fish_use_subcommand" -a health -d "Run comprehensive health check"
+complete -c dot -n "__fish_use_subcommand" -a smoke-test -d "Run automated toolchain verification"
+complete -c dot -n "__fish_use_subcommand" -a chaos -d "Simulate config corruption"
 complete -c dot -n "__fish_use_subcommand" -a drift -d "Drift dashboard"
 complete -c dot -n "__fish_use_subcommand" -a history -d "Shell history analysis"
 complete -c dot -n "__fish_use_subcommand" -a benchmark -d "Run shell startup benchmark"
@@ -41,6 +45,7 @@ complete -c dot -n "__fish_use_subcommand" -a fonts -d "Install Nerd Fonts"
 # Secrets & Security
 complete -c dot -n "__fish_use_subcommand" -a secrets-init -d "Initialize age key for secrets"
 complete -c dot -n "__fish_use_subcommand" -a secrets -d "Edit encrypted secrets"
+complete -c dot -n "__fish_use_subcommand" -a bundle -d "Create offline archive"
 complete -c dot -n "__fish_use_subcommand" -a upgrade -d "Update flake, plugins, and dotfiles"
 
 # Meta
