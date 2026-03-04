@@ -17,6 +17,26 @@ NC='\033[0m'
 # 2. Check Prerequisites & Bootstrap Package Managers
 step "Checking Prerequisites..."
 
+# Detect Operating System
+OS="$(uname -s)"
+case "$OS" in
+  Darwin) target_os="macos" ;;
+  Linux)
+    if grep -q Microsoft /proc/version 2>/dev/null; then
+      target_os="wsl2"
+    elif [ -f /etc/debian_version ]; then
+      target_os="debian"
+    elif [ -f /etc/fedora-release ]; then
+      target_os="fedora"
+    elif [ -f /etc/arch-release ]; then
+      target_os="arch"
+    else
+      target_os="linux"
+    fi
+    ;;
+  *) target_os="unknown" ;;
+esac
+
 # Bootstrap gum for a better UI if available or install it
 bootstrap_gum() {
   if command -v gum >/dev/null 2>&1; then return 0; fi
