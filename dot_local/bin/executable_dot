@@ -33,6 +33,7 @@ show_help() {
     echo "  sync        Apply dotfiles (alias of apply)"
     echo "  update      Pull latest changes and apply them (chezmoi update)"
     echo "  clean-cache Clear shell initialization caches"
+    echo "  prewarm     Regenerate shell caches for ultra-fast startup"
     echo "  add         Add a file to chezmoi source"
     echo "  diff        Show chezmoi diff with exclusions"
     echo "  status      Show configuration drift (chezmoi status)"
@@ -46,6 +47,7 @@ show_help() {
     echo "  health      Run comprehensive health check"
     echo "  smoke-test  Run automated toolchain verification"
     echo "  chaos       Simulate config corruption to test self-healing"
+    echo "  bundle      Create offline archive of dotfiles environment"
     echo "  rollback    Rollback dotfiles to a previous state"
     echo "  drift       Drift dashboard (detailed chezmoi status)"
     echo "  history     Shell history analysis"
@@ -291,6 +293,7 @@ case "$COMMAND" in
     health|health-check) run_script "scripts/ops/health-check.sh" "Health check script" "$@" ;;
     smoke-test) run_script "scripts/diagnostics/smoke-test.sh" "Smoke test script" "$@" ;;
     chaos) run_script "scripts/ops/chaos.sh" "Chaos engineering script" "$@" ;;
+    bundle) run_script "scripts/ops/bundle.sh" "Offline bundle script" "$@" ;;
     rollback) run_script "scripts/ops/rollback.sh" "Rollback script" "$@" ;;
     benchmark) run_script "scripts/tests/benchmark.sh" "Benchmark script" "$@" ;;
     perf)
@@ -501,6 +504,13 @@ PY
         rm -rf "$CACHE_DIR/nushell"/*.nu 2>/dev/null || true
         echo "Caches cleared. Restart your shell to regenerate."
         ;;
+    prewarm)
+        "$0" clean-cache
+        SRC_DIR="$(resolve_source_dir)"
+        if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/ops/prewarm.sh" ]; then
+            bash "$SRC_DIR/scripts/ops/prewarm.sh"
+        fi
+        ;;
     update)
         SRC_DIR="$(resolve_source_dir)"
         if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/ops/chezmoi-update.sh" ]; then
@@ -509,8 +519,8 @@ PY
             echo "Updating Dotfiles..."
             chezmoi update
         fi
-        # Invalidate caches after update
-        "$0" clean-cache
+        # Regenerate caches after update
+        "$0" prewarm
         ;;
     diff)
         SRC_DIR="$(resolve_source_dir)"
