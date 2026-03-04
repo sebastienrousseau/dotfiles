@@ -130,7 +130,7 @@ check_chezmoi_installed() {
 }
 
 check_dotfiles_source() {
-# shellcheck disable=SC1091
+  # shellcheck disable=SC1091
   log_info "Checking dotfiles source directory..."
   if [[ -d "$DOTFILES_SOURCE" ]]; then
     if [[ -d "$DOTFILES_SOURCE/.git" ]]; then
@@ -376,7 +376,7 @@ main() {
 
   # Run all checks
   check_chezmoi_installed || true
-# shellcheck disable=SC1091
+  # shellcheck disable=SC1091
   check_dotfiles_source || true
   check_chezmoi_config || true
   check_critical_files || true

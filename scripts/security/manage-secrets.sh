@@ -133,7 +133,7 @@ init_config() {
   log_info "Next steps:"
   echo "  1. Edit .env.local and configure required variables"
   echo "  2. Run '$0 validate' to check configuration"
-# shellcheck disable=SC1091
+  # shellcheck disable=SC1091
   echo "  3. Source the file: source .env.local"
 
   # Add to .gitignore if not present
@@ -168,7 +168,7 @@ validate_config() {
 
   # Source and validate environment
   # shellcheck source=/dev/null
-# shellcheck disable=SC1091
+  # shellcheck disable=SC1091
   if source "$ENV_LOCAL" 2>/dev/null; then
     log_success ".env.local loads successfully"
   else
