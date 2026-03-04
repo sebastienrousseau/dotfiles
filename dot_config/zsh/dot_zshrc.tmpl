@@ -44,6 +44,7 @@ export DOTFILES_THEME="{{ $theme }}"
 : ${DOTFILES_ULTRA_FAST_PROMPT:=1}
 : ${DOTFILES_LAYERS_LOAD:=ondemand}
 : ${DOTFILES_LAYERS_PREWARM:=system,text,api}
+: ${DOTFILES_ALIAS_WRAPPER:=0}
 
 # Default compinit based on profile (can be overridden by env)
 if [[ -z "${DOTFILES_ENABLE_COMPINIT+x}" ]]; then
