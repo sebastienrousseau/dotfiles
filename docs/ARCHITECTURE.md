@@ -37,6 +37,12 @@ This document outlines the core architectural decisions and system design of the
 
 Each shell utilizes a different strategy to achieve "Ultimate Performance":
 
+### 🏎️ Shared: Unified `_cached_eval` Logic
+Across Zsh, Fish, and Bash, we implement an idempotent caching wrapper for external tool initializations (Starship, Zoxide, Atuin).
+1.  **Intercept**: The shell checks if a cached version of the tool's `eval` output exists in `~/.cache/shell/`.
+2.  **Validate**: It compares the cache timestamp against the tool binary.
+3.  **Bypass**: If valid, the shell `source`s the text file directly, avoiding a subshell execution and saving **20-50ms** per tool.
+
 ### ⚡ Zsh: Modular Deferred Loading
 Zsh uses a tiered `rc.d` approach combined with `zinit` turbo mode.
 1.  **Phase 0 (Bootload)**: `.zshenv` sets XDG paths and essential `$PATH`.
