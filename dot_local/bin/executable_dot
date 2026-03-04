@@ -27,6 +27,7 @@ show_help() {
     echo "  apply       Apply dotfiles (chezmoi apply)"
     echo "  sync        Apply dotfiles (alias of apply)"
     echo "  update      Pull latest changes and apply them (chezmoi update)"
+    echo "  clean-cache Clear shell initialization caches"
     echo "  add         Add a file to chezmoi source"
     echo "  diff        Show chezmoi diff with exclusions"
     echo "  status      Show configuration drift (chezmoi status)"
@@ -482,13 +483,25 @@ PY
             exit 1
         fi
         ;;
+    clean-cache)
+        echo "Clearing shell initialization caches..."
+        CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"
+        rm -rf "$CACHE_DIR/zsh"/*-init.zsh "$CACHE_DIR/zsh"/*.zwc 2>/dev/null || true
+        rm -rf "$CACHE_DIR/bash"/*-init.bash 2>/dev/null || true
+        rm -rf "$CACHE_DIR/fish"/*-init.fish 2>/dev/null || true
+        rm -rf "$CACHE_DIR/nushell"/*.nu 2>/dev/null || true
+        echo "Caches cleared. Restart your shell to regenerate."
+        ;;
     update)
         SRC_DIR="$(resolve_source_dir)"
         if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/ops/chezmoi-update.sh" ]; then
-            exec bash "$SRC_DIR/scripts/ops/chezmoi-update.sh" "$@"
+            bash "$SRC_DIR/scripts/ops/chezmoi-update.sh" "$@"
+        else
+            echo "Updating Dotfiles..."
+            chezmoi update
         fi
-        echo "Updating Dotfiles..."
-        exec chezmoi update
+        # Invalidate caches after update
+        "$0" clean-cache
         ;;
     diff)
         SRC_DIR="$(resolve_source_dir)"

@@ -1,0 +1,68 @@
+# Copyright (c) 2015-2026 . All rights reserved.
+{ pkgs, ... }:
+
+{
+  home.username = "seb";
+  home.homeDirectory = "/home/seb";
+
+  # This value determines the Home Manager release that your configuration is
+  # compatible with. This helps avoid breakage when a new Home Manager release
+  # introduces backwards incompatible changes.
+  #
+  # You can update Home Manager without changing this value. See the Home Manager
+  # release notes for a list of state version changes in each release.
+  home.stateVersion = "24.11";
+
+  # The home.packages option allows you to install Nix packages into your
+  # environment.
+  home.packages = with pkgs; [
+    # Add additional packages here
+    htop
+    tldr
+  ];
+
+  # Home Manager is pretty good at managing dotfiles. The primary way to manage
+  # plain files is through 'home.file'.
+  home.file = {
+    # Example:
+    # ".screenrc".source = dotfiles/screenrc;
+  };
+
+  # Home Manager can also manage your environment variables through
+  # 'home.sessionVariables'. If you don't want to manage your shell through Home
+  # Manager then you have to manually source 'hm-session-vars.sh' located at
+  # either
+  #
+  #  ~/.nix-profile/etc/profile.d/hm-session-vars.sh
+  #
+  # or
+  #
+  #  ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
+  #
+  # or
+  #
+  #  /etc/profiles/per-user/seb/etc/profile.d/hm-session-vars.sh
+  #
+  home.sessionVariables = {
+    # EDITOR = "nvim";
+  };
+
+  # Let Home Manager install and manage itself.
+  programs.home-manager.enable = true;
+
+  # Manage fish plugins via Home Manager
+  programs.fish = {
+    enable = true;
+    plugins = [
+      {
+        name = "fisher";
+        src = pkgs.fetchFromGitHub {
+          owner = "jorgebucaran";
+          repo = "fisher";
+          rev = "main";
+          sha256 = "sha256-+ST6yL9iSSST9SGU6S6S6S6S6S6S6S6S6S6S6S6S6S6="; # Placeholder
+        };
+      }
+    ];
+  };
+}

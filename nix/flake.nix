@@ -2,14 +2,20 @@
 {
   description = "Dotfiles optional toolchain (Nix)";
 
-  # NOTE: Run `nix flake update` to generate/refresh flake.lock, then commit it
-  # for reproducible builds. Pin to a stable release channel for determinism.
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    home-manager = {
+      url = "github:nix-community/home-manager/release-24.11";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    { self, nixpkgs }:
+    {
+      self,
+      nixpkgs,
+      home-manager,
+    }:
     let
       systems = [
         "x86_64-linux"
@@ -20,6 +26,15 @@
       forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f system);
     in
     {
+      # Home Manager configuration
+      # Use: home-manager switch --flake .#seb
+      homeConfigurations = {
+        seb = home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages."x86_64-linux"; # Adjust if needed
+          modules = [ ./home.nix ];
+        };
+      };
+
       # Development shell for interactive use
       devShells = forAllSystems (
         system:
@@ -82,48 +97,30 @@
           dot-utils = pkgs.buildEnv {
             name = "dot-utils";
             paths = with pkgs; [
-              # Core
               git
               zsh
               neovim
               tmux
-
-              # Search & Navigation
               ripgrep
               fd
               bat
               fzf
               zoxide
               eza
-
-              # Git tools
               lazygit
               delta
               gh
-
-              # Data processing
               jq
               yq
-
-              # Dev tools
               chezmoi
               starship
               shellcheck
               shfmt
               just
               direnv
-
-              # Security
               age
               gnupg
             ];
-            meta = {
-              description = "Dotfiles utility bundle";
-              longDescription = ''
-                A meta-package that installs all core utilities used by the dotfiles.
-                Install with: nix profile install .#dot-utils
-              '';
-            };
           };
 
           default = self.packages.${system}.dot-utils;
