@@ -26,6 +26,9 @@ fish = true
 nushell = true
 starship = true
 
+# Shell hardening
+alias_wrapper = false
+
 # Editors
 nvim = true
 emacs = false
