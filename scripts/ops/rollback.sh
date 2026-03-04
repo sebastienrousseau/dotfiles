@@ -342,11 +342,11 @@ restore_file() {
 
   local source_file="$backup/$file_path"
 
-# shellcheck disable=SC1091
+  # shellcheck disable=SC1091
   # Verify resolved source path stays within the backup directory
   local resolved_source
   resolved_source="$(cd "$(dirname "$source_file")" 2>/dev/null && pwd)/$(basename "$source_file")" || {
-# shellcheck disable=SC1091
+    # shellcheck disable=SC1091
     log_error "Cannot resolve source path: $source_file"
     return 1
   }

@@ -160,13 +160,13 @@ run_checks() {
   # Chezmoi
   if command -v chezmoi >/dev/null 2>&1; then
     check "Chezmoi installed" "pass"
-# shellcheck disable=SC1091
+    # shellcheck disable=SC1091
     # Check if source dir exists
     if [[ -d "${HOME}/.local/share/chezmoi" ]] || [[ -d "${HOME}/.dotfiles" ]]; then
-# shellcheck disable=SC1091
+      # shellcheck disable=SC1091
       check "Chezmoi source directory" "pass"
     else
-# shellcheck disable=SC1091
+      # shellcheck disable=SC1091
       check "Chezmoi source directory" "fail" "Not found"
     fi
   else
