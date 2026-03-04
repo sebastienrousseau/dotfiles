@@ -7,6 +7,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
 ui_init
@@ -62,6 +63,7 @@ if dot_bin="$(resolve_dot_bin)"; then
   run_step "dot doctor" "$dot_bin" doctor
   run_step "dot status" "$dot_bin" status
 else
+# shellcheck disable=SC1091
   ui_err "dot binary" "not found in PATH, ~/.local/bin, or source tree"
   failures=$((failures + 1))
 fi
