@@ -4,16 +4,20 @@
 
 # Aider (AI Pair Programming)
 if command -v aider &>/dev/null; then
-  alias aid='aider'
-  alias aida='aider --chat-mode ask'
-  alias aidc='aider --chat-mode code'
-  alias aidw='aider --watch-files'
+  _aider_ctx="--read ~/.config/ai/identity.md"
+  alias aid="aider $_aider_ctx"
+  alias aida="aider $_aider_ctx --chat-mode ask"
+  alias aidc="aider $_aider_ctx --chat-mode code"
+  alias aidw="aider $_aider_ctx --watch-files"
+  unset _aider_ctx
 fi
 
 # Claude Code
 if command -v claude &>/dev/null; then
   alias cl='claude'
   alias clc='claude --chat'
+  # Provide context as a system prompt if possible (assuming file read support or piping)
+  alias clp='claude < ~/.config/ai/identity.md'
 fi
 
 # OpenAI Codex CLI
