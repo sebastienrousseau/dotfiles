@@ -25,3 +25,8 @@ export NANORC="${XDG_CONFIG_HOME}/nano/nanorc"
 # Vim (Use VIMINIT to source the config file)
 # Use single quotes to prevent shell expansion (Vim will expand $XDG_CONFIG_HOME)
 # export VIMINIT='source $XDG_CONFIG_HOME/vim/vimrc'
+
+# Nix
+if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
+  . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
+fi
