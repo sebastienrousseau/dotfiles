@@ -38,7 +38,7 @@ esac
 # Bootstrap gum for a better UI if available or install it
 bootstrap_gum() {
   if command -v gum >/dev/null 2>&1; then return 0; fi
-  
+
   echo "   Bootstrapping UI components (gum)..."
   if [[ "$OS" == "Darwin" ]] && command -v brew >/dev/null; then
     brew install gum >/dev/null 2>&1
