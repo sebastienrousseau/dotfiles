@@ -145,8 +145,8 @@ fi
 echo ""
 ui_header "Optional AI CLIs"
 for cmd in claude gemini sgpt ollama opencode aider; do
-  if command -v "$cmd" &>/dev/null; then
-    log_success "$cmd" "$(command -v "$cmd")"
+  if check_cmd "$cmd"; then
+    log_success "$cmd" "$(get_cmd_path "$cmd")"
   else
     log_warn "$cmd" "optional"
   fi
