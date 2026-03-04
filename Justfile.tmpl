@@ -17,9 +17,9 @@ update:
 # WebAssembly (Wasm) Tools
 # -----------------------------------------------------------------------------
 
-# Compile the Rust system utility to Wasm
+# Compile the Rust system utility to Wasm (with hardware-native optimizations)
 wasm-build:
-    cd lib/wasm-tools && cargo build --target wasm32-wasi --release
+    cd lib/wasm-tools && RUSTFLAGS="-C target-cpu=native" cargo build --target wasm32-wasi --release
     mkdir -p dot_local/bin/wasm
     cp lib/wasm-tools/target/wasm32-wasi/release/dot-sys.wasm dot_local/bin/wasm/dot-sys.wasm
 
