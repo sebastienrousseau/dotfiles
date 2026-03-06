@@ -83,6 +83,8 @@ Detailed guide: [AI.md](AI.md).
 | **Kiro CLI** | Agentic AI terminal assistant |
 | **Gemini CLI** | Google's multi-modal CLI tool |
 | **Mods/Fabric** | Pipeline-friendly AI processing |
+| sgpt | shell-gpt |
+| ollama | ollama |
 
 ---
 
