@@ -203,7 +203,7 @@ fi
 # Test: dot new with no args shows usage
 test_start "dot_cli_new_no_args"
 set +e
-output=$(bash "$DOT_CLI" new 2>&1)
+output=$(CHEZMOI_SOURCE_DIR="$REPO_ROOT" bash "$DOT_CLI" new 2>&1)
 ec=$?
 set -e
 if [[ "$output" == *"Usage: dot new <lang> <name>"* ]] && [[ $ec -ne 0 ]]; then

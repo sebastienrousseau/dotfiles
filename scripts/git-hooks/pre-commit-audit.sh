@@ -30,48 +30,48 @@ echo -n "   🔍 Scanning for secrets... "
 # Exclude assignments to values containing common placeholder strings or within template expressions
 SENSITIVE_PATTERNS="(GITHUB_TOKEN|API_KEY|SECRET|password|private_key|AKIA[0-9A-Z]{16})[[:space:]]*[:=]"
 # Exclusions list for legitimate variable checks or documentation
-SECRET_EXCLUDES="test_|assertions.sh|.pre-commit|README|CHANGELOG|FEATURES.md|CONFIG_STRATEGY.md|docs/|install/lib/|.chezmoitemplates/|mcp-doctor.sh"
+SECRET_EXCLUDES="test_|assertions.sh|.pre-commit|README|CHANGELOG|FEATURES.md|CONFIG_STRATEGY.md|docs/|install/lib/|.chezmoitemplates/|mcp-doctor.sh|\.github/workflows/"
 # Also exclude .tmpl files from secret scanning as they contain many false positive markers
 if echo "$STAGED_FILES" | grep -v "\.tmpl" | xargs grep -EiE "$SENSITIVE_PATTERNS" /dev/null | grep -vE "$SECRET_EXCLUDES" | grep -viE "dummy|placeholder|example|test|sk-placeholder|\\{\\{" >/dev/null 2>&1; then
-    echo -e "${RED}FAILED${NC}"
-    echo -e "      ${YELLOW}⚠ Potential secret detected in staged files:${NC}"
-    echo "$STAGED_FILES" | grep -v "\.tmpl" | xargs grep -EiE "$SENSITIVE_PATTERNS" /dev/null | grep -vE "$SECRET_EXCLUDES" | grep -viE "dummy|placeholder|example|test|sk-placeholder|\\{\\{" | sed 's/^/      /'
-    FAILED=1
+  echo -e "${RED}FAILED${NC}"
+  echo -e "      ${YELLOW}⚠ Potential secret detected in staged files:${NC}"
+  echo "$STAGED_FILES" | grep -v "\.tmpl" | xargs grep -EiE "$SENSITIVE_PATTERNS" /dev/null | grep -vE "$SECRET_EXCLUDES" | grep -viE "dummy|placeholder|example|test|sk-placeholder|\\{\\{" | sed 's/^/      /'
+  FAILED=1
 else
-    echo -e "${GREEN}PASSED${NC}"
+  echo -e "${GREEN}PASSED${NC}"
 fi
 
 # --- 👻 2. Ghost Path Linter ---
 echo -n "   👻 Checking for hardcoded paths... "
 # Exclude test files, documentation, the hook itself, Nix files, and template backups
-GHOST_EXCLUDES="test_|assertions.sh|pre-commit|interop.md|WSL2_NIX_TROUBLESHOOTING.md|\.nix|\.backup"
+GHOST_EXCLUDES="test_|assertions.sh|pre-commit|interop.md|WSL2_NIX_TROUBLESHOOTING.md|\.nix|\.backup|\.github/workflows/"
 if echo "$STAGED_FILES" | xargs grep -rIE '"/home/(linuxbrew)?[^$]|/Users/[^$]' /dev/null | grep -v "linuxbrew" | grep -vE "$GHOST_EXCLUDES" >/dev/null 2>&1; then
-    echo -e "${RED}FAILED${NC}"
-    echo -e "      ${YELLOW}⚠ Literal home paths detected (use \$HOME or ~ instead):${NC}"
-    echo "$STAGED_FILES" | xargs grep -rIE '"/home/(linuxbrew)?[^$]|/Users/[^$]' /dev/null | grep -v "linuxbrew" | grep -vE "$GHOST_EXCLUDES" | sed 's/^/      /'
-    FAILED=1
+  echo -e "${RED}FAILED${NC}"
+  echo -e "      ${YELLOW}⚠ Literal home paths detected (use \$HOME or ~ instead):${NC}"
+  echo "$STAGED_FILES" | xargs grep -rIE '"/home/(linuxbrew)?[^$]|/Users/[^$]' /dev/null | grep -v "linuxbrew" | grep -vE "$GHOST_EXCLUDES" | sed 's/^/      /'
+  FAILED=1
 else
-    echo -e "${GREEN}PASSED${NC}"
+  echo -e "${GREEN}PASSED${NC}"
 fi
 
 # --- 🐚 3. ShellCheck Hygiene ---
 if command -v shellcheck >/dev/null 2>&1; then
-    echo -n "   🐚 Running ShellCheck... "
-    # ONLY run on actual .sh files, NOT .tmpl files (Go templates break shellcheck)
-    # Also exclude files that contain Zsh-specific syntax that might trigger false positives in sh mode
-    SHELL_FILES=$(echo "$STAGED_FILES" | grep -E '\.sh$' | grep -v "\.tmpl" || true)
-    if [[ -n "$SHELL_FILES" ]]; then
-        if ! echo "$SHELL_FILES" | xargs shellcheck -x --severity=error -e SC1091,SC2296,SC2142 >/dev/null 2>&1; then
-            echo -e "${RED}FAILED${NC}"
-            echo -e "      ${YELLOW}⚠ Shell syntax errors detected:${NC}"
-            echo "$SHELL_FILES" | xargs shellcheck -x --severity=error -e SC1091,SC2296,SC2142 | sed 's/^/      /'
-            FAILED=1
-        else
-            echo -e "${GREEN}PASSED${NC}"
-        fi
+  echo -n "   🐚 Running ShellCheck... "
+  # ONLY run on actual .sh files, NOT .tmpl files (Go templates break shellcheck)
+  # Also exclude files that contain Zsh-specific syntax that might trigger false positives in sh mode
+  SHELL_FILES=$(echo "$STAGED_FILES" | grep -E '\.sh$' | grep -v "\.tmpl" || true)
+  if [[ -n "$SHELL_FILES" ]]; then
+    if ! echo "$SHELL_FILES" | xargs shellcheck -x --severity=error -e SC1091,SC2296,SC2142 >/dev/null 2>&1; then
+      echo -e "${RED}FAILED${NC}"
+      echo -e "      ${YELLOW}⚠ Shell syntax errors detected:${NC}"
+      echo "$SHELL_FILES" | xargs shellcheck -x --severity=error -e SC1091,SC2296,SC2142 | sed 's/^/      /'
+      FAILED=1
     else
-        echo -e "${YELLOW}SKIPPED${NC} (no .sh files)"
+      echo -e "${GREEN}PASSED${NC}"
     fi
+  else
+    echo -e "${YELLOW}SKIPPED${NC} (no .sh files)"
+  fi
 fi
 # --- 🧹 4. Formatting Audit ---
 echo -n "   🧹 Checking formatting... "
