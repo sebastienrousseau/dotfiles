@@ -123,6 +123,8 @@ done
 
 echo ""
 ui_header "Modern CLI Tools"
+# Extend PATH to include common non-standard install locations
+export PATH="$HOME/.atuin/bin:$HOME/.local/bin:$PATH"
 for cmd in rg bat chezmoi fzf zoxide atuin yazi zellij; do
   if check_cmd "$cmd"; then
     log_success "$cmd" "$(get_cmd_path "$cmd")"
