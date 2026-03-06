@@ -199,193 +199,223 @@ get_package_name() {
   esac
 }
 
-# Binary installer for tools not in standard apt repos
-_install_via_binary() {
+# =============================================================================
+# Animated Package Installer (inspired by charm.sh/bubbletea)
+# =============================================================================
+
+_SPIN=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
+
+_progress_bar() {
+  local current=$1 total=$2 width=20
+  if [[ $total -eq 0 ]]; then return; fi
+  local filled=$((current * width / total))
+  local empty=$((width - filled))
+  printf '\033[38;5;63m'
+  local i
+  for ((i = 0; i < filled; i++)); do printf '█'; done
+  printf '\033[0;2m'
+  for ((i = 0; i < empty; i++)); do printf '░'; done
+  printf '\033[0m'
+}
+
+# Run a command with animated spinner + progress bar
+# Usage: _pkg_install "label" completed total command [args...]
+_pkg_install() {
+  local label="$1" completed="$2" total="$3"
+  shift 3
+
+  # Non-terminal: simple line output
+  if [[ ! -t 1 ]]; then
+    if "$@" >/dev/null 2>&1; then
+      printf '  \033[38;5;42m✓\033[0m %s\n' "$label"
+      return 0
+    else
+      printf '  \033[38;5;196m✗\033[0m %s\n' "$label"
+      return 1
+    fi
+  fi
+
+  local rc_file
+  rc_file=$(mktemp)
+
+  # Run install in background, capture exit code
+  ( "$@" >/dev/null 2>&1; echo $? >"$rc_file" ) &
+  local pid=$!
+
+  # Animate spinner in foreground
+  local fi=0 w
+  w=${#total}
+  while kill -0 "$pid" 2>/dev/null; do
+    printf '\r  \033[38;5;63m%s\033[0m Installing \033[38;5;211m%s\033[0m  ' \
+      "${_SPIN[$fi]}" "$label"
+    _progress_bar "$completed" "$total"
+    printf ' %*d/%d ' "$w" "$((completed + 1))" "$total"
+    fi=$(( (fi + 1) % ${#_SPIN[@]} ))
+    sleep 0.08
+  done
+  wait "$pid" 2>/dev/null
+
+  local rc
+  rc=$(cat "$rc_file" 2>/dev/null || echo 1)
+  rm -f "$rc_file"
+
+  # Clear spinner line, print result
+  printf '\r\033[K'
+  if [[ "$rc" == "0" ]]; then
+    printf '  \033[38;5;42m✓\033[0m %s\n' "$label"
+  else
+    printf '  \033[38;5;196m✗\033[0m %s\n' "$label"
+  fi
+  return "$rc"
+}
+
+# Install a single package (dispatcher for _pkg_install to call in subshell)
+_do_install() {
   local cmd="$1"
+  local pkg_mgr="$2"
   local bin_dir="$HOME/.local/bin"
   mkdir -p "$bin_dir"
 
-  case "$cmd" in
-    starship)
-      log_info "Installing starship..."
-      if curl -fsSL https://starship.rs/install.sh | sh -s -- --yes >/dev/null 2>&1; then
-        log_success "Installed starship"
-        FIXES_APPLIED=$((FIXES_APPLIED + 1))
-        persist_log "HEAL: installed starship via curl installer"
-        return 0
-      fi
-      ;;
-    atuin)
-      log_info "Installing atuin..."
-      if curl -fsSL https://setup.atuin.sh | bash -s -- --yes >/dev/null 2>&1; then
-        # Add atuin to PATH for the rest of this session
-        export PATH="$HOME/.atuin/bin:$PATH"
-        log_success "Installed atuin"
-        FIXES_APPLIED=$((FIXES_APPLIED + 1))
-        persist_log "HEAL: installed atuin via curl installer"
-        return 0
-      fi
-      ;;
-    yazi)
-      log_info "Installing yazi..."
-      local arch
-      arch=$(uname -m)
-      local url="https://github.com/sxyazi/yazi/releases/latest/download/yazi-${arch}-unknown-linux-musl.zip"
-      local tmp
-      tmp=$(mktemp -d)
-      # Ensure unzip is available
-      if ! command -v unzip >/dev/null 2>&1; then
-        sudo apt-get install -y -qq unzip >/dev/null 2>&1 || true
-      fi
-      if curl -fsSL -o "$tmp/yazi.zip" "$url" && \
-         (cd "$tmp" && unzip -oq yazi.zip) && \
-         install -m 755 "$tmp"/yazi-*/yazi "$bin_dir/yazi"; then
-        log_success "Installed yazi"
-        FIXES_APPLIED=$((FIXES_APPLIED + 1))
-        persist_log "HEAL: installed yazi via GitHub release"
+  # Binary installers for tools not in standard apt repos
+  if [[ "$pkg_mgr" == "apt" ]]; then
+    case "$cmd" in
+      starship)
+        curl -fsSL https://starship.rs/install.sh | sh -s -- --yes
+        return $?
+        ;;
+      atuin)
+        curl -fsSL https://setup.atuin.sh | bash -s -- --yes
+        return $?
+        ;;
+      yazi)
+        local arch
+        arch=$(uname -m)
+        local url="https://github.com/sxyazi/yazi/releases/latest/download/yazi-${arch}-unknown-linux-musl.zip"
+        local tmp
+        tmp=$(mktemp -d)
+        command -v unzip >/dev/null 2>&1 || sudo apt-get install -y -qq unzip
+        curl -fsSL -o "$tmp/yazi.zip" "$url" \
+          && (cd "$tmp" && unzip -oq yazi.zip) \
+          && install -m 755 "$tmp"/yazi-*/yazi "$bin_dir/yazi"
+        local rc=$?
         rm -rf "$tmp"
-        return 0
-      fi
-      rm -rf "$tmp"
-      ;;
-    zellij)
-      log_info "Installing zellij..."
-      local arch
-      arch=$(uname -m)
-      local url="https://github.com/zellij-org/zellij/releases/latest/download/zellij-${arch}-unknown-linux-musl.tar.gz"
-      local tmp
-      tmp=$(mktemp -d)
-      if curl -fsSL -o "$tmp/zellij.tar.gz" "$url" && \
-         tar xzf "$tmp/zellij.tar.gz" -C "$tmp" && \
-         install -m 755 "$tmp/zellij" "$bin_dir/zellij"; then
-        log_success "Installed zellij"
-        FIXES_APPLIED=$((FIXES_APPLIED + 1))
-        persist_log "HEAL: installed zellij via GitHub release"
+        return $rc
+        ;;
+      zellij)
+        local arch
+        arch=$(uname -m)
+        local url="https://github.com/zellij-org/zellij/releases/latest/download/zellij-${arch}-unknown-linux-musl.tar.gz"
+        local tmp
+        tmp=$(mktemp -d)
+        curl -fsSL -o "$tmp/zellij.tar.gz" "$url" \
+          && tar xzf "$tmp/zellij.tar.gz" -C "$tmp" \
+          && install -m 755 "$tmp/zellij" "$bin_dir/zellij"
+        local rc=$?
         rm -rf "$tmp"
-        return 0
-      fi
-      rm -rf "$tmp"
-      ;;
-    *) return 1 ;;
-  esac
-  return 1
+        return $rc
+        ;;
+    esac
+  fi
+
+  # System package manager
+  local pkg
+  pkg=$(get_package_name "$cmd")
+  install_package "$pkg"
 }
 
 heal_missing_dependencies() {
-  log_step "Checking core dependencies"
-  # Match what dot doctor checks: Core Shells + Modern CLI Tools
+  log_step "Checking dependencies"
   local deps=(zsh chezmoi starship rg bat fzf zoxide atuin yazi zellij)
-  # Frontier tools (doctor reports these as warnings)
   local frontier_deps=("nushell" "pueue" "wasmtime" "sops" "age")
-  local missing=()
-  local missing_frontier=()
+  local all_missing=()
 
+  # Detect missing core tools
   for cmd in "${deps[@]}"; do
-    if check_cmd "$cmd"; then
-      continue
-    fi
-    # On Debian/Ubuntu, bat is installed as batcat
-    if [[ "$cmd" == "bat" ]] && check_cmd "batcat"; then
-      continue
-    fi
-    missing+=("$cmd")
+    if check_cmd "$cmd"; then continue; fi
+    if [[ "$cmd" == "bat" ]] && check_cmd "batcat"; then continue; fi
+    all_missing+=("$cmd")
     ISSUES_FOUND=$((ISSUES_FOUND + 1))
   done
 
-  # Frontier tools: check using check_cmd (mise-aware)
+  # Detect missing frontier tools
   for cmd in "${frontier_deps[@]}"; do
     local check_name="$cmd"
-    # 'nu' is the binary name for nushell
     [[ "$cmd" == "nushell" ]] && check_name="nu"
     if ! check_cmd "$check_name"; then
-      missing_frontier+=("$cmd")
+      all_missing+=("$cmd")
       ISSUES_FOUND=$((ISSUES_FOUND + 1))
     fi
   done
 
-  if [[ ${#missing[@]} -eq 0 ]] && [[ ${#missing_frontier[@]} -eq 0 ]]; then
+  if [[ ${#all_missing[@]} -eq 0 ]]; then
     log_success "All dependencies present"
     return 0
   fi
 
-  if [[ ${#missing[@]} -gt 0 ]]; then
-    log_warn "Missing core dependencies: ${missing[*]}"
-  fi
-
-  if [[ ${#missing_frontier[@]} -gt 0 ]]; then
-    log_warn "Missing frontier tools: ${missing_frontier[*]}"
-  fi
-
+  local total=${#all_missing[@]}
+  local completed=0
+  local installed=0
   local pkg_mgr
   pkg_mgr=$(detect_pkg_manager)
 
-  # Try mise for frontier tools if available
-  if command -v mise >/dev/null 2>&1 && [[ ${#missing_frontier[@]} -gt 0 ]]; then
-    for cmd in "${missing_frontier[@]}"; do
-      local mise_name=$cmd
-      # Map to specific aqua providers if registry lookup is failing
+  echo ""
+  for cmd in "${all_missing[@]}"; do
+    if [[ "$DRY_RUN" == "1" ]]; then
+      log_dry "install '$cmd'"
+      completed=$((completed + 1))
+      continue
+    fi
+
+    # Frontier tools: try mise first
+    local is_frontier=0
+    for ft in "${frontier_deps[@]}"; do
+      [[ "$ft" == "$cmd" ]] && is_frontier=1 && break
+    done
+
+    if [[ "$is_frontier" == "1" ]] && command -v mise >/dev/null 2>&1; then
+      local mise_name="$cmd"
       case "$cmd" in
         nushell) mise_name="aqua:nushell/nushell" ;;
         pueue) mise_name="aqua:Nukesor/pueue/pueue" ;;
       esac
-
-      if [[ "$DRY_RUN" == "1" ]]; then
-        log_dry "install '$mise_name' via mise"
-      else
-        log_info "Installing $mise_name via mise..."
-        if mise use -g "$mise_name"; then
-          log_success "Installed $cmd via mise"
-          FIXES_APPLIED=$((FIXES_APPLIED + 1))
-          persist_log "HEAL: installed $cmd via mise"
-          # Filter it out of the missing list
-          local temp_list=()
-          for item in "${missing_frontier[@]}"; do
-            [[ "$item" != "$cmd" ]] && temp_list+=("$item")
-          done
-          missing_frontier=("${temp_list[@]}")
-        fi
-      fi
-    done
-  fi
-
-  # System package manager fallback for core deps
-  if [[ ${#missing[@]} -eq 0 ]]; then return 0; fi
-
-  if [[ -z "$pkg_mgr" ]]; then
-    log_error "No supported package manager detected. Install manually: ${missing[*]}"
-    return 1
-  fi
-
-  for cmd in "${missing[@]}"; do
-    local pkg
-    pkg=$(get_package_name "$cmd")
-
-    if [[ "$DRY_RUN" == "1" ]]; then
-      log_dry "install '$pkg' via $pkg_mgr"
-    else
-      # Tools not in standard apt repos — use binary installers
-      if [[ "$pkg_mgr" == "apt" ]] && _install_via_binary "$cmd"; then
+      if _pkg_install "$cmd" "$completed" "$total" mise use -g "$mise_name"; then
+        FIXES_APPLIED=$((FIXES_APPLIED + 1))
+        installed=$((installed + 1))
+        persist_log "HEAL: installed $cmd via mise"
+        completed=$((completed + 1))
         continue
       fi
-
-      log_info "Installing $pkg via $pkg_mgr..."
-      if install_package "$pkg"; then
-        log_success "Installed $pkg"
-        FIXES_APPLIED=$((FIXES_APPLIED + 1))
-        persist_log "HEAL: installed $pkg via $pkg_mgr"
-
-        # On Debian/Ubuntu, bat installs as batcat — create symlink
-        if [[ "$cmd" == "bat" ]] && [[ "$pkg_mgr" == "apt" ]] && command -v batcat >/dev/null 2>&1 && ! command -v bat >/dev/null 2>&1; then
-          local bin_dir="$HOME/.local/bin"
-          mkdir -p "$bin_dir"
-          ln -sf "$(command -v batcat)" "$bin_dir/bat"
-          log_success "Created bat -> batcat symlink"
-        fi
-      else
-        log_error "Failed to install $pkg"
-      fi
     fi
+
+    if [[ -z "$pkg_mgr" ]]; then
+      printf '  \033[38;5;196m✗\033[0m %s (no package manager)\n' "$cmd"
+      completed=$((completed + 1))
+      continue
+    fi
+
+    if _pkg_install "$cmd" "$completed" "$total" _do_install "$cmd" "$pkg_mgr"; then
+      FIXES_APPLIED=$((FIXES_APPLIED + 1))
+      installed=$((installed + 1))
+      persist_log "HEAL: installed $cmd"
+
+      # Post-install hooks (run in parent scope)
+      case "$cmd" in
+        bat)
+          if [[ "$pkg_mgr" == "apt" ]] && command -v batcat >/dev/null 2>&1 && ! command -v bat >/dev/null 2>&1; then
+            mkdir -p "$HOME/.local/bin"
+            ln -sf "$(command -v batcat)" "$HOME/.local/bin/bat"
+          fi
+          ;;
+        atuin) export PATH="$HOME/.atuin/bin:$PATH" ;;
+      esac
+    fi
+    completed=$((completed + 1))
   done
+
+  if [[ "$DRY_RUN" != "1" ]]; then
+    echo ""
+    printf '  \033[1;38;5;42mDone!\033[0m Installed %d/%d packages.\n' "$installed" "$total"
+  fi
 }
 
 heal_broken_symlinks() {
