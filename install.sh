@@ -144,18 +144,9 @@ main() {
       mkdir -p "$bin_dir"
       echo "   Installing chezmoi via binary download..."
 
-      # Secure download to temporary file
-      local tmp_installer
-      tmp_installer=$(umask 077 && mktemp)
-      if curl -fsSL -o "$tmp_installer" https://get.chezmoi.io; then
-        if ! sh "$tmp_installer" -b "$bin_dir"; then
-          echo "   chezmoi binary installer failed" >&2
-          rm -f "$tmp_installer"
-          return 1
-        fi
-        rm -f "$tmp_installer"
-      else
-        rm -f "$tmp_installer"
+      # Use BINDIR env var — get.chezmoi.io passes remaining args to chezmoi
+      if ! BINDIR="$bin_dir" sh -c "$(curl -fsSL https://get.chezmoi.io)"; then
+        echo "   chezmoi binary installer failed" >&2
         return 1
       fi
     fi
