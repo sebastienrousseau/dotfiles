@@ -21,22 +21,16 @@ How dotfiles commands and shims map across macOS, Linux, and WSL2.
 | **Environment** | native plist / launchctl | systemd / dbus | systemd (if enabled) / init |
 | **Hardware** | Secure Enclave | TPM 2.0 / LUKS | Windows Hello bridge |
 
-## Virtualization and Containers
-
-- **Docker** — native Docker Desktop on macOS/Windows; native engine on Linux.
-- **Nix** — unified declarative environments across all three platforms.
-- **Mise** — polyglot runtime management with cross-platform parity.
-
 ## Troubleshooting
 
 ### WSL2 IO Latency
-Keep projects in the Linux filesystem (`~/...`), not in `/mnt/c/...`.
+Keep projects in the Linux filesystem (`~/...`), not under `/mnt/c/`.
 
 ### WSL2 Windows Binary Path
-Commands calling Windows-side binaries (`clip.exe`, `explorer.exe`, `cmd.exe`) require those binaries in your Windows `%PATH%`. WSL usually inherits this automatically. If you've disabled path sharing, ensure Windows-side paths are accessible.
+If you've disabled WSL path sharing, make sure Windows-side binaries like `clip.exe` and `explorer.exe` are still reachable in `$PATH`.
 
 ### macOS Permissions
-Grant Terminal/iTerm2/Ghostty "Full Disk Access" in System Settings to allow dotfiles to manage all configurations.
+Grant your terminal "Full Disk Access" in System Settings so dotfiles can manage all configurations.
 
 ### Linux GUI Fallbacks
-In headless environments (SSH), GUI commands like `cb` and `open` fall back to `gum log` or terminal bell to prevent script hangs.
+In headless environments, GUI commands like `cb` and `open` fall back to `gum log` or terminal bell instead of hanging.
