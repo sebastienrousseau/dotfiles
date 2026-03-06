@@ -1,73 +1,71 @@
 #!/usr/bin/env bash
-## Base64 Transcoder — Encode and decode base64 with URL-safe support.
-##
-## Supports standard and URL-safe base64 encoding/decoding modes.
-## Handles both command-line arguments and stdin input.
-##
-## # Requirements
-## - base64: Core utility (coreutils or macOS built-in)
-## - tr: For URL-safe character translation
-##
-## # Usage
-## b64 "string"                # Encode string to base64
-## b64 -d "encoded"            # Decode base64 string
-## b64 -u "string"             # URL-safe encode
-## b64 -d -u "encoded"         # URL-safe decode
-## echo "data" | b64           # Encode from stdin
-##
-## # Platform Notes
-## - macOS: Uses base64 -D for decode
-## - Linux: Uses base64 -d for decode
+# Copyright (c) 2015-2026 . All rights reserved.
+# Base64 Transcoder with URL-safe support.
+# Part of Dotfiles v0.2.494
 
 set -euo pipefail
 
-# --- UI Theme ---
-CYAN='\033[38;5;86m'
-PURPLE='\033[38;5;141m'
-GREEN='\033[38;5;84m'
-GRAY='\033[38;5;244m'
+# ANSI Colors
+PURPLE='\033[38;5;135m'
+GRAY='\033[38;5;243m'
+RED='\033[38;5;196m'
 NC='\033[0m'
 BOLD='\033[1m'
 
-log_header() {
-  echo -e "${BOLD}${PURPLE}󰇧 Base64 Transcoder${NC} ${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
-}
+# Check if TTY for interactive components (though b64 is mostly non-interactive)
+IS_TTY=0
+if [ -t 1 ]; then IS_TTY=1; fi
 
-usage() {
-  log_header
-  echo -e "Usage: b64 [options] [string]"
-  echo -e "Options:"
-  echo -e "  -e, --encode    ${GRAY}Encode to base64 (default)${NC}"
-  echo -e "  -d, --decode    ${GRAY}Decode from base64${NC}"
-  echo -e "  -u, --url       ${GRAY}URL-safe mode${NC}"
+show_help() {
+  if [ "$IS_TTY" -eq 1 ]; then
+    echo -e "${BOLD}${PURPLE}󰇧 Base64 Transcoder${NC} ${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+  else
+    echo "Base64 Transcoder"
+  fi
+
+  echo "Usage: b64 [options] [string]"
+  echo "Options:"
+  echo "  -e, --encode    Encode to base64 (default)"
+  echo "  -d, --decode    Decode from base64"
+  echo "  -u, --url       URL-safe mode"
+  echo "  -h, --help      Show this help"
   exit 0
 }
 
 MODE="encode"
-URL_SAFE=false
+URL_SAFE=0
+INPUT=""
 
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
   case "$1" in
-    -e|--encode|encode) MODE="encode"; shift ;;
-    -d|--decode|decode) MODE="decode"; shift ;;
-    -u|--url) URL_SAFE=true; shift ;;
-    -h|--help) usage ;;
-    *) break ;;
+    -e|--encode) MODE="encode"; shift ;;
+    -d|--decode) MODE="decode"; shift ;;
+    -u|--url)    URL_SAFE=1; shift ;;
+    -h|--help)   show_help ;;
+    *)           INPUT="$1"; shift ;;
   esac
 done
 
-INPUT="${*:-$(cat)}"
-
-if [[ "$MODE" == "encode" ]]; then
-  if $URL_SAFE; then
-    echo -n "$INPUT" | base64 | tr '+/' '-_' | tr -d '='
+if [ -z "$INPUT" ]; then
+  if [ ! -t 0 ]; then
+    INPUT=$(cat -)
   else
-    echo -n "$INPUT" | base64
+    show_help
+  fi
+fi
+
+if [ "$MODE" = "encode" ]; then
+  if [ "$URL_SAFE" -eq 1 ]; then
+    printf "%s" "$INPUT" | base64 | tr '+/' '-_' | tr -d '='
+  else
+    printf "%s" "$INPUT" | base64
   fi
 else
-  if $URL_SAFE; then
-    INPUT=$(echo "$INPUT" | tr '-_' '+/')
-    while [[ $(( ${#INPUT} % 4 )) -ne 0 ]]; do INPUT="${INPUT}="; done
+  # Add padding if needed for URL-safe decode
+  if [ "$URL_SAFE" -eq 1 ]; then
+    INPUT=$(printf "%s" "$INPUT" | tr '-_' '+/')
+    while [ $(( ${#INPUT} % 4 )) -ne 0 ]; do INPUT="${INPUT}="; done
   fi
-  echo "$INPUT" | base64 -d 2>/dev/null || echo "$INPUT" | base64 -D
+  printf "%s" "$INPUT" | base64 -d
 fi
+echo ""

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # MIT License
-# Copyright (c) 2026 Sebastien Rousseau
+# Copyright (c) 2026
 # See LICENSE file for details.
 
 import os

@@ -79,6 +79,7 @@ jobs:
           filters: |
             shell:
               - '**.sh'
+              - 'install.sh'
               - '.chezmoitemplates/**/*.sh'
               - 'scripts/**'
               - 'install/**'
@@ -92,6 +93,8 @@ jobs:
               - 'dot_*/**'
               - '.chezmoitemplates/**'
               - '**.tmpl'
+              - '**.toml'
+              - '.chezmoi*'
 
   # ============================================================================
   # STAGE 1: LINT (Fast, parallel checks)
@@ -322,30 +325,30 @@ jobs:
           retention-days: 5
 
   test-docker:
-    name: Test / Docker (${{ matrix.distro }})
+    name: Test / Integration (Docker)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: changes
-    # Only run Docker tests on schedule or when install scripts change
-    if: (needs.changes.outputs.shell == 'true' && needs.changes.outputs.config == 'true') || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    # Run whenever shell scripts, config, or install script change
+    if: needs.changes.outputs.shell == 'true' || needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
       matrix:
-        distro: [ubuntu]  # Reduced from [ubuntu, debian] - debian is similar
+        distro: [ubuntu]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Test in container
+      - name: E2E Installation Test
         run: |
-          docker run --rm -v "${GITHUB_WORKSPACE}:/root/.local/share/chezmoi" ${{ matrix.distro }}:latest bash -c "
+          # Use the newly created E2E test script which invokes install.sh
+          docker run --rm -v "${GITHUB_WORKSPACE}:/root/dotfiles-src" ${{ matrix.distro }}:latest bash -c "
             set -euo pipefail
             export DEBIAN_FRONTEND=noninteractive
-            export PATH=\"/root/.local/bin:\$PATH\"
             apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates
-            ln -s /root/.local/share/chezmoi /root/.dotfiles
-            bash /root/.local/share/chezmoi/scripts/ci/install-chezmoi-verified.sh \"${{ env.CHEZMOI_VERSION }}\" \"/root/.local/bin\"
-            chezmoi init --promptDefaults --no-tty --source /root/.local/share/chezmoi
-            DOTFILES_NONINTERACTIVE=1 chezmoi apply --exclude=scripts --force --no-tty
-            echo 'Chezmoi applied successfully'
+
+            # Execute the E2E test from within the container
+            # We point it to the mounted source
+            cd /root/dotfiles-src
+            ./scripts/tests/integration/test_install_e2e.sh
           "
 
   test-unit:

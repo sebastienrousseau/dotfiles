@@ -26,7 +26,7 @@
 ## # Idempotency
 ## Safe to run repeatedly. Read-only checks.
 ##
-## MIT License - Copyright (c) 2026 Sebastien Rousseau
+## MIT License - Copyright (c) 2026
 
 set -euo pipefail
 
@@ -44,6 +44,14 @@ echo ""
 
 Errors=0
 Warnings=0
+AI_DEBUG=0
+
+# Parse arguments
+for arg in "$@"; do
+  case "$arg" in
+    --ai) AI_DEBUG=1 ;;
+  esac
+done
 
 log_success() { ui_ok "$1" "${2:-}"; }
 log_fail() {
@@ -147,7 +155,7 @@ fi
 
 echo ""
 ui_header "Optional AI CLIs"
-for cmd in claude gemini sgpt ollama opencode aider; do
+for cmd in claude gemini sgpt ollama opencode aider kiro-cli; do
   if check_cmd "$cmd"; then
     log_success "$cmd" "$(get_cmd_path "$cmd")"
   else
@@ -238,7 +246,25 @@ else
   log_warn "Broken symlinks" "$broken_links detected"
 fi
 
-# 7. Check dot command resolution
+# 7. Ghost Path Linter (Portability check)
+echo ""
+ui_header "Ghost Path Linter"
+ghost_paths=0
+if [[ -d "$HOME/.config" ]]; then
+  # Scan for literal /home/user or /Users/user while ignoring linuxbrew and binary files
+  ghost_lines=$(grep -rIE '"/home/(linuxbrew)?[^$]|/Users/[^$]' "$HOME/.config" | grep -v "linuxbrew" || true)
+  if [[ -n "$ghost_lines" ]]; then
+    ghost_paths=$(echo "$ghost_lines" | wc -l)
+    log_warn "Ghost paths" "$ghost_paths hardcoded literals found in ~/.config"
+    if [[ "$ghost_paths" -lt 5 ]]; then
+      echo "    ${ghost_lines//$'\n'/$'\n'    }"
+    fi
+  else
+    log_success "Portability" "No hardcoded home paths found in ~/.config"
+  fi
+fi
+
+# 8. Check dot command resolution
 echo ""
 ui_header "CLI Resolution"
 if command -v dot >/dev/null 2>&1; then
@@ -254,6 +280,18 @@ fi
 
 # Summary
 echo ""
+ui_header "Performance Audit"
+if command -v hyperfine >/dev/null 2>&1; then
+  if bash "$SCRIPT_DIR/../tests/performance/bench.sh"; then
+    log_success "Startup latency" "Within 50ms threshold"
+  else
+    log_fail "Startup latency" "Threshold exceeded"
+  fi
+else
+  log_warn "hyperfine" "missing (performance audit skipped)"
+fi
+
+echo ""
 ui_header "Summary"
 if [[ $Errors -eq 0 ]]; then
   if [[ $Warnings -eq 0 ]]; then
@@ -263,6 +301,21 @@ if [[ $Errors -eq 0 ]]; then
   fi
 else
   ui_err "Issues found" "$Errors errors, $Warnings warnings"
-  echo "Run 'dot heal' to attempt auto-repair."
+
+  if [[ $AI_DEBUG -eq 1 ]]; then
+    ui_header "AI Problem Analysis"
+    doctor_report=$(~/.local/bin/dot doctor | grep -E "(\[FAIL\]|\[WARN\]|✗|⚠)")
+
+    ai_prompt="The dotfiles diagnostic 'dot doctor' found the following issues:
+---
+$doctor_report
+---
+Suggest specific shell commands to fix these issues according to our architectural standards."
+
+    # Use the bridge
+    dot cl --pattern hardener "$ai_prompt"
+  else
+    echo "Run 'dot heal' to attempt auto-repair."
+  fi
   exit 1
 fi

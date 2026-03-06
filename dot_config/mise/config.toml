@@ -64,6 +64,7 @@ uv = "latest"
 "npm:@google/gemini-cli" = "latest"
 "npm:codex-cli" = "latest"
 "npm:opencode-ai" = "latest"
+kiro-cli = "latest"
 
 # Task runners
 task = "latest"

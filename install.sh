@@ -1,20 +1,31 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # Universal Dotfiles Installer (Zero-Dependency)
-# Usage: sh -c "$(curl -fsSL https://dotfiles.io/install.sh)"
+# Usage: bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 # (or ./install.sh locally)
 
 set -euo pipefail
 
 # ANSI Colors
+RED='\033[0;31m'
 GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m'
 
+# Paths
+SOURCE_DIR="${SOURCE_DIR:-$HOME/.dotfiles}"
+LEGACY_SOURCE_DIR="$HOME/.local/share/chezmoi"
+CHEZMOI_CONFIG_DIR="$HOME/.config/chezmoi"
+CHEZMOI_CONFIG_FILE="$CHEZMOI_CONFIG_DIR/chezmoi.toml"
+
 # Utility Functions
 step() {
-  printf '%b\n' "${BOLD}${BLUE}==>${NC} ${BOLD}$1${NC}"
+  if [[ "${DOTFILES_SILENT:-0}" != "1" ]]; then
+    printf '%b\n' "${BOLD}${BLUE}==>${NC} ${BOLD}$1${NC}"
+  fi
 }
 
 error() {
@@ -23,7 +34,9 @@ error() {
 }
 
 success() {
-  printf '%b\n' "${GREEN}Success!${NC} $1"
+  if [[ "${DOTFILES_SILENT:-0}" != "1" ]]; then
+    printf '%b\n' "${GREEN}Success!${NC} $1"
+  fi
 }
 
 show_help() {
@@ -31,22 +44,37 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.493)
+  version       The version (tag or branch) to install (default: v0.2.494)
 
 Options:
   --help        Show this help message
   --force       Non-interactive mode (sets DOTFILES_NONINTERACTIVE=1)
+  --silent      Quiet mode (sets DOTFILES_SILENT=1)
 
 EOF
 }
 
 main() {
-  local version="${1:-v0.2.493}"
+  local version="${1:-v0.2.494}"
 
-  if [[ "$version" == "--help" ]]; then
-    show_help
-    exit 0
-  fi
+  case "$version" in
+    --help)
+      show_help
+      exit 0
+      ;;
+    --silent)
+      export DOTFILES_SILENT=1
+      version="v0.2.494"
+      ;;
+  esac
+
+  # Shift arguments to handle mixed flags/version
+  for arg in "$@"; do
+    case "$arg" in
+      --silent) export DOTFILES_SILENT=1 ;;
+      --force) export DOTFILES_NONINTERACTIVE=1 ;;
+    esac
+  done
 
   # 2. Check Prerequisites & Bootstrap Package Managers
   step "Checking Prerequisites..."
@@ -74,6 +102,7 @@ main() {
   # Bootstrap gum for a better UI if available or install it
   bootstrap_gum() {
     if command -v gum >/dev/null 2>&1; then return 0; fi
+    if [[ "${DOTFILES_SILENT:-0}" == "1" ]]; then return 0; fi
 
     echo "   Bootstrapping UI components (gum)..."
     if [[ "$OS" == "Darwin" ]] && command -v brew >/dev/null; then
@@ -85,149 +114,51 @@ main() {
       sudo apt-get update && sudo apt-get install gum -y >/dev/null 2>&1
     fi
   }
-  bootstrap_gum || true
 
-  if command -v gum >/dev/null 2>&1; then
-    gum style \
-      --foreground 212 --border-foreground 212 --border double \
-      --align center --width 50 --margin "1 2" --padding "2 4" \
-      "   ___      _    _  _  _          " \
-      "  / _ \___ | |_ (_)| |(_) ___  ___ " \
-      " / /_)/ _ \| __|| || || |/ _ \/ __|" \
-      "/ ___/ (_) | |_ | || || |  __/\__ \ " \
-      "\/    \___/ \__||_||_||_|\___||___/" \
-      "           Universal Installer"
-  else
-    printf '%b\n' "${CYAN}${BOLD}"
-    cat <<"EOF"
-   ___      _    _  _  _          
-  / _ \___ | |_ (_)| |(_) ___  ___ 
- / /_)/ _ \| __|| || || |/ _ \/ __|
-/ ___/ (_) | |_ | || || |  __/\__ \
-\/    \___/ \__||_||_||_|\___||___/
-           Universal Installer
-EOF
-    printf '%b\n' "${NC}"
-  fi
-
-  # On macOS, ensure Homebrew is available before checking curl/git
-  if [[ "$target_os" = "macos" ]] && ! command -v brew >/dev/null; then
-    echo "   Homebrew not found."
-    printf '%b\n' "${CYAN}   SECURITY NOTE: This will download and execute code from brew.sh${NC}"
-    echo "   Verify at: https://github.com/Homebrew/install"
-
-    # In non-interactive mode, proceed with warning
-    if [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]]; then
-      read -r -p "   Continue with Homebrew installation? [y/N] " response
-      case "$response" in
-        [yY][eE][sS] | [yY]) ;;
-        *) error "Homebrew installation cancelled. Install manually: https://brew.sh" ;;
-      esac
+  # 3. Install Chezmoi (in parallel with other checks where possible)
+  install_chezmoi() {
+    if command -v chezmoi >/dev/null; then
+      echo "   chezmoi already installed: $(chezmoi --version)"
+      return 0
     fi
 
-    echo "   Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    # Add brew to PATH for Apple Silicon
-    if [[ -x /opt/homebrew/bin/brew ]]; then
-      eval "$(/opt/homebrew/bin/brew shellenv)"
-    elif [[ -x /usr/local/bin/brew ]]; then
-      eval "$(/usr/local/bin/brew shellenv)"
-    fi
-  fi
+    if command -v brew >/dev/null; then
+      echo "   Installing chezmoi via Homebrew..."
+      brew install chezmoi >/dev/null 2>&1
+    else
+      bin_dir="$HOME/.local/bin"
+      mkdir -p "$bin_dir"
+      echo "   Installing chezmoi via binary download..."
 
-  # Detect Offline/Bundled Execution
-  if [[ -f "$SOURCE_DIR/mise.toml" ]] && [[ ! -d "$SOURCE_DIR/.git" ]]; then
-    echo "   Running in Offline/Bundled Mode..."
-    export DOTFILES_OFFLINE=1
-    ensure_chezmoi_source "$SOURCE_DIR"
-    APPLY_FLAGS=()
-    if [[ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]]; then
-      APPLY_FLAGS=(--force --no-tty)
-    fi
-    chezmoi apply "${APPLY_FLAGS[@]}"
-    success "Offline configuration loaded. Please restart your shell."
-    exit 0
-  fi
-
-  # On Linux, verify a package manager is available
-  case "$target_os" in
-    debian | wsl2)
-      if ! command -v apt-get >/dev/null; then
-        error "apt-get is required on Debian/Ubuntu/WSL2."
+      # Secure download to temporary file
+      local tmp_installer
+      tmp_installer=$(umask 077 && mktemp)
+      if curl -fsSL -o "$tmp_installer" https://get.chezmoi.io; then
+        sh "$tmp_installer" -- -b "$bin_dir" >/dev/null 2>&1
+        rm -f "$tmp_installer"
+      else
+        rm -f "$tmp_installer"
+        return 1
       fi
-      ;;
-    fedora)
-      if ! command -v dnf >/dev/null; then
-        error "dnf is required on Fedora/RHEL."
-      fi
-      ;;
-    arch)
-      if ! command -v pacman >/dev/null; then
-        error "pacman is required on Arch Linux."
-      fi
-      ;;
-    *) ;;
-  esac
-
-  if ! command -v curl >/dev/null; then error "curl is required."; fi
-  if ! command -v git >/dev/null; then error "git is required."; fi
-
-  # 3. Install Chezmoi
-  step "Installing Chezmoi..."
-  if command -v chezmoi >/dev/null; then
-    echo "   chezmoi already installed: $(chezmoi --version)"
-  elif command -v brew >/dev/null; then
-    echo "   Installing chezmoi via Homebrew..."
-    brew install chezmoi
-  else
-    bin_dir="$HOME/.local/bin"
-    BIN_DIR="$bin_dir"
-    mkdir -p "$BIN_DIR"
-
-    echo "   Installing chezmoi via binary download..."
-    printf '%b\n' "${CYAN}   SECURITY NOTE: Downloading from get.chezmoi.io with integrity check${NC}"
-
-    # Download installer script first for inspection
-    CHEZMOI_INSTALLER=$(umask 077 && mktemp)
-    if ! curl -fsSL -o "$CHEZMOI_INSTALLER" https://get.chezmoi.io; then
-      rm -f "$CHEZMOI_INSTALLER"
-      error "Failed to download chezmoi installer."
     fi
+  }
 
-    # Basic validation: check it's a shell script and not suspiciously large
-    if [[ "$(wc -c <"$CHEZMOI_INSTALLER")" -gt 102400 ]]; then
-      rm -f "$CHEZMOI_INSTALLER"
-      error "Chezmoi installer suspiciously large. Aborting for security."
-    fi
+  # Parallel execution of bootstrapping components
+  (bootstrap_gum) &
+  (install_chezmoi) &
 
-    if ! head -1 "$CHEZMOI_INSTALLER" | grep -q '^#!/'; then
-      rm -f "$CHEZMOI_INSTALLER"
-      error "Chezmoi installer doesn't look like a shell script. Aborting."
-    fi
+  # Wait for background tasks
+  wait
 
-    # Execute the verified installer
-    sh "$CHEZMOI_INSTALLER" -- -b "$BIN_DIR" 2>/dev/null ||
-      {
-        rm -f "$CHEZMOI_INSTALLER"
-        error "Failed to install chezmoi."
-      }
-
-    rm -f "$CHEZMOI_INSTALLER"
-
-    # Critical: Add to PATH for the rest of the script to see it
-    export PATH="$bin_dir:$PATH"
-  fi
+  # Critical: Add to PATH for the rest of the script to see it
+  bin_dir="$HOME/.local/bin"
+  export PATH="$bin_dir:$PATH"
 
   # 4. Prepare source directory
   step "Preparing source directory..."
 
   # VERSION pinning for supply-chain security
   VERSION="$version"
-
-  SOURCE_DIR="$HOME/.dotfiles"
-  LEGACY_SOURCE_DIR="$HOME/.local/share/chezmoi"
-  CHEZMOI_CONFIG_DIR="$HOME/.config/chezmoi"
-  CHEZMOI_CONFIG_FILE="$CHEZMOI_CONFIG_DIR/chezmoi.toml"
 
   ensure_chezmoi_source() {
     local dir="$1"

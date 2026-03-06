@@ -17,10 +17,10 @@ assert_file_exists "$OPS_DIR/chezmoi-apply.sh" "chezmoi-apply.sh should exist"
 # Test: chezmoi-apply.sh valid syntax
 test_start "chezmoi_apply_syntax"
 if bash -n "$OPS_DIR/chezmoi-apply.sh" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 
@@ -31,10 +31,10 @@ assert_file_exists "$OPS_DIR/chezmoi-diff.sh" "chezmoi-diff.sh should exist"
 # Test: chezmoi-diff.sh valid syntax
 test_start "chezmoi_diff_syntax"
 if bash -n "$OPS_DIR/chezmoi-diff.sh" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 
@@ -45,10 +45,10 @@ assert_file_exists "$OPS_DIR/chezmoi-update.sh" "chezmoi-update.sh should exist"
 # Test: chezmoi-update.sh valid syntax
 test_start "chezmoi_update_syntax"
 if bash -n "$OPS_DIR/chezmoi-update.sh" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 
@@ -65,10 +65,10 @@ for script in "$OPS_DIR"/chezmoi-*.sh; do
   fi
 done
 if [[ $found -ge 3 ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: ops scripts use chezmoi command"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: ops scripts should use chezmoi"
 fi
 

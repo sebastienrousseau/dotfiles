@@ -62,84 +62,70 @@ else
     PS1='\[\033[01;34m\]\w\[\033[00m\]\$ '
 fi
 
-# --- Safe and cached eval wrapper for tool initialization ---
-_SHELL_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/bash"
-[[ -d "$_SHELL_CACHE" ]] || mkdir -p "$_SHELL_CACHE"
+_deferred_hydration() {
+    # Remove self from PROMPT_COMMAND
+    PROMPT_COMMAND="${PROMPT_COMMAND//_deferred_hydration;/}"
+    [[ "$PROMPT_COMMAND" == "_deferred_hydration" ]] && unset PROMPT_COMMAND
 
-_cached_eval() {
-    local label="$1"; shift
-    local cache="$_SHELL_CACHE/${label}.bash"
-    local bin_name="$1"
-    local bin=$(command -v "$bin_name")
+    # --- Safe and cached eval wrapper for tool initialization ---
+    _SHELL_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/bash"
+    [[ -d "$_SHELL_CACHE" ]] || mkdir -p "$_SHELL_CACHE"
 
-    if [[ -f "$cache" ]] && [[ -z "$bin" || "$cache" -nt "$bin" ]]; then
-        source "$cache"
-    else
-        local init_output
-        init_output=$("$@" 2>/dev/null)
-        
-        # Reject if output contains suspicious patterns indicating malicious payloads
-        if [[ "$init_output" =~ (curl[[:space:]].*\|[[:space:]]*(ba)?sh|wget[[:space:]].*\|[[:space:]]*(ba)?sh|nc[[:space:]]+-e|\/dev\/tcp\/|base64[[:space:]]+-d[[:space:]]*\|) ]]; then
-            echo "[WARN] Suspicious output from $label init, skipping" >&2
-            return 1
+    _cached_eval() {
+        local label="$1"; shift
+        local cache="$_SHELL_CACHE/${label}.bash"
+        local bin_name="$1"
+        local bin=$(command -v "$bin_name")
+
+        if [[ -f "$cache" ]] && [[ -z "$bin" || "$cache" -nt "$bin" ]]; then
+            source "$cache"
+        else
+            local init_output
+            init_output=$("$@" 2>/dev/null)
+
+            # Reject if output contains suspicious patterns indicating malicious payloads
+            if [[ "$init_output" =~ (curl[[:space:]].*\|[[:space:]]*(ba)?sh|wget[[:space:]].*\|[[:space:]]*(ba)?sh|nc[[:space:]]+-e|\/dev\/tcp\/|base64[[:space:]]+-d[[:space:]]*\|) ]]; then
+                echo "[WARN] Suspicious output from $label init, skipping" >&2
+                return 1
+            fi
+
+            echo "$init_output" > "$cache"
+            source "$cache"
         fi
+    }
 
-        echo "$init_output" > "$cache"
-        source "$cache"
+    # Use Starship prompt if available
+    if command -v starship &>/dev/null; then
+        _cached_eval "starship-init" starship init bash || true
+    fi
+
+    # --- Tool Integration ---
+    # Zoxide (smart cd)
+    if command -v zoxide &>/dev/null; then
+        _cached_eval "zoxide-init" zoxide init bash || true
+    fi
+
+    # FZF (fuzzy finder)
+    if command -v fzf &>/dev/null; then
+        _cached_eval "fzf-init" fzf --bash || true
+    fi
+
+    # Atuin (shell history)
+    if command -v atuin &>/dev/null; then
+        _cached_eval "atuin-init" atuin init bash --disable-up-arrow || true
+    fi
+
+    # direnv (directory environments)
+    if command -v direnv &>/dev/null; then
+        _cached_eval "direnv-init" direnv hook bash || true
     fi
 }
 
-# Use Starship prompt if available
-if command -v starship &>/dev/null; then
-    _cached_eval "starship-init" starship init bash || true
-fi
-
-# --- Completion ---
-# Enable programmable completion
-if ! shopt -oq posix; then
-    if [[ -f /usr/share/bash-completion/bash_completion ]]; then
-        # shellcheck source=/dev/null
-        . /usr/share/bash-completion/bash_completion
-    elif [[ -f /etc/bash_completion ]]; then
-        # shellcheck source=/dev/null
-        . /etc/bash_completion
-    elif [[ -f /opt/homebrew/etc/profile.d/bash_completion.sh ]]; then
-        # shellcheck source=/dev/null
-        . /opt/homebrew/etc/profile.d/bash_completion.sh
-    fi
-fi
-
-# --- Source shell configuration ---
-# Load shared shell configuration (aliases, functions, paths)
-if [[ -d "${XDG_CONFIG_HOME}/shell" ]]; then
-    for file in "${XDG_CONFIG_HOME}/shell"/*.sh; do
-        if [[ -r "$file" ]]; then
-            # shellcheck source=/dev/null
-            . "$file"
-        fi
-    done
-    unset file
-fi
-
-# --- Tool Integration ---
-# Zoxide (smart cd)
-if command -v zoxide &>/dev/null; then
-    _cached_eval "zoxide-init" zoxide init bash || true
-fi
-
-# FZF (fuzzy finder)
-if command -v fzf &>/dev/null; then
-    _cached_eval "fzf-init" fzf --bash || true
-fi
-
-# Atuin (shell history)
-if command -v atuin &>/dev/null; then
-    _cached_eval "atuin-init" atuin init bash --disable-up-arrow || true
-fi
-
-# direnv (directory environments)
-if command -v direnv &>/dev/null; then
-    _cached_eval "direnv-init" direnv hook bash || true
+# Schedule deferred hydration
+if [[ -z "$PROMPT_COMMAND" ]]; then
+    PROMPT_COMMAND="_deferred_hydration"
+else
+    PROMPT_COMMAND="_deferred_hydration; $PROMPT_COMMAND"
 fi
 
 # --- Core Aliases ---
