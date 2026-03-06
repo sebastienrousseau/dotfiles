@@ -85,6 +85,23 @@ dot update
 
 ---
 
+## Features at a Glance
+
+| Feature | Detail |
+| :--- | :--- |
+| **Startup** | < 50ms first prompt (lazy-hydration with `_cached_eval`) |
+| **Shells** | Zsh, Fish, Nushell — shared alias/function core |
+| **Platforms** | macOS, Ubuntu/Debian, Arch, WSL2 |
+| **Runtimes** | Mise (polyglot) and Nix Flakes (deterministic) |
+| **Secrets** | Age + SOPS encryption, provider-aware storage |
+| **Signing** | SSH ED25519 commit signing enforced |
+| **Telemetry** | Disabled by default — no opt-out required |
+| **Backups** | Atomic snapshot on every `dot apply` |
+| **Testing** | 1,100+ unit tests, 100% module coverage |
+| **CI** | ShellCheck, shfmt, compliance guard, CodeQL |
+
+---
+
 ## The `dot` CLI
 
 | Command | Action |
@@ -119,14 +136,19 @@ dot update
 - **Pueue** — background task queue for long-running jobs
 </details>
 
-<details>
-<summary><b>Security</b></summary>
+---
 
-- **Age and SOPS** — secret encryption at rest
-- **Signed commits** — SSH/GPG signing enforced
-- **Audit logs** — every `dot` command logged to `~/.local/share/dotfiles.log`
-- **Telemetry controls** — OS-level telemetry disabled out of the box
-</details>
+## Security and Privacy
+
+Your credentials and configuration stay under your control.
+
+- **Encrypted secrets** — Age and SOPS encrypt sensitive data at rest. No plaintext tokens in the repo.
+- **Signed commits** — SSH or GPG signing enforced on every commit.
+- **Audit trail** — every `dot` command is logged to `~/.local/share/dotfiles.log`.
+- **Telemetry disabled** — OS-level telemetry is turned off out of the box. No opt-out required.
+- **No network calls** — the shell environment works fully offline after initial install.
+
+For hardening options (`dot firewall`, `dot dns-doh`, `dot encrypt-check`), see the [Security docs](docs/SECURITY.md).
 
 ---
 
