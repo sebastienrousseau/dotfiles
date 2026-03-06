@@ -126,6 +126,8 @@ ui_header "Modern CLI Tools"
 for cmd in rg bat chezmoi fzf zoxide atuin yazi zellij; do
   if check_cmd "$cmd"; then
     log_success "$cmd" "$(get_cmd_path "$cmd")"
+  elif [[ "$cmd" == "bat" ]] && check_cmd "batcat"; then
+    log_success "$cmd" "$(get_cmd_path "batcat") (batcat)"
   else
     log_fail "$cmd" "Missing"
   fi
