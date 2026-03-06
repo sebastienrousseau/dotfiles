@@ -71,6 +71,12 @@ For non-interactive use (CI/CD):
 DOTFILES_SILENT=1 DOTFILES_NONINTERACTIVE=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 ```
 
+Try it in Docker first:
+
+```bash
+docker run --rm -e DOTFILES_SILENT=1 -e DOTFILES_NONINTERACTIVE=1 ubuntu:24.04 bash -c 'apt-get update -qq && apt-get install -y -qq git curl sudo >/dev/null 2>&1 && git clone --depth 1 https://github.com/sebastienrousseau/dotfiles.git ~/.dotfiles && bash ~/.dotfiles/install.sh && export PATH="$HOME/.local/bin:$PATH" && dot --version && dot doctor'
+```
+
 ### Verify
 
 ```bash
