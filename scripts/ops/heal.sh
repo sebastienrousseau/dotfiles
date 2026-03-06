@@ -41,7 +41,7 @@ log_warn() { ui_warn "$*"; }
 log_error() { ui_err "$*"; }
 log_step() {
   echo ""
-  ui_header "$*"
+  printf '  \033[1;38;5;63m%s\033[0m\n' "$*"
 }
 log_dry() { ui_warn "DRY-RUN" "Would: $*"; }
 
@@ -326,6 +326,8 @@ _do_install() {
       tag=$(_gh_latest_tag "bytecodealliance/wasmtime")
       local tmp
       tmp=$(mktemp -d)
+      # xz-utils required for .tar.xz extraction
+      command -v xz >/dev/null 2>&1 || sudo apt-get install -y -qq xz-utils >/dev/null 2>&1 || true
       curl -fsSL -o "$tmp/wasmtime.tar.xz" \
         "https://github.com/bytecodealliance/wasmtime/releases/download/${tag}/wasmtime-${tag}-${arch}-linux.tar.xz" &&
         tar xJf "$tmp/wasmtime.tar.xz" -C "$tmp" --strip-components=1 &&
