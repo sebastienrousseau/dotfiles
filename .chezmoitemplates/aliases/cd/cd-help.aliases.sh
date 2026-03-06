@@ -6,9 +6,9 @@ _CD_HELP_LOADED=1
 
 # Display help information
 cd_aliases_help() {
-  echo "╭─────────────────────────────────────────────────────────────╮"
+  echo "┌─────────────────────────────────────────────────────────────┐"
   echo "│  ENHANCED DIRECTORY NAVIGATION v${DOTFILES_VERSION}                     │"
-  echo "╰─────────────────────────────────────────────────────────────╯"
+  echo "└─────────────────────────────────────────────────────────────┘"
   echo ""
   echo "PRIMARY NAVIGATION COMMANDS:"
   echo "  cd [dir]              Change to directory with history tracking"

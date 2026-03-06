@@ -11,10 +11,10 @@ terminal_font_family = "JetBrainsMono Nerd Font"
 terminal_font_size = 12
 default_shell = "fish" # zsh, fish, or nu
 
-# Git identity (set via chezmoi init prompts)
+# Git identity (should be set via chezmoi init prompts or local overrides)
 name = ""
 email = ""
-signingkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPzRW0aQniZQGfaN2hWaYNCRiZc/1KMyPvIdYIR7XVCm"
+signingkey = ""
 
 # ============================================================================
 # Feature Flags (controlled by profile or override manually)
