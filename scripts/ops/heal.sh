@@ -272,6 +272,11 @@ _pkg_install() {
   return "$rc"
 }
 
+# Resolve latest GitHub release tag for a repo
+_gh_latest_tag() {
+  curl -fsSLI -o /dev/null -w '%{url_effective}' "https://github.com/$1/releases/latest" | sed 's|.*/||'
+}
+
 # Install a single package (dispatcher for _pkg_install to call in subshell)
 _do_install() {
   local cmd="$1"
@@ -290,12 +295,14 @@ _do_install() {
       return $?
       ;;
     nushell)
-      local arch
+      local arch tag ver
       arch=$(uname -m)
+      tag=$(_gh_latest_tag "nushell/nushell")
+      ver="${tag#v}"
       local tmp
       tmp=$(mktemp -d)
       curl -fsSL -o "$tmp/nu.tar.gz" \
-        "https://github.com/nushell/nushell/releases/latest/download/nu-${arch}-unknown-linux-musl.tar.gz" &&
+        "https://github.com/nushell/nushell/releases/download/${tag}/nu-${ver}-${arch}-unknown-linux-musl.tar.gz" &&
         tar xzf "$tmp/nu.tar.gz" -C "$tmp" --strip-components=1 &&
         install -m 755 "$tmp/nu" "$bin_dir/nu"
       local rc=$?
@@ -314,12 +321,13 @@ _do_install() {
       return $?
       ;;
     wasmtime)
-      local arch
+      local arch tag
       arch=$(uname -m)
+      tag=$(_gh_latest_tag "bytecodealliance/wasmtime")
       local tmp
       tmp=$(mktemp -d)
       curl -fsSL -o "$tmp/wasmtime.tar.xz" \
-        "https://github.com/bytecodealliance/wasmtime/releases/latest/download/wasmtime-latest-${arch}-linux.tar.xz" &&
+        "https://github.com/bytecodealliance/wasmtime/releases/download/${tag}/wasmtime-${tag}-${arch}-linux.tar.xz" &&
         tar xJf "$tmp/wasmtime.tar.xz" -C "$tmp" --strip-components=1 &&
         install -m 755 "$tmp/wasmtime" "$bin_dir/wasmtime"
       local rc=$?
@@ -327,22 +335,24 @@ _do_install() {
       return $rc
       ;;
     sops)
-      local arch
+      local arch tag
       arch=$(uname -m)
       [[ "$arch" == "x86_64" ]] && arch="amd64"
       [[ "$arch" == "aarch64" ]] && arch="arm64"
+      tag=$(_gh_latest_tag "getsops/sops")
       curl -fsSL -o "$bin_dir/sops" \
-        "https://github.com/getsops/sops/releases/latest/download/sops-latest.linux.${arch}" &&
+        "https://github.com/getsops/sops/releases/download/${tag}/sops-${tag}.linux.${arch}" &&
         chmod +x "$bin_dir/sops"
       return $?
       ;;
     hyperfine)
-      local arch
+      local arch tag
       arch=$(uname -m)
+      tag=$(_gh_latest_tag "sharkdp/hyperfine")
       local tmp
       tmp=$(mktemp -d)
       curl -fsSL -o "$tmp/hyperfine.tar.gz" \
-        "https://github.com/sharkdp/hyperfine/releases/latest/download/hyperfine-latest-${arch}-unknown-linux-musl.tar.gz" &&
+        "https://github.com/sharkdp/hyperfine/releases/download/${tag}/hyperfine-${tag}-${arch}-unknown-linux-musl.tar.gz" &&
         tar xzf "$tmp/hyperfine.tar.gz" -C "$tmp" --strip-components=1 &&
         install -m 755 "$tmp/hyperfine" "$bin_dir/hyperfine"
       local rc=$?
