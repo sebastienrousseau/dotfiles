@@ -651,11 +651,17 @@ main() {
   heal_mise_tools || true
 
   # Quick checks (no animation needed)
-  local quick_checks=0
   heal_broken_symlinks || true
   heal_chezmoi_drift || true
   heal_missing_critical_files || true
   heal_missing_xdg_dirs || true
+
+  # Pre-warm shell caches for fast startup (< 50ms target)
+  local prewarm_script="$SCRIPT_DIR/prewarm.sh"
+  if [[ -f "$prewarm_script" ]] && [[ "$DRY_RUN" != "1" ]]; then
+    log_step "Performance"
+    _pkg_install "shell cache pre-warm" 0 1 bash "$prewarm_script" || true
+  fi
 
   # Summary
   echo ""

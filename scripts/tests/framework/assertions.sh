@@ -284,6 +284,9 @@ assert_contains() {
 
 # Print test summary
 print_summary() {
+  # Derive run count from assertions (test_start counts test cases, but
+  # TESTS_PASSED/TESTS_FAILED count individual assertions — use assertions)
+  TESTS_RUN=$((TESTS_PASSED + TESTS_FAILED))
   echo ""
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   printf '%b\n' "Tests run: $TESTS_RUN"
