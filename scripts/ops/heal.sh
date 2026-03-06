@@ -73,8 +73,8 @@ Environment:
   DOTFILES_NONINTERACTIVE=1   Skip all interactive prompts (same as --force)
 
 Repairs:
-  - Missing core dependencies (chezmoi, starship, rg, bat)
-  - Missing 2026 Frontier tools (nu, pueue, wasmtime, sops)
+  - Missing core tools (zsh, chezmoi, starship, rg, bat, fzf, zoxide, atuin, yazi, zellij)
+  - Missing frontier tools (nu, pueue, wasmtime, sops, age)
   - Broken symlinks in \$HOME (depth 3)
   - Chezmoi drift (re-applies dotfiles)
   - Missing critical files (.zshrc, .bashrc, .profile)
@@ -190,55 +190,46 @@ get_package_name() {
   pkg_mgr=$(detect_pkg_manager)
 
   case "$cmd" in
-    rg)
-      case "$pkg_mgr" in
-        apt | dnf) echo "ripgrep" ;;
-        *) echo "ripgrep" ;;
-      esac
-      ;;
-    bat)
-      case "$pkg_mgr" in
-        apt) echo "bat" ;;
-        *) echo "bat" ;;
-      esac
-      ;;
+    rg) echo "ripgrep" ;;
+    bat) echo "bat" ;;
+    fzf) echo "fzf" ;;
+    zsh) echo "zsh" ;;
+    age) echo "age" ;;
     *) echo "$cmd" ;;
   esac
 }
 
 heal_missing_dependencies() {
   log_step "Checking core dependencies"
-  local deps=(chezmoi starship rg bat)
-  # Use explicit mise registry names for frontier tools
-  local frontier_deps=("nushell" "pueue" "wasmtime" "sops")
+  # Match what dot doctor checks: Core Shells + Modern CLI Tools
+  local deps=(zsh chezmoi starship rg bat fzf zoxide atuin yazi zellij)
+  # Frontier tools (doctor reports these as warnings)
+  local frontier_deps=("nushell" "pueue" "wasmtime" "sops" "age")
   local missing=()
   local missing_frontier=()
 
   for cmd in "${deps[@]}"; do
-    if ! check_cmd "$cmd"; then
-      missing+=("$cmd")
-      ISSUES_FOUND=$((ISSUES_FOUND + 1))
+    if check_cmd "$cmd"; then
+      continue
     fi
+    # On Debian/Ubuntu, bat is installed as batcat
+    if [[ "$cmd" == "bat" ]] && check_cmd "batcat"; then
+      continue
+    fi
+    missing+=("$cmd")
+    ISSUES_FOUND=$((ISSUES_FOUND + 1))
   done
 
   # Frontier tools: check using check_cmd (mise-aware)
-  # 'nu' is the binary name for nushell
-  if ! check_cmd "nu"; then
-    missing_frontier+=("nushell")
-    ISSUES_FOUND=$((ISSUES_FOUND + 1))
-  fi
-  if ! check_cmd "pueue"; then
-    missing_frontier+=("pueue")
-    ISSUES_FOUND=$((ISSUES_FOUND + 1))
-  fi
-  if ! check_cmd "wasmtime"; then
-    missing_frontier+=("wasmtime")
-    ISSUES_FOUND=$((ISSUES_FOUND + 1))
-  fi
-  if ! check_cmd "sops"; then
-    missing_frontier+=("sops")
-    ISSUES_FOUND=$((ISSUES_FOUND + 1))
-  fi
+  for cmd in "${frontier_deps[@]}"; do
+    local check_name="$cmd"
+    # 'nu' is the binary name for nushell
+    [[ "$cmd" == "nushell" ]] && check_name="nu"
+    if ! check_cmd "$check_name"; then
+      missing_frontier+=("$cmd")
+      ISSUES_FOUND=$((ISSUES_FOUND + 1))
+    fi
+  done
 
   if [[ ${#missing[@]} -eq 0 ]] && [[ ${#missing_frontier[@]} -eq 0 ]]; then
     log_success "All dependencies present"
@@ -285,9 +276,8 @@ heal_missing_dependencies() {
     done
   fi
 
-  # System package manager fallback
-  local all_missing=("${missing[@]}" "${missing_frontier[@]}")
-  if [[ ${#all_missing[@]} -eq 0 ]]; then return 0; fi
+  # System package manager fallback for core deps
+  if [[ ${#missing[@]} -eq 0 ]]; then return 0; fi
 
   if [[ -z "$pkg_mgr" ]]; then
     log_error "No supported package manager detected. Install manually: ${missing[*]}"
@@ -301,11 +291,32 @@ heal_missing_dependencies() {
     if [[ "$DRY_RUN" == "1" ]]; then
       log_dry "install '$pkg' via $pkg_mgr"
     else
+      # starship is not in standard apt repos — use curl installer
+      if [[ "$cmd" == "starship" ]] && [[ "$pkg_mgr" == "apt" ]]; then
+        log_info "Installing starship via curl installer..."
+        if curl -fsSL https://starship.rs/install.sh | sh -s -- --yes; then
+          log_success "Installed starship"
+          FIXES_APPLIED=$((FIXES_APPLIED + 1))
+          persist_log "HEAL: installed starship via curl installer"
+        else
+          log_error "Failed to install starship"
+        fi
+        continue
+      fi
+
       log_info "Installing $pkg via $pkg_mgr..."
       if install_package "$pkg"; then
         log_success "Installed $pkg"
         FIXES_APPLIED=$((FIXES_APPLIED + 1))
         persist_log "HEAL: installed $pkg via $pkg_mgr"
+
+        # On Debian/Ubuntu, bat installs as batcat — create symlink
+        if [[ "$cmd" == "bat" ]] && [[ "$pkg_mgr" == "apt" ]] && command -v batcat >/dev/null 2>&1 && ! command -v bat >/dev/null 2>&1; then
+          local bin_dir="$HOME/.local/bin"
+          mkdir -p "$bin_dir"
+          ln -sf "$(command -v batcat)" "$bin_dir/bat"
+          log_success "Created bat -> batcat symlink"
+        fi
       else
         log_error "Failed to install $pkg"
       fi
