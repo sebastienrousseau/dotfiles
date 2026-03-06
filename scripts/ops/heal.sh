@@ -171,11 +171,11 @@ install_package() {
   pkg_mgr=$(detect_pkg_manager)
 
   case "$pkg_mgr" in
-    brew) brew install "$pkg" ;;
-    apt) sudo apt-get install -y "$pkg" ;;
-    dnf) sudo dnf install -y "$pkg" ;;
-    pacman) sudo pacman -S --noconfirm "$pkg" ;;
-    nix) nix-env -iA "nixpkgs.$pkg" ;;
+    brew) brew install --quiet "$pkg" >/dev/null 2>&1 ;;
+    apt) sudo apt-get install -y -qq "$pkg" >/dev/null 2>&1 ;;
+    dnf) sudo dnf install -y -q "$pkg" >/dev/null 2>&1 ;;
+    pacman) sudo pacman -S --noconfirm --quiet "$pkg" >/dev/null 2>&1 ;;
+    nix) nix-env -iA "nixpkgs.$pkg" >/dev/null 2>&1 ;;
     *)
       log_error "No supported package manager found. Install '$pkg' manually."
       return 1
@@ -207,8 +207,8 @@ _install_via_binary() {
 
   case "$cmd" in
     starship)
-      log_info "Installing starship via curl installer..."
-      if curl -fsSL https://starship.rs/install.sh | sh -s -- --yes; then
+      log_info "Installing starship..."
+      if curl -fsSL https://starship.rs/install.sh | sh -s -- --yes >/dev/null 2>&1; then
         log_success "Installed starship"
         FIXES_APPLIED=$((FIXES_APPLIED + 1))
         persist_log "HEAL: installed starship via curl installer"
@@ -216,9 +216,10 @@ _install_via_binary() {
       fi
       ;;
     atuin)
-      log_info "Installing atuin via install script..."
-      if curl -fsSL https://setup.atuin.sh | sh -s -- --yes 2>/dev/null || \
-         curl -fsSL https://setup.atuin.sh | bash; then
+      log_info "Installing atuin..."
+      if curl -fsSL https://setup.atuin.sh | bash -s -- --yes >/dev/null 2>&1; then
+        # Add atuin to PATH for the rest of this session
+        export PATH="$HOME/.atuin/bin:$PATH"
         log_success "Installed atuin"
         FIXES_APPLIED=$((FIXES_APPLIED + 1))
         persist_log "HEAL: installed atuin via curl installer"
@@ -226,14 +227,18 @@ _install_via_binary() {
       fi
       ;;
     yazi)
-      log_info "Installing yazi via GitHub release..."
+      log_info "Installing yazi..."
       local arch
       arch=$(uname -m)
       local url="https://github.com/sxyazi/yazi/releases/latest/download/yazi-${arch}-unknown-linux-musl.zip"
       local tmp
       tmp=$(mktemp -d)
+      # Ensure unzip is available
+      if ! command -v unzip >/dev/null 2>&1; then
+        sudo apt-get install -y -qq unzip >/dev/null 2>&1 || true
+      fi
       if curl -fsSL -o "$tmp/yazi.zip" "$url" && \
-         (cd "$tmp" && unzip -q yazi.zip 2>/dev/null || true) && \
+         (cd "$tmp" && unzip -oq yazi.zip) && \
          install -m 755 "$tmp"/yazi-*/yazi "$bin_dir/yazi"; then
         log_success "Installed yazi"
         FIXES_APPLIED=$((FIXES_APPLIED + 1))
@@ -244,7 +249,7 @@ _install_via_binary() {
       rm -rf "$tmp"
       ;;
     zellij)
-      log_info "Installing zellij via GitHub release..."
+      log_info "Installing zellij..."
       local arch
       arch=$(uname -m)
       local url="https://github.com/zellij-org/zellij/releases/latest/download/zellij-${arch}-unknown-linux-musl.tar.gz"
