@@ -18,8 +18,7 @@ EXCLUDE_FILES=(
   "docs/FONTS.md"
   "docs/LEGACY_ROADMAP.md"
   "docs/PLAN.md"
-  "docs/VERSION_SYNC.md"
-  "docs/WSL2_NIX_TROUBLESHOOTING.md"
+  "docs/MILESTONE_v0.2.487.md"
 )
 
 # Colors for output (respect NO_COLOR: https://no-color.org)

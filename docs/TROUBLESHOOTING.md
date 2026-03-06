@@ -102,6 +102,28 @@ Quick checks for common issues.
 - Review shell history size in atuin config
 - Disable unused plugins
 
+## Common infrastructure failures
+
+**Problem:** Nix isn't installed or commands not found
+- Ensure you have followed the installation guide: `curl -L https://nixos.org/nix/install | sh`
+- On Linux, you might need to enable experimental features in `~/.config/nix/nix.conf`:
+  `experimental-features = nix-command flakes`
+- Verify the daemon is running: `ps aux | grep nix-daemon`
+
+**Problem:** Systemd isn't available (mostly WSL2)
+- Dotfiles functions that rely on systemd (like `pueue` management) will fallback to direct execution.
+- To enable systemd in WSL2, add this to `/etc/wsl.conf` (requires Windows 11 or latest WSL):
+  ```ini
+  [boot]
+  systemd=true
+  ```
+- Restart WSL: `wsl.exe --shutdown`
+
+**Problem:** GPG or SSH signing fails
+- Check if your key is present: `gpg --list-secret-keys` or `ssh-add -l`
+- Ensure `GPG_TTY` is set (dotfiles does this automatically in `rc.d`).
+- For hardware keys (Yubikey), ensure `pcscd` is running on Linux.
+
 ## Advanced Troubleshooting
 
 ### WSL2 and Nix Integration Issues

@@ -5,9 +5,11 @@
 
 set -euo pipefail
 
-dot_is_wsl() {
-  [[ -f /proc/sys/kernel/osrelease ]] && grep -qiE '(microsoft|wsl)' /proc/sys/kernel/osrelease
-}
+if ! declare -F dot_is_wsl >/dev/null; then
+  dot_is_wsl() {
+    [[ -f /proc/sys/kernel/osrelease ]] && grep -qiE '(microsoft|wsl)' /proc/sys/kernel/osrelease
+  }
+fi
 
 dot_platform_id() {
   case "$(uname -s)" in

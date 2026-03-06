@@ -15,10 +15,10 @@ assert_file_exists "$VERIFY_FILE" "verify.sh should exist"
 
 test_start "verify_command_syntax_valid"
 if bash -n "$VERIFY_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 

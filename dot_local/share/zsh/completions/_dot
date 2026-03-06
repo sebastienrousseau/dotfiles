@@ -13,12 +13,21 @@ _dot() {
     'update:Pull latest changes and apply them'
     'clean-cache:Clear shell initialization caches'
     'prewarm:Regenerate shell caches for ultra-fast startup'
+    'cl:Claude CLI with context patterns'
+    'gemini:Gemini CLI with context patterns'
+    'kiro:Kiro CLI with context patterns'
+    'sgpt:Shell-GPT with context patterns'
+    'ollama:Ollama with context patterns'
+    'opencode:OpenCode with context patterns'
+    'aider:Aider with context patterns'
     'add:Add a file to chezmoi source'
     'diff:Show chezmoi diff with exclusions'
     'status:Show configuration drift'
     'remove:Safely remove a managed file'
     'cd:Print source directory path'
     'edit:Open chezmoi source in \$EDITOR'
+    'commit:AI-powered conventional commit'
+    'patterns:Manage AI steering patterns'
 
     # Diagnostics
     'doctor:Check system health and configuration'
@@ -27,6 +36,8 @@ _dot() {
     'smoke-test:Run automated toolchain verification'
     'chaos:Simulate config corruption to test self-healing'
     'scorecard:Unified health/security/performance scorecard'
+    'security-score:Analyze infrastructure security score'
+    'intelligence:Show Dotfiles Intelligence Surface'
     'rollback:Rollback dotfiles to a previous state'
     'drift:Drift dashboard (detailed chezmoi status)'
     'history:Shell history analysis'
@@ -36,6 +47,8 @@ _dot() {
     'load-bench:Measure time to heavy-layer readiness'
     'load-bench-pty:Measure background prewarm via PTY'
     'ai:Show AI helper status'
+    'ai-setup:Interactive setup for all AI CLI tools'
+    'ai-query:Context-aware RAG query over your dotfiles'
     'conflicts:Report alias/command conflicts'
     'locks:Show version locks for key tools'
     'snapshot:Capture baseline system snapshot'
@@ -141,6 +154,16 @@ _dot() {
             'provider:Show/switch secrets provider'
           )
           _describe -t subcommands 'secrets subcommand' secrets_cmds
+          ;;
+        cl | gemini | kiro | sgpt | ollama | opencode | aider)
+          _arguments -C \
+            '(--pattern -p)'{--pattern,-p}'[Specify steering pattern]:pattern:->patterns' \
+            '*:prompt: '
+          if [[ "$state" == "patterns" ]]; then
+            local -a patterns
+            patterns=($(ls -1 "${XDG_CONFIG_HOME:-$HOME/.config}/ai/patterns" 2>/dev/null | sed 's/\.md$//'))
+            _describe -t patterns 'AI pattern' patterns
+          fi
           ;;
         *)
           _default

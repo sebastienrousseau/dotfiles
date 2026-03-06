@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
+set -euo pipefail
+
+install_path="$ASDF_INSTALL_PATH"
+download_path="$ASDF_DOWNLOAD_PATH"
+
+mkdir -p "$install_path/bin"
+
+# The zip contains a 'kirocli/bin' directory
+cp "$download_path/kirocli/bin/kiro-cli" "$install_path/bin/"
+cp "$download_path/kirocli/bin/kiro-cli-chat" "$install_path/bin/"
+cp "$download_path/kirocli/bin/kiro-cli-term" "$install_path/bin/"
+
+# Create symlink for 'kiro'
+ln -sf "kiro-cli" "$install_path/bin/kiro"
+
+echo "Kiro CLI installed to $install_path"

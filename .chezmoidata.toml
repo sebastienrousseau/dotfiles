@@ -1,6 +1,6 @@
 # Active profile - change this to switch configurations
 # Options: minimal, laptop, workstation, server, devops
-dotfiles_version = "0.2.493"
+dotfiles_version = "0.2.494"
 profile = "laptop"
 
 # Visual theme
@@ -14,7 +14,7 @@ default_shell = "fish" # zsh, fish, or nu
 # Git identity (set via chezmoi init prompts)
 name = ""
 email = ""
-signingkey = ""
+signingkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPzRW0aQniZQGfaN2hWaYNCRiZc/1KMyPvIdYIR7XVCm"
 
 # ============================================================================
 # Feature Flags (controlled by profile or override manually)

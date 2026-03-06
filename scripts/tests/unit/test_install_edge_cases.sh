@@ -84,7 +84,7 @@ fi
 
 # Test: install.sh uses --force --no-tty in noninteractive mode
 test_start "install_noninteractive_flags"
-if grep -q "\-\-force" "$INSTALL_SCRIPT" && grep -q "\-\-no-tty" "$INSTALL_SCRIPT"; then
+if grep -q -- "--force" "$INSTALL_SCRIPT" && grep -q -- "--no-tty" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses --force --no-tty in noninteractive mode"
 else

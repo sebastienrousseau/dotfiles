@@ -157,6 +157,11 @@ if check_cmd "aider"; then
 else
   ui_err "aider" "optional — AI pair programming"
 fi
+if check_cmd "kiro-cli"; then
+  ui_ok "kiro-cli"
+else
+  ui_err "kiro-cli" "optional — install to enable this provider"
+fi
 
 if [[ "${DOTFILES_CHEZMOI_STATUS:-1}" = "1" ]]; then
   printf "\n"
