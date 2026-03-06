@@ -9,16 +9,17 @@
 # ... run tests ...
 # restore_os
 
+export ORIG_UNAME
 ORIG_UNAME=$(command -v uname)
 MOCK_BIN_DIR=$(mktemp -d)
 export PATH="$MOCK_BIN_DIR:$PATH"
 
 # Internal state
-MOCKED_OS=""
+export MOCKED_OS=""
 
 mock_os() {
     local target_os="$1"
-    MOCKED_OS="$target_os"
+    export MOCKED_OS="$target_os"
 
     # Mock uname
     case "$target_os" in

@@ -122,7 +122,7 @@ main() {
       local gpg_tmp
       gpg_tmp=$(mktemp)
       _cleanup_files+=("$gpg_tmp")
-      curl -fsSL -o "$gpg_tmp" https://repo.charm.sh/apt/gpg.key && cat "$gpg_tmp" | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+      curl -fsSL -o "$gpg_tmp" https://repo.charm.sh/apt/gpg.key && sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg < "$gpg_tmp"
       rm -f "$gpg_tmp"
       echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
       sudo apt-get update && sudo apt-get install gum -y >/dev/null 2>&1
