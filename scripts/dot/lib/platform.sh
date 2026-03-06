@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # Dotfiles CLI Platform Abstraction
 # Unified helpers for macOS, Linux, and WSL parity.
 
 set -euo pipefail
 
-dot_is_wsl() {
-  [[ -f /proc/sys/kernel/osrelease ]] && grep -qiE '(microsoft|wsl)' /proc/sys/kernel/osrelease
-}
+if ! declare -F dot_is_wsl >/dev/null; then
+  dot_is_wsl() {
+    [[ -f /proc/sys/kernel/osrelease ]] && grep -qiE '(microsoft|wsl)' /proc/sys/kernel/osrelease
+  }
+fi
 
 dot_platform_id() {
   case "$(uname -s)" in

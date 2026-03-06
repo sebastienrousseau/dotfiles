@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 ## Theme Switcher — Switch between theme families and light/dark modes.
 ##
 ## Supports Tokyo Night, Catppuccin, Rose Pine, Kanagawa, and other

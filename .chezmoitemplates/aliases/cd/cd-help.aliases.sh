@@ -1,14 +1,14 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # CD Navigation - Help and Documentation
 [[ -n "${_CD_HELP_LOADED:-}" ]] && :
 _CD_HELP_LOADED=1
 
 # Display help information
 cd_aliases_help() {
-  echo "╭─────────────────────────────────────────────────────────────╮"
+  echo "┌─────────────────────────────────────────────────────────────┐"
   echo "│  ENHANCED DIRECTORY NAVIGATION v${DOTFILES_VERSION}                     │"
-  echo "╰─────────────────────────────────────────────────────────────╯"
+  echo "└─────────────────────────────────────────────────────────────┘"
   echo ""
   echo "PRIMARY NAVIGATION COMMANDS:"
   echo "  cd [dir]              Change to directory with history tracking"

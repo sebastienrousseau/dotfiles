@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # Legal & Licensing Aliases
 # Tools for license compliance, headers, and attribution.
 
@@ -42,7 +42,7 @@ alias scan-licenses='scan_licenses_fn'
 # Using google/addlicense (Go) via Docker to avoid local deps
 # Usage: add-headers
 add_headers_fn() {
-  local holder="${GIT_AUTHOR_NAME:-Sebastien Rousseau}"
+  local holder="${GIT_AUTHOR_NAME:-}"
   echo "Adding MIT license headers for: $holder"
   docker run --rm -v "$(pwd):/src" -w /src ghcr.io/google/addlicense \
     -c "$holder" \

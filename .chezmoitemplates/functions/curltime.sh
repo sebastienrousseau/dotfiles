@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # Description:
 #   curltime is a function that measures and displays various timing metrics for
 #   an HTTP request made to a given URL using `curl`. It provides detailed

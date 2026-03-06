@@ -46,4 +46,4 @@ This code provides a set of aliases for [pnpm](https://pnpm.js.org/).
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [](https://github.com/sebastienrousseau)

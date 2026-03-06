@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # Go aliases and functions
 
 # Aliases for common Go commands
@@ -41,7 +41,7 @@ go-new() {
   local name="${1:?Usage: go-new <module-name>}"
   mkdir -p "$name" && cd "$name" || return
   go mod init "$name"
-  cat > main.go << 'EOF'
+  cat >main.go <<'EOF'
 package main
 
 import "fmt"

@@ -143,4 +143,4 @@ c7z archive.7z files/  # No additional parameters needed
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [](https://github.com/sebastienrousseau)

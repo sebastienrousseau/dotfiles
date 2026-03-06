@@ -13,11 +13,20 @@ def dot_commands [] {
         { value: "update", description: "Pull latest changes and apply" }
         { value: "clean-cache", description: "Clear shell caches" }
         { value: "prewarm", description: "Regenerate shell caches" }
+        { value: "cl", description: "Claude with context patterns" }
+        { value: "gemini", description: "Gemini with context patterns" }
+        { value: "kiro", description: "Kiro with context patterns" }
+        { value: "sgpt", description: "Shell-GPT with context" }
+        { value: "ollama", description: "Ollama with context" }
+        { value: "opencode", description: "OpenCode with context" }
+        { value: "aider", description: "Aider with context" }
         { value: "add", description: "Add a file to chezmoi source" }
         { value: "diff", description: "Show chezmoi diff" }
         { value: "status", description: "Show configuration drift" }
         { value: "remove", description: "Safely remove a managed file" }
         { value: "cd", description: "Print source directory path" }
+        { value: "patterns", description: "Manage AI steering patterns" }
+        { value: "commit", description: "AI-powered conventional commit" }
         { value: "edit", description: "Open chezmoi source in $EDITOR" }
         { value: "doctor", description: "Check system health" }
         { value: "heal", description: "Auto-repair issues" }

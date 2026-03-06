@@ -41,4 +41,4 @@ verbose output.
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [](https://github.com/sebastienrousseau)

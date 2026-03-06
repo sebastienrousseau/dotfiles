@@ -172,7 +172,7 @@ This project is licensed under the
 [MIT License](https://opensource.org/licenses/MIT).
 ---
 ## ‍ Author
-Created with  by [Sebastien Rousseau](https://sebastienrousseau.com)
+Created with  by [](https://sebastienrousseau.com)
 - Website: [https://sebastienrousseau.com](https://sebastienrousseau.com)
 - GitHub: [https://github.com/sebastienrousseau](https://github.com/sebastienrousseau)
 
@@ -180,4 +180,4 @@ Created with  by [Sebastien Rousseau](https://sebastienrousseau.com)
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [](https://github.com/sebastienrousseau)

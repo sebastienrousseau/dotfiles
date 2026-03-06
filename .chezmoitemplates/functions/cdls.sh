@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # Description:
 #   cdls is a simple function that combines the functionality of `cd` and `ls`.
 #   When called, it changes the current working directory and immediately lists

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # shellcheck disable=SC1090,SC1091
 # Unit tests for install.sh edge cases, idempotency, and input validation
 set -euo pipefail
@@ -84,7 +84,7 @@ fi
 
 # Test: install.sh uses --force --no-tty in noninteractive mode
 test_start "install_noninteractive_flags"
-if grep -q "\-\-force" "$INSTALL_SCRIPT" && grep -q "\-\-no-tty" "$INSTALL_SCRIPT"; then
+if grep -q -- "--force" "$INSTALL_SCRIPT" && grep -q -- "--no-tty" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses --force --no-tty in noninteractive mode"
 else

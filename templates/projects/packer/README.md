@@ -12,4 +12,4 @@ packer build .
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://sebastienrousseau.com)
+Made with ❤️ by [](https://sebastienrousseau.com)

@@ -29,4 +29,4 @@ These aliases are defined in `terraform.aliases.sh` and are automatically loaded
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [](https://github.com/sebastienrousseau)

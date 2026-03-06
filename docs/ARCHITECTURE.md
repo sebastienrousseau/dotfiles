@@ -6,13 +6,11 @@ This document outlines the core architectural decisions and system design of the
 
 ## 🏗️ Core Philosophy
 
-*   **XDG-First**: Configuration strictly adheres to the `~/.config/` (XDG Base Directory) specification to prevent home directory clutter.
+*   **XDG-First**: Configuration strictly adheres to the "~/.config/" (XDG Base Directory) specification to prevent home directory clutter.
 *   **Polyglot & Multi-Shell**: First-class support for **Zsh**, **Fish**, and **Nushell**, sharing a unified logic core.
 *   **Zero-Cost Startup**: Heavy features are deferred or autoloaded to ensure the first prompt appears in **< 10ms**.
 *   **Deterministic & Declarative**: Leveraging **Nix Flakes** for bit-for-bit identical environments across machines.
 *   **Async-by-Design**: Background daemons (**Pueue**) handle heavy mutations (upgrades, builds) without blocking the user.
-
----
 
 ## 📐 System Layout
 
@@ -26,6 +24,8 @@ This document outlines the core architectural decisions and system design of the
 │   └── ...              # 50+ tool configurations (nvim, tmux, ghostty, etc.)
 ├── dot_local/           # Local binaries and scripts (~/.local/bin)
 ├── .chezmoitemplates/   # Unified source for aliases, functions, and paths
+├── scripts/             # Internal libraries and diagnostics
+│   └── dot/lib/bento.sh # 2026 Intelligence Surface renderer
 ├── nix/                 # Nix Flake for deterministic toolchains
 ├── lib/wasm-tools/      # Rust source for high-performance Wasm utilities
 └── install.sh           # Universal, zero-dependency bootstrap script
@@ -35,67 +35,28 @@ This document outlines the core architectural decisions and system design of the
 
 ## 🐚 Shell Startup Strategies
 
-Each shell utilizes a different strategy to achieve "Ultimate Performance":
-
 ### 🏎️ Shared: Unified `_cached_eval` Logic
 Across Zsh, Fish, and Bash, we implement an idempotent caching wrapper for external tool initializations (Starship, Zoxide, Atuin).
 1.  **Intercept**: The shell checks if a cached version of the tool's `eval` output exists in `~/.cache/shell/`.
 2.  **Validate**: It compares the cache timestamp against the tool binary.
 3.  **Bypass**: If valid, the shell `source`s the text file directly, avoiding a subshell execution and saving **20-50ms** per tool.
 
-### ⚡ Zsh: Modular Deferred Loading
-Zsh uses a tiered `rc.d` approach combined with `zinit` turbo mode.
-1.  **Phase 0 (Bootload)**: `.zshenv` sets XDG paths and essential `$PATH`.
-2.  **Phase 1 (Core)**: `.zshrc` loads environment and basic options.
-3.  **Phase 2 (Deferred)**: Heavy tool aliases and plugins are loaded *after* the first prompt via a `precmd` hook.
-
-### 🐟 Fish: Dynamic Function Autoloading
-To avoid the cost of parsing a 200+ line alias file at startup, we use a **Transformation Pipeline**:
-1.  **Source**: Aliases are defined in `.chezmoitemplates/aliases/`.
-2.  **Build**: A Chezmoi `run_onchange` script parses these aliases.
-3.  **Output**: Every alias is converted into a standalone `~/.config/fish/functions/<name>.fish` file.
-4.  **Runtime**: Fish **never** reads these files until you actually type the command, resulting in a near-instant startup.
-
-### 📊 Nushell: Structured Data Pipeline
-Nushell treats the shell as a data processor.
-1.  **Environment**: `env.nu` handles path and cross-platform detection.
-2.  **Logic**: `config.nu` implements wrappers and data-aware aliases (e.g., `ls` returning tables instead of strings).
+### ⚡ 2026 Edition: Zero-Jank & Lazy-Hydration
+To achieve the "Apple-Standard" fluid threshold (~16ms), we have implemented a **Lazy-Hydration** model:
+1.  **Phase 1 (Visual Paint)**: The shell prompt (`➜ `) is rendered immediately using static escape codes.
+2.  **Phase 2 (Async Hydration)**: Tool initializations (mise, atuin, etc.) are dispatched to background workers (`&!`).
+3.  **Phase 3 (On-Demand Activation)**: Environment hydration only occurs upon the first user interaction (Enter or Prompt paint) or after 500ms of idle time. This ensures total execution time stays below 50ms.
 
 ---
 
-## ❄️ Deterministic Portability (Nix)
+## 💎 The Canvas: Artifact-Only Mode
 
-We use **Nix Flakes** to provide a consistent toolchain across macOS and Linux.
-*   **`flake.nix`**: Defines the exact versions of every tool (Neovim, Starship, Yazi, etc.).
-*   **`direnv`**: Automatically activates the Nix environment when you enter the dotfiles directory.
-*   **Benefits**: Zero configuration drift. If it works in CI, it works on your machine.
-
----
-
-## ⚙️ Async Task Management (Pueue)
-
-Heavy operations are offloaded to the **Pueue** daemon.
-*   **Flow**: User runs `bg-upgrade` → Script submits tasks to Pueue → Shell remains responsive.
-*   **Feedback**: The `starship` prompt monitors the Pueue socket and displays a `⚙` icon if tasks are active.
+A premium "Consumer-First" environment triggered by `DOTFILES_ARTIFACT_MODE=1`.
+*   **Minimalist UI**: Strips all prompt complexity, leaving only a green `➜ `.
+*   **Intelligence Surface**: An asynchronous Bento-style dashboard rendered via `bento.sh` that provides environmental context (Node version, Cloud status, Git health) without blocking the main thread.
+*   **Redraw Signaling**: Uses `SIGWINCH` to smoothly return control to the user after background hydration completes.
 
 ---
 
-## 🧠 Local AI RAG (Retrieval-Augmented Generation)
-
-The `dot-ai` utility implements a local semantic search:
-1.  **Retrieve**: Uses `ripgrep` to search your actual dotfile templates and documentation.
-2.  **Context**: Chunks the relevant aliases and functions.
-3.  **Generate**: Feeds the context into a local LLM (Ollama) or CLI (Mods) to provide personalized help.
-
----
-
-## 🛡️ Security Architecture
-
-*   **Secrets**: Managed via **Age** (encryption) and **SOPS** (declarative editing).
-*   **Audit Trail**: Every mutation or privileged action is logged to `~/.local/share/dotfiles.log`.
-*   **Hardening**: Opt-in scripts for Firewall (UFW/socketfilterfw), Telemetry disabling, and DNS-over-HTTPS.
-
----
-
-**Architecture Version**: 2.0.0 (2026 Edition)
+**Architecture Version**: 3.0.0 (2026 Euxis Evolution)
 **Status**: Stable / Sublime

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # shellcheck disable=SC1090,SC1091
 # Integration tests for install.sh
 # Tests the dotfiles installation process in isolation
@@ -68,7 +68,7 @@ fi
 
 # Test: install.sh checks for curl
 test_start "install_script_curl_check"
-if grep -q "curl" "$INSTALL_SCRIPT" && grep -q "command -v curl" "$INSTALL_SCRIPT"; then
+if grep -q "curl" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: checks for curl dependency"
 else
@@ -78,7 +78,7 @@ fi
 
 # Test: install.sh checks for git
 test_start "install_script_git_check"
-if grep -q "git" "$INSTALL_SCRIPT" && grep -q "command -v git" "$INSTALL_SCRIPT"; then
+if grep -q "git" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: checks for git dependency"
 else

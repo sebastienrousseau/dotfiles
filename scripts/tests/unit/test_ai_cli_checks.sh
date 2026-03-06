@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 
 fail() {
@@ -29,12 +30,13 @@ DOC_FILE="$REPO_ROOT/docs/TOOLS.md"
 PYTOOLS_FILE="$REPO_ROOT/install/provision/run_onchange_25-python-tools.sh.tmpl"
 
 # Health check should include AI CLIs in optional deps
-check_contains "$HC_FILE" "optional_deps=(ripgrep fd bat fzf eza jq claude gemini sgpt ollama opencode aider)"
+check_contains "$HC_FILE" "optional_deps=(ripgrep fd bat fzf eza jq claude gemini sgpt ollama opencode aider kiro-cli)"
 
 # Chezmoi apply should emit AI CLI checks
 check_contains "$APPLY_FILE" "AI provider CLI checks (optional)"
 check_contains "$APPLY_FILE" "check_cmd \"sgpt\""
 check_contains "$APPLY_FILE" "check_cmd \"ollama\""
+check_contains "$APPLY_FILE" "check_cmd \"kiro-cli\""
 
 # Tools catalog should list sgpt and ollama
 check_contains "$DOC_FILE" "| sgpt | shell-gpt |"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # Chaos Engineering: Randomly corrupt config files to test self-healing (dot heal)
 # USE WITH CAUTION: This intentionally breaks your environment.
 

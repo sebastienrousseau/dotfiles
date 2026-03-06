@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # shellcheck disable=SC2015,SC2034
 ## Dotfiles Health Check.
 ##
@@ -70,7 +70,11 @@ fi
 # Results collection for JSON
 declare -a RESULTS=()
 
-log_info() { [[ "$VERBOSE" == "1" ]] && printf '%b\n' "${BLUE}[INFO]${NC} $*" || true; }
+log_info() {
+  if [[ "$VERBOSE" == "1" ]]; then
+    printf '%b\n' "${BLUE}[INFO]${NC} $*"
+  fi
+}
 log_pass() { printf '%b\n' "${GREEN}[PASS]${NC} $*"; }
 log_fail() {
   printf '%b\n' "${RED}[FAIL]${NC} $*"
@@ -291,8 +295,10 @@ check_git_status() {
     return 0
   fi
 
-  local git_status
-  git_status=$(cd "$DOTFILES_SOURCE" && git status --porcelain 2>/dev/null || echo "")
+  local git_status=""
+  if cd "$DOTFILES_SOURCE" 2>/dev/null; then
+    git_status=$(git status --porcelain 2>/dev/null || echo "")
+  fi
 
   if [[ -z "$git_status" ]]; then
     log_pass "Git working tree clean"
@@ -310,7 +316,7 @@ check_git_status() {
 check_dependencies() {
   log_info "Checking recommended dependencies..."
   local deps=(git curl zsh)
-  local optional_deps=(ripgrep fd bat fzf eza jq claude gemini sgpt ollama opencode aider)
+  local optional_deps=(ripgrep fd bat fzf eza jq claude gemini sgpt ollama opencode aider kiro-cli)
   local missing_required=0
   local missing_optional=0
 

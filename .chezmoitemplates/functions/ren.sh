@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # Description:
 #   ren is a utility function to rename file extensions in the current directory.
 #   It supports batch renaming with confirmation.

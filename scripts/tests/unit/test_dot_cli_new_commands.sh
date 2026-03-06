@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -20,11 +20,11 @@ assert_file_contains "$DOT_CLI" "snapshot)" "dot CLI should handle snapshot comm
 test_start "dot_help_shows_verify"
 output=$("$DOT_CLI" help)
 if echo "$output" | grep -q "verify"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b
 ' "  ${GREEN}✓${NC} $CURRENT_TEST: verify in help"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b
 ' "  ${RED}✗${NC} $CURRENT_TEST: verify NOT in help"
 fi

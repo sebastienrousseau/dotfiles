@@ -1,9 +1,9 @@
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 { pkgs, ... }:
 
 {
-  home.username = "seb";
-  home.homeDirectory = "/home/seb";
+  home.username = "user";
+  home.homeDirectory = "/home/user";
 
   # This value determines the Home Manager release that your configuration is
   # compatible with. This helps avoid breakage when a new Home Manager release
@@ -29,20 +29,7 @@
   };
 
   # Home Manager can also manage your environment variables through
-  # 'home.sessionVariables'. If you don't want to manage your shell through Home
-  # Manager then you have to manually source 'hm-session-vars.sh' located at
-  # either
-  #
-  #  ~/.nix-profile/etc/profile.d/hm-session-vars.sh
-  #
-  # or
-  #
-  #  ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
-  #
-  # or
-  #
-  #  /etc/profiles/per-user/seb/etc/profile.d/hm-session-vars.sh
-  #
+  # 'home.sessionVariables'.
   home.sessionVariables = {
     # EDITOR = "nvim";
   };

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # shellcheck disable=SC2034
 # =============================================================================
 # Dotfiles Heal Script - Auto-repair common dotfiles issues
@@ -324,7 +324,7 @@ heal_broken_symlinks() {
   done < <(find "$HOME" -maxdepth 3 -type l -print0 2>/dev/null)
 
   # Special handling for common transient/app locks that dot doctor reported
-  local lock_patterns=("SingletonLock" "SingletonCookie" "euxis")
+  local lock_patterns=("SingletonLock" "SingletonCookie")
 
   if [[ ${#broken[@]} -eq 0 ]]; then
     log_success "No broken symlinks found"

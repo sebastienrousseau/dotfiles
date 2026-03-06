@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2012,SC2034
 # Unit tests for the backup function
 # Tests backup creation with various options and edge cases
@@ -27,10 +27,10 @@ assert_equals "1" "$exit_code" "exit code should be 1 for no args"
 test_start "backup_no_args_message"
 output=$(backup 2>&1)
 if [[ "$output" == *"ERROR"* && "$output" == *"provide"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shows error message for no arguments"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show error message for no arguments"
   printf '%b\n' "    Output: $output"
 fi
@@ -54,10 +54,10 @@ assert_equals "1" "$exit_code" "exit code should be 1 for unknown option"
 test_start "backup_unknown_option_message"
 output=$(backup --unknown-option 2>&1)
 if [[ "$output" == *"ERROR"* && "$output" == *"Unknown option"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shows error for unknown option"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show error for unknown option"
   printf '%b\n' "    Output: $output"
 fi
@@ -72,10 +72,10 @@ export BACKUP_DIR="$test_dir/backups"
 output=$(backup "$test_file" 2>&1)
 
 if [[ -d "$BACKUP_DIR" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: backup directory created"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: backup directory should be created"
 fi
 rm -rf "$test_dir"
@@ -93,10 +93,10 @@ exit_code=$?
 # Check if backup file was created
 backup_files=$(ls "$BACKUP_DIR"/backup_*.tar* 2>/dev/null | wc -l | tr -d ' ')
 if [[ "$backup_files" -gt 0 ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: backup archive created"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: backup archive should be created"
   printf '%b\n' "    Output: $output"
 fi
@@ -140,10 +140,10 @@ exit_code=$?
 
 # Should fail or warn with invalid unit
 if [[ "$exit_code" -ne 0 ]] || [[ "$output" == *"Invalid unit"* ]] || [[ "$output" == *"ERROR"* ]] || [[ "$output" == *"WARNING"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: invalid size unit handled"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should reject or warn about invalid size unit '100X'"
   printf '%b\n' "    Exit code: $exit_code"
   printf '%b\n' "    Output: $output"
@@ -175,10 +175,10 @@ export BACKUP_DIR="$test_dir/backups"
 output=$(backup "$test_file" 2>&1)
 
 if [[ "$output" == *"INFO"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shows INFO messages"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show INFO messages"
   printf '%b\n' "    Output: $output"
 fi
@@ -200,10 +200,10 @@ done
 backup_count=$(ls "$BACKUP_DIR"/backup_*.tar* 2>/dev/null | wc -l | tr -d ' ')
 
 if [[ "$backup_count" -le 2 ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: backup retention works (kept $backup_count)"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should keep only 2 backups, found $backup_count"
 fi
 rm -rf "$test_dir"

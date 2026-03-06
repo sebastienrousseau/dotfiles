@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2016,SC2034
 # Unit tests for Wave 1: install.sh chezmoi installation strategy
 set -euo pipefail
@@ -29,7 +29,7 @@ test_start "install_version_pinned"
 assert_file_contains "$INSTALL_SCRIPT" 'VERSION=' "should pin dotfiles version"
 
 test_start "install_source_dir_defined"
-assert_file_contains "$INSTALL_SCRIPT" 'SOURCE_DIR="$HOME/.dotfiles"' "should define source directory"
+assert_file_contains "$INSTALL_SCRIPT" 'SOURCE_DIR="${SOURCE_DIR:-$HOME/.dotfiles}"' "should define source directory"
 
 echo ""
 echo "Wave 1 install.sh chezmoi installation tests completed."

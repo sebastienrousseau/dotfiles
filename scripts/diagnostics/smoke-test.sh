@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # Smoke tests to quickly verify toolchain health after installation/updates.
 
 set -euo pipefail
@@ -74,8 +74,9 @@ verify_cmd "pueue" "pueue"
 
 # AI Tools
 # Prevent sgpt from prompting for a key by piping empty string
-export OPENAI_API_KEY="dummy"
+export OPENAI_API_KEY="sk-placeholder-for-testing"
 verify_cmd "sgpt" "ShellGPT"
+verify_cmd "kiro-cli" "kiro-cli"
 
 echo "==============================="
 echo "Smoke Test Summary:"

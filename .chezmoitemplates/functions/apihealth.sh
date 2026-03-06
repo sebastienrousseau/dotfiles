@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 #
 # This script checks the health/status of one or multiple APIs by sending HTTP
 # requests to specified endpoints. It supports different HTTP methods, allows

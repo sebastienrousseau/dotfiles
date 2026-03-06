@@ -73,4 +73,4 @@ for various checksum and hash utilities like "md5sum" and "sha256sum".
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [](https://github.com/sebastienrousseau)

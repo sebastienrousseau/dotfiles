@@ -16,4 +16,4 @@ Tools for hardening the environment and managing configuration immutability.
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [](https://github.com/sebastienrousseau)

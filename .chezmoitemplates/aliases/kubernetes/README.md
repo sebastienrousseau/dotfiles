@@ -37,4 +37,4 @@ These aliases are defined in `kubernetes.aliases.sh` and are automatically loade
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [](https://github.com/sebastienrousseau)

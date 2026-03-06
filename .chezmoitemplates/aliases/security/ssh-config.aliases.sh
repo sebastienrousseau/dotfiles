@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # SSH Configuration & Connections
 [[ -n "${_SSH_CONFIG_LOADED:-}" ]] && return 0
 _SSH_CONFIG_LOADED=1

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
 # Unit tests for dot CLI security commands
 # Tests: backup, firewall, telemetry, dns-doh, encrypt-check, lock-screen, usb-safety
@@ -18,70 +18,70 @@ assert_file_exists "$SEC_FILE" "security.sh should exist"
 # Test: security.sh is valid shell syntax
 test_start "security_cmd_syntax_valid"
 if bash -n "$SEC_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: security.sh has valid syntax"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: security.sh has syntax errors"
 fi
 
 # Test: defines firewall command
 test_start "security_cmd_defines_firewall"
 if grep -q "cmd_firewall\|_firewall\|firewall" "$SEC_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines firewall command"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define firewall command"
 fi
 
 # Test: defines backup command
 test_start "security_cmd_defines_backup"
 if grep -q "cmd_backup\|_backup\|backup" "$SEC_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines backup command"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define backup command"
 fi
 
 # Test: defines telemetry command
 test_start "security_cmd_defines_telemetry"
 if grep -q "cmd_telemetry\|telemetry" "$SEC_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines telemetry command"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define telemetry command"
 fi
 
 # Test: defines encrypt-check command
 test_start "security_cmd_defines_encrypt_check"
 if grep -q "encrypt.check\|encrypt_check\|encryptcheck" "$SEC_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines encrypt-check command"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define encrypt-check command"
 fi
 
 # Test: no dangerous commands
 test_start "security_cmd_no_dangerous_rm"
 if grep -qE 'rm -rf /[^$]' "$SEC_FILE" 2>/dev/null; then
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has dangerous rm -rf commands"
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no dangerous rm commands"
 fi
 
 # Test: requires confirmation for destructive actions
 test_start "security_cmd_confirms_destructive"
 if grep -qE 'run_script|cmd_backup|cmd_firewall|cmd_telemetry|DOTFILES_' "$SEC_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has confirmation prompts"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have confirmation for destructive actions"
 fi
 
@@ -90,14 +90,14 @@ test_start "security_cmd_sudo_usage"
 if grep -q "sudo" "$SEC_FILE" 2>/dev/null; then
   # Check if sudo is used with proper checks
   if grep -qE 'command -v sudo|which sudo|\$EUID' "$SEC_FILE" 2>/dev/null; then
-    ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: sudo usage has proper checks"
   else
-    ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: sudo should have availability check"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no sudo usage (OK)"
 fi
 
@@ -106,14 +106,14 @@ test_start "security_cmd_shellcheck"
 if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$SEC_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
-    ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
-    ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
 fi
 

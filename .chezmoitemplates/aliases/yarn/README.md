@@ -21,4 +21,4 @@ These aliases are defined in `yarn.aliases.sh` and are automatically loaded by `
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [](https://github.com/sebastienrousseau)

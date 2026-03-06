@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # Dotfiles CLI - Secrets/Env Commands
 # secrets-init, secrets, secrets-create, ssh-key, env load
 

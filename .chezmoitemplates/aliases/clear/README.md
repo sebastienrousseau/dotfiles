@@ -30,4 +30,4 @@ terminal easier and more efficient. The following aliases are included:
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [](https://github.com/sebastienrousseau)

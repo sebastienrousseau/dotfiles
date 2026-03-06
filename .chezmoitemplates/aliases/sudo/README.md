@@ -20,4 +20,4 @@ This code provides a set of aliases for the `sudo` command.
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [](https://github.com/sebastienrousseau)

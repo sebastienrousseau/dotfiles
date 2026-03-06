@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # shellcheck disable=SC1090,SC1091
 # Integration tests for the dot CLI
 # Tests core dot commands work end-to-end
@@ -31,14 +31,15 @@ assert_equals "#!/usr/bin/env bash" "$first_line" "dot CLI should have bash sheb
 
 test_start "dot_version_output"
 version_output=$(bash "$DOT_CLI" --version 2>&1)
-if echo "$version_output" | grep -q "^dot v"; then
+if echo "$version_output" | grep -q "^\.dotfiles "; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot --version outputs version string"
 else
   ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot --version should output 'dot v...'"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot --version should output '.dotfiles v...'"
   printf '%b\n' "    Got: '$version_output'"
 fi
+
 
 # ── dot help ─────────────────────────────────────────────────────
 

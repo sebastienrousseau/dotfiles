@@ -20,4 +20,4 @@ This code provides a set of aliases for the `wget` command.
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [](https://github.com/sebastienrousseau)

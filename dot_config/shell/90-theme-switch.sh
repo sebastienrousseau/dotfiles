@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # Detect system appearance (dark/light) and export THEME_MODE
 # Consumed by starship, bat, delta, fzf, and other theme-aware tools
 #
@@ -10,7 +10,7 @@
 
 detect_theme_mode() {
   local cache_file="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles_theme_mode"
-  local cache_ttl=3600  # 1 hour in seconds
+  local cache_ttl=3600 # 1 hour in seconds
 
   # Check if cache exists and is fresh
   if [[ -f "$cache_file" ]]; then
@@ -65,7 +65,7 @@ detect_theme_mode() {
   esac
 
   # Cache the result
-  echo "$THEME_MODE" > "$cache_file"
+  echo "$THEME_MODE" >"$cache_file"
 }
 
 detect_theme_mode

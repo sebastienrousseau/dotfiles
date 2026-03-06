@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 ## Apply GNOME Theme — Apply Catppuccin themes to GNOME desktop.
 ##
 ## Configures GTK theme, icon theme, cursor theme, shell theme,

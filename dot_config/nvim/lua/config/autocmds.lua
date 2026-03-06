@@ -1,4 +1,4 @@
--- Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+-- Copyright (c) 2015-2026 . All rights reserved.
 -- Check if we need to reload the file when it changed
 vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
   command = "checktime",

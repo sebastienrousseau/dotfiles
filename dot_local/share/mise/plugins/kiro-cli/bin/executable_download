@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 . All rights reserved.
+set -euo pipefail
+
+OS="$(uname -s)"
+ARCH="$(uname -m)"
+
+case "$OS" in
+  Darwin) target_os="darwin" ;;
+  Linux) target_os="linux" ;;
+  *) echo "Unsupported OS: $OS" >&2; exit 1 ;;
+esac
+
+case "$ARCH" in
+  x86_64|amd64) target_arch="x86_64" ;;
+  arm64|aarch64) target_arch="aarch64" ;;
+  *) echo "Unsupported arch: $ARCH" >&2; exit 1 ;;
+esac
+
+BASE_URL="https://desktop-release.q.us-east-1.amazonaws.com"
+
+if [[ "$target_os" == "darwin" ]]; then
+  # For macOS, we'd normally use the DMG, but mise prefers zips/tarballs for shims.
+  # If there's no zip for macOS, we might have to skip or handle differently.
+  # For now, let's assume linux support as requested.
+  echo "macOS support in mise plugin pending." >&2
+  exit 1
+fi
+
+# Linux
+# Check for musl (simplified check)
+if ldd /bin/ls 2>&1 | grep -q musl; then
+  filename="kirocli-${target_arch}-linux-musl.zip"
+else
+  filename="kirocli-${target_arch}-linux.zip"
+fi
+
+download_url="${BASE_URL}/latest/$filename"
+
+echo "Downloading Kiro CLI from $download_url..."
+curl -fsSL -o "$ASDF_DOWNLOAD_PATH/kiro-cli.zip" "$download_url"
+unzip -q "$ASDF_DOWNLOAD_PATH/kiro-cli.zip" -d "$ASDF_DOWNLOAD_PATH"
+rm "$ASDF_DOWNLOAD_PATH/kiro-cli.zip"

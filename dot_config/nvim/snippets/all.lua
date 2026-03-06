@@ -1,4 +1,4 @@
--- Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+-- Copyright (c) 2015-2026 . All rights reserved.
 local ls = require("luasnip")
 local s = ls.snippet
 local t = ls.text_node

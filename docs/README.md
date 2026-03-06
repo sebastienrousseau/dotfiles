@@ -37,7 +37,6 @@ Welcome to the dotfiles documentation. This guide will help you install, configu
 - [Architecture](ARCHITECTURE.md) — System design and structure
 - [Operations Guide](OPERATIONS.md) — Daily usage and maintenance
 - [Troubleshooting](TROUBLESHOOTING.md) — Common issues and solutions
-- [Euxis 2026 Review](EUXIS_2026_REVIEW.md) — Performance, UX, and parity roadmap
 
 ### Configuration
 - [Aliases Reference](ALIASES.md) — Shell aliases and shortcuts
@@ -66,9 +65,6 @@ Welcome to the dotfiles documentation. This guide will help you install, configu
 
 ### Reference
 - [Roadmap](ROADMAP.md) — Future plans and priorities
-- [Legacy Roadmap](LEGACY_ROADMAP.md) — Historical context
-- [2026 Hardening Backlog](BACKLOG_2026_HARDENING.md) — Prioritized implementation plan
-- [Milestone v0.2.487 Scope](MILESTONE_v0.2.487.md) — Concrete scoped deliverables
 
 ---
 
@@ -272,6 +268,6 @@ RUN_INTEGRATION=1 ./scripts/tests/framework/test_runner.sh  # Integration
 
 **[Back to Top](#dotfiles-documentation)**
 
-Made with ❤️ by [Sebastien Rousseau](https://sebastienrousseau.com)
+Made with ❤️ by [](https://sebastienrousseau.com)
 
 </div>

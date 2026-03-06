@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
 # Unit tests for the genpass function
 # Tests password generation with various options
@@ -36,10 +36,10 @@ output=$(
   genpass --help 2>&1
 )
 if [[ "$output" == *"Usage:"* || "$output" == *"genpass"* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --help shows usage information"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: --help should show usage information"
 fi
 
@@ -59,15 +59,15 @@ if command -v openssl >/dev/null 2>&1; then
     genpass 2>&1
   )
   if [[ "$output" == *"Generated password:"* ]]; then
-    ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: generates password with default settings"
   else
-    ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should generate password"
     printf '%b\n' "    Output: $output"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
@@ -84,14 +84,14 @@ if command -v openssl >/dev/null 2>&1; then
   dash_count=$(echo "$password" | tr -cd '-' | wc -c | tr -d ' ')
 
   if [[ "$dash_count" -eq 2 ]]; then
-    ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: default generates 3 blocks"
   else
     ((TESTS_PASSED++)) # Acceptable variation
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: password generated (block count may vary)"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
@@ -107,14 +107,14 @@ if command -v openssl >/dev/null 2>&1; then
   dash_count=$(echo "$password" | tr -cd '-' | wc -c | tr -d ' ')
 
   if [[ "$dash_count" -eq 4 ]]; then
-    ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: generates 5 blocks correctly"
   else
     ((TESTS_PASSED++)) # Function worked
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: password generated with custom blocks"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
@@ -130,14 +130,14 @@ if command -v openssl >/dev/null 2>&1; then
   dash_count=$(echo "$password" | tr -cd '-' | wc -c | tr -d ' ')
 
   if [[ "$dash_count" -eq 0 ]]; then
-    ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: single block has no separator"
   else
     ((TESTS_PASSED++)) # Function worked
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: password generated"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
@@ -151,15 +151,15 @@ if command -v openssl >/dev/null 2>&1; then
   password=$(echo "$output" | grep "Generated password:" | sed 's/.*Generated password: //')
 
   if [[ "$password" == *"/"* ]]; then
-    ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses custom separator '/'"
   else
-    ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should use custom separator"
     printf '%b\n' "    Password: $password"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
@@ -173,15 +173,15 @@ if command -v openssl >/dev/null 2>&1; then
   password=$(echo "$output" | grep "Generated password:" | sed 's/.*Generated password: //')
 
   if [[ "$password" == *":"* ]]; then
-    ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses colon separator"
   else
-    ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should use colon separator"
     printf '%b\n' "    Password: $password"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
@@ -194,7 +194,7 @@ if command -v openssl >/dev/null 2>&1; then
   )
   assert_equals "0" "$?" "exit code should be 0"
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
@@ -206,14 +206,14 @@ if command -v openssl >/dev/null 2>&1; then
     genpass 2>&1
   )
   if [[ "$output" == *"INFO"* ]]; then
-    ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shows INFO message"
   else
-    ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show INFO message"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
@@ -230,14 +230,14 @@ if command -v openssl >/dev/null 2>&1; then
   ) | grep "Generated password:" | sed 's/.*Generated password: //')
 
   if [[ "$pass1" != "$pass2" ]]; then
-    ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: generates unique passwords"
   else
-    ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: passwords should be unique"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
@@ -255,14 +255,14 @@ if command -v openssl >/dev/null 2>&1; then
 
   # 3 blocks * 12 chars = 36 chars (per default block_size)
   if [[ "$length" -ge 30 && "$length" -le 40 ]]; then
-    ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: password length is appropriate ($length chars)"
   else
     ((TESTS_PASSED++)) # Length varies based on implementation
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: password generated with length $length"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 
@@ -283,14 +283,14 @@ if command -v openssl >/dev/null 2>&1; then
   done
 
   if [[ "$has_special" == true ]]; then
-    ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: includes special characters"
   else
     ((TESTS_PASSED++)) # Might not always include special chars
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: password generated (special chars optional)"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (openssl not available)"
 fi
 

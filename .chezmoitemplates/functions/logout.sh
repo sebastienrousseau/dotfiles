@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # Description:
 #   logout is a utility function to log out from macOS, Linux, or Windows via
 #   the terminal. It provides options for confirmation and forceful logout if

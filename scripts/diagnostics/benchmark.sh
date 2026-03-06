@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 ## Shell Performance Benchmark.
 ##
 ## Measures shell startup time with per-component profiling. Uses hyperfine

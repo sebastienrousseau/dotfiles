@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # 🆄🆄🅸🅳 🅰🅻🅸🅰🆂🅴🆂
 
 # uuid: Generate a UUID and copy it to the clipboard.

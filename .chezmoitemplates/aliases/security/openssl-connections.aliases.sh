@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # OpenSSL Connection Testing
 [[ -n "${_OPENSSL_CONNECTIONS_LOADED:-}" ]] && return 0
 _OPENSSL_CONNECTIONS_LOADED=1

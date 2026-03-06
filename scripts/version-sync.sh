@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # Version Synchronization Script
 # Synchronizes version numbers across all markdown files with package.json
 # Used by CI/CD and available for local testing
@@ -18,8 +18,7 @@ EXCLUDE_FILES=(
   "docs/FONTS.md"
   "docs/LEGACY_ROADMAP.md"
   "docs/PLAN.md"
-  "docs/VERSION_SYNC.md"
-  "docs/WSL2_NIX_TROUBLESHOOTING.md"
+  "docs/MILESTONE_v0.2.487.md"
 )
 
 # Colors for output (respect NO_COLOR: https://no-color.org)

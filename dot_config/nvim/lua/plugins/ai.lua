@@ -1,4 +1,4 @@
--- Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+-- Copyright (c) 2015-2026 . All rights reserved.
 -- AI-assisted coding plugins
 -- Loaded when ai_tools feature is enabled in .chezmoidata.toml
 

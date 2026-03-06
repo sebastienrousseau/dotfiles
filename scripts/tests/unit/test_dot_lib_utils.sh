@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
 # Unit tests for dot/lib/utils.sh
 
@@ -17,10 +17,10 @@ assert_file_exists "$UTILS_FILE" "utils.sh should exist"
 # Test: utils.sh is valid shell syntax
 test_start "utils_syntax_valid"
 if bash -n "$UTILS_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: utils.sh has valid syntax"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: utils.sh has syntax errors"
 fi
 
@@ -28,40 +28,40 @@ fi
 test_start "utils_defines_functions"
 func_count=$(grep -cE '^[a-z_]+\(\)\s*\{' "$UTILS_FILE" 2>/dev/null || echo 0)
 if [[ "$func_count" -gt 0 ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines $func_count functions"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define utility functions"
 fi
 
 # Test: has logging functions
 test_start "utils_has_logging"
 if grep -qE 'die\(|warn\(|info\(|ui_' "$UTILS_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has logging functions"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have logging functions"
 fi
 
 # Test: uses colors properly
 test_start "utils_uses_colors"
 if grep -qE 'source .*ui.sh|ui_err|ui_warn|ui_info' "$UTILS_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses color codes"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should use color codes"
 fi
 
 # Test: no hardcoded paths
 test_start "utils_no_hardcoded_paths"
 if grep -qE '"/home/[a-z]+' "$UTILS_FILE" 2>/dev/null; then
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has hardcoded paths"
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no hardcoded paths"
 fi
 
@@ -70,14 +70,14 @@ test_start "utils_shellcheck"
 if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$UTILS_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
-    ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
-    ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available"
 fi
 

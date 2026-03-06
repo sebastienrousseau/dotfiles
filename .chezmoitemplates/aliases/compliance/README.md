@@ -15,4 +15,4 @@ See [COMPLIANCE.md](../../../docs/COMPLIANCE.md) for full SOC2/ISO control mappi
 
 ---
 
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+Made with ❤️ by [](https://github.com/sebastienrousseau)

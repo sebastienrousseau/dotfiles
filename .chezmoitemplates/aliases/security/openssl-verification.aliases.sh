@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 . All rights reserved.
 # OpenSSL Certificate Verification
 [[ -n "${_OPENSSL_VERIFICATION_LOADED:-}" ]] && return 0
 _OPENSSL_VERIFICATION_LOADED=1
