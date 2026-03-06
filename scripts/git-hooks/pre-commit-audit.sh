@@ -104,12 +104,29 @@ if echo "$STAGED_FILES" | grep -q "^README.md$"; then
   if echo "$README_CONTENT" | grep -qF "$EXPECTED_ARCHITECT" && echo "$README_CONTENT" | grep -qF "$EXPECTED_ENGINE"; then
     echo -e "${GREEN}PASSED${NC}"
   else
-    echo -e "${RED}FAILED${NC}"
-    echo -e "      ${YELLOW}⚠ README.md signature block is missing or altered.${NC}"
-    echo -e "      Expected:"
-    echo -e "        $EXPECTED_ARCHITECT"
-    echo -e "        $EXPECTED_ENGINE"
-    FAILED=1
+    # Auto-add the signature footer before ## License (or at EOF)
+    tmp_footer=$(mktemp)
+    if grep -qF '## License' README.md; then
+      awk -v arch="$EXPECTED_ARCHITECT" -v eng="$EXPECTED_ENGINE" '
+        /^## License/ {
+          print "---"
+          print ""
+          print arch
+          print eng
+          print ""
+          print "---"
+          print ""
+        }
+        { print }
+      ' README.md >"$tmp_footer" && mv "$tmp_footer" README.md
+    else
+      {
+        printf '\n---\n\n%s\n%s\n\n---\n' "$EXPECTED_ARCHITECT" "$EXPECTED_ENGINE"
+      } >>README.md
+    fi
+    rm -f "$tmp_footer"
+    git add README.md
+    echo -e "${GREEN}FIXED${NC} (auto-added)"
   fi
 fi
 
