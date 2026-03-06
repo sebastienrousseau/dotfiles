@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 . All rights reserved.
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # Test suite for executable_extract
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 . All rights reserved.
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 
-set -eu
+set -euo pipefail
 
 # =============================================================================
 # Kiro CLI Installation Script

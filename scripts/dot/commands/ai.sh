@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 . All rights reserved.
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 ## Dotfiles AI Bridge.
 ##
 ## Wraps AI CLI tools with contextual patterns and system metadata.
@@ -83,25 +83,25 @@ ${prompt}"
 
   case "$tool" in
     cl | claude)
-      printf "%b" "$full_prompt" | claude
+      printf "%s" "$full_prompt" | claude
       ;;
     gemini)
-      printf "%b" "$full_prompt" | gemini chat
+      printf "%s" "$full_prompt" | gemini chat
       ;;
     kiro | kiro-cli)
-      printf "%b" "$full_prompt" | kiro-cli chat
+      printf "%s" "$full_prompt" | kiro-cli chat
       ;;
     sgpt)
-      printf "%b" "$full_prompt" | sgpt --chat shell-gpt
+      printf "%s" "$full_prompt" | sgpt --chat shell-gpt
       ;;
     ollama)
-      printf "%b" "$full_prompt" | ollama run llama3.2
+      printf "%s" "$full_prompt" | ollama run llama3.2
       ;;
     opencode)
-      printf "%b" "$full_prompt" | opencode query
+      printf "%s" "$full_prompt" | opencode query
       ;;
     aider)
-      printf "%b" "$full_prompt" | aider --msg "-"
+      printf "%s" "$full_prompt" | aider --msg "-"
       ;;
     *)
       ui_err "Unsupported tool" "$tool"

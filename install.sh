@@ -38,6 +38,15 @@ success() {
   fi
 }
 
+# Cross-platform sed in-place (BSD vs GNU)
+sed_in_place() {
+  if sed --version >/dev/null 2>&1; then
+    sed -i "$@" # GNU
+  else
+    sed -i '' "$@" # BSD (macOS)
+  fi
+}
+
 show_help() {
   cat <<EOF
 Usage: install.sh [version] [options]
@@ -55,6 +64,8 @@ EOF
 
 main() {
   local version="${1:-v0.2.494}"
+  local _cleanup_files=()
+  trap 'rm -f "${_cleanup_files[@]}" 2>/dev/null' EXIT
 
   case "$version" in
     --help)
@@ -108,7 +119,11 @@ main() {
       brew install gum >/dev/null 2>&1
     elif [[ "$target_os" == "debian" || "$target_os" == "wsl2" ]]; then
       sudo mkdir -p /etc/apt/keyrings
-      curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+      local gpg_tmp
+      gpg_tmp=$(mktemp)
+      _cleanup_files+=("$gpg_tmp")
+      curl -fsSL -o "$gpg_tmp" https://repo.charm.sh/apt/gpg.key && sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg <"$gpg_tmp"
+      rm -f "$gpg_tmp"
       echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
       sudo apt-get update && sudo apt-get install gum -y >/dev/null 2>&1
     fi
@@ -143,11 +158,15 @@ main() {
   }
 
   # Parallel execution of bootstrapping components
+  local pid_gum pid_cm
   (bootstrap_gum) &
+  pid_gum=$!
   (install_chezmoi) &
+  pid_cm=$!
 
-  # Wait for background tasks
-  wait
+  # Wait and check exit codes
+  wait "$pid_gum" || true # gum is optional
+  wait "$pid_cm" || error "chezmoi installation failed"
 
   # Critical: Add to PATH for the rest of the script to see it
   bin_dir="$HOME/.local/bin"
@@ -166,8 +185,7 @@ main() {
     local escaped_dir
     escaped_dir=$(printf '%s\n' "$dir" | sed -e 's/[\/&]/\\&/g')
     if [[ -f "$CHEZMOI_CONFIG_FILE" ]] && grep -q '^sourceDir' "$CHEZMOI_CONFIG_FILE"; then
-      sed -i.bak "s,^sourceDir.*$,sourceDir = \"$escaped_dir\"," "$CHEZMOI_CONFIG_FILE"
-      rm -f "$CHEZMOI_CONFIG_FILE.bak"
+      sed_in_place "s,^sourceDir.*$,sourceDir = \"$escaped_dir\"," "$CHEZMOI_CONFIG_FILE"
     else
       printf 'sourceDir = "%s"\n' "$dir" >"$CHEZMOI_CONFIG_FILE"
     fi

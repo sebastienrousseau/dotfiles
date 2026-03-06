@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 . All rights reserved.
-set -e
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+set -euo pipefail
 
 # Dotfiles CLI Entry Point - v0.2.494
 
@@ -21,8 +21,8 @@ fi
 
 VERSION="0.2.494"
 
-COMMAND="$1"
-if [ -n "$1" ]; then
+COMMAND="${1:-}"
+if [ -n "${1:-}" ]; then
   shift
 fi
 

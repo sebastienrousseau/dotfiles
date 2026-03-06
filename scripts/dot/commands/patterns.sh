@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 . All rights reserved.
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # AI Steering Patterns Management.
 # Usage: dot patterns [list|view|edit] [name]
 

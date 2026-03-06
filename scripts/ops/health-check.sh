@@ -238,14 +238,15 @@ check_shell_startup_performance() {
   for shell in "${shells[@]}"; do
     if command -v "$shell" >/dev/null 2>&1; then
       local start_ms end_ms duration_ms
-      start_ms=$(($(date +%s%N) / 1000000))
+      start_ms=$(date +%s)
       "$shell" -i -c 'exit' 2>/dev/null || true
-      end_ms=$(($(date +%s%N) / 1000000))
-      duration_ms=$((end_ms - start_ms))
+      end_ms=$(date +%s)
+      # Convert to milliseconds (second-level precision; %N is GNU-only)
+      duration_ms=$(((end_ms - start_ms) * 1000))
 
       if [[ $duration_ms -gt $threshold_ms ]]; then
         log_warn "$shell startup: ${duration_ms}ms (threshold: ${threshold_ms}ms)"
-        ((slow_shells++))
+        ((slow_shells++)) || true
       else
         log_info "  $shell startup: ${duration_ms}ms"
       fi
