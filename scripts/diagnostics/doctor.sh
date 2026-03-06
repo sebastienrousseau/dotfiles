@@ -243,7 +243,7 @@ if command -v hyperfine >/dev/null 2>&1; then
   if bash "$SCRIPT_DIR/../tests/performance/bench.sh" 2>/dev/null; then
     _ok "startup latency" "within 50ms threshold"
   else
-    _fail "startup latency" "threshold exceeded"
+    _warn "startup latency" "threshold exceeded (run dot prewarm)"
   fi
 else
   _warn "hyperfine" "missing (benchmark skipped)"
