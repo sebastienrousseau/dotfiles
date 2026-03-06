@@ -59,6 +59,8 @@ Works on macOS, Linux (Debian/Ubuntu/Arch), and WSL2.
 
 ### Install
 
+Get started in seconds. Run the universal installer to provision your environment. The script detects your OS and configures the appropriate shims.
+
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 ```
