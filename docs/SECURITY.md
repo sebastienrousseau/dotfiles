@@ -1,6 +1,6 @@
 # Security
 
-How Dotfiles handles security and system modifications.
+How dotfiles handles security and system modifications.
 
 ## Core Principles
 
@@ -19,7 +19,7 @@ How Dotfiles handles security and system modifications.
 
 ## Secrets
 
-Dotfiles uses **age** for encryption.
+The dotfiles use **age** for encryption.
 
 - **Initialization**: `dot secrets-init` creates a key at `~/.config/chezmoi/key.txt`.
 - **Storage**: Secrets are stored as `.age` encrypted files.
@@ -36,6 +36,6 @@ Short-lived SSH certificates reduce the blast radius of key compromise.
 - **Default TTL**: 16 hours (override via `SSH_CERT_TTL` environment variable)
 - **CA URL**: Set `SSH_CERT_CA_URL` for step-ca integration
 
-## Report an issue
+## Reporting a Vulnerability
 
-If you discover a security vulnerability, please do not open a public issue. Follow the instructions in the Security Policy.
+If you discover a security vulnerability, don't open a public issue. Follow the instructions in the Security Policy.

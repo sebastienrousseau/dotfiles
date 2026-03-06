@@ -11,18 +11,16 @@ exec zsh
 
 This enables the local helper scripts (context suggestions and error analysis) without installing any AI tools.
 
-## Intelligence Layer (Patterns)
+## Steering Patterns
 
-The **Intelligence Layer** provides a way to "steer" AI tools by prepending specialized context and system metadata to every request. This ensures that the AI operates with an understanding of your architectural principles and environment.
+Managed patterns in `~/.dotfiles/dot_config/ai/patterns/` prepend specialized context to AI requests.
 
-### Steering Patterns
-Managed patterns are stored in `~/.dotfiles/dot_config/ai/patterns/`.
-
-- **Architect**: Focuses on shell infrastructure and 2026 stack optimization.
-- **Hardener**: Specializes in high-compliance security, encryption, and PQC.
-- **Refactor**: Optimizes for POSIX portability, performance, and linting.
+- **Architect** — shell infrastructure and stack optimization
+- **Hardener** — security, encryption, and compliance
+- **Refactor** — POSIX portability, performance, and linting
 
 ### Contextual Bridge
+
 Use the `dot` CLI to invoke AI tools with automated context:
 
 ```bash

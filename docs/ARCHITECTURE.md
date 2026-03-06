@@ -1,18 +1,18 @@
-# 🏛️ Architecture & System Design
+# Architecture
 
-This document outlines the core architectural decisions and system design of the **Dotfiles Shell Distribution (v{{ .dotfiles_version }})**. This is not just a configuration; it is a high-performance, modular infrastructure for your terminal.
+Core architectural decisions and system design of the dotfiles shell distribution.
 
 ---
 
-## 🏗️ Core Philosophy
+## Philosophy
 
-*   **XDG-First**: Configuration strictly adheres to the "~/.config/" (XDG Base Directory) specification to prevent home directory clutter.
-*   **Polyglot & Multi-Shell**: First-class support for **Zsh**, **Fish**, and **Nushell**, sharing a unified logic core.
-*   **Zero-Cost Startup**: Heavy features are deferred or autoloaded to ensure the first prompt appears in **< 10ms**.
-*   **Deterministic & Declarative**: Leveraging **Nix Flakes** for bit-for-bit identical environments across machines.
-*   **Async-by-Design**: Background daemons (**Pueue**) handle heavy mutations (upgrades, builds) without blocking the user.
+- **XDG-First**: Configuration lives under `~/.config/` to keep the home directory clean.
+- **Multi-Shell**: First-class support for Zsh, Fish, and Nushell with a shared logic core.
+- **Fast Startup**: Heavy features are deferred or autoloaded to keep the first prompt under 50ms.
+- **Deterministic**: Nix Flakes provide bit-for-bit identical environments across machines.
+- **Non-Blocking**: Background daemons (Pueue) handle upgrades and builds without stalling the shell.
 
-## 📐 System Layout
+## System Layout
 
 ```text
 ~/.dotfiles/
@@ -22,41 +22,40 @@ This document outlines the core architectural decisions and system design of the
 │   ├── nushell/         # Structured data shell config
 │   ├── shell/           # Shared logic (aliases, paths, functions)
 │   └── ...              # 50+ tool configurations (nvim, tmux, ghostty, etc.)
-├── dot_local/           # Local binaries and scripts (~/.local/bin)
+├── dot_local/           # Local binaries and scripts (~/.local/bin/)
 ├── .chezmoitemplates/   # Unified source for aliases, functions, and paths
 ├── scripts/             # Internal libraries and diagnostics
-│   └── dot/lib/bento.sh # 2026 Intelligence Surface renderer
 ├── nix/                 # Nix Flake for deterministic toolchains
-├── lib/wasm-tools/      # Rust source for high-performance Wasm utilities
-└── install.sh           # Universal, zero-dependency bootstrap script
+├── lib/wasm-tools/      # Rust source for Wasm utilities
+└── install.sh           # Universal bootstrap script (zero dependencies)
 ```
 
 ---
 
-## 🐚 Shell Startup Strategies
+## Shell Startup Strategies
 
-### 🏎️ Shared: Unified `_cached_eval` Logic
-Across Zsh, Fish, and Bash, we implement an idempotent caching wrapper for external tool initializations (Starship, Zoxide, Atuin).
-1.  **Intercept**: The shell checks if a cached version of the tool's `eval` output exists in `~/.cache/shell/`.
-2.  **Validate**: It compares the cache timestamp against the tool binary.
-3.  **Bypass**: If valid, the shell `source`s the text file directly, avoiding a subshell execution and saving **20-50ms** per tool.
+### Shared: `_cached_eval`
 
-### ⚡ 2026 Edition: Zero-Jank & Lazy-Hydration
-To achieve the "Apple-Standard" fluid threshold (~16ms), we have implemented a **Lazy-Hydration** model:
-1.  **Phase 1 (Visual Paint)**: The shell prompt (`➜ `) is rendered immediately using static escape codes.
-2.  **Phase 2 (Async Hydration)**: Tool initializations (mise, atuin, etc.) are dispatched to background workers (`&!`).
-3.  **Phase 3 (On-Demand Activation)**: Environment hydration only occurs upon the first user interaction (Enter or Prompt paint) or after 500ms of idle time. This ensures total execution time stays below 50ms.
+Across Zsh, Fish, and Bash, an idempotent caching wrapper avoids redundant tool initialization (Starship, Zoxide, Atuin).
 
----
+1. **Intercept** — check if a cached version of the tool's `eval` output exists in `~/.cache/shell/`.
+2. **Validate** — compare the cache timestamp against the tool binary's mtime.
+3. **Bypass** — if valid, `source` the cached text directly, saving 20-50ms per tool.
 
-## 💎 The Canvas: Artifact-Only Mode
+### Lazy-Hydration Model
 
-A premium "Consumer-First" environment triggered by `DOTFILES_ARTIFACT_MODE=1`.
-*   **Minimalist UI**: Strips all prompt complexity, leaving only a green `➜ `.
-*   **Intelligence Surface**: An asynchronous Bento-style dashboard rendered via `bento.sh` that provides environmental context (Node version, Cloud status, Git health) without blocking the main thread.
-*   **Redraw Signaling**: Uses `SIGWINCH` to smoothly return control to the user after background hydration completes.
+To reach a fluid first-prompt target (< 50ms), the shell uses a three-phase startup:
+
+1. **Phase 1 (Visual Paint)** — render the prompt immediately using static escape codes.
+2. **Phase 2 (Async Hydration)** — dispatch tool initializations (mise, atuin, etc.) to background workers.
+3. **Phase 3 (On-Demand Activation)** — environment hydration occurs on first user interaction or after 500ms of idle time.
 
 ---
 
-**Architecture Version**: 3.0.0 (2026 Euxis Evolution)
-**Status**: Stable / Sublime
+## Artifact Mode
+
+A minimal environment triggered by `DOTFILES_ARTIFACT_MODE=1`.
+
+- **Minimalist UI** — strips prompt complexity, leaving only a green `->`.
+- **Intelligence Surface** — an async Bento-style dashboard rendered via `bento.sh` that provides environment context (Node version, cloud status, Git health) without blocking the main thread.
+- **Redraw Signaling** — uses `SIGWINCH` to return control after background hydration completes.

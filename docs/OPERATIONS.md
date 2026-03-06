@@ -1,6 +1,6 @@
-# Discover operations
+# Operations
 
-This guide covers the core workflows to keep your dotfiles running well across platforms.
+Core workflows for keeping your dotfiles running across platforms.
 
 ---
 
@@ -171,7 +171,7 @@ If something runs slow or appears broken:
 
 ## Tools
 
-### Make it yours
+### Customization
 - **Wallpaper rotation**:
   ```bash
   ~/.dotfiles/scripts/theme/wallpaper-rotate.sh --interval 300
@@ -213,6 +213,7 @@ If something runs slow or appears broken:
 
 ---
 
-## Security policy
-- **GPG/SSH**: All commits use SSH signing.
-- **Audit log**: Review `~/.local/share/dotfiles.log` for a timeline of all changes that Dotfiles applied.
+## Security
+
+- **GPG/SSH** — all commits use SSH signing.
+- **Audit log** — review `~/.local/share/dotfiles.log` for a timeline of changes.

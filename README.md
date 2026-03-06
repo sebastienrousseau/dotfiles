@@ -5,7 +5,7 @@
 <h1 align="center">.dotfiles</h1>
 
 <p align="center">
-  <strong>Stop wasting hours re-configuring your environment. Get a world-class developer experience on any machine in 60 seconds.</strong>
+  <strong>Cross-platform shell configuration for macOS, Linux, and WSL. Managed by Chezmoi.</strong>
 </p>
 
 <p align="center">
@@ -15,46 +15,23 @@
   <a href="https://codespaces.new/sebastienrousseau/dotfiles"><img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces" /></a>
 </p>
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/docs/themes/hero-shot.svg" alt="Dotfiles Hero Shot" width="800" style="border-radius: 10px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);" />
-  <br>
-  <em><strong>Sublime Aesthetics</strong>: Neovim + Catppuccin + Starship — Battle-tested in high-compliance environments.</em>
-</p>
+---
+
+## Overview
+
+A reliable, idempotent shell environment for developers who need consistency across machines. Chezmoi manages templates, feature flags, and platform differences so you get the same setup on every device.
+
+- **Telemetry disabled by default** — no data leaves your machine
+- **Encrypted secrets** via Age/SOPS — no plaintext credentials in the repo
+- **Isolated runtimes** through Mise and Nix — nothing installed system-wide
+- **Built-in verification** with `dot doctor` and `dot smoke-test`
+- **Atomic backups** on every apply (`~/.dotfiles.bak`)
 
 ---
 
-## ✨ Overview
+## Architecture
 
-Dotfiles is a **high-performance, idempotent shell distribution** designed for developers who demand speed, security, and reproducibility. Managed by [Chezmoi](https://github.com/twpayne/chezmoi), it provides a curated infrastructure that evolves with you across **macOS, Linux, and WSL2**.
-
-### 🛡️ Why "Trusted Shell"?
-
-Unlike standard dotfile repos or frameworks like Oh-My-Zsh, this platform is built for **Enterprise-Grade reliability**.
-
-| Feature | Standard Frameworks | Your Trusted Shell |
-| :--- | :--- | :--- |
-| **Telemetry** | Often Enabled | **Disabled by Default** |
-| **Backups** | Manual/None | **Atomic & Automatic** (`~/.dotfiles.bak`) |
-| **Secrets** | Plaintext Env Vars | **Encrypted via Age/SOPS** |
-| **Runtimes** | System-wide / Manual | **Isolated via Mise & Nix** |
-| **Verification** | None | **Built-in `smoke-test` & `doctor`** |
-
----
-
-## 🚀 The 2026 Next-Gen Frontier
-
-While others are still configuring Bash, we are building the future.
-
-*   🏎️ **Zero-Cost Shell Startup**: Advanced `_cached_eval` logic for Zsh, Bash, and Fish, bypassing initializations for near-instant boot times.
-*   ❄️ **Nix & Home Manager**: Declarative user environments with full Home Manager support for bit-for-bit identical setups.
-*   🧠 **Unified AI Experience**: Centralized identity context (`~/.config/ai/identity.md`) shared across Claude, Gemini, and Aider.
-*   🛡️ **Self-Healing**: Automated `dot heal` logic that detects and repairs configuration drift and broken dependencies.
-
----
-
-## 🏗️ Architecture
-
-**Reliable by Design**: Run once or a hundred times, the result is always the same.
+Run once or a hundred times — the result is the same.
 
 ```mermaid
 graph TD
@@ -70,94 +47,94 @@ graph TD
 
 ---
 
-## ⚡ Quick Start
+## Quick Start
 
 Works on macOS, Linux (Debian/Ubuntu/Arch), and WSL2.
 
-### ✅ Pre-flight Checklist
-Before installing, ensure your system meets these minimal requirements:
-- [ ] **Git** 2.30+ installed (`command -v git`)
-- [ ] **Curl** installed (`command -v curl`)
-- [ ] **SSH Key** configured in GitHub (for signed commits)
-- [ ] **Internet Access** (for initial bootstrap)
+### Prerequisites
 
-### 1. The Instant Install (The One-Liner)
-Run this in your terminal for a fully functional environment in 60 seconds:
+- Git 2.30+
+- curl
+- SSH key configured in GitHub (for signed commits)
+
+### Install
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 ```
 
-*For a silent, non-interactive installation (ideal for CI/CD or new scripts):*
+For non-interactive use (CI/CD):
+
 ```bash
 DOTFILES_SILENT=1 DOTFILES_NONINTERACTIVE=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 ```
 
-### 2. Verify
+### Verify
+
 ```bash
 dot doctor
 ```
 
-### 3. Update
+### Update
+
 ```bash
 dot update
 ```
 
 ---
 
-## ⌨️ The `dot` CLI Showcase
+## The `dot` CLI
 
-| Command | Action | Why you'll love it |
-| :--- | :--- | :--- |
-| `dot apply` | Propagate changes | Instant synchronization of all configs |
-| `dot update` | Pull & Pre-warm | Updates everything and primes your shell cache |
-| `dot doctor` | Health Check | Validates paths, versions, and security |
-| `dot smoke-test` | Verify Toolchain | Ensures Rust, Go, and AI tools are functional |
-| `dot bundle` | Offline Archive | Create a zero-network portable environment |
-
----
-
-## 📦 Features & Details
-
-<details>
-<summary><b>🐚 Shells & Modern UX</b></summary>
-
-- **Zsh**: Primary shell with modular deferred loading.
-- **Fish**: High-performance shell with `_cached_eval` logic.
-- **Nushell**: Structured data processing via shell pipelines.
-- **Starship**: Fast, cross-shell prompt showing only what you need.
-- **Zoxide**: Smarter `cd` command that learns your habits.
-- **Atuin**: Magically searchable shell history across all machines.
-</details>
-
-<details>
-<summary><b>🛠️ Development & Runtimes</b></summary>
-
-- **Mise**: Polyglot runtime manager (Node, Python, Go, Rust).
-- **Nix Flakes**: Declarative, reproducible toolchains.
-- **Home Manager**: Full environment state management.
-- **Pueue**: Offload long-running tasks to a background daemon.
-- **Wasmtime**: Run ultra-fast WebAssembly-based CLI tools.
-</details>
-
-<details>
-<summary><b>🔐 Security & Hardening</b></summary>
-
-- **Age & SOPS**: Enterprise-grade secret encryption.
-- **Signed Commits**: Enforced SSH/GPG signing for every change.
-- **Audit Logs**: Every `dot` command is logged for traceability.
-- **Telemetry Disabling**: Privacy-first OS tuning out of the box.
-</details>
+| Command | Action |
+| :--- | :--- |
+| `dot apply` | Propagate configuration changes |
+| `dot update` | Pull latest changes and pre-warm caches |
+| `dot doctor` | Validate paths, versions, and security |
+| `dot smoke-test` | Verify toolchain (Rust, Go, AI tools) |
+| `dot bundle` | Create an offline portable archive |
 
 ---
 
-**THE ARCHITECT** ᛫ [Sebastien Rousseau](https://sebastienrousseau.com)  
+## What's Included
+
+<details>
+<summary><b>Shells</b></summary>
+
+- **Zsh** — primary shell with modular deferred loading
+- **Fish** — fast shell with `_cached_eval` startup optimization
+- **Nushell** — structured data processing through shell pipelines
+- **Starship** — cross-shell prompt showing only what matters
+- **Zoxide** — directory jumper that learns your habits
+- **Atuin** — searchable shell history synced across machines
+</details>
+
+<details>
+<summary><b>Development and Runtimes</b></summary>
+
+- **Mise** — polyglot runtime manager (Node, Python, Go, Rust)
+- **Nix Flakes** — declarative, reproducible toolchains
+- **Home Manager** — full environment state management
+- **Pueue** — background task queue for long-running jobs
+</details>
+
+<details>
+<summary><b>Security</b></summary>
+
+- **Age and SOPS** — secret encryption at rest
+- **Signed commits** — SSH/GPG signing enforced
+- **Audit logs** — every `dot` command logged to `~/.local/share/dotfiles.log`
+- **Telemetry controls** — OS-level telemetry disabled out of the box
+</details>
+
+---
+
+**THE ARCHITECT** ᛫ [Sebastien Rousseau](https://sebastienrousseau.com)
 **THE ENGINE** ᛞ [EUXIS](https://euxis.co) ᛫ Enterprise Unified Execution Intelligence System
 
 ---
 
-## 📜 License
+## License
 
 Licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
 
-<p align="right"><a href="#dotfiles">↑ Back to Top</a></p>
+<p align="right"><a href="#dotfiles">Back to Top</a></p>
