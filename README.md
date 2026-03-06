@@ -115,6 +115,7 @@ dot update
 | `dot apply` | Propagate configuration changes |
 | `dot update` | Pull latest changes and pre-warm caches |
 | `dot doctor` | Validate paths, versions, and security |
+| `dot heal` | Auto-repair missing tools and broken state |
 | `dot smoke-test` | Verify toolchain (Rust, Go, AI tools) |
 | `dot bundle` | Create an offline portable archive |
 
