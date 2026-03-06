@@ -46,6 +46,7 @@ yarn-error.log*
 .env
 .env.*
 !.env.example
+.history
 
 # Machine-specific configs (local only, never pushed)
 dot_etc/machines/

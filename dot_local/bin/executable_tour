@@ -1,6 +1,6 @@
 #!/bin/sh
 # Interactive Tour using Gum
-# Part of Dotfiles v0.2.493
+# Part of Dotfiles v0.2.494
 
 if ! command -v gum >/dev/null; then
     echo "Error: 'gum' is not installed."
@@ -22,6 +22,11 @@ if ! command -v gum >/dev/null; then
     exit 1
 fi
 
+if [ ! -t 1 ]; then
+    echo "Error: This interactive tour requires a TTY."
+    exit 1
+fi
+
 clear
 
 # Intro (match UI header style)
@@ -32,7 +37,7 @@ banner='██████╗  ██████╗ ████████╗
 ██████╔╝╚██████╔╝   ██║   ██║     ██║███████╗███████╗███████║
 ╚═════╝  ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝
 
-v0.2.493 · Infrastructure‑grade shell environment'
+v0.2.494 · Infrastructure‑grade shell environment'
 
 gum style \
     --foreground 212 --border-foreground 212 --border double \

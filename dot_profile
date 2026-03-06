@@ -52,7 +52,7 @@ export LANG="${LANG:-en_US.UTF-8}"
 export LC_ALL="${LC_ALL:-en_US.UTF-8}"
 
 # --- PATH Configuration ---
-# Ensure ~/bin is in PATH (euxis tools)
+# Ensure ~/bin is in PATH (dotfiles tools)
 case ":${PATH}:" in
     *":${HOME}/bin:"*) ;;
     *) export PATH="${HOME}/bin:${PATH}" ;;

@@ -1,7 +1,7 @@
 # AI Identity & Preferences
 
 ## Profile
-- **User**: Sebastien Rousseau
+- **User**:
 - **Role**: Senior Software Engineer / Architect
 - **Expertise**: Rust, TypeScript, Go, DevOps (Nix, Kubernetes), Shell Scripting.
 

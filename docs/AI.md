@@ -11,15 +11,31 @@ exec zsh
 
 This enables the local helper scripts (context suggestions and error analysis) without installing any AI tools.
 
-## Unified Identity Context
+## Intelligence Layer (Patterns)
 
-To ensure consistent responses across different AI providers, we use a centralized identity file:
-`~/.config/ai/identity.md`
+The **Intelligence Layer** provides a way to "steer" AI tools by prepending specialized context and system metadata to every request. This ensures that the AI operates with an understanding of your architectural principles and environment.
 
-This file contains your professional profile, coding style preferences, and workspace context. Managed aliases for `aider` and `claude` automatically reference this file to provide high-quality, tailored assistance.
+### Steering Patterns
+Managed patterns are stored in `~/.dotfiles/dot_config/ai/patterns/`.
 
-### Management
-Edit the source at `~/.dotfiles/dot_config/ai/identity.md` to update your preferences globally.
+- **Architect**: Focuses on shell infrastructure and 2026 stack optimization.
+- **Hardener**: Specializes in high-compliance security, encryption, and PQC.
+- **Refactor**: Optimizes for POSIX portability, performance, and linting.
+
+### Contextual Bridge
+Use the `dot` CLI to invoke AI tools with automated context:
+
+```bash
+# General usage
+dot cl|gemini|kiro --pattern <name> "prompt"
+
+# Quick aliases
+dcla "Optimize my zshrc"      # Claude + Architect
+dgmnh "Audit my ssh config"   # Gemini + Hardener
+dkir "Refactor this script"   # Kiro + Refactorer
+```
+
+The bridge automatically injects system metadata (OS, Architecture, Date) into the prompt, providing the AI with the necessary technical context to give accurate answers.
 
 ## Optional AI CLI tools
 

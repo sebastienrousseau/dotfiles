@@ -6,7 +6,8 @@ This guide covers supported platforms, prerequisites, and the standard install p
 
 - macOS (Homebrew)
 - Ubuntu/Debian (apt)
-- WSL2 (Ubuntu/Debian)
+- Arch Linux (pacman)
+- WSL2 (Ubuntu/Debian/Arch)
 
 ## Prerequisites
 
@@ -28,7 +29,7 @@ Works on macOS, Linux, and WSL2:
 
 ```bash
 # Works on macOS, Linux, and WSL2
-sh -c "$(curl -fsSL https://dotfiles.io/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 ```
 
 ### 2. Post-Install Shell Selection

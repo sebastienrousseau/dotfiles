@@ -43,7 +43,7 @@ ls -la ~/.dotfiles/
 2. **Use WSL2 native filesystem**:
    ```bash
    # Move dotfiles to WSL2 filesystem
-   cd /home/$USER
+   cd ~
    git clone https://github.com/yourusername/dotfiles.git .dotfiles
    ```
 
@@ -60,7 +60,7 @@ time ls -la /mnt/c/Users/
 time ls -la ~/
 ```
 
-**Solution:** Always work within WSL2 filesystem (`/home/`) for performance-critical operations.
+**Solution:** Always work within WSL2 filesystem (`~/`) for performance-critical operations.
 
 #### Problem: Permission denied errors on mounted Windows drives
 ```bash
@@ -455,8 +455,8 @@ git config --get core.editor
 #### Optimize filesystem performance
 ```bash
 # 1. Move frequently accessed files to WSL2 filesystem
-mkdir -p /home/$USER/workspace
-ln -s /home/$USER/workspace ~/workspace
+mkdir -p ~/workspace
+ln -s ~/workspace ~/workspace
 
 # 2. Configure Git for performance
 git config --global core.preloadindex true

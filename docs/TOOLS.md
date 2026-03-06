@@ -36,6 +36,7 @@ Cutting-edge utilities for the ultimate power user.
 | ⚙️ | **Pueue** | Async Daemon | Offload long-running tasks (upgrades, builds) to a background queue. |
 | 🧠 | **Dot-AI (RAG)** | AI Assistant | Local semantic search over your own dotfiles using ripgrep + LLMs. |
 | 💎 | **Wasmtime** | Wasm Runtime | Run pre-compiled Rust/Zig tools as ultra-fast WebAssembly modules. |
+| 💎 | **Atomic Surface** | Intelligence | High-fidelity, async Bento-Grid dashboard for environment context. |
 | 🔐 | **SOPS** | Secrets Ops | Declarative, encrypted secrets management integrated with Nix. |
 
 ---
@@ -88,6 +89,7 @@ Integrated AI helpers for the terminal.
 | :--- | :--- | :--- |
 | **Aider** | aider | Git-native AI pair programming. |
 | **Claude CLI** | claude | Anthropic's high-speed assistant. |
+| **Kiro CLI** | kiro-cli | Agentic AI terminal assistant. |
 | **Gemini CLI** | gemini | Google's multi-modal CLI tool. |
 | | sgpt | shell-gpt |
 | | ollama | ollama |
