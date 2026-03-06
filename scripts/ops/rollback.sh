@@ -115,7 +115,7 @@ list_backups() {
       timestamp=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M:%S" "$backup" 2>/dev/null || stat -c "%y" "$backup" 2>/dev/null | cut -d'.' -f1)
       size=$(du -sh "$backup" 2>/dev/null | cut -f1)
       printf "  %2d. %-30s  %s  %s\n" "$i" "$name" "$timestamp" "$size"
-      ((i++))
+      ((i++)) || true
     fi
   done < <(find "$BACKUP_DIR" -maxdepth 1 -type d -name "backup_*" | sort -r)
 
@@ -307,7 +307,7 @@ git_reset() {
       git stash push -m "Auto-stash before rollback $(date +%Y%m%d_%H%M%S)"
       log_success "Changes auto-stashed (use 'git stash pop' to recover)"
     else
-      read -rp "Stash changes? [y/N] " response
+      read -t 30 -rp "Stash changes? [y/N] " response || response="N"
       if [[ "$response" =~ ^[Yy]$ ]]; then
         git stash push -m "Auto-stash before rollback $(date +%Y%m%d_%H%M%S)"
         log_success "Changes stashed"
@@ -518,7 +518,7 @@ main() {
         exit 1
       fi
       if [[ "$FORCE" != "1" ]] && [[ "$DRY_RUN" != "1" ]]; then
-        read -rp "Rollback to $(basename "$latest")? [y/N] " response
+        read -t 30 -rp "Rollback to $(basename "$latest")? [y/N] " response || response="N"
         [[ ! "$response" =~ ^[Yy]$ ]] && exit 0
       fi
       perform_rollback "$latest" "$DRY_RUN"
@@ -536,14 +536,14 @@ main() {
         exit 1
       fi
       if [[ "$FORCE" != "1" ]] && [[ "$DRY_RUN" != "1" ]]; then
-        read -rp "Rollback to $(basename "$backup")? [y/N] " response
+        read -t 30 -rp "Rollback to $(basename "$backup")? [y/N] " response || response="N"
         [[ ! "$response" =~ ^[Yy]$ ]] && exit 0
       fi
       perform_rollback "$backup" "$DRY_RUN"
       ;;
     git-reset)
       if [[ "$FORCE" != "1" ]] && [[ "$DRY_RUN" != "1" ]]; then
-        read -rp "Reset to last known good commit? [y/N] " response
+        read -t 30 -rp "Reset to last known good commit? [y/N] " response || response="N"
         [[ ! "$response" =~ ^[Yy]$ ]] && exit 0
       fi
       git_reset "$DRY_RUN"

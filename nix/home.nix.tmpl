@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2026 . All rights reserved.
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 { pkgs, ... }:
 
 {
@@ -50,19 +50,8 @@
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
-  # Manage fish plugins via Home Manager
+  # Fish shell — plugins managed via fisher at runtime, not Nix
   programs.fish = {
     enable = true;
-    plugins = [
-      {
-        name = "fisher";
-        src = pkgs.fetchFromGitHub {
-          owner = "jorgebucaran";
-          repo = "fisher";
-          rev = "main";
-          sha256 = "sha256-+ST6yL9iSSST9SGU6S6S6S6S6S6S6S6S6S6S6S6S6S6="; # Placeholder
-        };
-      }
-    ];
   };
 }
