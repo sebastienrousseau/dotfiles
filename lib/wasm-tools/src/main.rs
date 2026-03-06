@@ -7,5 +7,5 @@ fn main() {
         .expect("Time went backwards")
         .as_secs();
 
-    println!("{\"status\": \"ok\", \"timestamp\": {}, \"engine\": \"wasm\"}", now);
+    println!(r#"{{"status": "ok", "timestamp": {}, "engine": "wasm"}}"#, now);
 }
