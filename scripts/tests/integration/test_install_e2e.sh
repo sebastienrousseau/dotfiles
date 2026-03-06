@@ -17,6 +17,8 @@ export PATH="$HOME/.local/bin:$PATH"
 # Cleanup on exit
 trap 'rm -rf "$MOCK_HOME"' EXIT
 
+# Stub ui_header if not already defined (not available in test context)
+command -v ui_header >/dev/null 2>&1 || ui_header() { echo "== $* =="; }
 ui_header "E2E Installation Test"
 
 # We use the local repo as the source to avoid network dependency and test current changes
