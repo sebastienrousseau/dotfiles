@@ -1,6 +1,6 @@
 # Documentation
 
-Cross-platform shell environment for macOS, Linux, and WSL. Managed by Chezmoi.
+Everything you need to know about this dotfiles setup, organized by topic.
 
 ---
 
@@ -45,25 +45,3 @@ Cross-platform shell environment for macOS, Linux, and WSL. Managed by Chezmoi.
 ### Reference
 - [Roadmap](ROADMAP.md) — future plans and priorities
 - [Version Sync](VERSION_SYNC.md) — how version numbers propagate
-
----
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Test with `dot doctor`
-4. Submit a pull request
-
-### Code Style
-
-- Shell scripts: follow ShellCheck recommendations, format with `shfmt -i 2 -ci`
-- Templates: use `.chezmoitemplates/` for reusable logic
-- Documentation: use UPPERCASE.md naming
-
-### Testing
-
-```bash
-./scripts/tests/framework/test_runner.sh                          # Unit tests
-RUN_INTEGRATION=1 ./scripts/tests/framework/test_runner.sh        # Integration
-```

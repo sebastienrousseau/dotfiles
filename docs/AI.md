@@ -33,26 +33,16 @@ dgmnh "Audit my ssh config"   # Gemini + Hardener
 dkir "Refactor this script"   # Kiro + Refactorer
 ```
 
-The bridge automatically injects system metadata (OS, Architecture, Date) into the prompt, providing the AI with the necessary technical context to give accurate answers.
+The bridge automatically injects system metadata (OS, Architecture, Date) into the prompt, giving the AI the technical context it needs for accurate answers.
 
 ## Optional AI CLI tools
 
-These tools are **not** installed automatically. Install only what you want:
+These tools aren't installed automatically. Install only what you want:
 
 - **Local-first**: `ollama` (run models locally)
 - **Cloud**: `codex`, `sgpt`, `claude`, `gemini` (provider CLIs)
 
 After installation, the dotfiles can surface basic helper functions and shortcuts, but only when `DOTFILES_AI=1` is set.
-
-## Optional autocomplete helpers
-
-If you want AI-assisted completion, keep it strictly opt-in and local when possible. A typical pattern is:
-
-1. Install the tool you want.
-2. Wire it behind a wrapper function.
-3. Gate it with `DOTFILES_AI=1`.
-
-This keeps startup fast and avoids accidental background activity.
 
 ## Agentic terminal workflows
 

@@ -1,6 +1,6 @@
 # Utilities
 
-Available through aliases, functions, and the `dot` CLI.
+Aliases, functions, and the `dot` CLI provide day-to-day tooling across macOS, Linux, and WSL.
 
 ## Dot CLI
 
@@ -10,7 +10,7 @@ The `dot` command is your primary interface for managing dotfiles. Run `dot --ve
 
 | Command | Description |
 |---------|-------------|
-| `dot apply` | Apply dotfiles (chezmoi apply) |
+| `dot apply` | Apply dotfiles (`chezmoi apply`) |
 | `dot sync` | Alias of apply |
 | `dot update` | Pull latest changes and apply |
 | `dot add <file>` | Add a file to chezmoi source |
@@ -36,53 +36,13 @@ The `dot` command is your primary interface for managing dotfiles. Run `dot --ve
 |---------|-------------|
 | `dot tools` | Show tools documentation |
 | `dot tools install` | Enter Nix development shell |
-| `dot new <lang> <name>` | Scaffold a project (python/go/node) |
+| `dot new <lang> <name>` | Scaffold a project (`python`/`go`/`node`) |
 | `dot sandbox` | Launch Docker sandbox preview |
 | `dot log-rotate` | Rotate `~/.local/share/dotfiles.log` |
 
-## Git
-
-You can use these shorthand aliases for everyday Git operations:
-
-- `g`, `ga`, `gco`, `gst`, `gl`, `gll`, and related aliases
-- `lg` shows a graph log; `lgui` opens `lazygit` (if installed)
-- `gh` aliases in `~/.config/gh/config.yml`
-
-## Docker
-
-These Docker aliases help you manage containers and images:
-
-- `dco` for `docker compose`
-- `dps`, `dpsa` for container listing
-- `dexec`, `denter` for container shells
-- `dlogsf`, `dl` for following logs
-- `dprune`, `dprunea` for system cleanup
-- `dbx`, `dbxbuild` for buildx operations
-- `lzd` for lazydocker TUI
-
-## Search
-
-You can search and navigate your filesystem with:
-
-- `rg` (ripgrep), `fd` (find)
-- `z <dir>` (zoxide jump)
-
-## Text
-
-- `jq` for JSON
-- `bat` for quick file previews
-
-## Terminal
-
-- `banner` for quick figlet-style banners
-- `rainbow` for lolcat-style output
-- `emoji` for an emoji picker (copies to clipboard)
-- `pipes` for a terminal screensaver
-- `cmatrix` wrapper with defaults
-
 ## Universal Scripts
 
-POSIX scripts in `~/.local/bin/` for cross-platform use (macOS, Linux, WSL).
+POSIX scripts in `~/.local/bin/` that work across macOS, Linux, and WSL.
 
 | Command | Description |
 |---------|-------------|
@@ -93,31 +53,25 @@ POSIX scripts in `~/.local/bin/` for cross-platform use (macOS, Linux, WSL).
 | `extract` | Universal archive extractor with robust format support and `gum` UI feedback |
 | `up <n>` | Navigate up `n` directory levels |
 | `bm` | Directory bookmarking tool (`add`, `goto`, `list`, `remove`, `update`) |
-| `win` | WSL-specific shim for intelligently running Windows binaries with translated paths |
-
-## Network
-
-You can debug HTTP requests with:
-
-- `curlheader`, `curlstatus`, `curltime`, `httpdebug`
+| `win` | WSL-specific shim for running Windows binaries with translated paths |
 
 ## Appearance
 
-- `dot theme` to switch terminal themes (dark/light)
-- `dot wallpaper` to apply a wallpaper
-- `dot fonts` to install Nerd Fonts
+| Command | Description |
+|---------|-------------|
+| `dot theme` | Switch terminal themes (dark/light) |
+| `dot wallpaper` | Apply a wallpaper |
+| `dot fonts` | Install Nerd Fonts |
 
 ## Security (opt-in)
 
-- `dot backup` to create a compressed backup
-- `dot encrypt-check` to check disk encryption status
-- `dot firewall` to apply firewall hardening
-- `dot telemetry` to disable telemetry
-- `dot dns-doh` to enable DNS-over-HTTPS
-- `dot lock-screen` to enforce lock screen idle settings
-- `dot usb-safety` to disable automount for removable media
-- `dot ssh-cert` to manage short-lived SSH certificates (issue/status/revoke)
-
-## Fonts
-
-- `~/.dotfiles/scripts/fonts/patch-fonts.sh` to patch a font with Nerd Fonts
+| Command | Description |
+|---------|-------------|
+| `dot backup` | Create a compressed backup |
+| `dot encrypt-check` | Check disk encryption status |
+| `dot firewall` | Apply firewall hardening |
+| `dot telemetry` | Disable telemetry |
+| `dot dns-doh` | Enable DNS-over-HTTPS |
+| `dot lock-screen` | Enforce lock screen idle settings |
+| `dot usb-safety` | Disable automount for removable media |
+| `dot ssh-cert` | Manage short-lived SSH certificates (`issue`/`status`/`revoke`) |
