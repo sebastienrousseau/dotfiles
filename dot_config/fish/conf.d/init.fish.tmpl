@@ -1,55 +1,95 @@
 # 🅳🅾🆃🅵🅸🅻🅴🆂 (v{{ .dotfiles_version }}) - <https://dotfiles.io>
 # Made With ❤️ in London, United Kingdom
-# Designed by Sebastien Rousseau
+# Designed by
 # Copyright (c) 2015-2026. All rights reserved.
 # License: MIT
 
 # Tool Initialization
 if status is-interactive
-    set -l SHELL_CACHE "$XDG_CACHE_HOME"
+    set -g SHELL_CACHE "$XDG_CACHE_HOME"
     if test -z "$SHELL_CACHE"
         set SHELL_CACHE "$HOME/.cache"
     end
     set SHELL_CACHE "$SHELL_CACHE/fish"
     mkdir -p "$SHELL_CACHE"
 
-    function _cached_eval
-        set -l label $argv[1]
-        set -l cache "$SHELL_CACHE/$label.fish"
-        set -l bin_name $argv[2]
-        set -l bin (type -p $bin_name)
+    # ==============================================================================
+    # Dotfiles 2026: Zero-Jank & Artifact-Only Mode Foundation
+    # ==============================================================================
+    if not set -q DOTFILES_ARTIFACT_MODE
+        set -gx DOTFILES_ARTIFACT_MODE 0
+    end
 
-        if test -f "$cache"
-            if test -z "$bin"; or test "$cache" -nt "$bin"
-                source "$cache"
-                return
+    if test "$DOTFILES_ARTIFACT_MODE" = "1"
+        # The Canvas: Strip away all visual noise.
+        function fish_prompt
+            set_color green
+            echo -n "➜ "
+            set_color normal
+        end
+        function fish_right_prompt; end
+        set -g fish_greeting ""
+    end
+    # ==============================================================================
+
+    function _dotfiles_async_init
+        # Mise
+        if command -v mise >/dev/null
+            set -l cache "$SHELL_CACHE/mise-init.fish"
+            if not test -f "$cache"
+                command mise activate fish > "$cache" </dev/null 2>/dev/null &
             end
+            test -f "$cache"; and source "$cache"
         end
 
-        # Run the command and cache its output
-        set -l cmd $argv[2..-1]
-        $cmd >"$cache" 2>/dev/null
-        source "$cache"
+        # Atuin
+        if command -v atuin >/dev/null
+            set -l cache "$SHELL_CACHE/atuin-init.fish"
+            if not test -f "$cache"
+                command atuin init fish > "$cache" </dev/null 2>/dev/null &
+            end
+            test -f "$cache"; and source "$cache"
+        end
+
+        # Starship (Skip in Artifact Mode)
+        if test "$DOTFILES_ARTIFACT_MODE" = "0"; and command -v starship >/dev/null
+            set -l cache "$SHELL_CACHE/starship-init.fish"
+            if not test -f "$cache"
+                command starship init fish > "$cache" </dev/null 2>/dev/null &
+            end
+            test -f "$cache"; and source "$cache"
+        end
+
+        # Zoxide
+        if command -v zoxide >/dev/null
+            set -l cache "$SHELL_CACHE/zoxide-init.fish"
+            if not test -f "$cache"
+                command zoxide init fish > "$cache" </dev/null 2>/dev/null &
+            end
+            test -f "$cache"; and source "$cache"
+        end
+
+        # FZF
+        if command -v fzf >/dev/null
+            set -l cache "$SHELL_CACHE/fzf-init.fish"
+            if not test -f "$cache"
+                command fzf --fish > "$cache" </dev/null 2>/dev/null &
+            end
+            test -f "$cache"; and source "$cache"
+        end
     end
 
-    # Mise (Universal Version Manager)
-    if command -v mise >/dev/null
-        _cached_eval mise-init mise activate fish
-    end
-
-    # Atuin (Memory Layer)
-    if command -v atuin >/dev/null
-        _cached_eval atuin-init atuin init fish
-    end
-
-    # Starship Prompt (High Performance)
-    if command -v starship >/dev/null
-        _cached_eval starship-init starship init fish
-    end
-
-    # Zoxide (Smart Directory Jumper) - Replaces 'cd'
-    if command -v zoxide >/dev/null
-        _cached_eval zoxide-init zoxide init fish
+    # Lazy-Hydration: Trigger on first prompt
+    function _dotfiles_trigger_hydration --on-event fish_prompt
+        functions -e _dotfiles_trigger_hydration
+        _dotfiles_async_init
+        if test "$DOTFILES_ARTIFACT_MODE" = "1"
+           # Run bento and then trigger a prompt redraw
+           begin
+             bash "$HOME/.dotfiles/scripts/dot/lib/bento.sh" </dev/null
+             kill -WINCH $fish_pid
+           end &
+        end
     end
 
     # Pueue Daemon (Background Task Manager)
@@ -57,10 +97,5 @@ if status is-interactive
         if command -v pueued >/dev/null
             pueued -d >/dev/null 2>&1
         end
-    end
-
-    # FZF (Fuzzy Finder)
-    if command -v fzf >/dev/null
-        _cached_eval fzf-init fzf --fish
     end
 end

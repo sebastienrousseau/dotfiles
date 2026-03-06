@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# 🅳🅾🆃🅵🅸🅻🅴🆂 - Deterministic Remote Provisioner
+# Usage: curl -sL https://dotfiles.io/bootstrap | bash
+#
+# This script provisions an entire machine from scratch using Nix.
+# It installs the Nix package manager, clones the dotfiles,
+# and drops you into a fully configured, isolated 2026 environment
+# without modifying the host OS package system.
+
+set -euo pipefail
+
+# ANSI Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+step() { printf '%b
+' "${BLUE}==>${NC} ${BOLD}$1${NC}"; }
+error() { printf '%b
+' "${RED}==> Error: $1${NC}"; exit 1; }
+
+step "Starting Deterministic Bootstrap (v0.2.493 Frontier)"
+
+# 1. Install Nix (if not present)
+if ! command -v nix >/dev/null 2>&1; then
+    step "Installing Nix Package Manager..."
+    curl -sL https://nixos.org/nix/install | sh -s -- --daemon
+    # Source nix daemon script
+    if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+        . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+    fi
+else
+    step "Nix is already installed."
+fi
+
+# 2. Enable Flakes
+mkdir -p ~/.config/nix
+if ! grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null; then
+    echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+fi
+
+# 3. Clone Repository
+DOTFILES_DIR="$HOME/.dotfiles"
+if [ ! -d "$DOTFILES_DIR" ]; then
+    step "Cloning Dotfiles..."
+    git clone https://github.com/sebastienrousseau/dotfiles.git "$DOTFILES_DIR"
+else
+    step "Dotfiles repository already exists at $DOTFILES_DIR"
+    (cd "$DOTFILES_DIR" && git pull)
+fi
+
+# 4. Bootstrap Chezmoi via Nix & Apply
+step "Applying Configurations (Isolated)"
+cd "$DOTFILES_DIR"
+nix shell nixpkgs#chezmoi -c chezmoi apply --force
+
+# 5. Drop into the Environment
+step "Bootstrapping Complete. Entering Deterministic Shell."
+echo "You are now in an isolated shell containing Neovim, Fish, Nushell, and Pueue."
+nix develop

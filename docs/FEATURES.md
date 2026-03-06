@@ -38,6 +38,14 @@ The `dot` CLI provides high-level commands for system validation:
 - **`dot chaos`**: (Warning: Destructive) Intentionally corrupts configurations to verify the self-healing capabilities of `dot heal`.
 - **`dot health`**: Comprehensive system diagnostic across paths, files, and dependencies.
 
+## Intelligence Layer
+
+The Intelligence Layer ensures that AI tools (Claude, Gemini, Kiro) are always contextually aware.
+
+- **Automated Metadata**: Every AI request made via the `dot` bridge includes OS, Architecture, and system state.
+- **Steering Patterns**: Specialized Markdown snippets that set the "persona" and "directives" for the AI (Architect, Hardener, Refactorer).
+- **Managed Context**: Synchronized professional identity via `~/.config/ai/identity.md`.
+
 ### Structured Logging
 Set `export DOTFILES_JSON_LOG=1` to enable JSON-structured output for all bootstrap and provisioning events, ideal for enterprise auditing.
 
@@ -179,4 +187,4 @@ secrets = true
 ---
 
 **Last Updated**: 2026-01-31
-**Dotfiles Version**: v0.2.493
+**Dotfiles Version**: v0.2.494

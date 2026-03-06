@@ -1,0 +1,55 @@
+#compdef dot
+
+# Zsh completion for the dot CLI
+# Source this file or place in a directory in $fpath
+
+_dot() {
+  local -a commands
+  commands=(
+    'apply:Apply dotfiles (chezmoi apply)'
+    'sync:Apply dotfiles (alias of apply)'
+    'update:Pull latest changes and apply'
+    'add:Add a file to chezmoi source'
+    'diff:Show chezmoi diff with exclusions'
+    'status:Show configuration drift'
+    'remove:Safely remove a managed file'
+    'cd:Print source directory path'
+    'drift:Drift dashboard (detailed chezmoi status)'
+    'history:Shell history analysis'
+    'doctor:Check system health and configuration'
+    'heal:Auto-repair common dotfiles issues'
+    'health:Run comprehensive health check'
+    'rollback:Rollback dotfiles to a previous state'
+    'keys:Show keybindings catalog'
+    'tools:Show or install nix packages'
+    'sandbox:Launch a safe sandbox preview'
+    'benchmark:Run shell startup benchmark'
+    'tune:Apply OS tuning (opt-in)'
+    'secrets:Edit encrypted secrets (age)'
+    'secrets-init:Initialize age key for secrets'
+    'secrets-create:Create an encrypted secrets file'
+    'ssh-key:Encrypt an SSH key locally with age'
+    'firewall:Apply firewall hardening (opt-in)'
+    'telemetry:Disable OS telemetry (opt-in)'
+    'dns-doh:Enable DNS-over-HTTPS (opt-in)'
+    'encrypt-check:Check disk encryption status'
+    'backup:Create a compressed backup of your home'
+    'lock-screen:Enforce lock screen idle settings'
+    'usb-safety:Disable automount for removable media'
+    'fonts:Install Nerd Fonts'
+    'wallpaper:Apply a wallpaper from your library'
+    'theme:Switch terminal theme (dark/light)'
+    'packages:List installed packages and package managers'
+    'upgrade:Update flake, plugins, and dotfiles'
+    'edit:Open chezmoi source in editor'
+    'docs:Show repo README'
+    'new:Create a new project from a template'
+    'log-rotate:Rotate ~/.local/share/dotfiles.log'
+    'learn:Start the interactive tour'
+    '--version:Show version information'
+    'help:Show this help message'
+  )
+  _describe 'command' commands
+}
+
+_dot "$@"

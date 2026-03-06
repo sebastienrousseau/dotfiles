@@ -21,7 +21,7 @@ log_json() {
     printf '{"time":"%s", "level":"%s", "message":"%s"}\n' "$timestamp" "$level" "$message"
 }
 
-log_info()  { 
+log_info()  {
     if [[ "${DOTFILES_JSON_LOG:-0}" == "1" ]]; then
         log_json "INFO" "$*"
     else
@@ -29,7 +29,7 @@ log_info()  {
     fi
 }
 
-log_warn()  { 
+log_warn()  {
     if [[ "${DOTFILES_JSON_LOG:-0}" == "1" ]]; then
         log_json "WARN" "$*" >&2
     else
@@ -37,7 +37,7 @@ log_warn()  {
     fi
 }
 
-log_error() { 
+log_error() {
     if [[ "${DOTFILES_JSON_LOG:-0}" == "1" ]]; then
         log_json "ERROR" "$*" >&2
     else

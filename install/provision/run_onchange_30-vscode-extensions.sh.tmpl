@@ -24,6 +24,11 @@ fi
 installed="$(code --list-extensions || true)"
 for ext in "${extensions[@]}"; do
   if ! grep -qx "${ext}" <<<"${installed}"; then
-    code --install-extension "${ext}" || true
+    echo "Installing extension: ${ext}"
+    code --install-extension "${ext}" --force &
   fi
 done
+
+# Wait for all background installations to complete
+wait
+echo "VS Code extensions installation complete."

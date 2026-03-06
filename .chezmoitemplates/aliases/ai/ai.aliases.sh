@@ -2,6 +2,22 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
 # AI & Intelligent Assistance Aliases
 
+# Dotfiles AI Bridge (Context-aware wrappers)
+alias dcl='dot cl'
+alias dcla='dot cl --pattern architect'
+alias dclh='dot cl --pattern hardener'
+alias dclr='dot cl --pattern refactor'
+
+alias dgmn='dot gemini'
+alias dgmna='dot gemini --pattern architect'
+alias dgmnh='dot gemini --pattern hardener'
+alias dgmnr='dot gemini --pattern refactor'
+
+alias dki='dot kiro'
+alias dkia='dot kiro --pattern architect'
+alias dkih='dot kiro --pattern hardener'
+alias dkir='dot kiro --pattern refactor'
+
 # Aider (AI Pair Programming)
 if command -v aider &>/dev/null; then
   # Note: Use a fixed path for the identity file to avoid shellcheck warnings
@@ -26,9 +42,16 @@ if command -v codex &>/dev/null; then
   alias codi='codex instruct'
 fi
 
-# Fabric (AI Helper)
+#fabric (AI Helper)
 if command -v fabric &>/dev/null; then
   alias fab='fabric'
+fi
+
+# Kiro CLI (AI terminal assistant)
+if command -v kiro-cli &>/dev/null; then
+  alias kiro='kiro-cli'
+  alias kic='kiro-cli chat'
+  alias kit='kiro-cli term'
 fi
 
 # Google Gemini CLI

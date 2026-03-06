@@ -172,8 +172,9 @@ jobs:
           echo "Testing with latest shellcheck version..."
 
           # Install latest shellcheck
-          wget -qO- https://github.com/koalaman/shellcheck/releases/latest/download/shellcheck-latest.linux.x86_64.tar.xz | \
-            tar -xJf - --strip-components=1 -C "$RUNNER_TEMP" shellcheck-latest/shellcheck
+          LATEST_VERSION=$(curl -s https://api.github.com/repos/koalaman/shellcheck/releases/latest | jq -r '.tag_name')
+          wget -qO- "https://github.com/koalaman/shellcheck/releases/download/${LATEST_VERSION}/shellcheck-${LATEST_VERSION}.linux.x86_64.tar.xz" | \
+            tar -xJf - --strip-components=1 -C "$RUNNER_TEMP" "shellcheck-${LATEST_VERSION}/shellcheck"
 
           # Test with latest version
           echo "Running shellcheck latest version..."

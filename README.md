@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/sebastienrousseau/dotfiles/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge&logo=github" alt="Build" /></a>
-  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.493-blue?style=for-the-badge" alt="Version" /></a>
+  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.494-blue?style=for-the-badge" alt="Version" /></a>
   <a href="https://github.com/sebastienrousseau/dotfiles/releases"><img src="https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge" alt="Downloads" /></a>
   <a href="https://codespaces.new/sebastienrousseau/dotfiles"><img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces" /></a>
 </p>
@@ -70,7 +70,9 @@ graph TD
 
 ---
 
-## 🛠️ Getting Started
+## ⚡ Quick Start
+
+Works on macOS, Linux (Debian/Ubuntu/Arch), and WSL2.
 
 ### ✅ Pre-flight Checklist
 Before installing, ensure your system meets these minimal requirements:
@@ -79,9 +81,26 @@ Before installing, ensure your system meets these minimal requirements:
 - [ ] **SSH Key** configured in GitHub (for signed commits)
 - [ ] **Internet Access** (for initial bootstrap)
 
-### ⚡ Instant Install
+### 1. The Instant Install (The One-Liner)
+Run this in your terminal for a fully functional environment in 60 seconds:
+
 ```bash
-sh -c "$(curl -fsSL https://dotfiles.io/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+```
+
+*For a silent, non-interactive installation (ideal for CI/CD or new scripts):*
+```bash
+DOTFILES_SILENT=1 DOTFILES_NONINTERACTIVE=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+```
+
+### 2. Verify
+```bash
+dot doctor
+```
+
+### 3. Update
+```bash
+dot update
 ```
 
 ---
@@ -132,7 +151,7 @@ sh -c "$(curl -fsSL https://dotfiles.io/install.sh)"
 
 ---
 
-**THE ARCHITECT** ᛫ [Sebastien Rousseau](https://sebastienrousseau.com)  
+**THE ARCHITECT** ᛫ [](https://sebastienrousseau.com)
 **THE ENGINE** ᛞ [EUXIS](https://euxis.co) ᛫ Enterprise Unified Execution Intelligence System
 
 ---
