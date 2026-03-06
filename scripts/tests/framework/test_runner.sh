@@ -41,9 +41,10 @@ run_test_file() {
   if [[ -n "$results_line" ]]; then
     local run passed failed
     IFS=':' read -r _ run passed failed <<<"$results_line"
-    TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + run))
     TOTAL_TESTS_PASSED=$((TOTAL_TESTS_PASSED + passed))
     TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + failed))
+    # Derive run count from assertions to avoid test-case vs assertion mismatch
+    TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + passed + failed))
   elif [[ $exit_status -ne 0 ]]; then
     # Test file crashed without producing RESULTS -- count as failure
     printf '%b\n' "\033[0;31mERROR: $(basename "$test_file") crashed (exit $exit_status) without producing results\033[0m"
