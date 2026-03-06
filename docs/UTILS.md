@@ -1,6 +1,6 @@
-# Discover utilities
+# Utilities
 
-These utilities are available through aliases, functions, and the `dot` CLI. The collection stays small and practical on purpose.
+Available through aliases, functions, and the `dot` CLI.
 
 ## Dot CLI
 
@@ -82,11 +82,11 @@ You can search and navigate your filesystem with:
 
 ## Universal Scripts
 
-A suite of high-performance POSIX scripts located in `~/.local/bin` for seamless cross-platform interoperability (macOS, Linux, WSL).
+POSIX scripts in `~/.local/bin/` for cross-platform use (macOS, Linux, WSL).
 
 | Command | Description |
 |---------|-------------|
-| `als` | High-fidelity interactive Command Intelligence Explorer (categorized alias/script viewer) |
+| `als` | Interactive alias and script viewer (categorized) |
 | `cb` | Universal clipboard utility (detects `pbcopy`/`pbpaste`, `xclip`/`wl-copy`, or `clip.exe`) |
 | `open` | Universal file/URL opener (maps to `open`, `xdg-open`, or `explorer.exe`) |
 | `notify` | Universal desktop notifications (`osascript`, `notify-send`, or `powershell`) |

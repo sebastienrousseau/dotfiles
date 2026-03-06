@@ -44,7 +44,7 @@ fi
 # --- 👻 2. Ghost Path Linter ---
 echo -n "   👻 Checking for hardcoded paths... "
 # Exclude test files, documentation, the hook itself, Nix files, and template backups
-GHOST_EXCLUDES="test_|assertions.sh|pre-commit|interop.md|WSL2_NIX_TROUBLESHOOTING.md|\.nix|\.backup|\.github/workflows/"
+GHOST_EXCLUDES="test_|assertions.sh|pre-commit|INTEROP.md|WSL2_NIX_TROUBLESHOOTING.md|\.nix|\.backup|\.github/workflows/"
 if echo "$STAGED_FILES" | xargs grep -rIE '"/home/(linuxbrew)?[^$]|/Users/[^$]' /dev/null | grep -v "linuxbrew" | grep -vE "$GHOST_EXCLUDES" >/dev/null 2>&1; then
   echo -e "${RED}FAILED${NC}"
   echo -e "      ${YELLOW}⚠ Literal home paths detected (use \$HOME or ~ instead):${NC}"

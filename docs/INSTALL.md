@@ -28,7 +28,6 @@ Optional (feature-dependent):
 Works on macOS, Linux, and WSL2:
 
 ```bash
-# Works on macOS, Linux, and WSL2
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 ```
 

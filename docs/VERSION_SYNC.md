@@ -178,8 +178,8 @@ Files that are intentionally excluded:
 - `package.json` - Source of truth
 - `docs/COMPLIANCE.md` - Includes external compliance spec versions
 - `docs/FONTS.md` - Includes upstream font release versions
-- `docs/LEGACY_ROADMAP.md` - Keeps historical release markers
-- `docs/PLAN.md` - Captures multi-release planning references
+- `docs/archive/LEGACY_ROADMAP.md` - Keeps historical release markers
+- `docs/archive/PLAN.md` - Captures multi-release planning references
 - `docs/VERSION_SYNC.md` - Documentation examples and usage
 - `docs/WALKTHROUGH.md` - Contains environment-specific tag examples
 - `docs/WSL2_NIX_TROUBLESHOOTING.md` - Contains IP addresses and version-like values
