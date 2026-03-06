@@ -69,6 +69,9 @@ Options:
   -f, --force     Skip confirmation prompts
   -h, --help      Show this help message
 
+Environment:
+  DOTFILES_NONINTERACTIVE=1   Skip all interactive prompts (same as --force)
+
 Repairs:
   - Missing core dependencies (chezmoi, starship, rg, bat)
   - Missing 2026 Frontier tools (nu, pueue, wasmtime, sops)
@@ -352,7 +355,7 @@ heal_broken_symlinks() {
     if [[ "$DRY_RUN" == "1" ]]; then
       log_dry "remove broken symlink: $link -> $target"
     else
-      if [[ "$is_lock" == "0" ]] && [[ "$FORCE" != "1" ]]; then
+      if [[ "$is_lock" == "0" ]] && [[ "$FORCE" != "1" ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]]; then
         read -rp "Remove broken symlink $link -> $target? [y/N] " response
         if [[ ! "$response" =~ ^[Yy]$ ]]; then
           log_info "Skipped: $link"
@@ -544,8 +547,8 @@ main() {
     log_info "Running in dry-run mode (no changes will be made)"
   fi
 
-  # Confirm before making changes (unless --force or --dry-run)
-  if [[ "$DRY_RUN" != "1" ]] && [[ "$FORCE" != "1" ]]; then
+  # Confirm before making changes (unless --force, --dry-run, or non-interactive)
+  if [[ "$DRY_RUN" != "1" ]] && [[ "$FORCE" != "1" ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]]; then
     echo ""
     log_warn "This will attempt to auto-repair your dotfiles environment."
     log_info "A backup will be created before any changes are made."
