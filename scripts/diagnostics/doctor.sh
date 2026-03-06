@@ -251,8 +251,17 @@ echo ""
 ui_header "Ghost Path Linter"
 ghost_paths=0
 if [[ -d "$HOME/.config" ]]; then
-  # Scan for literal /home/user or /Users/user while ignoring linuxbrew and binary files
-  ghost_lines=$(grep -rIE '"/home/(linuxbrew)?[^$]|/Users/[^$]' "$HOME/.config" | grep -v "linuxbrew" || true)
+  # Scan for hardcoded home directory literals, ignoring known false positives
+  ghost_lines=$(grep -rIE '"/home/(linuxbrew)?[^$]|/Users/[^$]' "$HOME/.config" |
+    grep -v "linuxbrew" |
+    grep -v "/mozilla/firefox" |
+    grep -v "/google-chrome" |
+    grep -v "/chromium" |
+    grep -v "/chezmoi/chezmoi.toml" |
+    grep -v "/bun/" |
+    grep -v "/noctalia/" |
+    grep -v -- "-backup/" ||
+    true)
   if [[ -n "$ghost_lines" ]]; then
     ghost_paths=$(echo "$ghost_lines" | wc -l)
     log_warn "Ghost paths" "$ghost_paths hardcoded literals found in ~/.config"
