@@ -32,44 +32,36 @@ echo "   -> Running install.sh from $SOURCE_DIR..."
 # or we set up the environment so it picks up the local source.
 # Based on install.sh, we can set SOURCE_DIR or similar.
 
-if DOTFILES_NONINTERACTIVE=1 DOTFILES_SILENT=1 bash "$SOURCE_DIR/install.sh" "$SOURCE_DIR"; then
+if SOURCE_DIR="$SOURCE_DIR" DOTFILES_NONINTERACTIVE=1 DOTFILES_SILENT=1 bash "$SOURCE_DIR/install.sh"; then
     ((TESTS_PASSED++))
-    printf '%b
-' "  ${GREEN}✓${NC} $CURRENT_TEST: install.sh executed successfully"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: install.sh executed successfully"
 else
     ((TESTS_FAILED++))
-    printf '%b
-' "  ${RED}✗${NC} $CURRENT_TEST: install.sh failed with exit code $?"
-    exit 1
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: install.sh failed with exit code $?"
 fi
 
 test_start "e2e_dot_cli_functional"
 if command -v dot >/dev/null 2>&1; then
     ((TESTS_PASSED++))
-    printf '%b
-' "  ${GREEN}✓${NC} $CURRENT_TEST: dot CLI is in PATH"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot CLI is in PATH"
 else
     ((TESTS_FAILED++))
-    printf '%b
-' "  ${RED}✗${NC} $CURRENT_TEST: dot CLI not found in PATH"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot CLI not found in PATH"
 fi
 
 test_start "e2e_dot_doctor_passes"
 if dot doctor >/dev/null 2>&1; then
     ((TESTS_PASSED++))
-    printf '%b
-' "  ${GREEN}✓${NC} $CURRENT_TEST: dot doctor passes after installation"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot doctor passes after installation"
 else
     # We might expect some warnings/errors in a bare-bones environment,
     # but the command should at least run.
     if [[ $? -le 1 ]]; then
         ((TESTS_PASSED++))
-        printf '%b
-' "  ${GREEN}✓${NC} $CURRENT_TEST: dot doctor executed (warnings expected in bare env)"
+        printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot doctor executed (warnings expected in bare env)"
     else
         ((TESTS_FAILED++))
-        printf '%b
-' "  ${RED}✗${NC} $CURRENT_TEST: dot doctor crashed after installation"
+        printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot doctor crashed after installation"
     fi
 fi
 
