@@ -76,7 +76,7 @@ fi
 # --- 🧹 4. Formatting Audit ---
 echo -n "   🧹 Checking formatting... "
 # Find files with trailing whitespace, excluding SVGs and other formats where it might be intentional or harmless
-OFFENDING_WHITESPACE=$(echo "$STAGED_FILES" | grep -vE '\.svg$' | xargs grep -l '[[:space:]]$' /dev/null || true)
+OFFENDING_WHITESPACE=$(echo "$STAGED_FILES" | grep -vE '\.(svg|md)$' | xargs grep -l '[[:space:]]$' /dev/null || true)
 # Use defused patterns to avoid self-detection
 MERGE_START="^<<<<<<< "
 MERGE_END="^>>>>>>> "
@@ -93,6 +93,24 @@ elif echo "$STAGED_FILES" | xargs grep -lE "$MERGE_START|$MERGE_END|$MERGE_DIV" 
   FAILED=1
 else
   echo -e "${GREEN}PASSED${NC}"
+fi
+
+# --- 🏛️ 5. Signature Guard ---
+if echo "$STAGED_FILES" | grep -q "^README.md$"; then
+  echo -n "   🏛️  Checking README signature... "
+  EXPECTED_ARCHITECT='**THE ARCHITECT** ᛫ [Sebastien Rousseau](https://sebastienrousseau.com)'
+  EXPECTED_ENGINE='**THE ENGINE** ᛞ [EUXIS](https://euxis.co) ᛫ Enterprise Unified Execution Intelligence System'
+  README_CONTENT=$(git show :README.md 2>/dev/null || cat README.md)
+  if echo "$README_CONTENT" | grep -qF "$EXPECTED_ARCHITECT" && echo "$README_CONTENT" | grep -qF "$EXPECTED_ENGINE"; then
+    echo -e "${GREEN}PASSED${NC}"
+  else
+    echo -e "${RED}FAILED${NC}"
+    echo -e "      ${YELLOW}⚠ README.md signature block is missing or altered.${NC}"
+    echo -e "      Expected:"
+    echo -e "        $EXPECTED_ARCHITECT"
+    echo -e "        $EXPECTED_ENGINE"
+    FAILED=1
+  fi
 fi
 
 echo ""

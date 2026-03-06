@@ -151,8 +151,8 @@ dot update
 
 ---
 
-**THE ARCHITECT** ᛫ Sebastien Rousseau
-**THE ENGINE** ᛞ EUXIS ᛫ Enterprise Unified Execution Intelligence System
+**THE ARCHITECT** ᛫ [Sebastien Rousseau](https://sebastienrousseau.com)  
+**THE ENGINE** ᛞ [EUXIS](https://euxis.co) ᛫ Enterprise Unified Execution Intelligence System
 
 ---
 
