@@ -274,7 +274,7 @@ main() {
   success "Configuration loaded. Please restart your shell."
 }
 
-# Run main if executed directly
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+# Run main if executed directly (or via bash -c where BASH_SOURCE is unset)
+if [[ "${BASH_SOURCE[0]:-}" == "${0:-}" ]] || [[ -z "${BASH_SOURCE[0]:-}" ]]; then
   main "$@"
 fi
