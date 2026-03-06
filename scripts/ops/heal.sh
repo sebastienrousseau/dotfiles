@@ -199,6 +199,73 @@ get_package_name() {
   esac
 }
 
+# Binary installer for tools not in standard apt repos
+_install_via_binary() {
+  local cmd="$1"
+  local bin_dir="$HOME/.local/bin"
+  mkdir -p "$bin_dir"
+
+  case "$cmd" in
+    starship)
+      log_info "Installing starship via curl installer..."
+      if curl -fsSL https://starship.rs/install.sh | sh -s -- --yes; then
+        log_success "Installed starship"
+        FIXES_APPLIED=$((FIXES_APPLIED + 1))
+        persist_log "HEAL: installed starship via curl installer"
+        return 0
+      fi
+      ;;
+    atuin)
+      log_info "Installing atuin via install script..."
+      if curl -fsSL https://setup.atuin.sh | sh -s -- --yes 2>/dev/null || \
+         curl -fsSL https://setup.atuin.sh | bash; then
+        log_success "Installed atuin"
+        FIXES_APPLIED=$((FIXES_APPLIED + 1))
+        persist_log "HEAL: installed atuin via curl installer"
+        return 0
+      fi
+      ;;
+    yazi)
+      log_info "Installing yazi via GitHub release..."
+      local arch
+      arch=$(uname -m)
+      local url="https://github.com/sxyazi/yazi/releases/latest/download/yazi-${arch}-unknown-linux-musl.zip"
+      local tmp
+      tmp=$(mktemp -d)
+      if curl -fsSL -o "$tmp/yazi.zip" "$url" && \
+         (cd "$tmp" && unzip -q yazi.zip 2>/dev/null || true) && \
+         install -m 755 "$tmp"/yazi-*/yazi "$bin_dir/yazi"; then
+        log_success "Installed yazi"
+        FIXES_APPLIED=$((FIXES_APPLIED + 1))
+        persist_log "HEAL: installed yazi via GitHub release"
+        rm -rf "$tmp"
+        return 0
+      fi
+      rm -rf "$tmp"
+      ;;
+    zellij)
+      log_info "Installing zellij via GitHub release..."
+      local arch
+      arch=$(uname -m)
+      local url="https://github.com/zellij-org/zellij/releases/latest/download/zellij-${arch}-unknown-linux-musl.tar.gz"
+      local tmp
+      tmp=$(mktemp -d)
+      if curl -fsSL -o "$tmp/zellij.tar.gz" "$url" && \
+         tar xzf "$tmp/zellij.tar.gz" -C "$tmp" && \
+         install -m 755 "$tmp/zellij" "$bin_dir/zellij"; then
+        log_success "Installed zellij"
+        FIXES_APPLIED=$((FIXES_APPLIED + 1))
+        persist_log "HEAL: installed zellij via GitHub release"
+        rm -rf "$tmp"
+        return 0
+      fi
+      rm -rf "$tmp"
+      ;;
+    *) return 1 ;;
+  esac
+  return 1
+}
+
 heal_missing_dependencies() {
   log_step "Checking core dependencies"
   # Match what dot doctor checks: Core Shells + Modern CLI Tools
@@ -291,16 +358,8 @@ heal_missing_dependencies() {
     if [[ "$DRY_RUN" == "1" ]]; then
       log_dry "install '$pkg' via $pkg_mgr"
     else
-      # starship is not in standard apt repos — use curl installer
-      if [[ "$cmd" == "starship" ]] && [[ "$pkg_mgr" == "apt" ]]; then
-        log_info "Installing starship via curl installer..."
-        if curl -fsSL https://starship.rs/install.sh | sh -s -- --yes; then
-          log_success "Installed starship"
-          FIXES_APPLIED=$((FIXES_APPLIED + 1))
-          persist_log "HEAL: installed starship via curl installer"
-        else
-          log_error "Failed to install starship"
-        fi
+      # Tools not in standard apt repos — use binary installers
+      if [[ "$pkg_mgr" == "apt" ]] && _install_via_binary "$cmd"; then
         continue
       fi
 
