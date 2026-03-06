@@ -148,7 +148,7 @@ main() {
       local tmp_installer
       tmp_installer=$(umask 077 && mktemp)
       if curl -fsSL -o "$tmp_installer" https://get.chezmoi.io; then
-        if ! sh "$tmp_installer" -- -b "$bin_dir"; then
+        if ! sh "$tmp_installer" -b "$bin_dir"; then
           echo "   chezmoi binary installer failed" >&2
           rm -f "$tmp_installer"
           return 1
