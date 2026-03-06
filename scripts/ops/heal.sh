@@ -73,8 +73,8 @@ Environment:
   DOTFILES_NONINTERACTIVE=1   Skip all interactive prompts (same as --force)
 
 Repairs:
-  - Missing core tools (zsh, chezmoi, starship, rg, bat, fzf, zoxide, atuin, yazi, zellij)
-  - Missing frontier tools (nu, pueue, wasmtime, sops, age)
+  - Missing tools (zsh, starship, rg, bat, fzf, zoxide, atuin, yazi, zellij,
+    nushell, pueue, wasmtime, sops, age, hyperfine)
   - Broken symlinks in \$HOME (depth 3)
   - Chezmoi drift (re-applies dotfiles)
   - Missing critical files (.zshrc, .bashrc, .profile)
@@ -239,7 +239,10 @@ _pkg_install() {
   rc_file=$(mktemp)
 
   # Run install in background, capture exit code
-  ( "$@" >/dev/null 2>&1; echo $? >"$rc_file" ) &
+  (
+    "$@" >/dev/null 2>&1
+    echo $? >"$rc_file"
+  ) &
   local pid=$!
 
   # Animate spinner in foreground
@@ -250,7 +253,7 @@ _pkg_install() {
       "${_SPIN[$fi]}" "$label"
     _progress_bar "$completed" "$total"
     printf ' %*d/%d ' "$w" "$((completed + 1))" "$total"
-    fi=$(( (fi + 1) % ${#_SPIN[@]} ))
+    fi=$(((fi + 1) % ${#_SPIN[@]}))
     sleep 0.08
   done
   wait "$pid" 2>/dev/null
@@ -276,46 +279,104 @@ _do_install() {
   local bin_dir="$HOME/.local/bin"
   mkdir -p "$bin_dir"
 
-  # Binary installers for tools not in standard apt repos
-  if [[ "$pkg_mgr" == "apt" ]]; then
-    case "$cmd" in
-      starship)
-        curl -fsSL https://starship.rs/install.sh | sh -s -- --yes
-        return $?
-        ;;
-      atuin)
-        curl -fsSL https://setup.atuin.sh | bash -s -- --yes
-        return $?
-        ;;
-      yazi)
-        local arch
-        arch=$(uname -m)
-        local url="https://github.com/sxyazi/yazi/releases/latest/download/yazi-${arch}-unknown-linux-musl.zip"
-        local tmp
-        tmp=$(mktemp -d)
-        command -v unzip >/dev/null 2>&1 || sudo apt-get install -y -qq unzip
-        curl -fsSL -o "$tmp/yazi.zip" "$url" \
-          && (cd "$tmp" && unzip -oq yazi.zip) \
-          && install -m 755 "$tmp"/yazi-*/yazi "$bin_dir/yazi"
-        local rc=$?
-        rm -rf "$tmp"
-        return $rc
-        ;;
-      zellij)
-        local arch
-        arch=$(uname -m)
-        local url="https://github.com/zellij-org/zellij/releases/latest/download/zellij-${arch}-unknown-linux-musl.tar.gz"
-        local tmp
-        tmp=$(mktemp -d)
-        curl -fsSL -o "$tmp/zellij.tar.gz" "$url" \
-          && tar xzf "$tmp/zellij.tar.gz" -C "$tmp" \
-          && install -m 755 "$tmp/zellij" "$bin_dir/zellij"
-        local rc=$?
-        rm -rf "$tmp"
-        return $rc
-        ;;
-    esac
-  fi
+  # Binary/curl installers for tools not in standard apt repos
+  case "$cmd" in
+    starship)
+      curl -fsSL https://starship.rs/install.sh | sh -s -- --yes
+      return $?
+      ;;
+    atuin)
+      curl -fsSL https://setup.atuin.sh | bash -s -- --yes
+      return $?
+      ;;
+    nushell)
+      local arch
+      arch=$(uname -m)
+      local tmp
+      tmp=$(mktemp -d)
+      curl -fsSL -o "$tmp/nu.tar.gz" \
+        "https://github.com/nushell/nushell/releases/latest/download/nu-${arch}-unknown-linux-musl.tar.gz" &&
+        tar xzf "$tmp/nu.tar.gz" -C "$tmp" --strip-components=1 &&
+        install -m 755 "$tmp/nu" "$bin_dir/nu"
+      local rc=$?
+      rm -rf "$tmp"
+      return $rc
+      ;;
+    pueue)
+      local arch
+      arch=$(uname -m)
+      curl -fsSL -o "$bin_dir/pueue" \
+        "https://github.com/Nukesor/pueue/releases/latest/download/pueue-${arch}-unknown-linux-musl" &&
+        chmod +x "$bin_dir/pueue"
+      curl -fsSL -o "$bin_dir/pueued" \
+        "https://github.com/Nukesor/pueue/releases/latest/download/pueued-${arch}-unknown-linux-musl" &&
+        chmod +x "$bin_dir/pueued"
+      return $?
+      ;;
+    wasmtime)
+      local arch
+      arch=$(uname -m)
+      local tmp
+      tmp=$(mktemp -d)
+      curl -fsSL -o "$tmp/wasmtime.tar.xz" \
+        "https://github.com/bytecodealliance/wasmtime/releases/latest/download/wasmtime-latest-${arch}-linux.tar.xz" &&
+        tar xJf "$tmp/wasmtime.tar.xz" -C "$tmp" --strip-components=1 &&
+        install -m 755 "$tmp/wasmtime" "$bin_dir/wasmtime"
+      local rc=$?
+      rm -rf "$tmp"
+      return $rc
+      ;;
+    sops)
+      local arch
+      arch=$(uname -m)
+      [[ "$arch" == "x86_64" ]] && arch="amd64"
+      [[ "$arch" == "aarch64" ]] && arch="arm64"
+      curl -fsSL -o "$bin_dir/sops" \
+        "https://github.com/getsops/sops/releases/latest/download/sops-latest.linux.${arch}" &&
+        chmod +x "$bin_dir/sops"
+      return $?
+      ;;
+    hyperfine)
+      local arch
+      arch=$(uname -m)
+      local tmp
+      tmp=$(mktemp -d)
+      curl -fsSL -o "$tmp/hyperfine.tar.gz" \
+        "https://github.com/sharkdp/hyperfine/releases/latest/download/hyperfine-latest-${arch}-unknown-linux-musl.tar.gz" &&
+        tar xzf "$tmp/hyperfine.tar.gz" -C "$tmp" --strip-components=1 &&
+        install -m 755 "$tmp/hyperfine" "$bin_dir/hyperfine"
+      local rc=$?
+      rm -rf "$tmp"
+      return $rc
+      ;;
+    yazi)
+      local arch
+      arch=$(uname -m)
+      local url="https://github.com/sxyazi/yazi/releases/latest/download/yazi-${arch}-unknown-linux-musl.zip"
+      local tmp
+      tmp=$(mktemp -d)
+      command -v unzip >/dev/null 2>&1 || sudo apt-get install -y -qq unzip
+      curl -fsSL -o "$tmp/yazi.zip" "$url" &&
+        (cd "$tmp" && unzip -oq yazi.zip) &&
+        install -m 755 "$tmp"/yazi-*/yazi "$bin_dir/yazi"
+      local rc=$?
+      rm -rf "$tmp"
+      return $rc
+      ;;
+    zellij)
+      local arch
+      arch=$(uname -m)
+      local url="https://github.com/zellij-org/zellij/releases/latest/download/zellij-${arch}-unknown-linux-musl.tar.gz"
+      local tmp
+      tmp=$(mktemp -d)
+      curl -fsSL -o "$tmp/zellij.tar.gz" "$url" &&
+        tar xzf "$tmp/zellij.tar.gz" -C "$tmp" &&
+        install -m 755 "$tmp/zellij" "$bin_dir/zellij"
+      local rc=$?
+      rm -rf "$tmp"
+      return $rc
+      ;;
+  esac
 
   # System package manager
   local pkg
@@ -325,26 +386,20 @@ _do_install() {
 
 heal_missing_dependencies() {
   log_step "Checking dependencies"
-  local deps=(zsh chezmoi starship rg bat fzf zoxide atuin yazi zellij)
-  local frontier_deps=("nushell" "pueue" "wasmtime" "sops" "age")
+  # All tools that dot doctor checks — unified list
+  local deps=(
+    zsh chezmoi starship rg bat fzf zoxide atuin yazi zellij
+    nushell pueue wasmtime sops age hyperfine
+  )
   local all_missing=()
 
-  # Detect missing core tools
   for cmd in "${deps[@]}"; do
-    if check_cmd "$cmd"; then continue; fi
+    local check_name="$cmd"
+    [[ "$cmd" == "nushell" ]] && check_name="nu"
+    if check_cmd "$check_name"; then continue; fi
     if [[ "$cmd" == "bat" ]] && check_cmd "batcat"; then continue; fi
     all_missing+=("$cmd")
     ISSUES_FOUND=$((ISSUES_FOUND + 1))
-  done
-
-  # Detect missing frontier tools
-  for cmd in "${frontier_deps[@]}"; do
-    local check_name="$cmd"
-    [[ "$cmd" == "nushell" ]] && check_name="nu"
-    if ! check_cmd "$check_name"; then
-      all_missing+=("$cmd")
-      ISSUES_FOUND=$((ISSUES_FOUND + 1))
-    fi
   done
 
   if [[ ${#all_missing[@]} -eq 0 ]]; then
@@ -364,27 +419,6 @@ heal_missing_dependencies() {
       log_dry "install '$cmd'"
       completed=$((completed + 1))
       continue
-    fi
-
-    # Frontier tools: try mise first
-    local is_frontier=0
-    for ft in "${frontier_deps[@]}"; do
-      [[ "$ft" == "$cmd" ]] && is_frontier=1 && break
-    done
-
-    if [[ "$is_frontier" == "1" ]] && command -v mise >/dev/null 2>&1; then
-      local mise_name="$cmd"
-      case "$cmd" in
-        nushell) mise_name="aqua:nushell/nushell" ;;
-        pueue) mise_name="aqua:Nukesor/pueue/pueue" ;;
-      esac
-      if _pkg_install "$cmd" "$completed" "$total" mise use -g "$mise_name"; then
-        FIXES_APPLIED=$((FIXES_APPLIED + 1))
-        installed=$((installed + 1))
-        persist_log "HEAL: installed $cmd via mise"
-        completed=$((completed + 1))
-        continue
-      fi
     fi
 
     if [[ -z "$pkg_mgr" ]]; then
@@ -419,7 +453,6 @@ heal_missing_dependencies() {
 }
 
 heal_broken_symlinks() {
-  log_step "Checking for broken symlinks"
   local broken=()
 
   while IFS= read -r -d '' link; do
@@ -435,12 +468,11 @@ heal_broken_symlinks() {
   local lock_patterns=("SingletonLock" "SingletonCookie")
 
   if [[ ${#broken[@]} -eq 0 ]]; then
-    log_success "No broken symlinks found"
+    printf '  \033[38;5;42m✓\033[0m symlinks\n'
     return 0
   fi
 
   ISSUES_FOUND=$((ISSUES_FOUND + ${#broken[@]}))
-  log_warn "${#broken[@]} broken symlink(s) found"
 
   for link in "${broken[@]}"; do
     local target
@@ -448,7 +480,6 @@ heal_broken_symlinks() {
     local filename
     filename=$(basename "$link")
 
-    # Auto-fix lock files without prompt if they are clearly broken
     local is_lock=0
     for pat in "${lock_patterns[@]}"; do
       if [[ "$filename" == *"$pat"* ]]; then
@@ -463,12 +494,11 @@ heal_broken_symlinks() {
       if [[ "$is_lock" == "0" ]] && [[ "$FORCE" != "1" ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]]; then
         read -rp "Remove broken symlink $link -> $target? [y/N] " response
         if [[ ! "$response" =~ ^[Yy]$ ]]; then
-          log_info "Skipped: $link"
           continue
         fi
       fi
       rm -f "$link"
-      log_success "Removed broken symlink: $link -> $target"
+      printf '  \033[38;5;42m✓\033[0m removed %s\n' "$link"
       FIXES_APPLIED=$((FIXES_APPLIED + 1))
       persist_log "HEAL: removed broken symlink $link"
     fi
@@ -476,51 +506,31 @@ heal_broken_symlinks() {
 }
 
 heal_chezmoi_drift() {
-  log_step "Checking chezmoi state"
-
-  if ! command -v chezmoi >/dev/null 2>&1; then
-    log_warn "chezmoi not installed, skipping drift check"
-    return 0
-  fi
+  if ! command -v chezmoi >/dev/null 2>&1; then return 0; fi
 
   local status_output
   status_output=$(chezmoi status 2>/dev/null || echo "")
 
   if [[ -z "$status_output" ]]; then
-    log_success "Chezmoi state is synchronized"
+    printf '  \033[38;5;42m✓\033[0m chezmoi state\n'
     return 0
   fi
 
-  local drift_count
-  drift_count=$(echo "$status_output" | wc -l | tr -d ' ')
   ISSUES_FOUND=$((ISSUES_FOUND + 1))
-  log_warn "$drift_count file(s) out of sync"
 
   if [[ "$DRY_RUN" == "1" ]]; then
     log_dry "run 'chezmoi apply --force' to re-sync"
-    echo "$status_output" | while read -r line; do
-      log_info "  $line"
-    done
   else
-    log_info "Re-applying dotfiles with chezmoi..."
-    if chezmoi apply --force; then
-      log_success "Chezmoi re-applied successfully"
+    if _pkg_install "chezmoi re-apply" 0 1 chezmoi apply --force; then
       FIXES_APPLIED=$((FIXES_APPLIED + 1))
       CHEZMOI_APPLIED=1
-      persist_log "HEAL: chezmoi apply --force ($drift_count files drifted)"
-    else
-      log_error "Chezmoi apply failed"
+      persist_log "HEAL: chezmoi apply --force"
     fi
   fi
 }
 
 heal_missing_critical_files() {
-  log_step "Checking critical files"
-  local critical_files=(
-    "$HOME/.zshrc"
-    "$HOME/.bashrc"
-    "$HOME/.profile"
-  )
+  local critical_files=("$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.profile")
   local missing=()
 
   for file in "${critical_files[@]}"; do
@@ -531,107 +541,64 @@ heal_missing_critical_files() {
   done
 
   if [[ ${#missing[@]} -eq 0 ]]; then
-    log_success "All critical shell configs present"
+    printf '  \033[38;5;42m✓\033[0m shell configs\n'
     return 0
   fi
 
-  log_warn "Missing critical files: ${missing[*]}"
-
-  if ! command -v chezmoi >/dev/null 2>&1; then
-    log_error "chezmoi not available to regenerate files"
-    return 1
-  fi
+  if ! command -v chezmoi >/dev/null 2>&1; then return 1; fi
 
   if [[ "$DRY_RUN" == "1" ]]; then
-    log_dry "run 'chezmoi apply --force' to regenerate missing files"
-  elif [[ "$CHEZMOI_APPLIED" == "1" ]]; then
-    log_info "chezmoi already re-applied during drift repair, verifying files..."
-    local restored=0
-    for file in "${missing[@]}"; do
-      if [[ -f "$file" ]] || [[ -L "$file" ]]; then
-        log_success "Restored (via earlier apply): $file"
-        restored=$((restored + 1))
-      else
-        log_warn "Still missing after apply: $file"
-      fi
-    done
-    FIXES_APPLIED=$((FIXES_APPLIED + restored))
-  else
-    log_info "Re-applying chezmoi to regenerate missing files..."
-    if chezmoi apply --force; then
+    log_dry "regenerate missing files via chezmoi"
+  elif [[ "$CHEZMOI_APPLIED" != "1" ]]; then
+    if _pkg_install "shell configs" 0 1 chezmoi apply --force; then
       CHEZMOI_APPLIED=1
-      # Verify files were restored
       local restored=0
       for file in "${missing[@]}"; do
-        if [[ -f "$file" ]] || [[ -L "$file" ]]; then
-          log_success "Restored: $file"
-          restored=$((restored + 1))
-        else
-          log_warn "Still missing after apply: $file"
-        fi
+        [[ -f "$file" ]] || [[ -L "$file" ]] && restored=$((restored + 1))
       done
       FIXES_APPLIED=$((FIXES_APPLIED + restored))
       persist_log "HEAL: regenerated $restored critical file(s)"
-    else
-      log_error "Chezmoi apply failed"
     fi
   fi
 }
 
 heal_mise_tools() {
-  log_step "Checking mise-managed tools"
   if ! command -v mise >/dev/null 2>&1; then
-    log_info "mise not found, skipping tool check"
     return 0
   fi
 
   if [[ "$DRY_RUN" == "1" ]]; then
     log_dry "run 'mise install' to ensure all tools are present"
   else
-    log_info "Running 'mise install'..."
-    if mise install; then
-      log_success "Mise tools verified"
-
+    if _pkg_install "mise tools" 0 1 mise install; then
       # Start pueue daemon if it was just installed but not running
       if command -v pueued >/dev/null && ! pueue status >/dev/null 2>&1; then
-        log_info "Starting pueue daemon..."
-        pueued -d
+        pueued -d 2>/dev/null || true
       fi
-    else
-      log_warn "Mise install had issues"
     fi
   fi
 }
 
 heal_missing_xdg_dirs() {
-  log_step "Checking XDG config directories"
-  local xdg_dirs=(
-    "$HOME/.config/shell"
-    "$HOME/.config/nvim"
-    "$HOME/.config/git"
-  )
+  local xdg_dirs=("$HOME/.config/shell" "$HOME/.config/nvim" "$HOME/.config/git")
   local missing=()
 
   for dir in "${xdg_dirs[@]}"; do
-    if [[ ! -d "$dir" ]]; then
-      missing+=("$dir")
-      ISSUES_FOUND=$((ISSUES_FOUND + 1))
-    fi
+    [[ -d "$dir" ]] || missing+=("$dir")
   done
 
   if [[ ${#missing[@]} -eq 0 ]]; then
-    log_success "All XDG config directories present"
+    printf '  \033[38;5;42m✓\033[0m xdg directories\n'
     return 0
   fi
 
-  log_warn "Missing XDG directories: ${missing[*]}"
-
+  ISSUES_FOUND=$((ISSUES_FOUND + ${#missing[@]}))
   for dir in "${missing[@]}"; do
     if [[ "$DRY_RUN" == "1" ]]; then
       log_dry "create directory: $dir"
     else
       mkdir -p "$dir"
-      log_success "Created: $dir"
+      printf '  \033[38;5;42m✓\033[0m %s\n' "$(basename "$dir")"
       FIXES_APPLIED=$((FIXES_APPLIED + 1))
       persist_log "HEAL: created directory $dir"
     fi
@@ -644,34 +611,35 @@ heal_missing_xdg_dirs() {
 
 main() {
   echo ""
-  echo "=========================================="
-  echo "     Dotfiles Heal - Auto-Repair"
-  echo "=========================================="
+  printf '  \033[1mDotfiles Heal\033[0m\n'
+  echo ""
 
   if [[ "$DRY_RUN" == "1" ]]; then
-    log_info "Running in dry-run mode (no changes will be made)"
+    log_info "Dry-run mode (no changes will be made)"
   fi
 
   # Confirm before making changes (unless --force, --dry-run, or non-interactive)
   if [[ "$DRY_RUN" != "1" ]] && [[ "$FORCE" != "1" ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]]; then
-    echo ""
-    log_warn "This will attempt to auto-repair your dotfiles environment."
-    log_info "A backup will be created before any changes are made."
-    read -rp "Continue? [y/N] " response
+    log_warn "This will auto-repair your dotfiles environment."
+    read -rp "  Continue? [y/N] " response
     if [[ ! "$response" =~ ^[Yy]$ ]]; then
       log_info "Aborted."
       exit 0
     fi
+    echo ""
   fi
 
   # Create backup before making changes
   if [[ "$DRY_RUN" != "1" ]]; then
-    create_pre_heal_backup
+    _pkg_install "backup" 0 1 create_pre_heal_backup 2>/dev/null || true
   fi
 
   # Run all repairs
   heal_missing_dependencies || true
   heal_mise_tools || true
+
+  # Quick checks (no animation needed)
+  local quick_checks=0
   heal_broken_symlinks || true
   heal_chezmoi_drift || true
   heal_missing_critical_files || true
@@ -679,25 +647,24 @@ main() {
 
   # Summary
   echo ""
-  echo "=========================================="
   if [[ "$DRY_RUN" == "1" ]]; then
     if [[ $ISSUES_FOUND -eq 0 ]]; then
-      log_success "No issues found. System is healthy."
+      printf '  \033[1;38;5;42mHealthy.\033[0m No issues found.\n'
     else
-      log_info "Found $ISSUES_FOUND issue(s). Run without --dry-run to apply fixes."
+      printf '  Found %d issue(s). Run without --dry-run to apply fixes.\n' "$ISSUES_FOUND"
     fi
   else
     if [[ $ISSUES_FOUND -eq 0 ]]; then
-      log_success "No issues found. System is healthy."
+      printf '  \033[1;38;5;42mHealthy.\033[0m No issues found.\n'
     elif [[ $FIXES_APPLIED -gt 0 ]]; then
-      log_success "Applied $FIXES_APPLIED fix(es) for $ISSUES_FOUND issue(s) found."
+      printf '  \033[1;38;5;42mDone!\033[0m Applied %d fix(es) for %d issue(s).\n' "$FIXES_APPLIED" "$ISSUES_FOUND"
       persist_log "HEAL_COMPLETE: $FIXES_APPLIED fixes applied"
     else
-      log_warn "Found $ISSUES_FOUND issue(s) but no fixes could be applied."
-      log_info "Try running 'dot doctor' for detailed diagnostics."
+      printf '  Found %d issue(s) but no fixes could be applied.\n' "$ISSUES_FOUND"
+      printf '  Run \033[38;5;211mdot doctor\033[0m for diagnostics.\n'
     fi
   fi
-  echo "=========================================="
+  echo ""
 }
 
 main
