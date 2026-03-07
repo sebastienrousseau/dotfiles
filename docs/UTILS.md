@@ -18,16 +18,22 @@ The `dot` command is your primary interface for managing dotfiles. Run `dot --ve
 | `dot status` | Show configuration drift |
 | `dot cd` | Print source directory path |
 | `dot edit` | Open source in your editor |
+| `dot prewarm` | Regenerate shell caches for fast startup |
+| `dot bundle` | Create an offline portable archive |
 
 ### Diagnostics
 
 | Command | Description |
 |---------|-------------|
 | `dot doctor` | Run system health checks |
+| `dot heal` | Auto-repair missing tools and broken state |
+| `dot smoke-test` | Verify toolchains (Rust, Go, AI CLIs) |
+| `dot verify` | Run security and integrity verification |
+| `dot chaos` | Simulate config corruption to test self-healing |
 | `dot drift` | Detailed configuration drift dashboard |
-| `dot history` | Analyse shell history |
 | `dot benchmark` | Measure shell startup time |
 | `dot perf` | Show performance mode + quick timing (`--json`, `--precmd`) |
+| `dot history` | Analyse shell history |
 | `dot ai` | Show AI helper status (opt-in) |
 
 ### Tools
