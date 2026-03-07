@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-## AI Update — Euxis AI workflow updater for cross-platform environments.
+## AI Update — Dotfiles AI workflow updater for cross-platform environments.
 ##
 ## Updates all AI-related tools and runtimes including mise, npm globals,
 ## pipx tools, Ollama, and LM Studio. Auto-detects installation methods.
@@ -85,6 +85,10 @@ if command -v mise >/dev/null 2>&1; then
     step "NPM (claude, gemini, etc)"
     mise exec node -- npm update -g --audit=false >/dev/null 2>&1
     ok
+
+    step "Kiro CLI (via mise)"
+    mise upgrade kiro-cli >/dev/null 2>&1
+    ok
 fi
 
 # Pipx (aider, sgpt)
@@ -112,7 +116,7 @@ if command -v ollama >/dev/null 2>&1; then
             current_ver="$(ollama --version | awk '{print $NF}' | tr -d '[:space:]')"
             # This is a bit slow but safer than downloading every time
             latest_ver="$(curl -fsSL -I https://github.com/ollama/ollama/releases/latest | grep -i location | sed 's/.*\/v//;s///' | tr -d '[:space:]')"
-            
+
             if [[ "$current_ver" == "$latest_ver" ]]; then
                 skip "already up to date"
             else
@@ -128,7 +132,7 @@ if command -v ollama >/dev/null 2>&1; then
 
                     # Extract
                     zstd -dc "$tmp_tar" | sudo tar -x -C /usr/local >/dev/null
-                    
+
                     # Ensure permissions
                     sudo chmod +x /usr/local/bin/ollama
 
@@ -161,18 +165,19 @@ fi
 
 # --- 4. Final Summary ---
 echo -e "${GRAY}-----------------------------------------------------------${NC}"
-echo -e "${GREEN}${BOLD}Euxis Environment Ready${NC}"
+echo -e "${GREEN}${BOLD}Dotfiles Environment Ready${NC}"
 
 # Version Report
 echo -e "
 ${BOLD}System Version Status:${NC}"
-printf "${GRAY}            ${NC} 
+printf "${GRAY}            ${NC}
 " "Node:" "$(node -v 2>/dev/null || echo 'N/A')"
-printf "${GRAY}            ${NC} 
+printf "${GRAY}            ${NC} \n" "Kiro:" "$(kiro-cli --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"
+printf "${GRAY}            ${NC}
 " "Ollama:" "$(ollama --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"
-printf "${GRAY}            ${NC} 
+printf "${GRAY}            ${NC}
 " "Pipx:" "$(pipx --version 2>/dev/null || echo 'N/A')"
-printf "${GRAY}            ${NC} 
+printf "${GRAY}            ${NC}
 " "Mise:" "$(mise --version 2>/dev/null | awk '{print $1}' || echo 'N/A')"
 
 trap - EXIT

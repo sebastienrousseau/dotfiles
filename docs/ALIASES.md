@@ -1,10 +1,6 @@
 # Aliases
 
-This page lists all shell aliases that the dotfiles provide.
-
-## Organization
-
-The repo organizes aliases in `~/.dotfiles/.chezmoitemplates/aliases/` by category. Each category has its own directory containing a `<name>.aliases.sh` file.
+Shell aliases provided by the dotfiles, organized by category in `~/.dotfiles/.chezmoitemplates/aliases/`.
 
 ## Categories
 

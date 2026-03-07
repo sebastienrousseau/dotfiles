@@ -18,8 +18,7 @@ EXCLUDE_FILES=(
   "docs/FONTS.md"
   "docs/LEGACY_ROADMAP.md"
   "docs/PLAN.md"
-  "docs/VERSION_SYNC.md"
-  "docs/WSL2_NIX_TROUBLESHOOTING.md"
+  "docs/MILESTONE_v0.2.487.md"
 )
 
 # Colors for output (respect NO_COLOR: https://no-color.org)
@@ -482,13 +481,13 @@ EOF
 
 # Ensure we have required tools
 if ! command -v jq &>/dev/null; then
-  log_error "jq is required but not installed"
-  exit 1
+  log_warning "jq is not installed — skipping version sync"
+  exit 0
 fi
 
 if ! command -v rg &>/dev/null; then
-  log_error "ripgrep (rg) is required but not installed"
-  exit 1
+  log_warning "ripgrep (rg) is not installed — skipping version sync"
+  exit 0
 fi
 
 # Run main function

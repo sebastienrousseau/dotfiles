@@ -1,26 +1,20 @@
 # Font configuration
 
-Learn about font setup, rendering, and the fonts included with these dotfiles.
+How fonts are set up, rendered, and installed in these dotfiles.
 
 ## Recommended fonts
 
 ### Primary: JetBrains Mono Nerd Font
 
-Your default font is JetBrains Mono with Nerd Font patches.
-
-Features:
-- Designed for code readability
-- Ligature support
-- Powerline/Nerd Font glyphs
-- Clear distinction between similar characters (0/O, 1/l/I)
+The default font is JetBrains Mono with Nerd Font patches. It's designed for code readability, supports ligatures, includes Powerline/Nerd Font glyphs, and clearly distinguishes similar characters (`0`/`O`, `1`/`l`/`I`).
 
 ### Alternatives
 
 | Font | Style | Best for |
 |------|-------|----------|
-| Fira Code | Modern | People who enjoy ligatures |
-| Cascadia Code | Microsoft | People who use VS Code |
-| Hack | Classic | People who prefer a classic look |
+| Fira Code | Modern | Ligature fans |
+| Cascadia Code | Microsoft | VS Code users |
+| Hack | Classic | Traditional monospace look |
 | Source Code Pro | Adobe | Clean aesthetic |
 | Iosevka | Narrow | Small screens |
 
@@ -29,60 +23,27 @@ Features:
 ### macOS (Homebrew)
 
 ```bash
-# Install via Homebrew
 brew tap homebrew/cask-fonts
 brew install --cask font-jetbrains-mono-nerd-font
 
-# Or use dot CLI
+# Or use the dot CLI
 dot fonts install
 ```
 
 ### Linux (manual)
 
 ```bash
-# Download from Nerd Fonts
 wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/JetBrainsMono.zip
-
-# Extract to fonts directory
 unzip JetBrainsMono.zip -d ~/.local/share/fonts/
-
-# Update font cache
 fc-cache -fv
 ```
 
-### Using the font patcher
+### Patching your own fonts
 
-To patch your own fonts with Nerd Font glyphs:
+To patch a custom font with Nerd Font glyphs:
 
 ```bash
-# Use the included script
 ~/.dotfiles/scripts/fonts/patch-fonts.sh /path/to/font.ttf
-```
-
-## Font rendering
-
-### Sample characters
-
-```
-ABCDEFGHIJKLMNOPQRSTUVWXYZ
-abcdefghijklmnopqrstuvwxyz
-0123456789
-!@#$%^&*()_+-=[]{}|;':",.<>?/
-
-Ligatures: -> => == != <= >= && || :: ...
-Powerline:
-Nerd Font:
-```
-
-### Ambiguous characters
-
-The font configuration provides clear distinction between:
-
-```
-0 vs O (zero vs capital O)
-1 vs l vs I (one vs lowercase L vs capital I)
-` vs ' (backtick vs single quote)
-" vs " (straight vs curly quotes)
 ```
 
 ## Terminal configuration
@@ -130,18 +91,18 @@ font_size 14.0
 
 ### Fonts not displaying correctly
 
-1. Verify font is installed: `fc-list | grep JetBrains`
-2. Restart terminal application
-3. Check terminal font settings
+1. Verify the font is installed: `fc-list | grep JetBrains`
+2. Restart your terminal
+3. Double-check the terminal's font settings
 
 ### Nerd Font icons missing
 
-1. Verify you are using a Nerd Font variant
-2. Confirm the terminal supports the Unicode range
-3. Try a different Nerd Font
+1. Make sure you're using a Nerd Font variant (not the plain version)
+2. Confirm the terminal supports the required Unicode range
+3. Try a different Nerd Font if the issue persists
 
 ### Ligatures not working
 
-1. Enable ligatures in terminal settings
-2. Some terminals do not support ligatures (for example, Terminal.app)
-3. Try Ghostty, WezTerm, or Kitty
+1. Enable ligatures in your terminal's settings
+2. Some terminals don't support ligatures (e.g., `Terminal.app`)
+3. Ghostty, WezTerm, and Kitty all handle ligatures well

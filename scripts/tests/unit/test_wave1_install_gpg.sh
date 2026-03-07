@@ -29,7 +29,7 @@ test_start "install_version_pinned"
 assert_file_contains "$INSTALL_SCRIPT" 'VERSION=' "should pin dotfiles version"
 
 test_start "install_source_dir_defined"
-assert_file_contains "$INSTALL_SCRIPT" 'SOURCE_DIR="$HOME/.dotfiles"' "should define source directory"
+assert_file_contains "$INSTALL_SCRIPT" 'SOURCE_DIR="${SOURCE_DIR:-$HOME/.dotfiles}"' "should define source directory"
 
 echo ""
 echo "Wave 1 install.sh chezmoi installation tests completed."

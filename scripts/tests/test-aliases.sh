@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # MIT License
-# Copyright (c) 2026 Sebastien Rousseau
+# Copyright (c) 2026
 # See LICENSE file for details.
 
 # Script: test-aliases.sh

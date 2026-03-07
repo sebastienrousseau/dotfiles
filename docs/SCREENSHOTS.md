@@ -1,20 +1,21 @@
-# Screenshots gallery
+# Screenshots Gallery
 
-See how the dotfiles look across different themes and configurations.
+Here's how the dotfiles look across different themes and configurations.
 
-## Theme gallery
+## Theme Gallery
 
 ### Catppuccin Mocha (default)
 
-The default theme, Catppuccin Mocha, gives you a dark palette with warm, muted colors.
+The default theme. Catppuccin Mocha gives you a dark palette with warm, muted colors.
 
 ```
 Terminal: Ghostty / WezTerm / Alacritty
-Font: JetBrains Mono Nerd Font
-Theme: Catppuccin Mocha
+Font:     JetBrains Mono Nerd Font
+Theme:    Catppuccin Mocha
 ```
 
 Key colors:
+
 - Background: `#1e1e2e`
 - Foreground: `#cdd6f4`
 - Accent Blue: `#89b4fa`
@@ -26,23 +27,23 @@ A light theme option for daytime use.
 
 ```
 Terminal: Ghostty / WezTerm / Alacritty
-Font: JetBrains Mono Nerd Font
-Theme: Catppuccin Latte
+Font:     JetBrains Mono Nerd Font
+Theme:    Catppuccin Latte
 ```
 
 Key colors:
+
 - Background: `#eff1f5`
 - Foreground: `#4c4f69`
 - Accent Blue: `#1e66f5`
 - Accent Red: `#d20f39`
 
-## Terminal configurations
+## Terminal Configurations
 
 ### Ghostty
 
 Modern, native terminal with GPU acceleration.
 
-Features:
 - Native macOS integration
 - Fast rendering
 - Ligature support
@@ -52,7 +53,6 @@ Features:
 
 Cross-platform terminal with Lua configuration.
 
-Features:
 - GPU acceleration
 - Multiple windows/tabs
 - Hyperlinks
@@ -62,7 +62,6 @@ Features:
 
 Minimal, fast terminal.
 
-Features:
 - Fast rendering
 - Simple YAML config
 - Vi mode
@@ -72,7 +71,6 @@ Features:
 
 Feature-rich terminal.
 
-Features:
 - GPU rendering
 - Ligatures
 - Image support
@@ -80,7 +78,8 @@ Features:
 
 ## Prompt (Starship)
 
-Your Starship prompt displays:
+The Starship prompt displays:
+
 - Current directory
 - Git branch and status
 - Language versions (when relevant)
@@ -89,28 +88,30 @@ Your Starship prompt displays:
 
 ## Neovim
 
-Your Neovim configuration includes:
+The Neovim configuration includes:
+
 - Catppuccin theme
 - Treesitter syntax highlighting
 - LSP integration
 - Telescope fuzzy finder
-- File tree (nvim-tree)
+- File tree (`nvim-tree`)
 
 ## tmux
 
-Your tmux status bar displays:
+The tmux status bar displays:
+
 - Session name
 - Current window
 - Host name
 - Date and time
 
-## Adding screenshots
+## Adding Screenshots
 
 To contribute screenshots:
 
-1. Take a screenshot of your terminal
-2. Save as PNG in `docs/themes/`
-3. Add reference in this file
-4. Submit a PR
+1. Take a screenshot of your terminal.
+2. Save it as a PNG in `docs/themes/`.
+3. Add a reference in this file.
+4. Submit a PR.
 
-Recommended screenshot size: 1920x1080 or 2560x1440
+Recommended screenshot size: 1920x1080 or 2560x1440.

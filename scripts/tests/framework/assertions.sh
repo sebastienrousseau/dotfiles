@@ -255,7 +255,7 @@ assert_file_contains() {
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $msg (no file path provided)"
     return 1
   fi
-  if [[ -f "$file" ]] && grep -qF "$needle" "$file"; then
+  if [[ -f "$file" ]] && grep -qF -- "$needle" "$file"; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $msg"
     return 0
@@ -266,8 +266,27 @@ assert_file_contains() {
   fi
 }
 
+# Assert string contains a substring
+assert_contains() {
+  local needle="$1" actual="$2" msg="${3:-string should contain substring}"
+  if [[ "$actual" == *"$needle"* ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $msg"
+    return 0
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $msg"
+    printf '%b\n' "    Expected to contain: '$needle'"
+    printf '%b\n' "    Actual string:      '$actual'"
+    return 1
+  fi
+}
+
 # Print test summary
 print_summary() {
+  # Derive run count from assertions (test_start counts test cases, but
+  # TESTS_PASSED/TESTS_FAILED count individual assertions — use assertions)
+  TESTS_RUN=$((TESTS_PASSED + TESTS_FAILED))
   echo ""
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   printf '%b\n' "Tests run: $TESTS_RUN"
@@ -281,4 +300,9 @@ print_summary() {
     return 1
   fi
   return 0
+}
+
+# Alias for print_summary
+test_summary() {
+  print_summary
 }

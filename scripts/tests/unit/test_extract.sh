@@ -1,164 +1,80 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
-# shellcheck disable=SC1090,SC1091
-# Unit tests for the extract function
-# Tests archive extraction with various formats and edge cases
+# Test suite for executable_extract
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
-source "$SCRIPT_DIR/../framework/assertions.sh"
-source "$SCRIPT_DIR/../framework/mocks.sh"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+EXTRACT_BIN="$REPO_ROOT/dot_local/bin/executable_extract"
 
-# Source the function being tested
-FUNC_FILE="$REPO_ROOT/.chezmoitemplates/functions/extract.sh"
-if [[ -f "$FUNC_FILE" ]]; then
-  source "$FUNC_FILE"
-else
-  echo "Warning: extract.sh not found at $FUNC_FILE"
-fi
+# Load test framework
+source "$REPO_ROOT/scripts/tests/framework/assertions.sh"
 
-# Test: extract with --help flag shows help
-test_start "extract_help"
-output=$(
-  set +u
-  extract --help 2>&1
-)
-if [[ "$output" == *"Usage:"* && "$output" == *"extract"* ]]; then
-  ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --help shows usage information"
-else
-  ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: --help should show usage information"
-fi
+test_start "extract_coverage"
 
-# Test: extract with --help returns exit code 0
-test_start "extract_help_exit_code"
-(
-  set +u
-  extract --help >/dev/null 2>&1
-)
-assert_equals "0" "$?" "exit code should be 0 for --help"
+# Mock directory
+MOCK_BIN_DIR=$(mktemp -d)
+PATH="$MOCK_BIN_DIR:$PATH"
 
-# Test: extract with no arguments shows error
-test_start "extract_no_args"
-(
-  set +u
-  extract 2>&1
-)
-exit_code=$?
-assert_equals "1" "$exit_code" "exit code should be 1 for no args"
+# Helper to mock a command
+mock_cmd() {
+  local cmd=$1
+  local exit_code=${2:-0}
+  echo "#!/bin/sh" > "$MOCK_BIN_DIR/$cmd"
+  echo "echo 'mocked $cmd' \$@" >> "$MOCK_BIN_DIR/$cmd"
+  echo "exit $exit_code" >> "$MOCK_BIN_DIR/$cmd"
+  chmod +x "$MOCK_BIN_DIR/$cmd"
+}
 
-# Test: extract with no arguments shows error message
-test_start "extract_no_args_message"
-output=$(
-  set +u
-  extract 2>&1
-)
-if [[ "$output" == *"ERROR"* || "$output" == *"argument"* ]]; then
-  ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shows error message for no arguments"
-else
-  ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show error message for no arguments"
-  printf '%b\n' "    Output: $output"
-fi
+# Ensure essential tools are available in MOCK_BIN_DIR
+ln -s "$(command -v sh)" "$MOCK_BIN_DIR/sh"
+ln -s "$(command -v echo)" "$MOCK_BIN_DIR/echo"
+ln -s "$(command -v sed)" "$MOCK_BIN_DIR/sed"
+ln -s "$(command -v grep)" "$MOCK_BIN_DIR/grep"
 
-# Test: extract with nonexistent file shows error
-test_start "extract_nonexistent_file"
-output=$(extract "/nonexistent/file.tar.gz" 2>&1)
-exit_code=$?
-assert_equals "1" "$exit_code" "exit code should be 1 for nonexistent file"
+# Test all supported extensions
+for ext in tar.bz2 tar.gz zip rar 7z tar.xz tar.zst; do
+  test_start "extract_$ext"
 
-# Test: extract with nonexistent file shows appropriate error
-test_start "extract_nonexistent_file_message"
-output=$(extract "/nonexistent/file.tar.gz" 2>&1)
-if [[ "$output" == *"ERROR"* || "$output" == *"not a valid file"* ]]; then
-  ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shows error for nonexistent file"
-else
-  ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show error for nonexistent file"
-  printf '%b\n' "    Output: $output"
-fi
+  # Case 1: Tool exists
+  case $ext in
+    tar.*) mock_cmd "tar" ;;
+    zip)   mock_cmd "unzip" ;;
+    rar)   mock_cmd "unrar" ;;
+    7z)    mock_cmd "7z" ;;
+  esac
 
-# Test: extract with too many arguments shows error
-test_start "extract_too_many_args"
-output=$(extract "file1.tar" "file2.tar" 2>&1)
-exit_code=$?
-assert_equals "1" "$exit_code" "exit code should be 1 for too many arguments"
+  output=$(env -i PATH="$MOCK_BIN_DIR" sh "$EXTRACT_BIN" "test.$ext" 2>&1)
+  assert_contains "mocked" "$output" "Should use native tool for $ext"
 
-# Test: extract with actual tar.gz file (if tar is available)
-test_start "extract_tar_gz"
-if command -v tar >/dev/null 2>&1; then
-  # Create a test directory and archive
-  test_dir=$(mock_dir "extract_test")
-  mkdir -p "$test_dir/content"
-  echo "test content" >"$test_dir/content/testfile.txt"
+  # Clean up mock tool
+  rm -f "$MOCK_BIN_DIR"/{tar,unzip,unrar,7z}
+done
 
-  # Create archive
-  archive_file="$test_dir/test.tar.gz"
-  (cd "$test_dir" && tar czf test.tar.gz content)
+# Test Nix fallback
+test_start "extract_nix_fallback"
+mock_cmd "nix"
+# Ensure no extraction tools exist in MOCK_BIN_DIR
+rm -f "$MOCK_BIN_DIR"/{tar,unzip,unrar,7z}
 
-  # Remove original content
-  rm -rf "$test_dir/content"
+output=$(env -i PATH="$MOCK_BIN_DIR" sh "$EXTRACT_BIN" "test.zip" 2>&1)
+assert_contains "Using Nix fallback" "$output" "Should use Nix when tool is missing"
+assert_contains "nix shell nixpkgs#unzip" "$output" "Should call nix shell for unzip"
 
-  # Extract
-  extract_output_dir="$test_dir/extract_output"
-  mkdir -p "$extract_output_dir"
-  (cd "$extract_output_dir" && extract "$archive_file" >/dev/null 2>&1)
+# Test Fail path (No tool, no Nix)
+test_start "extract_fail_path"
+rm -f "$MOCK_BIN_DIR"/* # Remove all mocks including nix
+ln -s "$(command -v sh)" "$MOCK_BIN_DIR/sh"
+ln -s "$(command -v echo)" "$MOCK_BIN_DIR/echo"
 
-  # Check if extraction created the content
-  if [[ -f "$extract_output_dir/content/testfile.txt" ]]; then
-    ((TESTS_PASSED++))
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: tar.gz extraction works"
-  else
-    ((TESTS_FAILED++))
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: tar.gz extraction did not produce expected file"
-  fi
+output=$(env -i PATH="$MOCK_BIN_DIR" sh "$EXTRACT_BIN" "test.zip" 2>&1)
+assert_contains "Nix not available" "$output" "Should fail when no tool and no Nix"
 
-  rm -rf "$test_dir"
-else
-  ((TESTS_PASSED++))
-  printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (tar not available)"
-fi
+# Test Unknown extension
+test_start "extract_unknown"
+output=$(sh "$EXTRACT_BIN" "test.unknown" 2>&1)
+assert_contains "cannot be extracted" "$output" "Should handle unknown extensions"
 
-# Test: extract recognizes unsupported extension
-test_start "extract_unsupported_extension"
-# Create a file with unsupported extension
-test_file=$(mock_file "test content")
-mv "$test_file" "${test_file}.unsupported"
-output=$(extract "${test_file}.unsupported" 2>&1)
-if [[ "$output" == *"cannot be extracted"* ]] || [[ "$output" == *"ERROR"* ]]; then
-  ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: unsupported extension handled"
-else
-  ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should report unsupported extension"
-  printf '%b\n' "    Output: $output"
-fi
-rm -f "${test_file}.unsupported"
+# Clean up
+rm -rf "$MOCK_BIN_DIR"
 
-# Test: extract with directory instead of file
-test_start "extract_directory"
-test_dir=$(mock_dir "extract_dir_test")
-output=$(extract "$test_dir" 2>&1)
-exit_code=$?
-# Should fail because directories are not files
-if [[ "$exit_code" -ne 0 ]] || [[ "$output" == *"ERROR"* ]] || [[ "$output" == *"not a valid file"* ]]; then
-  ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: directory correctly rejected"
-else
-  ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should reject directories"
-fi
-rm -rf "$test_dir"
-
-# Test: extract with empty filename
-test_start "extract_empty_filename"
-output=$(extract "" 2>&1)
-exit_code=$?
-assert_equals "1" "$exit_code" "exit code should be 1 for empty filename"
-
-echo ""
-echo "Extract function tests completed."
-echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
+test_summary

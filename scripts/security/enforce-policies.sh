@@ -114,7 +114,7 @@ check_file_permissions() {
   while IFS= read -r -d '' file; do
     if [[ -f "$file" ]]; then
       local perms
-      perms=$(stat -c %a "$file" 2>/dev/null || stat -f %A "$file")
+      perms=$(stat -c %a "$file" 2>/dev/null || stat -f %OLp "$file")
       if [[ $perms -gt 755 ]]; then
         log "WARN" "❌ Overly permissive file: ${file} (${perms})"
         violations=$((violations + 1))

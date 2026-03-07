@@ -159,7 +159,7 @@ validate_config() {
 
   # Check file permissions
   local perms
-  perms=$(stat -c %a "$ENV_LOCAL" 2>/dev/null || stat -f %A "$ENV_LOCAL")
+  perms=$(stat -c %a "$ENV_LOCAL" 2>/dev/null || stat -f %OLp "$ENV_LOCAL")
   if [[ "$perms" != "600" ]]; then
     log_warning ".env.local has incorrect permissions ($perms). Should be 600."
     log_info "Fix with: chmod 600 $ENV_LOCAL"

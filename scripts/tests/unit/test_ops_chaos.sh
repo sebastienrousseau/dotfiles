@@ -17,10 +17,10 @@ assert_exit_code 0 "bash -n '$TEST_SCRIPT'"
 test_start "chaos_requires_force"
 output=$(bash "$TEST_SCRIPT" 2>&1 || true)
 if echo "$output" | grep -q "To run, execute"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: requires --force flag"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: failed to require --force flag"
 fi
 

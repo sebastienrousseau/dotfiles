@@ -73,14 +73,14 @@ The system recognizes and updates these patterns:
 
 #### README.md
 ```markdown
-[![Version](https://img.shields.io/badge/Version-v0.2.485-blue?style=for-the-badge)]
+[![Version](https://img.shields.io/badge/Version-v0.2.494-blue?style=for-the-badge)]
 ```
 
 #### Documentation Files
 ```markdown
-**Version**: v0.2.485
-**Dotfiles Version**: v0.2.485
-Version: v0.2.485
+**Version**: v0.2.494
+**Dotfiles Version**: v0.2.494
+Version: v0.2.494
 version 0.2.485
 ```
 
@@ -178,8 +178,8 @@ Files that are intentionally excluded:
 - `package.json` - Source of truth
 - `docs/COMPLIANCE.md` - Includes external compliance spec versions
 - `docs/FONTS.md` - Includes upstream font release versions
-- `docs/LEGACY_ROADMAP.md` - Keeps historical release markers
-- `docs/PLAN.md` - Captures multi-release planning references
+- `docs/archive/LEGACY_ROADMAP.md` - Keeps historical release markers
+- `docs/archive/PLAN.md` - Captures multi-release planning references
 - `docs/VERSION_SYNC.md` - Documentation examples and usage
 - `docs/WALKTHROUGH.md` - Contains environment-specific tag examples
 - `docs/WSL2_NIX_TROUBLESHOOTING.md` - Contains IP addresses and version-like values
@@ -339,6 +339,6 @@ gh workflow run sync-versions.yml --ref feature-branch
 ---
 
 **Last Updated**: 2026-02-15
-**Version**: v0.2.485
+**Version**: v0.2.494
 **Maintainer**: Principal Automation Engineer
 **Status**: Production Ready ✅

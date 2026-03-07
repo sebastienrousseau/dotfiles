@@ -46,6 +46,10 @@ yarn-error.log*
 .env
 .env.*
 !.env.example
+.history
+
+# Version-sync backups (timestamped, not needed in repo)
+.version-sync-backup/
 
 # Machine-specific configs (local only, never pushed)
 dot_etc/machines/

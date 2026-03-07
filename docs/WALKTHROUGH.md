@@ -1,69 +1,49 @@
-# Get started
+# Walkthrough
 
-## Overview
+A hands-on tour of the dotfiles after installation. Run each step in your terminal to get comfortable with what's available.
 
-This release provides a modern, universal configuration that `chezmoi` manages across macOS, Linux, and Windows.
+## Step 1: Verify Installation
 
-## Demo walkthrough
-
-This guide walks you through the key features of the dotfiles after installation.
-
-### Step 1: Verify installation
-
-After running the installer, verify that everything works:
+Make sure everything landed correctly:
 
 ```bash
-# Check dot CLI is available
 dot --version
-
-# Run health checks
 dot doctor
-
-# View configuration status
 dot status
 ```
 
-### Step 2: Explore the shell
+`dot doctor` catches common problems early. If something's off, it'll tell you.
 
-Your shell comes pre-configured with modern tools:
+## Step 2: Explore the Shell
+
+The shell ships with modern replacements wired in:
 
 ```bash
-# Use zoxide for smart directory navigation
-z dotfiles          # Jump to ~/.dotfiles
+z dotfiles          # Jump to ~/.dotfiles (zoxide)
 z -                 # Go back
 
-# Use fzf for fuzzy finding
-<Ctrl-R>            # Search command history
-<Ctrl-T>            # Find files
+<Ctrl-R>            # Fuzzy search command history (fzf)
+<Ctrl-T>            # Fuzzy find files
 
-# Use modern tool replacements
-ls                  # Runs 'eza'
-cat file.txt        # Runs 'bat'
+ls                  # Aliased to eza
+cat file.txt        # Aliased to bat
 ```
 
-### Step 3: Git workflow
-
-Git includes helpful aliases:
+## Step 3: Git Workflow
 
 ```bash
-# Quick status and log
 gst                 # git status
-lg                  # pretty git log graph
-
-# Stage and commit
+lg                  # Pretty log graph
 ga .                # git add
 gcm "message"       # git commit -m
-
-# Open lazygit TUI
-lgui
+lgui                # Launch lazygit
 ```
 
-### Step 4: Tmux basics
+## Step 4: Tmux
 
-If tmux is running:
+Prefix is `Ctrl-a`:
 
 ```bash
-# Prefix is Ctrl-a (not Ctrl-b)
 <Ctrl-a> c          # New window
 <Ctrl-a> |          # Split vertically
 <Ctrl-a> -          # Split horizontally
@@ -71,95 +51,32 @@ If tmux is running:
 <Ctrl-a> f          # Fuzzy session switcher
 ```
 
-### Step 5: Neovim IDE
-
-Open Neovim:
+## Step 5: Neovim
 
 ```bash
 nvim .
 
 # Inside Neovim:
-<Space>             # Leader key, shows command menu
+<Space>             # Leader — shows command palette
 <Space>ff           # Find files
 <Space>fg           # Live grep
 <Space>e            # Toggle file tree
 ```
 
-### Step 6: Docker workflow
-
-Docker aliases:
+## Step 6: Docker
 
 ```bash
 dps                 # List running containers
-dco up -d           # Docker compose up
+dco up -d           # docker compose up
 dlogsf container    # Follow container logs
-lzd                 # Open lazydocker TUI
+lzd                 # Launch lazydocker
 ```
 
-### Step 7: Kubernetes (if enabled)
-
-Kubernetes aliases:
+## Step 7: Kubernetes (if enabled)
 
 ```bash
-k get pods          # kubectl get pods
+k get pods          # kubectl
 kctx                # Switch context
 kn                  # Switch namespace
-k9                  # Open k9s TUI
+k9                  # Launch k9s
 ```
-
-## Core architecture
-
-- **Chezmoi**: Replaces legacy Makefiles and symlinks with a robust template engine.
-- **Universal templates**: `run_onchange_*.sh.tmpl` scripts adapt to OS (Darwin/Linux) automatically.
-- **Performance**: Startup time varies by machine. Run `dot benchmark` for your numbers; `DOTFILES_FAST=1` yields the quickest first prompt.
-
-## Universal installer
-
-- **Bootstrap**: `install.sh` enables one-line installation through `curl`.
-- **Teleport**: `dot teleport user@host` pushes configs ephemerally to remote servers.
-- **Verification**: All syntax checks pass.
-
-## Deep integration
-
-- **macOS**: `defaults` hardening (screensaver, firewall, Finder).
-- **Fonts**: Auto-installation of `JetBrainsMono Nerd Font`.
-- **Compliance**: Strict XDG Base Directory enforcement.
-
-## Self-healing and compliance
-
-- **Doctor**: `dot doctor` diagnoses drift, paths, and dependencies.
-- **Audit**: Dotfiles logs all changes to `~/.local/share/dotfiles.log`.
-- **Privacy**: The `privacy-mode` alias disables telemetry.
-
-## Verification
-
-| Test | Status | Notes |
-| :--- | :--- | :--- |
-| **Syntax** | PASSED | `install.sh`, `pkg.sh`, `teleport.sh` verified. |
-| **Performance** | PASSED | `dot benchmark` reports your local Zsh startup time. |
-| **Drift** | VARIES | Audit logs may cause minor state drift reports. |
-| **Docker** | PASSED | **Ubuntu 26.04** bootstrap verified (`dotfiles:0.2.493`). |
-
-## Quick reference card
-
-| Action | Command |
-|--------|---------|
-| Update dotfiles | `dot update` |
-| Check health | `dot doctor` |
-| Show drift | `dot drift` |
-| Apply changes | `dot apply` |
-| Edit source | `dot edit` |
-| Benchmark shell | `dot benchmark` |
-| New project | `dot new python myapp` |
-| Enter sandbox | `dot sandbox` |
-
-## Video tutorial
-
-A future release will include a video walkthrough. Until then, use this document and the individual tool documentation.
-
-## Next steps
-
-- Customize your shell prompt in `~/.config/starship.toml`
-- Add custom aliases in `~/.dotfiles/.chezmoitemplates/aliases/`
-- Configure Neovim plugins in `~/.config/nvim/`
-- Set up secrets with `dot secrets-init`
