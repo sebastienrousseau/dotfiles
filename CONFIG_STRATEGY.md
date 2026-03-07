@@ -19,16 +19,6 @@ Chezmoi handles:
 - Application configs (~/.config/*)
 - SSH configuration (~/.ssh/config, config.d/)
 
-### Secondary: Euxis
-
-**Role:** AI agent orchestration framework (self-contained)
-**Location:** `~/.euxis/`
-**Management:** Git-tracked, symlinked from `~/Code/Private/euxis`
-
-Euxis is intentionally separate from chezmoi because:
-- It has its own versioning and release cycle
-- It contains runtime data (sessions, memory)
-- It may be shared across machines differently than dotfiles
 
 ### Tertiary: Runtime/Application Data
 
@@ -120,7 +110,6 @@ chezmoi update
 | Path | Owner | Notes |
 |------|-------|-------|
 | `~/.dotfiles/` | chezmoi | Source of truth |
-| `~/.euxis/` | Git (Code/Private) | Symlinked |
 | `~/.*` (dotfiles) | chezmoi-applied | Don't edit directly |
 | `~/.config/*` | Mixed | Check `chezmoi managed` |
 | `~/.local/` | chezmoi (bin) + runtime | Partial management |

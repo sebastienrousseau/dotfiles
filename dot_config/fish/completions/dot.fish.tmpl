@@ -10,12 +10,26 @@ complete -c dot -n "__fish_use_subcommand" -a sync -d "Alias of apply"
 complete -c dot -n "__fish_use_subcommand" -a update -d "Pull latest changes and apply"
 complete -c dot -n "__fish_use_subcommand" -a clean-cache -d "Clear shell initialization caches"
 complete -c dot -n "__fish_use_subcommand" -a prewarm -d "Regenerate shell caches for ultra-fast startup"
+complete -c dot -n "__fish_use_subcommand" -a cl -d "Claude CLI with context patterns"
+complete -c dot -n "__fish_use_subcommand" -a gemini -d "Gemini CLI with context patterns"
+complete -c dot -n "__fish_use_subcommand" -a kiro -d "Kiro CLI with context patterns"
+complete -c dot -n "__fish_use_subcommand" -a sgpt -d "Shell-GPT with context patterns"
+complete -c dot -n "__fish_use_subcommand" -a ollama -d "Ollama with context patterns"
+complete -c dot -n "__fish_use_subcommand" -a opencode -d "OpenCode with context patterns"
+complete -c dot -n "__fish_use_subcommand" -a aider -d "Aider with context patterns"
 complete -c dot -n "__fish_use_subcommand" -a add -d "Add a file to chezmoi source"
+
+# AI Pattern completions for cl, gemini, kiro
+for cmd in cl gemini kiro sgpt ollama opencode aider
+    complete -c dot -n "__fish_seen_subcommand_from $cmd" -s p -l pattern -x -a "(ls -1 ~/.config/ai/patterns 2>/dev/null | sed 's/\.md$//')"
+end
 complete -c dot -n "__fish_use_subcommand" -a diff -d "Show chezmoi diff with exclusions"
 complete -c dot -n "__fish_use_subcommand" -a status -d "Show configuration drift"
 complete -c dot -n "__fish_use_subcommand" -a remove -d "Safely remove a managed file"
 complete -c dot -n "__fish_use_subcommand" -a cd -d "Print source directory path"
 complete -c dot -n "__fish_use_subcommand" -a edit -d "Open chezmoi source in $EDITOR"
+complete -c dot -n "__fish_use_subcommand" -a patterns -d "Manage AI steering patterns"
+complete -c dot -n "__fish_use_subcommand" -a commit -d "AI-powered conventional commit"
 
 # Diagnostics
 complete -c dot -n "__fish_use_subcommand" -a doctor -d "Check system health and configuration"
@@ -28,6 +42,8 @@ complete -c dot -n "__fish_use_subcommand" -a history -d "Shell history analysis
 complete -c dot -n "__fish_use_subcommand" -a benchmark -d "Run shell startup benchmark"
 complete -c dot -n "__fish_use_subcommand" -a perf -d "Show current performance mode"
 complete -c dot -n "__fish_use_subcommand" -a ai -d "Show AI helper status"
+complete -c dot -n "__fish_use_subcommand" -a ai-setup -d "Interactive setup for all AI CLI tools"
+complete -c dot -n "__fish_use_subcommand" -a ai-query -d "Context-aware RAG query over your dotfiles"
 
 # Tools
 complete -c dot -n "__fish_use_subcommand" -a tools -d "Show or install nix packages"

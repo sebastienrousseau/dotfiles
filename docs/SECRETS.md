@@ -1,6 +1,6 @@
 # Secrets Management
 
-Provider-agnostic secret management via `dot secrets`. Supports macOS Keychain, `pass`, and age-encrypted local storage.
+Provider-agnostic secrets via `dot secrets`. Supports macOS Keychain, `pass`, and age-encrypted local storage.
 
 ## Providers
 

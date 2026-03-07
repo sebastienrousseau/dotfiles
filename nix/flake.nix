@@ -27,10 +27,11 @@
     in
     {
       # Home Manager configuration
-      # Use: home-manager switch --flake .#seb
+      # Use: home-manager switch --flake .#user
+      # You can rename 'user' to your actual username if desired
       homeConfigurations = {
-        seb = home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages."x86_64-linux"; # Adjust if needed
+        user = home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.x86_64-linux; # Default, overridden by --override-input if needed or just edit
           modules = [ ./home.nix ];
         };
       };

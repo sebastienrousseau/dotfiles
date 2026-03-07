@@ -2,19 +2,15 @@
 
 ## Overview
 
-This repository uses a multi-layer testing approach:
-- **Unit Tests**: Individual function validation
-- **Integration Tests**: System-wide behavior verification
-- **Performance Tests**: Resource efficiency benchmarks
+The repo uses a multi-layer testing approach: unit tests for individual functions, integration tests for system-wide behavior, and performance benchmarks for resource efficiency.
 
-## Running tests
+## Quick start
 
-### Quick start
 ```bash
 # Run all unit tests
 ./scripts/tests/framework/test_runner.sh
 
-# Run specific test suite
+# Run a specific test suite
 ./scripts/tests/framework/test_runner.sh extract
 
 # Run integration tests
@@ -40,12 +36,13 @@ scripts/tests/
 ## Writing tests
 
 ### Test file template
+
 ```bash
 #!/usr/bin/env bash
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../framework/assertions.sh"
 
-# Source function under test
+# Source the function under test
 source "$HOME/.dotfiles/.chezmoitemplates/functions/myfunction.sh"
 
 # Test cases
@@ -60,42 +57,56 @@ assert_exit_code 1 "myfunction"
 
 | Function | Description |
 |----------|-------------|
-| `assert_equals expected actual [msg]` | Assert two values are equal |
-| `assert_not_equals unexpected actual [msg]` | Assert two values differ |
-| `assert_exit_code code command` | Assert command exits with code |
-| `assert_output_contains needle command` | Assert output contains string |
-| `assert_output_not_contains needle command` | Assert output lacks string |
-| `assert_output_matches pattern command` | Assert output matches regex |
-| `assert_file_exists path [msg]` | Assert file exists |
-| `assert_file_not_exists path [msg]` | Assert file doesn't exist |
-| `assert_dir_exists path [msg]` | Assert directory exists |
-| `assert_dir_not_exists path [msg]` | Assert directory doesn't exist |
-| `assert_true condition [msg]` | Assert condition is true |
-| `assert_false condition [msg]` | Assert condition is false |
-| `assert_empty value [msg]` | Assert string is empty |
-| `assert_not_empty value [msg]` | Assert string is not empty |
-| `assert_file_contains file needle [msg]` | Assert file contains text |
+| `assert_equals expected actual [msg]` | Two values are equal |
+| `assert_not_equals unexpected actual [msg]` | Two values differ |
+| `assert_exit_code code command` | Command exits with given code |
+| `assert_output_contains needle command` | Output contains string |
+| `assert_output_not_contains needle command` | Output lacks string |
+| `assert_output_matches pattern command` | Output matches regex |
+| `assert_file_exists path [msg]` | File exists |
+| `assert_file_not_exists path [msg]` | File doesn't exist |
+| `assert_dir_exists path [msg]` | Directory exists |
+| `assert_dir_not_exists path [msg]` | Directory doesn't exist |
+| `assert_true condition [msg]` | Condition is true |
+| `assert_false condition [msg]` | Condition is false |
+| `assert_empty value [msg]` | String is empty |
+| `assert_not_empty value [msg]` | String isn't empty |
+| `assert_file_contains file needle [msg]` | File contains text |
 
 ### Mock utilities
 
 | Function | Description |
 |----------|-------------|
 | `mock_init` | Initialize mock environment |
-| `mock_command name output [exit_code]` | Create mock command |
-| `mock_command_spy name [output] [exit_code]` | Create mock that records calls |
+| `mock_command name output [exit_code]` | Create a mock command |
+| `mock_command_spy name [output] [exit_code]` | Create a mock that records calls |
 | `mock_get_calls name` | Get spy call history |
 | `mock_call_count name` | Get number of spy calls |
 | `mock_file content [filename]` | Create temp file with content |
 | `mock_dir [prefix]` | Create temp directory |
-| `mock_archive type [content]` | Create mock archive file |
-| `mock_env var_name value` | Set environment variable |
+| `mock_archive type [content]` | Create a mock archive file |
+| `mock_env var_name value` | Set an environment variable |
 | `mock_cleanup` | Clean up all mocks |
+
+## Test categories
+
+### Unit tests (`scripts/tests/unit/`)
+
+Test individual functions in isolation. Each file follows the `test_*.sh` naming convention and is discoverable with `ls scripts/tests/unit/`.
+
+### Integration tests (`scripts/tests/integration/`)
+
+Test complete workflows like the installation script and end-to-end apply behavior.
+
+### Performance tests (`scripts/tests/performance/`)
+
+Measure resource efficiency with shell startup benchmarks and load tests.
 
 ## Coverage goals
 
 | Category | Target | Current |
 |----------|--------|---------|
-| Module coverage (scripts/) | >=95% | 100% (62/62) |
+| Module coverage (`scripts/`) | >=95% | 100% (62/62) |
 | Unit test pass rate | 100% | 100% |
 | Integration | >90% | ~95% |
 
@@ -107,10 +118,7 @@ MIN_COVERAGE=95 ./scripts/tests/framework/module_coverage.sh
 
 ## CI integration
 
-Tests run automatically on:
-- Every push to main
-- Every pull request
-- Weekly scheduled runs (Monday 6 AM UTC)
+Tests run automatically on every push to main, every pull request, and weekly scheduled runs (Monday 6 AM UTC).
 
 ### GitHub Actions example
 
@@ -129,72 +137,29 @@ Tests run automatically on:
     ./scripts/tests/performance/benchmark_runner.sh
 ```
 
-## Test categories
-
-### Unit Tests (`scripts/tests/unit/`)
-
-Test individual functions in isolation:
-
-- **test_extract.sh** - Archive extraction function
-- **test_backup.sh** - Backup creation function
-- **test_genpass.sh** - Password generation function
-- **test_rd.sh** - Directory removal function (with security tests)
-- **test_cd_aliases.sh** - Directory navigation aliases
-- **test_apply_upgrade_path.sh** - Apply flow regression checks (non-interactive force, post-apply hook, shell reload notice)
-- **test_post_apply_repair.sh** - Branch coverage for post-apply validation and auto-repair paths
-
-### Upgrade-path verification
-
-Run the targeted suite for apply/upgrade behavior:
-
-```bash
-bash scripts/tests/unit/test_apply_upgrade_path.sh
-bash scripts/tests/unit/test_post_apply_repair.sh
-bash scripts/tests/unit/test_ops_chezmoi_apply.sh
-```
-
-These tests cover success, warning, and failure branches for:
-- stale `.zwc` cache detection and repair
-- `dot` CLI binary presence and zsh resolution checks
-- alias-collision detection messaging
-- non-interactive apply guardrails and reload instructions
-
-### Integration Tests (`scripts/tests/integration/`)
-
-Test complete workflows:
-
-- **test_install.sh** - Installation script validation
-
-### Performance Tests (`scripts/tests/performance/`)
-
-Measure resource efficiency:
-
-- **benchmark_runner.sh** - Shell startup and operation benchmarks
-- **stress_test.sh** - Load testing utilities
-
 ## Environment variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `RUN_INTEGRATION` | `0` | Set to `1` to run integration tests |
+| `RUN_INTEGRATION` | `0` | Set to `1` to include integration tests |
 | `VERBOSE` | `0` | Set to `1` for verbose output |
 | `REPO_ROOT` | Auto-detected | Repository root directory |
 | `TESTS_DIR` | Auto-detected | Tests directory |
 
 ## Best practices
 
-1. **Isolation**: Each test should be independent
-2. **Cleanup**: Use mocks that auto-cleanup via traps
-3. **No Sleep**: Avoid `sleep` or hardcoded delays
-4. **Descriptive Names**: Test names should describe what's being tested
-5. **Edge Cases**: Test error conditions, not just happy paths
-6. **Security**: Include tests for dangerous input rejection
+1. **Isolation** -- Each test should be independent and self-contained.
+2. **Cleanup** -- Use mocks that auto-cleanup via traps.
+3. **No sleep** -- Avoid `sleep` or hardcoded delays.
+4. **Descriptive names** -- Test names should describe what's being verified.
+5. **Edge cases** -- Test error conditions, not just happy paths.
+6. **Security** -- Include tests for dangerous input rejection.
 
 ## Troubleshooting
 
 ### Tests not found
 
-Ensure test files match the pattern `test_*.sh` and are executable:
+Make sure test files match the `test_*.sh` pattern and are executable:
 
 ```bash
 chmod +x scripts/tests/unit/test_*.sh
@@ -203,7 +168,7 @@ chmod +x scripts/tests/integration/test_*.sh
 
 ### Function not available
 
-If a test shows "function not available", verify the source file exists:
+If a test reports "function not available", verify the source file exists:
 
 ```bash
 ls -la .chezmoitemplates/functions/
@@ -211,4 +176,4 @@ ls -la .chezmoitemplates/functions/
 
 ### Mock cleanup issues
 
-If mocks aren't cleaning up, ensure you're not running with `set -e` before mock operations that might fail.
+If mocks aren't cleaning up, make sure you aren't running with `set -e` before mock operations that might intentionally fail.

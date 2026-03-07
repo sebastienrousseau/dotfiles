@@ -1,10 +1,13 @@
 # Feature Flags
 
-Feature flags control which components and configurations are enabled in your dotfiles setup. They are defined in `.chezmoidata.toml` and used throughout template files to conditionally include or exclude functionality.
+Feature flags control which components chezmoi deploys. They're defined in
+`.chezmoidata.toml` and evaluated at template processing time — there's no
+runtime overhead.
 
 ## Configuration
 
-Feature flags are configured in the `.chezmoidata.toml` file:
+All flags live in `.chezmoidata.toml`. If a flag isn't set, it defaults to
+`true` so everything works out of the box.
 
 ```toml
 [features]
@@ -15,168 +18,54 @@ gui = true
 secrets = true
 ```
 
-## Available Feature Flags
+## Available Flags
 
-| Flag | Default | Purpose | Dependencies | Impact |
-|------|---------|---------|--------------|---------|
-| `zsh` | `true` | Enable Zsh shell configuration and optimizations | - | Controls Zsh-specific configs, aliases, and shell enhancements |
-| `fish` | `true` | Enable Fish shell configuration and optimizations | - | Controls Fish-specific configs, aliases, and shell enhancements |
-| `nushell` | `true` | Enable Nushell configuration for structured data pipelines | - | Controls Nushell setup, plugins, and environment |
-| `nvim` | `true` | Enable Neovim editor configuration | - | Manages Neovim configs, plugins, and editor-specific settings |
-| `tmux` | `true` | Enable tmux terminal multiplexer configuration | - | Controls tmux configs, key bindings, and session management |
-| `zellij` | `false` | Enable Zellij terminal workspace configuration | - | Controls Zellij layouts, themes, and keybindings |
-| `gui` | `true` | Enable GUI application configurations | Desktop environment | Manages GUI app configs, window managers, and desktop settings |
-| `secrets` | `true` | Enable secrets management and encryption tools | GPG, Age, SSH keys | Controls access to encrypted configs and secure credential storage |
-| `ai_tools` | `true` | Enable AI CLI tool integrations and identity context | - | Manages AI tool aliases and unified context |
-| `alias_wrapper` | `false` | Enable robust alias hardening and validation | - | Opt-in safety wrappers for destructive commands |
+| Flag | Default | Purpose |
+|------|---------|---------|
+| `zsh` | `true` | Zsh shell configuration and optimizations |
+| `fish` | `true` | Fish shell configuration |
+| `nushell` | `true` | Nushell for structured data pipelines |
+| `nvim` | `true` | Neovim editor configuration and plugins |
+| `tmux` | `true` | Tmux terminal multiplexer |
+| `zellij` | `false` | Zellij terminal workspace |
+| `gui` | `true` | GUI application configs (ignored on headless systems) |
+| `secrets` | `true` | Secrets management via GPG, Age, and SSH keys |
+| `ai_tools` | `true` | AI CLI tool integrations and unified context |
+| `alias_wrapper` | `false` | Safety wrappers for destructive commands |
 
-## Validation & Observability
+## Validation
 
-The `dot` CLI provides high-level commands for system validation:
+The `dot` CLI provides commands for system validation:
 
-- **`dot smoke-test`**: Rapidly verifies that all core toolchains (Rust, Go, AI) are functional and returning valid versions.
-- **`dot chaos`**: (Warning: Destructive) Intentionally corrupts configurations to verify the self-healing capabilities of `dot heal`.
-- **`dot health`**: Comprehensive system diagnostic across paths, files, and dependencies.
+- **`dot health`** — comprehensive diagnostic across paths, files, and dependencies
+- **`dot smoke-test`** — verifies that core toolchains (Rust, Go, AI) are functional
+- **`dot chaos`** — (destructive) corrupts configs to test self-healing via `dot heal`
 
-### Structured Logging
-Set `export DOTFILES_JSON_LOG=1` to enable JSON-structured output for all bootstrap and provisioning events, ideal for enterprise auditing.
+## Structured Logging
 
-## How Feature Flags Work
+Set `export DOTFILES_JSON_LOG=1` to enable JSON-structured output for all
+bootstrap and provisioning events.
 
-### Template Processing
+## Modifying Flags
 
-Feature flags are processed in the Zsh configuration template (`dot_config/zsh/dot_zshrc.tmpl`) where they:
-
-1. **Set defaults**: If not explicitly defined, all features default to `true`
-2. **Export environment variables**: Active features are exported as `DOTFILES_FEATURES`
-3. **Enable conditional loading**: Allow selective inclusion of shell configurations
-
-### Example Usage
-
-```bash
-# In template files, feature flags are referenced as:
-{{- $features := default (dict "zsh" true "nvim" true "tmux" true "gui" true "secrets" true) .features -}}
-
-# Export enabled features to environment
-export DOTFILES_FEATURES="{{ join "," $enabled }}"
-```
-
-### Runtime Access
-
-Once processed, you can check active features in your shell:
-
-```bash
-# View all enabled features
-echo $DOTFILES_FEATURES
-
-# Check if a specific feature is enabled
-if [[ "$DOTFILES_FEATURES" == *"nvim"* ]]; then
-    echo "Neovim configuration is active"
-fi
-```
-
-## Modifying Feature Flags
-
-### Enable/Disable Features
-
-Edit `.chezmoidata.toml`:
+Edit `.chezmoidata.toml` and apply:
 
 ```toml
 [features]
-zsh = true
-nvim = true
-tmux = false    # Disable tmux configuration
-gui = false     # Disable GUI configurations
-secrets = true
+tmux = false    # disable tmux configuration
+gui = false     # disable GUI configurations
 ```
-
-### Apply Changes
-
-After modifying feature flags, apply the changes:
 
 ```bash
 chezmoi apply
 ```
 
-### Profile-Specific Overrides
+### Per-Machine Overrides
 
-For machine-specific configurations, you can override feature flags in your local chezmoi config (`~/.config/chezmoi/chezmoi.toml`):
+You can override flags on a specific machine in
+`~/.config/chezmoi/chezmoi.toml`:
 
 ```toml
 [data.features]
-gui = false  # Override: disable GUI on this machine
+gui = false  # disable GUI on this machine
 ```
-
-## Feature Flag Dependencies
-
-### Core Dependencies
-
-- **zsh**: Core shell functionality - recommended to keep enabled
-- **nvim**: Independent - can be disabled if using alternative editors
-- **tmux**: Independent - can be disabled if not using terminal multiplexer
-
-### Conditional Dependencies
-
-- **gui**: Requires desktop environment; automatically ignored on headless systems
-- **secrets**: Required for encrypted configurations; disable only if not using secure storage
-
-## Architecture Notes
-
-### Default Behavior
-
-The feature flag system uses a **fail-safe default** approach:
-- If `.chezmoidata.toml` is missing features, all flags default to `true`
-- This ensures the dotfiles work out-of-the-box without configuration
-
-### Performance Impact
-
-- **Enabled features**: Include additional configurations and may load more shell plugins
-- **Disabled features**: Reduce startup time and memory usage by excluding unnecessary components
-
-### Template Resolution
-
-Feature flags are resolved during chezmoi template processing, not at runtime. This means:
-- Changes require `chezmoi apply` to take effect
-- No runtime performance penalty for checking feature status
-- Configurations are pre-compiled based on active features
-
-## Troubleshooting
-
-### Check Current Features
-
-```bash
-# View active features
-echo $DOTFILES_FEATURES
-
-# View profile and theme
-echo "Profile: $DOTFILES_PROFILE"
-echo "Theme: $DOTFILES_THEME"
-```
-
-### Verify Configuration
-
-```bash
-# Check chezmoi data
-chezmoi data
-
-# Test template processing
-chezmoi execute-template '{{ .features.zsh }}'
-```
-
-### Reset to Defaults
-
-If you encounter issues, reset to default configuration:
-
-```toml
-[features]
-zsh = true
-nvim = true
-tmux = true
-gui = true
-secrets = true
-```
-
----
-
-**Last Updated**: 2026-01-31
-**Dotfiles Version**: v0.2.493

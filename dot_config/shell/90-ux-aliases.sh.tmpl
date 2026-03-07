@@ -85,7 +85,13 @@ _dotfiles_alias_shims() {
   lr() { dot_lr "$@"; }
   lra() { dot_lra "$@"; }
   lta() { dot_lta "$@"; }
-  d() { command -v dot >/dev/null 2>&1 && dot "$@" || command -v docker >/dev/null 2>&1 && docker "$@"; }
+  d() {
+    if command -v dot >/dev/null 2>&1; then
+      dot "$@"
+    elif command -v docker >/dev/null 2>&1; then
+      docker "$@"
+    fi
+  }
   i() { command -v epoch >/dev/null 2>&1 && epoch "$@"; }
   a() { command -v ai_core >/dev/null 2>&1 && ai_core query "$@"; }
   _() { sudo "$@"; }

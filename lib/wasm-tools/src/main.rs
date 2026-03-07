@@ -6,6 +6,6 @@ fn main() {
         .duration_since(SystemTime::UNIX_EPOCH)
         .expect("Time went backwards")
         .as_secs();
-    
-    println!("{\"status\": \"ok\", \"timestamp\": {}, \"engine\": \"wasm\"}", now);
+
+    println!(r#"{{"status": "ok", "timestamp": {}, "engine": "wasm"}}"#, now);
 }

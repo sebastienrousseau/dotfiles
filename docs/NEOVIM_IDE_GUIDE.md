@@ -1,23 +1,21 @@
 # Neovim
 
-## Discover
-
-### 1. Modern Core
+## Modern Core
 - **Installation**: Uses Neovim Nightly (v0.11+) for the latest features and plugin compatibility.
 - **Configuration**: A modular and lazy-loaded configuration based on `lazy.nvim`.
-- **UI**: A beautiful and functional UI with a dashboard, status line, buffer line, and file explorer.
+- **UI**: A dashboard, status line, buffer line, and file explorer.
 - **LSP**: Full LSP support for diagnostics, code actions, and more, managed by `mason.nvim`.
 
-### 2. Language Support
-- **Rust**: Out-of-the-box support for Rust development with `rustaceanvim`.
-- **Python**: Full support for Python development with `basedpyright`, `ruff`, and `venv-selector`.
+## Language Support
+- **Rust**: Out-of-the-box support with `rustaceanvim`.
+- **Python**: Full support with `basedpyright`, `ruff`, and `venv-selector`.
 - **Web**: Support for web development with `prettier` and `eslint`.
 
-### 3. AI Integration
+## AI Integration
 - **Copilot**: `copilot.lua` for code completion. Run `:Copilot auth` to sign in.
 - **Copilot Chat**: AI sidebar for asking questions and getting help (`<leader>cc`).
 
-### 4. VS Code Parity
+## VS Code Parity
 - **Problem Panel**: `trouble.nvim` for a VS Code-like problems panel (`<leader>xx`).
 - **Search & Replace**: `nvim-spectre` for project-wide search and replace (`<leader>S`).
 - **Auto-Pairs**: Automatically closes brackets and pairs.

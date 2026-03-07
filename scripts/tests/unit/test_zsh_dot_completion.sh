@@ -18,20 +18,20 @@ assert_file_exists "$COMP_FILE" "_dot completion should exist"
 # Test: has #compdef header
 test_start "dot_completion_compdef_header"
 if head -1 "$COMP_FILE" | grep -q '#compdef dot'; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has #compdef dot header"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have #compdef dot header"
 fi
 
 # Test: defines _dot function
 test_start "dot_completion_function_defined"
 if grep -q '_dot()' "$COMP_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines _dot() function"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define _dot() function"
 fi
 
@@ -44,10 +44,10 @@ for cmd in apply sync update add diff status remove cd edit; do
   fi
 done
 if [[ -z "$missing" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: all core commands present"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: missing core commands:$missing"
 fi
 
@@ -60,10 +60,10 @@ for cmd in doctor heal health rollback drift benchmark perf; do
   fi
 done
 if [[ -z "$missing" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: all diagnostic commands present"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: missing diagnostic commands:$missing"
 fi
 
@@ -76,50 +76,50 @@ for cmd in backup firewall telemetry dns-doh encrypt-check lock-screen usb-safet
   fi
 done
 if [[ -z "$missing" ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: all security commands present"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: missing security commands:$missing"
 fi
 
 # Test: includes ssh-cert command
 test_start "dot_completion_ssh_cert"
 if grep -q "ssh-cert" "$COMP_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: includes ssh-cert command"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should include ssh-cert command"
 fi
 
 # Test: ssh-cert has subcommand completion
 test_start "dot_completion_ssh_cert_subcommands"
 if grep -qE 'issue.*certificate|status.*certificate|revoke.*certificate' "$COMP_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: ssh-cert has subcommand completions"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: ssh-cert should have subcommand completions"
 fi
 
 # Test: new command has template completions
 test_start "dot_completion_new_templates"
 if grep -qE 'python.*go.*node' "$COMP_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: new command has template completions"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: new command should have template completions"
 fi
 
 # Test: perf command has flag completions
 test_start "dot_completion_perf_flags"
-if grep -q '\-\-json' "$COMP_FILE" 2>/dev/null && grep -q '\-\-precmd' "$COMP_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+if grep -q -- '--json' "$COMP_FILE" 2>/dev/null && grep -q -- '--precmd' "$COMP_FILE" 2>/dev/null; then
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: perf command has --json/--precmd completions"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: perf should have flag completions"
 fi
 
@@ -136,10 +136,10 @@ for cmd in $help_cmds; do
 done
 # Allow some flexibility (help format may differ slightly)
 if [[ "$missing_count" -le 3 ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: completion covers most help commands"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $missing_count commands missing from completion"
 fi
 

@@ -70,7 +70,11 @@ fi
 # Results collection for JSON
 declare -a RESULTS=()
 
-log_info() { [[ "$VERBOSE" == "1" ]] && printf '%b\n' "${BLUE}[INFO]${NC} $*" || true; }
+log_info() {
+  if [[ "$VERBOSE" == "1" ]]; then
+    printf '%b\n' "${BLUE}[INFO]${NC} $*"
+  fi
+}
 log_pass() { printf '%b\n' "${GREEN}[PASS]${NC} $*"; }
 log_fail() {
   printf '%b\n' "${RED}[FAIL]${NC} $*"
@@ -234,14 +238,15 @@ check_shell_startup_performance() {
   for shell in "${shells[@]}"; do
     if command -v "$shell" >/dev/null 2>&1; then
       local start_ms end_ms duration_ms
-      start_ms=$(($(date +%s%N) / 1000000))
+      start_ms=$(date +%s)
       "$shell" -i -c 'exit' 2>/dev/null || true
-      end_ms=$(($(date +%s%N) / 1000000))
-      duration_ms=$((end_ms - start_ms))
+      end_ms=$(date +%s)
+      # Convert to milliseconds (second-level precision; %N is GNU-only)
+      duration_ms=$(((end_ms - start_ms) * 1000))
 
       if [[ $duration_ms -gt $threshold_ms ]]; then
         log_warn "$shell startup: ${duration_ms}ms (threshold: ${threshold_ms}ms)"
-        ((slow_shells++))
+        ((slow_shells++)) || true
       else
         log_info "  $shell startup: ${duration_ms}ms"
       fi
@@ -291,8 +296,10 @@ check_git_status() {
     return 0
   fi
 
-  local git_status
-  git_status=$(cd "$DOTFILES_SOURCE" && git status --porcelain 2>/dev/null || echo "")
+  local git_status=""
+  if cd "$DOTFILES_SOURCE" 2>/dev/null; then
+    git_status=$(git status --porcelain 2>/dev/null || echo "")
+  fi
 
   if [[ -z "$git_status" ]]; then
     log_pass "Git working tree clean"
@@ -310,7 +317,7 @@ check_git_status() {
 check_dependencies() {
   log_info "Checking recommended dependencies..."
   local deps=(git curl zsh)
-  local optional_deps=(ripgrep fd bat fzf eza jq claude gemini sgpt ollama opencode aider)
+  local optional_deps=(ripgrep fd bat fzf eza jq claude gemini sgpt ollama opencode aider kiro-cli)
   local missing_required=0
   local missing_optional=0
 

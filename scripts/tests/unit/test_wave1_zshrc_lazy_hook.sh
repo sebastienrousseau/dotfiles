@@ -36,10 +36,10 @@ assert_file_contains "$ZSHRC" "autoload -Uz add-zsh-hook" "should autoload add-z
 test_start "zshrc_no_eager_fnm_eval"
 # There should be no eager `eval "$(fnm env` in the zshrc outside of 30-options
 if grep -q 'eval "$(fnm env' "$ZSHRC" 2>/dev/null; then
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: zshrc should not eagerly eval fnm env"
 else
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no eager fnm eval in zshrc"
 fi
 
@@ -80,10 +80,10 @@ assert_file_contains "$OPTIONS" "_lazy_load_fnm" "should define _lazy_load_fnm f
 test_start "options_fnm_lazy_wrapper"
 # fnm should be wrapped as lazy-load function
 if grep -q 'fnm() { _lazy_load_fnm; command fnm' "$OPTIONS"; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: fnm has lazy-load wrapper"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: fnm should have lazy-load wrapper"
 fi
 
@@ -94,10 +94,10 @@ test_start "options_no_duplicate_fnm_lazy"
 # Count how many _lazy_load_fnm function definitions exist (should be exactly 1)
 fnm_defs=$(grep -c '_lazy_load_fnm()' "$OPTIONS" || true)
 if [[ "$fnm_defs" -eq 1 ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: exactly one _lazy_load_fnm definition"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected 1 _lazy_load_fnm definition, found $fnm_defs"
 fi
 

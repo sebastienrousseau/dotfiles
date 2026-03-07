@@ -14,28 +14,28 @@ assert_file_exists "$SCRIPT_FILE" "install-chezmoi-verified.sh should exist"
 
 test_start "ci_install_chezmoi_verified_syntax"
 if bash -n "$SCRIPT_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 
 test_start "ci_install_chezmoi_verified_checksums"
 if grep -qE 'checksums\.txt|sha256sum|shasum' "$SCRIPT_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: verifies checksums"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: checksum verification missing"
 fi
 
 test_start "ci_install_chezmoi_verified_installs_binary"
 if grep -qE 'install -m 755|tar -xzf' "$SCRIPT_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: installs binary"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: binary install step missing"
 fi
 

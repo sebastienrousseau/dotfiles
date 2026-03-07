@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Dotfiles AI RAG (Retrieval-Augmented Generation)
+# Usage: dot ai-query "how do I list files?"
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=../scripts/dot/lib/ui.sh
+source "$HOME/.dotfiles/scripts/dot/lib/ui.sh"
+
+QUERY="${1:-}"
+if [[ -z "$QUERY" ]]; then
+  echo "Usage: dot ai-query 'your question'"
+  exit 1
+fi
+
+DOTFILES_DIR="${HOME}/.dotfiles"
+
+ui_info "Searching dotfiles context for: $QUERY..."
+# 1. Retrieval: Use ripgrep to find relevant snippets from docs and configs
+CONTEXT=$(rg -i --no-filename --no-line-number -C 2 -m 10 "$(echo "$QUERY" | tr ' ' '|')" "$DOTFILES_DIR/docs" "$DOTFILES_DIR/dot_config/shell" "$DOTFILES_DIR/.chezmoitemplates" 2>/dev/null || true)
+
+if [[ -z "$CONTEXT" ]]; then
+  CONTEXT="No specific context found in the local repository."
+fi
+
+# 2. Augmented Generation: Pipe to the Dotfiles AI Bridge
+# We use the 'architect' pattern to ensure the AI knows how to interpret dotfiles
+ui_info "Generating context-aware answer..."
+dot cl --pattern architect "Answer the following question based on this local dotfiles context:
+---
+$CONTEXT
+---
+User Question: $QUERY"
