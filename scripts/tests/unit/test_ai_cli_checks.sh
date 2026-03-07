@@ -39,8 +39,8 @@ check_contains "$APPLY_FILE" "check_cmd \"ollama\""
 check_contains "$APPLY_FILE" "check_cmd \"kiro-cli\""
 
 # Tools catalog should list sgpt and ollama
-check_contains "$DOC_FILE" "| sgpt | shell-gpt |"
-check_contains "$DOC_FILE" "| ollama | ollama |"
+check_contains "$DOC_FILE" "| **sgpt** | Shell-GPT for terminal AI queries |"
+check_contains "$DOC_FILE" "| **Ollama** | Run large language models locally |"
 
 # Python tools should include key dev tools
 check_contains "$PYTOOLS_FILE" "install_python_tool \"pytest\""
