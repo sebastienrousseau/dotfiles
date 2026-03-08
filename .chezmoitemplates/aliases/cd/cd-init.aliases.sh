@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # CD Navigation - Initialization
 [[ -n "${_CD_INIT_LOADED:-}" ]] && :
 _CD_INIT_LOADED=1
@@ -14,10 +14,10 @@ fi
 alias mcd='mkdir -p "$1" && cd "$1"' # Create and enter directory
 
 # Bookmark management
-alias bm='bm add'            # Create bookmark
-alias bmu='bm update'         # Update bookmark
-alias bmr='bm remove'         # Remove bookmark
-alias bml='bm list'           # List bookmarks
+alias bm='bm add'              # Create bookmark
+alias bmu='bm update'          # Update bookmark
+alias bmr='bm remove'          # Remove bookmark
+alias bml='bm list'            # List bookmarks
 alias bmg='cd "$(bm goto $1)"' # Go to bookmark (requires shell cd)
 
 # Navigation shortcuts

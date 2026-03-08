@@ -1,4 +1,4 @@
--- Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+-- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 -- Debug Adapter Protocol (DAP) Configuration
 
 -- Layout constants

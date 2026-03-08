@@ -4,8 +4,9 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| main    | :white_check_mark: |
-| < 1.0   | :x:                |
+| 0.2.x (latest) | :white_check_mark: |
+| main branch     | :white_check_mark: |
+| older releases  | :x:                |
 
 ## Vulnerability severity levels
 

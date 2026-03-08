@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # 🅶🅽🆄 🅲🅾🆁🅴🆄🆃🅸🅻🆂 🅰🅻🅸🅰🆂🅴🆂
 
 if command -v 'gdate' >/dev/null; then
@@ -7,22 +7,17 @@ if command -v 'gdate' >/dev/null; then
   # Strip directory and suffix from filenames.
   alias basename=basename
 
-
   # Strip non-directory suffix from filenames.
   alias dirname=dirname
 
-
   # Print the name of the link.
   alias loname=loname
-
-
 
   # Make named pipes (FIFOs).
   alias mkfifo=mkfifo
 
   # Make block or character special files.
   alias mknod=mknod
-
 
   # Check file name validity and portability.
   alias pathchk=pathchk
@@ -36,7 +31,6 @@ if command -v 'gdate' >/dev/null; then
   # Print the resolved physical path of the specified path.
   alias realpath=realpath
 
-
   # Remove empty directories.
   alias rmdir=rmdir
 
@@ -48,13 +42,11 @@ if command -v 'gdate' >/dev/null; then
   # Pattern scanning and processing language.
   alias awk=awk
 
-
   # Split a file into context-determined pieces.
   alias csplit=csplit
 
   # Remove sections from each line of files.
   alias cut=cut
-
 
   # Wrap each input line to fit in specified width.
   alias fold=fold

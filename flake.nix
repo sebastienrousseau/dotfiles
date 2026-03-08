@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 {
   description = "Universal Dotfiles Reproducible Environment";
 
@@ -70,7 +70,7 @@
             gum
             glow
             mods
-            thefuck
+            pay-respects
             carapace
             wl-clipboard
             xclip

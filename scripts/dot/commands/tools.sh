@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Dotfiles CLI - Tools Commands
 # tools, new, packages, log-rotate
 
@@ -319,7 +319,7 @@ cmd_aliases() {
       local src_dir out
       src_dir="$(require_source_dir)"
       out="$src_dir/docs/ALIASES_CHEATSHEET.md"
-      bash "$src_dir/scripts/diagnostics/aliases-cheatsheet.sh" > "$out"
+      bash "$src_dir/scripts/diagnostics/aliases-cheatsheet.sh" >"$out"
       ui_ok "Generated" "$out"
       ;;
     tiers)

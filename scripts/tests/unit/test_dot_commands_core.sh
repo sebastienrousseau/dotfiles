@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
 # Unit tests for dot CLI core commands
 # Tests: apply, sync, update, add, diff, status, remove, cd, upgrade, edit, docs
@@ -83,8 +83,8 @@ fi
 
 # Test: uses proper error handling
 test_start "core_error_handling"
-if grep -qE 'set -[euo]|errexit|nounset' "$CORE_FILE" 2>/dev/null || \
-   grep -q '|| return\||| exit\|if \[\[' "$CORE_FILE" 2>/dev/null; then
+if grep -qE 'set -[euo]|errexit|nounset' "$CORE_FILE" 2>/dev/null ||
+  grep -q '|| return\||| exit\|if \[\[' "$CORE_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has error handling"
 else
@@ -97,10 +97,10 @@ test_start "core_shellcheck_clean"
 if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$CORE_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
-  ((TESTS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck (error level)"
   else
-  ((TESTS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else

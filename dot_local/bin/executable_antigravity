@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Wrapper for Antigravity extension updates under Topgrade.
+# Clears Node/Electron env that can inject custom loaders and crash updater.
+set -euo pipefail
+
+unset NODE_OPTIONS
+unset ELECTRON_RUN_AS_NODE
+unset ELECTRON_NO_ATTACH_CONSOLE
+unset ELECTRON_ENABLE_LOGGING
+
+exec /usr/bin/antigravity "$@"

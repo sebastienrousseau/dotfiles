@@ -21,8 +21,8 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 > *The shell is instrumented: failures, timing, and lifecycle events are visible by design.*
 
 - [x] **Audit Structuring**: JSON-structured logging for bootstrap and provisioning events.
-- [ ] **Debug Modes**: First-class support for `DOTFILES_DEBUG=1` and `DOTFILES_TRACE=1`.
-- [ ] **Telemetry (Local)**: Granular startup timing breakdown (init vs plugins vs prompt).
+- [x] **Debug Modes**: First-class support for `DOTFILES_DEBUG=1` and `DOTFILES_TRACE=1`.
+- [x] **Telemetry (Local)**: Granular startup timing breakdown via `dot perf`.
 - [ ] **Health Dashboard (Phase 39)**: CLI view of system "health" metrics.
 - [ ] **System Status (Phase 39)**: Real-time resource usage, battery, and network stats.
 - [ ] **Update Manager (Phase 39)**: Visual interface for tool updates and migration.
@@ -31,8 +31,8 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 **Goal:** "Explicit Secrets Model".
 > *Secrets are never committed; sensitive state is encrypted or host-local by default.*
 
-- [ ] **Secret Driver**: Native integration with 1Password/Bitwarden CLI via `chezmoi`.
-- [ ] **Encryption**: Promoted use of `age` encryption for all private config files.
+- [x] **Secret Driver**: Native integration with 1Password/Bitwarden CLI via `chezmoi`.
+- [x] **Encryption**: Promoted use of `age` encryption for all private config files.
 - [ ] **Leak Prevention (Phase 29)**: Pre-commit hooks (TruffleHog/Gitleaks) for high-entropy detection.
 - [ ] **Vault Integration (Phase 29)**: Native HashiCorp Vault support.
 - [ ] **Hardware Enclaves (Phase 29)**: Support for Secure Enclave/TPM key storage.
@@ -65,7 +65,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 **Goal:** "Documented Threat Model".
 > *Security decisions are driven by an explicit, documented threat model.*
 
-- [ ] **Threat Model Doc**: A lightweight document defining the trust boundary (Local Machine).
+- [x] **Threat Model Doc**: A lightweight document defining the trust boundary (Local Machine). See `docs/THREAT_MODEL.md`.
 - [ ] **Supply Chain**: Verification steps for upstream dependencies.
 - [ ] **Identity & Access (Phase 40)**:
     - [ ] **SSH Certs**: Short-lived SSH Certificates.
@@ -78,7 +78,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 > *The environment can validate itself after installation or update.*
 
 - [x] **Smoke Tests**: Automated verification of key aliases (`ls`, `git`, `docker`).
-- [ ] **CI Validation**: GitHub Actions workflow to boot and verify the shell syntax.
+- [x] **CI Validation**: GitHub Actions workflow to boot and verify the shell syntax.
 - [x] **Chaos Engineering (Phase 41)**:
     - [ ] **Config Chaos**: Randomly corrupt config files to test recovery.
     - [ ] **Network Simulation**: Simulate high latency/packet loss.
@@ -88,7 +88,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 **Goal:** "Supported Platforms Matrix".
 > *Only listed platforms are guaranteed to work; others are best-effort.*
 
-- [ ] **Support Matrix**: Explicit table of OS/Version support (macOS 14+, Ubuntu 24.04+, WSL2).
+- [x] **Support Matrix**: Explicit table of OS/Version support. See `docs/SUPPORT_MATRIX.md`.
 - [ ] **Windows Deep Integration (Phase 53)**:
     - [ ] **PowerShell Profile**: Mirror Zsh functionality.
     - [ ] **WinGet**: Declarative package management.

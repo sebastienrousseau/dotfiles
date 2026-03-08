@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091
 # Tests for zsh bookmark completion setup
 
@@ -14,7 +14,7 @@ assert_file_exists "$COMPLETION_FILE" "cd completion template should exist"
 
 if command -v zsh >/dev/null 2>&1; then
   tmp_bookmarks="$(mktemp)"
-  printf "proj:%s\nwork:%s\n" "$HOME" "$HOME" > "$tmp_bookmarks"
+  printf "proj:%s\nwork:%s\n" "$HOME" "$HOME" >"$tmp_bookmarks"
 
   test_start "zsh_completion_source"
   assert_exit_code 0 "zsh -c 'set -e; autoload -U compinit; compinit; BOOKMARK_FILE=\"$tmp_bookmarks\"; source \"$COMPLETION_FILE\"; typeset -f _bookmark_complete_zsh >/dev/null'"

@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+// Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 /* global db, config, disableTelemetry */
 // MongoDB Shell Configuration (~/.config/mongosh/mongoshrc.js)
 // https://www.mongodb.com/docs/mongodb-shell/reference/configure-shell-settings/

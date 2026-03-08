@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 if [[ -n "${BASH_VERSION:-}" ]]; then
   # CD Navigation - Tab Completion
   [[ -n "${_CD_COMPLETION_LOADED:-}" ]] && :
@@ -57,7 +57,10 @@ if [[ -n "${ZSH_VERSION:-}" ]]; then
 
   _bookmark_complete_zsh() {
     local -a bookmarks
-    bookmarks=("${(@f)$(_get_bookmarks)}")
+    local line
+    while IFS= read -r line; do
+      bookmarks+=("$line")
+    done < <(_get_bookmarks)
     compadd -Q -- "${bookmarks[@]}"
   }
 

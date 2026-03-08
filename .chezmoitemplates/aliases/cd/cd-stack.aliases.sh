@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # CD Navigation - Directory Stack Management
 [[ -n "${_CD_STACK_LOADED:-}" ]] && :
 _CD_STACK_LOADED=1

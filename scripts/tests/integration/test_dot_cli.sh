@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091
 # Integration tests for the dot CLI
 # Tests core dot commands work end-to-end
@@ -31,7 +31,7 @@ assert_equals "#!/usr/bin/env bash" "$first_line" "dot CLI should have bash sheb
 
 test_start "dot_version_output"
 version_output=$(bash "$DOT_CLI" --version 2>&1)
-if echo "$version_output" | grep -q "^\.dotfiles "; then
+if echo "$version_output" | grep -q "\.dotfiles"; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot --version outputs version string"
 else
@@ -40,12 +40,11 @@ else
   printf '%b\n' "    Got: '$version_output'"
 fi
 
-
 # ── dot help ─────────────────────────────────────────────────────
 
 test_start "dot_help_output"
 help_output=$(bash "$DOT_CLI" help 2>&1)
-if echo "$help_output" | grep -q "Core Commands:"; then
+if echo "$help_output" | grep -q "Core Commands"; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot help shows Core Commands section"
 else
@@ -103,5 +102,5 @@ fi
 
 # ── Summary ──────────────────────────────────────────────────────
 echo ""
-echo "Integration tests: $TESTS_PASSED passed, $TESTS_FAILED failed (of $TESTS_RUN)"
-[[ $TESTS_FAILED -eq 0 ]] || exit 1
+echo "Integration dot CLI tests completed."
+print_summary

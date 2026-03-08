@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 #   A comprehensive cross-platform system update script for macOS, Linux, and
 #   Windows. It updates system software, programming tools, and cleans up resources.
 #

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Universal Dotfiles Installer (Zero-Dependency)
 # Usage: bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 # (or ./install.sh locally)
@@ -52,7 +52,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.494)
+  version       The version (tag or branch) to install (default: v0.2.495)
 
 Options:
   --help        Show this help message
@@ -63,7 +63,7 @@ EOF
 }
 
 main() {
-  local version="${1:-v0.2.494}"
+  local version="${1:-v0.2.495}"
   local _cleanup_files=()
   trap 'rm -f "${_cleanup_files[@]}" 2>/dev/null' EXIT
 
@@ -74,7 +74,7 @@ main() {
       ;;
     --silent)
       export DOTFILES_SILENT=1
-      version="v0.2.494"
+      version="v0.2.495"
       ;;
   esac
 
