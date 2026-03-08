@@ -10,7 +10,11 @@
 			"configureZshAsDefaultShell": true
 		},
 		"ghcr.io/devcontainers/features/git:1": {},
-		"ghcr.io/devcontainers/features/github-cli:1": {}
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/devcontainers/features/nix:1": {
+			"multiUser": true,
+			"extraNixConfig": "experimental-features = nix-command flakes"
+		}
 	},
 	"postCreateCommand": ".devcontainer/install-full.sh",
 	"remoteUser": "vscode",

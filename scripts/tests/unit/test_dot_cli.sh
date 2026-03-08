@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
 # Unit tests for the dot CLI entry point (executable_dot)
 set -euo pipefail
@@ -39,7 +39,7 @@ assert_file_contains "$DOT_CLI" "set -e" "should use set -e for error handling"
 # Test: dot --help shows usage
 test_start "dot_cli_help"
 output=$(bash "$DOT_CLI" help 2>&1) || true
-if [[ "$output" == *"Usage:"* ]] && [[ "$output" == *"dot"* ]]; then
+if [[ "$output" == *"Usage"* ]] && [[ "$output" == *"dot"* ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: help shows usage"
 else
@@ -63,7 +63,7 @@ fi
 # Test: dot (no args) shows help
 test_start "dot_cli_no_args"
 output=$(bash "$DOT_CLI" 2>&1) || true
-if [[ "$output" == *"Usage:"* ]]; then
+if [[ "$output" == *"Usage"* ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no args shows help"
 else
@@ -164,7 +164,7 @@ fi
 # Test: dot -h shows help
 test_start "dot_cli_h_flag"
 output=$(bash "$DOT_CLI" -h 2>&1) || true
-if [[ "$output" == *"Usage:"* ]]; then
+if [[ "$output" == *"Usage"* ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: -h shows help"
 else

@@ -1,7 +1,7 @@
 # Starship Configuration
 # https://starship.rs/config/
 
-command_timeout = 500
+command_timeout = 2000
 add_newline = true
 {{- $theme := default "catppuccin-mocha" .theme -}}
 {{- if eq $theme "catppuccin-latte" }}
@@ -101,11 +101,11 @@ symbol = "nix "
 style = "bold blue"
 
 # ---------- Direnv indicator ---------- #
+# Disabled: starship reads direnv state before the hook sets DIRENV_DIR,
+# causing "[WARN] unknown direnv state" on every prompt render.
+# Direnv itself still works — only the starship status indicator is hidden.
 [direnv]
-disabled = false
-symbol = "▼ "
-style = "bold yellow"
-format = "[$symbol$loaded/$allowed]($style) "
+disabled = true
 
 # ---------- Pueue Tasks (Background daemon) ---------- #
 [custom.pueue]

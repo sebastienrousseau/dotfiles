@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # CD Navigation - Utility Functions
 [[ -n "${_CD_UTILS_LOADED:-}" ]] && :
 _CD_UTILS_LOADED=1

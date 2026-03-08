@@ -21,7 +21,7 @@ complete -c dot -n "__fish_use_subcommand" -a add -d "Add a file to chezmoi sour
 
 # AI Pattern completions for cl, gemini, kiro
 for cmd in cl gemini kiro sgpt ollama opencode aider
-    complete -c dot -n "__fish_seen_subcommand_from $cmd" -s p -l pattern -x -a "(ls -1 ~/.config/ai/patterns 2>/dev/null | sed 's/\.md$//')"
+    complete -c dot -n "__fish_seen_subcommand_from $cmd" -s p -l pattern -x -a "(ls -1 ~/.config/ai/patterns 2>/dev/null | sed 's/\.md\$//')"
 end
 complete -c dot -n "__fish_use_subcommand" -a diff -d "Show chezmoi diff with exclusions"
 complete -c dot -n "__fish_use_subcommand" -a status -d "Show configuration drift"

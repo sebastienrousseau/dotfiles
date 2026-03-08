@@ -25,11 +25,11 @@ RUN_INTEGRATION=1 ./scripts/tests/framework/test_runner.sh
 ```
 scripts/tests/
 ├── framework/           # Test framework
-│   ├── assertions.sh    # 15+ assertion functions
+│   ├── assertions.sh    # 16 assertion functions
 │   ├── mocks.sh        # Mock utilities
 │   └── test_runner.sh  # Test executor
-├── unit/               # Unit tests
-├── integration/        # Integration tests
+├── unit/               # 378 unit test files
+├── integration/        # 9 integration test files
 └── performance/        # Benchmarks
 ```
 
@@ -72,6 +72,7 @@ assert_exit_code 1 "myfunction"
 | `assert_empty value [msg]` | String is empty |
 | `assert_not_empty value [msg]` | String isn't empty |
 | `assert_file_contains file needle [msg]` | File contains text |
+| `assert_file_not_contains file needle [msg]` | File lacks text |
 
 ### Mock utilities
 
@@ -106,9 +107,11 @@ Measure resource efficiency with shell startup benchmarks and load tests.
 
 | Category | Target | Current |
 |----------|--------|---------|
-| Module coverage (`scripts/`) | >=95% | 100% (62/62) |
+| Module coverage | >=95% | 100% |
+| Unit test files | - | 378 |
+| Integration test files | - | 9 |
+| Total tests (assertions) | - | 1655 |
 | Unit test pass rate | 100% | 100% |
-| Integration | >90% | ~95% |
 
 CI enforces module coverage via:
 

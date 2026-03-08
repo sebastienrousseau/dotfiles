@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Description:
 #   hiddenfiles is a utility function to toggle the visibility of hidden files
 #   and system files in the Finder on macOS. By default, it hides hidden files.

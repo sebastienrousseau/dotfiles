@@ -1,4 +1,4 @@
--- Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+-- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 return {
   -- Mason (Manage External Tools)
   {
@@ -16,11 +16,11 @@ return {
     dependencies = {
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
-      "hrsh7th/cmp-nvim-lsp",
+      "saghen/blink.cmp",
     },
     config = function()
-      -- 1. Setup capabilities for LSP
-      local capabilities = require("cmp_nvim_lsp").default_capabilities()
+      -- 1. Setup capabilities for LSP (blink.cmp provides these)
+      local capabilities = require("blink.cmp").get_lsp_capabilities()
 
       -- 2. Setup mason-lspconfig with custom handlers per server
       require("mason-lspconfig").setup({
@@ -146,81 +146,5 @@ return {
       },
       format_on_save = { timeout_ms = 500, lsp_fallback = true },
     },
-  },
-
-  -- Autocompletion: CMP (Optimized)
-  {
-    "hrsh7th/nvim-cmp",
-    event = "InsertEnter",
-    dependencies = {
-      "hrsh7th/cmp-nvim-lsp",
-      "hrsh7th/cmp-buffer",
-      "hrsh7th/cmp-path",
-      "L3MON4D3/LuaSnip",
-      "saadparwaiz1/cmp_luasnip",
-      "onsails/lspkind.nvim",
-    },
-    config = function()
-      local cmp = require("cmp")
-      local luasnip = require("luasnip")
-      local lspkind = require("lspkind")
-
-      require("luasnip.loaders.from_lua").lazy_load({
-        paths = { vim.fn.stdpath("config") .. "/snippets" },
-      })
-
-      cmp.setup({
-        snippet = {
-          expand = function(args)
-            luasnip.lsp_expand(args.body)
-          end,
-        },
-        window = {
-          completion = cmp.config.window.bordered(),
-          documentation = cmp.config.window.bordered(),
-        },
-        formatting = {
-          format = lspkind.cmp_format({
-            mode = "symbol_text",
-            maxwidth = 50,
-            ellipsis_char = "...",
-          }),
-        },
-        mapping = cmp.mapping.preset.insert({
-          ["<C-n>"] = cmp.mapping.select_next_item(),
-          ["<C-p>"] = cmp.mapping.select_prev_item(),
-          ["<C-b>"] = cmp.mapping.scroll_docs(-4),
-          ["<C-f>"] = cmp.mapping.scroll_docs(4),
-          ["<C-Space>"] = cmp.mapping.complete(),
-          ["<CR>"] = cmp.mapping.confirm({ select = true }),
-          ["<Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_next_item()
-            elseif luasnip.expand_or_jumpable() then
-              luasnip.expand_or_jump()
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
-          ["<S-Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_prev_item()
-            elseif luasnip.jumpable(-1) then
-              luasnip.jump(-1)
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
-        }),
-        sources = cmp.config.sources({
-          { name = "copilot" },
-          { name = "nvim_lsp" },
-          { name = "luasnip" },
-          { name = "path" },
-        }, {
-          { name = "buffer" },
-        }),
-      })
-    end,
   },
 }

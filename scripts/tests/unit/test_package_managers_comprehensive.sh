@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
 # Stable package manager coverage tests (environment-compatible)
 
@@ -38,18 +38,18 @@ if has_brew || ! has_brew; then
   if has_apt || ! has_apt; then
     if has_dnf || ! has_dnf; then
       if has_pacman || ! has_pacman; then
-  ((TESTS_PASSED++)) || true
+        ((TESTS_PASSED++)) || true
         printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: helper functions return proper status codes"
       else
-  ((TESTS_FAILED++)) || true
+        ((TESTS_FAILED++)) || true
         printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has_pacman status behavior invalid"
       fi
     else
-  ((TESTS_FAILED++)) || true
+      ((TESTS_FAILED++)) || true
       printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has_dnf status behavior invalid"
     fi
   else
-  ((TESTS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has_apt status behavior invalid"
   fi
 else

@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Description:
 #   sentencecase converts file or directory names to sentence case. It capitalizes
 #   the first character of the first word, while the rest of the characters are

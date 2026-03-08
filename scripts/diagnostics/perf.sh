@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Shell Performance Profiling
 # Usage: dot perf [--json] [--profile] [--runs N] [--target MS]
 
@@ -145,6 +145,57 @@ else
   echo "  Target:  ${TARGET_MS}ms"
   echo "  Score:   ${score}/100"
 fi
+
+# Per-shell startup comparison
+ui_section "Per-shell startup"
+
+for shell_name in zsh bash fish; do
+  if command -v "$shell_name" >/dev/null 2>&1; then
+    local_start=$(python3 -c 'import time; print(int(time.time() * 1000))')
+    if [[ "$shell_name" == "fish" ]]; then
+      fish -c exit >/dev/null 2>&1 || true
+    else
+      "$shell_name" -i -c exit >/dev/null 2>&1 || true
+    fi
+    local_end=$(python3 -c 'import time; print(int(time.time() * 1000))')
+    shell_time=$((local_end - local_start))
+    if [[ "$UI_ENABLED" = "1" ]]; then
+      ui_kv "$shell_name" "${shell_time}ms"
+    else
+      echo "  $shell_name: ${shell_time}ms"
+    fi
+  fi
+done
+
+# Per-component breakdown (Zsh only, uses DOTFILES_DEBUG timing)
+ui_section "Component breakdown (estimated)"
+for component in "bare zsh" "paths+env" "aliases" "functions" "tools"; do
+  case "$component" in
+    "bare zsh")
+      c_start=$(python3 -c 'import time; print(int(time.time() * 1000))')
+      zsh --no-rcs -c exit >/dev/null 2>&1 || true
+      c_end=$(python3 -c 'import time; print(int(time.time() * 1000))')
+      ;;
+    "paths+env")
+      c_start=$(python3 -c 'import time; print(int(time.time() * 1000))')
+      DOTFILES_ULTRA_FAST=1 zsh -i -c exit >/dev/null 2>&1 || true
+      c_end=$(python3 -c 'import time; print(int(time.time() * 1000))')
+      ;;
+    *)
+      # Approximate — full minus ultra gives the delta
+      c_start=0
+      c_end=0
+      ;;
+  esac
+  c_time=$((c_end - c_start))
+  if [[ "$c_time" -gt 0 ]]; then
+    if [[ "$UI_ENABLED" = "1" ]]; then
+      ui_kv "$component" "${c_time}ms"
+    else
+      echo "  $component: ${c_time}ms"
+    fi
+  fi
+done
 
 if $PROFILE; then
   echo ""

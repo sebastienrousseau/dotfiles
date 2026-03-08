@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
 # Unit tests for devcontainer install-full.sh bootstrap script
 
@@ -139,10 +139,10 @@ assert_file_exists "$DC_FILE" "devcontainer.json should exist"
 test_start "devcontainer_json_valid"
 if command -v jq &>/dev/null; then
   if jq . "$DC_FILE" >/dev/null 2>&1; then
-  ((TESTS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: devcontainer.json is valid JSON"
   else
-  ((TESTS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: devcontainer.json has JSON errors"
   fi
 else
@@ -179,10 +179,10 @@ test_start "devcontainer_full_shellcheck"
 if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error -e SC1091 "$FULL_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
-  ((TESTS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
-  ((TESTS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else

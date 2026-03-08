@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Dotfiles 2026: Atomic Intelligence Surface
 # High-fidelity, perfectly aligned, and professional.
 
@@ -16,13 +16,19 @@ _dotfiles_bento_render() {
   local os_name="Linux"
   local os_icon=""
   case "$(uname)" in
-    Darwin) os_name="macOS"; os_icon="" ;;
-    *) [[ -f /proc/sys/kernel/osrelease ]] && grep -qiE '(microsoft|wsl)' /proc/sys/kernel/osrelease && os_name="WSL"; os_icon="" ;;
+    Darwin)
+      os_name="macOS"
+      os_icon=""
+      ;;
+    *)
+      [[ -f /proc/sys/kernel/osrelease ]] && grep -qiE '(microsoft|wsl)' /proc/sys/kernel/osrelease && os_name="WSL"
+      os_icon=""
+      ;;
   esac
 
   # 1. Header with Version
   printf "\n"
-  printf "  ${c_cyan}${c_bold}💎  D O T F I L E S${c_reset}  ${c_slate}[v0.2.494]${c_reset}\n"
+  printf "  ${c_cyan}${c_bold}💎  D O T F I L E S${c_reset}  ${c_slate}[v0.2.495]${c_reset}\n"
   printf "  ${c_slate}──────────────────────────────────────────${c_reset}\n"
 
   # 2. High-Fidelity Metrics

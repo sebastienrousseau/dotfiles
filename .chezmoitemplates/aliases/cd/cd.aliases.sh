@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Description: This script provides enhanced functionality to quickly navigate directories.
 # Website: https://dotfiles.io
 # License: MIT
@@ -230,7 +230,7 @@ mkcd() {
 bookmark_list() {
   if [[ -f "${BOOKMARK_FILE}" ]]; then
     echo "Available bookmarks:"
-    sed 's/:/\t/' < "${BOOKMARK_FILE}" | column -t
+    sed 's/:/\t/' <"${BOOKMARK_FILE}" | column -t
   else
     echo "No bookmarks found."
   fi

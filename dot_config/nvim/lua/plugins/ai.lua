@@ -1,4 +1,4 @@
--- Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+-- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 -- AI-assisted coding plugins
 -- Loaded when ai_tools feature is enabled in .chezmoidata.toml
 
@@ -36,15 +36,6 @@ return {
           ["."] = false,
         },
       })
-    end,
-  },
-
-  -- Copilot cmp source (optional: integrates with nvim-cmp)
-  {
-    "zbirenbaum/copilot-cmp",
-    dependencies = { "zbirenbaum/copilot.lua" },
-    config = function()
-      require("copilot_cmp").setup()
     end,
   },
 
