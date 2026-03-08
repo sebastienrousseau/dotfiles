@@ -2,7 +2,7 @@
 
 This file documents all notable changes to this project.
 
-## v0.2.494
+## v0.2.495
 
 ### Fixed
 - **Installation failure (Issue #807)**: Resolved "unbound variable" errors in `install.sh` by correctly initializing color and path variables.

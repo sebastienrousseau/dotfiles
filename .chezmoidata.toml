@@ -1,6 +1,6 @@
 # Active profile - change this to switch configurations
 # Options: minimal, laptop, workstation, server, devops
-dotfiles_version = "0.2.494"
+dotfiles_version = "0.2.495"
 profile = "laptop"
 
 # Visual theme
