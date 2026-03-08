@@ -14,10 +14,10 @@ fi
 alias mcd='mkdir -p "$1" && cd "$1"' # Create and enter directory
 
 # Bookmark management
-alias bm='bm add'            # Create bookmark
-alias bmu='bm update'         # Update bookmark
-alias bmr='bm remove'         # Remove bookmark
-alias bml='bm list'           # List bookmarks
+alias bm='bm add'              # Create bookmark
+alias bmu='bm update'          # Update bookmark
+alias bmr='bm remove'          # Remove bookmark
+alias bml='bm list'            # List bookmarks
 alias bmg='cd "$(bm goto $1)"' # Go to bookmark (requires shell cd)
 
 # Navigation shortcuts

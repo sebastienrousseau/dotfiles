@@ -187,7 +187,7 @@ check_regression() {
     [[ -z "$baseline_value" ]] && continue
 
     if [[ $baseline_value -gt 0 ]]; then
-      local pct_change=$(( (value - baseline_value) * 100 / baseline_value ))
+      local pct_change=$(((value - baseline_value) * 100 / baseline_value))
       if [[ $pct_change -gt $regression_threshold ]]; then
         printf '%b\n' "  ${RED}⚠ REGRESSION${NC}: $metric increased ${pct_change}% (${baseline_value}ms -> ${value}ms)"
         ((BENCH_FAILURES++))
@@ -195,7 +195,7 @@ check_regression() {
         printf '%b\n' "  ${GREEN}✓ IMPROVEMENT${NC}: $metric decreased ${pct_change#-}% (${baseline_value}ms -> ${value}ms)"
       fi
     fi
-  done < "$RESULTS_FILE"
+  done <"$RESULTS_FILE"
 }
 
 generate_report() {

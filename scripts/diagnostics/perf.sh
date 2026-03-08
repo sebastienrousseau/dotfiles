@@ -183,7 +183,8 @@ for component in "bare zsh" "paths+env" "aliases" "functions" "tools"; do
       ;;
     *)
       # Approximate — full minus ultra gives the delta
-      c_start=0; c_end=0
+      c_start=0
+      c_end=0
       ;;
   esac
   c_time=$((c_end - c_start))

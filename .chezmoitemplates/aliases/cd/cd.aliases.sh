@@ -230,7 +230,7 @@ mkcd() {
 bookmark_list() {
   if [[ -f "${BOOKMARK_FILE}" ]]; then
     echo "Available bookmarks:"
-    sed 's/:/\t/' < "${BOOKMARK_FILE}" | column -t
+    sed 's/:/\t/' <"${BOOKMARK_FILE}" | column -t
   else
     echo "No bookmarks found."
   fi

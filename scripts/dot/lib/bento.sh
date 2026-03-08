@@ -16,8 +16,14 @@ _dotfiles_bento_render() {
   local os_name="Linux"
   local os_icon=""
   case "$(uname)" in
-    Darwin) os_name="macOS"; os_icon="" ;;
-    *) [[ -f /proc/sys/kernel/osrelease ]] && grep -qiE '(microsoft|wsl)' /proc/sys/kernel/osrelease && os_name="WSL"; os_icon="" ;;
+    Darwin)
+      os_name="macOS"
+      os_icon=""
+      ;;
+    *)
+      [[ -f /proc/sys/kernel/osrelease ]] && grep -qiE '(microsoft|wsl)' /proc/sys/kernel/osrelease && os_name="WSL"
+      os_icon=""
+      ;;
   esac
 
   # 1. Header with Version

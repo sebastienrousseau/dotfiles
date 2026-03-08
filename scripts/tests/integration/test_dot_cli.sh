@@ -40,7 +40,6 @@ else
   printf '%b\n' "    Got: '$version_output'"
 fi
 
-
 # ── dot help ─────────────────────────────────────────────────────
 
 test_start "dot_help_output"

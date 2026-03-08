@@ -57,7 +57,10 @@ if [[ -n "${ZSH_VERSION:-}" ]]; then
 
   _bookmark_complete_zsh() {
     local -a bookmarks
-    bookmarks=("${(@f)$(_get_bookmarks)}")
+    local line
+    while IFS= read -r line; do
+      bookmarks+=("$line")
+    done < <(_get_bookmarks)
     compadd -Q -- "${bookmarks[@]}"
   }
 

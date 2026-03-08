@@ -19,9 +19,9 @@ PATH="$MOCK_BIN_DIR:$PATH"
 mock_cmd() {
   local cmd=$1
   local exit_code=${2:-0}
-  echo "#!/bin/sh" > "$MOCK_BIN_DIR/$cmd"
-  echo "echo 'mocked $cmd' \$@" >> "$MOCK_BIN_DIR/$cmd"
-  echo "exit $exit_code" >> "$MOCK_BIN_DIR/$cmd"
+  echo "#!/bin/sh" >"$MOCK_BIN_DIR/$cmd"
+  echo "echo 'mocked $cmd' \$@" >>"$MOCK_BIN_DIR/$cmd"
+  echo "exit $exit_code" >>"$MOCK_BIN_DIR/$cmd"
   chmod +x "$MOCK_BIN_DIR/$cmd"
 }
 
@@ -38,9 +38,9 @@ for ext in tar.bz2 tar.gz zip rar 7z tar.xz tar.zst; do
   # Case 1: Tool exists
   case $ext in
     tar.*) mock_cmd "tar" ;;
-    zip)   mock_cmd "unzip" ;;
-    rar)   mock_cmd "unrar" ;;
-    7z)    mock_cmd "7z" ;;
+    zip) mock_cmd "unzip" ;;
+    rar) mock_cmd "unrar" ;;
+    7z) mock_cmd "7z" ;;
   esac
 
   output=$(env -i PATH="$MOCK_BIN_DIR" sh "$EXTRACT_BIN" "test.$ext" 2>&1)

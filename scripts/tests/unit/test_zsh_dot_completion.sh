@@ -126,7 +126,7 @@ fi
 # Test: completion parity with dot help
 test_start "dot_completion_parity_with_help"
 # Extract subcommands from dot case statement
-help_cmds=$(grep -oE '^\s+[a-z][-a-z]+\)' "$DOT_FILE" 2>/dev/null | \
+help_cmds=$(grep -oE '^\s+[a-z][-a-z]+\)' "$DOT_FILE" 2>/dev/null |
   sed 's/[[:space:]]*//;s/)//' | sort -u)
 missing_count=0
 for cmd in $help_cmds; do

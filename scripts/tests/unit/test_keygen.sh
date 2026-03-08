@@ -50,10 +50,10 @@ if type keygen &>/dev/null; then
   result=$(keygen --type invalid_type test_key 2>&1 || echo "error")
   # Check for error messages (case insensitive)
   if echo "$result" | grep -iqE "(error|invalid|unknown|usage)"; then
-  ((TESTS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: invalid type shows error message"
   else
-  ((TESTS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should show error for invalid type"
   fi
 fi

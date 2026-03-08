@@ -13,9 +13,11 @@ assert_file_exists "$TEST_SCRIPT" "patterns.sh should exist"
 
 test_start "patterns_syntax"
 if bash -n "$TEST_SCRIPT" 2>/dev/null; then
-  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
 else
-  ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax error"
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax error"
 fi
 
 test_start "patterns_shebang"
