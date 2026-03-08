@@ -4,7 +4,10 @@
 if vim.fn.has("nvim-0.11.2") ~= 1 then
   vim.api.nvim_echo({
     { "Dotfiles Neovim config requires Neovim >= 0.11.2\n", "ErrorMsg" },
-    { "Current: " .. vim.version().major .. "." .. vim.version().minor .. "." .. vim.version().patch .. "\n", "WarningMsg" },
+    {
+      "Current: " .. vim.version().major .. "." .. vim.version().minor .. "." .. vim.version().patch .. "\n",
+      "WarningMsg",
+    },
   }, true, {})
   return
 end
