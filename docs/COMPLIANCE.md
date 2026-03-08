@@ -307,22 +307,30 @@ Enable "Require signed commits" in repository settings:
 
 | Category | Count | Coverage |
 |----------|-------|----------|
-| Scripts | 62 | Tested |
-| Alias templates | 97 | Tested |
-| Function templates | 52 | Tested |
-| **Total modules** | **211** | - |
-| **Test files** | **218** | **Module coverage: 100% (threshold >=95%)** |
+| Scripts | 89 | Tested |
+| Alias files | 99 | Tested |
+| Function files | 51 | Tested |
+| Shell configs | 12 | Tested |
+| Fish functions + conf.d | 32 | Tested |
+| Nushell configs | 5 | Tested |
+| Neovim Lua configs | 15 | Tested |
+| **Total test files** | **387** | **Module coverage: 100% (threshold >=95%)** |
+| **Total assertions** | **1655** | **Pass rate: 100%** |
 
 ### Test Framework
 
 ```
 scripts/tests/
 ├── framework/
-│   ├── assertions.sh    # Test assertions
-│   ├── mocks.sh         # Mock functions
+│   ├── assertions.sh    # 16 assertion functions
+│   ├── mocks.sh         # Mock utilities
 │   └── test_runner.sh   # Test executor
-└── unit/
-    └── test_*.sh        # 218 unit test files
+├── unit/
+│   └── test_*.sh        # 378 unit test files
+├── integration/
+│   └── test_*.sh        # 9 integration test files
+└── performance/
+    └── benchmark_runner.sh
 ```
 
 ### Running Tests

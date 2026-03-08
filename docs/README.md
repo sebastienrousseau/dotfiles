@@ -19,10 +19,12 @@ Everything you need to know about this dotfiles setup, organized by topic.
 
 ### Configuration
 - [Aliases Reference](ALIASES.md) — shell aliases and shortcuts
+- [Aliases Cheatsheet](ALIASES_CHEATSHEET.md) — quick reference card
 - [Alias Deprecations](ALIASES_DEPRECATIONS.md) — removed aliases
 - [Keybindings](KEYS.md) — keyboard shortcuts
 - [Tools Reference](TOOLS.md) — integrated tools and utilities
 - [Utilities](UTILS.md) — helper scripts and the `dot` CLI
+- [AI Integrations](AI.md) — AI CLI tool configuration
 
 ### Customization
 - [Fonts Guide](FONTS.md) — Nerd Fonts setup
@@ -33,6 +35,8 @@ Everything you need to know about this dotfiles setup, organized by topic.
 - [Security Overview](SECURITY.md) — security model and practices
 - [Security Checklist](SECURITY_CHECKLIST.md) — hardening guide
 - [Secrets Management](SECRETS.md) — encrypted credentials
+- [Key Rotation](KEY_ROTATION.md) — rotating Age and SOPS keys
+- [Threat Model](THREAT_MODEL.md) — trust boundaries and attack surfaces
 
 ### Development
 - [Testing Guide](TESTING.md) — test framework and coverage
@@ -45,3 +49,4 @@ Everything you need to know about this dotfiles setup, organized by topic.
 ### Reference
 - [Roadmap](ROADMAP.md) — future plans and priorities
 - [Version Sync](VERSION_SYNC.md) — how version numbers propagate
+- [Support Matrix](SUPPORT_MATRIX.md) — tested platforms and tools
