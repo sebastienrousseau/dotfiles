@@ -1,9 +1,10 @@
 # Neovim
 
 ## Modern Core
-- **Installation**: Uses Neovim Nightly (v0.11+) for the latest features and plugin compatibility.
-- **Configuration**: A modular and lazy-loaded configuration based on `lazy.nvim`.
-- **UI**: A dashboard, status line, buffer line, and file explorer.
+- **Requirement**: Neovim >= 0.11.2. The config checks this at startup.
+- **Configuration**: Modular, lazy-loaded configuration based on `lazy.nvim`.
+- **Completion**: `blink.cmp` for fast, keystroke-level completion with LSP, snippets, and path sources.
+- **UI**: Snacks.nvim dashboard, notifications, status line, buffer line, and file explorer.
 - **LSP**: Full LSP support for diagnostics, code actions, and more, managed by `mason.nvim`.
 
 ## Language Support
@@ -18,9 +19,10 @@
 ## VS Code Parity
 - **Problem Panel**: `trouble.nvim` for a VS Code-like problems panel (`<leader>xx`).
 - **Search & Replace**: `nvim-spectre` for project-wide search and replace (`<leader>S`).
-- **Auto-Pairs**: Automatically closes brackets and pairs.
+- **Auto-Pairs**: Automatically closes brackets and pairs (via `blink.cmp` auto-brackets).
 - **TODOs**: Highlights `TODO` and `FIXME` comments.
 - **Session**: Auto-restores your last session.
+- **Snippets**: Native `vim.snippet` engine (Neovim 0.11+).
 
 ## Keybindings
 | Key | Action |
