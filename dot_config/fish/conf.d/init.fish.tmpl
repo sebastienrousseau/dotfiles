@@ -33,49 +33,32 @@ if status is-interactive
     # ==============================================================================
 
     function _dotfiles_async_init
+        # Tool initializations use _cached_eval for mtime-aware caching.
+        # Cache is invalidated automatically when the binary is upgraded.
+
         # Mise
         if command -v mise >/dev/null
-            set -l cache "$SHELL_CACHE/mise-init.fish"
-            if not test -f "$cache"
-                command mise activate fish > "$cache" </dev/null 2>/dev/null &
-            end
-            test -f "$cache"; and source "$cache"
+            _cached_eval mise activate fish
         end
 
         # Atuin
         if command -v atuin >/dev/null
-            set -l cache "$SHELL_CACHE/atuin-init.fish"
-            if not test -f "$cache"
-                command atuin init fish > "$cache" </dev/null 2>/dev/null &
-            end
-            test -f "$cache"; and source "$cache"
+            _cached_eval atuin init fish
         end
 
         # Starship (Skip in Artifact Mode)
         if test "$DOTFILES_ARTIFACT_MODE" = "0"; and command -v starship >/dev/null
-            set -l cache "$SHELL_CACHE/starship-init.fish"
-            if not test -f "$cache"
-                command starship init fish > "$cache" </dev/null 2>/dev/null &
-            end
-            test -f "$cache"; and source "$cache"
+            _cached_eval starship init fish
         end
 
         # Zoxide
         if command -v zoxide >/dev/null
-            set -l cache "$SHELL_CACHE/zoxide-init.fish"
-            if not test -f "$cache"
-                command zoxide init fish > "$cache" </dev/null 2>/dev/null &
-            end
-            test -f "$cache"; and source "$cache"
+            _cached_eval zoxide init fish
         end
 
         # FZF
         if command -v fzf >/dev/null
-            set -l cache "$SHELL_CACHE/fzf-init.fish"
-            if not test -f "$cache"
-                command fzf --fish > "$cache" </dev/null 2>/dev/null &
-            end
-            test -f "$cache"; and source "$cache"
+            _cached_eval fzf --fish
         end
     end
 

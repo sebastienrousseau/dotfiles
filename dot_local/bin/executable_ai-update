@@ -54,7 +54,11 @@ fi
 # --- 1. mise Core (Multi-Method Detection) ---
 if command -v mise >/dev/null 2>&1; then
     step "Checking mise core"
-    if [[ "$(uname -s)" == "Linux" ]] && command -v dpkg >/dev/null 2>&1 && dpkg -s mise >/dev/null 2>&1; then
+    if [[ "$(uname -s)" == "Linux" ]] && command -v pacman >/dev/null 2>&1 && pacman -Qs mise >/dev/null 2>&1; then
+        # Handle Arch/CachyOS AUR/Official package
+        sudo pacman -S --noconfirm mise >/dev/null 2>&1 || true
+        ok
+    elif [[ "$(uname -s)" == "Linux" ]] && command -v dpkg >/dev/null 2>&1 && dpkg -s mise >/dev/null 2>&1; then
         # Handle your ZorinOS APT installation
         sudo apt update -y -o Dir::Etc::sourcelist="sources.list.d/jdx.list" >/dev/null 2>&1 || true
         sudo apt install --only-upgrade -y mise >/dev/null 2>&1

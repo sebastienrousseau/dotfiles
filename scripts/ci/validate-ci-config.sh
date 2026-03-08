@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # CI Configuration Validation Script
 # Verifies that all zero-warning policy components are properly configured
 

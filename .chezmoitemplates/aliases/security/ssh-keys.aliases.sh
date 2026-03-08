@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # SSH Key Management
 [[ -n "${_SSH_KEYS_LOADED:-}" ]] && return 0
 _SSH_KEYS_LOADED=1

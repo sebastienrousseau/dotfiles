@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC2034
 # Assertion library for shell tests
 # Provides a comprehensive set of assertion functions for testing shell scripts

@@ -21,10 +21,10 @@
     <!-- Starship Prompt -->
     <text x="40" y="80" fill="#89b4fa">λ</text>
     <text x="60" y="80" fill="#cdd6f4">~/.dotfiles</text>
-    <text x="160" y="80" fill="#f5c2e7" font-weight="bold">on  feat/v0.2.494</text>
+    <text x="160" y="80" fill="#f5c2e7" font-weight="bold">on  feat/v0.2.495</text>
 
     <text x="40" y="110" fill="#cdd6f4">➜ dot --version</text>
-    <text x="40" y="130" fill="#a6e3a1">.dotfiles v0.2.494 — Battle-tested in high-compliance environments</text>
+    <text x="40" y="130" fill="#a6e3a1">.dotfiles v0.2.495 — Battle-tested in high-compliance environments</text>
 
     <!-- dot verify output -->
     <text x="40" y="170" fill="#cdd6f4">➜ dot verify --security</text>
@@ -50,7 +50,7 @@
     <!-- New prompt -->
     <text x="40" y="385" fill="#89b4fa">λ</text>
     <text x="60" y="385" fill="#cdd6f4">~/.dotfiles</text>
-    <text x="160" y="385" fill="#f5c2e7" font-weight="bold">on  feat/v0.2.494</text>
+    <text x="160" y="385" fill="#f5c2e7" font-weight="bold">on  feat/v0.2.495</text>
     <rect x="330" y="373" width="8" height="18" fill="#cdd6f4">
       <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite" />
     </rect>

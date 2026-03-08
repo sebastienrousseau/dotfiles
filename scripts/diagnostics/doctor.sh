@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 ## Dotfiles Doctor.
 ##
 ## Diagnoses dotfiles environment health by checking dependencies, paths,
@@ -56,6 +56,24 @@ _section() {
   printf '  \033[1;38;5;63m%s\033[0m\n' "$1"
 }
 
+pretty_path() {
+  local value="${1:-}"
+  if [[ -n "$value" ]]; then
+    printf '%s' "${value/#$HOME/\~}"
+  fi
+}
+
+tool_source() {
+  local path="${1:-}"
+  if [[ "$path" == "$HOME/.local/share/mise/"* ]]; then
+    echo "mise"
+  elif [[ "$path" == /usr/bin/* || "$path" == /bin/* || "$path" == /usr/sbin/* || "$path" == /sbin/* ]]; then
+    echo "system"
+  else
+    echo "custom"
+  fi
+}
+
 check_cmd() {
   local cmd="$1"
   if command -v "$cmd" &>/dev/null; then return 0; fi
@@ -92,7 +110,8 @@ printf '  \033[1mDotfiles Doctor\033[0m\n'
 _section "Core Shells"
 for cmd in zsh fish nu starship; do
   if check_cmd "$cmd"; then
-    _ok "$cmd" "$(get_cmd_path "$cmd")"
+    cmd_path="$(get_cmd_path "$cmd")"
+    _ok "$cmd" "$(pretty_path "$cmd_path") ($(tool_source "$cmd_path"))"
   elif [[ "$cmd" == "nu" || "$cmd" == "fish" ]]; then
     _warn "$cmd" "optional"
   else
@@ -104,9 +123,9 @@ done
 _section "Modern CLI Tools"
 for cmd in rg bat chezmoi fzf zoxide atuin yazi zellij; do
   if check_cmd "$cmd"; then
-    _ok "$cmd" "$(get_cmd_path "$cmd")"
+    _ok "$cmd" "$(pretty_path "$(get_cmd_path "$cmd")")"
   elif [[ "$cmd" == "bat" ]] && check_cmd "batcat"; then
-    _ok "$cmd" "$(get_cmd_path "batcat") (batcat)"
+    _ok "$cmd" "$(pretty_path "$(get_cmd_path "batcat")") (batcat)"
   else
     _fail "$cmd" "missing"
   fi
@@ -116,9 +135,9 @@ done
 _section "Infrastructure"
 for cmd in pueue wasmtime nix sops age hyperfine; do
   if check_cmd "$cmd"; then
-    _ok "$cmd" "$(get_cmd_path "$cmd")"
+    _ok "$cmd" "$(pretty_path "$(get_cmd_path "$cmd")")"
   elif [[ "$cmd" == "nix" ]]; then
-    _warn "$cmd" "optional (curl -L https://nixos.org/nix/install | sh)"
+    _ok "$cmd" "optional (not installed)"
   else
     _fail "$cmd" "missing"
   fi
@@ -136,7 +155,7 @@ fi
 _section "AI CLIs"
 for cmd in claude gemini sgpt ollama opencode aider kiro-cli; do
   if check_cmd "$cmd"; then
-    _ok "$cmd" "$(get_cmd_path "$cmd")"
+    _ok "$cmd" "$(pretty_path "$(get_cmd_path "$cmd")")"
   else
     _warn "$cmd" "optional"
   fi
@@ -145,13 +164,13 @@ done
 # --- Environment ---
 _section "Environment"
 if [[ -n "${XDG_CONFIG_HOME:-}" ]]; then
-  _ok "XDG_CONFIG_HOME" "$XDG_CONFIG_HOME"
+  _ok "XDG_CONFIG_HOME" "$(pretty_path "$XDG_CONFIG_HOME")"
 else
   _warn "XDG_CONFIG_HOME" "defaulting to ~/.config"
 fi
 
 if [[ -n "${PIPX_HOME:-}" ]]; then
-  _ok "PIPX_HOME" "$PIPX_HOME"
+  _ok "PIPX_HOME" "$(pretty_path "$PIPX_HOME")"
 else
   _warn "PIPX_HOME" "not set"
 fi
@@ -159,8 +178,31 @@ fi
 # --- Platform ---
 _section "Platform"
 platform_id="$(dot_platform_id)"
+host_os="$(dot_host_os)"
+kernel="$(uname -sr)"
+arch="$(uname -m)"
+hostname_value="$(hostname 2>/dev/null || true)"
+session_type="${XDG_SESSION_TYPE:-unknown}"
+desktop_env="${XDG_CURRENT_DESKTOP:-unknown}"
+uptime_human="$(uptime -p 2>/dev/null | sed 's/^up //')"
+
+if [[ -r /etc/os-release ]]; then
+  distro_pretty="$(. /etc/os-release; echo "${PRETTY_NAME:-$ID}")"
+else
+  distro_pretty="$host_os"
+fi
+
 _ok "Runtime" "$platform_id"
-_ok "Host" "$(dot_host_os)"
+_ok "Host OS" "$host_os"
+_ok "Distro" "$distro_pretty"
+_ok "Kernel" "$kernel"
+_ok "Architecture" "$arch"
+_ok "Hostname" "$hostname_value"
+_ok "Desktop" "$desktop_env"
+_ok "Session" "$session_type"
+if [[ -n "${uptime_human:-}" ]]; then
+  _ok "Uptime" "$uptime_human"
+fi
 
 if [[ "$platform_id" == "wsl" ]]; then
   if command -v wslpath >/dev/null 2>&1; then
@@ -192,12 +234,42 @@ fi
 if command -v dot >/dev/null 2>&1; then
   dot_path="$(command -v dot)"
   if [[ "$dot_path" == "$HOME/.local/bin/dot" ]]; then
-    _ok "dot" "$dot_path"
+    _ok "dot" "$(pretty_path "$dot_path")"
   else
-    _warn "dot" "$dot_path (expected ~/.local/bin/dot)"
+    _warn "dot" "$(pretty_path "$dot_path") (expected ~/.local/bin/dot)"
   fi
 else
   _fail "dot" "not found in PATH"
+fi
+
+# --- Topgrade Integration ---
+_section "Topgrade Integration"
+
+if command -v antigravity >/dev/null 2>&1; then
+  ag_path="$(command -v antigravity)"
+  if [[ "$ag_path" == "$HOME/.local/bin/antigravity" ]]; then
+    _ok "antigravity wrapper" "$(pretty_path "$ag_path")"
+  else
+    _warn "antigravity wrapper" "$(pretty_path "$ag_path") (expected ~/.local/bin/antigravity)"
+  fi
+else
+  _warn "antigravity" "optional"
+fi
+
+if [[ -f "$HOME/.config/fish/fish_plugins" ]]; then
+  if grep -qx "jorgebucaran/fisher" "$HOME/.config/fish/fish_plugins"; then
+    _ok "fish_plugins" "contains jorgebucaran/fisher"
+  else
+    _warn "fish_plugins" "present but missing jorgebucaran/fisher"
+  fi
+else
+  _fail "fish_plugins" "missing (~/.config/fish/fish_plugins)"
+fi
+
+if command -v cargo-install-update >/dev/null 2>&1; then
+  _ok "cargo-install-update" "$(pretty_path "$(command -v cargo-install-update)")"
+else
+  _warn "cargo-install-update" "missing (install: cargo install cargo-update)"
 fi
 
 # --- Symlinks ---
@@ -218,23 +290,37 @@ fi
 
 # --- Portability ---
 ghost_paths=0
-if [[ -d "$HOME/.config" ]]; then
-  ghost_lines=$(grep -rIE '"/home/(linuxbrew)?[^$]|/Users/[^$]' "$HOME/.config" |
-    grep -v "linuxbrew" |
-    grep -v "/mozilla/firefox" |
-    grep -v "/google-chrome" |
-    grep -v "/chromium" |
-    grep -v "/chezmoi/chezmoi.toml" |
-    grep -v "/bun/" |
-    grep -v "/noctalia/" |
-    grep -v -- "-backup/" ||
-    true)
-  if [[ -n "$ghost_lines" ]]; then
-    ghost_paths=$(echo "$ghost_lines" | wc -l)
-    _warn "portability" "$ghost_paths hardcoded paths in ~/.config"
+if command -v chezmoi >/dev/null 2>&1; then
+  while IFS= read -r managed_path; do
+    [[ "$managed_path" == "$HOME/.config/"* ]] || continue
+    [[ -f "$managed_path" ]] || continue
+    grep -Iq . "$managed_path" 2>/dev/null || continue
+
+    match_count=$(
+      grep -nE '"/home/(linuxbrew)?[^$]|/Users/[^$]' "$managed_path" 2>/dev/null |
+        grep -v "linuxbrew" |
+        grep -v "/mozilla/firefox" |
+        grep -v "/google-chrome" |
+        grep -v "/chromium" |
+        grep -v "/chezmoi/chezmoi.toml" |
+        grep -v "/bun/" |
+        grep -v "/.bun/" |
+        grep -v "/noctalia/" |
+        grep -v -- "-backup/" |
+        wc -l | tr -d ' ' ||
+        true
+    )
+
+    ghost_paths=$((ghost_paths + ${match_count:-0}))
+  done < <(chezmoi managed --path-style=absolute 2>/dev/null || true)
+
+  if [[ $ghost_paths -gt 0 ]]; then
+    _warn "portability" "$ghost_paths hardcoded paths in managed ~/.config files"
   else
-    _ok "portability" "no hardcoded paths"
+    _ok "portability" "no hardcoded paths in managed ~/.config files"
   fi
+else
+  _warn "portability" "chezmoi not found (scan skipped)"
 fi
 
 # --- Performance ---

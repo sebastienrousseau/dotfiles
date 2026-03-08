@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Description:
 #   goto is a utility function to quickly navigate to a specified directory.
 #   It changes to the given directory and lists its contents.

@@ -71,6 +71,74 @@ dot ssh-key ~/.ssh/id_ed25519
 
 This creates a local encrypted file, which you can add to chezmoi with `chezmoi add --encrypt` if needed.
 
+## External Secrets Backends
+
+Chezmoi natively supports external secret managers as template functions. Configure the backend in `.chezmoidata.toml`:
+
+```toml
+secrets_backend = "age"  # age, 1password, bitwarden, pass, vault
+```
+
+### 1Password
+
+Requires the [1Password CLI](https://developer.1password.com/docs/cli/) (`op`).
+
+```toml
+# .chezmoidata.toml
+secrets_backend = "1password"
+```
+
+Use in templates:
+```
+{{ onepassword "my-secret" "vault-name" }}
+{{ onepasswordRead "op://vault/item/field" }}
+```
+
+### Bitwarden
+
+Requires the [Bitwarden CLI](https://bitwarden.com/help/cli/) (`bw`).
+
+```toml
+# .chezmoidata.toml
+secrets_backend = "bitwarden"
+```
+
+Use in templates:
+```
+{{ bitwarden "item" "my-login" }}
+{{ bitwardenFields "item" "my-login" }}
+```
+
+### HashiCorp Vault
+
+Requires the [Vault CLI](https://developer.hashicorp.com/vault/docs/commands) (`vault`).
+
+```toml
+# .chezmoidata.toml
+secrets_backend = "vault"
+```
+
+Use in templates:
+```
+{{ vault "secret/data/my-secret" }}
+```
+
+### pass (Password Store)
+
+Requires [pass](https://www.passwordstore.org/).
+
+```toml
+# .chezmoidata.toml
+secrets_backend = "pass"
+```
+
+Use in templates:
+```
+{{ pass "my-secret" }}
+```
+
+See the [chezmoi documentation](https://www.chezmoi.io/user-guide/password-managers/) for full details on each backend.
+
 ## Security Notes
 
 - **Never commit** `~/.config/chezmoi/key.txt` to version control.

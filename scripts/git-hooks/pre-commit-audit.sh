@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Dotfiles Pre-Commit Sentinel (Audit Hook)
 # Prevents secrets, hardcoded paths, and shell hygiene violations.
 
@@ -136,6 +136,6 @@ if [[ $FAILED -eq 1 ]]; then
   echo -e "   (Use --no-verify to bypass if absolutely necessary)"
   exit 1
 else
-  echo -e "${GREEN}${BOLD}✅ Audit passed.${NC} v0.2.494 standards maintained."
+  echo -e "${GREEN}${BOLD}✅ Audit passed.${NC} v0.2.495 standards maintained."
   exit 0
 fi
