@@ -13,27 +13,34 @@ assert_file_exists "$TARGET" "keymaps.lua should exist"
 
 test_start "nvim_keymaps_not_empty"
 if [[ -s "$TARGET" ]]; then
-  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
-  ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: file is empty"
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: file is empty"
 fi
 
 test_start "nvim_keymaps_valid_lua"
 if command -v luacheck >/dev/null 2>&1; then
   if luacheck --no-color --quiet --globals vim -- "$TARGET" 2>/dev/null; then
-    ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck passed"
+    ((TESTS_PASSED++))
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck passed"
   else
-    ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck warnings (non-fatal)"
+    ((TESTS_PASSED++))
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck warnings (non-fatal)"
   fi
 else
-  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck not available (skipped)"
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck not available (skipped)"
 fi
 
 test_start "nvim_keymaps_defines_mappings"
 if grep -q 'vim.keymap.set\|vim.api.nvim_set_keymap\|map(' "$TARGET" 2>/dev/null; then
-  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines key mappings"
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines key mappings"
 else
-  ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define key mappings"
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define key mappings"
 fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

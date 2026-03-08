@@ -13,6 +13,12 @@ assert_dir_exists "$ALIASES_DIR" "yarn aliases should exist"
 test_start "yarn_aliases_valid"
 invalid=0
 for f in "$ALIASES_DIR"/*.sh; do [[ -f "$f" ]] && ! bash -n "$f" 2>/dev/null && ((invalid++)); done
-[[ "$invalid" -eq 0 ]] && { ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"; } || { ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"; }
+[[ "$invalid" -eq 0 ]] && {
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+} || {
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
+}
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

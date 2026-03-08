@@ -344,7 +344,7 @@ alias lzip='unzip -l'         # List zip archive contents
 if command -v unrar >/dev/null 2>&1; then
   alias lrar='unrar l' # List rar archive contents
 fi
-alias lar='list_archive'      # Generic list archive contents
+alias lar='list_archive' # Generic list archive contents
 
 # 7-Zip Aliases
 alias c7z='7z a' # Create 7z archive

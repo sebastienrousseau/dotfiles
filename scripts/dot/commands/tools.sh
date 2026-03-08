@@ -319,7 +319,7 @@ cmd_aliases() {
       local src_dir out
       src_dir="$(require_source_dir)"
       out="$src_dir/docs/ALIASES_CHEATSHEET.md"
-      bash "$src_dir/scripts/diagnostics/aliases-cheatsheet.sh" > "$out"
+      bash "$src_dir/scripts/diagnostics/aliases-cheatsheet.sh" >"$out"
       ui_ok "Generated" "$out"
       ;;
     tiers)

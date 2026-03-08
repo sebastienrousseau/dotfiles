@@ -238,7 +238,7 @@ update_version_references() {
         diff -u "$file" "$temp_file" | head -20 >&2 || true
       else
         # Use cat to preserve permissions and ownership
-        cat "$temp_file" > "$file"
+        cat "$temp_file" >"$file"
         log_success "Updated: $file"
       fi
       changes_made=$((changes_made + 1))
@@ -433,7 +433,7 @@ main() {
           log_info "Would update: $script_file"
         else
           # Use cat to preserve permissions and ownership
-          cat "$temp_file" > "$full_path"
+          cat "$temp_file" >"$full_path"
           log_success "Updated: $script_file"
         fi
       else

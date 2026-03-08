@@ -13,27 +13,34 @@ assert_file_exists "$TARGET" "autocmds.lua should exist"
 
 test_start "nvim_autocmds_not_empty"
 if [[ -s "$TARGET" ]]; then
-  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
-  ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: file is empty"
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: file is empty"
 fi
 
 test_start "nvim_autocmds_valid_lua"
 if command -v luacheck >/dev/null 2>&1; then
   if luacheck --no-color --quiet --globals vim -- "$TARGET" 2>/dev/null; then
-    ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck passed"
+    ((TESTS_PASSED++))
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck passed"
   else
-    ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck warnings (non-fatal)"
+    ((TESTS_PASSED++))
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck warnings (non-fatal)"
   fi
 else
-  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck not available (skipped)"
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck not available (skipped)"
 fi
 
 test_start "nvim_autocmds_defines_autocmds"
 if grep -q 'vim.api.nvim_create_autocmd\|vim.api.nvim_create_augroup\|autocmd' "$TARGET" 2>/dev/null; then
-  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines autocommands"
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines autocommands"
 else
-  ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define autocommands"
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define autocommands"
 fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

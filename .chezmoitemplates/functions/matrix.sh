@@ -33,18 +33,39 @@ show_version() {
 
 matrix() {
   case "${1:-}" in
-    --help) show_help; return 0 ;;
-    --version) show_version; return 0 ;;
+    --help)
+      show_help
+      return 0
+      ;;
+    --version)
+      show_version
+      return 0
+      ;;
   esac
 
   local color="green" speed="" rainbow=false bold="-b"
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --color) color="${2:-green}"; shift 2 ;;
-      --rainbow) rainbow=true; shift ;;
-      --slow) speed="-u 8"; shift ;;
-      --fast) speed="-u 2"; shift ;;
-      *) echo "Unknown option: '$1'" >&2; return 1 ;;
+      --color)
+        color="${2:-green}"
+        shift 2
+        ;;
+      --rainbow)
+        rainbow=true
+        shift
+        ;;
+      --slow)
+        speed="-u 8"
+        shift
+        ;;
+      --fast)
+        speed="-u 2"
+        shift
+        ;;
+      *)
+        echo "Unknown option: '$1'" >&2
+        return 1
+        ;;
     esac
   done
 
@@ -55,11 +76,11 @@ matrix() {
       cmatrix_args+=("-r")
     else
       case "$color" in
-        green)  cmatrix_args+=("-C" "green") ;;
-        purple|magenta) cmatrix_args+=("-C" "magenta") ;;
-        red)    cmatrix_args+=("-C" "red") ;;
-        blue)   cmatrix_args+=("-C" "blue") ;;
-        white)  cmatrix_args+=("-C" "white") ;;
+        green) cmatrix_args+=("-C" "green") ;;
+        purple | magenta) cmatrix_args+=("-C" "magenta") ;;
+        red) cmatrix_args+=("-C" "red") ;;
+        blue) cmatrix_args+=("-C" "blue") ;;
+        white) cmatrix_args+=("-C" "white") ;;
         yellow) cmatrix_args+=("-C" "yellow") ;;
       esac
     fi
@@ -67,8 +88,8 @@ matrix() {
     # ANSI color 0 to match, so ncurses uses the real background
     # (preserving transparency if the terminal supports it).
     local _bg=""
-    if printf '\e]11;?\e\\' > /dev/tty 2>/dev/null; then
-      IFS= read -rs -t 0.1 -d $'\\' _bg < /dev/tty 2>/dev/null || true
+    if printf '\e]11;?\e\\' >/dev/tty 2>/dev/null; then
+      IFS= read -rs -t 0.1 -d $'\\' _bg </dev/tty 2>/dev/null || true
       _bg="${_bg##*rgb:}"
       [[ -n "$_bg" ]] && printf '\e]4;0;rgb:%s\e\\' "$_bg"
     fi
@@ -81,9 +102,9 @@ matrix() {
   # Fallback: bash + awk implementation
   local MATRIX_COLORS
   declare -A MATRIX_COLORS=(
-    [green]='\033[38;5;46m'  [purple]='\033[38;5;55m'
-    [red]='\033[38;5;196m'   [blue]='\033[38;5;33m'
-    [white]='\033[38;5;15m'  [yellow]='\033[38;5;226m'
+    [green]='\033[38;5;46m' [purple]='\033[38;5;55m'
+    [red]='\033[38;5;196m' [blue]='\033[38;5;33m'
+    [white]='\033[38;5;15m' [yellow]='\033[38;5;226m'
   )
   local esc_color="${MATRIX_COLORS[$color]:-${MATRIX_COLORS[green]}}"
   local sleep_val=0.04
@@ -122,7 +143,11 @@ matrix() {
   fi
 
   (
-    _matrix_cleanup() { printf '\e[?25h'; tput cnorm 2>/dev/null; tput rmcup 2>/dev/null; }
+    _matrix_cleanup() {
+      printf '\e[?25h'
+      tput cnorm 2>/dev/null
+      tput rmcup 2>/dev/null
+    }
     trap '_matrix_cleanup' EXIT
 
     tput smcup
@@ -133,9 +158,9 @@ matrix() {
     local _rows=${LINES:-$(tput lines 2>/dev/null || echo 40)}
 
     # 'q' key listener — reads directly from terminal
-    { while IFS= read -rsn1 _k < /dev/tty 2>/dev/null; do
-        [[ "$_k" == "q" || "$_k" == "Q" ]] && kill $$ 2>/dev/null && break
-      done; } &
+    { while IFS= read -rsn1 _k </dev/tty 2>/dev/null; do
+      [[ "$_k" == "q" || "$_k" == "Q" ]] && kill $$ 2>/dev/null && break
+    done; } &
 
     while true; do
       echo "$_rows $_cols $((RANDOM % _cols)) $((RANDOM % 72))"

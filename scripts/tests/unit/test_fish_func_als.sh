@@ -12,20 +12,25 @@ assert_file_exists "$FISH_FUNC" "als.fish should exist"
 
 test_start "fish_als_not_empty"
 if [[ -s "$FISH_FUNC" ]]; then
-  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: not empty"
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: not empty"
 else
-  ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should not be empty"
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should not be empty"
 fi
 
 test_start "fish_als_valid_syntax"
 if command -v fish >/dev/null 2>&1; then
   if fish -n "$FISH_FUNC" 2>/dev/null; then
-    ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: valid fish syntax"
+    ((TESTS_PASSED++))
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: valid fish syntax"
   else
-    ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: fish syntax error"
+    ((TESTS_FAILED++))
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: fish syntax error"
   fi
 else
-  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (fish not available)"
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (fish not available)"
 fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

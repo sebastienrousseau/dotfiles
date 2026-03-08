@@ -20,9 +20,9 @@ export DOTFILES_SILENT=1
 
 # Prepare mock font directory
 if [[ "$(uname)" == "Darwin" ]]; then
-    FONT_DIR="$HOME/Library/Fonts"
+  FONT_DIR="$HOME/Library/Fonts"
 else
-    FONT_DIR="$HOME/.local/share/fonts"
+  FONT_DIR="$HOME/.local/share/fonts"
 fi
 mkdir -p "$FONT_DIR"
 
@@ -31,16 +31,16 @@ mkdir -p "$FONT_DIR"
 MOCK_BIN=$(mktemp -d)
 export PATH="$MOCK_BIN:$PATH"
 
-echo "#!/bin/sh" > "$MOCK_BIN/curl"
-echo "touch \$3" >> "$MOCK_BIN/curl" # mock -o/Lo behavior
+echo "#!/bin/sh" >"$MOCK_BIN/curl"
+echo "touch \$3" >>"$MOCK_BIN/curl" # mock -o/Lo behavior
 chmod +x "$MOCK_BIN/curl"
 
-echo "#!/bin/sh" > "$MOCK_BIN/unzip"
-echo "exit 0" >> "$MOCK_BIN/unzip"
+echo "#!/bin/sh" >"$MOCK_BIN/unzip"
+echo "exit 0" >>"$MOCK_BIN/unzip"
 chmod +x "$MOCK_BIN/unzip"
 
-echo "#!/bin/sh" > "$MOCK_BIN/fc-cache"
-echo "exit 0" >> "$MOCK_BIN/fc-cache"
+echo "#!/bin/sh" >"$MOCK_BIN/fc-cache"
+echo "exit 0" >>"$MOCK_BIN/fc-cache"
 chmod +x "$MOCK_BIN/fc-cache"
 
 output=$(bash "$FONT_INSTALL_SCRIPT" 2>&1)

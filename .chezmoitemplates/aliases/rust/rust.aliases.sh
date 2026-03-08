@@ -24,14 +24,14 @@ if command -v 'cargo' >/dev/null; then
   alias cgtt='cg test -- --test-threads=1' # Single threaded tests
 
   # Code Quality
-  alias cgc='cg check'      # Check compilation
-  alias cgcl='cg clean'     # Clean build artifacts
-  alias cgcy='cg clippy'    # Run clippy lints
-  alias cgf='cg fmt'        # Format code
-  alias cnfmt='cargo +nightly fmt' # Nightly format
-  alias cgfa='cg fmt --all' # Format all code
-  alias cgfx='cg fix'       # Auto-fix code issues
-  alias cgaud='cg audit'    # Security vulnerabilities check
+  alias cgc='cg check'                 # Check compilation
+  alias cgcl='cg clean'                # Clean build artifacts
+  alias cgcy='cg clippy'               # Run clippy lints
+  alias cgf='cg fmt'                   # Format code
+  alias cnfmt='cargo +nightly fmt'     # Nightly format
+  alias cgfa='cg fmt --all'            # Format all code
+  alias cgfx='cg fix'                  # Auto-fix code issues
+  alias cgaud='cg audit'               # Security vulnerabilities check
   alias cnclip='cargo +nightly clippy' # Nightly clippy
 
   # Documentation

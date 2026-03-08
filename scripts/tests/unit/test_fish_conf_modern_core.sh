@@ -12,16 +12,20 @@ assert_file_exists "$CONF_FILE" "modern-core.fish should exist"
 
 test_start "fish_conf_modern_core_not_empty"
 if [[ -s "$CONF_FILE" ]]; then
-  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: not empty"
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: not empty"
 else
-  ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should not be empty"
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should not be empty"
 fi
 
 test_start "fish_conf_modern_core_no_bash_syntax"
 if ! grep -qE '^\s*(if \[\[|then$|fi$|esac$|done$)' "$CONF_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no bash syntax"
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no bash syntax"
 else
-  ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: contains bash syntax"
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: contains bash syntax"
 fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

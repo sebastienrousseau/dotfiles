@@ -13,27 +13,34 @@ assert_file_exists "$TARGET" "completion.lua should exist"
 
 test_start "nvim_plugin_completion_not_empty"
 if [[ -s "$TARGET" ]]; then
-  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
-  ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: file is empty"
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: file is empty"
 fi
 
 test_start "nvim_plugin_completion_valid_lua"
 if command -v luacheck >/dev/null 2>&1; then
   if luacheck --no-color --quiet --globals vim -- "$TARGET" 2>/dev/null; then
-    ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck passed"
+    ((TESTS_PASSED++))
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck passed"
   else
-    ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck warnings (non-fatal)"
+    ((TESTS_PASSED++))
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck warnings (non-fatal)"
   fi
 else
-  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck not available (skipped)"
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: luacheck not available (skipped)"
 fi
 
 test_start "nvim_plugin_completion_uses_blink"
 if grep -q 'blink\.cmp\|saghen/blink' "$TARGET" 2>/dev/null; then
-  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses blink.cmp"
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses blink.cmp"
 else
-  ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should use blink.cmp"
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should use blink.cmp"
 fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

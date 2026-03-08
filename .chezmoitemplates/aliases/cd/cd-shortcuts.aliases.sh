@@ -5,12 +5,12 @@
 _CD_SHORTCUTS_LOADED=1
 
 # Parent Directory Shortcuts
-alias -- -='cd -'                         # Go to the previous directory
-alias ..='up 1'               # Go up one level
-alias ...='up 2'              # Go up two levels
-alias ....='up 3'             # Go up three levels
-alias .....='up 4'            # Go up four levels
-alias ......='up 5'           # Go up five levels
+alias -- -='cd -'   # Go to the previous directory
+alias ..='up 1'     # Go up one level
+alias ...='up 2'    # Go up two levels
+alias ....='up 3'   # Go up three levels
+alias .....='up 4'  # Go up four levels
+alias ......='up 5' # Go up five levels
 
 # Home and Frequently Used Directories
 # Only create aliases for directories that exist

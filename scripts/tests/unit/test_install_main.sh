@@ -89,10 +89,10 @@ test_start "install_shellcheck"
 if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$INSTALL_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
-  ((TESTS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
-  ((TESTS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else

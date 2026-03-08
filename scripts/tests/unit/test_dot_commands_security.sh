@@ -90,10 +90,10 @@ test_start "security_cmd_sudo_usage"
 if grep -q "sudo" "$SEC_FILE" 2>/dev/null; then
   # Check if sudo is used with proper checks
   if grep -qE 'command -v sudo|which sudo|\$EUID' "$SEC_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: sudo usage has proper checks"
   else
-  ((TESTS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: sudo should have availability check"
   fi
 else
@@ -106,10 +106,10 @@ test_start "security_cmd_shellcheck"
 if command -v shellcheck &>/dev/null; then
   errors=$(shellcheck -S error "$SEC_FILE" 2>&1 | wc -l)
   if [[ "$errors" -eq 0 ]]; then
-  ((TESTS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
   else
-  ((TESTS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
   fi
 else

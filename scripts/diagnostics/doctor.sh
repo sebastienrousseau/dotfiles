@@ -187,7 +187,10 @@ desktop_env="${XDG_CURRENT_DESKTOP:-unknown}"
 uptime_human="$(uptime -p 2>/dev/null | sed 's/^up //')"
 
 if [[ -r /etc/os-release ]]; then
-  distro_pretty="$(. /etc/os-release; echo "${PRETTY_NAME:-$ID}")"
+  distro_pretty="$(
+    . /etc/os-release
+    echo "${PRETTY_NAME:-$ID}"
+  )"
 else
   distro_pretty="$host_os"
 fi

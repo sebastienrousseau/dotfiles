@@ -14,17 +14,21 @@ assert_file_exists "$TMPL_FILE" "40-fzf-defaults.sh.tmpl should exist"
 
 test_start "fzf_defaults_not_empty"
 if [[ -s "$TMPL_FILE" ]]; then
-  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: file is not empty"
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: file is not empty"
 else
-  ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: file should not be empty"
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: file should not be empty"
 fi
 
 test_start "fzf_defaults_has_shebang_or_comment"
 first_line=$(head -n 1 "$TMPL_FILE")
 if [[ "$first_line" == "#!/"* ]] || [[ "$first_line" == "#"* ]]; then
-  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has header"
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has header"
 else
-  ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have shebang or comment header"
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have shebang or comment header"
 fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
