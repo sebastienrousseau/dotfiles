@@ -70,7 +70,7 @@
             gum
             glow
             mods
-            thefuck
+            pay-respects
             carapace
             wl-clipboard
             xclip
