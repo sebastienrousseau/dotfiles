@@ -200,6 +200,36 @@ else
   _fail "dot" "not found in PATH"
 fi
 
+# --- Topgrade Integration ---
+_section "Topgrade Integration"
+
+if command -v antigravity >/dev/null 2>&1; then
+  ag_path="$(command -v antigravity)"
+  if [[ "$ag_path" == "$HOME/.local/bin/antigravity" ]]; then
+    _ok "antigravity wrapper" "$ag_path"
+  else
+    _warn "antigravity wrapper" "$ag_path (expected ~/.local/bin/antigravity)"
+  fi
+else
+  _warn "antigravity" "optional"
+fi
+
+if [[ -f "$HOME/.config/fish/fish_plugins" ]]; then
+  if grep -qx "jorgebucaran/fisher" "$HOME/.config/fish/fish_plugins"; then
+    _ok "fish_plugins" "contains jorgebucaran/fisher"
+  else
+    _warn "fish_plugins" "present but missing jorgebucaran/fisher"
+  fi
+else
+  _fail "fish_plugins" "missing (~/.config/fish/fish_plugins)"
+fi
+
+if command -v cargo-install-update >/dev/null 2>&1; then
+  _ok "cargo-install-update" "$(command -v cargo-install-update)"
+else
+  _warn "cargo-install-update" "missing (install: cargo install cargo-update)"
+fi
+
 # --- Symlinks ---
 broken_links=0
 for root in "$HOME/.config" "$HOME/.local/bin" "$HOME/.local/share" "$HOME/.ssh"; do
