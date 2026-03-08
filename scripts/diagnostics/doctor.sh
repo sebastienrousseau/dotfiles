@@ -118,7 +118,7 @@ for cmd in pueue wasmtime nix sops age hyperfine; do
   if check_cmd "$cmd"; then
     _ok "$cmd" "$(get_cmd_path "$cmd")"
   elif [[ "$cmd" == "nix" ]]; then
-    _warn "$cmd" "optional (curl -L https://nixos.org/nix/install | sh)"
+    _ok "$cmd" "optional (not installed)"
   else
     _fail "$cmd" "missing"
   fi
@@ -248,23 +248,37 @@ fi
 
 # --- Portability ---
 ghost_paths=0
-if [[ -d "$HOME/.config" ]]; then
-  ghost_lines=$(grep -rIE '"/home/(linuxbrew)?[^$]|/Users/[^$]' "$HOME/.config" |
-    grep -v "linuxbrew" |
-    grep -v "/mozilla/firefox" |
-    grep -v "/google-chrome" |
-    grep -v "/chromium" |
-    grep -v "/chezmoi/chezmoi.toml" |
-    grep -v "/bun/" |
-    grep -v "/noctalia/" |
-    grep -v -- "-backup/" ||
-    true)
-  if [[ -n "$ghost_lines" ]]; then
-    ghost_paths=$(echo "$ghost_lines" | wc -l)
-    _warn "portability" "$ghost_paths hardcoded paths in ~/.config"
+if command -v chezmoi >/dev/null 2>&1; then
+  while IFS= read -r managed_path; do
+    [[ "$managed_path" == "$HOME/.config/"* ]] || continue
+    [[ -f "$managed_path" ]] || continue
+    grep -Iq . "$managed_path" 2>/dev/null || continue
+
+    match_count=$(
+      grep -nE '"/home/(linuxbrew)?[^$]|/Users/[^$]' "$managed_path" 2>/dev/null |
+        grep -v "linuxbrew" |
+        grep -v "/mozilla/firefox" |
+        grep -v "/google-chrome" |
+        grep -v "/chromium" |
+        grep -v "/chezmoi/chezmoi.toml" |
+        grep -v "/bun/" |
+        grep -v "/.bun/" |
+        grep -v "/noctalia/" |
+        grep -v -- "-backup/" |
+        wc -l | tr -d ' ' ||
+        true
+    )
+
+    ghost_paths=$((ghost_paths + ${match_count:-0}))
+  done < <(chezmoi managed --path-style=absolute 2>/dev/null || true)
+
+  if [[ $ghost_paths -gt 0 ]]; then
+    _warn "portability" "$ghost_paths hardcoded paths in managed ~/.config files"
   else
-    _ok "portability" "no hardcoded paths"
+    _ok "portability" "no hardcoded paths in managed ~/.config files"
   fi
+else
+  _warn "portability" "chezmoi not found (scan skipped)"
 fi
 
 # --- Performance ---

@@ -52,6 +52,8 @@ ruff = "latest"
 yazi = "latest"
 zellij = "latest"
 zoxide = "latest"
+"aqua:Nukesor/pueue/pueue" = "4.0.3"
+"aqua:Nukesor/pueue/pueued" = "4.0.3"
 
 # Python tools
 poetry = "latest"
