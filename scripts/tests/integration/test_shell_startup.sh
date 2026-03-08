@@ -74,7 +74,7 @@ if command -v fish >/dev/null 2>&1; then
   total=0
   iterations=3
   for ((i = 1; i <= iterations; i++)); do
-    local start end
+    start=0; end=0
     if command -v perl >/dev/null 2>&1; then
       start=$(perl -MTime::HiRes=time -e 'printf "%.0f\n", time * 1000')
       fish -c 'exit' >/dev/null 2>&1 || true
