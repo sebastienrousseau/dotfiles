@@ -13,7 +13,7 @@ Supported platforms: macOS (Homebrew), Ubuntu/Debian (apt), Arch Linux (pacman),
 Works on macOS, Linux, and WSL2:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
 ```
 
 ### Shell selection
