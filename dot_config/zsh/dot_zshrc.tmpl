@@ -92,7 +92,7 @@ _cached_eval() {
   else
     "$@" > "$cache" 2>/dev/null
     source "$cache"
-    { zcompile "$cache" } &
+    { zcompile "$cache" } &!
   fi
 }
 
@@ -234,7 +234,7 @@ if [[ "${DOTFILES_FAST}" != "1" ]]; then
     [[ -f "${HOME}/.config/shell/51-logic-functions-extra.sh" ]] && source "${HOME}/.config/shell/51-logic-functions-extra.sh"
     # Compile extra functions for faster future loads
     if command -v zcompile >/dev/null 2>&1; then
-      { [[ ! -f "${HOME}/.config/shell/51-logic-functions-extra.sh.zwc" || "${HOME}/.config/shell/51-logic-functions-extra.sh" -nt "${HOME}/.config/shell/51-logic-functions-extra.sh.zwc" ]] && zcompile "${HOME}/.config/shell/51-logic-functions-extra.sh" } &
+      { [[ ! -f "${HOME}/.config/shell/51-logic-functions-extra.sh.zwc" || "${HOME}/.config/shell/51-logic-functions-extra.sh" -nt "${HOME}/.config/shell/51-logic-functions-extra.sh.zwc" ]] && zcompile "${HOME}/.config/shell/51-logic-functions-extra.sh" } &!
     fi
     DOTFILES_LAYERS_LOAD_STATE=ready
     DOTFILES_LAYERS_LOAD_STATUS=ready
