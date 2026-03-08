@@ -128,6 +128,7 @@ matrix() {
       }
     }'
   else
+    # shellcheck disable=SC2016
     _awk_script='{
       letters="日ﾊﾐﾋｰｳｼﾅﾐﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾍ";
       c=$4; if (c <= 0 || c > length(letters)) next;
