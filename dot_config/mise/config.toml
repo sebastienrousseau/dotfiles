@@ -24,7 +24,6 @@ go = "latest"
 
 # Rust
 rust = "latest"
-"cargo:zellij" = "latest"
 
 # Ruby
 ruby = "3.3"
@@ -52,6 +51,11 @@ ruff = "latest"
 yazi = "latest"
 zellij = "latest"
 zoxide = "latest"
+"aqua:twpayne/chezmoi" = "latest"
+"aqua:junegunn/fzf" = "latest"
+"aqua:FiloSottile/age" = "latest"
+"aqua:sharkdp/hyperfine" = "latest"
+"aqua:ollama/ollama" = "latest"
 "aqua:Nukesor/pueue/pueue" = "4.0.3"
 "aqua:Nukesor/pueue/pueued" = "4.0.3"
 
