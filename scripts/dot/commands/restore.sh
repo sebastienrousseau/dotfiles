@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # dot restore - Restore dotfiles from backup or previous state
 # Usage: dot restore [--list|--latest|<backup-id>]
 

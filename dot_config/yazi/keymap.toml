@@ -1,0 +1,67 @@
+# Yazi Keymap — Vi-mode keybindings
+# ~/.config/yazi/keymap.toml
+
+[manager]
+keymap = [
+    # Navigation
+    { on = ["k"],       run = "arrow -1",         desc = "Move cursor up" },
+    { on = ["j"],       run = "arrow 1",          desc = "Move cursor down" },
+    { on = ["K"],       run = "arrow -5",         desc = "Move cursor up 5" },
+    { on = ["J"],       run = "arrow 5",          desc = "Move cursor down 5" },
+    { on = ["h"],       run = "leave",            desc = "Go to parent directory" },
+    { on = ["l"],       run = "enter",            desc = "Enter directory / open file" },
+    { on = ["g", "g"],  run = "arrow -99999999",  desc = "Go to top" },
+    { on = ["G"],       run = "arrow 99999999",   desc = "Go to bottom" },
+
+    # Selection
+    { on = ["<Space>"], run = ["select --state=none", "arrow 1"], desc = "Toggle select" },
+    { on = ["v"],       run = "visual_mode",      desc = "Visual mode" },
+    { on = ["V"],       run = "visual_mode --unset", desc = "Exit visual mode" },
+
+    # Operations
+    { on = ["o"],       run = "open",             desc = "Open file" },
+    { on = ["O"],       run = "open --interactive", desc = "Open interactively" },
+    { on = ["y"],       run = "yank",             desc = "Copy (yank)" },
+    { on = ["x"],       run = "yank --cut",       desc = "Cut" },
+    { on = ["p"],       run = "paste",            desc = "Paste" },
+    { on = ["P"],       run = "paste --force",    desc = "Paste (overwrite)" },
+    { on = ["d"],       run = "remove",           desc = "Move to trash" },
+    { on = ["D"],       run = "remove --permanently", desc = "Delete permanently" },
+    { on = ["a"],       run = "create",           desc = "Create file/directory" },
+    { on = ["r"],       run = "rename --cursor=before_ext", desc = "Rename" },
+
+    # Navigation shortcuts
+    { on = ["~"],       run = "cd ~",             desc = "Go home" },
+    { on = ["."],       run = "hidden toggle",    desc = "Toggle hidden files" },
+
+    # Search
+    { on = ["/"],       run = "find --smart",     desc = "Find" },
+    { on = ["n"],       run = "find_arrow",       desc = "Find next" },
+    { on = ["N"],       run = "find_arrow --previous", desc = "Find previous" },
+
+    # Sorting
+    { on = ["s", "a"],  run = "sort alphabetical --reverse=no",  desc = "Sort alphabetical" },
+    { on = ["s", "m"],  run = "sort modified --reverse=no",      desc = "Sort by modified" },
+    { on = ["s", "s"],  run = "sort size --reverse=no",          desc = "Sort by size" },
+
+    # Tabs
+    { on = ["t"],       run = "tab_create --current", desc = "New tab" },
+    { on = ["1"],       run = "tab_switch 0",     desc = "Tab 1" },
+    { on = ["2"],       run = "tab_switch 1",     desc = "Tab 2" },
+    { on = ["3"],       run = "tab_switch 2",     desc = "Tab 3" },
+    { on = ["w"],       run = "close",            desc = "Close tab" },
+
+    # Misc
+    { on = ["q"],       run = "quit",             desc = "Quit" },
+    { on = ["<Esc>"],   run = "escape",           desc = "Cancel / escape" },
+    { on = ["z", "h"],  run = "linemode size",    desc = "Linemode: size" },
+    { on = ["z", "m"],  run = "linemode mtime",   desc = "Linemode: modified" },
+    { on = ["z", "p"],  run = "linemode permissions", desc = "Linemode: permissions" },
+]
+
+[input]
+keymap = [
+    { on = ["<Esc>"],   run = "close",            desc = "Cancel input" },
+    { on = ["<Enter>"], run = "close --submit",   desc = "Submit input" },
+    { on = ["<C-c>"],   run = "close",            desc = "Cancel" },
+]

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Dotfiles Pre-Commit Sentinel (Audit Hook)
 # Prevents secrets, hardcoded paths, and shell hygiene violations.
 

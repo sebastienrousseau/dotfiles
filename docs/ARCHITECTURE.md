@@ -59,3 +59,55 @@ A minimal environment triggered by `DOTFILES_ARTIFACT_MODE=1`.
 - **Minimalist UI** — strips prompt complexity, leaving only a green `->`.
 - **Intelligence Surface** — an async Bento-style dashboard rendered via `bento.sh` that provides environment context (Node version, cloud status, Git health) without blocking the main thread.
 - **Redraw Signaling** — uses `SIGWINCH` to return control after background hydration completes.
+
+---
+
+## Ultra-Fast Mode
+
+Set `DOTFILES_ULTRA_FAST=1` to skip all non-essential initialization. Only core paths, aliases, and the prompt are loaded. Useful for:
+
+- CI/CD pipelines where full shell setup is unnecessary
+- Rapid scripting sessions where startup latency matters
+- Benchmarking baseline shell performance
+
+---
+
+## Debug and Trace Modes
+
+### DOTFILES_DEBUG=1
+
+Enables verbose diagnostic output during shell startup. Prints which files are sourced and their load times.
+
+### DOTFILES_TRACE=1
+
+Enables `set -x` tracing for the entire shell startup sequence. Output is written to `~/.local/state/dotfiles/debug.log` for post-mortem analysis.
+
+---
+
+## Function Groups (groups.json)
+
+Functions are organized into groups defined in `.chezmoitemplates/functions/groups.json`:
+
+| Group | Functions | Description |
+|-------|-----------|-------------|
+| `api` | apihealth, apilatency, apiload | API testing utilities |
+| `curl` | curlheader, curlstatus, curltime, httpdebug | HTTP debugging |
+| `text` | encode64, kebabcase, lowercase, titlecase, ... | Text transformation |
+| `system` | environment, freespace, hostinfo, myproc, sysinfo | System introspection |
+| `files` | backup, extract, hexdump, hiddenfiles, size, zipf | File operations |
+| `interactive` | banner, emoji, matrix, rainbow, stopwatch | Terminal fun |
+| `nav` | cdls, goto, ql | Navigation shortcuts |
+| `security` | genpass, keygen, mount_read_only | Security utilities |
+| `misc` | dothelp, view-source, prependpath, caffeine | Miscellaneous |
+
+Groups are lazy-loaded: stub functions are defined at startup, and the real implementation is loaded on first invocation. This keeps startup fast while providing 52+ functions on demand.
+
+The `groups.json` schema is a simple object mapping group names to arrays of filenames:
+
+```json
+{
+  "group_name": ["function1.sh", "function2.sh"]
+}
+```
+
+Each `.sh` file must define a single function with the same name as the file (minus `.sh` extension).

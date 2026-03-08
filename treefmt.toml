@@ -1,0 +1,35 @@
+# treefmt — Multi-language formatter orchestration
+# Run: treefmt (formats all changed files)
+# See: https://github.com/numtide/treefmt
+
+[formatter.shfmt]
+command = "shfmt"
+options = ["-i", "2", "-ci", "-w"]
+includes = ["*.sh", "*.bash"]
+excludes = ["dot_config/shell/*.sh.tmpl"]
+
+[formatter.stylua]
+command = "stylua"
+includes = ["*.lua"]
+
+[formatter.prettier]
+command = "prettier"
+options = ["--write"]
+includes = ["*.json", "*.yaml", "*.yml", "*.md", "*.css", "*.html"]
+excludes = ["lazy-lock.json", "flake.lock"]
+
+[formatter.taplo]
+command = "taplo"
+options = ["format"]
+includes = ["*.toml"]
+excludes = [".chezmoidata.toml"]
+
+[global]
+excludes = [
+    ".git/**",
+    "**/.git/**",
+    "**/node_modules/**",
+    "**/*.tmpl",
+    "dot_config/**/*.tmpl",
+    ".chezmoitemplates/**",
+]

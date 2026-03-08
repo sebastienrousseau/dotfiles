@@ -80,6 +80,31 @@ if [[ "${DOTFILES_ULTRA_FAST}" == "1" ]]; then
 fi
 
 # Cached eval helper â sources cached init scripts, regenerates when stale
+# Debug/Trace modes — observability for shell startup
+: ${DOTFILES_DEBUG:=0}
+: ${DOTFILES_TRACE:=0}
+
+if [[ "${DOTFILES_TRACE}" == "1" ]]; then
+  _dotfiles_trace_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
+  mkdir -p "$_dotfiles_trace_dir"
+  exec 3>&2 2>"$_dotfiles_trace_dir/debug.log"
+  PS4='+%D{%s.%6.} %N:%i> '
+  set -x
+fi
+
+if [[ "${DOTFILES_DEBUG}" == "1" ]]; then
+  _dotfiles_debug_start=${EPOCHREALTIME:-$(date +%s.%N)}
+  _dotfiles_debug() {
+    local now=${EPOCHREALTIME:-$(date +%s.%N)}
+    local elapsed
+    elapsed=$(printf '%.0f' "$(( (now - _dotfiles_debug_start) * 1000 ))")
+    printf '[debug %4dms] %s\n' "$elapsed" "$1" >&2
+  }
+  _dotfiles_debug "startup begins"
+else
+  _dotfiles_debug() { :; }
+fi
+
 _SHELL_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
 [[ -d "$_SHELL_CACHE" ]] || mkdir -p "$_SHELL_CACHE"
 

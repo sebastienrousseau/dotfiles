@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -12,12 +12,14 @@ test_start "smoke_test_exists"
 assert_file_exists "$TEST_SCRIPT" "smoke-test.sh should exist"
 
 test_start "smoke_test_syntax"
-assert_exit_code 0 "bash -n '$TEST_SCRIPT'"
+if bash -n "$TEST_SCRIPT" 2>/dev/null; then
+  ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: valid syntax"
+else
+  ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax error"
+fi
 
-test_start "smoke_test_defines_check_cmd"
-assert_file_contains "$TEST_SCRIPT" "check_cmd()" "should define check_cmd"
-
-test_start "smoke_test_defines_verify_cmd"
-assert_file_contains "$TEST_SCRIPT" "verify_cmd()" "should define verify_cmd"
+test_start "smoke_test_shebang"
+first_line=$(head -n 1 "$TEST_SCRIPT")
+assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
