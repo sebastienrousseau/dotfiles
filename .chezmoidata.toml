@@ -112,8 +112,14 @@ python_manager = "mise"  # pyenv, mise, or system
 # Secrets backend
 secrets_backend = "age"  # age, sops, or gpg
 
-# Shell benchmark threshold (ms)
+# Shell benchmark thresholds (ms) — enforced by CI and integration tests
 shell_startup_threshold = 200
+function_load_threshold = 200
+# Per-shell startup baselines (ms) — updated by benchmark CI
+[tools.baselines]
+bash_startup_ms = 100
+zsh_startup_ms = 200
+fish_startup_ms = 150
 
 [tools.ai]
 # Default AI provider for CLI tools

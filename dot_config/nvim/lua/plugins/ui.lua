@@ -1,4 +1,4 @@
--- Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+-- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 return {
   -----------------------------------------------------------------------------
   -- 1. Dashboard (Snacks.nvim)
@@ -8,6 +8,11 @@ return {
     priority = 1000,
     lazy = false,
     opts = {
+      notifier = {
+        enabled = true,
+        timeout = 3000,
+        style = "compact",
+      },
       dashboard = {
         preset = {
           header = [[
@@ -61,13 +66,12 @@ Simply design to fit your shell life
   {
     "folke/noice.nvim",
     event = "VeryLazy",
-    dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify" },
+    dependencies = { "MunifTanjim/nui.nvim" },
     opts = {
       lsp = {
         override = {
           ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
           ["vim.lsp.util.stylize_markdown"] = true,
-          ["cmp.entry.get_documentation"] = true,
         },
         hover = { enabled = true },
         signature = { enabled = true },
@@ -79,16 +83,6 @@ Simply design to fit your shell life
         inc_rename = false, -- enables an input dialog for inc-rename.nvim
         lsp_doc_border = true, -- add a border to hover docs and signature help
       },
-      notify = { enabled = false }, -- Fix: Allow nvim-notify to handle notifications directly
-    },
-  },
-
-  {
-    "rcarriga/nvim-notify",
-    opts = {
-      timeout = 3000,
-      render = "wrapped-compact",
-      background_colour = "#000000",
     },
   },
 
@@ -291,9 +285,6 @@ Simply design to fit your shell life
     config = true,
   },
 
-  -- LSP Kind icons
-  { "onsails/lspkind.nvim", event = "VeryLazy" },
-
   -- Theme Plugins (Loaded on demand)
   { "folke/tokyonight.nvim", name = "tokyonight", lazy = true, priority = 1000 },
   { "Mofiqul/dracula.nvim", name = "dracula", lazy = true, priority = 1000 },
@@ -369,11 +360,11 @@ Simply design to fit your shell life
           color_overrides = {},
           custom_highlights = {},
           integrations = {
-            cmp = true,
+            blink_cmp = true,
             gitsigns = true,
             nvimtree = true,
             treesitter = true,
-            notify = true,
+            snacks = true,
             mini = {
               enabled = true,
               indentscope_color = "",

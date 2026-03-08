@@ -102,10 +102,11 @@ style = "bold blue"
 
 # ---------- Direnv indicator ---------- #
 [direnv]
-disabled = true
+disabled = false
 symbol = "▼ "
 style = "bold yellow"
-format = "[$symbol$loaded/$allowed]($style) "
+format = "[$symbol$allowed]($style) "
+detect_files = [".envrc"]
 
 # ---------- Pueue Tasks (Background daemon) ---------- #
 [custom.pueue]

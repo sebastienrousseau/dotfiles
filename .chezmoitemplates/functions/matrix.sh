@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Description:
 #   matrix is a wrapper around cmatrix with a bash fallback for terminals
 #   without cmatrix installed. Supports color themes and speed options.

@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # CD Navigation - Help and Documentation
 [[ -n "${_CD_HELP_LOADED:-}" ]] && :
 _CD_HELP_LOADED=1

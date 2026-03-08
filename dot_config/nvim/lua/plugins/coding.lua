@@ -1,4 +1,4 @@
--- Copyright (c) 2015-2026 Sebastien Rousseau. All rights reserved.
+-- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 return {
   -- Treesitter (Syntax Highlighting)
   {
@@ -164,7 +164,7 @@ return {
       { "<leader>nd", ":Neogen<CR>", desc = "Generate Docstring" },
     },
     config = function()
-      require("neogen").setup({ snippet_engine = "luasnip" })
+      require("neogen").setup({ snippet_engine = "nvim" })
     end,
   },
 
