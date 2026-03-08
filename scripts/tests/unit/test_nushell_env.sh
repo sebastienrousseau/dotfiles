@@ -30,6 +30,7 @@ else
 fi
 
 test_start "nushell_env_sets_environment"
+# shellcheck disable=SC2016
 if grep -qE '\$env\.|ENV_CONVERSIONS|path_convert' "$TARGET" 2>/dev/null; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: sets environment variables"

@@ -13,12 +13,12 @@ assert_dir_exists "$ALIASES_DIR" "npm aliases should exist"
 test_start "npm_aliases_valid"
 invalid=0
 for f in "$ALIASES_DIR"/*.sh; do [[ -f "$f" ]] && ! bash -n "$f" 2>/dev/null && ((invalid++)); done
-[[ "$invalid" -eq 0 ]] && {
+if [[ "$invalid" -eq 0 ]]; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
-} || {
+else
   ((TESTS_FAILED++))
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
-}
+fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
