@@ -275,7 +275,7 @@ jobs:
           output_file_path: reports/checkov.sarif
       - name: Upload Checkov results to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@45580472a5bb82c4681c4ac726cfdb60060c2ee1 # v3
+        uses: github/codeql-action/upload-sarif@0d579ffd059c29b07949a3cce3983f0780820c98 # v3
         with:
           sarif_file: reports/checkov.sarif
 
