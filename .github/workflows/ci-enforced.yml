@@ -266,7 +266,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Checkov Infrastructure Security
-        uses: bridgecrewio/checkov-action@f99709f8ccc3496220c987b7d8729653237c23dc # v12
+        uses: bridgecrewio/checkov-action@f9b0a2206b0401cad02ac0a66be2a7934a5be838 # v12.3088.0
         with:
           framework: dockerfile,yaml,secrets
           quiet: false
@@ -275,7 +275,7 @@ jobs:
           output_file_path: reports/checkov.sarif
       - name: Upload Checkov results to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@45580472a5bb82c4681c4ac726cfdb60060c2ee1 # v3
+        uses: github/codeql-action/upload-sarif@0d579ffd059c29b07949a3cce3983f0780820c98 # v4
         with:
           sarif_file: reports/checkov.sarif
 

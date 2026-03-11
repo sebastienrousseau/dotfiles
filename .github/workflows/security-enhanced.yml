@@ -82,7 +82,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: TruffleHog OSS
-        uses: trufflesecurity/trufflehog@041f07e9df901a1038a528e5525b0226d04dd5ea # v3.93.6
+        uses: trufflesecurity/trufflehog@c3e599b7163e8198a55467f3133db0e7b2a492cb # v3.93.7
         with:
           path: ./
           base: ${{ github.event.pull_request.base.sha }}
@@ -120,7 +120,7 @@ jobs:
 
       - name: Upload Grype results to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@f5c2471be782132e47a6e6f9c725e56730d6e9a3 # v3
+        uses: github/codeql-action/upload-sarif@0d579ffd059c29b07949a3cce3983f0780820c98 # v4
         with:
           sarif_file: grype-results.sarif
           category: grype-analysis
@@ -140,7 +140,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Run Checkov
-        uses: bridgecrewio/checkov-action@f99709f8ccc3496220c987b7d8729653237c23dc # v12.3086.0
+        uses: bridgecrewio/checkov-action@f9b0a2206b0401cad02ac0a66be2a7934a5be838 # v12.3088.0
         with:
           output_format: sarif
           output_file_path: checkov-results.sarif
@@ -150,7 +150,7 @@ jobs:
 
       - name: Upload Checkov results to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@f5c2471be782132e47a6e6f9c725e56730d6e9a3 # v3
+        uses: github/codeql-action/upload-sarif@0d579ffd059c29b07949a3cce3983f0780820c98 # v4
         with:
           sarif_file: checkov-results.sarif
           category: checkov-analysis
@@ -184,7 +184,7 @@ jobs:
 
       - name: Upload container scan results
         if: always() && hashFiles('**/Dockerfile*') != ''
-        uses: github/codeql-action/upload-sarif@f5c2471be782132e47a6e6f9c725e56730d6e9a3 # v3
+        uses: github/codeql-action/upload-sarif@0d579ffd059c29b07949a3cce3983f0780820c98 # v4
         with:
           sarif_file: container-scan.sarif
           category: container-analysis
