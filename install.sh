@@ -94,7 +94,7 @@ main() {
   case "$OS" in
     Darwin) target_os="macos" ;;
     Linux)
-      if grep -q Microsoft /proc/version 2>/dev/null; then
+      if grep -qi microsoft /proc/version 2>/dev/null; then
         target_os="wsl2"
       elif [ -f /etc/debian_version ]; then
         target_os="debian"
