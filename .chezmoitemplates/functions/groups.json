@@ -1,71 +1,71 @@
 {
   "api": [
-    "apihealth.sh",
-    "apilatency.sh",
-    "apiload.sh"
+    "api/apihealth.sh",
+    "api/apilatency.sh",
+    "api/apiload.sh"
   ],
   "curl": [
-    "curlheader.sh",
-    "curlstatus.sh",
-    "curltime.sh",
-    "httpdebug.sh"
+    "curl/curlheader.sh",
+    "curl/curlstatus.sh",
+    "curl/curltime.sh",
+    "curl/httpdebug.sh"
   ],
   "text": [
-    "encode64.sh",
-    "kebabcase.sh",
-    "lowercase.sh",
-    "sentencecase.sh",
-    "snakecase.sh",
-    "titlecase.sh",
-    "uppercase.sh"
+    "text/encode64.sh",
+    "text/kebabcase.sh",
+    "text/lowercase.sh",
+    "text/sentencecase.sh",
+    "text/snakecase.sh",
+    "text/titlecase.sh",
+    "text/uppercase.sh"
   ],
   "system": [
-    "environment.sh",
-    "freespace.sh",
-    "hostinfo.sh",
-    "myproc.sh",
-    "sysinfo.sh",
-    "whoisport.sh",
-    "hstats.sh"
+    "system/environment.sh",
+    "system/freespace.sh",
+    "system/hostinfo.sh",
+    "system/myproc.sh",
+    "system/sysinfo.sh",
+    "system/whoisport.sh",
+    "system/hstats.sh"
   ],
   "files": [
-    "backup.sh",
-    "extract.sh",
-    "hexdump.sh",
-    "hiddenfiles.sh",
-    "showhiddenfiles.sh",
-    "size.sh",
-    "zipf.sh",
-    "ren.sh",
-    "rd.sh",
-    "remove_disk.sh"
+    "files/backup.sh",
+    "files/extract.sh",
+    "files/hexdump.sh",
+    "files/hiddenfiles.sh",
+    "files/showhiddenfiles.sh",
+    "files/size.sh",
+    "files/zipf.sh",
+    "files/ren.sh",
+    "files/rd.sh",
+    "files/remove_disk.sh"
   ],
   "interactive": [
-    "banner.sh",
-    "emoji.sh",
-    "matrix.sh",
-    "cmatrix.sh",
-    "rainbow.sh",
-    "stopwatch.sh"
+    "interactive/banner.sh",
+    "interactive/emoji.sh",
+    "interactive/matrix.sh",
+    "interactive/cmatrix.sh",
+    "interactive/rainbow.sh",
+    "interactive/stopwatch.sh"
   ],
   "nav": [
-    "cdls.sh",
-    "goto.sh",
-    "ql.sh"
+    "nav/cdls.sh",
+    "nav/goto.sh",
+    "nav/ql.sh"
   ],
   "security": [
-    "genpass.sh",
-    "keygen.sh",
-    "mount_read_only.sh"
+    "security/genpass.sh",
+    "security/keygen.sh",
+    "security/mount_read_only.sh"
   ],
   "misc": [
-    "dothelp.sh",
-    "view-source.sh",
-    "last.sh",
-    "pipes.sh",
-    "prependpath.sh",
-    "caffeine.sh",
-    "logout.sh",
-    "lazy_loaders.sh"
+    "misc/dothelp.sh",
+    "misc/view-source.sh",
+    "misc/last.sh",
+    "misc/pipes.sh",
+    "misc/prependpath.sh",
+    "misc/caffeine.sh",
+    "misc/logout.sh",
+    "misc/lazy_loaders.sh"
   ]
 }

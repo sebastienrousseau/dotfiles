@@ -14,7 +14,7 @@ DS001
 # Allow curl usage in install scripts (HTTPS only, legitimate package downloads)
 DS002
 
-# Ignore test framework security warnings in scripts/tests/
+# Ignore test framework security warnings in tests/
 # Test code uses eval and other patterns that are safe in test context
-DS001 scripts/tests/
-DS002 scripts/tests/
+DS001 tests/
+DS002 tests/

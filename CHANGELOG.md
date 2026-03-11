@@ -7,11 +7,18 @@ This file documents all notable changes to this project.
 ### Fixed
 - **Installation failure (Issue #807)**: Resolved "unbound variable" errors in `install.sh` by correctly initializing color and path variables.
 - **Shell Compatibility**: Fixed syntax errors when running `install.sh` with `sh` by ensuring the script runs with `bash` and updating documentation accordingly.
-- **Broken Links**: Updated installation instructions in `README.md` and `docs/INSTALL.md` to use the GitHub raw URL, bypassing issues with the `dotfiles.io` redirect.
+- **Broken Links**: Updated installation instructions in `README.md` and `docs/guides/INSTALL.md` to use the GitHub raw URL, bypassing issues with the `dotfiles.io` redirect.
 - **Documentation Sync**: Synchronized versioning and installation commands across all documentation and source files.
 
 ### Changed
-- Incremental updates and maintenance.
+- **Repository Restructuring**: Reorganized non-deployed files for improved discoverability.
+  - Docs categorized into `architecture/`, `guides/`, `reference/`, `security/`, `operations/` subdirectories.
+  - Tests promoted to top-level `tests/` with domain-based unit test subdirectories.
+  - Function templates grouped into subdirectories matching `groups.json` groups.
+  - `install/helpers/` merged into `install/lib/`.
+  - Renamed `.chezmoitemplates/gnome/` to `.chezmoitemplates/desktop/`.
+  - Added `docs/NAMING_CONVENTIONS.md` standardization guide.
+  - Added `dot_config/.module-manifest.json` for logical grouping of flat config directories.
 
 ## v0.2.493
 

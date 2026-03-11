@@ -21,7 +21,7 @@ __DOTFILES_EOF__
 }
 
 {{ range $files }}
-{{ $func := trimSuffix ".sh" . }}
+{{ $func := trimSuffix ".sh" (base .) }}
 {{ $func }}() { _dotfiles_load_group_{{ $group }}; {{ $func }} "$@"; }
 
 {{ end }}

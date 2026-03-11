@@ -427,7 +427,7 @@ case "$COMMAND" in
   chaos) run_script "scripts/ops/chaos.sh" "Chaos engineering script" "$@" ;;
   bundle) run_script "scripts/ops/bundle.sh" "Offline bundle script" "$@" ;;
   rollback) run_script "scripts/ops/rollback.sh" "Rollback script" "$@" ;;
-  benchmark) run_script "scripts/tests/benchmark.sh" "Benchmark script" "$@" ;;
+  benchmark) run_script "tests/benchmark.sh" "Benchmark script" "$@" ;;
   # load) -- removed: scripts/ops/load.sh does not exist
   tools) run_script "scripts/dot/commands/tools.sh" "Tools script" "tools" "$@" ;;
   new) run_script "scripts/dot/commands/tools.sh" "Tools script" "new" "$@" ;;

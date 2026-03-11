@@ -112,7 +112,7 @@ graph TD
 | `dot smoke-test` | Verify toolchains (Rust, Go, AI CLIs) |
 | `dot bundle` | Create an offline portable archive |
 
-Full reference: [docs/UTILS.md](docs/UTILS.md)
+Full reference: [docs/reference/UTILS.md](docs/reference/UTILS.md)
 
 ---
 
@@ -150,7 +150,7 @@ Full reference: [docs/UTILS.md](docs/UTILS.md)
 - **Audit trail** — every `dot` command logged to `~/.local/share/dotfiles.log`
 </details>
 
-For hardening options, see the [Security docs](docs/SECURITY.md).
+For hardening options, see the [Security docs](docs/security/SECURITY.md).
 
 ---
 

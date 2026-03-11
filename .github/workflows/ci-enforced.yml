@@ -328,10 +328,10 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Run unit tests with coverage
         run: |
-          chmod +x scripts/tests/framework/*.sh
+          chmod +x tests/framework/*.sh
           # Set coverage requirement to 100%
           export COVERAGE_THRESHOLD=100
-          ./scripts/tests/framework/test_runner.sh
+          ./tests/framework/test_runner.sh
           if [ $? -ne 0 ]; then
             echo "::error::Unit tests failed or coverage below 100%"
             exit 1
@@ -339,7 +339,7 @@ jobs:
       - name: Coverage Report
         run: |
           # Generate coverage report
-          ./scripts/tests/framework/coverage_analyzer.sh
+          ./tests/framework/coverage_analyzer.sh
           if [ $? -ne 0 ]; then
             echo "::error::Coverage analysis failed or threshold not met"
             exit 1
@@ -361,7 +361,7 @@ jobs:
       - name: Run integration tests
         run: |
           export RUN_INTEGRATION=1
-          ./scripts/tests/framework/test_runner.sh
+          ./tests/framework/test_runner.sh
           if [ $? -ne 0 ]; then
             echo "::error::Integration tests failed"
             exit 1
@@ -415,10 +415,10 @@ jobs:
         run: |
           echo "::notice::Testing with beta/nightly versions"
           export USE_BETA_VERSIONS=1
-          ./scripts/tests/framework/test_runner.sh || true
+          ./tests/framework/test_runner.sh || true
       - name: Extended Test Suite
         if: matrix.check == 'extended-tests'
         run: |
           echo "::notice::Running extended test suite"
           export RUN_EXTENDED=1
-          ./scripts/tests/framework/test_runner.sh || true
+          ./tests/framework/test_runner.sh || true

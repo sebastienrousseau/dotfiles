@@ -348,7 +348,7 @@ jobs:
             # Execute the E2E test from within the container
             # We point it to the mounted source
             cd /root/dotfiles-src
-            ./scripts/tests/integration/test_install_e2e.sh
+            ./tests/integration/test_install_e2e.sh
           "
 
   test-unit:
@@ -432,8 +432,8 @@ jobs:
 
       - name: Performance benchmark
         run: |
-          chmod +x scripts/tests/performance/*.sh 2>/dev/null || true
-          ./scripts/tests/performance/benchmark_runner.sh 2>/dev/null || true
+          chmod +x tests/performance/*.sh 2>/dev/null || true
+          ./tests/performance/benchmark_runner.sh 2>/dev/null || true
 
       - name: Shell startup benchmark with regression tracking
         id: benchmark

@@ -1,0 +1,69 @@
+{
+  "$schema": "Module manifest for dot_config/ — logical grouping of flat directories",
+  "groups": {
+    "shell": {
+      "description": "Shell environments and startup",
+      "modules": ["shell", "zsh", "fish", "nushell"]
+    },
+    "terminal": {
+      "description": "Terminal emulators",
+      "modules": ["alacritty", "ghostty", "kitty", "wezterm"]
+    },
+    "editor": {
+      "description": "Text editors and IDEs",
+      "modules": ["nvim", "vscode", "micro", "nano"]
+    },
+    "git": {
+      "description": "Version control",
+      "modules": ["git", "lazygit", "gh"]
+    },
+    "container": {
+      "description": "Containers and orchestration",
+      "modules": ["docker", "containers", "lazydocker", "k9s", "minikube"]
+    },
+    "ai": {
+      "description": "AI tools and assistants",
+      "modules": ["ai", "aider", "claude", "goose"]
+    },
+    "languages": {
+      "description": "Language toolchains",
+      "modules": ["go", "pip", "pypoetry", "gem", "bun", "yarn", "dlv"]
+    },
+    "system": {
+      "description": "System monitoring and management",
+      "modules": ["btop", "htop", "fastfetch", "topgrade", "systemd", "ncdu", "duf"]
+    },
+    "security": {
+      "description": "Security and secrets",
+      "modules": ["gnupg", "sops"]
+    },
+    "network": {
+      "description": "Network and HTTP tools",
+      "modules": ["curl", "wget"]
+    },
+    "data": {
+      "description": "Databases and data tools",
+      "modules": ["redis", "mongosh", "mycli", "ipython"]
+    },
+    "tools": {
+      "description": "CLI utilities",
+      "modules": ["bat", "fzf", "yazi", "just", "mise", "task", "tmux", "pueue", "atuin", "emoji"]
+    },
+    "desktop": {
+      "description": "Desktop environment and appearance",
+      "modules": ["gtk-3.0", "gtk-4.0", "fontconfig", "flatpak", "zellij"]
+    },
+    "macos": {
+      "description": "macOS-specific modules",
+      "modules": ["karabiner", "mas", "duti", "raycast"]
+    },
+    "infra": {
+      "description": "Infrastructure and cloud",
+      "modules": ["ansible", "tflint"]
+    },
+    "dotfiles": {
+      "description": "Dotfiles internal config",
+      "modules": ["dotfiles"]
+    }
+  }
+}

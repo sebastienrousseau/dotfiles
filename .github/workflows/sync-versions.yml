@@ -7,14 +7,14 @@ on:
       - '**/*.md'
       - 'package.json'
       - 'scripts/version-sync.sh'
-      - 'docs/VERSION_SYNC.md'
+      - 'docs/operations/VERSION_SYNC.md'
   pull_request:
     branches: [master]
     paths:
       - '**/*.md'
       - 'package.json'
       - 'scripts/version-sync.sh'
-      - 'docs/VERSION_SYNC.md'
+      - 'docs/operations/VERSION_SYNC.md'
   workflow_dispatch:
     inputs:
       target_version:
