@@ -1,5 +1,5 @@
 # Active profile - change this to switch configurations
-dotfiles_version = "0.2.495"
+dotfiles_version = "0.2.496"
 profile = "laptop"
 
 # Visual theme

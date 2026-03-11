@@ -1,6 +1,6 @@
 #!/bin/sh
 # Interactive Tour using Gum
-# Part of Dotfiles v0.2.495
+# Part of Dotfiles v0.2.496
 
 if ! command -v gum >/dev/null; then
     echo "Error: 'gum' is not installed."
@@ -37,7 +37,7 @@ banner='██████╗  ██████╗ ████████╗
 ██████╔╝╚██████╔╝   ██║   ██║     ██║███████╗███████╗███████║
 ╚═════╝  ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝
 
-v0.2.495 · Infrastructure‑grade shell environment'
+v0.2.496 · Infrastructure‑grade shell environment'
 
 gum style \
     --foreground 212 --border-foreground 212 --border double \
