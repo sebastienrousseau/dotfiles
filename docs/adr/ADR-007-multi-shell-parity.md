@@ -12,7 +12,7 @@ Accepted
 
 The dotfiles distribution supports three shells: Zsh (default since macOS Catalina), Fish (modern interactive shell), and Nushell (structured data shell). The codebase has 98 alias files and 52+ functions written in POSIX/Bash. Without a parity strategy, each shell gets a fragmented subset of functionality.
 
-**Problem:** Fish had zero access to the alias/function library until v0.2.495 added bridge templates. Nushell had only 6 hardcoded aliases and no function access.
+**Problem:** Fish had zero access to the alias/function library until v0.2.496 added bridge templates. Nushell had only 6 hardcoded aliases and no function access.
 
 **Constraints:**
 - Nushell's `source` is parse-time evaluated (no dynamic sourcing)
