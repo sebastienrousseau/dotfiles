@@ -85,15 +85,15 @@ else
 fi
 
 if [[ "$health_failures" -gt 0 ]]; then
-  ui_err "Health" "Failures detected (run 'dot health --fix')"
+  ui_err "Health" "Failures detected (run 'dot heal')"
 elif [[ "$health_warnings" -gt 0 ]]; then
-  ui_warn "Health" "Warnings detected (run 'dot health --fix')"
+  ui_warn "Health" "Warnings detected (run 'dot heal')"
 else
   ui_ok "Health" "All checks passing"
 fi
 
 ui_section "Tips"
-ui_info "Fix" "dot health --fix"
+ui_info "Fix" "dot heal"
 ui_info "Profile" "dot perf --profile"
 ui_info "Security" "dot security-score"
 ui_info "Drift" "dot drift"

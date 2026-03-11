@@ -4,12 +4,13 @@
 
 set -euo pipefail
 
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-NC='\033[0m'
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
+ui_init
 
-echo "Running Dotfiles Smoke Tests..."
-echo "==============================="
+ui_header "Dotfiles Smoke Tests"
 
 declare -i passed=0
 declare -i failed=0
@@ -31,10 +32,8 @@ verify_cmd() {
   local cmd="$1"
   local expected_output="${2:-}"
 
-  printf "Testing %-20s " "$cmd"
-
   if ! check_cmd "$cmd"; then
-    printf "[${RED}FAIL${NC}] (Command not found)\n"
+    ui_err "$cmd" "not found"
     failed+=1
     return 1
   fi
@@ -44,14 +43,14 @@ verify_cmd() {
     # shellcheck disable=SC2015
     output=$($cmd --version 2>&1 || $cmd version 2>&1 || true)
     if echo "$output" | grep -q "$expected_output"; then
-      printf "[${GREEN}PASS${NC}]\n"
+      ui_ok "$cmd"
       passed+=1
     else
-      printf "[${RED}FAIL${NC}] (Output mismatch)\n"
+      ui_err "$cmd" "output mismatch"
       failed+=1
     fi
   else
-    printf "[${GREEN}PASS${NC}]\n"
+    ui_ok "$cmd"
     passed+=1
   fi
 }
@@ -78,12 +77,10 @@ export OPENAI_API_KEY="sk-placeholder-for-testing"
 verify_cmd "sgpt" "ShellGPT"
 verify_cmd "kiro-cli" "kiro-cli"
 
-echo "==============================="
-echo "Smoke Test Summary:"
-echo "Passed: $passed"
-echo "Failed: $failed"
-
-if [[ $failed -gt 0 ]]; then
+echo ""
+if [[ $failed -eq 0 ]]; then
+  ui_ok "All $passed tests passed"
+else
+  ui_err "$failed failed" "$passed passed"
   exit 1
 fi
-exit 0

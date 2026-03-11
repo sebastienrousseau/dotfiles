@@ -26,134 +26,88 @@ if [ -n "${1:-}" ]; then
   shift
 fi
 
-UI_COLOR=0
-UI_BOLD=""
-UI_RESET=""
-UI_BLUE=""
-UI_CYAN=""
-UI_GREEN=""
-UI_YELLOW=""
-UI_RED=""
-UI_GRAY=""
-
-ui_init() {
-  if [[ -t 1 ]] && [[ -z "${NO_COLOR:-}" ]]; then
-    UI_COLOR=1
-    UI_BOLD=$'\033[1m'
-    UI_RESET=$'\033[0m'
-    UI_BLUE=$'\033[38;5;63m'
-    UI_CYAN=$'\033[38;5;81m'
-    UI_GREEN=$'\033[38;5;42m'
-    UI_YELLOW=$'\033[38;5;214m'
-    UI_RED=$'\033[38;5;196m'
-    UI_GRAY=$'\033[38;5;244m'
+# Resolve source directory (needed early for ui.sh sourcing)
+_resolve_source_dir() {
+  local dir=""
+  if [ -n "${CHEZMOI_SOURCE_DIR:-}" ] && [ -d "$CHEZMOI_SOURCE_DIR" ]; then
+    dir="$CHEZMOI_SOURCE_DIR"
+  elif [ -d "$HOME/.dotfiles" ]; then
+    dir="$HOME/.dotfiles"
+  elif [ -d "$HOME/.local/share/chezmoi" ]; then
+    dir="$HOME/.local/share/chezmoi"
+  elif [ -f "package.json" ] && grep -q '"name": "dotfiles"' package.json 2>/dev/null; then
+    dir="$(pwd)"
   fi
+  echo "$dir"
 }
 
-ui_header() {
-  local text="$1"
+# Source shared UI library for consistent colors, checkmarks, and formatting.
+# Falls back to minimal inline definitions if the source directory is unavailable.
+_DOT_SRC="$(_resolve_source_dir)"
+if [ -n "$_DOT_SRC" ] && [ -f "$_DOT_SRC/scripts/dot/lib/ui.sh" ]; then
+  # shellcheck source=../../scripts/dot/lib/ui.sh
+  # shellcheck disable=SC1091
+  source "$_DOT_SRC/scripts/dot/lib/ui.sh"
   ui_init
-  if [[ "$UI_COLOR" == "1" ]]; then
-    printf "\n  %s%s%s\n\n" "${UI_BOLD}${UI_BLUE}" "$text" "$UI_RESET"
-  else
-    printf "\n%s\n\n" "$text"
-  fi
-}
+else
+  # Minimal fallback when source dir is not available (e.g. first install)
+  UI_COLOR=0; BOLD=""; NORMAL=""; RED=""; GREEN=""; YELLOW=""; BLUE=""; CYAN=""; GRAY=""; MAGENTA=""
+  ui_init() {
+    if [[ -t 1 ]] && [[ -z "${NO_COLOR:-}" ]]; then
+      UI_COLOR=1; BOLD=$'\033[1m'; NORMAL=$'\033[0m'
+      RED=$'\033[38;5;196m'; GREEN=$'\033[38;5;42m'; YELLOW=$'\033[38;5;214m'
+      BLUE=$'\033[38;5;63m'; CYAN=$'\033[38;5;81m'; GRAY=$'\033[38;5;244m'; MAGENTA=$'\033[38;5;211m'
+    fi
+  }
+  ui_header()  { ui_init; printf "\n  %s%s%s\n\n" "${BOLD}${BLUE}" "$1" "$NORMAL"; }
+  ui_section() { ui_init; printf "  %s%s%s\n" "${BOLD}${CYAN}" "$1" "$NORMAL"; }
+  ui_cmd()     { ui_init; printf "  %s•%s %s%-16s%s %s\n" "$GREEN" "$NORMAL" "$GREEN" "$1" "$NORMAL" "$2"; }
+  ui_ok()      { ui_init; printf "  %s✓%s %-35s %s\n" "$GREEN" "$NORMAL" "$1" "${2:-}"; }
+  ui_info()    { ui_init; printf "  %s•%s %-35s %s\n" "$GRAY" "$NORMAL" "$1" "${2:-}"; }
+  ui_meta()    { ui_init; printf "  %s•%s %-14s %s\n" "$GRAY" "$NORMAL" "$1" "${2:-}"; }
+  ui_kv()      { ui_init; printf "  %s%-14s%s %s\n" "$BOLD" "$1" "$NORMAL" "$2"; }
+  ui_warn()    { ui_init; printf "  %s⚠%s %-35s %s\n" "$YELLOW" "$NORMAL" "$1" "${2:-}"; }
+  ui_err()     { ui_init; printf "  %s✗%s %-35s %s\n" "$RED" "$NORMAL" "$1" "${2:-}" >&2; }
+  ui_clear_line() { printf '\r\033[K'; }
+  ui_toast()   { case "$1" in success|ok) ui_ok "$2";; error|err) ui_err "$2";; warn) ui_warn "$2";; *) ui_info "$2";; esac; }
+fi
 
-ui_section() {
-  local text="$1"
-  if [[ "$UI_COLOR" == "1" ]]; then
-    printf "  %s%s%s\n" "${UI_BOLD}${UI_CYAN}" "$text" "$UI_RESET"
-  else
-    printf "  %s\n" "$text"
-  fi
-}
-
-ui_cmd() {
-  local cmd="$1"
-  local desc="$2"
-  if [[ "$UI_COLOR" == "1" ]]; then
-    printf "  %b%-16s%b %s\n" "${UI_GREEN}" "$cmd" "${UI_RESET}" "$desc"
-  else
-    printf "  %-16s %s\n" "$cmd" "$desc"
-  fi
-}
-
-ui_info() {
-  local label="$1"
-  local msg="$2"
-  if [[ "$UI_COLOR" == "1" ]]; then
-    printf "  %b•%b %-14s %s\n" "${UI_GRAY}" "${UI_RESET}" "$label" "$msg"
-  else
-    printf "  * %-14s %s\n" "$label" "$msg"
-  fi
-}
-
-ui_warn() {
-  local msg="$1"
-  if [[ "$UI_COLOR" == "1" ]]; then
-    printf "  %b⚠%b %s\n" "${UI_YELLOW}" "${UI_RESET}" "$msg"
-  else
-    printf "  [WARN] %s\n" "$msg"
-  fi
-}
-
-ui_fail() {
-  local msg="$1"
-  if [[ "$UI_COLOR" == "1" ]]; then
-    printf "  %b✗%b %s\n" "${UI_RED}" "${UI_RESET}" "$msg" >&2
-  else
-    printf "  [FAIL] %s\n" "$msg" >&2
-  fi
-}
+# Alias ui_fail → ui_err for backward compatibility in this script
+ui_fail() { ui_err "$@"; }
 
 show_help() {
   ui_header "Dotfiles CLI"
-  ui_info "Usage" "dot [command]"
-  ui_info "Version" "v$VERSION"
+  ui_meta "Usage" "dot [command]"
+  ui_meta "Version" "v$VERSION"
   echo ""
 
-  ui_section "Core Commands"
-  ui_cmd "apply" "Apply dotfiles (chezmoi apply)"
-  ui_cmd "sync" "Apply dotfiles (alias of apply)"
-  ui_cmd "update" "Pull latest changes and apply (chezmoi update)"
-  ui_cmd "clean-cache" "Clear shell initialization caches"
-  ui_cmd "prewarm" "Regenerate shell caches for ultra-fast startup"
+  ui_section "Core"
+  ui_cmd "sync" "Apply dotfiles (--pull to fetch, --check to preview)"
   ui_cmd "add" "Add a file to chezmoi source"
   ui_cmd "diff" "Show chezmoi diff with exclusions"
   ui_cmd "status" "Show configuration drift (chezmoi status)"
-  ui_cmd "remove" "Safely remove a managed file"
-  ui_cmd "cd" "Print source directory path (use: cd \$(dot cd))"
   ui_cmd "edit" "Open chezmoi source in \$EDITOR"
-  ui_cmd "patterns" "Manage AI steering patterns"
+  ui_cmd "cd" "Print source directory path (use: cd \$(dot cd))"
   ui_cmd "commit" "AI-powered conventional commit"
   echo ""
 
   ui_section "Diagnostics"
-  ui_cmd "doctor" "Check system health and configuration"
-  ui_cmd "heal" "Auto-repair common dotfiles issues"
-  ui_cmd "health" "Run comprehensive health check"
-  ui_cmd "verify" "Run security and integrity verification"
-  ui_cmd "scorecard" "System health and security scorecard"
-  ui_cmd "intelligence" "Show Dotfiles Intelligence Surface"
+  ui_cmd "doctor" "System health & configuration check"
+  ui_cmd "" "--heal --audit --score --smoke --drift --benchmark --json --ai"
+  ui_cmd "score" "System health and security scorecard"
   ui_cmd "snapshot" "Capture baseline system snapshot"
-  ui_cmd "smoke-test" "Run automated toolchain verification"
   ui_cmd "chaos" "Simulate config corruption to test self-healing"
   ui_cmd "bundle" "Create offline archive of dotfiles environment"
   ui_cmd "rollback" "Rollback dotfiles to a previous state"
-  ui_cmd "drift" "Drift dashboard (detailed chezmoi status)"
   ui_cmd "history" "Shell history analysis"
-  ui_cmd "benchmark" "Run shell startup benchmark"
   ui_cmd "perf" "Show performance mode and quick timing"
-  ui_cmd "load" "Preload heavy shell layers"
   ui_cmd "load-bench" "Measure time to heavy-layer readiness"
-  ui_cmd "load-bench-pty" "Measure background prewarm readiness via PTY"
-  ui_cmd "ai" "Show AI helper status (opt-in)"
-  ui_cmd "ai-setup" "Interactive setup for all AI CLI tools"
-  ui_cmd "ai-query" "Context-aware RAG query over your dotfiles"
   echo ""
 
-  ui_section "Tools"
+  ui_section "AI"
+  ui_cmd "ai" "AI CLI status & launcher"
+  ui_cmd "ai-setup" "Interactive setup for all AI CLI tools"
+  ui_cmd "ai-query" "Context-aware RAG query over your dotfiles"
   ui_cmd "cl" "Claude CLI with context patterns"
   ui_cmd "gemini" "Gemini CLI with context patterns"
   ui_cmd "kiro" "Kiro CLI with context patterns"
@@ -161,20 +115,24 @@ show_help() {
   ui_cmd "ollama" "Ollama with context patterns"
   ui_cmd "opencode" "OpenCode with context patterns"
   ui_cmd "aider" "Aider with context patterns"
+  echo ""
+
+  ui_section "Tools"
+  ui_cmd "env" "Tool versions (mise)"
+  ui_cmd "profile" "Show/switch configuration profile"
+  ui_cmd "keys" "Keybindings (sign-check: verify git signing)"
   ui_cmd "tools" "Show or install nix packages"
   ui_cmd "new" "Create a new project from a template"
   ui_cmd "sandbox" "Launch a safe sandbox preview (Docker/Podman)"
-  ui_cmd "keys" "Show keybindings catalog"
   ui_cmd "learn" "Start the interactive tour of your new tools"
   ui_cmd "docs" "Show repo README"
-  ui_cmd "log-rotate" "Rotate ~/.local/share/dotfiles.log"
   echo ""
 
   ui_section "Appearance"
   ui_cmd "theme" "Switch terminal theme (dark/light)"
-  ui_cmd "wallpaper" "Apply a wallpaper from your library"
+  ui_cmd "wallpaper" "Apply a wallpaper from your library [macOS,Linux]"
   ui_cmd "fonts" "Install Nerd Fonts (JetBrainsMono by default)"
-  ui_cmd "tune" "Apply OS tuning (opt-in)"
+  ui_cmd "tune" "Apply OS tuning (opt-in) [macOS,Linux]"
   echo ""
 
   ui_section "Secrets"
@@ -188,33 +146,22 @@ show_help() {
   ui_section "Security (opt-in)"
   ui_cmd "backup" "Create a compressed backup of your home"
   ui_cmd "encrypt-check" "Check disk encryption status"
-  ui_cmd "firewall" "Apply firewall hardening"
-  ui_cmd "telemetry" "Disable OS telemetry"
-  ui_cmd "dns-doh" "Enable DNS-over-HTTPS"
-  ui_cmd "lock-screen" "Enforce lock screen idle settings"
-  ui_cmd "usb-safety" "Disable automount for removable media"
+  ui_cmd "firewall" "Apply firewall hardening [macOS,Linux]"
+  ui_cmd "telemetry" "Disable OS telemetry [macOS,Linux]"
+  ui_cmd "dns-doh" "Enable DNS-over-HTTPS [macOS,Linux]"
+  ui_cmd "lock-screen" "Enforce lock screen idle settings [Linux]"
+  ui_cmd "usb-safety" "Disable automount for removable media [Linux]"
   echo ""
 
   ui_section "Meta"
   ui_cmd "upgrade" "Update flake, plugins, and dotfiles"
   ui_cmd "packages" "List installed packages and package managers"
+  ui_cmd "prewarm" "Regenerate shell caches for ultra-fast startup"
   ui_cmd "--version" "Show version information"
   ui_cmd "help" "Show this help message"
 }
 
-resolve_source_dir() {
-  local dir=""
-  if [ -n "${CHEZMOI_SOURCE_DIR:-}" ] && [ -d "$CHEZMOI_SOURCE_DIR" ]; then
-    dir="$CHEZMOI_SOURCE_DIR"
-  elif [ -d "$HOME/.dotfiles" ]; then
-    dir="$HOME/.dotfiles"
-  elif [ -d "$HOME/.local/share/chezmoi" ]; then
-    dir="$HOME/.local/share/chezmoi"
-  elif [ -f "package.json" ] && grep -q '"name": "dotfiles"' package.json 2>/dev/null; then
-    dir="$(pwd)"
-  fi
-  echo "$dir"
-}
+resolve_source_dir() { _resolve_source_dir; }
 
 run_script() {
   local script_rel_path="${1#/}" # Remove leading slash if present
@@ -245,16 +192,109 @@ run_script() {
   fi
 }
 
+_require_platform() {
+  local plat
+  plat="$(uname -s)"
+  case "$plat" in
+    Darwin) plat="macos" ;;
+    Linux)
+      if [[ -f /proc/sys/kernel/osrelease ]] && grep -qiE '(microsoft|wsl)' /proc/sys/kernel/osrelease 2>/dev/null; then
+        plat="wsl"
+      else
+        plat="linux"
+      fi
+      ;;
+    *) plat="unknown" ;;
+  esac
+  for allowed in "$@"; do
+    [[ "$plat" == "$allowed" ]] && return 0
+  done
+  ui_init
+  ui_warn "This command requires: $*  (detected: $plat)"
+  return 1
+}
+
+cmd_ai() {
+  ui_header "AI CLI Status"
+
+  # Define AI CLIs: name|binary|description
+  local -a ai_clis=(
+    "Claude Code|claude|Anthropic CLI agent"
+    "Gemini CLI|gemini|Google AI CLI"
+    "OpenCode|opencode|Terminal AI coding"
+    "Aider|aider|AI pair programming"
+    "Shell-GPT|sgpt|ChatGPT in terminal"
+    "Ollama|ollama|Local LLM runner"
+    "Kiro CLI|kiro-cli|AWS AI assistant"
+  )
+
+  local -a installed=()
+  local name bin desc ver
+  for entry in "${ai_clis[@]}"; do
+    IFS='|' read -r name bin desc <<< "$entry"
+    if command -v "$bin" >/dev/null 2>&1; then
+      ver=$("$bin" --version 2>/dev/null | head -1 | sed 's/^[^0-9]*//' | cut -d' ' -f1) || true
+      [ -z "$ver" ] && ver="installed"
+      ui_ok "$name" "$ver — $desc"
+      installed+=("$name|$bin")
+    else
+      ui_info "$name" "— $desc"
+    fi
+  done
+
+  echo ""
+  if [ ${#installed[@]} -eq 0 ]; then
+    ui_warn "No AI CLIs installed"
+  elif command -v gum >/dev/null 2>&1; then
+    ui_info "Launch" "Select an AI CLI to start"
+    local -a choices=()
+    for entry in "${installed[@]}"; do
+      IFS='|' read -r name bin <<< "$entry"
+      choices+=("$name")
+    done
+    local pick
+    pick=$(printf '%s\n' "${choices[@]}" | gum choose --header "Pick an AI CLI") || true
+    if [ -n "$pick" ]; then
+      for entry in "${installed[@]}"; do
+        IFS='|' read -r name bin <<< "$entry"
+        if [ "$name" = "$pick" ]; then
+          echo ""
+          ui_info "Starting" "$name ($bin)"
+          exec "$bin"
+        fi
+      done
+    fi
+  else
+    ui_info "Tip" "Install gum for interactive launcher: mise use -g gum"
+  fi
+}
+
 case "$COMMAND" in
-  apply | sync)
-    chezmoi apply --force
+  sync | apply)
+    local sync_pull=0 sync_check=0 sync_args=()
+    for arg in "$@"; do
+      case "$arg" in
+        --pull)  sync_pull=1 ;;
+        --check) sync_check=1 ;;
+        *)       sync_args+=("$arg") ;;
+      esac
+    done
+    if [[ $sync_pull -eq 1 ]]; then
+      run_script "scripts/ops/chezmoi-update.sh" "Update script" "${sync_args[@]+"${sync_args[@]}"}"
+      # Regenerate caches after pull (unless backgrounded)
+      local bg=0
+      for a in "${sync_args[@]+"${sync_args[@]}"}"; do
+        [[ "$a" == "--background" || "$a" == "-b" ]] && bg=1
+      done
+      [[ $bg -eq 0 ]] && "$0" prewarm
+    elif [[ $sync_check -eq 1 ]]; then
+      chezmoi diff "${sync_args[@]+"${sync_args[@]}"}"
+    else
+      chezmoi apply --force
+    fi
     ;;
   update)
-    run_script "scripts/ops/chezmoi-update.sh" "Update script" "$@"
-    # Regenerate caches after update (if not running in background)
-    if [[ "$1" != "--background" && "$1" != "-b" ]]; then
-      "$0" prewarm
-    fi
+    exec "$0" sync --pull "$@"
     ;;
   clean-cache)
     ui_info "Cache" "Clearing shell initialization caches"
@@ -307,9 +347,9 @@ case "$COMMAND" in
     exec chezmoi cd
     ;;
   doctor)
-    run_script "scripts/diagnostics/doctor.sh" "Doctor script" "$@"
+    run_script "scripts/diagnostics/doctor-unified.sh" "Doctor script" "$@"
     ;;
-  scorecard)
+  scorecard | score)
     run_script "scripts/diagnostics/scorecard.sh" "Scorecard script" "$@"
     ;;
   snapshot)
@@ -325,6 +365,7 @@ case "$COMMAND" in
     run_script "scripts/ops/theme.sh" "Theme script" "$@"
     ;;
   wallpaper)
+    _require_platform macos linux || exit 2
     run_script "scripts/ops/wallpaper.sh" "Wallpaper script" "$@"
     ;;
   fonts)
@@ -352,18 +393,23 @@ case "$COMMAND" in
     run_script "scripts/security/encryption-check.sh" "Encryption check script" "$@"
     ;;
   firewall)
+    _require_platform macos linux || exit 2
     run_script "scripts/security/firewall.sh" "Firewall script" "$@"
     ;;
   telemetry)
+    _require_platform macos linux || exit 2
     run_script "scripts/security/telemetry.sh" "Telemetry script" "$@"
     ;;
   dns-doh)
+    _require_platform macos linux || exit 2
     run_script "scripts/security/dns-doh.sh" "DNS-over-HTTPS script" "$@"
     ;;
   lock-screen)
+    _require_platform linux || exit 2
     run_script "scripts/security/lock-screen.sh" "Lock screen script" "$@"
     ;;
   usb-safety)
+    _require_platform linux || exit 2
     run_script "scripts/security/usb-safety.sh" "USB safety script" "$@"
     ;;
   upgrade)
@@ -376,7 +422,35 @@ case "$COMMAND" in
     run_script "scripts/ops/tour.sh" "Tour script" "$@"
     ;;
   keys)
-    run_script "scripts/diagnostics/keys.sh" "Keys script" "$@"
+    if [[ "${1:-}" == "sign-check" ]]; then
+      ui_init
+      ui_header "Git Signing Status"
+      local signing_key format key_file
+      signing_key="$(git config --global user.signingkey 2>/dev/null || true)"
+      format="$(git config --global gpg.format 2>/dev/null || true)"
+      if [[ -z "$signing_key" ]]; then
+        ui_warn "No signing key configured (git config --global user.signingkey)"
+      else
+        ui_info "Key" "$signing_key"
+        ui_info "Format" "${format:-gpg}"
+        if [[ "$format" == "ssh" ]]; then
+          key_file="${signing_key/#\~/$HOME}"
+          if [[ -f "$key_file" ]]; then
+            ui_info "Status" "SSH key file exists: $key_file"
+          else
+            ui_warn "SSH key file not found: $key_file"
+          fi
+        else
+          if command -v gpg >/dev/null 2>&1 && gpg --list-keys "$signing_key" >/dev/null 2>&1; then
+            ui_info "Status" "GPG key found in keyring"
+          else
+            ui_warn "GPG key not found in keyring: $signing_key"
+          fi
+        fi
+      fi
+    else
+      run_script "scripts/diagnostics/keys.sh" "Keys script" "$@"
+    fi
     ;;
   docs)
     SRC_DIR="$(resolve_source_dir)"
@@ -478,23 +552,66 @@ PY
     command dot-load-benchmark-pty "$@"
     ;;
   ai)
-    ui_header "AI Helpers"
-    ui_info "DOTFILES_AI" "${DOTFILES_AI:-0}"
-    ui_info "Enable" "export DOTFILES_AI=1"
-    if command -v ollama >/dev/null 2>&1; then
-      ui_cmd "ollama" "installed"
-    else
-      ui_cmd "ollama" "not installed"
-    fi
-    if command -v llm >/dev/null 2>&1; then
-      ui_cmd "llm" "installed"
-    else
-      ui_cmd "llm" "not installed"
-    fi
+    cmd_ai
     ;;
   ai-setup) run_script "scripts/ops/ai-setup.sh" "AI setup script" "$@" ;;
   ai-query) run_script "dot_local/bin/executable_dot-ai" "AI RAG script" "$@" ;;
+  env)
+    if ! command -v mise >/dev/null 2>&1; then
+      ui_fail "mise not installed (required for dot env)"; exit 1
+    fi
+    case "${1:-list}" in
+      list | ls) mise ls ;;
+      install) shift; mise install "$@" ;;
+      use) shift; mise use "$@" ;;
+      *) mise "$@" ;;
+    esac
+    ;;
+  profile)
+    local data_file
+    data_file="$(resolve_source_dir)/.chezmoidata.toml"
+    if [[ ! -f "$data_file" ]]; then
+      ui_fail ".chezmoidata.toml not found"; exit 1
+    fi
+    ui_init
+    case "${1:-show}" in
+      show)
+        ui_header "Dotfiles Profile"
+        local profile_val
+        profile_val="$(grep '^profile' "$data_file" | head -1 | sed 's/.*=\s*"\(.*\)"/\1/')"
+        ui_info "Profile" "${profile_val:-default}"
+        echo ""
+        ui_section "Feature Flags"
+        grep -A 100 '^\[features\]' "$data_file" | tail -n +2 | while IFS= read -r line; do
+          [[ "$line" =~ ^\[  ]] && break
+          [[ -z "$line" || "$line" =~ ^# ]] && continue
+          local key val
+          key="$(echo "$line" | cut -d= -f1 | tr -d ' ')"
+          val="$(echo "$line" | cut -d= -f2 | tr -d ' "')"
+          ui_info "$key" "$val"
+        done
+        ;;
+      set)
+        shift
+        local new_profile="${1:-}"
+        if [[ -z "$new_profile" ]]; then
+          ui_fail "Usage: dot profile set <name>"; exit 1
+        fi
+        if grep -q '^profile' "$data_file"; then
+          sed -i "s/^profile = \".*\"/profile = \"$new_profile\"/" "$data_file"
+        else
+          sed -i "1a profile = \"$new_profile\"" "$data_file"
+        fi
+        ui_info "Profile" "Set to '$new_profile'. Run 'dot sync' to apply."
+        ;;
+      *)
+        ui_fail "Unknown profile subcommand: ${1:-}. Use 'show' or 'set'."
+        exit 1
+        ;;
+    esac
+    ;;
   tune)
+    _require_platform macos linux || exit 2
     SRC_DIR="$(resolve_source_dir)"
     if [ -z "$SRC_DIR" ]; then
       ui_fail "Dotfiles source not found"

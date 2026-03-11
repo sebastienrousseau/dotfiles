@@ -5,20 +5,21 @@
 
 set -euo pipefail
 
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-YELLOW='\033[0;33m'
-NC='\033[0m'
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
+ui_init
 
 if [[ "${1:-}" != "--force" ]]; then
-  echo -e "${RED}WARNING: This script will intentionally break your dotfiles configuration.${NC}"
-  echo "It is designed to test the 'dot heal' auto-repair capabilities."
+  ui_err "WARNING" "This script will intentionally break your dotfiles configuration."
+  ui_info "Purpose" "Tests 'dot heal' auto-repair capabilities."
   echo ""
-  echo "To run, execute: ${0} --force"
+  ui_info "To run, execute" "${0} --force"
   exit 1
 fi
 
-echo -e "${YELLOW}Initiating Chaos Engineering Sequence...${NC}"
+ui_warn "Initiating Chaos Engineering Sequence..."
 
 # Target files for corruption/deletion
 TARGETS=(
@@ -30,20 +31,19 @@ TARGETS=(
 # 1. Configuration Deletion
 for target in "${TARGETS[@]}"; do
   if [[ -f "$target" ]] || [[ -L "$target" ]]; then
-    echo "💥 Destroying: $target"
+    ui_err "Destroying" "$target"
     rm -f "$target"
   fi
 done
 
 # 2. Symlink Corruption
-echo "💥 Creating broken symlinks..."
+ui_err "Creating" "broken symlinks..."
 ln -sf /tmp/nonexistent_file_xyz "$HOME/.config/broken_symlink_test"
 
 # 3. Path Mutation
-echo "💥 Corrupting PATH..."
+ui_err "Corrupting" "PATH..."
 export PATH="/bin"
 
 echo ""
-echo -e "${GREEN}Chaos injected successfully.${NC}"
-echo "Current state is drifted and broken. To recover, run:"
-echo "  dot heal"
+ui_ok "Chaos injected" "State is drifted and broken."
+ui_info "Recover" "dot heal"
