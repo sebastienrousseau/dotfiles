@@ -205,7 +205,10 @@ EOH
 
 copy_to_clipboard() {
   local pub_key_file="$1"
-  if command -v pbcopy &>/dev/null; then
+  if command -v cb &>/dev/null; then
+    cb <"${pub_key_file}"
+    log_info "Public key copied to clipboard."
+  elif command -v pbcopy &>/dev/null; then
     pbcopy <"${pub_key_file}"
     log_info "Public key copied to clipboard (macOS)."
   elif command -v xclip &>/dev/null; then

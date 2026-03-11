@@ -226,9 +226,6 @@ Simply design to fit your shell life
       require("scrollbar").setup({
         handle = { color = "#504945" },
         excluded_filetypes = {
-          "cmp_menu",
-          "cmp_docs",
-          "notify",
           "noice",
           "prompt",
           "TelescopePrompt",
@@ -277,11 +274,11 @@ Simply design to fit your shell life
     end,
   },
 
-  -- Symbols Outline
+  -- Symbols Outline (hedyhli/outline.nvim replaces archived simrat39/symbols-outline.nvim)
   {
-    "simrat39/symbols-outline.nvim",
-    cmd = "SymbolsOutline",
-    keys = { { "<leader>cs", "<cmd>SymbolsOutline<cr>", desc = "Symbols Outline" } },
+    "hedyhli/outline.nvim",
+    cmd = "Outline",
+    keys = { { "<leader>cs", "<cmd>Outline<cr>", desc = "Symbols Outline" } },
     config = true,
   },
 
@@ -490,8 +487,7 @@ Simply design to fit your shell life
         flavour = "mocha",
         integrations = {
           nvimtree = true,
-          notify = true,
-          symbols_outline = true,
+          snacks = true,
           mason = true,
           neotest = true,
           noice = true,

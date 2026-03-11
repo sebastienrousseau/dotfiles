@@ -87,7 +87,10 @@ EOF
   echo "[INFO] Generated password: ${password}"
 
   # Copy to clipboard if possible
-  if command -v pbcopy &>/dev/null; then
+  if command -v cb &>/dev/null; then
+    echo -n "${password}" | cb
+    echo "[INFO] Password copied to clipboard."
+  elif command -v pbcopy &>/dev/null; then
     echo -n "${password}" | pbcopy
     echo "[INFO] Password copied to clipboard (macOS)."
   elif command -v xclip &>/dev/null; then
@@ -96,8 +99,8 @@ EOF
   elif command -v wl-copy &>/dev/null; then
     echo -n "${password}" | wl-copy
     echo "[INFO] Password copied to clipboard (Linux with Wayland)."
-  elif command -v clip &>/dev/null; then
-    echo -n "${password}" | clip
+  elif command -v clip.exe &>/dev/null; then
+    echo -n "${password}" | clip.exe
     echo "[INFO] Password copied to clipboard (Windows)."
   else
     echo "[WARNING] Clipboard tool not found. Password not copied to clipboard."

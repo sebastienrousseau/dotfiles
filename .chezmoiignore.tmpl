@@ -61,9 +61,19 @@ nix/**
 {{- if eq .chezmoi.os "darwin" }}
 .config/i3
 .config/i3/**
+.config/fontconfig
+.config/fontconfig/**
 {{- end }}
 
 {{- if eq .chezmoi.os "linux" }}
 Library
 Library/**
+.config/karabiner
+.config/karabiner/**
+.config/mas
+.config/mas/**
+.config/duti
+.config/duti/**
+.config/raycast
+.config/raycast/**
 {{- end }}

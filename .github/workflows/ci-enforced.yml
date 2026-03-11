@@ -305,7 +305,7 @@ jobs:
       - name: Setup Chezmoi
         run: |
           if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
-            sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -t v${{ env.CHEZMOI_VERSION }}
+            bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
           fi
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Chezmoi Apply Test

@@ -14,52 +14,25 @@ uuid_copy() {
     return 1
   fi
 
-  # Clipboard providers by platform:
-  # macOS: pbcopy/pbpaste
-  # WSL: clip.exe + PowerShell Get-Clipboard
-  # Linux Wayland: wl-copy/wl-paste
-  # Linux X11: xclip
-  if command -v pbcopy >/dev/null 2>&1; then
+  # Copy to clipboard and echo the value
+  if command -v cb >/dev/null 2>&1; then
+    printf "%s" "$value" | cb
+    printf "%s\n" "$value"
+  elif command -v pbcopy >/dev/null 2>&1; then
     printf "%s" "$value" | pbcopy
-    if command -v pbpaste >/dev/null 2>&1; then
-      pbpaste
-    else
-      printf "%s\n" "$value"
-    fi
-    echo
-    return 0
-  fi
-
-  if command -v clip.exe >/dev/null 2>&1; then
+    printf "%s\n" "$value"
+  elif command -v clip.exe >/dev/null 2>&1; then
     printf "%s" "$value" | clip.exe
-    if command -v powershell.exe >/dev/null 2>&1; then
-      powershell.exe -NoProfile -Command "Get-Clipboard" | tr -d '\r'
-    else
-      printf "%s\n" "$value"
-    fi
-    return 0
-  fi
-
-  if command -v wl-copy >/dev/null 2>&1; then
+    printf "%s\n" "$value"
+  elif command -v wl-copy >/dev/null 2>&1; then
     printf "%s" "$value" | wl-copy
-    if command -v wl-paste >/dev/null 2>&1; then
-      wl-paste
-    else
-      printf "%s\n" "$value"
-    fi
-    echo
-    return 0
-  fi
-
-  if command -v xclip >/dev/null 2>&1; then
+    printf "%s\n" "$value"
+  elif command -v xclip >/dev/null 2>&1; then
     printf "%s" "$value" | xclip -selection clipboard
-    printf "%s" "$value" | xclip -selection clipboard -o
-    echo
-    return 0
+    printf "%s\n" "$value"
+  else
+    printf "%s\n" "$value"
   fi
-
-  # No clipboard tool found; still return generated UUID.
-  printf "%s\n" "$value"
   return 0
 }
 alias uuid='uuid_copy'

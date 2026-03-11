@@ -37,7 +37,9 @@ fi
 
 printf '%s' "$emoji"
 
-if command -v pbcopy >/dev/null; then
+if command -v cb >/dev/null; then
+  printf '%s' "$emoji" | cb
+elif command -v pbcopy >/dev/null; then
   printf '%s' "$emoji" | pbcopy
 elif command -v wl-copy >/dev/null; then
   printf '%s' "$emoji" | wl-copy

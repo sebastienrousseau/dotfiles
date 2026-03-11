@@ -168,8 +168,9 @@ setw -g clock-mode-style 24
 if-shell 'uname | grep -q Linux' {
   bind -n WheelDownPane select-pane -t= \; send-keys -M
   bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'select-pane -t=; copy-mode -e; send-keys -M'"
-  bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "xclip -selection c"
-  bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "xclip -in -selection clipboard"
+  # Use cb utility for cross-platform clipboard (Wayland, X11, WSL)
+  bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "cb"
+  bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "cb"
 }
 
 # --- PLUGINS (TPM) ---
