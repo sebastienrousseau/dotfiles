@@ -41,19 +41,19 @@ for arg in "$@"; do
   esac
 done
 
-# --- Output helpers (Bubble Tea-inspired colors) ---
-_ok() { printf '  \033[38;5;42m✓\033[0m %-35s %s\n' "$1" "${2:-}"; }
+# --- Output helpers (delegate to shared ui.sh) ---
+_ok() { ui_ok "$1" "${2:-}"; }
 _fail() {
-  printf '  \033[38;5;196m✗\033[0m %-35s %s\n' "$1" "${2:-}"
+  ui_err "$1" "${2:-}"
   Errors=$((Errors + 1))
 }
 _warn() {
-  printf '  \033[38;5;214m⚠\033[0m %-35s %s\n' "$1" "${2:-}"
+  ui_warn "$1" "${2:-}"
   Warnings=$((Warnings + 1))
 }
 _section() {
   echo ""
-  printf '  \033[1;38;5;63m%s\033[0m\n' "$1"
+  ui_section "$1"
 }
 
 pretty_path() {
@@ -103,8 +103,7 @@ get_cmd_path() {
 }
 
 # --- Header ---
-echo ""
-printf '  \033[1mDotfiles Doctor\033[0m\n'
+ui_header "Dotfiles Doctor"
 
 # --- Core Shells ---
 _section "Core Shells"
@@ -342,12 +341,12 @@ fi
 echo ""
 if [[ $Errors -eq 0 ]]; then
   if [[ $Warnings -eq 0 ]]; then
-    printf '  \033[1;38;5;42mHealthy.\033[0m All checks passed.\n'
+    ui_ok "Healthy" "All checks passed."
   else
-    printf '  \033[1;38;5;42mHealthy.\033[0m %d warning(s).\n' "$Warnings"
+    ui_ok "Healthy" "$Warnings warning(s)."
   fi
 else
-  printf '  \033[1;38;5;196m%d error(s)\033[0m, %d warning(s). Run \033[38;5;211mdot heal\033[0m to repair.\n' "$Errors" "$Warnings"
+  ui_err "$Errors error(s)" "$Warnings warning(s). Run 'dot heal' to repair."
 
   if [[ $AI_DEBUG -eq 1 ]]; then
     _section "AI Problem Analysis"

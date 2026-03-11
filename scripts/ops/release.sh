@@ -10,20 +10,16 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
+ui_init
 
-# Colors (respect NO_COLOR)
-if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
-  RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[0;33m'
-  BLUE='\033[0;34m' BOLD='\033[1m' NC='\033[0m'
-else
-  RED='' GREEN='' YELLOW='' BLUE='' BOLD='' NC=''
-fi
-
-log_info() { printf '%b\n' "${BLUE}[INFO]${NC} $*"; }
-log_success() { printf '%b\n' "${GREEN}[OK]${NC} $*"; }
-log_warn() { printf '%b\n' "${YELLOW}[WARN]${NC} $*"; }
-log_error() { printf '%b\n' "${RED}[ERROR]${NC} $*" >&2; }
-log_step() { printf '%b\n' "\n${BOLD}── $* ──${NC}"; }
+log_info() { ui_info "$@"; }
+log_success() { ui_ok "$@"; }
+log_warn() { ui_warn "$@"; }
+log_error() { ui_err "$@"; }
+log_step() { echo ""; ui_section "$*"; }
 
 usage() {
   local current

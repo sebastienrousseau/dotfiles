@@ -39,16 +39,10 @@ readonly REPO_ROOT
 readonly ENV_TEMPLATE="${REPO_ROOT}/.github/security-policies/environment-template.env"
 readonly ENV_LOCAL="${REPO_ROOT}/.env.local"
 
-# Color codes (respect NO_COLOR: https://no-color.org)
-if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
-  readonly RED='\033[0;31m'
-  readonly GREEN='\033[0;32m'
-  readonly YELLOW='\033[1;33m'
-  readonly BLUE='\033[0;34m'
-  readonly NC='\033[0m'
-else
-  readonly RED='' GREEN='' YELLOW='' BLUE='' NC=''
-fi
+# shellcheck source=../dot/lib/ui.sh
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/../dot/lib/ui.sh"
+ui_init
 
 # Help text
 show_help() {
@@ -86,22 +80,11 @@ SECURITY NOTES:
 EOF
 }
 
-# Logging functions
-log_info() {
-  printf '%b\n' "${BLUE}[INFO]${NC} $*"
-}
-
-log_success() {
-  printf '%b\n' "${GREEN}[SUCCESS]${NC} $*"
-}
-
-log_warning() {
-  printf '%b\n' "${YELLOW}[WARNING]${NC} $*"
-}
-
-log_error() {
-  printf '%b\n' "${RED}[ERROR]${NC} $*"
-}
+# Logging functions — delegate to shared ui.sh
+log_info() { ui_info "$@"; }
+log_success() { ui_ok "$@"; }
+log_warning() { ui_warn "$@"; }
+log_error() { ui_err "$@"; }
 
 # Initialize environment configuration
 init_config() {

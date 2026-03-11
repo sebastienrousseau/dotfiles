@@ -20,29 +20,14 @@ BACKUP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/backups"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
 HEAL_LOG="$STATE_DIR/heal.log"
 
-# Colors (respect NO_COLOR: https://no-color.org)
-if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
-  RED='\033[0;31m'
-  GREEN='\033[0;32m'
-  YELLOW='\033[0;33m'
-  BLUE='\033[0;34m'
-  BOLD='\033[1m'
-  NC='\033[0m'
-else
-  RED='' GREEN='' YELLOW='' BLUE='' BOLD='' NC=''
-fi
-
-# Logging
+# Logging — delegates to shared ui.sh primitives
 ui_init
 log() { printf '%b\n' "$*"; }
-log_info() { ui_info "$*"; }
-log_success() { ui_ok "$*"; }
-log_warn() { ui_warn "$*"; }
-log_error() { ui_err "$*"; }
-log_step() {
-  echo ""
-  printf '  \033[1;38;5;63m%s\033[0m\n' "$*"
-}
+log_info() { ui_info "$@"; }
+log_success() { ui_ok "$@"; }
+log_warn() { ui_warn "$@"; }
+log_error() { ui_err "$@"; }
+log_step() { echo ""; ui_section "$*"; }
 log_dry() { ui_warn "DRY-RUN" "Would: $*"; }
 
 # Persistent logging
@@ -200,77 +185,11 @@ get_package_name() {
 }
 
 # =============================================================================
-# Animated Package Installer (inspired by charm.sh/bubbletea)
+# Animated Package Installer — delegates to ui.sh ui_run_cmd
 # =============================================================================
 
-_SPIN=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
-
-_progress_bar() {
-  local current=$1 total=$2 width=20
-  if [[ $total -eq 0 ]]; then return; fi
-  local filled=$((current * width / total))
-  local empty=$((width - filled))
-  printf '\033[38;5;63m'
-  local i
-  for ((i = 0; i < filled; i++)); do printf '█'; done
-  printf '\033[0;2m'
-  for ((i = 0; i < empty; i++)); do printf '░'; done
-  printf '\033[0m'
-}
-
-# Run a command with animated spinner + progress bar
 # Usage: _pkg_install "label" completed total command [args...]
-_pkg_install() {
-  local label="$1" completed="$2" total="$3"
-  shift 3
-
-  # Non-terminal: simple line output
-  if [[ ! -t 1 ]]; then
-    if "$@" >/dev/null 2>&1; then
-      printf '  \033[38;5;42m✓\033[0m %s\n' "$label"
-      return 0
-    else
-      printf '  \033[38;5;196m✗\033[0m %s\n' "$label"
-      return 1
-    fi
-  fi
-
-  local rc_file
-  rc_file=$(mktemp)
-
-  # Run install in background, capture exit code
-  (
-    "$@" >/dev/null 2>&1
-    echo $? >"$rc_file"
-  ) &
-  local pid=$!
-
-  # Animate spinner in foreground
-  local fi=0 w
-  w=${#total}
-  while kill -0 "$pid" 2>/dev/null; do
-    printf '\r  \033[38;5;63m%s\033[0m Installing \033[38;5;211m%s\033[0m  ' \
-      "${_SPIN[$fi]}" "$label"
-    _progress_bar "$completed" "$total"
-    printf ' %*d/%d ' "$w" "$((completed + 1))" "$total"
-    fi=$(((fi + 1) % ${#_SPIN[@]}))
-    sleep 0.08
-  done
-  wait "$pid" 2>/dev/null
-
-  local rc
-  rc=$(cat "$rc_file" 2>/dev/null || echo 1)
-  rm -f "$rc_file"
-
-  # Clear spinner line, print result
-  printf '\r\033[K'
-  if [[ "$rc" == "0" ]]; then
-    printf '  \033[38;5;42m✓\033[0m %s\n' "$label"
-  else
-    printf '  \033[38;5;196m✗\033[0m %s\n' "$label"
-  fi
-  return "$rc"
-}
+_pkg_install() { ui_run_cmd "$@"; }
 
 # Resolve latest GitHub release tag for a repo
 _gh_latest_tag() {

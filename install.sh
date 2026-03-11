@@ -58,6 +58,7 @@ Options:
   --help        Show this help message
   --force       Non-interactive mode (sets DOTFILES_NONINTERACTIVE=1)
   --silent      Quiet mode (sets DOTFILES_SILENT=1)
+  --minimal     Minimal profile (disable nvim, tmux, zellij)
 
 EOF
 }
@@ -79,10 +80,12 @@ main() {
   esac
 
   # Shift arguments to handle mixed flags/version
+  local minimal=0
   for arg in "$@"; do
     case "$arg" in
       --silent) export DOTFILES_SILENT=1 ;;
       --force) export DOTFILES_NONINTERACTIVE=1 ;;
+      --minimal) minimal=1 ;;
     esac
   done
 
@@ -212,6 +215,18 @@ main() {
   else
     echo "   No existing dotfiles to back up."
     rm -rf "$BACKUP_DIR" 2>/dev/null || true
+  fi
+
+  # Apply --minimal overrides if requested
+  if [[ $minimal -eq 1 ]]; then
+    step "Applying minimal profile overrides..."
+    local data_file="$SOURCE_DIR/.chezmoidata.toml"
+    if [[ -f "$data_file" ]]; then
+      sed_in_place 's/^profile = ".*"/profile = "minimal"/' "$data_file"
+      sed_in_place 's/^nvim = true/nvim = false/' "$data_file"
+      sed_in_place 's/^tmux = true/tmux = false/' "$data_file"
+      sed_in_place 's/^zellij = true/zellij = false/' "$data_file"
+    fi
   fi
 
   # 6. Initialize & Apply

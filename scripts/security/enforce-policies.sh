@@ -13,24 +13,18 @@ readonly REPO_ROOT
 readonly POLICIES_DIR="${REPO_ROOT}/.github/security-policies"
 readonly LOG_FILE="${REPO_ROOT}/.security-audit.log"
 
-# Color codes for output (respect NO_COLOR: https://no-color.org)
-if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
-  readonly RED='\033[0;31m'
-  readonly GREEN='\033[0;32m'
-  readonly YELLOW='\033[1;33m'
-  readonly NC='\033[0m'
-else
-  readonly RED='' GREEN='' YELLOW='' NC=''
-fi
+# shellcheck source=../dot/lib/ui.sh
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/../dot/lib/ui.sh"
+ui_init
 
-# Logging function
+# Logging function (also writes to log file)
 log() {
   local level="$1"
   shift
   local message="$*"
   local timestamp
   timestamp=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
-
   echo "[${timestamp}] [${level}] ${message}" | tee -a "${LOG_FILE}"
 }
 
@@ -322,13 +316,13 @@ main() {
 
   # Final result
   if [[ $total_violations -eq 0 ]]; then
-    printf '%b\n' "${GREEN}✅ All security checks passed!${NC}"
+    ui_ok "All security checks passed"
     log "INFO" "Security policy enforcement completed successfully"
     exit 0
   else
-    printf '%b\n' "${RED}❌ Security policy enforcement failed with ${total_violations} violations${NC}"
-    printf '%b\n' "${YELLOW}📋 Check ${LOG_FILE} for details${NC}"
-    printf '%b\n' "${YELLOW}📋 Review security-report.md for summary${NC}"
+    ui_err "$total_violations violations" "Security policy enforcement failed"
+    ui_warn "Details" "Check ${LOG_FILE}"
+    ui_warn "Report" "Review security-report.md"
     log "ERROR" "Security policy enforcement failed with ${total_violations} violations"
     exit 1
   fi

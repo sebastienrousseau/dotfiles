@@ -46,6 +46,9 @@ set -euo pipefail
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
 REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 CHEZMOI_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi"
 DOTFILES_SOURCE="${HOME}/.dotfiles"
@@ -55,32 +58,22 @@ VERBOSE=0
 JSON_OUTPUT=0
 EXIT_CODE=0
 
-# Colors (disabled if not a terminal, JSON mode, or NO_COLOR set)
-if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]] && [[ "$JSON_OUTPUT" != "1" ]]; then
-  RED='\033[0;31m'
-  GREEN='\033[0;32m'
-  YELLOW='\033[0;33m'
-  BLUE='\033[0;34m'
-  BOLD='\033[1m'
-  NC='\033[0m'
-else
-  RED='' GREEN='' YELLOW='' BLUE='' BOLD='' NC=''
-fi
+ui_init
 
 # Results collection for JSON
 declare -a RESULTS=()
 
 log_info() {
   if [[ "$VERBOSE" == "1" ]]; then
-    printf '%b\n' "${BLUE}[INFO]${NC} $*"
+    ui_info "$@"
   fi
 }
-log_pass() { printf '%b\n' "${GREEN}[PASS]${NC} $*"; }
+log_pass() { ui_ok "$@"; }
 log_fail() {
-  printf '%b\n' "${RED}[FAIL]${NC} $*"
+  ui_err "$@"
   EXIT_CODE=1
 }
-log_warn() { printf '%b\n' "${YELLOW}[WARN]${NC} $*"; }
+log_warn() { ui_warn "$@"; }
 
 add_result() {
   local name="$1" status="$2" message="${3:-}"
