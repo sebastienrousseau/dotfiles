@@ -329,8 +329,8 @@ fi
 # --- Performance ---
 _section "Performance"
 if command -v hyperfine >/dev/null 2>&1; then
-  if bash "$SCRIPT_DIR/../tests/performance/bench.sh" 2>/dev/null; then
-    _ok "startup latency" "within 50ms threshold"
+  if bash "$SCRIPT_DIR/../../tests/performance/bench.sh" 2>/dev/null; then
+    _ok "startup latency" "within 15ms threshold"
   else
     _warn "startup latency" "threshold exceeded (run dot prewarm)"
   fi

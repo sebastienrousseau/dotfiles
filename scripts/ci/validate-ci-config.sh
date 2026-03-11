@@ -93,7 +93,7 @@ printf '%b\n' "${BLUE}3. Test Coverage Requirements${NC}"
 check_pattern_in_file "$REPO_ROOT/.github/workflows/ci.yml" "100%" "100% coverage requirement"
 check_pattern_in_file "$REPO_ROOT/.github/workflows/ci.yml" "fail-under" "Coverage threshold enforcement"
 
-if [[ -f "$REPO_ROOT/scripts/tests/framework/test_runner.sh" ]]; then
+if [[ -f "$REPO_ROOT/tests/framework/test_runner.sh" ]]; then
   printf '%b\n' "  ${GREEN}✓${NC} Test framework exists"
 else
   printf '%b\n' "  ${RED}✗${NC} Test framework missing"

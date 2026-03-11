@@ -97,7 +97,7 @@ jobs:
           if [[ "${{ steps.updates.outputs.nerd_fonts_update }}" == "true" ]]; then
             VERSION="${{ steps.updates.outputs.nerd_fonts_version }}"
             sed -i "s/NERD_FONTS_VERSION=\"[^\"]*\"/NERD_FONTS_VERSION=\"${VERSION}\"/" install/provision/run_onchange_50-install-fonts.sh.tmpl
-            sed -i "s|nerd-fonts/releases/download/v[0-9.]*|nerd-fonts/releases/download/v${VERSION}|g" docs/FONTS.md
+            sed -i "s|nerd-fonts/releases/download/v[0-9.]*|nerd-fonts/releases/download/v${VERSION}|g" docs/reference/FONTS.md
           fi
 
           # Update Chezmoi version in CI

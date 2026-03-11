@@ -14,11 +14,11 @@ SED_VERSION_PATTERN='[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*'
 BACKUP_DIR="$PROJECT_ROOT/.version-sync-backup"
 EXCLUDE_FILES=(
   "CHANGELOG.md"
-  "docs/COMPLIANCE.md"
-  "docs/FONTS.md"
-  "docs/LEGACY_ROADMAP.md"
-  "docs/PLAN.md"
-  "docs/MILESTONE_v0.2.487.md"
+  "docs/security/COMPLIANCE.md"
+  "docs/reference/FONTS.md"
+  "docs/archive/LEGACY_ROADMAP.md"
+  "docs/archive/PLAN.md"
+  "docs/archive/MILESTONE_v0.2.487.md"
 )
 
 # Colors for output (respect NO_COLOR: https://no-color.org)
@@ -127,7 +127,7 @@ find_version_files() {
 
   # Add known files that should be checked even if they don't have versions yet
   echo "README.md" >>"$temp_file"
-  echo "docs/FEATURES.md" >>"$temp_file"
+  echo "docs/reference/FEATURES.md" >>"$temp_file"
   echo "docs/COPYRIGHT" >>"$temp_file"
 
   # Remove duplicates and filter existing files

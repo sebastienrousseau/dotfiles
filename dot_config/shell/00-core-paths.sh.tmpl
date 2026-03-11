@@ -95,14 +95,9 @@ path_prepend "${HOME}/.node_modules/bin"
 # Lua (Luarocks)
 path_prepend "${HOME}/.luarocks/bin"
 
-# 4. Applications (macOS Specifics from 99-custom)
+# 4. macOS System Paths
 {{- if eq .chezmoi.os "darwin" }}
 path_prepend "/Library/Apple/usr/bin"
-path_prepend "/Library/TeX/texbin"
-path_prepend "/Applications/Topaz Photo AI.app/Contents/Resources/bin"
-path_prepend "/Applications/Little Snitch.app/Contents/Components"
-path_prepend "/Applications/iTerm.app/Contents/Resources/utilities"
-path_prepend "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 {{- end }}
 
 # 5. Local Bin (Highest Priority)

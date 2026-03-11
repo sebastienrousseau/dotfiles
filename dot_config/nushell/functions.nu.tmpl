@@ -8,7 +8,7 @@
 {{ range $group, $files := $groups -}}
 # --- {{ $group }} ---
 {{ range $files -}}
-{{ $func := trimSuffix ".sh" . -}}
+{{ $func := trimSuffix ".sh" (base .) -}}
 def {{ $func }} [...args] {
     bash -c $'source "$HOME/.config/shell/50-logic-functions.sh" 2>/dev/null; {{ $func }} "$@"' -- ...$args
 }
