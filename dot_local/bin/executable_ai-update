@@ -48,7 +48,7 @@ log_header
 # Pre-auth sudo to avoid mid-script interruptions
 if [[ "$(uname -s)" == "Linux" ]]; then
     step "Authenticating sudo"
-    sudo -v && ok || { err "Sudo required for system updates"; exit 1; }
+    if sudo -v; then ok; else err "Sudo required for system updates"; exit 1; fi
 fi
 
 # --- 1. mise Core (Multi-Method Detection) ---
@@ -69,7 +69,7 @@ if command -v mise >/dev/null 2>&1; then
         ok
     else
         # Fallback for standalone binary installation
-        mise self-update -y >/dev/null 2>&1 && ok || skip "manual update needed"
+        if mise self-update -y >/dev/null 2>&1; then ok; else skip "manual update needed"; fi
     fi
 else
     skip "mise not found"
@@ -156,7 +156,11 @@ if command -v ollama >/dev/null 2>&1; then
     else
         # macOS users typically use the .app or Brew
         step "Ollama (macOS)"
-        command -v brew >/dev/null 2>&1 && brew upgrade ollama --cask >/dev/null 2>&1 && ok || skip "Update via App"
+        if command -v brew >/dev/null 2>&1 && brew upgrade ollama --cask >/dev/null 2>&1; then
+            ok
+        else
+            skip "Update via App"
+        fi
     fi
 fi
 
@@ -174,14 +178,10 @@ echo -e "${GREEN}${BOLD}Dotfiles Environment Ready${NC}"
 # Version Report
 echo -e "
 ${BOLD}System Version Status:${NC}"
-printf "${GRAY}            ${NC}
-" "Node:" "$(node -v 2>/dev/null || echo 'N/A')"
-printf "${GRAY}            ${NC} \n" "Kiro:" "$(kiro-cli --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"
-printf "${GRAY}            ${NC}
-" "Ollama:" "$(ollama --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"
-printf "${GRAY}            ${NC}
-" "Pipx:" "$(pipx --version 2>/dev/null || echo 'N/A')"
-printf "${GRAY}            ${NC}
-" "Mise:" "$(mise --version 2>/dev/null | awk '{print $1}' || echo 'N/A')"
+printf "%b%-12s%b %s\n" "${GRAY}" "Node:" "${NC}" "$(node -v 2>/dev/null || echo 'N/A')"
+printf "%b%-12s%b %s\n" "${GRAY}" "Kiro:" "${NC}" "$(kiro-cli --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"
+printf "%b%-12s%b %s\n" "${GRAY}" "Ollama:" "${NC}" "$(ollama --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"
+printf "%b%-12s%b %s\n" "${GRAY}" "Pipx:" "${NC}" "$(pipx --version 2>/dev/null || echo 'N/A')"
+printf "%b%-12s%b %s\n" "${GRAY}" "Mise:" "${NC}" "$(mise --version 2>/dev/null | awk '{print $1}' || echo 'N/A')"
 
 trap - EXIT

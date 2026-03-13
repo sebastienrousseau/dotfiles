@@ -309,8 +309,7 @@ if command -v chezmoi >/dev/null 2>&1; then
         grep -v "/bun/" |
         grep -v "/.bun/" |
         grep -v "/noctalia/" |
-        grep -v -- "-backup/" |
-        wc -l | tr -d ' ' ||
+        grep -c -v -- "-backup/" ||
         true
     )
 

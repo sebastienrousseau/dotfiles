@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 set -euo pipefail
 
@@ -56,11 +57,8 @@ else
   UI_COLOR=0; BOLD=""; NORMAL=""; RED=""; GREEN=""; YELLOW=""; BLUE=""; CYAN=""; GRAY=""; MAGENTA=""
   ui_init() {
     if [[ -t 1 ]] && [[ -z "${NO_COLOR:-}" ]]; then
-      # shellcheck disable=SC2034
       UI_COLOR=1; BASH_BOLD=$'\033[1m'; NORMAL=$'\033[0m'
-      # shellcheck disable=SC2034
       RED=$'\033[38;5;196m'; GREEN=$'\033[38;5;42m'; YELLOW=$'\033[38;5;214m'
-      # shellcheck disable=SC2034
       BLUE=$'\033[38;5;63m'; CYAN=$'\033[38;5;81m'; GRAY=$'\033[38;5;244m'; MAGENTA=$'\033[38;5;211m'
     fi
   }
