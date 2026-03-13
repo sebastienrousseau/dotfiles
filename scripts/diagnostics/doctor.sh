@@ -187,6 +187,7 @@ uptime_human="$(uptime -p 2>/dev/null | sed 's/^up //')"
 
 if [[ -r /etc/os-release ]]; then
   distro_pretty="$(
+    # shellcheck disable=SC1091
     . /etc/os-release
     echo "${PRETTY_NAME:-$ID}"
   )"
@@ -308,8 +309,7 @@ if command -v chezmoi >/dev/null 2>&1; then
         grep -v "/bun/" |
         grep -v "/.bun/" |
         grep -v "/noctalia/" |
-        grep -v -- "-backup/" |
-        wc -l | tr -d ' ' ||
+        grep -v -- "-backup/" -c ||
         true
     )
 

@@ -232,7 +232,7 @@ check_shell_startup_performance() {
     if command -v "$shell" >/dev/null 2>&1; then
       local start_ms end_ms duration_ms
       start_ms=$(date +%s)
-      "$shell" -i -c 'exit' 2>/dev/null || true
+      "$shell" -c 'exit' 2>/dev/null || true
       end_ms=$(date +%s)
       # Convert to milliseconds (second-level precision; %N is GNU-only)
       duration_ms=$(((end_ms - start_ms) * 1000))
@@ -405,9 +405,9 @@ main() {
     echo ""
     echo "=========================================="
     if [[ $EXIT_CODE -eq 0 ]]; then
-      printf '%b\n' "${GREEN}${BOLD}Health Check: PASSED${NC}"
+      printf '%b\n' "${GREEN}${BOLD}Health Check: PASSED${NORMAL}"
     else
-      printf '%b\n' "${RED}${BOLD}Health Check: FAILED${NC}"
+      printf '%b\n' "${RED}${BOLD}Health Check: FAILED${NORMAL}"
     fi
     echo "=========================================="
   fi

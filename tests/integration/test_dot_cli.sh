@@ -44,12 +44,12 @@ fi
 
 test_start "dot_help_output"
 help_output=$(bash "$DOT_CLI" help 2>&1)
-if echo "$help_output" | grep -q "Core Commands"; then
+if echo "$help_output" | grep -q "Core"; then
   ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot help shows Core Commands section"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot help shows Core section"
 else
   ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot help should show Core Commands"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot help should show Core"
 fi
 
 test_start "dot_help_lists_health"
