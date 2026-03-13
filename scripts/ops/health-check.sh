@@ -75,6 +75,11 @@ log_fail() {
 }
 log_warn() { ui_warn "$@"; }
 
+_section() {
+  echo ""
+  ui_section "$1"
+}
+
 add_result() {
   local name="$1" status="$2" message="${3:-}"
   RESULTS+=("{\"check\": \"$name\", \"status\": \"$status\", \"message\": \"$message\"}")
@@ -367,20 +372,20 @@ check_symlinks_valid() {
 
 main() {
   if [[ "$JSON_OUTPUT" != "1" ]]; then
-    echo ""
-    echo "=========================================="
-    echo "     Dotfiles Health Check"
-    echo "=========================================="
-    echo ""
+    ui_logo_dot "Health Check"
   fi
 
-  # Run all checks
+  # --- Core Infrastructure ---
+  _section "Core Infrastructure"
   check_chezmoi_installed || true
   # shellcheck disable=SC1091
   check_dotfiles_source || true
   check_chezmoi_config || true
   check_critical_files || true
   check_config_directories || true
+
+  # --- Runtime & Sync ---
+  _section "Runtime & Sync"
   check_dependencies || true
   check_chezmoi_status || true
   check_git_status || true
@@ -403,13 +408,12 @@ main() {
     echo "}"
   else
     echo ""
-    echo "=========================================="
     if [[ $EXIT_CODE -eq 0 ]]; then
-      printf '%b\n' "${GREEN}${BOLD}Health Check: PASSED${NORMAL}"
+      ui_toast "success" "Health Check: PASSED"
     else
-      printf '%b\n' "${RED}${BOLD}Health Check: FAILED${NORMAL}"
+      ui_toast "error" "Health Check: FAILED"
     fi
-    echo "=========================================="
+    echo ""
   fi
 
   exit $EXIT_CODE
