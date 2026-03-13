@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+# shellcheck shell=bash
 #compdef dot
 
 # Zsh completion for the dot CLI

@@ -16,6 +16,7 @@ export PIPX_BIN_DIR="${HOME}/.local/bin"
 
 # Ensure Nix is in PATH if installed
 if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
+  # shellcheck disable=SC1091
   . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
 fi
 
@@ -51,11 +52,15 @@ if [ -n "$_DOT_SRC" ] && [ -f "$_DOT_SRC/scripts/dot/lib/ui.sh" ]; then
   ui_init
 else
   # Minimal fallback when source dir is not available (e.g. first install)
+  # shellcheck disable=SC2034
   UI_COLOR=0; BOLD=""; NORMAL=""; RED=""; GREEN=""; YELLOW=""; BLUE=""; CYAN=""; GRAY=""; MAGENTA=""
   ui_init() {
     if [[ -t 1 ]] && [[ -z "${NO_COLOR:-}" ]]; then
-      UI_COLOR=1; BOLD=$'\033[1m'; NORMAL=$'\033[0m'
+      # shellcheck disable=SC2034
+      UI_COLOR=1; BASH_BOLD=$'\033[1m'; NORMAL=$'\033[0m'
+      # shellcheck disable=SC2034
       RED=$'\033[38;5;196m'; GREEN=$'\033[38;5;42m'; YELLOW=$'\033[38;5;214m'
+      # shellcheck disable=SC2034
       BLUE=$'\033[38;5;63m'; CYAN=$'\033[38;5;81m'; GRAY=$'\033[38;5;244m'; MAGENTA=$'\033[38;5;211m'
     fi
   }
@@ -167,7 +172,8 @@ run_script() {
   local script_rel_path="${1#/}" # Remove leading slash if present
   local description="$2"
   shift 2
-  local src_dir="$(resolve_source_dir)"
+  local src_dir
+  src_dir="$(resolve_source_dir)"
 
   local background=0
   if [[ "${1:-}" == "--background" || "${1:-}" == "-b" ]]; then
@@ -271,7 +277,7 @@ cmd_ai() {
 
 case "$COMMAND" in
   sync | apply)
-    local sync_pull=0 sync_check=0 sync_args=()
+    sync_pull=0; sync_check=0; sync_args=()
     for arg in "$@"; do
       case "$arg" in
         --pull)  sync_pull=1 ;;
@@ -282,7 +288,7 @@ case "$COMMAND" in
     if [[ $sync_pull -eq 1 ]]; then
       run_script "scripts/ops/chezmoi-update.sh" "Update script" "${sync_args[@]+"${sync_args[@]}"}"
       # Regenerate caches after pull (unless backgrounded)
-      local bg=0
+      bg=0
       for a in "${sync_args[@]+"${sync_args[@]}"}"; do
         [[ "$a" == "--background" || "$a" == "-b" ]] && bg=1
       done
@@ -425,7 +431,7 @@ case "$COMMAND" in
     if [[ "${1:-}" == "sign-check" ]]; then
       ui_init
       ui_header "Git Signing Status"
-      local signing_key format key_file
+      signing_key=""; format=""; key_file=""
       signing_key="$(git config --global user.signingkey 2>/dev/null || true)"
       format="$(git config --global gpg.format 2>/dev/null || true)"
       if [[ -z "$signing_key" ]]; then
@@ -568,7 +574,6 @@ PY
     esac
     ;;
   profile)
-    local data_file
     data_file="$(resolve_source_dir)/.chezmoidata.toml"
     if [[ ! -f "$data_file" ]]; then
       ui_fail ".chezmoidata.toml not found"; exit 1
@@ -577,7 +582,6 @@ PY
     case "${1:-show}" in
       show)
         ui_header "Dotfiles Profile"
-        local profile_val
         profile_val="$(grep '^profile' "$data_file" | head -1 | sed 's/.*=\s*"\(.*\)"/\1/')"
         ui_info "Profile" "${profile_val:-default}"
         echo ""
@@ -585,7 +589,6 @@ PY
         grep -A 100 '^\[features\]' "$data_file" | tail -n +2 | while IFS= read -r line; do
           [[ "$line" =~ ^\[  ]] && break
           [[ -z "$line" || "$line" =~ ^# ]] && continue
-          local key val
           key="$(echo "$line" | cut -d= -f1 | tr -d ' ')"
           val="$(echo "$line" | cut -d= -f2 | tr -d ' "')"
           ui_info "$key" "$val"
@@ -593,7 +596,7 @@ PY
         ;;
       set)
         shift
-        local new_profile="${1:-}"
+        new_profile="${1:-}"
         if [[ -z "$new_profile" ]]; then
           ui_fail "Usage: dot profile set <name>"; exit 1
         fi
