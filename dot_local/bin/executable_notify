@@ -7,7 +7,7 @@ message="${2:-}"
 
 case "$(uname -s)" in
     Darwin)
-        osascript -e "display notification "$message" with title "$title""
+        osascript -e "display notification \"$message\" with title \"$title\""
         ;;
     Linux)
         if grep -qi microsoft /proc/version 2>/dev/null; then
