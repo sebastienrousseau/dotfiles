@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034,SC1091
 # 🅳🅾🆃🅵🅸🅻🅴🆂 - Deterministic Remote Provisioner
 # Usage: curl -sL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/dot_local/bin/executable_dot-bootstrap | bash
 #

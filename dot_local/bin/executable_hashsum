@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034
 ## Hash Calculator — Compute cryptographic hashes of strings or files.
 ##
 ## Supports MD5, SHA1, SHA256, and SHA512 algorithms.

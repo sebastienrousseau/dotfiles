@@ -77,7 +77,8 @@ get_hash_cmd() {
 compute_hash() {
   local algo="$1"
   local input="$2"
-  local cmd=$(get_hash_cmd "$algo")
+  local cmd
+  cmd=$(get_hash_cmd "$algo")
 
   if $FILE_MODE; then
     $cmd "$input" | awk '{print $1}'
