@@ -54,25 +54,68 @@ if [ -n "$_DOT_SRC" ] && [ -f "$_DOT_SRC/scripts/dot/lib/ui.sh" ]; then
 else
   # Minimal fallback when source dir is not available (e.g. first install)
   # shellcheck disable=SC2034
-  UI_COLOR=0; BOLD=""; NORMAL=""; RED=""; GREEN=""; YELLOW=""; BLUE=""; CYAN=""; GRAY=""; MAGENTA=""
+  UI_COLOR=0
+  BOLD=""
+  NORMAL=""
+  RED=""
+  GREEN=""
+  YELLOW=""
+  BLUE=""
+  CYAN=""
+  GRAY=""
+  MAGENTA=""
   ui_init() {
     if [[ -t 1 ]] && [[ -z "${NO_COLOR:-}" ]]; then
-      UI_COLOR=1; BASH_BOLD=$'\033[1m'; NORMAL=$'\033[0m'
-      RED=$'\033[38;5;196m'; GREEN=$'\033[38;5;42m'; YELLOW=$'\033[38;5;214m'
-      BLUE=$'\033[38;5;63m'; CYAN=$'\033[38;5;81m'; GRAY=$'\033[38;5;244m'; MAGENTA=$'\033[38;5;211m'
+      UI_COLOR=1
+      BASH_BOLD=$'\033[1m'
+      NORMAL=$'\033[0m'
+      RED=$'\033[38;5;196m'
+      GREEN=$'\033[38;5;42m'
+      YELLOW=$'\033[38;5;214m'
+      BLUE=$'\033[38;5;63m'
+      CYAN=$'\033[38;5;81m'
+      GRAY=$'\033[38;5;244m'
+      MAGENTA=$'\033[38;5;211m'
     fi
   }
-  ui_header()  { ui_init; printf "\n  %s%s%s\n\n" "${BOLD}${BLUE}" "$1" "$NORMAL"; }
-  ui_section() { ui_init; printf "  %s%s%s\n" "${BOLD}${CYAN}" "$1" "$NORMAL"; }
-  ui_cmd()     { ui_init; printf "  %s•%s %s%-16s%s %s\n" "$GREEN" "$NORMAL" "$GREEN" "$1" "$NORMAL" "$2"; }
-  ui_ok()      { ui_init; printf "  %s✓%s %-35s %s\n" "$GREEN" "$NORMAL" "$1" "${2:-}"; }
-  ui_info()    { ui_init; printf "  %s•%s %-35s %s\n" "$GRAY" "$NORMAL" "$1" "${2:-}"; }
-  ui_meta()    { ui_init; printf "  %s•%s %-14s %s\n" "$GRAY" "$NORMAL" "$1" "${2:-}"; }
-  ui_kv()      { ui_init; printf "  %s%-14s%s %s\n" "$BOLD" "$1" "$NORMAL" "$2"; }
-  ui_warn()    { ui_init; printf "  %s⚠%s %-35s %s\n" "$YELLOW" "$NORMAL" "$1" "${2:-}"; }
-  ui_err()     { ui_init; printf "  %s✗%s %-35s %s\n" "$RED" "$NORMAL" "$1" "${2:-}" >&2; }
+  ui_header() {
+    ui_init
+    printf "\n  %s%s%s\n\n" "${BOLD}${BLUE}" "$1" "$NORMAL"
+  }
+  ui_section() {
+    ui_init
+    printf "  %s%s%s\n" "${BOLD}${CYAN}" "$1" "$NORMAL"
+  }
+  ui_cmd() {
+    ui_init
+    printf "  %s•%s %s%-16s%s %s\n" "$GREEN" "$NORMAL" "$GREEN" "$1" "$NORMAL" "$2"
+  }
+  ui_ok() {
+    ui_init
+    printf "  %s✓%s %-35s %s\n" "$GREEN" "$NORMAL" "$1" "${2:-}"
+  }
+  ui_info() {
+    ui_init
+    printf "  %s•%s %-35s %s\n" "$GRAY" "$NORMAL" "$1" "${2:-}"
+  }
+  ui_meta() {
+    ui_init
+    printf "  %s•%s %-14s %s\n" "$GRAY" "$NORMAL" "$1" "${2:-}"
+  }
+  ui_kv() {
+    ui_init
+    printf "  %s%-14s%s %s\n" "$BOLD" "$1" "$NORMAL" "$2"
+  }
+  ui_warn() {
+    ui_init
+    printf "  %s⚠%s %-35s %s\n" "$YELLOW" "$NORMAL" "$1" "${2:-}"
+  }
+  ui_err() {
+    ui_init
+    printf "  %s✗%s %-35s %s\n" "$RED" "$NORMAL" "$1" "${2:-}" >&2
+  }
   ui_clear_line() { printf '\r\033[K'; }
-  ui_toast()   { case "$1" in success|ok) ui_ok "$2";; error|err) ui_err "$2";; warn) ui_warn "$2";; *) ui_info "$2";; esac; }
+  ui_toast() { case "$1" in success | ok) ui_ok "$2" ;; error | err) ui_err "$2" ;; warn) ui_warn "$2" ;; *) ui_info "$2" ;; esac }
 fi
 
 # Alias ui_fail → ui_err for backward compatibility in this script
@@ -235,7 +278,7 @@ cmd_ai() {
   local -a installed=()
   local name bin desc ver
   for entry in "${ai_clis[@]}"; do
-    IFS='|' read -r name bin desc <<< "$entry"
+    IFS='|' read -r name bin desc <<<"$entry"
     if command -v "$bin" >/dev/null 2>&1; then
       ver=$("$bin" --version 2>/dev/null | head -1 | sed 's/^[^0-9]*//' | cut -d' ' -f1) || true
       [ -z "$ver" ] && ver="installed"
@@ -253,14 +296,14 @@ cmd_ai() {
     ui_info "Launch" "Select an AI CLI to start"
     local -a choices=()
     for entry in "${installed[@]}"; do
-      IFS='|' read -r name bin <<< "$entry"
+      IFS='|' read -r name bin <<<"$entry"
       choices+=("$name")
     done
     local pick
     pick=$(printf '%s\n' "${choices[@]}" | gum choose --header "Pick an AI CLI") || true
     if [ -n "$pick" ]; then
       for entry in "${installed[@]}"; do
-        IFS='|' read -r name bin <<< "$entry"
+        IFS='|' read -r name bin <<<"$entry"
         if [ "$name" = "$pick" ]; then
           echo ""
           ui_info "Starting" "$name ($bin)"
@@ -275,12 +318,14 @@ cmd_ai() {
 
 case "$COMMAND" in
   sync | apply)
-    sync_pull=0; sync_check=0; sync_args=()
+    sync_pull=0
+    sync_check=0
+    sync_args=()
     for arg in "$@"; do
       case "$arg" in
-        --pull)  sync_pull=1 ;;
+        --pull) sync_pull=1 ;;
         --check) sync_check=1 ;;
-        *)       sync_args+=("$arg") ;;
+        *) sync_args+=("$arg") ;;
       esac
     done
     if [[ $sync_pull -eq 1 ]]; then
@@ -429,7 +474,9 @@ case "$COMMAND" in
     if [[ "${1:-}" == "sign-check" ]]; then
       ui_init
       ui_header "Git Signing Status"
-      signing_key=""; format=""; key_file=""
+      signing_key=""
+      format=""
+      key_file=""
       signing_key="$(git config --global user.signingkey 2>/dev/null || true)"
       format="$(git config --global gpg.format 2>/dev/null || true)"
       if [[ -z "$signing_key" ]]; then
@@ -562,19 +609,27 @@ PY
   ai-query) run_script "dot_local/bin/executable_dot-ai" "AI RAG script" "$@" ;;
   env)
     if ! command -v mise >/dev/null 2>&1; then
-      ui_fail "mise not installed (required for dot env)"; exit 1
+      ui_fail "mise not installed (required for dot env)"
+      exit 1
     fi
     case "${1:-list}" in
       list | ls) mise ls ;;
-      install) shift; mise install "$@" ;;
-      use) shift; mise use "$@" ;;
+      install)
+        shift
+        mise install "$@"
+        ;;
+      use)
+        shift
+        mise use "$@"
+        ;;
       *) mise "$@" ;;
     esac
     ;;
   profile)
     data_file="$(resolve_source_dir)/.chezmoidata.toml"
     if [[ ! -f "$data_file" ]]; then
-      ui_fail ".chezmoidata.toml not found"; exit 1
+      ui_fail ".chezmoidata.toml not found"
+      exit 1
     fi
     ui_init
     case "${1:-show}" in
@@ -585,7 +640,7 @@ PY
         echo ""
         ui_section "Feature Flags"
         grep -A 100 '^\[features\]' "$data_file" | tail -n +2 | while IFS= read -r line; do
-          [[ "$line" =~ ^\[  ]] && break
+          [[ "$line" =~ ^\[ ]] && break
           [[ -z "$line" || "$line" =~ ^# ]] && continue
           key="$(echo "$line" | cut -d= -f1 | tr -d ' ')"
           val="$(echo "$line" | cut -d= -f2 | tr -d ' "')"
@@ -596,7 +651,8 @@ PY
         shift
         new_profile="${1:-}"
         if [[ -z "$new_profile" ]]; then
-          ui_fail "Usage: dot profile set <name>"; exit 1
+          ui_fail "Usage: dot profile set <name>"
+          exit 1
         fi
         if grep -q '^profile' "$data_file"; then
           sed -i "s/^profile = \".*\"/profile = \"$new_profile\"/" "$data_file"

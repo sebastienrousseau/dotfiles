@@ -34,7 +34,7 @@ validate_install_path() {
 
   # Only allow known safe prefixes
   case "$resolved" in
-    /opt/*|/usr/local/*|"$HOME"/.local/*)
+    /opt/* | /usr/local/* | "$HOME"/.local/*)
       echo "$resolved"
       return 0
       ;;

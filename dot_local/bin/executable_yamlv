@@ -20,16 +20,19 @@
 set -euo pipefail
 
 QUIET=false
-[[ "${1:-}" == "-q" || "${1:-}" == "--quiet" ]] && { QUIET=true; shift; }
+[[ "${1:-}" == "-q" || "${1:-}" == "--quiet" ]] && {
+  QUIET=true
+  shift
+}
 
 validate_yaml() {
   local input="$1"
   if command -v yq >/dev/null 2>&1; then
-    yq -e '.' <<< "$input" >/dev/null 2>&1
+    yq -e '.' <<<"$input" >/dev/null 2>&1
   elif command -v python3 >/dev/null 2>&1; then
     python3 -c "import yaml; yaml.safe_load('''$input''')" 2>/dev/null
   elif command -v ruby >/dev/null 2>&1; then
-    ruby -ryaml -e "YAML.safe_load(STDIN.read)" <<< "$input" 2>/dev/null
+    ruby -ryaml -e "YAML.safe_load(STDIN.read)" <<<"$input" 2>/dev/null
   else
     echo "Error: yq, python3+pyyaml, or ruby required"
     exit 1

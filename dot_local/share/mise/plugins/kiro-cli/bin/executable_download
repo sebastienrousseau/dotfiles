@@ -8,13 +8,19 @@ ARCH="$(uname -m)"
 case "$OS" in
   Darwin) target_os="darwin" ;;
   Linux) target_os="linux" ;;
-  *) echo "Unsupported OS: $OS" >&2; exit 1 ;;
+  *)
+    echo "Unsupported OS: $OS" >&2
+    exit 1
+    ;;
 esac
 
 case "$ARCH" in
-  x86_64|amd64) target_arch="x86_64" ;;
-  arm64|aarch64) target_arch="aarch64" ;;
-  *) echo "Unsupported arch: $ARCH" >&2; exit 1 ;;
+  x86_64 | amd64) target_arch="x86_64" ;;
+  arm64 | aarch64) target_arch="aarch64" ;;
+  *)
+    echo "Unsupported arch: $ARCH" >&2
+    exit 1
+    ;;
 esac
 
 BASE_URL="https://desktop-release.q.us-east-1.amazonaws.com"

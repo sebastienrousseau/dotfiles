@@ -25,13 +25,13 @@ detect_os() {
         # shellcheck disable=SC1091
         . /etc/os-release
         case "${ID:-}" in
-          ubuntu|debian|pop|linuxmint|elementary)
+          ubuntu | debian | pop | linuxmint | elementary)
             target_os="debian"
             ;;
-          fedora|rhel|centos|rocky|alma)
+          fedora | rhel | centos | rocky | alma)
             target_os="fedora"
             ;;
-          arch|manjaro|endeavouros)
+          arch | manjaro | endeavouros)
             target_os="arch"
             ;;
           *)

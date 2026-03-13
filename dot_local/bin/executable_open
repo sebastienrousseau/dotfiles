@@ -6,29 +6,29 @@ target="${1:-.}"
 
 # Helper for rich feedback if TTY is present
 log_info() {
-    if [ -t 1 ] && command -v gum >/dev/null 2>&1; then
-        gum style --foreground 39 "󰀶 Opening: $1"
-    else
-        echo "open: $1"
-    fi
+  if [ -t 1 ] && command -v gum >/dev/null 2>&1; then
+    gum style --foreground 39 "󰀶 Opening: $1"
+  else
+    echo "open: $1"
+  fi
 }
 
 log_info "$target"
 
 case "$(uname -s)" in
-    Darwin)
-        open "$target"
-        ;;
-    Linux)
-        if grep -qi microsoft /proc/version 2>/dev/null; then
-            # WSL: Translate path and open with explorer.exe
-            win_path=$(wslpath -w "$target" 2>/dev/null || echo "$target")
-            explorer.exe "$win_path"
-        elif command -v xdg-open >/dev/null 2>&1; then
-            xdg-open "$target"
-        else
-            echo "Error: No opener found (xdg-open not installed)" >&2
-            exit 1
-        fi
-        ;;
+  Darwin)
+    open "$target"
+    ;;
+  Linux)
+    if grep -qi microsoft /proc/version 2>/dev/null; then
+      # WSL: Translate path and open with explorer.exe
+      win_path=$(wslpath -w "$target" 2>/dev/null || echo "$target")
+      explorer.exe "$win_path"
+    elif command -v xdg-open >/dev/null 2>&1; then
+      xdg-open "$target"
+    else
+      echo "Error: No opener found (xdg-open not installed)" >&2
+      exit 1
+    fi
+    ;;
 esac

@@ -31,9 +31,15 @@ MILLIS=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -r|--reverse) REVERSE=true; shift ;;
-    -m|--millis) MILLIS=true; shift ;;
-    -h|--help)
+    -r | --reverse)
+      REVERSE=true
+      shift
+      ;;
+    -m | --millis)
+      MILLIS=true
+      shift
+      ;;
+    -h | --help)
       echo -e "${PURPLE}epoch${NC} ${GRAY}convert to/from unix time${NC}"
       echo "Usage: epoch [options] [value]"
       echo "  -r, --reverse   Convert date string to epoch"
@@ -53,9 +59,9 @@ elif [[ $# -gt 0 ]]; then
   [[ ${#EPOCH} -gt 10 ]] && EPOCH=$((EPOCH / 1000))
   date -d "@$EPOCH" 2>/dev/null || date -r "$EPOCH" 2>/dev/null
 else
-if $MILLIS; then
-  date +%s%3N
-else
-  date +%s
-fi
+  if $MILLIS; then
+    date +%s%3N
+  else
+    date +%s
+  fi
 fi

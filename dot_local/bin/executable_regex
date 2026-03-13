@@ -42,13 +42,35 @@ COLOR=true
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -f|--file) FILE_MODE=true; shift ;;
-    -g|--global) GLOBAL=true; shift ;;
-    -i|--ignore) IGNORE_CASE="-i"; shift ;;
-    -c|--color) COLOR=true; shift ;;
-    --no-color) COLOR=false; shift ;;
-    -h|--help) usage; exit 0 ;;
-    -*) echo "Unknown option: $1"; usage; exit 1 ;;
+    -f | --file)
+      FILE_MODE=true
+      shift
+      ;;
+    -g | --global)
+      GLOBAL=true
+      shift
+      ;;
+    -i | --ignore)
+      IGNORE_CASE="-i"
+      shift
+      ;;
+    -c | --color)
+      COLOR=true
+      shift
+      ;;
+    --no-color)
+      COLOR=false
+      shift
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    -*)
+      echo "Unknown option: $1"
+      usage
+      exit 1
+      ;;
     *) break ;;
   esac
 done

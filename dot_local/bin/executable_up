@@ -6,11 +6,11 @@ levels=$1
 target=".."
 
 case "$levels" in
-    2) target="../.." ;;
-    3) target="../../.." ;;
-    4) target="../../../../.." ;;
-    5) target="../../../../../.." ;;
-    *) target=".." ;;
+  2) target="../.." ;;
+  3) target="../../.." ;;
+  4) target="../../../../.." ;;
+  5) target="../../../../../.." ;;
+  *) target=".." ;;
 esac
 
 # If cd_with_history (a dotfiles function) is available, use it.

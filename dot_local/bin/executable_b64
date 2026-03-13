@@ -39,11 +39,23 @@ INPUT=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    -e|--encode) MODE="encode"; shift ;;
-    -d|--decode) MODE="decode"; shift ;;
-    -u|--url)    URL_SAFE=1; shift ;;
-    -h|--help)   show_help ;;
-    *)           INPUT="$1"; shift ;;
+    -e | --encode)
+      MODE="encode"
+      shift
+      ;;
+    -d | --decode)
+      MODE="decode"
+      shift
+      ;;
+    -u | --url)
+      URL_SAFE=1
+      shift
+      ;;
+    -h | --help) show_help ;;
+    *)
+      INPUT="$1"
+      shift
+      ;;
   esac
 done
 
@@ -65,7 +77,7 @@ else
   # Add padding if needed for URL-safe decode
   if [ "$URL_SAFE" -eq 1 ]; then
     INPUT=$(printf "%s" "$INPUT" | tr '-_' '+/')
-    while [ $(( ${#INPUT} % 4 )) -ne 0 ]; do INPUT="${INPUT}="; done
+    while [ $((${#INPUT} % 4)) -ne 0 ]; do INPUT="${INPUT}="; done
   fi
   printf "%s" "$INPUT" | base64 -d
 fi

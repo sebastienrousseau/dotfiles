@@ -15,7 +15,7 @@
 
 # Prevent double-sourcing
 if [[ -n "$BASHRC_SOURCED" ]]; then
-    return 0
+  return 0
 fi
 export BASHRC_SOURCED=1
 
@@ -27,21 +27,21 @@ export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 
 # If not running interactively, exit early
 case $- in
-    *i*) ;;
-    *) return ;;
+  *i*) ;;
+  *) return ;;
 esac
 
 # --- Shell Options ---
 # Enable useful Bash options
-shopt -s histappend      # Append to history instead of overwriting
-shopt -s checkwinsize    # Update LINES and COLUMNS after each command
-shopt -s globstar        # Enable ** for recursive globbing
-shopt -s nocaseglob      # Case-insensitive globbing
-shopt -s cdspell         # Autocorrect minor spelling errors in cd
-shopt -s dirspell        # Autocorrect minor spelling errors in directory names
-shopt -s autocd          # Type directory name to cd into it
-shopt -s cmdhist         # Save multiline commands as single history entry
-shopt -s lithist         # Preserve newlines in history
+shopt -s histappend   # Append to history instead of overwriting
+shopt -s checkwinsize # Update LINES and COLUMNS after each command
+shopt -s globstar     # Enable ** for recursive globbing
+shopt -s nocaseglob   # Case-insensitive globbing
+shopt -s cdspell      # Autocorrect minor spelling errors in cd
+shopt -s dirspell     # Autocorrect minor spelling errors in directory names
+shopt -s autocd       # Type directory name to cd into it
+shopt -s cmdhist      # Save multiline commands as single history entry
+shopt -s lithist      # Preserve newlines in history
 
 # --- History Configuration ---
 export HISTSIZE=50000
@@ -57,77 +57,78 @@ export HISTFILE="${XDG_STATE_HOME}/bash/history"
 # --- Prompt Configuration ---
 # Set a simple but informative prompt
 if [[ -n "$SSH_CONNECTION" ]]; then
-    PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+  PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 else
-    PS1='\[\033[01;34m\]\w\[\033[00m\]\$ '
+  PS1='\[\033[01;34m\]\w\[\033[00m\]\$ '
 fi
 
 _deferred_hydration() {
-    # Remove self from PROMPT_COMMAND
-    PROMPT_COMMAND="${PROMPT_COMMAND//_deferred_hydration;/}"
-    [[ "$PROMPT_COMMAND" == "_deferred_hydration" ]] && unset PROMPT_COMMAND
+  # Remove self from PROMPT_COMMAND
+  PROMPT_COMMAND="${PROMPT_COMMAND//_deferred_hydration;/}"
+  [[ "$PROMPT_COMMAND" == "_deferred_hydration" ]] && unset PROMPT_COMMAND
 
-    # --- Safe and cached eval wrapper for tool initialization ---
-    _SHELL_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/bash"
-    [[ -d "$_SHELL_CACHE" ]] || mkdir -p "$_SHELL_CACHE"
+  # --- Safe and cached eval wrapper for tool initialization ---
+  _SHELL_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/bash"
+  [[ -d "$_SHELL_CACHE" ]] || mkdir -p "$_SHELL_CACHE"
 
-    _cached_eval() {
-        local label="$1"; shift
-        local cache="$_SHELL_CACHE/${label}.bash"
-        local bin_name="$1"
-        local bin=$(command -v "$bin_name")
+  _cached_eval() {
+    local label="$1"
+    shift
+    local cache="$_SHELL_CACHE/${label}.bash"
+    local bin_name="$1"
+    local bin=$(command -v "$bin_name")
 
-        if [[ -f "$cache" ]] && [[ -z "$bin" || "$cache" -nt "$bin" ]]; then
-            source "$cache"
-        else
-            local init_output
-            init_output=$("$@" 2>/dev/null)
+    if [[ -f "$cache" ]] && [[ -z "$bin" || "$cache" -nt "$bin" ]]; then
+      source "$cache"
+    else
+      local init_output
+      init_output=$("$@" 2>/dev/null)
 
-            # Reject if output contains suspicious patterns indicating malicious payloads
-            if [[ "$init_output" =~ (curl[[:space:]].*\|[[:space:]]*(ba)?sh|wget[[:space:]].*\|[[:space:]]*(ba)?sh|nc[[:space:]]+-e|\/dev\/tcp\/|base64[[:space:]]+-d[[:space:]]*\|) ]]; then
-                echo "[WARN] Suspicious output from $label init, skipping" >&2
-                return 1
-            fi
+      # Reject if output contains suspicious patterns indicating malicious payloads
+      if [[ "$init_output" =~ (curl[[:space:]].*\|[[:space:]]*(ba)?sh|wget[[:space:]].*\|[[:space:]]*(ba)?sh|nc[[:space:]]+-e|\/dev\/tcp\/|base64[[:space:]]+-d[[:space:]]*\|) ]]; then
+        echo "[WARN] Suspicious output from $label init, skipping" >&2
+        return 1
+      fi
 
-            echo "$init_output" > "$cache"
-            source "$cache"
-        fi
-    }
-
-    # Use Starship prompt if available
-    if command -v starship &>/dev/null; then
-        _cached_eval "starship-init" starship init bash || true
+      echo "$init_output" >"$cache"
+      source "$cache"
     fi
+  }
 
-    # --- Tool Integration ---
-    # Zoxide (smart cd)
-    if command -v zoxide &>/dev/null; then
-        _cached_eval "zoxide-init" zoxide init bash || true
-    fi
+  # Use Starship prompt if available
+  if command -v starship &>/dev/null; then
+    _cached_eval "starship-init" starship init bash || true
+  fi
 
-    # FZF (fuzzy finder)
-    if command -v fzf &>/dev/null; then
-        _cached_eval "fzf-init" fzf --bash || true
-    fi
+  # --- Tool Integration ---
+  # Zoxide (smart cd)
+  if command -v zoxide &>/dev/null; then
+    _cached_eval "zoxide-init" zoxide init bash || true
+  fi
 
-    # Atuin (shell history)
-    if command -v atuin &>/dev/null; then
-        _cached_eval "atuin-init" atuin init bash --disable-up-arrow || true
-    fi
+  # FZF (fuzzy finder)
+  if command -v fzf &>/dev/null; then
+    _cached_eval "fzf-init" fzf --bash || true
+  fi
 
-    # direnv (directory environments)
-    if command -v direnv &>/dev/null; then
-        _cached_eval "direnv-init" direnv hook bash || true
-    fi
+  # Atuin (shell history)
+  if command -v atuin &>/dev/null; then
+    _cached_eval "atuin-init" atuin init bash --disable-up-arrow || true
+  fi
+
+  # direnv (directory environments)
+  if command -v direnv &>/dev/null; then
+    _cached_eval "direnv-init" direnv hook bash || true
+  fi
 }
 
 # Schedule deferred hydration
 if [[ -z "$BASH_EXECUTION_STRING" ]]; then
-    if [[ -z "$PROMPT_COMMAND" ]]; then
-        PROMPT_COMMAND="_deferred_hydration"
-    else
-        PROMPT_COMMAND="_deferred_hydration; $PROMPT_COMMAND"
-    fi
+  if [[ -z "$PROMPT_COMMAND" ]]; then
+    PROMPT_COMMAND="_deferred_hydration"
+  else
+    PROMPT_COMMAND="_deferred_hydration; $PROMPT_COMMAND"
+  fi
 fi
 
 # --- Core Aliases ---
@@ -149,12 +150,12 @@ alias mv='mv -i'
 
 # Editor aliases
 if command -v nvim &>/dev/null; then
-    alias vim='nvim'
-    alias vi='nvim'
+  alias vim='nvim'
+  alias vi='nvim'
 fi
 
 # --- Source local overrides ---
 if [[ -f "$HOME/.bashrc.local" ]]; then
-    # shellcheck source=/dev/null
-    . "$HOME/.bashrc.local"
+  # shellcheck source=/dev/null
+  . "$HOME/.bashrc.local"
 fi

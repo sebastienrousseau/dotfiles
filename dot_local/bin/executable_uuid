@@ -28,9 +28,15 @@ NO_DASHES=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -u|--upper) UPPER=true; shift ;;
-    -n|--no-dashes) NO_DASHES=true; shift ;;
-    -h|--help)
+    -u | --upper)
+      UPPER=true
+      shift
+      ;;
+    -n | --no-dashes)
+      NO_DASHES=true
+      shift
+      ;;
+    -h | --help)
       echo "Usage: uuid [count] [OPTIONS]"
       echo ""
       echo "Options:"
@@ -44,8 +50,14 @@ while [[ $# -gt 0 ]]; do
       echo "  uuid -u       # Uppercase UUID"
       exit 0
       ;;
-    [0-9]*) COUNT="$1"; shift ;;
-    *) echo "Unknown option: $1"; exit 1 ;;
+    [0-9]*)
+      COUNT="$1"
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
   esac
 done
 
