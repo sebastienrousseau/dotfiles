@@ -122,10 +122,12 @@ _deferred_hydration() {
 }
 
 # Schedule deferred hydration
-if [[ -z "$PROMPT_COMMAND" ]]; then
-    PROMPT_COMMAND="_deferred_hydration"
-else
-    PROMPT_COMMAND="_deferred_hydration; $PROMPT_COMMAND"
+if [[ -z "$BASH_EXECUTION_STRING" ]]; then
+    if [[ -z "$PROMPT_COMMAND" ]]; then
+        PROMPT_COMMAND="_deferred_hydration"
+    else
+        PROMPT_COMMAND="_deferred_hydration; $PROMPT_COMMAND"
+    fi
 fi
 
 # --- Core Aliases ---

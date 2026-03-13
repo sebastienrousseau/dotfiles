@@ -52,3 +52,5 @@ if type -q flatpak
         command flatpak $argv
     end
 end
+
+status is-interactive; or return
