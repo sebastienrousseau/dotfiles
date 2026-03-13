@@ -5,6 +5,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/dot/lib/ui.sh"
 
 ui_header "Universal AI Toolchain Setup"

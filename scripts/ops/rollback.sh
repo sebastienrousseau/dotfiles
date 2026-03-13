@@ -253,7 +253,8 @@ perform_rollback() {
         last_log=$(git log -n 5 --oneline 2>/dev/null || true)
       fi
 
-      local ai_prompt="System rollback was triggered from $(basename "$backup_path").
+      local ai_prompt
+      ai_prompt="System rollback was triggered from $(basename "$backup_path").
 Recent Git History:
 $last_log
 
