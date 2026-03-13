@@ -1,11 +1,13 @@
 # Cognitive Shell Enhancements
-if command -v carapace >/dev/null 2>&1; then
-  source <(carapace _zsh)
-fi
+if [[ -o interactive ]]; then
+  if command -v carapace >/dev/null 2>&1; then
+    source <(carapace _zsh)
+  fi
 
-if command -v thefuck >/dev/null 2>&1; then
-  eval $(thefuck --alias)
-  alias fix='fuck'
+  if command -v thefuck >/dev/null 2>&1; then
+    eval $(thefuck --alias)
+    alias fix='fuck'
+  fi
 fi
 
 # Fallback command shims for environments with aliases disabled.
