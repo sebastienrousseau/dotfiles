@@ -22,7 +22,6 @@
 ## # Standards
 ## - Respects NO_COLOR (https://no-color.org)
 ## - Respects DOTFILES_ACCESSIBILITY=1 (ASCII-only, no gum)
-## - Detects dark/light terminal background
 ## - Guarded against multiple source/init (idempotent)
 ##
 ## # Usage
@@ -38,7 +37,6 @@ UI_ENABLED=0 # gum available + interactive
 UI_INITED=0  # guard flag
 UI_COLOR=0   # tput colors available
 UI_UTF8=0    # terminal supports UTF-8
-UI_DARK_BG=1 # assume dark; updated by detection
 
 BOLD=""
 NORMAL=""
@@ -103,15 +101,6 @@ ui_init() {
     MAGENTA="$(tput setaf 5)"
     CYAN="$(tput setaf 6)"
     GRAY="$(tput setaf 8)"
-  fi
-
-  # --- Dark / light background detection ---
-  # Check COLORFGBG (e.g. "15;0" means light-on-dark)
-  if [[ -n "${COLORFGBG:-}" ]]; then
-    local bg="${COLORFGBG##*;}"
-    if [[ "$bg" =~ ^[0-9]+$ ]] && ((bg > 8)); then
-      UI_DARK_BG=0 # light background
-    fi
   fi
 
   UI_INITED=1
