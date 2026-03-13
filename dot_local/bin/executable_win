@@ -7,22 +7,25 @@
 set -euo pipefail
 
 if ! grep -qi microsoft /proc/version 2>/dev/null; then
-    echo "This script is only for WSL systems." >&2
-    exit 1
+  echo "This script is only for WSL systems." >&2
+  exit 1
 fi
 
 cmd="$1"
-shift || { echo "Usage: win <windows_command> [args]"; exit 1; }
+shift || {
+  echo "Usage: win <windows_command> [args]"
+  exit 1
+}
 
 # Translate paths in arguments
 args=()
 for arg in "$@"; do
-    if [ -e "$arg" ]; then
-        translated=$(wslpath -w "$arg" 2>/dev/null || echo "$arg")
-        args+=("$translated")
-    else
-        args+=("$arg")
-    fi
+  if [ -e "$arg" ]; then
+    translated=$(wslpath -w "$arg" 2>/dev/null || echo "$arg")
+    args+=("$translated")
+  else
+    args+=("$arg")
+  fi
 done
 
 # Execute the windows command with translated paths

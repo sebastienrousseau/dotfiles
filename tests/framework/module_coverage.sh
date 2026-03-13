@@ -4,7 +4,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TESTS_DIR="$(dirname "$SCRIPT_DIR")"
-REPO_ROOT="$(dirname "$(dirname "$TESTS_DIR")")"
+REPO_ROOT="$(dirname "$TESTS_DIR")"
 
 MIN_COVERAGE="${MIN_COVERAGE:-95}"
 

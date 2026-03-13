@@ -7,6 +7,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../" && pwd)"
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../framework/assertions.sh"
 
 # Mock HOME to prevent messing with the host system
@@ -30,7 +31,8 @@ echo "   -> Running install.sh from $SOURCE_DIR..."
 
 # Run the installer in non-interactive and silent mode for CI
 # install.sh may fail in bare CI (chezmoi download/install issues) — treat as skip
-if SOURCE_DIR="$SOURCE_DIR" DOTFILES_NONINTERACTIVE=1 DOTFILES_SILENT=1 bash "$SOURCE_DIR/install.sh"; then
+export SOURCE_DIR="$SOURCE_DIR"
+if DOTFILES_NONINTERACTIVE=1 DOTFILES_SILENT=1 bash "$SOURCE_DIR/install.sh"; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: install.sh executed successfully"
   install_ok=1

@@ -5,7 +5,7 @@ fi
 
 # SSH agent: auto-start if no agent is running (interactive only)
 if [[ -o interactive ]] && [[ -z "$SSH_AUTH_SOCK" ]]; then
-  eval "$(ssh-agent -s)" > /dev/null 2>&1
+  eval "$(ssh-agent -s)" >/dev/null 2>&1
 
   # Add default key with timeout guard (2s max) to prevent startup hangs
   if [[ -f ~/.ssh/id_ed25519 ]]; then

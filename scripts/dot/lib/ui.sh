@@ -34,11 +34,11 @@
 # ═══════════════════════════════════════════════════════════════════════
 # State — all zeroed before ui_init
 # ═══════════════════════════════════════════════════════════════════════
-UI_ENABLED=0            # gum available + interactive
-UI_INITED=0             # guard flag
-UI_COLOR=0              # tput colors available
-UI_UTF8=0               # terminal supports UTF-8
-UI_DARK_BG=1            # assume dark; updated by detection
+UI_ENABLED=0 # gum available + interactive
+UI_INITED=0  # guard flag
+UI_COLOR=0   # tput colors available
+UI_UTF8=0    # terminal supports UTF-8
+UI_DARK_BG=1 # assume dark; updated by detection
 
 BOLD=""
 NORMAL=""
@@ -69,11 +69,17 @@ ui_init() {
 
   # --- Accessibility: disable gum + UTF-8 glyphs ---
   if [[ "${DOTFILES_ACCESSIBILITY:-0}" == "1" ]]; then
-    UI_ENABLED=0; UI_UTF8=0
-    _GL_OK="[OK]"; _GL_FAIL="[FAIL]"; _GL_WARN="[WARN]"
-    _GL_INFO="[INFO]"; _GL_BULLET="*"; _GL_LOGO="@"
+    UI_ENABLED=0
+    UI_UTF8=0
+    _GL_OK="[OK]"
+    _GL_FAIL="[FAIL]"
+    _GL_WARN="[WARN]"
+    _GL_INFO="[INFO]"
+    _GL_BULLET="*"
+    _GL_LOGO="@"
     _GL_SPINNER=('-' '\\' '|' '/')
-    _GL_BAR_FILL="#"; _GL_BAR_EMPTY="-"
+    _GL_BAR_FILL="#"
+    _GL_BAR_EMPTY="-"
   else
     # gum detection (interactive TTY only)
     if command -v gum >/dev/null 2>&1 && [[ -t 1 ]]; then
@@ -103,8 +109,8 @@ ui_init() {
   # Check COLORFGBG (e.g. "15;0" means light-on-dark)
   if [[ -n "${COLORFGBG:-}" ]]; then
     local bg="${COLORFGBG##*;}"
-    if [[ "$bg" =~ ^[0-9]+$ ]] && (( bg > 8 )); then
-      UI_DARK_BG=0  # light background
+    if [[ "$bg" =~ ^[0-9]+$ ]] && ((bg > 8)); then
+      UI_DARK_BG=0 # light background
     fi
   fi
 
@@ -166,9 +172,9 @@ ui_status() {
   fi
 }
 
-ui_ok()   { ui_status "$_GL_OK"   "[OK]"   "$1" "${2:-}" "$GREEN"; }
+ui_ok() { ui_status "$_GL_OK" "[OK]" "$1" "${2:-}" "$GREEN"; }
 ui_warn() { ui_status "$_GL_WARN" "[WARN]" "$1" "${2:-}" "$YELLOW"; }
-ui_err()  { ui_status "$_GL_FAIL" "[FAIL]" "$1" "${2:-}" "$RED"; }
+ui_err() { ui_status "$_GL_FAIL" "[FAIL]" "$1" "${2:-}" "$RED"; }
 ui_info() { ui_status "$_GL_INFO" "[INFO]" "$1" "${2:-}" "$GRAY"; }
 ui_meta() { ui_status "$_GL_INFO" "[INFO]" "$1" "${2:-}" "$GRAY" 14; }
 
@@ -241,7 +247,10 @@ ui_spinner_start() {
   local label="${1:-Working}"
   ui_init
   # No animation when non-interactive
-  [[ ! -t 1 ]] && { printf "  %s %s..." "$_GL_INFO" "$label"; return; }
+  [[ ! -t 1 ]] && {
+    printf "  %s %s..." "$_GL_INFO" "$label"
+    return
+  }
 
   ui_hide_cursor
   (
@@ -252,7 +261,7 @@ ui_spinner_start() {
       else
         printf '\r  %s %s ' "${_GL_SPINNER[$i]}" "$label"
       fi
-      i=$(( (i + 1) % ${#_GL_SPINNER[@]} ))
+      i=$(((i + 1) % ${#_GL_SPINNER[@]}))
       sleep 0.08
     done
   ) &
@@ -282,13 +291,13 @@ ui_progress() {
   [[ "$total" -eq 0 ]] && return
   ui_init
 
-  local filled=$(( current * width / total ))
-  local empty=$(( width - filled ))
+  local filled=$((current * width / total))
+  local empty=$((width - filled))
 
   local bar=""
   local i
-  for (( i = 0; i < filled; i++ )); do bar+="$_GL_BAR_FILL"; done
-  for (( i = 0; i < empty;  i++ )); do bar+="$_GL_BAR_EMPTY"; done
+  for ((i = 0; i < filled; i++)); do bar+="$_GL_BAR_FILL"; done
+  for ((i = 0; i < empty; i++)); do bar+="$_GL_BAR_EMPTY"; done
 
   if [[ "$UI_COLOR" = "1" ]]; then
     printf '%s%s%s' "$BLUE" "${bar:0:$filled}" "$NORMAL"
@@ -325,7 +334,10 @@ ui_run_cmd() {
   local rc_file
   rc_file=$(mktemp)
   # Run command in background
-  ( "$@" >/dev/null 2>&1; echo $? >"$rc_file" ) &
+  (
+    "$@" >/dev/null 2>&1
+    echo $? >"$rc_file"
+  ) &
   local pid=$!
 
   # Animate spinner while waiting
@@ -341,7 +353,7 @@ ui_run_cmd() {
     fi
     ui_progress "$completed" "$total"
     printf ' %*d/%d ' "$w" "$((completed + 1))" "$total"
-    fi=$(( (fi + 1) % ${#_GL_SPINNER[@]} ))
+    fi=$(((fi + 1) % ${#_GL_SPINNER[@]}))
     sleep 0.08
   done
   wait "$pid" 2>/dev/null
@@ -405,10 +417,10 @@ ui_toast() {
   local level="${1:?}" msg="${2:?}"
   ui_init
   case "$level" in
-    success|ok) ui_ok  "$msg" ;;
-    error|err)  ui_err "$msg" ;;
-    warn)       ui_warn "$msg" ;;
-    *)          ui_info "$msg" ;;
+    success | ok) ui_ok "$msg" ;;
+    error | err) ui_err "$msg" ;;
+    warn) ui_warn "$msg" ;;
+    *) ui_info "$msg" ;;
   esac
 }
 
@@ -426,8 +438,8 @@ ui_table_header() {
   _UI_TABLE_WIDTHS=()
   local out="  "
   for col in "$@"; do
-    local w=$(( ${#col} + 4 ))
-    (( w < 12 )) && w=12
+    local w=$((${#col} + 4))
+    ((w < 12)) && w=12
     _UI_TABLE_WIDTHS+=("$w")
     if [[ "$UI_COLOR" = "1" ]]; then
       out+="$(printf '%s%-*s%s' "$BOLD" "$w" "$col" "$NORMAL")"
@@ -443,7 +455,7 @@ ui_table_row() {
   for col in "$@"; do
     local w="${_UI_TABLE_WIDTHS[$i]:-16}"
     out+="$(printf '%-*s' "$w" "$col")"
-    (( i++ )) || true
+    ((i++)) || true
   done
   printf '%s\n' "$out"
 }
@@ -451,11 +463,11 @@ ui_table_row() {
 ui_table_sep() {
   local total=2
   for w in "${_UI_TABLE_WIDTHS[@]}"; do
-    (( total += w )) || true
+    ((total += w)) || true
   done
   printf '  '
   local i
-  for (( i = 0; i < total - 2; i++ )); do printf '─'; done
+  for ((i = 0; i < total - 2; i++)); do printf '─'; done
   printf '\n'
 }
 

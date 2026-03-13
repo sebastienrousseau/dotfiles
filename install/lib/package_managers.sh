@@ -10,6 +10,7 @@ set -euo pipefail
 # Source dependencies
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=os_detection.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/os_detection.sh" 2>/dev/null || true
 
 # Check if Homebrew is installed
@@ -47,7 +48,7 @@ install_homebrew() {
   if [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]]; then
     read -r -p "   Continue with Homebrew installation? [y/N] " response
     case "$response" in
-      [yY][eE][sS]|[yY]) ;;
+      [yY][eE][sS] | [yY]) ;;
       *) return 1 ;;
     esac
   fi
@@ -68,7 +69,7 @@ install_homebrew() {
 verify_package_manager() {
   # shellcheck disable=SC2154  # target_os set by os_detection.sh
   case "$target_os" in
-    debian|wsl2)
+    debian | wsl2)
       if ! has_apt; then
         echo "Error: apt-get is required on Debian/Ubuntu/WSL2." >&2
         return 1

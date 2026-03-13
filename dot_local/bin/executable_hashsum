@@ -71,15 +71,44 @@ EXPECTED=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -m|--md5) ALGO="md5"; shift ;;
-    -1|--sha1) ALGO="sha1"; shift ;;
-    -2|--sha256) ALGO="sha256"; shift ;;
-    -5|--sha512) ALGO="sha512"; shift ;;
-    -a|--all) ALL_MODE=true; shift ;;
-    -f|--file) FILE_MODE=true; shift ;;
-    -c|--check) CHECK_MODE=true; EXPECTED="$2"; shift 2 ;;
-    -h|--help) usage; exit 0 ;;
-    -*) echo "Unknown option: $1"; usage; exit 1 ;;
+    -m | --md5)
+      ALGO="md5"
+      shift
+      ;;
+    -1 | --sha1)
+      ALGO="sha1"
+      shift
+      ;;
+    -2 | --sha256)
+      ALGO="sha256"
+      shift
+      ;;
+    -5 | --sha512)
+      ALGO="sha512"
+      shift
+      ;;
+    -a | --all)
+      ALL_MODE=true
+      shift
+      ;;
+    -f | --file)
+      FILE_MODE=true
+      shift
+      ;;
+    -c | --check)
+      CHECK_MODE=true
+      EXPECTED="$2"
+      shift 2
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    -*)
+      echo "Unknown option: $1"
+      usage
+      exit 1
+      ;;
     *) break ;;
   esac
 done
