@@ -679,6 +679,10 @@ case "${1:-}" in
     shift
     cmd_profile "$@"
     ;;
+  lint)
+    shift
+    exec bash "$(require_source_dir)/scripts/dot/commands/lint.sh" lint "$@"
+    ;;
   *)
     echo "Unknown tools command: ${1:-}" >&2
     exit 1

@@ -170,6 +170,7 @@ show_help() {
   ui_cmd "tools" "Show or install nix packages"
   ui_cmd "new" "Create a new project from a template"
   ui_cmd "sandbox" "Launch a safe sandbox preview (Docker/Podman)"
+  ui_cmd "lint" "Lint shell scripts (--fix to auto-format, --check for CI)"
   ui_cmd "learn" "Start the interactive tour of your new tools"
   ui_cmd "docs" "Show repo README"
   echo ""
@@ -249,7 +250,7 @@ case "$COMMAND" in
     ;;
 
   # ── Tools & environment ─────────────────────────────────────────────────
-  env | profile | tools | new | packages | aliases | alias-check | setup | log-rotate)
+  env | profile | tools | new | packages | aliases | alias-check | setup | log-rotate | lint)
     _dispatch tools "$@"
     ;;
 
