@@ -32,7 +32,7 @@ resolve_source_dir() {
     if command -v realpath >/dev/null 2>&1; then
       dir="$(realpath "$dir")"
     elif command -v readlink >/dev/null 2>&1; then
-      dir="$(readlink -f "$dir")"
+      dir="$(readlink -f "$dir" 2>/dev/null || echo "$dir")"
     fi
     _DOT_SOURCE_DIR_CACHE="$dir"
     printf "%s\n" "$dir"

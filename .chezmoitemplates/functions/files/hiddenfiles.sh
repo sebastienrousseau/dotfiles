@@ -26,8 +26,14 @@
 ################################################################################
 
 hiddenfiles() {
+  # macOS only
+  if [[ "$(uname -s)" != "Darwin" ]]; then
+    echo "hiddenfiles: macOS only" >&2
+    return 1
+  fi
+
   # Display help menu
-  if [[ "$1" == "--help" ]]; then
+  if [[ "${1:-}" == "--help" ]]; then
     echo "hiddenfiles: Hidden Files Visibility Toggle"
     echo
     echo "Usage:"

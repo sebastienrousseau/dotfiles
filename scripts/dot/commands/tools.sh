@@ -9,6 +9,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh
 source "$SCRIPT_DIR/../lib/utils.sh"
 
+# Cross-platform sed in-place (BSD vs GNU)
+sed_in_place() {
+  if sed --version >/dev/null 2>&1; then
+    sed -i "$@" # GNU
+  else
+    sed -i '' "$@" # BSD (macOS)
+  fi
+}
+
 dot_ui_command_banner "Tools" "${1:-}"
 
 ensure_line_in_file() {
@@ -620,9 +629,9 @@ cmd_profile() {
         die "Usage: dot profile set <name>"
       fi
       if grep -q '^profile' "$data_file"; then
-        sed -i "s/^profile = \".*\"/profile = \"$new_profile\"/" "$data_file"
+        sed_in_place "s/^profile = \".*\"/profile = \"$new_profile\"/" "$data_file"
       else
-        sed -i "1a profile = \"$new_profile\"" "$data_file"
+        sed_in_place "1a profile = \"$new_profile\"" "$data_file"
       fi
       ui_info "Profile" "Set to '$new_profile'. Run 'dot sync' to apply."
       ;;

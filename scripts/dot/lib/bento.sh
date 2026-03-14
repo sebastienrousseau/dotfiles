@@ -28,7 +28,7 @@ _dotfiles_bento_render() {
 
   # 1. Header with Version
   printf "\n"
-  printf "  ${c_cyan}${c_bold}💎  D O T F I L E S${c_reset}  ${c_slate}[v0.2.495]${c_reset}\n"
+  printf "  ${c_cyan}${c_bold}💎  D O T F I L E S${c_reset}  ${c_slate}[v0.2.496]${c_reset}\n"
   printf "  ${c_slate}──────────────────────────────────────────${c_reset}\n"
 
   # 2. High-Fidelity Metrics

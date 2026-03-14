@@ -19,6 +19,21 @@
 #
 ################################################################################
 
+# Source shared logging utilities if not already defined
+if ! declare -f log_error >/dev/null 2>&1; then
+  _last_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
+  if [[ -f "${_last_dir}/utils/logging.sh" ]]; then
+    # shellcheck source=utils/logging.sh
+    source "${_last_dir}/utils/logging.sh"
+  else
+    # Minimal fallback logging functions
+    log_error() { echo "[ERROR] $*" >&2; }
+    log_info() { echo "[INFO] $*"; }
+    log_warning() { echo "[WARNING] $*" >&2; }
+  fi
+  unset _last_dir
+fi
+
 detect_tool() {
   if command -v /usr/bin/find &>/dev/null; then
     echo "find"
@@ -28,12 +43,13 @@ detect_tool() {
     echo "rg"
   else
     log_error "No compatible tools found (find, fd, or rg)."
+    return 1
   fi
 }
 
 last() {
   # Display help menu
-  if [[ "$1" == "--help" ]]; then
+  if [[ "${1:-}" == "--help" ]]; then
     cat <<'EOH'
 🅳🅾🆃🅵🅸🅻🅴🆂 - Recently Modified Files Viewer
 
@@ -71,11 +87,13 @@ EOH
   # Validate that the input is a positive integer
   if ! [[ "$minutes" =~ ^[0-9]+$ ]]; then
     log_error "Invalid input: '$minutes'. Please provide a positive integer for minutes."
+    return 1
   fi
 
   # Check maximum time range (7 days = 10080 minutes)
   if ((minutes > 10080)); then
     log_error "Time range too large. Maximum is 7 days (10080 minutes)."
+    return 1
   fi
 
   # Detect which tool to use
@@ -96,6 +114,7 @@ EOH
       ;;
     *)
       log_error "Unknown tool detected."
+      return 1
       ;;
   esac
 }
