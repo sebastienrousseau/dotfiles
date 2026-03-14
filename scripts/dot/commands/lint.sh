@@ -56,7 +56,6 @@ cmd_lint() {
 
   local sc_errors=0
   local fmt_errors=0
-  local sc_warnings=0
 
   case "$mode" in
     all | check)
