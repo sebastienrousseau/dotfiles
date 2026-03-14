@@ -9,9 +9,8 @@ Chezmoi-managed dotfiles for macOS, Linux, and WSL. Version `0.2.496`.
 ```bash
 chezmoi apply --dry-run     # Preview changes
 chezmoi diff                # Show pending diffs
-dot health                  # Run health check
-just dots-apply             # Apply via justfile
-just pre-commit             # Run all pre-commit hooks
+dot health                  # Run health dashboard
+dot doctor                  # Run system diagnostics
 ./tests/framework/test_runner.sh  # Run unit tests
 ```
 
