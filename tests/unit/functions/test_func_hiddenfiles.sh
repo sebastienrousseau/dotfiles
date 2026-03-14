@@ -47,6 +47,7 @@ test_start "osascript_usage"
 assert_file_contains "$FUNC_FILE" 'osascript' "should use osascript to restart Finder"
 
 test_start "guarded_dollar_1"
+# shellcheck disable=SC2016
 if grep -q '"\${1:-}"' "$FUNC_FILE"; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: \$1 is guarded with default"
