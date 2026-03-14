@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Dotfiles CLI - Diagnostics Commands
-# doctor, heal, health, rollback, drift, history, benchmark, verify, perf, scorecard, conflicts, locks, snapshot
+# doctor, heal, health, rollback, drift, history, benchmark, verify, perf,
+# scorecard, conflicts, locks, snapshot, load-bench, chaos, bundle
 
 set -euo pipefail
 
@@ -12,13 +13,23 @@ source "$SCRIPT_DIR/../lib/utils.sh"
 dot_ui_command_banner "Diagnostics" "${1:-}"
 
 cmd_doctor() {
-  echo "Running Dotfiles Doctor..."
   local src_dir
   src_dir="$(resolve_source_dir)"
-  if [ -n "$src_dir" ] && [ -f "$src_dir/scripts/diagnostics/doctor.sh" ]; then
+  # Prefer the unified doctor script (doctor-unified.sh)
+  if [ -n "$src_dir" ] && [ -f "$src_dir/scripts/diagnostics/doctor-unified.sh" ]; then
+    exec bash "$src_dir/scripts/diagnostics/doctor-unified.sh" "$@"
+  elif [ -n "$src_dir" ] && [ -f "$src_dir/scripts/diagnostics/doctor.sh" ]; then
     exec bash "$src_dir/scripts/diagnostics/doctor.sh" "$@"
   fi
   exec chezmoi doctor "$@"
+}
+
+cmd_smoke_test() {
+  run_script "scripts/diagnostics/smoke-test.sh" "Smoke test script" "$@"
+}
+
+cmd_intelligence() {
+  run_script "scripts/dot/lib/bento.sh" "Intelligence Surface" "$@"
 }
 
 cmd_heal() {
@@ -82,6 +93,22 @@ cmd_restore() {
   run_script "scripts/dot/commands/restore.sh" "Restore script" "$@"
 }
 
+cmd_load_bench() {
+  command dot-load-benchmark "$@"
+}
+
+cmd_load_bench_pty() {
+  command dot-load-benchmark-pty "$@"
+}
+
+cmd_chaos() {
+  run_script "scripts/ops/chaos.sh" "Chaos engineering script" "$@"
+}
+
+cmd_bundle() {
+  run_script "scripts/ops/bundle.sh" "Offline bundle script" "$@"
+}
+
 # Dispatch
 case "${1:-}" in
   doctor)
@@ -100,7 +127,7 @@ case "${1:-}" in
     shift
     cmd_security_score "$@"
     ;;
-  scorecard)
+  scorecard | score)
     shift
     cmd_scorecard "$@"
     ;;
@@ -143,6 +170,30 @@ case "${1:-}" in
   restore)
     shift
     cmd_restore "$@"
+    ;;
+  load-bench)
+    shift
+    cmd_load_bench "$@"
+    ;;
+  load-bench-pty)
+    shift
+    cmd_load_bench_pty "$@"
+    ;;
+  chaos)
+    shift
+    cmd_chaos "$@"
+    ;;
+  bundle)
+    shift
+    cmd_bundle "$@"
+    ;;
+  smoke-test)
+    shift
+    cmd_smoke_test "$@"
+    ;;
+  intelligence)
+    shift
+    cmd_intelligence "$@"
     ;;
   *)
     echo "Unknown diagnostics command: ${1:-}" >&2

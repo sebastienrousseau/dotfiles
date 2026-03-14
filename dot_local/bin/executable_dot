@@ -209,491 +209,96 @@ show_help() {
 
 resolve_source_dir() { _resolve_source_dir; }
 
-run_script() {
-  local script_rel_path="${1#/}" # Remove leading slash if present
-  local description="$2"
-  shift 2
-  local src_dir
-  src_dir="$(resolve_source_dir)"
+# ─── Dispatcher ───────────────────────────────────────────────────────────────
+# Routes COMMAND to the appropriate command module in scripts/dot/commands/.
+# Each module receives the original COMMAND as its first argument so that its
+# internal case statement can dispatch to the right sub-function.
+_SOURCE_DIR="$(_resolve_source_dir)"
+_CMD_DIR="${_SOURCE_DIR}/scripts/dot/commands"
 
-  local background=0
-  if [[ "${1:-}" == "--background" || "${1:-}" == "-b" ]]; then
-    background=1
-    shift
-  fi
-
-  if [ -n "$src_dir" ] && [ -f "$src_dir/$script_rel_path" ]; then
-
-    if [[ $background -eq 1 ]] && command -v pueue >/dev/null && pueue status >/dev/null 2>&1; then
-      ui_info "Background" "Offloading $description to Pueue queue"
-      pueue add -- bash "$src_dir/$script_rel_path" "$@"
-    else
-      if [[ $background -eq 1 ]]; then
-        ui_warn "Pueue not available, running $description in foreground"
-      fi
-      exec bash "$src_dir/$script_rel_path" "$@"
-    fi
+_dispatch() {
+  local module="$1"
+  shift  # remove module name; remaining $@ are the user's extra args
+  local cmd_file="${_CMD_DIR}/${module}.sh"
+  if [[ -f "$cmd_file" ]]; then
+    # shellcheck disable=SC1090
+    exec bash "$cmd_file" "$COMMAND" "$@"
   else
-    ui_fail "$description not found at $src_dir/$script_rel_path"
+    ui_fail "Command module not found: $cmd_file"
     exit 1
   fi
 }
 
-_require_platform() {
-  local plat
-  plat="$(uname -s)"
-  case "$plat" in
-    Darwin) plat="macos" ;;
-    Linux)
-      if [[ -f /proc/sys/kernel/osrelease ]] && grep -qiE '(microsoft|wsl)' /proc/sys/kernel/osrelease 2>/dev/null; then
-        plat="wsl"
-      else
-        plat="linux"
-      fi
-      ;;
-    *) plat="unknown" ;;
-  esac
-  for allowed in "$@"; do
-    [[ "$plat" == "$allowed" ]] && return 0
-  done
-  ui_init
-  ui_warn "This command requires: $*  (detected: $plat)"
-  return 1
-}
-
-cmd_ai() {
-  ui_header "AI CLI Status"
-
-  # Define AI CLIs: name|binary|description
-  local -a ai_clis=(
-    "Claude Code|claude|Anthropic CLI agent"
-    "Gemini CLI|gemini|Google AI CLI"
-    "OpenCode|opencode|Terminal AI coding"
-    "Aider|aider|AI pair programming"
-    "Shell-GPT|sgpt|ChatGPT in terminal"
-    "Ollama|ollama|Local LLM runner"
-    "Kiro CLI|kiro-cli|AWS AI assistant"
-  )
-
-  local -a installed=()
-  local name bin desc ver
-  for entry in "${ai_clis[@]}"; do
-    IFS='|' read -r name bin desc <<<"$entry"
-    if command -v "$bin" >/dev/null 2>&1; then
-      ver=$("$bin" --version 2>/dev/null | head -1 | sed 's/^[^0-9]*//' | cut -d' ' -f1) || true
-      [ -z "$ver" ] && ver="installed"
-      ui_ok "$name" "$ver — $desc"
-      installed+=("$name|$bin")
-    else
-      ui_info "$name" "— $desc"
-    fi
-  done
-
-  echo ""
-  if [ ${#installed[@]} -eq 0 ]; then
-    ui_warn "No AI CLIs installed"
-  elif command -v gum >/dev/null 2>&1; then
-    ui_info "Launch" "Select an AI CLI to start"
-    local -a choices=()
-    for entry in "${installed[@]}"; do
-      IFS='|' read -r name bin <<<"$entry"
-      choices+=("$name")
-    done
-    local pick
-    pick=$(printf '%s\n' "${choices[@]}" | gum choose --header "Pick an AI CLI") || true
-    if [ -n "$pick" ]; then
-      for entry in "${installed[@]}"; do
-        IFS='|' read -r name bin <<<"$entry"
-        if [ "$name" = "$pick" ]; then
-          echo ""
-          ui_info "Starting" "$name ($bin)"
-          exec "$bin"
-        fi
-      done
-    fi
-  else
-    ui_info "Tip" "Install gum for interactive launcher: mise use -g gum"
-  fi
-}
-
 case "$COMMAND" in
-  sync | apply)
-    sync_pull=0
-    sync_check=0
-    sync_args=()
-    for arg in "$@"; do
-      case "$arg" in
-        --pull) sync_pull=1 ;;
-        --check) sync_check=1 ;;
-        *) sync_args+=("$arg") ;;
-      esac
-    done
-    if [[ $sync_pull -eq 1 ]]; then
-      run_script "scripts/ops/chezmoi-update.sh" "Update script" "${sync_args[@]+"${sync_args[@]}"}"
-      # Regenerate caches after pull (unless backgrounded)
-      bg=0
-      for a in "${sync_args[@]+"${sync_args[@]}"}"; do
-        [[ "$a" == "--background" || "$a" == "-b" ]] && bg=1
-      done
-      [[ $bg -eq 0 ]] && "$0" prewarm
-    elif [[ $sync_check -eq 1 ]]; then
-      chezmoi diff "${sync_args[@]+"${sync_args[@]}"}"
-    else
-      chezmoi apply --force
-    fi
+
+  # ── Core chezmoi operations ──────────────────────────────────────────────
+  sync | apply | update | add | diff | status | remove | cd | edit | commit | clean-cache)
+    _dispatch core "$@"
     ;;
-  update)
-    exec "$0" sync --pull "$@"
+
+  # ── Diagnostics ─────────────────────────────────────────────────────────
+  doctor | scorecard | score | snapshot | history | perf | load-bench | load-bench-pty | \
+  chaos | bundle | rollback | heal | health | health-check | smoke-test | verify | \
+  security-score | drift | benchmark | intelligence | conflicts | locks | restore)
+    _dispatch diagnostics "$@"
     ;;
-  clean-cache)
-    ui_info "Cache" "Clearing shell initialization caches"
-    CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"
-    rm -rf "$CACHE_DIR/zsh"/*-init.zsh "$CACHE_DIR/zsh"/*.zwc 2>/dev/null || true
-    rm -rf "$CACHE_DIR/bash"/*-init.bash 2>/dev/null || true
-    rm -rf "$CACHE_DIR/fish"/*-init.fish 2>/dev/null || true
-    rm -rf "$CACHE_DIR/nushell"/*.nu 2>/dev/null || true
-    ui_info "Cache" "Cleared. Restart shell to regenerate"
+
+  # ── AI tools ────────────────────────────────────────────────────────────
+  ai | ai-setup | ai-query | cl | claude | gemini | kiro | sgpt | ollama | opencode | aider)
+    _dispatch ai "$@"
     ;;
-  prewarm)
-    "$0" clean-cache
-    SRC_DIR="$(resolve_source_dir)"
-    if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/ops/prewarm.sh" ]; then
-      bash "$SRC_DIR/scripts/ops/prewarm.sh"
-    fi
+
+  # ── Tools & environment ─────────────────────────────────────────────────
+  env | profile | tools | new | packages | aliases | alias-check | setup | log-rotate)
+    _dispatch tools "$@"
     ;;
-  add)
-    if [[ $# -eq 0 ]]; then
-      echo "Error: 'add' command requires at least 1 argument."
-      echo "Usage: dot add <file>..."
-      exit 1
-    fi
-    chezmoi add "$@"
+
+  # ── Appearance ──────────────────────────────────────────────────────────
+  theme | wallpaper | fonts | tune)
+    _dispatch appearance "$@"
     ;;
-  diff)
-    SRC_DIR="$(resolve_source_dir)"
-    if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/ops/chezmoi-diff.sh" ]; then
-      exec bash "$SRC_DIR/scripts/ops/chezmoi-diff.sh" "$@"
-    else
-      chezmoi diff "$@"
-    fi
+
+  # ── Secrets ─────────────────────────────────────────────────────────────
+  secrets-init | secrets | secrets-create | ssh-key | ssh-cert)
+    _dispatch secrets "$@"
     ;;
-  status)
-    chezmoi status "$@"
+
+  # ── Security (opt-in hardening) ──────────────────────────────────────────
+  backup | encrypt-check | firewall | telemetry | dns-doh | lock-screen | usb-safety)
+    _dispatch security "$@"
     ;;
-  commit)
-    run_script "dot_local/bin/executable_git-ai-commit" "Git AI commit script" "$@"
+
+  # ── Meta / housekeeping ──────────────────────────────────────────────────
+  upgrade | prewarm | docs | learn | keys | sandbox | mcp)
+    _dispatch meta "$@"
     ;;
+
+  # ── AI patterns (standalone script) ─────────────────────────────────────
   patterns)
-    run_script "scripts/dot/commands/patterns.sh" "AI patterns script" "$@"
-    ;;
-  remove)
-    chezmoi forget "$@"
-    ;;
-  cd)
-    resolve_source_dir
-    ;;
-  edit)
-    exec chezmoi cd
-    ;;
-  doctor)
-    run_script "scripts/diagnostics/doctor-unified.sh" "Doctor script" "$@"
-    ;;
-  scorecard | score)
-    run_script "scripts/diagnostics/scorecard.sh" "Scorecard script" "$@"
-    ;;
-  snapshot)
-    run_script "scripts/diagnostics/snapshot.sh" "Snapshot script" "$@"
-    ;;
-  history)
-    run_script "scripts/diagnostics/history.sh" "History script" "$@"
-    ;;
-  setup)
-    run_script "scripts/ops/setup.sh" "Setup script" "$@"
-    ;;
-  theme)
-    run_script "scripts/ops/theme.sh" "Theme script" "$@"
-    ;;
-  wallpaper)
-    _require_platform macos linux || exit 2
-    run_script "scripts/ops/wallpaper.sh" "Wallpaper script" "$@"
-    ;;
-  fonts)
-    run_script "scripts/ops/fonts.sh" "Fonts script" "$@"
-    ;;
-  secrets-init)
-    run_script "scripts/security/secrets-init.sh" "Secrets init script" "$@"
-    ;;
-  secrets)
-    run_script "scripts/security/manage-secrets.sh" "Secrets management script" "$@"
-    ;;
-  secrets-create)
-    run_script "scripts/security/secrets-create.sh" "Secrets creation script" "$@"
-    ;;
-  ssh-key)
-    run_script "scripts/security/ssh-key.sh" "SSH key script" "$@"
-    ;;
-  ssh-cert)
-    run_script "scripts/security/ssh-cert.sh" "SSH cert script" "$@"
-    ;;
-  backup)
-    run_script "scripts/security/backup.sh" "Backup script" "$@"
-    ;;
-  encrypt-check)
-    run_script "scripts/security/encryption-check.sh" "Encryption check script" "$@"
-    ;;
-  firewall)
-    _require_platform macos linux || exit 2
-    run_script "scripts/security/firewall.sh" "Firewall script" "$@"
-    ;;
-  telemetry)
-    _require_platform macos linux || exit 2
-    run_script "scripts/security/telemetry.sh" "Telemetry script" "$@"
-    ;;
-  dns-doh)
-    _require_platform macos linux || exit 2
-    run_script "scripts/security/dns-doh.sh" "DNS-over-HTTPS script" "$@"
-    ;;
-  lock-screen)
-    _require_platform linux || exit 2
-    run_script "scripts/security/lock-screen.sh" "Lock screen script" "$@"
-    ;;
-  usb-safety)
-    _require_platform linux || exit 2
-    run_script "scripts/security/usb-safety.sh" "USB safety script" "$@"
-    ;;
-  upgrade)
-    run_script "scripts/ops/upgrade.sh" "Upgrade script" "$@"
-    ;;
-  packages)
-    run_script "scripts/diagnostics/packages.sh" "Packages script" "$@"
-    ;;
-  learn)
-    run_script "scripts/ops/tour.sh" "Tour script" "$@"
-    ;;
-  keys)
-    if [[ "${1:-}" == "sign-check" ]]; then
-      ui_init
-      ui_header "Git Signing Status"
-      signing_key=""
-      format=""
-      key_file=""
-      signing_key="$(git config --global user.signingkey 2>/dev/null || true)"
-      format="$(git config --global gpg.format 2>/dev/null || true)"
-      if [[ -z "$signing_key" ]]; then
-        ui_warn "No signing key configured (git config --global user.signingkey)"
-      else
-        ui_info "Key" "$signing_key"
-        ui_info "Format" "${format:-gpg}"
-        if [[ "$format" == "ssh" ]]; then
-          key_file="${signing_key/#\~/$HOME}"
-          if [[ -f "$key_file" ]]; then
-            ui_info "Status" "SSH key file exists: $key_file"
-          else
-            ui_warn "SSH key file not found: $key_file"
-          fi
-        else
-          if command -v gpg >/dev/null 2>&1 && gpg --list-keys "$signing_key" >/dev/null 2>&1; then
-            ui_info "Status" "GPG key found in keyring"
-          else
-            ui_warn "GPG key not found in keyring: $signing_key"
-          fi
-        fi
-      fi
+    if [[ -n "$_SOURCE_DIR" ]] && [[ -f "$_SOURCE_DIR/scripts/dot/commands/patterns.sh" ]]; then
+      exec bash "$_SOURCE_DIR/scripts/dot/commands/patterns.sh" "$@"
     else
-      run_script "scripts/diagnostics/keys.sh" "Keys script" "$@"
-    fi
-    ;;
-  docs)
-    SRC_DIR="$(resolve_source_dir)"
-    if [ -f "$SRC_DIR/README.md" ]; then
-      if command -v glow >/dev/null 2>&1; then
-        glow "$SRC_DIR/README.md"
-      else
-        cat "$SRC_DIR/README.md"
-      fi
-    else
-      ui_fail "README not found"
+      ui_fail "patterns.sh not found"
       exit 1
     fi
     ;;
-  log-rotate)
-    ui_info "Log" "Rotating ~/.local/share/dotfiles.log"
-    mv "$HOME/.local/share/dotfiles.log" "$HOME/.local/share/dotfiles.log.old" 2>/dev/null || true
-    touch "$HOME/.local/share/dotfiles.log"
-    ui_info "Log" "Rotation complete"
-    ;;
-  sandbox)
-    SRC_DIR="$(resolve_source_dir)"
-    if [ -z "$SRC_DIR" ]; then
-      ui_fail "Dotfiles source not found"
-      exit 1
-    fi
-    if command -v docker >/dev/null; then
-      ui_info "Sandbox" "Launching via Docker"
-      docker build -f "$SRC_DIR/tests/Dockerfile.sandbox" -t dotfiles-sandbox "$SRC_DIR"
-      exec docker run --rm -it dotfiles-sandbox
-    elif command -v podman >/dev/null; then
-      ui_info "Sandbox" "Launching via Podman"
-      podman build -f "$SRC_DIR/tests/Dockerfile.sandbox" -t dotfiles-sandbox "$SRC_DIR"
-      exec podman run --rm -it dotfiles-sandbox
-    else
-      ui_fail "Docker or Podman is required for sandbox"
-      exit 1
-    fi
-    ;;
-  heal) run_script "scripts/ops/heal.sh" "Heal script" "$@" ;;
-  health | health-check) run_script "scripts/ops/health-check.sh" "Health check script" "$@" ;;
-  smoke-test) run_script "scripts/diagnostics/smoke-test.sh" "Smoke test script" "$@" ;;
-  verify) run_script "scripts/diagnostics/verify.sh" "Verification script" "$@" ;;
-  security-score) run_script "scripts/diagnostics/security-score.sh" "Security score script" "$@" ;;
-  intelligence) run_script "scripts/dot/lib/bento.sh" "Intelligence Surface" "$@" ;;
-  cl | claude | gemini | kiro | sgpt | ollama | opencode | aider) run_script "scripts/dot/commands/ai.sh" "AI Bridge" "$COMMAND" "$@" ;;
-  drift) run_script "scripts/diagnostics/drift-dashboard.sh" "Drift script" "$@" ;;
-  chaos) run_script "scripts/ops/chaos.sh" "Chaos engineering script" "$@" ;;
-  bundle) run_script "scripts/ops/bundle.sh" "Offline bundle script" "$@" ;;
-  rollback) run_script "scripts/ops/rollback.sh" "Rollback script" "$@" ;;
-  benchmark) run_script "tests/benchmark.sh" "Benchmark script" "$@" ;;
-  # load) -- removed: scripts/ops/load.sh does not exist
-  tools) run_script "scripts/dot/commands/tools.sh" "Tools script" "tools" "$@" ;;
-  new) run_script "scripts/dot/commands/tools.sh" "Tools script" "new" "$@" ;;
-  perf)
-    PERF_JSON=0
-    PERF_PRECMD=0
-    for arg in "$@"; do
-      case "$arg" in
-        --json) PERF_JSON=1 ;;
-        --precmd) PERF_PRECMD=1 ;;
-      esac
-    done
-    if [ "$PERF_JSON" = "0" ]; then
-      ui_header "Dotfiles Performance"
-      ui_info "DOTFILES_FAST" "${DOTFILES_FAST:-0}"
-      ui_info "DOTFILES_ULTRA_FAST" "${DOTFILES_ULTRA_FAST:-0}"
-      ui_info "DOTFILES_DEFER_ZINIT" "${DOTFILES_DEFER_ZINIT:-1}"
-      ui_info "DOTFILES_ENABLE_COLORS" "${DOTFILES_ENABLE_COLORS:-0}"
-      ui_info "DOTFILES_AI" "${DOTFILES_AI:-0}"
-      ui_info "PRECMD_HOOKS" "${PERF_PRECMD}"
-    fi
-    if command -v python3 >/dev/null 2>&1; then
-      PERF_JSON="$PERF_JSON" PERF_PRECMD="$PERF_PRECMD" python3 - <<'PY'
-import json
-import os
-import time
 
-def get_status():
-    status = {
-        "fast": os.environ.get("DOTFILES_FAST", "0") == "1",
-        "ultra_fast": os.environ.get("DOTFILES_ULTRA_FAST", "0") == "1",
-        "defer_zinit": os.environ.get("DOTFILES_DEFER_ZINIT", "1") == "1",
-        "ai": os.environ.get("DOTFILES_AI", "0") == "1"
-    }
-    return status
-
-if os.environ.get("PERF_JSON", "0") == "1":
-    print(json.dumps(get_status()))
-PY
-    else
-      ui_warn "python3 not found; run: zsh -i -c exit"
-    fi
-    ;;
-  load-bench)
-    command dot-load-benchmark "$@"
-    ;;
-  load-bench-pty)
-    command dot-load-benchmark-pty "$@"
-    ;;
-  ai)
-    cmd_ai
-    ;;
-  ai-setup) run_script "scripts/ops/ai-setup.sh" "AI setup script" "$@" ;;
-  ai-query) run_script "dot_local/bin/executable_dot-ai" "AI RAG script" "$@" ;;
-  env)
-    if ! command -v mise >/dev/null 2>&1; then
-      ui_fail "mise not installed (required for dot env)"
-      exit 1
-    fi
-    case "${1:-list}" in
-      list | ls) mise ls ;;
-      install)
-        shift
-        mise install "$@"
-        ;;
-      use)
-        shift
-        mise use "$@"
-        ;;
-      *) mise "$@" ;;
-    esac
-    ;;
-  profile)
-    data_file="$(resolve_source_dir)/.chezmoidata.toml"
-    if [[ ! -f "$data_file" ]]; then
-      ui_fail ".chezmoidata.toml not found"
-      exit 1
-    fi
-    ui_init
-    case "${1:-show}" in
-      show)
-        ui_header "Dotfiles Profile"
-        profile_val="$(grep '^profile' "$data_file" | head -1 | sed 's/.*=\s*"\(.*\)"/\1/')"
-        ui_info "Profile" "${profile_val:-default}"
-        echo ""
-        ui_section "Feature Flags"
-        grep -A 100 '^\[features\]' "$data_file" | tail -n +2 | while IFS= read -r line; do
-          [[ "$line" =~ ^\[ ]] && break
-          [[ -z "$line" || "$line" =~ ^# ]] && continue
-          key="$(echo "$line" | cut -d= -f1 | tr -d ' ')"
-          val="$(echo "$line" | cut -d= -f2 | tr -d ' "')"
-          ui_info "$key" "$val"
-        done
-        ;;
-      set)
-        shift
-        new_profile="${1:-}"
-        if [[ -z "$new_profile" ]]; then
-          ui_fail "Usage: dot profile set <name>"
-          exit 1
-        fi
-        if grep -q '^profile' "$data_file"; then
-          sed -i "s/^profile = \".*\"/profile = \"$new_profile\"/" "$data_file"
-        else
-          sed -i "1a profile = \"$new_profile\"" "$data_file"
-        fi
-        ui_info "Profile" "Set to '$new_profile'. Run 'dot sync' to apply."
-        ;;
-      *)
-        ui_fail "Unknown profile subcommand: ${1:-}. Use 'show' or 'set'."
-        exit 1
-        ;;
-    esac
-    ;;
-  tune)
-    _require_platform macos linux || exit 2
-    SRC_DIR="$(resolve_source_dir)"
-    if [ -z "$SRC_DIR" ]; then
-      ui_fail "Dotfiles source not found"
-      exit 1
-    fi
-    if [ -f "$SRC_DIR/scripts/ops/setup.sh" ]; then
-      exec bash "$SRC_DIR/scripts/ops/setup.sh" --tune
-    else
-      ui_fail "Tuning script not found"
-      exit 1
-    fi
-    ;;
+  # ── Help & version ──────────────────────────────────────────────────────
   help | --help | -h)
     show_help
     ;;
+
   --version | -v)
     ui_info "Version" ".dotfiles $VERSION"
     ;;
+
+  "")
+    show_help
+    ;;
+
   *)
-    if [ -z "$COMMAND" ]; then
-      show_help
-    else
-      ui_fail "Unknown command: $COMMAND"
-      ui_info "Hint" "Try 'dot help' for usage"
-      exit 1
-    fi
+    ui_fail "Unknown command: $COMMAND"
+    ui_info "Hint" "Try 'dot help' for usage"
+    exit 1
     ;;
 esac

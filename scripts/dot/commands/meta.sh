@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Dotfiles CLI - Meta Commands
-# upgrade, docs, learn, keys, sandbox, mcp
+# upgrade, prewarm, docs, learn, keys, sandbox, mcp
 
 set -euo pipefail
 
@@ -38,12 +38,32 @@ cmd_upgrade() {
   fi
 }
 
+cmd_prewarm() {
+  local src_dir
+  # Clear caches first
+  ui_info "Cache" "Clearing shell initialization caches"
+  local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}"
+  rm -rf "$cache_dir/zsh"/*-init.zsh "$cache_dir/zsh"/*.zwc 2>/dev/null || true
+  rm -rf "$cache_dir/bash"/*-init.bash 2>/dev/null || true
+  rm -rf "$cache_dir/fish"/*-init.fish 2>/dev/null || true
+  rm -rf "$cache_dir/nushell"/*.nu 2>/dev/null || true
+  ui_info "Cache" "Cleared. Regenerating..."
+  src_dir="$(resolve_source_dir)"
+  if [ -n "$src_dir" ] && [ -f "$src_dir/scripts/ops/prewarm.sh" ]; then
+    bash "$src_dir/scripts/ops/prewarm.sh"
+  fi
+}
+
 cmd_docs() {
   local src_dir
   src_dir="$(resolve_source_dir)"
 
   if [ -n "$src_dir" ] && [ -f "$src_dir/README.md" ]; then
-    exec cat "$src_dir/README.md"
+    if command -v glow >/dev/null 2>&1; then
+      glow "$src_dir/README.md"
+    else
+      exec cat "$src_dir/README.md"
+    fi
   else
     die "README not found."
   fi
@@ -55,13 +75,41 @@ cmd_learn() {
   if [ -f "$dot_bin/executable_tour" ]; then
     exec bash "$dot_bin/executable_tour" "$@"
   fi
-  # Fallback to PATH
-  exec tour "$@"
+  # Fallback to ops script
+  run_script "scripts/ops/tour.sh" "Tour script" "$@"
 }
 
 cmd_keys() {
   local src_dir
   src_dir="$(resolve_source_dir)"
+
+  if [[ "${1:-}" == "sign-check" ]]; then
+    ui_header "Git Signing Status"
+    local signing_key="" format="" key_file=""
+    signing_key="$(git config --global user.signingkey 2>/dev/null || true)"
+    format="$(git config --global gpg.format 2>/dev/null || true)"
+    if [[ -z "$signing_key" ]]; then
+      ui_warn "No signing key configured (git config --global user.signingkey)"
+    else
+      ui_info "Key" "$signing_key"
+      ui_info "Format" "${format:-gpg}"
+      if [[ "$format" == "ssh" ]]; then
+        key_file="${signing_key/#\~/$HOME}"
+        if [[ -f "$key_file" ]]; then
+          ui_info "Status" "SSH key file exists: $key_file"
+        else
+          ui_warn "SSH key file not found: $key_file"
+        fi
+      else
+        if command -v gpg >/dev/null 2>&1 && gpg --list-keys "$signing_key" >/dev/null 2>&1; then
+          ui_info "Status" "GPG key found in keyring"
+        else
+          ui_warn "GPG key not found in keyring: $signing_key"
+        fi
+      fi
+    fi
+    return 0
+  fi
 
   if [ -n "$src_dir" ] && [ -f "$src_dir/docs/KEYS.md" ]; then
     if [ -n "${1:-}" ]; then
@@ -70,7 +118,7 @@ cmd_keys() {
       exec cat "$src_dir/docs/KEYS.md"
     fi
   else
-    die "Keybindings catalog not found."
+    run_script "scripts/diagnostics/keys.sh" "Keys script" "$@"
   fi
 }
 
@@ -110,6 +158,10 @@ case "${1:-}" in
   upgrade)
     shift
     cmd_upgrade "$@"
+    ;;
+  prewarm)
+    shift
+    cmd_prewarm "$@"
     ;;
   docs)
     shift

@@ -118,6 +118,20 @@ cmd_edit() {
   fi
 }
 
+cmd_commit() {
+  run_script "dot_local/bin/executable_git-ai-commit" "Git AI commit script" "$@"
+}
+
+cmd_clean_cache() {
+  ui_info "Cache" "Clearing shell initialization caches"
+  local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}"
+  rm -rf "$cache_dir/zsh"/*-init.zsh "$cache_dir/zsh"/*.zwc 2>/dev/null || true
+  rm -rf "$cache_dir/bash"/*-init.bash 2>/dev/null || true
+  rm -rf "$cache_dir/fish"/*-init.fish 2>/dev/null || true
+  rm -rf "$cache_dir/nushell"/*.nu 2>/dev/null || true
+  ui_info "Cache" "Cleared. Restart shell to regenerate"
+}
+
 # Dispatch
 case "${1:-}" in
   apply)
@@ -155,6 +169,14 @@ case "${1:-}" in
   edit)
     shift
     cmd_edit "$@"
+    ;;
+  commit)
+    shift
+    cmd_commit "$@"
+    ;;
+  clean-cache)
+    shift
+    cmd_clean_cache "$@"
     ;;
   *)
     echo "Unknown core command: ${1:-}" >&2
