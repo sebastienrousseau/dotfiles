@@ -24,6 +24,7 @@ test_start "shows_usage_with_no_args"
 assert_file_contains "$BM_FILE" 'Usage: bm' "should show usage info"
 
 test_start "add_creates_bookmark"
+# shellcheck disable=SC2016
 assert_file_contains "$BM_FILE" 'echo "$name $(pwd)" >>"$BOOKMARKS_FILE"' "add should append to bookmarks file"
 
 test_start "list_shows_bookmarks"
