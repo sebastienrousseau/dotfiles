@@ -9,11 +9,18 @@
 
 set -euo pipefail
 
+_cleanup_files=()
+trap 'rm -f "${_cleanup_files[@]}"' EXIT
+
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
+# shellcheck source=../dot/lib/log.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/log.sh"
+DOT_COMMAND="heal"
 REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 DOTFILES_SOURCE="$REPO_ROOT"
 BACKUP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/backups"
@@ -94,6 +101,14 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Prevent concurrent execution
+LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/dotfiles-heal.lock"
+exec 9>"$LOCK_FILE"
+if ! flock -n 9; then
+  ui_warn "Already running" "Another instance is active"
+  exit 0
+fi
+
 # =============================================================================
 # Load modules (inherit scope: set -euo pipefail, ui.sh, and all variables)
 # =============================================================================
@@ -170,6 +185,7 @@ main() {
     elif [[ $FIXES_APPLIED -gt 0 ]]; then
       printf '  \033[1;38;5;42mDone!\033[0m Applied %d fix(es) for %d issue(s).\n' "$FIXES_APPLIED" "$ISSUES_FOUND"
       persist_log "HEAL_COMPLETE: $FIXES_APPLIED fixes applied"
+      dot_log info "heal_complete" "fixes=$FIXES_APPLIED" "issues=$ISSUES_FOUND"
     else
       printf '  Found %d issue(s) but no fixes could be applied.\n' "$ISSUES_FOUND"
       printf '  Run \033[38;5;211mdot doctor\033[0m for diagnostics.\n'

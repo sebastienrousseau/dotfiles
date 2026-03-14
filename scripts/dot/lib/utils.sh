@@ -285,6 +285,12 @@ dot_command_summary() {
     mcp)
       echo "Run MCP configuration diagnostics."
       ;;
+    cache-refresh | prewarm)
+      echo "Regenerate shell caches for ultra-fast startup."
+      ;;
+    search)
+      echo "Find commands by keyword."
+      ;;
     help | --help | -h)
       echo "Show command usage and reference."
       ;;

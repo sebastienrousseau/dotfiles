@@ -5,8 +5,9 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-source "$SCRIPT_DIR/dot/lib/ui.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../lib/utils.sh
+source "$SCRIPT_DIR/../lib/utils.sh"
 
 PATTERN_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/ai/patterns"
 mkdir -p "$PATTERN_DIR"
@@ -29,7 +30,7 @@ case "$command" in
     pattern_file="$PATTERN_DIR/${name}.md"
     if [[ -f "$pattern_file" ]]; then
       ui_header "Pattern: $name"
-      if command -v glow >/dev/null 2>&1; then
+      if has_command glow; then
         glow "$pattern_file"
       else
         cat "$pattern_file"

@@ -47,7 +47,7 @@ cmd_ai_status() {
   local name bin desc ver
   for entry in "${ai_clis[@]}"; do
     IFS='|' read -r name bin desc <<<"$entry"
-    if command -v "$bin" >/dev/null 2>&1; then
+    if has_command "$bin"; then
       ver=$("$bin" --version 2>/dev/null | head -1 | sed 's/^[^0-9]*//' | cut -d' ' -f1) || true
       [ -z "$ver" ] && ver="installed"
       ui_ok "$name" "$ver — $desc"
@@ -60,7 +60,7 @@ cmd_ai_status() {
   echo ""
   if [ ${#installed[@]} -eq 0 ]; then
     ui_warn "No AI CLIs installed"
-  elif command -v gum >/dev/null 2>&1; then
+  elif has_command gum; then
     ui_info "Launch" "Select an AI CLI to start"
     local -a choices=()
     for entry in "${installed[@]}"; do
