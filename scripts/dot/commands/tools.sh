@@ -571,6 +571,67 @@ cmd_log_rotate() {
   run_script "scripts/tools/log-rotate.sh" "Log rotation script" "$@"
 }
 
+cmd_env_mise() {
+  if ! has_command mise; then
+    ui_err "mise not installed (required for dot env)"
+    exit 1
+  fi
+  case "${1:-list}" in
+    list | ls) mise ls ;;
+    install)
+      shift
+      mise install "$@"
+      ;;
+    use)
+      shift
+      mise use "$@"
+      ;;
+    *) mise "$@" ;;
+  esac
+}
+
+cmd_profile() {
+  local data_file
+  data_file="$(resolve_source_dir)/.chezmoidata.toml"
+  if [[ ! -f "$data_file" ]]; then
+    die ".chezmoidata.toml not found"
+  fi
+  case "${1:-show}" in
+    show)
+      ui_header "Dotfiles Profile"
+      local profile_val
+      profile_val="$(grep '^profile' "$data_file" | head -1 | sed 's/.*=\s*"\(.*\)"/\1/')"
+      ui_info "Profile" "${profile_val:-default}"
+      echo ""
+      ui_section "Feature Flags"
+      grep -A 100 '^\[features\]' "$data_file" | tail -n +2 | while IFS= read -r line; do
+        [[ "$line" =~ ^\[ ]] && break
+        [[ -z "$line" || "$line" =~ ^# ]] && continue
+        local key val
+        key="$(echo "$line" | cut -d= -f1 | tr -d ' ')"
+        val="$(echo "$line" | cut -d= -f2 | tr -d ' "')"
+        ui_info "$key" "$val"
+      done
+      ;;
+    set)
+      shift
+      local new_profile="${1:-}"
+      if [[ -z "$new_profile" ]]; then
+        die "Usage: dot profile set <name>"
+      fi
+      if grep -q '^profile' "$data_file"; then
+        sed -i "s/^profile = \".*\"/profile = \"$new_profile\"/" "$data_file"
+      else
+        sed -i "1a profile = \"$new_profile\"" "$data_file"
+      fi
+      ui_info "Profile" "Set to '$new_profile'. Run 'dot sync' to apply."
+      ;;
+    *)
+      die "Unknown profile subcommand: ${1:-}. Use 'show' or 'set'."
+      ;;
+  esac
+}
+
 # Dispatch
 case "${1:-}" in
   tools)
@@ -600,6 +661,14 @@ case "${1:-}" in
   aliases)
     shift
     cmd_aliases "$@"
+    ;;
+  env)
+    shift
+    cmd_env_mise "$@"
+    ;;
+  profile)
+    shift
+    cmd_profile "$@"
     ;;
   *)
     echo "Unknown tools command: ${1:-}" >&2

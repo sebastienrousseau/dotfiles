@@ -143,11 +143,31 @@ main() {
       mkdir -p "$bin_dir"
       echo "   Installing chezmoi via binary download..."
 
-      # Use BINDIR env var — get.chezmoi.io passes remaining args to chezmoi
-      if ! BINDIR="$bin_dir" sh -c "$(curl -fsSL https://get.chezmoi.io)"; then
+      # Download installer to temp file and validate before execution
+      local installer
+      installer=$(umask 077 && mktemp)
+      if ! curl -fsSL -o "$installer" https://get.chezmoi.io; then
+        rm -f "$installer"
+        echo "   Failed to download chezmoi installer" >&2
+        return 1
+      fi
+      # Validate: must be a shell script and not suspiciously large
+      if [[ "$(wc -c <"$installer")" -gt 102400 ]]; then
+        rm -f "$installer"
+        echo "   Chezmoi installer suspiciously large. Aborting." >&2
+        return 1
+      fi
+      if ! head -1 "$installer" | grep -q '^#!/'; then
+        rm -f "$installer"
+        echo "   Chezmoi installer doesn't look like a shell script. Aborting." >&2
+        return 1
+      fi
+      if ! BINDIR="$bin_dir" sh "$installer"; then
+        rm -f "$installer"
         echo "   chezmoi binary installer failed" >&2
         return 1
       fi
+      rm -f "$installer"
     fi
   }
 

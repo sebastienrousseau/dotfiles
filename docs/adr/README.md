@@ -13,6 +13,8 @@ significant architectural decisions made in this project.
 | [ADR-004](ADR-004-cli-architecture.md) | Chezmoi + Custom CLI Wrapper Architecture | Accepted |
 | [ADR-005](ADR-005-chezmoi-choice.md) | Chezmoi as Dotfiles Manager | Accepted |
 | [ADR-006](ADR-006-shell-selection.md) | Zsh as Default Shell | Accepted |
+| [ADR-007](ADR-007-multi-shell-parity.md) | Multi-Shell Parity Strategy | Accepted |
+| [ADR-008](ADR-008-alias-system-architecture.md) | Alias System Architecture | Accepted |
 
 ## ADR Format
 

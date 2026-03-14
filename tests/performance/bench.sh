@@ -22,8 +22,11 @@ run_bench() {
   local threshold=$3
 
   local result
-  result=$(hyperfine -i --warmup 3 --runs 10 "$shell_cmd" --export-json /tmp/bench.json >/dev/null 2>&1 &&
-    jq -r '.results[0].mean * 1000' /tmp/bench.json)
+  local bench_json
+  bench_json=$(umask 077 && mktemp)
+  result=$(hyperfine -i --warmup 3 --runs 10 "$shell_cmd" --export-json "$bench_json" >/dev/null 2>&1 &&
+    jq -r '.results[0].mean * 1000' "$bench_json")
+  rm -f "$bench_json"
 
   local mean_ms
   mean_ms=$(printf "%.0f" "$result")

@@ -2,6 +2,33 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.496
+
+### Added
+- **Startup budget tracking** — CI now captures per-component timing from `DOTFILES_DEBUG=1` and fails on regression.
+- **Behavioral unit tests** — 10 critical functions now have runtime behavior tests (extract, genpass, encode64, path_prepend, platform detection, lazy loaders).
+- **Property-based tests** — `property_testing.sh` framework wired up with roundtrip, idempotence, and length-invariant tests.
+- **git-cliff configuration** — Automated CHANGELOG generation from conventional commits.
+- **Nix CI gate** — Home Manager activation package built and validated in CI.
+
+### Changed
+- **Performance** — Lazy-loaded `thefuck` (~200ms saving) and cached `carapace` output via `_cached_eval` (~50ms saving).
+- **Starship timeout** — Reduced `command_timeout` from 2000ms to 500ms for snappier prompts in large repos.
+- **PATH consolidation** — All PATH mutations now originate from `00-core-paths.sh.tmpl`; removed scattered prepends from zshenv/zprofile stubs.
+- **heal.sh modular split** — Broken into domain modules (heal-shell, heal-tools, heal-perms, heal-cache) for testability.
+- **dot CLI modular split** — Subcommands dispatched to individual scripts in `scripts/dot/commands/` for maintainability.
+
+### Fixed
+- **Security** — Replaced `curl|sh` pipes in `heal.sh` (starship, atuin) with download-to-temp + shebang validation. Pinned all heal.sh GitHub release versions with SHA256 checksums.
+- **Security** — `install.sh` now uses the secure `install/lib/chezmoi.sh` library instead of inline `curl|sh`.
+- **Security** — `dot-bootstrap` Nix installer now downloads to temp file with validation before execution.
+- **Security** — Extended `insecure-tls-check` pre-commit hook to cover `.tmpl` files.
+- **Security** — Added `sudo` availability guard in `heal.sh` before package manager calls.
+- **Documentation** — Fixed placeholder URLs in WSL2 troubleshooting guide.
+- **Documentation** — Added ADR-007 and ADR-008 to ADR index.
+- **Documentation** — Linked hero-shot.svg from README; updated hero-shot to show factual `dot doctor` output.
+- **Reliability** — `bench.sh` now uses `mktemp` instead of hardcoded `/tmp/bench.json`.
+
 ## v0.2.495
 
 ### Fixed

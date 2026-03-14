@@ -30,7 +30,18 @@ step "Starting Deterministic Bootstrap (v0.2.493 Frontier)"
 # 1. Install Nix (if not present)
 if ! command -v nix >/dev/null 2>&1; then
   step "Installing Nix Package Manager..."
-  curl -sL https://nixos.org/nix/install | sh -s -- --daemon
+  local nix_installer
+  nix_installer=$(umask 077 && mktemp)
+  if ! curl -fsSL -o "$nix_installer" https://nixos.org/nix/install; then
+    rm -f "$nix_installer"
+    error "Failed to download Nix installer"
+  fi
+  if ! head -1 "$nix_installer" | grep -q '^#!/'; then
+    rm -f "$nix_installer"
+    error "Nix installer does not look like a shell script"
+  fi
+  sh "$nix_installer" --daemon
+  rm -f "$nix_installer"
   # Source nix daemon script
   if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
     . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
