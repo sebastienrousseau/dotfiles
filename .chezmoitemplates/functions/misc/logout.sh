@@ -17,9 +17,24 @@
 #
 ################################################################################
 
+# Source shared logging utilities if not already defined
+if ! declare -f log_error >/dev/null 2>&1; then
+  _logout_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
+  if [[ -f "${_logout_dir}/utils/logging.sh" ]]; then
+    # shellcheck source=utils/logging.sh
+    source "${_logout_dir}/utils/logging.sh"
+  else
+    # Minimal fallback logging functions
+    log_error() { echo "[ERROR] $*" >&2; }
+    log_info() { echo "[INFO] $*"; }
+    log_warning() { echo "[WARNING] $*" >&2; }
+  fi
+  unset _logout_dir
+fi
+
 logout() {
   # Display help menu
-  if [[ "$1" == "--help" ]]; then
+  if [[ "${1:-}" == "--help" ]]; then
     cat <<'EOH'
 Cross-Platform Logout Utility (logout)
 
@@ -51,7 +66,7 @@ EOH
 
   # Check if the user passed --force
   local force=false
-  if [[ "$1" == "--force" ]]; then
+  if [[ "${1:-}" == "--force" ]]; then
     force=true
   fi
 
@@ -77,6 +92,7 @@ EOH
       log_info "Logging out from macOS..."
       if ! osascript -e 'tell application "System Events" to log out'; then
         log_error "Failed to log out using AppleScript. Try logging out manually."
+        return 1
       fi
       ;;
     "linux")
@@ -87,16 +103,19 @@ EOH
         loginctl terminate-user "$USER"
       else
         log_error "Unable to determine logout method for your Linux system. Try logging out manually."
+        return 1
       fi
       ;;
     "msys" | "cygwin" | "mingw"*)
       log_info "Logging out from Windows..."
       if ! shutdown /l; then
         log_error "Failed to log out from Windows. Try logging out manually."
+        return 1
       fi
       ;;
     *)
       log_error "Unsupported operating system: $os"
+      return 1
       ;;
   esac
 

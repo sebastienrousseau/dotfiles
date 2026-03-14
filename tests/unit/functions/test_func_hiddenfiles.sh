@@ -28,4 +28,31 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
+test_start "darwin_guard_present"
+assert_file_contains "$FUNC_FILE" 'uname -s' "should check for Darwin platform"
+
+test_start "darwin_guard_rejects_non_mac"
+assert_file_contains "$FUNC_FILE" 'macOS only' "should show macOS only message"
+
+test_start "help_output"
+assert_file_contains "$FUNC_FILE" 'Hidden Files Visibility Toggle' "should contain help text"
+
+test_start "invalid_arg_returns_error"
+assert_file_contains "$FUNC_FILE" 'Invalid argument' "should handle invalid arguments"
+
+test_start "defaults_write_usage"
+assert_file_contains "$FUNC_FILE" 'defaults write com.apple.Finder' "should use defaults write for Finder"
+
+test_start "osascript_usage"
+assert_file_contains "$FUNC_FILE" 'osascript' "should use osascript to restart Finder"
+
+test_start "guarded_dollar_1"
+if grep -q '"\${1:-}"' "$FUNC_FILE"; then
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: \$1 is guarded with default"
+else
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: \$1 should be guarded with \${1:-}"
+fi
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

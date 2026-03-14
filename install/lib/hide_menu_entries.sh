@@ -6,6 +6,15 @@
 # Strategy: Prefer Native (.deb) over Flatpak (com.*) to avoid duplicates.
 set -euo pipefail
 
+# Cross-platform sed in-place (BSD vs GNU)
+sed_in_place() {
+  if sed --version >/dev/null 2>&1; then
+    sed -i "$@" # GNU
+  else
+    sed -i '' "$@" # BSD (macOS)
+  fi
+}
+
 # This script only applies to Linux desktop environments
 [[ "$(uname -s)" != "Linux" ]] && exit 0
 
@@ -44,10 +53,10 @@ for app in "${HIDDEN_APPS[@]}"; do
 
     # Ensure NoDisplay is true in the [Desktop Entry] section
     if grep -q "NoDisplay=" "$HOME/.local/share/applications/$app"; then
-      sed -i 's/^NoDisplay=false/NoDisplay=true/g' "$HOME/.local/share/applications/$app"
+      sed_in_place 's/^NoDisplay=false/NoDisplay=true/g' "$HOME/.local/share/applications/$app"
     else
       # Insert NoDisplay=true after [Desktop Entry]
-      sed -i '/^\[Desktop Entry\]/a NoDisplay=true' "$HOME/.local/share/applications/$app"
+      sed_in_place '/^\[Desktop Entry\]/a NoDisplay=true' "$HOME/.local/share/applications/$app"
     fi
   fi
 done

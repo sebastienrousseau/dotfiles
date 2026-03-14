@@ -7,6 +7,15 @@
 
 set -euo pipefail
 
+# Cross-platform sed in-place (BSD vs GNU)
+sed_in_place() {
+  if sed --version >/dev/null 2>&1; then
+    sed -i "$@" # GNU
+  else
+    sed -i '' "$@" # BSD (macOS)
+  fi
+}
+
 # Check if chezmoi is installed
 has_chezmoi() {
   command -v chezmoi >/dev/null 2>&1
@@ -130,8 +139,7 @@ ensure_chezmoi_source() {
   escaped_dir=$(printf '%s\n' "$dir" | sed -e 's/[\/&]/\\&/g')
 
   if [[ -f "$config_file" ]] && grep -q '^sourceDir' "$config_file"; then
-    sed -i.bak "s,^sourceDir.*$,sourceDir = \"$escaped_dir\"," "$config_file"
-    rm -f "$config_file.bak"
+    sed_in_place "s,^sourceDir.*$,sourceDir = \"$escaped_dir\"," "$config_file"
   else
     printf 'sourceDir = "%s"\n' "$dir" >"$config_file"
   fi
