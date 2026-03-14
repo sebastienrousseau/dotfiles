@@ -20,9 +20,9 @@
 # Source shared logging utilities if not already defined
 if ! declare -f log_error >/dev/null 2>&1; then
   _logout_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
-  if [[ -f "${_logout_dir}/utils/logging.sh" ]]; then
-    # shellcheck source=utils/logging.sh
-    source "${_logout_dir}/utils/logging.sh"
+  if [[ -f "${_logout_dir}/../utils/logging.sh" ]]; then
+    # shellcheck source=../utils/logging.sh
+    source "${_logout_dir}/../utils/logging.sh"
   else
     # Minimal fallback logging functions
     log_error() { echo "[ERROR] $*" >&2; }

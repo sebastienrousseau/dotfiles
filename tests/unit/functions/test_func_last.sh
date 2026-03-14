@@ -65,6 +65,16 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: return 1 after max range error"
 fi
 
+test_start "detect_tool_no_rg_fallback"
+# rg doesn't support --changed-within; detect_tool should not list it
+if grep -q '"rg"' "$FUNC_FILE" 2>/dev/null; then
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: rg should not be a fallback (invalid flags)"
+else
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: rg correctly excluded from detect_tool"
+fi
+
 test_start "detect_tool_no_tools_has_return_1"
 if awk '/No compatible tools found/{found=1} found && /return 1/{print "OK"; exit}' "$FUNC_FILE" | grep -q OK; then
   ((TESTS_PASSED++))
@@ -72,6 +82,16 @@ if awk '/No compatible tools found/{found=1} found && /return 1/{print "OK"; exi
 else
   ((TESTS_FAILED++))
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: return 1 after no tools error"
+fi
+
+test_start "logging_path_resolves_correctly"
+# The logging source path should use ../ to reach utils/ from misc/
+if grep -q '../utils/logging.sh' "$FUNC_FILE"; then
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: logging path uses ../utils/logging.sh"
+else
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: logging path should use ../utils/logging.sh"
 fi
 
 test_start "unknown_tool_has_return_1"

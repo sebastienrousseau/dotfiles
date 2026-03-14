@@ -79,6 +79,15 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: return 1 after unsupported OS error"
 fi
 
+test_start "logging_path_resolves_correctly"
+if grep -q '../utils/logging.sh' "$FUNC_FILE"; then
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: logging path uses ../utils/logging.sh"
+else
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: logging path should use ../utils/logging.sh"
+fi
+
 test_start "guarded_dollar_1"
 if grep -q '"\${1:-}"' "$FUNC_FILE"; then
   ((TESTS_PASSED++))
