@@ -3,6 +3,9 @@
 # Unified doctor orchestrator — parses flags and dispatches to existing scripts.
 set -euo pipefail
 
+_cleanup_files=()
+trap 'rm -f "${_cleanup_files[@]}"' EXIT
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # shellcheck source=../dot/lib/ui.sh

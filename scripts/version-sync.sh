@@ -6,6 +6,9 @@
 
 set -euo pipefail
 
+_cleanup_files=()
+trap 'rm -f "${_cleanup_files[@]}"' EXIT
+
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"

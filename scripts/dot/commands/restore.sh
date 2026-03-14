@@ -6,8 +6,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../lib/ui.sh
-source "$SCRIPT_DIR/../lib/ui.sh"
+# shellcheck source=../lib/utils.sh
+source "$SCRIPT_DIR/../lib/utils.sh"
 
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
 BACKUP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/backups"
@@ -92,7 +92,7 @@ restore_from_git() {
   log_success "Restored from $ref"
 
   # Re-apply chezmoi
-  if command -v chezmoi >/dev/null 2>&1; then
+  if has_command chezmoi; then
     log_info "Re-applying chezmoi..."
     chezmoi apply
   fi

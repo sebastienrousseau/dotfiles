@@ -6,6 +6,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
+# shellcheck source=../dot/lib/log.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/log.sh"
+DOT_COMMAND="apply"
+
+# Temp file cleanup
+_TMPFILES=()
+cleanup() { rm -f "${_TMPFILES[@]}"; }
+trap cleanup EXIT
 
 # Help flag
 case "${1:-}" in
@@ -61,11 +70,20 @@ fi
 
 ui_init
 
+# Prevent concurrent execution
+LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/dotfiles-chezmoi-apply.lock"
+exec 9>"$LOCK_FILE"
+if ! flock -n 9; then
+  ui_warn "Already running" "Another instance is active"
+  exit 0
+fi
+
 run_step() {
   local title="$1"
   shift
   local out
   out="$(umask 077 && mktemp)"
+  _TMPFILES+=("$out")
   if [[ "$UI_ENABLED" = "1" ]]; then
     if gum spin --spinner dot --title "$title" -- "$@" >"$out" 2>&1; then
       ui_ok "$title"
@@ -93,6 +111,8 @@ run_step() {
   rm -f "$out"
 }
 
+dot_log info "apply_start"
+_apply_start=$(date +%s)
 ui_header "Applying dotfiles"
 if [[ "${DOTFILES_ALIAS_STRICT_MODE:-0}" == "1" ]]; then
   governance_script="$SCRIPT_DIR/../diagnostics/alias-governance.sh"
@@ -183,4 +203,7 @@ if [[ "${DOTFILES_POST_APPLY_REPAIR:-1}" = "1" ]]; then
 fi
 
 printf "\n"
+_apply_end=$(date +%s)
+dot_log info "apply_end" "duration_s=$((_apply_end - _apply_start))"
+dot_metric "chezmoi_apply_duration" "$((_apply_end - _apply_start))" "s"
 ui_info "Shell reload" "Run 'exec zsh' or restart your terminal to reload aliases/functions."

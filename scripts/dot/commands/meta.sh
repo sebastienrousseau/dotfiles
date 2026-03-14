@@ -59,7 +59,7 @@ cmd_docs() {
   src_dir="$(resolve_source_dir)"
 
   if [ -n "$src_dir" ] && [ -f "$src_dir/README.md" ]; then
-    if command -v glow >/dev/null 2>&1; then
+    if has_command glow; then
       glow "$src_dir/README.md"
     else
       exec cat "$src_dir/README.md"
@@ -101,7 +101,7 @@ cmd_keys() {
           ui_warn "SSH key file not found: $key_file"
         fi
       else
-        if command -v gpg >/dev/null 2>&1 && gpg --list-keys "$signing_key" >/dev/null 2>&1; then
+        if has_command gpg && gpg --list-keys "$signing_key" >/dev/null 2>&1; then
           ui_info "Status" "GPG key found in keyring"
         else
           ui_warn "GPG key not found in keyring: $signing_key"
@@ -159,7 +159,7 @@ case "${1:-}" in
     shift
     cmd_upgrade "$@"
     ;;
-  prewarm)
+  cache-refresh | prewarm)
     shift
     cmd_prewarm "$@"
     ;;

@@ -40,10 +40,17 @@
 
 set -euo pipefail
 
+_cleanup_files=()
+trap 'rm -f "${_cleanup_files[@]}"' EXIT
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
+# shellcheck source=../dot/lib/log.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/log.sh"
+DOT_COMMAND="benchmark"
 
 BENCHMARK_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/benchmarks"
 mkdir -p "$BENCHMARK_DIR"
@@ -308,6 +315,8 @@ run_hyperfine() {
 
     # Save with timestamp for history
     cp "$BENCHMARK_DIR/latest.json" "$BENCHMARK_DIR/$(date +%Y%m%d_%H%M%S).json"
+    dot_log info "benchmark_complete" "mean_ms=$mean_ms" "min_ms=$min_ms" "max_ms=$max_ms"
+    dot_metric "shell_startup_mean" "$mean_ms" "ms"
   fi
 }
 

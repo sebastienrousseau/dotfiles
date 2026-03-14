@@ -5,6 +5,9 @@
 
 set -euo pipefail
 
+_cleanup_files=()
+trap 'rm -f "${_cleanup_files[@]}"' EXIT
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 # shellcheck disable=SC1091

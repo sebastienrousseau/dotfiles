@@ -203,7 +203,8 @@ show_help() {
   ui_section "Meta"
   ui_cmd "upgrade" "Update flake, plugins, and dotfiles"
   ui_cmd "packages" "List installed packages and package managers"
-  ui_cmd "prewarm" "Regenerate shell caches for ultra-fast startup"
+  ui_cmd "cache-refresh" "Regenerate shell caches for ultra-fast startup"
+  ui_cmd "search" "Find commands by keyword"
   ui_cmd "--version" "Show version information"
   ui_cmd "help" "Show this help message"
 }
@@ -219,7 +220,7 @@ _CMD_DIR="${_SOURCE_DIR}/scripts/dot/commands"
 
 _dispatch() {
   local module="$1"
-  shift  # remove module name; remaining $@ are the user's extra args
+  shift # remove module name; remaining $@ are the user's extra args
   local cmd_file="${_CMD_DIR}/${module}.sh"
   if [[ -f "$cmd_file" ]]; then
     # shellcheck disable=SC1090
@@ -239,8 +240,8 @@ case "$COMMAND" in
 
   # ── Diagnostics ─────────────────────────────────────────────────────────
   doctor | scorecard | score | snapshot | history | perf | load-bench | load-bench-pty | \
-  chaos | bundle | rollback | heal | health | health-check | smoke-test | verify | \
-  security-score | drift | benchmark | intelligence | conflicts | locks | restore)
+    chaos | bundle | rollback | heal | health | health-check | smoke-test | verify | \
+    security-score | drift | benchmark | intelligence | conflicts | locks | restore)
     _dispatch diagnostics "$@"
     ;;
 
@@ -270,7 +271,7 @@ case "$COMMAND" in
     ;;
 
   # ── Meta / housekeeping ──────────────────────────────────────────────────
-  upgrade | prewarm | docs | learn | keys | sandbox | mcp)
+  upgrade | cache-refresh | prewarm | docs | learn | keys | sandbox | mcp)
     _dispatch meta "$@"
     ;;
 
@@ -282,6 +283,17 @@ case "$COMMAND" in
       ui_fail "patterns.sh not found"
       exit 1
     fi
+    ;;
+
+  # ── Search ──────────────────────────────────────────────────────────────
+  search)
+    keyword="${1:-}"
+    if [[ -z "$keyword" ]]; then
+      echo "Usage: dot search <keyword>"
+      exit 1
+    fi
+    show_help | grep -i --color=auto "$keyword" || echo "No commands matching '$keyword'"
+    exit 0
     ;;
 
   # ── Help & version ──────────────────────────────────────────────────────
