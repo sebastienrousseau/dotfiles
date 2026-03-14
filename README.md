@@ -15,6 +15,10 @@
   <a href="https://codespaces.new/sebastienrousseau/dotfiles"><img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces" /></a>
 </p>
 
+<p align="center">
+  <img src="docs/themes/hero-shot.svg" alt="Terminal preview showing dot doctor output" width="600" />
+</p>
+
 ---
 
 ## Install
@@ -158,6 +162,13 @@ For hardening options, see the [Security docs](docs/security/SECURITY.md).
 **THE ENGINE** ᛞ [EUXIS](https://euxis.co) ᛫ Enterprise Unified Execution Intelligence System
 
 ---
+
+## Links
+
+- [Changelog](CHANGELOG.md)
+- [Full documentation](docs/README.md)
+- [Install guide](docs/guides/INSTALL.md)
+- [Troubleshooting](docs/guides/TROUBLESHOOTING.md)
 
 ## License
 

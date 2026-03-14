@@ -1,11 +1,21 @@
 # Cognitive Shell Enhancements
 if [[ -o interactive ]]; then
+  # Carapace completions — cached to avoid subshell on every startup
   if command -v carapace >/dev/null 2>&1; then
-    source <(carapace _zsh)
+    if typeset -f _cached_eval >/dev/null 2>&1; then
+      _cached_eval carapace carapace _carapace zsh
+    else
+      source <(carapace _zsh)
+    fi
   fi
 
+  # thefuck — lazy-loaded to avoid ~200ms startup penalty
   if command -v thefuck >/dev/null 2>&1; then
-    eval $(thefuck --alias)
+    _lazy_load_thefuck() {
+      unfunction fuck _lazy_load_thefuck 2>/dev/null
+      eval "$(thefuck --alias)"
+    }
+    fuck() { _lazy_load_thefuck; fuck "$@"; }
     alias fix='fuck'
   fi
 fi
