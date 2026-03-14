@@ -28,7 +28,7 @@ test_start "ai_bridge_pattern_handling"
 assert_file_contains "$AI_SCRIPT" "--pattern" "should handle pattern flag"
 
 test_start "ai_bridge_help_shows_patterns"
-output=$(bash "$AI_SCRIPT" --help 2>&1 || true)
+output=$(bash "$AI_SCRIPT" cl --help 2>&1 || true)
 if echo "$output" | grep -q "Available Patterns"; then
   ((TESTS_PASSED++)) || true
   printf '%b

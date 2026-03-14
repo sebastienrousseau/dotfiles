@@ -192,7 +192,7 @@ set +e
 output=$(bash "$DOT_CLI" add 2>&1)
 ec=$?
 set -e
-if [[ "$output" == *"requires at least 1 argument"* ]] && [[ $ec -ne 0 ]]; then
+if [[ "$output" == *"Usage: dot add"* ]] && [[ $ec -ne 0 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot add with no args shows usage"
 else

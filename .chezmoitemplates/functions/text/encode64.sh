@@ -32,7 +32,7 @@
 # Function to encode a string to base64
 encode64() {
   # Display help menu
-  if [[ "$1" == "--help" ]]; then
+  if [[ "${1:-}" == "--help" ]]; then
     echo "encode64: Encode a string to base64"
     echo
     echo "Usage:"
@@ -66,7 +66,7 @@ encode64() {
 # Function to decode a base64 string
 decode64() {
   # Display help menu
-  if [[ "$1" == "--help" ]]; then
+  if [[ "${1:-}" == "--help" ]]; then
     echo "decode64: Decode a base64-encoded string"
     echo
     echo "Usage:"

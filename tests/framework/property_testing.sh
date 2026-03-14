@@ -150,9 +150,9 @@ run_property_test() {
     output=$($property_function "$test_input" 2>&1) || result=$?
 
     if [[ $result -eq 0 ]]; then
-      ((passed++))
+      ((passed++)) || true
     else
-      ((failed++))
+      ((failed++)) || true
       failures+=("Input: '$test_input' | Output: $output")
 
       # Show first few failures immediately
