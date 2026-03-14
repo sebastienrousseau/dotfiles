@@ -10,6 +10,11 @@ if [[ -d "${HOME}/.local/bin" ]]; then
   [[ ":${PATH}:" != *":${HOME}/.local/bin:"* ]] && export PATH="${HOME}/.local/bin:${PATH}"
 fi
 
+# Homebrew (macOS ARM)
+if [[ -d "/opt/homebrew/bin" ]]; then
+  [[ ":${PATH}:" != *":/opt/homebrew/bin:"* ]] && export PATH="/opt/homebrew/bin:${PATH}"
+fi
+
 # Zsh
 export ZDOTDIR="${XDG_CONFIG_HOME}/zsh"
 

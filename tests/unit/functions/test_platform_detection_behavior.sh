@@ -25,6 +25,7 @@ _source_platform() {
   # platform.sh starts with 'set -euo pipefail'; tolerate that in bash.
   # shellcheck source=/dev/null
   source "$PLATFORM_FILE"
+  set +e  # tests need to handle errors explicitly
 }
 _source_platform
 

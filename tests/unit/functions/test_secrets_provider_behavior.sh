@@ -30,6 +30,7 @@ source "$SECRETS_FILE" 2>/dev/null || {
   echo "RESULTS:0:0:0"
   exit 0
 }
+set +e  # tests need to handle errors explicitly
 
 mock_init
 

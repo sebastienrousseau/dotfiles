@@ -53,7 +53,7 @@ _setup_lazy_loader() {
     }
     mytool "$@"
   }
-  mytool() { lazy_mytool mytool "$@"; }
+  mytool() { lazy_mytool "$@"; }
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
