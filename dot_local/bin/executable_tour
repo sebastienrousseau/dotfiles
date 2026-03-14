@@ -136,7 +136,37 @@ gum style \
   "dot edit               # Open source in editor"
 
 echo ""
+gum confirm "Next: Linting & Performance" || exit 0
+clear
+
+# Slide 7: Linting & Performance
 gum style \
-  --foreground 212 --margin "1 2" \
-  "You’re all set. Tip: run 'dot update' weekly to stay current."
+  --foreground 214 --border rounded --padding "1 2" --margin "1 2" \
+  "Linting & Performance" \
+  "Keep your scripts clean and your shell fast." \
+  " " \
+  "dot lint              # ShellCheck + shfmt" \
+  "dot lint --fix        # Auto-format scripts" \
+  "dot lint --check      # CI mode (exit 1 on failure)" \
+  "dot benchmark --waterfall  # Startup waterfall chart" \
+  "dot perf              # Quick performance timing"
+
 echo ""
+gum confirm "Next: Finish" || exit 0
+clear
+
+# Final summary
+gum style \
+  --foreground 212 --border double --padding "1 2" --margin "1 2" \
+  "You’re all set!" \
+  " " \
+  "Tip: run ‘dot update’ weekly to stay current."
+
+echo ""
+choice=$(gum choose "Run dot doctor" "Run dot benchmark" "Open docs" "Exit")
+case "$choice" in
+  "Run dot doctor") exec dot doctor ;;
+  "Run dot benchmark") exec dot benchmark ;;
+  "Open docs") exec dot docs ;;
+  "Exit") exit 0 ;;
+esac

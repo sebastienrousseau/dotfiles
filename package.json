@@ -29,7 +29,15 @@
     "cli",
     "automation",
     "devops",
-    "security"
+    "security",
+    "nix",
+    "home-manager",
+    "starship",
+    "mise",
+    "age-encryption",
+    "terminal",
+    "configuration-management",
+    "infrastructure-as-code"
   ],
   "author": {
     "name": "Sebastien Rousseau",

@@ -34,8 +34,68 @@
     # EDITOR = "nvim";
   };
 
+  # ── Shell aliases (shared across all shells managed by Home Manager) ───
+  # home.shellAliases = {
+  #   ll = "eza -l --icons --git";
+  #   la = "eza -la --icons --git";
+  #   cat = "bat --style=auto";
+  #   g = "git";
+  #   d = "docker";
+  # };
+
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
+
+  # ── Example programs ───────────────────────────────────────────────────
+  # Uncomment any section below to let Home Manager manage these tools
+  # declaratively. Run `home-manager switch` after editing.
+
+  # programs.git = {
+  #   enable = true;
+  #   userName = "Your Name";
+  #   userEmail = "you@example.com";
+  #   signing = {
+  #     key = "~/.ssh/id_ed25519.pub";
+  #     signByDefault = true;
+  #   };
+  #   extraConfig.gpg.format = "ssh";
+  # };
+
+  # programs.starship = {
+  #   enable = true;
+  #   enableZshIntegration = true;
+  #   enableFishIntegration = true;
+  # };
+
+  # programs.zoxide = {
+  #   enable = true;
+  #   enableZshIntegration = true;
+  #   enableFishIntegration = true;
+  # };
+
+  # programs.direnv = {
+  #   enable = true;
+  #   nix-direnv.enable = true;  # Seamless nix shell integration
+  # };
+
+  # programs.bat = {
+  #   enable = true;
+  #   config.theme = "TwoDark";
+  # };
+
+  # programs.eza = {
+  #   enable = true;
+  #   enableZshIntegration = true;
+  # };
+
+  # ── XDG directories ───────────────────────────────────────────────────
+  # xdg = {
+  #   enable = true;
+  #   configHome = "${config.home.homeDirectory}/.config";
+  #   dataHome = "${config.home.homeDirectory}/.local/share";
+  #   cacheHome = "${config.home.homeDirectory}/.cache";
+  #   stateHome = "${config.home.homeDirectory}/.local/state";
+  # };
 
   # Manage fish plugins via Home Manager
   programs.fish = {
@@ -47,7 +107,10 @@
           owner = "jorgebucaran";
           repo = "fisher";
           rev = "main";
-          sha256 = "sha256-+ST6yL9iSSST9SGU6S6S6S6S6S6S6S6S6S6S6S6S6S6="; # Placeholder
+          # Run `nix flake lock` or use `nix-prefetch-git` to compute the
+          # correct hash. The placeholder below will cause a build error on
+          # first use — Nix will print the expected hash in the error message.
+          sha256 = pkgs.lib.fakeSha256;
         };
       }
     ];
