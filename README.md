@@ -33,7 +33,9 @@ Then verify:
 dot doctor
 ```
 
-Requires `git` and `curl`. Works on macOS, Ubuntu/Debian, Arch, and WSL2.
+Requires `git` and `curl`. Works on macOS, Ubuntu/Debian, Arch, and WSL2. Typical install: **3–5 minutes**.
+
+Use `--minimal` to skip Neovim, tmux, and zellij for servers or containers.
 
 <details>
 <summary>CI/CD and Docker options</summary>
@@ -100,7 +102,7 @@ graph TD
 | **Secrets** | Age + SOPS encryption with provider-aware storage |
 | **Signing** | SSH ED25519 commit signing enforced |
 | **Backups** | Atomic snapshot on every `dot apply` |
-| **Testing** | 1,200+ assertions, 100% module coverage |
+| **Testing** | 1,800+ assertions, 100% module coverage |
 | **CI** | ShellCheck, shfmt, compliance guard, CodeQL |
 
 ---

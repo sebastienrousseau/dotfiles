@@ -22,9 +22,9 @@
 # Source shared logging utilities if not already defined
 if ! declare -f log_error >/dev/null 2>&1; then
   _last_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
-  if [[ -f "${_last_dir}/utils/logging.sh" ]]; then
-    # shellcheck source=utils/logging.sh
-    source "${_last_dir}/utils/logging.sh"
+  if [[ -f "${_last_dir}/../utils/logging.sh" ]]; then
+    # shellcheck source=../utils/logging.sh
+    source "${_last_dir}/../utils/logging.sh"
   else
     # Minimal fallback logging functions
     log_error() { echo "[ERROR] $*" >&2; }
@@ -39,10 +39,8 @@ detect_tool() {
     echo "find"
   elif command -v fd &>/dev/null; then
     echo "fd"
-  elif command -v rg &>/dev/null; then
-    echo "rg"
   else
-    log_error "No compatible tools found (find, fd, or rg)."
+    log_error "No compatible tools found (find or fd)."
     return 1
   fi
 }
@@ -108,9 +106,6 @@ EOH
       ;;
     "fd")
       fd --type file --changed-within "${minutes}m"
-      ;;
-    "rg")
-      rg --type file --changed-within "${minutes}m"
       ;;
     *)
       log_error "Unknown tool detected."

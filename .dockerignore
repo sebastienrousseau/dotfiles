@@ -1,3 +1,12 @@
 .git
 node_modules
 all_aliases.sh
+dist/
+build/
+tests/
+docs/
+*.log
+*.tgz
+*.tar.gz
+.version-sync-backup/
+.claude/
