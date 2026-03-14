@@ -13,8 +13,8 @@ dot_ui_command_banner "Lint" "${1:-}"
 
 # ── Configuration ────────────────────────────────────────────────────────────
 # Flags from CLAUDE.md conventions:
-#   shellcheck: --severity=error -e SC1091 -e SC2030 -e SC2031
-#   shfmt:      -i 2 -ci
+#   SC flags: --severity=error -e SC1091 -e SC2030 -e SC2031
+#   shfmt:    -i 2 -ci
 SHELLCHECK_ARGS=(--severity=error -e SC1091 -e SC2030 -e SC2031)
 SHFMT_ARGS=(-i 2 -ci)
 
