@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$SCRIPT_DIR/dot/lib/ui.sh"
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/dot/lib/log.sh"
-DOT_COMMAND="prewarm"
+export DOT_COMMAND="prewarm"
 
 # Prevent concurrent execution
 LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/dotfiles-prewarm.lock"

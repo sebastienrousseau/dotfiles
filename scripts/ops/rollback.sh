@@ -20,7 +20,7 @@ source "$SCRIPT_DIR/../dot/lib/ui.sh"
 # shellcheck source=../dot/lib/log.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/log.sh"
-DOT_COMMAND="rollback"
+export DOT_COMMAND="rollback"
 REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 # Resolve symlinks for consistent path handling
 if command -v realpath >/dev/null 2>&1; then
