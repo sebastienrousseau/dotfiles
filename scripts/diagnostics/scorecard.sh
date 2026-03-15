@@ -12,7 +12,7 @@ source "$SCRIPT_DIR/../dot/lib/ui.sh"
 # shellcheck source=../dot/lib/log.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/log.sh"
-DOT_COMMAND="scorecard"
+export DOT_COMMAND="scorecard"
 
 ui_init
 set +x

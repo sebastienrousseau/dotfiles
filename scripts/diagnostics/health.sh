@@ -544,7 +544,7 @@ print_summary() {
 }
 
 # Main
-DOT_COMMAND="health"
+export DOT_COMMAND="health"
 print_header
 run_checks
 if $APPLY_FIX; then

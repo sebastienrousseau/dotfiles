@@ -50,7 +50,7 @@ source "$SCRIPT_DIR/../dot/lib/ui.sh"
 # shellcheck source=../dot/lib/log.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/log.sh"
-DOT_COMMAND="benchmark"
+export DOT_COMMAND="benchmark"
 
 BENCHMARK_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/benchmarks"
 mkdir -p "$BENCHMARK_DIR"

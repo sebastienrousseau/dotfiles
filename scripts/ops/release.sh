@@ -16,7 +16,7 @@ source "$SCRIPT_DIR/../dot/lib/ui.sh"
 # shellcheck source=../dot/lib/log.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/log.sh"
-DOT_COMMAND="release"
+export DOT_COMMAND="release"
 ui_init
 
 log_info() { ui_info "$@"; }

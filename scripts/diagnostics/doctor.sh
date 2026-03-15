@@ -28,7 +28,7 @@ source "$SCRIPT_DIR/../dot/lib/platform.sh"
 # shellcheck source=../dot/lib/log.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/log.sh"
-DOT_COMMAND="doctor"
+export DOT_COMMAND="doctor"
 
 ui_init
 
