@@ -12,6 +12,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
+# shellcheck source=../dot/lib/log.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/log.sh"
+DOT_COMMAND="perf"
 
 ui_init
 
@@ -206,6 +210,10 @@ if $PROFILE; then
   run_profile
   echo ""
 fi
+
+dot_log info "perf_complete" "mean_ms=$mean" "score=$score"
+dot_metric "shell_startup_mean" "$mean" "ms"
+dot_metric "perf_score" "$score" "percent"
 
 if [[ "$score" -eq 100 ]]; then
   ui_ok "Performance" "Excellent"

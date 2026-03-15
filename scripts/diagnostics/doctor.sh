@@ -25,6 +25,10 @@ source "$SCRIPT_DIR/../dot/lib/ui.sh"
 # shellcheck source=../dot/lib/platform.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/platform.sh"
+# shellcheck source=../dot/lib/log.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/log.sh"
+DOT_COMMAND="doctor"
 
 ui_init
 
@@ -167,6 +171,14 @@ if [[ -n "${XDG_CONFIG_HOME:-}" ]]; then
 else
   _warn "XDG_CONFIG_HOME" "defaulting to ~/.config"
 fi
+
+# Validate XDG paths are absolute
+for var in XDG_CONFIG_HOME XDG_DATA_HOME XDG_CACHE_HOME XDG_STATE_HOME; do
+  val="${!var:-}"
+  if [[ -n "$val" ]] && [[ "$val" != /* ]]; then
+    _warn "$var" "not absolute: $val"
+  fi
+done
 
 if [[ -n "${PIPX_HOME:-}" ]]; then
   _ok "PIPX_HOME" "$(pretty_path "$PIPX_HOME")"
@@ -338,6 +350,9 @@ else
 fi
 
 # --- Summary ---
+dot_log info "doctor_complete" "errors=$Errors" "warnings=$Warnings"
+dot_metric "doctor_errors" "$Errors" "count"
+dot_metric "doctor_warnings" "$Warnings" "count"
 echo ""
 if [[ $Errors -eq 0 ]]; then
   if [[ $Warnings -eq 0 ]]; then

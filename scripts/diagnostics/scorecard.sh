@@ -9,6 +9,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
+# shellcheck source=../dot/lib/log.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/log.sh"
+DOT_COMMAND="scorecard"
 
 ui_init
 set +x
@@ -51,6 +55,11 @@ if command -v chezmoi >/dev/null 2>&1; then
 else
   drift_count=0
 fi
+
+dot_log info "scorecard_complete" "health=$health_score" "security=$security_score" "perf=$perf_score"
+dot_metric "scorecard_health" "$health_score" "percent"
+dot_metric "scorecard_security" "$security_score" "percent"
+dot_metric "scorecard_perf" "$perf_score" "percent"
 
 if $JSON_OUTPUT; then
   cat <<JSON

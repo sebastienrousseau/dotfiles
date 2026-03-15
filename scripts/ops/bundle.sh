@@ -10,11 +10,23 @@ trap 'rm -f "${_cleanup_files[@]}"' EXIT
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/dot/lib/ui.sh"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/dot/lib/log.sh"
+DOT_COMMAND="bundle"
+
+# Concurrency guard
+LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/dotfiles-bundle.lock"
+exec 9>"$LOCK_FILE"
+if ! flock -n 9; then
+  ui_warn "Already running" "Another bundle instance is active"
+  exit 0
+fi
 
 OUTPUT_DIR="${1:-$HOME/Downloads}"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 BUNDLE_FILE="$OUTPUT_DIR/dotfiles_offline_bundle_$TIMESTAMP.tar.zst"
 
+dot_log info "bundle_start"
 ui_header "Creating Offline Bundle (Zero-Network Mode)"
 
 # Ensure target directory exists
@@ -56,6 +68,9 @@ tar --zstd -cf "$BUNDLE_FILE" -P "${valid_paths[@]}" 2>/dev/null || {
   exit 1
 }
 
+bundle_size=$(stat -c '%s' "$BUNDLE_FILE" 2>/dev/null || stat -f '%z' "$BUNDLE_FILE" 2>/dev/null || echo 0)
+dot_log info "bundle_end" "file=$BUNDLE_FILE"
+dot_metric "bundle_size" "$bundle_size" "bytes"
 ui_ok "Bundle created" "$BUNDLE_FILE"
 ui_info "To restore on an offline machine:"
 ui_bullet "tar --zstd -xf $BUNDLE_FILE -P"

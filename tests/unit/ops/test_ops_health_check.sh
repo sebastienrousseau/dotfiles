@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
+# health-check.sh was consolidated into scripts/diagnostics/health.sh.
+# This test now validates health.sh exists and "dot health-check" routes to it.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-TEST_SCRIPT="$REPO_ROOT/scripts/ops/health-check.sh"
+TEST_SCRIPT="$REPO_ROOT/scripts/diagnostics/health.sh"
 
 test_start "health_check_exists"
-assert_file_exists "$TEST_SCRIPT" "health-check.sh should exist"
+assert_file_exists "$TEST_SCRIPT" "health.sh should exist (consolidation target)"
 
 test_start "health_check_syntax"
 if bash -n "$TEST_SCRIPT" 2>/dev/null; then
