@@ -36,15 +36,15 @@ PROVIDER=""
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --provider|-p)
+    --provider | -p)
       PROVIDER="$2"
       shift 2
       ;;
-    --edit|-e)
+    --edit | -e)
       EDIT_MODE=true
       shift
       ;;
-    --help|-h)
+    --help | -h)
       echo "Usage: git ai-commit [--provider <provider>] [--edit]"
       echo ""
       echo "Options:"
@@ -157,7 +157,7 @@ echo "---"
 if [[ "$EDIT_MODE" == "true" ]]; then
   # Create temp file for editing
   TMPFILE=$(umask 077 && mktemp)
-  echo "$MESSAGE" > "$TMPFILE"
+  echo "$MESSAGE" >"$TMPFILE"
   ${EDITOR:-vim} "$TMPFILE"
   MESSAGE=$(cat "$TMPFILE")
   rm -f "$TMPFILE"

@@ -10,7 +10,7 @@
 if status is-interactive
 {{- range $group, $files := $groups }}
 {{- range $files }}
-{{- $func := trimSuffix ".sh" . }}
+{{- $func := trimSuffix ".sh" (base .) }}
 {{- $nativePath := joinPath $root.chezmoi.sourceDir (printf "dot_config/fish/functions/%s.fish" $func) }}
 {{- if not (has $nativePath $fishFuncs) }}
     function {{ $func }} --description 'Dotfiles: {{ $func }}'

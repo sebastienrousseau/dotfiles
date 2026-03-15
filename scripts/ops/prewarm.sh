@@ -5,7 +5,19 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/dot/lib/ui.sh"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/dot/lib/log.sh"
+export DOT_COMMAND="prewarm"
+
+# Prevent concurrent execution
+LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/dotfiles-prewarm.lock"
+exec 9>"$LOCK_FILE"
+if ! flock -n 9; then
+  ui_warn "Already running" "Another instance is active"
+  exit 0
+fi
 
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"
 mkdir -p "$CACHE_DIR/"{zsh,bash,fish,nushell}
@@ -65,3 +77,4 @@ if command -v atuin >/dev/null 2>&1; then
 fi
 
 ui_header "Cache Pre-warming Complete"
+dot_log info "prewarm_complete"

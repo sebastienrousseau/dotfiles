@@ -3,25 +3,27 @@
 
 # If tool is missing, use Nix to run it.
 run_if_not_found() {
-    cmd=$1; pkg=$2; shift 2
-    if command -v "$cmd" >/dev/null 2>&1; then
-        "$cmd" "$@"
-    elif command -v nix >/dev/null 2>&1; then
-        echo "   Tool '$cmd' missing. Using Nix fallback..." >&2
-        nix shell "nixpkgs#$pkg" -c "$cmd" "$@"
-    else
-        echo "Error: Tool '$cmd' not found and Nix not available." >&2
-        exit 1
-    fi
+  cmd=$1
+  pkg=$2
+  shift 2
+  if command -v "$cmd" >/dev/null 2>&1; then
+    "$cmd" "$@"
+  elif command -v nix >/dev/null 2>&1; then
+    echo "   Tool '$cmd' missing. Using Nix fallback..." >&2
+    nix shell "nixpkgs#$pkg" -c "$cmd" "$@"
+  else
+    echo "Error: Tool '$cmd' not found and Nix not available." >&2
+    exit 1
+  fi
 }
 
 case $1 in
-    *.tar.bz2)   run_if_not_found tar gnutar xvjf "$1"    ;;
-    *.tar.gz)    run_if_not_found tar gnutar xvzf "$1"    ;;
-    *.zip)       run_if_not_found unzip unzip "$1"        ;;
-    *.rar)       run_if_not_found unrar unrar x "$1"      ;;
-    *.7z)        run_if_not_found 7z p7zip a "$1"         ;;
-    *.tar.xz)    run_if_not_found tar gnutar xvf "$1"     ;;
-    *.tar.zst)   run_if_not_found tar gnutar xvf "$1"     ;;
-    *)           echo "'$1' cannot be extracted via extract" ;;
+  *.tar.bz2) run_if_not_found tar gnutar xvjf "$1" ;;
+  *.tar.gz) run_if_not_found tar gnutar xvzf "$1" ;;
+  *.zip) run_if_not_found unzip unzip "$1" ;;
+  *.rar) run_if_not_found unrar unrar x "$1" ;;
+  *.7z) run_if_not_found 7z p7zip a "$1" ;;
+  *.tar.xz) run_if_not_found tar gnutar xvf "$1" ;;
+  *.tar.zst) run_if_not_found tar gnutar xvf "$1" ;;
+  *) echo "'$1' cannot be extracted via extract" ;;
 esac

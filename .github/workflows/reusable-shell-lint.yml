@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       include_tests:
-        description: Include shell files under scripts/tests.
+        description: Include shell files under tests/.
         required: false
         default: false
         type: boolean
@@ -47,7 +47,10 @@ jobs:
 
       - name: Install tools
         run: |
-          sudo apt-get update && sudo apt-get install -y shellcheck ripgrep shfmt
+          sudo apt-get update && sudo apt-get install -y shellcheck ripgrep
+          # Install shfmt with exact version pinning via webi
+          curl -sS https://webi.sh/shfmt | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: ShellCheck
         run: |
@@ -57,7 +60,7 @@ jobs:
           if [[ "${{ inputs.include_tests }}" == "true" ]]; then
             mapfile -t files < <(rg --files -g "*.sh")
           else
-            mapfile -t files < <(rg --files -g "*.sh" -g "!scripts/tests/**")
+            mapfile -t files < <(rg --files -g "*.sh" -g "!tests/**")
           fi
 
           if [[ "${#files[@]}" -eq 0 ]]; then

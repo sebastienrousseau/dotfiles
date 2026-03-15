@@ -10,9 +10,13 @@
 
 <p align="center">
   <a href="https://github.com/sebastienrousseau/dotfiles/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge&logo=github" alt="Build" /></a>
-  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.495-blue?style=for-the-badge" alt="Version" /></a>
+  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.496-blue?style=for-the-badge" alt="Version" /></a>
   <a href="https://github.com/sebastienrousseau/dotfiles/releases"><img src="https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge" alt="Downloads" /></a>
   <a href="https://codespaces.new/sebastienrousseau/dotfiles"><img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces" /></a>
+</p>
+
+<p align="center">
+  <img src="docs/themes/hero-shot.svg" alt="Terminal preview showing dot doctor output" width="600" />
 </p>
 
 ---
@@ -29,7 +33,15 @@ Then verify:
 dot doctor
 ```
 
-Requires `git` and `curl`. Works on macOS, Ubuntu/Debian, Arch, and WSL2.
+Requires `git` and `curl`. Works on macOS, Ubuntu/Debian, Arch, and WSL2. Typical install: **3–5 minutes**.
+
+### Quick Start
+
+1. **Install** — run the one-liner above, then `dot doctor` to verify
+2. **Explore** — run `dot learn` for an interactive tour of every command
+3. **Customize** — drop scripts into `~/.config/shell/custom/` (auto-sourced)
+
+Use `--minimal` to skip Neovim, tmux, and zellij for servers or containers.
 
 <details>
 <summary>CI/CD and Docker options</summary>
@@ -96,7 +108,7 @@ graph TD
 | **Secrets** | Age + SOPS encryption with provider-aware storage |
 | **Signing** | SSH ED25519 commit signing enforced |
 | **Backups** | Atomic snapshot on every `dot apply` |
-| **Testing** | 1,200+ assertions, 100% module coverage |
+| **Testing** | 1,800+ assertions, 100% module coverage |
 | **CI** | ShellCheck, shfmt, compliance guard, CodeQL |
 
 ---
@@ -110,9 +122,11 @@ graph TD
 | `dot doctor` | Validate paths, versions, and security |
 | `dot heal` | Auto-repair missing tools and broken state |
 | `dot smoke-test` | Verify toolchains (Rust, Go, AI CLIs) |
+| `dot lint` | Lint shell scripts (`--fix` to auto-format, `--check` for CI) |
+| `dot benchmark --waterfall` | ASCII waterfall chart of startup component timings |
 | `dot bundle` | Create an offline portable archive |
 
-Full reference: [docs/UTILS.md](docs/UTILS.md)
+Full reference: [docs/reference/UTILS.md](docs/reference/UTILS.md)
 
 ---
 
@@ -150,7 +164,21 @@ Full reference: [docs/UTILS.md](docs/UTILS.md)
 - **Audit trail** — every `dot` command logged to `~/.local/share/dotfiles.log`
 </details>
 
-For hardening options, see the [Security docs](docs/SECURITY.md).
+For hardening options, see the [Security docs](docs/security/SECURITY.md).
+
+---
+
+## Extending
+
+Customize without forking — drop files into these directories and they are picked up automatically.
+
+| Path | Purpose |
+| :--- | :--- |
+| `~/.config/shell/custom/` | Drop-in shell extensions (auto-sourced by Zsh and Fish) |
+| `~/.config/zsh/rc.d/` | Numeric-prefixed Zsh modules (e.g. `99-my-stuff.zsh`) |
+| `.chezmoidata.toml` `[features]` | Feature flags to toggle modules on/off |
+
+**Adding custom aliases or functions** — create a file in `~/.config/shell/custom/` (e.g. `my-aliases.sh`). It will be sourced on every new shell without touching upstream files.
 
 ---
 
@@ -158,6 +186,13 @@ For hardening options, see the [Security docs](docs/SECURITY.md).
 **THE ENGINE** ᛞ [EUXIS](https://euxis.co) ᛫ Enterprise Unified Execution Intelligence System
 
 ---
+
+## Links
+
+- [Changelog](CHANGELOG.md)
+- [Full documentation](docs/README.md)
+- [Install guide](docs/guides/INSTALL.md)
+- [Troubleshooting](docs/guides/TROUBLESHOOTING.md)
 
 ## License
 

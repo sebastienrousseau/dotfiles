@@ -266,7 +266,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Checkov Infrastructure Security
-        uses: bridgecrewio/checkov-action@f99709f8ccc3496220c987b7d8729653237c23dc # v12
+        uses: bridgecrewio/checkov-action@f9b0a2206b0401cad02ac0a66be2a7934a5be838 # v12.3088.0
         with:
           framework: dockerfile,yaml,secrets
           quiet: false
@@ -275,7 +275,7 @@ jobs:
           output_file_path: reports/checkov.sarif
       - name: Upload Checkov results to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@45580472a5bb82c4681c4ac726cfdb60060c2ee1 # v3
+        uses: github/codeql-action/upload-sarif@0d579ffd059c29b07949a3cce3983f0780820c98 # v4
         with:
           sarif_file: reports/checkov.sarif
 
@@ -305,7 +305,7 @@ jobs:
       - name: Setup Chezmoi
         run: |
           if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
-            sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin -t v${{ env.CHEZMOI_VERSION }}
+            bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
           fi
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Chezmoi Apply Test
@@ -328,10 +328,10 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Run unit tests with coverage
         run: |
-          chmod +x scripts/tests/framework/*.sh
+          chmod +x tests/framework/*.sh
           # Set coverage requirement to 100%
           export COVERAGE_THRESHOLD=100
-          ./scripts/tests/framework/test_runner.sh
+          ./tests/framework/test_runner.sh
           if [ $? -ne 0 ]; then
             echo "::error::Unit tests failed or coverage below 100%"
             exit 1
@@ -339,7 +339,7 @@ jobs:
       - name: Coverage Report
         run: |
           # Generate coverage report
-          ./scripts/tests/framework/coverage_analyzer.sh
+          ./tests/framework/coverage_analyzer.sh
           if [ $? -ne 0 ]; then
             echo "::error::Coverage analysis failed or threshold not met"
             exit 1
@@ -361,7 +361,7 @@ jobs:
       - name: Run integration tests
         run: |
           export RUN_INTEGRATION=1
-          ./scripts/tests/framework/test_runner.sh
+          ./tests/framework/test_runner.sh
           if [ $? -ne 0 ]; then
             echo "::error::Integration tests failed"
             exit 1
@@ -415,10 +415,10 @@ jobs:
         run: |
           echo "::notice::Testing with beta/nightly versions"
           export USE_BETA_VERSIONS=1
-          ./scripts/tests/framework/test_runner.sh || true
+          ./tests/framework/test_runner.sh || true
       - name: Extended Test Suite
         if: matrix.check == 'extended-tests'
         run: |
           echo "::notice::Running extended test suite"
           export RUN_EXTENDED=1
-          ./scripts/tests/framework/test_runner.sh || true
+          ./tests/framework/test_runner.sh || true

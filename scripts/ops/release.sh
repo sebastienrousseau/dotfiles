@@ -10,20 +10,32 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
+# shellcheck source=../dot/lib/log.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/log.sh"
+export DOT_COMMAND="release"
+ui_init
 
-# Colors (respect NO_COLOR)
-if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
-  RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[0;33m'
-  BLUE='\033[0;34m' BOLD='\033[1m' NC='\033[0m'
-else
-  RED='' GREEN='' YELLOW='' BLUE='' BOLD='' NC=''
-fi
+log_info() { ui_info "$@"; }
+log_success() { ui_ok "$@"; }
+log_warn() { ui_warn "$@"; }
+log_error() { ui_err "$@"; }
+log_step() {
+  echo ""
+  ui_section "$*"
+}
 
-log_info() { printf '%b\n' "${BLUE}[INFO]${NC} $*"; }
-log_success() { printf '%b\n' "${GREEN}[OK]${NC} $*"; }
-log_warn() { printf '%b\n' "${YELLOW}[WARN]${NC} $*"; }
-log_error() { printf '%b\n' "${RED}[ERROR]${NC} $*" >&2; }
-log_step() { printf '%b\n' "\n${BOLD}── $* ──${NC}"; }
+# Cross-platform sed in-place (BSD vs GNU)
+sed_in_place() {
+  if sed --version >/dev/null 2>&1; then
+    sed -i "$@" # GNU
+  else
+    sed -i '' "$@" # BSD (macOS)
+  fi
+}
 
 usage() {
   local current
@@ -115,7 +127,16 @@ main() {
     esac
   done
 
+  # Concurrency guard
+  LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/dotfiles-release.lock"
+  exec 9>"$LOCK_FILE"
+  if ! flock -n 9; then
+    ui_warn "Already running" "Another release is in progress"
+    exit 0
+  fi
+
   cd "$PROJECT_ROOT"
+  dot_log info "release_start" "bump_type=$bump_type"
 
   local current_version new_version
   current_version=$(get_version)
@@ -173,7 +194,7 @@ main() {
 
   # ── Step 2: Bump version ──────────────────────────────────────
   log_step "Bump version in package.json"
-  sed -i.bak "s/\"version\": \"${current_version}\"/\"version\": \"${new_version}\"/" "$PROJECT_ROOT/package.json" && rm -f "$PROJECT_ROOT/package.json.bak"
+  sed_in_place "s/\"version\": \"${current_version}\"/\"version\": \"${new_version}\"/" "$PROJECT_ROOT/package.json"
   log_success "package.json: $current_version → $new_version"
 
   # ── Step 3: Sync versions across docs ─────────────────────────
@@ -193,13 +214,13 @@ main() {
 
   if [[ -f "$changelog" ]]; then
     # Insert new version header after the first "# Changelog" line
-    sed -i.bak "/^## v${current_version}/i\\
+    sed_in_place "/^## v${current_version}/i\\
 ## v${new_version} (${today})\\
 \\
 ### Changed\\
 \\
 - Version bump to v${new_version}.\\
-" "$changelog" && rm -f "$changelog.bak"
+" "$changelog"
     log_success "Added v${new_version} section to CHANGELOG.md"
   else
     log_warn "CHANGELOG.md not found, skipping"
@@ -224,6 +245,7 @@ main() {
   fi
 
   echo ""
+  dot_log info "release_end" "version=$new_version"
   log_success "Release v${new_version} complete"
 }
 

@@ -9,6 +9,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
+# shellcheck source=../dot/lib/log.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/log.sh"
+export DOT_COMMAND="scorecard"
 
 ui_init
 set +x
@@ -52,6 +56,11 @@ else
   drift_count=0
 fi
 
+dot_log info "scorecard_complete" "health=$health_score" "security=$security_score" "perf=$perf_score"
+dot_metric "scorecard_health" "$health_score" "percent"
+dot_metric "scorecard_security" "$security_score" "percent"
+dot_metric "scorecard_perf" "$perf_score" "percent"
+
 if $JSON_OUTPUT; then
   cat <<JSON
 {
@@ -85,15 +94,15 @@ else
 fi
 
 if [[ "$health_failures" -gt 0 ]]; then
-  ui_err "Health" "Failures detected (run 'dot health --fix')"
+  ui_err "Health" "Failures detected (run 'dot heal')"
 elif [[ "$health_warnings" -gt 0 ]]; then
-  ui_warn "Health" "Warnings detected (run 'dot health --fix')"
+  ui_warn "Health" "Warnings detected (run 'dot heal')"
 else
   ui_ok "Health" "All checks passing"
 fi
 
 ui_section "Tips"
-ui_info "Fix" "dot health --fix"
+ui_info "Fix" "dot heal"
 ui_info "Profile" "dot perf --profile"
 ui_info "Security" "dot security-score"
 ui_info "Drift" "dot drift"

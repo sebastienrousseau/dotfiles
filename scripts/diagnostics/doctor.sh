@@ -25,6 +25,10 @@ source "$SCRIPT_DIR/../dot/lib/ui.sh"
 # shellcheck source=../dot/lib/platform.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/platform.sh"
+# shellcheck source=../dot/lib/log.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/log.sh"
+export DOT_COMMAND="doctor"
 
 ui_init
 
@@ -41,19 +45,19 @@ for arg in "$@"; do
   esac
 done
 
-# --- Output helpers (Bubble Tea-inspired colors) ---
-_ok() { printf '  \033[38;5;42m✓\033[0m %-35s %s\n' "$1" "${2:-}"; }
+# --- Output helpers (delegate to shared ui.sh) ---
+_ok() { ui_ok "$1" "${2:-}"; }
 _fail() {
-  printf '  \033[38;5;196m✗\033[0m %-35s %s\n' "$1" "${2:-}"
+  ui_err "$1" "${2:-}"
   Errors=$((Errors + 1))
 }
 _warn() {
-  printf '  \033[38;5;214m⚠\033[0m %-35s %s\n' "$1" "${2:-}"
+  ui_warn "$1" "${2:-}"
   Warnings=$((Warnings + 1))
 }
 _section() {
   echo ""
-  printf '  \033[1;38;5;63m%s\033[0m\n' "$1"
+  ui_section "$1"
 }
 
 pretty_path() {
@@ -103,8 +107,7 @@ get_cmd_path() {
 }
 
 # --- Header ---
-echo ""
-printf '  \033[1mDotfiles Doctor\033[0m\n'
+ui_header "Dotfiles Doctor"
 
 # --- Core Shells ---
 _section "Core Shells"
@@ -169,6 +172,14 @@ else
   _warn "XDG_CONFIG_HOME" "defaulting to ~/.config"
 fi
 
+# Validate XDG paths are absolute
+for var in XDG_CONFIG_HOME XDG_DATA_HOME XDG_CACHE_HOME XDG_STATE_HOME; do
+  val="${!var:-}"
+  if [[ -n "$val" ]] && [[ "$val" != /* ]]; then
+    _warn "$var" "not absolute: $val"
+  fi
+done
+
 if [[ -n "${PIPX_HOME:-}" ]]; then
   _ok "PIPX_HOME" "$(pretty_path "$PIPX_HOME")"
 else
@@ -188,6 +199,7 @@ uptime_human="$(uptime -p 2>/dev/null | sed 's/^up //')"
 
 if [[ -r /etc/os-release ]]; then
   distro_pretty="$(
+    # shellcheck disable=SC1091
     . /etc/os-release
     echo "${PRETTY_NAME:-$ID}"
   )"
@@ -309,8 +321,7 @@ if command -v chezmoi >/dev/null 2>&1; then
         grep -v "/bun/" |
         grep -v "/.bun/" |
         grep -v "/noctalia/" |
-        grep -v -- "-backup/" |
-        wc -l | tr -d ' ' ||
+        grep -c -v -- "-backup/" ||
         true
     )
 
@@ -329,8 +340,8 @@ fi
 # --- Performance ---
 _section "Performance"
 if command -v hyperfine >/dev/null 2>&1; then
-  if bash "$SCRIPT_DIR/../tests/performance/bench.sh" 2>/dev/null; then
-    _ok "startup latency" "within 50ms threshold"
+  if bash "$SCRIPT_DIR/../../tests/performance/bench.sh" 2>/dev/null; then
+    _ok "startup latency" "within target thresholds"
   else
     _warn "startup latency" "threshold exceeded (run dot prewarm)"
   fi
@@ -339,15 +350,18 @@ else
 fi
 
 # --- Summary ---
+dot_log info "doctor_complete" "errors=$Errors" "warnings=$Warnings"
+dot_metric "doctor_errors" "$Errors" "count"
+dot_metric "doctor_warnings" "$Warnings" "count"
 echo ""
 if [[ $Errors -eq 0 ]]; then
   if [[ $Warnings -eq 0 ]]; then
-    printf '  \033[1;38;5;42mHealthy.\033[0m All checks passed.\n'
+    ui_ok "Healthy" "All checks passed."
   else
-    printf '  \033[1;38;5;42mHealthy.\033[0m %d warning(s).\n' "$Warnings"
+    ui_ok "Healthy" "$Warnings warning(s)."
   fi
 else
-  printf '  \033[1;38;5;196m%d error(s)\033[0m, %d warning(s). Run \033[38;5;211mdot heal\033[0m to repair.\n' "$Errors" "$Warnings"
+  ui_err "$Errors error(s)" "$Warnings warning(s). Run 'dot heal' to repair."
 
   if [[ $AI_DEBUG -eq 1 ]]; then
     _section "AI Problem Analysis"

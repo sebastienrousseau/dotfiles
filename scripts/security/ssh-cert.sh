@@ -26,10 +26,16 @@ CA_PROVISIONER="${SSH_CERT_CA_PROVISIONER:-}"
 
 # ---------- helpers -------------------------------------------------------- #
 
-info() { printf '\033[1;34m[ssh-cert]\033[0m %s\n' "$*"; }
-warn() { printf '\033[1;33m[ssh-cert]\033[0m %s\n' "$*" >&2; }
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../dot/lib/ui.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/ui.sh"
+ui_init
+
+info() { ui_info "ssh-cert" "$*"; }
+warn() { ui_warn "ssh-cert" "$*"; }
 error() {
-  printf '\033[1;31m[ssh-cert]\033[0m %s\n' "$*" >&2
+  ui_err "ssh-cert" "$*"
   exit 1
 }
 

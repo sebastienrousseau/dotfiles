@@ -40,7 +40,7 @@ path_prepend() {
 }
 
 # 1. System Paths (Prepend, but will be pushed down by later prepends)
-PATH="/usr/bin:/bin:/usr/sbin:/sbin:${PATH}"
+PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH}"
 
 # 2. Homebrew Paths (Prepend -> Higher Priority)
 path_prepend "/opt/homebrew/sbin"
@@ -56,6 +56,9 @@ path_prepend "${HOME}/.gem/ruby/bin"
 export PIPX_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/pipx"
 export PIPX_BIN_DIR="${XDG_BIN_HOME:-$HOME/.local/bin}"
 path_prepend "${PIPX_BIN_DIR}"
+
+# .NET Tools
+path_prepend "${HOME}/.dotnet/tools"
 
 # Rust (Cargo)
 path_prepend "${HOME}/.cargo/bin"
@@ -95,17 +98,13 @@ path_prepend "${HOME}/.node_modules/bin"
 # Lua (Luarocks)
 path_prepend "${HOME}/.luarocks/bin"
 
-# 4. Applications (macOS Specifics from 99-custom)
+# 4. macOS System Paths
 {{- if eq .chezmoi.os "darwin" }}
 path_prepend "/Library/Apple/usr/bin"
-path_prepend "/Library/TeX/texbin"
-path_prepend "/Applications/Topaz Photo AI.app/Contents/Resources/bin"
-path_prepend "/Applications/Little Snitch.app/Contents/Components"
-path_prepend "/Applications/iTerm.app/Contents/Resources/utilities"
-path_prepend "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 {{- end }}
 
-# 5. Local Bin (Highest Priority)
+# 5. Local Bin and Tools (Highest Priority)
+path_prepend "${HOME}/.fzf/bin"
 path_prepend "${HOME}/.local/bin"
 path_prepend "${HOME}/.local/share/mise/shims"
 path_prepend "${HOME}/bin"

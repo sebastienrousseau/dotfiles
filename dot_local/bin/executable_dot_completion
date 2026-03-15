@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+# shellcheck shell=bash disable=SC2034
 #compdef dot
 
 # Zsh completion for the dot CLI

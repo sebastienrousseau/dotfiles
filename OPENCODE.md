@@ -104,6 +104,6 @@ install.sh                  # Bootstrap installer
 
 ### Testing
 
-- Test framework: `scripts/tests/framework/`
-- Unit tests: `scripts/tests/unit/`
+- Test framework: `tests/framework/`
+- Unit tests: `tests/unit/`
 - Tests execute bash source files directly — they do NOT use Go template syntax

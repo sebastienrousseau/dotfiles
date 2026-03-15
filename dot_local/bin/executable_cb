@@ -4,33 +4,33 @@
 
 # Helper for rich feedback if TTY is present
 log_info() {
-    if [ -t 1 ] && command -v gum >/dev/null 2>&1; then
-        gum style --foreground 212 "󱉊 $1"
-    else
-        echo "cb: $1"
-    fi
+  if [ -t 1 ] && command -v gum >/dev/null 2>&1; then
+    gum style --foreground 212 "󱉊 $1"
+  else
+    echo "cb: $1"
+  fi
 }
 
 case "$(uname -s)" in
-    Darwin)
-        if [ -t 0 ]; then
-            pbpaste
-        else
-            pbcopy && log_info "Copied to macOS clipboard"
-        fi
-        ;;
-    Linux)
-        if grep -qi microsoft /proc/version 2>/dev/null; then
-            # WSL
-            if [ -t 0 ]; then
-                powershell.exe -command "Get-Clipboard" | tr -d '\r'
-            else
-                clip.exe && log_info "Copied to Windows clipboard (WSL)"
-            fi
-        elif [ -n "$WAYLAND_DISPLAY" ]; then
-            if [ -t 0 ]; then wl-paste; else wl-copy && log_info "Copied to Wayland clipboard"; fi
-        else
-            if [ -t 0 ]; then xclip -selection clipboard -o; else xclip -selection clipboard && log_info "Copied to X11 clipboard"; fi
-        fi
-        ;;
+  Darwin)
+    if [ -t 0 ]; then
+      pbpaste
+    else
+      pbcopy && log_info "Copied to macOS clipboard"
+    fi
+    ;;
+  Linux)
+    if grep -qi microsoft /proc/version 2>/dev/null; then
+      # WSL
+      if [ -t 0 ]; then
+        powershell.exe -command "Get-Clipboard" | tr -d '\r'
+      else
+        clip.exe && log_info "Copied to Windows clipboard (WSL)"
+      fi
+    elif [ -n "$WAYLAND_DISPLAY" ]; then
+      if [ -t 0 ]; then wl-paste; else wl-copy && log_info "Copied to Wayland clipboard"; fi
+    else
+      if [ -t 0 ]; then xclip -selection clipboard -o; else xclip -selection clipboard && log_info "Copied to X11 clipboard"; fi
+    fi
+    ;;
 esac

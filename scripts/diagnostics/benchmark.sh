@@ -11,6 +11,7 @@
 ## dot benchmark --detailed         # Per-component breakdown
 ## dot benchmark --profile          # zprof analysis
 ## dot benchmark --compare          # Compare with history
+## dot benchmark --waterfall        # ASCII waterfall chart of component timings
 ##
 ## # Dependencies
 ## - python3: Millisecond timing (required)
@@ -39,10 +40,17 @@
 
 set -euo pipefail
 
+_cleanup_files=()
+trap 'rm -f "${_cleanup_files[@]}"' EXIT
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
+# shellcheck source=../dot/lib/log.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/log.sh"
+export DOT_COMMAND="benchmark"
 
 BENCHMARK_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/benchmarks"
 mkdir -p "$BENCHMARK_DIR"
@@ -51,6 +59,7 @@ mkdir -p "$BENCHMARK_DIR"
 DETAILED=false
 PROFILE=false
 COMPARE=false
+WATERFALL=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --detailed | -d)
@@ -63,6 +72,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --compare | -c)
       COMPARE=true
+      shift
+      ;;
+    --waterfall | -w)
+      WATERFALL=true
       shift
       ;;
     *) shift ;;
@@ -144,6 +157,85 @@ benchmark_components() {
   echo "───────────────────────────────────────────────"
 }
 
+# Render ASCII waterfall chart from component timings
+render_waterfall() {
+  ui_header "Startup Waterfall"
+  echo ""
+
+  local -a names=()
+  local -a times=()
+  local total_time=0
+
+  # zshenv
+  local t
+  # shellcheck disable=SC1091
+  t=$(time_command "zsh -c 'source ~/.zshenv 2>/dev/null; exit'")
+  names+=("zshenv (bootloader)")
+  times+=("$t")
+  total_time=$((total_time + t))
+
+  # rc.d modules
+  # shellcheck disable=SC1091
+  t=$(time_command "zsh -c 'source ~/.config/zsh/rc.d/30-options.zsh 2>/dev/null; exit'" 2>/dev/null || echo 0)
+  names+=("rc.d/30-options.zsh")
+  times+=("$t")
+  total_time=$((total_time + t))
+
+  # shellcheck disable=SC1091
+  t=$(time_command "zsh -c 'source ~/.config/zsh/rc.d/20-zinit.zsh 2>/dev/null; exit'" 2>/dev/null || echo 0)
+  names+=("rc.d/20-zinit (plugins)")
+  times+=("$t")
+  total_time=$((total_time + t))
+
+  # Tool inits
+  for tool in starship atuin zoxide fzf direnv; do
+    if command -v "$tool" >/dev/null 2>&1; then
+      case "$tool" in
+        starship) t=$(time_command "starship init zsh >/dev/null") ;;
+        atuin) t=$(time_command "atuin init zsh >/dev/null") ;;
+        zoxide) t=$(time_command "zoxide init zsh >/dev/null") ;;
+        fzf) t=$(time_command "true") ;;
+        direnv) t=$(time_command "direnv hook zsh >/dev/null") ;;
+      esac
+      names+=("$tool init")
+      times+=("$t")
+      total_time=$((total_time + t))
+    fi
+  done
+
+  if [[ "$total_time" -eq 0 ]]; then
+    ui_warn "No timing data" "Could not measure components"
+    return
+  fi
+
+  # Render bars
+  local bar_width=30
+  local i
+  for i in "${!names[@]}"; do
+    local name="${names[$i]}"
+    local ms="${times[$i]}"
+    local pct=$((ms * 100 / total_time))
+    local filled=$((ms * bar_width / total_time))
+    local empty=$((bar_width - filled))
+
+    local bar=""
+    local j
+    for ((j = 0; j < filled; j++)); do bar+="$_GL_BAR_FILL"; done
+    for ((j = 0; j < empty; j++)); do bar+="$_GL_BAR_EMPTY"; done
+
+    if [[ "$UI_COLOR" = "1" ]]; then
+      printf "  %-22s %s%s%s%s%s  %4dms (%2d%%)\n" \
+        "$name" "$GREEN" "${bar:0:$filled}" "$NORMAL$GRAY" "${bar:$filled}" "$NORMAL" "$ms" "$pct"
+    else
+      printf "  %-22s %s  %4dms (%2d%%)\n" "$name" "$bar" "$ms" "$pct"
+    fi
+  done
+
+  echo "  ──────────────────────────────────────────────────────────"
+  printf "  %-22s %*s  %4dms\n" "Total" "$bar_width" "" "$total_time"
+  echo ""
+}
+
 # Run hyperfine benchmark
 run_hyperfine() {
   if ! command -v hyperfine >/dev/null 2>&1; then
@@ -223,6 +315,8 @@ run_hyperfine() {
 
     # Save with timestamp for history
     cp "$BENCHMARK_DIR/latest.json" "$BENCHMARK_DIR/$(date +%Y%m%d_%H%M%S).json"
+    dot_log info "benchmark_complete" "mean_ms=$mean_ms" "min_ms=$min_ms" "max_ms=$max_ms"
+    dot_metric "shell_startup_mean" "$mean_ms" "ms"
   fi
 }
 
@@ -263,6 +357,8 @@ if $PROFILE; then
   run_zsh_profile
 elif $COMPARE; then
   compare_benchmarks
+elif $WATERFALL; then
+  render_waterfall
 elif $DETAILED; then
   benchmark_components
   echo ""
@@ -275,8 +371,10 @@ if [[ "$UI_ENABLED" = "1" ]]; then
   echo ""
   ui_info "Tip" "dot benchmark --detailed"
   ui_info "Tip" "dot benchmark --profile"
+  ui_info "Tip" "dot benchmark --waterfall"
 else
   printf '%b\n' "\n${CYAN}Tip: Run 'dot benchmark --detailed' for per-component timing${NC}"
   printf '%b\n' "${CYAN}     Run 'dot benchmark --profile' for zprof analysis${NC}"
+  printf '%b\n' "${CYAN}     Run 'dot benchmark --waterfall' for ASCII waterfall chart${NC}"
 fi
 printf '%b\n' "${CYAN}     Run 'dot benchmark --compare' for history${NC}\n"

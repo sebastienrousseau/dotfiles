@@ -6,6 +6,9 @@
 
 set -euo pipefail
 
+_cleanup_files=()
+trap 'rm -f "${_cleanup_files[@]}"' EXIT
+
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -14,37 +17,23 @@ SED_VERSION_PATTERN='[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*'
 BACKUP_DIR="$PROJECT_ROOT/.version-sync-backup"
 EXCLUDE_FILES=(
   "CHANGELOG.md"
-  "docs/COMPLIANCE.md"
-  "docs/FONTS.md"
-  "docs/LEGACY_ROADMAP.md"
-  "docs/PLAN.md"
-  "docs/MILESTONE_v0.2.487.md"
+  "docs/security/COMPLIANCE.md"
+  "docs/reference/FONTS.md"
+  "docs/archive/LEGACY_ROADMAP.md"
+  "docs/archive/PLAN.md"
+  "docs/archive/MILESTONE_v0.2.487.md"
 )
 
-# Colors for output (respect NO_COLOR: https://no-color.org)
-if [[ -z "${NO_COLOR:-}" ]] && [[ -t 2 ]]; then
-  RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m'
-  BLUE='\033[0;34m' NC='\033[0m'
-else
-  RED='' GREEN='' YELLOW='' BLUE='' NC=''
-fi
+# shellcheck source=dot/lib/ui.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/dot/lib/ui.sh"
+ui_init
 
-# Functions
-log_info() {
-  printf '%b\n' "${BLUE}[INFO]${NC} $*" >&2
-}
-
-log_success() {
-  printf '%b\n' "${GREEN}[SUCCESS]${NC} $*" >&2
-}
-
-log_warning() {
-  printf '%b\n' "${YELLOW}[WARNING]${NC} $*" >&2
-}
-
-log_error() {
-  printf '%b\n' "${RED}[ERROR]${NC} $*" >&2
-}
+# Functions — delegate to shared ui.sh (redirect to stderr for script output)
+log_info() { ui_info "$@" >&2; }
+log_success() { ui_ok "$@" >&2; }
+log_warning() { ui_warn "$@" >&2; }
+log_error() { ui_err "$@" >&2; }
 
 show_help() {
   cat <<EOF
@@ -127,7 +116,7 @@ find_version_files() {
 
   # Add known files that should be checked even if they don't have versions yet
   echo "README.md" >>"$temp_file"
-  echo "docs/FEATURES.md" >>"$temp_file"
+  echo "docs/reference/FEATURES.md" >>"$temp_file"
   echo "docs/COPYRIGHT" >>"$temp_file"
 
   # Remove duplicates and filter existing files

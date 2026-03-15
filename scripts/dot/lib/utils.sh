@@ -32,7 +32,7 @@ resolve_source_dir() {
     if command -v realpath >/dev/null 2>&1; then
       dir="$(realpath "$dir")"
     elif command -v readlink >/dev/null 2>&1; then
-      dir="$(readlink -f "$dir")"
+      dir="$(readlink -f "$dir" 2>/dev/null || echo "$dir")"
     fi
     _DOT_SOURCE_DIR_CACHE="$dir"
     printf "%s\n" "$dir"
@@ -75,6 +75,24 @@ require_source_dir() {
 # Check if a command exists
 has_command() {
   command -v "$1" >/dev/null 2>&1
+}
+
+# Validate a name contains only safe characters (alphanumeric, dash, underscore, dot)
+validate_name() {
+  local name="$1" label="${2:-name}"
+  if [[ ! "$name" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+    die "Invalid $label: $name (only alphanumeric, dash, underscore, dot allowed)"
+  fi
+}
+
+# Validate an XDG path is absolute and exists or can be created
+validate_xdg_path() {
+  local var_name="$1" path="$2"
+  if [[ -n "$path" ]] && [[ "$path" != /* ]]; then
+    ui_warn "$var_name" "Not an absolute path: $path (ignoring, using default)"
+    return 1
+  fi
+  return 0
 }
 
 # Print error message and exit
@@ -133,10 +151,10 @@ dotfiles_version() {
 dot_command_summary() {
   case "${1:-}" in
     apply | sync)
-      echo "Apply dotfiles changes to this machine."
+      echo "Apply dotfiles changes (sync is an alias for apply)."
       ;;
     update)
-      echo "Pull latest dotfiles changes and apply them."
+      echo "Pull latest changes from remote, then apply."
       ;;
     add)
       echo "Add a file into chezmoi source management."
@@ -157,13 +175,13 @@ dot_command_summary() {
       echo "Open dotfiles source in your editor."
       ;;
     doctor)
-      echo "Run system and dotfiles diagnostics."
+      echo "Deep audit: tools, paths, portability, AI analysis."
       ;;
     heal)
-      echo "Attempt automatic repair of common issues."
+      echo "Auto-repair broken symlinks, missing tools, and drift."
       ;;
     health | health-check)
-      echo "Run a full health dashboard."
+      echo "Dashboard with health score, checks, and auto-fix (--fix)."
       ;;
     security-score)
       echo "Calculate and print security posture score."
@@ -268,7 +286,7 @@ dot_command_summary() {
       echo "Disable risky removable-media automount."
       ;;
     upgrade)
-      echo "Upgrade dotfiles and related toolchains."
+      echo "Update system toolchains, plugins, and dotfiles."
       ;;
     docs)
       echo "Show dotfiles documentation."
@@ -284,6 +302,15 @@ dot_command_summary() {
       ;;
     mcp)
       echo "Run MCP configuration diagnostics."
+      ;;
+    metrics)
+      echo "Show recent observability metrics from JSONL."
+      ;;
+    cache-refresh | prewarm)
+      echo "Regenerate shell caches for ultra-fast startup."
+      ;;
+    search)
+      echo "Find commands by keyword."
       ;;
     help | --help | -h)
       echo "Show command usage and reference."

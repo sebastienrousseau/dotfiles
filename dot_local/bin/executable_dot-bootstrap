@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034,SC1091
 # 🅳🅾🆃🅵🅸🅻🅴🆂 - Deterministic Remote Provisioner
 # Usage: curl -sL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/dot_local/bin/executable_dot-bootstrap | bash
 #
@@ -18,37 +19,51 @@ NC='\033[0m'
 
 step() { printf '%b
 ' "${BLUE}==>${NC} ${BOLD}$1${NC}"; }
-error() { printf '%b
-' "${RED}==> Error: $1${NC}"; exit 1; }
+error() {
+  printf '%b
+' "${RED}==> Error: $1${NC}"
+  exit 1
+}
 
 step "Starting Deterministic Bootstrap (v0.2.493 Frontier)"
 
 # 1. Install Nix (if not present)
 if ! command -v nix >/dev/null 2>&1; then
-    step "Installing Nix Package Manager..."
-    curl -sL https://nixos.org/nix/install | sh -s -- --daemon
-    # Source nix daemon script
-    if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-        . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-    fi
+  step "Installing Nix Package Manager..."
+  local nix_installer
+  nix_installer=$(umask 077 && mktemp)
+  if ! curl -fsSL -o "$nix_installer" https://nixos.org/nix/install; then
+    rm -f "$nix_installer"
+    error "Failed to download Nix installer"
+  fi
+  if ! head -1 "$nix_installer" | grep -q '^#!/'; then
+    rm -f "$nix_installer"
+    error "Nix installer does not look like a shell script"
+  fi
+  sh "$nix_installer" --daemon
+  rm -f "$nix_installer"
+  # Source nix daemon script
+  if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+    . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+  fi
 else
-    step "Nix is already installed."
+  step "Nix is already installed."
 fi
 
 # 2. Enable Flakes
 mkdir -p ~/.config/nix
 if ! grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null; then
-    echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+  echo "experimental-features = nix-command flakes" >>~/.config/nix/nix.conf
 fi
 
 # 3. Clone Repository
 DOTFILES_DIR="$HOME/.dotfiles"
 if [ ! -d "$DOTFILES_DIR" ]; then
-    step "Cloning Dotfiles..."
-    git clone https://github.com/sebastienrousseau/dotfiles.git "$DOTFILES_DIR"
+  step "Cloning Dotfiles..."
+  git clone https://github.com/sebastienrousseau/dotfiles.git "$DOTFILES_DIR"
 else
-    step "Dotfiles repository already exists at $DOTFILES_DIR"
-    (cd "$DOTFILES_DIR" && git pull)
+  step "Dotfiles repository already exists at $DOTFILES_DIR"
+  (cd "$DOTFILES_DIR" && git pull)
 fi
 
 # 4. Bootstrap Chezmoi via Nix & Apply

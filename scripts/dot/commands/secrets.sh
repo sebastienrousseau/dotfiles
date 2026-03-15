@@ -101,6 +101,10 @@ cmd_ssh_key() {
   run_script "scripts/secrets/encrypt-ssh-key.sh" "SSH key encryption script" "$@"
 }
 
+cmd_ssh_cert() {
+  run_script "scripts/security/ssh-cert.sh" "SSH cert script" "$@"
+}
+
 cmd_secrets_provider() {
   local provider
   provider="$(dot_secrets_provider)"
@@ -198,6 +202,10 @@ case "$top" in
   ssh-key)
     shift
     cmd_ssh_key "$@"
+    ;;
+  ssh-cert)
+    shift
+    cmd_ssh_cert "$@"
     ;;
   env)
     shift || true

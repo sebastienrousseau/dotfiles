@@ -1,5 +1,5 @@
 # Dotfiles - gitignore
-# v0.2.491
+# v0.2.496
 
 # OS Artifacts
 .DS_Store
@@ -32,6 +32,7 @@ logs/
 dist/
 build/
 debug/
+lib/wasm-tools/target/
 
 # Node (Partial support for scripts)
 node_modules/

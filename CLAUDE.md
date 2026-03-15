@@ -2,17 +2,16 @@
 
 ## Project Overview
 
-Chezmoi-managed dotfiles for macOS, Linux, and WSL. Version `0.2.495`.
+Chezmoi-managed dotfiles for macOS, Linux, and WSL. Version `0.2.496`.
 
 ## Key Commands
 
 ```bash
 chezmoi apply --dry-run     # Preview changes
 chezmoi diff                # Show pending diffs
-dot health                  # Run health check
-just dots-apply             # Apply via justfile
-just pre-commit             # Run all pre-commit hooks
-./scripts/tests/framework/test_runner.sh  # Run unit tests
+dot health                  # Run health dashboard
+dot doctor                  # Run system diagnostics
+./tests/framework/test_runner.sh  # Run unit tests
 ```
 
 ## Repository Layout
@@ -22,8 +21,9 @@ just pre-commit             # Run all pre-commit hooks
 .chezmoitemplates/          # Reusable template partials (aliases, functions, paths)
 dot_config/                 # XDG configs (~/.config/*) — largest directory
 dot_local/bin/              # User scripts deployed to ~/.local/bin
-scripts/                    # Repo-only scripts (tests, ops, maintenance, CI)
-docs/                       # 30+ markdown docs
+scripts/                    # Repo-only scripts (ops, maintenance, CI)
+tests/                      # Test suite (framework, unit, integration, performance)
+docs/                       # 30+ markdown docs (architecture/, guides/, reference/, security/, operations/)
 install.sh                  # Bootstrap installer (--help for usage)
 version-sync.sh             # Syncs dotfiles_version across non-template files
 ```
@@ -60,10 +60,10 @@ version-sync.sh             # Syncs dotfiles_version across non-template files
 
 ## Testing
 
-- Framework: `scripts/tests/framework/` (test_runner.sh, assertions.sh, mocks.sh)
-- Unit tests: `scripts/tests/unit/`
-- Integration tests: `scripts/tests/integration/`
-- Run: `./scripts/tests/framework/test_runner.sh`
+- Framework: `tests/framework/` (test_runner.sh, assertions.sh, mocks.sh)
+- Unit tests: `tests/unit/` (organized by domain: aliases/, functions/, shell/, etc.)
+- Integration tests: `tests/integration/`
+- Run: `./tests/framework/test_runner.sh`
 - Tests execute bash source files directly — do **not** use Go template syntax in non-`.tmpl` files.
 
 ## Do Not

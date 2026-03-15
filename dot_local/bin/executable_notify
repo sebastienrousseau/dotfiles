@@ -6,17 +6,17 @@ title="${1:-Notification}"
 message="${2:-}"
 
 case "$(uname -s)" in
-    Darwin)
-        osascript -e "display notification "$message" with title "$title""
-        ;;
-    Linux)
-        if grep -qi microsoft /proc/version 2>/dev/null; then
-            # WSL: Use PowerShell to show a toast notification
-            powershell.exe -Command "[Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms'); [System.Windows.Forms.MessageBox]::Show('$message', '$title')"
-        elif command -v notify-send >/dev/null 2>&1; then
-            notify-send "$title" "$message"
-        else
-            echo "$title: $message"
-        fi
-        ;;
+  Darwin)
+    osascript -e "display notification \"$message\" with title \"$title\""
+    ;;
+  Linux)
+    if grep -qi microsoft /proc/version 2>/dev/null; then
+      # WSL: Use PowerShell to show a toast notification
+      powershell.exe -Command "[Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms'); [System.Windows.Forms.MessageBox]::Show('$message', '$title')"
+    elif command -v notify-send >/dev/null 2>&1; then
+      notify-send "$title" "$message"
+    else
+      echo "$title: $message"
+    fi
+    ;;
 esac

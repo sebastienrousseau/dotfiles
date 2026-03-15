@@ -4,11 +4,13 @@ export XDG_CACHE_HOME="${HOME}/.cache"
 export XDG_DATA_HOME="${HOME}/.local/share"
 export XDG_STATE_HOME="${HOME}/.local/state"
 
-# Essential PATH entries (available before .zshrc and plugin init)
-# Prevents tools like dot, chezmoi, and Homebrew from being missing during early init.
+# Minimal early PATH: ~/.local/bin only (ensures `dot` CLI is available before .zshrc loads)
+# Full PATH assembly is handled in dot_config/shell/00-core-paths.sh.tmpl (sourced by .zshrc)
 if [[ -d "${HOME}/.local/bin" ]]; then
   [[ ":${PATH}:" != *":${HOME}/.local/bin:"* ]] && export PATH="${HOME}/.local/bin:${PATH}"
 fi
+
+# Homebrew (macOS ARM)
 if [[ -d "/opt/homebrew/bin" ]]; then
   [[ ":${PATH}:" != *":/opt/homebrew/bin:"* ]] && export PATH="/opt/homebrew/bin:${PATH}"
 fi

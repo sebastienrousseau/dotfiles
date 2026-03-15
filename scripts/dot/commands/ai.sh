@@ -1,42 +1,107 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
-## Dotfiles AI Bridge.
+## Dotfiles AI Commands.
 ##
+## Provides AI CLI status, setup, RAG query, and bridge commands.
 ## Wraps AI CLI tools with contextual patterns and system metadata.
-## Usage: dot cl --pattern [architect|hardener|refactor] "prompt"
+## Usage: dot ai|ai-setup|ai-query|cl|gemini|kiro|sgpt|ollama|opencode|aider
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-# shellcheck source=../lib/ui.sh
-source "$SCRIPT_DIR/dot/lib/ui.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../lib/utils.sh
+source "$SCRIPT_DIR/../lib/utils.sh"
 
 PATTERN_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/ai/patterns"
 
 # Fallback to source tree if patterns don't exist in config (common in CI)
 if [[ ! -d "$PATTERN_DIR" ]]; then
-  SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-  if [[ -d "$SRC_DIR/dot_config/ai/patterns" ]]; then
-    PATTERN_DIR="$SRC_DIR/dot_config/ai/patterns"
+  _AI_SRC="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+  if [[ -d "$_AI_SRC/dot_config/ai/patterns" ]]; then
+    PATTERN_DIR="$_AI_SRC/dot_config/ai/patterns"
   fi
 fi
 
-show_usage() {
-  echo "Usage: dot cl|gemini|kiro --pattern [name] "prompt""
+_show_ai_bridge_usage() {
+  echo "Usage: dot cl|gemini|kiro --pattern [name] \"prompt\""
   echo ""
   echo "Available Patterns:"
-  ls -1 "$PATTERN_DIR" | sed 's/\.md$//' | sed 's/^/  - /'
+  ls -1 "$PATTERN_DIR" 2>/dev/null | sed 's/\.md$//' | sed 's/^/  - /' || echo "  (none)"
+}
+
+cmd_ai_status() {
+  ui_header "AI CLI Status"
+
+  # Define AI CLIs: name|binary|description
+  local -a ai_clis=(
+    "Claude Code|claude|Anthropic CLI agent"
+    "Gemini CLI|gemini|Google AI CLI"
+    "OpenCode|opencode|Terminal AI coding"
+    "Aider|aider|AI pair programming"
+    "Shell-GPT|sgpt|ChatGPT in terminal"
+    "Ollama|ollama|Local LLM runner"
+    "Kiro CLI|kiro-cli|AWS AI assistant"
+  )
+
+  local -a installed=()
+  local name bin desc ver
+  for entry in "${ai_clis[@]}"; do
+    IFS='|' read -r name bin desc <<<"$entry"
+    if has_command "$bin"; then
+      ver=$("$bin" --version 2>/dev/null | head -1 | sed 's/^[^0-9]*//' | cut -d' ' -f1) || true
+      [ -z "$ver" ] && ver="installed"
+      ui_ok "$name" "$ver — $desc"
+      installed+=("$name|$bin")
+    else
+      ui_info "$name" "— $desc"
+    fi
+  done
+
+  echo ""
+  if [ ${#installed[@]} -eq 0 ]; then
+    ui_warn "No AI CLIs installed"
+  elif has_command gum; then
+    ui_info "Launch" "Select an AI CLI to start"
+    local -a choices=()
+    for entry in "${installed[@]}"; do
+      IFS='|' read -r name bin <<<"$entry"
+      choices+=("$name")
+    done
+    local pick
+    pick=$(printf '%s\n' "${choices[@]}" | gum choose --header "Pick an AI CLI") || true
+    if [ -n "$pick" ]; then
+      for entry in "${installed[@]}"; do
+        IFS='|' read -r name bin <<<"$entry"
+        if [ "$name" = "$pick" ]; then
+          echo ""
+          ui_info "Starting" "$name ($bin)"
+          exec "$bin"
+        fi
+      done
+    fi
+  else
+    ui_info "Tip" "Install gum for interactive launcher: mise use -g gum"
+  fi
+}
+
+cmd_ai_setup() {
+  run_script "scripts/ops/ai-setup.sh" "AI setup script" "$@"
+}
+
+cmd_ai_query() {
+  run_script "dot_local/bin/executable_dot-ai" "AI RAG script" "$@"
 }
 
 run_ai_with_context() {
   local tool="$1"
+  shift
   local pattern_name=""
   local prompt=""
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --help | -h)
-        show_usage
+        _show_ai_bridge_usage
         exit 0
         ;;
       --pattern | -p)
@@ -51,7 +116,7 @@ run_ai_with_context() {
   done
 
   if [[ -z "$prompt" ]]; then
-    show_usage
+    _show_ai_bridge_usage
     exit 1
   fi
 
@@ -110,4 +175,27 @@ ${prompt}"
   esac
 }
 
-run_ai_with_context "$@"
+# Dispatch
+case "${1:-}" in
+  ai)
+    shift
+    cmd_ai_status "$@"
+    ;;
+  ai-setup)
+    shift
+    cmd_ai_setup "$@"
+    ;;
+  ai-query)
+    shift
+    cmd_ai_query "$@"
+    ;;
+  cl | claude | gemini | kiro | sgpt | ollama | opencode | aider)
+    tool="$1"
+    shift
+    run_ai_with_context "$tool" "$@"
+    ;;
+  *)
+    echo "Unknown ai command: ${1:-}" >&2
+    exit 1
+    ;;
+esac

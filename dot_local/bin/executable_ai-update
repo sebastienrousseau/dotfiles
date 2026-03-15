@@ -31,9 +31,9 @@ BOLD='[1m'
 
 # --- UI Components ---
 log_header() {
-    echo -e "
+  echo -e "
 ${BOLD}${PURPLE}Updating AI Environment${NC}"
-    echo -e "${GRAY}-----------------------------------------------------------${NC}"
+  echo -e "${GRAY}-----------------------------------------------------------${NC}"
 }
 
 step() { echo -ne "${CYAN}->${NC} ${BOLD}$1...${NC} "; }
@@ -47,124 +47,131 @@ log_header
 
 # Pre-auth sudo to avoid mid-script interruptions
 if [[ "$(uname -s)" == "Linux" ]]; then
-    step "Authenticating sudo"
-    sudo -v && ok || { err "Sudo required for system updates"; exit 1; }
+  step "Authenticating sudo"
+  if sudo -v; then ok; else
+    err "Sudo required for system updates"
+    exit 1
+  fi
 fi
 
 # --- 1. mise Core (Multi-Method Detection) ---
 if command -v mise >/dev/null 2>&1; then
-    step "Checking mise core"
-    if [[ "$(uname -s)" == "Linux" ]] && command -v pacman >/dev/null 2>&1 && pacman -Qs mise >/dev/null 2>&1; then
-        # Handle Arch/CachyOS AUR/Official package
-        sudo pacman -S --noconfirm mise >/dev/null 2>&1 || true
-        ok
-    elif [[ "$(uname -s)" == "Linux" ]] && command -v dpkg >/dev/null 2>&1 && dpkg -s mise >/dev/null 2>&1; then
-        # Handle your ZorinOS APT installation
-        sudo apt update -y -o Dir::Etc::sourcelist="sources.list.d/jdx.list" >/dev/null 2>&1 || true
-        sudo apt install --only-upgrade -y mise >/dev/null 2>&1
-        ok
-    elif command -v brew >/dev/null 2>&1 && brew list mise >/dev/null 2>&1; then
-        # Handle macOS/Linux Brew installation
-        brew upgrade mise >/dev/null 2>&1
-        ok
-    else
-        # Fallback for standalone binary installation
-        mise self-update -y >/dev/null 2>&1 && ok || skip "manual update needed"
-    fi
+  step "Checking mise core"
+  if [[ "$(uname -s)" == "Linux" ]] && command -v pacman >/dev/null 2>&1 && pacman -Qs mise >/dev/null 2>&1; then
+    # Handle Arch/CachyOS AUR/Official package
+    sudo pacman -S --noconfirm mise >/dev/null 2>&1 || true
+    ok
+  elif [[ "$(uname -s)" == "Linux" ]] && command -v dpkg >/dev/null 2>&1 && dpkg -s mise >/dev/null 2>&1; then
+    # Handle your ZorinOS APT installation
+    sudo apt update -y -o Dir::Etc::sourcelist="sources.list.d/jdx.list" >/dev/null 2>&1 || true
+    sudo apt install --only-upgrade -y mise >/dev/null 2>&1
+    ok
+  elif command -v brew >/dev/null 2>&1 && brew list mise >/dev/null 2>&1; then
+    # Handle macOS/Linux Brew installation
+    brew upgrade mise >/dev/null 2>&1
+    ok
+  else
+    # Fallback for standalone binary installation
+    if mise self-update -y >/dev/null 2>&1; then ok; else skip "manual update needed"; fi
+  fi
 else
-    skip "mise not found"
+  skip "mise not found"
 fi
 
 # --- 2. System & Language Packages ---
 
 # Homebrew
 if command -v brew >/dev/null 2>&1; then
-    step "Homebrew packages"
-    brew update >/dev/null && brew upgrade --quiet >/dev/null
-    ok
+  step "Homebrew packages"
+  brew update >/dev/null && brew upgrade --quiet >/dev/null
+  ok
 fi
 
 # NPM Globals (via mise)
 if command -v mise >/dev/null 2>&1; then
-    step "NPM (claude, gemini, etc)"
-    mise exec node -- npm update -g --audit=false >/dev/null 2>&1
-    ok
+  step "NPM (claude, gemini, etc)"
+  mise exec node -- npm update -g --audit=false >/dev/null 2>&1
+  ok
 
-    step "Kiro CLI (via mise)"
-    mise upgrade kiro-cli >/dev/null 2>&1
-    ok
+  step "Kiro CLI (via mise)"
+  mise upgrade kiro-cli >/dev/null 2>&1
+  ok
 fi
 
 # Pipx (aider, sgpt)
 if command -v pipx >/dev/null 2>&1; then
-    step "Pipx tools"
-    pipx upgrade-all >/dev/null 2>&1
-    ok
+  step "Pipx tools"
+  pipx upgrade-all >/dev/null 2>&1
+  ok
 fi
 
 # --- 3. Specialized AI Binaries ---
 
 # Ollama (Verified Manual Override)
 if command -v ollama >/dev/null 2>&1; then
-    if [[ "$(uname -s)" == "Linux" ]]; then
-        step "Ollama (Manual Deployment)"
-        arch="$(uname -m)"
-        case "$arch" in
-            x86_64|amd64) ollama_arch="amd64" ;;
-            aarch64|arm64) ollama_arch="arm64" ;;
-            *) ollama_arch="" ;;
-        esac
+  if [[ "$(uname -s)" == "Linux" ]]; then
+    step "Ollama (Manual Deployment)"
+    arch="$(uname -m)"
+    case "$arch" in
+      x86_64 | amd64) ollama_arch="amd64" ;;
+      aarch64 | arm64) ollama_arch="arm64" ;;
+      *) ollama_arch="" ;;
+    esac
 
-        if [[ -n "$ollama_arch" ]]; then
-            # Check for updates by comparing local vs remote version
-            current_ver="$(ollama --version | awk '{print $NF}' | tr -d '[:space:]')"
-            # This is a bit slow but safer than downloading every time
-            latest_ver="$(curl -fsSL -I https://github.com/ollama/ollama/releases/latest | grep -i location | sed 's/.*\/v//;s///' | tr -d '[:space:]')"
+    if [[ -n "$ollama_arch" ]]; then
+      # Check for updates by comparing local vs remote version
+      current_ver="$(ollama --version | awk '{print $NF}' | tr -d '[:space:]')"
+      # This is a bit slow but safer than downloading every time
+      latest_ver="$(curl -fsSL -I https://github.com/ollama/ollama/releases/latest | grep -i location | sed 's/.*\/v//;s///' | tr -d '[:space:]')"
 
-            if [[ "$current_ver" == "$latest_ver" ]]; then
-                skip "already up to date"
-            else
-                tmp_tar="$(umask 077 && mktemp)"
-                trap 'rm -f "$tmp_tar"' EXIT
-                tar_url="https://ollama.com/download/ollama-linux-${ollama_arch}.tar.zst"
+      if [[ "$current_ver" == "$latest_ver" ]]; then
+        skip "already up to date"
+      else
+        tmp_tar="$(umask 077 && mktemp)"
+        trap 'rm -f "$tmp_tar"' EXIT
+        tar_url="https://ollama.com/download/ollama-linux-${ollama_arch}.tar.zst"
 
-                if curl -fsSL --retry 2 "$tar_url" -o "$tmp_tar" && zstd -t "$tmp_tar" >/dev/null 2>&1; then
-                    # Stop service safely
-                    if command -v systemctl >/dev/null 2>&1; then
-                        sudo systemctl stop ollama 2>/dev/null || true
-                    fi
+        if curl -fsSL --retry 2 "$tar_url" -o "$tmp_tar" && zstd -t "$tmp_tar" >/dev/null 2>&1; then
+          # Stop service safely
+          if command -v systemctl >/dev/null 2>&1; then
+            sudo systemctl stop ollama 2>/dev/null || true
+          fi
 
-                    # Extract
-                    zstd -dc "$tmp_tar" | sudo tar -x -C /usr/local >/dev/null
+          # Extract
+          zstd -dc "$tmp_tar" | sudo tar -x -C /usr/local >/dev/null
 
-                    # Ensure permissions
-                    sudo chmod +x /usr/local/bin/ollama
+          # Ensure permissions
+          sudo chmod +x /usr/local/bin/ollama
 
-                    # Restart if systemd exists
-                    if command -v systemctl >/dev/null 2>&1; then
-                        sudo systemctl daemon-reload
-                        sudo systemctl start ollama 2>/dev/null || true
-                    fi
-                    ok
-                else
-                    err "Integrity check failed"
-                fi
-            fi
+          # Restart if systemd exists
+          if command -v systemctl >/dev/null 2>&1; then
+            sudo systemctl daemon-reload
+            sudo systemctl start ollama 2>/dev/null || true
+          fi
+          ok
         else
-            skip "unsupported arch"
+          err "Integrity check failed"
         fi
+      fi
     else
-        # macOS users typically use the .app or Brew
-        step "Ollama (macOS)"
-        command -v brew >/dev/null 2>&1 && brew upgrade ollama --cask >/dev/null 2>&1 && ok || skip "Update via App"
+      skip "unsupported arch"
     fi
+  else
+    # macOS users typically use the .app or Brew
+    step "Ollama (macOS)"
+    if command -v brew >/dev/null 2>&1 && brew upgrade ollama --cask >/dev/null 2>&1; then
+      ok
+    else
+      skip "Update via App"
+    fi
+  fi
 fi
 
 # LM Studio Runtime
 if command -v lms >/dev/null 2>&1; then
-    step "LM Studio Runtime"
-    lms runtime update >/dev/null 2>&1
-    ok
+  step "LM Studio Runtime"
+  lms runtime update >/dev/null 2>&1
+  ok
 fi
 
 # --- 4. Final Summary ---
@@ -174,14 +181,10 @@ echo -e "${GREEN}${BOLD}Dotfiles Environment Ready${NC}"
 # Version Report
 echo -e "
 ${BOLD}System Version Status:${NC}"
-printf "${GRAY}            ${NC}
-" "Node:" "$(node -v 2>/dev/null || echo 'N/A')"
-printf "${GRAY}            ${NC} \n" "Kiro:" "$(kiro-cli --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"
-printf "${GRAY}            ${NC}
-" "Ollama:" "$(ollama --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"
-printf "${GRAY}            ${NC}
-" "Pipx:" "$(pipx --version 2>/dev/null || echo 'N/A')"
-printf "${GRAY}            ${NC}
-" "Mise:" "$(mise --version 2>/dev/null | awk '{print $1}' || echo 'N/A')"
+printf "%b%-12s%b %s\n" "${GRAY}" "Node:" "${NC}" "$(node -v 2>/dev/null || echo 'N/A')"
+printf "%b%-12s%b %s\n" "${GRAY}" "Kiro:" "${NC}" "$(kiro-cli --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"
+printf "%b%-12s%b %s\n" "${GRAY}" "Ollama:" "${NC}" "$(ollama --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"
+printf "%b%-12s%b %s\n" "${GRAY}" "Pipx:" "${NC}" "$(pipx --version 2>/dev/null || echo 'N/A')"
+printf "%b%-12s%b %s\n" "${GRAY}" "Mise:" "${NC}" "$(mise --version 2>/dev/null | awk '{print $1}' || echo 'N/A')"
 
 trap - EXIT

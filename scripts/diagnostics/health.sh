@@ -9,6 +9,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
+# shellcheck source=../dot/lib/log.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/log.sh"
+
+# Portable has_command (self-contained; no dependency on utils.sh)
+has_command() { command -v "$1" >/dev/null 2>&1; }
 
 # Colors (fallback when gum is unavailable; respect NO_COLOR)
 if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
@@ -57,6 +63,7 @@ TOTAL_CHECKS=0
 PASSED_CHECKS=0
 WARNINGS=0
 FAILURES=0
+declare -a RESULTS=()
 ui_init
 use_ui="$UI_ENABLED"
 
@@ -90,6 +97,9 @@ check() {
   local message="${3:-}"
 
   TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
+
+  # Collect structured result for JSON output
+  RESULTS+=("{\"check\":\"$name\",\"status\":\"$status\",\"message\":\"$message\"}")
 
   case "$status" in
     pass)
@@ -152,29 +162,23 @@ check_section() {
   fi
 }
 
-# === Core Checks ===
-run_checks() {
-  # --- Dotfiles Core ---
+# === Focused check sub-functions ===
+
+check_dotfiles_core() {
   check_section "Dotfiles Core"
 
-  # Chezmoi
-  if command -v chezmoi >/dev/null 2>&1; then
+  if has_command chezmoi; then
     check "Chezmoi installed" "pass"
-    # shellcheck disable=SC1091
-    # Check if source dir exists
     if [[ -d "${HOME}/.local/share/chezmoi" ]] || [[ -d "${HOME}/.dotfiles" ]]; then
-      # shellcheck disable=SC1091
       check "Chezmoi source directory" "pass"
     else
-      # shellcheck disable=SC1091
       check "Chezmoi source directory" "fail" "Not found"
     fi
   else
     check "Chezmoi installed" "fail" "Not installed"
   fi
 
-  # Git
-  if command -v git >/dev/null 2>&1; then
+  if has_command git; then
     check "Git installed" "pass"
     if git config user.email >/dev/null 2>&1; then
       check "Git user configured" "pass"
@@ -184,12 +188,12 @@ run_checks() {
   else
     check "Git installed" "fail"
   fi
+}
 
-  # --- Shell ---
+check_shell_env() {
   check_section "Shell Environment"
 
-  # Zsh
-  if command -v zsh >/dev/null 2>&1; then
+  if has_command zsh; then
     check "Zsh installed" "pass"
     if [[ "$SHELL" == *"zsh"* ]]; then
       check "Zsh is default shell" "pass"
@@ -200,25 +204,23 @@ run_checks() {
     check "Zsh installed" "fail"
   fi
 
-  # Zinit
   if [[ -d "${ZINIT_HOME:-$HOME/.local/share/zinit}" ]]; then
     check "Zinit plugin manager" "pass"
   else
     check "Zinit plugin manager" "warn" "Not found"
   fi
 
-  # Starship
-  if command -v starship >/dev/null 2>&1; then
+  if has_command starship; then
     check "Starship prompt" "pass"
   else
     check "Starship prompt" "warn" "Not installed"
   fi
+}
 
-  # --- Development Tools ---
+check_dev_tools() {
   check_section "Development Tools"
 
-  # Node.js
-  if command -v node >/dev/null 2>&1; then
+  if has_command node; then
     local node_version
     node_version=$(node --version 2>/dev/null)
     check "Node.js ($node_version)" "pass"
@@ -226,15 +228,13 @@ run_checks() {
     check "Node.js" "warn" "Not installed"
   fi
 
-  # fnm
-  if command -v fnm >/dev/null 2>&1; then
+  if has_command fnm; then
     check "fnm (Node version manager)" "pass"
   else
     check "fnm" "warn" "Not installed"
   fi
 
-  # Python
-  if command -v python3 >/dev/null 2>&1; then
+  if has_command python3; then
     local py_version
     py_version=$(python3 --version 2>/dev/null | cut -d' ' -f2)
     check "Python ($py_version)" "pass"
@@ -242,38 +242,38 @@ run_checks() {
     check "Python" "warn" "Not installed"
   fi
 
-  # Rust
-  if command -v rustc >/dev/null 2>&1; then
+  if has_command rustc; then
     check "Rust toolchain" "pass"
   else
     check "Rust toolchain" "warn" "Not installed"
   fi
 
-  # Go
-  if command -v go >/dev/null 2>&1; then
+  if has_command go; then
     check "Go" "pass"
   else
     check "Go" "warn" "Not installed"
   fi
+}
 
-  # --- CLI Tools ---
+check_cli_tools() {
   check_section "CLI Tools"
 
   local tools=("fzf" "ripgrep:rg" "fd" "bat" "eza" "zoxide" "atuin" "delta" "jq" "yq" "sops" "mise" "just" "zellij" "hyperfine")
   for tool in "${tools[@]}"; do
     local name="${tool%%:*}"
     local cmd="${tool##*:}"
-    if command -v "$cmd" >/dev/null 2>&1; then
+    if has_command "$cmd"; then
       check "$name" "pass"
     else
       check "$name" "warn" "Not installed"
     fi
   done
+}
 
-  # --- Editors ---
+check_editors() {
   check_section "Editors"
 
-  if command -v nvim >/dev/null 2>&1; then
+  if has_command nvim; then
     check "Neovim" "pass"
     if [[ -d "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy" ]]; then
       check "Neovim plugins (lazy.nvim)" "pass"
@@ -283,17 +283,17 @@ run_checks() {
   else
     check "Neovim" "warn" "Not installed"
   fi
+}
 
-  # --- Terminal ---
+check_terminal() {
   check_section "Terminal"
 
-  if command -v ghostty >/dev/null 2>&1 || [[ -d "/Applications/Ghostty.app" ]]; then
+  if has_command ghostty || [[ -d "/Applications/Ghostty.app" ]]; then
     check "Ghostty terminal" "pass"
   else
     check "Ghostty terminal" "warn" "Not installed"
   fi
 
-  # Fonts - check both Linux and macOS font locations
   local font_found=false
   if fc-list 2>/dev/null | grep -qi "JetBrains"; then
     font_found=true
@@ -308,12 +308,12 @@ run_checks() {
   else
     check "JetBrains Mono Nerd Font" "warn" "Not installed"
   fi
+}
 
-  # --- Security ---
+check_security() {
   check_section "Security"
 
-  # Age encryption
-  if command -v age >/dev/null 2>&1; then
+  if has_command age; then
     check "Age encryption" "pass"
     if [[ -f "${HOME}/.config/chezmoi/key.txt" ]]; then
       check "Age key configured" "pass"
@@ -324,15 +324,26 @@ run_checks() {
     check "Age encryption" "warn" "Not installed"
   fi
 
-  # SSH
   if [[ -f "${HOME}/.ssh/id_ed25519" ]] || [[ -f "${HOME}/.ssh/id_rsa" ]]; then
     check "SSH keys present" "pass"
   else
     check "SSH keys present" "warn" "No keys found"
   fi
 
-  # GPG
-  if command -v gpg >/dev/null 2>&1; then
+  # Check SSH key permissions
+  for key in "$HOME/.ssh/id_ed25519" "$HOME/.ssh/id_rsa" "$HOME/.ssh/id_ed25519_sk"; do
+    if [[ -f "$key" ]]; then
+      local perms
+      perms=$(stat -c '%a' "$key" 2>/dev/null || stat -f '%Lp' "$key" 2>/dev/null)
+      if [[ "$perms" != "600" && "$perms" != "400" ]]; then
+        check "SSH key perms (${key##*/})" "warn" "mode $perms (should be 600)"
+      else
+        check "SSH key perms (${key##*/})" "pass"
+      fi
+    fi
+  done
+
+  if has_command gpg; then
     if gpg --list-secret-keys 2>/dev/null | grep -q sec; then
       check "GPG keys" "pass"
     else
@@ -341,17 +352,15 @@ run_checks() {
   else
     check "GPG" "warn" "Not installed"
   fi
+}
 
-  # --- Performance ---
+check_performance() {
   check_section "Performance"
 
-  # Shell startup time
-  if command -v zsh >/dev/null 2>&1; then
+  if has_command zsh; then
     local startup_time
     startup_time=$({ time zsh -i -c exit; } 2>&1 | grep real | awk '{print $2}' | sed 's/[ms]//g')
-    # Try to parse the time (handle different formats)
     if [[ -n "$startup_time" ]]; then
-      # Simple check - if startup mentions 0m0, it's under 1 second
       check "Shell startup time" "pass"
     else
       check "Shell startup time" "warn" "Could not measure"
@@ -359,19 +368,108 @@ run_checks() {
   fi
 }
 
-print_summary() {
-  if $JSON_OUTPUT; then
-    echo "{"
-    echo "  \"total\": $TOTAL_CHECKS,"
-    echo "  \"passed\": $PASSED_CHECKS,"
-    echo "  \"warnings\": $WARNINGS,"
-    echo "  \"failures\": $FAILURES,"
-    echo "  \"score\": $((PASSED_CHECKS * 100 / TOTAL_CHECKS))"
-    echo "}"
-    return
+check_config_directories() {
+  check_section "Config Directories"
+
+  local config_dirs=(
+    "$HOME/.config/shell"
+    "$HOME/.config/nvim"
+    "$HOME/.config/git"
+  )
+  local found=0 total=${#config_dirs[@]}
+
+  for dir in "${config_dirs[@]}"; do
+    if [[ -d "$dir" ]]; then
+      check "Config: ${dir##*/}" "pass"
+      ((found++))
+    else
+      check "Config: ${dir##*/}" "warn" "Not found"
+    fi
+  done
+
+  if [[ $found -eq $total ]]; then
+    check "Config directories" "pass"
+  elif [[ $found -gt 0 ]]; then
+    check "Config directories" "warn" "$found/$total present"
+  else
+    check "Config directories" "fail" "None found"
+  fi
+}
+
+check_sync_status() {
+  check_section "Sync Status"
+
+  # Chezmoi status
+  if has_command chezmoi; then
+    local status_output
+    status_output=$(chezmoi status 2>/dev/null || echo "")
+    if [[ -z "$status_output" ]]; then
+      check "Chezmoi sync" "pass"
+    else
+      local changes
+      changes=$(printf '%s\n' "$status_output" | wc -l | tr -d ' ')
+      check "Chezmoi sync" "warn" "$changes file(s) out of sync"
+    fi
+  else
+    check "Chezmoi sync" "warn" "Not installed, skipped"
   fi
 
+  # Git status
+  local dotfiles_dir="${HOME}/.dotfiles"
+  if [[ -d "$dotfiles_dir/.git" ]]; then
+    local git_status=""
+    git_status=$(git -C "$dotfiles_dir" status --porcelain 2>/dev/null || echo "")
+    if [[ -z "$git_status" ]]; then
+      check "Git working tree" "pass"
+    else
+      local changes
+      changes=$(printf '%s\n' "$git_status" | wc -l | tr -d ' ')
+      check "Git working tree" "warn" "$changes uncommitted change(s)"
+    fi
+  else
+    check "Git working tree" "warn" "Not a git repo"
+  fi
+}
+
+# === Orchestrator ===
+run_checks() {
+  check_dotfiles_core
+  check_shell_env
+  check_dev_tools
+  check_cli_tools
+  check_editors
+  check_terminal
+  check_security
+  check_config_directories
+  check_sync_status
+  check_performance
+}
+
+print_summary() {
   local score=$((PASSED_CHECKS * 100 / TOTAL_CHECKS))
+
+  if $JSON_OUTPUT; then
+    printf '{\n'
+    printf '  "total": %d,\n' "$TOTAL_CHECKS"
+    printf '  "passed": %d,\n' "$PASSED_CHECKS"
+    printf '  "warnings": %d,\n' "$WARNINGS"
+    printf '  "failures": %d,\n' "$FAILURES"
+    printf '  "score": %d,\n' "$score"
+    printf '  "results": [\n'
+    local i=0
+    for result in "${RESULTS[@]}"; do
+      if [[ $i -gt 0 ]]; then
+        printf ',\n'
+      fi
+      printf '    %s' "$result"
+      i=$((i + 1))
+    done
+    printf '\n  ]\n'
+    printf '}\n'
+    dot_log info "health_complete" "score=$score" "total=$TOTAL_CHECKS"
+    dot_metric "health_score" "$score" "percent"
+    return
+  fi
 
   echo ""
   header "Summary"
@@ -440,9 +538,13 @@ print_summary() {
     printf '%b\n' "  ${CYAN}Tip:${NC} Run 'dot health --fix' to auto-repair common issues."
     echo ""
   fi
+
+  dot_log info "health_complete" "score=$score" "total=$TOTAL_CHECKS"
+  dot_metric "health_score" "$score" "percent"
 }
 
 # Main
+export DOT_COMMAND="health"
 print_header
 run_checks
 if $APPLY_FIX; then

@@ -27,7 +27,7 @@ fi
 
 # Create chezmoi config for container environment
 mkdir -p "${HOME}/.config/chezmoi"
-cat > "${HOME}/.config/chezmoi/chezmoi.toml" <<TOML
+cat >"${HOME}/.config/chezmoi/chezmoi.toml" <<TOML
 sourceDir = "${DOTFILES_SOURCE}"
 
 [data]
@@ -62,7 +62,7 @@ fi
 ZSHRC_LOCAL="${HOME}/.zshrc.local"
 if [[ ! -f "$ZSHRC_LOCAL" ]] || ! grep -q 'devcontainer' "$ZSHRC_LOCAL" 2>/dev/null; then
   info "Writing container-specific overrides to .zshrc.local..."
-  cat >> "$ZSHRC_LOCAL" <<'ZSHRC'
+  cat >>"$ZSHRC_LOCAL" <<'ZSHRC'
 # devcontainer overrides
 export DOTFILES_CONTAINER=1
 
