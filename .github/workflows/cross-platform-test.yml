@@ -230,13 +230,13 @@ jobs:
         run: |
           echo "=== Running unit tests on ${{ matrix.platform }} ==="
 
-          if [[ -f scripts/tests/framework/test_runner.sh ]]; then
-            chmod +x scripts/tests/framework/test_runner.sh
+          if [[ -f tests/framework/test_runner.sh ]]; then
+            chmod +x tests/framework/test_runner.sh
 
             # Run a subset of critical tests with timeout
             timeout 120 bash -c '
               export REPO_ROOT="$(pwd)"
-              cd scripts/tests/unit
+              cd tests/unit
 
               passed=0
               failed=0

@@ -52,18 +52,19 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.495)
+  version       The version (tag or branch) to install (default: v0.2.496)
 
 Options:
   --help        Show this help message
   --force       Non-interactive mode (sets DOTFILES_NONINTERACTIVE=1)
   --silent      Quiet mode (sets DOTFILES_SILENT=1)
+  --minimal     Minimal profile (disable nvim, tmux, zellij)
 
 EOF
 }
 
 main() {
-  local version="${1:-v0.2.495}"
+  local version="${1:-v0.2.496}"
   local _cleanup_files=()
   trap 'rm -f "${_cleanup_files[@]}" 2>/dev/null' EXIT
 
@@ -74,15 +75,17 @@ main() {
       ;;
     --silent)
       export DOTFILES_SILENT=1
-      version="v0.2.495"
+      version="v0.2.496"
       ;;
   esac
 
   # Shift arguments to handle mixed flags/version
+  local minimal=0
   for arg in "$@"; do
     case "$arg" in
       --silent) export DOTFILES_SILENT=1 ;;
       --force) export DOTFILES_NONINTERACTIVE=1 ;;
+      --minimal) minimal=1 ;;
     esac
   done
 
@@ -94,7 +97,7 @@ main() {
   case "$OS" in
     Darwin) target_os="macos" ;;
     Linux)
-      if grep -q Microsoft /proc/version 2>/dev/null; then
+      if grep -qi microsoft /proc/version 2>/dev/null; then
         target_os="wsl2"
       elif [ -f /etc/debian_version ]; then
         target_os="debian"
@@ -140,11 +143,31 @@ main() {
       mkdir -p "$bin_dir"
       echo "   Installing chezmoi via binary download..."
 
-      # Use BINDIR env var — get.chezmoi.io passes remaining args to chezmoi
-      if ! BINDIR="$bin_dir" sh -c "$(curl -fsSL https://get.chezmoi.io)"; then
+      # Download installer to temp file and validate before execution
+      local installer
+      installer=$(umask 077 && mktemp)
+      if ! curl -fsSL -o "$installer" https://get.chezmoi.io; then
+        rm -f "$installer"
+        echo "   Failed to download chezmoi installer" >&2
+        return 1
+      fi
+      # Validate: must be a shell script and not suspiciously large
+      if [[ "$(wc -c <"$installer")" -gt 102400 ]]; then
+        rm -f "$installer"
+        echo "   Chezmoi installer suspiciously large. Aborting." >&2
+        return 1
+      fi
+      if ! head -1 "$installer" | grep -q '^#!/'; then
+        rm -f "$installer"
+        echo "   Chezmoi installer doesn't look like a shell script. Aborting." >&2
+        return 1
+      fi
+      if ! BINDIR="$bin_dir" sh "$installer"; then
+        rm -f "$installer"
         echo "   chezmoi binary installer failed" >&2
         return 1
       fi
+      rm -f "$installer"
     fi
   }
 
@@ -212,6 +235,18 @@ main() {
   else
     echo "   No existing dotfiles to back up."
     rm -rf "$BACKUP_DIR" 2>/dev/null || true
+  fi
+
+  # Apply --minimal overrides if requested
+  if [[ $minimal -eq 1 ]]; then
+    step "Applying minimal profile overrides..."
+    local data_file="$SOURCE_DIR/.chezmoidata.toml"
+    if [[ -f "$data_file" ]]; then
+      sed_in_place 's/^profile = ".*"/profile = "minimal"/' "$data_file"
+      sed_in_place 's/^nvim = true/nvim = false/' "$data_file"
+      sed_in_place 's/^tmux = true/tmux = false/' "$data_file"
+      sed_in_place 's/^zellij = true/zellij = false/' "$data_file"
+    fi
   fi
 
   # 6. Initialize & Apply

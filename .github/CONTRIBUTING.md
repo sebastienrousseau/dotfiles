@@ -9,7 +9,7 @@
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.495)
+# Dotfiles (v0.2.496)
 
 Designed to fit your shell life
 
@@ -71,10 +71,12 @@ code to Dotfiles.
 
 ### Before submitting
 
-1. **Test your changes** - Run `chezmoi apply` and verify everything works
-2. **Check for lint errors** - Run shellcheck on shell scripts
-3. **Update documentation** - If you add new features, update relevant docs
-4. **Follow existing patterns** - Look at how similar features are implemented
+1. **Test your changes** - Run `dot apply` (or `chezmoi apply --dry-run` for preview)
+2. **Check for lint errors** - Run `shellcheck --severity=error -e SC1091 -e SC2030 -e SC2031`
+3. **Format code** - Run `shfmt -i 2 -ci -w` on shell scripts
+4. **Run tests** - Run `./tests/framework/test_runner.sh`
+5. **Update documentation** - If you add new features, update relevant docs
+6. **Follow existing patterns** - Look at how similar features are implemented
 
 ### PR title format
 
@@ -109,20 +111,27 @@ cd ~/.dotfiles
 git checkout -b feat/my-feature
 
 # Make changes and test
-chezmoi apply
+chezmoi apply --dry-run     # Preview changes
+dot apply                   # Apply changes
 
-# Commit and push
-git add .
-git commit -m "feat: add my feature"
+# Run tests and linting
+./tests/framework/test_runner.sh
+shellcheck --severity=error -e SC1091 -e SC2030 -e SC2031 your_script.sh
+shfmt -i 2 -ci -d your_script.sh
+
+# Commit (signed) and push
+git add your_script.sh
+git commit -S -m "feat: add my feature"
 git push origin feat/my-feature
 ```
 
 ## Code style
 
-- **Shell scripts**: Follow the Google Shell Style Guide
-- **Use shellcheck**: All shell scripts must pass `shellcheck`
-- **Use `set -euo pipefail`**: For robust error handling
+- **Shell scripts**: 2-space indent, `set -euo pipefail`, shellcheck-clean
+- **Formatting**: `shfmt -i 2 -ci` enforced in CI
+- **Linting**: `shellcheck --severity=error -e SC1091 -e SC2030 -e SC2031`
 - **Portable shebangs**: Use `#!/usr/bin/env bash`
+- **Signed commits**: All commits must be signed (`git commit -S`). SSH ED25519 keys preferred
 
 ## Questions?
 

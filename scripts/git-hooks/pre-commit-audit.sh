@@ -5,6 +5,9 @@
 
 set -euo pipefail
 
+_cleanup_files=()
+trap 'rm -f "${_cleanup_files[@]}"' EXIT
+
 # ANSI Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -106,6 +109,7 @@ if echo "$STAGED_FILES" | grep -q "^README.md$"; then
   else
     # Auto-add the signature footer before ## License (or at EOF)
     tmp_footer=$(mktemp)
+    _cleanup_files+=("$tmp_footer")
     if grep -qF '## License' README.md; then
       awk -v arch="$EXPECTED_ARCHITECT" -v eng="$EXPECTED_ENGINE" '
         /^## License/ {
@@ -136,6 +140,6 @@ if [[ $FAILED -eq 1 ]]; then
   echo -e "   (Use --no-verify to bypass if absolutely necessary)"
   exit 1
 else
-  echo -e "${GREEN}${BOLD}✅ Audit passed.${NC} v0.2.495 standards maintained."
+  echo -e "${GREEN}${BOLD}✅ Audit passed.${NC} v0.2.496 standards maintained."
   exit 0
 fi

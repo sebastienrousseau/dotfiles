@@ -156,7 +156,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Install fish
         run: sudo apt-get update && sudo apt-get install -y fish
       - name: Syntax Check
@@ -170,7 +170,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: DeterminateSystems/nix-installer-action@v14
       - name: Run Nu Check
         run: |
@@ -207,7 +207,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: TruffleHog Scan
-        uses: trufflesecurity/trufflehog@041f07e9df901a1038a528e5525b0226d04dd5ea # v3.93.6
+        uses: trufflesecurity/trufflehog@c3e599b7163e8198a55467f3133db0e7b2a492cb # v3.93.7
         with:
           extra_args: --only-verified
 
@@ -348,7 +348,7 @@ jobs:
             # Execute the E2E test from within the container
             # We point it to the mounted source
             cd /root/dotfiles-src
-            ./scripts/tests/integration/test_install_e2e.sh
+            ./tests/integration/test_install_e2e.sh
           "
 
   test-unit:
@@ -403,6 +403,9 @@ jobs:
       - uses: DeterminateSystems/magic-nix-cache-action@565684385bcd71bad329742eefe8d12f2e765b39 # v13
       - name: Flake check
         run: nix flake check ./nix
+      - name: Build Home Manager activation package
+        run: nix build ./nix#homeConfigurations.user.activationPackage --no-link --print-build-logs 2>&1 || echo "::warning::Home Manager build failed (non-blocking)"
+        continue-on-error: true
 
   # ============================================================================
   # STAGE 5: BENCHMARK (Only on schedule/manual - expensive)
@@ -432,8 +435,8 @@ jobs:
 
       - name: Performance benchmark
         run: |
-          chmod +x scripts/tests/performance/*.sh 2>/dev/null || true
-          ./scripts/tests/performance/benchmark_runner.sh 2>/dev/null || true
+          chmod +x tests/performance/*.sh 2>/dev/null || true
+          ./tests/performance/benchmark_runner.sh 2>/dev/null || true
 
       - name: Shell startup benchmark with regression tracking
         id: benchmark
@@ -488,6 +491,41 @@ jobs:
             echo "⚠️ **Performance regression detected**: ${time_ms}ms exceeds 500ms threshold" >> $GITHUB_STEP_SUMMARY
           else
             echo "✅ **Performance OK**: ${time_ms}ms is within 500ms threshold" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Per-component startup budget
+        run: |
+          # Capture per-component timing using DOTFILES_DEBUG mode
+          DOTFILES_DEBUG=1 zsh -i -c exit 2>benchmark-results/debug-timing.log || true
+
+          echo "### Per-Component Startup Budget" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Time |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|------|" >> $GITHUB_STEP_SUMMARY
+
+          # Parse [debug Xms] lines and report
+          if [[ -f benchmark-results/debug-timing.log ]]; then
+            grep -oP '\[debug \K[0-9]+ms\] .*' benchmark-results/debug-timing.log | while IFS=']' read -r time component; do
+              component=$(echo "$component" | sed 's/^ *//')
+              echo "| $component | ${time} |" >> $GITHUB_STEP_SUMMARY
+            done
+
+            # Check if any single component exceeds 100ms budget
+            MAX_COMPONENT_MS=100
+            if grep -oP '\[debug \K[0-9]+' benchmark-results/debug-timing.log | while read -r ms; do
+              if [[ "$ms" -gt "$MAX_COMPONENT_MS" ]]; then
+                echo "::warning::Component exceeded ${MAX_COMPONENT_MS}ms budget: ${ms}ms"
+                exit 1
+              fi
+            done; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "All components within ${MAX_COMPONENT_MS}ms budget." >> $GITHUB_STEP_SUMMARY
+            else
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "**Warning**: Some components exceed ${MAX_COMPONENT_MS}ms budget." >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "| (no debug output captured) | — |" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Upload benchmark results

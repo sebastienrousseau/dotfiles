@@ -74,7 +74,7 @@ TYPE="${1:-paragraphs}"
 COUNT="${2:-1}"
 
 case "$TYPE" in
-  w|word|words)
+  w | word | words)
     for ((i = 0; i < COUNT; i++)); do
       if [[ $i -eq 0 ]]; then
         word=$(random_word)
@@ -85,18 +85,18 @@ case "$TYPE" in
     done
     echo
     ;;
-  s|sentence|sentences)
+  s | sentence | sentences)
     for ((i = 0; i < COUNT; i++)); do
       generate_sentence
     done
     ;;
-  p|paragraph|paragraphs)
+  p | paragraph | paragraphs)
     for ((i = 0; i < COUNT; i++)); do
       generate_paragraph
       [[ $i -lt $((COUNT - 1)) ]] && echo
     done
     ;;
-  -h|--help)
+  -h | --help)
     echo "Usage: lorem [type] [count]"
     echo ""
     echo "Types:"

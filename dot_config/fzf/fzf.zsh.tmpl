@@ -1,8 +1,6 @@
 # Setup fzf (managed by dotfiles)
 # --------------------------------
-if [[ ! "$PATH" == *"$HOME/.fzf/bin"* ]]; then
-  PATH="${PATH:+${PATH}:}$HOME/.fzf/bin"
-fi
+# ~/.fzf/bin is added to PATH in dot_config/shell/00-core-paths.sh.tmpl
 
 if command -v fzf >/dev/null 2>&1; then
   # Initialize key bindings and completion (requires interactive TTY)

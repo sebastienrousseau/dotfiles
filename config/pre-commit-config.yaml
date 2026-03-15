@@ -93,10 +93,10 @@ repos:
 
       - id: insecure-tls-check
         name: Block Insecure TLS Patterns
-        entry: bash -c 'if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" -E "curl\s+[^|;]*(-k|--insecure)|wget\s+[^|;]*--no-check-certificate" . 2>/dev/null | grep -v "^Binary"; then echo "ERROR: Insecure TLS patterns found (curl -k or wget --no-check-certificate)"; exit 1; fi'
+        entry: bash -c 'if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" --include="*.tmpl" -E "curl\s+[^|;]*(-k|--insecure)|wget\s+[^|;]*--no-check-certificate" . 2>/dev/null | grep -v "^Binary"; then echo "ERROR: Insecure TLS patterns found (curl -k or wget --no-check-certificate)"; exit 1; fi'
         language: system
         pass_filenames: false
-        types: [shell]
+        types_or: [shell, text]
 
       - id: dangerous-chmod-check
         name: Block Dangerous Permissions

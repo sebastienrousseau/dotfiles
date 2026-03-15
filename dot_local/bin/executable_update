@@ -43,11 +43,26 @@ UPDATE_PIP=false
 for arg in "$@"; do
   case "$arg" in
     --all) UPDATE_ALL=true ;;
-    --brew) UPDATE_BREW=true; UPDATE_ALL=false ;;
-    --apt) UPDATE_APT=true; UPDATE_ALL=false ;;
-    --npm) UPDATE_NPM=true; UPDATE_ALL=false ;;
-    --cargo) UPDATE_CARGO=true; UPDATE_ALL=false ;;
-    --pip) UPDATE_PIP=true; UPDATE_ALL=false ;;
+    --brew)
+      UPDATE_BREW=true
+      UPDATE_ALL=false
+      ;;
+    --apt)
+      UPDATE_APT=true
+      UPDATE_ALL=false
+      ;;
+    --npm)
+      UPDATE_NPM=true
+      UPDATE_ALL=false
+      ;;
+    --cargo)
+      UPDATE_CARGO=true
+      UPDATE_ALL=false
+      ;;
+    --pip)
+      UPDATE_PIP=true
+      UPDATE_ALL=false
+      ;;
   esac
 done
 

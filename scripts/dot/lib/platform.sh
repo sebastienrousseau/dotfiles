@@ -86,3 +86,13 @@ dot_open_path() {
       ;;
   esac
 }
+
+dot_require_platform() {
+  local current
+  current="$(dot_platform_id)"
+  for allowed in "$@"; do
+    [[ "$current" == "$allowed" ]] && return 0
+  done
+  echo "  ! This command requires $* (detected: $current)" >&2
+  exit 2
+}

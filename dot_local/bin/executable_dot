@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 set -euo pipefail
 
-# Dotfiles CLI Entry Point - v0.2.495
+# Dotfiles CLI Entry Point - v0.2.496
 
 # Ensure XDG Base Directory variables are set
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -16,193 +17,19 @@ export PIPX_BIN_DIR="${HOME}/.local/bin"
 
 # Ensure Nix is in PATH if installed
 if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
+  # shellcheck disable=SC1091
   . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
 fi
 
-VERSION="0.2.495"
+VERSION="0.2.496"
 
 COMMAND="${1:-}"
 if [ -n "${1:-}" ]; then
   shift
 fi
 
-UI_COLOR=0
-UI_BOLD=""
-UI_RESET=""
-UI_BLUE=""
-UI_CYAN=""
-UI_GREEN=""
-UI_YELLOW=""
-UI_RED=""
-UI_GRAY=""
-
-ui_init() {
-  if [[ -t 1 ]] && [[ -z "${NO_COLOR:-}" ]]; then
-    UI_COLOR=1
-    UI_BOLD=$'\033[1m'
-    UI_RESET=$'\033[0m'
-    UI_BLUE=$'\033[38;5;63m'
-    UI_CYAN=$'\033[38;5;81m'
-    UI_GREEN=$'\033[38;5;42m'
-    UI_YELLOW=$'\033[38;5;214m'
-    UI_RED=$'\033[38;5;196m'
-    UI_GRAY=$'\033[38;5;244m'
-  fi
-}
-
-ui_header() {
-  local text="$1"
-  ui_init
-  if [[ "$UI_COLOR" == "1" ]]; then
-    printf "\n  %s%s%s\n\n" "${UI_BOLD}${UI_BLUE}" "$text" "$UI_RESET"
-  else
-    printf "\n%s\n\n" "$text"
-  fi
-}
-
-ui_section() {
-  local text="$1"
-  if [[ "$UI_COLOR" == "1" ]]; then
-    printf "  %s%s%s\n" "${UI_BOLD}${UI_CYAN}" "$text" "$UI_RESET"
-  else
-    printf "  %s\n" "$text"
-  fi
-}
-
-ui_cmd() {
-  local cmd="$1"
-  local desc="$2"
-  if [[ "$UI_COLOR" == "1" ]]; then
-    printf "  %b%-16s%b %s\n" "${UI_GREEN}" "$cmd" "${UI_RESET}" "$desc"
-  else
-    printf "  %-16s %s\n" "$cmd" "$desc"
-  fi
-}
-
-ui_info() {
-  local label="$1"
-  local msg="$2"
-  if [[ "$UI_COLOR" == "1" ]]; then
-    printf "  %b•%b %-14s %s\n" "${UI_GRAY}" "${UI_RESET}" "$label" "$msg"
-  else
-    printf "  * %-14s %s\n" "$label" "$msg"
-  fi
-}
-
-ui_warn() {
-  local msg="$1"
-  if [[ "$UI_COLOR" == "1" ]]; then
-    printf "  %b⚠%b %s\n" "${UI_YELLOW}" "${UI_RESET}" "$msg"
-  else
-    printf "  [WARN] %s\n" "$msg"
-  fi
-}
-
-ui_fail() {
-  local msg="$1"
-  if [[ "$UI_COLOR" == "1" ]]; then
-    printf "  %b✗%b %s\n" "${UI_RED}" "${UI_RESET}" "$msg" >&2
-  else
-    printf "  [FAIL] %s\n" "$msg" >&2
-  fi
-}
-
-show_help() {
-  ui_header "Dotfiles CLI"
-  ui_info "Usage" "dot [command]"
-  ui_info "Version" "v$VERSION"
-  echo ""
-
-  ui_section "Core Commands"
-  ui_cmd "apply" "Apply dotfiles (chezmoi apply)"
-  ui_cmd "sync" "Apply dotfiles (alias of apply)"
-  ui_cmd "update" "Pull latest changes and apply (chezmoi update)"
-  ui_cmd "clean-cache" "Clear shell initialization caches"
-  ui_cmd "prewarm" "Regenerate shell caches for ultra-fast startup"
-  ui_cmd "add" "Add a file to chezmoi source"
-  ui_cmd "diff" "Show chezmoi diff with exclusions"
-  ui_cmd "status" "Show configuration drift (chezmoi status)"
-  ui_cmd "remove" "Safely remove a managed file"
-  ui_cmd "cd" "Print source directory path (use: cd \$(dot cd))"
-  ui_cmd "edit" "Open chezmoi source in \$EDITOR"
-  ui_cmd "patterns" "Manage AI steering patterns"
-  ui_cmd "commit" "AI-powered conventional commit"
-  echo ""
-
-  ui_section "Diagnostics"
-  ui_cmd "doctor" "Check system health and configuration"
-  ui_cmd "heal" "Auto-repair common dotfiles issues"
-  ui_cmd "health" "Run comprehensive health check"
-  ui_cmd "verify" "Run security and integrity verification"
-  ui_cmd "scorecard" "System health and security scorecard"
-  ui_cmd "intelligence" "Show Dotfiles Intelligence Surface"
-  ui_cmd "snapshot" "Capture baseline system snapshot"
-  ui_cmd "smoke-test" "Run automated toolchain verification"
-  ui_cmd "chaos" "Simulate config corruption to test self-healing"
-  ui_cmd "bundle" "Create offline archive of dotfiles environment"
-  ui_cmd "rollback" "Rollback dotfiles to a previous state"
-  ui_cmd "drift" "Drift dashboard (detailed chezmoi status)"
-  ui_cmd "history" "Shell history analysis"
-  ui_cmd "benchmark" "Run shell startup benchmark"
-  ui_cmd "perf" "Show performance mode and quick timing"
-  ui_cmd "load" "Preload heavy shell layers"
-  ui_cmd "load-bench" "Measure time to heavy-layer readiness"
-  ui_cmd "load-bench-pty" "Measure background prewarm readiness via PTY"
-  ui_cmd "ai" "Show AI helper status (opt-in)"
-  ui_cmd "ai-setup" "Interactive setup for all AI CLI tools"
-  ui_cmd "ai-query" "Context-aware RAG query over your dotfiles"
-  echo ""
-
-  ui_section "Tools"
-  ui_cmd "cl" "Claude CLI with context patterns"
-  ui_cmd "gemini" "Gemini CLI with context patterns"
-  ui_cmd "kiro" "Kiro CLI with context patterns"
-  ui_cmd "sgpt" "Shell-GPT with context patterns"
-  ui_cmd "ollama" "Ollama with context patterns"
-  ui_cmd "opencode" "OpenCode with context patterns"
-  ui_cmd "aider" "Aider with context patterns"
-  ui_cmd "tools" "Show or install nix packages"
-  ui_cmd "new" "Create a new project from a template"
-  ui_cmd "sandbox" "Launch a safe sandbox preview (Docker/Podman)"
-  ui_cmd "keys" "Show keybindings catalog"
-  ui_cmd "learn" "Start the interactive tour of your new tools"
-  ui_cmd "docs" "Show repo README"
-  ui_cmd "log-rotate" "Rotate ~/.local/share/dotfiles.log"
-  echo ""
-
-  ui_section "Appearance"
-  ui_cmd "theme" "Switch terminal theme (dark/light)"
-  ui_cmd "wallpaper" "Apply a wallpaper from your library"
-  ui_cmd "fonts" "Install Nerd Fonts (JetBrainsMono by default)"
-  ui_cmd "tune" "Apply OS tuning (opt-in)"
-  echo ""
-
-  ui_section "Secrets"
-  ui_cmd "secrets-init" "Initialize age key for secrets"
-  ui_cmd "secrets" "Edit encrypted secrets (age)"
-  ui_cmd "secrets-create" "Create an encrypted secrets file"
-  ui_cmd "ssh-key" "Encrypt an SSH key locally with age"
-  ui_cmd "ssh-cert" "Manage short-lived SSH certificates"
-  echo ""
-
-  ui_section "Security (opt-in)"
-  ui_cmd "backup" "Create a compressed backup of your home"
-  ui_cmd "encrypt-check" "Check disk encryption status"
-  ui_cmd "firewall" "Apply firewall hardening"
-  ui_cmd "telemetry" "Disable OS telemetry"
-  ui_cmd "dns-doh" "Enable DNS-over-HTTPS"
-  ui_cmd "lock-screen" "Enforce lock screen idle settings"
-  ui_cmd "usb-safety" "Disable automount for removable media"
-  echo ""
-
-  ui_section "Meta"
-  ui_cmd "upgrade" "Update flake, plugins, and dotfiles"
-  ui_cmd "packages" "List installed packages and package managers"
-  ui_cmd "--version" "Show version information"
-  ui_cmd "help" "Show this help message"
-}
-
-resolve_source_dir() {
+# Resolve source directory (needed early for ui.sh sourcing)
+_resolve_source_dir() {
   local dir=""
   if [ -n "${CHEZMOI_SOURCE_DIR:-}" ] && [ -d "$CHEZMOI_SOURCE_DIR" ]; then
     dir="$CHEZMOI_SOURCE_DIR"
@@ -216,310 +43,276 @@ resolve_source_dir() {
   echo "$dir"
 }
 
-run_script() {
-  local script_rel_path="${1#/}" # Remove leading slash if present
-  local description="$2"
-  shift 2
-  local src_dir="$(resolve_source_dir)"
-
-  local background=0
-  if [[ "${1:-}" == "--background" || "${1:-}" == "-b" ]]; then
-    background=1
-    shift
-  fi
-
-  if [ -n "$src_dir" ] && [ -f "$src_dir/$script_rel_path" ]; then
-
-    if [[ $background -eq 1 ]] && command -v pueue >/dev/null && pueue status >/dev/null 2>&1; then
-      ui_info "Background" "Offloading $description to Pueue queue"
-      pueue add -- bash "$src_dir/$script_rel_path" "$@"
-    else
-      if [[ $background -eq 1 ]]; then
-        ui_warn "Pueue not available, running $description in foreground"
-      fi
-      exec bash "$src_dir/$script_rel_path" "$@"
+# Source shared UI library for consistent colors, checkmarks, and formatting.
+# Falls back to minimal inline definitions if the source directory is unavailable.
+_DOT_SRC="$(_resolve_source_dir)"
+if [ -n "$_DOT_SRC" ] && [ -f "$_DOT_SRC/scripts/dot/lib/ui.sh" ]; then
+  # shellcheck source=../../scripts/dot/lib/ui.sh
+  # shellcheck disable=SC1091
+  source "$_DOT_SRC/scripts/dot/lib/ui.sh"
+  ui_init
+else
+  # Minimal fallback when source dir is not available (e.g. first install)
+  # shellcheck disable=SC2034
+  UI_COLOR=0
+  BOLD=""
+  NORMAL=""
+  RED=""
+  GREEN=""
+  YELLOW=""
+  BLUE=""
+  CYAN=""
+  GRAY=""
+  MAGENTA=""
+  ui_init() {
+    if [[ -t 1 ]] && [[ -z "${NO_COLOR:-}" ]]; then
+      UI_COLOR=1
+      BASH_BOLD=$'\033[1m'
+      NORMAL=$'\033[0m'
+      RED=$'\033[38;5;196m'
+      GREEN=$'\033[38;5;42m'
+      YELLOW=$'\033[38;5;214m'
+      BLUE=$'\033[38;5;63m'
+      CYAN=$'\033[38;5;81m'
+      GRAY=$'\033[38;5;244m'
+      MAGENTA=$'\033[38;5;211m'
     fi
+  }
+  ui_header() {
+    ui_init
+    printf "\n  %s%s%s\n\n" "${BOLD}${BLUE}" "$1" "$NORMAL"
+  }
+  ui_section() {
+    ui_init
+    printf "  %s%s%s\n" "${BOLD}${CYAN}" "$1" "$NORMAL"
+  }
+  ui_cmd() {
+    ui_init
+    printf "  %s•%s %s%-16s%s %s\n" "$GREEN" "$NORMAL" "$GREEN" "$1" "$NORMAL" "$2"
+  }
+  ui_ok() {
+    ui_init
+    printf "  %s✓%s %-35s %s\n" "$GREEN" "$NORMAL" "$1" "${2:-}"
+  }
+  ui_info() {
+    ui_init
+    printf "  %s•%s %-35s %s\n" "$GRAY" "$NORMAL" "$1" "${2:-}"
+  }
+  ui_meta() {
+    ui_init
+    printf "  %s•%s %-14s %s\n" "$GRAY" "$NORMAL" "$1" "${2:-}"
+  }
+  ui_kv() {
+    ui_init
+    printf "  %s%-14s%s %s\n" "$BOLD" "$1" "$NORMAL" "$2"
+  }
+  ui_warn() {
+    ui_init
+    printf "  %s⚠%s %-35s %s\n" "$YELLOW" "$NORMAL" "$1" "${2:-}"
+  }
+  ui_err() {
+    ui_init
+    printf "  %s✗%s %-35s %s\n" "$RED" "$NORMAL" "$1" "${2:-}" >&2
+  }
+  ui_clear_line() { printf '\r\033[K'; }
+  ui_toast() { case "$1" in success | ok) ui_ok "$2" ;; error | err) ui_err "$2" ;; warn) ui_warn "$2" ;; *) ui_info "$2" ;; esac }
+fi
+
+# Alias ui_fail → ui_err for backward compatibility in this script
+ui_fail() { ui_err "$@"; }
+
+show_help() {
+  ui_header "Dotfiles CLI"
+  ui_meta "Usage" "dot [command]"
+  ui_meta "Version" "v$VERSION"
+  echo ""
+
+  ui_section "Core"
+  ui_cmd "sync" "Apply dotfiles (alias for apply; --pull to fetch, --check to preview)"
+  ui_cmd "add" "Add a file to chezmoi source"
+  ui_cmd "diff" "Show chezmoi diff with exclusions"
+  ui_cmd "status" "Show configuration drift (chezmoi status)"
+  ui_cmd "edit" "Open chezmoi source in \$EDITOR"
+  ui_cmd "cd" "Print source directory path (use: cd \$(dot cd))"
+  ui_cmd "commit" "AI-powered conventional commit"
+  echo ""
+
+  ui_section "Diagnostics"
+  ui_cmd "doctor" "Deep audit: tools, paths, portability, AI analysis (--ai)"
+  ui_cmd "" "--heal --audit --score --smoke --drift --benchmark --json"
+  ui_cmd "score" "System health and security scorecard"
+  ui_cmd "snapshot" "Capture baseline system snapshot"
+  ui_cmd "chaos" "Simulate config corruption to test self-healing"
+  ui_cmd "bundle" "Create offline archive of dotfiles environment"
+  ui_cmd "rollback" "Rollback dotfiles to a previous state"
+  ui_cmd "history" "Shell history analysis"
+  ui_cmd "perf" "Show performance mode and quick timing"
+  ui_cmd "metrics" "Show recent observability metrics (JSONL)"
+  ui_cmd "load-bench" "Measure time to heavy-layer readiness"
+  echo ""
+
+  ui_section "AI"
+  ui_cmd "ai" "AI CLI status & launcher"
+  ui_cmd "ai-setup" "Interactive setup for all AI CLI tools"
+  ui_cmd "ai-query" "Context-aware RAG query over your dotfiles"
+  ui_cmd "cl" "Claude CLI with context patterns"
+  ui_cmd "gemini" "Gemini CLI with context patterns"
+  ui_cmd "kiro" "Kiro CLI with context patterns"
+  ui_cmd "sgpt" "Shell-GPT with context patterns"
+  ui_cmd "ollama" "Ollama with context patterns"
+  ui_cmd "opencode" "OpenCode with context patterns"
+  ui_cmd "aider" "Aider with context patterns"
+  echo ""
+
+  ui_section "Tools"
+  ui_cmd "env" "Tool versions (mise)"
+  ui_cmd "profile" "Show/switch configuration profile"
+  ui_cmd "keys" "Keybindings (sign-check: verify git signing)"
+  ui_cmd "tools" "Show or install nix packages"
+  ui_cmd "new" "Create a new project from a template"
+  ui_cmd "sandbox" "Launch a safe sandbox preview (Docker/Podman)"
+  ui_cmd "lint" "Lint shell scripts (--fix to auto-format, --check for CI)"
+  ui_cmd "learn" "Start the interactive tour of your new tools"
+  ui_cmd "docs" "Show repo README"
+  echo ""
+
+  ui_section "Appearance"
+  ui_cmd "theme" "Switch terminal theme (dark/light)"
+  ui_cmd "wallpaper" "Apply a wallpaper from your library [macOS,Linux]"
+  ui_cmd "fonts" "Install Nerd Fonts (JetBrainsMono by default)"
+  ui_cmd "tune" "Apply OS tuning (opt-in) [macOS,Linux]"
+  echo ""
+
+  ui_section "Secrets"
+  ui_cmd "secrets-init" "Initialize age key for secrets"
+  ui_cmd "secrets" "Edit encrypted secrets (age)"
+  ui_cmd "secrets-create" "Create an encrypted secrets file"
+  ui_cmd "ssh-key" "Encrypt an SSH key locally with age"
+  ui_cmd "ssh-cert" "Manage short-lived SSH certificates"
+  echo ""
+
+  ui_section "Security (opt-in)"
+  ui_cmd "backup" "Create a compressed backup of your home"
+  ui_cmd "encrypt-check" "Check disk encryption status"
+  ui_cmd "firewall" "Apply firewall hardening [macOS,Linux]"
+  ui_cmd "telemetry" "Disable OS telemetry [macOS,Linux]"
+  ui_cmd "dns-doh" "Enable DNS-over-HTTPS [macOS,Linux]"
+  ui_cmd "lock-screen" "Enforce lock screen idle settings [Linux]"
+  ui_cmd "usb-safety" "Disable automount for removable media [Linux]"
+  echo ""
+
+  ui_section "Meta"
+  ui_cmd "upgrade" "Update system toolchains, plugins, and dotfiles"
+  ui_cmd "packages" "List installed packages and package managers"
+  ui_cmd "cache-refresh" "Regenerate shell caches for ultra-fast startup"
+  ui_cmd "search" "Find commands by keyword"
+  ui_cmd "--version" "Show version information"
+  ui_cmd "help" "Show this help message"
+}
+
+resolve_source_dir() { _resolve_source_dir; }
+
+# ─── Dispatcher ───────────────────────────────────────────────────────────────
+# Routes COMMAND to the appropriate command module in scripts/dot/commands/.
+# Each module receives the original COMMAND as its first argument so that its
+# internal case statement can dispatch to the right sub-function.
+_SOURCE_DIR="$(_resolve_source_dir)"
+_CMD_DIR="${_SOURCE_DIR}/scripts/dot/commands"
+
+_dispatch() {
+  local module="$1"
+  shift # remove module name; remaining $@ are the user's extra args
+  local cmd_file="${_CMD_DIR}/${module}.sh"
+  if [[ -f "$cmd_file" ]]; then
+    # shellcheck disable=SC1090
+    exec bash "$cmd_file" "$COMMAND" "$@"
   else
-    ui_fail "$description not found at $src_dir/$script_rel_path"
+    ui_fail "Command module not found: $cmd_file"
     exit 1
   fi
 }
 
 case "$COMMAND" in
-  apply | sync)
-    chezmoi apply --force
+
+  # ── Core chezmoi operations ──────────────────────────────────────────────
+  sync | apply | update | add | diff | status | remove | cd | edit | commit | clean-cache)
+    _dispatch core "$@"
     ;;
-  update)
-    run_script "scripts/ops/chezmoi-update.sh" "Update script" "$@"
-    # Regenerate caches after update (if not running in background)
-    if [[ "$1" != "--background" && "$1" != "-b" ]]; then
-      "$0" prewarm
-    fi
+
+  # ── Diagnostics ─────────────────────────────────────────────────────────
+  doctor | scorecard | score | snapshot | history | perf | load-bench | load-bench-pty | \
+    chaos | bundle | rollback | heal | health | health-check | smoke-test | verify | \
+    security-score | drift | benchmark | intelligence | conflicts | locks | restore | metrics)
+    _dispatch diagnostics "$@"
     ;;
-  clean-cache)
-    ui_info "Cache" "Clearing shell initialization caches"
-    CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"
-    rm -rf "$CACHE_DIR/zsh"/*-init.zsh "$CACHE_DIR/zsh"/*.zwc 2>/dev/null || true
-    rm -rf "$CACHE_DIR/bash"/*-init.bash 2>/dev/null || true
-    rm -rf "$CACHE_DIR/fish"/*-init.fish 2>/dev/null || true
-    rm -rf "$CACHE_DIR/nushell"/*.nu 2>/dev/null || true
-    ui_info "Cache" "Cleared. Restart shell to regenerate"
+
+  # ── AI tools ────────────────────────────────────────────────────────────
+  ai | ai-setup | ai-query | cl | claude | gemini | kiro | sgpt | ollama | opencode | aider)
+    _dispatch ai "$@"
     ;;
-  prewarm)
-    "$0" clean-cache
-    SRC_DIR="$(resolve_source_dir)"
-    if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/ops/prewarm.sh" ]; then
-      bash "$SRC_DIR/scripts/ops/prewarm.sh"
-    fi
+
+  # ── Tools & environment ─────────────────────────────────────────────────
+  env | profile | tools | new | packages | aliases | alias-check | setup | log-rotate | lint)
+    _dispatch tools "$@"
     ;;
-  add)
-    if [[ $# -eq 0 ]]; then
-      echo "Error: 'add' command requires at least 1 argument."
-      echo "Usage: dot add <file>..."
-      exit 1
-    fi
-    chezmoi add "$@"
+
+  # ── Appearance ──────────────────────────────────────────────────────────
+  theme | wallpaper | fonts | tune)
+    _dispatch appearance "$@"
     ;;
-  diff)
-    SRC_DIR="$(resolve_source_dir)"
-    if [ -n "$SRC_DIR" ] && [ -f "$SRC_DIR/scripts/ops/chezmoi-diff.sh" ]; then
-      exec bash "$SRC_DIR/scripts/ops/chezmoi-diff.sh" "$@"
-    else
-      chezmoi diff "$@"
-    fi
+
+  # ── Secrets ─────────────────────────────────────────────────────────────
+  secrets-init | secrets | secrets-create | ssh-key | ssh-cert)
+    _dispatch secrets "$@"
     ;;
-  status)
-    chezmoi status "$@"
+
+  # ── Security (opt-in hardening) ──────────────────────────────────────────
+  backup | encrypt-check | firewall | telemetry | dns-doh | lock-screen | usb-safety)
+    _dispatch security "$@"
     ;;
-  commit)
-    run_script "dot_local/bin/executable_git-ai-commit" "Git AI commit script" "$@"
+
+  # ── Meta / housekeeping ──────────────────────────────────────────────────
+  upgrade | cache-refresh | prewarm | docs | learn | keys | sandbox | mcp)
+    _dispatch meta "$@"
     ;;
+
+  # ── AI patterns (standalone script) ─────────────────────────────────────
   patterns)
-    run_script "scripts/dot/commands/patterns.sh" "AI patterns script" "$@"
-    ;;
-  remove)
-    chezmoi forget "$@"
-    ;;
-  cd)
-    resolve_source_dir
-    ;;
-  edit)
-    exec chezmoi cd
-    ;;
-  doctor)
-    run_script "scripts/diagnostics/doctor.sh" "Doctor script" "$@"
-    ;;
-  scorecard)
-    run_script "scripts/diagnostics/scorecard.sh" "Scorecard script" "$@"
-    ;;
-  snapshot)
-    run_script "scripts/diagnostics/snapshot.sh" "Snapshot script" "$@"
-    ;;
-  history)
-    run_script "scripts/diagnostics/history.sh" "History script" "$@"
-    ;;
-  setup)
-    run_script "scripts/ops/setup.sh" "Setup script" "$@"
-    ;;
-  theme)
-    run_script "scripts/ops/theme.sh" "Theme script" "$@"
-    ;;
-  wallpaper)
-    run_script "scripts/ops/wallpaper.sh" "Wallpaper script" "$@"
-    ;;
-  fonts)
-    run_script "scripts/ops/fonts.sh" "Fonts script" "$@"
-    ;;
-  secrets-init)
-    run_script "scripts/security/secrets-init.sh" "Secrets init script" "$@"
-    ;;
-  secrets)
-    run_script "scripts/security/manage-secrets.sh" "Secrets management script" "$@"
-    ;;
-  secrets-create)
-    run_script "scripts/security/secrets-create.sh" "Secrets creation script" "$@"
-    ;;
-  ssh-key)
-    run_script "scripts/security/ssh-key.sh" "SSH key script" "$@"
-    ;;
-  ssh-cert)
-    run_script "scripts/security/ssh-cert.sh" "SSH cert script" "$@"
-    ;;
-  backup)
-    run_script "scripts/security/backup.sh" "Backup script" "$@"
-    ;;
-  encrypt-check)
-    run_script "scripts/security/encryption-check.sh" "Encryption check script" "$@"
-    ;;
-  firewall)
-    run_script "scripts/security/firewall.sh" "Firewall script" "$@"
-    ;;
-  telemetry)
-    run_script "scripts/security/telemetry.sh" "Telemetry script" "$@"
-    ;;
-  dns-doh)
-    run_script "scripts/security/dns-doh.sh" "DNS-over-HTTPS script" "$@"
-    ;;
-  lock-screen)
-    run_script "scripts/security/lock-screen.sh" "Lock screen script" "$@"
-    ;;
-  usb-safety)
-    run_script "scripts/security/usb-safety.sh" "USB safety script" "$@"
-    ;;
-  upgrade)
-    run_script "scripts/ops/upgrade.sh" "Upgrade script" "$@"
-    ;;
-  packages)
-    run_script "scripts/diagnostics/packages.sh" "Packages script" "$@"
-    ;;
-  learn)
-    run_script "scripts/ops/tour.sh" "Tour script" "$@"
-    ;;
-  keys)
-    run_script "scripts/diagnostics/keys.sh" "Keys script" "$@"
-    ;;
-  docs)
-    SRC_DIR="$(resolve_source_dir)"
-    if [ -f "$SRC_DIR/README.md" ]; then
-      if command -v glow >/dev/null 2>&1; then
-        glow "$SRC_DIR/README.md"
-      else
-        cat "$SRC_DIR/README.md"
-      fi
+    if [[ -n "$_SOURCE_DIR" ]] && [[ -f "$_SOURCE_DIR/scripts/dot/commands/patterns.sh" ]]; then
+      exec bash "$_SOURCE_DIR/scripts/dot/commands/patterns.sh" "$@"
     else
-      ui_fail "README not found"
+      ui_fail "patterns.sh not found"
       exit 1
     fi
     ;;
-  log-rotate)
-    ui_info "Log" "Rotating ~/.local/share/dotfiles.log"
-    mv "$HOME/.local/share/dotfiles.log" "$HOME/.local/share/dotfiles.log.old" 2>/dev/null || true
-    touch "$HOME/.local/share/dotfiles.log"
-    ui_info "Log" "Rotation complete"
-    ;;
-  sandbox)
-    SRC_DIR="$(resolve_source_dir)"
-    if [ -z "$SRC_DIR" ]; then
-      ui_fail "Dotfiles source not found"
-      exit 1
-    fi
-    if command -v docker >/dev/null; then
-      ui_info "Sandbox" "Launching via Docker"
-      docker build -f "$SRC_DIR/tests/Dockerfile.sandbox" -t dotfiles-sandbox "$SRC_DIR"
-      exec docker run --rm -it dotfiles-sandbox
-    elif command -v podman >/dev/null; then
-      ui_info "Sandbox" "Launching via Podman"
-      podman build -f "$SRC_DIR/tests/Dockerfile.sandbox" -t dotfiles-sandbox "$SRC_DIR"
-      exec podman run --rm -it dotfiles-sandbox
-    else
-      ui_fail "Docker or Podman is required for sandbox"
-      exit 1
-    fi
-    ;;
-  heal) run_script "scripts/ops/heal.sh" "Heal script" "$@" ;;
-  health | health-check) run_script "scripts/ops/health-check.sh" "Health check script" "$@" ;;
-  smoke-test) run_script "scripts/diagnostics/smoke-test.sh" "Smoke test script" "$@" ;;
-  verify) run_script "scripts/diagnostics/verify.sh" "Verification script" "$@" ;;
-  security-score) run_script "scripts/diagnostics/security-score.sh" "Security score script" "$@" ;;
-  intelligence) run_script "scripts/dot/lib/bento.sh" "Intelligence Surface" "$@" ;;
-  cl | claude | gemini | kiro | sgpt | ollama | opencode | aider) run_script "scripts/dot/commands/ai.sh" "AI Bridge" "$COMMAND" "$@" ;;
-  drift) run_script "scripts/diagnostics/drift-dashboard.sh" "Drift script" "$@" ;;
-  chaos) run_script "scripts/ops/chaos.sh" "Chaos engineering script" "$@" ;;
-  bundle) run_script "scripts/ops/bundle.sh" "Offline bundle script" "$@" ;;
-  rollback) run_script "scripts/ops/rollback.sh" "Rollback script" "$@" ;;
-  benchmark) run_script "scripts/tests/benchmark.sh" "Benchmark script" "$@" ;;
-  load) run_script "scripts/ops/load.sh" "Load script" "$@" ;;
-  tools) run_script "scripts/dot/commands/tools.sh" "Tools script" "tools" "$@" ;;
-  new) run_script "scripts/dot/commands/tools.sh" "Tools script" "new" "$@" ;;
-  perf)
-    PERF_JSON=0
-    PERF_PRECMD=0
-    for arg in "$@"; do
-      case "$arg" in
-        --json) PERF_JSON=1 ;;
-        --precmd) PERF_PRECMD=1 ;;
-      esac
-    done
-    if [ "$PERF_JSON" = "0" ]; then
-      ui_header "Dotfiles Performance"
-      ui_info "DOTFILES_FAST" "${DOTFILES_FAST:-0}"
-      ui_info "DOTFILES_ULTRA_FAST" "${DOTFILES_ULTRA_FAST:-0}"
-      ui_info "DOTFILES_DEFER_ZINIT" "${DOTFILES_DEFER_ZINIT:-1}"
-      ui_info "DOTFILES_ENABLE_COLORS" "${DOTFILES_ENABLE_COLORS:-0}"
-      ui_info "DOTFILES_AI" "${DOTFILES_AI:-0}"
-      ui_info "PRECMD_HOOKS" "${PERF_PRECMD}"
-    fi
-    if command -v python3 >/dev/null 2>&1; then
-      PERF_JSON="$PERF_JSON" PERF_PRECMD="$PERF_PRECMD" python3 - <<'PY'
-import json
-import os
-import time
 
-def get_status():
-    status = {
-        "fast": os.environ.get("DOTFILES_FAST", "0") == "1",
-        "ultra_fast": os.environ.get("DOTFILES_ULTRA_FAST", "0") == "1",
-        "defer_zinit": os.environ.get("DOTFILES_DEFER_ZINIT", "1") == "1",
-        "ai": os.environ.get("DOTFILES_AI", "0") == "1"
-    }
-    return status
+  # ── Search ──────────────────────────────────────────────────────────────
+  search)
+    keyword="${1:-}"
+    if [[ -z "$keyword" ]]; then
+      echo "Usage: dot search <keyword>"
+      exit 1
+    fi
+    show_help | grep -i --color=auto "$keyword" || echo "No commands matching '$keyword'"
+    exit 0
+    ;;
 
-if os.environ.get("PERF_JSON", "0") == "1":
-    print(json.dumps(get_status()))
-PY
-    else
-      ui_warn "python3 not found; run: zsh -i -c exit"
-    fi
-    ;;
-  load-bench)
-    command dot-load-benchmark "$@"
-    ;;
-  load-bench-pty)
-    command dot-load-benchmark-pty "$@"
-    ;;
-  ai)
-    ui_header "AI Helpers"
-    ui_info "DOTFILES_AI" "${DOTFILES_AI:-0}"
-    ui_info "Enable" "export DOTFILES_AI=1"
-    if command -v ollama >/dev/null 2>&1; then
-      ui_cmd "ollama" "installed"
-    else
-      ui_cmd "ollama" "not installed"
-    fi
-    if command -v llm >/dev/null 2>&1; then
-      ui_cmd "llm" "installed"
-    else
-      ui_cmd "llm" "not installed"
-    fi
-    ;;
-  ai-setup) run_script "scripts/ops/ai-setup.sh" "AI setup script" "$@" ;;
-  ai-query) run_script "dot_local/bin/executable_dot-ai" "AI RAG script" "$@" ;;
-  tune)
-    SRC_DIR="$(resolve_source_dir)"
-    if [ -z "$SRC_DIR" ]; then
-      ui_fail "Dotfiles source not found"
-      exit 1
-    fi
-    if [ -f "$SRC_DIR/scripts/ops/setup.sh" ]; then
-      exec bash "$SRC_DIR/scripts/ops/setup.sh" --tune
-    else
-      ui_fail "Tuning script not found"
-      exit 1
-    fi
-    ;;
+  # ── Help & version ──────────────────────────────────────────────────────
   help | --help | -h)
     show_help
     ;;
+
   --version | -v)
     ui_info "Version" ".dotfiles $VERSION"
     ;;
+
+  "")
+    show_help
+    ;;
+
   *)
-    if [ -z "$COMMAND" ]; then
-      show_help
-    else
-      ui_fail "Unknown command: $COMMAND"
-      ui_info "Hint" "Try 'dot help' for usage"
-      exit 1
-    fi
+    ui_fail "Unknown command: $COMMAND"
+    ui_info "Hint" "Try 'dot help' for usage"
+    exit 1
     ;;
 esac

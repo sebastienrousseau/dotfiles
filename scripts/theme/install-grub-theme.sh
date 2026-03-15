@@ -2,6 +2,15 @@
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 set -euo pipefail
 
+# Cross-platform sed in-place (BSD vs GNU)
+sed_in_place() {
+  if sed --version >/dev/null 2>&1; then
+    sed -i "$@" # GNU
+  else
+    sed -i '' "$@" # BSD (macOS)
+  fi
+}
+
 THEME_SRC="${DOTFILES_GRUB_THEME_DIR:-$HOME/.config/dotfiles/grub/theme}"
 THEME_NAME="${DOTFILES_GRUB_THEME_NAME:-dotfiles}"
 APPLY=0
@@ -38,7 +47,7 @@ mkdir -p "$THEME_DST"
 cp -R "$THEME_SRC/." "$THEME_DST"
 
 if grep -q '^GRUB_THEME=' /etc/default/grub; then
-  sed -i.bak "s|^GRUB_THEME=.*|GRUB_THEME=\"$THEME_DST/theme.txt\"|" /etc/default/grub
+  sed_in_place "s|^GRUB_THEME=.*|GRUB_THEME=\"$THEME_DST/theme.txt\"|" /etc/default/grub
 else
   echo "GRUB_THEME=\"$THEME_DST/theme.txt\"" >>/etc/default/grub
 fi

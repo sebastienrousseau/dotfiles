@@ -38,13 +38,13 @@ jobs:
       - name: Unit tests (zero-failure policy)
         run: |
           set -euo pipefail
-          chmod +x scripts/tests/framework/*.sh
+          chmod +x tests/framework/*.sh
           echo "Running unit tests with 100% coverage enforcement..."
 
-          TOTAL_SCRIPTS="$(find scripts -name "*.sh" -not -path "scripts/tests/*" | wc -l)"
+          TOTAL_SCRIPTS="$(find scripts -name "*.sh" | wc -l)"
           echo "Found $TOTAL_SCRIPTS testable shell scripts"
 
-          ./scripts/tests/framework/test_runner.sh 2>&1 | tee test_output.log
+          ./tests/framework/test_runner.sh 2>&1 | tee test_output.log
 
           FAILED_TESTS="$(
             grep -a "Total failed:" test_output.log \
@@ -66,15 +66,15 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update && sudo apt-get install -y ripgrep
-          chmod +x scripts/tests/framework/module_coverage.sh
-          MIN_COVERAGE="${{ inputs.min_coverage }}" ./scripts/tests/framework/module_coverage.sh
+          chmod +x tests/framework/module_coverage.sh
+          MIN_COVERAGE="${{ inputs.min_coverage }}" ./tests/framework/module_coverage.sh
 
       - name: Integration tests
         if: inputs.run_integration == true
         run: |
           set -euo pipefail
           echo "Running integration tests..."
-          RUN_INTEGRATION=1 ./scripts/tests/framework/test_runner.sh 2>&1 | tee integration_output.log
+          RUN_INTEGRATION=1 ./tests/framework/test_runner.sh 2>&1 | tee integration_output.log
 
           INTEGRATION_FAILED="$(
             grep -a "Total failed:" integration_output.log \
@@ -97,6 +97,6 @@ jobs:
         run: |
           set -euo pipefail
           echo "Running strict-mode apply path checks..."
-          REPO_ROOT="$PWD" bash scripts/tests/unit/test_alias_strict_mode.sh
-          REPO_ROOT="$PWD" bash scripts/tests/unit/test_ops_chezmoi_apply.sh
-          REPO_ROOT="$PWD" bash scripts/tests/unit/test_install_lib_chezmoi.sh
+          REPO_ROOT="$PWD" bash tests/unit/aliases/test_alias_strict_mode.sh
+          REPO_ROOT="$PWD" bash tests/unit/ops/test_ops_chezmoi_apply.sh
+          REPO_ROOT="$PWD" bash tests/unit/install/test_install_lib_chezmoi.sh

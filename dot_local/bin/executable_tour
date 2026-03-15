@@ -1,30 +1,30 @@
 #!/bin/sh
 # Interactive Tour using Gum
-# Part of Dotfiles v0.2.495
+# Part of Dotfiles v0.2.496
 
 if ! command -v gum >/dev/null; then
-    echo "Error: 'gum' is not installed."
-    case "$(uname -s)" in
-        Darwin)
-            echo "Install: brew install gum"
-            ;;
-        Linux)
-            if command -v snap >/dev/null; then
-                echo "Install: sudo snap install gum --classic"
-            else
-                echo "Install: go install github.com/charmbracelet/gum@latest"
-            fi
-            ;;
-        *)
-            echo "Install gum from: https://github.com/charmbracelet/gum"
-            ;;
-    esac
-    exit 1
+  echo "Error: 'gum' is not installed."
+  case "$(uname -s)" in
+    Darwin)
+      echo "Install: brew install gum"
+      ;;
+    Linux)
+      if command -v snap >/dev/null; then
+        echo "Install: sudo snap install gum --classic"
+      else
+        echo "Install: go install github.com/charmbracelet/gum@latest"
+      fi
+      ;;
+    *)
+      echo "Install gum from: https://github.com/charmbracelet/gum"
+      ;;
+  esac
+  exit 1
 fi
 
 if [ ! -t 1 ]; then
-    echo "Error: This interactive tour requires a TTY."
-    exit 1
+  echo "Error: This interactive tour requires a TTY."
+  exit 1
 fi
 
 clear
@@ -37,12 +37,12 @@ banner='██████╗  ██████╗ ████████╗
 ██████╔╝╚██████╔╝   ██║   ██║     ██║███████╗███████╗███████║
 ╚═════╝  ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝
 
-v0.2.495 · Infrastructure‑grade shell environment'
+v0.2.496 · Infrastructure‑grade shell environment'
 
 gum style \
-    --foreground 212 --border-foreground 212 --border double \
-    --align center --margin "1 2" --padding "1 2" \
-    "$banner"
+  --foreground 212 --border-foreground 212 --border double \
+  --align center --margin "1 2" --padding "1 2" \
+  "$banner"
 
 echo ""
 gum confirm "Start a quick tour?" || exit 0
@@ -50,14 +50,14 @@ clear
 
 # Slide 1: Start here
 gum style \
-    --foreground 99 --border rounded --padding "1 2" --margin "1 2" \
-    "Start here" \
-    "Apply your setup. Keep it repeatable." \
-    " " \
-    "dot apply   # Apply your dotfiles" \
-    "dot update  # Pull and apply updates" \
-    "dot diff    # Review local changes" \
-    "dot drift   # Snapshot config drift"
+  --foreground 99 --border rounded --padding "1 2" --margin "1 2" \
+  "Start here" \
+  "Apply your setup. Keep it repeatable." \
+  " " \
+  "dot apply   # Apply your dotfiles" \
+  "dot update  # Pull and apply updates" \
+  "dot diff    # Review local changes" \
+  "dot drift   # Snapshot config drift"
 
 echo ""
 gum confirm "Next: Check health" || exit 0
@@ -65,13 +65,13 @@ clear
 
 # Slide 2: Diagnostics
 gum style \
-    --foreground 75 --border rounded --padding "1 2" --margin "1 2" \
-    "Check health" \
-    "Know what’s working. See what needs attention." \
-    " " \
-    "dot doctor    # Health checks" \
-    "dot history   # History analysis" \
-    "dot benchmark # Startup timing"
+  --foreground 75 --border rounded --padding "1 2" --margin "1 2" \
+  "Check health" \
+  "Know what’s working. See what needs attention." \
+  " " \
+  "dot doctor    # Health checks" \
+  "dot history   # History analysis" \
+  "dot benchmark # Startup timing"
 
 echo ""
 gum confirm "Next: Secrets" || exit 0
@@ -79,14 +79,14 @@ clear
 
 # Slide 3: Secrets
 gum style \
-    --foreground 214 --border rounded --padding "1 2" --margin "1 2" \
-    "Secrets (age)" \
-    "Keep sensitive data local and encrypted." \
-    " " \
-    "dot secrets-init   # Create a key" \
-    "dot secrets        # Edit secrets" \
-    "dot secrets-create # New encrypted file" \
-    "dot ssh-key        # Encrypt an SSH key"
+  --foreground 214 --border rounded --padding "1 2" --margin "1 2" \
+  "Secrets (age)" \
+  "Keep sensitive data local and encrypted." \
+  " " \
+  "dot secrets-init   # Create a key" \
+  "dot secrets        # Edit secrets" \
+  "dot secrets-create # New encrypted file" \
+  "dot ssh-key        # Encrypt an SSH key"
 
 echo ""
 gum confirm "Next: Security (opt‑in)" || exit 0
@@ -94,16 +94,16 @@ clear
 
 # Slide 4: Security (opt-in)
 gum style \
-    --foreground 150 --border double --padding "1 2" --margin "1 2" \
-    "Security (opt‑in)" \
-    "Explicit by design. Nothing changes without your choice." \
-    " " \
-    "dot firewall      # Firewall hardening" \
-    "dot telemetry     # Disable OS telemetry" \
-    "dot dns-doh       # DNS‑over‑HTTPS (Linux)" \
-    "dot lock-screen   # Idle lock settings" \
-    "dot usb-safety    # Disable automount" \
-    "dot encrypt-check # Disk encryption status"
+  --foreground 150 --border double --padding "1 2" --margin "1 2" \
+  "Security (opt‑in)" \
+  "Explicit by design. Nothing changes without your choice." \
+  " " \
+  "dot firewall      # Firewall hardening" \
+  "dot telemetry     # Disable OS telemetry" \
+  "dot dns-doh       # DNS‑over‑HTTPS (Linux)" \
+  "dot lock-screen   # Idle lock settings" \
+  "dot usb-safety    # Disable automount" \
+  "dot encrypt-check # Disk encryption status"
 
 echo ""
 gum confirm "Next: Themes & UX" || exit 0
@@ -111,15 +111,15 @@ clear
 
 # Slide 5: Themes & UX
 gum style \
-    --foreground 212 --border rounded --padding "1 2" --margin "1 2" \
-    "Themes & UX" \
-    "Make it yours without changing how it works." \
-    " " \
-    "dot theme      # Switch theme" \
-    "dot wallpaper  # Apply wallpaper" \
-    "dot fonts      # Install Nerd Fonts" \
-    "dot keys       # Keybindings" \
-    "dot tools      # Curated utilities"
+  --foreground 212 --border rounded --padding "1 2" --margin "1 2" \
+  "Themes & UX" \
+  "Make it yours without changing how it works." \
+  " " \
+  "dot theme      # Switch theme" \
+  "dot wallpaper  # Apply wallpaper" \
+  "dot fonts      # Install Nerd Fonts" \
+  "dot keys       # Keybindings" \
+  "dot tools      # Curated utilities"
 
 echo ""
 gum confirm "Next: Projects & Sandbox" || exit 0
@@ -127,16 +127,46 @@ clear
 
 # Slide 6: Projects & Sandbox
 gum style \
-    --foreground 111 --border rounded --padding "1 2" --margin "1 2" \
-    "Projects & sandbox" \
-    "Start quickly. Experiment safely." \
-    " " \
-    "dot new <lang> <name>  # Templates: python, go, node" \
-    "dot sandbox            # Safe preview (Docker/Podman)" \
-    "dot edit               # Open source in editor"
+  --foreground 111 --border rounded --padding "1 2" --margin "1 2" \
+  "Projects & sandbox" \
+  "Start quickly. Experiment safely." \
+  " " \
+  "dot new <lang> <name>  # Templates: python, go, node" \
+  "dot sandbox            # Safe preview (Docker/Podman)" \
+  "dot edit               # Open source in editor"
 
 echo ""
+gum confirm "Next: Linting & Performance" || exit 0
+clear
+
+# Slide 7: Linting & Performance
 gum style \
-    --foreground 212 --margin "1 2" \
-    "You’re all set. Tip: run 'dot update' weekly to stay current."
+  --foreground 214 --border rounded --padding "1 2" --margin "1 2" \
+  "Linting & Performance" \
+  "Keep your scripts clean and your shell fast." \
+  " " \
+  "dot lint              # ShellCheck + shfmt" \
+  "dot lint --fix        # Auto-format scripts" \
+  "dot lint --check      # CI mode (exit 1 on failure)" \
+  "dot benchmark --waterfall  # Startup waterfall chart" \
+  "dot perf              # Quick performance timing"
+
 echo ""
+gum confirm "Next: Finish" || exit 0
+clear
+
+# Final summary
+gum style \
+  --foreground 212 --border double --padding "1 2" --margin "1 2" \
+  "You’re all set!" \
+  " " \
+  "Tip: run ‘dot update’ weekly to stay current."
+
+echo ""
+choice=$(gum choose "Run dot doctor" "Run dot benchmark" "Open docs" "Exit")
+case "$choice" in
+  "Run dot doctor") exec dot doctor ;;
+  "Run dot benchmark") exec dot benchmark ;;
+  "Open docs") exec dot docs ;;
+  "Exit") exit 0 ;;
+esac

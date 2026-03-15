@@ -1,5 +1,5 @@
 # Multi-environment test for dotfiles README instructions
-# Usage: ./scripts/tests/test-docker.sh (builds and runs all targets)
+# Usage: ./tests/test-docker.sh (builds and runs all targets)
 # Or:   docker build --target ubuntu-test -f Dockerfile.test .
 # Security: DS-0029 fix included
 

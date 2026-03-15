@@ -27,7 +27,7 @@ decode_base64url() {
   if [[ $mod -eq 2 ]]; then input="${input}=="; fi
   if [[ $mod -eq 3 ]]; then input="${input}="; fi
   # Convert URL-safe to standard base64
-  echo "$input" | tr '-_' '+/' | base64 -d 2>/dev/null || base64 -D <<< "$(echo "$input" | tr '-_' '+/')"
+  echo "$input" | tr '-_' '+/' | base64 -d 2>/dev/null || base64 -D <<<"$(echo "$input" | tr '-_' '+/')"
 }
 
 format_json() {
@@ -52,7 +52,7 @@ TOKEN="${TOKEN#Bearer }"
 TOKEN="${TOKEN#bearer }"
 
 # Split into parts
-IFS='.' read -ra PARTS <<< "$TOKEN"
+IFS='.' read -ra PARTS <<<"$TOKEN"
 
 if [[ ${#PARTS[@]} -lt 2 ]]; then
   echo "Error: Invalid JWT format"
