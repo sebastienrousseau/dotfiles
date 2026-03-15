@@ -17,6 +17,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
+# shellcheck source=../dot/lib/log.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/log.sh"
+DOT_COMMAND="rollback"
 REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 # Resolve symlinks for consistent path handling
 if command -v realpath >/dev/null 2>&1; then
@@ -248,6 +252,7 @@ perform_rollback() {
   if [[ "$dry_run" != "1" ]]; then
     log_success "Rollback complete: $restored file(s) restored"
     persist_log "ROLLBACK: from $(basename "$backup_path"), $restored files restored"
+    dot_log info "rollback_end" "files=$restored" "backup=$(basename "$backup_path")"
 
     # AI-Driven Analysis of the failure
     if command -v dot >/dev/null 2>&1 && [[ "${DOTFILES_AI:-0}" == "1" ]]; then
@@ -494,6 +499,16 @@ main() {
   done
 
   ensure_dirs
+
+  # Concurrency guard
+  LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/dotfiles-rollback.lock"
+  exec 9>"$LOCK_FILE"
+  if ! flock -n 9; then
+    ui_warn "Already running" "Another rollback instance is active"
+    exit 0
+  fi
+
+  dot_log info "rollback_start" "command=$command"
 
   case "$command" in
     status)

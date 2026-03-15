@@ -109,6 +109,21 @@ cmd_bundle() {
   run_script "scripts/ops/bundle.sh" "Offline bundle script" "$@"
 }
 
+cmd_metrics() {
+  local src_dir
+  src_dir="$(resolve_source_dir)"
+  if [[ -z "$src_dir" ]]; then
+    echo "Dotfiles source not found." >&2
+    exit 1
+  fi
+  # shellcheck source=../lib/log.sh
+  # shellcheck disable=SC1091
+  source "$src_dir/scripts/dot/lib/log.sh"
+  ui_header "Recent Metrics"
+  echo ""
+  dot_metrics_summary "${1:-20}"
+}
+
 # Dispatch
 case "${1:-}" in
   doctor)
@@ -186,6 +201,10 @@ case "${1:-}" in
   bundle)
     shift
     cmd_bundle "$@"
+    ;;
+  metrics)
+    shift
+    cmd_metrics "$@"
     ;;
   smoke-test)
     shift

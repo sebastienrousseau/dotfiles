@@ -460,6 +460,11 @@ cmd_tools() {
       exit 1
     fi
     shift
+    # Validate any tool name arguments
+    for arg in "$@"; do
+      [[ "$arg" == -* ]] && continue
+      validate_name "$arg" "tool name"
+    done
     if [ -n "$src_dir" ] && [ -f "$src_dir/nix/flake.nix" ]; then
       ui_info "Entering" "Nix development shell"
       exec nix develop "$src_dir/nix" "$@"
@@ -589,10 +594,19 @@ cmd_env_mise() {
     list | ls) mise ls ;;
     install)
       shift
+      # Validate tool names to prevent injection
+      for arg in "$@"; do
+        [[ "$arg" == -* ]] && continue
+        validate_name "$arg" "tool name"
+      done
       mise install "$@"
       ;;
     use)
       shift
+      for arg in "$@"; do
+        [[ "$arg" == -* ]] && continue
+        validate_name "$arg" "tool name"
+      done
       mise use "$@"
       ;;
     *) mise "$@" ;;

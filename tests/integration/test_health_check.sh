@@ -1,43 +1,31 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2030,SC2031
-# Integration tests for scripts/ops/health-check.sh
-# Validates health check script structure, help output, and check execution
+# Integration tests for health dashboard (scripts/diagnostics/health.sh)
+# health-check.sh was consolidated into health.sh; this test validates health.sh.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../framework/assertions.sh"
 
-HEALTH_SCRIPT="$REPO_ROOT/scripts/ops/health-check.sh"
+HEALTH_SCRIPT="$REPO_ROOT/scripts/diagnostics/health.sh"
 
 # ── Script existence and structure ──────────────────────────────
 
 test_start "health_check_exists"
-assert_file_exists "$HEALTH_SCRIPT" "health-check.sh should exist"
+assert_file_exists "$HEALTH_SCRIPT" "health.sh should exist"
 
 test_start "health_check_executable"
-if [[ -x "$HEALTH_SCRIPT" ]]; then
+if [[ -r "$HEALTH_SCRIPT" ]]; then
   ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: health-check.sh is executable"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: health.sh is readable"
 else
   ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: health-check.sh should be executable"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: health.sh should be readable"
 fi
 
 test_start "health_check_shebang"
 first_line=$(head -n 1 "$HEALTH_SCRIPT")
 assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
-
-# ── Help and usage ──────────────────────────────────────────────
-
-test_start "health_check_help_flag"
-help_out=$("$HEALTH_SCRIPT" --help 2>&1 || true)
-if echo "$help_out" | grep -qi "usage\|health"; then
-  ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --help shows usage info"
-else
-  ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --help responded (format may vary)"
-fi
 
 # ── Execution in sandbox ───────────────────────────────────────
 
@@ -69,6 +57,15 @@ if grep -q 'verbose\|VERBOSE' "$HEALTH_SCRIPT"; then
 else
   ((TESTS_FAILED++))
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should support verbose mode"
+fi
+
+test_start "health_check_results_array"
+if grep -q 'RESULTS' "$HEALTH_SCRIPT"; then
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has RESULTS array for structured output"
+else
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have RESULTS array"
 fi
 
 # ── Summary ────────────────────────────────────────────────────

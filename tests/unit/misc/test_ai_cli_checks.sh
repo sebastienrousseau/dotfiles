@@ -24,13 +24,9 @@ check_contains() {
   fi
 }
 
-HC_FILE="$REPO_ROOT/scripts/ops/health-check.sh"
 APPLY_FILE="$REPO_ROOT/scripts/ops/chezmoi-apply.sh"
 DOC_FILE="$REPO_ROOT/docs/reference/TOOLS.md"
 PYTOOLS_FILE="$REPO_ROOT/install/provision/run_onchange_25-python-tools.sh.tmpl"
-
-# Health check should include AI CLIs in optional deps
-check_contains "$HC_FILE" "optional_deps=(ripgrep fd bat fzf eza jq claude gemini sgpt ollama opencode aider kiro-cli)"
 
 # Chezmoi apply should emit AI CLI checks
 check_contains "$APPLY_FILE" "AI provider CLI checks (optional)"

@@ -128,7 +128,7 @@ show_help() {
   echo ""
 
   ui_section "Core"
-  ui_cmd "sync" "Apply dotfiles (--pull to fetch, --check to preview)"
+  ui_cmd "sync" "Apply dotfiles (alias for apply; --pull to fetch, --check to preview)"
   ui_cmd "add" "Add a file to chezmoi source"
   ui_cmd "diff" "Show chezmoi diff with exclusions"
   ui_cmd "status" "Show configuration drift (chezmoi status)"
@@ -138,8 +138,8 @@ show_help() {
   echo ""
 
   ui_section "Diagnostics"
-  ui_cmd "doctor" "System health & configuration check"
-  ui_cmd "" "--heal --audit --score --smoke --drift --benchmark --json --ai"
+  ui_cmd "doctor" "Deep audit: tools, paths, portability, AI analysis (--ai)"
+  ui_cmd "" "--heal --audit --score --smoke --drift --benchmark --json"
   ui_cmd "score" "System health and security scorecard"
   ui_cmd "snapshot" "Capture baseline system snapshot"
   ui_cmd "chaos" "Simulate config corruption to test self-healing"
@@ -147,6 +147,7 @@ show_help() {
   ui_cmd "rollback" "Rollback dotfiles to a previous state"
   ui_cmd "history" "Shell history analysis"
   ui_cmd "perf" "Show performance mode and quick timing"
+  ui_cmd "metrics" "Show recent observability metrics (JSONL)"
   ui_cmd "load-bench" "Measure time to heavy-layer readiness"
   echo ""
 
@@ -201,7 +202,7 @@ show_help() {
   echo ""
 
   ui_section "Meta"
-  ui_cmd "upgrade" "Update flake, plugins, and dotfiles"
+  ui_cmd "upgrade" "Update system toolchains, plugins, and dotfiles"
   ui_cmd "packages" "List installed packages and package managers"
   ui_cmd "cache-refresh" "Regenerate shell caches for ultra-fast startup"
   ui_cmd "search" "Find commands by keyword"
@@ -241,7 +242,7 @@ case "$COMMAND" in
   # ── Diagnostics ─────────────────────────────────────────────────────────
   doctor | scorecard | score | snapshot | history | perf | load-bench | load-bench-pty | \
     chaos | bundle | rollback | heal | health | health-check | smoke-test | verify | \
-    security-score | drift | benchmark | intelligence | conflicts | locks | restore)
+    security-score | drift | benchmark | intelligence | conflicts | locks | restore | metrics)
     _dispatch diagnostics "$@"
     ;;
 

@@ -13,6 +13,10 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # shellcheck source=../dot/lib/ui.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
+# shellcheck source=../dot/lib/log.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../dot/lib/log.sh"
+DOT_COMMAND="release"
 ui_init
 
 log_info() { ui_info "$@"; }
@@ -123,7 +127,16 @@ main() {
     esac
   done
 
+  # Concurrency guard
+  LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/dotfiles-release.lock"
+  exec 9>"$LOCK_FILE"
+  if ! flock -n 9; then
+    ui_warn "Already running" "Another release is in progress"
+    exit 0
+  fi
+
   cd "$PROJECT_ROOT"
+  dot_log info "release_start" "bump_type=$bump_type"
 
   local current_version new_version
   current_version=$(get_version)
@@ -232,6 +245,7 @@ main() {
   fi
 
   echo ""
+  dot_log info "release_end" "version=$new_version"
   log_success "Release v${new_version} complete"
 }
 

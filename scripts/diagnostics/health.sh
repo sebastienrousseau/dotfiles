@@ -63,6 +63,7 @@ TOTAL_CHECKS=0
 PASSED_CHECKS=0
 WARNINGS=0
 FAILURES=0
+declare -a RESULTS=()
 ui_init
 use_ui="$UI_ENABLED"
 
@@ -96,6 +97,9 @@ check() {
   local message="${3:-}"
 
   TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
+
+  # Collect structured result for JSON output
+  RESULTS+=("{\"check\":\"$name\",\"status\":\"$status\",\"message\":\"$message\"}")
 
   case "$status" in
     pass)
@@ -326,6 +330,19 @@ check_security() {
     check "SSH keys present" "warn" "No keys found"
   fi
 
+  # Check SSH key permissions
+  for key in "$HOME/.ssh/id_ed25519" "$HOME/.ssh/id_rsa" "$HOME/.ssh/id_ed25519_sk"; do
+    if [[ -f "$key" ]]; then
+      local perms
+      perms=$(stat -c '%a' "$key" 2>/dev/null || stat -f '%Lp' "$key" 2>/dev/null)
+      if [[ "$perms" != "600" && "$perms" != "400" ]]; then
+        check "SSH key perms (${key##*/})" "warn" "mode $perms (should be 600)"
+      else
+        check "SSH key perms (${key##*/})" "pass"
+      fi
+    fi
+  done
+
   if has_command gpg; then
     if gpg --list-secret-keys 2>/dev/null | grep -q sec; then
       check "GPG keys" "pass"
@@ -351,6 +368,69 @@ check_performance() {
   fi
 }
 
+check_config_directories() {
+  check_section "Config Directories"
+
+  local config_dirs=(
+    "$HOME/.config/shell"
+    "$HOME/.config/nvim"
+    "$HOME/.config/git"
+  )
+  local found=0 total=${#config_dirs[@]}
+
+  for dir in "${config_dirs[@]}"; do
+    if [[ -d "$dir" ]]; then
+      check "Config: ${dir##*/}" "pass"
+      ((found++))
+    else
+      check "Config: ${dir##*/}" "warn" "Not found"
+    fi
+  done
+
+  if [[ $found -eq $total ]]; then
+    check "Config directories" "pass"
+  elif [[ $found -gt 0 ]]; then
+    check "Config directories" "warn" "$found/$total present"
+  else
+    check "Config directories" "fail" "None found"
+  fi
+}
+
+check_sync_status() {
+  check_section "Sync Status"
+
+  # Chezmoi status
+  if has_command chezmoi; then
+    local status_output
+    status_output=$(chezmoi status 2>/dev/null || echo "")
+    if [[ -z "$status_output" ]]; then
+      check "Chezmoi sync" "pass"
+    else
+      local changes
+      changes=$(printf '%s\n' "$status_output" | wc -l | tr -d ' ')
+      check "Chezmoi sync" "warn" "$changes file(s) out of sync"
+    fi
+  else
+    check "Chezmoi sync" "warn" "Not installed, skipped"
+  fi
+
+  # Git status
+  local dotfiles_dir="${HOME}/.dotfiles"
+  if [[ -d "$dotfiles_dir/.git" ]]; then
+    local git_status=""
+    git_status=$(git -C "$dotfiles_dir" status --porcelain 2>/dev/null || echo "")
+    if [[ -z "$git_status" ]]; then
+      check "Git working tree" "pass"
+    else
+      local changes
+      changes=$(printf '%s\n' "$git_status" | wc -l | tr -d ' ')
+      check "Git working tree" "warn" "$changes uncommitted change(s)"
+    fi
+  else
+    check "Git working tree" "warn" "Not a git repo"
+  fi
+}
+
 # === Orchestrator ===
 run_checks() {
   check_dotfiles_core
@@ -360,6 +440,8 @@ run_checks() {
   check_editors
   check_terminal
   check_security
+  check_config_directories
+  check_sync_status
   check_performance
 }
 
@@ -367,13 +449,23 @@ print_summary() {
   local score=$((PASSED_CHECKS * 100 / TOTAL_CHECKS))
 
   if $JSON_OUTPUT; then
-    echo "{"
-    echo "  \"total\": $TOTAL_CHECKS,"
-    echo "  \"passed\": $PASSED_CHECKS,"
-    echo "  \"warnings\": $WARNINGS,"
-    echo "  \"failures\": $FAILURES,"
-    echo "  \"score\": $score"
-    echo "}"
+    printf '{\n'
+    printf '  "total": %d,\n' "$TOTAL_CHECKS"
+    printf '  "passed": %d,\n' "$PASSED_CHECKS"
+    printf '  "warnings": %d,\n' "$WARNINGS"
+    printf '  "failures": %d,\n' "$FAILURES"
+    printf '  "score": %d,\n' "$score"
+    printf '  "results": [\n'
+    local i=0
+    for result in "${RESULTS[@]}"; do
+      if [[ $i -gt 0 ]]; then
+        printf ',\n'
+      fi
+      printf '    %s' "$result"
+      i=$((i + 1))
+    done
+    printf '\n  ]\n'
+    printf '}\n'
     dot_log info "health_complete" "score=$score" "total=$TOTAL_CHECKS"
     dot_metric "health_score" "$score" "percent"
     return
