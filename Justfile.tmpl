@@ -9,6 +9,14 @@ default:
 apply:
     chezmoi apply --force
 
+# Run the full reliability audit
+test:
+    bash ./scripts/qa/reliability-audit.sh
+
+# Run the quick local gate
+test-quick:
+    bash ./scripts/qa/reliability-audit.sh --quick
+
 # Update dependencies and tools
 update:
     topgrade

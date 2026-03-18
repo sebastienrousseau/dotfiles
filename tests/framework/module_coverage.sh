@@ -8,13 +8,12 @@ REPO_ROOT="$(dirname "$TESTS_DIR")"
 
 MIN_COVERAGE="${MIN_COVERAGE:-95}"
 
-mapfile -t modules < <(
-  while IFS= read -r file; do
-    rel="${file#"$REPO_ROOT/scripts/"}"
-    rel="${rel%.sh}"
-    printf "%s\n" "$rel"
-  done < <(find "$REPO_ROOT/scripts" -type f -name "*.sh" ! -path "$REPO_ROOT/scripts/tests/*")
-)
+modules=()
+while IFS= read -r file; do
+  rel="${file#"$REPO_ROOT/scripts/"}"
+  rel="${rel%.sh}"
+  modules+=("$rel")
+done < <(find "$REPO_ROOT/scripts" -type f -name "*.sh" ! -path "$REPO_ROOT/scripts/tests/*")
 
 total=0
 covered=0
