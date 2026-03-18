@@ -47,7 +47,15 @@ if status is-interactive
             done
         ' 2>/dev/null | while read -l _line
             set -l _parts (string match -r '^alias ([^=]+)=' -- "$_line")
-            if set -q _parts[2]; and not contains -- "$_parts[2]" $_skip
+            set -l _name
+            if set -q _parts[2]
+                set _name $_parts[2]
+            end
+            set -l _target (string replace -r '^alias [^=]+=["'\'']?([^ "'\'']+).*$' '$1' -- "$_line")
+            if set -q _name[1]; and not contains -- "$_name" $_skip
+                if string match -rq '^dot_[a-z0-9_]+$' -- "$_target"
+                    continue
+                end
                 echo "$_line"
             end
         end >"$_alias_cache.tmp"
