@@ -10,9 +10,12 @@ gitconfig_template="$REPO_ROOT/dot_gitconfig.tmpl"
 update_deps_workflow="$REPO_ROOT/.github/workflows/update-deps.yml"
 sync_versions_workflow="$REPO_ROOT/.github/workflows/sync-versions.yml"
 security_workflow="$REPO_ROOT/.github/workflows/security-enhanced.yml"
+reliability_workflow="$REPO_ROOT/.github/workflows/reliability-gate.yml"
 package_managers_lib="$REPO_ROOT/install/lib/package_managers.sh"
 allowed_signers_file="$REPO_ROOT/dot_config/git/allowed_signers"
 flake_lock_file="$REPO_ROOT/flake.lock"
+soup_register_file="$REPO_ROOT/docs/security/SOUP_REGISTER.md"
+automation_secrets_file="$REPO_ROOT/docs/security/AUTOMATION_SECRETS.md"
 
 test_start "git_template_enforces_merge_signature_verification"
 assert_file_contains "$gitconfig_template" "verifySignatures = true" "merge signature verification enabled"
@@ -65,8 +68,17 @@ fi
 
 test_start "allowed_signers_file_documented"
 assert_file_contains "$allowed_signers_file" "Git verifies SSH-signed commits" "allowed signers file documents trust roster"
+assert_file_contains "$allowed_signers_file" "sebastian.rousseau@gmail.com ssh-ed25519" "allowed signers file contains the current trusted signer"
 
 test_start "root_flake_lock_present"
 assert_file_exists "$flake_lock_file" "root flake.lock exists for deterministic Nix inputs"
+
+test_start "summary_jobs_present_for_branch_protection"
+assert_file_contains "$security_workflow" "name: Security Summary" "security summary job present"
+assert_file_contains "$reliability_workflow" "name: Reliability Summary" "reliability summary job present"
+
+test_start "compliance_docs_present"
+assert_file_exists "$soup_register_file" "SOUP register exists"
+assert_file_exists "$automation_secrets_file" "automation secrets doc exists"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

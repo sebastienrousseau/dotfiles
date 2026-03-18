@@ -248,3 +248,27 @@ jobs:
           name: security-attestation-${{ github.sha }}
           path: security-attestation.json
           retention-days: 30
+
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs:
+      - secrets-scan
+      - dependency-scan
+      - infrastructure-scan
+      - policy-enforcement
+    if: always()
+    steps:
+      - name: Security summary
+        run: |
+          for result in \
+            "${{ needs.secrets-scan.result }}" \
+            "${{ needs.dependency-scan.result }}" \
+            "${{ needs.infrastructure-scan.result }}" \
+            "${{ needs.policy-enforcement.result }}"; do
+            if [[ "$result" != "success" && "$result" != "skipped" ]]; then
+              echo "::error::Security workflow contains a failing mandatory job"
+              exit 1
+            fi
+          done
+          echo "Security workflow passed"

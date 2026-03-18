@@ -6,6 +6,7 @@ Use this checklist before cutting any new release (e.g., `v0.x.x`) to ensure sup
 - [ ] **Pinned Version**: Update `install.sh` `VERSION` variable to match the release tag.
 - [ ] **Docs Sync**: Ensure `README.md` and `.github/PULL_REQUEST_TEMPLATE.md` installer URLs point to the new tag (not `main`).
 - [ ] **Clean Build**: Verify `install.sh` does not curl random scripts from third parties without pinning.
+- [ ] **SOUP Register**: Review [SOUP_REGISTER.md](/home/seb/.dotfiles/docs/security/SOUP_REGISTER.md) and confirm all active external components have an owner and validation path.
 
 ## 2. Secrets & Leak Prevention
 - [ ] **SSH Keys**: Scan `dot_ssh/` to ensure no private keys (`id_rsa`, `id_ed25519`) are committed.
@@ -34,6 +35,7 @@ Run `dot mcp` to validate all MCP server configurations pass security checks.
 - [ ] **Attestation Signing**: Confirm `actions/attest-build-provenance` signs the release artifacts.
 - [ ] **Attestation Verification**: Verify with `gh attestation verify <artifact> --repo sebastienrousseau/dotfiles`.
 - [ ] **Branch Protection**: Ensure `security-attestation` is a required status check on master.
+- [ ] **Automation Keying**: Confirm `ACTIONS_BOT_SIGNING_KEY` exists and matches the signer in `dot_config/git/allowed_signers`.
 
 ## 7. Final Verification
 - [ ] **Docker Test**: Run `docker build -f Dockerfile.test .` to verify clean install.
