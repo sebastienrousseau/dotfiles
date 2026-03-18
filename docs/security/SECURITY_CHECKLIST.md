@@ -24,11 +24,12 @@ Use this checklist before cutting any new release (e.g., `v0.x.x`) to ensure sup
 ## 5. MCP (Model Context Protocol) Hardening
 - [ ] **Launcher Policy**: Verify `dot mcp` shows only allowlisted launchers (`npx`, `node`, `uvx`).
 - [ ] **Filesystem Scope**: Ensure no MCP server has broad access (`/`, `/home`, `/Users`).
+- [ ] **Default Profile**: Confirm only the `strict-local` server set is enabled by default.
 - [ ] **Token Validation**: Confirm required API tokens are set (`GITHUB_TOKEN`, `BRAVE_API_KEY`).
 - [ ] **Arg Policy**: No wildcard (`*`) or `--unsafe` arguments in MCP server configs.
 - [ ] **Env Placeholders**: All `${VAR}` references in MCP config have corresponding environment variables.
 
-Run `dot mcp` to validate all MCP server configurations pass security checks.
+Run `dot mcp --strict --json` to validate all MCP server configurations and capture an audit artifact.
 
 ## 6. Release Attestation
 - [ ] **SBOM Generation**: Verify `dotfiles-sbom.spdx.json` is generated in release workflow.

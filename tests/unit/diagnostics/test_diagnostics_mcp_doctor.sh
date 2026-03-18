@@ -7,6 +7,10 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 TEST_SCRIPT="$REPO_ROOT/scripts/diagnostics/mcp-doctor.sh"
+MCP_CONFIG_FILE="$REPO_ROOT/dot_config/claude/mcp_servers.json"
+MCP_POLICY_FILE="$REPO_ROOT/dot_config/dotfiles/mcp-policy.json"
+MCP_LOCK_FILE="$REPO_ROOT/dot_config/dotfiles/mcp-lock.json"
+META_COMMANDS_SCRIPT="$REPO_ROOT/scripts/dot/commands/meta.sh"
 
 test_start "mcp_doctor_exists"
 assert_file_exists "$TEST_SCRIPT" "mcp-doctor.sh should exist"
@@ -23,5 +27,56 @@ fi
 test_start "mcp_doctor_shebang"
 first_line=$(head -n 1 "$TEST_SCRIPT")
 assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
+
+test_start "mcp_meta_accepts_flag_form"
+assert_file_contains "$META_COMMANDS_SCRIPT" '[[ "${1:-}" == --* ]]' "dot mcp accepts flag-only form"
+
+test_start "mcp_policy_exists"
+assert_file_exists "$MCP_POLICY_FILE" "mcp-policy.json should exist"
+
+test_start "mcp_lock_exists"
+assert_file_exists "$MCP_LOCK_FILE" "mcp-lock.json should exist"
+
+test_start "mcp_config_local_only_defaults"
+for server in filesystem github brave-search fetch puppeteer; do
+  if grep -q "\"$server\"" "$MCP_CONFIG_FILE"; then
+    ((TESTS_FAILED++))
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: default MCP config should exclude $server"
+  else
+    ((TESTS_PASSED++))
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: default MCP config excludes $server"
+  fi
+done
+
+test_start "mcp_config_uses_pinned_package_refs"
+for package_ref in "mcp-server-git@2025.1.14" "@modelcontextprotocol/server-memory@2025.8.4" "mcp-server-sqlite@2025.1.14"; do
+  if grep -q "$package_ref" "$MCP_CONFIG_FILE"; then
+    ((TESTS_PASSED++))
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: pinned ref present for $package_ref"
+  else
+    ((TESTS_FAILED++))
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: missing pinned ref $package_ref"
+  fi
+done
+
+test_start "mcp_doctor_json_output"
+output=$(REPO_ROOT="$REPO_ROOT" MCP_CONFIG="$MCP_CONFIG_FILE" bash "$TEST_SCRIPT" --json 2>/dev/null) || true
+if [[ "$output" == \{* ]] && [[ "$output" == *"\"status\""* ]] && [[ "$output" == *"\"policy_path\""* ]]; then
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: emits JSON summary"
+else
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should emit JSON summary"
+  printf '%b\n' "    Output: $output"
+fi
+
+test_start "mcp_doctor_strict_local_passes"
+if REPO_ROOT="$REPO_ROOT" MCP_CONFIG="$MCP_CONFIG_FILE" bash "$TEST_SCRIPT" --strict >/dev/null 2>&1; then
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: strict-local baseline passes"
+else
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: strict-local baseline should pass"
+fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

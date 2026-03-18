@@ -141,9 +141,16 @@ cmd_sandbox() {
 
 cmd_mcp() {
   local subcommand="${1:-doctor}"
-  shift || true
+  if [[ "${1:-}" == --* ]] || [[ -z "${1:-}" ]]; then
+    subcommand="doctor"
+  else
+    shift || true
+  fi
   case "$subcommand" in
     doctor)
+      if [[ "${1:-}" == "doctor" ]]; then
+        shift || true
+      fi
       run_script "scripts/diagnostics/mcp-doctor.sh" "MCP doctor script" "$@"
       ;;
     *)
