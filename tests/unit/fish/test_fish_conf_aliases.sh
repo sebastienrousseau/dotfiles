@@ -40,4 +40,8 @@ assert_file_contains "$CAT_FUNCTION_FILE" "command cat" "cat.fish falls back to 
 test_start "fish_alias_bridge_skips_bash_only_dot_helpers"
 assert_file_contains "$CONF_FILE" "string match -rq '^dot_[a-z0-9_]+\$'" "fish alias bridge skips dot_ helper targets"
 
+test_start "fish_alias_bridge_cleans_stale_cat_wrapper"
+assert_file_contains "$CONF_FILE" "if functions -q cat; and not functions -q dot_cat" "fish aliases clean stale cat wrapper"
+assert_file_contains "$CONF_FILE" "functions -e cat" "fish aliases erase stale cat wrapper"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

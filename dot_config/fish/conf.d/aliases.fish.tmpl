@@ -66,4 +66,12 @@ if status is-interactive
     if test -s "$_alias_cache"
         source "$_alias_cache"
     end
+
+    # Remove stale alias wrappers that reference bash-only helper functions.
+    if functions -q cat; and not functions -q dot_cat
+        set -l _cat_def (functions cat)
+        if string match -rq 'dot_cat \$argv' -- "$_cat_def"
+            functions -e cat
+        end
+    end
 end
