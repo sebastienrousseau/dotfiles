@@ -52,9 +52,9 @@ concurrency:
 
 env:
   # Security scanning tool versions
-  TRIVY_VERSION: "0.50.1"
+  TRIVY_VERSION: "0.68.2"
   COSIGN_VERSION: "2.2.3"
-  GRYPE_VERSION: "0.74.7"
+  GRYPE_VERSION: "0.104.3"
 
 jobs:
   # ============================================================================
@@ -132,8 +132,6 @@ jobs:
     name: Security / Infrastructure
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Only run on schedule or manual trigger
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
