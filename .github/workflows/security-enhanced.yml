@@ -97,8 +97,6 @@ jobs:
     name: Security / Dependencies
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # Only run on schedule or manual trigger to save minutes
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -110,13 +108,14 @@ jobs:
           key: grype-db-${{ runner.os }}-${{ github.run_id }}
           restore-keys: grype-db-${{ runner.os }}-
 
-      - name: Install Grype
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin v${{ env.GRYPE_VERSION }}
-
       - name: Scan for vulnerabilities with Grype
         run: |
-          grype . --output sarif --file grype-results.sarif --fail-on critical
+          docker run --rm \
+            -v "$PWD:/work" \
+            -v "$HOME/.cache/grype:/grype-cache" \
+            -w /work \
+            "anchore/grype:v${{ env.GRYPE_VERSION }}" \
+            dir:/work --output sarif --file /work/grype-results.sarif --fail-on critical
 
       - name: Upload Grype results to GitHub Security
         if: always()
@@ -173,14 +172,15 @@ jobs:
         if: hashFiles('**/Dockerfile*') != ''
         run: docker build -f Dockerfile.test -t dotfiles-test:latest .
 
-      - name: Install Trivy
-        run: |
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v${{ env.TRIVY_VERSION }}
-
       - name: Scan container with Trivy
         if: hashFiles('**/Dockerfile*') != ''
         run: |
-          trivy image --security-checks vuln,config,secret --format sarif --output container-scan.sarif dotfiles-test:latest
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$PWD:/work" \
+            -w /work \
+            "aquasec/trivy:${{ env.TRIVY_VERSION }}" \
+            image --security-checks vuln,config,secret --format sarif --output /work/container-scan.sarif dotfiles-test:latest
 
       - name: Upload container scan results
         if: always() && hashFiles('**/Dockerfile*') != ''
