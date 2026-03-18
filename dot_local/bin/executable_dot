@@ -121,6 +121,15 @@ fi
 # Alias ui_fail → ui_err for backward compatibility in this script
 ui_fail() { ui_err "$@"; }
 
+show_version() {
+  ui_header "Dotfiles Version"
+  echo ""
+  ui_ok "Version" ".dotfiles $VERSION"
+  if [[ -n "$_DOT_SRC" ]]; then
+    ui_ok "Source" "$_DOT_SRC"
+  fi
+}
+
 show_help() {
   ui_header "Dotfiles CLI"
   ui_meta "Usage" "dot [command]"
@@ -302,8 +311,8 @@ case "$COMMAND" in
     show_help
     ;;
 
-  --version | -v)
-    ui_info "Version" ".dotfiles $VERSION"
+  --version | -v | version)
+    show_version
     ;;
 
   "")

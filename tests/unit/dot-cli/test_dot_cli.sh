@@ -163,6 +163,17 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: -v should show version"
 fi
 
+# Test: dot version is alias for --version
+test_start "dot_cli_version_cmd"
+output=$(bash "$DOT_CLI" version 2>&1) || true
+if [[ "$output" == *".dotfiles "* ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: version is alias for --version"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: version should show version"
+fi
+
 # Test: dot -h shows help
 test_start "dot_cli_h_flag"
 output=$(bash "$DOT_CLI" -h 2>&1) || true
