@@ -66,7 +66,7 @@ EOF
 main() {
   local version="${1:-v0.2.496}"
   local _cleanup_files=()
-  trap 'rm -f "${_cleanup_files[@]}" 2>/dev/null' EXIT
+  trap 'set +u; rm -f "${_cleanup_files[@]}" 2>/dev/null; set -u' EXIT
 
   case "$version" in
     --help)

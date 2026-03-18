@@ -10,7 +10,7 @@
 set -euo pipefail
 
 _cleanup_files=()
-trap 'rm -f "${_cleanup_files[@]}"' EXIT
+trap 'set +u; rm -f "${_cleanup_files[@]}" 2>/dev/null; set -u' EXIT
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -474,6 +474,11 @@ VERBOSE=0
 main() {
   local command="${1:-status}"
   shift || true
+
+  if [[ "$command" == "help" ]]; then
+    usage
+    exit 0
+  fi
 
   # Parse global options
   while [[ $# -gt 0 ]]; do
