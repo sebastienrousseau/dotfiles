@@ -93,7 +93,7 @@ while [ "$#" -gt 0 ]; do
     --with-integration)
       run_integration=1
       ;;
-    -h|--help)
+    -h | --help)
       usage
       exit 0
       ;;

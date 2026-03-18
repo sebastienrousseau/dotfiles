@@ -139,7 +139,7 @@ fi
 
 # Test: dot --version contains VERSION string from file
 test_start "dot_cli_version_value"
-EXPECTED_VERSION=$(jq -r '.version' "$REPO_ROOT/package.json")
+EXPECTED_VERSION=$(sed -nE 's/^[[:space:]]*"version":[[:space:]]*"([^"]+)".*/\1/p' "$REPO_ROOT/package.json" | head -n 1)
 output=$(bash "$DOT_CLI" --version 2>&1) || true
 if [[ "$output" == *"$EXPECTED_VERSION"* ]]; then
   ((TESTS_PASSED++)) || true
