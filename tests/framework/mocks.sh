@@ -173,6 +173,8 @@ mock_env() {
 
 # Clean up all mocks
 mock_cleanup() {
+  set +u
+
   # Restore PATH
   export PATH="$ORIGINAL_PATH"
 
@@ -200,6 +202,8 @@ mock_cleanup() {
   MOCK_COMMANDS=()
   MOCK_FILES=()
   MOCK_DIRS=()
+
+  set -u
 }
 
 # Setup trap to cleanup on exit
