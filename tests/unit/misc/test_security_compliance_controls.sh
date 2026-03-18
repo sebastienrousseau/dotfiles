@@ -16,6 +16,9 @@ allowed_signers_file="$REPO_ROOT/dot_config/git/allowed_signers"
 flake_lock_file="$REPO_ROOT/flake.lock"
 soup_register_file="$REPO_ROOT/docs/security/SOUP_REGISTER.md"
 automation_secrets_file="$REPO_ROOT/docs/security/AUTOMATION_SECRETS.md"
+mcp_policy_file="$REPO_ROOT/dot_config/dotfiles/mcp-policy.json"
+mcp_lock_file="$REPO_ROOT/dot_config/dotfiles/mcp-lock.json"
+mcp_config_file="$REPO_ROOT/dot_config/claude/mcp_servers.json"
 
 test_start "git_template_enforces_merge_signature_verification"
 assert_file_contains "$gitconfig_template" "verifySignatures = true" "merge signature verification enabled"
@@ -80,5 +83,12 @@ assert_file_contains "$reliability_workflow" "name: Reliability Summary" "reliab
 test_start "compliance_docs_present"
 assert_file_exists "$soup_register_file" "SOUP register exists"
 assert_file_exists "$automation_secrets_file" "automation secrets doc exists"
+
+test_start "mcp_policy_supply_chain_controls_present"
+assert_file_exists "$mcp_policy_file" "mcp policy file exists"
+assert_file_exists "$mcp_lock_file" "mcp lock file exists"
+assert_file_contains "$mcp_policy_file" "\"requireApprovedPackageLock\": true" "mcp policy requires approved package lock"
+assert_file_contains "$mcp_config_file" "@2025.1.14" "mcp config uses pinned release refs"
+assert_file_contains "$mcp_config_file" "@2025.8.4" "mcp config uses pinned memory ref"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

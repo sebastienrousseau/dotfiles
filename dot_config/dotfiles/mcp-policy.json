@@ -1,0 +1,25 @@
+{
+  "policyVersion": "2026.03",
+  "defaultProfile": "strict-local",
+  "profiles": {
+    "strict-local": {
+      "description": "Local-first MCP policy for regulated and high-trust environments.",
+      "allowedLaunchers": ["npx", "node", "uvx"],
+      "blockedFilesystemRoots": ["/", "/home", "/Users"],
+      "blockedArgPatterns": ["^--allow-.*", "^--unsafe$", "^\\*$"],
+      "warnOnUnpinnedNpx": true,
+      "requireApprovedPackageLock": true,
+      "requiredEnvByServer": {
+        "github": ["GITHUB_TOKEN"],
+        "brave-search": ["BRAVE_API_KEY"]
+      },
+      "forbidNetworkServersByDefault": [
+        "github",
+        "brave-search",
+        "fetch",
+        "puppeteer",
+        "filesystem"
+      ]
+    }
+  }
+}
