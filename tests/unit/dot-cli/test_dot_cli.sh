@@ -108,6 +108,7 @@ while IFS= read -r line; do
 done < <(grep -E '^\s+[a-z][-a-z]*\)' "$DOT_CLI")
 
 missing_handlers=0
+set +u
 for cmd in "${help_cmds[@]}"; do
   found=false
   for handler in "${case_handlers[@]}"; do
@@ -128,6 +129,7 @@ for cmd in "${help_cmds[@]}"; do
     missing_handlers=$((missing_handlers + 1))
   fi
 done
+set -u
 
 if [[ $missing_handlers -eq 0 ]]; then
   ((TESTS_PASSED++)) || true
