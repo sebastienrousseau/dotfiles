@@ -19,22 +19,22 @@ dot_log_file() {
   local level="$1" event="$2"
   shift 2
   local log_file="$_DOT_LOG_STATE_DIR/dot.log"
-  mkdir -p "$_DOT_LOG_STATE_DIR"
+  mkdir -p "$_DOT_LOG_STATE_DIR" 2>/dev/null || return 0
   # Rotate at 1MB
   if [[ -f "$log_file" ]]; then
     local size
     size=$(stat -c '%s' "$log_file" 2>/dev/null || stat -f '%z' "$log_file" 2>/dev/null || echo 0)
     if [[ "$size" -gt 1048576 ]]; then
-      mv "$log_file" "${log_file}.1"
+      mv "$log_file" "${log_file}.1" 2>/dev/null || true
     fi
   fi
   printf '[%s] [%s] [%s] %s' \
-    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$level" "$DOT_TRACE_ID" "$event" >>"$log_file"
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$level" "$DOT_TRACE_ID" "$event" >>"$log_file" 2>/dev/null || return 0
   while [[ $# -gt 0 ]]; do
-    printf ' %s' "$1" >>"$log_file"
+    printf ' %s' "$1" >>"$log_file" 2>/dev/null || return 0
     shift
   done
-  printf '\n' >>"$log_file"
+  printf '\n' >>"$log_file" 2>/dev/null || true
 }
 
 # Structured log entry (JSON when DOTFILES_JSON_LOG=1, silent otherwise)
@@ -64,9 +64,9 @@ dot_metric() {
   local ts
   ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   local metrics_file="$_DOT_LOG_STATE_DIR/metrics.jsonl"
-  mkdir -p "$_DOT_LOG_STATE_DIR"
+  mkdir -p "$_DOT_LOG_STATE_DIR" 2>/dev/null || return 0
   printf '{"time":"%s","metric":"%s","value":%s,"unit":"%s","trace_id":"%s"}\n' \
-    "$ts" "$name" "$value" "$unit" "$DOT_TRACE_ID" >>"$metrics_file"
+    "$ts" "$name" "$value" "$unit" "$DOT_TRACE_ID" >>"$metrics_file" 2>/dev/null || true
 }
 
 # Print recent metrics (for `dot metrics` command)

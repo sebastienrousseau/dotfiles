@@ -9,6 +9,16 @@ source "$SCRIPT_DIR/../framework/assertions.sh"
 
 HEALTH_SCRIPT="$REPO_ROOT/scripts/diagnostics/health.sh"
 
+run_health_with_timeout() {
+  local timeout_cmd=""
+  timeout_cmd="$(command -v timeout || command -v gtimeout || true)"
+  if [[ -n "$timeout_cmd" ]]; then
+    "$timeout_cmd" 30 bash "$HEALTH_SCRIPT" >/dev/null 2>&1
+    return $?
+  fi
+  bash "$HEALTH_SCRIPT" >/dev/null 2>&1
+}
+
 # ── Script existence and structure ──────────────────────────────
 
 test_start "health_check_exists"
@@ -31,7 +41,7 @@ assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
 
 test_start "health_check_runs_without_crash"
 exit_code=0
-timeout 30 bash "$HEALTH_SCRIPT" >/dev/null 2>&1 || exit_code=$?
+run_health_with_timeout || exit_code=$?
 # Health check may return 1 for failures — that's OK, we just want no crash (exit > 1)
 if [[ $exit_code -le 1 ]]; then
   ((TESTS_PASSED++))
@@ -42,7 +52,7 @@ else
 fi
 
 test_start "health_check_json_flag"
-if grep -q '\-\-json\|json' "$HEALTH_SCRIPT"; then
+if grep -Eq -- '--json|json' "$HEALTH_SCRIPT"; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: supports JSON output mode"
 else
