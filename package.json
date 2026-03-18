@@ -7,7 +7,11 @@
     "dotfiles-install": "./install.sh"
   },
   "scripts": {
-    "test": "bash -n install.sh && echo 'Syntax OK'",
+    "test": "bash ./scripts/qa/reliability-audit.sh",
+    "test:quick": "bash ./scripts/qa/reliability-audit.sh --quick",
+    "test:unit": "bash ./scripts/qa/reliability-audit.sh --unit-only",
+    "test:integration": "bash ./scripts/qa/reliability-audit.sh --with-integration",
+    "examples": "bash ./scripts/qa/validate-examples.sh",
     "lint": "shellcheck install.sh scripts/**/*.sh"
   },
   "repository": {
