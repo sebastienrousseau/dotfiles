@@ -507,10 +507,12 @@ main() {
 
   # Concurrency guard
   LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/dotfiles-rollback.lock"
-  exec 9>"$LOCK_FILE"
-  if ! flock -n 9; then
-    ui_warn "Already running" "Another rollback instance is active"
-    exit 0
+  if command -v flock >/dev/null 2>&1; then
+    exec 9>"$LOCK_FILE"
+    if ! flock -n 9; then
+      ui_warn "Already running" "Another rollback instance is active"
+      exit 0
+    fi
   fi
 
   dot_log info "rollback_start" "command=$command"
