@@ -6,6 +6,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 CONF_FILE="$REPO_ROOT/dot_config/fish/conf.d/aliases.fish.tmpl"
+CAT_FUNCTION_FILE="$REPO_ROOT/dot_config/fish/functions/cat.fish"
 
 test_start "fish_conf_aliases_exists"
 assert_file_exists "$CONF_FILE" "aliases.fish.tmpl should exist"
@@ -27,5 +28,16 @@ else
   ((TESTS_FAILED++))
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should contain fish syntax"
 fi
+
+test_start "fish_cat_function_exists"
+assert_file_exists "$CAT_FUNCTION_FILE" "cat.fish should exist"
+
+test_start "fish_cat_function_uses_bat_fallback"
+assert_file_contains "$CAT_FUNCTION_FILE" "function cat" "cat.fish defines cat function"
+assert_file_contains "$CAT_FUNCTION_FILE" "command -v bat" "cat.fish checks for bat"
+assert_file_contains "$CAT_FUNCTION_FILE" "command cat" "cat.fish falls back to system cat"
+
+test_start "fish_alias_bridge_skips_bash_only_dot_helpers"
+assert_file_contains "$CONF_FILE" "string match -rq '^dot_[a-z0-9_]+\$'" "fish alias bridge skips dot_ helper targets"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
