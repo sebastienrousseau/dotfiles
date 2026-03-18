@@ -19,6 +19,7 @@ assert_file_contains "$gitconfig_template" "verifySignatures = true" "merge sign
 
 test_start "git_template_points_to_allowed_signers"
 assert_file_contains "$gitconfig_template" "allowedSignersFile" "allowed signers file configured"
+assert_file_contains "$gitconfig_template" ".config/git/allowed_signers" "allowed signers file uses managed git config path"
 
 test_start "update_deps_uses_signed_commits"
 assert_file_contains "$update_deps_workflow" "git commit -S -m" "dependency updates use signed commits"
@@ -50,6 +51,17 @@ else
 fi
 assert_file_contains "$security_workflow" "anchore/grype:v" "grype uses pinned container image"
 assert_file_contains "$security_workflow" "aquasec/trivy:" "trivy uses pinned container image"
+assert_file_contains "$security_workflow" "GRYPE_VERSION: \"0.104.3\"" "grype version updated beyond known affected range"
+assert_file_contains "$security_workflow" "TRIVY_VERSION: \"0.68.2\"" "trivy version updated beyond known affected range"
+
+test_start "security_pipeline_runs_checkov_on_core_events"
+if ! sed -n '/infrastructure-scan:/,/container-scan:/p' "$security_workflow" | grep -q "if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'"; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: checkov scan is not schedule-only"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: checkov scan is still schedule-only"
+fi
 
 test_start "allowed_signers_file_documented"
 assert_file_contains "$allowed_signers_file" "Git verifies SSH-signed commits" "allowed signers file documents trust roster"
