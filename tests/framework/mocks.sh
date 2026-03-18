@@ -11,9 +11,13 @@ MOCK_DIRS=()
 ORIGINAL_PATH="$PATH"
 MOCK_BIN_DIR=""
 
+portable_mktemp_dir() {
+  mktemp -d 2>/dev/null || mktemp -d -t dotfiles-tests
+}
+
 # Initialize mock environment
 mock_init() {
-  MOCK_BIN_DIR=$(mktemp -d)
+  MOCK_BIN_DIR=$(portable_mktemp_dir)
   export MOCK_BIN_DIR
   export PATH="$MOCK_BIN_DIR:$PATH"
   MOCK_COMMANDS=()
@@ -113,7 +117,7 @@ mock_file() {
 mock_dir() {
   local prefix="${1:-mock}"
   local dir
-  dir=$(mktemp -d -t "${prefix}.XXXXXX")
+  dir=$(mktemp -d -t "${prefix}.XXXXXX" 2>/dev/null || mktemp -d -t "$prefix")
   MOCK_DIRS+=("$dir")
   echo "$dir"
 }
@@ -124,7 +128,7 @@ mock_archive() {
   local type="$1"
   local content="${2:-test content}"
   local temp_dir
-  temp_dir=$(mktemp -d)
+  temp_dir=$(portable_mktemp_dir)
   local temp_file="$temp_dir/test_file.txt"
   local archive
 

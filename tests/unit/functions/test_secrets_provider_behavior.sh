@@ -19,7 +19,7 @@ fi
 
 # secrets_provider.sh uses set -euo pipefail; source tolerantly.
 # We also override the globals to point at temp directories.
-_TMP_SECRETS=$(mktemp -d)
+_TMP_SECRETS=$(portable_mktemp_dir)
 export DOT_SECRETS_HOME="$_TMP_SECRETS"
 export DOT_SECRETS_STORE_DIR="$_TMP_SECRETS/store"
 export DOT_SECRETS_INDEX_FILE="$_TMP_SECRETS/index.txt"
@@ -30,7 +30,7 @@ source "$SECRETS_FILE" 2>/dev/null || {
   echo "RESULTS:0:0:0"
   exit 0
 }
-set +e  # tests need to handle errors explicitly
+set +e # tests need to handle errors explicitly
 
 mock_init
 
@@ -42,7 +42,7 @@ _clear_provider_env() {
   # Hide all known provider binaries from PATH:
   # security, pass, age are mocked via MOCK_BIN_DIR; clear them.
   rm -f "$MOCK_BIN_DIR/security" "$MOCK_BIN_DIR/pass" "$MOCK_BIN_DIR/age" \
-        "$MOCK_BIN_DIR/age-keygen" 2>/dev/null || true
+    "$MOCK_BIN_DIR/age-keygen" 2>/dev/null || true
   # Ensure we're on non-darwin so the OSTYPE guard doesn't trip.
   export OSTYPE="linux-gnu"
 }
@@ -125,9 +125,9 @@ assert_file_exists "$DOT_SECRETS_INDEX_FILE" "ensure_layout should create index 
 # 8. dot_secrets_index_add adds a key to the index (no duplicates)
 # ──────────────────────────────────────────────────────────────────────────────
 test_start "secrets_index_add_no_duplicate"
-> "$DOT_SECRETS_INDEX_FILE"
+>"$DOT_SECRETS_INDEX_FILE"
 dot_secrets_index_add "my-key"
-dot_secrets_index_add "my-key"   # second call — should not duplicate
+dot_secrets_index_add "my-key" # second call — should not duplicate
 count=$(grep -cxF "my-key" "$DOT_SECRETS_INDEX_FILE" || true)
 assert_equals "1" "$count" "index should contain 'my-key' exactly once after two adds"
 
@@ -135,7 +135,7 @@ assert_equals "1" "$count" "index should contain 'my-key' exactly once after two
 # 9. dot_secrets_index_list returns sorted unique keys
 # ──────────────────────────────────────────────────────────────────────────────
 test_start "secrets_index_list_sorted_unique"
-> "$DOT_SECRETS_INDEX_FILE"
+>"$DOT_SECRETS_INDEX_FILE"
 printf "zebra\nalpha\nalpha\nbeta\n" >>"$DOT_SECRETS_INDEX_FILE"
 result=$(dot_secrets_index_list)
 expected="alpha

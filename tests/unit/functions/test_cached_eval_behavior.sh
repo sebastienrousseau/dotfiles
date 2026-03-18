@@ -25,10 +25,11 @@ source "$SCRIPT_DIR/../../framework/mocks.sh"
 #     - cache file: $_SHELL_CACHE/<label>.sh
 #     - invalidated when command binary is newer than cache file
 # ──────────────────────────────────────────────────────────────────────────────
-_SHELL_CACHE=$(mktemp -d)
+_SHELL_CACHE=$(portable_mktemp_dir)
 
 _cached_eval() {
-  local label="$1"; shift
+  local label="$1"
+  shift
   local cache="$_SHELL_CACHE/${label}.sh"
   local bin
   bin=$(command -v "$1" 2>/dev/null || true)
@@ -37,7 +38,7 @@ _cached_eval() {
     # shellcheck source=/dev/null
     source "$cache"
   else
-    "$@" > "$cache" 2>/dev/null
+    "$@" >"$cache" 2>/dev/null
     # shellcheck source=/dev/null
     source "$cache"
   fi
@@ -72,7 +73,7 @@ exit 0
 EOF
 chmod +x "$MOCK_BIN_DIR/mycmd1"
 # The cache was created above; it should be at least as new as the binary.
-touch "$_SHELL_CACHE/test_label1.sh"   # ensure cache is fresh
+touch "$_SHELL_CACHE/test_label1.sh" # ensure cache is fresh
 _cached_eval "test_label1" mycmd1
 # Variable should still reflect the cached (first_run) content, not second_run
 assert_equals "first_run" "${CACHED_EVAL_VAR1:-}" "second call should read from cache, not re-execute"
@@ -93,8 +94,8 @@ mock_command_spy "mycmd2" "export CACHED_EVAL_VAR2=old_cached"
 # First call: build cache.
 _cached_eval "test_label2" mycmd2
 
-# Simulate binary being updated (touch binary to be newer than cache).
-sleep 0.1 2>/dev/null || true   # tiny gap to ensure mtime difference
+# Simulate binary being updated with deterministic mtimes.
+touch -t 200001010000 "$_SHELL_CACHE/test_label2.sh"
 # Update the spy output to reflect new binary behavior.
 cat >"$MOCK_BIN_DIR/mycmd2" <<'EOF'
 #!/usr/bin/env bash
@@ -103,7 +104,7 @@ echo "export CACHED_EVAL_VAR2=new_binary"
 exit 0
 EOF
 chmod +x "$MOCK_BIN_DIR/mycmd2"
-touch "$MOCK_BIN_DIR/mycmd2"    # make binary newer than cache
+touch -t 203001010000 "$MOCK_BIN_DIR/mycmd2"
 
 # Reset the variable so we can detect re-execution.
 unset CACHED_EVAL_VAR2
@@ -134,7 +135,7 @@ assert_file_exists "$_SHELL_CACHE/label_b.sh" "label_b cache file should exist"
 # ──────────────────────────────────────────────────────────────────────────────
 test_start "cached_eval_separate_labels_separate_vars"
 assert_equals "alpha" "${_CE_A:-}" "label_a should have set _CE_A=alpha"
-assert_equals "beta"  "${_CE_B:-}" "label_b should have set _CE_B=beta"
+assert_equals "beta" "${_CE_B:-}" "label_b should have set _CE_B=beta"
 
 # Cleanup
 rm -rf "$_SHELL_CACHE"

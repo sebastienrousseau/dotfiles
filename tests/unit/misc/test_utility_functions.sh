@@ -13,6 +13,16 @@ FUNCS_DIR="$REPO_ROOT/.chezmoitemplates/functions"
 
 echo "Testing utility functions..."
 
+run_hostinfo_capture() {
+  local timeout_cmd=""
+  timeout_cmd="$(command -v timeout || command -v gtimeout || true)"
+  if [[ -n "$timeout_cmd" ]]; then
+    "$timeout_cmd" 5 bash -c 'source "'"$FUNCS_DIR/system/hostinfo.sh"'" && hostinfo' 2>&1
+    return
+  fi
+  bash -c 'source "'"$FUNCS_DIR/system/hostinfo.sh"'" && hostinfo' 2>&1
+}
+
 # ============ hostinfo ============
 
 if [[ -f "$FUNCS_DIR/system/hostinfo.sh" ]]; then
@@ -42,9 +52,8 @@ fi
 
 test_start "hostinfo_shows_username"
 if type hostinfo &>/dev/null; then
-  # Use timeout to avoid network-dependent delays (hostinfo fetches public IP)
   set +e
-  output=$(timeout 5 bash -c 'source "'"$FUNCS_DIR/system/hostinfo.sh"'" && hostinfo' 2>&1)
+  output=$(run_hostinfo_capture)
   set -e
   if [[ "$output" == *"Username"* ]]; then
     ((TESTS_PASSED++)) || true
@@ -59,7 +68,7 @@ fi
 test_start "hostinfo_shows_hostname"
 if type hostinfo &>/dev/null; then
   set +e
-  output=$(timeout 5 bash -c 'source "'"$FUNCS_DIR/system/hostinfo.sh"'" && hostinfo' 2>&1)
+  output=$(run_hostinfo_capture)
   set -e
   if [[ "$output" == *"Hostname"* ]]; then
     ((TESTS_PASSED++)) || true
@@ -67,6 +76,7 @@ if type hostinfo &>/dev/null; then
   else
     ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: output should contain Hostname"
+    printf '%b\n' "    Output: ${output:0:200}"
   fi
 fi
 
