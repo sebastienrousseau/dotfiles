@@ -1,25 +1,6 @@
-<p align="center">
-  <img src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg" alt="Dotfiles logo" width="128" />
-</p>
+# Dotfiles
 
-<h1 align="center">.dotfiles</h1>
-
-<p align="center">
-  <strong>Cross-platform shell configuration for macOS, Linux, and WSL. Managed by Chezmoi.</strong>
-</p>
-
-<p align="center">
-  <a href="https://github.com/sebastienrousseau/dotfiles/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge&logo=github" alt="Build" /></a>
-  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.496-blue?style=for-the-badge" alt="Version" /></a>
-  <a href="https://github.com/sebastienrousseau/dotfiles/releases"><img src="https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge" alt="Downloads" /></a>
-  <a href="https://codespaces.new/sebastienrousseau/dotfiles"><img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces" /></a>
-</p>
-
-<p align="center">
-  <img src="docs/themes/hero-shot.svg" alt="Terminal preview showing dot doctor output" width="600" />
-</p>
-
----
+Fast, signed shell setup for macOS, Linux, and WSL. Managed by Chezmoi.
 
 ## Install
 
@@ -27,158 +8,67 @@
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
 ```
 
-Then verify:
+Requires `git` and `curl`.
+
+## Verify
 
 ```bash
+dot --version
 dot doctor
+dot help
 ```
 
-Requires `git` and `curl`. Works on macOS, Ubuntu/Debian, Arch, and WSL2. Typical install: **3–5 minutes**.
-
-### Quick Start
-
-1. **Install** — run the one-liner above, then `dot doctor` to verify
-2. **Explore** — run `dot learn` for an interactive tour of every command
-3. **Customize** — drop scripts into `~/.config/shell/custom/` (auto-sourced)
-
-Use `--minimal` to skip Neovim, tmux, and zellij for servers or containers.
-
-<details>
-<summary>CI/CD and Docker options</summary>
-
-Non-interactive install:
+## Use
 
 ```bash
-DOTFILES_SILENT=1 DOTFILES_NONINTERACTIVE=1 \
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
+dot learn
+dot update
+dot apply
 ```
 
-Docker sandbox:
+## Platforms
 
-```bash
-docker run --rm -e DOTFILES_NONINTERACTIVE=1 ubuntu:24.04 bash -c \
-  'apt-get update -qq && apt-get install -y -qq git curl sudo >/dev/null 2>&1 \
-  && git clone --depth 1 https://github.com/sebastienrousseau/dotfiles.git ~/.dotfiles \
-  && bash ~/.dotfiles/install.sh \
-  && export PATH="$HOME/.local/bin:$PATH" \
-  && dot doctor'
-```
+- macOS
+- Linux
+- WSL
 
-</details>
+## What’s included
 
----
+- Zsh, Fish, and Nushell
+- Mise and Nix
+- Encrypted secrets
+- Signed commits
+- Reliability and security gates
 
-## Overview
+## Day 1 path
 
-An idempotent shell environment that gives you the same setup on every machine. Chezmoi handles templates, feature flags, and platform differences.
+1. Install.
+2. Verify with `dot doctor`.
+3. Explore with `dot learn`.
+4. Customize with files in `~/.config/shell/custom/`.
 
-- **Encrypted secrets** via Age/SOPS — no plaintext credentials in the repo
-- **Isolated runtimes** through Mise and Nix — nothing installed system-wide
-- **Self-healing** with `dot heal` — auto-installs missing tools
-- **Telemetry disabled** by default — no data leaves your machine
+## Reference
 
----
+- [Install guide](docs/guides/INSTALL.md)
+- [Documentation index](docs/README.md)
+- [Utilities and `dot` CLI](docs/reference/UTILS.md)
+- [Support matrix](docs/reference/SUPPORT_MATRIX.md)
+- [Troubleshooting](docs/guides/TROUBLESHOOTING.md)
+- [Contributing](CONTRIBUTING.md)
 
 ## Architecture
 
-Run once or a hundred times — the result is the same.
-
 ```mermaid
-graph TD
-    A[User Shell] --> B{dot CLI}
-    B --> C[Diagnostics: dot doctor / smoke-test]
-    B --> D[Maintenance: dot update / prewarm]
-    B --> E[Lifecycle: dot apply / rollback]
-    D --> F[Chezmoi Source]
-    F --> G[Zsh / Fish / Bash Configs]
-    F --> H[Tool Runtimes: Mise / Nix]
-    G --> I[~/.cache/shell/: Fast Init]
+flowchart LR
+  A[Install] --> B[Verify]
+  B --> C[Use]
+  C --> D[Customize]
+  D --> E[Contribute]
+
+  A --> A1[macOS]
+  A --> A2[Linux]
+  A --> A3[WSL]
 ```
-
----
-
-## Features
-
-| | |
-| :--- | :--- |
-| **Startup** | < 50ms first prompt via lazy-hydration (`_cached_eval`) |
-| **Shells** | Zsh, Fish, Nushell with shared alias and function core |
-| **Platforms** | macOS, Ubuntu/Debian, Arch, WSL2 |
-| **Runtimes** | Mise (polyglot) and Nix Flakes (deterministic) |
-| **Secrets** | Age + SOPS encryption with provider-aware storage |
-| **Signing** | SSH ED25519 commit signing enforced |
-| **Backups** | Atomic snapshot on every `dot apply` |
-| **Testing** | 1,800+ assertions, 100% module coverage |
-| **CI** | ShellCheck, shfmt, compliance guard, CodeQL |
-
----
-
-## The `dot` CLI
-
-| Command | What it does |
-| :--- | :--- |
-| `dot apply` | Propagate configuration changes |
-| `dot update` | Pull latest and pre-warm caches |
-| `dot doctor` | Validate paths, versions, and security |
-| `dot heal` | Auto-repair missing tools and broken state |
-| `dot smoke-test` | Verify toolchains (Rust, Go, AI CLIs) |
-| `dot lint` | Lint shell scripts (`--fix` to auto-format, `--check` for CI) |
-| `dot benchmark --waterfall` | ASCII waterfall chart of startup component timings |
-| `dot bundle` | Create an offline portable archive |
-
-Full reference: [docs/reference/UTILS.md](docs/reference/UTILS.md)
-
----
-
-## What's Included
-
-<details>
-<summary><b>Shells and Navigation</b></summary>
-
-- **Zsh** — primary shell with modular `rc.d` deferred loading
-- **Fish** — interactive shell with `_cached_eval` startup optimization
-- **Nushell** — structured data processing through shell pipelines
-- **Starship** — cross-shell prompt that shows only what matters
-- **Zoxide** — directory jumper that learns your habits
-- **Atuin** — searchable shell history synced across machines
-- **fzf** — fuzzy finder for files, history, and git
-</details>
-
-<details>
-<summary><b>Development and Runtimes</b></summary>
-
-- **Mise** — polyglot runtime manager (Node, Python, Go, Rust)
-- **Nix Flakes** — declarative, reproducible toolchains
-- **Pueue** — background task queue for long-running jobs
-- **Neovim** — Lua-based IDE config with lazy.nvim
-- **Lazygit** — terminal UI for Git workflows
-</details>
-
-<details>
-<summary><b>Security and Secrets</b></summary>
-
-- **Age / SOPS** — encrypted secrets at rest, never committed in plaintext
-- **SSH signing** — ED25519 commit signing enforced on every commit
-- **Gitleaks** — pre-commit scanning prevents credential leaks
-- **Telemetry disabled** — OS-level kill switches, no opt-out needed
-- **Audit trail** — every `dot` command logged to `~/.local/share/dotfiles.log`
-</details>
-
-For hardening options, see the [Security docs](docs/security/SECURITY.md).
-
----
-
-## Extending
-
-Customize without forking — drop files into these directories and they are picked up automatically.
-
-| Path | Purpose |
-| :--- | :--- |
-| `~/.config/shell/custom/` | Drop-in shell extensions (auto-sourced by Zsh and Fish) |
-| `~/.config/zsh/rc.d/` | Numeric-prefixed Zsh modules (e.g. `99-my-stuff.zsh`) |
-| `.chezmoidata.toml` `[features]` | Feature flags to toggle modules on/off |
-
-**Adding custom aliases or functions** — create a file in `~/.config/shell/custom/` (e.g. `my-aliases.sh`). It will be sourced on every new shell without touching upstream files.
 
 ---
 
@@ -187,15 +77,6 @@ Customize without forking — drop files into these directories and they are pic
 
 ---
 
-## Links
-
-- [Changelog](CHANGELOG.md)
-- [Full documentation](docs/README.md)
-- [Install guide](docs/guides/INSTALL.md)
-- [Troubleshooting](docs/guides/TROUBLESHOOTING.md)
-
 ## License
 
-Licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
-
-<p align="right"><a href="#dotfiles">Back to Top</a></p>
+Licensed under the [MIT License](LICENSE).
