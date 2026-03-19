@@ -30,7 +30,7 @@ _dotfiles_bento_render() {
 
   # Render a fixed-width card (42 cols) so output aligns in any terminal width
   printf "\n"
-  printf "  ${c_cyan}${c_bold}💎  D O T F I L E S${c_reset}  ${c_slate}[v0.2.496]${c_reset}\n"
+  printf "  ${c_cyan}${c_bold}💎  D O T F I L E S${c_reset}  ${c_slate}[v0.2.497]${c_reset}\n"
   printf "  ${c_slate}──────────────────────────────────────────${c_reset}\n"
 
   # Key system properties at a glance — answers "is my env healthy?" in 1 second

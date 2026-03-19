@@ -60,12 +60,17 @@ JSON_VALID=0
 SERVER_COUNT=0
 POLICY_WARN_ON_UNPINNED_NPX=0
 REQUIRE_APPROVED_PACKAGE_LOCK=0
+REQUIRE_REGISTRY_ENTRY=0
+REQUIRE_HTTPS_FOR_HTTP=0
+REQUIRE_OAUTH_FOR_HTTP=0
 ALLOWED_LAUNCHERS='["npx","node","uvx"]'
+TRUSTED_TRANSPORTS='["stdio"]'
 BLOCKED_PATHS='["/","/home","/Users"]'
 BLOCKED_ARG_PATTERNS='["^--allow-.*","^--unsafe$","^\\\\*$"]'
 FORBIDDEN_DEFAULT_SERVERS='[]'
 REQUIRED_ENV_RULES='{}'
 APPROVED_PACKAGE_LOCK='{}'
+APPROVED_REGISTRY='{}'
 
 log_success() {
   if [[ "$JSON_MODE" -ne 1 ]]; then
@@ -95,6 +100,7 @@ fi
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 MCP_POLICY_CONFIG="${MCP_POLICY_CONFIG:-$REPO_ROOT/dot_config/dotfiles/mcp-policy.json}"
 MCP_LOCK_CONFIG="${MCP_LOCK_CONFIG:-$REPO_ROOT/dot_config/dotfiles/mcp-lock.json}"
+MCP_REGISTRY_CONFIG="${MCP_REGISTRY_CONFIG:-$REPO_ROOT/dot_config/dotfiles/mcp-registry.json}"
 
 if [[ "$JSON_MODE" -ne 1 ]]; then
   ui_init
@@ -108,16 +114,30 @@ if command -v jq >/dev/null 2>&1 && [[ -f "$MCP_POLICY_CONFIG" ]] && jq empty "$
   BLOCKED_ARG_PATTERNS="$(jq -c '.profiles[.defaultProfile].blockedArgPatterns // ["^--allow-.*","^--unsafe$","^\\\\*$"]' "$MCP_POLICY_CONFIG")"
   FORBIDDEN_DEFAULT_SERVERS="$(jq -c '.profiles[.defaultProfile].forbidNetworkServersByDefault // []' "$MCP_POLICY_CONFIG")"
   REQUIRED_ENV_RULES="$(jq -c '.profiles[.defaultProfile].requiredEnvByServer // {}' "$MCP_POLICY_CONFIG")"
+  TRUSTED_TRANSPORTS="$(jq -c '.profiles[.defaultProfile].trustedTransports // ["stdio"]' "$MCP_POLICY_CONFIG")"
   if [[ "$(jq -r '.profiles[.defaultProfile].warnOnUnpinnedNpx // false' "$MCP_POLICY_CONFIG")" == "true" ]]; then
     POLICY_WARN_ON_UNPINNED_NPX=1
   fi
   if [[ "$(jq -r '.profiles[.defaultProfile].requireApprovedPackageLock // false' "$MCP_POLICY_CONFIG")" == "true" ]]; then
     REQUIRE_APPROVED_PACKAGE_LOCK=1
   fi
+  if [[ "$(jq -r '.profiles[.defaultProfile].requireRegistryEntry // false' "$MCP_POLICY_CONFIG")" == "true" ]]; then
+    REQUIRE_REGISTRY_ENTRY=1
+  fi
+  if [[ "$(jq -r '.profiles[.defaultProfile].requireHttpsForHttpTransports // false' "$MCP_POLICY_CONFIG")" == "true" ]]; then
+    REQUIRE_HTTPS_FOR_HTTP=1
+  fi
+  if [[ "$(jq -r '.profiles[.defaultProfile].requireOauthForHttpTransports // false' "$MCP_POLICY_CONFIG")" == "true" ]]; then
+    REQUIRE_OAUTH_FOR_HTTP=1
+  fi
 fi
 
 if command -v jq >/dev/null 2>&1 && [[ -f "$MCP_LOCK_CONFIG" ]] && jq empty "$MCP_LOCK_CONFIG" >/dev/null 2>&1; then
   APPROVED_PACKAGE_LOCK="$(jq -c '.packages // {}' "$MCP_LOCK_CONFIG")"
+fi
+
+if command -v jq >/dev/null 2>&1 && [[ -f "$MCP_REGISTRY_CONFIG" ]] && jq empty "$MCP_REGISTRY_CONFIG" >/dev/null 2>&1; then
+  APPROVED_REGISTRY="$(jq -c '.servers // {}' "$MCP_REGISTRY_CONFIG")"
 fi
 
 [[ "$JSON_MODE" -ne 1 ]] && ui_header "Config File"
@@ -149,6 +169,15 @@ else
     log_warn "Package lock" "not found (strict-local expects a tracked lock file)"
   else
     log_success "Package lock" "not required"
+  fi
+fi
+if [[ -f "$MCP_REGISTRY_CONFIG" ]]; then
+  log_success "Registry" "$MCP_REGISTRY_CONFIG"
+else
+  if [[ "$REQUIRE_REGISTRY_ENTRY" -eq 1 ]]; then
+    log_warn "Registry" "not found (strict-local expects a tracked registry file)"
+  else
+    log_success "Registry" "not required"
   fi
 fi
 
@@ -221,6 +250,60 @@ if command -v jq >/dev/null 2>&1; then
       done <<<"$forbidden_default_servers"
     else
       log_success "Default server policy" "local-only default set"
+    fi
+
+    invalid_transports="$(jq -r --argjson trusted "$TRUSTED_TRANSPORTS" '
+      .mcpServers
+      | to_entries[]?
+      | .key as $name
+      | (.value.transport // "stdio") as $transport
+      | select(([$trusted[] | select(. == $transport)] | length) == 0)
+      | "\($name):\($transport)"
+    ' "$MCP_CONFIG" 2>/dev/null || true)"
+    if [[ -n "$invalid_transports" ]]; then
+      while IFS= read -r item; do
+        [[ -z "$item" ]] && continue
+        log_warn "Transport policy" "review untrusted transport $item"
+      done <<<"$invalid_transports"
+    else
+      log_success "Transport policy" "all servers use trusted transports"
+    fi
+
+    if [[ "$REQUIRE_HTTPS_FOR_HTTP" -eq 1 ]]; then
+      insecure_http_servers="$(jq -r '
+        .mcpServers
+        | to_entries[]?
+        | select((.value.transport // "") == "http")
+        | select((.value.url // "") | startswith("https://") | not)
+        | .key
+      ' "$MCP_CONFIG" 2>/dev/null || true)"
+      if [[ -n "$insecure_http_servers" ]]; then
+        while IFS= read -r item; do
+          [[ -z "$item" ]] && continue
+          log_warn "Transport security" "$item uses non-HTTPS HTTP transport"
+        done <<<"$insecure_http_servers"
+      else
+        log_success "Transport security" "HTTP transports are HTTPS"
+      fi
+    fi
+
+    if [[ "$REQUIRE_OAUTH_FOR_HTTP" -eq 1 ]]; then
+      non_oauth_http_servers="$(jq -r --argjson registry "$APPROVED_REGISTRY" '
+        .mcpServers
+        | to_entries[]?
+        | .key as $name
+        | select((.value.transport // "") == "http")
+        | select(($registry[$name].auth // "") != "oauth2")
+        | $name
+      ' "$MCP_CONFIG" 2>/dev/null || true)"
+      if [[ -n "$non_oauth_http_servers" ]]; then
+        while IFS= read -r item; do
+          [[ -z "$item" ]] && continue
+          log_warn "Auth policy" "$item HTTP transport is not registered for OAuth2"
+        done <<<"$non_oauth_http_servers"
+      else
+        log_success "Auth policy" "HTTP transports are registry-approved for OAuth2"
+      fi
     fi
 
     env_vars="$(
@@ -303,6 +386,32 @@ if command -v jq >/dev/null 2>&1; then
         done <<<"$approved_package_mismatches"
       else
         log_success "Package lock" "all active servers match approved package refs"
+      fi
+    fi
+
+    if [[ "$REQUIRE_REGISTRY_ENTRY" -eq 1 ]]; then
+      registry_mismatches="$(jq -r --argjson registry "$APPROVED_REGISTRY" '
+        .mcpServers
+        | to_entries[]?
+        | .key as $server
+        | (.value.command // "") as $command
+        | (.value.transport // "stdio") as $transport
+        | ((.value.args // []) | map(select(test("^[A-Za-z0-9@._/-]+@[A-Za-z0-9._-]+$"))) | .[0] // "") as $pkg
+        | (.value.url // "") as $url
+        | select(($registry[$server] | type) != "object"
+            or ($registry[$server].transport // "stdio") != $transport
+            or ($registry[$server].launcher // "") != $command
+            or (($command == "npx") and (($registry[$server].package // "") != $pkg))
+            or (($transport == "http") and (($registry[$server].url // "") != $url)))
+        | "\($server)\t\($transport)\t\($command)\t\($pkg)\t\($url)"
+      ' "$MCP_CONFIG" 2>/dev/null || true)"
+      if [[ -n "$registry_mismatches" ]]; then
+        while IFS=$'\t' read -r server transport command pkg url; do
+          [[ -z "${server:-}" ]] && continue
+          log_warn "Registry policy" "$server is missing or diverges from the tracked MCP registry"
+        done <<<"$registry_mismatches"
+      else
+        log_success "Registry policy" "all active servers match the tracked MCP registry"
       fi
     fi
   fi

@@ -1,6 +1,6 @@
 # Dotfiles
 
-Fast, signed shell setup for macOS, Linux, and WSL. Managed by Chezmoi.
+Fast, signed shell setup for macOS, Linux, WSL, and PowerShell. Managed by Chezmoi.
 
 ## Install
 
@@ -26,6 +26,7 @@ dot help
 dot learn
 dot update
 dot apply
+dot mode list
 ```
 
 ## Platforms
@@ -33,10 +34,12 @@ dot apply
 - macOS
 - Linux
 - WSL
+- PowerShell 7.5+
 
 ## What’s included
 
 - Zsh, Fish, and Nushell
+- PowerShell profile and cross-shell `dot` entrypoint
 - Mise and Nix
 - Encrypted secrets
 - Signed commits
@@ -48,6 +51,7 @@ dot apply
 2. Verify with `dot doctor`.
 3. Explore with `dot learn`.
 4. Customize with files in `~/.config/shell/custom/`.
+5. Select a bounded agent profile with `dot mode list`.
 
 ## Reference
 

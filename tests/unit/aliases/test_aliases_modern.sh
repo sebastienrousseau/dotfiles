@@ -33,4 +33,14 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
 
+test_start "alias_modern_tooling_coverage"
+MODERN_FILE="$ALIASES_DIR/modern.aliases.sh"
+assert_file_contains "$MODERN_FILE" "alias ms='mise'" "modern aliases include mise"
+assert_file_contains "$MODERN_FILE" "alias nx='nix'" "modern aliases include nix"
+assert_file_contains "$MODERN_FILE" "alias j='just'" "modern aliases include just"
+assert_file_contains "$MODERN_FILE" "alias zz='zoxide'" "modern aliases include zoxide"
+assert_file_contains "$MODERN_FILE" "alias de='direnv'" "modern aliases include direnv"
+assert_file_contains "$MODERN_FILE" "alias ghpr='gh pr view --web'" "modern aliases include gh"
+assert_file_contains "$MODERN_FILE" "alias p='podman'" "modern aliases include podman"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

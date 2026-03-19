@@ -18,13 +18,17 @@ Properties:
 
 The source of truth lives in [mcp-policy.json](/home/seb/.dotfiles/dot_config/dotfiles/mcp-policy.json).
 Approved package pins live in [mcp-lock.json](/home/seb/.dotfiles/dot_config/dotfiles/mcp-lock.json).
+Tracked server registry entries live in [mcp-registry.json](/home/seb/.dotfiles/dot_config/dotfiles/mcp-registry.json).
 
 Current defaults:
 - Allowed launchers: `npx`, `node`, `uvx`
+- Trusted transports: `stdio`, `http`
 - Blocked filesystem roots: `/`, `/home`, `/Users`
 - Blocked argument patterns: `^--allow-.*`, `^--unsafe$`, `^\\*$`
 - Network-facing servers disabled by default: `github`, `brave-search`, `fetch`, `puppeteer`, `filesystem`
 - Approved packages must resolve through the tracked MCP lock manifest
+- Every active server must match the tracked MCP registry
+- HTTP transports must use `https://` and registry-declared OAuth2
 
 ## Validation
 
@@ -33,6 +37,7 @@ Run:
 ```bash
 dot mcp --strict
 dot mcp --strict --json
+dot mcp registry
 ```
 
 The JSON form is the audit artifact for CI, release validation, and workstation attestation.
@@ -57,3 +62,5 @@ Current approved refs:
 - package refs are version-pinned
 - the pinned refs match the tracked lock manifest
 - non-approved package refs are rejected in strict mode
+- active servers match the tracked registry entries
+- remote HTTP transports are HTTPS and OAuth-backed

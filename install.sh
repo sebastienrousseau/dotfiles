@@ -52,7 +52,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.496)
+  version       The version (tag or branch) to install (default: v0.2.497)
 
 Options:
   --help        Show this help message
@@ -64,7 +64,7 @@ EOF
 }
 
 main() {
-  local version="${1:-v0.2.496}"
+  local version="${1:-v0.2.497}"
   local _cleanup_files=()
   trap 'set +u; rm -f "${_cleanup_files[@]}" 2>/dev/null; set -u' EXIT
 
@@ -75,7 +75,7 @@ main() {
       ;;
     --silent)
       export DOTFILES_SILENT=1
-      version="v0.2.496"
+      version="v0.2.497"
       ;;
   esac
 

@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 set -euo pipefail
 
-# Dotfiles CLI Entry Point - v0.2.496
+# Dotfiles CLI Entry Point - v0.2.497
 
 # Ensure XDG Base Directory variables are set
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -21,7 +21,7 @@ if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
   . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
 fi
 
-VERSION="0.2.496"
+VERSION="0.2.497"
 
 COMMAND="${1:-}"
 if [ -n "${1:-}" ]; then
@@ -164,6 +164,8 @@ show_help() {
   ui_cmd "ai" "AI CLI status & launcher"
   ui_cmd "ai-setup" "Interactive setup for all AI CLI tools"
   ui_cmd "ai-query" "Context-aware RAG query over your dotfiles"
+  ui_cmd "mode" "Set or inspect agent operating profiles (ask/plan/apply/audit)"
+  ui_cmd "agent" "Alias for mode with profile-aware execution"
   ui_cmd "cl" "Claude CLI with context patterns"
   ui_cmd "gemini" "Gemini CLI with context patterns"
   ui_cmd "kiro" "Kiro CLI with context patterns"
@@ -281,7 +283,7 @@ case "$COMMAND" in
     ;;
 
   # ── Meta / housekeeping ──────────────────────────────────────────────────
-  upgrade | cache-refresh | prewarm | docs | learn | keys | sandbox | mcp)
+  upgrade | cache-refresh | prewarm | docs | learn | keys | sandbox | mcp | mode | agent)
     _dispatch meta "$@"
     ;;
 
