@@ -21,17 +21,17 @@ JSON_MODE=0
 WRITE_PATH=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --json)
-      JSON_MODE=1
-      shift
-      ;;
-    --write)
-      WRITE_PATH="${2:-}"
-      shift 2
-      ;;
-    *)
-      shift
-      ;;
+  --json)
+    JSON_MODE=1
+    shift
+    ;;
+  --write)
+    WRITE_PATH="${2:-}"
+    shift 2
+    ;;
+  *)
+    shift
+    ;;
   esac
 done
 
@@ -88,7 +88,7 @@ attestation_json="$(
     --arg signing_format "$signing_format" \
     --arg signing_key "$signing_key" \
     --arg allowed_signers "$allowed_signers" \
-    --argjson merge_verify "$( [[ "$merge_verify" == "true" ]] && echo true || echo false )" \
+    --argjson merge_verify "$([[ "$merge_verify" == "true" ]] && echo true || echo false)" \
     --arg current_profile "$current_profile" \
     --argjson mcp "$mcp_summary" \
     --slurpfile agent_profiles "$agent_profile_file" \
