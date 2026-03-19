@@ -12,6 +12,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh
 source "$SCRIPT_DIR/../lib/utils.sh"
 
+dot_ui_command_banner "AI and Agents" "${1:-}"
+
 PATTERN_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/ai/patterns"
 
 # Fallback to source tree if patterns don't exist in config (common in CI)

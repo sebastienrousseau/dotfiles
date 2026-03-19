@@ -31,4 +31,7 @@ assert_file_contains "$VERIFY_FILE" "run_step \"dot status\"" "should run dot st
 test_start "verify_runs_chezmoi_diff"
 assert_file_contains "$VERIFY_FILE" "chezmoi diff" "should run chezmoi diff"
 
+test_start "verify_supports_security_alias"
+assert_file_contains "$VERIFY_FILE" "--security | -s" "verify supports -s"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

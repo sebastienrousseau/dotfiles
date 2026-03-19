@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Snapshot current system/tooling state
-# Usage: dot snapshot [--baseline] [--force]
+# Usage: dot snapshot [--baseline|-b] [--force|-f]
 
 set -euo pipefail
 
@@ -16,11 +16,11 @@ BASELINE=false
 FORCE=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --baseline)
+    --baseline | -b)
       BASELINE=true
       shift
       ;;
-    --force)
+    --force | -f)
       FORCE=true
       shift
       ;;
@@ -85,4 +85,5 @@ cat >"$output" <<JSON
 }
 JSON
 
+ui_dot_banner "Diagnostics"
 ui_ok "Snapshot" "$output"

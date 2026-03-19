@@ -6,11 +6,11 @@
 ## policy compliance: launcher allowlist, filesystem scope, token requirements.
 ##
 ## # Usage
-## dot mcp [--strict] [--json]
+## dot mcp [--strict|-s] [--json|-j]
 ##
 ## # Options
-## --strict: Treat policy warnings as errors (for CI enforcement)
-## --json: Emit a machine-readable summary
+## --strict, -s: Treat policy warnings as errors (for CI enforcement)
+## --json, -j: Emit a machine-readable summary
 ##
 ## # Dependencies
 ## - jq: JSON parsing (optional but recommended)
@@ -40,11 +40,11 @@ STRICT_MODE=0
 JSON_MODE=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --strict)
+    --strict | -s)
       STRICT_MODE=1
       shift
       ;;
-    --json)
+    --json | -j)
       JSON_MODE=1
       shift
       ;;
@@ -104,6 +104,7 @@ MCP_REGISTRY_CONFIG="${MCP_REGISTRY_CONFIG:-$REPO_ROOT/dot_config/dotfiles/mcp-r
 
 if [[ "$JSON_MODE" -ne 1 ]]; then
   ui_init
+  ui_dot_banner "AI and Agents"
   ui_header "MCP Doctor"
   echo ""
 fi

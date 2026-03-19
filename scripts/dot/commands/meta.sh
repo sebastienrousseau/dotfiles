@@ -11,7 +11,21 @@ source "$SCRIPT_DIR/../lib/utils.sh"
 # shellcheck source=../lib/log.sh
 source "$SCRIPT_DIR/../lib/log.sh"
 
-dot_ui_command_banner "Meta" "${1:-}"
+meta_banner_section() {
+  case "${1:-}" in
+    mcp | mode | agent)
+      printf '%s\n' "AI and Agents"
+      ;;
+    docs | keys | learn | search | help | version)
+      printf '%s\n' "Reference"
+      ;;
+    *)
+      printf '%s\n' "Meta"
+      ;;
+  esac
+}
+
+dot_ui_command_banner "$(meta_banner_section "${1:-}")" "${1:-}"
 
 cmd_upgrade() {
   local src_dir
@@ -143,7 +157,7 @@ cmd_sandbox() {
 
 cmd_mcp() {
   local subcommand="${1:-doctor}"
-  if [[ "${1:-}" == --* ]] || [[ -z "${1:-}" ]]; then
+  if [[ "${1:-}" == --* ]] || [[ "${1:-}" == -* ]] || [[ -z "${1:-}" ]]; then
     subcommand="doctor"
   else
     shift || true
@@ -162,7 +176,7 @@ cmd_mcp() {
       if [[ "${1:-}" == "registry" ]]; then
         shift || true
       fi
-      if [[ "${1:-}" == "--json" ]]; then
+      if [[ "${1:-}" == "--json" || "${1:-}" == "-j" ]]; then
         json_mode=1
       fi
       if [[ ! -f "$registry_file" ]]; then

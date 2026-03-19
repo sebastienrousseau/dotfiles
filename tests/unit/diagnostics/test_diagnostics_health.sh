@@ -80,6 +80,19 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
 fi
 
+test_start "health_flag_aliases"
+assert_file_contains "$HEALTH_FILE" "--verbose | -v" "health supports -v"
+assert_file_contains "$HEALTH_FILE" "--json | -j" "health supports -j"
+assert_file_contains "$HEALTH_FILE" "--fix | -f" "health supports -f"
+assert_file_contains "$HEALTH_FILE" "--force | -F" "health supports -F"
+
+test_start "health_supported_shell_logic"
+assert_file_contains "$HEALTH_FILE" 'check "Active shell" "pass"' "health accepts supported active shells"
+assert_file_contains "$HEALTH_FILE" 'Not required for $current_shell' "health skips zinit warning outside zsh"
+assert_file_contains "$HEALTH_FILE" 'check "Node version manager" "pass" "mise"' "health accepts mise for node management"
+assert_file_contains "$HEALTH_FILE" 'check "Nerd Font available" "pass"' "health accepts any Nerd Font"
+assert_file_contains "$HEALTH_FILE" 'check "Git signing" "pass" "ssh"' "health accepts SSH commit signing"
+
 echo ""
 echo "Health diagnostic tests completed."
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

@@ -56,8 +56,8 @@ _GL_INFO="•"
 _GL_BULLET="•"
 _GL_LOGO="◈"
 _GL_SPINNER=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
-_GL_BAR_FILL="█"
-_GL_BAR_EMPTY="░"
+_GL_BAR_FILL="￭"
+_GL_BAR_EMPTY="･"
 
 # ═══════════════════════════════════════════════════════════════════════
 # Initialisation (called once, guard-protected)
@@ -484,4 +484,23 @@ ui_logo_dot() {
   else
     printf "\n"
   fi
+}
+
+ui_product_banner() {
+  local title="${1:-Dot}"
+  ui_init
+  if [[ "${DOTFILES_SHOW_LOGO:-1}" != "1" ]]; then
+    return 0
+  fi
+  if [[ "${DOTFILES_LOGO_PRINTED:-0}" = "1" ]]; then
+    return 0
+  fi
+  ui_logo_dot "$title"
+  DOTFILES_LOGO_PRINTED=1
+  export DOTFILES_LOGO_PRINTED
+}
+
+ui_dot_banner() {
+  local section="${1:-Dot}"
+  ui_product_banner "Dot • $section"
 }

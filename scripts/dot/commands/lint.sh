@@ -130,7 +130,7 @@ cmd_lint() {
 
     *)
       ui_err "Unknown lint mode: $mode"
-      echo "Usage: dot lint [--fix | --check]"
+      echo "Usage: dot lint [--fix|-f | --check|-c]"
       exit 1
       ;;
   esac
@@ -161,16 +161,16 @@ case "${1:-}" in
   lint)
     shift
     case "${1:---}" in
-      --fix) cmd_lint "fix" ;;
-      --check) cmd_lint "check" ;;
+      --fix | -f) cmd_lint "fix" ;;
+      --check | -c) cmd_lint "check" ;;
       *) cmd_lint "all" ;;
     esac
     ;;
   *)
     # Direct invocation (dot lint)
     case "${1:---}" in
-      --fix) cmd_lint "fix" ;;
-      --check) cmd_lint "check" ;;
+      --fix | -f) cmd_lint "fix" ;;
+      --check | -c) cmd_lint "check" ;;
       *) cmd_lint "all" ;;
     esac
     ;;
