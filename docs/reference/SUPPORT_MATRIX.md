@@ -22,9 +22,9 @@ Tested platform and tool combinations for the dotfiles distribution.
 |-------|-------------|--------|-------------|-------|
 | Zsh | 5.8+ | Supported | Tier 1 (Full) | Default shell, all features |
 | Bash | 5.0+ | Supported | Tier 1 (Full) | Shared logic core |
-| Fish | 4.0+ | Supported | Tier 1 (Core CLI) | Native `dot`, `cat`, and cached alias bridge |
-| Nushell | 0.98+ | Supported | Tier 1 (Core CLI) | Native `dot` surface with bridged simple aliases |
-| PowerShell | 7.5+ | Supported | Tier 1 (Core CLI) | Managed profile, `dot` wrapper, modern listing helpers |
+| Fish | 4.0+ | Supported | Tier 1 (Core CLI) | Native `dot`, `dm`, `da`, `dmc`, `datt`, and cached alias bridge |
+| Nushell | 0.98+ | Supported | Tier 1 (Core CLI) | Native `d`, `dm`, `da`, `dmc`, `datt` aliases for core workflows |
+| PowerShell | 7.5+ | Supported | Tier 1 (Core CLI) | Managed profile, `dot` wrapper, modern listing helpers, and attestation aliases |
 
 ## Terminal Emulators
 

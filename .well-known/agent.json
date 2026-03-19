@@ -1,0 +1,6 @@
+{
+  "name": "dotfiles-agent",
+  "card": "dot_config/dotfiles/agent-card.json",
+  "protocols": ["mcp", "a2a-ready"],
+  "capabilities": ["workstation-attestation", "bounded-agent-modes", "signed-config-governance"]
+}

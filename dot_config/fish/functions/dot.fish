@@ -16,3 +16,19 @@ function dot --description 'dotfiles manager'
         return 1
     end
 end
+
+function dm --description 'List dot agent modes'
+    dot mode list
+end
+
+function da --description 'List dot agent profiles'
+    dot agent list
+end
+
+function dmc --description 'Show MCP registry'
+    dot mcp registry
+end
+
+function datt --description 'Emit workstation attestation JSON'
+    dot attest --json
+end

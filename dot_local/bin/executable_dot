@@ -149,6 +149,7 @@ show_help() {
   ui_section "Diagnostics"
   ui_cmd "doctor" "Deep audit: tools, paths, portability, AI analysis (--ai)"
   ui_cmd "" "--heal --audit --score --smoke --drift --benchmark --json"
+  ui_cmd "attest" "Export workstation attestation evidence (--json, --write)"
   ui_cmd "score" "System health and security scorecard"
   ui_cmd "snapshot" "Capture baseline system snapshot"
   ui_cmd "chaos" "Simulate config corruption to test self-healing"
@@ -165,7 +166,7 @@ show_help() {
   ui_cmd "ai-setup" "Interactive setup for all AI CLI tools"
   ui_cmd "ai-query" "Context-aware RAG query over your dotfiles"
   ui_cmd "mode" "Set or inspect agent operating profiles (ask/plan/apply/audit)"
-  ui_cmd "agent" "Alias for mode with profile-aware execution"
+  ui_cmd "agent" "Profile-aware execution, agent card, and session log"
   ui_cmd "cl" "Claude CLI with context patterns"
   ui_cmd "gemini" "Gemini CLI with context patterns"
   ui_cmd "kiro" "Kiro CLI with context patterns"
@@ -252,7 +253,7 @@ case "$COMMAND" in
 
   # ── Diagnostics ─────────────────────────────────────────────────────────
   doctor | scorecard | score | snapshot | history | perf | load-bench | load-bench-pty | \
-    chaos | bundle | rollback | heal | health | health-check | smoke-test | verify | \
+    chaos | bundle | rollback | heal | health | health-check | smoke-test | verify | attest | attestation | \
     security-score | drift | benchmark | intelligence | conflicts | locks | restore | metrics)
     _dispatch diagnostics "$@"
     ;;

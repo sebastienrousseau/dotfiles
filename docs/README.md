@@ -12,7 +12,9 @@ Start here. Then go deeper.
 
 - [Utilities and `dot` CLI](reference/UTILS.md)
 - [Operations](operations/OPERATIONS.md)
+- [Workstation attestation](operations/ATTESTATION.md)
 - [Interoperability](architecture/INTEROP.md)
+- [Agent interoperability](interop/A2A.md)
 - [AI integrations](AI.md)
 
 ## Security and trust
