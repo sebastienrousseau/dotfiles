@@ -21,17 +21,17 @@ JSON_MODE=0
 WRITE_PATH=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
-  --json)
-    JSON_MODE=1
-    shift
-    ;;
-  --write)
-    WRITE_PATH="${2:-}"
-    shift 2
-    ;;
-  *)
-    shift
-    ;;
+    --json)
+      JSON_MODE=1
+      shift
+      ;;
+    --write)
+      WRITE_PATH="${2:-}"
+      shift 2
+      ;;
+    *)
+      shift
+      ;;
   esac
 done
 
