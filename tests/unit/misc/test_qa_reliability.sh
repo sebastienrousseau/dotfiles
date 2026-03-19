@@ -34,9 +34,9 @@ assert_file_contains "$examples_script" "examples" "examples directory reference
 assert_file_contains "$examples_script" "Running example:" "example execution output present"
 
 test_start "qa_reliability_quick_mode_behavior"
-assert_file_contains "$audit_script" 'if [ "$mode" = "full" ]; then' "full mode branch present"
-assert_file_contains "$audit_script" 'run_step "Integration suite" integration_tests' "integration step present"
-assert_file_contains "$audit_script" 'if [ "$run_integration" -eq 1 ]; then' "integration branch guard present"
+assert_file_contains "$audit_script" "if [ \"\$mode\" = \"full\" ]; then" "full mode branch present"
+assert_file_contains "$audit_script" "run_step \"Integration suite\" integration_tests" "integration step present"
+assert_file_contains "$audit_script" "if [ \"\$run_integration\" -eq 1 ]; then" "integration branch guard present"
 
 test_start "qa_examples_include_platform_contract"
 assert_file_exists "$platform_example" "platform contract example exists"
