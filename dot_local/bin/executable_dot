@@ -31,13 +31,25 @@ fi
 # Resolve source directory (needed early for ui.sh sourcing)
 _resolve_source_dir() {
   local dir=""
-  if [ -n "${CHEZMOI_SOURCE_DIR:-}" ] && [ -d "$CHEZMOI_SOURCE_DIR" ]; then
+  local script_path=""
+  local script_dir=""
+  local repo_candidate=""
+
+  if script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null)"; then
+    script_dir="$script_path"
+    repo_candidate="$(cd "$script_dir/../.." && pwd 2>/dev/null || true)"
+    if [ -n "$repo_candidate" ] && [ -f "$repo_candidate/scripts/dot/lib/ui.sh" ]; then
+      dir="$repo_candidate"
+    fi
+  fi
+
+  if [ -z "$dir" ] && [ -n "${CHEZMOI_SOURCE_DIR:-}" ] && [ -d "$CHEZMOI_SOURCE_DIR" ]; then
     dir="$CHEZMOI_SOURCE_DIR"
-  elif [ -d "$HOME/.dotfiles" ]; then
+  elif [ -z "$dir" ] && [ -d "$HOME/.dotfiles" ]; then
     dir="$HOME/.dotfiles"
-  elif [ -d "$HOME/.local/share/chezmoi" ]; then
+  elif [ -z "$dir" ] && [ -d "$HOME/.local/share/chezmoi" ]; then
     dir="$HOME/.local/share/chezmoi"
-  elif [ -f "package.json" ] && grep -q '"name": "dotfiles"' package.json 2>/dev/null; then
+  elif [ -z "$dir" ] && [ -f "package.json" ] && grep -q '"name": "dotfiles"' package.json 2>/dev/null; then
     dir="$(pwd)"
   fi
   echo "$dir"
