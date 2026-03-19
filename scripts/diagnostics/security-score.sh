@@ -7,7 +7,7 @@
 ## actionable recommendations.
 ##
 ## # Usage
-## dot security-score [--verbose|-v] [--json] [--quiet|-q]
+## dot security-score [--verbose|-v] [--json|-j] [--quiet|-q]
 ##
 ## # Dependencies
 ## - age: Encryption tool check
@@ -47,7 +47,7 @@ while [[ $# -gt 0 ]]; do
       VERBOSE=false
       shift
       ;;
-    --json)
+    --json | -j)
       JSON_OUTPUT=true
       shift
       ;;
@@ -101,6 +101,7 @@ add_points() {
 print_header() {
   if ! $JSON_OUTPUT; then
     echo ""
+    ui_dot_banner "Diagnostics"
     ui_header "Security Score Assessment"
     echo ""
   fi

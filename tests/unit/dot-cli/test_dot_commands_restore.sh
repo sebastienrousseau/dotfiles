@@ -60,6 +60,13 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available"
 fi
 
+test_start "restore_flag_aliases"
+assert_file_contains "$RESTORE_FILE" "--list, -l" "restore supports -l"
+assert_file_contains "$RESTORE_FILE" "--latest, -L" "restore supports -L"
+assert_file_contains "$RESTORE_FILE" "--git, -g" "restore supports -g"
+assert_file_contains "$RESTORE_FILE" "--diff, -d" "restore supports -d"
+assert_file_contains "$RESTORE_FILE" "--dry-run, -n" "restore supports -n"
+
 echo ""
 echo "Restore command tests completed."
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

@@ -86,6 +86,7 @@ ui_init
 
 print_header() {
   echo ""
+  ui_dot_banner "Diagnostics"
   ui_header "Shell Performance Benchmark"
   echo ""
 }

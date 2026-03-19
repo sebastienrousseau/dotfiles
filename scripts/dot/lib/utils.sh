@@ -129,9 +129,7 @@ ui_logo_once() {
   if [[ "${DOTFILES_LOGO_PRINTED:-0}" = "1" ]]; then
     return
   fi
-  ui_logo_dot "$title"
-  DOTFILES_LOGO_PRINTED=1
-  export DOTFILES_LOGO_PRINTED
+  ui_product_banner "$title"
 }
 
 dotfiles_version() {
@@ -332,7 +330,16 @@ dot_command_summary() {
 dot_ui_command_banner() {
   local section="${1:-Dot}"
   local cmd="${2:-}"
+  shift 2 || true
   local version summary
+
+  for arg in "$@"; do
+    case "$arg" in
+      --json | -j)
+        return
+        ;;
+    esac
+  done
 
   ui_logo_once "Dot • $section"
 

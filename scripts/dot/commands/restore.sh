@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # dot restore - Restore dotfiles from backup or previous state
-# Usage: dot restore [--list|--latest|<backup-id>]
+# Usage: dot restore [--list|-l|--latest|-L|<backup-id>]
 
 set -euo pipefail
 
@@ -24,10 +24,10 @@ usage() {
   echo ""
   echo "Options:"
   echo "  --list, -l       List available backups"
-  echo "  --latest         Restore from latest backup"
-  echo "  --git <ref>      Restore from git ref (commit, tag, branch)"
-  echo "  --diff <ref>     Show diff between current and ref"
-  echo "  --dry-run        Show what would be restored"
+  echo "  --latest, -L     Restore from latest backup"
+  echo "  --git, -g <ref>  Restore from git ref (commit, tag, branch)"
+  echo "  --diff, -d <ref> Show diff between current and ref"
+  echo "  --dry-run, -n    Show what would be restored"
   echo "  -h, --help       Show this help"
   echo ""
   echo "Examples:"
@@ -177,19 +177,19 @@ while [[ $# -gt 0 ]]; do
       list_backups
       exit 0
       ;;
-    --latest)
+    --latest | -L)
       restore_latest
       exit 0
       ;;
-    --git)
+    --git | -g)
       restore_from_git "$2" "$DRY_RUN"
       exit 0
       ;;
-    --diff)
+    --diff | -d)
       show_diff "$2"
       exit 0
       ;;
-    --dry-run)
+    --dry-run | -n)
       DRY_RUN=true
       shift
       ;;

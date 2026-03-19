@@ -24,4 +24,10 @@ test_start "perf_shebang"
 first_line=$(head -n 1 "$TEST_SCRIPT")
 assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
 
+test_start "perf_flag_aliases"
+assert_file_contains "$TEST_SCRIPT" "--json | -j" "perf supports -j"
+assert_file_contains "$TEST_SCRIPT" "--profile | -p" "perf supports -p"
+assert_file_contains "$TEST_SCRIPT" "--runs | -r" "perf supports -r"
+assert_file_contains "$TEST_SCRIPT" "--target | -t" "perf supports -t"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

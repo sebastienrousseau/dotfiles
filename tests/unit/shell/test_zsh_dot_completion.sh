@@ -115,12 +115,26 @@ fi
 
 # Test: perf command has flag completions
 test_start "dot_completion_perf_flags"
-if grep -q -- '--json' "$COMP_FILE" 2>/dev/null && grep -q -- '--precmd' "$COMP_FILE" 2>/dev/null; then
+if grep -q -- '--json' "$COMP_FILE" 2>/dev/null &&
+  grep -q -- '-j:Output as JSON' "$COMP_FILE" 2>/dev/null &&
+  grep -q -- '--profile' "$COMP_FILE" 2>/dev/null &&
+  grep -q -- '--runs' "$COMP_FILE" 2>/dev/null &&
+  grep -q -- '--target' "$COMP_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: perf command has --json/--precmd completions"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: perf command has aligned short and long flag completions"
 else
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: perf should have flag completions"
+fi
+
+# Test: version command is part of the public completion surface
+test_start "dot_completion_version_command"
+if grep -q "'version:" "$COMP_FILE" 2>/dev/null && grep -q "'--version:" "$COMP_FILE" 2>/dev/null; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: completion exposes version and --version"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: completion should expose version and --version"
 fi
 
 # Test: completion parity with dot help

@@ -92,6 +92,7 @@ _dot() {
     # Meta
     'upgrade:Update flake, plugins, and dotfiles'
     'packages:List installed packages'
+    'version:Show version information'
     '--version:Show version information'
     'help:Show help message'
   )
@@ -121,8 +122,113 @@ _dot() {
           _message 'search pattern (optional)'
           ;;
         perf)
-          local -a perf_opts=('--json:Output as JSON' '--precmd:Include precmd hooks')
+          local -a perf_opts=(
+            '--json:Output as JSON'
+            '-j:Output as JSON'
+            '--profile:Include profile output'
+            '-p:Include profile output'
+            '--runs:Set the number of runs'
+            '-r:Set the number of runs'
+            '--target:Set the timing target in milliseconds'
+            '-t:Set the timing target in milliseconds'
+          )
           _describe -t options 'perf option' perf_opts
+          ;;
+        doctor)
+          local -a doctor_opts=(
+            '--heal:Auto-repair common issues'
+            '-H:Auto-repair common issues'
+            '--score:Show score output'
+            '-s:Show score output'
+            '--json:Emit JSON summary'
+            '-j:Emit JSON summary'
+            '--ai:Include AI diagnostics'
+            '-A:Include AI diagnostics'
+          )
+          _describe -t options 'doctor option' doctor_opts
+          ;;
+        attest)
+          local -a attest_opts=(
+            '--json:Emit JSON output'
+            '-j:Emit JSON output'
+            '--write:Write attestation to a file'
+            '-w:Write attestation to a file'
+          )
+          _describe -t options 'attest option' attest_opts
+          ;;
+        lint)
+          local -a lint_opts=(
+            '--check:Run check-only mode'
+            '-c:Run check-only mode'
+            '--fix:Apply safe fixes'
+            '-f:Apply safe fixes'
+          )
+          _describe -t options 'lint option' lint_opts
+          ;;
+        mcp)
+          local -a mcp_opts=(
+            'registry:Show the MCP registry'
+            '--strict:Treat policy warnings as errors'
+            '-s:Treat policy warnings as errors'
+            '--json:Emit JSON summary'
+            '-j:Emit JSON summary'
+          )
+          _describe -t options 'mcp option' mcp_opts
+          ;;
+        health)
+          local -a health_opts=(
+            '--verbose:Show detailed checks'
+            '-v:Show detailed checks'
+            '--json:Emit JSON summary'
+            '-j:Emit JSON summary'
+            '--fix:Apply common fixes'
+            '-f:Apply common fixes'
+            '--force:Apply fixes without prompts'
+            '-F:Apply fixes without prompts'
+          )
+          _describe -t options 'health option' health_opts
+          ;;
+        security-score)
+          local -a security_opts=(
+            '--verbose:Show detailed scoring'
+            '-v:Show detailed scoring'
+            '--quiet:Reduce output noise'
+            '-q:Reduce output noise'
+            '--json:Emit JSON summary'
+            '-j:Emit JSON summary'
+          )
+          _describe -t options 'security-score option' security_opts
+          ;;
+        snapshot)
+          local -a snapshot_opts=(
+            '--baseline:Capture the baseline snapshot'
+            '-b:Capture the baseline snapshot'
+            '--force:Overwrite an existing snapshot'
+            '-f:Overwrite an existing snapshot'
+          )
+          _describe -t options 'snapshot option' snapshot_opts
+          ;;
+        verify)
+          local -a verify_opts=(
+            '--security:Run security verification'
+            '-s:Run security verification'
+          )
+          _describe -t options 'verify option' verify_opts
+          ;;
+        restore)
+          local -a restore_opts=(
+            '--list:List available backups'
+            '-l:List available backups'
+            '--latest:Restore the latest backup'
+            '-L:Restore the latest backup'
+            '--git:Restore from a git ref'
+            '-g:Restore from a git ref'
+            '--diff:Show a diff for a git ref'
+            '-d:Show a diff for a git ref'
+            '--dry-run:Preview the restore'
+            '-n:Preview the restore'
+          )
+          _describe -t options 'restore option' restore_opts
           ;;
         load)
           local -a load_opts=('--background:Load in background' '--status:Show load status')

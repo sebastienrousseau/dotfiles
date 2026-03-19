@@ -54,6 +54,16 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should support --fix flag"
 fi
 
+# Test: -f flag supported
+test_start "lint_cmd_supports_short_fix"
+if grep -qE '\-\-fix[[:space:]]+\|[[:space:]]+\-f' "$LINT_FILE" 2>/dev/null; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: supports -f flag"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should support -f flag"
+fi
+
 # Test: --check flag supported
 test_start "lint_cmd_supports_check"
 if grep -q '\-\-check' "$LINT_FILE" 2>/dev/null; then
@@ -62,6 +72,16 @@ if grep -q '\-\-check' "$LINT_FILE" 2>/dev/null; then
 else
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should support --check flag"
+fi
+
+# Test: -c flag supported
+test_start "lint_cmd_supports_short_check"
+if grep -qE '\-\-check[[:space:]]+\|[[:space:]]+\-c' "$LINT_FILE" 2>/dev/null; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: supports -c flag"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should support -c flag"
 fi
 
 # Test: uses project shellcheck flags from CLAUDE.md

@@ -74,6 +74,21 @@ else
   printf '%b\n' "    Output: $output"
 fi
 
+test_start "mcp_doctor_short_flags_supported"
+assert_file_contains "$TEST_SCRIPT" "--strict | -s" "mcp-doctor supports -s"
+assert_file_contains "$TEST_SCRIPT" "--json | -j" "mcp-doctor supports -j"
+
+test_start "mcp_doctor_short_flag_json_output"
+output=$(REPO_ROOT="$REPO_ROOT" MCP_CONFIG="$MCP_CONFIG_FILE" bash "$TEST_SCRIPT" -s -j 2>/dev/null) || true
+if [[ "$output" == \{* ]] && [[ "$output" == *"\"status\""* ]]; then
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: -s -j emits JSON summary"
+else
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: -s -j should emit JSON summary"
+  printf '%b\n' "    Output: $output"
+fi
+
 test_start "mcp_policy_requires_registry_controls"
 assert_file_contains "$MCP_POLICY_FILE" "\"requireRegistryEntry\": true" "policy requires tracked registry entries"
 assert_file_contains "$MCP_POLICY_FILE" "\"requireHttpsForHttpTransports\": true" "policy requires HTTPS for HTTP transports"

@@ -4,7 +4,7 @@ Aliases, functions, and the `dot` CLI provide day-to-day tooling across macOS, L
 
 ## Dot CLI
 
-The `dot` command is your primary interface for managing dotfiles. Run `dot --version` to check the installed version.
+The `dot` command is the main interface for managing dotfiles. Run `dot version` or `dot --version` to check the installed version.
 
 ### Core commands
 
@@ -25,15 +25,20 @@ The `dot` command is your primary interface for managing dotfiles. Run `dot --ve
 
 | Command | Description |
 |---------|-------------|
-| `dot doctor` | Run system health checks |
+| `dot doctor` | Run system health checks (`--score|-s`, `--heal|-H`) |
+| `dot health` | Run the health dashboard (`--verbose|-v`, `--json|-j`, `--fix|-f`, `--force|-F`) |
 | `dot heal` | Auto-repair missing tools and broken state |
 | `dot smoke-test` | Verify toolchains (Rust, Go, AI CLIs) |
-| `dot verify` | Run security and integrity verification |
+| `dot verify` | Run security and integrity verification (`--security|-s`) |
 | `dot chaos` | Simulate config corruption to test self-healing |
 | `dot drift` | Detailed configuration drift dashboard |
-| `dot benchmark` | Measure shell startup time |
-| `dot perf` | Show performance mode + quick timing (`--json`, `--precmd`) |
+| `dot benchmark` | Measure shell startup time (`--detailed|-d`, `--profile|-p`, `--compare|-c`, `--waterfall|-w`) |
+| `dot perf` | Show performance mode + quick timing (`--json|-j`, `--profile|-p`, `--runs|-r`, `--target|-t`) |
+| `dot mcp` | Validate MCP policy and registry (`--strict|-s`, `--json|-j`) |
+| `dot attest` | Export workstation evidence (`--json|-j`, `--write|-w`) |
 | `dot history` | Analyse shell history |
+| `dot security-score` | Score workstation security (`--verbose|-v`, `--quiet|-q`, `--json|-j`) |
+| `dot snapshot` | Capture workstation state (`--baseline|-b`, `--force|-f`) |
 | `dot ai` | Show AI helper status (opt-in) |
 
 ### Tools
@@ -45,6 +50,7 @@ The `dot` command is your primary interface for managing dotfiles. Run `dot --ve
 | `dot new <lang> <name>` | Scaffold a project (`python`/`go`/`node`) |
 | `dot sandbox` | Launch Docker sandbox preview |
 | `dot log-rotate` | Rotate `~/.local/share/dotfiles.log` |
+| `dot lint` | Lint shell scripts (`--check|-c`, `--fix|-f`) |
 
 ## Universal Scripts
 

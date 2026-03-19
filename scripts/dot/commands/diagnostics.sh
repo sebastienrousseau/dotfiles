@@ -10,7 +10,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh
 source "$SCRIPT_DIR/../lib/utils.sh"
 
-dot_ui_command_banner "Diagnostics" "${1:-}"
+dot_ui_command_banner "Diagnostics" "${1:-}" "$@"
 
 cmd_doctor() {
   local src_dir
