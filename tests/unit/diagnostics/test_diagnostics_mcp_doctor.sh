@@ -10,6 +10,7 @@ TEST_SCRIPT="$REPO_ROOT/scripts/diagnostics/mcp-doctor.sh"
 MCP_CONFIG_FILE="$REPO_ROOT/dot_config/claude/mcp_servers.json"
 MCP_POLICY_FILE="$REPO_ROOT/dot_config/dotfiles/mcp-policy.json"
 MCP_LOCK_FILE="$REPO_ROOT/dot_config/dotfiles/mcp-lock.json"
+MCP_REGISTRY_FILE="$REPO_ROOT/dot_config/dotfiles/mcp-registry.json"
 META_COMMANDS_SCRIPT="$REPO_ROOT/scripts/dot/commands/meta.sh"
 
 test_start "mcp_doctor_exists"
@@ -36,6 +37,9 @@ assert_file_exists "$MCP_POLICY_FILE" "mcp-policy.json should exist"
 
 test_start "mcp_lock_exists"
 assert_file_exists "$MCP_LOCK_FILE" "mcp-lock.json should exist"
+
+test_start "mcp_registry_exists"
+assert_file_exists "$MCP_REGISTRY_FILE" "mcp-registry.json should exist"
 
 test_start "mcp_config_local_only_defaults"
 for server in filesystem github brave-search fetch puppeteer; do
@@ -69,6 +73,15 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should emit JSON summary"
   printf '%b\n' "    Output: $output"
 fi
+
+test_start "mcp_policy_requires_registry_controls"
+assert_file_contains "$MCP_POLICY_FILE" "\"requireRegistryEntry\": true" "policy requires tracked registry entries"
+assert_file_contains "$MCP_POLICY_FILE" "\"requireHttpsForHttpTransports\": true" "policy requires HTTPS for HTTP transports"
+assert_file_contains "$MCP_POLICY_FILE" "\"requireOauthForHttpTransports\": true" "policy requires OAuth for HTTP transports"
+
+test_start "mcp_meta_registry_subcommand"
+assert_file_contains "$META_COMMANDS_SCRIPT" "registry)" "dot mcp supports registry subcommand"
+assert_file_contains "$META_COMMANDS_SCRIPT" "Usage: dot mcp [doctor|registry]" "dot mcp usage includes registry"
 
 test_start "mcp_doctor_strict_local_passes"
 if REPO_ROOT="$REPO_ROOT" MCP_CONFIG="$MCP_CONFIG_FILE" bash "$TEST_SCRIPT" --strict >/dev/null 2>&1; then

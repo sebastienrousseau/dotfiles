@@ -5,10 +5,14 @@
     "strict-local": {
       "description": "Local-first MCP policy for regulated and high-trust environments.",
       "allowedLaunchers": ["npx", "node", "uvx"],
+      "trustedTransports": ["stdio", "http"],
       "blockedFilesystemRoots": ["/", "/home", "/Users"],
       "blockedArgPatterns": ["^--allow-.*", "^--unsafe$", "^\\*$"],
       "warnOnUnpinnedNpx": true,
       "requireApprovedPackageLock": true,
+      "requireRegistryEntry": true,
+      "requireHttpsForHttpTransports": true,
+      "requireOauthForHttpTransports": true,
       "requiredEnvByServer": {
         "github": ["GITHUB_TOKEN"],
         "brave-search": ["BRAVE_API_KEY"]
@@ -20,6 +24,23 @@
         "puppeteer",
         "filesystem"
       ]
+    },
+    "enterprise-remote": {
+      "description": "Enterprise-ready MCP policy with registry-backed remote transports.",
+      "allowedLaunchers": ["npx", "node", "uvx"],
+      "trustedTransports": ["stdio", "http"],
+      "blockedFilesystemRoots": ["/", "/home", "/Users"],
+      "blockedArgPatterns": ["^--allow-.*", "^--unsafe$", "^\\*$"],
+      "warnOnUnpinnedNpx": true,
+      "requireApprovedPackageLock": true,
+      "requireRegistryEntry": true,
+      "requireHttpsForHttpTransports": true,
+      "requireOauthForHttpTransports": true,
+      "requiredEnvByServer": {
+        "github": ["GITHUB_TOKEN"],
+        "brave-search": ["BRAVE_API_KEY"]
+      },
+      "forbidNetworkServersByDefault": []
     }
   }
 }

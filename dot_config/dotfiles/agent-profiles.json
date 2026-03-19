@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "2026.03",
+  "defaultProfile": "ask",
+  "profiles": {
+    "ask": {
+      "description": "Read-only guidance with no unattended changes.",
+      "approval": "manual",
+      "filesystem": "read-only",
+      "network": "off",
+      "mcpProfile": "strict-local",
+      "maxSteps": 1
+    },
+    "plan": {
+      "description": "Structured planning with local inspection and no writes.",
+      "approval": "manual",
+      "filesystem": "read-only",
+      "network": "limited",
+      "mcpProfile": "strict-local",
+      "maxSteps": 3
+    },
+    "apply": {
+      "description": "Bounded implementation with explicit approval and local policy guards.",
+      "approval": "on-request",
+      "filesystem": "workspace-write",
+      "network": "limited",
+      "mcpProfile": "strict-local",
+      "maxSteps": 6
+    },
+    "audit": {
+      "description": "Deep verification, scoring, and compliance analysis.",
+      "approval": "manual",
+      "filesystem": "read-only",
+      "network": "limited",
+      "mcpProfile": "enterprise-remote",
+      "maxSteps": 8
+    }
+  }
+}

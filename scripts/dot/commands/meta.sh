@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Dotfiles CLI - Meta Commands
-# upgrade, prewarm, docs, learn, keys, sandbox, mcp
+# upgrade, prewarm, docs, learn, keys, sandbox, mcp, mode, agent
 
 set -euo pipefail
 
@@ -153,8 +153,191 @@ cmd_mcp() {
       fi
       run_script "scripts/diagnostics/mcp-doctor.sh" "MCP doctor script" "$@"
       ;;
+    registry)
+      local repo_root registry_file json_mode=0
+      repo_root="$(require_source_dir)"
+      registry_file="${MCP_REGISTRY_CONFIG:-$repo_root/dot_config/dotfiles/mcp-registry.json}"
+      if [[ "${1:-}" == "registry" ]]; then
+        shift || true
+      fi
+      if [[ "${1:-}" == "--json" ]]; then
+        json_mode=1
+      fi
+      if [[ ! -f "$registry_file" ]]; then
+        die "MCP registry not found: $registry_file"
+      fi
+      if [[ "$json_mode" -eq 1 ]]; then
+        exec cat "$registry_file"
+      fi
+      if command -v jq >/dev/null 2>&1; then
+        ui_header "MCP Registry"
+        jq -r '
+          .servers
+          | to_entries[]
+          | "\(.key)\t\(.value.transport)\t\(.value.launcher)\t\(.value.package // .value.url // "local")"
+        ' "$registry_file" | while IFS=$'\t' read -r name transport launcher target; do
+          ui_ok "$name" "$transport via $launcher -> $target"
+        done
+      else
+        exec cat "$registry_file"
+      fi
+      ;;
     *)
-      echo "Usage: dot mcp [doctor]" >&2
+      echo "Usage: dot mcp [doctor|registry]" >&2
+      exit 1
+      ;;
+  esac
+}
+
+_agent_repo_root() {
+  require_source_dir
+}
+
+_agent_profiles_file() {
+  local repo_root
+  repo_root="$(_agent_repo_root)"
+  echo "${AGENT_PROFILE_CONFIG:-$repo_root/dot_config/dotfiles/agent-profiles.json}"
+}
+
+_agent_state_file() {
+  echo "${AGENT_STATE_FILE:-$HOME/.config/dotfiles/agent-mode.env}"
+}
+
+_agent_default_profile() {
+  local file
+  file="$(_agent_profiles_file)"
+  jq -r '.defaultProfile' "$file"
+}
+
+_agent_current_profile() {
+  local state_file current
+  state_file="$(_agent_state_file)"
+  if [[ -f "$state_file" ]]; then
+    current="$(sed -n 's/^DOT_AGENT_PROFILE=//p' "$state_file" | tail -n 1)"
+    if [[ -n "$current" ]]; then
+      echo "$current"
+      return 0
+    fi
+  fi
+  _agent_default_profile
+}
+
+_agent_profile_exists() {
+  local name="$1"
+  jq -e --arg name "$name" '.profiles[$name]' "$(_agent_profiles_file)" >/dev/null 2>&1
+}
+
+_agent_profile_field() {
+  local name="$1" field="$2"
+  jq -r --arg name "$name" --arg field "$field" '.profiles[$name][$field]' "$(_agent_profiles_file)"
+}
+
+_agent_assert_dependencies() {
+  local file
+  file="$(_agent_profiles_file)"
+  if [[ ! -f "$file" ]]; then
+    die "Agent profile config not found: $file"
+  fi
+  if ! command -v jq >/dev/null 2>&1; then
+    die "jq is required for dot mode"
+  fi
+}
+
+cmd_mode() {
+  _agent_assert_dependencies
+
+  local subcommand="${1:-current}"
+  if [[ -z "${1:-}" ]] || [[ "${1:-}" == --* ]]; then
+    subcommand="current"
+  else
+    shift || true
+  fi
+
+  case "$subcommand" in
+    list)
+      local current
+      current="$(_agent_current_profile)"
+      ui_header "Agent Modes"
+      jq -r '.profiles | to_entries[] | "\(.key)\t\(.value.description)"' "$(_agent_profiles_file)" \
+        | while IFS=$'\t' read -r name description; do
+            if [[ "$name" == "$current" ]]; then
+              ui_ok "$name" "$description [current]"
+            else
+              ui_info "$name" "$description"
+            fi
+          done
+      ;;
+    current)
+      local current
+      current="$(_agent_current_profile)"
+      ui_header "Agent Mode"
+      ui_ok "Profile" "$current"
+      ui_ok "Approval" "$(_agent_profile_field "$current" "approval")"
+      ui_ok "Filesystem" "$(_agent_profile_field "$current" "filesystem")"
+      ui_ok "Network" "$(_agent_profile_field "$current" "network")"
+      ui_ok "MCP" "$(_agent_profile_field "$current" "mcpProfile")"
+      ;;
+    show)
+      local name="${1:-}"
+      [[ -n "$name" ]] || die "Usage: dot mode show <profile>"
+      _agent_profile_exists "$name" || die "Unknown agent profile: $name"
+      ui_header "Agent Mode"
+      ui_ok "Profile" "$name"
+      ui_ok "Description" "$(_agent_profile_field "$name" "description")"
+      ui_ok "Approval" "$(_agent_profile_field "$name" "approval")"
+      ui_ok "Filesystem" "$(_agent_profile_field "$name" "filesystem")"
+      ui_ok "Network" "$(_agent_profile_field "$name" "network")"
+      ui_ok "Max steps" "$(_agent_profile_field "$name" "maxSteps")"
+      ui_ok "MCP" "$(_agent_profile_field "$name" "mcpProfile")"
+      ;;
+    set)
+      local name="${1:-}" state_file
+      [[ -n "$name" ]] || die "Usage: dot mode set <profile>"
+      _agent_profile_exists "$name" || die "Unknown agent profile: $name"
+      state_file="$(_agent_state_file)"
+      mkdir -p "$(dirname "$state_file")"
+      cat >"$state_file" <<EOF
+DOT_AGENT_PROFILE=$name
+DOT_AGENT_APPROVAL=$(_agent_profile_field "$name" "approval")
+DOT_AGENT_FILESYSTEM=$(_agent_profile_field "$name" "filesystem")
+DOT_AGENT_NETWORK=$(_agent_profile_field "$name" "network")
+DOT_AGENT_MCP_PROFILE=$(_agent_profile_field "$name" "mcpProfile")
+DOT_AGENT_MAX_STEPS=$(_agent_profile_field "$name" "maxSteps")
+EOF
+      ui_ok "Agent mode" "$name"
+      ui_info "State file" "$state_file"
+      ;;
+    run)
+      local name="${1:-}" current
+      if [[ -n "$name" ]] && _agent_profile_exists "$name"; then
+        shift || true
+      else
+        name="$(_agent_current_profile)"
+      fi
+      [[ $# -gt 0 ]] || die "Usage: dot mode run [profile] <command> [args...]"
+      export DOT_AGENT_PROFILE="$name"
+      export DOT_AGENT_APPROVAL="$(_agent_profile_field "$name" "approval")"
+      export DOT_AGENT_FILESYSTEM="$(_agent_profile_field "$name" "filesystem")"
+      export DOT_AGENT_NETWORK="$(_agent_profile_field "$name" "network")"
+      export DOT_AGENT_MCP_PROFILE="$(_agent_profile_field "$name" "mcpProfile")"
+      export DOT_AGENT_MAX_STEPS="$(_agent_profile_field "$name" "maxSteps")"
+      ui_info "Agent mode" "$name"
+      exec "$@"
+      ;;
+    doctor)
+      local file
+      file="$(_agent_profiles_file)"
+      ui_header "Agent Mode Doctor"
+      if jq empty "$file" >/dev/null 2>&1; then
+        ui_ok "Profile config" "$file"
+      else
+        die "Invalid JSON: $file"
+      fi
+      jq -e '.profiles[.defaultProfile]' "$file" >/dev/null 2>&1 || die "Default profile missing"
+      ui_ok "Default profile" "$(_agent_default_profile)"
+      ;;
+    *)
+      echo "Usage: dot mode [list|current|show|set|run|doctor]" >&2
       exit 1
       ;;
   esac
@@ -189,6 +372,10 @@ case "${1:-}" in
   mcp)
     shift
     cmd_mcp "$@"
+    ;;
+  mode | agent)
+    shift
+    cmd_mode "$@"
     ;;
   *)
     echo "Unknown meta command: ${1:-}" >&2

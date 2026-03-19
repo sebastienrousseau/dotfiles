@@ -22,8 +22,9 @@ Tested platform and tool combinations for the dotfiles distribution.
 |-------|-------------|--------|-------------|-------|
 | Zsh | 5.8+ | Supported | Tier 1 (Full) | Default shell, all features |
 | Bash | 5.0+ | Supported | Tier 1 (Full) | Shared logic core |
-| Fish | 4.0+ | Supported | Tier 2 (Bridged) | Alias/function bridges, `_cached_eval` |
-| Nushell | 0.98+ | Supported | Tier 3 (Compatible) | Simple aliases, function wrappers |
+| Fish | 4.0+ | Supported | Tier 1 (Core CLI) | Native `dot`, `cat`, and cached alias bridge |
+| Nushell | 0.98+ | Supported | Tier 1 (Core CLI) | Native `dot` surface with bridged simple aliases |
+| PowerShell | 7.5+ | Supported | Tier 1 (Core CLI) | Managed profile, `dot` wrapper, modern listing helpers |
 
 ## Terminal Emulators
 
@@ -69,5 +70,5 @@ Tested platform and tool combinations for the dotfiles distribution.
 | WSL2 | No native clipboard | `clip.exe`/`powershell.exe` bridge aliases |
 | NixOS | System packages conflict | Use Nix Flake exclusively |
 | Fish < 4.0 | No keyboard protocol | Upgrade to Fish 4.x |
-| Nushell | Complex aliases skipped | Bash bridge filters them |
+| Nushell | Complex aliases skipped | Core `dot` workflow remains first-class |
 | macOS Intel | Homebrew path differs | Template handles `/usr/local` vs `/opt/homebrew` |

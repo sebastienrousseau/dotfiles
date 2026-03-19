@@ -5,7 +5,7 @@
   align="right"
 />
 
-# Chezmoi Templates (v0.2.496)
+# Chezmoi Templates (v0.2.497)
 
 Simply designed to fit your shell life
 

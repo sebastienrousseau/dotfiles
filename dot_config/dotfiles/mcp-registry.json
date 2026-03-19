@@ -1,0 +1,29 @@
+{
+  "registryVersion": "2026.03",
+  "servers": {
+    "git": {
+      "transport": "stdio",
+      "launcher": "npx",
+      "package": "mcp-server-git@2025.1.14",
+      "auth": "env",
+      "scope": "repo-local",
+      "verification": "pinned-package"
+    },
+    "memory": {
+      "transport": "stdio",
+      "launcher": "npx",
+      "package": "@modelcontextprotocol/server-memory@2025.8.4",
+      "auth": "env",
+      "scope": "workspace-local",
+      "verification": "pinned-package"
+    },
+    "sqlite": {
+      "transport": "stdio",
+      "launcher": "npx",
+      "package": "mcp-server-sqlite@2025.1.14",
+      "auth": "env",
+      "scope": "workspace-local",
+      "verification": "pinned-package"
+    }
+  }
+}
