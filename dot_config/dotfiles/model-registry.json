@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "2026.03",
+  "defaultModel": "local-default",
+  "models": {
+    "local-default": {
+      "provider": "local",
+      "family": "workstation",
+      "intendedUse": "Local-first CLI assistance and bounded automation",
+      "changeControl": "signed-commit",
+      "riskLevel": "moderate"
+    },
+    "enterprise-audit": {
+      "provider": "remote",
+      "family": "audit",
+      "intendedUse": "Deep analysis with governed remote access",
+      "changeControl": "signed-commit-and-policy-review",
+      "riskLevel": "high"
+    }
+  }
+}

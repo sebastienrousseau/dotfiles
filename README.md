@@ -1,6 +1,6 @@
 # Dotfiles
 
-Fast, signed shell setup for macOS, Linux, WSL, and PowerShell. Managed by Chezmoi.
+Trusted agent workstation for macOS, Linux, WSL, and PowerShell. Signed. Local-first. Managed by Chezmoi.
 
 ## Install
 
@@ -47,6 +47,7 @@ dot attest --json
 - Reliability and security gates
 - Workstation attestation export
 - Agent card and session logging
+- Policy bundles and change-control registries
 
 ## Day 1 path
 
@@ -62,6 +63,7 @@ dot attest --json
 - [Documentation index](docs/README.md)
 - [Utilities and `dot` CLI](docs/reference/UTILS.md)
 - [Support matrix](docs/reference/SUPPORT_MATRIX.md)
+- [Trusted agent workstation](docs/operations/TRUSTED_AGENT_WORKSTATION.md)
 - [Troubleshooting](docs/guides/TROUBLESHOOTING.md)
 - [Contributing](CONTRIBUTING.md)
 

@@ -36,7 +36,7 @@ Run:
 
 ```bash
 dot mcp --strict
-dot mcp --strict --json
+dot mcp -s -j
 dot mcp registry
 ```
 
@@ -48,6 +48,7 @@ Any change to MCP policy requires:
 1. A signed commit
 2. A matching test update
 3. A release note if the effective trust boundary changes
+4. A policy bundle review when enterprise defaults change
 
 ## Supply-chain controls
 
@@ -58,9 +59,11 @@ Current approved refs:
 - `@modelcontextprotocol/server-memory@2025.8.4`
 - `mcp-server-sqlite@2025.1.14`
 
-`dot mcp --strict` now verifies that:
+`dot mcp --strict` and `dot mcp -s` now verify that:
 - package refs are version-pinned
 - the pinned refs match the tracked lock manifest
 - non-approved package refs are rejected in strict mode
 - active servers match the tracked registry entries
 - remote HTTP transports are HTTPS and OAuth-backed
+
+Policy bundle baselines live in [policy-bundles.json](/home/seb/.dotfiles/dot_config/dotfiles/policy-bundles.json).
