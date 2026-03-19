@@ -5,7 +5,9 @@ Fast, signed shell setup for macOS, Linux, and WSL. Managed by Chezmoi.
 ## Install
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
+bash -c "$(
+  curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh
+)"
 ```
 
 Requires `git` and `curl`.
