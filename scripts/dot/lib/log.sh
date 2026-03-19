@@ -14,6 +14,12 @@ export DOT_TRACE_ID
 
 _DOT_LOG_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
 
+dot_jsonl_append() {
+  local file="$1" payload="$2"
+  mkdir -p "$_DOT_LOG_STATE_DIR" 2>/dev/null || return 0
+  printf '%s\n' "$payload" >>"$_DOT_LOG_STATE_DIR/$file" 2>/dev/null || true
+}
+
 # Always-on file logging (appends to dot.log, rotates at 1MB)
 dot_log_file() {
   local level="$1" event="$2"
@@ -79,4 +85,30 @@ dot_metrics_summary() {
     return 0
   fi
   tail -n "$count" "$metrics_file"
+}
+
+dot_agent_session_log() {
+  local event="$1" profile="$2" status="${3:-ok}"
+  shift 3 || true
+  local ts payload
+  ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  payload=$(printf '{"time":"%s","event":"%s","profile":"%s","status":"%s","trace_id":"%s","command":"%s"' \
+    "$ts" "$event" "$profile" "$status" "$DOT_TRACE_ID" "${DOT_COMMAND:-unknown}")
+  while [[ $# -gt 0 ]]; do
+    payload+=$(printf ',"%s":"%s"' "${1%%=*}" "${1#*=}")
+    shift
+  done
+  payload+='}'
+  dot_jsonl_append "agent-sessions.jsonl" "$payload"
+}
+
+dot_agent_session_tail() {
+  local count="${1:-20}"
+  local sessions_file="$_DOT_LOG_STATE_DIR/agent-sessions.jsonl"
+  if [[ ! -f "$sessions_file" ]]; then
+    echo "No agent sessions recorded yet."
+    echo "Agent sessions are recorded at: $sessions_file"
+    return 0
+  fi
+  tail -n "$count" "$sessions_file"
 }

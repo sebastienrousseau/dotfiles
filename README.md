@@ -27,6 +27,7 @@ dot learn
 dot update
 dot apply
 dot mode list
+dot attest --json
 ```
 
 ## Platforms
@@ -44,6 +45,8 @@ dot mode list
 - Encrypted secrets
 - Signed commits
 - Reliability and security gates
+- Workstation attestation export
+- Agent card and session logging
 
 ## Day 1 path
 

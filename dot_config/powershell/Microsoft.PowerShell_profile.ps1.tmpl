@@ -23,6 +23,10 @@ function Invoke-DotfilesCli {
 
 function dot { Invoke-DotfilesCli @args }
 function d { Invoke-DotfilesCli @args }
+function dm { Invoke-DotfilesCli mode list }
+function da { Invoke-DotfilesCli agent list }
+function dmc { Invoke-DotfilesCli mcp registry }
+function datt { Invoke-DotfilesCli attest --json }
 
 function ll {
     if (Get-Command eza -ErrorAction SilentlyContinue) {
@@ -51,6 +55,26 @@ function cat {
 }
 
 Set-Alias -Name open -Value Invoke-Item -Option AllScope
+
+if (Get-Command mise -ErrorAction SilentlyContinue) {
+    function ms { & mise @args }
+}
+
+if (Get-Command nix -ErrorAction SilentlyContinue) {
+    function nx { & nix @args }
+}
+
+if (Get-Command just -ErrorAction SilentlyContinue) {
+    function j { & just @args }
+}
+
+if (Get-Command gh -ErrorAction SilentlyContinue) {
+    function ghpr { gh pr view --web @args }
+}
+
+if (Get-Command podman -ErrorAction SilentlyContinue) {
+    function p { & podman @args }
+}
 
 if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     Invoke-Expression (& { (zoxide init powershell | Out-String) })

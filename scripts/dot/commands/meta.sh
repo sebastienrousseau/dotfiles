@@ -8,6 +8,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh
 source "$SCRIPT_DIR/../lib/utils.sh"
+# shellcheck source=../lib/log.sh
+source "$SCRIPT_DIR/../lib/log.sh"
 
 dot_ui_command_banner "Meta" "${1:-}"
 
@@ -243,6 +245,12 @@ _agent_assert_dependencies() {
   fi
 }
 
+_agent_card_file() {
+  local repo_root
+  repo_root="$(_agent_repo_root)"
+  echo "${AGENT_CARD_CONFIG:-$repo_root/dot_config/dotfiles/agent-card.json}"
+}
+
 cmd_mode() {
   _agent_assert_dependencies
 
@@ -257,6 +265,7 @@ cmd_mode() {
     list)
       local current
       current="$(_agent_current_profile)"
+      dot_agent_session_log "list" "$current" "ok"
       ui_header "Agent Modes"
       jq -r '.profiles | to_entries[] | "\(.key)\t\(.value.description)"' "$(_agent_profiles_file)" \
         | while IFS=$'\t' read -r name description; do
@@ -270,6 +279,7 @@ cmd_mode() {
     current)
       local current
       current="$(_agent_current_profile)"
+      dot_agent_session_log "current" "$current" "ok"
       ui_header "Agent Mode"
       ui_ok "Profile" "$current"
       ui_ok "Approval" "$(_agent_profile_field "$current" "approval")"
@@ -281,6 +291,7 @@ cmd_mode() {
       local name="${1:-}"
       [[ -n "$name" ]] || die "Usage: dot mode show <profile>"
       _agent_profile_exists "$name" || die "Unknown agent profile: $name"
+      dot_agent_session_log "show" "$name" "ok"
       ui_header "Agent Mode"
       ui_ok "Profile" "$name"
       ui_ok "Description" "$(_agent_profile_field "$name" "description")"
@@ -304,6 +315,7 @@ DOT_AGENT_NETWORK=$(_agent_profile_field "$name" "network")
 DOT_AGENT_MCP_PROFILE=$(_agent_profile_field "$name" "mcpProfile")
 DOT_AGENT_MAX_STEPS=$(_agent_profile_field "$name" "maxSteps")
 EOF
+      dot_agent_session_log "set" "$name" "ok" "state_file=$state_file"
       ui_ok "Agent mode" "$name"
       ui_info "State file" "$state_file"
       ;;
@@ -322,11 +334,20 @@ EOF
       export DOT_AGENT_MCP_PROFILE="$(_agent_profile_field "$name" "mcpProfile")"
       export DOT_AGENT_MAX_STEPS="$(_agent_profile_field "$name" "maxSteps")"
       ui_info "Agent mode" "$name"
-      exec "$@"
+      dot_agent_session_log "run_start" "$name" "running" "argv=$*"
+      "$@"
+      local exit_code=$?
+      if [[ "$exit_code" -eq 0 ]]; then
+        dot_agent_session_log "run_finish" "$name" "ok" "exit_code=$exit_code"
+      else
+        dot_agent_session_log "run_finish" "$name" "failed" "exit_code=$exit_code"
+      fi
+      return "$exit_code"
       ;;
     doctor)
       local file
       file="$(_agent_profiles_file)"
+      dot_agent_session_log "doctor" "$(_agent_current_profile)" "ok"
       ui_header "Agent Mode Doctor"
       if jq empty "$file" >/dev/null 2>&1; then
         ui_ok "Profile config" "$file"
@@ -336,8 +357,34 @@ EOF
       jq -e '.profiles[.defaultProfile]' "$file" >/dev/null 2>&1 || die "Default profile missing"
       ui_ok "Default profile" "$(_agent_default_profile)"
       ;;
+    card)
+      local card_file json_mode=0
+      card_file="$(_agent_card_file)"
+      [[ -f "$card_file" ]] || die "Agent card not found: $card_file"
+      if [[ "${1:-}" == "--json" ]]; then
+        json_mode=1
+      fi
+      dot_agent_session_log "card" "$(_agent_current_profile)" "ok"
+      if [[ "$json_mode" -eq 1 ]] || ! command -v jq >/dev/null 2>&1; then
+        exec cat "$card_file"
+      fi
+      ui_header "Agent Card"
+      jq -r '
+        "Name\t\(.name)",
+        "Version\t\(.version)",
+        "Protocols\t\(.protocols | join(", "))",
+        "Default mode\t\(.defaultProfile)",
+        "Support\t\(.platforms | join(", "))"
+      ' "$card_file" | while IFS=$'\t' read -r key value; do
+        ui_ok "$key" "$value"
+      done
+      ;;
+    log)
+      dot_agent_session_log "log" "$(_agent_current_profile)" "ok"
+      dot_agent_session_tail "${1:-20}"
+      ;;
     *)
-      echo "Usage: dot mode [list|current|show|set|run|doctor]" >&2
+      echo "Usage: dot mode [list|current|show|set|run|doctor|card|log]" >&2
       exit 1
       ;;
   esac
