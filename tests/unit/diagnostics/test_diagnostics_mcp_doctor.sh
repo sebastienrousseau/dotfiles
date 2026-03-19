@@ -29,7 +29,7 @@ first_line=$(head -n 1 "$TEST_SCRIPT")
 assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
 
 test_start "mcp_meta_accepts_flag_form"
-assert_file_contains "$META_COMMANDS_SCRIPT" '[[ "${1:-}" == --* ]]' "dot mcp accepts flag-only form"
+assert_file_contains "$META_COMMANDS_SCRIPT" "[[ \"\${1:-}\" == --* ]]" "dot mcp accepts flag-only form"
 
 test_start "mcp_policy_exists"
 assert_file_exists "$MCP_POLICY_FILE" "mcp-policy.json should exist"
