@@ -12,4 +12,11 @@ Core properties:
 - workstation attestation export
 - persistent agent session logs
 
+Tracked governance artifacts:
+- policy bundles
+- prompt registry
+- model registry
+
 Session logs are stored in `~/.local/state/dotfiles/agent-sessions.jsonl`.
+
+The current posture is A2A-ready. It exposes identity, governance, and local evidence. Future phases add protocol conformance testing and transport validation.

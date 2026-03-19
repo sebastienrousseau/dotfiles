@@ -20,12 +20,27 @@ assert_file_contains "$DOT_CLI" "attest" "dot CLI should register attest command
 
 test_start "attestation_json_runs"
 output=$(REPO_ROOT="$REPO_ROOT" bash "$TEST_SCRIPT" --json 2>/dev/null) || true
-if [[ "$output" == \{* ]] && [[ "$output" == *"\"dotfiles_version\""* ]] && [[ "$output" == *"\"git_signing\""* ]]; then
+if [[ "$output" == \{* ]] && [[ "$output" == *"\"dotfiles_version\""* ]] && [[ "$output" == *"\"git_signing\""* ]] && [[ "$output" == *"\"governance\""* ]]; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: emits attestation JSON"
 else
   ((TESTS_FAILED++))
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should emit attestation JSON"
+  printf '%b\n' "    Output: $output"
+fi
+
+test_start "attestation_short_flags_supported"
+assert_file_contains "$TEST_SCRIPT" "--json | -j" "attestation supports -j"
+assert_file_contains "$TEST_SCRIPT" "--write | -w" "attestation supports -w"
+
+test_start "attestation_short_json_runs"
+output=$(REPO_ROOT="$REPO_ROOT" bash "$TEST_SCRIPT" -j 2>/dev/null) || true
+if [[ "$output" == \{* ]] && [[ "$output" == *"\"dotfiles_version\""* ]] && [[ "$output" == *"\"policy_bundles\""* ]]; then
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: -j emits attestation JSON"
+else
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: -j should emit attestation JSON"
   printf '%b\n' "    Output: $output"
 fi
 
