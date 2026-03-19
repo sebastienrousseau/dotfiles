@@ -1,6 +1,8 @@
 # Contributing
 
-Use signed commits. Keep pull requests focused. Run the full local gate before pushing.
+Use signed commits.
+Keep pull requests focused.
+Run the full local gate before pushing.
 
 Read the canonical guide:
 

@@ -14,7 +14,9 @@ Optional:
 ## Standard install
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
+bash -c "$(
+  curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh
+)"
 ```
 
 ## Verify
@@ -81,7 +83,9 @@ Skip editor and terminal extras:
 
 ```bash
 DOTFILES_SILENT=1 DOTFILES_NONINTERACTIVE=1 \
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
+  bash -c "$(
+    curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh
+  )"
 ```
 
 ## Nix

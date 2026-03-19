@@ -55,4 +55,6 @@ make test
 - List the verification commands
 - Link the issue when one exists
 
-GitHub uses [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) for the web flow. This file is the root entry point for local contributors.
+GitHub uses [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md)
+for the web flow.
+This file is the root entry point for local contributors.
