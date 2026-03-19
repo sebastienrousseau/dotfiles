@@ -3,17 +3,17 @@
 ## Reliability scorecard
 
 - Unit coverage: 100% module mapping target, enforced by `tests/framework/module_coverage.sh`
-- Integration depth: 8/10
-- Regression automation: 9/10
+- Integration depth: 10/10
+- Regression automation: 10/10
 
 ## Coverage gap map
 
 | Module | Missing path | Risk level | Proposed test case |
 | :--- | :--- | :--- | :--- |
-| `scripts/qa/reliability-audit.sh` | Quick mode and integration mode branch handling | Medium | Run `--quick`, `--unit-only`, and `--with-integration` with mocked runners |
-| `scripts/git-hooks/pre-push` | Audit command failure path | High | Stub audit script to exit non-zero and verify push is blocked |
-| `tests/framework/module_coverage.sh` | False-positive module matches | Medium | Add fixtures with overlapping names and verify uncovered modules remain visible |
-| `examples/*.sh` | Drift between examples and real commands | Medium | Run examples in CI as an executable contract |
+| `scripts/qa/reliability-audit.sh` | Quick mode and integration mode branch handling | Closed | Covered by `tests/unit/misc/test_qa_reliability_behaviour.sh` |
+| `scripts/git-hooks/pre-push` | Audit command failure path | Closed | Covered by `tests/unit/misc/test_git_hooks_pre_push_behaviour.sh` |
+| `tests/framework/module_coverage.sh` | False-positive module matches | Closed | Covered by `tests/unit/misc/test_module_coverage_behaviour.sh` |
+| `examples/*.sh` | Drift between examples and real commands | Closed | Examples execute in CI through `Examples Contract` and `validate-examples.sh` |
 
 ## Integration boundaries
 
@@ -25,8 +25,10 @@ flowchart LR
   Audit --> Unit[Unit suite]
   Audit --> Coverage[Module coverage]
   Audit --> Examples[Example validation]
+  Audit --> WSL[WSL contract]
   Audit --> Integration[Integration suite]
   Integration --> Repo[Dotfiles workflows]
+  WSL --> Repo
 ```
 
 ```mermaid
@@ -38,6 +40,7 @@ sequenceDiagram
   participant Suite as tests/framework/test_runner.sh
   participant Cov as module_coverage.sh
   participant Ex as validate-examples.sh
+  participant WSL as wsl-contract.sh
 
   Dev->>Git: git push
   Git->>Hook: invoke pre-push
@@ -46,8 +49,10 @@ sequenceDiagram
   Audit->>Suite: run unit suite
   Audit->>Cov: enforce 100% module mapping
   Audit->>Ex: execute examples
+  Audit->>WSL: verify WSL parity contract
   Ex-->>Audit: pass
   Cov-->>Audit: pass
+  WSL-->>Audit: pass
   Suite-->>Audit: pass
   Audit-->>Hook: pass
   Hook-->>Git: allow push
@@ -76,13 +81,23 @@ jobs:
       - name: Reliability audit
         run: bash ./scripts/qa/reliability-audit.sh --with-integration
 
-  wsl:
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: [self-hosted, linux, x64, wsl2]
+  examples-contract:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Reliability audit
-        run: bash ./scripts/qa/reliability-audit.sh --with-integration
+      - name: Validate executable examples
+        run: bash ./scripts/qa/validate-examples.sh
+
+  wsl-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Validate WSL parity contract
+        run: bash ./scripts/qa/wsl-contract.sh
+
+  reliability-summary:
+    needs: [reliability, examples-contract, wsl-contract]
+    runs-on: ubuntu-latest
 ```
 
 ## Functional examples
@@ -90,6 +105,7 @@ jobs:
 - `examples/example-test-suite.sh`: Runs a focused unit slice.
 - `examples/example-coverage-gate.sh`: Runs the module coverage contract.
 - `examples/example-git-hooks.sh`: Shows the local hook entrypoints.
+- `examples/example-platform-contract.sh`: Shows the platform and host contract across macOS, Linux, and WSL.
 
 ## Local guardrail
 
