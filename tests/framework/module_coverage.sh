@@ -3,10 +3,14 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TESTS_DIR="$(dirname "$SCRIPT_DIR")"
-REPO_ROOT="$(dirname "$TESTS_DIR")"
+TESTS_DIR="${TESTS_DIR:-$(dirname "$SCRIPT_DIR")}"
+REPO_ROOT="${REPO_ROOT:-$(dirname "$TESTS_DIR")}"
 
 MIN_COVERAGE="${MIN_COVERAGE:-95}"
+
+escape_regex() {
+  printf '%s' "$1" | sed 's/[][(){}.^$*+?|\\/]/\\&/g'
+}
 
 modules=()
 while IFS= read -r file; do
@@ -27,11 +31,17 @@ for m in "${modules[@]}"; do
   flat="${m//\//_}"
   flat="${flat//-/_}"
   base_u="${base//-/_}"
+  escaped_flat="$(escape_regex "$flat")"
+  escaped_base_u="$(escape_regex "$base_u")"
+  escaped_module="$(escape_regex "$m")"
 
   if command -v rg >/dev/null 2>&1; then
-    matcher=(rg -q "${base}|${base_u}|${flat}|test_.*${base}" "$TESTS_DIR/unit" -g "test_*.sh")
+    matcher=(rg -q -e "(^|[^A-Za-z0-9_])${escaped_flat}([^A-Za-z0-9_]|$)" \
+      -e "(^|[^A-Za-z0-9_])${escaped_base_u}([^A-Za-z0-9_]|$)" \
+      -e "${escaped_module}" \
+      "$TESTS_DIR/unit" -g "test_*.sh")
   else
-    matcher=(grep -R -E -q "${base}|${base_u}|${flat}|test_.*${base}" "$TESTS_DIR/unit")
+    matcher=(grep -R -E -q "(^|[^A-Za-z0-9_])${escaped_flat}([^A-Za-z0-9_]|$)|(^|[^A-Za-z0-9_])${escaped_base_u}([^A-Za-z0-9_]|$)|${escaped_module}" "$TESTS_DIR/unit")
   fi
 
   if "${matcher[@]}"; then
