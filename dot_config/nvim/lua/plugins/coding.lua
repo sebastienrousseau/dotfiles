@@ -194,7 +194,7 @@ return {
   -- Venv Selector (Python Env Management)
   {
     "linux-cultist/venv-selector.nvim",
-    branch = "main", -- Explicitly switch back to main
+    version = false, -- No tagged releases; track default branch
     dependencies = {
       "neovim/nvim-lspconfig",
       "nvim-telescope/telescope.nvim",

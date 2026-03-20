@@ -12,7 +12,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COVERAGE_DIR="$REPO_ROOT/.coverage"
 
-# Coverage tracking globals
+# Coverage tracking globals (requires bash 4+ for associative arrays)
+if [[ "${BASH_VERSINFO[0]}" -lt 4 ]]; then
+  echo "coverage_analyzer.sh requires bash 4+ (found ${BASH_VERSION})" >&2
+  exit 1
+fi
 declare -A LINE_COVERAGE=()
 declare -A BRANCH_COVERAGE=()
 declare -A FUNCTION_COVERAGE=()

@@ -1,7 +1,7 @@
 -- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 return {
   "akinsho/toggleterm.nvim",
-  version = "*",
+  version = "^2",
   config = function()
     require("toggleterm").setup({
       -- Automatically close the terminal when the process exits.

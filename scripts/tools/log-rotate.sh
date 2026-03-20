@@ -16,7 +16,7 @@ if [[ "${size}" -lt "${MAX_SIZE_BYTES}" ]]; then
   exit 0
 fi
 
-for i in $(seq ${ROTATIONS} -1 1); do
+for ((i = ROTATIONS; i >= 1; i--)); do
   if [[ -f "${LOG_FILE}.${i}.gz" ]]; then
     mv "${LOG_FILE}.${i}.gz" "${LOG_FILE}.$((i + 1)).gz"
   elif [[ -f "${LOG_FILE}.${i}" ]]; then

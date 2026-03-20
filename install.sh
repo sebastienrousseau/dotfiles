@@ -143,7 +143,19 @@ main() {
       mkdir -p "$bin_dir"
       echo "   Installing chezmoi via binary download..."
 
-      # Download installer to temp file and validate before execution
+      # Prefer verified installer with SHA256 checksum when available
+      local verified_installer
+      verified_installer="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/scripts/ci/install-chezmoi-verified.sh"
+      if [[ -x "$verified_installer" ]] || [[ -f "$verified_installer" ]]; then
+        echo "   Using checksum-verified installer..."
+        if ! bash "$verified_installer" "${CHEZMOI_VERSION:-2.47.1}" "$bin_dir"; then
+          echo "   Verified installer failed, falling back to get.chezmoi.io" >&2
+        else
+          return 0
+        fi
+      fi
+
+      # Fallback: download installer with size/shebang validation
       local installer
       installer=$(umask 077 && mktemp)
       if ! curl -fsSL -o "$installer" https://get.chezmoi.io; then
@@ -286,7 +298,7 @@ main() {
       fi
     )
     if [[ "$ACTUAL_REF" != "$VERSION" ]] && [[ "${ACTUAL_REF#v}" != "${VERSION#v}" ]]; then
-      printf '%b\n' "${CYAN}   INFO: Checked out ref $ACTUAL_REF (requested: $VERSION)${NC}"
+      printf '%b\n' "${RED}   WARNING: Checked out ref $ACTUAL_REF (requested: $VERSION) — version mismatch${NC}" >&2
     fi
 
     ensure_chezmoi_source "$SOURCE_DIR"

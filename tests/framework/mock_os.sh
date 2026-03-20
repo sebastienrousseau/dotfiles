@@ -12,7 +12,9 @@
 export ORIG_UNAME
 ORIG_UNAME=$(command -v uname)
 MOCK_BIN_DIR=$(mktemp -d)
+ORIG_PATH="$PATH"
 export PATH="$MOCK_BIN_DIR:$PATH"
+trap 'rm -rf "$MOCK_BIN_DIR"; export PATH="$ORIG_PATH"' EXIT
 
 # Internal state
 export MOCKED_OS=""
@@ -53,8 +55,7 @@ mock_os() {
 
 restore_os() {
   rm -f "$MOCK_BIN_DIR/uname"
-  # Note: we don't remove MOCK_BIN_DIR from PATH here to avoid complexity,
-  # but the mocks are gone.
+  export PATH="$ORIG_PATH"
   unset -f dot_is_wsl 2>/dev/null || true
 }
 
