@@ -35,11 +35,13 @@ The `dot` command is the main interface for managing dotfiles. Run `dot version`
 | `dot benchmark` | Measure shell startup time (`--detailed|-d`, `--profile|-p`, `--compare|-c`, `--waterfall|-w`) |
 | `dot perf` | Show performance mode + quick timing (`--json|-j`, `--profile|-p`, `--runs|-r`, `--target|-t`) |
 | `dot mcp` | Validate MCP policy and registry (`--strict|-s`, `--json|-j`) |
-| `dot attest` | Export workstation evidence (`--json|-j`, `--write|-w`) |
+| `dot attest` | Export workstation evidence (`--json|-j`, `--write|-w`, `--fleet-store|-F`) |
 | `dot history` | Analyse shell history |
 | `dot security-score` | Score workstation security (`--verbose|-v`, `--quiet|-q`, `--json|-j`) |
 | `dot snapshot` | Capture workstation state (`--baseline|-b`, `--force|-f`) |
 | `dot ai` | Show AI helper status (opt-in) |
+| `dot agent checkpoint` | Save, list, show, and replay bounded agent checkpoints |
+| `dot agent conformance` | Validate A2A discovery and agent card conformance (`--strict|-s`, `--json|-j`) |
 
 ### Tools
 

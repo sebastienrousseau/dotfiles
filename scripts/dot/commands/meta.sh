@@ -25,7 +25,7 @@ meta_banner_section() {
   esac
 }
 
-dot_ui_command_banner "$(meta_banner_section "${1:-}")" "${1:-}"
+dot_ui_command_banner "$(meta_banner_section "${1:-}")" "${1:-}" "$@"
 
 cmd_upgrade() {
   local src_dir
@@ -265,6 +265,21 @@ _agent_card_file() {
   echo "${AGENT_CARD_CONFIG:-$repo_root/dot_config/dotfiles/agent-card.json}"
 }
 
+_agent_checkpoint_file() {
+  local checkpoint_id="$1"
+  echo "$(dot_agent_checkpoint_dir)/${checkpoint_id}.json"
+}
+
+_agent_apply_profile_env() {
+  local name="$1"
+  export DOT_AGENT_PROFILE="$name"
+  export DOT_AGENT_APPROVAL="$(_agent_profile_field "$name" "approval")"
+  export DOT_AGENT_FILESYSTEM="$(_agent_profile_field "$name" "filesystem")"
+  export DOT_AGENT_NETWORK="$(_agent_profile_field "$name" "network")"
+  export DOT_AGENT_MCP_PROFILE="$(_agent_profile_field "$name" "mcpProfile")"
+  export DOT_AGENT_MAX_STEPS="$(_agent_profile_field "$name" "maxSteps")"
+}
+
 cmd_mode() {
   _agent_assert_dependencies
 
@@ -341,20 +356,20 @@ EOF
         name="$(_agent_current_profile)"
       fi
       [[ $# -gt 0 ]] || die "Usage: dot mode run [profile] <command> [args...]"
-      export DOT_AGENT_PROFILE="$name"
-      export DOT_AGENT_APPROVAL="$(_agent_profile_field "$name" "approval")"
-      export DOT_AGENT_FILESYSTEM="$(_agent_profile_field "$name" "filesystem")"
-      export DOT_AGENT_NETWORK="$(_agent_profile_field "$name" "network")"
-      export DOT_AGENT_MCP_PROFILE="$(_agent_profile_field "$name" "mcpProfile")"
-      export DOT_AGENT_MAX_STEPS="$(_agent_profile_field "$name" "maxSteps")"
+      _agent_apply_profile_env "$name"
+      local checkpoint_file checkpoint_id
+      checkpoint_file="$(dot_agent_checkpoint_create "$name" "ready" "$@")"
+      checkpoint_id="$(basename "$checkpoint_file" .json)"
       ui_info "Agent mode" "$name"
-      dot_agent_session_log "run_start" "$name" "running" "argv=$*"
+      dot_agent_session_log "run_start" "$name" "running" "argv=$*" "checkpoint_id=$checkpoint_id"
+      set +e
       "$@"
       local exit_code=$?
+      set -e
       if [[ "$exit_code" -eq 0 ]]; then
-        dot_agent_session_log "run_finish" "$name" "ok" "exit_code=$exit_code"
+        dot_agent_session_log "run_finish" "$name" "ok" "exit_code=$exit_code" "checkpoint_id=$checkpoint_id"
       else
-        dot_agent_session_log "run_finish" "$name" "failed" "exit_code=$exit_code"
+        dot_agent_session_log "run_finish" "$name" "failed" "exit_code=$exit_code" "checkpoint_id=$checkpoint_id"
       fi
       return "$exit_code"
       ;;
@@ -397,8 +412,96 @@ EOF
       dot_agent_session_log "log" "$(_agent_current_profile)" "ok"
       dot_agent_session_tail "${1:-20}"
       ;;
+    checkpoint)
+      local action="${1:-list}"
+      shift || true
+      case "$action" in
+        save)
+          local name="${1:-}" checkpoint_file checkpoint_id
+          if [[ -n "$name" ]] && _agent_profile_exists "$name"; then
+            shift || true
+          else
+            name="$(_agent_current_profile)"
+          fi
+          [[ $# -gt 0 ]] || die "Usage: dot agent checkpoint save [profile] <command> [args...]"
+          _agent_apply_profile_env "$name"
+          checkpoint_file="$(dot_agent_checkpoint_create "$name" "saved" "$@")"
+          checkpoint_id="$(basename "$checkpoint_file" .json)"
+          dot_agent_session_log "checkpoint_save" "$name" "ok" "checkpoint_id=$checkpoint_id"
+          ui_header "Agent Checkpoint"
+          ui_ok "ID" "$checkpoint_id"
+          ui_ok "Profile" "$name"
+          ui_ok "Command" "$*"
+          ui_ok "File" "$checkpoint_file"
+          ;;
+        list)
+          local count="${1:-20}"
+          dot_agent_session_log "checkpoint_list" "$(_agent_current_profile)" "ok"
+          if ! command -v jq >/dev/null 2>&1; then
+            dot_agent_checkpoint_tail "$count"
+            return 0
+          fi
+          ui_header "Agent Checkpoints"
+          dot_agent_checkpoint_tail "$count" | jq -r '"\(.id)\t\(.profile)\t\(.status)\t\(.created_at)\t\(.argv | join(" "))"' | while IFS=$'\t' read -r id profile status created_at argv; do
+            ui_ok "$id" "$profile / $status / $created_at / $argv"
+          done
+          ;;
+        show)
+          local checkpoint_id="${1:-}" checkpoint_file json_mode=0
+          [[ -n "$checkpoint_id" ]] || die "Usage: dot agent checkpoint show <id> [--json]"
+          shift || true
+          [[ "${1:-}" == "--json" || "${1:-}" == "-j" ]] && json_mode=1
+          checkpoint_file="$(_agent_checkpoint_file "$checkpoint_id")"
+          [[ -f "$checkpoint_file" ]] || die "Checkpoint not found: $checkpoint_id"
+          dot_agent_session_log "checkpoint_show" "$(_agent_current_profile)" "ok" "checkpoint_id=$checkpoint_id"
+          if [[ "$json_mode" -eq 1 ]] || ! command -v jq >/dev/null 2>&1; then
+            exec cat "$checkpoint_file"
+          fi
+          ui_header "Agent Checkpoint"
+          jq -r '"ID\t\(.id)",
+            "Profile\t\(.profile)",
+            "Status\t\(.status)",
+            "Created\t\(.created_at)",
+            "Command\t\(.argv | join(" "))"' "$checkpoint_file" | while IFS=$'\t' read -r key value; do
+              ui_ok "$key" "$value"
+            done
+          ;;
+        replay)
+          local checkpoint_id="${1:-}" checkpoint_file replay_profile
+          local -a replay_argv=()
+          [[ -n "$checkpoint_id" ]] || die "Usage: dot agent checkpoint replay <id>"
+          checkpoint_file="$(_agent_checkpoint_file "$checkpoint_id")"
+          [[ -f "$checkpoint_file" ]] || die "Checkpoint not found: $checkpoint_id"
+          replay_profile="$(jq -r '.profile' "$checkpoint_file")"
+          while IFS= read -r item; do
+            replay_argv+=("$item")
+          done < <(jq -r '.argv[]' "$checkpoint_file")
+          [[ "${#replay_argv[@]}" -gt 0 ]] || die "Checkpoint has no replayable command: $checkpoint_id"
+          _agent_apply_profile_env "$replay_profile"
+          dot_agent_session_log "checkpoint_replay" "$replay_profile" "running" "checkpoint_id=$checkpoint_id"
+          set +e
+          "${replay_argv[@]}"
+          local exit_code=$?
+          set -e
+          if [[ "$exit_code" -eq 0 ]]; then
+            dot_agent_session_log "checkpoint_replay_finish" "$replay_profile" "ok" "checkpoint_id=$checkpoint_id" "exit_code=$exit_code"
+          else
+            dot_agent_session_log "checkpoint_replay_finish" "$replay_profile" "failed" "checkpoint_id=$checkpoint_id" "exit_code=$exit_code"
+          fi
+          return "$exit_code"
+          ;;
+        *)
+          echo "Usage: dot agent checkpoint [save|list|show|replay]" >&2
+          exit 1
+          ;;
+      esac
+      ;;
+    conformance)
+      dot_agent_session_log "conformance" "$(_agent_current_profile)" "ok"
+      run_script "scripts/diagnostics/a2a-conformance.sh" "A2A conformance script" "$@"
+      ;;
     *)
-      echo "Usage: dot mode [list|current|show|set|run|doctor|card|log]" >&2
+      echo "Usage: dot mode [list|current|show|set|run|doctor|card|log|checkpoint|conformance]" >&2
       exit 1
       ;;
   esac

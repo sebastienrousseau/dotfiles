@@ -2,5 +2,6 @@
   "name": "dotfiles-agent",
   "card": "dot_config/dotfiles/agent-card.json",
   "protocols": ["mcp", "a2a-ready"],
-  "capabilities": ["workstation-attestation", "bounded-agent-modes", "signed-config-governance"]
+  "capabilities": ["workstation-attestation", "bounded-agent-modes", "signed-config-governance", "replayable-checkpoints", "fleet-attestation-export", "policy-bundle-releases"],
+  "conformanceVersion": "2026.03"
 }

@@ -26,7 +26,7 @@ assert_file_contains "$DOT_CLI" "agent" "dot CLI lists agent command"
 
 test_start "meta_mode_handler_exists"
 assert_file_contains "$META_FILE" "cmd_mode()" "meta command module defines cmd_mode"
-assert_file_contains "$META_FILE" "Usage: dot mode [list|current|show|set|run|doctor|card|log]" "mode usage is documented"
+assert_file_contains "$META_FILE" "Usage: dot mode [list|current|show|set|run|doctor|card|log|checkpoint|conformance]" "mode usage is documented"
 
 test_start "dot_mode_list_runs"
 assert_output_contains "Agent Modes" "bash '$DOT_CLI' mode list"

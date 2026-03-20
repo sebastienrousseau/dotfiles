@@ -165,13 +165,13 @@ Daily Use|diff|Preview pending changes.|Safe way to inspect before applying.
 Daily Use|edit|Open the source directory.|Use the configured editor.
 Daily Use|upgrade|Update tools and dotfiles.|Runs the managed upgrade path.
 Inspect and Repair|doctor|Run the main health check.|Supports deeper audit flags.
-Inspect and Repair|attest|Export workstation evidence.|Use `--json|-j` or `--write|-w`.
+Inspect and Repair|attest|Export workstation evidence.|Use `--json|-j`, `--write|-w`, or `--fleet-store|-F`.
 Inspect and Repair|rollback|Return to a previous state.|Use after a broken change.
 Inspect and Repair|lint|Check shell script quality.|Supports `--check|-c` and `--fix|-f`.
 AI and Agents|ai|Show installed AI tools.|Launches the AI status view.
 AI and Agents|mcp|Inspect MCP policy and registry.|Supports `--strict|-s` and `--json|-j`.
 AI and Agents|mode|Show or set the agent profile.|Profiles: ask, plan, apply, audit.
-AI and Agents|agent|Show agent metadata and logs.|Use for card, log, and controlled runs.
+AI and Agents|agent|Show agent metadata, logs, checkpoints, and conformance.|Use for card, log, checkpoint, and conformance.
 Configuration|env|Show managed tool versions.|Backed by mise.
 Configuration|profile|Show or switch the active profile.|Use for machine-specific behavior.
 Configuration|secrets|Edit or manage encrypted secrets.|Subcommands cover set, get, list, load.
@@ -192,7 +192,7 @@ Core|edit|Open chezmoi source in $EDITOR|Jump into the source tree quickly.
 Core|cd|Print source directory path (use: cd $(dot cd))|Useful in shell scripts and jump helpers.
 Core|commit|AI-powered conventional commit|Wraps the commit helper flow.
 Diagnostics|doctor|Deep audit: tools, paths, portability, AI analysis (--ai|-A)|Main health and repair entrypoint.
-Diagnostics|attest|Export workstation attestation evidence (--json|-j, --write|-w)|Produce machine-readable evidence.
+Diagnostics|attest|Export workstation attestation evidence (--json|-j, --write|-w, --fleet-store|-F)|Produce machine-readable evidence.
 Diagnostics|score|System health and security scorecard|Quick high-level readout.
 Diagnostics|snapshot|Capture baseline system snapshot|Use before larger changes.
 Diagnostics|chaos|Simulate config corruption to test self-healing|Advanced validation path.
@@ -207,7 +207,7 @@ AI|ai-setup|Interactive setup for all AI CLI tools|Initial AI tool bootstrap.
 AI|ai-query|Context-aware RAG query over your dotfiles|Ask questions over the repo state.
 AI|mcp|Inspect MCP policy, supply chain, and registry|Governance and validation surface.
 AI|mode|Set or inspect agent operating profiles (ask/plan/apply/audit)|Bounded-autonomy controls.
-AI|agent|Profile-aware execution, agent card, and session log|Agent metadata and local audit trail.
+AI|agent|Profile-aware execution, agent card, session log, checkpoints, and conformance|Agent metadata and local audit trail.
 AI|cl|Claude CLI with context patterns|Context-aware Anthropic bridge.
 AI|gemini|Gemini CLI with context patterns|Context-aware Gemini bridge.
 AI|kiro|Kiro CLI with context patterns|Context-aware Kiro bridge.
@@ -258,7 +258,7 @@ status|Show local drift in the managed home state.|dot status
 edit|Open the dotfiles source tree in the configured editor.|dot edit
 upgrade|Run the managed update path for tools and dotfiles.|dot upgrade
 doctor|Inspect shell tools, paths, portability, and health.|dot doctor\ndot doctor --score\ndot doctor -H
-attest|Export workstation attestation evidence.|dot attest\ndot attest --json\ndot attest -w attestation.json
+attest|Export workstation attestation evidence.|dot attest\ndot attest --json\ndot attest -F /srv/dotfiles-fleet
 health|Run the health dashboard with optional fixes.|dot health -v\ndot health -j\ndot health -f
 perf|Measure shell performance and emit structured timing.|dot perf -j -r 1\ndot perf -p\ndot perf -t 200
 security-score|Assess workstation security posture.|dot security-score -j\ndot security-score -q
@@ -270,7 +270,7 @@ lint|Run shell quality checks for the repo.|dot lint\ndot lint -c\ndot lint -f
 ai|Show installed AI tools and entrypoints.|dot ai
 mcp|Inspect MCP configuration, policy, and registry.|dot mcp\ndot mcp -s -j\ndot mcp registry
 mode|Inspect or switch the active agent mode.|dot mode list\ndot mode show ask\ndot mode set audit
-agent|Inspect agent metadata or run profile-aware actions.|dot agent card\ndot agent log
+agent|Inspect agent metadata or run profile-aware actions.|dot agent card\ndot agent checkpoint list\ndot agent conformance --strict --json
 env|Show managed tool versions and runtime state.|dot env
 profile|Show or switch the active configuration profile.|dot profile
 secrets|Manage encrypted secrets and environment loading.|dot secrets edit\ndot secrets list\ndot secrets load ai

@@ -20,9 +20,16 @@ dot attest --json
 dot attest -j
 dot attest --write ~/.local/state/dotfiles/attestations/workstation.json
 dot attest -w ~/.local/state/dotfiles/attestations/workstation.json
+dot attest --fleet-store /srv/dotfiles-fleet
+dot attest -F /srv/dotfiles-fleet -I engineering
 ```
 
 The default output path is `~/.local/state/dotfiles/attestations/workstation-attestation.json`.
+
+Fleet export writes:
+
+- `<fleet-store>/<fleet-id>/<hostname>/workstation-attestation.json`
+- timestamped copies for retention
 
 Governance evidence is embedded directly in the JSON output. That includes:
 

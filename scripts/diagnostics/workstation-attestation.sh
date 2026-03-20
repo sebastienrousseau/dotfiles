@@ -19,6 +19,8 @@ source "$SCRIPT_DIR/../dot/lib/utils.sh"
 
 JSON_MODE=0
 WRITE_PATH=""
+FLEET_STORE=""
+FLEET_ID=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --json | -j)
@@ -27,6 +29,14 @@ while [[ $# -gt 0 ]]; do
       ;;
     --write | -w)
       WRITE_PATH="${2:-}"
+      shift 2
+      ;;
+    --fleet-store | -F)
+      FLEET_STORE="${2:-}"
+      shift 2
+      ;;
+    --fleet-id | -I)
+      FLEET_ID="${2:-}"
       shift 2
       ;;
     *)
@@ -42,10 +52,14 @@ command -v jq >/dev/null 2>&1 || {
 
 ui_init
 
+if [[ -z "$FLEET_STORE" && -n "${DOTFILES_FLEET_STORE:-}" ]]; then
+  FLEET_STORE="$DOTFILES_FLEET_STORE"
+fi
+
 attestation_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/attestations"
 if [[ -n "$WRITE_PATH" ]]; then
   mkdir -p "$(dirname "$WRITE_PATH")"
-elif [[ "$JSON_MODE" -ne 1 ]]; then
+elif [[ "$JSON_MODE" -ne 1 && -z "$FLEET_STORE" ]]; then
   mkdir -p "$attestation_dir"
   WRITE_PATH="$attestation_dir/workstation-attestation.json"
 fi
@@ -139,6 +153,18 @@ if [[ -n "$WRITE_PATH" ]]; then
   printf '%s\n' "$attestation_json" >"$WRITE_PATH"
 fi
 
+if [[ -n "$FLEET_STORE" ]]; then
+  fleet_root="${FLEET_STORE%/}"
+  fleet_id="${FLEET_ID:-${DOTFILES_FLEET_ID:-default}}"
+  fleet_host="${hostname_value:-unknown-host}"
+  fleet_dir="$fleet_root/$fleet_id/$fleet_host"
+  fleet_file="$fleet_dir/workstation-attestation.json"
+  fleet_timestamp_file="$fleet_dir/workstation-attestation-$(date -u +%Y%m%dT%H%M%SZ).json"
+  mkdir -p "$fleet_dir"
+  printf '%s\n' "$attestation_json" >"$fleet_file"
+  printf '%s\n' "$attestation_json" >"$fleet_timestamp_file"
+fi
+
 if [[ "$JSON_MODE" -eq 1 ]]; then
   printf '%s\n' "$attestation_json"
 else
@@ -149,4 +175,7 @@ else
   ui_ok "Agent profile" "$current_profile"
   ui_ok "MCP status" "$(printf '%s' "$mcp_summary" | jq -r '.status')"
   ui_ok "Output" "$WRITE_PATH"
+  if [[ -n "$FLEET_STORE" ]]; then
+    ui_ok "Fleet store" "$fleet_root/$fleet_id/$fleet_host"
+  fi
 fi

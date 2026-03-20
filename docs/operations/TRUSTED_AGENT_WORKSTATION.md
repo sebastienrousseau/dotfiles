@@ -32,13 +32,19 @@ Phase 1 establishes:
 - prompt and model change control
 - attestation evidence for governance state
 
-Next phases add:
+Implemented next-layer controls:
 
-- fleet rollout and drift reporting
-- signed policy release bundles
+- filesystem-backed fleet attestation export
 - replayable agent checkpoints
+- signed policy bundle release workflow
+- tracked A2A conformance validation
+
+Further phases add:
+
 - central audit export
-- protocol conformance for A2A
+- fleet drift dashboards
+- checkpoint policies and retention controls
+- broader protocol interoperability coverage
 
 ## Validation
 
