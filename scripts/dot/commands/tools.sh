@@ -631,8 +631,11 @@ cmd_profile() {
         [[ "$line" =~ ^\[ ]] && break
         [[ -z "$line" || "$line" =~ ^# ]] && continue
         local key val
-        key="$(echo "$line" | cut -d= -f1 | tr -d ' ')"
-        val="$(echo "$line" | cut -d= -f2 | tr -d ' "')"
+        key="${line%%=*}"
+        key="${key// /}"
+        val="${line#*=}"
+        val="${val// /}"
+        val="${val//\"/}"
         ui_info "$key" "$val"
       done
       ;;
