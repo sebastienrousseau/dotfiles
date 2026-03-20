@@ -10,13 +10,10 @@ These aliases are defined in `find.aliases.sh` and are automatically loaded by `
 
 ## Aliases
 
-This code provides a set of command aliases for the `fd` utility that is
-an alternative to the `find` command on Unix-based systems.
-`fd` is a simple, fast, and user-friendly tool that can be used to
-search for files and directories in a given path. These aliases make it
-easier to use `fd` by providing simple and memorable commands for common
-use cases.
-Here are some of the available aliases:
+Command aliases for the `fd` utility, a fast alternative to `find`.
+`fd` searches for files and directories in a given path with colorized
+output and intuitive syntax. These aliases provide memorable shortcuts
+for common operations:
 - `fd` is the default alias for `fd --color always` that lists all files
   with colorized output.
 - `fda` lists all files with absolute paths.

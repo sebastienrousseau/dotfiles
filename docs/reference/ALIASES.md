@@ -42,7 +42,7 @@ Shell aliases provided by the dotfiles, organized by category in `~/.dotfiles/.c
 | `di` | `docker images` | List images |
 | `dexec` | `docker exec -it` | Execute in container |
 | `denter` | `docker exec -it <container> /bin/bash` | Enter container |
-| `dlogsf` | `docker logs -f` | Follow logs |
+| `dlogsf` | `docker logs -f` | Follow logs (deprecated, use `dklf`) |
 | `dl` | `docker logs` | Show logs |
 | `dprune` | `docker system prune` | Clean up |
 | `dprunea` | `docker system prune -a` | Clean up all |

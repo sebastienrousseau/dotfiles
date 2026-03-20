@@ -322,6 +322,7 @@ ui_run_cmd() {
 
   local rc_file
   rc_file=$(mktemp)
+  trap 'rm -f "$rc_file"' RETURN
   # Run command in background
   (
     "$@" >/dev/null 2>&1

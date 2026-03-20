@@ -305,6 +305,7 @@ cmd_aliases() {
       echo ""
       local tmp_aliases
       tmp_aliases="$(umask 077 && mktemp)"
+      trap 'rm -f "$tmp_aliases"' RETURN
       emit_alias_manifest | awk -F'\t' '{print $1}' | sort -u >"$tmp_aliases"
       awk -v aliases_file="$tmp_aliases" '
         BEGIN {

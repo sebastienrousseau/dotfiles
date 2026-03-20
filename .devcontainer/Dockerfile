@@ -31,6 +31,8 @@ RUN sh -c "$(curl -fsSL https://starship.rs/install.sh)" -- -y
 RUN mkdir -p /etc/apt/keyrings \
     && curl -fsSL https://raw.githubusercontent.com/eza-community/eza/main/deb.asc \
         | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg \
+    && gpg --no-default-keyring --keyring /etc/apt/keyrings/gierens.gpg \
+        --list-keys --with-colons 2>/dev/null | grep -q "pub:" \
     && echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" \
         | tee /etc/apt/sources.list.d/gierens.list >/dev/null \
     && apt-get update -qq && apt-get install -y --no-install-recommends eza \

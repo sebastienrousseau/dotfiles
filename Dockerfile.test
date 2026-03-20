@@ -192,7 +192,10 @@ RUN apt-get update && \
 # Install eza (official method for Ubuntu)
 # hadolint ignore=DL3008
 RUN mkdir -p /etc/apt/keyrings && \
-    curl -fsSL https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg && \
+    curl -fsSL https://raw.githubusercontent.com/eza-community/eza/main/deb.asc \
+      | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg && \
+    gpg --no-default-keyring --keyring /etc/apt/keyrings/gierens.gpg \
+      --list-keys --with-colons 2>/dev/null | grep -q "pub:" && \
     echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" > /etc/apt/sources.list.d/gierens.list && \
     apt-get update && \
     apt-get install -y --no-install-recommends eza && \

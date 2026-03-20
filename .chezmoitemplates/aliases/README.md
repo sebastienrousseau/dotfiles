@@ -1,11 +1,13 @@
 <img
   src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+  alt="dotfiles logo"
+  width="66"
   align="right"
 />
 
 # Dotfiles Aliases (v0.2.497)
 
-Simply designed to fit your shell life 
+Modular alias definitions managed by Chezmoi
 
 ![Dotfiles banner][banner]
 

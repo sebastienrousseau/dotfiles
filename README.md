@@ -1,8 +1,15 @@
 # Dotfiles
 
-[![CI](https://github.com/sebastienrousseau/dotfiles/actions/workflows/ci.yml/badge.svg)](https://github.com/sebastienrousseau/dotfiles/actions/workflows/ci.yml)
+[![CI status](https://github.com/sebastienrousseau/dotfiles/actions/workflows/ci.yml/badge.svg)](https://github.com/sebastienrousseau/dotfiles/actions/workflows/ci.yml "CI build status")
 
 Trusted agent workstation for macOS, Linux, WSL, and PowerShell. Signed. Local-first. Managed by Chezmoi.
+
+**Default shell:** Fish. Change it later in `.chezmoidata.toml` (Zsh and Nushell also supported).
+
+## Prerequisites
+
+- `git`
+- `curl`
 
 ## Install
 
@@ -12,24 +19,20 @@ bash -c "$(
 )"
 ```
 
-Requires `git` and `curl`.
-
 ## Verify
 
 ```bash
-dot --version
-dot doctor
-dot help
+dot --version        # Confirm installation
+dot doctor           # Check shell, git, and essential tools
+dot help             # Browse available commands
 ```
 
 ## Use
 
 ```bash
-dot learn
-dot update
-dot apply
-dot mode list
-dot attest --json
+dot learn            # Interactive onboarding tour
+dot update           # Pull latest changes and apply
+dot apply            # Apply configuration
 ```
 
 ## Platforms
@@ -41,11 +44,14 @@ dot attest --json
 
 ## What’s included
 
-- Zsh, Fish, and Nushell
+**Core:**
+- Zsh, Fish, and Nushell with modular configuration
 - PowerShell profile and cross-shell `dot` entrypoint
-- Mise and Nix
-- Encrypted secrets
-- Signed commits
+- Mise and Nix toolchain management
+- Encrypted secrets (age)
+- Signed commits (SSH ED25519)
+
+**Advanced:**
 - Reliability and security gates
 - Workstation attestation export
 - Agent card and session logging
@@ -58,10 +64,9 @@ dot attest --json
 **For users:**
 
 1. Install.
-2. Verify with `dot doctor`.
-3. Explore with `dot learn`.
-4. Customize with files in `~/.config/shell/custom/`.
-5. Select a bounded agent profile with `dot mode list`.
+2. Run `dot doctor` to verify shell, git, and tools.
+3. Run `dot learn` for an interactive tour.
+4. Customize files in `~/.config/shell/custom/`.
 
 **For contributors:**
 

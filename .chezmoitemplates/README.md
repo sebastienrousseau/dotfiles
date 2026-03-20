@@ -7,7 +7,7 @@
 
 # Chezmoi Templates (v0.2.497)
 
-Simply designed to fit your shell life
+Modular shell configuration managed by Chezmoi
 
 ![Dotfiles banner](https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg)
 
@@ -17,7 +17,7 @@ This directory contains modular templates that are aggregated into the shell env
 
 ### Directory Structure
 
-```
+```text
 .chezmoitemplates/
 ├── aliases/          # 97 files across 46 functional domains
 │   ├── ai/
@@ -66,7 +66,7 @@ This directory contains modular templates that are aggregated into the shell env
 - Each category has comprehensive documentation
 
 **Growth Concerns:**
-- Functions directory is flat with 52 files (will become unwieldy at scale)
+- Functions directory is flat with 52 files (becomes unwieldy at scale)
 - No consistent versioning scheme across categories
 - Potential namespace collisions in functions
 
@@ -74,10 +74,10 @@ This directory contains modular templates that are aggregated into the shell env
 
 #### 1. Functions Reorganization (Priority: HIGH)
 
-**Current Issue**: 52 functions in flat structure will become unmaintainable.
+**Current Issue**: 52 functions in a flat structure becomes unmaintainable at scale.
 
 **Recommended Structure**:
-```
+```text
 functions/
 ├── core/                # Essential system utilities
 │   ├── filesystem/      # File operations (backup, extract, zipf)
@@ -107,7 +107,7 @@ functions/
 **Current State**: Some platform-specific organization (macOS directory in aliases).
 
 **Recommended Structure**:
-```
+```text
 aliases/
 ├── core/               # Cross-platform commands
 ├── platform/

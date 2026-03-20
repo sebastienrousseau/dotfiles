@@ -22,7 +22,7 @@ RUN_INTEGRATION=1 ./tests/framework/test_runner.sh
 
 ## Test structure
 
-```
+```text
 tests/
 ├── framework/           # Test framework
 │   ├── assertions.sh    # 16 assertion functions
