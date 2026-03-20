@@ -106,11 +106,8 @@
         src = pkgs.fetchFromGitHub {
           owner = "jorgebucaran";
           repo = "fisher";
-          rev = "main";
-          # Run `nix flake lock` or use `nix-prefetch-git` to compute the
-          # correct hash. The placeholder below will cause a build error on
-          # first use — Nix will print the expected hash in the error message.
-          sha256 = pkgs.lib.fakeSha256;
+          rev = "791da644d33d392216f6b1a9b5fc1e470db6d7f2";
+          sha256 = "sha256-U1yd8m56YrHXrJFkU8xaOglulOGV0iBvwjU/bdf8tqA=";
         };
       }
     ];
