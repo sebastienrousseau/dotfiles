@@ -294,6 +294,9 @@ dot_command_summary() {
     usb-safety)
       echo "Disable risky removable-media automount."
       ;;
+    fleet)
+      echo "Show fleet node status, drift, and namespace."
+      ;;
     upgrade)
       echo "Update system toolchains, plugins, and dotfiles."
       ;;

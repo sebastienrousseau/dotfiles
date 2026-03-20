@@ -54,6 +54,36 @@ node_manager = "mise"  # mise, fnm, or nvm
 # [data.aliases.buckets]
 # system = false
 # svn = false
+# ============================================================================
+# Fleet & Telemetry (Enterprise)
+# ============================================================================
+[fleet]
+enabled = false
+telemetry = false  # Opt-in structured event emission
+endpoint = ""      # HTTPS endpoint for fleet event sink
+node_id = ""       # Unique identifier for this machine in the fleet
+namespace = ""     # Org/team namespace for multi-tenant isolation
+
+# ============================================================================
+# Namespace Profiles (Multi-Tenant)
+# ============================================================================
+# Define team-specific overrides. The active namespace is set by fleet.namespace.
+# Each namespace inherits all top-level settings, then applies overrides.
+[namespaces.default]
+# Base namespace — no overrides, uses top-level values
+
+[namespaces.engineering]
+theme = "catppuccin-mocha"
+default_shell = "fish"
+
+[namespaces.security]
+theme = "catppuccin-mocha"
+default_shell = "zsh"
+
+[namespaces.ops]
+theme = "catppuccin-latte"
+default_shell = "fish"
+
 [aliases.buckets]
 system = true
 svn = true

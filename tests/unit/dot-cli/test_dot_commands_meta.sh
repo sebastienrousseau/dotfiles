@@ -55,9 +55,11 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: command handlers should be present"
 fi
 
+AGENT_MODULE="$REPO_ROOT/scripts/dot/commands/agent.sh"
+
 test_start "meta_agent_enterprise_subcommands"
-assert_file_contains "$META_FILE" "checkpoint)" "meta module defines checkpoint handling"
-assert_file_contains "$META_FILE" "conformance)" "meta module defines conformance handling"
+assert_file_contains "$AGENT_MODULE" "checkpoint)" "agent module defines checkpoint handling"
+assert_file_contains "$AGENT_MODULE" "conformance)" "agent module defines conformance handling"
 
 # Test: version uses semantic versioning
 test_start "meta_semver_version"

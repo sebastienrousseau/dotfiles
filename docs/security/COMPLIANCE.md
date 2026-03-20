@@ -9,6 +9,7 @@ This document describes the compliance, security, and cross-platform compatibili
 | SOC 2 Type II | Aligned | Security, availability, and confidentiality |
 | ISO 27001 | Aligned | Information security management controls |
 | GDPR/HIPAA | Aligned | Privacy and data protection |
+| ISO 13485 | Aligned | Risk management (FMEA), verification & validation |
 | ALCOA | Implemented | Audit trail integrity |
 
 ---
@@ -157,6 +158,7 @@ The `cross-platform-test.yml` workflow validates scripts on both platforms:
 | `cross-platform-test.yml` | Push/PR + weekly | BSD/GNU compatibility |
 | `security-enhanced.yml` | Push/PR | Deep security analysis, SBOM |
 | `codeql.yml` | Push/PR + weekly | Static code analysis |
+| `sbom-diff.yml` | Pull request | SBOM diff and CVE correlation |
 | `nightly.yml` | Daily 2 AM UTC | Dependency version checks |
 
 ### Compliance Guard Jobs
@@ -354,6 +356,9 @@ bash tests/unit/test_dot_commands_apply.sh
 | SECURITY.md | Vulnerability reporting | `.github/SECURITY.md` |
 | CONTRIBUTING.md | Contribution guidelines | `.github/CONTRIBUTING.md` |
 | CODEOWNERS | Code ownership | `.github/CODEOWNERS` |
+| INCIDENT_RESPONSE.md | Incident response plan | `docs/security/` |
+| FMEA.md | Failure Mode & Effects Analysis | `docs/security/` |
+| VERIFICATION_VALIDATION.md | ISO 13485-style V&V report | `docs/security/` |
 | .editorconfig | Editor settings | Root |
 | .gitattributes | Git attributes | Root |
 

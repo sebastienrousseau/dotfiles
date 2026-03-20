@@ -172,6 +172,7 @@ AI and Agents|ai|Show installed AI tools.|Launches the AI status view.
 AI and Agents|mcp|Inspect MCP policy and registry.|Supports `--strict|-s` and `--json|-j`.
 AI and Agents|mode|Show or set the agent profile.|Profiles: ask, plan, apply, audit.
 AI and Agents|agent|Show agent metadata, logs, checkpoints, and conformance.|Use for card, log, checkpoint, and conformance.
+Fleet|fleet|Show fleet node status, drift, and namespace.|Enterprise fleet management.
 Configuration|env|Show managed tool versions.|Backed by mise.
 Configuration|profile|Show or switch the active profile.|Use for machine-specific behavior.
 Configuration|secrets|Edit or manage encrypted secrets.|Subcommands cover set, get, list, load.
@@ -240,6 +241,10 @@ Security (opt-in)|telemetry|Disable OS telemetry [macOS,Linux]|Privacy-focused h
 Security (opt-in)|dns-doh|Enable DNS-over-HTTPS [macOS,Linux]|Secure DNS helper.
 Security (opt-in)|lock-screen|Enforce lock screen idle settings [Linux]|Linux workstation hardening.
 Security (opt-in)|usb-safety|Disable automount for removable media [Linux]|Linux removable-media hardening.
+Fleet|fleet|Show fleet node status, drift, and namespace (--json for machine output)|Fleet management surface.
+Fleet|fleet drift|Check for configuration drift across managed files|Drift detection and reporting.
+Fleet|fleet namespace|Show or set the active namespace for multi-tenant isolation|Namespace management.
+Fleet|fleet events|Show recent fleet events from local event log|Fleet observability.
 Meta|upgrade|Update system toolchains, plugins, and dotfiles|Managed upgrade flow.
 Meta|packages|List installed packages and package managers|Inventory and package surfaces.
 Meta|cache-refresh|Regenerate shell caches for ultra-fast startup|Refresh generated shell state.
@@ -271,6 +276,7 @@ ai|Show installed AI tools and entrypoints.|dot ai
 mcp|Inspect MCP configuration, policy, and registry.|dot mcp\ndot mcp -s -j\ndot mcp registry
 mode|Inspect or switch the active agent mode.|dot mode list\ndot mode show ask\ndot mode set audit
 agent|Inspect agent metadata or run profile-aware actions.|dot agent card\ndot agent checkpoint list\ndot agent conformance --strict --json
+fleet|Show fleet node status, drift, and namespace.|dot fleet\ndot fleet status --json\ndot fleet drift\ndot fleet namespace set engineering
 env|Show managed tool versions and runtime state.|dot env
 profile|Show or switch the active configuration profile.|dot profile
 secrets|Manage encrypted secrets and environment loading.|dot secrets edit\ndot secrets list\ndot secrets load ai
@@ -379,6 +385,7 @@ sandbox|meta
 mcp|meta
 mode|meta
 agent|meta
+fleet|fleet
 patterns|patterns
 search|search
 help|help
@@ -526,7 +533,7 @@ fi
 route="$(_dot_command_route "$COMMAND" || true)"
 
 case "$route" in
-  core | diagnostics | ai | tools | appearance | secrets | security | meta)
+  core | diagnostics | ai | tools | appearance | secrets | security | meta | fleet)
     _dispatch "$route" "$@"
     ;;
 

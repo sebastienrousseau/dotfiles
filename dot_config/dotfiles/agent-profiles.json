@@ -1,6 +1,29 @@
 {
   "schemaVersion": "2026.03",
   "defaultProfile": "ask",
+  "rbac": {
+    "roles": {
+      "viewer": {
+        "description": "Read-only access to configuration and status.",
+        "allowedProfiles": ["ask"],
+        "permissions": ["read", "status", "audit"]
+      },
+      "developer": {
+        "description": "Standard development workflow with bounded writes.",
+        "inherits": "viewer",
+        "allowedProfiles": ["ask", "plan", "apply"],
+        "permissions": ["read", "write", "status", "audit", "execute"]
+      },
+      "admin": {
+        "description": "Full access including fleet management and profile switching.",
+        "inherits": "developer",
+        "allowedProfiles": ["ask", "plan", "apply", "audit"],
+        "permissions": ["read", "write", "status", "audit", "execute", "fleet", "configure"]
+      }
+    },
+    "defaultRole": "developer",
+    "enforcement": "advisory"
+  },
   "profiles": {
     "ask": {
       "description": "Read-only guidance with no unattended changes.",
