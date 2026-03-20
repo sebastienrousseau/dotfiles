@@ -1,4 +1,9 @@
 -- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+-- @module nvim.plugins.coding
+-- Syntax, completion, and language intelligence plugins.
+-- Treesitter provides AST-based highlighting and text-objects.
+-- nvim-cmp drives the completion engine with LSP, snippet, and path sources.
+-- venv-selector enables Python virtualenv switching from within Neovim.
 return {
   -- Treesitter (Syntax Highlighting)
   {

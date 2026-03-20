@@ -1,5 +1,7 @@
 # Dotfiles
 
+[![CI](https://github.com/sebastienrousseau/dotfiles/actions/workflows/ci.yml/badge.svg)](https://github.com/sebastienrousseau/dotfiles/actions/workflows/ci.yml)
+
 Trusted agent workstation for macOS, Linux, WSL, and PowerShell. Signed. Local-first. Managed by Chezmoi.
 
 ## Install
@@ -53,11 +55,19 @@ dot attest --json
 
 ## Day 1 path
 
+**For users:**
+
 1. Install.
 2. Verify with `dot doctor`.
 3. Explore with `dot learn`.
 4. Customize with files in `~/.config/shell/custom/`.
 5. Select a bounded agent profile with `dot mode list`.
+
+**For contributors:**
+
+1. Clone the repo and run `./install.sh`.
+2. Run `make test` or `./tests/framework/test_runner.sh`.
+3. Read [Contributing](CONTRIBUTING.md) for signed-commit and PR guidelines.
 
 ## Reference
 
