@@ -23,6 +23,12 @@ mock_os() {
   local target_os="$1"
   export MOCKED_OS="$target_os"
 
+  # Ensure mock bin dir is in PATH (restore_os may have removed it)
+  case ":$PATH:" in
+    *":$MOCK_BIN_DIR:"*) ;;
+    *) export PATH="$MOCK_BIN_DIR:$PATH" ;;
+  esac
+
   # Mock uname
   case "$target_os" in
     macos)

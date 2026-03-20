@@ -12,8 +12,6 @@
 TESTS_RUN=0
 TESTS_PASSED=0
 TESTS_FAILED=0
-ASSERTIONS_PASSED=0
-ASSERTIONS_FAILED=0
 CURRENT_TEST=""
 
 # Colors
@@ -32,11 +30,11 @@ test_start() {
 assert_equals() {
   local expected="$1" actual="$2" msg="${3:-values should be equal}"
   if [[ "$expected" == "$actual" ]]; then
-    ((ASSERTIONS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $msg"
     return 0
   else
-    ((ASSERTIONS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $msg"
     printf '%b\n' "    Expected: '$expected'"
     printf '%b\n' "    Actual:   '$actual'"
@@ -48,11 +46,11 @@ assert_equals() {
 assert_not_equals() {
   local unexpected="$1" actual="$2" msg="${3:-values should differ}"
   if [[ "$unexpected" != "$actual" ]]; then
-    ((ASSERTIONS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $msg"
     return 0
   else
-    ((ASSERTIONS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $msg"
     printf '%b\n' "    Unexpected: '$unexpected'"
     printf '%b\n' "    Actual:     '$actual'"
@@ -83,11 +81,11 @@ assert_output_contains() {
   # shellcheck disable=SC2086
   output=$(eval "$cmd" 2>&1) || true
   if [[ "$output" == *"$needle"* ]]; then
-    ((ASSERTIONS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: output contains '$needle'"
     return 0
   else
-    ((ASSERTIONS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: output should contain '$needle'"
     printf '%b\n' "    Actual output: $output"
     return 1
@@ -103,11 +101,11 @@ assert_output_not_contains() {
   # shellcheck disable=SC2086
   output=$(eval "$cmd" 2>&1) || true
   if [[ "$output" != *"$needle"* ]]; then
-    ((ASSERTIONS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: output does not contain '$needle'"
     return 0
   else
-    ((ASSERTIONS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: output should not contain '$needle'"
     printf '%b\n' "    Actual output: $output"
     return 1
@@ -123,11 +121,11 @@ assert_output_matches() {
   # shellcheck disable=SC2086
   output=$(eval "$cmd" 2>&1) || true
   if [[ "$output" =~ $pattern ]]; then
-    ((ASSERTIONS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: output matches pattern '$pattern'"
     return 0
   else
-    ((ASSERTIONS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: output should match pattern '$pattern'"
     printf '%b\n' "    Actual output: $output"
     return 1
@@ -138,11 +136,11 @@ assert_output_matches() {
 assert_file_exists() {
   local file="$1" msg="${2:-file should exist}"
   if [[ -f "$file" ]]; then
-    ((ASSERTIONS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $msg"
     return 0
   else
-    ((ASSERTIONS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $msg ($file not found)"
     return 1
   fi
@@ -152,11 +150,11 @@ assert_file_exists() {
 assert_file_not_exists() {
   local file="$1" msg="${2:-file should not exist}"
   if [[ ! -f "$file" ]]; then
-    ((ASSERTIONS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $msg"
     return 0
   else
-    ((ASSERTIONS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $msg ($file exists)"
     return 1
   fi
@@ -166,11 +164,11 @@ assert_file_not_exists() {
 assert_dir_exists() {
   local dir="$1" msg="${2:-directory should exist}"
   if [[ -d "$dir" ]]; then
-    ((ASSERTIONS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $msg"
     return 0
   else
-    ((ASSERTIONS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $msg ($dir not found)"
     return 1
   fi
@@ -180,11 +178,11 @@ assert_dir_exists() {
 assert_dir_not_exists() {
   local dir="$1" msg="${2:-directory should not exist}"
   if [[ ! -d "$dir" ]]; then
-    ((ASSERTIONS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $msg"
     return 0
   else
-    ((ASSERTIONS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $msg ($dir exists)"
     return 1
   fi
@@ -195,11 +193,11 @@ assert_true() {
   local condition="$1" msg="${2:-condition should be true}"
   # shellcheck disable=SC2086
   if eval "$condition"; then
-    ((ASSERTIONS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $msg"
     return 0
   else
-    ((ASSERTIONS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $msg"
     return 1
   fi
@@ -210,11 +208,11 @@ assert_false() {
   local condition="$1" msg="${2:-condition should be false}"
   # shellcheck disable=SC2086
   if ! eval "$condition"; then
-    ((ASSERTIONS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $msg"
     return 0
   else
-    ((ASSERTIONS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $msg"
     return 1
   fi
@@ -224,11 +222,11 @@ assert_false() {
 assert_empty() {
   local value="$1" msg="${2:-value should be empty}"
   if [[ -z "$value" ]]; then
-    ((ASSERTIONS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $msg"
     return 0
   else
-    ((ASSERTIONS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $msg"
     printf '%b\n' "    Actual: '$value'"
     return 1
@@ -239,11 +237,11 @@ assert_empty() {
 assert_not_empty() {
   local value="$1" msg="${2:-value should not be empty}"
   if [[ -n "$value" ]]; then
-    ((ASSERTIONS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $msg"
     return 0
   else
-    ((ASSERTIONS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $msg"
     return 1
   fi
@@ -253,16 +251,16 @@ assert_not_empty() {
 assert_file_contains() {
   local file="$1" needle="$2" msg="${3:-file should contain text}"
   if [[ -z "$file" ]]; then
-    ((ASSERTIONS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $msg (no file path provided)"
     return 1
   fi
   if [[ -f "$file" ]] && grep -qF -- "$needle" "$file"; then
-    ((ASSERTIONS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $msg"
     return 0
   else
-    ((ASSERTIONS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $msg"
     return 1
   fi
@@ -272,11 +270,11 @@ assert_file_contains() {
 assert_contains() {
   local needle="$1" actual="$2" msg="${3:-string should contain substring}"
   if [[ "$actual" == *"$needle"* ]]; then
-    ((ASSERTIONS_PASSED++)) || true
+    ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $msg"
     return 0
   else
-    ((ASSERTIONS_FAILED++)) || true
+    ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $msg"
     printf '%b\n' "    Expected to contain: '$needle'"
     printf '%b\n' "    Actual string:      '$actual'"
@@ -286,17 +284,17 @@ assert_contains() {
 
 # Print test summary
 print_summary() {
-  local total_assertions=$((ASSERTIONS_PASSED + ASSERTIONS_FAILED))
+  local total_assertions=$((TESTS_PASSED + TESTS_FAILED))
   echo ""
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   printf '%b\n' "Test cases: $TESTS_RUN | Assertions: $total_assertions"
-  printf '%b\n' "${GREEN}Passed: $ASSERTIONS_PASSED${NC}"
-  printf '%b\n' "${RED}Failed: $ASSERTIONS_FAILED${NC}"
+  printf '%b\n' "${GREEN}Passed: $TESTS_PASSED${NC}"
+  printf '%b\n' "${RED}Failed: $TESTS_FAILED${NC}"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   # Output machine-readable results for test_runner.sh (assertions are the unit of pass/fail)
-  echo "RESULTS:$total_assertions:$ASSERTIONS_PASSED:$ASSERTIONS_FAILED"
+  echo "RESULTS:$total_assertions:$TESTS_PASSED:$TESTS_FAILED"
 
-  if [[ $ASSERTIONS_FAILED -gt 0 ]]; then
+  if [[ $TESTS_FAILED -gt 0 ]]; then
     return 1
   fi
   return 0
