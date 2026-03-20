@@ -14,7 +14,7 @@ Core workflows for keeping your dotfiles running across platforms.
   ```bash
   chezmoi update
   ```
-  This runs `brew bundle install` behind the scenes to match `Brewfile.lock.json`.
+  This runs `brew bundle install` behind the scenes to reconcile against the declared Brewfiles.
 - **Permission issues**: `sudo chown -R $(whoami) $(brew --prefix)/*`
 - **Drift**: Run `brew bundle cleanup` to remove unmanaged packages.
 
@@ -28,7 +28,7 @@ Core workflows for keeping your dotfiles running across platforms.
   chezmoi update
   ```
   On Linux, `chezmoi` focuses on configuration. Package updates work best through the OS package manager to avoid `sudo` conflicts.
-- **Font issues**: If icons are missing, run `./install/provision/run_onchange_50-install-fonts.sh` manually.
+- **Font issues**: If icons are missing, run `./install/provision/run_onchange_50-install-fonts.sh.tmpl` manually via `chezmoi apply` or source directly with `bash`.
 
 ### Windows (WSL2)
 

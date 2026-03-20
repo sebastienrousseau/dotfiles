@@ -29,13 +29,12 @@ dot help
 
 ## Choose a shell
 
-The default shell is Zsh.
+The default shell is Fish.
 
 Set a different shell in `~/.dotfiles/.chezmoidata.toml`:
 
 ```toml
-[data]
-default_shell = "fish"
+default_shell = "zsh"
 ```
 
 Supported values:

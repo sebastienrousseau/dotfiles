@@ -1,4 +1,8 @@
 -- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+-- @module nvim.plugins.editor
+-- Editor enhancement plugins.
+-- toggleterm.nvim provides a floating terminal toggled with a single keymap,
+-- pinned to ^2 for API stability.
 return {
   "akinsho/toggleterm.nvim",
   version = "^2",
