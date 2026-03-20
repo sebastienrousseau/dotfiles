@@ -104,10 +104,10 @@ assert_output_matches "[0-9]+" "echo 'test123'"
 # ============ print_summary validation ============
 
 test_start "test_counters_consistent"
-# test_start increments TESTS_RUN (test cases), assertions track ASSERTIONS_PASSED/FAILED
+# test_start increments TESTS_RUN, assertions increment TESTS_PASSED/TESTS_FAILED
 # TESTS_RUN should equal the number of test_start calls so far
-expected_assertions=$((ASSERTIONS_PASSED + ASSERTIONS_FAILED + 1))
-assert_equals "$TESTS_RUN" "$expected_assertions" "TESTS_RUN should equal PASSED + FAILED + 1 (current)"
+expected_tests=$((TESTS_PASSED + TESTS_FAILED + 1))
+assert_equals "$TESTS_RUN" "$expected_tests" "TESTS_RUN should equal PASSED + FAILED + 1 (current)"
 
 echo ""
 echo "Framework edge case tests completed."
