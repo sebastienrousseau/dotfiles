@@ -98,8 +98,11 @@ check() {
 
   TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 
-  # Collect structured result for JSON output
-  RESULTS+=("{\"check\":\"$name\",\"status\":\"$status\",\"message\":\"$message\"}")
+  # Collect structured result for JSON output (escape quotes for valid JSON)
+  local _j_name="${name//\"/\\\"}"
+  local _j_status="${status//\"/\\\"}"
+  local _j_message="${message//\"/\\\"}"
+  RESULTS+=("{\"check\":\"${_j_name}\",\"status\":\"${_j_status}\",\"message\":\"${_j_message}\"}")
 
   case "$status" in
     pass)

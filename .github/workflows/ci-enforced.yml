@@ -178,8 +178,8 @@ jobs:
 
           # Check each file for copyright header (first 10 lines)
           while IFS= read -r file; do
-            # Skip files in excluded directories
-            if echo "$file" | grep -E "(node_modules/|\.git/|vendor/|target/|build/)" > /dev/null; then
+            # Skip files in excluded directories or generated/template files
+            if echo "$file" | grep -E "(node_modules/|\.git/|vendor/|target/|build/|\.tmpl$|\.chezmoitemplates/)" > /dev/null; then
               continue
             fi
 

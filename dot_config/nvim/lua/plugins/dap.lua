@@ -6,7 +6,7 @@ local SIDEBAR_WIDTH = 40
 local BOTTOM_PANEL_HEIGHT = 10
 local QUARTER_SIZE = 0.25
 local HALF_SIZE = 0.5
-local DEFAULT_DEV_SERVER_PORT = 3000
+local DEFAULT_DEV_SERVER_PORT = tonumber(vim.env.DAP_DEV_SERVER_PORT) or 3000
 
 return {
   -- DAP Core

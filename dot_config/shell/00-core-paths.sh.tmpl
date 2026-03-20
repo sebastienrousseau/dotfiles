@@ -80,7 +80,7 @@ _lazy_load_kubeconfig() {
         done
         [[ -n "$kubeconfig_extra" ]] && export KUBECONFIG="${HOME}/.kube/config${kubeconfig_extra}"
     fi
-    unfunction kubectl _lazy_load_kubeconfig 2>/dev/null
+    unset -f kubectl _lazy_load_kubeconfig 2>/dev/null
     command kubectl "$@"
 }
 # Only wrap kubectl if config.d exists and kubectl is installed

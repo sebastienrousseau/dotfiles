@@ -303,7 +303,8 @@ jobs:
         if: steps.check-dockerfiles.outputs.found == 'true'
         run: |
           set -euo pipefail
-          mapfile -t dockerfiles < <(find . -type f -name "Dockerfile*" ! -path "./.git/*" | sort)
+          dockerfiles=()
+          while IFS= read -r f; do dockerfiles+=("$f"); done < <(find . -type f -name "Dockerfile*" ! -path "./.git/*" | sort)
 
           for dockerfile in "${dockerfiles[@]}"; do
             echo "Linting $dockerfile"
