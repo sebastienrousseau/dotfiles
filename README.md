@@ -47,6 +47,8 @@ dot attest --json
 - Reliability and security gates
 - Workstation attestation export
 - Agent card and session logging
+- Replayable agent checkpoints
+- Fleet attestation export
 - Policy bundles and change-control registries
 
 ## Day 1 path

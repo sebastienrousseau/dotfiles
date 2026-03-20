@@ -17,12 +17,36 @@ assert_exit_code 0 "XDG_STATE_HOME='$STATE_DIR' bash '$DOT_CLI' mode run ask bas
 test_start "agent_log_outputs_jsonl"
 output=$(XDG_STATE_HOME="$STATE_DIR" bash "$DOT_CLI" agent log 5 2>/dev/null) || true
 if [[ "$output" == *"\"event\":\"log\""* ]] || [[ "$output" == *"\"event\":\"run_finish\""* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: agent log emits JSONL events"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected agent JSONL output"
   printf '%b\n' "    Output: $output"
+fi
+
+test_start "agent_checkpoint_list_outputs_entries"
+output=$(XDG_STATE_HOME="$STATE_DIR" bash "$DOT_CLI" agent checkpoint list 5 2>/dev/null) || true
+if [[ "$output" == *"Agent Checkpoints"* ]] || [[ "$output" == *"ready"* ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: checkpoint list shows saved run state"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected checkpoint listing output"
+  printf '%b\n' "    Output: $output"
+fi
+
+test_start "agent_checkpoint_replay_runs"
+replay_file="$STATE_DIR/replayed.txt"
+assert_exit_code 0 "XDG_STATE_HOME='$STATE_DIR' bash '$DOT_CLI' agent checkpoint save ask bash -lc 'printf replayed > \"$replay_file\"'"
+checkpoint_id="$(find "$STATE_DIR/dotfiles/checkpoints" -type f -name '*.json' | sort | tail -n 1 | xargs -r basename | sed 's/\.json$//')"
+assert_exit_code 0 "XDG_STATE_HOME='$STATE_DIR' bash '$DOT_CLI' agent checkpoint replay \"$checkpoint_id\""
+if [[ -f "$replay_file" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: checkpoint replay re-runs the saved command"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected replayed command side effect"
 fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

@@ -14,6 +14,10 @@ export DOT_TRACE_ID
 
 _DOT_LOG_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
 
+dot_agent_checkpoint_dir() {
+  printf '%s\n' "$_DOT_LOG_STATE_DIR/checkpoints"
+}
+
 dot_jsonl_append() {
   local file="$1" payload="$2"
   mkdir -p "$_DOT_LOG_STATE_DIR" 2>/dev/null || return 0
@@ -111,4 +115,72 @@ dot_agent_session_tail() {
     return 0
   fi
   tail -n "$count" "$sessions_file"
+}
+
+dot_agent_checkpoint_create() {
+  local profile="$1" status="${2:-ready}"
+  shift 2 || true
+
+  local checkpoint_dir checkpoint_id checkpoint_file created_at
+  local argv_json='[]'
+  checkpoint_dir="$(dot_agent_checkpoint_dir)"
+  checkpoint_id="${DOT_AGENT_CHECKPOINT_ID:-$(date -u +%Y%m%dT%H%M%SZ)-${DOT_TRACE_ID}}"
+  checkpoint_file="$checkpoint_dir/${checkpoint_id}.json"
+  created_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+  mkdir -p "$checkpoint_dir" 2>/dev/null || return 0
+
+  if [[ "$#" -gt 0 ]] && command -v jq >/dev/null 2>&1; then
+    argv_json="$(printf '%s\n' "$@" | jq -R . | jq -s .)"
+  fi
+
+  if command -v jq >/dev/null 2>&1; then
+    jq -n \
+      --arg id "$checkpoint_id" \
+      --arg time "$created_at" \
+      --arg profile "$profile" \
+      --arg status "$status" \
+      --arg trace_id "$DOT_TRACE_ID" \
+      --arg command "${DOT_COMMAND:-unknown}" \
+      --arg cwd "$(pwd)" \
+      --arg approval "${DOT_AGENT_APPROVAL:-}" \
+      --arg filesystem "${DOT_AGENT_FILESYSTEM:-}" \
+      --arg network "${DOT_AGENT_NETWORK:-}" \
+      --arg mcp_profile "${DOT_AGENT_MCP_PROFILE:-}" \
+      --arg max_steps "${DOT_AGENT_MAX_STEPS:-}" \
+      --argjson argv "$argv_json" \
+      '{
+        id: $id,
+        created_at: $time,
+        profile: $profile,
+        status: $status,
+        trace_id: $trace_id,
+        command: $command,
+        cwd: $cwd,
+        argv: $argv,
+        env: {
+          approval: $approval,
+          filesystem: $filesystem,
+          network: $network,
+          mcp_profile: $mcp_profile,
+          max_steps: $max_steps
+        }
+      }' >"$checkpoint_file"
+  else
+    printf '{"id":"%s","created_at":"%s","profile":"%s","status":"%s","trace_id":"%s","command":"%s"}\n' \
+      "$checkpoint_id" "$created_at" "$profile" "$status" "$DOT_TRACE_ID" "${DOT_COMMAND:-unknown}" >"$checkpoint_file"
+  fi
+
+  printf '%s\n' "$checkpoint_file"
+}
+
+dot_agent_checkpoint_tail() {
+  local count="${1:-20}"
+  local checkpoint_dir file
+  checkpoint_dir="$(dot_agent_checkpoint_dir)"
+  [[ -d "$checkpoint_dir" ]] || return 0
+  find "$checkpoint_dir" -maxdepth 1 -type f -name '*.json' | sort | tail -n "$count" | while IFS= read -r file; do
+    [[ -n "$file" ]] || continue
+    cat "$file"
+  done
 }

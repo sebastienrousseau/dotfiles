@@ -11,6 +11,8 @@ Core properties:
 - MCP-governed execution
 - workstation attestation export
 - persistent agent session logs
+- replayable checkpoints
+- fleet attestation export
 
 Tracked governance artifacts:
 - policy bundles
@@ -18,5 +20,13 @@ Tracked governance artifacts:
 - model registry
 
 Session logs are stored in `~/.local/state/dotfiles/agent-sessions.jsonl`.
+Checkpoints are stored in `~/.local/state/dotfiles/checkpoints/`.
 
-The current posture is A2A-ready. It exposes identity, governance, and local evidence. Future phases add protocol conformance testing and transport validation.
+Validate conformance with:
+
+```bash
+dot agent conformance
+dot agent conformance --strict --json
+```
+
+The current posture is A2A-ready with tracked conformance checks. It exposes identity, governance, checkpoints, and local evidence.

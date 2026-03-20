@@ -22,6 +22,7 @@ Start here. Then go deeper.
 
 - [Security overview](security/SECURITY.md)
 - [Security checklist](security/SECURITY_CHECKLIST.md)
+- [Policy bundle releases](security/POLICY_RELEASES.md)
 - [Secrets](security/SECRETS.md)
 - [Compliance](security/COMPLIANCE.md)
 - [Threat model](security/THREAT_MODEL.md)

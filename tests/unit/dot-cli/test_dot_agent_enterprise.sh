@@ -16,9 +16,11 @@ test_start "agent_card_exists"
 assert_file_exists "$AGENT_CARD" "agent-card.json should exist"
 assert_file_exists "$WELL_KNOWN" ".well-known agent.json should exist"
 
-test_start "agent_meta_supports_card_and_log"
+test_start "agent_meta_supports_enterprise_subcommands"
 assert_file_contains "$META_FILE" "card)" "dot mode supports card"
 assert_file_contains "$META_FILE" "log)" "dot mode supports log"
+assert_file_contains "$META_FILE" "checkpoint)" "dot mode supports checkpoint"
+assert_file_contains "$META_FILE" "conformance)" "dot mode supports conformance"
 
 test_start "agent_card_runs"
 assert_output_contains "Agent Card" "bash '$DOT_CLI' agent card"
@@ -26,11 +28,21 @@ assert_output_contains "Agent Card" "bash '$DOT_CLI' agent card"
 test_start "agent_card_json_runs"
 output=$(bash "$DOT_CLI" agent card --json 2>/dev/null) || true
 if [[ "$output" == \{* ]] && [[ "$output" == *"\"protocols\""* ]]; then
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: emits agent card JSON"
 else
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should emit agent card JSON"
+fi
+
+test_start "agent_conformance_json_runs"
+output=$(bash "$DOT_CLI" agent conformance --strict --json 2>/dev/null) || true
+if [[ "$output" == \{* ]] && [[ "$(printf '%s' "$output" | jq -r '.status')" == "healthy" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: emits healthy conformance JSON"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should emit healthy conformance JSON"
 fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

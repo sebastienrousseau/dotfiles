@@ -1,0 +1,115 @@
+name: Policy Bundle Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bundle_version:
+        description: "Policy bundle version"
+        required: true
+        type: string
+      ref:
+        description: "Git ref to package"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  package-policy-bundle:
+    name: Package Policy Bundle
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      archive: ${{ steps.bundle.outputs.archive }}
+      checksum: ${{ steps.bundle.outputs.checksum }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Verify signed source ref
+        run: |
+          set -euo pipefail
+          sig_status="$(git log -1 --format='%G?' HEAD 2>/dev/null || echo N)"
+          has_sig_header=false
+          if git cat-file -p HEAD | grep -qE '^(gpgsig|sshsig) '; then
+            has_sig_header=true
+          fi
+          case "$sig_status" in
+            G|U)
+              echo "Signed source ref verified"
+              ;;
+            *)
+              if [[ "$has_sig_header" != "true" ]]; then
+                echo "::error::Unsigned source ref is not allowed for policy bundle release"
+                exit 1
+              fi
+              echo "Signed source ref detected"
+              ;;
+          esac
+
+      - name: Package policy bundle
+        id: bundle
+        env:
+          BUNDLE_VERSION: ${{ inputs.bundle_version }}
+        run: |
+          set -euo pipefail
+          output="$(bash scripts/release/package-policy-bundles.sh --json)"
+          echo "archive=$(printf '%s' "$output" | jq -r '.archive')" >> "$GITHUB_OUTPUT"
+          echo "checksum=$(printf '%s' "$output" | jq -r '.checksum')" >> "$GITHUB_OUTPUT"
+
+      - name: Upload policy bundle
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: policy-bundle-${{ inputs.bundle_version }}
+          path: |
+            ${{ steps.bundle.outputs.archive }}
+            ${{ steps.bundle.outputs.checksum }}
+
+  attest-policy-bundle:
+    name: Attest Policy Bundle
+    runs-on: ubuntu-latest
+    needs: [package-policy-bundle]
+    permissions:
+      contents: read
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Rebuild bundle for attestation
+        env:
+          BUNDLE_VERSION: ${{ inputs.bundle_version }}
+        run: |
+          set -euo pipefail
+          bash scripts/release/package-policy-bundles.sh --json >/tmp/policy-bundle.json
+
+      - name: Attest policy bundle
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        with:
+          subject-path: dist/policy-bundles/policy-bundles-${{ inputs.bundle_version }}.tar.gz
+
+  policy-bundle-summary:
+    name: Policy Bundle Release Summary
+    runs-on: ubuntu-latest
+    needs: [package-policy-bundle, attest-policy-bundle]
+    if: always()
+    steps:
+      - name: Policy bundle summary
+        run: |
+          for result in \
+            "${{ needs.package-policy-bundle.result }}" \
+            "${{ needs.attest-policy-bundle.result }}"; do
+            if [[ "$result" != "success" ]]; then
+              echo "::error::Policy bundle release contains a failing mandatory job"
+              exit 1
+            fi
+          done
+          echo "Policy bundle release passed"

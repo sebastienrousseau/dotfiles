@@ -9,13 +9,18 @@
     "cli": "dot",
     "mode": "dot mode",
     "attestation": "dot attest --json",
-    "mcp": "dot mcp --strict --json"
+    "mcp": "dot mcp --strict --json",
+    "conformance": "dot agent conformance --strict --json",
+    "checkpoint": "dot agent checkpoint list"
   },
   "profiles": ["ask", "plan", "apply", "audit"],
   "security": {
     "signedCommits": true,
     "mcpRegistry": true,
     "sessionLogging": true,
-    "workstationAttestation": true
+    "workstationAttestation": true,
+    "replayableCheckpoints": true,
+    "fleetAttestationExport": true,
+    "policyBundleReleases": true
   }
 }
