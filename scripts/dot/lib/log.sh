@@ -174,6 +174,14 @@ dot_agent_checkpoint_create() {
   printf '%s\n' "$checkpoint_file"
 }
 
+# Convenience wrappers for human-readable log output.
+# Source this file and call log_info/log_warn/log_error/log_success instead of
+# ui_info/ui_warn/ui_err/ui_ok when the caller prefers semantic log names.
+log_info()    { ui_info "$*"; }
+log_warn()    { ui_warn "$*"; }
+log_error()   { ui_err  "$*"; }
+log_success() { ui_ok   "$*"; }
+
 dot_agent_checkpoint_tail() {
   local count="${1:-20}"
   local checkpoint_dir file

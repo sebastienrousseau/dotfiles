@@ -407,7 +407,7 @@ if command -v jq >/dev/null 2>&1; then
         | "\($server)\t\($transport)\t\($command)\t\($pkg)\t\($url)"
       ' "$MCP_CONFIG" 2>/dev/null || true)"
       if [[ -n "$registry_mismatches" ]]; then
-        while IFS=$'\t' read -r server transport command pkg url; do
+        while IFS=$'\t' read -r server _transport command pkg url; do
           [[ -z "${server:-}" ]] && continue
           log_warn "Registry policy" "$server is missing or diverges from the tracked MCP registry"
         done <<<"$registry_mismatches"

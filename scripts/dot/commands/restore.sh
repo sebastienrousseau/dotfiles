@@ -8,16 +8,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh
 source "$SCRIPT_DIR/../lib/utils.sh"
+# shellcheck source=../lib/log.sh
+source "$SCRIPT_DIR/../lib/log.sh"
 
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
 BACKUP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/backups"
 CHEZMOI_SOURCE="${HOME}/.local/share/chezmoi"
 
 ui_init
-log_info() { ui_info "$*"; }
-log_warn() { ui_warn "$*"; }
-log_error() { ui_err "$*"; }
-log_success() { ui_ok "$*"; }
 
 usage() {
   echo "Usage: dot restore [OPTIONS]"

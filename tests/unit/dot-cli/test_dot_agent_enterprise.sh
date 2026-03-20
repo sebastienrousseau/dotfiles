@@ -9,6 +9,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 DOT_CLI="$REPO_ROOT/dot_local/bin/executable_dot"
 META_FILE="$REPO_ROOT/scripts/dot/commands/meta.sh"
+AGENT_MODULE="$REPO_ROOT/scripts/dot/commands/agent.sh"
 AGENT_CARD="$REPO_ROOT/dot_config/dotfiles/agent-card.json"
 WELL_KNOWN="$REPO_ROOT/.well-known/agent.json"
 
@@ -17,10 +18,10 @@ assert_file_exists "$AGENT_CARD" "agent-card.json should exist"
 assert_file_exists "$WELL_KNOWN" ".well-known agent.json should exist"
 
 test_start "agent_meta_supports_enterprise_subcommands"
-assert_file_contains "$META_FILE" "card)" "dot mode supports card"
-assert_file_contains "$META_FILE" "log)" "dot mode supports log"
-assert_file_contains "$META_FILE" "checkpoint)" "dot mode supports checkpoint"
-assert_file_contains "$META_FILE" "conformance)" "dot mode supports conformance"
+assert_file_contains "$AGENT_MODULE" "card)" "dot mode supports card"
+assert_file_contains "$AGENT_MODULE" "log)" "dot mode supports log"
+assert_file_contains "$AGENT_MODULE" "checkpoint)" "dot mode supports checkpoint"
+assert_file_contains "$AGENT_MODULE" "conformance)" "dot mode supports conformance"
 
 test_start "agent_card_runs"
 assert_output_contains "Agent Card" "bash '$DOT_CLI' agent card"
