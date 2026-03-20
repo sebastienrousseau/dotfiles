@@ -8,7 +8,7 @@ Here's how the dotfiles look across different themes and configurations.
 
 The default theme. Catppuccin Mocha gives you a dark palette with warm, muted colors.
 
-```
+```text
 Terminal: Ghostty / WezTerm / Alacritty
 Font:     JetBrains Mono Nerd Font
 Theme:    Catppuccin Mocha
@@ -25,7 +25,7 @@ Key colors:
 
 A light theme option for daytime use.
 
-```
+```text
 Terminal: Ghostty / WezTerm / Alacritty
 Font:     JetBrains Mono Nerd Font
 Theme:    Catppuccin Latte

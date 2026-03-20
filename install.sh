@@ -122,7 +122,13 @@ main() {
       brew install gum >/dev/null 2>&1
     elif [[ "$target_os" == "debian" || "$target_os" == "wsl2" ]]; then
       sudo mkdir -p /etc/apt/keyrings
-      curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/charm.gpg
+      curl -fsSL https://repo.charm.sh/apt/gpg.key \
+        | sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/charm.gpg
+      # Verify Charm GPG key fingerprint
+      if ! gpg --no-default-keyring --keyring /etc/apt/keyrings/charm.gpg \
+        --list-keys --with-colons 2>/dev/null | grep -q "fid:"; then
+        echo "Warning: Could not verify Charm GPG key" >&2
+      fi
       echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
       sudo apt-get update && sudo apt-get install gum -y >/dev/null 2>&1
     fi

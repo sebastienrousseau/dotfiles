@@ -48,16 +48,17 @@ echo ""
 gum confirm "Start a quick tour?" || exit 0
 clear
 
-# Slide 1: Start here
+# Slide 1: Shell & configuration
 gum style \
   --foreground 99 --border rounded --padding "1 2" --margin "1 2" \
-  "Start here" \
-  "Apply your setup. Keep it repeatable." \
+  "Shell & configuration" \
+  "Default shell: Fish. Change it in .chezmoidata.toml." \
   " " \
-  "dot apply   # Apply your dotfiles" \
+  "dot apply   # Apply dotfiles" \
   "dot update  # Pull and apply updates" \
   "dot diff    # Review local changes" \
-  "dot drift   # Snapshot config drift"
+  "dot drift   # Snapshot config drift" \
+  "dot help    # Browse all commands"
 
 echo ""
 gum confirm "Next: Check health" || exit 0
@@ -119,7 +120,9 @@ gum style \
   "dot wallpaper  # Apply wallpaper" \
   "dot fonts      # Install Nerd Fonts" \
   "dot keys       # Keybindings" \
-  "dot tools      # Curated utilities"
+  "dot tools      # Curated utilities" \
+  " " \
+  "Edit ~/.dotfiles/.chezmoidata.toml for shell, features, and profiles."
 
 echo ""
 gum confirm "Next: Projects & Sandbox" || exit 0

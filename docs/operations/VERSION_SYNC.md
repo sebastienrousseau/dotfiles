@@ -191,19 +191,19 @@ Files that are intentionally excluded:
 ### Common Issues
 
 #### Version Mismatch
-```
+```text
 ❌ Found inconsistent release in docs/reference/FEATURES.md: vX.Y.Z (expected: vA.B.C)
 ```
 **Solution**: Run `./scripts/version-sync.sh` to fix
 
 #### Missing Dependencies
-```
+```text
 ❌ jq is required but not installed
 ```
 **Solution**: Install dependencies (`jq`, `rg`)
 
 #### Permission Issues
-```
+```text
 ❌ Permission denied writing to README.md
 ```
 **Solution**: Check file permissions and Git status

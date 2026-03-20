@@ -23,7 +23,7 @@ Welcome to your universally compatible, high-performance dotfiles configuration,
 ## Get started
 
 ### Install
-To install these dotfiles on a new machine, simply run:
+To install these dotfiles on a new machine, run:
 
 ```bash
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.497/install.sh)"
@@ -94,7 +94,7 @@ If you are migrating from an old `~/.dotfiles` setup:
 
 The configuration is managed in `~/.dotfiles`.
 
-```
+```text
 ~/.dotfiles/
 ├── dot_zshrc.tmpl          # Main Zsh configuration (template)
 ├── dot_vimrc               # Vim configuration
@@ -237,7 +237,7 @@ Available themes:
 
 ### DevContainer and Codespaces
 
-```
+```text
 .devcontainer/devcontainer.json
 ```
 

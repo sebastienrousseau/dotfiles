@@ -142,7 +142,7 @@ The `cross-platform-test.yml` workflow validates scripts on both platforms:
 |-------------|----------------|
 | No hardcoded user paths | Use `$HOME` or `~` |
 | Case-insensitive safe | No filename collisions |
-| Cross-platform paths | No `C:\` or `/Users/` literals |
+| Cross-platform paths | No platform-specific path literals |
 
 ---
 
@@ -161,7 +161,7 @@ The `cross-platform-test.yml` workflow validates scripts on both platforms:
 
 ### Compliance Guard Jobs
 
-```
+```text
 compliance-guard.yml
 ├── insecure-patterns     # TLS, credentials, chmod
 ├── portability           # ShellCheck, paths, .gitattributes
@@ -171,7 +171,7 @@ compliance-guard.yml
 
 ### Cross-Platform Test Jobs
 
-```
+```text
 cross-platform-test.yml
 ├── ubuntu-latest (GNU)   # Linux compatibility
 ├── macos-latest (BSD)    # macOS compatibility
@@ -319,7 +319,7 @@ Enable "Require signed commits" in repository settings:
 
 ### Test Framework
 
-```
+```text
 tests/
 ├── framework/
 │   ├── assertions.sh    # 16 assertion functions

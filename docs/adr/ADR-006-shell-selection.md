@@ -30,7 +30,7 @@ Use **Zsh** as the default interactive shell with **Zinit** as the plugin manage
 
 1. **Default on macOS**: Pre-installed since Catalina
 2. **Plugin Ecosystem**: Massive library of plugins and themes
-3. **Compatibility**: POSIX-compatible, easy migration from bash
+3. **Compatibility**: POSIX-compatible, smooth migration from bash
 4. **Completion System**: Superior tab completion
 5. **Customization**: Highly configurable prompt and behavior
 6. **Community**: Large community, well-documented
@@ -54,7 +54,7 @@ Zinit provides:
 
 ### Shell Layer System
 
-```
+```text
 dot_config/zsh/rc.d/
 ├── 00-10: Core (env, history, options)
 ├── 20-49: Middleware (zinit, completions)

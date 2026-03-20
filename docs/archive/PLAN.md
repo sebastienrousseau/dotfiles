@@ -85,7 +85,7 @@ Establish a "Trust Layer" for the dotfiles ecosystem, ensuring supply chain secu
 
 ## Changes
 - **SLSA & SBOM**: Implemented `security-release.yml` for provenance and SBOM generation.
-- **Signing**: Created `enable-signing` wizard alias for easy GPG/SSH configuration.
+- **Signing**: Created `enable-signing` wizard alias for streamlined GPG/SSH configuration.
 - **Immutability**: Created `lock-configs.sh` script and `lock-configs`/`unlock-configs` aliases.
 
 - **Immutability**: Created `lock-configs.sh` script and `lock-configs`/`unlock-configs` aliases.

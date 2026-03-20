@@ -1,17 +1,12 @@
 # Install
 
-Install on macOS, Linux, or WSL in a few minutes.
+Install on macOS, Linux, or WSL in 3-5 minutes.
 
-## Prerequisites
+**Prerequisites:** `git` and `curl`.
 
-- `git`
-- `curl`
+**Default shell:** Fish (change it after installation).
 
-Optional:
-- Docker or Podman for sandbox use
-- Nix for reproducible toolchains
-
-## Standard install
+## Install
 
 ```bash
 bash -c "$(
@@ -19,28 +14,25 @@ bash -c "$(
 )"
 ```
 
+Then restart the terminal or run `exec $SHELL`.
+
 ## Verify
 
 ```bash
-dot --version
-dot doctor
-dot help
+dot --version        # Confirm installation
+dot doctor           # Check shell, git, and tools
+dot help             # Browse available commands
 ```
 
 ## Choose a shell
 
-The default shell is Fish.
-
-Set a different shell in `~/.dotfiles/.chezmoidata.toml`:
+The default shell is Fish. Switch to Zsh or Nushell by editing `~/.dotfiles/.chezmoidata.toml`:
 
 ```toml
 default_shell = "zsh"
 ```
 
-Supported values:
-- `zsh`
-- `fish`
-- `nu`
+Supported values: `zsh`, `fish`, `nushell`.
 
 Apply the change:
 
@@ -50,19 +42,37 @@ dot apply
 
 ## Feature flags
 
-Toggle features in `.chezmoidata.toml`:
+Toggle optional tools after initial setup. Edit `.chezmoidata.toml`:
 
 ```toml
 [features]
-zsh = true
-fish = true
-nushell = true
-nix = true
+zsh = true         # Zsh shell configuration
+fish = true        # Fish shell configuration
+nushell = true     # Nushell configuration
+nvim = true        # Neovim IDE configuration
+tmux = true        # Terminal multiplexer
+nix = true         # Nix package manager integration
 ```
 
-## Local source install
+## Update
 
-Clone first. Then run the installer from the local source tree.
+```bash
+dot update
+```
+
+## Next steps
+
+1. Run `dot learn` for an interactive onboarding tour.
+2. Customize files in `~/.config/shell/custom/`.
+3. Read the [Utilities and `dot` CLI](../reference/UTILS.md) reference.
+
+---
+
+## Advanced
+
+### Local source install
+
+Clone first, then run the installer from the local source tree:
 
 ```bash
 git clone https://github.com/sebastienrousseau/dotfiles.git ~/.dotfiles
@@ -70,15 +80,17 @@ cd ~/.dotfiles
 ./install.sh
 ```
 
-## Minimal install
+### Minimal install
 
-Skip editor and terminal extras:
+Install shells and essentials only (skip editor and terminal extras):
 
 ```bash
 ./install.sh --minimal
 ```
 
-## Non-interactive install
+### Non-interactive install
+
+For CI or automation:
 
 ```bash
 DOTFILES_SILENT=1 DOTFILES_NONINTERACTIVE=1 \
@@ -87,14 +99,14 @@ DOTFILES_SILENT=1 DOTFILES_NONINTERACTIVE=1 \
   )"
 ```
 
-## Nix
+### Nix
 
 ```bash
 nix develop ~/.dotfiles/nix
 nix profile install ~/.dotfiles/nix#dot-utils
 ```
 
-## Offline bundle
+### Offline bundle
 
 Create a bundle on a connected machine:
 
@@ -110,13 +122,7 @@ cd ~/.dotfiles
 ./install.sh --force
 ```
 
-## Update
-
-```bash
-dot update
-```
-
-## Uninstall
+### Uninstall
 
 ```bash
 chezmoi purge
@@ -124,14 +130,11 @@ rm -rf ~/.dotfiles
 rm -rf ~/.local/share/chezmoi ~/.local/share/dotfiles.log
 ```
 
-## Signed contributions
+### Signed contributions
 
-Signed commits are required for changes to this repo.
+Signed commits are required. See [Contributing](../../CONTRIBUTING.md).
 
-See [Contributing](../../CONTRIBUTING.md).
+---
 
-## Next steps
-
-- [Utilities and `dot` CLI](../reference/UTILS.md)
 - [Troubleshooting](TROUBLESHOOTING.md)
 - [Support matrix](../reference/SUPPORT_MATRIX.md)
