@@ -16,9 +16,15 @@
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = with pkgs; [
-    # Add additional packages here
     htop
     tldr
+    ripgrep
+    fd
+    bat
+    eza
+    zoxide
+    starship
+    direnv
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -61,32 +67,32 @@
   #   extraConfig.gpg.format = "ssh";
   # };
 
-  # programs.starship = {
-  #   enable = true;
-  #   enableZshIntegration = true;
-  #   enableFishIntegration = true;
-  # };
+  programs.starship = {
+    enable = true;
+    enableZshIntegration = true;
+    enableFishIntegration = true;
+  };
 
-  # programs.zoxide = {
-  #   enable = true;
-  #   enableZshIntegration = true;
-  #   enableFishIntegration = true;
-  # };
+  programs.zoxide = {
+    enable = true;
+    enableZshIntegration = true;
+    enableFishIntegration = true;
+  };
 
-  # programs.direnv = {
-  #   enable = true;
-  #   nix-direnv.enable = true;  # Seamless nix shell integration
-  # };
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
 
-  # programs.bat = {
-  #   enable = true;
-  #   config.theme = "TwoDark";
-  # };
+  programs.bat = {
+    enable = true;
+    config.theme = "TwoDark";
+  };
 
-  # programs.eza = {
-  #   enable = true;
-  #   enableZshIntegration = true;
-  # };
+  programs.eza = {
+    enable = true;
+    enableZshIntegration = true;
+  };
 
   # ── XDG directories ───────────────────────────────────────────────────
   # xdg = {

@@ -53,6 +53,8 @@ files=(
   "dot_config/dotfiles/mcp-registry.json"
   "dot_config/dotfiles/mcp-lock.json"
   ".well-known/agent.json"
+  ".well-known/agent-card.json"
+  ".well-known/mcp/server-card.json"
   "docs/security/MCP_POLICY.md"
   "docs/operations/TRUSTED_AGENT_WORKSTATION.md"
   "docs/interop/A2A.md"
@@ -80,13 +82,43 @@ jq empty "$bundle_root/.well-known/agent.json" >/dev/null
 tar -C "$OUTPUT_DIR" -czf "$archive_file" "policy-bundles-$BUNDLE_VERSION"
 sha256sum "$archive_file" >"$checksum_file"
 
+# Generate CycloneDX SBOM
+sbom_file="$bundle_root/sbom.cyclonedx.json"
+if command -v syft >/dev/null 2>&1; then
+  syft dir:"$bundle_root" -o cyclonedx-json >"$sbom_file" 2>/dev/null
+else
+  # Minimal CycloneDX manifest via jq
+  jq -n \
+    --arg version "$BUNDLE_VERSION" \
+    --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    '{
+      bomFormat: "CycloneDX",
+      specVersion: "1.5",
+      version: 1,
+      metadata: {
+        timestamp: $timestamp,
+        component: {
+          type: "application",
+          name: "dotfiles-policy-bundles",
+          version: $version
+        }
+      },
+      components: []
+    }' >"$sbom_file"
+fi
+
+# Re-create archive with SBOM included
+tar -C "$OUTPUT_DIR" -czf "$archive_file" "policy-bundles-$BUNDLE_VERSION"
+sha256sum "$archive_file" >"$checksum_file"
+
 if [[ "$JSON_MODE" -eq 1 ]]; then
   jq -n \
     --arg version "$BUNDLE_VERSION" \
     --arg output_dir "$OUTPUT_DIR" \
     --arg archive "$archive_file" \
     --arg checksum "$checksum_file" \
-    '{version: $version, output_dir: $output_dir, archive: $archive, checksum: $checksum}'
+    --arg sbom "$sbom_file" \
+    '{version: $version, output_dir: $output_dir, archive: $archive, checksum: $checksum, sbom: $sbom}'
 else
   printf 'Policy bundle archive: %s\n' "$archive_file"
   printf 'Policy bundle checksum: %s\n' "$checksum_file"

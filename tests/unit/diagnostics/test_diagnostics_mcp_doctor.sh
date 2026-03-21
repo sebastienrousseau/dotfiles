@@ -53,7 +53,7 @@ for server in filesystem github brave-search fetch puppeteer; do
 done
 
 test_start "mcp_config_uses_pinned_package_refs"
-for package_ref in "mcp-server-git@2025.1.14" "@modelcontextprotocol/server-memory@2025.8.4" "mcp-server-sqlite@2025.1.14"; do
+for package_ref in "mcp-server-git@2026.3.0" "@modelcontextprotocol/server-memory@2026.3.0" "mcp-server-sqlite@2026.3.0"; do
   if grep -q "$package_ref" "$MCP_CONFIG_FILE"; then
     ((TESTS_PASSED++))
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: pinned ref present for $package_ref"

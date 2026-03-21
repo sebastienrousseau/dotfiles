@@ -208,7 +208,7 @@ AI|ai-setup|Interactive setup for all AI CLI tools|Initial AI tool bootstrap.
 AI|ai-query|Context-aware RAG query over your dotfiles|Ask questions over the repo state.
 AI|mcp|Inspect MCP policy, supply chain, and registry|Governance and validation surface.
 AI|mode|Set or inspect agent operating profiles (ask/plan/apply/audit)|Bounded-autonomy controls.
-AI|agent|Profile-aware execution, agent card, session log, checkpoints, and conformance|Agent metadata and local audit trail.
+AI|agent|Profile-aware execution, agent card, a2a-card, session log, checkpoints, and conformance|Agent metadata and local audit trail.
 AI|cl|Claude CLI with context patterns|Context-aware Anthropic bridge.
 AI|gemini|Gemini CLI with context patterns|Context-aware Gemini bridge.
 AI|kiro|Kiro CLI with context patterns|Context-aware Kiro bridge.
@@ -275,7 +275,7 @@ lint|Run shell quality checks for the repo.|dot lint\ndot lint -c\ndot lint -f
 ai|Show installed AI tools and entrypoints.|dot ai
 mcp|Inspect MCP configuration, policy, and registry.|dot mcp\ndot mcp -s -j\ndot mcp registry
 mode|Inspect or switch the active agent mode.|dot mode list\ndot mode show ask\ndot mode set audit
-agent|Inspect agent metadata or run profile-aware actions.|dot agent card\ndot agent checkpoint list\ndot agent conformance --strict --json
+agent|Inspect agent metadata or run profile-aware actions.|dot agent card\ndot agent a2a-card --validate\ndot agent checkpoint list\ndot agent conformance --strict --json
 fleet|Show fleet node status, drift, and namespace.|dot fleet\ndot fleet status --json\ndot fleet drift\ndot fleet namespace set engineering
 env|Show managed tool versions and runtime state.|dot env
 profile|Show or switch the active configuration profile.|dot profile

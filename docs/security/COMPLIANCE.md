@@ -11,6 +11,21 @@ This document describes the compliance, security, and cross-platform compatibili
 | GDPR/HIPAA | Aligned | Privacy and data protection |
 | ISO 13485 | Aligned | Risk management (FMEA), verification & validation |
 | ALCOA | Implemented | Audit trail integrity |
+| EU AI Act | Exempt | Minimal risk, open-source exemption (Article 2(12)) |
+
+---
+
+## EU AI Act (Regulation (EU) 2024/1689)
+
+| Requirement | Status | Implementation |
+|-------------|--------|----------------|
+| **Risk classification** | Minimal risk | No high-risk use cases (Annex III) |
+| **Open-source exemption** | Applicable | MIT license, no model weights distributed (Article 2(12)) |
+| **Prohibited practices** | Confirmed none | No subliminal, exploitative, or social scoring use (Article 5) |
+| **Transparency** | Voluntary | Agent session logging, model registry, attestation |
+| **GPAI provisions** | Not applicable | Consumer of AI APIs, not a provider |
+
+See [AI_ACT_COMPLIANCE.md](AI_ACT_COMPLIANCE.md) for full assessment.
 
 ---
 

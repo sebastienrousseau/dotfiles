@@ -24,6 +24,35 @@
     "defaultRole": "developer",
     "enforcement": "advisory"
   },
+  "delegation": {
+    "enabled": false,
+    "maxDepth": 2,
+    "allowedDelegates": {
+      "security-reviewer": {
+        "profile": "audit",
+        "permissions": ["read", "audit"],
+        "maxSteps": 4,
+        "timeout": 120
+      },
+      "test-runner": {
+        "profile": "apply",
+        "permissions": ["read", "execute"],
+        "maxSteps": 6,
+        "timeout": 300
+      },
+      "lint-checker": {
+        "profile": "ask",
+        "permissions": ["read"],
+        "maxSteps": 2,
+        "timeout": 60
+      }
+    },
+    "securityPolicy": {
+      "requireParentApproval": true,
+      "logAllDelegations": true,
+      "maxConcurrentDelegates": 3
+    }
+  },
   "profiles": {
     "ask": {
       "description": "Read-only guidance with no unattended changes.",
@@ -47,7 +76,8 @@
       "filesystem": "workspace-write",
       "network": "limited",
       "mcpProfile": "strict-local",
-      "maxSteps": 6
+      "maxSteps": 6,
+      "canDelegate": true
     },
     "audit": {
       "description": "Deep verification, scoring, and compliance analysis.",
@@ -55,7 +85,8 @@
       "filesystem": "read-only",
       "network": "limited",
       "mcpProfile": "enterprise-remote",
-      "maxSteps": 8
+      "maxSteps": 8,
+      "canDelegate": true
     }
   }
 }

@@ -83,6 +83,49 @@ _agent_apply_profile_env() {
   export DOT_AGENT_MAX_STEPS="$(_agent_profile_field "$name" "maxSteps")"
 }
 
+_agent_rbac_enforcement() {
+  local file
+  file="$(_agent_profiles_file)"
+  jq -r '.rbac.enforcement // "advisory"' "$file"
+}
+
+_agent_current_role() {
+  local state_file role
+  state_file="$(_agent_state_file)"
+  if [[ -f "$state_file" ]]; then
+    role="$(sed -n 's/^DOT_AGENT_ROLE=//p' "$state_file" | tail -n 1)"
+    if [[ -n "$role" ]]; then
+      echo "$role"
+      return 0
+    fi
+  fi
+  jq -r '.rbac.defaultRole // "developer"' "$(_agent_profiles_file)"
+}
+
+_agent_role_allows_profile() {
+  local role="$1" profile="$2"
+  local file
+  file="$(_agent_profiles_file)"
+  jq -e --arg role "$role" --arg profile "$profile" '
+    .rbac.roles[$role].allowedProfiles // [] | index($profile)
+  ' "$file" >/dev/null 2>&1
+}
+
+_agent_enforce_rbac() {
+  local target_profile="$1"
+  local enforcement role
+  enforcement="$(_agent_rbac_enforcement)"
+  role="$(_agent_current_role)"
+  if _agent_role_allows_profile "$role" "$target_profile"; then
+    return 0
+  fi
+  if [[ "$enforcement" == "strict" ]]; then
+    die "RBAC: role '$role' is not allowed to use profile '$target_profile' (enforcement: strict)"
+  else
+    ui_warn "RBAC" "role '$role' is not recommended for profile '$target_profile' (enforcement: advisory)"
+  fi
+}
+
 cmd_mode() {
   _agent_assert_dependencies
 
@@ -137,6 +180,7 @@ cmd_mode() {
       local name="${1:-}" state_file
       [[ -n "$name" ]] || die "Usage: dot mode set <profile>"
       _agent_profile_exists "$name" || die "Unknown agent profile: $name"
+      _agent_enforce_rbac "$name"
       state_file="$(_agent_state_file)"
       mkdir -p "$(dirname "$state_file")"
       cat >"$state_file" <<EOF
@@ -299,12 +343,102 @@ EOF
           ;;
       esac
       ;;
+    delegate)
+      local delegate_name="${1:-}"
+      [[ -n "$delegate_name" ]] || die "Usage: dot agent delegate <name> <command> [args...]"
+      shift || true
+      [[ $# -gt 0 ]] || die "Usage: dot agent delegate <name> <command> [args...]"
+      local profiles_file current_profile
+      profiles_file="$(_agent_profiles_file)"
+      current_profile="$(_agent_current_profile)"
+      # Check delegation is enabled
+      local delegation_enabled
+      delegation_enabled="$(jq -r '.delegation.enabled // false' "$profiles_file")"
+      [[ "$delegation_enabled" == "true" ]] || die "Delegation is not enabled in agent-profiles.json"
+      # Check current profile can delegate
+      local can_delegate
+      can_delegate="$(jq -r --arg p "$current_profile" '.profiles[$p].canDelegate // false' "$profiles_file")"
+      [[ "$can_delegate" == "true" ]] || die "Profile '$current_profile' cannot delegate"
+      # Check delegate name exists
+      jq -e --arg d "$delegate_name" '.delegation.allowedDelegates[$d]' "$profiles_file" >/dev/null 2>&1 || die "Unknown delegate: $delegate_name"
+      # Read delegate config
+      local delegate_profile delegate_timeout delegate_max_steps
+      delegate_profile="$(jq -r --arg d "$delegate_name" '.delegation.allowedDelegates[$d].profile' "$profiles_file")"
+      delegate_timeout="$(jq -r --arg d "$delegate_name" '.delegation.allowedDelegates[$d].timeout // 300' "$profiles_file")"
+      delegate_max_steps="$(jq -r --arg d "$delegate_name" '.delegation.allowedDelegates[$d].maxSteps // 4' "$profiles_file")"
+      # Apply delegate profile env
+      _agent_apply_profile_env "$delegate_profile"
+      export DOT_AGENT_MAX_STEPS="$delegate_max_steps"
+      export DOT_AGENT_DELEGATE="$delegate_name"
+      export DOT_AGENT_PARENT_PROFILE="$current_profile"
+      dot_agent_session_log "delegate_start" "$delegate_profile" "running" "delegate=$delegate_name" "parent=$current_profile" "timeout=$delegate_timeout"
+      ui_info "Delegating" "$delegate_name (profile: $delegate_profile, timeout: ${delegate_timeout}s)"
+      set +e
+      timeout "$delegate_timeout" "$@"
+      local exit_code=$?
+      set -e
+      if [[ "$exit_code" -eq 0 ]]; then
+        dot_agent_session_log "delegate_finish" "$delegate_profile" "ok" "delegate=$delegate_name" "exit_code=$exit_code"
+        ui_ok "Delegate" "$delegate_name completed"
+      else
+        dot_agent_session_log "delegate_finish" "$delegate_profile" "failed" "delegate=$delegate_name" "exit_code=$exit_code"
+        ui_err "Delegate" "$delegate_name failed (exit $exit_code)"
+      fi
+      return "$exit_code"
+      ;;
+    a2a-card)
+      local a2a_card_file json_mode=0 validate_mode=0 strict_mode=0
+      local repo_root
+      repo_root="$(_agent_repo_root)"
+      a2a_card_file="$repo_root/.well-known/agent-card.json"
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          --json | -j) json_mode=1 ; shift ;;
+          --validate | --strict | -s) validate_mode=1 ; strict_mode=1 ; shift ;;
+          *) shift ;;
+        esac
+      done
+      [[ -f "$a2a_card_file" ]] || die "A2A v0.3 card not found: $a2a_card_file"
+      dot_agent_session_log "a2a-card" "$(_agent_current_profile)" "ok"
+      if [[ "$json_mode" -eq 1 ]]; then
+        exec cat "$a2a_card_file"
+      fi
+      if [[ "$validate_mode" -eq 1 ]]; then
+        local v_issues=0
+        jq empty "$a2a_card_file" >/dev/null 2>&1 || { ui_err "JSON" "invalid"; exit 1; }
+        ui_header "A2A v0.3 Card Validation"
+        local sv
+        sv="$(jq -r '.specVersion // empty' "$a2a_card_file")"
+        if [[ "$sv" == "0.3" ]]; then ui_ok "specVersion" "$sv"; else ui_err "specVersion" "expected 0.3, got $sv"; v_issues=$((v_issues + 1)); fi
+        if jq -e '.skills | type == "array" and length > 0' "$a2a_card_file" >/dev/null 2>&1; then
+          ui_ok "skills" "$(jq '.skills | length' "$a2a_card_file") skills"
+        else
+          ui_err "skills" "missing or empty"; v_issues=$((v_issues + 1))
+        fi
+        if jq -e '.authentication' "$a2a_card_file" >/dev/null 2>&1; then ui_ok "authentication" "present"; else ui_err "authentication" "missing"; v_issues=$((v_issues + 1)); fi
+        if jq -e '.signing.method' "$a2a_card_file" >/dev/null 2>&1; then ui_ok "signing" "$(jq -r '.signing.method' "$a2a_card_file")"; else ui_err "signing" "missing method"; v_issues=$((v_issues + 1)); fi
+        if [[ "$v_issues" -gt 0 && "$strict_mode" -eq 1 ]]; then exit 1; fi
+        return 0
+      fi
+      ui_header "A2A v0.3 Agent Card"
+      jq -r '
+        "Name\t\(.name)",
+        "Version\t\(.version)",
+        "Spec\t\(.specVersion)",
+        "Protocols\t\(.protocols | join(", "))",
+        "Skills\t\(.skills | length) defined",
+        "Auth\t\(.authentication.schemes | join(", "))",
+        "Signing\t\(.signing.method)"
+      ' "$a2a_card_file" | while IFS=$'\t' read -r key value; do
+        ui_ok "$key" "$value"
+      done
+      ;;
     conformance)
       dot_agent_session_log "conformance" "$(_agent_current_profile)" "ok"
       run_script "scripts/diagnostics/a2a-conformance.sh" "A2A conformance script" "$@"
       ;;
     *)
-      echo "Usage: dot mode [list|current|show|set|run|doctor|card|log|checkpoint|conformance]" >&2
+      echo "Usage: dot mode [list|current|show|set|run|doctor|card|log|checkpoint|conformance|a2a-card]" >&2
       exit 1
       ;;
   esac

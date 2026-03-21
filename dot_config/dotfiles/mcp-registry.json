@@ -4,26 +4,44 @@
     "git": {
       "transport": "stdio",
       "launcher": "npx",
-      "package": "mcp-server-git@2025.1.14",
+      "package": "mcp-server-git@2026.3.0",
       "auth": "env",
+      "authProfile": "env-token",
       "scope": "repo-local",
       "verification": "pinned-package"
     },
     "memory": {
       "transport": "stdio",
       "launcher": "npx",
-      "package": "@modelcontextprotocol/server-memory@2025.8.4",
+      "package": "@modelcontextprotocol/server-memory@2026.3.0",
       "auth": "env",
+      "authProfile": "none",
       "scope": "workspace-local",
       "verification": "pinned-package"
     },
     "sqlite": {
       "transport": "stdio",
       "launcher": "npx",
-      "package": "mcp-server-sqlite@2025.1.14",
+      "package": "mcp-server-sqlite@2026.3.0",
       "auth": "env",
+      "authProfile": "none",
       "scope": "workspace-local",
       "verification": "pinned-package"
+    },
+    "example-remote": {
+      "transport": "streamable-http",
+      "url": "https://mcp.example.com/v1",
+      "headers": { "X-Org": "dotfiles" },
+      "auth": "oauth2",
+      "authProfile": "oauth2",
+      "authConfig": {
+        "provider": "https://auth.example.com",
+        "clientId": "${MCP_OAUTH_CLIENT_ID}",
+        "scopes": ["mcp:read", "mcp:write"]
+      },
+      "scope": "enterprise",
+      "verification": "registry-approved",
+      "enabled": false
     }
   }
 }

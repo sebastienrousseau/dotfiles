@@ -129,39 +129,111 @@ cmd_fleet_status() {
   _fleet_emit_event "status" "ok" "version=$version" "drift=$drift_status"
 }
 
-cmd_fleet_drift() {
-  ui_header "Fleet Drift Report"
-  echo ""
+_DRIFT_HISTORY_FILE="$_FLEET_STATE_DIR/drift-history.jsonl"
 
-  if ! has_command chezmoi; then
-    ui_err "chezmoi" "not installed"
-    return 1
-  fi
-
-  local drift_output
-  drift_output="$(chezmoi status 2>/dev/null || true)"
+_fleet_drift_append_history() {
+  local drift_output="$1"
+  local ts
+  ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  mkdir -p "$_FLEET_STATE_DIR" 2>/dev/null || return 0
   if [[ -z "$drift_output" ]]; then
-    ui_ok "Status" "No drift detected"
-    _fleet_emit_event "drift_check" "clean"
-    return 0
+    printf '{"time":"%s","status":"clean","files":[]}\n' "$ts" >>"$_DRIFT_HISTORY_FILE" 2>/dev/null || true
+  else
+    local files_json
+    files_json="$(printf '%s\n' "$drift_output" | awk '{print $NF}' | jq -R . | jq -s . 2>/dev/null || echo '[]')"
+    printf '{"time":"%s","status":"drifted","files":%s}\n' "$ts" "$files_json" >>"$_DRIFT_HISTORY_FILE" 2>/dev/null || true
+  fi
+}
+
+cmd_fleet_drift() {
+  local subcommand="${1:-check}"
+  if [[ "${1:-}" == --* ]] || [[ -z "${1:-}" ]]; then
+    subcommand="check"
+  else
+    shift || true
   fi
 
-  ui_warn "Status" "Configuration drift detected"
-  echo ""
-  printf '%s\n' "$drift_output" | while IFS= read -r line; do
-    local change_type="${line:0:2}"
-    local file_path="${line:3}"
-    case "$change_type" in
-      "MM" | "A " | " M")
-        ui_warn "$change_type" "$file_path"
-        ;;
-      *)
-        ui_info "$change_type" "$file_path"
-        ;;
-    esac
-  done
+  case "$subcommand" in
+    check)
+      ui_header "Fleet Drift Report"
+      echo ""
 
-  _fleet_emit_event "drift_check" "drifted" "count=$(echo "$drift_output" | wc -l | tr -d ' ')"
+      if ! has_command chezmoi; then
+        ui_err "chezmoi" "not installed"
+        return 1
+      fi
+
+      local drift_output
+      drift_output="$(chezmoi status 2>/dev/null || true)"
+
+      _fleet_drift_append_history "$drift_output"
+
+      if [[ -z "$drift_output" ]]; then
+        ui_ok "Status" "No drift detected"
+        _fleet_emit_event "drift_check" "clean"
+        return 0
+      fi
+
+      ui_warn "Status" "Configuration drift detected"
+      echo ""
+      printf '%s\n' "$drift_output" | while IFS= read -r line; do
+        local change_type="${line:0:2}"
+        local file_path="${line:3}"
+        case "$change_type" in
+          "MM" | "A " | " M")
+            ui_warn "$change_type" "$file_path"
+            ;;
+          *)
+            ui_info "$change_type" "$file_path"
+            ;;
+        esac
+      done
+
+      _fleet_emit_event "drift_check" "drifted" "count=$(echo "$drift_output" | wc -l | tr -d ' ')"
+      ;;
+    history)
+      ui_header "Drift History"
+      echo ""
+      if [[ ! -f "$_DRIFT_HISTORY_FILE" ]]; then
+        ui_info "No drift history recorded yet."
+        return 0
+      fi
+      local count="${1:-20}"
+      tail -n "$count" "$_DRIFT_HISTORY_FILE" | while IFS= read -r line; do
+        local time status file_count
+        time="$(printf '%s' "$line" | jq -r '.time' 2>/dev/null || echo "?")"
+        status="$(printf '%s' "$line" | jq -r '.status' 2>/dev/null || echo "?")"
+        file_count="$(printf '%s' "$line" | jq '.files | length' 2>/dev/null || echo 0)"
+        if [[ "$status" == "clean" ]]; then
+          ui_ok "$time" "clean"
+        else
+          ui_warn "$time" "drifted ($file_count files)"
+        fi
+      done
+      ;;
+    predict)
+      ui_header "Drift Prediction"
+      echo ""
+      if [[ ! -f "$_DRIFT_HISTORY_FILE" ]]; then
+        ui_info "Not enough history for prediction."
+        return 0
+      fi
+      # Simple heuristic: files that drifted in >50% of the last 10 checks
+      local recent_checks=10
+      local threshold=5
+      jq -r '.files[]?' "$_DRIFT_HISTORY_FILE" | tail -n 1000 | sort | uniq -c | sort -rn | while read -r count file; do
+        if [[ "$count" -ge "$threshold" ]]; then
+          ui_warn "Likely to drift" "$file (drifted $count times recently)"
+        fi
+      done
+      local total_checks
+      total_checks="$(wc -l <"$_DRIFT_HISTORY_FILE" | tr -d ' ')"
+      ui_info "History" "$total_checks checks recorded"
+      ;;
+    *)
+      die "Usage: dot fleet drift [check|history|predict]"
+      ;;
+  esac
 }
 
 cmd_fleet_events() {
@@ -235,6 +307,49 @@ cmd_fleet_namespace() {
   esac
 }
 
+cmd_fleet_enforce() {
+  local subcommand="${1:-status}"
+  shift || true
+
+  local repo_root
+  repo_root="$(resolve_source_dir)"
+  local profiles_file="$repo_root/dot_config/dotfiles/agent-profiles.json"
+
+  case "$subcommand" in
+    status)
+      if [[ ! -f "$profiles_file" ]]; then
+        ui_err "Profiles" "agent-profiles.json not found"
+        return 1
+      fi
+      local enforcement
+      enforcement="$(jq -r '.rbac.enforcement // "advisory"' "$profiles_file")"
+      ui_header "RBAC Enforcement"
+      ui_ok "Mode" "$enforcement"
+      ui_ok "Default role" "$(jq -r '.rbac.defaultRole // "developer"' "$profiles_file")"
+      jq -r '.rbac.roles | to_entries[] | "\(.key)\t\(.value.allowedProfiles | join(", "))"' "$profiles_file" | while IFS=$'\t' read -r role profiles; do
+        ui_info "$role" "$profiles"
+      done
+      ;;
+    set)
+      local mode="${1:-}"
+      [[ -n "$mode" ]] || die "Usage: dot fleet enforce set <advisory|strict>"
+      case "$mode" in
+        advisory | strict) ;;
+        *) die "Invalid enforcement mode: $mode (use advisory or strict)" ;;
+      esac
+      [[ -f "$profiles_file" ]] || die "agent-profiles.json not found"
+      local tmp
+      tmp="$(jq --arg mode "$mode" '.rbac.enforcement = $mode' "$profiles_file")"
+      printf '%s\n' "$tmp" >"$profiles_file"
+      ui_ok "Enforcement" "set to '$mode'"
+      _fleet_emit_event "enforcement_set" "ok" "mode=$mode"
+      ;;
+    *)
+      die "Usage: dot fleet enforce [status|set <advisory|strict>]"
+      ;;
+  esac
+}
+
 cmd_fleet() {
   local subcommand="${1:-status}"
   if [[ "${1:-}" == --* ]] || [[ -z "${1:-}" ]]; then
@@ -256,6 +371,9 @@ cmd_fleet() {
     namespace | ns)
       cmd_fleet_namespace "$@"
       ;;
+    enforce)
+      cmd_fleet_enforce "$@"
+      ;;
     *)
       ui_header "Fleet Commands"
       echo ""
@@ -265,6 +383,7 @@ cmd_fleet() {
       ui_ok "drift" "Check for configuration drift"
       ui_ok "events" "Show recent fleet events"
       ui_ok "namespace" "Show or set the active namespace"
+      ui_ok "enforce" "Show or set RBAC enforcement mode (advisory|strict)"
       ;;
   esac
 }

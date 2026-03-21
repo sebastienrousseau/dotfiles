@@ -52,6 +52,9 @@ jobs:
               ;;
           esac
 
+      - name: Install syft for SBOM generation
+        uses: anchore/sbom-action/download-syft@61119d458adab75f756bc0b9e4bde25725f86a7a # v0.17.2
+
       - name: Package policy bundle
         id: bundle
         env:
@@ -90,6 +93,18 @@ jobs:
         run: |
           set -euo pipefail
           bash scripts/release/package-policy-bundles.sh --json >/tmp/policy-bundle.json
+
+      - name: Verify SBOM presence
+        run: |
+          set -euo pipefail
+          sbom_path="dist/policy-bundles/policy-bundles-${{ inputs.bundle_version }}/sbom.cyclonedx.json"
+          if [[ -f "$sbom_path" ]]; then
+            jq empty "$sbom_path"
+            echo "SBOM verified: $sbom_path"
+          else
+            echo "::error::SBOM not found in policy bundle"
+            exit 1
+          fi
 
       - name: Attest policy bundle
         uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
