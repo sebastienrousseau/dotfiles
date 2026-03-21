@@ -14,8 +14,6 @@ All flags live in `.chezmoidata.toml`. If a flag isn't set, it defaults to
 zsh = true
 nvim = true
 tmux = true
-gui = true
-secrets = true
 ```
 
 ## Available Flags
@@ -25,12 +23,10 @@ secrets = true
 | `zsh` | `true` | Zsh shell configuration and optimizations |
 | `fish` | `true` | Fish shell configuration |
 | `nushell` | `true` | Nushell for structured data pipelines |
+| `starship` | `true` | Starship cross-shell prompt |
 | `nvim` | `true` | Neovim editor configuration and plugins |
 | `tmux` | `true` | Tmux terminal multiplexer |
 | `zellij` | `false` | Zellij terminal workspace |
-| `gui` | `true` | GUI application configs (ignored on headless systems) |
-| `secrets` | `true` | Secrets management via GPG, Age, and SSH keys |
-| `ai_tools` | `true` | AI CLI tool integrations and unified context |
 | `alias_wrapper` | `false` | Safety wrappers for destructive commands |
 
 ## Validation
@@ -53,7 +49,7 @@ Edit `.chezmoidata.toml` and apply:
 ```toml
 [features]
 tmux = false    # disable tmux configuration
-gui = false     # disable GUI configurations
+zellij = true   # enable zellij instead
 ```
 
 ```bash
