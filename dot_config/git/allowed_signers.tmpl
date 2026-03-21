@@ -1,0 +1,18 @@
+# Git SSH allowed signers
+#
+# Populate this file with trusted signer entries in the format:
+# principal[,principal...] keytype base64-encoded-key
+#
+# Example:
+# jane.doe@example.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI...
+#
+# Git verifies SSH-signed commits against this trust roster.
+{{- if eq .git_email "sebastian.rousseau@gmail.com" }}
+sebastian.rousseau@gmail.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKY+QFE+TjJyo1txN/p+THGR2nWYmSjojdKmYWEvD4dh
+sebastian.rousseau@gmail.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII32YuD6LxBOeFb5kG4Fqbm62kn9OkcHNPJtktO8iYVF
+sebastian.rousseau@gmail.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGeTXmJCl9Nw7fnsc2PPSkvIRgEIG8LJGulQoes2Dm5t
+sebastian.rousseau@gmail.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMeRLA7lL2oDcbHwahn36SvPvdFMN5r2c15d64NLgJlo
+sebastian.rousseau@gmail.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA9dcL2VJY0gswNoKjytR9NgNaa32oxaVWZTXcpLz9a/
+sebastian.rousseau@gmail.com sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIPX+TMKQfHnwGUP0geGZZ2wF4m+q32pnqhRRH0hCHfcFAAAABHNzaDo=
+sebastian.rousseau@gmail.com sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIIjCZ1135o3W7QWp5dANjj2CtHVpVfbCeAKLBgfrpgx2AAAABHNzaDo=
+{{- end }}
