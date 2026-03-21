@@ -20,6 +20,10 @@ pre_sudo = true
 [brew]
 
 [linux]
+{{- if ne .chezmoi.os "darwin" }}
+yay_arguments = "-Syu --noconfirm"
+paru_arguments = "-Syu --noconfirm"
+{{- end }}
 
 [git]
 
