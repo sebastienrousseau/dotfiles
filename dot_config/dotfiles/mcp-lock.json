@@ -4,7 +4,7 @@
   "packages": {
     "git": {
       "command": "npx",
-      "package": "mcp-server-git@2025.1.14",
+      "package": "mcp-server-git@2026.3.0",
       "source": "https://github.com/modelcontextprotocol/servers/releases/tag/2025.1.14",
       "verification": {
         "method": "tracked version pin",
@@ -13,7 +13,7 @@
     },
     "memory": {
       "command": "npx",
-      "package": "@modelcontextprotocol/server-memory@2025.8.4",
+      "package": "@modelcontextprotocol/server-memory@2026.3.0",
       "source": "https://www.npmjs.com/package/@modelcontextprotocol/server-memory",
       "verification": {
         "method": "tracked version pin",
@@ -22,7 +22,7 @@
     },
     "sqlite": {
       "command": "npx",
-      "package": "mcp-server-sqlite@2025.1.14",
+      "package": "mcp-server-sqlite@2026.3.0",
       "source": "https://github.com/modelcontextprotocol/servers/releases/tag/2025.1.14",
       "verification": {
         "method": "tracked version pin",

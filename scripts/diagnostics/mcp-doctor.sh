@@ -182,6 +182,29 @@ else
   fi
 fi
 
+MCP_SERVER_CARD="${MCP_SERVER_CARD:-$REPO_ROOT/.well-known/mcp/server-card.json}"
+if [[ "$JSON_MODE" -ne 1 ]]; then
+  echo ""
+  ui_header "Server Card (SEP-1649)"
+fi
+if [[ -f "$MCP_SERVER_CARD" ]]; then
+  if command -v jq >/dev/null 2>&1 && jq empty "$MCP_SERVER_CARD" >/dev/null 2>&1; then
+    log_success "Server card" "$MCP_SERVER_CARD"
+    has_card_version="$(jq -r '.cardVersion // empty' "$MCP_SERVER_CARD")"
+    has_card_name="$(jq -r '.name // empty' "$MCP_SERVER_CARD")"
+    has_card_capabilities="$(jq -e '.capabilities' "$MCP_SERVER_CARD" >/dev/null 2>&1 && echo "yes" || echo "")"
+    has_card_transport="$(jq -e '.transport' "$MCP_SERVER_CARD" >/dev/null 2>&1 && echo "yes" || echo "")"
+    [[ -n "$has_card_version" ]] && log_success "Card version" "$has_card_version" || log_warn "Card version" "missing cardVersion field"
+    [[ -n "$has_card_name" ]] && log_success "Card name" "$has_card_name" || log_warn "Card name" "missing name field"
+    [[ -n "$has_card_capabilities" ]] && log_success "Card capabilities" "present" || log_warn "Card capabilities" "missing capabilities block"
+    [[ -n "$has_card_transport" ]] && log_success "Card transport" "present" || log_warn "Card transport" "missing transport block"
+  else
+    log_fail "Server card" "invalid JSON"
+  fi
+else
+  log_warn "Server card" "not found (expected $MCP_SERVER_CARD)"
+fi
+
 if [[ "$JSON_MODE" -ne 1 ]]; then
   echo ""
   ui_header "Validation"
@@ -285,6 +308,47 @@ if command -v jq >/dev/null 2>&1; then
         done <<<"$insecure_http_servers"
       else
         log_success "Transport security" "HTTP transports are HTTPS"
+      fi
+    fi
+
+    # Streamable-HTTP HTTPS validation
+    insecure_streamable_servers="$(jq -r '
+      .mcpServers
+      | to_entries[]?
+      | select((.value.transport // "") == "streamable-http")
+      | select((.value.url // "") | startswith("https://") | not)
+      | .key
+    ' "$MCP_CONFIG" 2>/dev/null || true)"
+    if [[ -n "$insecure_streamable_servers" ]]; then
+      while IFS= read -r item; do
+        [[ -z "$item" ]] && continue
+        log_warn "Transport security" "$item streamable-http transport must use HTTPS"
+      done <<<"$insecure_streamable_servers"
+    fi
+
+    # Auth Profiles validation
+    if command -v jq >/dev/null 2>&1 && [[ -f "$MCP_POLICY_CONFIG" ]]; then
+      declared_auth="$(jq -c '.profiles[.defaultProfile].authProfiles // []' "$MCP_POLICY_CONFIG" 2>/dev/null)"
+      if [[ "$declared_auth" != "[]" ]]; then
+        log_success "Auth profiles" "declared: $declared_auth"
+        # Check transport/auth compatibility: streamable-http/http servers need more than "none"
+        incompatible_auth="$(jq -r --argjson registry "$APPROVED_REGISTRY" --argjson allowed_auth "$declared_auth" '
+          .mcpServers
+          | to_entries[]?
+          | .key as $name
+          | (.value.transport // "stdio") as $t
+          | select($t == "http" or $t == "streamable-http")
+          | select($registry[$name].authProfile // "none" | IN($allowed_auth[]) | not)
+          | "\($name):\($registry[$name].authProfile // "none")"
+        ' "$MCP_CONFIG" 2>/dev/null || true)"
+        if [[ -n "$incompatible_auth" ]]; then
+          while IFS= read -r item; do
+            [[ -z "$item" ]] && continue
+            log_warn "Auth compatibility" "$item uses auth profile not in policy"
+          done <<<"$incompatible_auth"
+        else
+          log_success "Auth compatibility" "all server auth profiles match policy"
+        fi
       fi
     fi
 

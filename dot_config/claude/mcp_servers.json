@@ -3,17 +3,17 @@
   "mcpServers": {
     "git": {
       "command": "npx",
-      "args": ["-y", "mcp-server-git@2025.1.14"],
+      "args": ["-y", "mcp-server-git@2026.3.0"],
       "env": {}
     },
     "memory": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory@2025.8.4"],
+      "args": ["-y", "@modelcontextprotocol/server-memory@2026.3.0"],
       "env": {}
     },
     "sqlite": {
       "command": "npx",
-      "args": ["-y", "mcp-server-sqlite@2025.1.14"],
+      "args": ["-y", "mcp-server-sqlite@2026.3.0"],
       "env": {}
     }
   }
