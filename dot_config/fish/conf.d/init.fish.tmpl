@@ -43,9 +43,9 @@ function _dotfiles_async_init
     if test "$DOTFILES_ARTIFACT_MODE" = "0"; and command -v starship >/dev/null
         _cached_eval starship init fish
     end
-    # Zoxide
+    # Zoxide (--cmd=cd replaces cd with zoxide-aware version)
     if command -v zoxide >/dev/null
-        _cached_eval zoxide init fish
+        _cached_eval zoxide init --cmd=cd fish
     end
     # FZF
     if command -v fzf >/dev/null
@@ -54,20 +54,7 @@ function _dotfiles_async_init
     # Carapace completions
     if command -v carapace >/dev/null 2>&1
         mkdir -p ~/.config/fish/completions
-        carapace --complete fish | source
-    end
-    # Modern core: unified history (Atuin) + smart directory jumping (Zoxide)
-    if test "$DOTFILES_ARTIFACT_MODE" = "0"
-        if command -v atuin >/dev/null 2>&1
-            atuin init fish | source
-        end
-        if command -v zoxide >/dev/null 2>&1
-            zoxide init fish | source
-            alias cd="z"
-        end
-        if command -v starship >/dev/null 2>&1
-            starship init fish | source
-        end
+        carapace _carapace fish | source
     end
 end
 
