@@ -37,9 +37,9 @@ All verification activities are executed through automated CI pipelines, pre-com
 | VR-07 | Signed commits enforced | Pre-push hook verifies `git verify-commit` for all commits in range | `scripts/git-hooks/pre-push`, `compliance-guard.yml` | Pass |
 | VR-08 | Conventional commit format | Pre-commit hook validates `feat:`, `fix:`, `docs:` prefixes | Pre-commit hook (conventional-commits) | Pass |
 | VR-09 | Template rendering correctness | `chezmoi apply --dry-run` on Linux and macOS CI runners | `ci.yml` (Linux + macOS matrix), `tests/unit/test_*.sh` | Pass |
-| VR-10 | Alias system functional | Unit tests source alias files and verify command availability | `tests/unit/aliases/test_*.sh` (99 files) | Pass |
+| VR-10 | Alias system functional | Unit tests source alias files and verify command availability | `tests/unit/aliases/test_*.sh` (104 files) | Pass |
 | VR-11 | Neovim config loads without errors | Headless Neovim launch with error detection | `tests/unit/neovim/test_*.sh` (15 files) | Pass |
-| VR-12 | Fish/Zsh/Nushell configs valid | Syntax validation and functional tests per shell | `tests/unit/fish/` (32), `tests/unit/shell/` (12), `tests/unit/nushell/` (5) | Pass |
+| VR-12 | Fish/Zsh/Nushell configs valid | Syntax validation and functional tests per shell | `tests/unit/fish/` (33), `tests/unit/shell/` (12), `tests/unit/nushell/` (5) | Pass |
 | VR-13 | CI pipelines execute successfully | GitHub Actions workflow status across all triggers | `ci.yml`, `ci-enforced.yml`, `compliance-guard.yml`, `cross-platform-test.yml`, `security-enhanced.yml`, `codeql.yml` | Pass |
 | VR-14 | Pre-commit hooks functional | Hook execution via `pre-commit run --all-files` | `config/pre-commit-config.yaml` | Pass |
 | VR-15 | Age encryption operational | Chezmoi age-encrypted file decryption during apply | `chezmoi apply --dry-run` (encrypted targets), integration tests | Pass |
@@ -52,8 +52,8 @@ All verification activities are executed through automated CI pipelines, pre-com
 
 | Metric | Value | Threshold | Status |
 |--------|-------|-----------|--------|
-| Total test files | 387 | N/A | Measured |
-| Total assertions | 1,655 | N/A | Measured |
+| Total test files | 430 | N/A | Measured |
+| Total assertions | 2,217 | N/A | Measured |
 | Pass rate | 100% | 100% | Pass |
 | Module coverage | 100% | >= 95% | Pass |
 
@@ -61,15 +61,23 @@ All verification activities are executed through automated CI pipelines, pre-com
 
 | Category | Test Files | Status |
 |----------|-----------|--------|
-| Scripts | 89 | Tested |
-| Alias files | 99 | Tested |
-| Function files | 51 | Tested |
-| Shell configs | 12 | Tested |
-| Fish functions + conf.d | 32 | Tested |
-| Nushell configs | 5 | Tested |
+| Alias files | 104 | Tested |
+| Function files | 76 | Tested |
+| Fish functions + conf.d | 33 | Tested |
+| Misc / compliance | 34 | Tested |
+| Dot CLI | 30 | Tested |
+| Diagnostics | 28 | Tested |
+| Shell configs | 20 | Tested |
+| Ops | 18 | Tested |
+| Install | 17 | Tested |
+| Security | 16 | Tested |
 | Neovim Lua configs | 15 | Tested |
-| Integration tests | 9 | Tested |
-| **Total** | **387** | **All pass** |
+| Theme | 11 | Tested |
+| Tools | 7 | Tested |
+| Nushell configs | 6 | Tested |
+| Secrets | 5 | Tested |
+| Integration tests | 10 | Tested |
+| **Total** | **430** | **All pass** |
 
 ### Validation Environments
 
@@ -100,9 +108,9 @@ tests/
 │   ├── fish/              # 32 Fish function and conf.d tests
 │   ├── nushell/           # 5 Nushell config tests
 │   ├── neovim/            # 15 Neovim Lua config tests
-│   └── test_*.sh          # 378 unit test files total
+│   └── test_*.sh          # 420 unit test files total
 ├── integration/
-│   └── test_*.sh          # 9 integration test files
+│   └── test_*.sh          # 10 integration test files
 └── performance/
     └── benchmark_runner.sh # Performance regression benchmarks
 ```
