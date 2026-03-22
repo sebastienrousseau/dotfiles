@@ -89,7 +89,7 @@ secrets_backend = "1password"
 ```
 
 Use in templates:
-```
+```text
 {{ onepassword "my-secret" "vault-name" }}
 {{ onepasswordRead "op://vault/item/field" }}
 ```
@@ -104,7 +104,7 @@ secrets_backend = "bitwarden"
 ```
 
 Use in templates:
-```
+```text
 {{ bitwarden "item" "my-login" }}
 {{ bitwardenFields "item" "my-login" }}
 ```
@@ -119,7 +119,7 @@ secrets_backend = "vault"
 ```
 
 Use in templates:
-```
+```text
 {{ vault "secret/data/my-secret" }}
 ```
 
@@ -133,7 +133,7 @@ secrets_backend = "pass"
 ```
 
 Use in templates:
-```
+```text
 {{ pass "my-secret" }}
 ```
 

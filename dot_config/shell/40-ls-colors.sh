@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+
+# Set ls colors with GNU/BSD detection and caching
+# GNU coreutils: LS_COLORS via dircolors
+# BSD/macOS: LSCOLORS + CLICOLOR
+
+_dircolors_cache="${XDG_CACHE_HOME:-$HOME/.cache}/shell/dircolors.sh"
+
+_dircolors_cached_eval() {
+  local cmd="$1"
+  shift
+  if [ -f "$_dircolors_cache" ]; then
+    # shellcheck disable=SC1090
+    . "$_dircolors_cache"
+  else
+    mkdir -p "$(dirname "$_dircolors_cache")"
+    "$cmd" "$@" >"$_dircolors_cache" 2>/dev/null
+    # shellcheck disable=SC1090
+    . "$_dircolors_cache"
+  fi
+}
+
+if command -v dircolors >/dev/null 2>&1; then
+  if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/dircolors" ]; then
+    _dircolors_cached_eval dircolors -b "${XDG_CONFIG_HOME:-$HOME/.config}/dircolors"
+  else
+    _dircolors_cached_eval dircolors -b
+  fi
+else
+  case "$(uname -s 2>/dev/null)" in
+    Darwin*)
+      export CLICOLOR=1
+      export LSCOLORS="ExFxCxDxBxegedabagacad"
+      if command -v gdircolors >/dev/null 2>&1; then
+        _dircolors_cached_eval gdircolors -b
+      fi
+      ;;
+  esac
+fi
+
+unset -f _dircolors_cached_eval
+unset _dircolors_cache
+
+# Ensure LS_COLORS is set for Zsh completion when only LSCOLORS exists
+if [ -z "${LS_COLORS:-}" ] && [ -n "${LSCOLORS:-}" ]; then
+  export LS_COLORS=""
+fi

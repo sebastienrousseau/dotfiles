@@ -1,0 +1,52 @@
+{
+  "policyVersion": "2026.03",
+  "defaultProfile": "strict-local",
+  "profiles": {
+    "strict-local": {
+      "description": "Local-first MCP policy for regulated and high-trust environments.",
+      "allowedLaunchers": ["npx", "node", "uvx"],
+      "trustedTransports": ["stdio", "http"],
+      "authProfiles": ["none", "env-token"],
+      "blockedFilesystemRoots": ["/", "/home", "/Users"],
+      "blockedArgPatterns": ["^--allow-.*", "^--unsafe$", "^\\*$"],
+      "warnOnUnpinnedNpx": true,
+      "requireApprovedPackageLock": true,
+      "requireRegistryEntry": true,
+      "requireHttpsForHttpTransports": true,
+      "requireOauthForHttpTransports": true,
+      "requiredEnvByServer": {
+        "github": ["GITHUB_TOKEN"],
+        "brave-search": ["BRAVE_API_KEY"]
+      },
+      "forbidNetworkServersByDefault": [
+        "github",
+        "brave-search",
+        "fetch",
+        "puppeteer",
+        "filesystem"
+      ]
+    },
+    "enterprise-remote": {
+      "description": "Enterprise-ready MCP policy with registry-backed remote transports.",
+      "allowedLaunchers": ["npx", "node", "uvx"],
+      "trustedTransports": ["stdio", "http", "streamable-http"],
+      "authProfiles": ["none", "env-token", "oauth2", "sso"],
+      "streamableHttpConfig": {
+        "sessionTimeout": 3600,
+        "maxConcurrentSessions": 4
+      },
+      "blockedFilesystemRoots": ["/", "/home", "/Users"],
+      "blockedArgPatterns": ["^--allow-.*", "^--unsafe$", "^\\*$"],
+      "warnOnUnpinnedNpx": true,
+      "requireApprovedPackageLock": true,
+      "requireRegistryEntry": true,
+      "requireHttpsForHttpTransports": true,
+      "requireOauthForHttpTransports": true,
+      "requiredEnvByServer": {
+        "github": ["GITHUB_TOKEN"],
+        "brave-search": ["BRAVE_API_KEY"]
+      },
+      "forbidNetworkServersByDefault": []
+    }
+  }
+}

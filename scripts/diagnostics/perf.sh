@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Shell Performance Profiling
-# Usage: dot perf [--json] [--profile] [--runs N] [--target MS]
+# Usage: dot perf [--json|-j] [--profile|-p] [--runs|-r N] [--target|-t MS]
 
 set -euo pipefail
 
@@ -32,19 +32,19 @@ MAX_MS="${DOTFILES_PERF_MAX_MS:-1000}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --json)
+    --json | -j)
       JSON_OUTPUT=true
       shift
       ;;
-    --profile)
+    --profile | -p)
       PROFILE=true
       shift
       ;;
-    --runs)
+    --runs | -r)
       RUNS="${2:-3}"
       shift 2
       ;;
-    --target)
+    --target | -t)
       TARGET_MS="${2:-$TARGET_MS}"
       shift 2
       ;;
@@ -115,6 +115,7 @@ JSON
   exit 0
 fi
 
+ui_dot_banner "Diagnostics"
 ui_header "Shell Performance"
 
 ui_section "Startup timing"

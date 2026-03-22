@@ -1,0 +1,10 @@
+{
+  "name": "dotfiles-agent",
+  "card": "dot_config/dotfiles/agent-card.json",
+  "a2aCard": ".well-known/agent-card.json",
+  "mcpCard": ".well-known/mcp/server-card.json",
+  "protocols": ["mcp", "a2a"],
+  "capabilities": ["workstation-attestation", "bounded-agent-modes", "signed-config-governance", "replayable-checkpoints", "fleet-attestation-export", "policy-bundle-releases"],
+  "conformanceVersion": "2026.03",
+  "_deprecated": "This file is retained for backward compatibility. The canonical A2A v0.3 card is at .well-known/agent-card.json."
+}

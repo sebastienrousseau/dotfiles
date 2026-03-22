@@ -90,7 +90,8 @@ _deferred_hydration() {
         return 1
       fi
 
-      echo "$init_output" >"$cache"
+      echo "$init_output" >"${cache}.tmp.$$"
+      mv "${cache}.tmp.$$" "$cache"
       source "$cache"
     fi
   }

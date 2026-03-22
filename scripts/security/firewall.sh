@@ -44,10 +44,20 @@ source "$SCRIPT_DIR/../dot/lib/ui.sh"
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/platform.sh"
 
+DRY_RUN=0
+for arg in "$@"; do
+  case "$arg" in --dry-run | -n) DRY_RUN=1 ;; esac
+done
+_run_cmd() {
+  if [[ "$DRY_RUN" -eq 1 ]]; then ui_info "[dry-run]" "$*"; else "$@"; fi
+}
+
 ui_init
 ui_header "Firewall"
 
-if [ "${DOTFILES_FIREWALL:-}" != "1" ]; then
+if [[ "$DRY_RUN" -eq 1 ]]; then
+  ui_info "Mode" "dry-run (no changes will be made)"
+elif [ "${DOTFILES_FIREWALL:-}" != "1" ]; then
   ui_warn "Firewall" "disabled by default"
   ui_info "Re-run" "DOTFILES_FIREWALL=1"
   exit 1
@@ -56,18 +66,18 @@ fi
 case "$(dot_platform_id)" in
   macos)
     ui_info "Enabling" "macOS firewall"
-    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
-    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setallowsigned on
-    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setallowsignedapp on
-    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setstealthmode on
+    _run_cmd sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
+    _run_cmd sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setallowsigned on
+    _run_cmd sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setallowsignedapp on
+    _run_cmd sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setstealthmode on
     ;;
   linux | wsl)
     if command -v ufw >/dev/null; then
       ui_info "Enabling" "UFW"
-      sudo ufw default deny incoming
-      sudo ufw default allow outgoing
-      sudo ufw allow OpenSSH
-      sudo ufw --force enable
+      _run_cmd sudo ufw default deny incoming
+      _run_cmd sudo ufw default allow outgoing
+      _run_cmd sudo ufw allow OpenSSH
+      _run_cmd sudo ufw --force enable
     else
       ui_err "ufw" "not installed; re-run after install"
       exit 1

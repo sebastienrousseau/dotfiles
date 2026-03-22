@@ -22,14 +22,14 @@ RUN_INTEGRATION=1 ./tests/framework/test_runner.sh
 
 ## Test structure
 
-```
+```text
 tests/
 ├── framework/           # Test framework
 │   ├── assertions.sh    # 16 assertion functions
 │   ├── mocks.sh        # Mock utilities
 │   └── test_runner.sh  # Test executor
-├── unit/               # 378 unit test files
-├── integration/        # 9 integration test files
+├── unit/               # 420 unit test files
+├── integration/        # 10 integration test files
 └── performance/        # Benchmarks
 ```
 
@@ -108,9 +108,9 @@ Measure resource efficiency with shell startup benchmarks and load tests.
 | Category | Target | Current |
 |----------|--------|---------|
 | Module coverage | >=95% | 100% |
-| Unit test files | - | 378 |
-| Integration test files | - | 9 |
-| Total tests (assertions) | - | 1655 |
+| Unit test files | - | 420 |
+| Integration test files | - | 10 |
+| Total tests (assertions) | - | 2217 |
 | Unit test pass rate | 100% | 100% |
 
 CI enforces module coverage via:

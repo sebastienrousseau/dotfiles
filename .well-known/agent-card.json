@@ -1,0 +1,57 @@
+{
+  "specVersion": "0.3",
+  "name": "dotfiles-agent",
+  "version": "0.2.497",
+  "description": "Trusted workstation agent surface for local shell automation, configuration governance, and fleet management.",
+  "url": "https://github.com/sebastienvermeille/dotfiles",
+  "skills": [
+    {
+      "id": "workstation-attestation",
+      "name": "Workstation Attestation",
+      "description": "Export cryptographically verifiable workstation evidence."
+    },
+    {
+      "id": "bounded-agent-modes",
+      "name": "Bounded Agent Modes",
+      "description": "Operate within ask/plan/apply/audit execution profiles with RBAC."
+    },
+    {
+      "id": "mcp-governance",
+      "name": "MCP Governance",
+      "description": "Validate MCP configuration, policy, supply chain, and registry."
+    },
+    {
+      "id": "replayable-checkpoints",
+      "name": "Replayable Checkpoints",
+      "description": "Save and replay bounded agent execution checkpoints."
+    },
+    {
+      "id": "fleet-attestation-export",
+      "name": "Fleet Attestation Export",
+      "description": "Export fleet-wide attestation and drift evidence."
+    }
+  ],
+  "authentication": {
+    "schemes": ["none"],
+    "description": "Local CLI tool — no network authentication required."
+  },
+  "signing": {
+    "method": "ssh-ed25519",
+    "description": "Signed commits and configuration governance via SSH ED25519 keys."
+  },
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": true
+  },
+  "protocols": ["mcp", "a2a"],
+  "defaultProfile": "ask",
+  "entrypoints": {
+    "cli": "dot",
+    "mode": "dot mode",
+    "attestation": "dot attest --json",
+    "mcp": "dot mcp --strict --json",
+    "conformance": "dot agent conformance --strict --json",
+    "a2aCard": "dot agent a2a-card --json"
+  }
+}

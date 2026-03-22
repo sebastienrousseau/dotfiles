@@ -39,7 +39,7 @@
 	format = {{ $git_signingformat }}
 
 [gpg "ssh"]
-	allowedSignersFile = {{ .chezmoi.homeDir }}/.ssh/allowed_signers
+	allowedSignersFile = {{ .chezmoi.homeDir }}/.config/git/allowed_signers
 {{- end }}
 
 [alias]
@@ -107,7 +107,7 @@
 	autoStash = true
 
 [merge]
-	verifySignatures = false
+	verifySignatures = true
 	conflictstyle = zdiff3
 
 [rerere]

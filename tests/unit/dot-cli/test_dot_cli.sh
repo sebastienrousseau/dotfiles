@@ -36,24 +36,24 @@ fi
 test_start "dot_cli_set_e"
 assert_file_contains "$DOT_CLI" "set -e" "should use set -e for error handling"
 
-# Test: dot --help shows usage
+# Test: dot --help shows onboarding overview
 test_start "dot_cli_help"
 output=$(bash "$DOT_CLI" help 2>&1) || true
-if [[ "$output" == *"Usage"* ]] && [[ "$output" == *"dot"* ]]; then
+if [[ "$output" == *"What it is"* ]] && [[ "$output" == *"Platforms"* ]] && [[ "$output" == *"Start"* ]]; then
   ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: help shows usage"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: help shows onboarding overview"
 else
   ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: help should show usage"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: help should show onboarding overview"
   printf '%b\n' "    Output: ${output:0:200}"
 fi
 
 # Test: dot --version shows version
 test_start "dot_cli_version"
 output=$(bash "$DOT_CLI" --version 2>&1) || true
-if [[ "$output" == *".dotfiles "* ]]; then
+if [[ "$output" == *"Dotfiles Version"* ]] && [[ "$output" == *".dotfiles "* ]] && [[ "$output" == *"Source"* ]]; then
   ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --version shows version string"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --version shows doctor-style version output"
 else
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: --version should show version"
@@ -63,7 +63,7 @@ fi
 # Test: dot (no args) shows help
 test_start "dot_cli_no_args"
 output=$(bash "$DOT_CLI" 2>&1) || true
-if [[ "$output" == *"Usage"* ]]; then
+if [[ "$output" == *"What it is"* ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no args shows help"
 else
@@ -87,47 +87,50 @@ else
   printf '%b\n' "    Output: $output"
 fi
 
-# Test: every subcommand in help has a case handler
+# Test: every subcommand in full help has a case handler
 test_start "dot_cli_help_handler_parity"
 # Extract subcommands from help text
-help_output=$(bash "$DOT_CLI" help 2>&1)
+help_output=$(bash "$DOT_CLI" help all 2>&1)
 help_cmds=()
 while IFS= read -r line; do
   # Match lines like "  apply       Description..."
-  if [[ "$line" =~ ^[[:space:]]+([a-z][-a-z0-9]+)[[:space:]] ]]; then
+  if [[ "$line" =~ ^[[:space:]]+((--[a-z-]+)|([a-z][-a-z0-9]+))[[:space:]] ]]; then
     help_cmds+=("${BASH_REMATCH[1]}")
   fi
 done <<<"$help_output"
 
-# Extract case handlers from the script
-case_handlers=()
+# Extract routed commands from the CLI registry
+route_handlers=()
+in_routes=0
 while IFS= read -r line; do
-  if [[ "$line" =~ ^[[:space:]]+([-a-z]+)\) ]]; then
-    case_handlers+=("${BASH_REMATCH[1]}")
+  if [[ "$line" == "_dot_command_routes() {" ]]; then
+    in_routes=1
+    continue
   fi
-done < <(grep -E '^\s+[a-z][-a-z]*\)' "$DOT_CLI")
+  if [[ "$in_routes" -eq 1 ]] && [[ "$line" == "}" ]]; then
+    break
+  fi
+  if [[ "$in_routes" -eq 1 ]] && [[ "$line" =~ ^([-[:alnum:]_]+)\|([[:alnum:]_-]+)$ ]]; then
+    route_handlers+=("${BASH_REMATCH[1]}")
+  fi
+done <"$DOT_CLI"
 
 missing_handlers=0
+set +u
 for cmd in "${help_cmds[@]}"; do
   found=false
-  for handler in "${case_handlers[@]}"; do
+  for handler in "${route_handlers[@]}"; do
     if [[ "$cmd" == "$handler" ]]; then
       found=true
       break
     fi
   done
-  # Some help entries are compound (e.g., "--version" is handled by "--version|-v|version)")
-  # Check if command appears anywhere in the script as a case label or reference
-  if [[ "$found" == false ]]; then
-    if grep -qE "(${cmd}[[:space:]]*[|)]|\"${cmd}\")" "$DOT_CLI" 2>/dev/null; then
-      found=true
-    fi
-  fi
   if [[ "$found" == false ]]; then
     echo "    WARNING: help lists '$cmd' but no case handler found"
     missing_handlers=$((missing_handlers + 1))
   fi
 done
+set -u
 
 if [[ $missing_handlers -eq 0 ]]; then
   ((TESTS_PASSED++)) || true
@@ -137,9 +140,55 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $missing_handlers help entries lack case handlers"
 fi
 
+# Test: help surface has no duplicate visible commands
+test_start "dot_cli_help_unique_commands"
+duplicate_cmds=$(printf '%s\n' "${help_cmds[@]}" | sort | uniq -d || true)
+if [[ -z "$duplicate_cmds" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: help commands are unique"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: duplicate help commands found"
+  printf '%b\n' "    Duplicates: $duplicate_cmds"
+fi
+
+# Test: mcp is part of the public help surface
+test_start "dot_cli_help_lists_mcp"
+overview_output=$(bash "$DOT_CLI" help 2>&1)
+if [[ "$help_output" == *"mcp"* ]] && [[ "$overview_output" == *"mcp"* ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: help lists mcp"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: help should list mcp"
+fi
+
+# Test: dot help <command> shows focused help
+test_start "dot_cli_help_command"
+output=$(bash "$DOT_CLI" help doctor 2>&1) || true
+if [[ "$output" == *"dot doctor"* ]] && [[ "$output" == *"Examples"* ]] && [[ "$output" == *"dot doctor -H"* ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: help doctor shows focused command help"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: help doctor should show focused command help"
+  printf '%b\n' "    Output: $output"
+fi
+
+# Test: dot help all shows full reference
+test_start "dot_cli_help_all"
+output=$(bash "$DOT_CLI" help all 2>&1) || true
+if [[ "$output" == *"Dotfiles Command Reference"* ]] && [[ "$output" == *"sync"* ]] && [[ "$output" == *"version"* ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: help all shows full reference"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: help all should show full reference"
+fi
+
 # Test: dot --version contains VERSION string from file
 test_start "dot_cli_version_value"
-EXPECTED_VERSION=$(jq -r '.version' "$REPO_ROOT/package.json")
+EXPECTED_VERSION=$(sed -nE 's/^[[:space:]]*"version":[[:space:]]*"([^"]+)".*/\1/p' "$REPO_ROOT/package.json" | head -n 1)
 output=$(bash "$DOT_CLI" --version 2>&1) || true
 if [[ "$output" == *"$EXPECTED_VERSION"* ]]; then
   ((TESTS_PASSED++)) || true
@@ -153,18 +202,41 @@ fi
 # Test: dot -v is alias for --version
 test_start "dot_cli_v_flag"
 output=$(bash "$DOT_CLI" -v 2>&1) || true
-if [[ "$output" == *".dotfiles "* ]]; then
+reference_output=$(bash "$DOT_CLI" --version 2>&1) || true
+if [[ "$output" == "$reference_output" ]]; then
   ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: -v is alias for --version"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: -v matches --version output"
 else
   ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: -v should show version"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: -v should match --version output"
+fi
+
+# Test: dot version is alias for --version
+test_start "dot_cli_version_cmd"
+output=$(bash "$DOT_CLI" version 2>&1) || true
+if [[ "$output" == "$reference_output" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: version matches --version output"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: version should match --version output"
+fi
+
+# Test: dot version uses doctor-style layout
+test_start "dot_cli_version_layout"
+if [[ "$reference_output" == *"Dotfiles Version"* ]] && [[ "$reference_output" == *"✓"* || "$reference_output" == *"[OK]"* ]] && [[ "$reference_output" == *"Version"* ]] && [[ "$reference_output" == *"Source"* ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: version reuses doctor-style header and status rows"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: version should reuse doctor-style header and status rows"
+  printf '%b\n' "    Output: $reference_output"
 fi
 
 # Test: dot -h shows help
 test_start "dot_cli_h_flag"
 output=$(bash "$DOT_CLI" -h 2>&1) || true
-if [[ "$output" == *"Usage"* ]]; then
+if [[ "$output" == *"What it is"* ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: -h shows help"
 else

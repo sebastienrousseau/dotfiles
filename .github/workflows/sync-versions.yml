@@ -88,6 +88,22 @@ jobs:
           echo "target_version=$TARGET_VERSION" >> "$GITHUB_OUTPUT"
           echo "Target version: $TARGET_VERSION"
 
+      - name: Configure signed commits
+        env:
+          ACTIONS_BOT_SIGNING_KEY: ${{ secrets.ACTIONS_BOT_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${ACTIONS_BOT_SIGNING_KEY}" ]]; then
+            echo "::error::Missing ACTIONS_BOT_SIGNING_KEY secret"
+            exit 1
+          fi
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "${ACTIONS_BOT_SIGNING_KEY}" > ~/.ssh/actions_bot_signing_key
+          chmod 600 ~/.ssh/actions_bot_signing_key
+          git config --local gpg.format ssh
+          git config --local user.signingkey ~/.ssh/actions_bot_signing_key
+          git config --local commit.gpgsign true
+
       - name: Sync versions
         run: |
           TARGET_VERSION="${{ steps.version.outputs.target_version }}"
@@ -109,5 +125,5 @@ jobs:
           git config --local user.name "GitHub Action"
 
           git add -A
-          git commit -m "chore: sync version references to v${TARGET_VERSION}"
+          git commit -S -m "chore: sync version references to v${TARGET_VERSION}"
           git push origin "${{ github.ref_name }}"

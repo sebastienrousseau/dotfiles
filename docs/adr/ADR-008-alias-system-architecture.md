@@ -24,7 +24,7 @@ The dotfiles manage 98 alias files across 30+ categories (git, docker, kubernete
 
 Aliases are organized by tool/domain in `.chezmoitemplates/aliases/<category>/<name>.aliases.sh`:
 
-```
+```text
 aliases/
   git/git.aliases.sh, signing.aliases.sh
   docker/docker.aliases.sh

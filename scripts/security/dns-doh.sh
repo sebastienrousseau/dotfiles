@@ -10,10 +10,20 @@ source "$SCRIPT_DIR/../dot/lib/ui.sh"
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/platform.sh"
 
+DRY_RUN=0
+for arg in "$@"; do
+  case "$arg" in --dry-run | -n) DRY_RUN=1 ;; esac
+done
+_run_cmd() {
+  if [[ "$DRY_RUN" -eq 1 ]]; then ui_info "[dry-run]" "$*"; else "$@"; fi
+}
+
 ui_init
 ui_header "DNS-over-HTTPS"
 
-if [ "${DOTFILES_DOH:-}" != "1" ]; then
+if [[ "$DRY_RUN" -eq 1 ]]; then
+  ui_info "Mode" "dry-run (no changes will be made)"
+elif [ "${DOTFILES_DOH:-}" != "1" ]; then
   ui_warn "DoH" "disabled by default"
   ui_info "Re-run" "DOTFILES_DOH=1"
   exit 1
@@ -23,8 +33,8 @@ case "$(dot_platform_id)" in
   linux | wsl)
     if command -v resolvectl >/dev/null; then
       ui_info "Enabling" "systemd-resolved DoH (Cloudflare)"
-      sudo resolvectl dns-over-https on
-      sudo resolvectl dns 1.1.1.1 1.0.0.1
+      _run_cmd sudo resolvectl dns-over-https on
+      _run_cmd sudo resolvectl dns 1.1.1.1 1.0.0.1
     else
       ui_err "systemd-resolved" "not detected"
       exit 1

@@ -1,5 +1,5 @@
 # Active profile - change this to switch configurations
-dotfiles_version = "0.2.496"
+dotfiles_version = "0.2.497"
 profile = "laptop"
 
 # Visual theme
@@ -19,20 +19,10 @@ signingkey = ""
 # Feature Flags
 # ============================================================================
 [features]
-# Core shell
-zsh = true
-fish = true
-nushell = true
-starship = true
-
 # Shell hardening
 alias_wrapper = false
 
-# Editors
-nvim = true
-
 # Terminal multiplexers
-tmux = true
 zellij = false
 
 # ============================================================================

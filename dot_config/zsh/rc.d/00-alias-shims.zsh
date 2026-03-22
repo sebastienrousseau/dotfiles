@@ -12,7 +12,7 @@ if [[ -o interactive ]]; then
   # thefuck — lazy-loaded to avoid ~200ms startup penalty
   if command -v thefuck >/dev/null 2>&1; then
     _lazy_load_thefuck() {
-      unfunction fuck _lazy_load_thefuck 2>/dev/null
+      unset -f fuck _lazy_load_thefuck 2>/dev/null
       eval "$(thefuck --alias)"
     }
     fuck() { _lazy_load_thefuck; fuck "$@"; }

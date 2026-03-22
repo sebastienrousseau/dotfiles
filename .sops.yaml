@@ -1,8 +1,11 @@
 # .sops.yaml
 # Define which keys should be used to encrypt files matching certain patterns.
+#
+# WARNING: The age key below is a NON-FUNCTIONAL placeholder. You MUST replace
+# it with your own public key before encrypting any secrets.
+# Generate one with: age-keygen -y ~/.config/sops/age/keys.txt
 
 # 1. Age keys (declarative & modern)
-# You should add your public key here (e.g. from `age-keygen -y ~/.config/sops/age/keys.txt`)
 # keys:
 #   - &admin_key age1... (Replace with your public key)
 

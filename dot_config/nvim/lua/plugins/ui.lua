@@ -1,4 +1,10 @@
 -- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+-- @module nvim.plugins.ui
+-- UI component plugins for a modern IDE experience.
+-- Snacks.nvim provides the dashboard and notification system.
+-- Noice.nvim replaces the default command line with a floating palette.
+-- These choices prioritise startup speed (lazy-loaded) and visual consistency
+-- with the Catppuccin / TokyoNight theme families.
 return {
   -----------------------------------------------------------------------------
   -- 1. Dashboard (Snacks.nvim)

@@ -25,6 +25,8 @@ run_test_file() {
   local test_file="$1"
   local temp_results
   temp_results=$(mktemp)
+  # Ensure temp file is cleaned up even on early exit
+  trap 'rm -f "$temp_results"' RETURN
 
   echo ""
   echo "Running: $(basename "$test_file")"
@@ -51,8 +53,6 @@ run_test_file() {
     TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + 1))
     TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + 1))
   fi
-
-  rm -f "$temp_results"
 }
 
 # Show usage

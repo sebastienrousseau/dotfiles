@@ -10,7 +10,7 @@
 set -euo pipefail
 
 _cleanup_files=()
-trap 'rm -f "${_cleanup_files[@]}"' EXIT
+trap 'set +u; rm -f "${_cleanup_files[@]}" 2>/dev/null; set -u' EXIT
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -475,6 +475,11 @@ main() {
   local command="${1:-status}"
   shift || true
 
+  if [[ "$command" == "help" ]]; then
+    usage
+    exit 0
+  fi
+
   # Parse global options
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -502,10 +507,12 @@ main() {
 
   # Concurrency guard
   LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/dotfiles-rollback.lock"
-  exec 9>"$LOCK_FILE"
-  if ! flock -n 9; then
-    ui_warn "Already running" "Another rollback instance is active"
-    exit 0
+  if command -v flock >/dev/null 2>&1; then
+    exec 9>"$LOCK_FILE"
+    if ! flock -n 9; then
+      ui_warn "Already running" "Another rollback instance is active"
+      exit 0
+    fi
   fi
 
   dot_log info "rollback_start" "command=$command"

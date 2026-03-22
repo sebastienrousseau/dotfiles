@@ -52,10 +52,12 @@ if type zipf &>/dev/null; then
   test_dir=$(mktemp -d)
   echo "test" >"$test_dir/test.txt"
 
-  # Run zipf and check if zip was created
-  zipf "$test_dir" 2>/dev/null || true
-
-  if [[ -f "${test_dir}.zip" ]]; then
+  # Run zipf and check if zip was created (skip if zip is not installed)
+  if ! command -v zip >/dev/null 2>&1; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (zip not installed)"
+    rm -rf "$test_dir" 2>/dev/null
+  elif zipf "$test_dir" 2>/dev/null && [[ -f "${test_dir}.zip" ]]; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: zipf created archive"
   else

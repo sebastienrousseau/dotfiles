@@ -6,7 +6,7 @@ Security analysis of the dotfiles distribution. Covers trust boundaries, threat 
 
 The primary trust boundary is the **local machine**. Dotfiles are deployed to and executed on the user's own system. All configuration files, scripts, and templates run with the user's privileges.
 
-```
+```text
 ┌─────────────────────────────────────────────────┐
 │ Local Machine (trusted zone)                    │
 │  ┌─────────────────┐  ┌──────────────────────┐  │

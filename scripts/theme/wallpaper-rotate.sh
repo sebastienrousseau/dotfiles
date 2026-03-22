@@ -40,7 +40,7 @@ pick_wallpaper() {
     printf '%s\n' "${files[@]}" | shuf -n 1
   else
     # macOS fallback using $RANDOM
-    echo "${files[$RANDOM%${#files[@]}]}"
+    echo "${files[$RANDOM % ${#files[@]}]}"
   fi
 }
 

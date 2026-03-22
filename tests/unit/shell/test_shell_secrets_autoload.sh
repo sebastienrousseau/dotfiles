@@ -7,10 +7,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-SECRETS_FILE="$REPO_ROOT/dot_config/shell/10-secrets.sh.tmpl"
+SECRETS_FILE="$REPO_ROOT/dot_config/shell/10-secrets.sh"
 
 test_start "secrets_autoload_file_exists"
-assert_file_exists "$SECRETS_FILE" "10-secrets template should exist"
+assert_file_exists "$SECRETS_FILE" "10-secrets script should exist"
 
 make_dot_stub() {
   local tmp_dir

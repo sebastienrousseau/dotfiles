@@ -1,4 +1,10 @@
 -- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+-- @module nvim.plugins.lsp
+-- Language Server Protocol configuration.
+-- Mason manages external tool installation (LSP servers, formatters, linters).
+-- mason-lspconfig bridges Mason with nvim-lspconfig for automatic server setup.
+-- Servers: bashls, lua_ls, basedpyright, ruff, ts_ls — matching the project's
+-- primary languages (shell, Lua, Python, TypeScript).
 return {
   -- Mason (Manage External Tools)
   {

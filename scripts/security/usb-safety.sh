@@ -10,10 +10,20 @@ source "$SCRIPT_DIR/../dot/lib/ui.sh"
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../dot/lib/platform.sh"
 
+DRY_RUN=0
+for arg in "$@"; do
+  case "$arg" in --dry-run | -n) DRY_RUN=1 ;; esac
+done
+_run_cmd() {
+  if [[ "$DRY_RUN" -eq 1 ]]; then ui_info "[dry-run]" "$*"; else "$@"; fi
+}
+
 ui_init
 ui_header "USB Safety"
 
-if [ "${DOTFILES_USB_SAFETY:-}" != "1" ]; then
+if [[ "$DRY_RUN" -eq 1 ]]; then
+  ui_info "Mode" "dry-run (no changes will be made)"
+elif [ "${DOTFILES_USB_SAFETY:-}" != "1" ]; then
   ui_warn "USB safety" "disabled by default"
   ui_info "Re-run" "DOTFILES_USB_SAFETY=1"
   exit 1
@@ -23,8 +33,8 @@ case "$(dot_platform_id)" in
   linux | wsl)
     if command -v gsettings >/dev/null; then
       ui_info "Disabling" "GNOME automount for removable media"
-      gsettings set org.gnome.desktop.media-handling automount false || true
-      gsettings set org.gnome.desktop.media-handling automount-open false || true
+      _run_cmd gsettings set org.gnome.desktop.media-handling automount false || true
+      _run_cmd gsettings set org.gnome.desktop.media-handling automount-open false || true
     else
       ui_err "gsettings" "not found"
       exit 1

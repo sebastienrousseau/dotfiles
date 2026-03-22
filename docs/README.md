@@ -1,53 +1,61 @@
 # Documentation
 
-Everything you need to know about this dotfiles setup, organized by topic.
+Start here. Then go deeper.
 
----
+## Start
 
-## Table of Contents
+- [Install](guides/INSTALL.md)
+- [Troubleshooting](guides/TROUBLESHOOTING.md)
+- [Support matrix](reference/SUPPORT_MATRIX.md)
 
-### Getting Started
-- [Installation Guide](guides/INSTALL.md) — set up your environment
-- [Walkthrough](architecture/WALKTHROUGH.md) — tour of key features after install
-- [Features Overview](reference/FEATURES.md) — feature flags and configuration
+## Daily use
 
-### Core
-- [Architecture](architecture/ARCHITECTURE.md) — system design and startup strategies
-- [Operations Guide](operations/OPERATIONS.md) — daily usage and maintenance
-- [Interoperability](architecture/INTEROP.md) — cross-platform command mapping
-- [Troubleshooting](guides/TROUBLESHOOTING.md) — common issues and fixes
+- [Utilities and `dot` CLI](reference/UTILS.md)
+- [Operations](operations/OPERATIONS.md)
+- [Trusted agent workstation](operations/TRUSTED_AGENT_WORKSTATION.md)
+- [Workstation attestation](operations/ATTESTATION.md)
+- [Interoperability](architecture/INTEROP.md)
+- [Agent interoperability](interop/A2A.md)
+- [AI integrations](AI.md)
 
-### Configuration
-- [Aliases Reference](reference/ALIASES.md) — shell aliases and shortcuts
-- [Aliases Cheatsheet](reference/ALIASES_CHEATSHEET.md) — quick reference card
-- [Alias Deprecations](reference/ALIASES_DEPRECATIONS.md) — removed aliases
-- [Keybindings](security/KEYS.md) — keyboard shortcuts
-- [Tools Reference](reference/TOOLS.md) — integrated tools and utilities
-- [Utilities](reference/UTILS.md) — helper scripts and the `dot` CLI
-- [AI Integrations](AI.md) — AI CLI tool configuration
+## Security and trust
 
-### Customization
-- [Fonts Guide](reference/FONTS.md) — Nerd Fonts setup
-- [Screenshots](reference/SCREENSHOTS.md) — visual gallery
-- [Neovim IDE Guide](guides/NEOVIM_IDE_GUIDE.md) — editor configuration
+- [Security overview](security/SECURITY.md)
+- [Security checklist](security/SECURITY_CHECKLIST.md)
+- [Policy bundle releases](security/POLICY_RELEASES.md)
+- [Secrets](security/SECRETS.md)
+- [Compliance](security/COMPLIANCE.md)
+- [Threat model](security/THREAT_MODEL.md)
 
-### Security
-- [Security Overview](security/SECURITY.md) — security model and practices
-- [Security Checklist](security/SECURITY_CHECKLIST.md) — hardening guide
-- [Secrets Management](security/SECRETS.md) — encrypted credentials
-- [Key Rotation](security/KEY_ROTATION.md) — rotating Age and SOPS keys
-- [Threat Model](security/THREAT_MODEL.md) — trust boundaries and attack surfaces
+## Build and maintain
 
-### Development
-- [Testing Guide](operations/TESTING.md) — test framework and coverage
-- [Compliance](security/COMPLIANCE.md) — standards and regulatory mapping
-- [Architecture Decisions](adr/) — ADRs for key decisions
-- [Naming Conventions](NAMING_CONVENTIONS.md) — standardization guide
+- [Testing](operations/TESTING.md)
+- [Reliability](operations/RELIABILITY.md)
+- [Naming conventions](NAMING_CONVENTIONS.md)
+- [Architecture](architecture/ARCHITECTURE.md)
+- [Architecture decisions](adr/README.md)
 
-### Platform-Specific
-- [WSL2 + Nix Guide](guides/WSL2_NIX_TROUBLESHOOTING.md) — Windows Subsystem for Linux
+## Repository map
 
-### Reference
-- [Roadmap](operations/ROADMAP.md) — future plans and priorities
-- [Version Sync](operations/VERSION_SYNC.md) — how version numbers propagate
-- [Support Matrix](reference/SUPPORT_MATRIX.md) — tested platforms and tools
+| Path | Purpose |
+| :--- | :--- |
+| `docs/` | Guides, reference, security, and architecture |
+| `scripts/` | Repo-only scripts and `dot` command internals |
+| `install/` | Installer and provisioning helpers |
+| `dot_config/` | Managed user configuration files |
+| `dot_local/` | Managed local executables |
+| `examples/` | Executable examples |
+| `tests/` | Unit, integration, and framework coverage |
+
+## Platform guides
+
+- [WSL2 and Nix](guides/WSL2_NIX_TROUBLESHOOTING.md)
+- [Neovim IDE](guides/NEOVIM_IDE_GUIDE.md)
+
+## Reference
+
+- [Features](reference/FEATURES.md)
+- [Tools](reference/TOOLS.md)
+- [Aliases](reference/ALIASES.md)
+- [Roadmap](operations/ROADMAP.md)
+- [Version sync](operations/VERSION_SYNC.md)

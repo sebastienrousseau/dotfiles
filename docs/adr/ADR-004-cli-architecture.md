@@ -25,7 +25,7 @@ Use **Chezmoi as the core engine** with a **custom `dot` CLI wrapper** that:
 
 ### Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────┐
 │                 dot CLI                      │
 │  (User-friendly interface, custom commands)  │
@@ -57,7 +57,7 @@ Use **Chezmoi as the core engine** with a **custom `dot` CLI wrapper** that:
 - Consistent help and error messages
 
 **3. Modular command structure:**
-```
+```text
 scripts/dot/
 ├── lib/
 │   └── utils.sh          # Shared functions

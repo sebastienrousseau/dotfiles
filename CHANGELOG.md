@@ -2,6 +2,28 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.497
+
+### Added
+- **Verified chezmoi installer** — `install.sh` prefers `scripts/ci/install-chezmoi-verified.sh` with SHA256 checksum validation before falling back to `get.chezmoi.io`.
+- **detect-secrets baseline** — `.secrets.baseline` for pre-commit secret scanning alongside gitleaks.
+- **Lua plugin module headers** — `@module` docstrings for ui.lua, coding.lua, lsp.lua, editor.lua, dap.lua explaining plugin selection rationale.
+
+### Changed
+- **CI hardening** — Pinned `nix-installer` to SHA, removed `continue-on-error` from Home Manager build, replaced `mapfile` with portable `while read` loops.
+- **Plugin version pins** — toggleterm pinned to `^2`, venv-selector uses `version = false` instead of `branch = "main"`.
+- **DAP port configurable** — `DAP_DEV_SERVER_PORT` environment variable overrides default port 3000.
+- **SSH template hardening** — Added `hasKey` guard for `.chezmoi.kernel` in SSH config template.
+- **Test framework** — Restored `TESTS_PASSED`/`TESTS_FAILED` counter names for backward compatibility with 383 test files; fixed `mock_os` PATH restoration between test cases.
+- **Documentation** — Fixed default shell reference (Zsh → Fish) in INSTALL.md, added CI badge and test runner to README, added function docstrings to `utils.sh`.
+
+### Fixed
+- **Shell compatibility** — Replaced zsh-only `unfunction` with POSIX `unset -f` in shell templates.
+- **Quote nesting** — Fixed broken double-quote nesting in `run_onchange_after_fonts.sh.tmpl`.
+- **Quoted expansion** — Added missing quotes around `$ZINIT_HOME` in zinit bootstrap.
+- **JSON injection** — Escaped double quotes in `health.sh` JSON output fields.
+- **Arithmetic portability** — Replaced `$(seq ...)` with `((i=N; i>=1; i--))` in `log-rotate.sh`.
+
 ## v0.2.496
 
 ### Added

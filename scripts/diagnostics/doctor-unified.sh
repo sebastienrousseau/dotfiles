@@ -18,13 +18,13 @@ target="scripts/diagnostics/doctor.sh"
 
 for arg in "$@"; do
   case "$arg" in
-    --heal) target="scripts/ops/heal.sh" ;;
-    --audit) target="scripts/ops/health-check.sh" ;;
-    --score) target="scripts/diagnostics/scorecard.sh" ;;
-    --smoke) target="scripts/diagnostics/smoke-test.sh" ;;
-    --drift) target="scripts/diagnostics/drift-dashboard.sh" ;;
-    --benchmark) target="tests/benchmark.sh" ;;
-    --json | --ai) passthrough+=("$arg") ;;
+    --heal | -H) target="scripts/ops/heal.sh" ;;
+    --audit | -a) target="scripts/ops/health-check.sh" ;;
+    --score | -s) target="scripts/diagnostics/scorecard.sh" ;;
+    --smoke | -m) target="scripts/diagnostics/smoke-test.sh" ;;
+    --drift | -d) target="scripts/diagnostics/drift-dashboard.sh" ;;
+    --benchmark | -b) target="tests/benchmark.sh" ;;
+    --json | -j | --ai | -A) passthrough+=("$arg") ;;
     *) passthrough+=("$arg") ;;
   esac
 done

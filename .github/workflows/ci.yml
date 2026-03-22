@@ -171,7 +171,7 @@ jobs:
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: DeterminateSystems/nix-installer-action@v14
+      - uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a # v21
       - name: Run Nu Check
         run: |
           nix shell nixpkgs#nushell -c nu -c "print 'Checking Nushell Syntax...'"
@@ -207,7 +207,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: TruffleHog Scan
-        uses: trufflesecurity/trufflehog@c3e599b7163e8198a55467f3133db0e7b2a492cb # v3.93.7
+        uses: trufflesecurity/trufflehog@6c05c4a00b91aa542267d8e32a8254774799d68d # v3.93.8
         with:
           extra_args: --only-verified
 
@@ -218,7 +218,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Generate SBOM with Syft
-        uses: anchore/sbom-action@17ae1740179002c89186b61233e0f892c3118b11 # v0
+        uses: anchore/sbom-action@57aae528053a48a3f6235f2d9461b05fbcb7366d # v0
         with:
           format: cyclonedx-json
           output-file: sbom.cyclonedx.json
@@ -297,8 +297,6 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 10  # Reduced from 15 to enforce efficiency
     needs: changes
-    # Only run macOS tests on schedule or manual trigger (expensive)
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Cache Chezmoi
@@ -354,7 +352,6 @@ jobs:
   test-unit:
     name: Test / Unit
     needs: changes
-    if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/reusable-test-suite.yml
     with:
       min_coverage: "95"
@@ -397,6 +394,9 @@ jobs:
     timeout-minutes: 15
     needs: [changes]
     if: needs.changes.outputs.nix == 'true' || needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a # v21
@@ -404,8 +404,7 @@ jobs:
       - name: Flake check
         run: nix flake check ./nix
       - name: Build Home Manager activation package
-        run: nix build ./nix#homeConfigurations.user.activationPackage --no-link --print-build-logs 2>&1 || echo "::warning::Home Manager build failed (non-blocking)"
-        continue-on-error: true
+        run: nix build ./nix#homeConfigurations.user.activationPackage --no-link --print-build-logs
 
   # ============================================================================
   # STAGE 5: BENCHMARK (Only on schedule/manual - expensive)

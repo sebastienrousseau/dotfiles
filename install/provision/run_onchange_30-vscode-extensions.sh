@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+set -euo pipefail
+
+if ! command -v code >/dev/null 2>&1; then
+  echo "VS Code not found in PATH; skipping extensions."
+  exit 0
+fi
+
+EXT_FILE="${HOME}/.config/vscode/extensions.txt"
+if [[ ! -f "${EXT_FILE}" ]]; then
+  echo "No VS Code extensions list found at ${EXT_FILE}."
+  exit 0
+fi
+
+extensions=()
+while IFS= read -r line; do
+  extensions+=("$line")
+done < <(grep -vE '^[[:space:]]*#|^[[:space:]]*$' "${EXT_FILE}" || true)
+if [[ ${#extensions[@]} -eq 0 ]]; then
+  echo "No VS Code extensions configured."
+  exit 0
+fi
+
+installed="$(code --list-extensions || true)"
+for ext in "${extensions[@]}"; do
+  if ! grep -qx "${ext}" <<<"${installed}"; then
+    echo "Installing extension: ${ext}"
+    code --install-extension "${ext}" --force &
+  fi
+done
+
+# Wait for all background installations to complete
+wait
+echo "VS Code extensions installation complete."

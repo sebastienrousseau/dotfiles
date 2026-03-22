@@ -2,7 +2,7 @@
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Dotfiles CLI - Diagnostics Commands
 # doctor, heal, health, rollback, drift, history, benchmark, verify, perf,
-# scorecard, conflicts, locks, snapshot, load-bench, chaos, bundle
+# scorecard, conflicts, locks, snapshot, load-bench, chaos, bundle, attest
 
 set -euo pipefail
 
@@ -10,7 +10,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh
 source "$SCRIPT_DIR/../lib/utils.sh"
 
-dot_ui_command_banner "Diagnostics" "${1:-}"
+dot_ui_command_banner "Diagnostics" "${1:-}" "$@"
 
 cmd_doctor() {
   local src_dir
@@ -62,6 +62,10 @@ cmd_locks() {
 
 cmd_snapshot() {
   run_script "scripts/diagnostics/snapshot.sh" "Snapshot" "$@"
+}
+
+cmd_attest() {
+  run_script "scripts/diagnostics/workstation-attestation.sh" "Workstation attestation" "$@"
 }
 
 cmd_rollback() {
@@ -161,6 +165,10 @@ case "${1:-}" in
   snapshot)
     shift
     cmd_snapshot "$@"
+    ;;
+  attest | attestation)
+    shift
+    cmd_attest "$@"
     ;;
   rollback)
     shift

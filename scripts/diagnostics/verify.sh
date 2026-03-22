@@ -11,7 +11,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
 
 ui_init
-ui_logo_dot "Dotfiles Verify"
+ui_dot_banner "Diagnostics"
+ui_header "Dotfiles Verify"
 echo ""
 
 failures=0
@@ -21,7 +22,7 @@ RUN_SECURITY=0
 # Parse arguments
 for arg in "$@"; do
   case "$arg" in
-    --security) RUN_SECURITY=1 ;;
+    --security | -s) RUN_SECURITY=1 ;;
   esac
 done
 

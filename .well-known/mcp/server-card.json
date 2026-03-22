@@ -1,0 +1,40 @@
+{
+  "cardVersion": "2026.03",
+  "name": "dotfiles-mcp",
+  "version": "0.2.497",
+  "description": "MCP server surface for dotfiles workstation automation.",
+  "transport": {
+    "stdio": {
+      "command": "dot",
+      "args": ["mcp", "--strict", "--json"]
+    }
+  },
+  "capabilities": {
+    "tools": true,
+    "resources": true,
+    "prompts": false,
+    "logging": true
+  },
+  "security": {
+    "authentication": "none",
+    "policyRef": "dot_config/dotfiles/mcp-policy.json"
+  },
+  "tools": [
+    {
+      "name": "mcp-doctor",
+      "description": "Validate MCP configuration, policy, and supply chain"
+    },
+    {
+      "name": "agent-mode",
+      "description": "Inspect or switch agent operating profiles"
+    },
+    {
+      "name": "workstation-attestation",
+      "description": "Export workstation attestation evidence"
+    },
+    {
+      "name": "fleet-status",
+      "description": "Show fleet node status and drift"
+    }
+  ]
+}
