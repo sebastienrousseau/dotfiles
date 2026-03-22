@@ -350,7 +350,7 @@ for tool in mise starship zoxide atuin fzf direnv; do
   for shell_dir in zsh bash fish; do
     case "$shell_dir" in
       fish) cache_file="$cache_base/$shell_dir/${tool}-init.fish" ;;
-      *)    cache_file="$cache_base/$shell_dir/${tool}-init.$shell_dir" ;;
+      *) cache_file="$cache_base/$shell_dir/${tool}-init.$shell_dir" ;;
     esac
     if [[ ! -f "$cache_file" ]] || [[ "$tool_bin" -nt "$cache_file" ]]; then
       stale_caches=$((stale_caches + 1))
@@ -359,7 +359,7 @@ for tool in mise starship zoxide atuin fzf direnv; do
         *"$tool"*) ;;
         *) stale_tools="${stale_tools:+$stale_tools, }$tool" ;;
       esac
-      break  # one stale shell is enough to flag the tool
+      break # one stale shell is enough to flag the tool
     fi
   done
 done
