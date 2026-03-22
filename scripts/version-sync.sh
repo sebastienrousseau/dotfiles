@@ -21,7 +21,6 @@ EXCLUDE_FILES=(
   "docs/reference/FONTS.md"
   "docs/archive/LEGACY_ROADMAP.md"
   "docs/archive/PLAN.md"
-  "docs/archive/MILESTONE_v0.2.487.md"
 )
 
 # shellcheck source=dot/lib/ui.sh
@@ -257,6 +256,11 @@ verify_version_consistency() {
 
   for file in "${files[@]}"; do
     if [[ ! -f "$file" ]]; then
+      continue
+    fi
+
+    if [[ "$(basename "$file")" == MILESTONE_* ]]; then
+      log_info "Skipping historical file: $file"
       continue
     fi
 
