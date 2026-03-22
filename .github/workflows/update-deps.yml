@@ -64,7 +64,7 @@ jobs:
           # Check Nerd Fonts version
           echo "Checking Nerd Fonts..."
           LATEST_NF=$(curl -s https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest | jq -r '.tag_name' | sed 's/^v//')
-          CURRENT_NF=$(grep -oP 'NERD_FONTS_VERSION="\K[^"]+' install/provision/run_onchange_50-install-fonts.sh.tmpl 2>/dev/null || echo "unknown")
+          CURRENT_NF=$(grep -oP 'NERD_FONTS_VERSION="\K[^"]+' install/provision/run_onchange_50-install-fonts.sh 2>/dev/null || echo "unknown")
           if [[ "$LATEST_NF" != "$CURRENT_NF" && "$LATEST_NF" != "null" ]]; then
             UPDATES="${UPDATES}nerd-fonts: ${CURRENT_NF} -> ${LATEST_NF}\n"
             echo "nerd_fonts_update=true" >> $GITHUB_OUTPUT
@@ -115,7 +115,7 @@ jobs:
           # Update Nerd Fonts version
           if [[ "${{ steps.updates.outputs.nerd_fonts_update }}" == "true" ]]; then
             VERSION="${{ steps.updates.outputs.nerd_fonts_version }}"
-            sed -i "s/NERD_FONTS_VERSION=\"[^\"]*\"/NERD_FONTS_VERSION=\"${VERSION}\"/" install/provision/run_onchange_50-install-fonts.sh.tmpl
+            sed -i "s/NERD_FONTS_VERSION=\"[^\"]*\"/NERD_FONTS_VERSION=\"${VERSION}\"/" install/provision/run_onchange_50-install-fonts.sh
             sed -i "s|nerd-fonts/releases/download/v[0-9.]*|nerd-fonts/releases/download/v${VERSION}|g" docs/reference/FONTS.md
           fi
 
@@ -201,6 +201,7 @@ jobs:
         if: steps.changes.outputs.has_changes == 'true' && inputs.dry_run != 'true'
         env:
           ACTIONS_BOT_SIGNING_KEY: ${{ secrets.ACTIONS_BOT_SIGNING_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
@@ -224,5 +225,3 @@ jobs:
             --title "chore(nvim): update plugin versions" \
             --body "Automated Neovim plugin update via lazy.nvim" \
             --base master
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
