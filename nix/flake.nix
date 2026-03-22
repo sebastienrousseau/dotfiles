@@ -37,7 +37,8 @@
       };
 
       # Overlay: read .chezmoidata.toml features to conditionally include packages
-      overlays.chezmoi-features = final: prev:
+      overlays.chezmoi-features =
+        final: prev:
         let
           dataFile = ../.chezmoidata.toml;
           hasFeature =
@@ -52,7 +53,12 @@
               (if hasFeature "starship" then [ final.starship ] else [ ])
               ++ (if hasFeature "zsh" then [ final.zoxide ] else [ ])
               ++ (if hasFeature "fish" then [ final.direnv ] else [ ])
-              ++ [ final.bat final.ripgrep final.fd final.eza ];
+              ++ [
+                final.bat
+                final.ripgrep
+                final.fd
+                final.eza
+              ];
           };
         };
 
