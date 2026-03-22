@@ -6,7 +6,6 @@
 set -euo pipefail
 
 _TOOLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT_DIR="$_TOOLS_DIR"
 # shellcheck source=../lib/utils.sh
 source "$_TOOLS_DIR/../lib/utils.sh"
 # shellcheck source=aliases.sh
