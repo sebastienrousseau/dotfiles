@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
-# Tests for 10-secrets.sh.tmpl template structure
+# Tests for 10-secrets.sh structure
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-TMPL_FILE="$REPO_ROOT/dot_config/shell/10-secrets.sh.tmpl"
+TMPL_FILE="$REPO_ROOT/dot_config/shell/10-secrets.sh"
 
 test_start "secrets_exists"
-assert_file_exists "$TMPL_FILE" "10-secrets.sh.tmpl should exist"
+assert_file_exists "$TMPL_FILE" "10-secrets.sh should exist"
 
 test_start "secrets_not_empty"
 if [[ -s "$TMPL_FILE" ]]; then

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 
 # 05-safety.sh: Core Safety Settings
 # Part of the "Core Layer"

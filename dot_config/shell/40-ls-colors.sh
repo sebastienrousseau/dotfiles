@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 
 # Set ls colors with GNU/BSD detection and caching
 # GNU coreutils: LS_COLORS via dircolors

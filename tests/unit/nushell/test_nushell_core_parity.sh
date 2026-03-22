@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-TARGET="$REPO_ROOT/dot_config/nushell/aliases.nu.tmpl"
+TARGET="$REPO_ROOT/dot_config/nushell/aliases.nu"
 
 test_start "nushell_core_parity_aliases"
 assert_file_contains "$TARGET" "alias dm = dot mode list" "nushell exposes dm"

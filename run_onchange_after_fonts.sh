@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Universal Nerd Font checker/installer
 # Inspired by 2026 terminal aesthetics
 

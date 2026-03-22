@@ -6,7 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-FONT_INSTALL_SCRIPT="$REPO_ROOT/install/provision/run_onchange_50-install-fonts.sh.tmpl"
+FONT_INSTALL_SCRIPT="$REPO_ROOT/install/provision/run_onchange_50-install-fonts.sh"
 
 # Load test framework
 source "$REPO_ROOT/tests/framework/assertions.sh"

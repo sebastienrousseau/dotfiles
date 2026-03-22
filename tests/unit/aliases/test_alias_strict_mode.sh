@@ -9,7 +9,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 DATA_FILE="$REPO_ROOT/.chezmoidata.toml"
 ZSHRC_TMPL="$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl"
-SAFETY_TMPL="$REPO_ROOT/dot_config/shell/05-core-safety.sh.tmpl"
+SAFETY_TMPL="$REPO_ROOT/dot_config/shell/05-core-safety.sh"
 APPLY_SCRIPT="$REPO_ROOT/scripts/ops/chezmoi-apply.sh"
 CHEZMOI_LIB="$REPO_ROOT/install/lib/chezmoi.sh"
 INTERACTIVE_ALIASES="$REPO_ROOT/.chezmoitemplates/aliases/interactive/interactive.aliases.sh"
