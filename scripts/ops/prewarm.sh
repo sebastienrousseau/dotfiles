@@ -70,8 +70,10 @@ warm_tool "direnv" "direnv hook fish" "fish" "fish"
 
 ui_section "Nushell"
 for _nu_entry in "starship:starship init nu:starship.nu" "zoxide:zoxide init nushell:zoxide.nu" "atuin:atuin init nu:atuin.nu"; do
-  _nu_tool="${_nu_entry%%:*}"; _nu_rest="${_nu_entry#*:}"
-  _nu_cmd="${_nu_rest%%:*}"; _nu_file="${_nu_rest#*:}"
+  _nu_tool="${_nu_entry%%:*}"
+  _nu_rest="${_nu_entry#*:}"
+  _nu_cmd="${_nu_rest%%:*}"
+  _nu_file="${_nu_rest#*:}"
   if command -v "$_nu_tool" >/dev/null 2>&1; then
     _nu_tmp="$CACHE_DIR/nushell/${_nu_file}.tmp.$$"
     if eval "$_nu_cmd" >"$_nu_tmp" 2>/dev/null && [ -s "$_nu_tmp" ]; then

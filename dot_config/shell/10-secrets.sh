@@ -25,12 +25,12 @@ for _bucket in "${_dot_secret_buckets[@]}"; do
   _dot_secret_out="$(dot env load "$_bucket" 2>/dev/null || true)"
   [[ -n "$_dot_secret_out" ]] || continue
   case "$_dot_secret_out" in
-    (export\ *|typeset\ *|unset\ *)
+    export\ * | typeset\ * | unset\ *)
       # Use process substitution instead of eval for safety
       # shellcheck disable=SC1090
-      . /dev/stdin <<< "$_dot_secret_out"
+      . /dev/stdin <<<"$_dot_secret_out"
       ;;
-    (*)
+    *)
       # Ignore non-shell output
       ;;
   esac
