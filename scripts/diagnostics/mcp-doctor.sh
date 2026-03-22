@@ -194,10 +194,26 @@ if [[ -f "$MCP_SERVER_CARD" ]]; then
     has_card_name="$(jq -r '.name // empty' "$MCP_SERVER_CARD")"
     has_card_capabilities="$(jq -e '.capabilities' "$MCP_SERVER_CARD" >/dev/null 2>&1 && echo "yes" || echo "")"
     has_card_transport="$(jq -e '.transport' "$MCP_SERVER_CARD" >/dev/null 2>&1 && echo "yes" || echo "")"
-    [[ -n "$has_card_version" ]] && log_success "Card version" "$has_card_version" || log_warn "Card version" "missing cardVersion field"
-    [[ -n "$has_card_name" ]] && log_success "Card name" "$has_card_name" || log_warn "Card name" "missing name field"
-    [[ -n "$has_card_capabilities" ]] && log_success "Card capabilities" "present" || log_warn "Card capabilities" "missing capabilities block"
-    [[ -n "$has_card_transport" ]] && log_success "Card transport" "present" || log_warn "Card transport" "missing transport block"
+    if [[ -n "$has_card_version" ]]; then
+      log_success "Card version" "$has_card_version"
+    else
+      log_warn "Card version" "missing cardVersion field"
+    fi
+    if [[ -n "$has_card_name" ]]; then
+      log_success "Card name" "$has_card_name"
+    else
+      log_warn "Card name" "missing name field"
+    fi
+    if [[ -n "$has_card_capabilities" ]]; then
+      log_success "Card capabilities" "present"
+    else
+      log_warn "Card capabilities" "missing capabilities block"
+    fi
+    if [[ -n "$has_card_transport" ]]; then
+      log_success "Card transport" "present"
+    else
+      log_warn "Card transport" "missing transport block"
+    fi
   else
     log_fail "Server card" "invalid JSON"
   fi
@@ -471,7 +487,7 @@ if command -v jq >/dev/null 2>&1; then
         | "\($server)\t\($transport)\t\($command)\t\($pkg)\t\($url)"
       ' "$MCP_CONFIG" 2>/dev/null || true)"
       if [[ -n "$registry_mismatches" ]]; then
-        while IFS=$'\t' read -r server _transport command pkg url; do
+        while IFS=$'\t' read -r server _transport _command _pkg _url; do
           [[ -z "${server:-}" ]] && continue
           log_warn "Registry policy" "$server is missing or diverges from the tracked MCP registry"
         done <<<"$registry_mismatches"

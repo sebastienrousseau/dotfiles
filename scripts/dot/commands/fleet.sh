@@ -219,7 +219,6 @@ cmd_fleet_drift() {
         return 0
       fi
       # Simple heuristic: files that drifted in >50% of the last 10 checks
-      local recent_checks=10
       local threshold=5
       jq -r '.files[]?' "$_DRIFT_HISTORY_FILE" | tail -n 1000 | sort | uniq -c | sort -rn | while read -r count file; do
         if [[ "$count" -ge "$threshold" ]]; then

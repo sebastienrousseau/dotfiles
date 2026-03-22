@@ -32,7 +32,7 @@ test_start "enforcement_enforce_rbac_function"
 assert_file_contains "$AGENT_SCRIPT" "_agent_enforce_rbac" "agent.sh should have _agent_enforce_rbac"
 
 test_start "enforcement_called_in_mode_set"
-assert_file_contains "$AGENT_SCRIPT" '_agent_enforce_rbac "$name"' "mode set should call _agent_enforce_rbac"
+assert_file_contains "$AGENT_SCRIPT" "_agent_enforce_rbac \"\$name\"" "mode set should call _agent_enforce_rbac"
 
 test_start "fleet_enforce_subcommand"
 assert_file_contains "$FLEET_SCRIPT" "cmd_fleet_enforce" "fleet.sh should have enforce subcommand"
