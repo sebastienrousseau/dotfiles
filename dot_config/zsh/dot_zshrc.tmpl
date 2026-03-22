@@ -122,7 +122,8 @@ _cached_eval() {
       print -u2 "[WARN] Suspicious output from $label init, skipping"
       return 1
     fi
-    print -r -- "$init_output" > "$cache"
+    print -r -- "$init_output" > "${cache}.tmp.$$"
+    mv "${cache}.tmp.$$" "$cache"
     source "$cache"
     { zcompile "$cache" } &!
   fi
