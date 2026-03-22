@@ -1,97 +1,57 @@
-# Get started
+# Install
 
-Supported platforms: macOS (Homebrew), Ubuntu/Debian (apt), Arch Linux (pacman), and WSL2.
+Install on macOS, Linux, or WSL in 3-5 minutes.
 
-## Prerequisites
+**Prerequisites:** `git` and `curl`.
 
-- `git` and `curl`
-- Homebrew (macOS), `apt-get` (Linux), or `pacman` (Arch)
-- Optional: Docker/Podman (sandbox), Nix (toolchain), `gum` (needed for `dot learn`)
+**Default shell:** Fish (change it after installation).
 
 ## Install
 
-Works on macOS, Linux, and WSL2:
+```bash
+bash -c "$(
+  curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh
+)"
+```
+
+Then restart the terminal or run `exec $SHELL`.
+
+## Verify
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
+dot --version        # Confirm installation
+dot doctor           # Check shell, git, and tools
+dot help             # Browse available commands
 ```
 
-### Shell selection
+## Choose a shell
 
-The installer defaults to Zsh. To switch, edit `~/.dotfiles/.chezmoidata.toml`:
+The default shell is Fish. Switch to Zsh or Nushell by editing `~/.dotfiles/.chezmoidata.toml`:
 
 ```toml
-[data]
-default_shell = "fish"  # Options: "zsh", "fish", "nu"
+default_shell = "zsh"
 ```
 
-Then run `dot apply`.
+Supported values: `zsh`, `fish`, `nushell`.
 
-### Feature gating
+Apply the change:
 
-Toggle features in `.chezmoidata.toml`:
+```bash
+dot apply
+```
+
+## Feature flags
+
+Toggle optional tools after initial setup. Edit `.chezmoidata.toml`:
 
 ```toml
 [features]
-zsh = true
-fish = true
-nushell = true
-nix = true
-```
-
-### Manual install
-
-```bash
-git clone https://github.com/sebastienrousseau/dotfiles.git ~/.dotfiles
-sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply sebastienrousseau/dotfiles
-exec zsh
-```
-
-### Using Nix
-
-If you've got Nix with flakes enabled:
-
-```bash
-nix develop ~/.dotfiles/nix
-
-# Or install the dot-utils meta-package
-nix profile install ~/.dotfiles/nix#dot-utils
-```
-
-### Offline / air-gapped
-
-1. **On a connected machine**, bundle your setup:
-   ```bash
-   dot bundle ~/Downloads
-   ```
-2. **Transfer** `dotfiles_offline_bundle_*.tar.zst` to the target machine.
-3. **Unpack and install** — the installer detects the bundle and skips network calls:
-   ```bash
-   tar --zstd -xf dotfiles_offline_bundle_*.tar.zst -P
-   cd ~/.dotfiles && ./install.sh --force
-   ```
-
-### Codespaces and devcontainers
-
-Codespaces auto-detects `.devcontainer/devcontainer.json` and runs `install-full.sh` via `postCreateCommand`. For local devcontainers, open the repo in VS Code Remote Containers — the same hook provisions dotfiles with a server profile.
-
-Environment variables:
-
-- `DOTFILES_PROFILE=server` — headless profile (no GUI tools)
-- `DOTFILES_NONINTERACTIVE=1` — non-interactive `chezmoi apply`
-
-## What happens
-
-1. The installer downloads a pinned chezmoi bootstrap, installs OS packages, fonts, and optional apps.
-2. Shell config and the `dot` CLI are deployed to `~/.local/bin` and your home directory.
-3. Run `dot doctor` to verify everything's working.
-
-## Post-install verification
-
-```bash
-dot --version
-dot doctor
-dot help
+zsh = true         # Zsh shell configuration
+fish = true        # Fish shell configuration
+nushell = true     # Nushell configuration
+nvim = true        # Neovim IDE configuration
+tmux = true        # Terminal multiplexer
+nix = true         # Nix package manager integration
 ```
 
 ## Update
@@ -100,7 +60,69 @@ dot help
 dot update
 ```
 
-## Uninstall
+## Next steps
+
+1. Run `dot learn` for an interactive onboarding tour.
+2. Customize files in `~/.config/shell/custom/`.
+3. Read the [Utilities and `dot` CLI](../reference/UTILS.md) reference.
+
+---
+
+## Advanced
+
+### Local source install
+
+Clone first, then run the installer from the local source tree:
+
+```bash
+git clone https://github.com/sebastienrousseau/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+./install.sh
+```
+
+### Minimal install
+
+Install shells and essentials only (skip editor and terminal extras):
+
+```bash
+./install.sh --minimal
+```
+
+### Non-interactive install
+
+For CI or automation:
+
+```bash
+DOTFILES_SILENT=1 DOTFILES_NONINTERACTIVE=1 \
+  bash -c "$(
+    curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh
+  )"
+```
+
+### Nix
+
+```bash
+nix develop ~/.dotfiles/nix
+nix profile install ~/.dotfiles/nix#dot-utils
+```
+
+### Offline bundle
+
+Create a bundle on a connected machine:
+
+```bash
+dot bundle ~/Downloads
+```
+
+Transfer the archive. Then unpack and install:
+
+```bash
+tar --zstd -xf dotfiles_offline_bundle_*.tar.zst -P
+cd ~/.dotfiles
+./install.sh --force
+```
+
+### Uninstall
 
 ```bash
 chezmoi purge
@@ -108,6 +130,11 @@ rm -rf ~/.dotfiles
 rm -rf ~/.local/share/chezmoi ~/.local/share/dotfiles.log
 ```
 
-## Troubleshooting
+### Signed contributions
 
-If install hooks fail, check `~/.local/share/dotfiles.log` and see `docs/guides/TROUBLESHOOTING.md`.
+Signed commits are required. See [Contributing](../../CONTRIBUTING.md).
+
+---
+
+- [Troubleshooting](TROUBLESHOOTING.md)
+- [Support matrix](../reference/SUPPORT_MATRIX.md)

@@ -52,7 +52,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.496)
+  version       The version (tag or branch) to install (default: v0.2.497)
 
 Options:
   --help        Show this help message
@@ -64,28 +64,31 @@ EOF
 }
 
 main() {
-  local version="${1:-v0.2.496}"
-  local _cleanup_files=()
-  trap 'rm -f "${_cleanup_files[@]}" 2>/dev/null' EXIT
-
-  case "$version" in
-    --help)
-      show_help
-      exit 0
-      ;;
-    --silent)
-      export DOTFILES_SILENT=1
-      version="v0.2.496"
-      ;;
-  esac
-
-  # Shift arguments to handle mixed flags/version
+  local version="v0.2.497"
+  local version_set=0
   local minimal=0
+  local _cleanup_files=()
+  trap 'set +u; rm -f "${_cleanup_files[@]}" 2>/dev/null; set -u' EXIT
+
   for arg in "$@"; do
     case "$arg" in
+      --help)
+        show_help
+        exit 0
+        ;;
       --silent) export DOTFILES_SILENT=1 ;;
       --force) export DOTFILES_NONINTERACTIVE=1 ;;
       --minimal) minimal=1 ;;
+      --*)
+        error "Unknown option: $arg"
+        ;;
+      *)
+        if [[ $version_set -eq 1 ]]; then
+          error "Multiple versions specified: $version and $arg"
+        fi
+        version="$arg"
+        version_set=1
+        ;;
     esac
   done
 
@@ -122,7 +125,13 @@ main() {
       brew install gum >/dev/null 2>&1
     elif [[ "$target_os" == "debian" || "$target_os" == "wsl2" ]]; then
       sudo mkdir -p /etc/apt/keyrings
-      curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/charm.gpg
+      curl -fsSL https://repo.charm.sh/apt/gpg.key |
+        sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/charm.gpg
+      # Verify Charm GPG key fingerprint
+      if ! gpg --no-default-keyring --keyring /etc/apt/keyrings/charm.gpg \
+        --list-keys --with-colons 2>/dev/null | grep -q "fid:"; then
+        echo "Warning: Could not verify Charm GPG key" >&2
+      fi
       echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
       sudo apt-get update && sudo apt-get install gum -y >/dev/null 2>&1
     fi
@@ -143,7 +152,19 @@ main() {
       mkdir -p "$bin_dir"
       echo "   Installing chezmoi via binary download..."
 
-      # Download installer to temp file and validate before execution
+      # Prefer verified installer with SHA256 checksum when available
+      local verified_installer
+      verified_installer="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/scripts/ci/install-chezmoi-verified.sh"
+      if [[ -x "$verified_installer" ]] || [[ -f "$verified_installer" ]]; then
+        echo "   Using checksum-verified installer..."
+        if ! bash "$verified_installer" "${CHEZMOI_VERSION:-2.47.1}" "$bin_dir"; then
+          echo "   Verified installer failed, falling back to get.chezmoi.io" >&2
+        else
+          return 0
+        fi
+      fi
+
+      # Fallback: download installer with size/shebang validation
       local installer
       installer=$(umask 077 && mktemp)
       if ! curl -fsSL -o "$installer" https://get.chezmoi.io; then
@@ -205,6 +226,15 @@ main() {
     fi
   }
 
+  apply_minimal_profile_overrides() {
+    local data_file="$1"
+    [[ -f "$data_file" ]] || return 0
+    sed_in_place 's/^profile = ".*"/profile = "minimal"/' "$data_file"
+    sed_in_place 's/^nvim = true/nvim = false/' "$data_file"
+    sed_in_place 's/^tmux = true/tmux = false/' "$data_file"
+    sed_in_place 's/^zellij = true/zellij = false/' "$data_file"
+  }
+
   # 5. Backup existing dotfiles that chezmoi will overwrite
   step "Backing up existing dotfiles..."
   BACKUP_DIR="$HOME/.dotfiles.bak.$(date +"%Y%m%d_%H%M%S")"
@@ -240,13 +270,7 @@ main() {
   # Apply --minimal overrides if requested
   if [[ $minimal -eq 1 ]]; then
     step "Applying minimal profile overrides..."
-    local data_file="$SOURCE_DIR/.chezmoidata.toml"
-    if [[ -f "$data_file" ]]; then
-      sed_in_place 's/^profile = ".*"/profile = "minimal"/' "$data_file"
-      sed_in_place 's/^nvim = true/nvim = false/' "$data_file"
-      sed_in_place 's/^tmux = true/tmux = false/' "$data_file"
-      sed_in_place 's/^zellij = true/zellij = false/' "$data_file"
-    fi
+    apply_minimal_profile_overrides "$SOURCE_DIR/.chezmoidata.toml"
   fi
 
   # 6. Initialize & Apply
@@ -286,7 +310,12 @@ main() {
       fi
     )
     if [[ "$ACTUAL_REF" != "$VERSION" ]] && [[ "${ACTUAL_REF#v}" != "${VERSION#v}" ]]; then
-      printf '%b\n' "${CYAN}   INFO: Checked out ref $ACTUAL_REF (requested: $VERSION)${NC}"
+      printf '%b\n' "${RED}   WARNING: Checked out ref $ACTUAL_REF (requested: $VERSION) — version mismatch${NC}" >&2
+    fi
+
+    if [[ $minimal -eq 1 ]]; then
+      step "Applying minimal profile overrides..."
+      apply_minimal_profile_overrides "$SOURCE_DIR/.chezmoidata.toml"
     fi
 
     ensure_chezmoi_source "$SOURCE_DIR"

@@ -1,0 +1,204 @@
+name: SBOM Diff
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+# Cancel in-progress runs for the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # ============================================================================
+  # SBOM Generation & Diff
+  # ============================================================================
+  generate-sbom:
+    name: SBOM / Diff
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+
+      - name: Generate base SBOM
+        uses: anchore/sbom-action@57aae528053a48a3f6235f2d9461b05fbcb7366d # v0
+        with:
+          path: base
+          format: spdx-json
+          output-file: base-sbom.spdx.json
+          upload-release-assets: false
+
+      - name: Checkout PR branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: pr
+
+      - name: Generate PR SBOM
+        uses: anchore/sbom-action@57aae528053a48a3f6235f2d9461b05fbcb7366d # v0
+        with:
+          path: pr
+          format: spdx-json
+          output-file: pr-sbom.spdx.json
+          upload-release-assets: false
+
+      - name: Generate SBOM diff
+        id: diff
+        run: |
+          set -euo pipefail
+
+          # Extract package lists from SPDX JSON SBOMs
+          jq -r '.packages[]? | "\(.name)@\(.versionInfo // "unknown")"' base-sbom.spdx.json | sort > base-packages.txt
+          jq -r '.packages[]? | "\(.name)@\(.versionInfo // "unknown")"' pr-sbom.spdx.json | sort > pr-packages.txt
+
+          # Compute additions and removals
+          comm -13 base-packages.txt pr-packages.txt > added-packages.txt
+          comm -23 base-packages.txt pr-packages.txt > removed-packages.txt
+
+          ADDED_COUNT=$(wc -l < added-packages.txt)
+          REMOVED_COUNT=$(wc -l < removed-packages.txt)
+
+          # Build diff summary for the PR comment
+          {
+            echo 'diff_summary<<SBOM_EOF'
+
+            if [[ "$ADDED_COUNT" -eq 0 ]] && [[ "$REMOVED_COUNT" -eq 0 ]]; then
+              echo "No package changes detected between base and PR."
+            else
+              if [[ "$ADDED_COUNT" -gt 0 ]]; then
+                echo "**Added packages ($ADDED_COUNT):**"
+                echo '```'
+                head -50 added-packages.txt
+                if [[ "$ADDED_COUNT" -gt 50 ]]; then
+                  echo "... and $((ADDED_COUNT - 50)) more"
+                fi
+                echo '```'
+                echo ""
+              fi
+
+              if [[ "$REMOVED_COUNT" -gt 0 ]]; then
+                echo "**Removed packages ($REMOVED_COUNT):**"
+                echo '```'
+                head -50 removed-packages.txt
+                if [[ "$REMOVED_COUNT" -gt 50 ]]; then
+                  echo "... and $((REMOVED_COUNT - 50)) more"
+                fi
+                echo '```'
+              fi
+            fi
+
+            echo 'SBOM_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+          echo "added=$ADDED_COUNT" >> "$GITHUB_OUTPUT"
+          echo "removed=$REMOVED_COUNT" >> "$GITHUB_OUTPUT"
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: sbom-diff
+          path: |
+            base-sbom.spdx.json
+            pr-sbom.spdx.json
+            added-packages.txt
+            removed-packages.txt
+          retention-days: 30
+
+      - name: Post PR comment with SBOM diff
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          SBOM_DIFF_SUMMARY: ${{ steps.diff.outputs.diff_summary }}
+        with:
+          script: |
+            const added = parseInt('${{ steps.diff.outputs.added }}') || 0;
+            const removed = parseInt('${{ steps.diff.outputs.removed }}') || 0;
+            const diffSummary = process.env.SBOM_DIFF_SUMMARY || 'No package changes detected between base and PR.';
+
+            const marker = '<!-- sbom-diff-comment -->';
+            const body = [
+              marker,
+              '## SBOM Diff Report',
+              '',
+              `| Metric | Count |`,
+              `|--------|-------|`,
+              `| Packages added | ${added} |`,
+              `| Packages removed | ${removed} |`,
+              '',
+              diffSummary,
+              '',
+              `<details>`,
+              `<summary>What is this?</summary>`,
+              ``,
+              `This report compares the Software Bill of Materials (SBOM) between the base branch and this PR.`,
+              `Package changes may introduce new dependencies or remove existing ones. The CVE scan job`,
+              `correlates the PR SBOM against known vulnerability databases.`,
+              `</details>`,
+            ].join('\n');
+
+            // Find and update existing comment, or create new one
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c => c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+  # ============================================================================
+  # CVE Correlation Scan
+  # ============================================================================
+  cve-scan:
+    name: SBOM / CVE Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: generate-sbom
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@57aae528053a48a3f6235f2d9461b05fbcb7366d # v0
+        with:
+          format: spdx-json
+          output-file: pr-sbom.spdx.json
+          upload-release-assets: false
+
+      - name: Scan SBOM for CVEs with Grype
+        uses: anchore/scan-action@7037fa011853d5a11690026fb85feee79f4c946c # v7
+        id: grype
+        with:
+          sbom: pr-sbom.spdx.json
+          fail-build: false
+          severity-cutoff: critical
+          output-format: json
+
+      - name: Upload CVE scan results
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: cve-scan-results
+          path: results.json
+          retention-days: 30

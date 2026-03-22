@@ -284,17 +284,15 @@ assert_contains() {
 
 # Print test summary
 print_summary() {
-  # Derive run count from assertions (test_start counts test cases, but
-  # TESTS_PASSED/TESTS_FAILED count individual assertions — use assertions)
-  TESTS_RUN=$((TESTS_PASSED + TESTS_FAILED))
+  local total_assertions=$((TESTS_PASSED + TESTS_FAILED))
   echo ""
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  printf '%b\n' "Tests run: $TESTS_RUN"
+  printf '%b\n' "Test cases: $TESTS_RUN | Assertions: $total_assertions"
   printf '%b\n' "${GREEN}Passed: $TESTS_PASSED${NC}"
   printf '%b\n' "${RED}Failed: $TESTS_FAILED${NC}"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  # Output machine-readable results for test_runner.sh
-  echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
+  # Output machine-readable results for test_runner.sh (assertions are the unit of pass/fail)
+  echo "RESULTS:$total_assertions:$TESTS_PASSED:$TESTS_FAILED"
 
   if [[ $TESTS_FAILED -gt 0 ]]; then
     return 1

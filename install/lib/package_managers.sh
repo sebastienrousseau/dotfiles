@@ -33,6 +33,18 @@ has_pacman() {
   command -v pacman >/dev/null 2>&1
 }
 
+sha256_file_pm() {
+  local file="$1"
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$file" | awk '{print $1}'
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$file" | awk '{print $1}'
+  else
+    echo "Error: sha256sum or shasum is required for verified bootstrap." >&2
+    return 1
+  fi
+}
+
 # Install Homebrew on macOS
 # Returns: 0 on success, 1 on failure or cancellation
 install_homebrew() {
@@ -54,7 +66,33 @@ install_homebrew() {
   fi
 
   echo "   Installing Homebrew..."
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  local installer
+  installer="$(umask 077 && mktemp)"
+  if ! curl -fsSL -o "$installer" https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh; then
+    rm -f "$installer"
+    echo "Error: failed to download Homebrew installer." >&2
+    return 1
+  fi
+
+  local expected_checksum="${HOMEBREW_INSTALLER_SHA256:-}"
+  if [[ -z "$expected_checksum" ]]; then
+    rm -f "$installer"
+    echo "Error: HOMEBREW_INSTALLER_SHA256 is required for verified Homebrew bootstrap." >&2
+    return 1
+  fi
+
+  local actual_checksum
+  actual_checksum="$(sha256_file_pm "$installer")"
+  if [[ "$actual_checksum" != "$expected_checksum" ]]; then
+    rm -f "$installer"
+    echo "Error: Homebrew installer checksum mismatch." >&2
+    echo "Expected: $expected_checksum" >&2
+    echo "Got:      $actual_checksum" >&2
+    return 1
+  fi
+
+  /bin/bash "$installer"
+  rm -f "$installer"
 
   # Add brew to PATH for Apple Silicon
   if [[ -x /opt/homebrew/bin/brew ]]; then

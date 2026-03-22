@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+repo_root="$(git rev-parse --show-toplevel)"
+
 while read -r local_ref local_sha remote_ref remote_sha; do
   [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue
 
@@ -21,3 +23,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     fi
   done
 done
+
+if [ "${DOTFILES_SKIP_PRE_PUSH_AUDIT:-0}" != "1" ]; then
+  bash "$repo_root/scripts/qa/reliability-audit.sh" --quick
+fi

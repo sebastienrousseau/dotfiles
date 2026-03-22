@@ -29,12 +29,38 @@
       # Home Manager configuration
       # Use: home-manager switch --flake .#user
       # You can rename 'user' to your actual username if desired
-      homeConfigurations = {
+      homeConfigurations = nixpkgs.lib.optionalAttrs (builtins.pathExists ./home.nix) {
         user = home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.x86_64-linux; # Default, overridden by --override-input if needed or just edit
           modules = [ ./home.nix ];
         };
       };
+
+      # Overlay: read .chezmoidata.toml features to conditionally include packages
+      overlays.chezmoi-features =
+        final: prev:
+        let
+          dataFile = ../.chezmoidata.toml;
+          hasFeature =
+            name:
+            builtins.pathExists dataFile
+            && builtins.match ".*${name} = true.*" (builtins.readFile dataFile) != null;
+        in
+        {
+          dotfiles-conditional = final.buildEnv {
+            name = "dotfiles-conditional";
+            paths =
+              (if hasFeature "starship" then [ final.starship ] else [ ])
+              ++ (if hasFeature "zsh" then [ final.zoxide ] else [ ])
+              ++ (if hasFeature "fish" then [ final.direnv ] else [ ])
+              ++ [
+                final.bat
+                final.ripgrep
+                final.fd
+                final.eza
+              ];
+          };
+        };
 
       # Development shell for interactive use
       devShells = forAllSystems (

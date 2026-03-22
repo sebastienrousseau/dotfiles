@@ -50,7 +50,7 @@ To patch a custom font with Nerd Font glyphs:
 
 ### Ghostty
 
-```
+```text
 font-family = JetBrains Mono Nerd Font
 font-size = 14
 ```
@@ -73,7 +73,7 @@ font:
 
 ### Kitty
 
-```
+```text
 font_family JetBrains Mono Nerd Font
 font_size 14.0
 ```

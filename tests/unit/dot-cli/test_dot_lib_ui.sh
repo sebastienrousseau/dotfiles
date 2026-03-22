@@ -44,6 +44,10 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define rich UI helpers"
 fi
 
+test_start "ui_progress_glyphs"
+assert_file_contains "$UI_FILE" '_GL_BAR_FILL="￭"' "uses halfwidth black square for filled bars"
+assert_file_contains "$UI_FILE" '_GL_BAR_EMPTY="･"' "uses a lightweight empty progress glyph"
+
 # Test: uses ANSI colors
 test_start "ui_uses_colors"
 if grep -qE 'tput|UI_COLOR|BOLD|RED|GREEN|BLUE' "$UI_FILE" 2>/dev/null; then

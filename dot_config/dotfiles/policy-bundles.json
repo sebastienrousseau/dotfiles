@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "2026.03",
+  "defaultBundle": "developer",
+  "bundles": {
+    "developer": {
+      "description": "Local development with bounded agent execution and strict-local MCP.",
+      "agentProfile": "apply",
+      "mcpProfile": "strict-local",
+      "signingRequired": true,
+      "attestationRequired": true,
+      "networkPolicy": "limited"
+    },
+    "offline": {
+      "description": "Disconnected local work with no remote MCP transport and no networked agents.",
+      "agentProfile": "ask",
+      "mcpProfile": "strict-local",
+      "signingRequired": true,
+      "attestationRequired": true,
+      "networkPolicy": "off"
+    },
+    "regulated": {
+      "description": "High-trust profile for controlled environments with explicit approvals and evidence export.",
+      "agentProfile": "audit",
+      "mcpProfile": "strict-local",
+      "signingRequired": true,
+      "attestationRequired": true,
+      "networkPolicy": "limited"
+    },
+    "enterprise": {
+      "description": "Enterprise remote profile with registry-backed MCP and governed audit posture.",
+      "agentProfile": "audit",
+      "mcpProfile": "enterprise-remote",
+      "signingRequired": true,
+      "attestationRequired": true,
+      "networkPolicy": "limited"
+    }
+  }
+}

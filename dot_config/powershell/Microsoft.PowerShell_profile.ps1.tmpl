@@ -1,0 +1,81 @@
+# Dotfiles PowerShell profile (v{{ .dotfiles_version }})
+
+$env:DOTFILES_VERSION = "{{ .dotfiles_version }}"
+$env:XDG_CONFIG_HOME = if ($env:XDG_CONFIG_HOME) { $env:XDG_CONFIG_HOME } else { Join-Path $HOME ".config" }
+$env:XDG_CACHE_HOME = if ($env:XDG_CACHE_HOME) { $env:XDG_CACHE_HOME } else { Join-Path $HOME ".cache" }
+$env:XDG_DATA_HOME = if ($env:XDG_DATA_HOME) { $env:XDG_DATA_HOME } else { Join-Path $HOME ".local/share" }
+
+$DotfilesRoot = if (Test-Path (Join-Path $HOME ".dotfiles")) {
+    Join-Path $HOME ".dotfiles"
+} elseif (Test-Path (Join-Path $HOME ".local/share/chezmoi")) {
+    Join-Path $HOME ".local/share/chezmoi"
+} else {
+    $null
+}
+
+function Invoke-DotfilesCli {
+    $dotPath = Join-Path $HOME ".local/bin/dot"
+    if (-not (Test-Path $dotPath)) {
+        throw "dot command not found at $dotPath"
+    }
+    & $dotPath @args
+}
+
+function dot { Invoke-DotfilesCli @args }
+function d { Invoke-DotfilesCli @args }
+function dm { Invoke-DotfilesCli mode list }
+function da { Invoke-DotfilesCli agent list }
+function dmc { Invoke-DotfilesCli mcp registry }
+function datt { Invoke-DotfilesCli attest --json }
+
+function ll {
+    if (Get-Command eza -ErrorAction SilentlyContinue) {
+        eza -alF --sort Name --icons --group-directories-first @args
+    } else {
+        Get-ChildItem -Force @args
+    }
+}
+
+function la {
+    if (Get-Command eza -ErrorAction SilentlyContinue) {
+        eza -a --sort Name --icons --group-directories-first @args
+    } else {
+        Get-ChildItem -Force -Hidden @args
+    }
+}
+
+function cat {
+    if (Get-Command bat -ErrorAction SilentlyContinue) {
+        bat @args
+    } elseif (Get-Command batcat -ErrorAction SilentlyContinue) {
+        batcat @args
+    } else {
+        Microsoft.PowerShell.Management\Get-Content @args
+    }
+}
+
+Set-Alias -Name open -Value Invoke-Item -Option AllScope
+
+if (Get-Command mise -ErrorAction SilentlyContinue) {
+    function ms { & mise @args }
+}
+
+if (Get-Command nix -ErrorAction SilentlyContinue) {
+    function nx { & nix @args }
+}
+
+if (Get-Command just -ErrorAction SilentlyContinue) {
+    function j { & just @args }
+}
+
+if (Get-Command gh -ErrorAction SilentlyContinue) {
+    function ghpr { gh pr view --web @args }
+}
+
+if (Get-Command podman -ErrorAction SilentlyContinue) {
+    function p { & podman @args }
+}
+
+if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+    Invoke-Expression (& { (zoxide init powershell | Out-String) })
+}

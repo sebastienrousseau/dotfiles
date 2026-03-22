@@ -12,6 +12,7 @@ This directory contains security documentation for the dotfiles project.
 | [KEY_ROTATION.md](KEY_ROTATION.md) | Key rotation procedures |
 | [KEYS.md](KEYS.md) | Keybindings reference |
 | [COMPLIANCE.md](COMPLIANCE.md) | SOC 2, ISO 27001, GDPR, HIPAA mapping |
+| [AI_ACT_COMPLIANCE.md](AI_ACT_COMPLIANCE.md) | EU AI Act risk classification and exemption analysis |
 | [SECURITY_CHECKLIST.md](SECURITY_CHECKLIST.md) | Pre-release security verification |
 
 ## Quick Reference

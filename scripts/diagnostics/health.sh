@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Dotfiles Health Check Dashboard
-# Usage: dot health [--verbose|-v] [--json] [--fix] [--force]
+# Usage: dot health [--verbose|-v] [--json|-j] [--fix|-f] [--force|-F]
 
 set -euo pipefail
 
@@ -35,15 +35,15 @@ while [[ $# -gt 0 ]]; do
       VERBOSE=true
       shift
       ;;
-    --fix)
+    --fix | -f)
       APPLY_FIX=true
       shift
       ;;
-    --force)
+    --force | -F)
       FORCE_FIX=true
       shift
       ;;
-    --json)
+    --json | -j)
       JSON_OUTPUT=true
       shift
       ;;
@@ -98,8 +98,11 @@ check() {
 
   TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 
-  # Collect structured result for JSON output
-  RESULTS+=("{\"check\":\"$name\",\"status\":\"$status\",\"message\":\"$message\"}")
+  # Collect structured result for JSON output (escape quotes for valid JSON)
+  local _j_name="${name//\"/\\\"}"
+  local _j_status="${status//\"/\\\"}"
+  local _j_message="${message//\"/\\\"}"
+  RESULTS+=("{\"check\":\"${_j_name}\",\"status\":\"${_j_status}\",\"message\":\"${_j_message}\"}")
 
   case "$status" in
     pass)
@@ -145,6 +148,7 @@ check() {
 print_header() {
   if ! $JSON_OUTPUT; then
     echo ""
+    ui_dot_banner "Diagnostics"
     header "Dotfiles Health Dashboard"
     echo ""
   fi
@@ -192,13 +196,14 @@ check_dotfiles_core() {
 
 check_shell_env() {
   check_section "Shell Environment"
+  local current_shell="${SHELL##*/}"
 
   if has_command zsh; then
     check "Zsh installed" "pass"
-    if [[ "$SHELL" == *"zsh"* ]]; then
-      check "Zsh is default shell" "pass"
+    if [[ "$current_shell" =~ ^(zsh|fish|bash|nu|nushell)$ ]]; then
+      check "Active shell" "pass" "$current_shell"
     else
-      check "Zsh is default shell" "warn" "Current: $SHELL"
+      check "Active shell" "warn" "Current: $SHELL"
     fi
   else
     check "Zsh installed" "fail"
@@ -206,8 +211,10 @@ check_shell_env() {
 
   if [[ -d "${ZINIT_HOME:-$HOME/.local/share/zinit}" ]]; then
     check "Zinit plugin manager" "pass"
-  else
+  elif [[ "$current_shell" == "zsh" ]]; then
     check "Zinit plugin manager" "warn" "Not found"
+  else
+    check "Zinit plugin manager" "pass" "Not required for $current_shell"
   fi
 
   if has_command starship; then
@@ -230,6 +237,8 @@ check_dev_tools() {
 
   if has_command fnm; then
     check "fnm (Node version manager)" "pass"
+  elif has_command mise && has_command node; then
+    check "Node version manager" "pass" "mise"
   else
     check "fnm" "warn" "Not installed"
   fi
@@ -295,18 +304,23 @@ check_terminal() {
   fi
 
   local font_found=false
-  if fc-list 2>/dev/null | grep -qi "JetBrains"; then
+  if command -v fc-list >/dev/null 2>&1; then
+    local fc_list_output=""
+    fc_list_output="$(fc-list 2>/dev/null || true)"
+    if [[ "$fc_list_output" == *"Nerd Font"* ]]; then
+      font_found=true
+    fi
+  fi
+  if [[ "$font_found" != true ]] && [[ -d "$HOME/Library/Fonts" ]] && compgen -G "$HOME/Library/Fonts/"'*Nerd*' >/dev/null 2>&1; then
     font_found=true
-  elif [[ -d "$HOME/Library/Fonts" ]] && compgen -G "$HOME/Library/Fonts/"*[Jj]et[Bb]rains* >/dev/null 2>&1; then
-    font_found=true
-  elif [[ -d "$HOME/.local/share/fonts" ]] && compgen -G "$HOME/.local/share/fonts/"*[Jj]et[Bb]rains* >/dev/null 2>&1; then
+  elif [[ "$font_found" != true ]] && [[ -d "$HOME/.local/share/fonts" ]] && compgen -G "$HOME/.local/share/fonts/"'*Nerd*' >/dev/null 2>&1; then
     font_found=true
   fi
 
   if $font_found; then
-    check "JetBrains Mono Nerd Font" "pass"
+    check "Nerd Font available" "pass"
   else
-    check "JetBrains Mono Nerd Font" "warn" "Not installed"
+    check "Nerd Font available" "warn" "Not installed"
   fi
 }
 
@@ -344,7 +358,14 @@ check_security() {
   done
 
   if has_command gpg; then
-    if gpg --list-secret-keys 2>/dev/null | grep -q sec; then
+    local signing_format signing_key allowed_signers
+    signing_format="$(git config --global gpg.format 2>/dev/null || true)"
+    signing_key="$(git config --global user.signingkey 2>/dev/null || true)"
+    allowed_signers="$(git config --global gpg.ssh.allowedSignersFile 2>/dev/null || echo "$HOME/.config/git/allowed_signers")"
+
+    if [[ "$signing_format" == "ssh" ]] && [[ -n "$signing_key" ]] && [[ -f "${signing_key/#\~/$HOME}" ]] && [[ -f "${allowed_signers/#\~/$HOME}" ]]; then
+      check "Git signing" "pass" "ssh"
+    elif gpg --list-secret-keys 2>/dev/null | grep -q sec; then
       check "GPG keys" "pass"
     else
       check "GPG keys" "warn" "No secret keys"
@@ -381,7 +402,7 @@ check_config_directories() {
   for dir in "${config_dirs[@]}"; do
     if [[ -d "$dir" ]]; then
       check "Config: ${dir##*/}" "pass"
-      ((found++))
+      found=$((found + 1))
     else
       check "Config: ${dir##*/}" "warn" "Not found"
     fi
@@ -424,7 +445,7 @@ check_sync_status() {
     else
       local changes
       changes=$(printf '%s\n' "$git_status" | wc -l | tr -d ' ')
-      check "Git working tree" "warn" "$changes uncommitted change(s)"
+      check "Git working tree" "pass" "$changes local change(s)"
     fi
   else
     check "Git working tree" "warn" "Not a git repo"
@@ -492,11 +513,17 @@ print_summary() {
   local bar_width=30
   local filled=$((score * bar_width / 100))
   local empty=$((bar_width - filled))
+  local filled_bar="" empty_bar="" i
+
+  for ((i = 0; i < filled; i++)); do
+    filled_bar+="${_GL_BAR_FILL}"
+  done
+  for ((i = 0; i < empty; i++)); do
+    empty_bar+="${_GL_BAR_EMPTY}"
+  done
 
   if [[ "$use_ui" = "1" ]]; then
-    local filled_bar empty_bar bar_color
-    filled_bar=$(printf "%${filled}s" | tr ' ' '█')
-    empty_bar=$(printf "%${empty}s" | tr ' ' '░')
+    local bar_color
     if [[ $score -ge 80 ]]; then
       bar_color=2
     elif [[ $score -ge 60 ]]; then
@@ -517,9 +544,9 @@ print_summary() {
     else
       printf '%s' "${RED}"
     fi
-    printf "%${filled}s" | tr ' ' '█'
+    printf '%s' "$filled_bar"
     printf '%s' "${NC}"
-    printf "%${empty}s" | tr ' ' '░'
+    printf '%s' "$empty_bar"
     printf "] %s%%\n\n" "${score}"
   fi
 

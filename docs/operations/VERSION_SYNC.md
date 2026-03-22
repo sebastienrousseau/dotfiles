@@ -73,14 +73,14 @@ The system recognizes and updates these patterns:
 
 #### README.md
 ```markdown
-[![Version](https://img.shields.io/badge/Version-v0.2.496-blue?style=for-the-badge)]
+[![Version](https://img.shields.io/badge/Version-v0.2.497-blue?style=for-the-badge)]
 ```
 
 #### Documentation Files
 ```markdown
-**Version**: v0.2.496
-**Dotfiles Version**: v0.2.496
-Version: v0.2.496
+**Version**: v0.2.497
+**Dotfiles Version**: v0.2.497
+Version: v0.2.497
 version 0.2.485
 ```
 
@@ -191,19 +191,19 @@ Files that are intentionally excluded:
 ### Common Issues
 
 #### Version Mismatch
-```
+```text
 ❌ Found inconsistent release in docs/reference/FEATURES.md: vX.Y.Z (expected: vA.B.C)
 ```
 **Solution**: Run `./scripts/version-sync.sh` to fix
 
 #### Missing Dependencies
-```
+```text
 ❌ jq is required but not installed
 ```
 **Solution**: Install dependencies (`jq`, `rg`)
 
 #### Permission Issues
-```
+```text
 ❌ Permission denied writing to README.md
 ```
 **Solution**: Check file permissions and Git status
@@ -339,6 +339,6 @@ gh workflow run sync-versions.yml --ref feature-branch
 ---
 
 **Last Updated**: 2026-02-15
-**Version**: v0.2.496
+**Version**: v0.2.497
 **Maintainer**: Principal Automation Engineer
 **Status**: Production Ready ✅

@@ -1,0 +1,29 @@
+{
+  "specVersion": "0.3",
+  "name": "dotfiles-agent",
+  "version": "0.2.497",
+  "description": "Trusted workstation agent surface for local shell automation.",
+  "defaultProfile": "ask",
+  "protocols": ["mcp", "a2a"],
+  "platforms": ["macOS", "Linux", "WSL", "PowerShell"],
+  "entrypoints": {
+    "cli": "dot",
+    "mode": "dot mode",
+    "attestation": "dot attest --json",
+    "mcp": "dot mcp --strict --json",
+    "conformance": "dot agent conformance --strict --json",
+    "checkpoint": "dot agent checkpoint list",
+    "a2aCard": "dot agent a2a-card --json"
+  },
+  "profiles": ["ask", "plan", "apply", "audit"],
+  "security": {
+    "signedCommits": true,
+    "mcpRegistry": true,
+    "sessionLogging": true,
+    "workstationAttestation": true,
+    "replayableCheckpoints": true,
+    "fleetAttestationExport": true,
+    "policyBundleReleases": true,
+    "cardSigning": "ssh-ed25519"
+  }
+}

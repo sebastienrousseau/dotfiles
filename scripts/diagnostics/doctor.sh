@@ -339,6 +339,37 @@ fi
 
 # --- Performance ---
 _section "Performance"
+
+# Check shell cache freshness — stale caches force runtime regeneration
+stale_caches=0
+stale_tools=""
+cache_base="${XDG_CACHE_HOME:-$HOME/.cache}"
+for tool in mise starship zoxide atuin fzf direnv; do
+  tool_bin="$(command -v "$tool" 2>/dev/null || true)"
+  [[ -n "$tool_bin" ]] || continue
+  for shell_dir in zsh bash fish; do
+    case "$shell_dir" in
+      fish) cache_file="$cache_base/$shell_dir/${tool}-init.fish" ;;
+      *) cache_file="$cache_base/$shell_dir/${tool}-init.$shell_dir" ;;
+    esac
+    if [[ ! -f "$cache_file" ]] || [[ "$tool_bin" -nt "$cache_file" ]]; then
+      stale_caches=$((stale_caches + 1))
+      # Track unique tool names for the summary
+      case "$stale_tools" in
+        *"$tool"*) ;;
+        *) stale_tools="${stale_tools:+$stale_tools, }$tool" ;;
+      esac
+      break # one stale shell is enough to flag the tool
+    fi
+  done
+done
+
+if [[ $stale_caches -eq 0 ]]; then
+  _ok "shell caches" "fresh"
+else
+  _warn "shell caches" "stale ($stale_tools) — run dot prewarm"
+fi
+
 if command -v hyperfine >/dev/null 2>&1; then
   if bash "$SCRIPT_DIR/../../tests/performance/bench.sh" 2>/dev/null; then
     _ok "startup latency" "within target thresholds"

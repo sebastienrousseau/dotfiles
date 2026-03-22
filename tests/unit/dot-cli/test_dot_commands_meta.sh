@@ -27,7 +27,7 @@ fi
 
 # Test: defines help command
 test_start "meta_defines_help"
-if grep -qE "cmd_docs|cmd_learn|cmd_keys|cmd_upgrade|cmd_sandbox|cmd_mcp" "$META_FILE" 2>/dev/null; then
+if grep -qE "cmd_docs|cmd_learn|cmd_keys|cmd_upgrade|cmd_sandbox|cmd_mcp|cmd_mode" "$META_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines meta command functions"
 else
@@ -37,7 +37,7 @@ fi
 
 # Test: defines version command
 test_start "meta_defines_version"
-if grep -qE "case .*\\{1,\\}|upgrade\\)|docs\\)|learn\\)|keys\\)|sandbox\\)|mcp\\)" "$META_FILE" 2>/dev/null; then
+if grep -qE "case .*\\{1,\\}|upgrade\\)|docs\\)|learn\\)|keys\\)|sandbox\\)|mcp\\)|mode \\| agent\\)" "$META_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines dispatch cases"
 else
@@ -47,13 +47,19 @@ fi
 
 # Test: defines log-rotate command
 test_start "meta_defines_log_rotate"
-if grep -qE "cmd_upgrade|cmd_docs|cmd_learn|cmd_keys|cmd_sandbox|cmd_mcp" "$META_FILE" 2>/dev/null; then
+if grep -qE "cmd_upgrade|cmd_docs|cmd_learn|cmd_keys|cmd_sandbox|cmd_mcp|cmd_mode" "$META_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: command handlers present"
 else
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: command handlers should be present"
 fi
+
+AGENT_MODULE="$REPO_ROOT/scripts/dot/commands/agent.sh"
+
+test_start "meta_agent_enterprise_subcommands"
+assert_file_contains "$AGENT_MODULE" "checkpoint)" "agent module defines checkpoint handling"
+assert_file_contains "$AGENT_MODULE" "conformance)" "agent module defines conformance handling"
 
 # Test: version uses semantic versioning
 test_start "meta_semver_version"

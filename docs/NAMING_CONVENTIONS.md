@@ -40,7 +40,7 @@ This document defines the naming conventions for all files in the dotfiles repos
 ### New alias category
 
 1. Create `.chezmoitemplates/aliases/<category>/<name>.aliases.sh`
-2. It will be auto-discovered by the `**/*.aliases.sh` glob
+2. The `**/*.aliases.sh` glob auto-discovers it
 3. Add to `$coreCategories` list in `90-ux-aliases.sh.tmpl` for eager loading; otherwise it loads lazily
 
 ### New function
@@ -60,7 +60,7 @@ This document defines the naming conventions for all files in the dotfiles repos
 
 ## Directory Structure Overview
 
-```
+```text
 .chezmoitemplates/
   aliases/        # 48 categories, auto-discovered
   functions/      # Grouped by domain (api/, curl/, text/, system/, etc.)

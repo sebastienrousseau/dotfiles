@@ -9,7 +9,23 @@ This document describes the compliance, security, and cross-platform compatibili
 | SOC 2 Type II | Aligned | Security, availability, and confidentiality |
 | ISO 27001 | Aligned | Information security management controls |
 | GDPR/HIPAA | Aligned | Privacy and data protection |
+| ISO 13485 | Aligned | Risk management (FMEA), verification & validation |
 | ALCOA | Implemented | Audit trail integrity |
+| EU AI Act | Exempt | Minimal risk, open-source exemption (Article 2(12)) |
+
+---
+
+## EU AI Act (Regulation (EU) 2024/1689)
+
+| Requirement | Status | Implementation |
+|-------------|--------|----------------|
+| **Risk classification** | Minimal risk | No high-risk use cases (Annex III) |
+| **Open-source exemption** | Applicable | MIT license, no model weights distributed (Article 2(12)) |
+| **Prohibited practices** | Confirmed none | No subliminal, exploitative, or social scoring use (Article 5) |
+| **Transparency** | Voluntary | Agent session logging, model registry, attestation |
+| **GPAI provisions** | Not applicable | Consumer of AI APIs, not a provider |
+
+See [AI_ACT_COMPLIANCE.md](AI_ACT_COMPLIANCE.md) for full assessment.
 
 ---
 
@@ -142,7 +158,7 @@ The `cross-platform-test.yml` workflow validates scripts on both platforms:
 |-------------|----------------|
 | No hardcoded user paths | Use `$HOME` or `~` |
 | Case-insensitive safe | No filename collisions |
-| Cross-platform paths | No `C:\` or `/Users/` literals |
+| Cross-platform paths | No platform-specific path literals |
 
 ---
 
@@ -157,11 +173,12 @@ The `cross-platform-test.yml` workflow validates scripts on both platforms:
 | `cross-platform-test.yml` | Push/PR + weekly | BSD/GNU compatibility |
 | `security-enhanced.yml` | Push/PR | Deep security analysis, SBOM |
 | `codeql.yml` | Push/PR + weekly | Static code analysis |
+| `sbom-diff.yml` | Pull request | SBOM diff and CVE correlation |
 | `nightly.yml` | Daily 2 AM UTC | Dependency version checks |
 
 ### Compliance Guard Jobs
 
-```
+```text
 compliance-guard.yml
 ├── insecure-patterns     # TLS, credentials, chmod
 ├── portability           # ShellCheck, paths, .gitattributes
@@ -171,7 +188,7 @@ compliance-guard.yml
 
 ### Cross-Platform Test Jobs
 
-```
+```text
 cross-platform-test.yml
 ├── ubuntu-latest (GNU)   # Linux compatibility
 ├── macos-latest (BSD)    # macOS compatibility
@@ -319,7 +336,7 @@ Enable "Require signed commits" in repository settings:
 
 ### Test Framework
 
-```
+```text
 tests/
 ├── framework/
 │   ├── assertions.sh    # 16 assertion functions
@@ -354,6 +371,9 @@ bash tests/unit/test_dot_commands_apply.sh
 | SECURITY.md | Vulnerability reporting | `.github/SECURITY.md` |
 | CONTRIBUTING.md | Contribution guidelines | `.github/CONTRIBUTING.md` |
 | CODEOWNERS | Code ownership | `.github/CODEOWNERS` |
+| INCIDENT_RESPONSE.md | Incident response plan | `docs/security/` |
+| FMEA.md | Failure Mode & Effects Analysis | `docs/security/` |
+| VERIFICATION_VALIDATION.md | ISO 13485-style V&V report | `docs/security/` |
 | .editorconfig | Editor settings | Root |
 | .gitattributes | Git attributes | Root |
 

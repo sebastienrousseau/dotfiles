@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Dotfiles Scorecard
-# Usage: dot scorecard [--json]
+# Usage: dot scorecard [--json|-j]
 
 set -euo pipefail
 
@@ -23,7 +23,7 @@ if ! command -v python3 >/dev/null 2>&1; then
 fi
 
 JSON_OUTPUT=false
-if [[ "${1:-}" == "--json" ]]; then
+if [[ "${1:-}" == "--json" || "${1:-}" == "-j" ]]; then
   JSON_OUTPUT=true
 fi
 
@@ -73,6 +73,7 @@ JSON
   exit 0
 fi
 
+ui_dot_banner "Diagnostics"
 ui_header "Dotfiles Scorecard"
 
 ui_section "Scores"

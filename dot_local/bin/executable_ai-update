@@ -94,8 +94,11 @@ if command -v mise >/dev/null 2>&1; then
   ok
 
   step "Kiro CLI (via mise)"
-  mise upgrade kiro-cli >/dev/null 2>&1
-  ok
+  if mise upgrade kiro-cli >/dev/null 2>&1; then
+    ok
+  else
+    skip "mise plugin update unavailable"
+  fi
 fi
 
 # Pipx (aider, sgpt)

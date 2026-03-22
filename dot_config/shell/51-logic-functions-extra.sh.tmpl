@@ -9,7 +9,7 @@
 
 {{ range $group, $files := $groups }}
 _dotfiles_load_group_{{ $group }}() {
-  unfunction _dotfiles_load_group_{{ $group }} 2>/dev/null
+  unset -f _dotfiles_load_group_{{ $group }} 2>/dev/null
   # shellcheck disable=SC1090
   . /dev/stdin <<'__DOTFILES_EOF__'
 {{ range $files }}

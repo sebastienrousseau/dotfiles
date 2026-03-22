@@ -11,7 +11,10 @@ source "$SCRIPT_DIR/platform.sh"
 
 _DOT_SOURCE_DIR_CACHE=""
 
-# Resolve the dotfiles source directory
+## resolve_source_dir — Locate the dotfiles source tree.
+## Checks (in order): relative to this script, $CHEZMOI_SOURCE_DIR,
+## ~/.dotfiles, ~/.local/share/chezmoi. Caches the result for the process.
+## Prints the absolute path (or empty string if not found). Exit: always 0.
 resolve_source_dir() {
   if [[ -n "${_DOT_SOURCE_DIR_CACHE:-}" ]] && [[ -d "$_DOT_SOURCE_DIR_CACHE" ]]; then
     printf "%s\n" "$_DOT_SOURCE_DIR_CACHE"
@@ -19,7 +22,16 @@ resolve_source_dir() {
   fi
 
   local dir=""
-  if [ -n "${CHEZMOI_SOURCE_DIR:-}" ] && [ -d "$CHEZMOI_SOURCE_DIR" ]; then
+  local repo_candidate=""
+
+  if repo_candidate="$(cd "$SCRIPT_DIR/../../.." && pwd 2>/dev/null)"; then
+    :
+  else
+    repo_candidate=""
+  fi
+  if [[ -n "$repo_candidate" && -f "$repo_candidate/scripts/dot/lib/ui.sh" ]]; then
+    dir="$repo_candidate"
+  elif [ -n "${CHEZMOI_SOURCE_DIR:-}" ] && [ -d "$CHEZMOI_SOURCE_DIR" ]; then
     dir="$CHEZMOI_SOURCE_DIR"
   elif [ -d "$HOME/.dotfiles" ]; then
     dir="$HOME/.dotfiles"
@@ -41,8 +53,9 @@ resolve_source_dir() {
   fi
 }
 
-# Generic dispatcher: resolve source dir, find script, exec it.
-# Usage: run_script <relative-script-path> <not-found-label> [args...]
+## run_script — Resolve source dir, find a script, exec it (never returns).
+## Usage: run_script <relative-script-path> <not-found-label> [args...]
+## Exit: 1 if source dir or script not found; otherwise execs into the script.
 run_script() {
   local script_rel="$1"
   local label="$2"
@@ -61,7 +74,7 @@ run_script() {
   fi
 }
 
-# Require source directory or exit
+## require_source_dir — Print source dir path or exit 1 if not found.
 require_source_dir() {
   local src_dir
   src_dir="$(resolve_source_dir)"
@@ -72,12 +85,14 @@ require_source_dir() {
   echo "$src_dir"
 }
 
-# Check if a command exists
+## has_command <name> — Return 0 if <name> is on PATH, 1 otherwise.
 has_command() {
   command -v "$1" >/dev/null 2>&1
 }
 
-# Validate a name contains only safe characters (alphanumeric, dash, underscore, dot)
+## validate_name <name> [label] — Die if name contains unsafe characters.
+## Allowed: [a-zA-Z0-9._-]. This prevents shell injection when names appear
+## in paths or eval contexts. Exit: 0 if valid, calls die() if invalid.
 validate_name() {
   local name="$1" label="${2:-name}"
   if [[ ! "$name" =~ ^[a-zA-Z0-9._-]+$ ]]; then
@@ -85,7 +100,7 @@ validate_name() {
   fi
 }
 
-# Validate an XDG path is absolute and exists or can be created
+## validate_xdg_path <var_name> <path> — Warn and return 1 if path is not absolute.
 validate_xdg_path() {
   local var_name="$1" path="$2"
   if [[ -n "$path" ]] && [[ "$path" != /* ]]; then
@@ -95,7 +110,7 @@ validate_xdg_path() {
   return 0
 }
 
-# Print error message and exit
+## die <message> [code] — Print error to stderr and exit (default code 1).
 die() {
   ui_err "$1" >&2
   exit "${2:-1}"
@@ -124,9 +139,7 @@ ui_logo_once() {
   if [[ "${DOTFILES_LOGO_PRINTED:-0}" = "1" ]]; then
     return
   fi
-  ui_logo_dot "$title"
-  DOTFILES_LOGO_PRINTED=1
-  export DOTFILES_LOGO_PRINTED
+  ui_product_banner "$title"
 }
 
 dotfiles_version() {
@@ -285,6 +298,9 @@ dot_command_summary() {
     usb-safety)
       echo "Disable risky removable-media automount."
       ;;
+    fleet)
+      echo "Show fleet node status, drift, and namespace."
+      ;;
     upgrade)
       echo "Update system toolchains, plugins, and dotfiles."
       ;;
@@ -327,7 +343,16 @@ dot_command_summary() {
 dot_ui_command_banner() {
   local section="${1:-Dot}"
   local cmd="${2:-}"
+  shift 2 || true
   local version summary
+
+  for arg in "$@"; do
+    case "$arg" in
+      --json | -j)
+        return
+        ;;
+    esac
+  done
 
   ui_logo_once "Dot • $section"
 

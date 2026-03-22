@@ -5,9 +5,9 @@
   align="right"
 />
 
-# Dotfiles Path Configuration (v0.2.496)
+# Dotfiles Path Configuration (v0.2.497)
 
-Simply designed to fit your shell life 
+Modular PATH configuration managed by Chezmoi
 
 ![Dotfiles banner][banner]
 

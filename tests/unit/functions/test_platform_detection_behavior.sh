@@ -21,11 +21,11 @@ fi
 _source_platform() {
   # Undefine any previously loaded versions to allow re-sourcing cleanly.
   unset -f dot_is_wsl dot_platform_id dot_host_os dot_path_to_unix \
-           dot_path_to_native dot_open_path dot_require_platform 2>/dev/null || true
+    dot_path_to_native dot_open_path dot_require_platform 2>/dev/null || true
   # platform.sh starts with 'set -euo pipefail'; tolerate that in bash.
   # shellcheck source=/dev/null
   source "$PLATFORM_FILE"
-  set +e  # tests need to handle errors explicitly
+  set +e # tests need to handle errors explicitly
 }
 _source_platform
 
@@ -55,7 +55,7 @@ EOF
 _mock_wsl_osrelease() {
   local content="$1"
   local fake_proc
-  fake_proc=$(mktemp -d)
+  fake_proc=$(portable_mktemp_dir)
   mkdir -p "$fake_proc/sys/kernel"
   echo "$content" >"$fake_proc/sys/kernel/osrelease"
   echo "$fake_proc"
@@ -78,7 +78,7 @@ _mock_uname "Linux"
 dot_is_wsl() { return 1; }
 result=$(dot_platform_id)
 assert_equals "linux" "$result" "Linux uname without WSL should yield 'linux'"
-_source_platform  # restore original definitions
+_source_platform # restore original definitions
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 3. dot_platform_id returns "unknown" for unrecognised kernel
@@ -95,7 +95,7 @@ _source_platform
 # ──────────────────────────────────────────────────────────────────────────────
 test_start "platform_id_wsl"
 _mock_uname "Linux"
-dot_is_wsl() { return 0; }  # force WSL detection
+dot_is_wsl() { return 0; } # force WSL detection
 result=$(dot_platform_id)
 assert_equals "wsl" "$result" "Linux + WSL flag should yield 'wsl'"
 _source_platform

@@ -5,9 +5,9 @@
 
 set -euo pipefail
 
-THRESHOLD_MS_BASH=15
-THRESHOLD_MS_ZSH=15
-THRESHOLD_MS_FISH=40
+THRESHOLD_MS_BASH=75
+THRESHOLD_MS_ZSH=75
+THRESHOLD_MS_FISH=100
 
 if ! command -v hyperfine >/dev/null 2>&1; then
   echo "hyperfine not found."

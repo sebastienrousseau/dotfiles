@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
-# Tests for 40-ls-colors.sh.tmpl template structure
+# Tests for 40-ls-colors.sh structure
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-TMPL_FILE="$REPO_ROOT/dot_config/shell/40-ls-colors.sh.tmpl"
+TMPL_FILE="$REPO_ROOT/dot_config/shell/40-ls-colors.sh"
 
 test_start "ls_colors_exists"
-assert_file_exists "$TMPL_FILE" "40-ls-colors.sh.tmpl should exist"
+assert_file_exists "$TMPL_FILE" "40-ls-colors.sh should exist"
 
 test_start "ls_colors_not_empty"
 if [[ -s "$TMPL_FILE" ]]; then

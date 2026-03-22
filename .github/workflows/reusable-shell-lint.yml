@@ -47,20 +47,18 @@ jobs:
 
       - name: Install tools
         run: |
-          sudo apt-get update && sudo apt-get install -y shellcheck ripgrep
-          # Install shfmt with exact version pinning via webi
-          curl -sS https://webi.sh/shfmt | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          sudo apt-get update && sudo apt-get install -y shellcheck ripgrep shfmt
 
       - name: ShellCheck
         run: |
           set -euo pipefail
           echo "Running ShellCheck..."
 
+          files=()
           if [[ "${{ inputs.include_tests }}" == "true" ]]; then
-            mapfile -t files < <(rg --files -g "*.sh")
+            while IFS= read -r f; do files+=("$f"); done < <(rg --files -g "*.sh")
           else
-            mapfile -t files < <(rg --files -g "*.sh" -g "!tests/**")
+            while IFS= read -r f; do files+=("$f"); done < <(rg --files -g "*.sh" -g "!tests/**")
           fi
 
           if [[ "${#files[@]}" -eq 0 ]]; then

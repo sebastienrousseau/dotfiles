@@ -212,6 +212,63 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: script has syntax errors"
 fi
 
+test_start "install_script_minimal_flag_behaviour"
+install_sandbox="$(mktemp -d)"
+trap 'rm -rf "$install_sandbox"' RETURN
+mkdir -p "$install_sandbox/bin" "$install_sandbox/home"
+cat >"$install_sandbox/bin/chezmoi" <<'EOF'
+#!/usr/bin/env bash
+printf 'chezmoi %s\n' "$*" >> "$TMP_LOG"
+EOF
+cat >"$install_sandbox/bin/git" <<'EOF'
+#!/usr/bin/env bash
+if [[ "$1" == "clone" ]]; then
+  dest="${@: -1}"
+  mkdir -p "$dest/.git"
+  cat >"$dest/.chezmoidata.toml" <<'DATA'
+profile = "default"
+nvim = true
+tmux = true
+zellij = true
+DATA
+  printf 'git %s\n' "$*" >> "$TMP_LOG"
+  exit 0
+fi
+if [[ "$1" == "describe" ]]; then
+  exit 1
+fi
+if [[ "$1" == "rev-parse" ]]; then
+  echo "v0.2.497"
+  exit 0
+fi
+printf 'git %s\n' "$*" >> "$TMP_LOG"
+exit 0
+EOF
+cat >"$install_sandbox/bin/curl" <<'EOF'
+#!/usr/bin/env bash
+exit 1
+EOF
+chmod +x "$install_sandbox/bin/chezmoi" "$install_sandbox/bin/git" "$install_sandbox/bin/curl"
+TMP_LOG="$install_sandbox/install.log" \
+  PATH="$install_sandbox/bin:/usr/bin:/bin" \
+  HOME="$install_sandbox/home" \
+  DOTFILES_NONINTERACTIVE=1 \
+  DOTFILES_SILENT=1 \
+  bash "$INSTALL_SCRIPT" --minimal >/dev/null 2>&1
+cloned_data="$install_sandbox/home/.dotfiles/.chezmoidata.toml"
+clone_log="$(cat "$install_sandbox/install.log")"
+if grep -q -- '--branch v0.2.497' <<<"$clone_log" \
+  && grep -q '^profile = "minimal"$' "$cloned_data" \
+  && grep -q '^nvim = false$' "$cloned_data" \
+  && grep -q '^tmux = false$' "$cloned_data" \
+  && grep -q '^zellij = false$' "$cloned_data"; then
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --minimal keeps default version pin and rewrites feature flags"
+else
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: --minimal should not become the git ref and should rewrite features"
+fi
+
 # Test: No hardcoded sensitive paths in install
 test_start "install_script_no_sensitive_paths"
 sensitive_patterns=("password" "secret" "token" "apikey" "api_key")

@@ -31,10 +31,16 @@ warm_tool() {
   local ext="$4"
 
   local cache_file="$CACHE_DIR/$shell/$tool-init.$ext"
+  local tmp_file="${cache_file}.tmp.$$"
 
   if command -v "$tool" >/dev/null 2>&1; then
-    eval "$cmd" >"$cache_file" 2>/dev/null || true
-    ui_ok "$tool" "Cached for $shell"
+    if eval "$cmd" >"$tmp_file" 2>/dev/null && [ -s "$tmp_file" ]; then
+      mv "$tmp_file" "$cache_file"
+      ui_ok "$tool" "Cached for $shell"
+    else
+      rm -f "$tmp_file"
+      ui_warn "$tool" "Failed to cache for $shell"
+    fi
   fi
 }
 
@@ -63,18 +69,22 @@ warm_tool "fzf" "fzf --fish" "fish" "fish"
 warm_tool "direnv" "direnv hook fish" "fish" "fish"
 
 ui_section "Nushell"
-if command -v starship >/dev/null 2>&1; then
-  starship init nu >"$CACHE_DIR/nushell/starship.nu" 2>/dev/null || true
-  ui_ok "starship" "Cached for nushell"
-fi
-if command -v zoxide >/dev/null 2>&1; then
-  zoxide init nushell >"$CACHE_DIR/nushell/zoxide.nu" 2>/dev/null || true
-  ui_ok "zoxide" "Cached for nushell"
-fi
-if command -v atuin >/dev/null 2>&1; then
-  atuin init nu >"$CACHE_DIR/nushell/atuin.nu" 2>/dev/null || true
-  ui_ok "atuin" "Cached for nushell"
-fi
+for _nu_entry in "starship:starship init nu:starship.nu" "zoxide:zoxide init nushell:zoxide.nu" "atuin:atuin init nu:atuin.nu"; do
+  _nu_tool="${_nu_entry%%:*}"
+  _nu_rest="${_nu_entry#*:}"
+  _nu_cmd="${_nu_rest%%:*}"
+  _nu_file="${_nu_rest#*:}"
+  if command -v "$_nu_tool" >/dev/null 2>&1; then
+    _nu_tmp="$CACHE_DIR/nushell/${_nu_file}.tmp.$$"
+    if eval "$_nu_cmd" >"$_nu_tmp" 2>/dev/null && [ -s "$_nu_tmp" ]; then
+      mv "$_nu_tmp" "$CACHE_DIR/nushell/$_nu_file"
+      ui_ok "$_nu_tool" "Cached for nushell"
+    else
+      rm -f "$_nu_tmp"
+      ui_warn "$_nu_tool" "Failed to cache for nushell"
+    fi
+  fi
+done
 
 ui_header "Cache Pre-warming Complete"
 dot_log info "prewarm_complete"

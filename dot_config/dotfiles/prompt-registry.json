@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "2026.03",
+  "defaultPromptSet": "core",
+  "promptSets": {
+    "core": {
+      "description": "General workstation guidance and bounded implementation prompts.",
+      "changeControl": "signed-commit",
+      "reviewRequired": true
+    },
+    "regulated-audit": {
+      "description": "Compliance and high-trust audit prompts with stricter review expectations.",
+      "changeControl": "signed-commit-and-policy-review",
+      "reviewRequired": true
+    }
+  }
+}

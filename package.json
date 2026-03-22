@@ -1,13 +1,17 @@
 {
   "name": "@sebastienrousseau/dotfiles",
-  "version": "0.2.496",
+  "version": "0.2.497",
   "description": "The Trusted Shell Platform — Universal dotfiles managed by Chezmoi. Features Bash & Zsh for macOS, Linux & WSL. Rust modern tooling & enterprise-grade security.",
   "main": "install.sh",
   "bin": {
     "dotfiles-install": "./install.sh"
   },
   "scripts": {
-    "test": "bash -n install.sh && echo 'Syntax OK'",
+    "test": "bash ./scripts/qa/reliability-audit.sh",
+    "test:quick": "bash ./scripts/qa/reliability-audit.sh --quick",
+    "test:unit": "bash ./scripts/qa/reliability-audit.sh --unit-only",
+    "test:integration": "bash ./scripts/qa/reliability-audit.sh --with-integration",
+    "examples": "bash ./scripts/qa/validate-examples.sh",
     "lint": "shellcheck install.sh scripts/**/*.sh"
   },
   "repository": {

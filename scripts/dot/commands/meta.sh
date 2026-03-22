@@ -1,15 +1,33 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Dotfiles CLI - Meta Commands
-# upgrade, prewarm, docs, learn, keys, sandbox, mcp
+# upgrade, prewarm, docs, learn, keys, sandbox, mcp, mode, agent
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_META_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/utils.sh
-source "$SCRIPT_DIR/../lib/utils.sh"
+source "$_META_DIR/../lib/utils.sh"
+# shellcheck source=../lib/log.sh
+source "$_META_DIR/../lib/log.sh"
+# shellcheck source=agent.sh
+source "$_META_DIR/agent.sh"
 
-dot_ui_command_banner "Meta" "${1:-}"
+meta_banner_section() {
+  case "${1:-}" in
+    mcp | mode | agent)
+      printf '%s\n' "AI and Agents"
+      ;;
+    docs | keys | learn | search | help | version)
+      printf '%s\n' "Reference"
+      ;;
+    *)
+      printf '%s\n' "Meta"
+      ;;
+  esac
+}
+
+dot_ui_command_banner "$(meta_banner_section "${1:-}")" "${1:-}" "$@"
 
 cmd_upgrade() {
   local src_dir
@@ -141,19 +159,55 @@ cmd_sandbox() {
 
 cmd_mcp() {
   local subcommand="${1:-doctor}"
-  shift || true
+  if [[ "${1:-}" == --* ]] || [[ "${1:-}" == -* ]] || [[ -z "${1:-}" ]]; then
+    subcommand="doctor"
+  else
+    shift || true
+  fi
   case "$subcommand" in
     doctor)
+      if [[ "${1:-}" == "doctor" ]]; then
+        shift || true
+      fi
       run_script "scripts/diagnostics/mcp-doctor.sh" "MCP doctor script" "$@"
       ;;
+    registry)
+      local repo_root registry_file json_mode=0
+      repo_root="$(require_source_dir)"
+      registry_file="${MCP_REGISTRY_CONFIG:-$repo_root/dot_config/dotfiles/mcp-registry.json}"
+      if [[ "${1:-}" == "registry" ]]; then
+        shift || true
+      fi
+      if [[ "${1:-}" == "--json" || "${1:-}" == "-j" ]]; then
+        json_mode=1
+      fi
+      if [[ ! -f "$registry_file" ]]; then
+        die "MCP registry not found: $registry_file"
+      fi
+      if [[ "$json_mode" -eq 1 ]]; then
+        exec cat "$registry_file"
+      fi
+      if command -v jq >/dev/null 2>&1; then
+        ui_header "MCP Registry"
+        jq -r '
+          .servers
+          | to_entries[]
+          | "\(.key)\t\(.value.transport)\t\(.value.launcher)\t\(.value.package // .value.url // "local")"
+        ' "$registry_file" | while IFS=$'\t' read -r name transport launcher target; do
+          ui_ok "$name" "$transport via $launcher -> $target"
+        done
+      else
+        exec cat "$registry_file"
+      fi
+      ;;
     *)
-      echo "Usage: dot mcp [doctor]" >&2
+      echo "Usage: dot mcp [doctor|registry]" >&2
       exit 1
       ;;
   esac
 }
 
-# Dispatch
+# Dispatch — cmd_mode is defined in agent.sh (sourced above)
 case "${1:-}" in
   upgrade)
     shift
@@ -182,6 +236,10 @@ case "${1:-}" in
   mcp)
     shift
     cmd_mcp "$@"
+    ;;
+  mode | agent)
+    shift
+    cmd_mode "$@"
     ;;
   *)
     echo "Unknown meta command: ${1:-}" >&2

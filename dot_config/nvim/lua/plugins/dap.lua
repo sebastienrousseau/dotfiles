@@ -1,12 +1,16 @@
 -- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
--- Debug Adapter Protocol (DAP) Configuration
+-- @module nvim.plugins.dap
+-- Debug Adapter Protocol (DAP) Configuration.
+-- Provides in-editor debugging with nvim-dap and a VS Code-like UI via dap-ui.
+-- js-debug-adapter handles Node/Chrome/Edge; the dev server port defaults to
+-- 3000 but can be overridden via DAP_DEV_SERVER_PORT.
 
 -- Layout constants
 local SIDEBAR_WIDTH = 40
 local BOTTOM_PANEL_HEIGHT = 10
 local QUARTER_SIZE = 0.25
 local HALF_SIZE = 0.5
-local DEFAULT_DEV_SERVER_PORT = 3000
+local DEFAULT_DEV_SERVER_PORT = tonumber(vim.env.DAP_DEV_SERVER_PORT) or 3000
 
 return {
   -- DAP Core

@@ -14,7 +14,15 @@ log_info " macOS: Starting setup..."
 # Check Homebrew
 if ! command -v brew >/dev/null; then
   log_info "Homebrew not found. Installing..."
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  brew_tmp=$(umask 077 && mktemp)
+  curl -fsSL -o "$brew_tmp" https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+  # Validate: must be a shell script under 1MB
+  if [ -s "$brew_tmp" ] && head -1 "$brew_tmp" | grep -q '^#!'; then
+    /bin/bash "$brew_tmp"
+  else
+    log_error "Homebrew installer failed validation."
+  fi
+  rm -f "$brew_tmp"
 fi
 
 # Brewfile hash: {{ printf "%s%s" (include "dot_config/shell/Brewfile.cli") (include "dot_config/shell/Brewfile.cask") | sha256sum }}

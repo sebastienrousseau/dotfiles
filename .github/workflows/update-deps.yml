@@ -34,14 +34,27 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Configure signed commits
+        if: inputs.dry_run != 'true'
+        env:
+          ACTIONS_BOT_SIGNING_KEY: ${{ secrets.ACTIONS_BOT_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${ACTIONS_BOT_SIGNING_KEY}" ]]; then
+            echo "::error::Missing ACTIONS_BOT_SIGNING_KEY secret"
+            exit 1
+          fi
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "${ACTIONS_BOT_SIGNING_KEY}" > ~/.ssh/actions_bot_signing_key
+          chmod 600 ~/.ssh/actions_bot_signing_key
+          git config --local gpg.format ssh
+          git config --local user.signingkey ~/.ssh/actions_bot_signing_key
+          git config --local commit.gpgsign true
+
       - name: Install tools
         run: |
           # Install jq, yq, and other tools
-          sudo apt-get update && sudo apt-get install -y jq curl
-
-          # Install yq
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
+          sudo apt-get update && sudo apt-get install -y jq curl yq
 
       - name: Check for updates
         id: updates
@@ -51,7 +64,7 @@ jobs:
           # Check Nerd Fonts version
           echo "Checking Nerd Fonts..."
           LATEST_NF=$(curl -s https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest | jq -r '.tag_name' | sed 's/^v//')
-          CURRENT_NF=$(grep -oP 'NERD_FONTS_VERSION="\K[^"]+' install/provision/run_onchange_50-install-fonts.sh.tmpl 2>/dev/null || echo "unknown")
+          CURRENT_NF=$(grep -oP 'NERD_FONTS_VERSION="\K[^"]+' install/provision/run_onchange_50-install-fonts.sh 2>/dev/null || echo "unknown")
           if [[ "$LATEST_NF" != "$CURRENT_NF" && "$LATEST_NF" != "null" ]]; then
             UPDATES="${UPDATES}nerd-fonts: ${CURRENT_NF} -> ${LATEST_NF}\n"
             echo "nerd_fonts_update=true" >> $GITHUB_OUTPUT
@@ -84,6 +97,12 @@ jobs:
 
           if [[ -n "$UPDATES" ]]; then
             echo "has_updates=true" >> $GITHUB_OUTPUT
+            {
+              echo "updates_summary<<EOF"
+              printf '%b' "$UPDATES"
+              echo
+              echo "EOF"
+            } >> $GITHUB_OUTPUT
             printf 'Updates found:\n%b' "$UPDATES"
           else
             echo "has_updates=false" >> $GITHUB_OUTPUT
@@ -96,7 +115,7 @@ jobs:
           # Update Nerd Fonts version
           if [[ "${{ steps.updates.outputs.nerd_fonts_update }}" == "true" ]]; then
             VERSION="${{ steps.updates.outputs.nerd_fonts_version }}"
-            sed -i "s/NERD_FONTS_VERSION=\"[^\"]*\"/NERD_FONTS_VERSION=\"${VERSION}\"/" install/provision/run_onchange_50-install-fonts.sh.tmpl
+            sed -i "s/NERD_FONTS_VERSION=\"[^\"]*\"/NERD_FONTS_VERSION=\"${VERSION}\"/" install/provision/run_onchange_50-install-fonts.sh
             sed -i "s|nerd-fonts/releases/download/v[0-9.]*|nerd-fonts/releases/download/v${VERSION}|g" docs/reference/FONTS.md
           fi
 
@@ -111,7 +130,7 @@ jobs:
         run: |
           git checkout -b "$BRANCH_NAME"
           git add -A
-          git commit -m "chore(deps): automated dependency updates
+          git commit -S -m "chore(deps): automated dependency updates
 
           Updates detected and applied:
           ${{ steps.updates.outputs.updates_summary }}
@@ -180,17 +199,29 @@ jobs:
 
       - name: Commit plugin updates
         if: steps.changes.outputs.has_changes == 'true' && inputs.dry_run != 'true'
+        env:
+          ACTIONS_BOT_SIGNING_KEY: ${{ secrets.ACTIONS_BOT_SIGNING_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [[ -z "${ACTIONS_BOT_SIGNING_KEY}" ]]; then
+            echo "::error::Missing ACTIONS_BOT_SIGNING_KEY secret"
+            exit 1
+          fi
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "${ACTIONS_BOT_SIGNING_KEY}" > ~/.ssh/actions_bot_signing_key
+          chmod 600 ~/.ssh/actions_bot_signing_key
+          git config --local gpg.format ssh
+          git config --local user.signingkey ~/.ssh/actions_bot_signing_key
+          git config --local commit.gpgsign true
           git checkout -b "deps/nvim-plugins-${{ github.run_number }}"
           git add dot_config/nvim/lazy-lock.json
-          git commit -m "chore(nvim): update lazy.nvim plugin lockfile"
+          git commit -S -m "chore(nvim): update lazy.nvim plugin lockfile"
           git push origin "deps/nvim-plugins-${{ github.run_number }}"
 
           gh pr create \
             --title "chore(nvim): update plugin versions" \
             --body "Automated Neovim plugin update via lazy.nvim" \
             --base master
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
