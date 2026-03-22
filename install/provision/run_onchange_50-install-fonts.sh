@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Install Nerd Fonts (JetBrainsMono & Symbols)
 # This script runs when the checksum of this file changes (user triggered or manual update)
 

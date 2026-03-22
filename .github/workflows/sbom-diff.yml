@@ -114,11 +114,13 @@ jobs:
 
       - name: Post PR comment with SBOM diff
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          SBOM_DIFF_SUMMARY: ${{ steps.diff.outputs.diff_summary }}
         with:
           script: |
             const added = parseInt('${{ steps.diff.outputs.added }}') || 0;
             const removed = parseInt('${{ steps.diff.outputs.removed }}') || 0;
-            const diffSummary = `${{ steps.diff.outputs.diff_summary }}`;
+            const diffSummary = process.env.SBOM_DIFF_SUMMARY || 'No package changes detected between base and PR.';
 
             const marker = '<!-- sbom-diff-comment -->';
             const body = [

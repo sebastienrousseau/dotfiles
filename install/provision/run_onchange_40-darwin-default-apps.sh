@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 set -euo pipefail
 
 if [[ "$(uname -s)" != "Darwin" ]]; then

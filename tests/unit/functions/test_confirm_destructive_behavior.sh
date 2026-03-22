@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
-# Behavioral tests for dot_confirm_destructive from dot_config/shell/05-core-safety.sh.tmpl.
+# Behavioral tests for dot_confirm_destructive from dot_config/shell/05-core-safety.sh.
 #
 # Behaviors under test:
 #   - Returns 0 immediately when strict mode is off (default).
@@ -16,16 +16,14 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 
-FUNC_FILE="$REPO_ROOT/dot_config/shell/05-core-safety.sh.tmpl"
+FUNC_FILE="$REPO_ROOT/dot_config/shell/05-core-safety.sh"
 if [[ ! -f "$FUNC_FILE" ]]; then
-  echo "SKIP: 05-core-safety.sh.tmpl not found at $FUNC_FILE"
+  echo "SKIP: 05-core-safety.sh not found at $FUNC_FILE"
   echo "RESULTS:0:0:0"
   exit 0
 fi
-# The .tmpl file is valid bash when no Go template directives are present at
-# the top level (they only appear in optional sections). Source it directly.
 source "$FUNC_FILE" 2>/dev/null || {
-  echo "SKIP: could not source 05-core-safety.sh.tmpl"
+  echo "SKIP: could not source 05-core-safety.sh"
   echo "RESULTS:0:0:0"
   exit 0
 }

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 
 # 10-secrets.sh: Optional secret bucket auto-loader
 # Loads configured secret buckets into the current shell via `dot env load`.
