@@ -86,7 +86,7 @@ tests/            # Test suite (not deployed)
   integration/    # End-to-end tests
   performance/    # Benchmarks
 
-docs/             # Documentation (not deployed)
+docs/             # Documentation and GitHub Pages source
   architecture/   # System design docs
   guides/         # How-to guides
   reference/      # Reference material
