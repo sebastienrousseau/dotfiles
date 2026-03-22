@@ -12,10 +12,12 @@ if ! command -v dot >/dev/null 2>&1; then
   return 0 2>/dev/null || exit 0
 fi
 
-if [[ -n "${ZSH_VERSION:-}" ]]; then
-  _dot_secret_buckets=(${(s:,:)DOTFILES_SECRETS_BUCKET_NAMES})
-else
-  IFS=',' read -r -a _dot_secret_buckets <<<"${DOTFILES_SECRETS_BUCKET_NAMES:-}"
+_dot_secret_buckets=()
+if [[ -n "${DOTFILES_SECRETS_BUCKET_NAMES:-}" ]]; then
+  while IFS= read -r _bucket; do
+    [[ -n "$_bucket" ]] || continue
+    _dot_secret_buckets+=("$_bucket")
+  done < <(printf '%s' "${DOTFILES_SECRETS_BUCKET_NAMES}" | tr ',' '\n')
 fi
 
 for _bucket in "${_dot_secret_buckets[@]}"; do
