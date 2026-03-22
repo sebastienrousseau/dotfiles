@@ -4,7 +4,7 @@
 {{- if eq .chezmoi.os "darwin" }}
 disable = ["vim", "node", "containers", "flatpak", "snap"]
 {{- else }}
-disable = ["vim", "node", "containers", "firmware"]
+disable = ["vim", "node", "containers", "firmware", "helm"]
 {{- end }}
 pre_sudo = true
 no_self_update = true

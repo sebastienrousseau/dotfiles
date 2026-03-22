@@ -55,8 +55,8 @@ zoxide = "latest"
 "aqua:FiloSottile/age" = "latest"
 "aqua:sharkdp/hyperfine" = "latest"
 "aqua:ollama/ollama" = "latest"
-"aqua:Nukesor/pueue/pueue" = "4.0.3"
-"aqua:Nukesor/pueue/pueued" = "4.0.3"
+"aqua:Nukesor/pueue/pueue" = "4.0.4"
+"aqua:Nukesor/pueue/pueued" = "4.0.4"
 
 # Python tools
 poetry = "latest"
