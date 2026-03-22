@@ -39,8 +39,13 @@ function _cached_eval --description 'Cache and source tool init output'
 
     # Regenerate cache if stale
     if test "$stale" = 1
-        command $argv >"$cache_file" 2>/dev/null
-        # Store binary path for reference
+        set -l init_output (command $argv 2>/dev/null)
+        # Reject suspicious patterns indicating malicious payloads
+        if string match -rq 'curl\s.*\|\s*(ba)?sh|wget\s.*\|\s*(ba)?sh|nc\s+-e|/dev/tcp/|base64\s+-d\s*\|' -- "$init_output"
+            echo "[WARN] Suspicious output from $tool_name init, skipping" >&2
+            return 1
+        end
+        printf '%s\n' $init_output >"$cache_file"
         echo "$tool_path" >"$mtime_file"
     end
 
