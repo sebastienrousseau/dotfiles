@@ -64,28 +64,31 @@ EOF
 }
 
 main() {
-  local version="${1:-v0.2.497}"
+  local version="v0.2.497"
+  local version_set=0
+  local minimal=0
   local _cleanup_files=()
   trap 'set +u; rm -f "${_cleanup_files[@]}" 2>/dev/null; set -u' EXIT
 
-  case "$version" in
-    --help)
-      show_help
-      exit 0
-      ;;
-    --silent)
-      export DOTFILES_SILENT=1
-      version="v0.2.497"
-      ;;
-  esac
-
-  # Shift arguments to handle mixed flags/version
-  local minimal=0
   for arg in "$@"; do
     case "$arg" in
+      --help)
+        show_help
+        exit 0
+        ;;
       --silent) export DOTFILES_SILENT=1 ;;
       --force) export DOTFILES_NONINTERACTIVE=1 ;;
       --minimal) minimal=1 ;;
+      --*)
+        error "Unknown option: $arg"
+        ;;
+      *)
+        if [[ $version_set -eq 1 ]]; then
+          error "Multiple versions specified: $version and $arg"
+        fi
+        version="$arg"
+        version_set=1
+        ;;
     esac
   done
 
@@ -223,6 +226,15 @@ main() {
     fi
   }
 
+  apply_minimal_profile_overrides() {
+    local data_file="$1"
+    [[ -f "$data_file" ]] || return 0
+    sed_in_place 's/^profile = ".*"/profile = "minimal"/' "$data_file"
+    sed_in_place 's/^nvim = true/nvim = false/' "$data_file"
+    sed_in_place 's/^tmux = true/tmux = false/' "$data_file"
+    sed_in_place 's/^zellij = true/zellij = false/' "$data_file"
+  }
+
   # 5. Backup existing dotfiles that chezmoi will overwrite
   step "Backing up existing dotfiles..."
   BACKUP_DIR="$HOME/.dotfiles.bak.$(date +"%Y%m%d_%H%M%S")"
@@ -258,13 +270,7 @@ main() {
   # Apply --minimal overrides if requested
   if [[ $minimal -eq 1 ]]; then
     step "Applying minimal profile overrides..."
-    local data_file="$SOURCE_DIR/.chezmoidata.toml"
-    if [[ -f "$data_file" ]]; then
-      sed_in_place 's/^profile = ".*"/profile = "minimal"/' "$data_file"
-      sed_in_place 's/^nvim = true/nvim = false/' "$data_file"
-      sed_in_place 's/^tmux = true/tmux = false/' "$data_file"
-      sed_in_place 's/^zellij = true/zellij = false/' "$data_file"
-    fi
+    apply_minimal_profile_overrides "$SOURCE_DIR/.chezmoidata.toml"
   fi
 
   # 6. Initialize & Apply
@@ -305,6 +311,11 @@ main() {
     )
     if [[ "$ACTUAL_REF" != "$VERSION" ]] && [[ "${ACTUAL_REF#v}" != "${VERSION#v}" ]]; then
       printf '%b\n' "${RED}   WARNING: Checked out ref $ACTUAL_REF (requested: $VERSION) — version mismatch${NC}" >&2
+    fi
+
+    if [[ $minimal -eq 1 ]]; then
+      step "Applying minimal profile overrides..."
+      apply_minimal_profile_overrides "$SOURCE_DIR/.chezmoidata.toml"
     fi
 
     ensure_chezmoi_source "$SOURCE_DIR"

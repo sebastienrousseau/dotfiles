@@ -67,6 +67,28 @@ assert_file_contains "$RESTORE_FILE" "--git, -g" "restore supports -g"
 assert_file_contains "$RESTORE_FILE" "--diff, -d" "restore supports -d"
 assert_file_contains "$RESTORE_FILE" "--dry-run, -n" "restore supports -n"
 
+test_start "restore_latest_preserves_hidden_paths"
+restore_sandbox="$(mktemp -d)"
+trap 'rm -rf "$restore_sandbox"' RETURN
+mkdir -p "$restore_sandbox/home" "$restore_sandbox/data/dotfiles/backups/backup-20260322_120000/.config/zsh"
+printf 'setopt\n' >"$restore_sandbox/data/dotfiles/backups/backup-20260322_120000/.zshrc"
+printf 'export TEST=1\n' >"$restore_sandbox/data/dotfiles/backups/backup-20260322_120000/.config/zsh/.zshrc"
+restore_output="$(
+  HOME="$restore_sandbox/home" \
+    XDG_DATA_HOME="$restore_sandbox/data" \
+    bash "$RESTORE_FILE" --latest 2>&1
+)"
+if [[ -f "$restore_sandbox/home/.zshrc" ]] \
+  && [[ -f "$restore_sandbox/home/.config/zsh/.zshrc" ]] \
+  && grep -q "Restored: .zshrc" <<<"$restore_output" \
+  && grep -q "Restored: .config" <<<"$restore_output"; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: restore_latest restores hidden files and nested paths"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: restore_latest should restore hidden files and nested paths"
+fi
+
 echo ""
 echo "Restore command tests completed."
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
