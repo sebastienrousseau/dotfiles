@@ -44,9 +44,9 @@ list_backups() {
   ui_header "Available Backups"
   echo "─────────────────────────────────────────"
 
-  find "$BACKUP_DIR" -maxdepth 1 -type d -name "backup-*" -printf "%T@ %f\n" 2>/dev/null | sort -rn | cut -d' ' -f2- | while read -r backup; do
+  while IFS= read -r backup; do
     echo "  $backup"
-  done
+  done < <(list_backup_names)
 
   echo ""
   echo ""
@@ -149,7 +149,7 @@ restore_latest() {
   fi
 
   local latest
-  latest=$(find "$BACKUP_DIR" -maxdepth 1 -type d -name "backup-*" -printf "%T@ %f\n" 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)
+  latest=$(list_backup_names | head -1)
 
   if [[ -z "$latest" ]]; then
     log_error "No backups found"
@@ -167,6 +167,27 @@ restore_latest() {
     cp -r "$item" "$target"
     log_success "Restored: $rel_path"
   done < <(find "$backup_path" -mindepth 1 -maxdepth 1 -print0)
+}
+
+list_backup_names() {
+  local backup_path
+
+  shopt -s nullglob
+  for backup_path in "$BACKUP_DIR"/backup-*; do
+    [[ -d "$backup_path" ]] || continue
+    printf '%s\n' "${backup_path##*/}"
+  done | while IFS= read -r backup_name; do
+    printf '%s\t%s\n' "$(portable_mtime "$BACKUP_DIR/$backup_name")" "$backup_name"
+  done | sort -rn | cut -f2-
+  shopt -u nullglob
+}
+
+portable_mtime() {
+  if stat -c %Y "$1" >/dev/null 2>&1; then
+    stat -c %Y "$1"
+  else
+    stat -f %m "$1"
+  fi
 }
 
 # Parse arguments
