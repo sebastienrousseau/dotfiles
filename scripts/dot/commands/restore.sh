@@ -116,6 +116,7 @@ create_backup() {
   local backup_name
   backup_name="backup-$(date +%Y%m%d_%H%M%S)"
   local backup_path="$BACKUP_DIR/$backup_name"
+  local rel_path
 
   mkdir -p "$backup_path"
 
@@ -132,7 +133,9 @@ create_backup() {
 
   for f in "${files_to_backup[@]}"; do
     if [[ -e "$f" ]]; then
-      cp -r "$f" "$backup_path/" 2>/dev/null || true
+      rel_path="${f#"$HOME"/}"
+      mkdir -p "$backup_path/$(dirname "$rel_path")"
+      cp -r "$f" "$backup_path/$rel_path" 2>/dev/null || true
     fi
   done
 
@@ -156,14 +159,14 @@ restore_latest() {
   log_info "Restoring from: $latest"
 
   local backup_path="$BACKUP_DIR/$latest"
-  local target
-  for item in "$backup_path"/*; do
-    if [[ -e "$item" ]]; then
-      target="$HOME/$(basename "$item")"
-      cp -r "$item" "$target"
-      log_success "Restored: $(basename "$item")"
-    fi
-  done
+  local item rel_path target
+  while IFS= read -r -d '' item; do
+    rel_path="${item#"$backup_path"/}"
+    target="$HOME/$rel_path"
+    mkdir -p "$(dirname "$target")"
+    cp -r "$item" "$target"
+    log_success "Restored: $rel_path"
+  done < <(find "$backup_path" -mindepth 1 -maxdepth 1 -print0)
 }
 
 # Parse arguments
