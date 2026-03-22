@@ -24,7 +24,11 @@ resolve_source_dir() {
   local dir=""
   local repo_candidate=""
 
-  repo_candidate="$(cd "$SCRIPT_DIR/../../.." && pwd 2>/dev/null || true)"
+  if repo_candidate="$(cd "$SCRIPT_DIR/../../.." && pwd 2>/dev/null)"; then
+    :
+  else
+    repo_candidate=""
+  fi
   if [[ -n "$repo_candidate" && -f "$repo_candidate/scripts/dot/lib/ui.sh" ]]; then
     dir="$repo_candidate"
   elif [ -n "${CHEZMOI_SOURCE_DIR:-}" ] && [ -d "$CHEZMOI_SOURCE_DIR" ]; then
