@@ -5,7 +5,7 @@
 <h1 align="center">.dotfiles</h1>
 
 <p align="center">
-  <strong>A signed, local-first workstation baseline for macOS, Linux, and WSL, with one CLI for apply, diagnostics, repair, and attestation.</strong>
+  <strong>A signed, local-first Trusted agent workstation baseline for macOS, Linux, and WSL, with one CLI for apply, diagnostics, repair, and attestation.</strong>
 </p>
 
 <p align="center">
