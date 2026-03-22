@@ -115,7 +115,14 @@ _cached_eval() {
   if [[ -f "$cache" ]] && [[ -z "$bin" || "$cache" -nt "$bin" ]]; then
     source "$cache"
   else
-    "$@" > "$cache" 2>/dev/null
+    local init_output
+    init_output=$("$@" 2>/dev/null)
+    # Reject suspicious patterns indicating malicious payloads
+    if [[ "$init_output" =~ (curl[[:space:]].*\|[[:space:]]*(ba)?sh|wget[[:space:]].*\|[[:space:]]*(ba)?sh|nc[[:space:]]+-e|/dev/tcp/|base64[[:space:]]+-d[[:space:]]*\|) ]]; then
+      print -u2 "[WARN] Suspicious output from $label init, skipping"
+      return 1
+    fi
+    print -r -- "$init_output" > "$cache"
     source "$cache"
     { zcompile "$cache" } &!
   fi
