@@ -45,7 +45,9 @@ function _cached_eval --description 'Cache and source tool init output'
             echo "[WARN] Suspicious output from $tool_name init, skipping" >&2
             return 1
         end
-        printf '%s\n' $init_output >"$cache_file"
+        set -l tmp_cache "$cache_file.tmp.%self"
+        printf '%s\n' $init_output >"$tmp_cache"
+        mv "$tmp_cache" "$cache_file"  # atomic rename
         echo "$tool_path" >"$mtime_file"
     end
 

@@ -7,7 +7,7 @@
 # jane.doe@example.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI...
 #
 # Git verifies SSH-signed commits against this trust roster.
-{{- if eq .git_email "sebastian.rousseau@gmail.com" }}
+{{- if and (hasKey . "git_email") .git_email (eq .git_email "sebastian.rousseau@gmail.com") }}
 sebastian.rousseau@gmail.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKY+QFE+TjJyo1txN/p+THGR2nWYmSjojdKmYWEvD4dh
 sebastian.rousseau@gmail.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII32YuD6LxBOeFb5kG4Fqbm62kn9OkcHNPJtktO8iYVF
 sebastian.rousseau@gmail.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGeTXmJCl9Nw7fnsc2PPSkvIRgEIG8LJGulQoes2Dm5t
