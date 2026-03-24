@@ -25,8 +25,8 @@ display_time = true
 
 [linux]
 {{- if ne .chezmoi.os "darwin" }}
-yay_arguments = "-Syu --noconfirm --ignore linux-cachyos,linux-cachyos-headers,linux-cachyos-lts,linux-cachyos-lts-headers"
-paru_arguments = "-Syu --noconfirm"
+arch_package_manager = "paru"
+yay_arguments = "--noconfirm --ignore linux-cachyos,linux-cachyos-headers,linux-cachyos-lts,linux-cachyos-lts-headers"
 {{- end }}
 
 [git]
