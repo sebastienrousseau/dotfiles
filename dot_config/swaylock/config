@@ -1,0 +1,43 @@
+daemonize
+show-failed-attempts
+ignore-empty-password
+
+# Colors (Catppuccin Mocha)
+color=1e1e2e
+
+# Inside ring (typing)
+inside-color=1e1e2e
+inside-clear-color=1e1e2e
+inside-ver-color=1e1e2e
+inside-wrong-color=1e1e2e
+
+# Ring
+ring-color=585b70
+ring-clear-color=f5e0dc
+ring-ver-color=89b4fa
+ring-wrong-color=f38ba8
+
+# Key highlight
+key-hl-color=a6e3a1
+bs-hl-color=f38ba8
+
+# Separator
+separator-color=00000000
+
+# Text
+text-color=cdd6f4
+text-clear-color=cdd6f4
+text-ver-color=cdd6f4
+text-wrong-color=f38ba8
+
+# Layout
+indicator-radius=120
+indicator-thickness=10
+line-color=00000000
+line-clear-color=00000000
+line-ver-color=00000000
+line-wrong-color=00000000
+
+# Font
+font=Inter
+font-size=24
