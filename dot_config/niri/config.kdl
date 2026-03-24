@@ -18,20 +18,10 @@ gestures {
 input {
     keyboard {
         xkb {
-            // You can set rules, model, layout, variant and options.
-            // For more information, see xkeyboard-config(7).
-
-            // For example:
-            // layout "us,ru"
-            // options "grp:win_space_toggle,compose:ralt,ctrl:nocaps"
-
-            // If this section is empty, niri will fetch xkb settings
-            // from org.freedesktop.locale1. You can control these using
-            // localectl set-x11-keymap.
         }
-
-        // Enable numlock on startup, omitting this setting disables it.
         numlock
+        repeat-delay 250
+        repeat-rate 35
     }
 
     // Next sections include libinput settings.
@@ -130,13 +120,9 @@ layout {
     // `draw-border-with-background`.
     border {
         off
-        width 4
-        active-color   "#707070"      // Neutral gray
-        inactive-color "#d0d0d0"      // Light gray
-        urgent-color   "#cc4444"      // Softer red
     }
     shadow {
-        softness 30
+        softness 15
         spread 5
         offset x=0 y=5
         color "#0007"
@@ -161,6 +147,9 @@ overview {
 
 // Idle management — lock screen after 5 min, monitors off after 10 min
 spawn-at-startup "swayidle" "-w" "timeout" "300" "swaylock -f" "timeout" "600" "niri msg action power-off-monitors" "before-sleep" "swaylock -f"
+
+// Clipboard persistence — wl-paste feeds cliphist for history across app closes
+spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
 
 environment {
   XDG_CURRENT_DESKTOP "niri"
