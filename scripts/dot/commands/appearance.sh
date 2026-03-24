@@ -16,7 +16,19 @@ cmd_theme() {
 }
 
 cmd_wallpaper() {
-  run_script "scripts/theme/wallpaper-sync.sh" "Wallpaper script" "$@"
+  case "${1:-sync}" in
+    sync)
+      shift 2>/dev/null || true
+      run_script "scripts/theme/wallpaper-sync.sh" "Wallpaper sync script" "$@"
+      ;;
+    rotate)
+      shift
+      run_script "scripts/theme/wallpaper-rotate.sh" "Wallpaper rotate script" "$@"
+      ;;
+    *)
+      run_script "scripts/theme/wallpaper-sync.sh" "Wallpaper sync script" "$@"
+      ;;
+  esac
 }
 
 cmd_fonts() {
