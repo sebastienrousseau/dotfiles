@@ -1,7 +1,7 @@
 {{- /* GTK-4.0 custom CSS for Catppuccin theming */ -}}
 {{- $theme := .theme -}}
 {{- $is_dark := false -}}
-{{- if or (hasSuffix $theme "-night") (hasSuffix $theme "-storm") (hasSuffix $theme "-moon") (hasSuffix $theme "-mocha") (hasSuffix $theme "-frappe") (hasSuffix $theme "-macchiato") (hasSuffix $theme "-dark") (hasSuffix $theme "-wave") (hasSuffix $theme "-dragon") (eq $theme "dracula") (eq $theme "nord") (eq $theme "onedark") -}}
+{{- if or (hasSuffix "-night" $theme) (hasSuffix "-storm" $theme) (hasSuffix "-moon" $theme) (hasSuffix "-mocha" $theme) (hasSuffix "-frappe" $theme) (hasSuffix "-macchiato" $theme) (hasSuffix "-dark" $theme) (hasSuffix "-wave" $theme) (hasSuffix "-dragon" $theme) (eq $theme "dracula") (eq $theme "nord") (eq $theme "onedark") -}}
 {{- $is_dark = true -}}
 {{- end -}}
 
@@ -62,7 +62,7 @@
 
 /* GTK4 Custom Styling for {{ $theme }} */
 
-{{- if hasPrefix $theme "catppuccin-" }}
+{{- if hasPrefix "catppuccin-" $theme }}
 /* Catppuccin GTK4 color scheme */
 @define-color accent_color {{ index $colors "blue" }};
 @define-color accent_bg_color {{ index $colors "blue" }};
@@ -129,11 +129,11 @@ button:active {
 }
 
 button.suggested-action {
-  box-shadow: 0 2px 6px {{ if hasPrefix $theme "catppuccin-" }}{{ index $colors "blue" }}40{{ else }}#3584e440{{ end }};
+  box-shadow: 0 2px 6px {{ if hasPrefix "catppuccin-" $theme }}{{ index $colors "blue" }}40{{ else }}#3584e440{{ end }};
 }
 
 button.destructive-action {
-  box-shadow: 0 2px 6px {{ if hasPrefix $theme "catppuccin-" }}{{ index $colors "red" }}40{{ else }}#e01b2440{{ end }};
+  box-shadow: 0 2px 6px {{ if hasPrefix "catppuccin-" $theme }}{{ index $colors "red" }}40{{ else }}#e01b2440{{ end }};
 }
 
 /* Entry field improvements */
@@ -144,7 +144,7 @@ entry {
 }
 
 entry:focus {
-  box-shadow: 0 0 0 2px {{ if hasPrefix $theme "catppuccin-" }}{{ index $colors "blue" }}{{ else }}#3584e4{{ end }},
+  box-shadow: 0 0 0 2px {{ if hasPrefix "catppuccin-" $theme }}{{ index $colors "blue" }}{{ else }}#3584e4{{ end }},
               0 2px 6px rgba(0, 0, 0, 0.1);
   transform: scale(1.01);
 }
@@ -163,8 +163,8 @@ switch slider {
 }
 
 switch:checked {
-  background: {{ if hasPrefix $theme "catppuccin-" }}{{ index $colors "blue" }}{{ else }}#3584e4{{ end }};
-  box-shadow: 0 0 8px {{ if hasPrefix $theme "catppuccin-" }}{{ index $colors "blue" }}40{{ else }}#3584e440{{ end }};
+  background: {{ if hasPrefix "catppuccin-" $theme }}{{ index $colors "blue" }}{{ else }}#3584e4{{ end }};
+  box-shadow: 0 0 8px {{ if hasPrefix "catppuccin-" $theme }}{{ index $colors "blue" }}40{{ else }}#3584e440{{ end }};
 }
 
 /* Progress bar improvements */
@@ -174,14 +174,14 @@ progressbar {
 
 progressbar > trough {
   border-radius: 10px;
-  {{ if hasPrefix $theme "catppuccin-" }}
+  {{ if hasPrefix "catppuccin-" $theme }}
   background-color: {{ index $colors "surface0" }};
   {{ end }}
 }
 
 progressbar > trough > progress {
   border-radius: 10px;
-  {{ if hasPrefix $theme "catppuccin-" }}
+  {{ if hasPrefix "catppuccin-" $theme }}
   background: linear-gradient(90deg, {{ index $colors "blue" }}, {{ index $colors "blue" }}dd);
   {{ end }}
 }
@@ -200,7 +200,7 @@ radiobutton radio {
 
 checkbutton check:checked,
 radiobutton radio:checked {
-  {{ if hasPrefix $theme "catppuccin-" }}
+  {{ if hasPrefix "catppuccin-" $theme }}
   background-color: {{ index $colors "blue" }};
   box-shadow: 0 0 6px {{ index $colors "blue" }}40;
   {{ end }}
@@ -213,28 +213,28 @@ scrollbar {
 
 scrollbar slider {
   border-radius: 8px;
-  {{ if hasPrefix $theme "catppuccin-" }}
+  {{ if hasPrefix "catppuccin-" $theme }}
   background-color: {{ index $colors "surface0" }};
   {{ end }}
   transition: all 200ms ease;
 }
 
 scrollbar slider:hover {
-  {{ if hasPrefix $theme "catppuccin-" }}
+  {{ if hasPrefix "catppuccin-" $theme }}
   background-color: {{ index $colors "subtext1" }};
   {{ end }}
 }
 
 /* Notebook tab improvements */
 notebook > header {
-  {{ if hasPrefix $theme "catppuccin-" }}
+  {{ if hasPrefix "catppuccin-" $theme }}
   background-color: {{ index $colors "mantle" }};
   {{ end }}
 }
 
 notebook > header > tabs > tab {
   border-radius: 8px 8px 0 0;
-  {{ if hasPrefix $theme "catppuccin-" }}
+  {{ if hasPrefix "catppuccin-" $theme }}
   background-color: {{ index $colors "surface0" }};
   color: {{ index $colors "subtext1" }};
   {{ end }}
@@ -242,7 +242,7 @@ notebook > header > tabs > tab {
 }
 
 notebook > header > tabs > tab:checked {
-  {{ if hasPrefix $theme "catppuccin-" }}
+  {{ if hasPrefix "catppuccin-" $theme }}
   background-color: {{ index $colors "blue" }};
   color: {{ index $colors "base" }};
   {{ end }}
@@ -251,7 +251,7 @@ notebook > header > tabs > tab:checked {
 
 /* Sidebar improvements */
 .sidebar {
-  {{ if hasPrefix $theme "catppuccin-" }}
+  {{ if hasPrefix "catppuccin-" $theme }}
   background-color: {{ index $colors "mantle" }};
   color: {{ index $colors "text" }};
   {{ end }}
@@ -264,7 +264,7 @@ notebook > header > tabs > tab:checked {
 }
 
 .sidebar row:hover {
-  {{ if hasPrefix $theme "catppuccin-" }}
+  {{ if hasPrefix "catppuccin-" $theme }}
   background-color: {{ index $colors "surface0" }};
   {{ end }}
 }
@@ -273,7 +273,7 @@ notebook > header > tabs > tab:checked {
 popover {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  {{ if hasPrefix $theme "catppuccin-" }}
+  {{ if hasPrefix "catppuccin-" $theme }}
   background-color: {{ index $colors "surface0" }};
   {{ end }}
 }
@@ -291,7 +291,7 @@ menubar > menuitem {
 menu {
   border-radius: 8px;
   box-shadow: 0 3px 9px rgba(0, 0, 0, 0.15);
-  {{ if hasPrefix $theme "catppuccin-" }}
+  {{ if hasPrefix "catppuccin-" $theme }}
   background-color: {{ index $colors "surface0" }};
   {{ end }}
 }
@@ -302,7 +302,7 @@ menu > menuitem {
 }
 
 menu > menuitem:hover {
-  {{ if hasPrefix $theme "catppuccin-" }}
+  {{ if hasPrefix "catppuccin-" $theme }}
   background-color: {{ index $colors "blue" }};
   color: {{ index $colors "base" }};
   {{ end }}
