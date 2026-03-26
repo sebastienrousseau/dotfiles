@@ -1,44 +1,12 @@
 {{- /* GNOME Shell theme configuration via dconf */ -}}
-{{- $theme := .theme -}}
-{{- $is_dark := false -}}
-{{- if or (hasSuffix "-night" $theme) (hasSuffix "-storm" $theme) (hasSuffix "-moon" $theme) (hasSuffix "-mocha" $theme) (hasSuffix "-frappe" $theme) (hasSuffix "-macchiato" $theme) (hasSuffix "-dark" $theme) (hasSuffix "-wave" $theme) (hasSuffix "-dragon" $theme) (eq $theme "dracula") (eq $theme "nord") (eq $theme "onedark") -}}
-{{- $is_dark = true -}}
-{{- end -}}
+{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end -}}
+{{- $is_dark := eq $t.mode "dark" -}}
+{{- $shell_theme := $t.app.gnome_shell -}}
+{{- $background_color := $t.term.bg -}}
+{{- $accent_color := $t.ui.accent -}}
 
-{{- $shell_theme := "" -}}
-{{- $background_color := "" -}}
-{{- $accent_color := "" -}}
-
-{{- if hasPrefix "catppuccin-" $theme -}}
-  {{- if eq $theme "catppuccin-latte" -}}
-    {{- $shell_theme = "Catppuccin-Latte" -}}
-    {{- $background_color = "#eff1f5" -}}
-    {{- $accent_color = "#1e66f5" -}}
-  {{- else if eq $theme "catppuccin-frappe" -}}
-    {{- $shell_theme = "Catppuccin-Frappe" -}}
-    {{- $background_color = "#303446" -}}
-    {{- $accent_color = "#8caaee" -}}
-  {{- else if eq $theme "catppuccin-macchiato" -}}
-    {{- $shell_theme = "Catppuccin-Macchiato" -}}
-    {{- $background_color = "#24273a" -}}
-    {{- $accent_color = "#8aadf4" -}}
-  {{- else if eq $theme "catppuccin-mocha" -}}
-    {{- $shell_theme = "Catppuccin-Mocha" -}}
-    {{- $background_color = "#1e1e2e" -}}
-    {{- $accent_color = "#89b4fa" -}}
-  {{- end -}}
-{{- else -}}
-  {{- $shell_theme = "" -}}
-  {{- if $is_dark -}}
-    {{- $background_color = "#2d2d2d" -}}
-    {{- $accent_color = "#3584e4" -}}
-  {{- else -}}
-    {{- $background_color = "#fafafa" -}}
-    {{- $accent_color = "#3584e4" -}}
-  {{- end -}}
-{{- end -}}
-
-# GNOME Shell theme settings for {{ $theme }}
+# GNOME Shell theme settings for {{ default "catppuccin-mocha" .theme }}
 # Apply with: dconf load /org/gnome/shell/ < shell-theme.dconf
 
 [/]
@@ -52,12 +20,8 @@ name=''
 {{- end }}
 
 [/org/gnome/desktop/interface]
-{{- if hasPrefix "catppuccin-" $theme }}
-gtk-theme='{{ if eq $theme "catppuccin-latte" }}Catppuccin-Latte-Standard-Blue-Light{{ else if eq $theme "catppuccin-frappe" }}Catppuccin-Frappe-Standard-Blue-Dark{{ else if eq $theme "catppuccin-macchiato" }}Catppuccin-Macchiato-Standard-Blue-Dark{{ else }}Catppuccin-Mocha-Standard-Blue-Dark{{ end }}'
-{{- else }}
-gtk-theme='{{ if $is_dark }}Adwaita-dark{{ else }}Adwaita{{ end }}'
-{{- end }}
-icon-theme='{{ if $is_dark }}Papirus-Dark{{ else }}Papirus{{ end }}'
+gtk-theme='{{ $t.app.gnome_gtk }}'
+icon-theme='{{ $t.app.gtk_icon }}'
 cursor-theme='Adwaita'
 cursor-size=24
 font-name='Inter 10'
@@ -69,7 +33,7 @@ enable-hot-corners=true
 text-scaling-factor=1.0
 
 [/org/gnome/desktop/wm/preferences]
-theme='{{ if hasPrefix "catppuccin-" $theme }}{{ $shell_theme }}{{ else }}{{ if $is_dark }}Adwaita-dark{{ else }}Adwaita{{ end }}{{ end }}'
+theme='{{ if $shell_theme }}{{ $shell_theme }}{{ else }}{{ $t.app.gnome_gtk }}{{ end }}'
 button-layout='close,minimize,maximize:'
 titlebar-font='Inter Bold 10'
 
@@ -78,9 +42,9 @@ dynamic-workspaces=true
 edge-tiling=true
 
 [/org/gnome/desktop/background]
-{{- if hasPrefix "catppuccin-" $theme }}
-picture-uri='file:///usr/share/backgrounds/catppuccin/{{ if eq $theme "catppuccin-latte" }}cat_latte.png{{ else if eq $theme "catppuccin-frappe" }}cat_frappe.png{{ else if eq $theme "catppuccin-macchiato" }}cat_macchiato.png{{ else }}cat_mocha.png{{ end }}'
-picture-uri-dark='file:///usr/share/backgrounds/catppuccin/{{ if eq $theme "catppuccin-latte" }}cat_latte.png{{ else if eq $theme "catppuccin-frappe" }}cat_frappe.png{{ else if eq $theme "catppuccin-macchiato" }}cat_macchiato.png{{ else }}cat_mocha.png{{ end }}'
+{{- if $t.app.cat_wallpaper }}
+picture-uri='file:///usr/share/backgrounds/catppuccin/{{ $t.app.cat_wallpaper }}'
+picture-uri-dark='file:///usr/share/backgrounds/catppuccin/{{ $t.app.cat_wallpaper }}'
 {{- end }}
 primary-color='{{ $background_color }}'
 secondary-color='{{ $accent_color }}'
@@ -88,8 +52,8 @@ color-shading-type='solid'
 picture-options='zoom'
 
 [/org/gnome/desktop/screensaver]
-{{- if hasPrefix "catppuccin-" $theme }}
-picture-uri='file:///usr/share/backgrounds/catppuccin/{{ if eq $theme "catppuccin-latte" }}cat_latte.png{{ else if eq $theme "catppuccin-frappe" }}cat_frappe.png{{ else if eq $theme "catppuccin-macchiato" }}cat_macchiato.png{{ else }}cat_mocha.png{{ end }}'
+{{- if $t.app.cat_wallpaper }}
+picture-uri='file:///usr/share/backgrounds/catppuccin/{{ $t.app.cat_wallpaper }}'
 {{- end }}
 primary-color='{{ $background_color }}'
 secondary-color='{{ $accent_color }}'

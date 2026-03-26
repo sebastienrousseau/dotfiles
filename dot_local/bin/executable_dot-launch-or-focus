@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+## dot-launch-or-focus — Launch or focus an app via niri IPC.
+##
+## Checks if app is already running and focuses it, or launches it if not.
+## Supports both shortname (ghostty) and reverse DNS (com.mitchellh.ghostty).
+##
+## # Usage
+##   dot-launch-or-focus ghostty
+##   dot-launch-or-focus com.mitchellh.ghostty
+##   dot-launch-or-focus firefox --private-window
+
+set -euo pipefail
+
+if [[ $# -lt 1 ]]; then
+  echo "Usage: dot-launch-or-focus <app> [args...]" >&2
+  exit 1
+fi
+
+APP="${1}"
+
+# Find the last opened instance matching the app_id (case-insensitive suffix match).
+APP_ID=$(
+  niri msg --json windows |
+    jq --arg app "${APP}" '
+    [
+      .[]
+      | select(
+          .app_id
+          | ascii_downcase
+          | endswith($app | ascii_downcase)
+        )
+    ]
+    [-1]
+    | .id
+  '
+)
+
+if [[ "${APP_ID}" == "null" || -z "${APP_ID}" ]]; then
+  shift
+  # Extract shortname from reverse DNS (com.mitchellh.ghostty → ghostty)
+  SPAWN_APP="${APP##*.}"
+  niri msg action spawn -- "${SPAWN_APP}" "$@"
+else
+  niri msg action focus-window --id "${APP_ID}"
+fi

@@ -1,48 +1,9 @@
-{{- /* GTK-3.0 Settings with Catppuccin theme support */ -}}
-{{- $theme := .theme -}}
-{{- $is_dark := false -}}
-{{- if or (hasSuffix "-night" $theme) (hasSuffix "-storm" $theme) (hasSuffix "-moon" $theme) (hasSuffix "-mocha" $theme) (hasSuffix "-frappe" $theme) (hasSuffix "-macchiato" $theme) (hasSuffix "-dark" $theme) (hasSuffix "-wave" $theme) (hasSuffix "-dragon" $theme) (eq $theme "dracula") (eq $theme "nord") (eq $theme "onedark") -}}
-{{- $is_dark = true -}}
-{{- end -}}
-
-{{- $gtk_theme := "" -}}
-{{- $icon_theme := "" -}}
+{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end -}}
+{{- $is_dark := eq $t.mode "dark" -}}
+{{- $gtk_theme := $t.app.gtk_theme -}}
+{{- $icon_theme := $t.app.gtk_icon -}}
 {{- $cursor_theme := "Adwaita" -}}
-
-{{- if hasPrefix "catppuccin-" $theme -}}
-  {{- if eq $theme "catppuccin-latte" -}}
-    {{- $gtk_theme = "catppuccin-latte-blue-standard+default" -}}
-    {{- $icon_theme = "Papirus-Light" -}}
-  {{- else if eq $theme "catppuccin-frappe" -}}
-    {{- $gtk_theme = "catppuccin-frappe-blue-standard+default" -}}
-    {{- $icon_theme = "Papirus-Dark" -}}
-  {{- else if eq $theme "catppuccin-macchiato" -}}
-    {{- $gtk_theme = "catppuccin-macchiato-blue-standard+default" -}}
-    {{- $icon_theme = "Papirus-Dark" -}}
-  {{- else if eq $theme "catppuccin-mocha" -}}
-    {{- $gtk_theme = "catppuccin-mocha-blue-standard+default" -}}
-    {{- $icon_theme = "Papirus-Dark" -}}
-  {{- else -}}
-    {{- $gtk_theme = "catppuccin-mocha-blue-standard+default" -}}
-    {{- $icon_theme = "Papirus-Dark" -}}
-  {{- end -}}
-{{- else if hasPrefix "tokyonight-" $theme -}}
-  {{- if $is_dark -}}
-    {{- $gtk_theme = "Adwaita-dark" -}}
-    {{- $icon_theme = "Papirus-Dark" -}}
-  {{- else -}}
-    {{- $gtk_theme = "Adwaita" -}}
-    {{- $icon_theme = "Papirus-Light" -}}
-  {{- end -}}
-{{- else -}}
-  {{- if $is_dark -}}
-    {{- $gtk_theme = "Adwaita-dark" -}}
-    {{- $icon_theme = "Papirus-Dark" -}}
-  {{- else -}}
-    {{- $gtk_theme = "Adwaita" -}}
-    {{- $icon_theme = "Papirus" -}}
-  {{- end -}}
-{{- end -}}
 
 [Settings]
 gtk-theme-name={{ $gtk_theme }}

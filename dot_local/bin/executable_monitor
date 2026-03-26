@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+## monitor — GPU-aware system monitoring in tmux.
+##
+## Opens btop alongside an auto-detected GPU monitor in a tmux split.
+##
+## # Usage
+##   monitor               # Opens btop + GPU monitor
+
+set -euo pipefail
+
+# Auto-detect GPU monitoring tool
+if command -v nvtop &>/dev/null; then
+  gpu_command=(nvtop)
+elif command -v amdgpu_top &>/dev/null; then
+  gpu_command=(amdgpu_top --dark)
+elif command -v nvidia-smi &>/dev/null; then
+  gpu_command=(nvidia-smi)
+elif command -v intel_gpu_top &>/dev/null; then
+  gpu_command=(sudo intel_gpu_top)
+else
+  gpu_command=(bash -c "printf 'No GPU monitoring tools available\n\nInstall nvtop, amdgpu_top, nvidia-smi, or intel_gpu_top.\n'; read -rp 'Press Enter to close...'")
+fi
+
+# If inside tmux, open as new window; otherwise create a new session
+tmux_command=(new-session -s)
+[[ -n "${TMUX:-}" ]] && tmux_command=(new-window -n)
+
+tmux "${tmux_command[@]}" "monitor" "btop" \; split-window "${gpu_command[@]}"

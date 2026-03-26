@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+## dtags — List sorted tags for a Docker Hub image.
+##
+## # Usage
+##   dtags python
+##   dtags node
+##   dtags ubuntu
+
+set -euo pipefail
+
+image="${1:-}"
+
+if [[ -z "${image}" ]]; then
+  echo "Usage: dtags <image>" >&2
+  exit 1
+fi
+
+curl --silent \
+  "https://registry.hub.docker.com/v2/repositories/library/${image}/tags?page_size=1000" |
+  jq -r ".results[].name" | sort --version-sort

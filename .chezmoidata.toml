@@ -2,8 +2,14 @@
 dotfiles_version = "0.2.498"
 profile = "laptop"
 
+# Machine preset — set per-host in ~/.config/chezmoi/chezmoi.toml:
+#   [data]
+#   machine = "macbook-t2"
+# See .chezmoidata/hardware.toml for available presets.
+machine = ""
+
 # Visual theme
-theme = "catppuccin-mocha"
+theme = "macos-tahoe-dark"
 
 # Terminal settings
 terminal_font_family = "JetBrainsMono Nerd Font"
@@ -21,6 +27,11 @@ signingkey = ""
 [features]
 # Shell hardening
 alias_wrapper = false
+
+# DMS (Dank Material Shell) — dot-theme-sync feeds accent colors to
+# matugen for desktop chrome (niri borders, GTK). Terminal emulators
+# use exact theme colors from .chezmoidata/themes.toml.
+dms = true
 
 # Terminal multiplexers
 zellij = false

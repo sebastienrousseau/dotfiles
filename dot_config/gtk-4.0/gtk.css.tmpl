@@ -1,98 +1,41 @@
-{{- /* GTK-4.0 custom CSS for Catppuccin theming */ -}}
-{{- $theme := .theme -}}
-{{- $is_dark := false -}}
-{{- if or (hasSuffix "-night" $theme) (hasSuffix "-storm" $theme) (hasSuffix "-moon" $theme) (hasSuffix "-mocha" $theme) (hasSuffix "-frappe" $theme) (hasSuffix "-macchiato" $theme) (hasSuffix "-dark" $theme) (hasSuffix "-wave" $theme) (hasSuffix "-dragon" $theme) (eq $theme "dracula") (eq $theme "nord") (eq $theme "onedark") -}}
-{{- $is_dark = true -}}
-{{- end -}}
+{{- /* GTK-4.0 custom CSS — colors from SSOT theme manifest */ -}}
+{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end -}}
+{{- $is_dark := eq $t.mode "dark" -}}
 
-{{- $colors := dict -}}
-{{- if eq $theme "catppuccin-latte" -}}
-  {{- $colors = dict
-      "blue" "#1e66f5"
-      "red" "#d20f39"
-      "green" "#40a02b"
-      "yellow" "#df8e1d"
-      "text" "#4c4f69"
-      "subtext1" "#5c5f77"
-      "surface0" "#ccd0da"
-      "base" "#eff1f5"
-      "mantle" "#e6e9ef"
-      "crust" "#dce0e8"
-  -}}
-{{- else if eq $theme "catppuccin-frappe" -}}
-  {{- $colors = dict
-      "blue" "#8caaee"
-      "red" "#e78284"
-      "green" "#a6d189"
-      "yellow" "#e5c890"
-      "text" "#c6d0f5"
-      "subtext1" "#b5bfe2"
-      "surface0" "#414559"
-      "base" "#303446"
-      "mantle" "#292c3c"
-      "crust" "#232634"
-  -}}
-{{- else if eq $theme "catppuccin-macchiato" -}}
-  {{- $colors = dict
-      "blue" "#8aadf4"
-      "red" "#ed8796"
-      "green" "#a6da95"
-      "yellow" "#eed49f"
-      "text" "#cad3f5"
-      "subtext1" "#b8c0e0"
-      "surface0" "#363a4f"
-      "base" "#24273a"
-      "mantle" "#1e2030"
-      "crust" "#181926"
-  -}}
-{{- else if eq $theme "catppuccin-mocha" -}}
-  {{- $colors = dict
-      "blue" "#89b4fa"
-      "red" "#f38ba8"
-      "green" "#a6e3a1"
-      "yellow" "#f9e2af"
-      "text" "#cdd6f4"
-      "subtext1" "#bac2de"
-      "surface0" "#313244"
-      "base" "#1e1e2e"
-      "mantle" "#181825"
-      "crust" "#11111b"
-  -}}
-{{- end -}}
+/* GTK4 Custom Styling for {{ .theme }} */
 
-/* GTK4 Custom Styling for {{ $theme }} */
-
-{{- if hasPrefix "catppuccin-" $theme }}
+{{- if eq $t.family "catppuccin" }}
 /* Catppuccin GTK4 color scheme */
-@define-color accent_color {{ index $colors "blue" }};
-@define-color accent_bg_color {{ index $colors "blue" }};
-@define-color accent_fg_color {{ index $colors "base" }};
+@define-color accent_color {{ $t.ext.blue }};
+@define-color accent_bg_color {{ $t.ext.blue }};
+@define-color accent_fg_color {{ $t.ext.base }};
 
-@define-color destructive_color {{ index $colors "red" }};
-@define-color destructive_bg_color {{ index $colors "red" }};
-@define-color destructive_fg_color {{ index $colors "base" }};
+@define-color destructive_color {{ $t.ext.red }};
+@define-color destructive_bg_color {{ $t.ext.red }};
+@define-color destructive_fg_color {{ $t.ext.base }};
 
-@define-color success_color {{ index $colors "green" }};
-@define-color success_bg_color {{ index $colors "green" }};
-@define-color success_fg_color {{ index $colors "base" }};
+@define-color success_color {{ $t.ext.green }};
+@define-color success_bg_color {{ $t.ext.green }};
+@define-color success_fg_color {{ $t.ext.base }};
 
-@define-color warning_color {{ index $colors "yellow" }};
-@define-color warning_bg_color {{ index $colors "yellow" }};
-@define-color warning_fg_color {{ index $colors "base" }};
+@define-color warning_color {{ $t.ext.yellow }};
+@define-color warning_bg_color {{ $t.ext.yellow }};
+@define-color warning_fg_color {{ $t.ext.base }};
 
-@define-color window_bg_color {{ index $colors "base" }};
-@define-color window_fg_color {{ index $colors "text" }};
-@define-color view_bg_color {{ index $colors "base" }};
-@define-color view_fg_color {{ index $colors "text" }};
+@define-color window_bg_color {{ $t.ext.base }};
+@define-color window_fg_color {{ $t.ext.text }};
+@define-color view_bg_color {{ $t.ext.base }};
+@define-color view_fg_color {{ $t.ext.text }};
 
-@define-color headerbar_bg_color {{ index $colors "mantle" }};
-@define-color headerbar_fg_color {{ index $colors "text" }};
+@define-color headerbar_bg_color {{ $t.ext.mantle }};
+@define-color headerbar_fg_color {{ $t.ext.text }};
 
-@define-color card_bg_color {{ index $colors "surface0" }};
-@define-color card_fg_color {{ index $colors "text" }};
+@define-color card_bg_color {{ $t.ext.surface0 }};
+@define-color card_fg_color {{ $t.ext.text }};
 
-@define-color popover_bg_color {{ index $colors "surface0" }};
-@define-color popover_fg_color {{ index $colors "text" }};
+@define-color popover_bg_color {{ $t.ext.surface0 }};
+@define-color popover_fg_color {{ $t.ext.text }};
 
 {{- end }}
 
@@ -129,11 +72,11 @@ button:active {
 }
 
 button.suggested-action {
-  box-shadow: 0 2px 6px {{ if hasPrefix "catppuccin-" $theme }}{{ index $colors "blue" }}40{{ else }}#3584e440{{ end }};
+  box-shadow: 0 2px 6px {{ $t.ui.accent }}40;
 }
 
 button.destructive-action {
-  box-shadow: 0 2px 6px {{ if hasPrefix "catppuccin-" $theme }}{{ index $colors "red" }}40{{ else }}#e01b2440{{ end }};
+  box-shadow: 0 2px 6px {{ $t.ui.error }}40;
 }
 
 /* Entry field improvements */
@@ -144,7 +87,7 @@ entry {
 }
 
 entry:focus {
-  box-shadow: 0 0 0 2px {{ if hasPrefix "catppuccin-" $theme }}{{ index $colors "blue" }}{{ else }}#3584e4{{ end }},
+  box-shadow: 0 0 0 2px {{ $t.ui.accent }},
               0 2px 6px rgba(0, 0, 0, 0.1);
   transform: scale(1.01);
 }
@@ -163,8 +106,8 @@ switch slider {
 }
 
 switch:checked {
-  background: {{ if hasPrefix "catppuccin-" $theme }}{{ index $colors "blue" }}{{ else }}#3584e4{{ end }};
-  box-shadow: 0 0 8px {{ if hasPrefix "catppuccin-" $theme }}{{ index $colors "blue" }}40{{ else }}#3584e440{{ end }};
+  background: {{ $t.ui.accent }};
+  box-shadow: 0 0 8px {{ $t.ui.accent }}40;
 }
 
 /* Progress bar improvements */
@@ -174,16 +117,16 @@ progressbar {
 
 progressbar > trough {
   border-radius: 10px;
-  {{ if hasPrefix "catppuccin-" $theme }}
-  background-color: {{ index $colors "surface0" }};
-  {{ end }}
+  {{- if eq $t.family "catppuccin" }}
+  background-color: {{ $t.ext.surface0 }};
+  {{- end }}
 }
 
 progressbar > trough > progress {
   border-radius: 10px;
-  {{ if hasPrefix "catppuccin-" $theme }}
-  background: linear-gradient(90deg, {{ index $colors "blue" }}, {{ index $colors "blue" }}dd);
-  {{ end }}
+  {{- if eq $t.family "catppuccin" }}
+  background: linear-gradient(90deg, {{ $t.ext.blue }}, {{ $t.ext.blue }}dd);
+  {{- end }}
 }
 
 /* Check and radio improvements */
@@ -200,10 +143,10 @@ radiobutton radio {
 
 checkbutton check:checked,
 radiobutton radio:checked {
-  {{ if hasPrefix "catppuccin-" $theme }}
-  background-color: {{ index $colors "blue" }};
-  box-shadow: 0 0 6px {{ index $colors "blue" }}40;
-  {{ end }}
+  {{- if eq $t.family "catppuccin" }}
+  background-color: {{ $t.ext.blue }};
+  box-shadow: 0 0 6px {{ $t.ext.blue }}40;
+  {{- end }}
 }
 
 /* Scrollbar improvements */
@@ -213,48 +156,48 @@ scrollbar {
 
 scrollbar slider {
   border-radius: 8px;
-  {{ if hasPrefix "catppuccin-" $theme }}
-  background-color: {{ index $colors "surface0" }};
-  {{ end }}
+  {{- if eq $t.family "catppuccin" }}
+  background-color: {{ $t.ext.surface0 }};
+  {{- end }}
   transition: all 200ms ease;
 }
 
 scrollbar slider:hover {
-  {{ if hasPrefix "catppuccin-" $theme }}
-  background-color: {{ index $colors "subtext1" }};
-  {{ end }}
+  {{- if eq $t.family "catppuccin" }}
+  background-color: {{ $t.ext.subtext1 }};
+  {{- end }}
 }
 
 /* Notebook tab improvements */
 notebook > header {
-  {{ if hasPrefix "catppuccin-" $theme }}
-  background-color: {{ index $colors "mantle" }};
-  {{ end }}
+  {{- if eq $t.family "catppuccin" }}
+  background-color: {{ $t.ext.mantle }};
+  {{- end }}
 }
 
 notebook > header > tabs > tab {
   border-radius: 8px 8px 0 0;
-  {{ if hasPrefix "catppuccin-" $theme }}
-  background-color: {{ index $colors "surface0" }};
-  color: {{ index $colors "subtext1" }};
-  {{ end }}
+  {{- if eq $t.family "catppuccin" }}
+  background-color: {{ $t.ext.surface0 }};
+  color: {{ $t.ext.subtext1 }};
+  {{- end }}
   transition: all 200ms ease;
 }
 
 notebook > header > tabs > tab:checked {
-  {{ if hasPrefix "catppuccin-" $theme }}
-  background-color: {{ index $colors "blue" }};
-  color: {{ index $colors "base" }};
-  {{ end }}
+  {{- if eq $t.family "catppuccin" }}
+  background-color: {{ $t.ext.blue }};
+  color: {{ $t.ext.base }};
+  {{- end }}
   box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Sidebar improvements */
 .sidebar {
-  {{ if hasPrefix "catppuccin-" $theme }}
-  background-color: {{ index $colors "mantle" }};
-  color: {{ index $colors "text" }};
-  {{ end }}
+  {{- if eq $t.family "catppuccin" }}
+  background-color: {{ $t.ext.mantle }};
+  color: {{ $t.ext.text }};
+  {{- end }}
   border-radius: 0 12px 12px 0;
 }
 
@@ -264,18 +207,18 @@ notebook > header > tabs > tab:checked {
 }
 
 .sidebar row:hover {
-  {{ if hasPrefix "catppuccin-" $theme }}
-  background-color: {{ index $colors "surface0" }};
-  {{ end }}
+  {{- if eq $t.family "catppuccin" }}
+  background-color: {{ $t.ext.surface0 }};
+  {{- end }}
 }
 
 /* Popover improvements */
 popover {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  {{ if hasPrefix "catppuccin-" $theme }}
-  background-color: {{ index $colors "surface0" }};
-  {{ end }}
+  {{- if eq $t.family "catppuccin" }}
+  background-color: {{ $t.ext.surface0 }};
+  {{- end }}
 }
 
 popover > contents {
@@ -291,9 +234,9 @@ menubar > menuitem {
 menu {
   border-radius: 8px;
   box-shadow: 0 3px 9px rgba(0, 0, 0, 0.15);
-  {{ if hasPrefix "catppuccin-" $theme }}
-  background-color: {{ index $colors "surface0" }};
-  {{ end }}
+  {{- if eq $t.family "catppuccin" }}
+  background-color: {{ $t.ext.surface0 }};
+  {{- end }}
 }
 
 menu > menuitem {
@@ -302,8 +245,8 @@ menu > menuitem {
 }
 
 menu > menuitem:hover {
-  {{ if hasPrefix "catppuccin-" $theme }}
-  background-color: {{ index $colors "blue" }};
-  color: {{ index $colors "base" }};
-  {{ end }}
+  {{- if eq $t.family "catppuccin" }}
+  background-color: {{ $t.ext.blue }};
+  color: {{ $t.ext.base }};
+  {{- end }}
 }

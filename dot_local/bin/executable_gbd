@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+## gbd — Bulk delete local branches except main/master.
+##
+## # Usage
+##   gbd                           # Delete all except main/master
+##   gbd --dry-run                 # Show what would be deleted
+##   gbd "(main|master|develop)"   # Custom whitelist pattern
+##   gbd "(main|dev)" --dry-run    # Custom whitelist + dry run
+
+set -euo pipefail
+
+default_whitelist="(main|master)"
+skip_branches="${1:-"${default_whitelist}"}"
+dry_run="${2:-}"
+
+# Handle --dry-run as first arg
+if [[ "${skip_branches}" == "--dry-run" ]]; then
+  skip_branches="${default_whitelist}"
+  dry_run="--dry-run"
+fi
+
+branches="$(git branch | grep -wEv "${skip_branches}" | grep -wv "$(git branch --show-current)" || true)"
+
+if [[ -z "${branches}" ]]; then
+  echo "No branches to delete."
+  exit 0
+fi
+
+if [[ -n "${dry_run}" ]]; then
+  echo "Would delete:"
+  echo "${branches}" | sed 's/^/  /'
+else
+  echo "${branches}" | xargs git branch -D
+fi

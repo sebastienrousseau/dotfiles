@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+## rec-stop — Restore shell history after recording.
+##
+## # Usage
+##   rec-stop
+
+set -euo pipefail
+
+histfile="${HISTFILE:-${HOME}/.bash_history}"
+
+if [[ ! -f "${histfile}.bak" ]]; then
+  echo "No backup found at ${histfile}.bak, nothing to restore."
+  exit 0
+fi
+
+mv "${histfile}.bak" "${histfile}"
+
+echo "Recording mode OFF"
+echo "  History restored to ${histfile}"

@@ -1,7 +1,16 @@
-// This config is in the KDL format: https://kdl.dev
-// "/-" comments out the following node.
-// Check the wiki for a full description of the configuration:
-// https://github.com/YaLTeR/niri/wiki/Configuration:-Introduction
+// Niri Configuration (v{{ .dotfiles_version }})
+// Machine: {{ .chezmoi.hostname }} | Profile: {{ .profile }}
+// KDL format: https://kdl.dev
+{{- $hw := .hardware -}}
+{{- $machine := .machine -}}
+{{- if and $machine (ne $machine "") -}}
+  {{- $m := index .machines $machine -}}
+  {{- if $m -}}
+    {{- $hw = $m -}}
+  {{- end -}}
+{{- end -}}
+{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end }}
 config-notification {
     disable-failed
 }
@@ -28,25 +37,29 @@ input {
     // Omitting settings disables them, or leaves them at their default values.
     // All commented-out settings here are examples, not defaults.
     touchpad {
-        // off
+{{- if eq $hw.touchpad true }}
         tap
         dwt
         dwtp
-        // drag false
-        // drag-lock
         natural-scroll
-        // accel-speed 0.2
-        // accel-profile "flat"
-        // scroll-method "two-finger"
-        // disabled-on-external-mouse
+{{- if ne (float64 $hw.touchpad_accel) 0.0 }}
+        accel-speed {{ $hw.touchpad_accel }}
+{{- end }}
+{{- if and $hw.touchpad_accel_profile (ne $hw.touchpad_accel_profile "adaptive") }}
+        accel-profile "{{ $hw.touchpad_accel_profile }}"
+{{- end }}
+{{- if eq $hw.profile "desktop" }}
+        disabled-on-external-mouse
+{{- end }}
+{{- else }}
+        off
+{{- end }}
     }
 
     mouse {
-        // off
-        // natural-scroll
-        // accel-speed 0.2
-        // accel-profile "flat"
-        // scroll-method "no-scroll"
+{{- if eq $hw.profile "desktop" }}
+        accel-profile "flat"
+{{- end }}
     }
 
     trackpoint {
@@ -78,17 +91,17 @@ cursor {
 clipboard {
     disable-primary
 }
-// You can configure outputs by their name, which you can find
-// by running `niri msg outputs` while inside a niri instance.
-// The built-in laptop monitor is usually called "eDP-1".
-// Find more information on the wiki:
-// https://github.com/YaLTeR/niri/wiki/Configuration:-Outputs
-// Remember to uncomment the node by removing "/-"!
-/-output "eDP-2" {
-    mode "2560x1600@239.998993"
-    position x=2560 y=0
+// Output configuration — hardware-aware via .chezmoidata/hardware.toml
+// Run `niri msg outputs` to discover output names.
+{{- if and $hw.output_name $hw.output_mode }}
+output "{{ $hw.output_name }}" {
+    mode "{{ $hw.output_mode }}"
+    scale {{ $hw.scale }}
+{{- if gt (int $hw.max_refresh) 60 }}
     variable-refresh-rate
+{{- end }}
 }
+{{- end }}
 // Settings that influence how windows are positioned and sized.
 // Find more information on the wiki:
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Layout
@@ -130,14 +143,21 @@ layout {
     //
     // Alternatively, you can override it with a window rule called
     // `draw-border-with-background`.
+    focus-ring {
+        active-color "{{ $t.ui.accent }}"
+        inactive-color "{{ $t.ui.border }}"
+        urgent-color "{{ $t.ui.error }}"
+    }
     border {
-        off
+        active-color "{{ $t.ui.accent }}"
+        inactive-color "{{ $t.ui.border }}"
+        urgent-color "{{ $t.ui.error }}"
     }
     shadow {
         softness 15
         spread 5
         offset x=0 y=5
-        color "#0007"
+        color "{{ $t.term.bg }}70"
     }
     struts {
     }
@@ -254,6 +274,10 @@ window-rule {
     match app-id="zoom"
     open-floating true
 }
+window-rule {
+    match app-id="flameshot"
+    open-floating true
+}
 // Open dms windows as floating by default
 window-rule {
     match app-id=r#"org.quickshell$"#
@@ -293,8 +317,7 @@ recent-windows {
     }
 }
 
-// Include dms files
-include "dms/colors.kdl"
+// Include dms files (colors owned by chezmoi, not dms/colors.kdl)
 include "dms/layout.kdl"
 include "dms/alttab.kdl"
 include "dms/binds.kdl"

@@ -1,38 +1,10 @@
 {
   // Theme Configuration - Dynamically set based on chezmoi theme variable
-{{- if eq .theme "catppuccin-latte" }}
-  "workbench.colorTheme": "Catppuccin Latte",
-  "workbench.preferredDarkColorTheme": "Catppuccin Mocha",
-  "workbench.preferredLightColorTheme": "Catppuccin Latte",
-{{- else if eq .theme "catppuccin-frappe" }}
-  "workbench.colorTheme": "Catppuccin Frappé",
-  "workbench.preferredDarkColorTheme": "Catppuccin Frappé",
-  "workbench.preferredLightColorTheme": "Catppuccin Latte",
-{{- else if eq .theme "catppuccin-macchiato" }}
-  "workbench.colorTheme": "Catppuccin Macchiato",
-  "workbench.preferredDarkColorTheme": "Catppuccin Macchiato",
-  "workbench.preferredLightColorTheme": "Catppuccin Latte",
-{{- else if eq .theme "catppuccin-mocha" }}
-  "workbench.colorTheme": "Catppuccin Mocha",
-  "workbench.preferredDarkColorTheme": "Catppuccin Mocha",
-  "workbench.preferredLightColorTheme": "Catppuccin Latte",
-{{- else if hasPrefix .theme "tokyonight-" }}
-  // Tokyo Night theme fallback
-{{- if eq .theme "tokyonight-day" }}
-  "workbench.colorTheme": "Tokyo Night Light",
-  "workbench.preferredLightColorTheme": "Tokyo Night Light",
-  "workbench.preferredDarkColorTheme": "Tokyo Night",
-{{- else }}
-  "workbench.colorTheme": "Tokyo Night",
-  "workbench.preferredDarkColorTheme": "Tokyo Night",
-  "workbench.preferredLightColorTheme": "Tokyo Night Light",
-{{- end }}
-{{- else }}
-  // Default to Catppuccin Mocha for unknown themes
-  "workbench.colorTheme": "Catppuccin Mocha",
-  "workbench.preferredDarkColorTheme": "Catppuccin Mocha",
-  "workbench.preferredLightColorTheme": "Catppuccin Latte",
-{{- end }}
+{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end }}
+  "workbench.colorTheme": "{{ $t.app.vscode }}",
+  "workbench.preferredDarkColorTheme": "{{ $t.app.vscode_dark }}",
+  "workbench.preferredLightColorTheme": "{{ $t.app.vscode_light }}",
 
   // Icon Theme - Use Catppuccin icons when available
   "workbench.iconTheme": "catppuccin-perfect",

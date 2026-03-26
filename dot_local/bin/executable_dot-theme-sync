@@ -1,0 +1,631 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+## dot-theme-sync — Fast theme switching with config regeneration + IPC reload.
+##
+## Sets the active theme in .chezmoidata.toml, regenerates config files via
+## targeted chezmoi apply, then signals running applications to reload.
+##
+## # Usage
+##   dot-theme-sync                    # Regenerate configs + reload running apps
+##   dot-theme-sync catppuccin-latte   # Set theme + regenerate + reload
+##   dot-theme-sync --full             # Full chezmoi apply + reload
+##   dot-theme-sync --help             # Show this help
+##
+## # Supported Applications
+##   Ghostty   — chezmoi apply + SIGUSR1 config reload
+##   Tmux      — chezmoi apply + source-file reload
+##   Niri      — screen transition
+##   Neovim    — --remote-expr colorscheme switch (direct IPC, no file needed)
+
+set -euo pipefail
+
+# =============================================================================
+# Constants & Colors
+# =============================================================================
+
+readonly RESET=$'\033[0m'
+readonly BOLD=$'\033[1m'
+readonly DIM=$'\033[2m'
+readonly GREEN=$'\033[32m'
+readonly YELLOW=$'\033[33m'
+readonly BLUE=$'\033[34m'
+readonly RED=$'\033[31m'
+readonly CYAN=$'\033[36m'
+
+# Timing — record start in nanoseconds (fallback to seconds * 1000)
+if date +%s%N &>/dev/null && [[ "$(date +%s%N)" != *N ]]; then
+  START_NS=$(date +%s%N)
+  _elapsed_ms() { echo $((($(date +%s%N) - START_NS) / 1000000)); }
+else
+  START_S=$(date +%s)
+  _elapsed_ms() { echo $((($(date +%s) - START_S) * 1000)); }
+fi
+
+# =============================================================================
+# Source Directory Resolution
+# =============================================================================
+
+resolve_source_dir() {
+  if [[ -n "${CHEZMOI_SOURCE_DIR:-}" && -d "$CHEZMOI_SOURCE_DIR" ]]; then
+    echo "$CHEZMOI_SOURCE_DIR"
+  elif [[ -d "$HOME/.dotfiles" ]]; then
+    echo "$HOME/.dotfiles"
+  elif [[ -d "$HOME/.local/share/chezmoi" ]]; then
+    echo "$HOME/.local/share/chezmoi"
+  else
+    echo ""
+  fi
+}
+
+SRC_DIR="$(resolve_source_dir)"
+if [[ -z "$SRC_DIR" ]]; then
+  printf '%s\n' "${RED}error${RESET}: dotfiles source directory not found"
+  exit 1
+fi
+
+readonly DATA_FILE="$SRC_DIR/.chezmoidata.toml"
+readonly THEMES_FILE="$SRC_DIR/.chezmoidata/themes.toml"
+
+# =============================================================================
+# Output Helpers
+# =============================================================================
+
+_ok() { printf '  %s✓%s  %-12s %s%s%s\n' "$GREEN" "$RESET" "$1" "$DIM" "$2" "$RESET"; }
+_skip() { printf '  %s·%s  %-12s %s%s%s\n' "$DIM" "$RESET" "$1" "$DIM" "$2" "$RESET"; }
+_err() { printf '  %s✗%s  %-12s %s%s%s\n' "$RED" "$RESET" "$1" "$DIM" "$2" "$RESET"; }
+_info() { printf '  %s→%s  %-12s %s%s%s\n' "$BLUE" "$RESET" "$1" "$DIM" "$2" "$RESET"; }
+
+# =============================================================================
+# Theme Parsing
+# =============================================================================
+
+# Read the current theme from .chezmoidata.toml
+current_theme() {
+  awk -F'"' '/^theme =/ {print $2}' "$DATA_FILE" | head -n 1
+}
+
+# Write a new theme into .chezmoidata.toml AND chezmoi.toml [data] section.
+# Both must be updated: chezmoi.toml [data] takes precedence over .chezmoidata.toml.
+write_theme() {
+  local new_theme="$1"
+  # Validate: only alphanumeric, hyphens, underscores
+  if [[ "$new_theme" =~ [^a-zA-Z0-9_-] ]]; then
+    _err "Invalid" "theme name: $new_theme"
+    exit 1
+  fi
+
+  # Update .chezmoidata.toml (source of truth for templates)
+  local tmp_file
+  tmp_file="$(umask 077 && mktemp)"
+  if grep -q '^theme = ' "$DATA_FILE"; then
+    sed "s/^theme = .*/theme = \"$new_theme\"/" "$DATA_FILE" >"$tmp_file"
+  else
+    cat "$DATA_FILE" >"$tmp_file"
+    printf 'theme = "%s"\n' "$new_theme" >>"$tmp_file"
+  fi
+  mv "$tmp_file" "$DATA_FILE"
+
+  # Update chezmoi.toml [data] section (overrides .chezmoidata.toml)
+  local chezmoi_cfg="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
+  if [[ -f "$chezmoi_cfg" ]] && grep -q '^theme = ' "$chezmoi_cfg"; then
+    tmp_file="$(umask 077 && mktemp)"
+    sed "s/^theme = .*/theme = \"$new_theme\"/" "$chezmoi_cfg" >"$tmp_file"
+    mv "$tmp_file" "$chezmoi_cfg"
+  fi
+}
+
+# Extract a value from [themes.<name>.app] section in themes.toml
+# Usage: theme_app_value <theme> <key>
+theme_app_value() {
+  local theme="$1" key="$2"
+  if [[ ! -f "$THEMES_FILE" ]]; then
+    return 1
+  fi
+  # Parse the TOML: find the [themes.<theme>.app] section and extract key
+  awk -v section="[themes.${theme}.app]" -v key="$key" '
+    BEGIN { in_section = 0 }
+    /^\[/ { in_section = ($0 == section) ? 1 : 0; next }
+    in_section && $0 ~ "^" key " *= *" {
+      gsub(/^[^"]*"/, ""); gsub(/".*$/, ""); print; exit
+    }
+  ' "$THEMES_FILE"
+}
+
+# Extract a top-level value from [themes.<name>] section in themes.toml
+# Usage: theme_value <theme> <key>
+theme_value() {
+  local theme="$1" key="$2"
+  if [[ ! -f "$THEMES_FILE" ]]; then
+    return 1
+  fi
+  awk -v section="[themes.${theme}]" -v key="$key" '
+    BEGIN { in_section = 0 }
+    /^\[/ { in_section = ($0 == section) ? 1 : 0; next }
+    in_section && $0 ~ "^" key " *= *" {
+      gsub(/^[^"]*"/, ""); gsub(/".*$/, ""); print; exit
+    }
+  ' "$THEMES_FILE"
+}
+
+# =============================================================================
+# Targeted Config Regeneration
+# =============================================================================
+
+# Regenerate only theme-dependent config files via chezmoi.
+# Much faster than a full apply — just renders the templates that use $t.
+apply_theme_configs() {
+  if ! command -v chezmoi &>/dev/null; then
+    _err "Chezmoi" "not installed"
+    return 1
+  fi
+
+  local targets=(
+    "$HOME/.config/ghostty/config"
+    "$HOME/.config/tmux/tmux.conf"
+    "$HOME/.config/alacritty/alacritty.toml"
+    "$HOME/.config/kitty/kitty.conf"
+    "$HOME/.config/wezterm/wezterm.lua"
+    "$HOME/.config/niri/config.kdl"
+    "$HOME/.config/gtk-3.0/gtk.css"
+    "$HOME/.config/gtk-3.0/settings.ini"
+    "$HOME/.config/gtk-4.0/gtk.css"
+    "$HOME/.config/gtk-4.0/settings.ini"
+  )
+
+  local applied=()
+  for target in "${targets[@]}"; do
+    if [[ -f "$target" ]] && chezmoi apply "$target" 2>/dev/null; then
+      applied+=("${target##*/}")
+    fi
+  done
+
+  if [[ ${#applied[@]} -gt 0 ]]; then
+    _ok "Chezmoi" "regenerated ${#applied[@]} configs"
+  else
+    _skip "Chezmoi" "no managed configs found"
+  fi
+}
+
+
+# =============================================================================
+# Application Reload Functions
+# =============================================================================
+
+# Track results for summary
+declare -a RELOADED=()
+declare -a SKIPPED=()
+
+reload_ghostty() {
+  if ! pgrep -x ghostty &>/dev/null; then
+    SKIPPED+=("ghostty")
+    _skip "Ghostty" "not running"
+    return
+  fi
+
+  # Ghostty GTK exposes reload-config via DBus (org.gtk.Actions).
+  # This is the most reliable method — SIGUSR1 isn't caught by all builds,
+  # and chezmoi's atomic writes bypass inotify file watches.
+  local dbus_name="com.mitchellh.ghostty"
+  local dbus_path="/com/mitchellh/ghostty"
+
+  if busctl --user call "${dbus_name}" "${dbus_path}" \
+    org.gtk.Actions Activate "sava{sv}" "reload-config" 0 0 2>/dev/null; then
+    RELOADED+=("ghostty")
+    _ok "Ghostty" "DBus reload-config"
+    return
+  fi
+
+  # Fallback: SIGUSR1 if the process catches it
+  local main_pid
+  main_pid="$(pgrep -x -o ghostty 2>/dev/null || true)"
+  if [[ -n "$main_pid" && -r "/proc/$main_pid/status" ]]; then
+    local sigcgt
+    sigcgt="$(awk '/^SigCgt:/{print $2}' "/proc/$main_pid/status" 2>/dev/null || true)"
+    if [[ -n "$sigcgt" ]] && (( 16#$sigcgt & 0x200 )); then
+      if kill -SIGUSR1 "$main_pid" 2>/dev/null; then
+        RELOADED+=("ghostty")
+        _ok "Ghostty" "SIGUSR1 → PID $main_pid"
+        return
+      fi
+    fi
+  fi
+
+  SKIPPED+=("ghostty")
+  _skip "Ghostty" "config regenerated but no reload method available"
+}
+
+reload_tmux() {
+  if ! command -v tmux &>/dev/null; then
+    SKIPPED+=("tmux")
+    _skip "Tmux" "not installed"
+    return
+  fi
+  if ! tmux list-sessions &>/dev/null; then
+    SKIPPED+=("tmux")
+    _skip "Tmux" "no active sessions"
+    return
+  fi
+  local conf="$HOME/.config/tmux/tmux.conf"
+  if [[ ! -f "$conf" ]]; then
+    conf="$HOME/.tmux.conf"
+  fi
+  if [[ ! -f "$conf" ]]; then
+    SKIPPED+=("tmux")
+    _skip "Tmux" "config not found"
+    return
+  fi
+  # source-file may return non-zero if plugins (TPM) aren't installed,
+  # but the theme/colors still reload successfully — treat as success.
+  local out
+  out="$(tmux source-file "$conf" 2>&1)" || true
+  RELOADED+=("tmux")
+  if [[ -n "$out" ]]; then
+    _ok "Tmux" "source-file (warnings: ${out##*: })"
+  else
+    _ok "Tmux" "source-file $conf"
+  fi
+}
+
+reload_niri() {
+  if ! command -v niri &>/dev/null; then
+    SKIPPED+=("niri")
+    _skip "Niri" "not installed"
+    return
+  fi
+  if ! pgrep -x niri &>/dev/null; then
+    SKIPPED+=("niri")
+    _skip "Niri" "not running"
+    return
+  fi
+  # Reload config (picks up new colors) then trigger visual transition
+  niri msg action load-config-file 2>/dev/null || true
+  if niri msg action do-screen-transition 2>/dev/null; then
+    RELOADED+=("niri")
+    _ok "Niri" "config reloaded + transition"
+  else
+    SKIPPED+=("niri")
+    _skip "Niri" "IPC unavailable"
+  fi
+}
+
+reload_desktop() {
+  local theme="$1"
+
+  if ! command -v gsettings &>/dev/null; then
+    SKIPPED+=("desktop")
+    _skip "Desktop" "gsettings not available"
+    return
+  fi
+
+  local mode gtk_theme gtk_icon color_scheme
+  mode="$(theme_value "$theme" "mode" 2>/dev/null || echo "dark")"
+  gtk_theme="$(theme_app_value "$theme" "gtk_theme" 2>/dev/null || true)"
+  gtk_icon="$(theme_app_value "$theme" "gtk_icon" 2>/dev/null || true)"
+
+  if [[ "$mode" == "light" ]]; then
+    color_scheme="prefer-light"
+  else
+    color_scheme="prefer-dark"
+  fi
+
+  local changed=0
+
+  # Set dark/light mode preference
+  if gsettings set org.gnome.desktop.interface color-scheme "$color_scheme" 2>/dev/null; then
+    changed=1
+  fi
+
+  # Set GTK theme
+  if [[ -n "$gtk_theme" ]]; then
+    gsettings set org.gnome.desktop.interface gtk-theme "$gtk_theme" 2>/dev/null && changed=1
+  fi
+
+  # Set icon theme
+  if [[ -n "$gtk_icon" ]]; then
+    gsettings set org.gnome.desktop.interface icon-theme "$gtk_icon" 2>/dev/null && changed=1
+  fi
+
+  # DMS (Dank Material Shell) — set stock theme to match accent color.
+  # Map theme families to closest DMS stock theme.
+  if command -v dms &>/dev/null; then
+    local dms_stock=""
+    case "$theme" in
+      catppuccin-mocha|catppuccin-frappe|catppuccin-macchiato) dms_stock="blue" ;;
+      catppuccin-latte)                                        dms_stock="blue" ;;
+      tokyonight-night|tokyonight-storm|tokyonight-moon)       dms_stock="blue" ;;
+      tokyonight-day)                                          dms_stock="blue" ;;
+      rose-pine|rose-pine-moon)                                dms_stock="cyan" ;;
+      rose-pine-dawn)                                          dms_stock="coral" ;;
+      dracula)                                                 dms_stock="purple" ;;
+      gruvbox-dark|gruvbox-light)                              dms_stock="orange" ;;
+      nord)                                                    dms_stock="cyan" ;;
+      onedark|onelight)                                        dms_stock="blue" ;;
+      solarized-dark|solarized-light)                          dms_stock="cyan" ;;
+      everforest-dark|everforest-light)                        dms_stock="green" ;;
+      kanagawa-wave|kanagawa-dragon)                           dms_stock="purple" ;;
+      kanagawa-lotus)                                          dms_stock="pink" ;;
+      abstract-waves-*)                                          dms_stock="blue" ;;
+      adwaita-dark)                                              dms_stock="cyan" ;;
+      adwaita-light)                                             dms_stock="purple" ;;
+      colourful-dark)                                            dms_stock="blue" ;;
+      colourful-light)                                           dms_stock="purple" ;;
+      imac-blue-*)                                               dms_stock="blue" ;;
+      macos-big-sur-*)                                           dms_stock="purple" ;;
+      macos-mojave-*)                                            dms_stock="blue" ;;
+      macos-monterey-*)                                          dms_stock="purple" ;;
+      macos-sequoia-*)                                           dms_stock="cyan" ;;
+      macos-sonoma-*)                                            dms_stock="green" ;;
+      macos-tahoe-*)                                             dms_stock="blue" ;;
+      macos-ventura-*)                                           dms_stock="orange" ;;
+      monterey-sierra-blue-*)                                    dms_stock="cyan" ;;
+      *)                                                       dms_stock="blue" ;;
+    esac
+
+    # DMS theme switch: sed -i writes to settings.json in-place.
+    # DMS FileView watches the file and triggers onLoaded → applyStoredTheme.
+    # NOTE: mv (atomic write) breaks the inotify watch — must use sed -i.
+    local dms_settings="${XDG_CONFIG_HOME:-$HOME/.config}/DankMaterialShell/settings.json"
+    if [[ -f "$dms_settings" ]]; then
+      sed -i \
+        -e "s/\"currentThemeName\": *\"[^\"]*\"/\"currentThemeName\": \"$dms_stock\"/" \
+        -e "s/\"currentThemeCategory\": *\"[^\"]*\"/\"currentThemeCategory\": \"stock\"/" \
+        "$dms_settings"
+      changed=1
+    fi
+
+    # Sync DMS light/dark mode
+    if [[ "$mode" == "light" ]]; then
+      dms ipc theme light &>/dev/null || true
+    else
+      dms ipc theme dark &>/dev/null || true
+    fi
+  fi
+
+  if [[ $changed -gt 0 ]]; then
+    RELOADED+=("desktop")
+    _ok "Desktop" "$color_scheme, ${gtk_theme:-default}"
+  else
+    SKIPPED+=("desktop")
+    _skip "Desktop" "gsettings failed"
+  fi
+}
+
+reload_nvim() {
+  local theme="$1"
+  local nvim_colorscheme nvim_style
+  nvim_colorscheme="$(theme_app_value "$theme" "nvim" 2>/dev/null || true)"
+  nvim_style="$(theme_app_value "$theme" "nvim_style" 2>/dev/null || true)"
+
+  if [[ -z "$nvim_colorscheme" ]]; then
+    SKIPPED+=("nvim")
+    _skip "Neovim" "no nvim colorscheme for theme '$theme'"
+    return
+  fi
+
+  # Build the Lua expression for runtime colorscheme switching.
+  # This mirrors the logic in dot_config/nvim/lua/plugins/ui.lua.
+  local lua_cmd
+  case "$nvim_colorscheme" in
+    catppuccin)
+      local flavour="${nvim_style:-mocha}"
+      lua_cmd="require('catppuccin').setup({flavour='${flavour}'}) vim.cmd.colorscheme('catppuccin')"
+      ;;
+    tokyonight-*)
+      lua_cmd="require('tokyonight').setup({style='${nvim_style:-night}'}) vim.cmd.colorscheme('${nvim_colorscheme}')"
+      ;;
+    kanagawa)
+      local variant="${nvim_style:-wave}"
+      lua_cmd="require('kanagawa').setup({theme='${variant}'}) vim.cmd.colorscheme('kanagawa')"
+      ;;
+    gruvbox)
+      local bg="dark"
+      [[ "$nvim_style" == "light" ]] && bg="light"
+      lua_cmd="vim.o.background='${bg}' require('gruvbox').setup({contrast='hard'}) vim.cmd.colorscheme('gruvbox')"
+      ;;
+    everforest)
+      local bg="dark"
+      [[ "$nvim_style" == "light" ]] && bg="light"
+      lua_cmd="vim.o.background='${bg}' vim.cmd.colorscheme('everforest')"
+      ;;
+    solarized)
+      local bg="dark"
+      [[ "$nvim_style" == "light" ]] && bg="light"
+      lua_cmd="vim.o.background='${bg}' require('solarized').setup({}) vim.cmd.colorscheme('solarized')"
+      ;;
+    onedark)
+      local style="dark"
+      [[ "$nvim_style" == "light" ]] && style="light"
+      lua_cmd="require('onedark').setup({style='${style}'}) vim.cmd.colorscheme('onedark')"
+      ;;
+    rose-pine*)
+      lua_cmd="vim.cmd.colorscheme('${nvim_colorscheme}')"
+      ;;
+    dracula)
+      lua_cmd="vim.cmd.colorscheme('dracula')"
+      ;;
+    nord)
+      lua_cmd="require('nord').set()"
+      ;;
+    *)
+      lua_cmd="vim.cmd.colorscheme('${nvim_colorscheme}')"
+      ;;
+  esac
+
+  # Find all running nvim server sockets.
+  # Neovim versions use different socket paths:
+  #   0.9-:  /tmp/nvimXXXXXX/0  (random suffix, no dot)
+  #   0.10+: $XDG_RUNTIME_DIR/nvim.PID.0
+  local sockets=()
+  local runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+
+  # Collect candidate sockets from known locations
+  local sock
+  for sock in /tmp/nvim*/0; do
+    [[ -S "$sock" ]] && sockets+=("$sock")
+  done
+  for sock in /run/user/*/nvim.*.0; do
+    [[ -S "$sock" ]] && sockets+=("$sock")
+  done
+  if [[ -d "$runtime_dir" ]]; then
+    for sock in "$runtime_dir"/nvim.*.0; do
+      [[ -S "$sock" ]] && sockets+=("$sock")
+    done
+  fi
+
+  # Deduplicate sockets
+  if [[ ${#sockets[@]} -gt 0 ]]; then
+    local -A seen=()
+    local unique_sockets=()
+    local s
+    for s in "${sockets[@]}"; do
+      if [[ -z "${seen[$s]:-}" ]]; then
+        seen[$s]=1
+        unique_sockets+=("$s")
+      fi
+    done
+    sockets=("${unique_sockets[@]}")
+  fi
+
+  if [[ ${#sockets[@]} -eq 0 ]]; then
+    SKIPPED+=("nvim")
+    _skip "Neovim" "no server sockets found"
+    return
+  fi
+
+  local count=0
+  local failed=0
+  for sock in "${sockets[@]}"; do
+    if nvim --server "$sock" --remote-expr "luaeval(\"(function() ${lua_cmd} return 'ok' end)()\")" &>/dev/null; then
+      count=$((count + 1))
+    else
+      failed=$((failed + 1))
+    fi
+  done
+
+  if [[ $count -gt 0 ]]; then
+    RELOADED+=("nvim")
+    _ok "Neovim" "${nvim_colorscheme} → ${count} instance(s)${failed:+, ${failed} failed}"
+  else
+    _err "Neovim" "all ${failed} instance(s) failed"
+  fi
+}
+
+# =============================================================================
+# Usage
+# =============================================================================
+
+usage() {
+  printf '%s\n' "${BOLD}dot-theme-sync${RESET} — fast theme switching"
+  echo ""
+  printf '%s\n' "${BOLD}USAGE${RESET}"
+  printf '  %s\n' "dot-theme-sync                    Regenerate configs + reload running apps"
+  printf '  %s\n' "dot-theme-sync <theme-name>       Set theme + regenerate + reload"
+  printf '  %s\n' "dot-theme-sync --full             Full chezmoi apply + reload"
+  printf '  %s\n' "dot-theme-sync --help             Show this help"
+  echo ""
+  printf '%s\n' "${BOLD}APPLICATIONS${RESET}"
+  printf '  %s\n' "Ghostty    chezmoi apply + SIGUSR1 reload"
+  printf '  %s\n' "Tmux       chezmoi apply + source-file reload"
+  printf '  %s\n' "Niri       screen transition"
+  printf '  %s\n' "Neovim     remote-expr colorscheme switch (direct IPC)"
+}
+
+# =============================================================================
+# Main
+# =============================================================================
+
+main() {
+  local do_full=false
+  local new_theme=""
+
+  # Parse arguments
+  case "${1:-}" in
+    --help | -h)
+      usage
+      exit 0
+      ;;
+    --full)
+      do_full=true
+      ;;
+    "")
+      # No arguments: use current theme
+      ;;
+    -*)
+      printf '%s\n' "${RED}error${RESET}: unknown flag '$1'"
+      usage
+      exit 1
+      ;;
+    *)
+      new_theme="$1"
+      ;;
+  esac
+
+  # Header
+  printf '%s\n' "${BOLD}${CYAN}dot-theme-sync${RESET}"
+  echo ""
+
+  # If a new theme was specified, write it to the data file
+  if [[ -n "$new_theme" ]]; then
+    write_theme "$new_theme"
+    _info "Theme" "set to $new_theme"
+  fi
+
+  # Read the active theme
+  local theme
+  theme="$(current_theme)"
+  if [[ -z "$theme" ]]; then
+    _err "Theme" "no theme found in $DATA_FILE"
+    exit 1
+  fi
+  _info "Theme" "$theme"
+  echo ""
+
+  # Regenerate config files with new theme data
+  if [[ "$do_full" == true ]]; then
+    _info "Chezmoi" "full apply..."
+    if chezmoi apply --force 2>/dev/null || chezmoi apply; then
+      _ok "Chezmoi" "full apply completed"
+    else
+      _err "Chezmoi" "apply failed"
+    fi
+  else
+    apply_theme_configs
+  fi
+  echo ""
+
+  # Signal running applications to reload
+  reload_ghostty
+  reload_tmux
+  reload_niri
+  reload_desktop "$theme"
+  reload_nvim "$theme"
+
+  # Summary
+  echo ""
+  local elapsed
+  elapsed="$(_elapsed_ms)"
+  local reloaded_count=${#RELOADED[@]}
+  local skipped_count=${#SKIPPED[@]}
+
+  if [[ $reloaded_count -gt 0 ]]; then
+    local apps
+    apps="$(
+      IFS=', '
+      echo "${RELOADED[*]}"
+    )"
+    printf '%s\n' "${GREEN}${BOLD}Done${RESET} ${DIM}in ${elapsed}ms${RESET} — reloaded ${BOLD}${apps}${RESET}"
+  else
+    printf '%s\n' "${YELLOW}${BOLD}Done${RESET} ${DIM}in ${elapsed}ms${RESET} — no running apps to reload"
+  fi
+
+  if [[ $skipped_count -gt 0 ]]; then
+    local skips
+    skips="$(
+      IFS=', '
+      echo "${SKIPPED[*]}"
+    )"
+    printf '%s\n' "${DIM}Skipped: ${skips}${RESET}"
+  fi
+}
+
+main "$@"

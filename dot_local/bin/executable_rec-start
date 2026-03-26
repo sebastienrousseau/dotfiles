@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+## rec-start — Disable shell history for screencasts/recordings.
+##
+## Backs up and removes the history file to prevent secrets leaking.
+## Run rec-stop to restore.
+##
+## # Usage
+##   rec-start
+
+set -euo pipefail
+
+histfile="${HISTFILE:-${HOME}/.bash_history}"
+
+if [[ ! -f "${histfile}" ]]; then
+  echo "No history file at ${histfile}, nothing to do."
+  exit 0
+fi
+
+# Only backup if one doesn't exist (prevents double-run overwrite)
+if [[ -f "${histfile}.bak" ]]; then
+  echo "Backup already exists at ${histfile}.bak"
+  echo "History is already disabled. Run rec-stop first."
+  exit 1
+fi
+
+cp -a "${histfile}" "${histfile}.bak"
+rm "${histfile}"
+
+echo "Recording mode ON"
+echo "  History backed up to ${histfile}.bak"
+echo "  Run rec-stop to restore."

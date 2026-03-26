@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+## pw — Generate a secure password and copy to clipboard.
+##
+## # Usage
+##   pw          # 48-char password (default)
+##   pw 64       # Custom length
+
+set -euo pipefail
+
+length="${1:-48}"
+
+pwgen -sync "${length}" -1 | cb
+echo "Password (${length} chars) copied to clipboard."

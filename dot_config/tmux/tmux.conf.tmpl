@@ -1,22 +1,12 @@
-{{- $theme := default "catppuccin-mocha" .theme -}}
-{{- $status_bg := "#2D1681" -}}
-{{- $status_fg := "#FFFFFF" -}}
-{{- $accent_blue := "#007ACC" -}}
-{{- $accent_red := "#EB0000" -}}
-{{- $panel_bg := "#14222A" -}}
-{{- if eq $theme "catppuccin-mocha" -}}
-{{- $status_bg = "#1e1e2e" -}}
-{{- $status_fg = "#cdd6f4" -}}
-{{- $accent_blue = "#89b4fa" -}}
-{{- $accent_red = "#f38ba8" -}}
-{{- $panel_bg = "#181825" -}}
-{{- else if eq $theme "catppuccin-latte" -}}
-{{- $status_bg = "#eff1f5" -}}
-{{- $status_fg = "#4c4f69" -}}
-{{- $accent_blue = "#1e66f5" -}}
-{{- $accent_red = "#d20f39" -}}
-{{- $panel_bg = "#e6e9ef" -}}
-{{- end }}
+{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end -}}
+{{- $bg := $t.term.bg -}}
+{{- $fg := $t.term.fg -}}
+{{- $accent := $t.ui.accent -}}
+{{- $accent_text := $t.ui.accent_text -}}
+{{- $panel := $t.ui.panel -}}
+{{- $border := $t.ui.border -}}
+{{- $dim := $t.term.c8 -}}
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  TMUX CONFIGURATION (Universal)                                          ║
@@ -145,23 +135,30 @@ bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 
 # --- THEME & STATUS BAR ---
 
-set -g status-bg "{{ $status_bg }}"
-set -g status-fg "{{ $status_fg }}"
+set -g status-style "bg={{ $panel }},fg={{ $fg }}"
 set -g status-interval 5
 set -g status-justify centre
 set -g status-left-length 50
 set -g status-right-length 50
 
-# OS-Specific Status Left
-if-shell 'uname | grep -q Darwin' 'set -g status-left "#[bg={{ $accent_blue }}]  macOS #S #[bg={{ $accent_red }}] #W #[bg={{ $panel_bg }}]"'
-if-shell 'uname | grep -q Linux' 'set -g status-left "#[bg={{ $accent_blue }}]  Linux #S #[bg={{ $accent_red }}] #W #[bg={{ $panel_bg }}]"'
-if-shell 'uname | grep -q MINGW' 'set -g status-left "#[bg={{ $accent_blue }}]  Windows #S #[bg={{ $accent_red }}] #W #[bg={{ $panel_bg }}]"'
+# Status Left: session name (accent) + window name (surface)
+if-shell 'uname | grep -q Darwin' 'set -g status-left "#[bg={{ $accent }},fg={{ $accent_text }},bold]  #S #[bg={{ $border }},fg={{ $fg }}] #W "'
+if-shell 'uname | grep -q Linux' 'set -g status-left "#[bg={{ $accent }},fg={{ $accent_text }},bold]  #S #[bg={{ $border }},fg={{ $fg }}] #W "'
+if-shell 'uname | grep -q MINGW' 'set -g status-left "#[bg={{ $accent }},fg={{ $accent_text }},bold]  #S #[bg={{ $border }},fg={{ $fg }}] #W "'
 
-set -g status-right "#[fg={{ $status_fg }}] #[bg={{ $panel_bg }}] ⬛ #I #[bg={{ $accent_blue }}] #H #[bg={{ $accent_red }}] %_d %B %I:%M%p "
-set -g window-status-current-format "#[bg={{ $status_bg }}]Dotfiles (v{{ .dotfiles_version }})"
-set -g window-status-current-style "bg={{ $accent_red }}"
+# Status Right: host + time
+set -g status-right "#[bg={{ $border }},fg={{ $fg }}] #H #[bg={{ $accent }},fg={{ $accent_text }},bold] %d %b %H:%M "
+
+# Window status
+set -g window-status-format "#[fg={{ $dim }}] #I:#W "
+set -g window-status-current-format "#[bg={{ $border }},fg={{ $accent }},bold] #I:#W "
 set -g window-status-separator ""
-setw -g clock-mode-colour "{{ $status_fg }}"
+
+# Pane borders
+set -g pane-border-style "fg={{ $border }}"
+set -g pane-active-border-style "fg={{ $accent }}"
+
+setw -g clock-mode-colour "{{ $accent }}"
 setw -g clock-mode-style 24
 
 # --- LINUX SPECIFIC ---

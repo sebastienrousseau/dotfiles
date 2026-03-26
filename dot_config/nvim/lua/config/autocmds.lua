@@ -62,3 +62,40 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
     vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
   end,
 })
+
+-- Theme hot-reload: clear cached modules and reapply colorscheme on LazyReload.
+-- Prevents stale theme state when dot-theme-sync sends a colorscheme change.
+vim.api.nvim_create_autocmd("User", {
+  pattern = "LazyReload",
+  callback = function()
+    local theme = vim.env.DOTFILES_THEME or "catppuccin-mocha"
+    -- Clear cached theme modules so setup() runs fresh
+    for name, _ in pairs(package.loaded) do
+      if name:match("^catppuccin") or name:match("^tokyonight") or name:match("^kanagawa")
+        or name:match("^gruvbox") or name:match("^rose%-pine") or name:match("^solarized")
+        or name:match("^onedark") or name:match("^nord") or name:match("^dracula")
+        or name:match("^everforest") then
+        package.loaded[name] = nil
+      end
+    end
+    -- Defer to let lazy.nvim finish its reload cycle
+    vim.defer_fn(function()
+      local cs = theme:match("^catppuccin") and "catppuccin"
+        or theme:match("^tokyonight") and theme
+        or theme
+      pcall(vim.cmd.colorscheme, cs)
+    end, 5)
+  end,
+})
+
+-- Cursorline only on focused window
+vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
+  callback = function()
+    vim.wo.cursorline = true
+  end,
+})
+vim.api.nvim_create_autocmd({ "WinLeave" }, {
+  callback = function()
+    vim.wo.cursorline = false
+  end,
+})
