@@ -18,6 +18,11 @@
 {{- $git_signingkey := coalesce (index . "git_signingkey") (index . "signingkey") "" -}}
 {{- $git_signingformat := coalesce (index . "git_signingformat") "ssh" -}}
 
+{{- /* Resolve active theme for delta syntax highlighting */ -}}
+{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end -}}
+{{- $is_dark := eq $t.mode "dark" -}}
+
 [user]
 {{- if $git_name }}
 	name = {{ $git_name }}
@@ -122,7 +127,11 @@
 
 [delta]
 	features = decorations
+{{- if $is_dark }}
 	syntax-theme = TwoDark
+{{- else }}
+	syntax-theme = GitHub
+{{- end }}
 
 [diff]
 	colorMoved = default

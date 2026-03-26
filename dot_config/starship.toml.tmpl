@@ -3,12 +3,10 @@
 
 command_timeout = 500
 add_newline = true
-{{- $theme := default "catppuccin-mocha" .theme -}}
-{{- if eq $theme "catppuccin-latte" }}
-palette = "catppuccin_latte"
-{{- else }}
-palette = "catppuccin_mocha"
-{{- end }}
+{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end }}
+# Palette driven by starship_palette in .chezmoidata/themes.toml
+palette = "{{ $t.app.starship_palette }}"
 
 [character]
 success_symbol = "[➜](bold green)"

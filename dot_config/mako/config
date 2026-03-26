@@ -1,0 +1,46 @@
+# Mako notification daemon config
+
+# Display
+max-visible=3
+sort=-time
+layer=overlay
+anchor=top-right
+
+# Appearance
+font=Inter 11
+width=380
+height=120
+margin=12
+padding=14
+border-size=2
+border-radius=8
+icons=1
+max-icon-size=48
+icon-location=left
+
+# Timing
+default-timeout=5000
+ignore-timeout=0
+
+# Colors (Catppuccin Mocha)
+background-color=#1e1e2eee
+text-color=#cdd6f4
+border-color=#89b4fa
+
+# Urgency
+[urgency=low]
+border-color=#313244
+default-timeout=3000
+
+[urgency=normal]
+border-color=#89b4fa
+default-timeout=5000
+
+[urgency=critical]
+border-color=#f38ba8
+default-timeout=0
+ignore-timeout=0
+
+# Do not disturb (allows explicit notify-send)
+[mode=do-not-disturb]
+invisible=1

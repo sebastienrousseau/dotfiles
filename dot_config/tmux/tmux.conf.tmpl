@@ -7,6 +7,12 @@
 {{- $panel := $t.ui.panel -}}
 {{- $border := $t.ui.border -}}
 {{- $dim := $t.term.c8 -}}
+{{- $error := $t.ui.error -}}
+{{- $success := $t.ui.success -}}
+{{- $warning := $t.ui.warning -}}
+{{- $info := $t.ui.info -}}
+{{- $c4 := $t.term.c4 -}}
+{{- $c6 := $t.term.c6 -}}
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  TMUX CONFIGURATION (Universal)                                          ║
@@ -133,33 +139,68 @@ bind C-c new-session
 bind C-f command-prompt -p find-session 'switch-client -t %%'
 bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 
-# --- THEME & STATUS BAR ---
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║  THEME — Powerline Status Bar                                           ║
+# ║  Colors from .chezmoidata/themes.toml ({{ default "catppuccin-mocha" .theme }})  ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
 
-set -g status-style "bg={{ $panel }},fg={{ $fg }}"
+# --- Status Bar ---
+set -g status on
 set -g status-interval 5
-set -g status-justify centre
-set -g status-left-length 50
-set -g status-right-length 50
+set -g status-position bottom
+set -g status-justify left
+set -g status-style "bg={{ $panel }},fg={{ $fg }}"
+set -g status-left-length 80
+set -g status-right-length 80
 
-# Status Left: session name (accent) + window name (surface)
-if-shell 'uname | grep -q Darwin' 'set -g status-left "#[bg={{ $accent }},fg={{ $accent_text }},bold]  #S #[bg={{ $border }},fg={{ $fg }}] #W "'
-if-shell 'uname | grep -q Linux' 'set -g status-left "#[bg={{ $accent }},fg={{ $accent_text }},bold]  #S #[bg={{ $border }},fg={{ $fg }}] #W "'
-if-shell 'uname | grep -q MINGW' 'set -g status-left "#[bg={{ $accent }},fg={{ $accent_text }},bold]  #S #[bg={{ $border }},fg={{ $fg }}] #W "'
+# --- Powerline Segments ---
+# Left: [session] ❱ [window]
+set -g status-left "\
+#[bg={{ $accent }},fg={{ $accent_text }},bold]  #S \
+#[fg={{ $accent }},bg={{ $border }},nobold,noitalics,nounderscore]\
+#[fg={{ $fg }},bg={{ $border }}] #W \
+#[fg={{ $border }},bg={{ $panel }},nobold,noitalics,nounderscore]"
 
-# Status Right: host + time
-set -g status-right "#[bg={{ $border }},fg={{ $fg }}] #H #[bg={{ $accent }},fg={{ $accent_text }},bold] %d %b %H:%M "
+# Right: [git?] [host] ❱ [date] ❱ [time]
+set -g status-right "\
+#[fg={{ $border }},bg={{ $panel }},nobold,noitalics,nounderscore]\
+#[fg={{ $fg }},bg={{ $border }}] #H \
+#[fg={{ $border }},bg={{ $border }},nobold,noitalics,nounderscore]\
+#[fg={{ $dim }},bg={{ $border }}] %d %b \
+#[fg={{ $accent }},bg={{ $border }},nobold,noitalics,nounderscore]\
+#[fg={{ $accent_text }},bg={{ $accent }},bold]  %H:%M "
 
-# Window status
-set -g window-status-format "#[fg={{ $dim }}] #I:#W "
-set -g window-status-current-format "#[bg={{ $border }},fg={{ $accent }},bold] #I:#W "
+# --- Window Tabs ---
+set -g window-status-format "\
+#[fg={{ $panel }},bg={{ $panel }},nobold,noitalics,nounderscore]\
+#[fg={{ $dim }},bg={{ $panel }}] #I  #W #F \
+#[fg={{ $panel }},bg={{ $panel }},nobold,noitalics,nounderscore]"
+
+set -g window-status-current-format "\
+#[fg={{ $panel }},bg={{ $border }},nobold,noitalics,nounderscore]\
+#[fg={{ $accent }},bg={{ $border }},bold] #I  #W #F \
+#[fg={{ $border }},bg={{ $panel }},nobold,noitalics,nounderscore]"
+
 set -g window-status-separator ""
 
-# Pane borders
+# --- Pane Borders ---
 set -g pane-border-style "fg={{ $border }}"
 set -g pane-active-border-style "fg={{ $accent }}"
+set -g display-panes-colour "{{ $border }}"
+set -g display-panes-active-colour "{{ $accent }}"
 
+# --- Messages & Menus ---
+set -g message-style "bg={{ $border }},fg={{ $accent }}"
+set -g message-command-style "bg={{ $border }},fg={{ $accent }}"
+set -g mode-style "bg={{ $border }},fg={{ $accent }},bold"
+
+# --- Clock ---
 setw -g clock-mode-colour "{{ $accent }}"
 setw -g clock-mode-style 24
+
+# --- Copy Mode Highlight ---
+set -g copy-mode-match-style "bg={{ $warning }},fg={{ $bg }}"
+set -g copy-mode-current-match-style "bg={{ $accent }},fg={{ $accent_text }},bold"
 
 # --- LINUX SPECIFIC ---
 if-shell 'uname | grep -q Linux' {

@@ -1,0 +1,51 @@
+# Appearance
+set font "Inter 11"
+set selection-clipboard clipboard
+set window-title-basename true
+set statusbar-basename true
+
+# Behavior
+set scroll-step 80
+set scroll-page-aware true
+set smooth-scroll true
+set adjust-open "best-fit"
+set pages-per-row 1
+set recolor true
+set recolor-keephue true
+set recolor-reverse-video true
+
+# Search
+set incremental-search true
+set highlight-active-color "#89b4fa"
+set highlight-color "#313244"
+
+# Keybindings
+map <C-=> zoom in
+map <C--> zoom out
+map <C-0> zoom 100%
+map D toggle_page_mode
+map r reload
+
+# Colors (Catppuccin Mocha)
+set default-bg "#1e1e2e"
+set default-fg "#cdd6f4"
+set statusbar-bg "#181825"
+set statusbar-fg "#cdd6f4"
+set inputbar-bg "#181825"
+set inputbar-fg "#cdd6f4"
+set notification-bg "#1e1e2e"
+set notification-fg "#cdd6f4"
+set notification-error-bg "#1e1e2e"
+set notification-error-fg "#f38ba8"
+set notification-warning-bg "#1e1e2e"
+set notification-warning-fg "#f9e2af"
+set recolor-darkcolor "#cdd6f4"
+set recolor-lightcolor "#1e1e2e"
+set index-bg "#1e1e2e"
+set index-fg "#cdd6f4"
+set index-active-bg "#313244"
+set index-active-fg "#cdd6f4"
+set completion-bg "#181825"
+set completion-fg "#cdd6f4"
+set completion-highlight-bg "#313244"
+set completion-highlight-fg "#cdd6f4"

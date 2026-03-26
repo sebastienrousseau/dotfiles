@@ -1,0 +1,13 @@
+.git
+node_modules
+.venv
+__pycache__
+target
+dist
+build
+.cache
+.direnv
+*.min.js
+*.min.css
+package-lock.json
+yarn.lock

@@ -1,23 +1,35 @@
 gui:
+  showIcons: true
+  showListFooter: false
+  showCommandLog: false
+  showFileTree: true
+  showRandomTip: false
+  nerdFontsVersion: "3"
+  border: rounded
   theme:
     activeBorderColor:
-      - green
+      - "#89b4fa"
       - bold
     inactiveBorderColor:
-      - white
+      - "#313244"
     optionsTextColor:
       - blue
     selectedLineBgColor:
-      - default
-  showFileTree: true
-  showRandomTip: false
-  border: single
+      - "#313244"
+    cherryPickedCommitFgColor:
+      - "#89b4fa"
 
 git:
   paging:
     colorArg: always
     pager: delta --dark --paging=never
+  log:
+    showGraph: always
+
+os:
+  editPreset: nvim
 
 keybinding:
   universal:
     quit: q
+    return: <escape>
