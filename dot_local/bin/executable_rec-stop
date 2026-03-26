@@ -7,14 +7,26 @@
 
 set -euo pipefail
 
-histfile="${HISTFILE:-${HOME}/.bash_history}"
+# Restore all backed-up history files
+candidates=(
+  "${HISTFILE:-${HOME}/.bash_history}"
+  "${HOME}/.local/share/fish/fish_history"
+  "${HOME}/.bash_history"
+)
 
-if [[ ! -f "${histfile}.bak" ]]; then
-  echo "No backup found at ${histfile}.bak, nothing to restore."
+restored=0
+for histfile in "${candidates[@]}"; do
+  if [[ -f "${histfile}.bak" ]]; then
+    mv "${histfile}.bak" "${histfile}"
+    echo "  Restored: ${histfile}"
+    restored=$((restored + 1))
+  fi
+done
+
+if [[ $restored -eq 0 ]]; then
+  echo "No backups found, nothing to restore."
   exit 0
 fi
 
-mv "${histfile}.bak" "${histfile}"
-
-echo "Recording mode OFF"
-echo "  History restored to ${histfile}"
+echo ""
+echo "Recording mode OFF ($restored files restored)"

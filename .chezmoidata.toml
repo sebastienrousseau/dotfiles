@@ -9,7 +9,7 @@ profile = "laptop"
 machine = ""
 
 # Visual theme
-theme = "macos-tahoe-dark"
+theme = "tokyonight-storm"
 
 # Terminal settings
 terminal_font_family = "JetBrainsMono Nerd Font"

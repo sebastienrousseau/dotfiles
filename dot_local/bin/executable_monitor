@@ -3,24 +3,51 @@
 ## monitor — GPU-aware system monitoring in tmux.
 ##
 ## Opens btop alongside an auto-detected GPU monitor in a tmux split.
+## Cross-platform: Linux (nvtop/amdgpu_top/nvidia-smi/intel_gpu_top),
+## macOS (powermetrics via sudo), WSL (nvidia-smi if available).
 ##
 ## # Usage
 ##   monitor               # Opens btop + GPU monitor
 
 set -euo pipefail
 
-# Auto-detect GPU monitoring tool
-if command -v nvtop &>/dev/null; then
-  gpu_command=(nvtop)
-elif command -v amdgpu_top &>/dev/null; then
-  gpu_command=(amdgpu_top --dark)
-elif command -v nvidia-smi &>/dev/null; then
-  gpu_command=(nvidia-smi)
-elif command -v intel_gpu_top &>/dev/null; then
-  gpu_command=(sudo intel_gpu_top)
-else
-  gpu_command=(bash -c "printf 'No GPU monitoring tools available\n\nInstall nvtop, amdgpu_top, nvidia-smi, or intel_gpu_top.\n'; read -rp 'Press Enter to close...'")
+if ! command -v tmux &>/dev/null; then
+  echo "monitor requires tmux" >&2
+  # Fallback: just run btop directly
+  exec btop
 fi
+
+if ! command -v btop &>/dev/null; then
+  echo "monitor requires btop" >&2
+  exit 1
+fi
+
+# Auto-detect GPU monitoring tool (platform-aware)
+case "$(uname -s)" in
+  Darwin)
+    if command -v powermetrics &>/dev/null; then
+      gpu_command=(sudo powermetrics --samplers gpu_power -i 2000)
+    else
+      gpu_command=(bash -c "printf 'macOS GPU metrics require powermetrics (built-in).\nRun: sudo powermetrics --samplers gpu_power\n'; read -rp 'Press Enter to close...'")
+    fi
+    ;;
+  Linux)
+    if command -v nvtop &>/dev/null; then
+      gpu_command=(nvtop)
+    elif command -v amdgpu_top &>/dev/null; then
+      gpu_command=(amdgpu_top --dark)
+    elif command -v nvidia-smi &>/dev/null; then
+      gpu_command=(nvidia-smi)
+    elif command -v intel_gpu_top &>/dev/null; then
+      gpu_command=(sudo intel_gpu_top)
+    else
+      gpu_command=(bash -c "printf 'No GPU monitoring tools found.\n\nInstall: nvtop, amdgpu_top, nvidia-smi, or intel_gpu_top.\n'; read -rp 'Press Enter to close...'")
+    fi
+    ;;
+  *)
+    gpu_command=(bash -c "printf 'GPU monitoring not supported on this platform.\n'; read -rp 'Press Enter to close...'")
+    ;;
+esac
 
 # If inside tmux, open as new window; otherwise create a new session
 tmux_command=(new-session -s)

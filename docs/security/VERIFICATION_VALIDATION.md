@@ -5,7 +5,7 @@
 | Field | Value |
 |-------|-------|
 | Document ID | VV-DOT-001 |
-| Version | 0.2.497 |
+| Version | 0.2.498 |
 | Date | 2026-03-20 |
 | Author | Repository Maintainer |
 | Status | Active |

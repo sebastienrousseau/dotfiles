@@ -10,5 +10,12 @@ set -euo pipefail
 
 length="${1:-48}"
 
-pwgen -sync "${length}" -1 | cb
+if command -v pwgen &>/dev/null; then
+  pwgen -sync "${length}" -1 | cb
+elif command -v openssl &>/dev/null; then
+  openssl rand -base64 "$((length * 3 / 4 + 1))" | head -c "$length" | cb
+else
+  echo "Requires pwgen or openssl" >&2
+  exit 1
+fi
 echo "Password (${length} chars) copied to clipboard."

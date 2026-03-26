@@ -10,6 +10,13 @@
 
 set -euo pipefail
 
+for cmd in fzf delta git; do
+  if ! command -v "$cmd" &>/dev/null; then
+    echo "gd requires $cmd" >&2
+    exit 1
+  fi
+done
+
 GIT_ARGS=()
 
 for arg in "$@"; do

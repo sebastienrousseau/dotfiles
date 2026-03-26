@@ -17,6 +17,13 @@
 
 set -euo pipefail
 
+for cmd in fzf delta git; do
+  if ! command -v "$cmd" &>/dev/null; then
+    echo "gl requires $cmd" >&2
+    exit 1
+  fi
+done
+
 # Open a commit URL in the default browser.
 open_commit_url() {
   local commit="${1}"

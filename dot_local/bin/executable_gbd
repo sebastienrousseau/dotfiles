@@ -10,6 +10,11 @@
 
 set -euo pipefail
 
+if ! command -v git &>/dev/null; then
+  echo "gbd requires git" >&2
+  exit 1
+fi
+
 default_whitelist="(main|master)"
 skip_branches="${1:-"${default_whitelist}"}"
 dry_run="${2:-}"

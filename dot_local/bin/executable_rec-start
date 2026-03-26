@@ -10,23 +10,34 @@
 
 set -euo pipefail
 
-histfile="${HISTFILE:-${HOME}/.bash_history}"
+# Detect history files across shells
+histfiles=()
+[[ -n "${HISTFILE:-}" && -f "${HISTFILE}" ]] && histfiles+=("${HISTFILE}")
+[[ -f "${HOME}/.local/share/fish/fish_history" ]] && histfiles+=("${HOME}/.local/share/fish/fish_history")
+[[ -f "${HOME}/.bash_history" && "${HISTFILE:-}" != "${HOME}/.bash_history" ]] && histfiles+=("${HOME}/.bash_history")
 
-if [[ ! -f "${histfile}" ]]; then
-  echo "No history file at ${histfile}, nothing to do."
+if [[ ${#histfiles[@]} -eq 0 ]]; then
+  echo "No history files found, nothing to do."
   exit 0
 fi
 
-# Only backup if one doesn't exist (prevents double-run overwrite)
-if [[ -f "${histfile}.bak" ]]; then
-  echo "Backup already exists at ${histfile}.bak"
-  echo "History is already disabled. Run rec-stop first."
+backed=0
+for histfile in "${histfiles[@]}"; do
+  if [[ -f "${histfile}.bak" ]]; then
+    echo "  Already backed up: ${histfile}"
+    continue
+  fi
+  cp -a "${histfile}" "${histfile}.bak"
+  rm "${histfile}"
+  echo "  Backed up: ${histfile}"
+  backed=$((backed + 1))
+done
+
+if [[ $backed -eq 0 ]]; then
+  echo "History already disabled. Run rec-stop first."
   exit 1
 fi
 
-cp -a "${histfile}" "${histfile}.bak"
-rm "${histfile}"
-
-echo "Recording mode ON"
-echo "  History backed up to ${histfile}.bak"
+echo ""
+echo "Recording mode ON ($backed files backed up)"
 echo "  Run rec-stop to restore."

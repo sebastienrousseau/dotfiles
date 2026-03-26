@@ -12,6 +12,12 @@
 
 set -euo pipefail
 
+if ! command -v niri &>/dev/null; then
+  echo "dot-launch-or-focus requires niri (Wayland compositor)" >&2
+  # Fallback: just launch the app directly
+  exec "${@##*.}" "${@:2}"
+fi
+
 if [[ $# -lt 1 ]]; then
   echo "Usage: dot-launch-or-focus <app> [args...]" >&2
   exit 1

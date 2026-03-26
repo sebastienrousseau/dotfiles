@@ -32,6 +32,18 @@ readonly BLUE=$'\033[34m'
 readonly RED=$'\033[31m'
 readonly CYAN=$'\033[36m'
 
+# Platform detection
+readonly PLATFORM="$(uname -s)"
+
+# Portable sed -i (GNU vs BSD/macOS)
+_sed_i() {
+  if [[ "$PLATFORM" == "Darwin" ]]; then
+    sed -i '' "$@"
+  else
+    sed -i "$@"
+  fi
+}
+
 # Timing — record start in nanoseconds (fallback to seconds * 1000)
 if date +%s%N &>/dev/null && [[ "$(date +%s%N)" != *N ]]; then
   START_NS=$(date +%s%N)
@@ -215,17 +227,29 @@ reload_ghostty() {
     return
   fi
 
-  # Fallback: SIGUSR1 if the process catches it
+  # Fallback: SIGUSR1
   local main_pid
-  main_pid="$(pgrep -x -o ghostty 2>/dev/null || true)"
-  if [[ -n "$main_pid" && -r "/proc/$main_pid/status" ]]; then
-    local sigcgt
-    sigcgt="$(awk '/^SigCgt:/{print $2}' "/proc/$main_pid/status" 2>/dev/null || true)"
-    if [[ -n "$sigcgt" ]] && (( 16#$sigcgt & 0x200 )); then
+  # -o (oldest) is GNU pgrep only; fall back to first match
+  main_pid="$(pgrep -x -o ghostty 2>/dev/null || pgrep -x ghostty 2>/dev/null | head -1 || true)"
+  if [[ -n "$main_pid" ]]; then
+    # macOS: Ghostty always catches SIGUSR1, send directly
+    if [[ "$(uname -s)" == "Darwin" ]]; then
       if kill -SIGUSR1 "$main_pid" 2>/dev/null; then
         RELOADED+=("ghostty")
         _ok "Ghostty" "SIGUSR1 → PID $main_pid"
         return
+      fi
+    fi
+    # Linux: verify signal handler before sending
+    if [[ -r "/proc/$main_pid/status" ]]; then
+      local sigcgt
+      sigcgt="$(awk '/^SigCgt:/{print $2}' "/proc/$main_pid/status" 2>/dev/null || true)"
+      if [[ -n "$sigcgt" ]] && (( 16#$sigcgt & 0x200 )); then
+        if kill -SIGUSR1 "$main_pid" 2>/dev/null; then
+          RELOADED+=("ghostty")
+          _ok "Ghostty" "SIGUSR1 → PID $main_pid"
+          return
+        fi
       fi
     fi
   fi
@@ -361,12 +385,12 @@ reload_desktop() {
       *)                                                       dms_stock="blue" ;;
     esac
 
-    # DMS theme switch: sed -i writes to settings.json in-place.
+    # DMS theme switch: write to settings.json in-place.
     # DMS FileView watches the file and triggers onLoaded → applyStoredTheme.
     # NOTE: mv (atomic write) breaks the inotify watch — must use sed -i.
     local dms_settings="${XDG_CONFIG_HOME:-$HOME/.config}/DankMaterialShell/settings.json"
     if [[ -f "$dms_settings" ]]; then
-      sed -i \
+      _sed_i \
         -e "s/\"currentThemeName\": *\"[^\"]*\"/\"currentThemeName\": \"$dms_stock\"/" \
         -e "s/\"currentThemeCategory\": *\"[^\"]*\"/\"currentThemeCategory\": \"stock\"/" \
         "$dms_settings"

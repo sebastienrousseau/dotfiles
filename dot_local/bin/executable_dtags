@@ -9,6 +9,13 @@
 
 set -euo pipefail
 
+for cmd in curl jq; do
+  if ! command -v "$cmd" &>/dev/null; then
+    echo "dtags requires $cmd" >&2
+    exit 1
+  fi
+done
+
 image="${1:-}"
 
 if [[ -z "${image}" ]]; then
@@ -18,4 +25,4 @@ fi
 
 curl --silent \
   "https://registry.hub.docker.com/v2/repositories/library/${image}/tags?page_size=1000" |
-  jq -r ".results[].name" | sort --version-sort
+  jq -r ".results[].name" | sort -V 2>/dev/null || sort -t. -k1,1n -k2,2n -k3,3n
