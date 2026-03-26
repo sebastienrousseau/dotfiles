@@ -184,7 +184,7 @@ test_start "all_colors_valid_hex"
 bad=0
 while IFS= read -r line; do
   if [[ "$line" =~ =.*\"#[0-9a-fA-F]+\" ]]; then
-    hex=$(echo "$line" | grep -oP '#[0-9a-fA-F]+')
+    hex=$(echo "$line" | grep -oE '#[0-9a-fA-F]+')
     if [[ ! "$hex" =~ ^#[0-9a-fA-F]{6}$ ]]; then
       echo "    BAD HEX: $line"
       bad=$((bad + 1))

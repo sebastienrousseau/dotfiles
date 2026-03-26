@@ -1,3 +1,4 @@
+// Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 // Firefox privacy and performance hardening
 // Apply by symlinking to ~/.mozilla/firefox/<profile>/user.js
 

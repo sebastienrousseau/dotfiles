@@ -47,7 +47,7 @@ done
 # Get project directories from configured paths
 get_project_dirs() {
   local paths
-  IFS=':' read -ra paths <<< "$SESSIONIZER_DIRS"
+  IFS=':' read -ra paths <<<"$SESSIONIZER_DIRS"
   for path in "${paths[@]}"; do
     local expanded="${path/#\~/$HOME}"
     [[ -d "$expanded" ]] && find "$expanded" -mindepth 1 -maxdepth 2 -type d 2>/dev/null
@@ -78,7 +78,7 @@ build_list() {
       local suffix="${DIM}${windows}${NC}"
       [[ -n "$attached" ]] && suffix="${suffix} ${GREEN}${attached}${NC}"
       echo -e "${GREEN}${icon}${NC}${BOLD}${name}${NC}  ${suffix}"
-    done <<< "$sessions"
+    done <<<"$sessions"
   fi
 
   # Zoxide frecent directories (blue icon, deduplicated against sessions)
@@ -93,7 +93,7 @@ build_list() {
         continue
       fi
       echo -e "${BLUE}◆ ${NC}${name}  ${DIM}${dir}${NC}"
-    done <<< "$zoxide_dirs"
+    done <<<"$zoxide_dirs"
   fi
 
   # Project directories (dim icon, deduplicated)
@@ -111,7 +111,7 @@ build_list() {
         continue
       fi
       echo -e "${DIM}○ ${NC}${name}  ${DIM}${dir}${NC}"
-    done <<< "$projects"
+    done <<<"$projects"
   fi
 }
 
@@ -290,15 +290,16 @@ main() {
   fi
 
   local selected
-  selected=$(echo -e "$list" | fzf \
-    --ansi \
-    --header "tmux sessions  (Ctrl-X: kill)" \
-    --prompt "❱ " \
-    --height 60% \
-    --reverse \
-    --no-sort \
-    --no-preview \
-    --bind "ctrl-x:execute-silent(tmux kill-session -t {2} 2>/dev/null)+reload(bash -c 'source $0; build_list')" \
+  selected=$(
+    echo -e "$list" | fzf \
+      --ansi \
+      --header "tmux sessions  (Ctrl-X: kill)" \
+      --prompt "❱ " \
+      --height 60% \
+      --reverse \
+      --no-sort \
+      --no-preview \
+      --bind "ctrl-x:execute-silent(tmux kill-session -t {2} 2>/dev/null)+reload(bash -c 'source $0; build_list')"
   ) || exit 0
 
   if [[ -n "$selected" ]]; then

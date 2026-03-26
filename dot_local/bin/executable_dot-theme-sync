@@ -200,7 +200,6 @@ apply_theme_configs() {
   fi
 }
 
-
 # =============================================================================
 # Application Reload Functions
 # =============================================================================
@@ -246,7 +245,7 @@ reload_ghostty() {
     if [[ -r "/proc/$main_pid/status" ]]; then
       local sigcgt
       sigcgt="$(awk '/^SigCgt:/{print $2}' "/proc/$main_pid/status" 2>/dev/null || true)"
-      if [[ -n "$sigcgt" ]] && (( 16#$sigcgt & 0x200 )); then
+      if [[ -n "$sigcgt" ]] && ((16#$sigcgt & 0x200)); then
         if kill -SIGUSR1 "$main_pid" 2>/dev/null; then
           RELOADED+=("ghostty")
           _ok "Ghostty" "SIGUSR1 → PID $main_pid"
@@ -356,35 +355,35 @@ reload_desktop() {
   if command -v dms &>/dev/null; then
     local dms_stock=""
     case "$theme" in
-      catppuccin-mocha|catppuccin-frappe|catppuccin-macchiato) dms_stock="blue" ;;
-      catppuccin-latte)                                        dms_stock="blue" ;;
-      tokyonight-night|tokyonight-storm|tokyonight-moon)       dms_stock="blue" ;;
-      tokyonight-day)                                          dms_stock="blue" ;;
-      rose-pine|rose-pine-moon)                                dms_stock="cyan" ;;
-      rose-pine-dawn)                                          dms_stock="coral" ;;
-      dracula)                                                 dms_stock="purple" ;;
-      gruvbox-dark|gruvbox-light)                              dms_stock="orange" ;;
-      nord)                                                    dms_stock="cyan" ;;
-      onedark|onelight)                                        dms_stock="blue" ;;
-      solarized-dark|solarized-light)                          dms_stock="cyan" ;;
-      everforest-dark|everforest-light)                        dms_stock="green" ;;
-      kanagawa-wave|kanagawa-dragon)                           dms_stock="purple" ;;
-      kanagawa-lotus)                                          dms_stock="pink" ;;
-      abstract-waves-*)                                          dms_stock="blue" ;;
-      adwaita-dark)                                              dms_stock="cyan" ;;
-      adwaita-light)                                             dms_stock="purple" ;;
-      colourful-dark)                                            dms_stock="blue" ;;
-      colourful-light)                                           dms_stock="purple" ;;
-      imac-blue-*)                                               dms_stock="blue" ;;
-      macos-big-sur-*)                                           dms_stock="purple" ;;
-      macos-mojave-*)                                            dms_stock="blue" ;;
-      macos-monterey-*)                                          dms_stock="purple" ;;
-      macos-sequoia-*)                                           dms_stock="cyan" ;;
-      macos-sonoma-*)                                            dms_stock="green" ;;
-      macos-tahoe-*)                                             dms_stock="blue" ;;
-      macos-ventura-*)                                           dms_stock="orange" ;;
-      monterey-sierra-blue-*)                                    dms_stock="cyan" ;;
-      *)                                                       dms_stock="blue" ;;
+      catppuccin-mocha | catppuccin-frappe | catppuccin-macchiato) dms_stock="blue" ;;
+      catppuccin-latte) dms_stock="blue" ;;
+      tokyonight-night | tokyonight-storm | tokyonight-moon) dms_stock="blue" ;;
+      tokyonight-day) dms_stock="blue" ;;
+      rose-pine | rose-pine-moon) dms_stock="cyan" ;;
+      rose-pine-dawn) dms_stock="coral" ;;
+      dracula) dms_stock="purple" ;;
+      gruvbox-dark | gruvbox-light) dms_stock="orange" ;;
+      nord) dms_stock="cyan" ;;
+      onedark | onelight) dms_stock="blue" ;;
+      solarized-dark | solarized-light) dms_stock="cyan" ;;
+      everforest-dark | everforest-light) dms_stock="green" ;;
+      kanagawa-wave | kanagawa-dragon) dms_stock="purple" ;;
+      kanagawa-lotus) dms_stock="pink" ;;
+      abstract-waves-*) dms_stock="blue" ;;
+      adwaita-dark) dms_stock="cyan" ;;
+      adwaita-light) dms_stock="purple" ;;
+      colourful-dark) dms_stock="blue" ;;
+      colourful-light) dms_stock="purple" ;;
+      imac-blue-*) dms_stock="blue" ;;
+      macos-big-sur-*) dms_stock="purple" ;;
+      macos-mojave-*) dms_stock="blue" ;;
+      macos-monterey-*) dms_stock="purple" ;;
+      macos-sequoia-*) dms_stock="cyan" ;;
+      macos-sonoma-*) dms_stock="green" ;;
+      macos-tahoe-*) dms_stock="blue" ;;
+      macos-ventura-*) dms_stock="orange" ;;
+      monterey-sierra-blue-*) dms_stock="cyan" ;;
+      *) dms_stock="blue" ;;
     esac
 
     # DMS theme switch: write to settings.json in-place.

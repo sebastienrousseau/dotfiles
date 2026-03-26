@@ -1,3 +1,4 @@
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # IPython configuration
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 c = get_config()  # noqa: F821

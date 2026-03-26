@@ -1,3 +1,4 @@
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 XDG_DESKTOP_DIR="$HOME/Desktop"
 XDG_DOWNLOAD_DIR="$HOME/Downloads"
 XDG_DOCUMENTS_DIR="$HOME/Documents"

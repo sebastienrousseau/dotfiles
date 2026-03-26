@@ -178,8 +178,8 @@ pick_theme() {
     --reverse \
     --no-sort \
     --no-preview \
-    --ansi \
-    | awk '{print $2}')" || return 0
+    --ansi |
+    awk '{print $2}')" || return 0
 
   if [[ -n "$selected" && "$selected" != "$current" ]]; then
     dot-theme-sync "$selected"
@@ -243,9 +243,10 @@ toggle_theme() {
       everforest) set_theme "everforest-light" ;;
       # Wallpaper themes: swap -dark to -light
       abstract-waves | adwaita | colourful | imac-blue | \
-      macos-big-sur | macos-mojave | macos-monterey | macos-sequoia | \
-      macos-sonoma | macos-tahoe | macos-ventura | monterey-sierra-blue)
-        set_theme "${current%-dark}-light" ;;
+        macos-big-sur | macos-mojave | macos-monterey | macos-sequoia | \
+        macos-sonoma | macos-tahoe | macos-ventura | monterey-sierra-blue)
+        set_theme "${current%-dark}-light"
+        ;;
       *) set_theme "$DEFAULT_LIGHT" ;;
     esac
   else
@@ -260,9 +261,10 @@ toggle_theme() {
       everforest) set_theme "everforest-dark" ;;
       # Wallpaper themes: swap -light to -dark
       abstract-waves | adwaita | colourful | imac-blue | \
-      macos-big-sur | macos-mojave | macos-monterey | macos-sequoia | \
-      macos-sonoma | macos-tahoe | macos-ventura | monterey-sierra-blue)
-        set_theme "${current%-light}-dark" ;;
+        macos-big-sur | macos-mojave | macos-monterey | macos-sequoia | \
+        macos-sonoma | macos-tahoe | macos-ventura | monterey-sierra-blue)
+        set_theme "${current%-light}-dark"
+        ;;
       *) set_theme "$DEFAULT_DARK" ;;
     esac
   fi

@@ -19,6 +19,6 @@ SIGNATURE_FILE="$HOME/.euxis/data/config/branding/signature.txt"
 if [[ -f "$SIGNATURE_FILE" ]]; then
   signature=$(cat "$SIGNATURE_FILE")
   if ! grep -qF "THE ARCHITECT" "$COMMIT_MSG_FILE" 2>/dev/null; then
-    printf '\n%s\n' "$signature" >> "$COMMIT_MSG_FILE"
+    printf '\n%s\n' "$signature" >>"$COMMIT_MSG_FILE"
   fi
 fi

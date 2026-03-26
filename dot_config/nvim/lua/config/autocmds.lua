@@ -71,18 +71,24 @@ vim.api.nvim_create_autocmd("User", {
     local theme = vim.env.DOTFILES_THEME or "catppuccin-mocha"
     -- Clear cached theme modules so setup() runs fresh
     for name, _ in pairs(package.loaded) do
-      if name:match("^catppuccin") or name:match("^tokyonight") or name:match("^kanagawa")
-        or name:match("^gruvbox") or name:match("^rose%-pine") or name:match("^solarized")
-        or name:match("^onedark") or name:match("^nord") or name:match("^dracula")
-        or name:match("^everforest") then
+      if
+        name:match("^catppuccin")
+        or name:match("^tokyonight")
+        or name:match("^kanagawa")
+        or name:match("^gruvbox")
+        or name:match("^rose%-pine")
+        or name:match("^solarized")
+        or name:match("^onedark")
+        or name:match("^nord")
+        or name:match("^dracula")
+        or name:match("^everforest")
+      then
         package.loaded[name] = nil
       end
     end
     -- Defer to let lazy.nvim finish its reload cycle
     vim.defer_fn(function()
-      local cs = theme:match("^catppuccin") and "catppuccin"
-        or theme:match("^tokyonight") and theme
-        or theme
+      local cs = theme:match("^catppuccin") and "catppuccin" or theme:match("^tokyonight") and theme or theme
       pcall(vim.cmd.colorscheme, cs)
     end, 5)
   end,

@@ -1,5 +1,6 @@
 {{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
 {{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end -}}
+{{- /* Copyright (c) 2015-2026 Dotfiles. All rights reserved. */ -}}
 {{- $bg := $t.term.bg -}}
 {{- $fg := $t.term.fg -}}
 {{- $accent := $t.ui.accent -}}
