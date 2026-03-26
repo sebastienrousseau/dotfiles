@@ -182,6 +182,8 @@ apply_theme_configs() {
     "$HOME/.config/gtk-3.0/settings.ini"
     "$HOME/.config/gtk-4.0/gtk.css"
     "$HOME/.config/gtk-4.0/settings.ini"
+    "$HOME/.config/waybar/config.jsonc"
+    "$HOME/.config/waybar/style.css"
   )
 
   local applied=()
