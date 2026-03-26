@@ -2,6 +2,8 @@
 // Firefox privacy and performance hardening
 // Apply by symlinking to ~/.mozilla/firefox/<profile>/user.js
 
+/* global user_pref */
+
 // Disable telemetry
 user_pref("toolkit.telemetry.enabled", false);
 user_pref("toolkit.telemetry.unified", false);
