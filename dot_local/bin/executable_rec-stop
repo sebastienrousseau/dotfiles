@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-# Restore all backed-up history files
+# Restore all backed-up history files (bounded: max 3 candidates)
 candidates=(
   "${HISTFILE:-${HOME}/.bash_history}"
   "${HOME}/.local/share/fish/fish_history"
@@ -17,9 +17,12 @@ candidates=(
 restored=0
 for histfile in "${candidates[@]}"; do
   if [[ -f "${histfile}.bak" ]]; then
-    mv "${histfile}.bak" "${histfile}"
-    echo "  Restored: ${histfile}"
-    restored=$((restored + 1))
+    if mv "${histfile}.bak" "${histfile}"; then
+      echo "  Restored: ${histfile}"
+      restored=$((restored + 1))
+    else
+      echo "  Failed to restore: ${histfile}" >&2
+    fi
   fi
 done
 

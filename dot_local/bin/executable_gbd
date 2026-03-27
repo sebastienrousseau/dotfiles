@@ -15,6 +15,12 @@ if ! command -v git &>/dev/null; then
   exit 1
 fi
 
+# R5: validate git repository
+if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+  echo "gbd: not a git repository" >&2
+  exit 1
+fi
+
 default_whitelist="(main|master)"
 skip_branches="${1:-"${default_whitelist}"}"
 dry_run="${2:-}"
@@ -23,6 +29,12 @@ dry_run="${2:-}"
 if [[ "${skip_branches}" == "--dry-run" ]]; then
   skip_branches="${default_whitelist}"
   dry_run="--dry-run"
+fi
+
+# R5: validate regex pattern before use
+if ! echo "" | grep -wEv "${skip_branches}" &>/dev/null; then
+  echo "Invalid whitelist pattern: ${skip_branches}" >&2
+  exit 1
 fi
 
 branches="$(git branch | grep -wEv "${skip_branches}" | grep -wv "$(git branch --show-current)" || true)"

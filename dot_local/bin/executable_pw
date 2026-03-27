@@ -10,6 +10,12 @@ set -euo pipefail
 
 length="${1:-48}"
 
+# R5: validate input is a positive integer
+if [[ ! "$length" =~ ^[0-9]+$ ]] || [[ "$length" -lt 1 ]] || [[ "$length" -gt 1024 ]]; then
+  echo "Usage: pw [length] (1-1024, default 48)" >&2
+  exit 1
+fi
+
 if command -v pwgen &>/dev/null; then
   pwgen -sync "${length}" -1 | cb
 elif command -v openssl &>/dev/null; then

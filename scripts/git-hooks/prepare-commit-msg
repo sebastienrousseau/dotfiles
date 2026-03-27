@@ -5,6 +5,11 @@
 
 set -euo pipefail
 
+# R5: validate commit message file argument
+if [[ -z "${1:-}" || ! -f "${1:-}" ]]; then
+  exit 0 # No file provided — git will handle the error
+fi
+
 COMMIT_MSG_FILE="$1"
 COMMIT_SOURCE="${2:-}"
 

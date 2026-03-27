@@ -10,7 +10,7 @@
 
 set -euo pipefail
 
-# Detect history files across shells
+# Detect history files across shells (bounded: max 3 candidates)
 histfiles=()
 [[ -n "${HISTFILE:-}" && -f "${HISTFILE}" ]] && histfiles+=("${HISTFILE}")
 [[ -f "${HOME}/.local/share/fish/fish_history" ]] && histfiles+=("${HOME}/.local/share/fish/fish_history")
@@ -27,10 +27,13 @@ for histfile in "${histfiles[@]}"; do
     echo "  Already backed up: ${histfile}"
     continue
   fi
-  cp -a "${histfile}" "${histfile}.bak"
-  rm "${histfile}"
-  echo "  Backed up: ${histfile}"
-  backed=$((backed + 1))
+  # Atomic: mv is a single rename syscall (no cp+rm race)
+  if mv "${histfile}" "${histfile}.bak"; then
+    echo "  Backed up: ${histfile}"
+    backed=$((backed + 1))
+  else
+    echo "  Failed to back up: ${histfile}" >&2
+  fi
 done
 
 if [[ $backed -eq 0 ]]; then

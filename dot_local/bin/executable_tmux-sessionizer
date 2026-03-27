@@ -30,7 +30,6 @@ readonly DIM=$'\033[2m'
 readonly BOLD=$'\033[1m'
 readonly GREEN=$'\033[32m'
 readonly BLUE=$'\033[34m'
-readonly YELLOW=$'\033[33m'
 readonly RED=$'\033[31m'
 readonly NC=$'\033[0m'
 
@@ -50,7 +49,7 @@ get_project_dirs() {
   IFS=':' read -ra paths <<<"$SESSIONIZER_DIRS"
   for path in "${paths[@]}"; do
     local expanded="${path/#\~/$HOME}"
-    [[ -d "$expanded" ]] && find "$expanded" -mindepth 1 -maxdepth 2 -type d 2>/dev/null
+    [[ -d "$expanded" ]] && find "$expanded" -mindepth 1 -maxdepth 2 -type d 2>/dev/null | head -200
   done
 }
 
@@ -117,12 +116,14 @@ build_list() {
 
 # Format session name from path
 format_name() {
+  [[ -n "${1:-}" ]] || return 1 # R5: validate input
   local dir="$1"
   basename "$dir" | tr '.' '_' | tr -cd '[:alnum:]._-' | head -c 32
 }
 
 # Resolve the actual path from a selection line
 resolve_selection() {
+  [[ -n "${1:-}" ]] || return 1 # R5: validate input
   local line="$1"
   # Strip ANSI codes
   local clean
@@ -167,6 +168,7 @@ resolve_selection() {
 
 # Switch to or create a session
 switch_to() {
+  [[ -n "${1:-}" ]] || return 1 # R5: validate input
   local target="$1"
   local type="${target%%:*}"
   local value="${target#*:}"

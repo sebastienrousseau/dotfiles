@@ -32,11 +32,13 @@ readonly BLUE=$'\033[34m'
 readonly RED=$'\033[31m'
 readonly CYAN=$'\033[36m'
 
-# Platform detection
-readonly PLATFORM="$(uname -s)"
+# Platform detection (R10: declare and assign separately)
+PLATFORM="$(uname -s)"
+readonly PLATFORM
 
 # Portable sed -i (GNU vs BSD/macOS)
 _sed_i() {
+  [[ $# -ge 2 ]] || return 1 # R5: validate args
   if [[ "$PLATFORM" == "Darwin" ]]; then
     sed -i '' "$@"
   else
@@ -99,8 +101,12 @@ current_theme() {
 # Write a new theme into .chezmoidata.toml AND chezmoi.toml [data] section.
 # Both must be updated: chezmoi.toml [data] takes precedence over .chezmoidata.toml.
 write_theme() {
-  local new_theme="$1"
-  # Validate: only alphanumeric, hyphens, underscores
+  local new_theme="${1:-}"
+  # R5: validate input
+  if [[ -z "$new_theme" ]]; then
+    _err "Invalid" "theme name required"
+    exit 1
+  fi
   if [[ "$new_theme" =~ [^a-zA-Z0-9_-] ]]; then
     _err "Invalid" "theme name: $new_theme"
     exit 1
@@ -115,14 +121,22 @@ write_theme() {
     cat "$DATA_FILE" >"$tmp_file"
     printf 'theme = "%s"\n' "$new_theme" >>"$tmp_file"
   fi
-  mv "$tmp_file" "$DATA_FILE"
+  # R7: check mv return, restore on failure
+  if ! mv "$tmp_file" "$DATA_FILE"; then
+    _err "Write" "failed to update $DATA_FILE"
+    rm -f "$tmp_file"
+    return 1
+  fi
 
   # Update chezmoi.toml [data] section (overrides .chezmoidata.toml)
   local chezmoi_cfg="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
   if [[ -f "$chezmoi_cfg" ]] && grep -q '^theme = ' "$chezmoi_cfg"; then
     tmp_file="$(umask 077 && mktemp)"
     sed "s/^theme = .*/theme = \"$new_theme\"/" "$chezmoi_cfg" >"$tmp_file"
-    mv "$tmp_file" "$chezmoi_cfg"
+    if ! mv "$tmp_file" "$chezmoi_cfg"; then
+      _err "Write" "failed to update $chezmoi_cfg"
+      rm -f "$tmp_file"
+    fi
   fi
 }
 

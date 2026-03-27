@@ -17,6 +17,12 @@ for cmd in fzf delta git; do
   fi
 done
 
+# R5: validate git repository
+if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+  echo "gd: not a git repository" >&2
+  exit 1
+fi
+
 GIT_ARGS=()
 
 for arg in "$@"; do
