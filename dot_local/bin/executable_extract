@@ -10,11 +10,6 @@ if [ -z "${1:-}" ]; then
   exit 1
 fi
 
-if [ ! -f "$1" ]; then
-  echo "File not found: $1" >&2
-  exit 1
-fi
-
 # If tool is missing, use Nix to run it.
 run_if_not_found() {
   local cmd="$1"
