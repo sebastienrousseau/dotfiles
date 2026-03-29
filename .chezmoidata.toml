@@ -9,7 +9,7 @@ profile = "laptop"
 machine = ""
 
 # Visual theme
-theme = "tokyonight-storm"
+theme = "macos-ventura-dark"
 
 # Terminal settings
 terminal_font_family = "JetBrainsMono Nerd Font"
@@ -35,6 +35,18 @@ dms = true
 
 # Terminal multiplexers
 zellij = false
+
+# Linux desktop / Wayland — override per-host in ~/.config/chezmoi/chezmoi.toml
+linux_desktop = false
+niri = false
+waybar = false
+fuzzel = false
+mako = false
+foot = false
+kanshi = false
+touch = false
+t2 = false
+surface = false
 
 # ============================================================================
 # Tool-specific configuration

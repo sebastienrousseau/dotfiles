@@ -1,0 +1,27 @@
+{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end }}
+[main]
+font={{ .terminal_font_family }}:size={{ .terminal_font_size }}
+pad=10x10
+term=xterm-256color
+
+[colors]
+alpha=0.95
+background={{ trimPrefix "#" $t.term.bg }}
+foreground={{ trimPrefix "#" $t.term.fg }}
+regular0={{ trimPrefix "#" $t.term.c0 }}
+regular1={{ trimPrefix "#" $t.term.c1 }}
+regular2={{ trimPrefix "#" $t.term.c2 }}
+regular3={{ trimPrefix "#" $t.term.c3 }}
+regular4={{ trimPrefix "#" $t.term.c4 }}
+regular5={{ trimPrefix "#" $t.term.c5 }}
+regular6={{ trimPrefix "#" $t.term.c6 }}
+regular7={{ trimPrefix "#" $t.term.c7 }}
+bright0={{ trimPrefix "#" $t.term.c8 }}
+bright1={{ trimPrefix "#" $t.term.c9 }}
+bright2={{ trimPrefix "#" $t.term.c10 }}
+bright3={{ trimPrefix "#" $t.term.c11 }}
+bright4={{ trimPrefix "#" $t.term.c12 }}
+bright5={{ trimPrefix "#" $t.term.c13 }}
+bright6={{ trimPrefix "#" $t.term.c14 }}
+bright7={{ trimPrefix "#" $t.term.c15 }}

@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Restart=always
 ExecStart=%h/.local/share/mise/shims/pueued
-ExecReload=%h/.local/share/mise/shims/pueued
+ExecReload=/bin/kill -HUP $MAINPID
 Environment=PATH=%h/.local/share/mise/shims:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
 
 [Install]
