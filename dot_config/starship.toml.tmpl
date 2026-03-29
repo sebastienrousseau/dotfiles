@@ -1,7 +1,9 @@
 # Starship Configuration
 # https://starship.rs/config/
 
-command_timeout = 500
+# Some toolchains (notably Node via mise on macOS) can exceed 2s on cold start.
+# Raise timeout to avoid spurious prompt warnings.
+command_timeout = 5000
 add_newline = true
 {{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
 {{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end }}
