@@ -59,7 +59,7 @@ zoxide = "latest"
 "aqua:Nukesor/pueue/pueued" = "4.0.4"
 
 # Python tools
-poetry = "latest"
+poetry = "2.2.1"
 uv = "latest"
 "pipx:aider-chat" = "latest"
 "pipx:shell-gpt" = "latest"

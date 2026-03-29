@@ -58,11 +58,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   # --- Misc ---
 
   # Clean up LaunchServices to remove duplicates in the 'Open With' menu
-  alias cleanup_ls='
-    /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
-    -kill -r -domain local -domain system -domain user && \
-    killall Finder
-  '
+  alias cleanup_ls='/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user && killall Finder'
 
   # Disable .DS_Store compilation on network stores
   alias no_network_ds='defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true'

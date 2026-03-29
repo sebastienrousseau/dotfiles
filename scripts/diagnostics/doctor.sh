@@ -111,16 +111,26 @@ ui_header "Dotfiles Doctor"
 
 # --- Core Shells ---
 _section "Core Shells"
-for cmd in zsh fish nu starship; do
+for cmd in zsh fish starship; do
   if check_cmd "$cmd"; then
     cmd_path="$(get_cmd_path "$cmd")"
     _ok "$cmd" "$(pretty_path "$cmd_path") ($(tool_source "$cmd_path"))"
-  elif [[ "$cmd" == "nu" || "$cmd" == "fish" ]]; then
+  elif [[ "$cmd" == "fish" ]]; then
     _warn "$cmd" "optional"
   else
     _fail "$cmd" "missing"
   fi
 done
+
+if check_cmd "nu"; then
+  cmd_path="$(get_cmd_path "nu")"
+  _ok "nu" "$(pretty_path "$cmd_path") ($(tool_source "$cmd_path"))"
+elif check_cmd "nushell"; then
+  cmd_path="$(get_cmd_path "nushell")"
+  _ok "nu" "$(pretty_path "$cmd_path") ($(tool_source "$cmd_path"))"
+else
+  _warn "nu" "optional"
+fi
 
 # --- Modern CLI Tools ---
 _section "Modern CLI Tools"
@@ -149,6 +159,8 @@ done
 if check_cmd pueue; then
   if "$(get_cmd_path pueue)" status >/dev/null 2>&1; then
     _ok "pueue daemon" "running"
+  elif command -v pueued >/dev/null 2>&1 && pueued -d >/dev/null 2>&1 && "$(get_cmd_path pueue)" status >/dev/null 2>&1; then
+    _ok "pueue daemon" "started"
   else
     _warn "pueue daemon" "not running (pueued -d)"
   fi
@@ -195,7 +207,12 @@ arch="$(uname -m)"
 hostname_value="$(hostname 2>/dev/null || true)"
 session_type="${XDG_SESSION_TYPE:-unknown}"
 desktop_env="${XDG_CURRENT_DESKTOP:-unknown}"
-uptime_human="$(uptime -p 2>/dev/null | sed 's/^up //')"
+if uptime -p >/dev/null 2>&1; then
+  uptime_human="$(uptime -p 2>/dev/null | sed 's/^up //')"
+else
+  # macOS/BSD fallback output does not support "-p".
+  uptime_human="$(uptime 2>/dev/null | sed -E 's/^.* up ([^,]+(, [^,]+){0,2}), [0-9]+ users?.*$/\1/' || true)"
+fi
 
 if [[ -r /etc/os-release ]]; then
   distro_pretty="$(
