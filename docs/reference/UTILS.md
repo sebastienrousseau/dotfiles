@@ -73,7 +73,7 @@ POSIX scripts in `~/.local/bin/` that work across macOS, Linux, and WSL.
 
 | Command | Description |
 |---------|-------------|
-| `dot theme` | Switch terminal themes (dark/light) |
+| `dot theme` | Switch terminal and desktop themes (dark/light) |
 | `dot wallpaper` | Apply a wallpaper |
 | `dot fonts` | Install Nerd Fonts |
 

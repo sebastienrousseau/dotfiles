@@ -329,17 +329,66 @@ reload_niri() {
 
 reload_desktop() {
   local theme="$1"
+  local mode gtk_theme gtk_icon color_scheme
+  mode="$(theme_value "$theme" "mode" 2>/dev/null || echo "dark")"
+  gtk_theme="$(theme_app_value "$theme" "gtk_theme" 2>/dev/null || true)"
+  gtk_icon="$(theme_app_value "$theme" "gtk_icon" 2>/dev/null || true)"
+
+  # macOS desktop integration: apply dark/light appearance and accent color.
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    if ! command -v osascript &>/dev/null; then
+      SKIPPED+=("desktop")
+      _skip "Desktop" "osascript not available"
+      return
+    fi
+
+    local dark_bool
+    local accent="-1" # Graphite fallback
+    local changed=0
+
+    if [[ "$mode" == "light" ]]; then
+      dark_bool="false"
+      color_scheme="light"
+    else
+      dark_bool="true"
+      color_scheme="dark"
+    fi
+
+    case "$theme" in
+      *catppuccin* | *tokyonight* | *imac-blue* | *macos-mojave* | *monterey-sierra-blue*) accent="4" ;; # Blue
+      *everforest* | *macos-sonoma*) accent="3" ;; # Green
+      *kanagawa* | *dracula* | *adwaita-light* | *macos-big-sur*) accent="5" ;; # Purple
+      *rose-pine* | *onedark* | *colourful-light*) accent="6" ;; # Pink
+      *gruvbox* | *macos-ventura*) accent="1" ;; # Orange
+      *nord* | *solarized* | *macos-sequoia*) accent="2" ;; # Yellow
+      *) accent="4" ;; # Blue default
+    esac
+
+    if osascript -e "tell application \"System Events\" to tell appearance preferences to set dark mode to $dark_bool" >/dev/null 2>&1; then
+      changed=1
+    fi
+
+    # Accent/highlight for consistency with selected theme family.
+    if defaults write -g AppleAccentColor -int "$accent" >/dev/null 2>&1 &&
+      defaults write -g AppleHighlightColor -string "0.698039 0.843137 1.000000 Blue" >/dev/null 2>&1; then
+      changed=1
+    fi
+
+    if [[ $changed -gt 0 ]]; then
+      RELOADED+=("desktop")
+      _ok "Desktop" "macOS ${color_scheme}, accent ${accent}"
+    else
+      SKIPPED+=("desktop")
+      _skip "Desktop" "macOS appearance unchanged"
+    fi
+    return
+  fi
 
   if ! command -v gsettings &>/dev/null; then
     SKIPPED+=("desktop")
     _skip "Desktop" "gsettings not available"
     return
   fi
-
-  local mode gtk_theme gtk_icon color_scheme
-  mode="$(theme_value "$theme" "mode" 2>/dev/null || echo "dark")"
-  gtk_theme="$(theme_app_value "$theme" "gtk_theme" 2>/dev/null || true)"
-  gtk_icon="$(theme_app_value "$theme" "gtk_icon" 2>/dev/null || true)"
 
   if [[ "$mode" == "light" ]]; then
     color_scheme="prefer-light"

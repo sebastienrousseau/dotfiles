@@ -13,6 +13,18 @@ dot theme toggle             # Toggle dark/light
 dot theme list               # List all themes
 ```
 
+## Runtime Apply Behavior
+
+`dot theme` writes the selected theme to `.chezmoidata.toml`, regenerates target configs through chezmoi, then attempts live reloads for running applications.
+
+- macOS:
+  - Applies system Light/Dark appearance via `osascript` (`System Events`).
+  - Applies a mapped accent color via `defaults write -g AppleAccentColor`.
+  - Reload attempts for Ghostty, tmux, and Neovim remain conditional on whether those apps are running.
+- Linux:
+  - Applies desktop color scheme through `gsettings` when available.
+  - Includes DMS (Dank Material Shell) stock-theme mapping when DMS config is present.
+
 ---
 
 ## Classic Themes

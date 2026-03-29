@@ -44,6 +44,12 @@ assert_file_contains "$SCRIPT_FILE" "reload_niri()" "must have reload_niri"
 test_start "has_reload_desktop"
 assert_file_contains "$SCRIPT_FILE" "reload_desktop()" "must have reload_desktop"
 
+test_start "desktop_supports_macos"
+assert_file_contains "$SCRIPT_FILE" 'uname -s' "desktop reload should detect OS"
+assert_file_contains "$SCRIPT_FILE" 'Darwin' "desktop reload should support macOS"
+assert_file_contains "$SCRIPT_FILE" 'osascript' "macOS desktop reload should use osascript"
+assert_file_contains "$SCRIPT_FILE" 'AppleAccentColor' "macOS desktop reload should set accent color"
+
 test_start "has_reload_nvim"
 assert_file_contains "$SCRIPT_FILE" "reload_nvim()" "must have reload_nvim"
 

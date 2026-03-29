@@ -49,7 +49,8 @@ Each theme switch touches these applications:
 | **Ghostty** | `chezmoi apply` + DBus `reload-config` | Background, foreground, all 16 ANSI colors, cursor |
 | **Tmux** | `chezmoi apply` + `source-file` | Status bar colors, pane borders, mode indicators |
 | **Niri** | `chezmoi apply` + `load-config-file` IPC | Window borders, focus ring, inactive tint |
-| **GTK 3/4** | `chezmoi apply` + `gsettings` | Theme name, icon theme, color scheme preference |
+| **Desktop (macOS)** | `osascript` + `defaults write -g AppleAccentColor` | System appearance (Light/Dark), accent color |
+| **Desktop (Linux/GNOME)** | `chezmoi apply` + `gsettings` | Theme name, icon theme, color scheme preference |
 | **DMS** | `sed -i` on settings.json + IPC | Stock theme mapped to accent family, dark/light mode |
 | **Neovim** | `--remote-expr` Lua eval over socket | Colorscheme, style variant, background mode |
 | **VS Code** | `chezmoi apply` on `settings.json` | `workbench.colorTheme` value |
@@ -111,6 +112,16 @@ pgrep -x ghostty
 ### GTK theme looks wrong
 
 GTK theme names must match installed themes exactly. Catppuccin themes use names like `catppuccin-mocha-blue-standard+default`. Install the matching GTK theme package or fall back to `Adwaita-dark` / `Adwaita`.
+
+### macOS accent or appearance did not update
+
+`dot-theme-sync` applies macOS appearance using `osascript` and accent via:
+
+```bash
+defaults write -g AppleAccentColor -int <value>
+```
+
+If the UI did not refresh immediately, log out/in once or toggle appearance manually in System Settings.
 
 ### tmux shows old colors
 
