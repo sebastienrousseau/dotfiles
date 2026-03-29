@@ -27,7 +27,7 @@ The `dot` command is the main interface for managing dotfiles. Run `dot version`
 |---------|-------------|
 | `dot doctor` | Run system health checks (`--score|-s`, `--heal|-H`) |
 | `dot health` | Run the health dashboard (`--verbose|-v`, `--json|-j`, `--fix|-f`, `--force|-F`) |
-| `dot heal` | Auto-repair missing tools and broken state |
+| `dot heal` | Auto-repair missing tools, chezmoi drift, broken symlinks, and critical files (`--dry-run|-n`, `--force|-f`) |
 | `dot smoke-test` | Verify toolchains (Rust, Go, AI CLIs) |
 | `dot verify` | Run security and integrity verification (`--security|-s`) |
 | `dot chaos` | Simulate config corruption to test self-healing |

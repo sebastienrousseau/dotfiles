@@ -108,7 +108,7 @@ graph TD
 | `dot apply` | Converge the machine onto the tracked configuration |
 | `dot update` | Pull the latest state and pre-warm slow paths |
 | `dot doctor` | Audit tools, paths, portability, and security posture |
-| `dot heal` | Repair missing tools and known broken state automatically |
+| `dot heal` | Auto-repair tools, chezmoi drift, broken symlinks, and missing critical files (`--dry-run|-n`, `--force|-f`) |
 | `dot smoke-test` | Exercise critical toolchains and integrations |
 | `dot attest` | Export machine-readable workstation evidence |
 | `dot bundle` | Produce a portable support or recovery archive |
