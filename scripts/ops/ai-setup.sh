@@ -30,10 +30,16 @@ setup_tool "Claude CLI" "claude" "claude --version" # Claude handles auth via we
 # 2. Gemini
 setup_tool "Gemini CLI" "gemini" "gemini info"
 
-# 3. Kiro
+# 3. Copilot
+setup_tool "Copilot CLI" "copilot" "copilot --version"
+
+# 4. Cline
+setup_tool "Cline CLI" "cline" "cline auth"
+
+# 5. Kiro
 setup_tool "Kiro CLI" "kiro-cli" "kiro-cli auth login"
 
-# 4. Aider
+# 6. Aider
 setup_tool "Aider" "aider" "aider --version"
 
 ui_header "AI Setup Complete"

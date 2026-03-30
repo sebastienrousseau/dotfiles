@@ -9,7 +9,7 @@
 ## - nc (netcat): For checking server availability
 ## - jq: For parsing JSON responses
 ## - llamafile (optional): Local LLM server
-## - gh copilot (optional): GitHub Copilot CLI fallback
+## - copilot (optional): GitHub Copilot CLI fallback
 ##
 ## # Usage
 ## ai_core status              # Check AI subsystem status
@@ -80,7 +80,9 @@ status() {
   fi
 
   # Check for other providers
-  if command -v gh &>/dev/null && gh copilot --version &>/dev/null; then
+  if command -v copilot &>/dev/null; then
+    echo "GitHub Copilot CLI: Available"
+  elif command -v gh &>/dev/null && gh copilot --version &>/dev/null; then
     echo "GitHub Copilot CLI: Available"
   else
     echo "GitHub Copilot CLI: Not available"
@@ -114,10 +116,13 @@ query() {
   fi
 
   # Priority 2: GitHub Copilot CLI
+  if command -v copilot &>/dev/null; then
+    echo "Local server not running. Using GitHub Copilot..."
+    copilot -p "$prompt"
+    return
+  fi
+
   if command -v gh &>/dev/null && gh copilot --version &>/dev/null; then
-    # Use gh copilot explain/suggest
-    # This wrapper might need adjustment based on how we want to use it
-    # generally 'gh copilot explain' is interactive.
     echo "Local server not running. Using GitHub Copilot..."
     gh copilot explain "$prompt"
     return

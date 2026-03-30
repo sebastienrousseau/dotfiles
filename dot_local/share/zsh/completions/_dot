@@ -261,7 +261,7 @@ _dot() {
           )
           _describe -t subcommands 'secrets subcommand' secrets_cmds
           ;;
-        cl | gemini | kiro | sgpt | ollama | opencode | aider)
+        cl | copilot | cline | gemini | kiro | sgpt | ollama | opencode | aider)
           _arguments -C \
             '(--pattern -p)'{--pattern,-p}'[Specify steering pattern]:pattern:->patterns' \
             '*:prompt: '

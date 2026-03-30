@@ -4,7 +4,7 @@
 ##
 ## Provides AI CLI status, setup, RAG query, and bridge commands.
 ## Wraps AI CLI tools with contextual patterns and system metadata.
-## Usage: dot ai|ai-setup|ai-query|cl|gemini|kiro|sgpt|ollama|opencode|aider
+## Usage: dot ai|ai-setup|ai-query|cl|copilot|cline|gemini|kiro|sgpt|ollama|opencode|aider
 
 set -euo pipefail
 
@@ -15,6 +15,9 @@ source "$SCRIPT_DIR/../lib/utils.sh"
 dot_ui_command_banner "AI and Agents" "${1:-}"
 
 PATTERN_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/ai/patterns"
+AI_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/ai"
+AI_STATUS_TTL="${DOTFILES_AI_STATUS_TTL:-300}"
+AI_STATUS_CACHE_FILE="${AI_CACHE_DIR}/status.tsv"
 
 # Fallback to source tree if patterns don't exist in config (common in CI)
 if [[ ! -d "$PATTERN_DIR" ]]; then
@@ -25,35 +28,106 @@ if [[ ! -d "$PATTERN_DIR" ]]; then
 fi
 
 _show_ai_bridge_usage() {
-  echo "Usage: dot cl|gemini|kiro --pattern [name] \"prompt\""
+  echo "Usage: dot cl|copilot|cline|gemini|kiro --pattern [name] \"prompt\""
   echo ""
   echo "Available Patterns:"
   ls -1 "$PATTERN_DIR" 2>/dev/null | sed 's/\.md$//' | sed 's/^/  - /' || echo "  (none)"
 }
 
+_ai_cache_fresh() {
+  local file="$1"
+  [[ -f "$file" ]] || return 1
+  local now mtime
+  now=$(date +%s)
+  mtime=$(stat -f %m "$file" 2>/dev/null || echo 0)
+  (( now - mtime < AI_STATUS_TTL ))
+}
+
+_ai_extract_version() {
+  local bin="$1"
+  local output version
+  output=$("$bin" --version 2>/dev/null | head -1) || true
+  version=$(printf '%s' "$output" | sed 's/^[^0-9]*//' | sed 's/[[:space:]]*$//' | sed 's/\.$//')
+  [[ -n "$version" ]] && printf '%s\n' "$version" || printf 'installed\n'
+}
+
+_ai_refresh_status_cache() {
+  local -n ai_entries=$1
+  local tmp_file
+  tmp_file="$(mktemp)"
+  mkdir -p "$AI_CACHE_DIR"
+
+  local entry category role name bin desc present version
+  for entry in "${ai_entries[@]}"; do
+    IFS='|' read -r category role name bin desc <<<"$entry"
+    if has_command "$bin"; then
+      present=1
+      version=$(_ai_extract_version "$bin")
+    else
+      present=0
+      version=""
+    fi
+    printf '%s\t%s\t%s\n' "$bin" "$present" "$version" >>"$tmp_file"
+  done
+
+  mv "$tmp_file" "$AI_STATUS_CACHE_FILE"
+}
+
+_ai_get_cached_status() {
+  local entries_name="$1"
+  local -n ai_entries=$1
+  local -n present_map=$2
+  local -n version_map=$3
+
+  if ! _ai_cache_fresh "$AI_STATUS_CACHE_FILE"; then
+    _ai_refresh_status_cache "$entries_name"
+  fi
+
+  present_map=()
+  version_map=()
+
+  local bin present version
+  while IFS=$'\t' read -r bin present version; do
+    present_map["$bin"]="$present"
+    version_map["$bin"]="$version"
+  done <"$AI_STATUS_CACHE_FILE"
+}
+
 cmd_ai_status() {
   ui_header "AI CLI Status"
 
-  # Define AI CLIs: name|binary|description
+  # category|name|binary|description
   local -a ai_clis=(
-    "Claude Code|claude|Anthropic CLI agent"
-    "Gemini CLI|gemini|Google AI CLI"
-    "OpenCode|opencode|Terminal AI coding"
-    "Aider|aider|AI pair programming"
-    "Shell-GPT|sgpt|ChatGPT in terminal"
-    "Ollama|ollama|Local LLM runner"
-    "Kiro CLI|kiro-cli|AWS AI assistant"
+    "Agents (autonomous)|agent|Claude Code|claude|Anthropic CLI agent"
+    "Agents (autonomous)|agent|Copilot CLI|copilot|GitHub Copilot CLI"
+    "Agents (autonomous)|agent|Cline CLI|cline|Terminal coding agent"
+    "Coding (interactive)|coding|Aider|aider|AI pair programmer"
+    "Coding (interactive)|coding|OpenCode|opencode|Terminal coding assistant"
+    "General (prompt-based)|general|Shell-GPT|sgpt|ChatGPT terminal interface"
+    "General (prompt-based)|general|Gemini CLI|gemini|Google AI CLI"
+    "Runtime (local)|local|Ollama|ollama|Local LLM runner"
+    "Cloud (platform)|cloud|Kiro CLI|kiro-cli|AWS AI assistant"
   )
 
+  declare -A ai_present=()
+  declare -A ai_version=()
+  _ai_get_cached_status ai_clis ai_present ai_version
+
   local -a installed=()
-  local name bin desc ver
+  local current_category=""
+  local category role name bin desc ver
   for entry in "${ai_clis[@]}"; do
-    IFS='|' read -r name bin desc <<<"$entry"
-    if has_command "$bin"; then
-      ver=$("$bin" --version 2>/dev/null | head -1 | sed 's/^[^0-9]*//' | cut -d' ' -f1) || true
-      [ -z "$ver" ] && ver="installed"
+    IFS='|' read -r category role name bin desc <<<"$entry"
+    if [[ "$category" != "$current_category" ]]; then
+      echo ""
+      ui_section "$category"
+      current_category="$category"
+    fi
+    if [[ "${ai_present[$bin]:-0}" == "1" ]]; then
+      ver="${ai_version[$bin]:-installed}"
+      [[ "$bin" == "claude" ]] && ver="${ver%% *}"
       ui_ok "$name" "$ver — $desc"
-      installed+=("$name|$bin")
+      installed+=("$name|$bin|$role")
     else
       ui_info "$name" "— $desc"
     fi
@@ -66,14 +140,16 @@ cmd_ai_status() {
     ui_info "Launch" "Select an AI CLI to start"
     local -a choices=()
     for entry in "${installed[@]}"; do
-      IFS='|' read -r name bin <<<"$entry"
-      choices+=("$name")
+      IFS='|' read -r name bin role <<<"$entry"
+      choices+=("$(printf '%-16s — %s' "$name" "$role")")
     done
     local pick
-    pick=$(printf '%s\n' "${choices[@]}" | gum choose --header "Pick an AI CLI") || true
+    pick=$(printf '%s\n' "${choices[@]}" | gum choose --header "Select an AI CLI") || true
     if [ -n "$pick" ]; then
+      pick="${pick%% — *}"
+      pick="${pick%"${pick##*[![:space:]]}"}"
       for entry in "${installed[@]}"; do
-        IFS='|' read -r name bin <<<"$entry"
+        IFS='|' read -r name bin role <<<"$entry"
         if [ "$name" = "$pick" ]; then
           echo ""
           ui_info "Starting" "$name ($bin)"
@@ -152,6 +228,12 @@ ${prompt}"
     cl | claude)
       printf "%s" "$full_prompt" | claude
       ;;
+    copilot)
+      copilot -sp "$full_prompt"
+      ;;
+    cline)
+      cline "$full_prompt"
+      ;;
     gemini)
       printf "%s" "$full_prompt" | gemini chat
       ;;
@@ -191,7 +273,7 @@ case "${1:-}" in
     shift
     cmd_ai_query "$@"
     ;;
-  cl | claude | gemini | kiro | sgpt | ollama | opencode | aider)
+  cl | claude | copilot | cline | gemini | kiro | sgpt | ollama | opencode | aider)
     tool="$1"
     shift
     run_ai_with_context "$tool" "$@"

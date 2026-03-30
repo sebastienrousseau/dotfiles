@@ -66,7 +66,9 @@ uv = "latest"
 
 # AI tools
 "npm:@anthropic-ai/claude-code" = "latest"
+"npm:@github/copilot" = "latest"
 "npm:@google/gemini-cli" = "latest"
+"npm:cline" = "latest"
 "npm:codex-cli" = "latest"
 "npm:opencode-ai" = "latest"
 kiro-cli = "latest"
