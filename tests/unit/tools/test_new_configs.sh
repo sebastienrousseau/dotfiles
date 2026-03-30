@@ -17,7 +17,7 @@ configs=(
   dot_config/bat/config
   dot_config/lazygit/config.yml
   dot_config/user-dirs.dirs
-  dot_config/firefox/user.js
+  dot_config/firefox/user.js.tmpl
   dot_config/fish/completions/dot-theme-sync.fish.tmpl
   dot_config/waybar/config.jsonc.tmpl
   dot_config/waybar/style.css.tmpl
@@ -48,7 +48,11 @@ assert_file_contains "$REPO_ROOT/dot_config/mako/config" "urgency=critical" "mak
 
 # Firefox disables telemetry
 test_start "firefox_no_telemetry"
-assert_file_contains "$REPO_ROOT/dot_config/firefox/user.js" "telemetry" "firefox must disable telemetry"
+assert_file_contains "$REPO_ROOT/dot_config/firefox/user.js.tmpl" "telemetry" "firefox must disable telemetry"
+
+# Firefox is theme-aware
+test_start "firefox_theme_sync"
+assert_file_contains "$REPO_ROOT/dot_config/firefox/user.js.tmpl" "layout.css.prefers-color-scheme.content-override" "firefox must sync website color scheme"
 
 # fd ignore has node_modules
 test_start "fdignore_node_modules"

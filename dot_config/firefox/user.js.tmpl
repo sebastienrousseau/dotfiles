@@ -4,6 +4,8 @@
 
 /* global user_pref */
 
+{{- $t := index .themes .theme -}}
+
 // Disable telemetry
 user_pref("toolkit.telemetry.enabled", false);
 user_pref("toolkit.telemetry.unified", false);
@@ -46,6 +48,10 @@ user_pref("media.peerconnection.ice.default_address_only", true);
 user_pref("gfx.webrender.all", true);
 user_pref("layers.acceleration.force-enabled", true);
 user_pref("layout.css.backdrop-filter.enabled", true);
+
+// Theme coordination
+// 0 = dark, 1 = light
+user_pref("layout.css.prefers-color-scheme.content-override", {{ if eq $t.mode "light" }}1{{ else }}0{{ end }});
 
 // UI
 user_pref("browser.uidensity", 1);

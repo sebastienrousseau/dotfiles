@@ -12,10 +12,11 @@
 ##   dot-theme-sync --help             # Show this help
 ##
 ## # Supported Applications
-##   Ghostty   — chezmoi apply + SIGUSR1 config reload
+##   Ghostty   — chezmoi apply + runtime config reload
 ##   Tmux      — chezmoi apply + source-file reload
 ##   Niri      — screen transition
 ##   Neovim    — --remote-expr colorscheme switch (direct IPC, no file needed)
+##   Browsers  — desktop color-scheme sync + Firefox content preference
 
 set -euo pipefail
 
@@ -79,6 +80,7 @@ fi
 
 readonly DATA_FILE="$SRC_DIR/.chezmoidata.toml"
 readonly THEMES_FILE="$SRC_DIR/.chezmoidata/themes.toml"
+readonly CHEZMOI_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
 
 # =============================================================================
 # Output Helpers
@@ -89,12 +91,37 @@ _skip() { printf '  %s·%s  %-12s %s%s%s\n' "$DIM" "$RESET" "$1" "$DIM" "$2" "$R
 _err() { printf '  %s✗%s  %-12s %s%s%s\n' "$RED" "$RESET" "$1" "$DIM" "$2" "$RESET"; }
 _info() { printf '  %s→%s  %-12s %s%s%s\n' "$BLUE" "$RESET" "$1" "$DIM" "$2" "$RESET"; }
 
+join_lines() {
+  local delimiter="$1"
+  awk -v d="$delimiter" '
+    NF {
+      if (seen++) {
+        printf "%s", d
+      }
+      printf "%s", $0
+    }
+    END {
+      if (seen) {
+        printf "\n"
+      }
+    }
+  '
+}
+
 # =============================================================================
 # Theme Parsing
 # =============================================================================
 
 # Read the current theme from .chezmoidata.toml
 current_theme() {
+  if [[ -f "$CHEZMOI_CFG" ]]; then
+    local chezmoi_theme
+    chezmoi_theme="$(awk -F'"' '/^theme =/ {print $2}' "$CHEZMOI_CFG" | head -n 1)"
+    if [[ -n "$chezmoi_theme" ]]; then
+      echo "$chezmoi_theme"
+      return 0
+    fi
+  fi
   awk -F'"' '/^theme =/ {print $2}' "$DATA_FILE" | head -n 1
 }
 
@@ -129,14 +156,28 @@ write_theme() {
   fi
 
   # Update chezmoi.toml [data] section (overrides .chezmoidata.toml)
-  local chezmoi_cfg="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
-  if [[ -f "$chezmoi_cfg" ]] && grep -q '^theme = ' "$chezmoi_cfg"; then
+  if [[ -f "$CHEZMOI_CFG" ]] && grep -q '^theme = ' "$CHEZMOI_CFG"; then
     tmp_file="$(umask 077 && mktemp)"
-    sed "s/^theme = .*/theme = \"$new_theme\"/" "$chezmoi_cfg" >"$tmp_file"
-    if ! mv "$tmp_file" "$chezmoi_cfg"; then
-      _err "Write" "failed to update $chezmoi_cfg"
+    sed "s/^theme = .*/theme = \"$new_theme\"/" "$CHEZMOI_CFG" >"$tmp_file"
+    if ! mv "$tmp_file" "$CHEZMOI_CFG"; then
+      _err "Write" "failed to update $CHEZMOI_CFG"
       rm -f "$tmp_file"
     fi
+  fi
+}
+
+sync_theme_state() {
+  [[ -f "$DATA_FILE" ]] || return 0
+  [[ -f "$CHEZMOI_CFG" ]] || return 0
+  grep -q '^theme = ' "$CHEZMOI_CFG" || return 0
+
+  local data_theme chezmoi_theme
+  data_theme="$(awk -F'"' '/^theme =/ {print $2}' "$DATA_FILE" | head -n 1)"
+  chezmoi_theme="$(awk -F'"' '/^theme =/ {print $2}' "$CHEZMOI_CFG" | head -n 1)"
+
+  if [[ -n "$chezmoi_theme" && -n "$data_theme" && "$data_theme" != "$chezmoi_theme" ]]; then
+    write_theme "$chezmoi_theme"
+    _info "Theme" "synced data files to chezmoi override ($chezmoi_theme)"
   fi
 }
 
@@ -191,6 +232,7 @@ apply_theme_configs() {
     "$HOME/.config/alacritty/alacritty.toml"
     "$HOME/.config/kitty/kitty.conf"
     "$HOME/.config/wezterm/wezterm.lua"
+    "$HOME/.config/firefox/user.js"
     "$HOME/.config/niri/config.kdl"
     "$HOME/.config/gtk-3.0/gtk.css"
     "$HOME/.config/gtk-3.0/settings.ini"
@@ -214,6 +256,28 @@ apply_theme_configs() {
   fi
 }
 
+sync_ghostty_macos_config() {
+  [[ "$PLATFORM" == "Darwin" ]] || return 0
+
+  local xdg_config="$HOME/.config/ghostty/config"
+  local macos_config="$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+  local macos_dir
+  macos_dir="$(dirname "$macos_config")"
+
+  [[ -f "$xdg_config" ]] || return 0
+  [[ -d "$macos_dir" ]] || return 0
+
+  if [[ -f "$macos_config" ]] && cmp -s "$xdg_config" "$macos_config"; then
+    return 0
+  fi
+
+  if cp "$xdg_config" "$macos_config" 2>/dev/null; then
+    _ok "Ghostty" "mirrored config to macOS app support"
+  else
+    _skip "Ghostty" "macOS app support config could not be updated"
+  fi
+}
+
 # =============================================================================
 # Application Reload Functions
 # =============================================================================
@@ -223,12 +287,6 @@ declare -a RELOADED=()
 declare -a SKIPPED=()
 
 reload_ghostty() {
-  if ! pgrep -x ghostty &>/dev/null; then
-    SKIPPED+=("ghostty")
-    _skip "Ghostty" "not running"
-    return
-  fi
-
   # Ghostty GTK exposes reload-config via DBus (org.gtk.Actions).
   # This is the most reliable method — SIGUSR1 isn't caught by all builds,
   # and chezmoi's atomic writes bypass inotify file watches.
@@ -242,16 +300,28 @@ reload_ghostty() {
     return
   fi
 
-  # Fallback: SIGUSR1
+  # Fallback: signal the main process directly.
+  # Ghostty's documented runtime reload path maps to SIGUSR2.
   local main_pid
-  # -o (oldest) is GNU pgrep only; fall back to first match
-  main_pid="$(pgrep -x -o ghostty 2>/dev/null || pgrep -x ghostty 2>/dev/null | head -1 || true)"
+  # -o (oldest) is GNU pgrep only; fall back to first match.
+  # On macOS app bundles can expose Ghostty under different process labels,
+  # so match both the executable name and bundle path.
+  main_pid="$(
+    pgrep -x -o ghostty 2>/dev/null ||
+      pgrep -x -o Ghostty 2>/dev/null ||
+      pgrep -f -o '/Applications/Ghostty\.app/Contents/MacOS/ghostty' 2>/dev/null ||
+      pgrep -f -o '/Applications/ghostty\.app/Contents/MacOS/ghostty' 2>/dev/null ||
+      pgrep -f -o 'com\.mitchellh\.ghostty' 2>/dev/null ||
+      pgrep -x ghostty 2>/dev/null | head -1 ||
+      pgrep -x Ghostty 2>/dev/null | head -1 ||
+      true
+  )"
   if [[ -n "$main_pid" ]]; then
-    # macOS: Ghostty always catches SIGUSR1, send directly
+    # macOS: direct signal is the only reliable non-interactive path.
     if [[ "$(uname -s)" == "Darwin" ]]; then
-      if kill -SIGUSR1 "$main_pid" 2>/dev/null; then
+      if kill -SIGUSR2 "$main_pid" 2>/dev/null; then
         RELOADED+=("ghostty")
-        _ok "Ghostty" "SIGUSR1 → PID $main_pid"
+        _ok "Ghostty" "SIGUSR2 → PID $main_pid"
         return
       fi
     fi
@@ -259,10 +329,10 @@ reload_ghostty() {
     if [[ -r "/proc/$main_pid/status" ]]; then
       local sigcgt
       sigcgt="$(awk '/^SigCgt:/{print $2}' "/proc/$main_pid/status" 2>/dev/null || true)"
-      if [[ -n "$sigcgt" ]] && ((16#$sigcgt & 0x200)); then
-        if kill -SIGUSR1 "$main_pid" 2>/dev/null; then
+      if [[ -n "$sigcgt" ]] && ((16#$sigcgt & 0x400)); then
+        if kill -SIGUSR2 "$main_pid" 2>/dev/null; then
           RELOADED+=("ghostty")
-          _ok "Ghostty" "SIGUSR1 → PID $main_pid"
+          _ok "Ghostty" "SIGUSR2 → PID $main_pid"
           return
         fi
       fi
@@ -270,7 +340,7 @@ reload_ghostty() {
   fi
 
   SKIPPED+=("ghostty")
-  _skip "Ghostty" "config regenerated but no reload method available"
+  _skip "Ghostty" "config regenerated but no runtime reload target was found"
 }
 
 reload_tmux() {
@@ -478,6 +548,97 @@ reload_desktop() {
   fi
 }
 
+firefox_profile_roots() {
+  if [[ "$PLATFORM" == "Darwin" ]]; then
+    printf '%s\n' "$HOME/Library/Application Support/Firefox/Profiles"
+  else
+    printf '%s\n' "$HOME/.mozilla/firefox"
+  fi
+}
+
+reload_browsers() {
+  local theme="$1"
+  local mode browser_scope
+  mode="$(theme_value "$theme" "mode" 2>/dev/null || echo "dark")"
+
+  if [[ "$PLATFORM" == "Darwin" ]]; then
+    browser_scope="macOS appearance"
+  else
+    browser_scope="desktop color-scheme"
+  fi
+
+  local coordinated=()
+  local managed_firefox="${XDG_CONFIG_HOME:-$HOME/.config}/firefox/user.js"
+  local firefox_roots=()
+  local firefox_profiles=()
+  local root profile
+
+  if [[ "$PLATFORM" == "Darwin" ]]; then
+    [[ -d "/Applications/Safari.app" ]] && coordinated+=("Safari")
+    [[ -d "/Applications/Google Chrome.app" ]] && coordinated+=("Chrome")
+    [[ -d "/Applications/Microsoft Edge.app" ]] && coordinated+=("Edge")
+  else
+    command -v google-chrome &>/dev/null && coordinated+=("Chrome")
+    command -v google-chrome-stable &>/dev/null && coordinated+=("Chrome")
+    command -v chromium &>/dev/null && coordinated+=("Chromium")
+    command -v chromium-browser &>/dev/null && coordinated+=("Chromium")
+    command -v microsoft-edge &>/dev/null && coordinated+=("Edge")
+    command -v microsoft-edge-stable &>/dev/null && coordinated+=("Edge")
+  fi
+
+  while IFS= read -r root; do
+    [[ -d "$root" ]] && firefox_roots+=("$root")
+  done < <(firefox_profile_roots)
+
+  for root in "${firefox_roots[@]}"; do
+    for profile in "$root"/*; do
+      [[ -d "$profile" ]] || continue
+      firefox_profiles+=("$profile")
+    done
+  done
+
+  local synced_firefox_profiles=0
+  if [[ -f "$managed_firefox" ]]; then
+    for profile in "${firefox_profiles[@]}"; do
+      if [[ -f "$profile/user.js" ]] && cmp -s "$managed_firefox" "$profile/user.js"; then
+        synced_firefox_profiles=$((synced_firefox_profiles + 1))
+      fi
+    done
+  fi
+
+  local summary_parts=()
+  if [[ ${#coordinated[@]} -gt 0 ]]; then
+    local native
+    native="$(
+      printf '%s\n' "${coordinated[@]}" | awk '!seen[$0]++' | join_lines ", "
+    )"
+    summary_parts+=("${native} follow ${browser_scope}")
+  fi
+
+  if [[ -f "$managed_firefox" ]]; then
+    if [[ $synced_firefox_profiles -gt 0 ]]; then
+      summary_parts+=("Firefox content mode synced for ${synced_firefox_profiles} profile(s)")
+    elif [[ ${#firefox_profiles[@]} -gt 0 ]]; then
+      summary_parts+=("Firefox content mode ready; link ~/.config/firefox/user.js into a profile to enforce it")
+    else
+      summary_parts+=("Firefox content mode regenerated")
+    fi
+  fi
+
+  if [[ ${#summary_parts[@]} -eq 0 ]]; then
+    SKIPPED+=("browsers")
+    _skip "Browsers" "no supported browsers detected"
+    return
+  fi
+
+  local detail
+  detail="$(
+    printf '%s\n' "${summary_parts[@]}" | join_lines "; "
+  )"
+  RELOADED+=("browsers")
+  _ok "Browsers" "${mode} via ${detail}"
+}
+
 reload_nvim() {
   local theme="$1"
   local nvim_colorscheme nvim_style
@@ -612,9 +773,10 @@ usage() {
   printf '  %s\n' "dot-theme-sync --help             Show this help"
   echo ""
   printf '%s\n' "${BOLD}APPLICATIONS${RESET}"
-  printf '  %s\n' "Ghostty    chezmoi apply + SIGUSR1 reload"
+  printf '  %s\n' "Ghostty    chezmoi apply + runtime reload"
   printf '  %s\n' "Tmux       chezmoi apply + source-file reload"
   printf '  %s\n' "Niri       screen transition"
+  printf '  %s\n' "Browsers   desktop sync + Firefox content preference"
   printf '  %s\n' "Neovim     remote-expr colorscheme switch (direct IPC)"
 }
 
@@ -656,6 +818,8 @@ main() {
   if [[ -n "$new_theme" ]]; then
     write_theme "$new_theme"
     _info "Theme" "set to $new_theme"
+  else
+    sync_theme_state
   fi
 
   # Read the active theme
@@ -679,6 +843,7 @@ main() {
   else
     apply_theme_configs
   fi
+  sync_ghostty_macos_config
   echo ""
 
   # Signal running applications to reload
@@ -686,6 +851,7 @@ main() {
   reload_tmux
   reload_niri
   reload_desktop "$theme"
+  reload_browsers "$theme"
   reload_nvim "$theme"
 
   # Summary

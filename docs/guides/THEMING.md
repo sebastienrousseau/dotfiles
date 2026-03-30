@@ -1,6 +1,6 @@
 # Theming Guide
 
-The dotfiles ship 48 themes with live switching across every managed application. One command changes the terminal, editor, window manager, GTK, and desktop environment in under a second.
+The dotfiles ship 48 themes with live switching across every managed application. One command changes the terminal, editor, window manager, GTK, desktop environment, and browser-facing color mode in under a second.
 
 ## How Themes Work
 
@@ -31,8 +31,9 @@ Sets the theme immediately. Regenerates configs and reloads running applications
 `dot-theme-sync` handles the full switching pipeline:
 
 1. Writes the new theme name into `.chezmoidata.toml` (and `chezmoi.toml` if present).
+   If those files drift, `dot-theme-sync` now resynchronizes them before rendering because `chezmoi.toml` `[data]` overrides the source data file.
 2. Runs a targeted `chezmoi apply` on theme-dependent config files only -- much faster than a full apply.
-3. Signals running applications to reload:
+3. Signals running applications to reload and coordinates browser-facing theme state:
 
 ```bash
 dot-theme-sync                    # Reload current theme
@@ -46,11 +47,13 @@ Each theme switch touches these applications:
 
 | Application | Mechanism | What Changes |
 | :--- | :--- | :--- |
-| **Ghostty** | `chezmoi apply` + DBus `reload-config` | Background, foreground, all 16 ANSI colors, cursor |
+| **Ghostty** | `chezmoi apply` + macOS app-support sync + DBus `reload-config` or runtime signal fallback | Background, foreground, all 16 ANSI colors, cursor |
 | **Tmux** | `chezmoi apply` + `source-file` | Status bar colors, pane borders, mode indicators |
 | **Niri** | `chezmoi apply` + `load-config-file` IPC | Window borders, focus ring, inactive tint |
 | **Desktop (macOS)** | `osascript` + `defaults write -g AppleAccentColor` | System appearance (Light/Dark), accent color |
 | **Desktop (Linux/GNOME)** | `chezmoi apply` + `gsettings` | Theme name, icon theme, color scheme preference |
+| **Safari / Chrome / Edge** | Native browser appearance follows desktop theme | Browser chrome stays aligned when using the default/native browser theme |
+| **Firefox** | `chezmoi apply` on `~/.config/firefox/user.js` | Website color scheme preference follows the active dot theme; link that file into a Firefox profile to enforce it |
 | **DMS** | `sed -i` on settings.json + IPC | Stock theme mapped to accent family, dark/light mode |
 | **Neovim** | `--remote-expr` Lua eval over socket | Colorscheme, style variant, background mode |
 | **VS Code** | `chezmoi apply` on `settings.json` | `workbench.colorTheme` value |
@@ -99,11 +102,13 @@ dot-theme-sync --full
 
 ### Ghostty did not reload
 
-Ghostty reloads via DBus (`com.mitchellh.ghostty` / `reload-config`). If DBus is unavailable, the fallback sends `SIGUSR1` to the main process. Verify Ghostty is running:
+Ghostty reloads via DBus (`com.mitchellh.ghostty` / `reload-config`). If DBus is unavailable, the fallback sends `SIGUSR2` to the main process and also matches the macOS app bundle path when needed. Verify Ghostty is running:
 
 ```bash
 pgrep -x ghostty
 ```
+
+On macOS, Ghostty may also read `~/Library/Application Support/com.mitchellh.ghostty/config`. `dot-theme-sync` now mirrors the regenerated XDG config into that location before reloading so the app-support override cannot keep an older palette active.
 
 ### Neovim did not change colors
 
@@ -122,6 +127,16 @@ defaults write -g AppleAccentColor -int <value>
 ```
 
 If the UI did not refresh immediately, log out/in once or toggle appearance manually in System Settings.
+
+### Browser theme did not change
+
+Safari, Chrome, and Edge are coordinated through the desktop theme, so custom browser themes can override what `dot-theme-sync` is trying to align. Switch those browsers back to their native/default theme if you want them to track macOS or GTK automatically.
+
+Firefox uses the managed file at `~/.config/firefox/user.js`. Link that file into your active Firefox profile as `user.js` if you want `dot-theme-sync` to control website `prefers-color-scheme` behavior:
+
+```bash
+ln -sf ~/.config/firefox/user.js ~/.mozilla/firefox/<profile>/user.js
+```
 
 ### tmux shows old colors
 
