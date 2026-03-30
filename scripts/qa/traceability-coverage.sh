@@ -91,7 +91,7 @@ main() {
         check_path_list "doc" "$docs" "$behavior_id"
         ;;
     esac
-  done < "$TRACE_DOC"
+  done <"$TRACE_DOC"
 
   while IFS= read -r required; do
     [ -n "$required" ] || continue

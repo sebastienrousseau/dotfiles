@@ -73,26 +73,6 @@ _ai_refresh_status_cache() {
   mv "$tmp_file" "$AI_STATUS_CACHE_FILE"
 }
 
-_ai_get_cached_status() {
-  local entries_name="$1"
-  local -n ai_entries=$1
-  local -n present_map=$2
-  local -n version_map=$3
-
-  if ! _ai_cache_fresh "$AI_STATUS_CACHE_FILE"; then
-    _ai_refresh_status_cache "$entries_name"
-  fi
-
-  present_map=()
-  version_map=()
-
-  local bin present version
-  while IFS=$'\t' read -r bin present version; do
-    present_map["$bin"]="$present"
-    version_map["$bin"]="$version"
-  done <"$AI_STATUS_CACHE_FILE"
-}
-
 cmd_ai_status() {
   ui_header "AI CLI Status"
 
@@ -109,9 +89,17 @@ cmd_ai_status() {
     "Cloud (platform)|cloud|Kiro CLI|kiro-cli|AWS AI assistant"
   )
 
+  if ! _ai_cache_fresh "$AI_STATUS_CACHE_FILE"; then
+    _ai_refresh_status_cache ai_clis
+  fi
+
   declare -A ai_present=()
   declare -A ai_version=()
-  _ai_get_cached_status ai_clis ai_present ai_version
+  local cached_bin cached_present cached_version
+  while IFS=$'\t' read -r cached_bin cached_present cached_version; do
+    ai_present["$cached_bin"]="$cached_present"
+    ai_version["$cached_bin"]="$cached_version"
+  done <"$AI_STATUS_CACHE_FILE"
 
   local -a installed=()
   local current_category=""

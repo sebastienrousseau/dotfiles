@@ -66,8 +66,7 @@ check_utility_docs() {
     dot-load-benchmark dot-load-benchmark-pty dot-theme-sync dtags epoch extract gbd gd \
     git-ai-commit git-ai-diff gl hash hashsum hex jsonv jwt kill-port lorem monitor myip \
     notify open pw rec-start rec-stop regex start-niri tmux-sessionizer tour up update uuid \
-    win yamlv
-  do
+    win yamlv; do
     record_doc_check "$utility in SCRIPTS.md" "\`$utility\`" "$SCRIPTS_DOC"
   done
 }
@@ -75,14 +74,16 @@ check_utility_docs() {
 check_function_group_docs() {
   local group=""
 
-  for group in $(python3 - <<'PY'
+  for group in $(
+    FUNCTION_GROUPS_JSON="$FUNCTION_GROUPS_JSON" python3 - <<'PY'
 import json
+import os
 from pathlib import Path
-path = Path("/Users/seb/.dotfiles/.chezmoitemplates/functions/groups.json")
+path = Path(os.environ["FUNCTION_GROUPS_JSON"])
 for key in json.loads(path.read_text()).keys():
     print(key)
 PY
-); do
+  ); do
     record_doc_check "function group $group in ARCHITECTURE.md" "\`$group\`" "$ARCH_DOC"
   done
 }
