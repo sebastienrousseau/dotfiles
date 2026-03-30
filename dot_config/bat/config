@@ -1,8 +1,23 @@
 # Bat configuration (dotfiles)
 # See: https://github.com/sharkdp/bat
 
+# Theme
 --theme="TwoDark"
---style="numbers,changes,header"
+
+# Style
+--style="numbers,changes,header,grid"
+
+# Paging
 --paging=auto
+--pager="less -FR"
+
+# Formatting
 --tabs=2
 --italic-text=always
+
+# Syntax mappings
+--map-syntax "*.conf:INI"
+--map-syntax ".gitignore:Git Ignore"
+--map-syntax "*.tmpl:Go HTML Template"
+--map-syntax "*.kdl:KDL"
+--map-syntax ".envrc:Bash"

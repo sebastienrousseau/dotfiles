@@ -116,9 +116,11 @@ _cached_eval() {
     source "$cache"
   else
     local init_output
+    local suspicious_re
     init_output=$("$@" 2>/dev/null)
+    suspicious_re='(curl[[:space:]].*\|[[:space:]]*(ba)?sh|wget[[:space:]].*\|[[:space:]]*(ba)?sh|nc[[:space:]]+-e|/dev/tcp/|base64[[:space:]]+-d[[:space:]]*\|)'
     # Reject suspicious patterns indicating malicious payloads
-    if [[ "$init_output" =~ (curl[[:space:]].*\|[[:space:]]*(ba)?sh|wget[[:space:]].*\|[[:space:]]*(ba)?sh|nc[[:space:]]+-e|/dev/tcp/|base64[[:space:]]+-d[[:space:]]*\|) ]]; then
+    if printf '%s\n' "$init_output" | LC_ALL=C grep -Eqs -- "$suspicious_re"; then
       print -u2 "[WARN] Suspicious output from $label init, skipping"
       return 1
     fi
@@ -427,16 +429,20 @@ _dotfiles_async_init() {
   local t
   for t in $tools; do
     if [[ -x "${commands[$t]}" ]]; then
-      local cache="$_SHELL_CACHE/${t}-init.zsh"
-      if [[ ! -f "$cache" ]]; then
-        case "$t" in
-          mise) (mise activate zsh > "$cache" &) ;;
-          atuin) (atuin init zsh > "$cache" &) ;;
-          starship) [[ "$DOTFILES_ARTIFACT_MODE" == "0" ]] && (starship init zsh > "$cache" &) ;;
-          zoxide) (zoxide init zsh > "$cache" &) ;;
-        esac
-      fi
-      [[ -f "$cache" ]] && source "$cache"
+      case "$t" in
+        mise)
+          _cached_eval mise-init mise activate zsh
+          ;;
+        atuin)
+          _cached_eval atuin-init atuin init zsh
+          ;;
+        starship)
+          [[ "$DOTFILES_ARTIFACT_MODE" == "0" ]] && _cached_eval starship-init starship init zsh
+          ;;
+        zoxide)
+          _cached_eval zoxide-init zoxide init zsh
+          ;;
+      esac
     fi
   done
 }

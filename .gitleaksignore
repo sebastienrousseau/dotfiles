@@ -1,0 +1,7 @@
+# False positives — placeholder values, checksums, and public keys
+# environment-template.env: placeholder GPG key "1234567890ABCDEF"
+499ba965458e0052c01bc4fc71c8a2be43a70b3b:.github/security-policies/environment-template.env:generic-api-key:16
+# install.sh: chezmoi GPG key fingerprint for verification (public, not secret)
+c26337708b2c87e0f240c643d203da45eb687aff:install.sh:generic-api-key:154
+# tauri.paths.sh: rsign encrypted key for Tauri build signing (password-protected)
+e01b6d177caf67cf388abe8d84ad56e2dfa7f770:lib/paths/tauri/tauri.paths.sh:generic-api-key:13

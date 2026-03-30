@@ -103,6 +103,22 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: ssh-cert should have subcommand completions"
 fi
 
+# Test: AI command completions include new providers
+test_start "dot_completion_ai_providers"
+missing=""
+for cmd in copilot cline kiro sgpt ollama opencode aider gemini; do
+  if ! grep -q " $cmd)" "$COMP_FILE" 2>/dev/null && ! grep -q "'$cmd:" "$COMP_FILE" 2>/dev/null; then
+    missing="$missing $cmd"
+  fi
+done
+if [[ -z "$missing" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: AI provider completions present"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: missing AI providers:$missing"
+fi
+
 # Test: new command has template completions
 test_start "dot_completion_new_templates"
 if grep -qE 'python.*go.*node' "$COMP_FILE" 2>/dev/null; then

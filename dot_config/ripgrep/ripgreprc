@@ -1,0 +1,21 @@
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# Smart case search
+--smart-case
+# Add custom type definitions
+--type-add=web:*.{html,css,js,ts,tsx,jsx,vue,svelte}
+--type-add=config:*.{toml,yaml,yml,json,ini,conf}
+--type-add=shell:*.{sh,bash,zsh,fish}
+# Max columns before truncation
+--max-columns=200
+--max-columns-preview
+# Ignore common directories
+--glob=!.git
+--glob=!node_modules
+--glob=!.venv
+--glob=!target
+--glob=!dist
+--glob=!build
+--glob=!*.min.js
+--glob=!*.min.css
+--glob=!package-lock.json
+--glob=!yarn.lock

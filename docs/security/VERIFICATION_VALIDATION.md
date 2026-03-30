@@ -5,7 +5,7 @@
 | Field | Value |
 |-------|-------|
 | Document ID | VV-DOT-001 |
-| Version | 0.2.497 |
+| Version | 0.2.498 |
 | Date | 2026-03-20 |
 | Author | Repository Maintainer |
 | Status | Active |
@@ -101,16 +101,16 @@ tests/
 │   ├── assertions.sh      # 16 assertion functions (assert_equals, assert_contains, etc.)
 │   └── mocks.sh           # Mock utilities for isolating external dependencies
 ├── unit/
-│   ├── aliases/           # 99 alias file tests
-│   ├── functions/         # 51 function file tests
-│   ├── scripts/           # 89 script tests
-│   ├── shell/             # 12 shell config tests
-│   ├── fish/              # 32 Fish function and conf.d tests
-│   ├── nushell/           # 5 Nushell config tests
-│   ├── neovim/            # 15 Neovim Lua config tests
-│   └── test_*.sh          # 420 unit test files total
+│   ├── aliases/           # Alias and command-surface tests
+│   ├── functions/         # Function behavior tests
+│   ├── dot-cli/           # `dot` command workflow tests
+│   ├── shell/             # Shell integration and completion tests
+│   ├── fish/              # Fish function and completion tests
+│   ├── nushell/           # Nushell configuration tests
+│   ├── nvim/              # Neovim configuration tests
+│   └── test_*.sh          # 425 unit test files total
 ├── integration/
-│   └── test_*.sh          # 10 integration test files
+│   └── test_*.sh          # 11 integration test files
 └── performance/
     └── benchmark_runner.sh # Performance regression benchmarks
 ```

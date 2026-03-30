@@ -10,7 +10,14 @@
 set -euo pipefail
 
 _cleanup_files=()
-trap 'rm -f "${_cleanup_files[@]}"' EXIT
+LOCK_DIR=""
+cleanup() {
+  rm -f "${_cleanup_files[@]:-}"
+  if [[ -n "$LOCK_DIR" ]]; then
+    rmdir "$LOCK_DIR" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -52,6 +59,7 @@ FORCE=0
 FIXES_APPLIED=0
 ISSUES_FOUND=0
 CHEZMOI_APPLIED=0
+MISSING_DEPS_FOUND=0
 
 usage() {
   cat <<EOF
@@ -102,11 +110,28 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Prevent concurrent execution
-LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/dotfiles-heal.lock"
-exec 9>"$LOCK_FILE"
-if ! flock -n 9; then
-  ui_warn "Already running" "Another instance is active"
-  exit 0
+# Prefer XDG runtime dir when it exists and is writable; fallback to /tmp.
+LOCK_BASE="/tmp"
+if [[ -n "${XDG_RUNTIME_DIR:-}" ]] && [[ -d "${XDG_RUNTIME_DIR}" ]] && [[ -w "${XDG_RUNTIME_DIR}" ]]; then
+  LOCK_BASE="${XDG_RUNTIME_DIR}"
+fi
+LOCK_FILE="${LOCK_BASE}/dotfiles-heal.lock"
+LOCK_DIR="${LOCK_FILE}.d"
+if command -v flock >/dev/null 2>&1; then
+  exec 9>"$LOCK_FILE"
+  if ! flock -n 9; then
+    # Fallback path for systems where flock exists but cannot lock reliably.
+    if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+      ui_warn "Already running" "Another instance is active"
+      exit 0
+    fi
+  fi
+else
+  # Portable fallback when flock is unavailable (e.g. default macOS envs).
+  if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+    ui_warn "Already running" "Another instance is active"
+    exit 0
+  fi
 fi
 
 # =============================================================================
@@ -159,8 +184,8 @@ main() {
   heal_mise_tools || true
 
   # Quick checks (no animation needed)
-  heal_broken_symlinks || true
   heal_chezmoi_drift || true
+  heal_broken_symlinks || true
   heal_missing_critical_files || true
   heal_missing_xdg_dirs || true
 

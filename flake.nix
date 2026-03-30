@@ -1,7 +1,6 @@
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 {
   description = "Universal Dotfiles Reproducible Environment";
-
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -13,72 +12,78 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
+        commonBuildInputs = with pkgs; [
+          # Core Shells
+          zsh
+          fish
+          nushell
+
+          # Prompt & Navigation
+          starship
+          zoxide
+
+          # Modern CLI Replacements
+          eza
+          bat
+          fd
+          ripgrep
+          fzf
+          yazi
+          zellij
+
+          # Dev tools
+          neovim
+          tmux
+          git
+          gh
+          lazygit
+          sops
+          age
+
+          # Neovim LSP & IDE Tooling
+          lua-language-server
+          nil # Nix LSP
+          marksman # Markdown LSP
+          taplo # Markdown linter
+          stylua
+          shellcheck
+          shfmt
+          nodePackages.typescript-language-server
+          nodePackages.prettier
+
+          # Configuration management
+          chezmoi
+          mise
+          direnv
+          nix-direnv
+
+          # Advanced tools
+          pueue
+          wasmtime
+
+          # Modern Terminal UI & AI (Charmbracelet + Productivity)
+          gum
+          glow
+          mods
+          pay-respects
+          carapace
+        ];
+        linuxOnlyBuildInputs = with pkgs; [
+          wl-clipboard
+          xclip
+        ];
       in
       {
         devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            # Core Shells
-            zsh
-            fish
-            nushell
-
-            # Prompt & Navigation
-            starship
-            zoxide
-            atuin
-
-            # Modern CLI Replacements
-            eza
-            bat
-            fd
-            ripgrep
-            fzf
-            yazi
-            zellij
-
-            # Dev tools
-            neovim
-            tmux
-            git
-            gh
-            lazygit
-            sops
-            age
-
-            # Neovim LSP & IDE Tooling
-            lua-language-server
-            nil # Nix LSP
-            marksman # Markdown LSP
-            taplo # Markdown linter
-            stylua
-            shellcheck
-            shfmt
-            nodePackages.typescript-language-server
-            nodePackages.prettier
-
-            # Configuration management
-            chezmoi
-            mise
-            direnv
-            nix-direnv
-
-            # Advanced tools
-            pueue
-            wasmtime
-
-            # Modern Terminal UI & AI (Charmbracelet + Productivity)
-            gum
-            glow
-            mods
-            pay-respects
-            carapace
-            wl-clipboard
-            xclip
-          ];
+          buildInputs =
+            commonBuildInputs
+            ++ pkgs.lib.optionals pkgs.stdenv.isLinux linuxOnlyBuildInputs;
 
           shellHook = ''
-            echo "🔮 Welcome to the declarative dotfiles shell!"
-            echo "   Packages are provided strictly via Nix Flakes."
+            if [ "''${DOTFILES_NIX_SHELL_BANNER:-0}" = "1" ]; then
+              echo "🔮 Welcome to the declarative dotfiles shell!"
+              echo "   Packages are provided strictly via Nix Flakes."
+            fi
             # Only start starship if inside supported shell
             if [ -n "$ZSH_VERSION" ]; then
               eval "$(starship init zsh)"

@@ -3,8 +3,8 @@
 ## Reliability scorecard
 
 - Unit coverage: 100% module mapping target, enforced by `tests/framework/module_coverage.sh`
-- Integration depth: 10/10
-- Regression automation: 10/10
+- Integration depth: 11 integration test files in `tests/integration/`
+- Regression automation: 436 discovered test files and 2149 named tests in the current baseline
 
 ## Coverage gap map
 
@@ -110,3 +110,7 @@ jobs:
 ## Local guardrail
 
 `make test` is the canonical reliability command. It runs syntax checks, unit tests, module coverage, executable examples, and integration tests.
+
+For a lightweight repository-wide snapshot, run `bash ./scripts/qa/coverage-baseline.sh --with-module-coverage`.
+
+Core internal behaviors are traced through `bash ./scripts/qa/traceability-coverage.sh`.

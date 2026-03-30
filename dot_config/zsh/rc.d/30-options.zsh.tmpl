@@ -179,5 +179,16 @@ fi
 
 # direnv (directory environments)
 if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]] && command -v direnv >/dev/null; then
-  _cached_eval direnv-hook direnv hook zsh
+  # Custom quiet hook: suppress direnv status chatter on every prompt/chdir.
+  _dotfiles_direnv_hook() {
+    # Fast path: skip direnv in dotfiles unless flake mode is explicitly enabled.
+    if [[ "${PWD:A}" == "${HOME}/.dotfiles"* ]] && [[ "${DOTFILES_USE_FLAKE:-0}" != "1" ]] && [[ "${CI:-0}" != "1" ]]; then
+      return 0
+    fi
+    trap -- '' SIGINT
+    eval "$(direnv export zsh 2>/dev/null)"
+    trap - SIGINT
+  }
+  autoload -Uz add-zsh-hook
+  add-zsh-hook chpwd _dotfiles_direnv_hook
 fi

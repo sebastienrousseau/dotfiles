@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+## gd — Interactive git diff browser with fzf + delta.
+##
+## # Usage
+##   gd                    # Browse unstaged diffs
+##   gd --staged           # Browse staged diffs
+##   gd --side             # Side-by-side delta mode
+##   gd [git diff flags]   # Pass any git diff flags through
+
+set -euo pipefail
+
+for cmd in fzf delta git; do
+  if ! command -v "$cmd" &>/dev/null; then
+    echo "gd requires $cmd" >&2
+    exit 1
+  fi
+done
+
+# R5: validate git repository
+if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+  echo "gd: not a git repository" >&2
+  exit 1
+fi
+
+GIT_ARGS=()
+
+for arg in "$@"; do
+  if [[ "${arg}" == "--side" ]]; then
+    export DELTA_FEATURES="${DELTA_FEATURES:-} side-by-side"
+  else
+    GIT_ARGS+=("${arg}")
+  fi
+done
+
+GIT_ARGS+=("--color=always")
+
+# shellcheck disable=SC2086,SC2068
+git diff ${GIT_ARGS[@]:-} --name-only |
+  fzf \
+    --preview "git diff ${GIT_ARGS[*]:-} -- {-1} | delta --width=\${FZF_PREVIEW_COLUMNS}" \
+    --preview-window="right,75%" || true

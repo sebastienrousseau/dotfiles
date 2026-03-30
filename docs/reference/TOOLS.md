@@ -93,6 +93,8 @@ Detailed guide: [AI.md](../AI.md).
 | :--- | :--- |
 | **Aider** | Git-native AI pair programming |
 | **Claude CLI** | Anthropic's terminal assistant |
+| **Copilot CLI** | GitHub Copilot in the terminal |
+| **Cline CLI** | Terminal coding agent workflow |
 | **Kiro CLI** | Agentic AI terminal assistant |
 | **Gemini CLI** | Google's multi-modal CLI tool |
 | **Mods/Fabric** | Pipeline-friendly AI processing |

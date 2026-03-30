@@ -4,6 +4,11 @@
 
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 
+_dotfiles_zinit_git_policy() {
+  [[ -d "$ZINIT_HOME/.git" ]] || return 0
+  command git -C "$ZINIT_HOME" config --local merge.verifySignatures false >/dev/null 2>&1 || true
+}
+
 _dotfiles_zinit_init() {
   if [[ ! -f "$ZINIT_HOME/zinit.zsh" ]]; then
      print -P "%F{33}▓▒░ %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} Initiative Plugin Manager (%F{33}zdharma-continuum/zinit%F{220})…%f"
@@ -12,6 +17,8 @@ _dotfiles_zinit_init() {
         print -P "%F{33}▓▒░ %F{34}Installation successful.%f%b" || \
         print -P "%F{160}▓▒░ The clone has failed.%f%b"
   fi
+
+  _dotfiles_zinit_git_policy
 
   source "$ZINIT_HOME/zinit.zsh"
   autoload -Uz _zinit

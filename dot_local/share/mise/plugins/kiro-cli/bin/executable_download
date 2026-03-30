@@ -26,11 +26,26 @@ esac
 BASE_URL="https://desktop-release.q.us-east-1.amazonaws.com"
 
 if [[ "$target_os" == "darwin" ]]; then
-  # For macOS, we'd normally use the DMG, but mise prefers zips/tarballs for shims.
-  # If there's no zip for macOS, we might have to skip or handle differently.
-  # For now, let's assume linux support as requested.
-  echo "macOS support in mise plugin pending." >&2
-  exit 1
+  app_path="/Applications/Kiro CLI.app/Contents/MacOS"
+
+  if [[ ! -x "$app_path/kiro-cli" ]]; then
+    if ! command -v brew >/dev/null 2>&1; then
+      echo "Kiro CLI.app not found and Homebrew is unavailable." >&2
+      exit 1
+    fi
+
+    if brew list --cask kiro-cli >/dev/null 2>&1; then
+      brew upgrade --cask kiro-cli
+    else
+      brew install --cask kiro-cli
+    fi
+  fi
+
+  mkdir -p "$ASDF_DOWNLOAD_PATH/kirocli/bin"
+  cp "$app_path/kiro-cli" "$ASDF_DOWNLOAD_PATH/kirocli/bin/"
+  cp "$app_path/kiro-cli-chat" "$ASDF_DOWNLOAD_PATH/kirocli/bin/"
+  cp "$app_path/kiro-cli-term" "$ASDF_DOWNLOAD_PATH/kirocli/bin/"
+  exit 0
 fi
 
 # Linux

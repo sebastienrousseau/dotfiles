@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+legacy_dir="${XDG_CONFIG_HOME:-$HOME/.config}/topgrade"
+legacy_file="${legacy_dir}/topgrade.toml"
+
+if [[ -f "$legacy_file" ]]; then
+  rm -f "$legacy_file"
+fi
+
+if [[ -d "$legacy_dir" ]] && [[ -z "$(find "$legacy_dir" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]]; then
+  rmdir "$legacy_dir" 2>/dev/null || true
+fi

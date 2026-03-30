@@ -152,6 +152,16 @@ if check_cmd "claude"; then
 else
   ui_err "claude" "recommended — install to enable this provider"
 fi
+if check_cmd "copilot"; then
+  ui_ok "copilot"
+else
+  ui_err "copilot" "optional — install to enable this provider"
+fi
+if check_cmd "cline"; then
+  ui_ok "cline"
+else
+  ui_err "cline" "optional — install to enable this provider"
+fi
 if check_cmd "gemini"; then
   ui_ok "gemini"
 else

@@ -1,0 +1,78 @@
+# ============================================================================
+# Hardware Profile Defaults
+# ============================================================================
+# Override per-machine in ~/.config/chezmoi/chezmoi.toml:
+#
+#   [data.hardware]
+#   scale = 2.0
+#   hidpi = true
+#   touchscreen = true
+#   max_refresh = 120
+#
+# Or set the machine key to use a preset:
+#
+#   [data]
+#   machine = "macbook-t2"
+
+[hardware]
+profile = "laptop"
+scale = 1.0
+hidpi = false
+touchscreen = false
+touchpad = true
+max_refresh = 60
+gpu = "integrated"
+keyboard_layout = "us"
+touchpad_accel = 0.0
+touchpad_accel_profile = "adaptive"
+output_name = ""
+output_mode = ""
+
+# ============================================================================
+# Machine Presets — referenced via {{ .machine }} in templates
+# ============================================================================
+
+[machines.macbook-t2]
+profile = "laptop"
+scale = 2.0
+hidpi = true
+touchscreen = false
+touchpad = true
+max_refresh = 60
+gpu = "integrated"
+keyboard_layout = "us"
+# T2-specific: macbook12-spi-driver touchpad, Apple media keys
+touchpad_accel = 0.3
+touchpad_accel_profile = "adaptive"
+output_name = "eDP-1"
+output_mode = "2560x1600@60"
+
+[machines.surface-pro]
+profile = "laptop"
+scale = 1.5
+hidpi = true
+touchscreen = true
+touchpad = true
+max_refresh = 60
+gpu = "integrated"
+keyboard_layout = "us"
+# Surface-specific: type cover touchpad, stylus input
+touchpad_accel = 0.2
+touchpad_accel_profile = "adaptive"
+output_name = "eDP-1"
+output_mode = "2736x1824@60"
+
+[machines.geekom-a9]
+profile = "desktop"
+scale = 1.0
+hidpi = false
+touchscreen = false
+touchpad = false
+max_refresh = 144
+gpu = "discrete"
+keyboard_layout = "us"
+# Desktop-specific: multi-monitor, high refresh
+touchpad_accel = 0.0
+touchpad_accel_profile = "flat"
+output_name = "DP-1"
+output_mode = "2560x1440@144"

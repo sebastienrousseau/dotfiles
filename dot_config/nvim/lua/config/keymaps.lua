@@ -39,6 +39,14 @@ map({ "i", "x", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = "Save file" })
 map("v", "<", "<gv")
 map("v", ">", ">gv")
 
+-- Delete to void register (prevent clipboard pollution)
+map({ "n", "v" }, "x", '"_x', { desc = "Delete char (void register)" })
+map({ "n", "v" }, "X", '"_X', { desc = "Delete char backward (void register)" })
+map("n", "Del", '"_x', { desc = "Delete char (void register)" })
+
+-- Paste over selection without clobbering register
+map("v", "p", "P", { desc = "Paste (keep register)" })
+
 -- Lazy
 map("n", "<leader>l", "<cmd>Lazy<cr>", { desc = "Lazy" })
 

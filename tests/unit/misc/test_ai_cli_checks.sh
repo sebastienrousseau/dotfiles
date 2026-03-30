@@ -30,11 +30,15 @@ PYTOOLS_FILE="$REPO_ROOT/install/provision/run_onchange_25-python-tools.sh.tmpl"
 
 # Chezmoi apply should emit AI CLI checks
 check_contains "$APPLY_FILE" "AI provider CLI checks (optional)"
+check_contains "$APPLY_FILE" "check_cmd \"copilot\""
+check_contains "$APPLY_FILE" "check_cmd \"cline\""
 check_contains "$APPLY_FILE" "check_cmd \"sgpt\""
 check_contains "$APPLY_FILE" "check_cmd \"ollama\""
 check_contains "$APPLY_FILE" "check_cmd \"kiro-cli\""
 
-# Tools catalog should list sgpt and ollama
+# Tools catalog should list Copilot, Cline, sgpt and ollama
+check_contains "$DOC_FILE" "| **Copilot CLI** | GitHub Copilot in the terminal |"
+check_contains "$DOC_FILE" "| **Cline CLI** | Terminal coding agent workflow |"
 check_contains "$DOC_FILE" "| **sgpt** | Shell-GPT for terminal AI queries |"
 check_contains "$DOC_FILE" "| **Ollama** | Run large language models locally |"
 

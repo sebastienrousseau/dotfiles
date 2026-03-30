@@ -124,7 +124,7 @@ If something's slow or broken:
 4. **Chaos testing (self-healing)**:
    ```bash
    dot chaos --force
-   dot heal
+   dot heal --force
    ```
 5. **Startup profiling**:
    ```bash

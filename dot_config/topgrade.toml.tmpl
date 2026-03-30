@@ -1,0 +1,54 @@
+# Topgrade configuration (managed by chezmoi)
+
+[misc]
+{{- if eq .chezmoi.os "darwin" }}
+disable = ["antigravity", "bun_packages", "claude_code", "containers", "firmware", "flatpak", "helm", "mas", "mise", "nix", "node", "pip3", "pipx", "pnpm", "poetry", "shell", "snap", "system", "uv", "vim"]
+{{- else }}
+disable = ["antigravity", "bun_packages", "claude_code", "containers", "firmware", "flatpak", "helm", "mise", "nix", "node", "pip3", "pipx", "pnpm", "poetry", "shell", "uv", "vim"]
+{{- end }}
+pre_sudo = true
+no_self_update = true
+cleanup = true
+display_time = false
+notify_end = "on_failure"
+assume_yes = true
+
+[pre_commands]
+
+[post_commands]
+
+[commands]
+"Mise" = "mise upgrade --yes"
+{{- if eq .chezmoi.os "darwin" }}
+"LM Studio Runtime" = "command -v lms >/dev/null 2>&1 && lms runtime update || true"
+{{- end }}
+
+[python]
+
+[brew]
+autoremove = true
+
+[linux]
+{{- if ne .chezmoi.os "darwin" }}
+arch_package_manager = "autodetect"
+yay_arguments = "--noconfirm --ignore linux-cachyos,linux-cachyos-headers,linux-cachyos-lts,linux-cachyos-lts-headers"
+{{- end }}
+
+[git]
+max_concurrency = 1
+
+[chezmoi]
+
+[npm]
+
+[vim]
+
+[firmware]
+
+[flatpak]
+
+[containers]
+
+[rustup]
+
+[vscode]
