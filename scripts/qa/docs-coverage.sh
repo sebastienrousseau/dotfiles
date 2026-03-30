@@ -11,6 +11,23 @@ AI_DOC="$REPO_ROOT/docs/AI.md"
 SCRIPTS_DOC="$REPO_ROOT/docs/reference/SCRIPTS.md"
 ARCH_DOC="$REPO_ROOT/docs/architecture/ARCHITECTURE.md"
 FUNCTION_GROUPS_JSON="$REPO_ROOT/.chezmoitemplates/functions/groups.json"
+MIN_DOCS_COVERAGE="${MIN_DOCS_COVERAGE:-100}"
+
+TOTAL_CHECKS=0
+COVERED_CHECKS=0
+
+record_doc_check() {
+  local label="$1"
+  local needle="$2"
+  local file="$3"
+
+  TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
+  if grep -Fq "$needle" "$file"; then
+    COVERED_CHECKS=$((COVERED_CHECKS + 1))
+  else
+    printf 'Missing documentation: %s\n' "$label" >&2
+  fi
+}
 
 extract_public_commands() {
   awk '
@@ -25,36 +42,23 @@ extract_public_commands() {
 }
 
 check_dot_command_docs() {
-  local failed=0
   local command=""
 
   while IFS= read -r command; do
     [ -n "$command" ] || continue
-    if ! grep -Fq "\`dot $command" "$UTILS_DOC"; then
-      printf 'Missing dot command docs: dot %s\n' "$command" >&2
-      failed=1
-    fi
+    record_doc_check "dot $command in UTILS.md" "\`dot $command" "$UTILS_DOC"
   done < <(extract_public_commands)
-
-  return "$failed"
 }
 
 check_ai_provider_docs() {
-  local failed=0
   local provider=""
 
   for provider in cl copilot cline gemini kiro sgpt ollama opencode aider; do
-    if ! grep -Fq "\`dot $provider\`" "$AI_DOC"; then
-      printf 'Missing AI provider docs: dot %s\n' "$provider" >&2
-      failed=1
-    fi
+    record_doc_check "dot $provider in AI.md" "\`dot $provider\`" "$AI_DOC"
   done
-
-  return "$failed"
 }
 
 check_utility_docs() {
-  local failed=0
   local utility=""
 
   for utility in \
@@ -64,17 +68,11 @@ check_utility_docs() {
     notify open pw rec-start rec-stop regex start-niri tmux-sessionizer tour up update uuid \
     win yamlv
   do
-    if ! grep -Fq "\`$utility\`" "$SCRIPTS_DOC"; then
-      printf 'Missing script docs: %s\n' "$utility" >&2
-      failed=1
-    fi
+    record_doc_check "$utility in SCRIPTS.md" "\`$utility\`" "$SCRIPTS_DOC"
   done
-
-  return "$failed"
 }
 
 check_function_group_docs() {
-  local failed=0
   local group=""
 
   for group in $(python3 - <<'PY'
@@ -85,28 +83,28 @@ for key in json.loads(path.read_text()).keys():
     print(key)
 PY
 ); do
-    if ! grep -Fq "\`$group\`" "$ARCH_DOC"; then
-      printf 'Missing function group docs: %s\n' "$group" >&2
-      failed=1
-    fi
+    record_doc_check "function group $group in ARCHITECTURE.md" "\`$group\`" "$ARCH_DOC"
   done
+}
 
-  return "$failed"
+report_coverage() {
+  local pct
+  pct="$(awk -v c="$COVERED_CHECKS" -v t="$TOTAL_CHECKS" 'BEGIN{if(t==0){print "0.00"}else{printf "%.2f", (100*c/t)}}')"
+
+  printf 'Docs coverage: %s/%s (%s%%)\n' "$COVERED_CHECKS" "$TOTAL_CHECKS" "$pct"
+  printf 'Threshold: %s%%\n' "$MIN_DOCS_COVERAGE"
+
+  awk -v p="$pct" -v min="$MIN_DOCS_COVERAGE" 'BEGIN{exit !(p+0 >= min+0)}'
 }
 
 main() {
-  local failed=0
+  check_dot_command_docs
+  check_ai_provider_docs
+  check_utility_docs
+  check_function_group_docs
+  report_coverage
 
-  check_dot_command_docs || failed=1
-  check_ai_provider_docs || failed=1
-  check_utility_docs || failed=1
-  check_function_group_docs || failed=1
-
-  if [ "$failed" -ne 0 ]; then
-    return 1
-  fi
-
-  printf 'PASS: public dot commands, utility entrypoints, AI providers, and function groups are documented\n'
+  printf 'PASS: public dot commands, utility entrypoints, AI providers, and function groups are documented at or above the required threshold\n'
 }
 
 main "$@"

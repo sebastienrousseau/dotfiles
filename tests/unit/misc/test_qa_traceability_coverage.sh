@@ -26,3 +26,7 @@ assert_file_contains "$TRACE_DOC" "BT-10" "traceability doc should include BT-10
 
 test_start "traceability_contract_passes"
 assert_exit_code 0 "bash '$TRACE_SCRIPT'"
+
+test_start "traceability_contract_reports_100_percent_floor"
+assert_file_contains "$TRACE_SCRIPT" 'MIN_TRACEABILITY_COVERAGE="${MIN_TRACEABILITY_COVERAGE:-100}"' "traceability coverage contract should default to a 100% floor"
+assert_file_contains "$TRACE_SCRIPT" 'Traceability coverage:' "traceability coverage contract should report a percentage"

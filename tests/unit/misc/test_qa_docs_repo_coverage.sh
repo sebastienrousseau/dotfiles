@@ -26,3 +26,6 @@ assert_file_contains "$ARCH_DOC" '`misc`' "architecture doc should document misc
 
 test_start "docs_repo_coverage_contract_passes"
 assert_exit_code 0 "bash '$DOCS_SCRIPT'"
+
+test_start "docs_repo_coverage_contract_can_enforce_threshold"
+assert_file_contains "$DOCS_SCRIPT" 'Threshold:' "docs coverage script should print the required threshold"

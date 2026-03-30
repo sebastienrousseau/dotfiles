@@ -31,3 +31,7 @@ assert_file_contains "$AI_DOC" '`dot aider`' "AI doc should document dot aider"
 
 test_start "docs_coverage_contract_passes"
 assert_exit_code 0 "bash '$SCRIPT_FILE'"
+
+test_start "docs_coverage_contract_reports_100_percent_floor"
+assert_file_contains "$SCRIPT_FILE" 'MIN_DOCS_COVERAGE="${MIN_DOCS_COVERAGE:-100}"' "docs coverage contract should default to a 100% floor"
+assert_file_contains "$SCRIPT_FILE" 'Docs coverage:' "docs coverage contract should report a percentage"

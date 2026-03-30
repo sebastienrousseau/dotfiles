@@ -5,6 +5,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 TRACE_DOC="$REPO_ROOT/docs/operations/TRACEABILITY.md"
+MIN_TRACEABILITY_COVERAGE="${MIN_TRACEABILITY_COVERAGE:-100}"
+
+TOTAL_TRACE_CHECKS=0
+COVERED_TRACE_CHECKS=0
 
 extract_impl_paths() {
   awk '
@@ -28,11 +32,22 @@ trim() {
   sed 's/^[[:space:]]*//; s/[[:space:]]*$//'
 }
 
+record_trace_check() {
+  local label="$1"
+  local target="$2"
+
+  TOTAL_TRACE_CHECKS=$((TOTAL_TRACE_CHECKS + 1))
+  if [ -e "$target" ]; then
+    COVERED_TRACE_CHECKS=$((COVERED_TRACE_CHECKS + 1))
+  else
+    printf 'Missing traceability target: %s (%s)\n' "$label" "$target" >&2
+  fi
+}
+
 check_path_list() {
   local kind="$1"
   local value="$2"
   local behavior_id="$3"
-  local failed=0
   local rel=""
 
   while IFS= read -r rel; do
@@ -40,17 +55,21 @@ check_path_list() {
     [ -n "$rel" ] || continue
     rel="${rel#\`}"
     rel="${rel%\`}"
-    if [ ! -e "$REPO_ROOT/$rel" ]; then
-      printf 'Missing %s path for %s: %s\n' "$kind" "$behavior_id" "$rel" >&2
-      failed=1
-    fi
+    record_trace_check "$behavior_id $kind" "$REPO_ROOT/$rel"
   done < <(printf '%s\n' "$value" | tr ',' '\n')
+}
 
-  return "$failed"
+report_traceability() {
+  local pct
+  pct="$(awk -v c="$COVERED_TRACE_CHECKS" -v t="$TOTAL_TRACE_CHECKS" 'BEGIN{if(t==0){print "0.00"}else{printf "%.2f", (100*c/t)}}')"
+
+  printf 'Traceability coverage: %s/%s (%s%%)\n' "$COVERED_TRACE_CHECKS" "$TOTAL_TRACE_CHECKS" "$pct"
+  printf 'Threshold: %s%%\n' "$MIN_TRACEABILITY_COVERAGE"
+
+  awk -v p="$pct" -v min="$MIN_TRACEABILITY_COVERAGE" 'BEGIN{exit !(p+0 >= min+0)}'
 }
 
 main() {
-  local failed=0
   local line=""
   local cols=""
   local behavior_id=""
@@ -67,18 +86,20 @@ main() {
         tests="$(printf '%s\n' "$cols" | cut -d'|' -f4 | trim)"
         docs="$(printf '%s\n' "$cols" | cut -d'|' -f5 | trim)"
 
-        check_path_list "implementation" "$impls" "$behavior_id" || failed=1
-        check_path_list "test" "$tests" "$behavior_id" || failed=1
-        check_path_list "doc" "$docs" "$behavior_id" || failed=1
+        check_path_list "implementation" "$impls" "$behavior_id"
+        check_path_list "test" "$tests" "$behavior_id"
+        check_path_list "doc" "$docs" "$behavior_id"
         ;;
     esac
   done < "$TRACE_DOC"
 
   while IFS= read -r required; do
     [ -n "$required" ] || continue
-    if ! extract_impl_paths | grep -Fxq "$required"; then
+    TOTAL_TRACE_CHECKS=$((TOTAL_TRACE_CHECKS + 1))
+    if extract_impl_paths | grep -Fxq "$required"; then
+      COVERED_TRACE_CHECKS=$((COVERED_TRACE_CHECKS + 1))
+    else
       printf 'Missing traceability row for implementation: %s\n' "$required" >&2
-      failed=1
     fi
   done < <(
     {
@@ -87,11 +108,9 @@ main() {
     } | sort -u
   )
 
-  if [ "$failed" -ne 0 ]; then
-    return 1
-  fi
+  report_traceability
 
-  printf 'PASS: core internal behaviors have implementation, test, and documentation traceability\n'
+  printf 'PASS: core internal behaviors have implementation, test, and documentation traceability at or above the required threshold\n'
 }
 
 main "$@"
