@@ -35,6 +35,20 @@ dkir "Refactor this script"   # Kiro + Refactorer
 
 The bridge automatically injects system metadata (OS, Architecture, Date) into the prompt, giving the AI the technical context it needs for accurate answers.
 
+Supported bridge commands:
+
+| Command | Provider |
+|---------|----------|
+| `dot cl` | Claude Code |
+| `dot copilot` | GitHub Copilot CLI |
+| `dot cline` | Cline CLI |
+| `dot gemini` | Gemini CLI |
+| `dot kiro` | Kiro CLI |
+| `dot sgpt` | Shell-GPT |
+| `dot ollama` | Ollama |
+| `dot opencode` | OpenCode |
+| `dot aider` | Aider |
+
 ### `dot ai` status and launcher
 
 `dot ai` provides a categorized status view for installed AI CLIs and opens an interactive launcher when `gum` is available.
@@ -50,6 +64,12 @@ Current categories:
 The launcher stays flat and fast, but adds compact role labels such as `agent`, `coding`, `general`, `local`, and `cloud` for quick selection.
 
 To keep the command responsive, `dot ai` caches provider presence and version metadata in `~/.cache/dotfiles/ai/status.tsv` for 5 minutes by default. Override the cache TTL with `DOTFILES_AI_STATUS_TTL`.
+
+Related AI commands:
+
+- `dot ai` for status and launching
+- `dot ai-setup` for interactive AI CLI bootstrap
+- `dot ai-query` for context-aware queries over the dotfiles repo
 
 ## Optional AI CLI tools
 

@@ -82,6 +82,11 @@ example_gate() {
   bash ./scripts/qa/validate-examples.sh
 }
 
+docs_coverage_gate() {
+  cd "$REPO_ROOT"
+  bash ./scripts/qa/docs-coverage.sh
+}
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --quick)
@@ -117,6 +122,7 @@ printf 'Coverage floor: %s%%\n' "$min_coverage"
 run_step "Shell syntax" shell_syntax
 run_step "Unit suite" unit_tests
 run_step "Module coverage" coverage_gate
+run_step "Docs coverage" docs_coverage_gate
 run_step "Executable examples" example_gate
 
 if [ "$run_integration" -eq 1 ]; then
