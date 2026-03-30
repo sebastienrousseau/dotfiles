@@ -39,7 +39,7 @@ The `dot` command is the main interface for managing dotfiles. Run `dot version`
 | `dot history` | Analyse shell history |
 | `dot security-score` | Score workstation security (`--verbose|-v`, `--quiet|-q`, `--json|-j`) |
 | `dot snapshot` | Capture workstation state (`--baseline|-b`, `--force|-f`) |
-| `dot ai` | Show AI helper status (opt-in) |
+| `dot ai` | Show categorized AI CLI status and launch an installed provider |
 | `dot agent checkpoint` | Save, list, show, and replay bounded agent checkpoints |
 | `dot agent conformance` | Validate A2A discovery and agent card conformance (`--strict|-s`, `--json|-j`) |
 
