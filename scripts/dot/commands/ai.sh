@@ -40,7 +40,7 @@ _ai_cache_fresh() {
   local now mtime
   now=$(date +%s)
   mtime=$(stat -f %m "$file" 2>/dev/null || echo 0)
-  (( now - mtime < AI_STATUS_TTL ))
+  ((now - mtime < AI_STATUS_TTL))
 }
 
 _ai_extract_version() {
@@ -73,6 +73,17 @@ _ai_refresh_status_cache() {
   mv "$tmp_file" "$AI_STATUS_CACHE_FILE"
 }
 
+_ai_get_cached_status() {
+  local -n present_ref=$1
+  local -n version_ref=$2
+  local cached_bin cached_present cached_version
+
+  while IFS=$'\t' read -r cached_bin cached_present cached_version; do
+    present_ref["$cached_bin"]="$cached_present"
+    version_ref["$cached_bin"]="$cached_version"
+  done <"$AI_STATUS_CACHE_FILE"
+}
+
 cmd_ai_status() {
   ui_header "AI CLI Status"
 
@@ -95,11 +106,7 @@ cmd_ai_status() {
 
   declare -A ai_present=()
   declare -A ai_version=()
-  local cached_bin cached_present cached_version
-  while IFS=$'\t' read -r cached_bin cached_present cached_version; do
-    ai_present["$cached_bin"]="$cached_present"
-    ai_version["$cached_bin"]="$cached_version"
-  done <"$AI_STATUS_CACHE_FILE"
+  _ai_get_cached_status ai_present ai_version
 
   local -a installed=()
   local current_category=""
