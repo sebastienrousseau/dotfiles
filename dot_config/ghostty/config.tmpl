@@ -72,7 +72,11 @@ working-directory = home
 window-inherit-working-directory = true
 {{ $shell := default "zsh" .default_shell -}}
 shell-integration = {{ if eq $shell "nu" }}none{{ else }}{{ $shell }}{{ end }}
+{{ if eq .chezmoi.os "darwin" -}}
+command = {{ lookPath $shell }}
+{{- else -}}
 command = /usr/bin/env {{ $shell }}
+{{- end }}
 quit-after-last-window-closed = true
 
 ################
