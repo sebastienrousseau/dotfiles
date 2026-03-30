@@ -126,6 +126,12 @@ For a current local baseline, run:
 bash ./scripts/qa/coverage-baseline.sh --with-module-coverage
 ```
 
+For core internal behavior traceability, run:
+
+```bash
+bash ./scripts/qa/traceability-coverage.sh
+```
+
 ## CI integration
 
 Tests run automatically on every push to main, every pull request, and weekly scheduled runs (Monday 6 AM UTC).

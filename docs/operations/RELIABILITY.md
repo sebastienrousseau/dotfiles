@@ -112,3 +112,5 @@ jobs:
 `make test` is the canonical reliability command. It runs syntax checks, unit tests, module coverage, executable examples, and integration tests.
 
 For a lightweight repository-wide snapshot, run `bash ./scripts/qa/coverage-baseline.sh --with-module-coverage`.
+
+Core internal behaviors are traced through `bash ./scripts/qa/traceability-coverage.sh`.

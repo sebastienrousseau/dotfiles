@@ -9,6 +9,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 audit_script="$REPO_ROOT/scripts/qa/reliability-audit.sh"
 examples_script="$REPO_ROOT/scripts/qa/validate-examples.sh"
 docs_coverage_script="$REPO_ROOT/scripts/qa/docs-coverage.sh"
+traceability_script="$REPO_ROOT/scripts/qa/traceability-coverage.sh"
 platform_example="$REPO_ROOT/examples/example-platform-contract.sh"
 wsl_contract_script="$REPO_ROOT/scripts/qa/wsl-contract.sh"
 reliability_workflow="$REPO_ROOT/.github/workflows/reliability-gate.yml"
@@ -33,6 +34,12 @@ assert_file_exists "$docs_coverage_script" "docs-coverage.sh exists"
 test_start "qa_docs_coverage_syntax"
 assert_exit_code 0 "bash -n '$docs_coverage_script'"
 
+test_start "qa_traceability_coverage_exists"
+assert_file_exists "$traceability_script" "traceability-coverage.sh exists"
+
+test_start "qa_traceability_coverage_syntax"
+assert_exit_code 0 "bash -n '$traceability_script'"
+
 test_start "qa_validate_examples_syntax"
 assert_exit_code 0 "bash -n '$examples_script'"
 
@@ -45,6 +52,7 @@ assert_file_contains "$audit_script" "if [ \"\$mode\" = \"full\" ]; then" "full 
 assert_file_contains "$audit_script" "run_step \"Integration suite\" integration_tests" "integration step present"
 assert_file_contains "$audit_script" "if [ \"\$run_integration\" -eq 1 ]; then" "integration branch guard present"
 assert_file_contains "$audit_script" "run_step \"Docs coverage\" docs_coverage_gate" "docs coverage step present"
+assert_file_contains "$audit_script" "run_step \"Traceability coverage\" traceability_gate" "traceability coverage step present"
 
 test_start "qa_examples_include_platform_contract"
 assert_file_exists "$platform_example" "platform contract example exists"
