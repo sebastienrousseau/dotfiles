@@ -16,3 +16,15 @@ It is enforced by `bash ./scripts/qa/traceability-coverage.sh`.
 | BT-08 | Repository coverage baseline audit | `scripts/qa/coverage-baseline.sh` | `tests/unit/misc/test_qa_coverage_baseline.sh` | `docs/operations/RELIABILITY.md`, `docs/operations/TESTING.md` |
 | BT-09 | Documentation coverage contract for public surfaces | `scripts/qa/docs-coverage.sh` | `tests/unit/misc/test_qa_docs_coverage.sh`, `tests/unit/misc/test_qa_docs_repo_coverage.sh` | `docs/operations/RELIABILITY.md`, `docs/reference/UTILS.md`, `docs/reference/SCRIPTS.md` |
 | BT-10 | Repository executable-surface coverage gate | `tests/framework/module_coverage.sh` | `tests/unit/tools/test_public_entrypoints.sh`, `tests/unit/misc/test_module_coverage_behaviour.sh` | `docs/operations/TESTING.md`, `docs/security/VERIFICATION_VALIDATION.md`, `docs/reference/SCRIPTS.md` |
+| BT-11 | Core apply, diff, status, edit, and commit workflows | `scripts/dot/commands/core.sh` | `tests/unit/dot-cli/test_dot_commands_core.sh`, `tests/unit/dot-cli/test_dot_cli.sh` | `docs/reference/UTILS.md` |
+| BT-12 | Alias discovery, search, and governance workflows | `scripts/dot/commands/aliases.sh` | `tests/unit/dot-cli/test_dot_commands_aliases.sh` | `docs/reference/ALIASES.md`, `docs/reference/UTILS.md` |
+| BT-13 | Appearance and theme command workflows | `scripts/dot/commands/appearance.sh` | `tests/unit/dot-cli/test_dot_commands_appearance.sh` | `docs/guides/THEMING.md`, `docs/reference/UTILS.md` |
+| BT-14 | Diagnostics command workflows | `scripts/dot/commands/diagnostics.sh` | `tests/unit/dot-cli/test_dot_commands_diagnostics.sh` | `docs/operations/RELIABILITY.md`, `docs/reference/UTILS.md` |
+| BT-15 | Lint command workflow | `scripts/dot/commands/lint.sh` | `tests/unit/dot-cli/test_dot_commands_lint.sh`, `tests/unit/dot-cli/test_lint.sh` | `docs/operations/TESTING.md`, `docs/reference/UTILS.md` |
+| BT-16 | AI steering pattern workflows | `scripts/dot/commands/patterns.sh` | `tests/unit/dot-cli/test_dot_commands_patterns.sh` | `docs/AI.md` |
+| BT-17 | Restore and rollback workflows | `scripts/dot/commands/restore.sh` | `tests/unit/dot-cli/test_dot_commands_restore.sh` | `docs/reference/UTILS.md` |
+| BT-18 | Security command workflows | `scripts/dot/commands/security.sh` | `tests/unit/dot-cli/test_dot_commands_security.sh` | `docs/reference/UTILS.md`, `docs/security/COMPLIANCE.md` |
+| BT-19 | Tool catalog and sandbox workflows | `scripts/dot/commands/tools.sh` | `tests/unit/dot-cli/test_dot_commands_tools.sh` | `docs/reference/TOOLS.md`, `docs/reference/UTILS.md` |
+| BT-20 | Example validation contract | `scripts/qa/validate-examples.sh` | `tests/unit/misc/test_qa_reliability.sh` | `docs/operations/RELIABILITY.md` |
+| BT-21 | WSL parity contract | `scripts/qa/wsl-contract.sh` | `tests/unit/misc/test_qa_reliability.sh` | `docs/operations/RELIABILITY.md`, `docs/reference/SUPPORT_MATRIX.md` |
+| BT-22 | Internal behavior traceability contract | `scripts/qa/traceability-coverage.sh` | `tests/unit/misc/test_qa_traceability_coverage.sh` | `docs/operations/TRACEABILITY.md`, `docs/operations/RELIABILITY.md` |

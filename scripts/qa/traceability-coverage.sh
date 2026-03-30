@@ -6,6 +6,24 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 TRACE_DOC="$REPO_ROOT/docs/operations/TRACEABILITY.md"
 
+extract_impl_paths() {
+  awk '
+    /^\| BT-/ {
+      cols = $0
+      sub(/^\|[[:space:]]*/, "", cols)
+      sub(/[[:space:]]*\|[[:space:]]*$/, "", cols)
+      n = split(cols, parts, /\|/)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", parts[3])
+      split(parts[3], impls, /,/)
+      for (i in impls) {
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", impls[i])
+        gsub(/`/, "", impls[i])
+        print impls[i]
+      }
+    }
+  ' "$TRACE_DOC" | sort -u
+}
+
 trim() {
   sed 's/^[[:space:]]*//; s/[[:space:]]*$//'
 }
@@ -55,6 +73,19 @@ main() {
         ;;
     esac
   done < "$TRACE_DOC"
+
+  while IFS= read -r required; do
+    [ -n "$required" ] || continue
+    if ! extract_impl_paths | grep -Fxq "$required"; then
+      printf 'Missing traceability row for implementation: %s\n' "$required" >&2
+      failed=1
+    fi
+  done < <(
+    {
+      find "$REPO_ROOT/scripts/dot/commands" -maxdepth 1 -type f -name '*.sh' | sed "s#^$REPO_ROOT/##"
+      find "$REPO_ROOT/scripts/qa" -maxdepth 1 -type f -name '*.sh' | sed "s#^$REPO_ROOT/##"
+    } | sort -u
+  )
 
   if [ "$failed" -ne 0 ]; then
     return 1
