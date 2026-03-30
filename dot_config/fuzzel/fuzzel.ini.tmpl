@@ -1,0 +1,18 @@
+{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end }}
+[main]
+font={{ .terminal_font_family }}:size={{ .terminal_font_size }}
+terminal=ghostty
+width=42
+horizontal-pad=18
+vertical-pad=14
+inner-pad=10
+layer=overlay
+
+[colors]
+background={{ trimPrefix "#" $t.term.bg }}ee
+text={{ trimPrefix "#" $t.term.fg }}ff
+match={{ trimPrefix "#" $t.term.c5 }}ff
+selection={{ trimPrefix "#" $t.term.c0 }}ff
+selection-text={{ trimPrefix "#" $t.term.fg }}ff
+border={{ trimPrefix "#" $t.term.c4 }}ff

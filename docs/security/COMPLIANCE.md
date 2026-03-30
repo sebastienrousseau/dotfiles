@@ -324,15 +324,12 @@ Enable "Require signed commits" in repository settings:
 
 | Category | Count | Coverage |
 |----------|-------|----------|
-| Scripts | 89 | Tested |
-| Alias files | 99 | Tested |
-| Function files | 51 | Tested |
-| Shell configs | 12 | Tested |
-| Fish functions + conf.d | 32 | Tested |
-| Nushell configs | 5 | Tested |
-| Neovim Lua configs | 15 | Tested |
-| **Total test files** | **387** | **Module coverage: 100% (threshold >=95%)** |
-| **Total assertions** | **1655** | **Pass rate: 100%** |
+| Documentation files | 63 | Audited |
+| Executable shell surfaces | 205 | Audited |
+| Unit test files | 425 | Tested |
+| Integration test files | 11 | Tested |
+| **Total test files** | **436** | **Module coverage: 100% (threshold >=95%)** |
+| **Named tests (`test_start`)** | **2149** | **Pass rate: 100%** |
 
 ### Test Framework
 

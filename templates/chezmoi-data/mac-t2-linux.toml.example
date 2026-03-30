@@ -1,0 +1,21 @@
+profile = "laptop"
+host_id = "mac-t2-linux"
+host_class = "linux-t2"
+
+[features]
+gui = true
+linux_desktop = true
+niri = true
+waybar = true
+fuzzel = true
+mako = true
+foot = true
+kanshi = true
+touch = false
+t2 = true
+surface = false
+
+[monitors]
+internal = true
+scale = 1.25
+rotation = "normal"

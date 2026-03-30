@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/sebastienrousseau/dotfiles/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge&logo=github" alt="Build" /></a>
-  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.497-blue?style=for-the-badge" alt="Version" /></a>
+  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.498-blue?style=for-the-badge" alt="Version" /></a>
   <a href="https://github.com/sebastienrousseau/dotfiles/releases"><img src="https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge" alt="Downloads" /></a>
   <a href="https://codespaces.new/sebastienrousseau/dotfiles"><img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces" /></a>
 </p>
@@ -108,7 +108,7 @@ graph TD
 | `dot apply` | Converge the machine onto the tracked configuration |
 | `dot update` | Pull the latest state and pre-warm slow paths |
 | `dot doctor` | Audit tools, paths, portability, and security posture |
-| `dot heal` | Repair missing tools and known broken state automatically |
+| `dot heal` | Auto-repair tools, chezmoi drift, broken symlinks, and missing critical files (`--dry-run|-n`, `--force|-f`) |
 | `dot smoke-test` | Exercise critical toolchains and integrations |
 | `dot attest` | Export machine-readable workstation evidence |
 | `dot bundle` | Produce a portable support or recovery archive |

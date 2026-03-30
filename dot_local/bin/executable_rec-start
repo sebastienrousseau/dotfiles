@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+## rec-start — Disable shell history for screencasts/recordings.
+##
+## Backs up and removes the history file to prevent secrets leaking.
+## Run rec-stop to restore.
+##
+## # Usage
+##   rec-start
+
+set -euo pipefail
+
+# Detect history files across shells (bounded: max 3 candidates)
+histfiles=()
+[[ -n "${HISTFILE:-}" && -f "${HISTFILE}" ]] && histfiles+=("${HISTFILE}")
+[[ -f "${HOME}/.local/share/fish/fish_history" ]] && histfiles+=("${HOME}/.local/share/fish/fish_history")
+[[ -f "${HOME}/.bash_history" && "${HISTFILE:-}" != "${HOME}/.bash_history" ]] && histfiles+=("${HOME}/.bash_history")
+
+if [[ ${#histfiles[@]} -eq 0 ]]; then
+  echo "No history files found, nothing to do."
+  exit 0
+fi
+
+backed=0
+for histfile in "${histfiles[@]}"; do
+  if [[ -f "${histfile}.bak" ]]; then
+    echo "  Already backed up: ${histfile}"
+    continue
+  fi
+  # Atomic: mv is a single rename syscall (no cp+rm race)
+  if mv "${histfile}" "${histfile}.bak"; then
+    echo "  Backed up: ${histfile}"
+    backed=$((backed + 1))
+  else
+    echo "  Failed to back up: ${histfile}" >&2
+  fi
+done
+
+if [[ $backed -eq 0 ]]; then
+  echo "History already disabled. Run rec-stop first."
+  exit 1
+fi
+
+echo ""
+echo "Recording mode ON ($backed files backed up)"
+echo "  Run rec-stop to restore."

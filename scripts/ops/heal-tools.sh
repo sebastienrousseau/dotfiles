@@ -264,6 +264,8 @@ heal_missing_dependencies() {
     ISSUES_FOUND=$((ISSUES_FOUND + 1))
   done
 
+  MISSING_DEPS_FOUND=${#all_missing[@]}
+
   if [[ ${#all_missing[@]} -eq 0 ]]; then
     log_success "All dependencies present"
     return 0
@@ -316,6 +318,12 @@ heal_missing_dependencies() {
 
 heal_mise_tools() {
   if ! command -v mise >/dev/null 2>&1; then
+    return 0
+  fi
+
+  # Avoid blocking every heal run. Only ensure mise tools when deps are missing
+  # or when explicitly requested.
+  if [[ "${DOTFILES_HEAL_MISE_INSTALL:-0}" != "1" ]] && [[ "${MISSING_DEPS_FOUND:-0}" -eq 0 ]]; then
     return 0
   fi
 

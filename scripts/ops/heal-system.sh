@@ -16,7 +16,7 @@ heal_broken_symlinks() {
     if [[ ! -e "$link" ]]; then
       broken+=("$link")
     fi
-  done < <(find "$HOME" -maxdepth 3 -type l -print0 2>/dev/null)
+  done < <(find "$HOME" -maxdepth 3 -type l -print0 2>/dev/null || true)
 
   # Special handling for common transient/app locks that dot doctor reported
   local lock_patterns=("SingletonLock" "SingletonCookie")
@@ -51,10 +51,13 @@ heal_broken_symlinks() {
           continue
         fi
       fi
-      rm -f "$link"
-      printf '  \033[38;5;42m✓\033[0m removed %s\n' "$link"
-      FIXES_APPLIED=$((FIXES_APPLIED + 1))
-      persist_log "HEAL: removed broken symlink $link"
+      if rm -f "$link" 2>/dev/null; then
+        printf '  \033[38;5;42m✓\033[0m removed %s\n' "$link"
+        FIXES_APPLIED=$((FIXES_APPLIED + 1))
+        persist_log "HEAL: removed broken symlink $link"
+      else
+        printf '  \033[38;5;214m⚠\033[0m could not remove %s\n' "$link"
+      fi
     fi
   done
 }
@@ -84,7 +87,9 @@ heal_missing_critical_files() {
       CHEZMOI_APPLIED=1
       local restored=0
       for file in "${missing[@]}"; do
-        [[ -f "$file" ]] || [[ -L "$file" ]] && restored=$((restored + 1))
+        if [[ -f "$file" ]] || [[ -L "$file" ]]; then
+          restored=$((restored + 1))
+        fi
       done
       FIXES_APPLIED=$((FIXES_APPLIED + restored))
       persist_log "HEAL: regenerated $restored critical file(s)"

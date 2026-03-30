@@ -1,0 +1,21 @@
+profile = "desktop"
+host_id = "geekom-a9"
+host_class = "linux-desktop"
+
+[features]
+gui = true
+linux_desktop = true
+niri = true
+waybar = true
+fuzzel = true
+mako = true
+foot = true
+kanshi = true
+touch = false
+t2 = false
+surface = false
+
+[monitors]
+internal = false
+scale = 1.0
+rotation = "normal"

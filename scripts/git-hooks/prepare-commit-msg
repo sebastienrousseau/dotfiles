@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# Appends the EUXIS branding signature to every commit message.
+# Signature source: ~/.euxis/data/config/branding/signature.txt
+
+set -euo pipefail
+
+# R5: validate commit message file argument
+if [[ -z "${1:-}" || ! -f "${1:-}" ]]; then
+  exit 0 # No file provided — git will handle the error
+fi
+
+COMMIT_MSG_FILE="$1"
+COMMIT_SOURCE="${2:-}"
+
+# Skip merge commits, amends with existing signature, and squash
+case "$COMMIT_SOURCE" in
+  merge | squash) exit 0 ;;
+esac
+
+SIGNATURE_FILE="$HOME/.euxis/data/config/branding/signature.txt"
+
+# Only append if the signature file exists and message doesn't already have it
+if [[ -f "$SIGNATURE_FILE" ]]; then
+  signature=$(cat "$SIGNATURE_FILE")
+  if ! grep -qF "THE ARCHITECT" "$COMMIT_MSG_FILE" 2>/dev/null; then
+    printf '\n%s\n' "$signature" >>"$COMMIT_MSG_FILE"
+  fi
+fi

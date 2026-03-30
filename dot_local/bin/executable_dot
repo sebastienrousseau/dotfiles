@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 set -euo pipefail
 
-# Dotfiles CLI Entry Point - v0.2.497
+# Dotfiles CLI Entry Point - v0.2.498
 
 # Ensure XDG Base Directory variables are set
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -21,7 +21,7 @@ if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
   . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
 fi
 
-VERSION="0.2.497"
+VERSION="0.2.498"
 
 COMMAND="${1:-}"
 if [ -n "${1:-}" ]; then
@@ -210,6 +210,8 @@ AI|mcp|Inspect MCP policy, supply chain, and registry|Governance and validation 
 AI|mode|Set or inspect agent operating profiles (ask/plan/apply/audit)|Bounded-autonomy controls.
 AI|agent|Profile-aware execution, agent card, a2a-card, session log, checkpoints, and conformance|Agent metadata and local audit trail.
 AI|cl|Claude CLI with context patterns|Context-aware Anthropic bridge.
+AI|copilot|GitHub Copilot CLI with context patterns|Context-aware Copilot bridge.
+AI|cline|Cline CLI with context patterns|Context-aware Cline bridge.
 AI|gemini|Gemini CLI with context patterns|Context-aware Gemini bridge.
 AI|kiro|Kiro CLI with context patterns|Context-aware Kiro bridge.
 AI|sgpt|Shell-GPT with context patterns|Context-aware Shell-GPT bridge.

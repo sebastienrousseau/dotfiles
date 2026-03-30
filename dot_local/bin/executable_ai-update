@@ -93,8 +93,10 @@ if command -v mise >/dev/null 2>&1; then
   mise exec node -- npm update -g --audit=false >/dev/null 2>&1
   ok
 
-  step "Kiro CLI (via mise)"
-  if mise upgrade kiro-cli >/dev/null 2>&1; then
+  step "Kiro CLI"
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    skip "managed by Kiro app bundle via mise plugin"
+  elif mise upgrade kiro-cli >/dev/null 2>&1; then
     ok
   else
     skip "mise plugin update unavailable"

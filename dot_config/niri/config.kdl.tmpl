@@ -1,7 +1,16 @@
-// This config is in the KDL format: https://kdl.dev
-// "/-" comments out the following node.
-// Check the wiki for a full description of the configuration:
-// https://github.com/YaLTeR/niri/wiki/Configuration:-Introduction
+// Niri Configuration (v{{ .dotfiles_version }})
+// Machine: {{ .chezmoi.hostname }} | Profile: {{ .profile }}
+// KDL format: https://kdl.dev
+{{- $hw := .hardware -}}
+{{- $machine := .machine -}}
+{{- if and $machine (ne $machine "") -}}
+  {{- $m := index .machines $machine -}}
+  {{- if $m -}}
+    {{- $hw = $m -}}
+  {{- end -}}
+{{- end -}}
+{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end }}
 config-notification {
     disable-failed
 }
@@ -18,45 +27,39 @@ gestures {
 input {
     keyboard {
         xkb {
-            // You can set rules, model, layout, variant and options.
-            // For more information, see xkeyboard-config(7).
-
-            // For example:
-            // layout "us,ru"
-            // options "grp:win_space_toggle,compose:ralt,ctrl:nocaps"
-
-            // If this section is empty, niri will fetch xkb settings
-            // from org.freedesktop.locale1. You can control these using
-            // localectl set-x11-keymap.
         }
-
-        // Enable numlock on startup, omitting this setting disables it.
         numlock
+        repeat-delay 250
+        repeat-rate 35
     }
 
     // Next sections include libinput settings.
     // Omitting settings disables them, or leaves them at their default values.
     // All commented-out settings here are examples, not defaults.
     touchpad {
-        // off
+{{- if eq $hw.touchpad true }}
         tap
         dwt
         dwtp
-        // drag false
-        // drag-lock
         natural-scroll
-        // accel-speed 0.2
-        // accel-profile "flat"
-        // scroll-method "two-finger"
-        // disabled-on-external-mouse
+{{- if ne (float64 $hw.touchpad_accel) 0.0 }}
+        accel-speed {{ $hw.touchpad_accel }}
+{{- end }}
+{{- if and $hw.touchpad_accel_profile (ne $hw.touchpad_accel_profile "adaptive") }}
+        accel-profile "{{ $hw.touchpad_accel_profile }}"
+{{- end }}
+{{- if eq $hw.profile "desktop" }}
+        disabled-on-external-mouse
+{{- end }}
+{{- else }}
+        off
+{{- end }}
     }
 
     mouse {
-        // off
-        // natural-scroll
-        // accel-speed 0.2
-        // accel-profile "flat"
-        // scroll-method "no-scroll"
+{{- if eq $hw.profile "desktop" }}
+        accel-profile "flat"
+{{- end }}
     }
 
     trackpoint {
@@ -76,18 +79,29 @@ input {
     // Focus windows and outputs automatically when moving the mouse into them.
     // Setting max-scroll-amount="0%" makes it work only on windows already fully on screen.
     // focus-follows-mouse max-scroll-amount="0%"
+
+    disable-power-key-handling
 }
-// You can configure outputs by their name, which you can find
-// by running `niri msg outputs` while inside a niri instance.
-// The built-in laptop monitor is usually called "eDP-1".
-// Find more information on the wiki:
-// https://github.com/YaLTeR/niri/wiki/Configuration:-Outputs
-// Remember to uncomment the node by removing "/-"!
-/-output "eDP-2" {
-    mode "2560x1600@239.998993"
-    position x=2560 y=0
+
+cursor {
+    hide-when-typing
+    hide-after-inactive-ms 3000
+}
+
+clipboard {
+    disable-primary
+}
+// Output configuration — hardware-aware via .chezmoidata/hardware.toml
+// Run `niri msg outputs` to discover output names.
+{{- if and $hw.output_name $hw.output_mode }}
+output "{{ $hw.output_name }}" {
+    mode "{{ $hw.output_mode }}"
+    scale {{ $hw.scale }}
+{{- if gt (int $hw.max_refresh) 60 }}
     variable-refresh-rate
+{{- end }}
 }
+{{- end }}
 // Settings that influence how windows are positioned and sized.
 // Find more information on the wiki:
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Layout
@@ -100,7 +114,8 @@ layout {
     // - "always", the focused column will always be centered.
     // - "on-overflow", focusing a column will center it if it doesn't fit
     //   together with the previously focused column.
-    center-focused-column "never"
+    center-focused-column "on-overflow"
+    always-center-single-column
     // You can customize the widths that "switch-preset-column-width" (Mod+R) toggles between.
     preset-column-widths {
         // Proportion sets the width as a fraction of the output width, taking gaps into account.
@@ -128,18 +143,21 @@ layout {
     //
     // Alternatively, you can override it with a window rule called
     // `draw-border-with-background`.
+    focus-ring {
+        active-color "{{ $t.ui.accent }}"
+        inactive-color "{{ $t.ui.border }}"
+        urgent-color "{{ $t.ui.error }}"
+    }
     border {
-        off
-        width 4
-        active-color   "#707070"      // Neutral gray
-        inactive-color "#d0d0d0"      // Light gray
-        urgent-color   "#cc4444"      // Softer red
+        active-color "{{ $t.ui.accent }}"
+        inactive-color "{{ $t.ui.border }}"
+        urgent-color "{{ $t.ui.error }}"
     }
     shadow {
-        softness 30
+        softness 15
         spread 5
         offset x=0 y=5
-        color "#0007"
+        color "{{ $t.term.bg }}70"
     }
     struts {
     }
@@ -162,6 +180,10 @@ overview {
 // Idle management — lock screen after 5 min, monitors off after 10 min
 spawn-at-startup "swayidle" "-w" "timeout" "300" "swaylock -f" "timeout" "600" "niri msg action power-off-monitors" "before-sleep" "swaylock -f"
 
+// Clipboard persistence — text and image history via cliphist
+spawn-at-startup "wl-paste" "--type" "text" "--watch" "cliphist" "store"
+spawn-at-startup "wl-paste" "--type" "image" "--watch" "cliphist" "store"
+
 environment {
   XDG_CURRENT_DESKTOP "niri"
 }
@@ -172,34 +194,34 @@ prefer-no-csd
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 animations {
     workspace-switch {
-        spring damping-ratio=0.80 stiffness=523 epsilon=0.0001
+        spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001
     }
     window-open {
-        duration-ms 150
+        duration-ms 120
         curve "ease-out-expo"
     }
     window-close {
-        duration-ms 150
+        duration-ms 120
         curve "ease-out-quad"
     }
     horizontal-view-movement {
-        spring damping-ratio=0.85 stiffness=423 epsilon=0.0001
+        spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
     }
     window-movement {
-        spring damping-ratio=0.75 stiffness=323 epsilon=0.0001
+        spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
     }
     window-resize {
-        spring damping-ratio=0.85 stiffness=423 epsilon=0.0001
+        spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
     }
     config-notification-open-close {
-        spring damping-ratio=0.65 stiffness=923 epsilon=0.001
+        spring damping-ratio=1.0 stiffness=900 epsilon=0.001
     }
     screenshot-ui-open {
-        duration-ms 200
+        duration-ms 150
         curve "ease-out-quad"
     }
     overview-open-close {
-        spring damping-ratio=0.85 stiffness=800 epsilon=0.0001
+        spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
     }
 }
 // Window rules let you adjust behavior for individual windows.
@@ -249,14 +271,37 @@ window-rule {
     draw-border-with-background false
 }
 window-rule {
-    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
     match app-id="zoom"
+    open-floating true
+}
+window-rule {
+    match app-id="flameshot"
     open-floating true
 }
 // Open dms windows as floating by default
 window-rule {
     match app-id=r#"org.quickshell$"#
     open-floating true
+}
+// Visual focus hierarchy — dim unfocused windows
+window-rule {
+    match is-focused=false
+    opacity 0.9
+}
+// Block sensitive apps from screen capture
+window-rule {
+    match app-id=r#"^org\.keepassxc\.KeePassXC$"#
+    match app-id=r#"^org\.gnome\.World\.Secrets$"#
+    match app-id=r#"^1Password$"#
+    block-out-from "screen-capture"
+}
+// Firefox PiP — float with fixed size, bottom-right
+window-rule {
+    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    open-floating true
+    default-column-width { fixed 480; }
+    default-window-height { fixed 270; }
+    default-floating-position x=32 y=32 relative-to="bottom-right"
 }
 debug {
     honor-xdg-activation-with-invalid-serial
@@ -272,8 +317,7 @@ recent-windows {
     }
 }
 
-// Include dms files
-include "dms/colors.kdl"
+// Include dms files (colors owned by chezmoi, not dms/colors.kdl)
 include "dms/layout.kdl"
 include "dms/alttab.kdl"
 include "dms/binds.kdl"

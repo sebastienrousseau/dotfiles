@@ -25,7 +25,7 @@ Use the `dot` CLI to invoke AI tools with automated context:
 
 ```bash
 # General usage
-dot cl|gemini|kiro --pattern <name> "prompt"
+dot cl|copilot|cline|gemini|kiro|sgpt|ollama|opencode|aider --pattern <name> "prompt"
 
 # Quick aliases
 dcla "Optimize my zshrc"      # Claude + Architect
@@ -35,12 +35,51 @@ dkir "Refactor this script"   # Kiro + Refactorer
 
 The bridge automatically injects system metadata (OS, Architecture, Date) into the prompt, giving the AI the technical context it needs for accurate answers.
 
+Supported bridge commands:
+
+| Command | Provider |
+|---------|----------|
+| `dot cl` | Claude Code |
+| `dot copilot` | GitHub Copilot CLI |
+| `dot cline` | Cline CLI |
+| `dot gemini` | Gemini CLI |
+| `dot kiro` | Kiro CLI |
+| `dot sgpt` | Shell-GPT |
+| `dot ollama` | Ollama |
+| `dot opencode` | OpenCode |
+| `dot aider` | Aider |
+
+### `dot ai` status and launcher
+
+`dot ai` provides a categorized status view for installed AI CLIs and opens an interactive launcher when `gum` is available.
+
+Current categories:
+
+- Agents (autonomous)
+- Coding (interactive)
+- General (prompt-based)
+- Runtime (local)
+- Cloud (platform)
+
+The launcher stays flat and fast, but adds compact role labels such as `agent`, `coding`, `general`, `local`, and `cloud` for quick selection.
+
+To keep the command responsive, `dot ai` caches provider presence and version metadata in `~/.cache/dotfiles/ai/status.tsv` for 5 minutes by default. Override the cache TTL with `DOTFILES_AI_STATUS_TTL`.
+
+Related AI commands:
+
+- `dot ai` for status and launching
+- `dot ai-setup` for interactive AI CLI bootstrap
+- `dot ai-query` for context-aware queries over the dotfiles repo
+
 ## Optional AI CLI tools
 
 These tools aren't installed automatically. Install only what you want:
 
-- **Local-first**: `ollama` (run models locally)
-- **Cloud**: `codex`, `sgpt`, `claude`, `gemini` (provider CLIs)
+- **Agents**: `claude`, `copilot`, `cline`
+- **Coding assistants**: `aider`, `opencode`
+- **General AI**: `gemini`, `sgpt`
+- **Local-first**: `ollama`
+- **Cloud / platform**: `kiro-cli`
 
 After installation, the dotfiles can surface basic helper functions and shortcuts, but only when `DOTFILES_AI=1` is set.
 

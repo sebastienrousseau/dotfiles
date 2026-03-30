@@ -85,7 +85,7 @@ current_theme() {
 }
 
 get_theme_family() {
-  theme="$1"
+  local theme="${1:-}"
   case "$theme" in
     tokyonight-*) echo "tokyonight" ;;
     catppuccin-*) echo "catppuccin" ;;
@@ -94,12 +94,24 @@ get_theme_family() {
     gruvbox-*) echo "gruvbox" ;;
     solarized-*) echo "solarized" ;;
     everforest-*) echo "everforest" ;;
+    abstract-waves-*) echo "abstract-waves" ;;
+    adwaita-*) echo "adwaita" ;;
+    colourful-*) echo "colourful" ;;
+    imac-blue-*) echo "imac-blue" ;;
+    macos-big-sur-*) echo "macos-big-sur" ;;
+    macos-mojave-*) echo "macos-mojave" ;;
+    macos-monterey-*) echo "macos-monterey" ;;
+    macos-sequoia-*) echo "macos-sequoia" ;;
+    macos-sonoma-*) echo "macos-sonoma" ;;
+    macos-tahoe-*) echo "macos-tahoe" ;;
+    macos-ventura-*) echo "macos-ventura" ;;
+    monterey-sierra-blue-*) echo "monterey-sierra-blue" ;;
     *) echo "other" ;;
   esac
 }
 
 is_dark_theme() {
-  theme="$1"
+  local theme="${1:-}"
   case "$theme" in
     *-night | *-storm | *-moon | *-mocha | *-frappe | *-macchiato | *-dark | *-wave | *-dragon | dracula | nord | onedark)
       return 0
@@ -111,31 +123,69 @@ is_dark_theme() {
 }
 
 set_theme() {
-  new_theme="$1"
+  local new_theme="$1"
   if [ -z "$new_theme" ]; then
-    ui_err "Theme" "name required"
+    pick_theme
+    return
+  fi
+  dot-theme-sync "$new_theme"
+}
+
+# Interactive theme picker
+pick_theme() {
+  if ! command -v fzf &>/dev/null; then
+    ui_err "fzf" "required for interactive picker"
+    ui_info "Usage" "dot theme set <name>"
     exit 1
   fi
-  # Validate theme name: only allow alphanumeric, hyphens, underscores
-  case "$new_theme" in
-    *[!a-zA-Z0-9_-]*)
-      ui_err "Invalid theme name" "$new_theme" >&2
-      ui_info "Allowed" "letters, digits, hyphens, underscores" >&2
-      exit 1
-      ;;
-  esac
 
-  tmp_file="$(umask 077 && mktemp)"
-  if grep -q '^theme = ' "$DATA_FILE"; then
-    sed "s/^theme = .*/theme = \"$new_theme\"/" "$DATA_FILE" >"$tmp_file"
-  else
-    cat "$DATA_FILE" >"$tmp_file"
-    echo "theme = \"$new_theme\"" >>"$tmp_file"
+  local current
+  local current="$(current_theme)"
+
+  local themes_file="$SRC_DIR/.chezmoidata/themes.toml"
+  if [[ ! -f "$themes_file" ]]; then
+    ui_err "Missing" "$themes_file"
+    exit 1
   fi
-  mv "$tmp_file" "$DATA_FILE"
-  ui_ok "Theme set" "$new_theme"
-  ui_info "Applying" "dotfiles"
-  chezmoi apply --force 2>/dev/null || chezmoi apply
+
+  # Build theme list with metadata
+  local theme_list=""
+  local name mode family
+  while IFS= read -r section; do
+    local name="${section#\[themes.}"
+    local name="${name%\]}"
+    [[ "$name" == *.* ]] && continue
+
+    local mode="$(awk -v n="$name" '
+      $0 == "[themes." n "]" { found=1; next }
+      /^\[/ { found=0 }
+      found && /^mode/ { sub(/.*= *"/, ""); sub(/".*/, ""); print; exit }
+    ' "$themes_file")"
+    local mode="${mode:-dark}"
+
+    local family="$(get_theme_family "$name")"
+    local marker="○"
+    [[ "$name" == "$current" ]] && marker="✓"
+
+    theme_list+="$(printf '%s  %-25s  %-10s  %s' "$marker" "$name" "$mode" "$family")"$'\n'
+  done < <(grep '^\[themes\.[a-z]' "$themes_file" | grep -v '\.\(term\|ui\|app\|ext\)\]')
+
+  local selected
+  selected="$(echo "$theme_list" | fzf \
+    --header "Select theme (current: $current)" \
+    --prompt "Theme > " \
+    --height 30 \
+    --reverse \
+    --no-sort \
+    --no-preview \
+    --ansi |
+    awk '{print $2}')" || return 0
+
+  if [[ -n "$selected" && "$selected" != "$current" ]]; then
+    dot-theme-sync "$selected"
+  elif [[ "$selected" == "$current" ]]; then
+    ui_info "Theme" "already on $current"
+  fi
 }
 
 list_themes() {
@@ -178,8 +228,8 @@ list_themes() {
 
 # Toggle between light and dark within the same family, or switch families
 toggle_theme() {
-  current="$(current_theme)"
-  family="$(get_theme_family "$current")"
+  local current="$(current_theme)"
+  local family="$(get_theme_family "$current")"
 
   if is_dark_theme "$current"; then
     # Currently dark, switch to light variant
@@ -191,6 +241,12 @@ toggle_theme() {
       gruvbox) set_theme "gruvbox-light" ;;
       solarized) set_theme "solarized-light" ;;
       everforest) set_theme "everforest-light" ;;
+      # Wallpaper themes: swap -dark to -light
+      abstract-waves | adwaita | colourful | imac-blue | \
+        macos-big-sur | macos-mojave | macos-monterey | macos-sequoia | \
+        macos-sonoma | macos-tahoe | macos-ventura | monterey-sierra-blue)
+        set_theme "${current%-dark}-light"
+        ;;
       *) set_theme "$DEFAULT_LIGHT" ;;
     esac
   else
@@ -203,6 +259,12 @@ toggle_theme() {
       gruvbox) set_theme "gruvbox-dark" ;;
       solarized) set_theme "solarized-dark" ;;
       everforest) set_theme "everforest-dark" ;;
+      # Wallpaper themes: swap -light to -dark
+      abstract-waves | adwaita | colourful | imac-blue | \
+        macos-big-sur | macos-mojave | macos-monterey | macos-sequoia | \
+        macos-sonoma | macos-tahoe | macos-ventura | monterey-sierra-blue)
+        set_theme "${current%-light}-dark"
+        ;;
       *) set_theme "$DEFAULT_DARK" ;;
     esac
   fi
@@ -210,8 +272,8 @@ toggle_theme() {
 
 # Switch between Tokyo Night and Catppuccin families
 switch_family() {
-  current="$(current_theme)"
-  family="$(get_theme_family "$current")"
+  local current="$(current_theme)"
+  local family="$(get_theme_family "$current")"
 
   if is_dark_theme "$current"; then
     # Stay in dark mode, switch family
@@ -232,11 +294,10 @@ switch_family() {
 
 # Show current theme info
 show_current() {
-  current="$(current_theme)"
-  family="$(get_theme_family "$current")"
-  if is_dark_theme "$current" 2>/dev/null; then
-    mode="dark"
-  else
+  local current="$(current_theme)"
+  local family="$(get_theme_family "$current")"
+  local mode="dark"
+  if ! is_dark_theme "$current" 2>/dev/null; then
     mode="light"
   fi
   ui_info "Current" "$current ($family, $mode)"
@@ -256,7 +317,7 @@ sync_theme() {
     Linux)
       if command -v gsettings >/dev/null 2>&1; then
         # Check GNOME color scheme
-        scheme=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")
+        local scheme=scheme=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")
         if [[ "$scheme" == "prefer-light" ]]; then
           os_mode="light"
         else
@@ -266,7 +327,7 @@ sync_theme() {
       ;;
   esac
 
-  current="$(current_theme)"
+  local current="$(current_theme)"
   if is_dark_theme "$current" && [[ "$os_mode" == "light" ]]; then
     ui_info "Sync" "System is light, switching dotfiles to light..."
     toggle_theme
@@ -302,22 +363,32 @@ case "${1:-}" in
   current)
     show_current
     ;;
-  "")
+  help | --help | -h)
     ui_header "Usage"
     ui_info "dot theme" "[command]"
     echo ""
     ui_header "Commands"
+    ui_ok "(no args)" "Interactive theme picker (fzf)"
     ui_ok "list" "Show all available themes"
-    ui_ok "set NAME" "Set theme to NAME"
+    ui_ok "set [NAME]" "Set theme (interactive if no name)"
     ui_ok "toggle" "Toggle between light/dark within current family"
-    ui_ok "family" "Switch between Tokyo Night and Catppuccin families"
+    ui_ok "family" "Cycle between theme families"
     ui_ok "current" "Show current theme info"
+    ui_ok "sync" "Sync dotfiles with system dark/light mode"
     echo ""
     show_current
     ;;
+  "")
+    pick_theme
+    ;;
   *)
-    ui_err "Unknown theme command" "$1"
-    ui_info "Usage" "dot theme [list|set <name>|toggle|family|current]"
-    exit 1
+    # Treat unknown args as theme names for quick switching: dot theme dracula
+    if grep -q "^\[themes\.${1}\]" "$SRC_DIR/.chezmoidata/themes.toml" 2>/dev/null; then
+      dot-theme-sync "$1"
+    else
+      ui_err "Unknown command or theme" "$1"
+      ui_info "Usage" "dot theme [list|set <name>|toggle|family|current|help]"
+      exit 1
+    fi
     ;;
 esac

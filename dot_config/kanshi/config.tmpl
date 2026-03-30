@@ -1,0 +1,22 @@
+profile undocked {
+  output "*" enable mode preferred
+}
+
+{{ if eq .machine "surface-pro-7p" -}}
+profile surface-internal {
+  output eDP-1 enable scale 1.5
+}
+{{- end }}
+
+{{ if eq .machine "mac-t2-linux" -}}
+profile t2-internal {
+  output eDP-1 enable scale 1.25
+}
+{{- end }}
+
+{{ if eq .machine "geekom-a9" -}}
+profile geekom-dual {
+  output DP-1 enable mode preferred position 0,0
+  output HDMI-A-1 enable mode preferred position 2560,0
+}
+{{- end }}

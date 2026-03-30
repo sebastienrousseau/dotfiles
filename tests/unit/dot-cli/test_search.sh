@@ -4,6 +4,7 @@
 # Unit tests for the `dot search` command
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 DOT_CLI="$REPO_ROOT/dot_local/bin/executable_dot"

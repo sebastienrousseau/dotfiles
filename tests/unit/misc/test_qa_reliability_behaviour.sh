@@ -35,6 +35,20 @@ printf 'validate_examples\n' >>"${LOG_FILE:?}"
 EOF
   chmod +x "$dir/scripts/qa/validate-examples.sh"
 
+  cat >"$dir/scripts/qa/docs-coverage.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'docs_coverage\n' >>"${LOG_FILE:?}"
+EOF
+  chmod +x "$dir/scripts/qa/docs-coverage.sh"
+
+  cat >"$dir/scripts/qa/traceability-coverage.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'traceability_coverage\n' >>"${LOG_FILE:?}"
+EOF
+  chmod +x "$dir/scripts/qa/traceability-coverage.sh"
+
   printf '%s\n' "$dir"
 }
 
@@ -42,12 +56,12 @@ test_start "qa_reliability_quick_skips_integration"
 stub_repo="$(make_stub_repo)"
 log_file="$stub_repo/run.log"
 if LOG_FILE="$log_file" bash "$stub_repo/scripts/qa/reliability-audit.sh" --quick >/dev/null 2>&1; then
-  if grep -q "test_runner:" "$log_file" && ! grep -q "test_runner:-i" "$log_file"; then
+  if grep -q "test_runner:" "$log_file" && ! grep -q "test_runner:-i" "$log_file" && grep -q "docs_coverage" "$log_file" && grep -q "traceability_coverage" "$log_file"; then
     ((TESTS_PASSED++))
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: quick mode runs unit path only"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: quick mode runs unit path with docs and traceability coverage"
   else
     ((TESTS_FAILED++))
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: quick mode should skip integration runner"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: quick mode should skip integration runner and include docs plus traceability coverage"
   fi
 else
   ((TESTS_FAILED++))
@@ -59,12 +73,12 @@ test_start "qa_reliability_with_integration_runs_integration"
 stub_repo="$(make_stub_repo)"
 log_file="$stub_repo/run.log"
 if LOG_FILE="$log_file" bash "$stub_repo/scripts/qa/reliability-audit.sh" --with-integration >/dev/null 2>&1; then
-  if grep -q "test_runner:-i" "$log_file"; then
+  if grep -q "test_runner:-i" "$log_file" && grep -q "docs_coverage" "$log_file" && grep -q "traceability_coverage" "$log_file"; then
     ((TESTS_PASSED++))
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: integration flag runs integration suite"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: integration flag runs integration suite with docs and traceability coverage"
   else
     ((TESTS_FAILED++))
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: integration flag should run integration suite"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: integration flag should run integration suite with docs and traceability coverage"
   fi
 else
   ((TESTS_FAILED++))

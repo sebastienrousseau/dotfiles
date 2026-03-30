@@ -1,0 +1,12 @@
+[Unit]
+Description=SSH Agent — single persistent agent for all sessions
+Documentation=man:ssh-agent(1)
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/ssh-agent -D -a %t/ssh-agent.socket
+Environment=SSH_AUTH_SOCK=%t/ssh-agent.socket
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

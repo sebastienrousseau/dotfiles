@@ -28,8 +28,8 @@ tests/
 │   ├── assertions.sh    # 16 assertion functions
 │   ├── mocks.sh        # Mock utilities
 │   └── test_runner.sh  # Test executor
-├── unit/               # 420 unit test files
-├── integration/        # 10 integration test files
+├── unit/               # 425 unit test files
+├── integration/        # 11 integration test files
 └── performance/        # Benchmarks
 ```
 
@@ -108,15 +108,28 @@ Measure resource efficiency with shell startup benchmarks and load tests.
 | Category | Target | Current |
 |----------|--------|---------|
 | Module coverage | >=95% | 100% |
-| Unit test files | - | 420 |
-| Integration test files | - | 10 |
-| Total tests (assertions) | - | 2217 |
+| Unit test files | - | 425 |
+| Integration test files | - | 11 |
+| Total test files | - | 436 |
+| Named tests (`test_start`) | - | 2149 |
 | Unit test pass rate | 100% | 100% |
 
 CI enforces module coverage via:
 
 ```bash
 MIN_COVERAGE=95 ./tests/framework/module_coverage.sh
+```
+
+For a current local baseline, run:
+
+```bash
+bash ./scripts/qa/coverage-baseline.sh --with-module-coverage
+```
+
+For core internal behavior traceability, run:
+
+```bash
+bash ./scripts/qa/traceability-coverage.sh
 ```
 
 ## CI integration

@@ -1,0 +1,9 @@
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# Completions for dot-theme-sync
+
+# Complete with theme names from themes.toml
+complete -c dot-theme-sync -f -a "{{- range $name, $_ := .themes }}{{ $name }} {{ end }}"
+
+# Complete with flags
+complete -c dot-theme-sync -l help -s h -d "Show help"
+complete -c dot-theme-sync -l full -d "Full chezmoi apply + reload"

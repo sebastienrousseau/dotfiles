@@ -13,10 +13,20 @@ export DOT_COMMAND="prewarm"
 
 # Prevent concurrent execution
 LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/dotfiles-prewarm.lock"
-exec 9>"$LOCK_FILE"
-if ! flock -n 9; then
-  ui_warn "Already running" "Another instance is active"
-  exit 0
+LOCK_DIR="${LOCK_FILE}.d"
+if command -v flock >/dev/null 2>&1; then
+  exec 9>"$LOCK_FILE"
+  if ! flock -n 9; then
+    ui_warn "Already running" "Another instance is active"
+    exit 0
+  fi
+else
+  # Portable fallback when flock is unavailable (e.g. minimal macOS envs).
+  if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+    ui_warn "Already running" "Another instance is active"
+    exit 0
+  fi
+  trap 'rmdir "$LOCK_DIR" 2>/dev/null || true' EXIT
 fi
 
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"

@@ -1,211 +1,90 @@
-{{- /* GTK-3.0 custom CSS for Catppuccin theming */ -}}
-{{- $theme := .theme -}}
-{{- $is_dark := false -}}
-{{- if or (hasSuffix $theme "-night") (hasSuffix $theme "-storm") (hasSuffix $theme "-moon") (hasSuffix $theme "-mocha") (hasSuffix $theme "-frappe") (hasSuffix $theme "-macchiato") (hasSuffix $theme "-dark") (hasSuffix $theme "-wave") (hasSuffix $theme "-dragon") (eq $theme "dracula") (eq $theme "nord") (eq $theme "onedark") -}}
-{{- $is_dark = true -}}
-{{- end -}}
+{{- /* GTK-3.0 custom CSS — colors from SSOT theme manifest */ -}}
+{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end -}}
+{{- $is_dark := eq $t.mode "dark" -}}
 
-{{- $colors := dict -}}
-{{- if eq $theme "catppuccin-latte" -}}
-  {{- $colors = dict
-      "rosewater" "#dc8a78"
-      "flamingo" "#dd7878"
-      "pink" "#ea76cb"
-      "mauve" "#8839ef"
-      "red" "#d20f39"
-      "maroon" "#e64553"
-      "peach" "#fe640b"
-      "yellow" "#df8e1d"
-      "green" "#40a02b"
-      "teal" "#179299"
-      "sky" "#04a5e5"
-      "sapphire" "#209fb5"
-      "blue" "#1e66f5"
-      "lavender" "#7287fd"
-      "text" "#4c4f69"
-      "subtext1" "#5c5f77"
-      "subtext0" "#6c6f85"
-      "overlay2" "#7c7f93"
-      "overlay1" "#8c8fa1"
-      "overlay0" "#9ca0b0"
-      "surface2" "#acb0be"
-      "surface1" "#bcc0cc"
-      "surface0" "#ccd0da"
-      "base" "#eff1f5"
-      "mantle" "#e6e9ef"
-      "crust" "#dce0e8"
-  -}}
-{{- else if eq $theme "catppuccin-frappe" -}}
-  {{- $colors = dict
-      "rosewater" "#f2d5cf"
-      "flamingo" "#eebebe"
-      "pink" "#f4b8e4"
-      "mauve" "#ca9ee6"
-      "red" "#e78284"
-      "maroon" "#ea999c"
-      "peach" "#ef9f76"
-      "yellow" "#e5c890"
-      "green" "#a6d189"
-      "teal" "#81c8be"
-      "sky" "#99d1db"
-      "sapphire" "#85c1dc"
-      "blue" "#8caaee"
-      "lavender" "#babbf1"
-      "text" "#c6d0f5"
-      "subtext1" "#b5bfe2"
-      "subtext0" "#a5adce"
-      "overlay2" "#949cbb"
-      "overlay1" "#838ba7"
-      "overlay0" "#737994"
-      "surface2" "#626880"
-      "surface1" "#51576d"
-      "surface0" "#414559"
-      "base" "#303446"
-      "mantle" "#292c3c"
-      "crust" "#232634"
-  -}}
-{{- else if eq $theme "catppuccin-macchiato" -}}
-  {{- $colors = dict
-      "rosewater" "#f4dbd6"
-      "flamingo" "#f0c6c6"
-      "pink" "#f5bde6"
-      "mauve" "#c6a0f6"
-      "red" "#ed8796"
-      "maroon" "#ee99a0"
-      "peach" "#f5a97f"
-      "yellow" "#eed49f"
-      "green" "#a6da95"
-      "teal" "#8bd5ca"
-      "sky" "#91d7e3"
-      "sapphire" "#7dc4e4"
-      "blue" "#8aadf4"
-      "lavender" "#b7bdf8"
-      "text" "#cad3f5"
-      "subtext1" "#b8c0e0"
-      "subtext0" "#a5adcb"
-      "overlay2" "#939ab7"
-      "overlay1" "#8087a2"
-      "overlay0" "#6e738d"
-      "surface2" "#5b6078"
-      "surface1" "#494d64"
-      "surface0" "#363a4f"
-      "base" "#24273a"
-      "mantle" "#1e2030"
-      "crust" "#181926"
-  -}}
-{{- else if eq $theme "catppuccin-mocha" -}}
-  {{- $colors = dict
-      "rosewater" "#f5e0dc"
-      "flamingo" "#f2cdcd"
-      "pink" "#f5c2e7"
-      "mauve" "#cba6f7"
-      "red" "#f38ba8"
-      "maroon" "#eba0ac"
-      "peach" "#fab387"
-      "yellow" "#f9e2af"
-      "green" "#a6e3a1"
-      "teal" "#94e2d5"
-      "sky" "#89dceb"
-      "sapphire" "#74c7ec"
-      "blue" "#89b4fa"
-      "lavender" "#b4befe"
-      "text" "#cdd6f4"
-      "subtext1" "#bac2de"
-      "subtext0" "#a6adc8"
-      "overlay2" "#9399b2"
-      "overlay1" "#7f849c"
-      "overlay0" "#6c7086"
-      "surface2" "#585b70"
-      "surface1" "#45475a"
-      "surface0" "#313244"
-      "base" "#1e1e2e"
-      "mantle" "#181825"
-      "crust" "#11111b"
-  -}}
-{{- end -}}
+/* GTK3 Custom Styling for {{ .theme }} */
 
-/* GTK3 Custom Styling for {{ $theme }} */
-
-{{- if hasPrefix $theme "catppuccin-" }}
+{{- if eq $t.family "catppuccin" }}
 /* Catppuccin color overrides */
-@define-color accent_color {{ index $colors "blue" }};
-@define-color accent_bg_color {{ index $colors "blue" }};
-@define-color accent_fg_color {{ if $is_dark }}{{ index $colors "base" }}{{ else }}{{ index $colors "crust" }}{{ end }};
+@define-color accent_color {{ $t.ext.blue }};
+@define-color accent_bg_color {{ $t.ext.blue }};
+@define-color accent_fg_color {{ if $is_dark }}{{ $t.ext.base }}{{ else }}{{ $t.ext.crust }}{{ end }};
 
-@define-color destructive_color {{ index $colors "red" }};
-@define-color destructive_bg_color {{ index $colors "red" }};
-@define-color destructive_fg_color {{ index $colors "base" }};
+@define-color destructive_color {{ $t.ext.red }};
+@define-color destructive_bg_color {{ $t.ext.red }};
+@define-color destructive_fg_color {{ $t.ext.base }};
 
-@define-color success_color {{ index $colors "green" }};
-@define-color success_bg_color {{ index $colors "green" }};
-@define-color success_fg_color {{ index $colors "base" }};
+@define-color success_color {{ $t.ext.green }};
+@define-color success_bg_color {{ $t.ext.green }};
+@define-color success_fg_color {{ $t.ext.base }};
 
-@define-color warning_color {{ index $colors "yellow" }};
-@define-color warning_bg_color {{ index $colors "yellow" }};
-@define-color warning_fg_color {{ index $colors "base" }};
+@define-color warning_color {{ $t.ext.yellow }};
+@define-color warning_bg_color {{ $t.ext.yellow }};
+@define-color warning_fg_color {{ $t.ext.base }};
 
-@define-color error_color {{ index $colors "red" }};
-@define-color error_bg_color {{ index $colors "red" }};
-@define-color error_fg_color {{ index $colors "base" }};
+@define-color error_color {{ $t.ext.red }};
+@define-color error_bg_color {{ $t.ext.red }};
+@define-color error_fg_color {{ $t.ext.base }};
 
-@define-color window_bg_color {{ index $colors "base" }};
-@define-color window_fg_color {{ index $colors "text" }};
-@define-color view_bg_color {{ index $colors "base" }};
-@define-color view_fg_color {{ index $colors "text" }};
+@define-color window_bg_color {{ $t.ext.base }};
+@define-color window_fg_color {{ $t.ext.text }};
+@define-color view_bg_color {{ $t.ext.base }};
+@define-color view_fg_color {{ $t.ext.text }};
 
-@define-color headerbar_bg_color {{ index $colors "mantle" }};
-@define-color headerbar_fg_color {{ index $colors "text" }};
-@define-color headerbar_border_color {{ index $colors "crust" }};
-@define-color headerbar_backdrop_color {{ index $colors "base" }};
-@define-color headerbar_shade_color {{ index $colors "crust" }};
+@define-color headerbar_bg_color {{ $t.ext.mantle }};
+@define-color headerbar_fg_color {{ $t.ext.text }};
+@define-color headerbar_border_color {{ $t.ext.crust }};
+@define-color headerbar_backdrop_color {{ $t.ext.base }};
+@define-color headerbar_shade_color {{ $t.ext.crust }};
 
-@define-color card_bg_color {{ index $colors "surface0" }};
-@define-color card_fg_color {{ index $colors "text" }};
-@define-color card_shade_color {{ index $colors "overlay0" }};
+@define-color card_bg_color {{ $t.ext.surface0 }};
+@define-color card_fg_color {{ $t.ext.text }};
+@define-color card_shade_color {{ $t.ext.overlay0 }};
 
-@define-color dialog_bg_color {{ index $colors "base" }};
-@define-color dialog_fg_color {{ index $colors "text" }};
+@define-color dialog_bg_color {{ $t.ext.base }};
+@define-color dialog_fg_color {{ $t.ext.text }};
 
-@define-color popover_bg_color {{ index $colors "surface0" }};
-@define-color popover_fg_color {{ index $colors "text" }};
+@define-color popover_bg_color {{ $t.ext.surface0 }};
+@define-color popover_fg_color {{ $t.ext.text }};
 
-@define-color thumbnail_bg_color {{ index $colors "surface0" }};
-@define-color thumbnail_fg_color {{ index $colors "text" }};
+@define-color thumbnail_bg_color {{ $t.ext.surface0 }};
+@define-color thumbnail_fg_color {{ $t.ext.text }};
 
-@define-color shade_color {{ index $colors "crust" }};
-@define-color scrollbar_outline_color {{ index $colors "overlay0" }};
+@define-color shade_color {{ $t.ext.crust }};
+@define-color scrollbar_outline_color {{ $t.ext.overlay0 }};
 
 /* Terminal colors support */
 .terminal-screen {
-  background-color: {{ index $colors "base" }};
-  color: {{ index $colors "text" }};
+  background-color: {{ $t.ext.base }};
+  color: {{ $t.ext.text }};
 }
 
 /* Sidebar styling */
 .sidebar {
-  background-color: {{ index $colors "mantle" }};
-  color: {{ index $colors "text" }};
+  background-color: {{ $t.ext.mantle }};
+  color: {{ $t.ext.text }};
 }
 
 .sidebar:backdrop {
-  background-color: {{ index $colors "base" }};
+  background-color: {{ $t.ext.base }};
 }
 
 /* Notebook tabs */
 notebook > header {
-  background-color: {{ index $colors "mantle" }};
-  border-color: {{ index $colors "surface0" }};
+  background-color: {{ $t.ext.mantle }};
+  border-color: {{ $t.ext.surface0 }};
 }
 
 notebook > header > tabs > tab {
-  background-color: {{ index $colors "surface0" }};
-  color: {{ index $colors "subtext1" }};
-  border-color: {{ index $colors "overlay0" }};
+  background-color: {{ $t.ext.surface0 }};
+  color: {{ $t.ext.subtext1 }};
+  border-color: {{ $t.ext.overlay0 }};
 }
 
 notebook > header > tabs > tab:checked {
-  background-color: {{ index $colors "blue" }};
-  color: {{ index $colors "base" }};
+  background-color: {{ $t.ext.blue }};
+  color: {{ $t.ext.base }};
 }
 
 /* Custom scrollbar */
@@ -214,18 +93,18 @@ scrollbar {
 }
 
 scrollbar slider {
-  background-color: {{ index $colors "overlay0" }};
+  background-color: {{ $t.ext.overlay0 }};
   border-radius: 6px;
   min-width: 6px;
   min-height: 6px;
 }
 
 scrollbar slider:hover {
-  background-color: {{ index $colors "overlay1" }};
+  background-color: {{ $t.ext.overlay1 }};
 }
 
 scrollbar slider:active {
-  background-color: {{ index $colors "overlay2" }};
+  background-color: {{ $t.ext.overlay2 }};
 }
 
 {{- end }}
@@ -265,7 +144,7 @@ entry {
 }
 
 entry:focus {
-  box-shadow: 0 0 0 2px {{ if hasPrefix $theme "catppuccin-" }}{{ index $colors "blue" }}{{ else }}#3584e4{{ end }};
+  box-shadow: 0 0 0 2px {{ $t.ui.accent }};
   transform: scale(1.02);
 }
 

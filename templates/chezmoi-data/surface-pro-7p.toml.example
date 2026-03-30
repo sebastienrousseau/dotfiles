@@ -1,0 +1,21 @@
+profile = "laptop"
+host_id = "surface-pro-7p"
+host_class = "linux-tablet"
+
+[features]
+gui = true
+linux_desktop = true
+niri = true
+waybar = true
+fuzzel = true
+mako = true
+foot = true
+kanshi = true
+touch = true
+t2 = false
+surface = true
+
+[monitors]
+internal = true
+scale = 1.5
+rotation = "normal"

@@ -193,54 +193,66 @@ apply_catppuccin_theme() {
 # Function to apply wallpaper
 apply_wallpaper() {
   local theme="$1"
-  local wallpaper_path=""
+  local wallpaper_dir="${DOTFILES_WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
+  local mode="light"
 
-  # Check for system wallpapers first
-  if [ -d "/usr/share/backgrounds/catppuccin" ]; then
-    case "$theme" in
-      catppuccin-latte)
-        wallpaper_path="/usr/share/backgrounds/catppuccin/cat_latte.png"
-        ;;
-      catppuccin-frappe)
-        wallpaper_path="/usr/share/backgrounds/catppuccin/cat_frappe.png"
-        ;;
-      catppuccin-macchiato)
-        wallpaper_path="/usr/share/backgrounds/catppuccin/cat_macchiato.png"
-        ;;
-      catppuccin-mocha)
-        wallpaper_path="/usr/share/backgrounds/catppuccin/cat_mocha.png"
-        ;;
-    esac
+  # Determine light/dark from theme name
+  case "$theme" in
+    *-latte) mode="light" ;;
+    *-frappe | *-macchiato | *-mocha) mode="dark" ;;
+    *-light*) mode="light" ;;
+    *-dark* | *-night* | *-storm* | *-moon*) mode="dark" ;;
+  esac
+
+  # Pick a random wallpaper matching the mode from curated collection
+  local wp=""
+  if [ -d "$wallpaper_dir" ]; then
+    wp="$(find "$wallpaper_dir" -maxdepth 1 -type f -iname "*-${mode}.jpg" 2>/dev/null | shuf -n 1 || true)"
   fi
 
-  # Fallback to user wallpapers
-  if [ ! -f "$wallpaper_path" ] && [ -d "$HOME/.local/share/backgrounds/catppuccin" ]; then
+  # Fallback: check Catppuccin system/user wallpapers
+  if [ -z "$wp" ]; then
+    local cat_flavor=""
     case "$theme" in
-      catppuccin-latte)
-        wallpaper_path="$HOME/.local/share/backgrounds/catppuccin/cat_latte.png"
-        ;;
-      catppuccin-frappe)
-        wallpaper_path="$HOME/.local/share/backgrounds/catppuccin/cat_frappe.png"
-        ;;
-      catppuccin-macchiato)
-        wallpaper_path="$HOME/.local/share/backgrounds/catppuccin/cat_macchiato.png"
-        ;;
-      catppuccin-mocha)
-        wallpaper_path="$HOME/.local/share/backgrounds/catppuccin/cat_mocha.png"
-        ;;
+      catppuccin-latte) cat_flavor="latte" ;;
+      catppuccin-frappe) cat_flavor="frappe" ;;
+      catppuccin-macchiato) cat_flavor="macchiato" ;;
+      catppuccin-mocha) cat_flavor="mocha" ;;
     esac
+    if [ -n "$cat_flavor" ]; then
+      for dir in /usr/share/backgrounds/catppuccin "$HOME/.local/share/backgrounds/catppuccin"; do
+        if [ -f "$dir/cat_${cat_flavor}.png" ]; then
+          wp="$dir/cat_${cat_flavor}.png"
+          break
+        fi
+      done
+    fi
   fi
 
-  if [ -f "$wallpaper_path" ]; then
-    log "Setting wallpaper: $wallpaper_path"
-    gsettings set org.gnome.desktop.background picture-uri "file://$wallpaper_path"
-    gsettings set org.gnome.desktop.background picture-uri-dark "file://$wallpaper_path"
-    gsettings set org.gnome.desktop.screensaver picture-uri "file://$wallpaper_path"
-    success "Wallpaper set to Catppuccin theme wallpaper"
+  if [ -z "$wp" ]; then
+    warn "No ${mode} wallpapers found in $wallpaper_dir"
+    return
+  fi
+
+  log "Setting wallpaper: $wp"
+
+  # Set both light and dark URIs if we have a pair
+  local base="${wp%-${mode}.jpg}"
+  local light_wp="${base}-light.jpg"
+  local dark_wp="${base}-dark.jpg"
+
+  if [ -f "$light_wp" ] && [ -f "$dark_wp" ]; then
+    gsettings set org.gnome.desktop.background picture-uri "file://${light_wp}"
+    gsettings set org.gnome.desktop.background picture-uri-dark "file://${dark_wp}"
+    gsettings set org.gnome.desktop.screensaver picture-uri "file://${light_wp}"
   else
-    warn "Catppuccin wallpaper not found for theme: $theme"
-    log "Install wallpapers with: $HOME/.dotfiles/scripts/theme/install-catppuccin-themes.sh wallpapers"
+    gsettings set org.gnome.desktop.background picture-uri "file://$wp"
+    gsettings set org.gnome.desktop.background picture-uri-dark "file://$wp"
+    gsettings set org.gnome.desktop.screensaver picture-uri "file://$wp"
   fi
+  gsettings set org.gnome.desktop.background picture-options "zoom"
+
+  success "Wallpaper set (${mode}): $(basename "$wp")"
 }
 
 # Function to backup current settings

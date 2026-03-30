@@ -64,6 +64,24 @@ nix/**
 .config/i3/**
 .config/fontconfig
 .config/fontconfig/**
+# Wayland / Linux desktop
+.config/niri
+.config/niri/**
+.config/foot
+.config/foot/**
+.config/fuzzel
+.config/fuzzel/**
+.config/kanshi
+.config/kanshi/**
+.config/mako
+.config/mako/**
+.config/environment.d
+.config/environment.d/**
+.config/systemd
+.config/systemd/**
+.local/bin/start-niri
+.local/share/wayland-sessions
+.local/share/wayland-sessions/**
 {{- end }}
 
 {{- if eq .chezmoi.os "linux" }}
@@ -77,4 +95,33 @@ Library/**
 .config/duti/**
 .config/raycast
 .config/raycast/**
+{{- end }}
+
+# Feature-gated Linux desktop configs
+{{- if not .features.foot }}
+.config/foot
+.config/foot/**
+{{- end }}
+{{- if not .features.fuzzel }}
+.config/fuzzel
+.config/fuzzel/**
+{{- end }}
+{{- if not .features.kanshi }}
+.config/kanshi
+.config/kanshi/**
+{{- end }}
+{{- if not .features.niri }}
+.config/niri
+.config/niri/**
+.local/bin/start-niri
+.local/share/wayland-sessions
+.local/share/wayland-sessions/**
+{{- end }}
+{{- if not .features.linux_desktop }}
+.config/environment.d
+.config/environment.d/**
+.config/systemd
+.config/systemd/**
+.config/mako
+.config/mako/**
 {{- end }}

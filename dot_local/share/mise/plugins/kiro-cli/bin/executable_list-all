@@ -1,3 +1,13 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+set -euo pipefail
+
+if [[ "$(uname -s)" == "Darwin" ]] && command -v brew >/dev/null 2>&1; then
+  version="$(brew info --cask --json=v2 kiro-cli 2>/dev/null | sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+  if [[ -n "${version:-}" ]]; then
+    printf '%s\n' "$version"
+    exit 0
+  fi
+fi
+
 echo "1.27.0 1.27.1"

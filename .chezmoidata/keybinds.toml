@@ -1,0 +1,113 @@
+# ============================================================================
+# Keybind Conflict Resolution Matrix
+# ============================================================================
+# Modifier Hierarchy (no collisions by contract):
+#   Super (Mod)  -> Niri (compositor-level window/workspace management)
+#   Alt          -> Niri (window switching: Alt+Tab, Alt+grave)
+#   Ctrl+a       -> Tmux prefix (multiplexer-level pane/window/session)
+#   Ctrl+{h,j,k,l} -> Smart nav (Tmux pane OR Neovim split, auto-detected)
+#   Ctrl+{c,v,t,w,n,q} -> Ghostty (terminal-level, Linux Mac-style via keyd)
+#   Space (leader) -> Neovim (editor-level)
+#
+# Platform Note:
+#   macOS: Cmd maps to Super. Ghostty uses cmd+* shortcuts natively.
+#   Linux: keyd remaps physical Cmd -> Ctrl. Ghostty uses ctrl+* shortcuts.
+
+[keybinds.hierarchy]
+compositor = "Super"
+window_switch = "Alt"
+terminal = "Ctrl (Linux) / Cmd (macOS)"
+multiplexer = "Ctrl+a (prefix)"
+smart_nav = "Ctrl+{h,j,k,l}"
+editor = "Space (leader)"
+
+# Layer: Niri (Compositor)
+[keybinds.niri]
+# Window switching (defined in config.kdl.tmpl recent-windows section)
+alt_tab = "next-window scope=output"
+alt_shift_tab = "previous-window scope=output"
+alt_grave = "next-window filter=app-id"
+alt_shift_grave = "previous-window filter=app-id"
+# Super+* binds are in dms/binds.kdl (external to repo)
+
+# Layer: Ghostty (Terminal)
+[keybinds.ghostty.linux]
+ctrl_c = "copy_to_clipboard (if selected) / SIGINT"
+ctrl_v = "paste_from_clipboard"
+ctrl_t = "new_tab"
+ctrl_w = "close_surface"
+ctrl_n = "new_window"
+ctrl_q = "quit"
+ctrl_shift_comma = "reload_config"
+ctrl_shift_lbracket = "previous_tab"
+ctrl_shift_rbracket = "next_tab"
+ctrl_equal = "increase_font_size"
+ctrl_minus = "decrease_font_size"
+ctrl_zero = "reset_font_size"
+ctrl_k = "clear_screen"
+
+[keybinds.ghostty.macos]
+cmd_shift_comma = "reload_config"
+opt_super_left = "previous_tab"
+opt_super_right = "next_tab"
+
+# Layer: Tmux (Multiplexer) -- all behind Ctrl+a prefix
+[keybinds.tmux]
+prefix = "Ctrl+a"
+reload = "prefix r"
+copy_mode = "prefix ["
+# Navigation (seamless with Neovim)
+smart_left = "Ctrl+h"
+smart_down = "Ctrl+j"
+smart_up = "Ctrl+k"
+smart_right = "Ctrl+l"
+# Window management
+prev_window = "prefix Ctrl+h"
+next_window = "prefix Ctrl+l"
+last_window = "prefix a / prefix Tab"
+new_window = "prefix N"
+rename_window = "prefix R"
+kill_window = "prefix X"
+# Pane management
+split_horizontal = 'prefix %  /  prefix |'
+split_vertical = 'prefix "  /  prefix \\'
+resize_left = "prefix H"
+resize_down = "prefix J"
+resize_up = "prefix K"
+resize_right = "prefix L"
+swap_up = "prefix <"
+swap_down = "prefix >"
+kill_pane = "prefix q"
+sync_panes = "prefix S"
+# Session
+new_session = "prefix Ctrl+c"
+find_session = "prefix Ctrl+f"
+sessionizer = "prefix f"
+
+# Layer: Neovim (Editor) -- all behind Space leader
+[keybinds.nvim]
+leader = "Space"
+# Navigation (seamless with Tmux)
+window_left = "Ctrl+h"
+window_down = "Ctrl+j"
+window_up = "Ctrl+k"
+window_right = "Ctrl+l"
+buf_prev = "Shift+h / [b"
+buf_next = "Shift+l / ]b"
+# Find
+find_files = "leader ff"
+find_grep = "leader fg"
+find_buffers = "leader fb"
+find_projects = "leader fp"
+# Code
+code_actions = "leader ca"
+code_rename = "leader cr"
+symbols_outline = "leader cs"
+# Explorer
+toggle_tree = "leader e"
+# Terminal
+toggle_terminal = "leader tt"
+# Python
+python_run = "leader pr"
+python_venv = "leader pi"
+python_test = "leader pt"
