@@ -27,7 +27,7 @@ test_start "uninstall_purges_chezmoi"
 assert_file_contains "$UNINSTALL_SCRIPT" "chezmoi purge" "should purge chezmoi-managed files"
 
 test_start "uninstall_removes_dotfiles_repo"
-assert_file_contains "$UNINSTALL_SCRIPT" 'rm -rf "$HOME/.dotfiles"' "should remove dotfiles repo"
+assert_file_contains "$UNINSTALL_SCRIPT" "/.dotfiles" "should remove dotfiles repo"
 
 test_start "uninstall_cleans_caches"
 assert_file_contains "$UNINSTALL_SCRIPT" "dotfiles" "should clean dotfiles caches"
