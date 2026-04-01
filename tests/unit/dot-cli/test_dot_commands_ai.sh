@@ -29,7 +29,6 @@ assert_file_contains "$AI_SCRIPT" "--pattern" "should handle pattern flag"
 
 test_start "ai_status_lists_new_providers"
 assert_file_contains "$AI_SCRIPT" "Copilot CLI|copilot|GitHub Copilot CLI" "should list Copilot CLI"
-assert_file_contains "$AI_SCRIPT" "Cline CLI|cline|Terminal coding agent" "should list Cline CLI"
 
 test_start "ai_status_has_grouped_sections"
 assert_file_contains "$AI_SCRIPT" "Agents (autonomous)" "should group agents"

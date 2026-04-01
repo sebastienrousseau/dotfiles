@@ -168,7 +168,7 @@ fi
 
 # --- AI CLIs ---
 _section "AI CLIs"
-for cmd in claude copilot cline gemini sgpt ollama opencode aider kiro-cli; do
+for cmd in claude copilot gemini sgpt ollama opencode aider kiro-cli; do
   if check_cmd "$cmd"; then
     _ok "$cmd" "$(pretty_path "$(get_cmd_path "$cmd")")"
   else

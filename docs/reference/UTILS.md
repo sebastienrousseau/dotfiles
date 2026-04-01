@@ -106,7 +106,6 @@ POSIX scripts in `~/.local/bin/` that work across macOS, Linux, and WSL.
 |---------|-------------|
 | `dot cl` | Invoke Claude Code with dotfiles context injection |
 | `dot copilot` | Invoke GitHub Copilot CLI with dotfiles context injection |
-| `dot cline` | Invoke Cline CLI with dotfiles context injection |
 | `dot gemini` | Invoke Gemini CLI with dotfiles context injection |
 | `dot kiro` | Invoke Kiro CLI with dotfiles context injection |
 | `dot sgpt` | Invoke Shell-GPT with dotfiles context injection |

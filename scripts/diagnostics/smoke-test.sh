@@ -76,7 +76,6 @@ verify_cmd "pueue" "pueue"
 export OPENAI_API_KEY="sk-placeholder-for-testing"
 verify_cmd "sgpt" "ShellGPT"
 verify_cmd "copilot" "copilot"
-verify_cmd "cline" "cline"
 verify_cmd "kiro-cli" "kiro-cli"
 
 echo ""

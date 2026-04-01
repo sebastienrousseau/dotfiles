@@ -25,7 +25,7 @@ Use the `dot` CLI to invoke AI tools with automated context:
 
 ```bash
 # General usage
-dot cl|copilot|cline|gemini|kiro|sgpt|ollama|opencode|aider --pattern <name> "prompt"
+dot cl|copilot|gemini|kiro|sgpt|ollama|opencode|aider|autohand|vibe|qwen|zai --pattern <name> "prompt"
 
 # Quick aliases
 dcla "Optimize my zshrc"      # Claude + Architect
@@ -41,13 +41,16 @@ Supported bridge commands:
 |---------|----------|
 | `dot cl` | Claude Code |
 | `dot copilot` | GitHub Copilot CLI |
-| `dot cline` | Cline CLI |
 | `dot gemini` | Gemini CLI |
 | `dot kiro` | Kiro CLI |
 | `dot sgpt` | Shell-GPT |
 | `dot ollama` | Ollama |
 | `dot opencode` | OpenCode |
 | `dot aider` | Aider |
+| `dot autohand` | Autohand Code |
+| `dot vibe` | Mistral Vibe |
+| `dot qwen` | Qwen Code |
+| `dot zai` | ZAI (Zhipu AI) |
 
 ### `dot ai` status and launcher
 
@@ -75,10 +78,11 @@ Related AI commands:
 
 These tools aren't installed automatically. Install only what you want:
 
-- **Agents**: `claude`, `copilot`, `cline`
+- **Agents**: `claude`, `copilot`
 - **Coding assistants**: `aider`, `opencode`
 - **General AI**: `gemini`, `sgpt`
 - **Local-first**: `ollama`
+- **Coding agents**: `autohand`, `vibe`, `qwen`, `zai`
 - **Cloud / platform**: `kiro-cli`
 
 After installation, the dotfiles can surface basic helper functions and shortcuts, but only when `DOTFILES_AI=1` is set.

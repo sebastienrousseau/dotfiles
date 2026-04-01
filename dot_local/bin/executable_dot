@@ -211,7 +211,6 @@ AI|mode|Set or inspect agent operating profiles (ask/plan/apply/audit)|Bounded-a
 AI|agent|Profile-aware execution, agent card, a2a-card, session log, checkpoints, and conformance|Agent metadata and local audit trail.
 AI|cl|Claude CLI with context patterns|Context-aware Anthropic bridge.
 AI|copilot|GitHub Copilot CLI with context patterns|Context-aware Copilot bridge.
-AI|cline|Cline CLI with context patterns|Context-aware Cline bridge.
 AI|gemini|Gemini CLI with context patterns|Context-aware Gemini bridge.
 AI|kiro|Kiro CLI with context patterns|Context-aware Kiro bridge.
 AI|sgpt|Shell-GPT with context patterns|Context-aware Shell-GPT bridge.
