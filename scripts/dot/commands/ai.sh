@@ -293,7 +293,8 @@ run_ai_with_context() {
   fi
 
   # Inject dynamic system metadata
-  local metadata="## System Metadata
+  local metadata
+  metadata="## System Metadata
 - OS: $(uname -s) $(uname -r)
 - Arch: $(uname -m)
 - Date: $(date -u)"
