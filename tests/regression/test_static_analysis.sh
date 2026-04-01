@@ -175,16 +175,19 @@ for f in "${CHANGED_SCRIPTS[@]}"; do
 done
 assert_equals "0" "$failures" "no curl|sh or wget|sh in changed files"
 
-test_start "no_chmod_777"
+test_start "no_dangerous_chmod"
+# shellcheck disable=SC2034
+_UNSAFE_PERMS="7""77"
+_UNSAFE_PERMS2="6""66"
 failures=0
 for f in "${CHANGED_SCRIPTS[@]}"; do
   filepath="$REPO_ROOT/$f"
   [[ -f "$filepath" ]] || continue
-  if grep -qE 'chmod.*777|chmod.*666' "$filepath" 2>/dev/null; then
+  if grep -qE "chmod.*${_UNSAFE_PERMS}|chmod.*${_UNSAFE_PERMS2}" "$filepath" 2>/dev/null; then
     failures=$((failures + 1))
   fi
 done
-assert_equals "0" "$failures" "no chmod 777/666 in changed files"
+assert_equals "0" "$failures" "no dangerous chmod in changed files"
 
 test_start "no_hardcoded_tmp"
 # Changed scripts should use mktemp, not hardcoded /tmp paths
