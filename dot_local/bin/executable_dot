@@ -565,9 +565,15 @@ case "$route" in
     show_version
     ;;
 
+  # User-provided custom commands
   *)
-    ui_fail "Unknown command: $COMMAND"
-    ui_info "Hint" "Try 'dot help' for usage"
-    exit 1
+    _user_cmd="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/commands/${COMMAND}.sh"
+    if [[ -f "$_user_cmd" ]]; then
+      source "$_user_cmd" "$@"
+    else
+      echo "Unknown command: ${COMMAND:-}" >&2
+      echo "Run 'dot help' for available commands." >&2
+      exit 1
+    fi
     ;;
 esac

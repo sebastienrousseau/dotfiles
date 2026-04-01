@@ -42,7 +42,7 @@ caffeine_detect_os() {
   esac
 }
 
-OS=$(caffeine_detect_os)
+CAFFEINE_OS=$(caffeine_detect_os)
 
 # Ensure config directory exists
 caffeine_ensure_config_dir() {
@@ -101,7 +101,7 @@ caffeine_start_daemon() {
   fi
 
   # Start daemon based on OS
-  case "$OS" in
+  case "$CAFFEINE_OS" in
     macos)
       # Daemon isn't needed on macOS as we can use caffeinate directly
       caffeine_log_info "Using native caffeinate on macOS - no separate daemon needed"
@@ -223,7 +223,7 @@ caffeine_check_active() {
   fi
 
   # For macOS, check if the process is still running
-  if [[ "$OS" == "macos" ]]; then
+  if [[ "$CAFFEINE_OS" == "macos" ]]; then
     local pid
     pid=$(cat "$CAFFEINE_STATEFILE" 2>/dev/null)
     if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
@@ -258,7 +258,7 @@ caffeine_start_caffeine() {
   fi
 
   # Start based on OS
-  case "$OS" in
+  case "$CAFFEINE_OS" in
     macos)
       # If an existing caffeinate process is running, kill it
       if [[ -f "$CAFFEINE_STATEFILE" ]]; then
@@ -301,7 +301,7 @@ caffeine_start_caffeine() {
 # Stop keeping screen awake
 caffeine_stop_caffeine() {
   # Check if caffeine is active
-  case "$OS" in
+  case "$CAFFEINE_OS" in
     macos)
       if [[ -f "$CAFFEINE_STATEFILE" ]]; then
         local pid
@@ -377,7 +377,7 @@ caffeine_show_diagnostic() {
   echo "Caffeine Diagnostic Information"
   echo "==============================="
   echo "Version: $CAFFEINE_VERSION"
-  echo "Operating System: $OS"
+  echo "Operating System: $CAFFEINE_OS"
   echo "Config Directory: $CAFFEINE_CONFIG_DIR"
 
   echo -n "Daemon Status: "
@@ -391,7 +391,7 @@ caffeine_show_diagnostic() {
 
   echo -n "Caffeine State: "
   if caffeine_check_active; then
-    case "$OS" in
+    case "$CAFFEINE_OS" in
       macos)
         local pid
         pid=$(cat "$CAFFEINE_STATEFILE" 2>/dev/null)
@@ -406,7 +406,7 @@ caffeine_show_diagnostic() {
   fi
 
   echo "Dependencies:"
-  case "$OS" in
+  case "$CAFFEINE_OS" in
     macos)
       echo "  caffeinate: $(command -v /usr/bin/caffeinate &>/dev/null && echo "Found" || echo "Not Found")"
       ;;

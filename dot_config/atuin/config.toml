@@ -27,6 +27,11 @@ history_filter = [
   "^export (SECRET|TOKEN|PASSWORD|API_KEY|AWS_)",
   "^PASSWORD=",
   "^ssh-keygen",
+  "^(aws|gcloud|az|kubectl).*(configure|auth|login|-k |--kubeconfig)",
+  "curl.*-H.*[Aa]uthorization",
+  "git clone.*https://.*:.*@",
+  "^vault ",
+  "^op (read|inject|run)",
 ]
 
 # Skip ephemeral directories

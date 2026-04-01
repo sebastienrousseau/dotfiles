@@ -1,67 +1,58 @@
-# Feature Flags
+# Feature Flags Reference
 
-Feature flags control which components chezmoi deploys. They're defined in
-`.chezmoidata.toml` and evaluated at template processing time — there's no
-runtime overhead.
+All feature flags are defined in `.chezmoidata.toml` under `[features]`.
 
-## Configuration
+## Shell & Terminal
 
-All flags live in `.chezmoidata.toml`. If a flag isn't set, it defaults to
-`true` so everything works out of the box.
+| Flag | Default | Description |
+|------|---------|-------------|
+| `alias_wrapper` | `false` | Enable alias governance wrapper (confirms destructive aliases) |
+| `dms` | `true` | Dank Material Shell theming for GNOME |
+| `zellij` | `false` | Enable Zellij terminal multiplexer config |
 
-```toml
-[features]
-zsh = true
-nvim = true
-tmux = true
-```
+## Linux Desktop
 
-## Available Flags
+| Flag | Default | Description |
+|------|---------|-------------|
+| `linux_desktop` | `false` | Enable full Linux desktop environment configs |
+| `niri` | `false` | Niri Wayland compositor config |
+| `waybar` | `false` | Waybar status bar config |
+| `fuzzel` | `false` | Fuzzel application launcher config |
+| `mako` | `false` | Mako notification daemon config |
+| `foot` | `false` | Foot terminal emulator config |
+| `kanshi` | `false` | Kanshi display manager config |
 
-| Flag | Default | Purpose |
-|------|---------|---------|
-| `zsh` | `true` | Zsh shell configuration and optimizations |
-| `fish` | `true` | Fish shell configuration |
-| `nushell` | `true` | Nushell for structured data pipelines |
-| `starship` | `true` | Starship cross-shell prompt |
-| `nvim` | `true` | Neovim editor configuration and plugins |
-| `tmux` | `true` | Tmux terminal multiplexer |
-| `zellij` | `false` | Zellij terminal workspace |
-| `alias_wrapper` | `false` | Safety wrappers for destructive commands |
+## Hardware
 
-## Validation
+| Flag | Default | Description |
+|------|---------|-------------|
+| `touch` | `false` | Enable touchscreen support (gestures, on-screen keyboard) |
+| `t2` | `false` | Apple T2 security chip handling |
+| `surface` | `false` | Microsoft Surface hardware support |
 
-The `dot` CLI provides commands for system validation:
+## Tool Selection
 
-- **`dot health`** — comprehensive diagnostic across paths, files, and dependencies
-- **`dot smoke-test`** — verifies that core toolchains (Rust, Go, AI) are functional
-- **`dot chaos`** — (destructive) corrupts configs to test self-healing via `dot heal`
+| Setting | Default | Options |
+|---------|---------|---------|
+| `node_manager` | `mise` | `mise`, `fnm`, `nvm` |
 
-## Structured Logging
+## Alias Policy
 
-Set `export DOTFILES_JSON_LOG=1` to enable JSON-structured output for all
-bootstrap and provisioning events.
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `aliases.buckets.system` | `true` | Enable system utility aliases |
+| `aliases.buckets.svn` | `true` | Enable SVN aliases |
+| `aliases.policy.strict_mode` | `false` | Require confirmation for destructive aliases (rm, mv) |
 
-## Modifying Flags
+## Toggling Features
 
-Edit `.chezmoidata.toml` and apply:
-
-```toml
-[features]
-tmux = false    # disable tmux configuration
-zellij = true   # enable zellij instead
-```
+Edit `.chezmoidata.toml` in the repo, or override per-machine in `~/.config/chezmoi/chezmoi.toml`:
 
 ```bash
-chezmoi apply
-```
-
-### Per-Machine Overrides
-
-You can override flags on a specific machine in
-`~/.config/chezmoi/chezmoi.toml`:
-
-```toml
+# In ~/.config/chezmoi/chezmoi.toml
 [data.features]
-gui = false  # disable GUI on this machine
+zellij = true
+linux_desktop = true
 ```
+
+Then apply: `dot apply`

@@ -57,6 +57,13 @@ zoxide = "latest"
 "aqua:ollama/ollama" = "latest"
 "aqua:Nukesor/pueue/pueue" = "4.0.4"
 "aqua:Nukesor/pueue/pueued" = "4.0.4"
+"aqua:dandavison/delta" = "latest"
+fd = "latest"
+"aqua:bootandy/dust" = "latest"
+"aqua:ClementTsang/bottom" = "latest"
+"npm:tldr" = "latest"
+"aqua:jesseduffield/lazygit" = "latest"
+"aqua:jesseduffield/lazydocker" = "latest"
 
 # Python tools
 "pipx:poetry" = "latest"

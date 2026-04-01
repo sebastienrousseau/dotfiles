@@ -23,13 +23,14 @@
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
 ```
 
-Then verify:
+Then verify and explore:
 
 ```bash
-dot doctor
+dot doctor        # verify installation
+dot learn         # interactive tour of your new dotfiles
 ```
 
-Requires `git` and `curl`. Works on macOS, Ubuntu/Debian, Arch, and WSL2.
+Requires `git` and `curl`. Works on macOS, Ubuntu/Debian, Arch, WSL2, and GitHub Codespaces.
 
 <details>
 <summary>CI/CD and Docker options</summary>
@@ -114,6 +115,20 @@ graph TD
 | `dot bundle` | Produce a portable support or recovery archive |
 
 Full reference: [docs/reference/UTILS.md](docs/reference/UTILS.md)
+
+---
+
+## First 5 Minutes
+
+After installation:
+
+1. **Verify** — `dot doctor` checks tools, paths, and security posture
+2. **Explore** — `dot learn` walks through shell, secrets, themes, and performance
+3. **Customize** — edit `~/.config/chezmoi/chezmoi.toml` for per-machine overrides ([Profiles](docs/reference/PROFILES.md))
+4. **Toggle features** — enable/disable capabilities in `.chezmoidata.toml` ([Feature Flags](docs/reference/FEATURES.md))
+5. **Apply** — `dot apply` converges the machine; `dot prewarm` caches shell init
+
+See [Migration Guide](docs/operations/MIGRATION.md) for upgrades between versions.
 
 ---
 

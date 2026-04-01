@@ -64,7 +64,7 @@ fi
 {{- end }}
 {{- /* When node_manager = "mise", Node.js is handled by mise activate in dot_zshrc.tmpl */}}
 
-# Tool completions — generate once into ZSH_COMPLETIONS_DIR
+# Completions: pre-warmed by `dot prewarm`, generated on-demand as fallback
 if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]]; then
   [[ ! -f "${ZSH_COMPLETIONS_DIR}/_gh" ]] && command -v gh >/dev/null &&
     command gh completion -s zsh >| "${ZSH_COMPLETIONS_DIR}/_gh"

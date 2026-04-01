@@ -486,8 +486,9 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [[ $time_ms -gt 500 ]]; then
-            echo "::warning::Shell startup ${time_ms}ms exceeds 500ms target"
+            echo "::error::Shell startup ${time_ms}ms exceeds 500ms threshold — performance regression"
             echo "⚠️ **Performance regression detected**: ${time_ms}ms exceeds 500ms threshold" >> $GITHUB_STEP_SUMMARY
+            exit 1
           else
             echo "✅ **Performance OK**: ${time_ms}ms is within 500ms threshold" >> $GITHUB_STEP_SUMMARY
           fi

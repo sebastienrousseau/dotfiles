@@ -255,6 +255,14 @@ if [[ "${DOTFILES_POST_APPLY_REPAIR:-1}" = "1" ]]; then
   fi
 fi
 
+if [[ "${DOTFILES_PREWARM_ON_APPLY:-1}" = "1" ]]; then
+  prewarm_script="$SCRIPT_DIR/prewarm.sh"
+  if [[ -f "$prewarm_script" ]]; then
+    printf "\n"
+    run_step "Pre-warming shell caches" bash "$prewarm_script"
+  fi
+fi
+
 printf "\n"
 _apply_end=$(date +%s)
 dot_log info "apply_end" "duration_s=$((_apply_end - _apply_start))"

@@ -129,6 +129,12 @@ if command -v zai &>/dev/null; then
   alias zar='zai run'
 fi
 
+# Ghost text / inline suggestions
+if command -v ghost &>/dev/null; then
+  alias gt='ghost'
+  alias gts='ghost suggest'
+fi
+
 # ai_core wrapper (fast query shortcut)
 if command -v ai_core &>/dev/null; then
   if ! alias a >/dev/null 2>&1; then
