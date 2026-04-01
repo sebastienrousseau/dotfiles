@@ -197,9 +197,12 @@ cmd_ai_status() {
         pkg=$(_ai_mise_pkg "$bin")
         if [[ -n "$pkg" ]]; then
           if has_command gum; then
-            gum spin --spinner dot --title "Installing $name ($pkg)" -- \
-              mise use -g "$pkg@latest" 2>&1 && ui_ok "$name" "installed" ||
+            if gum spin --spinner dot --title "Installing $name ($pkg)" -- \
+              mise use -g "$pkg@latest" 2>&1; then
+              ui_ok "$name" "installed"
+            else
               ui_warn "$name" "install failed (continuing)"
+            fi
           else
             ui_info "Installing" "$name via mise ($pkg)"
             mise use -g "$pkg@latest" 2>&1 || ui_warn "$name" "install failed (continuing)"

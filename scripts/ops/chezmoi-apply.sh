@@ -219,9 +219,12 @@ if [[ ${#_ai_missing[@]} -gt 0 ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]
       for _entry in "${_ai_to_install[@]}"; do
         IFS='|' read -r _bin _pkg _label <<<"$_entry"
         if command -v gum &>/dev/null; then
-          gum spin --spinner dot --title "Installing $_label ($_pkg)" -- \
-            mise use -g "$_pkg@latest" 2>&1 && ui_ok "$_label" "installed" ||
+          if gum spin --spinner dot --title "Installing $_label ($_pkg)" -- \
+            mise use -g "$_pkg@latest" 2>&1; then
+            ui_ok "$_label" "installed"
+          else
             ui_warn "$_label" "install failed (continuing)"
+          fi
         else
           ui_info "Installing" "$_label via mise ($_pkg)"
           mise use -g "$_pkg@latest" 2>&1 || ui_warn "$_label" "install failed (continuing)"
