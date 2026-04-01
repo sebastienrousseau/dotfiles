@@ -51,10 +51,9 @@ function _dotfiles_async_init
     if command -v fzf >/dev/null
         _cached_eval fzf --fish
     end
-    # Carapace completions
+    # Carapace completions (cached)
     if command -v carapace >/dev/null 2>&1
-        mkdir -p ~/.config/fish/completions
-        carapace _carapace fish | source
+        _cached_eval carapace _carapace fish
     end
     # Pueue daemon (deferred here to avoid blocking shell startup)
     if command -v pueue >/dev/null; and not pueue status >/dev/null 2>&1

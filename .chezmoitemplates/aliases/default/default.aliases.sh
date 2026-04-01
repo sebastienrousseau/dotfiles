@@ -99,13 +99,28 @@ set_default_aliases() {
   # Reload the shell.
   alias reload='exec $SHELL -l'
 
-  # WSL clipboard bridge (only when native macOS clipboard tools are absent).
-  if [[ "${OSTYPE:-}" == linux* ]] && command -v clip.exe >/dev/null 2>&1; then
+  # Cross-platform clipboard unification (pbcopy/pbpaste everywhere)
+  if [[ "${OSTYPE:-}" == linux* ]]; then
     if ! command -v pbcopy >/dev/null 2>&1; then
-      pbcopy() { clip.exe; }
-    fi
-    if ! command -v pbpaste >/dev/null 2>&1 && command -v powershell.exe >/dev/null 2>&1; then
-      pbpaste() { powershell.exe -NoProfile -Command "Get-Clipboard" | tr -d '\r'; }
+      if command -v wl-copy >/dev/null 2>&1; then
+        # Wayland
+        pbcopy() { wl-copy "$@"; }
+        pbpaste() { wl-paste "$@"; }
+      elif command -v xclip >/dev/null 2>&1; then
+        # X11
+        pbcopy() { xclip -selection clipboard "$@"; }
+        pbpaste() { xclip -selection clipboard -o "$@"; }
+      elif command -v xsel >/dev/null 2>&1; then
+        # X11 (fallback)
+        pbcopy() { xsel --clipboard --input "$@"; }
+        pbpaste() { xsel --clipboard --output "$@"; }
+      elif command -v clip.exe >/dev/null 2>&1; then
+        # WSL
+        pbcopy() { clip.exe; }
+        if command -v powershell.exe >/dev/null 2>&1; then
+          pbpaste() { powershell.exe -NoProfile -Command "Get-Clipboard" | tr -d '\r'; }
+        fi
+      fi
     fi
   fi
 
