@@ -77,22 +77,22 @@ _ai_get_cached_status() {
   cat "$AI_STATUS_CACHE_FILE"
 }
 
-  # binary -> mise package mapping
+# binary -> mise package mapping
 _ai_mise_pkg() {
   case "$1" in
-    claude)   echo "npm:@anthropic-ai/claude-code" ;;
-    copilot)  echo "npm:@github/copilot" ;;
-    aider)    echo "pipx:aider-chat" ;;
+    claude) echo "npm:@anthropic-ai/claude-code" ;;
+    copilot) echo "npm:@github/copilot" ;;
+    aider) echo "pipx:aider-chat" ;;
     opencode) echo "npm:opencode-ai" ;;
-    sgpt)     echo "pipx:shell-gpt" ;;
-    gemini)   echo "npm:@google/gemini-cli" ;;
-    ollama)   echo "aqua:ollama/ollama" ;;
+    sgpt) echo "pipx:shell-gpt" ;;
+    gemini) echo "npm:@google/gemini-cli" ;;
+    ollama) echo "aqua:ollama/ollama" ;;
     kiro-cli) echo "kiro-cli" ;;
     autohand) echo "npm:autohand-cli" ;;
-    vibe)     echo "pipx:mistral-vibe" ;;
-    qwen)     echo "npm:@qwen-code/qwen-code" ;;
-    zai)      echo "npm:@guizmo-ai/zai-cli" ;;
-    *)        echo "" ;;
+    vibe) echo "pipx:mistral-vibe" ;;
+    qwen) echo "npm:@qwen-code/qwen-code" ;;
+    zai) echo "npm:@guizmo-ai/zai-cli" ;;
+    *) echo "" ;;
   esac
 }
 
@@ -154,8 +154,8 @@ cmd_ai_status() {
     echo ""
     local _ai_install_action=""
     if has_command gum; then
-      _ai_install_action=$(printf '%s\n' "Install all" "Choose which to install" "Skip" \
-        | gum choose --header "Missing AI providers — install via mise?") || _ai_install_action=""
+      _ai_install_action=$(printf '%s\n' "Install all" "Choose which to install" "Skip" |
+        gum choose --header "Missing AI providers — install via mise?") || _ai_install_action=""
     else
       ui_info "Tip" "Install missing providers: mise install"
       ui_info "Tip" "Or individually: mise use -g <package>@latest"
@@ -173,8 +173,8 @@ cmd_ai_status() {
           _ai_pick_choices+=("$name")
         done
         local _ai_picked
-        _ai_picked=$(printf '%s\n' "${_ai_pick_choices[@]}" \
-          | gum choose --no-limit --header "Select providers to install (Space to toggle, Enter to confirm)") || _ai_picked=""
+        _ai_picked=$(printf '%s\n' "${_ai_pick_choices[@]}" |
+          gum choose --no-limit --header "Select providers to install (Space to toggle, Enter to confirm)") || _ai_picked=""
         if [[ -n "$_ai_picked" ]]; then
           while IFS= read -r selected; do
             [[ -z "$selected" ]] && continue
@@ -198,8 +198,8 @@ cmd_ai_status() {
         if [[ -n "$pkg" ]]; then
           if has_command gum; then
             gum spin --spinner dot --title "Installing $name ($pkg)" -- \
-              mise use -g "$pkg@latest" 2>&1 && ui_ok "$name" "installed" \
-              || ui_warn "$name" "install failed (continuing)"
+              mise use -g "$pkg@latest" 2>&1 && ui_ok "$name" "installed" ||
+              ui_warn "$name" "install failed (continuing)"
           else
             ui_info "Installing" "$name via mise ($pkg)"
             mise use -g "$pkg@latest" 2>&1 || ui_warn "$name" "install failed (continuing)"

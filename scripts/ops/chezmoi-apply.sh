@@ -180,8 +180,8 @@ if [[ ${#_ai_missing[@]} -gt 0 ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]
     echo ""
     _ai_install_action=""
     if command -v gum &>/dev/null; then
-      _ai_install_action=$(printf '%s\n' "Install all" "Choose which to install" "Skip" \
-        | gum choose --header "Missing AI providers — install via mise?") || _ai_install_action=""
+      _ai_install_action=$(printf '%s\n' "Install all" "Choose which to install" "Skip" |
+        gum choose --header "Missing AI providers — install via mise?") || _ai_install_action=""
     else
       ui_info "Tip" "Install all missing AI providers with: mise install"
       ui_info "Tip" "Or individually: mise use -g <package>@latest"
@@ -198,8 +198,8 @@ if [[ ${#_ai_missing[@]} -gt 0 ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]
           IFS='|' read -r _bin _pkg _label <<<"$_entry"
           _ai_pick_choices+=("$_label")
         done
-        _ai_picked=$(printf '%s\n' "${_ai_pick_choices[@]}" \
-          | gum choose --no-limit --header "Select providers to install (Space to toggle, Enter to confirm)") || _ai_picked=""
+        _ai_picked=$(printf '%s\n' "${_ai_pick_choices[@]}" |
+          gum choose --no-limit --header "Select providers to install (Space to toggle, Enter to confirm)") || _ai_picked=""
         if [[ -n "$_ai_picked" ]]; then
           while IFS= read -r _selected; do
             [[ -z "$_selected" ]] && continue
@@ -220,8 +220,8 @@ if [[ ${#_ai_missing[@]} -gt 0 ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]
         IFS='|' read -r _bin _pkg _label <<<"$_entry"
         if command -v gum &>/dev/null; then
           gum spin --spinner dot --title "Installing $_label ($_pkg)" -- \
-            mise use -g "$_pkg@latest" 2>&1 && ui_ok "$_label" "installed" \
-            || ui_warn "$_label" "install failed (continuing)"
+            mise use -g "$_pkg@latest" 2>&1 && ui_ok "$_label" "installed" ||
+            ui_warn "$_label" "install failed (continuing)"
         else
           ui_info "Installing" "$_label via mise ($_pkg)"
           mise use -g "$_pkg@latest" 2>&1 || ui_warn "$_label" "install failed (continuing)"
