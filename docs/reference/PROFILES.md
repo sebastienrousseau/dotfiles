@@ -1,8 +1,8 @@
-# Profiles & Machine Configuration
+# Profiles and Machine Setup
 
 ## Profile System
 
-Dotfiles supports per-machine configuration via profiles and hardware presets.
+You can set up each machine differently using profiles and hardware presets.
 
 ### Setting Your Profile
 
@@ -24,7 +24,7 @@ machine = "macbook-m3"    # optional: machine identifier
 
 ### Per-Machine Overrides
 
-Create `~/.config/chezmoi/chezmoi.toml` on each machine:
+Create a `~/.config/chezmoi/chezmoi.toml` file on each machine to override defaults:
 
 ```toml
 [data]
@@ -39,14 +39,14 @@ zellij = true
 
 ### Hardware Presets
 
-Templates in `templates/chezmoi-data/` provide starting points:
+The `templates/chezmoi-data/` folder has ready-made configs for common hardware:
 
 - `mac-m1.toml.example` — Apple Silicon MacBook
 - `geekom-a9.toml.example` — AMD mini PC (Linux)
 - `surface-pro-7p.toml.example` — Microsoft Surface (Linux)
 - `mac-t2-linux.toml.example` — Intel Mac running Linux
 
-Copy the relevant preset:
+Copy the one that matches your hardware:
 
 ```bash
 cp templates/chezmoi-data/mac-m1.toml.example ~/.config/chezmoi/chezmoi.toml
@@ -55,7 +55,7 @@ chezmoi apply
 
 ### Environment Variables
 
-Override behavior per-session without editing files:
+You can change behavior for a single session without editing any files:
 
 | Variable | Default | Effect |
 |----------|---------|--------|

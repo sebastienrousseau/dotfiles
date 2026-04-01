@@ -1,5 +1,5 @@
 <img
-  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+  src="https://cloudcdn.pro/dotfiles/v2/images/logos/dotfiles.svg"
   alt="dotfiles logo"
   width="66"
   align="right"
@@ -44,4 +44,4 @@ Path configurations are split into priority-based files. `chezmoi` aggregates th
 
 <!-- markdownlint-enable MD013-->
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg

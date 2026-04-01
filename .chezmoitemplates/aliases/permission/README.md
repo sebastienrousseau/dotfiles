@@ -36,7 +36,7 @@ This code provides a set of aliases for file permissions.
 - `chownr` Change file owner and group recursively.
 - `chownu` Change file owner and group recursively to the current user.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

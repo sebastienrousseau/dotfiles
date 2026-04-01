@@ -174,7 +174,7 @@ dkrm $(dk ps -aq --filter status=exited) && dknp && dkrmi_dangling
 dkstkd -c docker-compose.yml my-stack
 ```
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

@@ -37,7 +37,7 @@ case-insensitively.
 * `mkdir` Create a new directory, making parent directories as needed, with
 verbose output.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

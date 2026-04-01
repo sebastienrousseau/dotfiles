@@ -1,8 +1,8 @@
 # Feature Flags Reference
 
-All feature flags are defined in `.chezmoidata.toml` under `[features]`.
+All feature flags live in `.chezmoidata.toml` under `[features]`.
 
-## Shell & Terminal
+## Shell and Terminal
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -44,9 +44,9 @@ All feature flags are defined in `.chezmoidata.toml` under `[features]`.
 | `aliases.buckets.svn` | `true` | Enable SVN aliases |
 | `aliases.policy.strict_mode` | `false` | Require confirmation for destructive aliases (rm, mv) |
 
-## Toggling Features
+## How to Toggle Features
 
-Edit `.chezmoidata.toml` in the repo, or override per-machine in `~/.config/chezmoi/chezmoi.toml`:
+Edit `.chezmoidata.toml` in the repo, or override on a single machine in `~/.config/chezmoi/chezmoi.toml`:
 
 ```bash
 # In ~/.config/chezmoi/chezmoi.toml

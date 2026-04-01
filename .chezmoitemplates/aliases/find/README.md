@@ -30,7 +30,7 @@ for common operations:
 - `fdv` shows the version of `fd`.
 - `fdx` executes a command for each search result.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

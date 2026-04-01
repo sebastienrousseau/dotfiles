@@ -23,26 +23,26 @@ sops secrets.sops.yaml
 
 ## Key Management
 
-- **Private key**: `~/.config/sops/age/keys.txt` (NEVER commit this)
-- **Public key**: Safe to share, stored in `.sops.yaml`
-- **Backup**: Store private key in a password manager or hardware security module
+- **Private key**: `~/.config/sops/age/keys.txt` — never commit this file.
+- **Public key**: Safe to share. It lives in `.sops.yaml`.
+- **Backup**: Keep your private key in a password manager or a hardware security module.
 
 ## Recovery
 
-If you lose your age private key:
-1. Re-generate: `age-keygen -o ~/.config/sops/age/keys.txt`
-2. Re-encrypt all secrets with the new public key
-3. Update `.sops.yaml` with the new public key
+If you lose your age private key, follow these steps:
+1. Create a new key: `age-keygen -o ~/.config/sops/age/keys.txt`
+2. Re-encrypt all secrets with the new public key.
+3. Update `.sops.yaml` with the new public key.
 
 ## Integration with Chezmoi
 
-Chezmoi supports age encryption natively:
+Chezmoi has built-in support for age encryption.
 
 ```bash
 chezmoi add --encrypt ~/.ssh/config
 ```
 
-This encrypts the file in the source state using the age key configured in `~/.config/chezmoi/chezmoi.toml`:
+This encrypts the file in the source state. It uses the age key set in `~/.config/chezmoi/chezmoi.toml`:
 
 ```toml
 encryption = "age"

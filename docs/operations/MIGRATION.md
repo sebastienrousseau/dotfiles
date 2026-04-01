@@ -1,6 +1,6 @@
-# Migration & Upgrade Guide
+# Migration and Upgrade Guide
 
-## Upgrade Workflow
+## How to Upgrade
 
 ```bash
 # 1. Pre-upgrade check
@@ -43,15 +43,15 @@ dot doctor
 
 ## Breaking Changes
 
-If upgrading from v0.2.497 or earlier:
+If you are upgrading from v0.2.497 or earlier, note these changes:
 
-1. **Cline CLI removed** — if you used `dot cline`, switch to another AI CLI
-2. **AI tools now install via mise** — run `mise install` to update AI providers
-3. **SSH config hardening** — review `~/.ssh/config` after apply; may override existing settings
+1. **Cline CLI removed** — if you used `dot cline`, switch to a different AI CLI
+2. **AI tools now install through mise** — run `mise install` to set up AI providers
+3. **SSH config hardening** — check `~/.ssh/config` after apply, as it may change your current settings
 
 ## Rollback
 
-If an upgrade causes issues:
+If something goes wrong after an upgrade:
 
 ```bash
 # Quick rollback to previous state
@@ -68,16 +68,16 @@ git reset --hard HEAD~1   # Reset to previous commit
 dot apply                 # Re-apply
 ```
 
-## Pre-Upgrade Checklist
+## Before You Upgrade
 
-- [ ] Run `dot doctor` — verify current state is healthy
-- [ ] Check `dot diff` — review pending changes
-- [ ] Backup custom configs: `dot rollback backup`
+- [ ] Run `dot doctor` — make sure everything is healthy
+- [ ] Run `dot diff` — review any pending changes
+- [ ] Back up custom configs: `dot rollback backup`
 - [ ] Read CHANGELOG.md for breaking changes
 
-## Post-Upgrade Checklist
+## After You Upgrade
 
-- [ ] Run `dot doctor` — verify upgrade succeeded
-- [ ] Run `dot prewarm` — regenerate shell caches
-- [ ] Restart shell: `exec zsh`
+- [ ] Run `dot doctor` — make sure the upgrade worked
+- [ ] Run `dot prewarm` — rebuild shell caches
+- [ ] Restart your shell: `exec zsh`
 - [ ] Test AI tools: `dot ai`

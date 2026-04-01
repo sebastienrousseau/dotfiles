@@ -50,7 +50,7 @@ common use cases.
 - `gct` manages Google Cloud Tasks.
 - `gcu` manages Google Cloud App Engine.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

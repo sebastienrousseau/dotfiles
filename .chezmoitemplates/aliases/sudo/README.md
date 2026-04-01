@@ -16,7 +16,7 @@ This code provides a set of aliases for the `sudo` command.
 - `su` Execute a command as the superuser.
 - `sudo` Execute a command as the superuser.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

@@ -25,7 +25,7 @@ These aliases are defined in `terraform.aliases.sh` and are automatically loaded
 - `ansp` - Ansible Playbook
 - `anslint` - Ansible Lint
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

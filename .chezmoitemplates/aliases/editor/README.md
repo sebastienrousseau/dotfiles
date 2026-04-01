@@ -95,7 +95,7 @@ editrc git    # Edit git configuration
 editrc bash   # Edit bash configuration
 ```
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

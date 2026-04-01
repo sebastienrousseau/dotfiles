@@ -25,7 +25,7 @@ The following aliases are included:
 - `ips`: retrieves your public IPv4 and IPv6 addresses.
 - `wip`: retrieves your public IP address.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

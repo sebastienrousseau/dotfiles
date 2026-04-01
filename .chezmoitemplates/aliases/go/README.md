@@ -17,7 +17,7 @@ These aliases are defined in `go.aliases.sh` and are automatically loaded by `ch
 - `gomt` - `go mod tidy`
 - `goget` - `go get`
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

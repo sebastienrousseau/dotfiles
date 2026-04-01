@@ -28,7 +28,7 @@ following aliases are included:
 - `zshrc` opens the Zsh configuration file in the default text editor.
 - `zshp` opens the Zsh profile in the default text editor.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

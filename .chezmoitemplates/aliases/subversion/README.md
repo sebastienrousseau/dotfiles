@@ -55,7 +55,7 @@ This code provides a set of aliases for the Subversion command line.
 - `supg` Upgrade the metadata storage format for a working copy.
 - `sxp` Create an unversioned copy of a tree.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

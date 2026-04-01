@@ -26,7 +26,7 @@ terminal easier and more efficient. The following aliases are included:
 - `cplt` clears the terminal screen and prints the current working
   directory and the directory tree.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

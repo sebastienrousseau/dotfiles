@@ -16,7 +16,7 @@ macOS and Linux.
 - `update` runs Topgrade when installed; otherwise it falls back to `upd`.
 - `upd` performs a cross-platform system + dev tool update routine.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

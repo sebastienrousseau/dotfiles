@@ -18,7 +18,7 @@ This code provides a set of aliases for
 - `ps` Display all processes.
 - `psa` List all processes.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

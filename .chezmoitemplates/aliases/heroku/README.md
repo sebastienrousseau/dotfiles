@@ -320,7 +320,7 @@ This is a collection of aliases for the
 - `hkwhr` Removes a webhook from an app
 - `hkwhu` Updates a webhook in an app
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 
