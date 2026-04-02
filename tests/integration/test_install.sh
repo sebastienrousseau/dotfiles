@@ -238,7 +238,7 @@ if [[ "$1" == "describe" ]]; then
   exit 1
 fi
 if [[ "$1" == "rev-parse" ]]; then
-  echo "v0.2.498"
+  echo "v0.2.499"
   exit 0
 fi
 printf 'git %s\n' "$*" >> "$TMP_LOG"
@@ -257,7 +257,7 @@ TMP_LOG="$install_sandbox/install.log" \
   bash "$INSTALL_SCRIPT" --minimal >/dev/null 2>&1
 cloned_data="$install_sandbox/home/.dotfiles/.chezmoidata.toml"
 clone_log="$(cat "$install_sandbox/install.log")"
-if grep -q -- '--branch v0.2.498' <<<"$clone_log" \
+if grep -q -- '--branch v0.2.499' <<<"$clone_log" \
   && grep -q '^profile = "minimal"$' "$cloned_data" \
   && grep -q '^nvim = false$' "$cloned_data" \
   && grep -q '^tmux = false$' "$cloned_data" \
