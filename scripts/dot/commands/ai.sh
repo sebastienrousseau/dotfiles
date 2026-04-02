@@ -39,7 +39,7 @@ _ai_cache_fresh() {
   [[ -f "$file" ]] || return 1
   local now mtime
   now=$(date +%s)
-  mtime=$(stat -f %m "$file" 2>/dev/null || echo 0)
+  mtime=$(stat -c %Y "$file" 2>/dev/null || stat -f %m "$file" 2>/dev/null || echo 0)
   ((now - mtime < AI_STATUS_TTL))
 }
 
