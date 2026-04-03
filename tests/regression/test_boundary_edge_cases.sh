@@ -16,9 +16,8 @@ source "$SCRIPT_DIR/../framework/mocks.sh"
 
 test_start "edge_dot_help_without_gum"
 # dot help should work even without gum
-(
+if (
   export PATH="$MOCK_BIN_DIR"
-  # Ensure bash is available but gum is not
   ln -sf "$(command -v bash)" "$MOCK_BIN_DIR/bash"
   ln -sf "$(command -v grep)" "$MOCK_BIN_DIR/grep"
   ln -sf "$(command -v sed)" "$MOCK_BIN_DIR/sed"
@@ -27,13 +26,13 @@ test_start "edge_dot_help_without_gum"
   ln -sf "$(command -v awk)" "$MOCK_BIN_DIR/awk"
   ln -sf "$(command -v printf)" "$MOCK_BIN_DIR/printf" 2>/dev/null || true
   bash "$REPO_ROOT/dot_local/bin/executable_dot" --version >/dev/null 2>&1
-) && {
+); then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot works without gum"
-} || {
-  ((TESTS_PASSED++)) || true # Acceptable — gum is optional but PATH mutation is tricky
+else
+  ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (PATH isolation insufficient)"
-}
+fi
 
 test_start "edge_aliases_without_tools"
 # AI aliases should silently skip when tools are missing
@@ -43,7 +42,7 @@ test_start "edge_aliases_without_tools"
   source "$REPO_ROOT/.chezmoitemplates/aliases/ai/ai.aliases.sh" 2>/dev/null
   # Should not fail — just no aliases defined
   echo "ok"
-) >${TMPDIR:-/tmp}/test_edge_aliases_$$
+) >"${TMPDIR:-/tmp}/test_edge_aliases_$$"
 assert_file_contains "${TMPDIR:-/tmp}/test_edge_aliases_$$" "ok" "aliases should load without tools"
 rm -f "${TMPDIR:-/tmp}/test_edge_aliases_$$"
 
@@ -183,7 +182,7 @@ test_start "edge_no_rm_rf_root"
 # Scripts must never rm -rf / or rm -rf $HOME without guard
 dangerous=0
 while IFS= read -r f; do
-  if grep -qE 'rm -rf\s+/\s|rm -rf\s+~\s|rm -rf\s+\$HOME\s' "$f" 2>/dev/null; then
+  if grep -qE "rm -rf\s+/\s|rm -rf\s+~\s|rm -rf\s+\\\$HOME\s" "$f" 2>/dev/null; then
     dangerous=$((dangerous + 1))
   fi
 done < <(find "$REPO_ROOT/scripts" -name "*.sh" 2>/dev/null)

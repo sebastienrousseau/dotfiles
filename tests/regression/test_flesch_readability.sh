@@ -209,7 +209,7 @@ assert_equals "0" "$failures" "user docs must be at least 20 lines"
 for doc in "${USER_DOCS[@]}"; do
   filepath="$REPO_ROOT/$doc"
   [[ -f "$filepath" ]] || continue
-  doc_slug=$(echo "$doc" | sed 's|[/.]|_|g')
+  doc_slug="${doc//[\/.]/_}"
   test_start "flesch_sentence_length_${doc_slug}"
   prose=$(_extract_prose "$filepath")
   avg=$(_avg_sentence_length "$prose")
@@ -229,7 +229,7 @@ done
 for doc in "${USER_DOCS[@]}"; do
   filepath="$REPO_ROOT/$doc"
   [[ -f "$filepath" ]] || continue
-  doc_slug=$(echo "$doc" | sed 's|[/.]|_|g')
+  doc_slug="${doc//[\/.]/_}"
   test_start "flesch_complex_words_${doc_slug}"
   prose=$(_extract_prose "$filepath")
   pct=$(_complex_word_pct "$prose")
@@ -249,7 +249,7 @@ done
 for doc in "${USER_DOCS[@]}"; do
   filepath="$REPO_ROOT/$doc"
   [[ -f "$filepath" ]] || continue
-  doc_slug=$(echo "$doc" | sed 's|[/.]|_|g')
+  doc_slug="${doc//[\/.]/_}"
   test_start "flesch_passive_voice_${doc_slug}"
   prose=$(_extract_prose "$filepath")
   total_sentences=$(_sentence_count "$prose")
@@ -276,9 +276,9 @@ done
 for doc in "${USER_DOCS[@]}"; do
   filepath="$REPO_ROOT/$doc"
   [[ -f "$filepath" ]] || continue
-  doc_slug=$(echo "$doc" | sed 's|[/.]|_|g')
+  doc_slug="${doc//[\/.]/_}"
   test_start "flesch_paragraph_length_${doc_slug}"
-  max_period_run=$(sed '/^```/,/^```/d' "$filepath" | awk '/^$/{if(s>15){n++};s=0;next}{s+=gsub(/\./,"&")} END{print n+0}')
+  max_period_run=$(sed "/^\`\`\`/,/^\`\`\`/d" "$filepath" | awk '/^$/{if(s>15){n++};s=0;next}{s+=gsub(/\./,"&")} END{print n+0}')
   if [[ "$max_period_run" -eq 0 ]]; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no dense paragraphs"
@@ -390,7 +390,7 @@ assert_equals "0" "$failures" "bullet lists should not exceed 10 items without s
 for doc in "${USER_DOCS[@]}"; do
   filepath="$REPO_ROOT/$doc"
   [[ -f "$filepath" ]] || continue
-  doc_slug=$(echo "$doc" | sed 's|[/.]|_|g')
+  doc_slug="${doc//[\/.]/_}"
   test_start "flesch_clear_title_${doc_slug}"
   first_content=$(awk 'NF{print; exit}' "$filepath")
   if [[ "$first_content" =~ ^#[[:space:]] || "$first_content" =~ ^\<[phH] ]]; then
@@ -444,7 +444,7 @@ assert_equals "0" "$failures" "headings must follow consistent hierarchy"
 for doc in "${USER_DOCS[@]}"; do
   filepath="$REPO_ROOT/$doc"
   [[ -f "$filepath" ]] || continue
-  doc_slug=$(echo "$doc" | sed 's|[/.]|_|g')
+  doc_slug="${doc//[\/.]/_}"
   test_start "flesch_doc_length_${doc_slug}"
   lines=$(wc -l < "$filepath" | tr -d ' ')
   if [[ "$lines" -ge 20 ]]; then
@@ -463,9 +463,9 @@ done
 for doc in "${USER_DOCS[@]}"; do
   filepath="$REPO_ROOT/$doc"
   [[ -f "$filepath" ]] || continue
-  doc_slug=$(echo "$doc" | sed 's|[/.]|_|g')
+  doc_slug="${doc//[\/.]/_}"
   test_start "flesch_code_examples_${doc_slug}"
-  code_blocks=$(grep -c '^\`\`\`' "$filepath" 2>/dev/null || true)
+  code_blocks=$(grep -c "^\`\`\`" "$filepath" 2>/dev/null || true)
   half=$((code_blocks / 2))
   if [[ "$half" -ge 1 ]]; then
     ((TESTS_PASSED++)) || true

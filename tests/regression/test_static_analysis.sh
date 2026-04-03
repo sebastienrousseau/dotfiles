@@ -295,7 +295,7 @@ failures=0
 for f in "${NEW_SCRIPTS[@]}"; do
   filepath="$REPO_ROOT/$f"
   [[ -f "$filepath" ]] || continue
-  if grep -vE '^\s*#' "$filepath" 2>/dev/null | grep -qE '`[^`]+`'; then
+  if grep -vE '^\s*#' "$filepath" 2>/dev/null | grep -qE "\`[^\`]+\`"; then
     printf '    backtick in: %s\n' "$f"
     failures=$((failures + 1))
   fi

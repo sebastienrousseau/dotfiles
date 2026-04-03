@@ -402,9 +402,9 @@ for f in "${CHANGED_SCRIPTS[@]}"; do
   filepath="$REPO_ROOT/$f"
   [[ -f "$filepath" ]] || continue
   # Look for backtick command substitution (excluding inside comments and strings)
-  count=$(grep -vE '^\s*#' "$filepath" 2>/dev/null | grep -cE '`[^`]+`' || true)
+  count=$(grep -vE '^\s*#' "$filepath" 2>/dev/null | grep -cE "\`[^\`]+\`" || true)
   if [[ "$count" -gt 0 ]]; then
-    printf '    %s: %d backtick substitutions (use $() instead)\n' "$f" "$count"
+    printf '    %s: %d backtick substitutions (use %s instead)\n' "$f" "$count" '$()'
     failures=$((failures + 1))
   fi
 done
@@ -734,7 +734,6 @@ for f in "${NEW_SCRIPTS[@]}"; do
   [[ -f "$filepath" ]] || continue
   # Check for unquoted heredocs that might have unintended variable expansion
   unquoted_heredocs=$(grep -cE '<<\s*[A-Z]+\s*$' "$filepath" 2>/dev/null || true)
-  quoted_heredocs=$(grep -cE "<<\\s*['\"]?[A-Z]+['\"]?" "$filepath" 2>/dev/null || true)
   # This is informational; just verify syntax is valid
   if [[ "$unquoted_heredocs" -gt 0 ]]; then
     ((TESTS_PASSED++)) || true
@@ -878,7 +877,7 @@ for f in "${CHANGED_SCRIPTS[@]}"; do
   [[ -f "$filepath" ]] || continue
   hardcoded_home=$(grep -vE '^\s*#' "$filepath" 2>/dev/null | grep -cE '/Users/[a-z]|/home/[a-z]' || true)
   if [[ "$hardcoded_home" -gt 0 ]]; then
-    printf '    %s: %d hardcoded home paths (use $HOME or ~)\n' "$f" "$hardcoded_home"
+    printf '    %s: %d hardcoded home paths (use %s or ~)\n' "$f" "$hardcoded_home" '$HOME'
     failures=$((failures + 1))
   fi
 done
