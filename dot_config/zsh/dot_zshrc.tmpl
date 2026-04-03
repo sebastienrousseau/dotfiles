@@ -256,6 +256,11 @@ for core_layer in "${_core_layers[@]}"; do
 done
 unset _core_layers
 
+# Starship prompt (eager — must survive cache clears for consistent UI)
+if [[ "$DOTFILES_ARTIFACT_MODE" != "1" ]] && (( ${+commands[starship]} )); then
+  _cached_eval starship-init starship init zsh
+fi
+
 # User-local modules (aliases, functions — not managed by chezmoi)
 for _mod_dir in "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/modules.d"/*(N/); do
   for _mod_file in "$_mod_dir"/*.sh(N); do
