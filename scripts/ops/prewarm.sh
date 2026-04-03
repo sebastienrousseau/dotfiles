@@ -96,5 +96,27 @@ for _nu_entry in "starship:starship init nu:starship.nu" "zoxide:zoxide init nus
   fi
 done
 
+# --- Completions ---
+ui_section "Shell completions"
+ZSH_COMP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/completions"
+mkdir -p "$ZSH_COMP_DIR"
+
+_prewarm_completion() {
+  local name="$1" cmd="$2"
+  shift 2
+  if command -v "$cmd" >/dev/null 2>&1; then
+    if "$cmd" "$@" >"${ZSH_COMP_DIR}/_${name}" 2>/dev/null; then
+      ui_ok "$name" "completion generated"
+    fi
+  fi
+}
+
+_prewarm_completion "gh" "gh" completion -s zsh
+_prewarm_completion "just" "just" --completions zsh
+_prewarm_completion "chezmoi" "chezmoi" completion zsh
+_prewarm_completion "kubectl" "kubectl" completion zsh
+_prewarm_completion "mise" "mise" completion zsh
+_prewarm_completion "atuin" "atuin" gen-completions --shell zsh
+
 ui_header "Cache Pre-warming Complete"
 dot_log info "prewarm_complete"

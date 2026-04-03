@@ -27,7 +27,4 @@ assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
 test_start "ai_setup_includes_copilot"
 assert_file_contains "$TEST_SCRIPT" "setup_tool \"Copilot CLI\" \"copilot\" \"copilot --version\"" "should setup Copilot CLI"
 
-test_start "ai_setup_includes_cline"
-assert_file_contains "$TEST_SCRIPT" "setup_tool \"Cline CLI\" \"cline\" \"cline auth\"" "should setup Cline CLI"
-
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

@@ -28,7 +28,7 @@ Some of the most useful aliases include:
 - `clc`: clear the terminal screen and print the contents of the current
   directory.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

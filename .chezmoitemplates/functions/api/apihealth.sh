@@ -30,12 +30,12 @@ APIHEALTH_SCRIPT_NAME="apihealth"
 APIHEALTH_VERSION="0.1"
 
 # Default values
-DEFAULT_METHOD="GET"
-DEFAULT_EXPECT_STATUS=200
-DEFAULT_TIMEOUT=10
+DOTFILES_DEFAULT_METHOD="GET"
+DOTFILES_DEFAULT_EXPECT_STATUS=200
+DOTFILES_DEFAULT_TIMEOUT=10
 
 # Initialize headers array
-HEADERS=()
+DOTFILES_HEADERS=()
 
 #######################################
 # Print usage information.
@@ -98,17 +98,17 @@ check_dependencies() {
 #######################################
 apihealthealth() {
   local url="$1"
-  local method="${2:-$DEFAULT_METHOD}"
-  local expect_status="${3:-$DEFAULT_EXPECT_STATUS}"
-  local timeout="${4:-$DEFAULT_TIMEOUT}"
+  local method="${2:-$DOTFILES_DEFAULT_METHOD}"
+  local expect_status="${3:-$DOTFILES_DEFAULT_EXPECT_STATUS}"
+  local timeout="${4:-$DOTFILES_DEFAULT_TIMEOUT}"
   local curl_headers=()
 
   printf '%b\n' "[INFO] Testing API health: $url"
   printf '%b\n' "[INFO] Method: $method, Expected Status: $expect_status, Timeout: ${timeout}s"
 
   # Build curl headers array
-  if [[ ${#HEADERS[@]} -gt 0 ]]; then
-    for header in "${HEADERS[@]}"; do
+  if [[ ${#DOTFILES_HEADERS[@]} -gt 0 ]]; then
+    for header in "${DOTFILES_HEADERS[@]}"; do
       curl_headers+=(-H "$header")
     done
   fi
@@ -151,11 +151,11 @@ apihealthealth() {
 #######################################
 parse_arguments() {
   # Initialize variables
-  METHOD="$DEFAULT_METHOD"
-  EXPECT_STATUS="$DEFAULT_EXPECT_STATUS"
-  TIMEOUT="$DEFAULT_TIMEOUT"
+  METHOD="$DOTFILES_DEFAULT_METHOD"
+  EXPECT_STATUS="$DOTFILES_DEFAULT_EXPECT_STATUS"
+  TIMEOUT="$DOTFILES_DEFAULT_TIMEOUT"
   URLS=()
-  HEADERS=()
+  DOTFILES_HEADERS=()
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -191,7 +191,7 @@ parse_arguments() {
             printf '%b\n' "\e[31m[ERROR]\e[0m Invalid header format: '$2'. Expected 'Key: Value'"
             return 1
           fi
-          HEADERS+=("$2")
+          DOTFILES_HEADERS+=("$2")
           shift 2
         else
           printf '%b\n' "\e[31m[ERROR]\e[0m --header requires a non-empty option argument."

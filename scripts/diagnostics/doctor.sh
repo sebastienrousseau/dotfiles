@@ -168,7 +168,7 @@ fi
 
 # --- AI CLIs ---
 _section "AI CLIs"
-for cmd in claude copilot cline gemini sgpt ollama opencode aider kiro-cli; do
+for cmd in claude copilot gemini sgpt ollama opencode aider kiro-cli; do
   if check_cmd "$cmd"; then
     _ok "$cmd" "$(pretty_path "$(get_cmd_path "$cmd")")"
   else
@@ -200,43 +200,156 @@ fi
 
 # --- Platform ---
 _section "Platform"
+
 platform_id="$(dot_platform_id)"
-host_os="$(dot_host_os)"
-kernel="$(uname -sr)"
-arch="$(uname -m)"
-hostname_value="$(hostname 2>/dev/null || true)"
-session_type="${XDG_SESSION_TYPE:-unknown}"
-desktop_env="${XDG_CURRENT_DESKTOP:-unknown}"
+_os_name="$(uname -s)"
+_kernel="$(uname -sr)"
+_arch="$(uname -m)"
+_user="$(whoami 2>/dev/null || echo "${USER:-unknown}")"
+_hostname_val="$(hostname -s 2>/dev/null || hostname 2>/dev/null || echo "unknown")"
+
+# Shell version
+_shell_name="${SHELL##*/}"
+_shell_ver="$("$SHELL" --version 2>&1 | head -1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1 || true)"
+_shell="${_shell_name}${_shell_ver:+ $_shell_ver}"
+
+# Terminal
+_terminal="${TERM_PROGRAM:-${TERM:-unknown}}"
+
+# Uptime (portable)
 if uptime -p >/dev/null 2>&1; then
-  uptime_human="$(uptime -p 2>/dev/null | sed 's/^up //')"
+  _uptime="$(uptime -p 2>/dev/null | sed 's/^up //')"
 else
-  # macOS/BSD fallback output does not support "-p".
-  uptime_human="$(uptime 2>/dev/null | sed -E 's/^.* up ([^,]+(, [^,]+){0,2}), [0-9]+ users?.*$/\1/' || true)"
+  _uptime="$(uptime 2>/dev/null | sed -E 's/^.* up ([^,]+(, [^,]+){0,2}), [0-9]+ users?.*$/\1/' || true)"
 fi
 
-if [[ -r /etc/os-release ]]; then
-  distro_pretty="$(
-    # shellcheck disable=SC1091
-    . /etc/os-release
-    echo "${PRETTY_NAME:-$ID}"
-  )"
+# --- OS-specific detection ---
+_os="" _host="" _cpu="" _cpu_cores="" _gpu="" _mem="" _resolution="" _packages="" _de=""
+
+if [[ "$_os_name" == "Darwin" ]]; then
+  # macOS
+  _os="macOS $(sw_vers -productVersion 2>/dev/null || echo "unknown")"
+  _host="$(/usr/sbin/system_profiler SPHardwareDataType 2>/dev/null | awk -F': ' '/Model Name/{print $2}' || sysctl -n hw.model 2>/dev/null || echo "Mac")"
+  _cpu="$(sysctl -n machdep.cpu.brand_string 2>/dev/null || echo "$_arch")"
+  _cpu_cores="$(sysctl -n hw.ncpu 2>/dev/null || echo "?")"
+  _gpu="$(system_profiler SPDisplaysDataType 2>/dev/null | awk -F': ' '/Chipset Model|Chip/{print $2; exit}' || echo "n/a")"
+  _mem_total="$(sysctl -n hw.memsize 2>/dev/null || echo 0)"
+  _mem_total_gb="$(awk "BEGIN{printf \"%.2f\", ${_mem_total}/1073741824}")"
+  _mem_pages="$(vm_stat 2>/dev/null | awk '/Pages active/{gsub(/\./,"",$3); print $3}')"
+  _mem_used_gb="$(awk "BEGIN{printf \"%.2f\", ${_mem_pages:-0}*4096/1073741824}")"
+  _mem="${_mem_used_gb} GiB / ${_mem_total_gb} GiB"
+  _resolution="$(system_profiler SPDisplaysDataType 2>/dev/null | awk '/Resolution/{gsub(/^ +/,""); print; exit}' | sed 's/Resolution: //' || echo "n/a")"
+  _packages="$(brew list --formula 2>/dev/null | wc -l | tr -d ' ') (brew)"
+  _de="Aqua"
+
+elif [[ -r /etc/os-release ]]; then
+  # Linux (Debian, Ubuntu, Arch, Fedora, RHEL, etc.)
+  # shellcheck disable=SC1091
+  . /etc/os-release
+  _os="${PRETTY_NAME:-$ID}"
+
+  _host="$(cat /sys/devices/virtual/dmi/id/product_name 2>/dev/null || cat /sys/firmware/devicetree/base/model 2>/dev/null || echo "Linux")"
+
+  if command -v lscpu >/dev/null 2>&1; then
+    _cpu="$(lscpu | awk -F': +' '/Model name/{print $2}')"
+    _cpu_cores="$(lscpu | awk -F': +' '/^CPU\(s\):/{print $2}')"
+  else
+    _cpu="$(grep -m1 'model name' /proc/cpuinfo 2>/dev/null | cut -d: -f2 | sed 's/^ //' || uname -p)"
+    _cpu_cores="$(grep -c '^processor' /proc/cpuinfo 2>/dev/null || echo "?")"
+  fi
+
+  if command -v lspci >/dev/null 2>&1; then
+    _gpu="$(lspci 2>/dev/null | grep -iE 'vga|3d|display' | head -1 | sed 's/.*: //')"
+  else
+    _gpu="n/a"
+  fi
+
+  if command -v free >/dev/null 2>&1; then
+    _mem="$(free -b | awk '/Mem:/{printf "%.2f GiB / %.2f GiB", $3/1073741824, $2/1073741824}')"
+  elif [[ -r /proc/meminfo ]]; then
+    _mem_total_kb="$(awk '/MemTotal/{print $2}' /proc/meminfo)"
+    _mem_avail_kb="$(awk '/MemAvailable/{print $2}' /proc/meminfo)"
+    _mem_used_kb=$((_mem_total_kb - _mem_avail_kb))
+    _mem="$(awk "BEGIN{printf \"%.2f GiB / %.2f GiB\", ${_mem_used_kb}/1048576, ${_mem_total_kb}/1048576}")"
+  else
+    _mem="n/a"
+  fi
+
+  # Resolution (Wayland or X11)
+  if command -v wlr-randr >/dev/null 2>&1; then
+    _resolution="$(wlr-randr 2>/dev/null | awk '/current/{print $1; exit}' || echo "n/a")"
+  elif command -v xrandr >/dev/null 2>&1; then
+    _resolution="$(xrandr 2>/dev/null | awk '/\*/{print $1; exit}' || echo "n/a")"
+  elif command -v xdpyinfo >/dev/null 2>&1; then
+    _resolution="$(xdpyinfo 2>/dev/null | awk '/dimensions/{print $2}' || echo "n/a")"
+  else
+    _resolution="n/a"
+  fi
+
+  # Packages (multi-distro)
+  _pkg_count=0
+  _pkg_mgr="pkg"
+  if command -v dpkg >/dev/null 2>&1; then
+    _pkg_count="$(dpkg --get-selections 2>/dev/null | wc -l | tr -d ' ')"
+    _pkg_mgr="dpkg"
+  elif command -v rpm >/dev/null 2>&1; then
+    _pkg_count="$(rpm -qa 2>/dev/null | wc -l | tr -d ' ')"
+    _pkg_mgr="rpm"
+  elif command -v pacman >/dev/null 2>&1; then
+    _pkg_count="$(pacman -Q 2>/dev/null | wc -l | tr -d ' ')"
+    _pkg_mgr="pacman"
+  fi
+  _packages="${_pkg_count} (${_pkg_mgr})"
+
+  _de="${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-n/a}}"
+
 else
-  distro_pretty="$host_os"
+  # Fallback (unknown OS)
+  _os="$(uname -sr)"
+  _host="unknown"
+  _cpu="$(uname -p 2>/dev/null || echo "unknown")"
+  _cpu_cores="?"
+  _gpu="n/a"
+  _mem="n/a"
+  _resolution="n/a"
+  _packages="n/a"
+  _de="n/a"
 fi
 
-_ok "Runtime" "$platform_id"
-_ok "Host OS" "$host_os"
-_ok "Distro" "$distro_pretty"
-_ok "Kernel" "$kernel"
-_ok "Architecture" "$arch"
-_ok "Hostname" "$hostname_value"
-_ok "Desktop" "$desktop_env"
-_ok "Session" "$session_type"
-if [[ -n "${uptime_human:-}" ]]; then
-  _ok "Uptime" "$uptime_human"
+# WSL detection and overrides
+_wsl=""
+if [[ -f /proc/version ]] && grep -qi microsoft /proc/version 2>/dev/null; then
+  _wsl="yes"
+  _os="${_os} (WSL)"
+  _de="Windows Desktop (WSL)"
+  _terminal="${TERM_PROGRAM:-Windows Terminal}"
 fi
 
-if [[ "$platform_id" == "wsl" ]]; then
+# Print platform info
+_C='\033[0;36m'
+_W='\033[1;37m'
+_N='\033[0m'
+_D='\033[2m'
+
+printf '\n'
+printf '  %b%s%b@%b%s%b\n' "$_C" "$_user" "$_N" "$_C" "$_hostname_val" "$_N"
+printf '  %b%s%b\n' "$_D" "$(printf '%*s' "$((${#_user} + 1 + ${#_hostname_val}))" '' | tr ' ' '-')" "$_N"
+printf '  %bOS:%b         %s\n' "$_W" "$_N" "$_os"
+printf '  %bHost:%b       %s\n' "$_W" "$_N" "$_host"
+printf '  %bKernel:%b     %s\n' "$_W" "$_N" "$_kernel"
+printf '  %bUptime:%b     %s\n' "$_W" "$_N" "${_uptime:-n/a}"
+printf '  %bPackages:%b   %s\n' "$_W" "$_N" "$_packages"
+printf '  %bShell:%b      %s\n' "$_W" "$_N" "$_shell"
+printf '  %bResolution:%b %s\n' "$_W" "$_N" "$_resolution"
+printf '  %bDE:%b         %s\n' "$_W" "$_N" "$_de"
+printf '  %bTerminal:%b   %s\n' "$_W" "$_N" "$_terminal"
+printf '  %bCPU:%b        %s (%s)\n' "$_W" "$_N" "$_cpu" "$_cpu_cores"
+printf '  %bGPU:%b        %s\n' "$_W" "$_N" "${_gpu:-n/a}"
+printf '  %bMemory:%b     %s\n' "$_W" "$_N" "$_mem"
+printf '  %bArch:%b       %s\n' "$_W" "$_N" "$_arch"
+
+if [[ -n "$_wsl" ]]; then
+  echo ""
   if command -v wslpath >/dev/null 2>&1; then
     _ok "WSL bridge" "wslpath available"
   else

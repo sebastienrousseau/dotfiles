@@ -142,7 +142,7 @@ common Git commands, making them shorter and more intuitive.
 - `gconfr` Output remote origin from within a local repository.
 - `undopush` Undo the last push.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

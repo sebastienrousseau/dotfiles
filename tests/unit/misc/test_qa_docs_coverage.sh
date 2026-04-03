@@ -27,7 +27,6 @@ assert_file_contains "$UTILS_DOC" "\`dot help\`" "UTILS should document dot help
 test_start "docs_coverage_ai_reference_has_provider_bridges"
 assert_file_contains "$AI_DOC" "\`dot cl\`" "AI doc should document dot cl"
 assert_file_contains "$AI_DOC" "\`dot copilot\`" "AI doc should document dot copilot"
-assert_file_contains "$AI_DOC" "\`dot cline\`" "AI doc should document dot cline"
 assert_file_contains "$AI_DOC" "\`dot aider\`" "AI doc should document dot aider"
 
 test_start "docs_coverage_contract_passes"

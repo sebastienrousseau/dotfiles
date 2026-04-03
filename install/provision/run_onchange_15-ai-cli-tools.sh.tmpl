@@ -9,68 +9,117 @@ set -euo pipefail
 log_info() { printf '\n[INFO] %s\n' "$*"; }
 log_error() { printf '\n[ERROR] %s\n' "$*" >&2; }
 
-log_info "Installing AI CLI tools via npm..."
+log_info "Installing AI CLI and dev tools via mise..."
 
-# Ensure fnm is available
-if ! command -v fnm >/dev/null 2>&1; then
-{{- if eq .chezmoi.os "darwin" }}
-  log_info "fnm not found. Install via: brew install fnm"
-  exit 1
-{{- else }}
-  log_info "fnm not found. Installing fnm..."
-  fnm_installer=$(umask 077 && mktemp)
-  if curl -fsSL -o "$fnm_installer" https://fnm.vercel.app/install; then
-    if [ "$(wc -c <"$fnm_installer")" -le 204800 ] && head -1 "$fnm_installer" | grep -q '^#!'; then
-      bash "$fnm_installer"
-    else
-      log_error "fnm installer failed validation. Install manually."
-    fi
-    rm -f "$fnm_installer"
-  else
-    rm -f "$fnm_installer"
-    log_error "Failed to download fnm installer."
-  fi
-{{- end }}
-fi
+# Prefer mise for all AI tool installations (ensures topgrade can update them)
+if command -v mise >/dev/null 2>&1; then
+  # AI tools — installed globally via mise for consistent updates
+  AI_MISE_TOOLS=(
+    "npm:@anthropic-ai/claude-code"
+    "npm:@github/copilot"
+    "npm:@google/gemini-cli"
+    "npm:codex-cli"
+    "npm:opencode-ai"
+    "npm:autohand-cli"
+    "npm:@qwen-code/qwen-code"
+    "npm:@guizmo-ai/zai-cli"
+    "pipx:aider-chat"
+    "pipx:shell-gpt"
+    "pipx:mistral-vibe"
+    "kiro-cli"
+    "aqua:ollama/ollama"
+  )
 
-# Load fnm environment (try multiple locations)
-if [ -d "$HOME/.local/share/fnm" ]; then
-  export PATH="$HOME/.local/share/fnm:$PATH"
-fi
+  for tool in "${AI_MISE_TOOLS[@]}"; do
+    log_info "Installing $tool via mise..."
+    mise use -g "$tool@latest" 2>&1 || log_error "Failed to install $tool (continuing...)"
+  done
 
-if command -v fnm >/dev/null 2>&1; then
-  eval "$(fnm env --use-on-cd 2>/dev/null || fnm env 2>/dev/null || true)"
+  log_info "AI tools installed via mise. Topgrade will keep them updated."
 else
-  log_error "fnm installation failed. Please install manually."
-  exit 1
+  log_info "mise not found. Falling back to direct npm/pipx installation..."
+
+  # Ensure fnm is available
+  if ! command -v fnm >/dev/null 2>&1; then
+{{- if eq .chezmoi.os "darwin" }}
+    log_info "fnm not found. Install via: brew install fnm"
+    exit 1
+{{- else }}
+    log_info "fnm not found. Installing fnm..."
+    fnm_installer=$(umask 077 && mktemp)
+    if curl -fsSL -o "$fnm_installer" https://fnm.vercel.app/install; then
+      if [ "$(wc -c <"$fnm_installer")" -le 204800 ] && head -1 "$fnm_installer" | grep -q '^#!'; then
+        bash "$fnm_installer"
+      else
+        log_error "fnm installer failed validation. Install manually."
+      fi
+      rm -f "$fnm_installer"
+    else
+      rm -f "$fnm_installer"
+      log_error "Failed to download fnm installer."
+    fi
+{{- end }}
+  fi
+
+  # Load fnm environment (try multiple locations)
+  if [ -d "$HOME/.local/share/fnm" ]; then
+    export PATH="$HOME/.local/share/fnm:$PATH"
+  fi
+
+  if command -v fnm >/dev/null 2>&1; then
+    eval "$(fnm env --use-on-cd 2>/dev/null || fnm env 2>/dev/null || true)"
+  else
+    log_error "fnm installation failed. Please install manually."
+    exit 1
+  fi
+
+  # Ensure Node.js is installed
+  if ! command -v node >/dev/null 2>&1; then
+    log_info "Installing Node.js v24 via fnm..."
+    fnm install 24 || fnm install --lts
+    fnm default 24 2>/dev/null || fnm default lts-latest 2>/dev/null || true
+    fnm use 24 2>/dev/null || fnm use lts-latest 2>/dev/null || true
+    eval "$(fnm env 2>/dev/null || true)"
+  fi
+
+  if command -v corepack >/dev/null 2>&1; then
+    corepack enable || true
+  fi
+
+  log_info "Node.js version: $(node --version)"
+  log_info "npm version: $(npm --version)"
+
+  # Install AI CLI tools globally via npm
+  AI_TOOLS=(
+    "@anthropic-ai/claude-code"
+    "@google/gemini-cli"
+    "@openai/codex"
+    "opencode-ai"
+    "@factory/cli"
+    "autohand-cli"
+    "@qwen-code/qwen-code"
+    "@guizmo-ai/zai-cli"
+  )
+
+  for tool in "${AI_TOOLS[@]}"; do
+    log_info "Installing $tool..."
+    npm install -g "$tool" 2>&1 || log_error "Failed to install $tool (continuing...)"
+  done
+
+  # Install Python-based AI tools via pipx
+  if command -v pipx >/dev/null 2>&1; then
+    for pytool in aider-chat shell-gpt mistral-vibe; do
+      log_info "Installing $pytool via pipx..."
+      pipx install "$pytool" 2>&1 || log_error "Failed to install $pytool (continuing...)"
+    done
+  else
+    log_info "pipx not found — skipping Python AI tools (aider, sgpt, vibe)"
+  fi
 fi
 
-# Ensure Node.js is installed
-if ! command -v node >/dev/null 2>&1; then
-  log_info "Installing Node.js v24 via fnm..."
-  fnm install 24 || fnm install --lts
-  fnm default 24 2>/dev/null || fnm default lts-latest 2>/dev/null || true
-  fnm use 24 2>/dev/null || fnm use lts-latest 2>/dev/null || true
-  eval "$(fnm env 2>/dev/null || true)"
-fi
+# Install development tools globally (always via npm)
+log_info "Installing development tools via npm..."
 
-if command -v corepack >/dev/null 2>&1; then
-  corepack enable || true
-fi
-
-log_info "Node.js version: $(node --version)"
-log_info "npm version: $(npm --version)"
-
-# Install AI CLI tools globally
-AI_TOOLS=(
-  "@anthropic-ai/claude-code"
-  "@google/gemini-cli"
-  "@openai/codex"
-  "opencode-ai"
-  "@factory/cli"
-)
-
-# Install development tools globally
 DEV_TOOLS=(
   "eslint_d"
   "prettier_d"
@@ -78,32 +127,38 @@ DEV_TOOLS=(
   "typescript-language-server"
 )
 
-for tool in "${AI_TOOLS[@]}"; do
-  log_info "Installing $tool..."
-  npm install -g "$tool" 2>&1 || log_error "Failed to install $tool (continuing...)"
-done
+# Ensure Node.js is available for dev tools
+if command -v node >/dev/null 2>&1; then
+  for tool in "${DEV_TOOLS[@]}"; do
+    log_info "Installing $tool..."
+    npm install -g "$tool" 2>&1 || log_error "Failed to install $tool (continuing...)"
+  done
+else
+  log_info "Node.js not found — skipping dev tools"
+fi
 
-log_info "🛠️ Installing development tools via npm..."
-
-for tool in "${DEV_TOOLS[@]}"; do
-  log_info "Installing $tool..."
-  npm install -g "$tool" 2>&1 || log_error "Failed to install $tool (continuing...)"
-done
-
-log_info "✅ AI CLI and dev tools installation complete!"
+log_info "AI CLI and dev tools installation complete!"
 log_info ""
 log_info "Available commands:"
 log_info "  AI Tools:"
-log_info "    - claude   (Anthropic Claude CLI)"
-log_info "    - gemini   (Google Gemini CLI)"
-log_info "    - codex    (OpenAI Codex CLI)"
-log_info "    - opencode (OpenCode AI)"
-log_info "    - droid    (Factory AI Droid)"
+log_info "    - claude    (Anthropic Claude CLI)"
+log_info "    - copilot   (GitHub Copilot CLI)"
+log_info "    - gemini    (Google Gemini CLI)"
+log_info "    - codex     (OpenAI Codex CLI)"
+log_info "    - opencode  (OpenCode AI)"
+log_info "    - aider     (AI pair programmer)"
+log_info "    - sgpt      (Shell-GPT)"
+log_info "    - autohand  (Autohand Code CLI)"
+log_info "    - vibe      (Mistral Vibe CLI)"
+log_info "    - qwen      (Qwen Code CLI)"
+log_info "    - zai       (ZAI Zhipu AI CLI)"
+log_info "    - ollama    (Local LLM runner)"
+log_info "    - kiro-cli  (AWS AI assistant)"
 log_info "  Dev Tools:"
 log_info "    - eslint_d   (ESLint daemon for fast linting)"
 log_info "    - prettier_d (Prettier daemon for fast formatting)"
 log_info "    - tsserver   (TypeScript language server)"
 log_info ""
-log_info "Note: You may need to restart your shell or run 'eval \"\$(fnm env)\"'"
+log_info "Note: Use 'mise install' or 'topgrade' to update all tools."
 
 {{- end -}}

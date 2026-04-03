@@ -18,7 +18,7 @@ This code provides a set of aliases for the `mkdir` command.
 - `mdw` Make work directory with current date.
 - `mdt` Make directory with time.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

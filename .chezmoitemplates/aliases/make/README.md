@@ -21,7 +21,7 @@ This code provides a set of aliases for the `make` command.
 - `mkr` - Make run.
 - `mkt` - Make test.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

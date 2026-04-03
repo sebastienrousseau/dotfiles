@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 set -euo pipefail
 
-# Dotfiles CLI Entry Point - v0.2.498
+# Dotfiles CLI Entry Point - v0.2.499
 
 # Ensure XDG Base Directory variables are set
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -21,7 +21,7 @@ if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
   . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
 fi
 
-VERSION="0.2.498"
+VERSION="0.2.499"
 
 COMMAND="${1:-}"
 if [ -n "${1:-}" ]; then
@@ -211,7 +211,6 @@ AI|mode|Set or inspect agent operating profiles (ask/plan/apply/audit)|Bounded-a
 AI|agent|Profile-aware execution, agent card, a2a-card, session log, checkpoints, and conformance|Agent metadata and local audit trail.
 AI|cl|Claude CLI with context patterns|Context-aware Anthropic bridge.
 AI|copilot|GitHub Copilot CLI with context patterns|Context-aware Copilot bridge.
-AI|cline|Cline CLI with context patterns|Context-aware Cline bridge.
 AI|gemini|Gemini CLI with context patterns|Context-aware Gemini bridge.
 AI|kiro|Kiro CLI with context patterns|Context-aware Kiro bridge.
 AI|sgpt|Shell-GPT with context patterns|Context-aware Shell-GPT bridge.
@@ -566,9 +565,15 @@ case "$route" in
     show_version
     ;;
 
+  # User-provided custom commands
   *)
-    ui_fail "Unknown command: $COMMAND"
-    ui_info "Hint" "Try 'dot help' for usage"
-    exit 1
+    _user_cmd="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/commands/${COMMAND}.sh"
+    if [[ -f "$_user_cmd" ]]; then
+      source "$_user_cmd" "$@"
+    else
+      echo "Unknown command: ${COMMAND:-}" >&2
+      echo "Run 'dot help' for available commands." >&2
+      exit 1
+    fi
     ;;
 esac

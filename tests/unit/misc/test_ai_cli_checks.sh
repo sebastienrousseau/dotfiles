@@ -28,19 +28,26 @@ APPLY_FILE="$REPO_ROOT/scripts/ops/chezmoi-apply.sh"
 DOC_FILE="$REPO_ROOT/docs/reference/TOOLS.md"
 PYTOOLS_FILE="$REPO_ROOT/install/provision/run_onchange_25-python-tools.sh.tmpl"
 
-# Chezmoi apply should emit AI CLI checks
+# Chezmoi apply should list AI providers and offer mise installation
 check_contains "$APPLY_FILE" "AI provider CLI checks (optional)"
-check_contains "$APPLY_FILE" "check_cmd \"copilot\""
-check_contains "$APPLY_FILE" "check_cmd \"cline\""
-check_contains "$APPLY_FILE" "check_cmd \"sgpt\""
-check_contains "$APPLY_FILE" "check_cmd \"ollama\""
-check_contains "$APPLY_FILE" "check_cmd \"kiro-cli\""
+check_contains "$APPLY_FILE" "copilot|npm:@github/copilot|Copilot CLI"
+check_contains "$APPLY_FILE" "sgpt|pipx:shell-gpt|Shell-GPT"
+check_contains "$APPLY_FILE" "ollama|aqua:ollama/ollama|Ollama"
+check_contains "$APPLY_FILE" "kiro-cli|kiro-cli|Kiro CLI"
+check_contains "$APPLY_FILE" "autohand|npm:autohand-cli|Autohand Code"
+check_contains "$APPLY_FILE" "vibe|pipx:mistral-vibe|Mistral Vibe"
+check_contains "$APPLY_FILE" "qwen|npm:@qwen-code/qwen-code|Qwen Code"
+check_contains "$APPLY_FILE" "zai|npm:@guizmo-ai/zai-cli|ZAI"
+check_contains "$APPLY_FILE" "mise use -g"
 
-# Tools catalog should list Copilot, Cline, sgpt and ollama
+# Tools catalog should list Copilot, sgpt, ollama, and new AI CLIs
 check_contains "$DOC_FILE" "| **Copilot CLI** | GitHub Copilot in the terminal |"
-check_contains "$DOC_FILE" "| **Cline CLI** | Terminal coding agent workflow |"
 check_contains "$DOC_FILE" "| **sgpt** | Shell-GPT for terminal AI queries |"
 check_contains "$DOC_FILE" "| **Ollama** | Run large language models locally |"
+check_contains "$DOC_FILE" "| **Autohand Code** | Autohand coding agent CLI |"
+check_contains "$DOC_FILE" "| **Mistral Vibe** | Mistral AI coding agent |"
+check_contains "$DOC_FILE" "| **Qwen Code** | Qwen AI coding assistant |"
+check_contains "$DOC_FILE" "| **ZAI** | Zhipu AI GLM coding agent |"
 
 # Python tools should include key dev tools
 check_contains "$PYTOOLS_FILE" "install_python_tool \"pytest\""

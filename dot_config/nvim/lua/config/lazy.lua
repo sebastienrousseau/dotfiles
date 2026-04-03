@@ -14,10 +14,17 @@ if not vim.uv.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- User-local plugin specs (not managed by chezmoi)
+local _lazy_spec = {
+  { import = "plugins" },
+}
+local _user_plugins = vim.fn.stdpath("config") .. "/lua/plugins.local"
+if vim.uv.fs_stat(_user_plugins) then
+  table.insert(_lazy_spec, { import = "plugins.local" })
+end
+
 require("lazy").setup({
-  spec = {
-    { import = "plugins" },
-  },
+  spec = _lazy_spec,
   defaults = {
     lazy = false,
     version = false,

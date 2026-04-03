@@ -56,7 +56,7 @@ while [[ $# -gt 0 ]]; do
       exit 0
       ;;
     *)
-      echo -e "${RED}Unknown option: $1${NC}"
+      printf '%b\n' "${RED}Unknown option: $1${NC}"
       exit 1
       ;;
   esac
@@ -84,7 +84,7 @@ detect_provider() {
 PROVIDER="${PROVIDER:-$(detect_provider)}"
 
 if [[ -z "$PROVIDER" ]]; then
-  echo -e "${RED}Error: No AI provider found. Install claude, gemini, sgpt, aider, or ollama.${NC}"
+  printf '%b\n' "${RED}Error: No AI provider found. Install claude, gemini, sgpt, aider, or ollama.${NC}"
   exit 1
 fi
 
@@ -93,11 +93,11 @@ if ! git diff --cached --quiet; then
   DIFF=$(git diff --cached --stat)
   DIFF_CONTENT=$(git diff --cached)
 else
-  echo -e "${YELLOW}No staged changes. Stage changes with 'git add' first.${NC}"
+  printf '%b\n' "${YELLOW}No staged changes. Stage changes with 'git add' first.${NC}"
   exit 1
 fi
 
-echo -e "${BLUE}Generating commit message using ${PROVIDER}...${NC}"
+printf '%b\n' "${BLUE}Generating commit message using ${PROVIDER}...${NC}"
 
 # Prompt for commit message generation
 PROMPT="Generate a concise, conventional commit message for the following git diff.
@@ -136,7 +136,7 @@ case "$PROVIDER" in
     MESSAGE=$(echo "$PROMPT" | ollama run "$MODEL" 2>/dev/null || echo "")
     ;;
   *)
-    echo -e "${RED}Unknown provider: $PROVIDER${NC}"
+    printf '%b\n' "${RED}Unknown provider: $PROVIDER${NC}"
     exit 1
     ;;
 esac
@@ -145,11 +145,11 @@ esac
 MESSAGE=$(echo "$MESSAGE" | sed 's/^```[a-z]*//g' | sed 's/```$//g' | sed '/^$/d' | head -20)
 
 if [[ -z "$MESSAGE" ]]; then
-  echo -e "${RED}Failed to generate commit message.${NC}"
+  printf '%b\n' "${RED}Failed to generate commit message.${NC}"
   exit 1
 fi
 
-echo -e "${GREEN}Generated commit message:${NC}"
+printf '%b\n' "${GREEN}Generated commit message:${NC}"
 echo "---"
 echo "$MESSAGE"
 echo "---"
@@ -169,7 +169,7 @@ read -p "Commit with this message? [Y/n] " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY ]]; then
   git commit -m "$MESSAGE"
-  echo -e "${GREEN}Committed successfully!${NC}"
+  printf '%b\n' "${GREEN}Committed successfully!${NC}"
 else
-  echo -e "${YELLOW}Commit cancelled.${NC}"
+  printf '%b\n' "${YELLOW}Commit cancelled.${NC}"
 fi

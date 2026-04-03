@@ -58,3 +58,8 @@ environment() {
   # Output the result
   echo "${LOCAL_OS}"
 }
+
+# Detect Windows Subsystem for Linux
+is_wsl() {
+  [[ -f /proc/version ]] && grep -qi microsoft /proc/version 2>/dev/null
+}

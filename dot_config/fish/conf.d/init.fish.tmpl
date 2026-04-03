@@ -29,6 +29,11 @@ if test "$DOTFILES_ARTIFACT_MODE" = "1"
     set -g fish_greeting ""
 end
 
+# ── Starship (eager — must survive cache clears) ────────────────
+if test "$DOTFILES_ARTIFACT_MODE" = "0"; and command -v starship >/dev/null
+    starship init fish | source
+end
+
 # ── Lazy Hydration (deferred to first prompt) ────────────────────
 function _dotfiles_async_init
     # Mise
@@ -39,10 +44,6 @@ function _dotfiles_async_init
     if command -v atuin >/dev/null
         _cached_eval atuin init fish
     end
-    # Starship (skip in Artifact Mode)
-    if test "$DOTFILES_ARTIFACT_MODE" = "0"; and command -v starship >/dev/null
-        _cached_eval starship init fish
-    end
     # Zoxide (--cmd=cd replaces cd with zoxide-aware version)
     if command -v zoxide >/dev/null
         _cached_eval zoxide init --cmd=cd fish
@@ -51,10 +52,9 @@ function _dotfiles_async_init
     if command -v fzf >/dev/null
         _cached_eval fzf --fish
     end
-    # Carapace completions
+    # Carapace completions (cached)
     if command -v carapace >/dev/null 2>&1
-        mkdir -p ~/.config/fish/completions
-        carapace _carapace fish | source
+        _cached_eval carapace _carapace fish
     end
     # Pueue daemon (deferred here to avoid blocking shell startup)
     if command -v pueue >/dev/null; and not pueue status >/dev/null 2>&1

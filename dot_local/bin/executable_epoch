@@ -40,7 +40,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     -h | --help)
-      echo -e "${PURPLE}epoch${NC} ${GRAY}convert to/from unix time${NC}"
+      printf '%b\n' "${PURPLE}epoch${NC} ${GRAY}convert to/from unix time${NC}"
       echo "Usage: epoch [options] [value]"
       echo "  -r, --reverse   Convert date string to epoch"
       echo "  -m, --millis    Use milliseconds"

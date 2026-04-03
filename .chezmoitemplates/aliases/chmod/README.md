@@ -109,7 +109,7 @@ Created with  by [Sebastien Rousseau](https://sebastienrousseau.com)
 - Website: [https://sebastienrousseau.com](https://sebastienrousseau.com)
 - GitHub: [https://github.com/sebastienrousseau](https://github.com/sebastienrousseau)
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

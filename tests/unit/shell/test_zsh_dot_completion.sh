@@ -106,7 +106,7 @@ fi
 # Test: AI command completions include new providers
 test_start "dot_completion_ai_providers"
 missing=""
-for cmd in copilot cline kiro sgpt ollama opencode aider gemini; do
+for cmd in copilot kiro sgpt ollama opencode aider gemini; do
   if ! grep -q " $cmd)" "$COMP_FILE" 2>/dev/null && ! grep -q "'$cmd:" "$COMP_FILE" 2>/dev/null; then
     missing="$missing $cmd"
   fi

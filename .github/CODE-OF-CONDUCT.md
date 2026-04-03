@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD033 MD041 MD043 -->
 
 <img
-  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+  src="https://cloudcdn.pro/dotfiles/v2/images/logos/dotfiles.svg"
   alt="dotfiles logo"
   width="66"
   align="right"
@@ -9,7 +9,7 @@
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.498)
+# Dotfiles (v0.2.499)
 
 Designed to fit your shell life
 
@@ -94,4 +94,4 @@ This Code of Conduct is adapted from the
 
 [version]: http://contributor-covenant.org/version/1/4/
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg

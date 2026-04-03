@@ -1,10 +1,10 @@
 # Install
 
-Install on macOS, Linux, or WSL in 3-5 minutes.
+Set up on macOS, Linux, or WSL in 3 to 5 minutes.
 
-**Prerequisites:** `git` and `curl`.
+**You will need:** `git` and `curl`.
 
-**Default shell:** Fish (change it after installation).
+**Default shell:** Fish. You can change it after you install.
 
 ## Install
 
@@ -14,7 +14,7 @@ bash -c "$(
 )"
 ```
 
-Then restart the terminal or run `exec $SHELL`.
+Then restart your terminal or run `exec $SHELL`.
 
 ## Verify
 
@@ -26,7 +26,7 @@ dot help             # Browse available commands
 
 ## Choose a shell
 
-The default shell is Fish. Switch to Zsh or Nushell by editing `~/.dotfiles/.chezmoidata.toml`:
+Fish is the default shell. To switch to Zsh or Nushell, edit `~/.dotfiles/.chezmoidata.toml`:
 
 ```toml
 default_shell = "zsh"
@@ -34,7 +34,7 @@ default_shell = "zsh"
 
 Supported values: `zsh`, `fish`, `nushell`.
 
-Apply the change:
+Then apply the change:
 
 ```bash
 dot apply
@@ -42,7 +42,7 @@ dot apply
 
 ## Feature flags
 
-Toggle optional tools after initial setup. Edit `.chezmoidata.toml`:
+Turn optional tools on or off after setup. Edit `.chezmoidata.toml`:
 
 ```toml
 [features]
@@ -62,8 +62,8 @@ dot update
 
 ## Next steps
 
-1. Run `dot learn` for an interactive onboarding tour.
-2. Customize files in `~/.config/shell/custom/`.
+1. Run `dot learn` to take a guided tour.
+2. Add your own tweaks in `~/.config/shell/custom/`.
 3. Read the [Utilities and `dot` CLI](../reference/UTILS.md) reference.
 
 ---
@@ -72,7 +72,7 @@ dot update
 
 ### Local source install
 
-Clone first, then run the installer from the local source tree:
+Clone the repo first, then run the installer from your local copy:
 
 ```bash
 git clone https://github.com/sebastienrousseau/dotfiles.git ~/.dotfiles
@@ -82,7 +82,7 @@ cd ~/.dotfiles
 
 ### Minimal install
 
-Install shells and essentials only (skip editor and terminal extras):
+Install only shells and core tools. This skips editor and terminal extras:
 
 ```bash
 ./install.sh --minimal
@@ -90,7 +90,7 @@ Install shells and essentials only (skip editor and terminal extras):
 
 ### Non-interactive install
 
-For CI or automation:
+Use this mode for CI or scripts that run without user input:
 
 ```bash
 DOTFILES_SILENT=1 DOTFILES_NONINTERACTIVE=1 \
@@ -108,13 +108,13 @@ nix profile install ~/.dotfiles/nix#dot-utils
 
 ### Offline bundle
 
-Create a bundle on a connected machine:
+On a machine with internet access, create a bundle:
 
 ```bash
 dot bundle ~/Downloads
 ```
 
-Transfer the archive. Then unpack and install:
+Copy the archive to the target machine. Then unpack and install:
 
 ```bash
 tar --zstd -xf dotfiles_offline_bundle_*.tar.zst -P
@@ -132,7 +132,7 @@ rm -rf ~/.local/share/chezmoi ~/.local/share/dotfiles.log
 
 ### Signed contributions
 
-Signed commits are required. See [Contributing](../../CONTRIBUTING.md).
+All commits must be signed. See [Contributing](../../CONTRIBUTING.md) for details.
 
 ---
 

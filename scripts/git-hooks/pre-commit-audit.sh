@@ -15,13 +15,13 @@ YELLOW='\033[0;33m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-echo -e "${BOLD}🕵️  Running Pre-Commit Audit...${NC}"
+printf '%b\\n' "${BOLD}🕵️  Running Pre-Commit Audit...${NC}"
 
 # Get list of staged files
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
 
 if [[ -z "$STAGED_FILES" ]]; then
-  echo -e "${GREEN}✓ No files staged. Skipping.${NC}"
+  printf '%b\\n' "${GREEN}✓ No files staged. Skipping.${NC}"
   exit 0
 fi
 
@@ -36,12 +36,12 @@ SENSITIVE_PATTERNS="(GITHUB_TOKEN|API_KEY|SECRET|password|private_key|AKIA[0-9A-
 SECRET_EXCLUDES="test_|assertions.sh|.pre-commit|README|CHANGELOG|FEATURES.md|CONFIG_STRATEGY.md|docs/|install/lib/|.chezmoitemplates/|mcp-doctor.sh|\.github/workflows/"
 # Also exclude .tmpl files from secret scanning as they contain many false positive markers
 if echo "$STAGED_FILES" | grep -v "\.tmpl" | xargs grep -EiE "$SENSITIVE_PATTERNS" /dev/null | grep -vE "$SECRET_EXCLUDES" | grep -viE "dummy|placeholder|example|test|sk-placeholder|\\{\\{" >/dev/null 2>&1; then
-  echo -e "${RED}FAILED${NC}"
-  echo -e "      ${YELLOW}⚠ Potential secret detected in staged files:${NC}"
+  printf '%b\\n' "${RED}FAILED${NC}"
+  printf '%b\\n' "      ${YELLOW}⚠ Potential secret detected in staged files:${NC}"
   echo "$STAGED_FILES" | grep -v "\.tmpl" | xargs grep -EiE "$SENSITIVE_PATTERNS" /dev/null | grep -vE "$SECRET_EXCLUDES" | grep -viE "dummy|placeholder|example|test|sk-placeholder|\\{\\{" | sed 's/^/      /'
   FAILED=1
 else
-  echo -e "${GREEN}PASSED${NC}"
+  printf '%b\\n' "${GREEN}PASSED${NC}"
 fi
 
 # --- 👻 2. Ghost Path Linter ---
@@ -49,12 +49,12 @@ echo -n "   👻 Checking for hardcoded paths... "
 # Exclude test files, documentation, the hook itself, Nix files, and template backups
 GHOST_EXCLUDES="test_|assertions.sh|pre-commit|INTEROP.md|WSL2_NIX_TROUBLESHOOTING.md|\.nix|\.backup|\.github/workflows/"
 if echo "$STAGED_FILES" | xargs grep -rIE '"/home/(linuxbrew)?[^$]|/Users/[^$]' /dev/null | grep -v "linuxbrew" | grep -vE "$GHOST_EXCLUDES" >/dev/null 2>&1; then
-  echo -e "${RED}FAILED${NC}"
-  echo -e "      ${YELLOW}⚠ Literal home paths detected (use \$HOME or ~ instead):${NC}"
+  printf '%b\\n' "${RED}FAILED${NC}"
+  printf '%b\\n' "      ${YELLOW}⚠ Literal home paths detected (use \$HOME or ~ instead):${NC}"
   echo "$STAGED_FILES" | xargs grep -rIE '"/home/(linuxbrew)?[^$]|/Users/[^$]' /dev/null | grep -v "linuxbrew" | grep -vE "$GHOST_EXCLUDES" | sed 's/^/      /'
   FAILED=1
 else
-  echo -e "${GREEN}PASSED${NC}"
+  printf '%b\\n' "${GREEN}PASSED${NC}"
 fi
 
 # --- 🐚 3. ShellCheck Hygiene ---
@@ -65,15 +65,15 @@ if command -v shellcheck >/dev/null 2>&1; then
   SHELL_FILES=$(echo "$STAGED_FILES" | grep -E '\.sh$' | grep -v "\.tmpl" || true)
   if [[ -n "$SHELL_FILES" ]]; then
     if ! echo "$SHELL_FILES" | xargs shellcheck -x --severity=error -e SC1091,SC2296,SC2142 >/dev/null 2>&1; then
-      echo -e "${RED}FAILED${NC}"
-      echo -e "      ${YELLOW}⚠ Shell syntax errors detected:${NC}"
+      printf '%b\\n' "${RED}FAILED${NC}"
+      printf '%b\\n' "      ${YELLOW}⚠ Shell syntax errors detected:${NC}"
       echo "$SHELL_FILES" | xargs shellcheck -x --severity=error -e SC1091,SC2296,SC2142 | sed 's/^/      /'
       FAILED=1
     else
-      echo -e "${GREEN}PASSED${NC}"
+      printf '%b\\n' "${GREEN}PASSED${NC}"
     fi
   else
-    echo -e "${YELLOW}SKIPPED${NC} (no .sh files)"
+    printf '%b\\n' "${YELLOW}SKIPPED${NC} (no .sh files)"
   fi
 fi
 # --- 🧹 4. Formatting Audit ---
@@ -85,17 +85,17 @@ MERGE_START="^<<<<<<< "
 MERGE_END="^>>>>>>> "
 MERGE_DIV="^=======$"
 if [[ -n "$OFFENDING_WHITESPACE" ]]; then
-  echo -e "${RED}FAILED${NC}"
-  echo -e "      ${YELLOW}⚠ Trailing whitespace found in staged files:${NC}"
+  printf '%b\\n' "${RED}FAILED${NC}"
+  printf '%b\\n' "      ${YELLOW}⚠ Trailing whitespace found in staged files:${NC}"
   echo "      ${OFFENDING_WHITESPACE//$'\n'/$'\n'      }"
   FAILED=1
 elif echo "$STAGED_FILES" | xargs grep -lE "$MERGE_START|$MERGE_END|$MERGE_DIV" /dev/null >/dev/null 2>&1; then
-  echo -e "${RED}FAILED${NC}"
-  echo -e "      ${YELLOW}⚠ Unresolved merge markers found in staged files:${NC}"
+  printf '%b\\n' "${RED}FAILED${NC}"
+  printf '%b\\n' "      ${YELLOW}⚠ Unresolved merge markers found in staged files:${NC}"
   echo "$STAGED_FILES" | xargs grep -lE "$MERGE_START|$MERGE_END|$MERGE_DIV" /dev/null | sed 's/^/      /'
   FAILED=1
 else
-  echo -e "${GREEN}PASSED${NC}"
+  printf '%b\\n' "${GREEN}PASSED${NC}"
 fi
 
 # --- 🏛️ 5. Signature Guard ---
@@ -105,7 +105,7 @@ if echo "$STAGED_FILES" | grep -q "^README.md$"; then
   EXPECTED_ENGINE='**THE ENGINE** ᛞ [EUXIS](https://euxis.co) ᛫ Enterprise Unified Execution Intelligence System'
   README_CONTENT=$(git show :README.md 2>/dev/null || cat README.md)
   if echo "$README_CONTENT" | grep -qF "$EXPECTED_ARCHITECT" && echo "$README_CONTENT" | grep -qF "$EXPECTED_ENGINE"; then
-    echo -e "${GREEN}PASSED${NC}"
+    printf '%b\\n' "${GREEN}PASSED${NC}"
   else
     # Auto-add the signature footer before ## License (or at EOF)
     tmp_footer=$(mktemp)
@@ -130,16 +130,16 @@ if echo "$STAGED_FILES" | grep -q "^README.md$"; then
     fi
     rm -f "$tmp_footer"
     git add README.md
-    echo -e "${GREEN}FIXED${NC} (auto-added)"
+    printf '%b\\n' "${GREEN}FIXED${NC} (auto-added)"
   fi
 fi
 
 echo ""
 if [[ $FAILED -eq 1 ]]; then
-  echo -e "${RED}${BOLD}❌ Audit failed.${NC} Please fix the issues above before committing."
-  echo -e "   (Use --no-verify to bypass if absolutely necessary)"
+  printf '%b\\n' "${RED}${BOLD}❌ Audit failed.${NC} Please fix the issues above before committing."
+  printf '%b\\n' "   (Use --no-verify to bypass if absolutely necessary)"
   exit 1
 else
-  echo -e "${GREEN}${BOLD}✅ Audit passed.${NC} v0.2.498 standards maintained."
+  printf '%b\n' "${GREEN}${BOLD}✅ Audit passed.${NC} v0.2.499 standards maintained."
   exit 0
 fi

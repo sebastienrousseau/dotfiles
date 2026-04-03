@@ -147,50 +147,93 @@ check_cmd() {
 
 echo ""
 ui_header "AI provider CLI checks (optional)"
-if check_cmd "claude"; then
-  ui_ok "claude"
-else
-  ui_err "claude" "recommended — install to enable this provider"
-fi
-if check_cmd "copilot"; then
-  ui_ok "copilot"
-else
-  ui_err "copilot" "optional — install to enable this provider"
-fi
-if check_cmd "cline"; then
-  ui_ok "cline"
-else
-  ui_err "cline" "optional — install to enable this provider"
-fi
-if check_cmd "gemini"; then
-  ui_ok "gemini"
-else
-  ui_err "gemini" "optional — install to enable this provider"
-fi
-if check_cmd "sgpt"; then
-  ui_ok "sgpt"
-else
-  ui_err "sgpt" "optional — install to enable this provider"
-fi
-if check_cmd "ollama"; then
-  ui_ok "ollama"
-else
-  ui_err "ollama" "optional — install to enable this provider"
-fi
-if check_cmd "opencode"; then
-  ui_ok "opencode"
-else
-  ui_err "opencode" "optional — install to enable this provider"
-fi
-if check_cmd "aider"; then
-  ui_ok "aider"
-else
-  ui_err "aider" "optional — AI pair programming"
-fi
-if check_cmd "kiro-cli"; then
-  ui_ok "kiro-cli"
-else
-  ui_err "kiro-cli" "optional — install to enable this provider"
+
+# binary|mise_package|label
+_AI_PROVIDERS=(
+  "claude|npm:@anthropic-ai/claude-code|Claude Code"
+  "copilot|npm:@github/copilot|Copilot CLI"
+  "gemini|npm:@google/gemini-cli|Gemini CLI"
+  "sgpt|pipx:shell-gpt|Shell-GPT"
+  "ollama|aqua:ollama/ollama|Ollama"
+  "opencode|npm:opencode-ai|OpenCode"
+  "aider|pipx:aider-chat|Aider"
+  "kiro-cli|kiro-cli|Kiro CLI"
+  "autohand|npm:autohand-cli|Autohand Code"
+  "vibe|pipx:mistral-vibe|Mistral Vibe"
+  "qwen|npm:@qwen-code/qwen-code|Qwen Code"
+  "zai|npm:@guizmo-ai/zai-cli|ZAI"
+)
+
+_ai_missing=()
+for _entry in "${_AI_PROVIDERS[@]}"; do
+  IFS='|' read -r _bin _pkg _label <<<"$_entry"
+  if check_cmd "$_bin"; then
+    ui_ok "$_label"
+  else
+    ui_info "$_label" "not installed"
+    _ai_missing+=("$_entry")
+  fi
+done
+
+if [[ ${#_ai_missing[@]} -gt 0 ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]]; then
+  if command -v mise &>/dev/null; then
+    echo ""
+    _ai_install_action=""
+    if command -v gum &>/dev/null; then
+      _ai_install_action=$(printf '%s\n' "Install all" "Choose which to install" "Skip" |
+        gum choose --header "Missing AI providers — install via mise?") || _ai_install_action=""
+    else
+      ui_info "Tip" "Install all missing AI providers with: mise install"
+      ui_info "Tip" "Or individually: mise use -g <package>@latest"
+    fi
+
+    _ai_to_install=()
+    case "$_ai_install_action" in
+      "Install all")
+        _ai_to_install=("${_ai_missing[@]}")
+        ;;
+      "Choose which to install")
+        _ai_pick_choices=()
+        for _entry in "${_ai_missing[@]}"; do
+          IFS='|' read -r _bin _pkg _label <<<"$_entry"
+          _ai_pick_choices+=("$_label")
+        done
+        _ai_picked=$(printf '%s\n' "${_ai_pick_choices[@]}" |
+          gum choose --no-limit --header "Select providers to install (Space to toggle, Enter to confirm)") || _ai_picked=""
+        if [[ -n "$_ai_picked" ]]; then
+          while IFS= read -r _selected; do
+            [[ -z "$_selected" ]] && continue
+            for _entry in "${_ai_missing[@]}"; do
+              IFS='|' read -r _bin _pkg _label <<<"$_entry"
+              if [[ "$_label" == "$_selected" ]]; then
+                _ai_to_install+=("$_entry")
+              fi
+            done
+          done <<<"$_ai_picked"
+        fi
+        ;;
+    esac
+
+    if [[ ${#_ai_to_install[@]} -gt 0 ]]; then
+      echo ""
+      for _entry in "${_ai_to_install[@]}"; do
+        IFS='|' read -r _bin _pkg _label <<<"$_entry"
+        if command -v gum &>/dev/null; then
+          if gum spin --spinner dot --title "Installing $_label ($_pkg)" -- \
+            mise use -g "$_pkg@latest" 2>&1; then
+            ui_ok "$_label" "installed"
+          else
+            ui_warn "$_label" "install failed (continuing)"
+          fi
+        else
+          ui_info "Installing" "$_label via mise ($_pkg)"
+          mise use -g "$_pkg@latest" 2>&1 || ui_warn "$_label" "install failed (continuing)"
+        fi
+      done
+    fi
+  else
+    ui_warn "mise" "not found — install mise first to manage AI providers"
+  fi
 fi
 
 if [[ "${DOTFILES_CHEZMOI_STATUS:-1}" = "1" ]]; then
@@ -209,6 +252,14 @@ if [[ "${DOTFILES_POST_APPLY_REPAIR:-1}" = "1" ]]; then
   if [[ -f "$post_apply_script" ]]; then
     printf "\n"
     bash "$post_apply_script" || true
+  fi
+fi
+
+if [[ "${DOTFILES_PREWARM_ON_APPLY:-1}" = "1" ]]; then
+  prewarm_script="$SCRIPT_DIR/prewarm.sh"
+  if [[ -f "$prewarm_script" ]]; then
+    printf "\n"
+    run_step "Pre-warming shell caches" bash "$prewarm_script"
   fi
 fi
 

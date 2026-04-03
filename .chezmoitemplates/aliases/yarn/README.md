@@ -17,7 +17,7 @@ These aliases are defined in `yarn.aliases.sh` and are automatically loaded by `
 - `yrun` - Run script
 - `ystem` - Start
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

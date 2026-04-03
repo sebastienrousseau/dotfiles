@@ -139,7 +139,7 @@ compress_large xz largefile.dat
 c7z archive.7z files/  # No additional parameters needed
 ```
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

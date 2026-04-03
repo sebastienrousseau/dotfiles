@@ -31,7 +31,7 @@ This code provides a set of aliases for macOS.
 - `wifiOff` Turn off Wi-Fi.
 - `xcode` Launch XCode app in macOS.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

@@ -69,7 +69,7 @@ for various checksum and hash utilities like "md5sum" and "sha256sum".
 - `base64` Encode or decode base64 data.
 - `basenc` Encode or decode base64, base32,
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

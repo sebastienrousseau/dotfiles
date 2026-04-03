@@ -101,6 +101,40 @@ if command -v sgpt &>/dev/null; then
   alias aie='sgpt --shell'
 fi
 
+# Autohand Code CLI
+if command -v autohand &>/dev/null; then
+  alias ah='autohand'
+  alias ahc='autohand chat'
+  alias ahr='autohand run'
+fi
+
+# Mistral Vibe CLI
+if command -v vibe &>/dev/null; then
+  alias vb='vibe'
+  alias vbc='vibe chat'
+  alias vbr='vibe run'
+fi
+
+# Qwen Code CLI
+if command -v qwen &>/dev/null; then
+  alias qw='qwen'
+  alias qwc='qwen chat'
+  alias qwr='qwen run'
+fi
+
+# ZAI CLI (Zhipu AI)
+if command -v zai &>/dev/null; then
+  alias za='zai'
+  alias zac='zai chat'
+  alias zar='zai run'
+fi
+
+# Ghost text / inline suggestions
+if command -v ghost &>/dev/null; then
+  alias gt='ghost'
+  alias gts='ghost suggest'
+fi
+
 # ai_core wrapper (fast query shortcut)
 if command -v ai_core &>/dev/null; then
   if ! alias a >/dev/null 2>&1; then

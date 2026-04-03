@@ -180,6 +180,14 @@ if [[ -d "${ZSH_RC_DIR}" ]]; then
   done
 fi
 
+# User-local rc.d extensions (not managed by chezmoi)
+if [[ -d "${ZDOTDIR:-$HOME/.config/zsh}/rc.d.local" ]]; then
+  for _rc_local in "${ZDOTDIR:-$HOME/.config/zsh}"/rc.d.local/*.zsh(N); do
+    source "$_rc_local"
+  done
+  unset _rc_local
+fi
+
 ###############################
 # Performance: Auto-Zcompile  #
 ###############################
@@ -247,6 +255,19 @@ for core_layer in "${_core_layers[@]}"; do
   [[ -f "${HOME}/.config/shell/${core_layer}.sh" ]] && source "${HOME}/.config/shell/${core_layer}.sh"
 done
 unset _core_layers
+
+# Starship prompt (eager — must survive cache clears for consistent UI)
+if [[ "$DOTFILES_ARTIFACT_MODE" != "1" ]] && (( ${+commands[starship]} )); then
+  _cached_eval starship-init starship init zsh
+fi
+
+# User-local modules (aliases, functions — not managed by chezmoi)
+for _mod_dir in "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/modules.d"/*(N/); do
+  for _mod_file in "$_mod_dir"/*.sh(N); do
+    source "$_mod_file"
+  done
+done
+unset _mod_dir _mod_file
 
 if [[ "${DOTFILES_FAST}" != "1" ]]; then
   # On-demand loading of heavy layers (functions + aliases only when needed)

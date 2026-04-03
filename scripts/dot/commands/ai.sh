@@ -4,7 +4,7 @@
 ##
 ## Provides AI CLI status, setup, RAG query, and bridge commands.
 ## Wraps AI CLI tools with contextual patterns and system metadata.
-## Usage: dot ai|ai-setup|ai-query|cl|copilot|cline|gemini|kiro|sgpt|ollama|opencode|aider
+## Usage: dot ai|ai-setup|ai-query|cl|copilot|gemini|kiro|sgpt|ollama|opencode|aider|autohand|vibe|qwen|zai
 
 set -euo pipefail
 
@@ -28,7 +28,7 @@ if [[ ! -d "$PATTERN_DIR" ]]; then
 fi
 
 _show_ai_bridge_usage() {
-  echo "Usage: dot cl|copilot|cline|gemini|kiro --pattern [name] \"prompt\""
+  echo "Usage: dot cl|copilot|gemini|kiro|autohand|vibe|qwen|zai --pattern [name] \"prompt\""
   echo ""
   echo "Available Patterns:"
   ls -1 "$PATTERN_DIR" 2>/dev/null | sed 's/\.md$//' | sed 's/^/  - /' || echo "  (none)"
@@ -39,7 +39,7 @@ _ai_cache_fresh() {
   [[ -f "$file" ]] || return 1
   local now mtime
   now=$(date +%s)
-  mtime=$(stat -f %m "$file" 2>/dev/null || echo 0)
+  mtime=$(stat -c %Y "$file" 2>/dev/null || stat -f %m "$file" 2>/dev/null || echo 0)
   ((now - mtime < AI_STATUS_TTL))
 }
 
@@ -77,16 +77,38 @@ _ai_get_cached_status() {
   cat "$AI_STATUS_CACHE_FILE"
 }
 
+# binary -> mise package mapping
+_ai_mise_pkg() {
+  case "$1" in
+    claude) echo "npm:@anthropic-ai/claude-code" ;;
+    copilot) echo "npm:@github/copilot" ;;
+    aider) echo "pipx:aider-chat" ;;
+    opencode) echo "npm:opencode-ai" ;;
+    sgpt) echo "pipx:shell-gpt" ;;
+    gemini) echo "npm:@google/gemini-cli" ;;
+    ollama) echo "aqua:ollama/ollama" ;;
+    kiro-cli) echo "kiro-cli" ;;
+    autohand) echo "npm:autohand-cli" ;;
+    vibe) echo "pipx:mistral-vibe" ;;
+    qwen) echo "npm:@qwen-code/qwen-code" ;;
+    zai) echo "npm:@guizmo-ai/zai-cli" ;;
+    *) echo "" ;;
+  esac
+}
+
 cmd_ai_status() {
   ui_header "AI CLI Status"
 
-  # category|name|binary|description
+  # category|role|name|binary|description
   local -a ai_clis=(
     "Agents (autonomous)|agent|Claude Code|claude|Anthropic CLI agent"
     "Agents (autonomous)|agent|Copilot CLI|copilot|GitHub Copilot CLI"
-    "Agents (autonomous)|agent|Cline CLI|cline|Terminal coding agent"
     "Coding (interactive)|coding|Aider|aider|AI pair programmer"
     "Coding (interactive)|coding|OpenCode|opencode|Terminal coding assistant"
+    "Coding (interactive)|coding|Autohand Code|autohand|Autohand coding agent"
+    "Coding (interactive)|coding|Mistral Vibe|vibe|Mistral AI coding agent"
+    "Coding (interactive)|coding|Qwen Code|qwen|Qwen AI coding assistant"
+    "Coding (interactive)|coding|ZAI|zai|Zhipu AI coding agent"
     "General (prompt-based)|general|Shell-GPT|sgpt|ChatGPT terminal interface"
     "General (prompt-based)|general|Gemini CLI|gemini|Google AI CLI"
     "Runtime (local)|local|Ollama|ollama|Local LLM runner"
@@ -106,6 +128,7 @@ cmd_ai_status() {
   done < <(_ai_get_cached_status)
 
   local -a installed=()
+  local -a missing=()
   local current_category=""
   local category role name bin desc ver
   for entry in "${ai_clis[@]}"; do
@@ -121,9 +144,77 @@ cmd_ai_status() {
       ui_ok "$name" "$ver — $desc"
       installed+=("$name|$bin|$role")
     else
-      ui_info "$name" "— $desc"
+      ui_info "$name" "— $desc (not installed)"
+      missing+=("$name|$bin")
     fi
   done
+
+  # Offer to install missing providers via mise
+  if [[ ${#missing[@]} -gt 0 ]] && has_command mise; then
+    echo ""
+    local _ai_install_action=""
+    if has_command gum; then
+      _ai_install_action=$(printf '%s\n' "Install all" "Choose which to install" "Skip" |
+        gum choose --header "Missing AI providers — install via mise?") || _ai_install_action=""
+    else
+      ui_info "Tip" "Install missing providers: mise install"
+      ui_info "Tip" "Or individually: mise use -g <package>@latest"
+    fi
+
+    local -a _ai_to_install=()
+    case "$_ai_install_action" in
+      "Install all")
+        _ai_to_install=("${missing[@]}")
+        ;;
+      "Choose which to install")
+        local -a _ai_pick_choices=()
+        for entry in "${missing[@]}"; do
+          IFS='|' read -r name bin <<<"$entry"
+          _ai_pick_choices+=("$name")
+        done
+        local _ai_picked
+        _ai_picked=$(printf '%s\n' "${_ai_pick_choices[@]}" |
+          gum choose --no-limit --header "Select providers to install (Space to toggle, Enter to confirm)") || _ai_picked=""
+        if [[ -n "$_ai_picked" ]]; then
+          while IFS= read -r selected; do
+            [[ -z "$selected" ]] && continue
+            for entry in "${missing[@]}"; do
+              IFS='|' read -r name bin <<<"$entry"
+              if [[ "$name" == "$selected" ]]; then
+                _ai_to_install+=("$entry")
+              fi
+            done
+          done <<<"$_ai_picked"
+        fi
+        ;;
+    esac
+
+    if [[ ${#_ai_to_install[@]} -gt 0 ]]; then
+      echo ""
+      for entry in "${_ai_to_install[@]}"; do
+        IFS='|' read -r name bin <<<"$entry"
+        local pkg
+        pkg=$(_ai_mise_pkg "$bin")
+        if [[ -n "$pkg" ]]; then
+          if has_command gum; then
+            if gum spin --spinner dot --title "Installing $name ($pkg)" -- \
+              mise use -g "$pkg@latest" 2>&1; then
+              ui_ok "$name" "installed"
+            else
+              ui_warn "$name" "install failed (continuing)"
+            fi
+          else
+            ui_info "Installing" "$name via mise ($pkg)"
+            mise use -g "$pkg@latest" 2>&1 || ui_warn "$name" "install failed (continuing)"
+          fi
+        fi
+      done
+      # Invalidate cache after installs
+      rm -f "$AI_STATUS_CACHE_FILE"
+      echo ""
+      ui_ok "Done" "Run 'dot ai' again to see updated status"
+    fi
+  fi
 
   echo ""
   if [ ${#installed[@]} -eq 0 ]; then
@@ -202,7 +293,8 @@ run_ai_with_context() {
   fi
 
   # Inject dynamic system metadata
-  local metadata="## System Metadata
+  local metadata
+  metadata="## System Metadata
 - OS: $(uname -s) $(uname -r)
 - Arch: $(uname -m)
 - Date: $(date -u)"
@@ -214,6 +306,44 @@ ${metadata}
 ## User Request
 ${prompt}"
 
+  # Resolve the binary name for the tool
+  local tool_bin="$tool"
+  case "$tool" in
+    cl) tool_bin="claude" ;;
+    kiro) tool_bin="kiro-cli" ;;
+  esac
+
+  # Check if the tool is installed; offer mise install if not
+  if ! has_command "$tool_bin"; then
+    local mise_pkg
+    mise_pkg=$(_ai_mise_pkg "$tool_bin")
+    if [[ -n "$mise_pkg" ]] && has_command mise; then
+      ui_warn "$tool" "not installed"
+      local do_install=""
+      if has_command gum; then
+        do_install=$(gum confirm "Install $tool via mise ($mise_pkg)?" && echo "yes" || echo "no")
+      else
+        printf "Install %s via mise (%s)? [y/N] " "$tool" "$mise_pkg"
+        read -r do_install
+        case "$do_install" in y | Y | yes) do_install="yes" ;; *) do_install="no" ;; esac
+      fi
+      if [[ "$do_install" == "yes" ]]; then
+        ui_info "Installing" "$tool via mise ($mise_pkg)"
+        mise use -g "$mise_pkg@latest" 2>&1 || {
+          ui_err "$tool" "installation failed"
+          exit 1
+        }
+        rm -f "$AI_STATUS_CACHE_FILE"
+      else
+        ui_err "$tool" "not installed — install with: mise use -g $mise_pkg@latest"
+        exit 1
+      fi
+    else
+      ui_err "$tool" "not installed and mise not available"
+      exit 1
+    fi
+  fi
+
   ui_info "Executing $tool with pattern: ${pattern_name:-none}"
 
   case "$tool" in
@@ -222,9 +352,6 @@ ${prompt}"
       ;;
     copilot)
       copilot -sp "$full_prompt"
-      ;;
-    cline)
-      cline "$full_prompt"
       ;;
     gemini)
       printf "%s" "$full_prompt" | gemini chat
@@ -243,6 +370,18 @@ ${prompt}"
       ;;
     aider)
       printf "%s" "$full_prompt" | aider --msg "-"
+      ;;
+    autohand)
+      printf "%s" "$full_prompt" | autohand chat
+      ;;
+    vibe)
+      printf "%s" "$full_prompt" | vibe chat
+      ;;
+    qwen)
+      printf "%s" "$full_prompt" | qwen chat
+      ;;
+    zai)
+      printf "%s" "$full_prompt" | zai chat
       ;;
     *)
       ui_err "Unsupported tool" "$tool"
@@ -265,7 +404,7 @@ case "${1:-}" in
     shift
     cmd_ai_query "$@"
     ;;
-  cl | claude | copilot | cline | gemini | kiro | sgpt | ollama | opencode | aider)
+  cl | claude | copilot | gemini | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
     tool="$1"
     shift
     run_ai_with_context "$tool" "$@"

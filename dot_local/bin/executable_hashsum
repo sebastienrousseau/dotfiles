@@ -147,10 +147,10 @@ if $CHECK_MODE; then
   COMPUTED_LOWER=$(echo "$COMPUTED" | tr '[:upper:]' '[:lower:]')
 
   if [[ "$EXPECTED_LOWER" == "$COMPUTED_LOWER" ]]; then
-    echo -e "${GREEN}Hash matches${NC}"
+    printf '%b\n' "${GREEN}Hash matches${NC}"
     exit 0
   else
-    echo -e "${RED}Hash mismatch${NC}"
+    printf '%b\n' "${RED}Hash mismatch${NC}"
     echo "  Expected: $EXPECTED"
     echo "  Got:      $COMPUTED"
     exit 1

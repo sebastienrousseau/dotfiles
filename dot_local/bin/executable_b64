@@ -19,7 +19,7 @@ if [ -t 1 ]; then IS_TTY=1; fi
 
 show_help() {
   if [ "$IS_TTY" -eq 1 ]; then
-    echo -e "${BOLD}${PURPLE}󰇧 Base64 Transcoder${NC} ${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+    printf '%b\n' "${BOLD}${PURPLE}󰇧 Base64 Transcoder${NC} ${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
   else
     echo "Base64 Transcoder"
   fi

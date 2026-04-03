@@ -52,7 +52,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.498)
+  version       The version (tag or branch) to install (default: v0.2.499)
 
 Options:
   --help        Show this help message
@@ -64,7 +64,7 @@ EOF
 }
 
 main() {
-  local version="v0.2.498"
+  local version="v0.2.499"
   local version_set=0
   local minimal=0
   local _cleanup_files=()
@@ -267,8 +267,14 @@ main() {
     rm -rf "$BACKUP_DIR" 2>/dev/null || true
   fi
 
+  # Detect devcontainer/Codespaces environment
+  if [[ -f /.dockerenv ]] || [[ -n "${CODESPACES:-}" ]] || [[ -n "${REMOTE_CONTAINERS:-}" ]]; then
+    DOTFILES_MINIMAL=1
+    step "Detected container environment — using minimal profile"
+  fi
+
   # Apply --minimal overrides if requested
-  if [[ $minimal -eq 1 ]]; then
+  if [[ $minimal -eq 1 ]] || [[ "${DOTFILES_MINIMAL:-0}" = "1" ]]; then
     step "Applying minimal profile overrides..."
     apply_minimal_profile_overrides "$SOURCE_DIR/.chezmoidata.toml"
   fi
@@ -327,6 +333,7 @@ main() {
   fi
 
   success "Configuration loaded. Please restart your shell."
+  step "Run 'dot learn' for an interactive tour of your new dotfiles."
 }
 
 # Run main if executed directly (or via bash -c where BASH_SOURCE is unset)

@@ -1,11 +1,11 @@
 <img
-  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+  src="https://cloudcdn.pro/dotfiles/v2/images/logos/dotfiles.svg"
   alt="dotfiles logo"
   width="66"
   align="right"
 />
 
-# Dotfiles Path Configuration (v0.2.498)
+# Dotfiles Path Configuration (v0.2.499)
 
 Modular PATH configuration managed by Chezmoi
 
@@ -44,4 +44,4 @@ Path configurations are split into priority-based files. `chezmoi` aggregates th
 
 <!-- markdownlint-enable MD013-->
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg

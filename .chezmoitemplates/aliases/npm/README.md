@@ -30,7 +30,7 @@ This code provides a set of aliases for
 - `npx` Exec npm package.
 - `npy` Why npm package.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

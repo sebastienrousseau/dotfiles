@@ -1,15 +1,15 @@
 <img
-  src="https://kura.pro/dotfiles/v2/images/logos/dotfiles.svg"
+  src="https://cloudcdn.pro/dotfiles/v2/images/logos/dotfiles.svg"
   alt="dotfiles logo"
   width="66"
   align="right"
 />
 
-# Chezmoi Templates (v0.2.498)
+# Chezmoi Templates (v0.2.499)
 
 Modular shell configuration managed by Chezmoi
 
-![Dotfiles banner](https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg)
+![Dotfiles banner](https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg)
 
 This directory contains modular templates that are aggregated into the shell environment during `chezmoi apply`.
 

@@ -1,0 +1,149 @@
+.TH DOT 1 "April 2026" "dotfiles v0.2.499" "User Commands"
+.SH NAME
+dot \- dotfiles management CLI
+.SH SYNOPSIS
+.B dot
+.RI [ command ]
+.RI [ options ]
+.SH DESCRIPTION
+.B dot
+is the control plane for a chezmoi-managed dotfiles system. It provides
+commands for applying configuration, diagnostics, repair, security, and
+AI-assisted development workflows.
+.SH COMMANDS
+.SS Core
+.TP
+.B apply
+Converge the machine onto the tracked configuration.
+.TP
+.B update
+Pull the latest state and pre-warm slow paths.
+.TP
+.B sync
+Alias for apply.
+.TP
+.B diff
+Show chezmoi diff with exclusions.
+.TP
+.B status
+Show configuration drift.
+.TP
+.B add \fIfile\fR
+Add a file to chezmoi source.
+.TP
+.B remove \fIfile\fR
+Safely remove a managed file.
+.TP
+.B edit
+Open chezmoi source in $EDITOR.
+.TP
+.B cd
+Print source directory path.
+.SS Diagnostics
+.TP
+.B doctor
+Audit tools, paths, portability, and security posture.
+.TP
+.B health
+Run health dashboard.
+.TP
+.B heal
+Auto-repair tools, chezmoi drift, broken symlinks, and missing files.
+.TP
+.B smoke\-test
+Exercise critical toolchains and integrations.
+.TP
+.B benchmark
+Run shell startup performance benchmarks.
+.TP
+.B score
+Compute overall system health score.
+.SS Recovery
+.TP
+.B rollback
+Manage backups and rollback to previous states.
+.TP
+.B bundle
+Produce a portable support or recovery archive.
+.TP
+.B snapshot
+Create a baseline snapshot.
+.SS Security
+.TP
+.B attest
+Export machine-readable workstation evidence.
+.TP
+.B secrets \fIsubcommand\fR
+Manage encrypted secrets (load, edit, provider).
+.TP
+.B mcp
+MCP policy validation and server management.
+.SS AI
+.TP
+.B ai
+AI CLI status dashboard and interactive launcher.
+.TP
+.B ai\-setup
+Bootstrap and authenticate AI CLIs.
+.TP
+.B cl, copilot, gemini, kiro, sgpt, ollama, opencode, aider
+AI bridge commands with context pattern injection.
+.TP
+.B autohand, vibe, qwen, zai
+Additional AI coding CLI bridges.
+.SS Tools
+.TP
+.B env
+Inspect or modify environment variables.
+.TP
+.B profile
+Show or switch active profile.
+.TP
+.B prewarm
+Regenerate shell caches for fast startup.
+.TP
+.B clean\-cache
+Clear shell initialization caches.
+.TP
+.B learn
+Interactive tour of dotfiles features.
+.SH ENVIRONMENT
+.TP
+.B DOTFILES_FAST=1
+Skip heavy layers (zinit, completions) for fast startup.
+.TP
+.B DOTFILES_ULTRA_FAST=1
+Bare minimum shell (aliases + prompt only).
+.TP
+.B DOTFILES_AI=1
+Enable AI helper scripts.
+.TP
+.B DOTFILES_NONINTERACTIVE=1
+Force non-interactive mode (for CI/scripts).
+.TP
+.B DOTFILES_PREWARM_ON_APPLY=1
+Auto-prewarm caches after dot apply (default: enabled).
+.SH FILES
+.TP
+.I ~/.dotfiles/
+Repository root (chezmoi source).
+.TP
+.I ~/.config/chezmoi/chezmoi.toml
+Per-machine overrides.
+.TP
+.I ~/.config/dotfiles/commands/
+User-provided custom dot commands.
+.TP
+.I ~/.config/dotfiles/modules.d/
+User-provided aliases and functions.
+.TP
+.I ~/.config/zsh/rc.d.local/
+User-provided zsh initialization scripts.
+.SH SEE ALSO
+.BR chezmoi (1),
+.BR mise (1),
+.BR zsh (1)
+.SH AUTHORS
+Sebastien Rousseau <sebastian.rousseau@gmail.com>
+.SH BUGS
+Report issues at https://github.com/sebastienrousseau/dotfiles/issues

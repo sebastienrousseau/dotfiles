@@ -33,14 +33,23 @@ setup_tool "Gemini CLI" "gemini" "gemini info"
 # 3. Copilot
 setup_tool "Copilot CLI" "copilot" "copilot --version"
 
-# 4. Cline
-setup_tool "Cline CLI" "cline" "cline auth"
-
-# 5. Kiro
+# 4. Kiro
 setup_tool "Kiro CLI" "kiro-cli" "kiro-cli auth login"
 
 # 6. Aider
 setup_tool "Aider" "aider" "aider --version"
+
+# 7. Autohand Code
+setup_tool "Autohand Code" "autohand" "autohand --version"
+
+# 8. Mistral Vibe
+setup_tool "Mistral Vibe" "vibe" "vibe --version"
+
+# 9. Qwen Code
+setup_tool "Qwen Code" "qwen" "qwen --version"
+
+# 10. ZAI
+setup_tool "ZAI" "zai" "zai --version"
 
 ui_header "AI Setup Complete"
 ui_info "All tools are ready. Use 'dot ai' to check status."

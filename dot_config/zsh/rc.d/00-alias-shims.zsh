@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Cognitive Shell Enhancements
 if [[ -o interactive ]]; then
   # Carapace completions — cached to avoid subshell on every startup
@@ -13,7 +14,7 @@ if [[ -o interactive ]]; then
   if command -v thefuck >/dev/null 2>&1; then
     _lazy_load_thefuck() {
       unset -f fuck _lazy_load_thefuck 2>/dev/null
-      eval "$(thefuck --alias)"
+      _cached_eval "thefuck-alias" thefuck --alias
     }
     fuck() { _lazy_load_thefuck; fuck "$@"; }
     alias fix='fuck'

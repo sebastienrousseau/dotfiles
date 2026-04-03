@@ -33,7 +33,7 @@ These aliases are defined in `kubernetes.aliases.sh` and are automatically loade
 ### ui
 - `k9` - k9s terminal UI
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

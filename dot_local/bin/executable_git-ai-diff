@@ -59,7 +59,7 @@ while [[ $# -gt 0 ]]; do
       exit 0
       ;;
     -*)
-      echo -e "${RED}Unknown option: $1${NC}"
+      printf '%b\n' "${RED}Unknown option: $1${NC}"
       exit 1
       ;;
     *)
@@ -91,7 +91,7 @@ detect_provider() {
 PROVIDER="${PROVIDER:-$(detect_provider)}"
 
 if [[ -z "$PROVIDER" ]]; then
-  echo -e "${RED}Error: No AI provider found. Install claude, gemini, sgpt, aider, or ollama.${NC}"
+  printf '%b\n' "${RED}Error: No AI provider found. Install claude, gemini, sgpt, aider, or ollama.${NC}"
   exit 1
 fi
 
@@ -107,13 +107,13 @@ else
 fi
 
 if [[ -z "$DIFF" ]]; then
-  echo -e "${YELLOW}No changes to review.${NC}"
+  printf '%b\n' "${YELLOW}No changes to review.${NC}"
   exit 0
 fi
 
-echo -e "${BLUE}Analyzing ${CONTEXT} using ${PROVIDER}...${NC}"
+printf '%b\n' "${BLUE}Analyzing ${CONTEXT} using ${PROVIDER}...${NC}"
 echo ""
-echo -e "${CYAN}Changed files:${NC}"
+printf '%b\n' "${CYAN}Changed files:${NC}"
 echo "$DIFF_STAT"
 echo ""
 
@@ -152,18 +152,18 @@ case "$PROVIDER" in
     ANALYSIS=$(echo "$PROMPT" | ollama run "$MODEL" 2>/dev/null || echo "")
     ;;
   *)
-    echo -e "${RED}Unknown provider: $PROVIDER${NC}"
+    printf '%b\n' "${RED}Unknown provider: $PROVIDER${NC}"
     exit 1
     ;;
 esac
 
 if [[ -z "$ANALYSIS" ]]; then
-  echo -e "${RED}Failed to analyze diff.${NC}"
+  printf '%b\n' "${RED}Failed to analyze diff.${NC}"
   exit 1
 fi
 
-echo -e "${GREEN}=== AI Code Review ===${NC}"
+printf '%b\n' "${GREEN}=== AI Code Review ===${NC}"
 echo ""
 echo "$ANALYSIS"
 echo ""
-echo -e "${GREEN}=== End Review ===${NC}"
+printf '%b\n' "${GREEN}=== End Review ===${NC}"

@@ -439,8 +439,22 @@ reload_desktop() {
     fi
 
     # Accent/highlight for consistency with selected theme family.
+    # Map accent to matching highlight color (RGB + name)
+    local highlight_color
+    case "$accent" in
+      -1) highlight_color="0.847059 0.847059 0.862745 Graphite" ;;
+      0)  highlight_color="0.968627 0.831373 0.792157 Red" ;;
+      1)  highlight_color="0.968627 0.890196 0.745098 Orange" ;;
+      2)  highlight_color="1.000000 0.937255 0.690196 Yellow" ;;
+      3)  highlight_color="0.752941 0.964706 0.678431 Green" ;;
+      4)  highlight_color="0.698039 0.843137 1.000000 Blue" ;;
+      5)  highlight_color="0.968627 0.831373 1.000000 Purple" ;;
+      6)  highlight_color="1.000000 0.749020 0.823529 Pink" ;;
+      *)  highlight_color="0.698039 0.843137 1.000000 Blue" ;;
+    esac
+
     if defaults write -g AppleAccentColor -int "$accent" >/dev/null 2>&1 &&
-      defaults write -g AppleHighlightColor -string "0.698039 0.843137 1.000000 Blue" >/dev/null 2>&1; then
+      defaults write -g AppleHighlightColor -string "$highlight_color" >/dev/null 2>&1; then
       changed=1
     fi
 

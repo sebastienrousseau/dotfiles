@@ -31,15 +31,15 @@ BOLD='[1m'
 
 # --- UI Components ---
 log_header() {
-  echo -e "
+  printf '%b\n' "
 ${BOLD}${PURPLE}Updating AI Environment${NC}"
-  echo -e "${GRAY}-----------------------------------------------------------${NC}"
+  printf '%b\n' "${GRAY}-----------------------------------------------------------${NC}"
 }
 
 step() { echo -ne "${CYAN}->${NC} ${BOLD}$1...${NC} "; }
-ok() { echo -e "${GREEN}done${NC}"; }
-skip() { echo -e "${YELLOW}skipped${NC} ${GRAY}($1)${NC}"; }
-err() { echo -e "${RED}error${NC}
+ok() { printf '%b\n' "${GREEN}done${NC}"; }
+skip() { printf '%b\n' "${YELLOW}skipped${NC} ${GRAY}($1)${NC}"; }
+err() { printf '%b\n' "${RED}error${NC}
    ${RED}$1${NC}"; }
 
 # --- Initialization ---
@@ -180,11 +180,11 @@ if command -v lms >/dev/null 2>&1; then
 fi
 
 # --- 4. Final Summary ---
-echo -e "${GRAY}-----------------------------------------------------------${NC}"
-echo -e "${GREEN}${BOLD}Dotfiles Environment Ready${NC}"
+printf '%b\n' "${GRAY}-----------------------------------------------------------${NC}"
+printf '%b\n' "${GREEN}${BOLD}Dotfiles Environment Ready${NC}"
 
 # Version Report
-echo -e "
+printf '%b\n' "
 ${BOLD}System Version Status:${NC}"
 printf "%b%-12s%b %s\n" "${GRAY}" "Node:" "${NC}" "$(node -v 2>/dev/null || echo 'N/A')"
 printf "%b%-12s%b %s\n" "${GRAY}" "Kiro:" "${NC}" "$(kiro-cli --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"

@@ -14,7 +14,7 @@ This code provides a set of aliases for the `rsync` command.
 - `rs` Rsync with verbose and progress.
 - `rs` Rsync with verbose and progress.
 
-[banner]: https://kura.pro/dotfiles/v2/images/titles/title-dotfiles.svg
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 
