@@ -198,44 +198,151 @@ else
   _warn "PIPX_HOME" "not set"
 fi
 
-# --- Platform ---
+# --- Platform (neofetch-style) ---
 _section "Platform"
-platform_id="$(dot_platform_id)"
-host_os="$(dot_host_os)"
-kernel="$(uname -sr)"
-arch="$(uname -m)"
-hostname_value="$(hostname 2>/dev/null || true)"
-session_type="${XDG_SESSION_TYPE:-unknown}"
-desktop_env="${XDG_CURRENT_DESKTOP:-unknown}"
+
+# Gather system info
+_user="$(whoami 2>/dev/null || echo "${USER:-unknown}")"
+_hostname="$(hostname -s 2>/dev/null || hostname 2>/dev/null || echo "unknown")"
+_kernel="$(uname -sr)"
+_arch="$(uname -m)"
+
 if uptime -p >/dev/null 2>&1; then
-  uptime_human="$(uptime -p 2>/dev/null | sed 's/^up //')"
+  _uptime="$(uptime -p 2>/dev/null | sed 's/^up //')"
 else
-  # macOS/BSD fallback output does not support "-p".
-  uptime_human="$(uptime 2>/dev/null | sed -E 's/^.* up ([^,]+(, [^,]+){0,2}), [0-9]+ users?.*$/\1/' || true)"
+  _uptime="$(uptime 2>/dev/null | sed -E 's/^.* up ([^,]+(, [^,]+){0,2}), [0-9]+ users?.*$/\1/' || true)"
 fi
 
-if [[ -r /etc/os-release ]]; then
-  distro_pretty="$(
-    # shellcheck disable=SC1091
-    . /etc/os-release
-    echo "${PRETTY_NAME:-$ID}"
-  )"
+_shell="${SHELL##*/} $(${SHELL} --version 2>&1 | head -1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1)"
+_terminal="${TERM_PROGRAM:-${TERM:-unknown}}"
+
+# OS-specific info
+if [[ "$(uname)" == "Darwin" ]]; then
+  _os="macOS $(sw_vers -productVersion 2>/dev/null || echo "unknown")"
+  _os_name="$(sw_vers -productName 2>/dev/null || echo "macOS")"
+  _os_build="$(sw_vers -buildVersion 2>/dev/null || true)"
+  _host="$(sysctl -n hw.model 2>/dev/null || echo "Mac")"
+  # Friendly model name from system_profiler
+  _model="$(/usr/sbin/system_profiler SPHardwareDataType 2>/dev/null | awk -F': ' '/Model Name/{print $2}' || echo "$_host")"
+  _cpu="$(sysctl -n machdep.cpu.brand_string 2>/dev/null || echo "$_arch")"
+  _cpu_cores="$(sysctl -n hw.ncpu 2>/dev/null || echo "?")"
+  _gpu="$(system_profiler SPDisplaysDataType 2>/dev/null | awk -F': ' '/Chipset Model|Chip/{print $2; exit}' || echo "unknown")"
+  _mem_total="$(sysctl -n hw.memsize 2>/dev/null || echo 0)"
+  _mem_total_gb="$(awk "BEGIN{printf \"%.2f\", ${_mem_total}/1073741824}")"
+  _mem_used_pages="$(vm_stat 2>/dev/null | awk '/Pages active/{gsub(/\./,"",$3); print $3}')"
+  _mem_used_gb="$(awk "BEGIN{printf \"%.2f\", ${_mem_used_pages:-0}*4096/1073741824}")"
+  _resolution="$(system_profiler SPDisplaysDataType 2>/dev/null | awk '/Resolution/{gsub(/^ +/,""); print; exit}' | sed 's/Resolution: //' || echo "unknown")"
+  _packages="$(brew list --formula 2>/dev/null | wc -l | tr -d ' ') (brew)"
+  _de="Aqua (macOS Desktop)"
+elif [[ -r /etc/os-release ]]; then
+  # shellcheck disable=SC1091
+  . /etc/os-release
+  _os="${PRETTY_NAME:-$ID}"
+  _os_name="${NAME:-Linux}"
+  _os_build=""
+  _host="$(cat /sys/devices/virtual/dmi/id/product_name 2>/dev/null || echo "Linux")"
+  _model="$_host"
+  _cpu="$(lscpu 2>/dev/null | awk -F': +' '/Model name/{print $2}' || uname -p)"
+  _cpu_cores="$(nproc 2>/dev/null || echo "?")"
+  _gpu="$(lspci 2>/dev/null | grep -i 'vga\|3d\|display' | head -1 | sed 's/.*: //' || echo "unknown")"
+  _mem_info="$(free -b 2>/dev/null | awk '/Mem:/{printf "%.2f / %.2f", $3/1073741824, $2/1073741824}')"
+  _mem_used_gb="${_mem_info%% /*}"
+  _mem_total_gb="${_mem_info##*/ }"
+  _resolution="$(xdpyinfo 2>/dev/null | awk '/dimensions/{print $2}' || echo "unknown")"
+  _packages="$(dpkg -l 2>/dev/null | wc -l || rpm -qa 2>/dev/null | wc -l || pacman -Q 2>/dev/null | wc -l || echo 0) ($(command -v apt >/dev/null && echo apt || command -v dnf >/dev/null && echo dnf || command -v pacman >/dev/null && echo pacman || echo pkg))"
+  _de="${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-unknown}}"
 else
-  distro_pretty="$host_os"
+  _os="$(uname -s)"
+  _os_name="$_os"
+  _os_build=""
+  _host="unknown"
+  _model="$_host"
+  _cpu="$(uname -p)"
+  _cpu_cores="?"
+  _gpu="unknown"
+  _mem_used_gb="?"
+  _mem_total_gb="?"
+  _resolution="unknown"
+  _packages="unknown"
+  _de="unknown"
 fi
 
-_ok "Runtime" "$platform_id"
-_ok "Host OS" "$host_os"
-_ok "Distro" "$distro_pretty"
-_ok "Kernel" "$kernel"
-_ok "Architecture" "$arch"
-_ok "Hostname" "$hostname_value"
-_ok "Desktop" "$desktop_env"
-_ok "Session" "$session_type"
-if [[ -n "${uptime_human:-}" ]]; then
-  _ok "Uptime" "$uptime_human"
+# Apple logo (simplified dots) for macOS, Tux-style for Linux
+if [[ "$(uname)" == "Darwin" ]]; then
+  _logo=(
+    "                    ................        "
+    "                 ......................     "
+    "               ..........................   "
+    "              ............................  "
+    "             .............................. "
+    "            ................................"
+    "           ................................ "
+    "          ................................  "
+    "          ................................  "
+    "          ................................  "
+    "           ................................ "
+    "            ................................"
+    "             .............................. "
+    "              ............................  "
+    "               ..........................   "
+    "                 ......................     "
+    "                    ................        "
+  )
+else
+  _logo=(
+    "        .---.        "
+    "       /     \\       "
+    "       \\.@-@./       "
+    "       /\`\\_/\`\\       "
+    "      //  _  \\\\      "
+    "     | \\     )|_     "
+    "    /\`\\_\`>  <_/ \\    "
+    "    \\__/'---'\\__/    "
+    "                     "
+    "                     "
+    "                     "
+    "                     "
+    "                     "
+    "                     "
+    "                     "
+    "                     "
+    "                     "
+  )
 fi
 
+# Build info lines
+_C='\033[0;36m'  # Cyan
+_W='\033[1;37m'  # White bold
+_G='\033[0;32m'  # Green
+_N='\033[0m'     # Reset
+_D='\033[2m'     # Dim
+
+_info=()
+_info+=("${_C}${_user}${_N}@${_C}${_hostname}${_N}")
+_info+=("${_D}$(printf '%*s' "$((${#_user} + 1 + ${#_hostname}))" '' | tr ' ' '-')${_N}")
+_info+=("${_W}OS:${_N} ${_os} (Kernel ${_kernel##* })")
+_info+=("${_W}Host:${_N} ${_model}")
+_info+=("${_W}Kernel:${_N} ${_kernel}")
+_info+=("${_W}Uptime:${_N} ${_uptime}")
+_info+=("${_W}Packages:${_N} ${_packages}")
+_info+=("${_W}Shell:${_N} ${_shell}")
+_info+=("${_W}Resolution:${_N} ${_resolution}")
+_info+=("${_W}DE:${_N} ${_de}")
+_info+=("${_W}Terminal:${_N} ${_terminal}")
+_info+=("${_W}CPU:${_N} ${_cpu} (${_cpu_cores})")
+_info+=("${_W}GPU:${_N} ${_gpu}")
+_info+=("${_W}Memory:${_N} ${_mem_used_gb} GiB / ${_mem_total_gb} GiB")
+_info+=("")
+_info+=("")
+_info+=("")
+_info+=("")
+
+# Print side by side
+for i in "${!_logo[@]}"; do
+  printf '%b %b\n' "${_G}${_logo[$i]}${_N}" "${_info[$i]:-}"
+done
+
+platform_id="$(dot_platform_id)"
 if [[ "$platform_id" == "wsl" ]]; then
   if command -v wslpath >/dev/null 2>&1; then
     _ok "WSL bridge" "wslpath available"
