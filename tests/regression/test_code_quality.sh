@@ -404,7 +404,7 @@ for f in "${CHANGED_SCRIPTS[@]}"; do
   # Look for backtick command substitution (excluding inside comments and strings)
   count=$(grep -vE '^\s*#' "$filepath" 2>/dev/null | grep -cE "\`[^\`]+\`" || true)
   if [[ "$count" -gt 0 ]]; then
-    printf '    %s: %d backtick substitutions (use %s instead)\n' "$f" "$count" '$()'
+    printf "    %s: %d backtick substitutions found\n" "$f" "$count"
     failures=$((failures + 1))
   fi
 done
@@ -877,7 +877,7 @@ for f in "${CHANGED_SCRIPTS[@]}"; do
   [[ -f "$filepath" ]] || continue
   hardcoded_home=$(grep -vE '^\s*#' "$filepath" 2>/dev/null | grep -cE '/Users/[a-z]|/home/[a-z]' || true)
   if [[ "$hardcoded_home" -gt 0 ]]; then
-    printf '    %s: %d hardcoded home paths (use %s or ~)\n' "$f" "$hardcoded_home" '$HOME'
+    printf "    %s: %d hardcoded home paths found\n" "$f" "$hardcoded_home"
     failures=$((failures + 1))
   fi
 done
