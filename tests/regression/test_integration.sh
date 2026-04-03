@@ -169,5 +169,162 @@ assert_file_contains "$REPO_ROOT/dot_local/bin/executable_dot" "dotfiles/command
 test_start "integration_nvim_user_plugins"
 assert_file_contains "$REPO_ROOT/dot_config/nvim/lua/config/lazy.lua" "plugins.local" "lazy.lua must support user plugins"
 
+# ═══════════════════════════════════════════════════════════════
+# 9. DOT CLI HELP — key command categories
+# ═══════════════════════════════════════════════════════════════
+
+test_start "integration_help_start_here"
+assert_output_contains "Start Here" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+
+test_start "integration_help_daily_use"
+assert_output_contains "Daily Use" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+
+test_start "integration_help_inspect"
+assert_output_contains "Inspect" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+
+test_start "integration_help_ai_section"
+assert_output_contains "AI" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+
+test_start "integration_help_fleet_section"
+assert_output_contains "Fleet" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+
+test_start "integration_help_configuration"
+assert_output_contains "Configuration" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+
+test_start "integration_help_reference"
+assert_output_contains "Reference" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+
+# ═══════════════════════════════════════════════════════════════
+# 10. AI PROVIDER ALIASES
+# ═══════════════════════════════════════════════════════════════
+
+test_start "integration_ai_alias_claude"
+assert_file_contains "$REPO_ROOT/.chezmoitemplates/aliases/ai/ai.aliases.sh" "claude" "AI aliases must include claude"
+
+test_start "integration_ai_alias_copilot"
+assert_file_contains "$REPO_ROOT/.chezmoitemplates/aliases/ai/ai.aliases.sh" "copilot" "AI aliases must include copilot"
+
+test_start "integration_ai_alias_gemini"
+assert_file_contains "$REPO_ROOT/.chezmoitemplates/aliases/ai/ai.aliases.sh" "gemini" "AI aliases must include gemini"
+
+test_start "integration_ai_alias_ollama"
+assert_file_contains "$REPO_ROOT/.chezmoitemplates/aliases/ai/ai.aliases.sh" "ollama" "AI aliases must include ollama"
+
+# ═══════════════════════════════════════════════════════════════
+# 11. PREWARM HANDLES EACH SHELL
+# ═══════════════════════════════════════════════════════════════
+
+test_start "integration_prewarm_handles_zsh"
+assert_file_contains "$REPO_ROOT/scripts/ops/prewarm.sh" "zsh" "prewarm must handle zsh"
+
+test_start "integration_prewarm_handles_bash"
+assert_file_contains "$REPO_ROOT/scripts/ops/prewarm.sh" "bash" "prewarm must handle bash"
+
+test_start "integration_prewarm_handles_fish"
+assert_file_contains "$REPO_ROOT/scripts/ops/prewarm.sh" "fish" "prewarm must handle fish"
+
+test_start "integration_prewarm_handles_nushell"
+assert_file_contains "$REPO_ROOT/scripts/ops/prewarm.sh" "nu" "prewarm must handle nushell"
+
+# ═══════════════════════════════════════════════════════════════
+# 12. CHEZMOI DATA FLOW — template variables used
+# ═══════════════════════════════════════════════════════════════
+
+test_start "integration_chezmoidata_version_used_in_templates"
+assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" "dotfiles_version" "zshrc template must use dotfiles_version"
+
+test_start "integration_chezmoidata_email_used_in_gitconfig"
+assert_file_contains "$REPO_ROOT/dot_gitconfig.tmpl" "email" "gitconfig must use email from chezmoidata"
+
+test_start "integration_chezmoidata_features_used_in_zshrc"
+assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" ".features" "zshrc must reference .features from chezmoidata"
+
+# ═══════════════════════════════════════════════════════════════
+# 13. DOT_LOCAL/BIN SCRIPTS SOURCE CORRECT LIBRARIES
+# ═══════════════════════════════════════════════════════════════
+
+test_start "integration_dot_cli_sources_commands"
+assert_file_contains "$REPO_ROOT/dot_local/bin/executable_dot" "commands/" "dot CLI must source command scripts"
+
+test_start "integration_dot_ai_script_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/dot_local/bin/executable_dot-ai'"
+
+test_start "integration_tour_script_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/dot_local/bin/executable_tour'"
+
+# ═══════════════════════════════════════════════════════════════
+# 14. ROLLBACK SCRIPT
+# ═══════════════════════════════════════════════════════════════
+
+test_start "integration_rollback_script_exists"
+assert_file_exists "$REPO_ROOT/scripts/ops/rollback.sh" "rollback.sh must exist"
+
+test_start "integration_rollback_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/ops/rollback.sh'"
+
+test_start "integration_rollback_has_status"
+assert_file_contains "$REPO_ROOT/scripts/ops/rollback.sh" "status" "rollback must support status subcommand"
+
+test_start "integration_rollback_has_backup"
+assert_file_contains "$REPO_ROOT/scripts/ops/rollback.sh" "backup" "rollback must support backup subcommand"
+
+# ═══════════════════════════════════════════════════════════════
+# 15. BUNDLE SCRIPT
+# ═══════════════════════════════════════════════════════════════
+
+test_start "integration_bundle_script_exists"
+assert_file_exists "$REPO_ROOT/scripts/ops/bundle.sh" "bundle.sh must exist"
+
+test_start "integration_bundle_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/ops/bundle.sh'"
+
+# ═══════════════════════════════════════════════════════════════
+# 16. HEAL SCRIPTS
+# ═══════════════════════════════════════════════════════════════
+
+test_start "integration_heal_script_exists"
+assert_file_exists "$REPO_ROOT/scripts/ops/heal.sh" "heal.sh must exist"
+
+test_start "integration_heal_tools_exists"
+assert_file_exists "$REPO_ROOT/scripts/ops/heal-tools.sh" "heal-tools.sh must exist"
+
+test_start "integration_heal_system_exists"
+assert_file_exists "$REPO_ROOT/scripts/ops/heal-system.sh" "heal-system.sh must exist"
+
+test_start "integration_heal_chezmoi_exists"
+assert_file_exists "$REPO_ROOT/scripts/ops/heal-chezmoi.sh" "heal-chezmoi.sh must exist"
+
+test_start "integration_heal_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/ops/heal.sh'"
+
+test_start "integration_heal_tools_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/ops/heal-tools.sh'"
+
+# ═══════════════════════════════════════════════════════════════
+# 17. DOCTOR CHECKS FOR KEY TOOLS
+# ═══════════════════════════════════════════════════════════════
+
+test_start "integration_doctor_checks_claude"
+assert_file_contains "$REPO_ROOT/scripts/diagnostics/doctor.sh" "claude" "doctor must check for claude"
+
+test_start "integration_doctor_checks_copilot"
+assert_file_contains "$REPO_ROOT/scripts/diagnostics/doctor.sh" "copilot" "doctor must check for copilot"
+
+test_start "integration_doctor_checks_gemini"
+assert_file_contains "$REPO_ROOT/scripts/diagnostics/doctor.sh" "gemini" "doctor must check for gemini"
+
+test_start "integration_doctor_checks_ollama"
+assert_file_contains "$REPO_ROOT/scripts/diagnostics/doctor.sh" "ollama" "doctor must check for ollama"
+
+# ═══════════════════════════════════════════════════════════════
+# 18. SMOKE TEST CHECKS KEY TOOLS
+# ═══════════════════════════════════════════════════════════════
+
+test_start "integration_smoke_test_exists"
+assert_file_exists "$REPO_ROOT/scripts/diagnostics/smoke-test.sh" "smoke-test.sh must exist"
+
+test_start "integration_smoke_test_checks_mise"
+assert_file_contains "$REPO_ROOT/scripts/diagnostics/smoke-test.sh" "mise" "smoke test must check for mise"
+
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

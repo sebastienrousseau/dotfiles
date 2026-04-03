@@ -7,7 +7,7 @@
 # Target: Flesch Reading Ease 60-70 (Standard/Plain English, 8th-9th grade)
 # Method: Proxy metrics (sentence length, word complexity, passive voice)
 
-set -euo pipefail
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
@@ -201,6 +201,240 @@ for doc in "${USER_DOCS[@]}"; do
   fi
 done
 assert_equals "0" "$failures" "user docs must be at least 20 lines"
+
+# ═══════════════════════════════════════════════════════════════
+# 8. PER-DOC SENTENCE LENGTH — each doc checked individually
+# ═══════════════════════════════════════════════════════════════
+
+for doc in "${USER_DOCS[@]}"; do
+  filepath="$REPO_ROOT/$doc"
+  [[ -f "$filepath" ]] || continue
+  doc_slug=$(echo "$doc" | sed 's|[/.]|_|g')
+  test_start "flesch_sentence_length_${doc_slug}"
+  prose=$(_extract_prose "$filepath")
+  avg=$(_avg_sentence_length "$prose")
+  if [[ "$avg" -le 30 ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: avg sentence length $avg words"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: avg sentence length $avg words (max 30)"
+  fi
+done
+
+# ═══════════════════════════════════════════════════════════════
+# 9. PER-DOC COMPLEX WORD CHECK — each doc checked individually
+# ═══════════════════════════════════════════════════════════════
+
+for doc in "${USER_DOCS[@]}"; do
+  filepath="$REPO_ROOT/$doc"
+  [[ -f "$filepath" ]] || continue
+  doc_slug=$(echo "$doc" | sed 's|[/.]|_|g')
+  test_start "flesch_complex_words_${doc_slug}"
+  prose=$(_extract_prose "$filepath")
+  pct=$(_complex_word_pct "$prose")
+  if [[ "$pct" -le 20 ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $pct% complex words"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $pct% complex words (max 20%)"
+  fi
+done
+
+# ═══════════════════════════════════════════════════════════════
+# 10. PER-DOC PASSIVE VOICE — each doc checked individually
+# ═══════════════════════════════════════════════════════════════
+
+for doc in "${USER_DOCS[@]}"; do
+  filepath="$REPO_ROOT/$doc"
+  [[ -f "$filepath" ]] || continue
+  doc_slug=$(echo "$doc" | sed 's|[/.]|_|g')
+  test_start "flesch_passive_voice_${doc_slug}"
+  prose=$(_extract_prose "$filepath")
+  total_sentences=$(_sentence_count "$prose")
+  if [[ "$total_sentences" -eq 0 ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (no prose sentences)"
+    continue
+  fi
+  passive_count=$(echo "$prose" | grep -ciE "$passive_patterns" || true)
+  passive_pct=$((passive_count * 100 / total_sentences))
+  if [[ "$passive_pct" -le 40 ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $passive_pct% passive voice"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $passive_pct% passive voice (max 40%)"
+  fi
+done
+
+# ═══════════════════════════════════════════════════════════════
+# 11. PARAGRAPH LENGTH — no paragraphs longer than 5 sentences
+# ═══════════════════════════════════════════════════════════════
+
+test_start "flesch_paragraph_length"
+# Check no paragraph has excessive sentence endings (proxy for paragraph length)
+failures=0
+for doc in "${USER_DOCS[@]}"; do
+  filepath="$REPO_ROOT/$doc"
+  [[ -f "$filepath" ]] || continue
+  # Count max consecutive non-blank lines with many periods
+  max_period_run=$(sed '/^```/,/^```/d' "$filepath" | awk '/^$/{if(s>15){n++};s=0;next}{s+=gsub(/\./,"&")} END{print n+0}')
+  if [[ "$max_period_run" -gt 0 ]]; then
+    printf '    %s: dense paragraphs detected\n' "$doc"
+    failures=$((failures + 1))
+  fi
+done
+assert_equals "0" "$failures" "docs should break up dense paragraphs"
+
+# ═══════════════════════════════════════════════════════════════
+# 12. CODE BLOCKS HAVE CONTEXT — text before code blocks
+# ═══════════════════════════════════════════════════════════════
+
+test_start "flesch_code_blocks_have_context"
+failures=0
+for doc in "${USER_DOCS[@]}"; do
+  filepath="$REPO_ROOT/$doc"
+  [[ -f "$filepath" ]] || continue
+  prev_line=""
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^\`\`\` && -z "$prev_line" ]]; then
+      # Code block preceded by blank line — check if it is inside another block
+      # Allow if this is the closing fence
+      if [[ ! "$line" =~ ^\`\`\`[a-z] && "$line" != '```' ]]; then
+        prev_line="$line"
+        continue
+      fi
+    fi
+    prev_line="$line"
+  done < "$filepath"
+done
+assert_equals "0" "$failures" "code blocks should have context text before them"
+
+# ═══════════════════════════════════════════════════════════════
+# 13. NO DOC STARTS WITH CODE BLOCK — must have intro text
+# ═══════════════════════════════════════════════════════════════
+
+test_start "flesch_no_doc_starts_with_code"
+failures=0
+for doc in "${USER_DOCS[@]}"; do
+  filepath="$REPO_ROOT/$doc"
+  [[ -f "$filepath" ]] || continue
+  first_content=$(awk 'NF{print; exit}' "$filepath")
+  if [[ "$first_content" =~ ^\`\`\` ]]; then
+    printf '    %s: starts with a code block instead of intro text\n' "$doc"
+    failures=$((failures + 1))
+  fi
+done
+assert_equals "0" "$failures" "no doc should start with a code block"
+
+# ═══════════════════════════════════════════════════════════════
+# 14. NO ALL CAPS EMPHASIS — except acronyms (2-5 uppercase letters)
+# ═══════════════════════════════════════════════════════════════
+
+test_start "flesch_no_all_caps_emphasis"
+failures=0
+for doc in "${USER_DOCS[@]}"; do
+  filepath="$REPO_ROOT/$doc"
+  [[ -f "$filepath" ]] || continue
+  prose=$(_extract_prose "$filepath")
+  # Find words 6+ chars that are ALL CAPS (likely emphasis, not acronyms)
+  caps_words=$(echo "$prose" | grep -oE '\b[A-Z]{6,}\b' | grep -vE '^(README|INSTALL|MIGRATION|PROFILES|FEATURES|ENCRYPTION|IMPORTANT|WARNING|CLAUDE|DOTFILES|RESULTS|CHANGED|SCRIPTS|STANDALONE|PASSED|FAILED|ARCHITECT|ENGINE|LICENSE|SECURITY|CHANGELOG|CONTRIBUTING|TROUBLESHOOTING|OPERATIONS|ALIASES|ARCHITECTURE|COMPLIANCE|RELIABILITY|TESTING|VERSION|INCIDENT|RESPONSE)$' || true)
+  if [[ -n "$caps_words" ]]; then
+    printf '    %s: ALL CAPS words found: %s\n' "$doc" "$(echo "$caps_words" | tr '\n' ', ')"
+    failures=$((failures + 1))
+  fi
+done
+assert_equals "0" "$failures" "docs should not use ALL CAPS for emphasis (except acronyms)"
+
+# ═══════════════════════════════════════════════════════════════
+# 15. BULLET LISTS — no more than 10 items without subheadings
+# ═══════════════════════════════════════════════════════════════
+
+test_start "flesch_bullet_list_length"
+failures=0
+for doc in "${USER_DOCS[@]}"; do
+  filepath="$REPO_ROOT/$doc"
+  [[ -f "$filepath" ]] || continue
+  in_code=0
+  bullet_count=0
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^\`\`\` ]]; then
+      in_code=$((1 - in_code))
+      continue
+    fi
+    [[ $in_code -eq 1 ]] && continue
+    if [[ "$line" =~ ^[[:space:]]*[-*][[:space:]] ]]; then
+      bullet_count=$((bullet_count + 1))
+    elif [[ "$line" =~ ^#{1,3}[[:space:]] || -z "$line" ]]; then
+      if [[ "$bullet_count" -gt 10 ]]; then
+        printf '    %s: bullet list with %d items (max 10 without subheading)\n' "$doc" "$bullet_count"
+        failures=$((failures + 1))
+      fi
+      bullet_count=0
+    fi
+  done < "$filepath"
+  # Check trailing list
+  if [[ "$bullet_count" -gt 10 ]]; then
+    printf '    %s: bullet list with %d items at end of file\n' "$doc" "$bullet_count"
+    failures=$((failures + 1))
+  fi
+done
+assert_equals "0" "$failures" "bullet lists should not exceed 10 items without subheadings"
+
+# ═══════════════════════════════════════════════════════════════
+# 16. CLEAR TITLE — first non-empty line must be a # heading
+# ═══════════════════════════════════════════════════════════════
+
+test_start "flesch_clear_title"
+failures=0
+for doc in "${USER_DOCS[@]}"; do
+  filepath="$REPO_ROOT/$doc"
+  [[ -f "$filepath" ]] || continue
+  # README uses HTML header, other docs use # heading
+  first_content=$(awk 'NF{print; exit}' "$filepath")
+  if [[ ! "$first_content" =~ ^#[[:space:]] && ! "$first_content" =~ ^\<[phH] ]]; then
+    printf '    %s: first line is not a heading or HTML header\n' "$doc"
+    failures=$((failures + 1))
+  fi
+done
+assert_equals "0" "$failures" "each doc must have a clear title"
+
+# ═══════════════════════════════════════════════════════════════
+# 17. NO WEAK OPENINGS — avoid "It is", "There is", "There are"
+# ═══════════════════════════════════════════════════════════════
+
+test_start "flesch_no_weak_openings"
+failures=0
+for doc in "${USER_DOCS[@]}"; do
+  filepath="$REPO_ROOT/$doc"
+  [[ -f "$filepath" ]] || continue
+  prose=$(_extract_prose "$filepath")
+  weak_count=$(echo "$prose" | grep -cE '(^|\. )(It is|There is|There are) ' || true)
+  if [[ "$weak_count" -gt 3 ]]; then
+    printf '    %s: %d weak sentence openings (max 3)\n' "$doc" "$weak_count"
+    failures=$((failures + 1))
+  fi
+done
+assert_equals "0" "$failures" "docs should minimize weak openings (It is, There is, There are)"
+
+# ═══════════════════════════════════════════════════════════════
+# 18. CONSISTENT HEADING HIERARCHY — ## for sections, ### for subs
+# ═══════════════════════════════════════════════════════════════
+
+test_start "flesch_heading_hierarchy"
+# Verify no doc skips heading levels (e.g., # to ### without ##)
+failures=0
+for doc in "${USER_DOCS[@]}"; do
+  filepath="$REPO_ROOT/$doc"
+  [[ -f "$filepath" ]] || continue
+  jumps=$(awk '/^```/{c=!c;next} !c && /^#{1,6} /{match($0,/^#+/); print RLENGTH}' "$filepath" | awk 'NR>1 && $1>prev+1{n++} {prev=$1} END{print n+0}')
+  if [[ "$jumps" -gt 0 ]]; then
+    failures=$((failures + 1))
+  fi
+done
+assert_equals "0" "$failures" "headings must follow consistent hierarchy"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

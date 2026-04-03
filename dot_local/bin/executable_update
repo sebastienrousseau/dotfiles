@@ -28,9 +28,9 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-log_section() { echo -e "\n${CYAN}--- $1 ---${NC}"; }
-log_success() { echo -e "${GREEN}Done:${NC} $1"; }
-log_skip() { echo -e "${YELLOW}Skipped:${NC} $1"; }
+log_section() { printf '%b\n' "\n${CYAN}--- $1 ---${NC}"; }
+log_success() { printf '%b\n' "${GREEN}Done:${NC} $1"; }
+log_skip() { printf '%b\n' "${YELLOW}Skipped:${NC} $1"; }
 
 # Parse arguments
 UPDATE_ALL=true
@@ -139,4 +139,4 @@ if $UPDATE_ALL; then
   fi
 fi
 
-echo -e "\n${GREEN}Update complete!${NC}"
+printf '%b\n' "\n${GREEN}Update complete!${NC}"

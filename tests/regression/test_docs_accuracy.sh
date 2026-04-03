@@ -234,5 +234,239 @@ test_start "manpage_no_cline"
 # Man page must not reference removed Cline CLI
 assert_output_not_contains "cline" "cat '$REPO_ROOT/dot_local/share/man/man1/dot.1'"
 
+# ═══════════════════════════════════════════════════════════════
+# 13. DOCS SUBDIRECTORIES — each must have at least one file
+# ═══════════════════════════════════════════════════════════════
+
+test_start "docs_architecture_has_files"
+arch_count=$(find "$REPO_ROOT/docs/architecture" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+if [[ "$arch_count" -ge 1 ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: docs/architecture has $arch_count files"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: docs/architecture is empty"
+fi
+
+test_start "docs_guides_has_files"
+guides_count=$(find "$REPO_ROOT/docs/guides" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+if [[ "$guides_count" -ge 1 ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: docs/guides has $guides_count files"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: docs/guides is empty"
+fi
+
+test_start "docs_security_has_files"
+sec_count=$(find "$REPO_ROOT/docs/security" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+if [[ "$sec_count" -ge 1 ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: docs/security has $sec_count files"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: docs/security is empty"
+fi
+
+test_start "docs_operations_has_files"
+ops_count=$(find "$REPO_ROOT/docs/operations" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+if [[ "$ops_count" -ge 1 ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: docs/operations has $ops_count files"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: docs/operations is empty"
+fi
+
+test_start "docs_reference_has_files"
+ref_count=$(find "$REPO_ROOT/docs/reference" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+if [[ "$ref_count" -ge 1 ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: docs/reference has $ref_count files"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: docs/reference is empty"
+fi
+
+test_start "docs_adr_has_files"
+adr_count=$(find "$REPO_ROOT/docs/adr" -name "ADR-*.md" 2>/dev/null | wc -l | tr -d ' ')
+if [[ "$adr_count" -ge 1 ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: docs/adr has $adr_count ADR files"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: docs/adr is empty"
+fi
+
+# ═══════════════════════════════════════════════════════════════
+# 14. CLAUDE.md — correct references
+# ═══════════════════════════════════════════════════════════════
+
+test_start "claudemd_correct_test_runner_path"
+assert_file_contains "$REPO_ROOT/CLAUDE.md" "./tests/framework/test_runner.sh" "CLAUDE.md must have correct test runner path"
+
+test_start "claudemd_lists_chezmoi_apply"
+assert_file_contains "$REPO_ROOT/CLAUDE.md" "chezmoi apply" "CLAUDE.md must list chezmoi apply command"
+
+test_start "claudemd_lists_dot_health"
+assert_file_contains "$REPO_ROOT/CLAUDE.md" "dot health" "CLAUDE.md must list dot health command"
+
+test_start "claudemd_lists_dot_doctor"
+assert_file_contains "$REPO_ROOT/CLAUDE.md" "dot doctor" "CLAUDE.md must list dot doctor command"
+
+test_start "claudemd_lists_chezmoi_diff"
+assert_file_contains "$REPO_ROOT/CLAUDE.md" "chezmoi diff" "CLAUDE.md must list chezmoi diff command"
+
+# ═══════════════════════════════════════════════════════════════
+# 15. INDEX.MD — links to major sections
+# ═══════════════════════════════════════════════════════════════
+
+test_start "index_links_to_install"
+assert_file_contains "$REPO_ROOT/docs/index.md" "INSTALL.md" "index.md must link to install guide"
+
+test_start "index_links_to_security"
+assert_file_contains "$REPO_ROOT/docs/index.md" "SECURITY" "index.md must link to security"
+
+test_start "index_links_to_operations"
+assert_file_contains "$REPO_ROOT/docs/index.md" "OPERATIONS" "index.md must link to operations"
+
+test_start "index_links_to_architecture"
+assert_file_contains "$REPO_ROOT/docs/index.md" "ARCHITECTURE" "index.md must link to architecture"
+
+# ═══════════════════════════════════════════════════════════════
+# 16. CHANGELOG — exists and has content
+# ═══════════════════════════════════════════════════════════════
+
+test_start "changelog_exists"
+assert_file_exists "$REPO_ROOT/CHANGELOG.md" "CHANGELOG.md must exist"
+
+test_start "changelog_has_content"
+changelog_lines=$(wc -l < "$REPO_ROOT/CHANGELOG.md" 2>/dev/null | tr -d ' ')
+if [[ "$changelog_lines" -ge 10 ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: CHANGELOG.md has $changelog_lines lines"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: CHANGELOG.md is too short ($changelog_lines lines)"
+fi
+
+# ═══════════════════════════════════════════════════════════════
+# 17. ADR FILES — naming convention
+# ═══════════════════════════════════════════════════════════════
+
+test_start "adr_follow_naming_convention"
+# ADR files should follow ADR-NNN-description.md pattern
+bad_adrs=0
+while IFS= read -r adr; do
+  basename_adr=$(basename "$adr")
+  if [[ ! "$basename_adr" =~ ^ADR-[0-9]+-.*\.md$ && "$basename_adr" != "README.md" ]]; then
+    bad_adrs=$((bad_adrs + 1))
+  fi
+done < <(find "$REPO_ROOT/docs/adr" -name "*.md" 2>/dev/null)
+assert_equals "0" "$bad_adrs" "all ADR files must follow ADR-NNN-* naming"
+
+test_start "adr_has_minimum_count"
+adr_total=$(find "$REPO_ROOT/docs/adr" -name "ADR-*.md" 2>/dev/null | wc -l | tr -d ' ')
+if [[ "$adr_total" -ge 4 ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $adr_total ADRs documented"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: only $adr_total ADRs (expected >= 4)"
+fi
+
+# ═══════════════════════════════════════════════════════════════
+# 18. SECURITY DOCS — cover key topics
+# ═══════════════════════════════════════════════════════════════
+
+test_start "security_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/security/SECURITY.md" "SECURITY.md must exist"
+
+test_start "threat_model_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/security/THREAT_MODEL.md" "THREAT_MODEL.md must exist"
+
+test_start "compliance_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/security/COMPLIANCE.md" "COMPLIANCE.md must exist"
+
+test_start "incident_response_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/security/INCIDENT_RESPONSE.md" "INCIDENT_RESPONSE.md must exist"
+
+test_start "mcp_policy_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/security/MCP_POLICY.md" "MCP_POLICY.md must exist"
+
+# ═══════════════════════════════════════════════════════════════
+# 19. OPERATIONS DOCS — key files exist
+# ═══════════════════════════════════════════════════════════════
+
+test_start "operations_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/operations/OPERATIONS.md" "OPERATIONS.md must exist"
+
+test_start "testing_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/operations/TESTING.md" "TESTING.md must exist"
+
+test_start "reliability_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/operations/RELIABILITY.md" "RELIABILITY.md must exist"
+
+test_start "version_sync_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/operations/VERSION_SYNC.md" "VERSION_SYNC.md must exist"
+
+# ═══════════════════════════════════════════════════════════════
+# 20. REFERENCE DOCS — key files exist
+# ═══════════════════════════════════════════════════════════════
+
+test_start "aliases_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/reference/ALIASES.md" "ALIASES.md must exist"
+
+test_start "tools_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/reference/TOOLS.md" "TOOLS.md must exist"
+
+test_start "utils_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/reference/UTILS.md" "UTILS.md must exist"
+
+test_start "fonts_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/reference/FONTS.md" "FONTS.md must exist"
+
+# ═══════════════════════════════════════════════════════════════
+# 21. GUIDES — key files exist
+# ═══════════════════════════════════════════════════════════════
+
+test_start "install_guide_exists"
+assert_file_exists "$REPO_ROOT/docs/guides/INSTALL.md" "INSTALL.md guide must exist"
+
+test_start "troubleshooting_guide_exists"
+assert_file_exists "$REPO_ROOT/docs/guides/TROUBLESHOOTING.md" "TROUBLESHOOTING.md guide must exist"
+
+# ═══════════════════════════════════════════════════════════════
+# 22. README — no broken image references
+# ═══════════════════════════════════════════════════════════════
+
+test_start "readme_no_broken_images"
+broken_imgs=0
+while IFS= read -r img; do
+  [[ -z "$img" ]] && continue
+  [[ "$img" == http* ]] && continue
+  target="$REPO_ROOT/$img"
+  if [[ ! -f "$target" ]]; then
+    broken_imgs=$((broken_imgs + 1))
+  fi
+done < <(grep -oE '!\[.*\]\(([^)]+)\)' "$REPO_ROOT/README.md" 2>/dev/null | sed 's/.*](//' | sed 's/)//' | grep -v '^http')
+assert_equals "0" "$broken_imgs" "no broken image references in README"
+
+# ═══════════════════════════════════════════════════════════════
+# 23. MAN PAGE — covers major command groups
+# ═══════════════════════════════════════════════════════════════
+
+test_start "manpage_documents_apply"
+assert_file_contains "$REPO_ROOT/dot_local/share/man/man1/dot.1" "apply" "man page must document apply"
+
+test_start "manpage_documents_doctor"
+assert_file_contains "$REPO_ROOT/dot_local/share/man/man1/dot.1" "doctor" "man page must document doctor"
+
+test_start "manpage_documents_heal"
+assert_file_contains "$REPO_ROOT/dot_local/share/man/man1/dot.1" "heal" "man page must document heal"
+
+test_start "manpage_documents_secrets"
+assert_file_contains "$REPO_ROOT/dot_local/share/man/man1/dot.1" "secrets" "man page must document secrets"
+
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

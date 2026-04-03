@@ -165,5 +165,105 @@ assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/ops/prewarm.sh'"
 test_start "critical_prewarm_in_apply"
 assert_file_contains "$REPO_ROOT/scripts/ops/chezmoi-apply.sh" "DOTFILES_PREWARM_ON_APPLY" "apply must support prewarm"
 
+# ═══════════════════════════════════════════════════════════════
+# 8. RC.D FILES — each must have valid bash/zsh syntax
+# ═══════════════════════════════════════════════════════════════
+
+test_start "critical_rc_d_00_alias_shims_exists"
+assert_file_exists "$REPO_ROOT/dot_config/zsh/rc.d/00-alias-shims.zsh" "00-alias-shims.zsh must exist"
+
+test_start "critical_rc_d_05_ssh_agent_exists"
+assert_file_exists "$REPO_ROOT/dot_config/zsh/rc.d/05-ssh-agent.zsh" "05-ssh-agent.zsh must exist"
+
+test_start "critical_rc_d_10_env_template_exists"
+assert_file_exists "$REPO_ROOT/dot_config/zsh/rc.d/10-env.zsh.tmpl" "10-env.zsh.tmpl must exist"
+
+test_start "critical_rc_d_20_zinit_exists"
+assert_file_exists "$REPO_ROOT/dot_config/zsh/rc.d/20-zinit.zsh" "20-zinit.zsh must exist"
+
+test_start "critical_rc_d_30_options_template_exists"
+assert_file_exists "$REPO_ROOT/dot_config/zsh/rc.d/30-options.zsh.tmpl" "30-options.zsh.tmpl must exist"
+
+test_start "critical_rc_d_40_bell_exists"
+assert_file_exists "$REPO_ROOT/dot_config/zsh/rc.d/40-bell.zsh" "40-bell.zsh must exist"
+
+test_start "critical_rc_d_50_fortune_exists"
+assert_file_exists "$REPO_ROOT/dot_config/zsh/rc.d/50-login-fortune.zsh" "50-login-fortune.zsh must exist"
+
+test_start "critical_rc_d_99_alias_wrapper_exists"
+assert_file_exists "$REPO_ROOT/dot_config/zsh/rc.d/99-alias-wrapper.zsh" "99-alias-wrapper.zsh must exist"
+
+# ═══════════════════════════════════════════════════════════════
+# 9. DOT COMMAND SCRIPTS — all must exist and have valid syntax
+# ═══════════════════════════════════════════════════════════════
+
+test_start "critical_dot_cmd_core_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/core.sh'"
+
+test_start "critical_dot_cmd_diagnostics_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/diagnostics.sh'"
+
+test_start "critical_dot_cmd_aliases_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/aliases.sh'"
+
+test_start "critical_dot_cmd_tools_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/tools.sh'"
+
+test_start "critical_dot_cmd_meta_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/meta.sh'"
+
+test_start "critical_dot_cmd_secrets_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/secrets.sh'"
+
+test_start "critical_dot_cmd_security_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/security.sh'"
+
+test_start "critical_dot_cmd_agent_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/agent.sh'"
+
+test_start "critical_dot_cmd_appearance_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/appearance.sh'"
+
+test_start "critical_dot_cmd_fleet_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/fleet.sh'"
+
+test_start "critical_dot_cmd_lint_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/lint.sh'"
+
+test_start "critical_dot_cmd_patterns_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/patterns.sh'"
+
+test_start "critical_dot_cmd_restore_syntax"
+assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/restore.sh'"
+
+# ═══════════════════════════════════════════════════════════════
+# 10. KEY DOT_LOCAL/BIN EXECUTABLES
+# ═══════════════════════════════════════════════════════════════
+
+test_start "critical_bin_dot_exists"
+assert_file_exists "$REPO_ROOT/dot_local/bin/executable_dot" "dot executable must exist"
+
+test_start "critical_bin_tour_exists"
+assert_file_exists "$REPO_ROOT/dot_local/bin/executable_tour" "tour executable must exist"
+
+test_start "critical_bin_dot_ai_exists"
+assert_file_exists "$REPO_ROOT/dot_local/bin/executable_dot-ai" "dot-ai executable must exist"
+
+test_start "critical_bin_extract_exists"
+assert_file_exists "$REPO_ROOT/dot_local/bin/executable_extract" "extract executable must exist"
+
+test_start "critical_bin_uuid_exists"
+assert_file_exists "$REPO_ROOT/dot_local/bin/executable_uuid" "uuid executable must exist"
+
+# ═══════════════════════════════════════════════════════════════
+# 11. CHEZMOI TEMPLATE FILES EXIST
+# ═══════════════════════════════════════════════════════════════
+
+test_start "critical_gitconfig_template_exists"
+assert_file_exists "$REPO_ROOT/dot_gitconfig.tmpl" "dot_gitconfig.tmpl must exist"
+
+test_start "critical_zshenv_exists_toplevel"
+assert_file_exists "$REPO_ROOT/dot_zshenv" "dot_zshenv must exist at repo root"
+
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

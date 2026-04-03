@@ -76,7 +76,7 @@ build_list() {
       local icon="● "
       local suffix="${DIM}${windows}${NC}"
       [[ -n "$attached" ]] && suffix="${suffix} ${GREEN}${attached}${NC}"
-      echo -e "${GREEN}${icon}${NC}${BOLD}${name}${NC}  ${suffix}"
+      printf '%b\n' "${GREEN}${icon}${NC}${BOLD}${name}${NC}  ${suffix}"
     done <<<"$sessions"
   fi
 
@@ -91,7 +91,7 @@ build_list() {
       if tmux has-session -t="$name" 2>/dev/null; then
         continue
       fi
-      echo -e "${BLUE}◆ ${NC}${name}  ${DIM}${dir}${NC}"
+      printf '%b\n' "${BLUE}◆ ${NC}${name}  ${DIM}${dir}${NC}"
     done <<<"$zoxide_dirs"
   fi
 
@@ -109,7 +109,7 @@ build_list() {
       if [[ -n "$zoxide_dirs" ]] && echo "$zoxide_dirs" | grep -qF "$dir"; then
         continue
       fi
-      echo -e "${DIM}○ ${NC}${name}  ${DIM}${dir}${NC}"
+      printf '%b\n' "${DIM}○ ${NC}${name}  ${DIM}${dir}${NC}"
     done <<<"$projects"
   fi
 }
@@ -293,7 +293,7 @@ main() {
 
   local selected
   selected=$(
-    echo -e "$list" | fzf \
+    printf '%b\n' "$list" | fzf \
       --ansi \
       --header "tmux sessions  (Ctrl-X: kill)" \
       --prompt "❱ " \
