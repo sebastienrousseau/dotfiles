@@ -1,8 +1,10 @@
 # Feature Flags Reference
 
-All feature flags live in `.chezmoidata.toml` under `[features]`.
+Feature flags let you turn parts of the dotfiles on or off. All flags live in `.chezmoidata.toml` under `[features]`. Set a flag to `true` to enable it, or `false` to disable it. Changes take effect after you run `dot apply`.
 
 ## Shell and Terminal
+
+These flags control shell behavior and terminal tools.
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -11,6 +13,8 @@ All feature flags live in `.chezmoidata.toml` under `[features]`.
 | `zellij` | `false` | Enable Zellij terminal multiplexer config |
 
 ## Linux Desktop
+
+These flags enable Wayland desktop components. Turn them on if you run a Linux desktop with Niri or another tiling compositor.
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -46,7 +50,7 @@ All feature flags live in `.chezmoidata.toml` under `[features]`.
 
 ## How to Toggle Features
 
-Edit `.chezmoidata.toml` in the repo, or override on a single machine in `~/.config/chezmoi/chezmoi.toml`:
+You can edit flags in two places. Change `.chezmoidata.toml` in the repo to set defaults for all machines. Or override on a single machine in `~/.config/chezmoi/chezmoi.toml`:
 
 ```bash
 # In ~/.config/chezmoi/chezmoi.toml

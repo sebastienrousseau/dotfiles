@@ -273,20 +273,20 @@ done
 # 11. PARAGRAPH LENGTH — no paragraphs longer than 5 sentences
 # ═══════════════════════════════════════════════════════════════
 
-test_start "flesch_paragraph_length"
-# Check no paragraph has excessive sentence endings (proxy for paragraph length)
-failures=0
 for doc in "${USER_DOCS[@]}"; do
   filepath="$REPO_ROOT/$doc"
   [[ -f "$filepath" ]] || continue
-  # Count max consecutive non-blank lines with many periods
+  doc_slug=$(echo "$doc" | sed 's|[/.]|_|g')
+  test_start "flesch_paragraph_length_${doc_slug}"
   max_period_run=$(sed '/^```/,/^```/d' "$filepath" | awk '/^$/{if(s>15){n++};s=0;next}{s+=gsub(/\./,"&")} END{print n+0}')
-  if [[ "$max_period_run" -gt 0 ]]; then
-    printf '    %s: dense paragraphs detected\n' "$doc"
-    failures=$((failures + 1))
+  if [[ "$max_period_run" -eq 0 ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no dense paragraphs"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dense paragraphs detected"
   fi
 done
-assert_equals "0" "$failures" "docs should break up dense paragraphs"
 
 # ═══════════════════════════════════════════════════════════════
 # 12. CODE BLOCKS HAVE CONTEXT — text before code blocks
@@ -387,19 +387,20 @@ assert_equals "0" "$failures" "bullet lists should not exceed 10 items without s
 # 16. CLEAR TITLE — first non-empty line must be a # heading
 # ═══════════════════════════════════════════════════════════════
 
-test_start "flesch_clear_title"
-failures=0
 for doc in "${USER_DOCS[@]}"; do
   filepath="$REPO_ROOT/$doc"
   [[ -f "$filepath" ]] || continue
-  # README uses HTML header, other docs use # heading
+  doc_slug=$(echo "$doc" | sed 's|[/.]|_|g')
+  test_start "flesch_clear_title_${doc_slug}"
   first_content=$(awk 'NF{print; exit}' "$filepath")
-  if [[ ! "$first_content" =~ ^#[[:space:]] && ! "$first_content" =~ ^\<[phH] ]]; then
-    printf '    %s: first line is not a heading or HTML header\n' "$doc"
-    failures=$((failures + 1))
+  if [[ "$first_content" =~ ^#[[:space:]] || "$first_content" =~ ^\<[phH] ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has clear title"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: missing clear title"
   fi
 done
-assert_equals "0" "$failures" "each doc must have a clear title"
 
 # ═══════════════════════════════════════════════════════════════
 # 17. NO WEAK OPENINGS — avoid "It is", "There is", "There are"
@@ -435,6 +436,204 @@ for doc in "${USER_DOCS[@]}"; do
   fi
 done
 assert_equals "0" "$failures" "headings must follow consistent hierarchy"
+
+# ═══════════════════════════════════════════════════════════════
+# 19. PER-DOC LENGTH CHECK — each doc individually
+# ═══════════════════════════════════════════════════════════════
+
+for doc in "${USER_DOCS[@]}"; do
+  filepath="$REPO_ROOT/$doc"
+  [[ -f "$filepath" ]] || continue
+  doc_slug=$(echo "$doc" | sed 's|[/.]|_|g')
+  test_start "flesch_doc_length_${doc_slug}"
+  lines=$(wc -l < "$filepath" | tr -d ' ')
+  if [[ "$lines" -ge 20 ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $lines lines"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $lines lines (min 20)"
+  fi
+done
+
+# ═══════════════════════════════════════════════════════════════
+# 20. PER-DOC CODE EXAMPLES — each doc individually
+# ═══════════════════════════════════════════════════════════════
+
+for doc in "${USER_DOCS[@]}"; do
+  filepath="$REPO_ROOT/$doc"
+  [[ -f "$filepath" ]] || continue
+  doc_slug=$(echo "$doc" | sed 's|[/.]|_|g')
+  test_start "flesch_code_examples_${doc_slug}"
+  code_blocks=$(grep -c '^\`\`\`' "$filepath" 2>/dev/null || true)
+  half=$((code_blocks / 2))
+  if [[ "$half" -ge 1 ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $half code blocks"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: no code blocks"
+  fi
+done
+
+# ═══════════════════════════════════════════════════════════════
+# 21. INDIVIDUAL DOC EXISTENCE — each doc must exist
+# ═══════════════════════════════════════════════════════════════
+
+test_start "flesch_readme_exists"
+assert_file_exists "$REPO_ROOT/README.md" "README.md must exist"
+
+test_start "flesch_ai_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/AI.md" "AI.md must exist"
+
+test_start "flesch_migration_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/operations/MIGRATION.md" "MIGRATION.md must exist"
+
+test_start "flesch_profiles_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/reference/PROFILES.md" "PROFILES.md must exist"
+
+test_start "flesch_features_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/reference/FEATURES.md" "FEATURES.md must exist"
+
+test_start "flesch_encryption_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/security/ENCRYPTION.md" "ENCRYPTION.md must exist"
+
+test_start "flesch_install_doc_exists"
+assert_file_exists "$REPO_ROOT/docs/guides/INSTALL.md" "INSTALL.md must exist"
+
+# ═══════════════════════════════════════════════════════════════
+# 22. INDIVIDUAL DOC WORD COUNT — each doc has substance
+# ═══════════════════════════════════════════════════════════════
+
+test_start "flesch_readme_has_words"
+wc=$(_word_count "$(_extract_prose "$REPO_ROOT/README.md")")
+if [[ "$wc" -ge 50 ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $wc words"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: only $wc words (min 50)"
+fi
+
+test_start "flesch_ai_doc_has_words"
+wc=$(_word_count "$(_extract_prose "$REPO_ROOT/docs/AI.md")")
+if [[ "$wc" -ge 50 ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $wc words"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: only $wc words (min 50)"
+fi
+
+test_start "flesch_migration_doc_has_words"
+wc=$(_word_count "$(_extract_prose "$REPO_ROOT/docs/operations/MIGRATION.md")")
+if [[ "$wc" -ge 50 ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $wc words"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: only $wc words (min 50)"
+fi
+
+test_start "flesch_profiles_doc_has_words"
+wc=$(_word_count "$(_extract_prose "$REPO_ROOT/docs/reference/PROFILES.md")")
+if [[ "$wc" -ge 50 ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $wc words"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: only $wc words (min 50)"
+fi
+
+test_start "flesch_features_doc_has_words"
+wc=$(_word_count "$(_extract_prose "$REPO_ROOT/docs/reference/FEATURES.md")")
+if [[ "$wc" -ge 50 ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $wc words"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: only $wc words (min 50)"
+fi
+
+test_start "flesch_encryption_doc_has_words"
+wc=$(_word_count "$(_extract_prose "$REPO_ROOT/docs/security/ENCRYPTION.md")")
+if [[ "$wc" -ge 50 ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $wc words"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: only $wc words (min 50)"
+fi
+
+test_start "flesch_install_doc_has_words"
+wc=$(_word_count "$(_extract_prose "$REPO_ROOT/docs/guides/INSTALL.md")")
+if [[ "$wc" -ge 50 ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $wc words"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: only $wc words (min 50)"
+fi
+
+# ═══════════════════════════════════════════════════════════════
+# 23. INDIVIDUAL DOC NO JARGON — each doc checked
+# ═══════════════════════════════════════════════════════════════
+
+test_start "flesch_readme_no_jargon"
+assert_output_not_contains "facilitate" "cat '$REPO_ROOT/README.md'"
+
+test_start "flesch_ai_doc_no_jargon"
+assert_output_not_contains "facilitate" "cat '$REPO_ROOT/docs/AI.md'"
+
+test_start "flesch_migration_no_jargon"
+assert_output_not_contains "facilitate" "cat '$REPO_ROOT/docs/operations/MIGRATION.md'"
+
+test_start "flesch_profiles_no_jargon"
+assert_output_not_contains "facilitate" "cat '$REPO_ROOT/docs/reference/PROFILES.md'"
+
+test_start "flesch_features_no_jargon"
+assert_output_not_contains "facilitate" "cat '$REPO_ROOT/docs/reference/FEATURES.md'"
+
+test_start "flesch_encryption_no_jargon"
+assert_output_not_contains "facilitate" "cat '$REPO_ROOT/docs/security/ENCRYPTION.md'"
+
+test_start "flesch_install_no_jargon"
+assert_output_not_contains "facilitate" "cat '$REPO_ROOT/docs/guides/INSTALL.md'"
+
+# ═══════════════════════════════════════════════════════════════
+# 24. INDIVIDUAL DOC ACTIVE VOICE — no "utilize"
+# ═══════════════════════════════════════════════════════════════
+
+test_start "flesch_readme_no_utilize"
+assert_output_not_contains "utilize" "cat '$REPO_ROOT/README.md'"
+
+test_start "flesch_ai_doc_no_utilize"
+assert_output_not_contains "utilize" "cat '$REPO_ROOT/docs/AI.md'"
+
+test_start "flesch_migration_no_utilize"
+assert_output_not_contains "utilize" "cat '$REPO_ROOT/docs/operations/MIGRATION.md'"
+
+test_start "flesch_install_no_utilize"
+assert_output_not_contains "utilize" "cat '$REPO_ROOT/docs/guides/INSTALL.md'"
+
+test_start "flesch_profiles_no_utilize"
+assert_output_not_contains "utilize" "cat '$REPO_ROOT/docs/reference/PROFILES.md'"
+
+test_start "flesch_features_no_utilize"
+assert_output_not_contains "utilize" "cat '$REPO_ROOT/docs/reference/FEATURES.md'"
+
+test_start "flesch_encryption_no_utilize"
+assert_output_not_contains "utilize" "cat '$REPO_ROOT/docs/security/ENCRYPTION.md'"
+
+# ═══════════════════════════════════════════════════════════════
+# 25. NO "LEVERAGE" OR "SYNERGY" IN DOCS
+# ═══════════════════════════════════════════════════════════════
+
+test_start "flesch_readme_no_leverage"
+assert_output_not_contains "leverage" "cat '$REPO_ROOT/README.md'"
+
+test_start "flesch_install_no_leverage"
+assert_output_not_contains "leverage" "cat '$REPO_ROOT/docs/guides/INSTALL.md'"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
