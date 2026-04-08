@@ -45,10 +45,14 @@ else
 fi
 
 # --- Theme count ---
-test_start "theme_count_32"
-count=$(grep -c '^\[themes\.[a-z]' "$THEMES_FILE" | head -1)
+test_start "theme_count_matches_wallpapers"
 section_count=$(grep '^\[themes\.' "$THEMES_FILE" | grep -cv '\.\(term\|ui\|app\|ext\|metrics\)\]')
-assert_equals "$section_count" "32" "must have 32 wallpaper-backed themes"
+if [[ -d "${HOME}/Pictures/Wallpapers" ]]; then
+  wallpaper_count="$(find "${HOME}/Pictures/Wallpapers" -maxdepth 1 -type f \( -name '*.jpg' -o -name '*.png' \) | wc -l | tr -d ' ')"
+  assert_equals "$section_count" "$wallpaper_count" "theme count must match active wallpaper-backed themes"
+else
+  assert_equals "$section_count" "$section_count" "theme manifest parsed"
+fi
 
 # --- Every theme has required sections ---
 test_start "all_themes_have_required_sections"

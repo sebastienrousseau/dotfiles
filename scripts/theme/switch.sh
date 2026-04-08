@@ -116,16 +116,22 @@ get_theme_family() {
     blush-*) echo "blush" ;;
     citrus-*) echo "citrus" ;;
     colourful-*) echo "colourful" ;;
+    grid-green-*) echo "grid-green" ;;
+    grid-magenta-*) echo "grid-magenta" ;;
     imac-blue-*) echo "imac-blue" ;;
     indigo-*) echo "indigo" ;;
     macos-big-sur-*) echo "macos-big-sur" ;;
     macos-mojave-*) echo "macos-mojave" ;;
     macos-monterey-*) echo "macos-monterey" ;;
+    miami-worldcenter-*) echo "miami-worldcenter" ;;
     macos-sequoia-*) echo "macos-sequoia" ;;
     macos-sonoma-*) echo "macos-sonoma" ;;
     macos-tahoe-*) echo "macos-tahoe" ;;
     macos-ventura-*) echo "macos-ventura" ;;
     monterey-sierra-blue-*) echo "monterey-sierra-blue" ;;
+    spectrum-black-*) echo "spectrum-black" ;;
+    spectrum-red-*) echo "spectrum-red" ;;
+    spectrum-white-*) echo "spectrum-white" ;;
     silver-*) echo "silver" ;;
     *) echo "other" ;;
   esac
