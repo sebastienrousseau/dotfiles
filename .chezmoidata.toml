@@ -9,7 +9,7 @@ profile = "laptop"
 machine = ""
 
 # Visual theme
-theme = "macos-ventura-dark"
+theme = "blush-dark"
 
 # Terminal settings
 terminal_font_family = "JetBrainsMono Nerd Font"

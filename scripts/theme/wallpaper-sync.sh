@@ -11,6 +11,8 @@ ui_init
 ui_header "Wallpaper Sync"
 
 WALLPAPER_DIR="${DOTFILES_WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
+CHEZMOI_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
+DATA_FILE="${HOME}/.dotfiles/.chezmoidata.toml"
 
 if [ ! -d "$WALLPAPER_DIR" ]; then
   ui_err "Wallpaper directory" "not found: $WALLPAPER_DIR"
@@ -19,6 +21,17 @@ fi
 
 # Detect current color scheme (light/dark)
 detect_mode() {
+  if command -v dms &>/dev/null; then
+    local dms_mode
+    dms_mode="$(dms ipc theme getMode 2>/dev/null || true)"
+    case "$dms_mode" in
+      dark | light)
+        echo "$dms_mode"
+        return 0
+        ;;
+    esac
+  fi
+
   if command -v gsettings &>/dev/null; then
     local scheme
     scheme="$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null || echo "")"
@@ -33,13 +46,95 @@ detect_mode() {
 
 MODE="$(detect_mode)"
 
+current_theme() {
+  if [[ -f "$CHEZMOI_CFG" ]]; then
+    local chezmoi_theme
+    chezmoi_theme="$(awk -F'"' '/^theme =/ {print $2}' "$CHEZMOI_CFG" | head -n 1)"
+    if [[ -n "$chezmoi_theme" ]]; then
+      printf '%s\n' "$chezmoi_theme"
+      return 0
+    fi
+  fi
+
+  if [[ -f "$DATA_FILE" ]]; then
+    awk -F'"' '/^theme =/ {print $2}' "$DATA_FILE" | head -n 1
+  fi
+}
+
+wallpaper_for_theme() {
+  local theme="${1:-}"
+  local mode="${2:-}"
+  local candidate=""
+  local family=""
+
+  [[ -n "$theme" ]] || return 1
+  [[ -n "$mode" ]] || return 1
+
+  for ext in jpg png; do
+    candidate="$WALLPAPER_DIR/${theme}.${ext}"
+    if [[ -f "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+
+  family="${theme%-dark}"
+  if [[ "$family" == "$theme" ]]; then
+    family="${theme%-light}"
+  fi
+  for ext in jpg png; do
+    candidate="$WALLPAPER_DIR/${family}-${mode}.${ext}"
+    if [[ -f "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+theme_wallpaper_pair() {
+  local theme="${1:-}"
+  local family=""
+  local light_wp=""
+  local dark_wp=""
+
+  [[ -n "$theme" ]] || return 1
+
+  family="${theme%-dark}"
+  if [[ "$family" == "$theme" ]]; then
+    family="${theme%-light}"
+  fi
+
+  light_wp="$(wallpaper_for_theme "${family}-light" "light" || true)"
+  dark_wp="$(wallpaper_for_theme "${family}-dark" "dark" || true)"
+
+  if [[ -n "$light_wp" && -n "$dark_wp" ]]; then
+    printf '%s\n%s\n' "$light_wp" "$dark_wp"
+    return 0
+  fi
+
+  return 1
+}
+
 # Pick a wallpaper matching the current mode
 pick_wallpaper() {
   local mode="$1"
+  local theme="${2:-}"
   local files=()
+
+  if [[ -n "$theme" ]]; then
+    local matched
+    matched="$(wallpaper_for_theme "$theme" "$mode" || true)"
+    if [[ -n "$matched" ]]; then
+      printf '%s\n' "$matched"
+      return 0
+    fi
+  fi
+
   while IFS= read -r line; do
     files+=("$line")
-  done < <(find "$WALLPAPER_DIR" -maxdepth 1 -type f -iname "*-${mode}.jpg" | sort)
+  done < <(find "$WALLPAPER_DIR" -maxdepth 1 -type f \( -iname "*-${mode}.jpg" -o -iname "*-${mode}.png" \) | sort)
 
   if [[ ${#files[@]} -eq 0 ]]; then
     return 1
@@ -53,7 +148,8 @@ pick_wallpaper() {
   fi
 }
 
-WALLPAPER="$(pick_wallpaper "$MODE" || true)"
+THEME="$(current_theme || true)"
+WALLPAPER="$(pick_wallpaper "$MODE" "$THEME" || true)"
 if [ -z "$WALLPAPER" ]; then
   ui_err "No ${MODE} wallpapers found" "$WALLPAPER_DIR"
   exit 1
@@ -70,15 +166,67 @@ apply_wallpaper() {
       osascript -e "tell application \"System Events\" to set picture of every desktop to POSIX file \"$wp\"" || true
       ;;
     Linux)
-      # gsettings-based (GNOME, niri+DMS, and other freedesktop compositors)
+      # Niri + DMS/Quickshell uses its own wallpaper state.
+      if command -v dms &>/dev/null; then
+        local dms_result current_outputs output current_dms_mode light_wp dark_wp
+        dms_result="$(dms ipc wallpaper set "$wp" 2>/dev/null || true)"
+        if [[ "$dms_result" == SUCCESS:* ]]; then
+          ui_info "Applied via" "dms ipc wallpaper set"
+        elif [[ "$dms_result" == ERROR:\ Per-monitor\ mode\ enabled* ]]; then
+          current_outputs="$(dms ipc outputs current 2>/dev/null | tr -d '[]"')"
+          for output in ${current_outputs//,/ }; do
+            [[ -n "$output" ]] || continue
+            dms ipc wallpaper setFor "$output" "$wp" >/dev/null 2>&1 || true
+          done
+          ui_info "Applied via" "dms ipc wallpaper setFor"
+        else
+          ui_warn "DMS wallpaper" "set failed, falling back"
+        fi
+
+        # Keep DMS light/dark wallpaper slots aligned with the theme family.
+        if [[ -n "${THEME:-}" ]] && mapfile -t _pair < <(theme_wallpaper_pair "$THEME"); then
+          light_wp="${_pair[0]:-}"
+          dark_wp="${_pair[1]:-}"
+          current_dms_mode="$(dms ipc theme getMode 2>/dev/null || printf '%s\n' "$mode")"
+
+          if [[ -n "$light_wp" && -n "$dark_wp" ]]; then
+            dms ipc theme light >/dev/null 2>&1 || true
+            dms ipc wallpaper set "$light_wp" >/dev/null 2>&1 || true
+
+            dms ipc theme dark >/dev/null 2>&1 || true
+            dms ipc wallpaper set "$dark_wp" >/dev/null 2>&1 || true
+
+            if [[ "$current_dms_mode" == "light" ]]; then
+              dms ipc theme light >/dev/null 2>&1 || true
+            else
+              dms ipc theme dark >/dev/null 2>&1 || true
+            fi
+            ui_info "DMS pair" "$(basename "$light_wp"), $(basename "$dark_wp")"
+          fi
+        fi
+      fi
+
+      # gsettings-based desktop state for GTK/freedesktop consumers
       if command -v gsettings &>/dev/null; then
         # Find the matching pair for picture-uri and picture-uri-dark
-        local light_wp dark_wp
-        local base="${wp%-${mode}.jpg}"
-        light_wp="${base}-light.jpg"
-        dark_wp="${base}-dark.jpg"
+        local light_wp dark_wp base ext
+        ext="${wp##*.}"
+        base="${wp%-${mode}.${ext}}"
+        if [[ -f "${base}-light.${ext}" ]] && [[ -f "${base}-dark.${ext}" ]]; then
+          light_wp="${base}-light.${ext}"
+          dark_wp="${base}-dark.${ext}"
+        elif [[ -f "${base}-light.jpg" ]] && [[ -f "${base}-dark.jpg" ]]; then
+          light_wp="${base}-light.jpg"
+          dark_wp="${base}-dark.jpg"
+        elif [[ -f "${base}-light.png" ]] && [[ -f "${base}-dark.png" ]]; then
+          light_wp="${base}-light.png"
+          dark_wp="${base}-dark.png"
+        else
+          light_wp=""
+          dark_wp=""
+        fi
 
-        if [[ -f "$light_wp" ]] && [[ -f "$dark_wp" ]]; then
+        if [[ -n "$light_wp" ]] && [[ -n "$dark_wp" ]]; then
           gsettings set org.gnome.desktop.background picture-uri "file://${light_wp}"
           gsettings set org.gnome.desktop.background picture-uri-dark "file://${dark_wp}"
           gsettings set org.gnome.desktop.screensaver picture-uri "file://${light_wp}"
@@ -109,4 +257,8 @@ apply_wallpaper() {
 }
 
 apply_wallpaper "$WALLPAPER" "$MODE"
-ui_ok "Wallpaper applied (${MODE})" "$(basename "$WALLPAPER")"
+if [[ -n "$THEME" ]]; then
+  ui_ok "Wallpaper applied (${MODE})" "$(basename "$WALLPAPER") ← $THEME"
+else
+  ui_ok "Wallpaper applied (${MODE})" "$(basename "$WALLPAPER")"
+fi

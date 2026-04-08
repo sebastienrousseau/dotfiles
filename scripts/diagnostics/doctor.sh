@@ -422,7 +422,9 @@ broken_links=0
 for root in "$HOME/.config" "$HOME/.local/bin" "$HOME/.local/share" "$HOME/.ssh"; do
   [[ -d "$root" ]] || continue
   while IFS= read -r -d '' link; do
+    link_name="$(basename "$link")"
     [[ "$link" == *"google-chrome-backup"* ]] && continue
+    [[ "$link_name" == SingletonLock || "$link_name" == SingletonCookie || "$link_name" == SingletonSocket ]] && continue
     [[ -e "$link" ]] || broken_links=$((broken_links + 1))
   done < <(find "$root" -maxdepth 3 -type l -print0 2>/dev/null)
 done

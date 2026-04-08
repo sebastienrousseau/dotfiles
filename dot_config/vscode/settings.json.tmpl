@@ -1,7 +1,7 @@
 {
   // Theme Configuration - Dynamically set based on chezmoi theme variable
-{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end }}
+{{- $t := index .themes (default "macos-monterey-dark" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "macos-monterey-dark" -}}{{- end }}
   "workbench.colorTheme": "{{ $t.app.vscode }}",
   "workbench.preferredDarkColorTheme": "{{ $t.app.vscode_dark }}",
   "workbench.preferredLightColorTheme": "{{ $t.app.vscode_light }}",
@@ -14,7 +14,7 @@
 
   // Terminal Integration - Match system theme
   "terminal.integrated.minimumContrastRatio": 4.5,
-{{- if or (hasPrefix .theme "catppuccin-") (eq .theme "catppuccin-latte") }}
+{{- if eq $t.mode "dark" }}
   "terminal.integrated.drawBoldTextInBrightColors": false,
 {{- else }}
   "terminal.integrated.drawBoldTextInBrightColors": true,
@@ -37,23 +37,10 @@
   // Window Configuration
   "window.autoDetectColorScheme": false,
   "window.titleBarStyle": "custom",
-{{- if hasPrefix .theme "catppuccin-" }}
   "workbench.colorCustomizations": {
-{{- if eq .theme "catppuccin-latte" }}
-    "titleBar.activeBackground": "#eff1f5",
-    "titleBar.activeForeground": "#4c4f69"
-{{- else if eq .theme "catppuccin-frappe" }}
-    "titleBar.activeBackground": "#303446",
-    "titleBar.activeForeground": "#c6d0f5"
-{{- else if eq .theme "catppuccin-macchiato" }}
-    "titleBar.activeBackground": "#24273a",
-    "titleBar.activeForeground": "#cad3f5"
-{{- else if eq .theme "catppuccin-mocha" }}
-    "titleBar.activeBackground": "#1e1e2e",
-    "titleBar.activeForeground": "#cdd6f4"
-{{- end }}
+    "titleBar.activeBackground": "{{ $t.term.bg }}",
+    "titleBar.activeForeground": "{{ $t.term.fg }}"
   },
-{{- end }}
 
   // File Explorer
   "explorer.confirmDelete": false,

@@ -7,7 +7,7 @@
 ##
 ## # Usage
 ##   dot-theme-sync                    # Regenerate configs + reload running apps
-##   dot-theme-sync catppuccin-latte   # Set theme + regenerate + reload
+##   dot-theme-sync macos-monterey-light   # Set theme + regenerate + reload
 ##   dot-theme-sync --full             # Full chezmoi apply + reload
 ##   dot-theme-sync --help             # Show this help
 ##
@@ -243,9 +243,28 @@ apply_theme_configs() {
   )
 
   local applied=()
+  local target tmp_file
   for target in "${targets[@]}"; do
-    if [[ -f "$target" ]] && chezmoi apply "$target" 2>/dev/null; then
+    [[ -f "$target" ]] || continue
+
+    if chezmoi apply "$target" 2>/dev/null; then
       applied+=("${target##*/}")
+      continue
+    fi
+
+    # Some local Niri setups keep ~/.config/niri/config.kdl outside direct
+    # chezmoi management. Fall back to rendering the managed template so theme
+    # switches still update active border colors and other palette values.
+    if [[ "$target" == "$HOME/.config/niri/config.kdl" ]]; then
+      local niri_template="$SRC_DIR/dot_config/niri/config.kdl.tmpl"
+      if [[ -f "$niri_template" ]]; then
+        tmp_file="$(umask 077 && mktemp)"
+        if chezmoi execute-template <"$niri_template" >"$tmp_file" 2>/dev/null && mv "$tmp_file" "$target"; then
+          applied+=("${target##*/}")
+          continue
+        fi
+        rm -f "$tmp_file"
+      fi
     fi
   done
 
@@ -497,59 +516,30 @@ reload_desktop() {
     gsettings set org.gnome.desktop.interface icon-theme "$gtk_icon" 2>/dev/null && changed=1
   fi
 
-  # DMS (Dank Material Shell) — set stock theme to match accent color.
-  # Map theme families to closest DMS stock theme.
+  # DMS (Dank Material Shell) — prefer dynamic theme colors generated from the
+  # current wallpaper instead of forcing a stock palette in settings.
   if command -v dms &>/dev/null; then
-    local dms_stock=""
-    case "$theme" in
-      catppuccin-mocha | catppuccin-frappe | catppuccin-macchiato) dms_stock="blue" ;;
-      catppuccin-latte) dms_stock="blue" ;;
-      tokyonight-night | tokyonight-storm | tokyonight-moon) dms_stock="blue" ;;
-      tokyonight-day) dms_stock="blue" ;;
-      rose-pine | rose-pine-moon) dms_stock="cyan" ;;
-      rose-pine-dawn) dms_stock="coral" ;;
-      dracula) dms_stock="purple" ;;
-      gruvbox-dark | gruvbox-light) dms_stock="orange" ;;
-      nord) dms_stock="cyan" ;;
-      onedark | onelight) dms_stock="blue" ;;
-      solarized-dark | solarized-light) dms_stock="cyan" ;;
-      everforest-dark | everforest-light) dms_stock="green" ;;
-      kanagawa-wave | kanagawa-dragon) dms_stock="purple" ;;
-      kanagawa-lotus) dms_stock="pink" ;;
-      abstract-waves-*) dms_stock="blue" ;;
-      adwaita-dark) dms_stock="cyan" ;;
-      adwaita-light) dms_stock="purple" ;;
-      colourful-dark) dms_stock="blue" ;;
-      colourful-light) dms_stock="purple" ;;
-      imac-blue-*) dms_stock="blue" ;;
-      macos-big-sur-*) dms_stock="purple" ;;
-      macos-mojave-*) dms_stock="blue" ;;
-      macos-monterey-*) dms_stock="purple" ;;
-      macos-sequoia-*) dms_stock="cyan" ;;
-      macos-sonoma-*) dms_stock="green" ;;
-      macos-tahoe-*) dms_stock="blue" ;;
-      macos-ventura-*) dms_stock="orange" ;;
-      monterey-sierra-blue-*) dms_stock="cyan" ;;
-      *) dms_stock="blue" ;;
-    esac
-
     # DMS theme switch: write to settings.json in-place.
     # DMS FileView watches the file and triggers onLoaded → applyStoredTheme.
     # NOTE: mv (atomic write) breaks the inotify watch — must use sed -i.
     local dms_settings="${XDG_CONFIG_HOME:-$HOME/.config}/DankMaterialShell/settings.json"
     if [[ -f "$dms_settings" ]]; then
       _sed_i \
-        -e "s/\"currentThemeName\": *\"[^\"]*\"/\"currentThemeName\": \"$dms_stock\"/" \
-        -e "s/\"currentThemeCategory\": *\"[^\"]*\"/\"currentThemeCategory\": \"stock\"/" \
+        -e 's/"currentThemeName": *"[^"]*"/"currentThemeName": "dynamic"/' \
+        -e 's/"currentThemeCategory": *"[^"]*"/"currentThemeCategory": "dynamic"/' \
         "$dms_settings"
       changed=1
     fi
 
-    # Sync DMS light/dark mode
-    if [[ "$mode" == "light" ]]; then
-      dms ipc theme light &>/dev/null || true
-    else
-      dms ipc theme dark &>/dev/null || true
+    # Keep DMS theme mode in automatic mode across restarts. The shell's
+    # session state owns light/dark automation, so avoid forcing manual mode
+    # here via `dms ipc theme light|dark`.
+    local dms_session="${XDG_STATE_HOME:-$HOME/.local/state}/DankMaterialShell/session.json"
+    if [[ -f "$dms_session" ]]; then
+      _sed_i \
+        -e 's/"themeModeAutoEnabled": *false/"themeModeAutoEnabled": true/' \
+        -e 's/"themeModeAutoMode": *"[^"]*"/"themeModeAutoMode": "time"/' \
+        "$dms_session"
     fi
   fi
 
@@ -773,6 +763,52 @@ reload_nvim() {
   fi
 }
 
+reload_wallpaper() {
+  local script="$SRC_DIR/scripts/theme/wallpaper-sync.sh"
+
+  if [[ ! -x "$script" ]] && [[ ! -f "$script" ]]; then
+    SKIPPED+=("wallpaper")
+    _skip "Wallpaper" "sync script not found"
+    return
+  fi
+
+  if bash "$script" >/dev/null 2>&1; then
+    RELOADED+=("wallpaper")
+    _ok "Wallpaper" "matched active theme"
+  else
+    SKIPPED+=("wallpaper")
+    _skip "Wallpaper" "sync unavailable"
+  fi
+}
+
+reload_dms() {
+  if [[ "$PLATFORM" != "Linux" ]]; then
+    SKIPPED+=("dms")
+    _skip "DMS" "not Linux"
+    return
+  fi
+
+  if ! command -v systemctl &>/dev/null; then
+    SKIPPED+=("dms")
+    _skip "DMS" "systemctl not available"
+    return
+  fi
+
+  if ! systemctl --user is-active --quiet dms.service; then
+    SKIPPED+=("dms")
+    _skip "DMS" "service not active"
+    return
+  fi
+
+  if systemctl --user restart dms.service >/dev/null 2>&1; then
+    RELOADED+=("dms")
+    _ok "DMS" "service restarted"
+  else
+    SKIPPED+=("dms")
+    _skip "DMS" "restart failed"
+  fi
+}
+
 # =============================================================================
 # Usage
 # =============================================================================
@@ -865,6 +901,8 @@ main() {
   reload_tmux
   reload_niri
   reload_desktop "$theme"
+  reload_wallpaper
+  reload_dms
   reload_browsers "$theme"
   reload_nvim "$theme"
 

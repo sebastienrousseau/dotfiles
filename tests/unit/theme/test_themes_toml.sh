@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
-# Theme SSOT validation — verifies all 48 themes meet WCAG AAA standards
+# Theme SSOT validation — verifies wallpaper-backed themes stay paired and valid
 # shellcheck disable=SC1090,SC1091,SC2034
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
@@ -45,10 +45,10 @@ else
 fi
 
 # --- Theme count ---
-test_start "theme_count_48"
+test_start "theme_count_32"
 count=$(grep -c '^\[themes\.[a-z]' "$THEMES_FILE" | head -1)
-section_count=$(grep '^\[themes\.' "$THEMES_FILE" | grep -cv '\.\(term\|ui\|app\|ext\)\]')
-assert_equals "$section_count" "48" "must have 48 themes"
+section_count=$(grep '^\[themes\.' "$THEMES_FILE" | grep -cv '\.\(term\|ui\|app\|ext\|metrics\)\]')
+assert_equals "$section_count" "32" "must have 32 wallpaper-backed themes"
 
 # --- Every theme has required sections ---
 test_start "all_themes_have_required_sections"
@@ -99,6 +99,69 @@ while IFS= read -r section; do
   done
 done < <(grep '^\[themes\.[a-z]' "$THEMES_FILE" | grep -v '\.\(term\|ui\|app\|ext\)\]')
 assert_equals "$missing" "0" "all themes must have all ui fields"
+
+# --- Wallpaper pair validation ---
+test_start "wallpapers_match_theme_names"
+WALLPAPER_DIR="${HOME}/Pictures/Wallpapers"
+missing=0
+unexpected=0
+if [[ -d "$WALLPAPER_DIR" ]]; then
+  while IFS= read -r section; do
+    name="${section#\[themes.}"
+    name="${name%\]}"
+    [[ "$name" == *.* ]] && continue
+    if [[ ! -f "$WALLPAPER_DIR/${name}.jpg" && ! -f "$WALLPAPER_DIR/${name}.png" ]]; then
+      echo "    MISSING WALLPAPER: ${name}.jpg|png"
+      missing=$((missing + 1))
+    fi
+  done < <(grep '^\[themes\.[a-z]' "$THEMES_FILE" | grep -v '\.\(term\|ui\|app\|ext\|metrics\)\]')
+
+  while IFS= read -r file; do
+    base="${file%.*}"
+    if ! grep -q "^\[themes\.${base}\]$" "$THEMES_FILE"; then
+      echo "    UNEXPECTED WALLPAPER: $file"
+      unexpected=$((unexpected + 1))
+    fi
+  done < <(find "$WALLPAPER_DIR" -maxdepth 1 -type f \( -name '*.jpg' -o -name '*.png' \) 2>/dev/null | sed 's#^.*/##')
+
+  assert_equals "$missing" "0" "every theme must have a matching wallpaper"
+  assert_equals "$unexpected" "0" "every wallpaper must map to a theme"
+else
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (skipped: wallpaper directory missing)"
+fi
+
+test_start "wallpaper_families_have_light_dark_pairs"
+pair_errors=0
+if [[ -d "$WALLPAPER_DIR" ]]; then
+  families="$(find "$WALLPAPER_DIR" -maxdepth 1 -type f \( -name '*.jpg' -o -name '*.png' \) 2>/dev/null | sed 's#^.*/##' | sed -E 's/-(light|dark)\.(jpg|png)$//' | sort -u)"
+  while IFS= read -r family; do
+    [[ -n "$family" ]] || continue
+    [[ -f "${WALLPAPER_DIR}/${family}-light.jpg" || -f "${WALLPAPER_DIR}/${family}-light.png" ]] || { echo "    MISSING LIGHT: ${family}-light.(jpg|png)"; pair_errors=$((pair_errors + 1)); }
+    [[ -f "${WALLPAPER_DIR}/${family}-dark.jpg" || -f "${WALLPAPER_DIR}/${family}-dark.png" ]] || { echo "    MISSING DARK: ${family}-dark.(jpg|png)"; pair_errors=$((pair_errors + 1)); }
+  done <<<"$families"
+  assert_equals "$pair_errors" "0" "every wallpaper family must have light/dark pairs"
+else
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (skipped: wallpaper directory missing)"
+fi
+
+test_start "wallpapers_are_uniform_6k"
+size_errors=0
+if [[ -d "$WALLPAPER_DIR" ]] && command -v magick >/dev/null 2>&1; then
+  while IFS= read -r file; do
+    [[ -f "$file" ]] || continue
+    dims="$(magick identify -format '%wx%h' "$file" 2>/dev/null || true)"
+    if [[ "$dims" != "6016x3384" ]]; then
+      echo "    BAD SIZE: $(basename "$file") => ${dims:-unknown}"
+      size_errors=$((size_errors + 1))
+    fi
+  done < <(find "$WALLPAPER_DIR" -maxdepth 1 -type f \( -name '*.jpg' -o -name '*.png' \) | sort)
+  assert_equals "$size_errors" "0" "all wallpapers must be 6016x3384"
+else
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (skipped: wallpaper directory missing or magick unavailable)"
+fi
 
 # --- WCAG AAA contrast validation ---
 test_start "all_themes_wcag_aaa"
@@ -162,7 +225,7 @@ if [[ "$wcag_result" == "SKIP" ]]; then
 else
   fail_count="${wcag_result##*$'\n'}"
   fail_count="${fail_count//[^0-9]/}"
-  assert_equals "${fail_count:-0}" "0" "all 48 themes must pass WCAG AAA"
+  assert_equals "${fail_count:-0}" "0" "all wallpaper themes must pass WCAG AAA"
 fi
 
 # --- Mode field present ---

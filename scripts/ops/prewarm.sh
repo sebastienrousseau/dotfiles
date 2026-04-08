@@ -12,7 +12,12 @@ source "$SCRIPT_DIR/dot/lib/log.sh"
 export DOT_COMMAND="prewarm"
 
 # Prevent concurrent execution
-LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/dotfiles-prewarm.lock"
+# Prefer XDG runtime dir when it exists and is writable; fallback to /tmp.
+LOCK_BASE="/tmp"
+if [[ -n "${XDG_RUNTIME_DIR:-}" ]] && [[ -d "${XDG_RUNTIME_DIR}" ]] && [[ -w "${XDG_RUNTIME_DIR}" ]]; then
+  LOCK_BASE="${XDG_RUNTIME_DIR}"
+fi
+LOCK_FILE="${LOCK_BASE}/dotfiles-prewarm.lock"
 LOCK_DIR="${LOCK_FILE}.d"
 if command -v flock >/dev/null 2>&1; then
   exec 9>"$LOCK_FILE"

@@ -68,7 +68,7 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
 vim.api.nvim_create_autocmd("User", {
   pattern = "LazyReload",
   callback = function()
-    local theme = vim.env.DOTFILES_THEME or "catppuccin-mocha"
+    local theme = vim.env.DOTFILES_THEME or "macos-monterey-dark"
     -- Clear cached theme modules so setup() runs fresh
     for name, _ in pairs(package.loaded) do
       if

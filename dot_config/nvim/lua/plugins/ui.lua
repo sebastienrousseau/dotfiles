@@ -129,7 +129,7 @@ Simply design to fit your shell life
     opts = {
       options = {
         theme = (function()
-          local theme = vim.env.DOTFILES_THEME or "catppuccin-mocha"
+          local theme = vim.env.DOTFILES_THEME or "macos-monterey-dark"
           if theme:match("^tokyonight") then
             return "tokyonight"
           elseif theme:match("^catppuccin") then
@@ -311,7 +311,7 @@ Simply design to fit your shell life
     lazy = false,
     priority = 1001,
     config = function()
-      local theme = vim.env.DOTFILES_THEME or "catppuccin-mocha"
+      local theme = vim.env.DOTFILES_THEME or "macos-monterey-dark"
       local function load_theme(name)
         local ok, lazy = pcall(require, "lazy")
         if ok then

@@ -1,5 +1,11 @@
-{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end }}
+{{- $t := index .themes (default "macos-monterey-dark" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "macos-monterey-dark" -}}{{- end }}
+{{- $tt := $t -}}
+{{- $themeName := default "macos-monterey-dark" .theme -}}
+{{- if hasSuffix "-light" $themeName -}}
+  {{- $darkTheme := index .themes (printf "%s-dark" (trimSuffix "-light" $themeName)) -}}
+  {{- if $darkTheme -}}{{- $tt = $darkTheme -}}{{- end -}}
+{{- end }}
 [main]
 font={{ .terminal_font_family }}:size={{ .terminal_font_size }}
 pad=10x10
@@ -7,21 +13,21 @@ term=xterm-256color
 
 [colors]
 alpha=0.95
-background={{ trimPrefix "#" $t.term.bg }}
-foreground={{ trimPrefix "#" $t.term.fg }}
-regular0={{ trimPrefix "#" $t.term.c0 }}
-regular1={{ trimPrefix "#" $t.term.c1 }}
-regular2={{ trimPrefix "#" $t.term.c2 }}
-regular3={{ trimPrefix "#" $t.term.c3 }}
-regular4={{ trimPrefix "#" $t.term.c4 }}
-regular5={{ trimPrefix "#" $t.term.c5 }}
-regular6={{ trimPrefix "#" $t.term.c6 }}
-regular7={{ trimPrefix "#" $t.term.c7 }}
-bright0={{ trimPrefix "#" $t.term.c8 }}
-bright1={{ trimPrefix "#" $t.term.c9 }}
-bright2={{ trimPrefix "#" $t.term.c10 }}
-bright3={{ trimPrefix "#" $t.term.c11 }}
-bright4={{ trimPrefix "#" $t.term.c12 }}
-bright5={{ trimPrefix "#" $t.term.c13 }}
-bright6={{ trimPrefix "#" $t.term.c14 }}
-bright7={{ trimPrefix "#" $t.term.c15 }}
+background={{ trimPrefix "#" $tt.term.bg }}
+foreground={{ trimPrefix "#" $tt.term.fg }}
+regular0={{ trimPrefix "#" $tt.term.c0 }}
+regular1={{ trimPrefix "#" $tt.term.c1 }}
+regular2={{ trimPrefix "#" $tt.term.c2 }}
+regular3={{ trimPrefix "#" $tt.term.c3 }}
+regular4={{ trimPrefix "#" $tt.term.c4 }}
+regular5={{ trimPrefix "#" $tt.term.c5 }}
+regular6={{ trimPrefix "#" $tt.term.c6 }}
+regular7={{ trimPrefix "#" $tt.term.c7 }}
+bright0={{ trimPrefix "#" $tt.term.c8 }}
+bright1={{ trimPrefix "#" $tt.term.c9 }}
+bright2={{ trimPrefix "#" $tt.term.c10 }}
+bright3={{ trimPrefix "#" $tt.term.c11 }}
+bright4={{ trimPrefix "#" $tt.term.c12 }}
+bright5={{ trimPrefix "#" $tt.term.c13 }}
+bright6={{ trimPrefix "#" $tt.term.c14 }}
+bright7={{ trimPrefix "#" $tt.term.c15 }}

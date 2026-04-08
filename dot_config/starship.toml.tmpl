@@ -5,8 +5,8 @@
 # Raise timeout to avoid spurious prompt warnings.
 command_timeout = 5000
 add_newline = true
-{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end }}
+{{- $t := index .themes (default "macos-monterey-dark" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "macos-monterey-dark" -}}{{- end }}
 # Palette driven by starship_palette in .chezmoidata/themes.toml
 palette = "{{ $t.app.starship_palette }}"
 

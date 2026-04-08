@@ -19,8 +19,8 @@
 {{- $git_signingformat := coalesce (index . "git_signingformat") "ssh" -}}
 
 {{- /* Resolve active theme for delta syntax highlighting */ -}}
-{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end -}}
+{{- $t := index .themes (default "macos-monterey-dark" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "macos-monterey-dark" -}}{{- end -}}
 {{- $is_dark := eq $t.mode "dark" -}}
 
 [user]

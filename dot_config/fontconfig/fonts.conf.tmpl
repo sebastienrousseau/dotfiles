@@ -30,6 +30,19 @@
     </edit>
   </match>
 
+  <!-- Wayland grayscale rendering avoids color fringing on mixed-density panels -->
+  <match target="font">
+    <edit mode="assign" name="rgba">
+      <const>{{ if or .features.linux_desktop .features.niri }}none{{ else }}rgb{{ end }}</const>
+    </edit>
+  </match>
+
+  <match target="font">
+    <edit mode="assign" name="autohint">
+      <bool>false</bool>
+    </edit>
+  </match>
+
   <!-- Default Monospace Font -->
   <alias>
     <family>monospace</family>

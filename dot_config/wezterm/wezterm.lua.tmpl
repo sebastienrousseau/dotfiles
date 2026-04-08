@@ -7,16 +7,35 @@ end
 
 {{- $fontFamily := default "JetBrainsMono Nerd Font" .terminal_font_family -}}
 {{- $fontSize := default 12 .terminal_font_size -}}
-{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end }}
+{{- $t := index .themes (default "macos-monterey-dark" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "macos-monterey-dark" -}}{{- end }}
+{{- $tt := $t -}}
+{{- $themeName := default "macos-monterey-dark" .theme -}}
+{{- if hasSuffix "-light" $themeName -}}
+  {{- $darkTheme := index .themes (printf "%s-dark" (trimSuffix "-light" $themeName)) -}}
+  {{- if $darkTheme -}}{{- $tt = $darkTheme -}}{{- end -}}
+{{- end }}
 
 config.font = wezterm.font_with_fallback({
   "{{ $fontFamily }}",
-  "JetBrains Mono",
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- if ne $fontFamily "SF Mono" }}
   "SF Mono",
+  {{- end }}
+  {{- else }}
+  {{- if ne $fontFamily "JetBrainsMono Nerd Font" }}
+  "JetBrainsMono Nerd Font",
+  {{- end }}
+  {{- end }}
+  "JetBrains Mono",
+  "Noto Sans Mono",
   "Roboto Mono",
 })
 config.font_size = {{ $fontSize }}
+config.line_height = {{ if eq .chezmoi.os "darwin" }}1.05{{ else }}1.08{{ end }}
+config.freetype_load_target = "{{ if eq .chezmoi.os "darwin" }}HorizontalLcd{{ else }}Light{{ end }}"
+config.front_end = "WebGpu"
+config.animation_fps = 1
 
 config.window_padding = {
   left = 16,
@@ -24,6 +43,7 @@ config.window_padding = {
   top = 12,
   bottom = 12,
 }
+config.window_background_opacity = {{ if eq .chezmoi.os "darwin" }}0.92{{ else }}0.96{{ end }}
 
 config.enable_tab_bar = true
 config.use_fancy_tab_bar = false
@@ -31,14 +51,14 @@ config.hide_tab_bar_if_only_one_tab = true
 config.window_decorations = "RESIZE"
 
 config.colors = {
-  foreground = "{{ $t.term.fg }}",
-  background = "{{ $t.term.bg }}",
-  cursor_bg = "{{ $t.term.cursor }}",
-  cursor_fg = "{{ $t.term.cursor_text }}",
-  selection_bg = "{{ $t.term.sel_bg }}",
-  selection_fg = "{{ $t.term.sel_fg }}",
-  ansi = { "{{ $t.term.c0 }}", "{{ $t.term.c1 }}", "{{ $t.term.c2 }}", "{{ $t.term.c3 }}", "{{ $t.term.c4 }}", "{{ $t.term.c5 }}", "{{ $t.term.c6 }}", "{{ $t.term.c7 }}" },
-  brights = { "{{ $t.term.c8 }}", "{{ $t.term.c9 }}", "{{ $t.term.c10 }}", "{{ $t.term.c11 }}", "{{ $t.term.c12 }}", "{{ $t.term.c13 }}", "{{ $t.term.c14 }}", "{{ $t.term.c15 }}" },
+  foreground = "{{ $tt.term.fg }}",
+  background = "{{ $tt.term.bg }}",
+  cursor_bg = "{{ $tt.term.cursor }}",
+  cursor_fg = "{{ $tt.term.cursor_text }}",
+  selection_bg = "{{ $tt.term.sel_bg }}",
+  selection_fg = "{{ $tt.term.sel_fg }}",
+  ansi = { "{{ $tt.term.c0 }}", "{{ $tt.term.c1 }}", "{{ $tt.term.c2 }}", "{{ $tt.term.c3 }}", "{{ $tt.term.c4 }}", "{{ $tt.term.c5 }}", "{{ $tt.term.c6 }}", "{{ $tt.term.c7 }}" },
+  brights = { "{{ $tt.term.c8 }}", "{{ $tt.term.c9 }}", "{{ $tt.term.c10 }}", "{{ $tt.term.c11 }}", "{{ $tt.term.c12 }}", "{{ $tt.term.c13 }}", "{{ $tt.term.c14 }}", "{{ $tt.term.c15 }}" },
 }
 
 return config

@@ -1,33 +1,53 @@
 {{- $fontFamily := default "JetBrainsMono Nerd Font" .terminal_font_family -}}
 {{- $fontSize := default 12 .terminal_font_size -}}
+{{- $linuxDesktop := or .features.linux_desktop .features.niri -}}
 
 font_family {{ $fontFamily }}
+{{- if eq .chezmoi.os "darwin" }}
+bold_font SF Mono Bold
+italic_font SF Mono Regular Italic
+bold_italic_font SF Mono Bold Italic
+{{- else }}
+symbol_map U+E000-U+F8FF Symbols Nerd Font
+{{- end }}
 font_size {{ $fontSize }}
 
 window_padding_width 16
-background_opacity 0.9
+background_opacity {{ if eq .chezmoi.os "darwin" }}0.92{{ else }}0.96{{ end }}
+confirm_os_window_close 0
+enable_audio_bell no
+cursor_trail 0
+{{- if $linuxDesktop }}
+linux_display_server wayland
+{{- end }}
 
-{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end }}
-background {{ $t.term.bg }}
-foreground {{ $t.term.fg }}
-selection_background {{ $t.term.sel_bg }}
-selection_foreground {{ $t.term.sel_fg }}
-cursor {{ $t.term.cursor }}
+{{- $t := index .themes (default "macos-monterey-dark" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "macos-monterey-dark" -}}{{- end }}
+{{- $tt := $t -}}
+{{- $themeName := default "macos-monterey-dark" .theme -}}
+{{- if hasSuffix "-light" $themeName -}}
+  {{- $darkTheme := index .themes (printf "%s-dark" (trimSuffix "-light" $themeName)) -}}
+  {{- if $darkTheme -}}{{- $tt = $darkTheme -}}{{- end -}}
+{{- end }}
+background {{ $tt.term.bg }}
+foreground {{ $tt.term.fg }}
+selection_background {{ $tt.term.sel_bg }}
+selection_foreground {{ $tt.term.sel_fg }}
+cursor {{ $tt.term.cursor }}
 
-color0  {{ $t.term.c0 }}
-color1  {{ $t.term.c1 }}
-color2  {{ $t.term.c2 }}
-color3  {{ $t.term.c3 }}
-color4  {{ $t.term.c4 }}
-color5  {{ $t.term.c5 }}
-color6  {{ $t.term.c6 }}
-color7  {{ $t.term.c7 }}
-color8  {{ $t.term.c8 }}
-color9  {{ $t.term.c9 }}
-color10 {{ $t.term.c10 }}
-color11 {{ $t.term.c11 }}
-color12 {{ $t.term.c12 }}
-color13 {{ $t.term.c13 }}
-color14 {{ $t.term.c14 }}
-color15 {{ $t.term.c15 }}
+color0  {{ $tt.term.c0 }}
+color1  {{ $tt.term.c1 }}
+color2  {{ $tt.term.c2 }}
+color3  {{ $tt.term.c3 }}
+color4  {{ $tt.term.c4 }}
+color5  {{ $tt.term.c5 }}
+color6  {{ $tt.term.c6 }}
+color7  {{ $tt.term.c7 }}
+color8  {{ $tt.term.c8 }}
+color9  {{ $tt.term.c9 }}
+color10 {{ $tt.term.c10 }}
+color11 {{ $tt.term.c11 }}
+color12 {{ $tt.term.c12 }}
+color13 {{ $tt.term.c13 }}
+color14 {{ $tt.term.c14 }}
+color15 {{ $tt.term.c15 }}
