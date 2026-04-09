@@ -19,9 +19,10 @@ jobs:
         run: |
           SIGNATURE_LINE_1="THE ARCHITECT ᛫ Sebastien Rousseau ᛫ https://sebastienrousseau.com"
           SIGNATURE_LINE_2="THE ENGINE ᛞ EUXIS ᛫ Enterprise Unified Execution Intelligence System ᛫ https://euxis.co"
+          NORMALIZED_PR_BODY="$(printf '%s' "$PR_BODY" | tr '\r\n' ' ' | sed 's/[[:space:]][[:space:]]*/ /g')"
 
-          if printf '%s' "$PR_BODY" | grep -qF "$SIGNATURE_LINE_1" && \
-             printf '%s' "$PR_BODY" | grep -qF "$SIGNATURE_LINE_2"; then
+          if printf '%s' "$NORMALIZED_PR_BODY" | grep -qF "$SIGNATURE_LINE_1" && \
+             printf '%s' "$NORMALIZED_PR_BODY" | grep -qF "$SIGNATURE_LINE_2"; then
             echo "✓ PR signature verified"
           else
             echo "::error::PR description must end with the required Euxis signature."
