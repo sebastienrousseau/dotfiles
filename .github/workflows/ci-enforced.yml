@@ -266,7 +266,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Checkov Infrastructure Security
-        uses: bridgecrewio/checkov-action@2fd3901c8feb52417f27f0d9800259a106c1ec1e # v12.3089.0
+        uses: bridgecrewio/checkov-action@9ff61ad7df06a619665acec928d66258bd6adc8f # v12.3094.0
         with:
           framework: dockerfile,yaml,secrets
           quiet: false
@@ -275,7 +275,7 @@ jobs:
           output_file_path: reports/checkov.sarif
       - name: Upload Checkov results to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@38697555549f1db7851b81482ff19f1fa5c4fedc # v4
+        uses: github/codeql-action/upload-sarif@c10b8064de6f491fea524254123dbe5e09572f13 # v4
         with:
           sarif_file: reports/checkov.sarif
 
@@ -314,7 +314,7 @@ jobs:
           chezmoi apply --verbose --dry-run
       - name: Upload failure logs
         if: failure()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: logs-test-${{ matrix.cache_key }}
           path: ~/.local/share/chezmoi/.log
@@ -345,7 +345,7 @@ jobs:
             exit 1
           fi
       - name: Upload coverage reports
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-report
           path: coverage/
