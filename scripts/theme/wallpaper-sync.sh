@@ -158,8 +158,14 @@ fi
 # Convert .heic to .png on Linux (HEIC not universally supported)
 ensure_linux_compatible() {
   local wp="$1"
-  [[ "$(uname -s)" == "Linux" ]] || { printf '%s\n' "$wp"; return; }
-  [[ "${wp##*.}" == "heic" ]] || { printf '%s\n' "$wp"; return; }
+  [[ "$(uname -s)" == "Linux" ]] || {
+    printf '%s\n' "$wp"
+    return
+  }
+  [[ "${wp##*.}" == "heic" ]] || {
+    printf '%s\n' "$wp"
+    return
+  }
 
   local png="${wp%.heic}.png"
   if [[ -f "$png" ]] && [[ "$png" -nt "$wp" ]]; then
@@ -168,11 +174,20 @@ ensure_linux_compatible() {
   fi
 
   if command -v magick &>/dev/null; then
-    magick "$wp" -quality 95 "$png" 2>/dev/null && { printf '%s\n' "$png"; return; }
+    magick "$wp" -quality 95 "$png" 2>/dev/null && {
+      printf '%s\n' "$png"
+      return
+    }
   elif command -v heif-convert &>/dev/null; then
-    heif-convert "$wp" "$png" 2>/dev/null && { printf '%s\n' "$png"; return; }
+    heif-convert "$wp" "$png" 2>/dev/null && {
+      printf '%s\n' "$png"
+      return
+    }
   elif command -v convert &>/dev/null; then
-    convert "$wp" "$png" 2>/dev/null && { printf '%s\n' "$png"; return; }
+    convert "$wp" "$png" 2>/dev/null && {
+      printf '%s\n' "$png"
+      return
+    }
   fi
 
   # Fallback: use original and hope the DE supports it
