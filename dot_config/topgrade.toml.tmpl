@@ -2,9 +2,9 @@
 
 [misc]
 {{- if eq .chezmoi.os "darwin" }}
-disable = ["antigravity", "bun_packages", "claude_code", "containers", "firmware", "flatpak", "helm", "mas", "mise", "nix", "node", "pip3", "pipx", "pnpm", "poetry", "shell", "snap", "system", "uv", "vim"]
+disable = ["antigravity", "atuin", "bun_packages", "claude_code", "containers", "firmware", "flatpak", "helm", "mas", "mise", "nix", "node", "pip3", "pipx", "pnpm", "poetry", "shell", "snap", "system", "uv", "vim"]
 {{- else }}
-disable = ["antigravity", "bun_packages", "claude_code", "containers", "firmware", "flatpak", "helm", "hyprland_plugins", "mise", "nix", "node", "pip3", "pipx", "pnpm", "poetry", "shell", "uv", "vim"]
+disable = ["antigravity", "atuin", "bun_packages", "claude_code", "containers", "firmware", "flatpak", "helm", "hyprland_plugins", "mise", "nix", "node", "pip3", "pipx", "pnpm", "poetry", "shell", "uv", "vim"]
 {{- end }}
 pre_sudo = true
 no_self_update = true

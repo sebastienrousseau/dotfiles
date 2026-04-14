@@ -2,6 +2,25 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.500
+
+### Added
+- **24 unified themes** — consolidated to `macos-NAME-dark/light` naming with single-word identifiers (ai, bigsur, blue, blush, citrus, green, gridgreen, heatmap, indigo, miami, mojave, monterey, nova, orange, pink, purple, sequoia, silver, sonoma, tahoe, valentine, ventura, wave, yellow).
+- **Wallpaper system** — 48 `.heic` wallpapers at 6016x6016, dark/light pairs targeting golden ratio (1.618) brightness.
+- **HEIC → PNG auto-conversion** on Linux via `magick`/`heif-convert`/`convert`.
+- **macOS accent color mapping** — all 24 themes mapped to matching accent colors with forced UI refresh.
+- **Build artifact redirection** — Cargo, Go, pip, uv, Zig caches → `/tmp/builds/`.
+- **New theme families** — ai, blue, green, heatmap, miami, nova, orange, pink, purple, valentine, wave, yellow.
+
+### Changed
+- **Theme naming** — multi-word → single-word, `macos-` prefix on all themes.
+- **Theme picker** — shows all themes from `themes.toml` with `[W]` wallpaper markers.
+- **macOS appearance refresh** — kills cfprefsd/SystemUIServer/Dock/System Settings after changes.
+- **Wallpaper format support** — `.heic` supported alongside `.jpg`/`.png`.
+
+### Removed
+- **Legacy themes** without wallpaper backing (abstractwaves, adwaita, colourful, gridmagenta, imacblue, miamiworldcenter, montereysierrablue, rancho, saintecatherine, spectrumblack, spectrumred, spectrumwhite).
+
 ## v0.2.497
 
 ### Added

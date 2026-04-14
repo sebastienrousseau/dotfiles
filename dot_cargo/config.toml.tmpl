@@ -26,6 +26,8 @@ bloat = "bloat --release --crates"
 jobs = -1
 # Incremental compilation for faster rebuilds
 incremental = true
+# Build artifacts in /tmp (cleared on reboot)
+target-dir = "/tmp/builds/cargo"
 
 {{- if eq .chezmoi.os "darwin" }}
 # macOS: Use Apple's linker for faster linking

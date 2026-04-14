@@ -2,6 +2,7 @@
 # https://atuin.sh/docs/config
 
 # Core
+update_check = false
 db_path = "~/.local/share/atuin/history.db"
 key_path = "~/.local/share/atuin/key"
 session_path = "~/.local/share/atuin/session"

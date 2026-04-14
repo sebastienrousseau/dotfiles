@@ -1,6 +1,6 @@
 # Theming Guide
 
-The dotfiles ship 48 themes with live switching across every managed application. One command changes the terminal, editor, window manager, GTK, desktop environment, and browser-facing color mode in under a second.
+The dotfiles ship 24 themes (48 variants) with live switching across every managed application. One command changes the terminal, editor, window manager, GTK, desktop environment, wallpaper, and browser-facing color mode in under a second. All themes follow the `macos-NAME-dark/light` naming convention with single-word identifiers.
 
 ## How Themes Work
 
@@ -16,12 +16,12 @@ The `theme` key in `.chezmoidata.toml` controls the active theme. Every template
 dot theme
 ```
 
-Opens an interactive menu listing all 48 themes. Select one and press Enter.
+Opens an fzf picker listing all themes from `themes.toml`. Themes with matching wallpapers show a `[W]` marker. Select one and press Enter.
 
 ### Direct Switch
 
 ```bash
-dot theme catppuccin-mocha
+dot theme macos-tahoe-dark
 ```
 
 Sets the theme immediately. Regenerates configs and reloads running applications.
@@ -37,7 +37,7 @@ Sets the theme immediately. Regenerates configs and reloads running applications
 
 ```bash
 dot-theme-sync                    # Reload current theme
-dot-theme-sync catppuccin-latte   # Switch to a new theme
+dot-theme-sync macos-wave-light   # Switch to a new theme
 dot-theme-sync --full             # Full chezmoi apply instead of targeted
 ```
 
@@ -50,7 +50,9 @@ Each theme switch touches these applications:
 | **Ghostty** | `chezmoi apply` + macOS app-support sync + DBus `reload-config` or runtime signal fallback | Background, foreground, all 16 ANSI colors, cursor |
 | **Tmux** | `chezmoi apply` + `source-file` | Status bar colors, pane borders, mode indicators |
 | **Niri** | `chezmoi apply` + `load-config-file` IPC | Window borders, focus ring, inactive tint |
-| **Desktop (macOS)** | `osascript` + `defaults write -g AppleAccentColor` | System appearance (Light/Dark), accent color |
+| **Desktop (macOS)** | `osascript` + `defaults write` + `killall` | System appearance (Light/Dark), accent color, highlight color; forces SystemUIServer/Dock/cfprefsd refresh |
+| **Wallpaper (macOS)** | `osascript` System Events | Desktop wallpaper set across all displays |
+| **Wallpaper (Linux)** | `gsettings` / `dms` / `swaybg` / `feh` | HEIC auto-converted to PNG; `picture-uri` and `picture-uri-dark` set separately |
 | **Desktop (Linux/GNOME)** | `chezmoi apply` + `gsettings` | Theme name, icon theme, color scheme preference |
 | **Safari / Chrome / Edge** | Native browser appearance follows desktop theme | Browser chrome stays aligned when using the default/native browser theme |
 | **Firefox** | `chezmoi apply` on `~/.config/firefox/user.js` | Website color scheme preference follows the active dot theme; link that file into a Firefox profile to enforce it |
@@ -67,28 +69,57 @@ Each theme switch touches these applications:
 dot theme toggle
 ```
 
-Toggles between the dark and light variant of the current theme family. A theme named `catppuccin-mocha` (dark) toggles to `catppuccin-latte` (light), and vice versa. The toggle uses the `family` field in `themes.toml` to find the matching counterpart.
+Toggles between the dark and light variant of the current theme family. A theme named `macos-tahoe-dark` toggles to `macos-tahoe-light`, and vice versa.
 
 ## Theme Families
 
-Themes group into families. Each family has at least one dark and one light variant:
+Every theme has a dark and light variant. All follow the `macos-NAME-dark/light` naming convention:
 
-- **catppuccin** -- mocha, macchiato, frappe (dark), latte (light)
-- **tokyonight** -- night, storm, moon (dark), day (light)
-- **rose-pine** -- main, moon (dark), dawn (light)
-- **kanagawa** -- wave, dragon (dark), lotus (light)
-- **gruvbox** -- dark, light
-- **solarized** -- dark, light
-- **everforest** -- dark, light
-- **one** -- onedark, onelight
-- **dracula** -- dark only
-- **nord** -- dark only
-- **macos** -- big-sur, mojave, monterey, sequoia, sonoma, tahoe, ventura (dark/light pairs)
-- **abstract** -- waves (dark/light)
-- **adwaita** -- dark/light
-- **colourful** -- dark/light
-- **imac** -- blue (dark/light)
-- **monterey** -- sierra-blue (dark/light)
+- **macos-ai** -- magenta-rose aurora
+- **macos-bigsur** -- classic Big Sur landscape
+- **macos-blue** -- deep blue abstract
+- **macos-blush** -- warm blush gradient
+- **macos-citrus** -- vibrant citrus tones
+- **macos-green** -- natural green landscape
+- **macos-gridgreen** -- geometric green grid
+- **macos-heatmap** -- fiery orange-red heatmap
+- **macos-indigo** -- deep indigo abstract
+- **macos-miami** -- warm olive-earth tones
+- **macos-mojave** -- Mojave desert landscape
+- **macos-monterey** -- Monterey graphic
+- **macos-nova** -- warm amber desert
+- **macos-orange** -- deep orange gradient
+- **macos-pink** -- coral-pink abstract
+- **macos-purple** -- rich purple abstract
+- **macos-sequoia** -- Sequoia landscape
+- **macos-silver** -- neutral silver gradient
+- **macos-sonoma** -- Sonoma rolling hills
+- **macos-tahoe** -- Tahoe deep blue silk
+- **macos-valentine** -- vivid red-crimson
+- **macos-ventura** -- Ventura amber petals
+- **macos-wave** -- cool cyan-teal wave
+- **macos-yellow** -- warm golden yellow
+
+## Wallpapers
+
+Each theme has a matching wallpaper pair in `~/Pictures/Wallpapers/`:
+
+```
+macos-tahoe-dark.heic
+macos-tahoe-light.heic
+```
+
+All wallpapers are 6016x6016 `.heic` files. Dark/light pairs target a golden ratio (1.618) brightness relationship for balanced contrast across displays.
+
+### Linux and WSL
+
+Linux desktops (GNOME, Niri, swaybg, feh) do not universally support HEIC. The `wallpaper-sync.sh` script auto-converts `.heic` to `.png` on Linux using `magick`, `heif-convert`, or `convert` (whichever is available). The `.png` cache is only regenerated when the source `.heic` changes.
+
+WSL has no desktop compositor, so wallpapers do not apply. Terminal colors and Neovim themes still work in GUI terminals.
+
+## Build Artifacts
+
+All build caches (Cargo, Go, pip, uv, Zig) are redirected to `/tmp/builds/` via environment variables in `mise.toml` and `cargo/config.toml`. The directory is created on shell init via `fish/conf.d/env.fish`. Build artifacts are cleared on reboot.
 
 ## Troubleshooting
 
@@ -126,7 +157,7 @@ GTK theme names must match installed themes exactly. Catppuccin themes use names
 defaults write -g AppleAccentColor -int <value>
 ```
 
-If the UI did not refresh immediately, log out/in once or toggle appearance manually in System Settings.
+`dot-theme-sync` now kills `cfprefsd`, `SystemUIServer`, `Dock`, and `System Settings` after writing accent/highlight defaults to force an immediate refresh. If the UI still does not update, close and reopen System Settings.
 
 ### Browser theme did not change
 

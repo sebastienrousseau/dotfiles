@@ -444,12 +444,19 @@ reload_desktop() {
     fi
 
     case "$theme" in
-      *catppuccin* | *tokyonight* | *imac-blue* | *macos-mojave* | *monterey-sierra-blue*) accent="4" ;; # Blue
-      *everforest* | *macos-sonoma*) accent="3" ;; # Green
-      *kanagawa* | *dracula* | *adwaita-light* | *macos-big-sur*) accent="5" ;; # Purple
-      *rose-pine* | *onedark* | *colourful-light*) accent="6" ;; # Pink
-      *gruvbox* | *macos-ventura*) accent="1" ;; # Orange
-      *nord* | *solarized* | *macos-sequoia*) accent="2" ;; # Yellow
+      *macos-blue* | *macos-mojave* | *macos-wave* | *macos-indigo*) accent="4" ;; # Blue
+      *macos-green* | *macos-gridgreen* | *macos-sonoma* | *macos-miami*) accent="3" ;; # Green
+      *macos-purple* | *macos-bigsur*) accent="5" ;; # Purple
+      *macos-pink* | *macos-ai* | *macos-valentine* | *macos-blush*) accent="6" ;; # Pink
+      *macos-orange* | *macos-ventura* | *macos-heatmap* | *macos-nova*) accent="1" ;; # Orange
+      *macos-yellow* | *macos-sequoia* | *macos-citrus*) accent="2" ;; # Yellow
+      *macos-silver* | *macos-monterey*) accent="-1" ;; # Graphite
+      *catppuccin* | *tokyonight*) accent="4" ;; # Blue
+      *everforest*) accent="3" ;; # Green
+      *kanagawa* | *dracula*) accent="5" ;; # Purple
+      *rose-pine* | *onedark*) accent="6" ;; # Pink
+      *gruvbox*) accent="1" ;; # Orange
+      *nord* | *solarized*) accent="2" ;; # Yellow
       *) accent="4" ;; # Blue default
     esac
 
@@ -478,6 +485,11 @@ reload_desktop() {
     fi
 
     if [[ $changed -gt 0 ]]; then
+      # Force running apps to pick up the new accent/highlight preferences
+      killall -HUP cfprefsd 2>/dev/null || true
+      killall SystemUIServer 2>/dev/null || true
+      killall Dock 2>/dev/null || true
+      killall "System Settings" 2>/dev/null || true
       RELOADED+=("desktop")
       _ok "Desktop" "macOS ${color_scheme}, accent ${accent}"
     else

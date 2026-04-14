@@ -64,22 +64,22 @@ confirm "Enable strict alias governance?" && strict_mode=true
 secrets_provider=$(choose "Secrets provider" auto sops onepassword bitwarden)
 
 theme_choices=(
-  abstract-waves-dark abstract-waves-light
-  adwaita-dark adwaita-light
-  blush-dark blush-light
-  citrus-dark citrus-light
-  colourful-dark colourful-light
-  imac-blue-dark imac-blue-light
-  indigo-dark indigo-light
-  macos-big-sur-dark macos-big-sur-light
+ abstractwaves-light
+ adwaita-light
+  macos-blush-dark blush-light
+  macos-citrus-dark citrus-light
+ colourful-light
+  macos-imacblue-dark imacblue-light
+  macos-indigo-dark indigo-light
+  macos-bigsur-dark macos-bigsur-light
   macos-mojave-dark macos-mojave-light
   macos-monterey-dark macos-monterey-light
   macos-sequoia-dark macos-sequoia-light
   macos-sonoma-dark macos-sonoma-light
   macos-tahoe-dark macos-tahoe-light
   macos-ventura-dark macos-ventura-light
-  monterey-sierra-blue-dark monterey-sierra-blue-light
-  silver-dark silver-light
+ montereysierrablue-light
+  macos-silver-dark silver-light
 )
 theme=$(choose "Theme" "${theme_choices[@]}")
 

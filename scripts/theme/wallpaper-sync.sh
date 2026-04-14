@@ -70,7 +70,7 @@ wallpaper_for_theme() {
   [[ -n "$theme" ]] || return 1
   [[ -n "$mode" ]] || return 1
 
-  for ext in jpg png; do
+  for ext in heic jpg png; do
     candidate="$WALLPAPER_DIR/${theme}.${ext}"
     if [[ -f "$candidate" ]]; then
       printf '%s\n' "$candidate"
@@ -82,7 +82,7 @@ wallpaper_for_theme() {
   if [[ "$family" == "$theme" ]]; then
     family="${theme%-light}"
   fi
-  for ext in jpg png; do
+  for ext in heic jpg png; do
     candidate="$WALLPAPER_DIR/${family}-${mode}.${ext}"
     if [[ -f "$candidate" ]]; then
       printf '%s\n' "$candidate"
@@ -134,7 +134,7 @@ pick_wallpaper() {
 
   while IFS= read -r line; do
     files+=("$line")
-  done < <(find "$WALLPAPER_DIR" -maxdepth 1 -type f \( -iname "*-${mode}.jpg" -o -iname "*-${mode}.png" \) | sort)
+  done < <(find "$WALLPAPER_DIR" -maxdepth 1 -type f \( -iname "*-${mode}.jpg" -o -iname "*-${mode}.png" -o -iname "*-${mode}.heic" \) | sort)
 
   if [[ ${#files[@]} -eq 0 ]]; then
     return 1
@@ -155,10 +155,37 @@ if [ -z "$WALLPAPER" ]; then
   exit 1
 fi
 
+# Convert .heic to .png on Linux (HEIC not universally supported)
+ensure_linux_compatible() {
+  local wp="$1"
+  [[ "$(uname -s)" == "Linux" ]] || { printf '%s\n' "$wp"; return; }
+  [[ "${wp##*.}" == "heic" ]] || { printf '%s\n' "$wp"; return; }
+
+  local png="${wp%.heic}.png"
+  if [[ -f "$png" ]] && [[ "$png" -nt "$wp" ]]; then
+    printf '%s\n' "$png"
+    return
+  fi
+
+  if command -v magick &>/dev/null; then
+    magick "$wp" -quality 95 "$png" 2>/dev/null && { printf '%s\n' "$png"; return; }
+  elif command -v heif-convert &>/dev/null; then
+    heif-convert "$wp" "$png" 2>/dev/null && { printf '%s\n' "$png"; return; }
+  elif command -v convert &>/dev/null; then
+    convert "$wp" "$png" 2>/dev/null && { printf '%s\n' "$png"; return; }
+  fi
+
+  # Fallback: use original and hope the DE supports it
+  printf '%s\n' "$wp"
+}
+
 # Apply wallpaper based on platform and compositor
 apply_wallpaper() {
   local wp="$1"
   local mode="$2"
+
+  # Convert HEIC to PNG on Linux if needed
+  wp="$(ensure_linux_compatible "$wp")"
   local wp_uri="file://${wp}"
 
   case "$(uname -s)" in
@@ -215,6 +242,9 @@ apply_wallpaper() {
         if [[ -f "${base}-light.${ext}" ]] && [[ -f "${base}-dark.${ext}" ]]; then
           light_wp="${base}-light.${ext}"
           dark_wp="${base}-dark.${ext}"
+        elif [[ -f "${base}-light.heic" ]] && [[ -f "${base}-dark.heic" ]]; then
+          light_wp="${base}-light.heic"
+          dark_wp="${base}-dark.heic"
         elif [[ -f "${base}-light.jpg" ]] && [[ -f "${base}-dark.jpg" ]]; then
           light_wp="${base}-light.jpg"
           dark_wp="${base}-dark.jpg"
@@ -227,6 +257,8 @@ apply_wallpaper() {
         fi
 
         if [[ -n "$light_wp" ]] && [[ -n "$dark_wp" ]]; then
+          light_wp="$(ensure_linux_compatible "$light_wp")"
+          dark_wp="$(ensure_linux_compatible "$dark_wp")"
           gsettings set org.gnome.desktop.background picture-uri "file://${light_wp}"
           gsettings set org.gnome.desktop.background picture-uri-dark "file://${dark_wp}"
           gsettings set org.gnome.desktop.screensaver picture-uri "file://${light_wp}"

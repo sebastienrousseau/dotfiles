@@ -1,462 +1,8 @@
-# ============================================================================
-# Theme SSOT Manifest — Single Source of Truth for all color definitions
-# ============================================================================
-# Every template in the fleet reads from this file via {{ .themes.<name> }}.
-# To add a theme: define
-
-[themes.abstract-waves-dark]
-mode = "dark"
-family = "abstract"
-
-[themes.abstract-waves-dark.term]
-bg = "#141830"
-fg = "#d8dce8"
-cursor = "#6878c8"
-cursor_text = "#141830"
-sel_bg = "#2d345d"
-sel_fg = "#d8dce8"
-c0  = "#343856"
-c1  = "#c06878"
-c2  = "#68b088"
-c3  = "#c8a868"
-c4  = "#6878c8"
-c5  = "#a078b8"
-c6  = "#5898b0"
-c7  = "#b8bcc8"
-c8  = "#5a5676"
-c9  = "#d07888"
-c10 = "#78c098"
-c11 = "#d8b878"
-c12 = "#7888d8"
-c13 = "#b088c8"
-c14 = "#68a8c0"
-c15 = "#d0d4e0"
-
-[themes.abstract-waves-dark.ui]
-accent = "#4252a2"
-accent_text = "#ffffff"
-error = "#c06878"
-warning = "#c8a868"
-success = "#68b088"
-info = "#6878c8"
-panel = "#0e1228"
-border = "#242850"
-
-[themes.abstract-waves-dark.app]
-nvim = "catppuccin"
-nvim_style = "mocha"
-lualine = "catppuccin"
-gtk_theme = "Adwaita-dark"
-gtk_icon = "Papirus-Dark"
-gnome_shell = ""
-gnome_gtk = "Adwaita-dark"
-vscode = "Catppuccin Mocha"
-vscode_dark = "Catppuccin Mocha"
-vscode_light = "Catppuccin Latte"
-cat_wallpaper = ""
-starship_palette = "catppuccin_mocha"
-
-# ----------------------------------------------------------------------------
-# Pastel blue/lavender/pink waves — saturated blue-indigo palette
-# ----------------------------------------------------------------------------
-
-[themes.abstract-waves-light]
-mode = "light"
-family = "abstract"
-
-[themes.abstract-waves-light.term]
-bg = "#f0eef8"
-fg = "#2a2840"
-cursor = "#5868b8"
-cursor_text = "#f0eef8"
-sel_bg = "#cacce8"
-sel_fg = "#2a2840"
-c0  = "#2a2840"
-c1  = "#c03848"
-c2  = "#2a8848"
-c3  = "#9a7010"
-c4  = "#5868b8"
-c5  = "#8848a8"
-c6  = "#1878a0"
-c7  = "#e4e2f0"
-c8  = "#484660"
-c9  = "#d04858"
-c10 = "#389858"
-c11 = "#b08020"
-c12 = "#6878c8"
-c13 = "#9858b8"
-c14 = "#2888b0"
-c15 = "#1c1c1e"
-
-[themes.abstract-waves-light.ui]
-accent = "#4252a2"
-accent_text = "#ffffff"
-error = "#c03848"
-warning = "#b08020"
-success = "#2a8848"
-info = "#5868b8"
-panel = "#e4e2f0"
-border = "#d0cee0"
-
-[themes.abstract-waves-light.app]
-nvim = "catppuccin"
-nvim_style = "latte"
-lualine = "catppuccin"
-gtk_theme = "Adwaita"
-gtk_icon = "Papirus-Light"
-gnome_shell = ""
-gnome_gtk = "Adwaita"
-vscode = "Catppuccin Latte"
-vscode_dark = "Catppuccin Mocha"
-vscode_light = "Catppuccin Latte"
-cat_wallpaper = ""
-starship_palette = "catppuccin_latte"
-
-# ----------------------------------------------------------------------------
-# Dark teal/cyan geometric shapes — desaturated teal/cyan palette
-# ----------------------------------------------------------------------------
-
-[themes.adwaita-dark]
-mode = "dark"
-family = "adwaita"
-
-[themes.adwaita-dark.term]
-bg = "#1a2428"
-fg = "#d4dce0"
-cursor = "#58a0a8"
-cursor_text = "#1a2428"
-sel_bg = "#2c494e"
-sel_fg = "#d4dce0"
-c0  = "#36424a"
-c1  = "#c06868"
-c2  = "#68a878"
-c3  = "#c8a858"
-c4  = "#5888b8"
-c5  = "#a070a8"
-c6  = "#58a0a8"
-c7  = "#b8c0c4"
-c8  = "#54646c"
-c9  = "#d07878"
-c10 = "#78b888"
-c11 = "#d8b868"
-c12 = "#6898c8"
-c13 = "#b080b8"
-c14 = "#68b0b8"
-c15 = "#d0d8dc"
-
-[themes.adwaita-dark.ui]
-accent = "#58a0a8"
-accent_text = "#000000"
-error = "#c06868"
-warning = "#c8a858"
-success = "#68a878"
-info = "#58a0a8"
-panel = "#141e22"
-border = "#283438"
-
-[themes.adwaita-dark.app]
-nvim = "catppuccin"
-nvim_style = "mocha"
-lualine = "catppuccin"
-gtk_theme = "Adwaita-dark"
-gtk_icon = "Papirus-Dark"
-gnome_shell = ""
-gnome_gtk = "Adwaita-dark"
-vscode = "Catppuccin Mocha"
-vscode_dark = "Catppuccin Mocha"
-vscode_light = "Catppuccin Latte"
-cat_wallpaper = ""
-starship_palette = "catppuccin_mocha"
-
-# ----------------------------------------------------------------------------
-# Blue/lavender/pink geometric prisms — saturated blue-purple palette
-# ----------------------------------------------------------------------------
-
-[themes.adwaita-light]
-mode = "light"
-family = "adwaita"
-
-[themes.adwaita-light.term]
-bg = "#eee8f4"
-fg = "#282038"
-cursor = "#5070c0"
-cursor_text = "#eee8f4"
-sel_bg = "#c6cae7"
-sel_fg = "#282038"
-c0  = "#282038"
-c1  = "#c03040"
-c2  = "#288040"
-c3  = "#986810"
-c4  = "#5070c0"
-c5  = "#8840a0"
-c6  = "#187898"
-c7  = "#e2dcec"
-c8  = "#484058"
-c9  = "#d04050"
-c10 = "#389050"
-c11 = "#b08820"
-c12 = "#6080d0"
-c13 = "#9850b0"
-c14 = "#2888a8"
-c15 = "#1c1c1e"
-
-[themes.adwaita-light.ui]
-accent = "#3555a5"
-accent_text = "#ffffff"
-error = "#c03040"
-warning = "#a87818"
-success = "#288040"
-info = "#5070c0"
-panel = "#e2dcec"
-border = "#d4cee0"
-
-[themes.adwaita-light.app]
-nvim = "catppuccin"
-nvim_style = "latte"
-lualine = "catppuccin"
-gtk_theme = "Adwaita"
-gtk_icon = "Papirus-Light"
-gnome_shell = ""
-gnome_gtk = "Adwaita"
-vscode = "Catppuccin Latte"
-vscode_dark = "Catppuccin Mocha"
-vscode_light = "Catppuccin Latte"
-cat_wallpaper = ""
-starship_palette = "catppuccin_latte"
-
-# ----------------------------------------------------------------------------
-# Red/maroon + blue/cyan wave bands — warm red with cool cyan, desaturated
-# ----------------------------------------------------------------------------
-
-[themes.colourful-dark]
-mode = "dark"
-family = "colourful"
-
-[themes.colourful-dark.term]
-bg = "#1c1018"
-fg = "#dcd8e0"
-cursor = "#38a0c8"
-cursor_text = "#1c1018"
-sel_bg = "#243b4c"
-sel_fg = "#dcd8e0"
-c0  = "#403040"
-c1  = "#c86070"
-c2  = "#68a880"
-c3  = "#c8a060"
-c4  = "#5088c0"
-c5  = "#b870a0"
-c6  = "#38a0c8"
-c7  = "#c0b8c4"
-c8  = "#625262"
-c9  = "#d87080"
-c10 = "#78b890"
-c11 = "#d8b070"
-c12 = "#6098d0"
-c13 = "#c880b0"
-c14 = "#48b0d8"
-c15 = "#d8d0dc"
-
-[themes.colourful-dark.ui]
-accent = "#38a0c8"
-accent_text = "#000000"
-error = "#c86070"
-warning = "#c8a060"
-success = "#68a880"
-info = "#38a0c8"
-panel = "#160c14"
-border = "#2c2030"
-
-[themes.colourful-dark.app]
-nvim = "catppuccin"
-nvim_style = "mocha"
-lualine = "catppuccin"
-gtk_theme = "Adwaita-dark"
-gtk_icon = "Papirus-Dark"
-gnome_shell = ""
-gnome_gtk = "Adwaita-dark"
-vscode = "Catppuccin Mocha"
-vscode_dark = "Catppuccin Mocha"
-vscode_light = "Catppuccin Latte"
-cat_wallpaper = ""
-starship_palette = "catppuccin_mocha"
-
-# ----------------------------------------------------------------------------
-# Purple/magenta/orange + blue waves — saturated purple/magenta palette
-# ----------------------------------------------------------------------------
-
-[themes.colourful-light]
-mode = "light"
-family = "colourful"
-
-[themes.colourful-light.term]
-bg = "#f0ecf4"
-fg = "#282040"
-cursor = "#7858c0"
-cursor_text = "#f0ecf4"
-sel_bg = "#d2c7e7"
-sel_fg = "#282040"
-c0  = "#282040"
-c1  = "#c03048"
-c2  = "#287838"
-c3  = "#986010"
-c4  = "#5060c0"
-c5  = "#7858c0"
-c6  = "#187098"
-c7  = "#e4e0ec"
-c8  = "#483860"
-c9  = "#d04058"
-c10 = "#388848"
-c11 = "#b08020"
-c12 = "#6070d0"
-c13 = "#8868d0"
-c14 = "#2880a8"
-c15 = "#1c1c1e"
-
-[themes.colourful-light.ui]
-accent = "#6444ac"
-accent_text = "#ffffff"
-error = "#c03048"
-warning = "#a87018"
-success = "#287838"
-info = "#7858c0"
-panel = "#e4e0ec"
-border = "#d4d0e0"
-
-[themes.colourful-light.app]
-nvim = "catppuccin"
-nvim_style = "latte"
-lualine = "catppuccin"
-gtk_theme = "Adwaita"
-gtk_icon = "Papirus-Light"
-gnome_shell = ""
-gnome_gtk = "Adwaita"
-vscode = "Catppuccin Latte"
-vscode_dark = "Catppuccin Mocha"
-vscode_light = "Catppuccin Latte"
-cat_wallpaper = ""
-starship_palette = "catppuccin_latte"
-
-# ----------------------------------------------------------------------------
-# Deep navy with electric blue glowing curves — desaturated pure blue palette
-# ----------------------------------------------------------------------------
-
-[themes.imac-blue-dark]
-mode = "dark"
-family = "imac"
-
-[themes.imac-blue-dark.term]
-bg = "#0c1828"
-fg = "#d0dce8"
-cursor = "#2890e0"
-cursor_text = "#0c1828"
-sel_bg = "#143b5f"
-sel_fg = "#d0dce8"
-c0  = "#2c384e"
-c1  = "#c06070"
-c2  = "#60a878"
-c3  = "#c0a060"
-c4  = "#2890e0"
-c5  = "#9878b8"
-c6  = "#4898c0"
-c7  = "#b0bcc8"
-c8  = "#4a5a72"
-c9  = "#d07080"
-c10 = "#70b888"
-c11 = "#d0b070"
-c12 = "#38a0f0"
-c13 = "#a888c8"
-c14 = "#58a8d0"
-c15 = "#c8d4e0"
-
-[themes.imac-blue-dark.ui]
-accent = "#0058a8"
-accent_text = "#ffffff"
-error = "#c06070"
-warning = "#c0a060"
-success = "#60a878"
-info = "#2890e0"
-panel = "#081420"
-border = "#1c2c40"
-
-[themes.imac-blue-dark.app]
-nvim = "catppuccin"
-nvim_style = "mocha"
-lualine = "catppuccin"
-gtk_theme = "Adwaita-dark"
-gtk_icon = "Papirus-Dark"
-gnome_shell = ""
-gnome_gtk = "Adwaita-dark"
-vscode = "Catppuccin Mocha"
-vscode_dark = "Catppuccin Mocha"
-vscode_light = "Catppuccin Latte"
-cat_wallpaper = ""
-starship_palette = "catppuccin_mocha"
-
-# ----------------------------------------------------------------------------
-# Pale blue/white with blue curve lines — saturated pure blue palette
-# ----------------------------------------------------------------------------
-
-[themes.imac-blue-light]
-mode = "light"
-family = "imac"
-
-[themes.imac-blue-light.term]
-bg = "#eef2fa"
-fg = "#1c2838"
-cursor = "#2070d0"
-cursor_text = "#eef2fa"
-sel_bg = "#bad1ef"
-sel_fg = "#1c2838"
-c0  = "#1c2838"
-c1  = "#c03040"
-c2  = "#208038"
-c3  = "#906810"
-c4  = "#2070d0"
-c5  = "#7848a8"
-c6  = "#087898"
-c7  = "#e2e8f4"
-c8  = "#3c4858"
-c9  = "#d04050"
-c10 = "#309048"
-c11 = "#a87820"
-c12 = "#3080e0"
-c13 = "#8858b8"
-c14 = "#1888a8"
-c15 = "#1c1c1e"
-
-[themes.imac-blue-light.ui]
-accent = "#0555b5"
-accent_text = "#ffffff"
-error = "#c03040"
-warning = "#a07818"
-success = "#208038"
-info = "#2070d0"
-panel = "#e2e8f4"
-border = "#d0d8ea"
-
-[themes.imac-blue-light.app]
-nvim = "catppuccin"
-nvim_style = "latte"
-lualine = "catppuccin"
-gtk_theme = "Adwaita"
-gtk_icon = "Papirus-Light"
-gnome_shell = ""
-gnome_gtk = "Adwaita"
-vscode = "Catppuccin Latte"
-vscode_dark = "Catppuccin Mocha"
-vscode_light = "Catppuccin Latte"
-cat_wallpaper = ""
-starship_palette = "catppuccin_latte"
-
-# ----------------------------------------------------------------------------
-# Navy sky + red/coral dunes + cyan/purple aurora — desaturated purple/coral palette
-# ----------------------------------------------------------------------------
-
-[themes.macos-big-sur-dark]
+[themes.macos-bigsur-dark]
 mode = "dark"
 family = "macos"
 
-[themes.macos-big-sur-dark.term]
+[themes.macos-bigsur-dark.term]
 bg = "#18101e"
 fg = "#dcd4e0"
 cursor = "#a068b8"
@@ -480,7 +26,7 @@ c13 = "#b078c8"
 c14 = "#68a8c0"
 c15 = "#d8d0e0"
 
-[themes.macos-big-sur-dark.ui]
+[themes.macos-bigsur-dark.ui]
 accent = "#794191"
 accent_text = "#ffffff"
 error = "#c86070"
@@ -490,7 +36,7 @@ info = "#7080c8"
 panel = "#120c18"
 border = "#2c2038"
 
-[themes.macos-big-sur-dark.app]
+[themes.macos-bigsur-dark.app]
 nvim = "catppuccin"
 nvim_style = "mocha"
 lualine = "catppuccin"
@@ -508,11 +54,11 @@ starship_palette = "catppuccin_mocha"
 # Bright Big Sur landscape — saturated purple palette
 # ----------------------------------------------------------------------------
 
-[themes.macos-big-sur-light]
+[themes.macos-bigsur-light]
 mode = "light"
 family = "macos"
 
-[themes.macos-big-sur-light.term]
+[themes.macos-bigsur-light.term]
 bg = "#f2eef6"
 fg = "#241c34"
 cursor = "#9050b0"
@@ -536,7 +82,7 @@ c13 = "#a060c0"
 c14 = "#2880a8"
 c15 = "#1c1c1e"
 
-[themes.macos-big-sur-light.ui]
+[themes.macos-bigsur-light.ui]
 accent = "#7c3c9c"
 accent_text = "#ffffff"
 error = "#c03048"
@@ -546,7 +92,7 @@ info = "#5868c0"
 panel = "#e6e2f0"
 border = "#d6d2e4"
 
-[themes.macos-big-sur-light.app]
+[themes.macos-bigsur-light.app]
 nvim = "catppuccin"
 nvim_style = "latte"
 lualine = "catppuccin"
@@ -1127,11 +673,6 @@ vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
 cat_wallpaper = ""
 starship_palette = "catppuccin_latte"
-
-# ----------------------------------------------------------------------------
-# Dark navy with amber/orange/purple flower petals — desaturated warm amber/orange palette
-# ----------------------------------------------------------------------------
-
 [themes.macos-ventura-dark]
 mode = "dark"
 family = "macos"
@@ -1239,124 +780,11 @@ vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
 cat_wallpaper = ""
 starship_palette = "catppuccin_latte"
-
-# ----------------------------------------------------------------------------
-# Cool slate/steel blue mountain layers, foggy — very desaturated steel/slate blue
-# ----------------------------------------------------------------------------
-
-[themes.monterey-sierra-blue-dark]
-mode = "dark"
-family = "monterey"
-
-[themes.monterey-sierra-blue-dark.term]
-bg = "#181e24"
-fg = "#c8d0d8"
-cursor = "#7890a8"
-cursor_text = "#181e24"
-sel_bg = "#34404b"
-sel_fg = "#c8d0d8"
-c0  = "#343e46"
-c1  = "#b86868"
-c2  = "#60a078"
-c3  = "#b8a060"
-c4  = "#6880a0"
-c5  = "#9878a0"
-c6  = "#5898a0"
-c7  = "#b0b8c0"
-c8  = "#525e6a"
-c9  = "#c87878"
-c10 = "#70b088"
-c11 = "#c8b070"
-c12 = "#7890b0"
-c13 = "#a888b0"
-c14 = "#68a8b0"
-c15 = "#c8d0d8"
-
-[themes.monterey-sierra-blue-dark.ui]
-accent = "#435b73"
-accent_text = "#ffffff"
-error = "#b86868"
-warning = "#b8a060"
-success = "#60a078"
-info = "#7890a8"
-panel = "#121820"
-border = "#283038"
-
-[themes.monterey-sierra-blue-dark.app]
-nvim = "catppuccin"
-nvim_style = "mocha"
-lualine = "catppuccin"
-gtk_theme = "Adwaita-dark"
-gtk_icon = "Papirus-Dark"
-gnome_shell = ""
-gnome_gtk = "Adwaita-dark"
-vscode = "Catppuccin Mocha"
-vscode_dark = "Catppuccin Mocha"
-vscode_light = "Catppuccin Latte"
-cat_wallpaper = ""
-starship_palette = "catppuccin_mocha"
-
-# ----------------------------------------------------------------------------
-# Light misty mountains — saturated cool neutral/steel palette
-# ----------------------------------------------------------------------------
-
-[themes.monterey-sierra-blue-light]
-mode = "light"
-family = "monterey"
-
-[themes.monterey-sierra-blue-light.term]
-bg = "#f0f2f4"
-fg = "#1c2028"
-cursor = "#5878a0"
-cursor_text = "#f0f2f4"
-sel_bg = "#cad3df"
-sel_fg = "#1c2028"
-c0  = "#1c2028"
-c1  = "#b83040"
-c2  = "#287838"
-c3  = "#886010"
-c4  = "#5878a0"
-c5  = "#784898"
-c6  = "#107088"
-c7  = "#e6e8ec"
-c8  = "#3c4450"
-c9  = "#c84050"
-c10 = "#389848"
-c11 = "#a07820"
-c12 = "#6888b0"
-c13 = "#8858a8"
-c14 = "#208098"
-c15 = "#1c1c1e"
-
-[themes.monterey-sierra-blue-light.ui]
-accent = "#3a5a82"
-accent_text = "#ffffff"
-error = "#b83040"
-warning = "#987018"
-success = "#287838"
-info = "#5878a0"
-panel = "#e6e8ec"
-border = "#d6d8de"
-
-[themes.monterey-sierra-blue-light.app]
-nvim = "catppuccin"
-nvim_style = "latte"
-lualine = "catppuccin"
-gtk_theme = "Adwaita"
-gtk_icon = "Papirus-Light"
-gnome_shell = ""
-gnome_gtk = "Adwaita"
-vscode = "Catppuccin Latte"
-vscode_dark = "Catppuccin Mocha"
-vscode_light = "Catppuccin Latte"
-cat_wallpaper = ""
-starship_palette = "catppuccin_latte"
-
-[themes.blush-dark]
+[themes.macos-blush-dark]
 mode = "dark"
 family = "blush"
 
-[themes.blush-dark.term]
+[themes.macos-blush-dark.term]
 bg = "#1c1018"
 fg = "#dcd8e0"
 cursor = "#38a0c8"
@@ -1380,7 +808,7 @@ c13 = "#c880b0"
 c14 = "#48b0d8"
 c15 = "#d8d0dc"
 
-[themes.blush-dark.ui]
+[themes.macos-blush-dark.ui]
 accent = "#38a0c8"
 accent_text = "#000000"
 error = "#c86070"
@@ -1390,7 +818,7 @@ info = "#38a0c8"
 panel = "#160c14"
 border = "#2c2030"
 
-[themes.blush-dark.app]
+[themes.macos-blush-dark.app]
 nvim = "catppuccin"
 nvim_style = "mocha"
 lualine = "catppuccin"
@@ -1403,11 +831,11 @@ vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
 cat_wallpaper = "blush-dark.png"
 starship_palette = "catppuccin_mocha"
-[themes.blush-light]
+[themes.macos-blush-light]
 mode = "light"
 family = "blush"
 
-[themes.blush-light.term]
+[themes.macos-blush-light.term]
 bg = "#f0ecf4"
 fg = "#282040"
 cursor = "#7858c0"
@@ -1431,7 +859,7 @@ c13 = "#8868d0"
 c14 = "#2880a8"
 c15 = "#1c1c1e"
 
-[themes.blush-light.ui]
+[themes.macos-blush-light.ui]
 accent = "#6444ac"
 accent_text = "#ffffff"
 error = "#c03048"
@@ -1441,7 +869,7 @@ info = "#7858c0"
 panel = "#e4e0ec"
 border = "#d4d0e0"
 
-[themes.blush-light.app]
+[themes.macos-blush-light.app]
 nvim = "catppuccin"
 nvim_style = "latte"
 lualine = "catppuccin"
@@ -1454,11 +882,11 @@ vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
 cat_wallpaper = "blush-light.png"
 starship_palette = "catppuccin_latte"
-[themes.citrus-dark]
+[themes.macos-citrus-dark]
 mode = "dark"
 family = "citrus"
 
-[themes.citrus-dark.term]
+[themes.macos-citrus-dark.term]
 bg = "#1a1410"
 fg = "#e0d8d0"
 cursor = "#d89048"
@@ -1482,7 +910,7 @@ c13 = "#b888b0"
 c14 = "#68a8a8"
 c15 = "#dcd4cc"
 
-[themes.citrus-dark.ui]
+[themes.macos-citrus-dark.ui]
 accent = "#70a868"
 accent_text = "#000000"
 error = "#c86058"
@@ -1492,7 +920,7 @@ info = "#6888b0"
 panel = "#141008"
 border = "#2c2420"
 
-[themes.citrus-dark.app]
+[themes.macos-citrus-dark.app]
 nvim = "catppuccin"
 nvim_style = "mocha"
 lualine = "catppuccin"
@@ -1505,11 +933,11 @@ vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
 cat_wallpaper = "citrus-dark.png"
 starship_palette = "catppuccin_mocha"
-[themes.citrus-light]
+[themes.macos-citrus-light]
 mode = "light"
 family = "citrus"
 
-[themes.citrus-light.term]
+[themes.macos-citrus-light.term]
 bg = "#f8f2ec"
 fg = "#281c14"
 cursor = "#c87830"
@@ -1533,7 +961,7 @@ c13 = "#9850a8"
 c14 = "#209888"
 c15 = "#1c1c1e"
 
-[themes.citrus-light.ui]
+[themes.macos-citrus-light.ui]
 accent = "#1c5c1c"
 accent_text = "#ffffff"
 error = "#b83030"
@@ -1543,7 +971,7 @@ info = "#4878a8"
 panel = "#f0e8e0"
 border = "#e0d8ce"
 
-[themes.citrus-light.app]
+[themes.macos-citrus-light.app]
 nvim = "catppuccin"
 nvim_style = "latte"
 lualine = "catppuccin"
@@ -1556,11 +984,11 @@ vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
 cat_wallpaper = "citrus-light.png"
 starship_palette = "catppuccin_latte"
-[themes.indigo-dark]
+[themes.macos-indigo-dark]
 mode = "dark"
 family = "indigo"
 
-[themes.indigo-dark.term]
+[themes.macos-indigo-dark.term]
 bg = "#0c1828"
 fg = "#d0dce8"
 cursor = "#2890e0"
@@ -1584,7 +1012,7 @@ c13 = "#a888c8"
 c14 = "#58a8d0"
 c15 = "#c8d4e0"
 
-[themes.indigo-dark.ui]
+[themes.macos-indigo-dark.ui]
 accent = "#2445d0"
 accent_text = "#ffffff"
 error = "#c06070"
@@ -1594,7 +1022,7 @@ info = "#1ea3eb"
 panel = "#081420"
 border = "#1c2c40"
 
-[themes.indigo-dark.app]
+[themes.macos-indigo-dark.app]
 nvim = "catppuccin"
 nvim_style = "mocha"
 lualine = "catppuccin"
@@ -1607,11 +1035,11 @@ vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
 cat_wallpaper = "indigo-dark.png"
 starship_palette = "catppuccin_mocha"
-[themes.indigo-light]
+[themes.macos-indigo-light]
 mode = "light"
 family = "indigo"
 
-[themes.indigo-light.term]
+[themes.macos-indigo-light.term]
 bg = "#eef2fa"
 fg = "#1c2838"
 cursor = "#2070d0"
@@ -1635,7 +1063,7 @@ c13 = "#8858b8"
 c14 = "#1888a8"
 c15 = "#1c1c1e"
 
-[themes.indigo-light.ui]
+[themes.macos-indigo-light.ui]
 accent = "#2445d0"
 accent_text = "#ffffff"
 error = "#c03040"
@@ -1645,7 +1073,7 @@ info = "#58bcf7"
 panel = "#e2e8f4"
 border = "#d0d8ea"
 
-[themes.indigo-light.app]
+[themes.macos-indigo-light.app]
 nvim = "catppuccin"
 nvim_style = "latte"
 lualine = "catppuccin"
@@ -1658,11 +1086,11 @@ vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
 cat_wallpaper = "indigo-light.png"
 starship_palette = "catppuccin_latte"
-[themes.silver-dark]
+[themes.macos-silver-dark]
 mode = "dark"
 family = "silver"
 
-[themes.silver-dark.term]
+[themes.macos-silver-dark.term]
 bg = "#1a2428"
 fg = "#d4dce0"
 cursor = "#58a0a8"
@@ -1686,7 +1114,7 @@ c13 = "#b080b8"
 c14 = "#68b0b8"
 c15 = "#d0d8dc"
 
-[themes.silver-dark.ui]
+[themes.macos-silver-dark.ui]
 accent = "#5433d3"
 accent_text = "#ffffff"
 error = "#c06868"
@@ -1696,7 +1124,7 @@ info = "#62ada2"
 panel = "#141e22"
 border = "#283438"
 
-[themes.silver-dark.app]
+[themes.macos-silver-dark.app]
 nvim = "catppuccin"
 nvim_style = "mocha"
 lualine = "catppuccin"
@@ -1709,11 +1137,11 @@ vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
 cat_wallpaper = "silver-dark.png"
 starship_palette = "catppuccin_mocha"
-[themes.silver-light]
+[themes.macos-silver-light]
 mode = "light"
 family = "silver"
 
-[themes.silver-light.term]
+[themes.macos-silver-light.term]
 bg = "#eee8f4"
 fg = "#282038"
 cursor = "#5070c0"
@@ -1737,7 +1165,7 @@ c13 = "#9850b0"
 c14 = "#2888a8"
 c15 = "#1c1c1e"
 
-[themes.silver-light.ui]
+[themes.macos-silver-light.ui]
 accent = "#6e98d6"
 accent_text = "#000000"
 error = "#c03040"
@@ -1747,7 +1175,7 @@ info = "#4b2edb"
 panel = "#e2dcec"
 border = "#d4cee0"
 
-[themes.silver-light.app]
+[themes.macos-silver-light.app]
 nvim = "catppuccin"
 nvim_style = "latte"
 lualine = "catppuccin"
@@ -1761,11 +1189,11 @@ vscode_light = "Catppuccin Latte"
 cat_wallpaper = "silver-light.png"
 starship_palette = "catppuccin_latte"
 
-[themes.grid-green-dark]
+[themes.macos-gridgreen-dark]
 mode = "dark"
-family = "grid-green"
+family = "gridgreen"
 
-[themes.grid-green-dark.term]
+[themes.macos-gridgreen-dark.term]
 bg = "#122018"
 fg = "#d8e4dc"
 cursor = "#58b86a"
@@ -1789,7 +1217,7 @@ c13 = "#9e72c4"
 c14 = "#5cb2b0"
 c15 = "#d4e0d8"
 
-[themes.grid-green-dark.ui]
+[themes.macos-gridgreen-dark.ui]
 accent = "#245d33"
 accent_text = "#ffffff"
 error = "#c8646c"
@@ -1799,7 +1227,7 @@ info = "#5c84bc"
 panel = "#0d1712"
 border = "#203026"
 
-[themes.grid-green-dark.app]
+[themes.macos-gridgreen-dark.app]
 nvim = "catppuccin"
 nvim_style = "mocha"
 lualine = "catppuccin"
@@ -1810,14 +1238,14 @@ gnome_gtk = "Adwaita-dark"
 vscode = "Catppuccin Mocha"
 vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
-cat_wallpaper = "grid-green-dark.jpg"
+cat_wallpaper = "gridgreen-dark.jpg"
 starship_palette = "catppuccin_mocha"
 
-[themes.grid-green-light]
+[themes.macos-gridgreen-light]
 mode = "light"
-family = "grid-green"
+family = "gridgreen"
 
-[themes.grid-green-light.term]
+[themes.macos-gridgreen-light.term]
 bg = "#eef7f0"
 fg = "#1c2a22"
 cursor = "#2f7a44"
@@ -1841,7 +1269,7 @@ c13 = "#8c5ab4"
 c14 = "#3498a0"
 c15 = "#1c1c1e"
 
-[themes.grid-green-light.ui]
+[themes.macos-gridgreen-light.ui]
 accent = "#245d33"
 accent_text = "#ffffff"
 error = "#b83c44"
@@ -1851,7 +1279,7 @@ info = "#426eb2"
 panel = "#e2eee5"
 border = "#cfddd2"
 
-[themes.grid-green-light.app]
+[themes.macos-gridgreen-light.app]
 nvim = "catppuccin"
 nvim_style = "latte"
 lualine = "catppuccin"
@@ -1862,48 +1290,47 @@ gnome_gtk = "Adwaita"
 vscode = "Catppuccin Latte"
 vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
-cat_wallpaper = "grid-green-light.jpg"
+cat_wallpaper = "gridgreen-light.jpg"
 starship_palette = "catppuccin_latte"
-
-[themes.grid-magenta-dark]
+[themes.macos-ai-dark]
 mode = "dark"
-family = "grid-magenta"
+family = "macos"
 
-[themes.grid-magenta-dark.term]
-bg = "#1a1222"
-fg = "#e0d8e8"
-cursor = "#b05ad0"
-cursor_text = "#1a1222"
-sel_bg = "#4a2956"
-sel_fg = "#e0d8e8"
-c1 = "#c86476"
-c2 = "#66ac78"
-c3 = "#c0a45a"
-c4 = "#6888c0"
-c5 = "#b05ad0"
-c6 = "#5898b0"
-c7 = "#c4bccb"
-c0 = "#4a3d56"
-c8 = "#6e607b"
-c9 = "#d87486"
-c10 = "#76bc88"
-c11 = "#d0b46a"
-c12 = "#7898d0"
-c13 = "#c06ae0"
+[themes.macos-ai-dark.term]
+bg = "#140818"
+fg = "#e0d0e0"
+cursor = "#c83878"
+cursor_text = "#140818"
+sel_bg = "#3a1838"
+sel_fg = "#e0d0e0"
+c0  = "#2a1028"
+c1  = "#d04868"
+c2  = "#68a080"
+c3  = "#c8a060"
+c4  = "#6878c0"
+c5  = "#c04888"
+c6  = "#5898b0"
+c7  = "#c0b8c0"
+c8  = "#4a2848"
+c9  = "#e05878"
+c10 = "#78b090"
+c11 = "#d8b070"
+c12 = "#7888d0"
+c13 = "#d05898"
 c14 = "#68a8c0"
-c15 = "#d8d0e0"
+c15 = "#d8d0d8"
 
-[themes.grid-magenta-dark.ui]
-accent = "#7d2ea2"
+[themes.macos-ai-dark.ui]
+accent = "#c03070"
 accent_text = "#ffffff"
-error = "#c86476"
-warning = "#c0a45a"
-success = "#66ac78"
-info = "#6888c0"
-panel = "#120d18"
-border = "#291e32"
+error = "#d04868"
+warning = "#c8a060"
+success = "#68a080"
+info = "#6878c0"
+panel = "#0e0412"
+border = "#281430"
 
-[themes.grid-magenta-dark.app]
+[themes.macos-ai-dark.app]
 nvim = "catppuccin"
 nvim_style = "mocha"
 lualine = "catppuccin"
@@ -1914,48 +1341,52 @@ gnome_gtk = "Adwaita-dark"
 vscode = "Catppuccin Mocha"
 vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
-cat_wallpaper = "grid-magenta-dark.jpg"
+cat_wallpaper = ""
 starship_palette = "catppuccin_mocha"
 
-[themes.grid-magenta-light]
+# ----------------------------------------------------------------------------
+# Soft pink-rose AI aurora — light magenta-rose palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-ai-light]
 mode = "light"
-family = "grid-magenta"
+family = "macos"
 
-[themes.grid-magenta-light.term]
-bg = "#f4eef8"
-fg = "#281f34"
-cursor = "#7d2ea2"
-cursor_text = "#f4eef8"
-sel_bg = "#dfcfea"
-sel_fg = "#281f34"
-c0 = "#281f34"
-c1 = "#ba3c58"
-c2 = "#2f7a44"
-c3 = "#9b7618"
-c4 = "#536fc0"
-c5 = "#7d2ea2"
-c6 = "#2d8298"
-c7 = "#e8e1ee"
-c8 = "#4b4358"
-c9 = "#ca4c68"
-c10 = "#3f8a54"
-c11 = "#ab8628"
-c12 = "#637fd0"
-c13 = "#8d3eb2"
-c14 = "#3d92a8"
-c15 = "#1c1c1e"
+[themes.macos-ai-light.term]
+bg = "#f4ecf0"
+fg = "#281828"
+cursor = "#a83068"
+cursor_text = "#f4ecf0"
+sel_bg = "#d8c0d0"
+sel_fg = "#281828"
+c0  = "#281828"
+c1  = "#b82848"
+c2  = "#288040"
+c3  = "#907010"
+c4  = "#5060b0"
+c5  = "#a03070"
+c6  = "#187898"
+c7  = "#e8e0e4"
+c8  = "#483040"
+c9  = "#c83858"
+c10 = "#389050"
+c11 = "#a08020"
+c12 = "#6070c0"
+c13 = "#b04080"
+c14 = "#2888a8"
+c15 = "#1c1420"
 
-[themes.grid-magenta-light.ui]
-accent = "#712693"
+[themes.macos-ai-light.ui]
+accent = "#a82860"
 accent_text = "#ffffff"
-error = "#ba3c58"
-warning = "#ab8628"
-success = "#2f7a44"
-info = "#536fc0"
-panel = "#e9e1ef"
-border = "#d8cee0"
+error = "#b82848"
+warning = "#907010"
+success = "#288040"
+info = "#5060b0"
+panel = "#e8dce4"
+border = "#d8c8d4"
 
-[themes.grid-magenta-light.app]
+[themes.macos-ai-light.app]
 nvim = "catppuccin"
 nvim_style = "latte"
 lualine = "catppuccin"
@@ -1966,48 +1397,52 @@ gnome_gtk = "Adwaita"
 vscode = "Catppuccin Latte"
 vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
-cat_wallpaper = "grid-magenta-light.jpg"
+cat_wallpaper = ""
 starship_palette = "catppuccin_latte"
 
-[themes.miami-worldcenter-dark]
+# ----------------------------------------------------------------------------
+# Deep blue abstract — saturated blue palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-blue-dark]
 mode = "dark"
-family = "miami-worldcenter"
+family = "macos"
 
-[themes.miami-worldcenter-dark.term]
-bg = "#16120f"
-fg = "#e0d8cf"
-cursor = "#6ca8bb"
-cursor_text = "#16120f"
-sel_bg = "#30424c"
-sel_fg = "#e0d8cf"
-c0 = "#453d35"
-c1 = "#c96c62"
-c2 = "#6aa876"
-c3 = "#cca85e"
-c4 = "#5b84bc"
-c5 = "#966eb6"
-c6 = "#6ca8bb"
-c7 = "#c6beb4"
-c8 = "#6a6258"
-c9 = "#d97c72"
-c10 = "#7ab886"
-c11 = "#dcb86e"
-c12 = "#6b94cc"
-c13 = "#a67ec6"
-c14 = "#7cb8cb"
-c15 = "#d8d0c6"
+[themes.macos-blue-dark.term]
+bg = "#101828"
+fg = "#d0d8e8"
+cursor = "#5080c8"
+cursor_text = "#101828"
+sel_bg = "#283858"
+sel_fg = "#d0d8e8"
+c0  = "#202840"
+c1  = "#c06070"
+c2  = "#60a880"
+c3  = "#c0a060"
+c4  = "#5080c8"
+c5  = "#9070b8"
+c6  = "#4898b8"
+c7  = "#b0b8c8"
+c8  = "#384868"
+c9  = "#d07080"
+c10 = "#70b890"
+c11 = "#d0b070"
+c12 = "#6090d8"
+c13 = "#a080c8"
+c14 = "#58a8c8"
+c15 = "#c8d0e0"
 
-[themes.miami-worldcenter-dark.ui]
-accent = "#1f5564"
+[themes.macos-blue-dark.ui]
+accent = "#4070b8"
 accent_text = "#ffffff"
-error = "#c96c62"
-warning = "#cca85e"
-success = "#6aa876"
-info = "#6ca8bb"
-panel = "#0f0b09"
-border = "#26211d"
+error = "#c06070"
+warning = "#c0a060"
+success = "#60a880"
+info = "#5080c8"
+panel = "#0a1020"
+border = "#1c2840"
 
-[themes.miami-worldcenter-dark.app]
+[themes.macos-blue-dark.app]
 nvim = "catppuccin"
 nvim_style = "mocha"
 lualine = "catppuccin"
@@ -2018,48 +1453,52 @@ gnome_gtk = "Adwaita-dark"
 vscode = "Catppuccin Mocha"
 vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
-cat_wallpaper = "miami-worldcenter-dark.jpg"
+cat_wallpaper = ""
 starship_palette = "catppuccin_mocha"
 
-[themes.miami-worldcenter-light]
+# ----------------------------------------------------------------------------
+# Soft blue abstract — light blue palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-blue-light]
 mode = "light"
-family = "miami-worldcenter"
+family = "macos"
 
-[themes.miami-worldcenter-light.term]
-bg = "#f6f0ea"
-fg = "#2c241d"
-cursor = "#2d7286"
-cursor_text = "#f6f0ea"
-sel_bg = "#d8e4e8"
-sel_fg = "#2c241d"
-c0 = "#2c241d"
-c1 = "#bc5248"
-c2 = "#367a4a"
-c3 = "#a47c22"
-c4 = "#4672ba"
-c5 = "#7e56aa"
-c6 = "#2d7286"
-c7 = "#ece4dc"
-c8 = "#4e463e"
-c9 = "#cc6258"
-c10 = "#468a5a"
-c11 = "#b48c32"
-c12 = "#5682ca"
-c13 = "#8e66ba"
-c14 = "#3d8296"
-c15 = "#1c1c1e"
+[themes.macos-blue-light.term]
+bg = "#eef2fa"
+fg = "#182030"
+cursor = "#4070b8"
+cursor_text = "#eef2fa"
+sel_bg = "#c0d0e8"
+sel_fg = "#182030"
+c0  = "#182030"
+c1  = "#b83040"
+c2  = "#208838"
+c3  = "#906810"
+c4  = "#4070b8"
+c5  = "#7848a8"
+c6  = "#087898"
+c7  = "#e0e4ec"
+c8  = "#303848"
+c9  = "#c84050"
+c10 = "#309848"
+c11 = "#a07820"
+c12 = "#5080c8"
+c13 = "#8858b8"
+c14 = "#1888a8"
+c15 = "#141820"
 
-[themes.miami-worldcenter-light.ui]
-accent = "#245868"
+[themes.macos-blue-light.ui]
+accent = "#3868b0"
 accent_text = "#ffffff"
-error = "#bc5248"
-warning = "#a47c22"
-success = "#367a4a"
-info = "#4672ba"
-panel = "#ebe3dc"
-border = "#dacec6"
+error = "#b83040"
+warning = "#906810"
+success = "#208838"
+info = "#4070b8"
+panel = "#e2e8f4"
+border = "#d0d8ea"
 
-[themes.miami-worldcenter-light.app]
+[themes.macos-blue-light.app]
 nvim = "catppuccin"
 nvim_style = "latte"
 lualine = "catppuccin"
@@ -2070,152 +1509,164 @@ gnome_gtk = "Adwaita"
 vscode = "Catppuccin Latte"
 vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
-cat_wallpaper = "miami-worldcenter-light.jpg"
+cat_wallpaper = ""
 starship_palette = "catppuccin_latte"
 
-[themes.spectrum-black-dark]
+# ----------------------------------------------------------------------------
+# Deep green landscape — natural green palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-green-dark]
 mode = "dark"
-family = "spectrum-black"
+family = "macos"
 
-[themes.spectrum-black-dark.term]
-bg = "#181317"
-fg = "#e0d8de"
-cursor = "#8a6fb4"
-cursor_text = "#181317"
-sel_bg = "#43354a"
-sel_fg = "#e0d8de"
-c0 = "#473f47"
-c1 = "#c46a76"
-c2 = "#6ea67a"
-c3 = "#bca25a"
-c4 = "#6c86be"
-c5 = "#8a6fb4"
-c6 = "#6098b0"
-c7 = "#c4bcc2"
-c8 = "#6c616a"
-c9 = "#d47a86"
-c10 = "#7eb68a"
-c11 = "#ccb26a"
-c12 = "#7c96ce"
-c13 = "#9a7fc4"
-c14 = "#70a8c0"
-c15 = "#d8d0d6"
+[themes.macos-green-dark.term]
+bg = "#0c1810"
+fg = "#d0dcd4"
+cursor = "#48a060"
+cursor_text = "#0c1810"
+sel_bg = "#1c3828"
+sel_fg = "#d0dcd4"
+c0  = "#1c2820"
+c1  = "#c06060"
+c2  = "#48a060"
+c3  = "#b8a050"
+c4  = "#5080a8"
+c5  = "#9868a0"
+c6  = "#4898a0"
+c7  = "#b0bcb4"
+c8  = "#344838"
+c9  = "#d07070"
+c10 = "#58b070"
+c11 = "#c8b060"
+c12 = "#6090b8"
+c13 = "#a878b0"
+c14 = "#58a8b0"
+c15 = "#c8d4cc"
 
-[themes.spectrum-black-dark.ui]
-accent = "#5a446d"
+[themes.macos-green-dark.ui]
+accent = "#389050"
 accent_text = "#ffffff"
-error = "#c46a76"
-warning = "#bca25a"
-success = "#6ea67a"
-info = "#6c86be"
-panel = "#120e11"
-border = "#272027"
+error = "#c06060"
+warning = "#b8a050"
+success = "#48a060"
+info = "#5080a8"
+panel = "#061008"
+border = "#142818"
 
-[themes.spectrum-black-dark.app]
-nvim = "catppuccin"
-nvim_style = "mocha"
-lualine = "catppuccin"
+[themes.macos-green-dark.app]
+nvim = "everforest"
+nvim_style = "hard"
+lualine = "everforest"
 gtk_theme = "Adwaita-dark"
 gtk_icon = "Papirus-Dark"
 gnome_shell = ""
 gnome_gtk = "Adwaita-dark"
-vscode = "Catppuccin Mocha"
-vscode_dark = "Catppuccin Mocha"
-vscode_light = "Catppuccin Latte"
-cat_wallpaper = "spectrum-black-dark.jpg"
+vscode = "Everforest Dark"
+vscode_dark = "Everforest Dark"
+vscode_light = "Everforest Light"
+cat_wallpaper = ""
 starship_palette = "catppuccin_mocha"
 
-[themes.spectrum-black-light]
+# ----------------------------------------------------------------------------
+# Soft green landscape — light green palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-green-light]
 mode = "light"
-family = "spectrum-black"
+family = "macos"
 
-[themes.spectrum-black-light.term]
-bg = "#f3eded"
-fg = "#2b2429"
-cursor = "#5a446d"
-cursor_text = "#f3eded"
-sel_bg = "#e0d4db"
-sel_fg = "#2b2429"
-c0 = "#2b2429"
-c1 = "#b64656"
-c2 = "#387a4a"
-c3 = "#9c7a24"
-c4 = "#4d6fbc"
-c5 = "#5a446d"
-c6 = "#3b7f92"
-c7 = "#e8e0e3"
-c8 = "#4d444a"
-c9 = "#c65666"
-c10 = "#488a5a"
-c11 = "#ac8a34"
-c12 = "#5d7fcc"
-c13 = "#6a547d"
-c14 = "#4b8fa2"
-c15 = "#1c1c1e"
+[themes.macos-green-light.term]
+bg = "#eef4f0"
+fg = "#182018"
+cursor = "#308848"
+cursor_text = "#eef4f0"
+sel_bg = "#b8d4c0"
+sel_fg = "#182018"
+c0  = "#182018"
+c1  = "#b03030"
+c2  = "#308848"
+c3  = "#886810"
+c4  = "#406898"
+c5  = "#784898"
+c6  = "#187888"
+c7  = "#dce8e0"
+c8  = "#304030"
+c9  = "#c04040"
+c10 = "#409858"
+c11 = "#987820"
+c12 = "#5078a8"
+c13 = "#8858a8"
+c14 = "#288898"
+c15 = "#141c14"
 
-[themes.spectrum-black-light.ui]
-accent = "#503c60"
+[themes.macos-green-light.ui]
+accent = "#288040"
 accent_text = "#ffffff"
-error = "#b64656"
-warning = "#9c7a24"
-success = "#387a4a"
-info = "#4d6fbc"
-panel = "#e9e1e4"
-border = "#d7ced3"
+error = "#b03030"
+warning = "#886810"
+success = "#308848"
+info = "#406898"
+panel = "#e2ece4"
+border = "#d0dcd4"
 
-[themes.spectrum-black-light.app]
-nvim = "catppuccin"
-nvim_style = "latte"
-lualine = "catppuccin"
+[themes.macos-green-light.app]
+nvim = "everforest"
+nvim_style = "soft"
+lualine = "everforest"
 gtk_theme = "Adwaita"
 gtk_icon = "Papirus-Light"
 gnome_shell = ""
 gnome_gtk = "Adwaita"
-vscode = "Catppuccin Latte"
-vscode_dark = "Catppuccin Mocha"
-vscode_light = "Catppuccin Latte"
-cat_wallpaper = "spectrum-black-light.jpg"
+vscode = "Everforest Light"
+vscode_dark = "Everforest Dark"
+vscode_light = "Everforest Light"
+cat_wallpaper = ""
 starship_palette = "catppuccin_latte"
 
-[themes.spectrum-red-dark]
+# ----------------------------------------------------------------------------
+# Warm orange heatmap — fiery orange-red palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-heatmap-dark]
 mode = "dark"
-family = "spectrum-red"
+family = "macos"
 
-[themes.spectrum-red-dark.term]
-bg = "#1b1317"
-fg = "#e4d6da"
-cursor = "#c45a68"
-cursor_text = "#1b1317"
-sel_bg = "#4d2930"
-sel_fg = "#e4d6da"
-c0 = "#4a3f43"
-c1 = "#c45a68"
-c2 = "#6ea67a"
-c3 = "#bca25a"
-c4 = "#6c86be"
-c5 = "#9868b4"
-c6 = "#5e96ae"
-c7 = "#c8bcc0"
-c8 = "#71656a"
-c9 = "#d46a78"
-c10 = "#7eb68a"
-c11 = "#ccb26a"
-c12 = "#7c96ce"
-c13 = "#a878c4"
-c14 = "#6ea6be"
-c15 = "#dcd0d4"
+[themes.macos-heatmap-dark.term]
+bg = "#181008"
+fg = "#e0d8d0"
+cursor = "#d06028"
+cursor_text = "#181008"
+sel_bg = "#382818"
+sel_fg = "#e0d8d0"
+c0  = "#281c10"
+c1  = "#d05030"
+c2  = "#68a068"
+c3  = "#c89840"
+c4  = "#5878b0"
+c5  = "#a06888"
+c6  = "#489098"
+c7  = "#b8b0a8"
+c8  = "#483828"
+c9  = "#e06040"
+c10 = "#78b078"
+c11 = "#d8a850"
+c12 = "#6888c0"
+c13 = "#b07898"
+c14 = "#58a0a8"
+c15 = "#d0c8c0"
 
-[themes.spectrum-red-dark.ui]
-accent = "#8c3040"
+[themes.macos-heatmap-dark.ui]
+accent = "#c85020"
 accent_text = "#ffffff"
-error = "#c45a68"
-warning = "#bca25a"
-success = "#6ea67a"
-info = "#6c86be"
-panel = "#140d10"
-border = "#2a1f23"
+error = "#d05030"
+warning = "#c89840"
+success = "#68a068"
+info = "#5878b0"
+panel = "#100804"
+border = "#281810"
 
-[themes.spectrum-red-dark.app]
+[themes.macos-heatmap-dark.app]
 nvim = "catppuccin"
 nvim_style = "mocha"
 lualine = "catppuccin"
@@ -2226,48 +1677,52 @@ gnome_gtk = "Adwaita-dark"
 vscode = "Catppuccin Mocha"
 vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
-cat_wallpaper = "spectrum-red-dark.jpg"
+cat_wallpaper = ""
 starship_palette = "catppuccin_mocha"
 
-[themes.spectrum-red-light]
+# ----------------------------------------------------------------------------
+# Soft warm heatmap — light orange-amber palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-heatmap-light]
 mode = "light"
-family = "spectrum-red"
+family = "macos"
 
-[themes.spectrum-red-light.term]
-bg = "#f6ecec"
-fg = "#2c2224"
-cursor = "#8c3040"
-cursor_text = "#f6ecec"
-sel_bg = "#e7d2d6"
-sel_fg = "#2c2224"
-c0 = "#2c2224"
-c1 = "#b64050"
-c2 = "#387a4a"
-c3 = "#9c7a24"
-c4 = "#4d6fbc"
-c5 = "#7b56a8"
-c6 = "#3b7f92"
-c7 = "#ebe0e1"
-c8 = "#4e4345"
-c9 = "#c65060"
-c10 = "#488a5a"
-c11 = "#ac8a34"
-c12 = "#5d7fcc"
-c13 = "#8b66b8"
-c14 = "#4b8fa2"
-c15 = "#1c1c1e"
+[themes.macos-heatmap-light.term]
+bg = "#f8f0e8"
+fg = "#281810"
+cursor = "#c05020"
+cursor_text = "#f8f0e8"
+sel_bg = "#e0c8b0"
+sel_fg = "#281810"
+c0  = "#281810"
+c1  = "#b83020"
+c2  = "#288838"
+c3  = "#907010"
+c4  = "#4868a0"
+c5  = "#884888"
+c6  = "#187888"
+c7  = "#e8e0d8"
+c8  = "#483020"
+c9  = "#c84030"
+c10 = "#389848"
+c11 = "#a08020"
+c12 = "#5878b0"
+c13 = "#985898"
+c14 = "#288898"
+c15 = "#201008"
 
-[themes.spectrum-red-light.ui]
-accent = "#842d3c"
+[themes.macos-heatmap-light.ui]
+accent = "#b84818"
 accent_text = "#ffffff"
-error = "#b64050"
-warning = "#9c7a24"
-success = "#387a4a"
-info = "#4d6fbc"
-panel = "#ebe0e1"
-border = "#d9cdcf"
+error = "#b83020"
+warning = "#907010"
+success = "#288838"
+info = "#4868a0"
+panel = "#ece4d8"
+border = "#dcd0c0"
 
-[themes.spectrum-red-light.app]
+[themes.macos-heatmap-light.app]
 nvim = "catppuccin"
 nvim_style = "latte"
 lualine = "catppuccin"
@@ -2278,48 +1733,52 @@ gnome_gtk = "Adwaita"
 vscode = "Catppuccin Latte"
 vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
-cat_wallpaper = "spectrum-red-light.jpg"
+cat_wallpaper = ""
 starship_palette = "catppuccin_latte"
 
-[themes.spectrum-white-dark]
+# ----------------------------------------------------------------------------
+# Warm olive-earth tones — muted olive-brown palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-miami-dark]
 mode = "dark"
-family = "spectrum-white"
+family = "macos"
 
-[themes.spectrum-white-dark.term]
-bg = "#18161a"
-fg = "#e0dde0"
-cursor = "#7f6f8f"
-cursor_text = "#18161a"
-sel_bg = "#413d47"
-sel_fg = "#e0dde0"
-c0 = "#49454c"
-c1 = "#c06b74"
-c2 = "#72aa80"
-c3 = "#bca55f"
-c4 = "#6f89c0"
-c5 = "#7f6f8f"
-c6 = "#639aae"
-c7 = "#c5c1c6"
-c8 = "#5a565e"
-c9 = "#d07b84"
-c10 = "#82ba90"
-c11 = "#ccb56f"
-c12 = "#7f99d0"
-c13 = "#8f7f9f"
-c14 = "#73aabe"
-c15 = "#d8d5da"
+[themes.macos-miami-dark.term]
+bg = "#10100c"
+fg = "#d8d4c8"
+cursor = "#889040"
+cursor_text = "#10100c"
+sel_bg = "#2c2c20"
+sel_fg = "#d8d4c8"
+c0  = "#222018"
+c1  = "#c06050"
+c2  = "#689848"
+c3  = "#b89830"
+c4  = "#5878a0"
+c5  = "#987088"
+c6  = "#489088"
+c7  = "#b0aca0"
+c8  = "#3c3828"
+c9  = "#d07060"
+c10 = "#78a858"
+c11 = "#c8a840"
+c12 = "#6888b0"
+c13 = "#a88098"
+c14 = "#58a098"
+c15 = "#c8c4b8"
 
-[themes.spectrum-white-dark.ui]
-accent = "#595063"
+[themes.macos-miami-dark.ui]
+accent = "#788830"
 accent_text = "#ffffff"
-error = "#c06b74"
-warning = "#bca55f"
-success = "#72aa80"
-info = "#6f89c0"
-panel = "#121014"
-border = "#27242b"
+error = "#c06050"
+warning = "#b89830"
+success = "#689848"
+info = "#5878a0"
+panel = "#080806"
+border = "#1c1c14"
 
-[themes.spectrum-white-dark.app]
+[themes.macos-miami-dark.app]
 nvim = "catppuccin"
 nvim_style = "mocha"
 lualine = "catppuccin"
@@ -2330,48 +1789,52 @@ gnome_gtk = "Adwaita-dark"
 vscode = "Catppuccin Mocha"
 vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
-cat_wallpaper = "spectrum-white-dark.jpg"
+cat_wallpaper = ""
 starship_palette = "catppuccin_mocha"
 
-[themes.spectrum-white-light]
+# ----------------------------------------------------------------------------
+# Soft olive landscape — light olive-earth palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-miami-light]
 mode = "light"
-family = "spectrum-white"
+family = "macos"
 
-[themes.spectrum-white-light.term]
-bg = "#f6f3f2"
-fg = "#2a262a"
-cursor = "#595063"
-cursor_text = "#f6f3f2"
-sel_bg = "#e2dddd"
-sel_fg = "#2a262a"
-c0 = "#2a262a"
-c1 = "#b64852"
-c2 = "#3a7e4d"
-c3 = "#9c7e26"
-c4 = "#516fbe"
-c5 = "#695c74"
-c6 = "#427f95"
-c7 = "#ebe8e7"
-c8 = "#4c474c"
-c9 = "#c65862"
-c10 = "#4a8e5d"
-c11 = "#ac8e36"
-c12 = "#617fce"
-c13 = "#796c84"
-c14 = "#528fa5"
-c15 = "#1c1c1e"
+[themes.macos-miami-light.term]
+bg = "#f2f0e8"
+fg = "#1c1c14"
+cursor = "#688830"
+cursor_text = "#f2f0e8"
+sel_bg = "#c8c8b0"
+sel_fg = "#1c1c14"
+c0  = "#1c1c14"
+c1  = "#b03830"
+c2  = "#488828"
+c3  = "#887010"
+c4  = "#486890"
+c5  = "#785080"
+c6  = "#287878"
+c7  = "#e0dcd4"
+c8  = "#383828"
+c9  = "#c04840"
+c10 = "#589838"
+c11 = "#988020"
+c12 = "#5878a0"
+c13 = "#886090"
+c14 = "#388888"
+c15 = "#14140c"
 
-[themes.spectrum-white-light.ui]
-accent = "#50475a"
+[themes.macos-miami-light.ui]
+accent = "#608020"
 accent_text = "#ffffff"
-error = "#b64852"
-warning = "#9c7e26"
-success = "#3a7e4d"
-info = "#516fbe"
-panel = "#ece9e8"
-border = "#dbd6d5"
+error = "#b03830"
+warning = "#887010"
+success = "#488828"
+info = "#486890"
+panel = "#e6e4dc"
+border = "#d4d2c8"
 
-[themes.spectrum-white-light.app]
+[themes.macos-miami-light.app]
 nvim = "catppuccin"
 nvim_style = "latte"
 lualine = "catppuccin"
@@ -2382,5 +1845,789 @@ gnome_gtk = "Adwaita"
 vscode = "Catppuccin Latte"
 vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
-cat_wallpaper = "spectrum-white-light.jpg"
+cat_wallpaper = ""
+starship_palette = "catppuccin_latte"
+
+# ----------------------------------------------------------------------------
+# Warm amber desert — earthy amber-brown palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-nova-dark]
+mode = "dark"
+family = "macos"
+
+[themes.macos-nova-dark.term]
+bg = "#14100c"
+fg = "#dcd4c8"
+cursor = "#b87840"
+cursor_text = "#14100c"
+sel_bg = "#342818"
+sel_fg = "#dcd4c8"
+c0  = "#241c14"
+c1  = "#c86048"
+c2  = "#68a060"
+c3  = "#c09838"
+c4  = "#5878a8"
+c5  = "#a06880"
+c6  = "#489090"
+c7  = "#b4aca0"
+c8  = "#443828"
+c9  = "#d87058"
+c10 = "#78b070"
+c11 = "#d0a848"
+c12 = "#6888b8"
+c13 = "#b07890"
+c14 = "#58a0a0"
+c15 = "#ccc4b8"
+
+[themes.macos-nova-dark.ui]
+accent = "#a87038"
+accent_text = "#ffffff"
+error = "#c86048"
+warning = "#c09838"
+success = "#68a060"
+info = "#5878a8"
+panel = "#0c0806"
+border = "#1c1810"
+
+[themes.macos-nova-dark.app]
+nvim = "catppuccin"
+nvim_style = "mocha"
+lualine = "catppuccin"
+gtk_theme = "Adwaita-dark"
+gtk_icon = "Papirus-Dark"
+gnome_shell = ""
+gnome_gtk = "Adwaita-dark"
+vscode = "Catppuccin Mocha"
+vscode_dark = "Catppuccin Mocha"
+vscode_light = "Catppuccin Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_mocha"
+
+# ----------------------------------------------------------------------------
+# Soft amber warmth — light amber-brown palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-nova-light]
+mode = "light"
+family = "macos"
+
+[themes.macos-nova-light.term]
+bg = "#f6f0e8"
+fg = "#201810"
+cursor = "#987038"
+cursor_text = "#f6f0e8"
+sel_bg = "#d8c8b0"
+sel_fg = "#201810"
+c0  = "#201810"
+c1  = "#b04030"
+c2  = "#288838"
+c3  = "#886810"
+c4  = "#486898"
+c5  = "#884880"
+c6  = "#187878"
+c7  = "#e8e0d8"
+c8  = "#403020"
+c9  = "#c05040"
+c10 = "#389848"
+c11 = "#987820"
+c12 = "#5878a8"
+c13 = "#985890"
+c14 = "#288888"
+c15 = "#181008"
+
+[themes.macos-nova-light.ui]
+accent = "#906830"
+accent_text = "#ffffff"
+error = "#b04030"
+warning = "#886810"
+success = "#288838"
+info = "#486898"
+panel = "#ece4d8"
+border = "#dcd0c0"
+
+[themes.macos-nova-light.app]
+nvim = "catppuccin"
+nvim_style = "latte"
+lualine = "catppuccin"
+gtk_theme = "Adwaita"
+gtk_icon = "Papirus-Light"
+gnome_shell = ""
+gnome_gtk = "Adwaita"
+vscode = "Catppuccin Latte"
+vscode_dark = "Catppuccin Mocha"
+vscode_light = "Catppuccin Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_latte"
+
+# ----------------------------------------------------------------------------
+# Deep orange gradient — warm orange palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-orange-dark]
+mode = "dark"
+family = "macos"
+
+[themes.macos-orange-dark.term]
+bg = "#181008"
+fg = "#e0d8c8"
+cursor = "#c87020"
+cursor_text = "#181008"
+sel_bg = "#382410"
+sel_fg = "#e0d8c8"
+c0  = "#281c0c"
+c1  = "#d05030"
+c2  = "#68a060"
+c3  = "#c89828"
+c4  = "#5878a8"
+c5  = "#a06878"
+c6  = "#489090"
+c7  = "#b8b0a0"
+c8  = "#483810"
+c9  = "#e06040"
+c10 = "#78b070"
+c11 = "#d8a838"
+c12 = "#6888b8"
+c13 = "#b07888"
+c14 = "#58a0a0"
+c15 = "#d0c8b8"
+
+[themes.macos-orange-dark.ui]
+accent = "#c06818"
+accent_text = "#ffffff"
+error = "#d05030"
+warning = "#c89828"
+success = "#68a060"
+info = "#5878a8"
+panel = "#100804"
+border = "#281808"
+
+[themes.macos-orange-dark.app]
+nvim = "catppuccin"
+nvim_style = "mocha"
+lualine = "catppuccin"
+gtk_theme = "Adwaita-dark"
+gtk_icon = "Papirus-Dark"
+gnome_shell = ""
+gnome_gtk = "Adwaita-dark"
+vscode = "Catppuccin Mocha"
+vscode_dark = "Catppuccin Mocha"
+vscode_light = "Catppuccin Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_mocha"
+
+# ----------------------------------------------------------------------------
+# Soft orange warmth — light orange palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-orange-light]
+mode = "light"
+family = "macos"
+
+[themes.macos-orange-light.term]
+bg = "#f8f0e6"
+fg = "#281808"
+cursor = "#b06018"
+cursor_text = "#f8f0e6"
+sel_bg = "#e0c8a8"
+sel_fg = "#281808"
+c0  = "#281808"
+c1  = "#b83020"
+c2  = "#288838"
+c3  = "#887010"
+c4  = "#486898"
+c5  = "#884878"
+c6  = "#187878"
+c7  = "#ece4d8"
+c8  = "#483018"
+c9  = "#c84030"
+c10 = "#389848"
+c11 = "#988020"
+c12 = "#5878a8"
+c13 = "#985888"
+c14 = "#288888"
+c15 = "#201008"
+
+[themes.macos-orange-light.ui]
+accent = "#a85810"
+accent_text = "#ffffff"
+error = "#b83020"
+warning = "#887010"
+success = "#288838"
+info = "#486898"
+panel = "#ece0d0"
+border = "#dcd0b8"
+
+[themes.macos-orange-light.app]
+nvim = "catppuccin"
+nvim_style = "latte"
+lualine = "catppuccin"
+gtk_theme = "Adwaita"
+gtk_icon = "Papirus-Light"
+gnome_shell = ""
+gnome_gtk = "Adwaita"
+vscode = "Catppuccin Latte"
+vscode_dark = "Catppuccin Mocha"
+vscode_light = "Catppuccin Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_latte"
+
+# ----------------------------------------------------------------------------
+# Deep pink-coral — warm pink palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-pink-dark]
+mode = "dark"
+family = "macos"
+
+[themes.macos-pink-dark.term]
+bg = "#181014"
+fg = "#e0d4d8"
+cursor = "#c04858"
+cursor_text = "#181014"
+sel_bg = "#382028"
+sel_fg = "#e0d4d8"
+c0  = "#281820"
+c1  = "#d04858"
+c2  = "#68a078"
+c3  = "#c8a058"
+c4  = "#6078b8"
+c5  = "#b05878"
+c6  = "#5098a8"
+c7  = "#b8b0b4"
+c8  = "#482838"
+c9  = "#e05868"
+c10 = "#78b088"
+c11 = "#d8b068"
+c12 = "#7088c8"
+c13 = "#c06888"
+c14 = "#60a8b8"
+c15 = "#d0c8cc"
+
+[themes.macos-pink-dark.ui]
+accent = "#c04050"
+accent_text = "#ffffff"
+error = "#d04858"
+warning = "#c8a058"
+success = "#68a078"
+info = "#6078b8"
+panel = "#10080c"
+border = "#281420"
+
+[themes.macos-pink-dark.app]
+nvim = "catppuccin"
+nvim_style = "mocha"
+lualine = "catppuccin"
+gtk_theme = "Adwaita-dark"
+gtk_icon = "Papirus-Dark"
+gnome_shell = ""
+gnome_gtk = "Adwaita-dark"
+vscode = "Catppuccin Mocha"
+vscode_dark = "Catppuccin Mocha"
+vscode_light = "Catppuccin Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_mocha"
+
+# ----------------------------------------------------------------------------
+# Soft pink-coral — light pink palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-pink-light]
+mode = "light"
+family = "macos"
+
+[themes.macos-pink-light.term]
+bg = "#f6eef0"
+fg = "#281820"
+cursor = "#a83848"
+cursor_text = "#f6eef0"
+sel_bg = "#dcc0c8"
+sel_fg = "#281820"
+c0  = "#281820"
+c1  = "#b82838"
+c2  = "#288840"
+c3  = "#886810"
+c4  = "#5068a8"
+c5  = "#983868"
+c6  = "#187890"
+c7  = "#e8e0e4"
+c8  = "#482830"
+c9  = "#c83848"
+c10 = "#389850"
+c11 = "#987820"
+c12 = "#6078b8"
+c13 = "#a84878"
+c14 = "#2888a0"
+c15 = "#201018"
+
+[themes.macos-pink-light.ui]
+accent = "#a03040"
+accent_text = "#ffffff"
+error = "#b82838"
+warning = "#886810"
+success = "#288840"
+info = "#5068a8"
+panel = "#ece0e4"
+border = "#dcccd4"
+
+[themes.macos-pink-light.app]
+nvim = "catppuccin"
+nvim_style = "latte"
+lualine = "catppuccin"
+gtk_theme = "Adwaita"
+gtk_icon = "Papirus-Light"
+gnome_shell = ""
+gnome_gtk = "Adwaita"
+vscode = "Catppuccin Latte"
+vscode_dark = "Catppuccin Mocha"
+vscode_light = "Catppuccin Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_latte"
+
+# ----------------------------------------------------------------------------
+# Deep purple abstract — rich purple palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-purple-dark]
+mode = "dark"
+family = "macos"
+
+[themes.macos-purple-dark.term]
+bg = "#100c20"
+fg = "#d8d4e8"
+cursor = "#6858b8"
+cursor_text = "#100c20"
+sel_bg = "#282050"
+sel_fg = "#d8d4e8"
+c0  = "#201840"
+c1  = "#c06070"
+c2  = "#60a880"
+c3  = "#c0a060"
+c4  = "#6858b8"
+c5  = "#a068b0"
+c6  = "#4898b0"
+c7  = "#b0acc0"
+c8  = "#383060"
+c9  = "#d07080"
+c10 = "#70b890"
+c11 = "#d0b070"
+c12 = "#7868c8"
+c13 = "#b078c0"
+c14 = "#58a8c0"
+c15 = "#c8c4d8"
+
+[themes.macos-purple-dark.ui]
+accent = "#5848a8"
+accent_text = "#ffffff"
+error = "#c06070"
+warning = "#c0a060"
+success = "#60a880"
+info = "#6858b8"
+panel = "#080618"
+border = "#181040"
+
+[themes.macos-purple-dark.app]
+nvim = "catppuccin"
+nvim_style = "mocha"
+lualine = "catppuccin"
+gtk_theme = "Adwaita-dark"
+gtk_icon = "Papirus-Dark"
+gnome_shell = ""
+gnome_gtk = "Adwaita-dark"
+vscode = "Catppuccin Mocha"
+vscode_dark = "Catppuccin Mocha"
+vscode_light = "Catppuccin Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_mocha"
+
+# ----------------------------------------------------------------------------
+# Soft purple abstract — light purple palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-purple-light]
+mode = "light"
+family = "macos"
+
+[themes.macos-purple-light.term]
+bg = "#f0eef8"
+fg = "#181028"
+cursor = "#5848a0"
+cursor_text = "#f0eef8"
+sel_bg = "#c8c0e0"
+sel_fg = "#181028"
+c0  = "#181028"
+c1  = "#b83040"
+c2  = "#208838"
+c3  = "#886810"
+c4  = "#5848a0"
+c5  = "#8048a0"
+c6  = "#087898"
+c7  = "#e4e0ec"
+c8  = "#302840"
+c9  = "#c84050"
+c10 = "#309848"
+c11 = "#987820"
+c12 = "#6858b0"
+c13 = "#9058b0"
+c14 = "#1888a8"
+c15 = "#100820"
+
+[themes.macos-purple-light.ui]
+accent = "#5040a0"
+accent_text = "#ffffff"
+error = "#b83040"
+warning = "#886810"
+success = "#208838"
+info = "#5848a0"
+panel = "#e4e0f0"
+border = "#d4cee0"
+
+[themes.macos-purple-light.app]
+nvim = "catppuccin"
+nvim_style = "latte"
+lualine = "catppuccin"
+gtk_theme = "Adwaita"
+gtk_icon = "Papirus-Light"
+gnome_shell = ""
+gnome_gtk = "Adwaita"
+vscode = "Catppuccin Latte"
+vscode_dark = "Catppuccin Mocha"
+vscode_light = "Catppuccin Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_latte"
+
+# ----------------------------------------------------------------------------
+# Deep red valentine — vivid red-crimson palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-valentine-dark]
+mode = "dark"
+family = "macos"
+
+[themes.macos-valentine-dark.term]
+bg = "#180810"
+fg = "#e0d0d4"
+cursor = "#d02040"
+cursor_text = "#180810"
+sel_bg = "#381020"
+sel_fg = "#e0d0d4"
+c0  = "#280c18"
+c1  = "#d02040"
+c2  = "#68a070"
+c3  = "#c89850"
+c4  = "#5878b0"
+c5  = "#b04868"
+c6  = "#4898a0"
+c7  = "#b8b0b4"
+c8  = "#481828"
+c9  = "#e03050"
+c10 = "#78b080"
+c11 = "#d8a860"
+c12 = "#6888c0"
+c13 = "#c05878"
+c14 = "#58a8b0"
+c15 = "#d0c8cc"
+
+[themes.macos-valentine-dark.ui]
+accent = "#c81838"
+accent_text = "#ffffff"
+error = "#d02040"
+warning = "#c89850"
+success = "#68a070"
+info = "#5878b0"
+panel = "#10040a"
+border = "#280818"
+
+[themes.macos-valentine-dark.app]
+nvim = "catppuccin"
+nvim_style = "mocha"
+lualine = "catppuccin"
+gtk_theme = "Adwaita-dark"
+gtk_icon = "Papirus-Dark"
+gnome_shell = ""
+gnome_gtk = "Adwaita-dark"
+vscode = "Catppuccin Mocha"
+vscode_dark = "Catppuccin Mocha"
+vscode_light = "Catppuccin Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_mocha"
+
+# ----------------------------------------------------------------------------
+# Soft red valentine — light crimson-rose palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-valentine-light]
+mode = "light"
+family = "macos"
+
+[themes.macos-valentine-light.term]
+bg = "#f8ecee"
+fg = "#280c14"
+cursor = "#b01830"
+cursor_text = "#f8ecee"
+sel_bg = "#e0b8c0"
+sel_fg = "#280c14"
+c0  = "#280c14"
+c1  = "#b81828"
+c2  = "#288838"
+c3  = "#887010"
+c4  = "#486898"
+c5  = "#983058"
+c6  = "#187888"
+c7  = "#ece0e4"
+c8  = "#481820"
+c9  = "#c82838"
+c10 = "#389848"
+c11 = "#988020"
+c12 = "#5878a8"
+c13 = "#a84068"
+c14 = "#288898"
+c15 = "#200810"
+
+[themes.macos-valentine-light.ui]
+accent = "#a81028"
+accent_text = "#ffffff"
+error = "#b81828"
+warning = "#887010"
+success = "#288838"
+info = "#486898"
+panel = "#ecdce0"
+border = "#dcc8d0"
+
+[themes.macos-valentine-light.app]
+nvim = "catppuccin"
+nvim_style = "latte"
+lualine = "catppuccin"
+gtk_theme = "Adwaita"
+gtk_icon = "Papirus-Light"
+gnome_shell = ""
+gnome_gtk = "Adwaita"
+vscode = "Catppuccin Latte"
+vscode_dark = "Catppuccin Mocha"
+vscode_light = "Catppuccin Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_latte"
+
+# ----------------------------------------------------------------------------
+# Deep teal wave — cool cyan-teal palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-wave-dark]
+mode = "dark"
+family = "macos"
+
+[themes.macos-wave-dark.term]
+bg = "#081418"
+fg = "#d0e0e0"
+cursor = "#30a0b0"
+cursor_text = "#081418"
+sel_bg = "#183038"
+sel_fg = "#d0e0e0"
+c0  = "#142028"
+c1  = "#c06058"
+c2  = "#48a880"
+c3  = "#b8a050"
+c4  = "#4888b8"
+c5  = "#9068a0"
+c6  = "#30a0b0"
+c7  = "#a8b8b8"
+c8  = "#2c4048"
+c9  = "#d07068"
+c10 = "#58b890"
+c11 = "#c8b060"
+c12 = "#5898c8"
+c13 = "#a078b0"
+c14 = "#40b0c0"
+c15 = "#c0d0d0"
+
+[themes.macos-wave-dark.ui]
+accent = "#2898a8"
+accent_text = "#ffffff"
+error = "#c06058"
+warning = "#b8a050"
+success = "#48a880"
+info = "#4888b8"
+panel = "#040c10"
+border = "#102028"
+
+[themes.macos-wave-dark.app]
+nvim = "catppuccin"
+nvim_style = "mocha"
+lualine = "catppuccin"
+gtk_theme = "Adwaita-dark"
+gtk_icon = "Papirus-Dark"
+gnome_shell = ""
+gnome_gtk = "Adwaita-dark"
+vscode = "Catppuccin Mocha"
+vscode_dark = "Catppuccin Mocha"
+vscode_light = "Catppuccin Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_mocha"
+
+# ----------------------------------------------------------------------------
+# Soft teal wave — light cyan-teal palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-wave-light]
+mode = "light"
+family = "macos"
+
+[themes.macos-wave-light.term]
+bg = "#ecf4f4"
+fg = "#142020"
+cursor = "#2088a0"
+cursor_text = "#ecf4f4"
+sel_bg = "#b0d0d4"
+sel_fg = "#142020"
+c0  = "#142020"
+c1  = "#b03030"
+c2  = "#288848"
+c3  = "#886810"
+c4  = "#387898"
+c5  = "#704890"
+c6  = "#208898"
+c7  = "#dce8e8"
+c8  = "#2c3838"
+c9  = "#c04040"
+c10 = "#389858"
+c11 = "#987820"
+c12 = "#4888a8"
+c13 = "#8058a0"
+c14 = "#3098a8"
+c15 = "#0c1818"
+
+[themes.macos-wave-light.ui]
+accent = "#188098"
+accent_text = "#ffffff"
+error = "#b03030"
+warning = "#886810"
+success = "#288848"
+info = "#387898"
+panel = "#e0ecec"
+border = "#d0dcdc"
+
+[themes.macos-wave-light.app]
+nvim = "catppuccin"
+nvim_style = "latte"
+lualine = "catppuccin"
+gtk_theme = "Adwaita"
+gtk_icon = "Papirus-Light"
+gnome_shell = ""
+gnome_gtk = "Adwaita"
+vscode = "Catppuccin Latte"
+vscode_dark = "Catppuccin Mocha"
+vscode_light = "Catppuccin Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_latte"
+
+# ----------------------------------------------------------------------------
+# Deep golden yellow — warm yellow-gold palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-yellow-dark]
+mode = "dark"
+family = "macos"
+
+[themes.macos-yellow-dark.term]
+bg = "#141008"
+fg = "#e0dcc8"
+cursor = "#b8a020"
+cursor_text = "#141008"
+sel_bg = "#302810"
+sel_fg = "#e0dcc8"
+c0  = "#241c08"
+c1  = "#c86040"
+c2  = "#68a058"
+c3  = "#b8a020"
+c4  = "#5878a8"
+c5  = "#a06878"
+c6  = "#489088"
+c7  = "#b4b0a0"
+c8  = "#443810"
+c9  = "#d87050"
+c10 = "#78b068"
+c11 = "#c8b030"
+c12 = "#6888b8"
+c13 = "#b07888"
+c14 = "#58a098"
+c15 = "#ccc8b8"
+
+[themes.macos-yellow-dark.ui]
+accent = "#a89818"
+accent_text = "#ffffff"
+error = "#c86040"
+warning = "#b8a020"
+success = "#68a058"
+info = "#5878a8"
+panel = "#0c0804"
+border = "#1c1808"
+
+[themes.macos-yellow-dark.app]
+nvim = "catppuccin"
+nvim_style = "mocha"
+lualine = "catppuccin"
+gtk_theme = "Adwaita-dark"
+gtk_icon = "Papirus-Dark"
+gnome_shell = ""
+gnome_gtk = "Adwaita-dark"
+vscode = "Catppuccin Mocha"
+vscode_dark = "Catppuccin Mocha"
+vscode_light = "Catppuccin Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_mocha"
+
+# ----------------------------------------------------------------------------
+# Soft golden warmth — light yellow-gold palette
+# ----------------------------------------------------------------------------
+
+[themes.macos-yellow-light]
+mode = "light"
+family = "macos"
+
+[themes.macos-yellow-light.term]
+bg = "#f6f4e6"
+fg = "#1c1808"
+cursor = "#988018"
+cursor_text = "#f6f4e6"
+sel_bg = "#dcd4a8"
+sel_fg = "#1c1808"
+c0  = "#1c1808"
+c1  = "#b04030"
+c2  = "#288838"
+c3  = "#887010"
+c4  = "#486890"
+c5  = "#884878"
+c6  = "#187878"
+c7  = "#ece8d8"
+c8  = "#403008"
+c9  = "#c05040"
+c10 = "#389848"
+c11 = "#988020"
+c12 = "#5878a0"
+c13 = "#985888"
+c14 = "#288888"
+c15 = "#141008"
+
+[themes.macos-yellow-light.ui]
+accent = "#907810"
+accent_text = "#ffffff"
+error = "#b04030"
+warning = "#887010"
+success = "#288838"
+info = "#486890"
+panel = "#eae8d4"
+border = "#dcd8c0"
+
+[themes.macos-yellow-light.app]
+nvim = "catppuccin"
+nvim_style = "latte"
+lualine = "catppuccin"
+gtk_theme = "Adwaita"
+gtk_icon = "Papirus-Light"
+gnome_shell = ""
+gnome_gtk = "Adwaita"
+vscode = "Catppuccin Latte"
+vscode_dark = "Catppuccin Mocha"
+vscode_light = "Catppuccin Latte"
+cat_wallpaper = ""
 starship_palette = "catppuccin_latte"

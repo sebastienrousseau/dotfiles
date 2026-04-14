@@ -96,11 +96,15 @@ theme_exists() {
   grep -q "^\[themes\.${name}\]$" "$THEMES_FILE" 2>/dev/null
 }
 
+all_theme_names() {
+  sed -n 's/^\[themes\.\([a-z0-9-]*\)\]$/\1/p' "$THEMES_FILE" | sort -u
+}
+
 wallpaper_theme_names() {
   if [[ -d "$WALLPAPER_DIR" ]]; then
-    find "$WALLPAPER_DIR" -maxdepth 1 -type f \( -name "*.jpg" -o -name "*.png" \) 2>/dev/null |
+    find "$WALLPAPER_DIR" -maxdepth 1 -type f \( -name "*.jpg" -o -name "*.png" -o -name "*.heic" \) 2>/dev/null |
       sed 's#^.*/##' |
-      sed -E 's/\.(jpg|png)$//' |
+      sed -E 's/\.(jpg|png|heic)$//' |
       sort -u |
       while IFS= read -r name; do
         theme_exists "$name" && printf '%s\n' "$name"
@@ -108,31 +112,38 @@ wallpaper_theme_names() {
   fi
 }
 
+has_wallpaper() {
+  local name="${1:-}"
+  [[ -f "$WALLPAPER_DIR/${name}.heic" || -f "$WALLPAPER_DIR/${name}.jpg" || -f "$WALLPAPER_DIR/${name}.png" ]]
+}
+
 get_theme_family() {
   local theme="${1:-}"
   case "$theme" in
-    abstract-waves-*) echo "abstract-waves" ;;
-    adwaita-*) echo "adwaita" ;;
-    blush-*) echo "blush" ;;
-    citrus-*) echo "citrus" ;;
-    colourful-*) echo "colourful" ;;
-    grid-green-*) echo "grid-green" ;;
-    grid-magenta-*) echo "grid-magenta" ;;
-    imac-blue-*) echo "imac-blue" ;;
-    indigo-*) echo "indigo" ;;
-    macos-big-sur-*) echo "macos-big-sur" ;;
+    macos-ai-*) echo "macos-ai" ;;
+    macos-blue-*) echo "macos-blue" ;;
+    macos-blush-*) echo "macos-blush" ;;
+    macos-citrus-*) echo "macos-citrus" ;;
+    macos-green-*) echo "macos-green" ;;
+    macos-gridgreen-*) echo "macos-gridgreen" ;;
+    macos-heatmap-*) echo "macos-heatmap" ;;
+    macos-indigo-*) echo "macos-indigo" ;;
+    macos-bigsur-*) echo "macos-bigsur" ;;
+    macos-miami-*) echo "macos-miami" ;;
     macos-mojave-*) echo "macos-mojave" ;;
     macos-monterey-*) echo "macos-monterey" ;;
-    miami-worldcenter-*) echo "miami-worldcenter" ;;
+    macos-nova-*) echo "macos-nova" ;;
+    macos-orange-*) echo "macos-orange" ;;
+    macos-pink-*) echo "macos-pink" ;;
+    macos-purple-*) echo "macos-purple" ;;
     macos-sequoia-*) echo "macos-sequoia" ;;
     macos-sonoma-*) echo "macos-sonoma" ;;
     macos-tahoe-*) echo "macos-tahoe" ;;
+    macos-valentine-*) echo "macos-valentine" ;;
     macos-ventura-*) echo "macos-ventura" ;;
-    monterey-sierra-blue-*) echo "monterey-sierra-blue" ;;
-    spectrum-black-*) echo "spectrum-black" ;;
-    spectrum-red-*) echo "spectrum-red" ;;
-    spectrum-white-*) echo "spectrum-white" ;;
-    silver-*) echo "silver" ;;
+    macos-wave-*) echo "macos-wave" ;;
+    macos-yellow-*) echo "macos-yellow" ;;
+    macos-silver-*) echo "macos-silver" ;;
     *) echo "other" ;;
   esac
 }
@@ -174,28 +185,24 @@ pick_theme() {
     exit 1
   fi
 
-  local wallpaper_themes
-  wallpaper_themes="$(wallpaper_theme_names)"
-
   # Build theme list with metadata.
   local theme_list=""
-  local name mode family marker
-  if [[ -n "$wallpaper_themes" ]]; then
-    theme_list+="# Wallpaper-backed themes"$'\n'
-    while IFS= read -r name; do
-      [[ -n "$name" ]] || continue
-      mode="$(theme_mode "$name")"
-      mode="${mode:-dark}"
-      family="$(get_theme_family "$name")"
-      marker="○"
-      [[ "$name" == "$current" ]] && marker="✓"
-      theme_list+="$(printf '%s  %-25s  %-10s  %s' "$marker" "$name" "$mode" "$family")"$'\n'
-    done <<<"$wallpaper_themes"
-  fi
+  local name mode family marker wp
+  while IFS= read -r name; do
+    [[ -n "$name" ]] || continue
+    mode="$(theme_mode "$name")"
+    mode="${mode:-dark}"
+    family="$(get_theme_family "$name")"
+    marker="○"
+    [[ "$name" == "$current" ]] && marker="✓"
+    wp=" "
+    has_wallpaper "$name" && wp="W"
+    theme_list+="$(printf '%s  %-30s  %-6s  %-22s  %s' "$marker" "$name" "$mode" "$family" "$wp")"$'\n'
+  done < <(all_theme_names)
 
   local selected
   selected="$(echo "$theme_list" | fzf \
-    --header "Select wallpaper-backed theme (current: $current)" \
+    --header "Select theme (current: $current) [W = has wallpaper]" \
     --prompt "Theme > " \
     --height 30 \
     --reverse \
@@ -212,15 +219,17 @@ pick_theme() {
 }
 
 list_themes() {
-  local name mode family
+  local name mode family wp
 
-  ui_header "Wallpaper-backed Themes"
+  ui_header "Available Themes"
   while IFS= read -r name; do
     [[ -n "$name" ]] || continue
     mode="$(theme_mode "$name")"
     family="$(get_theme_family "$name")"
-    ui_ok "$name" "(${mode:-dark}, ${family})"
-  done < <(wallpaper_theme_names)
+    wp=""
+    has_wallpaper "$name" && wp=" [W]"
+    ui_ok "$name" "(${mode:-dark}, ${family})${wp}"
+  done < <(all_theme_names)
 
   echo ""
   ui_info "Current theme" "$(current_theme)"
@@ -261,7 +270,7 @@ switch_family() {
   while IFS= read -r name; do
     [[ -n "$name" ]] || continue
     families+=("$name")
-  done < <(wallpaper_theme_names | sed -E 's/-(dark|light)$//' | sort -u)
+  done < <(all_theme_names | sed -E 's/-(dark|light)$//' | sort -u)
 
   if [[ ${#families[@]} -eq 0 ]]; then
     set_theme "$DEFAULT_DARK"
