@@ -26,42 +26,18 @@ env:
 
 jobs:
   # ============================================================================
-  # STAGE 1: LINT (Zero-warning policy enforced)
+  # STAGE 1: LINT (Zero-warning policy enforced, reuses shared workflow)
   # ============================================================================
   lint-shell:
     name: Lint / Shell (Zero Warnings)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Cache tools
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
-        with:
-          path: |
-            ~/.local/bin
-            ~/.cargo/bin
-          key: shell-tools-${{ runner.os }}-v3
-      - name: Install tools
-        run: |
-          sudo apt-get update && sudo apt-get install -y shellcheck ripgrep shfmt
-      - name: Shellcheck (Zero Warnings Enforced)
-        run: |
-          echo "::notice::Enforcing zero-warning policy for shellcheck"
-          # Exclude SC1091 (sourced file not found), SC2030/SC2031 (intentional subshell overrides)
-          rg --files -g "*.sh" | xargs shellcheck -x --severity=error \
-            -e SC1091 -e SC2030 -e SC2031
-          if [ $? -ne 0 ]; then
-            echo "::error::Shellcheck failed - zero warnings policy violated"
-            exit 1
-          fi
-      - name: shfmt (Format Check - Fail on Unformatted)
-        run: |
-          echo "::notice::Checking shell format - will fail on any unformatted code"
-          shfmt -d -i 2 -ci scripts/**/*.sh install.sh .chezmoitemplates/**/*.sh
-          if [ $? -ne 0 ]; then
-            echo "::error::Shell formatting check failed - code is not properly formatted"
-            exit 1
-          fi
+    uses: ./.github/workflows/reusable-shell-lint.yml
+    with:
+      include_tests: false
+      shellcheck_severity: error
+      shellcheck_excludes: SC1091,SC2030,SC2031
+      fail_on_shellcheck: true
+      run_shfmt: true
+      shfmt_targets: scripts/**/*.sh install.sh .chezmoitemplates/**/*.sh
 
   lint-lua:
     name: Lint / Lua (Zero Warnings)
@@ -322,50 +298,12 @@ jobs:
 
   test-unit:
     name: Test / Unit Tests (100% Coverage)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10  # Enforced timeout
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Run unit tests with coverage
-        run: |
-          chmod +x tests/framework/*.sh
-          # Set coverage requirement to 100%
-          export COVERAGE_THRESHOLD=100
-          ./tests/framework/test_runner.sh
-          if [ $? -ne 0 ]; then
-            echo "::error::Unit tests failed or coverage below 100%"
-            exit 1
-          fi
-      - name: Coverage Report
-        run: |
-          # Generate coverage report
-          ./tests/framework/coverage_analyzer.sh
-          if [ $? -ne 0 ]; then
-            echo "::error::Coverage analysis failed or threshold not met"
-            exit 1
-          fi
-      - name: Upload coverage reports
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 30
-
-  test-integration:
-    name: Test / Integration
-    runs-on: ubuntu-latest
-    timeout-minutes: 10  # Enforced timeout
-    needs: [lint-shell, lint-lua, security-secrets]
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Run integration tests
-        run: |
-          export RUN_INTEGRATION=1
-          ./tests/framework/test_runner.sh
-          if [ $? -ne 0 ]; then
-            echo "::error::Integration tests failed"
-            exit 1
-          fi
+    uses: ./.github/workflows/reusable-test-suite.yml
+    with:
+      min_coverage: "100"
+      run_integration: true
+      run_strict_checks: true
+      timeout_minutes: 10
 
   # ============================================================================
   # STAGE 4: MERGE GATE (All checks must pass)
@@ -384,7 +322,6 @@ jobs:
       security-infrastructure,
       test-matrix,
       test-unit,
-      test-integration,
     ]
     steps:
       - name: All checks passed
