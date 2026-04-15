@@ -18,7 +18,7 @@ dot doctor
 
 ## Version History
 
-### v0.2.499 (Current)
+### v0.2.500 (Current)
 - Added AI CLIs: Autohand Code, Mistral Vibe, Qwen Code, ZAI
 - Removed Cline CLI (broken upstream dependency)
 - Interactive mise installer for missing AI providers
@@ -30,20 +30,20 @@ dot doctor
 - Auto-prewarm after dot apply
 - Expanded Atuin history filters
 
-### v0.2.499
+### v0.2.500
 - Theme system with Catppuccin integration
 - Linux desktop parity (Niri, Waybar, Fuzzel)
 - AI tooling expansion (Kiro, OpenCode)
 - Coverage contracts and QA docs
 
-### v0.2.499
+### v0.2.500
 - Verified chezmoi installer
 - Shell startup optimization
 - Property-based tests
 
 ## Breaking Changes
 
-If you are upgrading from v0.2.499 or earlier, note these changes:
+If you are upgrading from v0.2.500 or earlier, note these changes:
 
 1. **Cline CLI removed** — if you used `dot cline`, switch to a different AI CLI
 2. **AI tools now install through mise** — run `mise install` to set up AI providers

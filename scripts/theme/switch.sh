@@ -100,21 +100,37 @@ all_theme_names() {
   sed -n 's/^\[themes\.\([a-z0-9-]*\)\]$/\1/p' "$THEMES_FILE" | sort -u
 }
 
-wallpaper_theme_names() {
-  if [[ -d "$WALLPAPER_DIR" ]]; then
-    find "$WALLPAPER_DIR" -maxdepth 1 -type f \( -name "*.jpg" -o -name "*.png" -o -name "*.heic" \) 2>/dev/null |
-      sed 's#^.*/##' |
-      sed -E 's/\.(jpg|png|heic)$//' |
-      sort -u |
-      while IFS= read -r name; do
-        theme_exists "$name" && printf '%s\n' "$name"
-      done
-  fi
+# List wallpaper families that have BOTH dark and light variants in themes.toml.
+# Only these are presented to users — unpaired wallpapers are hidden.
+paired_families() {
+  local -A has_dark has_light
+  local name family
+  while IFS= read -r name; do
+    if [[ "$name" == *-dark ]]; then
+      family="${name%-dark}"
+      has_dark["$family"]=1
+    elif [[ "$name" == *-light ]]; then
+      family="${name%-light}"
+      has_light["$family"]=1
+    fi
+  done < <(all_theme_names)
+
+  for family in $(printf '%s\n' "${!has_dark[@]}" | sort); do
+    [[ -n "${has_light[$family]+x}" ]] && echo "$family"
+  done
 }
 
-has_wallpaper() {
-  local name="${1:-}"
-  [[ -f "$WALLPAPER_DIR/${name}.heic" || -f "$WALLPAPER_DIR/${name}.jpg" || -f "$WALLPAPER_DIR/${name}.png" ]]
+# Determine source type (system/custom) for a wallpaper family.
+wallpaper_source() {
+  local family="${1:-}"
+  # Custom wallpapers take precedence
+  for ext in heic jpg png; do
+    if [[ -f "$WALLPAPER_DIR/${family}-dark.${ext}" || -f "$WALLPAPER_DIR/${family}-light.${ext}" ]]; then
+      echo "Custom"
+      return
+    fi
+  done
+  echo "System"
 }
 
 get_theme_family() {
@@ -175,24 +191,29 @@ pick_theme() {
     exit 1
   fi
 
-  # Build theme list with metadata.
-  local theme_list=""
-  local name mode family marker wp
-  while IFS= read -r name; do
-    [[ -n "$name" ]] || continue
-    mode="$(theme_mode "$name")"
-    mode="${mode:-dark}"
-    family="$(get_theme_family "$name")"
-    marker="○"
-    [[ "$name" == "$current" ]] && marker="✓"
-    wp=" "
-    has_wallpaper "$name" && wp="W"
-    theme_list+="$(printf '%s  %-30s  %-6s  %-22s  %s' "$marker" "$name" "$mode" "$family" "$wp")"$'\n'
-  done < <(all_theme_names)
+  local current_family="${current%-dark}"
+  [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
+  local current_mode="dark"
+  is_dark_theme "$current" 2>/dev/null || current_mode="light"
 
-  local selected
-  selected="$(echo "$theme_list" | fzf \
-    --header "Select theme (current: $current) [W = has wallpaper]" \
+  # Build theme list: one row per family, shows active mode
+  local theme_list=""
+  local family source marker active_mode
+  while IFS= read -r family; do
+    [[ -n "$family" ]] || continue
+    source="$(wallpaper_source "$family")"
+    marker="○"
+    active_mode=""
+    if [[ "$family" == "$current_family" ]]; then
+      marker="✓"
+      active_mode="$current_mode"
+    fi
+    theme_list+="$(printf '%s  %-35s  %-8s  %s' "$marker" "$family" "$source" "$active_mode")"$'\n'
+  done < <(paired_families)
+
+  local selected_family
+  selected_family="$(echo "$theme_list" | fzf \
+    --header "Select wallpaper theme (current: $current_family [$current_mode])" \
     --prompt "Theme > " \
     --height 30 \
     --reverse \
@@ -201,28 +222,40 @@ pick_theme() {
     --ansi |
     awk '$1 !~ /^#/ && NF >= 2 {print $2}')" || return 0
 
-  if [[ -n "$selected" && "$selected" != "$current" ]]; then
-    dot-theme-sync "$selected"
-  elif [[ "$selected" == "$current" ]]; then
-    ui_info "Theme" "already on $current"
+  if [[ -n "$selected_family" ]]; then
+    # Apply with current appearance mode (dark/light)
+    local new_theme="${selected_family}-${current_mode}"
+    if [[ "$new_theme" != "$current" ]]; then
+      dot-theme-sync "$new_theme"
+    else
+      ui_info "Theme" "already on $current"
+    fi
   fi
 }
 
 list_themes() {
-  local name mode family wp
+  local current="$(current_theme)"
+  local current_family="${current%-dark}"
+  [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
 
-  ui_header "Available Themes"
-  while IFS= read -r name; do
-    [[ -n "$name" ]] || continue
-    mode="$(theme_mode "$name")"
-    family="$(get_theme_family "$name")"
-    wp=""
-    has_wallpaper "$name" && wp=" [W]"
-    ui_ok "$name" "(${mode:-dark}, ${family})${wp}"
-  done < <(all_theme_names)
+  local count=0
+  local family source
+
+  printf '  %-35s  %s\n' "WALLPAPER" "SOURCE"
+  printf '  %-35s  %s\n' "---------" "------"
+  while IFS= read -r family; do
+    [[ -n "$family" ]] || continue
+    source="$(wallpaper_source "$family")"
+    if [[ "$family" == "$current_family" ]]; then
+      ui_ok "$family" "$source ◀"
+    else
+      printf '  %-35s  %s\n' "$family" "$source"
+    fi
+    count=$((count + 1))
+  done < <(paired_families)
 
   echo ""
-  ui_info "Current theme" "$(current_theme)"
+  ui_info "Current" "$(current_theme) ($count wallpaper themes available)"
 }
 
 # Toggle between light and dark within the same family, or switch families
@@ -260,7 +293,7 @@ switch_family() {
   while IFS= read -r name; do
     [[ -n "$name" ]] || continue
     families+=("$name")
-  done < <(all_theme_names | sed -E 's/-(dark|light)$//' | sort -u)
+  done < <(paired_families)
 
   if [[ ${#families[@]} -eq 0 ]]; then
     set_theme "$DEFAULT_DARK"
