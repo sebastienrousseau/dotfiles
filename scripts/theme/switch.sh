@@ -119,33 +119,23 @@ has_wallpaper() {
 
 get_theme_family() {
   local theme="${1:-}"
-  case "$theme" in
-    macos-ai-*) echo "macos-ai" ;;
-    macos-blue-*) echo "macos-blue" ;;
-    macos-blush-*) echo "macos-blush" ;;
-    macos-citrus-*) echo "macos-citrus" ;;
-    macos-green-*) echo "macos-green" ;;
-    macos-gridgreen-*) echo "macos-gridgreen" ;;
-    macos-heatmap-*) echo "macos-heatmap" ;;
-    macos-indigo-*) echo "macos-indigo" ;;
-    macos-bigsur-*) echo "macos-bigsur" ;;
-    macos-miami-*) echo "macos-miami" ;;
-    macos-mojave-*) echo "macos-mojave" ;;
-    macos-monterey-*) echo "macos-monterey" ;;
-    macos-nova-*) echo "macos-nova" ;;
-    macos-orange-*) echo "macos-orange" ;;
-    macos-pink-*) echo "macos-pink" ;;
-    macos-purple-*) echo "macos-purple" ;;
-    macos-sequoia-*) echo "macos-sequoia" ;;
-    macos-sonoma-*) echo "macos-sonoma" ;;
-    macos-tahoe-*) echo "macos-tahoe" ;;
-    macos-valentine-*) echo "macos-valentine" ;;
-    macos-ventura-*) echo "macos-ventura" ;;
-    macos-wave-*) echo "macos-wave" ;;
-    macos-yellow-*) echo "macos-yellow" ;;
-    macos-silver-*) echo "macos-silver" ;;
-    *) echo "other" ;;
-  esac
+  # Read family from themes.toml if available
+  if [[ -f "$THEMES_FILE" ]]; then
+    local family
+    family="$(awk -v n="$theme" '
+      $0 == "[themes." n "]" { found=1; next }
+      /^\[/ { found=0 }
+      found && /^family/ { sub(/.*= *"/, ""); sub(/".*/, ""); print; exit }
+    ' "$THEMES_FILE")"
+    if [[ -n "$family" ]]; then
+      echo "$family"
+      return
+    fi
+  fi
+  # Fallback: strip -dark/-light suffix
+  local family="${theme%-dark}"
+  [[ "$family" != "$theme" ]] || family="${theme%-light}"
+  echo "$family"
 }
 
 is_dark_theme() {
@@ -362,6 +352,10 @@ case "${1:-}" in
   current)
     show_current
     ;;
+  rebuild)
+    shift
+    bash "$SCRIPT_DIR/rebuild-themes.sh" "$@"
+    ;;
   help | --help | -h)
     ui_header "Usage"
     ui_info "dot theme" "[command]"
@@ -374,6 +368,7 @@ case "${1:-}" in
     ui_ok "family" "Cycle between theme families"
     ui_ok "current" "Show current theme info"
     ui_ok "sync" "Sync dotfiles with system dark/light mode"
+    ui_ok "rebuild" "Regenerate themes from system + custom wallpapers"
     echo ""
     show_current
     ;;

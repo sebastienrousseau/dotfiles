@@ -1,12 +1,21 @@
 # Theming Guide
 
-The dotfiles ship 24 themes (48 variants) with live switching across every managed application. One command changes the terminal, editor, window manager, GTK, desktop environment, wallpaper, and browser-facing color mode in under a second. All themes follow the `macos-NAME-dark/light` naming convention with single-word identifiers.
+The dotfiles ship a wallpaper-driven theme system that generates terminal color palettes directly from wallpaper images using K-Means clustering in CIELAB color space. One command changes the terminal, editor, window manager, GTK, desktop environment, wallpaper, and browser-facing color mode in under a second.
+
+Themes are not hand-crafted — they are extracted from whatever wallpapers are available on the system.
 
 ## How Themes Work
 
-`.chezmoidata/themes.toml` is the single source of truth. It defines terminal palettes, UI accent colors, and per-application mappings for every theme. Chezmoi templates read from this file at apply time.
+Wallpapers are the source of truth. The system discovers wallpapers from two locations:
 
-The `theme` key in `.chezmoidata.toml` controls the active theme. Every template references the active theme's data through `{{ $t := index .themes .theme }}`, then uses `$t.term.bg`, `$t.ui.accent`, `$t.app.nvim`, and so on.
+1. **System wallpapers** — platform-native (macOS `/System/Library/Desktop Pictures/`, Linux `/usr/share/backgrounds/`)
+2. **Custom wallpapers** — user-provided in `~/Pictures/Wallpapers/` (custom overrides system)
+
+`extract-theme.py` extracts dominant colors from each wallpaper using K-Means clustering in CIELAB color space, then generates a full terminal palette (16 ANSI colors, accent, bg/fg, panel, border) with WCAG contrast enforcement.
+
+`rebuild-themes.sh` orchestrates discovery → extraction → assembly into `.chezmoidata/themes.toml`. Themes are cached in `~/.cache/dotfiles/themes/` and only regenerated when wallpapers change.
+
+The `theme` key in `.chezmoidata.toml` controls the active theme. Every template references the active theme's data through `{{ $t := index .themes .theme }}`.
 
 ## Switching Themes
 
@@ -73,32 +82,17 @@ Toggles between the dark and light variant of the current theme family. A theme 
 
 ## Theme Families
 
-Every theme has a dark and light variant. All follow the `macos-NAME-dark/light` naming convention:
+Available themes depend on your system. Run `dot theme list` to see what's discovered. On macOS Sonoma, you'll see ~150+ themes from system wallpapers. Custom wallpapers in `~/Pictures/Wallpapers/` add more.
 
-- **macos-ai** -- magenta-rose aurora
-- **macos-bigsur** -- classic Big Sur landscape
-- **macos-blue** -- deep blue abstract
-- **macos-blush** -- warm blush gradient
-- **macos-citrus** -- vibrant citrus tones
-- **macos-green** -- natural green landscape
-- **macos-gridgreen** -- geometric green grid
-- **macos-heatmap** -- fiery orange-red heatmap
-- **macos-indigo** -- deep indigo abstract
-- **macos-miami** -- warm olive-earth tones
-- **macos-mojave** -- Mojave desert landscape
-- **macos-monterey** -- Monterey graphic
-- **macos-nova** -- warm amber desert
-- **macos-orange** -- deep orange gradient
-- **macos-pink** -- coral-pink abstract
-- **macos-purple** -- rich purple abstract
-- **macos-sequoia** -- Sequoia landscape
-- **macos-silver** -- neutral silver gradient
-- **macos-sonoma** -- Sonoma rolling hills
-- **macos-tahoe** -- Tahoe deep blue silk
-- **macos-valentine** -- vivid red-crimson
-- **macos-ventura** -- Ventura amber petals
-- **macos-wave** -- cool cyan-teal wave
-- **macos-yellow** -- warm golden yellow
+### Rebuilding themes
+
+When wallpapers change (new system update, new custom wallpapers), regenerate:
+
+```bash
+dot theme rebuild          # Regenerate (uses cache for unchanged wallpapers)
+dot theme rebuild --force  # Force full regeneration
+dot theme rebuild --list   # List discovered wallpapers without rebuilding
+```
 
 ## What works without wallpapers
 

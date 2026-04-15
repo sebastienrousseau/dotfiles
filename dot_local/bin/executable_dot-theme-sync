@@ -443,22 +443,19 @@ reload_desktop() {
       color_scheme="dark"
     fi
 
-    case "$theme" in
-      *macos-blue* | *macos-mojave* | *macos-wave* | *macos-indigo*) accent="4" ;; # Blue
-      *macos-green* | *macos-gridgreen* | *macos-sonoma* | *macos-miami*) accent="3" ;; # Green
-      *macos-purple* | *macos-bigsur*) accent="5" ;; # Purple
-      *macos-pink* | *macos-ai* | *macos-valentine* | *macos-blush*) accent="6" ;; # Pink
-      *macos-orange* | *macos-ventura* | *macos-heatmap* | *macos-nova*) accent="1" ;; # Orange
-      *macos-yellow* | *macos-sequoia* | *macos-citrus*) accent="2" ;; # Yellow
-      *macos-silver* | *macos-monterey*) accent="-1" ;; # Graphite
-      *catppuccin* | *tokyonight*) accent="4" ;; # Blue
-      *everforest*) accent="3" ;; # Green
-      *kanagawa* | *dracula*) accent="5" ;; # Purple
-      *rose-pine* | *onedark*) accent="6" ;; # Pink
-      *gruvbox*) accent="1" ;; # Orange
-      *nord* | *solarized*) accent="2" ;; # Yellow
-      *) accent="4" ;; # Blue default
-    esac
+    # Read macos_accent from themes.toml (set by extract-theme.py from wallpaper hue)
+    local themes_file="$SRC_DIR/.chezmoidata/themes.toml"
+    if [[ -f "$themes_file" ]]; then
+      local toml_accent
+      toml_accent="$(awk -v n="$theme" '
+        $0 == "[themes." n "]" { found=1; next }
+        /^\[/ { found=0 }
+        found && /^macos_accent/ { sub(/.*= */, ""); print; exit }
+      ' "$themes_file")"
+      if [[ -n "$toml_accent" ]]; then
+        accent="$toml_accent"
+      fi
+    fi
 
     if osascript -e "tell application \"System Events\" to tell appearance preferences to set dark mode to $dark_bool" >/dev/null 2>&1; then
       changed=1
