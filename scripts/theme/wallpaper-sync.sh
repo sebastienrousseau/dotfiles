@@ -14,9 +14,9 @@ WALLPAPER_DIR="${DOTFILES_WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
 CHEZMOI_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
 DATA_FILE="${HOME}/.dotfiles/.chezmoidata.toml"
 
+WALLPAPER_DIR_EXISTS=true
 if [ ! -d "$WALLPAPER_DIR" ]; then
-  ui_info "Wallpaper" "directory not found: $WALLPAPER_DIR (skipping — theme colors still apply)"
-  exit 0
+  WALLPAPER_DIR_EXISTS=false
 fi
 
 # Detect current color scheme (light/dark)
@@ -93,6 +93,64 @@ wallpaper_for_theme() {
   return 1
 }
 
+# Fallback: find a matching system wallpaper when no custom one exists.
+# Maps theme names to platform-native wallpapers shipped with the OS.
+system_wallpaper_for_theme() {
+  local theme="${1:-}"
+  local mode="${2:-}"
+  local SYS_MAC="/System/Library/Desktop Pictures"
+  local SYS_LINUX_DIRS=(
+    /usr/share/backgrounds
+    /usr/share/wallpapers
+  )
+
+  [[ -n "$theme" ]] || return 1
+
+  # macOS: map theme names to Apple system wallpapers
+  if [[ "$(uname -s)" == "Darwin" && -d "$SYS_MAC" ]]; then
+    local -A mac_map=(
+      [macos - sonoma]="$SYS_MAC/Sonoma.heic"
+      [macos - blue]="$SYS_MAC/Mac Blue.heic"
+      [macos - pink]="$SYS_MAC/Mac Pink.heic"
+      [macos - purple]="$SYS_MAC/Mac Purple.heic"
+      [macos - yellow]="$SYS_MAC/Mac Yellow.heic"
+      [macos - orange]="$SYS_MAC/iMac Orange.heic"
+      [macos - green]="$SYS_MAC/iMac Green.heic"
+      [macos - silver]="$SYS_MAC/iMac Silver.heic"
+    )
+
+    # Extract family from theme name (strip -dark/-light)
+    local family="${theme%-dark}"
+    [[ "$family" == "$theme" ]] && family="${theme%-light}"
+
+    local sys_wp="${mac_map[$family]:-}"
+    if [[ -n "$sys_wp" && -f "$sys_wp" ]]; then
+      printf '%s\n' "$sys_wp"
+      return 0
+    fi
+  fi
+
+  # Linux: search system background directories for keyword match
+  if [[ "$(uname -s)" == "Linux" ]]; then
+    local keyword="${theme#macos-}"
+    keyword="${keyword%-dark}"
+    keyword="${keyword%-light}"
+
+    for dir in "${SYS_LINUX_DIRS[@]}"; do
+      [[ -d "$dir" ]] || continue
+      local match
+      match="$(find "$dir" -maxdepth 3 -type f \( -name "*.jpg" -o -name "*.png" \) \
+        -iname "*${keyword}*" 2>/dev/null | head -1)"
+      if [[ -n "$match" ]]; then
+        printf '%s\n' "$match"
+        return 0
+      fi
+    done
+  fi
+
+  return 1
+}
+
 theme_wallpaper_pair() {
   local theme="${1:-}"
   local family=""
@@ -149,9 +207,21 @@ pick_wallpaper() {
 }
 
 THEME="$(current_theme || true)"
-WALLPAPER="$(pick_wallpaper "$MODE" "$THEME" || true)"
-if [ -z "$WALLPAPER" ]; then
-  ui_info "Wallpaper" "no ${MODE} wallpaper for ${THEME:-unknown} (skipping — use ~/Pictures/Wallpapers/ for custom wallpapers)"
+WALLPAPER=""
+if [[ "$WALLPAPER_DIR_EXISTS" == "true" ]]; then
+  WALLPAPER="$(pick_wallpaper "$MODE" "$THEME" || true)"
+fi
+
+# Fallback: try OS-native system wallpapers
+if [[ -z "$WALLPAPER" ]]; then
+  WALLPAPER="$(system_wallpaper_for_theme "$THEME" "$MODE" || true)"
+  if [[ -n "$WALLPAPER" ]]; then
+    ui_info "Wallpaper" "using system wallpaper: $(basename "$WALLPAPER")"
+  fi
+fi
+
+if [[ -z "$WALLPAPER" ]]; then
+  ui_info "Wallpaper" "no wallpaper for ${THEME:-unknown} (skipping — theme colors still apply)"
   exit 0
 fi
 
