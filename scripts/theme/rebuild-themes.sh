@@ -159,6 +159,15 @@ fi
 
 mkdir -p "$CACHE_DIR"
 
+# Clean orphaned cache files (wallpapers that no longer exist)
+for cache_file in "$CACHE_DIR"/*.toml; do
+  [[ -f "$cache_file" ]] || continue
+  cached_name="$(basename "$cache_file" .toml)"
+  if [[ -z "${WALLPAPERS[$cached_name]+x}" ]]; then
+    rm -f "$cache_file"
+  fi
+done
+
 # ---------------------------------------------------------------------------
 # Generate themes
 # ---------------------------------------------------------------------------
