@@ -33,8 +33,8 @@ done
 # Discover wallpapers from all sources
 # ---------------------------------------------------------------------------
 
-declare -A WALLPAPERS  # name -> path (custom overrides system)
-declare -A WP_SOURCE   # name -> "system" | "custom"
+declare -A WALLPAPERS # name -> path (custom overrides system)
+declare -A WP_SOURCE  # name -> "system" | "custom"
 
 discover_macos_system() {
   local sys_dir="/System/Library/Desktop Pictures"
@@ -70,7 +70,7 @@ discover_macos_system() {
     # e.g. if "big-sur-graphic-dark" exists, remove "big-sur-graphic"
     for name in "${!WALLPAPERS[@]}"; do
       if [[ "${name}" != *-dark && "${name}" != *-light ]]; then
-        if [[ -n "${WALLPAPERS[${name}-dark]+x}" || -n "${WALLPAPERS[${name}-light]+x}" ]]; then
+        if [[ -n "${WALLPAPERS[${name} - dark]+x}" || -n "${WALLPAPERS[${name} - light]+x}" ]]; then
           unset "WALLPAPERS[$name]"
           unset "WP_SOURCE[$name]"
         fi
@@ -105,14 +105,40 @@ discover_linux_system() {
 discover_custom() {
   [[ -d "$CUSTOM_DIR" ]] || return 0
 
-  local file name
+  local file name frame_count
   for file in "$CUSTOM_DIR"/*.heic "$CUSTOM_DIR"/*.jpg "$CUSTOM_DIR"/*.png; do
     [[ -f "$file" ]] || continue
     name="$(basename "$file")"
     name="${name%.*}"
-    # Custom wallpapers override system ones
+
+    # Check if this is a dynamic HEIC (multi-frame = light+dark in one file)
+    if [[ "${file##*.}" == "heic" ]]; then
+      frame_count="$(magick identify "$file" 2>/dev/null | wc -l | tr -d ' ')"
+      if [[ "$frame_count" -ge 2 && "$name" != *-dark && "$name" != *-light ]]; then
+        # Dynamic HEIC: register as both dark and light
+        WALLPAPERS["${name}-light"]="$file[0]"
+        WP_SOURCE["${name}-light"]="custom"
+        WALLPAPERS["${name}-dark"]="$file[1]"
+        WP_SOURCE["${name}-dark"]="custom"
+        # Store the original file path for wallpaper-sync
+        WALLPAPERS["${name}"]="$file"
+        WP_SOURCE["${name}"]="custom-dynamic"
+        continue
+      fi
+    fi
+
     WALLPAPERS["$name"]="$file"
     WP_SOURCE["$name"]="custom"
+  done
+}
+
+# Remove dynamic base entries (keep only the -dark/-light variants for theme gen)
+cleanup_dynamic_entries() {
+  for name in "${!WP_SOURCE[@]}"; do
+    if [[ "${WP_SOURCE[$name]}" == "custom-dynamic" ]]; then
+      unset "WALLPAPERS[$name]"
+      unset "WP_SOURCE[$name]"
+    fi
   done
 }
 
@@ -122,6 +148,7 @@ case "$(uname -s)" in
   Linux) discover_linux_system ;;
 esac
 discover_custom
+cleanup_dynamic_entries
 
 # ---------------------------------------------------------------------------
 # List mode
@@ -193,6 +220,7 @@ echo "Generating themes..."
 # Build work list (skip cached)
 WORK=()
 for name in $(printf '%s\n' "${!WALLPAPERS[@]}" | sort); do
+  [[ -n "${WALLPAPERS[$name]+x}" ]] || continue
   wp_path="${WALLPAPERS[$name]}"
   cache_file="$CACHE_DIR/${name}.toml"
 
@@ -214,7 +242,7 @@ if [[ $TOTAL_WORK -gt 0 ]]; then
     source_type="${WP_SOURCE[$name]}"
 
     (
-      if python3 "$EXTRACT_SCRIPT" "$wp_path" --name "$name" --source "$source_type" > "$cache_file" 2>/dev/null; then
+      if python3 "$EXTRACT_SCRIPT" "$wp_path" --name "$name" --source "$source_type" >"$cache_file" 2>/dev/null; then
         printf "  %-40s [%s] ✓\n" "$name" "$source_type"
       else
         rm -f "$cache_file"
@@ -264,7 +292,7 @@ HEADER
     echo ""
     cat "$cache_file"
   done
-} > "$THEMES_FILE"
+} >"$THEMES_FILE"
 
 theme_count=$(grep -c '^\[themes\.' "$THEMES_FILE" | head -1)
 echo "  Written: $THEMES_FILE ($theme_count theme sections)"

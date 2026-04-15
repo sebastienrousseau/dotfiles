@@ -569,7 +569,7 @@ def determine_mode(pixels: List[Tuple[int, int, int]]) -> bool:
     if not pixels:
         return True
     avg_lum = sum(relative_luminance(*p) for p in pixels) / len(pixels)
-    return avg_lum < 0.4
+    return avg_lum < 0.35
 
 
 def derive_name(image_path: str) -> str:
@@ -597,8 +597,11 @@ def main():
     parser.add_argument("--source", choices=["system", "custom"], default="custom", help="Wallpaper source type")
     args = parser.parse_args()
 
-    if not os.path.isfile(args.image):
-        print(f"Error: {args.image} not found", file=sys.stderr)
+    # Support ImageMagick frame syntax: image.heic[0]
+    image_path = args.image
+    base_path = image_path.split("[")[0] if "[" in image_path else image_path
+    if not os.path.isfile(base_path):
+        print(f"Error: {base_path} not found", file=sys.stderr)
         sys.exit(1)
 
     # Extract pixels
@@ -607,12 +610,16 @@ def main():
         print("Error: no pixels extracted", file=sys.stderr)
         sys.exit(1)
 
-    # Determine dark/light
-    is_dark = determine_mode(pixels)
-
     # Derive name
     name = args.name or derive_name(args.image)
-    if not name.endswith("-dark") and not name.endswith("-light"):
+
+    # Determine dark/light: trust name suffix if present, else detect from pixels
+    if name.endswith("-dark"):
+        is_dark = True
+    elif name.endswith("-light"):
+        is_dark = False
+    else:
+        is_dark = determine_mode(pixels)
         name += "-dark" if is_dark else "-light"
 
     # Subsample for speed — 2000 pixels is enough for accurate K-Means
@@ -633,7 +640,7 @@ def main():
 
     # Generate theme
     theme = generate_theme(clusters, name, is_dark)
-    theme["wallpaper"] = os.path.abspath(args.image)
+    theme["wallpaper"] = os.path.abspath(base_path)
     theme["source"] = args.source
 
     # Output
