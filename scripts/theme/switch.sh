@@ -123,9 +123,9 @@ paired_families() {
 # Determine source type (system/custom) for a wallpaper family.
 wallpaper_source() {
   local family="${1:-}"
-  # Custom wallpapers take precedence
+  # Check for custom wallpapers: dynamic (family.heic) or split (family-dark/light.ext)
   for ext in heic jpg png; do
-    if [[ -f "$WALLPAPER_DIR/${family}-dark.${ext}" || -f "$WALLPAPER_DIR/${family}-light.${ext}" ]]; then
+    if [[ -f "$WALLPAPER_DIR/${family}.${ext}" || -f "$WALLPAPER_DIR/${family}-dark.${ext}" || -f "$WALLPAPER_DIR/${family}-light.${ext}" ]]; then
       echo "Custom"
       return
     fi
