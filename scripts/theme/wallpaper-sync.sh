@@ -15,8 +15,8 @@ CHEZMOI_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
 DATA_FILE="${HOME}/.dotfiles/.chezmoidata.toml"
 
 if [ ! -d "$WALLPAPER_DIR" ]; then
-  ui_err "Wallpaper directory" "not found: $WALLPAPER_DIR"
-  exit 1
+  ui_info "Wallpaper" "directory not found: $WALLPAPER_DIR (skipping — theme colors still apply)"
+  exit 0
 fi
 
 # Detect current color scheme (light/dark)
@@ -151,8 +151,8 @@ pick_wallpaper() {
 THEME="$(current_theme || true)"
 WALLPAPER="$(pick_wallpaper "$MODE" "$THEME" || true)"
 if [ -z "$WALLPAPER" ]; then
-  ui_err "No ${MODE} wallpapers found" "$WALLPAPER_DIR"
-  exit 1
+  ui_info "Wallpaper" "no ${MODE} wallpaper for ${THEME:-unknown} (skipping — use ~/Pictures/Wallpapers/ for custom wallpapers)"
+  exit 0
 fi
 
 # Convert .heic to .png on Linux (HEIC not universally supported)

@@ -784,9 +784,15 @@ reload_wallpaper() {
     return
   fi
 
-  if bash "$script" >/dev/null 2>&1; then
+  local wp_output
+  wp_output="$(bash "$script" 2>&1)" || true
+
+  if echo "$wp_output" | grep -q "Applied via\|Applied wallpaper\|matched"; then
     RELOADED+=("wallpaper")
     _ok "Wallpaper" "matched active theme"
+  elif echo "$wp_output" | grep -q "skipping\|not found\|no "; then
+    SKIPPED+=("wallpaper")
+    _skip "Wallpaper" "no custom wallpaper (add to ~/Pictures/Wallpapers/)"
   else
     SKIPPED+=("wallpaper")
     _skip "Wallpaper" "sync unavailable"

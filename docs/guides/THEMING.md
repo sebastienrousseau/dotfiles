@@ -100,22 +100,54 @@ Every theme has a dark and light variant. All follow the `macos-NAME-dark/light`
 - **macos-wave** -- cool cyan-teal wave
 - **macos-yellow** -- warm golden yellow
 
-## Wallpapers
+## What works without wallpapers
 
-Each theme has a matching wallpaper pair in `~/Pictures/Wallpapers/`:
+Theme switching is a two-tier system:
+
+**Core (always works)** — ships in the repo, no setup needed:
+- Terminal colors (Ghostty, Alacritty, Kitty, WezTerm, tmux)
+- Editor themes (Neovim colorscheme, VS Code)
+- macOS dark/light mode and accent color
+- Linux GNOME color-scheme, GTK theme, icon theme
+- Browser color mode (Safari, Chrome, Firefox)
+
+**Wallpapers (optional)** — user-provided, enhances the theme:
+- Desktop wallpaper matched to the active theme
+- Requires `~/Pictures/Wallpapers/` with files named `macos-NAME-dark.heic`
+
+If no wallpapers are present, `dot theme` applies all core changes and skips the wallpaper step. No errors, no manual config.
+
+## Wallpapers (optional)
+
+Wallpapers are not shipped in the repo. Each user sources their own and places them in `~/Pictures/Wallpapers/`:
 
 ```
 macos-tahoe-dark.heic
 macos-tahoe-light.heic
 ```
 
-All wallpapers are 6016x6016 `.heic` files. Dark/light pairs target a golden ratio (1.618) brightness relationship for balanced contrast across displays.
+The naming convention is `macos-NAME-APPEARANCE.heic` (or `.jpg`/`.png`). The theme picker marks themes with matching wallpapers as `[W]`.
 
-### Linux and WSL
+### Wallpaper guidelines
 
-Linux desktops (GNOME, Niri, swaybg, feh) do not universally support HEIC. The `wallpaper-sync.sh` script auto-converts `.heic` to `.png` on Linux using `magick`, `heif-convert`, or `convert` (whichever is available). The `.png` cache is only regenerated when the source `.heic` changes.
+- **Resolution**: 6016x6016 recommended (matches Apple's native resolution)
+- **Format**: `.heic` preferred on macOS, `.png`/`.jpg` also supported
+- **Brightness**: dark/light pairs targeting a golden ratio (1.618) relationship give balanced contrast across displays
 
-WSL has no desktop compositor, so wallpapers do not apply. Terminal colors and Neovim themes still work in GUI terminals.
+### Platform behavior
+
+| Platform | Wallpaper support | Mechanism |
+|---|---|---|
+| **macOS** | `.heic`, `.jpg`, `.png` | `osascript` (all desktops) |
+| **Linux (GNOME)** | `.png`, `.jpg` (`.heic` auto-converted) | `gsettings picture-uri` + `picture-uri-dark` |
+| **Linux (Wayland)** | `.png`, `.jpg` (`.heic` auto-converted) | `swaybg`, `feh`, or Niri/DMS IPC |
+| **WSL** | Not applicable | No compositor; terminal colors still apply |
+
+On Linux, `.heic` files are automatically converted to `.png` using `magick`, `heif-convert`, or `convert` (whichever is available). The `.png` is cached and only regenerated when the source `.heic` changes.
+
+### Using your OS default wallpapers
+
+If you don't provide custom wallpapers, your OS keeps its current desktop wallpaper. The theme still applies all color changes (terminal, editor, accent, dark/light mode). This is the expected default for most users.
 
 ## Build Artifacts
 
