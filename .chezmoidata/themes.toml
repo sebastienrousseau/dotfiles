@@ -15,6 +15,8 @@
 mode = "dark"
 family = "big-sur-aerial"
 macos_accent = 4
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Big Sur Aerial.heic"
+source = "system"
 
 [themes.big-sur-aerial-dark.term]
 bg = "#16191e"
@@ -68,6 +70,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "big-sur-coastline"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Big Sur Coastline.heic"
+source = "system"
 
 [themes.big-sur-coastline-dark.term]
 bg = "#262627"
@@ -121,6 +125,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "big-sur"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Big Sur Dark.heic"
+source = "system"
 
 [themes.big-sur-dark.term]
 bg = "#13151c"
@@ -174,6 +180,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "big-sur-graphic"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Big Sur Graphic Dark.heic"
+source = "system"
 
 [themes.big-sur-graphic-dark.term]
 bg = "#1e1213"
@@ -227,6 +235,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "big-sur-graphic-light"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Big Sur Graphic Light.heic"
+source = "system"
 
 [themes.big-sur-graphic-light.term]
 bg = "#212632"
@@ -280,6 +290,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "big-sur-horizon"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Big Sur Horizon.heic"
+source = "system"
 
 [themes.big-sur-horizon-dark.term]
 bg = "#1e1f22"
@@ -333,6 +345,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "big-sur-light"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Big Sur Light.heic"
+source = "system"
 
 [themes.big-sur-light.term]
 bg = "#1c1f21"
@@ -386,6 +400,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "big-sur-mountains"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Big Sur Mountains.heic"
+source = "system"
 
 [themes.big-sur-mountains-dark.term]
 bg = "#1c1c1e"
@@ -439,6 +455,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "big-sur-night-grasses"
 macos_accent = 4
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Big Sur Night Grasses.heic"
+source = "system"
 
 [themes.big-sur-night-grasses-dark.term]
 bg = "#16171c"
@@ -492,6 +510,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "big-sur-night-succulents"
 macos_accent = 0
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Big Sur Night Succulents.heic"
+source = "system"
 
 [themes.big-sur-night-succulents-dark.term]
 bg = "#1e1920"
@@ -545,6 +565,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "big-sur-road"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Big Sur Road.heic"
+source = "system"
 
 [themes.big-sur-road-dark.term]
 bg = "#161616"
@@ -598,6 +620,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "big-sur-shore-rocks"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Big Sur Shore Rocks.heic"
+source = "system"
 
 [themes.big-sur-shore-rocks-dark.term]
 bg = "#26252a"
@@ -651,6 +675,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "big-sur-waters-edge"
 macos_accent = 4
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Big Sur Waters Edge.heic"
+source = "system"
 
 [themes.big-sur-waters-edge-dark.term]
 bg = "#212526"
@@ -704,6 +730,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "catalina-clouds"
 macos_accent = 2
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Catalina Clouds.heic"
+source = "system"
 
 [themes.catalina-clouds-dark.term]
 bg = "#262527"
@@ -757,6 +785,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "catalina-coast"
 macos_accent = 2
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Catalina Coast.heic"
+source = "system"
 
 [themes.catalina-coast-dark.term]
 bg = "#1a1a1a"
@@ -810,6 +840,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "catalina"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Catalina Dark.heic"
+source = "system"
 
 [themes.catalina-dark.term]
 bg = "#161719"
@@ -863,6 +895,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "catalina-evening"
 macos_accent = 2
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Catalina Evening.heic"
+source = "system"
 
 [themes.catalina-evening-dark.term]
 bg = "#1c1c1b"
@@ -916,6 +950,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "catalina-light"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Catalina Light.heic"
+source = "system"
 
 [themes.catalina-light.term]
 bg = "#1c1c1e"
@@ -969,6 +1005,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "catalina-rock"
 macos_accent = 4
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Catalina Rock.heic"
+source = "system"
 
 [themes.catalina-rock-dark.term]
 bg = "#1b1c1d"
@@ -1022,6 +1060,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "catalina-shoreline"
 macos_accent = 2
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Catalina Shoreline.heic"
+source = "system"
 
 [themes.catalina-shoreline-dark.term]
 bg = "#272622"
@@ -1075,6 +1115,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "catalina-silhouette"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Catalina Silhouette.heic"
+source = "system"
 
 [themes.catalina-silhouette-dark.term]
 bg = "#232426"
@@ -1128,6 +1170,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "catalina-sunset"
 macos_accent = 2
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Catalina Sunset.heic"
+source = "system"
 
 [themes.catalina-sunset-dark.term]
 bg = "#1e2022"
@@ -1181,6 +1225,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "chroma-blue"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Chroma Blue Dark.heic"
+source = "system"
 
 [themes.chroma-blue-dark.term]
 bg = "#18191e"
@@ -1234,6 +1280,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "chroma-blue-light"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Chroma Blue Light.heic"
+source = "system"
 
 [themes.chroma-blue-light.term]
 bg = "#1c1a29"
@@ -1287,6 +1335,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "chroma-red"
 macos_accent = 0
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Chroma Red Dark.heic"
+source = "system"
 
 [themes.chroma-red-dark.term]
 bg = "#1e181b"
@@ -1340,6 +1390,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "chroma-red-light"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Chroma Red Light.heic"
+source = "system"
 
 [themes.chroma-red-light.term]
 bg = "#221922"
@@ -1393,6 +1445,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "dome"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Dome Dark.heic"
+source = "system"
 
 [themes.dome-dark.term]
 bg = "#18191c"
@@ -1446,6 +1500,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "dome-light"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Dome Light.heic"
+source = "system"
 
 [themes.dome-light.term]
 bg = "#22262a"
@@ -1499,6 +1555,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "grid-green"
 macos_accent = 3
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Grid Green Dark.heic"
+source = "system"
 
 [themes.grid-green-dark.term]
 bg = "#181b21"
@@ -1552,6 +1610,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "grid-green-light"
 macos_accent = 3
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Grid Green Light.heic"
+source = "system"
 
 [themes.grid-green-light.term]
 bg = "#1a1d20"
@@ -1605,6 +1665,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "grid-magenta"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Grid Magenta Dark.heic"
+source = "system"
 
 [themes.grid-magenta-dark.term]
 bg = "#211823"
@@ -1658,6 +1720,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "grid-magenta-light"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Grid Magenta Light.heic"
+source = "system"
 
 [themes.grid-magenta-light.term]
 bg = "#221e26"
@@ -1711,6 +1775,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "hello-blue"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/hello Blue Dark.heic"
+source = "system"
 
 [themes.hello-blue-dark.term]
 bg = "#161822"
@@ -1764,6 +1830,8 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "hello-blue"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/hello Blue Light.heic"
+source = "system"
 
 [themes.hello-blue-light.term]
 bg = "#edeef1"
@@ -1817,6 +1885,8 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "hello-green"
 macos_accent = 4
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/hello Green Dark.heic"
+source = "system"
 
 [themes.hello-green-dark.term]
 bg = "#151b1d"
@@ -1870,6 +1940,8 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "hello-green"
 macos_accent = 4
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/hello Green Light.heic"
+source = "system"
 
 [themes.hello-green-light.term]
 bg = "#e7eeec"
@@ -1923,6 +1995,8 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "hello-grey"
 macos_accent = 4
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/hello Grey Dark.heic"
+source = "system"
 
 [themes.hello-grey-dark.term]
 bg = "#1b1c1d"
@@ -1976,6 +2050,8 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "hello-grey"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/hello Grey Light.heic"
+source = "system"
 
 [themes.hello-grey-light.term]
 bg = "#e7e8ea"
@@ -2029,6 +2105,8 @@ starship_palette = "catppuccin_latte"
 mode = "light"
 family = "hello-metallic-blue"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Hello Metallic Blue.heic"
+source = "system"
 
 [themes.hello-metallic-blue-light.term]
 bg = "#e6e8eb"
@@ -2082,6 +2160,8 @@ starship_palette = "catppuccin_latte"
 mode = "light"
 family = "hello-metallic-green"
 macos_accent = 4
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Hello Metallic Green.heic"
+source = "system"
 
 [themes.hello-metallic-green-light.term]
 bg = "#e6eaeb"
@@ -2135,6 +2215,8 @@ starship_palette = "catppuccin_latte"
 mode = "light"
 family = "hello-metallic-orange"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Hello Metallic Orange.heic"
+source = "system"
 
 [themes.hello-metallic-orange-light.term]
 bg = "#ece7e5"
@@ -2188,6 +2270,8 @@ starship_palette = "catppuccin_latte"
 mode = "light"
 family = "hello-metallic-pink"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Hello Metallic Pink.heic"
+source = "system"
 
 [themes.hello-metallic-pink-light.term]
 bg = "#ece7e6"
@@ -2241,6 +2325,8 @@ starship_palette = "catppuccin_latte"
 mode = "light"
 family = "hello-metallic-purple"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Hello Metallic Purple.heic"
+source = "system"
 
 [themes.hello-metallic-purple-light.term]
 bg = "#e8e8ec"
@@ -2294,6 +2380,8 @@ starship_palette = "catppuccin_latte"
 mode = "light"
 family = "hello-metallic-silver"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Hello Metallic Silver.heic"
+source = "system"
 
 [themes.hello-metallic-silver-light.term]
 bg = "#e8e8e9"
@@ -2347,6 +2435,8 @@ starship_palette = "catppuccin_latte"
 mode = "light"
 family = "hello-metallic-yellow"
 macos_accent = 2
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Hello Metallic Yellow.heic"
+source = "system"
 
 [themes.hello-metallic-yellow-light.term]
 bg = "#ede9e1"
@@ -2400,6 +2490,8 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "hello-orange"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/hello Orange Dark.heic"
+source = "system"
 
 [themes.hello-orange-dark.term]
 bg = "#2e1b19"
@@ -2453,6 +2545,8 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "hello-orange"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/hello Orange Light.heic"
+source = "system"
 
 [themes.hello-orange-light.term]
 bg = "#ece9e7"
@@ -2506,6 +2600,8 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "hello-purple"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/hello Purple Dark.heic"
+source = "system"
 
 [themes.hello-purple-dark.term]
 bg = "#1b1626"
@@ -2559,6 +2655,8 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "hello-purple"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/hello Purple Light.heic"
+source = "system"
 
 [themes.hello-purple-light.term]
 bg = "#eeedf0"
@@ -2612,6 +2710,8 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "hello-red"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/hello Red Dark.heic"
+source = "system"
 
 [themes.hello-red-dark.term]
 bg = "#211414"
@@ -2665,6 +2765,8 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "hello-red"
 macos_accent = 0
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/hello Red Light.heic"
+source = "system"
 
 [themes.hello-red-light.term]
 bg = "#ece8ea"
@@ -2718,6 +2820,8 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "hello-yellow"
 macos_accent = 2
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/hello Yellow Dark.heic"
+source = "system"
 
 [themes.hello-yellow-dark.term]
 bg = "#281f1a"
@@ -2771,6 +2875,8 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "hello-yellow"
 macos_accent = 2
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/hello Yellow Light.heic"
+source = "system"
 
 [themes.hello-yellow-light.term]
 bg = "#f2f0e6"
@@ -2824,6 +2930,8 @@ starship_palette = "catppuccin_latte"
 mode = "light"
 family = "imac-blue"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/iMac Blue.heic"
+source = "system"
 
 [themes.imac-blue-light.term]
 bg = "#e6e8eb"
@@ -2877,6 +2985,8 @@ starship_palette = "catppuccin_latte"
 mode = "light"
 family = "imac-green"
 macos_accent = 3
+wallpaper = "/System/Library/Desktop Pictures/iMac Green.heic"
+source = "system"
 
 [themes.imac-green-light.term]
 bg = "#e5e9e6"
@@ -2930,6 +3040,8 @@ starship_palette = "catppuccin_latte"
 mode = "light"
 family = "imac-orange"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/iMac Orange.heic"
+source = "system"
 
 [themes.imac-orange-light.term]
 bg = "#eee7e4"
@@ -2983,6 +3095,8 @@ starship_palette = "catppuccin_latte"
 mode = "light"
 family = "imac-pink"
 macos_accent = 0
+wallpaper = "/System/Library/Desktop Pictures/iMac Pink.heic"
+source = "system"
 
 [themes.imac-pink-light.term]
 bg = "#ede6e8"
@@ -3036,6 +3150,8 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "imac-purple"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/iMac Purple.heic"
+source = "system"
 
 [themes.imac-purple-dark.term]
 bg = "#26223c"
@@ -3089,6 +3205,8 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "imac-silver"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/iMac Silver.heic"
+source = "system"
 
 [themes.imac-silver-light.term]
 bg = "#e8e8e9"
@@ -3142,6 +3260,8 @@ starship_palette = "catppuccin_latte"
 mode = "light"
 family = "imac-yellow"
 macos_accent = 2
+wallpaper = "/System/Library/Desktop Pictures/iMac Yellow.heic"
+source = "system"
 
 [themes.imac-yellow-light.term]
 bg = "#ece9df"
@@ -3195,6 +3315,8 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "iridescence"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Iridescence Dark.heic"
+source = "system"
 
 [themes.iridescence-dark.term]
 bg = "#1f182c"
@@ -3248,6 +3370,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "iridescence-light"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Iridescence Light.heic"
+source = "system"
 
 [themes.iridescence-light.term]
 bg = "#282336"
@@ -3301,6 +3425,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "light-stream-blue"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Light Stream Blue.heic"
+source = "system"
 
 [themes.light-stream-blue-dark.term]
 bg = "#282528"
@@ -3354,6 +3480,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "light-stream-green"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Light Stream Green.heic"
+source = "system"
 
 [themes.light-stream-green-dark.term]
 bg = "#292334"
@@ -3407,6 +3535,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "light-stream-pink"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Light Stream Pink.heic"
+source = "system"
 
 [themes.light-stream-pink-dark.term]
 bg = "#22242f"
@@ -3460,6 +3590,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "light-stream-red"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Light Stream Red.heic"
+source = "system"
 
 [themes.light-stream-red-dark.term]
 bg = "#212423"
@@ -3513,6 +3645,8 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "mac-blue"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/Mac Blue.heic"
+source = "system"
 
 [themes.mac-blue-light.term]
 bg = "#e5e8ed"
@@ -3566,6 +3700,8 @@ starship_palette = "catppuccin_latte"
 mode = "light"
 family = "mac-pink"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/Mac Pink.heic"
+source = "system"
 
 [themes.mac-pink-light.term]
 bg = "#eae7ea"
@@ -3619,6 +3755,8 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "mac-purple"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/Mac Purple.heic"
+source = "system"
 
 [themes.mac-purple-dark.term]
 bg = "#2c1d4b"
@@ -3672,6 +3810,8 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "mac-yellow"
 macos_accent = 2
+wallpaper = "/System/Library/Desktop Pictures/Mac Yellow.heic"
+source = "system"
 
 [themes.mac-yellow-light.term]
 bg = "#e8e8e3"
@@ -3725,6 +3865,8 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "macos-ai"
 macos_accent = 1
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-ai-dark.heic"
+source = "custom"
 
 [themes.macos-ai-dark.term]
 bg = "#2a213e"
@@ -3778,6 +3920,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-ai-light"
 macos_accent = 6
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-ai-light.heic"
+source = "custom"
 
 [themes.macos-ai-light.term]
 bg = "#291e4a"
@@ -3831,6 +3975,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-bigsur"
 macos_accent = 6
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-bigsur-dark.heic"
+source = "custom"
 
 [themes.macos-bigsur-dark.term]
 bg = "#1e1313"
@@ -3884,6 +4030,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-bigsur-light"
 macos_accent = 1
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-bigsur-light.heic"
+source = "custom"
 
 [themes.macos-bigsur-light.term]
 bg = "#222630"
@@ -3937,6 +4085,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-blue"
 macos_accent = 5
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-blue-dark.heic"
+source = "custom"
 
 [themes.macos-blue-dark.term]
 bg = "#252337"
@@ -3990,6 +4140,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-blue-light"
 macos_accent = 5
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-blue-light.heic"
+source = "custom"
 
 [themes.macos-blue-light.term]
 bg = "#1f2539"
@@ -4043,6 +4195,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-blush"
 macos_accent = 6
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-blush-dark.heic"
+source = "custom"
 
 [themes.macos-blush-dark.term]
 bg = "#2e2039"
@@ -4096,6 +4250,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-blush-light"
 macos_accent = 6
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-blush-light.heic"
+source = "custom"
 
 [themes.macos-blush-light.term]
 bg = "#321c42"
@@ -4149,6 +4305,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-citrus"
 macos_accent = 2
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-citrus-dark.heic"
+source = "custom"
 
 [themes.macos-citrus-dark.term]
 bg = "#222819"
@@ -4202,6 +4360,8 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "macos-citrus"
 macos_accent = 2
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-citrus-light.heic"
+source = "custom"
 
 [themes.macos-citrus-light.term]
 bg = "#ece9d3"
@@ -4255,6 +4415,8 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "macos-green"
 macos_accent = 3
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-green-dark.heic"
+source = "custom"
 
 [themes.macos-green-dark.term]
 bg = "#1b221c"
@@ -4308,6 +4470,8 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "macos-green"
 macos_accent = 3
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-green-light.heic"
+source = "custom"
 
 [themes.macos-green-light.term]
 bg = "#e3eae5"
@@ -4361,6 +4525,8 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "macos-gridgreen"
 macos_accent = 3
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-gridgreen-dark.heic"
+source = "custom"
 
 [themes.macos-gridgreen-dark.term]
 bg = "#171a1f"
@@ -4414,6 +4580,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-gridgreen-light"
 macos_accent = 3
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-gridgreen-light.heic"
+source = "custom"
 
 [themes.macos-gridgreen-light.term]
 bg = "#1e2320"
@@ -4467,6 +4635,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-heatmap"
 macos_accent = 1
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-heatmap-dark.heic"
+source = "custom"
 
 [themes.macos-heatmap-dark.term]
 bg = "#3c1d18"
@@ -4520,6 +4690,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-heatmap-light"
 macos_accent = 1
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-heatmap-light.heic"
+source = "custom"
 
 [themes.macos-heatmap-light.term]
 bg = "#451711"
@@ -4573,6 +4745,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-indigo"
 macos_accent = 6
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-indigo-dark.heic"
+source = "custom"
 
 [themes.macos-indigo-dark.term]
 bg = "#271e39"
@@ -4626,6 +4800,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-indigo-light"
 macos_accent = 6
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-indigo-light.heic"
+source = "custom"
 
 [themes.macos-indigo-light.term]
 bg = "#2b1f46"
@@ -4679,6 +4855,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-miami"
 macos_accent = 0
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-miami-dark.heic"
+source = "custom"
 
 [themes.macos-miami-dark.term]
 bg = "#181718"
@@ -4732,6 +4910,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-miami-light"
 macos_accent = 2
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-miami-light.heic"
+source = "custom"
 
 [themes.macos-miami-light.term]
 bg = "#272528"
@@ -4785,6 +4965,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-mojave"
 macos_accent = 5
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-mojave-dark.heic"
+source = "custom"
 
 [themes.macos-mojave-dark.term]
 bg = "#14151b"
@@ -4838,6 +5020,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-mojave-light"
 macos_accent = 2
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-mojave-light.heic"
+source = "custom"
 
 [themes.macos-mojave-light.term]
 bg = "#1c1818"
@@ -4891,6 +5075,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-monterey"
 macos_accent = 6
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-monterey-dark.heic"
+source = "custom"
 
 [themes.macos-monterey-dark.term]
 bg = "#1a1325"
@@ -4944,6 +5130,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-monterey-light"
 macos_accent = 6
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-monterey-light.heic"
+source = "custom"
 
 [themes.macos-monterey-light.term]
 bg = "#1f192c"
@@ -4997,6 +5185,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-nova"
 macos_accent = 1
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-nova-dark.heic"
+source = "custom"
 
 [themes.macos-nova-dark.term]
 bg = "#212727"
@@ -5050,6 +5240,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-nova-light"
 macos_accent = 1
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-nova-light.heic"
+source = "custom"
 
 [themes.macos-nova-light.term]
 bg = "#2d2420"
@@ -5103,6 +5295,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-orange"
 macos_accent = 2
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-orange-dark.heic"
+source = "custom"
 
 [themes.macos-orange-dark.term]
 bg = "#241915"
@@ -5156,6 +5350,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-orange-light"
 macos_accent = 1
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-orange-light.heic"
+source = "custom"
 
 [themes.macos-orange-light.term]
 bg = "#362113"
@@ -5209,6 +5405,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-pink"
 macos_accent = 0
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-pink-dark.heic"
+source = "custom"
 
 [themes.macos-pink-dark.term]
 bg = "#2d1b1a"
@@ -5262,6 +5460,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-pink-light"
 macos_accent = 0
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-pink-light.heic"
+source = "custom"
 
 [themes.macos-pink-light.term]
 bg = "#381f21"
@@ -5315,6 +5515,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-purple"
 macos_accent = 6
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-purple-dark.heic"
+source = "custom"
 
 [themes.macos-purple-dark.term]
 bg = "#251c37"
@@ -5368,6 +5570,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-purple-light"
 macos_accent = 5
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-purple-light.heic"
+source = "custom"
 
 [themes.macos-purple-light.term]
 bg = "#25233a"
@@ -5421,6 +5625,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-sequoia"
 macos_accent = 6
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-sequoia-dark.heic"
+source = "custom"
 
 [themes.macos-sequoia-dark.term]
 bg = "#20182b"
@@ -5474,6 +5680,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-sequoia-light"
 macos_accent = 6
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-sequoia-light.heic"
+source = "custom"
 
 [themes.macos-sequoia-light.term]
 bg = "#26223f"
@@ -5527,6 +5735,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-silver"
 macos_accent = 6
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-silver-dark.heic"
+source = "custom"
 
 [themes.macos-silver-dark.term]
 bg = "#271e36"
@@ -5580,6 +5790,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-silver-light"
 macos_accent = 6
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-silver-light.heic"
+source = "custom"
 
 [themes.macos-silver-light.term]
 bg = "#2b1f43"
@@ -5633,6 +5845,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-sonoma"
 macos_accent = 6
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-sonoma-dark.heic"
+source = "custom"
 
 [themes.macos-sonoma-dark.term]
 bg = "#1f281e"
@@ -5686,6 +5900,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-sonoma-light"
 macos_accent = 3
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-sonoma-light.heic"
+source = "custom"
 
 [themes.macos-sonoma-light.term]
 bg = "#1d291a"
@@ -5739,6 +5955,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-tahoe"
 macos_accent = 6
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-tahoe-dark.heic"
+source = "custom"
 
 [themes.macos-tahoe-dark.term]
 bg = "#1c172c"
@@ -5792,6 +6010,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-tahoe-light"
 macos_accent = 5
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-tahoe-light.heic"
+source = "custom"
 
 [themes.macos-tahoe-light.term]
 bg = "#222531"
@@ -5845,6 +6065,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-valentine"
 macos_accent = 1
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-valentine-dark.heic"
+source = "custom"
 
 [themes.macos-valentine-dark.term]
 bg = "#3a1e1f"
@@ -5898,6 +6120,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-valentine-light"
 macos_accent = 1
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-valentine-light.heic"
+source = "custom"
 
 [themes.macos-valentine-light.term]
 bg = "#41191b"
@@ -5951,6 +6175,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-ventura"
 macos_accent = 1
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-ventura-dark.heic"
+source = "custom"
 
 [themes.macos-ventura-dark.term]
 bg = "#14171c"
@@ -6004,6 +6230,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-ventura-light"
 macos_accent = 2
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-ventura-light.heic"
+source = "custom"
 
 [themes.macos-ventura-light.term]
 bg = "#212631"
@@ -6057,6 +6285,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-wave"
 macos_accent = 3
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-wave-dark.heic"
+source = "custom"
 
 [themes.macos-wave-dark.term]
 bg = "#1c2828"
@@ -6110,6 +6340,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-wave-light"
 macos_accent = 3
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-wave-light.heic"
+source = "custom"
 
 [themes.macos-wave-light.term]
 bg = "#1b2732"
@@ -6163,6 +6395,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-yellow"
 macos_accent = 2
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-yellow-dark.heic"
+source = "custom"
 
 [themes.macos-yellow-dark.term]
 bg = "#211d17"
@@ -6216,6 +6450,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "macos-yellow-light"
 macos_accent = 2
+wallpaper = "/Users/seb/Pictures/Wallpapers/macos-yellow-light.heic"
+source = "custom"
 
 [themes.macos-yellow-light.term]
 bg = "#2e2411"
@@ -6269,6 +6505,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "monterey-graphic"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Monterey Graphic Dark.heic"
+source = "system"
 
 [themes.monterey-graphic-dark.term]
 bg = "#1b1325"
@@ -6322,6 +6560,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "monterey-graphic-light"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Monterey Graphic Light.heic"
+source = "system"
 
 [themes.monterey-graphic-light.term]
 bg = "#2a213c"
@@ -6375,6 +6615,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "motion-blue"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Motion Blue Dark.heic"
+source = "system"
 
 [themes.motion-blue-dark.term]
 bg = "#1d1d21"
@@ -6428,6 +6670,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "motion-blue-light"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Motion Blue Light.heic"
+source = "system"
 
 [themes.motion-blue-light.term]
 bg = "#17181b"
@@ -6481,6 +6725,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "motion-green"
 macos_accent = 4
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Motion Green Dark.heic"
+source = "system"
 
 [themes.motion-green-dark.term]
 bg = "#181a1c"
@@ -6534,6 +6780,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "motion-green-light"
 macos_accent = 4
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Motion Green Light.heic"
+source = "system"
 
 [themes.motion-green-light.term]
 bg = "#181a1b"
@@ -6587,6 +6835,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "motion-purple"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Motion Purple Dark.heic"
+source = "system"
 
 [themes.motion-purple-dark.term]
 bg = "#1f1e21"
@@ -6640,6 +6890,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "motion-purple-light"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Motion Purple Light.heic"
+source = "system"
 
 [themes.motion-purple-light.term]
 bg = "#1c1b1f"
@@ -6693,6 +6945,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "motion-yellow"
 macos_accent = 2
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Motion Yellow Dark.heic"
+source = "system"
 
 [themes.motion-yellow-dark.term]
 bg = "#201e1d"
@@ -6746,6 +7000,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "motion-yellow-light"
 macos_accent = 2
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Motion Yellow Light.heic"
+source = "system"
 
 [themes.motion-yellow-light.term]
 bg = "#221f1f"
@@ -6799,6 +7055,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "peak"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Peak Dark.heic"
+source = "system"
 
 [themes.peak-dark.term]
 bg = "#1a1715"
@@ -6852,6 +7110,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "peak-light"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Peak Light.heic"
+source = "system"
 
 [themes.peak-light.term]
 bg = "#2b2422"
@@ -6905,6 +7165,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "pro-black"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Pro Black.heic"
+source = "system"
 
 [themes.pro-black-dark.term]
 bg = "#151616"
@@ -6958,6 +7220,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "radial-blue"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Radial Blue.heic"
+source = "system"
 
 [themes.radial-blue-dark.term]
 bg = "#1a1a24"
@@ -7011,6 +7275,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "radial-green"
 macos_accent = 4
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Radial Green.heic"
+source = "system"
 
 [themes.radial-green-dark.term]
 bg = "#151a1d"
@@ -7064,6 +7330,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "radial-purple"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Radial Purple.heic"
+source = "system"
 
 [themes.radial-purple-dark.term]
 bg = "#201828"
@@ -7117,6 +7385,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "radial-sky-blue"
 macos_accent = 4
+wallpaper = "/System/Library/Desktop Pictures/Radial Sky Blue.heic"
+source = "system"
 
 [themes.radial-sky-blue-dark.term]
 bg = "#15191d"
@@ -7170,6 +7440,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "radial-yellow"
 macos_accent = 2
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Radial Yellow.heic"
+source = "system"
 
 [themes.radial-yellow-dark.term]
 bg = "#1d1915"
@@ -7223,6 +7495,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "solar-gradients"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Solar Gradients.heic"
+source = "system"
 
 [themes.solar-gradients-dark.term]
 bg = "#262430"
@@ -7276,6 +7550,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "sonoma"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Sonoma Dark.heic"
+source = "system"
 
 [themes.sonoma-dark.term]
 bg = "#21281f"
@@ -7329,6 +7605,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "sonoma-light"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Sonoma Light.heic"
+source = "system"
 
 [themes.sonoma-light.term]
 bg = "#26271b"
@@ -7382,6 +7660,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "studio-color"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Studio Color.heic"
+source = "system"
 
 [themes.studio-color-dark.term]
 bg = "#1f1f2b"
@@ -7435,6 +7715,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "the-beach"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/The Beach Dark.heic"
+source = "system"
 
 [themes.the-beach-dark.term]
 bg = "#181224"
@@ -7488,6 +7770,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "the-beach-light"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/The Beach Light.heic"
+source = "system"
 
 [themes.the-beach-light.term]
 bg = "#212324"
@@ -7541,6 +7825,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "the-cliffs"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/The Cliffs Dark.heic"
+source = "system"
 
 [themes.the-cliffs-dark.term]
 bg = "#181125"
@@ -7594,6 +7880,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "the-cliffs-light"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/The Cliffs Light.heic"
+source = "system"
 
 [themes.the-cliffs-light.term]
 bg = "#2b1f2c"
@@ -7647,6 +7935,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "the-desert"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/The Desert Dark.heic"
+source = "system"
 
 [themes.the-desert-dark.term]
 bg = "#171023"
@@ -7700,6 +7990,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "the-desert-light"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/The Desert Light.heic"
+source = "system"
 
 [themes.the-desert-light.term]
 bg = "#31212b"
@@ -7753,6 +8045,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "the-lake"
 macos_accent = 6
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/The Lake Dark.heic"
+source = "system"
 
 [themes.the-lake-dark.term]
 bg = "#171121"
@@ -7806,6 +8100,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "the-lake-light"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/The Lake Light.heic"
+source = "system"
 
 [themes.the-lake-light.term]
 bg = "#2b2327"
@@ -7859,6 +8155,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "tree"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Tree Dark.heic"
+source = "system"
 
 [themes.tree-dark.term]
 bg = "#141418"
@@ -7912,6 +8210,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "tree-light"
 macos_accent = 5
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Tree Light.heic"
+source = "system"
 
 [themes.tree-light.term]
 bg = "#252625"
@@ -7965,6 +8265,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "valley"
 macos_accent = 2
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Valley Dark.heic"
+source = "system"
 
 [themes.valley-dark.term]
 bg = "#16181a"
@@ -8018,6 +8320,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "valley-light"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Valley Light.heic"
+source = "system"
 
 [themes.valley-light.term]
 bg = "#2b2420"
@@ -8071,6 +8375,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "ventura-graphic"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Ventura Graphic Dark.heic"
+source = "system"
 
 [themes.ventura-graphic-dark.term]
 bg = "#14171c"
@@ -8124,6 +8430,8 @@ starship_palette = "catppuccin_mocha"
 mode = "dark"
 family = "ventura-graphic-light"
 macos_accent = 1
+wallpaper = "/System/Library/Desktop Pictures/.thumbnails/Ventura Graphic Light.heic"
+source = "system"
 
 [themes.ventura-graphic-light.term]
 bg = "#1c2635"

@@ -470,6 +470,8 @@ def generate_theme(
         "mode": mode,
         "family": name.rsplit("-", 1)[0] if name.endswith(f"-{mode}") else name,
         "macos_accent": macos_accent,
+        "wallpaper": "",  # Set by caller
+        "source": "custom",  # Set by caller
         "term": {
             "bg": rgb_to_hex(*bg_rgb),
             "fg": rgb_to_hex(*fg_rgb),
@@ -533,6 +535,8 @@ def theme_to_toml(theme: Dict) -> str:
     lines.append(f'mode = "{theme["mode"]}"')
     lines.append(f'family = "{theme["family"]}"')
     lines.append(f'macos_accent = {theme["macos_accent"]}')
+    lines.append(f'wallpaper = "{theme["wallpaper"]}"')
+    lines.append(f'source = "{theme["source"]}"')
     lines.append("")
 
     lines.append(f"[themes.{name}.term]")
@@ -590,6 +594,7 @@ def main():
     parser.add_argument("--name", help="Theme name (default: derived from filename)")
     parser.add_argument("--format", choices=["toml", "json"], default="toml")
     parser.add_argument("--clusters", type=int, default=8, help="Number of K-Means clusters")
+    parser.add_argument("--source", choices=["system", "custom"], default="custom", help="Wallpaper source type")
     args = parser.parse_args()
 
     if not os.path.isfile(args.image):
@@ -628,6 +633,8 @@ def main():
 
     # Generate theme
     theme = generate_theme(clusters, name, is_dark)
+    theme["wallpaper"] = os.path.abspath(args.image)
+    theme["source"] = args.source
 
     # Output
     if args.format == "json":

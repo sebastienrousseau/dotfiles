@@ -70,6 +70,22 @@ wallpaper_for_theme() {
   [[ -n "$theme" ]] || return 1
   [[ -n "$mode" ]] || return 1
 
+  # 1. Check themes.toml for stored wallpaper path (set by extract-theme.py)
+  local themes_file="${HOME}/.dotfiles/.chezmoidata/themes.toml"
+  if [[ -f "$themes_file" ]]; then
+    local stored_wp
+    stored_wp="$(awk -v n="$theme" '
+      $0 == "[themes." n "]" { found=1; next }
+      /^\[/ { found=0 }
+      found && /^wallpaper/ { sub(/.*= *"/, ""); sub(/".*/, ""); print; exit }
+    ' "$themes_file")"
+    if [[ -n "$stored_wp" && -f "$stored_wp" ]]; then
+      printf '%s\n' "$stored_wp"
+      return 0
+    fi
+  fi
+
+  # 2. Check custom wallpaper directory
   for ext in heic jpg png; do
     candidate="$WALLPAPER_DIR/${theme}.${ext}"
     if [[ -f "$candidate" ]]; then

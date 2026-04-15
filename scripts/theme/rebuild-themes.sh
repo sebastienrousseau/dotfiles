@@ -205,7 +205,7 @@ if [[ $TOTAL_WORK -gt 0 ]]; then
     source_type="${WP_SOURCE[$name]}"
 
     (
-      if python3 "$EXTRACT_SCRIPT" "$wp_path" --name "$name" > "$cache_file" 2>/dev/null; then
+      if python3 "$EXTRACT_SCRIPT" "$wp_path" --name "$name" --source "$source_type" > "$cache_file" 2>/dev/null; then
         printf "  %-40s [%s] ✓\n" "$name" "$source_type"
       else
         rm -f "$cache_file"
