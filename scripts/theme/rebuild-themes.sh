@@ -40,6 +40,7 @@ discover_macos_system() {
   local sys_dir="/System/Library/Desktop Pictures"
   [[ -d "$sys_dir" ]] || return 0
 
+  # Register top-level system wallpapers (will be deduped later if thumbnails have dark/light)
   local file name
   for file in "$sys_dir"/*.heic; do
     [[ -f "$file" ]] || continue
@@ -68,9 +69,17 @@ discover_macos_system() {
 
     # Second pass: remove base wallpapers that have explicit dark/light variants
     # e.g. if "big-sur-graphic-dark" exists, remove "big-sur-graphic"
+    local check_name
     for name in "${!WALLPAPERS[@]}"; do
       if [[ "${name}" != *-dark && "${name}" != *-light ]]; then
-        if [[ -n "${WALLPAPERS[${name} - dark]+x}" || -n "${WALLPAPERS[${name} - light]+x}" ]]; then
+        check_name="${name}-dark"
+        if [[ -n "${WALLPAPERS[$check_name]+x}" ]]; then
+          unset "WALLPAPERS[$name]"
+          unset "WP_SOURCE[$name]"
+          continue
+        fi
+        check_name="${name}-light"
+        if [[ -n "${WALLPAPERS[$check_name]+x}" ]]; then
           unset "WALLPAPERS[$name]"
           unset "WP_SOURCE[$name]"
         fi
