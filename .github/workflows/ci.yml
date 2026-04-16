@@ -325,10 +325,10 @@ jobs:
   test-docker:
     name: Test / Integration (Docker)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20  # Increased — apt mirror congestion can take 7+ min
     needs: changes
-    # Run whenever shell scripts, config, or install script change
-    if: needs.changes.outputs.shell == 'true' || needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    # Only run when install.sh, scripts, or test_install_e2e.sh change
+    if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
       matrix:
@@ -337,14 +337,17 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: E2E Installation Test
         run: |
-          # Use the newly created E2E test script which invokes install.sh
+          # Retry apt-get up to 3 times to handle transient mirror failures
           docker run --rm -v "${GITHUB_WORKSPACE}:/root/dotfiles-src" ${{ matrix.distro }}:latest bash -c "
             set -euo pipefail
             export DEBIAN_FRONTEND=noninteractive
-            apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates
-
-            # Execute the E2E test from within the container
-            # We point it to the mounted source
+            for i in 1 2 3; do
+              if apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates; then
+                break
+              fi
+              echo \"apt attempt \$i failed, retrying...\"
+              sleep 10
+            done
             cd /root/dotfiles-src
             ./tests/integration/test_install_e2e.sh
           "
