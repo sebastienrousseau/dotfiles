@@ -34,9 +34,15 @@ jobs:
           fi
           cat package.json
 
-      # Trusted Publishing with OIDC (no token required)
-      # Configure at: npmjs.com → Packages → @sebastienrousseau/dotfiles → Settings → Trusted publishing
-      - name: Publish to npm (OIDC Trusted Publishing)
+      # Publish with NPM_TOKEN auth + --provenance (SLSA Level 3 attestation).
+      # Trusted Publishing (OIDC) is the eventual target, but it requires the
+      # package's "Trusted publishing" settings to be configured on npmjs.com
+      # first; until that's done, token auth is the working path.
+      # id-token: write (job permissions above) still lets npm attach a
+      # GitHub-signed provenance statement to the published tarball.
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public --provenance
 
   publish-gpr:
