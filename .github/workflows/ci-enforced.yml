@@ -49,6 +49,12 @@ jobs:
 
   lint-nix:
     name: Lint / Nix (Zero Warnings)
+    # reusable-nix-lint.yml requests id-token: write for the Nix installer's
+    # OIDC-backed cache. Top-level workflow permissions don't cover that, so
+    # the caller job must grant it explicitly.
+    permissions:
+      contents: read
+      id-token: write
     uses: ./.github/workflows/reusable-nix-lint.yml
     with:
       flake_dir: nix
