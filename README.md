@@ -5,7 +5,7 @@
 <h1 align="center">.dotfiles</h1>
 
 <p align="center">
-  <strong>The Trusted agent workstation. Wallpaper-driven themes. Cryptographic attestation. MCP-native. One CLI for macOS, Linux, and WSL.</strong>
+  <strong>Declarative dotfiles for macOS, Linux, and WSL. Multi-shell by default, with sub-second startup, wallpaper-driven themes, and signed releases.</strong>
 </p>
 
 <p align="center">

@@ -714,14 +714,14 @@ build_landing() {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>The .dotfiles Manual — v$VERSION</title>
-  <meta name="description" content="The Trusted agent workstation. Wallpaper-driven themes. Cryptographic attestation. MCP-native. One CLI for macOS, Linux, and WSL.">
+  <meta name="description" content="Declarative dotfiles for macOS, Linux, and WSL. Multi-shell by default, with sub-second startup, wallpaper-driven themes, and signed releases.">
   <meta name="author" content="Sebastien Rousseau">
-  <meta name="keywords" content="dotfiles, chezmoi, workstation, trusted agent, MCP, AI, macOS, Linux, WSL, themes, secrets, attestation">
+  <meta name="keywords" content="dotfiles, chezmoi, workstation, multi-shell, fish, zsh, nushell, macOS, Linux, WSL, themes, secrets, attestation">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="The .dotfiles Manual — v$VERSION">
-  <meta property="og:description" content="The Trusted agent workstation. Wallpaper-driven themes. Cryptographic attestation. MCP-native.">
+  <meta property="og:description" content="Declarative dotfiles for macOS, Linux, and WSL. Multi-shell by default, with sub-second startup, wallpaper-driven themes, and signed releases.">
   <meta property="og:url" content="$MANUAL_URL/">
   <meta property="og:site_name" content=".dotfiles">
   <meta property="og:locale" content="en_US">
@@ -729,7 +729,7 @@ build_landing() {
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="The .dotfiles Manual — v$VERSION">
-  <meta name="twitter:description" content="The Trusted agent workstation. Wallpaper-driven themes. Cryptographic attestation. MCP-native.">
+  <meta name="twitter:description" content="Declarative dotfiles for macOS, Linux, and WSL. Multi-shell by default, with sub-second startup, wallpaper-driven themes, and signed releases.">
 
   <link rel="canonical" href="$MANUAL_URL/">
   <link rel="stylesheet" href="style.css">
@@ -740,7 +740,7 @@ build_landing() {
     "@context": "https://schema.org",
     "@type": "TechArticle",
     "headline": "The .dotfiles Manual",
-    "description": "A Trusted Agent Workstation for macOS, Linux, and WSL",
+    "description": "Declarative dotfiles for macOS, Linux, and WSL — multi-shell, fast-startup, signed",
     "author": {"@type": "Person", "name": "Sebastien Rousseau", "url": "https://sebastienrousseau.com"},
     "datePublished": "$BUILD_DATE",
     "dateModified": "$BUILD_DATE",
@@ -758,7 +758,7 @@ build_landing() {
       {
         "@type": "Question",
         "name": "What is .dotfiles?",
-        "acceptedAnswer": {"@type": "Answer", "text": "A signed, local-first Trusted agent workstation baseline for macOS, Linux, and WSL with wallpaper-driven themes, MCP policy enforcement, cryptographic attestation, and self-healing."}
+        "acceptedAnswer": {"@type": "Answer", "text": "Declarative, chezmoi-managed dotfiles for macOS, Linux, and WSL. Multi-shell by default (fish, zsh, nushell, PowerShell), with sub-second startup, wallpaper-driven themes, encrypted secrets, and signed releases."}
       },
       {
         "@type": "Question",
