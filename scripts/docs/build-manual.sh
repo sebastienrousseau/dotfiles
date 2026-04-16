@@ -32,7 +32,6 @@ SUBTITLE="A Trusted Agent Workstation for macOS, Linux, and WSL"
 REPO_URL="https://github.com/sebastienrousseau/dotfiles"
 MANUAL_URL="https://sebastienrousseau.github.io/dotfiles/manual"
 BUILD_DATE="$(date +%Y-%m-%d)"
-BUILD_ISO="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 FAST=false
 CLEAN=false
@@ -144,6 +143,7 @@ build_indexes() {
     echo ""
     echo "Alphabetical list of \`dot\` subcommands referenced in the manual."
     echo ""
+    # shellcheck disable=SC2016 # literal grep pattern; single quotes intentional
     grep -rhoE '`dot [a-z][a-z-]+( [a-z-]+)?`' "$SOURCE_DIR"/*.md "$SOURCE_DIR"/*/*.md 2>/dev/null |
       sort -u |
       awk '{ print "- " $0 }'

@@ -28,7 +28,9 @@ done
 log() { printf '[check] %s\n' "$*"; }
 warn() {
   printf '[check] WARN: %s\n' "$*" >&2
-  $STRICT && FAILS=$((FAILS + 1)) || true
+  if $STRICT; then
+    FAILS=$((FAILS + 1))
+  fi
 }
 fail() {
   printf '[check] FAIL: %s\n' "$*" >&2
@@ -116,14 +118,16 @@ check_command_coverage() {
     return
   fi
 
-  # Extract commands referenced in manual
+  # Extract commands referenced in manual (single quotes intentional for grep pattern)
   local referenced
+  # shellcheck disable=SC2016
   referenced="$(grep -rhoE '`dot [a-z][a-z-]+`' "$MANUAL_DIR"/*.md "$MANUAL_DIR"/**/*.md 2>/dev/null |
     sort -u |
     sed -E 's/`dot ([a-z-]+)`/\1/')"
 
-  # Extract commands documented in CLI reference (headings like `### \`dot theme\``)
+  # Extract commands documented in CLI reference (single quotes intentional for grep pattern)
   local documented
+  # shellcheck disable=SC2016
   documented="$(grep -oE '^### `dot [a-z][a-z-]+`' "$cli_ref" 2>/dev/null |
     sed -E 's/### `dot ([a-z-]+)`/\1/' |
     sort -u)"
