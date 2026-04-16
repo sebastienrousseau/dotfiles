@@ -12,13 +12,12 @@
 #   python3 extract-theme.py ~/Pictures/Wallpapers/macos-tahoe-dark.heic --name macos-tahoe-dark
 
 import sys
-import subprocess
+import subprocess  # nosec B404 — used only with fixed magick command, no shell
 import math
-import random
+import random  # nosec B311 — used for K-Means seeding, not security
 import json
 import os
-import hashlib
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Dict
 
 # ---------------------------------------------------------------------------
 # Color space conversions (RGB ↔ XYZ ↔ CIELAB)
@@ -145,8 +144,7 @@ def kmeans_lab(
     max_iter: int = 20,
     runs: int = 3,
 ) -> List[Tuple[Tuple[float, float, float], int]]:
-    """
-    K-Means clustering in CIELAB space.
+    """K-Means clustering in CIELAB space.
 
     Returns list of (centroid_lab, population) sorted by population descending.
     Multiple runs with different seeds; best (lowest inertia) is kept.
@@ -159,9 +157,9 @@ def kmeans_lab(
     best_labels = None
     best_inertia = float("inf")
 
-    for run in range(runs):
-        # K-Means++ initialization
-        rng = random.Random(run * 42 + 7)
+    for run_idx in range(runs):
+        # K-Means++ initialization (deterministic seeding for reproducibility)
+        rng = random.Random(run_idx * 42 + 7)  # nosec B311
         centroids = [pixels[rng.randint(0, n - 1)]]
         for _ in range(1, k):
             dists = [min(lab_distance(p, c) ** 2 for c in centroids) for p in pixels]
@@ -178,7 +176,7 @@ def kmeans_lab(
                     break
 
         labels = [0] * n
-        for iteration in range(max_iter):
+        for _ in range(max_iter):
             # Assign pixels to nearest centroid
             changed = 0
             for i, p in enumerate(pixels):
@@ -197,7 +195,7 @@ def kmeans_lab(
                 break
 
             # Update centroids
-            for j in range(len(centroids)):
+            for j, _ in enumerate(centroids):
                 members = [pixels[i] for i in range(n) if labels[i] == j]
                 if members:
                     centroids[j] = tuple(
@@ -227,12 +225,17 @@ def kmeans_lab(
 
 def extract_pixels(image_path: str, max_dim: int = 80) -> List[Tuple[int, int, int]]:
     """Downsample image and extract RGB pixels using ImageMagick."""
+    # Validate path contains no shell metacharacters (defense in depth)
+    base_path = image_path.split("[")[0] if "[" in image_path else image_path
+    if not os.path.isfile(base_path):
+        raise FileNotFoundError(f"Image not found: {base_path}")
     cmd = [
         "magick", image_path,
         "-resize", f"{max_dim}x{max_dim}>",
         "-depth", "8",
         "txt:-",
     ]
+    # nosec B603 — cmd is a fixed list with validated image_path, no shell
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
     if result.returncode != 0:
         raise RuntimeError(f"ImageMagick failed: {result.stderr}")
@@ -299,14 +302,40 @@ def ensure_contrast(
     is_dark: bool,
 ) -> Tuple[int, int, int]:
     """Adjust fg lightness until contrast ratio meets min_ratio against bg."""
-    fg_lab = list(rgb_to_lab(*fg_rgb))
+    fl, fa, fb = rgb_to_lab(*fg_rgb)
     for _ in range(80):
-        cr = contrast_ratio(lab_to_rgb(*fg_lab), bg_rgb)
+        cr = contrast_ratio(lab_to_rgb(fl, fa, fb), bg_rgb)
         if cr >= min_ratio:
             break
-        fg_lab[0] += 2.0 if is_dark else -2.0
-        fg_lab[0] = max(0, min(100, fg_lab[0]))
-    return lab_to_rgb(*fg_lab)
+        fl += 2.0 if is_dark else -2.0
+        fl = max(0.0, min(100.0, fl))
+    return lab_to_rgb(fl, fa, fb)
+
+
+def _nvim_from_hue(hue: float, is_dark: bool) -> Tuple[str, str]:
+    """Map accent hue angle to nearest Neovim colorscheme."""
+    if 60 <= hue < 150:
+        return ("everforest", "hard" if is_dark else "soft")
+    if 210 <= hue < 270:
+        return ("tokyonight", "night" if is_dark else "day")
+    return ("catppuccin", "mocha" if is_dark else "latte")
+
+
+def _macos_accent_from_hue(hue: float) -> int:
+    """Map accent hue angle to macOS accent color integer."""
+    if hue < 30 or hue >= 345:
+        return 0   # Red
+    if hue < 60:
+        return 1   # Orange
+    if hue < 105:
+        return 2   # Yellow
+    if hue < 165:
+        return 3   # Green
+    if hue < 255:
+        return 4   # Blue
+    if hue < 300:
+        return 5   # Purple
+    return 6       # Pink
 
 
 def generate_theme(
@@ -315,7 +344,6 @@ def generate_theme(
     is_dark: bool,
 ) -> Dict:
     """Generate a full theme definition from clustered dominant colors."""
-
     # Separate clusters by lightness
     sorted_by_L = sorted(clusters, key=lambda c: c[0][0])
     sorted_by_chroma = sorted(clusters, key=lambda c: lab_chroma(*c[0]), reverse=True)
@@ -396,10 +424,8 @@ def generate_theme(
             # Use the most chromatic candidate
             base = max(candidates, key=lambda c: lab_chroma(*c))
         else:
-            # Synthesize from accent hue rotated to target
-            accent_hue = lab_hue(*accent_lab)
+            # Synthesize from accent chroma projected to target hue
             accent_chroma = lab_chroma(*accent_lab)
-            rotation = target_hue - accent_hue
             new_a = accent_chroma * math.cos(math.radians(target_hue))
             new_b = accent_chroma * math.sin(math.radians(target_hue))
             base = (50.0, new_a, new_b)
@@ -434,34 +460,9 @@ def generate_theme(
         c8_rgb = ensure_contrast(lab_to_rgb(35.0, bg_lab[1] * 0.2, bg_lab[2] * 0.2), bg_rgb, 4.5, False)
         c15_rgb = ensure_contrast(lab_to_rgb(8.0, 0, 0), bg_rgb, 10.0, False)
 
-    # Determine closest nvim colorscheme from accent hue
     accent_hue = lab_hue(*accent_lab)
-    if 0 <= accent_hue < 60 or accent_hue >= 330:
-        nvim_theme = ("catppuccin", "mocha" if is_dark else "latte")
-    elif 60 <= accent_hue < 150:
-        nvim_theme = ("everforest", "hard" if is_dark else "soft")
-    elif 150 <= accent_hue < 210:
-        nvim_theme = ("catppuccin", "mocha" if is_dark else "latte")
-    elif 210 <= accent_hue < 270:
-        nvim_theme = ("tokyonight", "night" if is_dark else "day")
-    else:
-        nvim_theme = ("catppuccin", "mocha" if is_dark else "latte")
-
-    # macOS accent mapping
-    if 0 <= accent_hue < 30 or accent_hue >= 345:
-        macos_accent = 0  # Red
-    elif 30 <= accent_hue < 60:
-        macos_accent = 1  # Orange
-    elif 60 <= accent_hue < 105:
-        macos_accent = 2  # Yellow
-    elif 105 <= accent_hue < 165:
-        macos_accent = 3  # Green
-    elif 165 <= accent_hue < 255:
-        macos_accent = 4  # Blue
-    elif 255 <= accent_hue < 300:
-        macos_accent = 5  # Purple
-    else:
-        macos_accent = 6  # Pink
+    nvim_theme = _nvim_from_hue(accent_hue, is_dark)
+    macos_accent = _macos_accent_from_hue(accent_hue)
 
     mode = "dark" if is_dark else "light"
 
@@ -597,15 +598,12 @@ def main():
     parser.add_argument("--source", choices=["system", "custom"], default="custom", help="Wallpaper source type")
     args = parser.parse_args()
 
-    # Support ImageMagick frame syntax: image.heic[0]
-    image_path = args.image
-    base_path = image_path.split("[")[0] if "[" in image_path else image_path
-    if not os.path.isfile(base_path):
-        print(f"Error: {base_path} not found", file=sys.stderr)
-        sys.exit(1)
-
     # Extract pixels
-    pixels = extract_pixels(args.image)
+    try:
+        pixels = extract_pixels(args.image)
+    except FileNotFoundError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        sys.exit(1)
     if not pixels:
         print("Error: no pixels extracted", file=sys.stderr)
         sys.exit(1)
@@ -624,7 +622,7 @@ def main():
 
     # Subsample for speed — 2000 pixels is enough for accurate K-Means
     if len(pixels) > 2000:
-        rng = random.Random(42)
+        rng = random.Random(42)  # nosec B311 — deterministic sampling
         pixels = rng.sample(pixels, 2000)
 
     # Convert to CIELAB
@@ -640,7 +638,8 @@ def main():
 
     # Generate theme
     theme = generate_theme(clusters, name, is_dark)
-    theme["wallpaper"] = os.path.abspath(base_path)
+    wp_base = args.image.split("[")[0] if "[" in args.image else args.image
+    theme["wallpaper"] = os.path.abspath(wp_base)
     theme["source"] = args.source
 
     # Output
