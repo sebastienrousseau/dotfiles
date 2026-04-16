@@ -125,9 +125,9 @@ discover_custom() {
       frame_count="$(magick identify "$file" 2>/dev/null | wc -l | tr -d ' ')"
       if [[ "$frame_count" -ge 2 && "$name" != *-dark && "$name" != *-light ]]; then
         # Dynamic HEIC: register as both dark and light
-        WALLPAPERS["${name}-light"]="$file[0]"
+        WALLPAPERS["${name}-light"]="${file}[0]"
         WP_SOURCE["${name}-light"]="custom"
-        WALLPAPERS["${name}-dark"]="$file[1]"
+        WALLPAPERS["${name}-dark"]="${file}[1]"
         WP_SOURCE["${name}-dark"]="custom"
         # Store the original file path for wallpaper-sync
         WALLPAPERS["${name}"]="$file"
