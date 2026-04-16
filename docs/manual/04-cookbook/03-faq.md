@@ -2,7 +2,7 @@
 
 ## General
 
-### Why should I use this over stow, yadm, or a plain Git repo?
+### Why use this over stow, yadm, or a plain Git repo?
 
 Because it's not just a dotfiles manager. It's a workstation baseline with:
 
@@ -75,7 +75,7 @@ The alternative (storing secrets outside the repo) creates sync headaches across
 
 ### What if I lose my Age private key?
 
-You lose access to all secrets encrypted only for that key. Recovery requires another recipient (another host with a valid key) to decrypt and re-encrypt. This is why fleet setups should use multiple recipients — see [Deploy to Fleet](../02-tutorials/05-deploy-fleet.md).
+You lose access to all secrets encrypted only for that key. Recovery requires another recipient (another host with a valid key) to decrypt and re-encrypt. Fleet setups use multiple recipients for this reason — see [Deploy to Fleet](../02-tutorials/05-deploy-fleet.md).
 
 ## AI & Agents
 

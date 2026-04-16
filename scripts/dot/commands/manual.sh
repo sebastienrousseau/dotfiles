@@ -30,12 +30,12 @@ USE_OFFLINE=false
 
 for arg in "$@"; do
   case "$arg" in
-    html|html-multi|pdf|epub|text|markdown) FORMAT="$arg" ;;
+    html | html-multi | pdf | epub | text | markdown) FORMAT="$arg" ;;
     download) MODE="download" ;;
     --offline) USE_OFFLINE=true ;;
     --local) USE_LOCAL=true ;;
     --url=*) MANUAL_URL="${arg#*=}" ;;
-    --help|-h)
+    --help | -h)
       sed -n 's/^# //p;s/^#$//p' "$0" | head -20
       exit 0
       ;;

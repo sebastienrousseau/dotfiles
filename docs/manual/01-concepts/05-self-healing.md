@@ -86,7 +86,7 @@ Detects dangling symlinks (target doesn't exist) and re-applies chezmoi to recre
 
 ## `dot chaos` — Self-Test
 
-`dot chaos` intentionally corrupts the local installation to verify `dot heal` can recover it. This is **destructive** — it should only be run in ephemeral environments (containers, VMs, fresh installs).
+`dot chaos` intentionally corrupts the local installation to verify `dot heal` can recover it. This is **destructive** — run only in ephemeral environments (containers, VMs, fresh installs).
 
 Corruption scenarios:
 

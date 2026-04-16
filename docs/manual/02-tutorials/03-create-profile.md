@@ -221,7 +221,7 @@ Verify the merge order:
 chezmoi execute-template '{{- $hw := index .hardware .machine -}}{{- $f := mergeOverwrite .features $hw.features -}}{{ $f | toToml }}'
 ```
 
-Per-preset features should override global defaults; if the output doesn't reflect that, check template syntax.
+Per-preset features must override global defaults. If the output doesn't reflect that, check template syntax.
 
 ## Summary
 

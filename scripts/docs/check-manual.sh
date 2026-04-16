@@ -25,9 +25,15 @@ for arg in "$@"; do
   esac
 done
 
-log()  { printf '[check] %s\n' "$*"; }
-warn() { printf '[check] WARN: %s\n' "$*" >&2; $STRICT && FAILS=$((FAILS + 1)) || true; }
-fail() { printf '[check] FAIL: %s\n' "$*" >&2; FAILS=$((FAILS + 1)); }
+log() { printf '[check] %s\n' "$*"; }
+warn() {
+  printf '[check] WARN: %s\n' "$*" >&2
+  $STRICT && FAILS=$((FAILS + 1)) || true
+}
+fail() {
+  printf '[check] FAIL: %s\n' "$*" >&2
+  FAILS=$((FAILS + 1))
+}
 
 # -----------------------------------------------------------------------------
 # Internal link check

@@ -147,7 +147,7 @@ After a switch, check the applied colors:
 grep -A30 "^\[themes.mytheme-dark\]" ~/.dotfiles/.chezmoidata/themes.toml
 ```
 
-Check WCAG compliance (should always pass):
+Check WCAG compliance (always passes for generated themes):
 
 ```sh
 bash tests/unit/theme/test_themes_toml.sh

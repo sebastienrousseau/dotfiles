@@ -28,3 +28,4 @@ It is enforced by `bash ./scripts/qa/traceability-coverage.sh`.
 | BT-20 | Example validation contract | `scripts/qa/validate-examples.sh` | `tests/unit/misc/test_qa_reliability.sh` | `docs/operations/RELIABILITY.md` |
 | BT-21 | WSL parity contract | `scripts/qa/wsl-contract.sh` | `tests/unit/misc/test_qa_reliability.sh` | `docs/operations/RELIABILITY.md`, `docs/reference/SUPPORT_MATRIX.md` |
 | BT-22 | Internal behavior traceability contract | `scripts/qa/traceability-coverage.sh` | `tests/unit/misc/test_qa_traceability_coverage.sh` | `docs/operations/TRACEABILITY.md`, `docs/operations/RELIABILITY.md` |
+| BT-23 | Multi-format Manual pipeline | `scripts/docs/build-manual.sh`, `scripts/docs/check-manual.sh`, `scripts/dot/commands/manual.sh` | `tests/unit/docs/test_build_manual.sh`, `tests/unit/docs/test_check_manual.sh`, `tests/unit/dot-cli/test_dot_commands_manual.sh` | `docs/manual/`, `docs/README.md`, `README.md` |

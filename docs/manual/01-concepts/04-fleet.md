@@ -105,7 +105,7 @@ This creates a **web-of-trust** among your own fleet. No central CA, no external
 
 ## Machine-Scoped Secrets
 
-Some secrets should only decrypt on specific hosts (e.g. a work VPN config that doesn't belong on a personal laptop). The SOPS approach:
+Some secrets must decrypt only on specific hosts (e.g. a work VPN config that doesn't belong on a personal laptop). The SOPS approach:
 
 ```yaml
 # dot_config/vpn.sops.yaml

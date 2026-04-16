@@ -10,7 +10,7 @@ Hand-crafted themes are expensive to maintain and constrain the user to a fixed 
 
 - **Adapt to any wallpaper** — drop a new image, run `dot theme rebuild`, get a new theme
 - **Guarantee contrast** — WCAG AAA is enforced algorithmically, not by taste
-- **Avoid IP issues** — we never redistribute Apple/Microsoft wallpapers; the engine works with whatever is already on the user's system
+- **Avoid IP issues** — the engine never redistributes Apple/Microsoft wallpapers; it works with whatever is already on the user's system
 - **Produce matched pairs** — every wallpaper yields a dark and light variant with a golden-ratio brightness relationship
 
 ## The Pipeline
@@ -34,7 +34,7 @@ graph LR
 magick input.heic -resize 80x80\> -depth 8 txt:-
 ```
 
-At 80×80 we have ~6,400 pixels. For dynamic HEIC files (`image.heic[0]`, `image.heic[1]`), each frame is processed independently.
+At 80×80 the image has ~6,400 pixels. For dynamic HEIC files (`image.heic[0]`, `image.heic[1]`), each frame is processed independently.
 
 ### Stage 2 — Subsampling
 
@@ -74,7 +74,7 @@ The 6 chromatic ANSI slots (red, green, yellow, blue, magenta, cyan) are assigne
 | blue | 275 |
 | magenta | 330 |
 
-For each slot, we pick the most chromatic cluster whose hue is nearest to the target. If no cluster is close enough, we synthesize the color by projecting the accent chroma onto the target hue angle.
+For each slot, the engine picks the most chromatic cluster whose hue is nearest to the target. If no cluster is close enough, the color is synthesized by projecting the accent chroma onto the target hue angle.
 
 Structural slots (`c0`/black, `c7`/white, `c8`, `c15`) are computed from the background Lab with fixed lightness offsets — they exist to provide the required contrast ratios, not to carry hue information.
 
@@ -93,7 +93,7 @@ Every color pair is checked and adjusted:
 | `panel` / `bg` | 1.03-2.0 (bounded) |
 | `border` / `bg` | 1.08-3.5 (bounded) |
 
-For the accent, we darken in Lab space until white text has 7:1 contrast. For fg and bright ANSI colors, we adjust lightness until the target ratio is met. The output is guaranteed AAA on launch — the `test_themes_toml.sh` unit test verifies this for every generated theme.
+For the accent, the engine darkens in Lab space until white text has 7:1 contrast. For fg and bright ANSI colors, lightness is adjusted until the target ratio is met. The output is guaranteed AAA on launch — the `test_themes_toml.sh` unit test verifies this for every generated theme.
 
 ## Wallpaper Discovery
 
