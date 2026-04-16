@@ -19,6 +19,17 @@ dot doctor
 ## Version History
 
 ### v0.2.500 (Current)
+- **Wallpaper-driven theme engine** — themes auto-generated from wallpapers via K-Means in CIELAB color space (no hand-crafted themes)
+- **Dynamic HEIC support** — custom wallpapers ship as Apple-compatible single-file dynamic HEIC; macOS auto-switches dark/light
+- **System wallpaper discovery** — pulls themes from `/System/Library/Desktop Pictures/` (macOS) and `/usr/share/backgrounds/` (Linux)
+- **`dot theme rebuild`** — parallel K-Means generation (4 jobs), mtime-based caching, orphan cleanup
+- **WCAG AAA enforcement** — all generated themes pass 7:1 contrast for fg/bg, accent_text/accent, c15/bg
+- **macOS accent from wallpaper hue** — `dot-theme-sync` reads `macos_accent` from themes.toml and forces UI refresh
+- **HEIC → PNG auto-conversion** on Linux for non-HEIC-aware desktops
+- **Build artifact redirection** — Cargo, Go, pip, uv, Zig caches → `/tmp/builds/` (cleared on reboot)
+- **CI dedup** — `ci-enforced.yml` reuses `reusable-shell-lint.yml` and `reusable-test-suite.yml`
+
+### v0.2.499
 - Added AI CLIs: Autohand Code, Mistral Vibe, Qwen Code, ZAI
 - Removed Cline CLI (broken upstream dependency)
 - Interactive mise installer for missing AI providers
@@ -30,20 +41,27 @@ dot doctor
 - Auto-prewarm after dot apply
 - Expanded Atuin history filters
 
-### v0.2.500
+### v0.2.498
 - Theme system with Catppuccin integration
 - Linux desktop parity (Niri, Waybar, Fuzzel)
 - AI tooling expansion (Kiro, OpenCode)
 - Coverage contracts and QA docs
 
-### v0.2.500
+### v0.2.497
 - Verified chezmoi installer
 - Shell startup optimization
 - Property-based tests
 
 ## Breaking Changes
 
-If you are upgrading from v0.2.500 or earlier, note these changes:
+If you are upgrading from v0.2.499 or earlier, note these changes:
+
+1. **`themes.toml` is now generated** — do not hand-edit. Run `dot theme rebuild` to regenerate from wallpapers
+2. **Theme names changed** — old hand-crafted names (e.g. `catppuccin-mocha`, `macos-tahoe-dark` with hardcoded palettes) are replaced by wallpaper-derived names. The picker only shows paired wallpaper themes.
+3. **Wallpaper format** — custom wallpapers should be dynamic HEIC (single file, both appearances). Use `bash scripts/theme/merge-wallpaper.sh` to merge separate dark/light pairs.
+4. **Build caches relocated** — Cargo/Go/pip/uv/Zig now write to `/tmp/builds/`. Restart your shell after upgrade so `mise [env]` picks up the new paths.
+
+If you are upgrading from v0.2.498 or earlier:
 
 1. **Cline CLI removed** — if you used `dot cline`, switch to a different AI CLI
 2. **AI tools now install through mise** — run `mise install` to set up AI providers
