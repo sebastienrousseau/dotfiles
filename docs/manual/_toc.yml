@@ -1,0 +1,58 @@
+# Master ordering for build-manual.sh
+# Determines concatenation order for single-page HTML/PDF/EPUB
+title: "The .dotfiles Manual"
+subtitle: "A Trusted Agent Workstation for macOS, Linux, and WSL"
+version: "0.2.500"
+
+sections:
+  - file: 00-introduction.md
+    title: "Introduction"
+
+  - group: "Concepts"
+    prefix: "01-concepts"
+    files:
+      - 01-architecture.md
+      - 02-trust-model.md
+      - 03-theme-engine.md
+      - 04-fleet.md
+      - 05-self-healing.md
+
+  - group: "Tutorials"
+    prefix: "02-tutorials"
+    files:
+      - 01-first-install.md
+      - 02-add-wallpaper.md
+      - 03-create-profile.md
+      - 04-encrypt-secret.md
+      - 05-deploy-fleet.md
+
+  - group: "Reference"
+    prefix: "03-reference"
+    files:
+      - 01-dot-cli.md
+      - 02-config-files.md
+      - 03-environment.md
+      - 04-templates.md
+      - 05-feature-flags.md
+
+  - group: "Cookbook"
+    prefix: "04-cookbook"
+    files:
+      - 01-recipes.md
+      - 02-troubleshooting.md
+      - 03-faq.md
+
+  - group: "Appendices"
+    prefix: "05-appendices"
+    files:
+      - A-platform-matrix.md
+      - B-security-checklist.md
+      - C-glossary.md
+      - D-bibliography.md
+      - E-license.md
+
+  - file: concept-index.md
+    title: "Concept Index"
+
+  - file: command-index.md
+    title: "Command Index"

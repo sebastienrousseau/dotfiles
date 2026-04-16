@@ -55,3 +55,4 @@ yarn-error.log*
 # Machine-specific configs (local only, never pushed)
 dot_etc/machines/
 install/provision/run_onchange_60-macbookair9-1-zorinos.sh.tmpl
+_build/

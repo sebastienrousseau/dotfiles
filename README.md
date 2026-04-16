@@ -178,7 +178,19 @@ Full guide: [docs/guides/THEMING.md](docs/guides/THEMING.md)
 | `dot benchmark` / `dot perf` | Measure shell startup |
 | `dot score` | Health and security scorecard |
 
-Full reference: [docs/reference/UTILS.md](docs/reference/UTILS.md)
+Full reference: [docs/reference/UTILS.md](docs/reference/UTILS.md) · Complete manual: [docs/manual/](docs/manual/) or `dot manual`
+
+---
+
+## Documentation
+
+The `.dotfiles` Manual is published in 9 formats: HTML (single + multi-page), PDF, EPUB, ASCII text, compressed variants, Markdown source. Auto-built on every change.
+
+- **Online** — <https://sebastienrousseau.github.io/dotfiles/manual/>
+- **Terminal** — `dot manual text | less`
+- **PDF** — `dot manual pdf`
+- **Offline bundle** — `dot bundle --manual`
+- **Sources** — [`docs/manual/`](docs/manual/)
 
 ---
 

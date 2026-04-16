@@ -388,6 +388,7 @@ mode|meta
 agent|meta
 fleet|fleet
 patterns|patterns
+manual|manual
 search|search
 help|help
 --help|help
@@ -536,6 +537,15 @@ route="$(_dot_command_route "$COMMAND" || true)"
 case "$route" in
   core | diagnostics | ai | tools | appearance | secrets | security | meta | fleet)
     _dispatch "$route" "$@"
+    ;;
+
+  manual)
+    if [[ -n "$_SOURCE_DIR" ]] && [[ -f "$_SOURCE_DIR/scripts/dot/commands/manual.sh" ]]; then
+      exec bash "$_SOURCE_DIR/scripts/dot/commands/manual.sh" "$@"
+    else
+      ui_fail "manual.sh not found"
+      exit 1
+    fi
     ;;
 
   patterns)

@@ -1,0 +1,164 @@
+# Concept Index
+
+Alphabetical list of concepts covered in the manual.
+
+- Accessibility
+- Adding a New Flag
+- Agent Policy Enforcement
+- AI & Agents
+- Algorithms
+- Apply / Sync
+- Attestation
+- Author
+- Auto-Populated
+- Bibliography
+- Build Artifacts
+- Built-in Chezmoi Functions
+- Built-in Chezmoi Variables
+- Cache Files
+- Caching
+- Changing Presets on an Existing Host
+- Checking Active Flags
+- CI
+- CI-Level Gates
+- CI-Specific
+- Color Science
+- Configuration
+- Contributions
+- Cross-Host Trust
+- Cryptography
+- Daily Use
+- Data Flow
+- Design Principles
+- Development
+- Diagnostics
+- Documentation Systems
+- Drift Detection
+- Dynamic HEIC (Apple Appearance Metadata)
+- Environment Variables
+- Example: Font Size by Preset
+- Example: Platform × Preset
+- Example: Using Theme in Ghostty Config
+- Exit Codes
+- Feature Matrix
+- Flag Catalogue
+- Flag Deprecation
+- Fleet
+- Fleet Attestation
+- Fleet Deployment Workflow
+- Fleet Operational Commands
+- Fleet Trust Propagation
+- From `.chezmoidata.toml`
+- From `.chezmoidata/hardware.toml`
+- From `.chezmoidata/themes.toml`
+- From Feature Flags
+- Gates Enforced by CI
+- General
+- Getting More Help
+- Global Flags
+- Global Flags (`.chezmoidata.toml`)
+- Hardware Presets
+- Helper Templates (in `.chezmoitemplates/`)
+- Identity and Signing
+- Incident Response
+- Inspect & Repair
+- Installation
+- Installation & Update
+- Invocation
+- Limitations
+- Listing Known Presets
+- Log Files
+- Machine-Scoped Secrets
+- Manual
+- MIT License
+- Next
+- Observability
+- Ongoing (monthly)
+- Ongoing (quarterly)
+- Operational Rules
+- Option A: Drop a Static Image
+- Option B: Dynamic HEIC (Recommended)
+- Option C: Golden Ratio Brightness (Advanced)
+- Option D: Install System Wallpapers (Already-Available)
+- Optional Binaries (installed by Mise on first apply)
+- Per-Machine Profiles
+- Per-Preset Overrides (`.chezmoidata/hardware.toml`)
+- Performance
+- Philosophy
+- Post-Install
+- Pre-Install
+- Prerequisites
+- Principles
+- Protocols
+- Read by Tools
+- Recovery
+- Reference
+- Required Binaries
+- Scenario
+- Secret-Related
+- Secrets
+- See Also
+- Shell Performance
+- Single Source, Many Hosts
+- Source Repository
+- Start Here
+- Startup Order
+- Startup Performance Model
+- Step 1: Choose or Create a Preset
+- Step 1: Generate an Age Key (First Time Only)
+- Step 1: Per-Host Install
+- Step 1: Run the Installer
+- Step 2: Choose Encryption Method
+- Step 2: Exchange Signing Keys
+- Step 2: Select the Preset for This Host
+- Step 2: Verify
+- Step 3: Reference the Preset in Templates
+- Step 3: Share the Age Key (for Shared Secrets)
+- Step 3: Take the Tour
+- Step 3A: Chezmoi-Encrypted File
+- Step 3B: SOPS-Encrypted YAML
+- Step 4: Add a New Preset
+- Step 4: Customize
+- Step 4: Reference the Secret in a Template
+- Step 4: Verify Fleet Alignment
+- Step 5: Add Your Identity
+- Step 5: Commit and Verify
+- Step 5: Per-Host Customization
+- Step 5: Per-Preset Feature Flags
+- Step 6: First Theme Switch
+- Step 6: Fleet-Wide Updates
+- Step 6: Multi-Recipient (Fleet)
+- Step 7: Rotate a Compromised Key
+- Step 7: Secrets Rotation
+- Step 8: Decommission a Host
+- Summary
+- Supported Architectures
+- Supported Platforms
+- Supported Shells
+- Template Testing
+- Tested CI Environments
+- The Four Subsystems
+- The Pipeline
+- The Self-Healing Loop
+- The Threat Model
+- The Why
+- Theme
+- Theme Application
+- Themes
+- Third-Party Licenses
+- Threat Model Summary
+- Tools & Systems
+- Troubleshooting
+- Troubleshooting Community
+- Trust Boundaries
+- Unsetting
+- User-Owned Configuration
+- User-Settable
+- Using a Flag in a Template
+- Validation in CI
+- Verified Files
+- Verifying No Plaintext Leaks
+- Verifying the Result
+- Wallpaper Discovery
+- What Got Installed
+- When to Use a Profile
