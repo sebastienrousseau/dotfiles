@@ -242,7 +242,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Checkov Infrastructure Security
-        uses: bridgecrewio/checkov-action@0ce65fae06c148e349f955c3c35ad049c11e838c # v12.3092.0
+        uses: bridgecrewio/checkov-action@9ff61ad7df06a619665acec928d66258bd6adc8f # v12.3094.0
         with:
           framework: dockerfile,yaml,secrets
           quiet: false
@@ -290,7 +290,7 @@ jobs:
           chezmoi apply --verbose --dry-run
       - name: Upload failure logs
         if: failure()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: logs-test-${{ matrix.cache_key }}
           path: ~/.local/share/chezmoi/.log
