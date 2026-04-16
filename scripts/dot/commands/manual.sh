@@ -95,7 +95,11 @@ resolve_source() {
 open_file() {
   local path="$1"
   case "$(uname -s)" in
-    Darwin) open "$path" ;;
+    Darwin)
+      # Use the system open explicitly — ~/.local/bin/open is a wrapper
+      # that would recurse on itself.
+      /usr/bin/open "$path"
+      ;;
     Linux)
       if command -v xdg-open &>/dev/null; then
         xdg-open "$path"
