@@ -25,15 +25,25 @@ The `theme` key in `.chezmoidata.toml` controls the active theme. Every template
 dot theme
 ```
 
-Opens an fzf picker listing all themes from `themes.toml`. Themes with matching wallpapers show a `[W]` marker. Select one and press Enter.
+Opens an fzf picker listing every paired wallpaper theme (themes that have both `-dark` and `-light` variants). Two columns: **WALLPAPER** name and **SOURCE** (System or Custom). The current theme is marked with `✓` and `◀`. Select one and press Enter.
 
 ### Direct Switch
 
 ```bash
-dot theme macos-tahoe-dark
+dot theme tahoe-dark
 ```
 
 Sets the theme immediately. Regenerates configs and reloads running applications.
+
+### Rebuild Themes
+
+```bash
+dot theme rebuild           # incremental (uses cache for unchanged wallpapers)
+dot theme rebuild --force   # full regeneration
+dot theme rebuild --list    # discover wallpapers without rebuilding
+```
+
+Discovers wallpapers from system + custom paths, runs K-Means extraction in parallel (4 jobs), caches generated themes in `~/.cache/dotfiles/themes/`, and writes `.chezmoidata/themes.toml`. Custom wallpapers override system wallpapers on name collision.
 
 ### Under the Hood: dot-theme-sync
 
