@@ -138,17 +138,76 @@ def lab_hue(L: float, a: float, b: float) -> float:
 # K-Means clustering in CIELAB
 # ---------------------------------------------------------------------------
 
+def _kmeans_init(pixels, k, rng):
+    """Initialize k centroids using K-Means++ seeding."""
+    n = len(pixels)
+    centroids = [pixels[rng.randint(0, n - 1)]]
+    for _ in range(1, k):
+        dists = [min(lab_distance(p, c) ** 2 for c in centroids) for p in pixels]
+        total = sum(dists)
+        if total == 0:
+            centroids.append(pixels[rng.randint(0, n - 1)])
+            continue
+        r = rng.random() * total
+        cumulative = 0.0
+        for i, d in enumerate(dists):
+            cumulative += d
+            if cumulative >= r:
+                centroids.append(pixels[i])
+                break
+    return centroids
+
+
+def _assign_labels(pixels, centroids, labels):
+    """Assign each pixel to its nearest centroid. Returns number of changed labels."""
+    changed = 0
+    for i, p in enumerate(pixels):
+        best_j = 0
+        best_d = lab_distance(p, centroids[0])
+        for j in range(1, len(centroids)):
+            d = lab_distance(p, centroids[j])
+            if d < best_d:
+                best_d = d
+                best_j = j
+        if labels[i] != best_j:
+            changed += 1
+        labels[i] = best_j
+    return changed
+
+
+def _update_centroids(pixels, labels, centroids):
+    """Recompute centroids as the mean of assigned pixels."""
+    n = len(pixels)
+    for j, _ in enumerate(centroids):
+        members = [pixels[i] for i in range(n) if labels[i] == j]
+        if members:
+            centroids[j] = tuple(
+                sum(m[d] for m in members) / len(members) for d in range(3)
+            )
+
+
+def _kmeans_single_run(pixels, k, max_iter, rng):
+    """Run one K-Means iteration loop. Returns (centroids, labels, inertia)."""
+    centroids = _kmeans_init(pixels, k, rng)
+    labels = [0] * len(pixels)
+    for _ in range(max_iter):
+        changed = _assign_labels(pixels, centroids, labels)
+        if changed == 0:
+            break
+        _update_centroids(pixels, labels, centroids)
+    inertia = sum(
+        lab_distance(pixels[i], centroids[labels[i]]) ** 2 for i in range(len(pixels))
+    )
+    return centroids, labels, inertia
+
+
 def kmeans_lab(
     pixels: List[Tuple[float, float, float]],
     k: int = 8,
     max_iter: int = 20,
     runs: int = 3,
 ) -> List[Tuple[Tuple[float, float, float], int]]:
-    """K-Means clustering in CIELAB space.
-
-    Returns list of (centroid_lab, population) sorted by population descending.
-    Multiple runs with different seeds; best (lowest inertia) is kept.
-    """
+    """Run K-Means clustering in CIELAB space with best-of-N initialization."""
     n = len(pixels)
     if n == 0:
         return []
@@ -158,58 +217,13 @@ def kmeans_lab(
     best_inertia = float("inf")
 
     for run_idx in range(runs):
-        # K-Means++ initialization (deterministic seeding for reproducibility)
         rng = random.Random(run_idx * 42 + 7)  # nosec B311
-        centroids = [pixels[rng.randint(0, n - 1)]]
-        for _ in range(1, k):
-            dists = [min(lab_distance(p, c) ** 2 for c in centroids) for p in pixels]
-            total = sum(dists)
-            if total == 0:
-                centroids.append(pixels[rng.randint(0, n - 1)])
-                continue
-            r = rng.random() * total
-            cumulative = 0.0
-            for i, d in enumerate(dists):
-                cumulative += d
-                if cumulative >= r:
-                    centroids.append(pixels[i])
-                    break
-
-        labels = [0] * n
-        for _ in range(max_iter):
-            # Assign pixels to nearest centroid
-            changed = 0
-            for i, p in enumerate(pixels):
-                best_j = 0
-                best_d = lab_distance(p, centroids[0])
-                for j in range(1, len(centroids)):
-                    d = lab_distance(p, centroids[j])
-                    if d < best_d:
-                        best_d = d
-                        best_j = j
-                if labels[i] != best_j:
-                    changed += 1
-                labels[i] = best_j
-
-            if changed == 0:
-                break
-
-            # Update centroids
-            for j, _ in enumerate(centroids):
-                members = [pixels[i] for i in range(n) if labels[i] == j]
-                if members:
-                    centroids[j] = tuple(
-                        sum(m[d] for m in members) / len(members) for d in range(3)
-                    )
-
-        # Compute inertia
-        inertia = sum(lab_distance(pixels[i], centroids[labels[i]]) ** 2 for i in range(n))
+        centroids, labels, inertia = _kmeans_single_run(pixels, k, max_iter, rng)
         if inertia < best_inertia:
             best_inertia = inertia
             best_centroids = centroids[:]
             best_labels = labels[:]
 
-    # Count populations
     populations = [0] * k
     for label in best_labels:
         populations[label] += 1
@@ -235,8 +249,10 @@ def extract_pixels(image_path: str, max_dim: int = 80) -> List[Tuple[int, int, i
         "-depth", "8",
         "txt:-",
     ]
-    # nosec B603 — cmd is a fixed list with validated image_path, no shell
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+    # cmd is a fixed list with validated image_path, shell=False by default
+    result = subprocess.run(  # nosec B603
+        cmd, capture_output=True, text=True, timeout=30, check=False
+    )
     if result.returncode != 0:
         raise RuntimeError(f"ImageMagick failed: {result.stderr}")
 
@@ -338,70 +354,48 @@ def _macos_accent_from_hue(hue: float) -> int:
     return 6       # Pink
 
 
-def generate_theme(
-    clusters: List[Tuple[Tuple[float, float, float], int]],
-    name: str,
-    is_dark: bool,
-) -> Dict:
-    """Generate a full theme definition from clustered dominant colors."""
-    # Separate clusters by lightness
+def _compute_bg_fg(clusters, is_dark):
+    """Select background and foreground from clustered colors."""
     sorted_by_L = sorted(clusters, key=lambda c: c[0][0])
-    sorted_by_chroma = sorted(clusters, key=lambda c: lab_chroma(*c[0]), reverse=True)
-
-    # Background: darkest cluster for dark mode, lightest for light mode
     if is_dark:
         bg_lab = sorted_by_L[0][0]
-        # Ensure bg is sufficiently dark
         bg_lab = (min(bg_lab[0], 15.0), bg_lab[1] * 0.3, bg_lab[2] * 0.3)
-    else:
-        bg_lab = sorted_by_L[-1][0]
-        # Ensure bg is sufficiently light
-        bg_lab = (max(bg_lab[0], 92.0), bg_lab[1] * 0.15, bg_lab[2] * 0.15)
-
-    bg_rgb = lab_to_rgb(*bg_lab)
-
-    # Foreground: high contrast against bg
-    if is_dark:
         fg_lab = (88.0, bg_lab[1] * 0.1, bg_lab[2] * 0.1)
     else:
+        bg_lab = sorted_by_L[-1][0]
+        bg_lab = (max(bg_lab[0], 92.0), bg_lab[1] * 0.15, bg_lab[2] * 0.15)
         fg_lab = (18.0, bg_lab[1] * 0.15, bg_lab[2] * 0.15)
+    bg_rgb = lab_to_rgb(*bg_lab)
     fg_rgb = ensure_contrast(lab_to_rgb(*fg_lab), bg_rgb, 7.0, is_dark)
+    return bg_lab, bg_rgb, fg_rgb
 
-    # Accent: most saturated cluster
+
+def _compute_accent(clusters, is_dark):
+    """Select and AAA-compliant-darken the most saturated cluster for accent."""
+    sorted_by_chroma = sorted(clusters, key=lambda c: lab_chroma(*c[0]), reverse=True)
     accent_lab = sorted_by_chroma[0][0]
     if is_dark:
         accent_lab = (max(accent_lab[0], 35.0), accent_lab[1], accent_lab[2])
     else:
         accent_lab = (min(accent_lab[0], 45.0), accent_lab[1], accent_lab[2])
-    accent_rgb = lab_to_rgb(*accent_lab)
-    # Darken accent until white text has 7:1 contrast (AAA)
-    _al, _aa, _ab = accent_lab
+    # Darken until white text has 7:1 contrast (AAA)
+    al, aa, ab = accent_lab
     for _ in range(80):
-        if contrast_ratio((255, 255, 255), lab_to_rgb(_al, _aa, _ab)) >= 7.0:
+        if contrast_ratio((255, 255, 255), lab_to_rgb(al, aa, ab)) >= 7.0:
             break
-        _al = max(0.0, _al - 2.0)
-    accent_lab = (_al, _aa, _ab)
-    accent_rgb = lab_to_rgb(*accent_lab)
-    accent_text = (255, 255, 255)
+        al = max(0.0, al - 2.0)
+    return (al, aa, ab), lab_to_rgb(al, aa, ab)
 
-    # Cursor
-    cursor_rgb = accent_rgb
 
-    # Selection background
+def _compute_panel_border(bg_lab, bg_rgb, is_dark):
+    """Compute panel and border with enforced contrast ranges against bg."""
     if is_dark:
-        sel_lab = (bg_lab[0] + 15, accent_lab[1] * 0.4, accent_lab[2] * 0.4)
-    else:
-        sel_lab = (bg_lab[0] - 12, accent_lab[1] * 0.3, accent_lab[2] * 0.3)
-    sel_rgb = lab_to_rgb(*sel_lab)
-
-    # Panel (slightly darker/lighter than bg, within 1.03-2.0 contrast)
-    if is_dark:
-        # Dark bg: panel should be slightly lighter for subtle contrast
         panel_lab = (min(bg_lab[0] + 3, 100), bg_lab[1], bg_lab[2])
+        border_lab = (bg_lab[0] + 8, bg_lab[1] * 0.5, bg_lab[2] * 0.5)
     else:
         panel_lab = (max(bg_lab[0] - 3, 0), bg_lab[1], bg_lab[2])
+        border_lab = (bg_lab[0] - 6, bg_lab[1] * 0.3, bg_lab[2] * 0.3)
     panel_rgb = lab_to_rgb(*panel_lab)
-    # Ensure panel/bg is within 1.03-2.0 range
     for _ in range(20):
         pr = contrast_ratio(panel_rgb, bg_rgb)
         if 1.03 <= pr <= 2.0:
@@ -412,72 +406,83 @@ def generate_theme(
             panel_lab = (panel_lab[0] + (-1 if is_dark else 1), panel_lab[1], panel_lab[2])
         panel_lab = (max(0, min(100, panel_lab[0])), panel_lab[1], panel_lab[2])
         panel_rgb = lab_to_rgb(*panel_lab)
+    return panel_rgb, lab_to_rgb(*border_lab)
 
-    # Border
+
+def _build_ansi_color(base_lab, accent_lab, bg_rgb, is_dark):
+    """Build normal + bright ANSI variant from a base Lab color."""
     if is_dark:
-        border_lab = (bg_lab[0] + 8, bg_lab[1] * 0.5, bg_lab[2] * 0.5)
+        normal_L = max(55.0, min(75.0, base_lab[0]))
+        bright_L = normal_L + 12
     else:
-        border_lab = (bg_lab[0] - 6, bg_lab[1] * 0.3, bg_lab[2] * 0.3)
-    border_rgb = lab_to_rgb(*border_lab)
+        normal_L = max(30.0, min(50.0, base_lab[0]))
+        bright_L = normal_L - 8
+    normal = adjust_lightness(base_lab, normal_L)
+    bright = adjust_lightness(base_lab, bright_L)
+    normal_rgb = ensure_contrast(lab_to_rgb(*normal), bg_rgb, 3.0, is_dark)
+    bright_rgb = ensure_contrast(lab_to_rgb(*bright), bg_rgb, 4.5, is_dark)
+    return normal_rgb, bright_rgb
 
-    # --- Generate 16 ANSI colors ---
-    # Use dominant colors mapped to nearest ANSI hue slots
-    chromatic_clusters = [
-        (c, pop) for c, pop in clusters if lab_chroma(*c) > 10
-    ]
 
-    # Assign each chromatic cluster to its nearest ANSI hue
-    hue_assignments: Dict[str, List[Tuple[float, float, float]]] = {
-        h: [] for h in ANSI_HUES
-    }
-    for c_lab, _ in chromatic_clusters:
-        hue = lab_hue(*c_lab)
-        nearest = find_nearest_hue(hue)
-        hue_assignments[nearest].append(c_lab)
+def _ansi_palette(clusters, accent_lab, bg_rgb, is_dark):
+    """Generate the 6 chromatic ANSI hues (red, green, yellow, blue, magenta, cyan)."""
+    chromatic = [(c, pop) for c, pop in clusters if lab_chroma(*c) > 10]
+    hue_assignments: Dict[str, List[Tuple[float, float, float]]] = {h: [] for h in ANSI_HUES}
+    for c_lab, _ in chromatic:
+        hue_assignments[find_nearest_hue(lab_hue(*c_lab))].append(c_lab)
 
-    # Build ANSI colors
+    accent_chroma = lab_chroma(*accent_lab)
     ansi = {}
     for hue_name, target_hue in ANSI_HUES.items():
         candidates = hue_assignments[hue_name]
         if candidates:
-            # Use the most chromatic candidate
             base = max(candidates, key=lambda c: lab_chroma(*c))
         else:
-            # Synthesize from accent chroma projected to target hue
-            accent_chroma = lab_chroma(*accent_lab)
             new_a = accent_chroma * math.cos(math.radians(target_hue))
             new_b = accent_chroma * math.sin(math.radians(target_hue))
             base = (50.0, new_a, new_b)
+        ansi[hue_name] = _build_ansi_color(base, accent_lab, bg_rgb, is_dark)
+    return ansi
 
-        # Normal variant (c1-c6 range)
-        if is_dark:
-            normal_L = max(55.0, min(75.0, base[0]))
-        else:
-            normal_L = max(30.0, min(50.0, base[0]))
-        normal = adjust_lightness(base, normal_L)
-        normal_rgb = ensure_contrast(lab_to_rgb(*normal), bg_rgb, 3.0, is_dark)
 
-        # Bright variant (c9-c14 range)
-        if is_dark:
-            bright_L = normal_L + 12
-        else:
-            bright_L = normal_L - 8
-        bright = adjust_lightness(base, bright_L)
-        bright_rgb = ensure_contrast(lab_to_rgb(*bright), bg_rgb, 4.5, is_dark)
-
-        ansi[hue_name] = (normal_rgb, bright_rgb)
-
-    # c0 (black) and c7 (white) — structural colors
+def _structural_colors(bg_lab, bg_rgb, is_dark):
+    """Compute c0, c7, c8, c15 structural ANSI colors."""
     if is_dark:
-        c0_rgb = ensure_contrast(lab_to_rgb(bg_lab[0] + 10, bg_lab[1], bg_lab[2]), bg_rgb, 1.5, True)
-        c7_rgb = ensure_contrast(lab_to_rgb(75.0, bg_lab[1] * 0.1, bg_lab[2] * 0.1), bg_rgb, 5.0, True)
-        c8_rgb = ensure_contrast(lab_to_rgb(bg_lab[0] + 25, bg_lab[1], bg_lab[2]), bg_rgb, 2.5, True)
-        c15_rgb = ensure_contrast(lab_to_rgb(90.0, bg_lab[1] * 0.05, bg_lab[2] * 0.05), bg_rgb, 7.0, True)
+        return (
+            ensure_contrast(lab_to_rgb(bg_lab[0] + 10, bg_lab[1], bg_lab[2]), bg_rgb, 1.5, True),
+            ensure_contrast(lab_to_rgb(75.0, bg_lab[1] * 0.1, bg_lab[2] * 0.1), bg_rgb, 5.0, True),
+            ensure_contrast(lab_to_rgb(bg_lab[0] + 25, bg_lab[1], bg_lab[2]), bg_rgb, 2.5, True),
+            ensure_contrast(lab_to_rgb(90.0, bg_lab[1] * 0.05, bg_lab[2] * 0.05), bg_rgb, 7.0, True),
+        )
+    return (
+        ensure_contrast(lab_to_rgb(18.0, bg_lab[1] * 0.2, bg_lab[2] * 0.2), bg_rgb, 7.0, False),
+        ensure_contrast(lab_to_rgb(bg_lab[0] - 8, bg_lab[1], bg_lab[2]), bg_rgb, 1.3, False),
+        ensure_contrast(lab_to_rgb(35.0, bg_lab[1] * 0.2, bg_lab[2] * 0.2), bg_rgb, 4.5, False),
+        ensure_contrast(lab_to_rgb(8.0, 0, 0), bg_rgb, 10.0, False),
+    )
+
+
+def generate_theme(
+    clusters: List[Tuple[Tuple[float, float, float], int]],
+    name: str,
+    is_dark: bool,
+) -> Dict:
+    """Generate a full theme definition from clustered dominant colors."""
+    bg_lab, bg_rgb, fg_rgb = _compute_bg_fg(clusters, is_dark)
+    accent_lab, accent_rgb = _compute_accent(clusters, is_dark)
+    accent_text = (255, 255, 255)
+    cursor_rgb = accent_rgb
+
+    # Selection background
+    if is_dark:
+        sel_lab = (bg_lab[0] + 15, accent_lab[1] * 0.4, accent_lab[2] * 0.4)
     else:
-        c0_rgb = ensure_contrast(lab_to_rgb(18.0, bg_lab[1] * 0.2, bg_lab[2] * 0.2), bg_rgb, 7.0, False)
-        c7_rgb = ensure_contrast(lab_to_rgb(bg_lab[0] - 8, bg_lab[1], bg_lab[2]), bg_rgb, 1.3, False)
-        c8_rgb = ensure_contrast(lab_to_rgb(35.0, bg_lab[1] * 0.2, bg_lab[2] * 0.2), bg_rgb, 4.5, False)
-        c15_rgb = ensure_contrast(lab_to_rgb(8.0, 0, 0), bg_rgb, 10.0, False)
+        sel_lab = (bg_lab[0] - 12, accent_lab[1] * 0.3, accent_lab[2] * 0.3)
+    sel_rgb = lab_to_rgb(*sel_lab)
+
+    panel_rgb, border_rgb = _compute_panel_border(bg_lab, bg_rgb, is_dark)
+    ansi = _ansi_palette(clusters, accent_lab, bg_rgb, is_dark)
+    c0_rgb, c7_rgb, c8_rgb, c15_rgb = _structural_colors(bg_lab, bg_rgb, is_dark)
 
     accent_hue = lab_hue(*accent_lab)
     nvim_theme = _nvim_from_hue(accent_hue, is_dark)
