@@ -374,8 +374,15 @@ def generate_theme(
     else:
         accent_lab = (min(accent_lab[0], 45.0), accent_lab[1], accent_lab[2])
     accent_rgb = lab_to_rgb(*accent_lab)
-    # Ensure accent_text has 7:1 contrast
-    accent_text = ensure_contrast((255, 255, 255), accent_rgb, 7.0, True)
+    # Darken accent until white text has 7:1 contrast (AAA)
+    _al, _aa, _ab = accent_lab
+    for _ in range(80):
+        if contrast_ratio((255, 255, 255), lab_to_rgb(_al, _aa, _ab)) >= 7.0:
+            break
+        _al = max(0.0, _al - 2.0)
+    accent_lab = (_al, _aa, _ab)
+    accent_rgb = lab_to_rgb(*accent_lab)
+    accent_text = (255, 255, 255)
 
     # Cursor
     cursor_rgb = accent_rgb
@@ -387,12 +394,24 @@ def generate_theme(
         sel_lab = (bg_lab[0] - 12, accent_lab[1] * 0.3, accent_lab[2] * 0.3)
     sel_rgb = lab_to_rgb(*sel_lab)
 
-    # Panel (slightly darker/lighter than bg)
+    # Panel (slightly darker/lighter than bg, within 1.03-2.0 contrast)
     if is_dark:
-        panel_lab = (max(bg_lab[0] - 4, 0), bg_lab[1], bg_lab[2])
+        # Dark bg: panel should be slightly lighter for subtle contrast
+        panel_lab = (min(bg_lab[0] + 3, 100), bg_lab[1], bg_lab[2])
     else:
-        panel_lab = (min(bg_lab[0] - 3, 100), bg_lab[1], bg_lab[2])
+        panel_lab = (max(bg_lab[0] - 3, 0), bg_lab[1], bg_lab[2])
     panel_rgb = lab_to_rgb(*panel_lab)
+    # Ensure panel/bg is within 1.03-2.0 range
+    for _ in range(20):
+        pr = contrast_ratio(panel_rgb, bg_rgb)
+        if 1.03 <= pr <= 2.0:
+            break
+        if pr < 1.03:
+            panel_lab = (panel_lab[0] + (2 if is_dark else -2), panel_lab[1], panel_lab[2])
+        else:
+            panel_lab = (panel_lab[0] + (-1 if is_dark else 1), panel_lab[1], panel_lab[2])
+        panel_lab = (max(0, min(100, panel_lab[0])), panel_lab[1], panel_lab[2])
+        panel_rgb = lab_to_rgb(*panel_lab)
 
     # Border
     if is_dark:

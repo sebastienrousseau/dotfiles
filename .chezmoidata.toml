@@ -9,7 +9,7 @@ profile = "laptop"
 machine = ""
 
 # Visual theme
-theme = "tahoe-dark"
+theme = "altai-dark"
 
 # Terminal settings
 terminal_font_family = "JetBrainsMono Nerd Font"

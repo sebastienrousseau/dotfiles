@@ -142,14 +142,14 @@ cmd_mode() {
       current="$(_agent_current_profile)"
       dot_agent_session_log "list" "$current" "ok"
       ui_header "Agent Modes"
-      jq -r '.profiles | to_entries[] | "\(.key)\t\(.value.description)"' "$(_agent_profiles_file)" \
-        | while IFS=$'\t' read -r name description; do
-            if [[ "$name" == "$current" ]]; then
-              ui_ok "$name" "$description [current]"
-            else
-              ui_info "$name" "$description"
-            fi
-          done
+      jq -r '.profiles | to_entries[] | "\(.key)\t\(.value.description)"' "$(_agent_profiles_file)" |
+        while IFS=$'\t' read -r name description; do
+          if [[ "$name" == "$current" ]]; then
+            ui_ok "$name" "$description [current]"
+          else
+            ui_info "$name" "$description"
+          fi
+        done
       ;;
     current)
       local current
@@ -310,8 +310,8 @@ EOF
             "Status\t\(.status)",
             "Created\t\(.created_at)",
             "Command\t\(.argv | join(" "))"' "$checkpoint_file" | while IFS=$'\t' read -r key value; do
-              ui_ok "$key" "$value"
-            done
+            ui_ok "$key" "$value"
+          done
           ;;
         replay)
           local checkpoint_id="${1:-}" checkpoint_file replay_profile
@@ -393,8 +393,15 @@ EOF
       a2a_card_file="$repo_root/.well-known/agent-card.json"
       while [[ $# -gt 0 ]]; do
         case "$1" in
-          --json | -j) json_mode=1 ; shift ;;
-          --validate | --strict | -s) validate_mode=1 ; strict_mode=1 ; shift ;;
+          --json | -j)
+            json_mode=1
+            shift
+            ;;
+          --validate | --strict | -s)
+            validate_mode=1
+            strict_mode=1
+            shift
+            ;;
           *) shift ;;
         esac
       done
@@ -405,18 +412,31 @@ EOF
       fi
       if [[ "$validate_mode" -eq 1 ]]; then
         local v_issues=0
-        jq empty "$a2a_card_file" >/dev/null 2>&1 || { ui_err "JSON" "invalid"; exit 1; }
+        jq empty "$a2a_card_file" >/dev/null 2>&1 || {
+          ui_err "JSON" "invalid"
+          exit 1
+        }
         ui_header "A2A v0.3 Card Validation"
         local sv
         sv="$(jq -r '.specVersion // empty' "$a2a_card_file")"
-        if [[ "$sv" == "0.3" ]]; then ui_ok "specVersion" "$sv"; else ui_err "specVersion" "expected 0.3, got $sv"; v_issues=$((v_issues + 1)); fi
+        if [[ "$sv" == "0.3" ]]; then ui_ok "specVersion" "$sv"; else
+          ui_err "specVersion" "expected 0.3, got $sv"
+          v_issues=$((v_issues + 1))
+        fi
         if jq -e '.skills | type == "array" and length > 0' "$a2a_card_file" >/dev/null 2>&1; then
           ui_ok "skills" "$(jq '.skills | length' "$a2a_card_file") skills"
         else
-          ui_err "skills" "missing or empty"; v_issues=$((v_issues + 1))
+          ui_err "skills" "missing or empty"
+          v_issues=$((v_issues + 1))
         fi
-        if jq -e '.authentication' "$a2a_card_file" >/dev/null 2>&1; then ui_ok "authentication" "present"; else ui_err "authentication" "missing"; v_issues=$((v_issues + 1)); fi
-        if jq -e '.signing.method' "$a2a_card_file" >/dev/null 2>&1; then ui_ok "signing" "$(jq -r '.signing.method' "$a2a_card_file")"; else ui_err "signing" "missing method"; v_issues=$((v_issues + 1)); fi
+        if jq -e '.authentication' "$a2a_card_file" >/dev/null 2>&1; then ui_ok "authentication" "present"; else
+          ui_err "authentication" "missing"
+          v_issues=$((v_issues + 1))
+        fi
+        if jq -e '.signing.method' "$a2a_card_file" >/dev/null 2>&1; then ui_ok "signing" "$(jq -r '.signing.method' "$a2a_card_file")"; else
+          ui_err "signing" "missing method"
+          v_issues=$((v_issues + 1))
+        fi
         if [[ "$v_issues" -gt 0 && "$strict_mode" -eq 1 ]]; then exit 1; fi
         return 0
       fi
