@@ -1,3 +1,20 @@
+<!--
+  Role:     Repo-scoped instructions for Claude Code when operating inside
+            this repository. Auto-loaded by Claude Code whenever the cwd is
+            somewhere under ~/.dotfiles/.
+  Audience: Claude Code, this repo only.
+
+  Distinct from:
+    - dot_claude/CLAUDE.md — your PERSONAL cross-project preferences,
+                             deployed to ~/.claude/CLAUDE.md by chezmoi.
+    - OPENCODE.md          — same intent as this file, but consumed by the
+                             OpenCode CLI instead of Claude Code.
+
+  When updating: keep this focused on *this repository's* conventions
+  (version, layout, naming, test framework, CI). Personal style lives
+  in dot_claude/CLAUDE.md, not here.
+-->
+
 # CLAUDE.md — AI Assistant Guidelines
 
 ## Project Overview

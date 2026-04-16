@@ -49,6 +49,7 @@ Quick jumps into the Manual:
 - [Reliability](operations/RELIABILITY.md)
 - [Naming conventions](NAMING_CONVENTIONS.md)
 - [Architecture](architecture/ARCHITECTURE.md)
+- [Repository layout](architecture/REPO_LAYOUT.md)
 - [Architecture decisions](adr/README.md)
 
 ## Repository map

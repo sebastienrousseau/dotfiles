@@ -22,6 +22,7 @@ This site is published from the `docs/` directory on `master` and tracks the cur
 - [Workstation attestation](operations/ATTESTATION.md)
 - [Operations runbooks](operations/OPERATIONS.md)
 - [Architecture overview](architecture/ARCHITECTURE.md)
+- [Repository layout](architecture/REPO_LAYOUT.md)
 
 ## Security and Governance
 

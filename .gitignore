@@ -1,5 +1,5 @@
 # Dotfiles - gitignore
-# v0.2.496
+# v0.2.500
 
 # OS Artifacts
 .DS_Store
@@ -39,6 +39,15 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+# pnpm content-addressable store (should never appear in the tree; if a tool
+# drops one here by accident, keep it out of commits).
+.pnpm-store/
+
+# AI-assistant local state
+# .claude/ holds per-machine Claude Code settings (e.g. settings.local.json
+# permission allowlists). Machine-specific — not for version control.
+# The repo-wide CLAUDE.md at the root IS tracked; only the .claude/ state dir is not.
+.claude/
 
 # Chezmoi
 .chezmoitemplates/**/.DS_Store
