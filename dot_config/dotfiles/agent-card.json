@@ -1,7 +1,7 @@
 {
   "specVersion": "0.3",
   "name": "dotfiles-agent",
-  "version": "0.2.499",
+  "version": "0.2.500",
   "description": "Trusted workstation agent surface for local shell automation.",
   "defaultProfile": "ask",
   "protocols": ["mcp", "a2a"],

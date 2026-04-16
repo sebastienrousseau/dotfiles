@@ -59,6 +59,8 @@ if [ -z "$SRC_DIR" ]; then
 fi
 
 DATA_FILE="$SRC_DIR/.chezmoidata.toml"
+THEMES_FILE="$SRC_DIR/.chezmoidata/themes.toml"
+WALLPAPER_DIR="${DOTFILES_WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
 if [ ! -f "$DATA_FILE" ]; then
   ui_err "Missing" "$DATA_FILE"
   exit 1
@@ -69,12 +71,8 @@ fi
 # =============================================================================
 
 # Default preferences
-DEFAULT_DARK="catppuccin-mocha"
-DEFAULT_LIGHT="catppuccin-latte"
-TOKYO_DARK="tokyonight-night"
-TOKYO_LIGHT="tokyonight-day"
-CATPPUCCIN_DARK="catppuccin-mocha"
-CATPPUCCIN_LIGHT="catppuccin-latte"
+DEFAULT_DARK="macos-monterey-dark"
+DEFAULT_LIGHT="macos-monterey-light"
 
 # =============================================================================
 # Theme Functions
@@ -84,36 +82,82 @@ current_theme() {
   awk -F'"' '/^theme =/ {print $2}' "$DATA_FILE" | head -n 1
 }
 
+theme_mode() {
+  local name="${1:-}"
+  awk -v n="$name" '
+    $0 == "[themes." n "]" { found=1; next }
+    /^\[/ { found=0 }
+    found && /^mode/ { sub(/.*= *"/, ""); sub(/".*/, ""); print; exit }
+  ' "$THEMES_FILE"
+}
+
+theme_exists() {
+  local name="${1:-}"
+  grep -q "^\[themes\.${name}\]$" "$THEMES_FILE" 2>/dev/null
+}
+
+all_theme_names() {
+  sed -n 's/^\[themes\.\([a-z0-9-]*\)\]$/\1/p' "$THEMES_FILE" | sort -u
+}
+
+# List wallpaper families that have BOTH dark and light variants in themes.toml.
+# Only these are presented to users — unpaired wallpapers are hidden.
+paired_families() {
+  local -A has_dark has_light
+  local name family
+  while IFS= read -r name; do
+    if [[ "$name" == *-dark ]]; then
+      family="${name%-dark}"
+      has_dark["$family"]=1
+    elif [[ "$name" == *-light ]]; then
+      family="${name%-light}"
+      has_light["$family"]=1
+    fi
+  done < <(all_theme_names)
+
+  for family in $(printf '%s\n' "${!has_dark[@]}" | sort); do
+    [[ -n "${has_light[$family]+x}" ]] && echo "$family"
+  done
+}
+
+# Determine source type (system/custom) for a wallpaper family.
+wallpaper_source() {
+  local family="${1:-}"
+  # Check for custom wallpapers: dynamic (family.heic) or split (family-dark/light.ext)
+  for ext in heic jpg png; do
+    if [[ -f "$WALLPAPER_DIR/${family}.${ext}" || -f "$WALLPAPER_DIR/${family}-dark.${ext}" || -f "$WALLPAPER_DIR/${family}-light.${ext}" ]]; then
+      echo "Custom"
+      return
+    fi
+  done
+  echo "System"
+}
+
 get_theme_family() {
   local theme="${1:-}"
-  case "$theme" in
-    tokyonight-*) echo "tokyonight" ;;
-    catppuccin-*) echo "catppuccin" ;;
-    rose-pine*) echo "rose-pine" ;;
-    kanagawa-*) echo "kanagawa" ;;
-    gruvbox-*) echo "gruvbox" ;;
-    solarized-*) echo "solarized" ;;
-    everforest-*) echo "everforest" ;;
-    abstract-waves-*) echo "abstract-waves" ;;
-    adwaita-*) echo "adwaita" ;;
-    colourful-*) echo "colourful" ;;
-    imac-blue-*) echo "imac-blue" ;;
-    macos-big-sur-*) echo "macos-big-sur" ;;
-    macos-mojave-*) echo "macos-mojave" ;;
-    macos-monterey-*) echo "macos-monterey" ;;
-    macos-sequoia-*) echo "macos-sequoia" ;;
-    macos-sonoma-*) echo "macos-sonoma" ;;
-    macos-tahoe-*) echo "macos-tahoe" ;;
-    macos-ventura-*) echo "macos-ventura" ;;
-    monterey-sierra-blue-*) echo "monterey-sierra-blue" ;;
-    *) echo "other" ;;
-  esac
+  # Read family from themes.toml if available
+  if [[ -f "$THEMES_FILE" ]]; then
+    local family
+    family="$(awk -v n="$theme" '
+      $0 == "[themes." n "]" { found=1; next }
+      /^\[/ { found=0 }
+      found && /^family/ { sub(/.*= *"/, ""); sub(/".*/, ""); print; exit }
+    ' "$THEMES_FILE")"
+    if [[ -n "$family" ]]; then
+      echo "$family"
+      return
+    fi
+  fi
+  # Fallback: strip -dark/-light suffix
+  local family="${theme%-dark}"
+  [[ "$family" != "$theme" ]] || family="${theme%-light}"
+  echo "$family"
 }
 
 is_dark_theme() {
   local theme="${1:-}"
   case "$theme" in
-    *-night | *-storm | *-moon | *-mocha | *-frappe | *-macchiato | *-dark | *-wave | *-dragon | dracula | nord | onedark)
+    *-dark)
       return 0
       ;;
     *)
@@ -142,154 +186,132 @@ pick_theme() {
   local current
   local current="$(current_theme)"
 
-  local themes_file="$SRC_DIR/.chezmoidata/themes.toml"
-  if [[ ! -f "$themes_file" ]]; then
-    ui_err "Missing" "$themes_file"
+  if [[ ! -f "$THEMES_FILE" ]]; then
+    ui_err "Missing" "$THEMES_FILE"
     exit 1
   fi
 
-  # Build theme list with metadata
+  local current_family="${current%-dark}"
+  [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
+  local current_mode="dark"
+  is_dark_theme "$current" 2>/dev/null || current_mode="light"
+
+  # Build theme list: one row per family, shows active mode
   local theme_list=""
-  local name mode family
-  while IFS= read -r section; do
-    local name="${section#\[themes.}"
-    local name="${name%\]}"
-    [[ "$name" == *.* ]] && continue
+  local family source marker active_mode
+  while IFS= read -r family; do
+    [[ -n "$family" ]] || continue
+    source="$(wallpaper_source "$family")"
+    marker="○"
+    active_mode=""
+    if [[ "$family" == "$current_family" ]]; then
+      marker="✓"
+      active_mode="$current_mode"
+    fi
+    theme_list+="$(printf '%s  %-35s  %-8s  %s' "$marker" "$family" "$source" "$active_mode")"$'\n'
+  done < <(paired_families)
 
-    local mode="$(awk -v n="$name" '
-      $0 == "[themes." n "]" { found=1; next }
-      /^\[/ { found=0 }
-      found && /^mode/ { sub(/.*= *"/, ""); sub(/".*/, ""); print; exit }
-    ' "$themes_file")"
-    local mode="${mode:-dark}"
-
-    local family="$(get_theme_family "$name")"
-    local marker="○"
-    [[ "$name" == "$current" ]] && marker="✓"
-
-    theme_list+="$(printf '%s  %-25s  %-10s  %s' "$marker" "$name" "$mode" "$family")"$'\n'
-  done < <(grep '^\[themes\.[a-z]' "$themes_file" | grep -v '\.\(term\|ui\|app\|ext\)\]')
-
-  local selected
-  selected="$(echo "$theme_list" | fzf \
-    --header "Select theme (current: $current)" \
+  local selected_family
+  selected_family="$(echo "$theme_list" | fzf \
+    --header "Select wallpaper theme (current: $current_family [$current_mode])" \
     --prompt "Theme > " \
     --height 30 \
     --reverse \
     --no-sort \
     --no-preview \
     --ansi |
-    awk '{print $2}')" || return 0
+    awk '$1 !~ /^#/ && NF >= 2 {print $2}')" || return 0
 
-  if [[ -n "$selected" && "$selected" != "$current" ]]; then
-    dot-theme-sync "$selected"
-  elif [[ "$selected" == "$current" ]]; then
-    ui_info "Theme" "already on $current"
+  if [[ -n "$selected_family" ]]; then
+    # Apply with current appearance mode (dark/light)
+    local new_theme="${selected_family}-${current_mode}"
+    if [[ "$new_theme" != "$current" ]]; then
+      dot-theme-sync "$new_theme"
+    else
+      ui_info "Theme" "already on $current"
+    fi
   fi
 }
 
 list_themes() {
-  ui_header "Catppuccin (Recommended)"
-  ui_ok "catppuccin-latte" "(light)"
-  ui_ok "catppuccin-frappe" "(dark - muted)"
-  ui_ok "catppuccin-macchiato" "(dark - balanced)"
-  ui_ok "catppuccin-mocha" "(dark - rich)"
+  local current="$(current_theme)"
+  local current_family="${current%-dark}"
+  [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
+
+  local count=0
+  local family source
+
+  printf '  %-35s  %s\n' "WALLPAPER" "SOURCE"
+  printf '  %-35s  %s\n' "---------" "------"
+  while IFS= read -r family; do
+    [[ -n "$family" ]] || continue
+    source="$(wallpaper_source "$family")"
+    if [[ "$family" == "$current_family" ]]; then
+      ui_ok "$family" "$source ◀"
+    else
+      printf '  %-35s  %s\n' "$family" "$source"
+    fi
+    count=$((count + 1))
+  done < <(paired_families)
+
   echo ""
-  ui_header "Tokyo Night"
-  ui_ok "tokyonight-day" "(light)"
-  ui_ok "tokyonight-storm" "(dark - muted)"
-  ui_ok "tokyonight-night" "(dark - default)"
-  ui_ok "tokyonight-moon" "(dark - softer)"
-  echo ""
-  ui_header "Rose Pine"
-  ui_ok "rose-pine" "(dark)"
-  ui_ok "rose-pine-moon" "(dark - softer)"
-  ui_ok "rose-pine-dawn" "(light)"
-  echo ""
-  ui_header "Kanagawa"
-  ui_ok "kanagawa-wave" "(dark - default)"
-  ui_ok "kanagawa-dragon" "(dark - vibrant)"
-  ui_ok "kanagawa-lotus" "(light)"
-  echo ""
-  ui_header "Other"
-  ui_ok "dracula" "(dark)"
-  ui_ok "gruvbox-light" "(light)"
-  ui_ok "gruvbox-dark" "(dark)"
-  ui_ok "nord" "(dark)"
-  ui_ok "onelight" "(light)"
-  ui_ok "onedark" "(dark)"
-  ui_ok "solarized-light" "(light)"
-  ui_ok "solarized-dark" "(dark)"
-  ui_ok "everforest-light" "(light)"
-  ui_ok "everforest-dark" "(dark)"
-  echo ""
-  ui_info "Current theme" "$(current_theme)"
+  ui_info "Current" "$(current_theme) ($count wallpaper themes available)"
 }
 
 # Toggle between light and dark within the same family, or switch families
 toggle_theme() {
   local current="$(current_theme)"
-  local family="$(get_theme_family "$current")"
 
   if is_dark_theme "$current"; then
-    # Currently dark, switch to light variant
-    case "$family" in
-      tokyonight) set_theme "$TOKYO_LIGHT" ;;
-      catppuccin) set_theme "$CATPPUCCIN_LIGHT" ;;
-      rose-pine) set_theme "rose-pine-dawn" ;;
-      kanagawa) set_theme "kanagawa-lotus" ;;
-      gruvbox) set_theme "gruvbox-light" ;;
-      solarized) set_theme "solarized-light" ;;
-      everforest) set_theme "everforest-light" ;;
-      # Wallpaper themes: swap -dark to -light
-      abstract-waves | adwaita | colourful | imac-blue | \
-        macos-big-sur | macos-mojave | macos-monterey | macos-sequoia | \
-        macos-sonoma | macos-tahoe | macos-ventura | monterey-sierra-blue)
-        set_theme "${current%-dark}-light"
-        ;;
-      *) set_theme "$DEFAULT_LIGHT" ;;
-    esac
+    if [[ "$current" == *-dark ]]; then
+      set_theme "${current%-dark}-light"
+    else
+      set_theme "$DEFAULT_LIGHT"
+    fi
   else
-    # Currently light, switch to dark variant
-    case "$family" in
-      tokyonight) set_theme "$TOKYO_DARK" ;;
-      catppuccin) set_theme "$CATPPUCCIN_DARK" ;;
-      rose-pine) set_theme "rose-pine" ;;
-      kanagawa) set_theme "kanagawa-wave" ;;
-      gruvbox) set_theme "gruvbox-dark" ;;
-      solarized) set_theme "solarized-dark" ;;
-      everforest) set_theme "everforest-dark" ;;
-      # Wallpaper themes: swap -light to -dark
-      abstract-waves | adwaita | colourful | imac-blue | \
-        macos-big-sur | macos-mojave | macos-monterey | macos-sequoia | \
-        macos-sonoma | macos-tahoe | macos-ventura | monterey-sierra-blue)
-        set_theme "${current%-light}-dark"
-        ;;
-      *) set_theme "$DEFAULT_DARK" ;;
-    esac
+    if [[ "$current" == *-light ]]; then
+      set_theme "${current%-light}-dark"
+    else
+      set_theme "$DEFAULT_DARK"
+    fi
   fi
 }
 
-# Switch between Tokyo Night and Catppuccin families
+# Switch to the next wallpaper family while preserving mode.
 switch_family() {
   local current="$(current_theme)"
   local family="$(get_theme_family "$current")"
+  local mode="dark"
+  local families=()
+  local idx=0
+  local next_family=""
 
-  if is_dark_theme "$current"; then
-    # Stay in dark mode, switch family
-    case "$family" in
-      tokyonight) set_theme "$CATPPUCCIN_DARK" ;;
-      catppuccin) set_theme "$TOKYO_DARK" ;;
-      *) set_theme "$CATPPUCCIN_DARK" ;;
-    esac
-  else
-    # Stay in light mode, switch family
-    case "$family" in
-      tokyonight) set_theme "$CATPPUCCIN_LIGHT" ;;
-      catppuccin) set_theme "$TOKYO_LIGHT" ;;
-      *) set_theme "$CATPPUCCIN_LIGHT" ;;
-    esac
+  if [[ "$current" == *-light ]]; then
+    mode="light"
   fi
+
+  while IFS= read -r name; do
+    [[ -n "$name" ]] || continue
+    families+=("$name")
+  done < <(paired_families)
+
+  if [[ ${#families[@]} -eq 0 ]]; then
+    set_theme "$DEFAULT_DARK"
+    return
+  fi
+
+  for idx in "${!families[@]}"; do
+    if [[ "${families[$idx]}" == "$family" ]]; then
+      next_family="${families[$(((idx + 1) % ${#families[@]}))]}"
+      break
+    fi
+  done
+
+  if [[ -z "$next_family" ]]; then
+    next_family="${families[0]}"
+  fi
+
+  set_theme "${next_family}-${mode}"
 }
 
 # Show current theme info
@@ -363,6 +385,10 @@ case "${1:-}" in
   current)
     show_current
     ;;
+  rebuild)
+    shift
+    bash "$SCRIPT_DIR/rebuild-themes.sh" "$@"
+    ;;
   help | --help | -h)
     ui_header "Usage"
     ui_info "dot theme" "[command]"
@@ -375,6 +401,7 @@ case "${1:-}" in
     ui_ok "family" "Cycle between theme families"
     ui_ok "current" "Show current theme info"
     ui_ok "sync" "Sync dotfiles with system dark/light mode"
+    ui_ok "rebuild" "Regenerate themes from system + custom wallpapers"
     echo ""
     show_current
     ;;
@@ -382,8 +409,8 @@ case "${1:-}" in
     pick_theme
     ;;
   *)
-    # Treat unknown args as theme names for quick switching: dot theme dracula
-    if grep -q "^\[themes\.${1}\]" "$SRC_DIR/.chezmoidata/themes.toml" 2>/dev/null; then
+    # Treat unknown args as theme names for quick switching: dot theme macos-sequoia-dark
+    if grep -q "^\[themes\.${1}\]" "$THEMES_FILE" 2>/dev/null; then
       dot-theme-sync "$1"
     else
       ui_err "Unknown command or theme" "$1"

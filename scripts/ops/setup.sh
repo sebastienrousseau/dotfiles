@@ -63,7 +63,33 @@ confirm "Enable strict alias governance?" && strict_mode=true
 
 secrets_provider=$(choose "Secrets provider" auto sops onepassword bitwarden)
 
-theme=$(choose "Theme" catppuccin-mocha catppuccin-latte)
+theme_choices=(
+  macos-ai-dark macos-ai-light
+  macos-bigsur-dark macos-bigsur-light
+  macos-blue-dark macos-blue-light
+  macos-blush-dark macos-blush-light
+  macos-citrus-dark macos-citrus-light
+  macos-green-dark macos-green-light
+  macos-gridgreen-dark macos-gridgreen-light
+  macos-heatmap-dark macos-heatmap-light
+  macos-indigo-dark macos-indigo-light
+  macos-miami-dark macos-miami-light
+  macos-mojave-dark macos-mojave-light
+  macos-monterey-dark macos-monterey-light
+  macos-nova-dark macos-nova-light
+  macos-orange-dark macos-orange-light
+  macos-pink-dark macos-pink-light
+  macos-purple-dark macos-purple-light
+  macos-sequoia-dark macos-sequoia-light
+  macos-silver-dark macos-silver-light
+  macos-sonoma-dark macos-sonoma-light
+  macos-tahoe-dark macos-tahoe-light
+  macos-valentine-dark macos-valentine-light
+  macos-ventura-dark macos-ventura-light
+  macos-wave-dark macos-wave-light
+  macos-yellow-dark macos-yellow-light
+)
+theme=$(choose "Theme" "${theme_choices[@]}")
 
 if [[ -f "$CONFIG_FILE" ]]; then
   cp "$CONFIG_FILE" "$BACKUP_FILE"

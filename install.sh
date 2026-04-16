@@ -52,7 +52,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.499)
+  version       The version (tag or branch) to install (default: v0.2.500)
 
 Options:
   --help        Show this help message
@@ -64,7 +64,7 @@ EOF
 }
 
 main() {
-  local version="v0.2.499"
+  local version="v0.2.500"
   local version_set=0
   local minimal=0
   local _cleanup_files=()

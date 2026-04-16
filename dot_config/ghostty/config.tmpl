@@ -14,6 +14,8 @@
 {{- $theme := default "tokyonight-night" .theme -}}
 {{- $fontFamily := default "JetBrains Mono" .terminal_font_family -}}
 {{- $fontSize := default 12 .terminal_font_size -}}
+{{- $linuxDesktop := or .features.linux_desktop .features.niri -}}
+{{- $wsl := and (hasKey .chezmoi.kernel "osrelease") (contains "microsoft" (get .chezmoi.kernel "osrelease" | default "")) -}}
 
 ##########
 # Theme  #
@@ -23,8 +25,8 @@
 ###############
 # Appearance  #
 ###############
-background-opacity = 0.9
-background-blur = 10
+background-opacity = {{ if eq .chezmoi.os "darwin" }}0.92{{ else }}0.96{{ end }}
+background-blur = {{ if eq .chezmoi.os "darwin" }}14{{ else }}0{{ end }}
 window-padding-x = 16
 window-padding-y = 12
 window-padding-balance = true
@@ -54,15 +56,25 @@ gtk-titlebar = true
 # Primary: User preference (Apple Native)
 # Fallback logic is handled by Ghostty attempting the first found.
 font-family = "{{ $fontFamily }}"
+{{- if eq .chezmoi.os "darwin" }}
+{{- if ne $fontFamily "SF Mono" }}
+font-family = "SF Mono"
+{{- end }}
+{{- else }}
+{{- if ne $fontFamily "JetBrainsMono Nerd Font" }}
+font-family = "JetBrainsMono Nerd Font"
+{{- end }}
+{{- end }}
 font-family = "JetBrains Mono"
+font-family = "Noto Sans Mono"
 font-family = "Roboto Mono"
 
 font-size = {{ $fontSize }}
 adjust-cell-width = -1
-font-thicken = true
-font-thicken-strength = 1
-adjust-cell-height = 2
-adjust-font-baseline = 0
+font-thicken = {{ if eq .chezmoi.os "darwin" }}false{{ else }}true{{ end }}
+font-thicken-strength = {{ if eq .chezmoi.os "darwin" }}0{{ else }}1{{ end }}
+adjust-cell-height = {{ if eq .chezmoi.os "darwin" }}1{{ else }}2{{ end }}
+adjust-font-baseline = {{ if eq .chezmoi.os "darwin" }}-1{{ else }}0{{ end }}
 
 #####################
 # Behaviour / UX    #
@@ -78,6 +90,15 @@ command = {{ lookPath $shell }}
 command = /usr/bin/env {{ $shell }}
 {{- end }}
 quit-after-last-window-closed = true
+{{- if $linuxDesktop }}
+gtk-tabs-location = top
+copy-on-select = clipboard
+{{- end }}
+{{- if $wsl }}
+window-decoration = auto
+clipboard-read = allow
+clipboard-write = allow
+{{- end }}
 
 ################
 # Keybindings  #
@@ -112,27 +133,33 @@ keybind = ctrl+k=clear_screen
 ################
 # Colors       #
 ################
-{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end }}
-background = {{ $t.term.bg }}
-foreground = {{ $t.term.fg }}
-cursor-color = {{ $t.term.cursor }}
-cursor-text = {{ $t.term.cursor_text }}
-selection-background = {{ $t.term.sel_bg }}
-selection-foreground = {{ $t.term.sel_fg }}
-palette = 0={{ $t.term.c0 }}
-palette = 1={{ $t.term.c1 }}
-palette = 2={{ $t.term.c2 }}
-palette = 3={{ $t.term.c3 }}
-palette = 4={{ $t.term.c4 }}
-palette = 5={{ $t.term.c5 }}
-palette = 6={{ $t.term.c6 }}
-palette = 7={{ $t.term.c7 }}
-palette = 8={{ $t.term.c8 }}
-palette = 9={{ $t.term.c9 }}
-palette = 10={{ $t.term.c10 }}
-palette = 11={{ $t.term.c11 }}
-palette = 12={{ $t.term.c12 }}
-palette = 13={{ $t.term.c13 }}
-palette = 14={{ $t.term.c14 }}
-palette = 15={{ $t.term.c15 }}
+{{- $t := index .themes (default "macos-monterey-dark" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "macos-monterey-dark" -}}{{- end }}
+{{- $tt := $t -}}
+{{- $themeName := default "macos-monterey-dark" .theme -}}
+{{- if hasSuffix "-light" $themeName -}}
+  {{- $darkTheme := index .themes (printf "%s-dark" (trimSuffix "-light" $themeName)) -}}
+  {{- if $darkTheme -}}{{- $tt = $darkTheme -}}{{- end -}}
+{{- end }}
+background = {{ $tt.term.bg }}
+foreground = {{ $tt.term.fg }}
+cursor-color = {{ $tt.term.cursor }}
+cursor-text = {{ $tt.term.cursor_text }}
+selection-background = {{ $tt.term.sel_bg }}
+selection-foreground = {{ $tt.term.sel_fg }}
+palette = 0={{ $tt.term.c0 }}
+palette = 1={{ $tt.term.c1 }}
+palette = 2={{ $tt.term.c2 }}
+palette = 3={{ $tt.term.c3 }}
+palette = 4={{ $tt.term.c4 }}
+palette = 5={{ $tt.term.c5 }}
+palette = 6={{ $tt.term.c6 }}
+palette = 7={{ $tt.term.c7 }}
+palette = 8={{ $tt.term.c8 }}
+palette = 9={{ $tt.term.c9 }}
+palette = 10={{ $tt.term.c10 }}
+palette = 11={{ $tt.term.c11 }}
+palette = 12={{ $tt.term.c12 }}
+palette = 13={{ $tt.term.c13 }}
+palette = 14={{ $tt.term.c14 }}
+palette = 15={{ $tt.term.c15 }}

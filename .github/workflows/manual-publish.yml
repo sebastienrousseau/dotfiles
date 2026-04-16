@@ -1,0 +1,164 @@
+name: Manual Publish
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/manual/**'
+      - 'scripts/docs/**'
+      - '.github/workflows/manual-publish.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/manual/**'
+      - 'scripts/docs/**'
+      - '.github/workflows/manual-publish.yml'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==========================================================================
+  # VALIDATE — fast (pandoc only, no TeX). Runs on every push/PR so broken
+  # manual sources fail quickly without pulling the ~1GB TeX Live stack.
+  # ==========================================================================
+  validate:
+    name: Validate Manual (fast — pandoc only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Install pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc codespell
+
+      - name: Run manual quality gates
+        run: bash scripts/docs/check-manual.sh
+
+      - name: Fast build (no PDF)
+        run: bash scripts/docs/build-manual.sh --fast
+
+  # ==========================================================================
+  # BUILD — full (pandoc + TeX Live). Only when we actually publish the site
+  # or attach to a release. Skipped on PRs to avoid the TeX Live download cost.
+  # ==========================================================================
+  build:
+    name: Build Manual (9 formats)
+    needs: validate
+    if: >-
+      github.event_name == 'release' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      html_size: ${{ steps.sizes.outputs.html_size }}
+      pdf_size: ${{ steps.sizes.outputs.pdf_size }}
+      epub_size: ${{ steps.sizes.outputs.epub_size }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      # Cache the apt archives directory so the ~1GB TeX Live download
+      # is reused across runs. Key is tied to the workflow file so that
+      # package changes invalidate the cache cleanly.
+      - name: Cache apt archives
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: /var/cache/apt/archives
+          key: manual-apt-${{ runner.os }}-${{ hashFiles('.github/workflows/manual-publish.yml') }}
+          restore-keys: |
+            manual-apt-${{ runner.os }}-
+
+      - name: Install pandoc + TeX Live (for PDF)
+        run: |
+          sudo apt-get update
+          # Retain downloaded .debs so the cache above stays populated.
+          sudo rm -f /etc/apt/apt.conf.d/docker-clean
+          echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' | sudo tee /etc/apt/apt.conf.d/01keep-debs >/dev/null
+          sudo apt-get install -y --no-install-recommends \
+            pandoc \
+            texlive-xetex \
+            texlive-fonts-recommended \
+            texlive-fonts-extra \
+            texlive-latex-recommended \
+            texlive-latex-extra \
+            lmodern \
+            librsvg2-bin \
+            codespell
+
+      - name: Build manual (all formats)
+        run: bash scripts/docs/build-manual.sh
+
+      - name: Record file sizes
+        id: sizes
+        run: |
+          size() { stat -c%s "$1" 2>/dev/null || echo 0; }
+          human() { awk -v b="$1" 'BEGIN{if(b<1024)print b"B";else if(b<1048576)printf "%dK",b/1024;else printf "%dM",b/1048576}'; }
+          {
+            echo "html_size=$(human "$(size _build/manual/dotfiles.html)")"
+            echo "pdf_size=$(human "$(size _build/manual/dotfiles.pdf)")"
+            echo "epub_size=$(human "$(size _build/manual/dotfiles.epub)")"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Upload manual artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: manual
+          path: _build/manual/
+          retention-days: 90
+
+      - name: Upload pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+        with:
+          path: _build/manual/
+
+  deploy-pages:
+    name: Deploy to GitHub Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+
+  attach-release:
+    name: Attach to Release
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v5.0.0
+        with:
+          name: manual
+          path: _build/manual/
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
+        with:
+          files: |
+            _build/manual/dotfiles.pdf
+            _build/manual/dotfiles.epub
+            _build/manual/dotfiles.html.gz
+            _build/manual/html.tar.gz
+            _build/manual/dotfiles.txt.gz
+            _build/manual/dotfiles-md.tar.gz
+            _build/manual/SHA256SUMS
+          fail_on_unmatched_files: false

@@ -1,12 +1,21 @@
 # Theming Guide
 
-The dotfiles ship 48 themes with live switching across every managed application. One command changes the terminal, editor, window manager, GTK, desktop environment, and browser-facing color mode in under a second.
+The dotfiles ship a wallpaper-driven theme system that generates terminal color palettes directly from wallpaper images using K-Means clustering in CIELAB color space. One command changes the terminal, editor, window manager, GTK, desktop environment, wallpaper, and browser-facing color mode in under a second.
+
+Themes are not hand-crafted — they are extracted from whatever wallpapers are available on the system.
 
 ## How Themes Work
 
-`.chezmoidata/themes.toml` is the single source of truth. It defines terminal palettes, UI accent colors, and per-application mappings for every theme. Chezmoi templates read from this file at apply time.
+Wallpapers are the source of truth. The system discovers wallpapers from two locations:
 
-The `theme` key in `.chezmoidata.toml` controls the active theme. Every template references the active theme's data through `{{ $t := index .themes .theme }}`, then uses `$t.term.bg`, `$t.ui.accent`, `$t.app.nvim`, and so on.
+1. **System wallpapers** — platform-native (macOS `/System/Library/Desktop Pictures/`, Linux `/usr/share/backgrounds/`)
+2. **Custom wallpapers** — user-provided in `~/Pictures/Wallpapers/` (custom overrides system)
+
+`extract-theme.py` extracts dominant colors from each wallpaper using K-Means clustering in CIELAB color space, then generates a full terminal palette (16 ANSI colors, accent, bg/fg, panel, border) with WCAG contrast enforcement.
+
+`rebuild-themes.sh` orchestrates discovery → extraction → assembly into `.chezmoidata/themes.toml`. Themes are cached in `~/.cache/dotfiles/themes/` and only regenerated when wallpapers change.
+
+The `theme` key in `.chezmoidata.toml` controls the active theme. Every template references the active theme's data through `{{ $t := index .themes .theme }}`.
 
 ## Switching Themes
 
@@ -16,15 +25,25 @@ The `theme` key in `.chezmoidata.toml` controls the active theme. Every template
 dot theme
 ```
 
-Opens an interactive menu listing all 48 themes. Select one and press Enter.
+Opens an fzf picker listing every paired wallpaper theme (themes that have both `-dark` and `-light` variants). Two columns: **WALLPAPER** name and **SOURCE** (System or Custom). The current theme is marked with `✓` and `◀`. Select one and press Enter.
 
 ### Direct Switch
 
 ```bash
-dot theme catppuccin-mocha
+dot theme tahoe-dark
 ```
 
 Sets the theme immediately. Regenerates configs and reloads running applications.
+
+### Rebuild Themes
+
+```bash
+dot theme rebuild           # incremental (uses cache for unchanged wallpapers)
+dot theme rebuild --force   # full regeneration
+dot theme rebuild --list    # discover wallpapers without rebuilding
+```
+
+Discovers wallpapers from system + custom paths, runs K-Means extraction in parallel (4 jobs), caches generated themes in `~/.cache/dotfiles/themes/`, and writes `.chezmoidata/themes.toml`. Custom wallpapers override system wallpapers on name collision.
 
 ### Under the Hood: dot-theme-sync
 
@@ -37,7 +56,7 @@ Sets the theme immediately. Regenerates configs and reloads running applications
 
 ```bash
 dot-theme-sync                    # Reload current theme
-dot-theme-sync catppuccin-latte   # Switch to a new theme
+dot-theme-sync macos-wave-light   # Switch to a new theme
 dot-theme-sync --full             # Full chezmoi apply instead of targeted
 ```
 
@@ -50,7 +69,9 @@ Each theme switch touches these applications:
 | **Ghostty** | `chezmoi apply` + macOS app-support sync + DBus `reload-config` or runtime signal fallback | Background, foreground, all 16 ANSI colors, cursor |
 | **Tmux** | `chezmoi apply` + `source-file` | Status bar colors, pane borders, mode indicators |
 | **Niri** | `chezmoi apply` + `load-config-file` IPC | Window borders, focus ring, inactive tint |
-| **Desktop (macOS)** | `osascript` + `defaults write -g AppleAccentColor` | System appearance (Light/Dark), accent color |
+| **Desktop (macOS)** | `osascript` + `defaults write` + `killall` | System appearance (Light/Dark), accent color, highlight color; forces SystemUIServer/Dock/cfprefsd refresh |
+| **Wallpaper (macOS)** | `osascript` System Events | Desktop wallpaper set across all displays |
+| **Wallpaper (Linux)** | `gsettings` / `dms` / `swaybg` / `feh` | HEIC auto-converted to PNG; `picture-uri` and `picture-uri-dark` set separately |
 | **Desktop (Linux/GNOME)** | `chezmoi apply` + `gsettings` | Theme name, icon theme, color scheme preference |
 | **Safari / Chrome / Edge** | Native browser appearance follows desktop theme | Browser chrome stays aligned when using the default/native browser theme |
 | **Firefox** | `chezmoi apply` on `~/.config/firefox/user.js` | Website color scheme preference follows the active dot theme; link that file into a Firefox profile to enforce it |
@@ -67,28 +88,74 @@ Each theme switch touches these applications:
 dot theme toggle
 ```
 
-Toggles between the dark and light variant of the current theme family. A theme named `catppuccin-mocha` (dark) toggles to `catppuccin-latte` (light), and vice versa. The toggle uses the `family` field in `themes.toml` to find the matching counterpart.
+Toggles between the dark and light variant of the current theme family. A theme named `macos-tahoe-dark` toggles to `macos-tahoe-light`, and vice versa.
 
 ## Theme Families
 
-Themes group into families. Each family has at least one dark and one light variant:
+Available themes depend on your system. Run `dot theme list` to see what's discovered. On macOS Sonoma, you'll see ~150+ themes from system wallpapers. Custom wallpapers in `~/Pictures/Wallpapers/` add more.
 
-- **catppuccin** -- mocha, macchiato, frappe (dark), latte (light)
-- **tokyonight** -- night, storm, moon (dark), day (light)
-- **rose-pine** -- main, moon (dark), dawn (light)
-- **kanagawa** -- wave, dragon (dark), lotus (light)
-- **gruvbox** -- dark, light
-- **solarized** -- dark, light
-- **everforest** -- dark, light
-- **one** -- onedark, onelight
-- **dracula** -- dark only
-- **nord** -- dark only
-- **macos** -- big-sur, mojave, monterey, sequoia, sonoma, tahoe, ventura (dark/light pairs)
-- **abstract** -- waves (dark/light)
-- **adwaita** -- dark/light
-- **colourful** -- dark/light
-- **imac** -- blue (dark/light)
-- **monterey** -- sierra-blue (dark/light)
+### Rebuilding themes
+
+When wallpapers change (new system update, new custom wallpapers), regenerate:
+
+```bash
+dot theme rebuild          # Regenerate (uses cache for unchanged wallpapers)
+dot theme rebuild --force  # Force full regeneration
+dot theme rebuild --list   # List discovered wallpapers without rebuilding
+```
+
+## What works without wallpapers
+
+Theme switching is a two-tier system:
+
+**Core (always works)** — ships in the repo, no setup needed:
+- Terminal colors (Ghostty, Alacritty, Kitty, WezTerm, tmux)
+- Editor themes (Neovim colorscheme, VS Code)
+- macOS dark/light mode and accent color
+- Linux GNOME color-scheme, GTK theme, icon theme
+- Browser color mode (Safari, Chrome, Firefox)
+
+**Wallpapers (optional)** — user-provided, enhances the theme:
+- Desktop wallpaper matched to the active theme
+- Requires `~/Pictures/Wallpapers/` with files named `macos-NAME-dark.heic`
+
+If no wallpapers are present, `dot theme` applies all core changes and skips the wallpaper step. No errors, no manual config.
+
+## Wallpapers (optional)
+
+Wallpapers are not shipped in the repo. Each user sources their own and places them in `~/Pictures/Wallpapers/`:
+
+```
+macos-tahoe-dark.heic
+macos-tahoe-light.heic
+```
+
+The naming convention is `macos-NAME-APPEARANCE.heic` (or `.jpg`/`.png`). The theme picker marks themes with matching wallpapers as `[W]`.
+
+### Wallpaper guidelines
+
+- **Resolution**: 6016x6016 recommended (matches Apple's native resolution)
+- **Format**: `.heic` preferred on macOS, `.png`/`.jpg` also supported
+- **Brightness**: dark/light pairs targeting a golden ratio (1.618) relationship give balanced contrast across displays
+
+### Platform behavior
+
+| Platform | Wallpaper support | Mechanism |
+|---|---|---|
+| **macOS** | `.heic`, `.jpg`, `.png` | `osascript` (all desktops) |
+| **Linux (GNOME)** | `.png`, `.jpg` (`.heic` auto-converted) | `gsettings picture-uri` + `picture-uri-dark` |
+| **Linux (Wayland)** | `.png`, `.jpg` (`.heic` auto-converted) | `swaybg`, `feh`, or Niri/DMS IPC |
+| **WSL** | Not applicable | No compositor; terminal colors still apply |
+
+On Linux, `.heic` files are automatically converted to `.png` using `magick`, `heif-convert`, or `convert` (whichever is available). The `.png` is cached and only regenerated when the source `.heic` changes.
+
+### Using your OS default wallpapers
+
+If you don't provide custom wallpapers, your OS keeps its current desktop wallpaper. The theme still applies all color changes (terminal, editor, accent, dark/light mode). This is the expected default for most users.
+
+## Build Artifacts
+
+All build caches (Cargo, Go, pip, uv, Zig) are redirected to `/tmp/builds/` via environment variables in `mise.toml` and `cargo/config.toml`. The directory is created on shell init via `fish/conf.d/env.fish`. Build artifacts are cleared on reboot.
 
 ## Troubleshooting
 
@@ -126,7 +193,7 @@ GTK theme names must match installed themes exactly. Catppuccin themes use names
 defaults write -g AppleAccentColor -int <value>
 ```
 
-If the UI did not refresh immediately, log out/in once or toggle appearance manually in System Settings.
+`dot-theme-sync` now kills `cfprefsd`, `SystemUIServer`, `Dock`, and `System Settings` after writing accent/highlight defaults to force an immediate refresh. If the UI still does not update, close and reopen System Settings.
 
 ### Browser theme did not change
 

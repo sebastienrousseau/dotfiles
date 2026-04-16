@@ -1,5 +1,5 @@
-{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end -}}
+{{- $t := index .themes (default "macos-monterey-dark" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "macos-monterey-dark" -}}{{- end -}}
 {{- $bg := $t.term.bg -}}
 {{- $fg := $t.term.fg -}}
 {{- $accent := $t.ui.accent -}}
@@ -141,7 +141,7 @@ bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  THEME — Powerline Status Bar                                           ║
-# ║  Colors from .chezmoidata/themes.toml ({{ default "catppuccin-mocha" .theme }})  ║
+# ║  Colors from .chezmoidata/themes.toml ({{ default "macos-monterey-dark" .theme }})  ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
 
 # --- Status Bar ---

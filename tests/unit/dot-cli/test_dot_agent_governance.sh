@@ -27,7 +27,11 @@ test_start "registries_require_signed_change_control"
 assert_file_contains "$MODEL_REGISTRY" 'signed-commit' "model registry enforces signed change control"
 assert_file_contains "$PROMPT_REGISTRY" 'signed-commit' "prompt registry enforces signed change control"
 
-test_start "readme_positions_trusted_workstation"
-assert_file_contains "$README_FILE" 'Trusted agent workstation' "README positions the repo as a trusted agent workstation"
+test_start "readme_links_trusted_workstation_doc"
+# The tagline no longer leads with "Trusted agent workstation" (it's been
+# demoted from headline to feature-table row), but the README must still
+# surface the trust/attestation story via the capability table or docs link.
+assert_file_contains "$README_FILE" 'Cryptographic Attestation' "README surfaces attestation as a capability"
+assert_file_contains "$README_FILE" 'signed' "README mentions signed releases"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

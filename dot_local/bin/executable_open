@@ -17,7 +17,9 @@ log_info "$target"
 
 case "$(uname -s)" in
   Darwin)
-    open "$target"
+    # Use /usr/bin/open explicitly — otherwise this wrapper would recurse
+    # into itself via PATH lookup.
+    /usr/bin/open "$target"
     ;;
   Linux)
     if grep -qi microsoft /proc/version 2>/dev/null; then

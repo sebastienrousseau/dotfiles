@@ -9,11 +9,14 @@ title: Fleet Deployment Architecture
 flowchart TD
     subgraph repo["Git Repository (SSOT)"]
         data[".chezmoidata.toml<br/>theme, profile, machine, features"]
-        themes[".chezmoidata/themes.toml<br/>24 themes x {term, ui, ext, app}"]
+        wallpapers["~/Pictures/Wallpapers/ + System<br/>wallpapers (source of truth)"]
+        engine_k["K-Means CIELAB engine<br/>extract-theme.py + rebuild-themes.sh"]
+        themes[".chezmoidata/themes.toml<br/>auto-generated, WCAG AAA"]
         hw[".chezmoidata/hardware.toml<br/>machine presets: T2, Surface, Geekom"]
         keys[".chezmoidata/keybinds.toml<br/>modifier hierarchy matrix"]
         tpl[".chezmoitemplates/<br/>reusable partials"]
         configs["dot_config/<br/>50+ app configs as .tmpl"]
+        wallpapers --> engine_k --> themes
     end
 
     repo --> engine["Chezmoi Template Engine<br/>chezmoi apply"]

@@ -10,8 +10,12 @@ heal_broken_symlinks() {
   local broken=()
 
   while IFS= read -r -d '' link; do
+    local filename
+    filename=$(basename "$link")
+
     # Skip known false positives (e.g., Chrome lock files in backups)
     [[ "$link" == *"google-chrome-backup"* ]] && continue
+    [[ "$filename" == "SingletonLock" || "$filename" == "SingletonCookie" || "$filename" == "SingletonSocket" ]] && continue
 
     if [[ ! -e "$link" ]]; then
       broken+=("$link")

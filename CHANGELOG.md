@@ -2,6 +2,26 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.500
+
+### Added
+- **Wallpaper-driven theme engine** — themes are no longer hand-crafted. `extract-theme.py` uses K-Means clustering in CIELAB color space to extract dominant colors from any wallpaper image and generate a full terminal palette (16 ANSI colors, accent, bg/fg, panel, border) with WCAG AAA contrast enforcement.
+- **Automatic wallpaper discovery** — `rebuild-themes.sh` scans system wallpapers (macOS `/System/Library/Desktop Pictures/`, Linux `/usr/share/backgrounds/`) and custom wallpapers (`~/Pictures/Wallpapers/`). Custom overrides system. Themes are cached and only regenerated when wallpapers change.
+- **`dot theme rebuild`** — new command to regenerate themes from discovered wallpapers. Supports `--force` (ignore cache) and `--list` (show wallpapers without rebuilding). Parallel processing (4 jobs).
+- **System wallpaper fallback** — when no custom wallpaper exists, `wallpaper-sync.sh` maps theme names to platform-native wallpapers before falling back to "skip gracefully".
+- **HEIC → PNG auto-conversion** on Linux via `magick`/`heif-convert`/`convert`.
+- **macOS accent from wallpaper** — `macos_accent` field in generated themes maps wallpaper dominant hue to macOS accent color. `dot-theme-sync` reads it from themes.toml instead of a hardcoded case statement.
+- **Build artifact redirection** — Cargo, Go, pip, uv, Zig caches → `/tmp/builds/`.
+
+### Changed
+- **themes.toml is now auto-generated** — run `dot theme rebuild` after adding wallpapers. Do not edit manually.
+- **Theme family derived from themes.toml** — `get_theme_family()` in `switch.sh` reads the `family` field dynamically instead of hardcoded case patterns.
+- **macOS appearance refresh** — kills cfprefsd/SystemUIServer/Dock/System Settings after accent changes.
+- **Graceful wallpaper fallback** — theme switching works without custom wallpapers. Core changes (colors, accent, dark/light) always apply; wallpaper is optional.
+
+### Removed
+- **Static theme definitions** — all hand-crafted theme entries replaced by wallpaper-driven generation.
+
 ## v0.2.497
 
 ### Added

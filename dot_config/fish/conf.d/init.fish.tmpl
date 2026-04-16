@@ -30,31 +30,89 @@ if test "$DOTFILES_ARTIFACT_MODE" = "1"
 end
 
 # ── Starship (eager — must survive cache clears) ────────────────
+function _dotfiles_source_cached_init --argument-names tool file
+    if test -n "$XDG_CACHE_HOME"
+        set -l cache_root "$XDG_CACHE_HOME"
+    else
+        set -l cache_root "$HOME/.cache"
+    end
+
+    set -l cache_file "$cache_root/fish/$file"
+    if test -s "$cache_file"
+        source "$cache_file"
+        return 0
+    end
+
+    if command -v $tool >/dev/null 2>&1
+        _cached_eval $tool init fish
+        return $status
+    end
+
+    return 1
+end
+
 if test "$DOTFILES_ARTIFACT_MODE" = "0"; and command -v starship >/dev/null
-    starship init fish | source
+    if not _dotfiles_source_cached_init starship starship-init.fish
+        starship init fish | source
+    end
 end
 
 # ── Lazy Hydration (deferred to first prompt) ────────────────────
 function _dotfiles_async_init
     # Mise
     if command -v mise >/dev/null
-        _cached_eval mise activate fish
+        if not test -s "$SHELL_CACHE/mise-init.fish"
+            _cached_eval mise activate fish
+        else
+            source "$SHELL_CACHE/mise-init.fish"
+        end
     end
     # Atuin
     if command -v atuin >/dev/null
-        _cached_eval atuin init fish
+        if not test -s "$SHELL_CACHE/atuin-init.fish"
+            _cached_eval atuin init fish
+        else
+            source "$SHELL_CACHE/atuin-init.fish"
+        end
     end
     # Zoxide (--cmd=cd replaces cd with zoxide-aware version)
     if command -v zoxide >/dev/null
-        _cached_eval zoxide init --cmd=cd fish
+        if not test -s "$SHELL_CACHE/zoxide-init.fish"
+            _cached_eval zoxide init --cmd=cd fish
+        else
+            source "$SHELL_CACHE/zoxide-init.fish"
+        end
     end
     # FZF
     if command -v fzf >/dev/null
-        _cached_eval fzf --fish
+        if not test -s "$SHELL_CACHE/fzf-init.fish"
+            _cached_eval fzf --fish
+        else
+            source "$SHELL_CACHE/fzf-init.fish"
+        end
+    end
+    # Direnv
+    if command -v direnv >/dev/null
+        if not test -s "$SHELL_CACHE/direnv-init.fish"
+            _cached_eval direnv hook fish
+        else
+            source "$SHELL_CACHE/direnv-init.fish"
+        end
     end
     # Carapace completions (cached)
     if command -v carapace >/dev/null 2>&1
-        _cached_eval carapace _carapace fish
+        set -l carapace_cache "$SHELL_CACHE/carapace-init.fish"
+        if test -s "$carapace_cache"
+            source "$carapace_cache"
+        else
+            set -l _carapace_tmp "$carapace_cache.tmp.$fish_pid"
+            if carapace _carapace fish >"$_carapace_tmp" 2>/dev/null
+                mv "$_carapace_tmp" "$carapace_cache"
+                source "$carapace_cache"
+            else
+                rm -f "$_carapace_tmp"
+            end
+        end
     end
     # Pueue daemon (deferred here to avoid blocking shell startup)
     if command -v pueue >/dev/null; and not pueue status >/dev/null 2>&1

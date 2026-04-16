@@ -1,281 +1,113 @@
 # Themes
 
-48 themes. Dark and light variants. WCAG AAA compliant.
+Themes are auto-generated from wallpapers. K-Means clustering in CIELAB color space extracts dominant colors. Every theme is WCAG AAA compliant.
 
-Every theme lives in `.chezmoidata/themes.toml` -- the single source of truth for all color definitions across the fleet. Templates read from `{{ .themes.<name> }}` and render terminal colors, UI accents, GTK settings, Neovim colorschemes, and VS Code themes in one pass.
+There is no fixed theme catalog. The available themes depend on which wallpapers are present on your system. Run `dot theme list` to see what's discovered.
+
+## Source of truth
+
+Wallpapers — not `themes.toml` — are the source of truth. The system discovers wallpapers from two locations:
+
+1. **System wallpapers** — platform-native (macOS `/System/Library/Desktop Pictures/`, Linux `/usr/share/backgrounds/`)
+2. **Custom wallpapers** — `~/Pictures/Wallpapers/` (custom overrides system on name collision)
+
+`extract-theme.py` runs K-Means++ in CIELAB on each wallpaper, generates a 16-color terminal palette plus UI/app mappings, and enforces WCAG AAA contrast. `rebuild-themes.sh` orchestrates discovery → parallel extraction → assembly into `.chezmoidata/themes.toml` (cached in `~/.cache/dotfiles/themes/`, regenerated only when wallpapers change).
+
+`.chezmoidata/themes.toml` is a **generated artifact**. Do not edit it directly.
 
 ## Quick Start
 
 ```bash
-dot theme                    # Interactive picker
-dot theme catppuccin-mocha   # Switch by name
-dot theme toggle             # Toggle dark/light
-dot theme list               # List all themes
+dot theme              # Interactive picker (paired wallpaper themes only)
+dot theme tahoe-dark   # Switch directly
+dot theme toggle       # Swap dark↔light within current family
+dot theme rebuild      # Regenerate from current wallpapers
+dot theme list         # Show paired themes with System/Custom source
 ```
 
 ## Runtime Apply Behavior
 
 `dot theme` writes the selected theme to `.chezmoidata.toml`, regenerates target configs through chezmoi, then attempts live reloads for running applications.
 
-- macOS:
-  - Applies system Light/Dark appearance via `osascript` (`System Events`).
-  - Applies a mapped accent color via `defaults write -g AppleAccentColor`.
-  - Reload attempts for Ghostty, tmux, and Neovim remain conditional on whether those apps are running.
-- Linux:
-  - Applies desktop color scheme through `gsettings` when available.
-  - Includes DMS (Dank Material Shell) stock-theme mapping when DMS config is present.
+- **macOS**:
+  - Applies system Light/Dark appearance via `osascript` (`System Events`)
+  - Applies the wallpaper's derived accent color via `defaults write -g AppleAccentColor` and `AppleHighlightColor`
+  - Forces UI refresh via `killall cfprefsd SystemUIServer Dock "System Settings"`
+  - Sets desktop wallpaper across all displays via `osascript`
+- **Linux**:
+  - Applies desktop color scheme through `gsettings`
+  - Sets `picture-uri` and `picture-uri-dark` separately
+  - Auto-converts HEIC → PNG via `magick`/`heif-convert`/`convert`
+  - DMS (Dank Material Shell) integration when present
 
----
+## Theme Naming
 
-## Classic Themes
+Themes follow the pattern `<wallpaper-name>-<dark|light>`. The wallpaper filename (lowercased, hyphenated) becomes the theme family.
 
-24 themes from established color scheme projects. Each defines full 16-color terminal palettes, UI accent colors, and application-specific mappings.
+Examples (depend on what's present on your system):
 
-### Catppuccin
+| Wallpaper file | Generated themes |
+|:---|:---|
+| `~/Pictures/Wallpapers/tahoe.heic` (dynamic HEIC, 2 frames) | `tahoe-dark`, `tahoe-light` |
+| `/System/Library/Desktop Pictures/Sonoma.heic` | `sonoma-dark`, `sonoma-light` |
+| `/System/Library/Desktop Pictures/.thumbnails/Dome Dark.heic` + `Dome Light.heic` | `dome-dark`, `dome-light` |
 
-Four flavors covering the full dark-to-light range. Extended palette includes 26 named colors for GTK CSS generation.
+Only paired themes (with both dark and light variants) appear in `dot theme` and `dot theme list`.
 
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `catppuccin-mocha` | dark | `#89b4fa` | catppuccin |
-| `catppuccin-macchiato` | dark | `#8aadf4` | catppuccin |
-| `catppuccin-frappe` | dark | `#8caaee` | catppuccin |
-| `catppuccin-latte` | light | `#024ad9` | catppuccin |
+## Custom Wallpapers — Dynamic HEIC
 
-### Dracula
+Custom wallpapers in `~/Pictures/Wallpapers/` ship as Apple-compatible dynamic HEIC files: a single `.heic` containing both light and dark images, tagged with `apple_desktop:apr` XMP metadata. macOS auto-switches the displayed image based on appearance mode.
 
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `dracula` | dark | `#bd93f9` | dracula |
+To merge separate dark + light pairs into a single dynamic HEIC:
 
-### Gruvbox
+```bash
+bash scripts/theme/merge-wallpaper.sh           # merge all pairs in ~/Pictures/Wallpapers/
+bash scripts/theme/merge-wallpaper.sh tahoe     # merge a specific family
+bash scripts/theme/merge-wallpaper.sh --dry-run # preview only
+```
 
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `gruvbox-dark` | dark | `#83a598` | gruvbox |
-| `gruvbox-light` | light | `#026173` | gruvbox |
+## Generated Theme Schema
 
-### Nord
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `nord` | dark | `#81a1c1` | nord |
-
-### Tokyo Night
-
-Four variants: deep night, storm, moonlight, and a full light mode.
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `tokyonight-night` | dark | `#7aa2f7` | tokyonight |
-| `tokyonight-storm` | dark | `#7aa2f7` | tokyonight |
-| `tokyonight-moon` | dark | `#82aaff` | tokyonight |
-| `tokyonight-day` | light | `#0453bf` | tokyonight |
-
-### Rose Pine
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `rose-pine` | dark | `#1c5f7a` | rose-pine |
-| `rose-pine-moon` | dark | `#0e5f80` | rose-pine |
-| `rose-pine-dawn` | light | `#1e5f79` | rose-pine |
-
-### Kanagawa
-
-Three variants inspired by Katsushika Hokusai's ink wash paintings.
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `kanagawa-wave` | dark | `#7e9cd8` | kanagawa |
-| `kanagawa-dragon` | dark | `#8ba4b0` | kanagawa |
-| `kanagawa-lotus` | light | `#3c588a` | kanagawa |
-
-### One
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `onedark` | dark | `#61afef` | one |
-| `onelight` | light | `#174fc9` | one |
-
-### Solarized
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `solarized-dark` | dark | `#005aa1` | solarized |
-| `solarized-light` | light | `#005aa1` | solarized |
-
-### Everforest
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `everforest-dark` | dark | `#a7c080` | everforest |
-| `everforest-light` | light | `#8da101` | everforest |
-
----
-
-## Wallpaper Themes
-
-24 themes derived from macOS wallpapers and abstract designs. Each dark/light pair matches a wallpaper in `~/Pictures/Wallpapers/`. Terminal palettes are desaturated for dark variants and saturated for light variants, following Apple HIG contrast guidelines.
-
-### Abstract Waves
-
-Deep blue-to-indigo wave bands.
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `abstract-waves-dark` | dark | `#4252a2` | abstract |
-| `abstract-waves-light` | light | `#4252a2` | abstract |
-
-### Adwaita
-
-Geometric shapes inspired by GNOME's default aesthetic.
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `adwaita-dark` | dark | `#58a0a8` | adwaita |
-| `adwaita-light` | light | `#3555a5` | adwaita |
-
-### Colourful
-
-Red, maroon, and cyan wave bands with warm-cool contrast.
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `colourful-dark` | dark | `#38a0c8` | colourful |
-| `colourful-light` | light | `#6444ac` | colourful |
-
-### iMac Blue
-
-Electric blue curves on deep navy.
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `imac-blue-dark` | dark | `#0058a8` | imac |
-| `imac-blue-light` | light | `#0555b5` | imac |
-
-### macOS Big Sur
-
-Navy sky with coral dunes and aurora accents.
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `macos-big-sur-dark` | dark | `#794191` | macos |
-| `macos-big-sur-light` | light | `#7c3c9c` | macos |
-
-### macOS Mojave
-
-Night desert with silver dune highlights.
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `macos-mojave-dark` | dark | `#425a7a` | macos |
-| `macos-mojave-light` | light | `#3a5a82` | macos |
-
-### macOS Monterey
-
-Deep indigo base with violet and magenta accents.
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `macos-monterey-dark` | dark | `#6b43a3` | macos |
-| `macos-monterey-light` | light | `#6646a6` | macos |
-
-### macOS Sequoia
-
-Indigo to cyan to mint light rays.
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `macos-sequoia-dark` | dark | `#48a8c8` | macos |
-| `macos-sequoia-light` | light | `#006080` | macos |
-
-### macOS Sonoma
-
-Green and blue rolling hills.
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `macos-sonoma-dark` | dark | `#58b078` | macos |
-| `macos-sonoma-light` | light | `#096727` | macos |
-
-### macOS Tahoe
-
-Royal blue silk with purple horizon.
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `macos-tahoe-dark` | dark | `#3951b1` | macos |
-| `macos-tahoe-light` | light | `#3050b8` | macos |
-
-### macOS Ventura
-
-Amber and orange flower petals on dark navy.
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `macos-ventura-dark` | dark | `#d89048` | macos |
-| `macos-ventura-light` | light | `#914100` | macos |
-
-### Monterey Sierra Blue
-
-Cool slate and steel blue mountain layers.
-
-| Theme | Mode | Accent | Family |
-| :--- | :--- | :--- | :--- |
-| `monterey-sierra-blue-dark` | dark | `#435b73` | monterey |
-| `monterey-sierra-blue-light` | light | `#3a5a82` | monterey |
-
----
-
-## Theme Data Structure
-
-Each theme in `themes.toml` follows this schema:
+Each theme block in the generated `themes.toml` follows this schema:
 
 ```toml
 [themes.example-dark]
-mode = "dark"           # "dark" or "light"
-family = "example"      # Groups related dark/light variants
+mode = "dark"               # "dark" or "light"
+family = "example"          # groups dark/light variants
+macos_accent = 4            # derived from accent hue (0-6, -1=Graphite)
+wallpaper = "/path/to/wallpaper.heic"
+source = "custom"           # "custom" or "system"
 
 [themes.example-dark.term]
-bg = "#1e1e2e"          # Terminal background
-fg = "#cdd6f4"          # Terminal foreground
-cursor = "#f5e0dc"      # Cursor color
-cursor_text = "#1e1e2e" # Text under cursor
-sel_bg = "#383a55"      # Selection background
-sel_fg = "#cdd6f4"      # Selection foreground
-c0 .. c15               # ANSI colors 0-15
+bg, fg, cursor, cursor_text, sel_bg, sel_fg
+c0  .. c15                  # 16 ANSI colors
 
 [themes.example-dark.ui]
-accent = "#89b4fa"      # Primary accent (borders, highlights)
-accent_text = "#000000" # Text on accent backgrounds
-error = "#f38ba8"       # Semantic: error
-warning = "#f9e2af"     # Semantic: warning
-success = "#a6e3a1"     # Semantic: success
-info = "#89b4fa"        # Semantic: info
-panel = "#181825"       # Panel/sidebar background
-border = "#313244"      # Border color
+accent, accent_text         # white text always 7:1 against accent
+error, warning, success, info
+panel, border               # contrast-bound (1.03-2.0 for panel, 1.08-3.5 for border)
 
 [themes.example-dark.app]
-nvim = "catppuccin"              # Neovim colorscheme name
-nvim_style = "mocha"             # Neovim variant/style
-lualine = "catppuccin"           # Lualine theme
-gtk_theme = "Adwaita-dark"       # GTK theme name
-gtk_icon = "Papirus-Dark"        # Icon theme
-gnome_shell = ""                 # GNOME Shell theme
-gnome_gtk = "Adwaita-dark"       # GNOME GTK theme
-vscode = "Catppuccin Mocha"      # VS Code active theme
-vscode_dark = "Catppuccin Mocha" # VS Code dark preference
-vscode_light = "Catppuccin Latte"# VS Code light preference
-cat_wallpaper = ""               # Catppuccin wallpaper filename
-starship_palette = "catppuccin_mocha" # Starship prompt palette
+nvim, nvim_style, lualine
+gtk_theme, gtk_icon, gnome_shell, gnome_gtk
+vscode, vscode_dark, vscode_light
+cat_wallpaper
+starship_palette
 ```
-
-Catppuccin themes include an additional `[themes.<name>.ext]` section with 26 named colors (rosewater through crust) for GTK CSS variable generation.
 
 ## Adding a Theme
 
-1. Add a new `[themes.<name>]` block to `.chezmoidata/themes.toml`.
-2. Define `mode`, `family`, `term`, `ui`, and `app` sections.
-3. Pick accent colors that meet WCAG AAA contrast (7:1) against the background.
-4. Run `dot theme <name>` to test. All template-driven configs regenerate automatically.
-5. Verify with `chezmoi diff` before applying.
+To add a new theme, add a wallpaper — there are no manual TOML edits.
+
+1. Drop a wallpaper into `~/Pictures/Wallpapers/`
+2. (Optional) Use `merge-wallpaper.sh` to combine separate dark/light files into a single dynamic HEIC
+3. Run `dot theme rebuild` to regenerate `themes.toml` (parallel K-Means extraction, ~1-4s per wallpaper)
+4. Run `dot theme <name>` to test
+5. Verify with `chezmoi diff` before applying
+
+For best results, wallpapers should be 6016×6016 dynamic HEIC with ~1.6× brightness ratio between dark and light variants (golden ratio). Lower-resolution images are auto-resized; non-paired wallpapers are skipped from the picker.
+
+## See Also
+
+- [Theming Guide](../guides/THEMING.md) — full pipeline documentation
+- [Utilities](UTILS.md) — `dot theme` command reference

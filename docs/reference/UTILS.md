@@ -95,10 +95,16 @@ POSIX scripts in `~/.local/bin/` that work across macOS, Linux, and WSL.
 
 | Command | Description |
 |---------|-------------|
-| `dot theme` | Switch terminal and desktop themes (dark/light) |
-| `dot wallpaper` | Apply a wallpaper |
+| `dot theme` | Interactive picker (paired wallpaper themes only) |
+| `dot theme <name>` | Switch directly (e.g. `dot theme tahoe-dark`) |
+| `dot theme toggle` | Swap dark↔light within current family |
+| `dot theme rebuild` | Regenerate themes from system + custom wallpapers via K-Means in CIELAB (`--force`, `--list`) |
+| `dot theme list` | Show paired wallpaper themes with System/Custom source |
+| `dot wallpaper` | Apply a wallpaper independently of theme |
 | `dot fonts` | Install Nerd Fonts |
 | `dot tune` | Apply supported host tuning changes |
+
+Themes are auto-generated from wallpapers — `themes.toml` is not hand-edited. See [Theming Guide](../guides/THEMING.md) for the K-Means CIELAB extraction model and Apple-compatible dynamic HEIC support.
 
 ## AI Bridges
 

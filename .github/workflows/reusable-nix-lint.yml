@@ -1,0 +1,67 @@
+name: Reusable Nix Lint
+
+on:
+  workflow_call:
+    inputs:
+      flake_dir:
+        description: Directory containing the flake (e.g. "nix").
+        required: false
+        default: nix
+        type: string
+      run_fmt_check:
+        description: Run `nix fmt` and fail if any file changes.
+        required: false
+        default: true
+        type: boolean
+      run_flake_check:
+        description: Run `nix flake check`.
+        required: false
+        default: true
+        type: boolean
+      run_build:
+        description: Run `nix build ./<flake_dir>#homeConfigurations.user.activationPackage`.
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  nix-lint:
+    name: Nix Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a # v21
+
+      - uses: DeterminateSystems/magic-nix-cache-action@565684385bcd71bad329742eefe8d12f2e765b39 # v13
+
+      - name: Nix format check
+        if: inputs.run_fmt_check == true
+        run: |
+          set -euo pipefail
+          echo "::notice::Checking nix formatting in ${{ inputs.flake_dir }}"
+          (cd "${{ inputs.flake_dir }}" && nix fmt .)
+          # flake.lock is intentionally not committed; strip before diff.
+          rm -f "${{ inputs.flake_dir }}/flake.lock"
+          if ! git diff --exit-code -- "${{ inputs.flake_dir }}/*.nix"; then
+            echo "::error::nix fmt produced changes — run 'cd ${{ inputs.flake_dir }} && nix fmt .' locally"
+            exit 1
+          fi
+
+      - name: Nix flake check
+        if: inputs.run_flake_check == true
+        run: |
+          set -euo pipefail
+          echo "::notice::Running nix flake check on ./${{ inputs.flake_dir }}"
+          nix flake check ./${{ inputs.flake_dir }} --no-warn-dirty
+
+      - name: Nix build activation package
+        if: inputs.run_build == true
+        run: |
+          set -euo pipefail
+          nix build ./${{ inputs.flake_dir }}#homeConfigurations.user.activationPackage --no-link --print-build-logs

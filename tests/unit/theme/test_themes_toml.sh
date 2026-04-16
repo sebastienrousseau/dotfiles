@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
-# Theme SSOT validation — verifies all 48 themes meet WCAG AAA standards
+# Theme SSOT validation — verifies wallpaper-backed themes stay paired and valid
 # shellcheck disable=SC1090,SC1091,SC2034
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
@@ -45,10 +45,15 @@ else
 fi
 
 # --- Theme count ---
-test_start "theme_count_48"
-count=$(grep -c '^\[themes\.[a-z]' "$THEMES_FILE" | head -1)
-section_count=$(grep '^\[themes\.' "$THEMES_FILE" | grep -cv '\.\(term\|ui\|app\|ext\)\]')
-assert_equals "$section_count" "48" "must have 48 themes"
+test_start "theme_count_positive"
+section_count=$(grep '^\[themes\.' "$THEMES_FILE" | grep -cv '\.\(term\|ui\|app\|ext\|metrics\)\]')
+if [[ "$section_count" -gt 0 ]]; then
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST ($section_count themes)"
+else
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: no themes found"
+fi
 
 # --- Every theme has required sections ---
 test_start "all_themes_have_required_sections"
@@ -99,6 +104,45 @@ while IFS= read -r section; do
   done
 done < <(grep '^\[themes\.[a-z]' "$THEMES_FILE" | grep -v '\.\(term\|ui\|app\|ext\)\]')
 assert_equals "$missing" "0" "all themes must have all ui fields"
+
+# --- Theme has required metadata ---
+test_start "themes_have_wallpaper_and_source"
+missing_meta=0
+while IFS= read -r section; do
+  name="${section#\[themes.}"
+  name="${name%\]}"
+  [[ "$name" == *.* ]] && continue
+  if ! awk -v n="$name" '
+    $0 == "[themes." n "]" { found=1; next }
+    /^\[/ { found=0 }
+    found && /^wallpaper/ { has_wp=1 }
+    found && /^source/ { has_src=1 }
+    END { exit (has_wp && has_src) ? 0 : 1 }
+  ' "$THEMES_FILE"; then
+    echo "    MISSING META: $name"
+    missing_meta=$((missing_meta + 1))
+  fi
+done < <(grep '^\[themes\.[a-z]' "$THEMES_FILE" | grep -v '\.\(term\|ui\|app\|ext\|metrics\)\]')
+assert_equals "$missing_meta" "0" "every theme must have wallpaper and source fields"
+
+# --- Custom wallpapers are dynamic HEIC at 6016x6016 ---
+test_start "custom_wallpapers_are_uniform_6016"
+WALLPAPER_DIR="${HOME}/Pictures/Wallpapers"
+size_errors=0
+if [[ -d "$WALLPAPER_DIR" ]] && command -v magick >/dev/null 2>&1; then
+  while IFS= read -r file; do
+    [[ -f "$file" ]] || continue
+    dims="$(magick identify -format '%wx%h\n' "$file" 2>/dev/null | head -1 || true)"
+    if [[ "$dims" != "6016x6016" ]]; then
+      echo "    BAD SIZE: $(basename "$file") => ${dims:-unknown}"
+      size_errors=$((size_errors + 1))
+    fi
+  done < <(find "$WALLPAPER_DIR" -maxdepth 1 -type f -name '*.heic' | sort)
+  assert_equals "$size_errors" "0" "all custom wallpapers must be 6016x6016 HEIC"
+else
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (skipped: wallpaper directory missing or magick unavailable)"
+fi
 
 # --- WCAG AAA contrast validation ---
 test_start "all_themes_wcag_aaa"
@@ -162,7 +206,7 @@ if [[ "$wcag_result" == "SKIP" ]]; then
 else
   fail_count="${wcag_result##*$'\n'}"
   fail_count="${fail_count//[^0-9]/}"
-  assert_equals "${fail_count:-0}" "0" "all 48 themes must pass WCAG AAA"
+  assert_equals "${fail_count:-0}" "0" "all wallpaper themes must pass WCAG AAA"
 fi
 
 # --- Mode field present ---

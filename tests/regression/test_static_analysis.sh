@@ -15,7 +15,7 @@ source "$SCRIPT_DIR/../framework/assertions.sh"
 # 1. SHELLCHECK — warning level (matches Codacy severity)
 # ═══════════════════════════════════════════════════════════════
 
-# Files modified in this branch (v0.2.499 changes)
+# Files modified in this branch (v0.2.500 changes)
 CHANGED_SCRIPTS=(
   scripts/dot/commands/ai.sh
   scripts/ops/chezmoi-apply.sh

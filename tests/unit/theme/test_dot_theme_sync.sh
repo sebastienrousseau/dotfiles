@@ -91,18 +91,15 @@ assert_file_contains "$SCRIPT_FILE" "load-config-file" "must reload niri config"
 test_start "dms_uses_sed_inplace"
 assert_file_contains "$SCRIPT_FILE" "sed -i" "must use sed -i for DMS settings"
 
-# --- DMS stock theme mapping covers all families ---
-test_start "dms_mapping_complete"
-for family in catppuccin dracula gruvbox nord rose-pine tokyonight kanagawa solarized everforest onedark macos-monterey macos-ventura macos-sonoma; do
-  if ! grep -q "$family" "$SCRIPT_FILE"; then
-    echo "    MISSING DMS mapping: $family"
-    ((TESTS_FAILED++))
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST — missing $family"
-    break
-  fi
-done
-((TESTS_PASSED++))
-printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+# --- macOS accent reads from themes.toml (wallpaper-driven) ---
+test_start "macos_accent_from_themes_toml"
+if grep -q 'macos_accent' "$SCRIPT_FILE"; then
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+else
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST — missing macos_accent lookup"
+fi
 
 # --- Validates theme name ---
 test_start "validates_theme_name"

@@ -1,3 +1,18 @@
+<!--
+  Role:     Repo-scoped instructions for the OpenCode CLI when operating
+            inside this repository. Mirrors CLAUDE.md but targets OpenCode's
+            conventions/discovery.
+  Audience: OpenCode, this repo only.
+
+  Distinct from:
+    - CLAUDE.md           — same intent, but for Claude Code.
+    - dot_claude/CLAUDE.md — PERSONAL cross-project Claude Code preferences,
+                             deployed to ~/.claude/CLAUDE.md by chezmoi.
+
+  Keep CLAUDE.md and OPENCODE.md in sync on repo-level conventions (layout,
+  naming, CI, testing). If they drift, CLAUDE.md is the source of truth.
+-->
+
 # OPENCODE.md — AI Assistant Guidelines for Dotfiles Repository
 
 ## Chezmoi Source Directory Conventions

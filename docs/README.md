@@ -2,6 +2,22 @@
 
 Start here. Then go deeper.
 
+## The Manual
+
+The complete reference is the `.dotfiles` Manual — a multi-format book covering every concept, tutorial, reference, and recipe.
+
+- Online: <https://sebastienrousseau.github.io/dotfiles/manual/> (HTML, PDF, EPUB, ASCII)
+- Locally: `dot manual` opens the HTML in your browser
+- Sources: [`docs/manual/`](manual/)
+
+Quick jumps into the Manual:
+
+- [Introduction](manual/00-introduction.md) — who, what, how
+- [Concepts](manual/01-concepts/) — architecture, trust model, theme engine, fleet, self-healing
+- [Tutorials](manual/02-tutorials/) — first install, wallpaper→theme, profiles, secrets, fleet
+- [Reference](manual/03-reference/) — CLI, config files, environment, templates, feature flags
+- [Cookbook](manual/04-cookbook/) — 40+ recipes, troubleshooting, FAQ
+
 ## Start
 
 - [Install](guides/INSTALL.md)
@@ -33,6 +49,7 @@ Start here. Then go deeper.
 - [Reliability](operations/RELIABILITY.md)
 - [Naming conventions](NAMING_CONVENTIONS.md)
 - [Architecture](architecture/ARCHITECTURE.md)
+- [Repository layout](architecture/REPO_LAYOUT.md)
 - [Architecture decisions](adr/README.md)
 
 ## Repository map

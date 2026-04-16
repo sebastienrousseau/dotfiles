@@ -26,194 +26,45 @@ env:
 
 jobs:
   # ============================================================================
-  # STAGE 1: LINT (Zero-warning policy enforced)
+  # STAGE 1: LINT (Zero-warning policy enforced, reuses shared workflow)
   # ============================================================================
   lint-shell:
     name: Lint / Shell (Zero Warnings)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Cache tools
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
-        with:
-          path: |
-            ~/.local/bin
-            ~/.cargo/bin
-          key: shell-tools-${{ runner.os }}-v3
-      - name: Install tools
-        run: |
-          sudo apt-get update && sudo apt-get install -y shellcheck ripgrep shfmt
-      - name: Shellcheck (Zero Warnings Enforced)
-        run: |
-          echo "::notice::Enforcing zero-warning policy for shellcheck"
-          # Exclude SC1091 (sourced file not found), SC2030/SC2031 (intentional subshell overrides)
-          rg --files -g "*.sh" | xargs shellcheck -x --severity=error \
-            -e SC1091 -e SC2030 -e SC2031
-          if [ $? -ne 0 ]; then
-            echo "::error::Shellcheck failed - zero warnings policy violated"
-            exit 1
-          fi
-      - name: shfmt (Format Check - Fail on Unformatted)
-        run: |
-          echo "::notice::Checking shell format - will fail on any unformatted code"
-          shfmt -d -i 2 -ci scripts/**/*.sh install.sh .chezmoitemplates/**/*.sh
-          if [ $? -ne 0 ]; then
-            echo "::error::Shell formatting check failed - code is not properly formatted"
-            exit 1
-          fi
+    uses: ./.github/workflows/reusable-shell-lint.yml
+    with:
+      include_tests: false
+      shellcheck_severity: error
+      shellcheck_excludes: SC1091,SC2030,SC2031
+      fail_on_shellcheck: true
+      run_shfmt: true
+      shfmt_targets: scripts/**/*.sh install.sh .chezmoitemplates/**/*.sh
 
   lint-lua:
     name: Lint / Lua (Zero Warnings)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Cache Lua tools
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
-        with:
-          path: |
-            ~/.luarocks
-            ~/.cargo/bin/stylua
-          key: lua-tools-${{ runner.os }}-v3
-      - name: Install tools
-        run: |
-          sudo apt-get update && sudo apt-get install -y lua5.1 luarocks
-          luarocks install --local luacheck
-          echo "$HOME/.luarocks/bin" >> $GITHUB_PATH
-          # Install stylua with version pinning (skip if cached)
-          [[ -x ~/.cargo/bin/stylua ]] || cargo install stylua --version "0.20.0"
-      - name: Luacheck (Zero Warnings Enforced)
-        run: |
-          echo "::notice::Enforcing zero-warning policy for luacheck"
-          # Enforce ALL luacheck rules - no exclusions
-          luacheck --no-color --codes --ranges dot_config/nvim
-          if [ $? -ne 0 ]; then
-            echo "::error::Luacheck failed - zero warnings policy violated"
-            exit 1
-          fi
-      - name: Stylua (Format Check - Fail on Unformatted)
-        run: |
-          echo "::notice::Checking Lua format - will fail on any unformatted code"
-          ~/.cargo/bin/stylua --check --color Never dot_config/nvim
-          if [ $? -ne 0 ]; then
-            echo "::error::Lua formatting check failed - code is not properly formatted"
-            exit 1
-          fi
+    uses: ./.github/workflows/reusable-lua-lint.yml
+    with:
+      target: dot_config/nvim
+      strict: true
+      stylua_version: "0.20.0"
 
   lint-nix:
     name: Lint / Nix (Zero Warnings)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # reusable-nix-lint.yml requests id-token: write for the Nix installer's
+    # OIDC-backed cache. Top-level workflow permissions don't cover that, so
+    # the caller job must grant it explicitly.
     permissions:
       contents: read
       id-token: write
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a # v21
-      - uses: DeterminateSystems/magic-nix-cache-action@565684385bcd71bad329742eefe8d12f2e765b39 # v13
-      - name: Nix Format Check (Fail on Unformatted)
-        run: |
-          echo "::notice::Checking Nix format - will fail on any unformatted code"
-          (cd nix && nix fmt .)
-          # Remove flake.lock if created during fmt (not committed to repo)
-          rm -f nix/flake.lock
-          if ! git diff --exit-code -- 'nix/*.nix'; then
-            echo "::error::Nix formatting check failed - code is not properly formatted"
-            exit 1
-          fi
-      - name: Nix Flake Check (Zero Warnings)
-        run: |
-          echo "::notice::Enforcing zero-warning policy for Nix"
-          nix flake check ./nix --no-warn-dirty
-          if [ $? -ne 0 ]; then
-            echo "::error::Nix flake check failed - zero warnings policy violated"
-            exit 1
-          fi
+    uses: ./.github/workflows/reusable-nix-lint.yml
+    with:
+      flake_dir: nix
+      run_fmt_check: true
+      run_flake_check: true
+      run_build: false
 
   lint-copyright:
     name: Lint / Copyright Headers (Zero Tolerance)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Install tools
-        run: |
-          sudo apt-get update && sudo apt-get install -y ripgrep
-      - name: Copyright Header Validation (Zero Tolerance)
-        run: |
-          echo "::notice::Enforcing zero-tolerance policy for copyright headers"
-
-          # Define copyright patterns to check for
-          PATTERNS=(
-            "Copyright"
-            "© "
-            "(c) "
-            "All rights reserved"
-          )
-
-          # File extensions that require copyright headers
-          EXTENSIONS=("sh" "lua" "nix" "py" "js" "ts" "go" "rs" "java" "cpp" "c" "h" "hpp")
-
-          # Build ripgrep pattern for file extensions
-          RG_PATTERN=""
-          for ext in "${EXTENSIONS[@]}"; do
-            if [ -n "$RG_PATTERN" ]; then
-              RG_PATTERN="$RG_PATTERN,"
-            fi
-            RG_PATTERN="$RG_PATTERN*.$ext"
-          done
-
-          echo "Checking files with extensions: ${EXTENSIONS[*]}"
-
-          # Find all relevant files
-          ALL_FILES=$(rg --files -g "{$RG_PATTERN}" 2>/dev/null || true)
-
-          if [ -z "$ALL_FILES" ]; then
-            echo "::notice::No files found requiring copyright headers"
-            exit 0
-          fi
-
-          MISSING_COPYRIGHT=()
-
-          # Check each file for copyright header (first 10 lines)
-          while IFS= read -r file; do
-            # Skip files in excluded directories or generated/template files
-            if echo "$file" | grep -E "(node_modules/|\.git/|vendor/|target/|build/|\.tmpl$|\.chezmoitemplates/)" > /dev/null; then
-              continue
-            fi
-
-            # Check if any copyright pattern exists in first 10 lines
-            FOUND_COPYRIGHT=false
-            for pattern in "${PATTERNS[@]}"; do
-              if head -10 "$file" | grep -q "$pattern"; then
-                FOUND_COPYRIGHT=true
-                break
-              fi
-            done
-
-            if [ "$FOUND_COPYRIGHT" = false ]; then
-              MISSING_COPYRIGHT+=("$file")
-            fi
-          done <<< "$ALL_FILES"
-
-          # Report results
-          if [ ${#MISSING_COPYRIGHT[@]} -gt 0 ]; then
-            echo "::error::Copyright header validation failed - ${#MISSING_COPYRIGHT[@]} files missing copyright headers"
-            echo "Files missing copyright headers:"
-            for file in "${MISSING_COPYRIGHT[@]}"; do
-              echo "  - $file"
-            done
-            echo ""
-            echo "Required: Files must contain one of the following copyright patterns in the first 10 lines:"
-            for pattern in "${PATTERNS[@]}"; do
-              echo "  - '$pattern'"
-            done
-            exit 1
-          else
-            echo "::notice::All files have valid copyright headers"
-            echo "✅ Copyright header validation passed"
-          fi
+    uses: ./.github/workflows/reusable-copyright-lint.yml
 
   # ============================================================================
   # STAGE 2: SECURITY (Mandatory - No bypass allowed)
@@ -266,7 +117,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Checkov Infrastructure Security
-        uses: bridgecrewio/checkov-action@2fd3901c8feb52417f27f0d9800259a106c1ec1e # v12.3089.0
+        uses: bridgecrewio/checkov-action@9ff61ad7df06a619665acec928d66258bd6adc8f # v12.3094.0
         with:
           framework: dockerfile,yaml,secrets
           quiet: false
@@ -274,8 +125,8 @@ jobs:
           output_format: sarif
           output_file_path: reports/checkov.sarif
       - name: Upload Checkov results to GitHub Security
-        if: always()
-        uses: github/codeql-action/upload-sarif@38697555549f1db7851b81482ff19f1fa5c4fedc # v4
+        if: always() && hashFiles('reports/checkov.sarif') != ''
+        uses: github/codeql-action/upload-sarif@c10b8064de6f491fea524254123dbe5e09572f13 # v4
         with:
           sarif_file: reports/checkov.sarif
 
@@ -290,82 +141,39 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]  # BOTH platforms enforced
-        include:
-          - os: ubuntu-latest
-            cache_key: Linux
-          - os: macos-latest
-            cache_key: macOS
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Cache Chezmoi
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: ~/.local/bin/chezmoi
-          key: chezmoi-${{ matrix.cache_key }}-${{ env.CHEZMOI_VERSION }}
+          key: chezmoi-${{ runner.os }}-${{ env.CHEZMOI_VERSION }}
       - name: Setup Chezmoi
         run: |
           if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
             bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
           fi
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Chezmoi Apply Test
         run: |
           chezmoi init
           chezmoi apply --verbose --dry-run
       - name: Upload failure logs
         if: failure()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: logs-test-${{ matrix.cache_key }}
+          name: logs-test-${{ runner.os }}
           path: ~/.local/share/chezmoi/.log
           retention-days: 5
 
   test-unit:
     name: Test / Unit Tests (100% Coverage)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10  # Enforced timeout
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Run unit tests with coverage
-        run: |
-          chmod +x tests/framework/*.sh
-          # Set coverage requirement to 100%
-          export COVERAGE_THRESHOLD=100
-          ./tests/framework/test_runner.sh
-          if [ $? -ne 0 ]; then
-            echo "::error::Unit tests failed or coverage below 100%"
-            exit 1
-          fi
-      - name: Coverage Report
-        run: |
-          # Generate coverage report
-          ./tests/framework/coverage_analyzer.sh
-          if [ $? -ne 0 ]; then
-            echo "::error::Coverage analysis failed or threshold not met"
-            exit 1
-          fi
-      - name: Upload coverage reports
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 30
-
-  test-integration:
-    name: Test / Integration
-    runs-on: ubuntu-latest
-    timeout-minutes: 10  # Enforced timeout
-    needs: [lint-shell, lint-lua, security-secrets]
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Run integration tests
-        run: |
-          export RUN_INTEGRATION=1
-          ./tests/framework/test_runner.sh
-          if [ $? -ne 0 ]; then
-            echo "::error::Integration tests failed"
-            exit 1
-          fi
+    uses: ./.github/workflows/reusable-test-suite.yml
+    with:
+      min_coverage: "100"
+      run_integration: true
+      run_strict_checks: true
+      timeout_minutes: 10
 
   # ============================================================================
   # STAGE 4: MERGE GATE (All checks must pass)
@@ -384,7 +192,6 @@ jobs:
       security-infrastructure,
       test-matrix,
       test-unit,
-      test-integration,
     ]
     steps:
       - name: All checks passed
