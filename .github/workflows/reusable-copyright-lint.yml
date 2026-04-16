@@ -1,0 +1,36 @@
+name: Reusable Copyright Lint
+
+on:
+  workflow_call:
+    inputs:
+      extensions:
+        description: Comma-separated file extensions to check.
+        required: false
+        default: "sh,lua,nix,py,js,ts,go,rs,java,cpp,c,h,hpp"
+        type: string
+      excludes:
+        description: Regex matched against each file path; skipped if it matches.
+        required: false
+        default: '(^|/)(node_modules|\.git|vendor|target|build)/|\.tmpl$|(^|/)\.chezmoitemplates/'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  copyright-lint:
+    name: Copyright Headers
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Install ripgrep
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
+
+      - name: Run copyright header validator
+        run: |
+          set -euo pipefail
+          bash scripts/ci/check-copyright-headers.sh \
+            "--extensions=${{ inputs.extensions }}" \
+            "--excludes=${{ inputs.excludes }}"

@@ -50,8 +50,9 @@ jobs:
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: /tmp/.buildx-cache
-          key: devcontainer-buildx-${{ hashFiles('.devcontainer/**') }}
+          key: devcontainer-buildx-${{ runner.os }}-${{ hashFiles('.devcontainer/**') }}
           restore-keys: |
+            devcontainer-buildx-${{ runner.os }}-
             devcontainer-buildx-
 
       - name: Prepare CI devcontainer config

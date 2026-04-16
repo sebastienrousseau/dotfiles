@@ -27,10 +27,39 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # ==========================================================================
+  # VALIDATE — fast (pandoc only, no TeX). Runs on every push/PR so broken
+  # manual sources fail quickly without pulling the ~1GB TeX Live stack.
+  # ==========================================================================
+  validate:
+    name: Validate Manual (fast — pandoc only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Install pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc codespell
+
+      - name: Run manual quality gates
+        run: bash scripts/docs/check-manual.sh
+
+      - name: Fast build (no PDF)
+        run: bash scripts/docs/build-manual.sh --fast
+
+  # ==========================================================================
+  # BUILD — full (pandoc + TeX Live). Only when we actually publish the site
+  # or attach to a release. Skipped on PRs to avoid the TeX Live download cost.
+  # ==========================================================================
   build:
     name: Build Manual (9 formats)
+    needs: validate
+    if: >-
+      github.event_name == 'release' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     outputs:
       html_size: ${{ steps.sizes.outputs.html_size }}
       pdf_size: ${{ steps.sizes.outputs.pdf_size }}
@@ -38,9 +67,23 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
+      # Cache the apt archives directory so the ~1GB TeX Live download
+      # is reused across runs. Key is tied to the workflow file so that
+      # package changes invalidate the cache cleanly.
+      - name: Cache apt archives
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: /var/cache/apt/archives
+          key: manual-apt-${{ runner.os }}-${{ hashFiles('.github/workflows/manual-publish.yml') }}
+          restore-keys: |
+            manual-apt-${{ runner.os }}-
+
       - name: Install pandoc + TeX Live (for PDF)
         run: |
           sudo apt-get update
+          # Retain downloaded .debs so the cache above stays populated.
+          sudo rm -f /etc/apt/apt.conf.d/docker-clean
+          echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' | sudo tee /etc/apt/apt.conf.d/01keep-debs >/dev/null
           sudo apt-get install -y --no-install-recommends \
             pandoc \
             texlive-xetex \
@@ -52,9 +95,6 @@ jobs:
             librsvg2-bin \
             codespell
 
-      - name: Run manual quality gates
-        run: bash scripts/docs/check-manual.sh
-
       - name: Build manual (all formats)
         run: bash scripts/docs/build-manual.sh
 
@@ -63,9 +103,11 @@ jobs:
         run: |
           size() { stat -c%s "$1" 2>/dev/null || echo 0; }
           human() { awk -v b="$1" 'BEGIN{if(b<1024)print b"B";else if(b<1048576)printf "%dK",b/1024;else printf "%dM",b/1048576}'; }
-          echo "html_size=$(human $(size _build/manual/dotfiles.html))" >> "$GITHUB_OUTPUT"
-          echo "pdf_size=$(human $(size _build/manual/dotfiles.pdf))" >> "$GITHUB_OUTPUT"
-          echo "epub_size=$(human $(size _build/manual/dotfiles.epub))" >> "$GITHUB_OUTPUT"
+          {
+            echo "html_size=$(human "$(size _build/manual/dotfiles.html)")"
+            echo "pdf_size=$(human "$(size _build/manual/dotfiles.pdf)")"
+            echo "epub_size=$(human "$(size _build/manual/dotfiles.epub)")"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Upload manual artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

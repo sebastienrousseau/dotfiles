@@ -1,0 +1,65 @@
+name: Reusable Lua Lint
+
+on:
+  workflow_call:
+    inputs:
+      target:
+        description: Directory to lint (luacheck + stylua).
+        required: false
+        default: dot_config/nvim
+        type: string
+      strict:
+        description: Enforce zero-warning policy (--codes --ranges).
+        required: false
+        default: true
+        type: boolean
+      stylua_version:
+        description: Pinned stylua version.
+        required: false
+        default: "0.20.0"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  lua-lint:
+    name: Lua Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Cache Lua tools
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: |
+            ~/.luarocks
+            ~/.cargo/bin/stylua
+          key: lua-lint-${{ runner.os }}-stylua-${{ inputs.stylua_version }}
+
+      - name: Install tools
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y lua5.1 luarocks
+          luarocks install --local luacheck
+          echo "$HOME/.luarocks/bin" >> "$GITHUB_PATH"
+          if [[ ! -x "$HOME/.cargo/bin/stylua" ]]; then
+            cargo install stylua --version "${{ inputs.stylua_version }}"
+          fi
+
+      - name: Luacheck
+        run: |
+          set -euo pipefail
+          echo "::notice::Running luacheck on ${{ inputs.target }}"
+          if [[ "${{ inputs.strict }}" == "true" ]]; then
+            luacheck --no-color --codes --ranges "${{ inputs.target }}"
+          else
+            luacheck --formatter plain --codes "${{ inputs.target }}"
+          fi
+
+      - name: Stylua (format check)
+        run: |
+          set -euo pipefail
+          echo "::notice::Checking stylua formatting on ${{ inputs.target }}"
+          "$HOME/.cargo/bin/stylua" --check --color Never "${{ inputs.target }}"
