@@ -1,0 +1,143 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ── AI Attribution (Linux kernel coding-assistants standard) ──────────
+# Appends "Assisted-by:" trailer to commit messages when authored during
+# an AI coding assistant session. Detects the active tool automatically.
+#
+# Reference: https://github.com/torvalds/linux/blob/master/Documentation/process/coding-assistants.rst
+# Format:    Assisted-by: AGENT_NAME:MODEL_VERSION [TOOL1] [TOOL2]
+
+detect_ai_agent() {
+  # Default model when running under Claude Code. Override at any time
+  # without editing this hook by exporting CLAUDE_MODEL in your shell
+  # rc, e.g. `export CLAUDE_MODEL=claude-opus-4-7`. Kept current with
+  # the latest generally-available Opus at time of last hook update.
+  local claude_default="${CLAUDE_MODEL:-claude-opus-4-7}"
+
+  # Claude Code (Anthropic). The CLI actually sets CLAUDECODE=1 (no
+  # underscore); the other vars are kept as historical aliases and for
+  # API-key-only sessions.
+  if [[ -n "${CLAUDECODE:-}" \
+     || -n "${CLAUDE_CODE:-}" \
+     || -n "${CLAUDE_SESSION_ID:-}" \
+     || -n "${CLAUDE_CODE_ENTRYPOINT:-}" \
+     || -n "${ANTHROPIC_API_KEY:-}" ]]; then
+    echo "Claude:${claude_default}"
+    return
+  fi
+
+  # GitHub Copilot CLI
+  if [[ -n "${GITHUB_COPILOT_CLI:-}" || -n "${COPILOT_SESSION:-}" ]]; then
+    echo "Copilot:copilot-cli"
+    return
+  fi
+
+  # Aider
+  if [[ -n "${AIDER_SESSION:-}" || -n "${AIDER_MODEL:-}" ]]; then
+    echo "Aider:${AIDER_MODEL:-unknown}"
+    return
+  fi
+
+  # OpenCode
+  if [[ -n "${OPENCODE_SESSION:-}" ]]; then
+    echo "OpenCode:${OPENCODE_MODEL:-unknown}"
+    return
+  fi
+
+  # Gemini CLI (Google)
+  if [[ -n "${GEMINI_API_KEY:-}" && -n "${GEMINI_SESSION:-}" ]]; then
+    echo "Gemini:gemini-cli"
+    return
+  fi
+
+  # Mistral Vibe
+  if [[ -n "${MISTRAL_API_KEY:-}" && -n "${MISTRAL_SESSION:-}" ]]; then
+    echo "Mistral:mistral-vibe"
+    return
+  fi
+
+  # Qwen Code
+  if [[ -n "${QWEN_SESSION:-}" ]]; then
+    echo "Qwen:qwen-code"
+    return
+  fi
+
+  # Kiro (AWS)
+  if [[ -n "${KIRO_SESSION:-}" || -n "${KIRO_CLI:-}" ]]; then
+    echo "Kiro:kiro-cli"
+    return
+  fi
+
+  # Autohand Code
+  if [[ -n "${AUTOHAND_SESSION:-}" ]]; then
+    echo "Autohand:autohand-code"
+    return
+  fi
+
+  # ZAI (Zhipu)
+  if [[ -n "${ZAI_SESSION:-}" ]]; then
+    echo "ZAI:zai-cli"
+    return
+  fi
+
+  # Shell-GPT
+  if [[ -n "${SHELL_GPT_SESSION:-}" ]]; then
+    echo "ShellGPT:shell-gpt"
+    return
+  fi
+
+  # Ollama (local)
+  if [[ -n "${OLLAMA_SESSION:-}" ]]; then
+    echo "Ollama:${OLLAMA_MODEL:-local}"
+    return
+  fi
+
+  # Fallback: check if any known AI process is in the tree.
+  # Uses the same overridable default as the env-var path above so a
+  # single export keeps both sites in sync.
+  if pgrep -q "claude" 2>/dev/null; then
+    echo "Claude:${claude_default}"
+    return
+  fi
+
+  # No AI detected
+  echo ""
+}
+
+# ── Branding Signature ────────────────────────────────────────────────
+sig_file="/Users/seb/.euxis/data/config/branding/signature.txt"
+msg_file="${1:-}"
+
+[[ -n "$msg_file" && -f "$msg_file" ]] || exit 0
+
+# Skip merge commits, fixups, and squashes
+first_line="$(head -1 "$msg_file")"
+if [[ "$first_line" =~ ^Merge\ |^fixup!\ |^squash!\  ]]; then
+  exit 0
+fi
+
+# ── Inject AI attribution if not already present ──────────────────────
+if ! grep -Fq "Assisted-by:" "$msg_file"; then
+  ai_agent="$(detect_ai_agent)"
+  if [[ -n "$ai_agent" ]]; then
+    printf '\nAssisted-by: %s\n' "$ai_agent" >> "$msg_file"
+  fi
+fi
+
+# ── Inject branding signature if not already present ──────────────────
+[[ -f "$sig_file" ]] || exit 0
+
+first_sig_line="$(sed -n '1p' "$sig_file")"
+[[ -n "$first_sig_line" ]] || exit 0
+
+if grep -Fqx -- "$first_sig_line" "$msg_file"; then
+  exit 0
+fi
+
+if [[ -s "$msg_file" ]]; then
+  printf '\n' >> "$msg_file"
+fi
+
+cat "$sig_file" >> "$msg_file"
+printf '\n' >> "$msg_file"
