@@ -110,25 +110,83 @@ _SHELL_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
 
 _cached_eval() {
   local label=$1; shift
-  local cache="$_SHELL_CACHE/${label}.zsh"
-  local bin="${commands[$1]}"
-  if [[ -f "$cache" ]] && [[ -z "$bin" || "$cache" -nt "$bin" ]]; then
-    source "$cache"
-  else
-    local init_output
-    local suspicious_re
-    init_output=$("$@" 2>/dev/null)
-    suspicious_re='(curl[[:space:]].*\|[[:space:]]*(ba)?sh|wget[[:space:]].*\|[[:space:]]*(ba)?sh|nc[[:space:]]+-e|/dev/tcp/|base64[[:space:]]+-d[[:space:]]*\|)'
-    # Reject suspicious patterns indicating malicious payloads
-    if printf '%s\n' "$init_output" | LC_ALL=C grep -Eqs -- "$suspicious_re"; then
-      print -u2 "[WARN] Suspicious output from $label init, skipping"
-      return 1
-    fi
-    print -r -- "$init_output" > "${cache}.tmp.$$"
-    mv "${cache}.tmp.$$" "$cache"
-    source "$cache"
-    { zcompile "$cache" } &!
+
+  # Debug bypass: skip cache read AND write entirely.
+  # Set EVALCACHE_DISABLE=true to eval directly without touching cache files.
+  if [[ "$EVALCACHE_DISABLE" == "true" ]]; then
+    eval "$("$@" 2>/dev/null)"
+    return $?
   fi
+
+  local cache="$_SHELL_CACHE/${label}.zsh"
+  local pin="${cache}.bin"
+  local bin="${commands[$1]}"
+  local real_bin=""
+  [[ -n "$bin" ]] && real_bin=${bin:A}
+
+  # Cache is valid when: it exists non-empty, the binary is not newer than it,
+  # the recorded realpath (if any) still matches the current realpath, and no
+  # file-path argument has been modified since cache write.
+  local cache_valid=1
+  if [[ ! -s "$cache" ]]; then
+    cache_valid=0
+  elif [[ -n "$bin" && "$bin" -nt "$cache" ]]; then
+    cache_valid=0
+  elif [[ -f "$pin" && -n "$real_bin" ]]; then
+    local pinned_real
+    pinned_real=$(<"$pin")
+    [[ -n "$pinned_real" && "$pinned_real" != "$real_bin" ]] && cache_valid=0
+  fi
+  if (( cache_valid )); then
+    local arg
+    for arg in "${@:2}"; do
+      if [[ -f "$arg" && "$arg" -nt "$cache" ]]; then
+        cache_valid=0
+        break
+      fi
+    done
+  fi
+
+  if (( cache_valid )); then
+    source "$cache"
+    return
+  fi
+
+  local init_output rc
+  init_output=$("$@" 2>/dev/null)
+  rc=$?
+  if (( rc != 0 )); then
+    print -u2 "[WARN] $label init exited $rc; not caching"
+    return $rc
+  fi
+
+  # Reject suspicious patterns indicating malicious payloads
+  local suspicious_re='(curl[[:space:]].*\|[[:space:]]*(ba)?sh|wget[[:space:]].*\|[[:space:]]*(ba)?sh|nc[[:space:]]+-e|/dev/tcp/|base64[[:space:]]+-d[[:space:]]*\|)'
+  if printf '%s\n' "$init_output" | LC_ALL=C grep -Eqs -- "$suspicious_re"; then
+    print -u2 "[WARN] Suspicious output from $label init, skipping"
+    return 1
+  fi
+
+  print -r -- "$init_output" > "${cache}.tmp.$$"
+  mv "${cache}.tmp.$$" "$cache"
+  if [[ -n "$real_bin" ]]; then
+    print -r -- "$real_bin" > "${pin}.tmp.$$"
+    mv "${pin}.tmp.$$" "$pin"
+  fi
+  source "$cache"
+  { zcompile "$cache" } &!
+}
+
+# Clear cache files written by _cached_eval (init outputs, realpath pins,
+# and zcompile artifacts). Safe: only touches *.zsh / *.zsh.bin / *.zwc.
+_cached_eval_clear() {
+  local cache_dir="$_SHELL_CACHE"
+  [[ -d "$cache_dir" ]] || return 0
+  local count=0 f
+  for f in "$cache_dir"/*.zsh(N) "$cache_dir"/*.zsh.bin(N) "$cache_dir"/*.zwc(N); do
+    rm -f -- "$f" && (( count++ ))
+  done
+  printf 'Cleared %d cached eval file(s) from %s\n' "$count" "$cache_dir"
 }
 
 # Lightweight precmd hook manager (faster than add-zsh-hook)

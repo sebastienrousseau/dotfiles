@@ -6,7 +6,10 @@
 #          _cached_eval zoxide init fish
 #
 # Cache files stored in $XDG_CACHE_HOME/fish/ (or ~/.cache/fish/)
-# Cache invalidated when binary mtime changes (e.g. after upgrade)
+# Cache invalidated when binary mtime, realpath, or any file-path arg changes
+# (e.g. after upgrade or PATH-shadow swap).
+#
+# Set EVALCACHE_DISABLE=true to bypass cache read AND write (debug aid).
 
 function _cached_eval --description 'Cache and source tool init output'
     set -l tool_name $argv[1]
@@ -21,34 +24,61 @@ function _cached_eval --description 'Cache and source tool init output'
         return 1
     end
 
+    # Debug bypass: skip cache read AND write entirely.
+    if test "$EVALCACHE_DISABLE" = true
+        command $argv 2>/dev/null | source
+        return $status
+    end
+
     set -l cache_dir (set -q XDG_CACHE_HOME; and echo $XDG_CACHE_HOME; or echo "$HOME/.cache")/fish
     set -l cache_file "$cache_dir/$tool_name-init.fish"
-    set -l mtime_file "$cache_dir/$tool_name-init.mtime"
+    set -l pin_file "$cache_dir/$tool_name-init.bin"
 
     mkdir -p "$cache_dir"
 
-    # Check if cache is stale (binary newer than cache)
+    set -l real_bin (realpath -- "$tool_path" 2>/dev/null; or echo "$tool_path")
+
+    # Cache valid when: present non-empty, binary not newer, recorded realpath
+    # still matches, and no file-path argument modified since cache write.
     set -l stale 0
-    if not test -f "$cache_file"
-        set stale 1
-    else if not test -f "$mtime_file"
+    if not test -s "$cache_file"
         set stale 1
     else if test "$tool_path" -nt "$cache_file"
         set stale 1
+    else if test -f "$pin_file"
+        set -l pinned (cat "$pin_file" 2>/dev/null)
+        if test -n "$pinned"; and test "$pinned" != "$real_bin"
+            set stale 1
+        end
+    end
+    if test "$stale" = 0
+        for arg in $argv[2..]
+            if test -f "$arg"; and test "$arg" -nt "$cache_file"
+                set stale 1
+                break
+            end
+        end
     end
 
     # Regenerate cache if stale
     if test "$stale" = 1
         set -l init_output (command $argv 2>/dev/null)
+        set -l rc $status
+        if test "$rc" -ne 0
+            echo "[WARN] $tool_name init exited $rc; not caching" >&2
+            return $rc
+        end
         # Reject suspicious patterns indicating malicious payloads
         if string match -rq 'curl\s.*\|\s*(ba)?sh|wget\s.*\|\s*(ba)?sh|nc\s+-e|/dev/tcp/|base64\s+-d\s*\|' -- "$init_output"
             echo "[WARN] Suspicious output from $tool_name init, skipping" >&2
             return 1
         end
-        set -l tmp_cache "$cache_file.tmp.%self"
+        set -l tmp_cache "$cache_file.tmp.$fish_pid"
         printf '%s\n' $init_output >"$tmp_cache"
         mv "$tmp_cache" "$cache_file"  # atomic rename
-        echo "$tool_path" >"$mtime_file"
+        set -l tmp_pin "$pin_file.tmp.$fish_pid"
+        printf '%s\n' "$real_bin" >"$tmp_pin"
+        mv "$tmp_pin" "$pin_file"
     end
 
     # Source cached output

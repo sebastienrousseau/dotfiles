@@ -74,26 +74,83 @@ _deferred_hydration() {
   _cached_eval() {
     local label="$1"
     shift
-    local cache="$_SHELL_CACHE/${label}.bash"
-    local bin_name="$1"
-    local bin=$(command -v "$bin_name")
 
-    if [[ -f "$cache" ]] && [[ -z "$bin" || "$cache" -nt "$bin" ]]; then
-      source "$cache"
-    else
-      local init_output
-      init_output=$("$@" 2>/dev/null)
-
-      # Reject if output contains suspicious patterns indicating malicious payloads
-      if [[ "$init_output" =~ (curl[[:space:]].*\|[[:space:]]*(ba)?sh|wget[[:space:]].*\|[[:space:]]*(ba)?sh|nc[[:space:]]+-e|\/dev\/tcp\/|base64[[:space:]]+-d[[:space:]]*\|) ]]; then
-        echo "[WARN] Suspicious output from $label init, skipping" >&2
-        return 1
-      fi
-
-      echo "$init_output" >"${cache}.tmp.$$"
-      mv "${cache}.tmp.$$" "$cache"
-      source "$cache"
+    # Debug bypass: skip cache read AND write entirely.
+    # Set EVALCACHE_DISABLE=true to eval directly without touching cache files.
+    if [[ "$EVALCACHE_DISABLE" == "true" ]]; then
+      eval "$("$@" 2>/dev/null)"
+      return $?
     fi
+
+    local cache="$_SHELL_CACHE/${label}.bash"
+    local pin="${cache}.bin"
+    local bin_name="$1"
+    local bin
+    bin=$(command -v "$bin_name")
+    local real_bin=""
+    [[ -n "$bin" ]] && real_bin=$(readlink -f -- "$bin" 2>/dev/null || echo "$bin")
+
+    # Cache valid when: present non-empty, binary not newer, recorded realpath
+    # still matches, and no file-path argument modified since cache write.
+    local cache_valid=1
+    if [[ ! -s "$cache" ]]; then
+      cache_valid=0
+    elif [[ -n "$bin" && "$bin" -nt "$cache" ]]; then
+      cache_valid=0
+    elif [[ -f "$pin" && -n "$real_bin" ]]; then
+      local pinned_real
+      pinned_real=$(<"$pin")
+      [[ -n "$pinned_real" && "$pinned_real" != "$real_bin" ]] && cache_valid=0
+    fi
+    if [[ "$cache_valid" == 1 ]]; then
+      local arg
+      for arg in "${@:2}"; do
+        if [[ -f "$arg" && "$arg" -nt "$cache" ]]; then
+          cache_valid=0
+          break
+        fi
+      done
+    fi
+
+    if [[ "$cache_valid" == 1 ]]; then
+      source "$cache"
+      return
+    fi
+
+    local init_output rc
+    init_output=$("$@" 2>/dev/null)
+    rc=$?
+    if [[ "$rc" -ne 0 ]]; then
+      echo "[WARN] $label init exited $rc; not caching" >&2
+      return "$rc"
+    fi
+
+    # Reject if output contains suspicious patterns indicating malicious payloads
+    if [[ "$init_output" =~ (curl[[:space:]].*\|[[:space:]]*(ba)?sh|wget[[:space:]].*\|[[:space:]]*(ba)?sh|nc[[:space:]]+-e|\/dev\/tcp\/|base64[[:space:]]+-d[[:space:]]*\|) ]]; then
+      echo "[WARN] Suspicious output from $label init, skipping" >&2
+      return 1
+    fi
+
+    echo "$init_output" >"${cache}.tmp.$$"
+    mv "${cache}.tmp.$$" "$cache"
+    if [[ -n "$real_bin" ]]; then
+      echo "$real_bin" >"${pin}.tmp.$$"
+      mv "${pin}.tmp.$$" "$pin"
+    fi
+    source "$cache"
+  }
+
+  # Clear cache files written by _cached_eval (init outputs and realpath pins).
+  _cached_eval_clear() {
+    local cache_dir="$_SHELL_CACHE"
+    [[ -d "$cache_dir" ]] || return 0
+    local count=0 f
+    shopt -s nullglob
+    for f in "$cache_dir"/*.bash "$cache_dir"/*.bash.bin; do
+      rm -f -- "$f" && ((count++))
+    done
+    shopt -u nullglob
+    printf 'Cleared %d cached eval file(s) from %s\n' "$count" "$cache_dir"
   }
 
   # Use Starship prompt if available
