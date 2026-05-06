@@ -4,6 +4,11 @@
 # Mock utilities for shell testing
 # Provides functions to create mock commands, files, and directories
 
+# Re-source guard: re-sourcing would clobber ORIGINAL_PATH (now containing
+# the mock dir) and reset MOCK_* tracking arrays.
+[[ "${_DOT_LIB_MOCKS_LOADED:-0}" == "1" ]] && return 0
+_DOT_LIB_MOCKS_LOADED=1
+
 # Track created mocks for cleanup
 MOCK_COMMANDS=()
 MOCK_FILES=()

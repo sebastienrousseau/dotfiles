@@ -30,6 +30,11 @@
 ##   ui_header "Section Title"
 ##   ui_ok "Operation succeeded"
 
+# Re-source guard: re-sourcing would zero out the BOLD/RED/etc colour
+# variables that ui_init() populated, breaking already-rendered output.
+[[ "${_DOT_LIB_UI_LOADED:-0}" == "1" ]] && return 0
+_DOT_LIB_UI_LOADED=1
+
 # ═══════════════════════════════════════════════════════════════════════
 # State — all zeroed before ui_init
 # ═══════════════════════════════════════════════════════════════════════

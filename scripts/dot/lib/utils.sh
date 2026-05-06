@@ -3,6 +3,10 @@
 # Dotfiles CLI Utilities
 # Shared functions for dot command modules
 
+# Re-source guard: cheap short-circuit when sourced from multiple modules.
+[[ "${_DOT_LIB_UTILS_LOADED:-0}" == "1" ]] && return 0
+_DOT_LIB_UTILS_LOADED=1
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=ui.sh
 source "$SCRIPT_DIR/ui.sh"
