@@ -145,6 +145,12 @@ jobs:
           nix shell nixpkgs#nushell -c nu -c "print 'Checking Nushell Syntax...'"
           # Template variables prevent true `nu --ide-check`, so we do a basic syntax check if possible.
 
+  lint-copyright:
+    name: Lint / Copyright
+    needs: changes
+    if: needs.changes.outputs.shell == 'true' || needs.changes.outputs.lua == 'true' || needs.changes.outputs.nix == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/reusable-copyright-lint.yml
+
   # ============================================================================
   # STAGE 2: SECURITY (Parallel with lint)
   # ============================================================================
@@ -552,7 +558,7 @@ jobs:
     name: Quality Gate
     runs-on: ubuntu-latest
     timeout-minutes: 2
-    needs: [lint-shell, security-secrets, security-dependencies, test-unit]
+    needs: [lint-shell, lint-copyright, security-secrets, security-dependencies, test-unit]
     if: github.event_name == 'pull_request'
     steps:
       - name: Enforce merge requirements
