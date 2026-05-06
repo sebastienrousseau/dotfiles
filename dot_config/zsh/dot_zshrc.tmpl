@@ -339,6 +339,13 @@ unset _core_layers
 # Starship prompt (eager — must survive cache clears for consistent UI)
 if [[ "$DOTFILES_ARTIFACT_MODE" != "1" ]] && (( ${+commands[starship]} )); then
   _cached_eval starship-init starship init zsh
+  # Transient Prompt: collapse the prompt of past commands to the
+  # [character] glyph after Enter, reducing scrollback noise.
+  # Guarded so the lazy-hydration path below doesn't double-bind widgets.
+  if [[ -z "${_DOTFILES_STARSHIP_TRANSIENT:-}" ]] && (( ${+functions[enable_transience]} )); then
+    enable_transience
+    _DOTFILES_STARSHIP_TRANSIENT=1
+  fi
 fi
 
 # User-local modules (aliases, functions — not managed by chezmoi)
@@ -538,7 +545,13 @@ _dotfiles_async_init() {
           _cached_eval atuin-init atuin init zsh
           ;;
         starship)
-          [[ "$DOTFILES_ARTIFACT_MODE" == "0" ]] && _cached_eval starship-init starship init zsh
+          if [[ "$DOTFILES_ARTIFACT_MODE" == "0" ]]; then
+            _cached_eval starship-init starship init zsh
+            if [[ -z "${_DOTFILES_STARSHIP_TRANSIENT:-}" ]] && (( ${+functions[enable_transience]} )); then
+              enable_transience
+              _DOTFILES_STARSHIP_TRANSIENT=1
+            fi
+          fi
           ;;
         zoxide)
           _cached_eval zoxide-init zoxide init zsh

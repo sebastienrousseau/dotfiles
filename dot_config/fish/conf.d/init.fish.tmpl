@@ -55,6 +55,11 @@ if test "$DOTFILES_ARTIFACT_MODE" = "0"; and command -v starship >/dev/null
     if not _dotfiles_source_cached_init starship starship-init.fish
         starship init fish | source
     end
+    # Transient Prompt: collapse past prompts to the [character] glyph
+    # after Enter, reducing scrollback noise.
+    if functions -q enable_transience
+        enable_transience
+    end
 end
 
 # ── Lazy Hydration (deferred to first prompt) ────────────────────
