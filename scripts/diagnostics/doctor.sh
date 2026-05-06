@@ -472,10 +472,12 @@ fi
 # --- Performance ---
 _section "Performance"
 
-# Check shell cache freshness — stale caches force runtime regeneration
+cache_base="${XDG_CACHE_HOME:-$HOME/.cache}"
+
+# 1. Shell cache freshness for tools the project already wraps in _cached_eval.
+# Stale caches force runtime regeneration on next shell start.
 stale_caches=0
 stale_tools=""
-cache_base="${XDG_CACHE_HOME:-$HOME/.cache}"
 for tool in mise starship zoxide atuin fzf direnv; do
   tool_bin="$(command -v "$tool" 2>/dev/null || true)"
   [[ -n "$tool_bin" ]] || continue
@@ -486,20 +488,96 @@ for tool in mise starship zoxide atuin fzf direnv; do
     esac
     if [[ ! -f "$cache_file" ]] || [[ "$tool_bin" -nt "$cache_file" ]]; then
       stale_caches=$((stale_caches + 1))
-      # Track unique tool names for the summary
       case "$stale_tools" in
         *"$tool"*) ;;
         *) stale_tools="${stale_tools:+$stale_tools, }$tool" ;;
       esac
-      break # one stale shell is enough to flag the tool
+      break
     fi
   done
 done
-
 if [[ $stale_caches -eq 0 ]]; then
   _ok "shell caches" "fresh"
 else
   _warn "shell caches" "stale ($stale_tools) — run dot prewarm"
+fi
+
+# 2. Slow-init tools that are present but NOT wrapped in _cached_eval.
+# Each of these runs uncached on every shell start; common offenders eat
+# 100-500ms apiece on a populated dev machine.
+unwrapped=""
+for tool in nvm fnm pyenv rbenv jenv asdf sdkman conda kubectl helm gh cargo pnpm yarn thefuck broot mcfly; do
+  command -v "$tool" >/dev/null 2>&1 || continue
+  found=0
+  for shell_dir in zsh bash fish; do
+    case "$shell_dir" in
+      fish) [[ -f "$cache_base/$shell_dir/${tool}-init.fish" ]] && found=1 ;;
+      *) [[ -f "$cache_base/$shell_dir/${tool}-init.$shell_dir" ]] && found=1 ;;
+    esac
+    (( found == 1 )) && break
+  done
+  (( found == 0 )) && unwrapped="${unwrapped:+$unwrapped, }$tool"
+done
+if [[ -z "$unwrapped" ]]; then
+  _ok "uncached slow-init tools" "none detected"
+else
+  _warn "uncached slow-init tools" "$unwrapped — consider wrapping in _cached_eval"
+fi
+
+# 3. Zsh completion dump health. compinit is usually the single biggest
+# cost on a zsh startup; a stale or uncompiled .zcompdump compounds it.
+if command -v zsh >/dev/null 2>&1; then
+  zcompdump="${HOME}/.zcompdump"
+  if [[ -f "$zcompdump" ]]; then
+    dump_mtime=$(stat -c %Y "$zcompdump" 2>/dev/null || stat -f %m "$zcompdump" 2>/dev/null || echo 0)
+    age_days=$(( ( $(date +%s) - dump_mtime ) / 86400 ))
+    if (( age_days > 7 )); then
+      _warn ".zcompdump" "${age_days}d old — refresh: rm ~/.zcompdump* && zsh -ic exit"
+    else
+      _ok ".zcompdump" "fresh (${age_days}d)"
+    fi
+    if [[ ! -f "${zcompdump}.zwc" ]]; then
+      _warn ".zcompdump.zwc" "missing — completion init slower than necessary"
+    fi
+  fi
+fi
+
+# 4. PATH length. Each entry is searched on every command resolution;
+# >40 entries is noticeably slow on cold-cache filesystems.
+path_count=$(printf '%s' "${PATH:-}" | tr ':' '\n' | grep -c . || true)
+if [[ "$path_count" -le 40 ]]; then
+  _ok "PATH length" "$path_count entries"
+elif [[ "$path_count" -le 80 ]]; then
+  _warn "PATH length" "$path_count entries — consider pruning"
+else
+  _fail "PATH length" "$path_count entries — likely slowing every command"
+fi
+
+# 5. Shell coverage. Surface installed shells that the project's caching
+# infrastructure (zsh/bash/fish) doesn't currently maintain caches for.
+shells_unmanaged=""
+for sh in nu pwsh; do
+  command -v "$sh" >/dev/null 2>&1 && shells_unmanaged="${shells_unmanaged:+$shells_unmanaged, }$sh"
+done
+if [[ -z "$shells_unmanaged" ]]; then
+  _ok "shell coverage" "all installed shells (zsh/bash/fish) are managed"
+else
+  _warn "shell coverage" "$shells_unmanaged installed — startup not measured by dot perf"
+fi
+
+# 6. Zsh hook count. Heavy precmd/preexec functions compound per-prompt.
+# Probe an interactive zsh with a hard timeout so a broken zshrc doesn't
+# stall doctor; skip cleanly if the probe fails.
+if command -v zsh >/dev/null 2>&1 && command -v timeout >/dev/null 2>&1; then
+  hook_counts=$(timeout 5 zsh -i -c 'echo "$#precmd_functions $#preexec_functions"' 2>/dev/null || echo "")
+  if [[ -n "$hook_counts" ]]; then
+    read -r precmd_n preexec_n <<<"$hook_counts"
+    if [[ "${precmd_n:-0}" -le 5 && "${preexec_n:-0}" -le 5 ]]; then
+      _ok "zsh hooks" "precmd=$precmd_n preexec=$preexec_n"
+    else
+      _warn "zsh hooks" "precmd=$precmd_n preexec=$preexec_n — heavy per-prompt work"
+    fi
+  fi
 fi
 
 if command -v hyperfine >/dev/null 2>&1; then
