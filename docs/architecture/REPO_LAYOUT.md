@@ -154,7 +154,7 @@ the repo itself.
 
 | Path                                  | Purpose                                                                    |
 |---------------------------------------|----------------------------------------------------------------------------|
-| `docs/manual/`                        | 26-page GNU-Stow-style reference manual (the v0.2.500 feature)             |
+| `docs/manual/`                        | 26-page GNU-Stow-style reference manual (the v0.2.501 feature)             |
 | `docs/architecture/`                  | This file + core architecture docs (ARCHITECTURE, INTEROP, fleet, walkthrough) |
 | `docs/operations/`                    | Runbooks, traceability matrix, migration notes                             |
 | `docs/reference/`                     | Command/config reference material                                           |

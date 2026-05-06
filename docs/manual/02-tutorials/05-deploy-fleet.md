@@ -111,7 +111,7 @@ dot fleet attest
 Expected output:
 
 ```
-Fleet Attestation — v0.2.500
+Fleet Attestation — v0.2.501
 
 Host           Git SHA    Policy    Tools OK   Drift   Verified
 -------------- ---------- --------- ---------- ------- --------

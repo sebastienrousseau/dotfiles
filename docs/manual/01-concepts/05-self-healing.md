@@ -138,7 +138,7 @@ They do **not** include:
 `dot bundle` creates a self-contained archive that can restore the workstation without network access:
 
 ```
-dotfiles-bundle-v0.2.500-20260416.tar.zst
+dotfiles-bundle-v0.2.501-20260416.tar.zst
 ├── source/              # Full git clone at current HEAD
 ├── tools/               # Pre-built chezmoi binary + mise
 ├── secrets/             # Age-encrypted snapshot of ~/.config/age/
