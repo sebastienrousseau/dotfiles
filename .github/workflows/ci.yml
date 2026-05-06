@@ -154,23 +154,27 @@ jobs:
   lint-chezmoidata:
     name: Lint / Chezmoidata Schema
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     needs: changes
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      # Pinned-binary install of taplo. Keeps the validator off the hot
-      # path and avoids a slow cargo build on every CI run.
+      # Cache the compiled taplo-cli binary across runs so we only pay
+      # the ~60s cargo build cost once. Key by major.minor so patch
+      # bumps invalidate cleanly.
+      - name: Cache taplo
+        id: taplo_cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~/.cargo/bin/taplo
+          key: taplo-cli-0.10-${{ runner.os }}
       - name: Install taplo
+        if: steps.taplo_cache.outputs.cache-hit != 'true'
+        run: cargo install --locked taplo-cli --version "^0.10"
+      - name: Verify taplo on PATH
         run: |
-          set -euo pipefail
-          version="0.10.0"
-          url="https://github.com/tamasfe/taplo/releases/download/${version}/taplo-full-linux-x86_64.gz"
-          curl -fsSL "$url" -o taplo.gz
-          gunzip taplo.gz
-          chmod +x taplo
-          sudo mv taplo /usr/local/bin/taplo
-          taplo --version
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          "$HOME/.cargo/bin/taplo" --version
       - name: Validate .chezmoidata.toml against schema
         run: bash scripts/ci/validate-chezmoidata.sh
 
