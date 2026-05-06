@@ -108,6 +108,22 @@ fi
 _SHELL_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
 [[ -d "$_SHELL_CACHE" ]] || mkdir -p "$_SHELL_CACHE"
 
+# Cache and source a tool's init output, with mtime/realpath/file-arg invalidation.
+#
+# Runs <cmd args...> on cache miss, vets the output for shell-injection
+# patterns, writes atomically, sources, and precompiles via zcompile in
+# the background. Cache invalidates when the binary's mtime is newer,
+# its realpath has changed (PATH-shadow swap), or a file-path argument
+# is newer than the cache.
+#
+# @arg $1 string Cache label (cache file: $_SHELL_CACHE/<label>.zsh)
+# @arg $2..N string Command and args to run on cache miss
+# @env EVALCACHE_DISABLE Set to "true" to bypass cache read AND write
+# @stdout Sourced cache content
+# @stderr Warning on init failure or suspicious-output rejection
+# @exitcode 0 Cache hit, successful regeneration, or successful bypass
+# @exitcode 1 Suspicious pattern detected in init output
+# @exitcode * Init command's exit code on non-zero return
 _cached_eval() {
   local label=$1; shift
 
@@ -177,8 +193,14 @@ _cached_eval() {
   { zcompile "$cache" } &!
 }
 
-# Clear cache files written by _cached_eval (init outputs, realpath pins,
-# and zcompile artifacts). Safe: only touches *.zsh / *.zsh.bin / *.zwc.
+# Clear cache files written by _cached_eval.
+#
+# Safe by design: only deletes *.zsh / *.zsh.bin / *.zwc files in
+# $_SHELL_CACHE, leaving any unrelated content untouched.
+#
+# @noargs
+# @stdout Single-line summary: "Cleared N cached eval file(s) from <dir>"
+# @exitcode 0 Always (no-op when cache dir doesn't exist)
 _cached_eval_clear() {
   local cache_dir="$_SHELL_CACHE"
   [[ -d "$cache_dir" ]] || return 0
