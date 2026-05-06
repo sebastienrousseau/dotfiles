@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/config/chezmoidata.schema.json",
+  "title": ".chezmoidata.toml",
+  "description": "Schema for the dotfiles project's root .chezmoidata.toml file. Catches typos in feature flags, profile names, and tool selections at PR time.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["dotfiles_version", "profile"],
+  "properties": {
+    "dotfiles_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?(\\+[A-Za-z0-9.-]+)?$",
+      "description": "Semver-style version string. Single source of truth synchronised by version-sync.sh."
+    },
+    "profile": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Active profile name (e.g. laptop, desktop, server). Custom values allowed."
+    },
+    "machine": {
+      "type": "string",
+      "description": "Machine preset key from .chezmoidata/hardware.toml. Empty string for generic / no preset."
+    },
+    "theme": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Visual theme key from .chezmoidata/themes.toml."
+    },
+    "terminal_font_family": {
+      "type": "string"
+    },
+    "terminal_font_size": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "default_shell": {
+      "type": "string",
+      "enum": ["zsh", "bash", "fish", "nu"],
+      "description": "Default interactive shell. Must match an installable shell on the target platform."
+    },
+    "name": {
+      "type": "string",
+      "description": "Git author name. Empty if set via chezmoi init prompts or per-host override."
+    },
+    "email": {
+      "type": "string",
+      "description": "Git author email. Empty if set via chezmoi init prompts or per-host override."
+    },
+    "signingkey": {
+      "type": "string",
+      "description": "SSH or GPG signing key reference for signed commits."
+    },
+    "features": {
+      "type": "object",
+      "description": "Feature flags. All values must be boolean.",
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    },
+    "tools": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "node_manager": {
+          "type": "string",
+          "enum": ["mise", "fnm", "nvm"]
+        }
+      }
+    },
+    "aliases": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "buckets": {
+          "type": "object",
+          "description": "Per-bucket alias toggles. All values must be boolean.",
+          "additionalProperties": {
+            "type": "boolean"
+          }
+        },
+        "policy": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "strict_mode": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  }
+}

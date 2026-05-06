@@ -151,6 +151,29 @@ jobs:
     if: needs.changes.outputs.shell == 'true' || needs.changes.outputs.lua == 'true' || needs.changes.outputs.nix == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/reusable-copyright-lint.yml
 
+  lint-chezmoidata:
+    name: Lint / Chezmoidata Schema
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: changes
+    if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      # Pinned-binary install of taplo. Keeps the validator off the hot
+      # path and avoids a slow cargo build on every CI run.
+      - name: Install taplo
+        run: |
+          set -euo pipefail
+          version="0.10.0"
+          url="https://github.com/tamasfe/taplo/releases/download/${version}/taplo-full-linux-x86_64.gz"
+          curl -fsSL "$url" -o taplo.gz
+          gunzip taplo.gz
+          chmod +x taplo
+          sudo mv taplo /usr/local/bin/taplo
+          taplo --version
+      - name: Validate .chezmoidata.toml against schema
+        run: bash scripts/ci/validate-chezmoidata.sh
+
   # ============================================================================
   # STAGE 2: SECURITY (Parallel with lint)
   # ============================================================================
