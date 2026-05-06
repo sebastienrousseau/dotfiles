@@ -61,7 +61,26 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@sebastienrousseau'
 
+      # Skip cleanly if this version is already on GPR (avoids 409 on
+      # workflow re-dispatches against an already-published release).
+      # Note: `npm view <pkg>@<ver> version` exits 0 with empty stdout
+      # when the version doesn't exist, so we check stdout, not rc.
+      - name: Check if version already exists on GPR
+        id: gpr_check
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=$(node -p 'require("./package.json").version')
+          existing=$(npm view "@sebastienrousseau/dotfiles@${version}" version --registry=https://npm.pkg.github.com 2>/dev/null || true)
+          if [[ -n "$existing" ]]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Version ${version} already on GPR; skipping publish."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish to GitHub Packages
+        if: steps.gpr_check.outputs.exists == 'false'
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
