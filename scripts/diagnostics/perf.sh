@@ -29,6 +29,7 @@ PROFILE=false
 RUNS=3
 TARGET_MS="${DOTFILES_PERF_TARGET_MS:-250}"
 MAX_MS="${DOTFILES_PERF_MAX_MS:-1000}"
+SHELL_FILTER=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -48,18 +49,68 @@ while [[ $# -gt 0 ]]; do
       TARGET_MS="${2:-$TARGET_MS}"
       shift 2
       ;;
+    --shell | -s)
+      SHELL_FILTER="${2:-}"
+      shift 2
+      ;;
     *)
       shift
       ;;
   esac
 done
 
-time_shell_startup() {
-  local start end
+# Per-shell defaults. nu and pwsh are genuinely slower than POSIX shells;
+# bash should be quickest. Override via DOTFILES_PERF_TARGET_<SHELL>_MS.
+shell_target_for() {
+  case "$1" in
+    zsh)  echo "${DOTFILES_PERF_TARGET_ZSH_MS:-$TARGET_MS}" ;;
+    bash) echo "${DOTFILES_PERF_TARGET_BASH_MS:-60}" ;;
+    fish) echo "${DOTFILES_PERF_TARGET_FISH_MS:-200}" ;;
+    nu)   echo "${DOTFILES_PERF_TARGET_NU_MS:-500}" ;;
+    pwsh) echo "${DOTFILES_PERF_TARGET_PWSH_MS:-600}" ;;
+    *)    echo "$TARGET_MS" ;;
+  esac
+}
+
+# Invoke a near-empty session for the named shell, picking flags that
+# load the user's interactive profile (matches what a fresh terminal does).
+invoke_shell() {
+  case "$1" in
+    zsh)  zsh -i -c exit </dev/null ;;
+    bash) bash -i -c exit </dev/null ;;
+    fish) fish -i -c exit </dev/null ;;
+    nu)   nu -c exit </dev/null ;;
+    pwsh) pwsh -Command exit </dev/null ;;
+    *)    return 1 ;;
+  esac
+}
+
+time_one_run() {
+  local shell_name="$1" start end
   start=$(python3 -c 'import time; print(int(time.time() * 1000))')
-  zsh -i -c exit >/dev/null 2>&1
+  invoke_shell "$shell_name" >/dev/null 2>&1 || true
   end=$(python3 -c 'import time; print(int(time.time() * 1000))')
   echo $((end - start))
+}
+
+# Existing single-shell helper retained for backward compatibility with
+# callers/tests that reference time_shell_startup; routes to time_one_run.
+time_shell_startup() { time_one_run zsh; }
+
+# Measure a shell across $RUNS iterations, return "mean min max".
+measure_shell() {
+  local shell_name="$1" sum=0 min=999999 max=0 t
+  local times=()
+  # One warm-up run discarded — caches a $_SHELL_CACHE on first invocation.
+  invoke_shell "$shell_name" >/dev/null 2>&1 || true
+  for _ in $(seq 1 "$RUNS"); do
+    t=$(time_one_run "$shell_name")
+    times+=("$t")
+    sum=$((sum + t))
+    [[ "$t" -lt "$min" ]] && min="$t"
+    [[ "$t" -gt "$max" ]] && max="$t"
+  done
+  echo "$((sum / RUNS)) $min $max"
 }
 
 calc_score() {
@@ -86,93 +137,84 @@ run_profile() {
   ' 2>/dev/null | head -20
 }
 
+# Discover installed shells. SHELL_FILTER (--shell <name>) restricts to one.
+all_shells=(zsh bash fish nu pwsh)
+shells_to_measure=()
+for s in "${all_shells[@]}"; do
+  command -v "$s" >/dev/null 2>&1 || continue
+  if [[ -n "$SHELL_FILTER" && "$s" != "$SHELL_FILTER" ]]; then
+    continue
+  fi
+  shells_to_measure+=("$s")
+done
+if (( ${#shells_to_measure[@]} == 0 )); then
+  ui_err "perf" "no measurable shells found${SHELL_FILTER:+ (filter: $SHELL_FILTER)}"
+  exit 1
+fi
+
+# Measure each shell once into parallel arrays.
+declare -a shell_names shell_means shell_mins shell_maxs shell_targets shell_passes
+for s in "${shells_to_measure[@]}"; do
+  read -r m mn mx <<<"$(measure_shell "$s")"
+  t=$(shell_target_for "$s")
+  shell_names+=("$s")
+  shell_means+=("$m")
+  shell_mins+=("$mn")
+  shell_maxs+=("$mx")
+  shell_targets+=("$t")
+  if [[ "$m" -le "$t" ]]; then
+    shell_passes+=("1")
+  else
+    shell_passes+=("0")
+  fi
+done
+
+# Primary "score" continues to use the zsh measurement (when available)
+# so existing dashboards / JSON consumers keep their reference number.
+mean=0
+for i in "${!shell_names[@]}"; do
+  if [[ "${shell_names[$i]}" == "zsh" ]]; then
+    mean="${shell_means[$i]}"
+    break
+  fi
+done
+[[ "$mean" -eq 0 && "${#shell_means[@]}" -gt 0 ]] && mean="${shell_means[0]}"
+score=$(calc_score "$mean")
+
 if $JSON_OUTPUT; then
-  times=()
-  for _ in $(seq 1 "$RUNS"); do
-    times+=("$(time_shell_startup)")
+  printf '{\n  "runs": %d,\n  "target_ms": %d,\n  "max_ms_target": %d,\n  "score": %d,\n  "mean_ms": %d,\n  "shells": {' \
+    "$RUNS" "$TARGET_MS" "$MAX_MS" "$score" "$mean"
+  for i in "${!shell_names[@]}"; do
+    [[ "$i" -gt 0 ]] && printf ','
+    printf '\n    "%s": {"mean_ms": %d, "min_ms": %d, "max_ms": %d, "target_ms": %d, "pass": %s}' \
+      "${shell_names[$i]}" "${shell_means[$i]}" "${shell_mins[$i]}" "${shell_maxs[$i]}" \
+      "${shell_targets[$i]}" "$([[ ${shell_passes[$i]} == 1 ]] && echo true || echo false)"
   done
-  sum=0
-  min=999999
-  max=0
-  for t in "${times[@]}"; do
-    sum=$((sum + t))
-    if [[ "$t" -lt "$min" ]]; then min="$t"; fi
-    if [[ "$t" -gt "$max" ]]; then max="$t"; fi
-  done
-  mean=$((sum / RUNS))
-  score=$(calc_score "$mean")
-  cat <<JSON
-{
-  "mean_ms": $mean,
-  "min_ms": $min,
-  "max_ms": $max,
-  "runs": $RUNS,
-  "target_ms": $TARGET_MS,
-  "max_ms_target": $MAX_MS,
-  "score": $score
-}
-JSON
+  printf '\n  }\n}\n'
   exit 0
 fi
 
 ui_dot_banner "Diagnostics"
 ui_header "Shell Performance"
 
-ui_section "Startup timing"
+ui_section "Per-shell startup ($RUNS runs each, after one warm-up)"
 
-times=()
-for _ in $(seq 1 "$RUNS"); do
-  times+=("$(time_shell_startup)")
-done
-sum=0
-min=999999
-max=0
-for t in "${times[@]}"; do
-  sum=$((sum + t))
-  if [[ "$t" -lt "$min" ]]; then min="$t"; fi
-  if [[ "$t" -gt "$max" ]]; then max="$t"; fi
-  if [[ "$UI_ENABLED" = "1" ]]; then
-    ui_kv "Run" "${t}ms"
+# Aligned table: name (6) | mean (8) | min/max (16) | target (12) | status
+for i in "${!shell_names[@]}"; do
+  name="${shell_names[$i]}"
+  m="${shell_means[$i]}"
+  mn="${shell_mins[$i]}"
+  mx="${shell_maxs[$i]}"
+  t="${shell_targets[$i]}"
+  if [[ "${shell_passes[$i]}" == "1" ]]; then
+    status_marker="✓"
+    detail=""
   else
-    echo "  Run: ${t}ms"
+    status_marker="✗"
+    detail=" — over by $((m - t))ms"
   fi
-done
-mean=$((sum / RUNS))
-score=$(calc_score "$mean")
-
-if [[ "$UI_ENABLED" = "1" ]]; then
-  ui_kv "Average" "${mean}ms"
-  ui_kv "Min" "${min}ms"
-  ui_kv "Max" "${max}ms"
-  ui_kv "Target" "${TARGET_MS}ms"
-  ui_kv "Score" "${score}/100"
-else
-  echo "  Average: ${mean}ms"
-  echo "  Min:     ${min}ms"
-  echo "  Max:     ${max}ms"
-  echo "  Target:  ${TARGET_MS}ms"
-  echo "  Score:   ${score}/100"
-fi
-
-# Per-shell startup comparison
-ui_section "Per-shell startup"
-
-for shell_name in zsh bash fish; do
-  if command -v "$shell_name" >/dev/null 2>&1; then
-    local_start=$(python3 -c 'import time; print(int(time.time() * 1000))')
-    if [[ "$shell_name" == "fish" ]]; then
-      fish -c exit >/dev/null 2>&1 || true
-    else
-      "$shell_name" -i -c exit >/dev/null 2>&1 || true
-    fi
-    local_end=$(python3 -c 'import time; print(int(time.time() * 1000))')
-    shell_time=$((local_end - local_start))
-    if [[ "$UI_ENABLED" = "1" ]]; then
-      ui_kv "$shell_name" "${shell_time}ms"
-    else
-      echo "  $shell_name: ${shell_time}ms"
-    fi
-  fi
+  printf '  %s %-6s mean %4dms  (min %3dms, max %3dms)  target %4dms%s\n' \
+    "$status_marker" "$name" "$m" "$mn" "$mx" "$t" "$detail"
 done
 
 # Per-component breakdown (Zsh only, uses DOTFILES_DEBUG timing)
