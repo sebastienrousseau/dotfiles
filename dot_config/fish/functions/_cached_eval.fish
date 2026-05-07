@@ -1,17 +1,43 @@
-# _cached_eval — Cache tool init output with binary mtime invalidation
-# Mirrors the bash/zsh _cached_eval pattern for Fish
+# _cached_eval — Cache tool init output with binary mtime invalidation.
+# Mirrors the bash/zsh _cached_eval pattern for Fish.
 #
 # Usage: _cached_eval <tool_binary> <init_args...>
 # Example: _cached_eval starship init fish
 #          _cached_eval zoxide init fish
 #
 # Cache files stored in $XDG_CACHE_HOME/fish/ (or ~/.cache/fish/)
-# Cache invalidated when binary mtime, realpath, or any file-path arg changes
-# (e.g. after upgrade or PATH-shadow swap).
+# Cache invalidated when binary mtime, realpath, or any file-path arg
+# changes (e.g. after upgrade or PATH-shadow swap).
 #
-# Set EVALCACHE_DISABLE=true to bypass cache read AND write (debug aid).
+# Env knobs:
+#   EVALCACHE_DISABLE=true  bypass cache read AND write (debug aid)
+#   EVALCACHE_TIMING=1      log per-call timing for `dot perf --by-tool`
 
-function _cached_eval --description 'Cache and source tool init output'
+function _cached_eval_log_timing --description 'Append a timing event for dot perf --by-tool'
+    set -l label $argv[1]
+    set -l t0 $argv[2]
+    set -l t1 $argv[3]
+    set -l rc $argv[4]
+    set -l shell fish
+    if test (count $argv) -ge 5
+        set shell $argv[5]
+    end
+    set -l log_dir (set -q XDG_STATE_HOME; and echo $XDG_STATE_HOME; or echo "$HOME/.local/state")/dotfiles
+    mkdir -p "$log_dir" 2>/dev/null; or return 0
+    set -l logfile "$log_dir/eval-timings.jsonl"
+    test -f "$logfile"; or touch "$logfile" 2>/dev/null; or return 0
+    # nanoseconds -> milliseconds
+    set -l ms 0
+    if test -n "$t0"; and test -n "$t1"
+        set ms (math --scale=0 "($t1 - $t0) / 1000000") 2>/dev/null; or set ms 0
+    end
+    set -l ts (date -u +%Y-%m-%dT%H:%M:%SZ)
+    printf '{"ts":"%s","shell":"%s","label":"%s","ms":%s,"rc":%s}\n' \
+        "$ts" "$shell" "$label" "$ms" "$rc" \
+        >>"$logfile" 2>/dev/null; or true
+end
+
+function _cached_eval_impl
     set -l tool_name $argv[1]
     if test -z "$tool_name"
         echo "_cached_eval: usage: _cached_eval <tool> <init args...>" >&2
@@ -85,4 +111,21 @@ function _cached_eval --description 'Cache and source tool init output'
     if test -s "$cache_file"
         source "$cache_file"
     end
+end
+
+function _cached_eval --description 'Cache and source tool init output'
+    if test "$EVALCACHE_TIMING" != 1
+        _cached_eval_impl $argv
+        return $status
+    end
+    set -l _ce_t0 (date +%s%N 2>/dev/null; or echo 0)
+    _cached_eval_impl $argv
+    set -l _ce_rc $status
+    set -l _ce_t1 (date +%s%N 2>/dev/null; or echo 0)
+    set -l label unknown
+    if test (count $argv) -ge 1
+        set label $argv[1]
+    end
+    _cached_eval_log_timing "$label" "$_ce_t0" "$_ce_t1" "$_ce_rc" fish
+    return $_ce_rc
 end

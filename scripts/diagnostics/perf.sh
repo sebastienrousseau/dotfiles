@@ -30,6 +30,8 @@ RUNS=3
 TARGET_MS="${DOTFILES_PERF_TARGET_MS:-250}"
 MAX_MS="${DOTFILES_PERF_MAX_MS:-1000}"
 SHELL_FILTER=""
+BY_TOOL=false
+RESET_TIMINGS=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -53,11 +55,72 @@ while [[ $# -gt 0 ]]; do
       SHELL_FILTER="${2:-}"
       shift 2
       ;;
+    --by-tool)
+      BY_TOOL=true
+      shift
+      ;;
+    --reset)
+      RESET_TIMINGS=true
+      shift
+      ;;
     *)
       shift
       ;;
   esac
 done
+
+# --by-tool reader: aggregate $XDG_STATE_HOME/dotfiles/eval-timings.jsonl
+# (populated by _cached_eval when EVALCACHE_TIMING=1) and report which
+# tools dominate startup time. Independent of the runtime measurement
+# loop above, so it returns immediately.
+if $BY_TOOL || $RESET_TIMINGS; then
+  log_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
+  log_file="$log_dir/eval-timings.jsonl"
+  if $RESET_TIMINGS; then
+    : > "$log_file" 2>/dev/null || rm -f "$log_file" 2>/dev/null || true
+    ui_ok "eval timings" "cleared $log_file"
+    $BY_TOOL || exit 0
+  fi
+  if [[ ! -s "$log_file" ]]; then
+    ui_warn "eval timings" "no data at $log_file"
+    echo "  Hint: open a new shell with EVALCACHE_TIMING=1 to start collecting." >&2
+    exit 0
+  fi
+  ui_dot_banner "Diagnostics"
+  ui_header "Per-tool timing breakdown"
+  ui_section "$log_file"
+  python3 - <<'PY' "$log_file"
+import json, sys
+from collections import defaultdict
+agg = defaultdict(lambda: {"count": 0, "total": 0, "min": 10**9, "max": 0, "shells": set()})
+with open(sys.argv[1]) as f:
+    for line in f:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            ev = json.loads(line)
+        except Exception:
+            continue
+        label = ev.get("label", "?")
+        ms = int(ev.get("ms", 0) or 0)
+        a = agg[label]
+        a["count"] += 1
+        a["total"] += ms
+        a["min"] = min(a["min"], ms)
+        a["max"] = max(a["max"], ms)
+        a["shells"].add(ev.get("shell", "?"))
+rows = sorted(agg.items(), key=lambda kv: kv[1]["total"], reverse=True)
+header = f"  {'label':<20} {'calls':>5} {'total':>8} {'mean':>7} {'min':>5} {'max':>5}  shells"
+print(header)
+print("  " + "-" * (len(header) - 2))
+for label, a in rows:
+    mean = a["total"] // a["count"] if a["count"] else 0
+    shells = ",".join(sorted(a["shells"]))
+    print(f"  {label:<20} {a['count']:>5} {a['total']:>6}ms {mean:>5}ms {a['min']:>3}ms {a['max']:>3}ms  {shells}")
+PY
+  exit 0
+fi
 
 # Per-shell defaults. nu and pwsh are genuinely slower than POSIX shells;
 # bash should be quickest. Override via DOTFILES_PERF_TARGET_<SHELL>_MS.

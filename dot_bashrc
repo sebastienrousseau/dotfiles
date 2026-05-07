@@ -71,6 +71,24 @@ _deferred_hydration() {
   _SHELL_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/bash"
   [[ -d "$_SHELL_CACHE" ]] || mkdir -p "$_SHELL_CACHE"
 
+  # Append a timing event for `dot perf --by-tool`. Bash 5+ has
+  # EPOCHREALTIME (float "secs.usecs"); split into a 16-digit microsecond
+  # int via string ops so $((...)) integer math handles the delta.
+  _cached_eval_log_timing() {
+    local label="$1" t0="$2" t1="$3" rc="${4:-0}" shell="${5:-bash}"
+    local log_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
+    [[ -d "$log_dir" ]] || mkdir -p "$log_dir" 2>/dev/null || return 0
+    local logfile="$log_dir/eval-timings.jsonl"
+    [[ -f "$logfile" ]] || touch "$logfile" 2>/dev/null || return 0
+    local t0_us="${t0/./}" t1_us="${t1/./}" ms_int=0
+    if [[ "$t0_us" =~ ^[0-9]+$ && "$t1_us" =~ ^[0-9]+$ ]]; then
+      ms_int=$(( (t1_us - t0_us) / 1000 ))
+    fi
+    printf '{"ts":"%s","shell":"%s","label":"%s","ms":%s,"rc":%s}\n' \
+      "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$shell" "$label" "$ms_int" "$rc" \
+      >> "$logfile" 2>/dev/null || true
+  }
+
   # Cache and source a tool's init output, with mtime/realpath/file-arg invalidation.
   #
   # Runs <cmd args...> on cache miss, vets the output for shell-injection
@@ -81,12 +99,26 @@ _deferred_hydration() {
   # @arg $1 string Cache label (cache file: $_SHELL_CACHE/<label>.bash)
   # @arg $2..N string Command and args to run on cache miss
   # @env EVALCACHE_DISABLE Set to "true" to bypass cache read AND write
+  # @env EVALCACHE_TIMING  Set to "1" to log per-call timing for `dot perf --by-tool`
   # @stdout Sourced cache content
   # @stderr Warning on init failure or suspicious-output rejection
   # @exitcode 0 Cache hit, successful regeneration, or successful bypass
   # @exitcode 1 Suspicious pattern detected in init output
   # @exitcode * Init command's exit code on non-zero return
   _cached_eval() {
+    if [[ "$EVALCACHE_TIMING" != "1" ]]; then
+      _cached_eval_impl "$@"
+      return
+    fi
+    local _ce_t0="${EPOCHREALTIME:-$(date +%s.%N 2>/dev/null || echo 0)}"
+    _cached_eval_impl "$@"
+    local _ce_rc=$?
+    local _ce_t1="${EPOCHREALTIME:-$(date +%s.%N 2>/dev/null || echo 0)}"
+    _cached_eval_log_timing "${1:-unknown}" "$_ce_t0" "$_ce_t1" "$_ce_rc" "bash"
+    return $_ce_rc
+  }
+
+  _cached_eval_impl() {
     local label="$1"
     shift
 
