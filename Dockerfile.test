@@ -6,7 +6,7 @@
 # =============================================================================
 # Ubuntu 24.04 (LTS) - Tests Debian/Ubuntu prerequisites + install.sh
 # =============================================================================
-FROM ubuntu:24.04 AS ubuntu-test
+FROM ubuntu:26.04 AS ubuntu-test
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root
@@ -177,7 +177,7 @@ USER testuser
 # =============================================================================
 # Ubuntu 24.04 + eza - Tests modern aliases with eza installed
 # =============================================================================
-FROM ubuntu:24.04 AS ubuntu-eza-test
+FROM ubuntu:26.04 AS ubuntu-eza-test
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root
