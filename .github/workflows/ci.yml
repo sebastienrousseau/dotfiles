@@ -175,7 +175,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: TruffleHog Scan
-        uses: trufflesecurity/trufflehog@47e7b7cd74f578e1e3145d48f669f22fd1330ca6 # v3.94.3
+        uses: trufflesecurity/trufflehog@17456f8c7d042d8c82c9a8ca9e937231f9f42e26 # v3.95.2
         with:
           extra_args: --only-verified
 
@@ -238,7 +238,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Cache Chezmoi
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/.local/bin/chezmoi
           key: chezmoi-${{ runner.os }}-${{ env.CHEZMOI_VERSION }}
@@ -268,7 +268,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Cache Chezmoi
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/.local/bin/chezmoi
           key: chezmoi-${{ runner.os }}-${{ env.CHEZMOI_VERSION }}

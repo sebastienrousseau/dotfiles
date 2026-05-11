@@ -47,7 +47,7 @@ jobs:
           driver-opts: image=moby/buildkit:latest
 
       - name: Cache Docker layers
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: /tmp/.buildx-cache
           key: devcontainer-buildx-${{ runner.os }}-${{ hashFiles('.devcontainer/**') }}
@@ -59,7 +59,7 @@ jobs:
         run: cp .devcontainer/devcontainer.ci.json .devcontainer/devcontainer.json
 
       - name: Pre-build devcontainer image
-        uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 # v0.3
+        uses: devcontainers/ci@b63b30de439b47a52267f241112c5b453b673db5 # v0.3
         with:
           # devcontainers/ci requires a standard filename for configFile.
           configFile: .devcontainer/devcontainer.json
