@@ -1,0 +1,107 @@
+name: Drift Detection
+
+# Nightly chezmoi drift detection (closes #875). Runs `dot drift --json`
+# in a clean container against the master branch and opens (or updates)
+# a tracking issue if anything has drifted between the chezmoi source
+# and what a fresh apply would produce.
+#
+# Catches the class of drift this session uncovered (deployed `.gitconfig`
+# had a `hooksPath` line not in the chezmoi template) by exercising the
+# same source-vs-deployed comparison `dot drift` runs locally.
+
+on:
+  schedule:
+    - cron: '0 4 * * *'  # Daily at 04:00 UTC — drift is cheap to check
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  drift-scan:
+    name: Drift / Master
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Install chezmoi
+        run: |
+          set -euo pipefail
+          curl -fsSL https://get.chezmoi.io | sh -s -- -b "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: chezmoi init from this checkout
+        run: |
+          set -euo pipefail
+          chezmoi init --source "$GITHUB_WORKSPACE" --apply=false
+          chezmoi diff --no-pager > /tmp/cm-diff.txt 2>&1 || true
+          chezmoi status > /tmp/cm-status.txt 2>&1 || true
+
+      - name: Run consolidated drift dashboard
+        id: drift
+        run: |
+          set -euo pipefail
+          bash scripts/diagnostics/drift-dashboard.sh --json > /tmp/drift.json || true
+          cat /tmp/drift.json
+          total=$(python3 -c 'import json; print(json.load(open("/tmp/drift.json")).get("total", 0))')
+          echo "total=$total" >> "$GITHUB_OUTPUT"
+
+      - name: Upload drift artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: drift-report-${{ github.run_number }}
+          path: |
+            /tmp/drift.json
+            /tmp/cm-diff.txt
+            /tmp/cm-status.txt
+          retention-days: 14
+
+      - name: Open / update drift tracking issue
+        if: steps.drift.outputs.total != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          total="${{ steps.drift.outputs.total }}"
+          title="Drift detected on master ($(date -u +%Y-%m-%d))"
+          body=$(cat <<EOF
+          Nightly drift scan found **$total** drift signal(s).
+
+          Summary (JSON):
+
+          \`\`\`json
+          $(cat /tmp/drift.json)
+          \`\`\`
+
+          Full chezmoi diff + status are attached to this run as the
+          \`drift-report-*\` artifact. Review and either:
+
+          * Update the chezmoi source so apply is idempotent, or
+          * Remove the orphan/stale target if the file no longer needs management, or
+          * Document the divergence under \`docs/operations/DRIFT.md\` if it's intentional.
+
+          Tracked under #875.
+          EOF
+          )
+
+          existing=$(gh issue list \
+            --search 'Drift detected on master' \
+            --state open \
+            --json number \
+            --jq '.[0].number' 2>/dev/null || true)
+
+          if [[ -n "$existing" ]]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create \
+              --title "$title" \
+              --body "$body" \
+              --label "type:chore,drift,priority:medium"
+          fi
