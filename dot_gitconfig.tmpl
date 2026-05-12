@@ -90,6 +90,12 @@
 [core]
 	excludesfile = {{ .chezmoi.homeDir }}/.config/git/ignore
 	attributesFile = {{ .chezmoi.homeDir }}/.config/git/attributes
+	# User-global hooks dir. Hosts the AI-attribution / branding
+	# `commit-msg` hook tracked under `dot_config/git/hooks/`. Per
+	# this repo's CLAUDE.md, do NOT point this at a repo-local
+	# `.git/hooks` or similar — only at this user-global dir, which
+	# is curated and shared across all repos.
+	hooksPath = {{ .chezmoi.homeDir }}/.config/git/hooks
 
 [fetch]
 	prune = true
