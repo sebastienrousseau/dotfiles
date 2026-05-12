@@ -15,6 +15,8 @@ significant architectural decisions made in this project.
 | [ADR-006](ADR-006-shell-selection.md) | Zsh as Default Shell | Accepted |
 | [ADR-007](ADR-007-multi-shell-parity.md) | Multi-Shell Parity Strategy | Accepted |
 | [ADR-008](ADR-008-alias-system-architecture.md) | Alias System Architecture | Accepted |
+| [ADR-009](ADR-009-wallpaper-driven-theming.md) | Wallpaper-Driven Theming Engine | Accepted |
+| [ADR-010](ADR-010-starship-transient-prompt.md) | Enable Starship Transient Prompt in Zsh and Fish | Accepted |
 
 ## ADR Format
 
