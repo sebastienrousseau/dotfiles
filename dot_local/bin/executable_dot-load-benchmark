@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 # Measure time to load heavy layers in a fresh interactive shell
 # Usage: dot-load-benchmark [runs]

@@ -3,6 +3,8 @@
 # Universal Nerd Font checker/installer
 # Inspired by 2026 terminal aesthetics
 
+set -eu
+
 if [ -t 1 ] && command -v gum >/dev/null 2>&1; then
     gum style --foreground 212 --border double --align center --width 50 "Font Check"
     if ! fc-list | grep -qi "Nerd Font"; then

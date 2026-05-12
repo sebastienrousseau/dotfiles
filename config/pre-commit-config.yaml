@@ -105,3 +105,11 @@ repos:
         language: system
         pass_filenames: false
         types: [shell]
+
+      - id: shell-preamble-check
+        name: Enforce set -euo pipefail (or set -eu for sh)
+        entry: scripts/ci/check-shell-preamble.sh
+        language: script
+        types: [shell]
+        # Sourced libraries opt out via a `# Sourced by` header or `# preamble:skip`
+        # marker; known-sourced paths are skipped inside the script itself.

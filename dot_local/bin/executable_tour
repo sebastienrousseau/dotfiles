@@ -2,6 +2,8 @@
 # Interactive Tour using Gum
 # Part of Dotfiles v0.2.501
 
+set -eu
+
 if ! command -v gum >/dev/null; then
   echo "Error: 'gum' is not installed."
   case "$(uname -s)" in

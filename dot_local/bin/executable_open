@@ -2,6 +2,8 @@
 # Universal file opener (open)
 # Maps to open (macOS), xdg-open (Linux), and explorer.exe (WSL)
 
+set -eu
+
 target="${1:-.}"
 
 # Helper for rich feedback if TTY is present
