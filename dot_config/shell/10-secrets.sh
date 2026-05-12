@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# Sourced by dot_zshrc.tmpl / dot_bashrc; inherits set -euo pipefail from the caller.
 
 # 10-secrets.sh: Optional secret bucket auto-loader
 # Loads configured secret buckets into the current shell via `dot env load`.

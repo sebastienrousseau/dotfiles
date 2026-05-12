@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# Sourced by scripts/dot/commands/*.sh and scripts/diagnostics/*; inherits set -euo pipefail.
 # Structured JSON logging and metrics library.
 # Source this file to emit machine-readable logs and performance metrics.
 #

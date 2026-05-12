@@ -44,11 +44,17 @@ check_one() {
   # which manages shell options for its children.
   case "$f" in
     tests/*) return 0 ;;
-    .chezmoitemplates/aliases/*) return 0 ;;     # alias fragments are sourced
-    .chezmoitemplates/functions/*) return 0 ;;   # function fragments are sourced
-    .chezmoitemplates/paths/*) return 0 ;;       # PATH fragments are sourced
-    dot_config/shell/*) return 0 ;;              # shell init fragments are sourced
-    scripts/dot/lib/*) return 0 ;;               # dot CLI internal libs are sourced
+    # Bulk-sourced fragments. These directories contain hundreds of
+    # alias / function / PATH snippets that are sourced into the
+    # caller's shell context — adding `set -e` locally would corrupt
+    # the caller. Path-skipped en masse rather than annotated per-file
+    # (would be 300+ marker comments).
+    .chezmoitemplates/aliases/*) return 0 ;;
+    .chezmoitemplates/functions/*) return 0 ;;
+    .chezmoitemplates/paths/*) return 0 ;;
+    # dot_config/shell/* and scripts/dot/lib/* are also sourced but
+    # have explicit `# Sourced by` headers as of #854 (defense in
+    # depth — the lint also accepts them on header alone).
     dot_local/bin/executable_dot_completion) return 0 ;;  # zsh completion, sourced into shell
   esac
 

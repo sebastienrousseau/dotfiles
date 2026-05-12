@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# Sourced by scripts/dot/commands/*.sh, scripts/diagnostics/*, scripts/ops/*; inherits set -euo pipefail.
 ## Dotfiles CLI UI Component Library — Single Source of Truth.
 ##
 ## All CLI output MUST go through these primitives.  No raw printf with

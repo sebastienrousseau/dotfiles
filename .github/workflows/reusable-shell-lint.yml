@@ -86,6 +86,15 @@ jobs:
             echo "::warning::ShellCheck found issues (non-blocking mode)."
           fi
 
+      - name: Preamble lint (set -euo pipefail / Sourced-by markers)
+        # Closes the CI half of #854 — every bash/sh script must
+        # either carry the safety preamble or declare itself as a
+        # sourced library via the `# Sourced by` header. See
+        # docs/security/SHELL_EXEMPTIONS.md for the contract.
+        run: |
+          set -euo pipefail
+          bash scripts/ci/check-shell-preamble.sh
+
       - name: shfmt
         if: inputs.run_shfmt == true
         run: |

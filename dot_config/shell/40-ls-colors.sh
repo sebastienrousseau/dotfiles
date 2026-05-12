@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# Sourced by dot_zshrc.tmpl / dot_bashrc; inherits set -euo pipefail from the caller.
 
 # Set ls colors with GNU/BSD detection and caching
 # GNU coreutils: LS_COLORS via dircolors
