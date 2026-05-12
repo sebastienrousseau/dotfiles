@@ -17,6 +17,8 @@
 
 ---
 
+> **Why this is different.** Three things you won't find in `mathiasbynens/`, `holman/`, or `paulirish/`: (1) wallpaper-driven terminal themes via K-Means CIELAB clustering with WCAG AAA contrast enforcement; (2) first-class agent governance — MCP policy, A2A discovery, signed attestation logs, bounded profiles (`ask` / `plan` / `apply` / `audit`); (3) verified multi-shell parity (zsh, fish, bash, nushell, PowerShell) tested on macOS, Linux, WSL2 and Apple Silicon CI runners. Signed commits enforced. Idempotent installer. Self-healing CLI.
+
 ## Install
 
 ```bash
