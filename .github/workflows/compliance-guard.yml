@@ -227,9 +227,14 @@ jobs:
     uses: ./.github/workflows/reusable-shell-lint.yml
     with:
       include_tests: false
+      # Severity widened to `warning` and the gate flipped to hard-fail
+      # under #857. Previously this was a silent soft-fail, hiding
+      # drift in portability findings. SC1090/1091/2034 stay excluded
+      # because they fire on every sourced library + the
+      # already-tracked _cleanup_files unused-but-trapped pattern.
       shellcheck_severity: warning
       shellcheck_excludes: SC1090,SC1091,SC2034
-      fail_on_shellcheck: false
+      fail_on_shellcheck: true
       run_shfmt: false
 
   portability:

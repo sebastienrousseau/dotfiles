@@ -1,5 +1,5 @@
 {
-  "description": "Branch protection configuration for dotfiles repository v0.2.480",
+  "description": "Branch protection configuration for dotfiles repository v0.2.501",
   "enforcement": "strict",
   "rules": {
     "master": {
@@ -18,7 +18,9 @@
             "Test / Unit Tests (100% Coverage)",
             "Test / Integration",
             "Type Check / Strict Mode",
-            "Merge Gate"
+            "Merge Gate",
+            "Compliance Summary",
+            "Reliability Summary"
           ]
         },
         "enforce_admins": true,

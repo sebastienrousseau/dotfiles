@@ -184,7 +184,7 @@ pick_theme() {
   fi
 
   local current
-  local current="$(current_theme)"
+  current="$(current_theme)"
 
   if [[ ! -f "$THEMES_FILE" ]]; then
     ui_err "Missing" "$THEMES_FILE"
@@ -234,7 +234,8 @@ pick_theme() {
 }
 
 list_themes() {
-  local current="$(current_theme)"
+  local current
+  current="$(current_theme)"
   local current_family="${current%-dark}"
   [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
 
@@ -260,7 +261,8 @@ list_themes() {
 
 # Toggle between light and dark within the same family, or switch families
 toggle_theme() {
-  local current="$(current_theme)"
+  local current
+  current="$(current_theme)"
 
   if is_dark_theme "$current"; then
     if [[ "$current" == *-dark ]]; then
@@ -279,8 +281,9 @@ toggle_theme() {
 
 # Switch to the next wallpaper family while preserving mode.
 switch_family() {
-  local current="$(current_theme)"
-  local family="$(get_theme_family "$current")"
+  local current family
+  current="$(current_theme)"
+  family="$(get_theme_family "$current")"
   local mode="dark"
   local families=()
   local idx=0
@@ -316,8 +319,9 @@ switch_family() {
 
 # Show current theme info
 show_current() {
-  local current="$(current_theme)"
-  local family="$(get_theme_family "$current")"
+  local current family
+  current="$(current_theme)"
+  family="$(get_theme_family "$current")"
   local mode="dark"
   if ! is_dark_theme "$current" 2>/dev/null; then
     mode="light"
@@ -338,8 +342,13 @@ sync_theme() {
       ;;
     Linux)
       if command -v gsettings >/dev/null 2>&1; then
-        # Check GNOME color scheme
-        local scheme=scheme=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")
+        # Check GNOME color scheme. Fixes a long-standing bug where the
+        # variable was declared as `local scheme=scheme=$(...)` — the
+        # extra `scheme=` prefix made the value always start with that
+        # literal, so the `prefer-light` test below could never match
+        # and the system always fell through to the dark branch.
+        local scheme
+        scheme=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")
         if [[ "$scheme" == "prefer-light" ]]; then
           os_mode="light"
         else
@@ -349,7 +358,8 @@ sync_theme() {
       ;;
   esac
 
-  local current="$(current_theme)"
+  local current
+  current="$(current_theme)"
   if is_dark_theme "$current" && [[ "$os_mode" == "light" ]]; then
     ui_info "Sync" "System is light, switching dotfiles to light..."
     toggle_theme
