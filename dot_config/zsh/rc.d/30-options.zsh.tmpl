@@ -112,24 +112,44 @@ if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]
   }
   sdk() { _lazy_load_sdkman; sdk "$@"; }
 fi
-# Defer compinit to first prompt — opt-in for max performance
+# Defer compinit to first prompt — opt-in for max performance.
+#
+# Cache lifecycle (closes #864):
+#   * dump path lives at $XDG_CACHE_HOME/zsh/zcompdump-$ZSH_VERSION so
+#     the user-state directory is clean (and zsh's own search picks up
+#     `.zwc` siblings automatically — non-laptop profiles get the
+#     benefit even without re-running compinit).
+#   * `compinit -C` (skip security-check, use the cached dump) is used
+#     when the dump is fresh (< 24 h); full `compinit` rebuilds when
+#     the dump is older.
+#   * The dump is `zcompile`d in the background after each rebuild so
+#     subsequent shells load the bytecode form directly.
+#   * The fpath corpus itself is precompiled at chezmoi-apply time by
+#     `run_onchange_after_zcompile-completions.sh.tmpl` — that runs
+#     once per fpath change, not per shell start.
 : ${DOTFILES_ENABLE_COMPINIT:=0}
 : ${DOTFILES_DEFER_COMPINIT:=1}
+
+_DOTFILES_ZCOMPDUMP="${XDG_CACHE_HOME:-${HOME}/.cache}/zsh/zcompdump-${ZSH_VERSION:-${ZSH_NAME:-unknown}}"
+
 if [[ "${DOTFILES_ENABLE_COMPINIT}" == "1" ]] && [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]]; then
   autoload -Uz compinit
+  [[ -d "${_DOTFILES_ZCOMPDUMP:h}" ]] || mkdir -p "${_DOTFILES_ZCOMPDUMP:h}"
+
   _deferred_compinit() {
     if [[ "${DOTFILES_DEFER_COMPINIT}" == "1" ]]; then
       _dotfiles_del_preexec _deferred_compinit
     else
       _dotfiles_del_precmd _deferred_compinit
     fi
-    if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
-      compinit
+    # Fresh dump (< 24 h) → use cached fast path; otherwise rebuild.
+    if [[ -n ${_DOTFILES_ZCOMPDUMP}(#qN.mh+24) ]]; then
+      compinit -d "${_DOTFILES_ZCOMPDUMP}"
     else
-      compinit -C
+      compinit -C -d "${_DOTFILES_ZCOMPDUMP}"
     fi
-    # Compile zcompdump to bytecode in background for faster subsequent loads
-    { [[ ! -f "${ZDOTDIR}/.zcompdump.zwc" || "${ZDOTDIR}/.zcompdump" -nt "${ZDOTDIR}/.zcompdump.zwc" ]] && zcompile "${ZDOTDIR}/.zcompdump" } &!
+    # Compile to bytecode in background for faster subsequent loads
+    { [[ ! -f "${_DOTFILES_ZCOMPDUMP}.zwc" || "${_DOTFILES_ZCOMPDUMP}" -nt "${_DOTFILES_ZCOMPDUMP}.zwc" ]] && zcompile "${_DOTFILES_ZCOMPDUMP}" } &!
   }
   if [[ "${DOTFILES_DEFER_COMPINIT}" == "1" ]]; then
     _dotfiles_add_preexec _deferred_compinit
