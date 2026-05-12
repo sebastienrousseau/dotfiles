@@ -69,6 +69,24 @@ Examples:
 - `fix: harden fish alias bridging`
 - `docs: simplify install guide`
 
+## Regression tests
+
+Files under `tests/regression/` must include a trace header within
+the first 15 lines. One of three accepted forms:
+
+```bash
+# Regression for: GH-1234            # preferred — link to a GitHub issue
+# Regression for: 1a2b3c4            # link to introducing commit (7+ hex chars)
+# Regression for: pre-history        # explicit "origin not traceable"
+```
+
+The convention is enforced by the `regression-traceability` pre-commit
+hook (`scripts/ci/check-regression-traceability.sh`) and audited weekly
+by `.github/workflows/regression-trace-audit.yml`, which fails the build
+and opens a tracking issue if any `GH-*` reference no longer resolves
+to a live issue. Use `pre-history` only when neither `git blame` nor
+the related PR history yields an originating issue or commit.
+
 ## Day 1 verification
 
 Run:

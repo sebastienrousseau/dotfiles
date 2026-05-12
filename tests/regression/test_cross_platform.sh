@@ -3,6 +3,8 @@
 # shellcheck disable=SC1090,SC1091,SC2030,SC2031
 # Regression: Cross-platform compatibility — validates that scripts,
 # configs, and templates work on macOS, Linux (Debian, Arch, RHEL), and WSL.
+# Regression for: d7e7c2bc (v0.2.499 baseline)
+# Why: Cross-platform regressions for BSD-vs-GNU tool divergence (sed -i, mktemp, stat, awk).
 
 set -euo pipefail
 

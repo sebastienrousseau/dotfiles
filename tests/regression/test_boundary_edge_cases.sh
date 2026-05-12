@@ -2,6 +2,8 @@
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2030,SC2031
 # Regression: Boundary & edge cases — extreme or unusual conditions.
+# Regression for: d7e7c2bc (v0.2.499 baseline)
+# Why: Edge-case input boundary regressions (empty strings, max sizes, unusual paths, off-by-one indexing).
 
 set -euo pipefail
 

@@ -147,3 +147,9 @@ repos:
         types: [shell]
         # Sourced libraries opt out via a `# Sourced by` header or `# preamble:skip`
         # marker; known-sourced paths are skipped inside the script itself.
+
+      - id: regression-traceability
+        name: Enforce 'Regression for:' header on tests/regression/*.sh
+        entry: scripts/ci/check-regression-traceability.sh
+        language: script
+        files: ^tests/regression/.*\.sh$

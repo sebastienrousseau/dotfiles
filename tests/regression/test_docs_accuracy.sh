@@ -3,6 +3,8 @@
 # shellcheck disable=SC1090,SC1091,SC2030,SC2031
 # Regression: Documentation accuracy — validates that docs reference
 # real files, commands, and features that actually exist in the codebase.
+# Regression for: d7e7c2bc (v0.2.499 baseline)
+# Why: Documentation-accuracy regressions: README claims, dot command list, version pins.
 
 set -euo pipefail
 
