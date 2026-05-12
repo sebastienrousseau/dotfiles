@@ -188,12 +188,19 @@ jobs:
           upload-release-assets: false
 
       - name: Scan SBOM for CVEs with Grype
+        # Gate policy (closes #852):
+        #   - PRs targeting `master`: hard-fail on high/critical findings.
+        #   - PRs targeting feature branches: advisory (annotation only),
+        #     so contributors can iterate without the gate blocking work
+        #     that hasn't yet reached the protected branch.
+        # severity-cutoff is set to `high` (was: critical) so RCE-class
+        # vulnerabilities no longer slip through silently.
         uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7
         id: grype
         with:
           sbom: pr-sbom.spdx.json
-          fail-build: false
-          severity-cutoff: critical
+          fail-build: ${{ github.base_ref == 'master' && 'true' || 'false' }}
+          severity-cutoff: high
           output-format: json
 
       - name: Upload CVE scan results
