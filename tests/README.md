@@ -65,6 +65,39 @@ RUN_INTEGRATION=1 ./tests/framework/test_runner.sh
 ./tests/framework/test_runner.sh -i
 ```
 
+### Run in parallel
+
+The runner accepts `--jobs N` (number of files concurrently) and
+`--jobs auto` (detected CPU count via `nproc` on Linux,
+`sysctl -n hw.ncpu` on macOS). Closes [#867](https://github.com/sebastienrousseau/dotfiles/issues/867).
+
+```bash
+# Use all detected cores
+./tests/framework/test_runner.sh --jobs auto
+
+# Cap at 4 workers
+./tests/framework/test_runner.sh --jobs 4
+
+# Force serial (the default) — useful when debugging output order
+./tests/framework/test_runner.sh --jobs 1
+```
+
+Trade-offs:
+
+- **Serial mode** streams each test's output live in alphabetical
+  order. Best when bisecting a flake.
+- **Parallel mode** captures each file's output to a private tempfile
+  and replays in completion order. Aggregate totals are identical to
+  serial — invariance is pinned by
+  `tests/regression/test_runner_parallel_invariant.sh`.
+
+If a future test introduces order-coupling (writes shared state at
+start, expects it at end), the invariance regression test fails and
+the offending file should be refactored to be hermetic.
+
+`TEST_JOBS=N` is the env-var equivalent of `--jobs N` and lets CI
+configure the default without touching the command line.
+
 ### Run Individual Test File
 
 ```bash

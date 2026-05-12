@@ -2,7 +2,16 @@
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
 # Main test runner for dotfiles test suite
-# Discovers and runs all test files, reports results
+# Discovers and runs all test files, reports results.
+#
+# Parallelism (closes #867):
+#   --jobs N      run N test files concurrently (default: 1)
+#   --jobs auto   use the detected CPU count (nproc on Linux,
+#                 `sysctl -n hw.ncpu` on macOS)
+#
+# Per-file output is captured to a private tempfile so concurrent
+# runs don't interleave. With --jobs 1, output is streamed live; with
+# --jobs >1 it's collected and replayed in completion order.
 
 set -euo pipefail
 
@@ -20,24 +29,38 @@ export TESTS_DIR
 export REPO_ROOT
 export FRAMEWORK_DIR="$SCRIPT_DIR"
 
-# Run a single test file and capture results
-run_test_file() {
+# -----------------------------------------------------------------------------
+# Helpers
+# -----------------------------------------------------------------------------
+
+detect_cores() {
+  if command -v nproc >/dev/null 2>&1; then
+    nproc
+  elif command -v sysctl >/dev/null 2>&1; then
+    sysctl -n hw.ncpu 2>/dev/null || echo 1
+  else
+    echo 1
+  fi
+}
+
+# Run a single test file in serial mode (live output).
+run_test_file_serial() {
   local test_file="$1"
   local temp_results
   temp_results=$(mktemp)
-  # Ensure temp file is cleaned up even on early exit
-  trap 'rm -f "$temp_results"' RETURN
+  # Double-quote: $temp_results captured at trap-registration time, so
+  # the trap fires correctly even when run from a calling function that
+  # has `set -u` enabled.
+  # shellcheck disable=SC2064
+  trap "rm -f '$temp_results'" RETURN
 
   echo ""
   echo "Running: $(basename "$test_file")"
   echo "─────────────────────────────────────"
 
-  # Run test as a separate process (not subshell with source)
-  # This avoids trap interference from double-sourcing framework files
   local exit_status=0
   bash "$test_file" </dev/null 2>&1 | tee "$temp_results" || exit_status=$?
 
-  # Parse results from output
   local results_line
   results_line=$(grep "^RESULTS:" "$temp_results" | tail -1) || true
   if [[ -n "$results_line" ]]; then
@@ -45,17 +68,98 @@ run_test_file() {
     IFS=':' read -r _ run passed failed <<<"$results_line"
     TOTAL_TESTS_PASSED=$((TOTAL_TESTS_PASSED + passed))
     TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + failed))
-    # Derive run count from assertions to avoid test-case vs assertion mismatch
     TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + passed + failed))
   elif [[ $exit_status -ne 0 ]]; then
-    # Test file crashed without producing RESULTS -- count as failure
     printf '%b\n' "\033[0;31mERROR: $(basename "$test_file") crashed (exit $exit_status) without producing results\033[0m"
     TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + 1))
     TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + 1))
   fi
 }
 
-# Show usage
+# Worker for parallel mode: write per-file output to its own file.
+# Invoked via xargs -I {} so it receives one filename per invocation.
+run_test_file_worker() {
+  local test_file="$1"
+  local out_dir="$2"
+  local out_file="$out_dir/$(basename "$test_file").out"
+
+  {
+    echo ""
+    echo "Running: $(basename "$test_file")"
+    echo "─────────────────────────────────────"
+    local exit_status=0
+    bash "$test_file" </dev/null 2>&1 || exit_status=$?
+    # Append exit status sentinel for the aggregator
+    printf 'EXIT_STATUS:%d\n' "$exit_status"
+  } > "$out_file" 2>&1
+}
+
+# Aggregate per-file outputs (for parallel mode), replay them in
+# alphabetical order, and tally results.
+aggregate_parallel_results() {
+  local out_dir="$1"
+  local f
+
+  for f in "$out_dir"/*.out; do
+    [[ -f "$f" ]] || continue
+    cat "$f"
+
+    local results_line exit_status_line exit_status=0
+    results_line=$(grep "^RESULTS:" "$f" | tail -1) || true
+    exit_status_line=$(grep "^EXIT_STATUS:" "$f" | tail -1) || true
+    if [[ -n "$exit_status_line" ]]; then
+      exit_status=${exit_status_line#EXIT_STATUS:}
+    fi
+
+    if [[ -n "$results_line" ]]; then
+      local run passed failed
+      IFS=':' read -r _ run passed failed <<<"$results_line"
+      TOTAL_TESTS_PASSED=$((TOTAL_TESTS_PASSED + passed))
+      TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + failed))
+      TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + passed + failed))
+    elif [[ $exit_status -ne 0 ]]; then
+      printf '%b\n' "\033[0;31mERROR: $(basename "$f" .out) crashed (exit $exit_status) without producing results\033[0m"
+      TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + 1))
+      TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + 1))
+    fi
+  done
+}
+
+# Run a list of test files. Honours $JOBS (set by main).
+# Args: <header-text> <test-file...>
+run_test_list() {
+  local header="$1"; shift
+  [[ $# -eq 0 ]] && return 0
+
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "$header"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+  if [[ "$JOBS" -le 1 ]]; then
+    local f
+    for f in "$@"; do
+      run_test_file_serial "$f"
+    done
+  else
+    local out_dir
+    out_dir=$(mktemp -d)
+    # shellcheck disable=SC2064  # capture $out_dir at trap-registration time
+    trap "rm -rf '$out_dir'" RETURN
+
+    export -f run_test_file_worker
+    # shellcheck disable=SC2016  # $0 inside xargs invocation
+    printf '%s\n' "$@" | xargs -I{} -P "$JOBS" \
+      bash -c 'run_test_file_worker "$@"' _ {} "$out_dir"
+
+    aggregate_parallel_results "$out_dir"
+  fi
+}
+
+# -----------------------------------------------------------------------------
+# CLI
+# -----------------------------------------------------------------------------
+
 usage() {
   cat <<EOF
 Dotfiles Test Runner
@@ -68,12 +172,15 @@ Options:
   -v, --verbose       Verbose output
   -i, --integration   Include integration tests
   -u, --unit-only     Run only unit tests
+  --jobs N            Run N test files in parallel (default 1)
+  --jobs auto         Use the detected CPU count
 
 Arguments:
   pattern             Run only tests matching pattern (e.g., 'extract', 'backup')
 
 Examples:
-  $(basename "$0")                    # Run all unit tests
+  $(basename "$0")                    # Run all unit tests serially
+  $(basename "$0") --jobs auto        # Run all unit tests in parallel
   $(basename "$0") extract            # Run only extract tests
   $(basename "$0") -i                 # Run unit and integration tests
   RUN_INTEGRATION=1 $(basename "$0")  # Alternative way to run integration tests
@@ -81,6 +188,7 @@ Examples:
 Environment Variables:
   RUN_INTEGRATION=1   Enable integration tests
   VERBOSE=1           Enable verbose output
+  TEST_JOBS=N         Default parallelism (overridden by --jobs)
 EOF
 }
 
@@ -89,13 +197,12 @@ main() {
   local run_integration="${RUN_INTEGRATION:-0}"
   local verbose="${VERBOSE:-0}"
   local unit_only=0
+  JOBS="${TEST_JOBS:-1}"
 
-  # Initialize global counters
   TOTAL_TESTS_RUN=0
   TOTAL_TESTS_PASSED=0
   TOTAL_TESTS_FAILED=0
 
-  # Parse arguments
   while [[ $# -gt 0 ]]; do
     case "$1" in
       -h | --help)
@@ -112,6 +219,29 @@ main() {
         ;;
       -u | --unit-only)
         unit_only=1
+        shift
+        ;;
+      --jobs)
+        shift
+        case "${1:-}" in
+          auto) JOBS=$(detect_cores) ;;
+          [0-9]*) JOBS="$1" ;;
+          *)
+            echo "Error: --jobs requires a positive integer or 'auto'" >&2
+            exit 1
+            ;;
+        esac
+        shift
+        ;;
+      --jobs=*)
+        case "${1#*=}" in
+          auto) JOBS=$(detect_cores) ;;
+          [0-9]*) JOBS="${1#*=}" ;;
+          *)
+            echo "Error: --jobs requires a positive integer or 'auto'" >&2
+            exit 1
+            ;;
+        esac
         shift
         ;;
       -*)
@@ -132,45 +262,35 @@ main() {
   echo ""
   echo "Repository: $REPO_ROOT"
   echo "Tests Dir:  $TESTS_DIR"
+  echo "Parallelism: $JOBS"
   echo ""
 
-  local test_count=0
-
-  # Run unit tests
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "UNIT TESTS"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-  while IFS= read -r -d '' test_file; do
-    run_test_file "$test_file"
-    ((test_count++)) || true
+  # Collect unit tests
+  local unit_files=()
+  while IFS= read -r -d '' f; do
+    unit_files+=("$f")
   done < <(find "$TESTS_DIR"/unit -name "test_${test_pattern}.sh" -type f -print0 | sort -z)
 
-  if [[ $test_count -eq 0 ]]; then
+  if [[ ${#unit_files[@]} -eq 0 ]]; then
     echo "No unit tests found matching pattern: $test_pattern"
+  else
+    run_test_list "UNIT TESTS (${#unit_files[@]} files)" "${unit_files[@]}"
   fi
 
-  # Run integration tests if requested
+  # Collect + run integration tests if requested
   if [[ "$run_integration" == "1" && "$unit_only" != "1" ]]; then
-    echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "INTEGRATION TESTS"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-    local integration_count=0
-    for test_file in "$TESTS_DIR"/integration/test_*.sh; do
-      if [[ -f "$test_file" ]]; then
-        run_test_file "$test_file"
-        ((integration_count++)) || true
-      fi
+    local integration_files=()
+    for f in "$TESTS_DIR"/integration/test_*.sh; do
+      [[ -f "$f" ]] && integration_files+=("$f")
     done
-
-    if [[ $integration_count -eq 0 ]]; then
+    if [[ ${#integration_files[@]} -gt 0 ]]; then
+      run_test_list "INTEGRATION TESTS (${#integration_files[@]} files)" "${integration_files[@]}"
+    else
       echo "No integration tests found."
     fi
   fi
 
-  # Print final summary
+  # Final summary
   echo ""
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo "FINAL SUMMARY"
