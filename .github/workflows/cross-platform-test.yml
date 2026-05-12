@@ -51,12 +51,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        # macos-latest currently maps to macos-13 (Intel). macos-14 is
+        # Apple Silicon (M-series). Both Darwin variants are kept so we
+        # catch arch-specific regressions before Apple Silicon users do.
+        os: [ubuntu-latest, macos-latest, macos-14]
         include:
           - os: ubuntu-latest
             platform: linux
             tools: gnu
           - os: macos-latest
+            platform: darwin
+            tools: bsd
+          - os: macos-14
             platform: darwin
             tools: bsd
 

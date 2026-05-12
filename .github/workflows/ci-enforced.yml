@@ -140,7 +140,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]  # BOTH platforms enforced
+        # ubuntu + macos (Intel) + macos-14 (Apple Silicon). All three
+        # platforms enforced — drift on M-series no longer ships silent.
+        os: [ubuntu-latest, macos-latest, macos-14]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Cache Chezmoi
