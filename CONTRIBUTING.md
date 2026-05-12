@@ -17,6 +17,11 @@ Use a signed commit:
 git commit -S -m "fix: concise summary"
 ```
 
+The pre-push audit is **mandatory by default**. If you need to bypass
+it for a single push (rare, almost never on `master`), see
+[`docs/security/AUDIT_BYPASS.md`](docs/security/AUDIT_BYPASS.md). The
+legacy `DOTFILES_SKIP_PRE_PUSH_AUDIT=1` variable is no longer honored.
+
 ## Pull request checklist
 
 - Use signed commits

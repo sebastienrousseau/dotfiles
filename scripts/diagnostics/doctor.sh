@@ -387,6 +387,25 @@ else
   _fail "dot" "not found in PATH"
 fi
 
+# --- Pre-push audit bypass log (closes #871) ---
+_section "Pre-Push Audit Bypass"
+
+bypass_log="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/audit-bypass.log"
+if [[ -s "$bypass_log" ]]; then
+  # Count entries in the last 7 days (timestamps are ISO-8601 UTC).
+  seven_days_ago=$(date -u -v-7d +%Y-%m-%dT00:00:00Z 2>/dev/null \
+                || date -u -d '7 days ago' +%Y-%m-%dT00:00:00Z 2>/dev/null \
+                || echo "1970-01-01T00:00:00Z")
+  recent=$(awk -v cutoff="$seven_days_ago" '$1 >= cutoff' "$bypass_log" | wc -l | tr -d ' ')
+  if (( recent > 0 )); then
+    _warn "audit bypass" "$recent push(es) bypassed in last 7 days — see $(pretty_path "$bypass_log")"
+  else
+    _ok "audit bypass" "log exists; no recent entries (last 7d)"
+  fi
+else
+  _ok "audit bypass" "clean — no pre-push audits bypassed"
+fi
+
 # --- Atuin history-filter (closes #872) ---
 _section "Atuin History Filter"
 
