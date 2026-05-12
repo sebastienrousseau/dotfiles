@@ -387,6 +387,30 @@ else
   _fail "dot" "not found in PATH"
 fi
 
+# --- Atuin history-filter (closes #872) ---
+_section "Atuin History Filter"
+
+atuin_cfg="$HOME/.config/atuin/config.toml"
+if [[ ! -f "$atuin_cfg" ]]; then
+  _warn "atuin config" "not found at $(pretty_path "$atuin_cfg")"
+else
+  if grep -Eq "^history_filter[[:space:]]*=" "$atuin_cfg"; then
+    pattern_count=$(awk '
+      /^history_filter[[:space:]]*=[[:space:]]*\[/ { inside = 1; next }
+      inside && /^\]/                              { inside = 0 }
+      inside && /^[[:space:]]*"/                   { count++ }
+      END                                          { print count + 0 }
+    ' "$atuin_cfg")
+    if (( pattern_count >= 10 )); then
+      _ok "history_filter" "$pattern_count patterns (chezmoi-managed)"
+    else
+      _warn "history_filter" "$pattern_count patterns (expected ≥10 from secrets-patterns.toml)"
+    fi
+  else
+    _fail "history_filter" "no history_filter block in $(pretty_path "$atuin_cfg") — secrets may leak into shell history"
+  fi
+fi
+
 # --- Topgrade Integration ---
 _section "Topgrade Integration"
 
