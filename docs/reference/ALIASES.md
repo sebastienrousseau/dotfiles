@@ -107,11 +107,13 @@ Shell aliases provided by the dotfiles, organized by category in `~/.dotfiles/.c
 ## Adding custom aliases
 
 1. Create a new file in the appropriate category:
+
    ```bash
    vim ~/.dotfiles/.chezmoitemplates/aliases/mycategory/mycategory.aliases.sh
    ```
 
 2. Define your aliases:
+
    ```bash
    # shellcheck shell=bash
    # My Custom Aliases
@@ -119,6 +121,7 @@ Shell aliases provided by the dotfiles, organized by category in `~/.dotfiles/.c
    ```
 
 3. Apply changes:
+
    ```bash
    chezmoi apply
    ```

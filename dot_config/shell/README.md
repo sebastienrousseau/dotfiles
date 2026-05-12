@@ -7,13 +7,13 @@ Welcome to your universally compatible, high-performance dotfiles configuration,
 - **Universal Support**: Works seamlessly on macOS, Linux (Ubuntu/Debian), and Windows (WSL).
 - **Fast Startup**: Optimized with `zcompile` and lazy-loading. Benchmarks vary by machine; use `DOTFILES_FAST=1` for the quickest first prompt.
 - **Modern Core**: Replaces legacy Unix tools with Rust-based alternatives:
-    - `eza` (ls)
-    - `bat` (cat)
-    - `ripgrep` (grep)
-    - `zoxide` (cd)
-    - `atuin` (history)
-    - `yazi` (files)
-    - `zellij` (multiplexer)
+  - `eza` (ls)
+  - `bat` (cat)
+  - `ripgrep` (grep)
+  - `zoxide` (cd)
+  - `atuin` (history)
+  - `yazi` (files)
+  - `zellij` (multiplexer)
 - **Starship Prompt**: A fast, customizable, cross-shell prompt.
 - **Optimized Vim**: Vim settings are kept minimal and fast by default.
 - **Modular Design**: Configuration is split into small, manageable templates.
@@ -23,6 +23,7 @@ Welcome to your universally compatible, high-performance dotfiles configuration,
 ## Get started
 
 ### Install
+
 To install these dotfiles on a new machine, run:
 
 ```bash
@@ -30,6 +31,7 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles
 ```
 
 This command will:
+
 1. Install `chezmoi`.
 2. Clone this repository.
 3. Install required packages (Homebrew/Apt).
@@ -40,7 +42,9 @@ This command will:
 ## Keep it current
 
 ### macOS
+
 Updates are handled via [Homebrew](https://brew.sh/).
+
 1. Edit `~/.dotfiles/dot_config/shell/Brewfile.cli` and `~/.dotfiles/dot_config/shell/Brewfile.cask`.
 2. Run `chezmoi apply`.
    - This triggers `run_onchange_darwin_install-packages.sh.tmpl`, which runs `brew bundle` for CLI and GUI packages.
@@ -48,16 +52,20 @@ Updates are handled via [Homebrew](https://brew.sh/).
    - Optional: `duti` applies default app bindings from `~/.config/duti/defaults.duti`.
 
 ### VS Code extensions
+
 1. Edit `~/.config/vscode/extensions.txt`.
 2. Run `chezmoi apply` to install missing extensions (if `code` is available).
 
 ### Linux and WSL
+
 Updates are handled via `apt-get` (Ubuntu/Debian).
+
 1. Run `chezmoi apply`.
    - This checks for package updates defined in `run_onchange_linux_install-packages.sh.tmpl`.
    - Optional Flatpak list is read from `~/.config/flatpak/flatpak.list`.
 
 ### Vim plugins
+
 1. Edit `~/.dotfiles/dot_vimrc`.
 2. Run `chezmoi apply`.
    - This automatically runs `vim +PlugInstall +PlugClean +qa`.
@@ -69,12 +77,14 @@ Updates are handled via `apt-get` (Ubuntu/Debian).
 If you are migrating from an old `~/.dotfiles` setup:
 
 1. **Backup**:
+
    ```bash
    mv ~/.dotfiles ~/.dotfiles.legacy
    cp ~/.zshrc ~/.zshrc.bak
    ```
 
 2. **Initialize Chezmoi**:
+
    ```bash
    git clone https://github.com/sebastienrousseau/dotfiles.git ~/.dotfiles
    chezmoi apply
@@ -115,6 +125,7 @@ The configuration is managed in `~/.dotfiles`.
 ## Use it
 
 ### Apply changes
+
 After editing any file in `~/.dotfiles`, apply the changes to your home directory:
 
 ```bash
@@ -195,6 +206,7 @@ ${EDITOR:-nano} ~/.config/chezmoi/chezmoi.toml
 ```
 
 Fields:
+
 - `git_name`
 - `git_email`
 - `git_signingkey`
@@ -211,6 +223,7 @@ terminal_font_size = 12
 ```
 
 Available themes:
+
 - `tokyonight-night` (best dark default)
 - `tokyonight-day` (best light default)
 - `tokyonight-storm`
@@ -242,6 +255,7 @@ Available themes:
 ```
 
 ### Add aliases
+
 1. Navigate to `~/.dotfiles/.chezmoitemplates/aliases/`.
 2. Create a new file (e.g., `mytool/mytool.aliases.sh`) or edit an existing one.
 3. Add your aliases.
@@ -250,12 +264,14 @@ Available themes:
 **Note:** Files in `macOS/` are only included on macOS systems.
 
 ### Add functions
+
 1. Navigate to `~/.dotfiles/.chezmoitemplates/functions/`.
 2. Create a new `.sh` file.
 3. Define your function with a usage comment.
 4. Run `chezmoi apply`.
 
 ## Performance
+
 - **Lazy Loading**: Heavy tools (like `nvm`, `rbenv`) are lazy-loaded. They only initialize when you type the command.
 - **Zcompile**: Your `.zshrc` and generated config files are automatically compiled to `.zwc` bytecode for faster parsing.
 - **Fast Mode**: Set `DOTFILES_FAST=1` to skip heavy startup work (plugins, completions, prompt tooling, AI helpers) for the quickest possible first prompt.
@@ -264,4 +280,5 @@ Available themes:
 - **Deferred Hooks**: Use `DOTFILES_DEFER_COMPINIT=1`, `DOTFILES_DEFER_TOOLS=1`, and `DOTFILES_DEFER_ZINIT_MODE=preexec` to move work after the first command.
 
 ## Test
+
 This repository includes GitHub Actions CI to test the configuration on macOS, Ubuntu, and Windows for every Pull Request.

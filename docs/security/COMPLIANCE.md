@@ -77,6 +77,7 @@ All network operations require valid TLS certificates:
 | Plaintext HTTP | `http://` URLs | CI warning |
 
 **Files:**
+
 - Pre-commit: `config/pre-commit-config.yaml`
 - CI: `.github/workflows/compliance-guard.yml`
 

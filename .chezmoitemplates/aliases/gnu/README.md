@@ -21,6 +21,7 @@ text processing commands like "awk" and "sed". There are also aliases
 for various checksum and hash utilities like "md5sum" and "sha256sum".
 
 ### Basic file management utilities
+
 - `basename` Strip directory and suffix from filenames.
 - `cp` Copy files and directories.
 - `dirname` Strip non-directory suffix from filenames.
@@ -38,7 +39,9 @@ for various checksum and hash utilities like "md5sum" and "sha256sum".
 - `rm` Remove files or directories.
 - `rmdir` Remove empty directories.
 - `unlink` Remove files or directories.
+
 ### File content manipulation utilities
+
 - `awk` Pattern scanning and processing language.
 - `cat` Concatenate and display files.
 - `csplit` Split a file into context-determined pieces.
@@ -56,7 +59,9 @@ for various checksum and hash utilities like "md5sum" and "sha256sum".
 - `split` Split a file into pieces.
 - `tail` Output the last part of files.
 - `tr` Translate or delete characters.
+
 ### File checksum and encryption utilities
+
 - `b2sum` Print or check BLAKE2 message digests.
 - `cksum` Print CRC checksum and byte counts.
 - `sha1sum` Print or check SHA1 message digests.
@@ -64,7 +69,9 @@ for various checksum and hash utilities like "md5sum" and "sha256sum".
 - `sha256sum` Print or check SHA256 message digests.
 - `sha384sum` Print or check SHA384 message digests.
 - `sha512sum` Print or check SHA512 message digests.
+
 ### Other file utilities
+
 - `base32` Print or convert base32 data.
 - `base64` Encode or decode base64 data.
 - `basenc` Encode or decode base64, base32,

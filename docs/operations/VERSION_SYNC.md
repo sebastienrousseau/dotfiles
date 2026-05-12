@@ -5,7 +5,9 @@ The version synchronization system ensures that all version references across th
 ## Overview
 
 ### Problem Statement
+
 Large repositories often have version numbers scattered across multiple files:
+
 - README badges
 - Documentation headers
 - Feature version stamps
@@ -14,7 +16,9 @@ Large repositories often have version numbers scattered across multiple files:
 Manually keeping these synchronized is error-prone and time-consuming.
 
 ### Solution Architecture
+
 This system provides automated version synchronization through:
+
 1. **CI/CD Workflow** (`.github/workflows/sync-versions.yml`) - Automated synchronization on version changes
 2. **Local Script** (`scripts/version-sync.sh`) - Manual synchronization and verification
 3. **Verification System** - Ensures all references remain consistent
@@ -26,17 +30,20 @@ This system provides automated version synchronization through:
 **Location**: `.github/workflows/sync-versions.yml`
 
 **Triggers**:
+
 - Push to `master` branch when `package.json` changes
 - Pull requests affecting `package.json`
 - Manual dispatch with optional target version
 
 **Process**:
+
 1. **Detect Changes** - Compares current vs previous `package.json` version
 2. **Sync Versions** - Updates all markdown files with version references
 3. **Verify Consistency** - Ensures all references match target version
 4. **Commit & Push** - Automatically commits changes (except on PRs)
 
 **Features**:
+
 - Backup creation before changes
 - Comprehensive change reporting
 - PR comment integration
@@ -47,6 +54,7 @@ This system provides automated version synchronization through:
 **Location**: `scripts/version-sync.sh`
 
 **Usage**:
+
 ```bash
 # Sync to current package.json version
 ./scripts/version-sync.sh
@@ -62,6 +70,7 @@ This system provides automated version synchronization through:
 ```
 
 **Options**:
+
 - `--dry-run` - Preview changes without applying
 - `--verify` - Check version consistency only
 - `--backup` / `--no-backup` - Control backup creation
@@ -72,11 +81,13 @@ This system provides automated version synchronization through:
 The system recognizes and updates these patterns:
 
 #### README.md
+
 ```markdown
 [![Version](https://img.shields.io/badge/Version-v0.2.501-blue?style=for-the-badge)]
 ```
 
 #### Documentation Files
+
 ```markdown
 **Version**: v0.2.501
 **Dotfiles Version**: v0.2.501
@@ -126,6 +137,7 @@ Version changes in `package.json` automatically trigger synchronization:
 ## Workflow Examples
 
 ### Scenario 1: Version Bump
+
 ```bash
 # Developer updates package.json version
 npm version patch
@@ -141,6 +153,7 @@ git push origin master
 ```
 
 ### Scenario 2: PR Review
+
 ```bash
 # PR with package.json changes
 # GitHub Actions automatically:
@@ -151,6 +164,7 @@ git push origin master
 ```
 
 ### Scenario 3: Manual Sync
+
 ```bash
 # Local development
 ./scripts/version-sync.sh --dry-run  # Preview changes
@@ -161,19 +175,25 @@ git push origin master
 ## File Detection Logic
 
 ### Automatic Discovery
+
 The system automatically discovers files containing version references:
+
 ```bash
 rg -l "v?[0-9]+\.[0-9]+\.[0-9]+" --type md
 ```
 
 ### Known Files
+
 These files are always included even if they don't currently contain versions:
+
 - `README.md`
 - `docs/reference/FEATURES.md`
 - Any file matching version patterns
 
 ### Exclusions
+
 Files that are intentionally excluded:
+
 - `CHANGELOG.md` - May contain historical versions
 - `package.json` - Source of truth
 - `docs/security/COMPLIANCE.md` - Includes external compliance spec versions
@@ -191,26 +211,33 @@ Files that are intentionally excluded:
 ### Common Issues
 
 #### Version Mismatch
+
 ```text
 ❌ Found inconsistent release in docs/reference/FEATURES.md: vX.Y.Z (expected: vA.B.C)
 ```
+
 **Solution**: Run `./scripts/version-sync.sh` to fix
 
 #### Missing Dependencies
+
 ```text
 ❌ jq is required but not installed
 ```
+
 **Solution**: Install dependencies (`jq`, `rg`)
 
 #### Permission Issues
+
 ```text
 ❌ Permission denied writing to README.md
 ```
+
 **Solution**: Check file permissions and Git status
 
 ### Recovery Procedures
 
 #### Rollback Changes
+
 ```bash
 # Restore from backup
 cp .version-sync-backup/README.md.*.backup README.md
@@ -220,6 +247,7 @@ git checkout HEAD~1 -- README.md
 ```
 
 #### Force Resync
+
 ```bash
 ./scripts/version-sync.sh --force
 ```
@@ -227,19 +255,23 @@ git checkout HEAD~1 -- README.md
 ## Monitoring & Maintenance
 
 ### Health Checks
+
 ```bash
 # Daily verification (add to cron)
 ./scripts/version-sync.sh --verify || echo "Version drift detected"
 ```
 
 ### Metrics Tracking
+
 The GitHub Actions workflow provides metrics:
+
 - Files scanned
 - Files updated
 - Verification status
 - Processing time
 
 ### Backup Strategy
+
 - Local backups in `.version-sync-backup/`
 - GitHub Actions artifacts (30-day retention)
 - Git history for rollback
@@ -247,6 +279,7 @@ The GitHub Actions workflow provides metrics:
 ## Security Considerations
 
 ### Token Permissions
+
 ```yaml
 permissions:
   contents: write      # Required for commits
@@ -254,11 +287,13 @@ permissions:
 ```
 
 ### Validation
+
 - Version format validation (`x.y.z` pattern)
 - File path validation (no directory traversal)
 - Change verification before commit
 
 ### Audit Trail
+
 - All changes logged in Git history
 - GitHub Actions run history
 - Backup preservation
@@ -266,16 +301,19 @@ permissions:
 ## Performance Optimization
 
 ### Caching Strategy
+
 - Git operations use shallow fetch when possible
 - Pattern compilation cached
 - File discovery optimized with `ripgrep`
 
 ### Parallel Processing
+
 - File processing is sequential but optimized
 - Git operations batched
 - Verification runs concurrently with updates
 
 ### Resource Usage
+
 - Typical run time: 30-60 seconds
 - Memory usage: <100MB
 - Network usage: Minimal (only Git operations)
@@ -283,6 +321,7 @@ permissions:
 ## Future Enhancements
 
 ### Planned Features
+
 1. **Smart Version Detection** - Semantic version awareness
 2. **Template Support** - Custom version patterns
 3. **Multi-Format Support** - YAML, JSON, TOML files
@@ -290,6 +329,7 @@ permissions:
 5. **Integration Testing** - End-to-end workflow tests
 
 ### Extension Points
+
 - Custom pattern definitions
 - File-specific update rules
 - Pre/post-sync hooks
@@ -298,12 +338,14 @@ permissions:
 ## Troubleshooting
 
 ### Debug Mode
+
 ```bash
 # Enable verbose output
 DEBUG=1 ./scripts/version-sync.sh --dry-run
 ```
 
 ### Common Solutions
+
 | Issue | Solution |
 |-------|----------|
 | Script not executable | `chmod +x scripts/version-sync.sh` |
@@ -313,6 +355,7 @@ DEBUG=1 ./scripts/version-sync.sh --dry-run
 | Changes not committed | Check branch protection rules |
 
 ### Log Analysis
+
 ```bash
 # View GitHub Actions logs
 gh run list --workflow=sync-versions.yml
@@ -322,6 +365,7 @@ gh run view <run-id> --log
 ## Contributing
 
 ### Testing Changes
+
 ```bash
 # Test local changes
 ./scripts/version-sync.sh --dry-run
@@ -331,6 +375,7 @@ gh workflow run sync-versions.yml --ref feature-branch
 ```
 
 ### Adding New Patterns
+
 1. Update pattern regex in script
 2. Add test cases
 3. Update documentation

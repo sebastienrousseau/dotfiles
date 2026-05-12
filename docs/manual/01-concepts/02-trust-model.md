@@ -6,7 +6,7 @@ The trust model combines cryptographic signing, local-first secrets, policy-gate
 
 | Threat | Mitigation |
 |:---|:---|
-| Unauthorized code execution on the workstation | Signed commits, shellcheck gates, no `curl | sh` in install path |
+| Unauthorized code execution on the workstation | Signed commits, shellcheck gates, no `curl \| sh` in install path |
 | Secret leakage into Git history | Age/SOPS encryption, gitleaks in CI, `detect-secrets` baseline |
 | Tampered upstream tool | SHA256-pinned chezmoi installer, SBOM + Grype CVE scan |
 | Malicious agent behavior | MCP policy enforcement, agent profile allowlists, attestation logs |

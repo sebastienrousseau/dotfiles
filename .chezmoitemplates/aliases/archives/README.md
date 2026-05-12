@@ -12,12 +12,17 @@ These aliases are defined in `archives.aliases.sh` and are automatically loaded 
 
 This module provides comprehensive tools for handling various archive and
 compression formats.
+
 ### Universal Extract Function
+
 The `extract` (or shorthand `x`) command automatically handles various archive formats:
+
 ```bash
 extract archive.tar.gz  # Automatically detects format and extracts
 ```
+
 Supported formats:
+
 - `.tar.bz2`, `.tbz2`
 - `.tar.gz`, `.tgz`
 - `.tar.xz`
@@ -36,31 +41,46 @@ Supported formats:
 - `.arj`
 - `.arc`
 - `.dms`
+
 ### Advanced Compression Function
+
 The new `compress` function (shorthand `ac`) provides a unified interface for all compression formats with support for compression levels and multiple files:
+
 ```bash
 compress tgz file1 file2 directory output.tar.gz  # Create tar.gz with multiple inputs
 compress zip -l 9 important_files backup.zip      # Create zip with maximum compression level
 ```
+
 Supported formats: `tar`, `tgz`, `tbz2`, `txz`, `tzst`, `zip`, `7z`, `gz`, `bz2`, `xz`, `zst`, `lz4`, `rar`
+
 ### Quick Backup Function
+
 The `backup` (or shorthand `bak`) function creates timestamped backups of files or directories:
+
 ```bash
 backup important_folder            # Creates important_folder-backup-20250312-123045.tar.gz
 backup database.sql zip            # Creates database.sql-backup-20250312-123045.zip
 ```
+
 ### Archive Content Listing
+
 The `list_archive` (or shorthand `lar`) function displays the contents of any supported archive:
+
 ```bash
 list_archive backup.tar.gz         # Lists all files in the archive
 ```
+
 ### Large File Compression (Legacy)
+
 The `compress_large` (shorthand `acl`) function is maintained for backward compatibility:
+
 ```bash
 compress_large gz largefile.dat    # Creates largefile.dat.gz
 compress_large xz data.bin output.xz  # Specific output name
 ```
+
 ### Archive Tools
+
 - `c7z` - Create 7z archive
 - `x7z` - Extract 7z archive
 - `l7z` - List contents
@@ -85,23 +105,36 @@ compress_large xz data.bin output.xz  # Specific output name
 - `crar` - Create rar archive
 - `xrar` - Extract rar archive
 - `lrar` - List contents
+
 ### Compression Tools
+
 #### Gzip
+
 - `cgz` - Compress with gzip
 - `xgz` - Extract gzip
+
 #### Bzip2
+
 - `cbz` - Compress with bzip2
 - `xbz` - Extract bzip2
+
 #### XZ
+
 - `cxz` - Compress with xz
 - `xxz` - Extract xz
+
 #### Zstandard
+
 - `czst` - Compress with zstd
 - `xzst` - Extract zstd
+
 #### LZ4
+
 - `clz4` - Compress with lz4
 - `xlz4` - Extract lz4
+
 ### Enhanced Features
+
 - Automatic format detection
 - Tab completion for commands
 - Robust error handling with logging
@@ -113,7 +146,9 @@ compress_large xz data.bin output.xz  # Specific output name
 - Content listing for all formats
 - Timestamped backups
 - Cross-platform compatibility
+
 ### Usage Examples
+
 ```bash
 # Extract any supported archive
 extract archive.tar.gz

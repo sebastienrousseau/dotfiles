@@ -11,6 +11,7 @@ These aliases are defined in `wget.aliases.sh` and are automatically loaded by `
 ## Aliases
 
 This code provides a set of aliases for the `wget` command.
+
 - `wg` wget.
 - `wgc` wget with continue.
 - `wge` wget with robots=off.

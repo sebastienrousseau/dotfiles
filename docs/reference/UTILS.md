@@ -34,31 +34,31 @@ The `dot` command is the main interface for managing dotfiles. Run `dot version`
 
 | Command | Description |
 |---------|-------------|
-| `dot doctor` | Run system health checks (`--score|-s`, `--heal|-H`) |
-| `dot health` | Run the health dashboard (`--verbose|-v`, `--json|-j`, `--fix|-f`, `--force|-F`) |
-| `dot heal` | Auto-repair missing tools, chezmoi drift, broken symlinks, and critical files (`--dry-run|-n`, `--force|-f`) |
+| `dot doctor` | Run system health checks (`--score/-s`,`--heal/-H`) |
+| `dot health` | Run the health dashboard (`--verbose/-v`,`--json/-j`,`--fix/-f`,`--force/-F`) |
+| `dot heal` | Auto-repair missing tools, chezmoi drift, broken symlinks, and critical files (`--dry-run/-n`,`--force/-f`) |
 | `dot smoke-test` | Verify toolchains (Rust, Go, AI CLIs) |
-| `dot verify` | Run security and integrity verification (`--security|-s`) |
+| `dot verify` | Run security and integrity verification (`--security/-s`) |
 | `dot chaos` | Simulate config corruption to test self-healing |
 | `dot rollback` | Roll back dotfiles to the previous known-good state |
 | `dot drift` | Detailed configuration drift dashboard |
-| `dot benchmark` | Measure shell startup time (`--detailed|-d`, `--profile|-p`, `--compare|-c`, `--waterfall|-w`) |
-| `dot perf` | Show performance mode + quick timing (`--json|-j`, `--profile|-p`, `--runs|-r`, `--target|-t`) |
+| `dot benchmark` | Measure shell startup time (`--detailed/-d`,`--profile/-p`,`--compare/-c`,`--waterfall/-w`) |
+| `dot perf` | Show performance mode + quick timing (`--json/-j`,`--profile/-p`,`--runs/-r`,`--target/-t`) |
 | `dot score` | Show the high-level system health and security scorecard |
 | `dot metrics` | Show recent observability metrics |
 | `dot load-bench` | Measure heavy-layer readiness |
-| `dot mcp` | Validate MCP policy and registry (`--strict|-s`, `--json|-j`) |
-| `dot attest` | Export workstation evidence (`--json|-j`, `--write|-w`, `--fleet-store|-F`) |
+| `dot mcp` | Validate MCP policy and registry (`--strict/-s`,`--json/-j`) |
+| `dot attest` | Export workstation evidence (`--json/-j`,`--write/-w`,`--fleet-store/-F`) |
 | `dot history` | Analyse shell history |
-| `dot security-score` | Score workstation security (`--verbose|-v`, `--quiet|-q`, `--json|-j`) |
-| `dot snapshot` | Capture workstation state (`--baseline|-b`, `--force|-f`) |
+| `dot security-score` | Score workstation security (`--verbose/-v`,`--quiet/-q`,`--json/-j`) |
+| `dot snapshot` | Capture workstation state (`--baseline/-b`,`--force/-f`) |
 | `dot ai` | Show categorized AI CLI status and launch an installed provider |
 | `dot ai-setup` | Bootstrap supported AI CLIs interactively |
 | `dot ai-query` | Run context-aware AI queries over the repo |
 | `dot mode` | Show or switch the active agent profile |
 | `dot agent` | Inspect agent metadata, logs, checkpoints, and conformance |
 | `dot agent checkpoint` | Save, list, show, and replay bounded agent checkpoints |
-| `dot agent conformance` | Validate A2A discovery and agent card conformance (`--strict|-s`, `--json|-j`) |
+| `dot agent conformance` | Validate A2A discovery and agent card conformance (`--strict/-s`,`--json/-j`) |
 
 ### Tools
 
@@ -74,7 +74,7 @@ The `dot` command is the main interface for managing dotfiles. Run `dot version`
 | `dot learn` | Start the guided onboarding tour |
 | `dot docs` | Show the main repository documentation |
 | `dot log-rotate` | Rotate `~/.local/share/dotfiles.log` |
-| `dot lint` | Lint shell scripts (`--check|-c`, `--fix|-f`) |
+| `dot lint` | Lint shell scripts (`--check/-c`,`--fix/-f`) |
 
 ## Universal Scripts
 

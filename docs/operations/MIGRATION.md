@@ -19,6 +19,7 @@ dot doctor
 ## Version History
 
 ### v0.2.501 (Current)
+
 - **Wallpaper-driven theme engine** — themes auto-generated from wallpapers via K-Means in CIELAB color space (no hand-crafted themes)
 - **Dynamic HEIC support** — custom wallpapers ship as Apple-compatible single-file dynamic HEIC; macOS auto-switches dark/light
 - **System wallpaper discovery** — pulls themes from `/System/Library/Desktop Pictures/` (macOS) and `/usr/share/backgrounds/` (Linux)
@@ -29,7 +30,8 @@ dot doctor
 - **Build artifact redirection** — Cargo, Go, pip, uv, Zig caches → `/tmp/builds/` (cleared on reboot)
 - **CI dedup** — `ci-enforced.yml` reuses `reusable-shell-lint.yml` and `reusable-test-suite.yml`
 
-### v0.2.501
+### v0.2.500
+
 - Added AI CLIs: Autohand Code, Mistral Vibe, Qwen Code, ZAI
 - Removed Cline CLI (broken upstream dependency)
 - Interactive mise installer for missing AI providers
@@ -41,13 +43,15 @@ dot doctor
 - Auto-prewarm after dot apply
 - Expanded Atuin history filters
 
-### v0.2.501
+### v0.2.497
+
 - Theme system with Catppuccin integration
 - Linux desktop parity (Niri, Waybar, Fuzzel)
 - AI tooling expansion (Kiro, OpenCode)
 - Coverage contracts and QA docs
 
-### v0.2.501
+### v0.2.496
+
 - Verified chezmoi installer
 - Shell startup optimization
 - Property-based tests

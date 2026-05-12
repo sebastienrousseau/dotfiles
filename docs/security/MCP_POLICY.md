@@ -7,6 +7,7 @@ MCP is treated as a controlled execution boundary.
 The tracked default is `strict-local`.
 
 Properties:
+
 - local-first
 - least privilege
 - no broad filesystem roots
@@ -21,6 +22,7 @@ Approved package pins live in [mcp-lock.json](/home/seb/.dotfiles/dot_config/dot
 Tracked server registry entries live in [mcp-registry.json](/home/seb/.dotfiles/dot_config/dotfiles/mcp-registry.json).
 
 Current defaults:
+
 - Allowed launchers: `npx`, `node`, `uvx`
 - Trusted transports: `stdio`, `http`
 - Blocked filesystem roots: `/`, `/home`, `/Users`
@@ -45,6 +47,7 @@ The JSON form is the audit artifact for CI, release validation, and workstation 
 ## Change control
 
 Any change to MCP policy requires:
+
 1. A signed commit
 2. A matching test update
 3. A release note if the effective trust boundary changes
@@ -55,11 +58,13 @@ Any change to MCP policy requires:
 Phase 2 adds explicit package locking for default MCP servers.
 
 Current approved refs:
+
 - `mcp-server-git@2025.1.14`
 - `@modelcontextprotocol/server-memory@2025.8.4`
 - `mcp-server-sqlite@2025.1.14`
 
 `dot mcp --strict` and `dot mcp -s` now verify that:
+
 - package refs are version-pinned
 - the pinned refs match the tracked lock manifest
 - non-approved package refs are rejected in strict mode

@@ -16,6 +16,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfil
 ```
 
 The installer:
+
 1. Verifies prerequisites (`git`, `curl`, write access to `~`)
 2. Downloads chezmoi via the SHA256-verified installer
 3. Clones the dotfiles source to `~/.dotfiles`

@@ -136,6 +136,7 @@ Full guide: [docs/guides/THEMING.md](docs/guides/THEMING.md)
 30+ commands grouped by intent. Run `dot help` for the full reference.
 
 ### Start Here
+
 | | |
 |:---|:---|
 | `dot sync` | Apply dotfiles to this machine |
@@ -143,6 +144,7 @@ Full guide: [docs/guides/THEMING.md](docs/guides/THEMING.md)
 | `dot learn` | Open the guided tour |
 
 ### Daily Use
+
 | | |
 |:---|:---|
 | `dot status` / `dot diff` | Show local drift / preview pending changes |
@@ -150,6 +152,7 @@ Full guide: [docs/guides/THEMING.md](docs/guides/THEMING.md)
 | `dot upgrade` | Update tools and dotfiles |
 
 ### Inspect & Repair
+
 | | |
 |:---|:---|
 | `dot heal` | Auto-fix tools, chezmoi drift, broken symlinks |
@@ -158,6 +161,7 @@ Full guide: [docs/guides/THEMING.md](docs/guides/THEMING.md)
 | `dot chaos` | Simulate corruption to test self-healing |
 
 ### AI & Agents
+
 | | |
 |:---|:---|
 | `dot ai` | Show installed AI tools |
@@ -166,6 +170,7 @@ Full guide: [docs/guides/THEMING.md](docs/guides/THEMING.md)
 | `dot agent` | Agent metadata, logs, checkpoints, conformance |
 
 ### Configuration
+
 | | |
 |:---|:---|
 | `dot theme` / `dot theme rebuild` | Switch theme / regenerate from wallpapers |
@@ -174,6 +179,7 @@ Full guide: [docs/guides/THEMING.md](docs/guides/THEMING.md)
 | `dot secrets` | Edit encrypted secrets |
 
 ### Fleet & Performance
+
 | | |
 |:---|:---|
 | `dot fleet` | Multi-node status, drift, namespace |
@@ -218,6 +224,7 @@ See the [Migration Guide](docs/operations/MIGRATION.md) for version upgrades.
 - **Nushell** handles structured terminal workflows
 - **PowerShell** keeps cross-platform and WSL sessions on the same baseline
 - **Starship**, **Zoxide**, **Atuin**, and **fzf** for navigation and command recall
+
 </details>
 
 <details>
@@ -229,6 +236,7 @@ See the [Migration Guide](docs/operations/MIGRATION.md) for version upgrades.
 - **Neovim** ships as a full Lua-based editor, not a starter template
 - **Lazygit** for terminal git workflow without a GUI
 - **Build caches** (Cargo, Go, pip, uv, Zig) redirected to `/tmp/builds/` — cleared on reboot
+
 </details>
 
 <details>
@@ -239,6 +247,7 @@ See the [Migration Guide](docs/operations/MIGRATION.md) for version upgrades.
 - **AI commit messages** (`dot commit`) — conventional commits generated from staged diff
 - **AI tools** (`dot ai`) — Claude Code, Codex, GitHub Copilot, Gemini CLI managed via Mise
 - **Attestation logs** — every agent session logged with policy hash + outcome
+
 </details>
 
 <details>
@@ -250,6 +259,7 @@ See the [Migration Guide](docs/operations/MIGRATION.md) for version upgrades.
 - **Workstation attestation** (`dot attest`) records machine state, policy, prompt, model metadata in tracked JSON
 - **Telemetry controls** and local-first defaults — you own your data
 - **SBOM (CycloneDX)** + Grype CVE scanning in CI
+
 </details>
 
 For security hardening options, see [Security docs](docs/security/SECURITY.md).

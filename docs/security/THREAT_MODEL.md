@@ -45,6 +45,7 @@ The primary trust boundary is the **local machine**. Dotfiles are deployed to an
 **Risk:** Malicious code in sourced files executes with user privileges on every shell start.
 
 **Mitigations:**
+
 - All shell scripts pass `shellcheck --severity=error`
 - `set -euo pipefail` enforced in all operational scripts
 - `eval` usage hardened with process substitution (`. /dev/stdin`)
@@ -56,6 +57,7 @@ The primary trust boundary is the **local machine**. Dotfiles are deployed to an
 **Risk:** API keys, tokens, and SSH keys leaked via git history, shell history, or environment.
 
 **Mitigations:**
+
 - [Gitleaks](https://github.com/gitleaks/gitleaks) pre-commit hook blocks secrets in commits
 - Atuin `history_filter` excludes sensitive patterns
 - Age encryption for local secret storage
@@ -67,6 +69,7 @@ The primary trust boundary is the **local machine**. Dotfiles are deployed to an
 **Risk:** Compromised upstream packages injected into the toolchain.
 
 **Mitigations:**
+
 - Nix Flakes provide reproducible, pinned dependencies
 - Zinit plugin versions pinned (`ver"0.8.0"`)
 - Neovim plugin versions locked via `lazy-lock.json`
@@ -78,6 +81,7 @@ The primary trust boundary is the **local machine**. Dotfiles are deployed to an
 **Risk:** Attacker places malicious binary in a PATH directory that shadows legitimate tools.
 
 **Mitigations:**
+
 - PATH construction is deterministic (template-generated)
 - `~/.local/bin` is user-controlled and checked for writability
 - No world-writable directories in PATH
@@ -88,6 +92,7 @@ The primary trust boundary is the **local machine**. Dotfiles are deployed to an
 **Risk:** Chezmoi template variables could inject shell code if not properly quoted.
 
 **Mitigations:**
+
 - Template variables come from `.chezmoidata.toml` (user-controlled)
 - No external/network data used in templates
 - Template validation via `chezmoi apply --dry-run` in CI
@@ -97,6 +102,7 @@ The primary trust boundary is the **local machine**. Dotfiles are deployed to an
 **Risk:** Stale or tampered cache files in `~/.cache/shell/` sourced at startup.
 
 **Mitigations:**
+
 - `_cached_eval` validates cache against binary mtime
 - Cache files are user-owned (0644)
 - Cache directory is under `$XDG_CACHE_HOME` (user-controlled)

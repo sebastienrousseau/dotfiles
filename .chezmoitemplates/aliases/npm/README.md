@@ -12,6 +12,7 @@ These aliases are defined in `npm.aliases.sh` and are automatically loaded by `c
 
 This code provides a set of aliases for
 [npm](https://www.npmjs.com/) package manager.
+
 - `npa` Audit npm packages.
 - `npb` Build npm script.
 - `npc` Cache npm package.

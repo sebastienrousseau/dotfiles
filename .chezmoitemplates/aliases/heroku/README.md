@@ -12,6 +12,7 @@ These aliases are defined in `heroku.aliases.sh` and are automatically loaded by
 
 This is a collection of aliases for the
 [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli).
+
 - `hkk` Heroku CLI command shortcut.
 - `hka` Add new users to your app.
 - `hkau` Update existing collaborators on an team app.

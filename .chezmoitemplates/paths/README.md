@@ -31,13 +31,17 @@ Path configurations are split into priority-based files. `chezmoi` aggregates th
 ## Usage
 
 ### Adding a user path
+
 1. Edit `99-custom.paths.sh` or create a new file (e.g. `50-myproject.paths.sh`).
 2. Add `export PATH="$PATH:/path/to/dir"`.
 3. Apply changes:
+
    ```bash
    chezmoi apply
    ```
+
 4. Verify:
+
    ```bash
    echo $PATH
    ```

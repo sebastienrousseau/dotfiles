@@ -25,7 +25,7 @@ asciinema replay) is noisy.
 
 Starship 1.24+ supports a **transient prompt** feature: when a command
 finishes, the prompt that produced it is rewritten to a compact form
-(e.g., `❯ `) and the full prompt is re-emitted only at the live editing
+(e.g., `❯`) and the full prompt is re-emitted only at the live editing
 line. The current command always shows the full prompt; history shows
 only the compact form.
 
@@ -39,7 +39,7 @@ shells we support as first-class.
 - Must not interfere with `_cached_eval`'s startup-cost optimization
   (the transient hook fires per-prompt, not per-shell-start).
 - Must not break copy-paste of previous commands: the compact line
-  must still be `❯ ` (or similar) so `<Ctrl-shift-c>` over scrollback
+  must still be `❯` (or similar) so `<Ctrl-shift-c>` over scrollback
   yields runnable shell content if the user includes the prompt.
 
 ## Decision
@@ -56,7 +56,7 @@ fish:
 - **Fish**: same Starship config (shared TOML), with fish-side
   integration via `dot_config/fish/conf.d/`.
 
-- **Transient prompt content**: `❯ ` plus optional exit-code dot
+- **Transient prompt content**: `❯` plus optional exit-code dot
   (red dot if `$status != 0`). Keep it 1–3 characters so scrollback
   density actually improves.
 

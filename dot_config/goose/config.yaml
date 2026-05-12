@@ -9,11 +9,11 @@ providers:
   anthropic:
     model: claude-opus-4-6
     max_tokens: 8192
-  
+
   openai:
     model: gpt-4o
     max_tokens: 4096
-  
+
   ollama:
     model: llama3.2
     host: http://localhost:11434

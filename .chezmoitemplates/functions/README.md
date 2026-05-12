@@ -18,6 +18,7 @@ A comprehensive collection of shell utilities and functions to enhance your prod
 Functions are defined as individual `.sh` files in this directory.
 
 During `chezmoi apply`, the main template `dot_config/shell/functions.sh.tmpl`:
+
 1. Scans this directory for `**/*.sh` files.
 2. Aggregates them into `~/.config/shell/functions.sh`.
 3. This file is sourced by `.zshrc`, making all functions immediately available.
@@ -25,9 +26,11 @@ During `chezmoi apply`, the main template `dot_config/shell/functions.sh.tmpl`:
 ## Usage
 
 ### Adding a New Function
+
 1. Create a new `.sh` file (e.g., `myfunc.sh`).
 2. Add your function definition.
 3. Apply changes:
+
    ```bash
    chezmoi apply
    ```
@@ -78,14 +81,14 @@ During `chezmoi apply`, the main template `dot_config/shell/functions.sh.tmpl`:
 | `titlecase` | Convert filenames to Title Case | `titlecase <files...>` |
 | `uppercase` | Convert filenames to UPPERCASE | `uppercase <files...>` |
 
-###  System Utilities
+### System Utilities
 
 | Function | Description | Usage |
 |----------|-------------|-------|
 | `caffeine` | Prevent system from sleeping | `caffeine [command]` |
 | `environment` | Detect operating system environment | `environment` |
 | `freespace` | Clean purgeable disk space | `freespace [disk]` |
-| `hiddenfiles` | Toggle visibility of hidden files in Finder | `hiddenfiles [show|hide]` |
+| `hiddenfiles` | Toggle visibility of hidden files in Finder | `hiddenfiles [show\|hide]` |
 | `hostinfo` | Display detailed host information | `hostinfo` |
 | `hstats` | View statistics about most used commands | `hstats` |
 | `last` | List recently modified files | `last [minutes]` |
@@ -143,9 +146,9 @@ The `caffeine` utility prevents your system from sleeping or activating the scre
 
 Most utilities work across platforms, with specific adaptations for:
 
--  **macOS**: Full support with macOS-specific utilities
--  **Linux**: Compatible with common Linux distributions
--  **Windows**: Windows support via WSL, Cygwin, or Git Bash
+- **macOS**: Full support with macOS-specific utilities
+- **Linux**: Compatible with common Linux distributions
+- **Windows**: Windows support via WSL, Cygwin, or Git Bash
 
 ## Function Documentation
 

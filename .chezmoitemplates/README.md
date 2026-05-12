@@ -61,11 +61,13 @@ This directory contains modular templates that are aggregated into the shell env
 ### Current State Assessment
 
 **Strengths:**
+
 - Aliases use excellent domain-based organization (46 functional categories)
 - Paths use priority-based numbering system (00-, 05-, 99-)
 - Each category has comprehensive documentation
 
 **Growth Concerns:**
+
 - Functions directory is flat with 52 files (becomes unwieldy at scale)
 - No consistent versioning scheme across categories
 - Potential namespace collisions in functions
@@ -77,6 +79,7 @@ This directory contains modular templates that are aggregated into the shell env
 **Current Issue**: 52 functions in a flat structure becomes unmaintainable at scale.
 
 **Recommended Structure**:
+
 ```text
 functions/
 ├── core/                # Essential system utilities
@@ -98,6 +101,7 @@ functions/
 **Current Issue**: No version coordination between template categories.
 
 **Recommended Approach**:
+
 - Maintain single version in top-level README
 - Template categories reference parent version
 - Individual templates can have micro-versions for breaking changes
@@ -107,6 +111,7 @@ functions/
 **Current State**: Some platform-specific organization (macOS directory in aliases).
 
 **Recommended Structure**:
+
 ```text
 aliases/
 ├── core/               # Cross-platform commands
@@ -120,6 +125,7 @@ aliases/
 #### 4. Dependency Management (Priority: LOW)
 
 **Future Consideration**: As template count grows, consider dependency declarations:
+
 ```yaml
 # In function headers
 # REQUIRES: utils/logging.sh
@@ -130,17 +136,20 @@ aliases/
 ## Migration Strategy
 
 ### Phase 1: Functions Reorganization (Immediate)
+
 1. Create new subdirectory structure in `functions/`
 2. Move existing functions to appropriate categories
 3. Update documentation to reflect new structure
 4. Test aggregation still works correctly
 
 ### Phase 2: Platform Abstraction (Future)
+
 1. Abstract platform-specific logic into dedicated namespaces
 2. Create platform detection in aggregation templates
 3. Conditional loading based on detected platform
 
 ### Phase 3: Dependency System (Future)
+
 1. Implement dependency validation in aggregation
 2. Add conflict detection
 3. Create template registry with metadata
@@ -148,16 +157,19 @@ aliases/
 ## Quality Standards
 
 ### Naming Conventions
+
 - **Aliases**: `category/toolname.aliases.sh`
 - **Functions**: `category/subcategory/funcname.sh`
 - **Paths**: `##-purpose.paths.sh` (priority prefix)
 
 ### Documentation Requirements
+
 - Each category MUST have README.md with usage examples
 - Individual functions MUST include `--help` documentation
 - Breaking changes MUST increment category micro-version
 
 ### Testing Considerations
+
 - Aggregation MUST remain functional after reorganization
 - Platform detection MUST be reliable
 - No namespace collisions between categories
@@ -165,6 +177,7 @@ aliases/
 ---
 
 **Next Actions:**
+
 1. Implement functions reorganization (Phase 1)
 2. Update aggregation templates to handle subdirectories
 3. Validate no regression in shell loading performance

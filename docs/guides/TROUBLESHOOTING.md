@@ -5,17 +5,20 @@ Quick checks for common issues.
 ## Install and update
 
 **Problem:** Install script fails immediately
+
 - Verify that `git` and `curl` are installed.
 - Check internet connectivity.
 - Try running with verbose output: `bash -x install.sh`
 
 **Problem:** Chezmoi apply fails
+
 - Re-run `chezmoi apply` to re-sync state.
 - Check for merge conflicts: `chezmoi diff`
 - If hooks fail, check `~/.local/share/dotfiles.log` for details.
 - For non-interactive sessions, force apply to avoid TTY prompts: `DOTFILES_NONINTERACTIVE=1 dot apply --force`
 
 **Problem:** Packages fail to install
+
 - macOS: Verify Homebrew is installed and up to date (`brew update`)
 - Linux: Run `sudo apt-get update` first
 - Verify you have sufficient permissions
@@ -23,22 +26,26 @@ Quick checks for common issues.
 ## Shell startup
 
 **Problem:** Shell is slow to start
+
 - Run `dot benchmark` to measure startup time
 - Profile with `zsh -x` to trace startup
 - Check for slow plugins or large history files
 
 **Problem:** Aliases or functions not available
+
 - Run `chezmoi apply` to regenerate config files
 - Source your shell config: `source ~/.zshrc`
 - Verify the relevant tool is installed
 
 **Problem:** `dot doctor` prints a directory listing instead of diagnostics
+
 - This usually means `dot` was shadowed by a navigation alias in the current shell session.
 - Check resolution: `type -a dot`
 - Fix current session: `unalias dot 2>/dev/null || true && exec zsh`
 - Validate after reload: `dot doctor`
 
 **Problem:** Zsh reports it cannot write `.zwc` files
+
 - Cause: stale read-only zsh cache files after an upgrade.
 - Remove stale caches:
   - `find ~/.config/shell ~/.config/zsh -type f -name '*.zwc' -delete`
@@ -46,6 +53,7 @@ Quick checks for common issues.
 - Re-run health checks: `dot doctor`
 
 **Problem:** Shell crashes on startup
+
 - Temporarily move `~/.zshrc` and retry to isolate the fault
 - Check for syntax errors: `zsh -n ~/.zshrc`
 - Review recent changes: `chezmoi diff`
@@ -53,22 +61,26 @@ Quick checks for common issues.
 ## Secrets and encryption
 
 **Problem:** Encrypted files fail to decrypt
+
 - Confirm `~/.config/chezmoi/key.txt` exists.
 - Verify the key matches the one used for encryption.
 - Re-initialize with `dot secrets-init` if needed.
 
 **Problem:** Age encryption not working
+
 - Verify `age` is installed: `command -v age`
 - Check key permissions: `ls -la ~/.config/chezmoi/key.txt` (should be 600)
 
 ## Neovim
 
 **Problem:** Plugins fail to load
+
 - Run `:checkhealth` in Neovim
 - Update plugins: `:Lazy sync`
 - Check for missing dependencies (node, python, etc.)
 
 **Problem:** LSP not working
+
 - Install required language servers
 - Check `:LspInfo` for status
 - Review `:LspLog` for errors
@@ -76,21 +88,25 @@ Quick checks for common issues.
 ## Git
 
 **Problem:** Git aliases not working
+
 - Check if Git config is applied: `git config --list`
 - Re-apply dotfiles: `chezmoi apply`
 
 **Problem:** Delta (diff pager) not showing colors
+
 - Verify `delta` is installed
 - Confirm your terminal supports 256 colors
 
 ## Kubernetes tools
 
 **Problem:** kubectl context issues
+
 - List contexts: `kubectl config get-contexts`
 - Switch context: `kubectx <context-name>`
 - Check kubeconfig: `echo $KUBECONFIG`
 
 **Problem:** Minikube won't start
+
 - Verify Docker is running
 - Try: `minikube delete && minikube start`
 - Check logs: `minikube logs`
@@ -98,6 +114,7 @@ Quick checks for common issues.
 ## Performance
 
 **Problem:** High memory usage
+
 - Look for runaway processes: `htop` or `btop`
 - Review shell history size in atuin config
 - Disable unused plugins
@@ -105,21 +122,26 @@ Quick checks for common issues.
 ## Common infrastructure failures
 
 **Problem:** Nix isn't installed or commands not found
+
 - Ensure you have followed the installation guide: `curl -L https://nixos.org/nix/install | sh`
 - On Linux, you might need to enable experimental features in `~/.config/nix/nix.conf`:
   `experimental-features = nix-command flakes`
 - Verify the daemon is running: `ps aux | grep nix-daemon`
 
 **Problem:** Systemd isn't available (mostly WSL2)
+
 - Dotfiles functions that rely on systemd (like `pueue` management) will fallback to direct execution.
 - To enable systemd in WSL2, add this to `/etc/wsl.conf` (requires Windows 11 or latest WSL):
+
   ```ini
   [boot]
   systemd=true
   ```
+
 - Restart WSL: `wsl.exe --shutdown`
 
 **Problem:** GPG or SSH signing fails
+
 - Check if your key is present: `gpg --list-secret-keys` or `ssh-add -l`
 - Ensure `GPG_TTY` is set (dotfiles does this automatically in `rc.d`).
 - For hardware keys (Yubikey), ensure `pcscd` is running on Linux.
@@ -132,6 +154,7 @@ For complex WSL2 edge cases, Nix integration problems, and recovery procedures, 
 **[WSL2 & Nix Troubleshooting Guide](WSL2_NIX_TROUBLESHOOTING.md)**
 
 This guide covers:
+
 - WSL2 filesystem and networking edge cases
 - Nix installation and flake management issues
 - Complete system recovery procedures
@@ -141,6 +164,7 @@ This guide covers:
 ## Still stuck
 
 Open an issue with:
+
 - OS + version
 - Output of `dot doctor` (if available)
 - Relevant log snippets from `~/.local/share/dotfiles.log`

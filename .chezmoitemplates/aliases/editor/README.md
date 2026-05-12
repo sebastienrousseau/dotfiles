@@ -11,8 +11,11 @@ These aliases are defined in `editor.aliases.sh` and are automatically loaded by
 ## Aliases
 
 This code provides a comprehensive set of command aliases for editing files using the editor configured in your environment. It works in conjunction with the editor configuration script (`editor.sh`) which automatically selects the best available editor on your system.
+
 ### Supported Editors
+
 The following editors are supported with specialized aliases:
+
 - **Neovim** - Modern, enhanced version of Vim
 - **Visual Studio Code** - Feature-rich code editor with extensions
 - **Vim** - Highly configurable text editor
@@ -57,8 +60,11 @@ Depending on which editor is selected by `editor.sh`, additional specialized ali
 - `a` - Launch Atom
 - `at` - Open current directory in Atom
 - `an` - Open in new Atom window
+
 ### Quick Configuration Editing
+
 The script provides the `editrc` function to quickly edit common configuration files:
+
 ```bash
 editrc bash     # Edit ~/.bashrc
 editrc zsh      # Edit ~/.zshrc
@@ -70,14 +76,19 @@ editrc ssh      # Edit ~/.ssh/config
 editrc alias    # Edit ~/.dotfiles/aliases
 editrc dotfiles # Edit ~/.dotfiles
 ```
+
 ### Integration with editor.sh
+
 These aliases work in harmony with the `editor.sh` script which:
+
 1. Automatically detects available editors on your system
 2. Sets appropriate environment variables (`EDITOR`, `VISUAL`, `GIT_EDITOR`, etc.)
 3. Configures editor-specific settings
 4. Provides intelligent fallbacks
 The aliases in this file are designed to provide convenient shortcuts based on the editor that was selected by the detection process.
+
 ### Usage Examples
+
 ```bash
 # Quick edit a file using the default editor
 e myfile.txt

@@ -124,11 +124,13 @@ dot rollback clean        # delete snapshots older than 30 days
 ```
 
 Snapshots include:
+
 - Every file chezmoi would have overwritten
 - The previous `.chezmoidata.toml` and `chezmoi.toml`
 - A pointer to the Git SHA at apply time
 
 They do **not** include:
+
 - Generated caches (`~/.cache/`)
 - Tool binaries (Mise-managed)
 - External state (databases, remote repos)
@@ -173,6 +175,7 @@ Recovery use case: you're stranded on a new machine with no internet. Copy the b
 | Compliance (policy hash match) | 15 |
 
 Scores:
+
 - 90-100 — healthy
 - 70-89 — minor issues
 - 50-69 — needs attention

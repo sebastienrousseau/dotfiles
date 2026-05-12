@@ -18,6 +18,7 @@ This directory contains modular alias definitions managed by **chezmoi**.
 Aliases are split into small, manageable files (e.g., `git/git.aliases.sh`, `docker/docker.aliases.sh`).
 
 During `chezmoi apply`, the main template `dot_config/shell/aliases.sh.tmpl`:
+
 1. Scans this directory for `**/*.aliases.sh` files.
 2. Aggregates them into a single `~/.config/shell/aliases.sh` file.
 3. This aggregated file is sourced by your `.zshrc`.
@@ -25,12 +26,16 @@ During `chezmoi apply`, the main template `dot_config/shell/aliases.sh.tmpl`:
 ## Usage
 
 ### Adding a New Alias
+
 1. Create a new directory or file (e.g., `mytool/mytool.aliases.sh`).
 2. Define your aliases:
+
    ```bash
    alias mycmd="echo 'Hello World'"
    ```
+
 3. Apply changes:
+
    ```bash
    chezmoi apply
    ```

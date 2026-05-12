@@ -109,6 +109,7 @@ dot theme rebuild --list   # List discovered wallpapers without rebuilding
 Theme switching is a two-tier system:
 
 **Core (always works)** — ships in the repo, no setup needed:
+
 - Terminal colors (Ghostty, Alacritty, Kitty, WezTerm, tmux)
 - Editor themes (Neovim colorscheme, VS Code)
 - macOS dark/light mode and accent color
@@ -116,6 +117,7 @@ Theme switching is a two-tier system:
 - Browser color mode (Safari, Chrome, Firefox)
 
 **Wallpapers (optional)** — user-provided, enhances the theme:
+
 - Desktop wallpaper matched to the active theme
 - Requires `~/Pictures/Wallpapers/` with files named `macos-NAME-dark.heic`
 

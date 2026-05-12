@@ -12,6 +12,7 @@ These aliases are defined in `clear.aliases.sh` and are automatically loaded by 
 
 This code provides a set of command aliases to make working with the
 terminal easier and more efficient. The following aliases are included:
+
 - `c` clears the terminal screen.
 - `cdw` changes the current directory to the workspace directory.
 - `cl` is an alias for `c`, which clears the terminal screen.

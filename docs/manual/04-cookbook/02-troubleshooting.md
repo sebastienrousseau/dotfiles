@@ -9,6 +9,7 @@ Symptom → cause → fix.
 **Cause**: `/usr/local/bin` or `~/.local/bin` not in PATH at install time.
 
 **Fix**:
+
 ```sh
 export PATH="$HOME/.local/bin:$PATH"
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
@@ -19,6 +20,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfil
 **Cause**: Permission issue on `~/.local`.
 
 **Fix**:
+
 ```sh
 mkdir -p ~/.local/share ~/.local/state ~/.local/bin
 chmod 755 ~/.local ~/.local/share
@@ -29,6 +31,7 @@ chmod 755 ~/.local ~/.local/share
 **Cause**: Slow network or corporate proxy.
 
 **Fix**:
+
 ```sh
 export https_proxy=$HTTP_PROXY  # if applicable
 # Or pre-download chezmoi manually
@@ -43,6 +46,7 @@ apt install chezmoi             # Debian 13+
 **Cause**: Chezmoi detected local drift on a managed file.
 
 **Fix**:
+
 ```sh
 dot diff                    # see what differs
 dot apply --force           # overwrite local
@@ -55,10 +59,13 @@ dot add <path>              # import local change to source
 **Cause**: A template references a missing data field.
 
 **Fix**: Check that your `.chezmoidata.toml` has the required field. For example:
+
 ```sh
 chezmoi execute-template '{{- $hw := index .hardware .machine -}}{{ $hw.wm }}'
 ```
+
 If `machine` is not set in your `~/.config/chezmoi/chezmoi.toml`, `index` returns nil. Set:
+
 ```toml
 [data]
 machine = "macbook-t2"
@@ -69,6 +76,7 @@ machine = "macbook-t2"
 **Cause**: Cached init scripts are stale.
 
 **Fix**:
+
 ```sh
 dot clean-cache
 dot prewarm
@@ -82,6 +90,7 @@ exec $SHELL -l
 **Cause**: No wallpapers discovered, themes.toml not generated.
 
 **Fix**:
+
 ```sh
 dot theme rebuild --force
 ```
@@ -91,6 +100,7 @@ dot theme rebuild --force
 **Cause**: Theme name doesn't exist in `themes.toml`.
 
 **Fix**:
+
 ```sh
 dot theme list            # see valid names
 dot theme rebuild --force # regenerate if expected but missing
@@ -101,10 +111,12 @@ dot theme rebuild --force # regenerate if expected but missing
 **Cause**: System Settings UI cached the old value.
 
 **Fix**: `dot-theme-sync` now calls `killall cfprefsd SystemUIServer Dock "System Settings"`. If it still doesn't refresh:
+
 ```sh
 killall -KILL Dock SystemUIServer
 sudo killall -KILL cfprefsd
 ```
+
 Or log out and back in.
 
 ### Symptom: Wallpaper not applying
@@ -112,6 +124,7 @@ Or log out and back in.
 **Cause**: Wrong format or missing DE support on Linux.
 
 **Fix**:
+
 ```sh
 # Check the wallpaper file exists
 ls -la ~/Pictures/Wallpapers/
@@ -127,6 +140,7 @@ sudo apt install imagemagick-7
 **Cause**: Ghostty DBus or SIGUSR2 signaling failed.
 
 **Fix**:
+
 ```sh
 # Restart Ghostty manually, or:
 pkill -USR2 ghostty 2>/dev/null
@@ -140,6 +154,7 @@ pkill -USR2 ghostty 2>/dev/null
 **Cause**: `~/.config/age/keys.txt` missing or unreadable.
 
 **Fix**:
+
 ```sh
 ls -la ~/.config/age/keys.txt
 # Should be: -rw------- 1 user user
@@ -153,6 +168,7 @@ chmod 600 ~/.config/age/keys.txt
 **Cause**: Your Age public key isn't listed in the file's recipients.
 
 **Fix**:
+
 ```sh
 # Add your public key to .sops.yaml
 sops updatekeys path/to/file.sops.yaml
@@ -165,6 +181,7 @@ sops updatekeys path/to/file.sops.yaml
 **Cause**: A secret was committed to Git history.
 
 **Fix**:
+
 ```sh
 # Immediate mitigation
 dot verify --security   # confirm which file
@@ -184,6 +201,7 @@ git filter-repo --path <file> --invert-paths
 **Cause**: Heavy modules loaded synchronously.
 
 **Fix**:
+
 ```sh
 dot benchmark --detailed
 # Identify which module is slow
@@ -200,6 +218,7 @@ dot prewarm
 **Cause**: Multiple health issues.
 
 **Fix**:
+
 ```sh
 dot doctor --verbose    # see every failure
 dot heal                # auto-fix what's possible
@@ -211,6 +230,7 @@ dot doctor              # recheck
 **Cause**: Mise shim not activated.
 
 **Fix**:
+
 ```sh
 eval "$(mise activate zsh)"  # or fish, bash
 dot doctor                    # confirm
@@ -223,6 +243,7 @@ dot doctor                    # confirm
 **Cause**: `~/.cargo/config.toml` not managed or was overridden.
 
 **Fix**:
+
 ```sh
 chezmoi apply ~/.cargo/config.toml
 cat ~/.cargo/config.toml | grep target-dir
@@ -234,6 +255,7 @@ cat ~/.cargo/config.toml | grep target-dir
 **Cause**: Created by shell init, but shell wasn't restarted.
 
 **Fix**:
+
 ```sh
 mkdir -p /tmp/builds
 # Or restart shell
@@ -247,6 +269,7 @@ exec $SHELL -l
 **Cause**: A fleet host is unreachable.
 
 **Fix**:
+
 ```sh
 # Check connectivity to each host
 for host in macbook-t2 surface-pro geekom-a9; do
@@ -261,6 +284,7 @@ done
 **Cause**: Remote host's SSH public key not in local `~/.ssh/allowed_signers`.
 
 **Fix**:
+
 ```sh
 # On the remote host:
 ssh remote-host 'cat ~/.ssh/id_ed25519.pub'
@@ -274,6 +298,7 @@ ssh remote-host 'cat ~/.ssh/id_ed25519.pub'
 **Cause**: `shfmt` formatting differs from canonical.
 
 **Fix**:
+
 ```sh
 shfmt -w -i 2 -ci scripts/**/*.sh install.sh .chezmoitemplates/**/*.sh
 # Commit the changes
@@ -284,6 +309,7 @@ shfmt -w -i 2 -ci scripts/**/*.sh install.sh .chezmoitemplates/**/*.sh
 **Cause**: New code added without tests.
 
 **Fix**:
+
 ```sh
 bash examples/example-coverage-gate.sh
 # Identifies uncovered modules

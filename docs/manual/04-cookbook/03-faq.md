@@ -36,6 +36,7 @@ CIELAB distances approximate human perception. A Δ in RGB might look identical 
 ### Why not pre-built themes like Catppuccin or Rosé Pine?
 
 Two reasons:
+
 1. **Maintenance** — 100+ themes × 20+ applications = thousands of template variables to keep in sync. Generation from wallpapers eliminates that.
 2. **User agency** — users bring their own wallpapers. The theme adapts to them, not the other way around.
 
@@ -52,6 +53,7 @@ You don't directly — the accent hue is extracted from the wallpaper. But `_com
 ### Can I use my own theme without a wallpaper?
 
 Not directly — the engine expects a source image. You could:
+
 1. Pick a wallpaper whose palette you want
 2. Let the engine generate the theme
 3. Lock the generated `.toml` entry by copying to a non-regenerated path
@@ -116,6 +118,7 @@ DOTFILES_DEBUG=1 zsh -i -c exit 2>&1 | grep -E '\[debug [0-9]+ms\]'
 ```
 
 Common culprits:
+
 - nvm loading Node on every shell (use lazy loading)
 - `mise activate` with aggressive hook-env (set `activate_aggressive = false`)
 - Plugin manager scanning for updates
@@ -153,6 +156,7 @@ To maximize adoption and contribution. MIT is compatible with commercial use; co
 ### Why no GUI configurator?
 
 Text + Git is the optimal interface for a workstation baseline:
+
 - Versioned (Git history)
 - Reproducible (same input → same output)
 - Auditable (diff-able)

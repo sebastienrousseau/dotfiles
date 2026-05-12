@@ -3,6 +3,7 @@
 This roadmap outlines the path to a high-performance, super-efficient development machine designed for Rust, Python, and AI on Linux (Zorin OS / T2 Mac hardware).
 
 ## Phase 1: Foundation (Completed)
+
 - **Core Shell**: Zsh + Oh My Zsh.
 - **Modern Prompt**: Starship (hooked & active).
 - **Language Managers**: `rustup` (Rust) and `fnm` (Node.js).
@@ -16,28 +17,34 @@ This roadmap outlines the path to a high-performance, super-efficient developmen
 ---
 
 ## Phase 2: Speed & Navigation (Completed)
+
 Focus: Reduce friction in filesystem navigation and build times.
 
 ### 1. Navigation
+
 - [x] **Zoxide**: Smarter `cd` command that learns your habits (`z directory`).
 - [x] **FZF**: Command-line fuzzy finder. Essential for search history, files, and replacing standard completion.
 - [x] **Yazi**: Blazing fast terminal file manager (Rust-based).
 
 ### 2. Rust Optimization
+
 - [x] **Mold**: Use the `mold` linker to speed up Rust compile times by 3x-10x.
 - [x] **Sccache**: Shared compilation cache to speed up recompilations across projects.
 - [x] **Bacon**: Background rust compiler that gives instant feedback on errors.
 
 ### 3. Python Optimization
+
 - [x] **Ruff**: Extremely fast Python linter and formatter (replace flake8/black).
 - [x] **Global Config**: Set `uv` to use system Python or managed Python preferences.
 
 ### 4. Code Search
+
 - [x] **Ripgrep-all (rga)**: Search inside PDFs, E-Books, zip files, etc.
 
 ---
 
 ## Phase 3: AI Power User (Completed)
+
 Focus: Integrate AI deeply into the workflow.
 
 - [x] **Fabric**: Open-source framework for augmenting humans using AI (installed via `cmd` path).
@@ -48,6 +55,7 @@ Focus: Integrate AI deeply into the workflow.
 ---
 
 ## Phase 4: System Tuning & Hardening (Completed)
+
 Focus: Squeeze every ounce of performance and security from the hardware.
 
 - [x] **Kernel Tuning**: Increase file descriptor limits and optimize TCP stack for lower latency.
@@ -58,12 +66,14 @@ Focus: Squeeze every ounce of performance and security from the hardware.
 ---
 
 ## Phase 5: Final Polish (Completed)
+
 - [x] **Global UV Config**: Created `~/.config/uv/uv.toml` for managed python preference.
 - [x] **Roadmap Completion**: Verified all items are 100% complete.
 
 ---
 
 ## Maintenance & Updates
+
 - **Update System**: `sudo apt update && sudo apt upgrade`
 - **Update Rust**: `rustup update`
 - **Update Node**: `fnm install --lts`
@@ -73,20 +83,22 @@ Focus: Squeeze every ounce of performance and security from the hardware.
 ---
 
 ## Phase 6: Desktop Environment (Completed)
+
 Focus: Clean, bloat-free, and supercharged GNOME/Zorin experience.
 
 - [x] **Bloatware Removal**: Removed games (`aisleriot`, `mines`, etc.) and media apps (`rhythmbox`, `totem`).
 - [x] **Menu Cleanup**: Created `hide_menu_entries.sh` to deduplicate and hide unwanted entries.
 - [x] **GNOME Extensions**: Installed productivity boosters via `gnome-extensions-cli`:
-    - [x] `Clipboard Indicator`: History management.
-    - [x] `Caffeine`: Prevent auto-suspend.
-    - [x] `Impatience`: Speed up animations.
-    - [x] `Vitals`: System monitoring in top bar.
+  - [x] `Clipboard Indicator`: History management.
+  - [x] `Caffeine`: Prevent auto-suspend.
+  - [x] `Impatience`: Speed up animations.
+  - [x] `Vitals`: System monitoring in top bar.
 - [x] **Memory Tuning**: Optimize GNOME Shell performance.
 
 ---
 
 ## Phase 7: Browser Optimization (Completed)
+
 Focus: Chrome tuned for development and memory efficiency.
 
 - [x] **Settings**: Enable "Memory Saver" and "Energy Saver" via Managed Policies.
@@ -96,47 +108,49 @@ Focus: Chrome tuned for development and memory efficiency.
 ---
 
 ## Phase 8: Neovim IDE (Completed)
+
 Focus: Building a terminal-based IDE that rivals VS Code for Rust, Python, and AI.
 
 - [x] **Latest Version**: Installed Neovim v0.12.0-dev (Nightly) to resolve plugin stability issues.
 - [x] **Plugin Manager**: Setup `lazy.nvim` with modular config (Restored from **PR #62**).
 - [x] **Core Plugins**:
-    - [x] `Telescope`: Fuzzy finding.
-    - [x] `Treesitter`: Syntax highlighting.
-    - [x] `Harpoon`: Fast file switching.
-    - [x] `Neo-tree`: File explorer.
+  - [x] `Telescope`: Fuzzy finding.
+  - [x] `Treesitter`: Syntax highlighting.
+  - [x] `Harpoon`: Fast file switching.
+  - [x] `Neo-tree`: File explorer.
 - [x] **UI/UX Menus**: Added `dressing.nvim` and `telescope-ui-select.nvim` for modern, searchable selection lists and floating inputs.
 - [x] **LSP & Autocomplete**:
-    - [x] `Mason`: Managing LSPs (rust-analyzer, pyright, ruff).
-    - [x] `Cmp`: Autocompletion engine.
+  - [x] `Mason`: Managing LSPs (rust-analyzer, pyright, ruff).
+  - [x] `Cmp`: Autocompletion engine.
 - [x] **Language Specifics**:
-    - [x] **Rust**: `rustaceanvim` configured.
-    - [x] **Python**: `pyright` + `ruff`.
+  - [x] **Rust**: `rustaceanvim` configured.
+  - [x] **Python**: `pyright` + `ruff`.
 - [x] **AI Integration**:
-    - [x] `Copilot.lua`: Enabled (needs `:Copilot auth`).
-    - [x] `CopilotChat.nvim`: Sidebar chat (VS Code style).
-    - [ ] `Avante.nvim`: Skipped (Removed due to complexity/instability).
+  - [x] `Copilot.lua`: Enabled (needs `:Copilot auth`).
+  - [x] `CopilotChat.nvim`: Sidebar chat (VS Code style).
+  - [ ] `Avante.nvim`: Skipped (Removed due to complexity/instability).
 - [x] **VS Code Parity Pack**:
-    - [x] `Trouble`: Problems panel.
-    - [x] `Spectre`: Search/Replace.
-    - [x] `Autopairs`: Auto-close brackets.
-    - [x] `Todo-Comments`: TODO/FIXME highlighting.
-    - [x] `Persistence`: Session management.
+  - [x] `Trouble`: Problems panel.
+  - [x] `Spectre`: Search/Replace.
+  - [x] `Autopairs`: Auto-close brackets.
+  - [x] `Todo-Comments`: TODO/FIXME highlighting.
+  - [x] `Persistence`: Session management.
 
 ---
 
 ## Phase 9: Repository Polish & PR #62 (In Progress)
+
 Focus: Finalize the `dotfiles` repository for public consumption and sync the local "Gold Standard" environment.
 
 - [x] **Repository Sync**:
-    - [x] Clone official repo to `~/dotfiles`.
-    - [ ] Sync validated configuration (Neovim, scripts, tuning) into repository.
+  - [x] Clone official repo to `~/dotfiles`.
+  - [ ] Sync validated configuration (Neovim, scripts, tuning) into repository.
 - [ ] **Documentation Update**:
-    - [ ] Refactor `README.md` for the modern architecture.
-    - [ ] Add "Easy Setup" and "Troubleshooting" guides.
+  - [ ] Refactor `README.md` for the modern architecture.
+  - [ ] Add "Easy Setup" and "Troubleshooting" guides.
 - [ ] **Final PR Submission**:
-    - [ ] Verify clean diff against original PR #62.
-    - [ ] Push updates to PR #62 branch.
+  - [ ] Verify clean diff against original PR #62.
+  - [ ] Push updates to PR #62 branch.
 
 
 

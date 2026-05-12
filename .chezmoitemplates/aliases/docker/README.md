@@ -12,13 +12,17 @@ These aliases are defined in `docker.aliases.sh` and are automatically loaded by
 
 This code provides a comprehensive set of aliases for Docker development
 using `docker`, `docker-compose`, and Docker Swarm commands.
+
 #### Basic Commands
+
 - `dk` - Docker shortcut
 - `dkv` - Show Docker version
 - `dki` - Display system-wide information
 - `dkl` - Login to Docker registry
 - `dklo` - Logout from Docker registry
+
 #### Container Operations
+
 - `dkps` - List running containers
 - `dkpsa` - List all containers
 - `dkr` - Run a command in new container
@@ -32,7 +36,9 @@ using `docker`, `docker-compose`, and Docker Swarm commands.
 - `dkrm` - Remove container
 - `dkrma` - Remove all containers
 - `dkrmf` - Force remove container
+
 #### Container Inspection
+
 - `dkin` - Inspect container
 - `dkl` - Show container logs
 - `dklf` - Follow container logs
@@ -42,7 +48,9 @@ using `docker`, `docker-compose`, and Docker Swarm commands.
 - `dkpl` - Pull image from registry
 - `dkex` - Execute command in container
 - `dkeit` - Execute interactive command
+
 #### Images
+
 - `dki` - List images
 - `dkia` - List all images
 - `dkb` - Build an image
@@ -55,14 +63,18 @@ using `docker`, `docker-compose`, and Docker Swarm commands.
 - `dkprune` - Remove unused data
 - `dkprunea` - Remove all unused data
 - `dkrmi_dangling` - Remove dangling images
+
 #### Volumes
+
 - `dkv` - Volume shortcut
 - `dkvls` - List volumes
 - `dkvc` - Create volume
 - `dkvi` - Inspect volume
 - `dkvrm` - Remove volume
 - `dkvp` - Remove unused volumes
+
 #### Networks
+
 - `dkn` - Network shortcut
 - `dknls` - List networks
 - `dknc` - Create network
@@ -71,7 +83,9 @@ using `docker`, `docker-compose`, and Docker Swarm commands.
 - `dknp` - Remove unused networks
 - `dkncon` - Connect container to network
 - `dkndis` - Disconnect container from network
+
 #### System
+
 - `dks` - System shortcut
 - `dksdf` - Show Docker disk usage
 - `dksev` - Get real-time events from Docker
@@ -79,7 +93,9 @@ using `docker`, `docker-compose`, and Docker Swarm commands.
 - `dksp` - Remove unused data
 - `dkspa` - Remove all unused data
 - `dkcon` - Context management
+
 #### Miscellaneous
+
 - `dkcp` - Copy files between container and local filesystem
 - `dkw` - Block until container stops
 - `dkk` - Kill container
@@ -115,7 +131,9 @@ using `docker`, `docker-compose`, and Docker Swarm commands.
 - `dcev` - Receive events from containers
 - `dctop` - Display running processes
 - `dcv` - Show Docker Compose version
+
 #### Swarm Management
+
 - `dksw` - Swarm shortcut
 - `dkswi` - Initialize Docker Swarm
 - `dkswj` - Join Docker Swarm
@@ -124,7 +142,9 @@ using `docker`, `docker-compose`, and Docker Swarm commands.
 - `dkswu` - Update Swarm
 - `dkswunl` - Unlock Swarm
 - `dkswunk` - Manage unlock keys
+
 #### Services
+
 - `dksrv` - Service shortcut
 - `dksrvls` - List services
 - `dksrvc` - Create service
@@ -136,14 +156,18 @@ using `docker`, `docker-compose`, and Docker Swarm commands.
 - `dksrvsc` - Scale service
 - `dksrvu` - Update service
 - `dksrvrl` - Rollback service
+
 #### Stacks
+
 - `dkstk` - Stack shortcut
 - `dkstkls` - List stacks
 - `dkstkd` - Deploy stack
 - `dkstkps` - List tasks in stack
 - `dkstksrv` - List services in stack
 - `dkstkrm` - Remove stack
+
 #### Nodes
+
 - `dkn` - Node shortcut
 - `dknls` - List nodes
 - `dkni` - Inspect node
@@ -152,23 +176,32 @@ using `docker`, `docker-compose`, and Docker Swarm commands.
 - `dknrm` - Remove node
 - `dknu` - Update node
 - `dknps` - List tasks running on node
+
 ### Common Workflows
+
 #### Container Development Workflow
+
 ```bash
 # Start a development container
 dkri --name dev-container -v $(pwd):/app -p 3000:3000 node:latest bash
 ```
+
 #### Docker Compose Development
+
 ```bash
 # Start services, rebuild if needed, in background
 dcb && dcud
 ```
+
 #### Cleanup Workflow
+
 ```bash
 # Remove all stopped containers, unused networks, and dangling images
 dkrm $(dk ps -aq --filter status=exited) && dknp && dkrmi_dangling
 ```
+
 #### Deployment to Swarm
+
 ```bash
 # Deploy or update a stack from a compose file
 dkstkd -c docker-compose.yml my-stack

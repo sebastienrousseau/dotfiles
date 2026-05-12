@@ -5,6 +5,7 @@ This file documents all notable changes to this project.
 ## v0.2.500
 
 ### Added
+
 - **Wallpaper-driven theme engine** — themes are no longer hand-crafted. `extract-theme.py` uses K-Means clustering in CIELAB color space to extract dominant colors from any wallpaper image and generate a full terminal palette (16 ANSI colors, accent, bg/fg, panel, border) with WCAG AAA contrast enforcement.
 - **Automatic wallpaper discovery** — `rebuild-themes.sh` scans system wallpapers (macOS `/System/Library/Desktop Pictures/`, Linux `/usr/share/backgrounds/`) and custom wallpapers (`~/Pictures/Wallpapers/`). Custom overrides system. Themes are cached and only regenerated when wallpapers change.
 - **`dot theme rebuild`** — new command to regenerate themes from discovered wallpapers. Supports `--force` (ignore cache) and `--list` (show wallpapers without rebuilding). Parallel processing (4 jobs).
@@ -14,22 +15,26 @@ This file documents all notable changes to this project.
 - **Build artifact redirection** — Cargo, Go, pip, uv, Zig caches → `/tmp/builds/`.
 
 ### Changed
+
 - **themes.toml is now auto-generated** — run `dot theme rebuild` after adding wallpapers. Do not edit manually.
 - **Theme family derived from themes.toml** — `get_theme_family()` in `switch.sh` reads the `family` field dynamically instead of hardcoded case patterns.
 - **macOS appearance refresh** — kills cfprefsd/SystemUIServer/Dock/System Settings after accent changes.
 - **Graceful wallpaper fallback** — theme switching works without custom wallpapers. Core changes (colors, accent, dark/light) always apply; wallpaper is optional.
 
 ### Removed
+
 - **Static theme definitions** — all hand-crafted theme entries replaced by wallpaper-driven generation.
 
 ## v0.2.497
 
 ### Added
+
 - **Verified chezmoi installer** — `install.sh` prefers `scripts/ci/install-chezmoi-verified.sh` with SHA256 checksum validation before falling back to `get.chezmoi.io`.
 - **detect-secrets baseline** — `.secrets.baseline` for pre-commit secret scanning alongside gitleaks.
 - **Lua plugin module headers** — `@module` docstrings for ui.lua, coding.lua, lsp.lua, editor.lua, dap.lua explaining plugin selection rationale.
 
 ### Changed
+
 - **CI hardening** — Pinned `nix-installer` to SHA, removed `continue-on-error` from Home Manager build, replaced `mapfile` with portable `while read` loops.
 - **Plugin version pins** — toggleterm pinned to `^2`, venv-selector uses `version = false` instead of `branch = "main"`.
 - **DAP port configurable** — `DAP_DEV_SERVER_PORT` environment variable overrides default port 3000.
@@ -38,6 +43,7 @@ This file documents all notable changes to this project.
 - **Documentation** — Fixed default shell reference (Zsh → Fish) in INSTALL.md, added CI badge and test runner to README, added function docstrings to `utils.sh`.
 
 ### Fixed
+
 - **Shell compatibility** — Replaced zsh-only `unfunction` with POSIX `unset -f` in shell templates.
 - **Quote nesting** — Fixed broken double-quote nesting in `run_onchange_after_fonts.sh.tmpl`.
 - **Quoted expansion** — Added missing quotes around `$ZINIT_HOME` in zinit bootstrap.
@@ -47,6 +53,7 @@ This file documents all notable changes to this project.
 ## v0.2.496
 
 ### Added
+
 - **Startup budget tracking** — CI now captures per-component timing from `DOTFILES_DEBUG=1` and fails on regression.
 - **Behavioral unit tests** — 10 critical functions now have runtime behavior tests (extract, genpass, encode64, path_prepend, platform detection, lazy loaders).
 - **Property-based tests** — `property_testing.sh` framework wired up with roundtrip, idempotence, and length-invariant tests.
@@ -54,6 +61,7 @@ This file documents all notable changes to this project.
 - **Nix CI gate** — Home Manager activation package built and validated in CI.
 
 ### Changed
+
 - **Performance** — Lazy-loaded `thefuck` (~200ms saving) and cached `carapace` output via `_cached_eval` (~50ms saving).
 - **Starship timeout** — Reduced `command_timeout` from 2000ms to 500ms for snappier prompts in large repos.
 - **PATH consolidation** — All PATH mutations now originate from `00-core-paths.sh.tmpl`; removed scattered prepends from zshenv/zprofile stubs.
@@ -61,6 +69,7 @@ This file documents all notable changes to this project.
 - **dot CLI modular split** — Subcommands dispatched to individual scripts in `scripts/dot/commands/` for maintainability.
 
 ### Fixed
+
 - **Security** — Replaced `curl|sh` pipes in `heal.sh` (starship, atuin) with download-to-temp + shebang validation. Pinned all heal.sh GitHub release versions with SHA256 checksums.
 - **Security** — `install.sh` now uses the secure `install/lib/chezmoi.sh` library instead of inline `curl|sh`.
 - **Security** — `dot-bootstrap` Nix installer now downloads to temp file with validation before execution.
@@ -74,12 +83,14 @@ This file documents all notable changes to this project.
 ## v0.2.495
 
 ### Fixed
+
 - **Installation failure (Issue #807)**: Resolved "unbound variable" errors in `install.sh` by correctly initializing color and path variables.
 - **Shell Compatibility**: Fixed syntax errors when running `install.sh` with `sh` by ensuring the script runs with `bash` and updating documentation accordingly.
 - **Broken Links**: Updated installation instructions in `README.md` and `docs/guides/INSTALL.md` to use the GitHub raw URL, bypassing issues with the `dotfiles.io` redirect.
 - **Documentation Sync**: Synchronized versioning and installation commands across all documentation and source files.
 
 ### Changed
+
 - **Repository Restructuring**: Reorganized non-deployed files for improved discoverability.
   - Docs categorized into `architecture/`, `guides/`, `reference/`, `security/`, `operations/` subdirectories.
   - Tests promoted to top-level `tests/` with domain-based unit test subdirectories.
@@ -92,17 +103,20 @@ This file documents all notable changes to this project.
 ## v0.2.493
 
 ### Added
+
 - Implementation of `_cached_eval` for Zsh, Bash, and Fish for ultra-fast startup.
 - Full integration of `zoxide` and `atuin` in Nushell with caching.
 - Explicit management of `sgpt`, `poetry`, `fisher`, `micro`, and `pueue` configs.
 - Robust `target_os` detection for Arch/CachyOS in `install.sh`.
 
 ### Changed
+
 - Refactored `install.sh` to use a modular `main()` function.
 - Moved XDG exports in `dot_bashrc` above interactive checks.
 - Optimized Zellij configuration with 2026-ready UX (rounded corners, compact layout).
 
 ### Fixed
+
 - Resolved 100% of security alerts regarding `apt-get` recommendations.
 - Achieved 100.00% module test coverage with new maintenance tests.
 - Fixed Nix profile sourcing drift in `dot_zshenv`.

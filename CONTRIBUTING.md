@@ -58,6 +58,7 @@ and [`.github/workflows/reusable-lua-lint.yml`](.github/workflows/reusable-lua-l
 ## Branch names
 
 Examples:
+
 - `feat/new-command`
 - `fix/fish-alias-cache`
 - `docs/readme-cleanup`
@@ -65,6 +66,7 @@ Examples:
 ## Commit titles
 
 Examples:
+
 - `feat: add platform contract example`
 - `fix: harden fish alias bridging`
 - `docs: simplify install guide`

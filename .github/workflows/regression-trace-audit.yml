@@ -65,10 +65,24 @@ jobs:
         run: |
           set -euo pipefail
           title="Regression trace audit: drift detected ($(date -u +%Y-%m-%d))"
-          body=$'The weekly regression-trace audit found broken `# Regression for: GH-NNN` references.\n\nSee the failing workflow run for details. Fix by either:\n\n* updating the reference to a current issue, or\n* changing to `pre-history` if the original context is irretrievable.\n\nTracked under #868.'
+          body=$(cat <<'EOF'
+          The weekly regression-trace audit found broken `# Regression for: GH-NNN` references.
+
+          See the failing workflow run for details. Fix by either:
+
+          * updating the reference to a current issue, or
+          * changing to `pre-history` if the original context is irretrievable.
+
+          Tracked under #868.
+          EOF
+          )
 
           # Reuse an existing open issue with the same title prefix if there is one.
-          existing=$(gh issue list --search 'Regression trace audit: drift detected' --state open --json number --jq '.[0].number' 2>/dev/null || true)
+          existing=$(gh issue list \
+            --search 'Regression trace audit: drift detected' \
+            --state open \
+            --json number \
+            --jq '.[0].number' 2>/dev/null || true)
           if [[ -n "$existing" ]]; then
             gh issue comment "$existing" --body "$body"
           else
