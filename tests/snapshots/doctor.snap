@@ -1,0 +1,89 @@
+--- Dotfiles Doctor ---
+
+== Core Shells ==
+  ✓    zsh                                 /opt/homebrew/bin/zsh (custom)
+  ✓    fish                                /opt/homebrew/bin/fish (custom)
+  ✓    starship                            ~/.local/share/mise/installs/starship/1.24.2/starship (mise)
+  ✓    nu                                  /opt/homebrew/bin/nu (custom)
+
+== Modern CLI Tools ==
+  ✓    rg                                  ~/.local/share/mise/installs/ripgrep/15.1.0/ripgrep-15.1.0-aarch64-apple-darwin/rg
+  ✓    bat                                 ~/.local/share/mise/installs/bat/0.26.1/bat-v0.0.0/bat
+  ✓    chezmoi                             ~/.local/share/mise/installs/aqua-twpayne-chezmoi/2.70.3/chezmoi
+  ✓    fzf                                 ~/.local/share/mise/installs/aqua-junegunn-fzf/0.72.0/fzf
+  ✓    zoxide                              ~/.local/share/mise/installs/zoxide/0.9.9/zoxide
+  ✓    atuin                               ~/.atuin/bin/atuin
+  ✓    yazi                                ~/.local/share/mise/installs/yazi/26.5.6/yazi-aarch64-apple-darwin/yazi
+  ✓    zellij                              ~/.local/share/mise/installs/zellij/0.44.2/zellij
+
+== Infrastructure ==
+  ✓    pueue                               ~/.local/share/mise/installs/aqua-nukesor-pueue-pueue/4.0.3/pueue
+  ✓    wasmtime                            /opt/homebrew/bin/wasmtime
+  ✓    nix                                 optional (not installed)
+  ✓    sops                                /opt/homebrew/bin/sops
+  ✓    age                                 ~/.local/share/mise/installs/aqua-filo-sottile-age/1.3.1/age/age
+  ✓    hyperfine                           ~/.local/share/mise/installs/aqua-sharkdp-hyperfine/1.20.0/hyperfine-v0.0.0_64-apple-darwin/hyperfine
+  ✓    pueue daemon                        running
+
+== AI CLIs ==
+  ✓    claude                              ~/.local/share/mise/installs/npm-anthropic-ai-claude-code/latest/bin/claude
+  ✓    copilot                             ~/.local/share/mise/installs/npm-github-copilot/latest/bin/copilot
+  ✓    gemini                              ~/.local/share/mise/installs/npm-google-gemini-cli/latest/bin/gemini
+  ✓    sgpt                                ~/.local/bin/sgpt
+  ✓    ollama                              ~/.local/share/mise/installs/aqua-ollama-ollama/0.23.2/ollama
+  ✓    opencode                            ~/.local/share/mise/installs/opencode/1.2.16/opencode
+  ✓    aider                               ~/.local/bin/aider
+  ✓    kiro-cli                            ~/.local/bin/kiro-cli
+
+== Environment ==
+  ✓    XDG_CONFIG_HOME                     ~/.config
+  ✓    PIPX_HOME                           ~/.local/share/pipx
+
+== Platform ==
+
+  [0;<dur>eb@rousseau-mbp-m1
+  -------------------
+  OS:         macOS 26.4.1
+  Host:       MacBook Pro
+  Kernel:     Darwin 25.4.0
+  Uptime:     17:41
+  Packages:   392 (brew)
+  Shell:      zsh 5.9
+  Resolution: 3024 x 1964 Retina
+  DE:         Aqua
+  Terminal:   tmux
+  CPU:        Apple M1 Pro (8)
+  GPU:        Apple M1 Pro
+  Memory:     <size> / <size>
+  Arch:       arm64
+
+== State ==
+  ✗    chezmoi                             drifted (run dot drift)
+  ✓    .zshrc                              present
+  ✓    dot                                 ~/.local/bin/dot
+
+== Pre-Push Audit Bypass ==
+  ✓    audit bypass                        clean — no pre-push audits bypassed
+
+== Atuin History Filter ==
+  ✓    history_filter                      24 patterns (chezmoi-managed)
+
+== Topgrade Integration ==
+  ✓    antigravity wrapper                 ~/.local/bin/antigravity
+  ✓    fish_plugins                        contains jorgebucaran/fisher
+  ✓    cargo-install-update                ~/.cargo/bin/cargo-install-update
+  ⚠    symlinks                            1 broken
+  ⚠    portability                         1 hardcoded paths in managed ~/.config files
+
+== Performance ==
+  ⚠    shell caches                        stale (mise, fzf) — run dot prewarm
+  ⚠    uncached slow-init tools            fnm, gh, cargo, pnpm — consider wrapping in _cached_eval
+  ✗    PATH length                         93 entries — likely slowing every command
+  ⚠    shell coverage                      nu installed — startup not measured by dot perf
+  ✓    zsh hooks                           precmd=3 preexec=4
+  ✓ zsh          <dur>
+  ✗ fish         <dur> (> <dur>)
+  ✓ bash         <dur>
+  ⚠    startup latency                     threshold exceeded (run dot prewarm)
+
+  ✗    2 error(s)                          6 warning(s). Run 'dot heal' to repair.
