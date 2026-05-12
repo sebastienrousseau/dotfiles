@@ -1,0 +1,122 @@
+name: OpenSSF Scorecard
+
+# Weekly OpenSSF Scorecard scan + a push-to-master trigger so the score
+# is recomputed every time the canonical branch moves. Closes #869.
+#
+# Results land in three places:
+#   1. GitHub Code Scanning (SARIF upload) — surfaced in the repo's
+#      Security tab.
+#   2. A 30-day workflow artifact for offline inspection.
+#   3. An auto-opened tracking issue if the aggregate score drops
+#      below the 7.0 threshold, so regressions are visible without
+#      manual log-trawling.
+
+on:
+  branch_protection_rule: {}
+  schedule:
+    - cron: '0 6 * * 1'  # Monday 06:00 UTC
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions: read-all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analysis:
+    name: Scorecard / Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      security-events: write   # upload SARIF
+      id-token: write          # publish results to OpenSSF API
+      contents: read
+      actions: read
+      issues: write            # open the auto-tracking issue
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+
+      - name: Run analysis
+        uses: ossf/scorecard-action@99c09fe975337306107572b4fdf4db224cf8e2f2 # v2.4.3
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          # Publish to https://api.securityscorecards.dev/ so the
+          # badge URL resolves to a fresh result on every run.
+          publish_results: true
+
+      - name: Upload SARIF to Code Scanning
+        uses: github/codeql-action/upload-sarif@68bde559dea0fdcac2102bfdf6230c5f70eb485e # v4
+        with:
+          sarif_file: results.sarif
+
+      - name: Upload SARIF artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: scorecard-results-${{ github.run_number }}
+          path: results.sarif
+          retention-days: 30
+
+      - name: Extract aggregate score
+        id: score
+        run: |
+          set -euo pipefail
+          # Scorecard SARIF embeds a `properties.aggregateScore` field
+          # at the run level. Pull it out with jq.
+          if [ ! -s results.sarif ]; then
+            echo "No SARIF results — skipping threshold check." >&2
+            echo "score=unknown" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          score=$(jq -r '.runs[0].properties.aggregateScore // "unknown"' results.sarif)
+          echo "Aggregate score: $score"
+          echo "score=$score" >> "$GITHUB_OUTPUT"
+
+      - name: Auto-open tracking issue on regression
+        if: |
+          steps.score.outputs.score != 'unknown' &&
+          steps.score.outputs.score != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          score="${{ steps.score.outputs.score }}"
+          threshold="7.0"
+
+          # bash arithmetic doesn't handle floats; use awk for the compare.
+          below=$(awk -v s="$score" -v t="$threshold" 'BEGIN{print (s+0 < t+0) ? "1" : "0"}')
+          if [ "$below" != "1" ]; then
+            echo "Score $score is at or above threshold $threshold — no issue opened."
+            exit 0
+          fi
+
+          title="OpenSSF Scorecard regression: score $score (< $threshold)"
+          body=$(cat <<EOF
+          The weekly OpenSSF Scorecard run reported an aggregate score of **$score**, below the **$threshold** threshold tracked under #869.
+
+          See the [Security tab](https://github.com/$GITHUB_REPOSITORY/security/code-scanning) for per-check breakdown, or grab the \`scorecard-results-*\` artifact from this workflow run for the raw SARIF.
+
+          Triage: identify which check(s) regressed against the previous Monday run and either remediate or file an exception under \`docs/security/SCORECARD.md\`.
+          EOF
+          )
+
+          existing=$(gh issue list \
+            --search 'OpenSSF Scorecard regression' \
+            --state open \
+            --json number \
+            --jq '.[0].number' 2>/dev/null || true)
+
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create \
+              --title "$title" \
+              --body "$body" \
+              --label "type:security,priority:high"
+          fi
