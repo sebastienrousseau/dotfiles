@@ -275,17 +275,8 @@ jobs:
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Cache Chezmoi
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ~/.local/bin/chezmoi
-          key: chezmoi-${{ runner.os }}-${{ env.CHEZMOI_VERSION }}
       - name: Setup Chezmoi
-        run: |
-          if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
-            bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
-          fi
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+        uses: ./.github/actions/setup-chezmoi
       - name: Init & Dry Run
         run: |
           chezmoi init
@@ -305,17 +296,8 @@ jobs:
     needs: changes
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Cache Chezmoi
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ~/.local/bin/chezmoi
-          key: chezmoi-${{ runner.os }}-${{ env.CHEZMOI_VERSION }}
       - name: Setup Chezmoi
-        run: |
-          if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
-            bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
-          fi
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+        uses: ./.github/actions/setup-chezmoi
       - name: Init & Dry Run
         run: |
           chezmoi init
@@ -381,9 +363,9 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Setup Chezmoi
+        uses: ./.github/actions/setup-chezmoi
+      - name: Configure source dir
         run: |
-          bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           mkdir -p "$HOME/.config/chezmoi"
           echo "sourceDir = \"$GITHUB_WORKSPACE\"" > "$HOME/.config/chezmoi/chezmoi.toml"
       - name: First apply
@@ -431,9 +413,10 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y zsh hyperfine jq
 
       - name: Setup Chezmoi
+        uses: ./.github/actions/setup-chezmoi
+
+      - name: Configure source dir
         run: |
-          bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           mkdir -p "$HOME/.config/chezmoi"
           echo "sourceDir = \"$GITHUB_WORKSPACE\"" > "$HOME/.config/chezmoi/chezmoi.toml"
 

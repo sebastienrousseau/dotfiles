@@ -145,17 +145,8 @@ jobs:
         os: [ubuntu-latest, macos-latest, macos-14]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Cache Chezmoi
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ~/.local/bin/chezmoi
-          key: chezmoi-${{ runner.os }}-${{ env.CHEZMOI_VERSION }}
       - name: Setup Chezmoi
-        run: |
-          if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
-            bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
-          fi
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+        uses: ./.github/actions/setup-chezmoi
       - name: Chezmoi Apply Test
         run: |
           chezmoi init

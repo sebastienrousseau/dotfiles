@@ -1,0 +1,94 @@
+name: 'setup-chezmoi'
+description: 'Install + cache chezmoi via the verified installer. Drop-in replacement for the inline cache+install block used across this repo.'
+
+inputs:
+  version:
+    description: 'chezmoi version to install (e.g. "2.55.0"). Defaults to env.CHEZMOI_VERSION.'
+    required: false
+    default: ''
+  cache:
+    description: 'Whether to use actions/cache for the chezmoi binary. Default true.'
+    required: false
+    default: 'true'
+  cache-key-prefix:
+    description: 'Override the cache key prefix (default "chezmoi").'
+    required: false
+    default: 'chezmoi'
+  bin-dir:
+    description: 'Install location for the chezmoi binary.'
+    required: false
+    default: '~/.local/bin'
+
+outputs:
+  version:
+    description: 'The chezmoi version that ended up installed.'
+    value: ${{ steps.resolve.outputs.version }}
+  path:
+    description: 'Absolute path to the chezmoi binary.'
+    value: ${{ steps.resolve.outputs.path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve install version
+      id: resolve
+      shell: bash
+      run: |
+        set -euo pipefail
+        version="${{ inputs.version }}"
+        if [[ -z "$version" ]]; then
+          version="${CHEZMOI_VERSION:-}"
+        fi
+        if [[ -z "$version" ]]; then
+          echo "::error::setup-chezmoi: no version supplied (input or CHEZMOI_VERSION env)" >&2
+          exit 1
+        fi
+        echo "version=$version" >> "$GITHUB_OUTPUT"
+
+        # Resolve $HOME-prefixed bin-dir to an absolute path.
+        bin_dir="${{ inputs.bin-dir }}"
+        bin_dir="${bin_dir/#\~/$HOME}"
+        echo "bin_dir=$bin_dir" >> "$GITHUB_OUTPUT"
+        echo "path=$bin_dir/chezmoi" >> "$GITHUB_OUTPUT"
+
+    - name: Restore chezmoi cache
+      if: inputs.cache == 'true'
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: ${{ steps.resolve.outputs.bin_dir }}/chezmoi
+        # OS-aware key — runner.os covers macos-vs-linux; runner.arch
+        # catches the Apple-Silicon/Intel boundary explicitly.
+        key: ${{ inputs.cache-key-prefix }}-${{ runner.os }}-${{ runner.arch }}-${{ steps.resolve.outputs.version }}
+
+    - name: Install chezmoi (cache miss)
+      shell: bash
+      run: |
+        set -euo pipefail
+        bin_dir="${{ steps.resolve.outputs.bin_dir }}"
+        version="${{ steps.resolve.outputs.version }}"
+
+        if [[ -x "$bin_dir/chezmoi" ]]; then
+          installed_version=$("$bin_dir/chezmoi" --version 2>/dev/null | awk '{print $2}' | sed 's/^v//' || true)
+          if [[ "$installed_version" == "$version" ]]; then
+            echo "chezmoi $version already installed at $bin_dir/chezmoi"
+          else
+            echo "Cached chezmoi version ($installed_version) differs from requested ($version) — reinstalling"
+            rm -f "$bin_dir/chezmoi"
+          fi
+        fi
+
+        if [[ ! -x "$bin_dir/chezmoi" ]]; then
+          mkdir -p "$bin_dir"
+          # Prefer the verified installer (SHA256-pinned) if checked out.
+          # The composite caller doesn't always have the repo checked out
+          # (e.g., drift-detection.yml may run against an external ref),
+          # so fall back to the upstream installer in that case.
+          if [[ -x "$GITHUB_WORKSPACE/scripts/ci/install-chezmoi-verified.sh" ]]; then
+            bash "$GITHUB_WORKSPACE/scripts/ci/install-chezmoi-verified.sh" "$version" "$bin_dir"
+          else
+            curl -fsSL https://get.chezmoi.io | sh -s -- -b "$bin_dir" "v$version"
+          fi
+        fi
+
+        echo "$bin_dir" >> "$GITHUB_PATH"
+        "$bin_dir/chezmoi" --version
