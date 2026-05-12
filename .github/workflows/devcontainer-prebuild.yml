@@ -35,7 +35,7 @@ jobs:
 
       - name: Login to GHCR
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@4a8376e001c7725687f0624d1c3698a3f6ab337e # v4.1.0
+        uses: docker/login-action@9f4a8ea54ed9055d5f86c993e1f2ffa674f98344 # v4.1.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
