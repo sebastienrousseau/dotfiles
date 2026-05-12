@@ -1,8 +1,12 @@
-name: Nightly Extended Tests
+name: Weekly Extended Tests
 
 on:
   schedule:
-    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+    # Weekly on Sunday at 02:00 UTC. Previously ran daily, but the jobs
+    # below (beta tool detection, older-macOS regression, extended OS
+    # matrix) do not need daily cadence — and burned ~6 of 7 nightly
+    # runs for no real signal. See #861.
+    - cron: '0 2 * * 0'
   workflow_dispatch:
 
 permissions:
