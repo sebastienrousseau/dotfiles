@@ -118,7 +118,10 @@ if [[ "$first_line" =~ ^Merge\ |^fixup!\ |^squash!\  ]]; then
 fi
 
 # ── Inject AI attribution if not already present ──────────────────────
-if ! grep -Fq "Assisted-by:" "$msg_file"; then
+# Line-anchored: a literal mention of `Assisted-by:` inside the commit
+# body (e.g. when the commit message *describes* the trailer) must not
+# fool the hook into skipping injection. Trailers always start at col 1.
+if ! grep -Eq "^Assisted-by:" "$msg_file"; then
   ai_agent="$(detect_ai_agent)"
   if [[ -n "$ai_agent" ]]; then
     printf '\nAssisted-by: %s\n' "$ai_agent" >> "$msg_file"
