@@ -58,7 +58,7 @@ Focus: Squeeze every ounce of performance and security from the hardware.
 ---
 
 ## Phase 5: Final Polish (Completed)
-- [x] **Global UV Config**: Created `~/.config/uv/uv.toml` for managed python perference.
+- [x] **Global UV Config**: Created `~/.config/uv/uv.toml` for managed python preference.
 - [x] **Roadmap Completion**: Verified all items are 100% complete.
 
 ---

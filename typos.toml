@@ -1,0 +1,39 @@
+# typos-cli configuration
+# https://github.com/crate-ci/typos
+
+[default]
+# Skip hex literals — color codes (#f38ba8, 89b4fa) and similar produce
+# spurious "ba should be by/be" hits. Same for the malware-detection regex
+# `(ba)?sh` used in `_cached_eval` to match both `sh` and `bash`.
+extend-ignore-re = [
+  "\\b[0-9a-fA-F]{6}\\b",        # 6-char hex (CSS / palette hex codes)
+  "\\b[0-9a-fA-F]{8}\\b",        # 8-char hex (with alpha)
+  "\\(ba\\)\\?sh",               # the (ba)?sh malware-regex literal
+  "bs-hl-color",                 # swaylock key name (bs = backspace)
+]
+
+[default.extend-words]
+# Project-specific words that typos flags but should not — applies inside
+# identifiers, strings, and prose (broader than extend-identifiers).
+oll = "oll"            # `oll` alias prefix for Ollama (oll-pull, oll-list)
+als = "als"            # `als` alias-listing function (fish/zsh/bash)
+ALS = "ALS"            # uppercase variant in data files
+sur = "sur"            # Microsoft Surface laptop product flag in chezmoidata
+Sur = "Sur"
+Hashi = "Hashi"        # HashiCorp / Hashicorp brand reference
+noice = "noice"        # noice.nvim Neovim plugin
+Noice = "Noice"
+nd = "nd"              # 2-char Neovim leader-key for Neogen docstring gen
+Pn = "Pn"              # Yarn Plug'n'Play abbreviation
+
+[files]
+# Skip auto-generated / vendored content
+extend-exclude = [
+  "dot_config/nvim/lazy-lock.json",
+  "**/*.lock",
+  ".secrets.baseline",
+  "mise-versions.lock.json",
+  "flake.lock",
+  "package-lock.json",
+  "tests/snapshots/**",
+]

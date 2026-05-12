@@ -74,6 +74,22 @@ repos:
       - id: hadolint
         args: ['--ignore', 'DL3008', '--ignore', 'DL3013', '--ignore', 'DL3018']
 
+  # Spell-checking (typos-cli) — see typos.toml at repo root for allowlist.
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.46.1
+    hooks:
+      - id: typos
+
+  # GitHub Actions workflow linting (actionlint).
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+        # 29 pre-existing shellcheck-in-script style hits are tracked under
+        # #866's follow-up sweep; mute them at the hook level so this gate
+        # surfaces only workflow-syntax + runner-label + event-mismatch.
+        args: ['-shellcheck=']
+
   # Custom security policy enforcement
   - repo: local
     hooks:

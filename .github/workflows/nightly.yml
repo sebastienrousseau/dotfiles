@@ -119,7 +119,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, macos-13]  # Include older macOS
+        # macos-13 was retired from GitHub-hosted runners in late 2025.
+        # macos-15-intel is the supported Intel runner; macos-14 is the
+        # canonical Apple Silicon runner; macos-latest tracks the newest.
+        # Together these give Intel + ASi + bleeding-edge coverage.
+        os: [ubuntu-latest, macos-latest, macos-15-intel, macos-14]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
