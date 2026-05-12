@@ -90,6 +90,24 @@ repos:
         # surfaces only workflow-syntax + runner-label + event-mismatch.
         args: ['-shellcheck=']
 
+  # Lua linting (luacheck) — pinned to match the version installed by
+  # `.github/workflows/reusable-lua-lint.yml`.
+  - repo: https://github.com/lunarmodules/luacheck
+    rev: v1.2.0
+    hooks:
+      - id: luacheck
+        files: \.lua$
+
+  # Lua formatting (stylua) — pinned to match the version installed by
+  # `.github/workflows/reusable-lua-lint.yml`. The `stylua-github` hook
+  # variant downloads the release binary (no Rust toolchain needed).
+  - repo: https://github.com/JohnnyMorganz/StyLua
+    rev: v2.4.1
+    hooks:
+      - id: stylua-github
+        files: \.lua$
+        args: ['--check']  # report drift; do not auto-format on commit
+
   # Custom security policy enforcement
   - repo: local
     hooks:

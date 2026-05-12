@@ -14,9 +14,16 @@ on:
         default: true
         type: boolean
       stylua_version:
+        # Keep in sync with `config/pre-commit-config.yaml` (#865).
         description: Pinned stylua version.
         required: false
-        default: "0.20.0"
+        default: "2.4.1"
+        type: string
+      luacheck_version:
+        # Keep in sync with `config/pre-commit-config.yaml` (#865).
+        description: Pinned luacheck version.
+        required: false
+        default: "1.2.0"
         type: string
 
 permissions:
@@ -42,7 +49,7 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update && sudo apt-get install -y lua5.1 luarocks
-          luarocks install --local luacheck
+          luarocks install --local luacheck "${{ inputs.luacheck_version }}"
           echo "$HOME/.luarocks/bin" >> "$GITHUB_PATH"
           if [[ ! -x "$HOME/.cargo/bin/stylua" ]]; then
             cargo install stylua --version "${{ inputs.stylua_version }}"

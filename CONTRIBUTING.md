@@ -22,6 +22,31 @@ it for a single push (rare, almost never on `master`), see
 [`docs/security/AUDIT_BYPASS.md`](docs/security/AUDIT_BYPASS.md). The
 legacy `DOTFILES_SKIP_PRE_PUSH_AUDIT=1` variable is no longer honored.
 
+## Pre-commit hooks
+
+The repo ships a `pre-commit` configuration that mirrors CI. Install
+once:
+
+```bash
+pip install --user pre-commit          # or: brew install pre-commit
+pre-commit install --config config/pre-commit-config.yaml
+```
+
+Run every hook against every file (do this after fresh-cloning, after
+big merges, or when CI surfaces a hook you don't have locally):
+
+```bash
+pre-commit run --all-files --config config/pre-commit-config.yaml
+```
+
+Hooks in this config (shellcheck, shfmt, hadolint, gitleaks,
+detect-secrets, checkov, conventional-commit linter, typos-cli,
+actionlint, **luacheck**, **stylua**, plus repo-local custom hooks)
+run on commit by default. The `luacheck` and `stylua` hooks are pinned
+to the same versions CI uses; if you bump one, bump the other in the
+same PR (see [`config/pre-commit-config.yaml`](config/pre-commit-config.yaml)
+and [`.github/workflows/reusable-lua-lint.yml`](.github/workflows/reusable-lua-lint.yml)).
+
 ## Pull request checklist
 
 - Use signed commits
