@@ -28,9 +28,10 @@ if [[ ! -d "$PATTERN_DIR" ]]; then
 fi
 
 _show_ai_bridge_usage() {
-  echo "Usage: dot cl|copilot|gemini|kiro|autohand|vibe|qwen|zai --pattern [name] \"prompt\""
+  echo "Usage: dot cl|codex|copilot|gemini|goose|kiro|autohand|vibe|qwen|zai --pattern [name] \"prompt\""
   echo ""
   echo "Available Patterns:"
+  # shellcheck disable=SC2012
   ls -1 "$PATTERN_DIR" 2>/dev/null | sed 's/\.md$//' | sed 's/^/  - /' || echo "  (none)"
 }
 
@@ -97,13 +98,15 @@ _ai_refresh_status_cache() {
     fi
   '
   # NOTE: `-I{}` already implies one input line per invocation. Adding
-  # `-n1` on top of `-I{}` triggers a long-standing BSD-xargs quirk
-  # where the input line is then word-split on whitespace, so payload
-  # entries like "0|Agents (autonomous)|..." arrive as ["0|Agents",
-  # "(autonomous)|...", ...]. Use only `-I{}` for stable single-line
-  # semantics.
-  printf '%s\n' "${indexed[@]}" |
-    xargs -I{} -P"$jobs" \
+  # `-n1` on top triggers a BSD-xargs quirk where the input line is
+  # word-split on whitespace ("0|Agents (autonomous)|..." → multiple
+  # entries). Use only `-I{}`.
+  #
+  # ALSO: feed null-delimited records (`-0`) so apostrophes and
+  # other quote-like characters in the descriptions ("Block's coding
+  # agent") don't trigger xargs's "unterminated quote" parser.
+  printf '%s\0' "${indexed[@]}" |
+    xargs -0 -I{} -P"$jobs" \
       bash -c "$probe_script" _ {} "$probe_dir" \
       2>/dev/null || true
 
@@ -133,7 +136,9 @@ _ai_get_cached_status() {
 _ai_mise_pkg() {
   case "$1" in
     claude) echo "npm:@anthropic-ai/claude-code" ;;
+    codex) echo "npm:@openai/codex" ;;
     copilot) echo "npm:@github/copilot" ;;
+    goose) echo "pipx:goose-ai" ;;
     aider) echo "pipx:aider-chat" ;;
     opencode) echo "npm:opencode-ai" ;;
     sgpt) echo "pipx:shell-gpt" ;;
@@ -154,7 +159,9 @@ cmd_ai_status() {
   # category|role|name|binary|description
   local -a ai_clis=(
     "Agents (autonomous)|agent|Claude Code|claude|Anthropic CLI agent"
+    "Agents (autonomous)|agent|Codex CLI|codex|OpenAI Codex agent"
     "Agents (autonomous)|agent|Copilot CLI|copilot|GitHub Copilot CLI"
+    "Agents (autonomous)|agent|Goose|goose|Block's coding agent"
     "Coding (interactive)|coding|Aider|aider|AI pair programmer"
     "Coding (interactive)|coding|OpenCode|opencode|Terminal coding assistant"
     "Coding (interactive)|coding|Autohand Code|autohand|Autohand coding agent"
@@ -456,7 +463,7 @@ case "${1:-}" in
     shift
     cmd_ai_query "$@"
     ;;
-  cl | claude | copilot | gemini | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
+  cl | claude | codex | copilot | gemini | goose | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
     tool="$1"
     shift
     run_ai_with_context "$tool" "$@"
