@@ -1,7 +1,7 @@
 {
   "cardVersion": "2026.03",
   "name": "dotfiles-mcp",
-  "version": "0.2.500",
+  "version": "0.2.501",
   "description": "MCP server surface for dotfiles workstation automation.",
   "transport": {
     "stdio": {

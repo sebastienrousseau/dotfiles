@@ -2,6 +2,48 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.501
+
+### Added
+
+- **Warp + iTerm2 theme support** — the two terminals the theme system did not yet cover are now first-class. `dot_warp/themes/dotfiles.yaml.tmpl` deploys a Warp theme; `run_onchange_22-iterm2-profile.sh.tmpl` writes an iTerm2 Dynamic Profile to `~/Library/Application Support/iTerm2/DynamicProfiles/dotfiles.json`. Both pick up the active theme's `.term` palette, so one `chezmoi apply` switches all six supported terminals (kitty, alacritty, wezterm, foot, warp, iterm2). The README's "Why this repo is different" surface lists this under wallpaper-driven themes.
+- **Starship Transient Prompt (fish)** — `dot_config/fish/conf.d/init.fish.tmpl` calls `enable_transience` after the cached `starship init`, collapsing past prompts to the `[character]` glyph in scrollback. The zsh implementation is a forward-compatibility hook only — Starship 1.24.2 does not yet ship `enable_transience` for zsh (upstream tracker [starship/starship#3522](https://github.com/starship/starship/issues/3522)). Rationale and rejected alternatives recorded in [ADR-010](docs/adr/ADR-010-starship-transient-prompt.md).
+- **`_cached_eval` enhancements (#847)** — `EVALCACHE_DISABLE=true` bypass for debugging, realpath sidecar pin to catch PATH-shadow swaps, file-path argument mtime check, init-failure handling (warns and returns rc instead of caching an empty output), and a new `_cached_eval_clear` helper. Applied to all three implementations (zsh, bash, fish). Adds shdoc docstrings.
+- **JSON Schema for `.chezmoidata.toml`** — `config/chezmoidata.schema.json` (draft-07) plus `.taplo.toml` and a new `lint-chezmoidata` CI job. Catches typos in feature flags, profile names, `default_shell`, and `node_manager` at PR time.
+- **OIDC trusted publishing for npm (#836)** — `publish-npm` workflow authenticates via OIDC instead of a long-lived `NPM_TOKEN`. Provenance is attached to every published tarball. The migration is breaking on the CI side: `NPM_TOKEN` is no longer used. **Manual followup needed before the first OIDC release**: configure Trusted Publishing on npmjs.com for `@sebastienrousseau/dotfiles` pointing at `sebastienrousseau/dotfiles` + `.github/workflows/npm-publish.yml`.
+- **`lint-copyright` in `ci.yml` (#834)** — the fast CI pipeline now runs the reusable copyright-header lint. Previously only `ci-enforced.yml` ran it.
+- **Test coverage roadmap, Slices 1 + 2 (#883)** — replaced the broken kcov pipeline with a pure bash xtrace runner that works on Linux and macOS. Slice 1 established a 2.72% measured baseline; Slice 2 converted 59 shallow tests into deep-execution tests via a new `tests/framework/coverage_helpers.sh` (sandbox + safe-mode entry-point exercise) and landed coverage at 10.80% on CI / 12.01% locally. `MIN_COVERAGE_PCT` floor raised 0 → 10.
+- **GitHub Pages deploy of `docs/` to doc.dotfiles.io** — new `.github/workflows/pages.yml` builds the Jekyll site (cayman theme, kramdown, Liquid disabled for chezmoi-template snippets) and publishes on every push to master that touches `docs/**`. Replaces the old approach where `manual-publish.yml` deployed the multi-format manual to Pages.
+- **PR consolidation — 8 Dependabot bumps (#839–#846)** — major bumps: `actions/deploy-pages` 4→5, `softprops/action-gh-release` 2→3, `actions/download-artifact` 4→8.0.1, `docker/setup-buildx-action` 3→4, `actions/upload-pages-artifact` 3→5, `actions/github-script` 8→9. Minor and SHA-only refreshes for `actions/cache`, `actions/setup-node`, `bridgecrewio/checkov-action`, `devcontainers/ci`, `docker/login-action`, the `github/codeql-action` family, and `trufflesecurity/trufflehog`. All actions remain pinned by full commit SHA.
+- **Re-source guards** on the five shared library files where re-sourcing would corrupt state: `tests/framework/{assertions,mocks}.sh` and `scripts/dot/lib/{utils,ui,log}.sh`.
+- **`tests/unit/ci/test_validate_chezmoidata.sh`** — 13 assertions covering the new schema-validator script. Restores the 100% module-coverage floor that the schema commit had broken.
+- **`tests/unit/ci/test_check_*.sh`** — four new module-coverage tests for `check-insecure-tls`, `check-dangerous-chmod`, `check-regression-traceability`, and `run-coverage`. Keeps module coverage at 221/221.
+- **`docs/operations/COVERAGE.md`** — documents the why-not-kcov decision (Ubuntu 24.04 bash 5.2 incompatibility) and the xtrace approach (`PS4 + BASH_ENV`).
+
+### Changed
+
+- **README rewrite for accuracy and readability** — three concrete inaccuracies fixed: PowerShell was incorrectly listed as Tier-3 (ADR-007 does not place it in the tier system), `dot bundle --manual` was a flag that does not exist (correct command is `dot manual --offline`), and the supported-terminal list missed Warp and iTerm2. Six coverage gaps filled (Starship Transient, JSON Schema, OIDC, `_cached_eval` enhancements, Bash as explicit Tier-1, and several previously-unmentioned `dot` subcommands). Command count corrected from "30+" to "over 80". Flesch baseline 28.3 → 42.9 raw / 47.7 prose-only.
+- **Header badges unified to `for-the-badge` style** — OpenSSF Scorecard and Codespaces badges now use shields.io renderings at the same height as Build / Version / Downloads.
+- **`manual-publish.yml`** — Pages-deploy steps removed. The workflow now only builds the multi-format manual and attaches it to releases.
+- **Coverage runner is now Linux + macOS** — the kcov-only runner had a hard Darwin skip. The xtrace runner works on both, so the pre-commit hook can invoke it on developer machines regardless of platform.
+- **`MIN_COVERAGE_PCT` in `.github/workflows/coverage.yml`** — raised from aspirational `50` (which never measured anything) to a real `10` floor based on the Slice 2 baseline. Ratchets up with each subsequent slice.
+
+### Fixed
+
+- **`core.hooksPath` config gap** — the global `commit-msg` hook is now tracked under chezmoi and pointed at by the user's git config, so the AI-attribution trailer fires on every commit.
+- **Liquid templating false-mangle of chezmoi snippets in docs** — 14 files containing `{{ … }}` Go-template syntax inside code blocks were being silently evaluated as Liquid by Jekyll. Bulk-wrapped with `{% raw %}` / `{% endraw %}`.
+- **Multiple `A && B || C` antipatterns** — restructured to proper `if/then/else` blocks across `tests/fuzz/fuzz_install.sh`, `tests/snapshots/test_snapshots.sh`, three diagnostics tests, two security tests, and `tests/unit/security/test_pre_push_bypass.sh`.
+- **macOS reliability gate** — the `cov_exercise_script` helper now probes for `timeout` then `gtimeout` (coreutils on macOS) before falling back to no-timeout. The previous version returned `rc=127` for every script on macOS-latest.
+- **Windows chezmoi installer fallback** — `setup-chezmoi` composite action now uses the upstream installer's `-t v$version` flag on Windows (Git Bash). The previous positional-arg form made chezmoi try to run itself as a subcommand and exit non-zero.
+- **Typos hook allowlist** — added 9 entries for alias names (`yout`, `hom`, `cod`, `dsk`, `dwn`, `mus`, `pic`, `wth`) and SLSA terminology (`intoto`, `writeable`) that the hook was mis-flagging.
+- **`scripts/ci/check-insecure-tls.sh` and `compliance-guard.yml`** — both now exclude themselves and the `tests/` tree from the curl/wget/chmod pattern scans. The scanners were flagging their own legitimate pattern fixtures.
+
+### Security
+
+- **OIDC trusted publishing for npm** — see Added above. Drops the long-lived `NPM_TOKEN` from CI.
+- **SHA-pinned GitHub Actions everywhere** — confirmed across all workflows after the Dependabot consolidation.
+- **`bash-dbgsym` not required** — the kcov-based coverage runner needed Ubuntu's debug symbols for bash, which created a supply-chain question (additional apt source). The xtrace replacement removes that requirement.
+
 ## v0.2.500
 
 ### Added
