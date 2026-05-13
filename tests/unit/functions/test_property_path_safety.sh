@@ -7,9 +7,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/property_testing.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 # Source the function under test
 FUNC_FILE="$REPO_ROOT/.chezmoitemplates/functions/misc/prependpath.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 if [[ -f "$FUNC_FILE" ]]; then
   source "$FUNC_FILE"
 else
@@ -238,4 +242,7 @@ run_property_test \
 
 echo ""
 echo "path_safety property tests completed."
+# Slice 3 (#883): exercise the script under sandbox for line coverage
+cov_exercise_script "$FUNC_FILE"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

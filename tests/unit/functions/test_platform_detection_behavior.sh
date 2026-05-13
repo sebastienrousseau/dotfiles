@@ -8,8 +8,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 PLATFORM_FILE="$REPO_ROOT/scripts/dot/lib/platform.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 if [[ ! -f "$PLATFORM_FILE" ]]; then
   echo "SKIP: platform.sh not found at $PLATFORM_FILE"
   echo "RESULTS:0:0:0"
@@ -166,4 +170,7 @@ mock_cleanup
 
 echo ""
 echo "platform detection behavioral tests completed."
+# Slice 3 (#883): exercise the script under sandbox for line coverage
+cov_exercise_script "$PLATFORM_FILE"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

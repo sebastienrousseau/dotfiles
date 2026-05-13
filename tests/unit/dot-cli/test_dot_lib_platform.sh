@@ -6,8 +6,12 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 PLATFORM_FILE="$REPO_ROOT/scripts/dot/lib/platform.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "platform_file_exists"
 assert_file_exists "$PLATFORM_FILE" "platform.sh should exist"
@@ -39,5 +43,8 @@ else
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: unexpected value '$platform_id'"
 fi
+
+# Slice 3 (#883): exercise the script under sandbox for line coverage
+cov_exercise_script "$PLATFORM_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

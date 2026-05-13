@@ -51,4 +51,8 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
 
+# Note: do NOT add cov_exercise_script here. This test asserts properties
+# of the coverage runner itself; running the runner during a coverage run
+# would spawn nested traces and pollute the parent's aggregation.
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

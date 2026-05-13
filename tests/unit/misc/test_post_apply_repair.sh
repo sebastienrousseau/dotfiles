@@ -6,8 +6,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 TARGET_SCRIPT="$REPO_ROOT/scripts/ops/post-apply-repair.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 tmp_root="$(mktemp -d)"
 trap 'rm -rf "$tmp_root"' EXIT
@@ -93,5 +97,8 @@ assert_output_contains "resolved to /usr/local/bin/dot (expected $home_ok/.local
 test_start "validate_dot_cli_resolution_missing"
 HOME="$home_ok" DOTFILES_ZSH_BIN="$fake_zsh" DOTFILES_FAKE_ZSH_OUTPUT=$'' run_with_log validate_dot_cli
 assert_output_contains "dot not found in a fresh zsh login shell" "printf '%s' \"$LOG\""
+
+# Slice 3 (#883): exercise the script under sandbox for line coverage
+cov_exercise_script "$TARGET_SCRIPT"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

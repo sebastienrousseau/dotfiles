@@ -5,8 +5,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 AGENT_SCRIPT="$REPO_ROOT/scripts/dot/commands/agent.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 PROFILES_FILE="$REPO_ROOT/dot_config/dotfiles/agent-profiles.json"
 
 test_start "delegation_config_exists"
@@ -56,5 +60,8 @@ assert_equals "true" "$cd" "apply profile should have canDelegate: true"
 test_start "audit_profile_can_delegate"
 cd="$(jq -r '.profiles.audit.canDelegate' "$PROFILES_FILE")"
 assert_equals "true" "$cd" "audit profile should have canDelegate: true"
+
+# Slice 3 (#883): exercise the script under sandbox for line coverage
+cov_exercise_script "$AGENT_SCRIPT"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

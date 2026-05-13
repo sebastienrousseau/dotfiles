@@ -9,8 +9,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 GOVERNANCE_SCRIPT="$REPO_ROOT/scripts/diagnostics/alias-governance.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 MANIFEST_SCRIPT="$REPO_ROOT/scripts/diagnostics/aliases-manifest.sh"
 CD_INIT_FILE="$REPO_ROOT/.chezmoitemplates/aliases/cd/cd-init.aliases.sh"
 
@@ -48,5 +52,8 @@ assert_file_contains "$GOVERNANCE_SCRIPT" "Policy:" "governance should print act
 test_start "governance_enforces_deprecations"
 assert_file_contains "$GOVERNANCE_SCRIPT" "alias-deprecations.tsv" "governance should check deprecated aliases"
 assert_file_contains "$GOVERNANCE_SCRIPT" "expired deprecated aliases" "governance should fail when deprecated aliases are overdue"
+
+# Slice 3 (#883): exercise the script under sandbox for line coverage
+cov_exercise_script "$GOVERNANCE_SCRIPT"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

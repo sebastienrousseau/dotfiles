@@ -6,9 +6,13 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 DOT_CLI="$REPO_ROOT/dot_local/bin/executable_dot"
 META_FILE="$REPO_ROOT/scripts/dot/commands/meta.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 PROFILE_FILE="$REPO_ROOT/dot_config/dotfiles/agent-profiles.json"
 
 test_start "agent_profile_file_exists"
@@ -38,5 +42,8 @@ assert_output_contains "Read-only guidance with no unattended changes." "bash '$
 
 test_start "dot_agent_alias_runs"
 assert_output_contains "Agent Modes" "bash '$DOT_CLI' agent list"
+
+# Slice 3 (#883): exercise the script under sandbox for line coverage
+cov_exercise_script "$META_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

@@ -54,8 +54,9 @@ jobs:
           # Floor ratcheted after each slice of #883.
           #   Slice 1: 2.72% baseline measured, floor=0
           #   Slice 2: 12.01% measured (59 deep-test conversions), floor=10
+          #   Slice 3: 18.90% measured (47 auto-tests + 119 conversions), floor=17
           # Bump in lockstep with the slice that lands the bump.
-          MIN_COVERAGE_PCT: '10'
+          MIN_COVERAGE_PCT: '17'
         run: bash scripts/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact

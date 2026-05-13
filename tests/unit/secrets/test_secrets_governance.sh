@@ -6,8 +6,12 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 PROVIDER_FILE="$REPO_ROOT/scripts/lib/secrets_provider.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 GOVERNANCE_FILE="$REPO_ROOT/scripts/diagnostics/secret-governance.sh"
 HOOK_FILE="$REPO_ROOT/scripts/git-hooks/pre-commit"
 
@@ -28,5 +32,8 @@ assert_file_exists "$HOOK_FILE" "pre-commit hook should exist"
 
 test_start "pre_commit_calls_governance"
 assert_file_contains "$HOOK_FILE" "secret-governance.sh" "pre-commit hook should run secret governance"
+
+# Slice 3 (#883): exercise the script under sandbox for line coverage
+cov_exercise_script "$PROVIDER_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

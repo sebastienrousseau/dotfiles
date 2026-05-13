@@ -6,6 +6,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 DOT_CLI="$REPO_ROOT/dot_local/bin/executable_dot"
 
@@ -32,6 +33,9 @@ assert_file_contains "$DOT_CLI" "update" "dot CLI should handle update as hidden
 
 test_start "dot_cli_has_require_platform"
 PLATFORM_LIB="$REPO_ROOT/scripts/dot/lib/platform.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 assert_file_contains "$PLATFORM_LIB" "dot_require_platform()" "platform lib should define dot_require_platform helper"
 
 # --- Wave 2: doctor-unified.sh exists and has valid syntax ---
@@ -77,4 +81,7 @@ assert_file_contains "$PLATFORM_SH" "dot_require_platform()" "platform.sh should
 
 echo ""
 echo "Restructured CLI command tests completed."
+# Slice 3 (#883): exercise the script under sandbox for line coverage
+cov_exercise_script "$PLATFORM_LIB"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

@@ -5,8 +5,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 BUNDLE_SCRIPT="$REPO_ROOT/scripts/release/package-policy-bundles.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 WORKFLOW_FILE="$REPO_ROOT/.github/workflows/policy-bundle-release.yml"
 
 test_start "sbom_bundle_script_exists"
@@ -36,5 +40,8 @@ assert_file_contains "$BUNDLE_SCRIPT" "agent-card.json" "bundle should include A
 
 test_start "sbom_bundle_includes_mcp_server_card"
 assert_file_contains "$BUNDLE_SCRIPT" "server-card.json" "bundle should include MCP server card"
+
+# Slice 3 (#883): exercise the script under sandbox for line coverage
+cov_exercise_script "$BUNDLE_SCRIPT"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
