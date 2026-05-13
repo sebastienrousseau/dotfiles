@@ -22,6 +22,22 @@
 
 ## Install
 
+**Verified install (recommended).** Pin to a release tag, download
+the installer, check its SHA256 against the value published with the
+release, then run it. See [docs/security/INSTALL_VERIFICATION.md](docs/security/INSTALL_VERIFICATION.md)
+for the per-release expected hash and how it's generated.
+
+```bash
+curl -fsSL -o /tmp/dotfiles-install.sh \
+  https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.501/install.sh
+echo "4c0303a2d88d5aed98428ab0da37618c9795af4dae0e6549646c2fce5235c280  /tmp/dotfiles-install.sh" \
+  | shasum -a 256 -c
+bash /tmp/dotfiles-install.sh
+```
+
+**Trust-source one-liner** (skips the SHA check — fine for sandboxes /
+ephemeral CI, not recommended for primary workstations):
+
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
 ```
@@ -33,7 +49,9 @@ dot doctor        # verify installation
 dot learn         # interactive tour
 ```
 
-Requires `git` and `curl`. Works on macOS, Ubuntu/Debian, Arch, WSL2, and GitHub Codespaces.
+Requires `git` and `curl` (and `shasum` or `sha256sum` for the
+verified path). Works on macOS, Ubuntu/Debian, Arch, WSL2, and
+GitHub Codespaces.
 
 <details>
 <summary>CI/CD and Docker options</summary>
