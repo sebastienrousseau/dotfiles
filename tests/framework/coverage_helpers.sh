@@ -27,13 +27,14 @@ cov_setup_sandbox() {
   export XDG_STATE_HOME="$HOME/.local/state"
   mkdir -p "$HOME/.config" "$HOME/.local/share" "$HOME/.cache" \
     "$HOME/.local/state" "$tmp/bin"
-  # No-op shims for every command we don't want to actually invoke.
-  # Each shim echoes its invocation to stderr (for debugging) and
-  # exits 0 so the script-under-test believes the operation succeeded.
+
+  # ── Default no-op shims ───────────────────────────────────────────
+  # Commands we just want to keep from touching the host. Each shim
+  # echoes its invocation to stderr (for debugging) and exits 0.
   local cmd
-  for cmd in sudo apt-get apt brew yum dnf pacman zypper \
-    curl wget git rsync systemctl \
-    chezmoi age gpg ssh-keygen \
+  for cmd in sudo apt-get apt yum dnf pacman zypper brew \
+    rsync systemctl \
+    age gpg ssh-keygen \
     docker podman kubectl gh \
     defaults open osascript \
     gnome-extensions gsettings dconf \
@@ -45,6 +46,88 @@ exit 0
 EOF
     chmod +x "$tmp/bin/$cmd"
   done
+
+  # ── Smart-output shims ────────────────────────────────────────────
+  # These shims emit canned stdout so scripts that branch on the
+  # command's output (e.g. `version=$(chezmoi --version)`) execute
+  # more than just the option-parser before hitting an empty-string
+  # condition. Slice 4 of #883.
+
+  cat >"$tmp/bin/chezmoi" <<'SHIM'
+#!/usr/bin/env bash
+case "${1:-}" in
+  --version|version) echo "chezmoi version 2.47.1 (commit f0000000), built at 2024-01-01" ;;
+  status)            : ;;  # no drift
+  data)              echo "{}" ;;
+  source-path)       echo "${HOME:-/tmp}/.dotfiles" ;;
+  managed)           : ;;
+  apply)             : ;;
+  diff)              : ;;
+  init)              : ;;
+  doctor)            echo "ok" ;;
+  cd|edit)           : ;;
+  *)                 : ;;
+esac
+exit 0
+SHIM
+
+  cat >"$tmp/bin/git" <<'SHIM'
+#!/usr/bin/env bash
+case "${1:-}" in
+  --version|version)        echo "git version 2.42.0" ;;
+  status)
+    case "${2:-}" in
+      --porcelain|--porcelain=v1|--porcelain=v2) : ;;
+      *) echo "On branch main"; echo "nothing to commit, working tree clean" ;;
+    esac
+    ;;
+  rev-parse)
+    case "${2:-}" in
+      HEAD)              echo "abc123def4567890abc123def4567890abc12345" ;;
+      --show-toplevel)   echo "${HOME:-/tmp}/.dotfiles" ;;
+      --abbrev-ref)      echo "main" ;;
+      *)                 echo "abc123" ;;
+    esac
+    ;;
+  config)
+    case "${*:2}" in
+      *user.name*)       echo "Test User" ;;
+      *user.email*)      echo "test@example.com" ;;
+      *)                 : ;;
+    esac
+    ;;
+  describe)              echo "v0.2.501" ;;
+  log)                   echo "abc123 test commit" ;;
+  branch)                echo "* main" ;;
+  remote)                echo "origin" ;;
+  diff)                  : ;;
+  *)                     : ;;
+esac
+exit 0
+SHIM
+
+  cat >"$tmp/bin/curl" <<'SHIM'
+#!/usr/bin/env bash
+# Default: silent empty body, exit 0 — most callers only check rc.
+# A `--head`-style probe still wants a "200 OK"-shaped header set
+# so anything that pipes into `grep "HTTP/"` doesn't break.
+for arg in "$@"; do
+  case "$arg" in
+    -I|--head)  echo "HTTP/1.1 200 OK"; echo "Content-Type: text/plain"; echo "" ;;
+  esac
+done
+exit 0
+SHIM
+
+  cat >"$tmp/bin/wget" <<'SHIM'
+#!/usr/bin/env bash
+exit 0
+SHIM
+
+  for cmd in chezmoi git curl wget; do
+    chmod +x "$tmp/bin/$cmd"
+  done
+
   export PATH="$tmp/bin:$PATH"
 }
 
@@ -172,6 +255,27 @@ cov_exercise_script() {
     ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: unexpected rc=$rc"
   fi
+
+  # Slice 4 of #883: probe common subcommands so scripts that gate on
+  # a positional arg (e.g. `agent`, `mode`, `theme`, `secrets`) exit
+  # the option-parser and start exercising the dispatch case. We try
+  # each subcommand only when the script's source mentions it as a
+  # case-pattern, so we don't spam every script with random args.
+  local sub
+  for sub in list status info show help version doctor check; do
+    # Only probe subcommands the script actually handles.
+    grep -qE "^\s*${sub}\)|^\s*${sub}\s*\|" "$script" 2>/dev/null || continue
+    test_start "${label}_sub_${sub}"
+    ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} bash "$script" "$sub" </dev/null >/dev/null
+    rc=$?
+    if [[ "$rc" -ne 124 ]]; then
+      ((TESTS_PASSED++)) || true
+      printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
+    else
+      ((TESTS_FAILED++)) || true
+      printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: unexpected rc=$rc"
+    fi
+  done
 
   # Restore the caller's errexit state and return success so the
   # test script doesn't inherit the non-zero rc from the last
