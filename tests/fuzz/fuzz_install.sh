@@ -52,7 +52,9 @@ declare -a TMP_PATHS=()
 cleanup() {
   local p
   for p in "${TMP_PATHS[@]+"${TMP_PATHS[@]}"}"; do
-    [[ -n "$p" && -e "$p" ]] && rm -rf -- "$p" 2>/dev/null || true
+    if [[ -n "$p" && -e "$p" ]]; then
+      rm -rf -- "$p" 2>/dev/null || true
+    fi
   done
 }
 trap cleanup EXIT

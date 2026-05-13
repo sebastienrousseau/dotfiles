@@ -93,7 +93,7 @@ test_start "dot_drift_dispatches_to_dashboard"
 if [[ -f "$DOT_BIN" ]] && grep -Fq 'drift|diagnostics' "$DOT_BIN"; then
   assert_exit_code 0 "true"
 else
-  assert_exit_code 0 "false  # dot CLI must route `drift` to the diagnostics command group"
+  assert_exit_code 0 "false  # dot CLI must route 'drift' to the diagnostics command group"
 fi
 
 DIAG="$REPO_ROOT/scripts/dot/commands/diagnostics.sh"

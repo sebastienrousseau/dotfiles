@@ -65,8 +65,11 @@ done
 out=$(XDG_STATE_HOME="$tmp/state" bash "$PERF" --by-tool 2>&1 || true)
 
 test_start "by_tool_reports_mise_init"
-echo "$out" | grep -q "mise-init" && assert_exit_code 0 "true" \
-  || assert_exit_code 0 "false  # by-tool output missing mise-init row"
+if echo "$out" | grep -q "mise-init"; then
+  assert_exit_code 0 "true"
+else
+  assert_exit_code 0 "false  # by-tool output missing mise-init row"
+fi
 
 test_start "by_tool_p50_correct_for_uniform"
 # starship-init: 10 samples of 42ms. P50 must be 42.

@@ -16,6 +16,33 @@ set -euo pipefail
 
 ROOT="${1:-.}"
 
+# Awk body intentionally lives in a variable. The $i / $NF / FILENAME /
+# NR references inside are awk's own field/record variables — NOT shell
+# variables — so the whole body must stay literal (single-quoted). The
+# SC2016 suppression is the canonical signal to readers + linters that
+# this is intentional.
+# shellcheck disable=SC2016
+AWK_BODY='
+  # Each input line tokenized on whitespace. Flag if the line uses
+  # curl/wget and a known insecure flag appears as a standalone token.
+  {
+    has_curl = 0; has_wget = 0
+    bad = ""
+    for (i = 1; i <= NF; i++) {
+      tok = $i
+      if (tok == "curl") has_curl = 1
+      if (tok == "wget") has_wget = 1
+      if (has_curl && (tok == "-k" || tok == "--insecure" || tok ~ /^--insecure=/)) {
+        bad = tok
+      }
+      if (has_wget && (tok == "--no-check-certificate" || tok ~ /^--no-check-certificate=/)) {
+        bad = tok
+      }
+    }
+    if (bad != "") printf "%s:%d:%s\n", FILENAME, NR, bad
+  }
+'
+
 matches=$(
   grep -rln \
     --include='*.sh' --include='*.bash' --include='*.zsh' --include='*.tmpl' \
@@ -23,26 +50,7 @@ matches=$(
     --exclude='check-insecure-tls.sh' \
     -E '\b(curl|wget)\b' \
     "$ROOT" 2>/dev/null |
-    xargs -I{} awk '
-      # Each input line tokenized on whitespace. Flag if the line uses
-      # curl/wget and a known insecure flag appears as a standalone token.
-      {
-        has_curl = 0; has_wget = 0
-        bad = ""
-        for (i = 1; i <= NF; i++) {
-          tok = $i
-          if (tok == "curl") has_curl = 1
-          if (tok == "wget") has_wget = 1
-          if (has_curl && (tok == "-k" || tok == "--insecure" || tok ~ /^--insecure=/)) {
-            bad = tok
-          }
-          if (has_wget && (tok == "--no-check-certificate" || tok ~ /^--no-check-certificate=/)) {
-            bad = tok
-          }
-        }
-        if (bad != "") printf "%s:%d:%s\n", FILENAME, NR, bad
-      }
-    ' {} 2>/dev/null
+    xargs -I{} awk "$AWK_BODY" {} 2>/dev/null
 )
 
 if [[ -n "$matches" ]]; then

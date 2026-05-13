@@ -55,7 +55,11 @@ check_snapshot() {
 }
 
 test_start "scrub_script_executable"
-[[ -x "$SCRUB" ]] && assert_exit_code 0 "true" || assert_exit_code 0 "false  # scrub.sh must be executable"
+if [[ -x "$SCRUB" ]]; then
+  assert_exit_code 0 "true"
+else
+  assert_exit_code 0 "false  # scrub.sh must be executable"
+fi
 
 check_snapshot help    --help
 check_snapshot version version

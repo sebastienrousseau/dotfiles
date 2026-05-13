@@ -19,7 +19,7 @@ $RepoRoot = if ($env:GITHUB_WORKSPACE) { $env:GITHUB_WORKSPACE } else { (Get-Loc
 $ProfileSrc = Join-Path $RepoRoot 'dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl'
 
 if (-not (Test-Path $ProfileSrc)) {
-    Write-Host "FAIL: profile source not found at $ProfileSrc"
+    Write-Output "FAIL: profile source not found at $ProfileSrc"
     exit 1
 }
 
@@ -45,9 +45,9 @@ $loadOk = $false
 try {
     . $Rendered
     $loadOk = $true
-    Write-Host "OK: profile dot-sourced"
+    Write-Output "OK: profile dot-sourced"
 } catch {
-    Write-Host "FAIL: profile threw during load: $_"
+    Write-Output "FAIL: profile threw during load: $_"
     $Failures.Add("profile load: $_")
 }
 
@@ -55,9 +55,9 @@ try {
 $RequiredFunctions = @('dot', 'd', 'll', 'la', 'cat')
 foreach ($fn in $RequiredFunctions) {
     if (Get-Command $fn -CommandType Function -ErrorAction SilentlyContinue) {
-        Write-Host "OK: function $fn defined"
+        Write-Output "OK: function $fn defined"
     } else {
-        Write-Host "FAIL: function $fn not defined"
+        Write-Output "FAIL: function $fn not defined"
         $Failures.Add("missing function: $fn")
     }
 }
@@ -65,7 +65,7 @@ foreach ($fn in $RequiredFunctions) {
 # Step 4 — PSScriptAnalyzer (static analysis). Pre-installed on the
 # windows-latest GitHub-hosted runner; install on demand if missing.
 if (-not (Get-Module -ListAvailable -Name PSScriptAnalyzer)) {
-    Write-Host "Installing PSScriptAnalyzer..."
+    Write-Output "Installing PSScriptAnalyzer..."
     Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -ErrorAction SilentlyContinue | Out-Null
 }
 
@@ -74,22 +74,22 @@ if (Get-Module -ListAvailable -Name PSScriptAnalyzer) {
     $Findings = Invoke-ScriptAnalyzer -Path $Rendered -Severity 'Error' -ErrorAction SilentlyContinue
     if ($Findings) {
         foreach ($f in $Findings) {
-            Write-Host "FAIL: PSScriptAnalyzer error: $($f.RuleName) at line $($f.Line): $($f.Message)"
+            Write-Output "FAIL: PSScriptAnalyzer error: $($f.RuleName) at line $($f.Line): $($f.Message)"
             $Failures.Add("PSScriptAnalyzer error: $($f.RuleName)")
         }
     } else {
-        Write-Host "OK: PSScriptAnalyzer clean (Error severity)"
+        Write-Output "OK: PSScriptAnalyzer clean (Error severity)"
     }
 } else {
-    Write-Host "WARN: PSScriptAnalyzer not available — static analysis skipped"
+    Write-Output "WARN: PSScriptAnalyzer not available — static analysis skipped"
 }
 
-Write-Host ""
+Write-Output ""
 if ($Failures.Count -eq 0) {
-    Write-Host "PowerShell contract: PASS"
+    Write-Output "PowerShell contract: PASS"
     exit 0
 } else {
-    Write-Host "PowerShell contract: FAIL ($($Failures.Count) issue(s))"
-    foreach ($f in $Failures) { Write-Host "  - $f" }
+    Write-Output "PowerShell contract: FAIL ($($Failures.Count) issue(s))"
+    foreach ($f in $Failures) { Write-Output "  - $f" }
     exit 1
 }

@@ -29,7 +29,11 @@ test_start "checker_exists"
 assert_file_exists "$CHECKER" "shell preamble checker should exist"
 
 test_start "checker_executable"
-[[ -x "$CHECKER" ]] && assert_exit_code 0 "true" || assert_exit_code 0 "false  # checker must be executable"
+if [[ -x "$CHECKER" ]]; then
+  assert_exit_code 0 "true"
+else
+  assert_exit_code 0 "false  # checker must be executable"
+fi
 
 # -----------------------------------------------------------------------------
 # Behavioural: fixtures

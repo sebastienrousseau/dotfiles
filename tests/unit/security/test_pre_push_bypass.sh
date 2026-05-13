@@ -28,7 +28,11 @@ test_start "hook_exists"
 assert_file_exists "$HOOK" "pre-push hook should exist"
 
 test_start "hook_executable"
-[[ -x "$HOOK" ]] && assert_exit_code 0 "true" || assert_exit_code 0 "false  # hook is not executable"
+if [[ -x "$HOOK" ]]; then
+  assert_exit_code 0 "true"
+else
+  assert_exit_code 0 "false  # hook is not executable"
+fi
 
 test_start "hook_uses_pipefail"
 assert_file_contains "$HOOK" "set -euo pipefail" "pre-push hook must enforce strict mode"
@@ -119,7 +123,11 @@ if [[ -s "$log" ]] && grep -q "reason=test fixture" "$log"; then
   assert_exit_code 0 "true"
 else
   echo "Expected log entry at $log with reason=test fixture; got:" >&2
-  [[ -f "$log" ]] && cat "$log" >&2 || echo "(log file not created)" >&2
+  if [[ -f "$log" ]]; then
+    cat "$log" >&2
+  else
+    echo "(log file not created)" >&2
+  fi
   assert_exit_code 0 "false"
 fi
 
