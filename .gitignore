@@ -69,3 +69,6 @@ _build/
 # Coverage artifacts
 /coverage/
 .sass-cache/
+
+# Runtime upgrade-report output
+/nightly-reports/
