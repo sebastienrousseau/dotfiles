@@ -83,9 +83,14 @@ cov_exercise_script() {
   elif command -v gtimeout >/dev/null 2>&1; then
     TIMEOUT_BIN="gtimeout"
   fi
+  # 60s cap rather than 15s. Some scripts under exercise (e.g. lint.sh)
+  # don't parse `--help` and instead run their full main, which can
+  # take tens of seconds when the repo has hundreds of shell files.
+  # 60s is enough for the slowest known script without making a hung
+  # test sink the parallel sweep for too long.
   local TIMEOUT_CMD
   if [[ -n "$TIMEOUT_BIN" ]]; then
-    TIMEOUT_CMD=("$TIMEOUT_BIN" --kill-after=5 15)
+    TIMEOUT_CMD=("$TIMEOUT_BIN" --kill-after=5 60)
   else
     TIMEOUT_CMD=()
   fi
