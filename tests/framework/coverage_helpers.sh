@@ -437,8 +437,11 @@ cov_exercise_functions_file() {
   test_start "${label}_functions_exercised"
   ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} bash -c '
     set +e
+    # Keep stderr connected — `2>/dev/null` on the source line
+    # would discard the bash xtrace lines for every command the
+    # sourced file executes, hiding ~all of its setup coverage.
     # shellcheck disable=SC1090
-    source "$1" 2>/dev/null
+    source "$1"
     tmpfile="$2"
     # Discover functions defined by this file (best-effort). Source
     # may also pull in helpers from neighboring includes; we restrict

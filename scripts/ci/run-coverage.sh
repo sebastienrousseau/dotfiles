@@ -50,9 +50,14 @@ mkdir -p "$trace_dir"
 # -----------------------------------------------------------------------------
 bash_env="$COVERAGE_DIR/_cov_bashenv.sh"
 cat >"$bash_env" <<'SETUP'
-# coverage runtime — enable xtrace, define PS4 with file+line markers
+# coverage runtime — enable xtrace, define PS4 with file+line markers.
+# `${BASH_SOURCE:-}` (not `${BASH_SOURCE}`) prevents PS4 evaluation
+# from failing under `set -u`: at the top level of a `bash -c`
+# script, BASH_SOURCE[0] is unbound; an unguarded expansion under
+# `set -u` aborts the shell, taking out any test that sources a
+# `set -euo pipefail` library file.
 set -x
-PS4='+@COV@:${LINENO}:${BASH_SOURCE}:@ '
+PS4='+@COV@:${LINENO}:${BASH_SOURCE:-}:@ '
 SETUP
 
 # Sanity-probe: run one trivial script through the pipeline so a
@@ -164,7 +169,16 @@ for trace_path in sorted(trace_dir.glob("*.trace")):
                     continue
                 src_path = Path(src)
                 if not src_path.is_absolute():
-                    src_path = (repo_root / src_path).resolve()
+                    src_path = (repo_root / src_path)
+                # Always resolve so `..`-style paths from inside
+                # `commands/foo.sh` sourcing `../lib/log.sh` collapse
+                # to the same canonical SF: key as a direct hit on
+                # `lib/log.sh`. Without this we get three SF: blocks
+                # for one file and the denominator inflates.
+                try:
+                    src_path = src_path.resolve()
+                except (OSError, RuntimeError):
+                    pass
                 if not in_includes(src_path):
                     continue
                 files[str(src_path)][lineno] += 1
