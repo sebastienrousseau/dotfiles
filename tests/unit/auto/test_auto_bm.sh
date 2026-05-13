@@ -31,5 +31,6 @@ else
 fi
 
 cov_exercise_script "$SCRIPT_FILE"
+cov_exercise_functions_file "$SCRIPT_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
