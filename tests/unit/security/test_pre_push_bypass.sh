@@ -84,10 +84,16 @@ STDIN_LINE="refs/heads/main $ZERO refs/heads/main $ZERO"
 
 # Test 1: legacy var → must FAIL with migration message
 test_start "legacy_var_rejected"
-output=$(cd "$tmpdir" && \
+# Capture combined stdout+stderr; trailing `|| true` keeps the command
+# substitution from inheriting the hook's intentional non-zero exit.
+# (Restructured from a single `cd ... && ... || true` chain because
+# Codacy reads that as the A&&B||C antipattern.)
+output=$(
+  cd "$tmpdir" || exit 1
   XDG_STATE_HOME="$tmpdir/.state" \
-  DOTFILES_SKIP_PRE_PUSH_AUDIT=1 \
-  bash .git/hooks/pre-push <<<"$STDIN_LINE" 2>&1 || true)
+    DOTFILES_SKIP_PRE_PUSH_AUDIT=1 \
+    bash .git/hooks/pre-push <<<"$STDIN_LINE" 2>&1 || true
+)
 if echo "$output" | grep -q "DOTFILES_SKIP_PRE_PUSH_AUDIT is no longer honored"; then
   assert_exit_code 0 "true"
 else
@@ -113,11 +119,13 @@ fi
 # Test 3: new var → bypass succeeds AND logs to the bypass log
 test_start "new_var_writes_log"
 rm -rf "$tmpdir/.state"
-(cd "$tmpdir" && \
+(
+  cd "$tmpdir" || exit 1
   XDG_STATE_HOME="$tmpdir/.state" \
-  DOTFILES_ALLOW_UNSKIPPED_PUSH=1 \
-  DOTFILES_BYPASS_REASON="test fixture" \
-  bash .git/hooks/pre-push <<<"$STDIN_LINE" >/dev/null 2>&1) || true
+    DOTFILES_ALLOW_UNSKIPPED_PUSH=1 \
+    DOTFILES_BYPASS_REASON="test fixture" \
+    bash .git/hooks/pre-push <<<"$STDIN_LINE" >/dev/null 2>&1
+) || true
 log="$tmpdir/.state/dotfiles/audit-bypass.log"
 if [[ -s "$log" ]] && grep -q "reason=test fixture" "$log"; then
   assert_exit_code 0 "true"
@@ -134,10 +142,12 @@ fi
 # Test 4: new var without DOTFILES_BYPASS_REASON should still work and record a default reason
 test_start "new_var_default_reason"
 rm -rf "$tmpdir/.state"
-(cd "$tmpdir" && \
+(
+  cd "$tmpdir" || exit 1
   XDG_STATE_HOME="$tmpdir/.state" \
-  DOTFILES_ALLOW_UNSKIPPED_PUSH=1 \
-  bash .git/hooks/pre-push <<<"$STDIN_LINE" >/dev/null 2>&1) || true
+    DOTFILES_ALLOW_UNSKIPPED_PUSH=1 \
+    bash .git/hooks/pre-push <<<"$STDIN_LINE" >/dev/null 2>&1
+) || true
 if grep -q "reason=no reason given" "$tmpdir/.state/dotfiles/audit-bypass.log"; then
   assert_exit_code 0 "true"
 else
