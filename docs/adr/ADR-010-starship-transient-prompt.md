@@ -48,17 +48,47 @@ shells we support as first-class.
 
 ## Decision
 
-Enable Starship's `enable_transient_prompt = true` for both zsh and
-fish:
+Call Starship's `enable_transience` shell function after the cached
+`starship init` runs in each shell. We share one `starship.toml.tmpl`
+across both shells; the transient prompt content is the existing
+`[character]` block (no separate `[transient_*]` section needed).
 
-- **Zsh**: configure via `dot_config/starship/starship.toml.tmpl`
-  (the canonical Starship config), and ensure `dot_config/zsh/dot_zshrc.tmpl`
-  initializes Starship through `_cached_eval` (which already happens).
-  No additional zsh code; Starship internally registers the
-  `TRAPDEBUG`/`preexec` hooks.
+- **Fish**: `dot_config/fish/conf.d/init.fish.tmpl` calls
+  `enable_transience` once the function is defined. `starship init
+  fish` defines it via `--print-full-init`. Result: `$fish_transient_prompt`
+  flips to `1` and the Enter handler is bound to
+  `__starship_transient_execute`. The compact prompt collapses past
+  scrollback as soon as the next command runs.
 
-- **Fish**: same Starship config (shared TOML), with fish-side
-  integration via `dot_config/fish/conf.d/`.
+- **Zsh**: `dot_config/zsh/dot_zshrc.tmpl` carries the same
+  `enable_transience` call, guarded by
+  `(( ${+functions[enable_transience]} ))`. **Upstream Starship does
+  not ship a zsh-side `enable_transience` function yet** (tracked by
+  [starship/starship#3522](https://github.com/starship/starship/issues/3522)).
+  The guard returns 0, the block no-ops, and zsh keeps its full multi-
+  line prompt in scrollback for now. The code is a forward-compatibility
+  hook: when upstream ships the zsh function, the feature activates
+  automatically on the next `mise upgrade starship` with no zshrc edit.
+
+  Alternatives we rejected for zsh:
+
+  - **Roll our own `zle` widget that rewrites `$PROMPT` on Enter.**
+    Possible (the standard recipe overrides `accept-line` with a
+    transient widget). Rejected because:
+    (a) any hand-rolled implementation will conflict with upstream
+        once they ship the official function, forcing a removal,
+    (b) Starship's prompt is multi-line and ANSI-coloured; correctly
+        rewriting it from a custom widget requires duplicating
+        Starship's escape-code generation, which drifts with every
+        Starship release,
+    (c) it'd run inside `_cached_eval`'s eager-init path, complicating
+        the cache-invalidation semantics we documented in ADR-002.
+  - **Third-party zsh plugin (e.g. zsh-autocomplete's transient mode).**
+    Rejected because the upstream Starship fix is in active discussion
+    and a plugin adds a permanent dependency we'd then have to remove.
+  - **Disable zsh transient until upstream lands.** The current state.
+    Zsh users see the same scrollback density they had before this PR;
+    the visible improvement is fish-only. Honest trade-off.
 
 - **Transient prompt content**: `❯` plus optional exit-code dot
   (red dot if `$status != 0`). Keep it 1–3 characters so scrollback
@@ -71,9 +101,9 @@ the canonical config.
 
 ## Consequences
 
-### Positive
+### Positive (fish only, until upstream lands zsh support)
 
-- Scrollback is 4–5× denser. A 100-command session that previously
+- Scrollback is 4–5× denser **in fish**. A 100-command session that previously
   filled the screen 20× over now fills it ~4×.
 - Asciinema recordings (relevant for the showcase commits in #874)
   read much more naturally — fewer screens of historical prompts

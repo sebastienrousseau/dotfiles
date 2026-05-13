@@ -375,7 +375,17 @@ if [[ "$DOTFILES_ARTIFACT_MODE" != "1" ]] && (( ${+commands[starship]} )); then
   _cached_eval starship-init starship init zsh
   # Transient Prompt: collapse the prompt of past commands to the
   # [character] glyph after Enter, reducing scrollback noise.
-  # Guarded so the lazy-hydration path below doesn't double-bind widgets.
+  #
+  # Forward-compatibility hook. Starship's `enable_transience` function
+  # is currently defined only by `starship init fish` (upstream issue
+  # starship/starship#3522 tracks the zsh equivalent). On zsh the
+  # `${+functions[enable_transience]}` guard evaluates to 0, so the
+  # block silently no-ops. When upstream ships the zsh-side function,
+  # this code activates automatically — no zshrc change needed.
+  #
+  # The `_DOTFILES_STARSHIP_TRANSIENT` flag prevents the lazy-hydration
+  # path below (which also re-runs starship init) from binding the
+  # widgets twice.
   if [[ -z "${_DOTFILES_STARSHIP_TRANSIENT:-}" ]] && (( ${+functions[enable_transience]} )); then
     enable_transience
     _DOTFILES_STARSHIP_TRANSIENT=1
