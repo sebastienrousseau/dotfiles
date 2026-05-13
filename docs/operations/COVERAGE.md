@@ -4,55 +4,74 @@ This page documents how coverage is measured, what the threshold is,
 how to run it locally, and how to triage a regression. Closes the
 docs slice of [#856](https://github.com/sebastienrousseau/dotfiles/issues/856).
 
-## Why kcov
+## Why pure bash xtrace (and not kcov)
 
 The repo's primary code surface is bash (~140 shell files under
 `scripts/`, hundreds more in `.chezmoitemplates/`). Standard
 language-specific coverage tools (`coverage.py`, `cargo tarpaulin`,
 `go cover`) don't apply.
 
-[kcov](https://github.com/SimonKagstrom/kcov) instruments bash via
-DWARF debugger interfaces: it observes each `bash -x` line execution
-without modifying the source files, and emits standard `lcov.info`
-(plus Cobertura XML) that Codecov / Codacy / GitHub Code Scanning
-all ingest natively.
+We originally targeted [kcov](https://github.com/SimonKagstrom/kcov),
+but kcov v43 on Ubuntu 24.04 + bash 5.2 cannot produce bash-script
+coverage in any configuration we tried:
+
+- Without bash debug symbols, kcov's ptrace backend fails to resolve
+  breakpoints and emits zero lines.
+- With `bash-dbgsym` installed, kcov switches into C-binary tracking
+  mode and emits coverage entries for bash's internal C headers
+  (`ctype.h`, `stdio.h`, `wchar.h`) instead of the `.sh` files we
+  want measured.
+
+Instead we use bash's own xtrace mechanism:
+
+```bash
+PS4='+@COV@:${LINENO}:${BASH_SOURCE}:@ '   # encode line + source
+BASH_ENV=/tmp/cov-setup.sh                  # `set -x` in every bash
+bash test.sh 2>traces/test.trace            # capture stderr per test
+```
+
+`BASH_ENV` is inherited by every non-interactive bash invocation, so
+subprocess `bash $SCRIPT_FILE` calls inside tests are also traced
+automatically. The runner parses every trace for `:LINENO:FILE:`
+matches and emits standard `lcov.info` that Codecov ingests natively.
 
 ## Where it runs
 
 | Surface | What runs |
 |---|---|
-| **PR + push to master** | `.github/workflows/coverage.yml` → `Coverage / kcov` job → uploads lcov.info to Codecov and fails the build below `MIN_COVERAGE_PCT` (currently `50`, tightened over time). |
-| **Local dev** | `bash scripts/ci/run-coverage.sh` — Linux-only (kcov on macOS requires private-API patches); skips silently on Darwin so the same command works in pre-commit on any platform. |
-| **macOS dev** | Not supported by kcov. The `Coverage / kcov` CI job covers PRs from macOS contributors via the Linux runner. |
+| **PR + push to master** | `.github/workflows/coverage.yml` → `Coverage / kcov` job → uploads lcov.info to Codecov and fails the build below `MIN_COVERAGE_PCT` (currently `0`, ratcheted up each slice). |
+| **Local dev** | `bash scripts/ci/run-coverage.sh` — works on Linux + macOS (xtrace is a bash primitive, no platform tools needed). |
+| **macOS dev** | Supported. xtrace-based instrumentation runs on macOS bash 3.2+ and Homebrew bash 5.x. |
 
 ## The current floor
 
-`MIN_COVERAGE_PCT=50` in `.github/workflows/coverage.yml`. The
-workflow fails the build if measured coverage drops below this. The
-floor is intentionally low to start — see "Why not 100% yet" below.
+`MIN_COVERAGE_PCT=0` in `.github/workflows/coverage.yml`. Slice 1
+of [#883](https://github.com/sebastienrousseau/dotfiles/issues/883)
+established the baseline at **~2.7% measured** (~613 of ~22 500 lines
+across 231 files). Each subsequent slice raises the floor by ~10–15
+percentage points until the target of ≥95% is reached.
 
 To tighten:
 
-1. Land a few PRs that bump coverage.
+1. Land a slice that bumps measured coverage.
 2. Wait until two-three Codecov runs report a stable value (no
    per-PR jitter).
-3. Edit `MIN_COVERAGE_PCT` upward by ≤5 percentage points per bump.
+3. Edit `MIN_COVERAGE_PCT` upward, ideally by ≤15 percentage points
+   per bump.
 4. Note the floor change in the commit message + this page.
 
 ## Running locally
 
 ```bash
-# Linux only:
-sudo apt-get install -y kcov
-bash scripts/ci/run-coverage.sh
+bash scripts/ci/run-coverage.sh   # Linux or macOS
 
 # Output:
-#   coverage/<file>.kcov/      — per-test kcov runs
-#   coverage/merged/           — kcov --merge artifacts
-#   coverage/lcov.info         — lcov-format report Codecov ingests
+#   coverage/traces/<file>.trace  — per-test xtrace logs
+#   coverage/lcov.info            — lcov-format report Codecov ingests
 ```
 
-Open `coverage/merged/index.html` in a browser for the per-file
+Open `coverage/lcov.info` in any lcov visualizer
+(`genhtml coverage/lcov.info -o coverage/html`) for the per-file
 heatmap.
 
 ## Triaging a regression
@@ -118,7 +137,8 @@ Adjust via the env vars at the top of `run-coverage.sh`.
 
 ## References
 
-- [kcov project](https://github.com/SimonKagstrom/kcov).
+- [Bash xtrace + PS4 + BASH_ENV docs](https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html).
 - [`scripts/ci/run-coverage.sh`](../../scripts/ci/run-coverage.sh).
 - [`.github/workflows/coverage.yml`](../../.github/workflows/coverage.yml).
-- Issue [#856](https://github.com/sebastienrousseau/dotfiles/issues/856).
+- Issue [#856](https://github.com/sebastienrousseau/dotfiles/issues/856) (closed) /
+  [#883](https://github.com/sebastienrousseau/dotfiles/issues/883) (coverage roadmap).
