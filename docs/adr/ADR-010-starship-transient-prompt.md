@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # ADR-010: Enable Starship Transient Prompt in Zsh and Fish
 
 ## Status

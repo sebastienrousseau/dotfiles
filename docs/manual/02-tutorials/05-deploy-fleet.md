@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Tutorial: Deploy to a Fleet
 
 Roll out `.dotfiles` across multiple workstations and verify they're in sync.

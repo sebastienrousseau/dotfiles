@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Incident Response Plan
 
 Incident response procedures for the dotfiles repository. Covers supply chain compromise, secrets exposure, configuration drift, tool tampering, and CI pipeline attacks. Based on NIST SP 800-61 Rev. 2 (Computer Security Incident Handling Guide).

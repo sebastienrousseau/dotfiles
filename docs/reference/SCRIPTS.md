@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Script Catalog
 
 Exhaustive catalog of user-facing executables installed from `dot_local/bin/`.

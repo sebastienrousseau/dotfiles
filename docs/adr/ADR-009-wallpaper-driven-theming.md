@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # ADR-009: Wallpaper-Driven Theming Engine
 
 ## Status

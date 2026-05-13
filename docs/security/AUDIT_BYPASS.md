@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Pre-Push Audit Bypass
 
 This page documents when the pre-push reliability audit can be bypassed,

@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Themes
 
 Themes are auto-generated from wallpapers. K-Means clustering in CIELAB color space extracts dominant colors. Every theme is WCAG AAA compliant.

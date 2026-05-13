@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # MCP Policy
 
 MCP is treated as a controlled execution boundary.

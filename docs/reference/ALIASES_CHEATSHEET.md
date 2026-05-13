@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Alias Cheatsheet
 
 Auto-generated from the alias manifest.

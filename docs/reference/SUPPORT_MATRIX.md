@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Support Matrix
 
 Tested platform and tool combinations for the dotfiles distribution.

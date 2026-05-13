@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # Reference: Feature Flags
 
 Feature flags toggle optional subsystems. Set in `.chezmoidata.toml`, override per-preset in `.chezmoidata/hardware.toml`.
@@ -120,3 +125,4 @@ Flags can be deprecated without breaking existing hosts. The deprecation process
 
 - [Configuration Files](02-config-files.md)
 - [Create a Profile](../02-tutorials/03-create-profile.md)
+{% endraw %}

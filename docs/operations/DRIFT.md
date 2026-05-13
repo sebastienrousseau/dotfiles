@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Drift Detection & Remediation
 
 This page documents how this repo detects drift between the chezmoi

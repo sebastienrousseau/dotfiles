@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # ADR-005: Chezmoi as Dotfiles Manager
 
 **Status**: Accepted
@@ -91,3 +96,4 @@ chezmoi apply
 - [Chezmoi Documentation](https://www.chezmoi.io/)
 - [Chezmoi Quick Start](https://www.chezmoi.io/quick-start/)
 - [Comparison with Other Tools](https://www.chezmoi.io/comparison-table/)
+{% endraw %}

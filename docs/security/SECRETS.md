@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # Secrets Management
 
 Provider-agnostic secrets via `dot secrets`. Supports macOS Keychain, `pass`, and age-encrypted local storage.
@@ -150,3 +155,4 @@ See the [chezmoi documentation](https://www.chezmoi.io/user-guide/password-manag
 - **Never commit** `~/.config/chezmoi/key.txt` to version control.
 - **Avoid shell history exposure** — use `dot secrets set` which prompts securely.
 - **Rotate credentials** on a regular schedule.
+{% endraw %}

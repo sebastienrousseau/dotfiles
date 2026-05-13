@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Trusted Agent Workstation
 
 This repository is more than shell setup.

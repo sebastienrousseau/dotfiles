@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Operations
 
 Core workflows for keeping your dotfiles running across platforms.

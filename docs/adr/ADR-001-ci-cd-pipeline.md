@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # ADR-001: Multi-stage CI/CD Pipeline Design
 
 **Status**: Accepted
@@ -110,3 +115,4 @@ jobs:
 
 - [GitHub Actions Path Filtering](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onpushpull_requestpull_request_targetpathspaths-ignore)
 - [dorny/paths-filter](https://github.com/dorny/paths-filter)
+{% endraw %}

@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Atuin History Filtering
 
 This page documents how high-risk command patterns are excluded from

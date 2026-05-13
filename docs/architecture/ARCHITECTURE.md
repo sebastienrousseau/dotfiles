@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Architecture
 
 Core architectural decisions and system design of the dotfiles shell distribution.

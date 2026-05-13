@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # OpenSSF Scorecard
 
 This page records the current OpenSSF Scorecard posture for this

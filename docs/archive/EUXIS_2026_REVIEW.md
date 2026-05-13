@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Euxis 2026 Architecture & Product Review
 
 This review translates the current dotfiles CLI stack into an Apple-tier product strategy:

@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # Theming Guide
 
 The dotfiles ship a wallpaper-driven theme system that generates terminal color palettes directly from wallpaper images using K-Means clustering in CIELAB color space. One command changes the terminal, editor, window manager, GTK, desktop environment, wallpaper, and browser-facing color mode in under a second.
@@ -222,3 +227,4 @@ grep '^theme = ' ~/.dotfiles/.chezmoidata.toml
 ```
 
 This prints the current theme name. Cross-reference with `dot theme list` for available options.
+{% endraw %}

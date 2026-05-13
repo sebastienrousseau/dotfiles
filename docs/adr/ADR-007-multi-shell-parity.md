@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # ADR-007: Multi-Shell Parity Strategy
 
 ## Status

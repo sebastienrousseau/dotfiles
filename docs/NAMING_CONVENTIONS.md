@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # Naming Conventions & Standardization Guide
 
 This document defines the naming conventions for all files in the dotfiles repository.
@@ -93,3 +98,4 @@ docs/             # Documentation and GitHub Pages source
   security/       # Security documentation
   operations/     # Ops and maintenance docs
 ```
+{% endraw %}

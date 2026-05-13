@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Version Synchronization System
 
 The version synchronization system ensures that all version references across the repository remain consistent with the version specified in `package.json`.

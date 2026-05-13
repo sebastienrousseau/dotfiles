@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Migration and Upgrade Guide
 
 ## How to Upgrade

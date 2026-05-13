@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Failure Mode and Effects Analysis (FMEA)
 
 Systematic risk assessment of the chezmoi-managed dotfiles repository per IEC 60812 methodology. Identifies failure modes, quantifies risk priority, and documents mitigations across all configuration management subsystems.

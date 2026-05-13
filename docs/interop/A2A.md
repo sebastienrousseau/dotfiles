@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Agent Interop
 
 The repository now ships an agent card and an A2A-ready discovery document.

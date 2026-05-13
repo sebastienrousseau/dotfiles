@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Visual Integrity Report
 
 Generated: 2026-04-08

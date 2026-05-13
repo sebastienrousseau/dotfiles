@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Appendix B: Security Checklist
 
 Run this checklist after a fresh install and quarterly afterwards.

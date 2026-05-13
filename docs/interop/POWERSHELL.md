@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # PowerShell Parity
 
 This page documents how PowerShell 7.5+ support is exercised in CI
@@ -94,3 +99,4 @@ pwsh ./scripts/qa/powershell-contract.ps1
 - [PSScriptAnalyzer rule reference](https://github.com/PowerShell/PSScriptAnalyzer/blob/master/docs/Rules/README.md)
 - `.github/workflows/reliability-gate.yml` — Windows job definition.
 - Issue [#860](https://github.com/sebastienrousseau/dotfiles/issues/860).
+{% endraw %}

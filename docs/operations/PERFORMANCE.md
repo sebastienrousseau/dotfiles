@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Performance — Budgets, Baselines, Regression Detection
 
 This page documents the per-shell startup budget, the baseline

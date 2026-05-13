@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Cross-Platform Interoperability
 
 How dotfiles commands and shims map across macOS, Linux, and WSL2.

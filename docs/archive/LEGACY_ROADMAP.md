@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # The Ultimate Developer Environment Roadmap
 
 This roadmap outlines the path to a high-performance, super-efficient development machine designed for Rust, Python, and AI on Linux (Zorin OS / T2 Mac hardware).

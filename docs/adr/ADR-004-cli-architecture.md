@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # ADR-004: Chezmoi + Custom CLI Wrapper Architecture
 
 **Status**: Accepted

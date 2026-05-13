@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Architecture Decision Records
 
 This directory contains Architecture Decision Records (ADRs) that document

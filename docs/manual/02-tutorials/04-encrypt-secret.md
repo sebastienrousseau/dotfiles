@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # Tutorial: Encrypt a Secret
 
 How to store an API key (or any secret) encrypted in the repository using Age and SOPS — decrypted automatically on `dot apply`.
@@ -273,3 +278,4 @@ chezmoi apply --verbose dot_tmp/stripe-key.txt
 - [Concept: Trust Model](../01-concepts/02-trust-model.md) — the security architecture
 - [Reference: Secret operations](../03-reference/01-dot-cli.md#secrets)
 - [Security: Secret management](../../security/SECRETS.md)
+{% endraw %}

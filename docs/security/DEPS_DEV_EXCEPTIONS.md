@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # deps.dev Advisory Exceptions
 
 The CI workflow `.github/workflows/deps-dev-validation.yml` scans

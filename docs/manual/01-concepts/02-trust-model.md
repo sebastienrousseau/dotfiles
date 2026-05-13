@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Trust Model
 
 The trust model combines cryptographic signing, local-first secrets, policy-gated agent operations, and machine-verifiable attestation.

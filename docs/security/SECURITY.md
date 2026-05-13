@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Security
 
 How dotfiles handles security and system modifications.

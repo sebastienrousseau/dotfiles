@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Universal Configuration Plan (Chezmoi)
 
 ... [Previous Sections Unchanged] ...

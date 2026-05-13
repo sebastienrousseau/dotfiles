@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Zsh Completion Cache Lifecycle
 
 This page documents how zsh completion compilation works in this repo

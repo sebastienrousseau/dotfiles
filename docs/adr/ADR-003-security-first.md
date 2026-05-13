@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # ADR-003: Security-First Approach
 
 **Status**: Accepted

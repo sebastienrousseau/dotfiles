@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Introduction
 
 This manual describes `.dotfiles` v0.2.501 — a trusted agent workstation baseline for macOS, Linux, and WSL.

@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 <!-- Copyright (c) 2015-2026 Dotfiles. All rights reserved. -->
 
 # Repository Layout

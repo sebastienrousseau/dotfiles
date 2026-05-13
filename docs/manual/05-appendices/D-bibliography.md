@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Appendix D: Bibliography
 
 Cited works and recommended reading.

@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # CI Composite Actions
 
 This page documents the repo-local composite actions under

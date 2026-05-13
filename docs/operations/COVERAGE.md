@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Code Coverage
 
 This page documents how coverage is measured, what the threshold is,

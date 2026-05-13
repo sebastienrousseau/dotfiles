@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # CI Cadence
 
 This page tabulates every GitHub Actions workflow in `.github/workflows/`

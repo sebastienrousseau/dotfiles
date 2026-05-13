@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # AI Integrations (Opt-in)
 
 AI helpers are **off by default**. You choose if and when to turn them on.

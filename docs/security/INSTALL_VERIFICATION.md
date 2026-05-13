@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Install Verification
 
 This page documents what gets verified during `install.sh` execution,

@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # CI Egress Allowlist
 
 This page documents the network endpoints CI jobs are allowed to

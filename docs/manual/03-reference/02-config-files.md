@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # Reference: Configuration Files
 
 Every config file read or written by `.dotfiles`, with its schema and purpose.
@@ -257,3 +262,4 @@ _build/
 - [Template Variables](04-templates.md)
 - [Feature Flags](05-feature-flags.md)
 - [First Install Tutorial](../02-tutorials/01-first-install.md)
+{% endraw %}

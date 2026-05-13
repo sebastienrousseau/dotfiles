@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # Fleet Architecture
 
 A "fleet" is two or more workstations sharing a single `.dotfiles` source repository. The fleet model handles per-host customization, drift detection, and cross-host trust propagation.
@@ -140,3 +145,4 @@ Only the host with the matching Age private key can decrypt. Other hosts see the
 - [Fleet Deployment Architecture](../../architecture/fleet-deployment.md) — diagrams
 - [Trust Model](02-trust-model.md)
 - [Tutorial: Deploy to a Fleet](../02-tutorials/05-deploy-fleet.md)
+{% endraw %}

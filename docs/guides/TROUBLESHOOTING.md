@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Troubleshooting
 
 Quick checks for common issues.

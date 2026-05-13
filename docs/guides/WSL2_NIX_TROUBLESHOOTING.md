@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # WSL2 & Nix Integration Troubleshooting Guide
 
 ### Metadata

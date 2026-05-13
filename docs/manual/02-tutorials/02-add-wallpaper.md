@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Tutorial: Add a Wallpaper → Theme
 
 Drop an image. Get a fully-WCAG-AAA terminal theme.

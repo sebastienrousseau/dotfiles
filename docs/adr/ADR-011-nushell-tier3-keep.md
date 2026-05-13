@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # ADR-011: Keep Nushell as Tier-3 Reference with Minimum-Viable Caching
 
 ## Status

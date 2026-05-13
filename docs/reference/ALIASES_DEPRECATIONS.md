@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Alias Deprecations
 
 This file tracks aliases that we've kept temporarily for backwards compatibility.

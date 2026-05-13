@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Command Index
 
 Alphabetical list of `dot` subcommands referenced in the manual.

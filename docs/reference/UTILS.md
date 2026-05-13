@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Utilities
 
 Aliases, functions, and the `dot` CLI provide day-to-day tooling across macOS, Linux, and WSL.

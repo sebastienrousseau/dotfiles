@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Behavioral Traceability
 
 This matrix ties core internal behaviors to implementation files, automated tests, and prose documentation.

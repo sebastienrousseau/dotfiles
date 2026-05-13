@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Security Release Checklist
 
 Use this checklist before cutting any new release (e.g., `v0.x.x`) to ensure supply-chain integrity.

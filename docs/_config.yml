@@ -15,6 +15,10 @@ plugins:
   - jekyll-seo-tag
   - jekyll-sitemap
   - jekyll-redirect-from
+  # Renders `README.md` as the directory index where present (matches
+  # the GitHub-browse experience for users coming from the repo links
+  # in docs/index.md).
+  - jekyll-readme-index
 
 relative_links:
   enabled: true
@@ -41,15 +45,15 @@ kramdown:
   syntax_highlighter: rouge
   hard_wrap: false
 
-# Disable Liquid rendering for all pages. Many of our docs include
-# chezmoi/Go-template snippets like `{{ .variable }}` inside fenced
-# code blocks; Liquid runs BEFORE kramdown sees those fences and would
-# try to resolve the placeholders as Liquid expressions. Turning Liquid
-# off site-wide is simpler than wrapping every code block in
-# `{% raw %}...{% endraw %}`. We don't use Jekyll includes or
-# site-variable interpolation in docs/, so nothing is lost.
+# Many of our docs include chezmoi/Go-template snippets like
+# `{{ .variable }}` inside fenced code blocks. Liquid runs BEFORE
+# kramdown sees those fences and would try to resolve the placeholders
+# as Liquid expressions (silently dropping them from the output). Each
+# .md file therefore carries explicit `render_with_liquid: false` in
+# its frontmatter — a site-wide default in this block was not honored
+# reliably, so we keep the kill-switch per-page instead.
 defaults:
   - scope:
       path: ""
     values:
-      render_with_liquid: false
+      layout: default

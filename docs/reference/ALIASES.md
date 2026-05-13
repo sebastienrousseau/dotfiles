@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Aliases
 
 Shell aliases provided by the dotfiles, organized by category in `~/.dotfiles/.chezmoitemplates/aliases/`.

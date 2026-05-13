@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Cookbook: Recipes
 
 Thirty short recipes for common tasks.

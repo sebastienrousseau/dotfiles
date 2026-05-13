@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Key Rotation Guide
 
 This guide covers rotating encryption keys for secrets managed by Age and SOPS.

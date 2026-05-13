@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # .dotfiles
 
 Cross-platform, signed, local-first dotfiles for macOS, Linux, and WSL.

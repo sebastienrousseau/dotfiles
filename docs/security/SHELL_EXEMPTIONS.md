@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Shell Preamble Exemptions
 
 Every bash script in this repo must include `set -euo pipefail` (or

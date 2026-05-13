@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Profiles and Machine Setup
 
 ## Profile System

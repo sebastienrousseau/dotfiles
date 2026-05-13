@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Self-Healing
 
 `.dotfiles` detects, diagnoses, and repairs configuration drift, missing tools, broken symlinks, and environmental damage — often without user intervention.

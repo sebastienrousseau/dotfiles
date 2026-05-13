@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Compliance Architecture
 
 This document describes the compliance, security, and cross-platform compatibility controls implemented in this repository, mapped to standard regulatory frameworks (SOC 2, ISO 27001, GDPR).

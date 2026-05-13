@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # Cookbook: Troubleshooting
 
 Symptom → cause → fix.
@@ -343,3 +348,4 @@ chezmoi --version
 - [Self-Healing concept](../01-concepts/05-self-healing.md)
 - [FAQ](03-faq.md)
 - [Security: Incident Response](../../security/INCIDENT_RESPONSE.md)
+{% endraw %}

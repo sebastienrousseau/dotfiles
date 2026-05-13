@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Secrets Encryption with SOPS and age
 
 ## Quick Start

@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # Reference: Template Variables
 
 Every variable available to chezmoi templates (`.tmpl` files).
@@ -182,3 +187,4 @@ If any template fails to render, the build breaks before merge.
 - [Chezmoi template reference](https://www.chezmoi.io/reference/templates/)
 - [Configuration Files](02-config-files.md)
 - [Create a Profile tutorial](../02-tutorials/03-create-profile.md)
+{% endraw %}

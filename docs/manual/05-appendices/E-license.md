@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Appendix E: License
 
 ## MIT License

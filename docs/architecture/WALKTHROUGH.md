@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Walkthrough
 
 A hands-on tour of the dotfiles after installation. Run each step in your terminal to get comfortable with what's available.

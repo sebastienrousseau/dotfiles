@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Dotfiles Maintenance Runbook
 
 This runbook captures recovery and release maintenance operations for this repository.

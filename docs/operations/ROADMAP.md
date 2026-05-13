@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Roadmap
 
 This roadmap steers the project from a "feature-rich dotfiles repo" to an **Enterprise-Grade Shell Distribution**. The structure is organized by strategic pillars (**Trust**, **Predictability**, **Observability**) rather than linear phases, though the original 100-Phase vision is preserved within these categories.

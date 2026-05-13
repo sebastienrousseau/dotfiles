@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # Reliability
 
 ## Reliability scorecard
@@ -114,3 +119,4 @@ jobs:
 For a lightweight repository-wide snapshot, run `bash ./scripts/qa/coverage-baseline.sh --with-module-coverage`.
 
 Core internal behaviors are traced through `bash ./scripts/qa/traceability-coverage.sh`.
+{% endraw %}

@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Feature Flags Reference
 
 Feature flags let you turn parts of the dotfiles on or off. All flags live in `.chezmoidata.toml` under `[features]`. Set a flag to `true` to enable it, or `false` to disable it. Changes take effect after you run `dot apply`.

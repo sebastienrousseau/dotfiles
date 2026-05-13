@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # ADR-002: Shell Performance Optimization Strategy
 
 **Status**: Accepted

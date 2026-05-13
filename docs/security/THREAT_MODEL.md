@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Threat Model
 
 Security analysis of the dotfiles distribution. Covers trust boundaries, threat actors, attack surfaces, and mitigations.

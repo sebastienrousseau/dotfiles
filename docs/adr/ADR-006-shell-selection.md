@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # ADR-006: Zsh as Default Shell
 
 **Status**: Accepted

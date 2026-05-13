@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Reference: The `dot` CLI
 
 Complete command reference. Every subcommand, every flag, every exit code.
