@@ -409,11 +409,17 @@ ${prompt}"
     cl | claude)
       printf "%s" "$full_prompt" | claude
       ;;
+    codex)
+      printf "%s" "$full_prompt" | codex
+      ;;
     copilot)
       copilot -sp "$full_prompt"
       ;;
     gemini)
       printf "%s" "$full_prompt" | gemini chat
+      ;;
+    goose)
+      printf "%s" "$full_prompt" | goose session start
       ;;
     kiro | kiro-cli)
       printf "%s" "$full_prompt" | kiro-cli chat
