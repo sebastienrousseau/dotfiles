@@ -133,21 +133,48 @@ if [[ -n "$first_kcov" ]]; then
   find "$first_kcov" -type f | head -10 >&2
 fi
 
-# Run kcov on one known-good test directly so we can verify the
-# baseline mechanic before declaring the test wrapping broken.
-echo "── diagnostic: direct kcov on validate-chezmoidata script ──" >&2
-direct_out="$COVERAGE_DIR/_direct.kcov"
-rm -rf "$direct_out"
-PATH="/usr/bin:/bin" kcov \
+# Triage the empty-output case with three orthogonal kcov invocations.
+# If ALL of these come back empty, the issue is kcov itself or env;
+# if some come back populated, the issue is in our test wrapping.
+KCOV_BIN="$(command -v kcov)"
+echo "── diagnostic: kcov binary = $KCOV_BIN ──" >&2
+
+# Probe 1: direct script invocation, default method, full filters.
+echo "── probe 1: direct kcov on validate-chezmoidata.sh (defaults) ──" >&2
+rm -rf "$COVERAGE_DIR/_probe1.kcov"
+"$KCOV_BIN" \
   --include-path="$KCOV_INCLUDE_PATH" \
   --exclude-path="$KCOV_EXCLUDE_PATH" \
-  "$direct_out" \
-  bash "$REPO_ROOT/scripts/ci/validate-chezmoidata.sh" >&2 2>&1 || true
-direct_cob=$(find "$direct_out" -name 'cobertura.xml' | head -1)
-if [[ -n "$direct_cob" ]]; then
-  echo "── direct cobertura class count: $(grep -c '<class ' "$direct_cob" 2>/dev/null || echo 0) ──" >&2
-  echo "── direct cobertura content (head 30) ──" >&2
-  head -30 "$direct_cob" >&2
+  "$COVERAGE_DIR/_probe1.kcov" \
+  bash "$REPO_ROOT/scripts/ci/validate-chezmoidata.sh" 2>&1 >/dev/null | head -10 >&2 || true
+probe1_cob=$(find "$COVERAGE_DIR/_probe1.kcov" -name 'cobertura.xml' 2>/dev/null | head -1)
+[[ -n "$probe1_cob" ]] && echo "  probe1 classes: $(grep -c '<class ' "$probe1_cob" 2>/dev/null || echo 0)" >&2
+
+# Probe 2: direct script invocation, DEBUG method (no PS4 rewriting).
+echo "── probe 2: --bash-method=DEBUG on validate-chezmoidata.sh ──" >&2
+rm -rf "$COVERAGE_DIR/_probe2.kcov"
+"$KCOV_BIN" \
+  --bash-method=DEBUG \
+  --include-path="$KCOV_INCLUDE_PATH" \
+  --exclude-path="$KCOV_EXCLUDE_PATH" \
+  "$COVERAGE_DIR/_probe2.kcov" \
+  bash "$REPO_ROOT/scripts/ci/validate-chezmoidata.sh" 2>&1 >/dev/null | head -10 >&2 || true
+probe2_cob=$(find "$COVERAGE_DIR/_probe2.kcov" -name 'cobertura.xml' 2>/dev/null | head -1)
+[[ -n "$probe2_cob" ]] && echo "  probe2 classes: $(grep -c '<class ' "$probe2_cob" 2>/dev/null || echo 0)" >&2
+
+# Probe 3: NO include-path filter at all. Surfaces whether kcov is
+# producing data that the filter is rejecting.
+echo "── probe 3: no include filter on validate-chezmoidata.sh ──" >&2
+rm -rf "$COVERAGE_DIR/_probe3.kcov"
+"$KCOV_BIN" \
+  --exclude-path="$KCOV_EXCLUDE_PATH" \
+  "$COVERAGE_DIR/_probe3.kcov" \
+  bash "$REPO_ROOT/scripts/ci/validate-chezmoidata.sh" 2>&1 >/dev/null | head -10 >&2 || true
+probe3_cob=$(find "$COVERAGE_DIR/_probe3.kcov" -name 'cobertura.xml' 2>/dev/null | head -1)
+if [[ -n "$probe3_cob" ]]; then
+  echo "  probe3 classes: $(grep -c '<class ' "$probe3_cob" 2>/dev/null || echo 0)" >&2
+  echo "  probe3 head:" >&2
+  head -40 "$probe3_cob" >&2
 fi
 
 # -----------------------------------------------------------------------------
