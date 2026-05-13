@@ -9,8 +9,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 UPDATE_SCRIPT="$REPO_ROOT/scripts/maintenance/check-updates.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "check_updates_script_exists"
 assert_file_exists "$UPDATE_SCRIPT" "check-updates.sh should exist"
@@ -37,5 +41,8 @@ assert_file_contains "$UPDATE_SCRIPT" "check_github_actions_updates" "should hav
 
 test_start "check_updates_has_chezmoi_check"
 assert_file_contains "$UPDATE_SCRIPT" "check_chezmoi_updates" "should have chezmoi update check"
+
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$UPDATE_SCRIPT"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

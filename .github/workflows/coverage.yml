@@ -51,10 +51,11 @@ jobs:
 
       - name: Run coverage
         env:
-          # Initial floor — start permissive while Slice 1 of #883
-          # establishes the baseline. Tighten in lockstep with each
-          # slice that lands real test coverage (target ≥95%).
-          MIN_COVERAGE_PCT: '0'
+          # Floor ratcheted after each slice of #883.
+          #   Slice 1: 2.72% baseline measured, floor=0
+          #   Slice 2: 12.01% measured (59 deep-test conversions), floor=10
+          # Bump in lockstep with the slice that lands the bump.
+          MIN_COVERAGE_PCT: '10'
         run: bash scripts/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact

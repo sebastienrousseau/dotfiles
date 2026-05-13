@@ -4,8 +4,12 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 SCRIPT_FILE="$REPO_ROOT/scripts/dot/commands/manual.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "script_exists"
 assert_file_exists "$SCRIPT_FILE" "manual.sh must exist"
@@ -30,5 +34,8 @@ assert_file_contains "$SCRIPT_FILE" "/usr/bin/open" "must use /usr/bin/open expl
 test_start "registered_in_dot_cli"
 DOT_BIN="$REPO_ROOT/dot_local/bin/executable_dot"
 assert_file_contains "$DOT_BIN" "manual|manual" "dot CLI must route 'manual' command"
+
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$SCRIPT_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

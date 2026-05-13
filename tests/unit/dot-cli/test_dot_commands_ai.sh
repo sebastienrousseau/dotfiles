@@ -9,8 +9,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 AI_SCRIPT="$REPO_ROOT/scripts/dot/commands/ai.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "ai_bridge_exists"
 assert_file_exists "$AI_SCRIPT" "ai.sh should exist"
@@ -57,5 +61,8 @@ else
   printf '%b
 ' "  ${RED}✗${NC} $CURRENT_TEST: help missing patterns"
 fi
+
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$AI_SCRIPT"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

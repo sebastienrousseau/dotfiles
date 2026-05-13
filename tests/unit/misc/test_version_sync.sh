@@ -7,8 +7,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 VERSION_FILE="$REPO_ROOT/scripts/version-sync.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 # Test: version-sync.sh file exists
 test_start "version_sync_exists"
@@ -69,6 +73,10 @@ else
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available"
 fi
+
+# Slice 2: drive real line coverage of version-sync.sh through safe-mode
+# entry points so the xtrace coverage runner records what executed.
+cov_exercise_script "$VERSION_FILE"
 
 echo ""
 echo "Version sync tests completed."

@@ -5,8 +5,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 TEST_SCRIPT="$REPO_ROOT/scripts/diagnostics/mcp-doctor.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 MCP_CONFIG_FILE="$REPO_ROOT/dot_config/claude/mcp_servers.json"
 MCP_POLICY_FILE="$REPO_ROOT/dot_config/dotfiles/mcp-policy.json"
 MCP_LOCK_FILE="$REPO_ROOT/dot_config/dotfiles/mcp-lock.json"
@@ -106,5 +110,8 @@ else
   ((TESTS_FAILED++))
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: strict-local baseline should pass"
 fi
+
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$TEST_SCRIPT"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

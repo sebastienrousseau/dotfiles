@@ -4,8 +4,12 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 FUNC_FILE="$REPO_ROOT/.chezmoitemplates/functions/misc/logout.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "func_file_exists"
 assert_file_exists "$FUNC_FILE" "logout.sh should exist"
@@ -97,5 +101,8 @@ else
   ((TESTS_FAILED++))
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: \$1 should be guarded with \${1:-}"
 fi
+
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$FUNC_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

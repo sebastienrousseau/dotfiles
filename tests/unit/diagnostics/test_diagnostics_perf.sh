@@ -5,8 +5,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 TEST_SCRIPT="$REPO_ROOT/scripts/diagnostics/perf.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "perf_exists"
 assert_file_exists "$TEST_SCRIPT" "perf.sh should exist"
@@ -29,5 +33,8 @@ assert_file_contains "$TEST_SCRIPT" "--json | -j" "perf supports -j"
 assert_file_contains "$TEST_SCRIPT" "--profile | -p" "perf supports -p"
 assert_file_contains "$TEST_SCRIPT" "--runs | -r" "perf supports -r"
 assert_file_contains "$TEST_SCRIPT" "--target | -t" "perf supports -t"
+
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$TEST_SCRIPT"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

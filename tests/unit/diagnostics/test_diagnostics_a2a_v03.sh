@@ -5,11 +5,15 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 A2A_CARD="$REPO_ROOT/.well-known/agent-card.json"
 INTERNAL_CARD="$REPO_ROOT/dot_config/dotfiles/agent-card.json"
 LEGACY_DOC="$REPO_ROOT/.well-known/agent.json"
 CONFORMANCE_SCRIPT="$REPO_ROOT/scripts/diagnostics/a2a-conformance.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "a2a_v03_card_exists"
 assert_file_exists "$A2A_CARD" "A2A v0.3 card should exist"
@@ -95,5 +99,8 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: v0.3 conformance should pass"
   printf '%b\n' "    Output: $output"
 fi
+
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$CONFORMANCE_SCRIPT"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

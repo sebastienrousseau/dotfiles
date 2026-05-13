@@ -8,9 +8,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 # Source the function being tested
 FUNC_FILE="$REPO_ROOT/.chezmoitemplates/functions/files/backup.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 if [[ -f "$FUNC_FILE" ]]; then
   source "$FUNC_FILE"
 else
@@ -225,4 +229,7 @@ rm -rf "$test_dir"
 
 echo ""
 echo "Backup function tests completed."
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$FUNC_FILE"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

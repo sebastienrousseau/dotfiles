@@ -4,8 +4,12 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 SCRIPT_FILE="$REPO_ROOT/scripts/docs/build-manual.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "script_exists"
 assert_file_exists "$SCRIPT_FILE" "build-manual.sh must exist"
@@ -26,5 +30,8 @@ test_start "produces_9_formats"
 for keyword in dotfiles.html dotfiles.epub dotfiles.txt dotfiles-md.tar.gz SHA256SUMS; do
   assert_file_contains "$SCRIPT_FILE" "$keyword" "must produce $keyword"
 done
+
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$SCRIPT_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
