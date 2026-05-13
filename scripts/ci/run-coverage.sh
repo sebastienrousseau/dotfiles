@@ -65,6 +65,43 @@ mkdir -p "$COVERAGE_DIR"
 rm -rf "$COVERAGE_DIR"/*.kcov 2>/dev/null || true
 
 # -----------------------------------------------------------------------------
+# Baseline probe: explicitly verify which kcov method actually captures
+# coverage on this runner before running 447 tests in vain. Costs ~1s.
+# -----------------------------------------------------------------------------
+trivial="$COVERAGE_DIR/_trivial.sh"
+cat > "$trivial" <<'TRIV'
+#!/usr/bin/env bash
+echo "line-1"
+x=1
+y=2
+z=$((x + y))
+echo "sum=$z"
+TRIV
+chmod +x "$trivial"
+
+probe_kcov() {
+  local label="$1"; shift
+  local out="$COVERAGE_DIR/_probe_$label"
+  rm -rf "$out"
+  "$KCOV_BIN" "$@" "$out" bash "$trivial" >/dev/null 2>&1 || true
+  local cob
+  cob=$(find "$out" -name 'cobertura.xml' 2>/dev/null | head -1)
+  if [[ -n "$cob" ]]; then
+    local classes
+    classes=$(grep -c '<class ' "$cob" 2>/dev/null || echo 0)
+    echo "  probe[$label] classes=$classes"
+  else
+    echo "  probe[$label] NO cobertura.xml produced"
+  fi
+}
+
+echo "── method probes (trivial script) ──" >&2
+probe_kcov default >&2
+probe_kcov ps4 --bash-method=PS4 >&2
+probe_kcov debug --bash-method=DEBUG >&2
+probe_kcov basic --configure=bash-use-basic-parser=1 >&2
+
+# -----------------------------------------------------------------------------
 # Collect test files (mirror tests/framework/test_runner.sh discovery).
 # -----------------------------------------------------------------------------
 mapfile -t test_files < <(find "$TESTS_DIR/unit" -name 'test_*.sh' -type f | sort)
