@@ -89,7 +89,12 @@ runs:
                && ( "$os_lower" == "linux" || "$os_lower" == "darwin" ) ]]; then
             bash "$GITHUB_WORKSPACE/scripts/ci/install-chezmoi-verified.sh" "$version" "$bin_dir"
           else
-            curl -fsSL https://get.chezmoi.io | sh -s -- -b "$bin_dir" "v$version"
+            # Upstream installer flags: -b BIN_DIR, -t TAG. The trailing
+            # positional args are passed to chezmoi AFTER install (so a
+            # raw "v$version" would be treated as a `chezmoi v2.47.1`
+            # subcommand and fail). Use `-t v$version` to actually pin
+            # the version installed.
+            curl -fsSL https://get.chezmoi.io | sh -s -- -b "$bin_dir" -t "v$version"
           fi
         fi
 

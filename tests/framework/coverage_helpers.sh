@@ -72,6 +72,24 @@ cov_exercise_script() {
   local label
   label="$(basename "$script" .sh)"
 
+  # Resolve a portable timeout binary. GNU coreutils ships `timeout`;
+  # macOS without coreutils only has `gtimeout` after `brew install
+  # coreutils`. If neither is on PATH, run without a wall-time cap —
+  # tests already exit on script completion. rc=127 (command not
+  # found) was previously sinking every macos-latest run.
+  local TIMEOUT_BIN=""
+  if command -v timeout >/dev/null 2>&1; then
+    TIMEOUT_BIN="timeout"
+  elif command -v gtimeout >/dev/null 2>&1; then
+    TIMEOUT_BIN="gtimeout"
+  fi
+  local TIMEOUT_CMD
+  if [[ -n "$TIMEOUT_BIN" ]]; then
+    TIMEOUT_CMD=("$TIMEOUT_BIN" --kill-after=5 15)
+  else
+    TIMEOUT_CMD=()
+  fi
+
   # The script under test almost always exits non-zero on
   # `--invalid-flag` (set -e + exit 1/2). If the calling test has
   # errexit enabled, that non-zero rc would terminate the test
@@ -85,7 +103,7 @@ cov_exercise_script() {
   set +e
 
   test_start "${label}_help_executes"
-  timeout 15 bash "$script" --help </dev/null >/dev/null
+  "${TIMEOUT_CMD[@]}" bash "$script" --help </dev/null >/dev/null
   rc=$?
   # Accept any rc < 125 — scripts that don't parse --help may interpret
   # it as a positional arg (e.g. a directory to scan) and exit 123/127
@@ -101,7 +119,7 @@ cov_exercise_script() {
 
   if grep -q -- "--dry-run" "$script" 2>/dev/null; then
     test_start "${label}_dry_run_executes"
-    timeout 15 bash "$script" --dry-run </dev/null >/dev/null
+    "${TIMEOUT_CMD[@]}" bash "$script" --dry-run </dev/null >/dev/null
     rc=$?
     if [[ "$rc" -ge 0 && "$rc" -lt 125 ]]; then
       ((TESTS_PASSED++)) || true
@@ -113,7 +131,7 @@ cov_exercise_script() {
   fi
 
   test_start "${label}_no_arg_executes"
-  timeout 15 bash "$script" </dev/null >/dev/null
+  "${TIMEOUT_CMD[@]}" bash "$script" </dev/null >/dev/null
   rc=$?
   if [[ "$rc" -ge 0 && "$rc" -lt 125 ]]; then
     ((TESTS_PASSED++)) || true
@@ -124,7 +142,7 @@ cov_exercise_script() {
   fi
 
   test_start "${label}_unknown_flag_handled"
-  timeout 15 bash "$script" --definitely-not-a-real-flag </dev/null >/dev/null
+  "${TIMEOUT_CMD[@]}" bash "$script" --definitely-not-a-real-flag </dev/null >/dev/null
   rc=$?
   if [[ "$rc" -ge 0 && "$rc" -lt 125 ]]; then
     ((TESTS_PASSED++)) || true

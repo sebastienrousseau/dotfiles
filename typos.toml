@@ -26,6 +26,7 @@ Noice = "Noice"
 nd = "nd"              # 2-char Neovim leader-key for Neogen docstring gen
 Pn = "Pn"              # Yarn Plug'n'Play abbreviation
 yout = "yout"          # `yout` alias = "yarn outdated"
+intoto = "intoto"      # SLSA in-toto attestation file extension (*.intoto.jsonl)
 hom = "hom"            # `hom` alias = navigate to $HOME
 cod = "cod"            # `cod` alias = navigate to ~/Code
 dsk = "dsk"            # `dsk` alias = navigate to ~/Desktop
