@@ -40,3 +40,16 @@ kramdown:
   input: GFM
   syntax_highlighter: rouge
   hard_wrap: false
+
+# Disable Liquid rendering for all pages. Many of our docs include
+# chezmoi/Go-template snippets like `{{ .variable }}` inside fenced
+# code blocks; Liquid runs BEFORE kramdown sees those fences and would
+# try to resolve the placeholders as Liquid expressions. Turning Liquid
+# off site-wide is simpler than wrapping every code block in
+# `{% raw %}...{% endraw %}`. We don't use Jekyll includes or
+# site-variable interpolation in docs/, so nothing is lost.
+defaults:
+  - scope:
+      path: ""
+    values:
+      render_with_liquid: false
