@@ -420,16 +420,33 @@ check_config_directories() {
 check_sync_status() {
   check_section "Sync Status"
 
-  # Chezmoi status
+  # Chezmoi status. The two-character prefix encodes both directions:
+  #   col 1 = last-applied state vs actual    (was the file edited in
+  #                                            place since last apply?)
+  #   col 2 = actual state vs target          (what `chezmoi apply`
+  #                                            would still change)
+  # Only col 2 matters for "is $HOME out of sync with the source" —
+  # col 1 alone just means the source repo has uncommitted edits,
+  # which is normal during development and not something the user
+  # needs warned about via the health dashboard.
   if has_command chezmoi; then
     local status_output
     status_output=$(chezmoi status 2>/dev/null || echo "")
     if [[ -z "$status_output" ]]; then
       check "Chezmoi sync" "pass"
     else
-      local changes
-      changes=$(printf '%s\n' "$status_output" | wc -l | tr -d ' ')
-      check "Chezmoi sync" "warn" "$changes file(s) out of sync"
+      # Count only entries where column 2 is non-space (apply would do something).
+      local applyable
+      applyable=$(printf '%s\n' "$status_output" | awk 'substr($0,2,1)!=" "' | wc -l | tr -d ' ')
+      if [[ "$applyable" -eq 0 ]]; then
+        # All drift is source-only (unstaged edits in the source repo).
+        # That's not a sync issue; mention it but pass.
+        local source_only
+        source_only=$(printf '%s\n' "$status_output" | wc -l | tr -d ' ')
+        check "Chezmoi sync" "pass" "$source_only source-only edit(s) (run 'chezmoi diff' to inspect)"
+      else
+        check "Chezmoi sync" "warn" "$applyable file(s) out of sync"
+      fi
     fi
   else
     check "Chezmoi sync" "warn" "Not installed, skipped"
