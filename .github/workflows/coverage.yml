@@ -1,8 +1,13 @@
 name: Coverage
 
-# Bash code coverage via kcov + Codecov upload + delta threshold gate.
-# Replaces the previous aspirational "100% Coverage" label with real
-# measurement. Closes #856.
+# Bash code coverage via pure xtrace instrumentation + Codecov upload
+# + delta threshold gate. Replaces the previous aspirational
+# "100% Coverage" label with real measurement. Closes #856.
+#
+# Coverage mechanism: BASH_ENV+PS4 turn on xtrace in every test bash
+# (and every subprocess bash); the runner captures stderr per test
+# and aggregates DA: entries into lcov.info. See scripts/ci/run-coverage.sh
+# for the why-not-kcov note.
 
 on:
   pull_request:
@@ -29,7 +34,7 @@ jobs:
   coverage:
     name: Coverage / kcov
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
@@ -38,32 +43,11 @@ jobs:
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - name: Cache kcov binary
-        id: kcov-cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ~/.local/bin/kcov
-          # Pin cache key to the kcov version embedded in the verified
-          # installer. Bump in lockstep with KCOV_VERSION there.
-          key: kcov-v43-${{ runner.os }}-${{ runner.arch }}
-
-      - name: Install kcov (SHA256-verified source build)
-        if: steps.kcov-cache.outputs.cache-hit != 'true'
-        # Ubuntu 24.04 (ubuntu-latest) dropped `kcov` from its apt
-        # universe in late 2024, so the previous `apt-get install kcov`
-        # invocation no longer resolves. The verified installer builds
-        # kcov v43 from a SHA256-pinned upstream tarball — same defence-
-        # in-depth pattern as install-chezmoi-verified.sh.
-        run: bash scripts/ci/install-kcov-verified.sh "$HOME/.local"
-
       - name: Ensure ancillary linters are present
         run: |
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends shellcheck ripgrep shfmt
-
-      - name: Add kcov to PATH
-        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Run coverage
         env:
@@ -89,7 +73,7 @@ jobs:
         continue-on-error: true   # don't block PRs on Codecov flakiness
         with:
           files: coverage/lcov.info
-          flags: bash-kcov
+          flags: bash-xtrace
           fail_ci_if_error: false
           verbose: false
 

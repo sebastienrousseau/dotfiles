@@ -1,31 +1,30 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # =============================================================================
-# run-coverage.sh — Bash code-coverage runner. Wraps every test file
-# under tests/unit/ with kcov (in parallel) and aggregates the per-test
-# Cobertura reports into a single lcov.info at $COVERAGE_OUT.
+# run-coverage.sh — Bash code-coverage runner using pure xtrace
+# instrumentation. Emits lcov.info at $COVERAGE_OUT.
 #
-# Why per-file aggregation (and not `kcov --merge`):
-#   kcov --merge emits varied directory layouts across versions and
-#   sometimes silently drops the merged Cobertura artifact when the
-#   set of inputs grows large. We read each per-test cobertura.xml
-#   directly and aggregate hits in Python — deterministic, no
-#   merge-format guessing.
+# Why pure xtrace (not kcov):
+#   kcov v43 on Ubuntu 24.04 + bash 5.2 won't emit bash-script
+#   coverage in either mode: without bash-dbgsym it captures nothing,
+#   and with bash-dbgsym it captures bash's *C-binary* internals
+#   (ctype.h, stdio.h) instead of the .sh file lines we care about.
+#   We bypass kcov entirely by using bash's own xtrace mechanism:
 #
-# Why parallel + per-test timeout:
-#   kcov's bash backend uses ptrace + hardware breakpoints (requires
-#   bash-dbgsym on Ubuntu 24.04+). Real instrumentation makes each
-#   test 3-10x slower than a raw run, so serial 447-test execution
-#   blew past GitHub's 30-min workflow budget. We fan out across
-#   $JOBS workers and hard-cap each wrapping at $KCOV_TEST_TIMEOUT
-#   seconds so a single hung test can't sink the whole run.
+#     PS4='+:${LINENO}:${BASH_SOURCE}:'   # encode line + file in trace
+#     BASH_ENV=/setup-that-runs-set-x      # turn on xtrace in every
+#                                          # non-interactive bash, so
+#                                          # children inherit tracing
+#     bash test.sh 2>traces/test.trace     # capture lines per test
 #
-# Linux-only (kcov on macOS reports "no debug symbols" for bash and
-# yields 0% — a known upstream limitation). Skips gracefully on
-# Darwin so the same script can be invoked from the parallel
-# pre-commit hook on developer boxes.
+#   Then we parse all traces with regex and write lcov.info. This is
+#   the same mechanism bashcov uses, minus the Ruby runtime.
 #
-# Closes the runner half of #856.
+# Linux + macOS both work (macOS bash 3.2 supports BASH_XTRACEFD as
+# well — verified locally on bash 5.3 via Homebrew). The pre-commit
+# hook in this repo can invoke this on any platform.
+#
+# Closes the runner half of #856 / Slice 1 of #883.
 # =============================================================================
 
 set -uo pipefail
@@ -34,62 +33,48 @@ REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
 TESTS_DIR="${TESTS_DIR:-$REPO_ROOT/tests}"
 COVERAGE_DIR="${COVERAGE_DIR:-$REPO_ROOT/coverage}"
 COVERAGE_OUT="${COVERAGE_OUT:-$COVERAGE_DIR/lcov.info}"
-MIN_COVERAGE_PCT="${MIN_COVERAGE_PCT:-0}"      # initial floor; tighten with each slice
-KCOV_INCLUDE_PATH="${KCOV_INCLUDE_PATH:-$REPO_ROOT/scripts,$REPO_ROOT/.chezmoitemplates/functions,$REPO_ROOT/dot_local/bin}"
-KCOV_EXCLUDE_PATH="${KCOV_EXCLUDE_PATH:-$TESTS_DIR}"
-KCOV_EXCLUDE_PATTERN="${KCOV_EXCLUDE_PATTERN:-/\.git/,/node_modules/}"
-# Tell kcov upfront which directories contain bash scripts it should
-# parse for coverage. Without this, kcov only sees scripts that are
-# directly invoked, and misses scripts called as subprocesses from
-# tests.
-KCOV_PARSE_DIRS="${KCOV_PARSE_DIRS:-$REPO_ROOT/scripts,$REPO_ROOT/dot_local/bin}"
-JOBS="${JOBS:-$(nproc 2>/dev/null || echo 4)}"
-KCOV_TEST_TIMEOUT="${KCOV_TEST_TIMEOUT:-60}"
-
-# Skip cleanly on macOS so the local-dev invocation doesn't blow up.
-case "$(uname -s)" in
-  Linux) ;;
-  *)
-    echo "::warning::run-coverage.sh skipped — kcov requires Linux (got $(uname -s))." >&2
-    exit 0
-    ;;
-esac
-
-if ! command -v kcov >/dev/null 2>&1; then
-  echo "::error::kcov not found on PATH. apt-get install -y kcov on Ubuntu." >&2
-  exit 2
-fi
-
-KCOV_BIN="$(command -v kcov)"
-echo "kcov: $KCOV_BIN ($(kcov --version 2>&1 | head -1))" >&2
-echo "include-path: $KCOV_INCLUDE_PATH" >&2
-echo "exclude-path: $KCOV_EXCLUDE_PATH" >&2
-echo "jobs: $JOBS / per-test timeout: ${KCOV_TEST_TIMEOUT}s" >&2
+MIN_COVERAGE_PCT="${MIN_COVERAGE_PCT:-0}"          # initial floor; tighten per slice
+COV_INCLUDE_DIRS="${COV_INCLUDE_DIRS:-$REPO_ROOT/scripts:$REPO_ROOT/dot_local/bin:$REPO_ROOT/.chezmoitemplates/functions}"
+JOBS="${JOBS:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}"
+COV_TEST_TIMEOUT="${COV_TEST_TIMEOUT:-60}"
 
 mkdir -p "$COVERAGE_DIR"
-rm -rf "$COVERAGE_DIR"/*.kcov 2>/dev/null || true
+trace_dir="$COVERAGE_DIR/traces"
+rm -rf "$trace_dir"
+mkdir -p "$trace_dir"
 
 # -----------------------------------------------------------------------------
-# Probe: validate the chosen kcov flags actually capture bash-script
-# coverage of a real repo script before running 447 tests. Fast (~2s)
-# and gives a sharp signal of whether `--bash-parse-files-in-dir`
-# wires through correctly.
-echo "── probe: validate-chezmoidata.sh with chosen flags ──" >&2
-rm -rf "$COVERAGE_DIR/_probe_real"
-"$KCOV_BIN" \
-  --bash-parse-files-in-dir="$KCOV_PARSE_DIRS" \
-  --include-path="$KCOV_INCLUDE_PATH" \
-  --exclude-path="$KCOV_EXCLUDE_PATH" \
-  "$COVERAGE_DIR/_probe_real" \
-  bash "$REPO_ROOT/scripts/ci/validate-chezmoidata.sh" >/dev/null 2>&1 || true
-probe_cob=$(find "$COVERAGE_DIR/_probe_real" -name 'cobertura.xml' 2>/dev/null | head -1)
-if [[ -n "$probe_cob" ]]; then
-  probe_classes=$(grep -c '<class ' "$probe_cob" 2>/dev/null || echo 0)
-  echo "  probe[real_with_parse_dirs] classes=$probe_classes" >&2
-  if [[ "$probe_classes" -gt 0 ]]; then
-    echo "  first <class> filenames:" >&2
-    grep -oE 'filename="[^"]*"' "$probe_cob" | head -8 >&2
-  fi
+# BASH_ENV setup file: enables xtrace in every non-interactive bash that
+# inherits it. Child processes spawned via `bash $SCRIPT` get their own
+# tracing turned on automatically.
+# -----------------------------------------------------------------------------
+bash_env="$COVERAGE_DIR/_cov_bashenv.sh"
+cat > "$bash_env" <<'SETUP'
+# coverage runtime — enable xtrace, define PS4 with file+line markers
+set -x
+PS4='+@COV@:${LINENO}:${BASH_SOURCE}:@ '
+SETUP
+
+# Sanity-probe: run one trivial script through the pipeline so a
+# subsequent failure of the real sweep can be diagnosed quickly.
+probe_target="$COVERAGE_DIR/_probe_target.sh"
+cat > "$probe_target" <<'PROBE'
+#!/usr/bin/env bash
+set -uo pipefail
+echo "probe-line-a"
+x=1; y=2
+echo "probe-sum=$((x + y))"
+PROBE
+chmod +x "$probe_target"
+
+PS4='+@COV@:${LINENO}:${BASH_SOURCE}:@ ' \
+  BASH_ENV="$bash_env" \
+  bash "$probe_target" 2>"$trace_dir/_probe.trace" >/dev/null || true
+probe_lines=$(grep -cE "^\+@COV@:[0-9]+:.*${probe_target}:@" "$trace_dir/_probe.trace" 2>/dev/null || echo 0)
+echo "probe: ${probe_lines} traced lines from ${probe_target}" >&2
+if [[ "$probe_lines" -eq 0 ]]; then
+  echo "::error::xtrace probe captured no lines — coverage mechanism broken" >&2
+  exit 2
 fi
 
 # -----------------------------------------------------------------------------
@@ -102,112 +87,151 @@ if [[ "${#test_files[@]}" -eq 0 ]]; then
   exit 1
 fi
 
-echo "Wrapping ${#test_files[@]} test files with kcov (parallel × $JOBS)..." >&2
+echo "Tracing ${#test_files[@]} test files (parallel × $JOBS, timeout ${COV_TEST_TIMEOUT}s/test)..." >&2
 
 # -----------------------------------------------------------------------------
-# Worker function — runs one test under kcov with a hard wall-time cap.
-# Exits 0 on success, 124 on timeout, other on kcov error.
-# Each invocation isolates its own out-dir so workers don't race.
+# Worker function — runs one test under xtrace, captures stderr.
 # -----------------------------------------------------------------------------
 # shellcheck disable=SC2329  # called indirectly via xargs subshell
 run_one() {
   local f="$1"
-  local rel="${f#"$REPO_ROOT/"}"
-  local out_dir
-  out_dir="$COVERAGE_DIR/$(basename "$f" .sh).kcov"
-  if timeout --kill-after=5 "$KCOV_TEST_TIMEOUT" \
-       "$KCOV_BIN" \
-         --bash-parse-files-in-dir="$KCOV_PARSE_DIRS" \
-         --include-path="$KCOV_INCLUDE_PATH" \
-         --exclude-path="$KCOV_EXCLUDE_PATH" \
-         --exclude-pattern="$KCOV_EXCLUDE_PATTERN" \
-         "$out_dir" \
-         bash "$f" >/dev/null 2>&1; then
-    return 0
-  else
-    rc=$?
-    echo "  ✗ $rel (rc=$rc)" >&2
-    return "$rc"
-  fi
+  local trace
+  trace="$COV_TRACE_DIR/$(basename "$f" .sh).trace"
+  PS4='+@COV@:${LINENO}:${BASH_SOURCE}:@ ' \
+  BASH_ENV="$COV_BASH_ENV" \
+    timeout --kill-after=5 "$COV_TEST_TIMEOUT" \
+      bash "$f" 2>"$trace" >/dev/null || true
 }
 
-# Export so xargs subshells can call run_one.
-export REPO_ROOT COVERAGE_DIR KCOV_BIN KCOV_INCLUDE_PATH KCOV_EXCLUDE_PATH \
-       KCOV_EXCLUDE_PATTERN KCOV_PARSE_DIRS KCOV_TEST_TIMEOUT
+export COV_TRACE_DIR="$trace_dir"
+export COV_BASH_ENV="$bash_env"
+export COV_TEST_TIMEOUT
 export -f run_one
 
-# Fan out with xargs. We accept partial failures (some tests legitimately
-# fail under kcov instrumentation due to ptrace ordering); the aggregate
-# step downstream reports whatever coverage was captured.
 start_ts=$(date +%s)
 printf '%s\n' "${test_files[@]}" \
   | xargs -I{} -n1 -P"$JOBS" bash -c 'run_one "$@"' _ {} \
   || true
 elapsed=$(($(date +%s) - start_ts))
-echo "kcov wrap phase done in ${elapsed}s" >&2
+echo "trace phase done in ${elapsed}s" >&2
 
 # -----------------------------------------------------------------------------
-# Diagnostic: count populated cobertura.xml outputs.
+# Aggregate trace files → lcov.info.
 # -----------------------------------------------------------------------------
-mapfile -t cobertura_files < <(find "$COVERAGE_DIR" -path '*.kcov/*/cobertura.xml' 2>/dev/null)
-nonempty=0
-sample=""
-for cob in "${cobertura_files[@]}"; do
-  if grep -q '<class ' "$cob" 2>/dev/null; then
-    nonempty=$((nonempty + 1))
-    [[ -z "$sample" ]] && sample="$cob"
-  fi
-done
-echo "${#cobertura_files[@]} cobertura.xml files; $nonempty have non-empty <class> entries" >&2
-[[ -n "$sample" ]] && echo "sample non-empty: $sample" >&2
-
-if [[ "${#cobertura_files[@]}" -eq 0 ]]; then
-  echo "::error::no cobertura.xml outputs produced by kcov" >&2
-  exit 1
-fi
-
-# -----------------------------------------------------------------------------
-# Aggregate per-test cobertura.xml into a single lcov.info.
-# -----------------------------------------------------------------------------
-python3 - "$COVERAGE_OUT" "${cobertura_files[@]}" <<'PY'
-"""Aggregate kcov Cobertura outputs into a single lcov.info."""
+python3 - "$COVERAGE_OUT" "$trace_dir" "$REPO_ROOT" "$COV_INCLUDE_DIRS" <<'PY'
+"""Aggregate bash xtrace output into lcov.info."""
+import os
+import re
 import sys
-import xml.etree.ElementTree as ET
 from collections import defaultdict
+from pathlib import Path
 
-out_path = sys.argv[1]
-inputs = sys.argv[2:]
+out_path, trace_dir, repo_root, include_dirs_spec = sys.argv[1:5]
+include_dirs = [Path(p).resolve() for p in include_dirs_spec.split(":") if p]
+trace_dir = Path(trace_dir)
+repo_root = Path(repo_root).resolve()
 
-# files[filename][line] = max hits seen across runs. Max is sufficient
-# for line coverage (covered vs not). Sum would inflate the count.
+# Pattern: +@COV@:<lineno>:<source>:@
+hit_re = re.compile(r"^\+@COV@:(\d+):([^:]+):@")
+
+# files[abs_path][line] = total hits
 files = defaultdict(lambda: defaultdict(int))
 
-for path in inputs:
+def in_includes(path: Path) -> bool:
     try:
-        root = ET.parse(path).getroot()
-    except ET.ParseError as exc:
-        print(f"warn: parse error in {path}: {exc}", file=sys.stderr)
-        continue
-    for cls in root.iter("class"):
-        filename = cls.get("filename") or ""
-        if not filename:
+        rp = path.resolve()
+    except (OSError, RuntimeError):
+        return False
+    for inc in include_dirs:
+        try:
+            rp.relative_to(inc)
+            return True
+        except ValueError:
             continue
-        for line in cls.iter("line"):
-            ln_attr = line.get("number")
-            hits = int(line.get("hits", "0"))
-            if ln_attr is None:
+    return False
+
+# Parse every trace file. Each trace can be MBs; iterate line by line.
+for trace_path in sorted(trace_dir.glob("*.trace")):
+    try:
+        with open(trace_path, "r", errors="replace") as f:
+            for line in f:
+                m = hit_re.match(line)
+                if not m:
+                    continue
+                lineno = int(m.group(1))
+                src = m.group(2).strip()
+                if not src or src == "main":
+                    continue
+                src_path = Path(src)
+                if not src_path.is_absolute():
+                    src_path = (repo_root / src_path).resolve()
+                if not in_includes(src_path):
+                    continue
+                files[str(src_path)][lineno] += 1
+    except OSError as e:
+        print(f"warn: read error {trace_path}: {e}", file=sys.stderr)
+
+# Sweep through include-dirs and add executable lines for files we never
+# touched, so lcov coverage % reflects total source surface, not just
+# touched files.
+ws_re = re.compile(r"^\s*$")
+comment_re = re.compile(r"^\s*#")
+shebang_re = re.compile(r"^\s*#!")
+
+def executable_lines(path: Path):
+    """Heuristic: lines that aren't comments, blank, or shebangs are
+    candidates for execution. Bash xtrace only fires on actual command
+    lines (control structures, function defs, etc. also count as
+    executable; we don't distinguish to keep this simple)."""
+    try:
+        with open(path, "r", errors="replace") as f:
+            text = f.read().splitlines()
+    except OSError:
+        return []
+    out = []
+    for i, line in enumerate(text, 1):
+        if not line or ws_re.match(line):
+            continue
+        if shebang_re.match(line):
+            continue
+        if comment_re.match(line):
+            continue
+        out.append(i)
+    return out
+
+for inc in include_dirs:
+    if not inc.exists():
+        continue
+    for path in inc.rglob("*.sh"):
+        ap = str(path.resolve())
+        existing = files[ap]  # creates the entry on touch
+        for ln in executable_lines(path):
+            if ln not in existing:
+                existing[ln] = 0
+    for path in inc.rglob("*"):
+        # also include shebanged shell scripts without .sh
+        if path.is_file() and not path.suffix and path.stat().st_size > 0:
+            try:
+                with open(path, "r", errors="replace") as f:
+                    first = f.readline()
+            except OSError:
                 continue
-            ln = int(ln_attr)
-            if hits > files[filename][ln]:
-                files[filename][ln] = hits
+            if first.startswith("#!") and ("bash" in first or "sh" in first):
+                ap = str(path.resolve())
+                existing = files[ap]
+                for ln in executable_lines(path):
+                    if ln not in existing:
+                        existing[ln] = 0
 
-with open(out_path, "w") as f:
+# Emit lcov.info
+with open(out_path, "w") as out:
     for filename in sorted(files):
-        f.write(f"SF:{filename}\n")
+        out.write(f"SF:{filename}\n")
         for ln in sorted(files[filename]):
-            f.write(f"DA:{ln},{files[filename][ln]}\n")
-        f.write("end_of_record\n")
+            out.write(f"DA:{ln},{files[filename][ln]}\n")
+        out.write("end_of_record\n")
 
+# Summary
 total_files = len(files)
 total_lines = sum(len(lines) for lines in files.values())
 covered = sum(1 for lines in files.values() for h in lines.values() if h > 0)
