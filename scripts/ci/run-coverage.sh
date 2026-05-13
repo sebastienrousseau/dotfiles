@@ -38,6 +38,11 @@ MIN_COVERAGE_PCT="${MIN_COVERAGE_PCT:-0}"      # initial floor; tighten with eac
 KCOV_INCLUDE_PATH="${KCOV_INCLUDE_PATH:-$REPO_ROOT/scripts,$REPO_ROOT/.chezmoitemplates/functions,$REPO_ROOT/dot_local/bin}"
 KCOV_EXCLUDE_PATH="${KCOV_EXCLUDE_PATH:-$TESTS_DIR}"
 KCOV_EXCLUDE_PATTERN="${KCOV_EXCLUDE_PATTERN:-/\.git/,/node_modules/}"
+# Tell kcov upfront which directories contain bash scripts it should
+# parse for coverage. Without this, kcov only sees scripts that are
+# directly invoked, and misses scripts called as subprocesses from
+# tests.
+KCOV_PARSE_DIRS="${KCOV_PARSE_DIRS:-$REPO_ROOT/scripts,$REPO_ROOT/dot_local/bin}"
 JOBS="${JOBS:-$(nproc 2>/dev/null || echo 4)}"
 KCOV_TEST_TIMEOUT="${KCOV_TEST_TIMEOUT:-60}"
 
@@ -65,89 +70,25 @@ mkdir -p "$COVERAGE_DIR"
 rm -rf "$COVERAGE_DIR"/*.kcov 2>/dev/null || true
 
 # -----------------------------------------------------------------------------
-# Baseline probe: explicitly verify which kcov method actually captures
-# coverage on this runner before running 447 tests in vain. Costs ~1s.
-# -----------------------------------------------------------------------------
-trivial="$COVERAGE_DIR/_trivial.sh"
-cat > "$trivial" <<'TRIV'
-#!/usr/bin/env bash
-echo "line-1"
-x=1
-y=2
-z=$((x + y))
-echo "sum=$z"
-TRIV
-chmod +x "$trivial"
-
-probe_kcov() {
-  local label="$1"; shift
-  local out="$COVERAGE_DIR/_probe_$label"
-  rm -rf "$out"
-  "$KCOV_BIN" "$@" "$out" bash "$trivial" >/dev/null 2>&1 || true
-  local cob
-  cob=$(find "$out" -name 'cobertura.xml' 2>/dev/null | head -1)
-  if [[ -n "$cob" ]]; then
-    local classes
-    classes=$(grep -c '<class ' "$cob" 2>/dev/null || echo 0)
-    echo "  probe[$label] classes=$classes"
-  else
-    echo "  probe[$label] NO cobertura.xml produced"
-  fi
-}
-
-echo "── method probes (trivial script) ──" >&2
-probe_kcov default >&2
-probe_kcov ps4 --bash-method=PS4 >&2
-probe_kcov debug --bash-method=DEBUG >&2
-probe_kcov basic --configure=bash-use-basic-parser=1 >&2
-
-# Test-pattern probes — same pattern the 447-test sweep uses, on
-# specific real targets. These tell us whether the filter or the
-# subprocess-bash pattern is what zeros out coverage.
-echo "── test-pattern probes ──" >&2
-
-# Direct on a script in include-path, no filters.
-echo "  -- direct on validate-chezmoidata.sh, NO filters" >&2
-rm -rf "$COVERAGE_DIR/_real_direct_nofilt"
-"$KCOV_BIN" "$COVERAGE_DIR/_real_direct_nofilt" \
-  bash "$REPO_ROOT/scripts/ci/validate-chezmoidata.sh" >/dev/null 2>&1 || true
-cob=$(find "$COVERAGE_DIR/_real_direct_nofilt" -name 'cobertura.xml' 2>/dev/null | head -1)
-if [[ -n "$cob" ]]; then
-  classes=$(grep -c '<class ' "$cob" 2>/dev/null || echo 0)
-  echo "  real[direct_nofilt] classes=$classes" >&2
-  if [[ "$classes" -gt 0 ]]; then
-    echo "  -- first <class> entries:" >&2
-    grep '<class ' "$cob" | head -5 >&2
-  fi
-fi
-
-# Direct on a script in include-path, WITH our filters.
-echo "  -- direct on validate-chezmoidata.sh, WITH filters" >&2
-rm -rf "$COVERAGE_DIR/_real_direct_filt"
+# Probe: validate the chosen kcov flags actually capture bash-script
+# coverage of a real repo script before running 447 tests. Fast (~2s)
+# and gives a sharp signal of whether `--bash-parse-files-in-dir`
+# wires through correctly.
+echo "── probe: validate-chezmoidata.sh with chosen flags ──" >&2
+rm -rf "$COVERAGE_DIR/_probe_real"
 "$KCOV_BIN" \
+  --bash-parse-files-in-dir="$KCOV_PARSE_DIRS" \
   --include-path="$KCOV_INCLUDE_PATH" \
   --exclude-path="$KCOV_EXCLUDE_PATH" \
-  "$COVERAGE_DIR/_real_direct_filt" \
+  "$COVERAGE_DIR/_probe_real" \
   bash "$REPO_ROOT/scripts/ci/validate-chezmoidata.sh" >/dev/null 2>&1 || true
-cob=$(find "$COVERAGE_DIR/_real_direct_filt" -name 'cobertura.xml' 2>/dev/null | head -1)
-if [[ -n "$cob" ]]; then
-  classes=$(grep -c '<class ' "$cob" 2>/dev/null || echo 0)
-  echo "  real[direct_filt] classes=$classes" >&2
-fi
-
-# Via the test wrapping pattern (kcov outer + test invokes inner bash), NO filters.
-echo "  -- via test_validate_chezmoidata.sh, NO filters" >&2
-rm -rf "$COVERAGE_DIR/_real_via_test_nofilt"
-"$KCOV_BIN" \
-  "$COVERAGE_DIR/_real_via_test_nofilt" \
-  bash "$REPO_ROOT/tests/unit/ci/test_validate_chezmoidata.sh" >/dev/null 2>&1 || true
-cob=$(find "$COVERAGE_DIR/_real_via_test_nofilt" -name 'cobertura.xml' 2>/dev/null | head -1)
-if [[ -n "$cob" ]]; then
-  classes=$(grep -c '<class ' "$cob" 2>/dev/null || echo 0)
-  echo "  real[via_test_nofilt] classes=$classes" >&2
-  if [[ "$classes" -gt 0 ]]; then
-    echo "  -- first <class> entries:" >&2
-    grep '<class ' "$cob" | head -5 >&2
+probe_cob=$(find "$COVERAGE_DIR/_probe_real" -name 'cobertura.xml' 2>/dev/null | head -1)
+if [[ -n "$probe_cob" ]]; then
+  probe_classes=$(grep -c '<class ' "$probe_cob" 2>/dev/null || echo 0)
+  echo "  probe[real_with_parse_dirs] classes=$probe_classes" >&2
+  if [[ "$probe_classes" -gt 0 ]]; then
+    echo "  first <class> filenames:" >&2
+    grep -oE 'filename="[^"]*"' "$probe_cob" | head -8 >&2
   fi
 fi
 
@@ -176,6 +117,7 @@ run_one() {
   out_dir="$COVERAGE_DIR/$(basename "$f" .sh).kcov"
   if timeout --kill-after=5 "$KCOV_TEST_TIMEOUT" \
        "$KCOV_BIN" \
+         --bash-parse-files-in-dir="$KCOV_PARSE_DIRS" \
          --include-path="$KCOV_INCLUDE_PATH" \
          --exclude-path="$KCOV_EXCLUDE_PATH" \
          --exclude-pattern="$KCOV_EXCLUDE_PATTERN" \
@@ -191,7 +133,7 @@ run_one() {
 
 # Export so xargs subshells can call run_one.
 export REPO_ROOT COVERAGE_DIR KCOV_BIN KCOV_INCLUDE_PATH KCOV_EXCLUDE_PATH \
-       KCOV_EXCLUDE_PATTERN KCOV_TEST_TIMEOUT
+       KCOV_EXCLUDE_PATTERN KCOV_PARSE_DIRS KCOV_TEST_TIMEOUT
 export -f run_one
 
 # Fan out with xargs. We accept partial failures (some tests legitimately

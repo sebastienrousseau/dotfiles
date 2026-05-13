@@ -62,31 +62,6 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends shellcheck ripgrep shfmt
 
-      - name: Install bash-dbgsym (Ubuntu 24.04 ships stripped bash)
-        # kcov's bash instrumentation uses ptrace + hardware breakpoints
-        # in the bash binary. Ubuntu 24.04 ships /usr/bin/bash stripped,
-        # so kcov silently produces empty cobertura.xml files even
-        # though the tests run. The fix is the dbgsym debug-symbol
-        # package, which lives in the ddebs repo (not the default apt
-        # universe). See probe 6 (`kcov --debug=31`) for the trail of
-        # "No debug symbols in /usr/bin/bash" warnings that exposed
-        # this.
-        run: |
-          set -euo pipefail
-          codename="$(lsb_release -cs)"
-          {
-            echo "deb http://ddebs.ubuntu.com ${codename} main restricted universe multiverse"
-            echo "deb http://ddebs.ubuntu.com ${codename}-updates main restricted universe multiverse"
-          } | sudo tee /etc/apt/sources.list.d/ddebs.list >/dev/null
-          sudo apt-get install -y --no-install-recommends ubuntu-dbgsym-keyring
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends bash-dbgsym
-          # Sanity: confirm gdb / kcov can now see bash symbols.
-          if command -v file >/dev/null 2>&1; then
-            file /usr/bin/bash
-            file /usr/lib/debug/.build-id/$(file /usr/bin/bash | grep -o 'BuildID\[sha1\]=[0-9a-f]*' | cut -d= -f2 | sed 's|^\(..\)|\1/|').debug 2>/dev/null || true
-          fi
-
       - name: Add kcov to PATH
         run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
