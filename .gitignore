@@ -68,3 +68,4 @@ _build/
 
 # Coverage artifacts
 /coverage/
+.sass-cache/
