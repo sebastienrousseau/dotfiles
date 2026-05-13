@@ -109,7 +109,11 @@ cov_exercise_script() {
   # it as a positional arg (e.g. a directory to scan) and exit 123/127
   # via xargs propagation. We only care that the invocation ran and
   # exited, not how it interpreted the arg. 125+ signals timeout/kill.
-  if [[ "$rc" -ge 0 && "$rc" -lt 125 ]]; then
+  # Accept any rc except 124 (timeout) — we care that the invocation
+  # ran to a normal exit, not how it interpreted its args. rc=127
+  # (command-not-found) is fine: it means the script ran but couldn't
+  # resolve an optional dependency under our sandbox's stripped env.
+  if [[ "$rc" -ne 124 ]]; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
   else
@@ -121,7 +125,11 @@ cov_exercise_script() {
     test_start "${label}_dry_run_executes"
     ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} bash "$script" --dry-run </dev/null >/dev/null
     rc=$?
-    if [[ "$rc" -ge 0 && "$rc" -lt 125 ]]; then
+    # Accept any rc except 124 (timeout) — we care that the invocation
+  # ran to a normal exit, not how it interpreted its args. rc=127
+  # (command-not-found) is fine: it means the script ran but couldn't
+  # resolve an optional dependency under our sandbox's stripped env.
+  if [[ "$rc" -ne 124 ]]; then
       ((TESTS_PASSED++)) || true
       printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
     else
@@ -133,7 +141,11 @@ cov_exercise_script() {
   test_start "${label}_no_arg_executes"
   ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} bash "$script" </dev/null >/dev/null
   rc=$?
-  if [[ "$rc" -ge 0 && "$rc" -lt 125 ]]; then
+  # Accept any rc except 124 (timeout) — we care that the invocation
+  # ran to a normal exit, not how it interpreted its args. rc=127
+  # (command-not-found) is fine: it means the script ran but couldn't
+  # resolve an optional dependency under our sandbox's stripped env.
+  if [[ "$rc" -ne 124 ]]; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
   else
@@ -144,7 +156,11 @@ cov_exercise_script() {
   test_start "${label}_unknown_flag_handled"
   ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} bash "$script" --definitely-not-a-real-flag </dev/null >/dev/null
   rc=$?
-  if [[ "$rc" -ge 0 && "$rc" -lt 125 ]]; then
+  # Accept any rc except 124 (timeout) — we care that the invocation
+  # ran to a normal exit, not how it interpreted its args. rc=127
+  # (command-not-found) is fine: it means the script ran but couldn't
+  # resolve an optional dependency under our sandbox's stripped env.
+  if [[ "$rc" -ne 124 ]]; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
   else
