@@ -90,7 +90,7 @@ Most dotfiles repos are personal collections. This one ships as workstation infr
 | **Fleet Management** | Multi-node drift dashboard, per-host profiles | `dot fleet` |
 | **Self-Healing** | Auto-repair tools, chezmoi drift, broken symlinks, missing files | `dot heal`, `dot chaos`, `dot rollback`, `dot bundle` |
 | **Sub-second Startup** | Lazy loading, `_cached_eval` pattern, mtime-based cache invalidation | `dot benchmark`, `dot perf` |
-| **Multi-shell Parity** | Fish, Zsh, Nushell, PowerShell share one templated baseline | `dot env`, `dot profile` |
+| **Multi-shell Parity** | Tier-1: zsh, bash. Tier-2: fish (bridged). Tier-3: nushell, PowerShell. See [ADR-007](docs/adr/ADR-007-multi-shell-parity.md) + [ADR-011](docs/adr/ADR-011-nushell-tier3-keep.md). | `dot env`, `dot profile` |
 | **Build Artifacts → /tmp** | Cargo, Go, pip, uv, Zig caches redirected; project dirs stay clean | `~/.config/mise/config.toml`, `~/.cargo/config.toml` |
 | **Encrypted Secrets** | Age + SOPS for per-machine secrets out of plaintext history | `dot secrets` |
 | **Portable Runtimes** | Mise for managed toolchains, Nix Flakes for strict reproducibility | `dot env`, `dot upgrade` |
