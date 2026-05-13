@@ -103,7 +103,7 @@ cov_exercise_script() {
   set +e
 
   test_start "${label}_help_executes"
-  "${TIMEOUT_CMD[@]}" bash "$script" --help </dev/null >/dev/null
+  ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} bash "$script" --help </dev/null >/dev/null
   rc=$?
   # Accept any rc < 125 — scripts that don't parse --help may interpret
   # it as a positional arg (e.g. a directory to scan) and exit 123/127
@@ -119,7 +119,7 @@ cov_exercise_script() {
 
   if grep -q -- "--dry-run" "$script" 2>/dev/null; then
     test_start "${label}_dry_run_executes"
-    "${TIMEOUT_CMD[@]}" bash "$script" --dry-run </dev/null >/dev/null
+    ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} bash "$script" --dry-run </dev/null >/dev/null
     rc=$?
     if [[ "$rc" -ge 0 && "$rc" -lt 125 ]]; then
       ((TESTS_PASSED++)) || true
@@ -131,7 +131,7 @@ cov_exercise_script() {
   fi
 
   test_start "${label}_no_arg_executes"
-  "${TIMEOUT_CMD[@]}" bash "$script" </dev/null >/dev/null
+  ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} bash "$script" </dev/null >/dev/null
   rc=$?
   if [[ "$rc" -ge 0 && "$rc" -lt 125 ]]; then
     ((TESTS_PASSED++)) || true
@@ -142,7 +142,7 @@ cov_exercise_script() {
   fi
 
   test_start "${label}_unknown_flag_handled"
-  "${TIMEOUT_CMD[@]}" bash "$script" --definitely-not-a-real-flag </dev/null >/dev/null
+  ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} bash "$script" --definitely-not-a-real-flag </dev/null >/dev/null
   rc=$?
   if [[ "$rc" -ge 0 && "$rc" -lt 125 ]]; then
     ((TESTS_PASSED++)) || true
