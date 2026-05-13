@@ -101,6 +101,56 @@ probe_kcov ps4 --bash-method=PS4 >&2
 probe_kcov debug --bash-method=DEBUG >&2
 probe_kcov basic --configure=bash-use-basic-parser=1 >&2
 
+# Test-pattern probes — same pattern the 447-test sweep uses, on
+# specific real targets. These tell us whether the filter or the
+# subprocess-bash pattern is what zeros out coverage.
+echo "── test-pattern probes ──" >&2
+
+# Direct on a script in include-path, no filters.
+echo "  -- direct on validate-chezmoidata.sh, NO filters" >&2
+rm -rf "$COVERAGE_DIR/_real_direct_nofilt"
+"$KCOV_BIN" "$COVERAGE_DIR/_real_direct_nofilt" \
+  bash "$REPO_ROOT/scripts/ci/validate-chezmoidata.sh" >/dev/null 2>&1 || true
+cob=$(find "$COVERAGE_DIR/_real_direct_nofilt" -name 'cobertura.xml' 2>/dev/null | head -1)
+if [[ -n "$cob" ]]; then
+  classes=$(grep -c '<class ' "$cob" 2>/dev/null || echo 0)
+  echo "  real[direct_nofilt] classes=$classes" >&2
+  if [[ "$classes" -gt 0 ]]; then
+    echo "  -- first <class> entries:" >&2
+    grep '<class ' "$cob" | head -5 >&2
+  fi
+fi
+
+# Direct on a script in include-path, WITH our filters.
+echo "  -- direct on validate-chezmoidata.sh, WITH filters" >&2
+rm -rf "$COVERAGE_DIR/_real_direct_filt"
+"$KCOV_BIN" \
+  --include-path="$KCOV_INCLUDE_PATH" \
+  --exclude-path="$KCOV_EXCLUDE_PATH" \
+  "$COVERAGE_DIR/_real_direct_filt" \
+  bash "$REPO_ROOT/scripts/ci/validate-chezmoidata.sh" >/dev/null 2>&1 || true
+cob=$(find "$COVERAGE_DIR/_real_direct_filt" -name 'cobertura.xml' 2>/dev/null | head -1)
+if [[ -n "$cob" ]]; then
+  classes=$(grep -c '<class ' "$cob" 2>/dev/null || echo 0)
+  echo "  real[direct_filt] classes=$classes" >&2
+fi
+
+# Via the test wrapping pattern (kcov outer + test invokes inner bash), NO filters.
+echo "  -- via test_validate_chezmoidata.sh, NO filters" >&2
+rm -rf "$COVERAGE_DIR/_real_via_test_nofilt"
+"$KCOV_BIN" \
+  "$COVERAGE_DIR/_real_via_test_nofilt" \
+  bash "$REPO_ROOT/tests/unit/ci/test_validate_chezmoidata.sh" >/dev/null 2>&1 || true
+cob=$(find "$COVERAGE_DIR/_real_via_test_nofilt" -name 'cobertura.xml' 2>/dev/null | head -1)
+if [[ -n "$cob" ]]; then
+  classes=$(grep -c '<class ' "$cob" 2>/dev/null || echo 0)
+  echo "  real[via_test_nofilt] classes=$classes" >&2
+  if [[ "$classes" -gt 0 ]]; then
+    echo "  -- first <class> entries:" >&2
+    grep '<class ' "$cob" | head -5 >&2
+  fi
+fi
+
 # -----------------------------------------------------------------------------
 # Collect test files (mirror tests/framework/test_runner.sh discovery).
 # -----------------------------------------------------------------------------
