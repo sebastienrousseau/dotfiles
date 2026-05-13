@@ -38,11 +38,32 @@ jobs:
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - name: Install kcov + dependencies
+      - name: Cache kcov binary
+        id: kcov-cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~/.local/bin/kcov
+          # Pin cache key to the kcov version embedded in the verified
+          # installer. Bump in lockstep with KCOV_VERSION there.
+          key: kcov-v43-${{ runner.os }}-${{ runner.arch }}
+
+      - name: Install kcov (SHA256-verified source build)
+        if: steps.kcov-cache.outputs.cache-hit != 'true'
+        # Ubuntu 24.04 (ubuntu-latest) dropped `kcov` from its apt
+        # universe in late 2024, so the previous `apt-get install kcov`
+        # invocation no longer resolves. The verified installer builds
+        # kcov v43 from a SHA256-pinned upstream tarball — same defence-
+        # in-depth pattern as install-chezmoi-verified.sh.
+        run: bash scripts/ci/install-kcov-verified.sh "$HOME/.local"
+
+      - name: Ensure ancillary linters are present
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y kcov shellcheck ripgrep shfmt
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends shellcheck ripgrep shfmt
+
+      - name: Add kcov to PATH
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Run coverage
         env:
