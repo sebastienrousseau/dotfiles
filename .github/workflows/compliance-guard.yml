@@ -164,9 +164,15 @@ jobs:
 
           # The repo's own insecure-pattern detector
           # (scripts/ci/check-insecure-tls.sh) MUST mention the literal
-          # flag strings it's hunting for. Exclude it from every grep
-          # below so the scanner doesn't flag itself.
-          EXCL=(--exclude=check-insecure-tls.sh)
+          # flag strings it's hunting for. Its unit test also has to
+          # write a tiny fixture containing `curl -k` to verify the
+          # detector flags it. Exclude both from every grep below so
+          # the scanner doesn't flag itself or its tests.
+          EXCL=(
+            --exclude=check-insecure-tls.sh
+            --exclude=test_check_insecure_tls.sh
+            --exclude-dir=tests
+          )
 
           # Pattern: curl -k or curl --insecure (disables TLS verification)
           if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" --include="*.tmpl" \

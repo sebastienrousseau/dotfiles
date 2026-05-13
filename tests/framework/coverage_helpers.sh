@@ -87,7 +87,11 @@ cov_exercise_script() {
   test_start "${label}_help_executes"
   timeout 15 bash "$script" --help </dev/null >/dev/null
   rc=$?
-  if [[ "$rc" -eq 0 || "$rc" -eq 1 || "$rc" -eq 2 || "$rc" -eq 124 ]]; then
+  # Accept any rc < 125 — scripts that don't parse --help may interpret
+  # it as a positional arg (e.g. a directory to scan) and exit 123/127
+  # via xargs propagation. We only care that the invocation ran and
+  # exited, not how it interpreted the arg. 125+ signals timeout/kill.
+  if [[ "$rc" -ge 0 && "$rc" -lt 125 ]]; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
   else
@@ -99,7 +103,7 @@ cov_exercise_script() {
     test_start "${label}_dry_run_executes"
     timeout 15 bash "$script" --dry-run </dev/null >/dev/null
     rc=$?
-    if [[ "$rc" -ge 0 && "$rc" -le 124 ]]; then
+    if [[ "$rc" -ge 0 && "$rc" -lt 125 ]]; then
       ((TESTS_PASSED++)) || true
       printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
     else
@@ -111,7 +115,7 @@ cov_exercise_script() {
   test_start "${label}_no_arg_executes"
   timeout 15 bash "$script" </dev/null >/dev/null
   rc=$?
-  if [[ "$rc" -ge 0 && "$rc" -le 124 ]]; then
+  if [[ "$rc" -ge 0 && "$rc" -lt 125 ]]; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
   else
@@ -122,7 +126,7 @@ cov_exercise_script() {
   test_start "${label}_unknown_flag_handled"
   timeout 15 bash "$script" --definitely-not-a-real-flag </dev/null >/dev/null
   rc=$?
-  if [[ "$rc" -ge 0 && "$rc" -le 124 ]]; then
+  if [[ "$rc" -ge 0 && "$rc" -lt 125 ]]; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
   else

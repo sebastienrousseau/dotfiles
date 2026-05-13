@@ -79,11 +79,14 @@ runs:
 
         if [[ ! -x "$bin_dir/chezmoi" ]]; then
           mkdir -p "$bin_dir"
-          # Prefer the verified installer (SHA256-pinned) if checked out.
-          # The composite caller doesn't always have the repo checked out
-          # (e.g., drift-detection.yml may run against an external ref),
-          # so fall back to the upstream installer in that case.
-          if [[ -x "$GITHUB_WORKSPACE/scripts/ci/install-chezmoi-verified.sh" ]]; then
+          # Prefer the verified installer (SHA256-pinned) on linux/darwin.
+          # install-chezmoi-verified.sh only supports those two OSes; on
+          # Windows (Git Bash → uname=MINGW64_NT-*) and other systems,
+          # fall back to the upstream chezmoi installer which handles
+          # the win64 binary natively.
+          os_lower="$(uname -s | tr '[:upper:]' '[:lower:]')"
+          if [[ -x "$GITHUB_WORKSPACE/scripts/ci/install-chezmoi-verified.sh" \
+               && ( "$os_lower" == "linux" || "$os_lower" == "darwin" ) ]]; then
             bash "$GITHUB_WORKSPACE/scripts/ci/install-chezmoi-verified.sh" "$version" "$bin_dir"
           else
             curl -fsSL https://get.chezmoi.io | sh -s -- -b "$bin_dir" "v$version"

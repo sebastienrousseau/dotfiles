@@ -25,6 +25,13 @@ noice = "noice"        # noice.nvim Neovim plugin
 Noice = "Noice"
 nd = "nd"              # 2-char Neovim leader-key for Neogen docstring gen
 Pn = "Pn"              # Yarn Plug'n'Play abbreviation
+yout = "yout"          # `yout` alias = "yarn outdated"
+hom = "hom"            # `hom` alias = navigate to $HOME
+cod = "cod"            # `cod` alias = navigate to ~/Code
+dsk = "dsk"            # `dsk` alias = navigate to ~/Desktop
+dwn = "dwn"            # `dwn` alias = navigate to ~/Downloads
+mus = "mus"            # `mus` alias = navigate to ~/Music
+pic = "pic"            # `pic` alias = navigate to ~/Pictures
 
 [files]
 # Skip auto-generated / vendored content
