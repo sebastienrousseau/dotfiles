@@ -162,20 +162,29 @@ jobs:
           echo "Scanning for insecure curl commands..."
           VIOLATIONS=""
 
+          # The repo's own insecure-pattern detector
+          # (scripts/ci/check-insecure-tls.sh) MUST mention the literal
+          # flag strings it's hunting for. Exclude it from every grep
+          # below so the scanner doesn't flag itself.
+          EXCL=(--exclude=check-insecure-tls.sh)
+
           # Pattern: curl -k or curl --insecure (disables TLS verification)
           if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" --include="*.tmpl" \
+               "${EXCL[@]}" \
                -E '(^|[[:space:]])curl([[:space:]][^|;#]*)?[[:space:]](--insecure|-k)([[:space:]]|$)' . 2>/dev/null | grep -v "^Binary"; then
             VIOLATIONS="${VIOLATIONS}Found curl with -k/--insecure flag (disables TLS verification)\n"
           fi
 
           # Pattern: wget --no-check-certificate
           if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" --include="*.tmpl" \
+               "${EXCL[@]}" \
                -E 'wget\s+[^|;]*--no-check-certificate' . 2>/dev/null | grep -v "^Binary"; then
             VIOLATIONS="${VIOLATIONS}Found wget with --no-check-certificate flag\n"
           fi
 
           # Pattern: curl without https (http://)
           if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" --include="*.tmpl" \
+               "${EXCL[@]}" \
                -E "curl[[:space:]][^|;#]*http://" . 2>/dev/null | grep -v "^Binary" | grep -Ev 'http://(localhost|127\.0\.0\.1)'; then
             VIOLATIONS="${VIOLATIONS}Found curl using http:// instead of https://\n"
           fi

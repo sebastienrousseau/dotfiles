@@ -33,7 +33,7 @@ REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
 TESTS_DIR="${TESTS_DIR:-$REPO_ROOT/tests}"
 COVERAGE_DIR="${COVERAGE_DIR:-$REPO_ROOT/coverage}"
 COVERAGE_OUT="${COVERAGE_OUT:-$COVERAGE_DIR/lcov.info}"
-MIN_COVERAGE_PCT="${MIN_COVERAGE_PCT:-0}"          # initial floor; tighten per slice
+MIN_COVERAGE_PCT="${MIN_COVERAGE_PCT:-0}" # initial floor; tighten per slice
 COV_INCLUDE_DIRS="${COV_INCLUDE_DIRS:-$REPO_ROOT/scripts:$REPO_ROOT/dot_local/bin:$REPO_ROOT/.chezmoitemplates/functions}"
 JOBS="${JOBS:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}"
 COV_TEST_TIMEOUT="${COV_TEST_TIMEOUT:-60}"
@@ -49,7 +49,7 @@ mkdir -p "$trace_dir"
 # tracing turned on automatically.
 # -----------------------------------------------------------------------------
 bash_env="$COVERAGE_DIR/_cov_bashenv.sh"
-cat > "$bash_env" <<'SETUP'
+cat >"$bash_env" <<'SETUP'
 # coverage runtime — enable xtrace, define PS4 with file+line markers
 set -x
 PS4='+@COV@:${LINENO}:${BASH_SOURCE}:@ '
@@ -58,7 +58,7 @@ SETUP
 # Sanity-probe: run one trivial script through the pipeline so a
 # subsequent failure of the real sweep can be diagnosed quickly.
 probe_target="$COVERAGE_DIR/_probe_target.sh"
-cat > "$probe_target" <<'PROBE'
+cat >"$probe_target" <<'PROBE'
 #!/usr/bin/env bash
 set -uo pipefail
 echo "probe-line-a"
@@ -98,9 +98,9 @@ run_one() {
   local trace
   trace="$COV_TRACE_DIR/$(basename "$f" .sh).trace"
   PS4='+@COV@:${LINENO}:${BASH_SOURCE}:@ ' \
-  BASH_ENV="$COV_BASH_ENV" \
+    BASH_ENV="$COV_BASH_ENV" \
     timeout --kill-after=5 "$COV_TEST_TIMEOUT" \
-      bash "$f" 2>"$trace" >/dev/null || true
+    bash "$f" 2>"$trace" >/dev/null || true
 }
 
 export COV_TRACE_DIR="$trace_dir"
@@ -109,9 +109,9 @@ export COV_TEST_TIMEOUT
 export -f run_one
 
 start_ts=$(date +%s)
-printf '%s\n' "${test_files[@]}" \
-  | xargs -I{} -n1 -P"$JOBS" bash -c 'run_one "$@"' _ {} \
-  || true
+printf '%s\n' "${test_files[@]}" |
+  xargs -I{} -n1 -P"$JOBS" bash -c 'run_one "$@"' _ {} ||
+  true
 elapsed=$(($(date +%s) - start_ts))
 echo "trace phase done in ${elapsed}s" >&2
 
@@ -248,7 +248,8 @@ fi
 # -----------------------------------------------------------------------------
 # Threshold check.
 # -----------------------------------------------------------------------------
-summary=$(python3 - "$COVERAGE_OUT" <<'PY'
+summary=$(
+  python3 - "$COVERAGE_OUT" <<'PY'
 import sys
 total = covered = 0
 with open(sys.argv[1]) as f:

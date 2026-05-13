@@ -105,7 +105,9 @@ jobs:
           body=$(cat <<EOF
           The weekly OpenSSF Scorecard run reported an aggregate score of **$score**, below the **$threshold** threshold tracked under #869.
 
-          See the [Security tab](https://github.com/$GITHUB_REPOSITORY/security/code-scanning) for per-check breakdown, or grab the \`scorecard-results-*\` artifact from this workflow run for the raw SARIF.
+          See the [Security tab](https://github.com/$GITHUB_REPOSITORY/security/code-scanning) for
+          per-check breakdown, or grab the \`scorecard-results-*\` artifact from this workflow run
+          for the raw SARIF.
 
           Triage: identify which check(s) regressed against the previous Monday run and either remediate or file an exception under \`docs/security/SCORECARD.md\`.
           EOF

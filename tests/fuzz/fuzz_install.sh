@@ -82,7 +82,7 @@ run_fuzz() {
 
   local actual_rc=0
   # 30s cap. Use `env -i` to start from a clean env and add only what we want.
-  if env -i HOME="${HOME}" PATH="${PATH}" "${env_pairs[@]}" \
+  if env -i HOME="${HOME}" PATH="${PATH}" ${env_pairs[@]+"${env_pairs[@]}"} \
       "$TIMEOUT_BIN" 30s \
       bash "$INSTALL_SH" "${cli_args[@]+"${cli_args[@]}"}" >/dev/null 2>&1; then
     actual_rc=0

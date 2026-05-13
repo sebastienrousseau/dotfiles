@@ -26,19 +26,19 @@ cov_setup_sandbox() {
   export XDG_CACHE_HOME="$HOME/.cache"
   export XDG_STATE_HOME="$HOME/.local/state"
   mkdir -p "$HOME/.config" "$HOME/.local/share" "$HOME/.cache" \
-           "$HOME/.local/state" "$tmp/bin"
+    "$HOME/.local/state" "$tmp/bin"
   # No-op shims for every command we don't want to actually invoke.
   # Each shim echoes its invocation to stderr (for debugging) and
   # exits 0 so the script-under-test believes the operation succeeded.
   local cmd
   for cmd in sudo apt-get apt brew yum dnf pacman zypper \
-             curl wget git rsync systemctl \
-             chezmoi age gpg ssh-keygen \
-             docker podman kubectl gh \
-             defaults open osascript \
-             gnome-extensions gsettings dconf \
-             killall pkill open xdg-open; do
-    cat > "$tmp/bin/$cmd" <<EOF
+    curl wget git rsync systemctl \
+    chezmoi age gpg ssh-keygen \
+    docker podman kubectl gh \
+    defaults open osascript \
+    gnome-extensions gsettings dconf \
+    killall pkill open xdg-open; do
+    cat >"$tmp/bin/$cmd" <<EOF
 #!/usr/bin/env bash
 printf '[cov-shim:%s]\\n' "$cmd \$*" >&2
 exit 0
@@ -49,8 +49,8 @@ EOF
 }
 
 cov_teardown_sandbox() {
-  [[ -n "${DOTFILES_COV_TMPDIR:-}" && -d "$DOTFILES_COV_TMPDIR" ]] \
-    && rm -rf "$DOTFILES_COV_TMPDIR"
+  [[ -n "${DOTFILES_COV_TMPDIR:-}" && -d "$DOTFILES_COV_TMPDIR" ]] &&
+    rm -rf "$DOTFILES_COV_TMPDIR"
   unset DOTFILES_COV_TMPDIR
 }
 
@@ -71,6 +71,18 @@ cov_exercise_script() {
 
   local label
   label="$(basename "$script" .sh)"
+
+  # The script under test almost always exits non-zero on
+  # `--invalid-flag` (set -e + exit 1/2). If the calling test has
+  # errexit enabled, that non-zero rc would terminate the test
+  # before we can record it. Suppress errexit for the duration of
+  # this function and restore it on return.
+  local prev_e
+  case "$-" in
+    *e*) prev_e=1 ;;
+    *)   prev_e=0 ;;
+  esac
+  set +e
 
   test_start "${label}_help_executes"
   timeout 15 bash "$script" --help </dev/null >/dev/null
@@ -117,4 +129,13 @@ cov_exercise_script() {
     ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: unexpected rc=$rc"
   fi
+
+  # Restore the caller's errexit state and return success so the
+  # test script doesn't inherit the non-zero rc from the last
+  # invocation. Without this every converted test would exit with
+  # that rc, the framework would treat it as a crash, and the
+  # RESULTS line never printed — the failure mode we hit on the
+  # first run.
+  [[ "$prev_e" == "1" ]] && set -e
+  return 0
 }
