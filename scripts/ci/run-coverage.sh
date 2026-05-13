@@ -173,9 +173,55 @@ rm -rf "$COVERAGE_DIR/_probe3.kcov"
 probe3_cob=$(find "$COVERAGE_DIR/_probe3.kcov" -name 'cobertura.xml' 2>/dev/null | head -1)
 if [[ -n "$probe3_cob" ]]; then
   echo "  probe3 classes: $(grep -c '<class ' "$probe3_cob" 2>/dev/null || echo 0)" >&2
-  echo "  probe3 head:" >&2
-  head -40 "$probe3_cob" >&2
 fi
+
+# Probe 4: Run kcov on a guaranteed-clean inline script that exits 0.
+# If THIS comes back with zero classes, kcov's bash instrumentation
+# itself is non-functional in this environment.
+echo "── probe 4: kcov on a trivial inline script (must exit 0) ──" >&2
+trivial="$COVERAGE_DIR/_trivial.sh"
+cat > "$trivial" <<'TRIV'
+#!/usr/bin/env bash
+echo "line-1"
+x=1
+y=2
+z=$((x + y))
+echo "sum=$z"
+TRIV
+chmod +x "$trivial"
+rm -rf "$COVERAGE_DIR/_probe4.kcov"
+"$KCOV_BIN" \
+  "$COVERAGE_DIR/_probe4.kcov" \
+  bash "$trivial" 2>&1 >/dev/null | head -20 >&2 || true
+probe4_cob=$(find "$COVERAGE_DIR/_probe4.kcov" -name 'cobertura.xml' 2>/dev/null | head -1)
+if [[ -n "$probe4_cob" ]]; then
+  echo "  probe4 classes: $(grep -c '<class ' "$probe4_cob" 2>/dev/null || echo 0)" >&2
+  echo "  probe4 head:" >&2
+  head -40 "$probe4_cob" >&2
+fi
+
+# Probe 5: same trivial script, with --bash-method=DEBUG explicitly.
+echo "── probe 5: --bash-method=DEBUG on trivial inline script ──" >&2
+rm -rf "$COVERAGE_DIR/_probe5.kcov"
+"$KCOV_BIN" \
+  --bash-method=DEBUG \
+  "$COVERAGE_DIR/_probe5.kcov" \
+  bash "$trivial" 2>&1 >/dev/null | head -20 >&2 || true
+probe5_cob=$(find "$COVERAGE_DIR/_probe5.kcov" -name 'cobertura.xml' 2>/dev/null | head -1)
+if [[ -n "$probe5_cob" ]]; then
+  echo "  probe5 classes: $(grep -c '<class ' "$probe5_cob" 2>/dev/null || echo 0)" >&2
+  echo "  probe5 head:" >&2
+  head -40 "$probe5_cob" >&2
+fi
+
+# Probe 6: kcov debug logging on the trivial script — tells us what
+# kcov thinks it's seeing.
+echo "── probe 6: kcov --debug=31 on trivial inline script ──" >&2
+rm -rf "$COVERAGE_DIR/_probe6.kcov"
+"$KCOV_BIN" \
+  --debug=31 \
+  "$COVERAGE_DIR/_probe6.kcov" \
+  bash "$trivial" 2>&1 | head -60 >&2 || true
 
 # -----------------------------------------------------------------------------
 # Aggregate every per-test cobertura.xml into a single lcov.info.
