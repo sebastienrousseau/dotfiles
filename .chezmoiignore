@@ -1,0 +1,87 @@
+# chezmoi-ignore — files in the source tree that must NOT be deployed
+# to $HOME. Without this, `chezmoi apply` on a developer machine would
+# deploy build artifacts, repo metadata, and CI scaffolding alongside
+# real dotfiles.
+#
+# chezmoi pattern syntax is gitignore-style.
+
+# ── Repo metadata + governance ────────────────────────────────────────
+README.md
+CHANGELOG.md
+CONFIG_STRATEGY.md
+CONTRIBUTING.md
+CLAUDE.md
+LICENSE
+.github
+.git
+.gitattributes
+.gitignore
+.gitleaks.toml
+.gitleaksignore
+.editorconfig
+.mailmap
+
+# ── Documentation tree (deployed separately to doc.dotfiles.io) ───────
+docs
+
+# ── Source / build / test scaffolding (repo-internal, never $HOME) ────
+scripts
+tests
+examples
+install
+lib
+nix
+config
+.chezmoidata
+.chezmoiroot
+.chezmoiversion
+.chezmoitemplates/aliases/dev-*
+Dockerfile*
+.devcontainer
+.well-known
+.version-sync-backup
+.sass-cache
+
+# ── Build artifacts (test output, coverage data, traces) ──────────────
+_build
+coverage
+nightly-reports
+node_modules
+
+# ── Standalone files that aren't user-deployable ──────────────────────
+install.sh
+uninstall.sh
+version-sync.sh
+package.json
+package-lock.json
+typos.toml
+llms.txt
+mise.lock.json
+mise-versions.lock.json
+Gemfile
+Gemfile.lock
+flake.nix
+flake.lock
+
+# ── Repo-root dotfiles that aren't chezmoi-prefixed (e.g. .fdignore is
+# meant for the chezmoi source tree itself, not for $HOME).
+.fdignore
+.shellcheckrc
+.taplo.toml
+.markdownlint.json
+.actrc
+.envrc
+
+# ── Mise / asdf / language version pins for THE REPO ──────────────────
+.tool-versions
+.python-version
+.node-version
+.nvmrc
+.ruby-version
+.terraform-version
+
+# ── Platform-specific scopes (chezmoi can also gate via
+# !{{ eq .chezmoi.os "..." }}) — keep simple here.
+{{- if ne .chezmoi.os "darwin" }}
+dot_warp
+{{- end }}
