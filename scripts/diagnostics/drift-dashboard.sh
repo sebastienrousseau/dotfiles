@@ -125,7 +125,7 @@ stale_list="${stale_list%$'\n'}"
 orphan_count=0
 orphan_file="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/orphans"
 if [[ -s "$orphan_file" ]]; then
-  orphan_count=$(wc -l < "$orphan_file" | tr -d ' ')
+  orphan_count=$(wc -l <"$orphan_file" | tr -d ' ')
 fi
 
 # -----------------------------------------------------------------------------
@@ -145,13 +145,13 @@ print(json.dumps({
     "total": $total
 }))
 PY
-  if (( total > 0 )); then exit 1; else exit 0; fi
+  if ((total > 0)); then exit 1; else exit 0; fi
 fi
 
 ui_header "Dotfiles Drift Dashboard"
 
 # Class 1
-if (( cm_count > 0 )); then
+if ((cm_count > 0)); then
   echo ""
   ui_warn "Managed drift" "$cm_count file(s) — deployed differs from rendered source"
   printf '%s\n' "$cm_status"
@@ -160,7 +160,7 @@ else
 fi
 
 # Class 2
-if (( untracked_count > 0 )); then
+if ((untracked_count > 0)); then
   echo ""
   ui_warn "Untracked source" "$untracked_count file(s) in chezmoi source not tracked by git"
   printf '%s\n' "$untracked"
@@ -169,7 +169,7 @@ else
 fi
 
 # Class 3
-if (( orphan_count > 0 )); then
+if ((orphan_count > 0)); then
   echo ""
   ui_warn "Orphan deployed" "$orphan_count file(s) — review $(pretty_path "$orphan_file")"
 else
@@ -177,7 +177,7 @@ else
 fi
 
 # Class 4
-if (( stale_count > 0 )); then
+if ((stale_count > 0)); then
   echo ""
   ui_warn "Stale source" "$stale_count target(s) newer than source — next \`chezmoi apply\` would revert"
   printf '%s\n' "$stale_list"
@@ -186,7 +186,7 @@ else
 fi
 
 echo ""
-if (( total > 0 )); then
+if ((total > 0)); then
   ui_warn "Total drift signals" "$total"
 else
   ui_ok "Total" "no drift detected"
@@ -198,4 +198,4 @@ if [[ "$SHOW_DIFF" = "1" && $cm_count -gt 0 ]]; then
   chezmoi diff --exclude scripts --exclude install --exclude tests || true
 fi
 
-(( total > 0 )) && exit 1 || exit 0
+((total > 0)) && exit 1 || exit 0

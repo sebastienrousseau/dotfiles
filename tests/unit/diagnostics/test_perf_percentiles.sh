@@ -101,16 +101,25 @@ fi
 # -----------------------------------------------------------------------------
 
 test_start "baseline_file_created_with_write"
-# Run --baseline once; the file should land at $XDG_CACHE_HOME/dotfiles/perf-baseline.json
-XDG_CACHE_HOME="$tmp/cache" bash "$PERF" --baseline --shell zsh >/dev/null 2>&1 || true
-if [[ -s "$tmp/cache/dotfiles/perf-baseline.json" ]]; then
-  assert_exit_code 0 "true"
+# Run --baseline once; the file should land at $XDG_CACHE_HOME/dotfiles/perf-baseline.json.
+# perf.sh --shell zsh requires a working zsh on PATH to measure; on
+# minimal CI images that lack zsh, skip rather than fail (this test
+# is exercising the aggregator, not zsh availability).
+if ! command -v zsh >/dev/null 2>&1; then
+  assert_exit_code 0 "true  # skipped: zsh unavailable"
 else
-  assert_exit_code 0 "false  # --baseline did not write the expected file"
+  XDG_CACHE_HOME="$tmp/cache" bash "$PERF" --baseline --shell zsh >/dev/null 2>&1 || true
+  if [[ -s "$tmp/cache/dotfiles/perf-baseline.json" ]]; then
+    assert_exit_code 0 "true"
+  else
+    assert_exit_code 0 "false  # --baseline did not write the expected file"
+  fi
 fi
 
 test_start "baseline_file_is_valid_json"
-if [[ -s "$tmp/cache/dotfiles/perf-baseline.json" ]] && \
+if ! command -v zsh >/dev/null 2>&1; then
+  assert_exit_code 0 "true  # skipped: zsh unavailable"
+elif [[ -s "$tmp/cache/dotfiles/perf-baseline.json" ]] && \
    python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$tmp/cache/dotfiles/perf-baseline.json" 2>/dev/null; then
   assert_exit_code 0 "true"
 else

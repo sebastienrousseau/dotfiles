@@ -94,7 +94,7 @@ if $BY_TOOL || $RESET_TIMINGS; then
   log_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
   log_file="$log_dir/eval-timings.jsonl"
   if $RESET_TIMINGS; then
-    : > "$log_file" 2>/dev/null || rm -f "$log_file" 2>/dev/null || true
+    : >"$log_file" 2>/dev/null || rm -f "$log_file" 2>/dev/null || true
     ui_ok "eval timings" "cleared $log_file"
     $BY_TOOL || exit 0
   fi
@@ -106,7 +106,7 @@ if $BY_TOOL || $RESET_TIMINGS; then
   ui_dot_banner "Diagnostics"
   ui_header "Per-tool timing breakdown"
   ui_section "$log_file"
-  python3 - <<'PY' "$log_file"
+  python3 - "$log_file" <<'PY'
 import json, sys
 from collections import defaultdict
 
@@ -175,12 +175,12 @@ fi
 # bash should be quickest. Override via DOTFILES_PERF_TARGET_<SHELL>_MS.
 shell_target_for() {
   case "$1" in
-    zsh)  echo "${DOTFILES_PERF_TARGET_ZSH_MS:-$TARGET_MS}" ;;
+    zsh) echo "${DOTFILES_PERF_TARGET_ZSH_MS:-$TARGET_MS}" ;;
     bash) echo "${DOTFILES_PERF_TARGET_BASH_MS:-60}" ;;
     fish) echo "${DOTFILES_PERF_TARGET_FISH_MS:-200}" ;;
-    nu)   echo "${DOTFILES_PERF_TARGET_NU_MS:-500}" ;;
+    nu) echo "${DOTFILES_PERF_TARGET_NU_MS:-500}" ;;
     pwsh) echo "${DOTFILES_PERF_TARGET_PWSH_MS:-600}" ;;
-    *)    echo "$TARGET_MS" ;;
+    *) echo "$TARGET_MS" ;;
   esac
 }
 
@@ -188,12 +188,12 @@ shell_target_for() {
 # load the user's interactive profile (matches what a fresh terminal does).
 invoke_shell() {
   case "$1" in
-    zsh)  zsh -i -c exit </dev/null ;;
+    zsh) zsh -i -c exit </dev/null ;;
     bash) bash -i -c exit </dev/null ;;
     fish) fish -i -c exit </dev/null ;;
-    nu)   nu -c exit </dev/null ;;
+    nu) nu -c exit </dev/null ;;
     pwsh) pwsh -Command exit </dev/null ;;
-    *)    return 1 ;;
+    *) return 1 ;;
   esac
 }
 
@@ -259,7 +259,7 @@ for s in "${all_shells[@]}"; do
   fi
   shells_to_measure+=("$s")
 done
-if (( ${#shells_to_measure[@]} == 0 )); then
+if ((${#shells_to_measure[@]} == 0)); then
   ui_err "perf" "no measurable shells found${SHELL_FILTER:+ (filter: $SHELL_FILTER)}"
   exit 1
 fi
@@ -313,7 +313,7 @@ if $WRITE_BASELINE; then
       printf '\n    "%s": %d' "${shell_names[$i]}" "${shell_means[$i]}"
     done
     printf '\n  }\n}\n'
-  } > "$BASELINE_FILE"
+  } >"$BASELINE_FILE"
 fi
 
 if ! $NO_BASELINE_CHECK && [[ -s "$BASELINE_FILE" ]]; then
@@ -332,7 +332,7 @@ except Exception:
     [[ -z "$baseline_ms" || "$baseline_ms" -eq 0 ]] && continue
     # Threshold: current > baseline * (1 + pct/100)
     threshold=$((baseline_ms * (100 + BASELINE_REGRESSION_PCT) / 100))
-    if (( m > threshold )); then
+    if ((m > threshold)); then
       delta_pct=$((((m - baseline_ms) * 100) / baseline_ms))
       baseline_warnings+=("$name: $m ms vs baseline $baseline_ms ms (+${delta_pct}%, threshold +${BASELINE_REGRESSION_PCT}%)")
     fi

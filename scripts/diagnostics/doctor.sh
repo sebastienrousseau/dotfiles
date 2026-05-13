@@ -393,11 +393,11 @@ _section "Pre-Push Audit Bypass"
 bypass_log="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/audit-bypass.log"
 if [[ -s "$bypass_log" ]]; then
   # Count entries in the last 7 days (timestamps are ISO-8601 UTC).
-  seven_days_ago=$(date -u -v-7d +%Y-%m-%dT00:00:00Z 2>/dev/null \
-                || date -u -d '7 days ago' +%Y-%m-%dT00:00:00Z 2>/dev/null \
-                || echo "1970-01-01T00:00:00Z")
+  seven_days_ago=$(date -u -v-7d +%Y-%m-%dT00:00:00Z 2>/dev/null ||
+    date -u -d '7 days ago' +%Y-%m-%dT00:00:00Z 2>/dev/null ||
+    echo "1970-01-01T00:00:00Z")
   recent=$(awk -v cutoff="$seven_days_ago" '$1 >= cutoff' "$bypass_log" | wc -l | tr -d ' ')
-  if (( recent > 0 )); then
+  if ((recent > 0)); then
     _warn "audit bypass" "$recent push(es) bypassed in last 7 days — see $(pretty_path "$bypass_log")"
   else
     _ok "audit bypass" "log exists; no recent entries (last 7d)"
@@ -420,7 +420,7 @@ else
       inside && /^[[:space:]]*"/                   { count++ }
       END                                          { print count + 0 }
     ' "$atuin_cfg")
-    if (( pattern_count >= 10 )); then
+    if ((pattern_count >= 10)); then
       _ok "history_filter" "$pattern_count patterns (chezmoi-managed)"
     else
       _warn "history_filter" "$pattern_count patterns (expected ≥10 from secrets-patterns.toml)"
@@ -557,9 +557,9 @@ for tool in nvm fnm pyenv rbenv jenv asdf sdkman conda kubectl helm gh cargo pnp
       fish) [[ -f "$cache_base/$shell_dir/${tool}-init.fish" ]] && found=1 ;;
       *) [[ -f "$cache_base/$shell_dir/${tool}-init.$shell_dir" ]] && found=1 ;;
     esac
-    (( found == 1 )) && break
+    ((found == 1)) && break
   done
-  (( found == 0 )) && unwrapped="${unwrapped:+$unwrapped, }$tool"
+  ((found == 0)) && unwrapped="${unwrapped:+$unwrapped, }$tool"
 done
 if [[ -z "$unwrapped" ]]; then
   _ok "uncached slow-init tools" "none detected"
@@ -573,8 +573,8 @@ if command -v zsh >/dev/null 2>&1; then
   zcompdump="${HOME}/.zcompdump"
   if [[ -f "$zcompdump" ]]; then
     dump_mtime=$(stat -c %Y "$zcompdump" 2>/dev/null || stat -f %m "$zcompdump" 2>/dev/null || echo 0)
-    age_days=$(( ( $(date +%s) - dump_mtime ) / 86400 ))
-    if (( age_days > 7 )); then
+    age_days=$((($(date +%s) - dump_mtime) / 86400))
+    if ((age_days > 7)); then
       _warn ".zcompdump" "${age_days}d old — refresh: rm ~/.zcompdump* && zsh -ic exit"
     else
       _ok ".zcompdump" "fresh (${age_days}d)"

@@ -67,7 +67,7 @@ marks reflect this repo's posture at the time of writing — the
 
 | Check | Expiry | Rationale |
 |---|---|---|
-| _(none currently)_ | _—_ | _—_ |
+| *(none currently)* | *—* | *—* |
 
 If you add an exception, include the check name, an expiry date
 (don't allow indefinite), and the rationale. Re-evaluate every quarter.

@@ -24,7 +24,7 @@
 set -uo pipefail
 
 REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
-THRESHOLD="${DEPS_DEV_SEVERITY_THRESHOLD:-HIGH}"  # LOW | MEDIUM | HIGH | CRITICAL
+THRESHOLD="${DEPS_DEV_SEVERITY_THRESHOLD:-HIGH}" # LOW | MEDIUM | HIGH | CRITICAL
 DEPS_DEV_BASE="${DEPS_DEV_BASE:-https://api.deps.dev/v3}"
 EXCEPTIONS_FILE="$REPO_ROOT/docs/security/DEPS_DEV_EXCEPTIONS.md"
 SARIF_OUT="${DEPS_DEV_SARIF_OUT:-}"
@@ -46,10 +46,10 @@ done
 severity_rank() {
   case "${1:-}" in
     CRITICAL) echo 4 ;;
-    HIGH)     echo 3 ;;
+    HIGH) echo 3 ;;
     MEDIUM | MODERATE) echo 2 ;;
-    LOW)      echo 1 ;;
-    *)        echo 0 ;;
+    LOW) echo 1 ;;
+    *) echo 0 ;;
   esac
 }
 
@@ -71,9 +71,9 @@ fetch_advisories() {
   local encoded_name
   encoded_name=$(python3 -c 'import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1], safe=""))' "$name")
   local url="$DEPS_DEV_BASE/systems/$system/packages/$encoded_name/versions/$version"
-  curl -fsSL --max-time 15 "$url" 2>/dev/null \
-    | jq -r '.advisoryKeys[]?.id // empty' 2>/dev/null \
-    || true
+  curl -fsSL --max-time 15 "$url" 2>/dev/null |
+    jq -r '.advisoryKeys[]?.id // empty' 2>/dev/null ||
+    true
 }
 
 # fetch_advisory_severity — given an advisory ID, return its highest
@@ -83,10 +83,10 @@ fetch_advisory_severity() {
   local advisory_id="$1"
   local encoded
   encoded=$(python3 -c 'import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1], safe=""))' "$advisory_id")
-  curl -fsSL --max-time 15 "$DEPS_DEV_BASE/advisories/$encoded" 2>/dev/null \
-    | jq -r '.severity[]?.type // empty' 2>/dev/null \
-    | head -1 \
-    || true
+  curl -fsSL --max-time 15 "$DEPS_DEV_BASE/advisories/$encoded" 2>/dev/null |
+    jq -r '.severity[]?.type // empty' 2>/dev/null |
+    head -1 ||
+    true
 }
 
 # -----------------------------------------------------------------------------
@@ -137,9 +137,9 @@ read_actions() {
   for f in "$REPO_ROOT"/.github/workflows/*.yml; do
     [[ -f "$f" ]] || continue
     # Match `uses: owner/repo@<40-hex-sha> # vX.Y.Z`
-    grep -Eo 'uses:[[:space:]]+[a-zA-Z0-9._-]+/[a-zA-Z0-9._/-]+@[a-f0-9]{40}[[:space:]]*#[[:space:]]*v[0-9.]+' "$f" \
-      | sed -E 's/uses:[[:space:]]+([^@]+)@[a-f0-9]{40}[[:space:]]+#[[:space:]]+v([0-9.]+).*/GITHUB_ACTIONS\t\1\t\2/' \
-      || true
+    grep -Eo 'uses:[[:space:]]+[a-zA-Z0-9._-]+/[a-zA-Z0-9._/-]+@[a-f0-9]{40}[[:space:]]*#[[:space:]]*v[0-9.]+' "$f" |
+      sed -E 's/uses:[[:space:]]+([^@]+)@[a-f0-9]{40}[[:space:]]+#[[:space:]]+v([0-9.]+).*/GITHUB_ACTIONS\t\1\t\2/' ||
+      true
   done | sort -u
 }
 
@@ -170,7 +170,7 @@ scan_one() {
     sev=$(fetch_advisory_severity "$adv")
     local rank
     rank=$(severity_rank "$sev")
-    if (( rank >= THRESHOLD_RANK )); then
+    if ((rank >= THRESHOLD_RANK)); then
       findings+=("$system:$name@$version :: $adv ($sev)")
       echo "::warning::deps.dev advisory $sev: $system $name $version → $adv" >&2
     fi

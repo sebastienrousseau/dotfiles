@@ -22,8 +22,8 @@ matches=$(
     --exclude-dir='.git' \
     --exclude='check-insecure-tls.sh' \
     -E '\b(curl|wget)\b' \
-    "$ROOT" 2>/dev/null \
-  | xargs -I{} awk '
+    "$ROOT" 2>/dev/null |
+    xargs -I{} awk '
       # Each input line tokenized on whitespace. Flag if the line uses
       # curl/wget and a known insecure flag appears as a standalone token.
       {
