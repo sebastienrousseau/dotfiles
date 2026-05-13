@@ -31,7 +31,15 @@ test_start "readme_links_trusted_workstation_doc"
 # The tagline no longer leads with "Trusted agent workstation" (it's been
 # demoted from headline to feature-table row), but the README must still
 # surface the trust/attestation story via the capability table or docs link.
-assert_file_contains "$README_FILE" 'Cryptographic Attestation' "README surfaces attestation as a capability"
+# Match case-insensitively so the test doesn't trip on sentence-case
+# variants ("Cryptographic attestation" vs "Cryptographic Attestation").
+if grep -qi 'cryptographic attestation' "$README_FILE"; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: README surfaces attestation as a capability"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: README surfaces attestation as a capability"
+fi
 assert_file_contains "$README_FILE" 'signed' "README mentions signed releases"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
