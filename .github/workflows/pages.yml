@@ -1,0 +1,77 @@
+name: Pages
+
+# Builds and deploys the docs/ site to GitHub Pages (custom domain:
+# doc.dotfiles.io). The repo's Pages settings have build_type=workflow,
+# so this is the canonical deploy path — no Jekyll-on-source-branch
+# fallback.
+#
+# Conflict note: manual-publish.yml builds the multi-format Manual
+# (HTML/PDF/EPUB/...) and attaches it to releases. It used to also
+# deploy `_build/manual/` to Pages, which races with this workflow.
+# That deploy step has been removed in the same change that introduced
+# this file; manual binaries are now downloadable only from releases.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, but don't cancel in-progress
+# runs — Pages publishes are idempotent and we want each push handled.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build site (Jekyll)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Configure Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
+
+      - name: Build with Jekyll
+        # actions/jekyll-build-pages bundles the Pages-supported plugin
+        # set, mirrors what GH's own Jekyll runner would do, and emits
+        # the static site to ./_site.
+        uses: actions/jekyll-build-pages@44a6e6beabd48582f863aeeb6cb2151cc1716697 # v1.0.13
+        with:
+          source: ./docs
+          destination: ./_site
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+
+  deploy:
+    name: Deploy to Pages
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0

@@ -1,0 +1,42 @@
+title: ".dotfiles"
+description: "Cross-platform, signed, local-first dotfiles for macOS, Linux, and WSL — published at doc.dotfiles.io."
+url: "https://doc.dotfiles.io"
+baseurl: ""
+
+# Jekyll renders this site from docs/ — see .github/workflows/pages.yml.
+# Theme is the GitHub-hosted Cayman skin (zero-Gemfile setup); switch to
+# `remote_theme: just-the-docs/just-the-docs` later if a richer
+# navigation/search UX is wanted (requires plugin allowlist update on
+# GH Pages side).
+theme: jekyll-theme-cayman
+
+plugins:
+  - jekyll-relative-links
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-redirect-from
+
+relative_links:
+  enabled: true
+  collections: true
+
+# Treat *.md as pages so cross-page links work without trailing-slash
+# kludges; include CNAME so the published artifact preserves it across
+# workflow deploys.
+include:
+  - CNAME
+  - .well-known
+
+exclude:
+  - "*.tmpl"
+  - "manual/_toc.yml"
+  - "scripts/"
+  - "Gemfile"
+  - "Gemfile.lock"
+  - "vendor/"
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  hard_wrap: false
