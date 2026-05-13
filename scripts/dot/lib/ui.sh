@@ -271,7 +271,12 @@ ui_spinner_stop() {
   fi
   ui_clear_line
   ui_show_cursor
+  # The newline is only needed when stdout is NOT a TTY. We must return
+  # 0 either way — without the explicit `return 0`, the function's exit
+  # status comes from the trailing `[[ ! -t 1 ]] && printf` chain, which
+  # is rc=1 on a TTY and breaks every caller running under `set -e`.
   [[ ! -t 1 ]] && printf "\n"
+  return 0
 }
 
 # ═══════════════════════════════════════════════════════════════════════
