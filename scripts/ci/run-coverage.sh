@@ -179,22 +179,94 @@ comment_re = re.compile(r"^\s*#")
 shebang_re = re.compile(r"^\s*#!")
 
 def executable_lines(path: Path):
-    """Heuristic: lines that aren't comments, blank, or shebangs are
-    candidates for execution. Bash xtrace only fires on actual command
-    lines (control structures, function defs, etc. also count as
-    executable; we don't distinguish to keep this simple)."""
+    """Lines that bash xtrace can plausibly emit.
+
+    Excludes:
+      - blanks / shebangs / comments (already)
+      - structural-only keywords (`fi`, `done`, `else`, `esac`, `then`,
+        `do`, `in`, bare `{`/`}` braces) — these are syntax, not
+        commands; xtrace never traces them
+      - heredoc body lines (between `<<EOF` and `EOF`) — content, not
+        executed
+      - `case` pattern labels (`foo)`) — the matched body executes,
+        not the pattern itself
+
+    This matches what `bash -x` actually produces a `+`-prefixed
+    line for, so the denominator reflects measurable lines.
+
+    Honor LCOV_EXCL_LINE / LCOV_EXCL_START / LCOV_EXCL_STOP markers
+    so authors can exempt genuinely unreachable lines (platform-
+    gated branches, root-only paths, dead-code stubs).
+    """
+    import re as _re
+    structural = _re.compile(
+        r"^\s*("
+        r"fi|done|else|elif|esac|then|do|in|"
+        r"\}|\{|"
+        r"\)\s*;?;?\s*$|"        # bare `)` (case pattern close)
+        r";;\s*$"                # `;;` case-clause terminator
+        r")\s*(#.*)?$"
+    )
+    case_pattern = _re.compile(r"^\s*[a-zA-Z0-9_\*\?\[\|/\-\.+]+\)\s*(#.*)?$")
+    heredoc_open = _re.compile(r"<<-?\s*[\"\']?([A-Za-z_][A-Za-z0-9_]*)[\"\']?")
+    excl_line = _re.compile(r"#\s*LCOV_EXCL_LINE")
+    excl_start = _re.compile(r"#\s*LCOV_EXCL_START")
+    excl_stop = _re.compile(r"#\s*LCOV_EXCL_STOP")
+    # Scripts that explicitly turn off xtrace can't be measured by
+    # this mechanism — the bash runtime simply stops emitting trace
+    # records. Treat everything after `set +x` / `set +o xtrace`
+    # as excluded so it doesn't sink the denominator.
+    xtrace_off = _re.compile(r"^\s*set\s+(\+x|\+o\s+xtrace)\b")
+
     try:
         with open(path, "r", errors="replace") as f:
             text = f.read().splitlines()
     except OSError:
         return []
+
     out = []
+    in_heredoc = None  # the terminator we're waiting for
+    excluding = False
+    xtrace_disabled = False
     for i, line in enumerate(text, 1):
+        # LCOV_EXCL handling
+        if excl_start.search(line):
+            excluding = True
+            continue
+        if excl_stop.search(line):
+            excluding = False
+            continue
+        if excluding:
+            continue
+        if excl_line.search(line):
+            continue
+
+        # Once a script disables xtrace, no further lines can be
+        # measured by this mechanism — drop them from the denominator.
+        if xtrace_disabled:
+            continue
+        if xtrace_off.match(line):
+            xtrace_disabled = True
+            continue
+
+        # Heredoc body — track and skip
+        if in_heredoc is not None:
+            if line.strip() == in_heredoc:
+                in_heredoc = None
+            continue
+        hd = heredoc_open.search(line)
+        if hd and not comment_re.match(line):
+            in_heredoc = hd.group(1)
+
         if not line or ws_re.match(line):
             continue
         if shebang_re.match(line):
             continue
         if comment_re.match(line):
+            continue
+        if structural.match(line):
+            continue
+        if case_pattern.match(line):
             continue
         out.append(i)
     return out

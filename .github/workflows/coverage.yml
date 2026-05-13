@@ -56,8 +56,11 @@ jobs:
           #   Slice 2: 12.01% measured (59 deep-test conversions), floor=10
           #   Slice 3: 18.90% measured (47 auto-tests + 119 conversions), floor=17
           #   Slice 4: 19.16% measured (smart mocks + subcommand probes), floor=18
+          #   Slice 5: 34.10% measured (fn-files exercise + dot-driver
+          #            + sandbox dotfiles symlink + xtrace-off filter),
+          #            floor=30 (3-point cushion absorbs platform jitter).
           # Bump in lockstep with the slice that lands the bump.
-          MIN_COVERAGE_PCT: '18'
+          MIN_COVERAGE_PCT: '30'
         run: bash scripts/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact

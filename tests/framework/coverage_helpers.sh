@@ -28,6 +28,29 @@ cov_setup_sandbox() {
   mkdir -p "$HOME/.config" "$HOME/.local/share" "$HOME/.cache" \
     "$HOME/.local/state" "$tmp/bin"
 
+  # Synthetic chezmoi source directory.
+  #
+  # Many of our scripts guard early by probing for $HOME/.dotfiles
+  # or $CHEZMOI_SOURCE_DIR; without this, they bail rc=1 within the
+  # first dozen lines and we never measure the dispatch / parse /
+  # function bodies. Others source helper libs via hardcoded
+  # `$HOME/.dotfiles/scripts/dot/lib/...` paths and fail under
+  # `set -e` if those don't exist.
+  #
+  # We solve both by symlinking $HOME/.dotfiles → the real repo root.
+  # The sandbox already redirects writes to $HOME's tmpdir (XDG_*
+  # paths point under $HOME). The lone risk is a probe that calls
+  # into a write_* helper which targets a path inside the source
+  # dir (e.g. write_theme writes .chezmoidata.toml). The driver
+  # tests are written to avoid those paths — they probe --help /
+  # list / show / status variants only.
+  local repo_root
+  repo_root="${REPO_ROOT:-$(cd "${BASH_SOURCE[0]%/*}/../.." && pwd)}"
+  ln -sfn "$repo_root" "$HOME/.dotfiles"
+  # Don't export CHEZMOI_SOURCE_DIR — scripts that consult
+  # BASH_SOURCE-relative paths first should win, and overriding
+  # this could mislead them into a stub copy.
+
   # ── Default no-op shims ───────────────────────────────────────────
   # Commands we just want to keep from touching the host. Each shim
   # echoes its invocation to stderr (for debugging) and exits 0.
@@ -38,7 +61,8 @@ cov_setup_sandbox() {
     docker podman kubectl gh \
     defaults open osascript \
     gnome-extensions gsettings dconf \
-    killall pkill open xdg-open; do
+    killall pkill open xdg-open \
+    fzf tmux less more man htop top nvim vim nano emacs; do
     cat >"$tmp/bin/$cmd" <<EOF
 #!/usr/bin/env bash
 printf '[cov-shim:%s]\\n' "$cmd \$*" >&2
@@ -155,6 +179,15 @@ cov_exercise_script() {
   local label
   label="$(basename "$script" .sh)"
 
+  # Always exercise from inside the sandbox tmpdir. Scripts that
+  # write to `./relative/path` then land in the sandbox, not in the
+  # real repo. Without this, e.g. functions/files/backup.sh creates
+  # a `backups/` directory next to wherever the test was launched
+  # from.
+  if [[ -n "${DOTFILES_COV_TMPDIR:-}" && -d "${DOTFILES_COV_TMPDIR}" ]]; then
+    cd "$DOTFILES_COV_TMPDIR" || return 0
+  fi
+
   # Resolve a portable timeout binary. GNU coreutils ships `timeout`;
   # macOS without coreutils only has `gtimeout` after `brew install
   # coreutils`. If neither is on PATH, run without a wall-time cap —
@@ -186,7 +219,7 @@ cov_exercise_script() {
   local prev_e
   case "$-" in
     *e*) prev_e=1 ;;
-    *)   prev_e=0 ;;
+    *) prev_e=0 ;;
   esac
   set +e
 
@@ -214,10 +247,10 @@ cov_exercise_script() {
     ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} bash "$script" --dry-run </dev/null >/dev/null
     rc=$?
     # Accept any rc except 124 (timeout) — we care that the invocation
-  # ran to a normal exit, not how it interpreted its args. rc=127
-  # (command-not-found) is fine: it means the script ran but couldn't
-  # resolve an optional dependency under our sandbox's stripped env.
-  if [[ "$rc" -ne 124 ]]; then
+    # ran to a normal exit, not how it interpreted its args. rc=127
+    # (command-not-found) is fine: it means the script ran but couldn't
+    # resolve an optional dependency under our sandbox's stripped env.
+    if [[ "$rc" -ne 124 ]]; then
       ((TESTS_PASSED++)) || true
       printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
     else
@@ -283,6 +316,161 @@ cov_exercise_script() {
   # that rc, the framework would treat it as a crash, and the
   # RESULTS line never printed — the failure mode we hit on the
   # first run.
+  [[ "$prev_e" == "1" ]] && set -e
+  return 0
+}
+
+# -----------------------------------------------------------------------------
+# cov_exercise_script_help_only <path-to-script>
+#
+# Same as cov_exercise_script but ONLY runs the `--help` mode. Use
+# this for scripts whose no-arg or `--invalid-flag` paths perform
+# writes to the real repo (e.g. build-manual.sh writes
+# docs/manual/* via absolute BASH_SOURCE-relative paths, so a cd
+# sandbox can't intercept it).
+# -----------------------------------------------------------------------------
+cov_exercise_script_help_only() {
+  local script="$1"
+  [[ -r "$script" ]] || return 0
+
+  local label
+  label="$(basename "$script" .sh)"
+
+  if [[ -n "${DOTFILES_COV_TMPDIR:-}" && -d "${DOTFILES_COV_TMPDIR}" ]]; then
+    cd "$DOTFILES_COV_TMPDIR" || return 0
+  fi
+
+  local TIMEOUT_BIN=""
+  if command -v timeout >/dev/null 2>&1; then
+    TIMEOUT_BIN="timeout"
+  elif command -v gtimeout >/dev/null 2>&1; then
+    TIMEOUT_BIN="gtimeout"
+  fi
+  local TIMEOUT_CMD
+  if [[ -n "$TIMEOUT_BIN" ]]; then
+    TIMEOUT_CMD=("$TIMEOUT_BIN" --kill-after=5 30)
+  else
+    TIMEOUT_CMD=()
+  fi
+
+  local prev_e
+  case "$-" in
+    *e*) prev_e=1 ;;
+    *) prev_e=0 ;;
+  esac
+  set +e
+
+  test_start "${label}_help_executes"
+  ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} bash "$script" --help </dev/null >/dev/null
+  rc=$?
+  if [[ "$rc" -ne 124 ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: unexpected rc=$rc"
+  fi
+
+  [[ "$prev_e" == "1" ]] && set -e
+  return 0
+}
+
+# -----------------------------------------------------------------------------
+# cov_exercise_functions_file <path-to-functions-file>
+#
+# For files that only define functions (no top-level executable code,
+# e.g. .chezmoitemplates/functions/text/lowercase.sh), bash xtrace
+# never enters the function body unless something calls the function.
+# This helper sources the file in a subshell, enumerates the functions
+# it defined, and invokes each one with a few canned arg modes so the
+# body lines record line coverage:
+#
+#   <fn>            no-arg path → typically hits the "missing required
+#                   args" error branch
+#   <fn> --help     help flag path
+#   <fn> <tmpfile>  a real readable path so the success branch starts
+#                   executing (often returns after a stat or so)
+#
+# Exit codes are ignored; we only care about line execution. The whole
+# probe runs under a 30s timeout cap, with the same TIMEOUT_BIN
+# fallback used by cov_exercise_script. Functions whose names match
+# unsafe patterns (logout, shutdown, kill*, reboot, halt) are skipped.
+# -----------------------------------------------------------------------------
+cov_exercise_functions_file() {
+  local script="$1"
+  [[ -r "$script" ]] || return 0
+
+  local label
+  label="$(basename "$script" .sh)"
+
+  # Always exercise from inside the sandbox tmpdir so the functions
+  # under test write to a disposable cwd, not the real repo.
+  if [[ -n "${DOTFILES_COV_TMPDIR:-}" && -d "${DOTFILES_COV_TMPDIR}" ]]; then
+    cd "$DOTFILES_COV_TMPDIR" || return 0
+  fi
+
+  local TIMEOUT_BIN=""
+  if command -v timeout >/dev/null 2>&1; then
+    TIMEOUT_BIN="timeout"
+  elif command -v gtimeout >/dev/null 2>&1; then
+    TIMEOUT_BIN="gtimeout"
+  fi
+  local TIMEOUT_CMD
+  if [[ -n "$TIMEOUT_BIN" ]]; then
+    TIMEOUT_CMD=("$TIMEOUT_BIN" --kill-after=5 30)
+  else
+    TIMEOUT_CMD=()
+  fi
+
+  local prev_e
+  case "$-" in
+    *e*) prev_e=1 ;;
+    *) prev_e=0 ;;
+  esac
+  set +e
+
+  local tmpfile tmpdir
+  tmpdir=$(mktemp -d -t cov-fn.XXXXXX)
+  tmpfile="$tmpdir/sample.txt"
+  echo "sample" >"$tmpfile"
+
+  test_start "${label}_functions_exercised"
+  ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} bash -c '
+    set +e
+    # shellcheck disable=SC1090
+    source "$1" 2>/dev/null
+    tmpfile="$2"
+    # Discover functions defined by this file (best-effort). Source
+    # may also pull in helpers from neighboring includes; we restrict
+    # ourselves to functions declared in the file itself by regexing
+    # the source.
+    while IFS= read -r fn; do
+      [[ -z "$fn" ]] && continue
+      case "$fn" in
+        logout|shutdown|kill*|reboot|halt|exit) continue ;;
+      esac
+      # Three arg modes: no-arg, --help, and a real path. Each call
+      # is independently rc-tolerant. We deliberately keep stderr
+      # connected (not `2>&1 >/dev/null`) so bash xtrace output is
+      # captured by the parent test runner — that is the whole point
+      # of this helper.
+      "$fn" </dev/null >/dev/null
+      "$fn" --help </dev/null >/dev/null
+      "$fn" "$tmpfile" </dev/null >/dev/null
+    done < <(grep -oE "^[a-zA-Z_][a-zA-Z0-9_]*\s*\(\)" "$1" | sed "s/[[:space:]]*()$//")
+    exit 0
+  ' _ "$script" "$tmpfile"
+  rc=$?
+  rm -rf "$tmpdir"
+
+  if [[ "$rc" -ne 124 ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: unexpected rc=$rc"
+  fi
+
   [[ "$prev_e" == "1" ]] && set -e
   return 0
 }

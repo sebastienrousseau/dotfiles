@@ -31,7 +31,11 @@ for keyword in dotfiles.html dotfiles.epub dotfiles.txt dotfiles-md.tar.gz SHA25
   assert_file_contains "$SCRIPT_FILE" "$keyword" "must produce $keyword"
 done
 
-# Slice 2: drive real line coverage of the script under test
-cov_exercise_script "$SCRIPT_FILE"
+# Slice 2: drive line coverage. build-manual.sh's no-arg + unknown-flag
+# paths both fall through to a full `pandoc` build that writes
+# docs/manual/{command,concept}-index.md back to the real repo
+# (the script resolves $REPO_ROOT via BASH_SOURCE, bypassing the
+# sandbox cwd). Limit ourselves to the --help mode here.
+cov_exercise_script_help_only "$SCRIPT_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
