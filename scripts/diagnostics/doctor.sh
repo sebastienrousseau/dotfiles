@@ -633,6 +633,53 @@ else
   _warn "hyperfine" "missing (benchmark skipped)"
 fi
 
+# 7. Baseline check + top-3 slowest tools from EVALCACHE_TIMING.
+# Closes part of #863. Reads the same baseline file `dot perf` writes,
+# and the same eval-timings.jsonl _cached_eval populates. Skipped
+# silently when either file is absent (first-run state).
+baseline_file="$cache_base/dotfiles/perf-baseline.json"
+if [[ -s "$baseline_file" ]] && command -v python3 >/dev/null 2>&1; then
+  baseline_age_days=$(python3 -c '
+import json, sys, datetime
+try:
+    d = json.load(open(sys.argv[1]))
+    rec = d.get("recorded_at", "")
+    if not rec: print(-1); sys.exit(0)
+    rec = rec.replace("Z", "+00:00")
+    age = (datetime.datetime.now(datetime.timezone.utc) - datetime.datetime.fromisoformat(rec)).days
+    print(age)
+except Exception:
+    print(-1)
+' "$baseline_file" 2>/dev/null)
+  if [[ "$baseline_age_days" -ge 0 ]]; then
+    _ok "perf baseline" "recorded ${baseline_age_days}d ago — run \`dot perf\` to compare"
+  fi
+fi
+
+timings_file="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/eval-timings.jsonl"
+if [[ -s "$timings_file" ]] && command -v python3 >/dev/null 2>&1; then
+  top_tools=$(python3 -c '
+import json, sys
+from collections import defaultdict
+samples = defaultdict(list)
+try:
+    for line in open(sys.argv[1]):
+        try:
+            ev = json.loads(line)
+            ms = int(ev.get("ms", 0) or 0)
+            samples[ev.get("label", "?")].append(ms)
+        except Exception:
+            pass
+    rows = sorted(samples.items(), key=lambda kv: sum(kv[1]) // max(len(kv[1]), 1), reverse=True)[:3]
+    print(", ".join(f"{lbl}({sum(v)//max(len(v),1)}ms)" for lbl, v in rows))
+except Exception:
+    pass
+' "$timings_file" 2>/dev/null)
+  if [[ -n "$top_tools" ]]; then
+    _ok "perf top-tools" "$top_tools"
+  fi
+fi
+
 # --- Summary ---
 dot_log info "doctor_complete" "errors=$Errors" "warnings=$Warnings"
 dot_metric "doctor_errors" "$Errors" "count"

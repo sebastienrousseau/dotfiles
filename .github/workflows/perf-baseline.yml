@@ -1,0 +1,150 @@
+name: Perf Baseline
+
+# Weekly perf baseline + regression alert. Closes #863's CI half.
+#
+# Flow:
+#   1. Restore the previous week's baseline from a workflow artifact.
+#   2. Apply the dotfiles + record current means via `dot perf --json`.
+#   3. If any shell regressed by >10% vs the restored baseline, open
+#      (or comment on) a tracking issue.
+#   4. Upload the current measurement as the next week's restore source.
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'  # Sunday 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read       # restore previous baseline artifact
+  issues: write       # open regression issues
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  baseline:
+    name: Perf / Baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Chezmoi
+        uses: ./.github/actions/setup-chezmoi
+
+      - name: Install zsh + bash + fish
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y zsh fish
+
+      - name: Apply dotfiles
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.config/chezmoi"
+          echo "sourceDir = \"$GITHUB_WORKSPACE\"" > "$HOME/.config/chezmoi/chezmoi.toml"
+          chezmoi apply --exclude=scripts --keep-going || true
+
+      - name: Restore previous baseline
+        id: restore
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.cache/dotfiles"
+
+          # Pull the most recent baseline artifact from prior runs.
+          gh run list \
+            --workflow=perf-baseline.yml \
+            --status=success \
+            --limit=20 \
+            --json databaseId,createdAt \
+            > runs.json 2>/dev/null || echo '[]' > runs.json
+
+          PREV_ID=$(jq -r '.[0].databaseId // empty' runs.json)
+          if [ -n "$PREV_ID" ]; then
+            gh run download "$PREV_ID" \
+              --name perf-baseline \
+              --dir "$HOME/.cache/dotfiles" 2>/dev/null \
+              || echo "::notice::No previous baseline artifact — first run."
+          fi
+
+          if [ -s "$HOME/.cache/dotfiles/perf-baseline.json" ]; then
+            echo "has_baseline=true" >> "$GITHUB_OUTPUT"
+            echo "Previous baseline restored:"
+            cat "$HOME/.cache/dotfiles/perf-baseline.json"
+          else
+            echo "has_baseline=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Measure current perf
+        id: measure
+        run: |
+          set -euo pipefail
+          bash scripts/diagnostics/perf.sh --json > /tmp/perf-current.json
+          echo "Current measurement:"
+          cat /tmp/perf-current.json
+          regression_count=$(jq -r '.regression_count // 0' /tmp/perf-current.json)
+          echo "regression_count=$regression_count" >> "$GITHUB_OUTPUT"
+
+      - name: Open regression issue
+        if: steps.measure.outputs.regression_count != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          title="Perf baseline regression detected ($(date -u +%Y-%m-%d))"
+          body=$(cat <<EOF
+          The weekly perf-baseline workflow reports regression(s) vs the last recorded baseline.
+
+          \`\`\`json
+          $(cat /tmp/perf-current.json)
+          \`\`\`
+
+          Triage:
+          - Identify which commit since the last baseline introduced the regression.
+          - Either revert / fix the cause, OR if the new baseline is intentional, run \`dot perf --baseline\` locally and commit the result, then dismiss this issue.
+
+          See \`docs/operations/PERFORMANCE.md\` for the budget + lifecycle.
+
+          Tracked under #863.
+          EOF
+          )
+
+          existing=$(gh issue list \
+            --search 'Perf baseline regression detected' \
+            --state open \
+            --json number \
+            --jq '.[0].number' 2>/dev/null || true)
+
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create \
+              --title "$title" \
+              --body "$body" \
+              --label "type:performance,priority:medium"
+          fi
+
+      - name: Record new baseline
+        run: |
+          set -euo pipefail
+          # The workflow's own perf.sh writes the file in --baseline mode;
+          # invoke it that way to keep the format stable.
+          bash scripts/diagnostics/perf.sh --baseline >/dev/null 2>&1 || true
+          cp "$HOME/.cache/dotfiles/perf-baseline.json" /tmp/perf-baseline.json
+
+      - name: Upload new baseline artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: perf-baseline
+          path: /tmp/perf-baseline.json
+          retention-days: 90
