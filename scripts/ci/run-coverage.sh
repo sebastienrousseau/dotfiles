@@ -105,20 +105,49 @@ done
 echo "kcov runs: $passed passed, $failed failed" >&2
 
 # -----------------------------------------------------------------------------
-# Diagnostic: show the structure + content of the first kcov output dir.
+# Diagnostic: find any cobertura.xml with non-empty classes so we can
+# see what kcov actually managed to instrument. Also report which tests
+# produced any class data at all.
 # -----------------------------------------------------------------------------
+nonempty=0
+sample_nonempty=""
+while IFS= read -r cob; do
+  if grep -q '<class ' "$cob" 2>/dev/null; then
+    nonempty=$((nonempty + 1))
+    [[ -z "$sample_nonempty" ]] && sample_nonempty="$cob"
+  fi
+done < <(find "$COVERAGE_DIR" -path '*.kcov/*/cobertura.xml')
+
+echo "── diagnostic: $nonempty / 447 cobertura.xml files have non-empty <class> entries ──" >&2
+
+if [[ -n "$sample_nonempty" ]]; then
+  echo "── diagnostic: head of non-empty sample $sample_nonempty ──" >&2
+  head -30 "$sample_nonempty" >&2
+fi
+
+# Always show the first test's cobertura too so we know what an empty
+# one looks like.
 first_kcov=$(find "$COVERAGE_DIR" -maxdepth 1 -name '*.kcov' -type d | sort | head -1)
 if [[ -n "$first_kcov" ]]; then
-  echo "── diagnostic: $first_kcov contents ──" >&2
+  echo "── diagnostic: alphabetically-first kcov dir contents ──" >&2
   find "$first_kcov" -type f | head -10 >&2
-  sample_cob=$(find "$first_kcov" -name 'cobertura.xml' | head -1)
-  if [[ -n "$sample_cob" ]]; then
-    echo "── diagnostic: head of $sample_cob ──" >&2
-    head -40 "$sample_cob" >&2
-    echo "── diagnostic: line/class counts in sample ──" >&2
-    grep -c '<class ' "$sample_cob" >&2 || true
-    grep -c '<line ' "$sample_cob" >&2 || true
-  fi
+fi
+
+# Run kcov on one known-good test directly so we can verify the
+# baseline mechanic before declaring the test wrapping broken.
+echo "── diagnostic: direct kcov on validate-chezmoidata script ──" >&2
+direct_out="$COVERAGE_DIR/_direct.kcov"
+rm -rf "$direct_out"
+PATH="/usr/bin:/bin" kcov \
+  --include-path="$KCOV_INCLUDE_PATH" \
+  --exclude-path="$KCOV_EXCLUDE_PATH" \
+  "$direct_out" \
+  bash "$REPO_ROOT/scripts/ci/validate-chezmoidata.sh" >&2 2>&1 || true
+direct_cob=$(find "$direct_out" -name 'cobertura.xml' | head -1)
+if [[ -n "$direct_cob" ]]; then
+  echo "── direct cobertura class count: $(grep -c '<class ' "$direct_cob" 2>/dev/null || echo 0) ──" >&2
+  echo "── direct cobertura content (head 30) ──" >&2
+  head -30 "$direct_cob" >&2
 fi
 
 # -----------------------------------------------------------------------------
