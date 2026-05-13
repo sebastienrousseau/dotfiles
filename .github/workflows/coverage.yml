@@ -58,9 +58,16 @@ jobs:
           #   Slice 4: 19.16% measured (smart mocks + subcommand probes), floor=18
           #   Slice 5: 34.10% measured (fn-files exercise + dot-driver
           #            + sandbox dotfiles symlink + xtrace-off filter),
-          #            floor=30 (3-point cushion absorbs platform jitter).
+          #            floor=30.
+          #   Slice 5b: 33.73% honest (PS4 set-u guard + SF: path dedup);
+          #            same floor — the prior figure was inflated by
+          #            duplicate SF: blocks.
+          #   Slice 5c: 36.10% (fn-file exercise on every auto-test).
+          #   Slice 5d: 36.73% (+7 auto-tests for scripts the existing
+          #            test-scan skipped). floor=33 (3-point cushion
+          #            absorbs platform jitter across Linux + macOS).
           # Bump in lockstep with the slice that lands the bump.
-          MIN_COVERAGE_PCT: '30'
+          MIN_COVERAGE_PCT: '33'
         run: bash scripts/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact
