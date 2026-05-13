@@ -180,7 +180,7 @@ jobs:
           retention-days: 5
 
   test-unit:
-    name: Test / Unit Tests (100% Coverage)
+    name: Test / Unit Tests
     uses: ./.github/workflows/reusable-test-suite.yml
     with:
       min_coverage: "100"

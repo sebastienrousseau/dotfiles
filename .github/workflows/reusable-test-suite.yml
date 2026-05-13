@@ -44,7 +44,7 @@ jobs:
         run: |
           set -euo pipefail
           chmod +x tests/framework/*.sh
-          echo "Running unit tests with 100% coverage enforcement..."
+          echo "Running unit tests (real coverage is gated by Coverage / kcov; see #856)..."
 
           TOTAL_SCRIPTS="$(find scripts -name "*.sh" | wc -l)"
           echo "Found $TOTAL_SCRIPTS testable shell scripts"
@@ -68,7 +68,7 @@ jobs:
             exit 1
           fi
 
-          echo "✅ All tests passed - 100% success rate maintained"
+          echo "✅ All tests passed"
 
       - name: Enforce module coverage
         run: |
