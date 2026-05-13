@@ -436,16 +436,16 @@ check_sync_status() {
       check "Chezmoi sync" "pass"
     else
       # Count only entries where column 2 is non-space (apply would do something).
-      local applyable
-      applyable=$(printf '%s\n' "$status_output" | awk 'substr($0,2,1)!=" "' | wc -l | tr -d ' ')
-      if [[ "$applyable" -eq 0 ]]; then
+      local applicable
+      applicable=$(printf '%s\n' "$status_output" | awk 'substr($0,2,1)!=" "' | wc -l | tr -d ' ')
+      if [[ "$applicable" -eq 0 ]]; then
         # All drift is source-only (unstaged edits in the source repo).
         # That's not a sync issue; mention it but pass.
         local source_only
         source_only=$(printf '%s\n' "$status_output" | wc -l | tr -d ' ')
         check "Chezmoi sync" "pass" "$source_only source-only edit(s) (run 'chezmoi diff' to inspect)"
       else
-        check "Chezmoi sync" "warn" "$applyable file(s) out of sync"
+        check "Chezmoi sync" "warn" "$applicable file(s) out of sync"
       fi
     fi
   else
