@@ -6,8 +6,8 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
-source "$SCRIPT_DIR/../../framework/property_testing.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
+source "$SCRIPT_DIR/../../framework/property_testing.sh"
 
 # Source the function under test
 FUNC_FILE="$REPO_ROOT/.chezmoitemplates/functions/security/genpass.sh"
