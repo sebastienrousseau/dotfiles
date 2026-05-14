@@ -30,7 +30,7 @@ Regressions are triaged within one Monday cycle: identify the check
 that dropped, either remediate or file an exception entry below with
 a rationale and an expiry date.
 
-## Per-check posture (snapshot)
+## Per-check posture (snapshot, master HEAD)
 
 The checks below come from OpenSSF Scorecard's published rubric. Tick
 marks reflect this repo's posture at the time of writing — the
@@ -38,30 +38,75 @@ marks reflect this repo's posture at the time of writing — the
 
 | Check | Status | Notes |
 |---|---|---|
-| Branch-Protection | ✓ | `master` requires signed commits, linear history, required checks. Codified at `.github/rulesets/master.json` and `.github/branch-protection-config.json`. |
-| Code-Review | ✓ | Every PR requires at least one approval; CODEOWNERS in place. |
+| Branch-Protection | ⚠ | `master` requires signed commits, linear history, required checks (`.github/rulesets/master.json`). Scorecard can't read classic protection rules without a fine-grained PAT, so this check reports as `-1` ("internal error"). |
+| Code-Review | ⚠ | Single-maintainer repo; PRs are self-merged after CI. Scorecard scores 0/30 here by design — see `Open findings` below. |
 | Signed-Commits | ✓ | Enforced by pre-push hook (`scripts/git-hooks/pre-push`) and at-push by branch protection (#853 + #857). |
 | Dependency-Update-Tool | ✓ | Dependabot configured for github-actions / npm / docker / devcontainers / uv. |
-| Fuzzing | ⚠ | `install.sh` fuzz harness lives under `tests/fuzz/` (closes #881). Coverage is the script's CLI surface plus chaos input fixtures — not full corpus fuzzing yet. |
+| Fuzzing | ⚠ | `install.sh` fuzz harness lives under `tests/fuzz/` (closes #881), but it's shell-based and Scorecard's heuristic only recognizes OSS-Fuzz / ClusterFuzzLite / native Go fuzz / libFuzzer / Atheris. None support shell. Property tests under `tests/unit/functions/test_property_*.sh` cover the closest equivalent surface. |
 | License | ✓ | Apache-2.0 at repo root. |
-| Maintained | ✓ | Active commit cadence; the [README](../../README.md) lists the current `dotfiles_version` (v0.2.501). |
-| Pinned-Dependencies | ✓ | Every workflow action is pinned to a 40-char commit SHA; the lint rule under `actionlint` enforces this on PR. |
+| Maintained | ✓ | Active commit cadence; the [README](../../README.md) lists the current `dotfiles_version`. |
+| Pinned-Dependencies | ⚠ | Closed 8 of 14 findings this cycle (every Dockerfile base + every workflow action + 2 `curl \| sh` installers + the `npm install -g npm` upgrade step). 5 residual findings stay open by design — see `Open findings`. |
 | SAST | ✓ | CodeQL (`.github/workflows/codeql.yml`) + Checkov + Grype. |
 | SBOM | ✓ | Generated per PR by `sbom-diff.yml` and per release by `security-release.yml`. |
 | Security-Policy | ✓ | `.github/SECURITY.md` + this page + `docs/security/THREAT_MODEL.md`. |
-| Token-Permissions | ✓ | Workflows use least-privilege `permissions:` blocks. `harden-runner` adoption (#878) tightens this further. |
+| Token-Permissions | ✓ | Top-level `permissions:` blocks restricted to `contents: read`. `write` scopes scoped to the jobs that need them (#886). |
 | Vulnerabilities | ✓ | Grype gate hard-fails on `high` / `critical` on `master` (#852). |
 | Webhooks | n/a | No external webhooks configured. |
-| CI-Tests | ✓ | Comprehensive CI matrix (Linux + macOS Intel + Apple Silicon, optional Windows). |
-| CII-Best-Practices | ☐ | Not applied yet — see "Open work" below. |
+| CI-Tests | ✓ | Linux + macOS Intel + Apple Silicon matrix; optional Windows. |
+| CII-Best-Practices | ☐ | Not applied yet — see `Open work` below. |
 | Dangerous-Workflow | ✓ | No `pull_request_target` with checkout-PR-code anti-pattern. |
 | Packaging | ✓ | `npm publish --provenance` via OIDC (`.github/workflows/npm-publish.yml`); `policy-bundle-release.yml` for the policy artifact. |
+| Signed-Releases | ⚠ | SLSA provenance + minisig attached via `security-release.yml`; Cosign keyless signing tracked at #876. |
+
+## Open findings
+
+The eight items below are surfaced as alerts at
+<https://github.com/sebastienrousseau/dotfiles/security/code-scanning>.
+Each row gives the dismissal **reason** and the exact **comment text**
+to paste when triaging.
+
+### Bucket 1 — Dismiss in the UI (5 items)
+
+Scorecard flags every `npm install`, `pip install`, `go install`, and
+`curl | sh` invocation under the `Pinned-Dependencies` check. The five
+below either belong to user-facing "update everything" aliases or are
+false positives in Scorecard's regex.
+
+| Path | Reason | Comment to paste |
+|---|---|---|
+| `.chezmoitemplates/aliases/legal/legal.aliases.sh:64` | **Won't fix** | User-facing convenience alias — `go install <fortune-style joke command>@latest`. Pinning by SHA would require users to update the alias manually on every upstream change. Intentional. |
+| `.chezmoitemplates/aliases/update/update.aliases.sh:173` | **Won't fix** | User-facing convenience alias — bulk-update wrapper around `npm`. The alias's purpose is to update everything; pinning defeats it. Intentional. |
+| `dot_local/bin/executable_update:99` | **Won't fix** | `dot_local/bin/executable_update` is the user-invoked "update everything" command. The literal point of `npm update -g` is to update to whatever's latest. Pinning defeats it. Intentional. |
+| `scripts/dot/commands/tools.sh:121` | **False positive** | `npm install --package-lock-only --ignore-scripts --silent` generates a lockfile and does NOT fetch packages. Scorecard's regex matches `npm install` blindly; this invocation has no supply-chain surface. |
+| `install/provision/run_onchange_10-linux-packages.sh.tmpl:369` | **Won't fix** | Already exact-version-pins `aider-chat==0.86.2`. Scorecard wants sha256-hash pinning, which would require a ~2,700-line lockfile covering all 108 transitive deps and re-generated on every aider release — disproportionate maintenance for a single optional provisioning install. |
+
+### Bucket 2 — Architectural (1 item)
+
+| Alert | Why architectural |
+|---|---|
+| `CodeReviewID` (high) — score 0 | Scorecard requires every merged PR to record an approval review by a different GitHub user than the author. This repo is single-maintainer; PRs are self-merged after CI. The fix path is either (a) onboard a co-maintainer who reviews PRs before merge, or (b) accept the finding. Dismiss as **Won't fix** with comment: "Single-maintainer project — no second reviewer available. CI gates (47 required checks per PR) substitute for human review." |
+
+### Bucket 3 — External action (2 items)
+
+| Alert | Action |
+|---|---|
+| `FuzzingID` (medium) | Dismiss as **Won't fix** with comment: "Repo is bash + Go-template + Lua. ClusterFuzzLite / OSS-Fuzz / native Go fuzz / libFuzzer / Atheris (the frameworks Scorecard recognises) all target compiled languages, none support shell. The `tests/fuzz/fuzz_install.sh` harness + property tests under `tests/unit/functions/test_property_*.sh` cover the equivalent surface." |
+| `CIIBestPracticesID` (low) | Apply at <https://www.bestpractices.dev/projects/new>. ~67 self-attested questions, free, 1-2 hours. After silver-tier approval, paste the badge into `README.md` next to the existing Scorecard badge. Most criteria already met (signed commits, CI, security policy, license). |
+
+## Closed this cycle
+
+| Date | Score | Alerts open | Change |
+|---|---|---|---|
+| 2026-05-14 | 6.5 | 28 | First clean publish after fixing the scorecard.yml `uses:`-only restriction (#885). Findings had been hidden by publish-step 400s until then. |
+| 2026-05-14 | 6.5 | 11 | Closed 17 of 28: 10× TokenPermissions (#886), 6× Dockerfile bases (#886), 1× gitleaks fixture (#884). |
+| 2026-05-14 | 6.5 | 9 | Closed 2× `curl \| sh` installers (#888). |
+| 2026-05-14 | 6.5 | 8 | Closed 1× `npm install -g npm@…` via Node 24 bump (#889). |
 
 ## Open work
 
-- Apply for the [OpenSSF Best Practices badge (CII)](https://www.bestpractices.dev/) and embed it next to the Scorecard badge. (Maintainer action — needs the project to register with the BestPractices.dev site.)
-- Once `harden-runner` is in `block` mode across all jobs (#878), the **Token-Permissions** check should hit its maximum.
-- Once Cosign keyless signing is wired into the release pipeline (#876), the **Signed-Releases** check should hit its maximum.
+- **Apply for the OpenSSF Best Practices Badge** — see Bucket 3 above.
+- **Wire Cosign keyless signing into the release pipeline (#876)** — should push `Signed-Releases` to its maximum.
+- **`harden-runner` block-mode adoption (#878)** — should tighten the `Token-Permissions` check further.
 
 ## Exceptions
 
@@ -72,9 +117,24 @@ marks reflect this repo's posture at the time of writing — the
 If you add an exception, include the check name, an expiry date
 (don't allow indefinite), and the rationale. Re-evaluate every quarter.
 
+## Refreshing this document
+
+```bash
+# Re-count open alerts:
+gh api 'repos/sebastienrousseau/dotfiles/code-scanning/alerts?state=open&per_page=50' \
+  --jq '[.[].rule.id] | group_by(.) | map({rule: .[0], count: length})'
+
+# Trigger Scorecard manually:
+gh workflow run scorecard.yml --ref master
+```
+
+If a new category appears, add a row to the matching bucket. If a
+remediation closes one of the rows above, delete the row.
+
 ## References
 
-- `.github/workflows/scorecard.yml` — the scanner.
+- `.github/workflows/scorecard.yml` — the scanner workflow (split into
+  `analysis` + `track-regression` jobs per #885).
 - [Scorecard project](https://github.com/ossf/scorecard).
 - [Scorecard checks reference](https://github.com/ossf/scorecard/blob/main/docs/checks.md).
-- Issue [#869](https://github.com/sebastienrousseau/dotfiles/issues/869).
+- Tracking issue [#869](https://github.com/sebastienrousseau/dotfiles/issues/869).
