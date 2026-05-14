@@ -32,17 +32,15 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Setup Node.js
+        # Node 24 LTS bundles npm >= 11, which is the minimum
+        # OIDC Trusted Publishing requires. With this we no longer
+        # need a follow-up `npm install -g npm@…` step; removing
+        # that step also closes the matching Scorecard
+        # `Pinned-Dependencies` finding on this workflow.
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: '20'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
-
-      # Trusted Publishing (OIDC) requires npm >= 11.5.1. Node 20 ships
-      # with npm 10.x, so upgrade explicitly. Pinned to a known-good major.
-      - name: Upgrade npm for Trusted Publishing
-        # Pinned to an exact version per Scorecard's Pinned-
-        # Dependencies check. Bump on the next npm major.
-        run: npm install -g npm@11.5.1
 
       - name: Verify package.json
         run: |
@@ -82,7 +80,10 @@ jobs:
       - name: Setup Node.js for GPR
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: '20'
+          # Match the publish-npm job's Node 24; keeps both pipelines
+          # on the same npm major and avoids surprise behavioural diffs
+          # between npm 10 and npm 11.
+          node-version: '24'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@sebastienrousseau'
 
