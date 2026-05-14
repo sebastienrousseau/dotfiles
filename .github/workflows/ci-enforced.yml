@@ -33,7 +33,7 @@ jobs:
   # ============================================================================
   lint-shell:
     name: Lint / Shell (Zero Warnings)
-    uses: ./.github/workflows/reusable-shell-lint.yml
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
     with:
       include_tests: false
       shellcheck_severity: error
@@ -44,7 +44,7 @@ jobs:
 
   lint-lua:
     name: Lint / Lua (Zero Warnings)
-    uses: ./.github/workflows/reusable-lua-lint.yml
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
     with:
       target: dot_config/nvim
       strict: true
@@ -58,7 +58,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: ./.github/workflows/reusable-nix-lint.yml
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
     with:
       flake_dir: nix
       run_fmt_check: true
@@ -67,7 +67,7 @@ jobs:
 
   lint-copyright:
     name: Lint / Copyright Headers (Zero Tolerance)
-    uses: ./.github/workflows/reusable-copyright-lint.yml
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
 
   # ============================================================================
   # STAGE 2: SECURITY (Mandatory - No bypass allowed)
@@ -187,7 +187,7 @@ jobs:
 
   test-unit:
     name: Test / Unit Tests
-    uses: ./.github/workflows/reusable-test-suite.yml
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
     with:
       min_coverage: "100"
       run_integration: true

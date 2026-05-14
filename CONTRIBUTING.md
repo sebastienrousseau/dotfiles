@@ -17,6 +17,11 @@ Use a signed commit:
 git commit -S -m "fix: concise summary"
 ```
 
+Signed commits are **enforced** at three layers (local commit-msg
+hook, local pre-push hook, GitHub Ruleset). An unsigned commit cannot
+reach `master`. Full SSH and GPG setup recipes plus verification
+commands live in [`docs/security/COMMIT_SIGNING.md`](docs/security/COMMIT_SIGNING.md).
+
 The pre-push audit is **mandatory by default**. If you need to bypass
 it for a single push (rare, almost never on `master`), see
 [`docs/security/AUDIT_BYPASS.md`](docs/security/AUDIT_BYPASS.md). The

@@ -4,7 +4,87 @@ render_with_liquid: false
 
 # Key Rotation Guide
 
-This guide covers rotating encryption keys for secrets managed by Age and SOPS.
+This page tracks two distinct key lifecycles:
+
+1. **Disclosure key** — the GPG key reporters use to encrypt vulnerability reports to the maintainer. Single key, public, rotated annually or on compromise. Source of truth for the active fingerprint is `.github/SECURITY.md`.
+2. **Secrets encryption keys** — the Age and SOPS keys that protect encrypted dotfiles in this repo. Multiple keys, per-machine, rotated annually or on personnel / device change.
+
+Both sections live here so a single audit can confirm the project's
+posture across encrypted-disclosure-in and encrypted-secrets-at-rest.
+
+## Disclosure Key (GPG)
+
+Closes the rotation half of [#870](https://github.com/sebastienrousseau/dotfiles/issues/870).
+
+### Active key
+
+| Field | Value |
+|---|---|
+| Identity | `security@sebastienrousseau.com` |
+| Fingerprint | **PLACEHOLDER** — paste the full 40-hex fingerprint from `gpg --fingerprint` once the key is generated |
+| Algorithm | ED25519 *(or RSA-4096 for the legacy line)* |
+| Created | YYYY-MM-DD |
+| Expires | YYYY-MM-DD (one year from creation) |
+| WKD URL | <https://sebastienrousseau.com/.well-known/openpgpkey/hu/qpzqfwauiwxnu1xrf5h47bunsho44p6f> |
+| Cross-reference | matches the SSH signing key in `dot_config/git/allowed_signers.tmpl` |
+
+### Rotation triggers
+
+| Trigger | Response time | Action |
+|---|---|---|
+| Annual cadence | Within 30 days of expiry | Generate new key, publish, sign transition statement with the old key, archive old key below. |
+| Suspected compromise | Same day | Revoke immediately, publish revocation cert to WKD, replay in-flight encrypted disclosures with the new key. |
+| Algorithm deprecation | Within 90 days of advisory | Generate replacement on a stronger algorithm; follow annual-cadence steps. |
+| Maintainer change | Same day as handover | Old maintainer signs a transition statement; old key revoked 30 days after handover. |
+
+### Rotation procedure
+
+1. Generate the new key (air-gapped where possible):
+
+   ```sh
+   gpg --quick-generate-key \
+     "Sebastien Rousseau (Security) <security@sebastienrousseau.com>" \
+     ed25519 sign 1y
+   ```
+
+2. Sign a transition statement with the OLD key:
+
+   ```sh
+   gpg --clearsign <<EOF
+   Transition statement, $(date -u +%Y-%m-%dT%H:%M:%SZ).
+   The disclosure key for security@sebastienrousseau.com rotates from:
+     OLD: <old-fingerprint>
+     NEW: <new-fingerprint>
+   Encrypted reports sent to either key during the 30-day overlap
+   will be accepted. After <UTC-cutoff>, only the new key is honoured.
+   EOF
+   ```
+
+3. Publish the new key to:
+   - `sebastienrousseau.com/.well-known/openpgpkey/hu/` (WKD)
+   - the maintainer's keyoxide profile if applicable
+
+4. Update the "Active key" table above with the new fingerprint and
+   move the previous row into the "Historical disclosure keys"
+   table below with the actual revocation date.
+
+5. Commit, signing with both old and new keys during the overlap:
+
+   ```sh
+   git commit -S -m "security(key): rotate disclosure key $(date +%Y-%m)" \
+     -m "$(cat transition.asc)"
+   ```
+
+6. After the 30-day overlap, revoke the old key and publish the
+   revocation cert to the same WKD endpoint.
+
+### Historical disclosure keys
+
+| From | Until | Fingerprint | Reason for rotation |
+|---|---|---|---|
+| *(none yet — first key)* | *—* | *—* | *—* |
+
+---
 
 ## Age Key Rotation
 
