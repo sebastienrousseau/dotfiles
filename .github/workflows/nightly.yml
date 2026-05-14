@@ -204,9 +204,11 @@ jobs:
         run: |
           echo "Testing with Go-built shfmt..."
 
-          # Install Go and build latest shfmt
+          # Install Go and build a pinned shfmt. Scorecard's
+          # Pinned-Dependencies check flags `@latest`; refresh
+          # this tag with each shfmt release.
           sudo apt-get update && sudo apt-get install -y golang-go
-          go install mvdan.cc/sh/v3/cmd/shfmt@latest
+          go install mvdan.cc/sh/v3/cmd/shfmt@v3.13.1
 
           echo "Running development shfmt..."
           ~/go/bin/shfmt -version

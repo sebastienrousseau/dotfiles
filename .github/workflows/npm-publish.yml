@@ -40,7 +40,9 @@ jobs:
       # Trusted Publishing (OIDC) requires npm >= 11.5.1. Node 20 ships
       # with npm 10.x, so upgrade explicitly. Pinned to a known-good major.
       - name: Upgrade npm for Trusted Publishing
-        run: npm install -g npm@^11.5.1
+        # Pinned to an exact version per Scorecard's Pinned-
+        # Dependencies check. Bump on the next npm major.
+        run: npm install -g npm@11.5.1
 
       - name: Verify package.json
         run: |
