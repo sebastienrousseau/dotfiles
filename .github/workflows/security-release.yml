@@ -10,15 +10,18 @@ on:
         required: true
         type: string
 
+# Least-privilege top-level — Scorecard's Token-Permissions check
+# flags top-level write scopes. The release-attaching jobs below
+# carry their own `contents: write` declarations.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   sbom:
     name: Release / SBOM
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write   # upload SBOM as release asset
     outputs:
       hash: ${{ steps.hash.outputs.hash }}
     steps:

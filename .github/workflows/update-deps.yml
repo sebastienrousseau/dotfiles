@@ -11,9 +11,11 @@ on:
         default: 'false'
         type: boolean
 
+# Least-privilege top-level — the update-dependencies job pushes
+# branches and opens PRs; its `contents:write` + `pull-requests:write`
+# are scoped to the job rather than granted workflow-wide.
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 env:
   BRANCH_NAME: deps/auto-update-${{ github.run_number }}
@@ -23,6 +25,9 @@ jobs:
     name: Update Dependencies
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: write           # push update branch
+      pull-requests: write      # open PR
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1

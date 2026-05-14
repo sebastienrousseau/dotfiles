@@ -28,10 +28,10 @@ on:
     - cron: '0 4 * * 2'   # Tuesday 04:00 UTC — after Dependabot
   workflow_dispatch:
 
+# Least-privilege top-level — write scopes are granted on the
+# validate job only (Scorecard's Token-Permissions check).
 permissions:
   contents: read
-  security-events: write
-  issues: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -42,6 +42,10 @@ jobs:
     name: deps.dev / direct deps
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write   # upload deps.dev SARIF
+      issues: write            # open advisory tracking issue
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
