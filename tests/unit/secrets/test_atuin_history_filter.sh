@@ -67,20 +67,24 @@ matches_any_pattern() {
   return 1
 }
 
+# Every entry below is a TEST FIXTURE for the atuin history-filter —
+# we feed each one to the filter and assert it gets blocked. Gitleaks
+# would otherwise flag the bait values as real leaks, so each line
+# carries `# gitleaks:allow` to suppress the false positive.
 LEAKED_FIXTURES=(
-  "export AWS_SECRET_ACCESS_KEY=ASIA1234567890ABCDEF"
-  "export ANTHROPIC_API_KEY=sk-ant-api03-AAAA"
-  "PASSWORD=hunter2 ./deploy.sh"
-  "aws configure set aws_secret_access_key wxyz"
-  "gcloud auth login --no-launch-browser"
-  "kubectl --kubeconfig=/tmp/k get pods"
-  "curl -H 'Authorization: Bearer eyJhbGc...' https://api"
-  "git clone https://user:tokenABC@github.com/org/repo.git"
-  "vault read secret/prod/db"
-  "op read 'op://Vault/Item/credential'"
-  "ssh-keygen -t ed25519 -C 'me@host'"
-  "psql postgres://admin:p4ss@db.internal:5432/main"
-  "GH_TOKEN=ghp_xxx gh auth status"
+  "export AWS_SECRET_ACCESS_KEY=ASIA1234567890ABCDEF" # gitleaks:allow
+  "export ANTHROPIC_API_KEY=sk-ant-api03-AAAA" # gitleaks:allow
+  "PASSWORD=hunter2 ./deploy.sh" # gitleaks:allow
+  "aws configure set aws_secret_access_key wxyz" # gitleaks:allow
+  "gcloud auth login --no-launch-browser" # gitleaks:allow
+  "kubectl --kubeconfig=/tmp/k get pods" # gitleaks:allow
+  "curl -H 'Authorization: Bearer eyJhbGc...' https://api" # gitleaks:allow
+  "git clone https://user:tokenABC@github.com/org/repo.git" # gitleaks:allow
+  "vault read secret/prod/db" # gitleaks:allow
+  "op read 'op://Vault/Item/credential'" # gitleaks:allow
+  "ssh-keygen -t ed25519 -C 'me@host'" # gitleaks:allow
+  "psql postgres://admin:p4ss@db.internal:5432/main" # gitleaks:allow
+  "GH_TOKEN=ghp_xxx gh auth status" # gitleaks:allow
 )
 
 BENIGN_FIXTURES=(
