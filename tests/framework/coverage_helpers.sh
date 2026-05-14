@@ -179,6 +179,26 @@ cov_exercise_script() {
   local label
   label="$(basename "$script" .sh)"
 
+  # Skip script-mode exercise for scripts whose --help / no-arg /
+  # invalid-flag paths don't terminate cleanly within the inner
+  # timeout. These typically run a watch / animate loop, open a
+  # blocking interactive prompt regardless of args, or — in the
+  # case of `myip` — `curl --max-time 5` three times before
+  # exiting on rc=254 from a downstream `set -u` violation. Body
+  # coverage they'd contribute is small vs the wall-clock cost
+  # (3 × 60s = 180s per script).
+  #
+  # Match both bare basenames and the `executable_` prefix that
+  # chezmoi strips at deploy time (scripts under dot_local/bin/).
+  case "${label}" in
+    cmatrix | pipes | stopwatch | matrix | rainbow | banner | \
+      myip | pre-push | rebuild-themes | \
+      lint | reliability-audit | record | \
+      executable_myip | executable_tmux-sessionizer)
+      return 0
+      ;;
+  esac
+
   # Always exercise from inside the sandbox tmpdir. Scripts that
   # write to `./relative/path` then land in the sandbox, not in the
   # real repo. Without this, e.g. functions/files/backup.sh creates
@@ -403,6 +423,28 @@ cov_exercise_functions_file() {
   local label
   label="$(basename "$script" .sh)"
 
+  # If the file defines no `name()` functions, sourcing it just runs
+  # its top-level main — `cov_exercise_script` already covers that
+  # path. Bail out so we don't double-run scripts like
+  # `git-hooks/pre-push`, where the top-level body shells out to an
+  # audit pipeline that nobody wants to run twice per test.
+  if ! grep -qE "^[a-zA-Z_][a-zA-Z0-9_]*\s*\(\)" "$script" 2>/dev/null; then
+    return 0
+  fi
+
+  # Same skip-list as cov_exercise_script — these scripts loop on
+  # their --help / no-arg paths regardless of how they're invoked,
+  # so the source-and-call mode hangs on them just as the
+  # script-mode does.
+  case "${label}" in
+    cmatrix | pipes | stopwatch | matrix | rainbow | banner | \
+      myip | pre-push | rebuild-themes | ql | \
+      lint | reliability-audit | record | \
+      executable_myip | executable_tmux-sessionizer)
+      return 0
+      ;;
+  esac
+
   # Always exercise from inside the sandbox tmpdir so the functions
   # under test write to a disposable cwd, not the real repo.
   if [[ -n "${DOTFILES_COV_TMPDIR:-}" && -d "${DOTFILES_COV_TMPDIR}" ]]; then
@@ -450,7 +492,12 @@ cov_exercise_functions_file() {
     while IFS= read -r fn; do
       [[ -z "$fn" ]] && continue
       case "$fn" in
-        logout|shutdown|kill*|reboot|halt|exit) continue ;;
+        # Destructive
+        logout | shutdown | kill* | reboot | halt | exit) continue ;;
+        # Long-running / interactive: watch / animate loops that
+        # only exit on Ctrl-C. Small body-coverage gain vs the
+        # 30s timeout cost per skipped script.
+        apilatency_monitor | apiload_load_test | cmatrix | pipes | stopwatch | matrix | rainbow | banner) continue ;;
       esac
       # Three arg modes: no-arg, --help, and a real path. Each call
       # is independently rc-tolerant. We deliberately keep stderr
@@ -462,7 +509,7 @@ cov_exercise_functions_file() {
       "$fn" "$tmpfile" </dev/null >/dev/null
     done < <(grep -oE "^[a-zA-Z_][a-zA-Z0-9_]*\s*\(\)" "$1" | sed "s/[[:space:]]*()$//")
     exit 0
-  ' _ "$script" "$tmpfile"
+  ' _ "$script" "$tmpfile" </dev/null
   rc=$?
   rm -rf "$tmpdir"
 

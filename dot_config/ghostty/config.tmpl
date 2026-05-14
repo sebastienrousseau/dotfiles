@@ -133,10 +133,10 @@ keybind = ctrl+k=clear_screen
 ################
 # Colors       #
 ################
-{{- $t := index .themes (default "macos-monterey-dark" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "macos-monterey-dark" -}}{{- end }}
+{{- $t := index .themes (default "big-sur-dark" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "big-sur-dark" -}}{{- end }}
 {{- $tt := $t -}}
-{{- $themeName := default "macos-monterey-dark" .theme -}}
+{{- $themeName := default "big-sur-dark" .theme -}}
 {{- if hasSuffix "-light" $themeName -}}
   {{- $darkTheme := index .themes (printf "%s-dark" (trimSuffix "-light" $themeName)) -}}
   {{- if $darkTheme -}}{{- $tt = $darkTheme -}}{{- end -}}

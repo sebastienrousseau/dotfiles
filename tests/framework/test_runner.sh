@@ -91,7 +91,7 @@ run_test_file_worker() {
     bash "$test_file" </dev/null 2>&1 || exit_status=$?
     # Append exit status sentinel for the aggregator
     printf 'EXIT_STATUS:%d\n' "$exit_status"
-  } > "$out_file" 2>&1
+  } >"$out_file" 2>&1
 }
 
 # Aggregate per-file outputs (for parallel mode), replay them in
@@ -128,7 +128,8 @@ aggregate_parallel_results() {
 # Run a list of test files. Honours $JOBS (set by main).
 # Args: <header-text> <test-file...>
 run_test_list() {
-  local header="$1"; shift
+  local header="$1"
+  shift
   [[ $# -eq 0 ]] && return 0
 
   echo ""

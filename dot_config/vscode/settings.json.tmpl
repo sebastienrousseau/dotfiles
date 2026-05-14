@@ -1,7 +1,7 @@
 {
   // Theme Configuration - Dynamically set based on chezmoi theme variable
-{{- $t := index .themes (default "macos-monterey-dark" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "macos-monterey-dark" -}}{{- end }}
+{{- $t := index .themes (default "big-sur-dark" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "big-sur-dark" -}}{{- end }}
   "workbench.colorTheme": "{{ $t.app.vscode }}",
   "workbench.preferredDarkColorTheme": "{{ $t.app.vscode_dark }}",
   "workbench.preferredLightColorTheme": "{{ $t.app.vscode_light }}",
