@@ -359,10 +359,14 @@ fi
 # Aider (Python-based)
 if ! command -v aider >/dev/null; then
   log_info "Installing Aider..."
+  # Pinned per Scorecard's Pinned-Dependencies check. Refresh on
+  # each aider-chat release. The pin uses `==`, not `>=`, so a
+  # yanked version is a hard fail rather than a silent upgrade.
+  AIDER_PIN="aider-chat==0.86.2"
   if command -v uv >/dev/null; then
-    uv tool install aider-chat || log_warn "Aider install via uv failed. Install manually with: pip install aider-chat"
+    uv tool install "$AIDER_PIN" || log_warn "Aider install via uv failed. Install manually with: pip install $AIDER_PIN"
   elif command -v pip3 >/dev/null; then
-    python3 -m pip install --user aider-chat || log_warn "Aider install via pip failed."
+    python3 -m pip install --user "$AIDER_PIN" || log_warn "Aider install via pip failed."
   else
     log_info "Skipping Aider install: neither uv nor pip found."
   fi
