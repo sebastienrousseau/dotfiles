@@ -477,11 +477,16 @@ cov_exercise_functions_file() {
   echo "sample" >"$tmpfile"
 
   test_start "${label}_functions_exercised"
+  # shellcheck disable=SC2016
+  # SC2016: `$1` and `$2` inside the bash -c body are INTENDED to
+  # expand in the inner shell, not the outer one — they're the
+  # positional args passed via `_ "$script" "$tmpfile"` below.
+  # Single quotes here are deliberate.
   ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} bash -c '
     set +e
-    # Keep stderr connected — `2>/dev/null` on the source line
-    # would discard the bash xtrace lines for every command the
-    # sourced file executes, hiding ~all of its setup coverage.
+    # Keep stderr connected — 2>/dev/null on the source line would
+    # discard the bash xtrace lines for every command the sourced
+    # file executes, hiding ~all of its setup coverage.
     # shellcheck disable=SC1090
     source "$1"
     tmpfile="$2"

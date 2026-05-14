@@ -127,10 +127,13 @@ for entry in "${PROBES[@]}"; do
   label="${entry%% *}"
   cmd="${entry#* }"
   cmd="${cmd# }"
-  # shellcheck disable=SC2086
   test_start "dot_${label}"
+  # `$cmd` is INTENDED to word-split into separate argv entries
+  # (e.g. `agent list` → `agent`, `list`). Quoting it would pass
+  # the whole string as a single positional arg.
   # Keep stderr connected so bash xtrace from sub-shells is captured
-  # by the parent test runner. `2>&1 >/dev/null` would suppress it.
+  # by the parent test runner; `2>&1 >/dev/null` would suppress it.
+  # shellcheck disable=SC2086
   "${TC[@]}" bash "$DOT" $cmd </dev/null >/dev/null
   rc=$?
   # rc 124 = timeout (hung subcommand). Anything else = ran to exit.
