@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Roadmap
 
 This roadmap steers the project from a "feature-rich dotfiles repo" to an **Enterprise-Grade Shell Distribution**. The structure is organized by strategic pillars (**Trust**, **Predictability**, **Observability**) rather than linear phases, though the original 100-Phase vision is preserved within these categories.
@@ -5,6 +9,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 ---
 
 ## Reproducibility
+
 **Goal:** "Reproducible Shell Environments".
 > *This distribution aims for deterministic rebuilds: the same tag yields the same environment across machines.*
 
@@ -17,6 +22,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 - [ ] **Terraform Provider (Phase 28)**: Custom provider to provision dotfiles state.
 
 ## Observability
+
 **Goal:** "Observable Shell Lifecycle".
 > *The shell is instrumented: failures, timing, and lifecycle events are visible by design.*
 
@@ -28,6 +34,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 - [ ] **Update Manager (Phase 39)**: Visual interface for tool updates and migration.
 
 ## Secrets
+
 **Goal:** "Explicit Secrets Model".
 > *Secrets are never committed; sensitive state is encrypted or host-local by default.*
 
@@ -39,6 +46,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 - [ ] **OIDC Auth (Phase 29)**: Keyless authentication via GitHub OIDC.
 
 ## Toolchain
+
 **Goal:** "Composable Shell Layers".
 > *The distribution is layered: core safety is mandatory, advanced features are opt-in.*
 
@@ -46,62 +54,67 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 - [ ] **UX Layer**: Prompt (Starship), Aliases, Completions.
 - [ ] **Toolchain Layer**: Rust replacements (`eza`, `bat`, `ripgrep`).
 - [ ] **Cross-Compiler Toolchain (Phase 34)**:
-    - [ ] **Multi-Arch**: `qemu-user-static` for ARM64/AMD64.
-    - [ ] **Wasm Target**: WebAssembly toolchain setup.
-    - [ ] **Embedded Dev**: Presets for Arduino/ESP32.
+  - [ ] **Multi-Arch**: `qemu-user-static` for ARM64/AMD64.
+  - [ ] **Wasm Target**: WebAssembly toolchain setup.
+  - [ ] **Embedded Dev**: Presets for Arduino/ESP32.
 
 ## Opt-in features
+
 **Goal:** "Explicit Feature Flags".
 > *Advanced features are gated behind explicit opt-in flags.*
 
 - [ ] **Feature Toggles**: Environment variables (e.g., `ENABLE_AI=0`, `ENABLE_HISTORY_SYNC=0`).
 - [ ] **Lazy Loading**: Strict lazy-loading for all non-core plugins.
 - [ ] **Plugin Ecosystem (Phase 35)**:
-    - [ ] **Module Registry**: Public index of dotfiles modules.
-    - [ ] **Dependency Solving**: Semantic versioning for modules.
-    - [ ] **Verified Publishers**: Cryptographic signing for "Official" modules.
+  - [ ] **Module Registry**: Public index of dotfiles modules.
+  - [ ] **Dependency Solving**: Semantic versioning for modules.
+  - [ ] **Verified Publishers**: Cryptographic signing for "Official" modules.
 
 ## Safety
+
 **Goal:** "Documented Threat Model".
 > *Security decisions are driven by an explicit, documented threat model.*
 
 - [x] **Threat Model Doc**: A lightweight document defining the trust boundary (Local Machine). See `docs/security/THREAT_MODEL.md`.
 - [ ] **Supply Chain**: Verification steps for upstream dependencies.
 - [ ] **Identity & Access (Phase 40)**:
-    - [ ] **SSH Certs**: Short-lived SSH Certificates.
-    - [ ] **YubiKey Bio**: Biometric enforcement for `sudo`.
-    - [ ] **PAM Modules**: Custom auth modules.
-    - [ ] **Auditd Rules**: Pre-configured audit rules.
+  - [ ] **SSH Certs**: Short-lived SSH Certificates.
+  - [ ] **YubiKey Bio**: Biometric enforcement for `sudo`.
+  - [ ] **PAM Modules**: Custom auth modules.
+  - [ ] **Auditd Rules**: Pre-configured audit rules.
 
 ## Validation
+
 **Goal:** "Self-Validating Environment".
 > *The environment can validate itself after installation or update.*
 
 - [x] **Smoke Tests**: Automated verification of key aliases (`ls`, `git`, `docker`).
 - [x] **CI Validation**: GitHub Actions workflow to boot and verify the shell syntax.
 - [x] **Chaos Engineering (Phase 41)**:
-    - [ ] **Config Chaos**: Randomly corrupt config files to test recovery.
-    - [ ] **Network Simulation**: Simulate high latency/packet loss.
-    - [ ] **Permission Fuzzing**: Verify strict umask behavior.
+  - [ ] **Config Chaos**: Randomly corrupt config files to test recovery.
+  - [ ] **Network Simulation**: Simulate high latency/packet loss.
+  - [ ] **Permission Fuzzing**: Verify strict umask behavior.
 
 ## Distribution
+
 **Goal:** "Supported Platforms Matrix".
 > *Only listed platforms are guaranteed to work; others are best-effort.*
 
 - [x] **Support Matrix**: Explicit table of OS/Version support. See `docs/reference/SUPPORT_MATRIX.md`.
 - [ ] **Windows Deep Integration (Phase 53)**:
-    - [ ] **PowerShell Profile**: Mirror Zsh functionality.
-    - [ ] **WinGet**: Declarative package management.
-    - [ ] **WSL Bridge**: Seamless interop.
+  - [ ] **PowerShell Profile**: Mirror Zsh functionality.
+  - [ ] **WinGet**: Declarative package management.
+  - [ ] **WSL Bridge**: Seamless interop.
 - [ ] **Linux Deep Integration (Phase 55)**:
-    - [x] **Systemd User Units**: User service management.
-    - [ ] **Desktop Envs**: GNOME/KDE/Sway configs.
+  - [x] **Systemd User Units**: User service management.
+  - [ ] **Desktop Envs**: GNOME/KDE/Sway configs.
 
 ---
 
 ## Future
 
 ### Domain-Specific Environments
+
 - [ ] **Data Science (Phase 38)**: Conda/Mamba, GPU Config, Jupyter.
 - [ ] **Network Topologies (Phase 56)**: Mesh Networks, Tor, Private VPNs.
 - [ ] **Build Systems (Phase 57)**: Bazel, Maven/Gradle, CMake.
@@ -112,6 +125,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 - [ ] **Bio-Informatics (Phase 70)**: Genomics, PDB, FASTA.
 
 ### Enterprise & Operations
+
 - [ ] **Collaborations (Phase 45)**: Pair Programming, Team Sync, ChatOps.
 - [ ] **Database DevOps (Phase 46)**: DB Clients, Local Docker DBs, Migrations.
 - [ ] **Serverless (Phase 47)**: Lambda, Edge Workers, Wasm.
@@ -120,6 +134,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 - [ ] **Recruiting & HR (Phase 94)**: Resume Generators, coding interview sets.
 
 ### Accessibility & Legacy
+
 - [ ] **Accessibility (Phase 36)**: Screen Reader optimization, High Contrast.
 - [ ] **Legacy Modernization (Phase 42)**: Mainframe/Unix support, PowerShell Core.
 
@@ -128,12 +143,14 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 ## Completed
 
 ### Core Foundations
+
 - [x] **Universal Config (Chezmoi) (Phase 1)**
 - [x] **Shell Environment (Phase 2)**
 - [x] **Tool Modernization (Phase 3)**
 - [x] **Performance Optimization (Phase 4)**
 
 ### Hardened Security
+
 - [x] **Security & Validation (Phase 5)**
 - [x] **Package Management (Phase 6)**
 - [x] **Hardened Security (Phase 21)**
@@ -141,6 +158,7 @@ This roadmap steers the project from a "feature-rich dotfiles repo" to an **Ente
 - [x] **Legal & Licensing (Phase 92)**: FOSSology, Headers, CLA.
 
 ### Experience
+
 - [x] **Documentation (Phase 25)**: DocSite, Interactive Tour.
 - [x] **Self-Healing (Phase 27)**: Doctor, Auto-Repair.
 - [x] **OS Bundling (Phase 26)**: XDG Compliance, Vendor Hooks.

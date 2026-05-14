@@ -5,8 +5,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 TEST_SCRIPT="$REPO_ROOT/scripts/ops/release.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "release_exists"
 assert_file_exists "$TEST_SCRIPT" "release.sh should exist"
@@ -23,5 +27,8 @@ fi
 test_start "release_shebang"
 first_line=$(head -n 1 "$TEST_SCRIPT")
 assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
+
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$TEST_SCRIPT"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

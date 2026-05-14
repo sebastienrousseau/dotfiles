@@ -14,6 +14,7 @@ This code provides a set of command aliases to make common tasks and
 commands more convenient and faster to execute. These aliases range from
 general purpose to system monitoring and file system navigation.
 Some of the most useful aliases include:
+
 - `c`: shortcut for the `clear` command to clear the terminal screen.
 - `p`: shortcut for the `pwd` command to display the current working
   directory.

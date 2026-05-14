@@ -11,6 +11,7 @@ These aliases are defined in `macOS.aliases.sh` and are automatically loaded by 
 ## Aliases
 
 This code provides a set of aliases for macOS.
+
 - `clds` Recursively delete .DS_Store files.
 - `clls`  Clean up LaunchServices to remove duplicates in the
   'Open With' menu.

@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Appendix A: Platform Support Matrix
 
 ## Supported Platforms

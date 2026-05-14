@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Cross-Platform Interoperability
 
 How dotfiles commands and shims map across macOS, Linux, and WSL2.
@@ -24,13 +28,17 @@ How dotfiles commands and shims map across macOS, Linux, and WSL2.
 ## Troubleshooting
 
 ### WSL2 IO Latency
+
 Keep projects in the Linux filesystem (`~/...`), not under `/mnt/c/`.
 
 ### WSL2 Windows Binary Path
+
 If you've disabled WSL path sharing, make sure Windows-side binaries like `clip.exe` and `explorer.exe` are still reachable in `$PATH`.
 
 ### macOS Permissions
+
 Grant your terminal "Full Disk Access" in System Settings so dotfiles can manage all configurations.
 
 ### Linux GUI Fallbacks
+
 In headless environments, GUI commands like `cb` and `open` fall back to `gum log` or terminal bell instead of hanging.

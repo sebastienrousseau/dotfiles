@@ -37,6 +37,11 @@ jobs:
     # Only run on pull requests
     if: github.event_name == 'pull_request'
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Checkout with full history
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
@@ -144,6 +149,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
@@ -152,20 +162,35 @@ jobs:
           echo "Scanning for insecure curl commands..."
           VIOLATIONS=""
 
+          # The repo's own insecure-pattern detector
+          # (scripts/ci/check-insecure-tls.sh) MUST mention the literal
+          # flag strings it's hunting for. Its unit test also has to
+          # write a tiny fixture containing `curl -k` to verify the
+          # detector flags it. Exclude both from every grep below so
+          # the scanner doesn't flag itself or its tests.
+          EXCL=(
+            --exclude=check-insecure-tls.sh
+            --exclude=test_check_insecure_tls.sh
+            --exclude-dir=tests
+          )
+
           # Pattern: curl -k or curl --insecure (disables TLS verification)
           if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" --include="*.tmpl" \
+               "${EXCL[@]}" \
                -E '(^|[[:space:]])curl([[:space:]][^|;#]*)?[[:space:]](--insecure|-k)([[:space:]]|$)' . 2>/dev/null | grep -v "^Binary"; then
             VIOLATIONS="${VIOLATIONS}Found curl with -k/--insecure flag (disables TLS verification)\n"
           fi
 
           # Pattern: wget --no-check-certificate
           if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" --include="*.tmpl" \
+               "${EXCL[@]}" \
                -E 'wget\s+[^|;]*--no-check-certificate' . 2>/dev/null | grep -v "^Binary"; then
             VIOLATIONS="${VIOLATIONS}Found wget with --no-check-certificate flag\n"
           fi
 
           # Pattern: curl without https (http://)
           if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" --include="*.tmpl" \
+               "${EXCL[@]}" \
                -E "curl[[:space:]][^|;#]*http://" . 2>/dev/null | grep -v "^Binary" | grep -Ev 'http://(localhost|127\.0\.0\.1)'; then
             VIOLATIONS="${VIOLATIONS}Found curl using http:// instead of https://\n"
           fi
@@ -203,8 +228,18 @@ jobs:
         run: |
           echo "Scanning for dangerous permission patterns..."
 
+          # The scanner script (scripts/ci/check-dangerous-chmod.sh)
+          # AND its functional test write the literal patterns 777/666
+          # as fixtures. Exclude both, plus the tests/ tree.
+          EXCL=(
+            --exclude=check-dangerous-chmod.sh
+            --exclude=test_check_dangerous_chmod.sh
+            --exclude-dir=tests
+          )
+
           # Pattern: chmod 777 or chmod -R 777 (world-writable)
           if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" \
+               "${EXCL[@]}" \
                -E 'chmod\s+(-R\s+)?777' . 2>/dev/null | grep -v "^Binary" | grep -v "#"; then
             echo "::error::Found chmod 777 (world-writable) - security risk"
             exit 1
@@ -212,6 +247,7 @@ jobs:
 
           # Pattern: chmod 666 (world-writable files)
           if grep -rn --include="*.sh" --include="*.bash" --include="*.zsh" \
+               "${EXCL[@]}" \
                -E 'chmod\s+(-R\s+)?666' . 2>/dev/null | grep -v "^Binary" | grep -v "#"; then
             echo "::error::Found chmod 666 (world-writable) - security risk"
             exit 1
@@ -227,9 +263,14 @@ jobs:
     uses: ./.github/workflows/reusable-shell-lint.yml
     with:
       include_tests: false
+      # Severity widened to `warning` and the gate flipped to hard-fail
+      # under #857. Previously this was a silent soft-fail, hiding
+      # drift in portability findings. SC1090/1091/2034 stay excluded
+      # because they fire on every sourced library + the
+      # already-tracked _cleanup_files unused-but-trapped pattern.
       shellcheck_severity: warning
       shellcheck_excludes: SC1090,SC1091,SC2034
-      fail_on_shellcheck: false
+      fail_on_shellcheck: true
       run_shfmt: false
 
   portability:
@@ -238,6 +279,11 @@ jobs:
     timeout-minutes: 5
     needs: [portability-shell-lint]
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
@@ -287,6 +333,11 @@ jobs:
     timeout-minutes: 5
     # Only run if Dockerfiles exist
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
@@ -331,6 +382,11 @@ jobs:
     needs: [verify-signatures, insecure-patterns, portability-shell-lint, portability, dockerfile-lint]
     if: always()
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Generate Summary
         run: |
           echo "## Compliance Guard Summary" >> "$GITHUB_STEP_SUMMARY"

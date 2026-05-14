@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 set -euo pipefail
 
-# Dotfiles CLI Entry Point - v0.2.500
+# Dotfiles CLI Entry Point - v0.2.501
 
 # Ensure XDG Base Directory variables are set
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -21,7 +21,7 @@ if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
   . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
 fi
 
-VERSION="0.2.500"
+VERSION="0.2.501"
 
 COMMAND="${1:-}"
 if [ -n "${1:-}" ]; then
@@ -344,12 +344,19 @@ ai-setup|ai
 ai-query|ai
 cl|ai
 claude|ai
+codex|ai
+copilot|ai
 gemini|ai
+goose|ai
 kiro|ai
 sgpt|ai
 ollama|ai
 opencode|ai
 aider|ai
+autohand|ai
+vibe|ai
+qwen|ai
+zai|ai
 env|tools
 profile|tools
 tools|tools

@@ -8,8 +8,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 SECRETS_FILE="$REPO_ROOT/scripts/dot/commands/secrets.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 # Test: secrets.sh file exists
 test_start "secrets_cmd_file_exists"
@@ -103,4 +107,7 @@ fi
 
 echo ""
 echo "Secrets commands tests completed."
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$SECRETS_FILE"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

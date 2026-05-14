@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Font configuration
 
 How fonts are set up, rendered, and installed in these dotfiles.

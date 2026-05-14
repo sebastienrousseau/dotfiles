@@ -13,6 +13,7 @@ These aliases are defined in `disk-usage.aliases.sh` and are automatically loade
 This code provides a set of command aliases to help users manage disk
 usage on a Unix-based system.
 The following aliases are provided:
+
 - `du`: Display the disk usage of the current directory.
 - `du1`: Show the file size of files and directories in the current
   directory.

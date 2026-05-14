@@ -1,0 +1,60 @@
+{
+  "_comment": "Rulesets-as-code for the `master` branch. Apply via:  gh api -X POST repos/sebastienrousseau/dotfiles/rulesets --input .github/rulesets/master.json  (or PATCH /rulesets/<id> to update an existing one). The descriptive `branch-protection-config.json` sibling captures the same intent in human-readable form; this file is the machine spec consumed by the GitHub API. See #857 + #853.",
+  "name": "master-protection",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "include": ["refs/heads/master"],
+      "exclude": []
+    }
+  },
+  "bypass_actors": [],
+  "rules": [
+    {
+      "type": "deletion"
+    },
+    {
+      "type": "non_fast_forward"
+    },
+    {
+      "type": "required_linear_history"
+    },
+    {
+      "type": "required_signatures"
+    },
+    {
+      "type": "pull_request",
+      "parameters": {
+        "required_approving_review_count": 1,
+        "dismiss_stale_reviews_on_push": true,
+        "require_code_owner_review": true,
+        "require_last_push_approval": true,
+        "required_review_thread_resolution": true
+      }
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": true,
+        "required_status_checks": [
+          {"context": "Lint / Shell (Zero Warnings)"},
+          {"context": "Lint / Lua (Zero Warnings)"},
+          {"context": "Lint / Nix (Zero Warnings)"},
+          {"context": "Security / Secrets Scan"},
+          {"context": "Security / Dependency Audit"},
+          {"context": "Security / Infrastructure Scan"},
+          {"context": "Test / ubuntu-latest"},
+          {"context": "Test / macos-latest"},
+          {"context": "Test / Unit Tests"},
+          {"context": "Coverage / kcov"},
+          {"context": "Test / Integration"},
+          {"context": "Type Check / Strict Mode"},
+          {"context": "Merge Gate"},
+          {"context": "Compliance Summary"},
+          {"context": "Reliability Summary"}
+        ]
+      }
+    }
+  ]
+}

@@ -1,8 +1,12 @@
-name: Nightly Extended Tests
+name: Weekly Extended Tests
 
 on:
   schedule:
-    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+    # Weekly on Sunday at 02:00 UTC. Previously ran daily, but the jobs
+    # below (beta tool detection, older-macOS regression, extended OS
+    # matrix) do not need daily cadence — and burned ~6 of 7 nightly
+    # runs for no real signal. See #861.
+    - cron: '0 2 * * 0'
   workflow_dispatch:
 
 permissions:
@@ -27,6 +31,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Check Chezmoi updates
@@ -115,22 +124,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, macos-13]  # Include older macOS
+        # macos-13 was retired from GitHub-hosted runners in late 2025.
+        # macos-15-intel is the supported Intel runner; macos-14 is the
+        # canonical Apple Silicon runner; macos-latest tracks the newest.
+        # Together these give Intel + ASi + bleeding-edge coverage.
+        os: [ubuntu-latest, macos-latest, macos-15-intel, macos-14]
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - name: Cache Chezmoi
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
-        with:
-          path: ~/.local/bin/chezmoi
-          key: chezmoi-${{ runner.os }}-${{ env.CHEZMOI_VERSION }}
-
       - name: Setup Chezmoi
-        run: |
-          if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
-            bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
-          fi
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+        uses: ./.github/actions/setup-chezmoi
 
       - name: Extended compatibility test
         run: |
@@ -165,6 +173,11 @@ jobs:
     timeout-minutes: 15
     continue-on-error: true  # Beta tools may fail
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Test with latest shellcheck
@@ -213,6 +226,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0  # Full history for comprehensive scan
@@ -272,16 +290,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Install dependencies
         run: |
           sudo apt-get update && sudo apt-get install -y zsh hyperfine jq
 
-      - name: Setup environment
+      - name: Setup Chezmoi
+        uses: ./.github/actions/setup-chezmoi
+
+      - name: Apply dotfiles
         run: |
-          bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
           mkdir -p "$HOME/.config/chezmoi"
           echo "sourceDir = \"$PWD\"" > "$HOME/.config/chezmoi/chezmoi.toml"
           chezmoi apply --exclude=scripts
@@ -363,6 +387,11 @@ jobs:
     needs: [dependency-updates, extended-os-matrix, beta-tools-test, security-extended, performance-tracking]
     if: always()
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Generate summary
         run: |
           echo "# 🌙 Nightly Test Summary" > summary.md

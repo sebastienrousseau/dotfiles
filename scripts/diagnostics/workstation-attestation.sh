@@ -9,6 +9,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+# Export so child processes (the mcp-doctor subprocess below) inherit it
+# without the env-prefix dance that confuses shellcheck (SC2097/SC2098).
+export REPO_ROOT
 
 # shellcheck source=../dot/lib/ui.sh
 source "$SCRIPT_DIR/../dot/lib/ui.sh"
@@ -91,7 +94,9 @@ if [[ -z "$current_profile" ]] && [[ -f "$agent_profile_file" ]]; then
   current_profile="$(jq -r '.defaultProfile // "ask"' "$agent_profile_file")"
 fi
 
-mcp_summary="$(REPO_ROOT="$REPO_ROOT" MCP_CONFIG="$REPO_ROOT/dot_config/claude/mcp_servers.json" bash "$REPO_ROOT/scripts/diagnostics/mcp-doctor.sh" --strict --json)"
+MCP_CONFIG="$REPO_ROOT/dot_config/claude/mcp_servers.json"
+export MCP_CONFIG
+mcp_summary="$(bash "$REPO_ROOT/scripts/diagnostics/mcp-doctor.sh" --strict --json)"
 
 attestation_json="$(
   jq -n \

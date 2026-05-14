@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # ADR-005: Chezmoi as Dotfiles Manager
 
 **Status**: Accepted
@@ -7,6 +12,7 @@
 ## Context
 
 Managing dotfiles across multiple machines requires:
+
 - Version control for configuration files
 - Template support for machine-specific values
 - Cross-platform compatibility (macOS, Linux, WSL)
@@ -65,6 +71,7 @@ chezmoi apply
 ## Consequences
 
 ### Positive
+
 - Consistent configuration across all machines
 - Secure secrets management with age encryption
 - Easy to add new machines to the fleet
@@ -72,12 +79,14 @@ chezmoi apply
 - Built-in diff and dry-run for safe updates
 
 ### Negative
+
 - Learning curve for Go templates
 - Additional abstraction layer over raw Git
 - Requires chezmoi binary installation
 - Some features (scripts) require careful ordering
 
 ### Neutral
+
 - Configuration stored in `~/.local/share/chezmoi` by default
 - Custom wrapper CLI (`dot`) provides simpler interface
 - Regular `git` commands still work in source directory
@@ -87,3 +96,4 @@ chezmoi apply
 - [Chezmoi Documentation](https://www.chezmoi.io/)
 - [Chezmoi Quick Start](https://www.chezmoi.io/quick-start/)
 - [Comparison with Other Tools](https://www.chezmoi.io/comparison-table/)
+{% endraw %}

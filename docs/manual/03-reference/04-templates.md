@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # Reference: Template Variables
 
 Every variable available to chezmoi templates (`.tmpl` files).
@@ -8,7 +13,7 @@ Flat top-level keys:
 
 | Variable | Type | Example |
 |:---|:---|:---|
-| `.dotfiles_version` | string | `"0.2.500"` |
+| `.dotfiles_version` | string | `"0.2.501"` |
 | `.theme` | string | `"tahoe-dark"` |
 | `.machine` | string | `"macbook-t2"` |
 | `.profile` | string | `"laptop"` |
@@ -182,3 +187,4 @@ If any template fails to render, the build breaks before merge.
 - [Chezmoi template reference](https://www.chezmoi.io/reference/templates/)
 - [Configuration Files](02-config-files.md)
 - [Create a Profile tutorial](../02-tutorials/03-create-profile.md)
+{% endraw %}

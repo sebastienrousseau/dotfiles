@@ -2,6 +2,8 @@
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2030,SC2031
 # Regression: Integration tests — module interop and third-party communication.
+# Regression for: d7e7c2bc (v0.2.499 baseline)
+# Why: End-to-end integration regressions across chezmoi + mise + dot CLI + shell init.
 
 set -euo pipefail
 

@@ -2,7 +2,7 @@
 
 Tools for regulatory compliance and privacy enforcement.
 
-##  Controls
+## Controls
 
 | Alias | Description |
 |-------|-------------|

@@ -9,6 +9,10 @@
 # These functions are only used in test code and should never be called with
 # untrusted input. All eval calls carry a shellcheck disable directive.
 
+# Re-source guard: re-sourcing would reset the TESTS_* counters mid-run.
+[[ "${_DOT_LIB_ASSERTIONS_LOADED:-0}" == "1" ]] && return 0
+_DOT_LIB_ASSERTIONS_LOADED=1
+
 TESTS_RUN=0
 TESTS_PASSED=0
 TESTS_FAILED=0

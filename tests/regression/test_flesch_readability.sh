@@ -3,6 +3,8 @@
 # shellcheck disable=SC1090,SC1091,SC2030,SC2031
 # Regression: Flesch reading compliance — validates that user-facing
 # documentation meets plain-English readability standards.
+# Regression for: d7e7c2bc (v0.2.499 baseline)
+# Why: Doc-readability regressions — every shipped manual page must meet a Flesch score threshold.
 #
 # Target: Flesch Reading Ease 60-70 (Standard/Plain English, 8th-9th grade)
 # Method: Proxy metrics (sentence length, word complexity, passive voice)

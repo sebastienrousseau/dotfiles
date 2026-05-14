@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Dotfiles Maintenance Runbook
 
 This runbook captures recovery and release maintenance operations for this repository.
@@ -27,7 +31,7 @@ This runbook captures recovery and release maintenance operations for this repos
 ```bash
 git verify-commit HEAD
 gh run list --workflow ci.yml --branch master --limit 1
-gh release view v0.2.500 --json tagName,targetCommitish,url
+gh release view v0.2.501 --json tagName,targetCommitish,url
 ```
 
 ## Release Closeout Checklist

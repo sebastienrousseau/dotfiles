@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Localization Readability Audit
 
 Note: Flesch metrics are English-centric. For localized pages, they are used as a plain-language proxy when Latin word boundaries are available.

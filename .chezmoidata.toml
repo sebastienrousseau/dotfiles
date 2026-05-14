@@ -1,5 +1,5 @@
 # Active profile - change this to switch configurations
-dotfiles_version = "0.2.500"
+dotfiles_version = "0.2.501"
 profile = "laptop"
 
 # Machine preset — set per-host in ~/.config/chezmoi/chezmoi.toml:
@@ -8,8 +8,13 @@ profile = "laptop"
 # See .chezmoidata/hardware.toml for available presets.
 machine = ""
 
-# Visual theme
-theme = "altai-light"
+# Visual theme — must be a key in .chezmoidata/themes.toml. Templates
+# that consult `.theme` (dot_gitconfig.tmpl, dot_config/alacritty/
+# alacritty.toml.tmpl, etc.) crash with `no entry for key` when this
+# names a theme that isn't defined. The hard-coded fallback in
+# dot_gitconfig.tmpl is `macos-monterey-dark`, which also isn't a
+# valid key — so the default has to render on its own.
+theme = "big-sur-dark"
 
 # Terminal settings
 terminal_font_family = "JetBrainsMono Nerd Font"

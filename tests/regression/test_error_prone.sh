@@ -2,6 +2,8 @@
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2030,SC2031
 # Regression: Error-prone areas — historically complex or fragile workflows.
+# Regression for: d7e7c2bc (v0.2.499 baseline)
+# Why: Regressions for historically-bug-prone constructs: unquoted vars, set -e gaps, locale traps.
 
 set -euo pipefail
 

@@ -257,16 +257,20 @@ TMP_LOG="$install_sandbox/install.log" \
   bash "$INSTALL_SCRIPT" --minimal >/dev/null 2>&1
 cloned_data="$install_sandbox/home/.dotfiles/.chezmoidata.toml"
 clone_log="$(cat "$install_sandbox/install.log")"
-if grep -q -- '--branch v0.2.500' <<<"$clone_log" \
+# Read the current default version from install.sh rather than hardcoding —
+# the repo bumps it at every release and the test would otherwise drift.
+EXPECTED_VERSION="$(grep -oE 'local version="v[0-9.]+"' "$INSTALL_SCRIPT" | head -1 | sed -E 's/.*"(v[0-9.]+)"$/\1/')"
+
+if grep -q -- "--branch $EXPECTED_VERSION" <<<"$clone_log" \
   && grep -q '^profile = "minimal"$' "$cloned_data" \
   && grep -q '^nvim = false$' "$cloned_data" \
   && grep -q '^tmux = false$' "$cloned_data" \
   && grep -q '^zellij = false$' "$cloned_data"; then
   ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --minimal keeps default version pin and rewrites feature flags"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --minimal keeps default version pin ($EXPECTED_VERSION) and rewrites feature flags"
 else
   ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: --minimal should not become the git ref and should rewrite features"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: --minimal should not become the git ref and should rewrite features (expected $EXPECTED_VERSION)"
 fi
 
 # Test: No hardcoded sensitive paths in install

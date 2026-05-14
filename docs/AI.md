@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # AI Integrations (Opt-in)
 
 AI helpers are **off by default**. You choose if and when to turn them on.
@@ -25,7 +29,7 @@ Use the `dot` CLI to run AI tools with added context:
 
 ```bash
 # General usage
-dot cl|copilot|gemini|kiro|sgpt|ollama|opencode|aider|autohand|vibe|qwen|zai --pattern <name> "prompt"
+dot cl|codex|copilot|gemini|goose|kiro|sgpt|ollama|opencode|aider|autohand|vibe|qwen|zai --pattern <name> "prompt"
 
 # Quick aliases
 dcla "Optimize my zshrc"      # Claude + Architect
@@ -40,8 +44,10 @@ Supported bridge commands:
 | Command | Provider |
 |---------|----------|
 | `dot cl` | Claude Code |
+| `dot codex` | OpenAI Codex CLI |
 | `dot copilot` | GitHub Copilot CLI |
 | `dot gemini` | Gemini CLI |
+| `dot goose` | Goose (Block) |
 | `dot kiro` | Kiro CLI |
 | `dot sgpt` | Shell-GPT |
 | `dot ollama` | Ollama |
@@ -78,7 +84,7 @@ Related AI commands:
 
 These tools are not installed for you. Pick and install only the ones you want:
 
-- **Agents**: `claude`, `copilot`
+- **Agents**: `claude`, `codex`, `copilot`, `goose`
 - **Coding assistants**: `aider`, `opencode`
 - **General AI**: `gemini`, `sgpt`
 - **Local-first**: `ollama`

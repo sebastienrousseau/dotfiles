@@ -33,18 +33,26 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: ${{ inputs.timeout_minutes }}
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Unit tests (zero-failure policy)
         run: |
           set -euo pipefail
           chmod +x tests/framework/*.sh
-          echo "Running unit tests with 100% coverage enforcement..."
+          echo "Running unit tests (real coverage is gated by Coverage / kcov; see #856)..."
 
           TOTAL_SCRIPTS="$(find scripts -name "*.sh" | wc -l)"
           echo "Found $TOTAL_SCRIPTS testable shell scripts"
 
-          ./tests/framework/test_runner.sh 2>&1 | tee test_output.log
+          # `--jobs auto` honours #867 parallelism. Invariance under
+          # parallel execution is pinned by
+          # `tests/regression/test_runner_parallel_invariant.sh`.
+          ./tests/framework/test_runner.sh --jobs auto 2>&1 | tee test_output.log
 
           FAILED_TESTS="$(
             grep -a "Total failed:" test_output.log \
@@ -60,7 +68,7 @@ jobs:
             exit 1
           fi
 
-          echo "✅ All tests passed - 100% success rate maintained"
+          echo "✅ All tests passed"
 
       - name: Enforce module coverage
         run: |
@@ -74,7 +82,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "Running integration tests..."
-          RUN_INTEGRATION=1 ./tests/framework/test_runner.sh 2>&1 | tee integration_output.log
+          RUN_INTEGRATION=1 ./tests/framework/test_runner.sh --jobs auto 2>&1 | tee integration_output.log
 
           INTEGRATION_FAILED="$(
             grep -a "Total failed:" integration_output.log \

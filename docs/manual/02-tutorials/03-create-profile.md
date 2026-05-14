@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # Tutorial: Create a Machine Profile
 
 Machine profiles tell chezmoi how to render templates differently on each host — display scale, keyboard layout, performance preset, available features.
@@ -236,3 +241,4 @@ Profiles let one source tree produce correctly-configured output on every host y
 - [Concept: Fleet Architecture](../01-concepts/04-fleet.md)
 - [Reference: Templates](../03-reference/04-templates.md)
 - [Reference: Feature Flags](../03-reference/05-feature-flags.md)
+{% endraw %}

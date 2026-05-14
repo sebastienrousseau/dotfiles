@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # ADR-002: Shell Performance Optimization Strategy
 
 **Status**: Accepted
@@ -12,6 +16,7 @@ configurations (completions, prompts, plugins), startup can easily exceed 1-2
 seconds.
 
 Goals:
+
 - Target startup time: <500ms for interactive shells
 - Maintain full functionality (completions, syntax highlighting, git info)
 - Support both zsh and bash
@@ -84,6 +89,7 @@ zinit light zsh-users/zsh-autosuggestions
 ### Monitoring
 
 Benchmark script to track startup time:
+
 ```bash
 hyperfine --warmup 3 --runs 10 "zsh -i -c exit"
 ```
@@ -93,17 +99,20 @@ CI enforces 500ms threshold with warnings.
 ## Consequences
 
 ### Positive
+
 - Consistent <500ms startup across platforms
 - Full functionality preserved
 - Easy to add new tools without performance regression
 - Clear patterns for contributors to follow
 
 ### Negative
+
 - First invocation of lazy-loaded commands is slower
 - Cache invalidation bugs can cause stale behavior
 - Complexity in understanding load order
 
 ### Neutral
+
 - Profiling required when adding new plugins
 - Trade-off between convenience and performance explicit
 

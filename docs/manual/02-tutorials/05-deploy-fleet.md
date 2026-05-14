@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Tutorial: Deploy to a Fleet
 
 Roll out `.dotfiles` across multiple workstations and verify they're in sync.
@@ -111,7 +115,7 @@ dot fleet attest
 Expected output:
 
 ```
-Fleet Attestation — v0.2.500
+Fleet Attestation — v0.2.501
 
 Host           Git SHA    Policy    Tools OK   Drift   Verified
 -------------- ---------- --------- ---------- ------- --------

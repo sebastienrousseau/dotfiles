@@ -1,0 +1,75 @@
+# .dotfiles
+
+> Workstation-infrastructure dotfiles for macOS, Linux, and WSL. Multi-shell by default (zsh, fish, bash, nushell, PowerShell), with wallpaper-driven terminal themes (K-Means CIELAB + WCAG AAA), first-class agent / MCP governance, signed releases, and a self-healing CLI. Chezmoi-managed. Current version: v0.2.501.
+
+This file is curated for LLM agents indexing the repository. The links below are the *load-bearing* documents — start here, not with `find`.
+
+## Project context
+
+- [README](README.md): top-level overview, hero differentiators, install snippet
+- [CLAUDE.md](CLAUDE.md): repo-scoped instructions for AI agents working inside this codebase
+- [CHANGELOG](CHANGELOG.md): release history in Keep-a-Changelog format
+- [CONTRIBUTING](CONTRIBUTING.md): conventions, commit signing, branch naming, test expectations
+- [LICENSE](LICENSE)
+
+## Architecture & decisions
+
+- [Architecture overview](docs/architecture/): how `.chezmoidata.toml` → templates → deployed files flow
+- [Architecture Decision Records](docs/adr/): MADR-format records of accepted design decisions
+- [Configuration strategy](CONFIG_STRATEGY.md): when to use Chezmoi vs Nix vs runtime data
+- [Manual](docs/manual/): Diátaxis-structured user manual (concepts, tutorials, reference, cookbook, appendices)
+
+## CLI surface
+
+- [`dot` CLI reference](docs/reference/UTILS.md): enumerated subcommands
+- [Aliases reference](docs/reference/ALIASES.md)
+- [Environment variables & feature flags](docs/reference/): `DOTFILES_*` flags and profiles
+- [Source: `scripts/dot/`](scripts/dot/): bash dispatcher + per-command modules
+
+## Security & trust
+
+- [Security policy](.github/SECURITY.md): disclosure SLA (Critical: 24h, High: 72h, Medium: 5d, Low: 10d) and reporting contact
+- [Threat model](docs/security/THREAT_MODEL.md)
+- [Encryption with age + SOPS](docs/security/ENCRYPTION.md)
+- [MCP governance policy](docs/security/MCP_POLICY.md)
+- [Compliance overview](docs/security/COMPLIANCE.md)
+- [Allowed signers (commit signing roots)](dot_config/git/allowed_signers.tmpl)
+- [Custom commit-msg hook (AI attribution + signature)](dot_config/git/hooks/executable_commit-msg)
+
+## Theming (the unique differentiator)
+
+- [Theming overview](docs/themes/)
+- [Theme reference](docs/reference/THEMES.md)
+- [`dot theme rebuild`](scripts/theme/): wallpaper → K-Means CIELAB → WCAG AAA palette
+- [Theme data](.chezmoidata/themes.toml)
+
+## Agent / AI integration
+
+- [A2A interop spec](docs/interop/A2A.md): agent discovery, bounded profiles (ask / plan / apply / audit)
+- [Agent card](.well-known/agent.json)
+- [MCP server configuration](dot_config/claude/)
+
+## CI / CD
+
+- [Workflows](.github/workflows/): 24 workflows incl. `ci-enforced.yml`, `reliability-gate.yml`, `compliance-guard.yml`, `cross-platform-test.yml`, `npm-publish.yml` (OIDC trusted publishing)
+- [Reusable workflows](.github/workflows/reusable-*.yml): 6 shared building blocks
+- [Branch protection config](.github/branch-protection-config.json)
+
+## Testing
+
+- [Test framework](tests/framework/): hand-rolled bash runner with assertions + mocks
+- [Test domains](tests/unit/): 19 subdirectories (aliases, ci, diagnostics, dot-cli, fish, install, nvim, ops, secrets, security, shell, themes, …)
+- [Performance tests](tests/performance/)
+- [Regression tests](tests/regression/)
+
+## Operations
+
+- [Performance diagnostics](scripts/diagnostics/perf.sh): `dot perf`, `EVALCACHE_TIMING`
+- [Health dashboard](scripts/diagnostics/): `dot health`, `dot doctor`
+- [Heal / drift](scripts/ops/): `dot heal`, `dot drift`, `dot rollback`
+
+## Optional
+
+- [Demo recordings](docs/themes/) and screenshots
+- [`mise.toml`](mise.toml): pinned tool versions (canonical version manager)
+- [`flake.nix`](flake.nix): Nix-based reproducible environment

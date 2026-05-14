@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Appendix D: Bibliography
 
 Cited works and recommended reading.
@@ -51,4 +55,4 @@ Cited works and recommended reading.
 
 ## Author
 
-- **Rousseau, S.** *Dotfiles v0.2.500.* <https://github.com/sebastienrousseau/dotfiles>
+- **Rousseau, S.** *Dotfiles v0.2.501.* <https://github.com/sebastienrousseau/dotfiles>

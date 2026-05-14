@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Support Matrix
 
 Tested platform and tool combinations for the dotfiles distribution.
@@ -31,10 +35,12 @@ Tested platform and tool combinations for the dotfiles distribution.
 | Terminal | Status | Notes |
 |----------|--------|-------|
 | Ghostty | Supported | Primary, custom config in `dot_config/ghostty/` |
-| iTerm2 | Supported | macOS, profile config included |
-| Alacritty | Supported | Config in `dot_config/alacritty/` |
-| Kitty | Supported | Config in `dot_config/kitty/` |
-| WezTerm | Supported | Config in `dot_config/wezterm/` |
+| iTerm2 | Supported | macOS only; auto-installed Dynamic Profile via `run_onchange_22-iterm2-profile.sh.tmpl` (pick "dotfiles" profile in iTerm2) |
+| Alacritty | Supported | Theme-driven, config in `dot_config/alacritty/` |
+| Kitty | Supported | Theme-driven, config in `dot_config/kitty/` |
+| WezTerm | Supported | Theme-driven, config in `dot_config/wezterm/` |
+| Foot | Supported | Linux/Wayland, gated by `features.foot`, config in `dot_config/foot/` |
+| Warp | Supported | Theme-driven, deploys to `~/.warp/themes/dotfiles.yaml`; pick "dotfiles" in Warp Settings → Appearance → Themes |
 | Windows Terminal | Supported | WSL2 profile |
 | tmux | Supported | Config in `dot_config/tmux/` |
 

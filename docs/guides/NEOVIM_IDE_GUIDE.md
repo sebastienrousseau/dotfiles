@@ -1,6 +1,11 @@
+---
+render_with_liquid: false
+---
+
 # Neovim
 
 ## Modern Core
+
 - **Requirement**: Neovim >= 0.11.2. The config checks this at startup.
 - **Configuration**: Modular, lazy-loaded configuration based on `lazy.nvim`.
 - **Completion**: `blink.cmp` for fast, keystroke-level completion with LSP, snippets, and path sources.
@@ -8,15 +13,18 @@
 - **LSP**: Full LSP support for diagnostics, code actions, and more, managed by `mason.nvim`.
 
 ## Language Support
+
 - **Rust**: Out-of-the-box support with `rustaceanvim`.
 - **Python**: Full support with `basedpyright`, `ruff`, and `venv-selector`.
 - **Web**: Support for web development with `prettier` and `eslint`.
 
 ## AI Integration
+
 - **Copilot**: `copilot.lua` for code completion. Run `:Copilot auth` to sign in.
 - **Copilot Chat**: AI sidebar for asking questions and getting help (`<leader>cc`).
 
 ## VS Code Parity
+
 - **Problem Panel**: `trouble.nvim` for a VS Code-like problems panel (`<leader>xx`).
 - **Search & Replace**: `nvim-spectre` for project-wide search and replace (`<leader>S`).
 - **Auto-Pairs**: Automatically closes brackets and pairs (via `blink.cmp` auto-brackets).
@@ -25,6 +33,7 @@
 - **Snippets**: Native `vim.snippet` engine (Neovim 0.11+).
 
 ## Keybindings
+
 | Key | Action |
 | --- | --- |
 | `<Space>ff` | Find Files |

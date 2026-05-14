@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Self-Healing
 
 `.dotfiles` detects, diagnoses, and repairs configuration drift, missing tools, broken symlinks, and environmental damage — often without user intervention.
@@ -124,11 +128,13 @@ dot rollback clean        # delete snapshots older than 30 days
 ```
 
 Snapshots include:
+
 - Every file chezmoi would have overwritten
 - The previous `.chezmoidata.toml` and `chezmoi.toml`
 - A pointer to the Git SHA at apply time
 
 They do **not** include:
+
 - Generated caches (`~/.cache/`)
 - Tool binaries (Mise-managed)
 - External state (databases, remote repos)
@@ -138,7 +144,7 @@ They do **not** include:
 `dot bundle` creates a self-contained archive that can restore the workstation without network access:
 
 ```
-dotfiles-bundle-v0.2.500-20260416.tar.zst
+dotfiles-bundle-v0.2.501-20260416.tar.zst
 ├── source/              # Full git clone at current HEAD
 ├── tools/               # Pre-built chezmoi binary + mise
 ├── secrets/             # Age-encrypted snapshot of ~/.config/age/
@@ -173,6 +179,7 @@ Recovery use case: you're stranded on a new machine with no internet. Copy the b
 | Compliance (policy hash match) | 15 |
 
 Scores:
+
 - 90-100 — healthy
 - 70-89 — minor issues
 - 50-69 — needs attention

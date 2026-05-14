@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Compliance Architecture
 
 This document describes the compliance, security, and cross-platform compatibility controls implemented in this repository, mapped to standard regulatory frameworks (SOC 2, ISO 27001, GDPR).
@@ -77,6 +81,7 @@ All network operations require valid TLS certificates:
 | Plaintext HTTP | `http://` URLs | CI warning |
 
 **Files:**
+
 - Pre-commit: `config/pre-commit-config.yaml`
 - CI: `.github/workflows/compliance-guard.yml`
 

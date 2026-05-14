@@ -28,7 +28,7 @@ export FORCE_COLOR_OS="Windows"
 
 {{- $profile := default "laptop" .profile -}}
 {{- $features := default (dict "zsh" true "nvim" true "tmux" true "gui" true "secrets" true) .features -}}
-{{- $theme := default "macos-monterey-dark" .theme -}}
+{{- $theme := default "big-sur-dark" .theme -}}
 {{- $strict_mode := default false (index . "strict_mode") -}}
 {{- $enabled := list -}}
 {{- range $k, $v := $features }}{{- if $v }}{{- $enabled = append $enabled $k }}{{- end }}{{- end }}
@@ -108,27 +108,141 @@ fi
 _SHELL_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
 [[ -d "$_SHELL_CACHE" ]] || mkdir -p "$_SHELL_CACHE"
 
-_cached_eval() {
-  local label=$1; shift
-  local cache="$_SHELL_CACHE/${label}.zsh"
-  local bin="${commands[$1]}"
-  if [[ -f "$cache" ]] && [[ -z "$bin" || "$cache" -nt "$bin" ]]; then
-    source "$cache"
-  else
-    local init_output
-    local suspicious_re
-    init_output=$("$@" 2>/dev/null)
-    suspicious_re='(curl[[:space:]].*\|[[:space:]]*(ba)?sh|wget[[:space:]].*\|[[:space:]]*(ba)?sh|nc[[:space:]]+-e|/dev/tcp/|base64[[:space:]]+-d[[:space:]]*\|)'
-    # Reject suspicious patterns indicating malicious payloads
-    if printf '%s\n' "$init_output" | LC_ALL=C grep -Eqs -- "$suspicious_re"; then
-      print -u2 "[WARN] Suspicious output from $label init, skipping"
-      return 1
-    fi
-    print -r -- "$init_output" > "${cache}.tmp.$$"
-    mv "${cache}.tmp.$$" "$cache"
-    source "$cache"
-    { zcompile "$cache" } &!
+# Append a timing event to ${XDG_STATE_HOME:-~/.local/state}/dotfiles/eval-timings.jsonl.
+# Read by `dot perf --by-tool` to attribute startup time per tool.
+_cached_eval_log_timing() {
+  emulate -L zsh
+  setopt no_clobber 2>/dev/null && unsetopt no_clobber
+  local label="$1" t0="$2" t1="$3" rc="${4:-0}" shell="${5:-zsh}"
+  local log_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
+  [[ -d "$log_dir" ]] || mkdir -p "$log_dir" 2>/dev/null || return 0
+  local logfile="$log_dir/eval-timings.jsonl"
+  [[ -f "$logfile" ]] || touch "$logfile" 2>/dev/null || return 0
+  local ms_int=0
+  if [[ -n "$t0" && -n "$t1" ]]; then
+    ms_int=$(printf '%.0f' "$(( (t1 - t0) * 1000 ))" 2>/dev/null) || ms_int=0
   fi
+  printf '{"ts":"%s","shell":"%s","label":"%s","ms":%s,"rc":%s}\n' \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$shell" "$label" "$ms_int" "$rc" \
+    >> "$logfile" 2>/dev/null || true
+}
+
+# Cache and source a tool's init output, with mtime/realpath/file-arg invalidation.
+#
+# Runs <cmd args...> on cache miss, vets the output for shell-injection
+# patterns, writes atomically, sources, and precompiles via zcompile in
+# the background. Cache invalidates when the binary's mtime is newer,
+# its realpath has changed (PATH-shadow swap), or a file-path argument
+# is newer than the cache.
+#
+# @arg $1 string Cache label (cache file: $_SHELL_CACHE/<label>.zsh)
+# @arg $2..N string Command and args to run on cache miss
+# @env EVALCACHE_DISABLE Set to "true" to bypass cache read AND write
+# @env EVALCACHE_TIMING  Set to "1" to log per-call timing for `dot perf --by-tool`
+# @stdout Sourced cache content
+# @stderr Warning on init failure or suspicious-output rejection
+# @exitcode 0 Cache hit, successful regeneration, or successful bypass
+# @exitcode 1 Suspicious pattern detected in init output
+# @exitcode * Init command's exit code on non-zero return
+_cached_eval() {
+  if [[ "$EVALCACHE_TIMING" != "1" ]]; then
+    _cached_eval_impl "$@"
+    return
+  fi
+  zmodload zsh/datetime 2>/dev/null
+  local _ce_t0="${EPOCHREALTIME:-$(date +%s.%N 2>/dev/null || echo 0)}"
+  _cached_eval_impl "$@"
+  local _ce_rc=$?
+  local _ce_t1="${EPOCHREALTIME:-$(date +%s.%N 2>/dev/null || echo 0)}"
+  _cached_eval_log_timing "${1:-unknown}" "$_ce_t0" "$_ce_t1" "$_ce_rc" "zsh"
+  return $_ce_rc
+}
+
+_cached_eval_impl() {
+  local label=$1; shift
+
+  # Debug bypass: skip cache read AND write entirely.
+  # Set EVALCACHE_DISABLE=true to eval directly without touching cache files.
+  if [[ "$EVALCACHE_DISABLE" == "true" ]]; then
+    eval "$("$@" 2>/dev/null)"
+    return $?
+  fi
+
+  local cache="$_SHELL_CACHE/${label}.zsh"
+  local pin="${cache}.bin"
+  local bin="${commands[$1]}"
+  local real_bin=""
+  [[ -n "$bin" ]] && real_bin=${bin:A}
+
+  # Cache is valid when: it exists non-empty, the binary is not newer than it,
+  # the recorded realpath (if any) still matches the current realpath, and no
+  # file-path argument has been modified since cache write.
+  local cache_valid=1
+  if [[ ! -s "$cache" ]]; then
+    cache_valid=0
+  elif [[ -n "$bin" && "$bin" -nt "$cache" ]]; then
+    cache_valid=0
+  elif [[ -f "$pin" && -n "$real_bin" ]]; then
+    local pinned_real
+    pinned_real=$(<"$pin")
+    [[ -n "$pinned_real" && "$pinned_real" != "$real_bin" ]] && cache_valid=0
+  fi
+  if (( cache_valid )); then
+    local arg
+    for arg in "${@:2}"; do
+      if [[ -f "$arg" && "$arg" -nt "$cache" ]]; then
+        cache_valid=0
+        break
+      fi
+    done
+  fi
+
+  if (( cache_valid )); then
+    source "$cache"
+    return
+  fi
+
+  local init_output rc
+  init_output=$("$@" 2>/dev/null)
+  rc=$?
+  if (( rc != 0 )); then
+    print -u2 "[WARN] $label init exited $rc; not caching"
+    return $rc
+  fi
+
+  # Reject suspicious patterns indicating malicious payloads
+  local suspicious_re='(curl[[:space:]].*\|[[:space:]]*(ba)?sh|wget[[:space:]].*\|[[:space:]]*(ba)?sh|nc[[:space:]]+-e|/dev/tcp/|base64[[:space:]]+-d[[:space:]]*\|)'
+  if printf '%s\n' "$init_output" | LC_ALL=C grep -Eqs -- "$suspicious_re"; then
+    print -u2 "[WARN] Suspicious output from $label init, skipping"
+    return 1
+  fi
+
+  print -r -- "$init_output" > "${cache}.tmp.$$"
+  mv "${cache}.tmp.$$" "$cache"
+  if [[ -n "$real_bin" ]]; then
+    print -r -- "$real_bin" > "${pin}.tmp.$$"
+    mv "${pin}.tmp.$$" "$pin"
+  fi
+  source "$cache"
+  { zcompile "$cache" } &!
+}
+
+# Clear cache files written by _cached_eval.
+#
+# Safe by design: only deletes *.zsh / *.zsh.bin / *.zwc files in
+# $_SHELL_CACHE, leaving any unrelated content untouched.
+#
+# @noargs
+# @stdout Single-line summary: "Cleared N cached eval file(s) from <dir>"
+# @exitcode 0 Always (no-op when cache dir doesn't exist)
+_cached_eval_clear() {
+  local cache_dir="$_SHELL_CACHE"
+  [[ -d "$cache_dir" ]] || return 0
+  local count=0 f
+  for f in "$cache_dir"/*.zsh(N) "$cache_dir"/*.zsh.bin(N) "$cache_dir"/*.zwc(N); do
+    rm -f -- "$f" && (( count++ ))
+  done
+  printf 'Cleared %d cached eval file(s) from %s\n' "$count" "$cache_dir"
 }
 
 # Lightweight precmd hook manager (faster than add-zsh-hook)
@@ -259,6 +373,23 @@ unset _core_layers
 # Starship prompt (eager — must survive cache clears for consistent UI)
 if [[ "$DOTFILES_ARTIFACT_MODE" != "1" ]] && (( ${+commands[starship]} )); then
   _cached_eval starship-init starship init zsh
+  # Transient Prompt: collapse the prompt of past commands to the
+  # [character] glyph after Enter, reducing scrollback noise.
+  #
+  # Forward-compatibility hook. Starship's `enable_transience` function
+  # is currently defined only by `starship init fish` (upstream issue
+  # starship/starship#3522 tracks the zsh equivalent). On zsh the
+  # `${+functions[enable_transience]}` guard evaluates to 0, so the
+  # block silently no-ops. When upstream ships the zsh-side function,
+  # this code activates automatically — no zshrc change needed.
+  #
+  # The `_DOTFILES_STARSHIP_TRANSIENT` flag prevents the lazy-hydration
+  # path below (which also re-runs starship init) from binding the
+  # widgets twice.
+  if [[ -z "${_DOTFILES_STARSHIP_TRANSIENT:-}" ]] && (( ${+functions[enable_transience]} )); then
+    enable_transience
+    _DOTFILES_STARSHIP_TRANSIENT=1
+  fi
 fi
 
 # User-local modules (aliases, functions — not managed by chezmoi)
@@ -458,7 +589,13 @@ _dotfiles_async_init() {
           _cached_eval atuin-init atuin init zsh
           ;;
         starship)
-          [[ "$DOTFILES_ARTIFACT_MODE" == "0" ]] && _cached_eval starship-init starship init zsh
+          if [[ "$DOTFILES_ARTIFACT_MODE" == "0" ]]; then
+            _cached_eval starship-init starship init zsh
+            if [[ -z "${_DOTFILES_STARSHIP_TRANSIENT:-}" ]] && (( ${+functions[enable_transience]} )); then
+              enable_transience
+              _DOTFILES_STARSHIP_TRANSIENT=1
+            fi
+          fi
           ;;
         zoxide)
           _cached_eval zoxide-init zoxide init zsh

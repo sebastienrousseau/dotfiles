@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Trust Model
 
 The trust model combines cryptographic signing, local-first secrets, policy-gated agent operations, and machine-verifiable attestation.
@@ -6,7 +10,7 @@ The trust model combines cryptographic signing, local-first secrets, policy-gate
 
 | Threat | Mitigation |
 |:---|:---|
-| Unauthorized code execution on the workstation | Signed commits, shellcheck gates, no `curl | sh` in install path |
+| Unauthorized code execution on the workstation | Signed commits, shellcheck gates, no `curl \| sh` in install path |
 | Secret leakage into Git history | Age/SOPS encryption, gitleaks in CI, `detect-secrets` baseline |
 | Tampered upstream tool | SHA256-pinned chezmoi installer, SBOM + Grype CVE scan |
 | Malicious agent behavior | MCP policy enforcement, agent profile allowlists, attestation logs |
@@ -94,7 +98,7 @@ Violations are logged to `~/.local/state/dotfiles/mcp-violations.log` and report
 
 ```json
 {
-  "version": "0.2.500",
+  "version": "0.2.501",
   "timestamp": "2026-04-16T09:00:00Z",
   "host": {
     "hostname_sha256": "...",

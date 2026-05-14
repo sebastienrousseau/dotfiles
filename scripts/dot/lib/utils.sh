@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# Sourced by scripts/dot/commands/*.sh and dot_local/bin/executable_dot; inherits set -euo pipefail.
 # Dotfiles CLI Utilities
 # Shared functions for dot command modules
+
+# Re-source guard: cheap short-circuit when sourced from multiple modules.
+[[ "${_DOT_LIB_UTILS_LOADED:-0}" == "1" ]] && return 0
+_DOT_LIB_UTILS_LOADED=1
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=ui.sh

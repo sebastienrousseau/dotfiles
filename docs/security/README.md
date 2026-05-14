@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Security Documentation
 
 This directory contains security documentation for the dotfiles project.

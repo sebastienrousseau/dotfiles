@@ -22,12 +22,8 @@ on:
       - 'scripts/**'
   merge_group:
     branches: [master]
-    paths:
-      - '**.sh'
-      - '**.bash'
-      - '**.zsh'
-      - '.chezmoitemplates/**'
-      - 'scripts/**'
+    # NOTE: `paths:` is ignored under merge_group; merge-queue runs
+    # always execute the full workflow regardless of changed paths.
   # Weekly check for tool version drift
   schedule:
     - cron: '0 7 * * 0'  # Sunday 7 AM UTC
@@ -51,7 +47,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        # macos-latest currently maps to macos-13 (Intel). macos-14 is
+        # Apple Silicon (M-series). Both Darwin variants are kept so we
+        # catch arch-specific regressions before Apple Silicon users do.
+        os: [ubuntu-latest, macos-latest, macos-14]
         include:
           - os: ubuntu-latest
             platform: linux
@@ -59,8 +58,16 @@ jobs:
           - os: macos-latest
             platform: darwin
             tools: bsd
+          - os: macos-14
+            platform: darwin
+            tools: bsd
 
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
@@ -298,6 +305,11 @@ jobs:
     needs: [cross-platform-test]
     if: always()
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Generate Report
         run: |
           echo "## Cross-Platform Compatibility Report" >> "$GITHUB_STEP_SUMMARY"

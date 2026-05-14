@@ -65,3 +65,10 @@ yarn-error.log*
 dot_etc/machines/
 install/provision/run_onchange_60-macbookair9-1-zorinos.sh.tmpl
 _build/
+
+# Coverage artifacts
+/coverage/
+.sass-cache/
+
+# Runtime upgrade-report output
+/nightly-reports/

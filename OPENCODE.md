@@ -41,6 +41,7 @@ Many shell config files exist **only** as `.tmpl` variants. When reading files:
 **Rule**: If a `.sh` or `.zsh` file is not found, always try appending `.tmpl`.
 
 Files that are templates (use Go template syntax like `{{ .variable }}`):
+
 - `dot_config/shell/*.sh.tmpl` — all shell layer files
 - `dot_config/zsh/dot_zshrc.tmpl` — main zsh config
 - `dot_config/zsh/rc.d/*.tmpl` — zsh startup modules
@@ -50,6 +51,7 @@ Files that are templates (use Go template syntax like `{{ .variable }}`):
 - `private_dot_netrc.tmpl` — netrc credentials
 
 Files that are **NOT** templates (plain files, no `.tmpl` suffix):
+
 - `dot_config/shell/00-container-detect.sh` — plain shell script
 - `dot_config/shell/90-theme-switch.sh` — plain shell script
 - `dot_config/zsh/rc.d/00-alias-shims.zsh` — plain zsh
@@ -59,6 +61,7 @@ Files that are **NOT** templates (plain files, no `.tmpl` suffix):
 ### Reading Template Files
 
 Template files contain Go template directives like:
+
 ```
 {{ if eq .chezmoi.os "darwin" }}
   # macOS-specific config

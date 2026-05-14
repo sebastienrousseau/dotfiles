@@ -2,6 +2,8 @@
 # Universal directory bookmarking with history support
 # Works across Bash, Zsh, and Fish
 
+set -eu
+
 # Cross-platform sed in-place (BSD vs GNU)
 _sed_i() {
   if sed --version >/dev/null 2>&1; then

@@ -2,9 +2,73 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.501
+
+### Added
+
+- **Warp + iTerm2 theme support** — the two terminals the theme system did not yet cover are now first-class. `dot_warp/themes/dotfiles.yaml.tmpl` deploys a Warp theme; `run_onchange_22-iterm2-profile.sh.tmpl` writes an iTerm2 Dynamic Profile to `~/Library/Application Support/iTerm2/DynamicProfiles/dotfiles.json`. Both pick up the active theme's `.term` palette, so one `chezmoi apply` switches all six supported terminals (kitty, alacritty, wezterm, foot, warp, iterm2). The README's "Why this repo is different" surface lists this under wallpaper-driven themes.
+- **Starship Transient Prompt (fish)** — `dot_config/fish/conf.d/init.fish.tmpl` calls `enable_transience` after the cached `starship init`, collapsing past prompts to the `[character]` glyph in scrollback. The zsh implementation is a forward-compatibility hook only — Starship 1.24.2 does not yet ship `enable_transience` for zsh (upstream tracker [starship/starship#3522](https://github.com/starship/starship/issues/3522)). Rationale and rejected alternatives recorded in [ADR-010](docs/adr/ADR-010-starship-transient-prompt.md).
+- **`_cached_eval` enhancements (#847)** — `EVALCACHE_DISABLE=true` bypass for debugging, realpath sidecar pin to catch PATH-shadow swaps, file-path argument mtime check, init-failure handling (warns and returns rc instead of caching an empty output), and a new `_cached_eval_clear` helper. Applied to all three implementations (zsh, bash, fish). Adds shdoc docstrings.
+- **JSON Schema for `.chezmoidata.toml`** — `config/chezmoidata.schema.json` (draft-07) plus `.taplo.toml` and a new `lint-chezmoidata` CI job. Catches typos in feature flags, profile names, `default_shell`, and `node_manager` at PR time.
+- **OIDC trusted publishing for npm (#836)** — `publish-npm` workflow authenticates via OIDC instead of a long-lived `NPM_TOKEN`. Provenance is attached to every published tarball. The migration is breaking on the CI side: `NPM_TOKEN` is no longer used. **Manual followup needed before the first OIDC release**: configure Trusted Publishing on npmjs.com for `@sebastienrousseau/dotfiles` pointing at `sebastienrousseau/dotfiles` + `.github/workflows/npm-publish.yml`.
+- **`lint-copyright` in `ci.yml` (#834)** — the fast CI pipeline now runs the reusable copyright-header lint. Previously only `ci-enforced.yml` ran it.
+- **Test coverage roadmap, Slices 1–5d (#883)** — replaced the broken kcov pipeline with a pure bash xtrace runner that works on Linux and macOS. Eight iterations land the floor at **33% measured, 36.73% real (5,783 / 15,744 lines)**:
+    - Slice 1: 2.72% baseline + xtrace runner (`PS4 + BASH_ENV`).
+    - Slice 2: 12.01% — 59 shallow → deep conversions via new `tests/framework/coverage_helpers.sh` (sandbox + safe-mode entry-point exercise).
+    - Slice 3: 18.90% — 47 auto-generated exercise tests + 119 deep conversions.
+    - Slice 4: 19.16% — smart-output shims (`chezmoi`, `git`, `curl`) and subcommand probes.
+    - Slice 5: 34.10% — `cov_exercise_functions_file` helper (source + call each function), sandbox `$HOME/.dotfiles` symlink unblocks scripts that guard on a managed checkout, `test_auto_dot_driver.sh` drives the top-level `dot` dispatcher through 70 read-only subcommands, aggregator filters lines after `set +o xtrace` (intentionally unmeasurable in `security-score.sh` / `scorecard.sh`) and structural-only keywords (`fi`, `done`, etc.).
+    - Slice 5b: 33.73% honest — PS4 `set -u` guard (`${BASH_SOURCE:-}`) and SF: path canonicalization (collapses duplicate keys like `commands/../lib/log.sh`).
+    - Slice 5c: 36.10% — `cov_exercise_functions_file` added to every existing auto-test.
+    - Slice 5d: 36.73% — seven more auto-tests for scripts the existing-test scan had skipped.
+
+    `MIN_COVERAGE_PCT` floor: 0 → 10 → 17 → 18 → 30 → **33** (3-point cushion absorbs cross-platform jitter).
+- **GitHub Pages deploy of `docs/` to doc.dotfiles.io** — new `.github/workflows/pages.yml` builds the Jekyll site (cayman theme, kramdown, Liquid disabled for chezmoi-template snippets) and publishes on every push to master that touches `docs/**`. Replaces the old approach where `manual-publish.yml` deployed the multi-format manual to Pages.
+- **PR consolidation — 8 Dependabot bumps (#839–#846)** — major bumps: `actions/deploy-pages` 4→5, `softprops/action-gh-release` 2→3, `actions/download-artifact` 4→8.0.1, `docker/setup-buildx-action` 3→4, `actions/upload-pages-artifact` 3→5, `actions/github-script` 8→9. Minor and SHA-only refreshes for `actions/cache`, `actions/setup-node`, `bridgecrewio/checkov-action`, `devcontainers/ci`, `docker/login-action`, the `github/codeql-action` family, and `trufflesecurity/trufflehog`. All actions remain pinned by full commit SHA.
+- **Re-source guards** on the five shared library files where re-sourcing would corrupt state: `tests/framework/{assertions,mocks}.sh` and `scripts/dot/lib/{utils,ui,log}.sh`.
+- **`tests/unit/ci/test_validate_chezmoidata.sh`** — 13 assertions covering the new schema-validator script. Restores the 100% module-coverage floor that the schema commit had broken.
+- **`tests/unit/ci/test_check_*.sh`** — four new module-coverage tests for `check-insecure-tls`, `check-dangerous-chmod`, `check-regression-traceability`, and `run-coverage`. Keeps module coverage at 221/221.
+- **`docs/operations/COVERAGE.md`** — documents the why-not-kcov decision (Ubuntu 24.04 bash 5.2 incompatibility) and the xtrace approach (`PS4 + BASH_ENV`).
+- **`.chezmoiignore`** — new file at the repo root. Excludes 880 → 408 paths from chezmoi's managed surface: build artifacts (`coverage/`, `nightly-reports/`, `_build/`), repo metadata (`README.md`, `CHANGELOG.md`, `LICENSE`, `.github/`, `.git/`), documentation tree (`docs/`, intended for doc.dotfiles.io, not `$HOME`), and CI scaffolding (`scripts/`, `tests/`, `examples/`, `install/`, `nix/`, `config/`, `.well-known/`). Also gates `dot_warp/` to macOS via a template conditional. Before this file, any developer machine that had run the test suite locally would have ~600 MB of coverage trace data deployed under `~/coverage/` on the next `chezmoi apply`.
+- **Goose and Codex CLI in `dot ai`** — both AI agents now appear in the status surface under "Agents (autonomous)". `goose` and `codex` are wired in `_ai_mise_pkg` (so `dot ai-setup` knows their install targets), in the bridge `case` (so `dot goose --pattern X "prompt"` and `dot codex --pattern X "prompt"` route correctly), and in the route table in `dot_local/bin/executable_dot`.
+- **Spinner feedback on slow operations** — `dot ai` now shows `Probing N AI tools (cached for 300s)…` during the cold-cache refresh. Previously the command sat silent for 15–30s on the first run after the 5-min TTL expired.
+
+### Changed
+
+- **README rewrite for accuracy and readability** — three concrete inaccuracies fixed: PowerShell was incorrectly listed as Tier-3 (ADR-007 does not place it in the tier system), `dot bundle --manual` was a flag that does not exist (correct command is `dot manual --offline`), and the supported-terminal list missed Warp and iTerm2. Six coverage gaps filled (Starship Transient, JSON Schema, OIDC, `_cached_eval` enhancements, Bash as explicit Tier-1, and several previously-unmentioned `dot` subcommands). Command count corrected from "30+" to "over 80". Flesch baseline 28.3 → 42.9 raw / 47.7 prose-only.
+- **Header badges unified to `for-the-badge` style** — OpenSSF Scorecard and Codespaces badges now use shields.io renderings at the same height as Build / Version / Downloads.
+- **`manual-publish.yml`** — Pages-deploy steps removed. The workflow now only builds the multi-format manual and attaches it to releases.
+- **Coverage runner is now Linux + macOS** — the kcov-only runner had a hard Darwin skip. The xtrace runner works on both, so the pre-commit hook can invoke it on developer machines regardless of platform.
+- **`MIN_COVERAGE_PCT` in `.github/workflows/coverage.yml`** — raised from aspirational `50` (which never measured anything) to a real `10` floor based on the Slice 2 baseline. Ratchets up with each subsequent slice.
+- **`dot ai` runs probes in parallel** — the 14-tool cold-cache refresh now runs via `xargs -P` (defaults to `$(nproc)` workers, override via `DOTFILES_AI_PROBE_JOBS`). Cold-cache wall-time on a fast laptop: 6.2s → 1.9s. Warm-cache (within the 5-min TTL): ~0.07s, unchanged.
+
+### Fixed
+
+- **`core.hooksPath` config gap** — the global `commit-msg` hook is now tracked under chezmoi and pointed at by the user's git config, so the AI-attribution trailer fires on every commit.
+- **Liquid templating false-mangle of chezmoi snippets in docs** — 14 files containing `{{ … }}` Go-template syntax inside code blocks were being silently evaluated as Liquid by Jekyll. Bulk-wrapped with `{% raw %}` / `{% endraw %}`.
+- **Multiple `A && B || C` antipatterns** — restructured to proper `if/then/else` blocks across `tests/fuzz/fuzz_install.sh`, `tests/snapshots/test_snapshots.sh`, three diagnostics tests, two security tests, and `tests/unit/security/test_pre_push_bypass.sh`.
+- **macOS reliability gate** — the `cov_exercise_script` helper now probes for `timeout` then `gtimeout` (coreutils on macOS) before falling back to no-timeout. The previous version returned `rc=127` for every script on macOS-latest.
+- **Windows chezmoi installer fallback** — `setup-chezmoi` composite action now uses the upstream installer's `-t v$version` flag on Windows (Git Bash). The previous positional-arg form made chezmoi try to run itself as a subcommand and exit non-zero.
+- **Typos hook allowlist** — added 9 entries for alias names (`yout`, `hom`, `cod`, `dsk`, `dwn`, `mus`, `pic`, `wth`) and SLSA terminology (`intoto`, `writeable`) that the hook incorrectly flagged.
+- **`scripts/ci/check-insecure-tls.sh` and `compliance-guard.yml`** — both now exclude themselves and the `tests/` tree from the curl/wget/chmod pattern scans. The scanners were flagging their own legitimate pattern fixtures.
+- **`dot health --fix` chezmoi-sync detection** — `chezmoi status` output has two columns: column 1 (last-applied vs. actual) and column 2 (actual vs. target). The health dashboard previously counted both columns, so a single uncommitted edit to a source file (column-1-only drift, normal during development) was reported as "1 file out of sync" even though `chezmoi apply` had nothing to fix. The dashboard now counts only column-2 drift (the apply-actionable kind) and surfaces source-only drift as an informational footnote.
+- **`dot health --fix` post-apply verification** — `heal_chezmoi_drift` previously ran `chezmoi apply --force` via `_pkg_install`, which silenced stdout/stderr. When apply partially failed (e.g., on conflicting files), the next health-check pass showed the same drift count and the user had no signal that anything was wrong. The heal now captures the apply log, re-runs `chezmoi status` to verify the drift cleared, and reports either "✓ X file(s) synced" or "⚠ X applied, Y still drifted — run `chezmoi diff` to inspect". On hard failure, the last 5 lines of the apply log are surfaced inline.
+- **`ui_spinner_stop` rc=1 on a TTY** — the function's last line was `[[ ! -t 1 ]] && printf "\n"`, which evaluates to rc=1 when stdout is a TTY. Under `set -euo pipefail`, that rc killed every caller, including `_ai_refresh_status_cache` — silently leaving the user with an empty cache file. Added explicit `return 0`.
+- **macOS `xargs -I{} -n1` payload splitting** — `_ai_refresh_status_cache` originally passed `-n1` on top of `-I{}`, which on BSD-xargs triggers a quirk where the input line is word-split on whitespace. Entries like `"0|Agents (autonomous)|…"` arrived as `["0|Agents", "(autonomous)|…", …]`, garbling every probe. Removed the `-n1` (it's redundant with `-I{}`).
+- **macOS `xargs` apostrophe-quote bug** — BSD-xargs reads `Block's coding agent` as an unterminated single quote, aborts parsing, and drops every record after the offending one. Switched the probe pipeline to null-delimited input (`printf '%s\0' …` + `xargs -0`). This was masking Goose's presence: it had been silently absent from `dot ai` even when installed.
+- **AI dispatcher route gaps** — four bridge tools (`autohand`, `vibe`, `qwen`, `zai`) were accepted by the bridge `case` in `ai.sh` but missing from the route table in `dot_local/bin/executable_dot`. `dot autohand …` was hitting "Unknown ai command". Routes filled in.
+- **`run_ai_with_context` missing handlers for Goose and Codex** — `dot codex "prompt"` and `dot goose "prompt"` would route correctly through the dispatcher and bridge case but then fall through to "Unsupported tool" because the per-tool execution case was missing. Added `codex)` and `goose)` arms.
+
+### Security
+
+- **OIDC trusted publishing for npm** — see Added above. Drops the long-lived `NPM_TOKEN` from CI.
+- **SHA-pinned GitHub Actions everywhere** — confirmed across all workflows after the Dependabot consolidation.
+- **`bash-dbgsym` not required** — the kcov-based coverage runner needed Ubuntu's debug symbols for bash, which created a supply-chain question (additional apt source). The xtrace replacement removes that requirement.
+
 ## v0.2.500
 
 ### Added
+
 - **Wallpaper-driven theme engine** — themes are no longer hand-crafted. `extract-theme.py` uses K-Means clustering in CIELAB color space to extract dominant colors from any wallpaper image and generate a full terminal palette (16 ANSI colors, accent, bg/fg, panel, border) with WCAG AAA contrast enforcement.
 - **Automatic wallpaper discovery** — `rebuild-themes.sh` scans system wallpapers (macOS `/System/Library/Desktop Pictures/`, Linux `/usr/share/backgrounds/`) and custom wallpapers (`~/Pictures/Wallpapers/`). Custom overrides system. Themes are cached and only regenerated when wallpapers change.
 - **`dot theme rebuild`** — new command to regenerate themes from discovered wallpapers. Supports `--force` (ignore cache) and `--list` (show wallpapers without rebuilding). Parallel processing (4 jobs).
@@ -14,22 +78,26 @@ This file documents all notable changes to this project.
 - **Build artifact redirection** — Cargo, Go, pip, uv, Zig caches → `/tmp/builds/`.
 
 ### Changed
+
 - **themes.toml is now auto-generated** — run `dot theme rebuild` after adding wallpapers. Do not edit manually.
 - **Theme family derived from themes.toml** — `get_theme_family()` in `switch.sh` reads the `family` field dynamically instead of hardcoded case patterns.
 - **macOS appearance refresh** — kills cfprefsd/SystemUIServer/Dock/System Settings after accent changes.
 - **Graceful wallpaper fallback** — theme switching works without custom wallpapers. Core changes (colors, accent, dark/light) always apply; wallpaper is optional.
 
 ### Removed
+
 - **Static theme definitions** — all hand-crafted theme entries replaced by wallpaper-driven generation.
 
 ## v0.2.497
 
 ### Added
+
 - **Verified chezmoi installer** — `install.sh` prefers `scripts/ci/install-chezmoi-verified.sh` with SHA256 checksum validation before falling back to `get.chezmoi.io`.
 - **detect-secrets baseline** — `.secrets.baseline` for pre-commit secret scanning alongside gitleaks.
 - **Lua plugin module headers** — `@module` docstrings for ui.lua, coding.lua, lsp.lua, editor.lua, dap.lua explaining plugin selection rationale.
 
 ### Changed
+
 - **CI hardening** — Pinned `nix-installer` to SHA, removed `continue-on-error` from Home Manager build, replaced `mapfile` with portable `while read` loops.
 - **Plugin version pins** — toggleterm pinned to `^2`, venv-selector uses `version = false` instead of `branch = "main"`.
 - **DAP port configurable** — `DAP_DEV_SERVER_PORT` environment variable overrides default port 3000.
@@ -38,6 +106,7 @@ This file documents all notable changes to this project.
 - **Documentation** — Fixed default shell reference (Zsh → Fish) in INSTALL.md, added CI badge and test runner to README, added function docstrings to `utils.sh`.
 
 ### Fixed
+
 - **Shell compatibility** — Replaced zsh-only `unfunction` with POSIX `unset -f` in shell templates.
 - **Quote nesting** — Fixed broken double-quote nesting in `run_onchange_after_fonts.sh.tmpl`.
 - **Quoted expansion** — Added missing quotes around `$ZINIT_HOME` in zinit bootstrap.
@@ -47,6 +116,7 @@ This file documents all notable changes to this project.
 ## v0.2.496
 
 ### Added
+
 - **Startup budget tracking** — CI now captures per-component timing from `DOTFILES_DEBUG=1` and fails on regression.
 - **Behavioral unit tests** — 10 critical functions now have runtime behavior tests (extract, genpass, encode64, path_prepend, platform detection, lazy loaders).
 - **Property-based tests** — `property_testing.sh` framework wired up with roundtrip, idempotence, and length-invariant tests.
@@ -54,6 +124,7 @@ This file documents all notable changes to this project.
 - **Nix CI gate** — Home Manager activation package built and validated in CI.
 
 ### Changed
+
 - **Performance** — Lazy-loaded `thefuck` (~200ms saving) and cached `carapace` output via `_cached_eval` (~50ms saving).
 - **Starship timeout** — Reduced `command_timeout` from 2000ms to 500ms for snappier prompts in large repos.
 - **PATH consolidation** — All PATH mutations now originate from `00-core-paths.sh.tmpl`; removed scattered prepends from zshenv/zprofile stubs.
@@ -61,6 +132,7 @@ This file documents all notable changes to this project.
 - **dot CLI modular split** — Subcommands dispatched to individual scripts in `scripts/dot/commands/` for maintainability.
 
 ### Fixed
+
 - **Security** — Replaced `curl|sh` pipes in `heal.sh` (starship, atuin) with download-to-temp + shebang validation. Pinned all heal.sh GitHub release versions with SHA256 checksums.
 - **Security** — `install.sh` now uses the secure `install/lib/chezmoi.sh` library instead of inline `curl|sh`.
 - **Security** — `dot-bootstrap` Nix installer now downloads to temp file with validation before execution.
@@ -74,12 +146,14 @@ This file documents all notable changes to this project.
 ## v0.2.495
 
 ### Fixed
+
 - **Installation failure (Issue #807)**: Resolved "unbound variable" errors in `install.sh` by correctly initializing color and path variables.
 - **Shell Compatibility**: Fixed syntax errors when running `install.sh` with `sh` by ensuring the script runs with `bash` and updating documentation accordingly.
 - **Broken Links**: Updated installation instructions in `README.md` and `docs/guides/INSTALL.md` to use the GitHub raw URL, bypassing issues with the `dotfiles.io` redirect.
 - **Documentation Sync**: Synchronized versioning and installation commands across all documentation and source files.
 
 ### Changed
+
 - **Repository Restructuring**: Reorganized non-deployed files for improved discoverability.
   - Docs categorized into `architecture/`, `guides/`, `reference/`, `security/`, `operations/` subdirectories.
   - Tests promoted to top-level `tests/` with domain-based unit test subdirectories.
@@ -92,17 +166,20 @@ This file documents all notable changes to this project.
 ## v0.2.493
 
 ### Added
+
 - Implementation of `_cached_eval` for Zsh, Bash, and Fish for ultra-fast startup.
 - Full integration of `zoxide` and `atuin` in Nushell with caching.
 - Explicit management of `sgpt`, `poetry`, `fisher`, `micro`, and `pueue` configs.
 - Robust `target_os` detection for Arch/CachyOS in `install.sh`.
 
 ### Changed
+
 - Refactored `install.sh` to use a modular `main()` function.
 - Moved XDG exports in `dot_bashrc` above interactive checks.
 - Optimized Zellij configuration with 2026-ready UX (rounded corners, compact layout).
 
 ### Fixed
+
 - Resolved 100% of security alerts regarding `apt-get` recommendations.
 - Achieved 100.00% module test coverage with new maintenance tests.
 - Fixed Nix profile sourcing drift in `dot_zshenv`.

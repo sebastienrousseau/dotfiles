@@ -52,7 +52,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.500)
+  version       The version (tag or branch) to install (default: v0.2.501)
 
 Options:
   --help        Show this help message
@@ -64,7 +64,7 @@ EOF
 }
 
 main() {
-  local version="v0.2.500"
+  local version="v0.2.501"
   local version_set=0
   local minimal=0
   local _cleanup_files=()
@@ -72,19 +72,27 @@ main() {
 
   for arg in "$@"; do
     case "$arg" in
-      --help)
+      -h | --help)
         show_help
         exit 0
         ;;
       --silent) export DOTFILES_SILENT=1 ;;
       --force) export DOTFILES_NONINTERACTIVE=1 ;;
       --minimal) minimal=1 ;;
-      --*)
+      -*)
+        # Catch single-dash and double-dash unknowns the same way.
         error "Unknown option: $arg"
         ;;
       *)
         if [[ $version_set -eq 1 ]]; then
           error "Multiple versions specified: $version and $arg"
+        fi
+        # Validate the positional looks like a semver (with or without
+        # leading v). Reject garbage early so an unknown positional
+        # like `foobar` doesn't trigger a 30s+ network download attempt.
+        # Caught by the install.sh fuzz harness (#881).
+        if [[ ! "$arg" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-+][a-zA-Z0-9.-]+)?$ ]]; then
+          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.501)."
         fi
         version="$arg"
         version_set=1

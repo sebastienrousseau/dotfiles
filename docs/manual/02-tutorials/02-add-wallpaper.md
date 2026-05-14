@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Tutorial: Add a Wallpaper → Theme
 
 Drop an image. Get a fully-WCAG-AAA terminal theme.
@@ -57,6 +61,7 @@ bash scripts/theme/merge-wallpaper.sh mytheme
 ```
 
 This:
+
 1. Resizes both to 6016×6016 (preserving aspect ratio, center-cropped)
 2. Encodes both into a single `.heic` via `heif-enc`
 3. Injects `apple_desktop:apr` XMP metadata (image 0 = light, image 1 = dark)

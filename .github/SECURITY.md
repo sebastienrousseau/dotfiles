@@ -35,13 +35,13 @@ We respond to security issues promptly:
 For security-related inquiries:
 
 - **Primary**: GitHub Security Advisories (preferred)
-- **Email**: security@sebastienrousseau.com
+- **Email**: <security@sebastienrousseau.com>
 
 ## Reporting a vulnerability
 
 Please use GitHub Security Advisories for private disclosure:
 
-- https://github.com/sebastienrousseau/dotfiles/security/advisories
+- <https://github.com/sebastienrousseau/dotfiles/security/advisories>
 
 We'll acknowledge reports and provide a fix timeline when possible.
 

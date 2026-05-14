@@ -1,8 +1,13 @@
+---
+render_with_liquid: false
+---
+
 # Workstation Attestation
 
 `dot attest` exports a machine-readable record of the current workstation state.
 
 It captures:
+
 - dotfiles version
 - platform and architecture
 - Git signing settings

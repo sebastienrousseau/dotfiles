@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Fleet Deployment Architecture
 
 ## Deployment Flow

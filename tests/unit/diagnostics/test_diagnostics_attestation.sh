@@ -5,8 +5,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 TEST_SCRIPT="$REPO_ROOT/scripts/diagnostics/workstation-attestation.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 DOT_CLI="$REPO_ROOT/dot_local/bin/executable_dot"
 
 test_start "attestation_exists"
@@ -58,5 +62,8 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected fleet attestation export"
 fi
 rm -rf "$fleet_dir"
+
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$TEST_SCRIPT"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

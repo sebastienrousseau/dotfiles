@@ -19,8 +19,9 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
+  # Pages deploys moved to pages.yml. This workflow only builds the
+  # multi-format manual + attaches it to releases (the `attach-release`
+  # job adds its own `contents: write` permission locally).
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -36,6 +37,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Install pandoc
@@ -65,13 +71,18 @@ jobs:
       pdf_size: ${{ steps.sizes.outputs.pdf_size }}
       epub_size: ${{ steps.sizes.outputs.epub_size }}
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       # Cache the apt archives directory so the ~1GB TeX Live download
       # is reused across runs. Key is tied to the workflow file so that
       # package changes invalidate the cache cleanly.
       - name: Cache apt archives
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: /var/cache/apt/archives
           key: manual-apt-${{ runner.os }}-${{ hashFiles('.github/workflows/manual-publish.yml') }}
@@ -116,26 +127,6 @@ jobs:
           path: _build/manual/
           retention-days: 90
 
-      - name: Upload pages artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
-        with:
-          path: _build/manual/
-
-  deploy-pages:
-    name: Deploy to GitHub Pages
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    needs: build
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
-
   attach-release:
     name: Attach to Release
     if: github.event_name == 'release'
@@ -145,13 +136,18 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v5.0.0
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: manual
           path: _build/manual/
 
       - name: Upload to release
-        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
           files: |
             _build/manual/dotfiles.pdf

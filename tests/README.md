@@ -65,6 +65,92 @@ RUN_INTEGRATION=1 ./tests/framework/test_runner.sh
 ./tests/framework/test_runner.sh -i
 ```
 
+### Run in parallel
+
+The runner accepts `--jobs N` (number of files concurrently) and
+`--jobs auto` (detected CPU count via `nproc` on Linux,
+`sysctl -n hw.ncpu` on macOS). Closes [#867](https://github.com/sebastienrousseau/dotfiles/issues/867).
+
+```bash
+# Use all detected cores
+./tests/framework/test_runner.sh --jobs auto
+
+# Cap at 4 workers
+./tests/framework/test_runner.sh --jobs 4
+
+# Force serial (the default) — useful when debugging output order
+./tests/framework/test_runner.sh --jobs 1
+```
+
+Trade-offs:
+
+- **Serial mode** streams each test's output live in alphabetical
+  order. Best when bisecting a flake.
+- **Parallel mode** captures each file's output to a private tempfile
+  and replays in completion order. Aggregate totals are identical to
+  serial — invariance is pinned by
+  `tests/regression/test_runner_parallel_invariant.sh`.
+
+If a future test introduces order-coupling (writes shared state at
+start, expects it at end), the invariance regression test fails and
+the offending file should be refactored to be hermetic.
+
+`TEST_JOBS=N` is the env-var equivalent of `--jobs N` and lets CI
+configure the default without touching the command line.
+
+### Golden snapshot tests (dot CLI output)
+
+`tests/snapshots/` holds blessed outputs for the user-facing `dot`
+commands (`dot --help`, `dot version`, `dot doctor`, `dot perf`,
+`dot health`). Closes part of [#881](https://github.com/sebastienrousseau/dotfiles/issues/881).
+
+```bash
+# Run the snapshot tests:
+bash tests/snapshots/test_snapshots.sh
+
+# Regenerate snapshots after an intentional CLI change:
+bash tests/snapshots/update.sh
+git diff tests/snapshots/    # review before committing
+```
+
+`tests/snapshots/scrub.sh` normalises machine- and time-specific
+content (paths under `$HOME`, timestamps, perf timings, memory sizes,
+uptime, ANSI colour codes) into stable placeholders so the same
+command run on two machines produces the same scrubbed text.
+
+When a snapshot test fails, decide:
+
+- **The change was intentional** — the CLI gained a new line, a
+  table reflowed, copy was reworded. Run `update.sh`, review the
+  diff, commit the new snapshots alongside the CLI change.
+- **The change is a regression** — output broke a downstream parser /
+  asciinema recording / screenshot. Fix the CLI, don't regenerate
+  the snapshot.
+
+### install.sh fuzz harness
+
+`tests/fuzz/fuzz_install.sh` runs `install.sh` against a battery of
+adversarial inputs (unknown flags, garbage positionals, symlink
+loops in `$HOME`, empty `$PATH`, doubled flags, 4 KB-long arg
+strings, NUL bytes in env vars) and asserts each one either
+succeeds cleanly or fails fast with a clear non-zero exit — but
+never hangs. Closes part of [#881](https://github.com/sebastienrousseau/dotfiles/issues/881).
+
+```bash
+bash tests/fuzz/fuzz_install.sh
+```
+
+Requires `timeout` (Linux) or `gtimeout` (macOS, install via
+`brew install coreutils`). Skips itself on systems without either.
+
+The harness already surfaced two real bugs (`-h` alias missing;
+unknown positionals triggered a 30 s+ network download attempt) —
+both fixed in the same commit that introduced the harness.
+
+CI: `.github/workflows/install-fuzz.yml` runs the harness weekly on
+both Linux and macOS, on every PR touching `install.sh` or
+`tests/fuzz/`, and on manual dispatch.
+
 ### Run Individual Test File
 
 ```bash

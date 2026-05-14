@@ -4,6 +4,8 @@
 # Regression: Static code analysis — mirrors Codacy checks locally.
 # Catches shellcheck warnings, unsafe patterns, and code quality issues
 # that would fail the Codacy gate in CI.
+# Regression for: d7e7c2bc (v0.2.499 baseline)
+# Why: Shellcheck / hadolint / actionlint findings that must not regress.
 
 set -uo pipefail
 

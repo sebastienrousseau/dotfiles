@@ -12,7 +12,9 @@ These aliases are defined in `update.aliases.sh` and are automatically loaded by
 
 This code provides a set of aliases for updating various software on
 macOS and Linux.
+
 ### macOS / Linux / Windows
+
 - `update` runs Topgrade when installed; otherwise it falls back to `upd`.
 - `upd` performs a cross-platform system + dev tool update routine.
 

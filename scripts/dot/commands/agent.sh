@@ -76,11 +76,20 @@ _agent_checkpoint_file() {
 _agent_apply_profile_env() {
   local name="$1"
   export DOT_AGENT_PROFILE="$name"
-  export DOT_AGENT_APPROVAL="$(_agent_profile_field "$name" "approval")"
-  export DOT_AGENT_FILESYSTEM="$(_agent_profile_field "$name" "filesystem")"
-  export DOT_AGENT_NETWORK="$(_agent_profile_field "$name" "network")"
-  export DOT_AGENT_MCP_PROFILE="$(_agent_profile_field "$name" "mcpProfile")"
-  export DOT_AGENT_MAX_STEPS="$(_agent_profile_field "$name" "maxSteps")"
+  # Split declare-and-assign to avoid masking the field-getter's exit
+  # code (SC2155). If the profile JSON is malformed, the assignment
+  # now fails the function instead of silently exporting an empty value.
+  local approval filesystem network mcp_profile max_steps
+  approval="$(_agent_profile_field "$name" "approval")"
+  filesystem="$(_agent_profile_field "$name" "filesystem")"
+  network="$(_agent_profile_field "$name" "network")"
+  mcp_profile="$(_agent_profile_field "$name" "mcpProfile")"
+  max_steps="$(_agent_profile_field "$name" "maxSteps")"
+  export DOT_AGENT_APPROVAL="$approval"
+  export DOT_AGENT_FILESYSTEM="$filesystem"
+  export DOT_AGENT_NETWORK="$network"
+  export DOT_AGENT_MCP_PROFILE="$mcp_profile"
+  export DOT_AGENT_MAX_STEPS="$max_steps"
 }
 
 _agent_rbac_enforcement() {

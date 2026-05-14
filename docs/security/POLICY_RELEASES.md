@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Policy Bundle Releases
 
 Policy bundles are released as tracked governance artifacts.

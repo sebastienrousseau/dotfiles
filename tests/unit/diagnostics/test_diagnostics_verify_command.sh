@@ -7,8 +7,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 VERIFY_FILE="$REPO_ROOT/scripts/diagnostics/verify.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "verify_command_file_exists"
 assert_file_exists "$VERIFY_FILE" "verify.sh should exist"
@@ -33,5 +37,8 @@ assert_file_contains "$VERIFY_FILE" "chezmoi diff" "should run chezmoi diff"
 
 test_start "verify_supports_security_alias"
 assert_file_contains "$VERIFY_FILE" "--security | -s" "verify supports -s"
+
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$VERIFY_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

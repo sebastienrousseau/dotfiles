@@ -55,6 +55,11 @@ if test "$DOTFILES_ARTIFACT_MODE" = "0"; and command -v starship >/dev/null
     if not _dotfiles_source_cached_init starship starship-init.fish
         starship init fish | source
     end
+    # Transient Prompt: collapse past prompts to the [character] glyph
+    # after Enter, reducing scrollback noise.
+    if functions -q enable_transience
+        enable_transience
+    end
 end
 
 # ── Lazy Hydration (deferred to first prompt) ────────────────────
@@ -124,6 +129,7 @@ end
 
 function _dotfiles_trigger_hydration --on-event fish_prompt
     functions -e _dotfiles_trigger_hydration
+    functions -e _dotfiles_trigger_hydration_on_missing
     _dotfiles_async_init
     if test "$DOTFILES_ARTIFACT_MODE" = "1"
         begin
@@ -131,6 +137,21 @@ function _dotfiles_trigger_hydration --on-event fish_prompt
             kill -WINCH $fish_pid
         end &
     end
+end
+
+# Belt-and-braces: if the user types an unknown command BEFORE the
+# first prompt fires (e.g. `fish -ic 'foo'` from a script that
+# doesn't render a prompt), trigger the same lazy-layer load via
+# fish_command_not_found. The hydration function may already have
+# fired and removed itself — guard against double-load. (Closes
+# AC#2 of #880; fish's analogue to zsh's function_not_found.)
+function _dotfiles_trigger_hydration_on_missing --on-event fish_command_not_found
+    functions -e _dotfiles_trigger_hydration_on_missing
+    functions -e _dotfiles_trigger_hydration
+    _dotfiles_async_init
+    # After hydration, the command may now resolve; let fish's default
+    # not-found handler print the standard message for whatever the
+    # user typed.
 end
 
 # ── Keybindings (Fish 4.x enhanced) ─────────────────────────────

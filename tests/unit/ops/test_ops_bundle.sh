@@ -5,8 +5,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 TEST_SCRIPT="$REPO_ROOT/scripts/ops/bundle.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "bundle_exists"
 assert_file_exists "$TEST_SCRIPT" "bundle.sh should exist"
@@ -16,5 +20,8 @@ assert_exit_code 0 "bash -n '$TEST_SCRIPT'"
 
 test_start "bundle_uses_tar_zstd"
 assert_file_contains "$TEST_SCRIPT" "tar --zstd" "should compress using tar and zstd"
+
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$TEST_SCRIPT"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

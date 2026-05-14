@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Secrets Encryption with SOPS and age
 
 ## Quick Start
@@ -30,6 +34,7 @@ sops secrets.sops.yaml
 ## Recovery
 
 If you lose your age private key, follow these steps:
+
 1. Create a new key: `age-keygen -o ~/.config/sops/age/keys.txt`
 2. Re-encrypt all secrets with the new public key.
 3. Update `.sops.yaml` with the new public key.

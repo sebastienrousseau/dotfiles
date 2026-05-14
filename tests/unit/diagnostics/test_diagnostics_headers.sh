@@ -6,9 +6,13 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 DOT_CLI="$REPO_ROOT/dot_local/bin/executable_dot"
 HEALTH_FILE="$REPO_ROOT/scripts/diagnostics/health.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 PERF_FILE="$REPO_ROOT/scripts/diagnostics/perf.sh"
 SCORECARD_FILE="$REPO_ROOT/scripts/diagnostics/scorecard.sh"
 SECURITY_SCORE_FILE="$REPO_ROOT/scripts/diagnostics/security-score.sh"
@@ -70,5 +74,8 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot version should print the standard banner"
   printf '%b\n' "    Output: ${version_output:0:200}"
 fi
+
+# Slice 3 (#883): exercise the script under sandbox for line coverage
+cov_exercise_script "$HEALTH_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

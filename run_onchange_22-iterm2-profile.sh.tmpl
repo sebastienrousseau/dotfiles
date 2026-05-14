@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# run_onchange_22-iterm2-profile.sh.tmpl
+# Generates an iTerm2 Dynamic Profile from the active dotfiles theme so the
+# colour scheme appears automatically in iTerm2 (no manual import needed).
+# iTerm2 docs: https://iterm2.com/documentation-dynamic-profiles.html
+{{- if eq .chezmoi.os "darwin" }}
+
+set -euo pipefail
+
+{{ $t := index .themes (default "big-sur-dark" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "big-sur-dark" -}}{{- end -}}
+{{- $tt := $t -}}
+{{- $themeName := default "big-sur-dark" .theme -}}
+{{- if hasSuffix "-light" $themeName -}}
+  {{- $darkTheme := index .themes (printf "%s-dark" (trimSuffix "-light" $themeName)) -}}
+  {{- if $darkTheme -}}{{- $tt = $darkTheme -}}{{- end -}}
+{{- end }}
+
+THEME_NAME={{ $themeName | quote }}
+
+# Active palette (#RRGGBB) baked in at template-render time so this script's
+# content changes when the theme changes, retriggering chezmoi onchange.
+declare -A C=(
+  [bg]={{ $tt.term.bg | quote }}
+  [fg]={{ $tt.term.fg | quote }}
+  [cursor]={{ $tt.term.cursor | quote }}
+  [cursor_text]={{ $tt.term.cursor_text | quote }}
+  [sel_bg]={{ $tt.term.sel_bg | quote }}
+  [sel_fg]={{ $tt.term.sel_fg | quote }}
+  [c0]={{ $tt.term.c0 | quote }}
+  [c1]={{ $tt.term.c1 | quote }}
+  [c2]={{ $tt.term.c2 | quote }}
+  [c3]={{ $tt.term.c3 | quote }}
+  [c4]={{ $tt.term.c4 | quote }}
+  [c5]={{ $tt.term.c5 | quote }}
+  [c6]={{ $tt.term.c6 | quote }}
+  [c7]={{ $tt.term.c7 | quote }}
+  [c8]={{ $tt.term.c8 | quote }}
+  [c9]={{ $tt.term.c9 | quote }}
+  [c10]={{ $tt.term.c10 | quote }}
+  [c11]={{ $tt.term.c11 | quote }}
+  [c12]={{ $tt.term.c12 | quote }}
+  [c13]={{ $tt.term.c13 | quote }}
+  [c14]={{ $tt.term.c14 | quote }}
+  [c15]={{ $tt.term.c15 | quote }}
+)
+
+# Convert "#RRGGBB" to three sRGB float components in 0.0..1.0.
+# Bash arithmetic for hex -> int (portable), awk for the float divide
+# (BSD awk on macOS doesn't parse 0x-prefixed numerics).
+hex_to_rgb_floats() {
+  local hex="${1#\#}"
+  local r g b
+  r=$((16#${hex:0:2}))
+  g=$((16#${hex:2:2}))
+  b=$((16#${hex:4:2}))
+  awk -v r="$r" -v g="$g" -v b="$b" \
+    'BEGIN { printf "%.9f %.9f %.9f\n", r/255, g/255, b/255 }'
+}
+
+# Emit one iTerm2 colour entry. Args: <key-name> <#RRGGBB>
+emit_colour() {
+  local key="$1" hex="$2"
+  read -r r g b < <(hex_to_rgb_floats "$hex")
+  cat <<JSON
+    "$key" : {
+      "Color Space" : "sRGB",
+      "Red Component" : $r,
+      "Green Component" : $g,
+      "Blue Component" : $b,
+      "Alpha Component" : 1
+    }
+JSON
+}
+
+DEST_DIR="$HOME/Library/Application Support/iTerm2/DynamicProfiles"
+DEST="$DEST_DIR/dotfiles.json"
+mkdir -p "$DEST_DIR"
+
+# Stable GUID derived from the profile name; iTerm2 uses GUID for identity.
+GUID="DOTFILES-PROFILE-0000-0000-000000000001"
+
+TMP="$(mktemp "${DEST}.tmp.XXXXXX")"
+trap 'rm -f "$TMP"' EXIT
+
+{
+  cat <<JSON
+{
+  "Profiles" : [
+    {
+      "Name" : "dotfiles",
+      "Guid" : "$GUID",
+      "Description" : "Generated from dotfiles theme: $THEME_NAME",
+      "Dynamic Profile Parent Name" : "Default",
+JSON
+  emit_colour "Background Color"     "${C[bg]}"
+  printf '    ,\n'
+  emit_colour "Foreground Color"     "${C[fg]}"
+  printf '    ,\n'
+  emit_colour "Cursor Color"         "${C[cursor]}"
+  printf '    ,\n'
+  emit_colour "Cursor Text Color"    "${C[cursor_text]}"
+  printf '    ,\n'
+  emit_colour "Selection Color"      "${C[sel_bg]}"
+  printf '    ,\n'
+  emit_colour "Selected Text Color"  "${C[sel_fg]}"
+  for i in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+    printf '    ,\n'
+    emit_colour "Ansi $i Color" "${C[c$i]}"
+  done
+  cat <<'JSON'
+    }
+  ]
+}
+JSON
+} > "$TMP"
+
+mv "$TMP" "$DEST"
+trap - EXIT
+
+echo "iTerm2 dynamic profile written: $DEST"
+{{- end }}

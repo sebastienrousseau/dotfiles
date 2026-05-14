@@ -43,6 +43,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Install tools
@@ -80,6 +85,15 @@ jobs:
             fi
             echo "::warning::ShellCheck found issues (non-blocking mode)."
           fi
+
+      - name: Preamble lint (set -euo pipefail / Sourced-by markers)
+        # Closes the CI half of #854 — every bash/sh script must
+        # either carry the safety preamble or declare itself as a
+        # sourced library via the `# Sourced by` header. See
+        # docs/security/SHELL_EXEMPTIONS.md for the contract.
+        run: |
+          set -euo pipefail
+          bash scripts/ci/check-shell-preamble.sh
 
       - name: shfmt
         if: inputs.run_shfmt == true

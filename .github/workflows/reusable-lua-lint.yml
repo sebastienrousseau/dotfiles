@@ -14,9 +14,16 @@ on:
         default: true
         type: boolean
       stylua_version:
+        # Keep in sync with `config/pre-commit-config.yaml` (#865).
         description: Pinned stylua version.
         required: false
-        default: "0.20.0"
+        default: "2.4.1"
+        type: string
+      luacheck_version:
+        # Keep in sync with `config/pre-commit-config.yaml` (#865).
+        description: Pinned luacheck version.
+        required: false
+        default: "1.2.0"
         type: string
 
 permissions:
@@ -28,10 +35,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Cache Lua tools
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: |
             ~/.luarocks
@@ -42,7 +54,7 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update && sudo apt-get install -y lua5.1 luarocks
-          luarocks install --local luacheck
+          luarocks install --local luacheck "${{ inputs.luacheck_version }}"
           echo "$HOME/.luarocks/bin" >> "$GITHUB_PATH"
           if [[ ! -x "$HOME/.cargo/bin/stylua" ]]; then
             cargo install stylua --version "${{ inputs.stylua_version }}"

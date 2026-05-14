@@ -49,9 +49,22 @@ fi
 
 test_start "ci_chezmoi_installer_uses_env_version"
 # CI should install chezmoi with the pinned CHEZMOI_VERSION env variable.
+# ci.yml now delegates to the setup-chezmoi composite action, which
+# falls back to $CHEZMOI_VERSION when no `version:` input is supplied.
+# So accept two acceptable wirings: either the legacy inline call to
+# install-chezmoi-verified.sh referencing CHEZMOI_VERSION, OR the
+# current shape where ci.yml exports CHEZMOI_VERSION at workflow scope
+# AND uses the setup-chezmoi action that reads it.
+ACTION_FILE="$REPO_ROOT/.github/actions/setup-chezmoi/action.yml"
 if grep -q 'install-chezmoi-verified.sh.*CHEZMOI_VERSION' "$CI_FILE"; then
   ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: install script uses pinned CHEZMOI_VERSION env variable"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: install script uses pinned CHEZMOI_VERSION env variable (legacy inline)"
+elif grep -q '^  CHEZMOI_VERSION:' "$CI_FILE" \
+  && grep -q 'setup-chezmoi' "$CI_FILE" \
+  && grep -q 'install-chezmoi-verified.sh' "$ACTION_FILE" 2>/dev/null \
+  && grep -q 'CHEZMOI_VERSION' "$ACTION_FILE" 2>/dev/null; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: install script uses pinned CHEZMOI_VERSION env variable (via setup-chezmoi composite)"
 else
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: install script should use pinned CHEZMOI_VERSION env variable"

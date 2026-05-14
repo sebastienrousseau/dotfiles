@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# Sourced by scripts/dot/commands/*.sh; inherits set -euo pipefail.
 # Dotfiles CLI Platform Abstraction
 # Unified helpers for macOS, Linux, and WSL parity.
 

@@ -13,6 +13,7 @@ This document defines the configuration management approach for this development
 **Managed Files:** 209 files/directories
 
 Chezmoi handles:
+
 - Shell configurations (.bashrc, .zshrc, .profile, .zshenv, .zprofile)
 - Editor configs (.vimrc, nvim, VS Code settings)
 - Tool configs (.gitconfig, .npmrc, .noderc, etc.)
@@ -24,6 +25,7 @@ Chezmoi handles:
 
 **Role:** Auto-generated, not version controlled
 **Examples:**
+
 - `~/.cache/` - Application caches
 - `~/.local/share/` - Application data
 - `~/.cargo/`, `~/.rustup/` - Language toolchains
@@ -63,6 +65,7 @@ secrets = true  # Enable secret management
 ### Template Patterns
 
 Files ending in `.tmpl` are processed with Go templates:
+
 - `dot_gitconfig.tmpl` - Injects name, email, signing key
 - `dot_npmrc.tmpl` - Injects registry tokens
 - `dot_noderc.tmpl` - Injects Node.js settings

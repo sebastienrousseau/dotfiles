@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Milestone v0.2.493 Scope
 
 This milestone keeps scope intentionally small and operationally focused.

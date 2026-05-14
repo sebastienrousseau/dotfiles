@@ -4,8 +4,12 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 SCRIPT_FILE="$REPO_ROOT/scripts/docs/check-manual.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "script_exists"
 assert_file_exists "$SCRIPT_FILE" "check-manual.sh must exist"
@@ -24,5 +28,8 @@ assert_file_contains "$SCRIPT_FILE" "check_structure" "must validate directory s
 
 test_start "validates_links"
 assert_file_contains "$SCRIPT_FILE" "check_links" "must validate internal links"
+
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$SCRIPT_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

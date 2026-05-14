@@ -1,0 +1,112 @@
+name: deps.dev Validation
+
+# Validates direct dependencies (npm / PyPI / GitHub Actions) against
+# the deps.dev Insights API. Catches advisories Grype misses (no CVE
+# yet) and unattested artifacts. Closes the CI half of #877.
+#
+# Triggers:
+#   * PR (advisory)         — runs the scan, reports findings as
+#     SARIF annotations, but does NOT fail the build. Lets
+#     contributors iterate without the gate blocking unrelated work.
+#   * push to master (hard) — same scan, but hard-fails on any HIGH+
+#     advisory.
+#   * weekly cron           — re-scans even when deps haven't changed,
+#     so a newly-published advisory against a frozen dep still gets
+#     surfaced.
+
+on:
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'pyproject.toml'
+      - '.github/workflows/**'
+      - 'scripts/ci/check-deps-dev.sh'
+      - 'docs/security/DEPS_DEV_EXCEPTIONS.md'
+  push:
+    branches: [master]
+  schedule:
+    - cron: '0 4 * * 2'   # Tuesday 04:00 UTC — after Dependabot
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  issues: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: deps.dev / direct deps
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Run deps.dev validation
+        id: scan
+        env:
+          # PRs are advisory; push-to-master + schedule are hard-fail.
+          DEPS_DEV_SARIF_OUT: ${{ github.workspace }}/deps-dev.sarif
+        run: |
+          set -uo pipefail
+          if bash scripts/ci/check-deps-dev.sh; then
+            echo "advisory_count=0" >> "$GITHUB_OUTPUT"
+          else
+            echo "advisory_count=1" >> "$GITHUB_OUTPUT"
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              echo "::notice::deps.dev advisory present — advisory-only on PRs."
+              exit 0
+            fi
+            exit 1
+          fi
+
+      - name: Upload SARIF to Code Scanning
+        if: always() && hashFiles('deps-dev.sarif') != ''
+        uses: github/codeql-action/upload-sarif@68bde559dea0fdcac2102bfdf6230c5f70eb485e # v4
+        with:
+          sarif_file: deps-dev.sarif
+          category: deps-dev
+
+      - name: Open advisory tracking issue on schedule
+        if: failure() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ADVISORY_COUNT: ${{ steps.scan.outputs.advisory_count }}
+        run: |
+          set -euo pipefail
+          title="deps.dev: weekly scan flagged ${ADVISORY_COUNT} advisor(y/ies)"
+          body=$(cat <<EOF
+          The Tuesday deps.dev scan found one or more advisories at or above the configured threshold.
+
+          See the failing workflow run for the per-dep breakdown, or download the \`deps-dev.sarif\` artifact for the SARIF body.
+
+          Triage:
+          - Update the affected dep.
+          - Or add a time-bound exception entry to \`docs/security/DEPS_DEV_EXCEPTIONS.md\` with rationale + expiry.
+
+          Tracked under #877.
+          EOF
+          )
+
+          existing=$(gh issue list \
+            --search 'deps.dev: weekly scan flagged' \
+            --state open \
+            --json number \
+            --jq '.[0].number' 2>/dev/null || true)
+
+          if [[ -n "$existing" ]]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create \
+              --title "$title" \
+              --body "$body" \
+              --label "type:security,priority:high"
+          fi

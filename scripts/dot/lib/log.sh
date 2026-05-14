@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# Sourced by scripts/dot/commands/*.sh and scripts/diagnostics/*; inherits set -euo pipefail.
 # Structured JSON logging and metrics library.
 # Source this file to emit machine-readable logs and performance metrics.
 #
@@ -7,6 +8,11 @@
 #   source "$(dirname "${BASH_SOURCE[0]}")/log.sh"
 #   dot_log info "apply_start" "source=chezmoi"
 #   dot_metric "shell_startup" 142 ms
+
+# Re-source guard: re-sourcing would mint a new DOT_TRACE_ID and break
+# correlation across modules that already captured the original.
+[[ "${_DOT_LIB_LOG_LOADED:-0}" == "1" ]] && return 0
+_DOT_LIB_LOG_LOADED=1
 
 # Correlation ID for tracing across commands in a single invocation
 DOT_TRACE_ID="${DOT_TRACE_ID:-$(date +%s%N 2>/dev/null | tail -c 12 || date +%s)}"

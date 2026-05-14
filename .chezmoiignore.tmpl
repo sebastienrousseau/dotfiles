@@ -6,6 +6,10 @@
 **/.DS_Store
 *.swp
 **/*.swp
+# Runtime state (XDG_STATE_HOME) — pre-push bypass audit log etc. must
+# never be tracked or applied from chezmoi source. See #871.
+.local/state/dotfiles/audit-bypass.log
+.local/state/dotfiles/**
 # Repo-only files and directories (do not apply into $HOME)
 .config/.module-manifest.json
 CHANGELOG.md

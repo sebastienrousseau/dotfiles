@@ -64,6 +64,11 @@ jobs:
       nix: ${{ steps.filter.outputs.nix }}
       config: ${{ steps.filter.outputs.config }}
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         id: filter
@@ -121,6 +126,11 @@ jobs:
     needs: changes
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Install fish
         run: sudo apt-get update && sudo apt-get install -y fish
@@ -138,12 +148,60 @@ jobs:
     needs: changes
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a # v21
       - name: Run Nu Check
         run: |
           nix shell nixpkgs#nushell -c nu -c "print 'Checking Nushell Syntax...'"
           # Template variables prevent true `nu --ide-check`, so we do a basic syntax check if possible.
+
+  lint-copyright:
+    name: Lint / Copyright
+    needs: changes
+    if: >-
+      needs.changes.outputs.shell == 'true'
+      || needs.changes.outputs.lua == 'true'
+      || needs.changes.outputs.nix == 'true'
+      || github.event_name == 'schedule'
+      || github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/reusable-copyright-lint.yml
+
+  lint-chezmoidata:
+    name: Lint / Chezmoidata Schema
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: changes
+    if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      # Cache the compiled taplo-cli binary across runs so we only pay
+      # the ~60s cargo build cost once. Key by major.minor so patch
+      # bumps invalidate cleanly.
+      - name: Cache taplo
+        id: taplo_cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~/.cargo/bin/taplo
+          key: taplo-cli-0.10-${{ runner.os }}
+      - name: Install taplo
+        if: steps.taplo_cache.outputs.cache-hit != 'true'
+        run: cargo install --locked taplo-cli --version "^0.10"
+      - name: Verify taplo on PATH
+        run: |
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          "$HOME/.cargo/bin/taplo" --version
+      - name: Validate .chezmoidata.toml against schema
+        run: bash scripts/ci/validate-chezmoidata.sh
 
   # ============================================================================
   # STAGE 2: SECURITY (Parallel with lint)
@@ -171,11 +229,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
       - name: TruffleHog Scan
-        uses: trufflesecurity/trufflehog@47e7b7cd74f578e1e3145d48f669f22fd1330ca6 # v3.94.3
+        uses: trufflesecurity/trufflehog@17456f8c7d042d8c82c9a8ca9e937231f9f42e26 # v3.95.2
         with:
           extra_args: --only-verified
 
@@ -184,6 +247,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Generate SBOM with Syft
         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
@@ -213,6 +281,11 @@ jobs:
     # Only run link check on schedule or manual trigger (saves minutes)
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Lychee link checker
         uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2
@@ -236,18 +309,14 @@ jobs:
     needs: changes
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Cache Chezmoi
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
         with:
-          path: ~/.local/bin/chezmoi
-          key: chezmoi-${{ runner.os }}-${{ env.CHEZMOI_VERSION }}
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Setup Chezmoi
-        run: |
-          if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
-            bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
-          fi
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+        uses: ./.github/actions/setup-chezmoi
       - name: Init & Dry Run
         run: |
           chezmoi init
@@ -266,18 +335,14 @@ jobs:
     timeout-minutes: 10  # Reduced from 15 to enforce efficiency
     needs: changes
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Cache Chezmoi
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
         with:
-          path: ~/.local/bin/chezmoi
-          key: chezmoi-${{ runner.os }}-${{ env.CHEZMOI_VERSION }}
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Setup Chezmoi
-        run: |
-          if [[ ! -x "$HOME/.local/bin/chezmoi" ]]; then
-            bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
-          fi
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+        uses: ./.github/actions/setup-chezmoi
       - name: Init & Dry Run
         run: |
           chezmoi init
@@ -302,6 +367,11 @@ jobs:
       matrix:
         distro: [ubuntu]
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: E2E Installation Test
         run: |
@@ -341,11 +411,16 @@ jobs:
     # Only run on full CI (schedule/manual) - idempotency is expensive
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Setup Chezmoi
+        uses: ./.github/actions/setup-chezmoi
+      - name: Configure source dir
         run: |
-          bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           mkdir -p "$HOME/.config/chezmoi"
           echo "sourceDir = \"$GITHUB_WORKSPACE\"" > "$HOME/.config/chezmoi/chezmoi.toml"
       - name: First apply
@@ -387,15 +462,21 @@ jobs:
     # Only run benchmarks on schedule or manual trigger
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y zsh hyperfine jq
 
       - name: Setup Chezmoi
+        uses: ./.github/actions/setup-chezmoi
+
+      - name: Configure source dir
         run: |
-          bash scripts/ci/install-chezmoi-verified.sh "${{ env.CHEZMOI_VERSION }}" "$HOME/.local/bin"
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           mkdir -p "$HOME/.config/chezmoi"
           echo "sourceDir = \"$GITHUB_WORKSPACE\"" > "$HOME/.config/chezmoi/chezmoi.toml"
 
@@ -517,7 +598,7 @@ jobs:
 
       - name: Comment on PR with benchmark results
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const time_ms = '${{ steps.benchmark.outputs.time_ms }}';
@@ -552,9 +633,14 @@ jobs:
     name: Quality Gate
     runs-on: ubuntu-latest
     timeout-minutes: 2
-    needs: [lint-shell, security-secrets, security-dependencies, test-unit]
+    needs: [lint-shell, lint-copyright, security-secrets, security-dependencies, test-unit]
     if: github.event_name == 'pull_request'
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Enforce merge requirements
         run: |
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

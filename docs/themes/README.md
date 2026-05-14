@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Theme Gallery
 
 Themes are auto-generated from your wallpapers — the available set depends on what's present on your system. Run `dot theme list` to see what's discovered.

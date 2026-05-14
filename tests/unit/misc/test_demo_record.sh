@@ -5,8 +5,12 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 SCRIPT_FILE="$REPO_ROOT/scripts/demo/record.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "script_exists"
 assert_file_exists "$SCRIPT_FILE" "demo record script should exist"
@@ -22,5 +26,8 @@ fi
 
 test_start "script_has_output_message"
 assert_output_contains "Saved demo to" "cat \"$SCRIPT_FILE\""
+
+# Slice 3 (#883): exercise the script under sandbox for line coverage
+cov_exercise_script "$SCRIPT_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

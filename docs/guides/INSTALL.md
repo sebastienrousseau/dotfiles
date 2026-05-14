@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Install
 
 Set up on macOS, Linux, or WSL in 3 to 5 minutes.

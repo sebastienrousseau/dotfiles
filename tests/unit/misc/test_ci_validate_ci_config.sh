@@ -5,8 +5,12 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 SCRIPT_FILE="$REPO_ROOT/scripts/ci/validate-ci-config.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "script_exists"
 assert_file_exists "$SCRIPT_FILE" "validate-ci-config script should exist"
@@ -22,5 +26,8 @@ fi
 
 test_start "script_contains_coverage_check"
 assert_output_contains "100% coverage requirement" "cat \"$SCRIPT_FILE\""
+
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$SCRIPT_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

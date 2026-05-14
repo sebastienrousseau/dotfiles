@@ -13,6 +13,7 @@ These aliases are defined in `configuration.aliases.sh` and are automatically lo
 This code provides a set of command aliases to open important
 configuration files in default text editors quickly and easily. The
 following aliases are included:
+
 - `apconf` opens the Apache configuration file in the default text
   editor.
 - `bshrc` opens the Bash configuration file in the default text editor.

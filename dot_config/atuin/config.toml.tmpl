@@ -1,0 +1,47 @@
+# Atuin Configuration (~/.config/atuin/config.toml)
+# https://atuin.sh/docs/config
+#
+# This file is templated by chezmoi. The `history_filter` block is sourced
+# from `.chezmoidata/secrets-patterns.toml` (see #872) so the same audited
+# defaults ship to every machine, with per-host extension via
+# `~/.config/chezmoi/chezmoi.toml` → `[data.atuin.history_filter] extra = [...]`.
+
+# Core
+update_check = false
+db_path = "~/.local/share/atuin/history.db"
+key_path = "~/.local/share/atuin/key"
+session_path = "~/.local/share/atuin/session"
+
+# Sync
+auto_sync = true
+sync_frequency = "10m"
+sync_address = "https://api.atuin.sh"
+
+# UI
+style = "compact"
+inline_height = 20
+show_preview = true
+enter_accept = true
+
+# Search
+search_mode = "fuzzy"
+filter_mode = "global"
+workspaces = true
+
+# Privacy: skip commands that may contain secrets.
+# Defaults come from .chezmoidata/secrets-patterns.toml; the `extra` slot
+# in chezmoi.toml allows per-host extension without editing this template.
+history_filter = [
+{{- range .atuin.history_filter.defaults }}
+  {{ . | quote }},
+{{- end }}
+{{- with .atuin.history_filter.extra }}
+{{- range . }}
+  {{ . | quote }},
+{{- end }}
+{{- end }}
+]
+
+# Skip ephemeral directories
+secrets_filter = true
+network_timeout = 30

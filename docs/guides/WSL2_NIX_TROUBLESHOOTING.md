@@ -1,6 +1,11 @@
+---
+render_with_liquid: false
+---
+
 # WSL2 & Nix Integration Troubleshooting Guide
 
 ### Metadata
+
 - **Type:** How-To Guide / Reference
 - **Audience:** Intermediate / Advanced
 - **Prerequisites:** Basic familiarity with command line, WSL2, and Nix package manager
@@ -25,6 +30,7 @@ A comprehensive troubleshooting guide for WSL2 edge cases, Nix integration issue
 ### Filesystem Issues
 
 #### Problem: Symlinks fail to work between Windows and WSL2
+
 ```bash
 # Check if symlinks are enabled
 ls -la ~/.dotfiles/
@@ -34,13 +40,16 @@ ls -la ~/.dotfiles/
 **Root Cause:** Windows filesystem doesn't support Unix symlinks by default.
 
 **Solutions:**
+
 1. **Enable Developer Mode** (Windows 10/11):
+
    ```powershell
    # Run in PowerShell as Administrator
    dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
    ```
 
 2. **Use WSL2 native filesystem**:
+
    ```bash
    # Move dotfiles to WSL2 filesystem
    cd ~
@@ -48,12 +57,14 @@ ls -la ~/.dotfiles/
    ```
 
 3. **Configure Git for WSL2**:
+
    ```bash
    git config --global core.symlinks true
    git config --global core.autocrlf false
    ```
 
 #### Problem: Slow filesystem performance on Windows drives
+
 ```bash
 # Test filesystem performance
 time ls -la /mnt/c/Users/
@@ -63,12 +74,14 @@ time ls -la ~/
 **Solution:** Always work within WSL2 filesystem (`~/`) for performance-critical operations.
 
 #### Problem: Permission denied errors on mounted Windows drives
+
 ```bash
 # Check mount options
 mount | grep drvfs
 ```
 
 **Solution:** Remount with proper permissions:
+
 ```bash
 # Create /etc/wsl.conf
 sudo tee /etc/wsl.conf > /dev/null <<EOF
@@ -86,6 +99,7 @@ wsl --shutdown
 ### Networking Issues
 
 #### Problem: DNS resolution fails in WSL2
+
 ```bash
 # Test DNS resolution
 nslookup github.com
@@ -93,15 +107,19 @@ ping github.com
 ```
 
 **Solutions:**
+
 1. **Reset WSL2 DNS**:
+
    ```bash
    sudo rm /etc/resolv.conf
    sudo bash -c 'echo "nameserver 8.8.8.8" > /etc/resolv.conf'
    ```
 
 2. **Configure permanent DNS**:
+
    ```bash
    sudo tee /etc/wsl.conf > /dev/null <<EOF
+
 [network]
 generateResolvConf = false
 EOF
@@ -110,6 +128,7 @@ EOF
 nameserver 1.1.1.1
 nameserver 8.8.8.8
 EOF
+
    ```
 
 #### Problem: Port forwarding doesn't work
@@ -119,6 +138,7 @@ netstat -tulpn | grep :3000
 ```
 
 **Solution:** Use Windows port proxy:
+
 ```powershell
 # Run in PowerShell as Administrator
 netsh interface portproxy add v4tov4 listenport=3000 listenaddress=0.0.0.0 connectport=3000 connectaddress=172.x.x.x
@@ -127,6 +147,7 @@ netsh interface portproxy add v4tov4 listenport=3000 listenaddress=0.0.0.0 conne
 ### Memory and Resource Issues
 
 #### Problem: WSL2 consumes excessive memory
+
 ```bash
 # Check WSL2 memory usage
 cat /proc/meminfo | grep MemTotal
@@ -134,6 +155,7 @@ free -h
 ```
 
 **Solution:** Limit WSL2 memory usage:
+
 ```ini
 # Create %UserProfile%\.wslconfig
 [wsl2]
@@ -143,7 +165,9 @@ swap=2GB
 ```
 
 #### Problem: WSL2 doesn't release memory back to Windows
+
 **Solution:** Compact WSL2 virtual disk:
+
 ```powershell
 # Run in PowerShell as Administrator
 wsl --shutdown
@@ -162,6 +186,7 @@ diskpart
 ### Installation Problems
 
 #### Problem: Nix installation fails on WSL2
+
 ```bash
 # Check if installation attempted
 ls -la /nix/
@@ -169,23 +194,29 @@ which nix
 ```
 
 **Solutions:**
+
 1. **Use deterministic installer**:
+
    ```bash
    curl -L https://nixos.org/nix/install | sh -s -- --daemon
    ```
 
 2. **Fix permissions after installation**:
+
    ```bash
    sudo chown -R $(whoami) /nix/var/nix/profiles/per-user/$(whoami)/
    sudo chmod -R 755 /nix/var/nix/profiles/per-user/$(whoami)/
    ```
 
 3. **Enable systemd for Nix daemon** (WSL2 Ubuntu 22.04+):
+
    ```bash
    sudo tee /etc/wsl.conf > /dev/null <<EOF
+
 [boot]
 systemd=true
 EOF
+
    ```
 
 #### Problem: Nix flakes not recognized
@@ -195,6 +226,7 @@ nix flake --help
 ```
 
 **Solution:** Enable experimental features:
+
 ```bash
 mkdir -p ~/.config/nix/
 tee ~/.config/nix/nix.conf > /dev/null <<EOF
@@ -210,18 +242,22 @@ EOF
 ```
 
 #### Problem: SSL certificate errors during Nix operations
+
 ```bash
 # Test Nix store access
 nix ping-store
 ```
 
 **Solutions:**
+
 1. **Update CA certificates**:
+
    ```bash
    sudo apt update && sudo apt install ca-certificates
    ```
 
 2. **Configure Nix with custom CA bundle**:
+
    ```bash
    export NIX_SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
    echo 'export NIX_SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt' >> ~/.bashrc
@@ -230,6 +266,7 @@ nix ping-store
 ### Flake and Profile Issues
 
 #### Problem: Flake lock file conflicts
+
 ```bash
 # Check flake lock status
 cd ~/.dotfiles/nix/
@@ -237,6 +274,7 @@ nix flake check --impure
 ```
 
 **Solution:** Update and rebuild lock file:
+
 ```bash
 cd ~/.dotfiles/nix/
 rm flake.lock
@@ -245,6 +283,7 @@ nix flake check
 ```
 
 #### Problem: Nix profile conflicts with system packages
+
 ```bash
 # List Nix profiles
 nix profile list
@@ -253,29 +292,35 @@ which -a git
 ```
 
 **Solutions:**
+
 1. **Remove conflicting profiles**:
+
    ```bash
    nix profile remove <profile-number>
    ```
 
 2. **Use priority settings**:
+
    ```bash
    nix profile install nixpkgs#git --priority 10
    ```
 
 3. **Create isolated development environments**:
+
    ```bash
    cd ~/.dotfiles/nix/
    nix develop
    ```
 
 #### Problem: Nix store corruption
+
 ```bash
 # Check store integrity
 nix-store --verify --check-contents
 ```
 
 **Solution:** Repair corrupted store:
+
 ```bash
 # Stop Nix daemon
 sudo systemctl stop nix-daemon
@@ -290,12 +335,14 @@ sudo systemctl start nix-daemon
 ### Build and Cache Issues
 
 #### Problem: Binary cache not working
+
 ```bash
 # Test cache connectivity
 nix ping-store --store https://cache.nixos.org
 ```
 
 **Solution:** Configure trusted substituters:
+
 ```bash
 sudo tee -a /etc/nix/nix.conf > /dev/null <<EOF
 substituters = https://cache.nixos.org/ https://nix-community.cachix.org
@@ -304,6 +351,7 @@ EOF
 ```
 
 #### Problem: Out of disk space during build
+
 ```bash
 # Check Nix store size
 du -sh /nix/store/
@@ -311,6 +359,7 @@ df -h /nix/
 ```
 
 **Solution:** Clean up Nix store:
+
 ```bash
 # Remove unused packages
 nix-collect-garbage
@@ -329,6 +378,7 @@ nix-store --optimise
 ### Complete System Recovery
 
 #### Scenario: Dotfiles installation completely broken
+
 ```bash
 # 1. Backup current state
 cp ~/.zshrc ~/.zshrc.backup.$(date +%s)
@@ -348,6 +398,7 @@ curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/ins
 ```
 
 #### Scenario: WSL2 completely broken
+
 ```powershell
 # From Windows PowerShell as Administrator
 
@@ -367,6 +418,7 @@ wsl -d Ubuntu -u root -- curl -fsSL https://raw.githubusercontent.com/sebastienr
 ### Partial Recovery
 
 #### Fix broken Nix installation
+
 ```bash
 # 1. Remove broken Nix
 sudo rm -rf /nix/
@@ -387,6 +439,7 @@ which nix
 ```
 
 #### Fix broken shell configuration
+
 ```bash
 # 1. Use emergency shell config
 cat > ~/.zshrc.emergency <<'EOF'
@@ -414,6 +467,7 @@ chezmoi apply
 ### Data Recovery
 
 #### Recover encrypted secrets
+
 ```bash
 # 1. Check if key file exists
 ls -la ~/.config/chezmoi/key.txt
@@ -430,6 +484,7 @@ chezmoi execute-template --init --force
 ```
 
 #### Recover Git configuration
+
 ```bash
 # 1. Check current git config
 git config --list --show-origin
@@ -453,6 +508,7 @@ git config --get core.editor
 ### WSL2 Performance Tuning
 
 #### Optimize filesystem performance
+
 ```bash
 # 1. Move frequently accessed files to WSL2 filesystem
 mkdir -p ~/workspace
@@ -469,6 +525,7 @@ export EDITOR="nvim"
 ```
 
 #### Reduce memory usage
+
 ```bash
 # 1. Limit shell history
 echo 'HISTSIZE=1000' >> ~/.zshrc
@@ -485,6 +542,7 @@ echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
 ### Nix Performance Tuning
 
 #### Optimize Nix builds
+
 ```bash
 # Configure build settings
 sudo tee -a /etc/nix/nix.conf > /dev/null <<EOF
@@ -497,6 +555,7 @@ EOF
 ```
 
 #### Enable build caching
+
 ```bash
 # Install and configure cachix
 nix profile install nixpkgs#cachix
@@ -513,6 +572,7 @@ echo 'eval "$(cachix completion bash)"' >> ~/.bashrc
 ### Moving from macOS to WSL2
 
 #### Environment differences checklist
+
 ```bash
 # 1. Check path differences
 echo $PATH | tr ':' '\n' | sort
@@ -528,6 +588,7 @@ which nix 2>/dev/null && echo "Nix found"
 ```
 
 #### Migration procedure
+
 ```bash
 # 1. Export current configuration
 cd ~/.dotfiles
@@ -551,6 +612,7 @@ chezmoi apply
 ### Moving from Linux to WSL2
 
 #### Handle systemd differences
+
 ```bash
 # Check systemd status
 systemctl is-system-running 2>/dev/null || echo "systemd not available"
@@ -560,6 +622,7 @@ sudo service ssh start  # Instead of systemctl start ssh
 ```
 
 #### Network configuration migration
+
 ```bash
 # 1. Export network settings from source system
 ip route show > network-config.txt
@@ -576,6 +639,7 @@ cat /etc/resolv.conf >> network-config.txt
 ### Emergency Shell Access
 
 #### If shell is completely broken
+
 ```bash
 # 1. Access via different shell
 /bin/bash --noprofile --norc
@@ -591,6 +655,7 @@ alias ll='ls -la'
 ```
 
 #### If WSL2 won't start
+
 ```powershell
 # From Windows PowerShell as Administrator
 
@@ -610,6 +675,7 @@ net start LxssManager
 ### Emergency Contacts and Resources
 
 #### Diagnostic commands for support requests
+
 ```bash
 # System information
 cat /etc/os-release
@@ -652,6 +718,7 @@ echo "Diagnostic report saved to ~/diagnostic-report.txt"
 ```
 
 #### Support channels
+
 - GitHub Issues: [Repository Issues](https://github.com/sebastienrousseau/dotfiles/issues)
 - WSL2 Documentation: [Microsoft WSL Docs](https://docs.microsoft.com/en-us/windows/wsl/)
 - Nix Documentation: [Nix Manual](https://nixos.org/manual/nix/stable/)
@@ -662,6 +729,7 @@ echo "Diagnostic report saved to ~/diagnostic-report.txt"
 ## Quick Reference
 
 ### Essential Commands
+
 ```bash
 # System status
 dot doctor                    # Run dotfiles health check
@@ -681,6 +749,7 @@ export PATH=/usr/bin:/bin    # Minimal PATH
 ```
 
 ### Recovery Commands
+
 ```bash
 # Nuclear options (use with caution)
 rm -rf ~/.local/share/chezmoi/     # Reset chezmoi

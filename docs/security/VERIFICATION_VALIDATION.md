@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Verification and Validation Report
 
 ## Document Control
@@ -5,7 +9,7 @@
 | Field | Value |
 |-------|-------|
 | Document ID | VV-DOT-001 |
-| Version | 0.2.500 |
+| Version | 0.2.501 |
 | Date | 2026-03-20 |
 | Author | Repository Maintainer |
 | Status | Active |

@@ -2,6 +2,8 @@
 # Universal desktop notification (notify)
 # Supports macOS (osascript), Linux (notify-send), and WSL (powershell)
 
+set -eu
+
 title="${1:-Notification}"
 message="${2:-}"
 

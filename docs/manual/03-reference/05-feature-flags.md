@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # Reference: Feature Flags
 
 Feature flags toggle optional subsystems. Set in `.chezmoidata.toml`, override per-preset in `.chezmoidata/hardware.toml`.
@@ -28,6 +33,7 @@ The effective value is `mergeOverwrite` of global + preset features.
 ### `dms` — Dank Material Shell
 
 When `true`:
+
 - Configures DMS IPC for theme sync
 - Enables Quickshell templates
 - Sets up per-monitor wallpaper via `dms ipc wallpaper`
@@ -37,6 +43,7 @@ Requires: Niri + Quickshell + DMS installed.
 ### `linux_desktop` — Linux Desktop Configs
 
 When `true`:
+
 - Enables GTK 3/4 theme generation from `themes.toml`
 - Configures `gsettings color-scheme` behaviour
 - Generates desktop file entries for installed tools
@@ -46,6 +53,7 @@ No effect on macOS.
 ### `niri` — Niri Window Manager
 
 When `true`:
+
 - Generates `~/.config/niri/config.kdl`
 - Enables Niri keybindings from `keybinds.toml`
 - Configures workspace rules per preset
@@ -55,6 +63,7 @@ Requires: Niri installed.
 ### `waybar` — Waybar Status Bar
 
 When `true`:
+
 - Generates `~/.config/waybar/config.jsonc` + `style.css`
 - Hooks into theme switching via `dot-theme-sync`
 
@@ -116,3 +125,4 @@ Flags can be deprecated without breaking existing hosts. The deprecation process
 
 - [Configuration Files](02-config-files.md)
 - [Create a Profile](../02-tutorials/03-create-profile.md)
+{% endraw %}

@@ -10,6 +10,12 @@ on:
 permissions:
   contents: read
 
+env:
+  # Pinned chezmoi version consumed by the `setup-chezmoi` composite
+  # action (which reads $CHEZMOI_VERSION when no `version:` input is
+  # supplied). Keep in lockstep with .github/workflows/ci.yml.
+  CHEZMOI_VERSION: "2.47.1"
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -21,8 +27,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        # macos-14 = Apple Silicon (M-series); macos-latest still
+        # resolves to Intel. Both kept to catch arch-specific drift.
+        os: [ubuntu-latest, macos-latest, macos-14]
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Reliability audit
         run: bash ./scripts/qa/reliability-audit.sh --with-integration
@@ -31,6 +44,11 @@ jobs:
     name: Examples Contract
     runs-on: ubuntu-latest
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Validate executable examples
         run: bash ./scripts/qa/validate-examples.sh
@@ -39,16 +57,53 @@ jobs:
     name: WSL Contract
     runs-on: ubuntu-latest
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Validate WSL parity contract
         run: bash ./scripts/qa/wsl-contract.sh
 
+  # PowerShell parity contract — verifies the dotfiles PowerShell
+  # profile loads, defines the expected function shims (dot, d, ll,
+  # la, cat), and passes Invoke-ScriptAnalyzer at Error severity.
+  # Runs on windows-latest so the parity claim in the README is
+  # actually exercised in CI rather than aspirational. Closes #860.
+  powershell-contract:
+    name: PowerShell Contract
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Chezmoi
+        # The composite resolves the chezmoi binary into a known
+        # location and appends it to PATH so the .ps1 contract can
+        # render the template.
+        uses: ./.github/actions/setup-chezmoi
+
+      - name: Run PowerShell parity contract
+        shell: pwsh
+        run: ./scripts/qa/powershell-contract.ps1
+
   reliability-summary:
     name: Reliability Summary
     runs-on: ubuntu-latest
-    needs: [reliability, examples-contract, wsl-contract]
+    needs: [reliability, examples-contract, wsl-contract, powershell-contract]
     if: always()
     steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Reliability summary
         run: |
           if [[ "${{ needs.reliability.result }}" != "success" ]]; then
@@ -61,6 +116,10 @@ jobs:
           fi
           if [[ "${{ needs.wsl-contract.result }}" != "success" ]]; then
             echo "::error::WSL contract failed"
+            exit 1
+          fi
+          if [[ "${{ needs.powershell-contract.result }}" != "success" ]]; then
+            echo "::error::PowerShell contract failed"
             exit 1
           fi
           echo "Reliability matrix passed"

@@ -8,8 +8,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 UNINSTALL_SCRIPT="$REPO_ROOT/scripts/uninstall.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "uninstall_script_exists"
 assert_file_exists "$UNINSTALL_SCRIPT" "uninstall.sh should exist"
@@ -31,5 +35,8 @@ assert_file_contains "$UNINSTALL_SCRIPT" "/.dotfiles" "should remove dotfiles re
 
 test_start "uninstall_cleans_caches"
 assert_file_contains "$UNINSTALL_SCRIPT" "dotfiles" "should clean dotfiles caches"
+
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$UNINSTALL_SCRIPT"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

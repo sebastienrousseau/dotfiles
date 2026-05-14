@@ -5,19 +5,34 @@
 <h1 align="center">.dotfiles</h1>
 
 <p align="center">
-  <strong>Declarative dotfiles for macOS, Linux, and WSL. Multi-shell by default, with sub-second startup, wallpaper-driven themes, and signed releases.</strong>
+  <strong>Declarative dotfiles for macOS, Linux, and WSL. Multi-shell by default. Sub-second startup. Wallpaper-driven themes. Signed releases.</strong>
 </p>
 
 <p align="center">
   <a href="https://github.com/sebastienrousseau/dotfiles/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge&logo=github" alt="Build" /></a>
-  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.500-blue?style=for-the-badge" alt="Version" /></a>
+  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.501-blue?style=for-the-badge" alt="Version" /></a>
   <a href="https://github.com/sebastienrousseau/dotfiles/releases"><img src="https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge" alt="Downloads" /></a>
-  <a href="https://codespaces.new/sebastienrousseau/dotfiles"><img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces" /></a>
+  <a href="https://codespaces.new/sebastienrousseau/dotfiles"><img src="https://img.shields.io/badge/Open%20in-Codespaces-blue?style=for-the-badge&logo=github" alt="Open in GitHub Codespaces" /></a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/dotfiles"><img src="https://img.shields.io/ossf-scorecard/github.com/sebastienrousseau/dotfiles?style=for-the-badge&label=OpenSSF%20Scorecard" alt="OpenSSF Scorecard" /></a>
 </p>
 
 ---
 
+> **Why this is different.** You won't find these three things in `mathiasbynens/`, `holman/`, or `paulirish/`. First, wallpaper-driven terminal themes. We use K-Means clustering in CIELAB and enforce WCAG AAA contrast. Second, first-class agent governance. That covers MCP policy, A2A discovery, signed attestation logs, and bounded profiles (`ask` / `plan` / `apply` / `audit`). Third, verified multi-shell parity across zsh, fish, bash, nushell, and PowerShell. The suite is tested on macOS, Linux, WSL2, and Apple Silicon CI runners. Signed commits are enforced. The installer is idempotent. The CLI heals itself.
+
 ## Install
+
+**Verified install (recommended).** Pin to a release tag. Download the installer. Check its SHA256 against the value published with the release. Then run it. See [docs/security/INSTALL_VERIFICATION.md](docs/security/INSTALL_VERIFICATION.md) for the per-release hash and how it's generated.
+
+```bash
+curl -fsSL -o /tmp/dotfiles-install.sh \
+  https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.501/install.sh
+echo "4c0303a2d88d5aed98428ab0da37618c9795af4dae0e6549646c2fce5235c280  /tmp/dotfiles-install.sh" \
+  | shasum -a 256 -c
+bash /tmp/dotfiles-install.sh
+```
+
+**Trust-source one-liner** (skips the SHA check — fine for sandboxes and ephemeral CI, not recommended for primary workstations):
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
@@ -30,7 +45,7 @@ dot doctor        # verify installation
 dot learn         # interactive tour
 ```
 
-Requires `git` and `curl`. Works on macOS, Ubuntu/Debian, Arch, WSL2, and GitHub Codespaces.
+The install needs `git` and `curl`. The verified path also needs `shasum` or `sha256sum`. The script runs on macOS, Ubuntu, Debian, Arch, WSL2, and GitHub Codespaces.
 
 <details>
 <summary>CI/CD and Docker options</summary>
@@ -59,26 +74,27 @@ docker run --rm -e DOTFILES_NONINTERACTIVE=1 ubuntu:24.04 bash -c \
 
 ## Why this repo is different
 
-Most dotfiles repos are personal collections. This one ships as workstation infrastructure: signed, attested, multi-platform, AI-aware, and self-healing.
+Most dotfiles repos are personal collections. This one ships as workstation infrastructure. It's signed, attested, multi-platform, AI-aware, and self-healing.
 
 | Capability | What you get | Where |
 |:---|:---|:---|
-| **Wallpaper-Driven Themes** | K-Means clustering in CIELAB extracts terminal palettes from any wallpaper. WCAG AAA enforced. Dynamic HEIC dark/light. | `dot theme rebuild` |
-| **AI & MCP Native** | Agent profiles, MCP policy enforcement, attestation logs, AI commit messages | `dot ai`, `dot mcp`, `dot agent`, `dot mode` |
-| **Cryptographic Attestation** | Signed commits, machine-readable evidence, policy bundle releases | `dot attest`, `dot verify` |
-| **Fleet Management** | Multi-node drift dashboard, per-host profiles | `dot fleet` |
-| **Self-Healing** | Auto-repair tools, chezmoi drift, broken symlinks, missing files | `dot heal`, `dot chaos`, `dot rollback`, `dot bundle` |
-| **Sub-second Startup** | Lazy loading, `_cached_eval` pattern, mtime-based cache invalidation | `dot benchmark`, `dot perf` |
-| **Multi-shell Parity** | Fish, Zsh, Nushell, PowerShell share one templated baseline | `dot env`, `dot profile` |
-| **Build Artifacts → /tmp** | Cargo, Go, pip, uv, Zig caches redirected; project dirs stay clean | `~/.config/mise/config.toml`, `~/.cargo/config.toml` |
-| **Encrypted Secrets** | Age + SOPS for per-machine secrets out of plaintext history | `dot secrets` |
-| **Portable Runtimes** | Mise for managed toolchains, Nix Flakes for strict reproducibility | `dot env`, `dot upgrade` |
+| **Wallpaper-driven themes** | K-Means clustering in CIELAB extracts terminal palettes from any wallpaper. WCAG AAA enforced. Dynamic HEIC dark/light. | `dot theme rebuild` |
+| **AI and MCP native** | Agent profiles, MCP policy enforcement, attestation logs, AI commit messages. | `dot ai`, `dot mcp`, `dot agent`, `dot mode` |
+| **Cryptographic attestation** | Signed commits, machine-readable evidence, policy bundle releases. | `dot attest`, `dot verify` |
+| **Fleet management** | Multi-node drift dashboard, per-host profiles. | `dot fleet` |
+| **Self-healing** | Auto-repair tools, chezmoi drift, broken symlinks, missing files. | `dot heal`, `dot chaos`, `dot rollback`, `dot bundle` |
+| **Sub-second startup** | Lazy loading, `_cached_eval` pattern, mtime-based cache invalidation, realpath sidecar pins. | `dot benchmark`, `dot perf` |
+| **Multi-shell parity** | Tier-1 (full): zsh, bash. Tier-2 (bridged): fish. Tier-3 (compatible): nushell. PowerShell is supported as a contract-tested parity target. See [ADR-007](docs/adr/ADR-007-multi-shell-parity.md) and [ADR-011](docs/adr/ADR-011-nushell-tier3-keep.md). | `dot env`, `dot profile` |
+| **Build artifacts → /tmp** | Cargo, Go, pip, uv, and Zig caches redirect to `/tmp/builds/`. Project dirs stay clean. | `~/.config/mise/config.toml`, `~/.cargo/config.toml` |
+| **Encrypted secrets** | Age and SOPS keep per-machine secrets out of plaintext history. | `dot secrets` |
+| **Portable runtimes** | Mise for managed toolchains. Nix Flakes for strict reproducibility. | `dot env`, `dot upgrade` |
+| **Schema-validated config** | `.chezmoidata.toml` is checked against a JSON Schema in CI via taplo. Typos in feature flags or profile names fail at PR time. | `config/chezmoidata.schema.json` |
 
 ---
 
 ## Architecture
 
-Idempotent. Run it once or a hundred times. Same machine state.
+The CLI is idempotent. Run it once or a hundred times. Same machine state.
 
 ```mermaid
 graph TD
@@ -95,7 +111,7 @@ graph TD
     J --> K[themes.toml<br/>WCAG AAA enforced]
     K --> H
 
-    H --> L[Zsh / Fish / Bash / Nushell]
+    H --> L[Zsh / Fish / Bash / Nushell / PowerShell]
     H --> M[Mise / Nix Toolchains]
     H --> N[MCP Policy / Agent Profiles]
     L --> O[~/.cache/shell Fast Init]
@@ -109,7 +125,7 @@ graph TD
 
 Drop a wallpaper. Get a theme.
 
-`dot theme rebuild` discovers system wallpapers (macOS `/System/Library/Desktop Pictures/`, Linux `/usr/share/backgrounds/`) plus your custom wallpapers (`~/Pictures/Wallpapers/`). K-Means clustering in CIELAB color space extracts dominant colors, generates a 16-color terminal palette, enforces WCAG AAA contrast, and assembles `themes.toml` automatically.
+`dot theme rebuild` discovers system wallpapers and your custom ones. On macOS it looks in `/System/Library/Desktop Pictures/`. On Linux it looks in `/usr/share/backgrounds/`. Custom wallpapers live in `~/Pictures/Wallpapers/`. K-Means clustering in CIELAB color space extracts dominant colors. The engine then generates a 16-color terminal palette, enforces WCAG AAA contrast, and assembles `themes.toml` on its own.
 
 | Tier | Source | Format |
 |:---|:---|:---|
@@ -123,7 +139,7 @@ dot theme toggle       # swap dark↔light within current family
 dot theme rebuild      # regenerate from current wallpapers
 ```
 
-On theme switch, every managed surface updates: terminal colors (Ghostty, Alacritty, Kitty, WezTerm, tmux), editor (Neovim, VS Code), GTK/icons, macOS accent + dark mode (forced UI refresh), browser color mode, wallpaper. Linux auto-converts HEIC → PNG via `magick`/`heif-convert`.
+On theme switch, every managed surface updates. Terminals: Ghostty, Alacritty, Kitty, WezTerm, Warp, iTerm2, tmux. Editors: Neovim and VS Code. The theme also sets GTK and icon themes, the macOS accent and dark-mode toggle (with a forced UI refresh), the browser color mode, and the wallpaper. On Linux, the engine auto-converts HEIC to PNG via `magick` or `heif-convert`.
 
 Full guide: [docs/guides/THEMING.md](docs/guides/THEMING.md)
 
@@ -131,9 +147,10 @@ Full guide: [docs/guides/THEMING.md](docs/guides/THEMING.md)
 
 ## The `dot` CLI
 
-30+ commands grouped by intent. Run `dot help` for the full reference.
+Over 80 commands grouped by intent. Run `dot help` for the full reference.
 
 ### Start Here
+
 | | |
 |:---|:---|
 | `dot sync` | Apply dotfiles to this machine |
@@ -141,42 +158,52 @@ Full guide: [docs/guides/THEMING.md](docs/guides/THEMING.md)
 | `dot learn` | Open the guided tour |
 
 ### Daily Use
+
 | | |
 |:---|:---|
-| `dot status` / `dot diff` | Show local drift / preview pending changes |
+| `dot status` / `dot diff` | Show local drift; preview pending changes |
 | `dot edit` | Open the source directory |
 | `dot upgrade` | Update tools and dotfiles |
+| `dot commit` | Generate an AI commit message from the staged diff |
 
 ### Inspect & Repair
+
 | | |
 |:---|:---|
-| `dot heal` | Auto-fix tools, chezmoi drift, broken symlinks |
+| `dot heal` | Auto-fix tools, chezmoi drift, and broken symlinks |
 | `dot rollback` | Return to a previous known-good state |
 | `dot attest` | Export workstation evidence |
 | `dot chaos` | Simulate corruption to test self-healing |
+| `dot bundle` | Create an offline tarball of the dotfiles environment |
 
 ### AI & Agents
+
 | | |
 |:---|:---|
 | `dot ai` | Show installed AI tools |
 | `dot mcp` | Inspect MCP policy and registry |
-| `dot mode` | Show or set the agent profile |
+| `dot mode` | Show or set the agent profile (ask / plan / apply / audit) |
 | `dot agent` | Agent metadata, logs, checkpoints, conformance |
+| `dot patterns` | List bundled AI patterns (architect, hardener, refactor) |
 
 ### Configuration
+
 | | |
 |:---|:---|
-| `dot theme` / `dot theme rebuild` | Switch theme / regenerate from wallpapers |
+| `dot theme` / `dot theme rebuild` | Switch theme or regenerate from wallpapers |
 | `dot env` | Show managed tool versions |
 | `dot profile` | Show or switch active profile |
 | `dot secrets` | Edit encrypted secrets |
+| `dot fonts` | Install or refresh Nerd Fonts |
 
 ### Fleet & Performance
+
 | | |
 |:---|:---|
-| `dot fleet` | Multi-node status, drift, namespace |
+| `dot fleet` | Multi-node status, drift, and namespace |
 | `dot benchmark` / `dot perf` | Measure shell startup |
-| `dot score` | Health and security scorecard |
+| `dot score` / `dot security-score` | Health and security scorecards |
+| `dot prewarm` | Warm caches for the first interactive shell |
 
 Full reference: [docs/reference/UTILS.md](docs/reference/UTILS.md) · Complete manual: [docs/manual/](docs/manual/) or `dot manual`
 
@@ -184,12 +211,12 @@ Full reference: [docs/reference/UTILS.md](docs/reference/UTILS.md) · Complete m
 
 ## Documentation
 
-The `.dotfiles` Manual is published in 9 formats: HTML (single + multi-page), PDF, EPUB, ASCII text, compressed variants, Markdown source. Auto-built on every change.
+The `.dotfiles` Manual is published in nine formats: HTML (single and multi-page), PDF, EPUB, ASCII text, compressed variants, and Markdown source. It auto-builds on every change.
 
 - **Online** — <https://sebastienrousseau.github.io/dotfiles/manual/>
 - **Terminal** — `dot manual text | less`
 - **PDF** — `dot manual pdf`
-- **Offline bundle** — `dot bundle --manual`
+- **Offline copy** — `dot manual --offline` (uses the bundled snapshot, no network)
 - **Sources** — [`docs/manual/`](docs/manual/)
 
 ---
@@ -197,10 +224,10 @@ The `.dotfiles` Manual is published in 9 formats: HTML (single + multi-page), PD
 ## First 5 Minutes
 
 1. **Check** — `dot doctor` validates tools, paths, and security
-2. **Explore** — `dot learn` walks through shells, secrets, themes, performance
+2. **Explore** — `dot learn` walks through shells, secrets, themes, and performance
 3. **Customize** — edit `~/.config/chezmoi/chezmoi.toml` for per-machine settings ([Profiles](docs/reference/PROFILES.md))
 4. **Toggle features** — flip features in `.chezmoidata.toml` ([Feature Flags](docs/reference/FEATURES.md))
-5. **Apply** — `dot sync` applies the config; `dot prewarm` caches shell startup
+5. **Apply** — `dot sync` applies the config and `dot prewarm` caches shell startup
 
 See the [Migration Guide](docs/operations/MIGRATION.md) for version upgrades.
 
@@ -213,9 +240,12 @@ See the [Migration Guide](docs/operations/MIGRATION.md) for version upgrades.
 
 - **Zsh** loads in stages through small modules, not one big startup script
 - **Fish** uses `_cached_eval` and deferred loading for fast interactive use
-- **Nushell** handles structured terminal workflows
-- **PowerShell** keeps cross-platform and WSL sessions on the same baseline
+- **Bash** ships full parity with zsh for tooling and aliases
+- **Nushell** handles structured terminal workflows (Tier-3 compatible)
+- **PowerShell** keeps cross-platform and WSL sessions on the same baseline. A `pwsh` parity contract runs in CI on every PR
 - **Starship**, **Zoxide**, **Atuin**, and **fzf** for navigation and command recall
+- **Starship Transient Prompt** collapses past prompts to a single glyph in scrollback on fish. The zsh hook is in place for when upstream Starship lands the matching function ([ADR-010](docs/adr/ADR-010-starship-transient-prompt.md))
+
 </details>
 
 <details>
@@ -226,31 +256,38 @@ See the [Migration Guide](docs/operations/MIGRATION.md) for version upgrades.
 - **Pueue** queues long-running tasks instead of spawning extra terminal tabs
 - **Neovim** ships as a full Lua-based editor, not a starter template
 - **Lazygit** for terminal git workflow without a GUI
-- **Build caches** (Cargo, Go, pip, uv, Zig) redirected to `/tmp/builds/` — cleared on reboot
+- **Build caches** (Cargo, Go, pip, uv, Zig) redirect to `/tmp/builds/` and clear on reboot
+- **`_cached_eval`** caches expensive `tool init` output with mtime and realpath invalidation. Set `EVALCACHE_DISABLE=true` to bypass for debugging
+
 </details>
 
 <details>
 <summary><b>AI, Agents, and MCP</b></summary>
 
-- **Agent profiles** (`dot mode`) — switch between architect, hardener, refactor patterns
-- **MCP policy enforcement** (`dot mcp`) — validate Model Context Protocol registry against policy
-- **AI commit messages** (`dot commit`) — conventional commits generated from staged diff
-- **AI tools** (`dot ai`) — Claude Code, Codex, GitHub Copilot, Gemini CLI managed via Mise
-- **Attestation logs** — every agent session logged with policy hash + outcome
+- **Agent profiles** (`dot mode`) — switch between ask, plan, apply, and audit
+- **Pattern library** (`dot patterns`) — architect, hardener, and refactor patterns bundled in `dot_config/ai/patterns/`
+- **MCP policy enforcement** (`dot mcp`) — validate the Model Context Protocol registry against policy
+- **AI commit messages** (`dot commit`) — conventional commits generated from the staged diff
+- **AI tools** (`dot ai`) — Claude Code, Codex, GitHub Copilot, Gemini CLI, and friends managed via Mise
+- **Attestation logs** — every agent session is logged with a policy hash and an outcome
+
 </details>
 
 <details>
 <summary><b>Security, Trust, and Governance</b></summary>
 
-- **Age + SOPS** keep secrets encrypted at rest and out of plaintext history
-- **SSH ED25519 signing** + trust metadata back signed commits and verifiable changes
-- **Gitleaks**, policy checks, compliance workflows
-- **Workstation attestation** (`dot attest`) records machine state, policy, prompt, model metadata in tracked JSON
+- **Age and SOPS** keep secrets encrypted at rest and out of plaintext history
+- **SSH ED25519 signing** plus trust metadata back signed commits and verifiable changes
+- **Gitleaks**, policy checks, and compliance workflows
+- **Workstation attestation** (`dot attest`) records machine state, policy, prompt, and model metadata in tracked JSON
 - **Telemetry controls** and local-first defaults — you own your data
-- **SBOM (CycloneDX)** + Grype CVE scanning in CI
+- **SBOM (CycloneDX)** and Grype CVE scanning in CI
+- **JSON Schema for `.chezmoidata.toml`** — taplo runs the schema in CI on every PR, so typos in feature flags or profile names fail before merge
+- **OIDC Trusted Publishing** — npm releases authenticate via OIDC, not a long-lived `NPM_TOKEN`. Provenance is attached to every published tarball
+
 </details>
 
-For security hardening options, see [Security docs](docs/security/SECURITY.md).
+For security hardening options, see the [Security docs](docs/security/SECURITY.md).
 
 ---
 
@@ -267,6 +304,7 @@ For security hardening options, see [Security docs](docs/security/SECURITY.md).
 | Fleet management | ✓ | — | — | — |
 | Encrypted secrets (Age/SOPS) | ✓ | ✓ | — | — |
 | Build artifact redirection | ✓ | — | — | — |
+| Schema-validated config | ✓ | — | — | — |
 
 `chezmoi` is the underlying templating engine. This repo is the opinionated reference implementation.
 

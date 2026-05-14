@@ -1,0 +1,52 @@
+
+◈ DOTFILES 
+Dot • Reference
+
+--- Dotfiles ---
+  •    Usage          dot [command]
+  •    Version        v0.0.0
+
+  •    What it is                          A single command for setting up, checking, and maintaining this shell environment.
+  •    Platforms                           macOS, Linux, and WSL
+  •    Start                               Run 'dot sync', then 'dot doctor', then 'dot learn'
+
+== Start Here ==
+  •  sync             Apply dotfiles to this machine.
+  •  doctor           Check the environment and surface issues.
+  •  learn            Open the guided tour.
+  •  help             Show the overview or help for one command.
+
+== Daily Use ==
+  •  status           Show local drift.
+  •  diff             Preview pending changes.
+  •  edit             Open the source directory.
+  •  upgrade          Update tools and dotfiles.
+
+== Inspect and Repair ==
+  •  doctor           Run the main health check.
+  •  attest           Export workstation evidence.
+  •  rollback         Return to a previous state.
+  •  lint             Check shell script quality.
+
+== AI and Agents ==
+  •  ai               Show installed AI tools.
+  •  mcp              Inspect MCP policy and registry.
+  •  mode             Show or set the agent profile.
+  •  agent            Show agent metadata, logs, checkpoints, and conformance.
+
+== Fleet ==
+  •  fleet            Show fleet node status, drift, and namespace.
+
+== Configuration ==
+  •  env              Show managed tool versions.
+  •  profile          Show or switch the active profile.
+  •  secrets          Edit or manage encrypted secrets.
+  •  theme            Switch the terminal theme.
+
+== Reference ==
+  •  search           Find commands by keyword.
+  •  help all         Show the full command reference.
+  •  version          Show version information.
+
+  •    Next                                Run 'dot help all' for the full command list
+  •    Detail                              Run 'dot help <command>' for one command

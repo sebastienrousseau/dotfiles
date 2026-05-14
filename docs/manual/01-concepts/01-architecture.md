@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Architecture
 
 `.dotfiles` is composed of four loosely coupled subsystems, coordinated by a single command-line interface.

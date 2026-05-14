@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# Sourced by scripts/dot/commands/*.sh, scripts/diagnostics/*, scripts/ops/*; inherits set -euo pipefail.
 ## Dotfiles CLI UI Component Library — Single Source of Truth.
 ##
 ## All CLI output MUST go through these primitives.  No raw printf with
@@ -29,6 +30,11 @@
 ##   ui_init
 ##   ui_header "Section Title"
 ##   ui_ok "Operation succeeded"
+
+# Re-source guard: re-sourcing would zero out the BOLD/RED/etc colour
+# variables that ui_init() populated, breaking already-rendered output.
+[[ "${_DOT_LIB_UI_LOADED:-0}" == "1" ]] && return 0
+_DOT_LIB_UI_LOADED=1
 
 # ═══════════════════════════════════════════════════════════════════════
 # State — all zeroed before ui_init
@@ -265,7 +271,12 @@ ui_spinner_stop() {
   fi
   ui_clear_line
   ui_show_cursor
+  # The newline is only needed when stdout is NOT a TTY. We must return
+  # 0 either way — without the explicit `return 0`, the function's exit
+  # status comes from the trailing `[[ ! -t 1 ]] && printf` chain, which
+  # is rc=1 on a TTY and breaks every caller running under `set -e`.
   [[ ! -t 1 ]] && printf "\n"
+  return 0
 }
 
 # ═══════════════════════════════════════════════════════════════════════

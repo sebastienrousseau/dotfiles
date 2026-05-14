@@ -17,6 +17,36 @@ Use a signed commit:
 git commit -S -m "fix: concise summary"
 ```
 
+The pre-push audit is **mandatory by default**. If you need to bypass
+it for a single push (rare, almost never on `master`), see
+[`docs/security/AUDIT_BYPASS.md`](docs/security/AUDIT_BYPASS.md). The
+legacy `DOTFILES_SKIP_PRE_PUSH_AUDIT=1` variable is no longer honored.
+
+## Pre-commit hooks
+
+The repo ships a `pre-commit` configuration that mirrors CI. Install
+once:
+
+```bash
+pip install --user pre-commit          # or: brew install pre-commit
+pre-commit install --config config/pre-commit-config.yaml
+```
+
+Run every hook against every file (do this after fresh-cloning, after
+big merges, or when CI surfaces a hook you don't have locally):
+
+```bash
+pre-commit run --all-files --config config/pre-commit-config.yaml
+```
+
+Hooks in this config (shellcheck, shfmt, hadolint, gitleaks,
+detect-secrets, checkov, conventional-commit linter, typos-cli,
+actionlint, **luacheck**, **stylua**, plus repo-local custom hooks)
+run on commit by default. The `luacheck` and `stylua` hooks are pinned
+to the same versions CI uses; if you bump one, bump the other in the
+same PR (see [`config/pre-commit-config.yaml`](config/pre-commit-config.yaml)
+and [`.github/workflows/reusable-lua-lint.yml`](.github/workflows/reusable-lua-lint.yml)).
+
 ## Pull request checklist
 
 - Use signed commits
@@ -28,6 +58,7 @@ git commit -S -m "fix: concise summary"
 ## Branch names
 
 Examples:
+
 - `feat/new-command`
 - `fix/fish-alias-cache`
 - `docs/readme-cleanup`
@@ -35,9 +66,28 @@ Examples:
 ## Commit titles
 
 Examples:
+
 - `feat: add platform contract example`
 - `fix: harden fish alias bridging`
 - `docs: simplify install guide`
+
+## Regression tests
+
+Files under `tests/regression/` must include a trace header within
+the first 15 lines. One of three accepted forms:
+
+```bash
+# Regression for: GH-1234            # preferred — link to a GitHub issue
+# Regression for: 1a2b3c4            # link to introducing commit (7+ hex chars)
+# Regression for: pre-history        # explicit "origin not traceable"
+```
+
+The convention is enforced by the `regression-traceability` pre-commit
+hook (`scripts/ci/check-regression-traceability.sh`) and audited weekly
+by `.github/workflows/regression-trace-audit.yml`, which fails the build
+and opens a tracking issue if any `GH-*` reference no longer resolves
+to a live issue. Use `pre-history` only when neither `git blame` nor
+the related PR history yields an originating issue or commit.
 
 ## Day 1 verification
 

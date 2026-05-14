@@ -1,0 +1,97 @@
+name: 'setup-mise'
+description: 'Install + cache mise (rtx). Sibling of setup-chezmoi for workflows that need the mise-managed toolchain (rust/go/node/bun/etc.).'
+
+inputs:
+  version:
+    description: 'mise version to install (e.g. "2026.5.1"). Defaults to latest stable.'
+    required: false
+    default: 'latest'
+  cache:
+    description: 'Whether to use actions/cache for the mise binary + toolchain.'
+    required: false
+    default: 'true'
+  cache-key-prefix:
+    description: 'Override the cache key prefix (default "mise").'
+    required: false
+    default: 'mise'
+  install-tools:
+    description: 'Run `mise install` after setup (reads mise.toml).'
+    required: false
+    default: 'false'
+  bin-dir:
+    description: 'Install location for the mise binary.'
+    required: false
+    default: '~/.local/bin'
+
+outputs:
+  version:
+    description: 'The mise version that ended up installed.'
+    value: ${{ steps.resolve.outputs.version }}
+  path:
+    description: 'Absolute path to the mise binary.'
+    value: ${{ steps.resolve.outputs.path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve install location
+      id: resolve
+      shell: bash
+      run: |
+        set -euo pipefail
+        bin_dir="${{ inputs.bin-dir }}"
+        bin_dir="${bin_dir/#\~/$HOME}"
+        echo "bin_dir=$bin_dir" >> "$GITHUB_OUTPUT"
+        echo "path=$bin_dir/mise" >> "$GITHUB_OUTPUT"
+        # version is filled in after install (latest can't be known up-front).
+        echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+
+    - name: Restore mise binary cache
+      if: inputs.cache == 'true' && inputs.version != 'latest'
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: ${{ steps.resolve.outputs.bin_dir }}/mise
+        key: ${{ inputs.cache-key-prefix }}-bin-${{ runner.os }}-${{ runner.arch }}-${{ inputs.version }}
+
+    - name: Restore mise toolchain cache
+      if: inputs.cache == 'true' && inputs.install-tools == 'true'
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        # ~/.local/share/mise is mise's default tool installation root.
+        # Key is tied to the lockfile so a tool bump invalidates correctly.
+        path: ~/.local/share/mise
+        key: ${{ inputs.cache-key-prefix }}-tools-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('mise.toml', 'mise-versions.lock.json') }}
+
+    - name: Install mise (cache miss)
+      shell: bash
+      run: |
+        set -euo pipefail
+        bin_dir="${{ steps.resolve.outputs.bin_dir }}"
+        version_input="${{ inputs.version }}"
+
+        if [[ ! -x "$bin_dir/mise" ]]; then
+          mkdir -p "$bin_dir"
+          # mise's documented one-liner. The upstream curl|sh pattern is
+          # intentionally allowed here because (a) the URL is pinned to
+          # mise.run, (b) the installer itself verifies its own SHAs,
+          # (c) it's behind the workflow's harden-runner egress allowlist.
+          if [[ "$version_input" == "latest" ]]; then
+            curl -fsSL https://mise.run | MISE_INSTALL_PATH="$bin_dir/mise" sh
+          else
+            curl -fsSL https://mise.run | MISE_INSTALL_PATH="$bin_dir/mise" MISE_VERSION="v$version_input" sh
+          fi
+        fi
+
+        echo "$bin_dir" >> "$GITHUB_PATH"
+        installed=$("$bin_dir/mise" --version 2>/dev/null | awk '{print $1}' | sed 's/^v//')
+        echo "Installed mise: $installed"
+        echo "version=$installed" >> "$GITHUB_OUTPUT"
+
+    - name: Install mise.toml tools
+      if: inputs.install-tools == 'true'
+      shell: bash
+      env:
+        MISE_BIN: ${{ steps.resolve.outputs.path }}
+      run: |
+        set -euo pipefail
+        "$MISE_BIN" install

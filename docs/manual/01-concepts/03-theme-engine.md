@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # The Theme Engine
 
 `.dotfiles` generates terminal color palettes directly from wallpaper images. There are no hand-crafted themes — dominant colors are extracted via K-Means clustering in CIELAB color space, mapped to ANSI slots, and enforced to WCAG AAA contrast.

@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # Reference: Configuration Files
 
 Every config file read or written by `.dotfiles`, with its schema and purpose.
@@ -28,7 +33,7 @@ Every config file read or written by `.dotfiles`, with its schema and purpose.
 
 ```toml
 # Version — bumped by version-sync.sh at release time
-dotfiles_version = "0.2.500"
+dotfiles_version = "0.2.501"
 
 # Machine preset — override in ~/.config/chezmoi/chezmoi.toml per host
 machine = ""
@@ -214,7 +219,7 @@ Agent Card (MCP A2A spec):
 ```json
 {
   "name": "dotfiles-agent",
-  "version": "0.2.500",
+  "version": "0.2.501",
   "capabilities": ["chezmoi.apply", "theme.switch", "secrets.decrypt"],
   "policy_hash": "0x7f2a..."
 }
@@ -257,3 +262,4 @@ _build/
 - [Template Variables](04-templates.md)
 - [Feature Flags](05-feature-flags.md)
 - [First Install Tutorial](../02-tutorials/01-first-install.md)
+{% endraw %}

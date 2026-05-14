@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # ADR-004: Chezmoi + Custom CLI Wrapper Architecture
 
 **Status**: Accepted
@@ -7,12 +11,14 @@
 ## Context
 
 Managing dotfiles requires:
+
 - Tracking file changes and applying them consistently
 - Handling platform-specific configurations
 - Supporting encrypted secrets
 - Providing a good developer experience
 
 Options considered:
+
 1. **Bare git repository**: Simple but poor UX, no templating
 2. **GNU Stow**: Symlink-based, limited features
 3. **Chezmoi only**: Powerful but complex CLI
@@ -45,18 +51,21 @@ Use **Chezmoi as the core engine** with a **custom `dot` CLI wrapper** that:
 ### Core Principles
 
 **1. Chezmoi handles complexity:**
+
 - Template rendering with Go text/template
 - Encrypted secrets with age
 - State tracking (what's applied vs source)
 - Cross-platform path handling
 
 **2. dot CLI handles UX:**
+
 - Memorable command names (`dot sync` vs `chezmoi apply`)
 - Domain-specific commands (`dot doctor`, `dot theme`)
 - Integration with external tools (Nix, Docker, Neovim)
 - Consistent help and error messages
 
 **3. Modular command structure:**
+
 ```text
 scripts/dot/
 ├── lib/
@@ -72,6 +81,7 @@ scripts/dot/
 ```
 
 **4. Delegation pattern:**
+
 ```bash
 # Main dispatcher in dot CLI
 dispatch() {
@@ -94,6 +104,7 @@ dispatch() {
 ### Extension Points
 
 Custom commands can:
+
 1. Wrap chezmoi commands with better defaults
 2. Add entirely new functionality (benchmarks, themes)
 3. Integrate with system tools (nix, docker, brew)
@@ -102,6 +113,7 @@ Custom commands can:
 ## Consequences
 
 ### Positive
+
 - Leverage Chezmoi's battle-tested engine
 - User-friendly interface for common tasks
 - Easy to add domain-specific commands
@@ -109,11 +121,13 @@ Custom commands can:
 - Single entry point (`dot`) for all operations
 
 ### Negative
+
 - Two layers to understand (chezmoi + dot)
 - Version coupling between chezmoi and scripts
 - Some chezmoi features not exposed via dot
 
 ### Neutral
+
 - Advanced users can still use chezmoi directly
 - Documentation needed for both layers
 - Upgrade path when chezmoi adds new features

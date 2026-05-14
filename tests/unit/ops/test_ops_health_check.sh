@@ -7,8 +7,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 TEST_SCRIPT="$REPO_ROOT/scripts/diagnostics/health.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "health_check_exists"
 assert_file_exists "$TEST_SCRIPT" "health.sh should exist (consolidation target)"
@@ -25,5 +29,8 @@ fi
 test_start "health_check_shebang"
 first_line=$(head -n 1 "$TEST_SCRIPT")
 assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
+
+# Slice 3 (#883): exercise the script under sandbox for line coverage
+cov_exercise_script "$TEST_SCRIPT"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

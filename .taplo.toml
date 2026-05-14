@@ -1,0 +1,23 @@
+# taplo configuration — TOML linting + schema validation.
+# https://taplo.tamasfe.dev/configuration/file.html
+
+include = [
+  ".chezmoidata.toml",
+  ".chezmoidata/*.toml",
+]
+
+[formatting]
+align_entries = false
+column_width = 100
+indent_string = "  "
+reorder_keys = false
+trailing_newline = true
+
+# Apply the .chezmoidata schema to the root file only. Per-domain files
+# (.chezmoidata/{hardware,keybinds,themes}.toml) have their own structure
+# and are intentionally left unschemed for now.
+[[rule]]
+include = [".chezmoidata.toml"]
+
+[rule.schema]
+path = "config/chezmoidata.schema.json"

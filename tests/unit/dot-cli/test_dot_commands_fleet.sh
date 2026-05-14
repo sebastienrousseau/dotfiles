@@ -7,8 +7,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 FLEET_FILE="$REPO_ROOT/scripts/dot/commands/fleet.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 # Test: fleet.sh file exists
 test_start "fleet_cmd_file_exists"
@@ -64,4 +68,7 @@ fi
 
 echo ""
 echo "Fleet commands tests completed."
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$FLEET_FILE"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

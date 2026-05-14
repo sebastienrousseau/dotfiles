@@ -28,9 +28,10 @@ if [[ ! -d "$PATTERN_DIR" ]]; then
 fi
 
 _show_ai_bridge_usage() {
-  echo "Usage: dot cl|copilot|gemini|kiro|autohand|vibe|qwen|zai --pattern [name] \"prompt\""
+  echo "Usage: dot cl|codex|copilot|gemini|goose|kiro|autohand|vibe|qwen|zai --pattern [name] \"prompt\""
   echo ""
   echo "Available Patterns:"
+  # shellcheck disable=SC2012
   ls -1 "$PATTERN_DIR" 2>/dev/null | sed 's/\.md$//' | sed 's/^/  - /' || echo "  (none)"
 }
 
@@ -57,18 +58,72 @@ _ai_refresh_status_cache() {
   tmp_file="$(mktemp)"
   mkdir -p "$AI_CACHE_DIR"
 
-  local entry category role name bin desc present version
+  local total=${#ai_entries[@]}
+
+  # Cold-cache refresh runs `$bin --version` for every tool — node-
+  # based ones are slow to start, so the total can hit 15-30s. Show a
+  # spinner so the user has feedback.
+  ui_spinner_start "Probing $total AI tools (cached for ${AI_STATUS_TTL}s)"
+
+  local jobs="${DOTFILES_AI_PROBE_JOBS:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}"
+  local probe_dir
+  probe_dir="$(mktemp -d)"
+
+  # Probe via xargs -P. The probe logic lives INLINE in the bash -c
+  # string rather than as an exported function, because `export -f`
+  # doesn't always survive across bash invocations on every platform
+  # (notably macOS bash 3.2 needs the BASH_FUNC_*() env-var format,
+  # which subtly breaks for some shells in PATH). Inlining sidesteps
+  # the inheritance question entirely.
+  local i=0
+  local entry
+  local indexed=()
   for entry in "${ai_entries[@]}"; do
-    IFS='|' read -r category role name bin desc <<<"$entry"
-    if has_command "$bin"; then
-      present=1
-      version=$(_ai_extract_version "$bin")
-    else
-      present=0
-      version=""
-    fi
-    printf '%s\t%s\t%s\n' "$bin" "$present" "$version" >>"$tmp_file"
+    indexed+=("$i|$entry")
+    i=$((i + 1))
   done
+  # shellcheck disable=SC2016
+  local probe_script='
+    payload="$1"
+    out_dir="$2"
+    i="${payload%%|*}"
+    entry="${payload#*|}"
+    IFS="|" read -r category role name bin desc <<<"$entry"
+    if command -v "$bin" >/dev/null 2>&1; then
+      output=$("$bin" --version 2>/dev/null | head -1) || true
+      version=$(printf "%s" "$output" | sed "s/^[^0-9]*//" | sed "s/[[:space:]]*$//" | sed "s/\.$//")
+      printf "%s\t1\t%s\n" "$bin" "$version" >"$out_dir/$i"
+    else
+      printf "%s\t0\t\n" "$bin" >"$out_dir/$i"
+    fi
+  '
+  # NOTE: `-I{}` already implies one input line per invocation. Adding
+  # `-n1` on top triggers a BSD-xargs quirk where the input line is
+  # word-split on whitespace ("0|Agents (autonomous)|..." → multiple
+  # entries). Use only `-I{}`.
+  #
+  # ALSO: feed null-delimited records (`-0`) so apostrophes and
+  # other quote-like characters in the descriptions ("Block's coding
+  # agent") don't trigger xargs's "unterminated quote" parser.
+  printf '%s\0' "${indexed[@]}" |
+    xargs -0 -I{} -P"$jobs" \
+      bash -c "$probe_script" _ {} "$probe_dir" \
+      2>/dev/null || true
+
+  # Re-assemble in original entry order.
+  local n
+  for ((n = 0; n < i; n++)); do
+    [[ -f "$probe_dir/$n" ]] && cat "$probe_dir/$n" >>"$tmp_file"
+  done
+  rm -rf "$probe_dir"
+
+  # Guard with `|| true` because ui_spinner_stop's last line evaluates
+  # to rc=1 when stdout is a TTY (the `[[ ! -t 1 ]] && printf` short-
+  # circuit). Under `set -euo pipefail` that rc would kill the script
+  # right before we get to write the cache, leaving the user with a
+  # silent broken cold-cache run. Defence in depth — the function
+  # now also has an explicit `return 0` upstream.
+  ui_spinner_stop || true
 
   mv "$tmp_file" "$AI_STATUS_CACHE_FILE"
 }
@@ -81,7 +136,9 @@ _ai_get_cached_status() {
 _ai_mise_pkg() {
   case "$1" in
     claude) echo "npm:@anthropic-ai/claude-code" ;;
+    codex) echo "npm:@openai/codex" ;;
     copilot) echo "npm:@github/copilot" ;;
+    goose) echo "pipx:goose-ai" ;;
     aider) echo "pipx:aider-chat" ;;
     opencode) echo "npm:opencode-ai" ;;
     sgpt) echo "pipx:shell-gpt" ;;
@@ -102,7 +159,9 @@ cmd_ai_status() {
   # category|role|name|binary|description
   local -a ai_clis=(
     "Agents (autonomous)|agent|Claude Code|claude|Anthropic CLI agent"
+    "Agents (autonomous)|agent|Codex CLI|codex|OpenAI Codex agent"
     "Agents (autonomous)|agent|Copilot CLI|copilot|GitHub Copilot CLI"
+    "Agents (autonomous)|agent|Goose|goose|Block's coding agent"
     "Coding (interactive)|coding|Aider|aider|AI pair programmer"
     "Coding (interactive)|coding|OpenCode|opencode|Terminal coding assistant"
     "Coding (interactive)|coding|Autohand Code|autohand|Autohand coding agent"
@@ -350,11 +409,17 @@ ${prompt}"
     cl | claude)
       printf "%s" "$full_prompt" | claude
       ;;
+    codex)
+      printf "%s" "$full_prompt" | codex
+      ;;
     copilot)
       copilot -sp "$full_prompt"
       ;;
     gemini)
       printf "%s" "$full_prompt" | gemini chat
+      ;;
+    goose)
+      printf "%s" "$full_prompt" | goose session start
       ;;
     kiro | kiro-cli)
       printf "%s" "$full_prompt" | kiro-cli chat
@@ -404,7 +469,7 @@ case "${1:-}" in
     shift
     cmd_ai_query "$@"
     ;;
-  cl | claude | copilot | gemini | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
+  cl | claude | codex | copilot | gemini | goose | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
     tool="$1"
     shift
     run_ai_with_context "$tool" "$@"

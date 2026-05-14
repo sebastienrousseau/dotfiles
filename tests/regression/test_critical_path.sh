@@ -2,6 +2,8 @@
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2030,SC2031
 # Regression: Critical path tests — must-work features that gate every release.
+# Regression for: d7e7c2bc (v0.2.499 baseline)
+# Why: Critical-path regressions for install → chezmoi apply → dot doctor end-to-end smoke.
 
 set -euo pipefail
 

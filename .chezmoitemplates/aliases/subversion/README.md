@@ -11,6 +11,7 @@ These aliases are defined in `subversion.aliases.sh` and are automatically loade
 ## Aliases
 
 This code provides a set of aliases for the Subversion command line.
+
 - `sad` Put new files and directories under version control.
 - `sau` Manage cached authentication credentials.
 - `sbl` Show when each line of a file was last (or next) changed.

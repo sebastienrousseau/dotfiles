@@ -81,6 +81,10 @@ merge_pair() {
 
   local tmpdir
   tmpdir="$(mktemp -d)"
+  # Single-quotes prevent the variable expanding at trap-definition time;
+  # `$tmpdir` resolves when the trap fires (still scoped to this function
+  # because RETURN is per-function).
+  # shellcheck disable=SC2064  # intentionally expand $tmpdir at trap time within this function scope
   trap "rm -rf '$tmpdir'" RETURN
 
   # Convert both to JPEG for heif-enc input (it handles JPEG best)

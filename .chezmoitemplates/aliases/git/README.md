@@ -12,6 +12,7 @@ These aliases are defined in `git.aliases.sh` and are automatically loaded by `c
 
 This is a collection of handy Git aliases that simplify and speed up
 common Git commands, making them shorter and more intuitive.
+
 - `gc` Commit command to automatically "add" changes from all known
   files
 - `gca` Amend the tip of the current branch rather than creating a new

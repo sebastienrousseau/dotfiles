@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Screenshots Gallery
 
 Here's how the dotfiles look across different themes and configurations.

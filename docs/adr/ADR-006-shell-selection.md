@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # ADR-006: Zsh as Default Shell
 
 **Status**: Accepted
@@ -7,6 +11,7 @@
 ## Context
 
 Choosing a default shell impacts:
+
 - Developer productivity and workflow
 - Plugin ecosystem and extensibility
 - Cross-platform compatibility
@@ -45,6 +50,7 @@ Use **Zsh** as the default interactive shell with **Zinit** as the plugin manage
 | Antibody | ~300ms | Simple, fast |
 
 Zinit provides:
+
 - **Turbo Mode**: Deferred loading after prompt
 - **Ice Modifiers**: Fine-grained control over plugin loading
 - **Binary Installation**: Install completions and binaries
@@ -84,6 +90,7 @@ zinit light zdharma-continuum/fast-syntax-highlighting
 ## Consequences
 
 ### Positive
+
 - Fast, responsive shell experience
 - Rich plugin ecosystem (autosuggestions, syntax highlighting)
 - Powerful completion system
@@ -91,12 +98,14 @@ zinit light zdharma-continuum/fast-syntax-highlighting
 - Modern prompt with Starship
 
 ### Negative
+
 - Requires zsh installation on some Linux distros
 - Plugin manager adds complexity
 - Some bash-isms need adjustment
 - Turbo mode can cause brief visual delay
 
 ### Neutral
+
 - Users can still use bash for scripts
 - Configuration more complex than vanilla shell
 - Performance monitoring needed

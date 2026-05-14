@@ -1,0 +1,14 @@
+
+◈ DOTFILES 
+Dot • Diagnostics
+
+--- Shell Performance ---
+== Per-shell startup (3 runs each, after one warm-up) ==
+  ✓ zsh    mean   <dur>  (min  <dur>, max  <dur>)  target  <dur>
+  ✓ bash   mean   <dur>  (min  <dur>, max  <dur>)  target   <dur>
+  ✗ fish   mean  <dur>  (min <dur>, max <dur>)  target  <dur> — over by <dur>
+  ✓ nu     mean   <dur>  (min  <dur>, max  <dur>)  target  <dur>
+== Component breakdown (estimated) ==
+  bare zsh: <dur>
+  paths+env: <dur>
+  ✓    Performance                         Excellent

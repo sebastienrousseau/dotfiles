@@ -14,6 +14,7 @@ Command aliases for the `fd` utility, a fast alternative to `find`.
 `fd` searches for files and directories in a given path with colorized
 output and intuitive syntax. These aliases provide memorable shortcuts
 for common operations:
+
 - `fd` is the default alias for `fd --color always` that lists all files
   with colorized output.
 - `fda` lists all files with absolute paths.

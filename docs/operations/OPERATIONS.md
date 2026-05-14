@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Operations
 
 Core workflows for keeping your dotfiles running across platforms.
@@ -11,9 +15,11 @@ Core workflows for keeping your dotfiles running across platforms.
 **Primary manager**: `Homebrew`
 
 - **Update**:
+
   ```bash
   chezmoi update
   ```
+
   This runs `brew bundle install` behind the scenes to reconcile against the declared Brewfiles.
 - **Permission issues**: `sudo chown -R $(whoami) $(brew --prefix)/*`
 - **Drift**: Run `brew bundle cleanup` to remove unmanaged packages.
@@ -23,10 +29,12 @@ Core workflows for keeping your dotfiles running across platforms.
 **Primary manager**: `apt-get` / `snap`
 
 - **Update**:
+
   ```bash
   sudo apt update && sudo apt upgrade -y
   chezmoi update
   ```
+
   On Linux, `chezmoi` focuses on configuration. Package updates work best through the OS package manager to avoid `sudo` conflicts.
 - **Font issues**: If icons are missing, run `./install/provision/run_onchange_50-install-fonts.sh.tmpl` manually via `chezmoi apply` or source directly with `bash`.
 
@@ -61,6 +69,7 @@ dot doctor
 ```
 
 `dot apply` includes post-apply checks that:
+
 - Remove stale read-only zsh cache files (`~/.config/shell/*.zwc`, `~/.config/zsh/**/*.zwc`)
 - Validate that `dot` resolves to `~/.local/bin/dot` in a fresh login shell
 
@@ -109,38 +118,53 @@ dot prewarm
 If something's slow or broken:
 
 1. **Check health**:
+
    ```bash
    dot doctor
    dot health --fix
    ```
+
 2. **Smoke test**:
+
    ```bash
    dot smoke-test
    ```
+
 3. **Scorecard**:
+
    ```bash
    dot scorecard
    ```
+
 4. **Chaos testing (self-healing)**:
+
    ```bash
    dot chaos --force
    dot heal --force
    ```
+
 5. **Startup profiling**:
+
    ```bash
    dot perf --profile
    ```
+
 6. **Post-merge verification**:
+
    ```bash
    dot verify
    ```
+
 7. **Inspect alias behavior**:
+
    ```bash
    dot aliases list
    dot aliases why dprune
    DOTFILES_ALIAS_POLICY=strict bash ~/.dotfiles/scripts/diagnostics/alias-governance.sh
    ```
+
 8. **Verbose mode**:
+
    ```bash
    DOTFILES_DEBUG=1 dot apply
    ```

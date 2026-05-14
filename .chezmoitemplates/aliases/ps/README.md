@@ -12,6 +12,7 @@ These aliases are defined in `ps.aliases.sh` and are automatically loaded by `ch
 
 This code provides a set of aliases for
 [ps](https://www.gnu.org/software/ps/).
+
 - `pid` Display the uid, pid, parent pid, recent CPU usage, process
   start time, controlling tty, elapsed CPU usage, and the associated
   command

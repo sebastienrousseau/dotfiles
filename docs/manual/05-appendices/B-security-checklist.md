@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Appendix B: Security Checklist
 
 Run this checklist after a fresh install and quarterly afterwards.
@@ -40,10 +44,12 @@ Run this checklist after a fresh install and quarterly afterwards.
 If a secret leak is detected:
 
 1. **Contain** — remove from history, force-push
+
    ```sh
    git filter-repo --path <file> --invert-paths
    git push --force
    ```
+
 2. **Rotate** — change the leaked secret upstream (Stripe key, SSH key, etc.)
 3. **Audit** — check who/what had access
 4. **Notify** — inform affected parties if required

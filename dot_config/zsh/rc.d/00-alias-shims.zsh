@@ -1,13 +1,35 @@
 # shellcheck shell=bash
 # Cognitive Shell Enhancements
+#
+# Carapace is deferred to first `preexec` (closes #862). The eager
+# `_cached_eval carapace ...` call previously cost ~15ms on every
+# interactive shell start even with the cache warm — that work is
+# only needed when the user invokes tab-completion, which happens
+# after the first command at the earliest. Opt out by setting
+# `DOTFILES_DEFER_CARAPACE=0` (rarely useful).
 if [[ -o interactive ]]; then
-  # Carapace completions — cached to avoid subshell on every startup
-  if command -v carapace >/dev/null 2>&1; then
-    if typeset -f _cached_eval >/dev/null 2>&1; then
-      _cached_eval carapace carapace _carapace zsh
-    else
-      source <(carapace _zsh)
+  : ${DOTFILES_DEFER_CARAPACE:=1}
+
+  _dotfiles_carapace_init() {
+    if command -v carapace >/dev/null 2>&1; then
+      if typeset -f _cached_eval >/dev/null 2>&1; then
+        _cached_eval carapace carapace _carapace zsh
+      else
+        source <(carapace _zsh)
+      fi
     fi
+  }
+
+  if [[ "${DOTFILES_DEFER_CARAPACE}" == "1" ]] && typeset -f _dotfiles_add_preexec >/dev/null 2>&1; then
+    _dotfiles_carapace_deferred() {
+      _dotfiles_del_preexec _dotfiles_carapace_deferred
+      _dotfiles_carapace_init
+    }
+    _dotfiles_add_preexec _dotfiles_carapace_deferred
+  else
+    # Fallback to eager init when preexec helpers aren't available
+    # (e.g., DOTFILES_FAST=1 paths that skip the zshrc helper block).
+    _dotfiles_carapace_init
   fi
 
   # thefuck — lazy-loaded to avoid ~200ms startup penalty

@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Alias Cheatsheet
 
 Auto-generated from the alias manifest.
@@ -10,7 +14,7 @@ Auto-generated from the alias manifest.
 | `q` | `quit` |
 | `e` | `${EDITOR:-nano}` |
 | `h` | `history` |
-| `_` | `sudo ` |
+| `_` | `sudo` |
 | `i` | `epoch` |
 | `l` | `dot_ls` |
 | `ll` | `dot_ll` |

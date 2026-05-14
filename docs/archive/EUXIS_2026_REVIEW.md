@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Euxis 2026 Architecture & Product Review
 
 This review translates the current dotfiles CLI stack into an Apple-tier product strategy:
@@ -76,18 +80,22 @@ Added `scripts/tests/unit/test_dot_lib_platform.sh`:
 ## File-by-file next refactors (high ROI)
 
 1. `scripts/dot/commands/tools.sh`
+
 - Split `cmd_aliases` into submodule file.
 - Replace repeated `command -v` checks with cached capability map.
 
-2. `dot_config/zsh/dot_zshrc.tmpl`
+1. `dot_config/zsh/dot_zshrc.tmpl`
+
 - Add startup budget guard (record startup time; warn >400ms).
 - Move optional integrations behind capability checks generated once/session.
 
-3. `scripts/ops/health-check.sh`
+1. `scripts/ops/health-check.sh`
+
 - Import `platform.sh`, unify WSL/macOS/Linux branch logic.
 - Emit machine-readable JSON summary for UI frontends.
 
-4. `scripts/diagnostics/perf.sh`
+1. `scripts/diagnostics/perf.sh`
+
 - Add percentile reporting (P50/P95 over 10 runs).
 - Add regression threshold with actionable remediation hints.
 

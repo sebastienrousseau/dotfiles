@@ -6,10 +6,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 DOT_CLI="$REPO_ROOT/dot_local/bin/executable_dot"
 DOCTOR_UNIFIED="$REPO_ROOT/scripts/diagnostics/doctor-unified.sh"
 SCORECARD="$REPO_ROOT/scripts/diagnostics/scorecard.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "doctor_unified_flag_aliases"
 assert_file_contains "$DOCTOR_UNIFIED" "--heal | -H" "doctor supports -H"
@@ -70,5 +74,8 @@ else
   ((TESTS_FAILED++))
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: help reference should remain available"
 fi
+
+# Slice 2: drive real line coverage of the script under test
+cov_exercise_script "$SCORECARD"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

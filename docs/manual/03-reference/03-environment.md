@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Reference: Environment Variables
 
 All environment variables that affect `.dotfiles` behaviour.

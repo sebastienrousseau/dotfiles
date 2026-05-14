@@ -5,9 +5,13 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 SERVER_CARD="$REPO_ROOT/.well-known/mcp/server-card.json"
 MCP_DOCTOR="$REPO_ROOT/scripts/diagnostics/mcp-doctor.sh"
+
+trap cov_teardown_sandbox EXIT
+cov_setup_sandbox
 
 test_start "mcp_server_card_exists"
 assert_file_exists "$SERVER_CARD" "server-card.json should exist"
@@ -62,5 +66,8 @@ assert_file_contains "$MCP_DOCTOR" "Server Card (SEP-1649)" "mcp-doctor should v
 
 test_start "agent_json_references_mcp_card"
 assert_file_contains "$REPO_ROOT/.well-known/agent.json" "mcpCard" "agent.json should reference MCP card"
+
+# Slice 3 (#883): exercise the script under sandbox for line coverage
+cov_exercise_script "$MCP_DOCTOR"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

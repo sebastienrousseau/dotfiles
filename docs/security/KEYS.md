@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Keybindings
 
 This is the single source of truth for navigation and muscle-memory shortcuts

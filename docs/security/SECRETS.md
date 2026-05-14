@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # Secrets Management
 
 Provider-agnostic secrets via `dot secrets`. Supports macOS Keychain, `pass`, and age-encrypted local storage.
@@ -17,6 +22,7 @@ infra = ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "GITHUB_TOKEN"]
 ```
 
 `auto` resolves in this order:
+
 1. `macos-keychain` on macOS
 2. `pass` when available
 3. `plain-enc` fallback (age-encrypted local store)
@@ -49,6 +55,7 @@ eval "$(dot env load ai)"
 When `auto_load = true`, shell startup can load configured buckets automatically via `dot env load <bucket>`.
 
 Environment toggles:
+
 - `DOTFILES_SECRETS_PROVIDER`
 - `DOTFILES_SECRETS_AUTO_LOAD`
 - `DOTFILES_SECRETS_BUCKET_NAMES`
@@ -89,6 +96,7 @@ secrets_backend = "1password"
 ```
 
 Use in templates:
+
 ```text
 {{ onepassword "my-secret" "vault-name" }}
 {{ onepasswordRead "op://vault/item/field" }}
@@ -104,6 +112,7 @@ secrets_backend = "bitwarden"
 ```
 
 Use in templates:
+
 ```text
 {{ bitwarden "item" "my-login" }}
 {{ bitwardenFields "item" "my-login" }}
@@ -119,6 +128,7 @@ secrets_backend = "vault"
 ```
 
 Use in templates:
+
 ```text
 {{ vault "secret/data/my-secret" }}
 ```
@@ -133,6 +143,7 @@ secrets_backend = "pass"
 ```
 
 Use in templates:
+
 ```text
 {{ pass "my-secret" }}
 ```
@@ -144,3 +155,4 @@ See the [chezmoi documentation](https://www.chezmoi.io/user-guide/password-manag
 - **Never commit** `~/.config/chezmoi/key.txt` to version control.
 - **Avoid shell history exposure** — use `dot secrets set` which prompts securely.
 - **Rotate credentials** on a regular schedule.
+{% endraw %}

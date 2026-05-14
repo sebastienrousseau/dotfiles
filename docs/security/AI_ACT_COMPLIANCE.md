@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # EU AI Act Compliance Assessment
 
 This document maps the dotfiles project against the EU Artificial Intelligence Act (Regulation (EU) 2024/1689) to confirm compliance posture and applicable obligations.

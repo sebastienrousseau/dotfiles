@@ -1,3 +1,8 @@
+---
+render_with_liquid: false
+---
+{% raw %}
+
 # Theming Guide
 
 The dotfiles ship a wallpaper-driven theme system that generates terminal color palettes directly from wallpaper images using K-Means clustering in CIELAB color space. One command changes the terminal, editor, window manager, GTK, desktop environment, wallpaper, and browser-facing color mode in under a second.
@@ -109,6 +114,7 @@ dot theme rebuild --list   # List discovered wallpapers without rebuilding
 Theme switching is a two-tier system:
 
 **Core (always works)** — ships in the repo, no setup needed:
+
 - Terminal colors (Ghostty, Alacritty, Kitty, WezTerm, tmux)
 - Editor themes (Neovim colorscheme, VS Code)
 - macOS dark/light mode and accent color
@@ -116,6 +122,7 @@ Theme switching is a two-tier system:
 - Browser color mode (Safari, Chrome, Firefox)
 
 **Wallpapers (optional)** — user-provided, enhances the theme:
+
 - Desktop wallpaper matched to the active theme
 - Requires `~/Pictures/Wallpapers/` with files named `macos-NAME-dark.heic`
 
@@ -220,3 +227,4 @@ grep '^theme = ' ~/.dotfiles/.chezmoidata.toml
 ```
 
 This prints the current theme name. Cross-reference with `dot theme list` for available options.
+{% endraw %}
