@@ -48,7 +48,14 @@ jobs:
           persist-credentials: false
 
       - name: Run analysis
-        uses: ossf/scorecard-action@99c09fe975337306107572b4fdf4db224cf8e2f2 # v2.4.3
+        # The v2.4.3 tag is an annotated tag pointing at commit
+        # 4eaacf0543bb3f2c246792bd56e8cdeffafb205a. Pinning by the
+        # tag-object SHA (99c09fe9…) made GitHub Actions happy but
+        # the scorecard.dev webapp's signature verifier flagged
+        # it as an "imposter commit" (the tag SHA isn't a real
+        # commit in ossf/scorecard-action), so the publish step
+        # 400'd with status 400 every run. Pin the commit SHA.
+        uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a # v2.4.3
         with:
           results_file: results.sarif
           results_format: sarif
