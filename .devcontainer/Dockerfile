@@ -1,6 +1,12 @@
 # Dotfiles Dev Container
 # Provides a full development environment with chezmoi-managed dotfiles
-FROM mcr.microsoft.com/devcontainers/base:ubuntu
+#
+# Base image pinned by sha256 digest per Scorecard's Pinned-Dependencies
+# check. Refresh with:
+#   docker pull mcr.microsoft.com/devcontainers/base:ubuntu
+#   docker inspect --format '{{index .RepoDigests 0}}' \
+#     mcr.microsoft.com/devcontainers/base:ubuntu
+FROM mcr.microsoft.com/devcontainers/base:ubuntu@sha256:7ee7da33a68d997971660d91ecc8372e55a38a777c3c6bd6808daf91928052db
 
 ARG DEBIAN_FRONTEND=noninteractive
 

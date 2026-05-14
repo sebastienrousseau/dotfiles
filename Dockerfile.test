@@ -6,7 +6,10 @@
 # =============================================================================
 # Ubuntu 26.04 (LTS) - Tests Debian/Ubuntu prerequisites + install.sh
 # =============================================================================
-FROM ubuntu:26.04 AS ubuntu-test
+# Base images pinned by sha256 digest per Scorecard's Pinned-
+# Dependencies check. Refresh with `docker pull <image> && docker
+# inspect --format '{{index .RepoDigests 0}}' <image>`.
+FROM ubuntu:26.04@sha256:f3d28607ddd78734bb7f71f117f3c6706c666b8b76cbff7c9ff6e5718d46ff64 AS ubuntu-test
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root
@@ -71,7 +74,7 @@ RUN bash -n "$HOME/.dotfiles/install.sh" && echo "=== Ubuntu 24.04: ALL TESTS PA
 # =============================================================================
 # Debian 12 (Bookworm) - Tests Debian prerequisites + install.sh
 # =============================================================================
-FROM debian:12 AS debian-test
+FROM debian:12@sha256:85019db29298555fd1a5f4bb57673ae989414a9884117c75d7a3e1a6cce21688 AS debian-test
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root
@@ -123,7 +126,7 @@ USER testuser
 # Arch Linux - Tests Arch prerequisites
 # =============================================================================
 # Using base-devel tag for stable builds (CKV_DOCKER_7)
-FROM archlinux:base-devel AS arch-test
+FROM archlinux:base-devel@sha256:6ec1f5073a94d877ae97ebf68e507f709b395c7a90005fe92d9db1c21f933077 AS arch-test
 
 ENV HOME=/root
 
@@ -177,7 +180,7 @@ USER testuser
 # =============================================================================
 # Ubuntu 26.04 + eza - Tests modern aliases with eza installed
 # =============================================================================
-FROM ubuntu:26.04 AS ubuntu-eza-test
+FROM ubuntu:26.04@sha256:f3d28607ddd78734bb7f71f117f3c6706c666b8b76cbff7c9ff6e5718d46ff64 AS ubuntu-eza-test
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root

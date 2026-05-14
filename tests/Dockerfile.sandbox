@@ -3,7 +3,10 @@
 # Run:   docker run --rm -it dotfiles-sandbox
 # Security: DS-0029 fix included
 
-FROM ubuntu:24.04
+# Base pinned by sha256 digest per Scorecard's Pinned-Dependencies
+# check. Refresh with `docker pull ubuntu:24.04 && docker inspect
+# --format '{{index .RepoDigests 0}}' ubuntu:24.04`.
+FROM ubuntu:24.04@sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root
