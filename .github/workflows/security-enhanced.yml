@@ -33,10 +33,13 @@ on:
     - cron: '0 2 * * 0'
   workflow_dispatch:
 
+# Least-privilege top-level — Scorecard's Token-Permissions check
+# flags any non-`read` token granted at the workflow level. The
+# write scopes are granted on jobs that actually need them
+# (security-events: write for SARIF upload, attestations: write
+# on the attestation job).
 permissions:
   contents: read
-  security-events: write
-  actions: read
 
 # Cancel in-progress runs for the same branch
 concurrency:
@@ -95,6 +98,9 @@ jobs:
     name: Security / Dependencies
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write   # upload Grype SARIF
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
@@ -135,6 +141,9 @@ jobs:
     name: Security / Infrastructure
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write   # upload Checkov SARIF
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
@@ -170,6 +179,9 @@ jobs:
     timeout-minutes: 15
     # Only run container scans manually or with explicit tag
     if: contains(github.event.head_commit.message, '[container]') || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+      security-events: write   # upload Trivy SARIF
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1

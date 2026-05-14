@@ -10,6 +10,12 @@ on:
         required: false
         type: string
 
+# Least-privilege top-level — write scopes are granted on jobs
+# that actually need them. Scorecard's Token-Permissions check
+# requires an explicit `permissions:` block at top-level.
+permissions:
+  contents: read
+
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
