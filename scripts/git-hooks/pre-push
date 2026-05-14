@@ -77,13 +77,13 @@ if [ "${DOTFILES_ALLOW_UNSKIPPED_PUSH:-}" = "1" ]; then
 
   ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
-  remote="$(git remote get-url --push @{upstream} 2>/dev/null \
-            || git config --get remote.origin.url 2>/dev/null \
-            || echo unknown)"
+  remote="$(git remote get-url --push @{upstream} 2>/dev/null ||
+    git config --get remote.origin.url 2>/dev/null ||
+    echo unknown)"
   reason="${DOTFILES_BYPASS_REASON:-no reason given}"
 
   printf '%s\tbranch=%s\tremote=%s\treason=%s\n' \
-    "$ts" "$branch" "$remote" "$reason" >> "$bypass_log"
+    "$ts" "$branch" "$remote" "$reason" >>"$bypass_log"
 
   echo "WARN: pre-push audit bypassed (logged to $bypass_log)" >&2
   exit 0
