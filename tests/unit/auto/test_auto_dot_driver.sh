@@ -120,6 +120,92 @@ declare -a PROBES=(
   "attest_json     attest --json"
   "fleet_status_j  fleet status --json"
   "restore_help2   restore -L"
+  # ── Agent subcommand sweep (closes #883 coverage roadmap incrementally) ──
+  "agent_current   agent current"
+  "agent_show_plan agent show plan"
+  "agent_show_apl  agent show apply"
+  "agent_show_aud  agent show audit"
+  "agent_log_help  agent log --help"
+  "agent_ckpt_save agent checkpoint save --help"
+  "agent_ckpt_show agent checkpoint show --help"
+  "agent_conf_h    agent conformance --help"
+  "agent_conf_json agent conformance --json"
+  "agent_delegate  agent delegate --help"
+  # ── Tools subcommand sweep ──
+  "tools_help_all  tools help"
+  "tools_aliases   tools alias-check"
+  "tools_env       tools env"
+  "tools_profile   tools profile"
+  "tools_packages  tools packages"
+  "tools_log_rot   tools log-rotate --help"
+  "tools_setup_h   tools setup --help"
+  "tools_new_h     tools new --help"
+  "tools_install_h tools install --help"
+  "tools_use_h     tools use --help"
+  "tools_show_h    tools show --help"
+  "tools_set_h     tools set --help"
+  # ── Rollback read-only paths (status / list are safe; rollback writes are skipped) ──
+  "rollback_stat   rollback status"
+  "rollback_h_long rollback help"
+  # ── AI bridge dispatch — the bridges resolve their patterns and exit
+  #    cleanly when no prompt is given. Each one exercises a different
+  #    arm of run_ai_with_context. Stderr noise is fine; we only care
+  #    that the branch line was traced.
+  "ai_bridge_help  cl --help"
+  "ai_bridge_codex codex --help"
+  "ai_bridge_cop   copilot --help"
+  "ai_bridge_gem   gemini --help"
+  "ai_bridge_goose goose --help"
+  "ai_bridge_kiro  kiro --help"
+  "ai_bridge_sgpt  sgpt --help"
+  "ai_bridge_oll   ollama --help"
+  "ai_bridge_opc   opencode --help"
+  "ai_bridge_aide  aider --help"
+  "ai_bridge_auto  autohand --help"
+  "ai_bridge_vibe  vibe --help"
+  "ai_bridge_qwen  qwen --help"
+  "ai_bridge_zai   zai --help"
+  # ── Fleet drift + namespace ──
+  "fleet_namesp    fleet namespace"
+  "fleet_drift     fleet drift"
+  # ── Meta subcommands ──
+  "meta_h          meta help"
+  # ── Search variants ──
+  "search_doctor   search doctor"
+  "search_theme    search theme"
+  "search_secrets  search secrets"
+  # ── Core read-only ──
+  "core_managed    managed"
+  "core_doctor_q   doctor -q"
+  "core_health_h   health --help"
+  "core_health_j   health -j"
+  # ── Help individual commands ──
+  "help_ai         help ai"
+  "help_mode       help mode"
+  "help_agent      help agent"
+  "help_theme      help theme"
+  "help_perf       help perf"
+  "help_fleet      help fleet"
+  "help_tools      help tools"
+  "help_security   help security"
+  "help_secrets    help secrets"
+  # ── Agent state-change probes (sandbox HOME isolates writes) ──
+  "agent_set_ask     agent set ask"
+  "agent_set_plan    agent set plan"
+  "agent_set_apply   agent set apply"
+  "agent_set_audit   agent set audit"
+  "agent_set_bad     agent set nonexistent-profile"
+  "agent_run_echo    agent run ask echo hello"
+  "agent_ckpt_save_l agent checkpoint save --label drive-test"
+  "agent_card_strict agent card --strict"
+  "agent_conf_strict agent conformance --strict --json"
+  "agent_a2a_val     agent a2a-card --validate"
+  # ── Theme read-only ──
+  "theme_help        theme --help"
+  "theme_list        theme list"
+  # ── Help via search ──
+  "search_help       search help"
+  "search_dark       search dark"
 )
 
 set +e

@@ -148,9 +148,115 @@ SHIM
 exit 0
 SHIM
 
-  for cmd in chezmoi git curl wget; do
+  # mise — version checks + tool listing
+  cat >"$tmp/bin/mise" <<'SHIM'
+#!/usr/bin/env bash
+case "${1:-}" in
+  --version|version) echo "2026.5.7 macos-arm64 (a1b2c3d 2026-05-06)" ;;
+  ls|list)           echo "node 24.15.0 ~/.tool-versions latest"; echo "rust 1.95.0 ~/.tool-versions latest" ;;
+  current)           echo "24.15.0" ;;
+  where)             echo "${HOME:-/tmp}/.local/share/mise/installs" ;;
+  exec|run)          shift; "$@" ;;
+  install|use|set)   : ;;
+  trust|untrust)     : ;;
+  doctor)            echo "ok" ;;
+  *)                 : ;;
+esac
+exit 0
+SHIM
+
+  # uv — Python tool manager
+  cat >"$tmp/bin/uv" <<'SHIM'
+#!/usr/bin/env bash
+case "${1:-}" in
+  --version) echo "uv 0.5.0 (a1b2c3d 2026-05-01)" ;;
+  tool)
+    case "${2:-}" in
+      list) echo "aider-chat 0.86.2" ;;
+      *)    : ;;
+    esac
+    ;;
+  *) : ;;
+esac
+exit 0
+SHIM
+
+  # Theme-dependent commands. wallpaper-sync / apply-gnome-theme /
+  # iterm2 profile gen run a battery of these and bail when any
+  # return non-zero — the shims keep them on the happy path.
+  cat >"$tmp/bin/gsettings" <<'SHIM'
+#!/usr/bin/env bash
+case "${1:-}" in
+  get)
+    case "${2:-}" in
+      org.gnome.desktop.background)
+        echo "'file://${HOME:-/tmp}/Pictures/Wallpapers/sample.heic'"
+        ;;
+      org.gnome.desktop.interface)
+        echo "'prefer-dark'"
+        ;;
+      *) echo "''" ;;
+    esac
+    ;;
+  set|reset) : ;;
+  list-keys) echo "color-scheme"; echo "picture-uri" ;;
+  *) : ;;
+esac
+exit 0
+SHIM
+
+  cat >"$tmp/bin/gnome-extensions" <<'SHIM'
+#!/usr/bin/env bash
+case "${1:-}" in
+  list)   echo "user-theme@gnome-shell-extensions.gcampax.github.com" ;;
+  info)   echo "name: User Themes"; echo "state: ENABLED" ;;
+  *)      : ;;
+esac
+exit 0
+SHIM
+
+  cat >"$tmp/bin/dconf" <<'SHIM'
+#!/usr/bin/env bash
+case "${1:-}" in
+  read)  echo "" ;;
+  write) : ;;
+  list)  : ;;
+  dump)  : ;;
+  *)     : ;;
+esac
+exit 0
+SHIM
+
+  cat >"$tmp/bin/defaults" <<'SHIM'
+#!/usr/bin/env bash
+case "${1:-}" in
+  read)      echo "1" ;;
+  write|delete|domains) : ;;
+  *) : ;;
+esac
+exit 0
+SHIM
+
+  # mktemp wrapper: stays out of the way (real one already works fine
+  # in the sandbox), but the smart shim list above documents shims as
+  # the way we keep the host clean.
+
+  for cmd in chezmoi git curl wget mise uv gsettings gnome-extensions dconf defaults; do
     chmod +x "$tmp/bin/$cmd"
   done
+
+  # ── Wallpaper fixture for theme-dependent scripts ─────────────────
+  # `wallpaper-sync.sh`, `extract-theme.py`, and friends read pixel
+  # data from a wallpaper file. We drop a tiny PNG header (8 bytes —
+  # just the magic + a single IHDR) so any tool that does
+  # `[[ -f "$wallpaper" ]] && file --mime-type "$wallpaper"` finds
+  # a real file. Anything that actually parses pixels will fail
+  # cleanly; the scripts under test handle the failure as "no
+  # wallpaper available" and proceed to their fallback paths,
+  # which is where the bulk of their code lives.
+  mkdir -p "$HOME/Pictures/Wallpapers"
+  printf '\x89PNG\r\n\x1a\n' >"$HOME/Pictures/Wallpapers/sample.png"
+  printf '\x89PNG\r\n\x1a\n' >"$HOME/Pictures/Wallpapers/sample.heic"
 
   export PATH="$tmp/bin:$PATH"
 }
@@ -440,7 +546,15 @@ cov_exercise_functions_file() {
     cmatrix | pipes | stopwatch | matrix | rainbow | banner | \
       myip | pre-push | rebuild-themes | ql | \
       lint | reliability-audit | record | \
-      executable_myip | executable_tmux-sessionizer)
+      executable_myip | executable_tmux-sessionizer | \
+      version-sync | release | bump | sync-version | \
+      build-manual | install | install-chezmoi-verified | uninstall)
+      # Scripts whose internal functions take a "version" or "file
+      # path" arg and WRITE to repo files (README.md, install.sh,
+      # CHANGELOG.md, etc.). Passing the helper's `$tmpfile` to
+      # them substitutes the temp-file path into the repo files —
+      # observed corrupting README.md badges in a previous run.
+      # Strictly out of scope for fn-exercise.
       return 0
       ;;
   esac
@@ -483,12 +597,43 @@ cov_exercise_functions_file() {
   # positional args passed via `_ "$script" "$tmpfile"` below.
   # Single quotes here are deliberate.
   ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} bash -c '
-    set +e
+    set +eu
+
+    # Many dot command files end with a `case "${1:-}"` dispatch
+    # that calls `exit N` on the catchall arm. Sourcing them with
+    # no $1 would kill this whole probe before we can call their
+    # internal helpers. Override `exit` as a function for the
+    # duration of the source so the dispatch error path returns
+    # rather than terminates. We restore the builtin right after.
+    exit() {
+      # echo trace so the override is visible if anyone debugs.
+      printf "[cov-exit-trap] exit %s suppressed during source\n" "${1:-0}" >&2
+      return "${1:-0}"
+    }
+
     # Keep stderr connected — 2>/dev/null on the source line would
     # discard the bash xtrace lines for every command the sourced
     # file executes, hiding ~all of its setup coverage.
+    #
+    # The `|| true` is essential, not stylistic: many dot command
+    # files start with `set -euo pipefail`. That propagates into our
+    # shell, then their tail dispatch case hits `exit 1` for an
+    # unknown subcommand. With errexit on AND a non-zero source rc,
+    # bash kills our outer shell before we can call any function.
+    # Putting source on the LHS of `||` suppresses errexit for the
+    # source command itself per the bash manual ("the command
+    # following the final && or || except the command following the
+    # final && or ||"), so we always reach the cleanup below.
     # shellcheck disable=SC1090
-    source "$1"
+    source "$1" || true
+
+    # Restore the real `exit` builtin so the rest of this probe
+    # (and any functions we call) can exit normally if they need to.
+    unset -f exit
+
+    # Force errexit + nounset off again after the source — the
+    # sourced file very likely turned them back on.
+    set +eu
     tmpfile="$2"
     # Discover functions defined by this file (best-effort). Source
     # may also pull in helpers from neighboring includes; we restrict
