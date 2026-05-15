@@ -69,7 +69,10 @@ declare -a PROBES=(
   "meta_help       meta --help"
   "diagnostics_help diagnostics --help"
   "doctor_help     doctor --help"
-  "verify_help     verify --help"
+  # `verify --help` routes through diagnostics.sh which sources
+  # security-score; under high parallelism that trips fork limits
+  # on macOS. Same family as the verify_s probe disabled earlier.
+  # "verify_help     verify --help"
   "snapshot_help   snapshot --help"
   "perf_help       perf --help"
   "restore_help    restore --help"

@@ -548,7 +548,13 @@ cov_exercise_functions_file() {
       lint | reliability-audit | record | \
       executable_myip | executable_tmux-sessionizer | \
       version-sync | release | bump | sync-version | \
-      build-manual | install | install-chezmoi-verified | uninstall)
+      build-manual | install | install-chezmoi-verified | uninstall | \
+      manage-secrets | executable_update | wallpaper-rotate | \
+      heal | heal-tools | rollback | restore | apply-gnome-theme | \
+      install-catppuccin-themes | switch | \
+      executable_ai_core | executable_dot-bootstrap | ai-update | \
+      executable_ai-update | enforce-policies | ssh-cert | firewall | \
+      secrets_provider | secrets-provider)
       # Scripts whose internal functions take a "version" or "file
       # path" arg and WRITE to repo files (README.md, install.sh,
       # CHANGELOG.md, etc.). Passing the helper's `$tmpfile` to
