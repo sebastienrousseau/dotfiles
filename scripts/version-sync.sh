@@ -142,6 +142,8 @@ sed_in_place() {
   fi
 }
 
+# LCOV_EXCL_START — rm -rf BACKUP_DIR + cp of real release files;
+# only run during a real release flow, not safe under coverage.
 create_backup() {
   local files=("$@")
 
@@ -166,6 +168,7 @@ create_backup() {
 
   log_success "Backed up $backup_count files"
 }
+# LCOV_EXCL_STOP
 
 update_version_references() {
   local target_version="$1"

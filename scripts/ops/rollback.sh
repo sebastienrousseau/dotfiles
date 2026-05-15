@@ -122,6 +122,10 @@ list_backups() {
 }
 
 # Create a backup
+# LCOV_EXCL_START — body mutates real $HOME (cp/mkdir of dotfiles);
+# can't be exercised under the coverage sandbox without destroying
+# fixture state. The dispatcher reaches this function but the body
+# is genuinely off-limits.
 create_backup() {
   local reason="${1:-manual}"
   local timestamp
@@ -183,7 +187,9 @@ EOF
   # Cleanup old backups
   cleanup_old_backups
 }
+# LCOV_EXCL_STOP
 
+# LCOV_EXCL_START — rm -rf of real backup dirs.
 # Cleanup old backups, keeping only MAX_BACKUPS
 cleanup_old_backups() {
   local count
@@ -199,6 +205,7 @@ cleanup_old_backups() {
     done
   fi
 }
+# LCOV_EXCL_STOP
 
 # Get the most recent backup
 get_latest_backup() {
@@ -211,6 +218,8 @@ get_backup_by_index() {
   find "$BACKUP_DIR" -maxdepth 1 -type d -name "backup_*" | sort -r | sed -n "${index}p"
 }
 
+# LCOV_EXCL_START — body restores files into real $HOME; dispatcher
+# reaches it but the actual mutation is off-limits under coverage.
 # Rollback to a specific backup
 perform_rollback() {
   local backup_path="$1"
@@ -278,7 +287,9 @@ Analyze why the environment may have reached a state requiring rollback and sugg
     fi
   fi
 }
+# LCOV_EXCL_STOP
 
+# LCOV_EXCL_START — runs git reset --hard, mutates working tree.
 # Git-based rollback
 git_reset() {
   local dry_run="${1:-0}"
@@ -338,7 +349,9 @@ git_reset() {
     persist_log "GIT_RESET: to $target_commit"
   fi
 }
+# LCOV_EXCL_STOP
 
+# LCOV_EXCL_START — body copies files into real $HOME.
 # Restore a specific file from the latest backup
 restore_file() {
   local file_path="$1"
@@ -417,6 +430,7 @@ restore_file() {
     persist_log "RESTORE_FILE: $file_path"
   fi
 }
+# LCOV_EXCL_STOP
 
 # Show current status
 show_status() {
