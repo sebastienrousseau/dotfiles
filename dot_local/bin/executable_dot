@@ -539,6 +539,8 @@ if [[ -z "$COMMAND" ]]; then
   exit 0
 fi
 
+# `|| true` is intentional: an unknown command yields an empty route, which falls
+# through the case below into the user-command path that emits the proper error.
 route="$(_dot_command_route "$COMMAND" || true)"
 
 case "$route" in
@@ -586,7 +588,9 @@ case "$route" in
   *)
     _user_cmd="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/commands/${COMMAND}.sh"
     if [[ -f "$_user_cmd" ]]; then
-      source "$_user_cmd" "$@"
+      # Run in a subshell so a user `exit` doesn't kill the dot CLI.
+      ( source "$_user_cmd" "$@" )
+      exit $?
     else
       echo "Unknown command: ${COMMAND:-}" >&2
       echo "Run 'dot help' for available commands." >&2

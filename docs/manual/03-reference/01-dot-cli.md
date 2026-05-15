@@ -151,19 +151,6 @@ dot attest [--output|-o <file>] [--sign|-s]
 
 Default output: `~/.local/state/dotfiles/attestation/YYYY-MM-DD-HHMMSS.json`. With `--sign`, the JSON is signed with the user's SSH ED25519 key.
 
-### `dot verify`
-
-Verify integrity of the installation.
-
-```
-dot verify [--security|-s] [--attestation <path>]
-```
-
-| Flag | Effect |
-|:---|:---|
-| `--security`, `-s` | Run gitleaks + signature checks + policy hash |
-| `--attestation <path>` | Verify an external attestation file |
-
 ### `dot lint`
 
 Lint shell scripts (shellcheck, shfmt).
@@ -174,24 +161,6 @@ dot lint [--path <glob>] [--strict]
 
 ## Performance
 
-### `dot benchmark`
-
-Measure shell startup time.
-
-```
-dot benchmark [--detailed|-d] [--profile|-p] [--compare|-c] [--waterfall|-w] [--runs|-r <n>]
-```
-
-| Flag | Effect |
-|:---|:---|
-| `--detailed`, `-d` | Per-module timing breakdown |
-| `--profile`, `-p` | Profile with `$SHELL -ixc ""` |
-| `--compare`, `-c` | Compare against baseline |
-| `--waterfall`, `-w` | Waterfall visualization |
-| `--runs`, `-r <n>` | Number of hyperfine runs (default 10) |
-
-Exit codes: 0 (<500ms target), 1 (regression).
-
 ### `dot perf`
 
 Quick performance snapshot.
@@ -200,17 +169,9 @@ Quick performance snapshot.
 dot perf [--json|-j] [--profile|-p] [--runs|-r <n>] [--target|-t <ms>]
 ```
 
-### `dot prewarm`
-
-Regenerate shell init caches for fast startup.
-
 ### `dot cache-refresh`
 
-Rebuild generated shell state (cold-start alternative to prewarm).
-
-### `dot clean-cache`
-
-Clear generated shell initialization caches. Next shell startup will be slow; use `dot prewarm` afterward.
+Regenerate shell caches for ultra-fast startup.
 
 ### `dot score`
 
@@ -322,7 +283,7 @@ Multi-node status, drift, and namespace.
 dot fleet              # show all known hosts
 dot fleet attest       # collect signed attestations
 dot fleet diff         # compare rendered config across hosts
-dot fleet sync         # run `dot update` on every host
+dot fleet sync         # run `dot upgrade` on every host
 ```
 
 Fleet hosts are configured in `~/.config/dotfiles/fleet.toml`.
@@ -360,10 +321,6 @@ dot add ~/.somefile                    # plaintext
 dot add --encrypt ~/.somefile          # encrypted with Age
 dot add --template ~/.somefile         # templatize
 ```
-
-### `dot remove <path>`
-
-Safely remove a managed file (removes from source and unmanages).
 
 ### `dot cd`
 
