@@ -66,7 +66,10 @@ _registry_url() {
   if [[ -f "$cfg" ]]; then
     local u
     u="$(awk -F'[ \t]*=[ \t]*' '/^url[ \t]*=/{gsub(/"/,"",$2); print $2; exit}' "$cfg")"
-    [[ -n "$u" ]] && { printf '%s\n' "$u"; return; }
+    [[ -n "$u" ]] && {
+      printf '%s\n' "$u"
+      return
+    }
   fi
   _registry_default_url
 }
@@ -86,7 +89,7 @@ _registry_fetch() {
   now="$(date +%s)"
   if [[ -s "$cache_file" ]]; then
     if mtime="$(stat -f %m "$cache_file" 2>/dev/null || stat -c %Y "$cache_file" 2>/dev/null)"; then
-      if (( now - mtime < 21600 )); then
+      if ((now - mtime < 21600)); then
         printf '%s\n' "$cache_file"
         return 0
       fi
@@ -113,7 +116,10 @@ _registry_fetch() {
 }
 
 _registry_require_jq() {
-  command -v jq >/dev/null 2>&1 || { ui_err "registry" "jq is required"; return 127; }
+  command -v jq >/dev/null 2>&1 || {
+    ui_err "registry" "jq is required"
+    return 127
+  }
 }
 
 cmd_registry() {
@@ -126,7 +132,10 @@ cmd_registry() {
       ;;
     set-url)
       local new_url="${1:-}"
-      [[ -n "$new_url" ]] || { ui_err "set-url" "missing URL"; return 1; }
+      [[ -n "$new_url" ]] || {
+        ui_err "set-url" "missing URL"
+        return 1
+      }
       # Refuse non-HTTPS schemes. The registry index is unsigned today,
       # so HTTPS is the only transport that gives us cert-pinned
       # integrity. The `file://` exemption is for local testing only
@@ -142,8 +151,12 @@ cmd_registry() {
       # written file.
       local _tmp
       _tmp="$(mktemp "${cfg}.XXXXXX")"
-      printf 'url = "%s"\n' "$new_url" > "$_tmp" && mv "$_tmp" "$cfg" \
-        || { rm -f "$_tmp"; ui_err "set-url" "failed to write $cfg"; return 1; }
+      printf 'url = "%s"\n' "$new_url" >"$_tmp" && mv "$_tmp" "$cfg" ||
+        {
+          rm -f "$_tmp"
+          ui_err "set-url" "failed to write $cfg"
+          return 1
+        }
       ui_ok "registry" "set to $new_url ($cfg)"
       ;;
     list)
@@ -164,7 +177,10 @@ cmd_registry() {
     search)
       _registry_require_jq || return $?
       local q="${1:-}"
-      [[ -n "$q" ]] || { ui_err "search" "missing query"; return 1; }
+      [[ -n "$q" ]] || {
+        ui_err "search" "missing query"
+        return 1
+      }
       local index
       index="$(_registry_fetch)" || return $?
       ui_header "Registry search: $q"
@@ -183,7 +199,10 @@ cmd_registry() {
     info)
       _registry_require_jq || return $?
       local name="${1:-}"
-      [[ -n "$name" ]] || { ui_err "info" "missing module name"; return 1; }
+      [[ -n "$name" ]] || {
+        ui_err "info" "missing module name"
+        return 1
+      }
       local index
       index="$(_registry_fetch)" || return $?
       local found
@@ -199,7 +218,10 @@ cmd_registry() {
       ;;
     install)
       local name="${1:-}"
-      [[ -n "$name" ]] || { ui_err "install" "missing module name"; return 1; }
+      [[ -n "$name" ]] || {
+        ui_err "install" "missing module name"
+        return 1
+      }
       ui_warn "install" "scaffold only — full module installer is a roadmap item"
       ui_info "install" "would fetch module $name from registry and apply it as a chezmoi sub-source"
       return 0

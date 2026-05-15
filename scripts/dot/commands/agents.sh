@@ -140,7 +140,10 @@ cmd_agents() {
       local claude_md root
       claude_md="$(_agents_canonical)"
       root="$(_agents_repo_root)"
-      [[ -f "$claude_md" ]] || { ui_err "CLAUDE.md" "not found at $claude_md"; return 2; }
+      [[ -f "$claude_md" ]] || {
+        ui_err "CLAUDE.md" "not found at $claude_md"
+        return 2
+      }
 
       # 1. AGENTS.md — body of CLAUDE.md + AGENTS.md cross-reference header.
       local agents_md="$root/AGENTS.md"
@@ -169,14 +172,14 @@ HEADER
 
 **Need richer context?** This file is the cross-harness summary. Claude Code reads the full canonical version from [`CLAUDE.md`](./CLAUDE.md). Both files are kept in sync via `dot agents render`.
 FOOTER
-      } > "$agents_md"
+      } >"$agents_md"
       chmod 0644 "$agents_md" 2>/dev/null || true
       ui_ok "AGENTS.md" "rendered → $agents_md"
 
       # 2. Cursor rules — MDC format, points at CLAUDE.md/AGENTS.md.
       local cursor_dir="$root/.cursor/rules"
       mkdir -p "$cursor_dir"
-      cat > "$cursor_dir/dotfiles.mdc" <<'MDC'
+      cat >"$cursor_dir/dotfiles.mdc" <<'MDC'
 ---
 description: Repo conventions for the dotfiles project (sourced from CLAUDE.md/AGENTS.md)
 globs:
@@ -190,19 +193,19 @@ Cursor rule file exists so Cursor's rule engine picks up the same
 context; do not duplicate content here — keep CLAUDE.md canonical.
 MDC
       chmod 0644 "$cursor_dir/dotfiles.mdc" 2>/dev/null || true
-      ui_ok "Cursor"    "rendered → $cursor_dir/dotfiles.mdc"
+      ui_ok "Cursor" "rendered → $cursor_dir/dotfiles.mdc"
 
       # 3. Codex CLI config stub — declares the AGENTS.md path.
       local codex_dir="$root/.codex"
       mkdir -p "$codex_dir"
-      cat > "$codex_dir/config.toml" <<'TOML'
+      cat >"$codex_dir/config.toml" <<'TOML'
 # Codex CLI config — points at the AGENTS.md cross-harness context.
 # Codex reads AGENTS.md natively; this file is a project-scoped pin so
 # the CLI prefers the in-repo guidance over any global default.
 project_context = "AGENTS.md"
 TOML
       chmod 0644 "$codex_dir/config.toml" 2>/dev/null || true
-      ui_ok "Codex"     "rendered → $codex_dir/config.toml"
+      ui_ok "Codex" "rendered → $codex_dir/config.toml"
 
       # 4-11. Per-harness rules files. All eight emitters reuse the
       # same body extracted from CLAUDE.md so a single edit propagates
@@ -215,7 +218,7 @@ TOML
           printf '%s\n\n' "$_header"
           _agents_body "$claude_md"
           printf '\n---\n\n**Canonical source:** [`CLAUDE.md`](./CLAUDE.md) — keep in sync via `dot agents render`.\n'
-        } > "$_path"
+        } >"$_path"
         chmod 0644 "$_path" 2>/dev/null || true
         ui_ok "$_harness" "rendered → $_path"
       }
@@ -245,17 +248,17 @@ These rules govern Cascade and the Windsurf agent inside this repository."
       # 9. Zed — config pointer (TOML).
       local zed_dir="$root/.zed"
       mkdir -p "$zed_dir"
-      cat > "$zed_dir/agent-config.toml" <<'TOML'
+      cat >"$zed_dir/agent-config.toml" <<'TOML'
 # Zed agent config — points at AGENTS.md for the cross-harness body.
 # Zed reads this file when its agent mode is enabled; the actual rule
 # body lives in AGENTS.md (which `dot agents render` keeps current).
 agent_context = "AGENTS.md"
 TOML
       chmod 0644 "$zed_dir/agent-config.toml" 2>/dev/null || true
-      ui_ok "Zed"       "rendered → $zed_dir/agent-config.toml"
+      ui_ok "Zed" "rendered → $zed_dir/agent-config.toml"
 
       # 10. Aider — YAML pointer to AGENTS.md / CLAUDE.md.
-      cat > "$root/.aider.conf.yml" <<'YML'
+      cat >"$root/.aider.conf.yml" <<'YML'
 # Aider config — surfaces the cross-harness context bundle.
 # Aider's `--read` flag pulls in AGENTS.md / CLAUDE.md per session.
 read:
@@ -263,19 +266,19 @@ read:
   - CLAUDE.md
 YML
       chmod 0644 "$root/.aider.conf.yml" 2>/dev/null || true
-      ui_ok "Aider"     "rendered → $root/.aider.conf.yml"
+      ui_ok "Aider" "rendered → $root/.aider.conf.yml"
 
       # 11. Continue — JSON pointer used by VS Code / JetBrains plugin.
-      cat > "$root/.continuerc.json" <<'JSON'
+      cat >"$root/.continuerc.json" <<'JSON'
 {
   "_comment": "Continue config pointer — see AGENTS.md for the full body.",
   "systemMessage": "Apply the rules in AGENTS.md (canonical source: CLAUDE.md). Run `dot agents render` if the two drift."
 }
 JSON
       chmod 0644 "$root/.continuerc.json" 2>/dev/null || true
-      ui_ok "Continue"  "rendered → $root/.continuerc.json"
+      ui_ok "Continue" "rendered → $root/.continuerc.json"
 
-      ui_info "Hint"    "commit AGENTS.md alongside CLAUDE.md changes (or add to your pre-commit hook)"
+      ui_info "Hint" "commit AGENTS.md alongside CLAUDE.md changes (or add to your pre-commit hook)"
       ;;
     --help | -h | help)
       cat <<EOF

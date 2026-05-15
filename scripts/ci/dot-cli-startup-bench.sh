@@ -31,14 +31,26 @@ DOT_ARGV_RAW="${DOT_BENCH_CMD:-version}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --budget-ms) BUDGET_MS="$2"; shift 2 ;;
-    --runs)      RUNS="$2"; shift 2 ;;
-    --cmd)       DOT_ARGV_RAW="$2"; shift 2 ;;
-    -h|--help)
+    --budget-ms)
+      BUDGET_MS="$2"
+      shift 2
+      ;;
+    --runs)
+      RUNS="$2"
+      shift 2
+      ;;
+    --cmd)
+      DOT_ARGV_RAW="$2"
+      shift 2
+      ;;
+    -h | --help)
       sed -n '5,25p' "${BASH_SOURCE[0]}"
       exit 0
       ;;
-    *) echo "Unknown arg: $1" >&2; exit 2 ;;
+    *)
+      echo "Unknown arg: $1" >&2
+      exit 2
+      ;;
   esac
 done
 
@@ -61,18 +73,18 @@ _now_ms() {
     awk -v t="$EPOCHREALTIME" 'BEGIN{printf "%d\n", t*1000}'
   elif date +%s%N 2>/dev/null | grep -qE '^[0-9]+$'; then
     # GNU date: nanoseconds.
-    echo $(( $(date +%s%N) / 1000000 ))
+    echo $(($(date +%s%N) / 1000000))
   elif command -v python3 >/dev/null 2>&1; then
     python3 -c 'import time; print(int(time.time()*1000))'
   else
     # Fall back to seconds × 1000 (low resolution; warn).
     echo "::warning::no high-resolution clock; using whole-second precision" >&2
-    echo $(( $(date +%s) * 1000 ))
+    echo $(($(date +%s) * 1000))
   fi
 }
 
 # Parse argv string (space-separated).
-read -r -a DOT_ARGV <<< "$DOT_ARGV_RAW"
+read -r -a DOT_ARGV <<<"$DOT_ARGV_RAW"
 
 echo "dot CLI cold-start benchmark"
 echo "  binary : $DOT_BIN"
@@ -82,7 +94,7 @@ echo "  budget : ${BUDGET_MS}ms"
 echo
 
 samples=()
-for ((i=1; i<=RUNS; i++)); do
+for ((i = 1; i <= RUNS; i++)); do
   start_ms="$(_now_ms)"
   # `env -i` strips inherited cached state so we measure cold-start, not
   # warm-cache. Keep PATH so the dispatcher can find git/awk/etc.
@@ -101,9 +113,9 @@ echo "median: ${median}ms  budget: ${BUDGET_MS}ms"
 # Optional baseline record for trend tracking.
 baseline_file="${DOT_BENCH_BASELINE:-$REPO_ROOT/.cache/dot-cli-startup-baseline.txt}"
 mkdir -p "$(dirname "$baseline_file")" 2>/dev/null || true
-printf '%s\n' "$median" > "$baseline_file"
+printf '%s\n' "$median" >"$baseline_file"
 
-if (( median > BUDGET_MS )); then
+if ((median > BUDGET_MS)); then
   echo "::error::dot CLI cold-start regression: median ${median}ms > budget ${BUDGET_MS}ms" >&2
   echo "  Possible causes: a slow source-time helper in dot_local/bin/executable_dot," >&2
   echo "  an unconditional ${BUDGET_MS}ms+ tool init at top of a sourced lib, or" >&2

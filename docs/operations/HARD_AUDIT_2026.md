@@ -106,6 +106,7 @@ Foundational features (ship these specifically):
 Distribution targets (pick 3, not 5): Homebrew tap first, AUR second, Scoop third (skip winget initially).
 
 Community moves:
+
 - **Show HN:** lead with the wallpaper-driven themes (v0.2.502). Screenshot-driven hook nobody else has.
 - **Blog post series (3 posts):** "Why I stopped using chezmoi directly", "Bootstrapping 15 machines from one git repo in <90 seconds", "Secrets in dotfiles: a 2026 threat model".
 - **CFPs:** FOSDEM 2027 (dev tools devroom), All Things Open 2026, SCaLE LA. Skip KubeCon.
@@ -116,11 +117,13 @@ Community moves:
 **Hero feature / USP:** `dot fleet apply` against N machines over SSH from one control machine, with state reconciliation and drift detection. Chezmoi is single-machine. Ansible is fleet-but-heavyweight. Position as "Ansible for personal devices and home lab" — 3 laptops, a Pi, a VPS, a work desktop, all reconciled from one source. Concrete, technical, nobody owns the niche.
 
 Reference customers worth pursuing:
+
 - Indie hackers running 3–5 machines (Pieter Levels-style operators).
 - One small consultancy (10–30 engineers) — the "we onboard new hires in 20 minutes" testimonial.
 - One OSS maintainer with a YouTube channel — a video walkthrough is worth 10,000 stars.
 
 Integration partnerships:
+
 - **mise plugin or native integration** — Jeff Dickey is responsive.
 - **1Password Developer Tools team** — they have a partner program.
 - **GitHub Codespaces / Dev Containers** — devcontainer.json template that bootstraps via this framework.
@@ -134,6 +137,7 @@ Network-effect features:
 3. **Telemetry-opt-in stats dashboard.** Public leaderboard of most-used modules drives social proof.
 
 Standard-setting:
+
 - Author a "Portable Dotfiles Manifest" RFC — TOML schema consumed by chezmoi/yadm/this. Even if competitors ignore it, you set the conversation.
 - FOSDEM main-track talk: "Reconciling 30 machines from one repo."
 - Quarterly state-of-dotfiles survey, like `State of JS`. Becomes the cited reference.
@@ -163,13 +167,14 @@ Standard-setting:
 
 **This month (research + targeted):** mostly landed
 
-5. ⏳ Generate GPG disclosure key, publish via WKD, fill placeholders (C1). **Needs user input.**
-6. ✅ Removed the unverified `get.chezmoi.io` fall-back; verified installer is now the only path (H6). (commit TBD)
-7. ✅ H7 was a **false positive** on review — `install_homebrew()` already SHA256-verifies.
-8. ✅ H8 was **overstated** on review — `github_asset_url` already obtains URLs from the same authenticated GitHub API call; HTTPS + cert validation covers the threat model.
-9. ✅ Atomic `mktemp + mv` write in fleet.sh (H3). (commit `bc843cd7`)
+1. ⏳ Generate GPG disclosure key, publish via WKD, fill placeholders (C1). **Needs user input.**
+2. ✅ Removed the unverified `get.chezmoi.io` fall-back; verified installer is now the only path (H6). (commit TBD)
+3. ✅ H7 was a **false positive** on review — `install_homebrew()` already SHA256-verifies.
+4. ✅ H8 was **overstated** on review — `github_asset_url` already obtains URLs from the same authenticated GitHub API call; HTTPS + cert validation covers the threat model.
+5. ✅ Atomic `mktemp + mv` write in fleet.sh (H3). (commit `bc843cd7`)
 
 Plus reliability fixes:
+
 - ✅ H4 PID-safe `_cached_eval` (commit `bc843cd7`)
 - ✅ H5 `find -delete` in meta.sh (commit `bc843cd7`)
 - ✅ H9 WSL `wslpath` return-code contract (commit TBD)
@@ -182,18 +187,19 @@ Plus reliability fixes:
 
 **This quarter (positioning):** ✅ shipped
 
-10. ✅ AGENTS.md generator — `dot agents render/check/list` syncs `CLAUDE.md` → `AGENTS.md` + Cursor + Codex stubs (commit TBD). Closes #1 competitive gap.
-11. ✅ Sub-100ms `dot` CLI cold-start gate — `scripts/ci/dot-cli-startup-bench.sh` + `.github/workflows/dot-cli-bench.yml`. Median **47ms** locally, budget 250ms. Closes #3 competitive gap.
-12. ⏳ Add `windows-latest` runner to the test matrix (deferred; needs PS7 mock harness).
-13. ⏳ Pursue mise + 1Password + Codespaces integrations (months 6-12 of the roadmap).
+1. ✅ AGENTS.md generator — `dot agents render/check/list` syncs `CLAUDE.md` → `AGENTS.md` + Cursor + Codex stubs (commit TBD). Closes #1 competitive gap.
+2. ✅ Sub-100ms `dot` CLI cold-start gate — `scripts/ci/dot-cli-startup-bench.sh` + `.github/workflows/dot-cli-bench.yml`. Median **47ms** locally, budget 250ms. Closes #3 competitive gap.
+3. ⏳ Add `windows-latest` runner to the test matrix (deferred; needs PS7 mock harness).
+4. ⏳ Pursue mise + 1Password + Codespaces integrations (months 6-12 of the roadmap).
 
 **This year (lock-in):** ✅ scaffolds shipped
 
-14. ✅ `dot fleet apply` SSH mode — pushes `dot sync` to N hosts from `~/.config/dotfiles/fleet.toml` with `--dry-run`, `--cmd`, `--jobs`, `--host` filters. (commit TBD)
-15. ✅ `dot registry` scaffold — JSON-indexed module discovery (`list`, `search`, `info`, `install`, `url`, `set-url`). Default registry at `docs/registry.json` via GitHub Pages. Full install pipeline tracked in [`docs/operations/REGISTRY.md`](./REGISTRY.md). (commit TBD)
-16. ⏳ Portable Dotfiles Manifest RFC (next: draft + submit as an issue on this repo).
+1. ✅ `dot fleet apply` SSH mode — pushes `dot sync` to N hosts from `~/.config/dotfiles/fleet.toml` with `--dry-run`, `--cmd`, `--jobs`, `--host` filters. (commit TBD)
+2. ✅ `dot registry` scaffold — JSON-indexed module discovery (`list`, `search`, `info`, `install`, `url`, `set-url`). Default registry at `docs/registry.json` via GitHub Pages. Full install pipeline tracked in [`docs/operations/REGISTRY.md`](./REGISTRY.md). (commit TBD)
+3. ⏳ Portable Dotfiles Manifest RFC (next: draft + submit as an issue on this repo).
 
 Plus new entry-points:
+
 - ✅ `dot init <github-user>` — bootstrap any user's dotfiles repo through this framework's harness (commit TBD).
 
 ---

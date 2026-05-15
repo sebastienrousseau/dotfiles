@@ -67,9 +67,18 @@ cmd_init() {
   local user_arg="" dry_run=0 apply=1 force=0
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --dry-run | -n) dry_run=1; shift ;;
-      --no-apply)     apply=0; shift ;;
-      --force | -f)   force=1; shift ;;
+      --dry-run | -n)
+        dry_run=1
+        shift
+        ;;
+      --no-apply)
+        apply=0
+        shift
+        ;;
+      --force | -f)
+        force=1
+        shift
+        ;;
       --help | -h)
         cat <<EOF
 Usage: dot init <github-user|owner/repo|url> [--dry-run] [--no-apply] [--force]
@@ -90,7 +99,10 @@ Flags:
 EOF
         return 0
         ;;
-      --) shift; break ;;
+      --)
+        shift
+        break
+        ;;
       -*)
         ui_err "Unknown flag" "$1"
         return 1
@@ -106,7 +118,10 @@ EOF
     esac
   done
 
-  [[ -n "$user_arg" ]] || { ui_err "init" "missing <user|repo|url>"; return 1; }
+  [[ -n "$user_arg" ]] || {
+    ui_err "init" "missing <user|repo|url>"
+    return 1
+  }
 
   local url
   url="$(_init_resolve_url "$user_arg")" || return $?
@@ -120,8 +135,8 @@ EOF
   source_dir="${CHEZMOI_SOURCE_DIR:-$(chezmoi source-path 2>/dev/null || echo "$HOME/.local/share/chezmoi")}"
 
   ui_header "Bootstrap dotfiles from $user_arg"
-  ui_info "Source URL"   "$url"
-  ui_info "Target dir"   "$source_dir"
+  ui_info "Source URL" "$url"
+  ui_info "Target dir" "$source_dir"
   ui_info "Apply after?" "$([[ "$apply" -eq 1 ]] && echo yes || echo no)"
 
   if [[ "$dry_run" -eq 1 ]]; then
@@ -139,8 +154,11 @@ EOF
   if [[ -t 0 ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]]; then
     read -r -p "  Continue? [y/N] " resp
     case "$resp" in
-      [yY]|[yY][eE][sS]) ;;
-      *) ui_info "Init" "aborted by user"; return 1 ;;
+      [yY] | [yY][eE][sS]) ;;
+      *)
+        ui_info "Init" "aborted by user"
+        return 1
+        ;;
     esac
   fi
 

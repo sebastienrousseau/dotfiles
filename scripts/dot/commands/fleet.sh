@@ -296,9 +296,12 @@ cmd_fleet_namespace() {
         # Avoids `sed -i` portability dance (GNU `-i` vs BSD `-i ''`).
         local _tmp
         _tmp="$(mktemp "${data_file}.XXXXXX")" || die "Cannot create tempfile"
-        sed "s/^namespace = \".*\"/namespace = \"$new_ns\"/" "$data_file" >"$_tmp" \
-          && mv "$_tmp" "$data_file" \
-          || { rm -f "$_tmp"; die "Failed to update namespace"; }
+        sed "s/^namespace = \".*\"/namespace = \"$new_ns\"/" "$data_file" >"$_tmp" &&
+          mv "$_tmp" "$data_file" ||
+          {
+            rm -f "$_tmp"
+            die "Failed to update namespace"
+          }
       fi
       ui_ok "Namespace" "Set to '$new_ns'. Run 'dot sync' to apply."
       _fleet_emit_event "namespace_set" "ok" "namespace=$new_ns"
@@ -389,10 +392,22 @@ cmd_fleet_apply() {
   local dry_run=0 only_host="" cmd="" jobs=4
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --dry-run | -n) dry_run=1; shift ;;
-      --host)         only_host="$2"; shift 2 ;;
-      --cmd)          cmd="$2"; shift 2 ;;
-      --jobs | -j)    jobs="$2"; shift 2 ;;
+      --dry-run | -n)
+        dry_run=1
+        shift
+        ;;
+      --host)
+        only_host="$2"
+        shift 2
+        ;;
+      --cmd)
+        cmd="$2"
+        shift 2
+        ;;
+      --jobs | -j)
+        jobs="$2"
+        shift 2
+        ;;
       --help | -h)
         cat <<EOF
 Usage: dot fleet apply [--host <name>] [--cmd <shell>] [--dry-run] [--jobs <n>]
@@ -429,7 +444,10 @@ Flags:
 EOF
         return 0
         ;;
-      *) ui_err "Unknown arg" "$1"; return 1 ;;
+      *)
+        ui_err "Unknown arg" "$1"
+        return 1
+        ;;
     esac
   done
 
@@ -449,7 +467,10 @@ EOF
   fi
   if [[ -n "$only_host" ]]; then
     entries="$(printf '%s\n' "$entries" | awk -F'\t' -v h="$only_host" '$1 == h')"
-    [[ -n "$entries" ]] || { ui_err "Fleet" "host not found: $only_host"; return 1; }
+    [[ -n "$entries" ]] || {
+      ui_err "Fleet" "host not found: $only_host"
+      return 1
+    }
   fi
 
   local default_cmd='dot sync && dot doctor --quiet'
@@ -457,8 +478,8 @@ EOF
 
   ui_header "Fleet apply"
   ui_info "Hosts file" "$hosts_file"
-  ui_info "Command"    "$effective_cmd"
-  ui_info "Parallel"   "$jobs"
+  ui_info "Command" "$effective_cmd"
+  ui_info "Parallel" "$jobs"
 
   if [[ "$dry_run" -eq 1 ]]; then
     printf '%s\n' "$entries" | while IFS=$'\t' read -r name ssh profile; do
@@ -490,7 +511,7 @@ EOF
       ui_err "$name" "invalid ssh target ($ssh) — only [a-zA-Z0-9._@:+/-] allowed"
       return 1
     fi
-  done <<< "$entries"
+  done <<<"$entries"
 
   # Run one SSH per host, parallelised via background jobs with a
   # semaphore. We DO NOT use `xargs -d` because that flag is GNU-only
@@ -500,9 +521,9 @@ EOF
   _fleet_apply_one() {
     local _name="$1" _ssh="$2" _cmd="$3" _tmp="$4"
     if ssh -o BatchMode=yes -o ConnectTimeout=10 \
-           -o StrictHostKeyChecking=accept-new \
-           "$_ssh" "$_cmd" </dev/null \
-           >"$_tmp/$_name.out" 2>"$_tmp/$_name.err"; then
+      -o StrictHostKeyChecking=accept-new \
+      "$_ssh" "$_cmd" </dev/null \
+      >"$_tmp/$_name.out" 2>"$_tmp/$_name.err"; then
       printf 'ok\n' >"$_tmp/$_name.status"
     else
       printf 'fail %d\n' "$?" >"$_tmp/$_name.status"
@@ -513,13 +534,13 @@ EOF
   while IFS=$'\t' read -r name ssh profile; do
     [[ -n "$name" && -n "$ssh" ]] || continue
     total=$((total + 1))
-    while (( running >= jobs )); do
+    while ((running >= jobs)); do
       wait -n 2>/dev/null || break
       running=$((running - 1))
     done
     _fleet_apply_one "$name" "$ssh" "$effective_cmd" "$tmpdir" &
     running=$((running + 1))
-  done <<< "$entries"
+  done <<<"$entries"
   wait
 
   printf '%s\n' "$entries" | while IFS=$'\t' read -r name ssh profile; do
