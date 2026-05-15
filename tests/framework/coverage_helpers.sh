@@ -258,6 +258,78 @@ SHIM
   printf '\x89PNG\r\n\x1a\n' >"$HOME/Pictures/Wallpapers/sample.png"
   printf '\x89PNG\r\n\x1a\n' >"$HOME/Pictures/Wallpapers/sample.heic"
 
+  # ── Pre-populate common config dirs + minimal contents so the
+  # "if config exists" branch in every dot command reaches the body
+  # rather than the missing-file error path.
+  mkdir -p "$HOME/.config/dotfiles" \
+           "$HOME/.config/chezmoi" \
+           "$HOME/.config/claude" \
+           "$HOME/.config/atuin" \
+           "$HOME/.config/fish" \
+           "$HOME/.config/git" \
+           "$HOME/.config/nvim" \
+           "$HOME/.config/shell" \
+           "$HOME/.config/zsh"
+
+  # dotfiles agent state — pre-populated so `dot agent current` finds
+  # a valid profile rather than dying on a missing file.
+  cat >"$HOME/.config/dotfiles/agent-mode.env" <<'AGENTENV'
+DOT_AGENT_PROFILE=ask
+DOT_AGENT_APPROVAL=manual
+DOT_AGENT_FILESYSTEM=read-only
+DOT_AGENT_NETWORK=disabled
+DOT_AGENT_MCP_PROFILE=read-only
+DOT_AGENT_MAX_STEPS=10
+AGENTENV
+
+  # MCP server config — used by `dot mcp` / `scripts/diagnostics/mcp-doctor.sh`.
+  # Three minimal entries cover the dispatch matrix (npx, node, uvx).
+  cat >"$HOME/.config/claude/mcp_servers.json" <<'MCPCFG'
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {"GITHUB_TOKEN": "${GITHUB_TOKEN}"}
+    },
+    "memory": {
+      "command": "uvx",
+      "args": ["mcp-server-memory"]
+    }
+  }
+}
+MCPCFG
+
+  # AI status cache — pre-warmed so `cmd_ai_status` skips the
+  # cold-cache probe path. The TSV format matches what
+  # `_ai_refresh_status_cache` writes.
+  mkdir -p "$HOME/.cache/dotfiles/ai"
+  cat >"$HOME/.cache/dotfiles/ai/status.tsv" <<'AICACHE'
+0	Agents (autonomous)
+1	Claude Code	installed	2.1.117 — Anthropic CLI agent
+1	Codex CLI	installed	0.130.0 — OpenAI Codex agent
+1	Copilot CLI	installed	1.0.34 — GitHub Copilot CLI
+0	Coding (interactive)
+1	Aider	installed	0.86.2 — AI pair programmer
+AICACHE
+  # mtime in the past makes the cache fresh by the default TTL.
+
+  # Git identity placeholder — many scripts read user.name/email
+  # from gitconfig. The smart `git config` shim already returns
+  # "Test User" + "test@example.com" for these lookups, but
+  # gitconfig file presence is checked separately.
+  cat >"$HOME/.config/git/config" <<'GITCFG'
+[user]
+	name = Test User
+	email = test@example.com
+[init]
+	defaultBranch = main
+GITCFG
+
   export PATH="$tmp/bin:$PATH"
 }
 
