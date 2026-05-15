@@ -160,6 +160,7 @@ Start Here|sync|Apply dotfiles to this machine.|Use after clone or after changes
 Start Here|doctor|Check the environment and surface issues.|Use when something feels off.
 Start Here|learn|Open the guided tour.|Best first stop for new users.
 Start Here|help|Show the overview or help for one command.|Use `dot help <command>` for detail.
+Daily Use|init|Bootstrap a foreign dotfiles repo through chezmoi + dot.|Usage: `dot init <github-user>`.
 Daily Use|status|Show local drift.|See what changed since the last apply.
 Daily Use|diff|Preview pending changes.|Safe way to inspect before applying.
 Daily Use|edit|Open the source directory.|Use the configured editor.
@@ -172,6 +173,8 @@ AI and Agents|ai|Show installed AI tools.|Launches the AI status view.
 AI and Agents|mcp|Inspect MCP policy and registry.|Supports `--strict|-s` and `--json|-j`.
 AI and Agents|mode|Show or set the agent profile.|Profiles: ask, plan, apply, audit.
 AI and Agents|agent|Show agent metadata, logs, checkpoints, and conformance.|Use for card, log, checkpoint, and conformance.
+AI and Agents|agents|Multi-harness agent context (AGENTS.md sync, Cursor/Codex stubs).|Subcommands: list, check, render.
+Fleet|registry|Browse reusable dotfile modules from the dot registry.|Subcommands: list, search, info, install, url, set-url.
 Fleet|fleet|Show fleet node status, drift, and namespace.|Enterprise fleet management.
 Configuration|env|Show managed tool versions.|Backed by mise.
 Configuration|profile|Show or switch the active profile.|Use for machine-specific behavior.
@@ -304,6 +307,7 @@ _dot_command_routes() {
   cat <<'EOF'
 sync|core
 apply|core
+init|init
 update|core
 add|core
 diff|core
@@ -393,7 +397,9 @@ sandbox|meta
 mcp|meta
 mode|meta
 agent|meta
+agents|agents
 fleet|fleet
+registry|registry
 patterns|patterns
 manual|manual
 search|search
@@ -546,6 +552,42 @@ route="$(_dot_command_route "$COMMAND" || true)"
 case "$route" in
   core | diagnostics | ai | tools | appearance | secrets | security | meta | fleet)
     _dispatch "$route" "$@"
+    ;;
+
+  agents)
+    if [[ -n "$_SOURCE_DIR" ]] && [[ -f "$_SOURCE_DIR/scripts/dot/commands/agents.sh" ]]; then
+      # shellcheck disable=SC1091
+      source "$_SOURCE_DIR/scripts/dot/commands/agents.sh"
+      cmd_agents "$@"
+      exit $?
+    else
+      ui_fail "agents.sh not found"
+      exit 1
+    fi
+    ;;
+
+  init)
+    if [[ -n "$_SOURCE_DIR" ]] && [[ -f "$_SOURCE_DIR/scripts/dot/commands/init.sh" ]]; then
+      # shellcheck disable=SC1091
+      source "$_SOURCE_DIR/scripts/dot/commands/init.sh"
+      cmd_init "$@"
+      exit $?
+    else
+      ui_fail "init.sh not found"
+      exit 1
+    fi
+    ;;
+
+  registry)
+    if [[ -n "$_SOURCE_DIR" ]] && [[ -f "$_SOURCE_DIR/scripts/dot/commands/registry.sh" ]]; then
+      # shellcheck disable=SC1091
+      source "$_SOURCE_DIR/scripts/dot/commands/registry.sh"
+      cmd_registry "$@"
+      exit $?
+    else
+      ui_fail "registry.sh not found"
+      exit 1
+    fi
     ;;
 
   manual)

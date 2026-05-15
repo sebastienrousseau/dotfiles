@@ -160,43 +160,31 @@ main() {
       mkdir -p "$bin_dir"
       echo "   Installing chezmoi via binary download..."
 
-      # Prefer verified installer with SHA256 checksum when available
+      # Prefer verified installer with SHA256 checksum when available.
+      # When verification fails or the verified installer isn't present
+      # we refuse to bootstrap rather than silently downloading and
+      # executing an unverified script (the previous fall-back to
+      # `get.chezmoi.io` was an unsigned `curl|sh` and a security hole).
       local verified_installer
       verified_installer="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/scripts/ci/install-chezmoi-verified.sh"
       if [[ -x "$verified_installer" ]] || [[ -f "$verified_installer" ]]; then
         echo "   Using checksum-verified installer..."
         if ! bash "$verified_installer" "${CHEZMOI_VERSION:-2.47.1}" "$bin_dir"; then
-          echo "   Verified installer failed, falling back to get.chezmoi.io" >&2
-        else
-          return 0
+          echo "" >&2
+          echo "   The verified chezmoi installer failed." >&2
+          echo "   Refusing to fall back to an unverified curl|sh path." >&2
+          echo "   Install chezmoi manually from a trusted source, then re-run install.sh:" >&2
+          echo "     macOS:  brew install chezmoi" >&2
+          echo "     Linux:  see https://www.chezmoi.io/install/" >&2
+          return 1
         fi
+        return 0
       fi
-
-      # Fallback: download installer with size/shebang validation
-      local installer
-      installer=$(umask 077 && mktemp)
-      if ! curl -fsSL -o "$installer" https://get.chezmoi.io; then
-        rm -f "$installer"
-        echo "   Failed to download chezmoi installer" >&2
-        return 1
-      fi
-      # Validate: must be a shell script and not suspiciously large
-      if [[ "$(wc -c <"$installer")" -gt 102400 ]]; then
-        rm -f "$installer"
-        echo "   Chezmoi installer suspiciously large. Aborting." >&2
-        return 1
-      fi
-      if ! head -1 "$installer" | grep -q '^#!/'; then
-        rm -f "$installer"
-        echo "   Chezmoi installer doesn't look like a shell script. Aborting." >&2
-        return 1
-      fi
-      if ! BINDIR="$bin_dir" sh "$installer"; then
-        rm -f "$installer"
-        echo "   chezmoi binary installer failed" >&2
-        return 1
-      fi
-      rm -f "$installer"
+      echo "" >&2
+      echo "   scripts/ci/install-chezmoi-verified.sh is missing; cannot verify chezmoi bootstrap." >&2
+      echo "   Install chezmoi manually (brew install chezmoi / official binary)" >&2
+      echo "   and re-run install.sh." >&2
+      return 1
     fi
   }
 

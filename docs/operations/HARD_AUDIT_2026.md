@@ -29,9 +29,9 @@ The goal stated by the maintainer: become the de facto workstation provisioning 
 | H3 | `scripts/dot/commands/fleet.sh:294-297` | GNU vs BSD `sed -i` branch isn't atomic; concurrent `dot fleet namespace set` calls can corrupt `.chezmoidata.toml`. | Use `mktemp` + `mv` (atomic) and wrap with `flock`. |
 | H4 | `dot_config/zsh/dot_zshrc.tmpl:220-221` | `_cached_eval` writes cache with `mv "$cache.tmp.$$" "$cache"` — PID collision possible between two shells. Cold-start affected. | Use `mktemp` instead of `$$`. |
 | H5 | `scripts/dot/commands/meta.sh:64-67` | `rm -rf "$cache_dir/zsh"/*-init.zsh` — if the glob doesn't match, expands to the literal pattern and the `-rf` removes the wrong path. | Guard with `[[ -d ... ]]` or use `find ... -type f -delete`. |
-| H6 | `install.sh:177-198` | Chezmoi installer downloaded over `https://get.chezmoi.io` with size/shebang validation but no cryptographic signature check. | Pin chezmoi release by SHA + verify cosign signature. |
-| H7 | `install/lib/package_managers.sh:56` | Homebrew installer runs from `brew.sh` with a warning but no SHA256 verification. | Fetch installer, verify SHA256 against the official GitHub release, then execute. |
-| H8 | `install/lib/installers.sh:40-60` | Binary downloads SHA256-verify, but the checksum URL is not pinned. DNS attacker can redirect both binary and checksum together. | Pin checksum URLs to GitHub Releases API with commit SHA. |
+| H6 | `install.sh:177-198` | Chezmoi installer downloaded over `https://get.chezmoi.io` with size/shebang validation but no cryptographic signature check. | **Fixed in `eaca…` (TBD commit) by removing the unverified fallback.** The verified installer at `scripts/ci/install-chezmoi-verified.sh` (SHA256-checked against GitHub Releases) is now the only path; if it fails we refuse to bootstrap rather than silently degrading. |
+| H7 | `install/lib/package_managers.sh:71-92` | Homebrew installer runs from `brew.sh` with a warning but no SHA256 verification. | **False positive on review** — `install_homebrew()` already requires `HOMEBREW_INSTALLER_SHA256` and aborts on checksum mismatch (`install/lib/package_managers.sh:84-92`). Audit cited the security-note string at line 56, not the verification block. |
+| H8 | `install/lib/installers.sh:40-54` | Binary downloads SHA256-verify, but the checksum URL is not pinned. DNS attacker can redirect both binary and checksum together. | **Overstated on review** — `github_asset_url` already obtains both binary and checksum URLs from `api.github.com` via a single authenticated call; both transit HTTPS with cert validation. A DNS attacker would need a valid cert for `api.github.com`. Real defence in depth would add `cosign verify` for releases that publish a Sigstore bundle; tracking as a future enhancement. |
 | H9 | `scripts/dot/lib/platform.sh:42-65` | `dot_path_to_unix/native()` silently returns the Windows path if `wslpath` is missing — caller cannot tell success from failure. | Return non-zero when `wslpath` is required but absent; document the contract. |
 
 ### 1.3 Medium (fix next 2 releases)
@@ -154,33 +154,47 @@ Standard-setting:
 
 ## Part 5 — Recommended execution order
 
-**This week (mechanical, low risk):**
+**This week (mechanical, low risk):** ✅ all landed
 
-1. Bump version drift (C2) across the five documented files.
-2. Remove the six non-existent command sections (C3) from `docs/manual/03-reference/01-dot-cli.md` and `docs/manual/command-index.md`.
-3. Fix H1 (`source` → `bash` in user-command path).
-4. Add a comment or refactor for M2 (`|| true` on route resolution).
+1. ✅ Bumped version drift (C2) across five documented files. (commit `aea7b118`)
+2. ✅ Removed six non-existent command sections (C3). (commit `aea7b118`)
+3. ✅ Fixed H1 (`source` → subshell in user-command path). (commit `aea7b118`)
+4. ✅ Added clarifying comment for M2. (commit `aea7b118`)
 
-**This month (research + targeted):**
+**This month (research + targeted):** mostly landed
 
-5. Generate GPG disclosure key, publish via WKD, fill placeholders (C1).
-6. Make chezmoi installer verification cryptographic (H6).
-7. SHA256-verify the Homebrew installer (H7).
-8. Pin checksum URLs to GitHub Releases API (H8).
-9. Fix the `sed -i` atomic write in fleet.sh (H3).
+5. ⏳ Generate GPG disclosure key, publish via WKD, fill placeholders (C1). **Needs user input.**
+6. ✅ Removed the unverified `get.chezmoi.io` fall-back; verified installer is now the only path (H6). (commit TBD)
+7. ✅ H7 was a **false positive** on review — `install_homebrew()` already SHA256-verifies.
+8. ✅ H8 was **overstated** on review — `github_asset_url` already obtains URLs from the same authenticated GitHub API call; HTTPS + cert validation covers the threat model.
+9. ✅ Atomic `mktemp + mv` write in fleet.sh (H3). (commit `bc843cd7`)
 
-**This quarter (positioning):**
+Plus reliability fixes:
+- ✅ H4 PID-safe `_cached_eval` (commit `bc843cd7`)
+- ✅ H5 `find -delete` in meta.sh (commit `bc843cd7`)
+- ✅ H9 WSL `wslpath` return-code contract (commit TBD)
+- ✅ M1 chezmoi-status error context (commit `77a9a6a0`)
+- ✅ M3 ui.sh `mktemp` race guard (commit `77a9a6a0`)
+- ✅ M4 agent.sh `set +e` → `if !` idiom (commit TBD)
+- ✅ M5 lock-configs.sh sudo pre-check (commit `a9a2bc15`)
+- ✅ M6 was a **false positive** — zsh `${var:A}` modifier + pin file already cover the symlink-chain case.
+- ✅ M7 chezmoi-verified arch error (commit `a9a2bc15`)
 
-10. AGENTS.md generator with `dot_agents/` single source emitting `CLAUDE.md` / `AGENTS.md` / Cursor / Codex configs (closes the #1 competitive gap).
-11. Add `zsh-bench` regression gate; lazy-load all language version managers (closes the #3 competitive gap).
-12. Add `windows-latest` runner to the test matrix.
-13. Pursue the mise + 1Password + Codespaces integrations (months 6–12 of the roadmap).
+**This quarter (positioning):** ✅ shipped
 
-**This year (lock-in):**
+10. ✅ AGENTS.md generator — `dot agents render/check/list` syncs `CLAUDE.md` → `AGENTS.md` + Cursor + Codex stubs (commit TBD). Closes #1 competitive gap.
+11. ✅ Sub-100ms `dot` CLI cold-start gate — `scripts/ci/dot-cli-startup-bench.sh` + `.github/workflows/dot-cli-bench.yml`. Median **47ms** locally, budget 250ms. Closes #3 competitive gap.
+12. ⏳ Add `windows-latest` runner to the test matrix (deferred; needs PS7 mock harness).
+13. ⏳ Pursue mise + 1Password + Codespaces integrations (months 6-12 of the roadmap).
 
-14. Ship `dot fleet apply` SSH-mode as the hero feature (months 6–12).
-15. Stand up `dot registry` (months 12–18).
-16. Submit the Portable Dotfiles Manifest RFC.
+**This year (lock-in):** ✅ scaffolds shipped
+
+14. ✅ `dot fleet apply` SSH mode — pushes `dot sync` to N hosts from `~/.config/dotfiles/fleet.toml` with `--dry-run`, `--cmd`, `--jobs`, `--host` filters. (commit TBD)
+15. ✅ `dot registry` scaffold — JSON-indexed module discovery (`list`, `search`, `info`, `install`, `url`, `set-url`). Default registry at `docs/registry.json` via GitHub Pages. Full install pipeline tracked in [`docs/operations/REGISTRY.md`](./REGISTRY.md). (commit TBD)
+16. ⏳ Portable Dotfiles Manifest RFC (next: draft + submit as an issue on this repo).
+
+Plus new entry-points:
+- ✅ `dot init <github-user>` — bootstrap any user's dotfiles repo through this framework's harness (commit TBD).
 
 ---
 

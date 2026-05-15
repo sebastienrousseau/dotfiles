@@ -1,0 +1,203 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# shellcheck shell=bash
+#
+# scripts/dot/commands/agents.sh
+#
+# `dot agents` — multi-harness AI agent configuration manager.
+#
+# Closes the #1 competitive gap identified in HARD_AUDIT_2026:
+# every other dotfiles framework either targets one AI tool or
+# requires hand-maintenance of N parallel config files. This command
+# keeps CLAUDE.md (canonical) and AGENTS.md (cross-harness standard)
+# in sync, plus stubs the Cursor/Codex tool-specific formats.
+#
+# Subcommands:
+#   render   Regenerate AGENTS.md and tool-specific stubs from CLAUDE.md.
+#   check    Verify AGENTS.md tracks CLAUDE.md (exit 0 in sync, 1 drifted).
+#   list     Show which harnesses are recognised + their target paths.
+#
+# Reads:  CLAUDE.md (repo root) — the canonical agent context.
+# Writes: AGENTS.md, .cursor/rules/dotfiles.mdc, .codex/config.toml
+#         (only when invoked with `render`).
+
+set -euo pipefail
+
+# shellcheck disable=SC1091
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/ui.sh"
+source "$SCRIPT_DIR/../lib/utils.sh"
+
+_agents_repo_root() {
+  # Resolve the chezmoi source dir (where CLAUDE.md/AGENTS.md live).
+  # Fall back to git toplevel for ad-hoc invocations outside chezmoi.
+  if command -v chezmoi >/dev/null 2>&1; then
+    chezmoi source-path 2>/dev/null || true
+  fi | grep . || git -C "$PWD" rev-parse --show-toplevel 2>/dev/null
+}
+
+_agents_canonical() {
+  printf "%s/CLAUDE.md" "$(_agents_repo_root)"
+}
+
+_agents_targets() {
+  # printed one-per-line: <harness>\t<path-relative-to-repo-root>
+  local root
+  root="$(_agents_repo_root)"
+  cat <<EOF
+agents-md	$root/AGENTS.md
+cursor	$root/.cursor/rules/dotfiles.mdc
+codex	$root/.codex/config.toml
+EOF
+}
+
+# Strip the leading HTML comment header (everything up to the first blank
+# line after the `-->`), the H1 title line (which differs by design
+# between CLAUDE.md / AGENTS.md), and the trailing cross-reference
+# block. Leaves the comparable content body.
+_agents_body() {
+  local file="$1"
+  awk '
+    BEGIN { in_header = 0; saw_close = 0; emit = 0 }
+    /^<!--/ && NR <= 5 { in_header = 1; next }
+    in_header && /-->/ { in_header = 0; saw_close = 1; next }
+    in_header { next }
+    saw_close && /^$/ && !emit { emit = 1; next }
+    saw_close && emit { print }
+    !saw_close { emit = 1; print }
+  ' "$file" |
+    # Drop the H1 (`# CLAUDE.md ...` or `# AGENTS.md ...`) and the
+    # trailing "Need richer context?" footer if present.
+    awk '
+      /^# (CLAUDE|AGENTS)\.md/ { next }
+      /^---$/ { trailer = 1; next }
+      trailer && /^\*\*Need richer context\?\*\*/ { next }
+      trailer && NF == 0 { next }
+      { trailer = 0; print }
+    '
+}
+
+cmd_agents() {
+  local subcommand="${1:-list}"
+  shift || true
+
+  case "$subcommand" in
+    list)
+      ui_header "Agent harness targets"
+      _agents_targets | while IFS=$'\t' read -r harness path; do
+        if [[ -f "$path" ]]; then
+          ui_ok "$harness" "$path"
+        else
+          ui_info "$harness" "$path (not yet rendered)"
+        fi
+      done
+      ;;
+    check)
+      local claude_md agents_md
+      claude_md="$(_agents_canonical)"
+      agents_md="$(_agents_repo_root)/AGENTS.md"
+      if [[ ! -f "$claude_md" ]]; then
+        ui_err "CLAUDE.md" "not found at $claude_md"
+        return 2
+      fi
+      if [[ ! -f "$agents_md" ]]; then
+        ui_warn "AGENTS.md" "missing — run 'dot agents render'"
+        return 1
+      fi
+      # Diff the bodies (header comments differ by design).
+      # `--ignore-blank-lines` so the trailing newline from the footer
+      # block doesn't false-positive as drift.
+      if diff -q --ignore-blank-lines <(_agents_body "$claude_md") <(_agents_body "$agents_md") >/dev/null 2>&1; then
+        ui_ok "AGENTS.md" "in sync with CLAUDE.md"
+        return 0
+      fi
+      ui_warn "AGENTS.md" "drifted from CLAUDE.md — run 'dot agents render'"
+      return 1
+      ;;
+    render)
+      local claude_md root
+      claude_md="$(_agents_canonical)"
+      root="$(_agents_repo_root)"
+      [[ -f "$claude_md" ]] || { ui_err "CLAUDE.md" "not found at $claude_md"; return 2; }
+
+      # 1. AGENTS.md — body of CLAUDE.md + AGENTS.md cross-reference header.
+      local agents_md="$root/AGENTS.md"
+      {
+        cat <<'HEADER'
+<!--
+  AGENTS.md — Cross-harness AI agent guidelines for this repository.
+
+  This file follows the AGENTS.md standard (originated by OpenAI in
+  August 2025, stewarded since December 2025 by the Linux Foundation
+  Agentic AI Foundation). Native readers: Codex CLI, GitHub Copilot,
+  Cursor, Windsurf, Amp, Devin, and a growing list of other agents.
+
+  Canonical source: CLAUDE.md (Claude Code uses CLAUDE.md natively).
+  This file is kept in sync via `dot agents render`. Edit CLAUDE.md
+  first; do not hand-edit AGENTS.md.
+-->
+
+HEADER
+        # Replace the title line so the rendered file declares its
+        # purpose, but pass everything else through unchanged.
+        _agents_body "$claude_md" | sed '1s/^# CLAUDE\.md.*/# AGENTS.md — AI Assistant Guidelines/'
+        cat <<'FOOTER'
+
+---
+
+**Need richer context?** This file is the cross-harness summary. Claude Code reads the full canonical version from [`CLAUDE.md`](./CLAUDE.md). Both files are kept in sync via `dot agents render`.
+FOOTER
+      } > "$agents_md"
+      ui_ok "AGENTS.md" "rendered → $agents_md"
+
+      # 2. Cursor rules — MDC format, points at CLAUDE.md/AGENTS.md.
+      local cursor_dir="$root/.cursor/rules"
+      mkdir -p "$cursor_dir"
+      cat > "$cursor_dir/dotfiles.mdc" <<'MDC'
+---
+description: Repo conventions for the dotfiles project (sourced from CLAUDE.md/AGENTS.md)
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+See `AGENTS.md` and `CLAUDE.md` in the repository root for the full
+project conventions, repository layout, testing, and CI policy. This
+Cursor rule file exists so Cursor's rule engine picks up the same
+context; do not duplicate content here — keep CLAUDE.md canonical.
+MDC
+      ui_ok "Cursor"    "rendered → $cursor_dir/dotfiles.mdc"
+
+      # 3. Codex CLI config stub — declares the AGENTS.md path.
+      local codex_dir="$root/.codex"
+      mkdir -p "$codex_dir"
+      cat > "$codex_dir/config.toml" <<'TOML'
+# Codex CLI config — points at the AGENTS.md cross-harness context.
+# Codex reads AGENTS.md natively; this file is a project-scoped pin so
+# the CLI prefers the in-repo guidance over any global default.
+project_context = "AGENTS.md"
+TOML
+      ui_ok "Codex"     "rendered → $codex_dir/config.toml"
+
+      ui_info "Hint"    "commit AGENTS.md alongside CLAUDE.md changes (or add to your pre-commit hook)"
+      ;;
+    --help | -h | help)
+      cat <<EOF
+Usage: dot agents <subcommand>
+
+Subcommands:
+  list     Show which agent harnesses are recognised and their target paths
+  check    Verify AGENTS.md tracks CLAUDE.md (exit 0 in sync, 1 drifted)
+  render   Regenerate AGENTS.md + Cursor/Codex stubs from CLAUDE.md
+
+CLAUDE.md is the canonical source. AGENTS.md follows the cross-harness
+standard read by Codex, Copilot, Cursor, Windsurf, Amp, and Devin.
+EOF
+      ;;
+    *)
+      ui_err "Unknown subcommand" "$subcommand"
+      echo "Run 'dot agents --help' for usage." >&2
+      return 1
+      ;;
+  esac
+}

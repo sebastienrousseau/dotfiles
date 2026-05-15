@@ -1,0 +1,4 @@
+# Codex CLI config — points at the AGENTS.md cross-harness context.
+# Codex reads AGENTS.md natively; this file is a project-scoped pin so
+# the CLI prefers the in-repo guidance over any global default.
+project_context = "AGENTS.md"

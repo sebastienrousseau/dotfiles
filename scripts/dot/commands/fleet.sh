@@ -352,6 +352,154 @@ cmd_fleet_enforce() {
   esac
 }
 
+_fleet_hosts_file() {
+  printf '%s\n' "${DOTFILES_FLEET_HOSTS:-$HOME/.config/dotfiles/fleet.toml}"
+}
+
+# Parse the hosts file. Format:
+#   [hosts.laptop]
+#   ssh = "user@laptop.local"
+#   profile = "workstation"
+#
+# Echoes one record per line: "<name>\t<ssh-target>\t<profile>".
+_fleet_hosts_iter() {
+  local f
+  f="$(_fleet_hosts_file)"
+  [[ -f "$f" ]] || return 0
+  awk '
+    BEGIN { name = ""; ssh = ""; profile = "" }
+    /^\[hosts\./ {
+      if (name != "") { printf "%s\t%s\t%s\n", name, ssh, profile }
+      gsub(/[\[\]]/, "", $0); sub(/^hosts\./, "", $0); name = $0
+      ssh = ""; profile = ""
+      next
+    }
+    /^ssh[[:space:]]*=/    { sub(/^ssh[[:space:]]*=[[:space:]]*/, ""); gsub(/"/, ""); ssh = $0; next }
+    /^profile[[:space:]]*=/ { sub(/^profile[[:space:]]*=[[:space:]]*/, ""); gsub(/"/, ""); profile = $0; next }
+    END {
+      if (name != "") { printf "%s\t%s\t%s\n", name, ssh, profile }
+    }
+  ' "$f"
+}
+
+# SSH-based "dot fleet apply" — push the local dotfiles state out to
+# each registered host. The §3 hero-feature: nobody else owns the
+# "Ansible for personal devices" niche.
+cmd_fleet_apply() {
+  local dry_run=0 only_host="" cmd="" jobs=4
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --dry-run | -n) dry_run=1; shift ;;
+      --host)         only_host="$2"; shift 2 ;;
+      --cmd)          cmd="$2"; shift 2 ;;
+      --jobs | -j)    jobs="$2"; shift 2 ;;
+      --help | -h)
+        cat <<EOF
+Usage: dot fleet apply [--host <name>] [--cmd <shell>] [--dry-run] [--jobs <n>]
+
+Push dotfiles state to every host registered in:
+  ${DOTFILES_FLEET_HOSTS:-\$HOME/.config/dotfiles/fleet.toml}
+
+Format of fleet.toml:
+  [hosts.laptop]
+  ssh     = "user@laptop.local"
+  profile = "workstation"
+
+Behavior:
+  By default each host runs:  dot sync && dot doctor --quiet
+  Override with --cmd "<shell>" to run an arbitrary command on every
+  host (e.g. --cmd "uptime").
+
+Flags:
+  --host <name>    Apply to a single host only.
+  --cmd <shell>    Run a custom command instead of 'dot sync'.
+  --dry-run, -n    Print resolved hosts + planned command; don't SSH.
+  --jobs <n>       Parallelism (default 4).
+EOF
+        return 0
+        ;;
+      *) ui_err "Unknown arg" "$1"; return 1 ;;
+    esac
+  done
+
+  local hosts_file
+  hosts_file="$(_fleet_hosts_file)"
+  if [[ ! -f "$hosts_file" ]]; then
+    ui_err "Fleet" "no hosts file at $hosts_file"
+    ui_info "Hint" "create it with stanzas like '[hosts.laptop]\\nssh = \"user@laptop.local\"'"
+    return 1
+  fi
+
+  local entries
+  entries="$(_fleet_hosts_iter)"
+  if [[ -z "$entries" ]]; then
+    ui_err "Fleet" "hosts file is empty: $hosts_file"
+    return 1
+  fi
+  if [[ -n "$only_host" ]]; then
+    entries="$(printf '%s\n' "$entries" | awk -F'\t' -v h="$only_host" '$1 == h')"
+    [[ -n "$entries" ]] || { ui_err "Fleet" "host not found: $only_host"; return 1; }
+  fi
+
+  local default_cmd='dot sync && dot doctor --quiet'
+  local effective_cmd="${cmd:-$default_cmd}"
+
+  ui_header "Fleet apply"
+  ui_info "Hosts file" "$hosts_file"
+  ui_info "Command"    "$effective_cmd"
+  ui_info "Parallel"   "$jobs"
+
+  if [[ "$dry_run" -eq 1 ]]; then
+    printf '%s\n' "$entries" | while IFS=$'\t' read -r name ssh profile; do
+      ui_info "$name" "$ssh  profile=$profile  cmd=$effective_cmd"
+    done
+    ui_ok "Dry-run" "no SSH connections opened"
+    return 0
+  fi
+
+  if ! command -v ssh >/dev/null 2>&1; then
+    ui_err "ssh" "not installed"
+    return 127
+  fi
+
+  local total=0 ok=0 fail=0
+  local tmpdir
+  tmpdir="$(mktemp -d)"
+  trap 'rm -rf "$tmpdir"' RETURN
+
+  # xargs-based fan-out limited to --jobs at once. Each child runs ssh
+  # against its host and writes a status line to $tmpdir/$name.status.
+  while IFS=$'\t' read -r name ssh profile; do
+    [[ -n "$name" && -n "$ssh" ]] || continue
+    total=$((total + 1))
+    printf '%s\t%s\t%s\n' "$name" "$ssh" "$effective_cmd"
+  done <<< "$entries" | xargs -P "$jobs" -n 1 -d '\n' -I {} bash -c '
+    IFS=$'"'"'\t'"'"' read -r name ssh cmd <<< "{}"
+    if ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "$ssh" "$cmd" </dev/null >"'"$tmpdir"'/$name.out" 2>"'"$tmpdir"'/$name.err"; then
+      printf "ok\n" > "'"$tmpdir"'/$name.status"
+    else
+      printf "fail %d\n" "$?" > "'"$tmpdir"'/$name.status"
+    fi
+  '
+
+  printf '%s\n' "$entries" | while IFS=$'\t' read -r name ssh profile; do
+    [[ -n "$name" ]] || continue
+    if [[ -s "$tmpdir/$name.status" ]] && head -1 "$tmpdir/$name.status" | grep -q '^ok'; then
+      ui_ok "$name" "$ssh"
+      ok=$((ok + 1))
+    else
+      local err_summary=""
+      [[ -s "$tmpdir/$name.err" ]] && err_summary=" — $(head -1 "$tmpdir/$name.err")"
+      ui_err "$name" "$ssh${err_summary}"
+      fail=$((fail + 1))
+    fi
+    _fleet_emit_event "apply" "$([[ -s "$tmpdir/$name.status" ]] && head -1 "$tmpdir/$name.status" || echo 'unknown')" "host=$name" "cmd=$effective_cmd"
+  done
+
+  ui_info "Summary" "$ok ok / $fail failed / $total total"
+  [[ "$fail" -eq 0 ]]
+}
+
 cmd_fleet() {
   local subcommand="${1:-status}"
   if [[ "${1:-}" == --* ]] || [[ -z "${1:-}" ]]; then
@@ -376,6 +524,9 @@ cmd_fleet() {
     enforce)
       cmd_fleet_enforce "$@"
       ;;
+    apply | push)
+      cmd_fleet_apply "$@"
+      ;;
     *)
       ui_header "Fleet Commands"
       echo ""
@@ -386,6 +537,7 @@ cmd_fleet() {
       ui_ok "events" "Show recent fleet events"
       ui_ok "namespace" "Show or set the active namespace"
       ui_ok "enforce" "Show or set RBAC enforcement mode (advisory|strict)"
+      ui_ok "apply" "SSH out to every host in fleet.toml and run 'dot sync'"
       ;;
   esac
 }

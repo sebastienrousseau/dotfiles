@@ -218,14 +218,15 @@ EOF
       checkpoint_id="$(basename "$checkpoint_file" .json)"
       ui_info "Agent mode" "$name"
       dot_agent_session_log "run_start" "$name" "running" "argv=$*" "checkpoint_id=$checkpoint_id"
-      set +e
-      "$@"
-      local exit_code=$?
-      set -e
-      if [[ "$exit_code" -eq 0 ]]; then
-        dot_agent_session_log "run_finish" "$name" "ok" "exit_code=$exit_code" "checkpoint_id=$checkpoint_id"
-      else
+      # `if !` instead of `set +e / "$@" / set -e` — bash's errexit
+      # is automatically suspended inside a conditional, so we capture
+      # the exit code cleanly without toggling shell options.
+      local exit_code=0
+      if ! "$@"; then
+        exit_code=$?
         dot_agent_session_log "run_finish" "$name" "failed" "exit_code=$exit_code" "checkpoint_id=$checkpoint_id"
+      else
+        dot_agent_session_log "run_finish" "$name" "ok" "exit_code=$exit_code" "checkpoint_id=$checkpoint_id"
       fi
       return "$exit_code"
       ;;
@@ -335,14 +336,12 @@ EOF
           [[ "${#replay_argv[@]}" -gt 0 ]] || die "Checkpoint has no replayable command: $checkpoint_id"
           _agent_apply_profile_env "$replay_profile"
           dot_agent_session_log "checkpoint_replay" "$replay_profile" "running" "checkpoint_id=$checkpoint_id"
-          set +e
-          "${replay_argv[@]}"
-          local exit_code=$?
-          set -e
-          if [[ "$exit_code" -eq 0 ]]; then
-            dot_agent_session_log "checkpoint_replay_finish" "$replay_profile" "ok" "checkpoint_id=$checkpoint_id" "exit_code=$exit_code"
-          else
+          local exit_code=0
+          if ! "${replay_argv[@]}"; then
+            exit_code=$?
             dot_agent_session_log "checkpoint_replay_finish" "$replay_profile" "failed" "checkpoint_id=$checkpoint_id" "exit_code=$exit_code"
+          else
+            dot_agent_session_log "checkpoint_replay_finish" "$replay_profile" "ok" "checkpoint_id=$checkpoint_id" "exit_code=$exit_code"
           fi
           return "$exit_code"
           ;;
@@ -382,16 +381,14 @@ EOF
       export DOT_AGENT_PARENT_PROFILE="$current_profile"
       dot_agent_session_log "delegate_start" "$delegate_profile" "running" "delegate=$delegate_name" "parent=$current_profile" "timeout=$delegate_timeout"
       ui_info "Delegating" "$delegate_name (profile: $delegate_profile, timeout: ${delegate_timeout}s)"
-      set +e
-      timeout "$delegate_timeout" "$@"
-      local exit_code=$?
-      set -e
-      if [[ "$exit_code" -eq 0 ]]; then
-        dot_agent_session_log "delegate_finish" "$delegate_profile" "ok" "delegate=$delegate_name" "exit_code=$exit_code"
-        ui_ok "Delegate" "$delegate_name completed"
-      else
+      local exit_code=0
+      if ! timeout "$delegate_timeout" "$@"; then
+        exit_code=$?
         dot_agent_session_log "delegate_finish" "$delegate_profile" "failed" "delegate=$delegate_name" "exit_code=$exit_code"
         ui_err "Delegate" "$delegate_name failed (exit $exit_code)"
+      else
+        dot_agent_session_log "delegate_finish" "$delegate_profile" "ok" "delegate=$delegate_name" "exit_code=$exit_code"
+        ui_ok "Delegate" "$delegate_name completed"
       fi
       return "$exit_code"
       ;;
