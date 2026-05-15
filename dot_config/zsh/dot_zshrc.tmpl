@@ -217,11 +217,15 @@ _cached_eval_impl() {
     return 1
   fi
 
-  print -r -- "$init_output" > "${cache}.tmp.$$"
-  mv "${cache}.tmp.$$" "$cache"
+  # `mktemp` instead of `${cache}.tmp.$$` — under PID recycling (very
+  # rare but possible) two concurrent shells with the same $$ could
+  # otherwise race on the same temp file. mktemp gives a unique name.
+  local _tmp _tmp_pin
+  _tmp="$(mktemp "${cache}.XXXXXX")" || return 1
+  print -r -- "$init_output" > "$_tmp" && mv "$_tmp" "$cache" || { rm -f "$_tmp"; return 1; }
   if [[ -n "$real_bin" ]]; then
-    print -r -- "$real_bin" > "${pin}.tmp.$$"
-    mv "${pin}.tmp.$$" "$pin"
+    _tmp_pin="$(mktemp "${pin}.XXXXXX")" || return 1
+    print -r -- "$real_bin" > "$_tmp_pin" && mv "$_tmp_pin" "$pin" || { rm -f "$_tmp_pin"; return 1; }
   fi
   source "$cache"
   { zcompile "$cache" } &!

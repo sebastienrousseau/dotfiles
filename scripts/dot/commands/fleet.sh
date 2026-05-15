@@ -291,11 +291,14 @@ cmd_fleet_namespace() {
       local data_file
       data_file="$(resolve_source_dir)/.chezmoidata.toml"
       if grep -q "^namespace = " "$data_file" 2>/dev/null; then
-        if sed --version >/dev/null 2>&1; then
-          sed -i "s/^namespace = \".*\"/namespace = \"$new_ns\"/" "$data_file"
-        else
-          sed -i '' "s/^namespace = \".*\"/namespace = \"$new_ns\"/" "$data_file"
-        fi
+        # Atomic write: render into a tempfile + mv so concurrent
+        # `dot fleet namespace set` callers can't corrupt the TOML.
+        # Avoids `sed -i` portability dance (GNU `-i` vs BSD `-i ''`).
+        local _tmp
+        _tmp="$(mktemp "${data_file}.XXXXXX")" || die "Cannot create tempfile"
+        sed "s/^namespace = \".*\"/namespace = \"$new_ns\"/" "$data_file" >"$_tmp" \
+          && mv "$_tmp" "$data_file" \
+          || { rm -f "$_tmp"; die "Failed to update namespace"; }
       fi
       ui_ok "Namespace" "Set to '$new_ns'. Run 'dot sync' to apply."
       _fleet_emit_event "namespace_set" "ok" "namespace=$new_ns"

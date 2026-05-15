@@ -61,10 +61,13 @@ cmd_prewarm() {
   # Clear caches first
   ui_info "Cache" "Clearing shell initialization caches"
   local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}"
-  rm -rf "$cache_dir/zsh"/*-init.zsh "$cache_dir/zsh"/*.zwc 2>/dev/null || true
-  rm -rf "$cache_dir/bash"/*-init.bash 2>/dev/null || true
-  rm -rf "$cache_dir/fish"/*-init.fish 2>/dev/null || true
-  rm -rf "$cache_dir/nushell"/*.nu 2>/dev/null || true
+  # `find ... -delete` instead of `rm -rf $glob` so an unmatched literal
+  # pattern can't accidentally remove a real same-named directory, and
+  # so we don't pass `-r` on what should always be files.
+  [[ -d "$cache_dir/zsh" ]] && find "$cache_dir/zsh" -maxdepth 1 -type f \( -name '*-init.zsh' -o -name '*.zwc' \) -delete 2>/dev/null
+  [[ -d "$cache_dir/bash" ]] && find "$cache_dir/bash" -maxdepth 1 -type f -name '*-init.bash' -delete 2>/dev/null
+  [[ -d "$cache_dir/fish" ]] && find "$cache_dir/fish" -maxdepth 1 -type f -name '*-init.fish' -delete 2>/dev/null
+  [[ -d "$cache_dir/nushell" ]] && find "$cache_dir/nushell" -maxdepth 1 -type f -name '*.nu' -delete 2>/dev/null
   ui_info "Cache" "Cleared. Regenerating..."
   src_dir="$(resolve_source_dir)"
   if [ -n "$src_dir" ] && [ -f "$src_dir/scripts/ops/prewarm.sh" ]; then
