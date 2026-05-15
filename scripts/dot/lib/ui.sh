@@ -359,9 +359,13 @@ ui_run_cmd() {
   done
   wait "$pid" 2>/dev/null
 
-  local rc
-  rc=$(cat "$rc_file" 2>/dev/null || echo 1)
+  # Guard against the rc_file being empty (race between subshell exit
+  # and parent read): an unset rc would default to non-numeric "" and
+  # fail the `[[ == "0" ]]` check confusingly. Treat empty as failure.
+  local rc=""
+  [[ -s "$rc_file" ]] && rc="$(<"$rc_file")"
   rm -f "$rc_file"
+  rc="${rc:-1}"
 
   ui_clear_line
   ui_show_cursor
