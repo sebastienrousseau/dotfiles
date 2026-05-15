@@ -372,7 +372,13 @@ cov_exercise_script() {
     cmatrix | pipes | stopwatch | matrix | rainbow | banner | \
       myip | pre-push | rebuild-themes | \
       lint | reliability-audit | record | \
-      executable_myip | executable_tmux-sessionizer)
+      executable_myip | executable_tmux-sessionizer | \
+      executable_update | update)
+      # `executable_update` runs brew/apt/pacman update + upgrade.
+      # Even with PATH shims, --help and invalid-flag modes can spawn
+      # subprocesses that the shims don't intercept, blowing the 60s
+      # timeout. Skip the script-mode exercise; functions-mode is
+      # already skipped via the separate skip-list around line 624.
       return 0
       ;;
   esac
