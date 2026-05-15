@@ -26,7 +26,10 @@ case "$ARCH" in
   x86_64 | amd64) ARCH="amd64" ;;
   arm64 | aarch64) ARCH="arm64" ;;
   *)
-    echo "Unsupported architecture: $ARCH" >&2
+    # chezmoi ships amd64 + arm64 builds only. Other architectures
+    # (ppc64le, s390x, riscv64, armv7) would need a source build.
+    echo "Unsupported architecture: $ARCH (only x86_64/amd64 and arm64/aarch64 are supported)" >&2
+    echo "See https://github.com/twpayne/chezmoi/releases for the full asset list." >&2
     exit 1
     ;;
 esac
