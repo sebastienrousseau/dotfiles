@@ -34,9 +34,17 @@ _agents_repo_root() {
   # user running `dot agents render` from inside some other git
   # checkout doesn't accidentally write CLAUDE.md/AGENTS.md/.cursor/
   # /.codex/ into that repo. Round-2 audit C-finding.
+  #
+  # On a CI runner `chezmoi source-path` may return a default path
+  # like `$HOME/.local/share/chezmoi` that doesn't exist on disk —
+  # we treat that as "not a match" and fall through to git, rather
+  # than accepting the wrong candidate.
   local candidate=""
   if command -v chezmoi >/dev/null 2>&1; then
     candidate="$(chezmoi source-path 2>/dev/null || true)"
+    if [[ -n "$candidate" && ! -f "$candidate/.chezmoidata.toml" ]]; then
+      candidate=""
+    fi
   fi
   if [[ -z "$candidate" ]]; then
     candidate="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || true)"
