@@ -33,4 +33,20 @@ fi
 cov_exercise_script "$SCRIPT_FILE"
 cov_exercise_functions_file "$SCRIPT_FILE"
 
+# Extra: drive the read-only modes (--verify, --dry-run) so the
+# script's discovery + comparison branches get covered. Sandbox-safe:
+# neither mode writes outside $HOME (already isolated).
+for mode in --verify --dry-run; do
+  test_start "version_sync_${mode//-/_}"
+  rc=0
+  bash "$SCRIPT_FILE" "$mode" </dev/null >/dev/null 2>&1 || rc=$?
+  if [[ "$rc" -lt 125 ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: unexpected rc=$rc"
+  fi
+done
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

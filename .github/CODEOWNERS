@@ -47,5 +47,6 @@
 
 # Security-sensitive files
 /.github/SECURITY.md @sebastienrousseau
+/.github/rulesets/ @sebastienrousseau
 /dot_config/gnupg/ @sebastienrousseau
 /dot_ssh/ @sebastienrousseau

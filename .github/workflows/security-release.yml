@@ -21,7 +21,8 @@ jobs:
     name: Release / SBOM
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # upload SBOM as release asset
+      contents: write   # upload SBOM + Cosign sig/cert as release assets
+      id-token: write   # OIDC token for Cosign keyless signing (#876)
     outputs:
       hash: ${{ steps.hash.outputs.hash }}
     steps:
@@ -47,11 +48,61 @@ jobs:
           sha256sum dotfiles-sbom.spdx.json > sbom.sha256
           echo "hash=$(base64 -w 0 sbom.sha256)" >> $GITHUB_OUTPUT
 
-      - name: Upload SBOM
+      # Cosign keyless signing of the SBOM (closes #876). Uses the
+      # workflow's OIDC token to mint a short-lived certificate from
+      # Fulcio; signature + certificate + Rekor entry are published
+      # alongside the SBOM as release assets so consumers can verify
+      # provenance without any static-key key-management overhead.
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159 # v3.9.2
+        with:
+          cosign-release: v2.4.1
+
+      - name: Sign SBOM with Cosign (keyless via Fulcio + Rekor)
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          set -euo pipefail
+          cosign sign-blob --yes \
+            --output-signature dotfiles-sbom.spdx.json.sig \
+            --output-certificate dotfiles-sbom.spdx.json.pem \
+            dotfiles-sbom.spdx.json
+
+          # Print verification recipe to the step summary so
+          # downstream consumers don't have to read this workflow.
+          {
+            echo "### Cosign verification recipe"
+            echo ""
+            echo '```sh'
+            echo "cosign verify-blob \\"
+            echo "  --certificate dotfiles-sbom.spdx.json.pem \\"
+            echo "  --signature dotfiles-sbom.spdx.json.sig \\"
+            echo "  --certificate-identity-regexp '^https://github.com/${{ github.repository }}/' \\"
+            echo "  --certificate-oidc-issuer https://token.actions.githubusercontent.com \\"
+            echo "  dotfiles-sbom.spdx.json"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload SBOM + Cosign artefacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dotfiles-sbom
-          path: dotfiles-sbom.spdx.json
+          path: |
+            dotfiles-sbom.spdx.json
+            dotfiles-sbom.spdx.json.sig
+            dotfiles-sbom.spdx.json.pem
+
+      - name: Attach Cosign artefacts to the release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          gh release upload "$RELEASE_TAG" \
+            dotfiles-sbom.spdx.json.sig \
+            dotfiles-sbom.spdx.json.pem \
+            --clobber
 
   provenance:
     name: Release / SLSA Provenance

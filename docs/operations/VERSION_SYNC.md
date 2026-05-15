@@ -93,9 +93,9 @@ The system recognizes and updates these patterns:
 #### Documentation Files
 
 ```markdown
-**Version**: v0.2.501
-**Dotfiles Version**: v0.2.501
-Version: v0.2.501
+**Version**: v0.2.502
+**Dotfiles Version**: v0.2.502
+Version: v0.2.502
 version 0.2.485
 ```
 
@@ -388,6 +388,6 @@ gh workflow run sync-versions.yml --ref feature-branch
 ---
 
 **Last Updated**: 2026-02-15
-**Version**: v0.2.501
+**Version**: v0.2.502
 **Maintainer**: Principal Automation Engineer
 **Status**: Production Ready ✅

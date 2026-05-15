@@ -64,10 +64,14 @@ jobs:
           #            duplicate SF: blocks.
           #   Slice 5c: 36.10% (fn-file exercise on every auto-test).
           #   Slice 5d: 36.73% (+7 auto-tests for scripts the existing
-          #            test-scan skipped). floor=33 (3-point cushion
-          #            absorbs platform jitter across Linux + macOS).
+          #            test-scan skipped). floor=33.
+          #   Slice 6: 38.48% — errexit-resilient fn-exercise:
+          #            `source $1 || true` + restored `set +eu` + `exit`
+          #            override during source. Unlocked the dot
+          #            command files (agent.sh 2→75 traced per probe,
+          #            ai.sh 15→87). floor=35 (3-pt cushion).
           # Bump in lockstep with the slice that lands the bump.
-          MIN_COVERAGE_PCT: '33'
+          MIN_COVERAGE_PCT: '35'
         run: bash scripts/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact

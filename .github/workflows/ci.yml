@@ -63,6 +63,7 @@ jobs:
       lua: ${{ steps.filter.outputs.lua }}
       nix: ${{ steps.filter.outputs.nix }}
       config: ${{ steps.filter.outputs.config }}
+      workflows: ${{ steps.filter.outputs.workflows }}
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
@@ -88,6 +89,9 @@ jobs:
               - '**.nix'
             config:
               - 'dot_*/**'
+            workflows:
+              - '.github/workflows/**'
+              - 'scripts/ci/lint-reusable-pins.sh'
               - '.chezmoitemplates/**'
               - '**.tmpl'
               - '**.toml'
@@ -100,7 +104,7 @@ jobs:
     name: Lint / Shell
     needs: changes
     if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    uses: ./.github/workflows/reusable-shell-lint.yml
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
     with:
       include_tests: false
       shellcheck_severity: error
@@ -113,7 +117,7 @@ jobs:
     name: Lint / Lua
     needs: changes
     if: needs.changes.outputs.lua == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    uses: ./.github/workflows/reusable-lua-lint.yml
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
     with:
       target: dot_config/nvim
       strict: false
@@ -169,7 +173,26 @@ jobs:
       || needs.changes.outputs.nix == 'true'
       || github.event_name == 'schedule'
       || github.event_name == 'workflow_dispatch'
-    uses: ./.github/workflows/reusable-copyright-lint.yml
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
+
+  lint-reusable-pins:
+    name: Lint / Reusable Workflow Pins
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: changes
+    # Touches every workflow file, so any workflow change re-runs the lint.
+    if: needs.changes.outputs.workflows == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Verify every reusable-workflow call site is SHA-pinned
+        # Closes the lint-rule half of #855. Policy: docs/security/CI_PINNING.md
+        run: bash scripts/ci/lint-reusable-pins.sh
 
   lint-chezmoidata:
     name: Lint / Chezmoidata Schema
@@ -208,7 +231,7 @@ jobs:
   # ============================================================================
   security-secrets:
     name: Security / Secrets Scan
-    uses: ./.github/workflows/reusable-secrets-scan.yml
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
     with:
       run_guard: true
       run_additional_patterns: true
@@ -217,7 +240,7 @@ jobs:
 
   security-dependencies:
     name: Security / Dependency Audit
-    uses: ./.github/workflows/reusable-security-baseline.yml
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
     with:
       run_dependency_audit: true
       run_supply_chain_checks: true
@@ -393,7 +416,7 @@ jobs:
   test-unit:
     name: Test / Unit
     needs: changes
-    uses: ./.github/workflows/reusable-test-suite.yml
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
     with:
       min_coverage: "95"
       run_integration: true
@@ -444,7 +467,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: ./.github/workflows/reusable-nix-lint.yml
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
     with:
       flake_dir: nix
       run_fmt_check: false

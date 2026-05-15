@@ -5,7 +5,7 @@
   align="right"
 />
 
-# Dotfiles Path Configuration (v0.2.501)
+# Dotfiles Path Configuration (v0.2.502)
 
 Modular PATH configuration managed by Chezmoi
 
