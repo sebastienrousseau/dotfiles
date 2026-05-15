@@ -29,6 +29,10 @@ _dot() {
     'edit:Open chezmoi source in \$EDITOR'
     'commit:AI-powered conventional commit'
     'patterns:Manage AI steering patterns'
+    'init:Bootstrap a foreign dotfiles repo through chezmoi + dot'
+    'agents:Multi-harness agent context (AGENTS.md sync, Cursor/Codex stubs)'
+    'manual:Open or download the multi-format manual'
+    'search:Find commands by keyword'
 
     # Diagnostics
     'doctor:Check system health and configuration'

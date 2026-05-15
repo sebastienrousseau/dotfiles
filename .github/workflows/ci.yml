@@ -394,34 +394,19 @@ jobs:
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - name: Install PowerShell 7.5
-        # windows-latest ships PowerShell 7.4 today. Install 7.5 via the
-        # official MSI so `pwsh` on PATH is the version we claim to support.
-        # Pinned to 7.5.0 with SHA256 verification.
+      - name: Verify PowerShell 7.4+
+        # windows-latest currently ships PowerShell 7.4 LTS (EOL 2026-11-10).
+        # 7.5 is current stable. Our claim is "7.4+" — both qualify. We'll
+        # bump to "7.5+" after the 7.4 LTS EOL, which is when the bundled
+        # runner version is likely to roll forward anyway.
         shell: pwsh
         run: |
-          $version = "7.5.0"
-          $url = "https://github.com/PowerShell/PowerShell/releases/download/v$version/PowerShell-$version-win-x64.msi"
-          $msi = "$env:RUNNER_TEMP\PowerShell-$version.msi"
-          Invoke-WebRequest -Uri $url -OutFile $msi
-          Start-Process msiexec.exe -Wait -ArgumentList "/i `"$msi`" /quiet ADD_PATH=1"
-          # Re-export PATH so subsequent steps see the new pwsh.
-          Add-Content -Path $env:GITHUB_PATH -Value "C:\Program Files\PowerShell\7"
-
-      - name: Verify PowerShell 7.5+
-        shell: pwsh
-        # Use the freshly-installed binary directly so we don't accidentally
-        # measure the runner's bundled 7.4.
-        run: |
-          $pwsh75 = "C:\Program Files\PowerShell\7\pwsh.exe"
-          if (-not (Test-Path $pwsh75)) { Write-Error "pwsh 7.5 missing"; exit 1 }
-          & $pwsh75 -NoProfile -Command @'
-            if ($PSVersionTable.PSVersion.Major -lt 7 -or ($PSVersionTable.PSVersion.Major -eq 7 -and $PSVersionTable.PSVersion.Minor -lt 5)) {
-              Write-Error "PowerShell $($PSVersionTable.PSVersion) — need 7.5+"
-              exit 1
-            }
-            Write-Host "PowerShell $($PSVersionTable.PSVersion) ✓"
-          '@
+          if ($PSVersionTable.PSVersion.Major -lt 7 -or
+              ($PSVersionTable.PSVersion.Major -eq 7 -and $PSVersionTable.PSVersion.Minor -lt 4)) {
+            Write-Error "PowerShell $($PSVersionTable.PSVersion) — need 7.4+ (LTS) or 7.5+"
+            exit 1
+          }
+          Write-Host "PowerShell $($PSVersionTable.PSVersion) ✓"
 
       - name: Install chezmoi (scoop)
         shell: pwsh
@@ -434,13 +419,9 @@ jobs:
           scoop install chezmoi
           chezmoi --version
 
-      - name: Run smoke test (PowerShell 7.5)
+      - name: Run smoke test
         shell: pwsh
-        # Invoke the freshly-installed pwsh 7.5 explicitly so the test
-        # body sees PSVersion 7.5+, not the runner's bundled 7.4.
-        run: |
-          $pwsh75 = "C:\Program Files\PowerShell\7\pwsh.exe"
-          & $pwsh75 -NoProfile -File scripts/ci/windows-smoke-test.ps1 -RepoRoot $env:GITHUB_WORKSPACE
+        run: pwsh -NoProfile -File scripts/ci/windows-smoke-test.ps1 -RepoRoot $env:GITHUB_WORKSPACE
 
       - name: Upload logs on failure
         if: failure()

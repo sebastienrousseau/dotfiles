@@ -5,7 +5,7 @@
 <h1 align="center">.dotfiles</h1>
 
 <p align="center">
-  <strong>Declarative dotfiles for macOS, Linux, WSL, and Windows-native PowerShell 7.5+. Multi-shell by default. Sub-100ms CLI cold-start. Wallpaper-driven themes. Signed + attested releases. Fleet apply over SSH.</strong>
+  <strong>Declarative dotfiles for macOS, Linux, WSL, and Windows-native PowerShell 7.4 LTS / 7.5+. Multi-shell by default. Sub-100ms CLI cold-start. Wallpaper-driven themes. Signed + attested releases. Fleet apply over SSH.</strong>
 </p>
 
 <p align="center">

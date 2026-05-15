@@ -164,7 +164,7 @@ main() {
       # When verification fails or the verified installer isn't present
       # we refuse to bootstrap rather than silently downloading and
       # executing an unverified script (the previous fall-back to
-      # `get.chezmoi.io` was an unsigned `curl|sh` and a security hole).
+      # `get.chezmoi.io` was an unsigned bootstrap and a security hole).
       local verified_installer
       verified_installer="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/scripts/ci/install-chezmoi-verified.sh"
       if [[ -x "$verified_installer" ]] || [[ -f "$verified_installer" ]]; then
@@ -172,7 +172,7 @@ main() {
         if ! bash "$verified_installer" "${CHEZMOI_VERSION:-2.47.1}" "$bin_dir"; then
           echo "" >&2
           echo "   The verified chezmoi installer failed." >&2
-          echo "   Refusing to fall back to an unverified curl|sh path." >&2
+          echo "   Refusing to fall back to an unverified bootstrap path." >&2
           echo "   Install chezmoi manually from a trusted source, then re-run install.sh:" >&2
           echo "     macOS:  brew install chezmoi" >&2
           echo "     Linux:  see https://www.chezmoi.io/install/" >&2
