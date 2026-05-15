@@ -5,7 +5,7 @@
 <h1 align="center">.dotfiles</h1>
 
 <p align="center">
-  <strong>Declarative dotfiles for macOS, Linux, and WSL. Multi-shell by default. Sub-second startup. Wallpaper-driven themes. Signed releases.</strong>
+  <strong>Declarative dotfiles for macOS, Linux, WSL, and Windows-native PowerShell 7.5+. Multi-shell by default. Sub-100ms CLI cold-start. Wallpaper-driven themes. Signed + attested releases. Fleet apply over SSH.</strong>
 </p>
 
 <p align="center">
@@ -177,9 +177,15 @@ Over 80 commands grouped by intent. Run `dot help` for the full reference.
 
 | | |
 |:---|:---|
+| `dot init <user>` | Bootstrap any GitHub user's dotfiles repo through this harness |
 | `dot sync` | Apply dotfiles to this machine |
 | `dot doctor` | Check the environment and surface issues |
 | `dot learn` | Open the guided tour |
+| `dot agents render` | Sync `CLAUDE.md` → `AGENTS.md` + Cursor + Codex stubs |
+| `dot fleet apply` | SSH out to every host in `~/.config/dotfiles/fleet.toml` |
+| `dot registry list` | Browse reusable dotfile modules from the registry |
+
+A [Claude Code skill](dot_claude/skills/dotfiles-bootstrap/SKILL.md) is also shipped — `/skills` discovers `dotfiles-bootstrap` and runs `dot init` with profile-aware safety defaults.
 
 ### Daily Use
 

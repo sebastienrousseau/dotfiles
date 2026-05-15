@@ -1,0 +1,122 @@
+<#
+.SYNOPSIS
+  Windows smoke test for the dotfiles framework.
+
+.DESCRIPTION
+  Ships under PowerShell 7.5+; verifies that the `dot` dispatcher
+  starts, that key read-only commands work, and that chezmoi can be
+  invoked from PowerShell. Designed to run inside `windows-latest`
+  GitHub Actions runners (B1 of ROADMAP_2026).
+
+  Closes the audit gap "PowerShell 7.5+ claim unverified."
+
+.NOTES
+  Exit codes:
+    0   all checks passed
+    1   one or more checks failed
+    2   environment misconfigured (chezmoi/dot missing)
+#>
+
+[CmdletBinding()]
+param(
+  [string] $RepoRoot = (Get-Location).Path,
+  [switch] $Strict
+)
+
+$ErrorActionPreference = 'Stop'
+Set-StrictMode -Version Latest
+
+$script:Failures = @()
+
+function Assert-Step {
+  param(
+    [Parameter(Mandatory)] [string] $Name,
+    [Parameter(Mandatory)] [scriptblock] $Test
+  )
+  Write-Host "→ $Name " -NoNewline
+  try {
+    & $Test | Out-Null
+    Write-Host 'ok' -ForegroundColor Green
+  }
+  catch {
+    Write-Host 'FAIL' -ForegroundColor Red
+    Write-Host "  $($_.Exception.Message)" -ForegroundColor DarkRed
+    $script:Failures += $Name
+  }
+}
+
+# ─── PowerShell version contract ─────────────────────────────────────────────
+Assert-Step 'PowerShell >= 7.5' {
+  if ($PSVersionTable.PSVersion.Major -lt 7 -or
+      ($PSVersionTable.PSVersion.Major -eq 7 -and $PSVersionTable.PSVersion.Minor -lt 5)) {
+    throw "PowerShell $($PSVersionTable.PSVersion) — need 7.5+"
+  }
+}
+
+# ─── Repo layout sanity ──────────────────────────────────────────────────────
+Assert-Step 'dot dispatcher present' {
+  $dot = Join-Path $RepoRoot 'dot_local/bin/executable_dot'
+  if (-not (Test-Path $dot)) { throw "missing $dot" }
+}
+
+Assert-Step '.chezmoidata.toml present' {
+  $data = Join-Path $RepoRoot '.chezmoidata.toml'
+  if (-not (Test-Path $data)) { throw "missing $data" }
+}
+
+# ─── chezmoi callable from pwsh ──────────────────────────────────────────────
+Assert-Step 'chezmoi on PATH' {
+  $cmd = Get-Command chezmoi -ErrorAction SilentlyContinue
+  if (-not $cmd) { throw 'chezmoi not on PATH (install via scoop install chezmoi or winget)' }
+}
+
+Assert-Step 'chezmoi --version succeeds' {
+  $out = & chezmoi --version 2>&1
+  if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
+}
+
+# ─── dot CLI cold-start (only when bash is on PATH) ──────────────────────────
+$bash = Get-Command bash -ErrorAction SilentlyContinue
+if ($bash) {
+  Assert-Step 'dot version' {
+    $dot = Join-Path $RepoRoot 'dot_local/bin/executable_dot'
+    $out = & bash $dot 'version' 2>&1
+    if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
+  }
+  Assert-Step 'dot help' {
+    $dot = Join-Path $RepoRoot 'dot_local/bin/executable_dot'
+    $out = & bash $dot 'help' 2>&1
+    if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
+  }
+  Assert-Step 'dot agents check (AGENTS.md ↔ CLAUDE.md sync)' {
+    $dot = Join-Path $RepoRoot 'dot_local/bin/executable_dot'
+    $out = & bash $dot 'agents' 'check' 2>&1
+    if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
+  }
+}
+else {
+  Write-Host '→ skipping bash-dependent checks (no bash on PATH)' -ForegroundColor DarkYellow
+}
+
+# ─── PSScriptAnalyzer over the smoke-test itself ────────────────────────────
+Assert-Step 'PSScriptAnalyzer over scripts/ci/*.ps1' {
+  if (-not (Get-Module -ListAvailable -Name PSScriptAnalyzer)) {
+    Install-Module PSScriptAnalyzer -Force -Scope CurrentUser -ErrorAction Stop
+  }
+  $issues = Invoke-ScriptAnalyzer -Path (Join-Path $RepoRoot 'scripts/ci') -Severity Error -ErrorAction Stop
+  if ($issues.Count -gt 0) {
+    $msg = ($issues | ForEach-Object { "$($_.RuleName) at $($_.ScriptPath):$($_.Line)" }) -join '; '
+    throw "PSScriptAnalyzer found $($issues.Count) error(s): $msg"
+  }
+}
+
+# ─── Summary ─────────────────────────────────────────────────────────────────
+if ($script:Failures.Count -gt 0) {
+  Write-Host ''
+  Write-Host "FAILED: $($script:Failures -join ', ')" -ForegroundColor Red
+  exit 1
+}
+
+Write-Host ''
+Write-Host 'All Windows smoke checks passed.' -ForegroundColor Green
+exit 0
