@@ -557,6 +557,21 @@ cov_exercise_functions_file() {
       # Strictly out of scope for fn-exercise.
       return 0
       ;;
+    executable_git-ai-commit | executable_git-ai-diff | \
+      executable_hashsum | executable_uuid | executable_regex | \
+      executable_hex | executable_epoch | executable_hash | \
+      executable_jsonv | executable_b64 | executable_cb)
+      # Small utility CLI tools whose top-level body is a
+      # `while [[ $# -gt 0 ]]; do case $1 in ... *) exit 1 ;; esac done`
+      # arg parser WITHOUT a `shift` in the catchall arm. Sourcing
+      # them with our $tmpfile as $1 makes the loop run forever —
+      # each iteration hits the catchall, fires exit 1, our
+      # override absorbs it, the loop never shifts, repeat. The
+      # script-mode `cov_exercise_script` already exercises their
+      # --help / no-arg / invalid-flag paths; fn-exercise has
+      # nothing to add for a single-purpose CLI tool.
+      return 0
+      ;;
   esac
 
   # Always exercise from inside the sandbox tmpdir so the functions
@@ -599,36 +614,46 @@ cov_exercise_functions_file() {
   ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} bash -c '
     set +eu
 
-    # Many dot command files end with a `case "${1:-}"` dispatch
-    # that calls `exit N` on the catchall arm. Sourcing them with
-    # no $1 would kill this whole probe before we can call their
-    # internal helpers. Override `exit` as a function for the
-    # duration of the source so the dispatch error path returns
-    # rather than terminates. We restore the builtin right after.
-    exit() {
-      # echo trace so the override is visible if anyone debugs.
-      printf "[cov-exit-trap] exit %s suppressed during source\n" "${1:-0}" >&2
-      return "${1:-0}"
-    }
-
     # Keep stderr connected — 2>/dev/null on the source line would
     # discard the bash xtrace lines for every command the sourced
     # file executes, hiding ~all of its setup coverage.
     #
     # The `|| true` is essential, not stylistic: many dot command
-    # files start with `set -euo pipefail`. That propagates into our
-    # shell, then their tail dispatch case hits `exit 1` for an
+    # files start with `set -euo pipefail`. That propagates into
+    # our shell, then their tail dispatch case hits `exit 1` for an
     # unknown subcommand. With errexit on AND a non-zero source rc,
     # bash kills our outer shell before we can call any function.
     # Putting source on the LHS of `||` suppresses errexit for the
     # source command itself per the bash manual ("the command
     # following the final && or || except the command following the
     # final && or ||"), so we always reach the cleanup below.
+    #
+    # We additionally override `exit` for the duration of the source
+    # so a tail `case … *) exit 1` dispatch (used by every dot
+    # command file) returns rather than terminates. This unlocks the
+    # function bodies that live below the dispatch. Restored to the
+    # builtin right after source. Scripts whose top-level arg parser
+    # loops without shifting (small `executable_git-ai-*` utilities)
+    # would infinite-loop here and are skip-listed above.
+    __cov_exit_calls=0
+    exit() {
+      __cov_exit_calls=$((__cov_exit_calls + 1))
+      # Bail out hard if the source is calling exit in a loop —
+      # at 50 iterations something is clearly stuck (the
+      # executable_git-ai-* scripts would hit thousands without
+      # this circuit-breaker).
+      if [[ "$__cov_exit_calls" -gt 50 ]]; then
+        unset -f exit
+        builtin exit "${1:-0}"
+      fi
+      return "${1:-0}"
+    }
+
     # shellcheck disable=SC1090
     source "$1" || true
 
-    # Restore the real `exit` builtin so the rest of this probe
-    # (and any functions we call) can exit normally if they need to.
+    # Restore the real `exit` builtin so any function we call below
+    # can exit normally if it needs to.
     unset -f exit
 
     # Force errexit + nounset off again after the source — the
