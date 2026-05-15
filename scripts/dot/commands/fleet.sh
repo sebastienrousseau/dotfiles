@@ -405,10 +405,21 @@ Format of fleet.toml:
   ssh     = "user@laptop.local"
   profile = "workstation"
 
+Hostnames are validated against [A-Za-z0-9._@:+/-]+ before any SSH
+fan-out; invalid entries abort the apply.
+
+First-time SSH connections use StrictHostKeyChecking=accept-new (TOFU).
+If your threat model requires no TOFU window, pre-populate
+~/.ssh/known_hosts before running this command.
+
 Behavior:
   By default each host runs:  dot sync && dot doctor --quiet
   Override with --cmd "<shell>" to run an arbitrary command on every
   host (e.g. --cmd "uptime").
+
+  WARNING: --cmd is the trust boundary. Whatever string you pass
+  executes on every remote host with the credentials your SSH key
+  carries. Verify the command before running.
 
 Flags:
   --host <name>    Apply to a single host only.
@@ -464,23 +475,52 @@ EOF
 
   local total=0 ok=0 fail=0
   local tmpdir
-  tmpdir="$(mktemp -d)"
+  # `-t` template includes PID + random, so two concurrent `dot fleet
+  # apply` invocations from the same user can't collide on $tmpdir.
+  tmpdir="$(mktemp -d -t dotfiles-fleet.XXXXXX)"
   trap 'rm -rf "$tmpdir"' RETURN
 
-  # xargs-based fan-out limited to --jobs at once. Each child runs ssh
-  # against its host and writes a status line to $tmpdir/$name.status.
+  # Validate every hostname against a conservative regex BEFORE fan-out.
+  # `user@host:port` characters only — refuses single quotes, backticks,
+  # `$()`, semicolons, spaces, any shell metacharacter. Closes the
+  # round-2 audit's hostname-injection finding.
+  while IFS=$'\t' read -r name ssh profile; do
+    [[ -n "$name" ]] || continue
+    if [[ ! "$ssh" =~ ^[a-zA-Z0-9._@:+/-]+$ ]]; then
+      ui_err "$name" "invalid ssh target ($ssh) — only [a-zA-Z0-9._@:+/-] allowed"
+      return 1
+    fi
+  done <<< "$entries"
+
+  # Run one SSH per host, parallelised via background jobs with a
+  # semaphore. We DO NOT use `xargs -d` because that flag is GNU-only
+  # and the §3 hero feature must work on macOS BSD xargs too. Also
+  # avoids embedding `{}` substitution into a `bash -c` (the previous
+  # implementation had a quoting hazard around TOML hostnames).
+  _fleet_apply_one() {
+    local _name="$1" _ssh="$2" _cmd="$3" _tmp="$4"
+    if ssh -o BatchMode=yes -o ConnectTimeout=10 \
+           -o StrictHostKeyChecking=accept-new \
+           "$_ssh" "$_cmd" </dev/null \
+           >"$_tmp/$_name.out" 2>"$_tmp/$_name.err"; then
+      printf 'ok\n' >"$_tmp/$_name.status"
+    else
+      printf 'fail %d\n' "$?" >"$_tmp/$_name.status"
+    fi
+  }
+
+  local running=0
   while IFS=$'\t' read -r name ssh profile; do
     [[ -n "$name" && -n "$ssh" ]] || continue
     total=$((total + 1))
-    printf '%s\t%s\t%s\n' "$name" "$ssh" "$effective_cmd"
-  done <<< "$entries" | xargs -P "$jobs" -n 1 -d '\n' -I {} bash -c '
-    IFS=$'"'"'\t'"'"' read -r name ssh cmd <<< "{}"
-    if ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "$ssh" "$cmd" </dev/null >"'"$tmpdir"'/$name.out" 2>"'"$tmpdir"'/$name.err"; then
-      printf "ok\n" > "'"$tmpdir"'/$name.status"
-    else
-      printf "fail %d\n" "$?" > "'"$tmpdir"'/$name.status"
-    fi
-  '
+    while (( running >= jobs )); do
+      wait -n 2>/dev/null || break
+      running=$((running - 1))
+    done
+    _fleet_apply_one "$name" "$ssh" "$effective_cmd" "$tmpdir" &
+    running=$((running + 1))
+  done <<< "$entries"
+  wait
 
   printf '%s\n' "$entries" | while IFS=$'\t' read -r name ssh profile; do
     [[ -n "$name" ]] || continue

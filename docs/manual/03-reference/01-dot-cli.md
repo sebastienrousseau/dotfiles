@@ -284,9 +284,68 @@ dot fleet              # show all known hosts
 dot fleet attest       # collect signed attestations
 dot fleet diff         # compare rendered config across hosts
 dot fleet sync         # run `dot upgrade` on every host
+dot fleet apply        # SSH out to every host in fleet.toml and run 'dot sync'
 ```
 
 Fleet hosts are configured in `~/.config/dotfiles/fleet.toml`.
+
+### `dot fleet apply`
+
+Push dotfiles state to every host registered in `~/.config/dotfiles/fleet.toml`.
+
+```
+dot fleet apply [--host <name>] [--cmd <shell>] [--dry-run] [--jobs <n>]
+```
+
+| Flag | Effect |
+|:---|:---|
+| `--host <name>` | Apply to a single host only (matches the `[hosts.<name>]` stanza key). |
+| `--cmd <shell>` | Run a custom command on every host instead of the default `dot sync && dot doctor --quiet`. **Warning:** this is arbitrary shell on remote hosts; the value is your trust boundary. |
+| `--dry-run`, `-n` | Print the resolved hosts + planned command without opening SSH. |
+| `--jobs <n>` | Parallelism (default 4). |
+
+Hostnames in `fleet.toml` are validated against `[A-Za-z0-9._@:+/-]+` before fan-out; entries containing other characters abort the apply. First-time SSH connections use `StrictHostKeyChecking=accept-new` (TOFU); pre-populate `~/.ssh/known_hosts` if your threat model requires no TOFU window.
+
+Example `fleet.toml`:
+
+```toml
+[hosts.laptop]
+ssh     = "user@laptop.local"
+profile = "workstation"
+```
+
+## Agents
+
+### `dot agents`
+
+Multi-harness AI agent configuration manager. `CLAUDE.md` is canonical; `dot agents render` keeps `AGENTS.md` (the cross-harness standard read by Codex / Copilot / Cursor / Windsurf / Amp / Devin) plus `.cursor/rules/dotfiles.mdc` and `.codex/config.toml` in sync.
+
+```
+dot agents list       # show which harnesses are recognised + their target paths
+dot agents check      # exit 0 if AGENTS.md tracks CLAUDE.md; 1 if drifted
+dot agents render     # regenerate AGENTS.md + Cursor/Codex stubs from CLAUDE.md
+```
+
+Edit `CLAUDE.md` first, then run `dot agents render`; do not hand-edit `AGENTS.md`. The check subcommand is suitable for pre-commit hooks.
+
+## Registry
+
+### `dot registry`
+
+JSON-indexed module registry. Discover and install reusable dotfile modules from a registry hosted via GitHub Pages (or any HTTPS URL via `set-url`).
+
+```
+dot registry list                 # list modules in the configured registry
+dot registry search <query>       # filter modules by keyword
+dot registry info <name>          # full metadata for one module
+dot registry install <name>       # apply a module (scaffold today)
+dot registry url                  # show the active registry URL
+dot registry set-url <url>        # override the registry URL (HTTPS-only)
+```
+
+Default registry: `https://sebastienrousseau.github.io/dotfiles/registry.json`. Cache lives at `${XDG_CACHE_HOME:-~/.cache}/dotfiles/registry/index.json` with a 6h TTL. One-off override: `DOTFILES_REGISTRY_URL=<url> dot registry list`.
+
+The JSON contract + module-contribution flow live in [`docs/operations/REGISTRY.md`](../../operations/REGISTRY.md).
 
 ## Reference
 

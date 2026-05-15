@@ -2,6 +2,50 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.502 (unreleased)
+
+### Added
+
+- **`dot agents`** — multi-harness AI agent context generator. `CLAUDE.md` is canonical; `dot agents render` mirrors it into `AGENTS.md` (the cross-harness standard read by Codex/Copilot/Cursor/Windsurf/Amp/Devin), `.cursor/rules/dotfiles.mdc`, and `.codex/config.toml`. `dot agents check` returns rc 0 when in sync (suitable for a pre-commit hook). Round-1 audit gap #1 closed.
+- **`dot init <github-user|owner/repo|url>`** — analogue to `chezmoi init`. Bootstrap a foreign dotfiles repo through this framework's harness with `--dry-run`, `--no-apply`, `--force` flags; an interactive trust prompt warns before SSH/HTTPS clones; refuses plain HTTP. Owner/repo and bare-user shorthands validated against `[A-Za-z0-9._-]+` to block shell-metacharacter injection.
+- **`dot fleet apply`** — SSH-based fleet reconciliation across hosts in `~/.config/dotfiles/fleet.toml`. Parallel fan-out (default 4-way) via background-job semaphore (no `xargs -d` so it works on macOS BSD xargs too). Hostnames validated against `[A-Za-z0-9._@:+/-]+` before fan-out. Flags: `--host`, `--cmd "<shell>"` (trust boundary — warning shown), `--dry-run`, `--jobs <n>`. Per-host stderr captured; collision-safe `mktemp -d -t dotfiles-fleet.XXXXXX` temp dir.
+- **`dot registry`** — JSON-indexed module marketplace scaffold. Subcommands `list / search / info / install / url / set-url`. Default registry at `https://sebastienrousseau.github.io/dotfiles/registry.json` (published from `docs/registry.json` via GitHub Pages). 6h cache TTL; `set-url` validates HTTPS-only (or `file://` for testing) and writes atomically via `mktemp + mv`. Full module contract + contribution flow in [`docs/operations/REGISTRY.md`](docs/operations/REGISTRY.md).
+- **Sub-100ms CLI cold-start gate** — `scripts/ci/dot-cli-startup-bench.sh` measures median dispatcher startup under a clean `env -i`. New workflow `.github/workflows/dot-cli-bench.yml` runs on every PR touching `dot_local/bin/executable_dot` or `scripts/dot/**`. Current observation: median 47ms locally; CI budget 250ms.
+- **`docs/operations/HARD_AUDIT_2026.md`** — consolidated audit (round 1 + round 2 addendum) of operational reliability, performance, documentation accuracy, cross-platform parity, security posture, competitor positioning, 2026 industry trends, and adoption playbook. Produced from twelve parallel research-agent runs.
+
+### Fixed
+
+- **`install.sh`** — removed the unverified `get.chezmoi.io` curl|sh fallback. The SHA256-verified installer is now the only path; if it fails, we refuse to bootstrap rather than silently degrading (H6).
+- **`scripts/dot/lib/platform.sh`** — `dot_path_to_unix` / `dot_path_to_native` return rc 2 with a stderr error when called in WSL without `wslpath`, instead of silently echoing a Windows-format path (H9).
+- **`dot_local/bin/executable_dot`** — user-provided custom commands now run in a subshell so a `exit` in the user script can't kill the whole CLI (H1).
+- **`scripts/dot/commands/fleet.sh`** — `dot fleet namespace set` writes via `mktemp + mv` instead of the brittle GNU/BSD `sed -i` dance (H3).
+- **`dot_config/zsh/dot_zshrc.tmpl`** — `_cached_eval` uses `mktemp` instead of `${cache}.tmp.$$`, eliminating the PID-collision race under shell recycling (H4).
+- **`scripts/dot/commands/meta.sh`** — cache-clear uses `find ... -type f -delete` with a directory guard instead of `rm -rf "$cache_dir/zsh"/*-init.zsh`, which expanded the literal pattern when no files matched (H5).
+- **`scripts/dot/commands/agent.sh`** — replaced three `set +e / "$@" / set -e` blocks with idiomatic `if !` so bash errexit suspension is implicit (M4).
+- **`scripts/dot/commands/core.sh`** — `cmd_status` captures chezmoi stderr and inspects the exit code, so a chezmoi crash is now distinguishable from a clean tree (M1).
+- **`scripts/dot/lib/ui.sh`** — `ui_run_cmd` guards the rc-file read with `[[ -s ]]` to avoid races between the subshell write and the parent read (M3).
+- **`scripts/security/lock-configs.sh`** — pre-checks `sudo` availability and TTY attachment before attempting `chattr +i`, instead of failing per-file in automation (M5).
+- **`scripts/ci/install-chezmoi-verified.sh`** — unsupported-architecture error now names the supported set (x86_64/amd64, arm64/aarch64) and points at the upstream release page (M7).
+- **`docs/manual/03-reference/01-dot-cli.md`** + **`docs/manual/command-index.md`** — removed six commands that were documented but never shipped (`dot verify`, `dot benchmark`, `dot prewarm`, `dot clean-cache`, `dot remove`, `dot update`). Added the new `agents`, `init`, `registry`, and `fleet apply` sections (C3).
+- **Version drift** — bumped `v0.2.501` → `v0.2.502` in five doc surfaces (`docs/manual/00-introduction.md`, `docs/manual/_toc.yml`, `docs/index.md`, `docs/manual/03-reference/02-config-files.md` × 2) (C2).
+- **`docs/manual/index.md`** — new landing page for `https://doc.dotfiles.io/manual/` (the Jekyll site was 404ing because `jekyll-readme-index` had no `README.md`/`index.md` to render in `docs/manual/`).
+
+### Security
+
+- **`scripts/dot/commands/agents.sh`** — render only writes when the resolved root contains `.chezmoidata.toml`, so a user running `dot agents render` from inside an unrelated git repo can't accidentally write agent configs there. Output files get explicit `chmod 0644`.
+- **`scripts/dot/commands/init.sh`** — owner/repo and bare-user shorthands are now validated against `[A-Za-z0-9._-]+` before URL construction.
+- **`scripts/dot/commands/fleet.sh`** — hostnames validated against `[A-Za-z0-9._@:+/-]+` before SSH fan-out; an attacker controlling `fleet.toml` can no longer inject shell metacharacters.
+- **`scripts/dot/commands/registry.sh`** — `set-url` refuses non-HTTPS schemes (with a `file://` exemption for local testing) and writes config atomically.
+
+### Documentation
+
+- **`docs/operations/REGISTRY.md`** — module contract, JSON schema, and contribution flow for the new registry.
+- **`docs/operations/COVERAGE.md`** — documents the achieved unit-test floor (~47%) plus the structural ceiling for xtrace-only instrumentation; closes #883.
+
+### Known gaps (require user action)
+
+- **C1 — GPG disclosure key**: `.github/SECURITY.md:55` and `docs/security/KEY_ROTATION.md:24` still carry `PLACEHOLDER` fingerprints. Generate the `security@sebastienrousseau.com` key, publish via WKD, and paste the fingerprint to close.
+
 ## v0.2.501
 
 ### Added

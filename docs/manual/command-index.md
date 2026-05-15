@@ -7,6 +7,10 @@ render_with_liquid: false
 Alphabetical list of `dot` subcommands referenced in the manual.
 
 - `dot agent`
+- `dot agents check`
+- `dot agents list`
+- `dot agents render`
+- `dot agents`
 - `dot ai`
 - `dot apply --dry-run`
 - `dot apply`
@@ -21,12 +25,16 @@ Alphabetical list of `dot` subcommands referenced in the manual.
 - `dot doctor`
 - `dot edit`
 - `dot env`
+- `dot fleet apply --dry-run`
+- `dot fleet apply`
 - `dot fleet attest`
 - `dot fleet diff`
 - `dot fleet sync`
 - `dot fleet`
 - `dot heal`
 - `dot help`
+- `dot init --dry-run`
+- `dot init`
 - `dot learn`
 - `dot lint`
 - `dot load-bench`
@@ -39,6 +47,10 @@ Alphabetical list of `dot` subcommands referenced in the manual.
 - `dot packages`
 - `dot perf`
 - `dot profile`
+- `dot registry info`
+- `dot registry list`
+- `dot registry search`
+- `dot registry`
 - `dot rollback`
 - `dot score`
 - `dot secrets rotate`

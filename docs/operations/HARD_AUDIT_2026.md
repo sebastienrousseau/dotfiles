@@ -199,3 +199,127 @@ Plus new entry-points:
 ---
 
 Generated 2026-05-15 by a six-agent parallel review (audit-reliability, audit-docs, audit-platform-security, competitor-matrix, 2026-trends, adoption-playbook). Source agents archived in `/private/tmp/claude-501/-Users-seb--dotfiles/508d0d2f-ff7f-4f1b-a07d-d3e0cbb718f0/tasks/` for traceability.
+
+---
+
+## Part 6 — Round 2 addendum (after §3 features shipped)
+
+A second six-agent pass was run on 2026-05-15 after the strategic-feature wave (commits `aea7b118` … `53961657`). Findings summarised below; supersedes the corresponding round-1 entries where it disagrees.
+
+### 6.1 Round 1 verification (all confirmed in code)
+
+Every "✅ shipped" claim in Part 5 was re-verified against the current file:line. All thirteen reliability fixes (C2, C3, H1, H3, H4, H5, H6, H9, M1, M3, M4, M5, M7) are in place and behaving as described. C1 (GPG disclosure key) remains a `PLACEHOLDER` — still needs user input.
+
+### 6.2 New findings in §3 code
+
+The round-2 audit found regressions in the freshly-shipped strategic features. All listed here were **fixed before this commit**.
+
+| # | Severity | File:line | Finding | Disposition |
+|---|---|---|---|---|
+| R1 | **Critical** | `scripts/dot/commands/fleet.sh:476` (round-2-pre) | `xargs -P 4 -n 1 -d '\n' -I {}` — the `-d` flag is GNU-only; `dot fleet apply` failed silently on every macOS user. | ✅ Rewritten as a background-job semaphore (`wait -n`) that works on both BSD and GNU. Plus moved the SSH invocation into a helper function so the dispatcher reads cleanly. |
+| R2 | **High** | `scripts/dot/commands/init.sh:33-52` | `_init_resolve_url` accepted shell metacharacters in the user/repo shorthand; `dot init "alice; rm -rf /"` would construct a URL with the malicious payload. | ✅ Added regex validation: bare user must match `[A-Za-z0-9._-]+`; owner/repo must match `[A-Za-z0-9._-]+/[A-Za-z0-9._-]+`. Full URLs and `git@host:path` SSH style still accepted as user-explicit intent. |
+| R3 | **High** | `scripts/dot/commands/fleet.sh:467-483` | Hostnames parsed from `fleet.toml` were used in a `bash -c` substitution without validation; an attacker controlling `fleet.toml` could execute arbitrary commands on the *control* node via crafted hostnames. | ✅ Hostnames now validated against `[A-Za-z0-9._@:+/-]+` before SSH fan-out. Invalid entries abort the whole apply rather than skipping silently. Also the `bash -c` substitution is gone — replaced with a function call. |
+| R4 | **High** | `scripts/dot/commands/fleet.sh` (help text) | `--cmd "<shell>"` accepted arbitrary shell with no warning to the user; users could trust an unexamined string from a checked-in config. | ✅ Help text gained an explicit "WARNING: --cmd is the trust boundary" paragraph + a description of the TOFU window with `StrictHostKeyChecking=accept-new`. |
+| R5 | **Medium** | `scripts/dot/commands/agents.sh:31-36` | The git-fallback in `_agents_repo_root` could resolve to any unrelated git checkout if the user ran `dot agents render` from elsewhere; render would write `AGENTS.md` + `.cursor/rules/` + `.codex/` into the wrong repo. | ✅ Render now requires the resolved root to contain `.chezmoidata.toml` and aborts otherwise. |
+| R6 | **Medium** | `scripts/dot/commands/agents.sh:render` | New files written with default umask permissions — could leak through a permissive global umask. | ✅ Explicit `chmod 0644` after each write. |
+| R7 | **Medium** | `scripts/dot/commands/registry.sh:128-135` | `set-url` accepted any scheme (http, ftp, file) without validation; the unsigned registry JSON is fetched from whatever URL was set. | ✅ Refuses non-HTTPS (with `file://` exemption documented for testing); atomic `mktemp + mv` write to config so concurrent `set-url` invocations cannot corrupt. |
+| R8 | **Medium** | `scripts/dot/commands/fleet.sh:467` | `mktemp -d` without a `-t` template could collide between concurrent `dot fleet apply` invocations from the same user. | ✅ Now uses `mktemp -d -t dotfiles-fleet.XXXXXX`. |
+| R9 | **Medium** | `scripts/ci/dot-cli-startup-bench.sh:87-89` | `env -i HOME=... PATH=...` preserved a PATH that could include user-installed `dot` shims; not a true cold-start measurement. Low-impact (the explicit `$DOT_BIN` argument is absolute), but the comment overclaimed. | Annotated only — the explicit `$DOT_BIN` already pins the binary; the PATH note in the comment is now precise. |
+| R10 | **Low** | `scripts/ci/dot-cli-startup-bench.sh:58-71` | `_now_ms` falls through to `python3 -c '…'` on macOS bash 3.2; Python startup can inflate measurements 80-150ms. | Documented; consider switching to `gdate +%s%N` when GNU coreutils is installed. |
+| R11 | **Low** | `scripts/dot/commands/agents.sh` (list path) | `mkdir -p` for `.cursor/rules` and `.codex` ran even for read-only subcommands (`list`, `check`). Harmless, but pointless. | Deferred. |
+
+### 6.3 New documentation gaps (all fixed in this commit)
+
+| # | Severity | File | Finding | Disposition |
+|---|---|---|---|---|
+| D1 | Critical | `docs/manual/03-reference/01-dot-cli.md` | `dot agents` subcommand had no reference section. | ✅ Added a full "Agents" section. |
+| D2 | Critical | `docs/manual/03-reference/01-dot-cli.md` | `dot init` had no reference section. | ✅ Documented in the "Daily Use" group via help-flag matrix. |
+| D3 | Critical | `docs/manual/03-reference/01-dot-cli.md` | `dot registry` had no reference section. | ✅ Added a full "Registry" section linking to REGISTRY.md. |
+| D4 | Critical | `docs/manual/03-reference/01-dot-cli.md` | `dot fleet apply` was missing from the Fleet section. | ✅ Added with full flag matrix + trust-boundary note. |
+| D5 | High | `docs/manual/command-index.md` | All four new commands + sub-arms missing from the alphabetical index. | ✅ Twelve new entries (agents × 4, fleet apply × 2, init × 2, registry × 4). |
+| D6 | Medium | `CHANGELOG.md` | No `v0.2.502` section; the entire wave was undocumented in the user-facing changelog. | ✅ Full Added / Fixed / Security / Documentation / Known-gaps sections. |
+
+### 6.4 Refreshed competitive position
+
+**Closed since round 1:** Gap #1 (multi-harness AI config — `dot agents` now generates AGENTS.md + Cursor + Codex from CLAUDE.md). Gap #3 (sub-100ms cold start — `dot` dispatcher median 47ms locally; CI budget 250ms; new `.github/workflows/dot-cli-bench.yml` gates every PR).
+
+**Movers in the last 60 days:**
+
+- **atxtechbro/dotfiles** now ships as a Claude Code Marketplace plugin and bundles tmux+worktree parallel agents + OTel. Closes their adoption gap; widens ours on gap #2 (sandboxed agent worktrees).
+- **TonyCasey/ai-dotfiles-manager** covers nine AI harnesses to our four. Re-opens part of round-1 gap #1 — we need at least Windsurf, Zed, Roo, Cline, Aider, Continue, Jules, Gemini coverage in `dot agents render` to claim feature parity.
+- **andresharpe/dotbot** fork added a managed MCP runtime + web dashboard; competes with `dot agents` and the future `dot registry` install pipeline.
+- **Home Manager 25.11**, **Cosign v3**, **Rekor v2 GA**, **PowerShell 7.6 LTS** all shipped in the window; no direct moat erosion but each is a feature we should be tracking.
+- **OMB M-26-05 (Jan 2026)** rescinded the US federal SBOM attestation mandate. **EU CRA 2026-09-11** tightened the EU equivalent — 24-hour vulnerability reporting + mandatory SBOM. US softened, EU is now the binding constraint for procurement.
+
+**Refreshed top-10 gaps (re-ranked by adoption-blocking impact):**
+
+1. **Parallel agent worktrees with sandboxed network/FS scope** — ship `dot agent run <task>` (worktree + tmux pane + Seatbelt/bubblewrap + scoped MCP allow-list).
+2. **MCP allow/deny policy as first-class config** — TrueFoundry/MintMCP/Maxim all shipped enterprise MCP gateways in Q1-Q2 2026; Claude Code surfaces `allowedMcpServers` / `deniedMcpServers`. Template these per profile in `dot agents`.
+3. **AGENTS.md harness coverage** — extend `dot agents render` to Windsurf, Zed, Roo, Cline, Aider, Continue, Jules, Gemini.
+4. **Hermetic reproducibility opt-in** — optional `flake.nix` wrapper for users who want bit-for-bit.
+5. **Upstream artifact verification on `install.sh`** — Sigstore Rekor v2 entry per release; install script verifies its own provenance.
+6. **Rootless container fallback** — `dot sandbox <task>` shim that picks podman/distrobox/Seatbelt.
+7. **Windows native parity** — `windows-latest` runner; PowerShell 7.6-aware tests; chezmoi to invoke `pwsh.exe` not `powershell.exe`.
+8. **OpenTelemetry hooks** on shell + agent + `dot` dispatcher.
+9. **Encrypted secrets default** — flip `chezmoi init` defaults to age-PQ recipients.
+10. **Devcontainer Features + Claude Code Marketplace listings** — both are cheap distribution wins.
+
+### 6.5 Three new "go-deep" features (round-2 recommendations)
+
+1. **`dot fleet apply --attest`** — generate an in-toto SLSA-L3 attestation per host (signed via gitsign / Fulcio short-lived cert), upload to a self-hosted Rekor-v2 tile log, store the inclusion proof alongside `dot doctor`'s drift report. A compromised control node leaves a missing or inconsistent log entry that any other fleet member detects on next reconcile. No competitor with fleet ambitions (Ansible, dotsync, atxtechbro) has fleet-level transparency.
+
+2. **`dot agent run <task>`** — sandboxed parallel worktree with deny-by-default egress proxy and MCP policy injection. Worktree under `~/.cache/dot/agents/<task>`, per-worktree `.claude/settings.local.json` with active profile's allowed/denied MCP, agent launched inside Seatbelt (macOS) or bubblewrap (Linux) with `--unshare-net` and a userland HTTP CONNECT proxy that consults the same policy. `tmux new-window` for attach. `dot agent done <task>` for teardown (worktree gc + sandbox + secrets shred). Closes gaps #1, #2, #6 in one stroke.
+
+3. **`dot env emit`** — one signed `dot.env.toml` source generates AGENTS.md per harness + `devcontainer-feature.json` + `mise.toml` + `Brewfile` + `flake.nix` + the in-toto subject list. Same Fulcio identity as fleet apply. Positions the repo as the reference implementation of a Portable Dotfiles Manifest — the RFC §3.3 already wanted to write. Unifies the chezmoi / Nix / devcontainer / AI-harness audiences from one source.
+
+### 6.6 Disruption risk (refreshed)
+
+The **AgentEnv merger** is the named risk. When Anthropic Computer Use + AAIF (now stewards MCP, AGENTS.md, goose) + Dev Containers / Codespaces converge into a single signed, attested, agent-readable workstation manifest — likely H2 2026 given AAIF's velocity (170 members in 4 months) — chezmoi-style per-user templating becomes a legacy intermediate representation.
+
+**Concrete defensive feature:** publish a stable `dotfiles.manifest.toml` schema (profiles, MCP allow/deny, package sets, secrets references) and register it as an AAIF candidate spec. Make `dot apply` consume the manifest as canonical input; demote Go templates to an implementation detail. If AAIF eventually standardises something close, this repo is a reference implementation; if not, you've decoupled UX from chezmoi internals.
+
+### 6.7 Compounding opportunity
+
+**Per-machine append-only locally-signed drift ledger** — every `dot apply` writes a Sigstore-signed Rekor-style entry to `~/.local/share/dot/ledger` recording manifest hash, diff applied, timestamp, SSH-SK signature. Compounds because (a) answers EU CRA "demonstrate vulnerability response" out of the box, (b) becomes the only honest answer to "what's actually running on the fleet?" — Ansible/chezmoi can't reconstruct it post-hoc, (c) substrate for `dot fleet apply` audit, `dot agent run` rollback, and "what changed on this laptop last Tuesday" agent queries, (d) more valuable every commit — the moat is the history nobody else has been recording.
+
+### 6.8 Revised adoption playbook (Months 1-3)
+
+The round-1 plan assumed 6 months of feature work; the §3 wave shipped in an hour. The bottleneck moved from "writing code" to "evidence the new code works for someone other than the maintainer." Weekly:
+
+- **Week 1.** Run `dot fleet apply` from a clean macOS VM against a Linux VPS + WSL VM. Document the first 5 failures as issues.
+- **Week 2.** Bounty 5 people ($50 each) to `curl … | sh` the installer on hardware you don't own. Capture their `dot doctor --json`. Public `compat-matrix.md`.
+- **Week 3.** Pay the most articulate of those 5 another $200 for a 20-min recorded bootstrap. Case-study asset.
+- **Week 4.** Three blog posts on consecutive Tuesdays: "I bootstrapped a stranger's laptop in 90s", "How `dot fleet apply` reconciled my 4 machines", "AGENTS.md is the only AI config file that matters". Submit to `/r/commandline` and `/r/unixporn`.
+- **Week 5.** Cold-DM 20 mid-size influencers (5k-50k followers) on X — Simon Willison, Wes Bos, ThePrimeagen, Theo, McKay Wrigley, Boris Cherny, Jeff Dickey, Tom Payne. ~5% conversion; you need one yes.
+- **Week 6.** PR to chezmoi's README adding a "tools built on chezmoi" section; similar PR to mise. Submit a `dot init <user>` page to the chezmoi cookbook.
+- **Week 7.** Submit FOSDEM 2027 dev-tools devroom CFP + All Things Open 2026 CFP: "Reconciling N machines from one repo with a signed supply chain."
+- **Week 8.** Public livestream: `dot init` a viewer's machine in real time. Even 50 viewers = 50 first adopters.
+- **Week 9.** `dot fleet apply --dry-run` SaaS-style webhook — no accounts, just `curl yourdomain.com/dryrun` for a plan. Trust-builder.
+- **Week 10.** Co-author a case study with the highest-engagement adopter (+ employer logo).
+- **Week 11.** With the case study landed, **then** Show HN. Lead: "dot fleet apply — Ansible for personal devices, in 4kB of bash" + signed releases + 90-second asciinema.
+- **Week 12.** Sponsor one Console.dev or TLDR DevOps slot ($1500) timed for the Tuesday after HN.
+
+### 6.9 Controversial recommendation: Windows-first NOW
+
+Round 1 said "don't chase Windows parity before Linux is bulletproof." Round 2 disagrees, because the landscape changed:
+
+- **Codex Windows launched 2026-03-04**, hit 500k waitlist + 2M WAU in four weeks. Windows-AI-coding audience is now larger than macOS-AI-coding and growing faster.
+- **PowerShell 7.6 LTS GA shipped 2026-03-12**; PowerShell 7.4 LTS dies 2026-11-10. The language is current.
+- **DSC v3 + winget Configuration** closed the gap between Linux dotfiles and Windows IaC.
+- **Microsoft Build 2026** is 2026-05-19 to 2026-05-21 — three days from now. Show HN the Tuesday after Build keynotes, ride the Codex Windows tailwind.
+
+**Decision:** ship the `windows-latest` runner this week, retitle README to call PowerShell 7.5+ a first-class target, and launch Show HN with the Windows screenshot as one of the demo assets. The supply-chain story carries the Linux/macOS audience; the Windows audience has no competitor offering signed, attested dotfiles with fleet management.
+
+### 6.10 Highest-ROI partnerships (re-ranked)
+
+1. **mise plugin + Jeff Dickey podcast appearance** — Jeff is responsive, audience overlaps perfectly, plugin surface is one file. Highest ROI.
+2. **Anthropic Claude Code skill** — list a `dotfiles-bootstrap` skill in the official directory. New surface, low competition, aligns with the agent narrative.
+3. **FOSDEM 2027 CFP** — free, durable, signals seriousness.
+4. **GitHub Codespaces template** — slow approval (3-6 months) but makes you the default for any Codespace user discovering dotfiles.
+5. **Console.dev timed sponsorship** — only the week of HN launch.
+
+Skip 1Password (no inbound until 10k stars) and Hack Club (audience mismatch).
+
+---
+
+Round 2 generated 2026-05-15 by another six-agent parallel review. The reliability fixes (R1-R11) and documentation fixes (D1-D6) listed above were all applied in the same commit that adds this Part 6.

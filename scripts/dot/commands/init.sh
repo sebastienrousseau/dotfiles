@@ -38,15 +38,27 @@ _init_resolve_url() {
       return 2
       ;;
     https://* | git@*:*)
+      # Trust full URLs as-is — these are the user's explicit intent.
       printf "%s\n" "$arg"
       ;;
-    */* | *)
-      # GitHub user (no scheme): expand to HTTPS clone URL.
-      if [[ "$arg" == */* ]]; then
-        printf "https://github.com/%s.git\n" "$arg"
-      else
-        printf "https://github.com/%s/dotfiles.git\n" "$arg"
+    */*)
+      # owner/repo shorthand: validate before constructing the URL so
+      # a crafted argument can't smuggle shell metacharacters into
+      # downstream tooling (chezmoi init, git clone).
+      if [[ ! "$arg" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]]; then
+        printf "dot init: invalid owner/repo (only [A-Za-z0-9._-]+/[A-Za-z0-9._-]+ allowed): %s\n" "$arg" >&2
+        return 2
       fi
+      printf "https://github.com/%s.git\n" "$arg"
+      ;;
+    *)
+      # Bare user shorthand: same character whitelist as the path
+      # segment of a GitHub URL.
+      if [[ ! "$arg" =~ ^[A-Za-z0-9._-]+$ ]]; then
+        printf "dot init: invalid user (only [A-Za-z0-9._-] allowed): %s\n" "$arg" >&2
+        return 2
+      fi
+      printf "https://github.com/%s/dotfiles.git\n" "$arg"
       ;;
   esac
 }

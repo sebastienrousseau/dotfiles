@@ -127,10 +127,23 @@ cmd_registry() {
     set-url)
       local new_url="${1:-}"
       [[ -n "$new_url" ]] || { ui_err "set-url" "missing URL"; return 1; }
+      # Refuse non-HTTPS schemes. The registry index is unsigned today,
+      # so HTTPS is the only transport that gives us cert-pinned
+      # integrity. The `file://` exemption is for local testing only
+      # (the bench-script and unit tests use it).
+      if [[ ! "$new_url" =~ ^(https://|file://) ]]; then
+        ui_err "set-url" "registry URL must use https:// (or file:// for local testing) — got: $new_url"
+        return 1
+      fi
       local cfg
       cfg="$(_registry_config_file)"
       mkdir -p "$(dirname "$cfg")"
-      printf 'url = "%s"\n' "$new_url" > "$cfg"
+      # Atomic write so a concurrent invocation can't read a half-
+      # written file.
+      local _tmp
+      _tmp="$(mktemp "${cfg}.XXXXXX")"
+      printf 'url = "%s"\n' "$new_url" > "$_tmp" && mv "$_tmp" "$cfg" \
+        || { rm -f "$_tmp"; ui_err "set-url" "failed to write $cfg"; return 1; }
       ui_ok "registry" "set to $new_url ($cfg)"
       ;;
     list)

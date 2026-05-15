@@ -30,10 +30,21 @@ source "$SCRIPT_DIR/../lib/utils.sh"
 
 _agents_repo_root() {
   # Resolve the chezmoi source dir (where CLAUDE.md/AGENTS.md live).
-  # Fall back to git toplevel for ad-hoc invocations outside chezmoi.
+  # We REQUIRE the resolved dir to contain `.chezmoidata.toml` so a
+  # user running `dot agents render` from inside some other git
+  # checkout doesn't accidentally write CLAUDE.md/AGENTS.md/.cursor/
+  # /.codex/ into that repo. Round-2 audit C-finding.
+  local candidate=""
   if command -v chezmoi >/dev/null 2>&1; then
-    chezmoi source-path 2>/dev/null || true
-  fi | grep . || git -C "$PWD" rev-parse --show-toplevel 2>/dev/null
+    candidate="$(chezmoi source-path 2>/dev/null || true)"
+  fi
+  if [[ -z "$candidate" ]]; then
+    candidate="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || true)"
+  fi
+  if [[ -z "$candidate" ]] || [[ ! -f "$candidate/.chezmoidata.toml" ]]; then
+    return 1
+  fi
+  printf '%s\n' "$candidate"
 }
 
 _agents_canonical() {
@@ -148,6 +159,7 @@ HEADER
 **Need richer context?** This file is the cross-harness summary. Claude Code reads the full canonical version from [`CLAUDE.md`](./CLAUDE.md). Both files are kept in sync via `dot agents render`.
 FOOTER
       } > "$agents_md"
+      chmod 0644 "$agents_md" 2>/dev/null || true
       ui_ok "AGENTS.md" "rendered → $agents_md"
 
       # 2. Cursor rules — MDC format, points at CLAUDE.md/AGENTS.md.
@@ -166,6 +178,7 @@ project conventions, repository layout, testing, and CI policy. This
 Cursor rule file exists so Cursor's rule engine picks up the same
 context; do not duplicate content here — keep CLAUDE.md canonical.
 MDC
+      chmod 0644 "$cursor_dir/dotfiles.mdc" 2>/dev/null || true
       ui_ok "Cursor"    "rendered → $cursor_dir/dotfiles.mdc"
 
       # 3. Codex CLI config stub — declares the AGENTS.md path.
@@ -177,6 +190,7 @@ MDC
 # the CLI prefers the in-repo guidance over any global default.
 project_context = "AGENTS.md"
 TOML
+      chmod 0644 "$codex_dir/config.toml" 2>/dev/null || true
       ui_ok "Codex"     "rendered → $codex_dir/config.toml"
 
       ui_info "Hint"    "commit AGENTS.md alongside CLAUDE.md changes (or add to your pre-commit hook)"
