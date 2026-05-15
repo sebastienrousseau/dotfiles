@@ -418,6 +418,10 @@ jobs:
           }
           scoop install chezmoi
           chezmoi --version
+          # Persist scoop shims on PATH for subsequent steps — each step
+          # gets a fresh environment, so PATH mutations performed by
+          # scoop's installer don't carry over.
+          Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\scoop\shims"
 
       - name: Run smoke test
         shell: pwsh

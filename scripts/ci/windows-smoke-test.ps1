@@ -106,7 +106,9 @@ Assert-Step 'PSScriptAnalyzer over scripts/ci/*.ps1' {
   if (-not (Get-Module -ListAvailable -Name PSScriptAnalyzer)) {
     Install-Module PSScriptAnalyzer -Force -Scope CurrentUser -ErrorAction Stop
   }
-  $issues = Invoke-ScriptAnalyzer -Path (Join-Path $RepoRoot 'scripts/ci') -Severity Error -ErrorAction Stop
+  # `@(...)` so a single-result return value is still an array, otherwise
+  # `.Count` on a $null / scalar trips the strict-mode property check.
+  $issues = @(Invoke-ScriptAnalyzer -Path (Join-Path $RepoRoot 'scripts/ci') -Severity Error -ErrorAction Stop)
   if ($issues.Count -gt 0) {
     $msg = ($issues | ForEach-Object { "$($_.RuleName) at $($_.ScriptPath):$($_.Line)" }) -join '; '
     throw "PSScriptAnalyzer found $($issues.Count) error(s): $msg"
