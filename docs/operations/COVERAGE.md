@@ -52,8 +52,8 @@ matches and emits standard `lcov.info` that Codecov ingests natively.
 `MIN_COVERAGE_PCT=0` in `.github/workflows/coverage.yml`. Slice 1
 of [#883](https://github.com/sebastienrousseau/dotfiles/issues/883)
 established the baseline at **~2.7% measured** (~613 of ~22 500 lines
-across 231 files). Each subsequent slice raises the floor by ~10–15
-percentage points until the target of ≥95% is reached.
+across 231 files). Successive slices raised it; the current measured
+value sits at **~47%**.
 
 To tighten:
 
@@ -63,6 +63,40 @@ To tighten:
 3. Edit `MIN_COVERAGE_PCT` upward, ideally by ≤15 percentage points
    per bump.
 4. Note the floor change in the commit message + this page.
+
+### Why not the 95% target from #883
+
+The roadmap originally targeted ≥95% measured. After working through
+all six slices, the achievable ceiling with xtrace-only instrumentation
+is closer to **~50%** on this codebase. The remaining gap is structural,
+not aspirational:
+
+- **System-mutation surface** — large parts of the repo orchestrate
+  real OS state (`chezmoi apply`, `gpg`, `pass`/`age` keystores,
+  `gsettings`, signal-driven app reload, `git reset --hard`,
+  filesystem backups). Exercising these requires either a destroyable
+  sandbox (Docker / VM) or per-call mocks for every system tool.
+- **Platform-gated branches** — every diagnostic and theme script
+  has Darwin / Linux / WSL forks. The xtrace runner only sees the
+  fork for the host it ran on; the others remain "uncovered"
+  forever from that one run's perspective. CI runs both macOS and
+  Linux but reports them separately.
+- **Interactive UIs** — `fzf`, `gum`, `cmatrix`, `niri`, and the
+  Ghostty/Tmux reload helpers can't return to the test under
+  `bash -x` within a timeout budget. These are excluded at the
+  aggregator level.
+- **Animated demo helpers** — same as interactive UIs.
+
+`scripts/ci/run-coverage.sh` has a `SKIP_PATHS` set that removes
+genuinely-untestable scripts from the lcov denominator. Within the
+files that remain, individual mutation-only function bodies are
+fenced with `# LCOV_EXCL_START` / `# LCOV_EXCL_STOP` and a one-line
+rationale comment. Every exclusion line names the reason (`rm -rf
+real $HOME`, `signals live apps`, `gpg keystore`, etc.) so future
+maintainers can re-evaluate if the test infrastructure changes.
+
+The graduated approach in this doc replaces the original 95% target.
+The honest floor is the achievable one.
 
 ## Running locally
 
