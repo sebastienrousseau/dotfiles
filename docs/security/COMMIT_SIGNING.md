@@ -70,8 +70,7 @@ git config --global gpg.ssh.allowedSignersFile \
 After this, `git log --show-signature` shows `Good "git" signature
 for you@example.com with ED25519 key SHA256:…` on every new commit.
 
-## Setting up GPG signing (legacy / required for tag signing on
-mirrors that don't yet support SSH)
+## Setting up GPG signing (legacy / for tag-signing mirrors that don't yet support SSH)
 
 ```sh
 # 1. Generate or import a key. ED25519 is the modern recommendation;
