@@ -5,9 +5,11 @@ name: Dot CLI Cold-Start Bench
 # one is fast (<30s) and specifically targets the `dot` dispatcher
 # cold-start, which is the user-visible cost of every `dot` invocation.
 #
-# Budget: 250ms median-of-11 on ubuntu-latest. Currently observed at
-# ~47ms locally on macOS bash 5.x; CI runners are slower so the budget
-# is loose. Ratchet down as improvements land.
+# Budget: 150ms median-of-11 on Linux, 200ms on macOS, 300ms on Windows.
+# Per-OS budgets reflect runner-cost differences (Windows tools are
+# slowest, Linux tools are fastest). Local macOS bash 5.x hits ~47ms
+# so this leaves comfortable headroom while still catching regressions.
+# Ratchet each budget down as improvements land (track in ROADMAP §C5).
 
 on:
   push:
@@ -38,7 +40,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            budget_ms: 150
+          - os: macos-latest
+            budget_ms: 200
     timeout-minutes: 5
     steps:
       - name: Harden runner (audit mode)
@@ -50,7 +56,7 @@ jobs:
 
       - name: Run cold-start gate
         env:
-          DOT_BENCH_BUDGET_MS: 250
+          DOT_BENCH_BUDGET_MS: ${{ matrix.budget_ms }}
           DOT_BENCH_RUNS: 11
           DOT_BENCH_CMD: version
         run: bash scripts/ci/dot-cli-startup-bench.sh
