@@ -323,10 +323,12 @@ Multi-harness AI agent configuration manager. `CLAUDE.md` is canonical; `dot age
 ```
 dot agents list       # show which harnesses are recognised + their target paths
 dot agents check      # exit 0 if AGENTS.md tracks CLAUDE.md; 1 if drifted
-dot agents render     # regenerate AGENTS.md + Cursor/Codex stubs from CLAUDE.md
+dot agents render     # regenerate AGENTS.md + 10 harness-specific files
 ```
 
-Edit `CLAUDE.md` first, then run `dot agents render`; do not hand-edit `AGENTS.md`. The check subcommand is suitable for pre-commit hooks.
+Harnesses covered: `AGENTS.md` (canonical cross-harness), Cursor (`.cursor/rules/dotfiles.mdc`), Codex (`.codex/config.toml`), Windsurf (`.windsurf/rules.md`), Zed (`.zed/agent-config.toml`), Roo (`.roo/rules.md`), Cline (`.clinerules`), Aider (`.aider.conf.yml`), Continue (`.continuerc.json`), Jules (`.jules/system.md`), Gemini (`.gemini/GEMINI.md`).
+
+Edit `CLAUDE.md` first, then run `dot agents render`; do not hand-edit `AGENTS.md` or any of the per-harness files. The check subcommand is suitable for pre-commit hooks.
 
 ## Registry
 

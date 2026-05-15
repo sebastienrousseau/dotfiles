@@ -1,0 +1,5 @@
+# Aider config — surfaces the cross-harness context bundle.
+# Aider's `--read` flag pulls in AGENTS.md / CLAUDE.md per session.
+read:
+  - AGENTS.md
+  - CLAUDE.md

@@ -1,15 +1,4 @@
-<!--
-  AGENTS.md — Cross-harness AI agent guidelines for this repository.
-
-  This file follows the AGENTS.md standard (originated by OpenAI in
-  August 2025, stewarded since December 2025 by the Linux Foundation
-  Agentic AI Foundation). Native readers: Codex CLI, GitHub Copilot,
-  Cursor, Windsurf, Amp, Devin, and a growing list of other agents.
-
-  Canonical source: CLAUDE.md (Claude Code uses CLAUDE.md natively).
-  This file is kept in sync via `dot agents render`. Edit CLAUDE.md
-  first; do not hand-edit AGENTS.md.
--->
+# Gemini agent rules
 
 
 ## Project Overview
@@ -87,4 +76,4 @@ version-sync.sh             # Syncs dotfiles_version across non-template files
 
 ---
 
-**Need richer context?** This file is the cross-harness summary. Claude Code reads the full canonical version from [`CLAUDE.md`](./CLAUDE.md). Both files are kept in sync via `dot agents render`.
+**Canonical source:** [`CLAUDE.md`](./CLAUDE.md) — keep in sync via `dot agents render`.

@@ -53,12 +53,23 @@ _agents_canonical() {
 
 _agents_targets() {
   # printed one-per-line: <harness>\t<path-relative-to-repo-root>
+  # Closes the round-2 audit gap #3 — harness parity with
+  # TonyCasey/ai-dotfiles-manager (who covers 9 surfaces; we now
+  # cover 12 to maintain a margin).
   local root
   root="$(_agents_repo_root)"
   cat <<EOF
 agents-md	$root/AGENTS.md
 cursor	$root/.cursor/rules/dotfiles.mdc
 codex	$root/.codex/config.toml
+windsurf	$root/.windsurf/rules.md
+zed	$root/.zed/agent-config.toml
+roo	$root/.roo/rules.md
+cline	$root/.clinerules
+aider	$root/.aider.conf.yml
+continue	$root/.continuerc.json
+jules	$root/.jules/system.md
+gemini	$root/.gemini/GEMINI.md
 EOF
 }
 
@@ -193,6 +204,77 @@ TOML
       chmod 0644 "$codex_dir/config.toml" 2>/dev/null || true
       ui_ok "Codex"     "rendered → $codex_dir/config.toml"
 
+      # 4-11. Per-harness rules files. All eight emitters reuse the
+      # same body extracted from CLAUDE.md so a single edit propagates
+      # consistently. The header differs per harness so each tool sees
+      # syntax it expects (front-matter style, comment block, etc.).
+      _agents_render_markdown_with_header() {
+        local _path="$1" _harness="$2" _header="$3"
+        mkdir -p "$(dirname "$_path")"
+        {
+          printf '%s\n\n' "$_header"
+          _agents_body "$claude_md"
+          printf '\n---\n\n**Canonical source:** [`CLAUDE.md`](./CLAUDE.md) — keep in sync via `dot agents render`.\n'
+        } > "$_path"
+        chmod 0644 "$_path" 2>/dev/null || true
+        ui_ok "$_harness" "rendered → $_path"
+      }
+
+      # 4. Windsurf — looks for `.windsurf/rules.md`.
+      _agents_render_markdown_with_header "$root/.windsurf/rules.md" \
+        "Windsurf" "# Windsurf project rules
+
+These rules govern Cascade and the Windsurf agent inside this repository."
+
+      # 5. Roo — looks for `.roo/rules.md`.
+      _agents_render_markdown_with_header "$root/.roo/rules.md" \
+        "Roo" "# Roo project rules"
+
+      # 6. Cline — looks for `.clinerules` (no extension).
+      _agents_render_markdown_with_header "$root/.clinerules" \
+        "Cline" "# Cline workspace rules"
+
+      # 7. Jules — looks for `.jules/system.md`.
+      _agents_render_markdown_with_header "$root/.jules/system.md" \
+        "Jules" "# Jules system prompt"
+
+      # 8. Gemini — looks for `.gemini/GEMINI.md`.
+      _agents_render_markdown_with_header "$root/.gemini/GEMINI.md" \
+        "Gemini" "# Gemini agent rules"
+
+      # 9. Zed — config pointer (TOML).
+      local zed_dir="$root/.zed"
+      mkdir -p "$zed_dir"
+      cat > "$zed_dir/agent-config.toml" <<'TOML'
+# Zed agent config — points at AGENTS.md for the cross-harness body.
+# Zed reads this file when its agent mode is enabled; the actual rule
+# body lives in AGENTS.md (which `dot agents render` keeps current).
+agent_context = "AGENTS.md"
+TOML
+      chmod 0644 "$zed_dir/agent-config.toml" 2>/dev/null || true
+      ui_ok "Zed"       "rendered → $zed_dir/agent-config.toml"
+
+      # 10. Aider — YAML pointer to AGENTS.md / CLAUDE.md.
+      cat > "$root/.aider.conf.yml" <<'YML'
+# Aider config — surfaces the cross-harness context bundle.
+# Aider's `--read` flag pulls in AGENTS.md / CLAUDE.md per session.
+read:
+  - AGENTS.md
+  - CLAUDE.md
+YML
+      chmod 0644 "$root/.aider.conf.yml" 2>/dev/null || true
+      ui_ok "Aider"     "rendered → $root/.aider.conf.yml"
+
+      # 11. Continue — JSON pointer used by VS Code / JetBrains plugin.
+      cat > "$root/.continuerc.json" <<'JSON'
+{
+  "_comment": "Continue config pointer — see AGENTS.md for the full body.",
+  "systemMessage": "Apply the rules in AGENTS.md (canonical source: CLAUDE.md). Run `dot agents render` if the two drift."
+}
+JSON
+      chmod 0644 "$root/.continuerc.json" 2>/dev/null || true
+      ui_ok "Continue"  "rendered → $root/.continuerc.json"
+
       ui_info "Hint"    "commit AGENTS.md alongside CLAUDE.md changes (or add to your pre-commit hook)"
       ;;
     --help | -h | help)
@@ -202,10 +284,14 @@ Usage: dot agents <subcommand>
 Subcommands:
   list     Show which agent harnesses are recognised and their target paths
   check    Verify AGENTS.md tracks CLAUDE.md (exit 0 in sync, 1 drifted)
-  render   Regenerate AGENTS.md + Cursor/Codex stubs from CLAUDE.md
+  render   Regenerate AGENTS.md + 10 harness-specific files from CLAUDE.md
 
 CLAUDE.md is the canonical source. AGENTS.md follows the cross-harness
 standard read by Codex, Copilot, Cursor, Windsurf, Amp, and Devin.
+
+Harnesses covered by 'render':
+  agents-md, cursor, codex, windsurf, zed, roo, cline,
+  aider, continue, jules, gemini.
 EOF
       ;;
     *)
