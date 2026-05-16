@@ -42,9 +42,42 @@ This file documents all notable changes to this project.
 - **`docs/operations/REGISTRY.md`** — module contract, JSON schema, and contribution flow for the new registry.
 - **`docs/operations/COVERAGE.md`** — documents the achieved unit-test floor (~47%) plus the structural ceiling for xtrace-only instrumentation; closes #883.
 
-### Known gaps (require user action)
+### Round 3 (HARD_AUDIT_2026.md Part 7)
 
-- **C1 — GPG disclosure key**: `.github/SECURITY.md:55` and `docs/security/KEY_ROTATION.md:24` still carry `PLACEHOLDER` fingerprints. Generate the `security@sebastienrousseau.com` key, publish via WKD, and paste the fingerprint to close.
+- **C1 closed — GPG disclosure key published.** Generated `security@sebastienrousseau.com` ed25519 + cv25519 keypair, fingerprint `55AFAD364FD9DB3819E61F0C8D688FAFA9144693`, expires 2029-05-15. Published to WKD at `sebastienrousseau.github.io/.well-known/openpgpkey/`. Repo carries the armored public key at `docs/security/security-pubkey.asc`.
+- **`.github/workflows/verify-gpg-wkd.yml`** (N1) — imports both the in-repo `.asc` and the live WKD-fetched key, compares fingerprints, fails loud on mismatch. Runs on push/PR + weekly schedule (Mondays 09:00 UTC). Wires the expiry monitor as the final step.
+- **`scripts/security/check-disclosure-key-expiry.sh`** (N2) — monitors the 2029-05-15 expiry; warns at 90 days remaining, fails CI at 30 days.
+- **`dot fleet apply --verify-hosts`** (N4) — closes the TOFU window per-invocation. Aborts the apply unless every host in `fleet.toml` is already present in `~/.ssh/known_hosts`.
+- **`install.sh` Charm GPG pin** (N5) — pins `CHARM_GPG_EXPECTED_FPR=C026D31B92F9BBE91D5DB75AB07AE17C9E0A6585`; aborts (removing the keyring file) on mismatch.
+- **`scripts/lib/secrets_provider.sh` exit codes** (N6) — `dot_secrets_get` now returns `2` (no provider), `3` (provider returned empty / key not found), or the provider's own rc; stderr names provider + key for diagnosis.
+- **R3 docs drifts** — purged 5 orphan dispatch routes + 1 orphan help-table entry in `dot_local/bin/executable_dot`; relabelled `dot agents` + `dot fleet apply` from "Full" to "Stub (bash-bridged)" on Windows-native in `docs/reference/POWERSHELL_PARITY.md`; corrected Microsoft Build 2026 date from "2026-05-19 in Seattle" to actual `2026-06-02 to 2026-06-03 in San Francisco (Fort Mason)` in `ROADMAP_2026.md`.
+- **R3 mocked-SSH test catches 2 real bugs.** `tests/unit/fleet/test_fleet_apply_mocked_ssh.sh` (5 tests with PATH-shim overriding `ssh`) caught: (a) subshell counter loss via pipe — fixed with `done < <(printf '%s\n' "$entries")`; (b) RETURN trap referencing `local tmpdir` failed under `set -u` — fixed with `printf -v _cleanup 'rm -rf %q' "$tmpdir"`.
+- **R3 strategic reversal.** Ship `dot env emit` BEFORE `--attest` (driven by AGNTCon Amsterdam 2026-09-17 deadline + EU CRA SBOM binding 2026-09-11). Full rationale in `HARD_AUDIT_2026.md` §7.4.
+
+### Round 4 (HARD_AUDIT_2026.md Part 8)
+
+- **Zero reliability findings** — second consecutive 0-finding round. 4 of 5 candidate perf claims were false positives (SSH-agent guard, completion-chain forks, FNM completion, carapace defer) caught by live verification.
+- **Documentation completeness fixes:**
+  - `README.md` — removed 4 stale references to ghost commands `dot verify` / `dot benchmark` / `dot prewarm` (none ship). Routed to `dot secrets verify`, `dot perf`, `dot health`.
+  - `docs/manual/03-reference/05-feature-flags.md` — documented the 9 previously-undocumented flags (`alias_wrapper`, `zellij`, `fuzzel`, `mako`, `foot`, `kanshi`, `touch`, `t2`, `surface`) with purpose + platform applicability + requirements.
+  - `dot_local/share/man/man1/dot.1` — header bumped `v0.2.500 → v0.2.502`, `April → May 2026`.
+  - `dot_config/zsh/rc.d/30-options.zsh.tmpl` — completion-block comment no longer references the non-existent `dot prewarm`.
+- **Strategic outputs** (deferred to follow-up PRs / R5):
+  - OSPS Baseline v2026.02.19 Level-2 adoption path documented as the cross-walk for EU CRA Article 24, NIS2 Article 21, SSDF v1.2.
+  - **R5 headline** identified: Shai-Hulud-class personal-device defence (credential-locality policy + honeytoken + shell-init integrity manifest + post-incident playbook in `SECURITY.md`).
+  - **Strategic leapfrog** identified: `dot attest --format=trustmee-wasm` — Wasm-verifiable workstation attestation (composes SLSA-Graduated + arXiv:2602.13148 TrustMee + MCP-exposed workstation state). No competitor reaches this.
+  - **Top-5 de-facto adoption gaps**: Homebrew tap, AUR `PKGBUILD`, Scoop manifest, Hyprland config, awesome-dotfiles listing.
+
+### Performance + polish (post-R4)
+
+- **`dot_config/zsh/dot_zshrc.tmpl`** — `_cached_eval_impl` writes use `>|` (force-clobber) instead of `>`, so the just-`mktemp`'d temp file is not rejected when the user has `setopt noclobber` set globally via `dot_config/shell/05-core-safety.sh:15`. Fixes the `_cached_eval_impl:64: file exists` warning surfaced on every interactive shell with a cache miss.
+- **`dot_config/shell/00-core-paths.sh.tmpl`** — system paths added via `path_prepend` (which removes duplicates first) instead of `PATH="...:${PATH}"`, eliminating the duplicate-system-path bloat that accumulates when the parent shell already had those entries (macOS launchd default).
+- **`dot_config/zsh/dot_zshrc.tmpl`** — re-apply `typeset -U path` after `_dotfiles_async_init` runs cached `export PATH=...` from mise/atuin/etc, since those bypass zsh's `-U` flag on the `path` array.
+- **`scripts/diagnostics/doctor.sh`** — only flag tools that actually emit shell-init eval and are not already lazy-loaded; raise PATH-length thresholds (60 ok / 120 warn) to match a populated mise-managed dev machine; skip `nu` when `cached_eval.nu` is present.
+- **`dot_config/git/hooks/executable_commit-msg`** — replaced hardcoded `/Users/seb` path with `${HOME}` so the hook is portable across hosts.
+- **`dot_config/fish/conf.d/{direnv,mise-activate}.fish`** — empty shadow files that override Homebrew `vendor_conf.d` to prevent eager init. fish dedupes `conf.d/` by basename, user wins. Saves ~140ms on every fish shell start; both tools are loaded lazily via `_cached_eval` in `init.fish`.
+- **`.devcontainer/Dockerfile`** — chezmoi install now goes through `scripts/ci/install-chezmoi-verified.sh` (SHA256-verified) instead of the unverified `curl -fsSL https://get.chezmoi.io` fallback. Closes R4 §8.3 P3 / mirrors R1 H6 fix in `install.sh`.
+- **`typos.toml`** — extended file exclusions (`**/*.asc`, `**/*.pgp`, `**/*.gpg`, `**/*.sig`) to skip armored cryptographic blobs; added `fpr` / `FPR` to the allow-list (GPG `--with-colons` fingerprint column label).
 
 ## v0.2.501
 

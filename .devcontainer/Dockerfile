@@ -27,8 +27,12 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
     zsh \
     && rm -rf /var/lib/apt/lists/*
 
-# Install chezmoi
-RUN sh -c "$(curl -fsSL https://get.chezmoi.io)" -- -b /usr/local/bin
+# Install chezmoi — SHA256-verified via the same script the production
+# bootstrap uses (closes R4 §8.3 P3 / mirrors R1 H6 fix in install.sh).
+ARG CHEZMOI_VERSION=2.47.1
+COPY scripts/ci/install-chezmoi-verified.sh /tmp/install-chezmoi-verified.sh
+RUN bash /tmp/install-chezmoi-verified.sh "${CHEZMOI_VERSION}" /usr/local/bin \
+    && rm -f /tmp/install-chezmoi-verified.sh
 
 # Install starship prompt
 RUN sh -c "$(curl -fsSL https://starship.rs/install.sh)" -- -y
