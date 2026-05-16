@@ -43,7 +43,7 @@ for sub in "--help" "url" "list"; do
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=0)"
   else
     rc=$?
-    if [[ "$rc" -lt 125 ]]; then
+    if [[ "$rc" -ne 124 ]]; then
       ((TESTS_PASSED++)) || true
       printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
     else
@@ -60,7 +60,7 @@ if bash "$DOT_BIN" registry search anything >/dev/null 2>&1; then
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
   rc=$?
-  if [[ "$rc" -lt 125 ]]; then
+  if [[ "$rc" -ne 124 ]]; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
   else

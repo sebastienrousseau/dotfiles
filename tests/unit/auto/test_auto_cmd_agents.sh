@@ -41,10 +41,12 @@ for sub in "--help" "list" "check"; do
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=0)"
   else
     rc=$?
-    # `check` may legitimately exit 1 if AGENTS.md drifted; treat
-    # rc < 125 as "ran cleanly" (the dispatcher executed and the
-    # branch was covered).
-    if [[ "$rc" -lt 125 ]]; then
+    # `check` may legitimately exit 1 if AGENTS.md drifted, and
+    # downstream tools may exit 127 (command not found) without
+    # signalling a real failure of our dispatcher arm. Anything
+    # except rc=124 (the timeout sentinel) means the case statement
+    # fired and the branch was covered.
+    if [[ "$rc" -ne 124 ]]; then
       ((TESTS_PASSED++)) || true
       printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
     else

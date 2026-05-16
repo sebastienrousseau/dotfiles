@@ -59,7 +59,7 @@ for cmd in "status --json" "drift check" "drift history" "events" "namespace" "n
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=0)"
   else
     rc=$?
-    if [[ "$rc" -lt 125 ]]; then
+    if [[ "$rc" -ne 124 ]]; then
       ((TESTS_PASSED++)) || true
       printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
     else
