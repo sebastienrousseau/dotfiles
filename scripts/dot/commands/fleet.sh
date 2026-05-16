@@ -508,8 +508,12 @@ EOF
   # define `printf -v`), NOT at trap-fire time. A naive
   # `trap 'rm -rf "$tmpdir"' RETURN` is unsafe under set -u because
   # `local tmpdir` is destroyed before the RETURN trap evaluates.
+  # The SC2064 warning ("Use single quotes, otherwise this expands now
+  # rather than when signalled") is exactly the behaviour we want here —
+  # we explicitly want eager expansion. Suppress per-line.
   local _cleanup
   printf -v _cleanup 'rm -rf %q' "$tmpdir"
+  # shellcheck disable=SC2064
   trap "$_cleanup" RETURN
 
   # Validate every hostname against a conservative regex BEFORE fan-out.

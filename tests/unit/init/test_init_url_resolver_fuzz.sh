@@ -78,6 +78,9 @@ _init_refuses "shell_semi"          "alice;rm -rf /"
 _init_refuses "shell_pipe"          "alice|cat"
 _init_refuses "shell_amp"           "alice&background"
 _init_refuses "shell_dollar"        "alice\$VAR"
+# shellcheck disable=SC2016
+# Single quotes are INTENTIONAL — the test injects the literal backtick
+# string to verify it's rejected. Double quotes would execute `whoami`.
 _init_refuses "shell_backtick"      'alice`whoami`'
 _init_refuses "shell_paren"         "alice(payload)"
 _init_refuses "shell_redirect_out"  "alice>file"
