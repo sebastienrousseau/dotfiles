@@ -40,11 +40,11 @@ cmd_aliases() {
     list)
       ui_header "Aliases"
       echo ""
-      printf "  %-18s %-42s %s\n" "Name" "Value" "Source"
-      echo "  $(printf '%.18s' '------------------') $(printf '%.42s' '------------------------------------------') -------------------------"
-      emit_alias_manifest | sort -t $'\t' -k1,1 | while IFS=$'\t' read -r name value file line; do
-        printf "  %-18s %-42s %s:%s\n" "$name" "${value:0:42}" "${file##*/}" "$line"
-      done
+      ui_table_begin "Name" "Value" "Source"
+      while IFS=$'\t' read -r name value file line; do
+        ui_table_add "$name" "${value:0:60}" "${file##*/}:$line"
+      done < <(emit_alias_manifest | sort -t $'\t' -k1,1)
+      ui_table_end
       ;;
     search)
       local query="${1:-}"
@@ -60,9 +60,11 @@ cmd_aliases() {
         ui_warn "No matches" "$query"
         return 1
       fi
-      printf "%s\n" "$results" | while IFS=$'\t' read -r name value file line; do
-        printf "  %-18s %-42s %s:%s\n" "$name" "${value:0:42}" "$file" "$line"
-      done
+      ui_table_begin "Name" "Value" "Source"
+      while IFS=$'\t' read -r name value file line; do
+        ui_table_add "$name" "${value:0:60}" "$file:$line"
+      done <<<"$results"
+      ui_table_end
       ;;
     why)
       local alias_name="${1:-}"

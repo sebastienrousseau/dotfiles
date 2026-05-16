@@ -114,13 +114,16 @@ cmd_agents() {
   case "$subcommand" in
     list)
       ui_header "Agent harness targets"
-      _agents_targets | while IFS=$'\t' read -r harness path; do
+      echo ""
+      ui_table_begin "Harness" "Target Path" "Status"
+      while IFS=$'\t' read -r harness path; do
         if [[ -f "$path" ]]; then
-          ui_ok "$harness" "$path"
+          ui_table_add "$harness" "$path" "rendered"
         else
-          ui_info "$harness" "$path (not yet rendered)"
+          ui_table_add "$harness" "$path" "not yet rendered"
         fi
-      done
+      done < <(_agents_targets)
+      ui_table_end
       ;;
     check)
       local claude_md agents_md

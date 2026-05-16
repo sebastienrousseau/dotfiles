@@ -170,14 +170,16 @@ cmd_registry() {
       index="$(_registry_fetch)" || return $?
       ui_header "Registry modules"
       ui_info "Source" "$(_registry_url)"
+      echo ""
       if ! jq -e '.modules | length > 0' "$index" >/dev/null 2>&1; then
         ui_warn "registry" "no modules published yet — see docs/operations/REGISTRY.md to contribute one"
         return 0
       fi
-      jq -r '.modules[] | "\(.name)\t\(.version // "-")\t\(.description // "")"' "$index" |
-        while IFS=$'\t' read -r name ver desc; do
-          ui_ok "$name" "v$ver  $desc"
-        done
+      ui_table_begin "Module" "Version" "Description"
+      while IFS=$'\t' read -r name ver desc; do
+        ui_table_add "$name" "v$ver" "$desc"
+      done < <(jq -r '.modules[] | "\(.name)\t\(.version // "-")\t\(.description // "")"' "$index")
+      ui_table_end
       ;;
     search)
       _registry_require_jq || return $?
@@ -189,7 +191,11 @@ cmd_registry() {
       local index
       index="$(_registry_fetch)" || return $?
       ui_header "Registry search: $q"
-      jq -r --arg q "$q" '
+      echo ""
+      ui_table_begin "Module" "Version" "Description"
+      while IFS=$'\t' read -r name ver desc; do
+        ui_table_add "$name" "v$ver" "$desc"
+      done < <(jq -r --arg q "$q" '
         .modules[]
         | select(
             (.name // "" | ascii_downcase | contains($q | ascii_downcase)) or
@@ -197,9 +203,8 @@ cmd_registry() {
             ((.tags // []) | map(ascii_downcase) | index($q | ascii_downcase))
           )
         | "\(.name)\t\(.version // "-")\t\(.description // "")"
-      ' "$index" | while IFS=$'\t' read -r name ver desc; do
-        ui_ok "$name" "v$ver  $desc"
-      done
+      ' "$index")
+      ui_table_end
       ;;
     info)
       _registry_require_jq || return $?

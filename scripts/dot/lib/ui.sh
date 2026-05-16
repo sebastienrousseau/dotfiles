@@ -477,6 +477,123 @@ ui_table_sep() {
 }
 
 # ═══════════════════════════════════════════════════════════════════════
+# Buffered table — accumulates rows then renders via `gum table -p`
+# (rounded borders) when gum is on PATH and stdout is a TTY; falls back
+# to the existing printf-based ui_table_header/row otherwise.
+#
+#   ui_table_begin "Tool" "Version" "Source" "Requested"
+#   ui_table_add   "node" "24.14.0" "~/.dotfiles/mise.toml" "24.14.0"
+#   ui_table_add   "node" "25.9.0"  ""                       ""
+#   ui_table_end
+#
+# Cells may contain anything except ASCII US (0x1f), the internal row
+# separator. Empty cells render as blank in both modes.
+#
+# Environment overrides:
+#   DOTFILES_NO_TUI=1   force the printf fallback even if gum is installed
+#   NO_COLOR=…          standard convention; also forces the fallback
+# ═══════════════════════════════════════════════════════════════════════
+_UI_TABLE_HEADERS=()
+_UI_TABLE_ROWS=()
+
+ui_table_begin() {
+  _UI_TABLE_HEADERS=("$@")
+  _UI_TABLE_ROWS=()
+}
+
+ui_table_add() {
+  if [[ "${#_UI_TABLE_HEADERS[@]}" -eq 0 ]]; then
+    return 1
+  fi
+  local IFS=$'\x1f'
+  _UI_TABLE_ROWS+=("$*")
+}
+
+ui_table_end() {
+  if [[ "${#_UI_TABLE_HEADERS[@]}" -eq 0 ]]; then
+    return 0
+  fi
+
+  local use_gum=0
+  if command -v gum >/dev/null 2>&1 &&
+    [[ -t 1 ]] &&
+    [[ "${DOTFILES_NO_TUI:-0}" != "1" ]] &&
+    [[ -z "${NO_COLOR:-}" ]]; then
+    use_gum=1
+  fi
+
+  if ((use_gum)); then
+    local header_row
+    local IFS=$'\x1f'
+    header_row="${_UI_TABLE_HEADERS[*]}"
+    {
+      printf '%s\n' "$header_row"
+      printf '%s\n' "${_UI_TABLE_ROWS[@]}"
+    } | gum table --print --separator=$'\x1f' --border=rounded 2>/dev/null ||
+      _ui_table_printf_fallback
+  else
+    _ui_table_printf_fallback
+  fi
+
+  _UI_TABLE_HEADERS=()
+  _UI_TABLE_ROWS=()
+}
+
+_ui_table_printf_fallback() {
+  ui_init
+  # Pre-scan all buffered rows + headers to compute per-column width so
+  # values aren't truncated or collide. Min width 8, +2 padding.
+  local ncols="${#_UI_TABLE_HEADERS[@]}"
+  local -a widths=()
+  local i
+  for ((i = 0; i < ncols; i++)); do
+    widths[i]="${#_UI_TABLE_HEADERS[i]}"
+  done
+  local row
+  for row in "${_UI_TABLE_ROWS[@]}"; do
+    local -a _fields=()
+    local IFS=$'\x1f'
+    read -ra _fields <<<"$row"
+    for ((i = 0; i < ncols; i++)); do
+      local len="${#_fields[i]}"
+      ((len > widths[i])) && widths[i]=$len
+    done
+  done
+  for ((i = 0; i < ncols; i++)); do
+    ((widths[i] += 2))
+    ((widths[i] < 8)) && widths[i]=8
+  done
+
+  # Emit header (bold when color available), separator, then rows.
+  local out="  "
+  for ((i = 0; i < ncols; i++)); do
+    if [[ "$UI_COLOR" = "1" ]]; then
+      out+="$(printf '%s%-*s%s' "$BOLD" "${widths[i]}" "${_UI_TABLE_HEADERS[i]}" "$NORMAL")"
+    else
+      out+="$(printf '%-*s' "${widths[i]}" "${_UI_TABLE_HEADERS[i]}")"
+    fi
+  done
+  printf '%s\n' "$out"
+
+  local total=2
+  for ((i = 0; i < ncols; i++)); do ((total += widths[i])); done
+  printf '  '
+  for ((i = 0; i < total - 2; i++)); do printf '─'; done
+  printf '\n'
+
+  for row in "${_UI_TABLE_ROWS[@]}"; do
+    local -a _fields=()
+    local IFS=$'\x1f'
+    read -ra _fields <<<"$row"
+    out="  "
+    for ((i = 0; i < ncols; i++)); do
+      out+="$(printf '%-*s' "${widths[i]}" "${_fields[i]:-}")"
+    done
+    printf '%s\n' "$out"
+  done
+}
+
+# ═══════════════════════════════════════════════════════════════════════
 # Logo
 # ═══════════════════════════════════════════════════════════════════════
 

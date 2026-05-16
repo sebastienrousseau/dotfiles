@@ -354,7 +354,25 @@ cmd_env_mise() {
   fi
   case "${1:-list}" in
     list | ls)
-      mise ls
+      if has_command jq; then
+        ui_table_begin "Tool" "Version" "Source" "Requested"
+        while IFS=$'\t' read -r tool ver source req; do
+          ui_table_add "$tool" "$ver" "${source/$HOME/\~}" "$req"
+        done < <(mise ls --json 2>/dev/null | jq -r '
+          to_entries[] as $t
+          | $t.value[]
+          | [
+              $t.key,
+              (.version // "-"),
+              (.source.path // ""),
+              (.requested_version // "")
+            ]
+          | @tsv
+        ')
+        ui_table_end
+      else
+        mise ls
+      fi
       # Surface orphan installs (tool versions on disk that no active config
       # claims). `--dry-run-code` exits 1 iff there is something to prune;
       # the call is fast (no I/O beyond reading the tracked-configs index).
