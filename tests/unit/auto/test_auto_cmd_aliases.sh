@@ -28,8 +28,11 @@ fi
 
 DOT_BIN="$REPO_ROOT/dot_local/bin/executable_dot"
 
+# Note: `aliases cheatsheet` writes docs/ALIASES_CHEATSHEET.md to
+# whatever cwd it runs in — exclude it so the probe doesn't leak
+# generated files into the repo. Cover via fn-exercise only.
 for cmd in "aliases list" "aliases search git" "aliases why ll" \
-  "aliases stats" "aliases cheatsheet" "aliases tiers" \
+  "aliases stats" "aliases tiers" \
   "alias-check"; do
   test_start "dot_$(echo "$cmd" | tr ' -' '__' | tr -dc 'a-z0-9_')"
   if (cd "$REPO_ROOT" && bash "$DOT_BIN" $cmd >/dev/null 2>&1); then
