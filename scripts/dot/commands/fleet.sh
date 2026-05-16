@@ -394,11 +394,19 @@ _fleet_hosts_iter() {
 # each registered host. The §3 hero-feature: nobody else owns the
 # "Ansible for personal devices" niche.
 cmd_fleet_apply() {
-  local dry_run=0 only_host="" cmd="" jobs=4
+  local dry_run=0 only_host="" cmd="" jobs=4 verify_hosts=0
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --dry-run | -n)
         dry_run=1
+        shift
+        ;;
+      --verify-hosts)
+        # Pre-flight check that every host already has a known_hosts
+        # entry, closing the TOFU window before any SSH connection.
+        # R3 audit N4. Without this, accept-new is the default and a
+        # first-connection MITM can seed an attacker key.
+        verify_hosts=1
         shift
         ;;
       --host)
@@ -442,10 +450,13 @@ Behavior:
   carries. Verify the command before running.
 
 Flags:
-  --host <name>    Apply to a single host only.
-  --cmd <shell>    Run a custom command instead of 'dot sync'.
-  --dry-run, -n    Print resolved hosts + planned command; don't SSH.
-  --jobs <n>       Parallelism (default 4).
+  --host <name>      Apply to a single host only.
+  --cmd <shell>      Run a custom command instead of 'dot sync'.
+  --dry-run, -n      Print resolved hosts + planned command; don't SSH.
+  --jobs <n>         Parallelism (default 4).
+  --verify-hosts     Refuse to open any SSH connection unless every
+                     target host already has a key in ~/.ssh/known_hosts.
+                     Use when your threat model excludes the TOFU window.
 EOF
         return 0
         ;;
@@ -527,6 +538,32 @@ EOF
       return 1
     fi
   done <<<"$entries"
+
+  # --verify-hosts: refuse the apply when any target host is missing
+  # from ~/.ssh/known_hosts. Closes the R3 audit N4 TOFU-window gap.
+  if (( verify_hosts == 1 )); then
+    local known_hosts="${HOME}/.ssh/known_hosts"
+    if [[ ! -f "$known_hosts" ]]; then
+      ui_err "verify-hosts" "no $known_hosts — populate before --verify-hosts"
+      return 1
+    fi
+    local unknown_count=0
+    while IFS=$'\t' read -r name ssh profile; do
+      [[ -n "$name" && -n "$ssh" ]] || continue
+      # Strip `user@` prefix and `:port` suffix for the lookup.
+      local hostpart="${ssh#*@}"
+      hostpart="${hostpart%%:*}"
+      if ! ssh-keygen -F "$hostpart" -f "$known_hosts" >/dev/null 2>&1; then
+        ui_err "$name" "no known_hosts entry for $hostpart — would TOFU on first connect"
+        unknown_count=$((unknown_count + 1))
+      fi
+    done <<<"$entries"
+    if (( unknown_count > 0 )); then
+      ui_err "verify-hosts" "$unknown_count host(s) missing from known_hosts — aborting"
+      return 1
+    fi
+    ui_ok "verify-hosts" "all hosts found in known_hosts"
+  fi
 
   # Run one SSH per host, parallelised via background jobs with a
   # semaphore. We DO NOT use `xargs -d` because that flag is GNU-only
