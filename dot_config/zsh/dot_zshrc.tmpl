@@ -649,6 +649,11 @@ _dotfiles_async_init() {
       esac
     fi
   done
+  # mise/atuin/etc emit `export PATH=...` which bypasses zsh's -U flag on
+  # the `path` array — re-apply uniqueness to drop any duplicates baked
+  # into the cached output (e.g. system paths inherited from a dirty
+  # parent shell).
+  typeset -U path
 }
 
 # Deferred Hydration for Zero-Jank Experience

@@ -41,7 +41,14 @@ path_prepend() {
 }
 
 # 1. System Paths (Prepend, but will be pushed down by later prepends)
-PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH}"
+# Use path_prepend so existing entries are removed first — avoids the
+# duplicate-system-path bloat that `PATH="...:${PATH}"` produces when
+# the parent shell already had these (e.g. macOS launchd default PATH).
+path_prepend "/sbin"
+path_prepend "/usr/sbin"
+path_prepend "/bin"
+path_prepend "/usr/bin"
+path_prepend "/usr/local/bin"
 
 # 2. Homebrew Paths (Prepend -> Higher Priority)
 path_prepend "/opt/homebrew/sbin"
