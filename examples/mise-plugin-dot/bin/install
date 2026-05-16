@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# mise-plugin-dot — install a version into $ASDF_INSTALL_PATH.
+#
+# Two install modes:
+#   * Tagged release  (mise install dot@v0.2.502)
+#       Downloads the SHA256-verified release tarball.
+#   * owner/repo spec (mise install dot@alice/cfg)
+#       Runs `dot init alice/cfg --no-apply` and copies the resulting
+#       dot binary into the install path. Skips chezmoi apply so mise
+#       installs don't mutate user state.
+
+set -euo pipefail
+
+VERSION="${ASDF_INSTALL_VERSION:-${MISE_INSTALL_VERSION:?missing install version}}"
+DEST="${ASDF_INSTALL_PATH:-${MISE_INSTALL_PATH:?missing install path}}"
+REPO_DEFAULT="${MISE_DOT_REPO:-sebastienrousseau/dotfiles}"
+
+mkdir -p "$DEST/bin"
+
+if [[ "$VERSION" == */* ]]; then
+  # owner/repo shorthand path
+  if ! command -v dot >/dev/null 2>&1; then
+    echo "install: 'dot' must be on PATH first to bootstrap by owner/repo" >&2
+    echo "  install the maintainer's release with: mise install dot@latest" >&2
+    exit 127
+  fi
+  dot init "$VERSION" --no-apply
+  cp "$HOME/.local/share/chezmoi/dot_local/bin/executable_dot" "$DEST/bin/dot"
+  chmod +x "$DEST/bin/dot"
+  exit 0
+fi
+
+# Tagged-release path: fetch the SHA256-verified tarball
+TAG="v${VERSION#v}"
+TARBALL_URL="https://github.com/${REPO_DEFAULT}/archive/refs/tags/${TAG}.tar.gz"
+SUM_URL="https://github.com/${REPO_DEFAULT}/releases/download/${TAG}/checksums.txt"
+
+tmp="$(mktemp -d -t mise-dot.XXXXXX)"
+trap 'rm -rf "$tmp"' EXIT
+
+curl -fsSL -o "$tmp/dotfiles.tar.gz" "$TARBALL_URL"
+
+# Verify SHA256 when the release ships a checksums file.
+if curl -fsSL -o "$tmp/checksums.txt" "$SUM_URL" 2>/dev/null; then
+  expected="$(awk -v f="${TAG}.tar.gz" '$2==f{print $1}' "$tmp/checksums.txt" | head -1)"
+  if [[ -n "$expected" ]]; then
+    if command -v sha256sum >/dev/null; then actual="$(sha256sum "$tmp/dotfiles.tar.gz" | awk '{print $1}')"
+    elif command -v shasum >/dev/null; then actual="$(shasum -a 256 "$tmp/dotfiles.tar.gz" | awk '{print $1}')"
+    else
+      echo "install: sha256sum/shasum required to verify the release" >&2
+      exit 1
+    fi
+    if [[ "$expected" != "$actual" ]]; then
+      echo "install: SHA256 mismatch for ${TAG}" >&2
+      exit 1
+    fi
+  fi
+fi
+
+# Extract just the dot dispatcher + the scripts/ tree it sources.
+tar -xzf "$tmp/dotfiles.tar.gz" -C "$tmp" --strip-components=1 \
+  dotfiles-${VERSION#v}/dot_local/bin/executable_dot \
+  dotfiles-${VERSION#v}/scripts \
+  2>/dev/null || tar -xzf "$tmp/dotfiles.tar.gz" -C "$tmp" --strip-components=1
+
+install -m 0755 "$tmp/dot_local/bin/executable_dot" "$DEST/bin/dot"
+mkdir -p "$DEST/scripts"
+cp -R "$tmp/scripts/." "$DEST/scripts/"
+
+echo "Installed dot ${VERSION} to ${DEST}"

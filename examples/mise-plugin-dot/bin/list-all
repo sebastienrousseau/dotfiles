@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# mise-plugin-dot — list every installable version.
+# Reads the GitHub releases API for sebastienrousseau/dotfiles.
+# Outputs newest-first, one tag per line.
+
+set -euo pipefail
+
+REPO="${MISE_DOT_REPO:-sebastienrousseau/dotfiles}"
+
+if ! command -v curl >/dev/null 2>&1; then
+  echo "list-all: curl is required" >&2
+  exit 1
+fi
+
+# Authenticated when GITHUB_TOKEN is set (avoids rate-limit on busy hosts).
+auth=()
+[[ -n "${GITHUB_TOKEN:-}" ]] && auth=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
+
+curl -fsSL "${auth[@]}" \
+  "https://api.github.com/repos/${REPO}/releases?per_page=100" |
+  grep -oE '"tag_name":\s*"v?[0-9.]+"' |
+  sed -E 's/"tag_name":\s*"v?([0-9.]+)"/\1/' |
+  head -50

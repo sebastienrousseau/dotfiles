@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# mise-plugin-dot — exec-env hook.
+#
+# If the project root contains a `.dot.toml` with [env] block,
+# export those vars (DOT_PROFILE, DOT_AGENT_PROFILE,
+# DOTFILES_FLEET_HOSTS, etc.) into the session that uses this
+# version of dot. Lets users keep agent/fleet config per-project
+# the same way they keep node/python versions per-project.
+#
+# No-op when no .dot.toml exists.
+
+set -euo pipefail
+
+PROJECT_DOT_TOML="${MISE_PROJECT_ROOT:-${ASDF_DIR:-$PWD}}/.dot.toml"
+[[ -f "$PROJECT_DOT_TOML" ]] || exit 0
+
+# Tiny inline TOML scanner: keys under [env] only, scalar string values.
+in_env=0
+while IFS= read -r line; do
+  line="${line%%#*}"           # strip comments
+  line="${line## }"; line="${line%% }"
+  [[ -z "$line" ]] && continue
+  if [[ "$line" == "[env]" ]]; then in_env=1; continue; fi
+  if [[ "$line" == "["* ]]; then in_env=0; continue; fi
+  if (( in_env )) && [[ "$line" == *=* ]]; then
+    key="${line%%=*}"; val="${line#*=}"
+    key="${key// /}"
+    val="${val## }"; val="${val%% }"
+    val="${val#\"}"; val="${val%\"}"
+    [[ -n "$key" && -n "$val" ]] && printf 'export %s=%q\n' "$key" "$val"
+  fi
+done < "$PROJECT_DOT_TOML"
