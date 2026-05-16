@@ -19,7 +19,13 @@ test_start "bin_exists"
 assert_file_exists "$BIN" "executable_b64 must exist"
 
 test_start "syntax_ok"
-bash -n "$BIN" 2>/dev/null && { ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"; } || { ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"; }
+if bash -n "$BIN" 2>/dev/null; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
+fi
 
 # Encode → decode round-trip. `awk` filters out trailing blank lines
 # that the script appends after the encoded result.
@@ -49,6 +55,12 @@ fi
 
 test_start "b64_help"
 out="$(bash "$BIN" --help 2>&1 || true)"
-[[ "$out" == *Usage* ]] && { ((TESTS_PASSED++)); printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"; } || { ((TESTS_FAILED++)); printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"; }
+if [[ "$out" == *Usage* ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
+fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
