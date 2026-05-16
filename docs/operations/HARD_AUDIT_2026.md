@@ -440,6 +440,7 @@ After R3 closures, the rating table updates as follows (R2 → R3):
 **This week (R3 outstanding):** ship N3 (cosign-sign release artifacts) — 1-day work, closes the last H-tier security item.
 
 **Next week (window to AGNTCon):** ship `dot env emit` per §7.4. Smallest deliverable that closes the 2026-09 strategic window:
+
 1. JSON Schema at `docs/schema/dot-env-v1.json`
 2. `scripts/dot/commands/env.sh` dispatcher
 3. One working emitter: AGENTS.md (reuses `cmd_agents`)

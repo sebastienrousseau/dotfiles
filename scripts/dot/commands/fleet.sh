@@ -541,7 +541,7 @@ EOF
 
   # --verify-hosts: refuse the apply when any target host is missing
   # from ~/.ssh/known_hosts. Closes the R3 audit N4 TOFU-window gap.
-  if (( verify_hosts == 1 )); then
+  if ((verify_hosts == 1)); then
     local known_hosts="${HOME}/.ssh/known_hosts"
     if [[ ! -f "$known_hosts" ]]; then
       ui_err "verify-hosts" "no $known_hosts — populate before --verify-hosts"
@@ -558,7 +558,7 @@ EOF
         unknown_count=$((unknown_count + 1))
       fi
     done <<<"$entries"
-    if (( unknown_count > 0 )); then
+    if ((unknown_count > 0)); then
       ui_err "verify-hosts" "$unknown_count host(s) missing from known_hosts — aborting"
       return 1
     fi

@@ -162,7 +162,9 @@ assert_contains "No supported secrets provider" "$output" "should mention 'No su
 test_start "secrets_get_no_provider_returns_error"
 _clear_provider_env
 dot_secrets_get "some-key" 2>/dev/null
-assert_equals "1" "$?" "dot_secrets_get with no provider should return exit code 1"
+# R3 N6 split the exit codes: rc=1 (bad usage), rc=2 (no provider),
+# rc=3 (provider returned empty). "No provider configured" is rc=2.
+assert_equals "2" "$?" "dot_secrets_get with no provider should return exit code 2 (rc=1 was the pre-N6 behavior)"
 
 # Cleanup
 rm -rf "$_TMP_SECRETS"

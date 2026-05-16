@@ -29,13 +29,22 @@ FAIL_DAYS=30
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --warn-days) WARN_DAYS="$2"; shift 2 ;;
-    --fail-days) FAIL_DAYS="$2"; shift 2 ;;
-    -h|--help)
+    --warn-days)
+      WARN_DAYS="$2"
+      shift 2
+      ;;
+    --fail-days)
+      FAIL_DAYS="$2"
+      shift 2
+      ;;
+    -h | --help)
       sed -n '5,25p' "${BASH_SOURCE[0]}"
       exit 0
       ;;
-    *) echo "Unknown arg: $1" >&2; exit 2 ;;
+    *)
+      echo "Unknown arg: $1" >&2
+      exit 2
+      ;;
   esac
 done
 
@@ -81,7 +90,7 @@ if [[ -z "$expires" || "$expires" == "0" ]]; then
 fi
 
 now=$(date -u +%s)
-remaining_days=$(( (expires - now) / 86400 ))
+remaining_days=$(((expires - now) / 86400))
 
 expires_date=$(date -u -r "$expires" '+%Y-%m-%d' 2>/dev/null || date -u -d "@$expires" '+%Y-%m-%d' 2>/dev/null || echo "(date format unknown)")
 
@@ -89,12 +98,12 @@ echo "Disclosure key expires: $expires_date ($remaining_days days from now)"
 echo "  warn threshold: $WARN_DAYS days"
 echo "  fail threshold: $FAIL_DAYS days"
 
-if (( remaining_days < FAIL_DAYS )); then
+if ((remaining_days < FAIL_DAYS)); then
   echo "::error::Disclosure key expires in $remaining_days days. Rotate now per docs/security/KEY_ROTATION.md." >&2
   exit 1
 fi
 
-if (( remaining_days < WARN_DAYS )); then
+if ((remaining_days < WARN_DAYS)); then
   echo "::warning::Disclosure key expires in $remaining_days days. Schedule rotation per docs/security/KEY_ROTATION.md." >&2
 fi
 

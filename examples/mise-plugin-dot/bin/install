@@ -44,8 +44,10 @@ curl -fsSL -o "$tmp/dotfiles.tar.gz" "$TARBALL_URL"
 if curl -fsSL -o "$tmp/checksums.txt" "$SUM_URL" 2>/dev/null; then
   expected="$(awk -v f="${TAG}.tar.gz" '$2==f{print $1}' "$tmp/checksums.txt" | head -1)"
   if [[ -n "$expected" ]]; then
-    if command -v sha256sum >/dev/null; then actual="$(sha256sum "$tmp/dotfiles.tar.gz" | awk '{print $1}')"
-    elif command -v shasum >/dev/null; then actual="$(shasum -a 256 "$tmp/dotfiles.tar.gz" | awk '{print $1}')"
+    if command -v sha256sum >/dev/null; then
+      actual="$(sha256sum "$tmp/dotfiles.tar.gz" | awk '{print $1}')"
+    elif command -v shasum >/dev/null; then
+      actual="$(shasum -a 256 "$tmp/dotfiles.tar.gz" | awk '{print $1}')"
     else
       echo "install: sha256sum/shasum required to verify the release" >&2
       exit 1
