@@ -84,4 +84,26 @@ run_under_ui progress_25         ui_progress 25
 run_under_ui progress_50         ui_progress 50 "Halfway done"
 run_under_ui progress_100        ui_progress 100 "Complete"
 
+# Spinner — start without TTY no-ops cleanly; stop reaps the bg loop.
+run_under_ui spinner_pair        bash -c 'source "'"$UI"'"; ui_init; ui_spinner_start "test"; ui_spinner_stop'
+
+# ui_run_cmd in non-TTY mode (the round-2 mktemp-race fix lives here).
+# Both success and failure paths exercise different branches.
+run_under_ui run_cmd_success     bash -c 'source "'"$UI"'"; ui_init; ui_run_cmd "label" 0 1 true'
+run_under_ui run_cmd_failure     bash -c 'source "'"$UI"'"; ui_init; ui_run_cmd "label" 0 1 false'
+
+# Toast / table primitives — visual helpers used by `dot doctor`,
+# `dot fleet`, etc. Each has a no-arg / single-arg / multi-cell shape.
+run_under_ui toast_default       ui_toast "Hello"
+run_under_ui toast_success       ui_toast "Saved" "ok"
+run_under_ui toast_warn          ui_toast "Drift detected" "warn"
+run_under_ui table_header        ui_table_header "Col A" "Col B" "Col C"
+run_under_ui table_row           ui_table_row    "data1" "data2" "data3"
+run_under_ui table_sep           ui_table_sep
+
+# Banner helpers — branding strings used by every command's banner.
+run_under_ui logo_dot            ui_logo_dot
+run_under_ui product_banner      ui_product_banner "Dot" "Reference"
+run_under_ui dot_banner          ui_dot_banner "Reference"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

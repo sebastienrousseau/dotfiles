@@ -241,6 +241,19 @@ declare -a PROBES=(
   # ── Help via search ──
   "search_help       search help"
   "search_dark       search dark"
+  # ── §3 strategic commands (agents/init/registry/fleet apply) ──
+  "agents_help       agents --help"
+  "agents_list       agents list"
+  "agents_check      agents check"
+  "init_help         init --help"
+  "init_dry_alice    init alice --dry-run"
+  "init_dry_owner    init alice/cfg --dry-run"
+  "init_dry_https    init https://example.com/r.git --dry-run"
+  "init_rejects_http init http://example.com/r.git --dry-run"
+  "registry_help     registry --help"
+  "registry_url      registry url"
+  "registry_install_stub registry install some-module"
+  "fleet_apply_help  fleet apply --help"
 )
 
 set +e
