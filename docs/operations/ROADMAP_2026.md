@@ -13,7 +13,7 @@ The structure mirrors a 6-month execution window:
 | Phase | Window | Theme |
 |---|---|---|
 | **A. Outstanding immediate** | now | Tasks blocked on user input (1 item) |
-| **B. Build 2026 window** | days 0–4 (by 2026-05-19) | Ship before Microsoft Build keynotes (Codex Windows tailwind) |
+| **B. Build 2026 window** | days 0–17 (by 2026-06-02) | Ship before Microsoft Build keynotes in San Francisco (Codex Windows + WinUI Agent Plugin tailwind) |
 | **C. Phase 1: Foundation** | weeks 1–4 | The three "go-deep" features + AGENTS.md coverage + cold-start lazy-load |
 | **D. Phase 2: Validation** | weeks 5–8 | Evidence the new code works for non-maintainers |
 | **E. Phase 3: Distribution** | weeks 9–12 | Show HN launch + partnerships + first case study |
@@ -45,9 +45,11 @@ Effort is given as **person-days** (P-d) assuming a solo maintainer + AI assist 
 
 ---
 
-## B. Build 2026 window (days 0–4, ship before 2026-05-19)
+## B. Build 2026 window (days 0–17, ship before 2026-06-02)
 
-The combination of Codex Windows GA (2026-03-04, 500k waitlist → 2M WAU in 4 weeks), PowerShell 7.6 LTS GA (2026-03-12), and the Microsoft Build 2026 keynote week (May 19–21) opens a one-week marketing window. Three small items maximise its value.
+The combination of Codex Windows GA (2026-03-04, 500k waitlist → 2M WAU in 4 weeks), PowerShell 7.6 LTS GA (2026-03-12), Microsoft's WinUI Agent Plugin announcement (2026-05-13, native Windows targeting from agent CLIs), and the Microsoft Build 2026 keynote week (2026-06-02 to 2026-06-03 at Fort Mason, San Francisco) opens a ~2-week marketing window. Three small items maximise its value.
+
+> **R3 date correction (2026-05-16):** earlier roadmap text said "2026-05-19 in Seattle". Primary sources (Thurrott session catalog, Windows Central, official build.microsoft.com) now confirm SF/June. The Codex Windows tailwind is unaffected; only the Show-HN timing shifts ~2 weeks right.
 
 ### B1 — Add `windows-latest` to the CI matrix — **1 P-d**
 

@@ -272,7 +272,6 @@ health|Run the health dashboard with optional fixes.|dot health -v\ndot health -
 perf|Measure shell performance and emit structured timing.|dot perf -j -r 1\ndot perf -p\ndot perf -t 200
 security-score|Assess workstation security posture.|dot security-score -j\ndot security-score -q
 snapshot|Capture the current workstation snapshot.|dot snapshot -b\ndot snapshot -b -f
-verify|Run post-change verification checks.|dot verify\ndot verify -s
 restore|Restore from a backup or git ref.|dot restore -l\ndot restore -L\ndot restore -g HEAD~1
 rollback|Restore a previous configuration snapshot.|dot rollback
 lint|Run shell quality checks for the repo.|dot lint\ndot lint -c\ndot lint -f
@@ -312,11 +311,9 @@ update|core
 add|core
 diff|core
 status|core
-remove|core
 cd|core
 edit|core
 commit|core
-clean-cache|core
 doctor|diagnostics
 scorecard|diagnostics
 score|diagnostics
@@ -332,12 +329,10 @@ heal|diagnostics
 health|diagnostics
 health-check|diagnostics
 smoke-test|diagnostics
-verify|diagnostics
 attest|diagnostics
 attestation|diagnostics
 security-score|diagnostics
 drift|diagnostics
-benchmark|diagnostics
 intelligence|diagnostics
 conflicts|diagnostics
 locks|diagnostics
@@ -389,7 +384,6 @@ lock-screen|security
 usb-safety|security
 upgrade|meta
 cache-refresh|meta
-prewarm|meta
 docs|meta
 learn|meta
 keys|meta

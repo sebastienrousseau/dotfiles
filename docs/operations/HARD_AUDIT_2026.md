@@ -312,7 +312,7 @@ Round 1 said "don't chase Windows parity before Linux is bulletproof." Round 2 d
 - **Codex Windows launched 2026-03-04**, hit 500k waitlist + 2M WAU in four weeks. Windows-AI-coding audience is now larger than macOS-AI-coding and growing faster.
 - **PowerShell 7.6 LTS GA shipped 2026-03-12**; PowerShell 7.4 LTS dies 2026-11-10. The language is current.
 - **DSC v3 + winget Configuration** closed the gap between Linux dotfiles and Windows IaC.
-- **Microsoft Build 2026** is 2026-05-19 to 2026-05-21 — three days from now. Show HN the Tuesday after Build keynotes, ride the Codex Windows tailwind.
+- **Microsoft Build 2026** is 2026-06-02 to 2026-06-03 in San Francisco (Fort Mason). Show HN the Tuesday after the Nadella keynote (2026-06-09 ideal), ride the Codex Windows + WinUI Agent Plugin tailwind. (R3 correction: earlier audit text said "2026-05-19 in Seattle" — primary sources now confirm the SF/June dates.)
 
 **Decision:** ship the `windows-latest` runner this week, retitle README to call PowerShell 7.5+ a first-class target, and launch Show HN with the Windows screenshot as one of the demo assets. The supply-chain story carries the Linux/macOS audience; the Windows audience has no competitor offering signed, attested dotfiles with fleet management.
 
