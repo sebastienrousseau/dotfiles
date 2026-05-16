@@ -504,7 +504,13 @@ EOF
   # `-t` template includes PID + random, so two concurrent `dot fleet
   # apply` invocations from the same user can't collide on $tmpdir.
   tmpdir="$(mktemp -d -t dotfiles-fleet.XXXXXX)"
-  trap 'rm -rf "$tmpdir"' RETURN
+  # Capture tmpdir's value at trap-definition time (via the eval-on-
+  # define `printf -v`), NOT at trap-fire time. A naive
+  # `trap 'rm -rf "$tmpdir"' RETURN` is unsafe under set -u because
+  # `local tmpdir` is destroyed before the RETURN trap evaluates.
+  local _cleanup
+  printf -v _cleanup 'rm -rf %q' "$tmpdir"
+  trap "$_cleanup" RETURN
 
   # Validate every hostname against a conservative regex BEFORE fan-out.
   # `user@host:port` characters only — refuses single quotes, backticks,
@@ -548,7 +554,12 @@ EOF
   done <<<"$entries"
   wait
 
-  printf '%s\n' "$entries" | while IFS=$'\t' read -r name ssh profile; do
+  # `while < <(printf ...)` instead of `printf ... | while` — the
+  # pipe form runs the loop body in a subshell, so the ok/fail
+  # counters never propagate back to the parent. Caught by
+  # tests/unit/fleet/test_fleet_apply_mocked_ssh.sh which exercised
+  # the full apply path (the dry-run test missed this).
+  while IFS=$'\t' read -r name ssh profile; do
     [[ -n "$name" ]] || continue
     if [[ -s "$tmpdir/$name.status" ]] && head -1 "$tmpdir/$name.status" | grep -q '^ok'; then
       ui_ok "$name" "$ssh"
@@ -562,7 +573,7 @@ EOF
     local _evt_status="unknown"
     [[ -s "$tmpdir/$name.status" ]] && _evt_status="$(head -1 "$tmpdir/$name.status")"
     _fleet_emit_event "apply" "$_evt_status" "host=$name" "cmd=$effective_cmd"
-  done
+  done < <(printf '%s\n' "$entries")
 
   ui_info "Summary" "$ok ok / $fail failed / $total total"
   [[ "$fail" -eq 0 ]]
