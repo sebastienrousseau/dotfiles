@@ -46,4 +46,11 @@ extend-exclude = [
   "flake.lock",
   "package-lock.json",
   "tests/snapshots/**",
+  # Binary-armored cryptographic material — random base64 bytes
+  # routinely trip typos rules ("BA" → BY/BE, etc.). Verify keys
+  # via fingerprint, not lexical content.
+  "**/*.asc",
+  "**/*.pgp",
+  "**/*.gpg",
+  "**/*.sig",
 ]
