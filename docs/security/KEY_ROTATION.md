@@ -21,10 +21,10 @@ Closes the rotation half of [#870](https://github.com/sebastienrousseau/dotfiles
 | Field | Value |
 |---|---|
 | Identity | `security@sebastienrousseau.com` |
-| Fingerprint | **PLACEHOLDER** — paste the full 40-hex fingerprint from `gpg --fingerprint` once the key is generated |
-| Algorithm | ED25519 *(or RSA-4096 for the legacy line)* |
-| Created | YYYY-MM-DD |
-| Expires | YYYY-MM-DD (one year from creation) |
+| Fingerprint | `55AFAD364FD9DB3819E61F0C8D688FAFA9144693` |
+| Algorithm | ED25519 signing primary + CV25519 encryption subkey |
+| Created | 2026-05-16 |
+| Expires | 2029-05-15 (3 years from creation) |
 | WKD URL | <https://sebastienrousseau.com/.well-known/openpgpkey/hu/qpzqfwauiwxnu1xrf5h47bunsho44p6f> |
 | Cross-reference | matches the SSH signing key in `dot_config/git/allowed_signers.tmpl` |
 

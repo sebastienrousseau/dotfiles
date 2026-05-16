@@ -16,7 +16,7 @@ The goal stated by the maintainer: become the de facto workstation provisioning 
 
 | # | File:line | Finding | Recommended fix |
 |---|---|---|---|
-| C1 | `.github/SECURITY.md:55` and `docs/security/KEY_ROTATION.md:24` | GPG disclosure key is `PLACEHOLDER`. Researchers cannot encrypt vulnerability reports today. | Generate `security@sebastienrousseau.com` GPG key, publish via WKD, paste fingerprint in both files. |
+| C1 | `.github/SECURITY.md:55` and `docs/security/KEY_ROTATION.md:24` | **✅ Closed.** GPG disclosure key generated (ed25519 primary + cv25519 encryption subkey, expires 2029-05-15). Fingerprint `55AFAD364FD9DB3819E61F0C8D688FAFA9144693` paste-replaced in both files; armored public key checked in at `docs/security/security-pubkey.asc`. WKD publish is the next mechanical step on the maintainer's web host (`openpgpkey.sebastienrousseau.com/.well-known/openpgpkey/sebastienrousseau.com/hu/<hash>`). |
 | C2 | `docs/manual/00-introduction.md:7`, `docs/manual/_toc.yml:5`, `docs/index.md:9-10,41`, `docs/manual/03-reference/02-config-files.md:36,222` | Version drift — five doc surfaces still say `v0.2.501` but `.chezmoidata.toml` declares `0.2.502`. | Mechanical bump to `0.2.502`. |
 | C3 | `docs/manual/03-reference/01-dot-cli.md:154-213,364-366` and `docs/manual/command-index.md:14,23,26,45,58,61` | Six commands documented but not implemented: `dot verify`, `dot benchmark`, `dot prewarm`, `dot clean-cache`, `dot remove`, `dot update`. | Remove the doc sections (these were never shipped) or open issues to implement; do not leave doc-only commands. |
 
@@ -167,7 +167,7 @@ Standard-setting:
 
 **This month (research + targeted):** mostly landed
 
-1. ⏳ Generate GPG disclosure key, publish via WKD, fill placeholders (C1). **Needs user input.**
+1. ✅ Generated GPG disclosure key (ed25519+cv25519, exp 2029-05-15), fingerprint `55AF…4693` in both files, public key at `docs/security/security-pubkey.asc` (C1). WKD publish on `openpgpkey.sebastienrousseau.com` is the remaining mechanical step.
 2. ✅ Removed the unverified `get.chezmoi.io` fall-back; verified installer is now the only path (H6). (commit TBD)
 3. ✅ H7 was a **false positive** on review — `install_homebrew()` already SHA256-verifies.
 4. ✅ H8 was **overstated** on review — `github_asset_url` already obtains URLs from the same authenticated GitHub API call; HTTPS + cert validation covers the threat model.
@@ -214,7 +214,7 @@ A second six-agent pass was run on 2026-05-15 after the strategic-feature wave (
 
 ### 6.1 Round 1 verification (all confirmed in code)
 
-Every "✅ shipped" claim in Part 5 was re-verified against the current file:line. All thirteen reliability fixes (C2, C3, H1, H3, H4, H5, H6, H9, M1, M3, M4, M5, M7) are in place and behaving as described. C1 (GPG disclosure key) remains a `PLACEHOLDER` — still needs user input.
+Every "✅ shipped" claim in Part 5 was re-verified against the current file:line. All thirteen reliability fixes (C2, C3, H1, H3, H4, H5, H6, H9, M1, M3, M4, M5, M7) are in place and behaving as described. **C1 (GPG disclosure key) is now closed** — ed25519 primary + cv25519 encryption subkey generated, fingerprint `55AFAD364FD9DB3819E61F0C8D688FAFA9144693` published in `.github/SECURITY.md`, `docs/security/KEY_ROTATION.md`, and `docs/security/security-pubkey.asc`. The only residual mechanical step is the WKD publish (`openpgpkey.sebastienrousseau.com`).
 
 ### 6.2 New findings in §3 code
 
