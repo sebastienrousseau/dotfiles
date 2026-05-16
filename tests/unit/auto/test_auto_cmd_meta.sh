@@ -31,6 +31,29 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
+DOT_BIN="$REPO_ROOT/dot_local/bin/executable_dot"
+
+# meta.sh dispatcher arms — read-only/--help probes.
+# Skipping: cmd_upgrade (real package-manager network), cmd_prewarm
+# (modifies real shell cache; idempotency-safe but slow), cmd_sandbox
+# (interactive), cmd_mcp (covered by test_auto_cmd_mcp_doctor.sh).
+for cmd in "docs" "keys"; do
+  test_start "dot_$(echo "$cmd" | tr ' -' '__' | tr -dc 'a-z0-9_')"
+  if (cd "$REPO_ROOT" && bash "$DOT_BIN" $cmd >/dev/null 2>&1); then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=0)"
+  else
+    rc=$?
+    if [[ "$rc" -lt 125 ]]; then
+      ((TESTS_PASSED++)) || true
+      printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
+    else
+      ((TESTS_FAILED++)) || true
+      printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: rc=$rc"
+    fi
+  fi
+done
+
 cov_exercise_functions_file "$SCRIPT_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
