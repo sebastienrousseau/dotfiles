@@ -225,7 +225,15 @@ TOML
         {
           printf '%s\n\n' "$_header"
           _agents_body "$claude_md"
-          printf '\n---\n\n**Canonical source:** [`CLAUDE.md`](./CLAUDE.md) — keep in sync via `dot agents render`.\n'
+          # Heredoc instead of printf — Codacy/shellcheck flags
+          # printf-with-backticks-in-single-quotes (SC2016) as
+          # ambiguous even when the backticks are literal Markdown.
+          cat <<'FOOTER'
+
+---
+
+**Canonical source:** [`CLAUDE.md`](./CLAUDE.md) — keep in sync via `dot agents render`.
+FOOTER
         } >"$_path"
         chmod 0644 "$_path" 2>/dev/null || true
         ui_ok "$_harness" "rendered → $_path"

@@ -137,7 +137,9 @@ EOF
   ui_header "Bootstrap dotfiles from $user_arg"
   ui_info "Source URL" "$url"
   ui_info "Target dir" "$source_dir"
-  ui_info "Apply after?" "$([[ "$apply" -eq 1 ]] && echo yes || echo no)"
+  local _apply_label="no"
+  [[ "$apply" -eq 1 ]] && _apply_label="yes"
+  ui_info "Apply after?" "$_apply_label"
 
   if [[ "$dry_run" -eq 1 ]]; then
     ui_ok "Dry-run" "no changes made"

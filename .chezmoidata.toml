@@ -14,7 +14,7 @@ machine = ""
 # names a theme that isn't defined. The hard-coded fallback in
 # dot_gitconfig.tmpl is `macos-monterey-dark`, which also isn't a
 # valid key — so the default has to render on its own.
-theme = "windows-dark"
+theme = "miami-dark"
 
 # Terminal settings
 terminal_font_family = "JetBrainsMono Nerd Font"

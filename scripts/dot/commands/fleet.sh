@@ -296,12 +296,17 @@ cmd_fleet_namespace() {
         # Avoids `sed -i` portability dance (GNU `-i` vs BSD `-i ''`).
         local _tmp
         _tmp="$(mktemp "${data_file}.XXXXXX")" || die "Cannot create tempfile"
-        sed "s/^namespace = \".*\"/namespace = \"$new_ns\"/" "$data_file" >"$_tmp" &&
-          mv "$_tmp" "$data_file" ||
-          {
+        # Explicit if/else instead of A && B || C — the latter (SC2015)
+        # silently runs C when B itself fails, masking real mv errors.
+        if sed "s/^namespace = \".*\"/namespace = \"$new_ns\"/" "$data_file" >"$_tmp"; then
+          if ! mv "$_tmp" "$data_file"; then
             rm -f "$_tmp"
-            die "Failed to update namespace"
-          }
+            die "Failed to commit namespace update"
+          fi
+        else
+          rm -f "$_tmp"
+          die "Failed to render namespace update"
+        fi
       fi
       ui_ok "Namespace" "Set to '$new_ns'. Run 'dot sync' to apply."
       _fleet_emit_event "namespace_set" "ok" "namespace=$new_ns"
@@ -554,7 +559,9 @@ EOF
       ui_err "$name" "$ssh${err_summary}"
       fail=$((fail + 1))
     fi
-    _fleet_emit_event "apply" "$([[ -s "$tmpdir/$name.status" ]] && head -1 "$tmpdir/$name.status" || echo 'unknown')" "host=$name" "cmd=$effective_cmd"
+    local _evt_status="unknown"
+    [[ -s "$tmpdir/$name.status" ]] && _evt_status="$(head -1 "$tmpdir/$name.status")"
+    _fleet_emit_event "apply" "$_evt_status" "host=$name" "cmd=$effective_cmd"
   done
 
   ui_info "Summary" "$ok ok / $fail failed / $total total"

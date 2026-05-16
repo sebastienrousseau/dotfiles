@@ -148,15 +148,20 @@ cmd_registry() {
       cfg="$(_registry_config_file)"
       mkdir -p "$(dirname "$cfg")"
       # Atomic write so a concurrent invocation can't read a half-
-      # written file.
+      # written file. Explicit if/else (avoid SC2015 A && B || C).
       local _tmp
       _tmp="$(mktemp "${cfg}.XXXXXX")"
-      printf 'url = "%s"\n' "$new_url" >"$_tmp" && mv "$_tmp" "$cfg" ||
-        {
+      if printf 'url = "%s"\n' "$new_url" >"$_tmp"; then
+        if ! mv "$_tmp" "$cfg"; then
           rm -f "$_tmp"
-          ui_err "set-url" "failed to write $cfg"
+          ui_err "set-url" "failed to commit $cfg"
           return 1
-        }
+        fi
+      else
+        rm -f "$_tmp"
+        ui_err "set-url" "failed to write $cfg"
+        return 1
+      fi
       ui_ok "registry" "set to $new_url ($cfg)"
       ;;
     list)
