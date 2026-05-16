@@ -52,7 +52,9 @@ trap 'rm -rf "$_fleet_fixture"; cov_teardown_sandbox' EXIT
 
 for cmd in "status --json" "drift check" "drift history" "events" "namespace" "namespace show" "apply --help" "apply --dry-run" "apply --dry-run --host laptop"; do
   test_start "dot_fleet_$(echo "$cmd" | tr ' -' '__' | tr -dc 'a-z0-9_')"
-  if ( cd "$REPO_ROOT" && bash "$DOT_BIN" fleet $cmd >/dev/null 2>&1 ); then
+  # `$cmd` is INTENDED to word-split into separate argv entries.
+  # shellcheck disable=SC2086
+  if (cd "$REPO_ROOT" && bash "$DOT_BIN" fleet $cmd >/dev/null 2>&1); then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=0)"
   else

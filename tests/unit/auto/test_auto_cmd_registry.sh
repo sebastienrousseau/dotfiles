@@ -38,7 +38,7 @@ export DOTFILES_REGISTRY_URL="$LOCAL_REGISTRY"
 
 for sub in "--help" "url" "list"; do
   test_start "dot_registry_$(echo "$sub" | tr -d -- '-')"
-  if bash "$DOT_BIN" registry $sub >/dev/null 2>&1; then
+  if bash "$DOT_BIN" registry "$sub" >/dev/null 2>&1; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=0)"
   else

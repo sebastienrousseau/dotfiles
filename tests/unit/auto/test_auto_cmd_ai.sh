@@ -43,6 +43,10 @@ for cmd in "ai" "ai-setup --help" "ai-query --help" \
   "gemini --help" "goose --help" "kiro --help" "sgpt --help" \
   "ollama --help" "opencode --help" "aider --help"; do
   test_start "dot_$(echo "$cmd" | tr ' -' '__' | tr -dc 'a-z0-9_')"
+  # `$cmd` is INTENDED to word-split into separate argv entries
+  # (e.g. `ai-setup --help` → `ai-setup`, `--help`). Quoting would
+  # pass the whole string as one positional arg.
+  # shellcheck disable=SC2086
   if (cd "$REPO_ROOT" && bash "$DOT_BIN" $cmd >/dev/null 2>&1); then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=0)"

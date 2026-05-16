@@ -37,6 +37,8 @@ for cmd in "tools" "tools --help" \
   "new --help" "packages" \
   "env" "profile" "alias-check" "aliases list"; do
   test_start "dot_$(echo "$cmd" | tr ' -' '__' | tr -dc 'a-z0-9_')"
+  # `$cmd` is INTENDED to word-split into separate argv entries.
+  # shellcheck disable=SC2086
   if (cd "$REPO_ROOT" && bash "$DOT_BIN" $cmd >/dev/null 2>&1); then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=0)"

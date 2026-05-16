@@ -39,6 +39,8 @@ DOT_BIN="$REPO_ROOT/dot_local/bin/executable_dot"
 # (interactive), cmd_mcp (covered by test_auto_cmd_mcp_doctor.sh).
 for cmd in "docs" "keys"; do
   test_start "dot_$(echo "$cmd" | tr ' -' '__' | tr -dc 'a-z0-9_')"
+  # `$cmd` is INTENDED to word-split.
+  # shellcheck disable=SC2086
   if (cd "$REPO_ROOT" && bash "$DOT_BIN" $cmd >/dev/null 2>&1); then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=0)"

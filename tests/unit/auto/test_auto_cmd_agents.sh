@@ -36,7 +36,7 @@ fi
 # find `.chezmoidata.toml`.
 for sub in "--help" "list" "check"; do
   test_start "dot_agents_$(echo "$sub" | tr -- - _)"
-  if ( cd "$REPO_ROOT" && bash "$DOT_BIN" agents $sub >/dev/null 2>&1 ); then
+  if (cd "$REPO_ROOT" && bash "$DOT_BIN" agents "$sub" >/dev/null 2>&1); then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=0)"
   else

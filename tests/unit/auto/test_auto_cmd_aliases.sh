@@ -35,6 +35,8 @@ for cmd in "aliases list" "aliases search git" "aliases why ll" \
   "aliases stats" "aliases tiers" \
   "alias-check"; do
   test_start "dot_$(echo "$cmd" | tr ' -' '__' | tr -dc 'a-z0-9_')"
+  # `$cmd` is INTENDED to word-split. shellcheck disable=SC2086
+  # shellcheck disable=SC2086
   if (cd "$REPO_ROOT" && bash "$DOT_BIN" $cmd >/dev/null 2>&1); then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=0)"
