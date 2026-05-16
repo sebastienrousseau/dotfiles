@@ -35,6 +35,8 @@ dsk = "dsk"            # `dsk` alias = navigate to ~/Desktop
 dwn = "dwn"            # `dwn` alias = navigate to ~/Downloads
 mus = "mus"            # `mus` alias = navigate to ~/Music
 pic = "pic"            # `pic` alias = navigate to ~/Pictures
+fpr = "fpr"            # GPG --with-colons fingerprint column label (/^fpr:/)
+FPR = "FPR"            # uppercase variant in shell variable names (CHARM_GPG_EXPECTED_FPR)
 
 [files]
 # Skip auto-generated / vendored content
