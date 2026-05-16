@@ -274,7 +274,7 @@ dot_command_summary() {
       echo "Manage secrets (set/get/list/load/provider)."
       ;;
     env)
-      echo "Load secret buckets into shell exports."
+      echo "List mise-managed toolchain versions and sources."
       ;;
     secrets-create)
       echo "Create a new encrypted secrets file."

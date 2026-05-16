@@ -353,7 +353,37 @@ cmd_env_mise() {
     exit 1
   fi
   case "${1:-list}" in
-    list | ls) mise ls ;;
+    list | ls)
+      mise ls
+      # Surface orphan installs (tool versions on disk that no active config
+      # claims). `--dry-run-code` exits 1 iff there is something to prune;
+      # the call is fast (no I/O beyond reading the tracked-configs index).
+      if mise prune --dry-run-code --quiet >/dev/null 2>&1; then
+        :
+      else
+        echo ""
+        ui_warn "orphan installs" "tool versions on disk are not requested by any config"
+        ui_info "to clean" "run 'dot env prune' (dry-run) or 'dot env prune --yes' to commit"
+      fi
+      ;;
+    prune)
+      shift
+      local commit=0
+      for arg in "$@"; do
+        case "$arg" in
+          --yes | -y) commit=1 ;;
+        esac
+      done
+      if ((commit)); then
+        mise prune
+      else
+        ui_info "dry-run" "showing what 'mise prune' would remove (pass --yes to commit)"
+        echo ""
+        mise prune --dry-run
+        echo ""
+        ui_info "next" "re-run with 'dot env prune --yes' to actually uninstall"
+      fi
+      ;;
     install)
       shift
       # Validate tool names to prevent injection

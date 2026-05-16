@@ -625,7 +625,7 @@ case "$route" in
     _user_cmd="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/commands/${COMMAND}.sh"
     if [[ -f "$_user_cmd" ]]; then
       # Run in a subshell so a user `exit` doesn't kill the dot CLI.
-      ( source "$_user_cmd" "$@" )
+      (source "$_user_cmd" "$@")
       exit $?
     else
       echo "Unknown command: ${COMMAND:-}" >&2
