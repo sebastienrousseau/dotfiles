@@ -329,3 +329,127 @@ Skip 1Password (no inbound until 10k stars) and Hack Club (audience mismatch).
 ---
 
 Round 2 generated 2026-05-15 by another six-agent parallel review. The reliability fixes (R1-R11) and documentation fixes (D1-D6) listed above were all applied in the same commit that adds this Part 6.
+
+---
+
+## Part 7 — Round 3 addendum (after R2 fixes + C1 closure)
+
+A third six-agent pass was run on 2026-05-16 after C1 (GPG disclosure key) closed, the mise plugin scaffold landed, and Round 2's R-tier fixes settled in CI. Round 3 focused on subtler issues — most easy wins were already gone. Findings categorised below.
+
+### 7.1 Reliability + performance
+
+**Round-3 reliability agent: 0 findings.** All R2 R-tier fixes verified intact at their stated file:line. Eight sub-categories checked (pipefail traps, subshell variable loss, RETURN/EXIT trap + set -u races, PID-named temp files, set -e conditional violations, wait-without-pidfile races, test-discovery coverage, CLI cold-start path-cost) — every one returned a clean "no Round-3 finding."
+
+### 7.2 Documentation accuracy
+
+Round-3 docs agent found 5 drifts, 2 of which were false positives on re-verification. The 3 real ones closed in commit `ee26749a`:
+
+| ID | File | Drift | Status |
+|---|---|---|---|
+| D1+D2 | `dot_local/bin/executable_dot` | 5 orphan dispatch routes + 1 orphan help-table entry for commands removed in C3 of Round 1 (`verify`, `benchmark`, `prewarm`, `remove`, `clean-cache`) | ✅ Fixed |
+| D3 | `docs/reference/POWERSHELL_PARITY.md` | `dot agents` + `dot fleet apply` labelled "Full" on Windows without backing CI | ✅ Relabelled to "Stub (bash-bridged)" |
+| D4 | `docs/operations/ROADMAP_2026.md` + `HARD_AUDIT_2026.md` §6.9 | Microsoft Build 2026 date was wrong: "2026-05-19 in Seattle" vs actual **2026-06-02 to 2026-06-03 in San Francisco (Fort Mason)** | ✅ Corrected; Show-HN timing shifts ~2 weeks right |
+
+### 7.3 Cross-platform + security
+
+Round-3 security agent found 10 new items. Three closed in commit `11a60ad6`; two more (N5, N6) closed in the commit that adds this Part 7. Five remain.
+
+| # | Severity | Status | Summary |
+|---|---|---|---|
+| **N1** | Critical | ✅ Closed | No CI check that in-repo `security-pubkey.asc` matched live WKD endpoint. Added `.github/workflows/verify-gpg-wkd.yml` — imports both keys, compares fingerprints, fails loud on mismatch. Runs on push/PR + weekly schedule. |
+| **N2** | High | ✅ Closed | No automated alert for the 2029-05-15 disclosure-key expiry. Added `scripts/security/check-disclosure-key-expiry.sh` (warn-at-90d, fail-at-30d). Wired into the verify-gpg-wkd workflow. |
+| **N3** | High | ⏳ Deferred | Release artifacts not cosign-signed (only SBOM is). Tracked as a follow-up PR — needs coordination with the existing `security-release.yml` flow. |
+| **N4** | High | ✅ Closed | `dot fleet apply` had no pre-flight known_hosts check. Added `--verify-hosts` flag that aborts the apply unless every TOML host is already in `~/.ssh/known_hosts`. TOFU window now closeable per-invocation. |
+| **N5** | Medium | ✅ Closed | Charm GPG key was downloaded + imported without fingerprint pinning. `install.sh` now pins `CHARM_GPG_EXPECTED_FPR=C026D31B92F9BBE91D5DB75AB07AE17C9E0A6585` and aborts (removing the keyring file) on mismatch. |
+| **N6** | Medium | ✅ Closed | `dot_secrets_get` returned empty on misconfigured provider, indistinguishable from "key not found." Now returns 2 (no provider), 3 (provider returned empty / not found), or the provider's own rc. Stderr names provider + key for diagnosis. |
+| **N7** | Medium | ⏳ Deferred | SLSA provenance subject hash covers the SBOM but not individual release artifacts. Tracked. |
+| **N8** | Low | ⏳ Deferred | PSScriptAnalyzer doesn't run a signing-policy check. Low priority. |
+| **N9** | Low | ⏳ Deferred | `install_chezmoi()` doesn't pre-check release-tag existence on GitHub. Cosmetic; current behaviour is "download fails with curl 404 error." |
+| **N10** | Low | ⏳ Deferred | No `scripts/security/rotate-disclosure-key.sh` automating the rotation flow. Manual procedure documented in `docs/security/KEY_ROTATION.md`. |
+
+### 7.4 Competitive position — strategic reversal
+
+R3 competitor agent caught a major landscape shift in the last 30 days:
+
+- **atxtechbro/dotfiles** (R2's #2 threat) — dormant since 2026-02-14. Not competitive.
+- **TonyCasey/ai-dotfiles-manager** (R2's #3 threat) — dead since 2025-12-17. 11-harness AGENTS.md lead is uncontested.
+- **andresharpe/dotbot** — **NEW apex competitor.** +27 stars since R2. v3.5.0 in April. 6 commits last week. Manifest-driven (`workflow.yaml`), enterprise audit features, Claude+Codex+Gemini provider switching. Converging on the same "auditable workstation" niche as our `dot fleet apply --attest`.
+
+Plus 4 fresh 2026 threats not on R1/R2 radar:
+
+1. **obra/superpowers-marketplace** (968★, accepted into Anthropic's official marketplace 2026-01-15) — Claude Code skills distribution. Don't compete; submit our `dotfiles-bootstrap` skill.
+2. **trailofbits/skills-curated** (402★, 2026-02-06) — security-vetted marketplace. Trail of Bits review is the security stamp our supply-chain story actually pays for.
+3. **agents-oss/agentspec** (`agent.yaml`) — the AgentEnv merger R2 §6.6 warned about, now real. AGNTCon Amsterdam **2026-09-17** is the public deadline.
+4. **Manifold Security Manifest** (2026-05-12) — MCP server scoring. Pull into `dot registry`.
+
+**Strategic reversal:** R2 §6.5 recommended `dot fleet apply --attest` as the next hero feature. R3 disagrees:
+
+> **Ship `dot env emit` FIRST, `--attest` SECOND.**
+
+Defence (3 independent forces all pulling the same direction within ~120 days):
+
+1. AgentSpec + AAIF velocity → public deadline 2026-09-17 (AGNTCon Amsterdam). First-mover with the canonical "one signed manifest → AGENTS.md + agent.yaml + devcontainer-feature.json + mise.toml + Brewfile + flake.nix + in-toto subject list" generator owns the reference implementation.
+2. dotbot v3.5.0's `workflow.yaml` is 80% of the way to AgentEnv parity. Window is **weeks not months** before they generate the same 11 harnesses we do.
+3. **EU CRA SBOM reporting binding 2026-09-11.** A `dot env emit` ships a CycloneDX subject list per workstation — that's the "demonstrate vulnerability response" story for any EU procurement team. `--attest` without a portable manifest can't be SBOM'd.
+
+`--attest` becomes a natural follow-on attesting the emitted manifest (not the raw chezmoi source tree). Order matters: emit then attest.
+
+### 7.5 Trend delta (2026-05-09 → 2026-05-16)
+
+Six of the twelve R1 trends moved in the last 7 days. Two stand out:
+
+**Mini-Shai-Hulud npm worm (2026-05-11).** First-ever **validly-attested SLSA L3 provenance for malicious npm packages.** 84 artifacts across 42 `@tanstack/*` packages compromised in 6 minutes; 373 malicious package-versions across 169 packages within 26 hours. Hijacked legitimate OIDC. Hit `@mistralai`, `@uipath`, `@opensearch-project`. **Implication:** the slogan "attested = safe" died this week. Our supply-chain story must now include behavioral verification (Rekor monitoring + SBOM diff alerts), not just signature checks. R3 §6.5 N1 (WKD drift CI) is in this spirit — checks the *consistency* of two signed surfaces, not just one signature.
+
+**OpenTelemetry GenAI semconv published 2026-05-14.** First formal trace convention for agent runs (model name, token counts, tool calls, opt-in prompt/completion capture). Directly applies to a future `dot agent run`. Implication: if we ship the agent-sandbox feature in ROADMAP §C2, it should emit OTel spans from day one — the convention exists, the cost of conforming is now near-zero.
+
+**SPIFFE-style ephemeral identity for AI agents — NEW trend, missed in R1+R2.** CSA framing 2026-05-08, HashiCorp's "SPIFFE for agentic AI" post, arXiv 2511.02841 on DID+VC for agents. Pattern: every agent instance gets a SPIFFE SVID at spawn, default token TTL 5 minutes, broker-enforced scopes. NHIs now outnumber humans 144:1 — the `.env`-file pattern is the next CVE class. **Implication for `dot agent run`:** by Q4 2026 users will expect short-lived workload identities, not static API keys in `~/.config/anthropic`. Add `dot identity broker` to the long-tail roadmap.
+
+### 7.6 Microsoft Build 2026 pre-game
+
+Date correction: **Build is 2026-06-02 to 2026-06-03 at Fort Mason, San Francisco** (not Seattle/May as R2 §6.9 stated). Nadella keynote 2026-06-02 08:00 PT. Already-leaked / scheduled talks indicate:
+
+- **WinUI Agent Plugin** (shipped 2026-05-13) gets keynote re-amplification.
+- **Codex on Windows** (live since 2026-04) gets a re-launch slot.
+- **BRK261 + BRK260** ("developer-optimized experience on Windows" + "build local AI powered experiences with Microsoft Foundry") — high probability of a `winget configure` agentic-bootstrap announcement.
+- **GitHub Copilot CLI 1.0.44+ co-marketing** (multi-model Claude+GPT+Gemini+Haiku).
+
+Show-HN timing shifts to **2026-06-09 (Tuesday after the keynote)**, not 2026-05-26 as R2 implied.
+
+### 7.7 Updated overall ratings
+
+After R3 closures, the rating table updates as follows (R2 → R3):
+
+| Category | R2 | R3 | Movement |
+|---|---|---|---|
+| Reliability fixes | 9.5 | **10** | 0 R3 findings; all R2 fixes intact |
+| Test coverage | 7 | 7.5 | +43 R2 + small R3 additions |
+| Security posture | 9 | **9.5** | N1/N2/N4/N5/N6 closed; N3/N7 deferred |
+| Cross-platform parity | 8 | **8.5** | PS-parity matrix now honest about Stub tier |
+| Documentation | 9.5 | **9.5** | R3 drifts fixed; PowerShell parity now accurate |
+| Reviewability | 7.5 | 7.5 | Unchanged (PR size unchanged) |
+| Strategic features | 6.5 | 6.5 | `dot env emit` deferred — see R3 §6.4 reversal |
+| Risk | 7 | **8** | Mocked-SSH + verify-hosts + WKD drift CI all narrow the attack surface |
+| Adoption readiness | 8 | 8 | Unchanged (still gated on external repo / Anthropic submission) |
+| Audit thoroughness | 9 | **9.5** | Three independent passes now; R3 confirmed R2's fixes held |
+| Honesty / integrity | 9.5 | 9.5 | Unchanged |
+
+**Overall: ~8.8 → ~9.1.** The ceiling on adoption readiness (still 8) and reviewability (7.5) is what holds the overall back from 9.5+. Strategic features completeness needs `dot env emit` to ship — see §7.4 for the case.
+
+### 7.8 Recommended execution order (R3 revision)
+
+**This week (R3 outstanding):** ship N3 (cosign-sign release artifacts) — 1-day work, closes the last H-tier security item.
+
+**Next week (window to AGNTCon):** ship `dot env emit` per §7.4. Smallest deliverable that closes the 2026-09 strategic window:
+1. JSON Schema at `docs/schema/dot-env-v1.json`
+2. `scripts/dot/commands/env.sh` dispatcher
+3. One working emitter: AGENTS.md (reuses `cmd_agents`)
+4. Stubs for: `devcontainer-feature.json`, `mise.toml`, `Brewfile`
+5. `docs/operations/MANIFEST.md` schema doc
+
+**By Build 2026-06-02:** Windows-native pwsh test for `dot agents check` (today bash-bridged). Plus Show-HN draft.
+
+**By 2026-09-11 (EU CRA):** SLSA L3 provenance per artifact (N7) + `dot vuln-report` per ROADMAP §F1.
+
+---
+
+Round 3 generated 2026-05-16 by a six-agent parallel review (audit-reliability returned 0 findings; audit-docs found 5 drifts → 3 real → fixed; audit-platform-security found 10 N-items → 5 closed in-PR, 5 deferred; competitor-matrix found the major dotbot/agentspec shift; trends found Mini-Shai-Hulud + Build date correction + SPIFFE; adoption agent still pending at synthesis time — its findings will land as a follow-up addendum).

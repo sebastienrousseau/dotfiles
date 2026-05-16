@@ -135,10 +135,29 @@ main() {
       sudo mkdir -p /etc/apt/keyrings
       curl -fsSL https://repo.charm.sh/apt/gpg.key |
         sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/charm.gpg
-      # Verify Charm GPG key fingerprint
-      if ! gpg --no-default-keyring --keyring /etc/apt/keyrings/charm.gpg \
-        --list-keys --with-colons 2>/dev/null | grep -q "fid:"; then
-        echo "Warning: Could not verify Charm GPG key" >&2
+      # Pin the Charm GPG key fingerprint — a DNS attacker swapping
+      # repo.charm.sh/apt/gpg.key for a forged key with the same uid
+      # would otherwise pass the prior "any fid: present" check.
+      # Pinned value taken from https://repo.charm.sh/apt/gpg.key on
+      # 2026-05-16. If Charm rotates, update this and call it out in
+      # CHANGELOG.md.
+      CHARM_GPG_EXPECTED_FPR="C026D31B92F9BBE91D5DB75AB07AE17C9E0A6585"
+      charm_actual_fpr="$(gpg --no-default-keyring \
+        --keyring /etc/apt/keyrings/charm.gpg \
+        --with-colons --fingerprint 2>/dev/null |
+        awk -F: '/^fpr:/{print $10; exit}')"
+      if [[ -z "$charm_actual_fpr" ]]; then
+        echo "Error: Could not extract Charm GPG fingerprint — aborting" >&2
+        sudo rm -f /etc/apt/keyrings/charm.gpg
+        return 1
+      fi
+      if [[ "$charm_actual_fpr" != "$CHARM_GPG_EXPECTED_FPR" ]]; then
+        echo "Error: Charm GPG fingerprint mismatch" >&2
+        echo "  expected: $CHARM_GPG_EXPECTED_FPR" >&2
+        echo "  got:      $charm_actual_fpr" >&2
+        echo "  aborting (possible DNS / keyserver hijack)" >&2
+        sudo rm -f /etc/apt/keyrings/charm.gpg
+        return 1
       fi
       echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
       sudo apt-get update && sudo apt-get install gum -y >/dev/null 2>&1
