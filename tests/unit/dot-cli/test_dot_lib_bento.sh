@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-BENTO_FILE="$REPO_ROOT/scripts/dot/lib/bento.sh"
+BENTO_FILE="$REPO_ROOT/lib/dot/bento.sh"
 
 # Test: bento.sh file exists
 test_start "bento_file_exists"

@@ -34,7 +34,7 @@ resolve_source_dir() {
   else
     repo_candidate=""
   fi
-  if [[ -n "$repo_candidate" && -f "$repo_candidate/scripts/dot/lib/ui.sh" ]]; then
+  if [[ -n "$repo_candidate" && -f "$repo_candidate/lib/dot/ui.sh" ]]; then
     dir="$repo_candidate"
   elif [ -n "${CHEZMOI_SOURCE_DIR:-}" ] && [ -d "$CHEZMOI_SOURCE_DIR" ]; then
     dir="$CHEZMOI_SOURCE_DIR"

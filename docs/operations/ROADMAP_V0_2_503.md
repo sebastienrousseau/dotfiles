@@ -105,11 +105,13 @@ Target the [public Scorecard report](https://scorecard.dev/viewer/?uri=github.co
 4. Re-trigger Scorecard workflow after v0.2.502 backfill so the dashboard reflects the fixed Signed-Releases score.
 5. Track every sub-10 score with a follow-up issue tagged `scorecard`.
 
-## Out of scope (deferred to v0.3.0 — breaking)
+## Reorganisation now in-scope (was deferred — see RFC)
 
+Pulled forward from v0.3.0 into this PR per maintainer request.
 The R4 audit identified the framework / user-config intermingling
-as the highest-leverage structural gap. Fixing it cleanly requires
-*breaking changes for existing users*:
+as the highest-leverage structural gap. Implementation is phased
+per `RFC_v0_2_503_reorganization.md`; each phase is independently
+atomic.
 
 | Move | Why it's breaking |
 |------|-------------------|
@@ -117,7 +119,7 @@ as the highest-leverage structural gap. Fixing it cleanly requires
 | `dot_local/bin/executable_dot` → `bin/dot` | Same; `~/.local/bin/dot` would be removed before the new path is installed. |
 | Split `framework/` (CLI + lib) from user-facing defaults | Major restructuring; needs RFC + migration tool + 2-version deprecation window. |
 
-These will land in v0.3.0 as a coordinated single PR with a
+These will land in v0.2.503 as a coordinated single PR with a
 `migrate-v0_2-to-v0_3.sh` script.
 
 ## Success criteria (v0.2.503)

@@ -16,8 +16,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../lib/utils.sh
-source "$SCRIPT_DIR/../lib/utils.sh"
+# shellcheck source=../../../lib/dot/utils.sh
+source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 
 MANUAL_URL="${DOTFILES_MANUAL_URL:-https://sebastienrousseau.github.io/dotfiles/manual}"
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/manual"

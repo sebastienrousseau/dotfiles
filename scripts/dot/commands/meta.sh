@@ -6,10 +6,10 @@
 set -euo pipefail
 
 _META_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../lib/utils.sh
-source "$_META_DIR/../lib/utils.sh"
-# shellcheck source=../lib/log.sh
-source "$_META_DIR/../lib/log.sh"
+# shellcheck source=../../../lib/dot/utils.sh
+source "$_META_DIR/../../../lib/dot/utils.sh"
+# shellcheck source=../../../lib/dot/log.sh
+source "$_META_DIR/../../../lib/dot/log.sh"
 # shellcheck source=agent.sh
 source "$_META_DIR/agent.sh"
 

@@ -1,12 +1,21 @@
 ---
-title: "RFC: v0.3.0 Repository Reorganisation"
-status: Draft
+title: "RFC: v0.2.503 Repository Reorganisation"
+status: Accepted — shipping incrementally in this PR
 authors: ['@sebastienrousseau']
 opened: 2026-05-17
-target: v0.3.0
+accepted: 2026-05-17
+target: v0.2.503
 ---
 
-# RFC: v0.3.0 Repository Reorganisation
+# RFC: v0.2.503 Repository Reorganisation
+
+> **Status: Accepted.** This RFC was opened in this PR and
+> immediately accepted by the maintainer with explicit decision to
+> ship the reorganisation incrementally within v0.2.503 rather
+> than the originally-proposed two-version deprecation window.
+> Phases land as separate commits on `feat/v0.2.503`; each is
+> independently atomic and verified by `dot lint` + the existing
+> test matrix.
 
 ## Summary
 
@@ -192,7 +201,7 @@ multi-shell setup.
 
 ## Backwards compatibility
 
-| Surface | v0.2.x behaviour | v0.3.0 behaviour | Breaking? |
+| Surface | v0.2.x behaviour | v0.2.503 behaviour | Breaking? |
 |---------|------------------|------------------|-----------|
 | `~/.local/bin/dot` | Deployed by chezmoi | Replaced by Homebrew/Scoop install, OR symlinked by chezmoi from the new source | Yes — path may move; migration script handles it |
 | `~/.zshrc` etc | Source-pinned at `dot_zshrc` | Source-pinned at `defaults/home/dot_zshrc`, chezmoi reads via `.chezmoiroot` | No — destination path unchanged |
@@ -202,9 +211,9 @@ multi-shell setup.
 
 ### Two-version deprecation window
 
-v0.3.0 ships with the migration script and a deprecation warning
+v0.2.503 ships with the migration script and a deprecation warning
 in `dot doctor`. v0.4.0 removes any v0.2.x shim code. Users who
-skip v0.3.0 entirely (v0.2.x → v0.4.0) hit a hard error and must
+skip v0.2.503 entirely (v0.2.x → v0.4.0) hit a hard error and must
 run the migration tool from a v0.3.x release manually.
 
 ## Alternatives considered
@@ -253,7 +262,7 @@ without giving us a standalone tarball.
 | 4 | Update CI: every workflow that references `scripts/`, `dot_local/`, `dot_config/` needs path updates. | 3 days |
 | 5 | Update every doc that references the old paths. Most are in `docs/manual/`. | 1 day |
 | 6 | Cut v0.2.999 RC as a deprecation-warning-only release; let real users dry-run the migration. | 1 day + 2-week soak |
-| 7 | Cut v0.3.0 with the actual reorg + migration tool. | 1 day |
+| 7 | Cut v0.2.503 with the actual reorg + migration tool. | 1 day |
 | 8 | Publish to Homebrew/Scoop/AUR using `install/{homebrew,scoop,aur}/` scaffolds. | 1 week |
 | **Total** | | **~5 weeks calendar time** |
 

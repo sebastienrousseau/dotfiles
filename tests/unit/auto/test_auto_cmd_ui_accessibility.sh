@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
-# Targeted coverage for the accessibility branch of scripts/dot/lib/ui.sh.
+# Targeted coverage for the accessibility branch of lib/dot/ui.sh.
 # That branch (lines 76-86) is gated on DOTFILES_ACCESSIBILITY=1 and so
 # is never traced by the default sandbox-environment run. Exercising
 # it explicitly closes a 10-line gap without touching any other test.
@@ -13,7 +13,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-UI="$REPO_ROOT/scripts/dot/lib/ui.sh"
+UI="$REPO_ROOT/lib/dot/ui.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

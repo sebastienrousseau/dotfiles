@@ -38,7 +38,7 @@ _resolve_source_dir() {
   if script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null)"; then
     script_dir="$script_path"
     repo_candidate="$(cd "$script_dir/../.." && pwd 2>/dev/null || true)"
-    if [ -n "$repo_candidate" ] && [ -f "$repo_candidate/scripts/dot/lib/ui.sh" ]; then
+    if [ -n "$repo_candidate" ] && [ -f "$repo_candidate/lib/dot/ui.sh" ]; then
       dir="$repo_candidate"
     fi
   fi
@@ -58,10 +58,10 @@ _resolve_source_dir() {
 # Source shared UI library for consistent colors, checkmarks, and formatting.
 # Falls back to minimal inline definitions if the source directory is unavailable.
 _DOT_SRC="$(_resolve_source_dir)"
-if [ -n "$_DOT_SRC" ] && [ -f "$_DOT_SRC/scripts/dot/lib/ui.sh" ]; then
-  # shellcheck source=../../scripts/dot/lib/ui.sh
+if [ -n "$_DOT_SRC" ] && [ -f "$_DOT_SRC/lib/dot/ui.sh" ]; then
+  # shellcheck source=../../lib/dot/ui.sh
   # shellcheck disable=SC1091
-  source "$_DOT_SRC/scripts/dot/lib/ui.sh"
+  source "$_DOT_SRC/lib/dot/ui.sh"
   ui_init
 else
   # Minimal fallback when source dir is not available (e.g. first install)

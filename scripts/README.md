@@ -9,7 +9,8 @@ workflows, by `chezmoi apply` hooks, or by hand.
 
 | Path | Purpose | Touched by |
 |---|---|---|
-| `scripts/dot/` | The `dot` CLI implementation. See breakdown below. | Sourced by `dot_local/bin/executable_dot` |
+| `scripts/dot/commands/` | Per-subcommand handlers for the `dot` CLI. Sources `lib/dot/*.sh` (moved out of this tree in v0.2.503 Phase 1). | Dispatched by `dot_local/bin/executable_dot` |
+| `scripts/dot/powershell/` | Native PowerShell module (`Dot.psm1`) exporting `Get-DotVersion` / `Invoke-DotHelp` / `Test-DotAgentsSync`. | `dot_local/bin/dot.ps1` |
 | `scripts/lib/` | Cross-cutting library helpers reused across multiple scripts. Example: `secrets_provider.sh` (keychain / pass / age dispatch). | `scripts/dot/commands/*`, ops scripts, CI |
 | `scripts/ci/` | CI-only helpers: `dot-cli-startup-bench.sh`, `install-chezmoi-verified.sh`, `windows-smoke-test.ps1`, `run-coverage.sh`, etc. | `.github/workflows/*` |
 | `scripts/diagnostics/` | `doctor.sh` and its helpers — long-form environment health check. | `dot doctor` |
@@ -31,16 +32,19 @@ workflows, by `chezmoi apply` hooks, or by hand.
 
 The `dot` CLI is implemented as `dot_local/bin/executable_dot`
 (dispatcher) + `scripts/dot/commands/<cmd>.sh` (per-command
-handlers) + `scripts/dot/lib/*.sh` (shared helpers).
+handlers) + `lib/dot/*.sh` (shared helpers — moved out of
+`scripts/dot/lib/` in v0.2.503 Phase 1 per the
+[reorganisation RFC](../docs/operations/RFC_v0_2_503_reorganization.md)).
 
 | Path | Purpose |
 |---|---|
-| `scripts/dot/commands/` | One file per `dot <cmd>` subcommand. Each defines a `cmd_<name>()` function the dispatcher calls. |
-| `scripts/dot/lib/utils.sh` | Common helpers (resolve_source_dir, validate_name, die, run_script, etc.). |
-| `scripts/dot/lib/ui.sh` | Single source of truth for CLI output (ui_ok/warn/err/info, ui_header, ui_table_*, ui_spinner_*, ui_confirm, ...). |
-| `scripts/dot/lib/platform.sh` | OS / shell / WSL detection, path translation. |
-| `scripts/dot/lib/log.sh` | Structured logging (JSONL audit log when `DOTFILES_AUDIT_LOG=1`). |
-| `scripts/dot/lib/bento.sh` | The "bento box" layout primitive used by `dot health` and friends. |
+| `scripts/dot/commands/` | One file per `dot <cmd>` subcommand. Each defines a `cmd_<name>()` function the dispatcher calls. Sources the library via `$SCRIPT_DIR/../../../lib/dot/<X>.sh`. |
+| `scripts/dot/powershell/` | Native PowerShell module — see top-level table. |
+| **`lib/dot/utils.sh`** | Common helpers (resolve_source_dir, validate_name, die, run_script, etc.). |
+| **`lib/dot/ui.sh`** | Single source of truth for CLI output (ui_ok/warn/err/info, ui_header, ui_table_*, ui_spinner_*, ui_confirm, ...). |
+| **`lib/dot/platform.sh`** | OS / shell / WSL detection, path translation. |
+| **`lib/dot/log.sh`** | Structured logging (JSONL audit log when `DOTFILES_AUDIT_LOG=1`). |
+| **`lib/dot/bento.sh`** | The "bento box" layout primitive used by `dot health` and friends. |
 
 ## Adding a new subcommand
 

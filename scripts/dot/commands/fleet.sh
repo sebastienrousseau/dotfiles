@@ -6,10 +6,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../lib/utils.sh
-source "$SCRIPT_DIR/../lib/utils.sh"
-# shellcheck source=../lib/log.sh
-source "$SCRIPT_DIR/../lib/log.sh"
+# shellcheck source=../../../lib/dot/utils.sh
+source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
+# shellcheck source=../../../lib/dot/log.sh
+source "$SCRIPT_DIR/../../../lib/dot/log.sh"
 
 dot_ui_command_banner "Fleet" "${1:-}"
 

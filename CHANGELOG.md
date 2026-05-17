@@ -4,18 +4,20 @@ This file documents all notable changes to this project.
 
 ## v0.2.503 (unreleased)
 
-Polish + cross-platform + Scorecard release. Non-breaking; the
-v0.3.0 RFC (`docs/operations/RFC_v0_3_0_reorganization.md`) tracks
-the breaking root-reorganisation deferred from this cycle.
+Polish + cross-platform + Scorecard release **plus** the
+incremental repo reorganisation per
+`docs/operations/RFC_v0_2_503_reorganization.md`. The reorg ships
+in phases across this PR; each phase is independently atomic and
+verified by `dot lint` + the existing test matrix.
 
 ### Added
 
 - **`STRUCTURE.md`** + **`scripts/README.md`** — repo-map docs so a new contributor orients in <30s. Explains the chezmoi naming contract that forces the current layout.
 - **`MAINTAINERS.md`** + **`GOVERNANCE.md`** — formal single-maintainer declaration + decision/RFC process. Required by the OpenSSF Best Practices badge application; contextualises the Scorecard `Code-Review` 0/30 score.
 - **`docs/operations/ROADMAP_V0_2_503.md`** — seven-workstream scope for this release.
-- **`docs/operations/RFC_v0_3_0_reorganization.md`** — 267-line formal RFC for the v0.3.0 framework / user-config split. Covers target layout (Debian/aws-cli discipline), `.chezmoiroot` strategy, 7-step idempotent migration script, distribution surface table, ~5-week implementation plan.
+- **`docs/operations/RFC_v0_2_503_reorganization.md`** — 267-line formal RFC for the v0.2.503 framework / user-config split. Covers target layout (Debian/aws-cli discipline), `.chezmoiroot` strategy, 7-step idempotent migration script, distribution surface table, ~5-week implementation plan.
 - **`docs/security/VERIFY_RELEASE.md`** — end-user "how to verify a `dot` release" walkthrough. Three independent attestations (SBOM, Cosign keyless, SLSA L3); identity-bound `cosign verify-blob` recipe; `slsa-verifier` recipe; one-liner `verify-dot-release` shell function.
-- **`install/{homebrew/dot.rb, scoop/dot.json, aur/PKGBUILD}`** + **`install/README.md`** — distribution-channel scaffolds for the v0.3.0 standalone-CLI tarball. Publication checklist per channel.
+- **`install/{homebrew/dot.rb, scoop/dot.json, aur/PKGBUILD}`** + **`install/README.md`** — distribution-channel scaffolds for the v0.2.503 standalone-CLI tarball. Publication checklist per channel.
 - **`scripts/qa/check-version-consistency.sh`** — catches drift between `.chezmoidata.toml` (source-of-truth) and the 8 human-visible version surfaces (CLI banner, man page, bento splash, README badge, etc.). `--quiet` mode for hooks; `--fix` for auto-correct. Wired into pre-push.
 - **`scripts/docs/generate-command-index.sh`** — regenerates `docs/manual/command-index.md` from `dot help all` (caught 9 missing entries, 58 → 67). `--check` mode for CI gating.
 - **`scripts/qa/scorecard-snapshot.sh`** — refreshes the per-check table in `docs/security/SCORECARD.md` from `api.scorecard.dev` between BEGIN/END markers.
@@ -35,12 +37,17 @@ the breaking root-reorganisation deferred from this cycle.
 
 - **`docs/security/SCORECARD.md`** — added baseline snapshot (7.6 / 10 at 2026-05-17), updated "Closed this cycle" log with v0.2.502 + PR #894 SLSA backfill, full PAT-creation walkthrough for unblocking the `-1` checks.
 
-### Deferred (v0.3.0 — see RFC)
+### Reorganisation (per RFC, incremental phases)
 
-- Root reorganisation to a Debian/aws-cli-style `bin/` + `lib/` + `share/` + `defaults/` layout (breaking; needs migration tool + 2-version deprecation window).
-- Real publication to Homebrew tap / Scoop bucket / AUR (blocked on the standalone-CLI tarball that the v0.3.0 reorg unlocks).
-- Native PowerShell ports of `dot agents check` + `dot fleet apply` (POWERSHELL_PARITY.md `Stub` rows).
-- OSS-Fuzz / cifuzz migration for the `install.sh` fuzz harness (Scorecard `Fuzzing` 0 → 5+).
+- **Phase 0 — RFC in-scope.** `RFC_v0_2_503_reorganization.md` repositioned from "deferred to v0.3.0" to "shipping in v0.2.503". CHANGELOG + ROADMAP + scaffold docs updated.
+- **Phase 1 — `lib/` move.** `scripts/dot/lib/{utils,ui,platform,log,bento}.sh` → `lib/dot/{utils,ui,platform,log,bento}.sh`. Every `source` path in `scripts/dot/commands/*.sh` updated. Non-breaking for end users (lib is not chezmoi-deployed).
+- Subsequent phases follow per the RFC: `bin/`, `share/`, `defaults/` + `.chezmoiroot`, `tools/`, `install/migrate/migrate-v0_2-to-v0_3.sh`.
+
+### Big-ticket features (per "what else" iterations)
+
+- **`dot env emit`** — v1 workstation-environment manifest emitter. JSON Schema 2020-12 at `docs/schema/dot-env-v1.json`; doc + downstream-consumer matrix at `docs/operations/MANIFEST.md`. Closes R3 §7.4 strategic-reversal item ahead of the 2026-09-17 / 2026-09-11 AGNTCon + EU CRA windows.
+- **Native PowerShell module** — `scripts/dot/powershell/Dot.psm1` + `dot_local/bin/dot.ps1` dispatcher. `dot version` / `dot help` / `dot agents check` now zero-bash on Windows. POWERSHELL_PARITY.md updated, smoke test extended.
+- **OSS-Fuzz scaffold** — `oss-fuzz-integration/` ready-to-PR upstream bundle. Two native Go fuzzers (`FuzzValidateName`, `FuzzInitURLResolver`) verified at 2M+ execs each. CI workflow runs them per PR. `docs/security/FUZZING.md` covers onboarding + when-to-add-a-harness.
 
 ## v0.2.502 — 2026-05-17
 

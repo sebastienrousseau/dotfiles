@@ -19,7 +19,7 @@ else
 fi
 
 test_start "bento_version_matches"
-local_file="$REPO_ROOT/scripts/dot/lib/bento.sh"
+local_file="$REPO_ROOT/lib/dot/bento.sh"
 if [[ -f "$local_file" ]]; then
   if grep -q "v${CANONICAL_VERSION}" "$local_file"; then
     ((TESTS_PASSED++))

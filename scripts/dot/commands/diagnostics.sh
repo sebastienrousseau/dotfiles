@@ -7,8 +7,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../lib/utils.sh
-source "$SCRIPT_DIR/../lib/utils.sh"
+# shellcheck source=../../../lib/dot/utils.sh
+source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 
 dot_ui_command_banner "Diagnostics" "${1:-}" "$@"
 
@@ -29,7 +29,7 @@ cmd_smoke_test() {
 }
 
 cmd_intelligence() {
-  run_script "scripts/dot/lib/bento.sh" "Intelligence Surface" "$@"
+  run_script "lib/dot/bento.sh" "Intelligence Surface" "$@"
 }
 
 cmd_heal() {
@@ -120,9 +120,9 @@ cmd_metrics() {
     echo "Dotfiles source not found." >&2
     exit 1
   fi
-  # shellcheck source=../lib/log.sh
+  # shellcheck source=../../../lib/dot/log.sh
   # shellcheck disable=SC1091
-  source "$src_dir/scripts/dot/lib/log.sh"
+  source "$src_dir/lib/dot/log.sh"
   ui_header "Recent Metrics"
   echo ""
   dot_metrics_summary "${1:-20}"

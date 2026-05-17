@@ -8,7 +8,7 @@ purpose. Skim it once and you should be able to answer:
 - **What's the framework vs. the maintainer's personal config?** → Everything under `scripts/`, `install/`, `dot_local/bin/`, and `.chezmoitemplates/` is framework code. Everything under `dot_config/`, `dot_warp/`, `dot_etc/`, `private_dot_ssh/` is user-facing default configuration.
 
 A breaking restructuring to a Debian/aws-cli-style root layout
-(`bin/`, `lib/`, `defaults/`) is planned for **v0.3.0** —
+(`bin/`, `lib/`, `defaults/`) is planned for **v0.2.503** —
 see `docs/operations/ROADMAP_V0_2_503.md` for the migration
 plan. Until then, the chezmoi naming contract forces the
 current layout.
@@ -22,11 +22,12 @@ current layout.
 | **CLI + framework** | | |
 | `dot_local/bin/` | framework | `executable_dot` (CLI entrypoint) and helper scripts. Deploys to `~/.local/bin/`. |
 | `dot_local/share/` | framework | Man pages, zsh completions. Deploys to `~/.local/share/`. |
-| `scripts/` | framework | All non-deployed shell helpers: CLI lib, ops, security, CI, diagnostics. See `scripts/README.md`. |
-| `install/` | framework | Bootstrap logic. `install/provision/` runs on `chezmoi apply` via `run_onchange_*` triggers. |
+| `scripts/` | framework | Repo-only ops: CI helpers, diagnostics, release, security audits. NOT distributable. See `scripts/README.md`. |
+| `lib/dot/` | framework | Shared bash library sourced by every `dot` subcommand and the dispatcher. Reorganised here from `scripts/dot/lib/` per RFC Phase 1. See `lib/dot/README.md`. |
+| `lib/` | framework | Library tree (`lib/dot/` + third-party `lib/wasm-tools/`). |
+| `install/` | framework | Bootstrap logic + distribution-channel manifests (`homebrew/`, `scoop/`, `aur/`). See `install/README.md`. `install/provision/` runs on `chezmoi apply` via `run_onchange_*` triggers. |
 | `install.sh` | framework | Top-level installer. SHA256-verified chezmoi fetch + initial apply. |
 | `.chezmoitemplates/` | framework | Reusable Go-template partials (aliases, functions, paths). Sourced by `dot_*.tmpl` files. |
-| `lib/` | framework | Shared library helpers used by the test runner and CI tooling. |
 | **User-facing defaults** | | |
 | `dot_bashrc`, `dot_zshrc`, `dot_zshenv`, `dot_zprofile`, `dot_profile`, `dot_vimrc`, etc. | defaults | Shell + editor rc files. Deploy to `~/.X`. |
 | `dot_config/` | defaults | XDG config (`~/.config/*`). Largest tree — 80+ tool configs. |
@@ -96,4 +97,4 @@ stale state in `~/.config/chezmoi/`.
 - `scripts/README.md` — map of the `scripts/` subtree.
 - `CONTRIBUTING.md` — code-style + commit-message + signing requirements.
 - `CLAUDE.md` — AI-assistant guidelines (the canonical source for `dot agents render`).
-- `docs/operations/ROADMAP_V0_2_503.md` — current release scope, including the v0.3.0 reorganisation plan.
+- `docs/operations/ROADMAP_V0_2_503.md` — current release scope, including the v0.2.503 reorganisation plan.

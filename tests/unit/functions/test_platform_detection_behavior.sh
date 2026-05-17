@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
-# Behavioral tests for dot_platform_id and dot_is_wsl from scripts/dot/lib/platform.sh.
+# Behavioral tests for dot_platform_id and dot_is_wsl from lib/dot/platform.sh.
 # Mocks 'uname' and the WSL osrelease file to simulate different platforms.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -10,7 +10,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-PLATFORM_FILE="$REPO_ROOT/scripts/dot/lib/platform.sh"
+PLATFORM_FILE="$REPO_ROOT/lib/dot/platform.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
