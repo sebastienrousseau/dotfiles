@@ -20,6 +20,6 @@ if ! command -v taplo >/dev/null 2>&1; then
   exit 127
 fi
 
-# `taplo check` reads .taplo.toml at the repo root, applies the schema
-# rule, and reports schema violations + TOML syntax errors.
-taplo check
+# `taplo check` reads config/taplo.toml (v0.2.503: moved out of root),
+# applies the schema rule, and reports schema violations + TOML syntax errors.
+taplo check --config config/taplo.toml

@@ -1,4 +1,0 @@
-# Zed agent config — points at AGENTS.md for the cross-harness body.
-# Zed reads this file when its agent mode is enabled; the actual rule
-# body lives in AGENTS.md (which `dot agents render` keeps current).
-agent_context = "AGENTS.md"

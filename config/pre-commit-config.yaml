@@ -90,26 +90,28 @@ repos:
         # surfaces only workflow-syntax + runner-label + event-mismatch.
         args: ['-shellcheck=']
 
-  # YAML linting — see .yamllint.yaml at repo root for the rule overrides.
+  # YAML linting — see config/yamllint.yaml for the rule overrides.
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.38.0
     hooks:
       - id: yamllint
-        args: ['-c', '.yamllint.yaml']
+        args: ['-c', 'config/yamllint.yaml']
 
-  # Markdown linting — see .markdownlint.jsonc / .markdownlint-cli2.jsonc
-  # at repo root for the rule overrides.
+  # Markdown linting — see config/markdownlint.jsonc + config/markdownlint-cli2.jsonc
+  # for the rule overrides (post-v0.2.503 the configs live under config/).
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.22.1
     hooks:
       - id: markdownlint-cli2
+        args: ['--config', 'config/markdownlint-cli2.jsonc']
 
   # Lua linting (luacheck) — pinned to match the version installed by
-  # `.github/workflows/reusable-lua-lint.yml`.
+  # `.github/workflows/reusable-lua-lint.yml`. Reads config/luacheckrc.
   - repo: https://github.com/lunarmodules/luacheck
     rev: v1.2.0
     hooks:
       - id: luacheck
+        args: ['--config', 'config/luacheckrc']
         files: \.lua$
 
   # Lua formatting (stylua) — pinned to match the version installed by

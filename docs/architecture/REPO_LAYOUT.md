@@ -14,7 +14,7 @@ For naming conventions (file prefixes, run-script numbering tiers), see
 [`../NAMING_CONVENTIONS.md`](../NAMING_CONVENTIONS.md). For the broader
 architectural rationale (philosophy, startup model, flake strategy), see
 [`ARCHITECTURE.md`](ARCHITECTURE.md). For the configuration-management
-strategy at a higher level, see [`../../CONFIG_STRATEGY.md`](../../CONFIG_STRATEGY.md).
+strategy at a higher level, see [`../CONFIG_STRATEGY.md`](../CONFIG_STRATEGY.md).
 
 ---
 
@@ -85,7 +85,7 @@ exist on purpose and don't overlap:
 |-------------------------------|-----------------------|------------------------------------------------------------------|-------------------------------|
 | `dot_claude/CLAUDE.md`        | `~/.claude/CLAUDE.md` | Claude Code, in **any** cwd on this machine                      | Personal, cross-project       |
 | `CLAUDE.md` (repo root)       | Not deployed          | Claude Code, when cwd is **this** repo                           | Repo-scoped guidance          |
-| `OPENCODE.md` (repo root)     | Not deployed          | OpenCode CLI, when cwd is **this** repo                          | Repo-scoped guidance (mirror) |
+| `docs/OPENCODE.md`            | Not deployed          | OpenCode CLI, when cwd is **this** repo                          | Repo-scoped guidance (mirror) |
 | `.claude/settings.local.json` | Not deployed, **not tracked** | Claude Code                                                     | Per-machine permission allowlist |
 
 Each of the three tracked files carries a header comment explaining its
@@ -199,7 +199,7 @@ braces.
 | `templates/chezmoi-data/`, `templates/projects/` | Starter scaffolding for new machines / new projects                     |
 | `examples/`                               | 14 standalone demo scripts used by the manual and tutorials                  |
 | `CHANGELOG.md`, `LICENSE`, `README.md`    | Standard                                                                     |
-| `CONFIG_STRATEGY.md`                      | High-level "how configuration management works here" overview                |
+| `docs/CONFIG_STRATEGY.md`                 | High-level "how configuration management works here" overview                |
 | `.gitattributes`, `.gitignore`, `.gitleaksignore`, `.editorconfig`, `.secrets.baseline`, `.sops.yaml`, `.luacheckrc` | Repo-level tool configs                                                    |
 | `.pre-commit-config.yaml` → `config/pre-commit-config.yaml` | Symlink so `pre-commit` finds the canonical config                       |
 

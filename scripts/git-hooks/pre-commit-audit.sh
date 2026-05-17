@@ -33,7 +33,7 @@ echo -n "   🔍 Scanning for secrets... "
 # Exclude assignments to values containing common placeholder strings or within template expressions
 SENSITIVE_PATTERNS="(GITHUB_TOKEN|API_KEY|SECRET|password|private_key|AKIA[0-9A-Z]{16})[[:space:]]*[:=]"
 # Exclusions list for legitimate variable checks or documentation
-SECRET_EXCLUDES="test_|assertions.sh|.pre-commit|README|CHANGELOG|FEATURES.md|CONFIG_STRATEGY.md|docs/|install/lib/|.chezmoitemplates/|mcp-doctor.sh|\.github/workflows/"
+SECRET_EXCLUDES="test_|assertions.sh|.pre-commit|README|CHANGELOG|FEATURES.md|docs/|install/lib/|.chezmoitemplates/|mcp-doctor.sh|\.github/workflows/"
 # Also exclude .tmpl files from secret scanning as they contain many false positive markers
 if echo "$STAGED_FILES" | grep -v "\.tmpl" | xargs grep -EiE "$SENSITIVE_PATTERNS" /dev/null | grep -vE "$SECRET_EXCLUDES" | grep -viE "dummy|placeholder|example|test|sk-placeholder|\\{\\{" >/dev/null 2>&1; then
   printf '%b\\n' "${RED}FAILED${NC}"
