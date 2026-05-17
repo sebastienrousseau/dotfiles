@@ -14,6 +14,8 @@
   <a href="https://github.com/sebastienrousseau/dotfiles/releases"><img src="https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge" alt="Downloads" /></a>
   <a href="https://codespaces.new/sebastienrousseau/dotfiles"><img src="https://img.shields.io/badge/Open%20in-Codespaces-blue?style=for-the-badge&logo=github" alt="Open in GitHub Codespaces" /></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/dotfiles"><img src="https://img.shields.io/ossf-scorecard/github.com/sebastienrousseau/dotfiles?style=for-the-badge&label=OpenSSF%20Scorecard" alt="OpenSSF Scorecard" /></a>
+  <a href="https://www.bestpractices.dev/projects/new"><img src="https://img.shields.io/badge/OpenSSF%20Best%20Practices-in%20progress-yellow?style=for-the-badge" alt="OpenSSF Best Practices" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT" /></a>
 </p>
 
 ---
