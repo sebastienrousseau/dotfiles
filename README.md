@@ -50,7 +50,7 @@
 
 ```bash
 curl -fsSL -o /tmp/dotfiles-install.sh \
-  https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.502/install.sh
+  https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.503/install.sh
 echo "4c0303a2d88d5aed98428ab0da37618c9795af4dae0e6549646c2fce5235c280  /tmp/dotfiles-install.sh" \
   | shasum -a 256 -c
 bash /tmp/dotfiles-install.sh

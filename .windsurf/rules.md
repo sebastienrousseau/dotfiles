@@ -5,7 +5,7 @@ These rules govern Cascade and the Windsurf agent inside this repository.
 
 ## Project Overview
 
-Chezmoi-managed dotfiles for macOS, Linux, WSL, and PowerShell 7.5+. Version `0.2.502`.
+Chezmoi-managed dotfiles for macOS, Linux, WSL, and PowerShell 7.5+. Version `0.2.503`.
 
 ## Key Commands
 

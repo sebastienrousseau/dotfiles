@@ -107,7 +107,7 @@ Distribution targets (pick 3, not 5): Homebrew tap first, AUR second, Scoop thir
 
 Community moves:
 
-- **Show HN:** lead with the wallpaper-driven themes (v0.2.502). Screenshot-driven hook nobody else has.
+- **Show HN:** lead with the wallpaper-driven themes (v0.2.503). Screenshot-driven hook nobody else has.
 - **Blog post series (3 posts):** "Why I stopped using chezmoi directly", "Bootstrapping 15 machines from one git repo in <90 seconds", "Secrets in dotfiles: a 2026 threat model".
 - **CFPs:** FOSDEM 2027 (dev tools devroom), All Things Open 2026, SCaLE LA. Skip KubeCon.
 - **Sponsor 2–3 newsletters at $500–1500/issue:** Console.dev, TLDR DevOps, Changelog News.
