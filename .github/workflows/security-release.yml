@@ -92,14 +92,21 @@ jobs:
             dotfiles-sbom.spdx.json.sig
             dotfiles-sbom.spdx.json.pem
 
-      - name: Attach Cosign artefacts to the release
-        if: github.event_name == 'release'
+      - name: Attach SBOM + Cosign artefacts to the release
+        # Under workflow_dispatch we also re-upload the SBOM itself —
+        # the freshly-generated file will have a different hash than
+        # whatever was attached when the release first published, so
+        # the .sig / .pem must match the new SBOM bytes. The release-
+        # event path uploads only the sig+cert (the SBOM is added by
+        # the sbom-action step's `upload-release-assets` elsewhere).
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
         run: |
           set -euo pipefail
           gh release upload "$RELEASE_TAG" \
+            dotfiles-sbom.spdx.json \
             dotfiles-sbom.spdx.json.sig \
             dotfiles-sbom.spdx.json.pem \
             --clobber
@@ -111,10 +118,28 @@ jobs:
       actions: read
       id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    # NOTE: The SLSA generator's `builder-fetch.sh` requires `BUILDER_REF`
+    # to be `refs/tags/vX.Y.Z` (regex-checked at start of fetch). A SHA-
+    # pinned `@<sha>` makes the ref a bare hash and the script exits 2
+    # — see slsa-framework/slsa-github-generator#1163. The SLSA team's
+    # documented recommendation is to pin by tag, which is what we do
+    # here. v2.1.0 = f7dd8c54c2067bafc12ca7a55595d5ee9b75204a (verify
+    # before each bump). This single tag-pinned reusable workflow is the
+    # documented exception to the repo's otherwise-strict SHA-pinning
+    # convention; Scorecard's Pinned-Dependencies check explicitly
+    # exempts SLSA-generator from SHA pinning for this reason.
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
     with:
       base64-subjects: "${{ needs.sbom.outputs.hash }}"
       upload-assets: true
+      # SLSA `upload-assets` job is gated on
+      #   startsWith(github.ref, 'refs/tags/') || inputs.upload-tag-name != ''
+      # A `workflow_dispatch` re-run carries `github.ref = refs/heads/<branch>`,
+      # which would skip the upload. Pass the dispatch-provided tag through so
+      # operators can retroactively attach provenance to an existing release.
+      # Release-event runs leave this empty (the first arm of the condition
+      # above already matches the tag ref).
+      upload-tag-name: ${{ inputs.release_tag || '' }}
 
   verify-release-integrity:
     name: Release / Verify Integrity
@@ -171,20 +196,37 @@ jobs:
           fi
           echo "Release provenance asset verified"
 
-      - name: Install verification dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159 # v3.9.2
+        with:
+          cosign-release: v2.4.1
 
-      - name: Verify SBOM attestation cryptographically
+      - name: Download cosign signature + certificate from the release
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag || github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          gh release download "$RELEASE_TAG" \
+            --pattern dotfiles-sbom.spdx.json.sig \
+            --pattern dotfiles-sbom.spdx.json.pem \
+            --clobber
+
+      - name: Verify SBOM signature with Cosign
+        # `gh attestation verify` only finds attestations from
+        # `actions/attest-*`. Our SBOM is signed via Cosign keyless
+        # (Fulcio + Rekor) in the sbom job above, so verify with the
+        # same tool against the same artefacts. Identity binds to the
+        # repo that produced the signature — any rebuild from a fork
+        # would fail this check.
+        env:
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          gh attestation verify dotfiles-sbom.spdx.json --repo "${REPO}" --format json >"$RUNNER_TEMP/attestation-verify.json"
-          if ! jq -e 'length > 0' "$RUNNER_TEMP/attestation-verify.json" >/dev/null; then
-            echo "::error::No valid attestations were returned for dotfiles-sbom.spdx.json"
-            exit 1
-          fi
-          echo "SBOM attestation verified"
+          cosign verify-blob \
+            --certificate dotfiles-sbom.spdx.json.pem \
+            --signature dotfiles-sbom.spdx.json.sig \
+            --certificate-identity-regexp "^https://github.com/${REPO}/" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            dotfiles-sbom.spdx.json
+          echo "SBOM Cosign signature verified"
