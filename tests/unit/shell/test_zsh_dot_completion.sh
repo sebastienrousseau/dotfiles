@@ -12,11 +12,11 @@ COMP_FILE="$REPO_ROOT/share/completions/zsh/_dot"
 DOT_FILE="$REPO_ROOT/bin/dot"
 
 # Test: _dot completion file exists
-test_start "defaults/dot_completion_file_exists"
+test_start "dot_completion_file_exists"
 assert_file_exists "$COMP_FILE" "_dot completion should exist"
 
 # Test: has #compdef header
-test_start "defaults/dot_completion_compdef_header"
+test_start "dot_completion_compdef_header"
 if head -1 "$COMP_FILE" | grep -q '#compdef dot'; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has #compdef dot header"
@@ -26,7 +26,7 @@ else
 fi
 
 # Test: defines _dot function
-test_start "defaults/dot_completion_function_defined"
+test_start "dot_completion_function_defined"
 if grep -q '_dot()' "$COMP_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines _dot() function"
@@ -36,7 +36,7 @@ else
 fi
 
 # Test: includes core commands
-test_start "defaults/dot_completion_core_commands"
+test_start "dot_completion_core_commands"
 missing=""
 for cmd in apply sync update add diff status remove cd edit; do
   if ! grep -q "'$cmd:" "$COMP_FILE" 2>/dev/null; then
@@ -52,7 +52,7 @@ else
 fi
 
 # Test: includes diagnostic commands
-test_start "defaults/dot_completion_diagnostic_commands"
+test_start "dot_completion_diagnostic_commands"
 missing=""
 for cmd in doctor heal health rollback drift benchmark perf; do
   if ! grep -q "'$cmd:" "$COMP_FILE" 2>/dev/null; then
@@ -68,7 +68,7 @@ else
 fi
 
 # Test: includes security commands
-test_start "defaults/dot_completion_security_commands"
+test_start "dot_completion_security_commands"
 missing=""
 for cmd in backup firewall telemetry dns-doh encrypt-check lock-screen usb-safety; do
   if ! grep -q "'$cmd:" "$COMP_FILE" 2>/dev/null; then
@@ -84,7 +84,7 @@ else
 fi
 
 # Test: includes ssh-cert command
-test_start "defaults/dot_completion_ssh_cert"
+test_start "dot_completion_ssh_cert"
 if grep -q "ssh-cert" "$COMP_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: includes ssh-cert command"
@@ -94,7 +94,7 @@ else
 fi
 
 # Test: ssh-cert has subcommand completion
-test_start "defaults/dot_completion_ssh_cert_subcommands"
+test_start "dot_completion_ssh_cert_subcommands"
 if grep -qE 'issue.*certificate|status.*certificate|revoke.*certificate' "$COMP_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: ssh-cert has subcommand completions"
@@ -104,7 +104,7 @@ else
 fi
 
 # Test: AI command completions include new providers
-test_start "defaults/dot_completion_ai_providers"
+test_start "dot_completion_ai_providers"
 missing=""
 for cmd in copilot kiro sgpt ollama opencode aider gemini; do
   if ! grep -q " $cmd)" "$COMP_FILE" 2>/dev/null && ! grep -q "'$cmd:" "$COMP_FILE" 2>/dev/null; then
@@ -120,7 +120,7 @@ else
 fi
 
 # Test: new command has template completions
-test_start "defaults/dot_completion_new_templates"
+test_start "dot_completion_new_templates"
 if grep -qE 'python.*go.*node' "$COMP_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: new command has template completions"
@@ -130,7 +130,7 @@ else
 fi
 
 # Test: perf command has flag completions
-test_start "defaults/dot_completion_perf_flags"
+test_start "dot_completion_perf_flags"
 if grep -q -- '--json' "$COMP_FILE" 2>/dev/null &&
   grep -q -- '-j:Output as JSON' "$COMP_FILE" 2>/dev/null &&
   grep -q -- '--profile' "$COMP_FILE" 2>/dev/null &&
@@ -144,7 +144,7 @@ else
 fi
 
 # Test: version command is part of the public completion surface
-test_start "defaults/dot_completion_version_command"
+test_start "dot_completion_version_command"
 if grep -q "'version:" "$COMP_FILE" 2>/dev/null && grep -q "'--version:" "$COMP_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: completion exposes version and --version"
@@ -154,7 +154,7 @@ else
 fi
 
 # Test: completion parity with dot help
-test_start "defaults/dot_completion_parity_with_help"
+test_start "dot_completion_parity_with_help"
 # Extract subcommands from dot case statement
 help_cmds=$(grep -oE '^\s+[a-z][-a-z]+\)' "$DOT_FILE" 2>/dev/null |
   sed 's/[[:space:]]*//;s/)//' | sort -u)

@@ -24,7 +24,7 @@ assert_file_contains "$PROFILE_FILE" "\"plan\"" "plan profile present"
 assert_file_contains "$PROFILE_FILE" "\"apply\"" "apply profile present"
 assert_file_contains "$PROFILE_FILE" "\"audit\"" "audit profile present"
 
-test_start "defaults/dot_cli_registers_mode_and_agent"
+test_start "dot_cli_registers_mode_and_agent"
 assert_file_contains "$DOT_CLI" "mode" "dot CLI lists mode command"
 assert_file_contains "$DOT_CLI" "agent" "dot CLI lists agent command"
 
@@ -34,13 +34,13 @@ test_start "meta_mode_handler_exists"
 assert_file_contains "$AGENT_MODULE" "cmd_mode()" "meta command module defines cmd_mode"
 assert_file_contains "$AGENT_MODULE" "Usage: dot mode [list|current|show|set|run|doctor|card|log|checkpoint|conformance|a2a-card]" "mode usage is documented"
 
-test_start "defaults/dot_mode_list_runs"
+test_start "dot_mode_list_runs"
 assert_output_contains "Agent Modes" "bash '$DOT_CLI' mode list"
 
-test_start "defaults/dot_mode_show_runs"
+test_start "dot_mode_show_runs"
 assert_output_contains "Read-only guidance with no unattended changes." "bash '$DOT_CLI' mode show ask"
 
-test_start "defaults/dot_agent_alias_runs"
+test_start "dot_agent_alias_runs"
 assert_output_contains "Agent Modes" "bash '$DOT_CLI' agent list"
 
 # Slice 3 (#883): exercise the script under sandbox for line coverage

@@ -30,7 +30,7 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
-test_start "defaults/dot_init_help"
+test_start "dot_init_help"
 if bash "$DOT_BIN" init --help >/dev/null 2>&1; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
@@ -54,7 +54,7 @@ for arg in "alice" "alice/cfg" "https://example.com/repo.git" "git@github.com:al
 done
 
 # Negative cases — these exercise the safety-rejection branches.
-test_start "defaults/dot_init_rejects_http"
+test_start "dot_init_rejects_http"
 if bash "$DOT_BIN" init "http://example.com/repo.git" --dry-run >/dev/null 2>&1; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have refused plain HTTP"
@@ -63,7 +63,7 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
 
-test_start "defaults/dot_init_rejects_shell_metachars"
+test_start "dot_init_rejects_shell_metachars"
 if bash "$DOT_BIN" init "alice; rm -rf /" --dry-run >/dev/null 2>&1; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have refused metacharacters"
@@ -72,7 +72,7 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
 
-test_start "defaults/dot_init_rejects_missing_arg"
+test_start "dot_init_rejects_missing_arg"
 if bash "$DOT_BIN" init --dry-run >/dev/null 2>&1; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have refused missing arg"

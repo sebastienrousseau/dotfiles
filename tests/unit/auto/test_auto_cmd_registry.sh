@@ -54,7 +54,7 @@ for sub in "--help" "url" "list"; do
 done
 
 # search + info — both require jq; skipped cleanly when absent.
-test_start "defaults/dot_registry_search"
+test_start "dot_registry_search"
 if bash "$DOT_BIN" registry search anything >/dev/null 2>&1; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
@@ -69,7 +69,7 @@ else
   fi
 fi
 
-test_start "defaults/dot_registry_info_missing_module"
+test_start "dot_registry_info_missing_module"
 # Empty registry → info on any name should exit non-zero (module not found),
 # which still counts as exercising the info branch.
 if ! bash "$DOT_BIN" registry info nonexistent-module >/dev/null 2>&1; then
@@ -80,7 +80,7 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have rejected"
 fi
 
-test_start "defaults/dot_registry_install_stub"
+test_start "dot_registry_install_stub"
 # install is a scaffold today — should print the would-fetch hint
 # and return 0. Exercises the install case arm.
 if bash "$DOT_BIN" registry install some-module >/dev/null 2>&1; then
@@ -92,7 +92,7 @@ else
 fi
 
 # Safety guards on set-url.
-test_start "defaults/dot_registry_set_url_refuses_http"
+test_start "dot_registry_set_url_refuses_http"
 if bash "$DOT_BIN" registry set-url "http://evil.example.com/r" >/dev/null 2>&1; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have refused HTTP"
@@ -101,7 +101,7 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
 
-test_start "defaults/dot_registry_set_url_missing_arg"
+test_start "dot_registry_set_url_missing_arg"
 if bash "$DOT_BIN" registry set-url >/dev/null 2>&1; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have refused missing URL"
@@ -110,7 +110,7 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
 
-test_start "defaults/dot_registry_unknown_subcommand"
+test_start "dot_registry_unknown_subcommand"
 if bash "$DOT_BIN" registry not-a-real-subcommand >/dev/null 2>&1; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have rejected"

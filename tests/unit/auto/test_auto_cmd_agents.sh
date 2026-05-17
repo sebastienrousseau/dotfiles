@@ -56,7 +56,7 @@ for sub in "--help" "list" "check"; do
   fi
 done
 
-test_start "defaults/dot_agents_unknown_subcommand"
+test_start "dot_agents_unknown_subcommand"
 if ( cd "$REPO_ROOT" && bash "$DOT_BIN" agents this-does-not-exist >/dev/null 2>&1 ); then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have rejected"

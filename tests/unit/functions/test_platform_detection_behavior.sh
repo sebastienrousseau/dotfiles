@@ -107,7 +107,7 @@ _source_platform
 # ──────────────────────────────────────────────────────────────────────────────
 # 5. dot_is_wsl returns false when osrelease is absent
 # ──────────────────────────────────────────────────────────────────────────────
-test_start "defaults/dot_is_wsl_absent_osrelease"
+test_start "dot_is_wsl_absent_osrelease"
 # Override dot_is_wsl to test against a nonexistent file path.
 _dot_is_wsl_with_file() {
   local osrelease_file="$1"
@@ -120,7 +120,7 @@ assert_equals "1" "$rc" "missing osrelease should make dot_is_wsl return false"
 # ──────────────────────────────────────────────────────────────────────────────
 # 6. dot_is_wsl returns true when osrelease contains "microsoft"
 # ──────────────────────────────────────────────────────────────────────────────
-test_start "defaults/dot_is_wsl_microsoft_marker"
+test_start "dot_is_wsl_microsoft_marker"
 fake_proc=$(_mock_wsl_osrelease "5.15.90.1-microsoft-standard-WSL2")
 _dot_is_wsl_with_file "$fake_proc/sys/kernel/osrelease"
 rc=$?
@@ -130,7 +130,7 @@ rm -rf "$fake_proc"
 # ──────────────────────────────────────────────────────────────────────────────
 # 7. dot_is_wsl returns true when osrelease contains "WSL" (case-insensitive)
 # ──────────────────────────────────────────────────────────────────────────────
-test_start "defaults/dot_is_wsl_wsl_marker_uppercase"
+test_start "dot_is_wsl_wsl_marker_uppercase"
 fake_proc=$(_mock_wsl_osrelease "4.4.0-WSL")
 _dot_is_wsl_with_file "$fake_proc/sys/kernel/osrelease"
 rc=$?
@@ -140,7 +140,7 @@ rm -rf "$fake_proc"
 # ──────────────────────────────────────────────────────────────────────────────
 # 8. dot_is_wsl returns false for plain Linux osrelease
 # ──────────────────────────────────────────────────────────────────────────────
-test_start "defaults/dot_is_wsl_plain_linux"
+test_start "dot_is_wsl_plain_linux"
 fake_proc=$(_mock_wsl_osrelease "6.1.0-27-amd64")
 _dot_is_wsl_with_file "$fake_proc/sys/kernel/osrelease"
 rc=$?
@@ -150,7 +150,7 @@ rm -rf "$fake_proc"
 # ──────────────────────────────────────────────────────────────────────────────
 # 9. dot_host_os returns "macos" on Darwin (non-WSL)
 # ──────────────────────────────────────────────────────────────────────────────
-test_start "defaults/dot_host_os_macos"
+test_start "dot_host_os_macos"
 _mock_uname "Darwin"
 dot_is_wsl() { return 1; }
 result=$(dot_host_os)
@@ -160,7 +160,7 @@ _source_platform
 # ──────────────────────────────────────────────────────────────────────────────
 # 10. dot_host_os returns "windows" inside WSL
 # ──────────────────────────────────────────────────────────────────────────────
-test_start "defaults/dot_host_os_wsl_is_windows"
+test_start "dot_host_os_wsl_is_windows"
 dot_is_wsl() { return 0; }
 result=$(dot_host_os)
 assert_equals "windows" "$result" "WSL environment should report host_os 'windows'"

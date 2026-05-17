@@ -22,7 +22,7 @@ DOT="$REPO_ROOT/bin/dot"
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
-test_start "defaults/dot_exists"
+test_start "dot_exists"
 assert_file_exists "$DOT" "dot dispatcher must exist"
 
 # Resolve a portable timeout binary (matches cov_exercise_script).

@@ -56,8 +56,8 @@ assert_file_contains "$audit_script" "run_step \"Traceability coverage\" traceab
 
 test_start "qa_examples_include_platform_contract"
 assert_file_exists "$platform_example" "platform contract example exists"
-assert_file_contains "$platform_example" "defaults/dot_platform_id" "platform example prints platform id"
-assert_file_contains "$platform_example" "defaults/dot_host_os" "platform example prints host os"
+assert_file_contains "$platform_example" "dot_platform_id" "platform example prints platform id"
+assert_file_contains "$platform_example" "dot_host_os" "platform example prints host os"
 
 test_start "qa_wsl_contract_exists"
 assert_file_exists "$wsl_contract_script" "wsl contract script exists"

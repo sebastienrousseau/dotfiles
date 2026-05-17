@@ -85,7 +85,7 @@ assert_file_contains "$BIN_DIR/executable_gbd" "dry-run" "gbd must support --dry
 test_start "gbd_protects_main"
 assert_file_contains "$BIN_DIR/executable_gbd" "main|master" "gbd must whitelist main/master"
 
-test_start "defaults/dot_launch_or_focus_uses_niri"
+test_start "dot_launch_or_focus_uses_niri"
 assert_file_contains "$BIN_DIR/executable_dot-launch-or-focus" "niri msg" "must use niri IPC"
 
 test_start "monitor_detects_gpu"

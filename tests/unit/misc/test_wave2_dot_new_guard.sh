@@ -12,10 +12,10 @@ DOT_CLI="$REPO_ROOT/bin/dot"
 
 echo "Testing Wave 2: dot new Python pre-flight guard..."
 
-test_start "defaults/dot_cli_exists"
+test_start "dot_cli_exists"
 assert_file_exists "$DOT_CLI" "executable_dot should exist"
 
-test_start "defaults/dot_cli_syntax"
+test_start "dot_cli_syntax"
 assert_exit_code 0 "bash -n '$DOT_CLI'"
 
 # The Python check lives in the tools.sh command module (dispatched from executable_dot)
@@ -58,7 +58,7 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: Python error should be checked in tools module"
 fi
 
-test_start "defaults/dot_new_no_args_usage"
+test_start "dot_new_no_args_usage"
 set +e
 output=$(CHEZMOI_SOURCE_DIR="$REPO_ROOT" bash "$DOT_CLI" new 2>&1)
 ec=$?
