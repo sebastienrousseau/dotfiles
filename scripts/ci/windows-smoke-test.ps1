@@ -78,6 +78,40 @@ Assert-Step 'chezmoi --version succeeds' {
   if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
 }
 
+# ─── Native PowerShell module — no bash needed ───────────────────────────────
+# Tests the cmdlets in scripts/dot/powershell/Dot.psm1.
+Assert-Step 'Dot.psm1 imports cleanly' {
+  Import-Module (Join-Path $RepoRoot 'scripts/dot/powershell/Dot.psm1') -Force
+}
+
+Assert-Step 'Get-DotVersion (native)' {
+  $env:DOT_REPO_ROOT = $RepoRoot
+  Import-Module (Join-Path $RepoRoot 'scripts/dot/powershell/Dot.psm1') -Force
+  $v = Get-DotVersion
+  if ($v -notmatch '^\d+\.\d+\.\d+$') { throw "unexpected version: $v" }
+}
+
+Assert-Step 'Test-DotAgentsSync (native — AGENTS.md ↔ CLAUDE.md)' {
+  $env:DOT_REPO_ROOT = $RepoRoot
+  Import-Module (Join-Path $RepoRoot 'scripts/dot/powershell/Dot.psm1') -Force
+  if (-not (Test-DotAgentsSync)) {
+    throw 'AGENTS.md not in sync with CLAUDE.md'
+  }
+}
+
+Assert-Step 'dot.ps1 dispatcher: version subcommand' {
+  $ps1 = Join-Path $RepoRoot 'dot_local/bin/dot.ps1'
+  $out = & pwsh -NoProfile -File $ps1 'version' 2>&1
+  if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
+  if ($out -notmatch '^\d+\.\d+\.\d+$') { throw "unexpected: $out" }
+}
+
+Assert-Step 'dot.ps1 dispatcher: agents check subcommand' {
+  $ps1 = Join-Path $RepoRoot 'dot_local/bin/dot.ps1'
+  $out = & pwsh -NoProfile -File $ps1 'agents' 'check' 2>&1
+  if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
+}
+
 # Native Windows: validate every chezmoi template renders without needing
 # bash. This catches Go-template syntax errors that wouldn't surface until
 # a real user ran `chezmoi apply` on Windows. Uses a throwaway destDir +

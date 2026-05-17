@@ -21,11 +21,12 @@ This document tracks what is supported on Windows-native PowerShell 7.4 LTS / 7.
 
 | Command | Windows-native | WSL2 | macOS | Linux |
 |---|---|---|---|---|
-| `dot version` | Full | Full | Full | Full |
-| `dot help` | Full | Full | Full | Full |
+| `dot version` | **Full (native)** — `Get-DotVersion` cmdlet in `scripts/dot/powershell/Dot.psm1`; reads `.chezmoidata.toml` directly, no bash | Full | Full | Full |
+| `dot help` | **Full (native)** — `Invoke-DotHelp` cmdlet; `dot help <subcmd>` still bash-bridged | Full | Full | Full |
 | `dot doctor` | Full (subset of checks; some Unix-only checks return N/A) | Full | Full | Full |
 | `dot init <user>` | Full (requires `chezmoi` on PATH — install via `scoop install chezmoi`) | Full | Full | Full |
-| `dot agents render` / `check` / `list` | Stub (bash-bridged — requires bash on PATH; the smoke test calls `bash dot agents check` from pwsh) | Full | Full | Full |
+| `dot agents check` | **Full (native)** — `Test-DotAgentsSync` cmdlet; CI smoke test runs the cmdlet directly | Full | Full | Full |
+| `dot agents render` / `list` | Stub (bash-bridged — `render` is a multi-harness mustache-equivalent rewrite, tracked as a separate ticket) | Full | Full | Full |
 | `dot fleet status` / `drift` / `events` | Full | Full | Full | Full |
 | `dot fleet apply` | Stub (bash-bridged + requires Windows OpenSSH `ssh.exe` on PATH; no native pwsh-side test in CI yet — tracked in ROADMAP §C5 follow-up) | Full | Full | Full |
 | `dot fleet namespace set` | Full | Full | Full | Full |
