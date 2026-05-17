@@ -161,6 +161,8 @@ jobs:
           framework: dockerfile,yaml,secrets
           quiet: true
           soft_fail: true
+          # OSS-Fuzz scaffolding can't satisfy CKV_DOCKER_2/3/7 — see ci-enforced.yml.
+          skip_path: oss-fuzz-integration/
 
       - name: Upload Checkov results to GitHub Security
         if: always()
