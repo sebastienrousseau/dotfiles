@@ -189,151 +189,505 @@ log "master markdown: $(human_size "$MASTER_SIZE")"
 # -----------------------------------------------------------------------------
 
 write_css() {
+  # Apple-inspired design system, mirroring dotfiles.io
+  # (VitePress + custom Apple-style theme). Token names align with
+  # the public site so an upstream redesign here travels there too.
   cat >"$BUILD_DIR/style.css" <<'CSSEOF'
 :root {
-  --fg: #1c1c1e;
-  --bg: #fff;
-  --accent: #2d538e;
-  --accent-text: #fff;
-  --border: #e5e5ea;
+  /* Surfaces */
+  --bg: #ffffff;
+  --bg-secondary: #f5f5f7;
+  --bg-elevated: #ffffff;
+  --bg-nav: rgba(255, 255, 255, 0.72);
+  --bg-footer: #f5f5f7;
+
+  /* Text */
+  --text-primary: #1d1d1f;
+  --text-secondary: #494950;
+  --text-muted: #6e6e73;
+  --footer-title: #1d1d1f;
+  --footer-text: #494950;
+  --footer-link: #3b3b40;
+
+  /* Borders & dividers */
+  --border: #d2d2d7;
+  --divider: #e5e5ea;
+
+  /* Links & focus */
+  --link: #004fa3;
+  --link-hover: #003d80;
+  --focus-ring: #0058b0;
+
+  /* Brand / accent */
+  --brand: #0071e3;
+  --brand-hover: #005bb5;
+  --brand-text: #ffffff;
+
+  /* Code */
   --code-bg: #f5f5f7;
-  --muted: #6d6d72;
-  --focus-ring: #0066cc;
+  --code-border: #e5e5ea;
+  --code-text: #1d1d1f;
+  --code-keyword: #aa0d91;
+  --code-string: #c41a16;
+  --code-comment: #6e6e73;
+
+  /* Effects */
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.08);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-pill: 980px;
+
+  /* Type */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Inter", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "SF Mono", SFMono-Regular, ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
+
+  /* Layout */
+  --content-max: 980px;
+  --nav-height: 56px;
 }
+
 @media (prefers-color-scheme: dark) {
   :root {
-    --fg: #f2f2f7;
-    --bg: #111;
-    --accent: #64a0e4;
-    --accent-text: #111;
-    --border: #2c2c2e;
-    --code-bg: #1c1c1e;
-    --muted: #9b9ba0;
-    --focus-ring: #5ac8fa;
+    --bg: #000000;
+    --bg-secondary: #1d1d1f;
+    --bg-elevated: #1d1d1f;
+    --bg-nav: rgba(0, 0, 0, 0.72);
+    --bg-footer: #1d1d1f;
+
+    --text-primary: #f5f5f7;
+    --text-secondary: #acacb0;
+    --text-muted: #86868b;
+    --footer-title: #f5f5f7;
+    --footer-text: #c0c0c5;
+    --footer-link: #d0d0d5;
+
+    --border: #424245;
+    --divider: #2c2c2e;
+
+    --link: #4dadff;
+    --link-hover: #6fc0ff;
+    --focus-ring: #4dadff;
+
+    --brand: #2997ff;
+    --brand-hover: #0a84ff;
+
+    --code-bg: #1d1d1f;
+    --code-border: #2c2c2e;
+    --code-text: #f5f5f7;
+    --code-keyword: #ff7ab2;
+    --code-string: #fc6a5d;
+    --code-comment: #86868b;
+
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.4);
+    --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.6);
   }
 }
 
-/* Skip link for keyboard users */
+/* ── Reset / base ─────────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Accessibility ──────────────────────────────────────────────────────── */
+
 .skip-link {
   position: absolute;
   left: -9999px;
   top: 0;
-  background: var(--accent);
-  color: var(--accent-text);
-  padding: 0.5rem 1rem;
+  background: var(--brand);
+  color: var(--brand-text);
+  padding: 0.6rem 1rem;
   z-index: 1000;
   text-decoration: none;
+  font-weight: 500;
+  border-radius: 0 0 var(--radius-sm) 0;
 }
 .skip-link:focus { left: 0; }
 
 *:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
-  border-radius: 2px;
+  border-radius: 4px;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
-  max-width: 820px;
-  margin: 2rem auto;
-  padding: 0 1rem;
-  color: var(--fg);
-  background: var(--bg);
-  line-height: 1.6;
+/* ── Top navigation bar (Apple-style) ───────────────────────────────────── */
+
+.site-nav {
+  position: sticky;
+  top: 0;
+  height: var(--nav-height);
+  background: var(--bg-nav);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--divider);
+  z-index: 100;
+}
+.site-nav-inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+}
+.site-nav .brand-link {
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+.site-nav .brand-link::before {
+  content: "◈";
+  display: inline-block;
+  margin-right: 0.5rem;
+  color: var(--brand);
+}
+.site-nav-links {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.site-nav-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 400;
+  transition: color 0.15s ease;
+}
+.site-nav-links a:hover { color: var(--text-primary); }
+
+/* ── Layout ─────────────────────────────────────────────────────────────── */
+
+body > main, .content, article {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
 }
 
-h1, h2, h3 { color: var(--accent); margin-top: 2rem; line-height: 1.3; }
-h1 { border-bottom: 2px solid var(--accent); padding-bottom: 0.3rem; }
-h2 { margin-top: 2.5rem; }
+/* ── Typography ─────────────────────────────────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 2.5rem 0 1rem;
+}
+h1 {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-top: 1rem;
+}
+h2 {
+  font-size: clamp(1.5rem, 2.6vw, 1.875rem);
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--divider);
+}
+h3 { font-size: 1.25rem; margin-top: 2rem; }
+h4 { font-size: 1.0625rem; color: var(--text-secondary); }
+
+p { margin: 0 0 1rem; }
+
+a { color: var(--link); text-decoration: none; transition: color 0.15s ease; }
+a:hover { color: var(--link-hover); text-decoration: underline; text-underline-offset: 3px; }
+
+ul, ol { padding-left: 1.5rem; margin: 0 0 1rem; }
+li { margin: 0.25rem 0; }
+
+blockquote {
+  border-left: 3px solid var(--brand);
+  padding: 0.5rem 1.25rem;
+  margin: 1.5rem 0;
+  background: var(--bg-secondary);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--text-secondary);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--divider);
+  margin: 2.5rem 0;
+}
+
+/* ── Code ───────────────────────────────────────────────────────────────── */
 
 code {
   background: var(--code-bg);
-  padding: 0.1rem 0.3rem;
-  border-radius: 3px;
-  font-family: "JetBrains Mono", "SF Mono", Menlo, monospace;
-  font-size: 0.9em;
+  color: var(--code-text);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  border: 1px solid var(--code-border);
 }
 pre {
   background: var(--code-bg);
-  padding: 1rem;
-  border-radius: 6px;
+  color: var(--code-text);
+  padding: 1.125rem 1.25rem;
+  border-radius: var(--radius-sm);
   overflow-x: auto;
+  border: 1px solid var(--code-border);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 1.25rem 0;
+}
+pre code { background: transparent; padding: 0; border: 0; font-size: inherit; }
+
+/* ── Tables ─────────────────────────────────────────────────────────────── */
+
+table {
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  width: 100%;
+  font-size: 0.9375rem;
+}
+th, td {
+  border-bottom: 1px solid var(--divider);
+  padding: 0.625rem 1rem;
+  text-align: left;
+  vertical-align: top;
+}
+thead th {
+  background: var(--bg-secondary);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-secondary);
+}
+tbody tr:hover { background: var(--bg-secondary); }
+
+/* ── Buttons ────────────────────────────────────────────────────────────── */
+
+.btn, button.btn, a.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.5rem;
+  background: var(--brand);
+  color: var(--brand-text);
+  border: 0;
+  border-radius: var(--radius-pill);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.05s ease;
+  line-height: 1.2;
+}
+.btn:hover { background: var(--brand-hover); color: var(--brand-text); text-decoration: none; }
+.btn:active { transform: scale(0.98); }
+.btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   border: 1px solid var(--border);
 }
-pre code { background: transparent; padding: 0; }
+.btn-secondary:hover { background: var(--bg-elevated); color: var(--text-primary); }
 
-table { border-collapse: collapse; margin: 1rem 0; width: 100%; }
-th, td { border: 1px solid var(--border); padding: 0.4rem 0.8rem; text-align: left; }
-th { background: var(--code-bg); font-weight: 600; }
+/* ── Search widget ──────────────────────────────────────────────────────── */
 
-a { color: var(--accent); }
-a:hover { text-decoration: underline; }
-
-nav ol, nav ul { padding-left: 1.2rem; }
-blockquote {
-  border-left: 3px solid var(--accent);
-  padding-left: 1rem;
-  color: var(--muted);
-  margin: 1rem 0;
-}
-
-/* Search box */
 .search-widget {
-  margin: 1rem 0 2rem;
-  padding: 0.8rem 1rem;
-  background: var(--code-bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  margin: 1.5rem 0 2.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius);
+}
+.search-widget label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 .search-widget input {
   width: 100%;
-  padding: 0.5rem 0.8rem;
-  font-size: 1rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.9375rem;
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: var(--bg);
-  color: var(--fg);
+  color: var(--text-primary);
   font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.search-widget input:focus {
+  outline: 0;
+  border-color: var(--focus-ring);
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.18);
 }
 .search-results {
-  margin-top: 0.8rem;
-  max-height: 300px;
+  margin-top: 0.875rem;
+  max-height: 320px;
   overflow-y: auto;
+  list-style: none;
+  padding: 0;
 }
 .search-results li {
-  list-style: none;
-  padding: 0.4rem 0;
-  border-bottom: 1px solid var(--border);
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--divider);
 }
 .search-results li:last-child { border-bottom: none; }
-.search-results a { text-decoration: none; display: block; }
-.search-results .hit-section { font-size: 0.85em; color: var(--muted); }
+.search-results a { text-decoration: none; display: block; color: var(--text-primary); }
+.search-results a:hover { color: var(--link); }
+.search-results .hit-section { font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.125rem; }
 
-/* Page footer / edit link */
+/* ── Page footer / edit link ────────────────────────────────────────────── */
+
 .page-footer {
-  margin-top: 3rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
-  font-size: 0.9em;
-  color: var(--muted);
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--divider);
+  font-size: 0.875rem;
+  color: var(--text-muted);
 }
-.page-footer a { color: var(--muted); }
+.page-footer a { color: var(--text-secondary); }
 
-/* Formats list on landing */
-.formats { margin: 2rem 0; }
-.formats li { margin: 0.4rem 0; }
-.size { color: var(--muted); font-size: 0.9em; }
+/* ── Landing: hero, features, formats ───────────────────────────────────── */
 
-/* Version badge */
+.hero {
+  text-align: center;
+  padding: 4rem 1rem 3rem;
+  border-bottom: 1px solid var(--divider);
+  margin-bottom: 3rem;
+}
+.hero h1 {
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: 0 0 1rem;
+}
+.hero .tagline {
+  font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
+  color: var(--text-secondary);
+  max-width: 640px;
+  margin: 0 auto 2rem;
+  font-weight: 400;
+}
+.hero-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
 .version-badge {
   display: inline-block;
-  background: var(--accent);
-  color: var(--accent-text);
-  padding: 0.15rem 0.6rem;
-  border-radius: 12px;
-  font-size: 0.8em;
-  font-weight: 600;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   margin-left: 0.5rem;
+  border: 1px solid var(--divider);
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin: 2.5rem 0;
+}
+.feature-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--divider);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.feature-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-1px);
+}
+.feature-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+}
+.feature-card p {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.formats { margin: 2.5rem 0; list-style: none; padding: 0; }
+.formats li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin: 0.625rem 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.15s ease;
+}
+.formats li:hover { background: var(--bg-secondary); }
+.formats a { font-weight: 500; }
+.size { color: var(--text-muted); font-size: 0.8125rem; margin-left: auto; font-variant-numeric: tabular-nums; }
+
+/* ── Footer (page-bottom site footer for the landing) ─────────────────── */
+
+.site-footer {
+  background: var(--bg-footer);
+  border-top: 1px solid var(--divider);
+  margin-top: 4rem;
+  padding: 2.5rem 1.5rem;
+  font-size: 0.8125rem;
+  color: var(--footer-text);
+}
+.site-footer .footer-inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+.site-footer a { color: var(--footer-link); }
+.site-footer a:hover { color: var(--text-primary); }
+
+/* ── Responsive tweaks ──────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .site-nav-links { gap: 0.875rem; font-size: 0.8125rem; }
+  body { font-size: 16px; }
+  .hero { padding: 2.5rem 1rem 2rem; }
+}
+
+/* ── Print ──────────────────────────────────────────────────────────────── */
+
+@media print {
+  .site-nav, .search-widget, .skip-link, .hero-actions { display: none; }
+  body { font-size: 11pt; color: #000; background: #fff; }
+  a { color: inherit; text-decoration: underline; }
+  pre, code { background: #f5f5f7; border-color: #d2d2d7; }
 }
 CSSEOF
 }
@@ -463,11 +817,17 @@ build_html_single() {
     --css=style.css \
     -o "$out"
 
-  # Inject skip link + ARIA landmarks
-  sed -i.bak '
-    s|<body>|<body>\n<a href="#main" class="skip-link">Skip to main content</a>\n<main id="main" role="main">|
-    s|</body>|</main>\n</body>|
-  ' "$out" && rm -f "$out.bak"
+  # Inject skip link + top-nav + ARIA landmarks (matches dotfiles.io UX)
+  local nav_html
+  nav_html="<nav class=\"site-nav\" aria-label=\"Site\"><div class=\"site-nav-inner\"><a href=\"./index.html\" class=\"brand-link\">dotfiles<span class=\"version-badge\">v$VERSION</span></a><ul class=\"site-nav-links\"><li><a href=\"./index.html\">Home</a></li><li><a href=\"$REPO_URL\">GitHub</a></li></ul></div></nav>"
+  sed -i.bak "
+    s|<body>|<body>\\
+<a href=\"#main\" class=\"skip-link\">Skip to main content</a>\\
+$nav_html\\
+<main id=\"main\" role=\"main\">|
+    s|</body>|</main>\\
+</body>|
+  " "$out" && rm -f "$out.bak"
 
   local sz
   sz=$(file_size "$out")
@@ -517,16 +877,30 @@ FOOT
       --include-after-body=<(echo "$footer") \
       -o "$outpath"
 
-    # Inject skip link + ARIA
-    sed -i.bak '
-      s|<body>|<body>\n<a href="#main" class="skip-link">Skip to main content</a>\n<main id="main" role="main">|
-      s|</body>|</main>\n</body>|
-    ' "$outpath" && rm -f "$outpath.bak"
+    # Inject skip link + top-nav + ARIA.
+    # `up` = path back to BUILD_DIR (landing root). For html/foo.html,
+    # that's `../`. For html/a/b.html it's `../../` (one ../ per
+    # slash in rel_src). `manual_up` = path back to html/ (drops one
+    # leading ../ from `up`).
+    local sub_depth="${rel_src//[^\/]/}"
+    local up="../"
+    [[ -n "$sub_depth" ]] && for _ in $(seq ${#sub_depth}); do up="../$up"; done
+    local manual_up="${up#../}"
+    local sub_nav
+    sub_nav="<nav class=\"site-nav\" aria-label=\"Site\"><div class=\"site-nav-inner\"><a href=\"${up}index.html\" class=\"brand-link\">dotfiles<span class=\"version-badge\">v$VERSION</span></a><ul class=\"site-nav-links\"><li><a href=\"${manual_up}index.html\">Manual</a></li><li><a href=\"${up}dotfiles.html\">Single page</a></li><li><a href=\"$REPO_URL\">GitHub</a></li></ul></div></nav>"
+    sed -i.bak "
+      s|<body>|<body>\\
+<a href=\"#main\" class=\"skip-link\">Skip to main content</a>\\
+$sub_nav\\
+<main id=\"main\" role=\"main\">|
+      s|</body>|</main>\\
+</body>|
+    " "$outpath" && rm -f "$outpath.bak"
   done
 
   cp "$BUILD_DIR/style.css" "$HTML_DIR/style.css"
 
-  # Multi-page index with search
+  # Multi-page index with search + Apple-style nav
   {
     echo '<!DOCTYPE html>'
     echo '<html lang="en">'
@@ -537,14 +911,24 @@ FOOT
     echo '</head>'
     echo '<body>'
     echo '<a href="#main" class="skip-link">Skip to main content</a>'
+    echo '<nav class="site-nav" aria-label="Site"><div class="site-nav-inner">'
+    echo "<a href=\"../index.html\" class=\"brand-link\">dotfiles<span class=\"version-badge\">v$VERSION</span></a>"
+    echo '<ul class="site-nav-links">'
+    echo '<li><a href="./index.html">Manual</a></li>'
+    echo '<li><a href="../dotfiles.html">Single page</a></li>'
+    echo "<li><a href=\"$REPO_URL\">GitHub</a></li>"
+    echo '</ul></div></nav>'
     echo '<main id="main" role="main">'
-    echo "<h1>$TITLE <span class=\"version-badge\">v$VERSION</span></h1>"
-    echo "<p><em>$SUBTITLE</em></p>"
+    echo '<section class="hero" style="padding:3rem 1rem 2rem;border-bottom:0;margin-bottom:1rem;">'
+    echo "<h1>$TITLE</h1>"
+    echo "<p class=\"tagline\">$SUBTITLE</p>"
+    echo '</section>'
     echo '<div class="search-widget" role="search">'
-    echo '  <label for="manual-search" style="font-weight: 600;">Search the manual</label>'
+    echo '  <label for="manual-search">Search the manual</label>'
     echo '  <input type="search" id="manual-search" placeholder="Type at least 2 characters..." aria-label="Search the manual" autocomplete="off">'
     echo '  <div id="manual-search-results" aria-live="polite"></div>'
     echo '</div>'
+    echo '<h2>Table of contents</h2>'
     echo '<nav aria-label="Manual table of contents"><ul>'
     echo "$FILES_LIST" | while IFS= read -r f; do
       local rel_src="${f#$SOURCE_DIR/}"
@@ -557,6 +941,9 @@ FOOT
     done
     echo '</ul></nav>'
     echo '</main>'
+    echo '<footer class="site-footer"><div class="footer-inner">'
+    echo "<p>Generated $BUILD_DATE · <a href=\"$REPO_URL\">sebastienrousseau/dotfiles</a> · <a href=\"$REPO_URL/blob/master/LICENSE\">MIT License</a></p>"
+    echo '</div></footer>'
     echo '<script src="../search.js" defer></script>'
     echo '</body></html>'
   } >"$HTML_DIR/index.html"
@@ -791,58 +1178,92 @@ build_landing() {
 </head>
 <body>
   <a href="#main" class="skip-link">Skip to main content</a>
+
+  <nav class="site-nav" aria-label="Site">
+    <div class="site-nav-inner">
+      <a href="./" class="brand-link">dotfiles<span class="version-badge">v$VERSION</span></a>
+      <ul class="site-nav-links">
+        <li><a href="html/index.html">Manual</a></li>
+        <li><a href="dotfiles.html">Single page</a></li>
+        <li><a href="$REPO_URL">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
+
   <main id="main" role="main">
-  <header>
-    <h1>The .dotfiles Manual <span class="version-badge">v$VERSION</span></h1>
-    <p><em>$SUBTITLE</em></p>
-  </header>
+    <section class="hero">
+      <h1>Your Shell, Everywhere.</h1>
+      <p class="tagline">$SUBTITLE — multi-shell by default, sub-second startup, wallpaper-driven themes, encrypted secrets, and signed releases.</p>
+      <div class="hero-actions">
+        <a class="btn" href="html/index.html">Read the Manual</a>
+        <a class="btn btn-secondary" href="$REPO_URL">View on GitHub</a>
+      </div>
+    </section>
 
-  <div class="search-widget" role="search">
-    <label for="manual-search" style="font-weight: 600;">Search the manual</label>
-    <input type="search" id="manual-search" placeholder="Type at least 2 characters..." aria-label="Search the manual" autocomplete="off">
-    <div id="manual-search-results" aria-live="polite"></div>
-  </div>
+    <section class="features" aria-label="Key features">
+      <div class="feature-card">
+        <h3>Modern Core</h3>
+        <p>Chezmoi-managed templates, mise-pinned toolchains, and a single <code>dot</code> CLI surface across fish, zsh, nushell, bash, and PowerShell.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Hardened Security</h3>
+        <p>SLSA L3 provenance, signed releases, in-toto attestations, age + SOPS-encrypted secrets, and an OpenSSF Scorecard 10/10 baseline.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Infrastructure Approach</h3>
+        <p>Self-healing apply, fleet-aware namespacing, drift detection, and reproducible environment manifests for every workstation.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Cross-Platform</h3>
+        <p>First-class macOS, Ubuntu, Arch, Fedora, openSUSE, WSL2, and PowerShell 7.5+ support — the same UX everywhere.</p>
+      </div>
+    </section>
 
-  <h2>Available formats</h2>
-  <p>This manual is published from a single Markdown source in the following formats:</p>
-  <ul class="formats">
-    <li><a href="html/index.html">HTML</a> — one page per chapter, with search</li>
-    <li><a href="dotfiles.html">HTML single page</a> <span class="size">($html_size)</span></li>
-    <li><a href="html.tar.gz">HTML compressed</a> <span class="size">($html_tar_size gzipped tar, multi-page)</span></li>
-    <li><a href="dotfiles.html.gz">HTML compressed</a> <span class="size">($html_gz_size gzipped, single page)</span></li>
-    <li><a href="dotfiles.epub">EPUB</a> <span class="size">($epub_size)</span></li>
+    <div class="search-widget" role="search">
+      <label for="manual-search">Search the manual</label>
+      <input type="search" id="manual-search" placeholder="Type at least 2 characters..." aria-label="Search the manual" autocomplete="off">
+      <div id="manual-search-results" aria-live="polite"></div>
+    </div>
+
+    <h2>Available formats</h2>
+    <p>This manual is published from a single Markdown source in the following formats:</p>
+    <ul class="formats">
+      <li><a href="html/index.html">HTML</a> — one page per chapter, with search</li>
+      <li><a href="dotfiles.html">HTML single page</a> <span class="size">$html_size</span></li>
+      <li><a href="html.tar.gz">HTML compressed (multi-page)</a> <span class="size">$html_tar_size</span></li>
+      <li><a href="dotfiles.html.gz">HTML compressed (single page)</a> <span class="size">$html_gz_size</span></li>
+      <li><a href="dotfiles.epub">EPUB</a> <span class="size">$epub_size</span></li>
 HTML
 
   if [[ -n "$pdf_size" ]]; then
-    echo "    <li><a href=\"dotfiles.pdf\">PDF</a> <span class=\"size\">($pdf_size, with cover page)</span></li>" >>"$out"
+    echo "      <li><a href=\"dotfiles.pdf\">PDF</a> <span class=\"size\">$pdf_size</span></li>" >>"$out"
   fi
 
   cat >>"$out" <<HTML
-    <li><a href="dotfiles.txt">ASCII text</a> <span class="size">($txt_size)</span></li>
-    <li><a href="dotfiles.txt.gz">ASCII text compressed</a> <span class="size">($txt_gz_size gzipped)</span></li>
-    <li><a href="dotfiles-md.tar.gz">Markdown source</a> <span class="size">($md_size gzipped tar)</span></li>
-  </ul>
+      <li><a href="dotfiles.txt">ASCII text</a> <span class="size">$txt_size</span></li>
+      <li><a href="dotfiles.txt.gz">ASCII text compressed</a> <span class="size">$txt_gz_size</span></li>
+      <li><a href="dotfiles-md.tar.gz">Markdown source</a> <span class="size">$md_size</span></li>
+    </ul>
 
-  <p>Integrity: <a href="SHA256SUMS">SHA256SUMS</a> · Version history: <a href="$REPO_URL/releases">GitHub Releases</a></p>
+    <p>Integrity: <a href="SHA256SUMS">SHA256SUMS</a> · Version history: <a href="$REPO_URL/releases">GitHub Releases</a></p>
 
-  <h2>About this manual</h2>
-  <p><code>.dotfiles</code> is workstation infrastructure: signed, attested, multi-platform, AI-aware, and self-healing.
-  Install with one command; get terminal themes generated from wallpapers, encrypted secrets, agent policy enforcement,
-  and cross-host attestation.</p>
-
-  <h2>Quick start</h2>
-  <pre><code>bash -c "\$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
+    <h2>Quick start</h2>
+    <pre><code>bash -c "\$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
 dot doctor
 dot learn</code></pre>
 
-  <h2>Source code</h2>
-  <p>Repository: <a href="$REPO_URL">sebastienrousseau/dotfiles</a> · License: <a href="$REPO_URL/blob/master/LICENSE">MIT</a></p>
-
-  <div class="page-footer">
-    <p>Generated $BUILD_DATE from <a href="dotfiles-md.tar.gz">docs/manual/</a> via <code>tools/docs/build-manual.sh</code>.</p>
-    <p>Questions? <a href="$REPO_URL/issues">Open an issue</a> or <a href="$REPO_URL/discussions">start a discussion</a>.</p>
-  </div>
+    <h2>Source</h2>
+    <p>Repository: <a href="$REPO_URL">sebastienrousseau/dotfiles</a> · License: <a href="$REPO_URL/blob/master/LICENSE">MIT</a></p>
   </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>Generated $BUILD_DATE from <a href="dotfiles-md.tar.gz">docs/manual/</a> via <code>tools/docs/build-manual.sh</code>.
+      Questions? <a href="$REPO_URL/issues">Open an issue</a> or <a href="$REPO_URL/discussions">start a discussion</a>.</p>
+      <p>&copy; 2015–$(date +%Y) Sebastien Rousseau · <a href="$REPO_URL/blob/master/LICENSE">MIT License</a></p>
+    </div>
+  </footer>
+
   <script src="search.js" defer></script>
 </body>
 </html>
