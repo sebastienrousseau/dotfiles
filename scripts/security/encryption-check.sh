@@ -3,12 +3,12 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../dot/lib/ui.sh
+# shellcheck source=../../lib/dot/ui.sh
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/../dot/lib/ui.sh"
-# shellcheck source=../dot/lib/platform.sh
+source "$SCRIPT_DIR/../../lib/dot/ui.sh"
+# shellcheck source=../../lib/dot/platform.sh
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/../dot/lib/platform.sh"
+source "$SCRIPT_DIR/../../lib/dot/platform.sh"
 
 ui_init
 ui_header "Encryption Check"

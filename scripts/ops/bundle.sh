@@ -9,9 +9,9 @@ trap 'rm -f "${_cleanup_files[@]}"' EXIT
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/dot/lib/ui.sh"
+source "$SCRIPT_DIR/../lib/dot/ui.sh"
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/dot/lib/log.sh"
+source "$SCRIPT_DIR/../lib/dot/log.sh"
 export DOT_COMMAND="bundle"
 
 # Concurrency guard

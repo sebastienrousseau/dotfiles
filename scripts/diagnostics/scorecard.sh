@@ -6,12 +6,12 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../dot/lib/ui.sh
+# shellcheck source=../../lib/dot/ui.sh
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/../dot/lib/ui.sh"
-# shellcheck source=../dot/lib/log.sh
+source "$SCRIPT_DIR/../../lib/dot/ui.sh"
+# shellcheck source=../../lib/dot/log.sh
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/../dot/lib/log.sh"
+source "$SCRIPT_DIR/../../lib/dot/log.sh"
 export DOT_COMMAND="scorecard"
 
 ui_init

@@ -13,12 +13,12 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 # without the env-prefix dance that confuses shellcheck (SC2097/SC2098).
 export REPO_ROOT
 
-# shellcheck source=../dot/lib/ui.sh
-source "$SCRIPT_DIR/../dot/lib/ui.sh"
-# shellcheck source=../dot/lib/platform.sh
-source "$SCRIPT_DIR/../dot/lib/platform.sh"
-# shellcheck source=../dot/lib/utils.sh
-source "$SCRIPT_DIR/../dot/lib/utils.sh"
+# shellcheck source=../../lib/dot/ui.sh
+source "$SCRIPT_DIR/../../lib/dot/ui.sh"
+# shellcheck source=../../lib/dot/platform.sh
+source "$SCRIPT_DIR/../../lib/dot/platform.sh"
+# shellcheck source=../../lib/dot/utils.sh
+source "$SCRIPT_DIR/../../lib/dot/utils.sh"
 
 JSON_MODE=0
 WRITE_PATH=""

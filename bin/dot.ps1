@@ -27,9 +27,23 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 # Locate this script's repo root so module-import + bash-fallback
-# both use the same anchor.
+# both use the same anchor. Post-Phase 2 (v0.2.503) the dispatcher
+# lives at bin/dot.ps1 — repo root is one level up. Legacy install
+# location is dot_local/bin/executable_dot.ps1 — two levels up.
+# Probe both so chezmoi-deployed and source-tree invocations work.
 $ScriptPath = $MyInvocation.MyCommand.Path
-$RepoRoot   = (Resolve-Path (Join-Path (Split-Path $ScriptPath) '..\..')).Path
+$ScriptDir  = Split-Path $ScriptPath
+$RepoRoot   = $null
+foreach ($candidate in @('..', '..\..')) {
+    $probe = (Resolve-Path (Join-Path $ScriptDir $candidate)).Path
+    if (Test-Path (Join-Path $probe 'scripts/dot/powershell/Dot.psm1')) {
+        $RepoRoot = $probe
+        break
+    }
+}
+if (-not $RepoRoot) {
+    throw "dot.ps1: could not locate repo root from $ScriptDir"
+}
 $env:DOT_REPO_ROOT = $RepoRoot
 
 Import-Module (Join-Path $RepoRoot 'scripts/dot/powershell/Dot.psm1') -Force

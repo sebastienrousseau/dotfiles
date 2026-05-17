@@ -8,11 +8,14 @@
 [[ "${_DOT_LIB_UTILS_LOADED:-0}" == "1" ]] && return 0
 _DOT_LIB_UTILS_LOADED=1
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Lib-private: do NOT clobber the caller's SCRIPT_DIR. Callers in
+# scripts/dot/commands/*.sh set SCRIPT_DIR to their own directory
+# before sourcing us; reassigning it here breaks relative paths.
+_DOT_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=ui.sh
-source "$SCRIPT_DIR/ui.sh"
+source "$_DOT_LIB_DIR/ui.sh"
 # shellcheck source=platform.sh
-source "$SCRIPT_DIR/platform.sh"
+source "$_DOT_LIB_DIR/platform.sh"
 
 _DOT_SOURCE_DIR_CACHE=""
 
@@ -29,13 +32,19 @@ resolve_source_dir() {
   local dir=""
   local repo_candidate=""
 
-  if repo_candidate="$(cd "$SCRIPT_DIR/../../.." && pwd 2>/dev/null)"; then
+  # Post-Phase 1: lib lives at lib/dot/, so repo root is two levels up.
+  # Pre-Phase 1 it was scripts/dot/lib/ (three levels up). Probe both for
+  # safety while older deployments may still have the legacy layout.
+  for candidate in "$_DOT_LIB_DIR/../.." "$_DOT_LIB_DIR/../../.."; do
+    if repo_candidate="$(cd "$candidate" && pwd 2>/dev/null)"; then
+      if [[ -n "$repo_candidate" && -f "$repo_candidate/lib/dot/ui.sh" ]]; then
+        dir="$repo_candidate"
+        break
+      fi
+    fi
+  done
+  if [[ -n "$dir" ]]; then
     :
-  else
-    repo_candidate=""
-  fi
-  if [[ -n "$repo_candidate" && -f "$repo_candidate/lib/dot/ui.sh" ]]; then
-    dir="$repo_candidate"
   elif [ -n "${CHEZMOI_SOURCE_DIR:-}" ] && [ -d "$CHEZMOI_SOURCE_DIR" ]; then
     dir="$CHEZMOI_SOURCE_DIR"
   elif [ -d "$HOME/.dotfiles" ]; then
