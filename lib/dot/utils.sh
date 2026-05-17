@@ -60,14 +60,6 @@ resolve_source_dir() {
     elif command -v readlink >/dev/null 2>&1; then
       dir="$(readlink -f "$dir" 2>/dev/null || echo "$dir")"
     fi
-    # Post-Phase-4b: if .chezmoiroot exists, descend into its target
-    # so callers see the same paths chezmoi sees. Mirrors chezmoi's
-    # own source-root resolution.
-    if [[ -f "$dir/.chezmoiroot" ]]; then
-      local sub
-      sub="$(head -1 "$dir/.chezmoiroot" | tr -d '[:space:]')"
-      [[ -n "$sub" && -d "$dir/$sub" ]] && dir="$dir/$sub"
-    fi
     _DOT_SOURCE_DIR_CACHE="$dir"
     printf "%s\n" "$dir"
   else
@@ -105,6 +97,24 @@ require_source_dir() {
     exit 1
   fi
   echo "$src_dir"
+}
+
+## resolve_chezmoi_source_dir — Print the path chezmoi treats as its
+## source root. Post-Phase-4b (v0.2.503) this descends into the
+## subdir named in .chezmoiroot (typically "defaults"). For chezmoi-
+## tracked content (.chezmoidata.toml, .chezmoitemplates/, dot_config/,
+## etc.). For scripts/, lib/, tools/ at the repo root, use
+## resolve_source_dir instead.
+resolve_chezmoi_source_dir() {
+  local dir
+  dir="$(resolve_source_dir)"
+  [[ -z "$dir" ]] && return 0
+  if [[ -f "$dir/.chezmoiroot" ]]; then
+    local sub
+    sub="$(head -1 "$dir/.chezmoiroot" | tr -d '[:space:]')"
+    [[ -n "$sub" && -d "$dir/$sub" ]] && dir="$dir/$sub"
+  fi
+  printf "%s\n" "$dir"
 }
 
 ## has_command <name> — Return 0 if <name> is on PATH, 1 otherwise.

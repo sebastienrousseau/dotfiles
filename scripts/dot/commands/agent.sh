@@ -9,6 +9,11 @@ set -euo pipefail
 # These functions are sourced by meta.sh for dispatch.
 
 _agent_repo_root() {
+  # Post-Phase-4b: agent profile/card JSON ships under defaults/dot_config/.
+  # Prefer the chezmoi source dir so callers can append dot_config/... directly.
+  local dir
+  dir="$(resolve_chezmoi_source_dir)"
+  [[ -n "$dir" ]] && { printf '%s\n' "$dir"; return; }
   require_source_dir
 }
 

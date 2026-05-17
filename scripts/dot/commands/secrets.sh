@@ -15,7 +15,8 @@ dot_ui_command_banner "Secrets" "${1:-}"
 
 dot_data_file() {
   local src_dir
-  src_dir="$(require_source_dir)"
+  src_dir="$(resolve_chezmoi_source_dir)"
+  [[ -z "$src_dir" ]] && src_dir="$(require_source_dir)"
   printf "%s\n" "$src_dir/.chezmoidata.toml"
 }
 

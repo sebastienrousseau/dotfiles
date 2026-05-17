@@ -123,7 +123,7 @@ dot_env_emit() {
   # bits chezmoi already records (os, machine).
   local emitter_version
   emitter_version="$(grep -E '^dotfiles_version[[:space:]]*=' \
-    "$(require_source_dir)/.chezmoidata.toml" 2>/dev/null |
+    "$(resolve_chezmoi_source_dir)/.chezmoidata.toml" 2>/dev/null |
     head -1 | sed -E 's/.*"([^"]+)".*/\1/' || echo "unknown")"
   local timestamp
   timestamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"

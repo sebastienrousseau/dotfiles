@@ -34,6 +34,11 @@ cmd_lint() {
     files+=("$src_dir/install.sh")
   fi
 
+  # Post-Phase-4b chezmoi-tracked content lives under defaults/.
+  local chezmoi_src
+  chezmoi_src="$(resolve_chezmoi_source_dir)"
+  [[ -z "$chezmoi_src" ]] && chezmoi_src="$src_dir"
+
   # dot_local/bin/executable_* scripts (shell scripts only)
   while IFS= read -r -d '' f; do
     if file "$f" 2>/dev/null | grep -qiE 'shell|bash|sh'; then
@@ -41,12 +46,12 @@ cmd_lint() {
     elif head -1 "$f" 2>/dev/null | grep -qE '^#!.*(bash|sh)'; then
       files+=("$f")
     fi
-  done < <(find "$src_dir/dot_local/bin" -name 'executable_*' -type f -print0 2>/dev/null)
+  done < <(find "$chezmoi_src/dot_local/bin" -name 'executable_*' -type f -print0 2>/dev/null)
 
   # .chezmoitemplates/*.sh (non-.tmpl shell scripts)
   while IFS= read -r -d '' f; do
     files+=("$f")
-  done < <(find "$src_dir/.chezmoitemplates" -name '*.sh' -type f -print0 2>/dev/null)
+  done < <(find "$chezmoi_src/.chezmoitemplates" -name '*.sh' -type f -print0 2>/dev/null)
 
   local total=${#files[@]}
   if [[ "$total" -eq 0 ]]; then

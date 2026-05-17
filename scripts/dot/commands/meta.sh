@@ -92,7 +92,12 @@ cmd_docs() {
 
 cmd_learn() {
   local dot_bin
-  dot_bin="$(dirname "${BASH_SOURCE[0]}")/../../../dot_local/bin"
+  # Post-Phase-4b: dot_local/ lives under defaults/. Legacy layout
+  # (older deployments before .chezmoiroot activation) kept it at
+  # repo root — probe both.
+  dot_bin="$(dirname "${BASH_SOURCE[0]}")/../../../defaults/dot_local/bin"
+  [[ -f "$dot_bin/executable_tour" ]] || \
+    dot_bin="$(dirname "${BASH_SOURCE[0]}")/../../../dot_local/bin"
   if [ -f "$dot_bin/executable_tour" ]; then
     exec bash "$dot_bin/executable_tour" "$@"
   fi
@@ -176,7 +181,8 @@ cmd_mcp() {
       ;;
     registry)
       local repo_root registry_file json_mode=0
-      repo_root="$(require_source_dir)"
+      repo_root="$(resolve_chezmoi_source_dir)"
+      [[ -z "$repo_root" ]] && repo_root="$(require_source_dir)"
       registry_file="${MCP_REGISTRY_CONFIG:-$repo_root/dot_config/dotfiles/mcp-registry.json}"
       if [[ "${1:-}" == "registry" ]]; then
         shift || true

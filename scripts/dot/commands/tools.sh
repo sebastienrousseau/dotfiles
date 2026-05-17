@@ -435,7 +435,7 @@ cmd_env_mise() {
 
 cmd_profile() {
   local data_file
-  data_file="$(resolve_source_dir)/.chezmoidata.toml"
+  data_file="$(resolve_chezmoi_source_dir)/.chezmoidata.toml"
   if [[ ! -f "$data_file" ]]; then
     die ".chezmoidata.toml not found"
   fi

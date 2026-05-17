@@ -110,7 +110,7 @@ if [[ -f "$deprecations_file" ]]; then
         alias_found=1
       fi
       function_found=0
-      if rg -q --glob '*.sh' --glob '*.aliases.sh' --glob '*.tmpl' "^[[:space:]]*(function[[:space:]]+)?${alias_name}[[:space:]]*\\(\\)" "$SCRIPT_DIR/../../.chezmoitemplates/aliases" "$SCRIPT_DIR/../../scripts/dot"; then
+      if rg -q --glob '*.sh' --glob '*.aliases.sh' --glob '*.tmpl' "^[[:space:]]*(function[[:space:]]+)?${alias_name}[[:space:]]*\\(\\)" "$SCRIPT_DIR/../../defaults/.chezmoitemplates/aliases" "$SCRIPT_DIR/../../scripts/dot"; then
         function_found=1
       fi
       if [[ $alias_found -eq 1 || $function_found -eq 1 ]]; then
