@@ -348,6 +348,16 @@ cmd_log_rotate() {
 }
 
 cmd_env_mise() {
+  # `dot env emit` is a separate sub-handler — it doesn't need mise
+  # at command-time, only when actually invoked (the script checks).
+  if [[ "${1:-}" == "emit" ]]; then
+    shift
+    # shellcheck source=./env-emit.sh
+    source "$(require_source_dir)/scripts/dot/commands/env-emit.sh"
+    dot_env_emit "$@"
+    return $?
+  fi
+
   if ! has_command mise; then
     ui_err "mise not installed (required for dot env)"
     exit 1
