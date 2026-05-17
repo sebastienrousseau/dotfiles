@@ -1,4 +1,4 @@
 #!/usr/bin/env python3
 # Chezmoi-deployed thin wrapper — see executable_dot.tmpl rationale.
 import os, sys
-os.execv("{{ .chezmoi.sourceDir }}/bin/dot-load-benchmark-pty", sys.argv)
+os.execv("{{ .chezmoi.sourceDir }}/../bin/dot-load-benchmark-pty", sys.argv)

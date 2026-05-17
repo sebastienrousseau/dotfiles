@@ -2,13 +2,11 @@
 # preamble:skip — thin exec wrapper; no need for set -euo pipefail
 # Chezmoi-deployed thin wrapper.
 #
-# The canonical `dot` CLI lives at `bin/dot` in the chezmoi source.
+# The canonical `dot` CLI lives at `bin/dot` at the repo root.
+# Post-v0.2.503 the chezmoi source-dir is `<repo>/defaults` (set via
+# .chezmoiroot), so `bin/dot` is one level UP from `.chezmoi.sourceDir`.
 # This wrapper exists so existing users whose ~/.local/bin/dot
-# points at chezmoi-deployed state keep working transparently
-# after the v0.2.503 reorg. Homebrew/Scoop/AUR users invoke
-# `bin/dot` directly and don't see this wrapper at all.
-#
-# Path resolution: `{{ .chezmoi.sourceDir }}` is rendered to the
-# user's chezmoi source-dir at apply time, so the wrapper is
-# correct on any host (no $HOME hardcoding).
-exec "{{ .chezmoi.sourceDir }}/bin/dot" "$@"
+# points at chezmoi-deployed state keep working transparently after
+# the v0.2.503 reorg. Homebrew/Scoop/AUR users invoke `bin/dot`
+# directly and don't see this wrapper at all.
+exec "{{ .chezmoi.sourceDir }}/../bin/dot" "$@"
