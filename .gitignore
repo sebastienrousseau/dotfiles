@@ -73,3 +73,6 @@ _build/
 # Runtime upgrade-report output
 /nightly-reports/
 .cache/
+
+# Local security-audit script output
+.security-audit.log
