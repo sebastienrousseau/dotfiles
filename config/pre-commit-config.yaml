@@ -75,11 +75,14 @@ repos:
         args: ['--ignore', 'DL3008', '--ignore', 'DL3013', '--ignore', 'DL3018']
 
   # Spell-checking (typos-cli) — see config/typos.toml for allowlist.
+  # Hidden symlink .typos.toml → config/typos.toml at root lets the
+  # default `typos` invocation (which uses --force-exclude) auto-discover
+  # the config; overriding args here would drop --force-exclude and
+  # scan files the config means to skip (e.g. *.asc GPG keys).
   - repo: https://github.com/crate-ci/typos
     rev: v1.46.1
     hooks:
       - id: typos
-        args: ['--config', 'config/typos.toml']
 
   # GitHub Actions workflow linting (actionlint).
   - repo: https://github.com/rhysd/actionlint
