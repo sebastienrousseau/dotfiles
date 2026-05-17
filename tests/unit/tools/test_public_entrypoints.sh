@@ -17,15 +17,24 @@ test_start "bin_public_entrypoints_exist_and_parse"
 # dot-theme-sync, dot-load-benchmark-pty) lives at bin/<name>. The
 # remaining utility binaries stay at dot_local/bin/executable_<name>
 # (chezmoi-deployed user utilities, not framework distribution targets).
-declare -A REPO_PATH
-for name in dot dot-bootstrap dot-theme-sync dot-load-benchmark-pty; do
-  REPO_PATH[$name]="$REPO_ROOT/bin/$name"
-done
+#
+# macOS bash 3.2 has no `declare -A` (associative arrays). Use a
+# case-based resolver instead so the test runs everywhere.
+_bin_path() {
+  case "$1" in
+    dot | dot-bootstrap | dot-theme-sync | dot-load-benchmark-pty)
+      printf "%s/bin/%s\n" "$REPO_ROOT" "$1"
+      ;;
+    *)
+      printf "%s/dot_local/bin/executable_%s\n" "$REPO_ROOT" "$1"
+      ;;
+  esac
+}
 
 for name in \
   ai-update antigravity b64 dot-bootstrap dot-load-benchmark dot-load-benchmark-pty epoch git-ai-commit \
   git-ai-diff hashsum jsonv jwt kill-port lorem myip tour yamlv start-niri dot-ai ai_core; do
-  path="${REPO_PATH[$name]:-$REPO_ROOT/dot_local/bin/executable_${name}}"
+  path="$(_bin_path "$name")"
   assert_file_exists "$path" "bin_${name//-/_}_exists"
   case "$name" in
     dot-load-benchmark)
