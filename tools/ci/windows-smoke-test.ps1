@@ -63,7 +63,10 @@ Assert-Step 'dot dispatcher present' {
 }
 
 Assert-Step '.chezmoidata.toml present' {
-  $data = Join-Path $RepoRoot '.chezmoidata.toml'
+  $data = Join-Path $RepoRoot 'defaults/.chezmoidata.toml'
+  if (-not (Test-Path $data)) {
+    $data = Join-Path $RepoRoot '.chezmoidata.toml'
+  }
   if (-not (Test-Path $data)) { throw "missing $data" }
 }
 
