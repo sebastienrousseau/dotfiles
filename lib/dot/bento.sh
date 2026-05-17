@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
-# Sourced by scripts/dot/commands/*.sh and dot_local/bin/executable_dot; inherits set -euo pipefail.
+# Sourced by scripts/dot/commands/*.sh and bin/dot; inherits set -euo pipefail.
 # Dotfiles 2026: Atomic Intelligence Surface
 # High-fidelity, perfectly aligned, and professional.
 

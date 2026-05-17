@@ -23,7 +23,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
-DOT_BIN="${DOT_BIN:-$REPO_ROOT/dot_local/bin/executable_dot}"
+DOT_BIN="${DOT_BIN:-$REPO_ROOT/bin/dot}"
 SCRUB="$SCRIPT_DIR/scrub.sh"
 
 if [[ ! -x "$DOT_BIN" && ! -f "$DOT_BIN" ]]; then

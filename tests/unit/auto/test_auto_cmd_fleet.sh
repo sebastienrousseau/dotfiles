@@ -34,7 +34,7 @@ fi
 # End-to-end dispatcher coverage — exercise every safe subcommand so
 # the case statement and per-subcommand helpers each get traced. No
 # real SSH egress (apply runs --dry-run + --help only).
-DOT_BIN="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT_BIN="$REPO_ROOT/bin/dot"
 
 # Build a 2-host fleet.toml the apply path can read in dry-run mode.
 _fleet_fixture="$(mktemp -d -t dotfiles-fleet-test.XXXXXX)"

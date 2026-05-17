@@ -197,7 +197,7 @@ $ dot agent run "fix the flaky integration test"
 
 **Files to modify.**
 
-- `dot_local/bin/executable_dot` — route `agent run` to the new entry-point
+- `bin/dot` — route `agent run` to the new entry-point
 - `scripts/dot/commands/agent.sh:cmd_mode` — record sandboxed runs in the session log
 - `dot_config/dotfiles/agent-profiles.json` (template) — add `allowedMcpServers` / `deniedMcpServers` per profile
 
@@ -267,7 +267,7 @@ harnesses = ["claude", "agents-md", "cursor", "codex", "windsurf", "zed", "roo",
 
 **Files to modify.**
 
-- `dot_local/bin/executable_dot` — route `env emit | diff | validate`
+- `bin/dot` — route `env emit | diff | validate`
 - `scripts/dot/commands/agents.sh` — consume the same source-of-truth (or accept `--from <toml>`)
 
 **Test plan.**

@@ -11,7 +11,7 @@ TEST_SCRIPT="$REPO_ROOT/scripts/diagnostics/workstation-attestation.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
-DOT_CLI="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT_CLI="$REPO_ROOT/bin/dot"
 
 test_start "attestation_exists"
 assert_file_exists "$TEST_SCRIPT" "workstation-attestation.sh should exist"

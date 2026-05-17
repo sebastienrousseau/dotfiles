@@ -8,8 +8,8 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 
-COMP_FILE="$REPO_ROOT/dot_local/share/zsh/completions/_dot"
-DOT_FILE="$REPO_ROOT/dot_local/bin/executable_dot"
+COMP_FILE="$REPO_ROOT/share/completions/zsh/_dot"
+DOT_FILE="$REPO_ROOT/bin/dot"
 
 # Test: _dot completion file exists
 test_start "dot_completion_file_exists"

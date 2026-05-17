@@ -57,7 +57,7 @@ done
 # Locate the dot dispatcher binary. Prefer the repo-local copy so a
 # user-installed `dot` on PATH can't sneak in.
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-DOT_BIN="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT_BIN="$REPO_ROOT/bin/dot"
 if [[ ! -x "$DOT_BIN" ]] && command -v dot >/dev/null 2>&1; then
   DOT_BIN="$(command -v dot)"
 fi
@@ -117,7 +117,7 @@ printf '%s\n' "$median" >"$baseline_file"
 
 if ((median > BUDGET_MS)); then
   echo "::error::dot CLI cold-start regression: median ${median}ms > budget ${BUDGET_MS}ms" >&2
-  echo "  Possible causes: a slow source-time helper in dot_local/bin/executable_dot," >&2
+  echo "  Possible causes: a slow source-time helper in bin/dot," >&2
   echo "  an unconditional ${BUDGET_MS}ms+ tool init at top of a sourced lib, or" >&2
   echo "  unnecessary jq/awk calls before the dispatcher case statement." >&2
   exit 1

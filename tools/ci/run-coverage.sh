@@ -205,8 +205,8 @@ SKIP_PATHS = {
     "scripts/ops/setup.sh",                           # post-install bootstrap
     "scripts/theme/wallpaper-rotate.sh",              # cron-driven wallpaper change
     "scripts/git-hooks/pre-commit-audit.sh",          # full hook flow needs real index
-    "dot_local/bin/executable_dot-theme-sync",        # signals live apps
-    "dot_local/bin/executable_dot-bootstrap",
+    "bin/dot-theme-sync",        # signals live apps
+    "bin/dot-bootstrap",
     "dot_local/bin/executable_update",
     "dot_local/bin/executable_ai_core",
     "dot_local/bin/executable_ai-update",

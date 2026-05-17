@@ -3,7 +3,7 @@
 #
 # Routes subcommands to the native PowerShell module
 # (scripts/dot/powershell/Dot.psm1) where one exists, falls back to
-# the bash dispatcher (dot_local/bin/executable_dot) for everything
+# the bash dispatcher (bin/dot) for everything
 # else.
 #
 # Goals: zero-bash UX for the supported subcommands; transparent
@@ -53,7 +53,7 @@ For everything else, install:
 "@
         exit 2
     }
-    $dispatcher = Join-Path $RepoRoot 'dot_local/bin/executable_dot'
+    $dispatcher = Join-Path $RepoRoot 'bin/dot'
     & bash $dispatcher @RemainingArgs
     exit $LASTEXITCODE
 }
@@ -89,7 +89,7 @@ switch ($cmd) {
                 exit 0
             }
             else {
-                Write-Error 'AGENTS.md is stale. Run: bash dot_local/bin/executable_dot agents render'
+                Write-Error 'AGENTS.md is stale. Run: bash bin/dot agents render'
                 exit 1
             }
         }

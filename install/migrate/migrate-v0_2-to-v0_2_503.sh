@@ -22,10 +22,10 @@
 # Per the RFC at docs/operations/RFC_v0_2_503_reorganization.md, the
 # v0.2.503 reorg moves chezmoi-managed source paths:
 #
-#   dot_local/bin/executable_dot   → bin/dot           (Phase 2)
-#   dot_local/share/man/...        → share/man/...     (Phase 3)
-#   dot_local/share/.../comp...    → share/completions (Phase 3)
-#   dot_*, dot_config/, etc.       → defaults/...      (Phase 4)
+#   dot_local/bin/executable_dot   → bin/dot                  (Phase 2)
+#   dot_local/share/man/...        → share/man/...            (Phase 3)
+#   dot_local/share/.../comp...    → share/completions/...    (Phase 3)
+#   dot_*, dot_config/, etc.       → defaults/...             (Phase 4)
 #
 # Without intervention, chezmoi would see the old paths as "deleted
 # from source" and REMOVE the deployed files at the user's HOME
@@ -130,7 +130,7 @@ do_migration() {
   local did_work=0
 
   # ── Phase 2: bin/ — fires once `bin/dot` exists in the source ─────
-  if [[ -f "$CHEZMOI_SOURCE/bin/dot" ]] && [[ -f "$CHEZMOI_SOURCE/dot_local/bin/executable_dot" || -f "$HOME/.local/bin/dot" ]]; then
+  if [[ -f "$CHEZMOI_SOURCE/bin/dot" ]] && [[ -f "$HOME/.local/bin/dot" ]]; then
     _say "Phase 2: untracking dot_local/bin/* paths"
     for old in \
       "$HOME/.local/bin/dot" \

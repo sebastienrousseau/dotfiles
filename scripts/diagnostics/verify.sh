@@ -43,8 +43,8 @@ resolve_dot_bin() {
   elif [[ -d "$HOME/.local/share/chezmoi" ]]; then
     src_dir="$HOME/.local/share/chezmoi"
   fi
-  if [[ -n "$src_dir" && -x "$src_dir/dot_local/bin/executable_dot" ]]; then
-    printf "%s\n" "$src_dir/dot_local/bin/executable_dot"
+  if [[ -n "$src_dir" && -x "$src_dir/bin/dot" ]]; then
+    printf "%s\n" "$src_dir/bin/dot"
     return
   fi
   return 1

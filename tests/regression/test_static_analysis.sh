@@ -588,11 +588,11 @@ assert_equals "0" "$failures" "test files should use [[ ]] not [ ]"
 
 test_start "dot_cli_syntax"
 dot_result=0
-bash -n "$REPO_ROOT/dot_local/bin/executable_dot" >/dev/null 2>&1 || dot_result=1
+bash -n "$REPO_ROOT/bin/dot" >/dev/null 2>&1 || dot_result=1
 assert_equals "0" "$dot_result" "dot CLI must pass bash -n"
 
 test_start "dot_cli_has_set_euo"
-assert_file_contains "$REPO_ROOT/dot_local/bin/executable_dot" "set -e" "dot CLI must use set -e"
+assert_file_contains "$REPO_ROOT/bin/dot" "set -e" "dot CLI must use set -e"
 
 # ═══════════════════════════════════════════════════════════════
 # 27. ASSERTION/FRAMEWORK FILES — must be valid

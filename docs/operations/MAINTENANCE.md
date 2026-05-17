@@ -46,7 +46,7 @@ For every release update:
 6. Local apply has completed:
 
 ```bash
-CHEZMOI_SOURCE_DIR="$HOME/.dotfiles" ./dot_local/bin/executable_dot apply
+CHEZMOI_SOURCE_DIR="$HOME/.dotfiles" ./bin/dot apply
 ```
 
 ## Security Scan Guardrails

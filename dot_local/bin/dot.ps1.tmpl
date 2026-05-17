@@ -1,0 +1,5 @@
+#!/usr/bin/env pwsh
+# Chezmoi-deployed thin wrapper — see executable_dot.tmpl rationale.
+# The .tmpl rendering substitutes the actual source dir at apply time.
+& "{{ .chezmoi.sourceDir }}/bin/dot.ps1" @args
+exit $LASTEXITCODE

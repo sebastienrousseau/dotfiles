@@ -17,7 +17,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-DOT="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT="$REPO_ROOT/bin/dot"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

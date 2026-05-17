@@ -19,7 +19,7 @@ on:
   pull_request:
     paths:
       - 'docs/manual/command-index.md'
-      - 'dot_local/bin/executable_dot'
+      - 'bin/dot'
       - 'scripts/dot/commands/**'
       - 'tools/docs/generate-command-index.sh'
       - 'scripts/qa/check-version-consistency.sh'
@@ -29,7 +29,7 @@ on:
       - 'CLAUDE.md'
       - 'AGENTS.md'
       - 'package.json'
-      - 'dot_local/share/man/man1/dot.1'
+      - 'share/man/man1/dot.1'
       - 'scripts/dot/lib/bento.sh'
   workflow_dispatch:
 

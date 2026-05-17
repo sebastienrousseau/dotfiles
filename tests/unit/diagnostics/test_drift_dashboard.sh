@@ -88,7 +88,7 @@ fi
 # `dot drift` wiring: command must dispatch to this dashboard
 # -----------------------------------------------------------------------------
 
-DOT_BIN="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT_BIN="$REPO_ROOT/bin/dot"
 test_start "dot_drift_dispatches_to_dashboard"
 if [[ -f "$DOT_BIN" ]] && grep -Fq 'drift|diagnostics' "$DOT_BIN"; then
   assert_exit_code 0 "true"

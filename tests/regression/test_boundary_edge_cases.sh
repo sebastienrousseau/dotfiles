@@ -27,7 +27,7 @@ if (
   ln -sf "$(command -v head)" "$MOCK_BIN_DIR/head"
   ln -sf "$(command -v awk)" "$MOCK_BIN_DIR/awk"
   ln -sf "$(command -v printf)" "$MOCK_BIN_DIR/printf" 2>/dev/null || true
-  bash "$REPO_ROOT/dot_local/bin/executable_dot" --version >/dev/null 2>&1
+  bash "$REPO_ROOT/bin/dot" --version >/dev/null 2>&1
 ); then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot works without gum"

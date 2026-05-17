@@ -127,14 +127,14 @@ assert_file_contains "$REPO_ROOT/scripts/ops/chezmoi-apply.sh" "prewarm" "apply 
 # ═══════════════════════════════════════════════════════════════
 
 test_start "integration_zsh_completion_exists"
-assert_file_exists "$REPO_ROOT/dot_local/share/zsh/completions/_dot" "zsh completion must exist"
+assert_file_exists "$REPO_ROOT/share/completions/zsh/_dot" "zsh completion must exist"
 
 test_start "integration_fish_completion_exists"
 assert_file_exists "$REPO_ROOT/dot_config/fish/completions/dot.fish.tmpl" "fish completion must exist"
 
 test_start "integration_completions_include_ai"
 # All three completion files should know about AI commands
-assert_file_contains "$REPO_ROOT/dot_local/share/zsh/completions/_dot" "gemini" "zsh completions must include AI commands"
+assert_file_contains "$REPO_ROOT/share/completions/zsh/_dot" "gemini" "zsh completions must include AI commands"
 
 # ═══════════════════════════════════════════════════════════════
 # 7. SECURITY POLICY CHAIN
@@ -166,7 +166,7 @@ test_start "integration_modules_d_sourced"
 assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" "modules.d" "zshrc must source modules.d"
 
 test_start "integration_custom_commands_dispatched"
-assert_file_contains "$REPO_ROOT/dot_local/bin/executable_dot" "dotfiles/commands" "dot CLI must check user commands"
+assert_file_contains "$REPO_ROOT/bin/dot" "dotfiles/commands" "dot CLI must check user commands"
 
 test_start "integration_nvim_user_plugins"
 assert_file_contains "$REPO_ROOT/dot_config/nvim/lua/config/lazy.lua" "plugins.local" "lazy.lua must support user plugins"
@@ -176,25 +176,25 @@ assert_file_contains "$REPO_ROOT/dot_config/nvim/lua/config/lazy.lua" "plugins.l
 # ═══════════════════════════════════════════════════════════════
 
 test_start "integration_help_start_here"
-assert_output_contains "Start Here" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+assert_output_contains "Start Here" "bash '$REPO_ROOT/bin/dot' help"
 
 test_start "integration_help_daily_use"
-assert_output_contains "Daily Use" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+assert_output_contains "Daily Use" "bash '$REPO_ROOT/bin/dot' help"
 
 test_start "integration_help_inspect"
-assert_output_contains "Inspect" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+assert_output_contains "Inspect" "bash '$REPO_ROOT/bin/dot' help"
 
 test_start "integration_help_ai_section"
-assert_output_contains "AI" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+assert_output_contains "AI" "bash '$REPO_ROOT/bin/dot' help"
 
 test_start "integration_help_fleet_section"
-assert_output_contains "Fleet" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+assert_output_contains "Fleet" "bash '$REPO_ROOT/bin/dot' help"
 
 test_start "integration_help_configuration"
-assert_output_contains "Configuration" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+assert_output_contains "Configuration" "bash '$REPO_ROOT/bin/dot' help"
 
 test_start "integration_help_reference"
-assert_output_contains "Reference" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+assert_output_contains "Reference" "bash '$REPO_ROOT/bin/dot' help"
 
 # ═══════════════════════════════════════════════════════════════
 # 10. AI PROVIDER ALIASES
@@ -246,7 +246,7 @@ assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" ".features" "zsh
 # ═══════════════════════════════════════════════════════════════
 
 test_start "integration_dot_cli_sources_commands"
-assert_file_contains "$REPO_ROOT/dot_local/bin/executable_dot" "commands/" "dot CLI must source command scripts"
+assert_file_contains "$REPO_ROOT/bin/dot" "commands/" "dot CLI must source command scripts"
 
 test_start "integration_dot_ai_script_syntax"
 assert_exit_code 0 "bash -n '$REPO_ROOT/dot_local/bin/executable_dot-ai'"

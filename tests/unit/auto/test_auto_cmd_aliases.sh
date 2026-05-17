@@ -26,7 +26,7 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
-DOT_BIN="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT_BIN="$REPO_ROOT/bin/dot"
 
 # Note: `aliases cheatsheet` writes docs/ALIASES_CHEATSHEET.md to
 # whatever cwd it runs in — exclude it so the probe doesn't leak

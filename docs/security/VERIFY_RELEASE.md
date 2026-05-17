@@ -109,7 +109,7 @@ SLSA + Cosign protect the *supply chain* (you got what we shipped)
 
 For correctness review:
 
-* Code is open under MIT — read it. Start at `dot_local/bin/executable_dot`.
+* Code is open under MIT — read it. Start at `bin/dot`.
 * CI runs ~75 checks per PR (shellcheck, shfmt, CodeQL, Semgrep, Codacy, etc.).
 * Pre-commit hooks reject typos, unsigned commits, raw secrets.
 * See `docs/security/SCORECARD.md` for the OpenSSF score posture.

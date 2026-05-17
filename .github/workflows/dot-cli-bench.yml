@@ -15,13 +15,13 @@ on:
   push:
     branches: [master]
     paths:
-      - 'dot_local/bin/executable_dot'
+      - 'bin/dot'
       - 'scripts/dot/**'
       - 'tools/ci/dot-cli-startup-bench.sh'
       - '.github/workflows/dot-cli-bench.yml'
   pull_request:
     paths:
-      - 'dot_local/bin/executable_dot'
+      - 'bin/dot'
       - 'scripts/dot/**'
       - 'tools/ci/dot-cli-startup-bench.sh'
       - '.github/workflows/dot-cli-bench.yml'

@@ -12,7 +12,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 source "$SCRIPT_DIR/../framework/assertions.sh"
 source "$SCRIPT_DIR/../framework/mocks.sh"
 
-DOT_CLI="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT_CLI="$REPO_ROOT/bin/dot"
 CHEZMOIDATA="$REPO_ROOT/.chezmoidata.toml"
 
 # ═══════════════════════════════════════════════════════════════
@@ -243,7 +243,7 @@ assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/restore.sh'"
 # ═══════════════════════════════════════════════════════════════
 
 test_start "critical_bin_dot_exists"
-assert_file_exists "$REPO_ROOT/dot_local/bin/executable_dot" "dot executable must exist"
+assert_file_exists "$REPO_ROOT/bin/dot" "dot executable must exist"
 
 test_start "critical_bin_tour_exists"
 assert_file_exists "$REPO_ROOT/dot_local/bin/executable_tour" "tour executable must exist"

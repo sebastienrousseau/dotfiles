@@ -116,7 +116,7 @@ atomic.
 | Move | Why it's breaking |
 |------|-------------------|
 | `dot_config/` → `defaults/` (with chezmoi `.chezmoiroot`) | Every existing user's chezmoi source-state would need to re-bootstrap. |
-| `dot_local/bin/executable_dot` → `bin/dot` | Same; `~/.local/bin/dot` would be removed before the new path is installed. |
+| `bin/dot` → `bin/dot` | Same; `~/.local/bin/dot` would be removed before the new path is installed. |
 | Split `framework/` (CLI + lib) from user-facing defaults | Major restructuring; needs RFC + migration tool + 2-version deprecation window. |
 
 These will land in v0.2.503 as a coordinated single PR with a

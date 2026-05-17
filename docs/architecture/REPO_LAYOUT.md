@@ -229,7 +229,7 @@ A quick decision tree for common cases:
 
 - **New app config that lives under `~/.config/<app>/`** → `dot_config/<app>/` (see `docs/NAMING_CONVENTIONS.md` → "Adding New Modules").
 - **New user-facing CLI script** → `dot_local/bin/executable_<name>`.
-- **New `dot` subcommand** → implementation in `scripts/dot/commands/<name>.sh`, routing in `dot_local/bin/executable_dot`.
+- **New `dot` subcommand** → implementation in `scripts/dot/commands/<name>.sh`, routing in `bin/dot`.
 - **New repo-only automation** (CI helper, maintenance task, release step) → `scripts/<domain>/<name>.sh`.
 - **New test** → `tests/unit/<domain>/test_<feature>.sh` (follow `test_{domain}_{feature}.sh` naming).
 - **New doc** → pick the narrowest of `docs/architecture/`, `docs/reference/`, `docs/guides/`, `docs/operations/`, `docs/security/`.

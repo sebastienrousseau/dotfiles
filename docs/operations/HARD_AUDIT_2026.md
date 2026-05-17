@@ -24,7 +24,7 @@ The goal stated by the maintainer: become the de facto workstation provisioning 
 
 | # | File:line | Finding | Recommended fix |
 |---|---|---|---|
-| H1 | `dot_local/bin/executable_dot:589` | `source "$_user_cmd" "$@"` — a user-provided custom command calling `exit` kills the whole CLI. | Replace with `bash "$_user_cmd" "$@"` or `( source "$_user_cmd" "$@" )` subshell. |
+| H1 | `bin/dot:589` | `source "$_user_cmd" "$@"` — a user-provided custom command calling `exit` kills the whole CLI. | Replace with `bash "$_user_cmd" "$@"` or `( source "$_user_cmd" "$@" )` subshell. |
 | H2 | `scripts/dot/commands/agent.sh:28,51,83-92` | `_agent_default_profile()` calls `jq` before `_agent_assert_dependencies()` runs in `cmd_mode()`. On a host without jq, error message is cryptic. | Move dependency assertion to top of every entry-point. |
 | H3 | `scripts/dot/commands/fleet.sh:294-297` | GNU vs BSD `sed -i` branch isn't atomic; concurrent `dot fleet namespace set` calls can corrupt `.chezmoidata.toml`. | Use `mktemp` + `mv` (atomic) and wrap with `flock`. |
 | H4 | `dot_config/zsh/dot_zshrc.tmpl:220-221` | `_cached_eval` writes cache with `mv "$cache.tmp.$$" "$cache"` — PID collision possible between two shells. Cold-start affected. | Use `mktemp` instead of `$$`. |
@@ -39,7 +39,7 @@ The goal stated by the maintainer: become the de facto workstation provisioning 
 | # | File:line | Finding | Recommended fix |
 |---|---|---|---|
 | M1 | `scripts/dot/commands/core.sh:81` | `chezmoi status \|\| true` loses error context — can't distinguish "tree is clean" from "chezmoi crashed". | Capture into a variable and inspect the exit code. |
-| M2 | `dot_local/bin/executable_dot:542` | `route="$(_dot_command_route "$COMMAND" \|\| true)"` is defensible (falls through to the user-command path that emits a proper error), but reads as a bug. | Add comment explaining intent or refactor to explicit `if`. |
+| M2 | `bin/dot:542` | `route="$(_dot_command_route "$COMMAND" \|\| true)"` is defensible (falls through to the user-command path that emits a proper error), but reads as a bug. | Add comment explaining intent or refactor to explicit `if`. |
 | M3 | `scripts/dot/lib/ui.sh:335,340` | `mktemp` output race in `ui_run_cmd()` between subshell write and parent read; under load the `cat` can hit an empty file. | Switch to `read rc < "$rc_file"` or `[[ -s "$rc_file" ]]` guard. |
 | M4 | `scripts/dot/commands/agent.sh:221-224,338-341,385-388` | `set +e / "$@" / set -e` blocks log failure but propagate the original exit code; callers can't tell intentional vs accidental. | Document the contract or restructure to `if !`. |
 | M5 | `scripts/security/lock-configs.sh:27-33` | `sudo chattr +i` silently fails when sudo is unavailable in automation. | Fail explicitly when sudo is required. |
@@ -346,7 +346,7 @@ Round-3 docs agent found 5 drifts, 2 of which were false positives on re-verific
 
 | ID | File | Drift | Status |
 |---|---|---|---|
-| D1+D2 | `dot_local/bin/executable_dot` | 5 orphan dispatch routes + 1 orphan help-table entry for commands removed in C3 of Round 1 (`verify`, `benchmark`, `prewarm`, `remove`, `clean-cache`) | ✅ Fixed |
+| D1+D2 | `bin/dot` | 5 orphan dispatch routes + 1 orphan help-table entry for commands removed in C3 of Round 1 (`verify`, `benchmark`, `prewarm`, `remove`, `clean-cache`) | ✅ Fixed |
 | D3 | `docs/reference/POWERSHELL_PARITY.md` | `dot agents` + `dot fleet apply` labelled "Full" on Windows without backing CI | ✅ Relabelled to "Stub (bash-bridged)" |
 | D4 | `docs/operations/ROADMAP_2026.md` + `HARD_AUDIT_2026.md` §6.9 | Microsoft Build 2026 date was wrong: "2026-05-19 in Seattle" vs actual **2026-06-02 to 2026-06-03 in San Francisco (Fort Mason)** | ✅ Corrected; Show-HN timing shifts ~2 weeks right |
 
@@ -501,10 +501,10 @@ R4 cross-platform agent produced a 10-table audit. Real findings, ranked by what
 
 | # | Severity | Gap | Concrete close |
 |---|---|---|---|
-| **P1** | High | No `Makefile install` target with `PREFIX`/`DESTDIR` support. Distro packagers have no canonical artefact to package. | Add `Makefile` with `install:` rule copying `dot_local/bin/executable_dot` to `$(PREFIX)/bin/dot`, man page to `$(PREFIX)/share/man/man1/`, completions to `$(PREFIX)/share/zsh/site-functions/_dot`. |
+| **P1** | High | No `Makefile install` target with `PREFIX`/`DESTDIR` support. Distro packagers have no canonical artefact to package. | Add `Makefile` with `install:` rule copying `bin/dot` to `$(PREFIX)/bin/dot`, man page to `$(PREFIX)/share/man/man1/`, completions to `$(PREFIX)/share/zsh/site-functions/_dot`. |
 | **P2** | High | No Homebrew tap, no AUR `PKGBUILD`, no Scoop manifest. | Publish `sebastienrousseau/homebrew-tap`, `aur/dotfiles-git/PKGBUILD`, `scoop-bucket/dot.json` from CI on tag — single tarball with SHA256 + Cosign-signed bundle. |
 | **P3** | High | `.devcontainer/Dockerfile:31` still installs unverified `get.chezmoi.io` (the same anti-pattern that gave us H6 in R1). | Replace with the pinned-SHA256 path used in `install-chezmoi-verified.sh`. |
-| **P4** | High | Repo intermingles framework (`scripts/`, `dot_local/bin/executable_dot`, `install/`) with maintainer's personal `dot_config/` (~80 tools). Packagers must ship both. | Document the framework/user split in a new `FRAMEWORK_STRUCTURE.md`; long-term, move framework code under `framework/` so `Makefile install` skips `dot_config/`. |
+| **P4** | High | Repo intermingles framework (`scripts/`, `bin/dot`, `install/`) with maintainer's personal `dot_config/` (~80 tools). Packagers must ship both. | Document the framework/user split in a new `FRAMEWORK_STRUCTURE.md`; long-term, move framework code under `framework/` so `Makefile install` skips `dot_config/`. |
 | **P5** | Medium | PowerShell-native parity is bash-bridged for `dot agents`, `dot fleet apply`, `dot theme`. Windows-native users can't run them without WSL. | Native PowerShell ports per `docs/reference/POWERSHELL_PARITY.md` Stub rows; estimated 1-week effort for full top-3. |
 
 P1+P2 together unlock the entire distribution surface and are ~5 person-days combined. They are the *cheapest path to "you can install us with `brew install`/`paru -S`/`scoop install`"* — which is the literal threshold for de-facto status on each platform.

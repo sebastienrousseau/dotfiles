@@ -3,7 +3,7 @@
 This document maps every top-level path in the repository to its
 purpose. Skim it once and you should be able to answer:
 
-- **Where is the `dot` CLI?** → `dot_local/bin/executable_dot` (the source-of-truth file). At runtime it lives at `~/.local/bin/dot`.
+- **Where is the `dot` CLI?** → `bin/dot` (the source-of-truth file). At runtime it lives at `~/.local/bin/dot`.
 - **Why are there 20+ `dot_*` files at root?** → chezmoi convention: a `dot_X` source file deploys to `~/.X` on apply. Same for `executable_*` (gains `+x`), `private_*` (`0600`), `run_onchange_*` (re-runs when source changes).
 - **What's the framework vs. the maintainer's personal config?** → Everything under `scripts/`, `install/`, `dot_local/bin/`, and `.chezmoitemplates/` is framework code. Everything under `dot_config/`, `dot_warp/`, `dot_etc/`, `private_dot_ssh/` is user-facing default configuration.
 
@@ -85,7 +85,7 @@ stale state in `~/.config/chezmoi/`.
 
 | Goal | File(s) to edit |
 |------|----------------|
-| Add a new `dot <subcommand>` | `scripts/dot/commands/<subcommand>.sh` + dispatch in `dot_local/bin/executable_dot` + entry in `docs/manual/03-reference/01-dot-cli.md` + entry in `docs/manual/command-index.md`. |
+| Add a new `dot <subcommand>` | `scripts/dot/commands/<subcommand>.sh` + dispatch in `bin/dot` + entry in `docs/manual/03-reference/01-dot-cli.md` + entry in `docs/manual/command-index.md`. |
 | Change an alias | `.chezmoitemplates/aliases/<file>.aliases.sh` (sourced by `dot_zshrc.tmpl`, etc.). |
 | Add a feature flag | `[features]` block in `.chezmoidata.toml` + doc entry in `docs/manual/03-reference/05-feature-flags.md`. |
 | Add a new file deployed to `~/.X` | Create `dot_X` at root (or under a chezmoi-managed subtree). |

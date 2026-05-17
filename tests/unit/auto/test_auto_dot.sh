@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
-# Auto-generated exercise test for dot_local/bin/executable_dot.
+# Auto-generated exercise test for bin/dot.
 # Slice 5 of #883: backfill coverage for scripts with no existing test
 # by running each through safe-mode entry points (--help / no-arg /
 # invalid flag / subcommand probes).
@@ -13,13 +13,13 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-SCRIPT_FILE="$REPO_ROOT/dot_local/bin/executable_dot"
+SCRIPT_FILE="$REPO_ROOT/bin/dot"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
 test_start "script_exists"
-assert_file_exists "$SCRIPT_FILE" "dot_local/bin/executable_dot must exist"
+assert_file_exists "$SCRIPT_FILE" "bin/dot must exist"
 
 test_start "script_valid_syntax"
 if bash -n "$SCRIPT_FILE" 2>/dev/null; then

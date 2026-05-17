@@ -27,7 +27,7 @@ scoop install chezmoi         # Windows (Scoop)
 sh -c "$(curl -fsLS get.chezmoi.io)"  # everywhere else (verify the script first)
 ```
 
-You also need the `dot` dispatcher binary on PATH. The minimum set is `dot_local/bin/executable_dot` from this repo plus the `scripts/dot/` directory; for the cleanest install run `dot init sebastienrousseau` once, which sets everything up.
+You also need the `dot` dispatcher binary on PATH. The minimum set is `bin/dot` from this repo plus the `scripts/dot/` directory; for the cleanest install run `dot init sebastienrousseau` once, which sets everything up.
 
 ## Verifying the skill loaded
 

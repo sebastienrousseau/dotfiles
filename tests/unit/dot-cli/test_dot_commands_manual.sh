@@ -32,7 +32,7 @@ test_start "uses_system_open_on_darwin"
 assert_file_contains "$SCRIPT_FILE" "/usr/bin/open" "must use /usr/bin/open explicitly to avoid recursion"
 
 test_start "registered_in_dot_cli"
-DOT_BIN="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT_BIN="$REPO_ROOT/bin/dot"
 assert_file_contains "$DOT_BIN" "manual|manual" "dot CLI must route 'manual' command"
 
 # Slice 2: drive real line coverage of the script under test

@@ -8,7 +8,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 TEST_SCRIPT="$REPO_ROOT/scripts/diagnostics/a2a-conformance.sh"
-DOT_CLI="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT_CLI="$REPO_ROOT/bin/dot"
 
 test_start "a2a_conformance_exists"
 assert_file_exists "$TEST_SCRIPT" "a2a-conformance.sh should exist"

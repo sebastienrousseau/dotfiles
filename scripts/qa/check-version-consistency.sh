@@ -67,9 +67,9 @@ _log "canonical: $canonical (.chezmoidata.toml)"
 # missed — bento.sh banner, man-page header, dispatcher header.
 specs=(
   "package.json|\"version\"|\"version\": \"${canonical}\""
-  "dot_local/bin/executable_dot|^VERSION=|VERSION=\"${canonical}\""
-  "dot_local/bin/executable_dot|^# Dotfiles CLI Entry Point - v|# Dotfiles CLI Entry Point - v${canonical}"
-  "dot_local/share/man/man1/dot.1|^.TH DOT 1|dotfiles v${canonical}"
+  "bin/dot|^VERSION=|VERSION=\"${canonical}\""
+  "bin/dot|^# Dotfiles CLI Entry Point - v|# Dotfiles CLI Entry Point - v${canonical}"
+  "share/man/man1/dot.1|^.TH DOT 1|dotfiles v${canonical}"
   "lib/dot/bento.sh|D O T F I L E S|[v${canonical}]"
   "README.md|img.shields.io/badge/Version|Version-v${canonical}-blue"
   "CLAUDE.md|^Chezmoi-managed dotfiles|Version \`${canonical}\`"

@@ -40,7 +40,7 @@ target="docs/manual/command-index.md"
   exit 2
 }
 
-dot_bin="dot_local/bin/executable_dot"
+dot_bin="bin/dot"
 [[ -x "$dot_bin" ]] || {
   echo "dot CLI not found at $dot_bin" >&2
   exit 2

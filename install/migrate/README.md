@@ -35,7 +35,7 @@ semantics.
 
 | Phase | From | To |
 |---|---|---|
-| 2 | `dot_local/bin/executable_dot` | `bin/dot` |
+| 2 | `dot_local/bin/executable_dot` (old chezmoi-tracked path) | `bin/dot` (canonical) + thin chezmoi wrapper that execs it |
 | 3 | `dot_local/share/man/man1/dot.1` | `share/man/man1/dot.1` |
 | 3 | `dot_local/share/zsh/completions/_dot` | `share/completions/zsh/_dot` |
 | 4 | `dot_*`, `dot_config/`, etc. | `defaults/...` (via `.chezmoiroot`) |

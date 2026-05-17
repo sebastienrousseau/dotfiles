@@ -59,7 +59,7 @@ Concrete symptoms:
 
 The reorganisation is **breaking** for existing user installs:
 chezmoi tracks deployed files by source path, so moving
-`dot_local/bin/executable_dot` to `bin/dot` means the old
+`bin/dot` to `bin/dot` means the old
 `~/.local/bin/dot` would be removed before the new path is
 installed. Mitigation: ship a `migrate-v0.2-to-v0.3.sh` script
 that runs before the first post-upgrade `chezmoi apply`.
@@ -75,10 +75,10 @@ orients in <30 seconds):
 ```
 .
 ├── bin/                          # CLI entrypoints
-│   ├── dot                       # was dot_local/bin/executable_dot
-│   ├── dot-load-benchmark-pty    # was dot_local/bin/executable_dot-load-benchmark-pty
-│   ├── dot-theme-sync            # was dot_local/bin/executable_dot-theme-sync
-│   ├── dot-bootstrap             # was dot_local/bin/executable_dot-bootstrap
+│   ├── dot                       # was bin/dot
+│   ├── dot-load-benchmark-pty    # was bin/dot-load-benchmark-pty
+│   ├── dot-theme-sync            # was bin/dot-theme-sync
+│   ├── dot-bootstrap             # was bin/dot-bootstrap
 │   └── dot-update                # was dot_local/bin/executable_update (renamed)
 ├── lib/                          # Framework library (no chezmoi)
 │   ├── commands/                 # was scripts/dot/commands/
@@ -129,7 +129,7 @@ paths.
 
 This means:
 - Repo top-level is no longer required to follow chezmoi naming.
-- `bin/dot` is a plain shell script, not `dot_local/bin/executable_dot`.
+- `bin/dot` is a plain shell script, not `bin/dot`.
 - `share/man/man1/dot.1` is a plain file, not chezmoi-deployed.
 - A Homebrew formula can `bin.install 'bin/dot'` directly.
 
@@ -237,7 +237,7 @@ v0.4 if v0.3 single-repo with `.chezmoiroot` proves insufficient.
 
 ### C) Rename current root files only (cosmetic)
 
-Just rename `dot_local/bin/executable_dot` → `bin/executable_dot`
+Just rename `bin/dot` → `bin/executable_dot`
 without `.chezmoiroot`.
 
 **Rejected**: chezmoi only resolves the `executable_` /

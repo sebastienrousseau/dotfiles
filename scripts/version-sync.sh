@@ -412,7 +412,7 @@ main() {
 
   # Sync non-template script files that embed the version
   local script_files=(
-    "dot_local/bin/executable_dot"
+    "bin/dot"
     "dot_local/bin/executable_tour"
     "install.sh"
   )

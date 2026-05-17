@@ -58,7 +58,7 @@ Assert-Step 'PowerShell >= 7.4 (LTS or current)' {
 
 # ─── Repo layout sanity ──────────────────────────────────────────────────────
 Assert-Step 'dot dispatcher present' {
-  $dot = Join-Path $RepoRoot 'dot_local/bin/executable_dot'
+  $dot = Join-Path $RepoRoot 'bin/dot'
   if (-not (Test-Path $dot)) { throw "missing $dot" }
 }
 
@@ -100,14 +100,14 @@ Assert-Step 'Test-DotAgentsSync (native — AGENTS.md ↔ CLAUDE.md)' {
 }
 
 Assert-Step 'dot.ps1 dispatcher: version subcommand' {
-  $ps1 = Join-Path $RepoRoot 'dot_local/bin/dot.ps1'
+  $ps1 = Join-Path $RepoRoot 'bin/dot.ps1'
   $out = & pwsh -NoProfile -File $ps1 'version' 2>&1
   if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
   if ($out -notmatch '^\d+\.\d+\.\d+$') { throw "unexpected: $out" }
 }
 
 Assert-Step 'dot.ps1 dispatcher: agents check subcommand' {
-  $ps1 = Join-Path $RepoRoot 'dot_local/bin/dot.ps1'
+  $ps1 = Join-Path $RepoRoot 'bin/dot.ps1'
   $out = & pwsh -NoProfile -File $ps1 'agents' 'check' 2>&1
   if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
 }
@@ -141,12 +141,12 @@ Assert-Step 'chezmoi apply --dry-run renders every template' {
 $bash = Get-Command bash -ErrorAction SilentlyContinue
 if ($bash) {
   Assert-Step 'dot version' {
-    $dot = Join-Path $RepoRoot 'dot_local/bin/executable_dot'
+    $dot = Join-Path $RepoRoot 'bin/dot'
     $out = & bash $dot 'version' 2>&1
     if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
   }
   Assert-Step 'dot help' {
-    $dot = Join-Path $RepoRoot 'dot_local/bin/executable_dot'
+    $dot = Join-Path $RepoRoot 'bin/dot'
     $out = & bash $dot 'help' 2>&1
     if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
   }
@@ -156,7 +156,7 @@ if ($bash) {
     # $PWD when no usable chezmoi source-path is on disk.
     Push-Location $RepoRoot
     try {
-      $dot = Join-Path $RepoRoot 'dot_local/bin/executable_dot'
+      $dot = Join-Path $RepoRoot 'bin/dot'
       $out = & bash $dot 'agents' 'check' 2>&1
       if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
     }

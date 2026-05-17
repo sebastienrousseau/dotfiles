@@ -93,7 +93,7 @@ else
 fi
 
 test_start "version_in_dot_cli"
-assert_file_contains "$REPO_ROOT/dot_local/bin/executable_dot" 'VERSION=' "dot CLI must define VERSION"
+assert_file_contains "$REPO_ROOT/bin/dot" 'VERSION=' "dot CLI must define VERSION"
 
 # ═══════════════════════════════════════════════════════════════
 # 5. CROSS-PLATFORM PATH HANDLING

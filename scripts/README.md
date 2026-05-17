@@ -17,8 +17,8 @@ few specialised subtrees.
 
 | Path | Purpose | Touched by |
 |---|---|---|
-| `scripts/dot/commands/` | Per-subcommand handlers for the `dot` CLI. Sources `lib/dot/*.sh` (moved out of this tree in v0.2.503 Phase 1). | Dispatched by `dot_local/bin/executable_dot` |
-| `scripts/dot/powershell/` | Native PowerShell module (`Dot.psm1`) exporting `Get-DotVersion` / `Invoke-DotHelp` / `Test-DotAgentsSync`. | `dot_local/bin/dot.ps1` |
+| `scripts/dot/commands/` | Per-subcommand handlers for the `dot` CLI. Sources `lib/dot/*.sh` (moved out of this tree in v0.2.503 Phase 1). | Dispatched by `bin/dot` |
+| `scripts/dot/powershell/` | Native PowerShell module (`Dot.psm1`) exporting `Get-DotVersion` / `Invoke-DotHelp` / `Test-DotAgentsSync`. | `bin/dot.ps1` |
 | `scripts/dot/data/` | Per-command static data (registry seeds, palette tables). | `scripts/dot/commands/*` |
 | `scripts/lib/` | Cross-cutting library helpers reused across multiple scripts. Example: `secrets_provider.sh` (keychain / pass / age dispatch). | `scripts/dot/commands/*`, ops scripts |
 | `scripts/diagnostics/` | `doctor.sh` and its helpers — long-form environment health check. | `dot doctor` |
@@ -46,7 +46,7 @@ few specialised subtrees.
 
 ## `scripts/dot/` breakdown
 
-The `dot` CLI is implemented as `dot_local/bin/executable_dot`
+The `dot` CLI is implemented as `bin/dot`
 (dispatcher) + `scripts/dot/commands/<cmd>.sh` (per-command
 handlers) + `lib/dot/*.sh` (shared helpers — moved out of
 `scripts/dot/lib/` in v0.2.503 Phase 1 per the
@@ -88,7 +88,7 @@ handlers) + `lib/dot/*.sh` (shared helpers — moved out of
    }
    ```
 
-2. Add a dispatch arm in `dot_local/bin/executable_dot`:
+2. Add a dispatch arm in `bin/dot`:
 
    ```bash
    <name>) load_commands "<name>"; cmd_<name> "$@" ;;
@@ -97,7 +97,7 @@ handlers) + `lib/dot/*.sh` (shared helpers — moved out of
 3. Document it in `docs/manual/03-reference/01-dot-cli.md` and add
    to `docs/manual/command-index.md`.
 
-4. Add a help-table entry in `dot_local/bin/executable_dot`'s
+4. Add a help-table entry in `bin/dot`'s
    help renderer.
 
 5. Add a unit test under `tests/unit/<domain>/test_<name>.sh`

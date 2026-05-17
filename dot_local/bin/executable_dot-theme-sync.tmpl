@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Chezmoi-deployed thin wrapper — see executable_dot.tmpl rationale.
+exec "{{ .chezmoi.sourceDir }}/bin/dot-theme-sync" "$@"
