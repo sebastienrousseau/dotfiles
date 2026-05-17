@@ -41,7 +41,11 @@ verified by `dot lint` + the existing test matrix.
 
 - **Phase 0 — RFC in-scope.** `RFC_v0_2_503_reorganization.md` repositioned from "deferred to v0.3.0" to "shipping in v0.2.503". CHANGELOG + ROADMAP + scaffold docs updated.
 - **Phase 1 — `lib/` move.** `scripts/dot/lib/{utils,ui,platform,log,bento}.sh` → `lib/dot/{utils,ui,platform,log,bento}.sh`. Every `source` path in `scripts/dot/commands/*.sh` updated. Non-breaking for end users (lib is not chezmoi-deployed).
-- Subsequent phases follow per the RFC: `bin/`, `share/`, `defaults/` + `.chezmoiroot`, `tools/`, `install/migrate/migrate-v0_2-to-v0_3.sh`.
+- **Phase 2 — `bin/` dispatcher.** `dot_local/bin/executable_dot{,-bootstrap,-theme-sync,-load-benchmark-pty}` → `bin/<name>`. Chezmoi-deployed wrappers at the old paths still exec the canonical for backward compatibility on existing installs.
+- **Phase 3 — `share/` man + completions.** Man pages, zsh completions, and shell-init fragments moved out of `dot_local/share/` into top-level `share/`.
+- **Phase 4 — `defaults/` + `.chezmoiroot`.** All 33 chezmoi-tracked source paths (every `dot_*`, `private_dot_*`, `run_onchange_*`, `.chezmoi*`) moved into `defaults/`; `.chezmoiroot=defaults` activated. Chezmoi natively re-bases its source-root; the included migration script (`install/migrate/migrate-v0_2-to-v0_2_503.sh`) handles the user-machine transition idempotently. Repo root is now strictly project metadata + framework distribution; all user-config payload lives under `defaults/`. New `resolve_chezmoi_source_dir()` in `lib/dot/utils.sh` separates chezmoi-content lookups from repo-root lookups.
+- **Phase 5 — `tools/` split.** Repo-only ops (`scripts/{ci,release,maintenance,docs}` → `tools/{ci,release,maintenance,docs}`). 68 references swept across workflows, CHANGELOG, READMEs, PR template, PowerShell parity matrix.
+- **Phase 6 — automatic seamless migration.** `install/migrate/migrate-v0_2-to-v0_2_503.sh` wired into `install.sh`, `chezmoi run_before` hook, and direct invocation. State-file guard at `$XDG_STATE_HOME/dotfiles/v0_2_503-migration/.complete` ensures real work runs exactly once per host. Snapshot kept for inspection.
 
 ### Big-ticket features (per "what else" iterations)
 
