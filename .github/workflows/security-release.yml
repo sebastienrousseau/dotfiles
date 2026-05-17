@@ -92,14 +92,21 @@ jobs:
             dotfiles-sbom.spdx.json.sig
             dotfiles-sbom.spdx.json.pem
 
-      - name: Attach Cosign artefacts to the release
-        if: github.event_name == 'release'
+      - name: Attach SBOM + Cosign artefacts to the release
+        # Under workflow_dispatch we also re-upload the SBOM itself —
+        # the freshly-generated file will have a different hash than
+        # whatever was attached when the release first published, so
+        # the .sig / .pem must match the new SBOM bytes. The release-
+        # event path uploads only the sig+cert (the SBOM is added by
+        # the sbom-action step's `upload-release-assets` elsewhere).
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
         run: |
           set -euo pipefail
           gh release upload "$RELEASE_TAG" \
+            dotfiles-sbom.spdx.json \
             dotfiles-sbom.spdx.json.sig \
             dotfiles-sbom.spdx.json.pem \
             --clobber
