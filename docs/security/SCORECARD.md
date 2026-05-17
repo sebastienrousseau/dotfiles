@@ -113,6 +113,29 @@ false positives in Scorecard's regex.
 - **Investigate `License` 9/10 false-positive** — repo is MIT (SPDX-compliant), Scorecard's penalty should not apply.
 - **Investigate `Branch-Protection` `-1`** — scanner internal error; manually verify with `gh api repos/:owner/:repo/branches/master/protection` and document.
 
+### Enabling Branch-Protection + Webhooks checks (one-time PAT setup)
+
+Scorecard's `Branch-Protection` and `Webhooks` checks require a
+fine-grained Personal Access Token with `Administration: read`
+scope. Without it both checks return `-1` ("internal error"). The
+workflow already wires this up — only the secret needs to be created.
+
+Steps (one-time, repo owner):
+
+1. Go to <https://github.com/settings/personal-access-tokens/new>
+2. **Resource owner**: `sebastienrousseau` · **Repository access**: only `sebastienrousseau/dotfiles`
+3. **Repository permissions** → `Administration: read-only` and `Metadata: read-only`
+4. **Expiration**: 1 year (set a calendar reminder to rotate; document the rotation in this file when done)
+5. Generate the token, copy it once
+6. Add as a secret named `SCORECARD_TOKEN` at <https://github.com/sebastienrousseau/dotfiles/settings/secrets/actions/new>
+7. Next Scorecard run (manual via `gh workflow run scorecard.yml` or weekly cron) picks it up automatically
+8. Expected effect: `Branch-Protection` `-1` → 10/10 if all rules are correctly configured; `Webhooks` `-1` → 10/10 (no webhooks present).
+
+The PAT secret is **optional**. When absent, the workflow falls back
+to `${{ github.token }}` and Scorecard continues to run, only with
+those two checks at `-1`. Adding the PAT cannot reduce any other check's
+score — it's a strict improvement.
+
 ## Exceptions
 
 | Check | Expiry | Rationale |

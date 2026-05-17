@@ -72,6 +72,13 @@ jobs:
           # Publish to https://api.securityscorecards.dev/ so the
           # badge URL resolves to a fresh result on every run.
           publish_results: true
+          # Fine-grained PAT with Administration:read enables the
+          # Branch-Protection + Webhooks checks (otherwise both
+          # report -1 "internal error"). The secret is optional —
+          # when absent, scorecard falls back to GITHUB_TOKEN and
+          # those two checks remain at -1. See
+          # docs/security/SCORECARD.md for the PAT creation flow.
+          repo_token: ${{ secrets.SCORECARD_TOKEN || github.token }}
 
       - name: Upload SARIF to Code Scanning
         uses: github/codeql-action/upload-sarif@68bde559dea0fdcac2102bfdf6230c5f70eb485e # v4
