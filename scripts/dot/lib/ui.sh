@@ -526,10 +526,21 @@ ui_table_end() {
     local header_row
     local IFS=$'\x1f'
     header_row="${_UI_TABLE_HEADERS[*]}"
+    # Charm palette: 212 = hot pink (matches ui_header), 240 = muted grey.
+    # Cell colour intentionally left at terminal default so the table
+    # reads on both light and dark backgrounds.
+    # Override via DOTFILES_TABLE_{BORDER,HEADER}_FG env vars.
+    local border_fg="${DOTFILES_TABLE_BORDER_FG:-240}"
+    local header_fg="${DOTFILES_TABLE_HEADER_FG:-212}"
     {
       printf '%s\n' "$header_row"
       printf '%s\n' "${_UI_TABLE_ROWS[@]}"
-    } | gum table --print --separator=$'\x1f' --border=rounded 2>/dev/null ||
+    } | gum table --print \
+      --separator=$'\x1f' \
+      --border=rounded \
+      --border.foreground="$border_fg" \
+      --header.foreground="$header_fg" \
+      --padding="0 1" 2>/dev/null ||
       _ui_table_printf_fallback
   else
     _ui_table_printf_fallback
