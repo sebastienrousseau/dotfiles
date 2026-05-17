@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
 # Wrapper for Antigravity extension updates under Topgrade.
 # Clears Node/Electron env that can inject custom loaders and crash updater.
+# No-ops when upstream binary is missing so Topgrade does not fail.
 set -euo pipefail
 
 unset NODE_OPTIONS
 unset ELECTRON_RUN_AS_NODE
 unset ELECTRON_NO_ATTACH_CONSOLE
 unset ELECTRON_ENABLE_LOGGING
+
+if [[ ! -x /usr/bin/antigravity ]]; then
+  case "${1-}" in
+    --version) echo "antigravity wrapper (upstream not installed)" ;;
+    *) echo "antigravity: /usr/bin/antigravity not installed; skipping" >&2 ;;
+  esac
+  exit 0
+fi
 
 exec /usr/bin/antigravity "$@"
