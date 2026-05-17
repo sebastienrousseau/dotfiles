@@ -78,6 +78,31 @@ Assert-Step 'chezmoi --version succeeds' {
   if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
 }
 
+# Native Windows: validate every chezmoi template renders without needing
+# bash. This catches Go-template syntax errors that wouldn't surface until
+# a real user ran `chezmoi apply` on Windows. Uses a throwaway destDir +
+# `--no-tty` to avoid the interactive prompts that real apply triggers.
+Assert-Step 'chezmoi apply --dry-run renders every template' {
+  $destDir = Join-Path $env:RUNNER_TEMP "chezmoi-smoke-$([System.IO.Path]::GetRandomFileName())"
+  try {
+    New-Item -ItemType Directory -Path $destDir | Out-Null
+    $out = & chezmoi apply `
+      --source $RepoRoot `
+      --destination $destDir `
+      --dry-run `
+      --no-tty `
+      --keep-going 2>&1
+    if ($LASTEXITCODE -ne 0) {
+      throw "rc=$LASTEXITCODE :: $($out | Select-Object -First 30 | Out-String)"
+    }
+  }
+  finally {
+    if (Test-Path $destDir) {
+      Remove-Item -Recurse -Force $destDir -ErrorAction SilentlyContinue
+    }
+  }
+}
+
 # ─── dot CLI cold-start (only when bash is on PATH) ──────────────────────────
 $bash = Get-Command bash -ErrorAction SilentlyContinue
 if ($bash) {
