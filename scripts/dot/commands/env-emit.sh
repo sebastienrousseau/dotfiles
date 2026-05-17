@@ -44,7 +44,10 @@ dot_env_emit() {
           return 1
         }
         ;;
-      --format=*) format="${1#*=}"; shift ;;
+      --format=*)
+        format="${1#*=}"
+        shift
+        ;;
       --output | -o)
         output="${2:-}"
         shift 2 || {
@@ -52,9 +55,18 @@ dot_env_emit() {
           return 1
         }
         ;;
-      --output=*) output="${1#*=}"; shift ;;
-      --pretty) pretty=1; shift ;;
-      --compact) pretty=0; shift ;;
+      --output=*)
+        output="${1#*=}"
+        shift
+        ;;
+      --pretty)
+        pretty=1
+        shift
+        ;;
+      --compact)
+        pretty=0
+        shift
+        ;;
       -h | --help)
         cat <<-EOF
 	Usage: dot env emit [--format <fmt>] [--output <path>] [--pretty|--compact]
@@ -111,8 +123,8 @@ dot_env_emit() {
   # bits chezmoi already records (os, machine).
   local emitter_version
   emitter_version="$(grep -E '^dotfiles_version[[:space:]]*=' \
-    "$(require_source_dir)/.chezmoidata.toml" 2>/dev/null \
-    | head -1 | sed -E 's/.*"([^"]+)".*/\1/' || echo "unknown")"
+    "$(require_source_dir)/.chezmoidata.toml" 2>/dev/null |
+    head -1 | sed -E 's/.*"([^"]+)".*/\1/' || echo "unknown")"
   local timestamp
   timestamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   local os_type machine_arch
@@ -166,8 +178,9 @@ dot_env_emit() {
   local rendered
   if [[ "$format" == "ndjson" ]]; then
     # NDJSON: header object on line 1, one tool per subsequent line.
-    rendered="$(printf '%s' "$body" \
-      | jq -c '
+    rendered="$(
+      printf '%s' "$body" |
+        jq -c '
         ({schema_version, manifest_version, emitted_at, emitter, host}),
         (.tools[])'
     )"
