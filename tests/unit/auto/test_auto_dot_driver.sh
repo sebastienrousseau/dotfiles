@@ -192,6 +192,38 @@ declare -a PROBES=(
   "help_tools      help tools"
   "help_security   help security"
   "help_secrets    help secrets"
+  # ── MCP diagnostics flags ──
+  "mcp_help        mcp --help"
+  "mcp_json        mcp --json"
+  "mcp_strict      mcp --strict"
+  "mcp_sj          mcp -s -j"
+  "mcp_registry    mcp registry"
+  # ── doctor flags ──
+  "doctor_ai       doctor --ai"
+  # ── fleet drift / namespace variants ──
+  "fleet_drift_h   fleet drift history"
+  "fleet_drift_p   fleet drift predict"
+  "fleet_drift_c   fleet drift check"
+  "fleet_ns_set    fleet namespace set engineering"
+  # ── manual subcommand probes ──
+  "manual_help     manual --help"
+  "manual_open     manual open"
+  "manual_dl_help  manual download --help"
+  # ── env probes ──
+  "env_help        env --help"
+  # ── profile probes ──
+  "profile_help    profile --help"
+  "profile_show    profile show"
+  # ── secrets probes ──
+  "secrets_get_h   secrets get --help"
+  "secrets_set_h   secrets set --help"
+  "secrets_load_h  secrets load --help"
+  "secrets_prov_h  secrets provider --help"
+  # ── attest variants ──
+  "attest_help     attest --help"
+  "attest_default  attest"
+  # ── learn ──
+  "learn_help      learn --help"
   # ── Agent state-change probes (sandbox HOME isolates writes) ──
   "agent_set_ask     agent set ask"
   "agent_set_plan    agent set plan"
@@ -209,6 +241,19 @@ declare -a PROBES=(
   # ── Help via search ──
   "search_help       search help"
   "search_dark       search dark"
+  # ── §3 strategic commands (agents/init/registry/fleet apply) ──
+  "agents_help       agents --help"
+  "agents_list       agents list"
+  "agents_check      agents check"
+  "init_help         init --help"
+  "init_dry_alice    init alice --dry-run"
+  "init_dry_owner    init alice/cfg --dry-run"
+  "init_dry_https    init https://example.com/r.git --dry-run"
+  "init_rejects_http init http://example.com/r.git --dry-run"
+  "registry_help     registry --help"
+  "registry_url      registry url"
+  "registry_install_stub registry install some-module"
+  "fleet_apply_help  fleet apply --help"
 )
 
 set +e

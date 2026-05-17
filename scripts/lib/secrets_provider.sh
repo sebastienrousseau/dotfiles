@@ -126,15 +126,41 @@ dot_secrets_set() {
 }
 
 dot_secrets_get() {
-  local key="${1:-}" provider
-  [[ -n "$key" ]] || return 1
+  local key="${1:-}" provider value rc=0
+  [[ -n "$key" ]] || {
+    printf 'dot_secrets_get: empty key\n' >&2
+    return 1
+  }
   provider="$(dot_secrets_provider)"
   case "$provider" in
-    macos-keychain) dot_secrets_get_macos "$key" ;;
-    pass) dot_secrets_get_pass "$key" ;;
-    plain-enc) dot_secrets_get_plain_enc "$key" ;;
-    *) return 1 ;;
+    macos-keychain) value="$(dot_secrets_get_macos "$key")" || rc=$? ;;
+    pass) value="$(dot_secrets_get_pass "$key")" || rc=$? ;;
+    plain-enc) value="$(dot_secrets_get_plain_enc "$key")" || rc=$? ;;
+    none)
+      # No usable provider on this host — silent miss is wrong;
+      # callers need to know whether to fall back.
+      printf 'dot_secrets_get: no provider configured for key=%s\n' "$key" >&2
+      return 2
+      ;;
+    *)
+      printf 'dot_secrets_get: unknown provider %q\n' "$provider" >&2
+      return 1
+      ;;
   esac
+  if [[ "$rc" -ne 0 ]]; then
+    printf 'dot_secrets_get: provider %q failed (rc=%d) for key=%s\n' \
+      "$provider" "$rc" "$key" >&2
+    return "$rc"
+  fi
+  if [[ -z "$value" ]]; then
+    # An empty return from a successful provider call usually means
+    # "key not found" — distinguish from "provider crashed" so the
+    # caller's fallback can be different.
+    printf 'dot_secrets_get: provider %q returned empty for key=%s (not found?)\n' \
+      "$provider" "$key" >&2
+    return 3
+  fi
+  printf '%s' "$value"
 }
 
 dot_secrets_bucket_keys() {

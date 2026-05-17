@@ -217,11 +217,17 @@ _cached_eval_impl() {
     return 1
   fi
 
-  print -r -- "$init_output" > "${cache}.tmp.$$"
-  mv "${cache}.tmp.$$" "$cache"
+  # `mktemp` instead of `${cache}.tmp.$$` — under PID recycling (very
+  # rare but possible) two concurrent shells with the same $$ could
+  # otherwise race on the same temp file. mktemp gives a unique name.
+  # Use `>|` so we overwrite the just-created mktemp file even when the
+  # user has `setopt noclobber` (see dot_config/shell/05-core-safety.sh).
+  local _tmp _tmp_pin
+  _tmp="$(mktemp "${cache}.XXXXXX")" || return 1
+  print -r -- "$init_output" >| "$_tmp" && mv "$_tmp" "$cache" || { rm -f "$_tmp"; return 1; }
   if [[ -n "$real_bin" ]]; then
-    print -r -- "$real_bin" > "${pin}.tmp.$$"
-    mv "${pin}.tmp.$$" "$pin"
+    _tmp_pin="$(mktemp "${pin}.XXXXXX")" || return 1
+    print -r -- "$real_bin" >| "$_tmp_pin" && mv "$_tmp_pin" "$pin" || { rm -f "$_tmp_pin"; return 1; }
   fi
   source "$cache"
   { zcompile "$cache" } &!
@@ -243,6 +249,48 @@ _cached_eval_clear() {
     rm -f -- "$f" && (( count++ ))
   done
   printf 'Cleared %d cached eval file(s) from %s\n' "$count" "$cache_dir"
+}
+
+# Lazy-load helper for user-supplied slow tools.
+#
+# Usage in ~/.config/zsh/rc.d/99-local.zsh:
+#   _dot_lazy nvm nvm node npm npx               # nvm.sh sourced on first nvm/node/npm/npx call
+#   _dot_lazy pyenv pyenv python python3 pip pip3
+#   _dot_lazy conda conda
+#
+# First arg is the "trigger" — also the function name that bootstraps
+# the real tool. Remaining args are the commands that, when invoked,
+# bootstrap the trigger then re-exec the command. Bootstrap functions
+# must export `_DOT_LAZY_<TRIGGER>_LOADED` so subsequent calls bypass
+# the stub.
+#
+# Why this matters: every `eval "$(slowtool init zsh)"` at startup
+# costs 50-200ms; lazy-load defers that to first use, keeping
+# `dot version` cold-start under 100ms.
+_dot_lazy() {
+  local trigger="$1"; shift || return 1
+  local cmd
+  for cmd in "$trigger" "$@"; do
+    # shellcheck disable=SC2139,SC2140
+    eval "$cmd() {
+      local _trigger=\"$trigger\"
+      local _loaded_var=\"_DOT_LAZY_\${(U)_trigger//[^A-Z0-9]/_}_LOADED\"
+      if [[ -z \${(P)_loaded_var} ]]; then
+        # Unset every stub so the real binary takes over.
+        local _c
+        for _c in \"$trigger\" $@; do
+          unset -f -- \"\$_c\" 2>/dev/null
+        done
+        # User must define a __dot_lazy_init_<trigger> bootstrap.
+        local _init=\"__dot_lazy_init_\${_trigger//-/_}\"
+        if (( \${+functions[\$_init]} )); then
+          \"\$_init\" || return \$?
+        fi
+        export \"\$_loaded_var=1\"
+      fi
+      command \"$cmd\" \"\$@\"
+    }"
+  done
 }
 
 # Lightweight precmd hook manager (faster than add-zsh-hook)
@@ -603,6 +651,11 @@ _dotfiles_async_init() {
       esac
     fi
   done
+  # mise/atuin/etc emit `export PATH=...` which bypasses zsh's -U flag on
+  # the `path` array — re-apply uniqueness to drop any duplicates baked
+  # into the cached output (e.g. system paths inherited from a dirty
+  # parent shell).
+  typeset -U path
 }
 
 # Deferred Hydration for Zero-Jank Experience

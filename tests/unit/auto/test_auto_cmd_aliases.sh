@@ -26,6 +26,32 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
+DOT_BIN="$REPO_ROOT/dot_local/bin/executable_dot"
+
+# Note: `aliases cheatsheet` writes docs/ALIASES_CHEATSHEET.md to
+# whatever cwd it runs in — exclude it so the probe doesn't leak
+# generated files into the repo. Cover via fn-exercise only.
+for cmd in "aliases list" "aliases search git" "aliases why ll" \
+  "aliases stats" "aliases tiers" \
+  "alias-check"; do
+  test_start "dot_$(echo "$cmd" | tr ' -' '__' | tr -dc 'a-z0-9_')"
+  # `$cmd` is INTENDED to word-split into separate argv entries.
+  # shellcheck disable=SC2086
+  if (cd "$REPO_ROOT" && bash "$DOT_BIN" $cmd >/dev/null 2>&1); then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=0)"
+  else
+    rc=$?
+    if [[ "$rc" -ne 124 ]]; then
+      ((TESTS_PASSED++)) || true
+      printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
+    else
+      ((TESTS_FAILED++)) || true
+      printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: rc=$rc"
+    fi
+  fi
+done
+
 cov_exercise_functions_file "$SCRIPT_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

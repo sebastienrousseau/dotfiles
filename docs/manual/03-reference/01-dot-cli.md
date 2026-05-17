@@ -151,19 +151,6 @@ dot attest [--output|-o <file>] [--sign|-s]
 
 Default output: `~/.local/state/dotfiles/attestation/YYYY-MM-DD-HHMMSS.json`. With `--sign`, the JSON is signed with the user's SSH ED25519 key.
 
-### `dot verify`
-
-Verify integrity of the installation.
-
-```
-dot verify [--security|-s] [--attestation <path>]
-```
-
-| Flag | Effect |
-|:---|:---|
-| `--security`, `-s` | Run gitleaks + signature checks + policy hash |
-| `--attestation <path>` | Verify an external attestation file |
-
 ### `dot lint`
 
 Lint shell scripts (shellcheck, shfmt).
@@ -174,24 +161,6 @@ dot lint [--path <glob>] [--strict]
 
 ## Performance
 
-### `dot benchmark`
-
-Measure shell startup time.
-
-```
-dot benchmark [--detailed|-d] [--profile|-p] [--compare|-c] [--waterfall|-w] [--runs|-r <n>]
-```
-
-| Flag | Effect |
-|:---|:---|
-| `--detailed`, `-d` | Per-module timing breakdown |
-| `--profile`, `-p` | Profile with `$SHELL -ixc ""` |
-| `--compare`, `-c` | Compare against baseline |
-| `--waterfall`, `-w` | Waterfall visualization |
-| `--runs`, `-r <n>` | Number of hyperfine runs (default 10) |
-
-Exit codes: 0 (<500ms target), 1 (regression).
-
 ### `dot perf`
 
 Quick performance snapshot.
@@ -200,17 +169,9 @@ Quick performance snapshot.
 dot perf [--json|-j] [--profile|-p] [--runs|-r <n>] [--target|-t <ms>]
 ```
 
-### `dot prewarm`
-
-Regenerate shell init caches for fast startup.
-
 ### `dot cache-refresh`
 
-Rebuild generated shell state (cold-start alternative to prewarm).
-
-### `dot clean-cache`
-
-Clear generated shell initialization caches. Next shell startup will be slow; use `dot prewarm` afterward.
+Regenerate shell caches for ultra-fast startup.
 
 ### `dot score`
 
@@ -322,10 +283,71 @@ Multi-node status, drift, and namespace.
 dot fleet              # show all known hosts
 dot fleet attest       # collect signed attestations
 dot fleet diff         # compare rendered config across hosts
-dot fleet sync         # run `dot update` on every host
+dot fleet sync         # run `dot upgrade` on every host
+dot fleet apply        # SSH out to every host in fleet.toml and run 'dot sync'
 ```
 
 Fleet hosts are configured in `~/.config/dotfiles/fleet.toml`.
+
+### `dot fleet apply`
+
+Push dotfiles state to every host registered in `~/.config/dotfiles/fleet.toml`.
+
+```
+dot fleet apply [--host <name>] [--cmd <shell>] [--dry-run] [--jobs <n>]
+```
+
+| Flag | Effect |
+|:---|:---|
+| `--host <name>` | Apply to a single host only (matches the `[hosts.<name>]` stanza key). |
+| `--cmd <shell>` | Run a custom command on every host instead of the default `dot sync && dot doctor --quiet`. **Warning:** this is arbitrary shell on remote hosts; the value is your trust boundary. |
+| `--dry-run`, `-n` | Print the resolved hosts + planned command without opening SSH. |
+| `--jobs <n>` | Parallelism (default 4). |
+
+Hostnames in `fleet.toml` are validated against `[A-Za-z0-9._@:+/-]+` before fan-out; entries containing other characters abort the apply. First-time SSH connections use `StrictHostKeyChecking=accept-new` (TOFU); pre-populate `~/.ssh/known_hosts` if your threat model requires no TOFU window.
+
+Example `fleet.toml`:
+
+```toml
+[hosts.laptop]
+ssh     = "user@laptop.local"
+profile = "workstation"
+```
+
+## Agents
+
+### `dot agents`
+
+Multi-harness AI agent configuration manager. `CLAUDE.md` is canonical; `dot agents render` keeps `AGENTS.md` (the cross-harness standard read by Codex / Copilot / Cursor / Windsurf / Amp / Devin) plus `.cursor/rules/dotfiles.mdc` and `.codex/config.toml` in sync.
+
+```
+dot agents list       # show which harnesses are recognised + their target paths
+dot agents check      # exit 0 if AGENTS.md tracks CLAUDE.md; 1 if drifted
+dot agents render     # regenerate AGENTS.md + 10 harness-specific files
+```
+
+Harnesses covered: `AGENTS.md` (canonical cross-harness), Cursor (`.cursor/rules/dotfiles.mdc`), Codex (`.codex/config.toml`), Windsurf (`.windsurf/rules.md`), Zed (`.zed/agent-config.toml`), Roo (`.roo/rules.md`), Cline (`.clinerules`), Aider (`.aider.conf.yml`), Continue (`.continuerc.json`), Jules (`.jules/system.md`), Gemini (`.gemini/GEMINI.md`).
+
+Edit `CLAUDE.md` first, then run `dot agents render`; do not hand-edit `AGENTS.md` or any of the per-harness files. The check subcommand is suitable for pre-commit hooks.
+
+## Registry
+
+### `dot registry`
+
+JSON-indexed module registry. Discover and install reusable dotfile modules from a registry hosted via GitHub Pages (or any HTTPS URL via `set-url`).
+
+```
+dot registry list                 # list modules in the configured registry
+dot registry search <query>       # filter modules by keyword
+dot registry info <name>          # full metadata for one module
+dot registry install <name>       # apply a module (scaffold today)
+dot registry url                  # show the active registry URL
+dot registry set-url <url>        # override the registry URL (HTTPS-only)
+```
+
+Default registry: `https://sebastienrousseau.github.io/dotfiles/registry.json`. Cache lives at `${XDG_CACHE_HOME:-~/.cache}/dotfiles/registry/index.json` with a 6h TTL. One-off override: `DOTFILES_REGISTRY_URL=<url> dot registry list`.
+
+The JSON contract + module-contribution flow live in [`docs/operations/REGISTRY.md`](../../operations/REGISTRY.md).
 
 ## Reference
 
@@ -360,10 +382,6 @@ dot add ~/.somefile                    # plaintext
 dot add --encrypt ~/.somefile          # encrypted with Age
 dot add --template ~/.somefile         # templatize
 ```
-
-### `dot remove <path>`
-
-Safely remove a managed file (removes from source and unmanages).
 
 ### `dot cd`
 

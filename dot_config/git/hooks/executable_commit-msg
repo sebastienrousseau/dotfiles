@@ -106,7 +106,7 @@ detect_ai_agent() {
 }
 
 # ── Branding Signature ────────────────────────────────────────────────
-sig_file="/Users/seb/.euxis/data/config/branding/signature.txt"
+sig_file="${HOME}/.euxis/data/config/branding/signature.txt"
 msg_file="${1:-}"
 
 [[ -n "$msg_file" && -f "$msg_file" ]] || exit 0

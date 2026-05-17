@@ -52,8 +52,11 @@ before sending.
 **Key fingerprint** (verify before encrypting):
 
 ```text
-PLACEHOLDER — replace with `gpg --fingerprint security@sebastienrousseau.com`
+55AF AD36 4FD9 DB38 19E6  1F0C 8D68 8FAF A914 4693
 ```
+
+The same fingerprint without spaces (machine-friendly form):
+`55AFAD364FD9DB3819E61F0C8D688FAFA9144693`
 
 **Fetch the public key** via Web Key Directory (WKD):
 

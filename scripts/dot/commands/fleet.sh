@@ -291,10 +291,21 @@ cmd_fleet_namespace() {
       local data_file
       data_file="$(resolve_source_dir)/.chezmoidata.toml"
       if grep -q "^namespace = " "$data_file" 2>/dev/null; then
-        if sed --version >/dev/null 2>&1; then
-          sed -i "s/^namespace = \".*\"/namespace = \"$new_ns\"/" "$data_file"
+        # Atomic write: render into a tempfile + mv so concurrent
+        # `dot fleet namespace set` callers can't corrupt the TOML.
+        # Avoids `sed -i` portability dance (GNU `-i` vs BSD `-i ''`).
+        local _tmp
+        _tmp="$(mktemp "${data_file}.XXXXXX")" || die "Cannot create tempfile"
+        # Explicit if/else instead of A && B || C — the latter (SC2015)
+        # silently runs C when B itself fails, masking real mv errors.
+        if sed "s/^namespace = \".*\"/namespace = \"$new_ns\"/" "$data_file" >"$_tmp"; then
+          if ! mv "$_tmp" "$data_file"; then
+            rm -f "$_tmp"
+            die "Failed to commit namespace update"
+          fi
         else
-          sed -i '' "s/^namespace = \".*\"/namespace = \"$new_ns\"/" "$data_file"
+          rm -f "$_tmp"
+          die "Failed to render namespace update"
         fi
       fi
       ui_ok "Namespace" "Set to '$new_ns'. Run 'dot sync' to apply."
@@ -349,6 +360,266 @@ cmd_fleet_enforce() {
   esac
 }
 
+_fleet_hosts_file() {
+  printf '%s\n' "${DOTFILES_FLEET_HOSTS:-$HOME/.config/dotfiles/fleet.toml}"
+}
+
+# Parse the hosts file. Format:
+#   [hosts.laptop]
+#   ssh = "user@laptop.local"
+#   profile = "workstation"
+#
+# Echoes one record per line: "<name>\t<ssh-target>\t<profile>".
+_fleet_hosts_iter() {
+  local f
+  f="$(_fleet_hosts_file)"
+  [[ -f "$f" ]] || return 0
+  awk '
+    BEGIN { name = ""; ssh = ""; profile = "" }
+    /^\[hosts\./ {
+      if (name != "") { printf "%s\t%s\t%s\n", name, ssh, profile }
+      gsub(/[\[\]]/, "", $0); sub(/^hosts\./, "", $0); name = $0
+      ssh = ""; profile = ""
+      next
+    }
+    /^ssh[[:space:]]*=/    { sub(/^ssh[[:space:]]*=[[:space:]]*/, ""); gsub(/"/, ""); ssh = $0; next }
+    /^profile[[:space:]]*=/ { sub(/^profile[[:space:]]*=[[:space:]]*/, ""); gsub(/"/, ""); profile = $0; next }
+    END {
+      if (name != "") { printf "%s\t%s\t%s\n", name, ssh, profile }
+    }
+  ' "$f"
+}
+
+# SSH-based "dot fleet apply" — push the local dotfiles state out to
+# each registered host. The §3 hero-feature: nobody else owns the
+# "Ansible for personal devices" niche.
+cmd_fleet_apply() {
+  local dry_run=0 only_host="" cmd="" jobs=4 verify_hosts=0
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --dry-run | -n)
+        dry_run=1
+        shift
+        ;;
+      --verify-hosts)
+        # Pre-flight check that every host already has a known_hosts
+        # entry, closing the TOFU window before any SSH connection.
+        # R3 audit N4. Without this, accept-new is the default and a
+        # first-connection MITM can seed an attacker key.
+        verify_hosts=1
+        shift
+        ;;
+      --host)
+        only_host="$2"
+        shift 2
+        ;;
+      --cmd)
+        cmd="$2"
+        shift 2
+        ;;
+      --jobs | -j)
+        jobs="$2"
+        shift 2
+        ;;
+      --help | -h)
+        cat <<EOF
+Usage: dot fleet apply [--host <name>] [--cmd <shell>] [--dry-run] [--jobs <n>]
+
+Push dotfiles state to every host registered in:
+  ${DOTFILES_FLEET_HOSTS:-\$HOME/.config/dotfiles/fleet.toml}
+
+Format of fleet.toml:
+  [hosts.laptop]
+  ssh     = "user@laptop.local"
+  profile = "workstation"
+
+Hostnames are validated against [A-Za-z0-9._@:+/-]+ before any SSH
+fan-out; invalid entries abort the apply.
+
+First-time SSH connections use StrictHostKeyChecking=accept-new (TOFU).
+If your threat model requires no TOFU window, pre-populate
+~/.ssh/known_hosts before running this command.
+
+Behavior:
+  By default each host runs:  dot sync && dot doctor --quiet
+  Override with --cmd "<shell>" to run an arbitrary command on every
+  host (e.g. --cmd "uptime").
+
+  WARNING: --cmd is the trust boundary. Whatever string you pass
+  executes on every remote host with the credentials your SSH key
+  carries. Verify the command before running.
+
+Flags:
+  --host <name>      Apply to a single host only.
+  --cmd <shell>      Run a custom command instead of 'dot sync'.
+  --dry-run, -n      Print resolved hosts + planned command; don't SSH.
+  --jobs <n>         Parallelism (default 4).
+  --verify-hosts     Refuse to open any SSH connection unless every
+                     target host already has a key in ~/.ssh/known_hosts.
+                     Use when your threat model excludes the TOFU window.
+EOF
+        return 0
+        ;;
+      *)
+        ui_err "Unknown arg" "$1"
+        return 1
+        ;;
+    esac
+  done
+
+  local hosts_file
+  hosts_file="$(_fleet_hosts_file)"
+  if [[ ! -f "$hosts_file" ]]; then
+    ui_err "Fleet" "no hosts file at $hosts_file"
+    ui_info "Hint" "create it with stanzas like '[hosts.laptop]\\nssh = \"user@laptop.local\"'"
+    return 1
+  fi
+
+  local entries
+  entries="$(_fleet_hosts_iter)"
+  if [[ -z "$entries" ]]; then
+    ui_err "Fleet" "hosts file is empty: $hosts_file"
+    return 1
+  fi
+  if [[ -n "$only_host" ]]; then
+    entries="$(printf '%s\n' "$entries" | awk -F'\t' -v h="$only_host" '$1 == h')"
+    [[ -n "$entries" ]] || {
+      ui_err "Fleet" "host not found: $only_host"
+      return 1
+    }
+  fi
+
+  local default_cmd='dot sync && dot doctor --quiet'
+  local effective_cmd="${cmd:-$default_cmd}"
+
+  ui_header "Fleet apply"
+  ui_info "Hosts file" "$hosts_file"
+  ui_info "Command" "$effective_cmd"
+  ui_info "Parallel" "$jobs"
+
+  if [[ "$dry_run" -eq 1 ]]; then
+    printf '%s\n' "$entries" | while IFS=$'\t' read -r name ssh profile; do
+      ui_info "$name" "$ssh  profile=$profile  cmd=$effective_cmd"
+    done
+    ui_ok "Dry-run" "no SSH connections opened"
+    return 0
+  fi
+
+  if ! command -v ssh >/dev/null 2>&1; then
+    ui_err "ssh" "not installed"
+    return 127
+  fi
+
+  local total=0 ok=0 fail=0
+  local tmpdir
+  # `-t` template includes PID + random, so two concurrent `dot fleet
+  # apply` invocations from the same user can't collide on $tmpdir.
+  tmpdir="$(mktemp -d -t dotfiles-fleet.XXXXXX)"
+  # Capture tmpdir's value at trap-definition time (via the eval-on-
+  # define `printf -v`), NOT at trap-fire time. A naive
+  # `trap 'rm -rf "$tmpdir"' RETURN` is unsafe under set -u because
+  # `local tmpdir` is destroyed before the RETURN trap evaluates.
+  # The SC2064 warning ("Use single quotes, otherwise this expands now
+  # rather than when signalled") is exactly the behaviour we want here —
+  # we explicitly want eager expansion. Suppress per-line.
+  local _cleanup
+  printf -v _cleanup 'rm -rf %q' "$tmpdir"
+  # shellcheck disable=SC2064
+  trap "$_cleanup" RETURN
+
+  # Validate every hostname against a conservative regex BEFORE fan-out.
+  # `user@host:port` characters only — refuses single quotes, backticks,
+  # `$()`, semicolons, spaces, any shell metacharacter. Closes the
+  # round-2 audit's hostname-injection finding.
+  while IFS=$'\t' read -r name ssh profile; do
+    [[ -n "$name" ]] || continue
+    if [[ ! "$ssh" =~ ^[a-zA-Z0-9._@:+/-]+$ ]]; then
+      ui_err "$name" "invalid ssh target ($ssh) — only [a-zA-Z0-9._@:+/-] allowed"
+      return 1
+    fi
+  done <<<"$entries"
+
+  # --verify-hosts: refuse the apply when any target host is missing
+  # from ~/.ssh/known_hosts. Closes the R3 audit N4 TOFU-window gap.
+  if ((verify_hosts == 1)); then
+    local known_hosts="${HOME}/.ssh/known_hosts"
+    if [[ ! -f "$known_hosts" ]]; then
+      ui_err "verify-hosts" "no $known_hosts — populate before --verify-hosts"
+      return 1
+    fi
+    local unknown_count=0
+    while IFS=$'\t' read -r name ssh profile; do
+      [[ -n "$name" && -n "$ssh" ]] || continue
+      # Strip `user@` prefix and `:port` suffix for the lookup.
+      local hostpart="${ssh#*@}"
+      hostpart="${hostpart%%:*}"
+      if ! ssh-keygen -F "$hostpart" -f "$known_hosts" >/dev/null 2>&1; then
+        ui_err "$name" "no known_hosts entry for $hostpart — would TOFU on first connect"
+        unknown_count=$((unknown_count + 1))
+      fi
+    done <<<"$entries"
+    if ((unknown_count > 0)); then
+      ui_err "verify-hosts" "$unknown_count host(s) missing from known_hosts — aborting"
+      return 1
+    fi
+    ui_ok "verify-hosts" "all hosts found in known_hosts"
+  fi
+
+  # Run one SSH per host, parallelised via background jobs with a
+  # semaphore. We DO NOT use `xargs -d` because that flag is GNU-only
+  # and the §3 hero feature must work on macOS BSD xargs too. Also
+  # avoids embedding `{}` substitution into a `bash -c` (the previous
+  # implementation had a quoting hazard around TOML hostnames).
+  _fleet_apply_one() {
+    local _name="$1" _ssh="$2" _cmd="$3" _tmp="$4"
+    if ssh -o BatchMode=yes -o ConnectTimeout=10 \
+      -o StrictHostKeyChecking=accept-new \
+      "$_ssh" "$_cmd" </dev/null \
+      >"$_tmp/$_name.out" 2>"$_tmp/$_name.err"; then
+      printf 'ok\n' >"$_tmp/$_name.status"
+    else
+      printf 'fail %d\n' "$?" >"$_tmp/$_name.status"
+    fi
+  }
+
+  local running=0
+  while IFS=$'\t' read -r name ssh profile; do
+    [[ -n "$name" && -n "$ssh" ]] || continue
+    total=$((total + 1))
+    while ((running >= jobs)); do
+      wait -n 2>/dev/null || break
+      running=$((running - 1))
+    done
+    _fleet_apply_one "$name" "$ssh" "$effective_cmd" "$tmpdir" &
+    running=$((running + 1))
+  done <<<"$entries"
+  wait
+
+  # `while < <(printf ...)` instead of `printf ... | while` — the
+  # pipe form runs the loop body in a subshell, so the ok/fail
+  # counters never propagate back to the parent. Caught by
+  # tests/unit/fleet/test_fleet_apply_mocked_ssh.sh which exercised
+  # the full apply path (the dry-run test missed this).
+  while IFS=$'\t' read -r name ssh profile; do
+    [[ -n "$name" ]] || continue
+    if [[ -s "$tmpdir/$name.status" ]] && head -1 "$tmpdir/$name.status" | grep -q '^ok'; then
+      ui_ok "$name" "$ssh"
+      ok=$((ok + 1))
+    else
+      local err_summary=""
+      [[ -s "$tmpdir/$name.err" ]] && err_summary=" — $(head -1 "$tmpdir/$name.err")"
+      ui_err "$name" "$ssh${err_summary}"
+      fail=$((fail + 1))
+    fi
+    local _evt_status="unknown"
+    [[ -s "$tmpdir/$name.status" ]] && _evt_status="$(head -1 "$tmpdir/$name.status")"
+    _fleet_emit_event "apply" "$_evt_status" "host=$name" "cmd=$effective_cmd"
+  done < <(printf '%s\n' "$entries")
+
+  ui_info "Summary" "$ok ok / $fail failed / $total total"
+  [[ "$fail" -eq 0 ]]
+}
+
 cmd_fleet() {
   local subcommand="${1:-status}"
   if [[ "${1:-}" == --* ]] || [[ -z "${1:-}" ]]; then
@@ -373,6 +644,9 @@ cmd_fleet() {
     enforce)
       cmd_fleet_enforce "$@"
       ;;
+    apply | push)
+      cmd_fleet_apply "$@"
+      ;;
     *)
       ui_header "Fleet Commands"
       echo ""
@@ -383,6 +657,7 @@ cmd_fleet() {
       ui_ok "events" "Show recent fleet events"
       ui_ok "namespace" "Show or set the active namespace"
       ui_ok "enforce" "Show or set RBAC enforcement mode (advisory|strict)"
+      ui_ok "apply" "SSH out to every host in fleet.toml and run 'dot sync'"
       ;;
   esac
 }

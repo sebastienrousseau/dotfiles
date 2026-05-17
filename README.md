@@ -5,7 +5,7 @@
 <h1 align="center">.dotfiles</h1>
 
 <p align="center">
-  <strong>Declarative dotfiles for macOS, Linux, and WSL. Multi-shell by default. Sub-second startup. Wallpaper-driven themes. Signed releases.</strong>
+  <strong>Declarative dotfiles for macOS, Linux, WSL, and Windows-native PowerShell 7.4 LTS / 7.5+. Multi-shell by default. Sub-100ms CLI cold-start. Wallpaper-driven themes. Signed + attested releases. Fleet apply over SSH.</strong>
 </p>
 
 <p align="center">
@@ -104,10 +104,10 @@ Most dotfiles repos are personal collections. This one ships as workstation infr
 |:---|:---|:---|
 | **Wallpaper-driven themes** | K-Means clustering in CIELAB extracts terminal palettes from any wallpaper. WCAG AAA enforced. Dynamic HEIC dark/light. | `dot theme rebuild` |
 | **AI and MCP native** | Agent profiles, MCP policy enforcement, attestation logs, AI commit messages. | `dot ai`, `dot mcp`, `dot agent`, `dot mode` |
-| **Cryptographic attestation** | Signed commits, machine-readable evidence, policy bundle releases. | `dot attest`, `dot verify` |
+| **Cryptographic attestation** | Signed commits, machine-readable evidence, policy bundle releases. | `dot attest`, `dot secrets verify` |
 | **Fleet management** | Multi-node drift dashboard, per-host profiles. | `dot fleet` |
 | **Self-healing** | Auto-repair tools, chezmoi drift, broken symlinks, missing files. | `dot heal`, `dot chaos`, `dot rollback`, `dot bundle` |
-| **Sub-second startup** | Lazy loading, `_cached_eval` pattern, mtime-based cache invalidation, realpath sidecar pins. | `dot benchmark`, `dot perf` |
+| **Sub-second startup** | Lazy loading, `_cached_eval` pattern, mtime-based cache invalidation, realpath sidecar pins. | `dot perf`, `dot health` |
 | **Multi-shell parity** | Tier-1 (full): zsh, bash. Tier-2 (bridged): fish. Tier-3 (compatible): nushell. PowerShell is supported as a contract-tested parity target. See [ADR-007](docs/adr/ADR-007-multi-shell-parity.md) and [ADR-011](docs/adr/ADR-011-nushell-tier3-keep.md). | `dot env`, `dot profile` |
 | **Build artifacts → /tmp** | Cargo, Go, pip, uv, and Zig caches redirect to `/tmp/builds/`. Project dirs stay clean. | `~/.config/mise/config.toml`, `~/.cargo/config.toml` |
 | **Encrypted secrets** | Age and SOPS keep per-machine secrets out of plaintext history. | `dot secrets` |
@@ -177,9 +177,15 @@ Over 80 commands grouped by intent. Run `dot help` for the full reference.
 
 | | |
 |:---|:---|
+| `dot init <user>` | Bootstrap any GitHub user's dotfiles repo through this harness |
 | `dot sync` | Apply dotfiles to this machine |
 | `dot doctor` | Check the environment and surface issues |
 | `dot learn` | Open the guided tour |
+| `dot agents render` | Sync `CLAUDE.md` → `AGENTS.md` + Cursor + Codex stubs |
+| `dot fleet apply` | SSH out to every host in `~/.config/dotfiles/fleet.toml` |
+| `dot registry list` | Browse reusable dotfile modules from the registry |
+
+A [Claude Code skill](dot_claude/skills/dotfiles-bootstrap/SKILL.md) is also shipped — `/skills` discovers `dotfiles-bootstrap` and runs `dot init` with profile-aware safety defaults.
 
 ### Daily Use
 
@@ -225,9 +231,9 @@ Over 80 commands grouped by intent. Run `dot help` for the full reference.
 | | |
 |:---|:---|
 | `dot fleet` | Multi-node status, drift, and namespace |
-| `dot benchmark` / `dot perf` | Measure shell startup |
+| `dot perf` | Measure shell startup |
 | `dot score` / `dot security-score` | Health and security scorecards |
-| `dot prewarm` | Warm caches for the first interactive shell |
+| `dot health` | Live dashboard for caches and tool state |
 
 Full reference: [docs/reference/UTILS.md](docs/reference/UTILS.md) · Complete manual: [docs/manual/](docs/manual/) or `dot manual`
 
@@ -251,7 +257,7 @@ The `.dotfiles` Manual is published in nine formats: HTML (single and multi-page
 2. **Explore** — `dot learn` walks through shells, secrets, themes, and performance
 3. **Customize** — edit `~/.config/chezmoi/chezmoi.toml` for per-machine settings ([Profiles](docs/reference/PROFILES.md))
 4. **Toggle features** — flip features in `.chezmoidata.toml` ([Feature Flags](docs/reference/FEATURES.md))
-5. **Apply** — `dot sync` applies the config and `dot prewarm` caches shell startup
+5. **Apply** — `dot sync` applies the config and the next interactive shell hydrates caches via `_cached_eval`
 
 See the [Migration Guide](docs/operations/MIGRATION.md) for version upgrades.
 

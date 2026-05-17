@@ -1,0 +1,124 @@
+name: Verify GPG WKD
+
+# Closes N1 (Critical) from Hard-Audit Round 3:
+#
+#   The disclosure public key is published in two places:
+#     1. docs/security/security-pubkey.asc (in-repo, ASCII-armored)
+#     2. https://sebastienrousseau.com/.well-known/openpgpkey/hu/<hash>
+#        (live, served from sebastienrousseau/sebastienrousseau.github.io)
+#
+#   These can drift independently. A compromised github.io repo could
+#   swap the WKD-served key while the in-repo .asc stays intact (and
+#   vice versa). This workflow imports both and compares fingerprints
+#   on every change to the security surface — failing loud if they
+#   disagree.
+#
+#   Also runs on schedule (weekly) so we catch slow drift even when
+#   no PR touches the security files.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/security/security-pubkey.asc'
+      - '.github/SECURITY.md'
+      - 'docs/security/KEY_ROTATION.md'
+      - '.github/workflows/verify-gpg-wkd.yml'
+  pull_request:
+    paths:
+      - 'docs/security/security-pubkey.asc'
+      - '.github/SECURITY.md'
+      - 'docs/security/KEY_ROTATION.md'
+      - '.github/workflows/verify-gpg-wkd.yml'
+  schedule:
+    - cron: '0 9 * * 1'   # Mondays 09:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify in-repo ↔ WKD fingerprint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Import in-repo armored key + capture fingerprint
+        id: in_repo
+        run: |
+          set -uo pipefail
+          GNUPGHOME="$(mktemp -d)"
+          export GNUPGHOME
+          chmod 700 "$GNUPGHOME"
+          # gpg can exit non-zero under set -e even on successful import
+          # (gpg-agent IPC quirks in fresh GNUPGHOME). Verify by looking
+          # for the literal `imported: N` line in stderr.
+          gpg --batch --import docs/security/security-pubkey.asc 2>"$GNUPGHOME/imp.err" || true
+          if ! grep -qE '^gpg:[[:space:]]*imported: [1-9]' "$GNUPGHOME/imp.err"; then
+            echo "::error::gpg import failed:" >&2
+            cat "$GNUPGHOME/imp.err" >&2
+            exit 1
+          fi
+          fpr=$(gpg --with-colons --fingerprint | awk -F: '/^fpr:/{print $10; exit}')
+          [[ -n "$fpr" ]] || { echo "::error::no fingerprint in security-pubkey.asc" >&2; exit 1; }
+          echo "fpr=$fpr" >> "$GITHUB_OUTPUT"
+          echo "in-repo fingerprint: $fpr"
+
+      - name: Fetch WKD key from live URL + capture fingerprint
+        id: wkd
+        run: |
+          set -uo pipefail
+          # WKD URL is fixed per the disclosure-key publish flow.
+          # Recomputing the hash from the local-part on every run would
+          # require gpg-wks-client which isn't on the runner; the hash
+          # is stable for a given local-part, so we pin it.
+          url="https://sebastienrousseau.com/.well-known/openpgpkey/hu/t5s8ztdbon8yzntexy6oz5y48etqsnbb"
+          curl -fsSL --max-time 15 -o /tmp/wkd.bin "$url"
+          GNUPGHOME="$(mktemp -d)"
+          export GNUPGHOME
+          chmod 700 "$GNUPGHOME"
+          gpg --batch --import /tmp/wkd.bin 2>"$GNUPGHOME/imp.err" || true
+          if ! grep -qE '^gpg:[[:space:]]*imported: [1-9]' "$GNUPGHOME/imp.err"; then
+            echo "::error::gpg import of WKD key failed:" >&2
+            cat "$GNUPGHOME/imp.err" >&2
+            exit 1
+          fi
+          fpr=$(gpg --with-colons --fingerprint | awk -F: '/^fpr:/{print $10; exit}')
+          [[ -n "$fpr" ]] || { echo "::error::no fingerprint in WKD key" >&2; exit 1; }
+          echo "fpr=$fpr" >> "$GITHUB_OUTPUT"
+          echo "WKD fingerprint: $fpr"
+
+      - name: Compare fingerprints
+        run: |
+          set -euo pipefail
+          in_repo="${{ steps.in_repo.outputs.fpr }}"
+          wkd="${{ steps.wkd.outputs.fpr }}"
+          expected="55AFAD364FD9DB3819E61F0C8D688FAFA9144693"
+          echo "in-repo: $in_repo"
+          echo "WKD    : $wkd"
+          echo "pinned : $expected"
+          if [[ "$in_repo" != "$wkd" ]]; then
+            echo "::error::FINGERPRINT DRIFT — in-repo .asc and live WKD endpoint disagree." >&2
+            echo "::error::Investigate: did the GitHub Pages repo serve a different key?" >&2
+            exit 1
+          fi
+          if [[ "$in_repo" != "$expected" ]]; then
+            echo "::warning::Both keys agree but neither matches the pinned fingerprint $expected." >&2
+            echo "::warning::If a key rotation happened, update this workflow's pinned value." >&2
+            exit 1
+          fi
+          echo "✓ in-repo .asc ↔ live WKD endpoint ↔ pinned fingerprint all match"
+
+      - name: Check days-to-expiry
+        run: bash scripts/security/check-disclosure-key-expiry.sh

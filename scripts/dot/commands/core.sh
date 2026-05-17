@@ -77,13 +77,19 @@ cmd_diff() {
 }
 
 cmd_status() {
-  local out
-  out="$(chezmoi status "$@" || true)"
+  local out rc=0
+  # Capture chezmoi's stderr too so an actual tool failure surfaces
+  # to the user instead of being indistinguishable from a clean tree.
+  out="$(chezmoi status "$@" 2>&1)" || rc=$?
+  ui_header "Dotfiles Status"
+  if [[ "$rc" -ne 0 ]]; then
+    ui_err "chezmoi" "exited $rc"
+    [[ -n "$out" ]] && printf "%s\n" "$out"
+    return "$rc"
+  fi
   if [[ -z "$out" ]]; then
-    ui_header "Dotfiles Status"
     ui_ok "Clean" "no local drift detected"
   else
-    ui_header "Dotfiles Status"
     printf "%s\n" "$out"
   fi
 }

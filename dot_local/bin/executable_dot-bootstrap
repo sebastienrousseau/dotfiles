@@ -30,7 +30,6 @@ step "Starting Deterministic Bootstrap (v0.2.493 Frontier)"
 # 1. Install Nix (if not present)
 if ! command -v nix >/dev/null 2>&1; then
   step "Installing Nix Package Manager..."
-  local nix_installer
   nix_installer=$(umask 077 && mktemp)
   if ! curl -fsSL -o "$nix_installer" https://nixos.org/nix/install; then
     rm -f "$nix_installer"

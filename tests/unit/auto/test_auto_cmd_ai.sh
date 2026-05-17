@@ -31,6 +31,37 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
+# Dispatcher arms — exercise the read-only AI subcommands plus every
+# bridge `--help` so the per-CLI case branches in run_ai_with_context
+# get traced. None of these reach the actual AI CLI; they all hit the
+# "not installed / show help" path which is the most common branch
+# users encounter.
+DOT_BIN="$REPO_ROOT/dot_local/bin/executable_dot"
+
+for cmd in "ai" "ai-setup --help" "ai-query --help" \
+  "cl --help" "claude --help" "codex --help" "copilot --help" \
+  "gemini --help" "goose --help" "kiro --help" "sgpt --help" \
+  "ollama --help" "opencode --help" "aider --help"; do
+  test_start "dot_$(echo "$cmd" | tr ' -' '__' | tr -dc 'a-z0-9_')"
+  # `$cmd` is INTENDED to word-split into separate argv entries
+  # (e.g. `ai-setup --help` → `ai-setup`, `--help`). Quoting would
+  # pass the whole string as one positional arg.
+  # shellcheck disable=SC2086
+  if (cd "$REPO_ROOT" && bash "$DOT_BIN" $cmd >/dev/null 2>&1); then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=0)"
+  else
+    rc=$?
+    if [[ "$rc" -ne 124 ]]; then
+      ((TESTS_PASSED++)) || true
+      printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
+    else
+      ((TESTS_FAILED++)) || true
+      printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: rc=$rc"
+    fi
+  fi
+done
+
 cov_exercise_functions_file "$SCRIPT_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

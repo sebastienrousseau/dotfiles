@@ -39,12 +39,22 @@ dot_host_os() {
 }
 
 # Convert host-native path into Linux path when inside WSL.
+#
+# Contract:
+#   - In WSL: requires `wslpath`. Returns 2 (with a stderr error) if
+#     missing — callers must not silently treat a Windows-style path
+#     as Linux-safe.
+#   - Outside WSL: paths are already Linux/macOS paths; echoes the
+#     input unchanged and returns 0.
+#   - Empty input returns 1 (usage error).
 dot_path_to_unix() {
   local p="${1:-}"
-  if [[ -z "$p" ]]; then
-    return 1
-  fi
-  if dot_is_wsl && command -v wslpath >/dev/null 2>&1; then
+  [[ -n "$p" ]] || return 1
+  if dot_is_wsl; then
+    if ! command -v wslpath >/dev/null 2>&1; then
+      printf "dot_path_to_unix: wslpath required in WSL but not found\n" >&2
+      return 2
+    fi
     wslpath -u "$p"
     return
   fi
@@ -52,12 +62,15 @@ dot_path_to_unix() {
 }
 
 # Convert Linux path into host-native path when inside WSL.
+# Same contract as dot_path_to_unix (see above).
 dot_path_to_native() {
   local p="${1:-}"
-  if [[ -z "$p" ]]; then
-    return 1
-  fi
-  if dot_is_wsl && command -v wslpath >/dev/null 2>&1; then
+  [[ -n "$p" ]] || return 1
+  if dot_is_wsl; then
+    if ! command -v wslpath >/dev/null 2>&1; then
+      printf "dot_path_to_native: wslpath required in WSL but not found\n" >&2
+      return 2
+    fi
     wslpath -w "$p"
     return
   fi

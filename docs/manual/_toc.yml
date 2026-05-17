@@ -2,7 +2,7 @@
 # Determines concatenation order for single-page HTML/PDF/EPUB
 title: "The .dotfiles Manual"
 subtitle: "A Trusted Agent Workstation for macOS, Linux, and WSL"
-version: "0.2.501"
+version: "0.2.502"
 
 sections:
   - file: 00-introduction.md

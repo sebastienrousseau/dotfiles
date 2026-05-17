@@ -548,9 +548,30 @@ fi
 # 2. Slow-init tools that are present but NOT wrapped in _cached_eval.
 # Each of these runs uncached on every shell start; common offenders eat
 # 100-500ms apiece on a populated dev machine.
+#
+# Only flag tools that actually emit shell init via `<tool> init <shell>`
+# (or equivalent) and would benefit from caching that output. Plain CLIs
+# like gh/cargo/pnpm/yarn don't have init eval; their completions are
+# cached separately under $ZSH_COMPLETIONS_DIR.
 unwrapped=""
-for tool in nvm fnm pyenv rbenv jenv asdf sdkman conda kubectl helm gh cargo pnpm yarn thefuck broot mcfly; do
+for tool in nvm fnm pyenv rbenv jenv asdf sdkman conda kubectl helm thefuck broot mcfly direnv; do
   command -v "$tool" >/dev/null 2>&1 || continue
+  # If the tool is installed but no shell config sources or evals its
+  # init (no `$tool env`, `$tool init`, `$tool.sh`, lazy-load stub), it
+  # isn't adding startup cost — skip the warning.
+  init_referenced=0
+  if grep -rIlqE "\\b${tool}([[:space:]]+(env|init|hook)|\\.sh|_lazy_load_${tool}|_dot_lazy[[:space:]]+${tool})" \
+    "$HOME/.config/zsh" "$HOME/.config/fish" "$HOME/.config/shell" 2>/dev/null; then
+    init_referenced=1
+  fi
+  ((init_referenced == 0)) && continue
+  # Tools we lazy-load via shell stubs don't need init-eval cache files.
+  case "$tool" in
+    fnm | nvm | sdkman)
+      grep -rIlqE "_lazy_load_${tool}|_dot_lazy[[:space:]]+${tool}" \
+        "$HOME/.config/zsh" "$HOME/.config/fish" 2>/dev/null && continue
+      ;;
+  esac
   found=0
   for shell_dir in zsh bash fish; do
     case "$shell_dir" in
@@ -585,27 +606,36 @@ if command -v zsh >/dev/null 2>&1; then
   fi
 fi
 
-# 4. PATH length. Each entry is searched on every command resolution;
-# >40 entries is noticeably slow on cold-cache filesystems.
+# 4. PATH length. Each entry is searched on every command resolution.
+# A mise-managed dev machine routinely adds 50+ entries (one per tool
+# install path), so the warn/fail thresholds are set higher than a
+# lean baseline (40) would suggest.
 path_count=$(printf '%s' "${PATH:-}" | tr ':' '\n' | grep -c . || true)
-if [[ "$path_count" -le 40 ]]; then
+if [[ "$path_count" -le 60 ]]; then
   _ok "PATH length" "$path_count entries"
-elif [[ "$path_count" -le 80 ]]; then
+elif [[ "$path_count" -le 120 ]]; then
   _warn "PATH length" "$path_count entries — consider pruning"
 else
   _fail "PATH length" "$path_count entries — likely slowing every command"
 fi
 
 # 5. Shell coverage. Surface installed shells that the project's caching
-# infrastructure (zsh/bash/fish) doesn't currently maintain caches for.
+# infrastructure doesn't currently maintain caches for. zsh/bash/fish/nu
+# all have a `_cached_eval` analogue; pwsh does not.
 shells_unmanaged=""
 for sh in nu pwsh; do
-  command -v "$sh" >/dev/null 2>&1 && shells_unmanaged="${shells_unmanaged:+$shells_unmanaged, }$sh"
+  command -v "$sh" >/dev/null 2>&1 || continue
+  case "$sh" in
+    nu)
+      [[ -f "$HOME/.config/nushell/cached_eval.nu" ]] && continue
+      ;;
+  esac
+  shells_unmanaged="${shells_unmanaged:+$shells_unmanaged, }$sh"
 done
 if [[ -z "$shells_unmanaged" ]]; then
-  _ok "shell coverage" "all installed shells (zsh/bash/fish) are managed"
+  _ok "shell coverage" "all installed shells have _cached_eval support"
 else
-  _warn "shell coverage" "$shells_unmanaged installed — startup not measured by dot perf"
+  _warn "shell coverage" "$shells_unmanaged installed — no _cached_eval helper"
 fi
 
 # 6. Zsh hook count. Heavy precmd/preexec functions compound per-prompt.

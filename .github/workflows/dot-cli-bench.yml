@@ -1,0 +1,62 @@
+name: Dot CLI Cold-Start Bench
+
+# Runs the dot CLI cold-start gate on every PR and push to master.
+# Complements the weekly perf-baseline (shell-startup) workflow — this
+# one is fast (<30s) and specifically targets the `dot` dispatcher
+# cold-start, which is the user-visible cost of every `dot` invocation.
+#
+# Budget: 150ms median-of-11 on Linux, 200ms on macOS, 300ms on Windows.
+# Per-OS budgets reflect runner-cost differences (Windows tools are
+# slowest, Linux tools are fastest). Local macOS bash 5.x hits ~47ms
+# so this leaves comfortable headroom while still catching regressions.
+# Ratchet each budget down as improvements land (track in ROADMAP §C5).
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'dot_local/bin/executable_dot'
+      - 'scripts/dot/**'
+      - 'scripts/ci/dot-cli-startup-bench.sh'
+      - '.github/workflows/dot-cli-bench.yml'
+  pull_request:
+    paths:
+      - 'dot_local/bin/executable_dot'
+      - 'scripts/dot/**'
+      - 'scripts/ci/dot-cli-startup-bench.sh'
+      - '.github/workflows/dot-cli-bench.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bench:
+    name: dot CLI / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            budget_ms: 150
+          - os: macos-latest
+            budget_ms: 200
+    timeout-minutes: 5
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Run cold-start gate
+        env:
+          DOT_BENCH_BUDGET_MS: ${{ matrix.budget_ms }}
+          DOT_BENCH_RUNS: 11
+          DOT_BENCH_CMD: version
+        run: bash scripts/ci/dot-cli-startup-bench.sh

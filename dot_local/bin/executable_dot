@@ -160,6 +160,7 @@ Start Here|sync|Apply dotfiles to this machine.|Use after clone or after changes
 Start Here|doctor|Check the environment and surface issues.|Use when something feels off.
 Start Here|learn|Open the guided tour.|Best first stop for new users.
 Start Here|help|Show the overview or help for one command.|Use `dot help <command>` for detail.
+Daily Use|init|Bootstrap a foreign dotfiles repo through chezmoi + dot.|Usage: `dot init <github-user>`.
 Daily Use|status|Show local drift.|See what changed since the last apply.
 Daily Use|diff|Preview pending changes.|Safe way to inspect before applying.
 Daily Use|edit|Open the source directory.|Use the configured editor.
@@ -172,6 +173,8 @@ AI and Agents|ai|Show installed AI tools.|Launches the AI status view.
 AI and Agents|mcp|Inspect MCP policy and registry.|Supports `--strict|-s` and `--json|-j`.
 AI and Agents|mode|Show or set the agent profile.|Profiles: ask, plan, apply, audit.
 AI and Agents|agent|Show agent metadata, logs, checkpoints, and conformance.|Use for card, log, checkpoint, and conformance.
+AI and Agents|agents|Multi-harness agent context (AGENTS.md sync, Cursor/Codex stubs).|Subcommands: list, check, render.
+Fleet|registry|Browse reusable dotfile modules from the dot registry.|Subcommands: list, search, info, install, url, set-url.
 Fleet|fleet|Show fleet node status, drift, and namespace.|Enterprise fleet management.
 Configuration|env|Show managed tool versions.|Backed by mise.
 Configuration|profile|Show or switch the active profile.|Use for machine-specific behavior.
@@ -269,7 +272,6 @@ health|Run the health dashboard with optional fixes.|dot health -v\ndot health -
 perf|Measure shell performance and emit structured timing.|dot perf -j -r 1\ndot perf -p\ndot perf -t 200
 security-score|Assess workstation security posture.|dot security-score -j\ndot security-score -q
 snapshot|Capture the current workstation snapshot.|dot snapshot -b\ndot snapshot -b -f
-verify|Run post-change verification checks.|dot verify\ndot verify -s
 restore|Restore from a backup or git ref.|dot restore -l\ndot restore -L\ndot restore -g HEAD~1
 rollback|Restore a previous configuration snapshot.|dot rollback
 lint|Run shell quality checks for the repo.|dot lint\ndot lint -c\ndot lint -f
@@ -304,15 +306,14 @@ _dot_command_routes() {
   cat <<'EOF'
 sync|core
 apply|core
+init|init
 update|core
 add|core
 diff|core
 status|core
-remove|core
 cd|core
 edit|core
 commit|core
-clean-cache|core
 doctor|diagnostics
 scorecard|diagnostics
 score|diagnostics
@@ -328,12 +329,10 @@ heal|diagnostics
 health|diagnostics
 health-check|diagnostics
 smoke-test|diagnostics
-verify|diagnostics
 attest|diagnostics
 attestation|diagnostics
 security-score|diagnostics
 drift|diagnostics
-benchmark|diagnostics
 intelligence|diagnostics
 conflicts|diagnostics
 locks|diagnostics
@@ -385,7 +384,6 @@ lock-screen|security
 usb-safety|security
 upgrade|meta
 cache-refresh|meta
-prewarm|meta
 docs|meta
 learn|meta
 keys|meta
@@ -393,7 +391,9 @@ sandbox|meta
 mcp|meta
 mode|meta
 agent|meta
+agents|agents
 fleet|fleet
+registry|registry
 patterns|patterns
 manual|manual
 search|search
@@ -539,11 +539,49 @@ if [[ -z "$COMMAND" ]]; then
   exit 0
 fi
 
+# `|| true` is intentional: an unknown command yields an empty route, which falls
+# through the case below into the user-command path that emits the proper error.
 route="$(_dot_command_route "$COMMAND" || true)"
 
 case "$route" in
   core | diagnostics | ai | tools | appearance | secrets | security | meta | fleet)
     _dispatch "$route" "$@"
+    ;;
+
+  agents)
+    if [[ -n "$_SOURCE_DIR" ]] && [[ -f "$_SOURCE_DIR/scripts/dot/commands/agents.sh" ]]; then
+      # shellcheck disable=SC1091
+      source "$_SOURCE_DIR/scripts/dot/commands/agents.sh"
+      cmd_agents "$@"
+      exit $?
+    else
+      ui_fail "agents.sh not found"
+      exit 1
+    fi
+    ;;
+
+  init)
+    if [[ -n "$_SOURCE_DIR" ]] && [[ -f "$_SOURCE_DIR/scripts/dot/commands/init.sh" ]]; then
+      # shellcheck disable=SC1091
+      source "$_SOURCE_DIR/scripts/dot/commands/init.sh"
+      cmd_init "$@"
+      exit $?
+    else
+      ui_fail "init.sh not found"
+      exit 1
+    fi
+    ;;
+
+  registry)
+    if [[ -n "$_SOURCE_DIR" ]] && [[ -f "$_SOURCE_DIR/scripts/dot/commands/registry.sh" ]]; then
+      # shellcheck disable=SC1091
+      source "$_SOURCE_DIR/scripts/dot/commands/registry.sh"
+      cmd_registry "$@"
+      exit $?
+    else
+      ui_fail "registry.sh not found"
+      exit 1
+    fi
     ;;
 
   manual)
@@ -586,7 +624,9 @@ case "$route" in
   *)
     _user_cmd="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/commands/${COMMAND}.sh"
     if [[ -f "$_user_cmd" ]]; then
-      source "$_user_cmd" "$@"
+      # Run in a subshell so a user `exit` doesn't kill the dot CLI.
+      (source "$_user_cmd" "$@")
+      exit $?
     else
       echo "Unknown command: ${COMMAND:-}" >&2
       echo "Run 'dot help' for available commands." >&2

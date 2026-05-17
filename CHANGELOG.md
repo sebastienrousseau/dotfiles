@@ -2,6 +2,83 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.502 — 2026-05-17
+
+### Added
+
+- **`dot agents`** — multi-harness AI agent context generator. `CLAUDE.md` is canonical; `dot agents render` mirrors it into `AGENTS.md` (the cross-harness standard read by Codex/Copilot/Cursor/Windsurf/Amp/Devin), `.cursor/rules/dotfiles.mdc`, and `.codex/config.toml`. `dot agents check` returns rc 0 when in sync (suitable for a pre-commit hook). Round-1 audit gap #1 closed.
+- **`dot init <github-user|owner/repo|url>`** — analogue to `chezmoi init`. Bootstrap a foreign dotfiles repo through this framework's harness with `--dry-run`, `--no-apply`, `--force` flags; an interactive trust prompt warns before SSH/HTTPS clones; refuses plain HTTP. Owner/repo and bare-user shorthands validated against `[A-Za-z0-9._-]+` to block shell-metacharacter injection.
+- **`dot fleet apply`** — SSH-based fleet reconciliation across hosts in `~/.config/dotfiles/fleet.toml`. Parallel fan-out (default 4-way) via background-job semaphore (no `xargs -d` so it works on macOS BSD xargs too). Hostnames validated against `[A-Za-z0-9._@:+/-]+` before fan-out. Flags: `--host`, `--cmd "<shell>"` (trust boundary — warning shown), `--dry-run`, `--jobs <n>`. Per-host stderr captured; collision-safe `mktemp -d -t dotfiles-fleet.XXXXXX` temp dir.
+- **`dot registry`** — JSON-indexed module marketplace scaffold. Subcommands `list / search / info / install / url / set-url`. Default registry at `https://sebastienrousseau.github.io/dotfiles/registry.json` (published from `docs/registry.json` via GitHub Pages). 6h cache TTL; `set-url` validates HTTPS-only (or `file://` for testing) and writes atomically via `mktemp + mv`. Full module contract + contribution flow in [`docs/operations/REGISTRY.md`](docs/operations/REGISTRY.md).
+- **Sub-100ms CLI cold-start gate** — `scripts/ci/dot-cli-startup-bench.sh` measures median dispatcher startup under a clean `env -i`. New workflow `.github/workflows/dot-cli-bench.yml` runs on every PR touching `dot_local/bin/executable_dot` or `scripts/dot/**`. Current observation: median 47ms locally; CI budget 250ms.
+- **`docs/operations/HARD_AUDIT_2026.md`** — consolidated audit (round 1 + round 2 addendum) of operational reliability, performance, documentation accuracy, cross-platform parity, security posture, competitor positioning, 2026 industry trends, and adoption playbook. Produced from twelve parallel research-agent runs.
+
+### Fixed
+
+- **`install.sh`** — removed the unverified `get.chezmoi.io` curl|sh fallback. The SHA256-verified installer is now the only path; if it fails, we refuse to bootstrap rather than silently degrading (H6).
+- **`scripts/dot/lib/platform.sh`** — `dot_path_to_unix` / `dot_path_to_native` return rc 2 with a stderr error when called in WSL without `wslpath`, instead of silently echoing a Windows-format path (H9).
+- **`dot_local/bin/executable_dot`** — user-provided custom commands now run in a subshell so a `exit` in the user script can't kill the whole CLI (H1).
+- **`scripts/dot/commands/fleet.sh`** — `dot fleet namespace set` writes via `mktemp + mv` instead of the brittle GNU/BSD `sed -i` dance (H3).
+- **`dot_config/zsh/dot_zshrc.tmpl`** — `_cached_eval` uses `mktemp` instead of `${cache}.tmp.$$`, eliminating the PID-collision race under shell recycling (H4).
+- **`scripts/dot/commands/meta.sh`** — cache-clear uses `find ... -type f -delete` with a directory guard instead of `rm -rf "$cache_dir/zsh"/*-init.zsh`, which expanded the literal pattern when no files matched (H5).
+- **`scripts/dot/commands/agent.sh`** — replaced three `set +e / "$@" / set -e` blocks with idiomatic `if !` so bash errexit suspension is implicit (M4).
+- **`scripts/dot/commands/core.sh`** — `cmd_status` captures chezmoi stderr and inspects the exit code, so a chezmoi crash is now distinguishable from a clean tree (M1).
+- **`scripts/dot/lib/ui.sh`** — `ui_run_cmd` guards the rc-file read with `[[ -s ]]` to avoid races between the subshell write and the parent read (M3).
+- **`scripts/security/lock-configs.sh`** — pre-checks `sudo` availability and TTY attachment before attempting `chattr +i`, instead of failing per-file in automation (M5).
+- **`scripts/ci/install-chezmoi-verified.sh`** — unsupported-architecture error now names the supported set (x86_64/amd64, arm64/aarch64) and points at the upstream release page (M7).
+- **`docs/manual/03-reference/01-dot-cli.md`** + **`docs/manual/command-index.md`** — removed six commands that were documented but never shipped (`dot verify`, `dot benchmark`, `dot prewarm`, `dot clean-cache`, `dot remove`, `dot update`). Added the new `agents`, `init`, `registry`, and `fleet apply` sections (C3).
+- **Version drift** — bumped `v0.2.501` → `v0.2.502` in five doc surfaces (`docs/manual/00-introduction.md`, `docs/manual/_toc.yml`, `docs/index.md`, `docs/manual/03-reference/02-config-files.md` × 2) (C2).
+- **`docs/manual/index.md`** — new landing page for `https://doc.dotfiles.io/manual/` (the Jekyll site was 404ing because `jekyll-readme-index` had no `README.md`/`index.md` to render in `docs/manual/`).
+
+### Security
+
+- **`scripts/dot/commands/agents.sh`** — render only writes when the resolved root contains `.chezmoidata.toml`, so a user running `dot agents render` from inside an unrelated git repo can't accidentally write agent configs there. Output files get explicit `chmod 0644`.
+- **`scripts/dot/commands/init.sh`** — owner/repo and bare-user shorthands are now validated against `[A-Za-z0-9._-]+` before URL construction.
+- **`scripts/dot/commands/fleet.sh`** — hostnames validated against `[A-Za-z0-9._@:+/-]+` before SSH fan-out; an attacker controlling `fleet.toml` can no longer inject shell metacharacters.
+- **`scripts/dot/commands/registry.sh`** — `set-url` refuses non-HTTPS schemes (with a `file://` exemption for local testing) and writes config atomically.
+
+### Documentation
+
+- **`docs/operations/REGISTRY.md`** — module contract, JSON schema, and contribution flow for the new registry.
+- **`docs/operations/COVERAGE.md`** — documents the achieved unit-test floor (~47%) plus the structural ceiling for xtrace-only instrumentation; closes #883.
+
+### Round 3 (HARD_AUDIT_2026.md Part 7)
+
+- **C1 closed — GPG disclosure key published.** Generated `security@sebastienrousseau.com` ed25519 + cv25519 keypair, fingerprint `55AFAD364FD9DB3819E61F0C8D688FAFA9144693`, expires 2029-05-15. Published to WKD at `sebastienrousseau.github.io/.well-known/openpgpkey/`. Repo carries the armored public key at `docs/security/security-pubkey.asc`.
+- **`.github/workflows/verify-gpg-wkd.yml`** (N1) — imports both the in-repo `.asc` and the live WKD-fetched key, compares fingerprints, fails loud on mismatch. Runs on push/PR + weekly schedule (Mondays 09:00 UTC). Wires the expiry monitor as the final step.
+- **`scripts/security/check-disclosure-key-expiry.sh`** (N2) — monitors the 2029-05-15 expiry; warns at 90 days remaining, fails CI at 30 days.
+- **`dot fleet apply --verify-hosts`** (N4) — closes the TOFU window per-invocation. Aborts the apply unless every host in `fleet.toml` is already present in `~/.ssh/known_hosts`.
+- **`install.sh` Charm GPG pin** (N5) — pins `CHARM_GPG_EXPECTED_FPR=C026D31B92F9BBE91D5DB75AB07AE17C9E0A6585`; aborts (removing the keyring file) on mismatch.
+- **`scripts/lib/secrets_provider.sh` exit codes** (N6) — `dot_secrets_get` now returns `2` (no provider), `3` (provider returned empty / key not found), or the provider's own rc; stderr names provider + key for diagnosis.
+- **R3 docs drifts** — purged 5 orphan dispatch routes + 1 orphan help-table entry in `dot_local/bin/executable_dot`; relabelled `dot agents` + `dot fleet apply` from "Full" to "Stub (bash-bridged)" on Windows-native in `docs/reference/POWERSHELL_PARITY.md`; corrected Microsoft Build 2026 date from "2026-05-19 in Seattle" to actual `2026-06-02 to 2026-06-03 in San Francisco (Fort Mason)` in `ROADMAP_2026.md`.
+- **R3 mocked-SSH test catches 2 real bugs.** `tests/unit/fleet/test_fleet_apply_mocked_ssh.sh` (5 tests with PATH-shim overriding `ssh`) caught: (a) subshell counter loss via pipe — fixed with `done < <(printf '%s\n' "$entries")`; (b) RETURN trap referencing `local tmpdir` failed under `set -u` — fixed with `printf -v _cleanup 'rm -rf %q' "$tmpdir"`.
+- **R3 strategic reversal.** Ship `dot env emit` BEFORE `--attest` (driven by AGNTCon Amsterdam 2026-09-17 deadline + EU CRA SBOM binding 2026-09-11). Full rationale in `HARD_AUDIT_2026.md` §7.4.
+
+### Round 4 (HARD_AUDIT_2026.md Part 8)
+
+- **Zero reliability findings** — second consecutive 0-finding round. 4 of 5 candidate perf claims were false positives (SSH-agent guard, completion-chain forks, FNM completion, carapace defer) caught by live verification.
+- **Documentation completeness fixes:**
+  - `README.md` — removed 4 stale references to ghost commands `dot verify` / `dot benchmark` / `dot prewarm` (none ship). Routed to `dot secrets verify`, `dot perf`, `dot health`.
+  - `docs/manual/03-reference/05-feature-flags.md` — documented the 9 previously-undocumented flags (`alias_wrapper`, `zellij`, `fuzzel`, `mako`, `foot`, `kanshi`, `touch`, `t2`, `surface`) with purpose + platform applicability + requirements.
+  - `dot_local/share/man/man1/dot.1` — header bumped `v0.2.500 → v0.2.502`, `April → May 2026`.
+  - `dot_config/zsh/rc.d/30-options.zsh.tmpl` — completion-block comment no longer references the non-existent `dot prewarm`.
+- **Strategic outputs** (deferred to follow-up PRs / R5):
+  - OSPS Baseline v2026.02.19 Level-2 adoption path documented as the cross-walk for EU CRA Article 24, NIS2 Article 21, SSDF v1.2.
+  - **R5 headline** identified: Shai-Hulud-class personal-device defence (credential-locality policy + honeytoken + shell-init integrity manifest + post-incident playbook in `SECURITY.md`).
+  - **Strategic leapfrog** identified: `dot attest --format=trustmee-wasm` — Wasm-verifiable workstation attestation (composes SLSA-Graduated + arXiv:2602.13148 TrustMee + MCP-exposed workstation state). No competitor reaches this.
+  - **Top-5 de-facto adoption gaps**: Homebrew tap, AUR `PKGBUILD`, Scoop manifest, Hyprland config, awesome-dotfiles listing.
+
+### Performance + polish (post-R4)
+
+- **`dot_config/zsh/dot_zshrc.tmpl`** — `_cached_eval_impl` writes use `>|` (force-clobber) instead of `>`, so the just-`mktemp`'d temp file is not rejected when the user has `setopt noclobber` set globally via `dot_config/shell/05-core-safety.sh:15`. Fixes the `_cached_eval_impl:64: file exists` warning surfaced on every interactive shell with a cache miss.
+- **`dot_config/shell/00-core-paths.sh.tmpl`** — system paths added via `path_prepend` (which removes duplicates first) instead of `PATH="...:${PATH}"`, eliminating the duplicate-system-path bloat that accumulates when the parent shell already had those entries (macOS launchd default).
+- **`dot_config/zsh/dot_zshrc.tmpl`** — re-apply `typeset -U path` after `_dotfiles_async_init` runs cached `export PATH=...` from mise/atuin/etc, since those bypass zsh's `-U` flag on the `path` array.
+- **`scripts/diagnostics/doctor.sh`** — only flag tools that actually emit shell-init eval and are not already lazy-loaded; raise PATH-length thresholds (60 ok / 120 warn) to match a populated mise-managed dev machine; skip `nu` when `cached_eval.nu` is present.
+- **`dot_config/git/hooks/executable_commit-msg`** — replaced hardcoded `/Users/seb` path with `${HOME}` so the hook is portable across hosts.
+- **`dot_config/fish/conf.d/{direnv,mise-activate}.fish`** — empty shadow files that override Homebrew `vendor_conf.d` to prevent eager init. fish dedupes `conf.d/` by basename, user wins. Saves ~140ms on every fish shell start; both tools are loaded lazily via `_cached_eval` in `init.fish`.
+- **`.devcontainer/Dockerfile`** — chezmoi install now goes through `scripts/ci/install-chezmoi-verified.sh` (SHA256-verified) instead of the unverified `curl -fsSL https://get.chezmoi.io` fallback. Closes R4 §8.3 P3 / mirrors R1 H6 fix in `install.sh`.
+- **`typos.toml`** — extended file exclusions (`**/*.asc`, `**/*.pgp`, `**/*.gpg`, `**/*.sig`) to skip armored cryptographic blobs; added `fpr` / `FPR` to the allow-list (GPG `--with-colons` fingerprint column label).
+
 ## v0.2.501
 
 ### Added

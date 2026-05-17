@@ -22,13 +22,22 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   UNLOCK_CMD="chflags nouchg"
   CHECK_CMD="ls -lO"
 else
-  # Linux (requires root usually, but we'll try)
+  # Linux (chattr +i requires root; fail loudly when sudo is missing
+  # rather than printing a confusing error per file in automation)
   if command -v chattr >/dev/null; then
+    if ! command -v sudo >/dev/null; then
+      echo " 'sudo' not found; chattr requires root. Aborting." >&2
+      exit 1
+    fi
+    if ! sudo -n true 2>/dev/null && [[ ! -t 0 ]]; then
+      echo " sudo requires a password but no TTY is attached. Aborting." >&2
+      exit 1
+    fi
     LOCK_CMD="sudo chattr +i"
     UNLOCK_CMD="sudo chattr -i"
     CHECK_CMD="lsattr"
   else
-    echo " 'chattr' not found. Cannot set immutability on Linux without it."
+    echo " 'chattr' not found. Cannot set immutability on Linux without it." >&2
     exit 1
   fi
 fi
