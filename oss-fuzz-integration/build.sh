@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # OSS-Fuzz build script — compiles every Go fuzzer in fuzz/
 # against libFuzzer with $SANITIZER applied.
 #

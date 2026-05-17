@@ -37,10 +37,18 @@ _resolve_source_dir() {
 
   if script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null)"; then
     script_dir="$script_path"
-    repo_candidate="$(cd "$script_dir/../.." && pwd 2>/dev/null || true)"
-    if [ -n "$repo_candidate" ] && [ -f "$repo_candidate/lib/dot/ui.sh" ]; then
-      dir="$repo_candidate"
-    fi
+    # Post-v0.2.503: the canonical dispatcher lives at <repo>/bin/dot, so
+    # $script_dir/.. is the repo root. Pre-v0.2.503 (and chezmoi-deployed
+    # wrapper invocations that still exec the canonical) the dispatcher
+    # was at <repo>/dot_local/bin/executable_dot, so $script_dir/../..
+    # was the repo. Probe both to cover the transition.
+    for candidate in "$script_dir/.." "$script_dir/../.."; do
+      repo_candidate="$(cd "$candidate" && pwd 2>/dev/null || true)"
+      if [ -n "$repo_candidate" ] && [ -f "$repo_candidate/lib/dot/ui.sh" ]; then
+        dir="$repo_candidate"
+        break
+      fi
+    done
   fi
 
   if [ -z "$dir" ] && [ -n "${CHEZMOI_SOURCE_DIR:-}" ] && [ -d "$CHEZMOI_SOURCE_DIR" ]; then

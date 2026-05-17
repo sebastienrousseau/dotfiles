@@ -1,3 +1,4 @@
+// Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 // FuzzInitURLResolver exercises the URL-construction logic in
 // `dot init` (scripts/dot/commands/init.sh). The shell flow takes
 // one of three input shapes:

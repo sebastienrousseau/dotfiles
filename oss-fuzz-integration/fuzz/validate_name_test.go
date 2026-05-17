@@ -1,3 +1,4 @@
+// Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 // FuzzValidateName exercises the same regex our shell
 // `validate_name` function (scripts/dot/lib/utils.sh:101) uses
 // to gate user-supplied identifiers before passing them to mise /
