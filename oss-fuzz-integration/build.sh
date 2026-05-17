@@ -36,5 +36,7 @@ compile_go_fuzzer \
 # Seed corpora: copy any *_seed_corpus/ subdirectories alongside
 # the binary. OSS-Fuzz picks them up automatically.
 for corpus in *_seed_corpus; do
-  [[ -d "$corpus" ]] && cp -r "$corpus" "$OUT/" || true
+  if [[ -d "$corpus" ]]; then
+    cp -r "$corpus" "$OUT/"
+  fi
 done

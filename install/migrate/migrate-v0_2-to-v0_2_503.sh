@@ -141,7 +141,11 @@ do_migration() {
         if ((DRY_RUN)); then
           _say "  [dry-run] would forget: $old"
         else
-          chezmoi forget --force "$old" >>"$SNAPSHOT" 2>&1 && _log "  forgot: $old" || _warn "  forget failed: $old"
+          if chezmoi forget --force "$old" >>"$SNAPSHOT" 2>&1; then
+            _log "  forgot: $old"
+          else
+            _warn "  forget failed: $old"
+          fi
         fi
       fi
     done
@@ -158,7 +162,11 @@ do_migration() {
         if ((DRY_RUN)); then
           _say "  [dry-run] would forget: $old"
         else
-          chezmoi forget --force "$old" >>"$SNAPSHOT" 2>&1 && _log "  forgot: $old" || _warn "  forget failed: $old"
+          if chezmoi forget --force "$old" >>"$SNAPSHOT" 2>&1; then
+            _log "  forgot: $old"
+          else
+            _warn "  forget failed: $old"
+          fi
         fi
       fi
     done

@@ -73,6 +73,7 @@ trap 'rm -f "$block"' EXIT
         | .[]
         | [.name, (.score|tostring), ((.reason // "") | gsub("\\|"; "\\|") | .[0:100])]
         | "| " + (. | join(" | ")) + " |"'
+  # shellcheck disable=SC2016 # backticks here are markdown code-spans, not subshells
   printf '\n_Refresh: `scripts/qa/scorecard-snapshot.sh` · CI check: `lint/scorecard-snapshot` (planned)._\n'
   printf '<!-- END scorecard-snapshot -->\n'
 } >"$block"
