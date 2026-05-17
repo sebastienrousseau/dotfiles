@@ -118,23 +118,23 @@ check_command_coverage() {
     return
   fi
 
-  # Extract commands referenced in manual (single quotes intentional for grep pattern)
+  # Extract commands referenced in manual (single quotes intentional for grep pattern).
+  # `|| true` suffix keeps bash 5.x `set -euo pipefail` happy when grep returns 1
+  # (no match) — the empty result is the correct outcome we want to diff against.
   local referenced
   # shellcheck disable=SC2016
   referenced="$(grep -rhoE '`dot [a-z][a-z-]+`' "$MANUAL_DIR"/*.md "$MANUAL_DIR"/**/*.md 2>/dev/null |
     sort -u |
-    sed -E 's/`dot ([a-z-]+)`/\1/')"
+    sed -E 's/`dot ([a-z-]+)`/\1/' || true)"
 
-  # Extract commands documented in CLI reference (single quotes intentional for grep pattern)
   local documented
   # shellcheck disable=SC2016
   documented="$(grep -oE '^### `dot [a-z][a-z-]+`' "$cli_ref" 2>/dev/null |
     sed -E 's/### `dot ([a-z-]+)`/\1/' |
-    sort -u)"
+    sort -u || true)"
 
-  # Diff
   local missing
-  missing="$(comm -23 <(echo "$referenced") <(echo "$documented") 2>/dev/null)"
+  missing="$(comm -23 <(echo "$referenced") <(echo "$documented") 2>/dev/null || true)"
 
   if [[ -n "$missing" ]]; then
     warn "commands referenced but not documented in CLI reference:"

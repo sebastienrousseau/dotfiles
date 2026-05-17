@@ -5,3 +5,5 @@
 c26337708b2c87e0f240c643d203da45eb687aff:install.sh:generic-api-key:154
 # tauri.paths.sh: rsign encrypted key for Tauri build signing (password-protected)
 e01b6d177caf67cf388abe8d84ad56e2dfa7f770:lib/paths/tauri/tauri.paths.sh:generic-api-key:13
+# MAINTAINERS.md: GPG disclosure key fingerprint for the project owner (public, not secret)
+d03171b2fd8575a13d37f052a3988a033fa9e0f8:MAINTAINERS.md:generic-api-key:12

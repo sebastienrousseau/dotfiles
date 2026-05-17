@@ -80,7 +80,10 @@ if ($args.Count -eq 0) {
 }
 
 $cmd = $args[0]
-$rest = if ($args.Count -gt 1) { $args[1..($args.Count - 1)] } else { @() }
+# Force-wrap with @() so single-element slices stay arrays under
+# Set-StrictMode -Latest (otherwise `$rest.Count` and `$rest[0]` fail
+# when `$args.Count -eq 2` because PowerShell auto-unwraps single-element arrays).
+$rest = @(if ($args.Count -gt 1) { $args[1..($args.Count - 1)] } else { @() })
 
 switch ($cmd) {
     { $_ -in 'version', '-v', '--version' } {
