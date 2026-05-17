@@ -10,7 +10,7 @@ on:
       - '**.sh'
       - '**.bash'
       - '**.zsh'
-      - '.chezmoitemplates/**'
+      - 'defaults/.chezmoitemplates/**'
       - 'scripts/**'
   push:
     branches: [master]
@@ -18,7 +18,7 @@ on:
       - '**.sh'
       - '**.bash'
       - '**.zsh'
-      - '.chezmoitemplates/**'
+      - 'defaults/.chezmoitemplates/**'
       - 'scripts/**'
   merge_group:
     branches: [master]

@@ -40,13 +40,13 @@ jobs:
       shellcheck_excludes: SC1091,SC2030,SC2031
       fail_on_shellcheck: true
       run_shfmt: true
-      shfmt_targets: scripts/**/*.sh install.sh .chezmoitemplates/**/*.sh
+      shfmt_targets: scripts/**/*.sh install.sh defaults/.chezmoitemplates/**/*.sh
 
   lint-lua:
     name: Lint / Lua (Zero Warnings)
     uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
     with:
-      target: dot_config/nvim
+      target: defaults/dot_config/nvim
       strict: true
       stylua_version: "0.20.0"
 

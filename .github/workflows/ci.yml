@@ -8,7 +8,7 @@ on:
     paths:
       - '**.sh'
       - '**.tmpl'
-      - '.chezmoitemplates/**'
+      - 'defaults/.chezmoitemplates/**'
       - 'dot_*/**'
       - 'install/**'
       - 'scripts/**'
@@ -21,7 +21,7 @@ on:
     paths:
       - '**.sh'
       - '**.tmpl'
-      - '.chezmoitemplates/**'
+      - 'defaults/.chezmoitemplates/**'
       - 'dot_*/**'
       - 'install/**'
       - 'scripts/**'
@@ -78,11 +78,11 @@ jobs:
             shell:
               - '**.sh'
               - 'install.sh'
-              - '.chezmoitemplates/**/*.sh'
+              - 'defaults/.chezmoitemplates/**/*.sh'
               - 'scripts/**'
               - 'install/**'
             lua:
-              - 'dot_config/nvim/**'
+              - 'defaults/dot_config/nvim/**'
               - '**.lua'
             nix:
               - 'nix/**'
@@ -92,10 +92,10 @@ jobs:
             workflows:
               - '.github/workflows/**'
               - 'tools/ci/lint-reusable-pins.sh'
-              - '.chezmoitemplates/**'
+              - 'defaults/.chezmoitemplates/**'
               - '**.tmpl'
               - '**.toml'
-              - '.chezmoi*'
+              - 'defaults/.chezmoi*'
 
   # ============================================================================
   # STAGE 1: LINT (Fast, parallel checks)
@@ -111,7 +111,7 @@ jobs:
       shellcheck_excludes: SC1091,SC2030,SC2031
       fail_on_shellcheck: true
       run_shfmt: true
-      shfmt_targets: scripts/**/*.sh install.sh .chezmoitemplates/**/*.sh
+      shfmt_targets: scripts/**/*.sh install.sh defaults/.chezmoitemplates/**/*.sh
 
   lint-lua:
     name: Lint / Lua
@@ -119,7 +119,7 @@ jobs:
     if: needs.changes.outputs.lua == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
     with:
-      target: dot_config/nvim
+      target: defaults/dot_config/nvim
       strict: false
       stylua_version: "0.20.0"
 
@@ -141,7 +141,7 @@ jobs:
       - name: Syntax Check
         run: |
           # -print0 | xargs -0 to handle non-alphanumeric filenames safely.
-          find dot_config/fish \( -name '*.fish' -o -name '*.fish.tmpl' \) -print0 \
+          find defaults/dot_config/fish \( -name '*.fish' -o -name '*.fish.tmpl' \) -print0 \
             | xargs -0 -I{} fish --no-execute {} \
             || echo "Template strings might cause issues in raw fish check, ignoring strict failure for tmpl"
 
@@ -223,7 +223,7 @@ jobs:
         run: |
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           "$HOME/.cargo/bin/taplo" --version
-      - name: Validate .chezmoidata.toml against schema
+      - name: Validate defaults/.chezmoidata.toml against schema
         run: bash tools/ci/validate-chezmoidata.sh
 
   # ============================================================================

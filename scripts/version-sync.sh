@@ -443,15 +443,18 @@ main() {
     create_backup "${version_files[@]}"
   fi
 
-  # Sync chezmoidata.toml (single source of truth for template files)
-  local chezmoidata="$PROJECT_ROOT/.chezmoidata.toml"
+  # Sync chezmoidata.toml (single source of truth for template files).
+  # Post-Phase-4b lives under defaults/ — kept old root location as a
+  # fallback so this script is forward- and backward-compatible.
+  local chezmoidata="$PROJECT_ROOT/defaults/.chezmoidata.toml"
+  [[ -f "$chezmoidata" ]] || chezmoidata="$PROJECT_ROOT/.chezmoidata.toml"
   if [[ -f "$chezmoidata" ]]; then
     if [[ "$dry_run" == "true" ]]; then
-      log_info "Would update .chezmoidata.toml: dotfiles_version = \"$target_version\""
+      log_info "Would update ${chezmoidata#"$PROJECT_ROOT/"}: dotfiles_version = \"$target_version\""
     else
       sed_in_place "$chezmoidata" \
         "s|^dotfiles_version = \"$SED_VERSION_PATTERN\"|dotfiles_version = \"$target_version\"|"
-      log_success "Updated .chezmoidata.toml"
+      log_success "Updated ${chezmoidata#"$PROJECT_ROOT/"}"
     fi
   fi
 

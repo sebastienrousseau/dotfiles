@@ -8,7 +8,7 @@ name: Doc Drift / Generators
 #
 #   - scripts/qa/check-version-consistency.sh --quiet
 #       Verifies 8 human-visible version surfaces match
-#       .chezmoidata.toml.
+#       defaults/.chezmoidata.toml.
 #
 # Adding a third generator is just adding a new step below — keep
 # this workflow flat and easy to extend.
@@ -24,7 +24,7 @@ on:
       - 'tools/docs/generate-command-index.sh'
       - 'scripts/qa/check-version-consistency.sh'
       - 'scripts/qa/scorecard-snapshot.sh'
-      - '.chezmoidata.toml'
+      - 'defaults/.chezmoidata.toml'
       - 'README.md'
       - 'CLAUDE.md'
       - 'AGENTS.md'
@@ -64,5 +64,5 @@ jobs:
         with:
           egress-policy: audit
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Verify version-bearing files match .chezmoidata.toml
+      - name: Verify version-bearing files match defaults/.chezmoidata.toml
         run: bash scripts/qa/check-version-consistency.sh

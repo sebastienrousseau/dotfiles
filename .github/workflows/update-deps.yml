@@ -193,20 +193,20 @@ jobs:
         run: |
           # Create minimal init for headless update
           mkdir -p ~/.config/nvim
-          cp -r dot_config/nvim/* ~/.config/nvim/ 2>/dev/null || true
+          cp -r defaults/dot_config/nvim/* ~/.config/nvim/ 2>/dev/null || true
 
           # Run lazy update (if lazy.nvim is set up)
           nvim --headless "+Lazy! sync" +qa 2>/dev/null || echo "Lazy.nvim sync skipped"
 
           # Check for lockfile changes
           if [[ -f ~/.config/nvim/lazy-lock.json ]]; then
-            cp ~/.config/nvim/lazy-lock.json dot_config/nvim/lazy-lock.json 2>/dev/null || true
+            cp ~/.config/nvim/lazy-lock.json defaults/dot_config/nvim/lazy-lock.json 2>/dev/null || true
           fi
 
       - name: Check for changes
         id: changes
         run: |
-          if git diff --quiet dot_config/nvim/lazy-lock.json 2>/dev/null; then
+          if git diff --quiet defaults/dot_config/nvim/lazy-lock.json 2>/dev/null; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
@@ -232,7 +232,7 @@ jobs:
           git config --local user.signingkey ~/.ssh/actions_bot_signing_key
           git config --local commit.gpgsign true
           git checkout -b "deps/nvim-plugins-${{ github.run_number }}"
-          git add dot_config/nvim/lazy-lock.json
+          git add defaults/dot_config/nvim/lazy-lock.json
           git commit -S -m "chore(nvim): update lazy.nvim plugin lockfile"
           git push origin "deps/nvim-plugins-${{ github.run_number }}"
 

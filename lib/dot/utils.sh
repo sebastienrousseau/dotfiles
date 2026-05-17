@@ -60,6 +60,14 @@ resolve_source_dir() {
     elif command -v readlink >/dev/null 2>&1; then
       dir="$(readlink -f "$dir" 2>/dev/null || echo "$dir")"
     fi
+    # Post-Phase-4b: if .chezmoiroot exists, descend into its target
+    # so callers see the same paths chezmoi sees. Mirrors chezmoi's
+    # own source-root resolution.
+    if [[ -f "$dir/.chezmoiroot" ]]; then
+      local sub
+      sub="$(head -1 "$dir/.chezmoiroot" | tr -d '[:space:]')"
+      [[ -n "$sub" && -d "$dir/$sub" ]] && dir="$dir/$sub"
+    fi
     _DOT_SOURCE_DIR_CACHE="$dir"
     printf "%s\n" "$dir"
   else

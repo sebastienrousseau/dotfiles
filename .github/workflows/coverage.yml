@@ -15,7 +15,7 @@ on:
     paths:
       - 'scripts/**'
       - 'tests/**'
-      - '.chezmoitemplates/**'
+      - 'defaults/.chezmoitemplates/**'
       - 'dot_local/bin/**'
       - 'tools/ci/run-coverage.sh'
       - '.github/workflows/coverage.yml'

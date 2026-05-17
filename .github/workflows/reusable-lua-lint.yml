@@ -6,7 +6,7 @@ on:
       target:
         description: Directory to lint (luacheck + stylua).
         required: false
-        default: dot_config/nvim
+        default: defaults/dot_config/nvim
         type: string
       strict:
         description: Enforce zero-warning policy (--codes --ranges).

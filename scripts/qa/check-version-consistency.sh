@@ -48,14 +48,14 @@ _log() { ((quiet)) || printf '%s\n' "$*"; }
 _err() { printf 'check-version-consistency: %s\n' "$*" >&2; }
 
 # ── Canonical version ──────────────────────────────────────────────────
-canonical="$(grep -E '^dotfiles_version[[:space:]]*=' .chezmoidata.toml |
+canonical="$(grep -E '^dotfiles_version[[:space:]]*=' defaults/.chezmoidata.toml |
   head -1 | sed -E 's/.*"([^"]+)".*/\1/')"
 
 if [[ -z "$canonical" ]]; then
-  _err 'failed to read dotfiles_version from .chezmoidata.toml'
+  _err 'failed to read dotfiles_version from defaults/.chezmoidata.toml'
   exit 2
 fi
-_log "canonical: $canonical (.chezmoidata.toml)"
+_log "canonical: $canonical (defaults/.chezmoidata.toml)"
 
 # ── Per-file expected-substring map ────────────────────────────────────
 # Each entry: PATH|MATCH_PATTERN|EXPECTED_STRING

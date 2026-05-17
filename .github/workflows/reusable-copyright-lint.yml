@@ -11,7 +11,7 @@ on:
       excludes:
         description: Regex matched against each file path; skipped if it matches.
         required: false
-        default: '(^|/)(node_modules|\.git|vendor|target|build)/|\.tmpl$|(^|/)\.chezmoitemplates/'
+        default: '(^|/)(node_modules|\.git|vendor|target|build)/|\.tmpl$|(^|/)\defaults/.chezmoitemplates/'
         type: string
 
 permissions:
