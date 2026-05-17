@@ -9,7 +9,7 @@
 # tracked completion/template sources change.
 #
 # Tracked hashes (drive the run_onchange contract):
-#   completion fragments: {{ output "find" .chezmoi.sourceDir "-type" "f" "-path" "*/completions/*.zsh" | sha256sum }}
+#   completion fragments: {{ joinPath .chezmoi.sourceDir "**" "completions" "*.zsh" | glob | toJson | sha256sum }}
 #   zshrc:                {{ include "dot_config/zsh/dot_zshrc.tmpl" | sha256sum }}
 #   options:              {{ include "dot_config/zsh/rc.d/30-options.zsh.tmpl" | sha256sum }}
 #
