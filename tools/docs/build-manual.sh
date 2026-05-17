@@ -17,9 +17,9 @@
 #   search-index.json               client-side search index
 #
 # Usage:
-#   bash scripts/docs/build-manual.sh           # full build
-#   bash scripts/docs/build-manual.sh --fast    # skip PDF
-#   bash scripts/docs/build-manual.sh --clean   # remove _build/manual first
+#   bash tools/docs/build-manual.sh           # full build
+#   bash tools/docs/build-manual.sh --fast    # skip PDF
+#   bash tools/docs/build-manual.sh --clean   # remove _build/manual first
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -839,7 +839,7 @@ dot learn</code></pre>
   <p>Repository: <a href="$REPO_URL">sebastienrousseau/dotfiles</a> · License: <a href="$REPO_URL/blob/master/LICENSE">MIT</a></p>
 
   <div class="page-footer">
-    <p>Generated $BUILD_DATE from <a href="dotfiles-md.tar.gz">docs/manual/</a> via <code>scripts/docs/build-manual.sh</code>.</p>
+    <p>Generated $BUILD_DATE from <a href="dotfiles-md.tar.gz">docs/manual/</a> via <code>tools/docs/build-manual.sh</code>.</p>
     <p>Questions? <a href="$REPO_URL/issues">Open an issue</a> or <a href="$REPO_URL/discussions">start a discussion</a>.</p>
   </div>
   </main>

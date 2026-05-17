@@ -7,26 +7,42 @@ workflows, by `chezmoi apply` hooks, or by hand.
 
 ## Subtree map
 
+Per the v0.2.503 reorg (RFC `docs/operations/RFC_v0_2_503_reorganization.md`),
+**repo-only ops** (CI, release, maintenance, docs-generation) have
+moved to the top-level `tools/` tree. `scripts/` retains the
+**runtime-invoked** scripts that the `dot` CLI dispatches to plus a
+few specialised subtrees.
+
+### `scripts/` (CLI dispatch + specialised subtrees)
+
 | Path | Purpose | Touched by |
 |---|---|---|
 | `scripts/dot/commands/` | Per-subcommand handlers for the `dot` CLI. Sources `lib/dot/*.sh` (moved out of this tree in v0.2.503 Phase 1). | Dispatched by `dot_local/bin/executable_dot` |
 | `scripts/dot/powershell/` | Native PowerShell module (`Dot.psm1`) exporting `Get-DotVersion` / `Invoke-DotHelp` / `Test-DotAgentsSync`. | `dot_local/bin/dot.ps1` |
-| `scripts/lib/` | Cross-cutting library helpers reused across multiple scripts. Example: `secrets_provider.sh` (keychain / pass / age dispatch). | `scripts/dot/commands/*`, ops scripts, CI |
-| `scripts/ci/` | CI-only helpers: `dot-cli-startup-bench.sh`, `install-chezmoi-verified.sh`, `windows-smoke-test.ps1`, `run-coverage.sh`, etc. | `.github/workflows/*` |
+| `scripts/dot/data/` | Per-command static data (registry seeds, palette tables). | `scripts/dot/commands/*` |
+| `scripts/lib/` | Cross-cutting library helpers reused across multiple scripts. Example: `secrets_provider.sh` (keychain / pass / age dispatch). | `scripts/dot/commands/*`, ops scripts |
 | `scripts/diagnostics/` | `doctor.sh` and its helpers — long-form environment health check. | `dot doctor` |
 | `scripts/security/` | Security-domain ops: `check-disclosure-key-expiry.sh`, `lock-configs.sh`, etc. | `dot security`, CI |
 | `scripts/secrets/` | Secret-bucket utilities (rotation, audit). | `dot secrets` subcommands |
 | `scripts/theme/` | Wallpaper-to-palette extraction logic. | `dot theme rebuild` |
-| `scripts/tools/` | Tool-management ops: `log-rotate.sh`, etc. | `dot tools`, `dot env` |
+| `scripts/tools/` | Tool-helpers shipped via `dot tools` (e.g. `cmatrix.sh`, `emoji-picker.sh`, `figlet-banner.sh`, `log-rotate.sh`). Runtime-invoked. | `dot tools`, `dot env` |
 | `scripts/tuning/` | Opt-in OS tuning scripts (`macos.sh`, `linux.sh`). | `dot tune`, manual invocation |
 | `scripts/ops/` | Repo-wide ops: `rollback.sh`, etc. | `dot rollback`, maintenance |
-| `scripts/maintenance/` | Recurring upkeep: `check-updates.sh`, etc. | Cron, manual |
-| `scripts/release/` | Release-time tasks. | Release workflow |
-| `scripts/docs/` | Documentation-generation helpers (manual builds, screenshot CI). | `manual-publish.yml`, `dot manual` |
 | `scripts/fonts/` | Nerd Font install helpers. | `dot fonts` |
 | `scripts/git-hooks/` | Git hooks not managed by chezmoi (kept here for portable install). | `install/provision/*` |
-| `scripts/qa/` | Quality-assurance helpers: PowerShell contract tests, etc. | `.github/workflows/pr-signature.yml`, `powershell-contract.yml` |
+| `scripts/qa/` | Quality-assurance helpers (PowerShell contract tests, version-consistency checks, scorecard snapshot, etc). | `.github/workflows/pr-signature.yml`, `powershell-contract.yml`, doc-drift |
 | `scripts/demo/` | Demonstration helpers (recordings, screenshots). | Manual |
+| `scripts/version-sync.sh` | Bulk version-string propagator (`scripts/qa/check-version-consistency.sh` is the verifier). | Release flow |
+| `scripts/uninstall.sh` | Reverse-of-`install.sh` — user-invoked. | Manual |
+
+### `tools/` (repo-only ops, not distributable)
+
+| Path | Purpose | Touched by |
+|---|---|---|
+| `tools/ci/` | CI-only helpers: `dot-cli-startup-bench.sh`, `install-chezmoi-verified.sh`, `windows-smoke-test.ps1`, `run-coverage.sh`, etc. | `.github/workflows/*` |
+| `tools/release/` | Release-time tasks. | Release workflow |
+| `tools/maintenance/` | Recurring upkeep: `check-updates.sh`, etc. | Cron, manual |
+| `tools/docs/` | Documentation-generation helpers (manual builds, screenshot CI, `generate-command-index.sh`). | `manual-publish.yml`, `dot manual`, doc-drift |
 
 ## `scripts/dot/` breakdown
 

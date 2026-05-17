@@ -106,10 +106,10 @@ orients in <30 seconds):
 ├── tests/                        # unchanged
 ├── examples/                     # unchanged
 ├── tools/                        # NEW: ops scripts not shipped to users
-│   ├── ci/                       # was scripts/ci/
-│   ├── release/                  # was scripts/release/
-│   ├── maintenance/              # was scripts/maintenance/
-│   ├── docs/                     # was scripts/docs/
+│   ├── ci/                       # was tools/ci/
+│   ├── release/                  # was tools/release/
+│   ├── maintenance/              # was tools/maintenance/
+│   ├── docs/                     # was tools/docs/
 │   └── version-sync.sh           # was scripts/version-sync.sh
 ├── .chezmoiroot                  # NEW: points at defaults/
 ├── README.md

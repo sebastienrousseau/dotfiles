@@ -69,7 +69,7 @@ if [[ "$fail_count" -gt 0 ]]; then
   echo "  git fetch origin master"
   echo "  PIN=\$(git rev-parse origin/master)"
   echo "  # Apply per call site, then verify:"
-  echo "  bash scripts/ci/lint-reusable-pins.sh"
+  echo "  bash tools/ci/lint-reusable-pins.sh"
   echo ""
   echo "Policy: docs/security/CI_PINNING.md"
   exit 1

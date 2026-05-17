@@ -11,7 +11,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-UPDATE_SCRIPT="$REPO_ROOT/scripts/maintenance/check-updates.sh"
+UPDATE_SCRIPT="$REPO_ROOT/tools/maintenance/check-updates.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

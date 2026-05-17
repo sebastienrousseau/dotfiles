@@ -14,7 +14,7 @@
 #
 # Invocation:
 #   * pre-commit local hook (files passed as args)
-#   * standalone: ./scripts/ci/check-regression-traceability.sh
+#   * standalone: ./tools/ci/check-regression-traceability.sh
 # =============================================================================
 
 set -euo pipefail

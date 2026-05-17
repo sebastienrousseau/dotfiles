@@ -3,7 +3,7 @@
 # Validate .chezmoidata.toml against config/chezmoidata.schema.json via taplo.
 #
 # Usage:
-#   bash scripts/ci/validate-chezmoidata.sh
+#   bash tools/ci/validate-chezmoidata.sh
 #
 # In CI the workflow installs taplo before invoking this script. Locally,
 # install via: cargo install --locked taplo-cli  (or `brew install taplo`).

@@ -29,7 +29,7 @@ The goal stated by the maintainer: become the de facto workstation provisioning 
 | H3 | `scripts/dot/commands/fleet.sh:294-297` | GNU vs BSD `sed -i` branch isn't atomic; concurrent `dot fleet namespace set` calls can corrupt `.chezmoidata.toml`. | Use `mktemp` + `mv` (atomic) and wrap with `flock`. |
 | H4 | `dot_config/zsh/dot_zshrc.tmpl:220-221` | `_cached_eval` writes cache with `mv "$cache.tmp.$$" "$cache"` — PID collision possible between two shells. Cold-start affected. | Use `mktemp` instead of `$$`. |
 | H5 | `scripts/dot/commands/meta.sh:64-67` | `rm -rf "$cache_dir/zsh"/*-init.zsh` — if the glob doesn't match, expands to the literal pattern and the `-rf` removes the wrong path. | Guard with `[[ -d ... ]]` or use `find ... -type f -delete`. |
-| H6 | `install.sh:177-198` | Chezmoi installer downloaded over `https://get.chezmoi.io` with size/shebang validation but no cryptographic signature check. | **Fixed in `eaca…` (TBD commit) by removing the unverified fallback.** The verified installer at `scripts/ci/install-chezmoi-verified.sh` (SHA256-checked against GitHub Releases) is now the only path; if it fails we refuse to bootstrap rather than silently degrading. |
+| H6 | `install.sh:177-198` | Chezmoi installer downloaded over `https://get.chezmoi.io` with size/shebang validation but no cryptographic signature check. | **Fixed in `eaca…` (TBD commit) by removing the unverified fallback.** The verified installer at `tools/ci/install-chezmoi-verified.sh` (SHA256-checked against GitHub Releases) is now the only path; if it fails we refuse to bootstrap rather than silently degrading. |
 | H7 | `install/lib/package_managers.sh:71-92` | Homebrew installer runs from `brew.sh` with a warning but no SHA256 verification. | **False positive on review** — `install_homebrew()` already requires `HOMEBREW_INSTALLER_SHA256` and aborts on checksum mismatch (`install/lib/package_managers.sh:84-92`). Audit cited the security-note string at line 56, not the verification block. |
 | H8 | `install/lib/installers.sh:40-54` | Binary downloads SHA256-verify, but the checksum URL is not pinned. DNS attacker can redirect both binary and checksum together. | **Overstated on review** — `github_asset_url` already obtains both binary and checksum URLs from `api.github.com` via a single authenticated call; both transit HTTPS with cert validation. A DNS attacker would need a valid cert for `api.github.com`. Real defence in depth would add `cosign verify` for releases that publish a Sigstore bundle; tracking as a future enhancement. |
 | H9 | `scripts/dot/lib/platform.sh:42-65` | `dot_path_to_unix/native()` silently returns the Windows path if `wslpath` is missing — caller cannot tell success from failure. | Return non-zero when `wslpath` is required but absent; document the contract. |
@@ -44,7 +44,7 @@ The goal stated by the maintainer: become the de facto workstation provisioning 
 | M4 | `scripts/dot/commands/agent.sh:221-224,338-341,385-388` | `set +e / "$@" / set -e` blocks log failure but propagate the original exit code; callers can't tell intentional vs accidental. | Document the contract or restructure to `if !`. |
 | M5 | `scripts/security/lock-configs.sh:27-33` | `sudo chattr +i` silently fails when sudo is unavailable in automation. | Fail explicitly when sudo is required. |
 | M6 | `dot_config/zsh/dot_zshrc.tmpl:147-159` | `_cached_eval` mtime check doesn't follow symlinks — a `mise` upgrade that only flips a symlink target won't bust the cache. | Resolve via `readlink -f` and track the chain. |
-| M7 | `scripts/ci/install-chezmoi-verified.sh:25-32` | Only x86_64 + arm64 are supported. ppc64le, s390x, riscv64 fail silently. | Document supported architectures and emit a clear error otherwise. |
+| M7 | `tools/ci/install-chezmoi-verified.sh:25-32` | Only x86_64 + arm64 are supported. ppc64le, s390x, riscv64 fail silently. | Document supported architectures and emit a clear error otherwise. |
 
 ### 1.4 Low (track in backlog)
 
@@ -188,7 +188,7 @@ Plus reliability fixes:
 **This quarter (positioning):** ✅ shipped
 
 1. ✅ AGENTS.md generator — `dot agents render/check/list` syncs `CLAUDE.md` → `AGENTS.md` + Cursor + Codex stubs (commit TBD). Closes #1 competitive gap.
-2. ✅ Sub-100ms `dot` CLI cold-start gate — `scripts/ci/dot-cli-startup-bench.sh` + `.github/workflows/dot-cli-bench.yml`. Median **47ms** locally, budget 250ms. Closes #3 competitive gap.
+2. ✅ Sub-100ms `dot` CLI cold-start gate — `tools/ci/dot-cli-startup-bench.sh` + `.github/workflows/dot-cli-bench.yml`. Median **47ms** locally, budget 250ms. Closes #3 competitive gap.
 3. ⏳ Add `windows-latest` runner to the test matrix (deferred; needs PS7 mock harness).
 4. ⏳ Pursue mise + 1Password + Codespaces integrations (months 6-12 of the roadmap).
 
@@ -230,8 +230,8 @@ The round-2 audit found regressions in the freshly-shipped strategic features. A
 | R6 | **Medium** | `scripts/dot/commands/agents.sh:render` | New files written with default umask permissions — could leak through a permissive global umask. | ✅ Explicit `chmod 0644` after each write. |
 | R7 | **Medium** | `scripts/dot/commands/registry.sh:128-135` | `set-url` accepted any scheme (http, ftp, file) without validation; the unsigned registry JSON is fetched from whatever URL was set. | ✅ Refuses non-HTTPS (with `file://` exemption documented for testing); atomic `mktemp + mv` write to config so concurrent `set-url` invocations cannot corrupt. |
 | R8 | **Medium** | `scripts/dot/commands/fleet.sh:467` | `mktemp -d` without a `-t` template could collide between concurrent `dot fleet apply` invocations from the same user. | ✅ Now uses `mktemp -d -t dotfiles-fleet.XXXXXX`. |
-| R9 | **Medium** | `scripts/ci/dot-cli-startup-bench.sh:87-89` | `env -i HOME=... PATH=...` preserved a PATH that could include user-installed `dot` shims; not a true cold-start measurement. Low-impact (the explicit `$DOT_BIN` argument is absolute), but the comment overclaimed. | Annotated only — the explicit `$DOT_BIN` already pins the binary; the PATH note in the comment is now precise. |
-| R10 | **Low** | `scripts/ci/dot-cli-startup-bench.sh:58-71` | `_now_ms` falls through to `python3 -c '…'` on macOS bash 3.2; Python startup can inflate measurements 80-150ms. | Documented; consider switching to `gdate +%s%N` when GNU coreutils is installed. |
+| R9 | **Medium** | `tools/ci/dot-cli-startup-bench.sh:87-89` | `env -i HOME=... PATH=...` preserved a PATH that could include user-installed `dot` shims; not a true cold-start measurement. Low-impact (the explicit `$DOT_BIN` argument is absolute), but the comment overclaimed. | Annotated only — the explicit `$DOT_BIN` already pins the binary; the PATH note in the comment is now precise. |
+| R10 | **Low** | `tools/ci/dot-cli-startup-bench.sh:58-71` | `_now_ms` falls through to `python3 -c '…'` on macOS bash 3.2; Python startup can inflate measurements 80-150ms. | Documented; consider switching to `gdate +%s%N` when GNU coreutils is installed. |
 | R11 | **Low** | `scripts/dot/commands/agents.sh` (list path) | `mkdir -p` for `.cursor/rules` and `.codex` ran even for read-only subcommands (`list`, `check`). Harmless, but pointless. | Deferred. |
 
 ### 6.3 New documentation gaps (all fixed in this commit)

@@ -17,13 +17,13 @@ on:
     paths:
       - 'dot_local/bin/executable_dot'
       - 'scripts/dot/**'
-      - 'scripts/ci/dot-cli-startup-bench.sh'
+      - 'tools/ci/dot-cli-startup-bench.sh'
       - '.github/workflows/dot-cli-bench.yml'
   pull_request:
     paths:
       - 'dot_local/bin/executable_dot'
       - 'scripts/dot/**'
-      - 'scripts/ci/dot-cli-startup-bench.sh'
+      - 'tools/ci/dot-cli-startup-bench.sh'
       - '.github/workflows/dot-cli-bench.yml'
 
 permissions:
@@ -59,4 +59,4 @@ jobs:
           DOT_BENCH_BUDGET_MS: ${{ matrix.budget_ms }}
           DOT_BENCH_RUNS: 11
           DOT_BENCH_CMD: version
-        run: bash scripts/ci/dot-cli-startup-bench.sh
+        run: bash tools/ci/dot-cli-startup-bench.sh

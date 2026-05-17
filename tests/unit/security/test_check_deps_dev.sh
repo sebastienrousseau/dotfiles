@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
-# Unit tests for scripts/ci/check-deps-dev.sh — the deps.dev Insights
+# Unit tests for tools/ci/check-deps-dev.sh — the deps.dev Insights
 # API supply-chain validator.
 #
 # The script's network calls (curl → api.deps.dev) are shimmed to
@@ -18,7 +18,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 # shellcheck source=../../framework/assertions.sh
 source "$REPO_ROOT/tests/framework/assertions.sh"
 
-SCRIPT="$REPO_ROOT/scripts/ci/check-deps-dev.sh"
+SCRIPT="$REPO_ROOT/tools/ci/check-deps-dev.sh"
 
 # -----------------------------------------------------------------------------
 # Structural

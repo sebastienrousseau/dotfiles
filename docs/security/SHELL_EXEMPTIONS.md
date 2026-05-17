@@ -7,7 +7,7 @@ render_with_liquid: false
 Every bash script in this repo must include `set -euo pipefail` (or
 `set -eu` for POSIX `sh`) within its first 50 lines. The rule is
 enforced by
-[`scripts/ci/check-shell-preamble.sh`](../../scripts/ci/check-shell-preamble.sh),
+[`tools/ci/check-shell-preamble.sh`](../../tools/ci/check-shell-preamble.sh),
 wired into `pre-commit` and the `reusable-shell-lint.yml` CI job.
 Tests pin the contract under
 [`tests/unit/security/test_shell_preamble_lint.sh`](../../tests/unit/security/test_shell_preamble_lint.sh).
@@ -115,14 +115,14 @@ When you need to mark a new file:
 3. **Run the checker:**
 
    ```bash
-   ./scripts/ci/check-shell-preamble.sh path/to/file.sh
+   ./tools/ci/check-shell-preamble.sh path/to/file.sh
    ```
 
    Exit 0 = lint passes.
 
 4. **If you're adding a new entire directory of fragments**
    (rare — alias buckets, plugin trees), edit the path-skip rule
-   in `scripts/ci/check-shell-preamble.sh` and document it in this
+   in `tools/ci/check-shell-preamble.sh` and document it in this
    page's "Bulk-sourced fragments" table above.
 
 ## CI integration
@@ -138,7 +138,7 @@ this page in the same PR.
 
 ## References
 
-- `scripts/ci/check-shell-preamble.sh` — the lint.
+- `tools/ci/check-shell-preamble.sh` — the lint.
 - `tests/unit/security/test_shell_preamble_lint.sh` — contract test.
 - `config/pre-commit-config.yaml` (`shell-preamble-check` hook).
 - `.github/workflows/reusable-shell-lint.yml` — CI invocation.

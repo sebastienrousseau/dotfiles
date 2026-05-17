@@ -5,7 +5,7 @@ render_with_liquid: false
 # Command Index
 
 Generated from `dot help all`. To refresh after adding or renaming
-a subcommand, run `scripts/docs/generate-command-index.sh`. The CI
+a subcommand, run `tools/docs/generate-command-index.sh`. The CI
 job `lint/command-index` fails when this file is stale.
 
 | Command | Summary |

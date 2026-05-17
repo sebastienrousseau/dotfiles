@@ -185,7 +185,7 @@ main() {
       # executing an unverified script (the previous fall-back to
       # `get.chezmoi.io` was an unsigned bootstrap and a security hole).
       local verified_installer
-      verified_installer="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/scripts/ci/install-chezmoi-verified.sh"
+      verified_installer="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/tools/ci/install-chezmoi-verified.sh"
       if [[ -x "$verified_installer" ]] || [[ -f "$verified_installer" ]]; then
         echo "   Using checksum-verified installer..."
         if ! bash "$verified_installer" "${CHEZMOI_VERSION:-2.47.1}" "$bin_dir"; then
@@ -200,7 +200,7 @@ main() {
         return 0
       fi
       echo "" >&2
-      echo "   scripts/ci/install-chezmoi-verified.sh is missing; cannot verify chezmoi bootstrap." >&2
+      echo "   tools/ci/install-chezmoi-verified.sh is missing; cannot verify chezmoi bootstrap." >&2
       echo "   Install chezmoi manually (brew install chezmoi / official binary)" >&2
       echo "   and re-run install.sh." >&2
       return 1
@@ -296,6 +296,21 @@ main() {
 
   # 6. Initialize & Apply
   step "Applying Configuration..."
+
+  # ── Auto-migration for v0.2.503 reorg ─────────────────────────────────
+  # If the user is upgrading from a pre-0.2.503 install, run the
+  # migration script BEFORE `chezmoi apply` so the reorg's source-
+  # path moves don't cause chezmoi to delete deployed files.
+  # The script is idempotent + silent-by-default; safe to run on
+  # every install (fresh installs detect "no prior state" and exit 0).
+  for migrate_src in "$SOURCE_DIR" "$LEGACY_SOURCE_DIR"; do
+    migrate_script="$migrate_src/install/migrate/migrate-v0_2-to-v0_2_503.sh"
+    if [[ -x "$migrate_script" ]]; then
+      echo "   Running v0.2.503 migration (idempotent; safe on fresh installs)..."
+      "$migrate_script" || echo "   migration exited non-zero — continuing apply"
+      break
+    fi
+  done
 
   # If we are running from a local source, just apply
   if [[ -d "$SOURCE_DIR/.git" ]]; then

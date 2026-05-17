@@ -6,7 +6,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-SCRIPT_FILE="$REPO_ROOT/scripts/docs/build-manual.sh"
+SCRIPT_FILE="$REPO_ROOT/tools/docs/build-manual.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

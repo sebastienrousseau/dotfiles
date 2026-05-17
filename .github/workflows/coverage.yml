@@ -6,7 +6,7 @@ name: Coverage
 #
 # Coverage mechanism: BASH_ENV+PS4 turn on xtrace in every test bash
 # (and every subprocess bash); the runner captures stderr per test
-# and aggregates DA: entries into lcov.info. See scripts/ci/run-coverage.sh
+# and aggregates DA: entries into lcov.info. See tools/ci/run-coverage.sh
 # for the why-not-kcov note.
 
 on:
@@ -17,7 +17,7 @@ on:
       - 'tests/**'
       - '.chezmoitemplates/**'
       - 'dot_local/bin/**'
-      - 'scripts/ci/run-coverage.sh'
+      - 'tools/ci/run-coverage.sh'
       - '.github/workflows/coverage.yml'
   push:
     branches: [master]
@@ -72,7 +72,7 @@ jobs:
           #            ai.sh 15→87). floor=35 (3-pt cushion).
           # Bump in lockstep with the slice that lands the bump.
           MIN_COVERAGE_PCT: '35'
-        run: bash scripts/ci/run-coverage.sh
+        run: bash tools/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

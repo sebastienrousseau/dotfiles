@@ -8,7 +8,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-GUARD_SCRIPT="$REPO_ROOT/scripts/ci/guard-gitleaks-checkout.sh"
+GUARD_SCRIPT="$REPO_ROOT/tools/ci/guard-gitleaks-checkout.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

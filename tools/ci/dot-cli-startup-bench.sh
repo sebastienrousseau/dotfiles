@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 #
-# scripts/ci/dot-cli-startup-bench.sh
+# tools/ci/dot-cli-startup-bench.sh
 #
 # Sub-100ms cold-start gate for the `dot` CLI dispatcher.
 #
@@ -11,7 +11,7 @@
 # elapsed time, and exits non-zero when the median exceeds the budget.
 #
 # Usage:
-#   bash scripts/ci/dot-cli-startup-bench.sh [--budget-ms <n>] [--runs <n>] [--cmd <argv>]
+#   bash tools/ci/dot-cli-startup-bench.sh [--budget-ms <n>] [--runs <n>] [--cmd <argv>]
 #
 # Env overrides:
 #   DOT_BENCH_BUDGET_MS   Default budget in ms (default: 250).

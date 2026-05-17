@@ -14,8 +14,8 @@
 #
 # Invocation:
 #   * pre-commit local hook (files passed as args)
-#   * standalone: ./scripts/ci/check-shell-preamble.sh           # full repo
-#                 ./scripts/ci/check-shell-preamble.sh file.sh   # explicit
+#   * standalone: ./tools/ci/check-shell-preamble.sh           # full repo
+#                 ./tools/ci/check-shell-preamble.sh file.sh   # explicit
 # =============================================================================
 
 set -euo pipefail

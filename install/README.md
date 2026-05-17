@@ -22,7 +22,7 @@ The canonical install path is `install.sh` at the repo root —
 **not** anything in this directory. `install.sh`:
 
 1. Verifies `git` and `curl` are present.
-2. SHA256-pins chezmoi via `scripts/ci/install-chezmoi-verified.sh`.
+2. SHA256-pins chezmoi via `tools/ci/install-chezmoi-verified.sh`.
 3. Clones the repo (or uses an existing checkout).
 4. Runs `chezmoi init --apply --source <repo>`.
 
@@ -41,7 +41,7 @@ checked in now so:
 
 ### Publication checklist (per channel, v0.2.503+)
 
-1. **Build the standalone tarball** with `scripts/release/build-dist.sh` (v0.2.503).
+1. **Build the standalone tarball** with `tools/release/build-dist.sh` (v0.2.503).
 2. **Sign + SBOM** via the existing `security-release.yml` pipeline.
 3. **Publish to each channel**:
    - Homebrew: PR to `sebastienrousseau/homebrew-tap` (separate repo) with the updated `dot.rb` + fresh SHA256.

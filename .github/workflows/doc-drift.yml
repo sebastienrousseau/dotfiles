@@ -3,7 +3,7 @@ name: Doc Drift / Generators
 # Block PRs that let a generator-managed file drift out of sync with
 # its source. Two generators today, both shipped in v0.2.503:
 #
-#   - scripts/docs/generate-command-index.sh --check
+#   - tools/docs/generate-command-index.sh --check
 #       Verifies docs/manual/command-index.md matches `dot help all`.
 #
 #   - scripts/qa/check-version-consistency.sh --quiet
@@ -21,7 +21,7 @@ on:
       - 'docs/manual/command-index.md'
       - 'dot_local/bin/executable_dot'
       - 'scripts/dot/commands/**'
-      - 'scripts/docs/generate-command-index.sh'
+      - 'tools/docs/generate-command-index.sh'
       - 'scripts/qa/check-version-consistency.sh'
       - 'scripts/qa/scorecard-snapshot.sh'
       - '.chezmoidata.toml'
@@ -52,7 +52,7 @@ jobs:
           egress-policy: audit
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Verify docs/manual/command-index.md is in sync
-        run: bash scripts/docs/generate-command-index.sh --check
+        run: bash tools/docs/generate-command-index.sh --check
 
   version-consistency:
     name: Generators / version-consistency

@@ -60,8 +60,8 @@ The combination of Codex Windows GA (2026-03-04, 500k waitlist → 2M WAU in 4 w
 1. New job `windows` in `.github/workflows/ci.yml`:
    - runs-on: `windows-latest`
    - install pwsh 7.6 via `actions/setup-pwsh`
-   - run `pwsh -File scripts/ci/windows-smoke-test.ps1`
-2. New `scripts/ci/windows-smoke-test.ps1` that:
+   - run `pwsh -File tools/ci/windows-smoke-test.ps1`
+2. New `tools/ci/windows-smoke-test.ps1` that:
    - asserts `dot.ps1` (or the bash dispatcher under WSL) starts cleanly
    - exercises `dot version`, `dot help`, `dot agents check`
    - verifies chezmoi can be invoked from PowerShell
@@ -70,7 +70,7 @@ The combination of Codex Windows GA (2026-03-04, 500k waitlist → 2M WAU in 4 w
 
 **Acceptance.** Three new green checks on every PR: `CI / Windows / pwsh-smoke-test`, `Test / Windows / pwsh`, `Lint / Windows / PSScriptAnalyzer`.
 
-**Files.** `.github/workflows/ci.yml` (job add), `scripts/ci/windows-smoke-test.ps1` (new), `README.md` (header), `scripts/dot/lib/platform.sh` (pwsh.exe over powershell.exe).
+**Files.** `.github/workflows/ci.yml` (job add), `tools/ci/windows-smoke-test.ps1` (new), `README.md` (header), `scripts/dot/lib/platform.sh` (pwsh.exe over powershell.exe).
 
 ### B2 — Publish a Claude Code skill — **0.5 P-d**
 
@@ -321,7 +321,7 @@ Each adds 8–15 lines to `cmd_agents`. The body content reuses `_agents_body` (
 
 **Files to modify.** `dot_config/zsh/dot_zshrc.tmpl`, `dot_config/zsh/conf.d/*.zsh`, `.github/workflows/dot-cli-bench.yml` (budget tighten).
 
-**Test plan.** `scripts/ci/dot-cli-startup-bench.sh --budget-ms 100` becomes the new CI gate. Plus an integration test that asserts `nvm`, `mise`, etc. still work after lazy-load (run `node --version` once and confirm activation fires).
+**Test plan.** `tools/ci/dot-cli-startup-bench.sh --budget-ms 100` becomes the new CI gate. Plus an integration test that asserts `nvm`, `mise`, etc. still work after lazy-load (run `node --version` once and confirm activation fires).
 
 **Acceptance.** Median cold-start `dot version` < 100ms on macOS local + < 150ms on ubuntu-latest CI runner.
 

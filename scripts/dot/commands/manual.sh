@@ -66,7 +66,7 @@ resolve_source() {
       echo "$src_dir/$fname"
       return 0
     fi
-    ui_err "manual" "local build not found at $src_dir/$fname — run bash scripts/docs/build-manual.sh"
+    ui_err "manual" "local build not found at $src_dir/$fname — run bash tools/docs/build-manual.sh"
     return 1
   fi
 

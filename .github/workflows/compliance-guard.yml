@@ -163,7 +163,7 @@ jobs:
           VIOLATIONS=""
 
           # The repo's own insecure-pattern detector
-          # (scripts/ci/check-insecure-tls.sh) MUST mention the literal
+          # (tools/ci/check-insecure-tls.sh) MUST mention the literal
           # flag strings it's hunting for. Its unit test also has to
           # write a tiny fixture containing `curl -k` to verify the
           # detector flags it. Exclude both from every grep below so
@@ -228,7 +228,7 @@ jobs:
         run: |
           echo "Scanning for dangerous permission patterns..."
 
-          # The scanner script (scripts/ci/check-dangerous-chmod.sh)
+          # The scanner script (tools/ci/check-dangerous-chmod.sh)
           # AND its functional test write the literal patterns 777/666
           # as fixtures. Exclude both, plus the tests/ tree.
           EXCL=(

@@ -93,7 +93,7 @@ jobs:
         # docs/security/SHELL_EXEMPTIONS.md for the contract.
         run: |
           set -euo pipefail
-          bash scripts/ci/check-shell-preamble.sh
+          bash tools/ci/check-shell-preamble.sh
 
       - name: shfmt
         if: inputs.run_shfmt == true

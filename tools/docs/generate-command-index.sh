@@ -6,8 +6,8 @@
 # the manual's index — flagged in R1/R2/R3/R4 audits.
 #
 # Usage:
-#   scripts/docs/generate-command-index.sh           # write
-#   scripts/docs/generate-command-index.sh --check   # exit 1 if stale
+#   tools/docs/generate-command-index.sh           # write
+#   tools/docs/generate-command-index.sh --check   # exit 1 if stale
 #
 # Exit codes:
 #   0  index written / already in sync
@@ -58,7 +58,7 @@ render_with_liquid: false
 # Command Index
 
 Generated from `dot help all`. To refresh after adding or renaming
-a subcommand, run `scripts/docs/generate-command-index.sh`. The CI
+a subcommand, run `tools/docs/generate-command-index.sh`. The CI
 job `lint/command-index` fails when this file is stale.
 
 | Command | Summary |
@@ -91,7 +91,7 @@ bash "$dot_bin" help all 2>/dev/null |
 
 if [[ "$mode" == "check" ]]; then
   if ! diff -q "$target" "$tmp" >/dev/null 2>&1; then
-    echo "command-index.md is stale. Run scripts/docs/generate-command-index.sh to refresh." >&2
+    echo "command-index.md is stale. Run tools/docs/generate-command-index.sh to refresh." >&2
     diff -u "$target" "$tmp" | head -40 >&2
     exit 1
   fi

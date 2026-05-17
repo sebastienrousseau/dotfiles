@@ -20,7 +20,7 @@ on:
       - 'package.json'
       - 'pyproject.toml'
       - '.github/workflows/**'
-      - 'scripts/ci/check-deps-dev.sh'
+      - 'tools/ci/check-deps-dev.sh'
       - 'docs/security/DEPS_DEV_EXCEPTIONS.md'
   push:
     branches: [master]
@@ -61,7 +61,7 @@ jobs:
           DEPS_DEV_SARIF_OUT: ${{ github.workspace }}/deps-dev.sarif
         run: |
           set -uo pipefail
-          if bash scripts/ci/check-deps-dev.sh; then
+          if bash tools/ci/check-deps-dev.sh; then
             echo "advisory_count=0" >> "$GITHUB_OUTPUT"
           else
             echo "advisory_count=1" >> "$GITHUB_OUTPUT"

@@ -66,7 +66,7 @@ jobs:
           BUNDLE_VERSION: ${{ inputs.bundle_version }}
         run: |
           set -euo pipefail
-          output="$(bash scripts/release/package-policy-bundles.sh --json)"
+          output="$(bash tools/release/package-policy-bundles.sh --json)"
           echo "archive=$(printf '%s' "$output" | jq -r '.archive')" >> "$GITHUB_OUTPUT"
           echo "checksum=$(printf '%s' "$output" | jq -r '.checksum')" >> "$GITHUB_OUTPUT"
 
@@ -102,7 +102,7 @@ jobs:
           BUNDLE_VERSION: ${{ inputs.bundle_version }}
         run: |
           set -euo pipefail
-          bash scripts/release/package-policy-bundles.sh --json >/tmp/policy-bundle.json
+          bash tools/release/package-policy-bundles.sh --json >/tmp/policy-bundle.json
 
       - name: Verify SBOM presence
         run: |

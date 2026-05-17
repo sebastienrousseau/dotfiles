@@ -8,7 +8,7 @@ Every external dependency the CI pipeline consumes must be pinned by
 40-hex commit SHA. The policy applies to:
 
 1. **Third-party actions** — `uses: owner/action@<sha>` (already enforced via Scorecard's `Pinned-Dependencies` check at score ≥ 9).
-2. **Reusable workflows in this repo** — `uses: sebastienrousseau/dotfiles/.github/workflows/reusable-X.yml@<sha>` (added with [#855](https://github.com/sebastienrousseau/dotfiles/issues/855); enforced by `scripts/ci/lint-reusable-pins.sh`).
+2. **Reusable workflows in this repo** — `uses: sebastienrousseau/dotfiles/.github/workflows/reusable-X.yml@<sha>` (added with [#855](https://github.com/sebastienrousseau/dotfiles/issues/855); enforced by `tools/ci/lint-reusable-pins.sh`).
 3. **Container base images** — `FROM image:tag@sha256:<digest>` (closed by [#886](https://github.com/sebastienrousseau/dotfiles/pull/886)).
 4. **Release binaries downloaded at build time** — `curl … && echo "<sha256> ..." | sha256sum -c` (closed by [#888](https://github.com/sebastienrousseau/dotfiles/pull/888)).
 
@@ -50,7 +50,7 @@ uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@maste
 uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@v0.2.501
 ```
 
-The `lint-reusable-pins` job in `ci.yml` runs `scripts/ci/lint-reusable-pins.sh`
+The `lint-reusable-pins` job in `ci.yml` runs `tools/ci/lint-reusable-pins.sh`
 on every workflow change. The lint fails the build on any of the
 rejected forms above.
 
@@ -73,7 +73,7 @@ find .github/workflows -name '*.yml' -exec sed -i.bak -E \
 rm -f .github/workflows/*.bak
 
 # 4. Verify the lint still passes:
-bash scripts/ci/lint-reusable-pins.sh
+bash tools/ci/lint-reusable-pins.sh
 
 # 5. Land the bump on a follow-up PR with a single-purpose commit:
 git commit -am "chore(ci): bump reusable-workflow pins to ${PIN:0:10}"
@@ -108,6 +108,6 @@ merge time.
 ## See also
 
 - [#855](https://github.com/sebastienrousseau/dotfiles/issues/855) — original tracking issue.
-- `scripts/ci/lint-reusable-pins.sh` — the enforcement script.
+- `tools/ci/lint-reusable-pins.sh` — the enforcement script.
 - `tests/unit/ci/test_reusable_pin_lint.sh` — the negative test.
 - [GitHub: pinning actions to a full-length commit SHA](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions).

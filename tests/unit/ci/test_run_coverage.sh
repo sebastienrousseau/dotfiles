@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
-# Tests for scripts/ci/run-coverage.sh — the xtrace-based bash
+# Tests for tools/ci/run-coverage.sh — the xtrace-based bash
 # coverage runner introduced by Slice 1 of #883. Asserts file
 # structure + entry-point behaviour; the runner itself is exercised
 # end-to-end by the Coverage / kcov workflow.
@@ -10,7 +10,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-SCRIPT_FILE="$REPO_ROOT/scripts/ci/run-coverage.sh"
+SCRIPT_FILE="$REPO_ROOT/tools/ci/run-coverage.sh"
 
 test_start "script_exists"
 assert_file_exists "$SCRIPT_FILE" "run-coverage.sh must exist"

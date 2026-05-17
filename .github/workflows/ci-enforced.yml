@@ -245,7 +245,7 @@ jobs:
         if: matrix.check == 'dependency-updates'
         run: |
           echo "::notice::Checking for available dependency updates"
-          ./scripts/maintenance/check-updates.sh || true
+          ./tools/maintenance/check-updates.sh || true
       - name: Beta/Nightly Testing
         if: matrix.check == 'beta-testing'
         run: |

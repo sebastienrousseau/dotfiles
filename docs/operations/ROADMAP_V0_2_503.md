@@ -51,7 +51,7 @@ purpose, contributors orient in under 30 seconds.
 
 | | |
 |---|---|
-| Windows-native smoke test expansion | `scripts/ci/windows-smoke-test.ps1` exists but only covers a few commands. Add `dot version / dot help / dot agents check / dot doctor` Windows-native runs. |
+| Windows-native smoke test expansion | `tools/ci/windows-smoke-test.ps1` exists but only covers a few commands. Add `dot version / dot help / dot agents check / dot doctor` Windows-native runs. |
 | Real `ubuntu-latest` + `macos-latest` + `windows-latest` matrix for the test runner | Currently `ubuntu` + `macos` only; add `windows-latest` to the regular test workflow. |
 | `chezmoi apply --dry-run` on all three OSes | Verify our templates render on every platform on every PR. |
 

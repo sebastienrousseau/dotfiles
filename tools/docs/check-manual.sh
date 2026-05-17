@@ -9,8 +9,8 @@
 #   - Coverage: every `dot <command>` referenced must be documented
 #
 # Usage:
-#   bash scripts/docs/check-manual.sh
-#   bash scripts/docs/check-manual.sh --strict   # fail on warnings
+#   bash tools/docs/check-manual.sh
+#   bash tools/docs/check-manual.sh --strict   # fail on warnings
 
 set -euo pipefail
 

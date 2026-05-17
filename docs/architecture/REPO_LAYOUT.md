@@ -143,11 +143,11 @@ the repo itself.
 
 | Subdir                                    | Purpose                                                         |
 |-------------------------------------------|-----------------------------------------------------------------|
-| `scripts/ci/`                             | CI helpers (`check-copyright-headers.sh`, `install-chezmoi-verified.sh`, `validate-ci-config.sh`) |
+| `tools/ci/`                             | CI helpers (`check-copyright-headers.sh`, `install-chezmoi-verified.sh`, `validate-ci-config.sh`) |
 | `scripts/dot/commands/`                   | Subcommand implementations for the `dot` CLI                    |
-| `scripts/docs/`                           | Manual build pipeline (`build-manual.sh`, `check-manual.sh`)    |
+| `tools/docs/`                           | Manual build pipeline (`build-manual.sh`, `check-manual.sh`)    |
 | `scripts/theme/`                          | K-Means CIELAB theme engine + HEIC merge/convert                |
-| `scripts/ops/`, `scripts/maintenance/`, `scripts/release/` | Operator tooling                                        |
+| `scripts/ops/`, `tools/maintenance/`, `tools/release/` | Operator tooling                                        |
 | `scripts/diagnostics/`, `scripts/qa/`, `scripts/security/`, `scripts/secrets/` | Domain-scoped scripts                          |
 | `scripts/fonts/`, `scripts/demo/`, `scripts/git-hooks/`, `scripts/tools/`, `scripts/tuning/`, `scripts/lib/` | Supporting scripts                                          |
 | `scripts/uninstall.sh`, `scripts/version-sync.sh` | Top-level ops entrypoints                                 |
@@ -213,7 +213,7 @@ version control. If one of them ever shows up in `git status`, check the
 
 | Path                     | Source                                                                       |
 |--------------------------|------------------------------------------------------------------------------|
-| `_build/`                | Output of `scripts/docs/build-manual.sh`                                     |
+| `_build/`                | Output of `tools/docs/build-manual.sh`                                     |
 | `.pnpm-store/`           | pnpm's content-addressable store (should never appear here)                  |
 | `.claude/`               | Claude Code per-machine state (`settings.local.json` permission allowlists)  |
 | `node_modules/`          | Node dependency trees from repo-local scripts                                |

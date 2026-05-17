@@ -5,13 +5,13 @@ on:
     branches: [master]
     paths:
       - 'docs/manual/**'
-      - 'scripts/docs/**'
+      - 'tools/docs/**'
       - '.github/workflows/manual-publish.yml'
   pull_request:
     branches: [master]
     paths:
       - 'docs/manual/**'
-      - 'scripts/docs/**'
+      - 'tools/docs/**'
       - '.github/workflows/manual-publish.yml'
   release:
     types: [published]
@@ -48,10 +48,10 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y pandoc codespell
 
       - name: Run manual quality gates
-        run: bash scripts/docs/check-manual.sh
+        run: bash tools/docs/check-manual.sh
 
       - name: Fast build (no PDF)
-        run: bash scripts/docs/build-manual.sh --fast
+        run: bash tools/docs/build-manual.sh --fast
 
   # ==========================================================================
   # BUILD — full (pandoc + TeX Live). Only when we actually publish the site
@@ -107,7 +107,7 @@ jobs:
             codespell
 
       - name: Build manual (all formats)
-        run: bash scripts/docs/build-manual.sh
+        run: bash tools/docs/build-manual.sh
 
       - name: Record file sizes
         id: sizes

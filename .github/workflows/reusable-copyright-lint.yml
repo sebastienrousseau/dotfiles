@@ -36,6 +36,6 @@ jobs:
       - name: Run copyright header validator
         run: |
           set -euo pipefail
-          bash scripts/ci/check-copyright-headers.sh \
+          bash tools/ci/check-copyright-headers.sh \
             "--extensions=${{ inputs.extensions }}" \
             "--excludes=${{ inputs.excludes }}"

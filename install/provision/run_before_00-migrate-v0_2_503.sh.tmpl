@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+#
+# chezmoi `run_before_*` hook — fires before every `chezmoi apply`.
+# This is the AUTOMATIC trigger for the v0.2.503 reorg migration.
+#
+# Why `run_before` (not `run_onchange`):
+#   * run_before always fires; the migration script's own state-file
+#     guard makes the actual work happen exactly once per host.
+#   * If a user resets state with `chezmoi state delete-bucket
+#     scriptState`, run_onchange would silently re-fire and re-do
+#     work it should skip. run_before + script-side idempotency
+#     handles this correctly.
+#
+# Why "00-" prefix: chezmoi sorts run_before scripts alphabetically;
+# the migration must execute before anything else in apply.
+
+set -euo pipefail
+
+migrate_script="{{ .chezmoi.sourceDir }}/install/migrate/migrate-v0_2-to-v0_2_503.sh"
+
+if [[ -x "$migrate_script" ]]; then
+  # The migration script is idempotent + silent-by-default. It exits
+  # 0 immediately if a prior run completed (state file present).
+  # Failure here must NOT block apply — log + continue.
+  "$migrate_script" || {
+    echo "[chezmoi run_before] v0.2.503 migration script exited non-zero — continuing apply" >&2
+    echo "[chezmoi run_before] inspect: $migrate_script and ~/.local/state/dotfiles/v0_2_503-migration/" >&2
+  }
+fi

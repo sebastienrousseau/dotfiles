@@ -170,7 +170,7 @@ else {
 }
 
 # ─── PSScriptAnalyzer over the smoke-test itself ────────────────────────────
-Assert-Step 'PSScriptAnalyzer over scripts/ci/*.ps1' {
+Assert-Step 'PSScriptAnalyzer over tools/ci/*.ps1' {
   if (-not (Get-Module -ListAvailable -Name PSScriptAnalyzer)) {
     Install-Module PSScriptAnalyzer -Force -Scope CurrentUser -ErrorAction Stop
   }
