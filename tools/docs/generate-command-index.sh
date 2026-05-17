@@ -85,7 +85,7 @@ bash "$dot_bin" help all 2>/dev/null |
       printf "%s\t%s\n", cmd, desc
     }
   ' |
-  sort -u |
+  LC_ALL=C sort -u |
   awk -F'\t' '{ printf "| `dot %s` | %s |\n", $1, $2 }' \
     >>"$tmp"
 

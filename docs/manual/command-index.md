@@ -33,10 +33,10 @@ job `lint/command-index` fails when this file is stale.
 | `dot encrypt-check` | Check disk encryption status |
 | `dot env` | Tool versions (mise) |
 | `dot firewall` | Apply firewall hardening [macOS,Linux] |
+| `dot fleet` | Show fleet node status, drift, and namespace (--json for machine output) |
 | `dot fleet` | drift Check for configuration drift across managed files |
 | `dot fleet` | events Show recent fleet events from local event log |
 | `dot fleet` | namespace Show or set the active namespace for multi-tenant isolation |
-| `dot fleet` | Show fleet node status, drift, and namespace (--json for machine output) |
 | `dot fonts` | Install Nerd Fonts (JetBrainsMono by default) |
 | `dot gemini` | Gemini CLI with context patterns |
 | `dot help` | Show this help message |
