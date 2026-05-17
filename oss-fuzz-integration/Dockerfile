@@ -3,6 +3,7 @@
 # Copied verbatim into google/oss-fuzz at projects/dotfiles/Dockerfile
 # when the upstream PR lands.
 
+# hadolint ignore=DL3006
 FROM gcr.io/oss-fuzz-base/base-builder-go
 
 # Maintainer (per OSS-Fuzz convention).
