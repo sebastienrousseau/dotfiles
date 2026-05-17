@@ -125,6 +125,14 @@ jobs:
     with:
       base64-subjects: "${{ needs.sbom.outputs.hash }}"
       upload-assets: true
+      # SLSA `upload-assets` job is gated on
+      #   startsWith(github.ref, 'refs/tags/') || inputs.upload-tag-name != ''
+      # A `workflow_dispatch` re-run carries `github.ref = refs/heads/<branch>`,
+      # which would skip the upload. Pass the dispatch-provided tag through so
+      # operators can retroactively attach provenance to an existing release.
+      # Release-event runs leave this empty (the first arm of the condition
+      # above already matches the tag ref).
+      upload-tag-name: ${{ inputs.release_tag || '' }}
 
   verify-release-integrity:
     name: Release / Verify Integrity
