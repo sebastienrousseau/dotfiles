@@ -42,6 +42,6 @@ existing files. After adding `lib/dot/foo.sh`:
 
 ## See also
 
-- `STRUCTURE.md` — top-level repo map.
+- `../../docs/STRUCTURE.md` — top-level repo map.
 - `scripts/README.md` — `scripts/` subtree (the ops-only sister).
 - `docs/operations/RFC_v0_2_503_reorganization.md` — full reorg plan.

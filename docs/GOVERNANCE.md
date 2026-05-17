@@ -3,7 +3,7 @@
 ## Model
 
 **Single-maintainer steward.** The project is owned and decided
-by one maintainer (see `MAINTAINERS.md`). This document exists so
+by one maintainer (see [`MAINTAINERS.md`](MAINTAINERS.md)). This document exists so
 contributors and downstream consumers understand exactly how
 decisions are made, how to influence them, and what guarantees
 exist.
@@ -82,8 +82,8 @@ review bandwidth, perspective). The project mitigates these by:
 
 - **Comprehensive automation**: 75+ CI checks, pre-commit hooks,
   shellcheck/shfmt/typos enforcement.
-- **Documented architecture**: `STRUCTURE.md`, `scripts/README.md`,
-  `docs/architecture/`, `docs/operations/HARD_AUDIT_2026.md`.
+- **Documented architecture**: [`STRUCTURE.md`](STRUCTURE.md), `scripts/README.md`,
+  `architecture/`, `operations/HARD_AUDIT_2026.md`.
 - **Cryptographic supply chain**: Cosign-signed SBOMs, SLSA L3
   provenance, signed commits, WKD-published disclosure key.
 - **Permissive license**: MIT — anyone can fork and continue.

@@ -195,7 +195,7 @@ jobs:
 
       - name: Build test container
         if: hashFiles('**/Dockerfile*') != ''
-        run: docker build -f Dockerfile.test -t dotfiles-test:latest .
+        run: docker build -f tests/Dockerfile.test -t dotfiles-test:latest .
 
       - name: Scan container with Trivy
         if: hashFiles('**/Dockerfile*') != ''

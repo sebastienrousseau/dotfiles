@@ -44,6 +44,6 @@ Same as `scripts/`:
 
 ## See also
 
-- `STRUCTURE.md` — top-level repo map.
+- `../docs/STRUCTURE.md` — top-level repo map.
 - `scripts/README.md` — the runtime-invoked sister tree.
 - `docs/operations/RFC_v0_2_503_reorganization.md` — Phase 5 spec.

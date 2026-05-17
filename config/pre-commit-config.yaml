@@ -74,11 +74,12 @@ repos:
       - id: hadolint
         args: ['--ignore', 'DL3008', '--ignore', 'DL3013', '--ignore', 'DL3018']
 
-  # Spell-checking (typos-cli) — see typos.toml at repo root for allowlist.
+  # Spell-checking (typos-cli) — see config/typos.toml for allowlist.
   - repo: https://github.com/crate-ci/typos
     rev: v1.46.1
     hooks:
       - id: typos
+        args: ['--config', 'config/typos.toml']
 
   # GitHub Actions workflow linting (actionlint).
   - repo: https://github.com/rhysd/actionlint

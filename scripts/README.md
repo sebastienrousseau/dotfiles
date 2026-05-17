@@ -118,6 +118,6 @@ handlers) + `lib/dot/*.sh` (shared helpers — moved out of
 
 ## See also
 
-- `STRUCTURE.md` (root) — full repository map.
+- `../docs/STRUCTURE.md` — full repository map.
 - `docs/manual/03-reference/01-dot-cli.md` — every `dot <cmd>` documented.
 - `scripts/dot/lib/ui.sh` — the UI primitive library (always source this for output).

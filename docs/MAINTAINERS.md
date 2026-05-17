@@ -1,7 +1,7 @@
 # Maintainers
 
 This project is maintained by a single primary maintainer with an
-explicit, documented governance model (see `GOVERNANCE.md`).
+explicit, documented governance model (see [`GOVERNANCE.md`](GOVERNANCE.md)).
 
 ## Primary maintainer
 
