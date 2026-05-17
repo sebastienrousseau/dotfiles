@@ -128,8 +128,9 @@ etc. — and deploy to the normal `~/.zshrc` / `~/.config/starship.toml`
 paths.
 
 This means:
+
 - Repo top-level is no longer required to follow chezmoi naming.
-- `bin/dot` is a plain shell script, not `bin/dot`.
+- `bin/dot` is a plain shell script, not `dot_local/bin/executable_dot`.
 - `share/man/man1/dot.1` is a plain file, not chezmoi-deployed.
 - A Homebrew formula can `bin.install 'bin/dot'` directly.
 
@@ -160,18 +161,21 @@ matching the source" and is a no-op.
 ### Library bash-source paths
 
 Today `scripts/dot/commands/<cmd>.sh` does:
+
 ```bash
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/utils.sh"
 ```
 
 After reorganisation:
+
 ```bash
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../utils.sh"   # commands/<cmd>.sh → lib/utils.sh
 ```
 
 Or, more robustly, drive lookup from a single env var set by `bin/dot`:
+
 ```bash
 : "${DOT_LIB:=$(dirname "$(realpath "$0")")/../lib}"
 source "$DOT_LIB/utils.sh"

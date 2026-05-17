@@ -3,7 +3,7 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 # Driver test that invokes the top-level `dot` dispatcher against
 # every read-only subcommand. The point is line coverage for
-# scripts/dot/commands/*.sh + scripts/dot/lib/*.sh which are sourced
+# scripts/dot/commands/*.sh + lib/dot/*.sh which are sourced
 # by `dot` but never executed standalone (they only define functions).
 #
 # Slice 5 of #883: dispatcher-driver coverage. Strictly read-only —

@@ -14,7 +14,7 @@ on:
     branches: [master]
   pull_request:
     paths:
-      - 'scripts/dot/lib/utils.sh'
+      - 'lib/dot/utils.sh'
       - 'scripts/dot/commands/init.sh'
       - 'oss-fuzz-integration/**'
       - '.github/workflows/fuzz.yml'

@@ -25,7 +25,18 @@
     "MD036": false,
     // PR templates have a `# PR Title` + `# PR Description` pair by
     // design (matches GitHub's UI hint).
-    "MD025": false
+    "MD025": false,
+
+    // List style: per-document consistency only. Repo mixes `-`/`*`/`+`
+    // across docs; cross-document uniformity provides no value.
+    "MD004": { "style": "consistent" },
+
+    // Emphasis style: per-document consistency only.
+    "MD049": { "style": "consistent" },
+
+    // Bare URLs in PR template signature block + RFC reference lists
+    // are intentional.
+    "MD034": false
   },
 
   // Files to scan.

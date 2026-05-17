@@ -30,7 +30,7 @@ on:
       - 'AGENTS.md'
       - 'package.json'
       - 'share/man/man1/dot.1'
-      - 'scripts/dot/lib/bento.sh'
+      - 'lib/dot/bento.sh'
   workflow_dispatch:
 
 permissions:

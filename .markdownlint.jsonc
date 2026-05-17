@@ -43,5 +43,21 @@
   "MD036": false,
 
   // PR templates have a `# PR Title` + `# PR Description` pair by design.
-  "MD025": false
+  "MD025": false,
+
+  // List style: allow any single style consistently per-document.
+  // Default mode requires global consistency (cross-document); the
+  // repo intentionally uses `-` in some docs (lib/dot/README.md,
+  // install/migrate/README.md) and `*` or `+` in others. "consistent"
+  // means "pick any style, just be consistent within the file."
+  "MD004": { "style": "consistent" },
+
+  // Emphasis style: same per-document consistency policy as MD004.
+  // The repo mixes `*emphasis*` and `_emphasis_` across docs; both
+  // render identically in GitHub-flavoured Markdown.
+  "MD049": { "style": "consistent" },
+
+  // Bare URLs in PR templates (signature block) + RFC references are
+  // intentional — the surrounding context is the URL itself.
+  "MD034": false
 }

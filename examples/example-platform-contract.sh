@@ -3,8 +3,8 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-# shellcheck source=../scripts/dot/lib/platform.sh
-source "$repo_root/scripts/dot/lib/platform.sh"
+# shellcheck source=../lib/dot/platform.sh
+source "$repo_root/lib/dot/platform.sh"
 
 printf 'Platform: %s\n' "$(dot_platform_id)"
 printf 'Host OS: %s\n' "$(dot_host_os)"

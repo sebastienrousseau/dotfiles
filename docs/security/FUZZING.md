@@ -31,7 +31,7 @@ the shell rejects (or vice-versa), one of them has a hole.
 | Harness | Mirrors | What it proves |
 |---------|---------|----------------|
 | `FuzzValidateName` | `scripts/dot/lib/utils.sh:101` (`validate_name`) | Every accepted name contains only `[a-zA-Z0-9._-]`; no shell metacharacter slips through; empty input refused. |
-| `FuzzInitURLResolver` | `scripts/dot/commands/init.sh` (URL construction in `dot init <user|owner/repo|url>`) | Accepted URLs use `https://` / `git@` / `ssh://` only; plain HTTP refused; no shell metacharacters in constructed URLs; one input shape per acceptable form. |
+| `FuzzInitURLResolver` | `scripts/dot/commands/init.sh` (URL construction in `dot init <user\|owner/repo\|url>`) | Accepted URLs use `https://` / `git@` / `ssh://` only; plain HTTP refused; no shell metacharacters in constructed URLs; one input shape per acceptable form. |
 
 Add a harness when:
 

@@ -52,7 +52,7 @@ check_one() {
     .chezmoitemplates/aliases/*) return 0 ;;
     .chezmoitemplates/functions/*) return 0 ;;
     .chezmoitemplates/paths/*) return 0 ;;
-    # dot_config/shell/* and scripts/dot/lib/* are also sourced but
+    # dot_config/shell/* and lib/dot/* are also sourced but
     # have explicit `# Sourced by` headers as of #854 (defense in
     # depth — the lint also accepts them on header alone).
     dot_local/bin/executable_dot_completion) return 0 ;; # zsh completion, sourced into shell

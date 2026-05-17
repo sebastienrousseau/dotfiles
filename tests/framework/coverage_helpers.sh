@@ -34,7 +34,7 @@ cov_setup_sandbox() {
   # or $CHEZMOI_SOURCE_DIR; without this, they bail rc=1 within the
   # first dozen lines and we never measure the dispatch / parse /
   # function bodies. Others source helper libs via hardcoded
-  # `$HOME/.dotfiles/scripts/dot/lib/...` paths and fail under
+  # `$HOME/.dotfiles/lib/dot/...` paths and fail under
   # `set -e` if those don't exist.
   #
   # We solve both by symlinking $HOME/.dotfiles → the real repo root.

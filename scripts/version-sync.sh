@@ -16,16 +16,61 @@ VERSION_PATTERN='[0-9]+\.[0-9]+\.[0-9]+'
 SED_VERSION_PATTERN='[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*'
 BACKUP_DIR="$PROJECT_ROOT/.version-sync-backup"
 EXCLUDE_FILES=(
+  # Historical / referential docs — version refs inside are intentional
+  # pointers at prior versions, not "this is the current version" claims.
   "CHANGELOG.md"
   "docs/security/COMPLIANCE.md"
   "docs/reference/FONTS.md"
   "docs/archive/LEGACY_ROADMAP.md"
   "docs/archive/PLAN.md"
+
+  # Roadmap + audit narratives — describe per-version work; refs to
+  # prior versions are intentional and historical.
+  "docs/operations/ROADMAP_V0_2_503.md"
+  "docs/operations/VERSION_SYNC.md"
+  "docs/operations/RFC_v0_2_503_reorganization.md"
+  "docs/operations/HARD_AUDIT_2026.md"
+  "docs/reference/ALIASES_DEPRECATIONS.md"
+
+  # Security docs — INSTALL_VERIFICATION + CI_PINNING + SCORECARD
+  # carry per-release hash tables / closed-cycle logs. The "current"
+  # version inside these is tracked by hand, not by version-sync.
+  "docs/security/CI_PINNING.md"
+  "docs/security/INSTALL_VERIFICATION.md"
+  "docs/security/SCORECARD.md"
+
+  # Release-verification recipes use an EXAMPLE tag (currently v0.2.502)
+  # that intentionally stays pinned to a known-published release.
+  "docs/security/VERIFY_RELEASE.md"
+
+  # Example bundles — version refs in README'd examples are illustrative.
+  "examples/mise-plugin-dot/README.md"
+
+  # MANIFEST + MIGRATION docs — describe per-version manifests &
+  # cross-version migration paths; intentional references to other tags.
+  "docs/operations/MANIFEST.md"
+  "docs/operations/MIGRATION.md"
+
+  # ADR + architecture + manual + operations narratives — every
+  # version reference inside is dated context, not a "current version"
+  # claim. The single source-of-truth is .chezmoidata.toml (plus
+  # README, package.json — which version-sync DOES rewrite).
+  "docs/adr/ADR-007-multi-shell-parity.md"
+  "docs/architecture/REPO_LAYOUT.md"
+  "docs/manual/01-concepts/04-fleet.md"
+  "docs/manual/01-concepts/05-self-healing.md"
+  "docs/manual/02-tutorials/05-deploy-fleet.md"
+  "docs/manual/05-appendices/D-bibliography.md"
+  "docs/operations/MAINTENANCE.md"
+
+  # CI_COMPOSITES.md cites third-party action versions (e.g. v5.0.5),
+  # not dotfiles_version. False-positive pattern match.
+  "docs/operations/CI_COMPOSITES.md"
 )
 
-# shellcheck source=dot/lib/ui.sh
+# shellcheck source=../lib/dot/ui.sh
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/dot/lib/ui.sh"
+source "$SCRIPT_DIR/../lib/dot/ui.sh"
 ui_init
 
 # Functions — delegate to shared ui.sh (redirect to stderr for script output)
