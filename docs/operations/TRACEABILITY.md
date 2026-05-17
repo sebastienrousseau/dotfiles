@@ -36,3 +36,6 @@ It is enforced by `bash ./scripts/qa/traceability-coverage.sh`.
 | BT-24 | Multi-harness AI agent context (AGENTS.md generator) | `scripts/dot/commands/agents.sh` | `tests/unit/auto/test_auto_dot_driver.sh` | `AGENTS.md`, `CLAUDE.md`, `docs/operations/HARD_AUDIT_2026.md` |
 | BT-25 | Bootstrap foreign dotfiles repo through chezmoi harness | `scripts/dot/commands/init.sh` | `tests/unit/auto/test_auto_dot_driver.sh` | `docs/operations/ROADMAP_2026.md`, `docs/manual/03-reference/01-dot-cli.md` |
 | BT-26 | Module registry discovery and install scaffold | `scripts/dot/commands/registry.sh` | `tests/unit/auto/test_auto_dot_driver.sh` | `docs/operations/REGISTRY.md`, `docs/registry.json` |
+| BT-27 | Workstation environment manifest emitter (`dot env emit`) | `scripts/dot/commands/env-emit.sh` | `tests/unit/dot-cli/test_cmd_env_emit.sh` | `docs/operations/MANIFEST.md`, `docs/schema/dot-env-v1.json` |
+| BT-28 | Cross-file version-string consistency contract | `scripts/qa/check-version-consistency.sh` | `tests/unit/qa/test_check_version_consistency.sh` | `docs/operations/RELIABILITY.md` |
+| BT-29 | OpenSSF Scorecard nightly snapshot artefact | `scripts/qa/scorecard-snapshot.sh` | `tests/unit/qa/test_scorecard_snapshot.sh` | `docs/security/SCORECARD.md` |

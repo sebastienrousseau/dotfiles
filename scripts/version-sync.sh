@@ -39,8 +39,8 @@ EXCLUDE_FILES=(
   "docs/security/INSTALL_VERIFICATION.md"
   "docs/security/SCORECARD.md"
 
-  # Release-verification recipes use an EXAMPLE tag (currently v0.2.502)
-  # that intentionally stays pinned to a known-published release.
+  # Release-verification recipes use an example pinned tag
+  # that intentionally stays at a known-published release.
   "docs/security/VERIFY_RELEASE.md"
 
   # Example bundles — version refs in README'd examples are illustrative.
