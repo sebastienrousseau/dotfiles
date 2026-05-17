@@ -52,10 +52,15 @@ check_one() {
     .chezmoitemplates/aliases/*) return 0 ;;
     .chezmoitemplates/functions/*) return 0 ;;
     .chezmoitemplates/paths/*) return 0 ;;
+    # Post-Phase-4b (v0.2.503) the same trees live under defaults/.
+    defaults/.chezmoitemplates/aliases/*) return 0 ;;
+    defaults/.chezmoitemplates/functions/*) return 0 ;;
+    defaults/.chezmoitemplates/paths/*) return 0 ;;
     # dot_config/shell/* and lib/dot/* are also sourced but
     # have explicit `# Sourced by` headers as of #854 (defense in
     # depth — the lint also accepts them on header alone).
     dot_local/bin/executable_dot_completion) return 0 ;; # zsh completion, sourced into shell
+    defaults/dot_local/bin/executable_dot_completion) return 0 ;;
   esac
 
   # Required preamble lives within the first 50 lines (after optional docstring).
@@ -84,7 +89,7 @@ else
   # Full-repo scan
   while IFS= read -r f; do
     check_one "$f" || fail=1
-  done < <(git ls-files | grep -E '\.sh$|^dot_local/bin/executable_|^scripts/.+\.sh$')
+  done < <(git ls-files | grep -E '\.sh$|^(defaults/)?dot_local/bin/executable_|^scripts/.+\.sh$')
 fi
 
 if [[ $fail -ne 0 ]]; then

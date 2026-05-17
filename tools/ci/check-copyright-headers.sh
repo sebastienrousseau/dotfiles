@@ -17,7 +17,7 @@
 set -euo pipefail
 
 EXTENSIONS_DEFAULT="sh,lua,nix,py,js,ts,go,rs,java,cpp,c,h,hpp"
-EXCLUDES_DEFAULT='(^|/)(node_modules|\.git|vendor|target|build)/|\.tmpl$|(^|/)\.chezmoitemplates/'
+EXCLUDES_DEFAULT='(^|/)(node_modules|\.git|vendor|target|build)/|\.tmpl$|(^|/)(defaults/)?\.chezmoitemplates/'
 
 EXTENSIONS="$EXTENSIONS_DEFAULT"
 EXCLUDES="$EXCLUDES_DEFAULT"

@@ -160,22 +160,22 @@ repo_root = Path(repo_root).resolve()
 # -----------------------------------------------------------------------------
 SKIP_PATHS = {
     # Interactive / animation — require a TTY + user input.
-    ".chezmoitemplates/functions/interactive/matrix.sh",
-    ".chezmoitemplates/functions/interactive/cmatrix.sh",
-    ".chezmoitemplates/functions/interactive/stopwatch.sh",
-    ".chezmoitemplates/functions/interactive/banner.sh",
-    ".chezmoitemplates/functions/interactive/rainbow.sh",
-    ".chezmoitemplates/functions/interactive/pipes.sh",
-    ".chezmoitemplates/functions/misc/pipes.sh",
-    ".chezmoitemplates/functions/misc/view-source.sh",
-    ".chezmoitemplates/functions/misc/caffeine.sh",   # daemon controller, real /tmp/lock
-    ".chezmoitemplates/functions/nav/ql.sh",
+    "defaults/.chezmoitemplates/functions/interactive/matrix.sh",
+    "defaults/.chezmoitemplates/functions/interactive/cmatrix.sh",
+    "defaults/.chezmoitemplates/functions/interactive/stopwatch.sh",
+    "defaults/.chezmoitemplates/functions/interactive/banner.sh",
+    "defaults/.chezmoitemplates/functions/interactive/rainbow.sh",
+    "defaults/.chezmoitemplates/functions/interactive/pipes.sh",
+    "defaults/.chezmoitemplates/functions/misc/pipes.sh",
+    "defaults/.chezmoitemplates/functions/misc/view-source.sh",
+    "defaults/.chezmoitemplates/functions/misc/caffeine.sh",   # daemon controller, real /tmp/lock
+    "defaults/.chezmoitemplates/functions/nav/ql.sh",
     "scripts/tools/pipes.sh",
     "scripts/tools/cmatrix.sh",
     "scripts/demo/record.sh",
-    "dot_local/bin/executable_tmux-sessionizer",
-    "dot_local/bin/executable_myip",
-    "dot_local/bin/executable_tour",                  # requires TTY + gum
+    "defaults/dot_local/bin/executable_tmux-sessionizer",
+    "defaults/dot_local/bin/executable_myip",
+    "defaults/dot_local/bin/executable_tour",                  # requires TTY + gum
     # Self-reference + CI gates
     "tools/ci/run-coverage.sh",
     "tools/ci/check-deps-dev.sh",
@@ -207,9 +207,9 @@ SKIP_PATHS = {
     "scripts/git-hooks/pre-commit-audit.sh",          # full hook flow needs real index
     "bin/dot-theme-sync",        # signals live apps
     "bin/dot-bootstrap",
-    "dot_local/bin/executable_update",
-    "dot_local/bin/executable_ai_core",
-    "dot_local/bin/executable_ai-update",
+    "defaults/dot_local/bin/executable_update",
+    "defaults/dot_local/bin/executable_ai_core",
+    "defaults/dot_local/bin/executable_ai-update",
 }
 
 def is_skipped(abs_path: Path) -> bool:
