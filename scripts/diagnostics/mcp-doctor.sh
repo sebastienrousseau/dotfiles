@@ -95,7 +95,7 @@ log_warn() {
 MCP_CONFIG="${MCP_CONFIG:-$HOME/.config/claude/mcp_servers.json}"
 if [[ ! -f "$MCP_CONFIG" ]]; then
   for cand in "$HOME/.dotfiles/defaults/dot_config/claude/mcp_servers.json" \
-              "$HOME/.dotfiles/dot_config/claude/mcp_servers.json"; do
+    "$HOME/.dotfiles/dot_config/claude/mcp_servers.json"; do
     [[ -f "$cand" ]] && MCP_CONFIG="$cand" && break
   done
 fi

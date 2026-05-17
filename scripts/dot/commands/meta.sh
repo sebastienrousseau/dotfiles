@@ -96,7 +96,7 @@ cmd_learn() {
   # (older deployments before .chezmoiroot activation) kept it at
   # repo root — probe both.
   dot_bin="$(dirname "${BASH_SOURCE[0]}")/../../../defaults/dot_local/bin"
-  [[ -f "$dot_bin/executable_tour" ]] || \
+  [[ -f "$dot_bin/executable_tour" ]] ||
     dot_bin="$(dirname "${BASH_SOURCE[0]}")/../../../dot_local/bin"
   if [ -f "$dot_bin/executable_tour" ]; then
     exec bash "$dot_bin/executable_tour" "$@"

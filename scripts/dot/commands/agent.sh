@@ -13,7 +13,10 @@ _agent_repo_root() {
   # Prefer the chezmoi source dir so callers can append dot_config/... directly.
   local dir
   dir="$(resolve_chezmoi_source_dir)"
-  [[ -n "$dir" ]] && { printf '%s\n' "$dir"; return; }
+  [[ -n "$dir" ]] && {
+    printf '%s\n' "$dir"
+    return
+  }
   require_source_dir
 }
 
