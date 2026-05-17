@@ -2,6 +2,46 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.503 (unreleased)
+
+Polish + cross-platform + Scorecard release. Non-breaking; the
+v0.3.0 RFC (`docs/operations/RFC_v0_3_0_reorganization.md`) tracks
+the breaking root-reorganisation deferred from this cycle.
+
+### Added
+
+- **`STRUCTURE.md`** + **`scripts/README.md`** — repo-map docs so a new contributor orients in <30s. Explains the chezmoi naming contract that forces the current layout.
+- **`MAINTAINERS.md`** + **`GOVERNANCE.md`** — formal single-maintainer declaration + decision/RFC process. Required by the OpenSSF Best Practices badge application; contextualises the Scorecard `Code-Review` 0/30 score.
+- **`docs/operations/ROADMAP_V0_2_503.md`** — seven-workstream scope for this release.
+- **`docs/operations/RFC_v0_3_0_reorganization.md`** — 267-line formal RFC for the v0.3.0 framework / user-config split. Covers target layout (Debian/aws-cli discipline), `.chezmoiroot` strategy, 7-step idempotent migration script, distribution surface table, ~5-week implementation plan.
+- **`docs/security/VERIFY_RELEASE.md`** — end-user "how to verify a `dot` release" walkthrough. Three independent attestations (SBOM, Cosign keyless, SLSA L3); identity-bound `cosign verify-blob` recipe; `slsa-verifier` recipe; one-liner `verify-dot-release` shell function.
+- **`install/{homebrew/dot.rb, scoop/dot.json, aur/PKGBUILD}`** + **`install/README.md`** — distribution-channel scaffolds for the v0.3.0 standalone-CLI tarball. Publication checklist per channel.
+- **`scripts/qa/check-version-consistency.sh`** — catches drift between `.chezmoidata.toml` (source-of-truth) and the 8 human-visible version surfaces (CLI banner, man page, bento splash, README badge, etc.). `--quiet` mode for hooks; `--fix` for auto-correct. Wired into pre-push.
+- **`scripts/docs/generate-command-index.sh`** — regenerates `docs/manual/command-index.md` from `dot help all` (caught 9 missing entries, 58 → 67). `--check` mode for CI gating.
+- **`scripts/qa/scorecard-snapshot.sh`** — refreshes the per-check table in `docs/security/SCORECARD.md` from `api.scorecard.dev` between BEGIN/END markers.
+- **`.github/workflows/doc-drift.yml`** — gates PRs on the two new `--check` hooks (`command-index`, `version-consistency`).
+- **`.github/ISSUE_TEMPLATE/scorecard.md`** — Scorecard regression issue scaffold matching the triage flow in `SCORECARD.md`.
+- **`.github/PULL_REQUEST_TEMPLATE.md`** — Euxis signature block embedded so contributors don't trip `pr-signature.yml`.
+- **`scripts/ci/windows-smoke-test.ps1`** — native `chezmoi apply --dry-run` check (no bash required). Catches Go-template syntax errors on Windows.
+- **README badges** — OpenSSF Best Practices ("in progress") + License (MIT) shields.
+
+### Fixed
+
+- **`LICENSE`** — normalised 1284-line MIT+GPL3+GPL2+Apache+QRCode conglomerate to clean 21-line MIT. GitHub's license detector now returns `MIT` (was `NOASSERTION`). Expected effect: Scorecard `License` 9 → 10.
+- **`.github/workflows/scorecard.yml`** — wired `SCORECARD_TOKEN` PAT path (falls back to `github.token` when absent). Unlocks `Branch-Protection` + `Webhooks` checks from `-1` to 10 once the maintainer creates the PAT (one-time setup, ~5 min per `docs/security/SCORECARD.md`).
+- **Version sweep** — `scripts/version-sync.sh 0.2.503` across 26 files, plus manual fixups for `bento.sh` banner and man-page header (not in version-sync's file list — now in `check-version-consistency.sh` spec to prevent recurrence).
+
+### Documentation
+
+- **`docs/security/SCORECARD.md`** — added baseline snapshot (7.6 / 10 at 2026-05-17), updated "Closed this cycle" log with v0.2.502 + PR #894 SLSA backfill, full PAT-creation walkthrough for unblocking the `-1` checks.
+
+### Deferred (v0.3.0 — see RFC)
+
+- Root reorganisation to a Debian/aws-cli-style `bin/` + `lib/` + `share/` + `defaults/` layout (breaking; needs migration tool + 2-version deprecation window).
+- Real publication to Homebrew tap / Scoop bucket / AUR (blocked on the standalone-CLI tarball that the v0.3.0 reorg unlocks).
+- Native PowerShell ports of `dot agents check` + `dot fleet apply` (POWERSHELL_PARITY.md `Stub` rows).
+- OSS-Fuzz / cifuzz migration for the `install.sh` fuzz harness (Scorecard `Fuzzing` 0 → 5+).
+
 ## v0.2.502 — 2026-05-17
 
 ### Added
