@@ -111,7 +111,17 @@ jobs:
       actions: read
       id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    # NOTE: The SLSA generator's `builder-fetch.sh` requires `BUILDER_REF`
+    # to be `refs/tags/vX.Y.Z` (regex-checked at start of fetch). A SHA-
+    # pinned `@<sha>` makes the ref a bare hash and the script exits 2
+    # — see slsa-framework/slsa-github-generator#1163. The SLSA team's
+    # documented recommendation is to pin by tag, which is what we do
+    # here. v2.1.0 = f7dd8c54c2067bafc12ca7a55595d5ee9b75204a (verify
+    # before each bump). This single tag-pinned reusable workflow is the
+    # documented exception to the repo's otherwise-strict SHA-pinning
+    # convention; Scorecard's Pinned-Dependencies check explicitly
+    # exempts SLSA-generator from SHA pinning for this reason.
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
     with:
       base64-subjects: "${{ needs.sbom.outputs.hash }}"
       upload-assets: true
