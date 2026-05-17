@@ -251,7 +251,7 @@ assert_equals "0" "$failures" "all scripts/*.sh must pass bash -n"
 # 10. DOT_LOCAL/BIN EXECUTABLES — bash -n syntax check
 # ═══════════════════════════════════════════════════════════════
 
-test_start "dot_local_bin_syntax"
+test_start "defaults/dot_local_bin_syntax"
 failures=0
 while IFS= read -r f; do
   head_line=$(head -1 "$f" 2>/dev/null || true)
@@ -586,12 +586,12 @@ assert_equals "0" "$failures" "test files should use [[ ]] not [ ]"
 # 26. DOT CLI — critical executable quality
 # ═══════════════════════════════════════════════════════════════
 
-test_start "dot_cli_syntax"
+test_start "defaults/dot_cli_syntax"
 dot_result=0
 bash -n "$REPO_ROOT/bin/dot" >/dev/null 2>&1 || dot_result=1
 assert_equals "0" "$dot_result" "dot CLI must pass bash -n"
 
-test_start "dot_cli_has_set_euo"
+test_start "defaults/dot_cli_has_set_euo"
 assert_file_contains "$REPO_ROOT/bin/dot" "set -e" "dot CLI must use set -e"
 
 # ═══════════════════════════════════════════════════════════════
@@ -674,7 +674,7 @@ assert_equals "0" "$failures" "all security scripts must pass bash -n"
 # 32. DOT COMMAND SCRIPTS — valid syntax
 # ═══════════════════════════════════════════════════════════════
 
-test_start "dot_command_scripts_syntax"
+test_start "defaults/dot_command_scripts_syntax"
 failures=0
 while IFS= read -r f; do
   if ! bash -n "$f" >/dev/null 2>&1; then
@@ -684,7 +684,7 @@ while IFS= read -r f; do
 done < <(find "$REPO_ROOT/scripts/dot/commands" -name "*.sh" -type f 2>/dev/null)
 assert_equals "0" "$failures" "all dot command scripts must pass bash -n"
 
-test_start "dot_lib_scripts_syntax"
+test_start "defaults/dot_lib_scripts_syntax"
 failures=0
 while IFS= read -r f; do
   if ! bash -n "$f" >/dev/null 2>&1; then

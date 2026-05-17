@@ -11,10 +11,10 @@ DOT_CLI="$REPO_ROOT/bin/dot"
 
 # ── dot CLI existence and structure ──────────────────────────────
 
-test_start "dot_cli_exists"
+test_start "defaults/dot_cli_exists"
 assert_file_exists "$DOT_CLI" "dot CLI should exist"
 
-test_start "dot_cli_executable"
+test_start "defaults/dot_cli_executable"
 if [[ -x "$DOT_CLI" ]]; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot CLI is executable"
@@ -23,13 +23,13 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot CLI should be executable"
 fi
 
-test_start "dot_cli_shebang"
+test_start "defaults/dot_cli_shebang"
 first_line=$(head -n 1 "$DOT_CLI")
 assert_equals "#!/usr/bin/env bash" "$first_line" "dot CLI should have bash shebang"
 
 # ── dot --version ────────────────────────────────────────────────
 
-test_start "dot_version_output"
+test_start "defaults/dot_version_output"
 version_output=$(bash "$DOT_CLI" --version 2>&1)
 if echo "$version_output" | grep -q "\.dotfiles"; then
   ((TESTS_PASSED++))
@@ -42,7 +42,7 @@ fi
 
 # ── dot help ─────────────────────────────────────────────────────
 
-test_start "dot_help_output"
+test_start "defaults/dot_help_output"
 help_output=$(bash "$DOT_CLI" help 2>&1)
 if echo "$help_output" | grep -q "Start Here"; then
   ((TESTS_PASSED++))
@@ -52,7 +52,7 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot help should show Start Here"
 fi
 
-test_start "dot_help_lists_health"
+test_start "defaults/dot_help_lists_health"
 if echo "$help_output" | grep -q "health"; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot help lists health command"
@@ -63,7 +63,7 @@ fi
 
 # ── dot cd ───────────────────────────────────────────────────────
 
-test_start "dot_cd_output"
+test_start "defaults/dot_cd_output"
 cd_output=$(CHEZMOI_SOURCE_DIR="$REPO_ROOT" bash "$DOT_CLI" cd 2>&1)
 if [[ -d "$cd_output" ]]; then
   ((TESTS_PASSED++))
@@ -76,7 +76,7 @@ fi
 
 # ── resolve_source_dir uses realpath ─────────────────────────────
 
-test_start "dot_cd_resolves_symlinks"
+test_start "defaults/dot_cd_resolves_symlinks"
 # The output should not contain symlink components
 if [[ "$cd_output" != *"//"* ]]; then
   ((TESTS_PASSED++))
@@ -88,7 +88,7 @@ fi
 
 # ── Unknown command handling ─────────────────────────────────────
 
-test_start "dot_unknown_command"
+test_start "defaults/dot_unknown_command"
 unknown_output=$(bash "$DOT_CLI" nonexistent-command 2>&1)
 exit_code=$?
 if [[ $exit_code -ne 0 ]] && echo "$unknown_output" | grep -q "Unknown command"; then

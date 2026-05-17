@@ -89,7 +89,7 @@ fi
 # -----------------------------------------------------------------------------
 
 DOT_BIN="$REPO_ROOT/bin/dot"
-test_start "dot_drift_dispatches_to_dashboard"
+test_start "defaults/dot_drift_dispatches_to_dashboard"
 if [[ -f "$DOT_BIN" ]] && grep -Fq 'drift|diagnostics' "$DOT_BIN"; then
   assert_exit_code 0 "true"
 else

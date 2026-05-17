@@ -70,7 +70,7 @@ for cmd in "status --json" "drift check" "drift history" "events" "namespace" "n
 done
 
 # Hostname-validation reject path.
-test_start "dot_fleet_apply_rejects_bad_hostname"
+test_start "defaults/dot_fleet_apply_rejects_bad_hostname"
 cat >"$_fleet_fixture/bad.toml" <<'TOML'
 [hosts.evil]
 ssh = "user@evil';rm -rf /;'.com"

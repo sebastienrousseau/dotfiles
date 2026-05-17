@@ -397,7 +397,7 @@ test_start "edge_nushell_completions_exist"
 assert_file_exists "$REPO_ROOT/defaults/dot_config/nushell/completions.nu.tmpl" "nushell completions must exist"
 
 test_start "edge_nushell_completions_has_commands"
-assert_file_contains "$REPO_ROOT/defaults/dot_config/nushell/completions.nu.tmpl" "dot_commands" "nushell completions must define commands"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/nushell/completions.nu.tmpl" "defaults/dot_commands" "nushell completions must define commands"
 
 test_start "edge_nushell_config_exists"
 assert_file_exists "$REPO_ROOT/defaults/dot_config/nushell/config.nu.tmpl" "nushell config must exist"

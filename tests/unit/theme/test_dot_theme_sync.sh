@@ -13,11 +13,11 @@ trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
 # --- Script exists ---
-test_start "dot_theme_sync_exists"
+test_start "defaults/dot_theme_sync_exists"
 assert_file_exists "$SCRIPT_FILE" "dot-theme-sync must exist"
 
 # --- Valid syntax ---
-test_start "dot_theme_sync_syntax"
+test_start "defaults/dot_theme_sync_syntax"
 if bash -n "$SCRIPT_FILE" 2>/dev/null; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"

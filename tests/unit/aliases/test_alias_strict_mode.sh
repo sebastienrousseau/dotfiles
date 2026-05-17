@@ -40,8 +40,8 @@ else
 fi
 
 test_start "destructive_aliases_guarded_by_confirm"
-assert_file_contains "$INTERACTIVE_ALIASES" "dot_confirm_destructive" "interactive destructive aliases should require confirmation"
-assert_file_contains "$DOCKER_ALIASES" "dot_confirm_destructive" "docker destructive helpers should require confirmation"
-assert_file_contains "$GIT_ALIASES" "dot_confirm_destructive" "git destructive helpers should require confirmation"
+assert_file_contains "$INTERACTIVE_ALIASES" "defaults/dot_confirm_destructive" "interactive destructive aliases should require confirmation"
+assert_file_contains "$DOCKER_ALIASES" "defaults/dot_confirm_destructive" "docker destructive helpers should require confirmation"
+assert_file_contains "$GIT_ALIASES" "defaults/dot_confirm_destructive" "git destructive helpers should require confirmation"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

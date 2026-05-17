@@ -27,7 +27,7 @@ else
   printf '%b\n' "    Output: $output"
 fi
 
-test_start "dot_agent_conformance_runs"
+test_start "defaults/dot_agent_conformance_runs"
 output=$(REPO_ROOT="$REPO_ROOT" bash "$DOT_CLI" agent conformance --strict --json 2>/dev/null) || true
 if [[ "$output" == \{* ]] && [[ "$(printf '%s' "$output" | jq -r '.status')" == "healthy" ]]; then
   ((TESTS_PASSED++)) || true

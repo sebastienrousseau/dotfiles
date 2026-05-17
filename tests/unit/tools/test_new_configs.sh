@@ -8,20 +8,20 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 # Config files that must exist
 configs=(
-  dot_config/ripgrep/ripgreprc
-  dot_fdignore
-  dot_config/mpv/mpv.conf
-  dot_config/mpv/input.conf
-  dot_config/zathura/zathurarc
-  dot_config/mako/config
-  dot_config/bat/config
-  dot_config/lazygit/config.yml
-  dot_config/user-dirs.dirs
-  dot_config/firefox/user.js.tmpl
-  dot_config/fish/completions/dot-theme-sync.fish.tmpl
-  dot_config/waybar/config.jsonc.tmpl
-  dot_config/waybar/style.css.tmpl
-  dot_config/ipython/profile_default/ipython_config.py
+  defaults/dot_config/ripgrep/ripgreprc
+  defaults/dot_fdignore
+  defaults/dot_config/mpv/mpv.conf
+  defaults/dot_config/mpv/input.conf
+  defaults/dot_config/zathura/zathurarc
+  defaults/dot_config/mako/config
+  defaults/dot_config/bat/config
+  defaults/dot_config/lazygit/config.yml
+  defaults/dot_config/user-dirs.dirs
+  defaults/dot_config/firefox/user.js.tmpl
+  defaults/dot_config/fish/completions/dot-theme-sync.fish.tmpl
+  defaults/dot_config/waybar/config.jsonc.tmpl
+  defaults/dot_config/waybar/style.css.tmpl
+  defaults/dot_config/ipython/profile_default/ipython_config.py
 )
 
 for cfg in "${configs[@]}"; do
