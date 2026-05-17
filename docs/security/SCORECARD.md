@@ -11,6 +11,33 @@ narrative behind it.
 
 ## Live score
 
+<!-- BEGIN scorecard-snapshot (auto-generated, do not edit by hand) -->
+Aggregate score **7.6 / 10** at 2026-05-17T08:11:51Z.
+
+| Check | Score | Reason |
+|---|---:|---|
+| Binary-Artifacts | 10 | no binaries found in the repo |
+| Branch-Protection | -1 | internal error: error during branchesHandler.setup: internal error: some github tokens can't read cl |
+| CI-Tests | 10 | 15 out of 15 merged PRs checked by a CI test -- score normalized to 10 |
+| CII-Best-Practices | 2 | badge detected: InProgress |
+| Code-Review | 0 | Found 0/30 approved changesets -- score normalized to 0 |
+| Contributors | 0 | project has 0 contributing companies or organizations -- score normalized to 0 |
+| Dangerous-Workflow | 10 | no dangerous workflow patterns detected |
+| Dependency-Update-Tool | 10 | update tool detected |
+| Fuzzing | 0 | project is not fuzzed |
+| License | 9 | license file detected |
+| Maintained | 10 | 30 commit(s) and 30 issue activity found in the last 90 days -- score normalized to 10 |
+| Packaging | 10 | packaging workflow detected |
+| Pinned-Dependencies | 9 | dependency not pinned by hash detected -- score normalized to 9 |
+| SAST | 10 | SAST tool is run on all commits |
+| Security-Policy | 10 | security policy file detected |
+| Signed-Releases | 3 | 1 out of the last 3 releases have a total of 2 signed artifacts. |
+| Token-Permissions | 10 | GitHub workflow tokens follow principle of least privilege |
+| Vulnerabilities | 10 | 0 existing vulnerabilities detected |
+
+_Refresh: `scripts/qa/scorecard-snapshot.sh` · CI check: `lint/scorecard-snapshot` (planned)._
+<!-- END scorecard-snapshot -->
+
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/sebastienrousseau/dotfiles/badge)](https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/dotfiles)
 
 The badge above is regenerated every Monday at 06:00 UTC and on every
