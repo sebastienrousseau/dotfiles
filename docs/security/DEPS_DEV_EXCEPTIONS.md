@@ -19,7 +19,7 @@ Managed under [#877](https://github.com/sebastienrousseau/dotfiles/issues/877).
 
 ## Active exceptions
 
-_(none currently)_
+*(none currently)*
 
 ## Adding an exception
 

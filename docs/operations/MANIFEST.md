@@ -73,8 +73,8 @@ a 2026-09-17 / 2026-09-11 window:
 
 1. **AgentSpec / AAIF** public deadline at AGNTCon Amsterdam
    2026-09-17. First-mover with the canonical "one signed
-   manifest → AGENTS.md + agent.yaml + devcontainer-feature.json
-   + mise.toml + Brewfile + flake.nix + in-toto subject list"
+   manifest → AGENTS.md, agent.yaml, devcontainer-feature.json,
+   mise.toml, Brewfile, flake.nix, in-toto subject list"
    generator owns the reference implementation.
 2. **EU CRA SBOM reporting** binding 2026-09-11. A v1 manifest
    per workstation feeds the "demonstrate vulnerability response"

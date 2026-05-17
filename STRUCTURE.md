@@ -22,7 +22,7 @@ current layout.
 | **CLI + framework** | | |
 | `dot_local/bin/` | framework | `executable_dot` (CLI entrypoint) and helper scripts. Deploys to `~/.local/bin/`. |
 | `dot_local/share/` | framework | Man pages, zsh completions. Deploys to `~/.local/share/`. |
-| `scripts/` | framework | Runtime-invoked scripts (`dot CLI dispatch + specialised subtrees). See `scripts/README.md`. |
+| `scripts/` | framework | Runtime-invoked scripts (`dot` CLI dispatch + specialised subtrees). See `scripts/README.md`. |
 | `tools/` | repo-ops | Repo-only ops: CI helpers, release, maintenance, docs-generation. Not distributable. See `tools/README.md`. |
 | `lib/dot/` | framework | Shared bash library sourced by every `dot` subcommand and the dispatcher. Reorganised here from `scripts/dot/lib/` per RFC Phase 1. See `lib/dot/README.md`. |
 | `lib/` | framework | Library tree (`lib/dot/` + third-party `lib/wasm-tools/`). |

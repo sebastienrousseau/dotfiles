@@ -35,9 +35,9 @@ the shell rejects (or vice-versa), one of them has a hole.
 
 Add a harness when:
 
-* a new `dot <subcommand>` accepts user input via `$1` / `--flag`,
-* a new regex appears in `scripts/dot/lib/utils.sh`,
-* a new "construct a URL / path / shell-eval string" code path lands.
+- a new `dot <subcommand>` accepts user input via `$1` / `--flag`,
+- a new regex appears in `scripts/dot/lib/utils.sh`,
+- a new "construct a URL / path / shell-eval string" code path lands.
 
 ## Running locally
 
@@ -98,9 +98,9 @@ which runs OSS-Fuzz-style fuzzing on every PR in this repo
 `.github/workflows/fuzz.yml` (planned) runs each harness for
 60 seconds on every PR touching:
 
-* `scripts/dot/lib/utils.sh`
-* `scripts/dot/commands/init.sh`
-* `oss-fuzz-integration/**`
+- `scripts/dot/lib/utils.sh`
+- `scripts/dot/commands/init.sh`
+- `oss-fuzz-integration/**`
 
 This is the local equivalent of CIFuzz and catches the
 "shell-regex-change without Go-port update" drift class before
