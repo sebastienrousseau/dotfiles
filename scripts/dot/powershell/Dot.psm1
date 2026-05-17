@@ -30,7 +30,13 @@ else {
     (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path
 }
 
-$script:DataFile = Join-Path $script:RepoRoot '.chezmoidata.toml'
+# Post-Phase-4b (v0.2.503) .chezmoidata.toml ships under defaults/.
+# Probe defaults/ first; fall back to legacy root location for older
+# deployments that pre-date the .chezmoiroot activation.
+$script:DataFile = Join-Path $script:RepoRoot 'defaults/.chezmoidata.toml'
+if (-not (Test-Path $script:DataFile)) {
+    $script:DataFile = Join-Path $script:RepoRoot '.chezmoidata.toml'
+}
 
 # Helpers ---------------------------------------------------------------------
 
