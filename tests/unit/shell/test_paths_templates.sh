@@ -8,7 +8,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 
-PATHS_DIR="$REPO_ROOT/.chezmoitemplates/paths"
+PATHS_DIR="$REPO_ROOT/defaults/.chezmoitemplates/paths"
 
 # Test: paths directory exists
 test_start "paths_dir_exists"

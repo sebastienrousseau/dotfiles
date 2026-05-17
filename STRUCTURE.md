@@ -5,13 +5,13 @@ purpose. Skim it once and you should be able to answer:
 
 - **Where is the `dot` CLI?** → `bin/dot` (the source-of-truth file). At runtime it lives at `~/.local/bin/dot`.
 - **Why are there 20+ `dot_*` files at root?** → chezmoi convention: a `dot_X` source file deploys to `~/.X` on apply. Same for `executable_*` (gains `+x`), `private_*` (`0600`), `run_onchange_*` (re-runs when source changes).
-- **What's the framework vs. the maintainer's personal config?** → Everything under `scripts/`, `install/`, `dot_local/bin/`, and `.chezmoitemplates/` is framework code. Everything under `dot_config/`, `dot_warp/`, `dot_etc/`, `private_dot_ssh/` is user-facing default configuration.
+- **What's the framework vs. the maintainer's personal config?** → Everything under `scripts/`, `install/`, `tools/`, `lib/`, and `defaults/.chezmoitemplates/` is framework code. Everything under `defaults/dot_config/`, `defaults/dot_warp/`, `defaults/private_dot_ssh/` is user-facing default configuration (chezmoi auto-rebases via `.chezmoiroot`).
 
-A breaking restructuring to a Debian/aws-cli-style root layout
-(`bin/`, `lib/`, `defaults/`) is planned for **v0.2.503** —
-see `docs/operations/ROADMAP_V0_2_503.md` for the migration
-plan. Until then, the chezmoi naming contract forces the
-current layout.
+The Debian/aws-cli-style root layout shipped in **v0.2.503**:
+`bin/` (dispatcher), `lib/` (shared bash libs), `defaults/`
+(all chezmoi-tracked source files, rebased via
+`.chezmoiroot`). Repo root now hosts only project/CI/docs paths.
+See `docs/operations/ROADMAP_V0_2_503.md` for the full history.
 
 ---
 

@@ -118,7 +118,7 @@ fi
 
 if command -v stylua >/dev/null 2>&1; then
   test_start "existing_lua_passes_stylua"
-  if stylua --check "$REPO_ROOT/dot_config/nvim" >/dev/null 2>&1; then
+  if stylua --check "$REPO_ROOT/defaults/dot_config/nvim" >/dev/null 2>&1; then
     assert_exit_code 0 "true"
   else
     assert_exit_code 0 "false  # committed Lua tree fails stylua"
@@ -127,7 +127,7 @@ fi
 
 if command -v luacheck >/dev/null 2>&1; then
   test_start "existing_lua_passes_luacheck"
-  if luacheck --no-color "$REPO_ROOT/dot_config/nvim" >/dev/null 2>&1; then
+  if luacheck --no-color "$REPO_ROOT/defaults/dot_config/nvim" >/dev/null 2>&1; then
     assert_exit_code 0 "true"
   else
     assert_exit_code 0 "false  # committed Lua tree fails luacheck"

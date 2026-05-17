@@ -22,7 +22,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-FUNC_FILE="$REPO_ROOT/.chezmoitemplates/functions/misc/lazy_loaders.sh"
+FUNC_FILE="$REPO_ROOT/defaults/.chezmoitemplates/functions/misc/lazy_loaders.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

@@ -26,7 +26,7 @@ check_contains() {
 
 APPLY_FILE="$REPO_ROOT/scripts/ops/chezmoi-apply.sh"
 REPAIR_FILE="$REPO_ROOT/scripts/ops/post-apply-repair.sh"
-CONFIG_ALIASES="$REPO_ROOT/.chezmoitemplates/aliases/configuration/configuration.aliases.sh"
+CONFIG_ALIASES="$REPO_ROOT/defaults/.chezmoitemplates/aliases/configuration/configuration.aliases.sh"
 
 check_contains "$APPLY_FILE" 'args=("$@")'
 check_contains "$APPLY_FILE" 'DOTFILES_NONINTERACTIVE'

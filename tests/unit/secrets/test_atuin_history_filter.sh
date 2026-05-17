@@ -17,8 +17,8 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 # shellcheck source=../../framework/assertions.sh
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-TEMPLATE_FILE="$REPO_ROOT/dot_config/atuin/config.toml.tmpl"
-DATA_FILE="$REPO_ROOT/.chezmoidata/secrets-patterns.toml"
+TEMPLATE_FILE="$REPO_ROOT/defaults/dot_config/atuin/config.toml.tmpl"
+DATA_FILE="$REPO_ROOT/defaults/.chezmoidata/secrets-patterns.toml"
 
 # -----------------------------------------------------------------------------
 # Structural checks

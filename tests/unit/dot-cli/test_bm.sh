@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-BM_FILE="$REPO_ROOT/dot_local/bin/executable_bm"
+BM_FILE="$REPO_ROOT/defaults/dot_local/bin/executable_bm"
 
 test_start "script_exists"
 assert_file_exists "$BM_FILE" "executable_bm should exist"

@@ -10,7 +10,7 @@ UTILS_DOC="$REPO_ROOT/docs/reference/UTILS.md"
 AI_DOC="$REPO_ROOT/docs/AI.md"
 SCRIPTS_DOC="$REPO_ROOT/docs/reference/SCRIPTS.md"
 ARCH_DOC="$REPO_ROOT/docs/architecture/ARCHITECTURE.md"
-FUNCTION_GROUPS_JSON="$REPO_ROOT/.chezmoitemplates/functions/groups.json"
+FUNCTION_GROUPS_JSON="$REPO_ROOT/defaults/.chezmoitemplates/functions/groups.json"
 MIN_DOCS_COVERAGE="${MIN_DOCS_COVERAGE:-100}"
 
 TOTAL_CHECKS=0

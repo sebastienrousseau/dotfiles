@@ -26,7 +26,7 @@ _bin_path() {
       printf "%s/bin/%s\n" "$REPO_ROOT" "$1"
       ;;
     *)
-      printf "%s/dot_local/bin/executable_%s\n" "$REPO_ROOT" "$1"
+      printf "%s/defaults/dot_local/bin/executable_%s\n" "$REPO_ROOT" "$1"
       ;;
   esac
 }
@@ -51,5 +51,5 @@ for name in \
 done
 
 test_start "functions_utils_yazi_exists_and_parses"
-assert_file_exists "$REPO_ROOT/.chezmoitemplates/functions/utils/yazi.sh" "functions_utils_yazi_exists"
-assert_exit_code 0 "bash -n '$REPO_ROOT/.chezmoitemplates/functions/utils/yazi.sh'"
+assert_file_exists "$REPO_ROOT/defaults/.chezmoitemplates/functions/utils/yazi.sh" "functions_utils_yazi_exists"
+assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/functions/utils/yazi.sh'"

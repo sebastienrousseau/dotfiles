@@ -8,8 +8,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-ZSHRC="$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl"
-OPTIONS="$REPO_ROOT/dot_config/zsh/rc.d/30-options.zsh.tmpl"
+ZSHRC="$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl"
+OPTIONS="$REPO_ROOT/defaults/dot_config/zsh/rc.d/30-options.zsh.tmpl"
 
 echo "Testing Wave 1: zshrc lazy hook and FNM fix..."
 

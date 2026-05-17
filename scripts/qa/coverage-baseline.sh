@@ -43,7 +43,7 @@ integration_tests="$(find "$REPO_ROOT/tests/integration" -name 'test_*.sh' | wc 
 total_tests="$(find "$REPO_ROOT/tests" -path '*/framework/*' -prune -o -name 'test_*.sh' -print | wc -l | tr -d ' ')"
 named_tests="$(rg -o '\btest_start\b' "$REPO_ROOT/tests/unit" "$REPO_ROOT/tests/integration" -g 'test_*.sh' | wc -l | tr -d ' ')"
 docs_files="$(find "$REPO_ROOT/docs" -type f \( -name '*.md' -o -name '*.md.tmpl' \) | wc -l | tr -d ' ')"
-shell_surfaces="$(find "$REPO_ROOT/scripts" "$REPO_ROOT/dot_local/bin" "$REPO_ROOT/.chezmoitemplates/functions" -type f \( -name '*.sh' -o -name 'executable_*' \) | wc -l | tr -d ' ')"
+shell_surfaces="$(find "$REPO_ROOT/scripts" "$REPO_ROOT/defaults/dot_local/bin" "$REPO_ROOT/defaults/.chezmoitemplates/functions" -type f \( -name '*.sh' -o -name 'executable_*' \) | wc -l | tr -d ' ')"
 
 printf 'Coverage Baseline\n'
 printf 'Repository: %s\n' "$REPO_ROOT"

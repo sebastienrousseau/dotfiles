@@ -35,8 +35,8 @@ command -v jq >/dev/null 2>&1 || {
 
 a2a_card="$REPO_ROOT/.well-known/agent-card.json"
 legacy_doc="$REPO_ROOT/.well-known/agent.json"
-internal_card="$REPO_ROOT/dot_config/dotfiles/agent-card.json"
-agent_profiles="$REPO_ROOT/dot_config/dotfiles/agent-profiles.json"
+internal_card="$REPO_ROOT/defaults/dot_config/dotfiles/agent-card.json"
+agent_profiles="$REPO_ROOT/defaults/dot_config/dotfiles/agent-profiles.json"
 status="healthy"
 issues=()
 

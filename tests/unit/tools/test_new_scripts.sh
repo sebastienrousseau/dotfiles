@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-BIN_DIR="$REPO_ROOT/dot_local/bin"
+BIN_DIR="$REPO_ROOT/defaults/dot_local/bin"
 
 # All new scripts created in this session
 SCRIPTS=(

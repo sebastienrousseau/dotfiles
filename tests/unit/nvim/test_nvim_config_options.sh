@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-TARGET="$REPO_ROOT/dot_config/nvim/lua/config/options.lua"
+TARGET="$REPO_ROOT/defaults/dot_config/nvim/lua/config/options.lua"
 
 test_start "nvim_options_exists"
 assert_file_exists "$TARGET" "options.lua should exist"

@@ -69,7 +69,7 @@ assert_output_not_contains "dot cline" "grep -F 'dot cline' '$REPO_ROOT/docs/AI.
 test_start "features_doc_flags_match_chezmoidata"
 failures=0
 for flag in alias_wrapper dms zellij linux_desktop niri waybar fuzzel mako foot kanshi touch t2 surface; do
-  if ! grep -q "$flag" "$REPO_ROOT/.chezmoidata.toml" 2>/dev/null; then
+  if ! grep -q "$flag" "$REPO_ROOT/defaults/.chezmoidata.toml" 2>/dev/null; then
     failures=$((failures + 1))
   fi
 done
@@ -93,7 +93,7 @@ assert_equals "0" "$failures" "all PROFILES.md presets must have matching templa
 # ═══════════════════════════════════════════════════════════════
 
 test_start "tools_doc_ai_tools_in_mise"
-mise_config="$REPO_ROOT/dot_config/mise/config.toml"
+mise_config="$REPO_ROOT/defaults/dot_config/mise/config.toml"
 failures=0
 for tool in claude copilot gemini ollama opencode aider; do
   if grep -q "$tool" "$REPO_ROOT/docs/reference/TOOLS.md" 2>/dev/null; then

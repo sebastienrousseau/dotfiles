@@ -115,7 +115,7 @@ assert_equals "0" "$failures" "no script exceeds 7 levels of nesting"
 test_start "duplication_cached_eval_not_triplicated"
 # _cached_eval should exist in at most 2 shell files (zsh + bash)
 # Fish has its own implementation in .fish format
-count=$(grep -rl '_cached_eval()' "$REPO_ROOT/dot_bashrc" "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" 2>/dev/null | wc -l | tr -d ' ')
+count=$(grep -rl '_cached_eval()' "$REPO_ROOT/defaults/dot_bashrc" "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" 2>/dev/null | wc -l | tr -d ' ')
 if [[ "$count" -le 2 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: _cached_eval in $count files (max 2)"

@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-ALIASES_DIR="$REPO_ROOT/.chezmoitemplates/aliases/docker"
+ALIASES_DIR="$REPO_ROOT/defaults/.chezmoitemplates/aliases/docker"
 
 test_start "docker_aliases_dir_exists"
 assert_dir_exists "$ALIASES_DIR" "docker aliases directory should exist"

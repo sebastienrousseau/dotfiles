@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-BIN_DIR="$REPO_ROOT/dot_local/bin"
+BIN_DIR="$REPO_ROOT/defaults/dot_local/bin"
 
 test_start "bin_dir_exists"
 assert_dir_exists "$BIN_DIR" "bin directory should exist"
@@ -103,9 +103,9 @@ bash -n "$BIN_DIR/executable_win" && ((TESTS_PASSED++)) && printf '%b
 
 # Test als configuration
 test_start "als_fish_exists"
-assert_file_exists "$REPO_ROOT/dot_config/fish/functions/als.fish" "als.fish should exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/fish/functions/als.fish" "als.fish should exist"
 
 test_start "als_data_tmpl_exists"
-assert_file_exists "$REPO_ROOT/dot_config/shell/als_data.txt.tmpl" "als_data.txt.tmpl should exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/shell/als_data.txt.tmpl" "als_data.txt.tmpl should exist"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

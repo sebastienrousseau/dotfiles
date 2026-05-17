@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-TARGET="$REPO_ROOT/dot_config/nushell/config.nu.tmpl"
+TARGET="$REPO_ROOT/defaults/dot_config/nushell/config.nu.tmpl"
 
 test_start "nushell_config_exists"
 assert_file_exists "$TARGET" "config.nu.tmpl should exist"

@@ -39,7 +39,7 @@ else
 fi
 
 test_start "mcp_json_short_runtime"
-output=$(REPO_ROOT="$REPO_ROOT" MCP_CONFIG="$REPO_ROOT/dot_config/claude/mcp_servers.json" bash "$DOT_CLI" mcp -s -j 2>/dev/null) || true
+output=$(REPO_ROOT="$REPO_ROOT" MCP_CONFIG="$REPO_ROOT/defaults/dot_config/claude/mcp_servers.json" bash "$DOT_CLI" mcp -s -j 2>/dev/null) || true
 if [[ "$output" == \{* ]] && [[ "$output" == *"\"status\""* ]]; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot mcp -s -j emits JSON"

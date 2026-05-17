@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-COMPLETION_FILE="$REPO_ROOT/.chezmoitemplates/aliases/cd/cd-completion.aliases.sh"
+COMPLETION_FILE="$REPO_ROOT/defaults/.chezmoitemplates/aliases/cd/cd-completion.aliases.sh"
 
 test_start "zsh_completion_file_exists"
 assert_file_exists "$COMPLETION_FILE" "cd completion template should exist"

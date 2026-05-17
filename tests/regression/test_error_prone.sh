@@ -18,13 +18,13 @@ source "$SCRIPT_DIR/../framework/mocks.sh"
 
 test_start "template_zshrc_has_balanced_braces"
 # Go template {{ }} must be balanced
-open=$(grep -o '{{' "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" | wc -l | tr -d ' ')
-close=$(grep -o '}}' "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" | wc -l | tr -d ' ')
+open=$(grep -o '{{' "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" | wc -l | tr -d ' ')
+close=$(grep -o '}}' "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" | wc -l | tr -d ' ')
 assert_equals "$open" "$close" "zshrc template braces must be balanced ($open open, $close close)"
 
 test_start "template_gitconfig_has_balanced_braces"
-open=$(grep -o '{{' "$REPO_ROOT/dot_gitconfig.tmpl" | wc -l | tr -d ' ')
-close=$(grep -o '}}' "$REPO_ROOT/dot_gitconfig.tmpl" | wc -l | tr -d ' ')
+open=$(grep -o '{{' "$REPO_ROOT/defaults/dot_gitconfig.tmpl" | wc -l | tr -d ' ')
+close=$(grep -o '}}' "$REPO_ROOT/defaults/dot_gitconfig.tmpl" | wc -l | tr -d ' ')
 assert_equals "$open" "$close" "gitconfig template braces must be balanced"
 
 test_start "template_no_raw_template_syntax_in_non_tmpl"
@@ -35,7 +35,7 @@ while IFS= read -r f; do
   if grep -qE '\{\{\s*\.(chezmoi|dotfiles|features|if|else|end|range)' "$f" 2>/dev/null; then
     violations=$((violations + 1))
   fi
-done < <(find "$REPO_ROOT/.chezmoitemplates" -name "*.sh" ! -name "*.tmpl" 2>/dev/null)
+done < <(find "$REPO_ROOT/defaults/.chezmoitemplates" -name "*.sh" ! -name "*.tmpl" 2>/dev/null)
 assert_equals "0" "$violations" "non-.tmpl files must not contain chezmoi template directives"
 
 # ═══════════════════════════════════════════════════════════════
@@ -44,7 +44,7 @@ assert_equals "0" "$violations" "non-.tmpl files must not contain chezmoi templa
 
 test_start "alias_no_duplicate_names_in_ai"
 # Extract alias names from AI aliases and check for duplicates
-ai_aliases=$(grep -E '^\s*alias\s+\w+=' "$REPO_ROOT/.chezmoitemplates/aliases/ai/ai.aliases.sh" 2>/dev/null | sed 's/.*alias \([^=]*\)=.*/\1/' | sort)
+ai_aliases=$(grep -E '^\s*alias\s+\w+=' "$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh" 2>/dev/null | sed 's/.*alias \([^=]*\)=.*/\1/' | sort)
 dupes=$(echo "$ai_aliases" | uniq -d)
 if [[ -z "$dupes" ]]; then
   ((TESTS_PASSED++))
@@ -55,7 +55,7 @@ else
 fi
 
 test_start "alias_no_duplicate_names_in_git"
-git_aliases=$(grep -rhE '^\s*alias\s+\w+=' "$REPO_ROOT/.chezmoitemplates/aliases/git/" 2>/dev/null | sed 's/.*alias \([^=]*\)=.*/\1/' | sort)
+git_aliases=$(grep -rhE '^\s*alias\s+\w+=' "$REPO_ROOT/defaults/.chezmoitemplates/aliases/git/" 2>/dev/null | sed 's/.*alias \([^=]*\)=.*/\1/' | sort)
 dupes=$(echo "$git_aliases" | uniq -d)
 if [[ -z "$dupes" ]]; then
   ((TESTS_PASSED++))
@@ -70,20 +70,20 @@ fi
 # ═══════════════════════════════════════════════════════════════
 
 test_start "cached_eval_zsh_has_malware_check"
-assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" "suspicious_re" "zsh _cached_eval must check for suspicious output"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" "suspicious_re" "zsh _cached_eval must check for suspicious output"
 
 test_start "cached_eval_bash_has_malware_check"
-assert_file_contains "$REPO_ROOT/dot_bashrc" "Suspicious" "bash _cached_eval must check for suspicious output"
+assert_file_contains "$REPO_ROOT/defaults/dot_bashrc" "Suspicious" "bash _cached_eval must check for suspicious output"
 
 test_start "cached_eval_fish_exists"
-assert_file_exists "$REPO_ROOT/dot_config/fish/functions/_cached_eval.fish" "fish _cached_eval must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/fish/functions/_cached_eval.fish" "fish _cached_eval must exist"
 
 # ═══════════════════════════════════════════════════════════════
 # 4. VERSION SYNC — dotfiles_version consistency
 # ═══════════════════════════════════════════════════════════════
 
 test_start "version_in_chezmoidata"
-version=$(grep -E '^dotfiles_version' "$REPO_ROOT/.chezmoidata.toml" | head -1 | sed 's/.*"\(.*\)".*/\1/')
+version=$(grep -E '^dotfiles_version' "$REPO_ROOT/defaults/.chezmoidata.toml" | head -1 | sed 's/.*"\(.*\)".*/\1/')
 if [[ -n "$version" ]]; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: version is $version"
@@ -110,12 +110,12 @@ while IFS= read -r f; do
       hardcoded=$((hardcoded + 1))
     fi
   fi
-done < <(find "$REPO_ROOT/.chezmoitemplates" -name "*.sh" 2>/dev/null)
+done < <(find "$REPO_ROOT/defaults/.chezmoitemplates" -name "*.sh" 2>/dev/null)
 assert_equals "0" "$hardcoded" "no hardcoded user home paths in templates"
 
 test_start "paths_xdg_compliance"
 # Core shell files should reference XDG vars with fallbacks
-assert_file_contains "$REPO_ROOT/dot_bashrc" "XDG_CACHE_HOME" "bashrc must use XDG_CACHE_HOME"
+assert_file_contains "$REPO_ROOT/defaults/dot_bashrc" "XDG_CACHE_HOME" "bashrc must use XDG_CACHE_HOME"
 
 # ═══════════════════════════════════════════════════════════════
 # 6. FEATURE FLAG GATING
@@ -128,7 +128,7 @@ while IFS= read -r line; do
   if echo "$line" | grep -qE '^\s*\w+\s*=\s*"'; then
     non_bool=$((non_bool + 1))
   fi
-done < <(sed -n '/\[features\]/,/^\[/p' "$REPO_ROOT/.chezmoidata.toml" | grep -v '^\[' | grep -v '^$' | grep -v '^#')
+done < <(sed -n '/\[features\]/,/^\[/p' "$REPO_ROOT/defaults/.chezmoidata.toml" | grep -v '^\[' | grep -v '^$' | grep -v '^#')
 assert_equals "0" "$non_bool" "all feature flags should be boolean (true/false)"
 
 # ═══════════════════════════════════════════════════════════════
@@ -136,13 +136,13 @@ assert_equals "0" "$non_bool" "all feature flags should be boolean (true/false)"
 # ═══════════════════════════════════════════════════════════════
 
 test_start "gitconfig_commit_signing"
-assert_file_contains "$REPO_ROOT/dot_gitconfig.tmpl" "gpgsign = true" "commit signing must be enabled"
+assert_file_contains "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "gpgsign = true" "commit signing must be enabled"
 
 test_start "gitconfig_merge_verify"
-assert_file_contains "$REPO_ROOT/dot_gitconfig.tmpl" "verifySignatures" "merge signature verification must be configured"
+assert_file_contains "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "verifySignatures" "merge signature verification must be configured"
 
 test_start "gpg_cache_ttl_reasonable"
-ttl=$(grep -E 'default-cache-ttl' "$REPO_ROOT/dot_config/gnupg/gpg-agent.conf" | head -1 | awk '{print $2}')
+ttl=$(grep -E 'default-cache-ttl' "$REPO_ROOT/defaults/dot_config/gnupg/gpg-agent.conf" | head -1 | awk '{print $2}')
 if [[ -n "$ttl" && "$ttl" -le 7200 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: GPG cache TTL is ${ttl}s (<= 7200s)"
@@ -156,36 +156,36 @@ fi
 # ═══════════════════════════════════════════════════════════════
 
 test_start "template_ssh_config_has_balanced_braces"
-open=$(grep -o '{{' "$REPO_ROOT/private_dot_ssh/config.tmpl" | wc -l | tr -d ' ')
-close=$(grep -o '}}' "$REPO_ROOT/private_dot_ssh/config.tmpl" | wc -l | tr -d ' ')
+open=$(grep -o '{{' "$REPO_ROOT/defaults/private_dot_ssh/config.tmpl" | wc -l | tr -d ' ')
+close=$(grep -o '}}' "$REPO_ROOT/defaults/private_dot_ssh/config.tmpl" | wc -l | tr -d ' ')
 assert_equals "$open" "$close" "ssh config template braces must be balanced ($open open, $close close)"
 
 test_start "template_fish_init_has_balanced_braces"
-open=$(grep -o '{{' "$REPO_ROOT/dot_config/fish/conf.d/init.fish.tmpl" | wc -l | tr -d ' ')
-close=$(grep -o '}}' "$REPO_ROOT/dot_config/fish/conf.d/init.fish.tmpl" | wc -l | tr -d ' ')
+open=$(grep -o '{{' "$REPO_ROOT/defaults/dot_config/fish/conf.d/init.fish.tmpl" | wc -l | tr -d ' ')
+close=$(grep -o '}}' "$REPO_ROOT/defaults/dot_config/fish/conf.d/init.fish.tmpl" | wc -l | tr -d ' ')
 assert_equals "$open" "$close" "fish init template braces must be balanced ($open open, $close close)"
 
 test_start "template_bashrc_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/dot_bashrc'"
+assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/dot_bashrc'"
 
 test_start "template_options_zsh_has_balanced_braces"
-open=$(grep -o '{{' "$REPO_ROOT/dot_config/zsh/rc.d/30-options.zsh.tmpl" | wc -l | tr -d ' ')
-close=$(grep -o '}}' "$REPO_ROOT/dot_config/zsh/rc.d/30-options.zsh.tmpl" | wc -l | tr -d ' ')
+open=$(grep -o '{{' "$REPO_ROOT/defaults/dot_config/zsh/rc.d/30-options.zsh.tmpl" | wc -l | tr -d ' ')
+close=$(grep -o '}}' "$REPO_ROOT/defaults/dot_config/zsh/rc.d/30-options.zsh.tmpl" | wc -l | tr -d ' ')
 assert_equals "$open" "$close" "options.zsh template braces must be balanced ($open open, $close close)"
 
 test_start "template_aliases_aggregator_has_balanced_braces"
-open=$(grep -o '{{' "$REPO_ROOT/dot_config/shell/90-ux-aliases.sh.tmpl" | wc -l | tr -d ' ')
-close=$(grep -o '}}' "$REPO_ROOT/dot_config/shell/90-ux-aliases.sh.tmpl" | wc -l | tr -d ' ')
+open=$(grep -o '{{' "$REPO_ROOT/defaults/dot_config/shell/90-ux-aliases.sh.tmpl" | wc -l | tr -d ' ')
+close=$(grep -o '}}' "$REPO_ROOT/defaults/dot_config/shell/90-ux-aliases.sh.tmpl" | wc -l | tr -d ' ')
 assert_equals "$open" "$close" "alias aggregator template braces must be balanced ($open open, $close close)"
 
 test_start "template_starship_has_balanced_braces"
-open=$(grep -o '{{' "$REPO_ROOT/dot_config/starship.toml.tmpl" | wc -l | tr -d ' ')
-close=$(grep -o '}}' "$REPO_ROOT/dot_config/starship.toml.tmpl" | wc -l | tr -d ' ')
+open=$(grep -o '{{' "$REPO_ROOT/defaults/dot_config/starship.toml.tmpl" | wc -l | tr -d ' ')
+close=$(grep -o '}}' "$REPO_ROOT/defaults/dot_config/starship.toml.tmpl" | wc -l | tr -d ' ')
 assert_equals "$open" "$close" "starship template braces must be balanced ($open open, $close close)"
 
 test_start "template_kitty_has_balanced_braces"
-open=$(grep -o '{{' "$REPO_ROOT/dot_config/kitty/kitty.conf.tmpl" | wc -l | tr -d ' ')
-close=$(grep -o '}}' "$REPO_ROOT/dot_config/kitty/kitty.conf.tmpl" | wc -l | tr -d ' ')
+open=$(grep -o '{{' "$REPO_ROOT/defaults/dot_config/kitty/kitty.conf.tmpl" | wc -l | tr -d ' ')
+close=$(grep -o '}}' "$REPO_ROOT/defaults/dot_config/kitty/kitty.conf.tmpl" | wc -l | tr -d ' ')
 assert_equals "$open" "$close" "kitty template braces must be balanced ($open open, $close close)"
 
 # ═══════════════════════════════════════════════════════════════
@@ -193,7 +193,7 @@ assert_equals "$open" "$close" "kitty template braces must be balanced ($open op
 # ═══════════════════════════════════════════════════════════════
 
 test_start "alias_no_duplicate_names_in_docker"
-docker_aliases=$(grep -rhE '^\s*alias\s+\w+=' "$REPO_ROOT/.chezmoitemplates/aliases/docker/" 2>/dev/null | sed 's/.*alias \([^=]*\)=.*/\1/' | sort)
+docker_aliases=$(grep -rhE '^\s*alias\s+\w+=' "$REPO_ROOT/defaults/.chezmoitemplates/aliases/docker/" 2>/dev/null | sed 's/.*alias \([^=]*\)=.*/\1/' | sort)
 dupes=$(echo "$docker_aliases" | uniq -d)
 if [[ -z "$dupes" ]]; then
   ((TESTS_PASSED++)) || true
@@ -204,7 +204,7 @@ else
 fi
 
 test_start "alias_no_duplicate_names_in_kubernetes"
-k8s_aliases=$(grep -rhE '^\s*alias\s+\w+=' "$REPO_ROOT/.chezmoitemplates/aliases/kubernetes/" 2>/dev/null | sed 's/.*alias \([^=]*\)=.*/\1/' | sort)
+k8s_aliases=$(grep -rhE '^\s*alias\s+\w+=' "$REPO_ROOT/defaults/.chezmoitemplates/aliases/kubernetes/" 2>/dev/null | sed 's/.*alias \([^=]*\)=.*/\1/' | sort)
 dupes=$(echo "$k8s_aliases" | uniq -d)
 if [[ -z "$dupes" ]]; then
   ((TESTS_PASSED++)) || true
@@ -215,7 +215,7 @@ else
 fi
 
 test_start "alias_no_duplicate_names_in_cd"
-cd_aliases=$(grep -rhE '^\s*alias\s+\w+=' "$REPO_ROOT/.chezmoitemplates/aliases/cd/" 2>/dev/null | sed 's/.*alias \([^=]*\)=.*/\1/' | sort)
+cd_aliases=$(grep -rhE '^\s*alias\s+\w+=' "$REPO_ROOT/defaults/.chezmoitemplates/aliases/cd/" 2>/dev/null | sed 's/.*alias \([^=]*\)=.*/\1/' | sort)
 dupes=$(echo "$cd_aliases" | uniq -d)
 if [[ -z "$dupes" ]]; then
   ((TESTS_PASSED++)) || true
@@ -227,7 +227,7 @@ fi
 
 test_start "alias_no_duplicate_names_in_default"
 # Conditional aliases (if/elif) may define the same name for different platforms — exclude those
-default_aliases=$(grep -rhE '^\s*alias\s+\w+=' "$REPO_ROOT/.chezmoitemplates/aliases/default/" 2>/dev/null | sed 's/.*alias \([^=]*\)=.*/\1/' | sort)
+default_aliases=$(grep -rhE '^\s*alias\s+\w+=' "$REPO_ROOT/defaults/.chezmoitemplates/aliases/default/" 2>/dev/null | sed 's/.*alias \([^=]*\)=.*/\1/' | sort)
 dupes=$(echo "$default_aliases" | uniq -c | awk '$1 > 2 {print $2}' || true)
 if [[ -z "$dupes" ]]; then
   ((TESTS_PASSED++)) || true
@@ -242,7 +242,7 @@ fi
 # ═══════════════════════════════════════════════════════════════
 
 test_start "version_consistent_chezmoidata_vs_package_json"
-chezmoi_ver=$(grep -E '^dotfiles_version' "$REPO_ROOT/.chezmoidata.toml" | head -1 | sed 's/.*"\(.*\)".*/\1/')
+chezmoi_ver=$(grep -E '^dotfiles_version' "$REPO_ROOT/defaults/.chezmoidata.toml" | head -1 | sed 's/.*"\(.*\)".*/\1/')
 pkg_ver=$(grep -E '"version"' "$REPO_ROOT/package.json" | head -1 | sed 's/.*"\([0-9][0-9.]*\)".*/\1/')
 assert_equals "$chezmoi_ver" "$pkg_ver" "version in .chezmoidata.toml ($chezmoi_ver) must match package.json ($pkg_ver)"
 
@@ -256,7 +256,7 @@ while IFS= read -r f; do
   if grep -qE 'vim\.loop' "$f" 2>/dev/null; then
     vim_loop_count=$((vim_loop_count + 1))
   fi
-done < <(find "$REPO_ROOT/dot_config/nvim" -name "*.lua" 2>/dev/null)
+done < <(find "$REPO_ROOT/defaults/dot_config/nvim" -name "*.lua" 2>/dev/null)
 assert_equals "0" "$vim_loop_count" "nvim configs must not use deprecated vim.loop (use vim.uv instead)"
 
 # ═══════════════════════════════════════════════════════════════
@@ -338,22 +338,22 @@ fi
 # ═══════════════════════════════════════════════════════════════
 
 test_start "aliases_docker_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/.chezmoitemplates/aliases/docker/docker.aliases.sh'"
+assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/docker/docker.aliases.sh'"
 
 test_start "aliases_kubernetes_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/.chezmoitemplates/aliases/kubernetes/kubernetes.aliases.sh'"
+assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/kubernetes/kubernetes.aliases.sh'"
 
 test_start "aliases_git_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/.chezmoitemplates/aliases/git/git.aliases.sh'"
+assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/git/git.aliases.sh'"
 
 test_start "aliases_cd_core_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/.chezmoitemplates/aliases/cd/cd-core.aliases.sh'"
+assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/cd/cd-core.aliases.sh'"
 
 test_start "aliases_modern_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/.chezmoitemplates/aliases/modern/modern.aliases.sh'"
+assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/modern/modern.aliases.sh'"
 
 test_start "aliases_security_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/.chezmoitemplates/aliases/security/security.aliases.sh'"
+assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/security/security.aliases.sh'"
 
 # ═══════════════════════════════════════════════════════════════
 # 14. FEATURE FLAGS USED IN TEMPLATES EXIST IN .CHEZMOIDATA.TOML
@@ -363,10 +363,10 @@ test_start "feature_flags_referenced_exist"
 # Extract feature flags used in templates ({{ if .features.X }})
 missing_flags=""
 while IFS= read -r flag; do
-  if ! grep -qE "^\s*${flag}\s*=" "$REPO_ROOT/.chezmoidata.toml" 2>/dev/null; then
+  if ! grep -qE "^\s*${flag}\s*=" "$REPO_ROOT/defaults/.chezmoidata.toml" 2>/dev/null; then
     missing_flags="$missing_flags $flag"
   fi
-done < <(grep -rohE '\.\s*features\.([a-zA-Z_]+)' "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" 2>/dev/null | sed 's/.*features\.\([a-zA-Z_]*\)/\1/' | sort -u)
+done < <(grep -rohE '\.\s*features\.([a-zA-Z_]+)' "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" 2>/dev/null | sed 's/.*features\.\([a-zA-Z_]*\)/\1/' | sort -u)
 if [[ -z "$missing_flags" ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: all referenced feature flags exist in .chezmoidata.toml"
@@ -387,7 +387,7 @@ while IFS= read -r f; do
   if grep -vE '^\s*#' "$f" | grep -qE '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}' 2>/dev/null; then
     email_count=$((email_count + 1))
   fi
-done < <(find "$REPO_ROOT/.chezmoitemplates" -name "*.sh" ! -name "*.tmpl" 2>/dev/null)
+done < <(find "$REPO_ROOT/defaults/.chezmoitemplates" -name "*.sh" ! -name "*.tmpl" 2>/dev/null)
 assert_equals "0" "$email_count" "non-template shell scripts must not contain hardcoded email addresses"
 
 # ═══════════════════════════════════════════════════════════════
@@ -395,36 +395,36 @@ assert_equals "0" "$email_count" "non-template shell scripts must not contain ha
 # ═══════════════════════════════════════════════════════════════
 
 test_start "ssh_config_has_host_wildcard"
-assert_file_contains "$REPO_ROOT/private_dot_ssh/config.tmpl" "Host *" "ssh config must define Host * defaults"
+assert_file_contains "$REPO_ROOT/defaults/private_dot_ssh/config.tmpl" "Host *" "ssh config must define Host * defaults"
 
 test_start "ssh_config_has_kex_algorithms"
-assert_file_contains "$REPO_ROOT/private_dot_ssh/config.tmpl" "KexAlgorithms" "ssh config must specify KexAlgorithms"
+assert_file_contains "$REPO_ROOT/defaults/private_dot_ssh/config.tmpl" "KexAlgorithms" "ssh config must specify KexAlgorithms"
 
 # ═══════════════════════════════════════════════════════════════
 # 17. GIT CONFIG TEMPLATE REQUIRED SECTIONS
 # ═══════════════════════════════════════════════════════════════
 
 test_start "gitconfig_has_user_section"
-assert_file_contains "$REPO_ROOT/dot_gitconfig.tmpl" "[user]" "gitconfig must have [user] section"
+assert_file_contains "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "[user]" "gitconfig must have [user] section"
 
 test_start "gitconfig_has_core_section"
-assert_file_contains "$REPO_ROOT/dot_gitconfig.tmpl" "[core]" "gitconfig must have [core] section"
+assert_file_contains "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "[core]" "gitconfig must have [core] section"
 
 test_start "gitconfig_has_push_section"
-assert_file_contains "$REPO_ROOT/dot_gitconfig.tmpl" "[push]" "gitconfig must have [push] section"
+assert_file_contains "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "[push]" "gitconfig must have [push] section"
 
 test_start "gitconfig_has_merge_section"
-assert_file_contains "$REPO_ROOT/dot_gitconfig.tmpl" "[merge]" "gitconfig must have [merge] section"
+assert_file_contains "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "[merge]" "gitconfig must have [merge] section"
 
 # ═══════════════════════════════════════════════════════════════
 # 18. ADDITIONAL ALIAS AND FUNCTION SYNTAX CHECKS
 # ═══════════════════════════════════════════════════════════════
 
 test_start "aliases_npm_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/.chezmoitemplates/aliases/npm/npm.aliases.sh'"
+assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/npm/npm.aliases.sh'"
 
 test_start "aliases_python_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/.chezmoitemplates/aliases/python/python.aliases.sh'"
+assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/python/python.aliases.sh'"
 
 test_start "functions_nav_files_syntax"
 bad_funcs=""

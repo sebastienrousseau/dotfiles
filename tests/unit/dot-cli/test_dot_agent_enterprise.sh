@@ -14,7 +14,7 @@ META_FILE="$REPO_ROOT/scripts/dot/commands/meta.sh"
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 AGENT_MODULE="$REPO_ROOT/scripts/dot/commands/agent.sh"
-AGENT_CARD="$REPO_ROOT/dot_config/dotfiles/agent-card.json"
+AGENT_CARD="$REPO_ROOT/defaults/dot_config/dotfiles/agent-card.json"
 WELL_KNOWN="$REPO_ROOT/.well-known/agent.json"
 
 test_start "agent_card_exists"

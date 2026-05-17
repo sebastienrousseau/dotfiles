@@ -11,7 +11,7 @@ source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 # Source the function being tested
-FUNC_FILE="$REPO_ROOT/.chezmoitemplates/functions/files/backup.sh"
+FUNC_FILE="$REPO_ROOT/defaults/.chezmoitemplates/functions/files/backup.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

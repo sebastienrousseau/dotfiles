@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 
 OUTPUT_DIR="${OUTPUT_DIR:-$REPO_ROOT/dist/policy-bundles}"
-BUNDLE_VERSION="${BUNDLE_VERSION:-$(jq -r '.schemaVersion' "$REPO_ROOT/dot_config/dotfiles/policy-bundles.json")}"
+BUNDLE_VERSION="${BUNDLE_VERSION:-$(jq -r '.schemaVersion' "$REPO_ROOT/defaults/dot_config/dotfiles/policy-bundles.json")}"
 JSON_MODE=0
 
 while [[ $# -gt 0 ]]; do

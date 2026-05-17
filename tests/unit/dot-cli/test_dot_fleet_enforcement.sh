@@ -12,7 +12,7 @@ AGENT_SCRIPT="$REPO_ROOT/scripts/dot/commands/agent.sh"
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 FLEET_SCRIPT="$REPO_ROOT/scripts/dot/commands/fleet.sh"
-PROFILES_FILE="$REPO_ROOT/dot_config/dotfiles/agent-profiles.json"
+PROFILES_FILE="$REPO_ROOT/defaults/dot_config/dotfiles/agent-profiles.json"
 
 test_start "enforcement_field_exists"
 if jq -e '.rbac.enforcement' "$PROFILES_FILE" >/dev/null 2>&1; then

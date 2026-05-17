@@ -13,7 +13,7 @@ source "$SCRIPT_DIR/../framework/assertions.sh"
 source "$SCRIPT_DIR/../framework/mocks.sh"
 
 DOT_CLI="$REPO_ROOT/bin/dot"
-CHEZMOIDATA="$REPO_ROOT/.chezmoidata.toml"
+CHEZMOIDATA="$REPO_ROOT/defaults/.chezmoidata.toml"
 
 # ═══════════════════════════════════════════════════════════════
 # 1. CHEZMOI APPLY (the most critical operation)
@@ -67,20 +67,20 @@ assert_output_contains "AI" "bash '$DOT_CLI' help"
 # ═══════════════════════════════════════════════════════════════
 
 test_start "critical_zshrc_template_exists"
-assert_file_exists "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" "zshrc template must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" "zshrc template must exist"
 
 test_start "critical_zshenv_exists"
-assert_file_exists "$REPO_ROOT/dot_zshenv" "zshenv must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_zshenv" "zshenv must exist"
 
 test_start "critical_bashrc_exists"
-assert_file_exists "$REPO_ROOT/dot_bashrc" "bashrc must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_bashrc" "bashrc must exist"
 
 test_start "critical_bashrc_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/dot_bashrc'"
+assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/dot_bashrc'"
 
 test_start "critical_rc_d_ordering"
 # rc.d files must follow numeric prefix ordering
-rc_files=$(ls "$REPO_ROOT/dot_config/zsh/rc.d/" 2>/dev/null | sort)
+rc_files=$(ls "$REPO_ROOT/defaults/dot_config/zsh/rc.d/" 2>/dev/null | sort)
 prev_prefix="-1"
 ordering_ok=true
 while IFS= read -r f; do
@@ -100,10 +100,10 @@ else
 fi
 
 test_start "critical_aliases_file_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/.chezmoitemplates/aliases/ai/ai.aliases.sh'"
+assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh'"
 
 test_start "critical_default_aliases_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/.chezmoitemplates/aliases/default/default.aliases.sh'"
+assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/default/default.aliases.sh'"
 
 # ═══════════════════════════════════════════════════════════════
 # 4. DIAGNOSTICS (must always be able to report health)
@@ -172,28 +172,28 @@ assert_file_contains "$REPO_ROOT/scripts/ops/chezmoi-apply.sh" "DOTFILES_PREWARM
 # ═══════════════════════════════════════════════════════════════
 
 test_start "critical_rc_d_00_alias_shims_exists"
-assert_file_exists "$REPO_ROOT/dot_config/zsh/rc.d/00-alias-shims.zsh" "00-alias-shims.zsh must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/zsh/rc.d/00-alias-shims.zsh" "00-alias-shims.zsh must exist"
 
 test_start "critical_rc_d_05_ssh_agent_exists"
-assert_file_exists "$REPO_ROOT/dot_config/zsh/rc.d/05-ssh-agent.zsh" "05-ssh-agent.zsh must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/zsh/rc.d/05-ssh-agent.zsh" "05-ssh-agent.zsh must exist"
 
 test_start "critical_rc_d_10_env_template_exists"
-assert_file_exists "$REPO_ROOT/dot_config/zsh/rc.d/10-env.zsh.tmpl" "10-env.zsh.tmpl must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/zsh/rc.d/10-env.zsh.tmpl" "10-env.zsh.tmpl must exist"
 
 test_start "critical_rc_d_20_zinit_exists"
-assert_file_exists "$REPO_ROOT/dot_config/zsh/rc.d/20-zinit.zsh" "20-zinit.zsh must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/zsh/rc.d/20-zinit.zsh" "20-zinit.zsh must exist"
 
 test_start "critical_rc_d_30_options_template_exists"
-assert_file_exists "$REPO_ROOT/dot_config/zsh/rc.d/30-options.zsh.tmpl" "30-options.zsh.tmpl must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/zsh/rc.d/30-options.zsh.tmpl" "30-options.zsh.tmpl must exist"
 
 test_start "critical_rc_d_40_bell_exists"
-assert_file_exists "$REPO_ROOT/dot_config/zsh/rc.d/40-bell.zsh" "40-bell.zsh must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/zsh/rc.d/40-bell.zsh" "40-bell.zsh must exist"
 
 test_start "critical_rc_d_50_fortune_exists"
-assert_file_exists "$REPO_ROOT/dot_config/zsh/rc.d/50-login-fortune.zsh" "50-login-fortune.zsh must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/zsh/rc.d/50-login-fortune.zsh" "50-login-fortune.zsh must exist"
 
 test_start "critical_rc_d_99_alias_wrapper_exists"
-assert_file_exists "$REPO_ROOT/dot_config/zsh/rc.d/99-alias-wrapper.zsh" "99-alias-wrapper.zsh must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/zsh/rc.d/99-alias-wrapper.zsh" "99-alias-wrapper.zsh must exist"
 
 # ═══════════════════════════════════════════════════════════════
 # 9. DOT COMMAND SCRIPTS — all must exist and have valid syntax
@@ -246,26 +246,26 @@ test_start "critical_bin_dot_exists"
 assert_file_exists "$REPO_ROOT/bin/dot" "dot executable must exist"
 
 test_start "critical_bin_tour_exists"
-assert_file_exists "$REPO_ROOT/dot_local/bin/executable_tour" "tour executable must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_local/bin/executable_tour" "tour executable must exist"
 
 test_start "critical_bin_dot_ai_exists"
-assert_file_exists "$REPO_ROOT/dot_local/bin/executable_dot-ai" "dot-ai executable must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_local/bin/executable_dot-ai" "dot-ai executable must exist"
 
 test_start "critical_bin_extract_exists"
-assert_file_exists "$REPO_ROOT/dot_local/bin/executable_extract" "extract executable must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_local/bin/executable_extract" "extract executable must exist"
 
 test_start "critical_bin_uuid_exists"
-assert_file_exists "$REPO_ROOT/dot_local/bin/executable_uuid" "uuid executable must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_local/bin/executable_uuid" "uuid executable must exist"
 
 # ═══════════════════════════════════════════════════════════════
 # 11. CHEZMOI TEMPLATE FILES EXIST
 # ═══════════════════════════════════════════════════════════════
 
 test_start "critical_gitconfig_template_exists"
-assert_file_exists "$REPO_ROOT/dot_gitconfig.tmpl" "dot_gitconfig.tmpl must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "dot_gitconfig.tmpl must exist"
 
 test_start "critical_zshenv_exists_toplevel"
-assert_file_exists "$REPO_ROOT/dot_zshenv" "dot_zshenv must exist at repo root"
+assert_file_exists "$REPO_ROOT/defaults/dot_zshenv" "dot_zshenv must exist at repo root"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

@@ -34,7 +34,7 @@ TESTS_DIR="${TESTS_DIR:-$REPO_ROOT/tests}"
 COVERAGE_DIR="${COVERAGE_DIR:-$REPO_ROOT/coverage}"
 COVERAGE_OUT="${COVERAGE_OUT:-$COVERAGE_DIR/lcov.info}"
 MIN_COVERAGE_PCT="${MIN_COVERAGE_PCT:-0}" # initial floor; tighten per slice
-COV_INCLUDE_DIRS="${COV_INCLUDE_DIRS:-$REPO_ROOT/scripts:$REPO_ROOT/dot_local/bin:$REPO_ROOT/.chezmoitemplates/functions}"
+COV_INCLUDE_DIRS="${COV_INCLUDE_DIRS:-$REPO_ROOT/scripts:$REPO_ROOT/defaults/dot_local/bin:$REPO_ROOT/defaults/.chezmoitemplates/functions}"
 JOBS="${JOBS:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}"
 COV_TEST_TIMEOUT="${COV_TEST_TIMEOUT:-60}"
 

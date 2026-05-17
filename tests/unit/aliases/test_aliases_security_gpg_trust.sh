@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-ALIAS_FILE="$REPO_ROOT/.chezmoitemplates/aliases/security/gpg-trust.aliases.sh"
+ALIAS_FILE="$REPO_ROOT/defaults/.chezmoitemplates/aliases/security/gpg-trust.aliases.sh"
 
 test_start "security_gpg_trust_file_exists"
 assert_file_exists "$ALIAS_FILE" "gpg-trust.aliases.sh should exist"

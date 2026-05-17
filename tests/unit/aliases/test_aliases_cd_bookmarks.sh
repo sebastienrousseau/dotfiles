@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-ALIAS_FILE="$REPO_ROOT/.chezmoitemplates/aliases/cd/cd-bookmarks.aliases.sh"
+ALIAS_FILE="$REPO_ROOT/defaults/.chezmoitemplates/aliases/cd/cd-bookmarks.aliases.sh"
 
 test_start "cd_bookmarks_file_exists"
 assert_file_exists "$ALIAS_FILE" "cd/cd-bookmarks.aliases.sh should exist"

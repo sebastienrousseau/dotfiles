@@ -212,7 +212,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 
 # Source function being tested
-source "$REPO_ROOT/.chezmoitemplates/functions/myfunction.sh"
+source "$REPO_ROOT/defaults/.chezmoitemplates/functions/myfunction.sh"
 
 # Test case
 test_start "my_function_basic"

@@ -13,7 +13,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-SCRIPT_FILE="$REPO_ROOT/.chezmoitemplates/functions/misc/view-source.sh"
+SCRIPT_FILE="$REPO_ROOT/defaults/.chezmoitemplates/functions/misc/view-source.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

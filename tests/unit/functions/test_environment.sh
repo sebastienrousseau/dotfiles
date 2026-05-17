@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-FUNC_FILE="$REPO_ROOT/.chezmoitemplates/functions/system/environment.sh"
+FUNC_FILE="$REPO_ROOT/defaults/.chezmoitemplates/functions/system/environment.sh"
 
 echo "Testing environment function..."
 

@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-ALIASES_DIR="$REPO_ROOT/.chezmoitemplates/aliases/modern"
+ALIASES_DIR="$REPO_ROOT/defaults/.chezmoitemplates/aliases/modern"
 
 test_start "alias_dir_exists"
 assert_dir_exists "$ALIASES_DIR" "aliases directory should exist"

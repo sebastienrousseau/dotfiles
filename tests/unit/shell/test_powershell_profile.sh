@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-PROFILE_FILE="$REPO_ROOT/dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl"
+PROFILE_FILE="$REPO_ROOT/defaults/dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl"
 SUPPORT_FILE="$REPO_ROOT/docs/reference/SUPPORT_MATRIX.md"
 
 test_start "powershell_profile_exists"

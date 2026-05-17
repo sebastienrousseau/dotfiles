@@ -13,7 +13,7 @@ META_FILE="$REPO_ROOT/scripts/dot/commands/meta.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
-PROFILE_FILE="$REPO_ROOT/dot_config/dotfiles/agent-profiles.json"
+PROFILE_FILE="$REPO_ROOT/defaults/dot_config/dotfiles/agent-profiles.json"
 
 test_start "agent_profile_file_exists"
 assert_file_exists "$PROFILE_FILE" "agent-profiles.json should exist"

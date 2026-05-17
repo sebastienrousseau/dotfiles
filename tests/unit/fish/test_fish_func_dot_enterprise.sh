@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-TARGET="$REPO_ROOT/dot_config/fish/functions/dot.fish"
+TARGET="$REPO_ROOT/defaults/dot_config/fish/functions/dot.fish"
 
 test_start "fish_dot_enterprise_helpers"
 assert_file_contains "$TARGET" "function dm" "fish exposes dm"

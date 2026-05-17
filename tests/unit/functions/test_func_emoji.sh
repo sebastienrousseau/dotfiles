@@ -6,7 +6,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-FUNC_FILE="$REPO_ROOT/.chezmoitemplates/functions/interactive/emoji.sh"
+FUNC_FILE="$REPO_ROOT/defaults/.chezmoitemplates/functions/interactive/emoji.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

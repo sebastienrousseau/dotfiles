@@ -7,7 +7,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 # Get the canonical version from .chezmoidata.toml
-CANONICAL_VERSION="$(grep '^dotfiles_version' "$REPO_ROOT/.chezmoidata.toml" | sed 's/.*= *"\(.*\)"/\1/')"
+CANONICAL_VERSION="$(grep '^dotfiles_version' "$REPO_ROOT/defaults/.chezmoidata.toml" | sed 's/.*= *"\(.*\)"/\1/')"
 
 test_start "canonical_version_exists"
 if [[ -n "$CANONICAL_VERSION" ]]; then
@@ -62,7 +62,7 @@ if [[ "$patch" -gt 5 ]]; then
     stale_pattern+="|$i"
   done
   stale_pattern+=")"
-  stale_count="$(grep -rEn "$stale_pattern" "$REPO_ROOT/scripts/" "$REPO_ROOT/.chezmoitemplates/" \
+  stale_count="$(grep -rEn "$stale_pattern" "$REPO_ROOT/scripts/" "$REPO_ROOT/defaults/.chezmoitemplates/" \
     --include='*.sh' --include='*.md' 2>/dev/null \
     | grep -v CHANGELOG \
     | grep -v 'archive/' \

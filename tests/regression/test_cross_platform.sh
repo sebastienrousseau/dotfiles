@@ -67,10 +67,10 @@ test_start "platform_installer_detects_wsl"
 assert_file_contains "$REPO_ROOT/install.sh" "wsl" "installer must detect WSL"
 
 test_start "platform_chezmoidata_supports_linux"
-assert_file_contains "$REPO_ROOT/.chezmoidata.toml" "linux_desktop" "chezmoidata must have Linux desktop flag"
+assert_file_contains "$REPO_ROOT/defaults/.chezmoidata.toml" "linux_desktop" "chezmoidata must have Linux desktop flag"
 
 test_start "platform_wsl_detection_function"
-assert_file_contains "$REPO_ROOT/.chezmoitemplates/functions/system/environment.sh" "is_wsl" "must have WSL detection function"
+assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/functions/system/environment.sh" "is_wsl" "must have WSL detection function"
 
 # ═══════════════════════════════════════════════════════════════
 # 3. PATH HANDLING — no platform-specific hardcoding
@@ -78,7 +78,7 @@ assert_file_contains "$REPO_ROOT/.chezmoitemplates/functions/system/environment.
 
 test_start "platform_homebrew_path_guarded"
 # /opt/homebrew must only appear inside darwin/macOS guards
-paths_file="$REPO_ROOT/.chezmoitemplates/paths/00-default.paths.sh"
+paths_file="$REPO_ROOT/defaults/.chezmoitemplates/paths/00-default.paths.sh"
 if [[ -f "$paths_file" ]]; then
   if grep -q '/opt/homebrew' "$paths_file" 2>/dev/null; then
     if grep -B3 '/opt/homebrew' "$paths_file" | grep -qiE 'darwin\|OSTYPE.*darwin'; then
@@ -119,29 +119,29 @@ assert_equals "0" "$failures" "new scripts must use XDG vars with fallback defau
 # ═══════════════════════════════════════════════════════════════
 
 test_start "platform_clipboard_wayland"
-assert_file_contains "$REPO_ROOT/.chezmoitemplates/aliases/default/default.aliases.sh" "wl-copy" "clipboard must support Wayland"
+assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/default/default.aliases.sh" "wl-copy" "clipboard must support Wayland"
 
 test_start "platform_clipboard_x11"
-assert_file_contains "$REPO_ROOT/.chezmoitemplates/aliases/default/default.aliases.sh" "xclip" "clipboard must support X11"
+assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/default/default.aliases.sh" "xclip" "clipboard must support X11"
 
 test_start "platform_clipboard_wsl"
-assert_file_contains "$REPO_ROOT/.chezmoitemplates/aliases/default/default.aliases.sh" "clip.exe" "clipboard must support WSL"
+assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/default/default.aliases.sh" "clip.exe" "clipboard must support WSL"
 
 test_start "platform_clipboard_xsel_fallback"
-assert_file_contains "$REPO_ROOT/.chezmoitemplates/aliases/default/default.aliases.sh" "xsel" "clipboard must support xsel fallback"
+assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/default/default.aliases.sh" "xsel" "clipboard must support xsel fallback"
 
 # ═══════════════════════════════════════════════════════════════
 # 5. TEMPLATES — platform conditionals in chezmoi templates
 # ═══════════════════════════════════════════════════════════════
 
 test_start "platform_gitconfig_os_conditional"
-assert_file_contains "$REPO_ROOT/dot_gitconfig.tmpl" "chezmoi.os" "gitconfig must use OS conditionals"
+assert_file_contains "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "chezmoi.os" "gitconfig must use OS conditionals"
 
 test_start "platform_zshrc_template_os_aware"
-assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" "chezmoi.os" "zshrc template must be OS-aware"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" "chezmoi.os" "zshrc template must be OS-aware"
 
 test_start "platform_ssh_config_os_conditional"
-assert_file_contains "$REPO_ROOT/private_dot_ssh/config.tmpl" "chezmoi.os" "SSH config must use OS conditionals"
+assert_file_contains "$REPO_ROOT/defaults/private_dot_ssh/config.tmpl" "chezmoi.os" "SSH config must use OS conditionals"
 
 # ═══════════════════════════════════════════════════════════════
 # 6. PACKAGE MANAGERS — multi-distro support
@@ -169,14 +169,14 @@ else
 fi
 
 test_start "platform_mise_cross_platform"
-assert_file_contains "$REPO_ROOT/dot_config/mise/config.toml" "auto_install = true" "mise must auto-install tools on all platforms"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/config.toml" "auto_install = true" "mise must auto-install tools on all platforms"
 
 # ═══════════════════════════════════════════════════════════════
 # 7. LINUX DESKTOP — conditional feature flags
 # ═══════════════════════════════════════════════════════════════
 
 test_start "platform_niri_config_is_template"
-if [[ -f "$REPO_ROOT/dot_config/niri/config.kdl.tmpl" ]]; then
+if [[ -f "$REPO_ROOT/defaults/dot_config/niri/config.kdl.tmpl" ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: niri config is a chezmoi template"
 else
@@ -185,7 +185,7 @@ else
 fi
 
 test_start "platform_waybar_config_is_template"
-if [[ -f "$REPO_ROOT/dot_config/waybar/config.jsonc.tmpl" ]]; then
+if [[ -f "$REPO_ROOT/defaults/dot_config/waybar/config.jsonc.tmpl" ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: waybar config is a chezmoi template"
 else
@@ -198,16 +198,16 @@ fi
 # ═══════════════════════════════════════════════════════════════
 
 test_start "platform_fish_config_exists"
-assert_file_exists "$REPO_ROOT/dot_config/fish/conf.d/init.fish.tmpl" "fish config must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/fish/conf.d/init.fish.tmpl" "fish config must exist"
 
 test_start "platform_nushell_config_exists"
-assert_file_exists "$REPO_ROOT/dot_config/nushell/completions.nu.tmpl" "nushell completions must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/nushell/completions.nu.tmpl" "nushell completions must exist"
 
 test_start "platform_bash_config_exists"
-assert_file_exists "$REPO_ROOT/dot_bashrc" "bash config must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_bashrc" "bash config must exist"
 
 test_start "platform_zsh_config_exists"
-assert_file_exists "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" "zsh config must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" "zsh config must exist"
 
 # ═══════════════════════════════════════════════════════════════
 # 9. CI MATRIX — must test on multiple platforms
@@ -248,7 +248,7 @@ assert_equals "0" "$failures" "macOS-only commands must be guarded by platform c
 # ═══════════════════════════════════════════════════════════════
 
 test_start "platform_fish_config_is_template"
-fish_tmpl_count=$(find "$REPO_ROOT/dot_config/fish" -name "*.tmpl" -type f 2>/dev/null | wc -l | tr -d ' ')
+fish_tmpl_count=$(find "$REPO_ROOT/defaults/dot_config/fish" -name "*.tmpl" -type f 2>/dev/null | wc -l | tr -d ' ')
 if [[ "$fish_tmpl_count" -gt 0 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: fish has $fish_tmpl_count template files"
@@ -258,16 +258,16 @@ else
 fi
 
 test_start "platform_nushell_config_is_template"
-assert_file_exists "$REPO_ROOT/dot_config/nushell/config.nu.tmpl" "nushell config must be a chezmoi template"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/nushell/config.nu.tmpl" "nushell config must be a chezmoi template"
 
 test_start "platform_nushell_env_is_template"
-assert_file_exists "$REPO_ROOT/dot_config/nushell/env.nu.tmpl" "nushell env must be a chezmoi template"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/nushell/env.nu.tmpl" "nushell env must be a chezmoi template"
 
 test_start "platform_topgrade_config_is_template"
-assert_file_exists "$REPO_ROOT/dot_config/topgrade.toml.tmpl" "topgrade config must be a chezmoi template"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/topgrade.toml.tmpl" "topgrade config must be a chezmoi template"
 
 test_start "platform_ghostty_config_exists"
-ghostty_count=$(find "$REPO_ROOT/dot_config/ghostty" -type f 2>/dev/null | wc -l | tr -d ' ')
+ghostty_count=$(find "$REPO_ROOT/defaults/dot_config/ghostty" -type f 2>/dev/null | wc -l | tr -d ' ')
 if [[ "$ghostty_count" -gt 0 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: ghostty config exists ($ghostty_count files)"
@@ -277,13 +277,13 @@ else
 fi
 
 test_start "platform_wezterm_config_exists"
-assert_file_exists "$REPO_ROOT/dot_config/wezterm/wezterm.lua.tmpl" "wezterm config must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/wezterm/wezterm.lua.tmpl" "wezterm config must exist"
 
 test_start "platform_zellij_config_exists"
-assert_file_exists "$REPO_ROOT/dot_config/zellij/config.kdl.tmpl" "zellij config must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/zellij/config.kdl.tmpl" "zellij config must exist"
 
 test_start "platform_zellij_config_is_template"
-if [[ "$REPO_ROOT/dot_config/zellij/config.kdl.tmpl" == *.tmpl ]]; then
+if [[ "$REPO_ROOT/defaults/dot_config/zellij/config.kdl.tmpl" == *.tmpl ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: zellij config is a chezmoi template"
 else
@@ -320,19 +320,19 @@ fi
 # ═══════════════════════════════════════════════════════════════
 
 test_start "platform_starship_config_is_template"
-assert_file_exists "$REPO_ROOT/dot_config/starship.toml.tmpl" "starship config must be a chezmoi template for cross-platform"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/starship.toml.tmpl" "starship config must be a chezmoi template for cross-platform"
 
 test_start "platform_gitconfig_credential_macos"
-assert_file_contains "$REPO_ROOT/dot_gitconfig.tmpl" "osxkeychain" "gitconfig must handle macOS keychain credential helper"
+assert_file_contains "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "osxkeychain" "gitconfig must handle macOS keychain credential helper"
 
 test_start "platform_gitconfig_credential_linux"
-assert_file_contains "$REPO_ROOT/dot_gitconfig.tmpl" "credential" "gitconfig must handle Linux credential helpers"
+assert_file_contains "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "credential" "gitconfig must handle Linux credential helpers"
 
 test_start "platform_ssh_usekeychain_conditional"
-assert_file_contains "$REPO_ROOT/private_dot_ssh/config.tmpl" "UseKeychain" "SSH config must handle macOS UseKeychain"
+assert_file_contains "$REPO_ROOT/defaults/private_dot_ssh/config.tmpl" "UseKeychain" "SSH config must handle macOS UseKeychain"
 
 test_start "platform_atuin_config_exists"
-assert_file_exists "$REPO_ROOT/dot_config/atuin/config.toml" "atuin config must exist for cross-platform history"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/atuin/config.toml" "atuin config must exist for cross-platform history"
 
 test_start "platform_installer_detects_fedora"
 assert_file_contains "$REPO_ROOT/install.sh" "fedora" "installer must detect Fedora/RHEL"
@@ -348,7 +348,7 @@ while IFS= read -r f; do
     printf '    hardcoded path in: %s\n' "$f"
     failures=$((failures + 1))
   fi
-done < <(find "$REPO_ROOT/dot_config/nvim" -name "*.lua" -type f 2>/dev/null)
+done < <(find "$REPO_ROOT/defaults/dot_config/nvim" -name "*.lua" -type f 2>/dev/null)
 assert_equals "0" "$failures" "neovim config must not have platform-specific hardcoded paths"
 
 test_start "platform_neovim_no_os_execute_unguarded"
@@ -358,7 +358,7 @@ while IFS= read -r f; do
     printf '    unguarded os.execute with package manager in: %s\n' "$f"
     failures=$((failures + 1))
   fi
-done < <(find "$REPO_ROOT/dot_config/nvim" -name "*.lua" -type f 2>/dev/null)
+done < <(find "$REPO_ROOT/defaults/dot_config/nvim" -name "*.lua" -type f 2>/dev/null)
 assert_equals "0" "$failures" "neovim must not call platform-specific package managers via os.execute"
 
 # ═══════════════════════════════════════════════════════════════
@@ -366,11 +366,11 @@ assert_equals "0" "$failures" "neovim must not call platform-specific package ma
 # ═══════════════════════════════════════════════════════════════
 
 test_start "platform_docker_aliases_exist"
-assert_file_exists "$REPO_ROOT/.chezmoitemplates/aliases/docker/docker.aliases.sh" "docker aliases must exist"
+assert_file_exists "$REPO_ROOT/defaults/.chezmoitemplates/aliases/docker/docker.aliases.sh" "docker aliases must exist"
 
 test_start "platform_docker_aliases_no_hardcoded_paths"
 failures=0
-docker_alias_file="$REPO_ROOT/.chezmoitemplates/aliases/docker/docker.aliases.sh"
+docker_alias_file="$REPO_ROOT/defaults/.chezmoitemplates/aliases/docker/docker.aliases.sh"
 if [[ -f "$docker_alias_file" ]]; then
   if grep -vE '^\s*#' "$docker_alias_file" 2>/dev/null | grep -qE '/usr/local/bin/docker|/opt/homebrew/bin/docker'; then
     failures=$((failures + 1))
@@ -379,11 +379,11 @@ fi
 assert_equals "0" "$failures" "docker aliases must not hardcode platform-specific binary paths"
 
 test_start "platform_kubernetes_aliases_exist"
-assert_file_exists "$REPO_ROOT/.chezmoitemplates/aliases/kubernetes/kubernetes.aliases.sh" "kubernetes aliases must exist"
+assert_file_exists "$REPO_ROOT/defaults/.chezmoitemplates/aliases/kubernetes/kubernetes.aliases.sh" "kubernetes aliases must exist"
 
 test_start "platform_kubernetes_aliases_platform_neutral"
 failures=0
-k8s_alias_file="$REPO_ROOT/.chezmoitemplates/aliases/kubernetes/kubernetes.aliases.sh"
+k8s_alias_file="$REPO_ROOT/defaults/.chezmoitemplates/aliases/kubernetes/kubernetes.aliases.sh"
 if [[ -f "$k8s_alias_file" ]]; then
   if grep -vE '^\s*#' "$k8s_alias_file" 2>/dev/null | grep -qE '/usr/local/bin/kubectl|/opt/homebrew/bin/kubectl'; then
     failures=$((failures + 1))
@@ -396,13 +396,13 @@ assert_equals "0" "$failures" "kubernetes aliases must not hardcode platform-spe
 # ═══════════════════════════════════════════════════════════════
 
 test_start "platform_powershell_profile_is_template"
-assert_file_exists "$REPO_ROOT/dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl" "powershell profile must be a chezmoi template"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl" "powershell profile must be a chezmoi template"
 
 test_start "platform_alacritty_config_is_template"
-assert_file_exists "$REPO_ROOT/dot_config/alacritty/alacritty.toml.tmpl" "alacritty config must be a chezmoi template"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/alacritty/alacritty.toml.tmpl" "alacritty config must be a chezmoi template"
 
 test_start "platform_foot_config_is_template"
-assert_file_exists "$REPO_ROOT/dot_config/foot/foot.ini.tmpl" "foot terminal config must be a template (Linux-only terminal)"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/foot/foot.ini.tmpl" "foot terminal config must be a template (Linux-only terminal)"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
