@@ -43,7 +43,7 @@ marks reflect this repo's posture at the time of writing — the
 | Signed-Commits | ✓ | Enforced by pre-push hook (`scripts/git-hooks/pre-push`) and at-push by branch protection (#853 + #857). |
 | Dependency-Update-Tool | ✓ | Dependabot configured for github-actions / npm / docker / devcontainers / uv. |
 | Fuzzing | ⚠ | `install.sh` fuzz harness lives under `tests/fuzz/` (closes #881), but it's shell-based and Scorecard's heuristic only recognizes OSS-Fuzz / ClusterFuzzLite / native Go fuzz / libFuzzer / Atheris. None support shell. Property tests under `tests/unit/functions/test_property_*.sh` cover the closest equivalent surface. |
-| License | ✓ | Apache-2.0 at repo root. |
+| License | ✓ | MIT at repo root (`LICENSE`). |
 | Maintained | ✓ | Active commit cadence; the [README](../../README.md) lists the current `dotfiles_version`. |
 | Pinned-Dependencies | ⚠ | Closed 8 of 14 findings this cycle (every Dockerfile base + every workflow action + 2 `curl \| sh` installers + the `npm install -g npm` upgrade step). 5 residual findings stay open by design — see `Open findings`. |
 | SAST | ✓ | CodeQL (`.github/workflows/codeql.yml`) + Checkov + Grype. |
@@ -101,12 +101,17 @@ false positives in Scorecard's regex.
 | 2026-05-14 | 6.5 | 11 | Closed 17 of 28: 10× TokenPermissions (#886), 6× Dockerfile bases (#886), 1× gitleaks fixture (#884). |
 | 2026-05-14 | 6.5 | 9 | Closed 2× `curl \| sh` installers (#888). |
 | 2026-05-14 | 6.5 | 8 | Closed 1× `npm install -g npm@…` via Node 24 bump (#889). |
+| 2026-05-17 | 7.6 | 7 | v0.2.502 released; Cosign keyless signing live (#876 implementation landed in `security-release.yml` sbom job). |
+| 2026-05-17 | 7.6 | 6 | SLSA Release Attestation pipeline unblocked (PR #894 — 6 prior releases had failed identically). v0.2.502 backfilled with `.intoto.jsonl` + `.sig` + `.pem` triplet. `Signed-Releases` should bump from 3 to ~10 on next Scorecard re-scrape. |
+| 2026-05-17 | 7.6 | — | Added `MAINTAINERS.md` + `GOVERNANCE.md` at repo root. Provides the formal context for the `Code-Review` 0/30 score (solo maintainer) and unblocks the CII Best Practices badge application. |
 
 ## Open work
 
-- **Apply for the OpenSSF Best Practices Badge** — see Bucket 3 above.
-- **Wire Cosign keyless signing into the release pipeline (#876)** — should push `Signed-Releases` to its maximum.
+- **Apply for the OpenSSF Best Practices Badge** — see Bucket 3 above. All passing-tier criteria are now met (signed commits, CI, security policy, MIT license, MAINTAINERS.md, GOVERNANCE.md, RFC process documented).
+- **Re-trigger Scorecard after SLSA backfill propagates** — expected `Signed-Releases` 3 → 10.
 - **`harden-runner` block-mode adoption (#878)** — should tighten the `Token-Permissions` check further.
+- **Investigate `License` 9/10 false-positive** — repo is MIT (SPDX-compliant), Scorecard's penalty should not apply.
+- **Investigate `Branch-Protection` `-1`** — scanner internal error; manually verify with `gh api repos/:owner/:repo/branches/master/protection` and document.
 
 ## Exceptions
 
