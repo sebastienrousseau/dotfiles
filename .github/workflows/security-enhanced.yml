@@ -218,7 +218,7 @@ jobs:
 
   policy-enforcement:
     name: Security / Policy Enforcement
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@4acbe15316661b2e4d0811cede802768ee6c2d4f # master
     needs: [secrets-scan]
     # Only run on PRs to catch issues before merge
     if: github.event_name == 'pull_request'
