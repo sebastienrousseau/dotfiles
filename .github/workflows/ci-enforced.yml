@@ -67,7 +67,7 @@ jobs:
 
   lint-copyright:
     name: Lint / Copyright Headers (Zero Tolerance)
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@4acbe15316661b2e4d0811cede802768ee6c2d4f # master
 
   # ============================================================================
   # STAGE 2: SECURITY (Mandatory - No bypass allowed)
