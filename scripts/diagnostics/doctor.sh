@@ -611,7 +611,7 @@ fi
 # install path), so the warn/fail thresholds are set higher than a
 # lean baseline (40) would suggest.
 path_count=$(printf '%s' "${PATH:-}" | tr ':' '\n' | grep -c . || true)
-if [[ "$path_count" -le 60 ]]; then
+if [[ "$path_count" -le 75 ]]; then
   _ok "PATH length" "$path_count entries"
 elif [[ "$path_count" -le 120 ]]; then
   _warn "PATH length" "$path_count entries — consider pruning"
