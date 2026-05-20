@@ -318,8 +318,8 @@ assert_equals "0" "$failures" "all alias files must pass bash -n"
 test_start "edge_typeset_unique_path"
 assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" "typeset -aU" "zsh must use typeset -aU for unique arrays"
 
-test_start "edge_paths_file_exists"
-assert_file_exists "$REPO_ROOT/.chezmoitemplates/paths/00-default.paths.sh" "default paths file must exist"
+test_start "edge_core_paths_file_exists"
+assert_file_exists "$REPO_ROOT/dot_config/shell/00-core-paths.sh.tmpl" "core paths file must exist"
 
 # ═══════════════════════════════════════════════════════════════
 # 15. ALIAS FILE SIZES — no unreasonably large files

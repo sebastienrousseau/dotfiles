@@ -607,9 +607,9 @@ if command -v zsh >/dev/null 2>&1; then
 fi
 
 # 4. PATH length. Each entry is searched on every command resolution.
-# A mise-managed dev machine routinely adds 50+ entries (one per tool
-# install path), so the warn/fail thresholds are set higher than a
-# lean baseline (40) would suggest.
+# A mise-managed 2026 dev machine routinely adds 60-90 entries (one per
+# installed tool version + per-shim path), so the warn/fail thresholds
+# reflect that baseline rather than a lean default (~40).
 path_count=$(printf '%s' "${PATH:-}" | tr ':' '\n' | grep -c . || true)
 if [[ "$path_count" -le 75 ]]; then
   _ok "PATH length" "$path_count entries"

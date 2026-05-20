@@ -51,7 +51,7 @@ check_one() {
     # (would be 300+ marker comments).
     .chezmoitemplates/aliases/*) return 0 ;;
     .chezmoitemplates/functions/*) return 0 ;;
-    .chezmoitemplates/paths/*) return 0 ;;
+    # .chezmoitemplates/paths/ removed — PATH now in dot_config/shell/00-core-paths.sh.tmpl
     # dot_config/shell/* and scripts/dot/lib/* are also sourced but
     # have explicit `# Sourced by` headers as of #854 (defense in
     # depth — the lint also accepts them on header alone).
