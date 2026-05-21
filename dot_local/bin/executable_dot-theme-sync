@@ -781,13 +781,19 @@ reload_wallpaper() {
     return
   fi
 
-  # Run wallpaper sync in the background — DMS matugen color extraction
-  # takes several seconds and would block the terminal. Theme configs and
-  # desktop colors are already applied; wallpaper is visual polish.
-  bash "$script" >/dev/null 2>&1 &
-  disown
-  RELOADED+=("wallpaper")
-  _ok "Wallpaper" "syncing in background"
+  local wp_output
+  wp_output="$(bash "$script" 2>&1)" || true
+
+  if echo "$wp_output" | grep -q "Applied via\|Applied wallpaper\|matched"; then
+    RELOADED+=("wallpaper")
+    _ok "Wallpaper" "applied"
+  elif echo "$wp_output" | grep -q "skipping\|not found\|no "; then
+    SKIPPED+=("wallpaper")
+    _skip "Wallpaper" "no custom wallpaper (add to ~/Pictures/Wallpapers/)"
+  else
+    SKIPPED+=("wallpaper")
+    _skip "Wallpaper" "sync unavailable"
+  fi
 }
 
 reload_dms() {
@@ -797,25 +803,17 @@ reload_dms() {
     return
   fi
 
-  if ! command -v systemctl &>/dev/null; then
+  if ! command -v dms &>/dev/null; then
     SKIPPED+=("dms")
-    _skip "DMS" "systemctl not available"
+    _skip "DMS" "not installed"
     return
   fi
 
-  if ! systemctl --user is-active --quiet dms.service; then
-    SKIPPED+=("dms")
-    _skip "DMS" "service not active"
-    return
-  fi
-
-  if systemctl --user restart dms.service >/dev/null 2>&1; then
-    RELOADED+=("dms")
-    _ok "DMS" "service restarted"
-  else
-    SKIPPED+=("dms")
-    _skip "DMS" "restart failed"
-  fi
+  # DMS picks up settings.json changes via inotify (written by
+  # reload_desktop's sed -i). No service restart needed — restarting
+  # kills wallpaper state and races with wallpaper-sync IPC calls.
+  RELOADED+=("dms")
+  _ok "DMS" "settings updated (inotify)"
 }
 
 # =============================================================================
@@ -917,8 +915,6 @@ main() {
   reload_tmux
   reload_niri
   reload_desktop "$theme"
-  # DMS must restart BEFORE wallpaper sync (which runs in background and
-  # sends DMS IPC calls — those fail if DMS restarts mid-flight).
   reload_dms
   reload_wallpaper
   reload_browsers "$theme"
