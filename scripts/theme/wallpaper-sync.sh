@@ -70,7 +70,43 @@ wallpaper_for_theme() {
   [[ -n "$theme" ]] || return 1
   [[ -n "$mode" ]] || return 1
 
-  # 1. Check themes.toml for stored wallpaper path (set by extract-theme.py)
+  family="${theme%-dark}"
+  if [[ "$family" == "$theme" ]]; then
+    family="${theme%-light}"
+  fi
+
+  # 1. Prefer pre-extracted frames (fast, no conversion needed)
+  #    Dynamic HEIC wallpapers are extracted to {family}-0.png (light)
+  #    and {family}-1.png (dark) by extract-theme.py.
+  local frame_idx=0
+  [[ "$mode" == "dark" ]] && frame_idx=1
+  for ext in png jpg; do
+    candidate="$WALLPAPER_DIR/${family}-${frame_idx}.${ext}"
+    if [[ -f "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+
+  # 2. Check exact theme name (e.g. hello-dark.png)
+  for ext in png jpg heic; do
+    candidate="$WALLPAPER_DIR/${theme}.${ext}"
+    if [[ -f "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+
+  # 3. Check family-mode variant (e.g. hello-dark.png)
+  for ext in png jpg heic; do
+    candidate="$WALLPAPER_DIR/${family}-${mode}.${ext}"
+    if [[ -f "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+
+  # 4. Check themes.toml stored wallpaper path (set by extract-theme.py)
   local themes_file="${HOME}/.dotfiles/.chezmoidata/themes.toml"
   if [[ -f "$themes_file" ]]; then
     local stored_wp
@@ -79,27 +115,21 @@ wallpaper_for_theme() {
       /^\[/ { found=0 }
       found && /^wallpaper/ { sub(/.*= *"/, ""); sub(/".*/, ""); print; exit }
     ' "$themes_file")"
-    if [[ -n "$stored_wp" && -f "$stored_wp" ]]; then
-      printf '%s\n' "$stored_wp"
-      return 0
+    if [[ -n "$stored_wp" ]]; then
+      # Cross-platform: resolve macOS /Users/<user>/ to $HOME/ on Linux
+      if [[ ! -f "$stored_wp" && "$stored_wp" == /Users/* ]]; then
+        stored_wp="${HOME}/${stored_wp#/Users/*/}"
+      fi
+      if [[ -f "$stored_wp" ]]; then
+        printf '%s\n' "$stored_wp"
+        return 0
+      fi
     fi
   fi
 
-  # 2. Check custom wallpaper directory
-  for ext in heic jpg png; do
-    candidate="$WALLPAPER_DIR/${theme}.${ext}"
-    if [[ -f "$candidate" ]]; then
-      printf '%s\n' "$candidate"
-      return 0
-    fi
-  done
-
-  family="${theme%-dark}"
-  if [[ "$family" == "$theme" ]]; then
-    family="${theme%-light}"
-  fi
-  for ext in heic jpg png; do
-    candidate="$WALLPAPER_DIR/${family}-${mode}.${ext}"
+  # 5. Check family-only file (e.g. hello.heic — dynamic wallpaper)
+  for ext in png jpg heic; do
+    candidate="$WALLPAPER_DIR/${family}.${ext}"
     if [[ -f "$candidate" ]]; then
       printf '%s\n' "$candidate"
       return 0
@@ -295,41 +325,55 @@ apply_wallpaper() {
       ;;
     Linux)
       # Niri + DMS/Quickshell uses its own wallpaper state.
+      # DMS runs matugen for color extraction on each wallpaper set.
+      # Rapid-fire IPC calls overwhelm the worker — serialize with waits.
       if command -v dms &>/dev/null; then
         local dms_result current_outputs output current_dms_mode light_wp dark_wp
-        dms_result="$(dms ipc wallpaper set "$wp" 2>/dev/null || true)"
-        if [[ "$dms_result" == SUCCESS:* ]]; then
-          ui_info "Applied via" "dms ipc wallpaper set"
-        elif [[ "$dms_result" == ERROR:\ Per-monitor\ mode\ enabled* ]]; then
-          current_outputs="$(dms ipc outputs current 2>/dev/null | tr -d '[]"')"
-          for output in ${current_outputs//,/ }; do
-            [[ -n "$output" ]] || continue
-            dms ipc wallpaper setFor "$output" "$wp" >/dev/null 2>&1 || true
-          done
-          ui_info "Applied via" "dms ipc wallpaper setFor"
-        else
-          ui_warn "DMS wallpaper" "set failed, falling back"
-        fi
+        local has_pair=false
 
-        # Keep DMS light/dark wallpaper slots aligned with the theme family.
+        # Check if we have a light/dark pair — if so, skip the initial
+        # single-wallpaper set to avoid a redundant matugen run.
         if [[ -n "${THEME:-}" ]] && mapfile -t _pair < <(theme_wallpaper_pair "$THEME"); then
           light_wp="${_pair[0]:-}"
           dark_wp="${_pair[1]:-}"
+          [[ -n "$light_wp" && -n "$dark_wp" ]] && has_pair=true
+        fi
+
+        if [[ "$has_pair" == true ]]; then
+          # Set both light/dark slots with waits between each to let
+          # the matugen color-extraction worker finish before the next.
           current_dms_mode="$(dms ipc theme getMode 2>/dev/null || printf '%s\n' "$mode")"
 
-          if [[ -n "$light_wp" && -n "$dark_wp" ]]; then
+          dms ipc theme light >/dev/null 2>&1 || true
+          dms ipc wallpaper set "$light_wp" >/dev/null 2>&1 || true
+          sleep 2
+
+          dms ipc theme dark >/dev/null 2>&1 || true
+          dms ipc wallpaper set "$dark_wp" >/dev/null 2>&1 || true
+          sleep 2
+
+          # Restore the original mode
+          if [[ "$current_dms_mode" == "light" ]]; then
             dms ipc theme light >/dev/null 2>&1 || true
-            dms ipc wallpaper set "$light_wp" >/dev/null 2>&1 || true
-
+          else
             dms ipc theme dark >/dev/null 2>&1 || true
-            dms ipc wallpaper set "$dark_wp" >/dev/null 2>&1 || true
-
-            if [[ "$current_dms_mode" == "light" ]]; then
-              dms ipc theme light >/dev/null 2>&1 || true
-            else
-              dms ipc theme dark >/dev/null 2>&1 || true
-            fi
-            ui_info "DMS pair" "$(basename "$light_wp"), $(basename "$dark_wp")"
+          fi
+          ui_info "Applied via" "dms ipc (light/dark pair)"
+          ui_info "DMS pair" "$(basename "$light_wp"), $(basename "$dark_wp")"
+        else
+          # Single wallpaper — no pair available
+          dms_result="$(dms ipc wallpaper set "$wp" 2>/dev/null || true)"
+          if [[ "$dms_result" == SUCCESS:* ]]; then
+            ui_info "Applied via" "dms ipc wallpaper set"
+          elif [[ "$dms_result" == ERROR:\ Per-monitor\ mode\ enabled* ]]; then
+            current_outputs="$(dms ipc outputs current 2>/dev/null | tr -d '[]"')"
+            for output in ${current_outputs//,/ }; do
+              [[ -n "$output" ]] || continue
+              dms ipc wallpaper setFor "$output" "$wp" >/dev/null 2>&1 || true
+            done
+            ui_info "Applied via" "dms ipc wallpaper setFor"
+          else
+            ui_warn "DMS wallpaper" "set failed, falling back"
           fi
         fi
       fi
@@ -337,24 +381,35 @@ apply_wallpaper() {
       # gsettings-based desktop state for GTK/freedesktop consumers
       if command -v gsettings &>/dev/null; then
         # Find the matching pair for picture-uri and picture-uri-dark
-        local light_wp dark_wp base ext
+        local light_wp dark_wp base ext family_base
         ext="${wp##*.}"
         base="${wp%-${mode}.${ext}}"
+        # Also derive family base for -0/-1 naming (e.g. hello-1.png → hello)
+        family_base="${wp%-[01].${ext}}"
+
+        light_wp=""
+        dark_wp=""
+        # Try -light/-dark naming first
         if [[ -f "${base}-light.${ext}" ]] && [[ -f "${base}-dark.${ext}" ]]; then
           light_wp="${base}-light.${ext}"
           dark_wp="${base}-dark.${ext}"
-        elif [[ -f "${base}-light.heic" ]] && [[ -f "${base}-dark.heic" ]]; then
-          light_wp="${base}-light.heic"
-          dark_wp="${base}-dark.heic"
-        elif [[ -f "${base}-light.jpg" ]] && [[ -f "${base}-dark.jpg" ]]; then
-          light_wp="${base}-light.jpg"
-          dark_wp="${base}-dark.jpg"
-        elif [[ -f "${base}-light.png" ]] && [[ -f "${base}-dark.png" ]]; then
-          light_wp="${base}-light.png"
-          dark_wp="${base}-dark.png"
+        # Then try -0/-1 extracted frame naming (0=light, 1=dark)
+        elif [[ -f "${family_base}-0.${ext}" ]] && [[ -f "${family_base}-1.${ext}" ]]; then
+          light_wp="${family_base}-0.${ext}"
+          dark_wp="${family_base}-1.${ext}"
         else
-          light_wp=""
-          dark_wp=""
+          # Scan common extensions
+          for try_ext in png jpg heic; do
+            if [[ -f "${base}-light.${try_ext}" ]] && [[ -f "${base}-dark.${try_ext}" ]]; then
+              light_wp="${base}-light.${try_ext}"
+              dark_wp="${base}-dark.${try_ext}"
+              break
+            elif [[ -f "${family_base}-0.${try_ext}" ]] && [[ -f "${family_base}-1.${try_ext}" ]]; then
+              light_wp="${family_base}-0.${try_ext}"
+              dark_wp="${family_base}-1.${try_ext}"
+              break
+            fi
+          done
         fi
 
         if [[ -n "$light_wp" ]] && [[ -n "$dark_wp" ]]; then
