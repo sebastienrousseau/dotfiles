@@ -308,9 +308,15 @@ ensure_linux_compatible() {
   }
 
   local png="${wp%.heic}.png"
+  # Use cached PNG only if it exists, is newer than source, and is > 1MB
+  # (corrupt/truncated conversions produce tiny files that crash matugen).
   if [[ -f "$png" ]] && [[ "$png" -nt "$wp" ]]; then
-    printf '%s\n' "$png"
-    return
+    local fsize
+    fsize="$(stat -c%s "$png" 2>/dev/null || stat -f%z "$png" 2>/dev/null || echo 0)"
+    if [[ "$fsize" -gt 1000000 ]]; then
+      printf '%s\n' "$png"
+      return
+    fi
   fi
 
   # Write to temp file then atomic move — prevents DMS/matugen from
@@ -320,7 +326,19 @@ ensure_linux_compatible() {
 
   if command -v magick &>/dev/null; then
     magick "$wp" -quality 95 "$tmp_png" 2>/dev/null && {
-      mv -f "$tmp_png" "$png" 2>/dev/null
+      # Multi-frame HEIC: magick creates {name}-0.png, {name}-1.png etc.
+      # Move each extracted frame to its final location atomically.
+      local tmp_base="${tmp_png%.png}"
+      local final_base="${png%.png}"
+      if [[ -f "${tmp_base}-0.png" ]]; then
+        for f in "${tmp_base}"-*.png; do
+          local suffix="${f#"$tmp_base"}"
+          mv -f "$f" "${final_base}${suffix}" 2>/dev/null
+        done
+        rm -f "$tmp_png" 2>/dev/null
+      else
+        mv -f "$tmp_png" "$png" 2>/dev/null
+      fi
       printf '%s\n' "$png"
       return
     }
@@ -357,64 +375,22 @@ apply_wallpaper() {
       osascript -e "tell application \"System Events\" to set picture of every desktop to POSIX file \"$wp\"" || true
       ;;
     Linux)
-      # Niri + DMS/Quickshell uses its own wallpaper state.
-      # DMS runs matugen for color extraction on each wallpaper set.
-      # Rapid-fire IPC calls overwhelm the worker — serialize with waits.
+      # DMS owns wallpaper display and runs matugen for color extraction.
+      # Set the wallpaper ONCE for the current mode — DMS handles the rest.
+      # Multiple IPC calls (pair-setting, mode switching) cause matugen
+      # worker crashes and slow transitions. Keep it simple.
       if command -v dms &>/dev/null; then
-        local dms_result current_outputs output current_dms_mode light_wp dark_wp
-        local has_pair=false
-
-        # Check if we have a light/dark pair — if so, skip the initial
-        # single-wallpaper set to avoid a redundant matugen run.
-        if [[ -n "${THEME:-}" ]] && mapfile -t _pair < <(theme_wallpaper_pair "$THEME"); then
-          light_wp="${_pair[0]:-}"
-          dark_wp="${_pair[1]:-}"
-          [[ -n "$light_wp" && -n "$dark_wp" ]] && has_pair=true
-        fi
-
-        if [[ "$has_pair" == true ]]; then
-          # Convert HEIC → PNG BEFORE any DMS IPC calls. ImageMagick
-          # extraction of multi-frame HEIC is slow (~10s for 6K images).
-          # DMS reads the file immediately on wallpaper set — partial
-          # writes cause "unexpected end of file" matugen crashes.
-          light_wp="$(ensure_linux_compatible "$light_wp")"
-          dark_wp="$(ensure_linux_compatible "$dark_wp")"
-
-          # Set both light/dark slots with waits between each to let
-          # the matugen color-extraction worker finish before the next.
-          current_dms_mode="$(dms ipc theme getMode 2>/dev/null || printf '%s\n' "$mode")"
-
-          dms ipc theme light >/dev/null 2>&1 || true
-          dms ipc wallpaper set "$light_wp" >/dev/null 2>&1 || true
-          sleep 1
-
-          dms ipc theme dark >/dev/null 2>&1 || true
-          dms ipc wallpaper set "$dark_wp" >/dev/null 2>&1 || true
-          sleep 1
-
-          # Restore the original mode
-          if [[ "$current_dms_mode" == "light" ]]; then
-            dms ipc theme light >/dev/null 2>&1 || true
-          else
-            dms ipc theme dark >/dev/null 2>&1 || true
-          fi
-          ui_info "Applied via" "dms ipc (light/dark pair)"
-          ui_info "DMS pair" "$(basename "$light_wp"), $(basename "$dark_wp")"
-        else
-          # Single wallpaper — no pair available
-          dms_result="$(dms ipc wallpaper set "$wp" 2>/dev/null || true)"
-          if [[ "$dms_result" == SUCCESS:* ]]; then
-            ui_info "Applied via" "dms ipc wallpaper set"
-          elif [[ "$dms_result" == ERROR:\ Per-monitor\ mode\ enabled* ]]; then
-            current_outputs="$(dms ipc outputs current 2>/dev/null | tr -d '[]"')"
-            for output in ${current_outputs//,/ }; do
-              [[ -n "$output" ]] || continue
-              dms ipc wallpaper setFor "$output" "$wp" >/dev/null 2>&1 || true
-            done
-            ui_info "Applied via" "dms ipc wallpaper setFor"
-          else
-            ui_warn "DMS wallpaper" "set failed, falling back"
-          fi
+        local dms_result current_outputs output
+        dms_result="$(dms ipc wallpaper set "$wp" 2>/dev/null || true)"
+        if [[ "$dms_result" == SUCCESS:* ]]; then
+          ui_info "Applied via" "dms ipc"
+        elif [[ "$dms_result" == ERROR:\ Per-monitor\ mode\ enabled* ]]; then
+          current_outputs="$(dms ipc outputs current 2>/dev/null | tr -d '[]"')"
+          for output in ${current_outputs//,/ }; do
+            [[ -n "$output" ]] || continue
+            dms ipc wallpaper setFor "$output" "$wp" >/dev/null 2>&1 || true
+          done
+          ui_info "Applied via" "dms ipc (per-monitor)"
         fi
       fi
 
