@@ -346,11 +346,11 @@ apply_wallpaper() {
 
           dms ipc theme light >/dev/null 2>&1 || true
           dms ipc wallpaper set "$light_wp" >/dev/null 2>&1 || true
-          sleep 2
+          sleep 1
 
           dms ipc theme dark >/dev/null 2>&1 || true
           dms ipc wallpaper set "$dark_wp" >/dev/null 2>&1 || true
-          sleep 2
+          sleep 1
 
           # Restore the original mode
           if [[ "$current_dms_mode" == "light" ]]; then

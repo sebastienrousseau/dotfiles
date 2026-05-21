@@ -781,19 +781,13 @@ reload_wallpaper() {
     return
   fi
 
-  local wp_output
-  wp_output="$(bash "$script" 2>&1)" || true
-
-  if echo "$wp_output" | grep -q "Applied via\|Applied wallpaper\|matched"; then
-    RELOADED+=("wallpaper")
-    _ok "Wallpaper" "matched active theme"
-  elif echo "$wp_output" | grep -q "skipping\|not found\|no "; then
-    SKIPPED+=("wallpaper")
-    _skip "Wallpaper" "no custom wallpaper (add to ~/Pictures/Wallpapers/)"
-  else
-    SKIPPED+=("wallpaper")
-    _skip "Wallpaper" "sync unavailable"
-  fi
+  # Run wallpaper sync in the background — DMS matugen color extraction
+  # takes several seconds and would block the terminal. Theme configs and
+  # desktop colors are already applied; wallpaper is visual polish.
+  bash "$script" >/dev/null 2>&1 &
+  disown
+  RELOADED+=("wallpaper")
+  _ok "Wallpaper" "syncing in background"
 }
 
 reload_dms() {
