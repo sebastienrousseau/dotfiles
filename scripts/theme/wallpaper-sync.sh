@@ -131,14 +131,30 @@ wallpaper_for_theme() {
     fi
   fi
 
-  # 5. Check family-only file (e.g. hello.heic — dynamic wallpaper)
-  for ext in png jpg webp heic; do
+  # 5. Check family-only file (e.g. hello.heic — dynamic wallpaper).
+  #    For HEIC on Linux, extract frames first then return the correct one.
+  for ext in png jpg webp; do
     candidate="$WALLPAPER_DIR/${family}.${ext}"
     if [[ -f "$candidate" ]]; then
       printf '%s\n' "$candidate"
       return 0
     fi
   done
+  candidate="$WALLPAPER_DIR/${family}.heic"
+  if [[ -f "$candidate" ]] && [[ "$(uname -s)" == "Linux" ]]; then
+    # Extract frames from HEIC then return the mode-appropriate one
+    ensure_linux_compatible "$candidate" >/dev/null
+    # Re-check for extracted frames
+    for fext in png jpg; do
+      if [[ -f "$WALLPAPER_DIR/${family}-${frame_idx}.${fext}" ]]; then
+        printf '%s\n' "$WALLPAPER_DIR/${family}-${frame_idx}.${fext}"
+        return 0
+      fi
+    done
+  elif [[ -f "$candidate" ]]; then
+    printf '%s\n' "$candidate"
+    return 0
+  fi
 
   return 1
 }
@@ -336,10 +352,16 @@ ensure_linux_compatible() {
           mv -f "$f" "${final_base}${suffix}" 2>/dev/null
         done
         rm -f "$tmp_png" 2>/dev/null
+        # Return the correct frame: -0 = light, -1 = dark
+        if [[ -f "${final_base}-0.png" ]]; then
+          printf '%s\n' "${final_base}-0.png"
+        else
+          printf '%s\n' "$png"
+        fi
       else
         mv -f "$tmp_png" "$png" 2>/dev/null
+        printf '%s\n' "$png"
       fi
-      printf '%s\n' "$png"
       return
     }
   elif command -v heif-convert &>/dev/null; then
