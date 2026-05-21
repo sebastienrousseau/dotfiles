@@ -304,23 +304,32 @@ ensure_linux_compatible() {
     return
   fi
 
+  # Write to temp file then atomic move — prevents DMS/matugen from
+  # reading a partially-written PNG during multi-frame HEIC extraction.
+  local tmp_png
+  tmp_png="$(mktemp "${png%.png}.XXXXXX.png")"
+
   if command -v magick &>/dev/null; then
-    magick "$wp" -quality 95 "$png" 2>/dev/null && {
+    magick "$wp" -quality 95 "$tmp_png" 2>/dev/null && {
+      mv -f "$tmp_png" "$png" 2>/dev/null
       printf '%s\n' "$png"
       return
     }
   elif command -v heif-convert &>/dev/null; then
-    heif-convert "$wp" "$png" 2>/dev/null && {
+    heif-convert "$wp" "$tmp_png" 2>/dev/null && {
+      mv -f "$tmp_png" "$png" 2>/dev/null
       printf '%s\n' "$png"
       return
     }
   elif command -v convert &>/dev/null; then
-    convert "$wp" "$png" 2>/dev/null && {
+    convert "$wp" "$tmp_png" 2>/dev/null && {
+      mv -f "$tmp_png" "$png" 2>/dev/null
       printf '%s\n' "$png"
       return
     }
   fi
 
+  rm -f "$tmp_png" 2>/dev/null
   # Fallback: use original and hope the DE supports it
   printf '%s\n' "$wp"
 }
@@ -355,6 +364,13 @@ apply_wallpaper() {
         fi
 
         if [[ "$has_pair" == true ]]; then
+          # Convert HEIC → PNG BEFORE any DMS IPC calls. ImageMagick
+          # extraction of multi-frame HEIC is slow (~10s for 6K images).
+          # DMS reads the file immediately on wallpaper set — partial
+          # writes cause "unexpected end of file" matugen crashes.
+          light_wp="$(ensure_linux_compatible "$light_wp")"
+          dark_wp="$(ensure_linux_compatible "$dark_wp")"
+
           # Set both light/dark slots with waits between each to let
           # the matugen color-extraction worker finish before the next.
           current_dms_mode="$(dms ipc theme getMode 2>/dev/null || printf '%s\n' "$mode")"
