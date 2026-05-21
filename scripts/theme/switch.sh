@@ -124,8 +124,8 @@ paired_families() {
 wallpaper_source() {
   local family="${1:-}"
   # Check for custom wallpapers: dynamic (family.heic) or split (family-dark/light.ext)
-  for ext in heic jpg png; do
-    if [[ -f "$WALLPAPER_DIR/${family}.${ext}" || -f "$WALLPAPER_DIR/${family}-dark.${ext}" || -f "$WALLPAPER_DIR/${family}-light.${ext}" ]]; then
+  for ext in heic jpg png webp; do
+    if [[ -f "$WALLPAPER_DIR/${family}.${ext}" || -f "$WALLPAPER_DIR/${family}-dark.${ext}" || -f "$WALLPAPER_DIR/${family}-light.${ext}" || -f "$WALLPAPER_DIR/${family}-0.${ext}" ]]; then
       echo "Custom"
       return
     fi

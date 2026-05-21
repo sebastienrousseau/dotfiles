@@ -75,12 +75,12 @@ wallpaper_for_theme() {
     family="${theme%-light}"
   fi
 
-  # 1. Prefer pre-extracted frames (fast, no conversion needed)
-  #    Dynamic HEIC wallpapers are extracted to {family}-0.png (light)
-  #    and {family}-1.png (dark) by extract-theme.py.
+  # 1. Prefer pre-extracted frames (fast, no conversion needed).
+  #    Convention: {family}-0.png = light, {family}-1.png = dark.
+  #    These are created externally (e.g. ImageMagick/ffmpeg from dynamic HEIC).
   local frame_idx=0
   [[ "$mode" == "dark" ]] && frame_idx=1
-  for ext in png jpg; do
+  for ext in png jpg webp; do
     candidate="$WALLPAPER_DIR/${family}-${frame_idx}.${ext}"
     if [[ -f "$candidate" ]]; then
       printf '%s\n' "$candidate"
@@ -89,7 +89,7 @@ wallpaper_for_theme() {
   done
 
   # 2. Check exact theme name (e.g. hello-dark.png)
-  for ext in png jpg heic; do
+  for ext in png jpg webp heic; do
     candidate="$WALLPAPER_DIR/${theme}.${ext}"
     if [[ -f "$candidate" ]]; then
       printf '%s\n' "$candidate"
@@ -98,7 +98,7 @@ wallpaper_for_theme() {
   done
 
   # 3. Check family-mode variant (e.g. hello-dark.png)
-  for ext in png jpg heic; do
+  for ext in png jpg webp heic; do
     candidate="$WALLPAPER_DIR/${family}-${mode}.${ext}"
     if [[ -f "$candidate" ]]; then
       printf '%s\n' "$candidate"
@@ -116,11 +116,17 @@ wallpaper_for_theme() {
       found && /^wallpaper/ { sub(/.*= *"/, ""); sub(/".*/, ""); print; exit }
     ' "$themes_file")"
     if [[ -n "$stored_wp" ]]; then
-      # Cross-platform: resolve macOS /Users/<user>/ to $HOME/ on Linux
-      if [[ ! -f "$stored_wp" && "$stored_wp" == /Users/* ]]; then
-        stored_wp="${HOME}/${stored_wp#/Users/*/}"
+      # Cross-platform: resolve macOS paths on Linux
+      if [[ ! -f "$stored_wp" ]]; then
+        if [[ "$stored_wp" == /Users/* ]]; then
+          # /Users/<user>/Pictures/... → $HOME/Pictures/...
+          stored_wp="${HOME}/${stored_wp#/Users/*/}"
+        elif [[ "$stored_wp" == /System/* ]]; then
+          # macOS system wallpapers don't exist on Linux — skip to next fallback
+          stored_wp=""
+        fi
       fi
-      if [[ -f "$stored_wp" ]]; then
+      if [[ -n "$stored_wp" && -f "$stored_wp" ]]; then
         printf '%s\n' "$stored_wp"
         return 0
       fi
@@ -128,7 +134,7 @@ wallpaper_for_theme() {
   fi
 
   # 5. Check family-only file (e.g. hello.heic — dynamic wallpaper)
-  for ext in png jpg heic; do
+  for ext in png jpg webp heic; do
     candidate="$WALLPAPER_DIR/${family}.${ext}"
     if [[ -f "$candidate" ]]; then
       printf '%s\n' "$candidate"
@@ -185,7 +191,7 @@ system_wallpaper_for_theme() {
     for dir in "${SYS_LINUX_DIRS[@]}"; do
       [[ -d "$dir" ]] || continue
       local match
-      match="$(find "$dir" -maxdepth 3 -type f \( -name "*.jpg" -o -name "*.png" \) \
+      match="$(find "$dir" -maxdepth 3 -type f \( -name "*.jpg" -o -name "*.png" -o -name "*.webp" \) \
         -iname "*${keyword}*" 2>/dev/null | head -1)"
       if [[ -n "$match" ]]; then
         printf '%s\n' "$match"
@@ -238,7 +244,16 @@ pick_wallpaper() {
 
   while IFS= read -r line; do
     files+=("$line")
-  done < <(find "$WALLPAPER_DIR" -maxdepth 1 -type f \( -iname "*-${mode}.jpg" -o -iname "*-${mode}.png" -o -iname "*-${mode}.heic" \) | sort)
+  done < <(find "$WALLPAPER_DIR" -maxdepth 1 -type f \( -iname "*-${mode}.jpg" -o -iname "*-${mode}.png" -o -iname "*-${mode}.webp" -o -iname "*-${mode}.heic" \) | sort)
+
+  # Fallback: search for extracted frames (-0 = light, -1 = dark)
+  if [[ ${#files[@]} -eq 0 ]]; then
+    local frame_suffix=0
+    [[ "$mode" == "dark" ]] && frame_suffix=1
+    while IFS= read -r line; do
+      files+=("$line")
+    done < <(find "$WALLPAPER_DIR" -maxdepth 1 -type f \( -iname "*-${frame_suffix}.jpg" -o -iname "*-${frame_suffix}.png" -o -iname "*-${frame_suffix}.webp" \) | sort)
+  fi
 
   if [[ ${#files[@]} -eq 0 ]]; then
     return 1
@@ -380,37 +395,33 @@ apply_wallpaper() {
 
       # gsettings-based desktop state for GTK/freedesktop consumers
       if command -v gsettings &>/dev/null; then
-        # Find the matching pair for picture-uri and picture-uri-dark
-        local light_wp dark_wp base ext family_base
+        # Find the matching pair for picture-uri and picture-uri-dark.
+        # Wallpapers use two naming conventions:
+        #   -light/-dark   (e.g. hello-light.png, hello-dark.png)
+        #   -0/-1          (e.g. hello-0.png = light, hello-1.png = dark)
+        local light_wp="" dark_wp="" base ext family_base
         ext="${wp##*.}"
+        # Strip -light/-dark suffix to get family base
         base="${wp%-${mode}.${ext}}"
-        # Also derive family base for -0/-1 naming (e.g. hello-1.png → hello)
+        # Strip -0/-1 suffix to get family base for frame naming
         family_base="${wp%-[01].${ext}}"
-
-        light_wp=""
-        dark_wp=""
-        # Try -light/-dark naming first
-        if [[ -f "${base}-light.${ext}" ]] && [[ -f "${base}-dark.${ext}" ]]; then
-          light_wp="${base}-light.${ext}"
-          dark_wp="${base}-dark.${ext}"
-        # Then try -0/-1 extracted frame naming (0=light, 1=dark)
-        elif [[ -f "${family_base}-0.${ext}" ]] && [[ -f "${family_base}-1.${ext}" ]]; then
-          light_wp="${family_base}-0.${ext}"
-          dark_wp="${family_base}-1.${ext}"
-        else
-          # Scan common extensions
-          for try_ext in png jpg heic; do
-            if [[ -f "${base}-light.${try_ext}" ]] && [[ -f "${base}-dark.${try_ext}" ]]; then
-              light_wp="${base}-light.${try_ext}"
-              dark_wp="${base}-dark.${try_ext}"
-              break
-            elif [[ -f "${family_base}-0.${try_ext}" ]] && [[ -f "${family_base}-1.${try_ext}" ]]; then
-              light_wp="${family_base}-0.${try_ext}"
-              dark_wp="${family_base}-1.${try_ext}"
-              break
-            fi
-          done
+        # If neither pattern matched, both equal $wp — derive family from theme
+        if [[ "$family_base" == "$wp" && "$base" == "$wp" ]]; then
+          family_base="${WALLPAPER_DIR}/${THEME%-dark}"
+          [[ "$family_base" == "${WALLPAPER_DIR}/${THEME}" ]] && family_base="${WALLPAPER_DIR}/${THEME%-light}"
+          base="$family_base"
         fi
+
+        for try_ext in "$ext" png jpg webp heic; do
+          [[ -z "$light_wp" ]] || break
+          if [[ -f "${base}-light.${try_ext}" ]] && [[ -f "${base}-dark.${try_ext}" ]]; then
+            light_wp="${base}-light.${try_ext}"
+            dark_wp="${base}-dark.${try_ext}"
+          elif [[ -f "${family_base}-0.${try_ext}" ]] && [[ -f "${family_base}-1.${try_ext}" ]]; then
+            light_wp="${family_base}-0.${try_ext}"
+            dark_wp="${family_base}-1.${try_ext}"
+          fi
+        done
 
         if [[ -n "$light_wp" ]] && [[ -n "$dark_wp" ]]; then
           light_wp="$(ensure_linux_compatible "$light_wp")"

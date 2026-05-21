@@ -873,6 +873,10 @@ main() {
   printf '%s\n' "${BOLD}${CYAN}dot-theme-sync${RESET}"
   echo ""
 
+  # Save previous theme for rollback on failure
+  local prev_theme
+  prev_theme="$(current_theme)"
+
   # If a new theme was specified, write it to the data file
   if [[ -n "$new_theme" ]]; then
     write_theme "$new_theme"
@@ -897,7 +901,10 @@ main() {
     if chezmoi apply --force 2>/dev/null || chezmoi apply; then
       _ok "Chezmoi" "full apply completed"
     else
-      _err "Chezmoi" "apply failed"
+      _err "Chezmoi" "apply failed — rolling back to $prev_theme"
+      write_theme "$prev_theme"
+      apply_theme_configs
+      return 1
     fi
   else
     apply_theme_configs
@@ -910,8 +917,10 @@ main() {
   reload_tmux
   reload_niri
   reload_desktop "$theme"
-  reload_wallpaper
+  # DMS must restart BEFORE wallpaper sync (which runs in background and
+  # sends DMS IPC calls — those fail if DMS restarts mid-flight).
   reload_dms
+  reload_wallpaper
   reload_browsers "$theme"
   reload_nvim "$theme"
 
