@@ -44,8 +44,6 @@ detect_mode() {
   fi
 }
 
-MODE="$(detect_mode)"
-
 current_theme() {
   if [[ -f "$CHEZMOI_CFG" ]]; then
     local chezmoi_theme
@@ -268,6 +266,17 @@ pick_wallpaper() {
 }
 
 THEME="$(current_theme || true)"
+
+# Derive mode from theme name (authoritative) instead of querying DMS
+# which may have just restarted and report stale state.
+if [[ "$THEME" == *-dark ]]; then
+  MODE="dark"
+elif [[ "$THEME" == *-light ]]; then
+  MODE="light"
+else
+  MODE="$(detect_mode)"
+fi
+
 WALLPAPER=""
 if [[ "$WALLPAPER_DIR_EXISTS" == "true" ]]; then
   WALLPAPER="$(pick_wallpaper "$MODE" "$THEME" || true)"
