@@ -104,7 +104,7 @@ jobs:
     name: Lint / Shell
     needs: changes
     if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@2fd9927a5a42809da23a34e79c91ab781564853c # feat/v0.2.503
     with:
       include_tests: false
       shellcheck_severity: error
