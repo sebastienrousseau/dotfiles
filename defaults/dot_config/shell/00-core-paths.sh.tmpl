@@ -117,16 +117,16 @@ path_prepend "${HOME}/.local/bin"
 path_prepend "${HOME}/.local/share/mise/shims"
 path_prepend "${HOME}/bin"
 
-# Deduplicate PATH (Keep first occurrence to maintain precedence)
-# Standard Zsh handles this with 'typeset -U path', but for bash compatibility/subshells:
+# Deduplicate and prune PATH (keep first occurrence, drop non-existent dirs)
+# Standard Zsh handles dedup with 'typeset -U path', but for bash compatibility/subshells:
 if [ -z "${ZSH_VERSION:-}" ]; then
-    # Use native bash associative arrays for O(n) deduplication (bash 4+)
+    # Use native bash associative arrays for O(n) dedup + prune (bash 4+)
     if [[ ${BASH_VERSION%%.*} -ge 4 ]]; then
         declare -A _seen_paths
         IFS=':' read -ra _path_array <<< "$PATH"
         _new_path=""
         for _dir in "${_path_array[@]}"; do
-            if [[ -n "$_dir" && -z "${_seen_paths[$_dir]:-}" ]]; then
+            if [[ -n "$_dir" && -d "$_dir" && -z "${_seen_paths[$_dir]:-}" ]]; then
                 _seen_paths[$_dir]=1
                 _new_path="${_new_path:+$_new_path:}$_dir"
             fi
@@ -134,7 +134,7 @@ if [ -z "${ZSH_VERSION:-}" ]; then
         PATH="$_new_path"
         unset _seen_paths _path_array _new_path _dir
     else
-        # Fallback to awk for bash 3.x
+        # Fallback to awk for bash 3.x (dedup only; prune not feasible in awk)
         PATH=$(echo "$PATH" | awk -v RS=':' '!seen[$0]++ {ORS=(NR>1?":":"")} {print}')
     fi
     export PATH

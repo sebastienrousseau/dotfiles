@@ -786,7 +786,7 @@ reload_wallpaper() {
 
   if echo "$wp_output" | grep -q "Applied via\|Applied wallpaper\|matched"; then
     RELOADED+=("wallpaper")
-    _ok "Wallpaper" "matched active theme"
+    _ok "Wallpaper" "applied"
   elif echo "$wp_output" | grep -q "skipping\|not found\|no "; then
     SKIPPED+=("wallpaper")
     _skip "Wallpaper" "no custom wallpaper (add to ~/Pictures/Wallpapers/)"
@@ -803,25 +803,17 @@ reload_dms() {
     return
   fi
 
-  if ! command -v systemctl &>/dev/null; then
+  if ! command -v dms &>/dev/null; then
     SKIPPED+=("dms")
-    _skip "DMS" "systemctl not available"
+    _skip "DMS" "not installed"
     return
   fi
 
-  if ! systemctl --user is-active --quiet dms.service; then
-    SKIPPED+=("dms")
-    _skip "DMS" "service not active"
-    return
-  fi
-
-  if systemctl --user restart dms.service >/dev/null 2>&1; then
-    RELOADED+=("dms")
-    _ok "DMS" "service restarted"
-  else
-    SKIPPED+=("dms")
-    _skip "DMS" "restart failed"
-  fi
+  # DMS picks up settings.json changes via inotify (written by
+  # reload_desktop's sed -i). No service restart needed — restarting
+  # kills wallpaper state and races with wallpaper-sync IPC calls.
+  RELOADED+=("dms")
+  _ok "DMS" "settings updated (inotify)"
 }
 
 # =============================================================================
@@ -879,6 +871,10 @@ main() {
   printf '%s\n' "${BOLD}${CYAN}dot-theme-sync${RESET}"
   echo ""
 
+  # Save previous theme for rollback on failure
+  local prev_theme
+  prev_theme="$(current_theme)"
+
   # If a new theme was specified, write it to the data file
   if [[ -n "$new_theme" ]]; then
     write_theme "$new_theme"
@@ -903,7 +899,10 @@ main() {
     if chezmoi apply --force 2>/dev/null || chezmoi apply; then
       _ok "Chezmoi" "full apply completed"
     else
-      _err "Chezmoi" "apply failed"
+      _err "Chezmoi" "apply failed — rolling back to $prev_theme"
+      write_theme "$prev_theme"
+      apply_theme_configs
+      return 1
     fi
   else
     apply_theme_configs
@@ -916,8 +915,8 @@ main() {
   reload_tmux
   reload_niri
   reload_desktop "$theme"
-  reload_wallpaper
   reload_dms
+  reload_wallpaper
   reload_browsers "$theme"
   reload_nvim "$theme"
 
