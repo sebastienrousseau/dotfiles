@@ -102,5 +102,16 @@ jobs:
             echo "No shfmt targets provided, skipping."
             exit 0
           fi
+          # Enable ** recursion (globstar) and drop unmatched globs
+          # (nullglob) so callers can pass `dir/**/*.sh` without bash
+          # leaving the literal glob in place when nothing matches at
+          # the shallow level — shfmt would then fail on lstat.
+          shopt -s globstar nullglob
+          files=()
           # shellcheck disable=SC2086
-          shfmt -d -i 2 -ci ${{ inputs.shfmt_targets }}
+          for f in ${{ inputs.shfmt_targets }}; do files+=("$f"); done
+          if [[ ${#files[@]} -eq 0 ]]; then
+            echo "No shfmt targets matched, skipping."
+            exit 0
+          fi
+          shfmt -d -i 2 -ci "${files[@]}"
