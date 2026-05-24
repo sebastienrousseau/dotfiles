@@ -28,6 +28,13 @@ export NANORC="${XDG_CONFIG_HOME}/nano/nanorc"
 # Use single quotes to prevent shell expansion (Vim will expand $XDG_CONFIG_HOME)
 # export VIMINIT='source $XDG_CONFIG_HOME/vim/vimrc'
 
+# SSH agent — point shells at the systemd user agent socket when available.
+# Linux only; macOS uses its own keychain integration via ssh-add --apple-use-keychain.
+if [[ -z "${SSH_AUTH_SOCK:-}" ]] && [[ -n "${XDG_RUNTIME_DIR:-}" ]] \
+  && [[ -S "${XDG_RUNTIME_DIR}/ssh-agent.socket" ]]; then
+  export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket"
+fi
+
 # Nix
 if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
   . "${HOME}/.nix-profile/etc/profile.d/nix.sh"

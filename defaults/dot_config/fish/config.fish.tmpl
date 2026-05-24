@@ -23,6 +23,11 @@ if test -f "$HOME/.config/fish/config.fish.local"
     source "$HOME/.config/fish/config.fish.local"
 end
 
+# SSH agent — point shells at the systemd user agent socket when available.
+if not set -q SSH_AUTH_SOCK; and set -q XDG_RUNTIME_DIR; and test -S "$XDG_RUNTIME_DIR/ssh-agent.socket"
+    set -gx SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/ssh-agent.socket"
+end
+
 # Ensure LS_COLORS is set for fish (bridged from bash dircolors setup)
 if not set -q LS_COLORS
     set -l _dircolors_cache "$HOME/.cache/shell/dircolors.sh"
