@@ -1,17 +1,40 @@
 name: Perf Baseline
 
-# Weekly perf baseline + regression alert. Closes #863's CI half.
+# Perf baseline + regression alert. Closes #863's CI half.
+#
+# Triggers:
+#   - schedule (Sunday 03:00 UTC): full flow — measure, record, upload
+#     new baseline artifact, open/comment regression issue.
+#   - push (feat/**, paths-filtered): measure-only — emits ::warning::
+#     on regression; does not touch baseline or issues.
+#
+# Per-push runs catch regressions at PR time; weekly cron is still the
+# source of truth for the recorded baseline so PR churn can't quietly
+# rewrite the reference.
 #
 # Flow:
-#   1. Restore the previous week's baseline from a workflow artifact.
+#   1. Restore the previous baseline from the most recent successful run.
 #   2. Apply the dotfiles + record current means via `dot perf --json`.
-#   3. If any shell regressed by >10% vs the restored baseline, open
-#      (or comment on) a tracking issue.
-#   4. Upload the current measurement as the next week's restore source.
+#   3. Compare; emit ::warning:: (push) or open/comment issue (cron).
+#   4. Upload current measurement as the next baseline (cron only).
 
 on:
   schedule:
-    - cron: '0 3 * * 0'  # Sunday 03:00 UTC
+    - cron: '0 3 * * 0'  # Sunday 03:00 UTC — establishes the recorded baseline
+  push:
+    branches:
+      - 'feat/**'        # Per-commit measurement for fast regression feedback
+    paths:               # Skip pushes that can't affect shell startup time
+      - '**.sh'
+      - '**.zsh'
+      - '**.bash'
+      - '**.fish'
+      - '**.tmpl'
+      - 'defaults/.chezmoitemplates/**'
+      - 'defaults/dot_config/shell/**'
+      - 'defaults/dot_*'
+      - 'scripts/diagnostics/perf.sh'
+      - '.github/workflows/perf-baseline.yml'
   workflow_dispatch:
 
 permissions:
@@ -95,8 +118,14 @@ jobs:
           regression_count=$(jq -r '.regression_count // 0' /tmp/perf-current.json)
           echo "regression_count=$regression_count" >> "$GITHUB_OUTPUT"
 
+      - name: Warn on regression (push events)
+        if: github.event_name == 'push' && steps.measure.outputs.regression_count != '0'
+        run: |
+          echo "::warning::Perf regression detected on this push — see job log for details. Tracked weekly via cron; baseline not overwritten by push events."
+          cat /tmp/perf-current.json
+
       - name: Open regression issue
-        if: steps.measure.outputs.regression_count != '0'
+        if: github.event_name != 'push' && steps.measure.outputs.regression_count != '0'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -135,14 +164,18 @@ jobs:
           fi
 
       - name: Record new baseline
+        if: github.event_name != 'push'
         run: |
           set -euo pipefail
           # The workflow's own perf.sh writes the file in --baseline mode;
-          # invoke it that way to keep the format stable.
+          # invoke it that way to keep the format stable. Push events
+          # measure-only — baseline is only updated by the weekly cron
+          # so per-PR drift doesn't quietly rewrite the reference.
           bash scripts/diagnostics/perf.sh --baseline >/dev/null 2>&1 || true
           cp "$HOME/.cache/dotfiles/perf-baseline.json" /tmp/perf-baseline.json
 
       - name: Upload new baseline artifact
+        if: github.event_name != 'push'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: perf-baseline
