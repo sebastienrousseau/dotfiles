@@ -35,6 +35,7 @@ non-Claude-Code users access the same delegator.
 ## Why
 
 Claude (Sonnet 4.6) costs $3/M input, $15/M output. Cheap delegates:
+
 - Mistral Medium 3.5: $1.50/$7.50 per M tokens (or $0 within Le Chat Pro sub)
 - DeepSeek V4 Flash: $0.14/$0.28 per M tokens
 
@@ -72,6 +73,7 @@ The CLI shim wraps the same delegator. Cost log lives at
 Default: whatever your `~/.vibe/config.toml` lists as `default_model`.
 
 Override per session:
+
 ```
 /vibe-model-pick deepseek-v4-flash
 ```

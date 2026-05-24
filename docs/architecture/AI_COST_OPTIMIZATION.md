@@ -66,7 +66,7 @@ for anything beyond a one-line edit.
 | `vibe` skill | `defaults/dot_claude/skills/vibe/` | `~/.claude/skills/vibe/` | Claude Code slash commands (`/vibe`, `/vibe-report`, etc.) |
 | Delegator binary | `defaults/dot_claude/skills/vibe/tools/executable_vibe-delegate` | `~/.claude/skills/vibe/tools/vibe-delegate` | Runs the cheap-model task in a pseudo-TTY, parses streaming JSON, syntax-checks changes, logs the run |
 | Reporter | `defaults/dot_claude/skills/vibe/tools/executable_delegate-report` | `~/.claude/skills/vibe/tools/delegate-report` | Reads the JSONL log, prints overview / by-model / by-project / failure tables |
-| CLI shim | `scripts/dot/commands/ai.sh` | `bin/dot ai delegate|cost` | Same delegator + reporter, callable from the terminal without Claude Code |
+| CLI shim | `scripts/dot/commands/ai.sh` | `bin/dot ai delegate` / `bin/dot ai cost` | Same delegator + reporter, callable from the terminal without Claude Code |
 | Unified log hook | `_ai_log_run` in `ai.sh` | runs inside `run_ai_with_context` | Appends one JSONL line per `dot ai <provider>` invocation |
 | Log file | runtime-managed | `~/.local/share/delegate-runs.jsonl` | One line per run; `dot ai cost` reads it |
 
@@ -141,5 +141,3 @@ Not implemented yet, ordered roughly by likely impact:
 4. **Rate-limit awareness.** Track API rate limits from response
    headers, queue requests, surface a `dot ai cost --limits` view that
    shows time-to-reset for every provider with an active limit.
-
-[#863]: https://github.com/sebastienrousseau/dotfiles/issues/863
