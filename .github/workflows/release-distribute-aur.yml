@@ -1,0 +1,147 @@
+name: Release / Distribute AUR
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag (e.g., v0.2.503)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  distribute-aur:
+    name: Distribute AUR Package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout dotfiles
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve release tag
+        id: resolve-tag
+        run: |
+          set -euo pipefail
+          TAG="${{ github.event.release.tag_name || inputs.release_tag }}"
+          if [[ -z "$TAG" ]]; then
+            echo "::error::No release tag provided"
+            exit 1
+          fi
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download release asset
+        id: download-asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.resolve-tag.outputs.tag }}"
+          VERSION="${{ steps.resolve-tag.outputs.version }}"
+          ASSET_NAME="dot-${VERSION}.tar.gz"
+          echo "Downloading ${ASSET_NAME} from release ${TAG}..."
+          mkdir -p assets
+          gh release download "$TAG" --dir assets --pattern "${ASSET_NAME}"
+          ASSET_PATH="$(find assets -name "${ASSET_NAME}" -type f | head -1)"
+          if [[ -z "$ASSET_PATH" ]]; then
+            echo "::error::Asset ${ASSET_NAME} not found in release ${TAG}"
+            exit 1
+          fi
+          echo "asset_path=${ASSET_PATH}" >> $GITHUB_OUTPUT
+
+      - name: Compute SHA256 of tarball
+        id: compute-sha256
+        run: |
+          set -euo pipefail
+          ASSET_PATH="${{ steps.download-asset.outputs.asset_path }}"
+          SHA256=$(sha256sum "$ASSET_PATH" | awk '{print $1}')
+          echo "sha256=${SHA256}" >> $GITHUB_OUTPUT
+          echo "SHA256: ${SHA256}"
+
+      - name: Configure AUR SSH
+        env:
+          AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${AUR_SSH_KEY}" ]]; then
+            echo "::error::Missing AUR_SSH_KEY secret. See docs/security/AUR_PUBLISHING.md for setup."
+            exit 1
+          fi
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "${AUR_SSH_KEY}" > ~/.ssh/aur_ed25519
+          chmod 600 ~/.ssh/aur_ed25519
+          ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts 2>/dev/null
+          cat >> ~/.ssh/config << 'EOF'
+          Host aur.archlinux.org
+            IdentityFile ~/.ssh/aur_ed25519
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+          EOF
+          chmod 600 ~/.ssh/config
+
+      - name: Clone AUR repository
+        id: clone-aur
+        run: |
+          set -euo pipefail
+          if ! git clone ssh://aur@aur.archlinux.org/dotfiles-git.git aur-pkg 2>&1; then
+            echo "::error::First publication: the user must create the AUR package entry via the web UI at https://aur.archlinux.org/packages first"
+            exit 1
+          fi
+
+      - name: Update PKGBUILD
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.resolve-tag.outputs.version }}"
+          SHA256="${{ steps.compute-sha256.outputs.sha256 }}"
+          ASSET_PATH="${{ steps.download-asset.outputs.asset_path }}"
+
+          cp install/aur/PKGBUILD aur-pkg/PKGBUILD
+          sed -i "s/^pkgver=.*/pkgver=${VERSION}/" aur-pkg/PKGBUILD
+          sed -i "s/^sha256sums=(.*)$/sha256sums=('${SHA256}')/" aur-pkg/PKGBUILD
+          echo "Updated PKGBUILD:"
+          cat aur-pkg/PKGBUILD
+
+      - name: Generate .SRCINFO
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -v $(pwd)/aur-pkg:/work \
+            -w /work \
+            archlinux/archlinux:base-devel \
+            bash -c "useradd -m builder && chown -R builder:builder /work && su builder -c 'cd /work && makepkg --printsrcinfo > .SRCINFO'"
+
+      - name: Commit and push to AUR
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.resolve-tag.outputs.version }}"
+
+          cd aur-pkg
+          git config user.name "Sebastien Rousseau"
+          git config user.email "sebastian.rousseau@gmail.com"
+
+          git add PKGBUILD .SRCINFO
+          git commit -m "dot ${VERSION}"
+          git push origin master
+
+      - name: Print AUR URL
+        run: |
+          echo "AUR package updated: https://aur.archlinux.org/packages/dotfiles-git"
