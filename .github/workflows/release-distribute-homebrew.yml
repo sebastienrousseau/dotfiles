@@ -123,9 +123,9 @@ jobs:
           cp "$TEMPLATE_PATH" dot.rb
 
           # Update the url line - match the full url line and replace version
-          sed -i \
-            -E "s|^  url 'https://github\.com/sebastienrousseau/dotfiles/releases/download/v[0-9.]+/dot-[0-9.]+\.tar\.gz'$|  url 'https://github.com/sebastienrousseau/dotfiles/releases/download/${TAG}/dot-${VERSION}.tar.gz'|" \
-            dot.rb
+          NEW_URL="https://github.com/sebastienrousseau/dotfiles/releases/download/${TAG}/dot-${VERSION}.tar.gz"
+          URL_RE="https://github\.com/sebastienrousseau/dotfiles/releases/download/v[0-9.]+/dot-[0-9.]+\.tar\.gz"
+          sed -i -E "s|^  url '${URL_RE}'\$|  url '${NEW_URL}'|" dot.rb
 
           # Update the sha256 line - match the full sha256 line and replace hash
           sed -i \
