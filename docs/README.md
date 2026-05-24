@@ -54,6 +54,8 @@ Quick jumps into the Manual:
 - [Naming conventions](NAMING_CONVENTIONS.md)
 - [Architecture](architecture/ARCHITECTURE.md)
 - [Repository layout](architecture/REPO_LAYOUT.md)
+- [AI cost optimization](architecture/AI_COST_OPTIMIZATION.md)
+- [Release pipeline](operations/RELEASE_PIPELINE.md)
 - [Architecture decisions](adr/README.md)
 
 ## Repository map

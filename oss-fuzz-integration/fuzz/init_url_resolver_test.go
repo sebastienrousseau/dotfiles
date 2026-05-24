@@ -36,8 +36,15 @@ var ghOwnerRepoRE = regexp.MustCompile(`^([a-zA-Z0-9._\-]+)(/([a-zA-Z0-9._\-]+))
 
 // ResolveInitURL ports the shell logic.
 // Returns "" when the input is refused.
+//
+// IMPORTANT: no TrimSpace. The shell case statement
+// (scripts/dot/commands/init.sh) operates on the literal arg without
+// trimming. Adding TrimSpace here would make the Go port MORE
+// permissive than the shell — past fuzz runs proved this: ` git@"` and
+// ` git@:"` both passed after trim but the shell would reject them
+// outright because the leading whitespace makes the `git@*:*` case
+// pattern miss.
 func ResolveInitURL(in string) string {
-	in = strings.TrimSpace(in)
 	if in == "" {
 		return ""
 	}
