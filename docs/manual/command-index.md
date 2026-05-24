@@ -12,7 +12,7 @@ job `lint/command-index` fails when this file is stale.
 |---------|---------|
 | `dot add` | Add a file to chezmoi source |
 | `dot agent` | Profile-aware execution, agent card, a2a-card, session log, checkpoints, and conformance |
-| `dot ai` | AI CLI status & launcher |
+| `dot ai` | AI CLI status, delegate, and cost report |
 | `dot ai-query` | Context-aware RAG query over your dotfiles |
 | `dot ai-setup` | Interactive setup for all AI CLI tools |
 | `dot aider` | Aider with context patterns |

@@ -214,7 +214,7 @@ Diagnostics|history|Shell history analysis|Inspect command usage patterns.
 Diagnostics|perf|Show performance mode and quick timing|Startup and shell timing surface.
 Diagnostics|metrics|Show recent observability metrics (JSONL)|Recent runtime events and counters.
 Diagnostics|load-bench|Measure time to heavy-layer readiness|Performance benchmarking helper.
-AI|ai|AI CLI status & launcher|Overview of installed AI tools.
+AI|ai|AI CLI status, delegate, and cost report|Subcommands: dot ai (status), dot ai delegate "<prompt>", dot ai cost [--since N].
 AI|ai-setup|Interactive setup for all AI CLI tools|Initial AI tool bootstrap.
 AI|ai-query|Context-aware RAG query over your dotfiles|Ask questions over the repo state.
 AI|mcp|Inspect MCP policy, supply chain, and registry|Governance and validation surface.
@@ -283,7 +283,7 @@ snapshot|Capture the current workstation snapshot.|dot snapshot -b\ndot snapshot
 restore|Restore from a backup or git ref.|dot restore -l\ndot restore -L\ndot restore -g HEAD~1
 rollback|Restore a previous configuration snapshot.|dot rollback
 lint|Run shell quality checks for the repo.|dot lint\ndot lint -c\ndot lint -f
-ai|Show installed AI tools and entrypoints.|dot ai
+ai|Show installed AI tools, delegate a task to a cheap model, or report spend.|dot ai\ndot ai delegate "rename UserService.get* to fetch*"\ndot ai cost --since 7
 mcp|Inspect MCP configuration, policy, and registry.|dot mcp\ndot mcp -s -j\ndot mcp registry
 mode|Inspect or switch the active agent mode.|dot mode list\ndot mode show ask\ndot mode set audit
 agent|Inspect agent metadata or run profile-aware actions.|dot agent card\ndot agent a2a-card --validate\ndot agent checkpoint list\ndot agent conformance --strict --json
