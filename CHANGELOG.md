@@ -53,6 +53,29 @@ verified by `dot lint` + the existing test matrix.
 - **Native PowerShell module** — `scripts/dot/powershell/Dot.psm1` + `bin/dot.ps1` dispatcher. `dot version` / `dot help` / `dot agents check` now zero-bash on Windows. POWERSHELL_PARITY.md updated, smoke test extended.
 - **OSS-Fuzz scaffold** — `oss-fuzz-integration/` ready-to-PR upstream bundle. Two native Go fuzzers (`FuzzValidateName`, `FuzzInitURLResolver`) verified at 2M+ execs each. CI workflow runs them per PR. `docs/security/FUZZING.md` covers onboarding + when-to-add-a-harness.
 
+### Phase 1 hardening (test framework + CI quality gates)
+
+- **`DOT_STRICT=1` test mode** — promotes silent `command not found` / `unbound variable` inside `cov_exercise_functions_file` to test failures. Default stays tolerant. Caught the `require_source_dir` regression that escaped pre-v0.2.503 review. Regression test in `tests/unit/misc/test_cov_strict_mode.sh`. Documented in `docs/operations/TESTING.md`.
+- **Pre-commit drift gates** — `command-index-drift` + `version-consistency` hooks added to `.pre-commit-config.yaml`. Same checks already enforced by `doc-drift.yml` in CI; now also caught at commit time so contributors don't push, wait for CI, and then re-push.
+- **FINAL SUMMARY per-file failure list** — `test_runner.sh` now lists which test files failed (not just the total count). With 4000+ assertions a single failure was previously a 3-grep search through the run log; now it's at the bottom of the summary.
+- **`perf-baseline.yml` on push** — added `feat/**` push trigger so regressions catch at PR time, not the Monday cron. Cron remains source-of-truth for the recorded baseline; push runs are measure-only and emit `::warning::` on regression.
+- **`bump-reusable-pins.yml`** — auto-PR caller workflows (`ci.yml`, `ci-enforced.yml`) when a `reusable-*.yml` merges to master. Closes the two-commit fix-and-bump-pin foot-gun that bit us on the shfmt globstar fix. SHA-pinned, signed via `ACTIONS_BOT_SIGNING_KEY`.
+
+### Phase 2 release engineering (signing + packaging + distribution)
+
+- **`release-package-dot.yml`** — on `release.created`, stages bin/lib/share/completions into a canonical `dot-VERSION/` tree and produces a deterministic `dot-VERSION.tar.gz` + `.zip` (sorted, TZ=UTC, owner=0, zip -X -D). Reproducible across runners. Uploaded as release assets.
+- **`security-release.yml` manifest job** — on `release.published`, builds `ALL_SHA256SUMS` over every release asset and Cosign-keyless-signs it. One signed manifest now covers every artefact in a release; downstream verification is `cosign verify-blob ALL_SHA256SUMS` then `sha256sum -c ALL_SHA256SUMS`. SBOM + SLSA L3 provenance were already in place.
+- **`release-attestation-check.yml`** — weekly watchdog that walks the latest release, asserts the full attestation bundle (SBOM + sig + cert + intoto + manifest + sig + cert) is present, opens / comments on a tracking issue if anything is missing. Catches silent upload failures the release-time workflow can't detect.
+- **`release-distribute-{homebrew,scoop,aur}.yml`** — three sibling workflows that, on `release.published`, hash the new release artefacts and ship to each distribution channel. Homebrew + Scoop open PRs to `sebastienrousseau/{homebrew-tap,scoop-bucket}`. AUR pushes directly to `ssh://aur@aur.archlinux.org/dotfiles-git.git` via `AUR_SSH_KEY`. All idempotent, signed-commit, default-branch-detection, comment-on-existing-PR for re-runs. Three were drafted by Mistral Vibe via the new delegator (see below); 49% saved vs Claude.
+- **`docs/operations/RELEASE_PIPELINE.md`** — end-to-end map of all five release workflows, their triggers, dependencies, and secrets. Single source of truth for the release flow.
+
+### AI cost optimization
+
+- **`/vibe` Claude Code skill** ported from [pcx-wave/vibe-skill](https://github.com/pcx-wave/vibe-skill) and shipped via chezmoi to `~/.claude/skills/vibe/`. Delegates coding tasks to a cheap model (Mistral Vibe / DeepSeek / Gemini Flash) while Claude only sees the final `git diff` + tool-call summary (~500-1500 tokens per delegation regardless of how many file reads happen internally). Slash commands: `/vibe`, `/vibeon`, `/vibeoff`, `/vibestatus`, `/vibe-model-pick`, `/vibe-model-clear`, `/vibe-report`.
+- **`dot ai delegate "<prompt>"`** + **`dot ai cost [--since N]`** — CLI shims so the same delegator + cost reporter work from the terminal without Claude Code. Both expose the underlying `vibe-delegate` / `delegate-report` tools deployed by the skill.
+- **Unified provider log** — every `dot ai <provider>` invocation now appends a JSONL entry to `~/.local/share/delegate-runs.jsonl`, so `dot ai cost` reports spend across Claude + Gemini + Aider + Vibe etc., not just Vibe. Token-level fields stay zero for providers that don't surface them; the report tolerates the gap.
+- **`docs/architecture/AI_COST_OPTIMIZATION.md`** — pattern, prices, deployed pieces, state files, provider coverage matrix, future work (budget guard, prompt cache, model routing, rate-limit awareness).
+
 ## v0.2.502 — 2026-05-17
 
 ### Added
