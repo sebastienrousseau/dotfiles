@@ -69,10 +69,12 @@ run_test_file_serial() {
     TOTAL_TESTS_PASSED=$((TOTAL_TESTS_PASSED + passed))
     TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + failed))
     TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + passed + failed))
+    if [[ "$failed" -gt 0 ]]; then TOTAL_FAILED_FILES+=("$(basename "$test_file") ($failed failed)"); fi
   elif [[ $exit_status -ne 0 ]]; then
     printf '%b\n' "\033[0;31mERROR: $(basename "$test_file") crashed (exit $exit_status) without producing results\033[0m"
     TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + 1))
     TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + 1))
+    TOTAL_FAILED_FILES+=("$(basename "$test_file") (crashed exit=$exit_status)")
   fi
 }
 
@@ -117,10 +119,12 @@ aggregate_parallel_results() {
       TOTAL_TESTS_PASSED=$((TOTAL_TESTS_PASSED + passed))
       TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + failed))
       TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + passed + failed))
+      if [[ "$failed" -gt 0 ]]; then TOTAL_FAILED_FILES+=("$(basename "$f" .out) ($failed failed)"); fi
     elif [[ $exit_status -ne 0 ]]; then
       printf '%b\n' "\033[0;31mERROR: $(basename "$f" .out) crashed (exit $exit_status) without producing results\033[0m"
       TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + 1))
       TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + 1))
+      TOTAL_FAILED_FILES+=("$(basename "$f" .out) (crashed exit=$exit_status)")
     fi
   done
 }
@@ -203,6 +207,7 @@ main() {
   TOTAL_TESTS_RUN=0
   TOTAL_TESTS_PASSED=0
   TOTAL_TESTS_FAILED=0
+  TOTAL_FAILED_FILES=()
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -299,6 +304,10 @@ main() {
   printf '%b\n' "Total tests run: $TOTAL_TESTS_RUN"
   printf '%b\n' "\033[0;32mTotal passed: $TOTAL_TESTS_PASSED\033[0m"
   printf '%b\n' "\033[0;31mTotal failed: $TOTAL_TESTS_FAILED\033[0m"
+  if [[ "${#TOTAL_FAILED_FILES[@]}" -gt 0 ]]; then
+    printf '%b\n' "\033[0;31mFailed test files (${#TOTAL_FAILED_FILES[@]}):\033[0m"
+    printf '  - %s\n' "${TOTAL_FAILED_FILES[@]}"
+  fi
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
   if [[ $TOTAL_TESTS_FAILED -gt 0 ]]; then
