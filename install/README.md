@@ -51,7 +51,7 @@ re-test a specific channel out-of-band.
    - Homebrew: PR to `sebastienrousseau/homebrew-tap` with the regenerated `dot.rb`.
    - Scoop: PR to `sebastienrousseau/scoop-bucket` with the regenerated `dot.json` (both 64bit + arm64 point at the same zip).
    - AUR: direct push to `ssh://aur@aur.archlinux.org/dotfiles-git.git` (requires `AUR_SSH_KEY` secret and a pre-existing AUR package entry).
-4. **Verify locally** before announcing:
+5. **Verify locally** before announcing:
 
    ```sh
    # macOS
