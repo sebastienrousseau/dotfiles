@@ -56,9 +56,15 @@ rejected forms above.
 
 ## Refreshing pinned SHAs
 
-Reusable workflows in this repo are the only same-repo dependency
-Dependabot doesn't auto-bump. Refresh manually after a change to a
-reusable:
+`bump-reusable-pins.yml` handles this automatically. On every push to
+`master` that touches `.github/workflows/reusable-*.yml`, the bot scans
+caller workflows for stale pins and opens a PR bumping them to the new
+SHA. Signed with `ACTIONS_BOT_SIGNING_KEY` so the resulting commit
+passes `Verify Commit Signatures`.
+
+The manual recipe below stays here as a fallback — for example, if you
+need to bump pins before a merge to master, or if the bot's run failed
+and you want to short-circuit waiting for the next push trigger.
 
 ```sh
 # 1. Land the change to the reusable on master via a PR.
@@ -79,8 +85,9 @@ bash tools/ci/lint-reusable-pins.sh
 git commit -am "chore(ci): bump reusable-workflow pins to ${PIN:0:10}"
 ```
 
-We treat the manual bump as **deliberate**, not a chore — it forces
-a reviewer to confirm the new reusable content is intentional.
+Whether bumped by the bot or by hand, the resulting PR runs the full
+CI suite — a reviewer still confirms the new reusable content is
+intentional before merge.
 
 ## Dependabot
 
@@ -110,4 +117,5 @@ merge time.
 - [#855](https://github.com/sebastienrousseau/dotfiles/issues/855) — original tracking issue.
 - `tools/ci/lint-reusable-pins.sh` — the enforcement script.
 - `tests/unit/ci/test_reusable_pin_lint.sh` — the negative test.
+- `.github/workflows/bump-reusable-pins.yml` — the auto-bump bot.
 - [GitHub: pinning actions to a full-length commit SHA](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions).
