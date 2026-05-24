@@ -42,6 +42,10 @@ permissions:
   actions: read       # restore previous baseline artifact
   issues: write       # open regression issues
 
+# Shared with ci.yml — keep these in sync via scripts/version-sync.sh.
+env:
+  CHEZMOI_VERSION: "2.47.1"
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
