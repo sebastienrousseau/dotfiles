@@ -1,0 +1,332 @@
+#!/usr/bin/env python3
+"""delegate-report — Token, cost, and failure report for delegate runs.
+
+Usage:
+  delegate-report [--since DAYS] [--project NAME] [--fails]
+"""
+
+import json, sys, argparse
+from pathlib import Path
+from datetime import datetime, timezone, timedelta
+from collections import defaultdict
+
+LOG = Path.home() / '.local' / 'share' / 'delegate-runs.jsonl'
+
+
+def load_runs(since_days=None, project=None):
+    if not LOG.exists():
+        print(f"No log found at {LOG}")
+        sys.exit(0)
+    cutoff = None
+    if since_days:
+        cutoff = datetime.now(timezone.utc) - timedelta(days=since_days)
+    runs = []
+    for line in LOG.read_text().splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            r = json.loads(line)
+        except Exception:
+            continue
+        if project and r.get('project') != project:
+            continue
+        if cutoff:
+            ts = r.get('ts', '')
+            try:
+                run_time = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+                if run_time < cutoff:
+                    continue
+            except Exception:
+                pass
+        runs.append(r)
+    return runs
+
+
+def ceq(r):
+    """Claude Sonnet 4.6 equivalent cost — use logged value or recompute."""
+    if 'cost_claude_eq' in r:
+        return r['cost_claude_eq']
+    return (r.get('tokens_in', 0) * 3.0 + r.get('tokens_out', 0) * 15.0) / 1_000_000
+
+
+def fmt_cost(v):
+    return f"${v:.4f}" if v else "  -   "
+
+
+def fmt_pct(a, b):
+    return f"{100*a//b:3d}%" if b else "  - "
+
+
+def col_widths(headers, rows):
+    widths = [len(h) for h in headers]
+    for row in rows:
+        for i, cell in enumerate(row):
+            widths[i] = max(widths[i], len(str(cell)))
+    return widths
+
+
+def print_table(headers, rows):
+    if not rows:
+        print("  (no data)")
+        return
+    widths = col_widths(headers, rows)
+    sep = "  "
+    fmt = sep.join(f"{{:<{w}}}" for w in widths)
+    print(fmt.format(*headers))
+    print(sep.join("-" * w for w in widths))
+    for row in rows:
+        print(fmt.format(*[str(x) for x in row]))
+
+
+def date_range(runs):
+    dates = sorted(r.get('ts', '') for r in runs if r.get('ts'))
+    if not dates:
+        return ""
+    return f"  {dates[0][:10]} → {dates[-1][:10]}"
+
+
+def is_manual(r):
+    return r.get('delegate') == 'claude-manual'
+
+
+def show_overview(runs):
+    delegate_runs = [r for r in runs if not is_manual(r)]
+    manual_runs   = [r for r in runs if is_manual(r)]
+
+    total = len(delegate_runs)
+    ok = sum(1 for r in delegate_runs if r.get('exit_code') == 0)
+    tokens = sum(r.get('tokens_total', 0) for r in delegate_runs)
+    cost = sum(r.get('cost_usd', 0) for r in delegate_runs)
+    claude_eq = sum(ceq(r) for r in delegate_runs)
+    manual_cost = sum(r.get('cost_usd', 0) for r in manual_runs)
+    actual_saved = claude_eq - cost - manual_cost
+    warns = sum(r.get('warn_count', 0) for r in delegate_runs)
+    sr_f = sum(r.get('search_replace_fails', 0) for r in delegate_runs)
+    syntax = sum(r.get('syntax_errors', 0) for r in delegate_runs)
+    timeouts = sum(1 for r in delegate_runs if r.get('timed_out'))
+    wrote_nothing = sum(1 for r in delegate_runs if r.get('wrote_nothing'))
+    avg_dur = sum(r.get('duration_secs', 0) for r in delegate_runs) / total if total else 0
+    saved_pct = f"  ({int(actual_saved / claude_eq * 100)}% cheaper than Claude)" if claude_eq > 0 and actual_saved > 0 else ""
+
+    print(f"\n{'=' * 56}")
+    print(f"  DELEGATE REPORT{date_range(runs)}")
+    print(f"{'=' * 56}")
+    print(f"  Runs          : {total}  (ok: {ok}, failed: {total-ok}, timeout: {timeouts})")
+    print(f"  Success rate  : {fmt_pct(ok, total)}")
+    print(f"  Avg duration  : {avg_dur:.1f}s")
+    print(f"  Tokens total  : {tokens:,}")
+    print(f"  Delegate cost : {fmt_cost(cost)}")
+    print(f"  Claude equiv  : {fmt_cost(claude_eq)}")
+    if manual_runs:
+        manual_lines = sum(r.get('lines_added', 0) for r in manual_runs)
+        print(f"  Manual (Claude): {len(manual_runs)} intervention(s)  ~{manual_lines} lines  est. {fmt_cost(manual_cost)}")
+        print(f"  Actual saved  : {fmt_cost(actual_saved)}{saved_pct}  (after manual cost)")
+    else:
+        print(f"  Saved         : {fmt_cost(actual_saved)}{saved_pct}")
+    if warns or sr_f or syntax or wrote_nothing:
+        print(f"  --- bugs/warns ---")
+        if warns:         print(f"  Warnings      : {warns}")
+        if sr_f:          print(f"  SR failures   : {sr_f}")
+        if syntax:        print(f"  Syntax errors : {syntax}")
+        if wrote_nothing: print(f"  Wrote nothing : {wrote_nothing}  (prompt too vague or task already done)")
+    print()
+
+
+def show_by_model(runs):
+    delegate_runs = [r for r in runs if not is_manual(r)]
+    manual_runs   = [r for r in runs if is_manual(r)]
+
+    by_model = defaultdict(list)
+    for r in delegate_runs:
+        by_model[r.get('model', 'unknown')].append(r)
+
+    print("BY MODEL")
+    headers = ["Model", "Runs", "OK%", "Tokens", "Cost", "Claude eq", "Saved%", "Warns", "SR fails"]
+    rows = []
+    for model, mrs in sorted(by_model.items(), key=lambda x: -len(x[1])):
+        ok = sum(1 for r in mrs if r.get('exit_code') == 0)
+        tokens = sum(r.get('tokens_total', 0) for r in mrs)
+        c = sum(r.get('cost_usd', 0) for r in mrs)
+        claude_eq = sum(ceq(r) for r in mrs)
+        saved_pct = f"{int((claude_eq - c) / claude_eq * 100)}%" if claude_eq > 0 else "-"
+        rows.append([
+            model, len(mrs), fmt_pct(ok, len(mrs)),
+            f"{tokens:,}", fmt_cost(c), fmt_cost(claude_eq), saved_pct,
+            sum(r.get('warn_count', 0) for r in mrs),
+            sum(r.get('search_replace_fails', 0) for r in mrs),
+        ])
+    if manual_runs:
+        tokens = sum(r.get('tokens_total', 0) for r in manual_runs)
+        c = sum(r.get('cost_usd', 0) for r in manual_runs)
+        lines = sum(r.get('lines_added', 0) for r in manual_runs)
+        rows.append([
+            "claude-manual", len(manual_runs), " — ",
+            f"~{tokens:,}", f"~{fmt_cost(c)}", " — ", " — ",
+            f"~{lines}L", "(est.)",
+        ])
+    print_table(headers, rows)
+    print()
+
+
+def show_by_project(runs):
+    by_proj = defaultdict(list)
+    for r in runs:
+        by_proj[r.get('project', '?')].append(r)
+
+    print("BY PROJECT")
+    headers = ["Project", "Runs", "OK%", "Cost", "Saved", "Warns", "SR fails"]
+    rows = []
+    for proj, prs in sorted(by_proj.items(), key=lambda x: -len(x[1])):
+        ok = sum(1 for r in prs if r.get('exit_code') == 0)
+        c = sum(r.get('cost_usd', 0) for r in prs)
+        claude_eq = sum(ceq(r) for r in prs)
+        rows.append([
+            proj[:30], len(prs), fmt_pct(ok, len(prs)),
+            fmt_cost(c), fmt_cost(claude_eq - c),
+            sum(r.get('warn_count', 0) for r in prs),
+            sum(r.get('search_replace_fails', 0) for r in prs),
+        ])
+    print_table(headers, rows)
+    print()
+
+
+# ── Failure classification ────────────────────────────────────────────────────
+
+FAIL_INFO = {
+    'timeout':  ('Context saturated or task too large',
+                 'Decompose into sub-tasks; reduce --max-turns to ≤8'),
+    'exit_err': ('Vibe verification failed or crashed',
+                 'Read git diff; understand partial work before relaunching'),
+    'syntax':   ('Vibe wrote syntactically invalid code',
+                 'Run py_compile/node --check; fix manually before committing'),
+    'sr_fail':  ('search_replace match failed — UTF-8 or wrong context',
+                 'Use python str.replace() for accented chars; verify exact match'),
+    'empty':    ('Vibe ran tool calls but wrote nothing',
+                 'Grep for target first; rephrase prompt as an imperative verb'),
+    'warn':     ('Non-fatal tool errors during run',
+                 'Check [WARN] lines in run output; may still be correct'),
+}
+
+
+def classify_fail(r):
+    """Return primary failure type code, or None if run was clean."""
+    if r.get('timed_out'):
+        return 'timeout'
+    if r.get('exit_code', 0) not in (0, 124):
+        return 'exit_err'
+    if r.get('syntax_errors', 0) > 0:
+        return 'syntax'
+    if r.get('search_replace_fails', 0) > 0:
+        return 'sr_fail'
+    if r.get('wrote_nothing'):
+        return 'empty'
+    if r.get('warn_count', 0) > 0:
+        return 'warn'
+    return None
+
+
+def is_notable(r, include_warns=False):
+    return (
+        r.get('exit_code', 0) != 0
+        or r.get('syntax_errors', 0) > 0
+        or r.get('search_replace_fails', 0) > 0
+        or r.get('wrote_nothing')
+        or (include_warns and r.get('warn_count', 0) > 0)
+    )
+
+
+def show_fails_by_model(fails):
+    """Benchmark table: failures broken down by model."""
+    by_model = defaultdict(list)
+    for r in fails:
+        by_model[r.get('model', 'unknown')].append(r)
+
+    print("FAILURES BY MODEL  (benchmark)")
+    headers = ["Model", "Fails", "Timeout", "exit_err", "syntax", "sr_fail", "empty", "warn"]
+    rows = []
+    for model, mrs in sorted(by_model.items(), key=lambda x: -len(x[1])):
+        counts = defaultdict(int)
+        for r in mrs:
+            t = classify_fail(r)
+            if t:
+                counts[t] += 1
+        rows.append([
+            model, len(mrs),
+            counts['timeout'] or ".",
+            counts['exit_err'] or ".",
+            counts['syntax'] or ".",
+            counts['sr_fail'] or ".",
+            counts['empty'] or ".",
+            counts['warn'] or ".",
+        ])
+    print_table(headers, rows)
+    print()
+
+
+def show_fails(runs, limit=20, include_warns=False, benchmark=False):
+    fails = [r for r in runs if is_notable(r, include_warns)]
+    if not fails:
+        print("No failures or issues found.")
+        return
+
+    if benchmark:
+        show_fails_by_model(fails)
+
+    fails_sorted = sorted(fails, key=lambda r: r.get('ts', ''), reverse=True)[:limit]
+    print(f"FAILURES / ISSUES  (last {len(fails_sorted)} of {len(fails)})")
+    headers = ["Date", "Project", "Model", "Type", "Exit", "Warns", "SR", "Syn", "Dur"]
+    rows = []
+    seen_types = []
+    for r in fails_sorted:
+        ftype = classify_fail(r) or "?"
+        if ftype not in seen_types:
+            seen_types.append(ftype)
+        rows.append([
+            r.get('ts', '')[:10],
+            r.get('project', '?')[:22],
+            r.get('model', '?')[:20],
+            ftype,
+            r.get('exit_code', '?'),
+            r.get('warn_count', 0) or ".",
+            r.get('search_replace_fails', 0) or ".",
+            r.get('syntax_errors', 0) or ".",
+            f"{r.get('duration_secs', 0):.0f}s",
+        ])
+    print_table(headers, rows)
+
+    # Legend: only for types that appear in this report
+    if seen_types:
+        print()
+        print("LEGEND")
+        for ftype in seen_types:
+            info = FAIL_INFO.get(ftype, ('Unknown issue', 'Check run output manually'))
+            print(f"  {ftype:<10}  {info[0]}")
+            print(f"             → {info[1]}")
+    print()
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Delegate run report")
+    ap.add_argument('--since', type=int, metavar='DAYS', help='Last N days only')
+    ap.add_argument('--project', metavar='NAME', help='Filter by project name')
+    ap.add_argument('--fails', action='store_true', help='Show only failures and issues')
+    args = ap.parse_args()
+
+    runs = load_runs(args.since, args.project)
+    if not runs:
+        print("No runs found.")
+        return
+
+    if args.fails:
+        show_fails(runs, limit=50, include_warns=True, benchmark=True)
+        return
+
+    show_overview(runs)
+    show_by_model(runs)
+    show_by_project(runs)
+    show_fails(runs, limit=10, include_warns=False, benchmark=False)
+
+
+if __name__ == '__main__':
+    main()
