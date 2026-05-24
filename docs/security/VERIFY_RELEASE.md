@@ -5,36 +5,42 @@ date: 2026-05-17
 
 # Verifying a Release
 
-Every release of the framework ships three independent attestations.
-Verify any of them — they're orthogonal and each rules out a
+Every release of the framework ships four independent attestations.
+Verify any of them, they're orthogonal and each rules out a
 different class of attack.
 
 | Artefact | Format | Tool | Threat covered |
 |----------|--------|------|----------------|
-| **SBOM** (`dotfiles-sbom.spdx.json`) | SPDX 2.3 JSON | any SBOM viewer | "what's in the release?" — full component inventory |
-| **Cosign signature** (`.sig` + `.pem`) | sigstore keyless | `cosign verify-blob` | "did our CI actually produce this SBOM?" — short-lived Fulcio cert + Rekor transparency-log entry |
-| **SLSA provenance** (`.intoto.jsonl`) | in-toto v1 / SLSA L3 | `slsa-verifier` | "what build process produced this?" — workflow ID, source ref, builder identity |
+| **SBOM** (`dotfiles-sbom.spdx.json`) | SPDX 2.3 JSON | any SBOM viewer | "what's in the release?", full component inventory |
+| **Cosign signature** (`.sig` + `.pem`) | sigstore keyless | `cosign verify-blob` | "did our CI actually produce this SBOM?", short-lived Fulcio cert + Rekor transparency-log entry |
+| **SLSA provenance** (`.intoto.jsonl`) | in-toto v1 / SLSA L3 | `slsa-verifier` | "what build process produced this?", workflow ID, source ref, builder identity |
+| **Unified manifest** (`ALL_SHA256SUMS` + `.sig` + `.pem`) | text + sigstore keyless | `cosign verify-blob` then `sha256sum -c` | "is every other asset on this release the one our CI produced?", one signed line per asset |
 
-All three are attached to every GitHub Release as assets. The
-`SHA256SUMS` file ties the SBOM hash to the release tag.
+All four are attached to every GitHub Release as assets, from v0.2.503 forward.
+Releases v0.2.500 through v0.2.502 carry the SBOM bundle only: the unified
+manifest landed in v0.2.503 and is forward-only (re-tagging earlier releases
+would break consumer pins on existing SHAs).
 
 ---
 
-## TL;DR — verify v0.2.502 end-to-end
+## TL;DR — verify v0.2.503+ end-to-end
 
 ```sh
 # 0. Pick the release to verify
-TAG=v0.2.502
+TAG=v0.2.503
 REPO=sebastienrousseau/dotfiles
 
-# 1. Download the four artefacts
+# 1. Download every attestation artefact
 gh release download "$TAG" --repo "$REPO" \
   --pattern dotfiles-sbom.spdx.json \
   --pattern dotfiles-sbom.spdx.json.sig \
   --pattern dotfiles-sbom.spdx.json.pem \
-  --pattern dotfiles-sbom.spdx.json.intoto.jsonl
+  --pattern dotfiles-sbom.spdx.json.intoto.jsonl \
+  --pattern ALL_SHA256SUMS \
+  --pattern ALL_SHA256SUMS.sig \
+  --pattern ALL_SHA256SUMS.pem
 
-# 2. Verify Cosign signature (binds SBOM → CI workflow identity)
+# 2. Verify Cosign signature on the SBOM (binds SBOM to CI workflow identity)
 cosign verify-blob \
   --certificate dotfiles-sbom.spdx.json.pem \
   --signature  dotfiles-sbom.spdx.json.sig \
@@ -42,15 +48,27 @@ cosign verify-blob \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   dotfiles-sbom.spdx.json
 
-# 3. Verify SLSA provenance (binds SBOM → exact source tag + builder)
+# 3. Verify SLSA provenance (binds SBOM to exact source tag + builder)
 slsa-verifier verify-artifact dotfiles-sbom.spdx.json \
   --provenance-path dotfiles-sbom.spdx.json.intoto.jsonl \
   --source-uri "github.com/$REPO" \
   --source-tag "$TAG"
+
+# 4. Verify the unified manifest, then verify every other asset against it.
+#    One signed file covers all release artefacts in one shot.
+cosign verify-blob \
+  --certificate ALL_SHA256SUMS.pem \
+  --signature  ALL_SHA256SUMS.sig \
+  --certificate-identity-regexp "^https://github.com/$REPO/" \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  ALL_SHA256SUMS
+
+gh release download "$TAG" --repo "$REPO" --dir .  # pull every other asset
+sha256sum -c ALL_SHA256SUMS                        # one line per asset
 ```
 
-Both commands should print a "Verified" / "PASSED" message and
-exit 0. If either fails, **the release was tampered with** — open
+All four commands should print "Verified" / "PASSED" / "OK" and
+exit 0. If any fails, **the release was tampered with**: open
 an issue at <https://github.com/sebastienrousseau/dotfiles/issues>
 and do **not** install.
 

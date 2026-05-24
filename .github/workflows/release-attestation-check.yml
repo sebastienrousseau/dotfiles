@@ -1,0 +1,136 @@
+name: Release Attestation Check
+
+# Independent watchdog: every Monday, scan the most recent release and
+# confirm it carries the full attestation bundle (SBOM, Cosign cert+sig,
+# SLSA provenance, signed asset manifest). Opens / comments a tracking
+# issue if anything is missing.
+#
+# Why a separate workflow: security-release.yml runs at release time and
+# might pass even when an asset upload silently fails (network blip,
+# rate limit, etc). This is the after-the-fact integrity check that
+# catches drift between intent and reality.
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'  # Monday 07:00 UTC
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag to check (default: latest)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Verify last release has full attestation bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write       # open/comment if attestation missing
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Resolve target release
+        id: target
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          INPUT_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          if [[ -n "$INPUT_TAG" ]]; then
+            tag="$INPUT_TAG"
+          else
+            tag=$(gh release list --repo "$REPO" --limit 1 --json tagName --jq '.[0].tagName')
+          fi
+          [[ -z "$tag" ]] && { echo "::error::no releases found"; exit 1; }
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Checking release: $tag"
+
+      - name: Verify attestation assets present
+        id: verify
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ steps.target.outputs.tag }}
+        run: |
+          set -euo pipefail
+          mapfile -t assets < <(gh release view "$TAG" --repo "$REPO" --json assets --jq '.assets[].name')
+          echo "Assets on $TAG (${#assets[@]}):"
+          printf '  %s\n' "${assets[@]}"
+
+          # Required per VERIFY_RELEASE.md contract
+          required=(
+            "dotfiles-sbom.spdx.json"
+            "dotfiles-sbom.spdx.json.sig"
+            "dotfiles-sbom.spdx.json.pem"
+            "dotfiles-sbom.spdx.json.intoto.jsonl"
+            "ALL_SHA256SUMS"
+            "ALL_SHA256SUMS.sig"
+            "ALL_SHA256SUMS.pem"
+          )
+
+          missing=()
+          for r in "${required[@]}"; do
+            found=0
+            for a in "${assets[@]}"; do
+              [[ "$a" == "$r" ]] && { found=1; break; }
+            done
+            [[ "$found" -eq 0 ]] && missing+=("$r")
+          done
+
+          {
+            echo "missing<<MISSING_EOF"
+            printf '%s\n' "${missing[@]+"${missing[@]}"}"
+            echo "MISSING_EOF"
+            echo "count=${#missing[@]}"
+          } >> "$GITHUB_OUTPUT"
+
+          if [[ "${#missing[@]}" -gt 0 ]]; then
+            echo "::error::Release $TAG is missing ${#missing[@]} required attestation asset(s)"
+            printf '  - %s\n' "${missing[@]}"
+            exit 1
+          fi
+          echo "Release $TAG has the full attestation bundle"
+
+      - name: Open or comment tracking issue
+        if: failure() && steps.verify.outputs.count != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ steps.target.outputs.tag }}
+          MISSING: ${{ steps.verify.outputs.missing }}
+        run: |
+          set -euo pipefail
+          title="Release attestation incomplete: $TAG"
+          body=$(cat <<EOF
+          Automated watchdog detected missing attestation assets on the latest release.
+
+          **Release:** [$TAG](https://github.com/$REPO/releases/tag/$TAG)
+          **Missing assets:**
+          \`\`\`
+          $MISSING
+          \`\`\`
+
+          ## Triage
+          1. Check the \`Release / Security Attestation\` workflow run for \`$TAG\` — was there a failure?
+          2. If the workflow ran but upload failed, re-run via:
+             \`gh workflow run security-release.yml -f release_tag=$TAG\`
+          3. Re-run this watchdog to confirm: \`gh workflow run release-attestation-check.yml -f release_tag=$TAG\`
+
+          See \`docs/security/VERIFY_RELEASE.md\` for the full attestation contract.
+          EOF
+          )
+          existing=$(gh issue list --repo "$REPO" --search "Release attestation incomplete in:title" --state open --json number --jq '.[0].number' 2>/dev/null || true)
+          if [[ -n "$existing" ]]; then
+            gh issue comment "$existing" --repo "$REPO" --body "$body"
+          else
+            gh issue create --repo "$REPO" --title "$title" --body "$body" --label "type:security,priority:high"
+          fi

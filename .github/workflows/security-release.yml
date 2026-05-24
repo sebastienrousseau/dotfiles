@@ -2,7 +2,12 @@ name: Release / Security Attestation
 
 on:
   release:
-    types: [created]
+    # `created` fires once when the release first appears (covers the
+    # SBOM + provenance generated from source). `published` fires when
+    # a human edits a draft → public, by which point asset-uploading
+    # workflows (manual-publish.yml etc.) have finished — that's when
+    # we sign the full asset manifest. Both runs are idempotent.
+    types: [created, published]
   workflow_dispatch:
     inputs:
       release_tag:
@@ -109,6 +114,103 @@ jobs:
             dotfiles-sbom.spdx.json \
             dotfiles-sbom.spdx.json.sig \
             dotfiles-sbom.spdx.json.pem \
+            --clobber
+
+  manifest:
+    name: Release / Signed Asset Manifest
+    # Runs on `published` (after asset-uploaders have finished) to
+    # build ALL_SHA256SUMS over every release asset and Cosign-sign
+    # it. The result: one signed file covers every artefact on the
+    # release, so downstream verifiers don't need to enumerate.
+    if: github.event_name == 'workflow_dispatch' || github.event.action == 'published'
+    runs-on: ubuntu-latest
+    needs: [sbom]
+    permissions:
+      contents: write   # upload manifest + sig + cert
+      id-token: write   # OIDC for Cosign keyless
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
+
+      - name: Download every release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p assets
+          cd assets
+          # Pull everything attached to the release at this moment.
+          # Re-running the job after additional assets land will pick
+          # them up; the upload step uses --clobber so the manifest
+          # tracks current state.
+          gh release download "$RELEASE_TAG" --dir . || true
+          ls -la
+
+      - name: Build ALL_SHA256SUMS (excludes manifest's own .sig/.pem/itself)
+        run: |
+          set -euo pipefail
+          cd assets
+          # Exclude prior manifest signatures so re-runs are idempotent.
+          # Sort by filename for byte-stable output across runners.
+          rm -f ALL_SHA256SUMS ALL_SHA256SUMS.sig ALL_SHA256SUMS.pem
+          find . -maxdepth 1 -type f ! -name 'ALL_SHA256SUMS*' -printf '%f\n' \
+            | sort \
+            | xargs -d '\n' -I {} sha256sum {} \
+            > ALL_SHA256SUMS
+          echo "=== ALL_SHA256SUMS ==="
+          cat ALL_SHA256SUMS
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159 # v3.9.2
+        with:
+          cosign-release: v2.4.1
+
+      - name: Sign ALL_SHA256SUMS with Cosign (keyless)
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        working-directory: assets
+        run: |
+          set -euo pipefail
+          cosign sign-blob --yes \
+            --output-signature ALL_SHA256SUMS.sig \
+            --output-certificate ALL_SHA256SUMS.pem \
+            ALL_SHA256SUMS
+
+          {
+            echo "### Unified manifest verification"
+            echo ""
+            echo "Verifies every release asset in one command."
+            echo ""
+            echo '```sh'
+            echo "cosign verify-blob \\"
+            echo "  --certificate ALL_SHA256SUMS.pem \\"
+            echo "  --signature ALL_SHA256SUMS.sig \\"
+            echo "  --certificate-identity-regexp '^https://github.com/${{ github.repository }}/' \\"
+            echo "  --certificate-oidc-issuer https://token.actions.githubusercontent.com \\"
+            echo "  ALL_SHA256SUMS"
+            echo "# Then check every other asset against the manifest:"
+            echo "sha256sum -c ALL_SHA256SUMS"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload signed manifest to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+        working-directory: assets
+        run: |
+          set -euo pipefail
+          gh release upload "$RELEASE_TAG" \
+            ALL_SHA256SUMS \
+            ALL_SHA256SUMS.sig \
+            ALL_SHA256SUMS.pem \
             --clobber
 
   provenance:
