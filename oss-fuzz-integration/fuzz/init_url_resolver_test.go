@@ -42,16 +42,18 @@ func ResolveInitURL(in string) string {
 		return ""
 	}
 
-	// Full URL? Accept https://, git@, ssh:// — refuse plain http://
-	// and everything else.
-	if strings.HasPrefix(in, "https://") ||
-		strings.HasPrefix(in, "git@") ||
-		strings.HasPrefix(in, "ssh://") {
-		// Parse to verify it at least lexes as a URL.
-		// git@ syntax isn't a URL per RFC but we passthrough.
-		if strings.HasPrefix(in, "git@") {
-			return in
+	// Full URL? Accept https://, git@<host>:<path>, ssh:// — refuse
+	// plain http:// and everything else. Mirrors the shell case in
+	// scripts/dot/commands/init.sh which uses pattern `git@*:*`
+	// (requires the colon after git@; without it the SSH form is
+	// malformed and downstream tools reject it anyway).
+	if strings.HasPrefix(in, "git@") {
+		if !strings.Contains(in[4:], ":") {
+			return ""
 		}
+		return in
+	}
+	if strings.HasPrefix(in, "https://") || strings.HasPrefix(in, "ssh://") {
 		if _, err := url.Parse(in); err != nil {
 			return ""
 		}
