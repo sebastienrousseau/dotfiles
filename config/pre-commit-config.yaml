@@ -173,3 +173,23 @@ repos:
         entry: scripts/ci/check-regression-traceability.sh
         language: script
         files: ^tests/regression/.*\.sh$
+
+      - id: command-index-drift
+        name: docs/manual/command-index.md matches `dot help all`
+        entry: tools/docs/generate-command-index.sh
+        args: ['--check']
+        language: script
+        pass_filenames: false
+        # Local-only: skip on pre-push to avoid blocking when the
+        # checking script needs a working `dot` CLI environment that
+        # CI runs anyway via .github/workflows/doc-drift.yml.
+        stages: [pre-commit]
+        files: '^(bin/dot|scripts/dot/commands/.*\.sh|tools/docs/generate-command-index\.sh|docs/manual/command-index\.md)$'
+
+      - id: version-consistency
+        name: Version-bearing files match defaults/.chezmoidata.toml
+        entry: scripts/qa/check-version-consistency.sh
+        language: script
+        pass_filenames: false
+        stages: [pre-commit]
+        files: '^(defaults/\.chezmoidata\.toml|README\.md|CLAUDE\.md|AGENTS\.md|package\.json|share/man/man1/dot\.1|lib/dot/bento\.sh|scripts/qa/check-version-consistency\.sh)$'
