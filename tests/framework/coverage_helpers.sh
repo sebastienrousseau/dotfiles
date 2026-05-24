@@ -684,9 +684,10 @@ cov_exercise_functions_file() {
   esac
   set +e
 
-  local tmpfile tmpdir
+  local tmpfile tmpdir stderr_log
   tmpdir=$(mktemp -d -t cov-fn.XXXXXX)
   tmpfile="$tmpdir/sample.txt"
+  stderr_log="$tmpdir/stderr.log"
   echo "sample" >"$tmpfile"
 
   test_start "${label}_functions_exercised"
@@ -768,11 +769,26 @@ cov_exercise_functions_file() {
       "$fn" "$tmpfile" </dev/null >/dev/null
     done < <(grep -oE "^[a-zA-Z_][a-zA-Z0-9_]*\s*\(\)" "$1" | sed "s/[[:space:]]*()$//")
     exit 0
-  ' _ "$script" "$tmpfile" </dev/null
+  ' _ "$script" "$tmpfile" </dev/null 2> >(tee -a "$stderr_log" >&2)
   rc=$?
+
+  # DOT_STRICT=1: promote silent-but-loud failures (command-not-found,
+  # unbound variable in nounset mode) to test failures. Default behavior
+  # remains tolerant — these helpers exercise unsourced files where the
+  # noise is expected. Strict mode is for CI runs that want signal over
+  # body-coverage breadth.
+  local strict_violations=""
+  if [[ "${DOT_STRICT:-0}" == "1" && -s "$stderr_log" ]]; then
+    strict_violations="$(grep -E ': (command not found|unbound variable)$' "$stderr_log" | sort -u | head -5)"
+  fi
+
   rm -rf "$tmpdir"
 
-  if [[ "$rc" -ne 124 ]]; then
+  if [[ -n "$strict_violations" ]]; then
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: DOT_STRICT violations in $label:"
+    while IFS= read -r line; do printf '       %s\n' "$line"; done <<<"$strict_violations"
+  elif [[ "$rc" -ne 124 ]]; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
   else
