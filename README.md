@@ -187,7 +187,7 @@ Over 80 commands grouped by intent. Run `dot help` for the full reference.
 | `dot fleet apply` | SSH out to every host in `~/.config/dotfiles/fleet.toml` |
 | `dot registry list` | Browse reusable dotfile modules from the registry |
 
-A [Claude Code skill](dot_claude/skills/dotfiles-bootstrap/SKILL.md) is also shipped — `/skills` discovers `dotfiles-bootstrap` and runs `dot init` with profile-aware safety defaults.
+A [Claude Code skill](defaults/dot_claude/skills/dotfiles-bootstrap/SKILL.md) is also shipped — `/skills` discovers `dotfiles-bootstrap` and runs `dot init` with profile-aware safety defaults.
 
 ### Daily Use
 

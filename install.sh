@@ -6,6 +6,13 @@
 
 set -euo pipefail
 
+# Restrict the permissions of any file/dir we create during bootstrap.
+# The installer writes secret-adjacent artifacts (chezmoi config, age
+# keys, ssh tooling, downloaded archives) under $HOME — 077 prevents
+# other local accounts from reading them. Individual call sites can
+# still relax with `chmod` when a file is meant to be world-readable.
+umask 077
+
 # ANSI Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'

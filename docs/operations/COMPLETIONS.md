@@ -116,8 +116,8 @@ their lifecycle.
 
 ## References
 
-- [`dot_config/zsh/rc.d/30-options.zsh.tmpl`](../../dot_config/zsh/rc.d/30-options.zsh.tmpl) — the deferred-compinit logic.
-- [`run_onchange_after_zcompile-completions.sh.tmpl`](../../run_onchange_after_zcompile-completions.sh.tmpl) — the apply-time precompile hook.
+- [`dot_config/zsh/rc.d/30-options.zsh.tmpl`](../../defaults/dot_config/zsh/rc.d/30-options.zsh.tmpl) — the deferred-compinit logic.
+- [`run_onchange_after_zcompile-completions.sh.tmpl`](../../defaults/run_onchange_after_zcompile-completions.sh.tmpl) — the apply-time precompile hook.
 - [`zsh` completion docs](https://zsh.sourceforge.io/Doc/Release/Completion-System.html).
 - ADR-002 (Shell Performance Optimization).
 - Issue [#864](https://github.com/sebastienrousseau/dotfiles/issues/864).

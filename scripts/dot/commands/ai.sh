@@ -316,7 +316,7 @@ cmd_ai_query() {
 # /vibe Claude Code skill. Path stays in sync with
 # defaults/dot_claude/skills/vibe/tools/.
 _ai_delegate_tool() {
-  local tool="$1"  # vibe-delegate | delegate-report
+  local tool="$1" # vibe-delegate | delegate-report
   local path="${HOME}/.claude/skills/vibe/tools/${tool}"
   if [[ ! -x "$path" ]]; then
     # Errors to stderr so callers capturing stdout via $() get just the path.
