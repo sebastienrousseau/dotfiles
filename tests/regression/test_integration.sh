@@ -150,7 +150,10 @@ test_start "integration_mcp_registry_exists"
 assert_file_exists "$REPO_ROOT/defaults/dot_config/dotfiles/mcp-registry.json" "MCP registry must exist"
 
 test_start "integration_atuin_filters_cloud_clis"
-assert_file_contains "$REPO_ROOT/defaults/dot_config/atuin/config.toml" "aws|gcloud|az|kubectl" "atuin must filter cloud CLI commands"
+# Post-Phase-4b the atuin history_filter list moved out of the template
+# into defaults/.chezmoidata/secrets-patterns.toml, which is templated
+# into the config via `{{- range .atuin.history_filter.defaults }}`.
+assert_file_contains "$REPO_ROOT/defaults/.chezmoidata/secrets-patterns.toml" "aws|gcloud|az|kubectl" "atuin must filter cloud CLI commands"
 
 test_start "integration_gitleaks_config_exists"
 assert_file_exists "$REPO_ROOT/config/gitleaks.toml" "gitleaks config must exist"

@@ -283,6 +283,22 @@ main() {
     run_test_list "UNIT TESTS (${#unit_files[@]} files)" "${unit_files[@]}"
   fi
 
+  # Collect + run regression tests. These are always run alongside unit
+  # tests (issue #868 — regressions must always be exercised), but only
+  # when the user is running the full suite. When a `pattern` argument
+  # narrows the unit set (e.g. `--jobs 1 secrets_*` from
+  # test_runner_parallel_invariant.sh), skip regression tests to avoid
+  # recursive self-invocation through the parallel-invariant guard.
+  if [[ "$unit_only" != "1" && "$test_pattern" == "*" ]]; then
+    local regression_files=()
+    while IFS= read -r -d '' f; do
+      regression_files+=("$f")
+    done < <(find "$TESTS_DIR"/regression -name "test_*.sh" -type f -print0 | sort -z)
+    if [[ ${#regression_files[@]} -gt 0 ]]; then
+      run_test_list "REGRESSION TESTS (${#regression_files[@]} files)" "${regression_files[@]}"
+    fi
+  fi
+
   # Collect + run integration tests if requested
   if [[ "$run_integration" == "1" && "$unit_only" != "1" ]]; then
     local integration_files=()

@@ -332,7 +332,9 @@ test_start "platform_ssh_usekeychain_conditional"
 assert_file_contains "$REPO_ROOT/defaults/private_dot_ssh/config.tmpl" "UseKeychain" "SSH config must handle macOS UseKeychain"
 
 test_start "platform_atuin_config_exists"
-assert_file_exists "$REPO_ROOT/defaults/dot_config/atuin/config.toml" "atuin config must exist for cross-platform history"
+# Post-Phase-4b the atuin config is a chezmoi template under defaults/
+# so it can branch on platform/profile.
+assert_file_exists "$REPO_ROOT/defaults/dot_config/atuin/config.toml.tmpl" "atuin config must exist for cross-platform history"
 
 test_start "platform_installer_detects_fedora"
 assert_file_contains "$REPO_ROOT/install.sh" "fedora" "installer must detect Fedora/RHEL"

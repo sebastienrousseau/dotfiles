@@ -169,9 +169,23 @@ test_start "template_bashrc_syntax"
 assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/dot_bashrc'"
 
 test_start "template_options_zsh_has_balanced_braces"
-open=$(grep -o '{{' "$REPO_ROOT/defaults/dot_config/zsh/rc.d/30-options.zsh.tmpl" | wc -l | tr -d ' ')
-close=$(grep -o '}}' "$REPO_ROOT/defaults/dot_config/zsh/rc.d/30-options.zsh.tmpl" | wc -l | tr -d ' ')
-assert_equals "$open" "$close" "options.zsh template braces must be balanced ($open open, $close close)"
+# Shell sources like this template contain nested `${VAR:-${INNER}}`
+# which legitimately produces `}}` without being Go template syntax.
+# Counting both delimiters confuses the two. Validate the template by
+# asking chezmoi to render it — if it parses, the braces are balanced.
+options_tmpl="$REPO_ROOT/defaults/dot_config/zsh/rc.d/30-options.zsh.tmpl"
+if command -v chezmoi >/dev/null 2>&1; then
+  if chezmoi execute-template <"$options_tmpl" >/dev/null 2>&1; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: chezmoi parses the template"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: chezmoi failed to parse the template"
+  fi
+else
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (chezmoi not installed)"
+fi
 
 test_start "template_aliases_aggregator_has_balanced_braces"
 open=$(grep -o '{{' "$REPO_ROOT/defaults/dot_config/shell/90-ux-aliases.sh.tmpl" | wc -l | tr -d ' ')
