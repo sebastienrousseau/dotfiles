@@ -12,7 +12,17 @@ ui_header "Wallpaper Sync"
 
 WALLPAPER_DIR="${DOTFILES_WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
 CHEZMOI_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
-DATA_FILE="${HOME}/.dotfiles/.chezmoidata.toml"
+
+# Resolve dotfiles repo root, then descend into chezmoi source subdir if
+# .chezmoiroot is present (v0.2.503+, where chezmoi files live in defaults/)
+_DOTFILES_ROOT="${HOME}/.dotfiles"
+[[ ! -d "$_DOTFILES_ROOT" && -d "${HOME}/.local/share/chezmoi" ]] && _DOTFILES_ROOT="${HOME}/.local/share/chezmoi"
+_CHEZMOI_SRC="$_DOTFILES_ROOT"
+if [[ -f "$_DOTFILES_ROOT/.chezmoiroot" ]]; then
+  _sub="$(head -1 "$_DOTFILES_ROOT/.chezmoiroot" | tr -d '[:space:]')"
+  [[ -n "$_sub" && -d "$_DOTFILES_ROOT/$_sub" ]] && _CHEZMOI_SRC="$_DOTFILES_ROOT/$_sub"
+fi
+DATA_FILE="${_CHEZMOI_SRC}/.chezmoidata.toml"
 
 WALLPAPER_DIR_EXISTS=true
 if [ ! -d "$WALLPAPER_DIR" ]; then
@@ -105,7 +115,7 @@ wallpaper_for_theme() {
   done
 
   # 4. Check themes.toml stored wallpaper path (set by extract-theme.py)
-  local themes_file="${HOME}/.dotfiles/.chezmoidata/themes.toml"
+  local themes_file="${_CHEZMOI_SRC}/.chezmoidata/themes.toml"
   if [[ -f "$themes_file" ]]; then
     local stored_wp
     stored_wp="$(awk -v n="$theme" '
@@ -394,7 +404,109 @@ apply_wallpaper() {
 
   case "$(uname -s)" in
     Darwin)
-      osascript -e "tell application \"System Events\" to set picture of every desktop to POSIX file \"$wp\"" || true
+      # macOS Sonoma+ moved wallpaper state to ~/Library/Application Support/
+      # com.apple.wallpaper/Store/Index.plist, owned by WallpaperAgent. Each
+      # Space and Display has its own entry, and AppleScript's `every desktop`
+      # only sees the active Space — so the only reliable way to cover all
+      # desktops is to rewrite each entry in Index.plist directly.
+      #
+      # The Configuration field of each choice is itself a nested binary plist
+      # of the form: {type: 'imageFile', url: {relative: 'file:///path'}}
+      # The store has several shapes: Spaces[uuid].Default.Desktop (per-Space
+      # wallpaper), Spaces[uuid].Default.Linked (desktop + screensaver share
+      # one image), and per-display nesting under Spaces[uuid].Displays[uuid].
+      # Walk the tree and patch any node that holds a wallpaper Choice list.
+      # After updating, killall WallpaperAgent so launchd respawns it and it
+      # re-reads the store.
+      python3 - "$wp" <<'PYEOF' 2>/dev/null || true
+import plistlib, os, sys
+wp = sys.argv[1]
+uri = "file://" + wp
+store = os.path.expanduser(
+    "~/Library/Application Support/com.apple.wallpaper/Store/Index.plist"
+)
+if not os.path.exists(store):
+    sys.exit(0)
+
+def make_config(uri):
+    return plistlib.dumps(
+        {"type": "imageFile", "url": {"relative": uri}},
+        fmt=plistlib.FMT_BINARY,
+    )
+
+def patch_node(node, uri):
+    """Patch a Desktop/Linked node in-place. Returns 1 if patched."""
+    content = node.get("Content")
+    if not isinstance(content, dict):
+        return 0
+    choices = content.get("Choices")
+    if not isinstance(choices, list) or not choices:
+        return 0
+    first = choices[0]
+    if not isinstance(first, dict):
+        return 0
+    first["Configuration"] = make_config(uri)
+    first["Provider"] = "com.apple.wallpaper.choice.image"
+    first["Files"] = []
+    content["Choices"] = [first]
+    content["Shuffle"] = "$null"
+    # Leave EncodedOptionValues alone — it stores crop/color and is per-image.
+    return 1
+
+# Recursively patch every wallpaper-bearing node. A node qualifies when it
+# has a Content.Choices list — this matches Desktop and Linked entries
+# wherever they appear (top-level Displays, AllSpacesAndDisplays, Spaces[*]
+# .Default, Spaces[*].Displays[*], etc.) and ignores Idle (screensaver) so
+# we don't clobber the user's lock-screen wallpaper.
+def walk(node, uri, key=None):
+    count = 0
+    if isinstance(node, dict):
+        if key in ("Desktop", "Linked") and "Content" in node:
+            count += patch_node(node, uri)
+        else:
+            for k, v in node.items():
+                count += walk(v, uri, k)
+    elif isinstance(node, list):
+        for item in node:
+            count += walk(item, uri)
+    return count
+
+with open(store, "rb") as f:
+    data = plistlib.load(f)
+
+# Safety backup before mutating.
+try:
+    with open(store + ".dot-bak", "wb") as f:
+        plistlib.dump(data, f, fmt=plistlib.FMT_BINARY)
+except Exception:
+    pass
+
+updated = walk(data, uri)
+
+if updated:
+    with open(store, "wb") as f:
+        plistlib.dump(data, f, fmt=plistlib.FMT_BINARY)
+
+print(updated)
+PYEOF
+
+      # Restart WallpaperAgent so it re-reads the store. launchd respawns it.
+      killall WallpaperAgent 2>/dev/null || true
+
+      # Also nudge the active Space via the public API. This covers the
+      # initial render before WallpaperAgent comes back, and handles screens
+      # the Index.plist rewrite somehow missed.
+      if command -v wallpaper &>/dev/null; then
+        wallpaper set "$wp" --screen all 2>/dev/null || true
+      else
+        osascript -e "
+tell application \"System Events\"
+    set theFile to POSIX file \"${wp}\"
+    repeat with d in (get every desktop)
+        set picture of d to theFile
+    end repeat
+end tell" 2>/dev/null || true
+      fi
       ;;
     Linux)
       # DMS owns wallpaper display and runs matugen for color extraction.
@@ -480,7 +592,7 @@ apply_wallpaper() {
 
 apply_wallpaper "$WALLPAPER" "$MODE"
 if [[ -n "$THEME" ]]; then
-  ui_ok "Wallpaper applied (${MODE})" "$(basename "$WALLPAPER") ← $THEME"
+  ui_ok "Applied wallpaper (${MODE})" "$(basename "$WALLPAPER") ← $THEME"
 else
-  ui_ok "Wallpaper applied (${MODE})" "$(basename "$WALLPAPER")"
+  ui_ok "Applied wallpaper (${MODE})" "$(basename "$WALLPAPER")"
 fi

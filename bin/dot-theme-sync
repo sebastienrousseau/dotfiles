@@ -78,8 +78,15 @@ if [[ -z "$SRC_DIR" ]]; then
   exit 1
 fi
 
-readonly DATA_FILE="$SRC_DIR/.chezmoidata.toml"
-readonly THEMES_FILE="$SRC_DIR/.chezmoidata/themes.toml"
+# Descend into the chezmoi source subdir when .chezmoiroot is present (v0.2.503+)
+CHEZMOI_SRC="$SRC_DIR"
+if [[ -f "$SRC_DIR/.chezmoiroot" ]]; then
+  _sub="$(head -1 "$SRC_DIR/.chezmoiroot" | tr -d '[:space:]')"
+  [[ -n "$_sub" && -d "$SRC_DIR/$_sub" ]] && CHEZMOI_SRC="$SRC_DIR/$_sub"
+fi
+
+readonly DATA_FILE="$CHEZMOI_SRC/.chezmoidata.toml"
+readonly THEMES_FILE="$CHEZMOI_SRC/.chezmoidata/themes.toml"
 readonly CHEZMOI_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
 
 # =============================================================================
@@ -233,7 +240,6 @@ apply_theme_configs() {
     "$HOME/.config/kitty/kitty.conf"
     "$HOME/.config/wezterm/wezterm.lua"
     "$HOME/.config/firefox/user.js"
-    "$HOME/.config/niri/config.kdl"
     "$HOME/.config/gtk-3.0/gtk.css"
     "$HOME/.config/gtk-3.0/settings.ini"
     "$HOME/.config/gtk-4.0/gtk.css"
@@ -242,34 +248,44 @@ apply_theme_configs() {
     "$HOME/.config/waybar/style.css"
   )
 
-  local applied=()
-  local target tmp_file
+  # Collect existing targets and apply in one chezmoi call.
+  # --force skips interactive "file has changed" prompts; &>/dev/null
+  # suppresses the prompt text that leaks onto stdout.
+  local valid_targets=()
+  local target
   for target in "${targets[@]}"; do
-    [[ -f "$target" ]] || continue
+    [[ -f "$target" ]] && valid_targets+=("$target")
+  done
 
-    if chezmoi apply "$target" 2>/dev/null; then
-      applied+=("${target##*/}")
-      continue
+  local applied_count=0
+  if [[ ${#valid_targets[@]} -gt 0 ]]; then
+    if chezmoi apply --force "${valid_targets[@]}" &>/dev/null; then
+      applied_count=${#valid_targets[@]}
     fi
+  fi
 
-    # Some local Niri setups keep ~/.config/niri/config.kdl outside direct
-    # chezmoi management. Fall back to rendering the managed template so theme
-    # switches still update active border colors and other palette values.
-    if [[ "$target" == "$HOME/.config/niri/config.kdl" ]]; then
+  # Niri: some setups keep config.kdl outside chezmoi management; fall back
+  # to rendering the template directly.
+  local niri_target="$HOME/.config/niri/config.kdl"
+  local tmp_file
+  if [[ -f "$niri_target" ]]; then
+    if chezmoi apply --force "$niri_target" &>/dev/null; then
+      applied_count=$((applied_count + 1))
+    else
       local niri_template="$SRC_DIR/dot_config/niri/config.kdl.tmpl"
       if [[ -f "$niri_template" ]]; then
         tmp_file="$(umask 077 && mktemp)"
-        if chezmoi execute-template <"$niri_template" >"$tmp_file" 2>/dev/null && mv "$tmp_file" "$target"; then
-          applied+=("${target##*/}")
-          continue
+        if chezmoi execute-template <"$niri_template" >"$tmp_file" 2>/dev/null && mv "$tmp_file" "$niri_target"; then
+          applied_count=$((applied_count + 1))
+        else
+          rm -f "$tmp_file"
         fi
-        rm -f "$tmp_file"
       fi
     fi
-  done
+  fi
 
-  if [[ ${#applied[@]} -gt 0 ]]; then
-    _ok "Chezmoi" "regenerated ${#applied[@]} configs"
+  if [[ $applied_count -gt 0 ]]; then
+    _ok "Chezmoi" "regenerated $applied_count configs"
   else
     _skip "Chezmoi" "no managed configs found"
   fi
@@ -444,7 +460,7 @@ reload_desktop() {
     fi
 
     # Read macos_accent from themes.toml (set by extract-theme.py from wallpaper hue)
-    local themes_file="$SRC_DIR/.chezmoidata/themes.toml"
+    local themes_file="$CHEZMOI_SRC/.chezmoidata/themes.toml"
     if [[ -f "$themes_file" ]]; then
       local toml_accent
       toml_accent="$(awk -v n="$theme" '

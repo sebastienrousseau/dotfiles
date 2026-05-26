@@ -58,8 +58,15 @@ if [ -z "$SRC_DIR" ]; then
   exit 1
 fi
 
-DATA_FILE="$SRC_DIR/.chezmoidata.toml"
-THEMES_FILE="$SRC_DIR/.chezmoidata/themes.toml"
+# Descend into the chezmoi source subdir when .chezmoiroot is present (v0.2.503+)
+CHEZMOI_SRC="$SRC_DIR"
+if [[ -f "$SRC_DIR/.chezmoiroot" ]]; then
+  _sub="$(head -1 "$SRC_DIR/.chezmoiroot" | tr -d '[:space:]')"
+  [[ -n "$_sub" && -d "$SRC_DIR/$_sub" ]] && CHEZMOI_SRC="$SRC_DIR/$_sub"
+fi
+
+DATA_FILE="$CHEZMOI_SRC/.chezmoidata.toml"
+THEMES_FILE="$CHEZMOI_SRC/.chezmoidata/themes.toml"
 WALLPAPER_DIR="${DOTFILES_WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
 if [ ! -f "$DATA_FILE" ]; then
   ui_err "Missing" "$DATA_FILE"
