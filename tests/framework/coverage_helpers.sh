@@ -632,7 +632,15 @@ cov_exercise_functions_file() {
       install-catppuccin-themes | switch | \
       executable_ai_core | executable_dot-bootstrap | dot-bootstrap | ai-update | \
       executable_ai-update | enforce-policies | ssh-cert | firewall | \
-      secrets_provider | secrets-provider)
+      secrets_provider | secrets-provider | \
+      diagnostics | validate-examples | verify)
+      # diagnostics.sh dispatches into `dot doctor`-style audits that
+      # walk the package managers — even with $tmpfile args, the
+      # internal cmd_doctor / cmd_perf paths spawn expensive
+      # subprocesses that overrun the 60s budget under parallel load.
+      # validate-examples and verify enumerate the whole repo (find +
+      # bash -n on hundreds of scripts) and hit the same wall.
+      # Script-mode exercise already covers their --help paths.
       # Scripts whose internal functions take a "version" or "file
       # path" arg and WRITE to repo files (README.md, install.sh,
       # CHANGELOG.md, etc.). Passing the helper's `$tmpfile` to
