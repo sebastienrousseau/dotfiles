@@ -297,6 +297,53 @@ search|Find commands by keyword across the public surface.|dot search ai
 help|Show the overview or a focused command reference.|dot help\ndot help doctor\ndot help all
 --version|Show the installed dotfiles version.|dot --version\ndot version
 version|Show the installed dotfiles version.|dot --version\ndot version
+cd|Print the dotfiles source directory path for shell helpers.|cd $(dot cd)\ndot cd
+commit|Draft an AI-assisted Conventional Commit for staged changes.|dot commit\ngit add -p && dot commit
+score|Print a system health and security scorecard.|dot score\ndot score --json\ndot score -q
+history|Analyse and surface insights from your shell history.|dot history\ndot history --top 20
+load-bench|Measure time to heavy-layer shell readiness.|dot load-bench\ndot load-bench --json
+chaos|Simulate config corruption to validate self-healing paths.|dot chaos --dry-run\ndot chaos --restore
+bundle|Create an offline archive of your dotfiles environment.|dot bundle\ndot bundle --output ~/dot-bundle.tar.zst
+metrics|Show recent observability metrics (JSONL event log).|dot metrics\ndot metrics --since 1h
+ai-setup|Interactive setup of installed AI CLI tools.|dot ai-setup\ndot ai-setup --tool claude
+ai-query|Run a context-aware RAG query over your dotfiles.|dot ai-query "where is theme switch handled"\ndot ai-query --top 5 "wallpaper sync"
+cl|Run the Claude CLI with dotfiles context patterns.|dot cl "explain this repo's theme pipeline"\ndot cl --model opus
+claude|Run the Claude CLI bridge (alias for cl).|dot claude "summarise CHANGELOG"\ndot claude --model sonnet
+codex|Run the OpenAI Codex CLI with dotfiles context patterns.|dot codex "refactor wallpaper-sync.sh"\ndot codex --review
+copilot|Run the GitHub Copilot CLI with dotfiles context patterns.|dot copilot suggest "review my latest commit"\ndot copilot explain
+gemini|Run the Google Gemini CLI with dotfiles context patterns.|dot gemini "audit security/firewall.sh"\ndot gemini --model 1.5-pro
+goose|Run the Goose CLI with dotfiles context patterns.|dot goose session start\ndot goose run
+kiro|Run the Kiro CLI with dotfiles context patterns.|dot kiro "design a new dot subcommand"
+sgpt|Run the Shell-GPT CLI with dotfiles context patterns.|dot sgpt "find leftover macOS plist writes"\ndot sgpt --shell "tar gz wallpapers"
+ollama|Run a local Ollama model with dotfiles context patterns.|dot ollama "review this branch diff" --model llama3
+opencode|Run the OpenCode CLI with dotfiles context patterns.|dot opencode "patch wallpaper-sync"\ndot opencode --review
+aider|Run the Aider pair-programming CLI with dotfiles context.|dot aider scripts/theme/switch.sh\ndot aider --model gpt-4o
+autohand|Run the Autohand CLI with dotfiles context patterns.|dot autohand "stage and commit theme fixes"
+vibe|Run the Vibe AI CLI with dotfiles context patterns.|dot vibe "cheap-route this prompt"\ndot vibe --report
+qwen|Run the Qwen Coder CLI with dotfiles context patterns.|dot qwen "convert this shell script to fish"
+zai|Run the ZAI CLI with dotfiles context patterns.|dot zai "audit env-emit.sh"
+tools|Show or install the managed Nix package set.|dot tools\ndot tools install
+new|Scaffold a new project from a managed template.|dot new\ndot new --template rust-cli my-project
+packages|List installed packages across every package manager on this host.|dot packages\ndot packages --json
+aliases|Inspect or audit shell aliases shipped by the dotfiles.|dot aliases\ndot aliases --check
+wallpaper|Apply a wallpaper from your Pictures/Wallpapers/ library.|dot wallpaper\ndot wallpaper sync\ndot wallpaper rotate
+fonts|Install Nerd Fonts (JetBrainsMono by default) for terminal glyphs.|dot fonts\ndot fonts install Hack
+tune|Apply opt-in OS tuning (macOS / Linux desktop polish).|dot tune\ndot tune --dry-run
+secrets-init|Initialize the age key used for encrypted secrets.|dot secrets-init\ndot secrets-init --recipient ~/.config/sops/age/keys.txt
+secrets-create|Create a new encrypted secrets file.|dot secrets-create ai\ndot secrets-create work --recipient alice@example.com
+ssh-key|Encrypt an SSH private key at rest with age.|dot ssh-key encrypt ~/.ssh/id_ed25519\ndot ssh-key decrypt ~/.ssh/id_ed25519.age
+ssh-cert|Manage short-lived SSH certificates from your CA.|dot ssh-cert request --principals seb\ndot ssh-cert list
+backup|Create a compressed backup of $HOME before risky changes.|dot backup\ndot backup --output ~/backups
+encrypt-check|Audit disk encryption status (FileVault / LUKS).|dot encrypt-check\ndot encrypt-check --json
+firewall|Apply opt-in firewall hardening for macOS or Linux.|dot firewall enable\ndot firewall status
+telemetry|Disable OS-level telemetry on macOS and Linux.|dot telemetry disable\ndot telemetry status
+dns-doh|Enable DNS-over-HTTPS for the active resolver.|dot dns-doh enable\ndot dns-doh status
+lock-screen|Enforce idle lock-screen settings (Linux only).|dot lock-screen 300\ndot lock-screen status
+usb-safety|Disable automount for removable media (Linux only).|dot usb-safety enable\ndot usb-safety status
+cache-refresh|Regenerate shell init caches for fast startup.|dot cache-refresh\ndot cache-refresh --force
+docs|Open the repository README in your pager.|dot docs\ndot docs --section architecture
+keys|Inspect keybindings and verify git signing.|dot keys\ndot keys sign-check
+sandbox|Launch a safe sandbox preview (Docker or Podman).|dot sandbox\ndot sandbox --runtime podman
 EOF
 }
 
