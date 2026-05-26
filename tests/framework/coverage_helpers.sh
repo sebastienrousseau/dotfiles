@@ -630,7 +630,7 @@ cov_exercise_functions_file() {
       manage-secrets | executable_update | wallpaper-rotate | \
       heal | heal-tools | rollback | restore | apply-gnome-theme | \
       install-catppuccin-themes | switch | \
-      executable_ai_core | executable_dot-bootstrap | ai-update | \
+      executable_ai_core | executable_dot-bootstrap | dot-bootstrap | ai-update | \
       executable_ai-update | enforce-policies | ssh-cert | firewall | \
       secrets_provider | secrets-provider)
       # Scripts whose internal functions take a "version" or "file

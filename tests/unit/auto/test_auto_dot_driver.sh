@@ -34,7 +34,12 @@ elif command -v gtimeout >/dev/null 2>&1; then
 fi
 TC=()
 if [[ -n "$TIMEOUT_BIN" ]]; then
-  TC=("$TIMEOUT_BIN" --kill-after=2 15)
+  # 60s rather than 15s. `dot doctor` runs a system audit (mise list,
+  # brew list, package introspection, etc.) which routinely brushes
+  # past 15s when 8 test files are running in parallel and share the
+  # same CPU + filesystem cache. 60s aligns with cov_exercise_script
+  # and absorbs the worst observed `dot doctor --json` wall-time.
+  TC=("$TIMEOUT_BIN" --kill-after=2 60)
 fi
 
 # Pre-seed minimal state so commands that read config find sensible
