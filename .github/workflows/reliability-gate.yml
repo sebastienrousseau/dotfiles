@@ -37,6 +37,28 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Install shfmt + shellcheck
+        # tests/regression/test_static_analysis.sh shells out to both
+        # tools but the GitHub-hosted runners don't preinstall shfmt
+        # (shellcheck is on ubuntu-latest but not macOS). Without the
+        # tools every `! shfmt ...` check inverts a "command not found"
+        # into a "fail" and the static-analysis test reports every
+        # file in CHANGED_SCRIPTS as broken regardless of content.
+        run: |
+          set -euo pipefail
+          case "$(uname -s)" in
+            Linux)
+              sudo apt-get update -qq
+              sudo apt-get install -y -qq shfmt shellcheck
+              ;;
+            Darwin)
+              brew install shfmt shellcheck
+              ;;
+          esac
+          shfmt --version
+          shellcheck --version | head -2
+
       - name: Reliability audit
         run: bash ./scripts/qa/reliability-audit.sh --with-integration
 
