@@ -87,7 +87,7 @@ out="$(CHEZMOI_SOURCE_DIR="$sandbox" HOME="$sandbox/fake-home" \
   XDG_CONFIG_HOME="$sandbox/fake-home/.config" \
   XDG_STATE_HOME="$sandbox/fake-home/.local/state" \
   XDG_CACHE_HOME="$sandbox/fake-home/.cache" \
-  "$BASH" "$SWITCH" current 2>&1)"
+  "$BASH" "$SWITCH" current 2>&1)" || out="${out} [exit=$?]"
 if [[ "$out" == *"$SENTINEL_THEME"* ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: switch.sh current → sentinel"
@@ -124,7 +124,7 @@ out="$(PATH="$mockbin:$PATH" CHEZMOI_SOURCE_DIR="$sandbox" \
   XDG_CONFIG_HOME="$sandbox/fake-home/.config" \
   XDG_STATE_HOME="$sandbox/fake-home/.local/state" \
   XDG_CACHE_HOME="$sandbox/fake-home/.cache" \
-  "$BASH" "$THEME_SYNC" 2>&1)"
+  "$BASH" "$THEME_SYNC" 2>&1)" || out="${out} [exit=$?]"
 if [[ "$out" == *"$SENTINEL_THEME"* ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot-theme-sync read sentinel from defaults/"
@@ -150,7 +150,7 @@ out="$(CHEZMOI_SOURCE_DIR="$sandbox" HOME="$sandbox/fake-home" \
   XDG_CONFIG_HOME="$sandbox/fake-home/.config" \
   XDG_STATE_HOME="$sandbox/fake-home/.local/state" \
   XDG_CACHE_HOME="$sandbox/fake-home/.cache" \
-  "$BASH" "$SWITCH" list 2>&1)"
+  "$BASH" "$SWITCH" list 2>&1)" || out="${out} [exit=$?]"
 if [[ "$out" == *"$SENTINEL_THEME"* ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: list shows the sandbox theme"
@@ -175,7 +175,7 @@ out="$(PATH="$mockbin:$PATH" CHEZMOI_SOURCE_DIR="$sandbox" \
   XDG_STATE_HOME="$sandbox/fake-home/.local/state" \
   XDG_CACHE_HOME="$sandbox/fake-home/.cache" \
   DOTFILES_WALLPAPER_DIR="$empty_wp" \
-  "$BASH" "$WALLPAPER_SYNC" 2>&1)"
+  "$BASH" "$WALLPAPER_SYNC" 2>&1)" || out="${out} [exit=$?]"
 # When no wallpaper file matches, the script prints
 #   "no wallpaper for <theme> (skipping ...)" with the resolved theme.
 if [[ "$out" == *"$SENTINEL_THEME"* ]]; then
