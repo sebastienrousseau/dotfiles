@@ -35,7 +35,13 @@ export HOME="$sandbox" \
 # with the dispatcher. Each line is `command|route`. We skip aliases
 # that exist only to map flags (`--help`, `-h`, `--version`, `-v`)
 # since `dot help <flag>` doesn't make sense.
-mapfile -t routes < <(
+# Portable equivalent of `mapfile -t`. mapfile is bash 4+, and macOS
+# stock /bin/bash is still 3.2; the brew-installed bash 4+ may or may
+# not be first in PATH on a given runner. while-read is universal.
+routes=()
+while IFS= read -r _route_line; do
+  routes+=("$_route_line")
+done < <(
   awk '/^_dot_command_routes\(\)/{flag=1; next}
        flag && /^EOF$/{exit}
        flag && /^[a-z][a-z_-]+\|/{print}' "$DOT_CLI"
