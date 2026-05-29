@@ -299,8 +299,15 @@ main() {
     fi
   fi
 
-  # Collect + run integration tests if requested
-  if [[ "$run_integration" == "1" && "$unit_only" != "1" ]]; then
+  # Collect + run integration tests if requested. Same pattern-gate
+  # as the regression block above: when a `pattern` narrows the unit
+  # set (e.g. `--jobs auto secrets_*` from
+  # test_runner_parallel_invariant.sh), skip integration tests too.
+  # Without this gate the inner parallel run pulls in every
+  # integration test whenever RUN_INTEGRATION was inherited from the
+  # outer reliability-audit --with-integration invocation, which
+  # turned into a flaky chezmoi-apply assertion on macOS Reliability.
+  if [[ "$run_integration" == "1" && "$unit_only" != "1" && "$test_pattern" == "*" ]]; then
     local integration_files=()
     for f in "$TESTS_DIR"/integration/test_*.sh; do
       [[ -f "$f" ]] && integration_files+=("$f")
