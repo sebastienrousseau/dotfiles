@@ -341,6 +341,7 @@ dns-doh|Enable DNS-over-HTTPS for the active resolver.|dot dns-doh enable\ndot d
 lock-screen|Enforce idle lock-screen settings (Linux only).|dot lock-screen 300\ndot lock-screen status
 usb-safety|Disable automount for removable media (Linux only).|dot usb-safety enable\ndot usb-safety status
 cache-refresh|Regenerate shell init caches for fast startup.|dot cache-refresh\ndot cache-refresh --force
+prewarm|Alias of cache-refresh — regenerate shell init caches.|dot prewarm\ndot prewarm --force
 docs|Open the repository README in your pager.|dot docs\ndot docs --section architecture
 keys|Inspect keybindings and verify git signing.|dot keys\ndot keys sign-check
 sandbox|Launch a safe sandbox preview (Docker or Podman).|dot sandbox\ndot sandbox --runtime podman
