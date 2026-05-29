@@ -83,6 +83,15 @@ _ai_refresh_status_cache() {
     i=$((i + 1))
   done
   # shellcheck disable=SC2016
+  # Probe needs to be totally non-interactive: several AI CLIs (sgpt,
+  # codex, aider) read their config on every invocation and will
+  # prompt for an API key on first run if none is configured. Even
+  # `--version` triggers it because they parse args after init. Three
+  # guards:
+  #
+  #   < /dev/null    no stdin → prompt reads see EOF and exit cleanly
+  #   timeout 3s     hard cap if the tool ignores the EOF
+  #   2>/dev/null    suppress any prompt that escapes to stderr
   local probe_script='
     payload="$1"
     out_dir="$2"
@@ -90,7 +99,11 @@ _ai_refresh_status_cache() {
     entry="${payload#*|}"
     IFS="|" read -r category role name bin desc <<<"$entry"
     if command -v "$bin" >/dev/null 2>&1; then
-      output=$("$bin" --version 2>/dev/null | head -1) || true
+      if command -v timeout >/dev/null 2>&1; then
+        output=$(timeout 3 "$bin" --version </dev/null 2>/dev/null | head -1) || true
+      else
+        output=$("$bin" --version </dev/null 2>/dev/null | head -1) || true
+      fi
       version=$(printf "%s" "$output" | sed "s/^[^0-9]*//" | sed "s/[[:space:]]*$//" | sed "s/\.$//")
       printf "%s\t1\t%s\n" "$bin" "$version" >"$out_dir/$i"
     else
