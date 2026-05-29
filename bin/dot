@@ -439,6 +439,7 @@ lock-screen|security
 usb-safety|security
 upgrade|meta
 cache-refresh|meta
+prewarm|meta
 docs|meta
 learn|meta
 keys|meta
