@@ -182,24 +182,27 @@ system_wallpaper_for_theme() {
 
   [[ -n "$theme" ]] || return 1
 
-  # macOS: map theme names to Apple system wallpapers
+  # macOS: map theme names to Apple system wallpapers.
+  # Plain case statement (not `local -A`) because macOS still ships
+  # /bin/bash 3.2 which doesn't support associative arrays. Users who
+  # have brew bash get the same behaviour; first-run users with stock
+  # bash do too.
   if [[ "$(uname -s)" == "Darwin" && -d "$SYS_MAC" ]]; then
-    local -A mac_map=(
-      [macos - sonoma]="$SYS_MAC/Sonoma.heic"
-      [macos - blue]="$SYS_MAC/Mac Blue.heic"
-      [macos - pink]="$SYS_MAC/Mac Pink.heic"
-      [macos - purple]="$SYS_MAC/Mac Purple.heic"
-      [macos - yellow]="$SYS_MAC/Mac Yellow.heic"
-      [macos - orange]="$SYS_MAC/iMac Orange.heic"
-      [macos - green]="$SYS_MAC/iMac Green.heic"
-      [macos - silver]="$SYS_MAC/iMac Silver.heic"
-    )
-
     # Extract family from theme name (strip -dark/-light)
     local family="${theme%-dark}"
     [[ "$family" == "$theme" ]] && family="${theme%-light}"
 
-    local sys_wp="${mac_map[$family]:-}"
+    local sys_wp=""
+    case "$family" in
+      "macos - sonoma") sys_wp="$SYS_MAC/Sonoma.heic" ;;
+      "macos - blue")   sys_wp="$SYS_MAC/Mac Blue.heic" ;;
+      "macos - pink")   sys_wp="$SYS_MAC/Mac Pink.heic" ;;
+      "macos - purple") sys_wp="$SYS_MAC/Mac Purple.heic" ;;
+      "macos - yellow") sys_wp="$SYS_MAC/Mac Yellow.heic" ;;
+      "macos - orange") sys_wp="$SYS_MAC/iMac Orange.heic" ;;
+      "macos - green")  sys_wp="$SYS_MAC/iMac Green.heic" ;;
+      "macos - silver") sys_wp="$SYS_MAC/iMac Silver.heic" ;;
+    esac
     if [[ -n "$sys_wp" && -f "$sys_wp" ]]; then
       printf '%s\n' "$sys_wp"
       return 0
