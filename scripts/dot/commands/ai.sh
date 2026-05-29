@@ -82,11 +82,11 @@ _ai_refresh_status_cache() {
     indexed+=("$i|$entry")
     i=$((i + 1))
   done
+  # Probe is non-interactive: </dev/null is a clean EOF for tools that
+  # prompt for an API key on first run; `timeout 3` caps the wait.
   # shellcheck disable=SC2016
-  # Probe is non-interactive: </dev/null gives a clean EOF to tools
-  # like sgpt/codex/aider that prompt for an API key on first run,
-  # and `timeout 3` caps the wait if a tool ignores the EOF.
-  local _TO=""; command -v timeout >/dev/null 2>&1 && _TO="timeout 3 "
+  local _TO=""
+  command -v timeout >/dev/null 2>&1 && _TO="timeout 3 "
   local probe_script='
     payload="$1"; out_dir="$2"; to="$3"
     i="${payload%%|*}"; entry="${payload#*|}"
