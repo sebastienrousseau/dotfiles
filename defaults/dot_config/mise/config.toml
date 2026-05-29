@@ -86,6 +86,11 @@ kiro-cli = "latest"
 task = "latest"
 just = "latest"
 
+# Nushell (structured-data shell). The bare `nushell` name isn't in
+# mise's tool registry; the aqua: backend resolves it from the official
+# release tarballs.
+"aqua:nushell/nushell" = "latest"
+
 [env]
 # Environment variables to set
 MISE_EXPERIMENTAL = "1"
