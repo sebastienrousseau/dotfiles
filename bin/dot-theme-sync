@@ -559,12 +559,50 @@ reload_desktop() {
     # Keep DMS theme mode in automatic mode across restarts. The shell's
     # session state owns light/dark automation, so avoid forcing manual mode
     # here via `dms ipc theme light|dark`.
+    #
+    # Also realign wallpaperPath / Light / Dark to the currently-resolved
+    # PNG frames for this theme family. DMS's matugen worker reads
+    # wallpaperPath directly and crashes on .heic because ImageMagick's
+    # heif decoder can't always decompress Apple's dynamic HEIC. Walking
+    # the wallpaper dir for `{family}-{0,1}.png` and writing those paths
+    # keeps the matugen worker on a format it can decode.
     local dms_session="${XDG_STATE_HOME:-$HOME/.local/state}/DankMaterialShell/session.json"
     if [[ -f "$dms_session" ]]; then
       _sed_i \
         -e 's/"themeModeAutoEnabled": *false/"themeModeAutoEnabled": true/' \
         -e 's/"themeModeAutoMode": *"[^"]*"/"themeModeAutoMode": "time"/' \
         "$dms_session"
+
+      if command -v python3 >/dev/null 2>&1; then
+        DMS_THEME="$theme" DMS_SESSION="$dms_session" \
+          DMS_WP_DIR="${DOTFILES_WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}" \
+          python3 - <<'PY' 2>/dev/null || true
+import json, os
+theme   = os.environ['DMS_THEME']
+session = os.environ['DMS_SESSION']
+wp_dir  = os.environ['DMS_WP_DIR']
+family  = theme[:-5] if theme.endswith('-dark') else (theme[:-6] if theme.endswith('-light') else theme)
+
+def resolve(idx, fallback_ext='heic'):
+    for ext in ('png', 'jpg', 'webp'):
+        cand = os.path.join(wp_dir, f"{family}-{idx}.{ext}")
+        if os.path.isfile(cand):
+            return cand
+    cand = os.path.join(wp_dir, f"{family}.{fallback_ext}")
+    return cand if os.path.isfile(cand) else None
+
+wp_light = resolve(0)
+wp_dark  = resolve(1)
+with open(session) as f:
+    d = json.load(f)
+if wp_light: d['wallpaperPathLight'] = wp_light
+if wp_dark:  d['wallpaperPathDark']  = wp_dark
+active = wp_dark if not d.get('isLightMode') else wp_light
+if active: d['wallpaperPath'] = active
+with open(session, 'w') as f:
+    json.dump(d, f, indent=2)
+PY
+      fi
     fi
   fi
 
