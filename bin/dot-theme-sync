@@ -894,12 +894,14 @@ main() {
   # If a new theme was specified, write it to the data file
   if [[ -n "$new_theme" ]]; then
     write_theme "$new_theme"
-    _info "Theme" "set to $new_theme"
   else
     sync_theme_state
   fi
 
-  # Read the active theme
+  # Read the active theme and print exactly once. When `new_theme` was
+  # supplied it's the same value `current_theme` returns now, so the
+  # earlier "set to $new_theme" line was just noise; we print the
+  # canonical active theme regardless of how we got here.
   local theme
   theme="$(current_theme)"
   if [[ -z "$theme" ]]; then
