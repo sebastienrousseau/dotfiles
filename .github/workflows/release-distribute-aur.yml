@@ -58,8 +58,23 @@ jobs:
           TAG="${{ steps.resolve-tag.outputs.tag }}"
           VERSION="${{ steps.resolve-tag.outputs.version }}"
           ASSET_NAME="dot-${VERSION}.tar.gz"
-          echo "Downloading ${ASSET_NAME} from release ${TAG}..."
           mkdir -p assets
+
+          # release.published fires concurrently with release-package-dot.yml,
+          # so the tarball may not be on the release yet. Poll for up to 5 min.
+          for attempt in $(seq 1 30); do
+            if gh release view "$TAG" --json assets --jq '.assets[].name' | grep -qx "${ASSET_NAME}"; then
+              echo "Found ${ASSET_NAME} on release (attempt $attempt)"
+              break
+            fi
+            if [[ $attempt -eq 30 ]]; then
+              echo "::error::Asset ${ASSET_NAME} never appeared on release ${TAG} after 5 minutes"
+              exit 1
+            fi
+            sleep 10
+          done
+
+          echo "Downloading ${ASSET_NAME} from release ${TAG}..."
           gh release download "$TAG" --dir assets --pattern "${ASSET_NAME}"
           ASSET_PATH="$(find assets -name "${ASSET_NAME}" -type f | head -1)"
           if [[ -z "$ASSET_PATH" ]]; then
@@ -128,6 +143,10 @@ jobs:
             -w /work \
             archlinux/archlinux:base-devel \
             bash -c "useradd -m builder && chown -R builder:builder /work && su builder -c 'cd /work && makepkg --printsrcinfo > .SRCINFO'"
+          # The container chown'd /work to its in-container builder uid (1000),
+          # which may not match the runner user. Reclaim ownership so the next
+          # step can write .git/config and commit.
+          sudo chown -R "$(id -u):$(id -g)" aur-pkg
 
       - name: Commit and push to AUR
         run: |
