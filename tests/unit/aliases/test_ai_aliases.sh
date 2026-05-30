@@ -9,7 +9,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 
 # Test setup
-ALIASES_FILE="$REPO_ROOT/.chezmoitemplates/aliases/ai/ai.aliases.sh"
+ALIASES_FILE="$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh"
 
 test_start "ai_aliases_file_exists"
 assert_file_exists "$ALIASES_FILE" "AI aliases file should exist"

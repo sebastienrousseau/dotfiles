@@ -31,9 +31,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../dot/lib/ui.sh
+# shellcheck source=../../lib/dot/ui.sh
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/../dot/lib/ui.sh"
+source "$SCRIPT_DIR/../../lib/dot/ui.sh"
 
 # Parse arguments
 STRICT_MODE=0
@@ -93,14 +93,17 @@ log_warn() {
 }
 
 MCP_CONFIG="${MCP_CONFIG:-$HOME/.config/claude/mcp_servers.json}"
-if [[ ! -f "$MCP_CONFIG" && -f "$HOME/.dotfiles/dot_config/claude/mcp_servers.json" ]]; then
-  MCP_CONFIG="$HOME/.dotfiles/dot_config/claude/mcp_servers.json"
+if [[ ! -f "$MCP_CONFIG" ]]; then
+  for cand in "$HOME/.dotfiles/defaults/dot_config/claude/mcp_servers.json" \
+    "$HOME/.dotfiles/dot_config/claude/mcp_servers.json"; do
+    [[ -f "$cand" ]] && MCP_CONFIG="$cand" && break
+  done
 fi
 
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
-MCP_POLICY_CONFIG="${MCP_POLICY_CONFIG:-$REPO_ROOT/dot_config/dotfiles/mcp-policy.json}"
-MCP_LOCK_CONFIG="${MCP_LOCK_CONFIG:-$REPO_ROOT/dot_config/dotfiles/mcp-lock.json}"
-MCP_REGISTRY_CONFIG="${MCP_REGISTRY_CONFIG:-$REPO_ROOT/dot_config/dotfiles/mcp-registry.json}"
+MCP_POLICY_CONFIG="${MCP_POLICY_CONFIG:-$REPO_ROOT/defaults/dot_config/dotfiles/mcp-policy.json}"
+MCP_LOCK_CONFIG="${MCP_LOCK_CONFIG:-$REPO_ROOT/defaults/dot_config/dotfiles/mcp-lock.json}"
+MCP_REGISTRY_CONFIG="${MCP_REGISTRY_CONFIG:-$REPO_ROOT/defaults/dot_config/dotfiles/mcp-registry.json}"
 
 if [[ "$JSON_MODE" -ne 1 ]]; then
   ui_init

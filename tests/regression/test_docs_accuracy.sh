@@ -69,7 +69,7 @@ assert_output_not_contains "dot cline" "grep -F 'dot cline' '$REPO_ROOT/docs/AI.
 test_start "features_doc_flags_match_chezmoidata"
 failures=0
 for flag in alias_wrapper dms zellij linux_desktop niri waybar fuzzel mako foot kanshi touch t2 surface; do
-  if ! grep -q "$flag" "$REPO_ROOT/.chezmoidata.toml" 2>/dev/null; then
+  if ! grep -q "$flag" "$REPO_ROOT/defaults/.chezmoidata.toml" 2>/dev/null; then
     failures=$((failures + 1))
   fi
 done
@@ -93,7 +93,7 @@ assert_equals "0" "$failures" "all PROFILES.md presets must have matching templa
 # ═══════════════════════════════════════════════════════════════
 
 test_start "tools_doc_ai_tools_in_mise"
-mise_config="$REPO_ROOT/dot_config/mise/config.toml"
+mise_config="$REPO_ROOT/defaults/dot_config/mise/config.toml"
 failures=0
 for tool in claude copilot gemini ollama opencode aider; do
   if grep -q "$tool" "$REPO_ROOT/docs/reference/TOOLS.md" 2>/dev/null; then
@@ -112,7 +112,7 @@ assert_output_not_contains "Cline" "grep -F 'Cline' '$REPO_ROOT/docs/reference/T
 # ═══════════════════════════════════════════════════════════════
 
 test_start "utils_doc_commands_exist"
-dot_cli="$REPO_ROOT/dot_local/bin/executable_dot"
+dot_cli="$REPO_ROOT/bin/dot"
 failures=0
 for cmd in apply doctor heal rollback bundle secrets; do
   if grep -q "dot $cmd" "$REPO_ROOT/docs/reference/UTILS.md" 2>/dev/null; then
@@ -224,17 +224,17 @@ assert_file_contains "$REPO_ROOT/CLAUDE.md" "SC1091" "CLAUDE.md must document sh
 # ═══════════════════════════════════════════════════════════════
 
 test_start "manpage_exists"
-assert_file_exists "$REPO_ROOT/dot_local/share/man/man1/dot.1" "dot.1 man page must exist"
+assert_file_exists "$REPO_ROOT/share/man/man1/dot.1" "dot.1 man page must exist"
 
 test_start "manpage_documents_ai"
-assert_file_contains "$REPO_ROOT/dot_local/share/man/man1/dot.1" "autohand" "man page must document new AI CLIs"
+assert_file_contains "$REPO_ROOT/share/man/man1/dot.1" "autohand" "man page must document new AI CLIs"
 
 test_start "manpage_documents_extensions"
-assert_file_contains "$REPO_ROOT/dot_local/share/man/man1/dot.1" "modules.d" "man page must document user extension points"
+assert_file_contains "$REPO_ROOT/share/man/man1/dot.1" "modules.d" "man page must document user extension points"
 
 test_start "manpage_no_cline"
 # Man page must not reference removed Cline CLI
-assert_output_not_contains "cline" "cat '$REPO_ROOT/dot_local/share/man/man1/dot.1'"
+assert_output_not_contains "cline" "cat '$REPO_ROOT/share/man/man1/dot.1'"
 
 # ═══════════════════════════════════════════════════════════════
 # 13. DOCS SUBDIRECTORIES — each must have at least one file
@@ -459,16 +459,16 @@ assert_equals "0" "$broken_imgs" "no broken image references in README"
 # ═══════════════════════════════════════════════════════════════
 
 test_start "manpage_documents_apply"
-assert_file_contains "$REPO_ROOT/dot_local/share/man/man1/dot.1" "apply" "man page must document apply"
+assert_file_contains "$REPO_ROOT/share/man/man1/dot.1" "apply" "man page must document apply"
 
 test_start "manpage_documents_doctor"
-assert_file_contains "$REPO_ROOT/dot_local/share/man/man1/dot.1" "doctor" "man page must document doctor"
+assert_file_contains "$REPO_ROOT/share/man/man1/dot.1" "doctor" "man page must document doctor"
 
 test_start "manpage_documents_heal"
-assert_file_contains "$REPO_ROOT/dot_local/share/man/man1/dot.1" "heal" "man page must document heal"
+assert_file_contains "$REPO_ROOT/share/man/man1/dot.1" "heal" "man page must document heal"
 
 test_start "manpage_documents_secrets"
-assert_file_contains "$REPO_ROOT/dot_local/share/man/man1/dot.1" "secrets" "man page must document secrets"
+assert_file_contains "$REPO_ROOT/share/man/man1/dot.1" "secrets" "man page must document secrets"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

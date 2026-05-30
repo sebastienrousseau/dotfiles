@@ -16,16 +16,61 @@ VERSION_PATTERN='[0-9]+\.[0-9]+\.[0-9]+'
 SED_VERSION_PATTERN='[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*'
 BACKUP_DIR="$PROJECT_ROOT/.version-sync-backup"
 EXCLUDE_FILES=(
+  # Historical / referential docs — version refs inside are intentional
+  # pointers at prior versions, not "this is the current version" claims.
   "CHANGELOG.md"
   "docs/security/COMPLIANCE.md"
   "docs/reference/FONTS.md"
   "docs/archive/LEGACY_ROADMAP.md"
   "docs/archive/PLAN.md"
+
+  # Roadmap + audit narratives — describe per-version work; refs to
+  # prior versions are intentional and historical.
+  "docs/operations/ROADMAP_V0_2_503.md"
+  "docs/operations/VERSION_SYNC.md"
+  "docs/operations/RFC_v0_2_503_reorganization.md"
+  "docs/operations/HARD_AUDIT_2026.md"
+  "docs/reference/ALIASES_DEPRECATIONS.md"
+
+  # Security docs — INSTALL_VERIFICATION + CI_PINNING + SCORECARD
+  # carry per-release hash tables / closed-cycle logs. The "current"
+  # version inside these is tracked by hand, not by version-sync.
+  "docs/security/CI_PINNING.md"
+  "docs/security/INSTALL_VERIFICATION.md"
+  "docs/security/SCORECARD.md"
+
+  # Release-verification recipes use an example pinned tag
+  # that intentionally stays at a known-published release.
+  "docs/security/VERIFY_RELEASE.md"
+
+  # Example bundles — version refs in README'd examples are illustrative.
+  "examples/mise-plugin-dot/README.md"
+
+  # MANIFEST + MIGRATION docs — describe per-version manifests &
+  # cross-version migration paths; intentional references to other tags.
+  "docs/operations/MANIFEST.md"
+  "docs/operations/MIGRATION.md"
+
+  # ADR + architecture + manual + operations narratives — every
+  # version reference inside is dated context, not a "current version"
+  # claim. The single source-of-truth is .chezmoidata.toml (plus
+  # README, package.json — which version-sync DOES rewrite).
+  "docs/adr/ADR-007-multi-shell-parity.md"
+  "docs/architecture/REPO_LAYOUT.md"
+  "docs/manual/01-concepts/04-fleet.md"
+  "docs/manual/01-concepts/05-self-healing.md"
+  "docs/manual/02-tutorials/05-deploy-fleet.md"
+  "docs/manual/05-appendices/D-bibliography.md"
+  "docs/operations/MAINTENANCE.md"
+
+  # CI_COMPOSITES.md cites third-party action versions (e.g. v5.0.5),
+  # not dotfiles_version. False-positive pattern match.
+  "docs/operations/CI_COMPOSITES.md"
 )
 
-# shellcheck source=dot/lib/ui.sh
+# shellcheck source=../lib/dot/ui.sh
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/dot/lib/ui.sh"
+source "$SCRIPT_DIR/../lib/dot/ui.sh"
 ui_init
 
 # Functions — delegate to shared ui.sh (redirect to stderr for script output)
@@ -398,21 +443,24 @@ main() {
     create_backup "${version_files[@]}"
   fi
 
-  # Sync chezmoidata.toml (single source of truth for template files)
-  local chezmoidata="$PROJECT_ROOT/.chezmoidata.toml"
+  # Sync chezmoidata.toml (single source of truth for template files).
+  # Post-Phase-4b lives under defaults/ — kept old root location as a
+  # fallback so this script is forward- and backward-compatible.
+  local chezmoidata="$PROJECT_ROOT/defaults/.chezmoidata.toml"
+  [[ -f "$chezmoidata" ]] || chezmoidata="$PROJECT_ROOT/.chezmoidata.toml"
   if [[ -f "$chezmoidata" ]]; then
     if [[ "$dry_run" == "true" ]]; then
-      log_info "Would update .chezmoidata.toml: dotfiles_version = \"$target_version\""
+      log_info "Would update ${chezmoidata#"$PROJECT_ROOT/"}: dotfiles_version = \"$target_version\""
     else
       sed_in_place "$chezmoidata" \
         "s|^dotfiles_version = \"$SED_VERSION_PATTERN\"|dotfiles_version = \"$target_version\"|"
-      log_success "Updated .chezmoidata.toml"
+      log_success "Updated ${chezmoidata#"$PROJECT_ROOT/"}"
     fi
   fi
 
   # Sync non-template script files that embed the version
   local script_files=(
-    "dot_local/bin/executable_dot"
+    "bin/dot"
     "dot_local/bin/executable_tour"
     "install.sh"
   )

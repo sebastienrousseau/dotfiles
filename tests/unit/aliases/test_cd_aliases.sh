@@ -10,7 +10,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 
 # Source the aliases files being tested
-ALIAS_DIR="$REPO_ROOT/.chezmoitemplates/aliases/cd"
+ALIAS_DIR="$REPO_ROOT/defaults/.chezmoitemplates/aliases/cd"
 ALIAS_FILE="$ALIAS_DIR/cd.aliases.sh"
 if [[ -f "$ALIAS_FILE" ]]; then
   # Reset some variables to avoid side effects

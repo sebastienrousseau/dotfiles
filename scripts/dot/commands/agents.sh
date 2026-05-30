@@ -25,8 +25,8 @@ set -euo pipefail
 
 # shellcheck disable=SC1091
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../lib/ui.sh"
-source "$SCRIPT_DIR/../lib/utils.sh"
+source "$SCRIPT_DIR/../../../lib/dot/ui.sh"
+source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 
 _agents_repo_root() {
   # Resolve the chezmoi source dir (where CLAUDE.md/AGENTS.md live).
@@ -40,16 +40,26 @@ _agents_repo_root() {
   # we treat that as "not a match" and fall through to git, rather
   # than accepting the wrong candidate.
   local candidate=""
+  # Sanity probe: post-Phase-4b the data file lives at
+  # defaults/.chezmoidata.toml; older deployments kept it at the root.
+  _has_chezmoidata() {
+    [[ -f "$1/.chezmoidata.toml" || -f "$1/defaults/.chezmoidata.toml" ]]
+  }
   if command -v chezmoi >/dev/null 2>&1; then
     candidate="$(chezmoi source-path 2>/dev/null || true)"
-    if [[ -n "$candidate" && ! -f "$candidate/.chezmoidata.toml" ]]; then
+    # chezmoi source-path returns defaults/ when .chezmoiroot is set;
+    # peel back one level so callers receive the actual repo root.
+    if [[ -n "$candidate" && -f "$candidate/.chezmoidata.toml" && "$(basename "$candidate")" == "defaults" ]]; then
+      candidate="$(dirname "$candidate")"
+    fi
+    if [[ -n "$candidate" ]] && ! _has_chezmoidata "$candidate"; then
       candidate=""
     fi
   fi
   if [[ -z "$candidate" ]]; then
     candidate="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || true)"
   fi
-  if [[ -z "$candidate" ]] || [[ ! -f "$candidate/.chezmoidata.toml" ]]; then
+  if [[ -z "$candidate" ]] || ! _has_chezmoidata "$candidate"; then
     return 1
   fi
   printf '%s\n' "$candidate"

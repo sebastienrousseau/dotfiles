@@ -85,9 +85,9 @@ runs:
           # fall back to the upstream chezmoi installer which handles
           # the win64 binary natively.
           os_lower="$(uname -s | tr '[:upper:]' '[:lower:]')"
-          if [[ -x "$GITHUB_WORKSPACE/scripts/ci/install-chezmoi-verified.sh" \
+          if [[ -x "$GITHUB_WORKSPACE/tools/ci/install-chezmoi-verified.sh" \
                && ( "$os_lower" == "linux" || "$os_lower" == "darwin" ) ]]; then
-            bash "$GITHUB_WORKSPACE/scripts/ci/install-chezmoi-verified.sh" "$version" "$bin_dir"
+            bash "$GITHUB_WORKSPACE/tools/ci/install-chezmoi-verified.sh" "$version" "$bin_dir"
           else
             # Upstream installer flags: -b BIN_DIR, -t TAG. The trailing
             # positional args are passed to chezmoi AFTER install (so a

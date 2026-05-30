@@ -8,7 +8,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-DOT_CLI="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT_CLI="$REPO_ROOT/bin/dot"
 HEALTH_FILE="$REPO_ROOT/scripts/diagnostics/health.sh"
 
 trap cov_teardown_sandbox EXIT
@@ -24,8 +24,8 @@ VERIFY_FILE="$REPO_ROOT/scripts/diagnostics/verify.sh"
 AI_FILE="$REPO_ROOT/scripts/dot/commands/ai.sh"
 
 test_start "header_helpers_available"
-assert_file_contains "$REPO_ROOT/scripts/dot/lib/ui.sh" "ui_product_banner()" "ui library exposes a product banner helper"
-assert_file_contains "$REPO_ROOT/scripts/dot/lib/ui.sh" "ui_dot_banner()" "ui library exposes a dot banner helper"
+assert_file_contains "$REPO_ROOT/lib/dot/ui.sh" "ui_product_banner()" "ui library exposes a product banner helper"
+assert_file_contains "$REPO_ROOT/lib/dot/ui.sh" "ui_dot_banner()" "ui library exposes a dot banner helper"
 
 test_start "diagnostics_scripts_use_shared_banner"
 assert_file_contains "$HEALTH_FILE" 'ui_dot_banner "Diagnostics"' "health uses the shared diagnostics banner"

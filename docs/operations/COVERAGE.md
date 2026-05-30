@@ -44,7 +44,7 @@ matches and emits standard `lcov.info` that Codecov ingests natively.
 | Surface | What runs |
 |---|---|
 | **PR + push to master** | `.github/workflows/coverage.yml` → `Coverage / kcov` job → uploads lcov.info to Codecov and fails the build below `MIN_COVERAGE_PCT` (currently `0`, ratcheted up each slice). |
-| **Local dev** | `bash scripts/ci/run-coverage.sh` — works on Linux + macOS (xtrace is a bash primitive, no platform tools needed). |
+| **Local dev** | `bash tools/ci/run-coverage.sh` — works on Linux + macOS (xtrace is a bash primitive, no platform tools needed). |
 | **macOS dev** | Supported. xtrace-based instrumentation runs on macOS bash 3.2+ and Homebrew bash 5.x. |
 
 ## The current floor
@@ -87,7 +87,7 @@ not aspirational:
   aggregator level.
 - **Animated demo helpers** — same as interactive UIs.
 
-`scripts/ci/run-coverage.sh` has a `SKIP_PATHS` set that removes
+`tools/ci/run-coverage.sh` has a `SKIP_PATHS` set that removes
 genuinely-untestable scripts from the lcov denominator. Within the
 files that remain, individual mutation-only function bodies are
 fenced with `# LCOV_EXCL_START` / `# LCOV_EXCL_STOP` and a one-line
@@ -101,7 +101,7 @@ The honest floor is the achievable one.
 ## Running locally
 
 ```bash
-bash scripts/ci/run-coverage.sh   # Linux or macOS
+bash tools/ci/run-coverage.sh   # Linux or macOS
 
 # Output:
 #   coverage/traces/<file>.trace  — per-test xtrace logs
@@ -159,7 +159,7 @@ threshold to get two independent signals.
 
 ## Excluded paths
 
-`scripts/ci/run-coverage.sh` excludes:
+`tools/ci/run-coverage.sh` excludes:
 
 - `tests/**` itself (don't measure coverage of the tests).
 - `.git/`, `node_modules/`.
@@ -176,7 +176,7 @@ Adjust via the env vars at the top of `run-coverage.sh`.
 ## References
 
 - [Bash xtrace + PS4 + BASH_ENV docs](https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html).
-- [`scripts/ci/run-coverage.sh`](../../scripts/ci/run-coverage.sh).
+- [`tools/ci/run-coverage.sh`](../../tools/ci/run-coverage.sh).
 - [`.github/workflows/coverage.yml`](../../.github/workflows/coverage.yml).
 - Issue [#856](https://github.com/sebastienrousseau/dotfiles/issues/856) (closed) /
   [#883](https://github.com/sebastienrousseau/dotfiles/issues/883) (coverage roadmap).

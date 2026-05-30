@@ -2,6 +2,80 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.503 (unreleased)
+
+Polish + cross-platform + Scorecard release **plus** the
+incremental repo reorganisation per
+`docs/operations/RFC_v0_2_503_reorganization.md`. The reorg ships
+in phases across this PR; each phase is independently atomic and
+verified by `dot lint` + the existing test matrix.
+
+### Added
+
+- **`STRUCTURE.md`** + **`scripts/README.md`** — repo-map docs so a new contributor orients in <30s. Explains the chezmoi naming contract that forces the current layout.
+- **`MAINTAINERS.md`** + **`GOVERNANCE.md`** — formal single-maintainer declaration + decision/RFC process. Required by the OpenSSF Best Practices badge application; contextualises the Scorecard `Code-Review` 0/30 score.
+- **`docs/operations/ROADMAP_V0_2_503.md`** — seven-workstream scope for this release.
+- **`docs/operations/RFC_v0_2_503_reorganization.md`** — 267-line formal RFC for the v0.2.503 framework / user-config split. Covers target layout (Debian/aws-cli discipline), `.chezmoiroot` strategy, 7-step idempotent migration script, distribution surface table, ~5-week implementation plan.
+- **`docs/security/VERIFY_RELEASE.md`** — end-user "how to verify a `dot` release" walkthrough. Three independent attestations (SBOM, Cosign keyless, SLSA L3); identity-bound `cosign verify-blob` recipe; `slsa-verifier` recipe; one-liner `verify-dot-release` shell function.
+- **`install/{homebrew/dot.rb, scoop/dot.json, aur/PKGBUILD}`** + **`install/README.md`** — distribution-channel scaffolds for the v0.2.503 standalone-CLI tarball. Publication checklist per channel.
+- **`scripts/qa/check-version-consistency.sh`** — catches drift between `.chezmoidata.toml` (source-of-truth) and the 8 human-visible version surfaces (CLI banner, man page, bento splash, README badge, etc.). `--quiet` mode for hooks; `--fix` for auto-correct. Wired into pre-push.
+- **`tools/docs/generate-command-index.sh`** — regenerates `docs/manual/command-index.md` from `dot help all` (caught 9 missing entries, 58 → 67). `--check` mode for CI gating.
+- **`scripts/qa/scorecard-snapshot.sh`** — refreshes the per-check table in `docs/security/SCORECARD.md` from `api.scorecard.dev` between BEGIN/END markers.
+- **`.github/workflows/doc-drift.yml`** — gates PRs on the two new `--check` hooks (`command-index`, `version-consistency`).
+- **`.github/ISSUE_TEMPLATE/scorecard.md`** — Scorecard regression issue scaffold matching the triage flow in `SCORECARD.md`.
+- **`.github/PULL_REQUEST_TEMPLATE.md`** — Euxis signature block embedded so contributors don't trip `pr-signature.yml`.
+- **`tools/ci/windows-smoke-test.ps1`** — native `chezmoi apply --dry-run` check (no bash required). Catches Go-template syntax errors on Windows.
+- **README badges** — OpenSSF Best Practices ("in progress") + License (MIT) shields.
+
+### Fixed
+
+- **`LICENSE`** — normalised 1284-line MIT+GPL3+GPL2+Apache+QRCode conglomerate to clean 21-line MIT. GitHub's license detector now returns `MIT` (was `NOASSERTION`). Expected effect: Scorecard `License` 9 → 10.
+- **`.github/workflows/scorecard.yml`** — wired `SCORECARD_TOKEN` PAT path (falls back to `github.token` when absent). Unlocks `Branch-Protection` + `Webhooks` checks from `-1` to 10 once the maintainer creates the PAT (one-time setup, ~5 min per `docs/security/SCORECARD.md`).
+- **Version sweep** — `scripts/version-sync.sh 0.2.503` across 26 files, plus manual fixups for `bento.sh` banner and man-page header (not in version-sync's file list — now in `check-version-consistency.sh` spec to prevent recurrence).
+
+### Documentation
+
+- **`docs/security/SCORECARD.md`** — added baseline snapshot (7.6 / 10 at 2026-05-17), updated "Closed this cycle" log with v0.2.502 + PR #894 SLSA backfill, full PAT-creation walkthrough for unblocking the `-1` checks.
+
+### Reorganisation (per RFC, incremental phases)
+
+- **Phase 0 — RFC in-scope.** `RFC_v0_2_503_reorganization.md` repositioned from "deferred to v0.3.0" to "shipping in v0.2.503". CHANGELOG + ROADMAP + scaffold docs updated.
+- **Phase 1 — `lib/` move.** `scripts/dot/lib/{utils,ui,platform,log,bento}.sh` → `lib/dot/{utils,ui,platform,log,bento}.sh`. Every `source` path in `scripts/dot/commands/*.sh` updated. Non-breaking for end users (lib is not chezmoi-deployed).
+- **Phase 2 — `bin/` dispatcher.** `dot_local/bin/executable_dot{,-bootstrap,-theme-sync,-load-benchmark-pty}` → `bin/<name>`. Chezmoi-deployed wrappers at the old paths still exec the canonical for backward compatibility on existing installs.
+- **Phase 3 — `share/` man + completions.** Man pages, zsh completions, and shell-init fragments moved out of `dot_local/share/` into top-level `share/`.
+- **Phase 4 — `defaults/` + `.chezmoiroot`.** All 33 chezmoi-tracked source paths (every `dot_*`, `private_dot_*`, `run_onchange_*`, `.chezmoi*`) moved into `defaults/`; `.chezmoiroot=defaults` activated. Chezmoi natively re-bases its source-root; the included migration script (`install/migrate/migrate-v0_2-to-v0_2_503.sh`) handles the user-machine transition idempotently. Repo root is now strictly project metadata + framework distribution; all user-config payload lives under `defaults/`. New `resolve_chezmoi_source_dir()` in `lib/dot/utils.sh` separates chezmoi-content lookups from repo-root lookups.
+- **Phase 5 — `tools/` split.** Repo-only ops (`scripts/{ci,release,maintenance,docs}` → `tools/{ci,release,maintenance,docs}`). 68 references swept across workflows, CHANGELOG, READMEs, PR template, PowerShell parity matrix.
+- **Phase 6 — automatic seamless migration.** `install/migrate/migrate-v0_2-to-v0_2_503.sh` wired into `install.sh`, `chezmoi run_before` hook, and direct invocation. State-file guard at `$XDG_STATE_HOME/dotfiles/v0_2_503-migration/.complete` ensures real work runs exactly once per host. Snapshot kept for inspection.
+
+### Big-ticket features (per "what else" iterations)
+
+- **`dot env emit`** — v1 workstation-environment manifest emitter. JSON Schema 2020-12 at `docs/schema/dot-env-v1.json`; doc + downstream-consumer matrix at `docs/operations/MANIFEST.md`. Closes R3 §7.4 strategic-reversal item ahead of the 2026-09-17 / 2026-09-11 AGNTCon + EU CRA windows.
+- **Native PowerShell module** — `scripts/dot/powershell/Dot.psm1` + `bin/dot.ps1` dispatcher. `dot version` / `dot help` / `dot agents check` now zero-bash on Windows. POWERSHELL_PARITY.md updated, smoke test extended.
+- **OSS-Fuzz scaffold** — `oss-fuzz-integration/` ready-to-PR upstream bundle. Two native Go fuzzers (`FuzzValidateName`, `FuzzInitURLResolver`) verified at 2M+ execs each. CI workflow runs them per PR. `docs/security/FUZZING.md` covers onboarding + when-to-add-a-harness.
+
+### Phase 1 hardening (test framework + CI quality gates)
+
+- **`DOT_STRICT=1` test mode** — promotes silent `command not found` / `unbound variable` inside `cov_exercise_functions_file` to test failures. Default stays tolerant. Caught the `require_source_dir` regression that escaped pre-v0.2.503 review. Regression test in `tests/unit/misc/test_cov_strict_mode.sh`. Documented in `docs/operations/TESTING.md`.
+- **Pre-commit drift gates** — `command-index-drift` + `version-consistency` hooks added to `.pre-commit-config.yaml`. Same checks already enforced by `doc-drift.yml` in CI; now also caught at commit time so contributors don't push, wait for CI, and then re-push.
+- **FINAL SUMMARY per-file failure list** — `test_runner.sh` now lists which test files failed (not just the total count). With 4000+ assertions a single failure was previously a 3-grep search through the run log; now it's at the bottom of the summary.
+- **`perf-baseline.yml` on push** — added `feat/**` push trigger so regressions catch at PR time, not the Monday cron. Cron remains source-of-truth for the recorded baseline; push runs are measure-only and emit `::warning::` on regression.
+- **`bump-reusable-pins.yml`** — auto-PR caller workflows (`ci.yml`, `ci-enforced.yml`) when a `reusable-*.yml` merges to master. Closes the two-commit fix-and-bump-pin foot-gun that bit us on the shfmt globstar fix. SHA-pinned, signed via `ACTIONS_BOT_SIGNING_KEY`.
+
+### Phase 2 release engineering (signing + packaging + distribution)
+
+- **`release-package-dot.yml`** — on `release.created`, stages bin/lib/share/completions into a canonical `dot-VERSION/` tree and produces a deterministic `dot-VERSION.tar.gz` + `.zip` (sorted, TZ=UTC, owner=0, zip -X -D). Reproducible across runners. Uploaded as release assets.
+- **`security-release.yml` manifest job** — on `release.published`, builds `ALL_SHA256SUMS` over every release asset and Cosign-keyless-signs it. One signed manifest now covers every artefact in a release; downstream verification is `cosign verify-blob ALL_SHA256SUMS` then `sha256sum -c ALL_SHA256SUMS`. SBOM + SLSA L3 provenance were already in place.
+- **`release-attestation-check.yml`** — weekly watchdog that walks the latest release, asserts the full attestation bundle (SBOM + sig + cert + intoto + manifest + sig + cert) is present, opens / comments on a tracking issue if anything is missing. Catches silent upload failures the release-time workflow can't detect.
+- **`release-distribute-{homebrew,scoop,aur}.yml`** — three sibling workflows that, on `release.published`, hash the new release artefacts and ship to each distribution channel. Homebrew + Scoop open PRs to `sebastienrousseau/{homebrew-tap,scoop-bucket}`. AUR pushes directly to `ssh://aur@aur.archlinux.org/dotfiles-git.git` via `AUR_SSH_KEY`. All idempotent, signed-commit, default-branch-detection, comment-on-existing-PR for re-runs. Three were drafted by Mistral Vibe via the new delegator (see below); 49% saved vs Claude.
+- **`docs/operations/RELEASE_PIPELINE.md`** — end-to-end map of all five release workflows, their triggers, dependencies, and secrets. Single source of truth for the release flow.
+
+### AI cost optimization
+
+- **`/vibe` Claude Code skill** ported from [pcx-wave/vibe-skill](https://github.com/pcx-wave/vibe-skill) and shipped via chezmoi to `~/.claude/skills/vibe/`. Delegates coding tasks to a cheap model (Mistral Vibe / DeepSeek / Gemini Flash) while Claude only sees the final `git diff` + tool-call summary (~500-1500 tokens per delegation regardless of how many file reads happen internally). Slash commands: `/vibe`, `/vibeon`, `/vibeoff`, `/vibestatus`, `/vibe-model-pick`, `/vibe-model-clear`, `/vibe-report`.
+- **`dot ai delegate "<prompt>"`** + **`dot ai cost [--since N]`** — CLI shims so the same delegator + cost reporter work from the terminal without Claude Code. Both expose the underlying `vibe-delegate` / `delegate-report` tools deployed by the skill.
+- **Unified provider log** — every `dot ai <provider>` invocation now appends a JSONL entry to `~/.local/share/delegate-runs.jsonl`, so `dot ai cost` reports spend across Claude + Gemini + Aider + Vibe etc., not just Vibe. Token-level fields stay zero for providers that don't surface them; the report tolerates the gap.
+- **`docs/architecture/AI_COST_OPTIMIZATION.md`** — pattern, prices, deployed pieces, state files, provider coverage matrix, future work (budget guard, prompt cache, model routing, rate-limit awareness).
+
 ## v0.2.502 — 2026-05-17
 
 ### Added
@@ -10,14 +84,14 @@ This file documents all notable changes to this project.
 - **`dot init <github-user|owner/repo|url>`** — analogue to `chezmoi init`. Bootstrap a foreign dotfiles repo through this framework's harness with `--dry-run`, `--no-apply`, `--force` flags; an interactive trust prompt warns before SSH/HTTPS clones; refuses plain HTTP. Owner/repo and bare-user shorthands validated against `[A-Za-z0-9._-]+` to block shell-metacharacter injection.
 - **`dot fleet apply`** — SSH-based fleet reconciliation across hosts in `~/.config/dotfiles/fleet.toml`. Parallel fan-out (default 4-way) via background-job semaphore (no `xargs -d` so it works on macOS BSD xargs too). Hostnames validated against `[A-Za-z0-9._@:+/-]+` before fan-out. Flags: `--host`, `--cmd "<shell>"` (trust boundary — warning shown), `--dry-run`, `--jobs <n>`. Per-host stderr captured; collision-safe `mktemp -d -t dotfiles-fleet.XXXXXX` temp dir.
 - **`dot registry`** — JSON-indexed module marketplace scaffold. Subcommands `list / search / info / install / url / set-url`. Default registry at `https://sebastienrousseau.github.io/dotfiles/registry.json` (published from `docs/registry.json` via GitHub Pages). 6h cache TTL; `set-url` validates HTTPS-only (or `file://` for testing) and writes atomically via `mktemp + mv`. Full module contract + contribution flow in [`docs/operations/REGISTRY.md`](docs/operations/REGISTRY.md).
-- **Sub-100ms CLI cold-start gate** — `scripts/ci/dot-cli-startup-bench.sh` measures median dispatcher startup under a clean `env -i`. New workflow `.github/workflows/dot-cli-bench.yml` runs on every PR touching `dot_local/bin/executable_dot` or `scripts/dot/**`. Current observation: median 47ms locally; CI budget 250ms.
+- **Sub-100ms CLI cold-start gate** — `tools/ci/dot-cli-startup-bench.sh` measures median dispatcher startup under a clean `env -i`. New workflow `.github/workflows/dot-cli-bench.yml` runs on every PR touching `bin/dot` or `scripts/dot/**`. Current observation: median 47ms locally; CI budget 250ms.
 - **`docs/operations/HARD_AUDIT_2026.md`** — consolidated audit (round 1 + round 2 addendum) of operational reliability, performance, documentation accuracy, cross-platform parity, security posture, competitor positioning, 2026 industry trends, and adoption playbook. Produced from twelve parallel research-agent runs.
 
 ### Fixed
 
 - **`install.sh`** — removed the unverified `get.chezmoi.io` curl|sh fallback. The SHA256-verified installer is now the only path; if it fails, we refuse to bootstrap rather than silently degrading (H6).
 - **`scripts/dot/lib/platform.sh`** — `dot_path_to_unix` / `dot_path_to_native` return rc 2 with a stderr error when called in WSL without `wslpath`, instead of silently echoing a Windows-format path (H9).
-- **`dot_local/bin/executable_dot`** — user-provided custom commands now run in a subshell so a `exit` in the user script can't kill the whole CLI (H1).
+- **`bin/dot`** — user-provided custom commands now run in a subshell so a `exit` in the user script can't kill the whole CLI (H1).
 - **`scripts/dot/commands/fleet.sh`** — `dot fleet namespace set` writes via `mktemp + mv` instead of the brittle GNU/BSD `sed -i` dance (H3).
 - **`dot_config/zsh/dot_zshrc.tmpl`** — `_cached_eval` uses `mktemp` instead of `${cache}.tmp.$$`, eliminating the PID-collision race under shell recycling (H4).
 - **`scripts/dot/commands/meta.sh`** — cache-clear uses `find ... -type f -delete` with a directory guard instead of `rm -rf "$cache_dir/zsh"/*-init.zsh`, which expanded the literal pattern when no files matched (H5).
@@ -25,7 +99,7 @@ This file documents all notable changes to this project.
 - **`scripts/dot/commands/core.sh`** — `cmd_status` captures chezmoi stderr and inspects the exit code, so a chezmoi crash is now distinguishable from a clean tree (M1).
 - **`scripts/dot/lib/ui.sh`** — `ui_run_cmd` guards the rc-file read with `[[ -s ]]` to avoid races between the subshell write and the parent read (M3).
 - **`scripts/security/lock-configs.sh`** — pre-checks `sudo` availability and TTY attachment before attempting `chattr +i`, instead of failing per-file in automation (M5).
-- **`scripts/ci/install-chezmoi-verified.sh`** — unsupported-architecture error now names the supported set (x86_64/amd64, arm64/aarch64) and points at the upstream release page (M7).
+- **`tools/ci/install-chezmoi-verified.sh`** — unsupported-architecture error now names the supported set (x86_64/amd64, arm64/aarch64) and points at the upstream release page (M7).
 - **`docs/manual/03-reference/01-dot-cli.md`** + **`docs/manual/command-index.md`** — removed six commands that were documented but never shipped (`dot verify`, `dot benchmark`, `dot prewarm`, `dot clean-cache`, `dot remove`, `dot update`). Added the new `agents`, `init`, `registry`, and `fleet apply` sections (C3).
 - **Version drift** — bumped `v0.2.501` → `v0.2.502` in five doc surfaces (`docs/manual/00-introduction.md`, `docs/manual/_toc.yml`, `docs/index.md`, `docs/manual/03-reference/02-config-files.md` × 2) (C2).
 - **`docs/manual/index.md`** — new landing page for `https://doc.dotfiles.io/manual/` (the Jekyll site was 404ing because `jekyll-readme-index` had no `README.md`/`index.md` to render in `docs/manual/`).
@@ -50,7 +124,7 @@ This file documents all notable changes to this project.
 - **`dot fleet apply --verify-hosts`** (N4) — closes the TOFU window per-invocation. Aborts the apply unless every host in `fleet.toml` is already present in `~/.ssh/known_hosts`.
 - **`install.sh` Charm GPG pin** (N5) — pins `CHARM_GPG_EXPECTED_FPR=C026D31B92F9BBE91D5DB75AB07AE17C9E0A6585`; aborts (removing the keyring file) on mismatch.
 - **`scripts/lib/secrets_provider.sh` exit codes** (N6) — `dot_secrets_get` now returns `2` (no provider), `3` (provider returned empty / key not found), or the provider's own rc; stderr names provider + key for diagnosis.
-- **R3 docs drifts** — purged 5 orphan dispatch routes + 1 orphan help-table entry in `dot_local/bin/executable_dot`; relabelled `dot agents` + `dot fleet apply` from "Full" to "Stub (bash-bridged)" on Windows-native in `docs/reference/POWERSHELL_PARITY.md`; corrected Microsoft Build 2026 date from "2026-05-19 in Seattle" to actual `2026-06-02 to 2026-06-03 in San Francisco (Fort Mason)` in `ROADMAP_2026.md`.
+- **R3 docs drifts** — purged 5 orphan dispatch routes + 1 orphan help-table entry in `bin/dot`; relabelled `dot agents` + `dot fleet apply` from "Full" to "Stub (bash-bridged)" on Windows-native in `docs/reference/POWERSHELL_PARITY.md`; corrected Microsoft Build 2026 date from "2026-05-19 in Seattle" to actual `2026-06-02 to 2026-06-03 in San Francisco (Fort Mason)` in `ROADMAP_2026.md`.
 - **R3 mocked-SSH test catches 2 real bugs.** `tests/unit/fleet/test_fleet_apply_mocked_ssh.sh` (5 tests with PATH-shim overriding `ssh`) caught: (a) subshell counter loss via pipe — fixed with `done < <(printf '%s\n' "$entries")`; (b) RETURN trap referencing `local tmpdir` failed under `set -u` — fixed with `printf -v _cleanup 'rm -rf %q' "$tmpdir"`.
 - **R3 strategic reversal.** Ship `dot env emit` BEFORE `--attest` (driven by AGNTCon Amsterdam 2026-09-17 deadline + EU CRA SBOM binding 2026-09-11). Full rationale in `HARD_AUDIT_2026.md` §7.4.
 
@@ -76,7 +150,7 @@ This file documents all notable changes to this project.
 - **`scripts/diagnostics/doctor.sh`** — only flag tools that actually emit shell-init eval and are not already lazy-loaded; raise PATH-length thresholds (60 ok / 120 warn) to match a populated mise-managed dev machine; skip `nu` when `cached_eval.nu` is present.
 - **`dot_config/git/hooks/executable_commit-msg`** — replaced hardcoded `/Users/seb` path with `${HOME}` so the hook is portable across hosts.
 - **`dot_config/fish/conf.d/{direnv,mise-activate}.fish`** — empty shadow files that override Homebrew `vendor_conf.d` to prevent eager init. fish dedupes `conf.d/` by basename, user wins. Saves ~140ms on every fish shell start; both tools are loaded lazily via `_cached_eval` in `init.fish`.
-- **`.devcontainer/Dockerfile`** — chezmoi install now goes through `scripts/ci/install-chezmoi-verified.sh` (SHA256-verified) instead of the unverified `curl -fsSL https://get.chezmoi.io` fallback. Closes R4 §8.3 P3 / mirrors R1 H6 fix in `install.sh`.
+- **`.devcontainer/Dockerfile`** — chezmoi install now goes through `tools/ci/install-chezmoi-verified.sh` (SHA256-verified) instead of the unverified `curl -fsSL https://get.chezmoi.io` fallback. Closes R4 §8.3 P3 / mirrors R1 H6 fix in `install.sh`.
 - **`typos.toml`** — extended file exclusions (`**/*.asc`, `**/*.pgp`, `**/*.gpg`, `**/*.sig`) to skip armored cryptographic blobs; added `fpr` / `FPR` to the allow-list (GPG `--with-colons` fingerprint column label).
 
 ## v0.2.501
@@ -107,7 +181,7 @@ This file documents all notable changes to this project.
 - **`tests/unit/ci/test_check_*.sh`** — four new module-coverage tests for `check-insecure-tls`, `check-dangerous-chmod`, `check-regression-traceability`, and `run-coverage`. Keeps module coverage at 221/221.
 - **`docs/operations/COVERAGE.md`** — documents the why-not-kcov decision (Ubuntu 24.04 bash 5.2 incompatibility) and the xtrace approach (`PS4 + BASH_ENV`).
 - **`.chezmoiignore`** — new file at the repo root. Excludes 880 → 408 paths from chezmoi's managed surface: build artifacts (`coverage/`, `nightly-reports/`, `_build/`), repo metadata (`README.md`, `CHANGELOG.md`, `LICENSE`, `.github/`, `.git/`), documentation tree (`docs/`, intended for doc.dotfiles.io, not `$HOME`), and CI scaffolding (`scripts/`, `tests/`, `examples/`, `install/`, `nix/`, `config/`, `.well-known/`). Also gates `dot_warp/` to macOS via a template conditional. Before this file, any developer machine that had run the test suite locally would have ~600 MB of coverage trace data deployed under `~/coverage/` on the next `chezmoi apply`.
-- **Goose and Codex CLI in `dot ai`** — both AI agents now appear in the status surface under "Agents (autonomous)". `goose` and `codex` are wired in `_ai_mise_pkg` (so `dot ai-setup` knows their install targets), in the bridge `case` (so `dot goose --pattern X "prompt"` and `dot codex --pattern X "prompt"` route correctly), and in the route table in `dot_local/bin/executable_dot`.
+- **Goose and Codex CLI in `dot ai`** — both AI agents now appear in the status surface under "Agents (autonomous)". `goose` and `codex` are wired in `_ai_mise_pkg` (so `dot ai-setup` knows their install targets), in the bridge `case` (so `dot goose --pattern X "prompt"` and `dot codex --pattern X "prompt"` route correctly), and in the route table in `bin/dot`.
 - **Spinner feedback on slow operations** — `dot ai` now shows `Probing N AI tools (cached for 300s)…` during the cold-cache refresh. Previously the command sat silent for 15–30s on the first run after the 5-min TTL expired.
 
 ### Changed
@@ -127,13 +201,13 @@ This file documents all notable changes to this project.
 - **macOS reliability gate** — the `cov_exercise_script` helper now probes for `timeout` then `gtimeout` (coreutils on macOS) before falling back to no-timeout. The previous version returned `rc=127` for every script on macOS-latest.
 - **Windows chezmoi installer fallback** — `setup-chezmoi` composite action now uses the upstream installer's `-t v$version` flag on Windows (Git Bash). The previous positional-arg form made chezmoi try to run itself as a subcommand and exit non-zero.
 - **Typos hook allowlist** — added 9 entries for alias names (`yout`, `hom`, `cod`, `dsk`, `dwn`, `mus`, `pic`, `wth`) and SLSA terminology (`intoto`, `writeable`) that the hook incorrectly flagged.
-- **`scripts/ci/check-insecure-tls.sh` and `compliance-guard.yml`** — both now exclude themselves and the `tests/` tree from the curl/wget/chmod pattern scans. The scanners were flagging their own legitimate pattern fixtures.
+- **`tools/ci/check-insecure-tls.sh` and `compliance-guard.yml`** — both now exclude themselves and the `tests/` tree from the curl/wget/chmod pattern scans. The scanners were flagging their own legitimate pattern fixtures.
 - **`dot health --fix` chezmoi-sync detection** — `chezmoi status` output has two columns: column 1 (last-applied vs. actual) and column 2 (actual vs. target). The health dashboard previously counted both columns, so a single uncommitted edit to a source file (column-1-only drift, normal during development) was reported as "1 file out of sync" even though `chezmoi apply` had nothing to fix. The dashboard now counts only column-2 drift (the apply-actionable kind) and surfaces source-only drift as an informational footnote.
 - **`dot health --fix` post-apply verification** — `heal_chezmoi_drift` previously ran `chezmoi apply --force` via `_pkg_install`, which silenced stdout/stderr. When apply partially failed (e.g., on conflicting files), the next health-check pass showed the same drift count and the user had no signal that anything was wrong. The heal now captures the apply log, re-runs `chezmoi status` to verify the drift cleared, and reports either "✓ X file(s) synced" or "⚠ X applied, Y still drifted — run `chezmoi diff` to inspect". On hard failure, the last 5 lines of the apply log are surfaced inline.
 - **`ui_spinner_stop` rc=1 on a TTY** — the function's last line was `[[ ! -t 1 ]] && printf "\n"`, which evaluates to rc=1 when stdout is a TTY. Under `set -euo pipefail`, that rc killed every caller, including `_ai_refresh_status_cache` — silently leaving the user with an empty cache file. Added explicit `return 0`.
 - **macOS `xargs -I{} -n1` payload splitting** — `_ai_refresh_status_cache` originally passed `-n1` on top of `-I{}`, which on BSD-xargs triggers a quirk where the input line is word-split on whitespace. Entries like `"0|Agents (autonomous)|…"` arrived as `["0|Agents", "(autonomous)|…", …]`, garbling every probe. Removed the `-n1` (it's redundant with `-I{}`).
 - **macOS `xargs` apostrophe-quote bug** — BSD-xargs reads `Block's coding agent` as an unterminated single quote, aborts parsing, and drops every record after the offending one. Switched the probe pipeline to null-delimited input (`printf '%s\0' …` + `xargs -0`). This was masking Goose's presence: it had been silently absent from `dot ai` even when installed.
-- **AI dispatcher route gaps** — four bridge tools (`autohand`, `vibe`, `qwen`, `zai`) were accepted by the bridge `case` in `ai.sh` but missing from the route table in `dot_local/bin/executable_dot`. `dot autohand …` was hitting "Unknown ai command". Routes filled in.
+- **AI dispatcher route gaps** — four bridge tools (`autohand`, `vibe`, `qwen`, `zai`) were accepted by the bridge `case` in `ai.sh` but missing from the route table in `bin/dot`. `dot autohand …` was hitting "Unknown ai command". Routes filled in.
 - **`run_ai_with_context` missing handlers for Goose and Codex** — `dot codex "prompt"` and `dot goose "prompt"` would route correctly through the dispatcher and bridge case but then fall through to "Unsupported tool" because the per-tool execution case was missing. Added `codex)` and `goose)` arms.
 
 ### Security
@@ -169,7 +243,7 @@ This file documents all notable changes to this project.
 
 ### Added
 
-- **Verified chezmoi installer** — `install.sh` prefers `scripts/ci/install-chezmoi-verified.sh` with SHA256 checksum validation before falling back to `get.chezmoi.io`.
+- **Verified chezmoi installer** — `install.sh` prefers `tools/ci/install-chezmoi-verified.sh` with SHA256 checksum validation before falling back to `get.chezmoi.io`.
 - **detect-secrets baseline** — `.secrets.baseline` for pre-commit secret scanning alongside gitleaks.
 - **Lua plugin module headers** — `@module` docstrings for ui.lua, coding.lua, lsp.lua, editor.lua, dap.lua explaining plugin selection rationale.
 

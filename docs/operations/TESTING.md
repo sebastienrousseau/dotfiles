@@ -22,7 +22,24 @@ RUN_INTEGRATION=1 ./tests/framework/test_runner.sh
 
 # Run performance benchmarks
 ./tests/performance/benchmark_runner.sh
+
+# Run unit tests in parallel (parsed per-file output, deterministic order)
+./tests/framework/test_runner.sh --jobs auto
+
+# Strict mode: promote silent `command not found` / `unbound variable`
+# inside cov_exercise_functions_file to test failures. Default is
+# tolerant (the helper sources dot command files in a clean shell where
+# their lib/dot/ helpers are intentionally unresolved). Use STRICT=1
+# locally before pushing to catch the class of bug that escaped
+# review pre-v0.2.503 (e.g. agent.sh: _agent_repo_root falling
+# through to a missing require_source_dir).
+DOT_STRICT=1 ./tests/framework/test_runner.sh
 ```
+
+The runner's FINAL SUMMARY lists which test files failed (not just
+the total count) so locating a regression in a 4000+ assertion run
+doesn't require grepping back through the full log. Per-file failure
+counts and crashed-file markers appear inline.
 
 ## Test structure
 

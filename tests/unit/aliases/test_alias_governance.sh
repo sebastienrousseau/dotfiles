@@ -16,7 +16,7 @@ GOVERNANCE_SCRIPT="$REPO_ROOT/scripts/diagnostics/alias-governance.sh"
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 MANIFEST_SCRIPT="$REPO_ROOT/scripts/diagnostics/aliases-manifest.sh"
-CD_INIT_FILE="$REPO_ROOT/.chezmoitemplates/aliases/cd/cd-init.aliases.sh"
+CD_INIT_FILE="$REPO_ROOT/defaults/.chezmoitemplates/aliases/cd/cd-init.aliases.sh"
 
 test_start "alias_governance_script_exists"
 assert_file_exists "$GOVERNANCE_SCRIPT" "alias governance script should exist"

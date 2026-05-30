@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# preamble:skip — thin exec wrapper; no need for set -euo pipefail
+# Chezmoi-deployed thin wrapper — see executable_dot.tmpl rationale.
+exec "{{ .chezmoi.sourceDir }}/../bin/dot-bootstrap" "$@"

@@ -137,8 +137,8 @@ plugin system, bash bridge for aliases) await an actual user request.
 
 ## References
 
-- [`dot_config/nushell/cached_eval.nu`](../../dot_config/nushell/cached_eval.nu) — the new module.
-- [`dot_config/nushell/env.nu.tmpl`](../../dot_config/nushell/env.nu.tmpl) — adopter.
+- [`dot_config/nushell/cached_eval.nu`](../../defaults/dot_config/nushell/cached_eval.nu) — the new module.
+- [`dot_config/nushell/env.nu.tmpl`](../../defaults/dot_config/nushell/env.nu.tmpl) — adopter.
 - ADR-007 (Multi-Shell Parity Strategy) — establishes the tier definitions.
 - ADR-002 (Shell Performance Optimization Strategy) — establishes `_cached_eval` semantics this module ports.
 - Issue [#880](https://github.com/sebastienrousseau/dotfiles/issues/880).

@@ -10,7 +10,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 
-FUNCS_DIR="$REPO_ROOT/.chezmoitemplates/functions"
+FUNCS_DIR="$REPO_ROOT/defaults/.chezmoitemplates/functions"
 
 # Source all case functions (located in text/ subdirectory)
 for func_file in text/snakecase.sh text/kebabcase.sh text/uppercase.sh text/lowercase.sh text/titlecase.sh text/sentencecase.sh; do

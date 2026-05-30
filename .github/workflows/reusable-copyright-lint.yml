@@ -11,7 +11,7 @@ on:
       excludes:
         description: Regex matched against each file path; skipped if it matches.
         required: false
-        default: '(^|/)(node_modules|\.git|vendor|target|build)/|\.tmpl$|(^|/)\.chezmoitemplates/'
+        default: '(^|/)(node_modules|\.git|vendor|target|build)/|\.tmpl$|(^|/)\defaults/.chezmoitemplates/'
         type: string
 
 permissions:
@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -36,6 +36,6 @@ jobs:
       - name: Run copyright header validator
         run: |
           set -euo pipefail
-          bash scripts/ci/check-copyright-headers.sh \
+          bash tools/ci/check-copyright-headers.sh \
             "--extensions=${{ inputs.extensions }}" \
             "--excludes=${{ inputs.excludes }}"

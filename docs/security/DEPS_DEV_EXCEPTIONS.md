@@ -19,7 +19,7 @@ Managed under [#877](https://github.com/sebastienrousseau/dotfiles/issues/877).
 
 ## Active exceptions
 
-_(none currently)_
+*(none currently)*
 
 ## Adding an exception
 
@@ -79,7 +79,7 @@ auto-fail the gate even when they're still listed here.
 
 ## References
 
-- [`scripts/ci/check-deps-dev.sh`](../../scripts/ci/check-deps-dev.sh) — the scanner.
+- [`tools/ci/check-deps-dev.sh`](../../tools/ci/check-deps-dev.sh) — the scanner.
 - [`.github/workflows/deps-dev-validation.yml`](../../.github/workflows/deps-dev-validation.yml) — CI wiring.
 - [`tests/unit/security/test_check_deps_dev.sh`](../../tests/unit/security/test_check_deps_dev.sh) — contract test against canned fixtures.
 - [deps.dev API reference](https://docs.deps.dev/api/v3/).

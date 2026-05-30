@@ -7,7 +7,7 @@
   Distinct from:
     - dot_claude/CLAUDE.md — your PERSONAL cross-project preferences,
                              deployed to ~/.claude/CLAUDE.md by chezmoi.
-    - OPENCODE.md          — same intent as this file, but consumed by the
+    - docs/OPENCODE.md     — same intent as this file, but consumed by the
                              OpenCode CLI instead of Claude Code.
 
   When updating: keep this focused on *this repository's* conventions
@@ -19,7 +19,7 @@
 
 ## Project Overview
 
-Chezmoi-managed dotfiles for macOS, Linux, WSL, and PowerShell 7.5+. Version `0.2.502`.
+Chezmoi-managed dotfiles for macOS, Linux, WSL, and PowerShell 7.5+. Version `0.2.503`.
 
 ## Key Commands
 

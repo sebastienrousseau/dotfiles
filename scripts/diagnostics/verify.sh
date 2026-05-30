@@ -6,9 +6,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../dot/lib/ui.sh
+# shellcheck source=../../lib/dot/ui.sh
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/../dot/lib/ui.sh"
+source "$SCRIPT_DIR/../../lib/dot/ui.sh"
 
 ui_init
 ui_dot_banner "Diagnostics"
@@ -43,8 +43,8 @@ resolve_dot_bin() {
   elif [[ -d "$HOME/.local/share/chezmoi" ]]; then
     src_dir="$HOME/.local/share/chezmoi"
   fi
-  if [[ -n "$src_dir" && -x "$src_dir/dot_local/bin/executable_dot" ]]; then
-    printf "%s\n" "$src_dir/dot_local/bin/executable_dot"
+  if [[ -n "$src_dir" && -x "$src_dir/bin/dot" ]]; then
+    printf "%s\n" "$src_dir/bin/dot"
     return
   fi
   return 1

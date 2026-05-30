@@ -4,7 +4,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-EXTRACT_BIN="$REPO_ROOT/dot_local/bin/executable_extract"
+EXTRACT_BIN="$REPO_ROOT/defaults/dot_local/bin/executable_extract"
 
 # Load test framework
 source "$REPO_ROOT/tests/framework/assertions.sh"

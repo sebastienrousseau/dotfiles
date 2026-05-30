@@ -132,8 +132,8 @@ test_template_output() {
 
   # Test critical templates
   local critical_templates=(
-    "dot_gitconfig.tmpl"
-    "dot_zshrc.tmpl"
+    "defaults/dot_gitconfig.tmpl"
+    "defaults/dot_zshrc.tmpl"
   )
 
   for tmpl_name in "${critical_templates[@]}"; do

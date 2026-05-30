@@ -6,8 +6,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../lib/utils.sh
-source "$SCRIPT_DIR/../lib/utils.sh"
+# shellcheck source=../../../lib/dot/utils.sh
+source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 # shellcheck source=../../lib/secrets_provider.sh
 source "$SCRIPT_DIR/../../lib/secrets_provider.sh"
 
@@ -15,7 +15,8 @@ dot_ui_command_banner "Secrets" "${1:-}"
 
 dot_data_file() {
   local src_dir
-  src_dir="$(require_source_dir)"
+  src_dir="$(resolve_chezmoi_source_dir)"
+  [[ -z "$src_dir" ]] && src_dir="$(require_source_dir)"
   printf "%s\n" "$src_dir/.chezmoidata.toml"
 }
 

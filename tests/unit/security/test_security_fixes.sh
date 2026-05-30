@@ -11,7 +11,7 @@ echo "Testing security fixes..."
 
 # Test: mount_read_only.sh validates input
 test_start "mount_read_only_validates_input"
-FUNC_FILE="$REPO_ROOT/.chezmoitemplates/functions/security/mount_read_only.sh"
+FUNC_FILE="$REPO_ROOT/defaults/.chezmoitemplates/functions/security/mount_read_only.sh"
 assert_file_exists "$FUNC_FILE" "mount_read_only.sh should exist"
 
 # Test: mount_read_only requires argument
@@ -46,7 +46,7 @@ fi
 
 # Test: genpass validates numeric input
 test_start "genpass_validates_numeric"
-GENPASS_FILE="$REPO_ROOT/.chezmoitemplates/functions/security/genpass.sh"
+GENPASS_FILE="$REPO_ROOT/defaults/.chezmoitemplates/functions/security/genpass.sh"
 result=$(bash -c '
   source "'"$GENPASS_FILE"'"
   genpass "abc" 2>&1
@@ -102,7 +102,7 @@ assert_file_contains "$UPDATE_FILE" 'read -ra flag_array' "should use read for s
 
 # Test: tmux-sessionizer sanitizes session names
 test_start "tmux_sessionizer_sanitizes"
-SESSION_FILE="$REPO_ROOT/dot_local/bin/executable_tmux-sessionizer"
+SESSION_FILE="$REPO_ROOT/defaults/dot_local/bin/executable_tmux-sessionizer"
 assert_file_contains "$SESSION_FILE" "tr -cd '[:alnum:]._-'" "should sanitize session names"
 
 # Test: install.sh uses printf instead of sed for config generation
@@ -112,7 +112,7 @@ assert_file_contains "$INSTALL_FILE" "printf" "should use printf for safe config
 
 # Test: permission aliases warn about dangerous modes
 test_start "permission_warns_666"
-PERM_FILE="$REPO_ROOT/.chezmoitemplates/aliases/permission/permission.aliases.sh"
+PERM_FILE="$REPO_ROOT/defaults/.chezmoitemplates/aliases/permission/permission.aliases.sh"
 assert_file_contains "$PERM_FILE" "WARNING: 666" "should warn about 666 permissions"
 
 test_start "permission_warns_777"

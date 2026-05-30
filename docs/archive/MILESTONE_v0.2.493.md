@@ -16,7 +16,7 @@ This milestone keeps scope intentionally small and operationally focused.
 
 - [x] Add `dot verify` command routing in diagnostics module.
   - `scripts/dot/commands/diagnostics.sh`
-  - `dot_local/bin/executable_dot`
+  - `bin/dot`
 - [x] Add verification runner script.
   - `scripts/diagnostics/verify.sh`
   - Runs:

@@ -69,10 +69,12 @@ run_test_file_serial() {
     TOTAL_TESTS_PASSED=$((TOTAL_TESTS_PASSED + passed))
     TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + failed))
     TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + passed + failed))
+    if [[ "$failed" -gt 0 ]]; then TOTAL_FAILED_FILES+=("$(basename "$test_file") ($failed failed)"); fi
   elif [[ $exit_status -ne 0 ]]; then
     printf '%b\n' "\033[0;31mERROR: $(basename "$test_file") crashed (exit $exit_status) without producing results\033[0m"
     TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + 1))
     TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + 1))
+    TOTAL_FAILED_FILES+=("$(basename "$test_file") (crashed exit=$exit_status)")
   fi
 }
 
@@ -117,10 +119,12 @@ aggregate_parallel_results() {
       TOTAL_TESTS_PASSED=$((TOTAL_TESTS_PASSED + passed))
       TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + failed))
       TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + passed + failed))
+      if [[ "$failed" -gt 0 ]]; then TOTAL_FAILED_FILES+=("$(basename "$f" .out) ($failed failed)"); fi
     elif [[ $exit_status -ne 0 ]]; then
       printf '%b\n' "\033[0;31mERROR: $(basename "$f" .out) crashed (exit $exit_status) without producing results\033[0m"
       TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + 1))
       TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + 1))
+      TOTAL_FAILED_FILES+=("$(basename "$f" .out) (crashed exit=$exit_status)")
     fi
   done
 }
@@ -203,6 +207,7 @@ main() {
   TOTAL_TESTS_RUN=0
   TOTAL_TESTS_PASSED=0
   TOTAL_TESTS_FAILED=0
+  TOTAL_FAILED_FILES=()
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -278,8 +283,31 @@ main() {
     run_test_list "UNIT TESTS (${#unit_files[@]} files)" "${unit_files[@]}"
   fi
 
-  # Collect + run integration tests if requested
-  if [[ "$run_integration" == "1" && "$unit_only" != "1" ]]; then
+  # Collect + run regression tests. These are always run alongside unit
+  # tests (issue #868 — regressions must always be exercised), but only
+  # when the user is running the full suite. When a `pattern` argument
+  # narrows the unit set (e.g. `--jobs 1 secrets_*` from
+  # test_runner_parallel_invariant.sh), skip regression tests to avoid
+  # recursive self-invocation through the parallel-invariant guard.
+  if [[ "$unit_only" != "1" && "$test_pattern" == "*" ]]; then
+    local regression_files=()
+    while IFS= read -r -d '' f; do
+      regression_files+=("$f")
+    done < <(find "$TESTS_DIR"/regression -name "test_*.sh" -type f -print0 | sort -z)
+    if [[ ${#regression_files[@]} -gt 0 ]]; then
+      run_test_list "REGRESSION TESTS (${#regression_files[@]} files)" "${regression_files[@]}"
+    fi
+  fi
+
+  # Collect + run integration tests if requested. Same pattern-gate
+  # as the regression block above: when a `pattern` narrows the unit
+  # set (e.g. `--jobs auto secrets_*` from
+  # test_runner_parallel_invariant.sh), skip integration tests too.
+  # Without this gate the inner parallel run pulls in every
+  # integration test whenever RUN_INTEGRATION was inherited from the
+  # outer reliability-audit --with-integration invocation, which
+  # turned into a flaky chezmoi-apply assertion on macOS Reliability.
+  if [[ "$run_integration" == "1" && "$unit_only" != "1" && "$test_pattern" == "*" ]]; then
     local integration_files=()
     for f in "$TESTS_DIR"/integration/test_*.sh; do
       [[ -f "$f" ]] && integration_files+=("$f")
@@ -299,6 +327,10 @@ main() {
   printf '%b\n' "Total tests run: $TOTAL_TESTS_RUN"
   printf '%b\n' "\033[0;32mTotal passed: $TOTAL_TESTS_PASSED\033[0m"
   printf '%b\n' "\033[0;31mTotal failed: $TOTAL_TESTS_FAILED\033[0m"
+  if [[ "${#TOTAL_FAILED_FILES[@]}" -gt 0 ]]; then
+    printf '%b\n' "\033[0;31mFailed test files (${#TOTAL_FAILED_FILES[@]}):\033[0m"
+    printf '  - %s\n' "${TOTAL_FAILED_FILES[@]}"
+  fi
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
   if [[ $TOTAL_TESTS_FAILED -gt 0 ]]; then

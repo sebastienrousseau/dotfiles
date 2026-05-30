@@ -1,4 +1,0 @@
-{
-  "_comment": "Continue config pointer — see AGENTS.md for the full body.",
-  "systemMessage": "Apply the rules in AGENTS.md (canonical source: CLAUDE.md). Run `dot agents render` if the two drift."
-}

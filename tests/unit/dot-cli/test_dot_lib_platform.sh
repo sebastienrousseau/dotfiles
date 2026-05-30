@@ -8,7 +8,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-PLATFORM_FILE="$REPO_ROOT/scripts/dot/lib/platform.sh"
+PLATFORM_FILE="$REPO_ROOT/lib/dot/platform.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

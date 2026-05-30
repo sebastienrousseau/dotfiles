@@ -27,7 +27,7 @@ if (
   ln -sf "$(command -v head)" "$MOCK_BIN_DIR/head"
   ln -sf "$(command -v awk)" "$MOCK_BIN_DIR/awk"
   ln -sf "$(command -v printf)" "$MOCK_BIN_DIR/printf" 2>/dev/null || true
-  bash "$REPO_ROOT/dot_local/bin/executable_dot" --version >/dev/null 2>&1
+  bash "$REPO_ROOT/bin/dot" --version >/dev/null 2>&1
 ); then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot works without gum"
@@ -41,7 +41,7 @@ test_start "edge_aliases_without_tools"
 (
   shopt -s expand_aliases
   export PATH="$MOCK_BIN_DIR"
-  source "$REPO_ROOT/.chezmoitemplates/aliases/ai/ai.aliases.sh" 2>/dev/null
+  source "$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh" 2>/dev/null
   # Should not fail — just no aliases defined
   echo "ok"
 ) >"${TMPDIR:-/tmp}/test_edge_aliases_$$"
@@ -54,7 +54,7 @@ rm -f "${TMPDIR:-/tmp}/test_edge_aliases_$$"
 
 test_start "edge_empty_chezmoidata_features"
 # Feature flags section should be parseable even if empty
-feature_count=$(sed -n '/\[features\]/,/^\[/p' "$REPO_ROOT/.chezmoidata.toml" | grep -cE '^\w+\s*=' || true)
+feature_count=$(sed -n '/\[features\]/,/^\[/p' "$REPO_ROOT/defaults/.chezmoidata.toml" | grep -cE '^\w+\s*=' || true)
 if [[ "$feature_count" -ge 1 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: features section has $feature_count flags"
@@ -93,11 +93,11 @@ assert_file_contains "$REPO_ROOT/scripts/ops/rollback.sh" "lock" "rollback must 
 
 test_start "edge_path_deduplication"
 # PATH deduplication should handle duplicates
-assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" "typeset -aU" "zsh must deduplicate PATH"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" "typeset -aU" "zsh must deduplicate PATH"
 
 test_start "edge_history_limits"
 # History size must be bounded
-histsize=$(grep -E 'HISTSIZE=' "$REPO_ROOT/dot_config/zsh/rc.d/30-options.zsh.tmpl" | head -1 | grep -oE '[0-9]+')
+histsize=$(grep -E 'HISTSIZE=' "$REPO_ROOT/defaults/dot_config/zsh/rc.d/30-options.zsh.tmpl" | head -1 | grep -oE '[0-9]+')
 if [[ -n "$histsize" && "$histsize" -le 100000 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: HISTSIZE=$histsize is bounded"
@@ -127,7 +127,7 @@ assert_equals "0" "$found" "no real secrets in tracked files"
 
 test_start "edge_private_files_marked"
 # Files with credentials must use private_ prefix
-assert_file_exists "$REPO_ROOT/private_dot_netrc.tmpl" "netrc must use private_ prefix"
+assert_file_exists "$REPO_ROOT/defaults/private_dot_netrc.tmpl" "netrc must use private_ prefix"
 
 test_start "edge_umask_in_installer"
 assert_file_contains "$REPO_ROOT/install.sh" "umask" "installer must set restrictive umask for temp files"
@@ -137,16 +137,16 @@ assert_file_contains "$REPO_ROOT/install.sh" "umask" "installer must set restric
 # ═══════════════════════════════════════════════════════════════
 
 test_start "edge_wsl_detection_function"
-assert_file_contains "$REPO_ROOT/.chezmoitemplates/functions/system/environment.sh" "is_wsl" "WSL detection function must exist"
+assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/functions/system/environment.sh" "is_wsl" "WSL detection function must exist"
 
 test_start "edge_clipboard_unification"
-assert_file_contains "$REPO_ROOT/.chezmoitemplates/aliases/default/default.aliases.sh" "wl-copy" "clipboard must support Wayland"
-assert_file_contains "$REPO_ROOT/.chezmoitemplates/aliases/default/default.aliases.sh" "xclip" "clipboard must support X11"
-assert_file_contains "$REPO_ROOT/.chezmoitemplates/aliases/default/default.aliases.sh" "clip.exe" "clipboard must support WSL"
+assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/default/default.aliases.sh" "wl-copy" "clipboard must support Wayland"
+assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/default/default.aliases.sh" "xclip" "clipboard must support X11"
+assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/default/default.aliases.sh" "clip.exe" "clipboard must support WSL"
 
 test_start "edge_homebrew_path_conditional"
 # Homebrew paths should only be added on macOS
-paths_file="$REPO_ROOT/.chezmoitemplates/paths/00-default.paths.sh"
+paths_file="$REPO_ROOT/defaults/.chezmoitemplates/paths/00-default.paths.sh"
 if [[ -f "$paths_file" ]]; then
   if grep -q 'darwin\|OSTYPE.*darwin\|chezmoi.os.*darwin' "$paths_file" 2>/dev/null; then
     ((TESTS_PASSED++)) || true
@@ -171,10 +171,10 @@ test_start "edge_minimal_profile_support"
 assert_file_contains "$REPO_ROOT/install.sh" "minimal" "installer must support minimal profile"
 
 test_start "edge_fast_mode_support"
-assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" "DOTFILES_FAST" "zshrc must support fast mode"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" "DOTFILES_FAST" "zshrc must support fast mode"
 
 test_start "edge_ultra_fast_mode_support"
-assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" "DOTFILES_ULTRA_FAST" "zshrc must support ultra-fast mode"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" "DOTFILES_ULTRA_FAST" "zshrc must support ultra-fast mode"
 
 # ═══════════════════════════════════════════════════════════════
 # 8. FILE SYSTEM SAFETY
@@ -206,17 +206,17 @@ assert_equals "0" "$hardcoded_tmp" "ops scripts must use mktemp, not hardcoded /
 # ═══════════════════════════════════════════════════════════════
 
 test_start "edge_zshrc_fast_mode_guard"
-assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" "DOTFILES_FAST" "zshrc must guard with DOTFILES_FAST"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" "DOTFILES_FAST" "zshrc must guard with DOTFILES_FAST"
 
 test_start "edge_zinit_fast_mode_early_return"
-assert_file_contains "$REPO_ROOT/dot_config/zsh/rc.d/20-zinit.zsh" "DOTFILES_FAST" "zinit must skip in fast mode"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/rc.d/20-zinit.zsh" "DOTFILES_FAST" "zinit must skip in fast mode"
 
 test_start "edge_options_fast_mode_guard"
-assert_file_contains "$REPO_ROOT/dot_config/zsh/rc.d/30-options.zsh.tmpl" "DOTFILES_FAST" "zsh options must respect fast mode"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/rc.d/30-options.zsh.tmpl" "DOTFILES_FAST" "zsh options must respect fast mode"
 
 test_start "edge_ultra_fast_distinct_from_fast"
 # DOTFILES_ULTRA_FAST should be checked separately from DOTFILES_FAST
-assert_file_contains "$REPO_ROOT/dot_config/zsh/rc.d/30-options.zsh.tmpl" "DOTFILES_ULTRA_FAST" "ultra-fast mode must be distinct check"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/rc.d/30-options.zsh.tmpl" "DOTFILES_ULTRA_FAST" "ultra-fast mode must be distinct check"
 
 # ═══════════════════════════════════════════════════════════════
 # 10. MISSING XDG DIRECTORIES — graceful handling
@@ -224,7 +224,7 @@ assert_file_contains "$REPO_ROOT/dot_config/zsh/rc.d/30-options.zsh.tmpl" "DOTFI
 
 test_start "edge_xdg_config_home_referenced"
 # Shell configs should reference XDG_CONFIG_HOME
-xdg_refs=$(grep -rl 'XDG_CONFIG_HOME' "$REPO_ROOT/dot_config/zsh/" 2>/dev/null | wc -l | tr -d ' ')
+xdg_refs=$(grep -rl 'XDG_CONFIG_HOME' "$REPO_ROOT/defaults/dot_config/zsh/" 2>/dev/null | wc -l | tr -d ' ')
 if [[ "$xdg_refs" -ge 1 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: zsh configs reference XDG_CONFIG_HOME"
@@ -234,7 +234,7 @@ else
 fi
 
 test_start "edge_xdg_cache_home_referenced"
-cache_refs=$(grep -rl 'XDG_CACHE_HOME\|\.cache' "$REPO_ROOT/dot_config/zsh/" 2>/dev/null | wc -l | tr -d ' ')
+cache_refs=$(grep -rl 'XDG_CACHE_HOME\|\.cache' "$REPO_ROOT/defaults/dot_config/zsh/" 2>/dev/null | wc -l | tr -d ' ')
 if [[ "$cache_refs" -ge 1 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: zsh configs reference cache directory"
@@ -244,21 +244,21 @@ else
 fi
 
 test_start "edge_xdg_data_home_in_zsh"
-assert_file_contains "$REPO_ROOT/dot_config/zsh/rc.d/30-options.zsh.tmpl" "XDG_DATA_HOME" "zsh must reference XDG_DATA_HOME"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/rc.d/30-options.zsh.tmpl" "XDG_DATA_HOME" "zsh must reference XDG_DATA_HOME"
 
 # ═══════════════════════════════════════════════════════════════
 # 11. EMPTY .chezmoidata.toml SECTIONS — no crash
 # ═══════════════════════════════════════════════════════════════
 
 test_start "edge_chezmoidata_has_version"
-assert_file_contains "$REPO_ROOT/.chezmoidata.toml" "dotfiles_version" ".chezmoidata.toml must have version"
+assert_file_contains "$REPO_ROOT/defaults/.chezmoidata.toml" "dotfiles_version" ".chezmoidata.toml must have version"
 
 test_start "edge_chezmoidata_has_profile_key"
-assert_file_contains "$REPO_ROOT/.chezmoidata.toml" "profile" ".chezmoidata.toml must have profile key"
+assert_file_contains "$REPO_ROOT/defaults/.chezmoidata.toml" "profile" ".chezmoidata.toml must have profile key"
 
 test_start "edge_chezmoidata_parseable_toml"
 # File must have balanced brackets (basic TOML validity)
-open_brackets=$(grep -cE '^\[' "$REPO_ROOT/.chezmoidata.toml" || true)
+open_brackets=$(grep -cE '^\[' "$REPO_ROOT/defaults/.chezmoidata.toml" || true)
 if [[ "$open_brackets" -ge 2 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: .chezmoidata.toml has $open_brackets sections"
@@ -277,7 +277,7 @@ while IFS= read -r link; do
   if [[ -L "$link" && ! -e "$link" ]]; then
     broken_links=$((broken_links + 1))
   fi
-done < <(find "$REPO_ROOT/dot_local/bin" -type l 2>/dev/null)
+done < <(find "$REPO_ROOT/defaults/dot_local/bin" -type l 2>/dev/null)
 assert_equals "0" "$broken_links" "no broken symlinks in dot_local/bin"
 
 test_start "edge_no_broken_symlinks_in_scripts"
@@ -299,7 +299,7 @@ while IFS= read -r f; do
   if ! bash -n "$f" >/dev/null 2>&1; then
     failures=$((failures + 1))
   fi
-done < <(find "$REPO_ROOT/.chezmoitemplates/functions" -name "*.sh" 2>/dev/null)
+done < <(find "$REPO_ROOT/defaults/.chezmoitemplates/functions" -name "*.sh" 2>/dev/null)
 assert_equals "0" "$failures" "all function library files must pass bash -n"
 
 test_start "edge_alias_files_valid_bash"
@@ -308,7 +308,7 @@ while IFS= read -r f; do
   if ! bash -n "$f" >/dev/null 2>&1; then
     failures=$((failures + 1))
   fi
-done < <(find "$REPO_ROOT/.chezmoitemplates/aliases" -name "*.sh" 2>/dev/null)
+done < <(find "$REPO_ROOT/defaults/.chezmoitemplates/aliases" -name "*.sh" 2>/dev/null)
 assert_equals "0" "$failures" "all alias files must pass bash -n"
 
 # ═══════════════════════════════════════════════════════════════
@@ -316,10 +316,10 @@ assert_equals "0" "$failures" "all alias files must pass bash -n"
 # ═══════════════════════════════════════════════════════════════
 
 test_start "edge_typeset_unique_path"
-assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" "typeset -aU" "zsh must use typeset -aU for unique arrays"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" "typeset -aU" "zsh must use typeset -aU for unique arrays"
 
-test_start "edge_paths_file_exists"
-assert_file_exists "$REPO_ROOT/.chezmoitemplates/paths/00-default.paths.sh" "default paths file must exist"
+test_start "edge_core_paths_file_exists"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/shell/00-core-paths.sh.tmpl" "core paths file must exist"
 
 # ═══════════════════════════════════════════════════════════════
 # 15. ALIAS FILE SIZES — no unreasonably large files
@@ -332,7 +332,7 @@ while IFS= read -r f; do
   if [[ "$size" -gt 51200 ]]; then
     oversized=$((oversized + 1))
   fi
-done < <(find "$REPO_ROOT/.chezmoitemplates/aliases" -name "*.sh" 2>/dev/null)
+done < <(find "$REPO_ROOT/defaults/.chezmoitemplates/aliases" -name "*.sh" 2>/dev/null)
 assert_equals "0" "$oversized" "no alias files exceed 50KB"
 
 test_start "edge_function_files_under_50kb"
@@ -342,7 +342,7 @@ while IFS= read -r f; do
   if [[ "$size" -gt 51200 ]]; then
     oversized=$((oversized + 1))
   fi
-done < <(find "$REPO_ROOT/.chezmoitemplates/functions" -name "*.sh" 2>/dev/null)
+done < <(find "$REPO_ROOT/defaults/.chezmoitemplates/functions" -name "*.sh" 2>/dev/null)
 assert_equals "0" "$oversized" "no function files exceed 50KB"
 
 # ═══════════════════════════════════════════════════════════════
@@ -381,41 +381,41 @@ assert_file_contains "$REPO_ROOT/scripts/ops/chezmoi-apply.sh" "command -v" "app
 # ═══════════════════════════════════════════════════════════════
 
 test_start "edge_fish_config_exists"
-assert_file_exists "$REPO_ROOT/dot_config/fish/config.fish.tmpl" "fish config must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/fish/config.fish.tmpl" "fish config must exist"
 
 test_start "edge_fish_interactive_guard"
-assert_file_contains "$REPO_ROOT/dot_config/fish/config.fish.tmpl" "is-interactive" "fish config must guard for interactive shell"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/fish/config.fish.tmpl" "is-interactive" "fish config must guard for interactive shell"
 
 test_start "edge_fish_cached_eval_exists"
-assert_file_exists "$REPO_ROOT/dot_config/fish/functions/_cached_eval.fish" "fish cached eval must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/fish/functions/_cached_eval.fish" "fish cached eval must exist"
 
 # ═══════════════════════════════════════════════════════════════
 # 19. NUSHELL — completions have valid structure
 # ═══════════════════════════════════════════════════════════════
 
 test_start "edge_nushell_completions_exist"
-assert_file_exists "$REPO_ROOT/dot_config/nushell/completions.nu.tmpl" "nushell completions must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/nushell/completions.nu.tmpl" "nushell completions must exist"
 
 test_start "edge_nushell_completions_has_commands"
-assert_file_contains "$REPO_ROOT/dot_config/nushell/completions.nu.tmpl" "dot_commands" "nushell completions must define commands"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/nushell/completions.nu.tmpl" "dot_commands" "nushell completions must define commands"
 
 test_start "edge_nushell_config_exists"
-assert_file_exists "$REPO_ROOT/dot_config/nushell/config.nu.tmpl" "nushell config must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/nushell/config.nu.tmpl" "nushell config must exist"
 
 # ═══════════════════════════════════════════════════════════════
 # 20. BASH COMPLETION — valid structure
 # ═══════════════════════════════════════════════════════════════
 
 test_start "edge_bash_completion_exists"
-assert_file_exists "$REPO_ROOT/dot_local/share/bash-completion/completions/dot" "bash completion for dot must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_local/share/bash-completion/completions/dot" "bash completion for dot must exist"
 
 test_start "edge_bash_completion_valid_syntax"
 bash_comp_result=0
-bash -n "$REPO_ROOT/dot_local/share/bash-completion/completions/dot" >/dev/null 2>&1 || bash_comp_result=1
+bash -n "$REPO_ROOT/defaults/dot_local/share/bash-completion/completions/dot" >/dev/null 2>&1 || bash_comp_result=1
 assert_equals "0" "$bash_comp_result" "bash completion must pass syntax check"
 
 test_start "edge_bash_completion_has_function"
-assert_file_contains "$REPO_ROOT/dot_local/share/bash-completion/completions/dot" "_dot_completions" "bash completion must define _dot_completions"
+assert_file_contains "$REPO_ROOT/defaults/dot_local/share/bash-completion/completions/dot" "_dot_completions" "bash completion must define _dot_completions"
 
 # ═══════════════════════════════════════════════════════════════
 # 21. PROVISION SCRIPTS — OS-gated
@@ -451,14 +451,14 @@ fi
 # ═══════════════════════════════════════════════════════════════
 
 test_start "edge_bashrc_exists"
-assert_file_exists "$REPO_ROOT/dot_bashrc" "bashrc must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_bashrc" "bashrc must exist"
 
 test_start "edge_bashrc_double_source_guard"
-assert_file_contains "$REPO_ROOT/dot_bashrc" "BASHRC_SOURCED" "bashrc must prevent double-sourcing"
+assert_file_contains "$REPO_ROOT/defaults/dot_bashrc" "BASHRC_SOURCED" "bashrc must prevent double-sourcing"
 
 test_start "edge_bashrc_valid_syntax"
 bashrc_result=0
-bash -n "$REPO_ROOT/dot_bashrc" >/dev/null 2>&1 || bashrc_result=1
+bash -n "$REPO_ROOT/defaults/dot_bashrc" >/dev/null 2>&1 || bashrc_result=1
 assert_equals "0" "$bashrc_result" "bashrc must pass syntax check"
 
 echo ""

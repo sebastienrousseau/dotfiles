@@ -11,10 +11,10 @@ TEST_SCRIPT="$REPO_ROOT/scripts/diagnostics/mcp-doctor.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
-MCP_CONFIG_FILE="$REPO_ROOT/dot_config/claude/mcp_servers.json"
-MCP_POLICY_FILE="$REPO_ROOT/dot_config/dotfiles/mcp-policy.json"
-MCP_LOCK_FILE="$REPO_ROOT/dot_config/dotfiles/mcp-lock.json"
-MCP_REGISTRY_FILE="$REPO_ROOT/dot_config/dotfiles/mcp-registry.json"
+MCP_CONFIG_FILE="$REPO_ROOT/defaults/dot_config/claude/mcp_servers.json"
+MCP_POLICY_FILE="$REPO_ROOT/defaults/dot_config/dotfiles/mcp-policy.json"
+MCP_LOCK_FILE="$REPO_ROOT/defaults/dot_config/dotfiles/mcp-lock.json"
+MCP_REGISTRY_FILE="$REPO_ROOT/defaults/dot_config/dotfiles/mcp-registry.json"
 META_COMMANDS_SCRIPT="$REPO_ROOT/scripts/dot/commands/meta.sh"
 
 test_start "mcp_doctor_exists"

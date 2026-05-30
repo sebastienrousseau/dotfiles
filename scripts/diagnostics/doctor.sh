@@ -19,15 +19,15 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../dot/lib/ui.sh
+# shellcheck source=../../lib/dot/ui.sh
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/../dot/lib/ui.sh"
-# shellcheck source=../dot/lib/platform.sh
+source "$SCRIPT_DIR/../../lib/dot/ui.sh"
+# shellcheck source=../../lib/dot/platform.sh
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/../dot/lib/platform.sh"
-# shellcheck source=../dot/lib/log.sh
+source "$SCRIPT_DIR/../../lib/dot/platform.sh"
+# shellcheck source=../../lib/dot/log.sh
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/../dot/lib/log.sh"
+source "$SCRIPT_DIR/../../lib/dot/log.sh"
 export DOT_COMMAND="doctor"
 
 ui_init
@@ -607,11 +607,11 @@ if command -v zsh >/dev/null 2>&1; then
 fi
 
 # 4. PATH length. Each entry is searched on every command resolution.
-# A mise-managed dev machine routinely adds 50+ entries (one per tool
-# install path), so the warn/fail thresholds are set higher than a
-# lean baseline (40) would suggest.
+# A mise-managed 2026 dev machine routinely adds 60-90 entries (one per
+# installed tool version + per-shim path), so the warn/fail thresholds
+# reflect that baseline rather than a lean default (~40).
 path_count=$(printf '%s' "${PATH:-}" | tr ':' '\n' | grep -c . || true)
-if [[ "$path_count" -le 60 ]]; then
+if [[ "$path_count" -le 75 ]]; then
   _ok "PATH length" "$path_count entries"
 elif [[ "$path_count" -le 120 ]]; then
   _warn "PATH length" "$path_count entries — consider pruning"

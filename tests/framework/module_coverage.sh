@@ -21,16 +21,23 @@ while IFS= read -r file; do
 done < <(find "$REPO_ROOT/scripts" -type f -name "*.sh" ! -path "$REPO_ROOT/scripts/tests/*")
 
 while IFS= read -r file; do
-  rel="${file#"$REPO_ROOT/.chezmoitemplates/functions/"}"
+  rel="${file#"$REPO_ROOT/defaults/.chezmoitemplates/functions/"}"
   rel="${rel%.sh}"
   modules+=("functions:$rel")
-done < <(find "$REPO_ROOT/.chezmoitemplates/functions" -type f -name "*.sh")
+done < <(find "$REPO_ROOT/defaults/.chezmoitemplates/functions" -type f -name "*.sh")
 
 while IFS= read -r file; do
-  rel="${file#"$REPO_ROOT/dot_local/bin/"}"
+  rel="${file#"$REPO_ROOT/defaults/dot_local/bin/"}"
   rel="${rel#executable_}"
   modules+=("bin:$rel")
-done < <(find "$REPO_ROOT/dot_local/bin" -maxdepth 1 -type f -name "executable_*")
+done < <(find "$REPO_ROOT/defaults/dot_local/bin" -maxdepth 1 -type f -name "executable_*" ! -name "*.tmpl")
+
+# Phase 2 dispatcher canonical path lives at bin/dot (v0.2.503 reorg).
+# Scan it the same way as the legacy dot_local/bin/executable_* layout.
+while IFS= read -r file; do
+  rel="${file#"$REPO_ROOT/bin/"}"
+  modules+=("bin:$rel")
+done < <(find "$REPO_ROOT/bin" -maxdepth 1 -type f ! -name "*.tmpl" ! -name "*.ps1" 2>/dev/null)
 
 total=0
 covered=0

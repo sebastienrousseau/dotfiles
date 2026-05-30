@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-FISH_FUNC="$REPO_ROOT/dot_config/fish/functions/l.fish"
+FISH_FUNC="$REPO_ROOT/defaults/dot_config/fish/functions/l.fish"
 
 test_start "fish_l_exists"
 assert_file_exists "$FISH_FUNC" "l.fish should exist"

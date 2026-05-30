@@ -6,8 +6,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-ZSH_TEMPLATE="$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl"
-FISH_TEMPLATE="$REPO_ROOT/dot_config/fish/conf.d/init.fish.tmpl"
+ZSH_TEMPLATE="$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl"
+FISH_TEMPLATE="$REPO_ROOT/defaults/dot_config/fish/conf.d/init.fish.tmpl"
 
 # Test: Zsh template has artifact mode
 test_start "zsh_has_artifact_mode"

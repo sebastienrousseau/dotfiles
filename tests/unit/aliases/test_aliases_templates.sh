@@ -8,7 +8,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 
-ALIASES_DIR="$REPO_ROOT/.chezmoitemplates/aliases"
+ALIASES_DIR="$REPO_ROOT/defaults/.chezmoitemplates/aliases"
 
 # Test: aliases directory exists
 test_start "aliases_dir_exists"

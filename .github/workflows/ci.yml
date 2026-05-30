@@ -8,7 +8,7 @@ on:
     paths:
       - '**.sh'
       - '**.tmpl'
-      - '.chezmoitemplates/**'
+      - 'defaults/.chezmoitemplates/**'
       - 'dot_*/**'
       - 'install/**'
       - 'scripts/**'
@@ -21,7 +21,7 @@ on:
     paths:
       - '**.sh'
       - '**.tmpl'
-      - '.chezmoitemplates/**'
+      - 'defaults/.chezmoitemplates/**'
       - 'dot_*/**'
       - 'install/**'
       - 'scripts/**'
@@ -66,7 +66,7 @@ jobs:
       workflows: ${{ steps.filter.outputs.workflows }}
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -78,11 +78,11 @@ jobs:
             shell:
               - '**.sh'
               - 'install.sh'
-              - '.chezmoitemplates/**/*.sh'
+              - 'defaults/.chezmoitemplates/**/*.sh'
               - 'scripts/**'
               - 'install/**'
             lua:
-              - 'dot_config/nvim/**'
+              - 'defaults/dot_config/nvim/**'
               - '**.lua'
             nix:
               - 'nix/**'
@@ -91,11 +91,11 @@ jobs:
               - 'dot_*/**'
             workflows:
               - '.github/workflows/**'
-              - 'scripts/ci/lint-reusable-pins.sh'
-              - '.chezmoitemplates/**'
+              - 'tools/ci/lint-reusable-pins.sh'
+              - 'defaults/.chezmoitemplates/**'
               - '**.tmpl'
               - '**.toml'
-              - '.chezmoi*'
+              - 'defaults/.chezmoi*'
 
   # ============================================================================
   # STAGE 1: LINT (Fast, parallel checks)
@@ -104,22 +104,22 @@ jobs:
     name: Lint / Shell
     needs: changes
     if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@49bdc6f3aea9df02f8032e4ac16c6228b82ede94 # feat/v0.2.503
     with:
       include_tests: false
       shellcheck_severity: error
       shellcheck_excludes: SC1091,SC2030,SC2031
       fail_on_shellcheck: true
       run_shfmt: true
-      shfmt_targets: scripts/**/*.sh install.sh .chezmoitemplates/**/*.sh
+      shfmt_targets: scripts/**/*.sh install.sh defaults/.chezmoitemplates/**/*.sh
 
   lint-lua:
     name: Lint / Lua
     needs: changes
     if: needs.changes.outputs.lua == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@4acbe15316661b2e4d0811cede802768ee6c2d4f # master
     with:
-      target: dot_config/nvim
+      target: defaults/dot_config/nvim
       strict: false
       stylua_version: "0.20.0"
 
@@ -131,7 +131,7 @@ jobs:
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -141,7 +141,7 @@ jobs:
       - name: Syntax Check
         run: |
           # -print0 | xargs -0 to handle non-alphanumeric filenames safely.
-          find dot_config/fish \( -name '*.fish' -o -name '*.fish.tmpl' \) -print0 \
+          find defaults/dot_config/fish \( -name '*.fish' -o -name '*.fish.tmpl' \) -print0 \
             | xargs -0 -I{} fish --no-execute {} \
             || echo "Template strings might cause issues in raw fish check, ignoring strict failure for tmpl"
 
@@ -153,12 +153,12 @@ jobs:
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: DeterminateSystems/nix-installer-action@c5a866b6ab867e88becbed4467b93592bce69f8a # v21
+      - uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
       - name: Run Nu Check
         run: |
           nix shell nixpkgs#nushell -c nu -c "print 'Checking Nushell Syntax...'"
@@ -186,13 +186,13 @@ jobs:
       contents: read
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Verify every reusable-workflow call site is SHA-pinned
         # Closes the lint-rule half of #855. Policy: docs/security/CI_PINNING.md
-        run: bash scripts/ci/lint-reusable-pins.sh
+        run: bash tools/ci/lint-reusable-pins.sh
 
   lint-chezmoidata:
     name: Lint / Chezmoidata Schema
@@ -202,7 +202,7 @@ jobs:
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -223,8 +223,8 @@ jobs:
         run: |
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           "$HOME/.cargo/bin/taplo" --version
-      - name: Validate .chezmoidata.toml against schema
-        run: bash scripts/ci/validate-chezmoidata.sh
+      - name: Validate defaults/.chezmoidata.toml against schema
+        run: bash tools/ci/validate-chezmoidata.sh
 
   # ============================================================================
   # STAGE 2: SECURITY (Parallel with lint)
@@ -253,7 +253,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -271,7 +271,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -305,7 +305,7 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -333,7 +333,7 @@ jobs:
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -359,7 +359,7 @@ jobs:
     needs: changes
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -388,7 +388,7 @@ jobs:
     if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -425,7 +425,7 @@ jobs:
 
       - name: Run smoke test
         shell: pwsh
-        run: pwsh -NoProfile -File scripts/ci/windows-smoke-test.ps1 -RepoRoot $env:GITHUB_WORKSPACE
+        run: pwsh -NoProfile -File tools/ci/windows-smoke-test.ps1 -RepoRoot $env:GITHUB_WORKSPACE
 
       - name: Upload logs on failure
         if: failure()
@@ -448,7 +448,7 @@ jobs:
         distro: [ubuntu]
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -492,7 +492,7 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -543,7 +543,7 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -717,7 +717,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 

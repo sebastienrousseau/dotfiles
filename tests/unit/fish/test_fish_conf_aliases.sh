@@ -5,8 +5,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-CONF_FILE="$REPO_ROOT/dot_config/fish/conf.d/aliases.fish.tmpl"
-CAT_FUNCTION_FILE="$REPO_ROOT/dot_config/fish/functions/cat.fish"
+CONF_FILE="$REPO_ROOT/defaults/dot_config/fish/conf.d/aliases.fish.tmpl"
+CAT_FUNCTION_FILE="$REPO_ROOT/defaults/dot_config/fish/functions/cat.fish"
 
 test_start "fish_conf_aliases_exists"
 assert_file_exists "$CONF_FILE" "aliases.fish.tmpl should exist"

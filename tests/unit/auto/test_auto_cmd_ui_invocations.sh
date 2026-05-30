@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
-# Hand-curated invocation test for scripts/dot/lib/ui.sh. The generic
+# Hand-curated invocation test for lib/dot/ui.sh. The generic
 # fn-exercise helper calls each ui_* function with `$tmpfile`, which
 # produces output but doesn't exercise the conditional branches inside
 # each helper. This test passes the SHAPE each function expects
@@ -16,7 +16,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-UI="$REPO_ROOT/scripts/dot/lib/ui.sh"
+UI="$REPO_ROOT/lib/dot/ui.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

@@ -110,7 +110,7 @@ fi
 
 # Test: lint is registered in dot CLI dispatch
 test_start "lint_cmd_registered_in_dispatch"
-if grep -q 'lint' "$REPO_ROOT/dot_local/bin/executable_dot" 2>/dev/null; then
+if grep -q 'lint' "$REPO_ROOT/bin/dot" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: lint registered in dot CLI dispatch"
 else

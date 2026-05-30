@@ -15,7 +15,7 @@ bad_refs=$(grep -r 'raw.githubusercontent.com/sebastienrousseau/dotfiles/main/' 
   "$REPO_ROOT/README.md" \
   "$REPO_ROOT/install.sh" \
   "$REPO_ROOT/docs/guides/INSTALL.md" \
-  "$REPO_ROOT/dot_local/bin/executable_dot-bootstrap" \
+  "$REPO_ROOT/bin/dot-bootstrap" \
   2>/dev/null || true)
 if [[ -z "$bad_refs" ]]; then
   ((TESTS_PASSED++))
@@ -70,7 +70,7 @@ fi
 # ── Verify bootstrap script URL consistency ──────────────────────
 
 test_start "bootstrap_url_consistency"
-bootstrap="$REPO_ROOT/dot_local/bin/executable_dot-bootstrap"
+bootstrap="$REPO_ROOT/bin/dot-bootstrap"
 if [[ -f "$bootstrap" ]]; then
   if grep -q 'raw.githubusercontent.com/sebastienrousseau/dotfiles/master/' "$bootstrap"; then
     ((TESTS_PASSED++))

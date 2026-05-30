@@ -1,0 +1,120 @@
+name: Release / Package dot CLI
+
+# On every release, package a standalone tarball + zip of the dot CLI
+# (bin/, lib/, share/) and attach to the release as a distribution-
+# ready artefact. Downstream distribution workflows
+# (release-distribute.yml) hash the tarball and push to Homebrew /
+# Scoop / AUR taps.
+#
+# The tarball is the deterministic, distribution-friendly bundle of:
+#   bin/dot, bin/dot-*           — dispatcher + companions
+#   lib/dot/*                    — sourced helpers
+#   share/man/man1/dot.1         — man page
+#   share/zsh/site-functions/_dot
+#   share/bash-completion/completions/dot
+#   share/fish/vendor_completions.d/dot.fish
+#
+# The Homebrew formula in install/homebrew/dot.rb installs from this
+# exact layout — keep them in lockstep.
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag (e.g., v0.2.503)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Package dot CLI tarball + zip
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write   # upload release assets
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
+
+      - name: Resolve version
+        id: ver
+        env:
+          INPUT_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          tag="${INPUT_TAG:-${GITHUB_REF#refs/tags/}}"
+          version="${tag#v}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Stage layout for distribution
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          set -euo pipefail
+          stage="dot-${VERSION}"
+          mkdir -p "$stage"/{bin,lib/dot,share/man/man1,share/zsh/site-functions,share/bash-completion/completions,share/fish/vendor_completions.d}
+
+          # Dispatcher + companions
+          cp bin/dot "$stage/bin/"
+          for f in bin/dot-*; do [[ -f "$f" ]] && cp "$f" "$stage/bin/"; done
+
+          # Sourced helpers
+          cp lib/dot/*.sh "$stage/lib/dot/"
+          # README.md kept alongside helpers for context; harmless on install.
+          [[ -f lib/dot/README.md ]] && cp lib/dot/README.md "$stage/lib/dot/"
+
+          # Man page
+          cp share/man/man1/dot.1 "$stage/share/man/man1/"
+
+          # Completions — source paths differ from install paths.
+          cp share/completions/zsh/_dot "$stage/share/zsh/site-functions/_dot"
+          cp defaults/dot_local/share/bash-completion/completions/dot "$stage/share/bash-completion/completions/dot"
+          cp defaults/dot_config/fish/functions/dot.fish "$stage/share/fish/vendor_completions.d/dot.fish"
+
+          echo "=== staged layout ==="
+          find "$stage" -type f | sort
+
+      - name: Build tarball (deterministic)
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          set -euo pipefail
+          stage="dot-${VERSION}"
+          # GNU tar deterministic flags: stable mtime, owner, sort order.
+          # Without these, byte-for-byte hashes drift across runners.
+          TZ=UTC tar --sort=name \
+            --mtime='1970-01-01 00:00:00 UTC' \
+            --owner=0 --group=0 --numeric-owner \
+            -czf "dot-${VERSION}.tar.gz" "$stage"
+
+          # Windows-friendly zip variant for Scoop. zip's `-X` strips
+          # extra file attrs; `-D` skips directory entries for stable
+          # hashing.
+          zip -X -D -r "dot-${VERSION}.zip" "$stage"
+
+          echo "=== artefact sizes ==="
+          ls -la "dot-${VERSION}".{tar.gz,zip}
+
+      - name: Upload to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.ver.outputs.tag }}
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          set -euo pipefail
+          gh release upload "$RELEASE_TAG" \
+            "dot-${VERSION}.tar.gz" \
+            "dot-${VERSION}.zip" \
+            --clobber

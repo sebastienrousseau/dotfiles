@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sebastienrousseau.github.io/dotfiles/schema/dot-env-v1.json",
+  "title": "Dotfiles Environment Manifest v1",
+  "description": "Portable workstation-environment manifest emitted by `dot env emit`. The canonical 'what is installed on this machine + at what version + from which source' record. Designed to feed downstream tooling: CycloneDX SBOM aggregators, AgentSpec/AAIF agent runtimes, EU CRA compliance reports.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "manifest_version",
+    "emitted_at",
+    "emitter",
+    "host",
+    "tools"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of the schema this manifest conforms to. Must equal $id of this file."
+    },
+    "manifest_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semantic version of the manifest payload itself, independent of the schema URL."
+    },
+    "emitted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 / ISO 8601 UTC timestamp when the manifest was produced."
+    },
+    "emitter": {
+      "type": "object",
+      "required": ["name", "version", "repo"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Tool name that produced the manifest (e.g. 'dot env emit')."
+        },
+        "version": {
+          "type": "string",
+          "description": "Version of the emitter (e.g. '0.2.503')."
+        },
+        "repo": {
+          "type": "string",
+          "description": "Source repository identifier (e.g. 'github.com/sebastienrousseau/dotfiles')."
+        }
+      }
+    },
+    "host": {
+      "type": "object",
+      "required": ["hostname", "os", "arch"],
+      "additionalProperties": false,
+      "properties": {
+        "hostname": {
+          "type": "string",
+          "description": "Result of `uname -n`. May be 'unknown' in headless / containerised contexts."
+        },
+        "os": {
+          "type": "string",
+          "description": "Result of `uname -s` — Darwin, Linux, MINGW64_NT-*, etc."
+        },
+        "arch": {
+          "type": "string",
+          "description": "Result of `uname -m` — x86_64, arm64, aarch64, etc."
+        }
+      }
+    },
+    "tools": {
+      "type": "array",
+      "description": "Flattened list of all tool installations mise sees on this host. Multiple records per tool are allowed when multiple versions are installed.",
+      "items": {
+        "type": "object",
+        "required": ["name", "version", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Tool identifier as mise knows it (e.g. 'node', 'aqua:charmbracelet/gum', 'npm:@anthropic-ai/claude-code')."
+          },
+          "version": {
+            "type": ["string", "null"],
+            "description": "Installed version. null when the install record is incomplete."
+          },
+          "source": {
+            "type": "string",
+            "description": "Absolute path of the config file that requested this tool. The literal string 'orphan' for installs not referenced by any active config."
+          },
+          "source_type": {
+            "type": ["string", "null"],
+            "description": "mise source classifier — typically 'mise.toml'."
+          },
+          "requested_version": {
+            "type": ["string", "null"],
+            "description": "Version spec the config requested (e.g. '24.14.0', 'latest', '3.12'). null for orphans."
+          },
+          "install_path": {
+            "type": ["string", "null"],
+            "description": "Absolute path of the install directory under mise's data root."
+          },
+          "active": {
+            "type": "boolean",
+            "description": "True iff this version is the one shimmed/active for the current path."
+          }
+        }
+      }
+    }
+  }
+}

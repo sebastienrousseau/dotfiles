@@ -8,8 +8,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-EAGER_TMPL="$REPO_ROOT/dot_config/shell/90-ux-aliases.sh.tmpl"
-LAZY_TMPL="$REPO_ROOT/dot_config/shell/91-ux-aliases-lazy.sh.tmpl"
+EAGER_TMPL="$REPO_ROOT/defaults/dot_config/shell/90-ux-aliases.sh.tmpl"
+LAZY_TMPL="$REPO_ROOT/defaults/dot_config/shell/91-ux-aliases-lazy.sh.tmpl"
 
 echo "Testing Wave 1: Eager/Lazy alias split..."
 

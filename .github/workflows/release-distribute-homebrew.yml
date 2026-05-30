@@ -1,0 +1,225 @@
+name: Release / Distribute Homebrew
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag (e.g., v0.2.503)"
+        required: false
+        type: string
+
+# Least-privilege top-level. The distribute-homebrew job pushes
+# branches and opens PRs; its `contents:write` + `pull-requests:write`
+# are scoped to the job rather than granted workflow-wide.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  distribute-homebrew:
+    name: Distribute Homebrew Formula
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write           # push bump branch to homebrew-tap
+      pull-requests: write      # open PR to homebrew-tap
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout dotfiles
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Configure signed commits
+        env:
+          ACTIONS_BOT_SIGNING_KEY: ${{ secrets.ACTIONS_BOT_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${ACTIONS_BOT_SIGNING_KEY}" ]]; then
+            echo "::error::Missing ACTIONS_BOT_SIGNING_KEY secret"
+            exit 1
+          fi
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "${ACTIONS_BOT_SIGNING_KEY}" > ~/.ssh/actions_bot_signing_key
+          chmod 600 ~/.ssh/actions_bot_signing_key
+          git config --local gpg.format ssh
+          git config --local user.signingkey ~/.ssh/actions_bot_signing_key
+          git config --local commit.gpgsign true
+
+      - name: Resolve release tag
+        id: resolve-tag
+        run: |
+          set -euo pipefail
+          # Use release tag from event or workflow_dispatch input
+          TAG="${{ github.event.release.tag_name || inputs.release_tag }}"
+          if [[ -z "$TAG" ]]; then
+            echo "::error::No release tag provided"
+            exit 1
+          fi
+          # Remove leading 'v' for VERSION
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download release asset
+        id: download-asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.resolve-tag.outputs.tag }}"
+          VERSION="${{ steps.resolve-tag.outputs.version }}"
+          ASSET_NAME="dot-${VERSION}.tar.gz"
+          echo "Downloading ${ASSET_NAME} from release ${TAG}..."
+          mkdir -p assets
+          gh release download "$TAG" --dir assets --pattern "${ASSET_NAME}"
+          ASSET_PATH="$(find assets -name "${ASSET_NAME}" -type f | head -1)"
+          if [[ -z "$ASSET_PATH" ]]; then
+            echo "::error::Asset ${ASSET_NAME} not found in release ${TAG}"
+            exit 1
+          fi
+          echo "asset_path=${ASSET_PATH}" >> $GITHUB_OUTPUT
+
+      - name: Compute SHA256 of tarball
+        id: compute-sha256
+        run: |
+          set -euo pipefail
+          ASSET_PATH="${{ steps.download-asset.outputs.asset_path }}"
+          SHA256=$(sha256sum "$ASSET_PATH" | awk '{print $1}')
+          echo "sha256=${SHA256}" >> $GITHUB_OUTPUT
+          echo "SHA256: ${SHA256}"
+
+      - name: Update Homebrew formula
+        id: update-formula
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.resolve-tag.outputs.version }}"
+          SHA256="${{ steps.compute-sha256.outputs.sha256 }}"
+          TAG="${{ steps.resolve-tag.outputs.tag }}"
+
+          # Read the template formula
+          TEMPLATE_PATH="install/homebrew/dot.rb"
+          if [[ ! -f "$TEMPLATE_PATH" ]]; then
+            echo "::error::Template formula not found at ${TEMPLATE_PATH}"
+            exit 1
+          fi
+
+          # Create a copy to modify
+          cp "$TEMPLATE_PATH" dot.rb
+
+          # Update the url line - match the full url line and replace version
+          NEW_URL="https://github.com/sebastienrousseau/dotfiles/releases/download/${TAG}/dot-${VERSION}.tar.gz"
+          URL_RE="https://github\.com/sebastienrousseau/dotfiles/releases/download/v[0-9.]+/dot-[0-9.]+\.tar\.gz"
+          sed -i -E "s|^  url '${URL_RE}'\$|  url '${NEW_URL}'|" dot.rb
+
+          # Update the sha256 line - match the full sha256 line and replace hash
+          sed -i \
+            -E "s|^  sha256 '[a-f0-9]{64}'$|  sha256 '${SHA256}'|" \
+            dot.rb
+
+          echo "Updated formula:"
+          cat dot.rb
+          echo "formula_path=$(pwd)/dot.rb" >> $GITHUB_OUTPUT
+
+      - name: Clone homebrew-tap repository
+        id: clone-tap
+        run: |
+          set -euo pipefail
+          TAP_REPO="sebastienrousseau/homebrew-tap"
+          git clone "https://${{ secrets.GITHUB_TOKEN }}@github.com/${TAP_REPO}.git" homebrew-tap
+          # Detect the default branch (main vs master) so the PR targets
+          # the right base regardless of how the tap is initialised.
+          cd homebrew-tap
+          default_branch=$(git symbolic-ref --short HEAD)
+          echo "default_branch=${default_branch}" >> "$GITHUB_OUTPUT"
+          echo "Tap default branch: ${default_branch}"
+
+      - name: Prepare bump branch and update formula in tap
+        id: prepare-bump
+        env:
+          ACTIONS_BOT_SIGNING_KEY: ${{ secrets.ACTIONS_BOT_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.resolve-tag.outputs.version }}"
+          BRANCH_NAME="bump/dot-${VERSION}"
+          FORMULA_PATH="${{ steps.update-formula.outputs.formula_path }}"
+
+          cd homebrew-tap
+
+          # Configure git for the tap repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local gpg.format ssh
+          git config --local user.signingkey ~/.ssh/actions_bot_signing_key
+          git config --local commit.gpgsign true
+
+          # Create or reset the bump branch. `-B` is idempotent for re-runs
+          # against the same release tag (the previous attempt's branch
+          # would otherwise block `-b`).
+          git checkout -B "$BRANCH_NAME"
+
+          # Copy the updated formula into place
+          mkdir -p Formula
+          cp "$FORMULA_PATH" Formula/dot.rb
+
+          # Commit the change
+          git add Formula/dot.rb
+          git commit -S -m "dot ${VERSION}
+
+          Update Homebrew formula for dotfiles CLI release ${VERSION}."
+
+          # Force-with-lease so a stale prior bump branch is overwritten
+          # safely without clobbering unrelated commits.
+          git push --force-with-lease origin "$BRANCH_NAME"
+
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: Open Pull Request to homebrew-tap
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.resolve-tag.outputs.version }}"
+          BRANCH_NAME="${{ steps.prepare-bump.outputs.branch_name }}"
+          BASE_BRANCH="${{ steps.clone-tap.outputs.default_branch }}"
+          cd homebrew-tap
+
+          # If a PR for this branch already exists (re-run), comment a refresh
+          # note instead of failing on duplicate.
+          existing=$(gh pr list --head "$BRANCH_NAME" --state open --json number --jq '.[0].number' 2>/dev/null || true)
+          if [[ -n "$existing" ]]; then
+            gh pr comment "$existing" --body "Re-pushed by Release / Distribute Homebrew for dot ${VERSION}."
+            exit 0
+          fi
+
+          gh pr create \
+            --title "dot ${VERSION}" \
+            --body "Automated update of the \`dot\` Homebrew formula for release ${VERSION}.
+
+          Changes:
+          - Updated download URL to release tag
+          - Updated SHA256 checksum of the tarball
+
+          Verification:
+          - [ ] Formula installs successfully with \`brew install --build-from-source Formula/dot.rb\`
+          - [ ] \`dot version\` reports correct version
+          - [ ] CI passes
+
+          Generated by .github/workflows/release-distribute-homebrew.yml." \
+            --base "$BASE_BRANCH" \
+            --head "$BRANCH_NAME"

@@ -8,7 +8,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-DOT_CLI="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT_CLI="$REPO_ROOT/bin/dot"
 DOCTOR_UNIFIED="$REPO_ROOT/scripts/diagnostics/doctor-unified.sh"
 SCORECARD="$REPO_ROOT/scripts/diagnostics/scorecard.sh"
 
@@ -39,7 +39,7 @@ else
 fi
 
 test_start "mcp_json_short_runtime"
-output=$(REPO_ROOT="$REPO_ROOT" MCP_CONFIG="$REPO_ROOT/dot_config/claude/mcp_servers.json" bash "$DOT_CLI" mcp -s -j 2>/dev/null) || true
+output=$(REPO_ROOT="$REPO_ROOT" MCP_CONFIG="$REPO_ROOT/defaults/dot_config/claude/mcp_servers.json" bash "$DOT_CLI" mcp -s -j 2>/dev/null) || true
 if [[ "$output" == \{* ]] && [[ "$output" == *"\"status\""* ]]; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot mcp -s -j emits JSON"

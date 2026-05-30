@@ -36,7 +36,7 @@ fi
 # get traced. None of these reach the actual AI CLI; they all hit the
 # "not installed / show help" path which is the most common branch
 # users encounter.
-DOT_BIN="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT_BIN="$REPO_ROOT/bin/dot"
 
 for cmd in "ai" "ai-setup --help" "ai-query --help" \
   "cl --help" "claude --help" "codex --help" "copilot --help" \

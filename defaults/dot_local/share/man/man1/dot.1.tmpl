@@ -1,0 +1,6 @@
+.\" Chezmoi-deployed thin wrapper for the canonical man page.
+.\" The .so directive includes the actual man source from the
+.\" `share/` tree (the v0.2.503 reorg's canonical location).
+.\" After Phase 4 (.chezmoiroot), this wrapper goes away — the
+.\" canonical share/ tree is the package-manager-installed path.
+.so {{ .chezmoi.sourceDir }}/share/man/man1/dot.1

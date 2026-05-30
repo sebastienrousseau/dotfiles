@@ -6,8 +6,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../lib/utils.sh
-source "$SCRIPT_DIR/../lib/utils.sh"
+# shellcheck source=../../../lib/dot/utils.sh
+source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 
 dot_ui_command_banner "Security" "${1:-}"
 

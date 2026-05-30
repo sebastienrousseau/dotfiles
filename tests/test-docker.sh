@@ -30,7 +30,7 @@ echo ""
 
 for target in "${TARGETS[@]}"; do
   printf '%b\n' "${BLUE}==> Building: ${BOLD}${target}${NC}"
-  if docker build --target "$target" -f Dockerfile.test -t "dotfiles-test:${target}" . 2>&1; then
+  if docker build --target "$target" -f tests/Dockerfile.test -t "dotfiles-test:${target}" . 2>&1; then
     printf '%b\n' "${GREEN}==> PASSED: ${target}${NC}"
     PASSED=$((PASSED + 1))
   else

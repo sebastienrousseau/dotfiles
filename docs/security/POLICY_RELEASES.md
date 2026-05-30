@@ -19,8 +19,8 @@ They include:
 ## Local packaging
 
 ```bash
-bash scripts/release/package-policy-bundles.sh --version 2026.03
-bash scripts/release/package-policy-bundles.sh --json
+bash tools/release/package-policy-bundles.sh --version 2026.03
+bash tools/release/package-policy-bundles.sh --json
 ```
 
 ## Release workflow

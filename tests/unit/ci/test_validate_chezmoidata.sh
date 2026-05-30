@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
-# Tests for scripts/ci/validate-chezmoidata.sh — the wrapper that
+# Tests for tools/ci/validate-chezmoidata.sh — the wrapper that
 # validates .chezmoidata.toml against config/chezmoidata.schema.json
 # via taplo. Tests do NOT require taplo to be installed; they exercise
 # the script's missing-dependency path and verify the supporting files.
@@ -10,12 +10,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-SCRIPT_FILE="$REPO_ROOT/scripts/ci/validate-chezmoidata.sh"
+SCRIPT_FILE="$REPO_ROOT/tools/ci/validate-chezmoidata.sh"
 SCHEMA_FILE="$REPO_ROOT/config/chezmoidata.schema.json"
 TAPLO_CONFIG="$REPO_ROOT/.taplo.toml"
 
 test_start "script_exists"
-assert_file_exists "$SCRIPT_FILE" "scripts/ci/validate-chezmoidata.sh must exist"
+assert_file_exists "$SCRIPT_FILE" "tools/ci/validate-chezmoidata.sh must exist"
 
 test_start "script_is_executable"
 if [[ -x "$SCRIPT_FILE" ]]; then

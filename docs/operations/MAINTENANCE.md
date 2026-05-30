@@ -46,7 +46,7 @@ For every release update:
 6. Local apply has completed:
 
 ```bash
-CHEZMOI_SOURCE_DIR="$HOME/.dotfiles" ./dot_local/bin/executable_dot apply
+CHEZMOI_SOURCE_DIR="$HOME/.dotfiles" ./bin/dot apply
 ```
 
 ## Security Scan Guardrails
@@ -54,10 +54,10 @@ CHEZMOI_SOURCE_DIR="$HOME/.dotfiles" ./dot_local/bin/executable_dot apply
 We prevent gitleaks historical-scan regressions with:
 
 - Shallow checkout (`fetch-depth: 1`, `fetch-tags: false`) in gitleaks jobs.
-- A workflow-dispatch guard script: `scripts/ci/guard-gitleaks-checkout.sh`.
+- A workflow-dispatch guard script: `tools/ci/guard-gitleaks-checkout.sh`.
 
 **Manual verification:**
 
 ```bash
-bash scripts/ci/guard-gitleaks-checkout.sh
+bash tools/ci/guard-gitleaks-checkout.sh
 ```

@@ -1,0 +1,159 @@
+name: Bump Reusable Pins
+
+# When an in-repo reusable workflow merges, its callers in this same
+# repo still reference the previous SHA. Today that means a two-step
+# fix-and-bump-pin dance (see PR #895's globstar fix). This workflow
+# closes that loop: on every push to master that touches a
+# `.github/workflows/reusable-*.yml`, scan caller workflows for stale
+# `@<sha>` pins and open a PR bumping them to the new SHA.
+#
+# Triggers only on master so feat-branch experimentation does not
+# spam pin-bump PRs. The bot signs commits using ACTIONS_BOT_SIGNING_KEY
+# (same secret as update-deps.yml).
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/reusable-*.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  BRANCH_NAME: ci/bump-reusable-pins-${{ github.run_number }}
+
+jobs:
+  bump-pins:
+    name: Auto-bump reusable workflow pins
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write           # push update branch
+      pull-requests: write      # open PR
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Configure signed commits
+        env:
+          ACTIONS_BOT_SIGNING_KEY: ${{ secrets.ACTIONS_BOT_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${ACTIONS_BOT_SIGNING_KEY}" ]]; then
+            echo "::warning::ACTIONS_BOT_SIGNING_KEY missing — opening PR with unsigned commit (will fail Verify Commit Signatures)"
+            exit 0
+          fi
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "${ACTIONS_BOT_SIGNING_KEY}" > ~/.ssh/actions_bot_signing_key
+          chmod 600 ~/.ssh/actions_bot_signing_key
+          git config --local gpg.format ssh
+          git config --local user.signingkey ~/.ssh/actions_bot_signing_key
+          git config --local commit.gpgsign true
+
+      - name: Detect stale reusable pins
+        id: detect
+        run: |
+          set -euo pipefail
+
+          owner_repo="${GITHUB_REPOSITORY}"  # sebastienrousseau/dotfiles
+          changes=0
+          summary=""
+
+          # For each reusable workflow file, find the SHA of its most
+          # recent commit on master. That is the SHA all callers should
+          # be pinned to.
+          for reusable in .github/workflows/reusable-*.yml; do
+            [[ -f "$reusable" ]] || continue
+            target_sha=$(git log -1 --format='%H' -- "$reusable")
+            reusable_name=$(basename "$reusable")
+
+            # Walk every caller workflow looking for stale pins to this
+            # reusable. Acceptable form (enforced by lint-reusable-pins.sh):
+            #   uses: <owner>/<repo>/.github/workflows/<reusable>@<40-hex>
+            while IFS= read -r caller; do
+              [[ "$caller" == "$reusable" ]] && continue
+              # Match `@<sha>` immediately after the reusable filename
+              # to avoid clobbering unrelated SHA references.
+              pattern="${owner_repo}/.github/workflows/${reusable_name}@[0-9a-f]{40}"
+              if grep -qE "${pattern//\//\\/}" "$caller"; then
+                current=$(grep -oE "${pattern//\//\\/}" "$caller" | head -1 | sed -E "s|.*@([0-9a-f]{40}).*|\1|")
+                if [[ "$current" != "$target_sha" ]]; then
+                  echo "Bumping $caller : $reusable_name @${current:0:7} -> @${target_sha:0:7}"
+                  sed -i -E "s|(${owner_repo//\//\\/}/.github/workflows/${reusable_name}@)[0-9a-f]{40}|\1${target_sha}|g" "$caller"
+                  changes=$((changes + 1))
+                  summary="${summary}- \`${caller#.github/workflows/}\`: ${reusable_name} \`${current:0:7}\` -> \`${target_sha:0:7}\`"$'\n'
+                fi
+              fi
+            done < <(find .github/workflows -maxdepth 1 -type f -name '*.yml')
+          done
+
+          {
+            echo "changes=$changes"
+            echo "summary<<SUMMARY_EOF"
+            printf '%s' "$summary"
+            echo
+            echo "SUMMARY_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          if [[ "$changes" -eq 0 ]]; then
+            echo "All reusable workflow pins are current."
+          fi
+
+      - name: Open PR
+        if: steps.detect.outputs.changes != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SUMMARY: ${{ steps.detect.outputs.summary }}
+        run: |
+          set -euo pipefail
+          git checkout -b "${BRANCH_NAME}"
+          git add .github/workflows/
+          git commit -m "$(cat <<MSG
+          ci(pins): bump reusable workflow pins to latest master
+
+          Auto-generated by bump-reusable-pins.yml. Triggered by a merge
+          touching one or more .github/workflows/reusable-*.yml files.
+
+          ${SUMMARY}
+          MSG
+          )"
+          git push -u origin "${BRANCH_NAME}"
+
+          gh pr create \
+            --title "ci(pins): bump reusable workflow pins to latest master" \
+            --body "$(cat <<BODY
+          Automated pin bump generated by \`.github/workflows/bump-reusable-pins.yml\`.
+
+          ## Bumps
+          ${SUMMARY}
+
+          ## Why
+          When an in-repo reusable workflow merges, callers still pin
+          the previous SHA — \`lint-reusable-pins.sh\` enforces SHA
+          pinning but does not enforce freshness, so callers can drift.
+          This bot closes that loop within minutes of the underlying
+          merge.
+
+          ## Safety
+          - Single \`sed\` replacement scoped to \`<owner>/<repo>/...<file>@<sha>\` form.
+          - No content changes to the reusables themselves.
+          - All standard CI gates run on this PR.
+          BODY
+          )" \
+            --label "ci,dependencies" \
+            --base master \
+            --head "${BRANCH_NAME}"

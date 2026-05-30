@@ -26,7 +26,7 @@ jobs:
       checksum: ${{ steps.bundle.outputs.checksum }}
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -66,7 +66,7 @@ jobs:
           BUNDLE_VERSION: ${{ inputs.bundle_version }}
         run: |
           set -euo pipefail
-          output="$(bash scripts/release/package-policy-bundles.sh --json)"
+          output="$(bash tools/release/package-policy-bundles.sh --json)"
           echo "archive=$(printf '%s' "$output" | jq -r '.archive')" >> "$GITHUB_OUTPUT"
           echo "checksum=$(printf '%s' "$output" | jq -r '.checksum')" >> "$GITHUB_OUTPUT"
 
@@ -88,7 +88,7 @@ jobs:
       id-token: write
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -102,7 +102,7 @@ jobs:
           BUNDLE_VERSION: ${{ inputs.bundle_version }}
         run: |
           set -euo pipefail
-          bash scripts/release/package-policy-bundles.sh --json >/tmp/policy-bundle.json
+          bash tools/release/package-policy-bundles.sh --json >/tmp/policy-bundle.json
 
       - name: Verify SBOM presence
         run: |
@@ -128,7 +128,7 @@ jobs:
     if: always()
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 

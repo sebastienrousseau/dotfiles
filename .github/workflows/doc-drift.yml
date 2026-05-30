@@ -1,0 +1,68 @@
+name: Doc Drift / Generators
+
+# Block PRs that let a generator-managed file drift out of sync with
+# its source. Two generators today, both shipped in v0.2.503:
+#
+#   - tools/docs/generate-command-index.sh --check
+#       Verifies docs/manual/command-index.md matches `dot help all`.
+#
+#   - scripts/qa/check-version-consistency.sh --quiet
+#       Verifies 8 human-visible version surfaces match
+#       defaults/.chezmoidata.toml.
+#
+# Adding a third generator is just adding a new step below — keep
+# this workflow flat and easy to extend.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    paths:
+      - 'docs/manual/command-index.md'
+      - 'bin/dot'
+      - 'scripts/dot/commands/**'
+      - 'tools/docs/generate-command-index.sh'
+      - 'scripts/qa/check-version-consistency.sh'
+      - 'scripts/qa/scorecard-snapshot.sh'
+      - 'defaults/.chezmoidata.toml'
+      - 'README.md'
+      - 'CLAUDE.md'
+      - 'AGENTS.md'
+      - 'package.json'
+      - 'share/man/man1/dot.1'
+      - 'lib/dot/bento.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: doc-drift-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  command-index:
+    name: Generators / command-index
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Verify docs/manual/command-index.md is in sync
+        run: bash tools/docs/generate-command-index.sh --check
+
+  version-consistency:
+    name: Generators / version-consistency
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Verify version-bearing files match defaults/.chezmoidata.toml
+        run: bash scripts/qa/check-version-consistency.sh

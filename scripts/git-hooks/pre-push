@@ -90,3 +90,16 @@ if [ "${DOTFILES_ALLOW_UNSKIPPED_PUSH:-}" = "1" ]; then
 fi
 
 bash "$repo_root/scripts/qa/reliability-audit.sh" --quick
+
+# Step 4 — version-string consistency. Catches the case where the
+# canonical version in .chezmoidata.toml advanced but a human-visible
+# surface (CLI banner, man page, README badge) wasn't bumped. The
+# script is cheap (~8 grep calls); failure tells the user exactly
+# which file drifted and offers --fix.
+bash "$repo_root/scripts/qa/check-version-consistency.sh" --quiet || {
+  echo "" >&2
+  echo "Pre-push blocked: version-string drift detected." >&2
+  echo "Run: scripts/qa/check-version-consistency.sh" >&2
+  echo "Then: scripts/qa/check-version-consistency.sh --fix    (optional auto-fix)" >&2
+  exit 1
+}

@@ -36,14 +36,14 @@ fi
 # ═══════════════════════════════════════════════════════════════
 
 test_start "integration_aliases_aggregator_exists"
-assert_file_exists "$REPO_ROOT/dot_config/shell/90-ux-aliases.sh.tmpl" "alias aggregator template must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/shell/90-ux-aliases.sh.tmpl" "alias aggregator template must exist"
 
 test_start "integration_functions_aggregator_exists"
 # Check that functions are sourced somewhere in the shell init chain
-assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" "functions.sh" "zshrc must source functions"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" "functions.sh" "zshrc must source functions"
 
 test_start "integration_paths_in_init"
-assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" "paths.sh" "zshrc must source paths"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" "paths.sh" "zshrc must source paths"
 
 # ═══════════════════════════════════════════════════════════════
 # 3. MISE CONFIG → TOOL AVAILABILITY
@@ -59,17 +59,17 @@ while IFS= read -r line; do
   if ((quote_count % 2 != 0)); then
     unmatched=$((unmatched + 1))
   fi
-done < "$REPO_ROOT/dot_config/mise/config.toml"
+done < "$REPO_ROOT/defaults/dot_config/mise/config.toml"
 assert_equals "0" "$unmatched" "mise config.toml must have balanced quotes"
 
 test_start "integration_mise_has_ai_tools"
-assert_file_contains "$REPO_ROOT/dot_config/mise/config.toml" "npm:@anthropic-ai/claude-code" "mise must include Claude Code"
-assert_file_contains "$REPO_ROOT/dot_config/mise/config.toml" "npm:@google/gemini-cli" "mise must include Gemini CLI"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/config.toml" "npm:@anthropic-ai/claude-code" "mise must include Claude Code"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/config.toml" "npm:@google/gemini-cli" "mise must include Gemini CLI"
 
 test_start "integration_mise_has_modern_cli_tools"
-assert_file_contains "$REPO_ROOT/dot_config/mise/config.toml" "delta" "mise must include delta"
-assert_file_contains "$REPO_ROOT/dot_config/mise/config.toml" "lazygit" "mise must include lazygit"
-assert_file_contains "$REPO_ROOT/dot_config/mise/config.toml" "fd" "mise must include fd"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/config.toml" "delta" "mise must include delta"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/config.toml" "lazygit" "mise must include lazygit"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/config.toml" "fd" "mise must include fd"
 
 # ═══════════════════════════════════════════════════════════════
 # 4. AI BRIDGE → MISE PACKAGE MAPPING
@@ -90,7 +90,7 @@ printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: all AI providers present in bri
 
 test_start "integration_ai_aliases_match_bridge"
 # AI aliases should reference tools that the bridge supports
-alias_file="$REPO_ROOT/.chezmoitemplates/aliases/ai/ai.aliases.sh"
+alias_file="$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh"
 for tool in autohand vibe qwen zai; do
   if ! grep -q "$tool" "$alias_file" 2>/dev/null; then
     ((TESTS_FAILED++)) || true
@@ -127,30 +127,33 @@ assert_file_contains "$REPO_ROOT/scripts/ops/chezmoi-apply.sh" "prewarm" "apply 
 # ═══════════════════════════════════════════════════════════════
 
 test_start "integration_zsh_completion_exists"
-assert_file_exists "$REPO_ROOT/dot_local/share/zsh/completions/_dot" "zsh completion must exist"
+assert_file_exists "$REPO_ROOT/share/completions/zsh/_dot" "zsh completion must exist"
 
 test_start "integration_fish_completion_exists"
-assert_file_exists "$REPO_ROOT/dot_config/fish/completions/dot.fish.tmpl" "fish completion must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/fish/completions/dot.fish.tmpl" "fish completion must exist"
 
 test_start "integration_completions_include_ai"
 # All three completion files should know about AI commands
-assert_file_contains "$REPO_ROOT/dot_local/share/zsh/completions/_dot" "gemini" "zsh completions must include AI commands"
+assert_file_contains "$REPO_ROOT/share/completions/zsh/_dot" "gemini" "zsh completions must include AI commands"
 
 # ═══════════════════════════════════════════════════════════════
 # 7. SECURITY POLICY CHAIN
 # ═══════════════════════════════════════════════════════════════
 
 test_start "integration_mcp_policy_exists"
-assert_file_exists "$REPO_ROOT/dot_config/dotfiles/mcp-policy.json" "MCP policy must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/dotfiles/mcp-policy.json" "MCP policy must exist"
 
 test_start "integration_mcp_lock_exists"
-assert_file_exists "$REPO_ROOT/dot_config/dotfiles/mcp-lock.json" "MCP lock must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/dotfiles/mcp-lock.json" "MCP lock must exist"
 
 test_start "integration_mcp_registry_exists"
-assert_file_exists "$REPO_ROOT/dot_config/dotfiles/mcp-registry.json" "MCP registry must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/dotfiles/mcp-registry.json" "MCP registry must exist"
 
 test_start "integration_atuin_filters_cloud_clis"
-assert_file_contains "$REPO_ROOT/dot_config/atuin/config.toml" "aws|gcloud|az|kubectl" "atuin must filter cloud CLI commands"
+# Post-Phase-4b the atuin history_filter list moved out of the template
+# into defaults/.chezmoidata/secrets-patterns.toml, which is templated
+# into the config via `{{- range .atuin.history_filter.defaults }}`.
+assert_file_contains "$REPO_ROOT/defaults/.chezmoidata/secrets-patterns.toml" "aws|gcloud|az|kubectl" "atuin must filter cloud CLI commands"
 
 test_start "integration_gitleaks_config_exists"
 assert_file_exists "$REPO_ROOT/config/gitleaks.toml" "gitleaks config must exist"
@@ -160,57 +163,57 @@ assert_file_exists "$REPO_ROOT/config/gitleaks.toml" "gitleaks config must exist
 # ═══════════════════════════════════════════════════════════════
 
 test_start "integration_rc_d_local_sourced"
-assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" "rc.d.local" "zshrc must source rc.d.local"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" "rc.d.local" "zshrc must source rc.d.local"
 
 test_start "integration_modules_d_sourced"
-assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" "modules.d" "zshrc must source modules.d"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" "modules.d" "zshrc must source modules.d"
 
 test_start "integration_custom_commands_dispatched"
-assert_file_contains "$REPO_ROOT/dot_local/bin/executable_dot" "dotfiles/commands" "dot CLI must check user commands"
+assert_file_contains "$REPO_ROOT/bin/dot" "dotfiles/commands" "dot CLI must check user commands"
 
 test_start "integration_nvim_user_plugins"
-assert_file_contains "$REPO_ROOT/dot_config/nvim/lua/config/lazy.lua" "plugins.local" "lazy.lua must support user plugins"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/nvim/lua/config/lazy.lua" "plugins.local" "lazy.lua must support user plugins"
 
 # ═══════════════════════════════════════════════════════════════
 # 9. DOT CLI HELP — key command categories
 # ═══════════════════════════════════════════════════════════════
 
 test_start "integration_help_start_here"
-assert_output_contains "Start Here" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+assert_output_contains "Start Here" "bash '$REPO_ROOT/bin/dot' help"
 
 test_start "integration_help_daily_use"
-assert_output_contains "Daily Use" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+assert_output_contains "Daily Use" "bash '$REPO_ROOT/bin/dot' help"
 
 test_start "integration_help_inspect"
-assert_output_contains "Inspect" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+assert_output_contains "Inspect" "bash '$REPO_ROOT/bin/dot' help"
 
 test_start "integration_help_ai_section"
-assert_output_contains "AI" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+assert_output_contains "AI" "bash '$REPO_ROOT/bin/dot' help"
 
 test_start "integration_help_fleet_section"
-assert_output_contains "Fleet" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+assert_output_contains "Fleet" "bash '$REPO_ROOT/bin/dot' help"
 
 test_start "integration_help_configuration"
-assert_output_contains "Configuration" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+assert_output_contains "Configuration" "bash '$REPO_ROOT/bin/dot' help"
 
 test_start "integration_help_reference"
-assert_output_contains "Reference" "bash '$REPO_ROOT/dot_local/bin/executable_dot' help"
+assert_output_contains "Reference" "bash '$REPO_ROOT/bin/dot' help"
 
 # ═══════════════════════════════════════════════════════════════
 # 10. AI PROVIDER ALIASES
 # ═══════════════════════════════════════════════════════════════
 
 test_start "integration_ai_alias_claude"
-assert_file_contains "$REPO_ROOT/.chezmoitemplates/aliases/ai/ai.aliases.sh" "claude" "AI aliases must include claude"
+assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh" "claude" "AI aliases must include claude"
 
 test_start "integration_ai_alias_copilot"
-assert_file_contains "$REPO_ROOT/.chezmoitemplates/aliases/ai/ai.aliases.sh" "copilot" "AI aliases must include copilot"
+assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh" "copilot" "AI aliases must include copilot"
 
 test_start "integration_ai_alias_gemini"
-assert_file_contains "$REPO_ROOT/.chezmoitemplates/aliases/ai/ai.aliases.sh" "gemini" "AI aliases must include gemini"
+assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh" "gemini" "AI aliases must include gemini"
 
 test_start "integration_ai_alias_ollama"
-assert_file_contains "$REPO_ROOT/.chezmoitemplates/aliases/ai/ai.aliases.sh" "ollama" "AI aliases must include ollama"
+assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh" "ollama" "AI aliases must include ollama"
 
 # ═══════════════════════════════════════════════════════════════
 # 11. PREWARM HANDLES EACH SHELL
@@ -233,26 +236,26 @@ assert_file_contains "$REPO_ROOT/scripts/ops/prewarm.sh" "nu" "prewarm must hand
 # ═══════════════════════════════════════════════════════════════
 
 test_start "integration_chezmoidata_version_used_in_templates"
-assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" "dotfiles_version" "zshrc template must use dotfiles_version"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" "dotfiles_version" "zshrc template must use dotfiles_version"
 
 test_start "integration_chezmoidata_email_used_in_gitconfig"
-assert_file_contains "$REPO_ROOT/dot_gitconfig.tmpl" "email" "gitconfig must use email from chezmoidata"
+assert_file_contains "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "email" "gitconfig must use email from chezmoidata"
 
 test_start "integration_chezmoidata_features_used_in_zshrc"
-assert_file_contains "$REPO_ROOT/dot_config/zsh/dot_zshrc.tmpl" ".features" "zshrc must reference .features from chezmoidata"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" ".features" "zshrc must reference .features from chezmoidata"
 
 # ═══════════════════════════════════════════════════════════════
 # 13. DOT_LOCAL/BIN SCRIPTS SOURCE CORRECT LIBRARIES
 # ═══════════════════════════════════════════════════════════════
 
 test_start "integration_dot_cli_sources_commands"
-assert_file_contains "$REPO_ROOT/dot_local/bin/executable_dot" "commands/" "dot CLI must source command scripts"
+assert_file_contains "$REPO_ROOT/bin/dot" "commands/" "dot CLI must source command scripts"
 
 test_start "integration_dot_ai_script_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/dot_local/bin/executable_dot-ai'"
+assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/dot_local/bin/executable_dot-ai'"
 
 test_start "integration_tour_script_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/dot_local/bin/executable_tour'"
+assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/dot_local/bin/executable_tour'"
 
 # ═══════════════════════════════════════════════════════════════
 # 14. ROLLBACK SCRIPT

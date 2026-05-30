@@ -6,7 +6,7 @@
 #
 # Builds a sandboxed `.github/workflows/` tree, drops in workflows
 # containing each rejected reference form, and asserts that
-# `scripts/ci/lint-reusable-pins.sh` exits non-zero with the right
+# `tools/ci/lint-reusable-pins.sh` exits non-zero with the right
 # error message. Then drops in only-pinned workflows and asserts
 # the script exits zero.
 
@@ -14,7 +14,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-LINT="$REPO_ROOT/scripts/ci/lint-reusable-pins.sh"
+LINT="$REPO_ROOT/tools/ci/lint-reusable-pins.sh"
 
 # -----------------------------------------------------------------------------
 # Helper: run the lint against an isolated REPO_ROOT containing only

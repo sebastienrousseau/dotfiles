@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
-# Tests for scripts/ci/check-insecure-tls.sh — the curl-k/--insecure +
+# Tests for tools/ci/check-insecure-tls.sh — the curl-k/--insecure +
 # wget --no-check-certificate scanner used by the compliance guard.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -9,13 +9,13 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-SCRIPT_FILE="$REPO_ROOT/scripts/ci/check-insecure-tls.sh"
+SCRIPT_FILE="$REPO_ROOT/tools/ci/check-insecure-tls.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
 test_start "script_exists"
-assert_file_exists "$SCRIPT_FILE" "scripts/ci/check-insecure-tls.sh must exist"
+assert_file_exists "$SCRIPT_FILE" "tools/ci/check-insecure-tls.sh must exist"
 
 test_start "script_is_executable"
 if [[ -x "$SCRIPT_FILE" ]]; then

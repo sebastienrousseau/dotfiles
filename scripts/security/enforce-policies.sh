@@ -13,9 +13,9 @@ readonly REPO_ROOT
 readonly POLICIES_DIR="${REPO_ROOT}/.github/security-policies"
 readonly LOG_FILE="${REPO_ROOT}/.security-audit.log"
 
-# shellcheck source=../dot/lib/ui.sh
+# shellcheck source=../../lib/dot/ui.sh
 # shellcheck disable=SC1091
-source "${SCRIPT_DIR}/../dot/lib/ui.sh"
+source "${SCRIPT_DIR}/../../lib/dot/ui.sh"
 ui_init
 
 # Logging function (also writes to log file)

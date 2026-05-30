@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
-# Unit tests for scripts/ci/check-shell-preamble.sh — the lint rule
+# Unit tests for tools/ci/check-shell-preamble.sh — the lint rule
 # that enforces `set -euo pipefail` (bash) or `set -eu` (sh) on every
 # executable shell script.
 #
@@ -19,7 +19,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 # shellcheck source=../../framework/assertions.sh
 source "$REPO_ROOT/tests/framework/assertions.sh"
 
-CHECKER="$REPO_ROOT/scripts/ci/check-shell-preamble.sh"
+CHECKER="$REPO_ROOT/tools/ci/check-shell-preamble.sh"
 
 # -----------------------------------------------------------------------------
 # Structural
@@ -123,7 +123,7 @@ test_start "repo_scan_passes"
 if (cd "$REPO_ROOT" && "$CHECKER" >/dev/null 2>&1); then
   assert_exit_code 0 "true"
 else
-  assert_exit_code 0 "false  # repo-wide preamble scan failed — run scripts/ci/check-shell-preamble.sh"
+  assert_exit_code 0 "false  # repo-wide preamble scan failed — run tools/ci/check-shell-preamble.sh"
 fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

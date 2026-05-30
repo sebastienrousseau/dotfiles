@@ -22,7 +22,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 # shellcheck source=../framework/assertions.sh
 source "$REPO_ROOT/tests/framework/assertions.sh"
 
-DOT_BIN="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT_BIN="$REPO_ROOT/bin/dot"
 SCRUB="$SCRIPT_DIR/scrub.sh"
 
 check_snapshot() {

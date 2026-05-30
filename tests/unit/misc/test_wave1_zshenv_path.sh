@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-ZSHENV="$REPO_ROOT/dot_zshenv"
+ZSHENV="$REPO_ROOT/defaults/dot_zshenv"
 
 echo "Testing Wave 1: dot_zshenv PATH entries..."
 

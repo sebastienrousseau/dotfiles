@@ -16,7 +16,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 
-FUNC_FILE="$REPO_ROOT/dot_config/shell/05-core-safety.sh"
+FUNC_FILE="$REPO_ROOT/defaults/dot_config/shell/05-core-safety.sh"
 if [[ ! -f "$FUNC_FILE" ]]; then
   echo "SKIP: 05-core-safety.sh not found at $FUNC_FILE"
   echo "RESULTS:0:0:0"

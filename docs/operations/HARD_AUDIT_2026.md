@@ -24,12 +24,12 @@ The goal stated by the maintainer: become the de facto workstation provisioning 
 
 | # | File:line | Finding | Recommended fix |
 |---|---|---|---|
-| H1 | `dot_local/bin/executable_dot:589` | `source "$_user_cmd" "$@"` — a user-provided custom command calling `exit` kills the whole CLI. | Replace with `bash "$_user_cmd" "$@"` or `( source "$_user_cmd" "$@" )` subshell. |
+| H1 | `bin/dot:589` | `source "$_user_cmd" "$@"` — a user-provided custom command calling `exit` kills the whole CLI. | Replace with `bash "$_user_cmd" "$@"` or `( source "$_user_cmd" "$@" )` subshell. |
 | H2 | `scripts/dot/commands/agent.sh:28,51,83-92` | `_agent_default_profile()` calls `jq` before `_agent_assert_dependencies()` runs in `cmd_mode()`. On a host without jq, error message is cryptic. | Move dependency assertion to top of every entry-point. |
 | H3 | `scripts/dot/commands/fleet.sh:294-297` | GNU vs BSD `sed -i` branch isn't atomic; concurrent `dot fleet namespace set` calls can corrupt `.chezmoidata.toml`. | Use `mktemp` + `mv` (atomic) and wrap with `flock`. |
 | H4 | `dot_config/zsh/dot_zshrc.tmpl:220-221` | `_cached_eval` writes cache with `mv "$cache.tmp.$$" "$cache"` — PID collision possible between two shells. Cold-start affected. | Use `mktemp` instead of `$$`. |
 | H5 | `scripts/dot/commands/meta.sh:64-67` | `rm -rf "$cache_dir/zsh"/*-init.zsh` — if the glob doesn't match, expands to the literal pattern and the `-rf` removes the wrong path. | Guard with `[[ -d ... ]]` or use `find ... -type f -delete`. |
-| H6 | `install.sh:177-198` | Chezmoi installer downloaded over `https://get.chezmoi.io` with size/shebang validation but no cryptographic signature check. | **Fixed in `eaca…` (TBD commit) by removing the unverified fallback.** The verified installer at `scripts/ci/install-chezmoi-verified.sh` (SHA256-checked against GitHub Releases) is now the only path; if it fails we refuse to bootstrap rather than silently degrading. |
+| H6 | `install.sh:177-198` | Chezmoi installer downloaded over `https://get.chezmoi.io` with size/shebang validation but no cryptographic signature check. | **Fixed in `eaca…` (TBD commit) by removing the unverified fallback.** The verified installer at `tools/ci/install-chezmoi-verified.sh` (SHA256-checked against GitHub Releases) is now the only path; if it fails we refuse to bootstrap rather than silently degrading. |
 | H7 | `install/lib/package_managers.sh:71-92` | Homebrew installer runs from `brew.sh` with a warning but no SHA256 verification. | **False positive on review** — `install_homebrew()` already requires `HOMEBREW_INSTALLER_SHA256` and aborts on checksum mismatch (`install/lib/package_managers.sh:84-92`). Audit cited the security-note string at line 56, not the verification block. |
 | H8 | `install/lib/installers.sh:40-54` | Binary downloads SHA256-verify, but the checksum URL is not pinned. DNS attacker can redirect both binary and checksum together. | **Overstated on review** — `github_asset_url` already obtains both binary and checksum URLs from `api.github.com` via a single authenticated call; both transit HTTPS with cert validation. A DNS attacker would need a valid cert for `api.github.com`. Real defence in depth would add `cosign verify` for releases that publish a Sigstore bundle; tracking as a future enhancement. |
 | H9 | `scripts/dot/lib/platform.sh:42-65` | `dot_path_to_unix/native()` silently returns the Windows path if `wslpath` is missing — caller cannot tell success from failure. | Return non-zero when `wslpath` is required but absent; document the contract. |
@@ -39,12 +39,12 @@ The goal stated by the maintainer: become the de facto workstation provisioning 
 | # | File:line | Finding | Recommended fix |
 |---|---|---|---|
 | M1 | `scripts/dot/commands/core.sh:81` | `chezmoi status \|\| true` loses error context — can't distinguish "tree is clean" from "chezmoi crashed". | Capture into a variable and inspect the exit code. |
-| M2 | `dot_local/bin/executable_dot:542` | `route="$(_dot_command_route "$COMMAND" \|\| true)"` is defensible (falls through to the user-command path that emits a proper error), but reads as a bug. | Add comment explaining intent or refactor to explicit `if`. |
+| M2 | `bin/dot:542` | `route="$(_dot_command_route "$COMMAND" \|\| true)"` is defensible (falls through to the user-command path that emits a proper error), but reads as a bug. | Add comment explaining intent or refactor to explicit `if`. |
 | M3 | `scripts/dot/lib/ui.sh:335,340` | `mktemp` output race in `ui_run_cmd()` between subshell write and parent read; under load the `cat` can hit an empty file. | Switch to `read rc < "$rc_file"` or `[[ -s "$rc_file" ]]` guard. |
 | M4 | `scripts/dot/commands/agent.sh:221-224,338-341,385-388` | `set +e / "$@" / set -e` blocks log failure but propagate the original exit code; callers can't tell intentional vs accidental. | Document the contract or restructure to `if !`. |
 | M5 | `scripts/security/lock-configs.sh:27-33` | `sudo chattr +i` silently fails when sudo is unavailable in automation. | Fail explicitly when sudo is required. |
 | M6 | `dot_config/zsh/dot_zshrc.tmpl:147-159` | `_cached_eval` mtime check doesn't follow symlinks — a `mise` upgrade that only flips a symlink target won't bust the cache. | Resolve via `readlink -f` and track the chain. |
-| M7 | `scripts/ci/install-chezmoi-verified.sh:25-32` | Only x86_64 + arm64 are supported. ppc64le, s390x, riscv64 fail silently. | Document supported architectures and emit a clear error otherwise. |
+| M7 | `tools/ci/install-chezmoi-verified.sh:25-32` | Only x86_64 + arm64 are supported. ppc64le, s390x, riscv64 fail silently. | Document supported architectures and emit a clear error otherwise. |
 
 ### 1.4 Low (track in backlog)
 
@@ -107,7 +107,7 @@ Distribution targets (pick 3, not 5): Homebrew tap first, AUR second, Scoop thir
 
 Community moves:
 
-- **Show HN:** lead with the wallpaper-driven themes (v0.2.502). Screenshot-driven hook nobody else has.
+- **Show HN:** lead with the wallpaper-driven themes (v0.2.503). Screenshot-driven hook nobody else has.
 - **Blog post series (3 posts):** "Why I stopped using chezmoi directly", "Bootstrapping 15 machines from one git repo in <90 seconds", "Secrets in dotfiles: a 2026 threat model".
 - **CFPs:** FOSDEM 2027 (dev tools devroom), All Things Open 2026, SCaLE LA. Skip KubeCon.
 - **Sponsor 2–3 newsletters at $500–1500/issue:** Console.dev, TLDR DevOps, Changelog News.
@@ -188,7 +188,7 @@ Plus reliability fixes:
 **This quarter (positioning):** ✅ shipped
 
 1. ✅ AGENTS.md generator — `dot agents render/check/list` syncs `CLAUDE.md` → `AGENTS.md` + Cursor + Codex stubs (commit TBD). Closes #1 competitive gap.
-2. ✅ Sub-100ms `dot` CLI cold-start gate — `scripts/ci/dot-cli-startup-bench.sh` + `.github/workflows/dot-cli-bench.yml`. Median **47ms** locally, budget 250ms. Closes #3 competitive gap.
+2. ✅ Sub-100ms `dot` CLI cold-start gate — `tools/ci/dot-cli-startup-bench.sh` + `.github/workflows/dot-cli-bench.yml`. Median **47ms** locally, budget 250ms. Closes #3 competitive gap.
 3. ⏳ Add `windows-latest` runner to the test matrix (deferred; needs PS7 mock harness).
 4. ⏳ Pursue mise + 1Password + Codespaces integrations (months 6-12 of the roadmap).
 
@@ -230,8 +230,8 @@ The round-2 audit found regressions in the freshly-shipped strategic features. A
 | R6 | **Medium** | `scripts/dot/commands/agents.sh:render` | New files written with default umask permissions — could leak through a permissive global umask. | ✅ Explicit `chmod 0644` after each write. |
 | R7 | **Medium** | `scripts/dot/commands/registry.sh:128-135` | `set-url` accepted any scheme (http, ftp, file) without validation; the unsigned registry JSON is fetched from whatever URL was set. | ✅ Refuses non-HTTPS (with `file://` exemption documented for testing); atomic `mktemp + mv` write to config so concurrent `set-url` invocations cannot corrupt. |
 | R8 | **Medium** | `scripts/dot/commands/fleet.sh:467` | `mktemp -d` without a `-t` template could collide between concurrent `dot fleet apply` invocations from the same user. | ✅ Now uses `mktemp -d -t dotfiles-fleet.XXXXXX`. |
-| R9 | **Medium** | `scripts/ci/dot-cli-startup-bench.sh:87-89` | `env -i HOME=... PATH=...` preserved a PATH that could include user-installed `dot` shims; not a true cold-start measurement. Low-impact (the explicit `$DOT_BIN` argument is absolute), but the comment overclaimed. | Annotated only — the explicit `$DOT_BIN` already pins the binary; the PATH note in the comment is now precise. |
-| R10 | **Low** | `scripts/ci/dot-cli-startup-bench.sh:58-71` | `_now_ms` falls through to `python3 -c '…'` on macOS bash 3.2; Python startup can inflate measurements 80-150ms. | Documented; consider switching to `gdate +%s%N` when GNU coreutils is installed. |
+| R9 | **Medium** | `tools/ci/dot-cli-startup-bench.sh:87-89` | `env -i HOME=... PATH=...` preserved a PATH that could include user-installed `dot` shims; not a true cold-start measurement. Low-impact (the explicit `$DOT_BIN` argument is absolute), but the comment overclaimed. | Annotated only — the explicit `$DOT_BIN` already pins the binary; the PATH note in the comment is now precise. |
+| R10 | **Low** | `tools/ci/dot-cli-startup-bench.sh:58-71` | `_now_ms` falls through to `python3 -c '…'` on macOS bash 3.2; Python startup can inflate measurements 80-150ms. | Documented; consider switching to `gdate +%s%N` when GNU coreutils is installed. |
 | R11 | **Low** | `scripts/dot/commands/agents.sh` (list path) | `mkdir -p` for `.cursor/rules` and `.codex` ran even for read-only subcommands (`list`, `check`). Harmless, but pointless. | Deferred. |
 
 ### 6.3 New documentation gaps (all fixed in this commit)
@@ -346,7 +346,7 @@ Round-3 docs agent found 5 drifts, 2 of which were false positives on re-verific
 
 | ID | File | Drift | Status |
 |---|---|---|---|
-| D1+D2 | `dot_local/bin/executable_dot` | 5 orphan dispatch routes + 1 orphan help-table entry for commands removed in C3 of Round 1 (`verify`, `benchmark`, `prewarm`, `remove`, `clean-cache`) | ✅ Fixed |
+| D1+D2 | `bin/dot` | 5 orphan dispatch routes + 1 orphan help-table entry for commands removed in C3 of Round 1 (`verify`, `benchmark`, `prewarm`, `remove`, `clean-cache`) | ✅ Fixed |
 | D3 | `docs/reference/POWERSHELL_PARITY.md` | `dot agents` + `dot fleet apply` labelled "Full" on Windows without backing CI | ✅ Relabelled to "Stub (bash-bridged)" |
 | D4 | `docs/operations/ROADMAP_2026.md` + `HARD_AUDIT_2026.md` §6.9 | Microsoft Build 2026 date was wrong: "2026-05-19 in Seattle" vs actual **2026-06-02 to 2026-06-03 in San Francisco (Fort Mason)** | ✅ Corrected; Show-HN timing shifts ~2 weeks right |
 
@@ -501,10 +501,10 @@ R4 cross-platform agent produced a 10-table audit. Real findings, ranked by what
 
 | # | Severity | Gap | Concrete close |
 |---|---|---|---|
-| **P1** | High | No `Makefile install` target with `PREFIX`/`DESTDIR` support. Distro packagers have no canonical artefact to package. | Add `Makefile` with `install:` rule copying `dot_local/bin/executable_dot` to `$(PREFIX)/bin/dot`, man page to `$(PREFIX)/share/man/man1/`, completions to `$(PREFIX)/share/zsh/site-functions/_dot`. |
+| **P1** | High | No `Makefile install` target with `PREFIX`/`DESTDIR` support. Distro packagers have no canonical artefact to package. | Add `Makefile` with `install:` rule copying `bin/dot` to `$(PREFIX)/bin/dot`, man page to `$(PREFIX)/share/man/man1/`, completions to `$(PREFIX)/share/zsh/site-functions/_dot`. |
 | **P2** | High | No Homebrew tap, no AUR `PKGBUILD`, no Scoop manifest. | Publish `sebastienrousseau/homebrew-tap`, `aur/dotfiles-git/PKGBUILD`, `scoop-bucket/dot.json` from CI on tag — single tarball with SHA256 + Cosign-signed bundle. |
 | **P3** | High | `.devcontainer/Dockerfile:31` still installs unverified `get.chezmoi.io` (the same anti-pattern that gave us H6 in R1). | Replace with the pinned-SHA256 path used in `install-chezmoi-verified.sh`. |
-| **P4** | High | Repo intermingles framework (`scripts/`, `dot_local/bin/executable_dot`, `install/`) with maintainer's personal `dot_config/` (~80 tools). Packagers must ship both. | Document the framework/user split in a new `FRAMEWORK_STRUCTURE.md`; long-term, move framework code under `framework/` so `Makefile install` skips `dot_config/`. |
+| **P4** | High | Repo intermingles framework (`scripts/`, `bin/dot`, `install/`) with maintainer's personal `dot_config/` (~80 tools). Packagers must ship both. | Document the framework/user split in a new `FRAMEWORK_STRUCTURE.md`; long-term, move framework code under `framework/` so `Makefile install` skips `dot_config/`. |
 | **P5** | Medium | PowerShell-native parity is bash-bridged for `dot agents`, `dot fleet apply`, `dot theme`. Windows-native users can't run them without WSL. | Native PowerShell ports per `docs/reference/POWERSHELL_PARITY.md` Stub rows; estimated 1-week effort for full top-3. |
 
 P1+P2 together unlock the entire distribution surface and are ~5 person-days combined. They are the *cheapest path to "you can install us with `brew install`/`paru -S`/`scoop install`"* — which is the literal threshold for de-facto status on each platform.

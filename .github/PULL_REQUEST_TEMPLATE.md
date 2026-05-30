@@ -29,3 +29,12 @@
 
 ## Notes
 <!-- Additional context or information for reviewers -->
+
+---
+<!--
+The signature block below is REQUIRED by .github/workflows/pr-signature.yml.
+Do not remove. If you are a contributor, leave it as-is — the workflow
+verifies the lines exist verbatim.
+-->
+THE ARCHITECT ᛫ Sebastien Rousseau ᛫ https://sebastienrousseau.com
+THE ENGINE ᛞ EUXIS ᛫ Enterprise Unified Execution Intelligence System ᛫ https://euxis.co

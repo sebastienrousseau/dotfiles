@@ -21,11 +21,12 @@ This document tracks what is supported on Windows-native PowerShell 7.4 LTS / 7.
 
 | Command | Windows-native | WSL2 | macOS | Linux |
 |---|---|---|---|---|
-| `dot version` | Full | Full | Full | Full |
-| `dot help` | Full | Full | Full | Full |
+| `dot version` | **Full (native)** — `Get-DotVersion` cmdlet in `scripts/dot/powershell/Dot.psm1`; reads `.chezmoidata.toml` directly, no bash | Full | Full | Full |
+| `dot help` | **Full (native)** — `Invoke-DotHelp` cmdlet; `dot help <subcmd>` still bash-bridged | Full | Full | Full |
 | `dot doctor` | Full (subset of checks; some Unix-only checks return N/A) | Full | Full | Full |
 | `dot init <user>` | Full (requires `chezmoi` on PATH — install via `scoop install chezmoi`) | Full | Full | Full |
-| `dot agents render` / `check` / `list` | Stub (bash-bridged — requires bash on PATH; the smoke test calls `bash dot agents check` from pwsh) | Full | Full | Full |
+| `dot agents check` | **Full (native)** — `Test-DotAgentsSync` cmdlet; CI smoke test runs the cmdlet directly | Full | Full | Full |
+| `dot agents render` / `list` | Stub (bash-bridged — `render` is a multi-harness mustache-equivalent rewrite, tracked as a separate ticket) | Full | Full | Full |
 | `dot fleet status` / `drift` / `events` | Full | Full | Full | Full |
 | `dot fleet apply` | Stub (bash-bridged + requires Windows OpenSSH `ssh.exe` on PATH; no native pwsh-side test in CI yet — tracked in ROADMAP §C5 follow-up) | Full | Full | Full |
 | `dot fleet namespace set` | Full | Full | Full | Full |
@@ -51,11 +52,11 @@ This document tracks what is supported on Windows-native PowerShell 7.4 LTS / 7.
 | `dot version` exits 0 | windows-latest, ubuntu-latest, macos-latest, macos-14 |
 | `dot help` exits 0 | windows-latest, ubuntu-latest, macos-latest, macos-14 |
 | `dot agents check` exits 0 | windows-latest (via bash on PATH), ubuntu-latest, macos-latest, macos-14 |
-| PowerShell ≥ 7.4 | windows-latest (smoke test at `scripts/ci/windows-smoke-test.ps1`) |
+| PowerShell ≥ 7.4 | windows-latest (smoke test at `tools/ci/windows-smoke-test.ps1`) |
 | PSScriptAnalyzer Error-level findings | windows-latest |
 | `chezmoi --version` exits 0 | windows-latest (via scoop), all Unix matrices |
-| `bash scripts/ci/dot-cli-startup-bench.sh` median < 200ms | macos-latest |
-| `bash scripts/ci/dot-cli-startup-bench.sh` median < 150ms | ubuntu-latest |
+| `bash tools/ci/dot-cli-startup-bench.sh` median < 200ms | macos-latest |
+| `bash tools/ci/dot-cli-startup-bench.sh` median < 150ms | ubuntu-latest |
 
 ## Known parity gaps (deferred to follow-up PRs)
 
@@ -69,7 +70,7 @@ These are scoped in [`ROADMAP_2026 §C5`](../operations/ROADMAP_2026.md) but not
 ## Source-of-truth files
 
 - `.github/workflows/ci.yml` — `test-windows` job (pwsh + scoop + chezmoi + smoke)
-- `scripts/ci/windows-smoke-test.ps1` — the actual gate
+- `tools/ci/windows-smoke-test.ps1` — the actual gate
 - `dot_config/powershell/Microsoft.PowerShell_profile.ps1` — the deployed PowerShell profile (if present)
 - `scripts/dot/lib/platform.sh` — the dot_path_to_unix/native bridge (H9 audit fix)
 

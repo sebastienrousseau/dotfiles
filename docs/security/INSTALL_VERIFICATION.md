@@ -27,7 +27,7 @@ the install never starts.
 ### 2. The `chezmoi` binary (always verified when possible)
 
 `install.sh` prefers the bundled checksum-verified installer at
-`scripts/ci/install-chezmoi-verified.sh`, which:
+`tools/ci/install-chezmoi-verified.sh`, which:
 
 - Resolves the platform (`uname -s` + `uname -m`).
 - Downloads `chezmoi_<version>_<os>_<arch>.tar.gz` AND the matching
@@ -115,7 +115,7 @@ PR.
 ## References
 
 - `install.sh` — the entry point.
-- `scripts/ci/install-chezmoi-verified.sh` — the SHA256-pinned
+- `tools/ci/install-chezmoi-verified.sh` — the SHA256-pinned
   chezmoi installer.
 - `tests/unit/install/test_install_chezmoi_verified.sh` — the
   negative test.

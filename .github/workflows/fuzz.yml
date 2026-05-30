@@ -1,0 +1,75 @@
+name: Fuzz / Native Go harnesses
+
+# Runs each Go fuzz harness for a short window on every PR that
+# touches user-input parsing surfaces or the harnesses themselves.
+# Catches regressions before they merge.
+#
+# Pairs with the (pending) OSS-Fuzz integration in
+# oss-fuzz-integration/ which runs the same harnesses
+# continuously at scale on Google infra. See
+# docs/security/FUZZING.md.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    paths:
+      - 'lib/dot/utils.sh'
+      - 'scripts/dot/commands/init.sh'
+      - 'oss-fuzz-integration/**'
+      - '.github/workflows/fuzz.yml'
+  workflow_dispatch:
+    inputs:
+      fuzztime:
+        description: 'Per-harness fuzz duration (e.g. 60s, 5m, 1h)'
+        required: false
+        default: '60s'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fuzz-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fuzz:
+    name: Fuzz / ${{ matrix.harness }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        harness:
+          - FuzzValidateName
+          - FuzzInitURLResolver
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Set up Go
+        uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
+        with:
+          go-version-file: oss-fuzz-integration/fuzz/go.mod
+          cache: false
+
+      - name: Run ${{ matrix.harness }}
+        working-directory: oss-fuzz-integration/fuzz
+        env:
+          FUZZTIME: ${{ inputs.fuzztime || '60s' }}
+        run: |
+          go test -run TestNothing -fuzz='^${{ matrix.harness }}$' \
+            -fuzztime="$FUZZTIME" ./...
+
+      - name: Upload reproducer corpus if failed
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: fuzz-reproducer-${{ matrix.harness }}
+          path: oss-fuzz-integration/fuzz/testdata/fuzz/
+          retention-days: 14

@@ -21,12 +21,12 @@ trap cleanup EXIT
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../dot/lib/ui.sh
+# shellcheck source=../../lib/dot/ui.sh
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/../dot/lib/ui.sh"
-# shellcheck source=../dot/lib/log.sh
+source "$SCRIPT_DIR/../../lib/dot/ui.sh"
+# shellcheck source=../../lib/dot/log.sh
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/../dot/lib/log.sh"
+source "$SCRIPT_DIR/../../lib/dot/log.sh"
 DOT_COMMAND="heal"
 REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 DOTFILES_SOURCE="$REPO_ROOT"

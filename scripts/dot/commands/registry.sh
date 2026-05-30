@@ -43,10 +43,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../lib/ui.sh disable=SC1091
-source "$SCRIPT_DIR/../lib/ui.sh"
-# shellcheck source=../lib/utils.sh disable=SC1091
-source "$SCRIPT_DIR/../lib/utils.sh"
+# shellcheck source=../../../lib/dot/ui.sh disable=SC1091
+source "$SCRIPT_DIR/../../../lib/dot/ui.sh"
+# shellcheck source=../../../lib/dot/utils.sh disable=SC1091
+source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 
 _registry_default_url() {
   printf '%s\n' "https://sebastienrousseau.github.io/dotfiles/registry.json"

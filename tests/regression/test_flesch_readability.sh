@@ -280,7 +280,14 @@ for doc in "${USER_DOCS[@]}"; do
   [[ -f "$filepath" ]] || continue
   doc_slug="${doc//[\/.]/_}"
   test_start "flesch_paragraph_length_${doc_slug}"
-  max_period_run=$(sed "/^\`\`\`/,/^\`\`\`/d" "$filepath" | awk '/^$/{if(s>15){n++};s=0;next}{s+=gsub(/\./,"&")} END{print n+0}')
+  # Strip URLs (periods inside hostnames inflate the sentence count
+  # against the prose-sentence threshold), inline `code` spans,
+  # fenced code blocks, and markdown table rows (each cell often has
+  # filenames / abbreviations that count as sentences) before counting.
+  # A paragraph with > 15 actual prose sentences is "dense".
+  max_period_run=$(sed "/^\`\`\`/,/^\`\`\`/d" "$filepath" |
+    sed -E -e 's|https?://[^ )]+||g' -e 's|`[^`]*`||g' -e '/^[[:space:]]*\|/d' |
+    awk '/^$/{if(s>15){n++};s=0;next}{s+=gsub(/\./,"&")} END{print n+0}')
   if [[ "$max_period_run" -eq 0 ]]; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no dense paragraphs"
@@ -342,7 +349,7 @@ for doc in "${USER_DOCS[@]}"; do
   [[ -f "$filepath" ]] || continue
   prose=$(_extract_prose "$filepath")
   # Find words 6+ chars that are ALL CAPS (likely emphasis, not acronyms)
-  caps_words=$(echo "$prose" | grep -oE '\b[A-Z]{6,}\b' | grep -vE '^(README|INSTALL|MIGRATION|PROFILES|FEATURES|ENCRYPTION|IMPORTANT|WARNING|CLAUDE|DOTFILES|RESULTS|CHANGED|SCRIPTS|STANDALONE|PASSED|FAILED|ARCHITECT|ENGINE|LICENSE|SECURITY|CHANGELOG|CONTRIBUTING|TROUBLESHOOTING|OPERATIONS|ALIASES|ARCHITECTURE|COMPLIANCE|RELIABILITY|TESTING|VERSION|INCIDENT|RESPONSE)$' || true)
+  caps_words=$(echo "$prose" | grep -oE '\b[A-Z]{6,}\b' | grep -vE '^(README|INSTALL|MIGRATION|PROFILES|FEATURES|ENCRYPTION|IMPORTANT|WARNING|CLAUDE|DOTFILES|RESULTS|CHANGED|SCRIPTS|STANDALONE|PASSED|FAILED|ARCHITECT|ENGINE|LICENSE|SECURITY|CHANGELOG|CONTRIBUTING|TROUBLESHOOTING|OPERATIONS|ALIASES|ARCHITECTURE|COMPLIANCE|RELIABILITY|TESTING|VERSION|INCIDENT|RESPONSE|CIELAB|ASCIINEMA)$' || true)
   if [[ -n "$caps_words" ]]; then
     printf '    %s: ALL CAPS words found: %s\n' "$doc" "$(echo "$caps_words" | tr '\n' ', ')"
     failures=$((failures + 1))
@@ -394,7 +401,15 @@ for doc in "${USER_DOCS[@]}"; do
   [[ -f "$filepath" ]] || continue
   doc_slug="${doc//[\/.]/_}"
   test_start "flesch_clear_title_${doc_slug}"
-  first_content=$(awk 'NF{print; exit}' "$filepath")
+  # Skip YAML/TOML frontmatter (between leading --- ... --- block) before
+  # looking for the first heading. Without this, docs that use Jekyll-
+  # style frontmatter for site metadata are flagged as title-less.
+  first_content=$(awk '
+    NR == 1 && $0 == "---" { in_frontmatter = 1; next }
+    in_frontmatter && $0 == "---" { in_frontmatter = 0; next }
+    in_frontmatter { next }
+    NF { print; exit }
+  ' "$filepath")
   if [[ "$first_content" =~ ^#[[:space:]] || "$first_content" =~ ^\<[phH] ]]; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has clear title"

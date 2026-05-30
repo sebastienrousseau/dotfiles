@@ -11,6 +11,33 @@ narrative behind it.
 
 ## Live score
 
+<!-- BEGIN scorecard-snapshot (auto-generated, do not edit by hand) -->
+Aggregate score **7.6 / 10** at 2026-05-17T08:11:51Z.
+
+| Check | Score | Reason |
+|---|---:|---|
+| Binary-Artifacts | 10 | no binaries found in the repo |
+| Branch-Protection | -1 | internal error: error during branchesHandler.setup: internal error: some github tokens can't read cl |
+| CI-Tests | 10 | 15 out of 15 merged PRs checked by a CI test -- score normalized to 10 |
+| CII-Best-Practices | 2 | badge detected: InProgress |
+| Code-Review | 0 | Found 0/30 approved changesets -- score normalized to 0 |
+| Contributors | 0 | project has 0 contributing companies or organizations -- score normalized to 0 |
+| Dangerous-Workflow | 10 | no dangerous workflow patterns detected |
+| Dependency-Update-Tool | 10 | update tool detected |
+| Fuzzing | 0 | project is not fuzzed |
+| License | 9 | license file detected |
+| Maintained | 10 | 30 commit(s) and 30 issue activity found in the last 90 days -- score normalized to 10 |
+| Packaging | 10 | packaging workflow detected |
+| Pinned-Dependencies | 9 | dependency not pinned by hash detected -- score normalized to 9 |
+| SAST | 10 | SAST tool is run on all commits |
+| Security-Policy | 10 | security policy file detected |
+| Signed-Releases | 3 | 1 out of the last 3 releases have a total of 2 signed artifacts. |
+| Token-Permissions | 10 | GitHub workflow tokens follow principle of least privilege |
+| Vulnerabilities | 10 | 0 existing vulnerabilities detected |
+
+*Refresh: `scripts/qa/scorecard-snapshot.sh` · CI check: `lint/scorecard-snapshot` (planned).*
+<!-- END scorecard-snapshot -->
+
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/sebastienrousseau/dotfiles/badge)](https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/dotfiles)
 
 The badge above is regenerated every Monday at 06:00 UTC and on every
@@ -43,7 +70,7 @@ marks reflect this repo's posture at the time of writing — the
 | Signed-Commits | ✓ | Enforced by pre-push hook (`scripts/git-hooks/pre-push`) and at-push by branch protection (#853 + #857). |
 | Dependency-Update-Tool | ✓ | Dependabot configured for github-actions / npm / docker / devcontainers / uv. |
 | Fuzzing | ⚠ | `install.sh` fuzz harness lives under `tests/fuzz/` (closes #881), but it's shell-based and Scorecard's heuristic only recognizes OSS-Fuzz / ClusterFuzzLite / native Go fuzz / libFuzzer / Atheris. None support shell. Property tests under `tests/unit/functions/test_property_*.sh` cover the closest equivalent surface. |
-| License | ✓ | Apache-2.0 at repo root. |
+| License | ✓ | MIT at repo root (`LICENSE`). |
 | Maintained | ✓ | Active commit cadence; the [README](../../README.md) lists the current `dotfiles_version`. |
 | Pinned-Dependencies | ⚠ | Closed 8 of 14 findings this cycle (every Dockerfile base + every workflow action + 2 `curl \| sh` installers + the `npm install -g npm` upgrade step). 5 residual findings stay open by design — see `Open findings`. |
 | SAST | ✓ | CodeQL (`.github/workflows/codeql.yml`) + Checkov + Grype. |
@@ -101,12 +128,40 @@ false positives in Scorecard's regex.
 | 2026-05-14 | 6.5 | 11 | Closed 17 of 28: 10× TokenPermissions (#886), 6× Dockerfile bases (#886), 1× gitleaks fixture (#884). |
 | 2026-05-14 | 6.5 | 9 | Closed 2× `curl \| sh` installers (#888). |
 | 2026-05-14 | 6.5 | 8 | Closed 1× `npm install -g npm@…` via Node 24 bump (#889). |
+| 2026-05-17 | 7.6 | 7 | v0.2.502 released; Cosign keyless signing live (#876 implementation landed in `security-release.yml` sbom job). |
+| 2026-05-17 | 7.6 | 6 | SLSA Release Attestation pipeline unblocked (PR #894 — 6 prior releases had failed identically). v0.2.502 backfilled with `.intoto.jsonl` + `.sig` + `.pem` triplet. `Signed-Releases` should bump from 3 to ~10 on next Scorecard re-scrape. |
+| 2026-05-17 | 7.6 | — | Added `MAINTAINERS.md` + `GOVERNANCE.md` at repo root. Provides the formal context for the `Code-Review` 0/30 score (solo maintainer) and unblocks the CII Best Practices badge application. |
 
 ## Open work
 
-- **Apply for the OpenSSF Best Practices Badge** — see Bucket 3 above.
-- **Wire Cosign keyless signing into the release pipeline (#876)** — should push `Signed-Releases` to its maximum.
+- **Apply for the OpenSSF Best Practices Badge** — see Bucket 3 above. All passing-tier criteria are now met (signed commits, CI, security policy, MIT license, MAINTAINERS.md, GOVERNANCE.md, RFC process documented).
+- **Re-trigger Scorecard after SLSA backfill propagates** — expected `Signed-Releases` 3 → 10.
 - **`harden-runner` block-mode adoption (#878)** — should tighten the `Token-Permissions` check further.
+- **Investigate `License` 9/10 false-positive** — repo is MIT (SPDX-compliant), Scorecard's penalty should not apply.
+- **Investigate `Branch-Protection` `-1`** — scanner internal error; manually verify with `gh api repos/:owner/:repo/branches/master/protection` and document.
+
+### Enabling Branch-Protection + Webhooks checks (one-time PAT setup)
+
+Scorecard's `Branch-Protection` and `Webhooks` checks require a
+fine-grained Personal Access Token with `Administration: read`
+scope. Without it both checks return `-1` ("internal error"). The
+workflow already wires this up — only the secret needs to be created.
+
+Steps (one-time, repo owner):
+
+1. Go to <https://github.com/settings/personal-access-tokens/new>
+2. **Resource owner**: `sebastienrousseau` · **Repository access**: only `sebastienrousseau/dotfiles`
+3. **Repository permissions** → `Administration: read-only` and `Metadata: read-only`
+4. **Expiration**: 1 year (set a calendar reminder to rotate; document the rotation in this file when done)
+5. Generate the token, copy it once
+6. Add as a secret named `SCORECARD_TOKEN` at <https://github.com/sebastienrousseau/dotfiles/settings/secrets/actions/new>
+7. Next Scorecard run (manual via `gh workflow run scorecard.yml` or weekly cron) picks it up automatically
+8. Expected effect: `Branch-Protection` `-1` → 10/10 if all rules are correctly configured; `Webhooks` `-1` → 10/10 (no webhooks present).
+
+The PAT secret is **optional**. When absent, the workflow falls back
+to `${{ github.token }}` and Scorecard continues to run, only with
+those two checks at `-1`. Adding the PAT cannot reduce any other check's
+score — it's a strict improvement.
 
 ## Exceptions
 

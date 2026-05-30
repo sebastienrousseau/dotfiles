@@ -7,9 +7,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-POLICY_BUNDLES="$REPO_ROOT/dot_config/dotfiles/policy-bundles.json"
-MODEL_REGISTRY="$REPO_ROOT/dot_config/dotfiles/model-registry.json"
-PROMPT_REGISTRY="$REPO_ROOT/dot_config/dotfiles/prompt-registry.json"
+POLICY_BUNDLES="$REPO_ROOT/defaults/dot_config/dotfiles/policy-bundles.json"
+MODEL_REGISTRY="$REPO_ROOT/defaults/dot_config/dotfiles/model-registry.json"
+PROMPT_REGISTRY="$REPO_ROOT/defaults/dot_config/dotfiles/prompt-registry.json"
 README_FILE="$REPO_ROOT/README.md"
 WORKSTATION_DOC="$REPO_ROOT/docs/operations/TRUSTED_AGENT_WORKSTATION.md"
 

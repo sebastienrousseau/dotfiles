@@ -8,7 +8,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 # Source the function
-FUNC_FILE="$REPO_ROOT/.chezmoitemplates/functions/text/encode64.sh"
+FUNC_FILE="$REPO_ROOT/defaults/.chezmoitemplates/functions/text/encode64.sh"
 if [[ -f "$FUNC_FILE" ]]; then
   source "$FUNC_FILE"
 else

@@ -8,7 +8,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 A2A_CARD="$REPO_ROOT/.well-known/agent-card.json"
-INTERNAL_CARD="$REPO_ROOT/dot_config/dotfiles/agent-card.json"
+INTERNAL_CARD="$REPO_ROOT/defaults/dot_config/dotfiles/agent-card.json"
 LEGACY_DOC="$REPO_ROOT/.well-known/agent.json"
 CONFORMANCE_SCRIPT="$REPO_ROOT/scripts/diagnostics/a2a-conformance.sh"
 

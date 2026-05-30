@@ -88,7 +88,7 @@ the first 15 lines. One of three accepted forms:
 ```
 
 The convention is enforced by the `regression-traceability` pre-commit
-hook (`scripts/ci/check-regression-traceability.sh`) and audited weekly
+hook (`tools/ci/check-regression-traceability.sh`) and audited weekly
 by `.github/workflows/regression-trace-audit.yml`, which fails the build
 and opens a tracking issue if any `GH-*` reference no longer resolves
 to a live issue. Use `pre-history` only when neither `git blame` nor

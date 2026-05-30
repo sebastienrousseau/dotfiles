@@ -1,0 +1,279 @@
+#!/bin/bash
+# shellcheck shell=bash
+#
+# ~/.bashrc - Bash interactive shell configuration
+#
+# This file is sourced for interactive non-login Bash shells.
+# It provides a fallback for environments where Zsh is unavailable.
+#
+# Loading order:
+#   1. ~/.bash_profile or ~/.profile (login shells)
+#   2. ~/.bashrc (this file, for interactive shells)
+#
+# References:
+#   - Bash Manual: https://www.gnu.org/software/bash/manual/
+
+# Prevent double-sourcing
+if [[ -n "$BASHRC_SOURCED" ]]; then
+  return 0
+fi
+export BASHRC_SOURCED=1
+
+# --- XDG Base Directory Specification ---
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+
+# SSH agent — point shells at the systemd user agent socket when available.
+if [[ -z "${SSH_AUTH_SOCK:-}" ]] && [[ -n "${XDG_RUNTIME_DIR:-}" ]] \
+  && [[ -S "${XDG_RUNTIME_DIR}/ssh-agent.socket" ]]; then
+  export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket"
+fi
+
+# If not running interactively, exit early
+case $- in
+  *i*) ;;
+  *) return ;;
+esac
+
+# --- Shell Options ---
+# Enable useful Bash options
+shopt -s histappend   # Append to history instead of overwriting
+shopt -s checkwinsize # Update LINES and COLUMNS after each command
+shopt -s globstar     # Enable ** for recursive globbing
+shopt -s nocaseglob   # Case-insensitive globbing
+shopt -s cdspell      # Autocorrect minor spelling errors in cd
+shopt -s dirspell     # Autocorrect minor spelling errors in directory names
+shopt -s autocd       # Type directory name to cd into it
+shopt -s cmdhist      # Save multiline commands as single history entry
+shopt -s lithist      # Preserve newlines in history
+
+# --- History Configuration ---
+export HISTSIZE=50000
+export HISTFILESIZE=100000
+export HISTCONTROL="ignoreboth:erasedups"
+export HISTIGNORE="ls:cd:cd -:pwd:exit:date:* --help"
+export HISTTIMEFORMAT="%F %T "
+export HISTFILE="${XDG_STATE_HOME}/bash/history"
+
+# Create history directory if it does not exist
+[[ -d "${XDG_STATE_HOME}/bash" ]] || mkdir -p "${XDG_STATE_HOME}/bash"
+
+# --- Prompt Configuration ---
+# Set a simple but informative prompt
+if [[ -n "$SSH_CONNECTION" ]]; then
+  PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+else
+  PS1='\[\033[01;34m\]\w\[\033[00m\]\$ '
+fi
+
+_deferred_hydration() {
+  # Remove self from PROMPT_COMMAND
+  PROMPT_COMMAND="${PROMPT_COMMAND//_deferred_hydration;/}"
+  [[ "$PROMPT_COMMAND" == "_deferred_hydration" ]] && unset PROMPT_COMMAND
+
+  # --- Safe and cached eval wrapper for tool initialization ---
+  _SHELL_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/bash"
+  [[ -d "$_SHELL_CACHE" ]] || mkdir -p "$_SHELL_CACHE"
+
+  # Append a timing event for `dot perf --by-tool`. Bash 5+ has
+  # EPOCHREALTIME (float "secs.usecs"); split into a 16-digit microsecond
+  # int via string ops so $((...)) integer math handles the delta.
+  _cached_eval_log_timing() {
+    local label="$1" t0="$2" t1="$3" rc="${4:-0}" shell="${5:-bash}"
+    local log_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
+    [[ -d "$log_dir" ]] || mkdir -p "$log_dir" 2>/dev/null || return 0
+    local logfile="$log_dir/eval-timings.jsonl"
+    [[ -f "$logfile" ]] || touch "$logfile" 2>/dev/null || return 0
+    local t0_us="${t0/./}" t1_us="${t1/./}" ms_int=0
+    if [[ "$t0_us" =~ ^[0-9]+$ && "$t1_us" =~ ^[0-9]+$ ]]; then
+      ms_int=$(( (t1_us - t0_us) / 1000 ))
+    fi
+    printf '{"ts":"%s","shell":"%s","label":"%s","ms":%s,"rc":%s}\n' \
+      "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$shell" "$label" "$ms_int" "$rc" \
+      >> "$logfile" 2>/dev/null || true
+  }
+
+  # Cache and source a tool's init output, with mtime/realpath/file-arg invalidation.
+  #
+  # Runs <cmd args...> on cache miss, vets the output for shell-injection
+  # patterns, writes atomically, and sources. Cache invalidates when the
+  # binary's mtime is newer, its realpath has changed (PATH-shadow swap),
+  # or a file-path argument is newer than the cache.
+  #
+  # @arg $1 string Cache label (cache file: $_SHELL_CACHE/<label>.bash)
+  # @arg $2..N string Command and args to run on cache miss
+  # @env EVALCACHE_DISABLE Set to "true" to bypass cache read AND write
+  # @env EVALCACHE_TIMING  Set to "1" to log per-call timing for `dot perf --by-tool`
+  # @stdout Sourced cache content
+  # @stderr Warning on init failure or suspicious-output rejection
+  # @exitcode 0 Cache hit, successful regeneration, or successful bypass
+  # @exitcode 1 Suspicious pattern detected in init output
+  # @exitcode * Init command's exit code on non-zero return
+  _cached_eval() {
+    if [[ "$EVALCACHE_TIMING" != "1" ]]; then
+      _cached_eval_impl "$@"
+      return
+    fi
+    local _ce_t0="${EPOCHREALTIME:-$(date +%s.%N 2>/dev/null || echo 0)}"
+    _cached_eval_impl "$@"
+    local _ce_rc=$?
+    local _ce_t1="${EPOCHREALTIME:-$(date +%s.%N 2>/dev/null || echo 0)}"
+    _cached_eval_log_timing "${1:-unknown}" "$_ce_t0" "$_ce_t1" "$_ce_rc" "bash"
+    return $_ce_rc
+  }
+
+  _cached_eval_impl() {
+    local label="$1"
+    shift
+
+    # Debug bypass: skip cache read AND write entirely.
+    # Set EVALCACHE_DISABLE=true to eval directly without touching cache files.
+    if [[ "$EVALCACHE_DISABLE" == "true" ]]; then
+      eval "$("$@" 2>/dev/null)"
+      return $?
+    fi
+
+    local cache="$_SHELL_CACHE/${label}.bash"
+    local pin="${cache}.bin"
+    local bin_name="$1"
+    local bin
+    bin=$(command -v "$bin_name")
+    local real_bin=""
+    [[ -n "$bin" ]] && real_bin=$(readlink -f -- "$bin" 2>/dev/null || echo "$bin")
+
+    # Cache valid when: present non-empty, binary not newer, recorded realpath
+    # still matches, and no file-path argument modified since cache write.
+    local cache_valid=1
+    if [[ ! -s "$cache" ]]; then
+      cache_valid=0
+    elif [[ -n "$bin" && "$bin" -nt "$cache" ]]; then
+      cache_valid=0
+    elif [[ -f "$pin" && -n "$real_bin" ]]; then
+      local pinned_real
+      pinned_real=$(<"$pin")
+      [[ -n "$pinned_real" && "$pinned_real" != "$real_bin" ]] && cache_valid=0
+    fi
+    if [[ "$cache_valid" == 1 ]]; then
+      local arg
+      for arg in "${@:2}"; do
+        if [[ -f "$arg" && "$arg" -nt "$cache" ]]; then
+          cache_valid=0
+          break
+        fi
+      done
+    fi
+
+    if [[ "$cache_valid" == 1 ]]; then
+      source "$cache"
+      return
+    fi
+
+    local init_output rc
+    init_output=$("$@" 2>/dev/null)
+    rc=$?
+    if [[ "$rc" -ne 0 ]]; then
+      echo "[WARN] $label init exited $rc; not caching" >&2
+      return "$rc"
+    fi
+
+    # Reject if output contains suspicious patterns indicating malicious payloads
+    if [[ "$init_output" =~ (curl[[:space:]].*\|[[:space:]]*(ba)?sh|wget[[:space:]].*\|[[:space:]]*(ba)?sh|nc[[:space:]]+-e|\/dev\/tcp\/|base64[[:space:]]+-d[[:space:]]*\|) ]]; then
+      echo "[WARN] Suspicious output from $label init, skipping" >&2
+      return 1
+    fi
+
+    echo "$init_output" >"${cache}.tmp.$$"
+    mv "${cache}.tmp.$$" "$cache"
+    if [[ -n "$real_bin" ]]; then
+      echo "$real_bin" >"${pin}.tmp.$$"
+      mv "${pin}.tmp.$$" "$pin"
+    fi
+    source "$cache"
+  }
+
+  # Clear cache files written by _cached_eval.
+  #
+  # Safe by design: only deletes *.bash / *.bash.bin files in
+  # $_SHELL_CACHE, leaving any unrelated content untouched.
+  #
+  # @noargs
+  # @stdout Single-line summary: "Cleared N cached eval file(s) from <dir>"
+  # @exitcode 0 Always (no-op when cache dir doesn't exist)
+  _cached_eval_clear() {
+    local cache_dir="$_SHELL_CACHE"
+    [[ -d "$cache_dir" ]] || return 0
+    local count=0 f
+    shopt -s nullglob
+    for f in "$cache_dir"/*.bash "$cache_dir"/*.bash.bin; do
+      rm -f -- "$f" && ((count++))
+    done
+    shopt -u nullglob
+    printf 'Cleared %d cached eval file(s) from %s\n' "$count" "$cache_dir"
+  }
+
+  # Use Starship prompt if available
+  if command -v starship &>/dev/null; then
+    _cached_eval "starship-init" starship init bash || true
+  fi
+
+  # --- Tool Integration ---
+  # Zoxide (smart cd)
+  if command -v zoxide &>/dev/null; then
+    _cached_eval "zoxide-init" zoxide init bash || true
+  fi
+
+  # FZF (fuzzy finder)
+  if command -v fzf &>/dev/null; then
+    _cached_eval "fzf-init" fzf --bash || true
+  fi
+
+  # Atuin (shell history)
+  if command -v atuin &>/dev/null; then
+    _cached_eval "atuin-init" atuin init bash --disable-up-arrow || true
+  fi
+
+  # direnv (directory environments)
+  if command -v direnv &>/dev/null; then
+    _cached_eval "direnv-init" direnv hook bash || true
+  fi
+}
+
+# Schedule deferred hydration
+if [[ -z "$BASH_EXECUTION_STRING" ]]; then
+  if [[ -z "$PROMPT_COMMAND" ]]; then
+    PROMPT_COMMAND="_deferred_hydration"
+  else
+    PROMPT_COMMAND="_deferred_hydration; $PROMPT_COMMAND"
+  fi
+fi
+
+# --- Core Aliases ---
+# These provide essential functionality even without full shell config
+alias ls='ls --color=auto'
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+alias ..='cd ..'
+alias ...='cd ../..'
+
+# Safety aliases
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# Editor aliases
+if command -v nvim &>/dev/null; then
+  alias vim='nvim'
+  alias vi='nvim'
+fi
+
+# --- Source local overrides ---
+if [[ -f "$HOME/.bashrc.local" ]]; then
+  # shellcheck source=/dev/null
+  . "$HOME/.bashrc.local"
+fi

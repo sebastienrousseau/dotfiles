@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-CONF_FILE="$REPO_ROOT/dot_config/fish/conf.d/env.fish.tmpl"
+CONF_FILE="$REPO_ROOT/defaults/dot_config/fish/conf.d/env.fish.tmpl"
 
 test_start "fish_conf_env_has_path_exists"
 assert_file_exists "$CONF_FILE" "env.fish.tmpl should exist"

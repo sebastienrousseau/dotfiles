@@ -8,7 +8,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-DOT_CLI="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT_CLI="$REPO_ROOT/bin/dot"
 
 echo "Testing restructured CLI commands..."
 
@@ -32,7 +32,7 @@ assert_file_contains "$DOT_CLI" "update" "dot CLI should handle update as hidden
 # --- Wave 1: _require_platform defined ---
 
 test_start "dot_cli_has_require_platform"
-PLATFORM_LIB="$REPO_ROOT/scripts/dot/lib/platform.sh"
+PLATFORM_LIB="$REPO_ROOT/lib/dot/platform.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
@@ -76,7 +76,7 @@ assert_file_contains "$DOT_CLI" "sign-check" "keys should support sign-check sub
 # --- Platform guard: dot_require_platform in platform.sh ---
 
 test_start "platform_sh_has_dot_require_platform"
-PLATFORM_SH="$REPO_ROOT/scripts/dot/lib/platform.sh"
+PLATFORM_SH="$REPO_ROOT/lib/dot/platform.sh"
 assert_file_contains "$PLATFORM_SH" "dot_require_platform()" "platform.sh should define dot_require_platform"
 
 echo ""

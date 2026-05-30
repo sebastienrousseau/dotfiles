@@ -31,7 +31,7 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
-DOT_BIN="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT_BIN="$REPO_ROOT/bin/dot"
 
 # meta.sh dispatcher arms — read-only/--help probes.
 # Skipping: cmd_upgrade (real package-manager network), cmd_prewarm

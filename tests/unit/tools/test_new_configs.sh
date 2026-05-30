@@ -8,20 +8,20 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 # Config files that must exist
 configs=(
-  dot_config/ripgrep/ripgreprc
-  dot_fdignore
-  dot_config/mpv/mpv.conf
-  dot_config/mpv/input.conf
-  dot_config/zathura/zathurarc
-  dot_config/mako/config
-  dot_config/bat/config
-  dot_config/lazygit/config.yml
-  dot_config/user-dirs.dirs
-  dot_config/firefox/user.js.tmpl
-  dot_config/fish/completions/dot-theme-sync.fish.tmpl
-  dot_config/waybar/config.jsonc.tmpl
-  dot_config/waybar/style.css.tmpl
-  dot_config/ipython/profile_default/ipython_config.py
+  defaults/dot_config/ripgrep/ripgreprc
+  defaults/dot_fdignore
+  defaults/dot_config/mpv/mpv.conf
+  defaults/dot_config/mpv/input.conf
+  defaults/dot_config/zathura/zathurarc
+  defaults/dot_config/mako/config
+  defaults/dot_config/bat/config
+  defaults/dot_config/lazygit/config.yml
+  defaults/dot_config/user-dirs.dirs
+  defaults/dot_config/firefox/user.js.tmpl
+  defaults/dot_config/fish/completions/dot-theme-sync.fish.tmpl
+  defaults/dot_config/waybar/config.jsonc.tmpl
+  defaults/dot_config/waybar/style.css.tmpl
+  defaults/dot_config/ipython/profile_default/ipython_config.py
 )
 
 for cfg in "${configs[@]}"; do
@@ -32,78 +32,78 @@ done
 
 # Ripgrep has smart-case
 test_start "ripgrep_smart_case"
-assert_file_contains "$REPO_ROOT/dot_config/ripgrep/ripgreprc" "smart-case" "ripgrep must have smart-case"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/ripgrep/ripgreprc" "smart-case" "ripgrep must have smart-case"
 
 # MPV has gpu-hq
 test_start "mpv_gpu_hq"
-assert_file_contains "$REPO_ROOT/dot_config/mpv/mpv.conf" "gpu-hq" "mpv must have gpu-hq profile"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/mpv/mpv.conf" "gpu-hq" "mpv must have gpu-hq profile"
 
 # Zathura has recolor
 test_start "zathura_recolor"
-assert_file_contains "$REPO_ROOT/dot_config/zathura/zathurarc" "recolor" "zathura must have recolor"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/zathura/zathurarc" "recolor" "zathura must have recolor"
 
 # Mako has urgency levels
 test_start "mako_urgency"
-assert_file_contains "$REPO_ROOT/dot_config/mako/config" "urgency=critical" "mako must have urgency levels"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/mako/config" "urgency=critical" "mako must have urgency levels"
 
 # Firefox disables telemetry
 test_start "firefox_no_telemetry"
-assert_file_contains "$REPO_ROOT/dot_config/firefox/user.js.tmpl" "telemetry" "firefox must disable telemetry"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/firefox/user.js.tmpl" "telemetry" "firefox must disable telemetry"
 
 # Firefox is theme-aware
 test_start "firefox_theme_sync"
-assert_file_contains "$REPO_ROOT/dot_config/firefox/user.js.tmpl" "layout.css.prefers-color-scheme.content-override" "firefox must sync website color scheme"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/firefox/user.js.tmpl" "layout.css.prefers-color-scheme.content-override" "firefox must sync website color scheme"
 
 # fd ignore has node_modules
 test_start "fdignore_node_modules"
-assert_file_contains "$REPO_ROOT/dot_fdignore" "node_modules" "fdignore must exclude node_modules"
+assert_file_contains "$REPO_ROOT/defaults/dot_fdignore" "node_modules" "fdignore must exclude node_modules"
 
 # dot-theme-sync completion is a template
 test_start "theme_sync_completion_template"
-assert_file_contains "$REPO_ROOT/dot_config/fish/completions/dot-theme-sync.fish.tmpl" "dot-theme-sync" "must complete dot-theme-sync"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/fish/completions/dot-theme-sync.fish.tmpl" "dot-theme-sync" "must complete dot-theme-sync"
 
 # Bat has style
 test_start "bat_has_style"
-assert_file_contains "$REPO_ROOT/dot_config/bat/config" "style" "bat must have style config"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/bat/config" "style" "bat must have style config"
 
 # Lazygit has delta pager
 test_start "lazygit_delta"
-assert_file_contains "$REPO_ROOT/dot_config/lazygit/config.yml" "delta" "lazygit must use delta pager"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/lazygit/config.yml" "delta" "lazygit must use delta pager"
 
 # Waybar has niri workspaces
 test_start "waybar_niri_workspaces"
-assert_file_contains "$REPO_ROOT/dot_config/waybar/config.jsonc.tmpl" "niri/workspaces" "waybar must have niri workspaces"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/waybar/config.jsonc.tmpl" "niri/workspaces" "waybar must have niri workspaces"
 
 # Waybar style uses theme vars
 test_start "waybar_themed"
-assert_file_contains "$REPO_ROOT/dot_config/waybar/style.css.tmpl" 'ui.accent' "waybar style must use theme accent"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/waybar/style.css.tmpl" 'ui.accent' "waybar style must use theme accent"
 
 # IPython has vi mode
 test_start "ipython_vi_mode"
-assert_file_contains "$REPO_ROOT/dot_config/ipython/profile_default/ipython_config.py" "vi" "ipython must have vi mode"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/ipython/profile_default/ipython_config.py" "vi" "ipython must have vi mode"
 
 # DAP has Python debugger
 test_start "dap_python"
-assert_file_contains "$REPO_ROOT/dot_config/nvim/lua/plugins/dap.lua" "debugpy" "dap must have python debugging"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/nvim/lua/plugins/dap.lua" "debugpy" "dap must have python debugging"
 
 # DAP has Go debugger
 test_start "dap_go"
-assert_file_contains "$REPO_ROOT/dot_config/nvim/lua/plugins/dap.lua" "delve" "dap must have go debugging"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/nvim/lua/plugins/dap.lua" "delve" "dap must have go debugging"
 
 # DAP has Rust/C debugger
 test_start "dap_rust"
-assert_file_contains "$REPO_ROOT/dot_config/nvim/lua/plugins/dap.lua" "codelldb" "dap must have rust/c debugging"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/nvim/lua/plugins/dap.lua" "codelldb" "dap must have rust/c debugging"
 
 # DAP has bash debugger
 test_start "dap_bash"
-assert_file_contains "$REPO_ROOT/dot_config/nvim/lua/plugins/dap.lua" "bashdb" "dap must have bash debugging"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/nvim/lua/plugins/dap.lua" "bashdb" "dap must have bash debugging"
 
 # tmux-sessionizer has zoxide
 test_start "sessionizer_zoxide"
-assert_file_contains "$REPO_ROOT/dot_local/bin/executable_tmux-sessionizer" "zoxide" "sessionizer must have zoxide integration"
+assert_file_contains "$REPO_ROOT/defaults/dot_local/bin/executable_tmux-sessionizer" "zoxide" "sessionizer must have zoxide integration"
 
 # tmux-sessionizer has kill option
 test_start "sessionizer_kill"
-assert_file_contains "$REPO_ROOT/dot_local/bin/executable_tmux-sessionizer" "kill" "sessionizer must support kill"
+assert_file_contains "$REPO_ROOT/defaults/dot_local/bin/executable_tmux-sessionizer" "kill" "sessionizer must support kill"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

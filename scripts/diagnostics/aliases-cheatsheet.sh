@@ -3,9 +3,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../dot/lib/utils.sh
+# shellcheck source=../../lib/dot/utils.sh
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/../dot/lib/utils.sh"
+source "$SCRIPT_DIR/../../lib/dot/utils.sh"
 
 src_dir="$(require_source_dir)"
 manifest="$src_dir/scripts/diagnostics/aliases-manifest.sh"

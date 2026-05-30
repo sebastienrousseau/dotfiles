@@ -8,13 +8,13 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-DOT_CLI="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT_CLI="$REPO_ROOT/bin/dot"
 META_FILE="$REPO_ROOT/scripts/dot/commands/meta.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 AGENT_MODULE="$REPO_ROOT/scripts/dot/commands/agent.sh"
-AGENT_CARD="$REPO_ROOT/dot_config/dotfiles/agent-card.json"
+AGENT_CARD="$REPO_ROOT/defaults/dot_config/dotfiles/agent-card.json"
 WELL_KNOWN="$REPO_ROOT/.well-known/agent.json"
 
 test_start "agent_card_exists"

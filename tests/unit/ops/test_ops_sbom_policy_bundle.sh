@@ -7,7 +7,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-BUNDLE_SCRIPT="$REPO_ROOT/scripts/release/package-policy-bundles.sh"
+BUNDLE_SCRIPT="$REPO_ROOT/tools/release/package-policy-bundles.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

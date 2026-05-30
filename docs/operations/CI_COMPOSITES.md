@@ -17,7 +17,7 @@ to bump pins. Managed under
 Path: `.github/actions/setup-chezmoi/action.yml`
 
 Installs the pinned `chezmoi` binary (using the SHA256-verified
-installer at `scripts/ci/install-chezmoi-verified.sh` when the repo is
+installer at `tools/ci/install-chezmoi-verified.sh` when the repo is
 checked out, falling back to `get.chezmoi.io` otherwise), caches the
 result, and appends the bin-dir to `$GITHUB_PATH`.
 
@@ -151,6 +151,6 @@ bump on a weekly schedule.
 
 - `.github/actions/setup-chezmoi/action.yml`
 - `.github/actions/setup-mise/action.yml`
-- `scripts/ci/install-chezmoi-verified.sh` — the SHA-pinned installer
+- `tools/ci/install-chezmoi-verified.sh` — the SHA-pinned installer
   the chezmoi composite prefers when available.
 - Issue [#879](https://github.com/sebastienrousseau/dotfiles/issues/879).

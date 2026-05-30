@@ -6,7 +6,7 @@ name: Coverage
 #
 # Coverage mechanism: BASH_ENV+PS4 turn on xtrace in every test bash
 # (and every subprocess bash); the runner captures stderr per test
-# and aggregates DA: entries into lcov.info. See scripts/ci/run-coverage.sh
+# and aggregates DA: entries into lcov.info. See tools/ci/run-coverage.sh
 # for the why-not-kcov note.
 
 on:
@@ -15,9 +15,9 @@ on:
     paths:
       - 'scripts/**'
       - 'tests/**'
-      - '.chezmoitemplates/**'
+      - 'defaults/.chezmoitemplates/**'
       - 'dot_local/bin/**'
-      - 'scripts/ci/run-coverage.sh'
+      - 'tools/ci/run-coverage.sh'
       - '.github/workflows/coverage.yml'
   push:
     branches: [master]
@@ -37,7 +37,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -72,7 +72,7 @@ jobs:
           #            ai.sh 15→87). floor=35 (3-pt cushion).
           # Bump in lockstep with the slice that lands the bump.
           MIN_COVERAGE_PCT: '35'
-        run: bash scripts/ci/run-coverage.sh
+        run: bash tools/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -85,7 +85,7 @@ jobs:
       - name: Upload to Codecov
         # Tokenless OSS upload — no secret needed for public repos.
         # When the repo is private or rate-limited, set CODECOV_TOKEN.
-        uses: codecov/codecov-action@3f20e214133d0983f9a10f3d63b0faf9241a3daa # v6.0.0
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
         if: always()
         continue-on-error: true   # don't block PRs on Codecov flakiness
         with:

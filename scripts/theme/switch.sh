@@ -30,9 +30,9 @@ cleanup() {
 trap cleanup EXIT
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../dot/lib/ui.sh
+# shellcheck source=../../lib/dot/ui.sh
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/../dot/lib/ui.sh"
+source "$SCRIPT_DIR/../../lib/dot/ui.sh"
 
 ui_init
 
@@ -58,8 +58,15 @@ if [ -z "$SRC_DIR" ]; then
   exit 1
 fi
 
-DATA_FILE="$SRC_DIR/.chezmoidata.toml"
-THEMES_FILE="$SRC_DIR/.chezmoidata/themes.toml"
+# Descend into the chezmoi source subdir when .chezmoiroot is present (v0.2.503+)
+CHEZMOI_SRC="$SRC_DIR"
+if [[ -f "$SRC_DIR/.chezmoiroot" ]]; then
+  _sub="$(head -1 "$SRC_DIR/.chezmoiroot" | tr -d '[:space:]')"
+  [[ -n "$_sub" && -d "$SRC_DIR/$_sub" ]] && CHEZMOI_SRC="$SRC_DIR/$_sub"
+fi
+
+DATA_FILE="$CHEZMOI_SRC/.chezmoidata.toml"
+THEMES_FILE="$CHEZMOI_SRC/.chezmoidata/themes.toml"
 WALLPAPER_DIR="${DOTFILES_WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
 if [ ! -f "$DATA_FILE" ]; then
   ui_err "Missing" "$DATA_FILE"
@@ -124,8 +131,8 @@ paired_families() {
 wallpaper_source() {
   local family="${1:-}"
   # Check for custom wallpapers: dynamic (family.heic) or split (family-dark/light.ext)
-  for ext in heic jpg png; do
-    if [[ -f "$WALLPAPER_DIR/${family}.${ext}" || -f "$WALLPAPER_DIR/${family}-dark.${ext}" || -f "$WALLPAPER_DIR/${family}-light.${ext}" ]]; then
+  for ext in heic jpg png webp; do
+    if [[ -f "$WALLPAPER_DIR/${family}.${ext}" || -f "$WALLPAPER_DIR/${family}-dark.${ext}" || -f "$WALLPAPER_DIR/${family}-light.${ext}" || -f "$WALLPAPER_DIR/${family}-0.${ext}" ]]; then
       echo "Custom"
       return
     fi

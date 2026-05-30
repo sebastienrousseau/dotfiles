@@ -30,7 +30,7 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
-DOT_BIN="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT_BIN="$REPO_ROOT/bin/dot"
 
 # Tools dispatcher arms — read-only and `--help` probes.
 for cmd in "tools" "tools --help" \

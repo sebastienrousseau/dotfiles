@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-TARGET="$REPO_ROOT/dot_config/nvim/lua/config/lazy.lua"
+TARGET="$REPO_ROOT/defaults/dot_config/nvim/lua/config/lazy.lua"
 
 test_start "nvim_lazy_exists"
 assert_file_exists "$TARGET" "lazy.lua should exist"

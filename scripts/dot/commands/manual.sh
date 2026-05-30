@@ -16,8 +16,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../lib/utils.sh
-source "$SCRIPT_DIR/../lib/utils.sh"
+# shellcheck source=../../../lib/dot/utils.sh
+source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 
 MANUAL_URL="${DOTFILES_MANUAL_URL:-https://sebastienrousseau.github.io/dotfiles/manual}"
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/manual"
@@ -66,7 +66,7 @@ resolve_source() {
       echo "$src_dir/$fname"
       return 0
     fi
-    ui_err "manual" "local build not found at $src_dir/$fname — run bash scripts/docs/build-manual.sh"
+    ui_err "manual" "local build not found at $src_dir/$fname — run bash tools/docs/build-manual.sh"
     return 1
   fi
 

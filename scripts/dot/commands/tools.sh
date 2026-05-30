@@ -6,8 +6,8 @@
 set -euo pipefail
 
 _TOOLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../lib/utils.sh
-source "$_TOOLS_DIR/../lib/utils.sh"
+# shellcheck source=../../../lib/dot/utils.sh
+source "$_TOOLS_DIR/../../../lib/dot/utils.sh"
 # shellcheck source=aliases.sh
 source "$_TOOLS_DIR/aliases.sh"
 
@@ -348,6 +348,16 @@ cmd_log_rotate() {
 }
 
 cmd_env_mise() {
+  # `dot env emit` is a separate sub-handler — it doesn't need mise
+  # at command-time, only when actually invoked (the script checks).
+  if [[ "${1:-}" == "emit" ]]; then
+    shift
+    # shellcheck source=./env-emit.sh
+    source "$(require_source_dir)/scripts/dot/commands/env-emit.sh"
+    dot_env_emit "$@"
+    return $?
+  fi
+
   if ! has_command mise; then
     ui_err "mise not installed (required for dot env)"
     exit 1
@@ -425,7 +435,7 @@ cmd_env_mise() {
 
 cmd_profile() {
   local data_file
-  data_file="$(resolve_source_dir)/.chezmoidata.toml"
+  data_file="$(resolve_chezmoi_source_dir)/.chezmoidata.toml"
   if [[ ! -f "$data_file" ]]; then
     die ".chezmoidata.toml not found"
   fi

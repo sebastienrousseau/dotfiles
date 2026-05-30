@@ -34,7 +34,7 @@ cov_setup_sandbox() {
   # or $CHEZMOI_SOURCE_DIR; without this, they bail rc=1 within the
   # first dozen lines and we never measure the dispatch / parse /
   # function bodies. Others source helper libs via hardcoded
-  # `$HOME/.dotfiles/scripts/dot/lib/...` paths and fail under
+  # `$HOME/.dotfiles/lib/dot/...` paths and fail under
   # `set -e` if those don't exist.
   #
   # We solve both by symlinking $HOME/.dotfiles → the real repo root.
@@ -630,9 +630,17 @@ cov_exercise_functions_file() {
       manage-secrets | executable_update | wallpaper-rotate | \
       heal | heal-tools | rollback | restore | apply-gnome-theme | \
       install-catppuccin-themes | switch | \
-      executable_ai_core | executable_dot-bootstrap | ai-update | \
+      executable_ai_core | executable_dot-bootstrap | dot-bootstrap | ai-update | \
       executable_ai-update | enforce-policies | ssh-cert | firewall | \
-      secrets_provider | secrets-provider)
+      secrets_provider | secrets-provider | \
+      diagnostics | validate-examples | verify)
+      # diagnostics.sh dispatches into `dot doctor`-style audits that
+      # walk the package managers — even with $tmpfile args, the
+      # internal cmd_doctor / cmd_perf paths spawn expensive
+      # subprocesses that overrun the 60s budget under parallel load.
+      # validate-examples and verify enumerate the whole repo (find +
+      # bash -n on hundreds of scripts) and hit the same wall.
+      # Script-mode exercise already covers their --help paths.
       # Scripts whose internal functions take a "version" or "file
       # path" arg and WRITE to repo files (README.md, install.sh,
       # CHANGELOG.md, etc.). Passing the helper's `$tmpfile` to
@@ -684,9 +692,10 @@ cov_exercise_functions_file() {
   esac
   set +e
 
-  local tmpfile tmpdir
+  local tmpfile tmpdir stderr_log
   tmpdir=$(mktemp -d -t cov-fn.XXXXXX)
   tmpfile="$tmpdir/sample.txt"
+  stderr_log="$tmpdir/stderr.log"
   echo "sample" >"$tmpfile"
 
   test_start "${label}_functions_exercised"
@@ -768,11 +777,26 @@ cov_exercise_functions_file() {
       "$fn" "$tmpfile" </dev/null >/dev/null
     done < <(grep -oE "^[a-zA-Z_][a-zA-Z0-9_]*\s*\(\)" "$1" | sed "s/[[:space:]]*()$//")
     exit 0
-  ' _ "$script" "$tmpfile" </dev/null
+  ' _ "$script" "$tmpfile" </dev/null 2> >(tee -a "$stderr_log" >&2)
   rc=$?
+
+  # DOT_STRICT=1: promote silent-but-loud failures (command-not-found,
+  # unbound variable in nounset mode) to test failures. Default behavior
+  # remains tolerant — these helpers exercise unsourced files where the
+  # noise is expected. Strict mode is for CI runs that want signal over
+  # body-coverage breadth.
+  local strict_violations=""
+  if [[ "${DOT_STRICT:-0}" == "1" && -s "$stderr_log" ]]; then
+    strict_violations="$(grep -E ': (command not found|unbound variable)$' "$stderr_log" | sort -u | head -5)"
+  fi
+
   rm -rf "$tmpdir"
 
-  if [[ "$rc" -ne 124 ]]; then
+  if [[ -n "$strict_violations" ]]; then
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: DOT_STRICT violations in $label:"
+    while IFS= read -r line; do printf '       %s\n' "$line"; done <<<"$strict_violations"
+  elif [[ "$rc" -ne 124 ]]; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
   else

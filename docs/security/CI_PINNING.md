@@ -8,7 +8,7 @@ Every external dependency the CI pipeline consumes must be pinned by
 40-hex commit SHA. The policy applies to:
 
 1. **Third-party actions** — `uses: owner/action@<sha>` (already enforced via Scorecard's `Pinned-Dependencies` check at score ≥ 9).
-2. **Reusable workflows in this repo** — `uses: sebastienrousseau/dotfiles/.github/workflows/reusable-X.yml@<sha>` (added with [#855](https://github.com/sebastienrousseau/dotfiles/issues/855); enforced by `scripts/ci/lint-reusable-pins.sh`).
+2. **Reusable workflows in this repo** — `uses: sebastienrousseau/dotfiles/.github/workflows/reusable-X.yml@<sha>` (added with [#855](https://github.com/sebastienrousseau/dotfiles/issues/855); enforced by `tools/ci/lint-reusable-pins.sh`).
 3. **Container base images** — `FROM image:tag@sha256:<digest>` (closed by [#886](https://github.com/sebastienrousseau/dotfiles/pull/886)).
 4. **Release binaries downloaded at build time** — `curl … && echo "<sha256> ..." | sha256sum -c` (closed by [#888](https://github.com/sebastienrousseau/dotfiles/pull/888)).
 
@@ -50,15 +50,21 @@ uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@maste
 uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@v0.2.501
 ```
 
-The `lint-reusable-pins` job in `ci.yml` runs `scripts/ci/lint-reusable-pins.sh`
+The `lint-reusable-pins` job in `ci.yml` runs `tools/ci/lint-reusable-pins.sh`
 on every workflow change. The lint fails the build on any of the
 rejected forms above.
 
 ## Refreshing pinned SHAs
 
-Reusable workflows in this repo are the only same-repo dependency
-Dependabot doesn't auto-bump. Refresh manually after a change to a
-reusable:
+`bump-reusable-pins.yml` handles this automatically. On every push to
+`master` that touches `.github/workflows/reusable-*.yml`, the bot scans
+caller workflows for stale pins and opens a PR bumping them to the new
+SHA. Signed with `ACTIONS_BOT_SIGNING_KEY` so the resulting commit
+passes `Verify Commit Signatures`.
+
+The manual recipe below stays here as a fallback — for example, if you
+need to bump pins before a merge to master, or if the bot's run failed
+and you want to short-circuit waiting for the next push trigger.
 
 ```sh
 # 1. Land the change to the reusable on master via a PR.
@@ -73,14 +79,15 @@ find .github/workflows -name '*.yml' -exec sed -i.bak -E \
 rm -f .github/workflows/*.bak
 
 # 4. Verify the lint still passes:
-bash scripts/ci/lint-reusable-pins.sh
+bash tools/ci/lint-reusable-pins.sh
 
 # 5. Land the bump on a follow-up PR with a single-purpose commit:
 git commit -am "chore(ci): bump reusable-workflow pins to ${PIN:0:10}"
 ```
 
-We treat the manual bump as **deliberate**, not a chore — it forces
-a reviewer to confirm the new reusable content is intentional.
+Whether bumped by the bot or by hand, the resulting PR runs the full
+CI suite — a reviewer still confirms the new reusable content is
+intentional before merge.
 
 ## Dependabot
 
@@ -108,6 +115,7 @@ merge time.
 ## See also
 
 - [#855](https://github.com/sebastienrousseau/dotfiles/issues/855) — original tracking issue.
-- `scripts/ci/lint-reusable-pins.sh` — the enforcement script.
+- `tools/ci/lint-reusable-pins.sh` — the enforcement script.
 - `tests/unit/ci/test_reusable_pin_lint.sh` — the negative test.
+- `.github/workflows/bump-reusable-pins.yml` — the auto-bump bot.
 - [GitHub: pinning actions to a full-length commit SHA](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions).

@@ -3,7 +3,7 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 # Driver test that invokes the top-level `dot` dispatcher against
 # every read-only subcommand. The point is line coverage for
-# scripts/dot/commands/*.sh + scripts/dot/lib/*.sh which are sourced
+# scripts/dot/commands/*.sh + lib/dot/*.sh which are sourced
 # by `dot` but never executed standalone (they only define functions).
 #
 # Slice 5 of #883: dispatcher-driver coverage. Strictly read-only —
@@ -17,7 +17,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-DOT="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT="$REPO_ROOT/bin/dot"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
@@ -34,7 +34,12 @@ elif command -v gtimeout >/dev/null 2>&1; then
 fi
 TC=()
 if [[ -n "$TIMEOUT_BIN" ]]; then
-  TC=("$TIMEOUT_BIN" --kill-after=2 15)
+  # 60s rather than 15s. `dot doctor` runs a system audit (mise list,
+  # brew list, package introspection, etc.) which routinely brushes
+  # past 15s when 8 test files are running in parallel and share the
+  # same CPU + filesystem cache. 60s aligns with cov_exercise_script
+  # and absorbs the worst observed `dot doctor --json` wall-time.
+  TC=("$TIMEOUT_BIN" --kill-after=2 60)
 fi
 
 # Pre-seed minimal state so commands that read config find sensible

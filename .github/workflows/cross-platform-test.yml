@@ -10,7 +10,7 @@ on:
       - '**.sh'
       - '**.bash'
       - '**.zsh'
-      - '.chezmoitemplates/**'
+      - 'defaults/.chezmoitemplates/**'
       - 'scripts/**'
   push:
     branches: [master]
@@ -18,7 +18,7 @@ on:
       - '**.sh'
       - '**.bash'
       - '**.zsh'
-      - '.chezmoitemplates/**'
+      - 'defaults/.chezmoitemplates/**'
       - 'scripts/**'
   merge_group:
     branches: [master]
@@ -64,7 +64,7 @@ jobs:
 
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -280,8 +280,8 @@ jobs:
           # Test scripts that are likely to have BSD/GNU differences
           test_scripts=(
             "scripts/diagnostics/health.sh"
-            "scripts/dot/lib/ui.sh"
-            "scripts/dot/lib/utils.sh"
+            "lib/dot/ui.sh"
+            "lib/dot/utils.sh"
           )
 
           for script in "${test_scripts[@]}"; do
@@ -306,7 +306,7 @@ jobs:
     if: always()
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 

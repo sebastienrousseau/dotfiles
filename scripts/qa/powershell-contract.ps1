@@ -16,7 +16,7 @@ $ErrorActionPreference = 'Stop'
 $Failures = New-Object System.Collections.Generic.List[string]
 
 $RepoRoot = if ($env:GITHUB_WORKSPACE) { $env:GITHUB_WORKSPACE } else { (Get-Location).Path }
-$ProfileSrc = Join-Path $RepoRoot 'dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl'
+$ProfileSrc = Join-Path $RepoRoot 'defaults/dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl'
 
 if (-not (Test-Path $ProfileSrc)) {
     Write-Output "FAIL: profile source not found at $ProfileSrc"

@@ -32,7 +32,7 @@ The trust anchor is the signer's public key published in `~/.ssh/allowed_signers
 
 ### Verified Chezmoi Installer
 
-The `install.sh` script prefers `scripts/ci/install-chezmoi-verified.sh`, which:
+The `install.sh` script prefers `tools/ci/install-chezmoi-verified.sh`, which:
 
 1. Downloads chezmoi from the upstream release URL
 2. Verifies the SHA256 checksum against a hardcoded, version-pinned value

@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-TMPL_FILE="$REPO_ROOT/dot_config/shell/00-container-detect.sh"
+TMPL_FILE="$REPO_ROOT/defaults/dot_config/shell/00-container-detect.sh"
 
 if [[ ! -f "$TMPL_FILE" ]]; then
   echo "SKIP: 00-container-detect.sh not found at $TMPL_FILE"

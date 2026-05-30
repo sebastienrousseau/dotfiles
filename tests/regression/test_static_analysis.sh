@@ -261,7 +261,7 @@ while IFS= read -r f; do
       failures=$((failures + 1))
     fi
   fi
-done < <(find "$REPO_ROOT/dot_local/bin" -name "executable_*" -type f 2>/dev/null)
+done < <(find "$REPO_ROOT/defaults/dot_local/bin" -name "executable_*" -type f 2>/dev/null)
 assert_equals "0" "$failures" "all dot_local/bin executables must pass bash -n"
 
 # ═══════════════════════════════════════════════════════════════
@@ -285,7 +285,7 @@ while IFS= read -r f; do
     printf '    echo -e in: %s\n' "$(basename "$f")"
     failures=$((failures + 1))
   fi
-done < <(find "$REPO_ROOT/dot_local/bin" -name "executable_*" -type f 2>/dev/null)
+done < <(find "$REPO_ROOT/defaults/dot_local/bin" -name "executable_*" -type f 2>/dev/null)
 assert_equals "0" "$failures" "no bin scripts use echo -e (use printf instead)"
 
 # ═══════════════════════════════════════════════════════════════
@@ -327,7 +327,7 @@ while IFS= read -r f; do
     printf '    missing shebang: %s\n' "$(basename "$f")"
     failures=$((failures + 1))
   fi
-done < <(find "$REPO_ROOT/dot_local/bin" -name "executable_*" -type f -not -path "*__pycache__*" 2>/dev/null)
+done < <(find "$REPO_ROOT/defaults/dot_local/bin" -name "executable_*" -type f -not -path "*__pycache__*" 2>/dev/null)
 assert_equals "0" "$failures" "all bin executables must have a shebang line"
 
 # ═══════════════════════════════════════════════════════════════
@@ -588,11 +588,11 @@ assert_equals "0" "$failures" "test files should use [[ ]] not [ ]"
 
 test_start "dot_cli_syntax"
 dot_result=0
-bash -n "$REPO_ROOT/dot_local/bin/executable_dot" >/dev/null 2>&1 || dot_result=1
+bash -n "$REPO_ROOT/bin/dot" >/dev/null 2>&1 || dot_result=1
 assert_equals "0" "$dot_result" "dot CLI must pass bash -n"
 
 test_start "dot_cli_has_set_euo"
-assert_file_contains "$REPO_ROOT/dot_local/bin/executable_dot" "set -e" "dot CLI must use set -e"
+assert_file_contains "$REPO_ROOT/bin/dot" "set -e" "dot CLI must use set -e"
 
 # ═══════════════════════════════════════════════════════════════
 # 27. ASSERTION/FRAMEWORK FILES — must be valid
@@ -705,7 +705,7 @@ while IFS= read -r f; do
     printf '    echo -e in alias: %s\n' "$(basename "$f")"
     failures=$((failures + 1))
   fi
-done < <(find "$REPO_ROOT/.chezmoitemplates/aliases" -name "*.sh" -type f 2>/dev/null)
+done < <(find "$REPO_ROOT/defaults/.chezmoitemplates/aliases" -name "*.sh" -type f 2>/dev/null)
 assert_equals "0" "$failures" "no alias files use echo -e (use printf instead)"
 
 test_start "no_echo_e_in_functions"
@@ -715,7 +715,7 @@ while IFS= read -r f; do
     printf '    echo -e in function: %s\n' "$(basename "$f")"
     failures=$((failures + 1))
   fi
-done < <(find "$REPO_ROOT/.chezmoitemplates/functions" -name "*.sh" -type f 2>/dev/null)
+done < <(find "$REPO_ROOT/defaults/.chezmoitemplates/functions" -name "*.sh" -type f 2>/dev/null)
 assert_equals "0" "$failures" "no function files use echo -e (use printf instead)"
 
 # ═══════════════════════════════════════════════════════════════

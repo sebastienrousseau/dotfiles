@@ -9,7 +9,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-UI_FILE="$REPO_ROOT/scripts/dot/lib/ui.sh"
+UI_FILE="$REPO_ROOT/lib/dot/ui.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

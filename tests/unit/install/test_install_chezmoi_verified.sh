@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
-# Negative + positive tests for scripts/ci/install-chezmoi-verified.sh.
+# Negative + positive tests for tools/ci/install-chezmoi-verified.sh.
 # Confirms the SHA256 verification step actually catches a tampered
 # tarball (the only thing standing between a user and an arbitrary
 # binary if get.chezmoi.io / the GitHub CDN is compromised).
@@ -17,7 +17,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 # shellcheck source=../../framework/assertions.sh
 source "$REPO_ROOT/tests/framework/assertions.sh"
 
-INSTALLER="$REPO_ROOT/scripts/ci/install-chezmoi-verified.sh"
+INSTALLER="$REPO_ROOT/tools/ci/install-chezmoi-verified.sh"
 
 # -----------------------------------------------------------------------------
 # Structural

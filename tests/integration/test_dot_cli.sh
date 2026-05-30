@@ -7,7 +7,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../framework/assertions.sh"
 
-DOT_CLI="$REPO_ROOT/dot_local/bin/executable_dot"
+DOT_CLI="$REPO_ROOT/bin/dot"
 
 # ── dot CLI existence and structure ──────────────────────────────
 

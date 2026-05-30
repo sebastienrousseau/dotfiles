@@ -36,7 +36,7 @@ jobs:
       packages: write   # push image to ghcr.io
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -45,7 +45,7 @@ jobs:
 
       - name: Login to GHCR
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@9f4a8ea54ed9055d5f86c993e1f2ffa674f98344 # v4.1.0
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.1.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}

@@ -7,7 +7,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-SCRIPT_FILE="$REPO_ROOT/dot_local/bin/executable_dot-theme-sync"
+SCRIPT_FILE="$REPO_ROOT/bin/dot-theme-sync"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

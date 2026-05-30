@@ -10,7 +10,7 @@ source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 source "$SCRIPT_DIR/../../framework/property_testing.sh"
 
 # Source the function under test
-FUNC_FILE="$REPO_ROOT/.chezmoitemplates/functions/misc/prependpath.sh"
+FUNC_FILE="$REPO_ROOT/defaults/.chezmoitemplates/functions/misc/prependpath.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

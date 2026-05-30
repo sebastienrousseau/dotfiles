@@ -23,7 +23,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 # shellcheck source=../../framework/assertions.sh
 source "$REPO_ROOT/tests/framework/assertions.sh"
 
-PROFILE="$REPO_ROOT/dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl"
+PROFILE="$REPO_ROOT/defaults/dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl"
 CONTRACT="$REPO_ROOT/scripts/qa/powershell-contract.ps1"
 
 # -----------------------------------------------------------------------------

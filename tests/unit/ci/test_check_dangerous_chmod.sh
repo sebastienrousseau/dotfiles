@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # shellcheck disable=SC1090,SC1091,SC2034
-# Tests for scripts/ci/check-dangerous-chmod.sh — blocks any
+# Tests for tools/ci/check-dangerous-chmod.sh — blocks any
 # `chmod 777` / `chmod 666` from landing in shell sources.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -9,13 +9,13 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-SCRIPT_FILE="$REPO_ROOT/scripts/ci/check-dangerous-chmod.sh"
+SCRIPT_FILE="$REPO_ROOT/tools/ci/check-dangerous-chmod.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
 test_start "script_exists"
-assert_file_exists "$SCRIPT_FILE" "scripts/ci/check-dangerous-chmod.sh must exist"
+assert_file_exists "$SCRIPT_FILE" "tools/ci/check-dangerous-chmod.sh must exist"
 
 test_start "script_valid_syntax"
 if bash -n "$SCRIPT_FILE" 2>/dev/null; then

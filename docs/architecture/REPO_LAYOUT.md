@@ -14,7 +14,7 @@ For naming conventions (file prefixes, run-script numbering tiers), see
 [`../NAMING_CONVENTIONS.md`](../NAMING_CONVENTIONS.md). For the broader
 architectural rationale (philosophy, startup model, flake strategy), see
 [`ARCHITECTURE.md`](ARCHITECTURE.md). For the configuration-management
-strategy at a higher level, see [`../../CONFIG_STRATEGY.md`](../../CONFIG_STRATEGY.md).
+strategy at a higher level, see [`../CONFIG_STRATEGY.md`](../CONFIG_STRATEGY.md).
 
 ---
 
@@ -85,7 +85,7 @@ exist on purpose and don't overlap:
 |-------------------------------|-----------------------|------------------------------------------------------------------|-------------------------------|
 | `dot_claude/CLAUDE.md`        | `~/.claude/CLAUDE.md` | Claude Code, in **any** cwd on this machine                      | Personal, cross-project       |
 | `CLAUDE.md` (repo root)       | Not deployed          | Claude Code, when cwd is **this** repo                           | Repo-scoped guidance          |
-| `OPENCODE.md` (repo root)     | Not deployed          | OpenCode CLI, when cwd is **this** repo                          | Repo-scoped guidance (mirror) |
+| `docs/OPENCODE.md`            | Not deployed          | OpenCode CLI, when cwd is **this** repo                          | Repo-scoped guidance (mirror) |
 | `.claude/settings.local.json` | Not deployed, **not tracked** | Claude Code                                                     | Per-machine permission allowlist |
 
 Each of the three tracked files carries a header comment explaining its
@@ -143,11 +143,11 @@ the repo itself.
 
 | Subdir                                    | Purpose                                                         |
 |-------------------------------------------|-----------------------------------------------------------------|
-| `scripts/ci/`                             | CI helpers (`check-copyright-headers.sh`, `install-chezmoi-verified.sh`, `validate-ci-config.sh`) |
+| `tools/ci/`                             | CI helpers (`check-copyright-headers.sh`, `install-chezmoi-verified.sh`, `validate-ci-config.sh`) |
 | `scripts/dot/commands/`                   | Subcommand implementations for the `dot` CLI                    |
-| `scripts/docs/`                           | Manual build pipeline (`build-manual.sh`, `check-manual.sh`)    |
+| `tools/docs/`                           | Manual build pipeline (`build-manual.sh`, `check-manual.sh`)    |
 | `scripts/theme/`                          | K-Means CIELAB theme engine + HEIC merge/convert                |
-| `scripts/ops/`, `scripts/maintenance/`, `scripts/release/` | Operator tooling                                        |
+| `scripts/ops/`, `tools/maintenance/`, `tools/release/` | Operator tooling                                        |
 | `scripts/diagnostics/`, `scripts/qa/`, `scripts/security/`, `scripts/secrets/` | Domain-scoped scripts                          |
 | `scripts/fonts/`, `scripts/demo/`, `scripts/git-hooks/`, `scripts/tools/`, `scripts/tuning/`, `scripts/lib/` | Supporting scripts                                          |
 | `scripts/uninstall.sh`, `scripts/version-sync.sh` | Top-level ops entrypoints                                 |
@@ -199,7 +199,7 @@ braces.
 | `templates/chezmoi-data/`, `templates/projects/` | Starter scaffolding for new machines / new projects                     |
 | `examples/`                               | 14 standalone demo scripts used by the manual and tutorials                  |
 | `CHANGELOG.md`, `LICENSE`, `README.md`    | Standard                                                                     |
-| `CONFIG_STRATEGY.md`                      | High-level "how configuration management works here" overview                |
+| `docs/CONFIG_STRATEGY.md`                 | High-level "how configuration management works here" overview                |
 | `.gitattributes`, `.gitignore`, `.gitleaksignore`, `.editorconfig`, `.secrets.baseline`, `.sops.yaml`, `.luacheckrc` | Repo-level tool configs                                                    |
 | `.pre-commit-config.yaml` → `config/pre-commit-config.yaml` | Symlink so `pre-commit` finds the canonical config                       |
 
@@ -213,7 +213,7 @@ version control. If one of them ever shows up in `git status`, check the
 
 | Path                     | Source                                                                       |
 |--------------------------|------------------------------------------------------------------------------|
-| `_build/`                | Output of `scripts/docs/build-manual.sh`                                     |
+| `_build/`                | Output of `tools/docs/build-manual.sh`                                     |
 | `.pnpm-store/`           | pnpm's content-addressable store (should never appear here)                  |
 | `.claude/`               | Claude Code per-machine state (`settings.local.json` permission allowlists)  |
 | `node_modules/`          | Node dependency trees from repo-local scripts                                |
@@ -229,7 +229,7 @@ A quick decision tree for common cases:
 
 - **New app config that lives under `~/.config/<app>/`** → `dot_config/<app>/` (see `docs/NAMING_CONVENTIONS.md` → "Adding New Modules").
 - **New user-facing CLI script** → `dot_local/bin/executable_<name>`.
-- **New `dot` subcommand** → implementation in `scripts/dot/commands/<name>.sh`, routing in `dot_local/bin/executable_dot`.
+- **New `dot` subcommand** → implementation in `scripts/dot/commands/<name>.sh`, routing in `bin/dot`.
 - **New repo-only automation** (CI helper, maintenance task, release step) → `scripts/<domain>/<name>.sh`.
 - **New test** → `tests/unit/<domain>/test_<feature>.sh` (follow `test_{domain}_{feature}.sh` naming).
 - **New doc** → pick the narrowest of `docs/architecture/`, `docs/reference/`, `docs/guides/`, `docs/operations/`, `docs/security/`.

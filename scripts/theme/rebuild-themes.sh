@@ -15,7 +15,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 EXTRACT_SCRIPT="$SCRIPT_DIR/extract-theme.py"
 DOTFILES_DIR="${HOME}/.dotfiles"
-THEMES_FILE="$DOTFILES_DIR/.chezmoidata/themes.toml"
+
+# Descend into the chezmoi source subdir when .chezmoiroot is present (v0.2.503+)
+CHEZMOI_SRC="$DOTFILES_DIR"
+if [[ -f "$DOTFILES_DIR/.chezmoiroot" ]]; then
+  _sub="$(head -1 "$DOTFILES_DIR/.chezmoiroot" | tr -d '[:space:]')"
+  [[ -n "$_sub" && -d "$DOTFILES_DIR/$_sub" ]] && CHEZMOI_SRC="$DOTFILES_DIR/$_sub"
+fi
+THEMES_FILE="$CHEZMOI_SRC/.chezmoidata/themes.toml"
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/themes"
 CUSTOM_DIR="${DOTFILES_WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
 

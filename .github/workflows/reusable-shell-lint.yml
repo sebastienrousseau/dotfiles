@@ -43,10 +43,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
-        with:
-          egress-policy: audit
+      # harden-runner removed: audit-only mode was crashing the runner
+      # agent (armour lockdown) on ubuntu-latest, preventing the lint
+      # step from ever starting. Other workflows retain harden-runner.
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
@@ -93,7 +92,7 @@ jobs:
         # docs/security/SHELL_EXEMPTIONS.md for the contract.
         run: |
           set -euo pipefail
-          bash scripts/ci/check-shell-preamble.sh
+          bash tools/ci/check-shell-preamble.sh
 
       - name: shfmt
         if: inputs.run_shfmt == true
@@ -103,5 +102,16 @@ jobs:
             echo "No shfmt targets provided, skipping."
             exit 0
           fi
+          # Enable ** recursion (globstar) and drop unmatched globs
+          # (nullglob) so callers can pass `dir/**/*.sh` without bash
+          # leaving the literal glob in place when nothing matches at
+          # the shallow level — shfmt would then fail on lstat.
+          shopt -s globstar nullglob
+          files=()
           # shellcheck disable=SC2086
-          shfmt -d -i 2 -ci ${{ inputs.shfmt_targets }}
+          for f in ${{ inputs.shfmt_targets }}; do files+=("$f"); done
+          if [[ ${#files[@]} -eq 0 ]]; then
+            echo "No shfmt targets matched, skipping."
+            exit 0
+          fi
+          shfmt -d -i 2 -ci "${files[@]}"

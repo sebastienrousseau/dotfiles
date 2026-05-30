@@ -39,9 +39,9 @@ readonly REPO_ROOT
 readonly ENV_TEMPLATE="${REPO_ROOT}/.github/security-policies/environment-template.env"
 readonly ENV_LOCAL="${REPO_ROOT}/.env.local"
 
-# shellcheck source=../dot/lib/ui.sh
+# shellcheck source=../../lib/dot/ui.sh
 # shellcheck disable=SC1091
-source "${SCRIPT_DIR}/../dot/lib/ui.sh"
+source "${SCRIPT_DIR}/../../lib/dot/ui.sh"
 ui_init
 
 # Help text

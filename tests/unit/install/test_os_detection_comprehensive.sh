@@ -23,7 +23,7 @@ test_macos_detection() {
   # Define mocks locally to override platform.sh if it was already sourced
   dot_is_wsl() { return 1; }
 
-  source "$REPO_ROOT/scripts/dot/lib/platform.sh"
+  source "$REPO_ROOT/lib/dot/platform.sh"
 
   local platform_id
   platform_id=$(dot_platform_id)
@@ -42,7 +42,7 @@ test_linux_detection() {
 
   dot_is_wsl() { return 1; }
 
-  source "$REPO_ROOT/scripts/dot/lib/platform.sh"
+  source "$REPO_ROOT/lib/dot/platform.sh"
 
   local platform_id
   platform_id=$(dot_platform_id)
@@ -61,7 +61,7 @@ test_wsl_detection() {
 
   dot_is_wsl() { return 0; }
 
-  source "$REPO_ROOT/scripts/dot/lib/platform.sh"
+  source "$REPO_ROOT/lib/dot/platform.sh"
 
   local platform_id
   platform_id=$(dot_platform_id)
@@ -84,7 +84,7 @@ test_path_translation() {
   echo "if [ \"\$1\" = \"-u\" ]; then echo \"/mnt/c/Users\"; else echo \"C:\\\\Users\"; fi" >>"$MOCK_BIN_DIR/wslpath"
   chmod +x "$MOCK_BIN_DIR/wslpath"
 
-  source "$REPO_ROOT/scripts/dot/lib/platform.sh"
+  source "$REPO_ROOT/lib/dot/platform.sh"
 
   local unix_path
   unix_path=$(dot_path_to_unix "C:\\Users")
@@ -107,7 +107,7 @@ test_open_path_dispatch() {
   echo "echo \"opened \$@\"" >>"$MOCK_BIN_DIR/open"
   chmod +x "$MOCK_BIN_DIR/open"
 
-  source "$REPO_ROOT/scripts/dot/lib/platform.sh"
+  source "$REPO_ROOT/lib/dot/platform.sh"
 
   local output
   output=$(dot_open_path "test.txt")

@@ -11,7 +11,7 @@ AGENT_SCRIPT="$REPO_ROOT/scripts/dot/commands/agent.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
-PROFILES_FILE="$REPO_ROOT/dot_config/dotfiles/agent-profiles.json"
+PROFILES_FILE="$REPO_ROOT/defaults/dot_config/dotfiles/agent-profiles.json"
 
 test_start "delegation_config_exists"
 if jq -e '.delegation' "$PROFILES_FILE" >/dev/null 2>&1; then

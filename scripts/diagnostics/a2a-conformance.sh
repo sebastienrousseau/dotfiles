@@ -7,8 +7,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 
-# shellcheck source=../dot/lib/ui.sh
-source "$SCRIPT_DIR/../dot/lib/ui.sh"
+# shellcheck source=../../lib/dot/ui.sh
+source "$SCRIPT_DIR/../../lib/dot/ui.sh"
 
 JSON_MODE=0
 STRICT_MODE=0
@@ -35,8 +35,8 @@ command -v jq >/dev/null 2>&1 || {
 
 a2a_card="$REPO_ROOT/.well-known/agent-card.json"
 legacy_doc="$REPO_ROOT/.well-known/agent.json"
-internal_card="$REPO_ROOT/dot_config/dotfiles/agent-card.json"
-agent_profiles="$REPO_ROOT/dot_config/dotfiles/agent-profiles.json"
+internal_card="$REPO_ROOT/defaults/dot_config/dotfiles/agent-card.json"
+agent_profiles="$REPO_ROOT/defaults/dot_config/dotfiles/agent-profiles.json"
 status="healthy"
 issues=()
 

@@ -6,10 +6,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../lib/utils.sh
-source "$SCRIPT_DIR/../lib/utils.sh"
-# shellcheck source=../lib/log.sh
-source "$SCRIPT_DIR/../lib/log.sh"
+# shellcheck source=../../../lib/dot/utils.sh
+source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
+# shellcheck source=../../../lib/dot/log.sh
+source "$SCRIPT_DIR/../../../lib/dot/log.sh"
 
 dot_ui_command_banner "Fleet" "${1:-}"
 
@@ -18,7 +18,7 @@ _FLEET_EVENTS_FILE="$_FLEET_STATE_DIR/events.jsonl"
 
 _fleet_enabled() {
   local data_file
-  data_file="$(resolve_source_dir)/.chezmoidata.toml"
+  data_file="$(resolve_chezmoi_source_dir)/.chezmoidata.toml"
   if [[ -f "$data_file" ]] && grep -q '^enabled = true' "$data_file" 2>/dev/null; then
     return 0
   fi
@@ -27,7 +27,7 @@ _fleet_enabled() {
 
 _fleet_node_id() {
   local data_file node_id=""
-  data_file="$(resolve_source_dir)/.chezmoidata.toml"
+  data_file="$(resolve_chezmoi_source_dir)/.chezmoidata.toml"
   if [[ -f "$data_file" ]]; then
     node_id="$(sed -n 's/^node_id = "\(.*\)"/\1/p' "$data_file" | head -1)"
   fi
@@ -39,7 +39,7 @@ _fleet_node_id() {
 
 _fleet_namespace() {
   local data_file ns=""
-  data_file="$(resolve_source_dir)/.chezmoidata.toml"
+  data_file="$(resolve_chezmoi_source_dir)/.chezmoidata.toml"
   if [[ -f "$data_file" ]]; then
     ns="$(sed -n 's/^namespace = "\(.*\)"/\1/p' "$data_file" | head -1)"
   fi
@@ -67,7 +67,7 @@ _fleet_emit_event() {
   # Forward to endpoint if configured
   local endpoint=""
   local data_file
-  data_file="$(resolve_source_dir)/.chezmoidata.toml"
+  data_file="$(resolve_chezmoi_source_dir)/.chezmoidata.toml"
   if [[ -f "$data_file" ]]; then
     endpoint="$(sed -n 's/^endpoint = "\(.*\)"/\1/p' "$data_file" | head -1)"
   fi
@@ -271,7 +271,7 @@ cmd_fleet_namespace() {
       ui_ok "Active" "$ns"
 
       local data_file
-      data_file="$(resolve_source_dir)/.chezmoidata.toml"
+      data_file="$(resolve_chezmoi_source_dir)/.chezmoidata.toml"
       if [[ -f "$data_file" ]]; then
         echo ""
         ui_section "Available Namespaces"
@@ -289,7 +289,7 @@ cmd_fleet_namespace() {
       [[ -n "$new_ns" ]] || die "Usage: dot fleet namespace set <name>"
       validate_name "$new_ns" "namespace"
       local data_file
-      data_file="$(resolve_source_dir)/.chezmoidata.toml"
+      data_file="$(resolve_chezmoi_source_dir)/.chezmoidata.toml"
       if grep -q "^namespace = " "$data_file" 2>/dev/null; then
         # Atomic write: render into a tempfile + mv so concurrent
         # `dot fleet namespace set` callers can't corrupt the TOML.
@@ -322,7 +322,8 @@ cmd_fleet_enforce() {
   shift || true
 
   local repo_root
-  repo_root="$(resolve_source_dir)"
+  repo_root="$(resolve_chezmoi_source_dir)"
+  [[ -z "$repo_root" ]] && repo_root="$(resolve_source_dir)"
   local profiles_file="$repo_root/dot_config/dotfiles/agent-profiles.json"
 
   case "$subcommand" in

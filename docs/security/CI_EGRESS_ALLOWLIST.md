@@ -101,7 +101,7 @@ This job deliberately runs `curl ... | tar -xJf -` against the
 shellcheck release. Justified because the job is `continue-on-error: true`
 and is opt-in (manual or scheduled). Future hardening: download the
 release asset, verify a known hash, then exec — same shape as
-`scripts/ci/install-chezmoi-verified.sh`.
+`tools/ci/install-chezmoi-verified.sh`.
 
 ## Updating this page
 

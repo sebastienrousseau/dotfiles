@@ -9,7 +9,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-UTILS_FILE="$REPO_ROOT/scripts/dot/lib/utils.sh"
+UTILS_FILE="$REPO_ROOT/lib/dot/utils.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

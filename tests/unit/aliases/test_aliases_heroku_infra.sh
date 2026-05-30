@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-ALIAS_FILE="$REPO_ROOT/.chezmoitemplates/aliases/heroku/heroku-infra.aliases.sh"
+ALIAS_FILE="$REPO_ROOT/defaults/.chezmoitemplates/aliases/heroku/heroku-infra.aliases.sh"
 
 test_start "heroku_infra_file_exists"
 assert_file_exists "$ALIAS_FILE" "heroku-infra.aliases.sh should exist"
