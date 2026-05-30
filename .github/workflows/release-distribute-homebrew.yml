@@ -166,10 +166,19 @@ jobs:
 
       - name: Clone homebrew-tap repository
         id: clone-tap
+        env:
+          # GITHUB_TOKEN is scoped to this repo only — it cannot push to
+          # the tap. Prefer a fine-grained PAT (contents:write + pull-requests:write
+          # on the tap repo). Falls back to GITHUB_TOKEN for cloning a public
+          # tap, but the later `git push` will fail without the PAT.
+          PUSH_TOKEN: ${{ secrets.DISTRIBUTION_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
+          if [[ -z "${{ secrets.DISTRIBUTION_PUSH_TOKEN }}" ]]; then
+            echo "::warning::DISTRIBUTION_PUSH_TOKEN secret not set — push to homebrew-tap will fail with a 403. Create a fine-grained PAT with contents:write + pull-requests:write on sebastienrousseau/homebrew-tap and add it as DISTRIBUTION_PUSH_TOKEN."
+          fi
           TAP_REPO="sebastienrousseau/homebrew-tap"
-          git clone "https://${{ secrets.GITHUB_TOKEN }}@github.com/${TAP_REPO}.git" homebrew-tap
+          git clone "https://${PUSH_TOKEN}@github.com/${TAP_REPO}.git" homebrew-tap
           # Detect the default branch (main vs master) so the PR targets
           # the right base regardless of how the tap is initialised.
           cd homebrew-tap
@@ -224,7 +233,8 @@ jobs:
 
       - name: Open Pull Request to homebrew-tap
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # PR creation also needs cross-repo write — same PAT as the push.
+          GH_TOKEN: ${{ secrets.DISTRIBUTION_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           VERSION="${{ steps.resolve-tag.outputs.version }}"

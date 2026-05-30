@@ -160,10 +160,20 @@ jobs:
 
       - name: Clone scoop-bucket repository
         id: clone-bucket
+        env:
+          # GITHUB_TOKEN is scoped to this repo only — it cannot push to
+          # the bucket. Prefer a fine-grained PAT (contents:write +
+          # pull-requests:write on the bucket repo). Falls back to
+          # GITHUB_TOKEN for cloning a public bucket, but the later
+          # `git push` will fail without the PAT.
+          PUSH_TOKEN: ${{ secrets.DISTRIBUTION_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
+          if [[ -z "${{ secrets.DISTRIBUTION_PUSH_TOKEN }}" ]]; then
+            echo "::warning::DISTRIBUTION_PUSH_TOKEN secret not set — push to scoop-bucket will fail with a 403. Create a fine-grained PAT with contents:write + pull-requests:write on sebastienrousseau/scoop-bucket and add it as DISTRIBUTION_PUSH_TOKEN."
+          fi
           BUCKET_REPO="sebastienrousseau/scoop-bucket"
-          git clone "https://${{ secrets.GITHUB_TOKEN }}@github.com/${BUCKET_REPO}.git" scoop-bucket
+          git clone "https://${PUSH_TOKEN}@github.com/${BUCKET_REPO}.git" scoop-bucket
           # Detect the default branch (main vs master) so the PR targets
           # the right base regardless of how the bucket is initialised.
           cd scoop-bucket
@@ -218,7 +228,8 @@ jobs:
 
       - name: Open Pull Request to scoop-bucket
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # PR creation also needs cross-repo write — same PAT as the push.
+          GH_TOKEN: ${{ secrets.DISTRIBUTION_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           VERSION="${{ steps.resolve-tag.outputs.version }}"
