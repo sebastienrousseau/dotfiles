@@ -502,7 +502,7 @@ R4 cross-platform agent produced a 10-table audit. Real findings, ranked by what
 | # | Severity | Gap | Concrete close |
 |---|---|---|---|
 | **P1** | High | No `Makefile install` target with `PREFIX`/`DESTDIR` support. Distro packagers have no canonical artefact to package. | Add `Makefile` with `install:` rule copying `bin/dot` to `$(PREFIX)/bin/dot`, man page to `$(PREFIX)/share/man/man1/`, completions to `$(PREFIX)/share/zsh/site-functions/_dot`. |
-| **P2** | High | No Homebrew tap, no AUR `PKGBUILD`, no Scoop manifest. | Publish `sebastienrousseau/homebrew-tap`, `aur/dotfiles-git/PKGBUILD`, `scoop-bucket/dot.json` from CI on tag — single tarball with SHA256 + Cosign-signed bundle. |
+| **P2** | High | No Homebrew tap, no AUR `PKGBUILD`, no Scoop manifest. | Publish `sebastienrousseau/homebrew-tap`, `aur/dot-cli-git/PKGBUILD`, `scoop-bucket/dot.json` from CI on tag — single tarball with SHA256 + Cosign-signed bundle. |
 | **P3** | High | `.devcontainer/Dockerfile:31` still installs unverified `get.chezmoi.io` (the same anti-pattern that gave us H6 in R1). | Replace with the pinned-SHA256 path used in `install-chezmoi-verified.sh`. |
 | **P4** | High | Repo intermingles framework (`scripts/`, `bin/dot`, `install/`) with maintainer's personal `dot_config/` (~80 tools). Packagers must ship both. | Document the framework/user split in a new `FRAMEWORK_STRUCTURE.md`; long-term, move framework code under `framework/` so `Makefile install` skips `dot_config/`. |
 | **P5** | Medium | PowerShell-native parity is bash-bridged for `dot agents`, `dot fleet apply`, `dot theme`. Windows-native users can't run them without WSL. | Native PowerShell ports per `docs/reference/POWERSHELL_PARITY.md` Stub rows; estimated 1-week effort for full top-3. |

@@ -14,7 +14,7 @@ managers.
 | `run_before_cleanup.sh` | active | Pre-apply cleanup hook (chezmoi `run_before_` convention). |
 | `homebrew/dot.rb` | template | Homebrew formula for the `dot` CLI. Bumped per release by `.github/workflows/release-distribute-homebrew.yml` (PR to `sebastienrousseau/homebrew-tap`). |
 | `scoop/dot.json` | template | Scoop manifest for Windows. Bumped per release by `.github/workflows/release-distribute-scoop.yml` (PR to `sebastienrousseau/scoop-bucket`). |
-| `aur/PKGBUILD` | template | Arch User Repository package definition. Bumped per release by `.github/workflows/release-distribute-aur.yml` (push to `ssh://aur@aur.archlinux.org/dotfiles-git.git`). First-time publication requires the AUR package entry to exist (manual web-UI step). |
+| `aur/PKGBUILD` | template | Arch User Repository package definition. Bumped per release by `.github/workflows/release-distribute-aur.yml` (push to `ssh://aur@aur.archlinux.org/dot-cli-git.git`). First-time publication requires the AUR package entry to exist (manual web-UI step). |
 
 ## Bootstrap entrypoint
 
@@ -50,7 +50,7 @@ re-test a specific channel out-of-band.
 4. **`release-distribute-*.yml`** fan out:
    - Homebrew: PR to `sebastienrousseau/homebrew-tap` with the regenerated `dot.rb`.
    - Scoop: PR to `sebastienrousseau/scoop-bucket` with the regenerated `dot.json` (both 64bit + arm64 point at the same zip).
-   - AUR: direct push to `ssh://aur@aur.archlinux.org/dotfiles-git.git` (requires `AUR_SSH_KEY` secret and a pre-existing AUR package entry).
+   - AUR: direct push to `ssh://aur@aur.archlinux.org/dot-cli-git.git` (requires `AUR_SSH_KEY` secret and a pre-existing AUR package entry).
 5. **Verify locally** before announcing:
 
    ```sh

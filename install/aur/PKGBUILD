@@ -10,10 +10,10 @@
 # `sha256sums` is SKIP and source uses the master branch as a
 # placeholder.
 #
-# Publication target: aur.archlinux.org/packages/dotfiles-git
-# Validate via:  paru -S dotfiles-git
+# Publication target: aur.archlinux.org/packages/dot-cli-git
+# Validate via:  paru -S dot-cli-git
 
-pkgname=dotfiles-git
+pkgname=dot-cli-git
 pkgver=0.2.503.r0
 pkgrel=1
 pkgdesc='Declarative dotfiles CLI for macOS, Linux, WSL, and PowerShell (git head)'

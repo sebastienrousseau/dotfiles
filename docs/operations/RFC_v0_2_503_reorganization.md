@@ -193,7 +193,7 @@ Once `bin/dot` is standalone:
 |---------|----------|----------------|
 | Homebrew tap | `dot-${VERSION}-${OS}-${ARCH}.tar.gz` | `brew install sebastienrousseau/tap/dot && dot version` |
 | Scoop bucket | `dot.json` → `dot-${VERSION}-windows-${ARCH}.zip` | `scoop install dot && dot version` |
-| AUR | `dotfiles-git` PKGBUILD building from source | `paru -S dotfiles-git && dot version` |
+| AUR | `dot-cli-git` PKGBUILD building from source | `paru -S dot-cli-git && dot version` |
 | `install.sh` | Same SHA256-verified path as today | `bash install.sh` |
 | Direct tarball | Cosign-signed + SLSA-attested release asset | per `docs/security/VERIFY_RELEASE.md` |
 
