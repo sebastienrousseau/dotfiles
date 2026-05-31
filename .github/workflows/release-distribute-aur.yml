@@ -104,7 +104,35 @@ jobs:
           install -d -m 700 ~/.ssh
           printf '%s\n' "${AUR_SSH_KEY}" > ~/.ssh/aur_ed25519
           chmod 600 ~/.ssh/aur_ed25519
-          ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts 2>/dev/null
+
+          # Pin AUR host keys against the fingerprints published at
+          # https://aur.archlinux.org/ rather than trusting whatever
+          # ssh-keyscan returns on first contact. Scan, compute the
+          # fingerprint of each key, and only accept ones on the
+          # published allow-list — abort if any unexpected key shows up.
+          expected_fps='SHA256:RFzBCUItH9LZS0cKB5UE6ceAYhBD5C8GeOBip8Z11+4
+          SHA256:uTa/0PndEgPZTf76e1DFqXKJEXKsn7m9ivhLQtzGOCI
+          SHA256:5s5cIyReIfNNVGRFdDbe3hdYiI5OelHGpw2rOUud3Q8'
+          scanned=$(mktemp)
+          ssh-keyscan aur.archlinux.org > "$scanned" 2>/dev/null
+          accepted=0
+          while IFS= read -r line; do
+            [[ -z "$line" || "$line" == \#* ]] && continue
+            fp=$(printf '%s\n' "$line" | ssh-keygen -lf - 2>/dev/null | awk '{print $2}')
+            if grep -qFx "$fp" <<<"$expected_fps"; then
+              printf '%s\n' "$line" >> ~/.ssh/known_hosts
+              accepted=$((accepted + 1))
+            else
+              echo "::error::Unexpected AUR host key fingerprint: $fp"
+              exit 1
+            fi
+          done < "$scanned"
+          rm -f "$scanned"
+          if [[ $accepted -eq 0 ]]; then
+            echo "::error::ssh-keyscan returned no AUR host keys"
+            exit 1
+          fi
+
           cat >> ~/.ssh/config << 'EOF'
           Host aur.archlinux.org
             IdentityFile ~/.ssh/aur_ed25519
@@ -113,16 +141,45 @@ jobs:
           EOF
           chmod 600 ~/.ssh/config
 
-      - name: Clone AUR repository
+      - name: Clone or initialise AUR repository
         id: clone-aur
         run: |
           set -euo pipefail
-          if ! git clone ssh://aur@aur.archlinux.org/dot-cli-git.git aur-pkg 2>&1; then
-            echo "::error::First publication: the user must create the AUR package entry via the web UI at https://aur.archlinux.org/packages first"
-            exit 1
+          REPO="ssh://aur@aur.archlinux.org/dot-cli-git.git"
+          # AUR has no separate "register name" step: the first successful
+          # push to ssh://aur@.../PKGNAME.git creates the package iff the
+          # name is free. Three cases to handle:
+          #
+          #  1. Existing package: `git clone` succeeds, working tree has
+          #     prior PKGBUILD/.SRCINFO — straight update.
+          #  2. Empty / previously-deleted package: `git clone` succeeds
+          #     with `warning: You appear to have cloned an empty
+          #     repository.` — no PKGBUILD present. Treat as first publish
+          #     but reuse any retained history (AUR keeps git state for
+          #     deleted packages, and wiki requires a rebase on top).
+          #  3. Brand-new name: `git clone` fails outright — initialise a
+          #     local repo and let the subsequent push create the package.
+          #
+          # A taken-by-someone-else failure still surfaces at push time as
+          # "permission denied: <user>".
+          if git -c init.defaultBranch=master clone "$REPO" aur-pkg 2>/tmp/aur-clone.err; then
+            cat /tmp/aur-clone.err
+            if [[ -f aur-pkg/PKGBUILD ]]; then
+              echo "Cloned existing AUR package (update flow)."
+            else
+              echo "Cloned empty/deleted AUR repo (first-publish on existing slot)."
+            fi
+          else
+            echo "Clone failed — brand-new package. Stderr was:"
+            cat /tmp/aur-clone.err
+            rm -rf aur-pkg
+            mkdir aur-pkg
+            ( cd aur-pkg
+              git init -q -b master
+              git remote add origin "$REPO" )
           fi
 
-      - name: Update PKGBUILD
+      - name: Update PKGBUILD and stage LICENSE
         run: |
           set -euo pipefail
           VERSION="${{ steps.resolve-tag.outputs.version }}"
@@ -132,6 +189,9 @@ jobs:
           cp install/aur/PKGBUILD aur-pkg/PKGBUILD
           sed -i "s/^pkgver=.*/pkgver=${VERSION}/" aur-pkg/PKGBUILD
           sed -i "s/^sha256sums=(.*)$/sha256sums=('${SHA256}')/" aur-pkg/PKGBUILD
+          # AUR submission guidelines recommend a LICENSE file in the
+          # package repo so the licence terms travel with the PKGBUILD.
+          cp LICENSE aur-pkg/LICENSE
           echo "Updated PKGBUILD:"
           cat aur-pkg/PKGBUILD
 
@@ -157,7 +217,11 @@ jobs:
           git config user.name "Sebastien Rousseau"
           git config user.email "sebastian.rousseau@gmail.com"
 
-          git add PKGBUILD .SRCINFO
+          # PKGBUILD + .SRCINFO must be in the same commit (the AUR
+          # post-receive hook rejects pushes where they're out of sync).
+          # LICENSE is committed once and refreshed in case upstream
+          # changes it.
+          git add PKGBUILD .SRCINFO LICENSE
           git commit -m "dot ${VERSION}"
           git push origin master
 

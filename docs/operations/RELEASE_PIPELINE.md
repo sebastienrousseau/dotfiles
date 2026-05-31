@@ -93,7 +93,7 @@ manifest job after late asset uploads picks up the new state and the
 |---|---|---|
 | Homebrew | `sebastienrousseau/homebrew-tap` | Tap repo exists (currently bare README + LICENSE). Workflow creates the `Formula/dot.rb` path on first publish. |
 | Scoop | `sebastienrousseau/scoop-bucket` | Bucket repo exists (currently bare). Workflow creates `bucket/dot.json` on first publish. |
-| AUR | `ssh://aur@aur.archlinux.org/dot-cli-git.git` | **Manual one-time step**: the maintainer must create the package entry via the AUR web UI before the workflow's `git clone` can succeed. The workflow exits with a clear error message on the first run if the repo doesn't exist. |
+| AUR | `ssh://aur@aur.archlinux.org/dot-cli-git.git` | None — AUR has no separate "register" step. On first run, `git clone` either succeeds against an empty repo (deleted-package case) or fails entirely (brand-new name), and the workflow initialises a local repo + pushes either way. AUR creates the slot when the first push succeeds, provided the SSH-authenticated user owns the name (or it's free). |
 
 ## Verifying a release
 
