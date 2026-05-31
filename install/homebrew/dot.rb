@@ -1,25 +1,15 @@
 # typed: false
 # frozen_string_literal: true
 
-# Homebrew formula scaffold for the `dot` CLI from
+# Homebrew formula for the `dot` CLI from
 # https://github.com/sebastienrousseau/dotfiles
 #
-# STATUS: scaffold only. The framework does not yet ship a single-
-# tarball release artefact (the chezmoi-managed `dot_*` prefixed
-# files at the repo root require chezmoi to render). The v0.2.503
-# repo reorganisation (`docs/operations/ROADMAP_V0_2_503.md`)
-# unblocks publication by separating the CLI binary into a
-# `bin/dot` path that can be distributed standalone.
+# This file is the template the release pipeline rewrites per tag:
+# `release-distribute-homebrew.yml` swaps the `url` and `sha256`
+# lines and opens a PR against sebastienrousseau/homebrew-tap.
 #
-# Until then, this file lives here as the target structure so the
-# v0.2.503 PR's reviewer can see exactly what shape the formula
-# needs and can validate it against the Brew-tap publication
-# checklist.
-#
-# Once v0.2.503 ships the standalone-CLI tarball:
-#   1. Publish to sebastienrousseau/homebrew-tap (separate repo)
-#   2. Refresh `sha256` below from the release artefact
-#   3. Verify via:  brew install --build-from-source dot.rb && dot version
+# Verify locally with:
+#   brew install --build-from-source dot.rb && dot version
 
 class Dot < Formula
   desc 'Declarative dotfiles CLI for macOS, Linux, WSL, and PowerShell'

@@ -1,17 +1,4 @@
 {
-  "$comment": [
-    "Scoop manifest scaffold for the `dot` CLI from",
-    "https://github.com/sebastienrousseau/dotfiles",
-    "",
-    "STATUS: scaffold only. The framework does not yet ship a",
-    "single-tarball release artefact (chezmoi-managed root layout).",
-    "The v0.2.503 reorganisation (docs/operations/ROADMAP_V0_2_503.md)",
-    "produces a standalone-CLI tarball that this manifest can",
-    "point at. Until then, the hash/url fields are PLACEHOLDER.",
-    "",
-    "Publication target: sebastienrousseau/scoop-bucket repo.",
-    "Validate via:  scoop install https://raw.githubusercontent.com/sebastienrousseau/scoop-bucket/master/dot.json"
-  ],
   "version": "0.2.503",
   "description": "Declarative dotfiles CLI for macOS, Linux, WSL, and PowerShell.",
   "homepage": "https://github.com/sebastienrousseau/dotfiles",
@@ -23,23 +10,27 @@
   },
   "architecture": {
     "64bit": {
-      "url": "https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.503/dot-0.2.503-windows-amd64.zip",
-      "hash": "sha256:PLACEHOLDER_FILL_ON_v0.2.503_PUBLICATION"
+      "url": "https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.503/dot-0.2.503.zip",
+      "hash": "sha256:PLACEHOLDER_FILL_ON_v0.2.503_PUBLICATION",
+      "extract_dir": "dot-0.2.503"
     },
     "arm64": {
-      "url": "https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.503/dot-0.2.503-windows-arm64.zip",
-      "hash": "sha256:PLACEHOLDER_FILL_ON_v0.2.503_PUBLICATION"
+      "url": "https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.503/dot-0.2.503.zip",
+      "hash": "sha256:PLACEHOLDER_FILL_ON_v0.2.503_PUBLICATION",
+      "extract_dir": "dot-0.2.503"
     }
   },
-  "bin": ["dot.ps1", "dot.cmd"],
+  "bin": ["bin/dot.ps1", "bin/dot.cmd"],
   "checkver": "github",
   "autoupdate": {
     "architecture": {
       "64bit": {
-        "url": "https://github.com/sebastienrousseau/dotfiles/releases/download/v$version/dot-$version-windows-amd64.zip"
+        "url": "https://github.com/sebastienrousseau/dotfiles/releases/download/v$version/dot-$version.zip",
+        "extract_dir": "dot-$version"
       },
       "arm64": {
-        "url": "https://github.com/sebastienrousseau/dotfiles/releases/download/v$version/dot-$version-windows-arm64.zip"
+        "url": "https://github.com/sebastienrousseau/dotfiles/releases/download/v$version/dot-$version.zip",
+        "extract_dir": "dot-$version"
       }
     }
   }
