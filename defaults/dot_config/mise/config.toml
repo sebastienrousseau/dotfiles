@@ -94,7 +94,13 @@ just = "latest"
 [env]
 # Environment variables to set
 MISE_EXPERIMENTAL = "1"
-GITHUB_TOKEN = "{{exec(command='gh auth token')}}"
+# Use the gh token when authenticated (lifts GitHub API rate limits for
+# aqua/ubi backends), but degrade gracefully when gh is absent or logged
+# out. Without the `|| true` the failing command makes mise abort *every*
+# operation with "failed to parse template" — breaking `dot env`,
+# `mise install`, and shell startup on any machine where `gh auth` hasn't
+# run yet.
+GITHUB_TOKEN = "{{exec(command='gh auth token 2>/dev/null || true')}}"
 # Build caches → /tmp (cleared on reboot)
 GOCACHE = "/tmp/builds/go-cache"
 GOTMPDIR = "/tmp/builds/go-tmp"
