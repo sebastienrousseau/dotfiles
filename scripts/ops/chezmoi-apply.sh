@@ -11,9 +11,15 @@ source "$SCRIPT_DIR/../../lib/dot/ui.sh"
 source "$SCRIPT_DIR/../../lib/dot/log.sh"
 export DOT_COMMAND="apply"
 
-# Temp file cleanup
+# Temp file cleanup. `set +u` guards the array expansion: on bash 3.2
+# (macOS) expanding an empty array under `set -u` is an "unbound
+# variable" error, which would fire on every clean `dot sync`.
 _TMPFILES=()
-cleanup() { rm -f "${_TMPFILES[@]}"; }
+cleanup() {
+  set +u
+  rm -f "${_TMPFILES[@]}" 2>/dev/null
+  set -u
+}
 trap cleanup EXIT
 
 # Help flag
