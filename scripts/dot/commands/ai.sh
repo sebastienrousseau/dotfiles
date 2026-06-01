@@ -53,7 +53,9 @@ _ai_extract_version() {
 }
 
 _ai_refresh_status_cache() {
-  local -n ai_entries=$1
+  # Entries are passed by value (the array is read-only here), not by
+  # nameref: `local -n` is bash 4.3+, and macOS ships bash 3.2.
+  local ai_entries=("$@")
   local tmp_file
   tmp_file="$(mktemp)"
   mkdir -p "$AI_CACHE_DIR"
@@ -134,6 +136,16 @@ _ai_get_cached_status() {
   cat "$AI_STATUS_CACHE_FILE"
 }
 
+# Look up one field for a tool from the cached status TSV. The cache has
+# one line per binary: bin<TAB>present<TAB>version. Field 2 = present
+# flag (0/1), field 3 = version string. Prints empty if the bin is
+# absent from the cache. Used instead of a bash-4 associative array.
+_ai_status_field() {
+  local bin="$1" field="$2"
+  awk -F'\t' -v b="$bin" -v f="$field" '$1 == b { print $f; exit }' \
+    "$AI_STATUS_CACHE_FILE" 2>/dev/null
+}
+
 # binary -> mise package mapping
 _ai_mise_pkg() {
   case "$1" in
@@ -177,16 +189,12 @@ cmd_ai_status() {
   )
 
   if ! _ai_cache_fresh "$AI_STATUS_CACHE_FILE"; then
-    _ai_refresh_status_cache ai_clis
+    _ai_refresh_status_cache "${ai_clis[@]}"
   fi
 
-  declare -A ai_present=()
-  declare -A ai_version=()
-  local cached_bin cached_present cached_version
-  while IFS=$'\t' read -r cached_bin cached_present cached_version; do
-    ai_present["$cached_bin"]="$cached_present"
-    ai_version["$cached_bin"]="$cached_version"
-  done < <(_ai_get_cached_status)
+  # No associative arrays (bash 4+); the per-tool probe results are read
+  # straight from the cached TSV (bin<TAB>present<TAB>version) via
+  # _ai_status_field below.
 
   local -a installed=()
   local -a missing=()
@@ -199,8 +207,9 @@ cmd_ai_status() {
       ui_section "$category"
       current_category="$category"
     fi
-    if [[ "${ai_present[$bin]:-0}" == "1" ]]; then
-      ver="${ai_version[$bin]:-installed}"
+    if [[ "$(_ai_status_field "$bin" 2)" == "1" ]]; then
+      ver="$(_ai_status_field "$bin" 3)"
+      [[ -z "$ver" ]] && ver="installed"
       [[ "$bin" == "claude" ]] && ver="${ver%% *}"
       ui_ok "$name" "$ver — $desc"
       installed+=("$name|$bin|$role")
