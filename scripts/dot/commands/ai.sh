@@ -53,8 +53,7 @@ _ai_extract_version() {
 }
 
 _ai_refresh_status_cache() {
-  # Entries are passed by value (the array is read-only here), not by
-  # nameref: `local -n` is bash 4.3+, and macOS ships bash 3.2.
+  # Entries passed by value (not a `local -n` nameref — bash 4.3+; macOS bash is 3.2).
   local ai_entries=("$@")
   local tmp_file
   tmp_file="$(mktemp)"
@@ -136,14 +135,10 @@ _ai_get_cached_status() {
   cat "$AI_STATUS_CACHE_FILE"
 }
 
-# Look up one field for a tool from the cached status TSV. The cache has
-# one line per binary: bin<TAB>present<TAB>version. Field 2 = present
-# flag (0/1), field 3 = version string. Prints empty if the bin is
-# absent from the cache. Used instead of a bash-4 associative array.
+# Look up field $2 (2=present 0/1, 3=version) for binary $1 from the
+# cached TSV. Replaces a bash-4 associative array for macOS bash 3.2.
 _ai_status_field() {
-  local bin="$1" field="$2"
-  awk -F'\t' -v b="$bin" -v f="$field" '$1 == b { print $f; exit }' \
-    "$AI_STATUS_CACHE_FILE" 2>/dev/null
+  awk -F'\t' -v b="$1" -v f="$2" '$1==b{print $f;exit}' "$AI_STATUS_CACHE_FILE" 2>/dev/null
 }
 
 # binary -> mise package mapping
@@ -191,10 +186,6 @@ cmd_ai_status() {
   if ! _ai_cache_fresh "$AI_STATUS_CACHE_FILE"; then
     _ai_refresh_status_cache "${ai_clis[@]}"
   fi
-
-  # No associative arrays (bash 4+); the per-tool probe results are read
-  # straight from the cached TSV (bin<TAB>present<TAB>version) via
-  # _ai_status_field below.
 
   local -a installed=()
   local -a missing=()
