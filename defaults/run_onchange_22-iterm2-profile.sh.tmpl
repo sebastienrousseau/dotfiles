@@ -20,29 +20,36 @@ THEME_NAME={{ $themeName | quote }}
 
 # Active palette (#RRGGBB) baked in at template-render time so this script's
 # content changes when the theme changes, retriggering chezmoi onchange.
-declare -A C=(
-  [bg]={{ $tt.term.bg | quote }}
-  [fg]={{ $tt.term.fg | quote }}
-  [cursor]={{ $tt.term.cursor | quote }}
-  [cursor_text]={{ $tt.term.cursor_text | quote }}
-  [sel_bg]={{ $tt.term.sel_bg | quote }}
-  [sel_fg]={{ $tt.term.sel_fg | quote }}
-  [c0]={{ $tt.term.c0 | quote }}
-  [c1]={{ $tt.term.c1 | quote }}
-  [c2]={{ $tt.term.c2 | quote }}
-  [c3]={{ $tt.term.c3 | quote }}
-  [c4]={{ $tt.term.c4 | quote }}
-  [c5]={{ $tt.term.c5 | quote }}
-  [c6]={{ $tt.term.c6 | quote }}
-  [c7]={{ $tt.term.c7 | quote }}
-  [c8]={{ $tt.term.c8 | quote }}
-  [c9]={{ $tt.term.c9 | quote }}
-  [c10]={{ $tt.term.c10 | quote }}
-  [c11]={{ $tt.term.c11 | quote }}
-  [c12]={{ $tt.term.c12 | quote }}
-  [c13]={{ $tt.term.c13 | quote }}
-  [c14]={{ $tt.term.c14 | quote }}
-  [c15]={{ $tt.term.c15 | quote }}
+#
+# NOTE: plain variables + an indexed array (not `declare -A`). This script is
+# macOS-only (see the `eq .chezmoi.os "darwin"` guard above) and macOS ships
+# bash 3.2, which has no associative arrays — `declare -A` there aborts with
+# "unbound variable" under `set -u`. Indexed arrays work back to bash 3.x.
+C_bg={{ $tt.term.bg | quote }}
+C_fg={{ $tt.term.fg | quote }}
+C_cursor={{ $tt.term.cursor | quote }}
+C_cursor_text={{ $tt.term.cursor_text | quote }}
+C_sel_bg={{ $tt.term.sel_bg | quote }}
+C_sel_fg={{ $tt.term.sel_fg | quote }}
+
+# ANSI colours 0..15, indexed so the emit loop below can address them by number.
+ANSI=(
+  {{ $tt.term.c0 | quote }}
+  {{ $tt.term.c1 | quote }}
+  {{ $tt.term.c2 | quote }}
+  {{ $tt.term.c3 | quote }}
+  {{ $tt.term.c4 | quote }}
+  {{ $tt.term.c5 | quote }}
+  {{ $tt.term.c6 | quote }}
+  {{ $tt.term.c7 | quote }}
+  {{ $tt.term.c8 | quote }}
+  {{ $tt.term.c9 | quote }}
+  {{ $tt.term.c10 | quote }}
+  {{ $tt.term.c11 | quote }}
+  {{ $tt.term.c12 | quote }}
+  {{ $tt.term.c13 | quote }}
+  {{ $tt.term.c14 | quote }}
+  {{ $tt.term.c15 | quote }}
 )
 
 # Convert "#RRGGBB" to three sRGB float components in 0.0..1.0.
@@ -93,20 +100,20 @@ trap 'rm -f "$TMP"' EXIT
       "Description" : "Generated from dotfiles theme: $THEME_NAME",
       "Dynamic Profile Parent Name" : "Default",
 JSON
-  emit_colour "Background Color"     "${C[bg]}"
+  emit_colour "Background Color"     "$C_bg"
   printf '    ,\n'
-  emit_colour "Foreground Color"     "${C[fg]}"
+  emit_colour "Foreground Color"     "$C_fg"
   printf '    ,\n'
-  emit_colour "Cursor Color"         "${C[cursor]}"
+  emit_colour "Cursor Color"         "$C_cursor"
   printf '    ,\n'
-  emit_colour "Cursor Text Color"    "${C[cursor_text]}"
+  emit_colour "Cursor Text Color"    "$C_cursor_text"
   printf '    ,\n'
-  emit_colour "Selection Color"      "${C[sel_bg]}"
+  emit_colour "Selection Color"      "$C_sel_bg"
   printf '    ,\n'
-  emit_colour "Selected Text Color"  "${C[sel_fg]}"
+  emit_colour "Selected Text Color"  "$C_sel_fg"
   for i in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
     printf '    ,\n'
-    emit_colour "Ansi $i Color" "${C[c$i]}"
+    emit_colour "Ansi $i Color" "${ANSI[$i]}"
   done
   cat <<'JSON'
     }
