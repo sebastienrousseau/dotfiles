@@ -257,6 +257,35 @@ main() {
     sed_in_place 's/^zellij = true/zellij = false/' "$data_file"
   }
 
+  # Carry the user's existing global git identity into chezmoi's data.
+  #
+  # This installer sets up chezmoi via sourceDir rather than `chezmoi init`,
+  # so the config template's prompts for git_name / git_email never run. The
+  # gitconfig template coalesces git_name->name->"" (likewise email,
+  # signingkey) and only emits a [user] block when non-empty — so without
+  # this, a fresh install produces a ~/.gitconfig with no identity at all,
+  # and commits fail with "Author identity unknown". Seed name/email/
+  # signingkey from `git config --global` when present. Idempotent: skips if
+  # the config already carries a [data] block.
+  toml_escape() { printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'; }
+  seed_git_identity() {
+    local cfg="$CHEZMOI_CONFIG_FILE"
+    [[ -f "$cfg" ]] || return 0
+    grep -q '^\[data\]' "$cfg" 2>/dev/null && return 0
+    local gname gemail gkey
+    gname="$(git config --global user.name 2>/dev/null || true)"
+    gemail="$(git config --global user.email 2>/dev/null || true)"
+    gkey="$(git config --global user.signingkey 2>/dev/null || true)"
+    [[ -z "$gname" && -z "$gemail" ]] && return 0
+    {
+      printf '\n[data]\n'
+      [[ -n "$gname" ]] && printf 'name = "%s"\n' "$(toml_escape "$gname")"
+      [[ -n "$gemail" ]] && printf 'email = "%s"\n' "$(toml_escape "$gemail")"
+      [[ -n "$gkey" ]] && printf 'signingkey = "%s"\n' "$(toml_escape "$gkey")"
+    } >>"$cfg"
+    echo "   Seeded git identity ($gname <$gemail>) into chezmoi data."
+  }
+
   # 5. Backup existing dotfiles that chezmoi will overwrite
   step "Backing up existing dotfiles..."
   BACKUP_DIR="$HOME/.dotfiles.bak.$(date +"%Y%m%d_%H%M%S")"
@@ -273,6 +302,17 @@ main() {
   if command -v chezmoi >/dev/null && [[ -f "$CHEZMOI_CONFIG_FILE" ]]; then
     while IFS= read -r file; do
       [[ -z "$file" ]] && continue
+      # Skip managed *directories*: chezmoi apply never clobbers a
+      # directory's existing contents, so they don't need backing up, and
+      # `cp -a` on one recurses into things it can't copy — e.g. the live
+      # ssh-agent sockets under ~/.ssh/agent, which spew
+      # "is a socket (not copied)" warnings. The managed files chezmoi
+      # would actually overwrite are listed (and backed up) individually.
+      # `-d` without `-L` excludes only real dirs; symlinks are copied as
+      # links by `cp -a`, so they never recurse.
+      if [[ -d "$file" && ! -L "$file" ]]; then
+        continue
+      fi
       if [[ -e "$file" ]]; then
         rel="${file#"$HOME"/}"
         mkdir -p "$BACKUP_DIR/$(dirname "$rel")"
@@ -323,6 +363,7 @@ main() {
   if [[ -d "$SOURCE_DIR/.git" ]]; then
     echo "   Applying from local source: $SOURCE_DIR"
     ensure_chezmoi_source "$SOURCE_DIR"
+    seed_git_identity
     APPLY_FLAGS=()
     if [[ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]]; then
       APPLY_FLAGS=(--force --no-tty)
@@ -332,6 +373,7 @@ main() {
     echo "   Migrating from legacy source: $LEGACY_SOURCE_DIR"
     mv "$LEGACY_SOURCE_DIR" "$SOURCE_DIR"
     ensure_chezmoi_source "$SOURCE_DIR"
+    seed_git_identity
     APPLY_FLAGS=()
     if [[ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]]; then
       APPLY_FLAGS=(--force --no-tty)
@@ -362,6 +404,7 @@ main() {
     fi
 
     ensure_chezmoi_source "$SOURCE_DIR"
+    seed_git_identity
     APPLY_FLAGS=()
     if [[ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]]; then
       APPLY_FLAGS=(--force --no-tty)
@@ -370,6 +413,18 @@ main() {
   fi
 
   success "Configuration loaded. Please restart your shell."
+
+  # If no git identity ended up configured, commits will fail with
+  # "Author identity unknown". Point the user at the one-line fix rather
+  # than letting them discover it on their first commit.
+  if [[ -z "$(git config --global user.email 2>/dev/null || true)" ]] &&
+    ! grep -q '^email' "$CHEZMOI_CONFIG_FILE" 2>/dev/null; then
+    step "No git identity detected. Set yours so commits are attributed:"
+    echo "   git config --global user.name  \"Your Name\""
+    echo "   git config --global user.email \"you@example.com\""
+    echo "   then re-run: chezmoi apply"
+  fi
+
   step "Run 'dot learn' for an interactive tour of your new dotfiles."
 }
 
