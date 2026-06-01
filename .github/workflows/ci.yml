@@ -240,7 +240,7 @@ jobs:
 
   security-dependencies:
     name: Security / Dependency Audit
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@da89db441c0e41f3d2fdcbf290eb681f0b49921d # master
     with:
       run_dependency_audit: true
       run_supply_chain_checks: true
