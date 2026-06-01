@@ -73,7 +73,10 @@ for arg in "$@"; do
   esac
 done
 
-_log() { ((VERBOSE)) && printf '[migrate] %s\n' "$*"; }
+# `((VERBOSE))` is 0/false when quiet, which would make `_log` return 1.
+# Under `set -e`, a trailing `_log` (e.g. just before a fast-path `exit 0`)
+# would then abort the whole script with status 1. Keep it always-zero.
+_log() { ((VERBOSE)) && printf '[migrate] %s\n' "$*"; return 0; }
 _say() { printf '[migrate] %s\n' "$*"; }    # always-printed
 _warn() { printf '[migrate] WARN %s\n' "$*" >&2; }
 _die() {
