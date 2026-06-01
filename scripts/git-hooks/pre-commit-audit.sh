@@ -6,7 +6,7 @@
 set -euo pipefail
 
 _cleanup_files=()
-trap 'rm -f "${_cleanup_files[@]}"' EXIT
+trap 'set +u; rm -f "${_cleanup_files[@]}" 2>/dev/null; set -u' EXIT
 
 # ANSI Colors
 RED='\033[0;31m'

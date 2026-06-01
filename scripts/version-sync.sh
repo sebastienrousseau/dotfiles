@@ -7,7 +7,7 @@
 set -euo pipefail
 
 _cleanup_files=()
-trap 'rm -f "${_cleanup_files[@]}"' EXIT
+trap 'set +u; rm -f "${_cleanup_files[@]}" 2>/dev/null; set -u' EXIT
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
