@@ -99,14 +99,18 @@ matrix() {
     return $rc
   fi
 
-  # Fallback: bash + awk implementation
-  local MATRIX_COLORS
-  declare -A MATRIX_COLORS=(
-    [green]='\033[38;5;46m' [purple]='\033[38;5;55m'
-    [red]='\033[38;5;196m' [blue]='\033[38;5;33m'
-    [white]='\033[38;5;15m' [yellow]='\033[38;5;226m'
-  )
-  local esc_color="${MATRIX_COLORS[$color]:-${MATRIX_COLORS[green]}}"
+  # Fallback: bash + awk implementation.
+  # Plain `case` rather than `declare -A` (associative arrays are bash 4+;
+  # macOS ships bash 3.2). Default is green for any unknown colour.
+  local esc_color
+  case "$color" in
+    purple) esc_color='\033[38;5;55m' ;;
+    red) esc_color='\033[38;5;196m' ;;
+    blue) esc_color='\033[38;5;33m' ;;
+    white) esc_color='\033[38;5;15m' ;;
+    yellow) esc_color='\033[38;5;226m' ;;
+    *) esc_color='\033[38;5;46m' ;; # green (default)
+  esac
   local sleep_val=0.04
   [[ -n "$speed" ]] && case "$speed" in *8*) sleep_val=0.08 ;; *2*) sleep_val=0.02 ;; esac
 
