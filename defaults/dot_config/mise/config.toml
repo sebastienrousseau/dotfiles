@@ -53,7 +53,12 @@ zoxide = "latest"
 "aqua:twpayne/chezmoi" = "latest"
 "aqua:junegunn/fzf" = "latest"
 "aqua:FiloSottile/age" = "latest"
-"aqua:sharkdp/hyperfine" = "latest"
+# hyperfine intentionally NOT managed by mise: the aqua package for
+# sharkdp/hyperfine only ships an x86_64 macOS binary, so on Apple
+# Silicon without Rosetta the mise shim is unrunnable ("Bad CPU type in
+# executable"), which silently breaks `dot doctor`'s startup benchmark.
+# It's provided natively by Brewfile.cli (arm64) and by Linux package
+# managers instead.
 "aqua:ollama/ollama" = "latest"
 "aqua:Nukesor/pueue/pueue" = "4.0.4"
 "aqua:Nukesor/pueue/pueued" = "4.0.4"
