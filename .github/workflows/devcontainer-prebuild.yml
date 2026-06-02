@@ -52,7 +52,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4
         with:
           driver-opts: image=moby/buildkit:latest
 
@@ -69,7 +69,7 @@ jobs:
         run: cp .devcontainer/devcontainer.ci.json .devcontainer/devcontainer.json
 
       - name: Pre-build devcontainer image
-        uses: devcontainers/ci@b63b30de439b47a52267f241112c5b453b673db5 # v0.3
+        uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3
         with:
           # devcontainers/ci requires a standard filename for configFile.
           configFile: .devcontainer/devcontainer.json
