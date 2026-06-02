@@ -59,7 +59,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.503)
+  version       The version (tag or branch) to install (default: v0.2.504)
 
 Options:
   --help        Show this help message
@@ -71,7 +71,7 @@ EOF
 }
 
 main() {
-  local version="v0.2.503"
+  local version="v0.2.504"
   local version_set=0
   local minimal=0
   local _cleanup_files=()
@@ -99,7 +99,7 @@ main() {
         # like `foobar` doesn't trigger a 30s+ network download attempt.
         # Caught by the install.sh fuzz harness (#881).
         if [[ ! "$arg" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-+][a-zA-Z0-9.-]+)?$ ]]; then
-          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.503)."
+          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.504)."
         fi
         version="$arg"
         version_set=1
@@ -344,7 +344,7 @@ main() {
   # 6. Initialize & Apply
   step "Applying Configuration..."
 
-  # ── Auto-migration for v0.2.503 reorg ─────────────────────────────────
+  # ── Auto-migration for v0.2.504 reorg ─────────────────────────────────
   # If the user is upgrading from a pre-0.2.503 install, run the
   # migration script BEFORE `chezmoi apply` so the reorg's source-
   # path moves don't cause chezmoi to delete deployed files.
@@ -353,7 +353,7 @@ main() {
   for migrate_src in "$SOURCE_DIR" "$LEGACY_SOURCE_DIR"; do
     migrate_script="$migrate_src/install/migrate/migrate-v0_2-to-v0_2_503.sh"
     if [[ -x "$migrate_script" ]]; then
-      echo "   Running v0.2.503 migration (idempotent; safe on fresh installs)..."
+      echo "   Running v0.2.504 migration (idempotent; safe on fresh installs)..."
       "$migrate_script" || echo "   migration exited non-zero — continuing apply"
       break
     fi

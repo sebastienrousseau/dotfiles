@@ -38,7 +38,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 EXTRACT_SCRIPT="$SCRIPT_DIR/extract-theme.py"
 DOTFILES_DIR="${HOME}/.dotfiles"
 
-# Descend into the chezmoi source subdir when .chezmoiroot is present (v0.2.503+)
+# Descend into the chezmoi source subdir when .chezmoiroot is present (post-reorg, chezmoi files under defaults/)
 CHEZMOI_SRC="$DOTFILES_DIR"
 if [[ -f "$DOTFILES_DIR/.chezmoiroot" ]]; then
   _sub="$(head -1 "$DOTFILES_DIR/.chezmoiroot" | tr -d '[:space:]')"

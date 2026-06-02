@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
-# Compat shim: the canonical script moved to tools/ci/ in v0.2.503.
+# Compat shim: the canonical script moved to tools/ci/ during the repo reorg.
 # Pinned reusable workflows on master still reference the old path;
 # this delegates so they keep working until the next pin bump.
 set -euo pipefail

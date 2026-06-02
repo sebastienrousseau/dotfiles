@@ -80,7 +80,7 @@ You're upgrading from a release older than v0.2.503 to a release
 
    ```sh
    curl -fsSL \
-     https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.503/install/migrate/migrate-v0_2-to-v0_2_503.sh \
+     https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.504/install/migrate/migrate-v0_2-to-v0_2_503.sh \
      | bash
    ```
 

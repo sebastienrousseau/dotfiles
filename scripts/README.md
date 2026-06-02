@@ -7,7 +7,7 @@ workflows, by `chezmoi apply` hooks, or by hand.
 
 ## Subtree map
 
-Per the v0.2.503 reorg (RFC `docs/operations/RFC_v0_2_503_reorganization.md`),
+Per the repository reorg (RFC `docs/operations/RFC_v0_2_503_reorganization.md`),
 **repo-only ops** (CI, release, maintenance, docs-generation) have
 moved to the top-level `tools/` tree. `scripts/` retains the
 **runtime-invoked** scripts that the `dot` CLI dispatches to plus a
@@ -17,7 +17,7 @@ few specialised subtrees.
 
 | Path | Purpose | Touched by |
 |---|---|---|
-| `scripts/dot/commands/` | Per-subcommand handlers for the `dot` CLI. Sources `lib/dot/*.sh` (moved out of this tree in v0.2.503 Phase 1). | Dispatched by `bin/dot` |
+| `scripts/dot/commands/` | Per-subcommand handlers for the `dot` CLI. Sources `lib/dot/*.sh` (moved out of this tree in the Phase 1 reorg). | Dispatched by `bin/dot` |
 | `scripts/dot/powershell/` | Native PowerShell module (`Dot.psm1`) exporting `Get-DotVersion` / `Invoke-DotHelp` / `Test-DotAgentsSync`. | `bin/dot.ps1` |
 | `scripts/dot/data/` | Per-command static data (registry seeds, palette tables). | `scripts/dot/commands/*` |
 | `scripts/lib/` | Cross-cutting library helpers reused across multiple scripts. Example: `secrets_provider.sh` (keychain / pass / age dispatch). | `scripts/dot/commands/*`, ops scripts |
@@ -49,7 +49,7 @@ few specialised subtrees.
 The `dot` CLI is implemented as `bin/dot`
 (dispatcher) + `scripts/dot/commands/<cmd>.sh` (per-command
 handlers) + `lib/dot/*.sh` (shared helpers — moved out of
-`scripts/dot/lib/` in v0.2.503 Phase 1 per the
+`scripts/dot/lib/` in the Phase 1 reorg per the
 [reorganisation RFC](../docs/operations/RFC_v0_2_503_reorganization.md)).
 
 | Path | Purpose |

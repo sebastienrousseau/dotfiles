@@ -154,9 +154,14 @@ find_version_files() {
 
   log_info "Scanning for markdown files with version references..."
 
-  # Find all markdown files with version patterns
+  # Find all markdown files with version patterns.
+  # The "." path is required: with no path and a non-TTY stdin (CI, pipes,
+  # background jobs) rg reads from stdin instead of searching the tree, so
+  # the whole script hangs forever. The `sed` strips rg's leading "./" so
+  # the paths match the EXCLUDE_FILES entries (which have no "./"),
+  # otherwise excluded historical docs get rewritten.
   cd "$PROJECT_ROOT"
-  rg -l "v?$VERSION_PATTERN" --type md >"$temp_file" 2>/dev/null || true
+  rg -l "v?$VERSION_PATTERN" --type md . 2>/dev/null | sed 's|^\./||' >"$temp_file" || true
 
   # Add known files that should be checked even if they don't have versions yet
   echo "README.md" >>"$temp_file"

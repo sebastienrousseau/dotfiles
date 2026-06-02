@@ -30,7 +30,7 @@ resolve_source_dir() {
 
 src_dir=$(resolve_source_dir)
 
-# resolve_source_dir returns the repo root, but since the v0.2.503 reorg the
+# resolve_source_dir returns the repo root, but since the defaults/ reorg the
 # deployable tree lives under the .chezmoiroot subdir (defaults/). Descend
 # into it so paths like dot_config/... resolve. (Without this the mise lookup
 # below silently reported "config not found" on every run.)
