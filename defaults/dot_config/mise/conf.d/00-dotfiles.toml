@@ -69,8 +69,8 @@ zoxide = "latest"
 # It's provided natively by Brewfile.cli (arm64) and by Linux package
 # managers instead.
 "aqua:ollama/ollama" = "latest"
-"aqua:Nukesor/pueue/pueue" = "4.0.4"
-"aqua:Nukesor/pueue/pueued" = "4.0.4"
+"aqua:Nukesor/pueue/pueue" = "4.0.3"
+"aqua:Nukesor/pueue/pueued" = "4.0.3"
 "aqua:dandavison/delta" = "latest"
 fd = "latest"
 "aqua:ClementTsang/bottom" = "latest"
