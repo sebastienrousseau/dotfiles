@@ -132,7 +132,11 @@ size_errors=0
 if [[ -d "$WALLPAPER_DIR" ]] && command -v magick >/dev/null 2>&1; then
   while IFS= read -r file; do
     [[ -f "$file" ]] || continue
-    dims="$(magick identify -format '%wx%h\n' "$file" 2>/dev/null | head -1 || true)"
+    # `-ping` reads dimensions from the header only. Without it, `magick
+    # identify` fully decodes the frame and returns *empty* on very large
+    # HEICs (30 MB+ dynamic wallpapers), so correctly-sized files were
+    # reported as BAD. `[0]` pins the first frame of multi-frame HEICs.
+    dims="$(magick identify -ping -format '%wx%h' "${file}[0]" 2>/dev/null || true)"
     if [[ "$dims" != "6016x6016" ]]; then
       echo "    BAD SIZE: $(basename "$file") => ${dims:-unknown}"
       size_errors=$((size_errors + 1))
