@@ -22,7 +22,7 @@ ruby.compile = false
 
 [tools]
 # Node.js
-node = "lts"
+node = "24"
 
 # Python
 python = ["3.12", "3.11", "3.14"]
