@@ -66,6 +66,10 @@ Options:
   --force       Non-interactive mode (sets DOTFILES_NONINTERACTIVE=1)
   --silent      Quiet mode (sets DOTFILES_SILENT=1)
   --minimal     Minimal profile (disable nvim, tmux, zellij)
+  --provision   After applying configs, install the toolchain (packages,
+                fonts, language tools) via the install/provision scripts.
+                Also enabled by DOTFILES_PROVISION=1. Opt-in because it
+                installs packages and may change OS defaults.
 
 EOF
 }
@@ -74,6 +78,7 @@ main() {
   local version="v0.2.504"
   local version_set=0
   local minimal=0
+  local provision="${DOTFILES_PROVISION:-0}"
   local _cleanup_files=()
   trap 'set +u; rm -f "${_cleanup_files[@]}" 2>/dev/null; set -u' EXIT
 
@@ -86,6 +91,7 @@ main() {
       --silent) export DOTFILES_SILENT=1 ;;
       --force) export DOTFILES_NONINTERACTIVE=1 ;;
       --minimal) minimal=1 ;;
+      --provision) provision=1 ;;
       -*)
         # Catch single-dash and double-dash unknowns the same way.
         error "Unknown option: $arg"
@@ -410,6 +416,36 @@ main() {
       APPLY_FLAGS=(--force --no-tty)
     fi
     chezmoi apply "${APPLY_FLAGS[@]}"
+  fi
+
+  # Toolchain provisioning (opt-in). The install/provision/ scripts (package
+  # managers, fonts, language + AI tools) are chezmoi run_ scripts, but they
+  # live OUTSIDE the .chezmoiroot source dir (defaults/), so `chezmoi apply`
+  # never runs them — a fresh install otherwise ships configs but zero tools.
+  # Run them here only when explicitly requested: they install packages and
+  # can change OS defaults, so we never do it implicitly (CI / Docker /
+  # unattended automation must opt in via --provision or DOTFILES_PROVISION=1).
+  if [[ "$provision" = "1" && $minimal -eq 0 ]]; then
+    step "Provisioning toolchain (packages, fonts, tools)..."
+    local prov_dir="$SOURCE_DIR/install/provision"
+    if [[ -d "$prov_dir" ]]; then
+      local script
+      # run_once_install_* (shells) first, then numbered run_onchange_* in order.
+      while IFS= read -r script; do
+        [[ -f "$script" ]] || continue
+        echo "   → $(basename "$script")"
+        if [[ "$script" == *.tmpl ]]; then
+          chezmoi execute-template <"$script" | bash ||
+            echo "     (step exited non-zero — continuing)"
+        else
+          bash "$script" || echo "     (step exited non-zero — continuing)"
+        fi
+      done < <(ls "$prov_dir"/run_once_install_* "$prov_dir"/run_onchange_* 2>/dev/null | sort)
+    fi
+  elif [[ $minimal -eq 0 ]]; then
+    step "Configs deployed. To also install the toolchain (packages, fonts, tools):"
+    echo "   bash \"$SOURCE_DIR/install.sh\" --provision    # or DOTFILES_PROVISION=1"
+    echo "   (or: brew bundle --file ~/.config/shell/Brewfile.cli)"
   fi
 
   success "Configuration loaded. Please restart your shell."
