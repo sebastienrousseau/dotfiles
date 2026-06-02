@@ -63,6 +63,17 @@ EXCLUDE_FILES=(
   "docs/manual/05-appendices/D-bibliography.md"
   "docs/operations/MAINTENANCE.md"
 
+  # Release-process / structural docs that reference *historical* dotfiles
+  # versions (the repo reorg, past release tags, migration scenarios).
+  # Bumping these each release would corrupt accurate history.
+  "docs/operations/RELEASE_PIPELINE.md"
+  "docs/operations/TESTING.md"
+  "docs/STRUCTURE.md"
+  "install/migrate/README.md"
+  "install/README.md"
+  "tools/README.md"
+  "defaults/README.md"
+
   # CI_COMPOSITES.md cites third-party action versions (e.g. v5.0.5),
   # not dotfiles_version. False-positive pattern match.
   "docs/operations/CI_COMPOSITES.md"
