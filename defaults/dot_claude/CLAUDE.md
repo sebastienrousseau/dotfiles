@@ -27,18 +27,25 @@
 Whenever I need to run shell steps myself (signed-commit flows
 where your Bash tool can't reach my ssh-agent, interactive
 prompts, anything destructive that needs my eyes first), hand
-them over as ONE runnable script — never scattered one-liners.
+them over as ONE runnable script FILE that I can invoke by path
+— never a fenced copy-paste block, never scattered one-liners.
 
-- A single fenced ```bash block, or a file under `.git/`, or
-  somewhere else outside the working tree.
-- First line: `set -euo pipefail`.
+- Write the script to disk: `.git/<name>.sh` for repo-local
+  work, or another path outside the working tree.
+- `chmod +x` it so I can run it directly: `./.git/<name>.sh`.
+- Shebang `#!/usr/bin/env bash`, first line of body
+  `set -euo pipefail`.
 - Quote heredocs (`<<'EOF'`) so commit messages don't
   interpolate.
-- Normalise cwd up front: `cd "$(git rev-parse --show-toplevel)"`.
+- Normalise cwd up front: `cd "$(git rev-parse --show-toplevel)"`
+  (or an explicit absolute path).
 - Multi-phase work goes in one script with labelled sections,
   not multiple scripts I have to chain.
 - After the script, one line on what it does and what to tell
   you next.
+
+A fenced ```bash block in chat is NOT a script — it's a
+copy-paste instruction. Write the file.
 
 Applies to every project, not just the one this preference was
 captured in.
