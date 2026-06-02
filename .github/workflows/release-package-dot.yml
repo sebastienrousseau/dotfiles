@@ -8,6 +8,7 @@ name: Release / Package dot CLI
 #
 # The tarball is the deterministic, distribution-friendly bundle of:
 #   bin/dot, bin/dot-*           — dispatcher + companions
+#   bin/dot.ps1, bin/dot.cmd     — Windows entrypoint + cmd shim (Scoop)
 #   lib/dot/*                    — sourced helpers
 #   share/man/man1/dot.1         — man page
 #   share/zsh/site-functions/_dot
@@ -69,6 +70,25 @@ jobs:
           # Dispatcher + companions
           cp bin/dot "$stage/bin/"
           for f in bin/dot-*; do [[ -f "$f" ]] && cp "$f" "$stage/bin/"; done
+
+          # Windows entrypoint + cmd shim for Scoop. The PowerShell
+          # script is the real driver; the .cmd is a one-line wrapper
+          # so plain cmd.exe (and Scoop's shim generator) can launch
+          # it. Synthesized rather than committed since it has no
+          # variant content.
+          if [[ -f bin/dot.ps1 ]]; then
+            cp bin/dot.ps1 "$stage/bin/dot.ps1"
+            # CRLF line endings: cmd.exe is strict about them, and the
+            # zip is consumed by Scoop on Windows where text-mode unzip
+            # is not implicit. printf with %% escapes %~dp0 and %*
+            # against the shell pass.
+            {
+              printf '@echo off\r\n'
+              printf 'powershell -ExecutionPolicy Bypass -NoProfile -File "%%~dp0dot.ps1" %%*\r\n'
+            } > "$stage/bin/dot.cmd"
+          else
+            echo "::warning::bin/dot.ps1 not found — Scoop install will lack a Windows entrypoint"
+          fi
 
           # Sourced helpers
           cp lib/dot/*.sh "$stage/lib/dot/"

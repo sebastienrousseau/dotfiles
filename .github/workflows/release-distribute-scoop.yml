@@ -121,17 +121,31 @@ jobs:
 
           URL="https://github.com/sebastienrousseau/dotfiles/releases/download/${TAG}/dot-${VERSION}.zip"
 
-          # Update the manifest using jq
+          # Update the manifest using jq. The release zip extracts as
+          # dot-VERSION/... so extract_dir must also follow the version
+          # bump — otherwise scoop installs from a nonexistent
+          # subdirectory on the next release.
           jq \
             --arg ver "$VERSION" \
             --arg url "$URL" \
             --arg sha "$SHA256" \
+            --arg extract "dot-$VERSION" \
             '.version = $ver |
             .architecture["64bit"].url = $url |
             .architecture["64bit"].hash = ("sha256:" + $sha) |
+            .architecture["64bit"].extract_dir = $extract |
             .architecture["arm64"].url = $url |
-            .architecture["arm64"].hash = ("sha256:" + $sha)' \
+            .architecture["arm64"].hash = ("sha256:" + $sha) |
+            .architecture["arm64"].extract_dir = $extract' \
             "$TEMPLATE_PATH" > dot.json
+
+          # Defence in depth: the template carries a PLACEHOLDER hash
+          # for first-publish; bail if jq didn't substitute it.
+          if grep -qiE "placeholder" dot.json; then
+            echo "::error::Manifest still contains a PLACEHOLDER token after rewrite:"
+            grep -nEi placeholder dot.json
+            exit 1
+          fi
 
           echo "Updated manifest:"
           cat dot.json

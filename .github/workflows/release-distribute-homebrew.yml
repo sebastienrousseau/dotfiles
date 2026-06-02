@@ -127,10 +127,28 @@ jobs:
           URL_RE="https://github\.com/sebastienrousseau/dotfiles/releases/download/v[0-9.]+/dot-[0-9.]+\.tar\.gz"
           sed -i -E "s|^  url '${URL_RE}'\$|  url '${NEW_URL}'|" dot.rb
 
-          # Update the sha256 line - match the full sha256 line and replace hash
+          # Update the sha256 line. The template may carry either a real
+          # 64-hex digest from the previous release OR a literal
+          # placeholder (e.g. PLACEHOLDER_FILL_ON_v0.2.503_PUBLICATION).
+          # Match anything between the quotes so first-time substitution
+          # is not silently skipped.
           sed -i \
-            -E "s|^  sha256 '[a-f0-9]{64}'$|  sha256 '${SHA256}'|" \
+            -E "s|^  sha256 '[^']*'$|  sha256 '${SHA256}'|" \
             dot.rb
+
+          # Fail loudly if the substitution didn't take — a passing
+          # workflow that ships an unhashed formula is the worst-case
+          # outcome here.
+          if ! grep -qE "^  sha256 '${SHA256}'\$" dot.rb; then
+            echo "::error::sha256 substitution failed — formula still shows:"
+            grep -n sha256 dot.rb || true
+            exit 1
+          fi
+          if grep -qiE "placeholder" dot.rb; then
+            echo "::error::Formula still contains a PLACEHOLDER token after rewrite:"
+            grep -nEi placeholder dot.rb
+            exit 1
+          fi
 
           echo "Updated formula:"
           cat dot.rb
