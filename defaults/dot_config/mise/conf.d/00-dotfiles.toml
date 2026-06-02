@@ -1,5 +1,14 @@
-# mise (runtime manager) configuration
+# mise (runtime manager) configuration — DOTFILES-MANAGED BASE LAYER
 # https://mise.jdx.dev/
+#
+# This file lives in conf.d/ (loaded first, lowest precedence) and is the
+# read-only base config deployed by chezmoi. The writable global config
+# `~/.config/mise/config.toml` is intentionally NOT chezmoi-managed (see
+# .chezmoiignore): that's where `mise use -g` / `mise upgrade` write their
+# version pins. Splitting them this way stops mise's mutable writes from
+# perpetually drifting the chezmoi-managed source. User pins in
+# config.toml override these defaults. Don't move tool defaults back into
+# config.toml or the drift returns.
 
 [settings]
 # Install missing tools automatically

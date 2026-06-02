@@ -93,7 +93,7 @@ assert_equals "0" "$failures" "all PROFILES.md presets must have matching templa
 # ═══════════════════════════════════════════════════════════════
 
 test_start "tools_doc_ai_tools_in_mise"
-mise_config="$REPO_ROOT/defaults/dot_config/mise/config.toml"
+mise_config="$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml"
 failures=0
 for tool in claude copilot gemini ollama opencode aider; do
   if grep -q "$tool" "$REPO_ROOT/docs/reference/TOOLS.md" 2>/dev/null; then

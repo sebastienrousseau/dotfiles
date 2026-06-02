@@ -117,7 +117,7 @@ install.sh                  # Bootstrap installer
 ### Key Data Files
 
 - `.chezmoidata.toml` — All configuration: profiles, feature flags, tool settings
-- `dot_config/mise/config.toml` — mise tool versions (node, python, go, rust, etc.)
+- `dot_config/mise/conf.d/00-dotfiles.toml` — mise tool versions (node, python, go, rust, etc.); the writable `~/.config/mise/config.toml` is mise-owned and not chezmoi-managed
 - `dot_config/starship.toml.tmpl` — Prompt configuration
 
 ### Testing

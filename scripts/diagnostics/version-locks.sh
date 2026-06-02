@@ -30,10 +30,20 @@ resolve_source_dir() {
 
 src_dir=$(resolve_source_dir)
 
+# resolve_source_dir returns the repo root, but since the v0.2.503 reorg the
+# deployable tree lives under the .chezmoiroot subdir (defaults/). Descend
+# into it so paths like dot_config/... resolve. (Without this the mise lookup
+# below silently reported "config not found" on every run.)
+cm_src="$src_dir"
+if [[ -f "$src_dir/.chezmoiroot" ]]; then
+  _cm_root="$(tr -d '[:space:]' <"$src_dir/.chezmoiroot")"
+  [[ -n "$_cm_root" && -d "$src_dir/$_cm_root" ]] && cm_src="$src_dir/$_cm_root"
+fi
+
 ui_header "Version Locks"
 
 ui_section "mise toolchain"
-mise_config="$src_dir/dot_config/mise/config.toml"
+mise_config="$cm_src/dot_config/mise/conf.d/00-dotfiles.toml"
 if [[ -f "$mise_config" ]]; then
   awk -F= '
     /^\[tools\]/ {in_tools=1; next}
