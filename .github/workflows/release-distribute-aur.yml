@@ -102,7 +102,7 @@ jobs:
         id: clone-aur
         run: |
           set -euo pipefail
-          if ! git clone ssh://aur@aur.archlinux.org/dotfiles-git.git aur-pkg 2>&1; then
+          if ! git clone ssh://aur@aur.archlinux.org/dot-cli-git.git aur-pkg 2>&1; then
             echo "::error::First publication: the user must create the AUR package entry via the web UI at https://aur.archlinux.org/packages first"
             exit 1
           fi
@@ -148,4 +148,4 @@ jobs:
 
       - name: Print AUR URL
         run: |
-          echo "AUR package updated: https://aur.archlinux.org/packages/dotfiles-git"
+          echo "AUR package updated: https://aur.archlinux.org/packages/dot-cli-git"
