@@ -59,7 +59,7 @@ where dependencies allow.
 | `security-release.yml` (manifest job) | `release.published`, dispatch | Build `ALL_SHA256SUMS` over every release asset, Cosign-sign it. | `ALL_SHA256SUMS` + `.sig` + `.pem`. |
 | `release-distribute-homebrew.yml` | `release.published`, dispatch | Hash `dot-VERSION.tar.gz`, regenerate `install/homebrew/dot.rb`, push branch + PR to `sebastienrousseau/homebrew-tap`. | One PR on the tap repo. |
 | `release-distribute-scoop.yml` | `release.published`, dispatch | Hash `dot-VERSION.zip`, rewrite `install/scoop/dot.json` via jq (both 64bit + arm64 point at same zip), PR to `sebastienrousseau/scoop-bucket`. | One PR on the bucket repo. |
-| `release-distribute-aur.yml` | `release.published`, dispatch | Hash `dot-VERSION.tar.gz`, rewrite `pkgver` + `sha256sums` in `install/aur/PKGBUILD`, regenerate `.SRCINFO` via dockerised `makepkg`, push to `ssh://aur@aur.archlinux.org/dotfiles-git.git`. | One commit on AUR. |
+| `release-distribute-aur.yml` | `release.published`, dispatch | Hash `dot-VERSION.tar.gz`, rewrite `pkgver` + `sha256sums` in `install/aur/PKGBUILD`, regenerate `.SRCINFO` via dockerised `makepkg`, push to `ssh://aur@aur.archlinux.org/dot-cli-git.git`. | One commit on AUR. |
 | `release-attestation-check.yml` | weekly cron + dispatch | Verify the latest release carries the full attestation bundle (SBOM + sig + cert + intoto + manifest + sig + cert). | Opens or comments on a tracking issue. |
 
 ## Why `created` vs `published`
@@ -93,7 +93,7 @@ manifest job after late asset uploads picks up the new state and the
 |---|---|---|
 | Homebrew | `sebastienrousseau/homebrew-tap` | Tap repo exists (currently bare README + LICENSE). Workflow creates the `Formula/dot.rb` path on first publish. |
 | Scoop | `sebastienrousseau/scoop-bucket` | Bucket repo exists (currently bare). Workflow creates `bucket/dot.json` on first publish. |
-| AUR | `ssh://aur@aur.archlinux.org/dotfiles-git.git` | **Manual one-time step**: the maintainer must create the package entry via the AUR web UI before the workflow's `git clone` can succeed. The workflow exits with a clear error message on the first run if the repo doesn't exist. |
+| AUR | `ssh://aur@aur.archlinux.org/dot-cli-git.git` | **Manual one-time step**: the maintainer must create the package entry via the AUR web UI before the workflow's `git clone` can succeed. The workflow exits with a clear error message on the first run if the repo doesn't exist. |
 
 ## Verifying a release
 
@@ -105,7 +105,7 @@ independently.
 
 ## Known caveats
 
-- **AUR `pkgname=dotfiles-git`**: AUR's `-git` convention means
+- **AUR `pkgname=dot-cli-git`**: AUR's `-git` convention means
   "tracks git HEAD", but the workflow publishes tagged stable
   releases. Either rename to plain `dotfiles` in
   `install/aur/PKGBUILD` and register that package, or accept the
