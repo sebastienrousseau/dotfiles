@@ -159,7 +159,7 @@ jobs:
         run: |
           set -euo pipefail
           TAP_REPO="sebastienrousseau/homebrew-tap"
-          git clone "https://${{ secrets.GITHUB_TOKEN }}@github.com/${TAP_REPO}.git" homebrew-tap
+          git clone "https://${{ secrets.TAP_PUSH_TOKEN || secrets.GITHUB_TOKEN }}@github.com/${TAP_REPO}.git" homebrew-tap
           # Detect the default branch (main vs master) so the PR targets
           # the right base regardless of how the tap is initialised.
           cd homebrew-tap
@@ -209,7 +209,7 @@ jobs:
 
       - name: Open Pull Request to homebrew-tap
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.TAP_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           VERSION="${{ steps.resolve-tag.outputs.version }}"

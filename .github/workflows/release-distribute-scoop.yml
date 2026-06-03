@@ -156,7 +156,7 @@ jobs:
         run: |
           set -euo pipefail
           BUCKET_REPO="sebastienrousseau/scoop-bucket"
-          git clone "https://${{ secrets.GITHUB_TOKEN }}@github.com/${BUCKET_REPO}.git" scoop-bucket
+          git clone "https://${{ secrets.TAP_PUSH_TOKEN || secrets.GITHUB_TOKEN }}@github.com/${BUCKET_REPO}.git" scoop-bucket
           # Detect the default branch (main vs master) so the PR targets
           # the right base regardless of how the bucket is initialised.
           cd scoop-bucket
@@ -206,7 +206,7 @@ jobs:
 
       - name: Open Pull Request to scoop-bucket
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.TAP_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           VERSION="${{ steps.resolve-tag.outputs.version }}"
