@@ -2,7 +2,7 @@
 
 This file documents all notable changes to this project.
 
-## v0.2.504 (unreleased)
+## v0.2.504 — 2026-06-03
 
 First-class **stock-macOS** support: the installer and the entire `dot` CLI
 now run correctly under the system `/bin/bash` 3.2, and the mise↔chezmoi
@@ -28,7 +28,7 @@ end-to-end install and exercising every command. Full suite: 4821/4821.
 
 - Homebrew/Scoop release installers now actually install (sha256 substitution, Scoop `extract_dir` + Windows entrypoint).
 
-## v0.2.503 (unreleased)
+## v0.2.503 — 2026-05-30
 
 Polish + cross-platform + Scorecard release **plus** the
 incremental repo reorganisation per
