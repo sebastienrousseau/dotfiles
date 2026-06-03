@@ -128,6 +128,10 @@ jobs:
             -w /work \
             archlinux/archlinux:base-devel \
             bash -c "useradd -m builder && chown -R builder:builder /work && su builder -c 'cd /work && makepkg --printsrcinfo > .SRCINFO'"
+          # The container chowned the bind-mount (including aur-pkg/.git) to
+          # its builder UID; restore runner ownership so the host git steps
+          # below can lock .git/config and commit/push.
+          sudo chown -R "$(id -u):$(id -g)" aur-pkg
 
       - name: Commit and push to AUR
         run: |
