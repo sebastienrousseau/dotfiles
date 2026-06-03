@@ -169,7 +169,7 @@ else
 fi
 
 test_start "platform_mise_cross_platform"
-assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/config.toml" "auto_install = true" "mise must auto-install tools on all platforms"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml" "auto_install = true" "mise must auto-install tools on all platforms"
 
 # ═══════════════════════════════════════════════════════════════
 # 7. LINUX DESKTOP — conditional feature flags

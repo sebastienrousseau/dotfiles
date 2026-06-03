@@ -64,7 +64,25 @@ YELLOW="${YELLOW:-}"
 # Scoring
 TOTAL_POINTS=0
 MAX_POINTS=0
-declare -A CATEGORY_SCORES
+# Parallel indexed arrays instead of `declare -A` (bash 4+; macOS ships
+# bash 3.2). CAT_NAMES[i] holds a category name, CAT_SCORES[i] its running
+# total. Category names can contain spaces, so an emulation via dynamic
+# variable names wouldn't work — a linear scan over the handful of
+# categories is fine.
+CAT_NAMES=()
+CAT_SCORES=()
+
+_cat_add() {
+  local name="$1" pts="$2" i
+  for ((i = 0; i < ${#CAT_NAMES[@]}; i++)); do
+    if [[ "${CAT_NAMES[$i]}" == "$name" ]]; then
+      CAT_SCORES[i]=$((CAT_SCORES[i] + pts))
+      return 0
+    fi
+  done
+  CAT_NAMES+=("$name")
+  CAT_SCORES+=("$pts")
+}
 
 add_points() {
   local category="$1"
@@ -74,7 +92,7 @@ add_points() {
 
   TOTAL_POINTS=$((TOTAL_POINTS + points))
   MAX_POINTS=$((MAX_POINTS + max))
-  CATEGORY_SCORES["$category"]=$((${CATEGORY_SCORES[$category]:-0} + points))
+  _cat_add "$category" "$points"
 
   if ! $JSON_OUTPUT && $VERBOSE; then
     local icon
@@ -339,10 +357,11 @@ print_summary() {
     echo "  \"grade\": \"$(get_grade $score)\","
     echo "  \"categories\": {"
     local first=true
-    for cat in "${!CATEGORY_SCORES[@]}"; do
+    local _ci
+    for ((_ci = 0; _ci < ${#CAT_NAMES[@]}; _ci++)); do
       $first || echo ","
       first=false
-      printf "    \"%s\": %d" "$cat" "${CATEGORY_SCORES[$cat]}"
+      printf "    \"%s\": %d" "${CAT_NAMES[$_ci]}" "${CAT_SCORES[$_ci]}"
     done
     echo ""
     echo "  }"

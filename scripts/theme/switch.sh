@@ -58,7 +58,7 @@ if [ -z "$SRC_DIR" ]; then
   exit 1
 fi
 
-# Descend into the chezmoi source subdir when .chezmoiroot is present (v0.2.503+)
+# Descend into the chezmoi source subdir when .chezmoiroot is present (post-reorg, chezmoi files under defaults/)
 CHEZMOI_SRC="$SRC_DIR"
 if [[ -f "$SRC_DIR/.chezmoiroot" ]]; then
   _sub="$(head -1 "$SRC_DIR/.chezmoiroot" | tr -d '[:space:]')"

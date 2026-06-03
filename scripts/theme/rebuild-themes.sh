@@ -12,11 +12,33 @@
 #   bash rebuild-themes.sh --list       # List discovered wallpapers without rebuilding
 set -euo pipefail
 
+# This script relies on associative arrays (`declare -A`) and `wait -n`,
+# both of which need bash >= 4. macOS ships /bin/bash 3.2, where it would
+# otherwise fail with cryptic "invalid option" / "bad array subscript"
+# errors mid-run. Re-exec under a newer bash when one is available
+# (Homebrew, MacPorts, mise), and fail with a clear, actionable message
+# otherwise rather than corrupting a half-built themes.toml.
+if ((BASH_VERSINFO[0] < 4)); then
+  for _newer_bash in \
+    /opt/homebrew/bin/bash \
+    /usr/local/bin/bash \
+    "${HOMEBREW_PREFIX:-}/bin/bash" \
+    "$(command -v bash 2>/dev/null || true)"; do
+    if [[ -n "$_newer_bash" && -x "$_newer_bash" ]] &&
+      "$_newer_bash" -c '((BASH_VERSINFO[0] >= 4))' 2>/dev/null; then
+      exec "$_newer_bash" "$0" "$@"
+    fi
+  done
+  echo "Error: 'dot theme rebuild' needs bash >= 4 (macOS ships bash 3.2)." >&2
+  echo "       Install a newer bash and retry:  brew install bash" >&2
+  exit 1
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 EXTRACT_SCRIPT="$SCRIPT_DIR/extract-theme.py"
 DOTFILES_DIR="${HOME}/.dotfiles"
 
-# Descend into the chezmoi source subdir when .chezmoiroot is present (v0.2.503+)
+# Descend into the chezmoi source subdir when .chezmoiroot is present (post-reorg, chezmoi files under defaults/)
 CHEZMOI_SRC="$DOTFILES_DIR"
 if [[ -f "$DOTFILES_DIR/.chezmoiroot" ]]; then
   _sub="$(head -1 "$DOTFILES_DIR/.chezmoiroot" | tr -d '[:space:]')"
@@ -266,7 +288,7 @@ if [[ $TOTAL_WORK -gt 0 ]]; then
       fi
     ) &
 
-    # Limit parallel jobs
+    # Limit parallel jobs (bash >= 4 guaranteed by the guard at the top).
     while [[ $(jobs -r | wc -l) -ge $JOBS ]]; do
       wait -n 2>/dev/null || true
     done

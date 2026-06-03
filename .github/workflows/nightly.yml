@@ -107,7 +107,7 @@ jobs:
 
   nightly-test-suite:
     name: Nightly / Test Suite
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@da89db441c0e41f3d2fdcbf290eb681f0b49921d # master
     with:
       min_coverage: "95"
       run_integration: false

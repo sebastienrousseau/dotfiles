@@ -583,16 +583,21 @@ EOF
     fi
   }
 
-  local running=0
+  # Throttle to `jobs` concurrent workers. `wait -n` (wait for the next
+  # job to finish) is bash 4.3+, but macOS ships bash 3.2 — there it
+  # silently fails and the throttle collapses to unbounded parallelism.
+  # Track PIDs and block on the oldest when at capacity instead; works on
+  # bash 3.2 and 4+ alike.
+  local _pids=()
   while IFS=$'\t' read -r name ssh profile; do
     [[ -n "$name" && -n "$ssh" ]] || continue
     total=$((total + 1))
-    while ((running >= jobs)); do
-      wait -n 2>/dev/null || break
-      running=$((running - 1))
+    while ((${#_pids[@]} >= jobs)); do
+      wait "${_pids[0]}" 2>/dev/null || true
+      _pids=("${_pids[@]:1}")
     done
     _fleet_apply_one "$name" "$ssh" "$effective_cmd" "$tmpdir" &
-    running=$((running + 1))
+    _pids+=("$!")
   done <<<"$entries"
   wait
 

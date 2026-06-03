@@ -14,7 +14,7 @@ WALLPAPER_DIR="${DOTFILES_WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
 CHEZMOI_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
 
 # Resolve dotfiles repo root, then descend into chezmoi source subdir if
-# .chezmoiroot is present (v0.2.503+, where chezmoi files live in defaults/)
+# .chezmoiroot is present (where chezmoi files live in defaults/)
 _DOTFILES_ROOT="${HOME}/.dotfiles"
 [[ ! -d "$_DOTFILES_ROOT" && -d "${HOME}/.local/share/chezmoi" ]] && _DOTFILES_ROOT="${HOME}/.local/share/chezmoi"
 _CHEZMOI_SRC="$_DOTFILES_ROOT"

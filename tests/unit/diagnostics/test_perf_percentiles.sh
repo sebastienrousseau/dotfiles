@@ -62,7 +62,11 @@ for _ in $(seq 1 10); do
 done
 
 # Invoke the by-tool reader directly via XDG_STATE_HOME override.
-out=$(XDG_STATE_HOME="$tmp/state" bash "$PERF" --by-tool 2>&1 || true)
+# MISE_YES=1: perf.sh's aggregator runs `python3`, which is a mise shim once
+# the toolchain is installed. Overriding XDG_STATE_HOME discards mise's trust
+# cache, so the shim would otherwise abort on the untrusted repo mise.toml and
+# swallow the percentile output. MISE_YES auto-trusts in this isolated env.
+out=$(XDG_STATE_HOME="$tmp/state" MISE_YES=1 bash "$PERF" --by-tool 2>&1 || true)
 
 test_start "by_tool_reports_mise_init"
 if echo "$out" | grep -q "mise-init"; then
@@ -111,7 +115,7 @@ test_start "baseline_file_created_with_write"
 if ! command -v zsh >/dev/null 2>&1; then
   assert_exit_code 0 "true  # skipped: zsh unavailable"
 else
-  XDG_CACHE_HOME="$tmp/cache" bash "$PERF" --baseline --shell zsh >/dev/null 2>&1 || true
+  XDG_CACHE_HOME="$tmp/cache" MISE_YES=1 bash "$PERF" --baseline --shell zsh >/dev/null 2>&1 || true
   if [[ -s "$tmp/cache/dotfiles/perf-baseline.json" ]]; then
     assert_exit_code 0 "true"
   else

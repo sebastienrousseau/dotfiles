@@ -66,6 +66,9 @@ package.json
 package-lock.json
 mise.toml
 mise-versions.lock.json
+# mise's writable global config (owned by `mise use -g`, not chezmoi).
+# Managed base lives in conf.d/00-dotfiles.toml.
+.config/mise/config.toml
 version-sync.sh
 # Root Nix flake for the repo dev shell (distinct from nix/ home-manager flake)
 flake.nix

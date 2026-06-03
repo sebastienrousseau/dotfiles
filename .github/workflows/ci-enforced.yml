@@ -44,7 +44,7 @@ jobs:
 
   lint-lua:
     name: Lint / Lua (Zero Warnings)
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@4acbe15316661b2e4d0811cede802768ee6c2d4f # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@da89db441c0e41f3d2fdcbf290eb681f0b49921d # master
     with:
       target: defaults/dot_config/nvim
       strict: true
@@ -58,7 +58,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@da89db441c0e41f3d2fdcbf290eb681f0b49921d # master
     with:
       flake_dir: nix
       run_fmt_check: true
@@ -67,7 +67,7 @@ jobs:
 
   lint-copyright:
     name: Lint / Copyright Headers (Zero Tolerance)
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@da89db441c0e41f3d2fdcbf290eb681f0b49921d # master
 
   # ============================================================================
   # STAGE 2: SECURITY (Mandatory - No bypass allowed)
@@ -86,7 +86,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Gitleaks (No bypass)
-        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -138,7 +138,7 @@ jobs:
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Checkov Infrastructure Security
-        uses: bridgecrewio/checkov-action@4048c972aae68d0b983a48bb3479aab2d877b898 # v12.3102.0
+        uses: bridgecrewio/checkov-action@b75da993a1a8b73d1086c8d330cadeee5bcccb31 # v12.3103.0
         with:
           framework: dockerfile,yaml,secrets
           quiet: false
@@ -191,7 +191,7 @@ jobs:
 
   test-unit:
     name: Test / Unit Tests
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@da89db441c0e41f3d2fdcbf290eb681f0b49921d # master
     with:
       min_coverage: "100"
       run_integration: true

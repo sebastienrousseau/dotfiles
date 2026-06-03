@@ -58,6 +58,11 @@ typos.toml
 llms.txt
 mise.lock.json
 mise-versions.lock.json
+# mise's writable global config — owned by `mise use -g` / `mise upgrade`,
+# NOT chezmoi. The managed base lives in conf.d/00-dotfiles.toml. Ignoring
+# config.toml stops mise's version-pin writes from drifting against the
+# source. See defaults/dot_config/mise/conf.d/00-dotfiles.toml.
+.config/mise/config.toml
 Gemfile
 Gemfile.lock
 flake.nix

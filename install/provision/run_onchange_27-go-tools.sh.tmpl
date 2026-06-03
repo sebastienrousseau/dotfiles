@@ -2,7 +2,7 @@
 
 # run_onchange_27-go-tools.sh.tmpl
 # Go toolchain and tools provisioning
-{{- if and (lookPath "go") (has "go" .features) }}
+{{- if lookPath "go" }}
 
 set -euo pipefail
 

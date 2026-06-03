@@ -1,5 +1,14 @@
-# mise (runtime manager) configuration
+# mise (runtime manager) configuration — DOTFILES-MANAGED BASE LAYER
 # https://mise.jdx.dev/
+#
+# This file lives in conf.d/ (loaded first, lowest precedence) and is the
+# read-only base config deployed by chezmoi. The writable global config
+# `~/.config/mise/config.toml` is intentionally NOT chezmoi-managed (see
+# .chezmoiignore): that's where `mise use -g` / `mise upgrade` write their
+# version pins. Splitting them this way stops mise's mutable writes from
+# perpetually drifting the chezmoi-managed source. User pins in
+# config.toml override these defaults. Don't move tool defaults back into
+# config.toml or the drift returns.
 
 [settings]
 # Install missing tools automatically
@@ -13,7 +22,7 @@ ruby.compile = false
 
 [tools]
 # Node.js
-node = ["lts", "24", "25"]
+node = "24"
 
 # Python
 python = ["3.12", "3.11", "3.14"]
@@ -53,10 +62,15 @@ zoxide = "latest"
 "aqua:twpayne/chezmoi" = "latest"
 "aqua:junegunn/fzf" = "latest"
 "aqua:FiloSottile/age" = "latest"
-"aqua:sharkdp/hyperfine" = "latest"
+# hyperfine intentionally NOT managed by mise: the aqua package for
+# sharkdp/hyperfine only ships an x86_64 macOS binary, so on Apple
+# Silicon without Rosetta the mise shim is unrunnable ("Bad CPU type in
+# executable"), which silently breaks `dot doctor`'s startup benchmark.
+# It's provided natively by Brewfile.cli (arm64) and by Linux package
+# managers instead.
 "aqua:ollama/ollama" = "latest"
-"aqua:Nukesor/pueue/pueue" = "4.0.4"
-"aqua:Nukesor/pueue/pueued" = "4.0.4"
+"aqua:Nukesor/pueue/pueue" = "4.0.3"
+"aqua:Nukesor/pueue/pueued" = "4.0.3"
 "aqua:dandavison/delta" = "latest"
 fd = "latest"
 "aqua:ClementTsang/bottom" = "latest"
@@ -94,7 +108,13 @@ just = "latest"
 [env]
 # Environment variables to set
 MISE_EXPERIMENTAL = "1"
-GITHUB_TOKEN = "{{exec(command='gh auth token')}}"
+# Use the gh token when authenticated (lifts GitHub API rate limits for
+# aqua/ubi backends), but degrade gracefully when gh is absent or logged
+# out. Without the `|| true` the failing command makes mise abort *every*
+# operation with "failed to parse template" — breaking `dot env`,
+# `mise install`, and shell startup on any machine where `gh auth` hasn't
+# run yet.
+GITHUB_TOKEN = "{{exec(command='gh auth token 2>/dev/null || true')}}"
 # Build caches → /tmp (cleared on reboot)
 GOCACHE = "/tmp/builds/go-cache"
 GOTMPDIR = "/tmp/builds/go-tmp"

@@ -59,17 +59,17 @@ while IFS= read -r line; do
   if ((quote_count % 2 != 0)); then
     unmatched=$((unmatched + 1))
   fi
-done < "$REPO_ROOT/defaults/dot_config/mise/config.toml"
+done < "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml"
 assert_equals "0" "$unmatched" "mise config.toml must have balanced quotes"
 
 test_start "integration_mise_has_ai_tools"
-assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/config.toml" "npm:@anthropic-ai/claude-code" "mise must include Claude Code"
-assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/config.toml" "npm:@google/gemini-cli" "mise must include Gemini CLI"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml" "npm:@anthropic-ai/claude-code" "mise must include Claude Code"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml" "npm:@google/gemini-cli" "mise must include Gemini CLI"
 
 test_start "integration_mise_has_modern_cli_tools"
-assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/config.toml" "delta" "mise must include delta"
-assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/config.toml" "lazygit" "mise must include lazygit"
-assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/config.toml" "fd" "mise must include fd"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml" "delta" "mise must include delta"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml" "lazygit" "mise must include lazygit"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml" "fd" "mise must include fd"
 
 # ═══════════════════════════════════════════════════════════════
 # 4. AI BRIDGE → MISE PACKAGE MAPPING

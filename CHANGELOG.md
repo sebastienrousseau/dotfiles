@@ -2,6 +2,32 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.504 (unreleased)
+
+First-class **stock-macOS** support: the installer and the entire `dot` CLI
+now run correctly under the system `/bin/bash` 3.2, and the mise↔chezmoi
+ownership conflict is resolved structurally. Found by performing a clean
+end-to-end install and exercising every command. Full suite: 4821/4821.
+
+### Fixed
+
+- **macOS bash 3.2 compatibility** across the CLI, which had assumed bash 4+:
+  - iTerm2 profile `run_onchange` used `declare -A` and aborted `chezmoi apply`; rewritten with indexed arrays.
+  - `dot ai` used `local -n` namerefs + `declare -A`; now passes arrays by value and reads probe results from the cached TSV via `awk`.
+  - `dot security-score` and the `matrix` effect dropped `declare -A` (parallel arrays / `case`).
+  - `dot fleet apply` replaced the bash-4.3 `wait -n` throttle with a portable PID-FIFO; `dot theme rebuild` now requires bash 4 and re-execs under a newer bash when available.
+  - `dot perf` / `dot bundle` / `dot benchmark` / `dot doctor` / `dot sync` and the pre-commit hook: empty-array `"${arr[@]}"` under `set -u` aborted on bash 3.2; cleanup traps now use the `set +u` idiom.
+  - `.bashrc` guards bash-4-only `shopt` options (`globstar`, `dirspell`, `autocd`).
+- **Installer:** backup loop no longer recurses into live `~/.ssh/agent` sockets; seeds git identity from `git config --global` and prints a hint when none is set. The v0.2.503 migration no longer exits non-zero under `set -e`.
+- **mise:** the chezmoi-managed base config moved to `conf.d/00-dotfiles.toml`; `~/.config/mise/config.toml` is now mise's `.chezmoiignore`'d writable global, so `mise use -g` no longer drifts the source. An absent `gh` token no longer breaks the whole config, and the x86_64-only hyperfine aqua package (unrunnable on Apple Silicon) is no longer managed by mise. `version-sync.sh` no longer hangs on a non-TTY stdin (rg now searches the tree, not stdin) and respects `EXCLUDE_FILES`.
+- **`Brewfile.cli`:** add `zellij` and `sops` (checked by `dot doctor`, previously absent).
+- **`dot version-locks`** is `.chezmoiroot`-aware again (had reported "config not found" since the v0.2.503 reorg).
+- **Tests:** robust large-HEIC wallpaper dimension probe (`-ping`); `test_perf_percentiles` trusts mise in its isolated environment.
+
+### Changed
+
+- Homebrew/Scoop release installers now actually install (sha256 substitution, Scoop `extract_dir` + Windows entrypoint).
+
 ## v0.2.503 (unreleased)
 
 Polish + cross-platform + Scorecard release **plus** the

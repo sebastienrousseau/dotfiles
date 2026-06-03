@@ -6,7 +6,7 @@
 set -euo pipefail
 
 _cleanup_files=()
-trap 'rm -f "${_cleanup_files[@]}"' EXIT
+trap 'set +u; rm -f "${_cleanup_files[@]}" 2>/dev/null; set -u' EXIT
 
 # ANSI Colors
 RED='\033[0;31m'
@@ -140,6 +140,6 @@ if [[ $FAILED -eq 1 ]]; then
   printf '%b\\n' "   (Use --no-verify to bypass if absolutely necessary)"
   exit 1
 else
-  printf '%b\n' "${GREEN}${BOLD}✅ Audit passed.${NC} v0.2.503 standards maintained."
+  printf '%b\n' "${GREEN}${BOLD}✅ Audit passed.${NC} v0.2.504 standards maintained."
   exit 0
 fi
