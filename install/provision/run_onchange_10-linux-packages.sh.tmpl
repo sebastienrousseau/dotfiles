@@ -66,6 +66,17 @@ if command -v apt-get >/dev/null; then
   )
   $sudo_cmd apt-get install -y "${packages[@]}"
 
+  # Debian/Ubuntu ship these under alternate binary names (bat->batcat,
+  # fd->fdfind). Expose the canonical names so scripts/aliases that call
+  # `bat`/`fd` work the same as on macOS/Arch.
+  mkdir -p "$HOME/.local/bin"
+  if command -v batcat >/dev/null 2>&1 && [ ! -e "$HOME/.local/bin/bat" ]; then
+    ln -sf "$(command -v batcat)" "$HOME/.local/bin/bat"
+  fi
+  if command -v fdfind >/dev/null 2>&1 && [ ! -e "$HOME/.local/bin/fd" ]; then
+    ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
+  fi
+
   # GitHub CLI (apt) — requires official repo
   if ! command -v gh >/dev/null; then
     if ! apt-cache show gh >/dev/null 2>&1; then
@@ -139,6 +150,23 @@ elif command -v pacman >/dev/null; then
   if [ ${#install_optional[@]} -gt 0 ]; then
     $sudo_cmd pacman -S --needed --noconfirm "${install_optional[@]}"
   fi
+
+else
+  # No apt/dnf/pacman: openSUSE (zypper), Alpine (apk), Gentoo, etc. are not
+  # provisioned here. Surface it loudly instead of silently installing nothing
+  # and then assuming a compiler/curl are present for the binary tools below.
+  log_warn "No supported package manager (apt-get/dnf/pacman) found."
+  log_warn "Skipping system package installation — install curl, git, a compiler"
+  log_warn "toolchain, and unzip manually, or the binary-tool installs below may fail."
+fi
+
+# ── WSL interop ──────────────────────────────────────────────
+# wslu provides wslview (open URLs in the Windows browser); BROWSER=wslview
+# is exported by the shell env. Best-effort — only on Debian/Ubuntu WSL.
+if grep -qi microsoft /proc/version 2>/dev/null \
+  && command -v apt-get >/dev/null 2>&1 \
+  && ! command -v wslview >/dev/null 2>&1; then
+  $sudo_cmd apt-get install -y wslu || log_warn "Could not install wslu (WSL interop helpers)."
 fi
 
 # ── Luacheck ─────────────────────────────────────────────────
@@ -192,18 +220,24 @@ if ! command -v fzf >/dev/null; then
   fi
 fi
 
-# Neovim (custom install to /opt)
+# Neovim (custom install to /opt). Neovim renamed its release assets after
+# v0.10.3: nvim-linux64.tar.gz -> nvim-linux-{x86_64,arm64}.tar.gz, and the
+# tarball's top-level directory matches the asset name.
 if ! command -v nvim >/dev/null; then
-  log_info "Installing Neovim (Nightly)..."
+  log_info "Installing Neovim ($NEOVIM_TAG)..."
+  case "$arch" in
+    x86_64) nvim_asset="nvim-linux-x86_64" ;;
+    aarch64) nvim_asset="nvim-linux-arm64" ;;
+  esac
   neovim_sha_suffix="${NEOVIM_NIGHTLY_SHA_SUFFIX:-sha256sum}"
-  url="$(github_asset_url "neovim/neovim" "nvim-linux64.tar.gz" "$NEOVIM_TAG")"
-  sha_url="$(github_asset_url "neovim/neovim" "nvim-linux64.tar.gz.${neovim_sha_suffix}" "$NEOVIM_TAG")"
+  url="$(github_asset_url "neovim/neovim" "${nvim_asset}.tar.gz" "$NEOVIM_TAG")"
+  sha_url="$(github_asset_url "neovim/neovim" "${nvim_asset}.tar.gz.${neovim_sha_suffix}" "$NEOVIM_TAG")"
   tmp_dir="$(umask 077 && mktemp -d)"
-  download_and_verify_sha256 "$url" "$sha_url" "$tmp_dir/nvim-linux64.tar.gz"
-  tar -xzf "$tmp_dir/nvim-linux64.tar.gz" -C "$tmp_dir"
-  $sudo_cmd rm -rf /opt/nvim-linux64
-  $sudo_cmd mv "$tmp_dir/nvim-linux64" /opt/
-  $sudo_cmd ln -sf /opt/nvim-linux64/bin/nvim /usr/local/bin/nvim
+  download_and_verify_sha256 "$url" "$sha_url" "$tmp_dir/${nvim_asset}.tar.gz"
+  tar -xzf "$tmp_dir/${nvim_asset}.tar.gz" -C "$tmp_dir"
+  $sudo_cmd rm -rf "/opt/${nvim_asset}" /opt/nvim-linux64
+  $sudo_cmd mv "$tmp_dir/${nvim_asset}" /opt/
+  $sudo_cmd ln -sf "/opt/${nvim_asset}/bin/nvim" /usr/local/bin/nvim
   rm -rf "$tmp_dir"
 fi
 
