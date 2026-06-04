@@ -20,12 +20,12 @@ It defines a signed, local-first workstation baseline for agentic development on
 
 The source of truth lives in tracked JSON artifacts:
 
-- [policy-bundles.json](/home/seb/.dotfiles/dot_config/dotfiles/policy-bundles.json)
-- [agent-profiles.json](/home/seb/.dotfiles/dot_config/dotfiles/agent-profiles.json)
-- [mcp-policy.json](/home/seb/.dotfiles/dot_config/dotfiles/mcp-policy.json)
-- [mcp-registry.json](/home/seb/.dotfiles/dot_config/dotfiles/mcp-registry.json)
-- [model-registry.json](/home/seb/.dotfiles/dot_config/dotfiles/model-registry.json)
-- [prompt-registry.json](/home/seb/.dotfiles/dot_config/dotfiles/prompt-registry.json)
+- [policy-bundles.json](../../defaults/dot_config/dotfiles/policy-bundles.json)
+- [agent-profiles.json](../../defaults/dot_config/dotfiles/agent-profiles.json)
+- [mcp-policy.json](../../defaults/dot_config/dotfiles/mcp-policy.json)
+- [mcp-registry.json](../../defaults/dot_config/dotfiles/mcp-registry.json)
+- [model-registry.json](../../defaults/dot_config/dotfiles/model-registry.json)
+- [prompt-registry.json](../../defaults/dot_config/dotfiles/prompt-registry.json)
 
 ## Enterprise path
 

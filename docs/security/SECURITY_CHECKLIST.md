@@ -11,7 +11,7 @@ Use this checklist before cutting any new release (e.g., `v0.x.x`) to ensure sup
 - [ ] **Pinned Version**: Update `install.sh` `VERSION` variable to match the release tag.
 - [ ] **Docs Sync**: Ensure `README.md` and `.github/PULL_REQUEST_TEMPLATE.md` installer URLs point to the new tag (not `main`).
 - [ ] **Clean Build**: Verify `install.sh` does not curl random scripts from third parties without pinning.
-- [ ] **SOUP Register**: Review [SOUP_REGISTER.md](/home/seb/.dotfiles/docs/security/SOUP_REGISTER.md) and confirm all active external components have an owner and validation path.
+- [ ] **SOUP Register**: Review [SOUP_REGISTER.md](SOUP_REGISTER.md) and confirm all active external components have an owner and validation path.
 
 ## 2. Secrets & Leak Prevention
 
