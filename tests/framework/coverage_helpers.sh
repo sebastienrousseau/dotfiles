@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC2034
 # coverage_helpers.sh — sandbox + safe-exercise helpers for shallow→deep
 # test conversions. Lets a test run its script under safe-mode entry

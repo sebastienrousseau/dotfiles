@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # dot-theme-sync validation — verifies script structure and functions
 # shellcheck disable=SC1090,SC1091,SC2034
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

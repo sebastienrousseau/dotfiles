@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # CI Configuration Validation Script
 # Verifies that all zero-warning policy components are properly configured
 

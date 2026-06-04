@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Universal Dotfiles Installer (Zero-Dependency)
 # Usage: bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
 # (or ./install.sh locally)

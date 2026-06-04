@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Guard against full-history gitleaks scans on manual runs.
 # This ensures workflow checkout remains shallow near gitleaks steps.
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # =============================================================================
 # scrub.sh — replace machine- and time-specific content in dot-CLI output
 # with stable placeholders so golden-file snapshot tests don't break on

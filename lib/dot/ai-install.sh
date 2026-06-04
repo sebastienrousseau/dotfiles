@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Sourced by scripts/dot/commands/ai.sh and scripts/ops/chezmoi-apply.sh.
 # Shared AI provider install helpers (mise-package map + Claude installer).
 #
