@@ -319,7 +319,7 @@ cmd_ai_delegate() {
   # Usage: dot ai delegate "<prompt>" [max-turns] [agent] [timeout]
   if [[ $# -lt 1 ]]; then
     ui_err "Usage" "dot ai delegate \"<prompt>\" [max-turns] [agent] [timeout-secs]"
-    ui_info "Example" "dot ai delegate \"add a CHANGELOG entry for v0.2.504\""
+    ui_info "Example" "dot ai delegate \"add a CHANGELOG entry for v0.2.505\""
     return 1
   fi
   local prompt="$1"
