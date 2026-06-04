@@ -24,16 +24,29 @@ case "$(uname -s)" in
     ;;
   Linux)
     if grep -qi microsoft /proc/version 2>/dev/null; then
-      # WSL
+      # WSL — relies on Windows interop being on PATH (clip.exe / powershell.exe).
       if [ -t 0 ]; then
-        powershell.exe -command "Get-Clipboard" | tr -d '\r'
-      else
+        if command -v powershell.exe >/dev/null 2>&1; then
+          powershell.exe -command "Get-Clipboard" | tr -d '\r'
+        else
+          echo "cb: powershell.exe not on PATH (WSL interop disabled?)" >&2
+          exit 1
+        fi
+      elif command -v clip.exe >/dev/null 2>&1; then
         clip.exe && log_info "Copied to Windows clipboard (WSL)"
+      else
+        echo "cb: clip.exe not on PATH (WSL interop disabled?)" >&2
+        exit 1
       fi
-    elif [ -n "$WAYLAND_DISPLAY" ]; then
+    elif [ -n "${WAYLAND_DISPLAY:-}" ] && command -v wl-copy >/dev/null 2>&1; then
       if [ -t 0 ]; then wl-paste; else wl-copy && log_info "Copied to Wayland clipboard"; fi
-    else
+    elif command -v xclip >/dev/null 2>&1; then
       if [ -t 0 ]; then xclip -selection clipboard -o; else xclip -selection clipboard && log_info "Copied to X11 clipboard"; fi
+    elif command -v xsel >/dev/null 2>&1; then
+      if [ -t 0 ]; then xsel -b -o; else xsel -b && log_info "Copied to X11 clipboard (xsel)"; fi
+    else
+      echo "cb: no clipboard backend found (install wl-clipboard, xclip, or xsel)" >&2
+      exit 1
     fi
     ;;
 esac
