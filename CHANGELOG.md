@@ -8,7 +8,9 @@ Claude Code is no longer installed through mise/npm. npm 11 silently drops
 the platform-native `optionalDependency` on global installs, leaving a stub
 binary that errors with "claude native binary not installed". The fix moves
 Claude Code to Anthropic's native installer and audits the other AI tools for
-the same class of bug.
+the same class of bug. This release also repairs Linux install breaks, hardens
+cross-platform shell parity (bash, fish, nushell), and adds SPDX license
+headers across the source tree.
 
 ### Fixed
 
@@ -18,6 +20,24 @@ the same class of bug.
   optional-dependency bug. Bootstrap (`run_onchange_15-ai-cli-tools`), `dot ai`,
   and `dot apply`'s "install missing providers" flow all install Claude Code
   natively now instead of reinstalling the broken package.
+- **Linux install breaks (every distro):** Neovim fetched `nvim-linux64.tar.gz`,
+  an asset Neovim renamed after v0.10.3, so the pinned v0.11.6 download 404'd and
+  aborted the whole provision run — now arch-aware (`nvim-linux-{x86_64,arm64}`)
+  with ARM support; AIChat defaulted to a `latest` tag baked into the asset
+  filename (also a guaranteed 404) — now pinned via `AICHAT_TAG`.
+- **Clipboard (`cb`):** crashed under `set -u` on non-Wayland Linux
+  (`$WAYLAND_DISPLAY` was referenced unguarded); added `command -v` guards, an
+  `xsel` fallback, and clear per-backend (Wayland/X11/WSL) error messages.
+- **Bash parity:** `dot_bashrc` shipped ~14 hardcoded aliases and none of the
+  library functions — it never sourced the shared `~/.config/shell/*` hub. It
+  now loads the same layers zsh does (867 aliases + 185 functions), matching its
+  documented Tier-1 "Full" status.
+- **fish/nushell `goto`/`cdls`:** these change directory but were run through a
+  `bash -c` subshell, so the `cd` was discarded — they silently no-op'd.
+  Reimplemented natively (fish functions; nushell `def --env`, the only form
+  whose `cd` propagates to the caller).
+- **Docs:** fixed 18 hardcoded absolute markdown links (`/home/seb/.dotfiles/…`,
+  broken on GitHub and on any other machine) to file-relative paths.
 
 ### Changed
 
@@ -30,6 +50,13 @@ the same class of bug.
 - **Extracted** the shared Claude native-installer helper and the AI
   provider→mise-package map into `lib/dot/ai-install.sh`, removing duplication
   across `dot ai` and `dot apply`.
+- **Cross-distro robustness:** Debian/Ubuntu now symlink `~/.local/bin/{bat,fd}`
+  to `batcat`/`fdfind`; a missing apt/dnf/pacman warns loudly instead of silently
+  installing nothing; WSL gets a best-effort `wslu` install for `wslview`. fish
+  and nushell now export `EDITOR`/`VISUAL`/`PAGER` to match the zsh/bash profile.
+- **Licensing:** added `SPDX-License-Identifier: MIT` headers (SPDX-first / REUSE
+  form) and normalized the copyright line to `Sebastien Rousseau` across 831
+  repo-only source files; dropped the contradictory `All rights reserved.`.
 - **README** — fixed the OpenSSF Best Practices badge (was linking to the
   new-project form with a static label; now the live `cii/percentage/12840`
   endpoint linked to the real project).
