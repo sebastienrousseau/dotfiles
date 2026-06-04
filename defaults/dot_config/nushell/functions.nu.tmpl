@@ -9,9 +9,40 @@
 # --- {{ $group }} ---
 {{ range $files -}}
 {{ $func := trimSuffix ".sh" (base .) -}}
+{{- if not (or (eq $func "goto") (eq $func "cdls")) }}
 def {{ $func }} [...args] {
     bash -c $'source "$HOME/.config/shell/50-logic-functions.sh" 2>/dev/null; {{ $func }} "$@"' -- ...$args
 }
+{{ end -}}
+{{ end -}}
+{{ end -}}
 
-{{ end -}}
-{{ end -}}
+# --- Native directory-changing nav functions ---
+# goto/cdls change the working directory. A `bash -c` wrapper cannot (the cd is
+# lost when the subshell exits), and even a plain Nushell `def` scopes cd to the
+# command. `def --env` propagates the cd to the caller.
+
+# cd to a directory and list its contents
+def --env goto [dir?: string] {
+    if ($dir | is-empty) {
+        print -e "[ERROR] No directory provided."
+        return
+    }
+    if not ($dir | path exists) {
+        print -e $"[ERROR] '($dir)' is not a valid directory."
+        return
+    }
+    cd $dir
+    ls
+}
+
+# cd to a directory (or home) and list its contents
+def --env cdls [dir?: string] {
+    if ($dir | is-empty) { cd } else { cd $dir }
+    ls
+}
+
+# Alias for cdls
+def --env cdl [dir?: string] {
+    if ($dir | is-empty) { cdls } else { cdls $dir }
+}
