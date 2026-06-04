@@ -142,9 +142,11 @@ _ai_status_field() {
 }
 
 # binary -> mise package mapping
+# Note: claude is intentionally absent — it is installed via Anthropic's
+# native installer (see _ai_install_claude_native), not mise/npm, because
+# npm 11 drops the platform-native optionalDependency on global installs.
 _ai_mise_pkg() {
   case "$1" in
-    claude) echo "npm:@anthropic-ai/claude-code" ;;
     codex) echo "npm:@openai/codex" ;;
     copilot) echo "npm:@github/copilot" ;;
     goose) echo "pipx:goose-ai" ;;
@@ -160,6 +162,32 @@ _ai_mise_pkg() {
     zai) echo "npm:@guizmo-ai/zai-cli" ;;
     *) echo "" ;;
   esac
+}
+
+# Install Claude Code via Anthropic's native installer (~/.local/bin/claude,
+# self-updating). Used instead of mise because npm 11 silently drops the
+# platform-native optionalDependency on global installs, leaving a broken binary.
+_ai_install_claude_native() {
+  local name="${1:-Claude Code}"
+  local installer
+  installer=$(umask 077 && mktemp)
+  if curl -fsSL -o "$installer" https://claude.ai/install.sh &&
+    [ "$(wc -c <"$installer")" -le 262144 ] &&
+    head -1 "$installer" | grep -q '^#!'; then
+    if has_command gum; then
+      if gum spin --spinner dot --title "Installing $name (native installer)" -- bash "$installer"; then
+        ui_ok "$name" "installed"
+      else
+        ui_warn "$name" "install failed (continuing)"
+      fi
+    else
+      ui_info "Installing" "$name via native installer"
+      bash "$installer" || ui_warn "$name" "install failed (continuing)"
+    fi
+  else
+    ui_warn "$name" "installer download/validation failed (continuing)"
+  fi
+  rm -f "$installer"
 }
 
 cmd_ai_status() {
@@ -254,6 +282,10 @@ cmd_ai_status() {
       echo ""
       for entry in "${_ai_to_install[@]}"; do
         IFS='|' read -r name bin <<<"$entry"
+        if [[ "$bin" == "claude" ]]; then
+          _ai_install_claude_native "$name"
+          continue
+        fi
         local pkg
         pkg=$(_ai_mise_pkg "$bin")
         if [[ -n "$pkg" ]]; then

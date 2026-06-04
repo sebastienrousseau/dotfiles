@@ -184,7 +184,7 @@ After `dot doctor` reports a healthy score, you have:
 | **Editor** | Neovim with lazy.nvim + LSP + theme-synced colorscheme |
 | **Terminal** | Ghostty/Alacritty/Kitty/WezTerm configs (pick whichever is installed) |
 | **Git** | Signed commits, delta diff, conventional commit template |
-| **AI tooling** | Claude Code, Codex, Copilot CLI, Gemini CLI via mise |
+| **AI tooling** | Codex, Copilot CLI, Gemini CLI via mise; Claude Code via Anthropic's native installer |
 | **Secret store** | Age key, SOPS config, `dot secrets` command ready |
 | **Security** | Gitleaks, detect-secrets baseline, signed attestation log |
 | **Theme engine** | K-Means wallpaper extractor, system + custom wallpaper discovery |

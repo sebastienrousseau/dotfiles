@@ -151,12 +151,38 @@ check_cmd() {
   return 1
 }
 
+# Install Claude Code via Anthropic's native installer instead of mise:
+# npm 11 drops the platform-native optionalDependency on global installs,
+# leaving a broken binary. The native installer self-updates ~/.local/bin/claude.
+_install_claude_native() {
+  local label="${1:-Claude Code}"
+  local installer
+  installer=$(umask 077 && mktemp)
+  if curl -fsSL -o "$installer" https://claude.ai/install.sh &&
+    [ "$(wc -c <"$installer")" -le 262144 ] &&
+    head -1 "$installer" | grep -q '^#!'; then
+    if command -v gum &>/dev/null; then
+      if gum spin --spinner dot --title "Installing $label (native installer)" -- bash "$installer"; then
+        ui_ok "$label" "installed"
+      else
+        ui_warn "$label" "install failed (continuing)"
+      fi
+    else
+      ui_info "Installing" "$label via native installer"
+      bash "$installer" || ui_warn "$label" "install failed (continuing)"
+    fi
+  else
+    ui_warn "$label" "installer download/validation failed (continuing)"
+  fi
+  rm -f "$installer"
+}
+
 echo ""
 ui_header "AI provider CLI checks (optional)"
 
-# binary|mise_package|label
+# binary|mise_package|label  (claude uses the native installer, not mise)
 _AI_PROVIDERS=(
-  "claude|npm:@anthropic-ai/claude-code|Claude Code"
+  "claude|native|Claude Code"
   "copilot|npm:@github/copilot|Copilot CLI"
   "gemini|npm:@google/gemini-cli|Gemini CLI"
   "sgpt|pipx:shell-gpt|Shell-GPT"
@@ -224,6 +250,10 @@ if [[ ${#_ai_missing[@]} -gt 0 ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]
       echo ""
       for _entry in "${_ai_to_install[@]}"; do
         IFS='|' read -r _bin _pkg _label <<<"$_entry"
+        if [[ "$_bin" == "claude" ]]; then
+          _install_claude_native "$_label"
+          continue
+        fi
         if command -v gum &>/dev/null; then
           if gum spin --spinner dot --title "Installing $_label ($_pkg)" -- \
             mise use -g "$_pkg@latest" 2>&1; then
