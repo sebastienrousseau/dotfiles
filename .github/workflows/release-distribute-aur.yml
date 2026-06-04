@@ -60,10 +60,20 @@ jobs:
           ASSET_NAME="dot-${VERSION}.tar.gz"
           echo "Downloading ${ASSET_NAME} from release ${TAG}..."
           mkdir -p assets
-          gh release download "$TAG" --dir assets --pattern "${ASSET_NAME}"
-          ASSET_PATH="$(find assets -name "${ASSET_NAME}" -type f | head -1)"
+          # The packaging workflow (release-package-dot.yml) uploads this asset
+          # in parallel on the same `release: published` event, so it may not be
+          # present yet when this job starts (the race that failed first-run
+          # distribution on v0.2.504/v0.2.505). Poll for it (~5 min) before failing.
+          ASSET_PATH=""
+          for attempt in $(seq 1 20); do
+            gh release download "$TAG" --dir assets --pattern "${ASSET_NAME}" --clobber 2>/dev/null || true
+            ASSET_PATH="$(find assets -name "${ASSET_NAME}" -type f | head -1)"
+            [[ -n "$ASSET_PATH" ]] && break
+            echo "Asset ${ASSET_NAME} not ready (attempt ${attempt}/20); waiting 15s..."
+            sleep 15
+          done
           if [[ -z "$ASSET_PATH" ]]; then
-            echo "::error::Asset ${ASSET_NAME} not found in release ${TAG}"
+            echo "::error::Asset ${ASSET_NAME} not found in release ${TAG} after ~5min"
             exit 1
           fi
           echo "asset_path=${ASSET_PATH}" >> $GITHUB_OUTPUT
