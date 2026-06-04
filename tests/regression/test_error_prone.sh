@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2030,SC2031
 # Regression: Error-prone areas — historically complex or fragile workflows.
 # Regression for: d7e7c2bc (v0.2.499 baseline)

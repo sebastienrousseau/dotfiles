@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Dotfiles CLI - Agent Mode Commands (extracted from meta.sh)
 # mode list|current|show|set|run|doctor|card|log|checkpoint|conformance
 

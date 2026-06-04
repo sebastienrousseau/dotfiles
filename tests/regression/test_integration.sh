@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2030,SC2031
 # Regression: Integration tests — module interop and third-party communication.
 # Regression for: d7e7c2bc (v0.2.499 baseline)
@@ -63,7 +64,9 @@ done < "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml"
 assert_equals "0" "$unmatched" "mise config.toml must have balanced quotes"
 
 test_start "integration_mise_has_ai_tools"
-assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml" "npm:@anthropic-ai/claude-code" "mise must include Claude Code"
+# Claude Code is installed via Anthropic's native installer, not mise/npm:
+# npm 11 drops the platform-native optionalDependency on global installs.
+assert_file_contains "$REPO_ROOT/install/provision/run_onchange_15-ai-cli-tools.sh.tmpl" "claude.ai/install.sh" "provisioning must install Claude Code via native installer"
 assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml" "npm:@google/gemini-cli" "mise must include Gemini CLI"
 
 test_start "integration_mise_has_modern_cli_tools"

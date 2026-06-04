@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Sourced by scripts/dot/commands/*.sh and bin/dot; inherits set -euo pipefail.
 # Dotfiles 2026: Atomic Intelligence Surface
 # High-fidelity, perfectly aligned, and professional.
@@ -31,7 +32,7 @@ _dotfiles_bento_render() {
 
   # Render a fixed-width card (42 cols) so output aligns in any terminal width
   printf "\n"
-  printf "  ${c_cyan}${c_bold}💎  D O T F I L E S${c_reset}  ${c_slate}[v0.2.504]${c_reset}\n"
+  printf "  ${c_cyan}${c_bold}💎  D O T F I L E S${c_reset}  ${c_slate}[v0.2.505]${c_reset}\n"
   printf "  ${c_slate}──────────────────────────────────────────${c_reset}\n"
 
   # Key system properties at a glance — answers "is my env healthy?" in 1 second

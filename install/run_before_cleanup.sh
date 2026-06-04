@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 #
 # This script removes legacy files from the home directory.
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2030,SC2031
 # Regression: Static code analysis — mirrors Codacy checks locally.
 # Catches shellcheck warnings, unsafe patterns, and code quality issues

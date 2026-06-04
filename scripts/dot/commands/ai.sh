@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 ## Dotfiles AI Commands.
 ##
 ## Provides AI CLI status, setup, RAG query, and bridge commands.
@@ -141,26 +142,7 @@ _ai_status_field() {
   awk -F'\t' -v b="$1" -v f="$2" '$1==b{print $f;exit}' "$AI_STATUS_CACHE_FILE" 2>/dev/null
 }
 
-# binary -> mise package mapping
-_ai_mise_pkg() {
-  case "$1" in
-    claude) echo "npm:@anthropic-ai/claude-code" ;;
-    codex) echo "npm:@openai/codex" ;;
-    copilot) echo "npm:@github/copilot" ;;
-    goose) echo "pipx:goose-ai" ;;
-    aider) echo "pipx:aider-chat" ;;
-    opencode) echo "npm:opencode-ai" ;;
-    sgpt) echo "pipx:shell-gpt" ;;
-    gemini) echo "npm:@google/gemini-cli" ;;
-    ollama) echo "aqua:ollama/ollama" ;;
-    kiro-cli) echo "kiro-cli" ;;
-    autohand) echo "npm:autohand-cli" ;;
-    vibe) echo "pipx:mistral-vibe" ;;
-    qwen) echo "npm:@qwen-code/qwen-code" ;;
-    zai) echo "npm:@guizmo-ai/zai-cli" ;;
-    *) echo "" ;;
-  esac
-}
+# _ai_mise_pkg (binary -> mise package map) is defined in lib/dot/ai-install.sh.
 
 cmd_ai_status() {
   ui_header "AI CLI Status"
@@ -254,6 +236,10 @@ cmd_ai_status() {
       echo ""
       for entry in "${_ai_to_install[@]}"; do
         IFS='|' read -r name bin <<<"$entry"
+        if [[ "$bin" == "claude" ]]; then
+          install_claude_native "$name"
+          continue
+        fi
         local pkg
         pkg=$(_ai_mise_pkg "$bin")
         if [[ -n "$pkg" ]]; then
@@ -334,7 +320,7 @@ cmd_ai_delegate() {
   # Usage: dot ai delegate "<prompt>" [max-turns] [agent] [timeout]
   if [[ $# -lt 1 ]]; then
     ui_err "Usage" "dot ai delegate \"<prompt>\" [max-turns] [agent] [timeout-secs]"
-    ui_info "Example" "dot ai delegate \"add a CHANGELOG entry for v0.2.504\""
+    ui_info "Example" "dot ai delegate \"add a CHANGELOG entry for v0.2.505\""
     return 1
   fi
   local prompt="$1"

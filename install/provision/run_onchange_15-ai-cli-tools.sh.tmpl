@@ -9,17 +9,46 @@ set -euo pipefail
 log_info() { printf '\n[INFO] %s\n' "$*"; }
 log_error() { printf '\n[ERROR] %s\n' "$*" >&2; }
 
+# Install Claude Code via Anthropic's native installer.
+# npm 11 silently drops the platform-native optionalDependency on global
+# installs, leaving a broken binary, so Claude Code is NOT managed via
+# mise/npm like the other AI tools. The native installer fetches the
+# platform binary directly to ~/.local/bin/claude and self-updates.
+install_claude_native() {
+  if command -v claude >/dev/null 2>&1 || [ -x "$HOME/.local/bin/claude" ]; then
+    log_info "Claude Code already installed (native). Skipping."
+    return 0
+  fi
+  log_info "Installing Claude Code via native installer..."
+  local installer
+  installer=$(umask 077 && mktemp)
+  if curl -fsSL -o "$installer" https://claude.ai/install.sh; then
+    if [ "$(wc -c <"$installer")" -le 262144 ] && head -1 "$installer" | grep -q '^#!'; then
+      bash "$installer" || log_error "Claude Code native installer failed (continuing...)"
+    else
+      log_error "Claude Code installer failed validation. Install manually: https://claude.ai/install.sh"
+    fi
+    rm -f "$installer"
+  else
+    rm -f "$installer"
+    log_error "Failed to download Claude Code installer."
+  fi
+}
+
+# Claude Code is installed natively regardless of mise/npm availability.
+install_claude_native
+
 log_info "Installing AI CLI and dev tools via mise..."
 
 # Prefer mise for all AI tool installations (ensures topgrade can update them)
 if command -v mise >/dev/null 2>&1; then
   # AI tools — installed globally via mise for consistent updates
   AI_MISE_TOOLS=(
-    "npm:@anthropic-ai/claude-code"
+    # Claude Code installed via native installer above (npm optional-dep bug).
     "npm:@github/copilot"
     "npm:@google/gemini-cli"
-    "npm:codex-cli"
-    "npm:opencode-ai"
+    # codex + opencode come from native mise pins (codex, opencode), not npm:
+    # npm:codex-cli was a legacy package collision; npm:opencode-ai a broken dup.
     "npm:autohand-cli"
     "npm:@qwen-code/qwen-code"
     "npm:@guizmo-ai/zai-cli"
@@ -91,7 +120,7 @@ else
 
   # Install AI CLI tools globally via npm
   AI_TOOLS=(
-    "@anthropic-ai/claude-code"
+    # Claude Code installed via native installer above (npm optional-dep bug).
     "@google/gemini-cli"
     "@openai/codex"
     "opencode-ai"

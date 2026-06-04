@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # MIT License
-# Copyright (c) 2026
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # See LICENSE file for details.
 
 import os

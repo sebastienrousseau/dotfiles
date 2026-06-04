@@ -2,6 +2,38 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.505 — 2026-06-04
+
+Claude Code is no longer installed through mise/npm. npm 11 silently drops
+the platform-native `optionalDependency` on global installs, leaving a stub
+binary that errors with "claude native binary not installed". The fix moves
+Claude Code to Anthropic's native installer and audits the other AI tools for
+the same class of bug.
+
+### Fixed
+
+- **Claude Code install** — switched off the mise `npm:@anthropic-ai/claude-code`
+  pin onto Anthropic's native installer (`~/.local/bin/claude`, self-updating),
+  which fetches the platform binary directly and sidesteps the npm 11
+  optional-dependency bug. Bootstrap (`run_onchange_15-ai-cli-tools`), `dot ai`,
+  and `dot apply`'s "install missing providers" flow all install Claude Code
+  natively now instead of reinstalling the broken package.
+
+### Changed
+
+- **Removed two redundant mise pins** uncovered while auditing the other AI
+  tools: `npm:codex-cli` (a legacy package — codex.js — that collided on the
+  `codex` bin name; Codex is already provided by the native `codex` pin) and
+  `npm:opencode-ai` (a broken-wrapper duplicate of the native `opencode` pin).
+  Both shims already resolved to the native builds, so runtime behaviour is
+  unchanged. copilot/gemini/qwen/zai were checked and are unaffected.
+- **Extracted** the shared Claude native-installer helper and the AI
+  provider→mise-package map into `lib/dot/ai-install.sh`, removing duplication
+  across `dot ai` and `dot apply`.
+- **README** — fixed the OpenSSF Best Practices badge (was linking to the
+  new-project form with a static label; now the live `cii/percentage/12840`
+  endpoint linked to the real project).
+
 ## v0.2.504 — 2026-06-03
 
 First-class **stock-macOS** support: the installer and the entire `dot` CLI

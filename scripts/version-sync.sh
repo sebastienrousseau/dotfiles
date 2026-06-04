@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Version Synchronization Script
 # Synchronizes version numbers across all markdown files with package.json
 # Used by CI/CD and available for local testing

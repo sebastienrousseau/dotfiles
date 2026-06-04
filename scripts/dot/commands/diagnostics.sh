@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Dotfiles CLI - Diagnostics Commands
 # doctor, heal, health, rollback, drift, history, benchmark, verify, perf,
 # scorecard, conflicts, locks, snapshot, load-bench, chaos, bundle, attest

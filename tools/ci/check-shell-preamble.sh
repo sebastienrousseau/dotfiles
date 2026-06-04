@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # =============================================================================
 # check-shell-preamble.sh — Enforce `set -euo pipefail` (bash) / `set -eu` (sh)
 # on every executable shell script in the repo.

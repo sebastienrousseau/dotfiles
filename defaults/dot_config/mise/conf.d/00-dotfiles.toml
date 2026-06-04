@@ -85,11 +85,13 @@ uv = "latest"
 "pipx:shell-gpt" = "latest"
 
 # AI tools
-"npm:@anthropic-ai/claude-code" = "latest"
+# "npm:@anthropic-ai/claude-code" = "latest"  # disabled 2026-06-04: npm 11 skips the platform-native optionalDependency on global installs, breaking the binary. Use Anthropic's native installer instead (~/.local/bin/claude, self-updating).
 "npm:@github/copilot" = "latest"
 "npm:@google/gemini-cli" = "latest"
-"npm:codex-cli" = "latest"
-"npm:opencode-ai" = "latest"
+# codex provided by the native `codex` pin above; `npm:codex-cli` was an
+# unrelated legacy package (codex.js) that collided on the `codex` bin name.
+# opencode provided by the native `opencode` pin in mise.toml; `npm:opencode-ai`
+# was a redundant duplicate using the broken npm optional-dep wrapper pattern.
 kiro-cli = "latest"
 "npm:autohand-cli" = "latest"
 "npm:@qwen-code/qwen-code" = "latest"

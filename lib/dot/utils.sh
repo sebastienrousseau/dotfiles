@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Sourced by scripts/dot/commands/*.sh and bin/dot; inherits set -euo pipefail.
 # Dotfiles CLI Utilities
 # Shared functions for dot command modules
@@ -16,6 +17,8 @@ _DOT_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$_DOT_LIB_DIR/ui.sh"
 # shellcheck source=platform.sh
 source "$_DOT_LIB_DIR/platform.sh"
+# shellcheck source=ai-install.sh
+source "$_DOT_LIB_DIR/ai-install.sh"
 
 _DOT_SOURCE_DIR_CACHE=""
 

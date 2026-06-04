@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Dotfiles Pre-Commit Sentinel (Audit Hook)
 # Prevents secrets, hardcoded paths, and shell hygiene violations.
 
@@ -140,6 +141,6 @@ if [[ $FAILED -eq 1 ]]; then
   printf '%b\\n' "   (Use --no-verify to bypass if absolutely necessary)"
   exit 1
 else
-  printf '%b\n' "${GREEN}${BOLD}✅ Audit passed.${NC} v0.2.504 standards maintained."
+  printf '%b\n' "${GREEN}${BOLD}✅ Audit passed.${NC} v0.2.505 standards maintained."
   exit 0
 fi

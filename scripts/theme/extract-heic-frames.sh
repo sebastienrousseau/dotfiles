@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # extract-heic-frames.sh — extract per-frame PNGs from dynamic HEIC wallpapers.
 #
 # Apple's dynamic HEIC format packs two images (frame 0 = light, frame 1 =

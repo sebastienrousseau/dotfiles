@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Chaos Engineering: Randomly corrupt config files to test self-healing (dot heal)
 # USE WITH CAUTION: This intentionally breaks your environment.
 

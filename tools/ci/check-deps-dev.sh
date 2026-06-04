@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # =============================================================================
 # check-deps-dev.sh — Validate direct dependencies against the deps.dev
 # Insights API. Catches supply-chain risk a Grype-only scan misses:

@@ -4,7 +4,7 @@ render_with_liquid: false
 
 # Introduction
 
-This manual describes `.dotfiles` v0.2.504 — a trusted agent workstation baseline for macOS, Linux, and WSL.
+This manual describes `.dotfiles` v0.2.505 — a trusted agent workstation baseline for macOS, Linux, and WSL.
 
 The repository is more than a personal dotfiles collection. It ships as workstation infrastructure: signed, attested, multi-platform, AI-aware, and self-healing. Chezmoi handles templating and platform differences. The `dot` CLI sits on top and coordinates lifecycle operations.
 

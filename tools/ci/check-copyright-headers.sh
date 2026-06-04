@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Copyright header validator (zero-tolerance policy).
 #
 # Scans source files for a copyright header in the first 10 lines. Patterns

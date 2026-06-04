@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Compat shim: the canonical script moved to tools/ci/ during the repo reorg.
 # Pinned reusable workflows on master still reference the old path;
 # this delegates so they keep working until the next pin bump.

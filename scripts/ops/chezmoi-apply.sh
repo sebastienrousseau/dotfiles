@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -9,6 +10,9 @@ source "$SCRIPT_DIR/../../lib/dot/ui.sh"
 # shellcheck source=../../lib/dot/log.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../../lib/dot/log.sh"
+# shellcheck source=../../lib/dot/ai-install.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../../lib/dot/ai-install.sh"
 export DOT_COMMAND="apply"
 
 # Temp file cleanup. `set +u` guards the array expansion: on bash 3.2
@@ -154,9 +158,9 @@ check_cmd() {
 echo ""
 ui_header "AI provider CLI checks (optional)"
 
-# binary|mise_package|label
+# binary|mise_package|label  (claude uses the native installer, not mise)
 _AI_PROVIDERS=(
-  "claude|npm:@anthropic-ai/claude-code|Claude Code"
+  "claude|native|Claude Code"
   "copilot|npm:@github/copilot|Copilot CLI"
   "gemini|npm:@google/gemini-cli|Gemini CLI"
   "sgpt|pipx:shell-gpt|Shell-GPT"
@@ -224,6 +228,10 @@ if [[ ${#_ai_missing[@]} -gt 0 ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]
       echo ""
       for _entry in "${_ai_to_install[@]}"; do
         IFS='|' read -r _bin _pkg _label <<<"$_entry"
+        if [[ "$_bin" == "claude" ]]; then
+          install_claude_native "$_label"
+          continue
+        fi
         if command -v gum &>/dev/null; then
           if gum spin --spinner dot --title "Installing $_label ($_pkg)" -- \
             mise use -g "$_pkg@latest" 2>&1; then

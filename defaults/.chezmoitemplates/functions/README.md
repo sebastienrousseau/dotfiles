@@ -5,7 +5,7 @@
   align="right"
 />
 
-# Dotfiles Functions (v0.2.504)
+# Dotfiles Functions (v0.2.505)
 
 > Modular shell utilities managed by Chezmoi
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 # Auto-generated exercise test for dot_local/bin/executable_dot-launch-or-focus.
 # Slice 3 of #883: backfill coverage by running each managed script

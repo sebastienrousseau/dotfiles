@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034,SC2012
 # Behavioral tests for the backup function from .chezmoitemplates/functions/files/backup.sh.
 # Tests timestamped archive creation, compression, retention, and error paths.
