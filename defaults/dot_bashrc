@@ -278,6 +278,22 @@ if command -v nvim &>/dev/null; then
   alias vi='nvim'
 fi
 
+# --- Shared dotfiles hub (aliases + functions) ---
+# The generated ~/.config/shell/*.sh layers are the single source of truth for
+# aliases and functions across zsh, bash, and the fish/nushell bridges. bash is
+# a Tier-1 "Full" shell (ADR-007), so source the same eager + core layers zsh
+# loads — minus the heavy 50-logic-functions.sh, which probes hardware at load.
+_dotfiles_shell_dir="${XDG_CONFIG_HOME:-$HOME/.config}/shell"
+for _hub_layer in 00-core-paths 05-core-safety 40-ls-colors \
+  50-logic-functions-core 51-logic-functions-extra \
+  90-ux-aliases 91-ux-aliases-lazy; do
+  if [[ -f "${_dotfiles_shell_dir}/${_hub_layer}.sh" ]]; then
+    # shellcheck source=/dev/null
+    . "${_dotfiles_shell_dir}/${_hub_layer}.sh"
+  fi
+done
+unset _dotfiles_shell_dir _hub_layer
+
 # --- Source local overrides ---
 if [[ -f "$HOME/.bashrc.local" ]]; then
   # shellcheck source=/dev/null
