@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Install Nerd Fonts (JetBrainsMono & Symbols)
 # This script runs when the checksum of this file changes (user triggered or manual update)
 

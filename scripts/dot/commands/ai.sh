@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# Copyright (c) 2015-2026 Sebastien Rousseau
 ## Dotfiles AI Commands.
 ##
 ## Provides AI CLI status, setup, RAG query, and bridge commands.

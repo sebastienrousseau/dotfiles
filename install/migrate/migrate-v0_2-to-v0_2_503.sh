@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 #
 # migrate-v0_2-to-v0_2_503.sh — Idempotent, silent-by-default
 # migration for the v0.2.503 repository reorganisation (Phases 2-4).

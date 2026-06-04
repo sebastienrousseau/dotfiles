@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 # Behavioral tests for the secrets provider from scripts/lib/secrets_provider.sh.
 # Mocks keychain/pass/age commands to verify provider detection order and

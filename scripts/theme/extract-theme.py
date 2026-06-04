@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # extract-theme.py — Generate a terminal theme from wallpaper dominant colors.
 #
 # Uses K-Means clustering in CIELAB color space for perceptually accurate

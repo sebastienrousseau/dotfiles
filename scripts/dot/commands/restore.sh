@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # dot restore - Restore dotfiles from backup or previous state
 # Usage: dot restore [--list|-l|--latest|-L|<backup-id>]
 

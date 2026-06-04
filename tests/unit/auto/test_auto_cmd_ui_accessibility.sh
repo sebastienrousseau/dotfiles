@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 # Targeted coverage for the accessibility branch of lib/dot/ui.sh.
 # That branch (lines 76-86) is gated on DOTFILES_ACCESSIBILITY=1 and so

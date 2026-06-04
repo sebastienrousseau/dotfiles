@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 #
 # Verify that every "live" version reference matches the canonical
 # version in .chezmoidata.toml. The intent is to catch drift between
