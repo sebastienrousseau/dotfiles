@@ -47,8 +47,8 @@ if command -v mise >/dev/null 2>&1; then
     # Claude Code installed via native installer above (npm optional-dep bug).
     "npm:@github/copilot"
     "npm:@google/gemini-cli"
-    "npm:codex-cli"
-    "npm:opencode-ai"
+    # codex + opencode come from native mise pins (codex, opencode), not npm:
+    # npm:codex-cli was a legacy package collision; npm:opencode-ai a broken dup.
     "npm:autohand-cli"
     "npm:@qwen-code/qwen-code"
     "npm:@guizmo-ai/zai-cli"
