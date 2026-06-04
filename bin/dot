@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 set -euo pipefail
 
-# Dotfiles CLI Entry Point - v0.2.504
+# Dotfiles CLI Entry Point - v0.2.505
 
 # Ensure XDG Base Directory variables are set
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -21,7 +21,7 @@ if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
   . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
 fi
 
-VERSION="0.2.504"
+VERSION="0.2.505"
 
 COMMAND="${1:-}"
 if [ -n "${1:-}" ]; then
@@ -37,8 +37,8 @@ _resolve_source_dir() {
 
   if script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null)"; then
     script_dir="$script_path"
-    # Post-v0.2.504: the canonical dispatcher lives at <repo>/bin/dot, so
-    # $script_dir/.. is the repo root. Pre-v0.2.504 (and chezmoi-deployed
+    # Post-v0.2.505: the canonical dispatcher lives at <repo>/bin/dot, so
+    # $script_dir/.. is the repo root. Pre-v0.2.505 (and chezmoi-deployed
     # wrapper invocations that still exec the canonical) the dispatcher
     # was at <repo>/dot_local/bin/executable_dot, so $script_dir/../..
     # was the repo. Probe both to cover the transition.
