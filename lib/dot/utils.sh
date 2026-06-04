@@ -16,6 +16,8 @@ _DOT_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$_DOT_LIB_DIR/ui.sh"
 # shellcheck source=platform.sh
 source "$_DOT_LIB_DIR/platform.sh"
+# shellcheck source=ai-install.sh
+source "$_DOT_LIB_DIR/ai-install.sh"
 
 _DOT_SOURCE_DIR_CACHE=""
 
