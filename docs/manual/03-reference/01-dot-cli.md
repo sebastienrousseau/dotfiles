@@ -326,7 +326,7 @@ dot agents check      # exit 0 if AGENTS.md tracks CLAUDE.md; 1 if drifted
 dot agents render     # regenerate AGENTS.md + 10 harness-specific files
 ```
 
-Harnesses covered: `AGENTS.md` (canonical cross-harness), Cursor (`.cursor/rules/dotfiles.mdc`), Codex (`.codex/config.toml`), Windsurf (`.windsurf/rules.md`), Zed (`.zed/agent-config.toml`), Roo (`.roo/rules.md`), Cline (`.clinerules`), Aider (`.aider.conf.yml`), Continue (`.continuerc.json`), Jules (`.jules/system.md`), Gemini (`.gemini/GEMINI.md`).
+Harnesses covered: `AGENTS.md` (canonical cross-harness), Cursor (`.cursor/rules/dotfiles.mdc`), Codex (`.codex/config.toml`), Windsurf (`.windsurf/rules.md`), Zed (`.zed/agent-config.toml`), Roo (`.roo/rules.md`), Cline (`.clinerules`), Aider (`.aider.conf.yml`), Continue (`.continuerc.json`), Jules (`.jules/system.md`), Antigravity (`.agy/AGY.md`).
 
 Edit `CLAUDE.md` first, then run `dot agents render`; do not hand-edit `AGENTS.md` or any of the per-harness files. The check subcommand is suitable for pre-commit hooks.
 

@@ -12,7 +12,7 @@ complete -c dot -n "__fish_use_subcommand" -a clean-cache -d "Clear shell initia
 complete -c dot -n "__fish_use_subcommand" -a prewarm -d "Regenerate shell caches for ultra-fast startup"
 complete -c dot -n "__fish_use_subcommand" -a cl -d "Claude CLI with context patterns"
 complete -c dot -n "__fish_use_subcommand" -a copilot -d "GitHub Copilot CLI with context patterns"
-complete -c dot -n "__fish_use_subcommand" -a gemini -d "Gemini CLI with context patterns"
+complete -c dot -n "__fish_use_subcommand" -a agy -d "Antigravity CLI with context patterns"
 complete -c dot -n "__fish_use_subcommand" -a kiro -d "Kiro CLI with context patterns"
 complete -c dot -n "__fish_use_subcommand" -a sgpt -d "Shell-GPT with context patterns"
 complete -c dot -n "__fish_use_subcommand" -a ollama -d "Ollama with context patterns"
@@ -21,7 +21,7 @@ complete -c dot -n "__fish_use_subcommand" -a aider -d "Aider with context patte
 complete -c dot -n "__fish_use_subcommand" -a add -d "Add a file to chezmoi source"
 
 # AI Pattern completions for AI CLIs
-for cmd in cl copilot gemini kiro sgpt ollama opencode aider
+for cmd in cl copilot agy kiro sgpt ollama opencode aider
     complete -c dot -n "__fish_seen_subcommand_from $cmd" -s p -l pattern -x -a "(ls -1 ~/.config/ai/patterns 2>/dev/null | sed 's/\.md\$//')"
 end
 complete -c dot -n "__fish_use_subcommand" -a diff -d "Show chezmoi diff with exclusions"
@@ -50,6 +50,13 @@ complete -c dot -n "__fish_use_subcommand" -a restore -d "Restore from backup or
 complete -c dot -n "__fish_use_subcommand" -a ai -d "Show AI helper status"
 complete -c dot -n "__fish_use_subcommand" -a ai-setup -d "Interactive setup for all AI CLI tools"
 complete -c dot -n "__fish_use_subcommand" -a ai-query -d "Context-aware RAG query over your dotfiles"
+# dot ai subcommands
+complete -c dot -n "__fish_seen_subcommand_from ai" -a status -d "Show AI CLI status (default)"
+complete -c dot -n "__fish_seen_subcommand_from ai" -a dashboard -d "Real-time multi-agent TUI dashboard"
+complete -c dot -n "__fish_seen_subcommand_from ai" -a dash -d "Alias for dashboard"
+complete -c dot -n "__fish_seen_subcommand_from ai" -a cost -d "Show token cost report"
+complete -c dot -n "__fish_seen_subcommand_from ai" -a delegate -d "Run a background AI delegate"
+complete -c dot -n "__fish_seen_subcommand_from ai" -a install -d "Install a provider binary"
 complete -c dot -n "__fish_use_subcommand" -a attest -d "Export workstation attestation evidence"
 complete -c dot -n "__fish_use_subcommand" -a lint -d "Lint shell scripts"
 

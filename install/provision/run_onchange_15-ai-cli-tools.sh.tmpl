@@ -45,10 +45,10 @@ if command -v mise >/dev/null 2>&1; then
   # AI tools — installed globally via mise for consistent updates
   AI_MISE_TOOLS=(
     # Claude Code installed via native installer above (npm optional-dep bug).
+    "npm:@openai/codex"
     "npm:@github/copilot"
-    "npm:@google/gemini-cli"
-    # codex + opencode come from native mise pins (codex, opencode), not npm:
-    # npm:codex-cli was a legacy package collision; npm:opencode-ai a broken dup.
+    "npm:opencode-ai"
+    # agy (Antigravity CLI) installed via native installer below.
     "npm:autohand-cli"
     "npm:@qwen-code/qwen-code"
     "npm:@guizmo-ai/zai-cli"
@@ -65,6 +65,42 @@ if command -v mise >/dev/null 2>&1; then
   done
 
   log_info "AI tools installed via mise. Topgrade will keep them updated."
+
+  # Goose (Block) — no mise/npm package; native installer only.
+  if command -v goose >/dev/null 2>&1 || [ -x "$HOME/.local/bin/goose" ]; then
+    log_info "Goose already installed. Skipping."
+  else
+    log_info "Installing Goose (Block) via native installer..."
+    goose_installer=$(umask 077 && mktemp)
+    if curl -fsSL -o "$goose_installer" https://github.com/block/goose/releases/download/stable/download_cli.sh; then
+      if [ "$(wc -c <"$goose_installer")" -le 524288 ] && head -1 "$goose_installer" | grep -q '^#!'; then
+        bash "$goose_installer" || log_error "Goose native installer failed (continuing...)"
+      else
+        log_error "Goose installer failed validation. Install manually: https://github.com/block/goose"
+      fi
+    else
+      log_error "Failed to download Goose installer."
+    fi
+    rm -f "$goose_installer"
+  fi
+
+  # Antigravity CLI (agy) — native installer only.
+  if command -v agy >/dev/null 2>&1 || [ -x "$HOME/.local/bin/agy" ]; then
+    log_info "Antigravity CLI already installed. Skipping."
+  else
+    log_info "Installing Antigravity CLI (agy) via native installer..."
+    agy_installer=$(umask 077 && mktemp)
+    if curl -fsSL -o "$agy_installer" https://antigravity.google/cli/install.sh; then
+      if [ "$(wc -c <"$agy_installer")" -le 262144 ] && head -1 "$agy_installer" | grep -q '^#!'; then
+        bash "$agy_installer" || log_error "Antigravity CLI installer failed (continuing...)"
+      else
+        log_error "Antigravity CLI installer failed validation."
+      fi
+    else
+      log_error "Failed to download Antigravity CLI installer."
+    fi
+    rm -f "$agy_installer"
+  fi
 else
   log_info "mise not found. Falling back to direct npm/pipx installation..."
 
@@ -118,13 +154,12 @@ else
   log_info "Node.js version: $(node --version)"
   log_info "npm version: $(npm --version)"
 
-  # Install AI CLI tools globally via npm
+  # Install AI CLI tools globally via npm (fallback when mise is unavailable)
   AI_TOOLS=(
-    # Claude Code installed via native installer above (npm optional-dep bug).
-    "@google/gemini-cli"
+    # Claude Code: native installer above. Goose/agy: native installers below.
     "@openai/codex"
+    "@github/copilot"
     "opencode-ai"
-    "@factory/cli"
     "autohand-cli"
     "@qwen-code/qwen-code"
     "@guizmo-ai/zai-cli"
@@ -143,6 +178,38 @@ else
     done
   else
     log_info "pipx not found — skipping Python AI tools (aider, sgpt, vibe)"
+  fi
+
+  # Goose (Block) — native installer (no npm/pipx package).
+  if ! command -v goose >/dev/null 2>&1 && [ ! -x "$HOME/.local/bin/goose" ]; then
+    log_info "Installing Goose (Block) via native installer..."
+    goose_installer=$(umask 077 && mktemp)
+    if curl -fsSL -o "$goose_installer" https://github.com/block/goose/releases/download/stable/download_cli.sh; then
+      if [ "$(wc -c <"$goose_installer")" -le 524288 ] && head -1 "$goose_installer" | grep -q '^#!'; then
+        bash "$goose_installer" || log_error "Goose native installer failed (continuing...)"
+      else
+        log_error "Goose installer failed validation."
+      fi
+    else
+      log_error "Failed to download Goose installer."
+    fi
+    rm -f "$goose_installer"
+  fi
+
+  # Antigravity CLI (agy) — native installer only.
+  if ! command -v agy >/dev/null 2>&1 && [ ! -x "$HOME/.local/bin/agy" ]; then
+    log_info "Installing Antigravity CLI (agy) via native installer..."
+    agy_installer=$(umask 077 && mktemp)
+    if curl -fsSL -o "$agy_installer" https://antigravity.google/cli/install.sh; then
+      if [ "$(wc -c <"$agy_installer")" -le 262144 ] && head -1 "$agy_installer" | grep -q '^#!'; then
+        bash "$agy_installer" || log_error "Antigravity CLI installer failed (continuing...)"
+      else
+        log_error "Antigravity CLI installer failed validation."
+      fi
+    else
+      log_error "Failed to download Antigravity CLI installer."
+    fi
+    rm -f "$agy_installer"
   fi
 fi
 
@@ -171,16 +238,17 @@ log_info ""
 log_info "Available commands:"
 log_info "  AI Tools:"
 log_info "    - claude    (Anthropic Claude CLI)"
-log_info "    - copilot   (GitHub Copilot CLI)"
-log_info "    - gemini    (Google Gemini CLI)"
 log_info "    - codex     (OpenAI Codex CLI)"
-log_info "    - opencode  (OpenCode AI)"
+log_info "    - copilot   (GitHub Copilot CLI)"
+log_info "    - goose     (Block coding agent)"
+log_info "    - agy       (Google Antigravity CLI)"
 log_info "    - aider     (AI pair programmer)"
-log_info "    - sgpt      (Shell-GPT)"
+log_info "    - opencode  (OpenCode AI)"
 log_info "    - autohand  (Autohand Code CLI)"
 log_info "    - vibe      (Mistral Vibe CLI)"
 log_info "    - qwen      (Qwen Code CLI)"
 log_info "    - zai       (ZAI Zhipu AI CLI)"
+log_info "    - sgpt      (Shell-GPT)"
 log_info "    - ollama    (Local LLM runner)"
 log_info "    - kiro-cli  (AWS AI assistant)"
 log_info "  Dev Tools:"

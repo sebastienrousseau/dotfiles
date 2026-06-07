@@ -161,8 +161,10 @@ ui_header "AI provider CLI checks (optional)"
 # binary|mise_package|label  (claude uses the native installer, not mise)
 _AI_PROVIDERS=(
   "claude|native|Claude Code"
+  "codex|npm:@openai/codex|Codex CLI"
   "copilot|npm:@github/copilot|Copilot CLI"
-  "gemini|npm:@google/gemini-cli|Gemini CLI"
+  "goose|native|Goose"
+  "agy|native|Antigravity CLI"
   "sgpt|pipx:shell-gpt|Shell-GPT"
   "ollama|aqua:ollama/ollama|Ollama"
   "opencode|npm:opencode-ai|OpenCode"
@@ -230,6 +232,14 @@ if [[ ${#_ai_missing[@]} -gt 0 ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]
         IFS='|' read -r _bin _pkg _label <<<"$_entry"
         if [[ "$_bin" == "claude" ]]; then
           install_claude_native "$_label"
+          continue
+        fi
+        if [[ "$_bin" == "goose" ]]; then
+          install_goose_native "$_label"
+          continue
+        fi
+        if [[ "$_bin" == "agy" ]]; then
+          install_agy_native "$_label"
           continue
         fi
         if command -v gum &>/dev/null; then

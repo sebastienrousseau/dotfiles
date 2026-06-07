@@ -3,15 +3,18 @@
 # AI & Intelligent Assistance Aliases
 
 # Dotfiles AI Bridge (Context-aware wrappers)
+alias daid='dot ai dashboard'
+alias daish='dot ai dashboard'
+
 alias dcl='dot cl'
 alias dcla='dot cl --pattern architect'
 alias dclh='dot cl --pattern hardener'
 alias dclr='dot cl --pattern refactor'
 
-alias dgmn='dot gemini'
-alias dgmna='dot gemini --pattern architect'
-alias dgmnh='dot gemini --pattern hardener'
-alias dgmnr='dot gemini --pattern refactor'
+alias dagy='dot agy'
+alias dagya='dot agy --pattern architect'
+alias dagyh='dot agy --pattern hardener'
+alias dagyr='dot agy --pattern refactor'
 
 alias dki='dot kiro'
 alias dkia='dot kiro --pattern architect'
@@ -54,11 +57,11 @@ if command -v kiro-cli &>/dev/null; then
   alias kit='kiro-cli term'
 fi
 
-# Google Gemini CLI
-if command -v gemini &>/dev/null; then
-  alias gemi='gemini info'
-  alias gems='gemini chat'
-  alias gmn='gemini'
+# Google Antigravity CLI
+if command -v agy &>/dev/null; then
+  alias agyi='agy info'
+  alias agys='agy chat'
+  alias agy='agy'
 fi
 
 # GitHub Copilot CLI

@@ -1,0 +1,330 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+"""dot-ai-dash — Real-time multi-agent status dashboard.
+
+Reads ~/.local/share/dotfiles-ai.db (written by dot ai and vibe-delegate).
+Shows running agents, today's cost by provider, and recent run history.
+
+Usage:  dot-ai-dash [--refresh N]
+Keys:   q / ESC  quit
+        r        force refresh
+"""
+
+import curses
+import signal
+import sqlite3
+import subprocess
+import sys
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+DB      = Path.home() / '.local' / 'share' / 'dotfiles-ai.db'
+REFRESH = 5  # seconds between auto-refreshes
+
+# (binary, vendor_label)  — order determines display order
+PROVIDERS = [
+    ('claude',   'Anthropic'),
+    ('agy',      'Google'),
+    ('codex',    'OpenAI'),
+    ('copilot',  'GitHub'),
+    ('vibe',     'Mistral'),
+    ('goose',    'Block'),
+    ('opencode', 'OpenCode'),
+    ('aider',    'OSS'),
+    ('autohand', 'Autohand'),
+    ('qwen',     'Alibaba'),
+    ('zai',      'Zhipu'),
+    ('sgpt',     'OpenAI'),
+    ('ollama',   'Local'),
+    ('kiro-cli', 'AWS'),
+]
+BINARIES = [b for b, _ in PROVIDERS]
+
+
+# ── Data layer ──────────────────────────────────────────────────────────────
+
+def detect_running():
+    """Return {binary: [pid, ...]} for all AI processes currently running."""
+    running = {}
+    for binary in BINARIES:
+        r = subprocess.run(
+            ['pgrep', '-x', binary],
+            capture_output=True, text=True,
+        )
+        if r.returncode == 0:
+            running[binary] = r.stdout.strip().split()
+    return running
+
+
+def _process_start(pid):
+    """Return elapsed seconds for a PID, or None on failure."""
+    try:
+        r = subprocess.run(
+            ['ps', '-o', 'etimes=', '-p', pid],
+            capture_output=True, text=True,
+        )
+        if r.returncode == 0:
+            return int(r.stdout.strip())
+    except Exception:
+        pass
+    return None
+
+
+def load_today():
+    """Return (recent_runs, cost_by_provider, total_cost_today)."""
+    if not DB.exists():
+        return [], {}, 0.0
+    today = datetime.now(timezone.utc).strftime('%Y-%m-%dT')
+    try:
+        db = sqlite3.connect(str(DB), timeout=5)
+        db.row_factory = sqlite3.Row
+        runs = db.execute(
+            'SELECT * FROM runs WHERE ts >= ? ORDER BY ts DESC LIMIT 50',
+            (today,),
+        ).fetchall()
+        agg = db.execute(
+            '''SELECT delegate,
+                      SUM(cost_usd)     AS cost,
+                      SUM(tokens_total) AS tokens,
+                      COUNT(*)          AS runs
+               FROM runs WHERE ts >= ?
+               GROUP BY delegate
+               ORDER BY cost DESC''',
+            (today,),
+        ).fetchall()
+        db.close()
+    except sqlite3.Error:
+        return [], {}, 0.0
+    cost_by = {
+        r['delegate']: {
+            'cost':   r['cost']   or 0.0,
+            'tokens': r['tokens'] or 0,
+            'runs':   r['runs'],
+        }
+        for r in agg
+    }
+    total = sum(v['cost'] for v in cost_by.values())
+    return [dict(r) for r in runs], cost_by, total
+
+
+# ── Rendering helpers ───────────────────────────────────────────────────────
+
+def _bar(frac, width=8):
+    filled = min(int(frac * width), width)
+    return '█' * filled + '░' * (width - filled)
+
+
+def _fmt_ts(ts):
+    try:
+        dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+        return dt.strftime('%H:%M')
+    except Exception:
+        return '??:??'
+
+
+def _fmt_dur(secs):
+    if secs is None:
+        return '?'
+    secs = int(secs)
+    if secs < 60:
+        return f'{secs}s'
+    return f'{secs // 60}m{secs % 60:02d}s'
+
+
+def _safe(stdscr, y, x, text, attr=0):
+    h, w = stdscr.getmaxyx()
+    if y < 0 or y >= h or x < 0 or x >= w:
+        return
+    try:
+        stdscr.addstr(y, x, text[: max(0, w - x)], attr)
+    except curses.error:
+        pass
+
+
+# ── Main draw ───────────────────────────────────────────────────────────────
+
+def draw(stdscr, running, runs, cost_by, total_cost):
+    stdscr.erase()
+    h, w = stdscr.getmaxyx()
+
+    curses.init_pair(1, curses.COLOR_GREEN,  -1)
+    curses.init_pair(2, curses.COLOR_YELLOW, -1)
+    curses.init_pair(3, curses.COLOR_RED,    -1)
+    curses.init_pair(4, curses.COLOR_CYAN,   -1)
+    curses.init_pair(5, -1,                  -1)  # default / dim
+
+    GREEN  = curses.color_pair(1) | curses.A_BOLD
+    YELLOW = curses.color_pair(2)
+    RED    = curses.color_pair(3)
+    CYAN   = curses.color_pair(4) | curses.A_BOLD
+    DIM    = curses.color_pair(5) | curses.A_DIM
+
+    mid = w // 2
+
+    # ── Title bar ────────────────────────────────────────────────────────
+    _safe(stdscr, 0, 0, '─' * w, CYAN)
+    title = ' dot ai dashboard '
+    _safe(stdscr, 0, max(0, (w - len(title)) // 2), title, CYAN)
+    hint = ' q:quit  r:refresh '
+    _safe(stdscr, 0, max(0, w - len(hint)), hint, DIM)
+
+    row = 2
+
+    # ── Left column: AGENTS ──────────────────────────────────────────────
+    _safe(stdscr, row, 2, 'AGENTS', CYAN)
+    row += 1
+
+    seen_delegates = {r.get('delegate', '') for r in runs[:20]}
+    agent_row = row
+    shown = False
+    for binary, _vendor in PROVIDERS:
+        if agent_row >= h - 4:
+            break
+        pids = running.get(binary, [])
+        if pids:
+            pid      = pids[0]
+            elapsed  = _process_start(pid)
+            status   = _fmt_dur(elapsed) if elapsed is not None else 'running'
+            line     = f'  ● {binary:<12}  {len(pids)}× {status}'
+            _safe(stdscr, agent_row, 0, line, GREEN)
+            agent_row += 1
+            shown = True
+        elif binary in seen_delegates:
+            line = f'  ○ {binary:<12}  idle'
+            _safe(stdscr, agent_row, 0, line, DIM)
+            agent_row += 1
+            shown = True
+
+    if not shown:
+        _safe(stdscr, agent_row, 2, '(no agents detected)', DIM)
+        agent_row += 1
+
+    row = agent_row + 1
+
+    # ── Right column: COST TODAY ─────────────────────────────────────────
+    cost_row = 2
+    _safe(stdscr, cost_row, mid, 'COST TODAY', CYAN)
+    cost_row += 1
+
+    if cost_by:
+        for delegate, info in list(cost_by.items())[:min(6, h - 8)]:
+            if cost_row >= h - 4:
+                break
+            cost = info['cost']
+            frac = cost / total_cost if total_cost > 0 else 0
+            pct  = int(frac * 100)
+            b    = _bar(frac)
+            line = f'  {delegate:<12} ${cost:6.4f}  {b} {pct:3d}%'
+            _safe(stdscr, cost_row, mid, line, YELLOW if cost > 0 else DIM)
+            cost_row += 1
+        _safe(stdscr, cost_row, mid, f'  {"─" * (mid - 4)}', DIM)
+        cost_row += 1
+        total_line = f'  {"Total":<12} ${total_cost:6.4f}'
+        _safe(stdscr, cost_row, mid, total_line, YELLOW | curses.A_BOLD)
+        cost_row += 1
+    else:
+        _safe(stdscr, cost_row, mid, '  (no runs today)', DIM)
+        cost_row += 1
+
+    # ── Recent runs ──────────────────────────────────────────────────────
+    run_row = max(row, cost_row) + 1
+    if run_row < h - 5:
+        _safe(stdscr, run_row, 2, 'RECENT RUNS', CYAN)
+        run_row += 1
+        max_runs = min(len(runs), h - run_row - 3, 10)
+        for r in runs[:max_runs]:
+            if run_row >= h - 3:
+                break
+            ok    = r.get('exit_code', 0) == 0
+            mark  = '✓' if ok else '✗'
+            attr  = DIM if ok else RED
+            ts_s  = _fmt_ts(r.get('ts', ''))
+            dlg   = (r.get('delegate') or '?')[:10]
+            proj  = (r.get('project')  or '?')[:14]
+            cost  = r.get('cost_usd', 0) or 0
+            tok   = r.get('tokens_total', 0) or 0
+            dur   = r.get('duration_secs', 0) or 0
+            line  = (f'  {ts_s}  {dlg:<10}  {proj:<14}  {mark}'
+                     f'  ${cost:.4f}  {tok:>6}tok  {dur:>5.0f}s')
+            _safe(stdscr, run_row, 0, line, attr)
+            if not ok:
+                ec = r.get('exit_code', '?')
+                _safe(stdscr, run_row, len(line), f'  [exit:{ec}]', RED)
+            run_row += 1
+
+    # ── Status bar ───────────────────────────────────────────────────────
+    _safe(stdscr, h - 1, 0, '─' * w, DIM)
+    now_s  = datetime.now().strftime('%H:%M:%S')
+    db_s   = str(DB) if DB.exists() else 'no DB (run a delegate first)'
+    status = f' {now_s}  auto-refresh:{REFRESH}s  {db_s} '
+    _safe(stdscr, h - 1, 2, status, DIM)
+
+    stdscr.refresh()
+
+
+# ── Event loop ──────────────────────────────────────────────────────────────
+
+_RESIZE = False
+
+
+def _on_resize(signum, frame):
+    global _RESIZE
+    _RESIZE = True
+
+
+def _loop(stdscr, _args):
+    global _RESIZE
+    curses.start_color()
+    curses.use_default_colors()
+    curses.curs_set(0)
+    stdscr.timeout(1000)  # poll keys every 1s; full refresh every REFRESH polls
+
+    signal.signal(signal.SIGWINCH, _on_resize)
+
+    ticks   = REFRESH   # trigger immediate first refresh
+    running = {}
+    runs    = []
+    cost_by = {}
+    total   = 0.0
+
+    while True:
+        key = stdscr.getch()
+
+        if key in (ord('q'), ord('Q'), 27):
+            break
+
+        force = key in (ord('r'), ord('R'))
+
+        if force or ticks >= REFRESH or _RESIZE:
+            if _RESIZE:
+                curses.resizeterm(*stdscr.getmaxyx())
+                _RESIZE = False
+            running         = detect_running()
+            runs, cost_by, total = load_today()
+            draw(stdscr, running, runs, cost_by, total)
+            ticks = 0
+        else:
+            ticks += 1
+
+
+def main():
+    global REFRESH
+    args = sys.argv[1:]
+    if '--refresh' in args:
+        try:
+            REFRESH = int(args[args.index('--refresh') + 1])
+        except (IndexError, ValueError):
+            pass
+    if '--help' in args or '-h' in args:
+        print(__doc__)
+        sys.exit(0)
+    try:
+        curses.wrapper(_loop, args)
+    except KeyboardInterrupt:
+        pass
+
+
+if __name__ == '__main__':
+    main()

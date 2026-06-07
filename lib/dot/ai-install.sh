@@ -21,11 +21,11 @@ _ai_mise_pkg() {
   case "$1" in
     codex) echo "npm:@openai/codex" ;;
     copilot) echo "npm:@github/copilot" ;;
-    goose) echo "pipx:goose-ai" ;;
+    goose) echo "" ;;
     aider) echo "pipx:aider-chat" ;;
     opencode) echo "npm:opencode-ai" ;;
     sgpt) echo "pipx:shell-gpt" ;;
-    gemini) echo "npm:@google/gemini-cli" ;;
+    agy) echo "" ;;
     ollama) echo "aqua:ollama/ollama" ;;
     kiro-cli) echo "kiro-cli" ;;
     autohand) echo "npm:autohand-cli" ;;
@@ -39,6 +39,54 @@ _ai_mise_pkg() {
 # install_claude_native [label] — download + run the native installer.
 # Validates the installer's size and shebang before executing it. Never
 # fatal: failures are reported and the caller continues.
+# install_agy_native [label] — download + run the Antigravity CLI native installer.
+# Validates the installer's size and shebang before executing it.
+install_agy_native() {
+  local label="${1:-Antigravity CLI}"
+  local installer
+  installer=$(umask 077 && mktemp)
+  if curl -fsSL -o "$installer" https://antigravity.google/cli/install.sh &&
+    [ "$(wc -c <"$installer")" -le 262144 ] &&
+    head -1 "$installer" | grep -q '^#!'; then
+    if command -v gum >/dev/null 2>&1; then
+      if gum spin --spinner dot --title "Installing $label (native installer)" -- bash "$installer"; then
+        ui_ok "$label" "installed"
+      else
+        ui_warn "$label" "install failed (continuing)"
+      fi
+    else
+      ui_info "Installing" "$label via native installer"
+      bash "$installer" || ui_warn "$label" "install failed (continuing)"
+    fi
+  else
+    ui_warn "$label" "installer download/validation failed (continuing)"
+  fi
+  rm -f "$installer"
+}
+
+install_goose_native() {
+  local label="${1:-Goose}"
+  local installer
+  installer=$(umask 077 && mktemp)
+  if curl -fsSL -o "$installer" https://github.com/block/goose/releases/download/stable/download_cli.sh &&
+    [ "$(wc -c <"$installer")" -le 524288 ] &&
+    head -1 "$installer" | grep -q '^#!'; then
+    if command -v gum >/dev/null 2>&1; then
+      if gum spin --spinner dot --title "Installing $label (native installer)" -- bash "$installer"; then
+        ui_ok "$label" "installed"
+      else
+        ui_warn "$label" "install failed (continuing)"
+      fi
+    else
+      ui_info "Installing" "$label via native installer"
+      bash "$installer" || ui_warn "$label" "install failed (continuing)"
+    fi
+  else
+    ui_warn "$label" "installer download/validation failed (continuing)"
+  fi
+  rm -f "$installer"
+}
+
 install_claude_native() {
   local label="${1:-Claude Code}"
   local installer

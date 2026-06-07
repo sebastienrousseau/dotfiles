@@ -6,7 +6,7 @@
 ##
 ## # Requirements
 ## - git: Version control
-## - One of: claude, gemini, sgpt, aider, ollama
+## - One of: claude, agy, sgpt, aider, ollama
 ##
 ## # Usage
 ## git ai-diff                         # Review working changes vs HEAD
@@ -51,7 +51,7 @@ while [[ $# -gt 0 ]]; do
       echo ""
       echo "Options:"
       echo "  <commit>        Compare against this commit (default: HEAD)"
-      echo "  --provider, -p  AI provider: claude, gemini, sgpt, ollama, aider"
+      echo "  --provider, -p  AI provider: claude, agy, sgpt, ollama, aider"
       echo "  --staged, -s    Review only staged changes"
       echo ""
       echo "Environment:"
@@ -77,8 +77,8 @@ detect_provider() {
     echo "claude"
   elif command -v aider >/dev/null 2>&1; then
     echo "aider"
-  elif command -v gemini >/dev/null 2>&1; then
-    echo "gemini"
+  elif command -v agy >/dev/null 2>&1; then
+    echo "agy"
   elif command -v sgpt >/dev/null 2>&1; then
     echo "sgpt"
   elif command -v ollama >/dev/null 2>&1; then
@@ -91,7 +91,7 @@ detect_provider() {
 PROVIDER="${PROVIDER:-$(detect_provider)}"
 
 if [[ -z "$PROVIDER" ]]; then
-  printf '%b\n' "${RED}Error: No AI provider found. Install claude, gemini, sgpt, aider, or ollama.${NC}"
+  printf '%b\n' "${RED}Error: No AI provider found. Install claude, agy, sgpt, aider, or ollama.${NC}"
   exit 1
 fi
 
@@ -141,8 +141,8 @@ case "$PROVIDER" in
   aider)
     ANALYSIS=$(aider --message "$PROMPT" --no-git --yes 2>/dev/null | tail -50 || echo "")
     ;;
-  gemini)
-    ANALYSIS=$(echo "$PROMPT" | gemini 2>/dev/null || echo "")
+  agy)
+    ANALYSIS=$(echo "$PROMPT" | agy 2>/dev/null || echo "")
     ;;
   sgpt)
     ANALYSIS=$(sgpt "$PROMPT" 2>/dev/null || echo "")

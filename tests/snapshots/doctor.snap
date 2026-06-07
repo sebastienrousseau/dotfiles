@@ -28,7 +28,7 @@
 == AI CLIs ==
   ✓    claude                              ~/.local/bin/claude
   ✓    copilot                             ~/.local/share/mise/installs/npm-github-copilot/latest/bin/copilot
-  ✓    gemini                              ~/.local/share/mise/installs/npm-google-gemini-cli/latest/bin/gemini
+  ✓    agy                                 ~/.local/bin/agy
   ✓    sgpt                                ~/.local/bin/sgpt
   ✓    ollama                              ~/.local/share/mise/installs/aqua-ollama-ollama/0.23.2/ollama
   ✓    opencode                            ~/.local/share/mise/installs/opencode/1.2.16/opencode

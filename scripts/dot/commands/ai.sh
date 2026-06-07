@@ -5,7 +5,7 @@
 ##
 ## Provides AI CLI status, setup, RAG query, and bridge commands.
 ## Wraps AI CLI tools with contextual patterns and system metadata.
-## Usage: dot ai [delegate|cost|status]|ai-setup|ai-query|cl|copilot|gemini|kiro|sgpt|ollama|opencode|aider|autohand|vibe|qwen|zai
+## Usage: dot ai [delegate|cost|dashboard|status]|ai-setup|ai-query|cl|copilot|agy|kiro|sgpt|ollama|opencode|aider|autohand|vibe|qwen|zai
 
 set -euo pipefail
 
@@ -29,7 +29,7 @@ if [[ ! -d "$PATTERN_DIR" ]]; then
 fi
 
 _show_ai_bridge_usage() {
-  echo "Usage: dot cl|codex|copilot|gemini|goose|kiro|autohand|vibe|qwen|zai --pattern [name] \"prompt\""
+  echo "Usage: dot cl|codex|copilot|agy|goose|kiro|autohand|vibe|qwen|zai --pattern [name] \"prompt\""
   echo ""
   echo "Available Patterns:"
   # shellcheck disable=SC2012
@@ -85,10 +85,12 @@ _ai_refresh_status_cache() {
     i=$((i + 1))
   done
   # Probe is non-interactive: </dev/null is a clean EOF for tools that
-  # prompt for an API key on first run; `timeout 3` caps the wait.
+  # prompt for an API key on first run; `timeout 8` caps the wait.
+  # Node-based tools (codex, copilot, opencode) need 5-8s on cold start;
+  # 3s caused false "not installed" results in the status cache.
   # shellcheck disable=SC2016
   local _TO=""
-  command -v timeout >/dev/null 2>&1 && _TO="timeout 3 "
+  command -v timeout >/dev/null 2>&1 && _TO="timeout 8 "
   local probe_script='
     payload="$1"; out_dir="$2"; to="$3"
     i="${payload%%|*}"; entry="${payload#*|}"
@@ -160,7 +162,7 @@ cmd_ai_status() {
     "Coding (interactive)|coding|Qwen Code|qwen|Qwen AI coding assistant"
     "Coding (interactive)|coding|ZAI|zai|Zhipu AI coding agent"
     "General (prompt-based)|general|Shell-GPT|sgpt|ChatGPT terminal interface"
-    "General (prompt-based)|general|Gemini CLI|gemini|Google AI CLI"
+    "General (prompt-based)|general|Antigravity CLI|agy|Google Antigravity CLI"
     "Runtime (local)|local|Ollama|ollama|Local LLM runner"
     "Cloud (platform)|cloud|Kiro CLI|kiro-cli|AWS AI assistant"
   )
@@ -238,6 +240,10 @@ cmd_ai_status() {
         IFS='|' read -r name bin <<<"$entry"
         if [[ "$bin" == "claude" ]]; then
           install_claude_native "$name"
+          continue
+        fi
+        if [[ "$bin" == "agy" ]]; then
+          install_agy_native "$name"
           continue
         fi
         local pkg
@@ -350,41 +356,84 @@ cmd_ai_cost() {
 # delegate-report. Token/cost fields are left blank when the provider
 # CLI does not surface them — the report tolerates missing fields and
 # groups by `model`. This gives users one place to see invocations
-# across Claude, Gemini, Aider, Vibe, etc., not just Vibe.
+# across Claude, Antigravity, Aider, Vibe, etc., not just Vibe.
 _ai_log_run() {
   local provider="$1" exit_code="$2" duration_secs="$3" prompt_words="$4"
-  local log_file="${HOME}/.local/share/delegate-runs.jsonl"
-  mkdir -p "$(dirname "$log_file")"
   local project ts
   project="$(basename "$PWD")"
   ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  # python3 keeps the encoding boring; jq would also work but isn't
-  # guaranteed present everywhere this script runs.
-  python3 - "$log_file" "$provider" "$project" "$exit_code" "$duration_secs" "$prompt_words" "$ts" <<'PY'
-import json, sys
-log, provider, project, ec, dur, pw, ts = sys.argv[1:8]
-entry = {
-    "ts": ts,
-    "delegate": provider,
-    "model": provider,
-    "project": project,
-    "exit_code": int(ec),
-    "duration_secs": float(dur),
-    "prompt_words": int(pw),
-    "tool_calls": 0,
-    "files_changed": 0,
-    "wrote_nothing": False,
-    "warn_count": 0,
-    "search_replace_fails": 0,
-    "syntax_errors": 0,
-    "tokens_in": 0,
-    "tokens_out": 0,
-    "tokens_total": 0,
-    "cost_usd": 0,
-    "cost_claude_eq": 0,
-}
-with open(log, "a") as fh:
-    fh.write(json.dumps(entry) + "\n")
+  python3 - "$provider" "$project" "$exit_code" "$duration_secs" "$prompt_words" "$ts" <<'PY'
+import json, sqlite3, sys
+from pathlib import Path
+
+provider, project, ec, dur, pw, ts = sys.argv[1:7]
+DB    = Path.home() / '.local' / 'share' / 'dotfiles-ai.db'
+JSONL = Path.home() / '.local' / 'share' / 'delegate-runs.jsonl'
+DB.parent.mkdir(parents=True, exist_ok=True)
+
+db = sqlite3.connect(str(DB), timeout=10, isolation_level=None)
+db.execute('PRAGMA journal_mode=WAL')
+db.execute('PRAGMA synchronous=NORMAL')
+db.execute('''CREATE TABLE IF NOT EXISTS runs (
+    id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts                   TEXT    NOT NULL DEFAULT "",
+    delegate             TEXT    NOT NULL DEFAULT "",
+    model                TEXT    NOT NULL DEFAULT "",
+    project              TEXT    NOT NULL DEFAULT "",
+    workdir              TEXT             DEFAULT "",
+    agent                TEXT             DEFAULT "default",
+    max_turns            INTEGER          DEFAULT 0,
+    timeout_secs         INTEGER          DEFAULT 0,
+    exit_code            INTEGER          DEFAULT 0,
+    timed_out            INTEGER          DEFAULT 0,
+    duration_secs        REAL             DEFAULT 0,
+    prompt_words         INTEGER          DEFAULT 0,
+    tool_calls           INTEGER          DEFAULT 0,
+    files_changed        INTEGER          DEFAULT 0,
+    wrote_nothing        INTEGER          DEFAULT 0,
+    warn_count           INTEGER          DEFAULT 0,
+    search_replace_fails INTEGER          DEFAULT 0,
+    syntax_errors        INTEGER          DEFAULT 0,
+    tokens_in            INTEGER          DEFAULT 0,
+    tokens_out           INTEGER          DEFAULT 0,
+    tokens_total         INTEGER          DEFAULT 0,
+    cost_usd             REAL             DEFAULT 0,
+    cost_claude_eq       REAL             DEFAULT 0
+)''')
+db.execute('CREATE TABLE IF NOT EXISTS _meta (key TEXT PRIMARY KEY, value TEXT)')
+# One-time migration of existing JSONL data into SQLite.
+if not db.execute("SELECT 1 FROM _meta WHERE key='jsonl_migrated'").fetchone():
+    if JSONL.exists():
+        for line in JSONL.read_text().splitlines():
+            if not line.strip():
+                continue
+            try:
+                r = json.loads(line)
+                db.execute('''INSERT INTO runs
+                    (ts,delegate,model,project,workdir,agent,max_turns,timeout_secs,
+                     exit_code,timed_out,duration_secs,prompt_words,tool_calls,
+                     files_changed,wrote_nothing,warn_count,search_replace_fails,
+                     syntax_errors,tokens_in,tokens_out,tokens_total,cost_usd,cost_claude_eq)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''',
+                    (r.get('ts',''), r.get('delegate',''), r.get('model',''),
+                     r.get('project',''), r.get('workdir',''), r.get('agent','default'),
+                     int(r.get('max_turns',0) or 0), int(r.get('timeout_secs',0) or 0),
+                     int(r.get('exit_code',0) or 0), int(bool(r.get('timed_out',False))),
+                     float(r.get('duration_secs',0) or 0), int(r.get('prompt_words',0) or 0),
+                     int(r.get('tool_calls',0) or 0), int(r.get('files_changed',0) or 0),
+                     int(bool(r.get('wrote_nothing',False))), int(r.get('warn_count',0) or 0),
+                     int(r.get('search_replace_fails',0) or 0), int(r.get('syntax_errors',0) or 0),
+                     int(r.get('tokens_in',0) or 0), int(r.get('tokens_out',0) or 0),
+                     int(r.get('tokens_total',0) or 0), float(r.get('cost_usd',0) or 0),
+                     float(r.get('cost_claude_eq',0) or 0)))
+            except Exception:
+                pass
+    db.execute("INSERT OR REPLACE INTO _meta VALUES ('jsonl_migrated','1')")
+
+db.execute('''INSERT INTO runs (ts,delegate,model,project,exit_code,duration_secs,prompt_words)
+    VALUES (?,?,?,?,?,?,?)''',
+    (ts, provider, provider, project, int(ec), float(dur), int(pw)))
+db.close()
 PY
 }
 
@@ -473,6 +522,10 @@ ${prompt}"
         ui_err "$tool" "not installed — install with: mise use -g $mise_pkg@latest"
         exit 1
       fi
+    elif [[ "$tool_bin" == "agy" ]]; then
+      ui_warn "$tool" "not installed"
+      ui_info "Install" "curl -fsSL https://antigravity.google/cli/install.sh | bash"
+      exit 1
     else
       ui_err "$tool" "not installed and mise not available"
       exit 1
@@ -499,8 +552,8 @@ ${prompt}"
     copilot)
       copilot -sp "$full_prompt" || _ai_exit=$?
       ;;
-    gemini)
-      printf "%s" "$full_prompt" | gemini chat || _ai_exit=$?
+    agy)
+      printf "%s" "$full_prompt" | agy chat || _ai_exit=$?
       ;;
     goose)
       printf "%s" "$full_prompt" | goose session start || _ai_exit=$?
@@ -558,6 +611,15 @@ case "${1:-}" in
         shift
         cmd_ai_cost "$@"
         ;;
+      dashboard | dash)
+        shift
+        if has_command dot-ai-dash; then
+          exec dot-ai-dash "$@"
+        else
+          ui_warn "dot-ai-dash" "not found — run: chezmoi apply"
+          cmd_ai_status
+        fi
+        ;;
       "" | status)
         cmd_ai_status "$@"
         ;;
@@ -574,7 +636,7 @@ case "${1:-}" in
     shift
     cmd_ai_query "$@"
     ;;
-  cl | claude | codex | copilot | gemini | goose | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
+  cl | claude | codex | copilot | agy | goose | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
     tool="$1"
     shift
     run_ai_with_context "$tool" "$@"

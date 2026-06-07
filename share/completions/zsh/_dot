@@ -15,7 +15,7 @@ _dot() {
     'prewarm:Regenerate shell caches for ultra-fast startup'
     'cl:Claude CLI with context patterns'
     'copilot:GitHub Copilot CLI with context patterns'
-    'gemini:Gemini CLI with context patterns'
+    'agy:Antigravity CLI with context patterns'
     'kiro:Kiro CLI with context patterns'
     'sgpt:Shell-GPT with context patterns'
     'ollama:Ollama with context patterns'
@@ -255,6 +255,17 @@ _dot() {
           )
           _describe -t subcommands 'ssh-cert subcommand' cert_cmds
           ;;
+        ai)
+          local -a ai_cmds=(
+            'status:Show AI CLI status (default)'
+            'dashboard:Real-time multi-agent TUI dashboard'
+            'dash:Alias for dashboard'
+            'cost:Show token cost report'
+            'delegate:Run a background AI delegate'
+            'install:Install a provider binary'
+          )
+          _describe -t subcommands 'ai subcommand' ai_cmds
+          ;;
         secrets)
           local -a secrets_cmds=(
             'edit:Edit encrypted secrets'
@@ -266,7 +277,7 @@ _dot() {
           )
           _describe -t subcommands 'secrets subcommand' secrets_cmds
           ;;
-        cl | copilot | gemini | kiro | sgpt | ollama | opencode | aider)
+        cl | copilot | agy | kiro | sgpt | ollama | opencode | aider)
           _arguments -C \
             '(--pattern -p)'{--pattern,-p}'[Specify steering pattern]:pattern:->patterns' \
             '*:prompt: '

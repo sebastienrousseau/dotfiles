@@ -88,7 +88,7 @@ cline	$root/.clinerules
 aider	$root/.aider.conf.yml
 continue	$root/.continuerc.json
 jules	$root/.jules/system.md
-gemini	$root/.gemini/GEMINI.md
+agy	$root/.agy/AGY.md
 EOF
 }
 
@@ -271,9 +271,9 @@ These rules govern Cascade and the Windsurf agent inside this repository."
       _agents_render_markdown_with_header "$root/.jules/system.md" \
         "Jules" "# Jules system prompt"
 
-      # 8. Gemini — looks for `.gemini/GEMINI.md`.
-      _agents_render_markdown_with_header "$root/.gemini/GEMINI.md" \
-        "Gemini" "# Gemini agent rules"
+      # 8. Antigravity — looks for `.agy/AGY.md`.
+      _agents_render_markdown_with_header "$root/.agy/AGY.md" \
+        "Antigravity" "# Antigravity agent rules"
 
       # 9. Zed — config pointer (TOML).
       local zed_dir="$root/.zed"
@@ -324,7 +324,7 @@ standard read by Codex, Copilot, Cursor, Windsurf, Amp, and Devin.
 
 Harnesses covered by 'render':
   agents-md, cursor, codex, windsurf, zed, roo, cline,
-  aider, continue, jules, gemini.
+  aider, continue, jules, agy.
 EOF
       ;;
     *)

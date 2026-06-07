@@ -29,11 +29,11 @@ Use the `dot` CLI to run AI tools with added context:
 
 ```bash
 # General usage
-dot cl|codex|copilot|gemini|goose|kiro|sgpt|ollama|opencode|aider|autohand|vibe|qwen|zai --pattern <name> "prompt"
+dot cl|codex|copilot|agy|goose|kiro|sgpt|ollama|opencode|aider|autohand|vibe|qwen|zai --pattern <name> "prompt"
 
 # Quick aliases
 dcla "Optimize my zshrc"      # Claude + Architect
-dgmnh "Audit my ssh config"   # Gemini + Hardener
+dagyh "Audit my ssh config"   # Antigravity + Hardener
 dkir "Refactor this script"   # Kiro + Refactorer
 ```
 
@@ -46,7 +46,7 @@ Supported bridge commands:
 | `dot cl` | Claude Code |
 | `dot codex` | OpenAI Codex CLI |
 | `dot copilot` | GitHub Copilot CLI |
-| `dot gemini` | Gemini CLI |
+| `dot agy` | Antigravity CLI |
 | `dot goose` | Goose (Block) |
 | `dot kiro` | Kiro CLI |
 | `dot sgpt` | Shell-GPT |
@@ -77,8 +77,28 @@ To stay fast, `dot ai` caches provider info in `~/.cache/dotfiles/ai/status.tsv`
 Related AI commands:
 
 - `dot ai` — check status and launch tools
+- `dot ai dashboard` / `dot ai dash` — real-time multi-agent TUI dashboard
 - `dot ai-setup` — set up AI CLIs step by step
 - `dot ai-query` — run context-aware queries on the dotfiles repo
+
+### `dot ai dashboard`
+
+A real-time terminal dashboard for monitoring all running AI agents at once. Opens a Python curses TUI showing:
+
+- **AGENTS** — which providers are running, how long they have been up
+- **COST TODAY** — spend by provider, bar chart, running total
+- **RECENT RUNS** — last 50 runs from the SQLite log with status, tokens, and duration
+
+```bash
+dot ai dashboard          # open dashboard (auto-refreshes every 5s)
+dot ai dash               # alias
+dot-ai-dash --refresh 10  # set refresh interval
+# Keys: q/ESC → quit   r → force refresh
+```
+
+Data comes from `~/.local/share/dotfiles-ai.db` (written by `dot ai delegate` and `vibe-delegate`). No runs yet? The dashboard shows empty panels and waits — start an agent and it will appear on the next refresh.
+
+Aliases: `daid`, `daish`.
 
 ## Optional AI CLI tools
 
@@ -86,7 +106,7 @@ These tools are not installed for you. Pick and install only the ones you want:
 
 - **Agents**: `claude`, `codex`, `copilot`, `goose`
 - **Coding assistants**: `aider`, `opencode`
-- **General AI**: `gemini`, `sgpt`
+- **General AI**: `agy`, `sgpt`
 - **Local-first**: `ollama`
 - **Coding agents**: `autohand`, `vibe`, `qwen`, `zai`
 - **Cloud / platform**: `kiro-cli`

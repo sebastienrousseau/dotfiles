@@ -41,7 +41,7 @@ DOT_BIN="$REPO_ROOT/bin/dot"
 
 for cmd in "ai" "ai-setup --help" "ai-query --help" \
   "cl --help" "claude --help" "codex --help" "copilot --help" \
-  "gemini --help" "goose --help" "kiro --help" "sgpt --help" \
+  "agy --help" "goose --help" "kiro --help" "sgpt --help" \
   "ollama --help" "opencode --help" "aider --help"; do
   test_start "dot_$(echo "$cmd" | tr ' -' '__' | tr -dc 'a-z0-9_')"
   # `$cmd` is INTENDED to word-split into separate argv entries

@@ -300,7 +300,7 @@ See the [Migration Guide](docs/operations/MIGRATION.md) for version upgrades.
 - **Pattern library** (`dot patterns`) — architect, hardener, and refactor patterns bundled in `dot_config/ai/patterns/`
 - **MCP policy enforcement** (`dot mcp`) — validate the Model Context Protocol registry against policy
 - **AI commit messages** (`dot commit`) — conventional commits generated from the staged diff
-- **AI tools** (`dot ai`) — Codex, GitHub Copilot, Gemini CLI, and friends managed via Mise; Claude Code via Anthropic's native installer
+- **AI tools** (`dot ai`) — Codex, GitHub Copilot, Antigravity CLI, and friends managed via Mise; Claude Code via Anthropic's native installer
 - **Attestation logs** — every agent session is logged with a policy hash and an outcome
 
 </details>

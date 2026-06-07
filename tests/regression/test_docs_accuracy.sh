@@ -50,7 +50,7 @@ test_start "ai_doc_bridge_commands_match_code"
 # Every bridge command documented in AI.md must exist in ai.sh dispatch
 ai_script="$REPO_ROOT/scripts/dot/commands/ai.sh"
 failures=0
-for cmd in cl copilot gemini kiro sgpt ollama opencode aider autohand vibe qwen zai; do
+for cmd in cl copilot agy kiro sgpt ollama opencode aider autohand vibe qwen zai; do
   if grep -q "dot $cmd" "$REPO_ROOT/docs/AI.md" 2>/dev/null; then
     if ! grep -q "$cmd" "$ai_script" 2>/dev/null; then
       failures=$((failures + 1))
@@ -96,7 +96,7 @@ assert_equals "0" "$failures" "all PROFILES.md presets must have matching templa
 test_start "tools_doc_ai_tools_in_mise"
 mise_config="$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml"
 failures=0
-for tool in claude copilot gemini ollama opencode aider; do
+for tool in claude copilot agy ollama opencode aider; do
   if grep -q "$tool" "$REPO_ROOT/docs/reference/TOOLS.md" 2>/dev/null; then
     if ! grep -qi "$tool" "$mise_config" 2>/dev/null; then
       failures=$((failures + 1))

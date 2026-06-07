@@ -99,7 +99,7 @@ Detailed guide: [AI.md](../AI.md).
 | **Claude CLI** | Anthropic's terminal assistant |
 | **Copilot CLI** | GitHub Copilot in the terminal |
 | **Kiro CLI** | Agentic AI terminal assistant |
-| **Gemini CLI** | Google's multi-modal CLI tool |
+| **Antigravity CLI** | Google's Antigravity CLI (`agy`) |
 | **Mods/Fabric** | Pipeline-friendly AI processing |
 | **sgpt** | Shell-GPT for terminal AI queries |
 | **Ollama** | Run large language models locally |

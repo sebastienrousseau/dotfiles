@@ -163,7 +163,7 @@ declare -a PROBES=(
   "ai_bridge_help  cl --help"
   "ai_bridge_codex codex --help"
   "ai_bridge_cop   copilot --help"
-  "ai_bridge_gem   gemini --help"
+  "ai_bridge_agy   agy --help"
   "ai_bridge_goose goose --help"
   "ai_bridge_kiro  kiro --help"
   "ai_bridge_sgpt  sgpt --help"
