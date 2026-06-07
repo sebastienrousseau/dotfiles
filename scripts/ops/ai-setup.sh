@@ -28,7 +28,7 @@ setup_tool() {
 }
 
 # 1. Claude
-setup_tool "Claude CLI" "claude" claude --version  # Claude handles auth via web flow or env
+setup_tool "Claude CLI" "claude" claude --version # Claude handles auth via web flow or env
 
 # 2. Antigravity CLI
 setup_tool "Antigravity CLI" "agy" agy --version

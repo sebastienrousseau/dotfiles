@@ -352,89 +352,14 @@ cmd_ai_cost() {
   "$tool" "$@"
 }
 
-# Append a best-effort run entry to the unified AI log read by
-# delegate-report. Token/cost fields are left blank when the provider
-# CLI does not surface them — the report tolerates missing fields and
-# groups by `model`. This gives users one place to see invocations
-# across Claude, Antigravity, Aider, Vibe, etc., not just Vibe.
 _ai_log_run() {
   local provider="$1" exit_code="$2" duration_secs="$3" prompt_words="$4"
-  local project ts
+  local project ts log_bin
   project="$(basename "$PWD")"
   ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  python3 - "$provider" "$project" "$exit_code" "$duration_secs" "$prompt_words" "$ts" <<'PY'
-import json, sqlite3, sys
-from pathlib import Path
-
-provider, project, ec, dur, pw, ts = sys.argv[1:7]
-DB    = Path.home() / '.local' / 'share' / 'dotfiles-ai.db'
-JSONL = Path.home() / '.local' / 'share' / 'delegate-runs.jsonl'
-DB.parent.mkdir(parents=True, exist_ok=True)
-
-db = sqlite3.connect(str(DB), timeout=10, isolation_level=None)
-db.execute('PRAGMA journal_mode=WAL')
-db.execute('PRAGMA synchronous=NORMAL')
-db.execute('''CREATE TABLE IF NOT EXISTS runs (
-    id                   INTEGER PRIMARY KEY AUTOINCREMENT,
-    ts                   TEXT    NOT NULL DEFAULT "",
-    delegate             TEXT    NOT NULL DEFAULT "",
-    model                TEXT    NOT NULL DEFAULT "",
-    project              TEXT    NOT NULL DEFAULT "",
-    workdir              TEXT             DEFAULT "",
-    agent                TEXT             DEFAULT "default",
-    max_turns            INTEGER          DEFAULT 0,
-    timeout_secs         INTEGER          DEFAULT 0,
-    exit_code            INTEGER          DEFAULT 0,
-    timed_out            INTEGER          DEFAULT 0,
-    duration_secs        REAL             DEFAULT 0,
-    prompt_words         INTEGER          DEFAULT 0,
-    tool_calls           INTEGER          DEFAULT 0,
-    files_changed        INTEGER          DEFAULT 0,
-    wrote_nothing        INTEGER          DEFAULT 0,
-    warn_count           INTEGER          DEFAULT 0,
-    search_replace_fails INTEGER          DEFAULT 0,
-    syntax_errors        INTEGER          DEFAULT 0,
-    tokens_in            INTEGER          DEFAULT 0,
-    tokens_out           INTEGER          DEFAULT 0,
-    tokens_total         INTEGER          DEFAULT 0,
-    cost_usd             REAL             DEFAULT 0,
-    cost_claude_eq       REAL             DEFAULT 0
-)''')
-db.execute('CREATE TABLE IF NOT EXISTS _meta (key TEXT PRIMARY KEY, value TEXT)')
-# One-time migration of existing JSONL data into SQLite.
-if not db.execute("SELECT 1 FROM _meta WHERE key='jsonl_migrated'").fetchone():
-    if JSONL.exists():
-        for line in JSONL.read_text().splitlines():
-            if not line.strip():
-                continue
-            try:
-                r = json.loads(line)
-                db.execute('''INSERT INTO runs
-                    (ts,delegate,model,project,workdir,agent,max_turns,timeout_secs,
-                     exit_code,timed_out,duration_secs,prompt_words,tool_calls,
-                     files_changed,wrote_nothing,warn_count,search_replace_fails,
-                     syntax_errors,tokens_in,tokens_out,tokens_total,cost_usd,cost_claude_eq)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''',
-                    (r.get('ts',''), r.get('delegate',''), r.get('model',''),
-                     r.get('project',''), r.get('workdir',''), r.get('agent','default'),
-                     int(r.get('max_turns',0) or 0), int(r.get('timeout_secs',0) or 0),
-                     int(r.get('exit_code',0) or 0), int(bool(r.get('timed_out',False))),
-                     float(r.get('duration_secs',0) or 0), int(r.get('prompt_words',0) or 0),
-                     int(r.get('tool_calls',0) or 0), int(r.get('files_changed',0) or 0),
-                     int(bool(r.get('wrote_nothing',False))), int(r.get('warn_count',0) or 0),
-                     int(r.get('search_replace_fails',0) or 0), int(r.get('syntax_errors',0) or 0),
-                     int(r.get('tokens_in',0) or 0), int(r.get('tokens_out',0) or 0),
-                     int(r.get('tokens_total',0) or 0), float(r.get('cost_usd',0) or 0),
-                     float(r.get('cost_claude_eq',0) or 0)))
-            except Exception:
-                pass
-    db.execute("INSERT OR REPLACE INTO _meta VALUES ('jsonl_migrated','1')")
-
-db.execute('''INSERT INTO runs (ts,delegate,model,project,exit_code,duration_secs,prompt_words)
-    VALUES (?,?,?,?,?,?,?)''',
-    (ts, provider, provider, project, int(ec), float(dur), int(pw)))
-db.close()
-PY
+  log_bin="${HOME}/.local/bin/dot-ai-log"
+  [[ -x "$log_bin" ]] || return 0
+  "$log_bin" "$provider" "$project" "$exit_code" "$duration_secs" "$prompt_words" "$ts" || true
 }
 
 run_ai_with_context() {
@@ -524,7 +449,7 @@ ${prompt}"
       fi
     elif [[ "$tool_bin" == "agy" ]]; then
       ui_warn "$tool" "not installed"
-      ui_info "Install" "curl -fsSL https://antigravity.google/cli/install.sh | bash"
+      ui_info "Install" "curl -fsSL -o /tmp/agy-install.sh https://antigravity.google/cli/install.sh && bash /tmp/agy-install.sh"
       exit 1
     else
       ui_err "$tool" "not installed and mise not available"

@@ -30,7 +30,7 @@ first_line=$(head -n 1 "$TEST_SCRIPT")
 assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
 
 test_start "ai_setup_includes_copilot"
-assert_file_contains "$TEST_SCRIPT" "setup_tool \"Copilot CLI\" \"copilot\" \"copilot --version\"" "should setup Copilot CLI"
+assert_file_contains "$TEST_SCRIPT" "setup_tool \"Copilot CLI\" \"copilot\" copilot --version" "should setup Copilot CLI"
 
 # Slice 3 (#883): exercise the script under sandbox for line coverage
 cov_exercise_script "$TEST_SCRIPT"
