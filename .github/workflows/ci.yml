@@ -70,7 +70,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         id: filter
         with:
@@ -117,7 +117,7 @@ jobs:
     name: Lint / Lua
     needs: changes
     if: needs.changes.outputs.lua == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@da89db441c0e41f3d2fdcbf290eb681f0b49921d # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@91922371a9774e39e018179d9eaf44d4746f4a0d # master
     with:
       target: defaults/dot_config/nvim
       strict: false
@@ -135,7 +135,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: Install fish
         run: sudo apt-get update && sudo apt-get install -y fish
       - name: Syntax Check
@@ -157,7 +157,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
       - name: Run Nu Check
         run: |
@@ -173,7 +173,7 @@ jobs:
       || needs.changes.outputs.nix == 'true'
       || github.event_name == 'schedule'
       || github.event_name == 'workflow_dispatch'
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@da89db441c0e41f3d2fdcbf290eb681f0b49921d # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@91922371a9774e39e018179d9eaf44d4746f4a0d # master
 
   lint-reusable-pins:
     name: Lint / Reusable Workflow Pins
@@ -189,7 +189,7 @@ jobs:
         uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: Verify every reusable-workflow call site is SHA-pinned
         # Closes the lint-rule half of #855. Policy: docs/security/CI_PINNING.md
         run: bash tools/ci/lint-reusable-pins.sh
@@ -206,7 +206,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       # Cache the compiled taplo-cli binary across runs so we only pay
       # the ~60s cargo build cost once. Key by major.minor so patch
       # bumps invalidate cleanly.
@@ -231,7 +231,7 @@ jobs:
   # ============================================================================
   security-secrets:
     name: Security / Secrets Scan
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@da89db441c0e41f3d2fdcbf290eb681f0b49921d # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@91922371a9774e39e018179d9eaf44d4746f4a0d # master
     with:
       run_guard: true
       run_additional_patterns: true
@@ -240,7 +240,7 @@ jobs:
 
   security-dependencies:
     name: Security / Dependency Audit
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@da89db441c0e41f3d2fdcbf290eb681f0b49921d # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@91922371a9774e39e018179d9eaf44d4746f4a0d # master
     with:
       run_dependency_audit: true
       run_supply_chain_checks: true
@@ -257,11 +257,11 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           fetch-depth: 0
       - name: TruffleHog Scan
-        uses: trufflesecurity/trufflehog@37b77001d0174ebec2fcca2bd83ff83a6d45a3ab # v3.95.3
+        uses: trufflesecurity/trufflehog@d411fff7b8879a62509f3fa98c07f247ac089a51 # v3.95.5
         with:
           extra_args: --only-verified
 
@@ -275,7 +275,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: Generate SBOM with Syft
         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
         with:
@@ -309,7 +309,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: Lychee link checker
         uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2
         with:
@@ -337,7 +337,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: Setup Chezmoi
         uses: ./.github/actions/setup-chezmoi
       - name: Init & Dry Run
@@ -363,7 +363,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: Setup Chezmoi
         uses: ./.github/actions/setup-chezmoi
       - name: Init & Dry Run
@@ -392,7 +392,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Verify PowerShell 7.4+
         # windows-latest currently ships PowerShell 7.4 LTS (EOL 2026-11-10).
@@ -452,7 +452,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: E2E Installation Test
         run: |
           # Retry apt-get up to 3 times to handle transient mirror failures
@@ -473,7 +473,7 @@ jobs:
   test-unit:
     name: Test / Unit
     needs: changes
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@da89db441c0e41f3d2fdcbf290eb681f0b49921d # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@91922371a9774e39e018179d9eaf44d4746f4a0d # master
     with:
       min_coverage: "95"
       run_integration: true
@@ -496,7 +496,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: Setup Chezmoi
         uses: ./.github/actions/setup-chezmoi
       - name: Configure source dir
@@ -524,7 +524,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@da89db441c0e41f3d2fdcbf290eb681f0b49921d # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@91922371a9774e39e018179d9eaf44d4746f4a0d # master
     with:
       flake_dir: nix
       run_fmt_check: false
@@ -547,7 +547,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y zsh hyperfine jq
