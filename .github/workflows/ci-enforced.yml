@@ -44,7 +44,7 @@ jobs:
 
   lint-lua:
     name: Lint / Lua (Zero Warnings)
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@da89db441c0e41f3d2fdcbf290eb681f0b49921d # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@91922371a9774e39e018179d9eaf44d4746f4a0d # master
     with:
       target: defaults/dot_config/nvim
       strict: true
@@ -58,7 +58,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@da89db441c0e41f3d2fdcbf290eb681f0b49921d # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@91922371a9774e39e018179d9eaf44d4746f4a0d # master
     with:
       flake_dir: nix
       run_fmt_check: true
@@ -67,7 +67,7 @@ jobs:
 
   lint-copyright:
     name: Lint / Copyright Headers (Zero Tolerance)
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@da89db441c0e41f3d2fdcbf290eb681f0b49921d # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@91922371a9774e39e018179d9eaf44d4746f4a0d # master
 
   # ============================================================================
   # STAGE 2: SECURITY (Mandatory - No bypass allowed)
@@ -82,7 +82,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
         with:
           fetch-depth: 0
       - name: Gitleaks (No bypass)
@@ -100,7 +100,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
       - name: Audit shell dependencies
         run: |
           echo "::notice::Auditing external dependencies in shell scripts"
@@ -136,9 +136,9 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
       - name: Checkov Infrastructure Security
-        uses: bridgecrewio/checkov-action@b75da993a1a8b73d1086c8d330cadeee5bcccb31 # v12.3103.0
+        uses: bridgecrewio/checkov-action@fa9edf8f0a491c59a924ea6accd5bdcf07752cff # v12.3107.0
         with:
           framework: dockerfile,yaml,secrets
           quiet: false
@@ -151,7 +151,7 @@ jobs:
           skip_path: oss-fuzz-integration/
       - name: Upload Checkov results to GitHub Security
         if: always() && hashFiles('reports/checkov.sarif') != ''
-        uses: github/codeql-action/upload-sarif@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4
+        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4
         with:
           sarif_file: reports/checkov.sarif
 
@@ -174,7 +174,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
       - name: Setup Chezmoi
         uses: ./.github/actions/setup-chezmoi
       - name: Chezmoi Apply Test
@@ -191,7 +191,7 @@ jobs:
 
   test-unit:
     name: Test / Unit Tests
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@da89db441c0e41f3d2fdcbf290eb681f0b49921d # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@91922371a9774e39e018179d9eaf44d4746f4a0d # master
     with:
       min_coverage: "100"
       run_integration: true
@@ -244,7 +244,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
       - name: Dependency Update Check
         if: matrix.check == 'dependency-updates'
         run: |
