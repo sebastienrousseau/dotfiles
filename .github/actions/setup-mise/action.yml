@@ -48,14 +48,14 @@ runs:
 
     - name: Restore mise binary cache
       if: inputs.cache == 'true' && inputs.version != 'latest'
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
       with:
         path: ${{ steps.resolve.outputs.bin_dir }}/mise
         key: ${{ inputs.cache-key-prefix }}-bin-${{ runner.os }}-${{ runner.arch }}-${{ inputs.version }}
 
     - name: Restore mise toolchain cache
       if: inputs.cache == 'true' && inputs.install-tools == 'true'
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
       with:
         # ~/.local/share/mise is mise's default tool installation root.
         # Key is tied to the lockfile so a tool bump invalidates correctly.
