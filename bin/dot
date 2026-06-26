@@ -38,8 +38,8 @@ _resolve_source_dir() {
 
   if script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null)"; then
     script_dir="$script_path"
-    # Post-v0.2.505: the canonical dispatcher lives at <repo>/bin/dot, so
-    # $script_dir/.. is the repo root. Pre-v0.2.505 (and chezmoi-deployed
+    # Post-v0.2.506: the canonical dispatcher lives at <repo>/bin/dot, so
+    # $script_dir/.. is the repo root. Pre-v0.2.506 (and chezmoi-deployed
     # wrapper invocations that still exec the canonical) the dispatcher
     # was at <repo>/dot_local/bin/executable_dot, so $script_dir/../..
     # was the repo. Probe both to cover the transition.
