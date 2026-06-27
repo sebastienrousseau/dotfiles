@@ -733,7 +733,7 @@ else
 $doctor_report
 ---
 Suggest specific shell commands to fix these issues according to our architectural standards."
-    dot cl --pattern hardener "$ai_prompt"
+    dot ai claude --style hardener "$ai_prompt"
   fi
   exit 1
 fi

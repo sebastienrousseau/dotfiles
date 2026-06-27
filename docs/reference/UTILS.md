@@ -56,9 +56,9 @@ The `dot` command is the main interface for managing dotfiles. Run `dot version`
 | `dot history` | Analyse shell history |
 | `dot security-score` | Score workstation security (`--verbose/-v`,`--quiet/-q`,`--json/-j`) |
 | `dot snapshot` | Capture workstation state (`--baseline/-b`,`--force/-f`) |
-| `dot ai` | Show categorized AI CLI status and launch an installed provider |
-| `dot ai-setup` | Bootstrap supported AI CLIs interactively |
-| `dot ai-query` | Run context-aware AI queries over the repo |
+| `dot ai` | Open the AI fleet cockpit; run prompts, serve a local Claude gateway, install, cost |
+| `dot ai-setup` | Bootstrap AI CLIs interactively (deprecated alias for `dot ai login`) |
+| `dot ai-query` | Context-aware RAG query over the repo (deprecated alias for `dot ai ask`) |
 | `dot mode` | Show or switch the active agent profile |
 | `dot agent` | Inspect agent metadata, logs, checkpoints, and conformance |
 | `dot agent checkpoint` | Save, list, show, and replay bounded agent checkpoints |
@@ -110,18 +110,22 @@ POSIX scripts in `~/.local/bin/` that work across macOS, Linux, and WSL.
 
 Themes are auto-generated from wallpapers — `themes.toml` is not hand-edited. See [Theming Guide](../guides/THEMING.md) for the K-Means CIELAB extraction model and Apple-compatible dynamic HEIC support.
 
-## AI Bridges
+## AI Bridges (deprecated aliases)
+
+These run a tool with dotfiles context injection. They still work but are
+**deprecated** in favour of `dot ai <tool>` (e.g. `dot ai claude "…"`); each
+prints a one-line hint. See [AI.md](../AI.md) for the full surface.
 
 | Command | Description |
 |---------|-------------|
-| `dot cl` | Invoke Claude Code with dotfiles context injection |
-| `dot copilot` | Invoke GitHub Copilot CLI with dotfiles context injection |
-| `dot gemini` | Invoke Gemini CLI with dotfiles context injection |
-| `dot kiro` | Invoke Kiro CLI with dotfiles context injection |
-| `dot sgpt` | Invoke Shell-GPT with dotfiles context injection |
-| `dot ollama` | Invoke Ollama with dotfiles context injection |
-| `dot opencode` | Invoke OpenCode with dotfiles context injection |
-| `dot aider` | Invoke Aider with dotfiles context injection |
+| `dot cl` | Claude Code with context injection — use `dot ai claude` |
+| `dot copilot` | GitHub Copilot CLI — use `dot ai copilot` |
+| `dot agy` | Antigravity CLI — use `dot ai agy` |
+| `dot kiro` | Kiro CLI — use `dot ai kiro` |
+| `dot sgpt` | Shell-GPT — use `dot ai sgpt` |
+| `dot ollama` | Ollama — use `dot ai ollama` |
+| `dot opencode` | OpenCode — use `dot ai opencode` |
+| `dot aider` | Aider — use `dot ai aider` |
 
 ## Secrets
 

@@ -189,11 +189,26 @@ Measure heavy-layer (nvm, rbenv, direnv) readiness time.
 
 ### `dot ai`
 
-Show installed AI tools with versions and status.
+The cockpit for your AI-CLI fleet. Bare `dot ai` opens a Bubble Tea TUI;
+a prompt runs a one-shot; `dot ai serve` serves your Claude subscription
+locally to any Anthropic/OpenAI-protocol tool.
 
 ```
-dot ai
+dot ai                      # open the cockpit (TUI)
+dot ai "fix the auth bug"   # one-shot on Claude
+dot ai codex "add tests"    # one-shot on a named tool
+dot ai chat [tool]          # interactive session
+dot ai tools                # install / manage the fleet
+dot ai install [all|<tool>] # install fleet tools
+dot ai serve [stop|status]  # local Claude gateway (start also routes the fleet)
+dot ai cost                 # spend report
+dot ai login [tool]         # authenticate
+dot ai doctor               # health-check fleet + gateway
 ```
+
+Add `--style <name>` (architect, hardener, refactor) to steer a prompt.
+Old forms (`dot cl`, `dot ai dashboard`, `dot ai proxy`, `dot ai-setup`, …)
+still work as deprecated aliases. See [AI.md](../../AI.md) for the full guide.
 
 ### `dot mcp`
 

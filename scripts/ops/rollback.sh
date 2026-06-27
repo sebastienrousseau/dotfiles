@@ -284,7 +284,7 @@ $drift
 
 Analyze why the environment may have reached a state requiring rollback and suggest architectural hardening steps."
 
-      dot cl --pattern hardener "$ai_prompt" || true
+      dot ai claude --style hardener "$ai_prompt" || true
     fi
   fi
 }

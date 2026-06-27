@@ -212,7 +212,7 @@ A [Claude Code skill](defaults/dot_claude/skills/dotfiles-bootstrap/SKILL.md) is
 
 | | |
 |:---|:---|
-| `dot ai` | Show installed AI tools |
+| `dot ai` | AI fleet cockpit — run, chat, install, serve a local Claude gateway, cost |
 | `dot mcp` | Inspect MCP policy and registry |
 | `dot mode` | Show or set the agent profile (ask / plan / apply / audit) |
 | `dot agent` | Agent metadata, logs, checkpoints, conformance |
@@ -300,7 +300,7 @@ See the [Migration Guide](docs/operations/MIGRATION.md) for version upgrades.
 - **Pattern library** (`dot patterns`) — architect, hardener, and refactor patterns bundled in `dot_config/ai/patterns/`
 - **MCP policy enforcement** (`dot mcp`) — validate the Model Context Protocol registry against policy
 - **AI commit messages** (`dot commit`) — conventional commits generated from the staged diff
-- **AI tools** (`dot ai`) — Codex, GitHub Copilot, Antigravity CLI, and friends managed via Mise; Claude Code via Anthropic's native installer
+- **AI fleet cockpit** (`dot ai`) — install and run Codex, Copilot, Antigravity, Aider, OpenCode, and friends from one Bubble Tea TUI; `dot ai serve` serves your Claude subscription locally to any Anthropic/OpenAI-protocol tool. See [docs/AI.md](docs/AI.md)
 - **Attestation logs** — every agent session is logged with a policy hash and an outcome
 
 </details>
