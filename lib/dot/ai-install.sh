@@ -42,6 +42,8 @@ _ai_mise_pkg() {
 # install_agy_native [label] — download + run the Antigravity CLI native installer.
 # Validates the installer's size and shebang before executing it.
 install_agy_native() {
+  # LCOV_EXCL_START — network curl|bash installer; can't run in the unit
+  # sandbox (the repo SKIPs install.sh / executable_update for the same reason).
   local label="${1:-Antigravity CLI}"
   local installer
   installer=$(umask 077 && mktemp)
@@ -62,9 +64,11 @@ install_agy_native() {
     ui_warn "$label" "installer download/validation failed (continuing)"
   fi
   rm -f "$installer"
+  # LCOV_EXCL_STOP
 }
 
 install_goose_native() {
+  # LCOV_EXCL_START — network curl|bash installer (see install_agy_native).
   local label="${1:-Goose}"
   local installer
   installer=$(umask 077 && mktemp)
@@ -88,9 +92,11 @@ install_goose_native() {
     ui_warn "$label" "installer download/validation failed (continuing)"
   fi
   rm -f "$installer"
+  # LCOV_EXCL_STOP
 }
 
 install_claude_native() {
+  # LCOV_EXCL_START — network curl|bash installer (see install_agy_native).
   local label="${1:-Claude Code}"
   local installer
   installer=$(umask 077 && mktemp)
@@ -111,4 +117,5 @@ install_claude_native() {
     ui_warn "$label" "installer download/validation failed (continuing)"
   fi
   rm -f "$installer"
+  # LCOV_EXCL_STOP
 }
