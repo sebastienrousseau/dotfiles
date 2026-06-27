@@ -305,13 +305,7 @@ cmd_ai_status() {
   fi
 }
 
-cmd_ai_setup() {
-  run_script "scripts/ops/ai-setup.sh" "AI setup script" "$@"
-}
-
-cmd_ai_query() {
-  run_script "dot_local/bin/executable_dot-ai" "AI RAG script" "$@"
-}
+# cmd_ai_setup / cmd_ai_query / cmd_ai_install live in lib/dot/ai-commands.sh.
 
 _ai_log_run() {
   local provider="$1" exit_code="$2" duration_secs="$3" prompt_words="$4"
@@ -512,7 +506,16 @@ case "${1:-}" in
         ;;
       tools)
         shift
-        cmd_ai_status "$@"
+        if [[ "${1:-}" == install ]]; then
+          shift
+          cmd_ai_install "$@"
+        else
+          cmd_ai_status "$@"
+        fi
+        ;;
+      install)
+        shift
+        cmd_ai_install "$@"
         ;;
       serve)
         shift

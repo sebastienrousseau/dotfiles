@@ -103,6 +103,75 @@ cmd_ai_doctor() {
   ui_info "Fleet" "$installed/$total tools installed — 'dot ai tools' to manage"
 }
 
+# cmd_ai_setup [tool…] — authenticate / initialize AI CLIs (dot ai login).
+cmd_ai_setup() {
+  run_script "scripts/ops/ai-setup.sh" "AI setup script" "$@"
+}
+
+# cmd_ai_query <question…> — RAG query over the dotfiles repo (dot ai ask).
+cmd_ai_query() {
+  run_script "dot_local/bin/executable_dot-ai" "AI RAG script" "$@"
+}
+
+# cmd_ai_install [all|<tool>] — install missing fleet tools, or one tool.
+# Uses the native installers for claude/goose/agy and mise for the rest.
+cmd_ai_install() {
+  local target="${1:-all}"
+  local fleet=(claude codex copilot goose agy sgpt ollama opencode aider kiro-cli autohand vibe qwen zai)
+  local -a todo=()
+  local b pkg
+  case "$target" in
+    all | "")
+      for b in "${fleet[@]}"; do has_command "$b" || todo+=("$b"); done
+      if [[ ${#todo[@]} -eq 0 ]]; then
+        ui_ok "AI fleet" "all tools already installed"
+        return 0
+      fi
+      ui_info "Installing" "${#todo[@]} missing tool(s)"
+      ;;
+    *)
+      if has_command "$target"; then
+        ui_ok "$target" "already installed"
+        return 0
+      fi
+      todo=("$target")
+      ;;
+  esac
+  for b in "${todo[@]}"; do
+    case "$b" in
+      claude)
+        install_claude_native "Claude Code"
+        continue
+        ;;
+      goose)
+        install_goose_native "Goose"
+        continue
+        ;;
+      agy)
+        install_agy_native "Antigravity CLI"
+        continue
+        ;;
+    esac
+    pkg="$(_ai_mise_pkg "$b")"
+    if [[ -z "$pkg" ]]; then
+      ui_warn "$b" "no installer mapping — skipping"
+      continue
+    fi
+    if ! has_command mise; then
+      ui_err "$b" "mise not available — install: mise use -g $pkg@latest"
+      continue
+    fi
+    ui_info "Installing" "$b ($pkg)"
+    if mise use -g "$pkg@latest" 2>&1; then
+      ui_ok "$b" "installed"
+    else
+      ui_warn "$b" "install failed (continuing)"
+    fi
+  done
+  rm -f "${AI_STATUS_CACHE_FILE:-}" 2>/dev/null || true
+  ui_ok "Done" "run 'dot ai tools' to verify"
+}
+
 # Locate the vibe-delegate / delegate-report tools deployed by the /vibe
 # Claude Code skill. Path stays in sync with
 # defaults/dot_claude/skills/vibe/tools/.
