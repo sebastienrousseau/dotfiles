@@ -68,18 +68,21 @@ install_goose_native() {
   local label="${1:-Goose}"
   local installer
   installer=$(umask 077 && mktemp)
+  # CONFIGURE=false: the goose installer otherwise runs `goose configure`
+  # interactively after install, which hangs in non-interactive contexts
+  # (gum spin, CI, `dot ai install`). Users can `goose configure` later.
   if curl -fsSL -o "$installer" https://github.com/block/goose/releases/download/stable/download_cli.sh &&
     [ "$(wc -c <"$installer")" -le 524288 ] &&
     head -1 "$installer" | grep -q '^#!'; then
     if command -v gum >/dev/null 2>&1; then
-      if gum spin --spinner dot --title "Installing $label (native installer)" -- bash "$installer"; then
+      if gum spin --spinner dot --title "Installing $label (native installer)" -- env CONFIGURE=false bash "$installer"; then
         ui_ok "$label" "installed"
       else
         ui_warn "$label" "install failed (continuing)"
       fi
     else
       ui_info "Installing" "$label via native installer"
-      bash "$installer" || ui_warn "$label" "install failed (continuing)"
+      CONFIGURE=false bash "$installer" || ui_warn "$label" "install failed (continuing)"
     fi
   else
     ui_warn "$label" "installer download/validation failed (continuing)"
