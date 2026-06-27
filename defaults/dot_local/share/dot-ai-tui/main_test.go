@@ -77,6 +77,43 @@ func TestSlashCommands(t *testing.T) {
 	}
 }
 
+// The slash palette must surface cockpit + the selected tool's commands,
+// filter by prefix, switch with the tool, and hide outside the chat input.
+func TestPalette(t *testing.T) {
+	m := newModel()
+	m.focus = "input"
+	m.input.SetValue("/")
+	cockpit, claude := false, false
+	for _, it := range m.palette() {
+		if it.label == "/help" {
+			cockpit = true
+		}
+		if it.label == "/compact" && it.kind == "session" {
+			claude = true
+		}
+	}
+	if !cockpit || !claude {
+		t.Fatal("palette missing cockpit or claude commands")
+	}
+	m.input.SetValue("/comp")
+	if p := m.palette(); len(p) != 1 || p[0].label != "/compact" {
+		t.Fatalf("prefix filter failed: %+v", p)
+	}
+	for i, tl := range fleet {
+		if tl.name == "aider" {
+			m.cursor = i
+		}
+	}
+	m.input.SetValue("/add")
+	if p := m.palette(); len(p) != 1 || p[0].label != "/add" {
+		t.Fatalf("tool-aware palette failed for aider: %+v", p)
+	}
+	m.focus = "fleet"
+	if m.palette() != nil {
+		t.Fatal("palette must be empty outside the chat input")
+	}
+}
+
 // Fenced code must be syntax-highlighted; prose must pass through unchanged.
 func TestHighlightCode(t *testing.T) {
 	out := highlight("```ts\nexport function f() { return 1 }\n```")

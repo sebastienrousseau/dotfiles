@@ -87,6 +87,45 @@ type line struct {
 	text string
 }
 
+// paletteItem is one entry in the `/` command palette. kind "cockpit" runs in
+// the chat; kind "session" opens the tool's native REPL where it applies.
+type paletteItem struct {
+	label, desc, kind string
+}
+
+// Cockpit commands work in the in-chat one-shot mode.
+var cockpitCmds = []paletteItem{
+	{"/help", "list commands", "cockpit"},
+	{"/clear", "clear the chat", "cockpit"},
+	{"/style", "set steering style", "cockpit"},
+	{"/tool", "switch tool", "cockpit"},
+	{"/serve", "start the gateway", "cockpit"},
+	{"/cost", "spend report", "cockpit"},
+	{"/exit", "quit the cockpit", "cockpit"},
+}
+
+// Common native REPL commands per provider — for familiarity. Selecting one
+// opens the tool's session (overlapping cockpit labels are filtered out).
+var toolCmds = map[string][]paletteItem{
+	"claude":   {{"/compact", "summarise context", "session"}, {"/model", "switch model", "session"}, {"/resume", "resume a session", "session"}, {"/agents", "manage subagents", "session"}, {"/mcp", "MCP servers", "session"}, {"/usage", "usage & limits", "session"}, {"/init", "generate CLAUDE.md", "session"}},
+	"codex":    {{"/model", "switch model", "session"}, {"/approvals", "approval mode", "session"}, {"/status", "session status", "session"}, {"/mcp", "MCP servers", "session"}},
+	"aider":    {{"/add", "add files", "session"}, {"/drop", "drop files", "session"}, {"/diff", "show diff", "session"}, {"/commit", "commit changes", "session"}, {"/undo", "undo last edit", "session"}, {"/model", "switch model", "session"}},
+	"opencode": {{"/model", "switch model", "session"}, {"/share", "share session", "session"}, {"/undo", "undo", "session"}},
+	"goose":    {{"/mode", "set agent mode", "session"}, {"/extension", "manage extensions", "session"}, {"/model", "switch model", "session"}},
+	"copilot":  {{"/model", "switch model", "session"}, {"/clear", "clear context", "session"}},
+	"qwen":     {{"/model", "switch model", "session"}, {"/clear", "clear", "session"}},
+}
+
+func clampi(v, lo, hi int) int {
+	if v < lo {
+		return lo
+	}
+	if v > hi {
+		return hi
+	}
+	return v
+}
+
 type refreshMsg struct {
 	tools      []tool
 	gatewayUp  bool
@@ -117,6 +156,54 @@ type model struct {
 	status        string
 	style         string // active steering style (--style)
 	streamCh      chan streamMsg
+	palSel        int // selected index in the `/` command palette
+}
+
+// palette returns the filtered command list when the input begins with "/".
+func (m model) palette() []paletteItem {
+	if m.focus != "input" {
+		return nil
+	}
+	v := strings.ToLower(strings.TrimSpace(m.input.Value()))
+	if !strings.HasPrefix(v, "/") {
+		return nil
+	}
+	seen := map[string]bool{}
+	var out []paletteItem
+	add := func(items []paletteItem) {
+		for _, it := range items {
+			if seen[it.label] {
+				continue // cockpit label wins over a duplicate tool label
+			}
+			if v == "/" || strings.HasPrefix(it.label, v) {
+				seen[it.label] = true
+				out = append(out, it)
+			}
+		}
+	}
+	add(cockpitCmds)
+	add(toolCmds[m.tools[m.cursor].name])
+	return out
+}
+
+func (m model) renderPalette(pal []paletteItem, w int) string {
+	sel := clampi(m.palSel, 0, len(pal)-1)
+	var b strings.Builder
+	for i, it := range pal {
+		name := fmt.Sprintf("%-11s", it.label)
+		row := dimSt.Render("  ") + bodySt.Render(name) + dimSt.Render(it.desc)
+		if it.kind == "session" {
+			row += dimSt.Render("  → " + m.tools[m.cursor].name + " session")
+		}
+		if i == sel {
+			row = selSt.Render("▌ "+name) + bodySt.Render(it.desc)
+			if it.kind == "session" {
+				row += dimSt.Render("  → " + m.tools[m.cursor].name + " session")
+			}
+		}
+		b.WriteString(ansi.Truncate(row, w, "…") + "\n")
+	}
+	return strings.TrimRight(b.String(), "\n")
 }
 
 func gatewayBase() string {
@@ -358,6 +445,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.input.Focus()
 				return m, textinput.Blink
 			}
+			// In chat: tab completes the open palette instead of toggling.
+			if len(m.palette()) > 0 {
+				return m.updateInput(msg)
+			}
 			m.focus = "fleet"
 			m.input.Blur()
 			return m, nil
@@ -409,12 +500,45 @@ func (m model) updateFleet(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) updateInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	pal := m.palette()
 	switch msg.String() {
 	case "esc":
+		if len(pal) > 0 { // close the palette first
+			m.input.SetValue("")
+			m.palSel = 0
+			return m, nil
+		}
 		m.focus = "fleet"
 		m.input.Blur()
 		return m, nil
+	case "up", "ctrl+p":
+		if len(pal) > 0 {
+			m.palSel = clampi(m.palSel-1, 0, len(pal)-1)
+			return m, nil
+		}
+	case "down", "ctrl+n":
+		if len(pal) > 0 {
+			m.palSel = clampi(m.palSel+1, 0, len(pal)-1)
+			return m, nil
+		}
+	case "tab": // complete the input to the selected command
+		if len(pal) > 0 {
+			m.input.SetValue(pal[clampi(m.palSel, 0, len(pal)-1)].label + " ")
+			m.palSel = 0
+			return m, nil
+		}
 	case "enter":
+		if len(pal) > 0 { // run the selected palette command
+			it := pal[clampi(m.palSel, 0, len(pal)-1)]
+			m.input.SetValue("")
+			m.palSel = 0
+			if it.kind == "cockpit" {
+				return m.handleSlash(it.label)
+			}
+			m.transcript = append(m.transcript, line{who: "sys",
+				text: "opening " + m.tools[m.cursor].name + " session — " + it.label + " works there"})
+			return m, dotExec("chat", m.tools[m.cursor].name)
+		}
 		q := strings.TrimSpace(m.input.Value())
 		if q == "" {
 			return m, nil
@@ -437,6 +561,7 @@ func (m model) updateInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	}
 	var c tea.Cmd
 	m.input, c = m.input.Update(msg)
+	m.palSel = 0
 	return m, c
 }
 
@@ -558,8 +683,15 @@ func (m model) View() string {
 		state = dimSt.Render(" · ready")
 	}
 	cb.WriteString(state + "\n\n")
-	cb.WriteString(m.renderTranscript(rw-2, bodyH-5))
+	pal := m.palette()
+	if len(pal) > 8 {
+		pal = pal[:8]
+	}
+	cb.WriteString(m.renderTranscript(rw-2, bodyH-5-len(pal)))
 	cb.WriteString("\n")
+	if len(pal) > 0 {
+		cb.WriteString(m.renderPalette(pal, rw-2) + "\n")
+	}
 	if m.running {
 		cb.WriteString(m.spin.View() + dimSt.Render(" "+t.name+" is thinking…"))
 	} else {
@@ -690,6 +822,7 @@ func renderSnapshot() {
 	}
 	m.style = "architect"
 	m.focus = "input"
+	m.input.SetValue("/") // show the command palette in the preview
 	fmt.Println(m.View())
 }
 
