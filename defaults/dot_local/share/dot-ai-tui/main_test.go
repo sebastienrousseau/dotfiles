@@ -52,6 +52,42 @@ func TestRenderChrome(t *testing.T) {
 	}
 }
 
+// Slash commands must steer the session: set style, clear, switch tool.
+func TestSlashCommands(t *testing.T) {
+	m := newModel()
+	mm, _ := m.handleSlash("/style architect")
+	m = mm.(model)
+	if m.style != "architect" {
+		t.Fatalf("/style: got %q", m.style)
+	}
+	m.transcript = []line{{who: "you", text: "hi"}}
+	mm, _ = m.handleSlash("/clear")
+	if len(mm.(model).transcript) != 0 {
+		t.Fatal("/clear did not clear the transcript")
+	}
+	mm, _ = m.handleSlash("/tool codex")
+	want := -1
+	for i, tl := range fleet {
+		if tl.name == "codex" {
+			want = i
+		}
+	}
+	if mm.(model).cursor != want {
+		t.Fatalf("/tool codex: cursor=%d want=%d", mm.(model).cursor, want)
+	}
+}
+
+// Fenced code must be syntax-highlighted; prose must pass through unchanged.
+func TestHighlightCode(t *testing.T) {
+	out := highlight("```ts\nexport function f() { return 1 }\n```")
+	if !strings.Contains(out, "\x1b[38;5;") {
+		t.Fatal("code block produced no colour")
+	}
+	if got := highlight("just prose, no fences"); got != "just prose, no fences" {
+		t.Fatalf("prose was altered: %q", got)
+	}
+}
+
 // Cursor navigation must stay in bounds at both ends.
 func TestCursorBounds(t *testing.T) {
 	m := newModel()

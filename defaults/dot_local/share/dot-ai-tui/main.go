@@ -18,10 +18,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/alecthomas/chroma/v2/quick"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 )
 
 type tool struct {
@@ -113,6 +115,7 @@ type model struct {
 	transcript    []line
 	running       bool
 	status        string
+	style         string // active steering style (--style)
 }
 
 func gatewayBase() string {
@@ -175,18 +178,66 @@ func sqlite(db, query string) string {
 	return strings.TrimSpace(string(b))
 }
 
-// runPrompt runs a one-shot through `dot ai [tool] "<prompt>"` and returns the
-// captured output. Chatting stays inside the TUI — no screen takeover.
-func runPrompt(toolName, prompt string) tea.Cmd {
+// runPrompt runs a turn through `dot ai [tool] [--style s] "<prompt>"` and
+// returns the captured output. Prior turns are flattened into the prompt so
+// the conversation has context (multi-turn). Stays inside the TUI.
+func runPrompt(toolName, style string, history []line, prompt string) tea.Cmd {
 	return func() tea.Msg {
+		full := prompt
+		if len(history) > 0 {
+			var b strings.Builder
+			b.WriteString("Continue this conversation. Reply only as the assistant, concisely.\n\n")
+			for _, l := range history {
+				if l.who == "sys" {
+					continue
+				}
+				role := "Assistant"
+				if l.who == "you" {
+					role = "User"
+				}
+				b.WriteString(role + ": " + l.text + "\n\n")
+			}
+			b.WriteString("User: " + prompt + "\n\nAssistant:")
+			full = b.String()
+		}
 		args := []string{"ai"}
 		if toolName != "" && toolName != "claude" {
 			args = append(args, toolName)
 		}
-		args = append(args, prompt)
+		if style != "" {
+			args = append(args, "--style", style)
+		}
+		args = append(args, full)
 		out, err := exec.Command("dot", args...).CombinedOutput()
 		return promptResultMsg{toolName: toolName, out: strings.TrimSpace(string(out)), err: err}
 	}
+}
+
+// highlight syntax-colours fenced ``` code blocks (and inline diffs) with
+// chroma, leaving prose untouched.
+func highlight(text string) string {
+	if !strings.Contains(text, "```") {
+		return text
+	}
+	parts := strings.Split(text, "```")
+	var b strings.Builder
+	for i, p := range parts {
+		if i%2 == 0 {
+			b.WriteString(p)
+			continue
+		}
+		lang, code := "", p
+		if nl := strings.IndexByte(p, '\n'); nl >= 0 {
+			lang, code = strings.TrimSpace(p[:nl]), p[nl+1:]
+		}
+		var hb strings.Builder
+		if err := quick.Highlight(&hb, code, lang, "terminal256", "github-dark"); err == nil {
+			b.WriteString(hb.String())
+		} else {
+			b.WriteString(code)
+		}
+	}
+	return b.String()
 }
 
 // dotExec suspends the TUI for an interactive `dot ai <args…>` then refreshes.
@@ -200,7 +251,7 @@ func newModel() model {
 	copy(t, fleet)
 
 	ti := textinput.New()
-	ti.Placeholder = "ask the selected tool…  (Tab to browse the fleet)"
+	ti.Placeholder = "ask the selected tool…  (/help · Tab to browse)"
 	ti.Prompt = "❯ "
 	ti.PromptStyle = lipgloss.NewStyle().Foreground(pink).Bold(true)
 	ti.TextStyle = bodySt
@@ -302,18 +353,65 @@ func (m model) updateInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case "enter":
 		q := strings.TrimSpace(m.input.Value())
-		if q == "" || m.running {
+		if q == "" {
+			return m, nil
+		}
+		m.input.SetValue("")
+		if strings.HasPrefix(q, "/") {
+			return m.handleSlash(q)
+		}
+		if m.running {
 			return m, nil
 		}
 		t := m.tools[m.cursor]
+		history := append([]line(nil), m.transcript...)
 		m.transcript = append(m.transcript, line{who: "you", text: q})
-		m.input.SetValue("")
 		m.running = true
-		return m, tea.Batch(runPrompt(t.name, q), m.spin.Tick)
+		return m, tea.Batch(runPrompt(t.name, m.style, history, q), m.spin.Tick)
 	}
 	var c tea.Cmd
 	m.input, c = m.input.Update(msg)
 	return m, c
+}
+
+// handleSlash interprets in-chat slash commands.
+func (m model) handleSlash(cmd string) (tea.Model, tea.Cmd) {
+	f := strings.Fields(cmd)
+	name := f[0]
+	arg := strings.TrimSpace(strings.TrimPrefix(cmd, name))
+	sys := func(s string) { m.transcript = append(m.transcript, line{who: "sys", text: s}) }
+	switch name {
+	case "/help", "/?":
+		sys("commands  ·  /tool <name>  /style <name|off>  /serve  /cost  /clear  /quit")
+	case "/clear":
+		m.transcript = nil
+	case "/quit", "/q":
+		return m, tea.Quit
+	case "/style":
+		if arg == "" || arg == "off" {
+			m.style, _ = "", arg
+			sys("style cleared")
+		} else {
+			m.style = arg
+			sys("style → " + arg)
+		}
+	case "/tool":
+		for i, t := range m.tools {
+			if t.name == arg {
+				m.cursor = i
+				sys("tool → " + arg)
+				return m, nil
+			}
+		}
+		sys("unknown tool: " + arg + "  (Tab to browse the fleet)")
+	case "/serve":
+		return m, dotExec("serve")
+	case "/cost":
+		return m, dotExec("cost")
+	default:
+		sys("unknown command: " + name + "  (try /help)")
+	}
+	return m, nil
 }
 
 // ── layout helpers ──────────────────────────────────────────────────────────
@@ -340,6 +438,9 @@ func (m model) View() string {
 		gw = chipOK.Render("● " + m.gatewayMsg)
 	}
 	left := logoSt.Render("◆ dot ai") + "  " + tagSt.Render("AI fleet cockpit")
+	if m.style != "" {
+		left += dimSt.Render("  · style ") + selSt.Render(m.style)
+	}
 	right := gw + " " + chipCost.Render("today "+m.costToday)
 	gap := m.width - lipgloss.Width(left) - lipgloss.Width(right) - 2
 	if gap < 1 {
@@ -463,12 +564,30 @@ func (m model) renderTranscript(w, h int) string {
 		}
 	} else {
 		for _, l := range m.transcript {
-			tag := botSt.Render(l.who + " ▸ ")
-			if l.who == "you" {
-				tag = youSt.Render("you ▸ ")
+			var tag, content string
+			hasCode := false
+			switch l.who {
+			case "you":
+				tag, content = youSt.Render("you ▸ "), bodySt.Render(l.text)
+			case "sys":
+				tag, content = dimSt.Render("· "), dimSt.Render(l.text)
+			default:
+				tag, content = botSt.Render(l.who+" ▸ "), highlight(l.text)
+				hasCode = strings.Contains(l.text, "```")
 			}
-			wrapped := lipgloss.NewStyle().Width(w).Render(tag + bodySt.Render(l.text))
-			lines = append(lines, strings.Split(wrapped, "\n")...)
+			if hasCode {
+				// Code carries chroma ANSI — truncate (don't lipgloss-wrap,
+				// which would strip the colours).
+				for i, ln := range strings.Split(content, "\n") {
+					if i == 0 {
+						ln = tag + ln
+					}
+					lines = append(lines, ansi.Truncate(ln, w, "…"))
+				}
+			} else {
+				wrapped := lipgloss.NewStyle().Width(w).Render(tag + content)
+				lines = append(lines, strings.Split(wrapped, "\n")...)
+			}
 		}
 	}
 	// Keep the tail; pad the top so content sits at the bottom.
@@ -492,9 +611,10 @@ func renderSnapshot() {
 		m = mm.(model)
 	}
 	m.transcript = []line{
-		{who: "you", text: "refactor auth.ts to use the new token API"},
-		{who: "claude", text: "Extracted validateToken() and swapped the legacy call sites — 3 files touched, tests green."},
+		{who: "you", text: "show me a typed fetch wrapper"},
+		{who: "claude", text: "Here's a small typed wrapper:\n```ts\nexport async function getJSON<T>(url: string): Promise<T> {\n  const r = await fetch(url);\n  if (!r.ok) throw new Error(r.statusText);\n  return r.json();\n}\n```\nCall it with `getJSON<User>(\"/api/me\")`."},
 	}
+	m.style = "architect"
 	m.focus = "input"
 	fmt.Println(m.View())
 }
