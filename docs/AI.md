@@ -58,7 +58,7 @@ Running `dot ai` on a terminal opens a glamorous, chat-centric TUI (built with [
 Tab focus   ↑↓ move   ⏎ send   s serve   i install   c refresh   q quit
 ```
 
-Default focus is the fleet (browse with `↑↓`/`j`/`k`); `Tab`, `Enter`, or `/` jumps to the chat input. Prompts run through `dot ai <tool>`, so the cockpit and the command line behave identically. In non-interactive contexts (CI, pipes) `dot ai` falls back to a plain text fleet listing. The cockpit binary (`dot-ai-tui`) is built on `chezmoi apply` via the mise-managed Go toolchain; `DOT_AI_SNAPSHOT=1 dot-ai-tui` prints a single frame for previews.
+Two modes per tool: **Enter on the fleet** opens the tool's *full native session* (where its own `/exit`, `/model`, `/clear`, … work); **Tab / `/`** drops into the quick in-cockpit streaming chat. In the chat input, typing `/` opens a **tool-aware command palette** — the cockpit commands (`/help /clear /style /tool /serve /cost /exit`, which run in-chat) plus the selected provider's common REPL commands (`/compact /model /resume /agents` for claude; `/add /diff /commit` for aider; `/approvals /status` for codex; …), tagged `→ <tool> session`. Navigate with `↑↓`, `Tab` to complete, `Enter` to run. Prompts run through `dot ai <tool>`, so the cockpit and the command line behave identically. In non-interactive contexts (CI, pipes) `dot ai` falls back to a plain text fleet listing. The cockpit binary (`dot-ai-tui`) is built on `chezmoi apply` via the mise-managed Go toolchain; `DOT_AI_SNAPSHOT=1 dot-ai-tui` prints a single frame for previews.
 
 ## Steering styles
 
