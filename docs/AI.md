@@ -116,12 +116,12 @@ dot ai proxy start        # launch dot-ai-serve in the background
 dot ai proxy status       # process + /health + routing state
 dot ai proxy logs -f      # follow the log
 
-# Point the fleet at it (writes ANTHROPIC_BASE_URL / OPENAI_BASE_URL)
-dot ai local on           # new shells route automatically; `source` it for the current one
-dot ai local off          # stop routing through the proxy
+# Route the NON-Claude fleet through it
+dot ai local on           # codex/aider/… run via the gateway when launched with `dot ai <tool>`
+dot ai local off          # stop routing
 ```
 
-`dot ai local on` writes `~/.config/dotfiles/ai-local.env` (and a fish variant), auto-sourced by the shell when `DOTFILES_AI` is set. With routing on, `dot cl "…"` and direct tool invocations (`codex`, `aider`, …) all run on the proxied subscription — no per-provider API keys needed.
+**Native session, never a key.** The gateway authenticates through your `claude` CLI's native session — there is no API key anywhere. Routing is applied **per-invocation** to non-Claude tools (`dot ai codex "…"`, `dot ai aider "…"`); it is **not** sourced into your interactive shell. The primary `claude` is never routed — it always uses its own native session, so claude.ai connectors stay enabled. (Setting `ANTHROPIC_API_KEY` in your shell would disable those connectors, which is exactly why routing stays scoped to each tool's subprocess.)
 
 **Config:** `DOT_AI_HOST` (default `127.0.0.1`), `DOT_AI_PORT` (default `3456`), `DOT_AI_DEFAULT_MODEL` (default `sonnet`), `DOT_AI_API_KEY` (optional shared secret).
 

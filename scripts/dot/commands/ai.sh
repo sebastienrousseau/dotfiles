@@ -368,15 +368,6 @@ run_ai_with_context() {
   local pattern_name=""
   local prompt=""
 
-  # When `dot ai local on` is active, route this run through the local
-  # proxy even if the env wasn't sourced at shell start (e.g. toggled
-  # mid-session). Idempotent: a no-op when the file is absent.
-  local _ai_local_env="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/ai-local.env"
-  if [[ -z "${ANTHROPIC_BASE_URL:-}" && -r "$_ai_local_env" ]]; then
-    # shellcheck disable=SC1090
-    source "$_ai_local_env"
-  fi
-
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --help | -h)
@@ -467,6 +458,20 @@ ${prompt}"
   fi
 
   ui_info "Executing $tool with pattern: ${pattern_name:-none}"
+
+  # Route non-Claude tools through the local gateway when one is running.
+  # The primary Claude ALWAYS uses its native session — never route it,
+  # and never set ANTHROPIC_API_KEY where Claude Code can see it (that
+  # disables claude.ai connectors). Routing is scoped to this run's
+  # subprocess; the interactive shell is never touched.
+  case "$tool" in
+    cl | claude) : ;;
+    *)
+      local _ai_local_env="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/ai-local.env"
+      # shellcheck disable=SC1090
+      [[ -r "$_ai_local_env" ]] && source "$_ai_local_env"
+      ;;
+  esac
 
   # Wrap the provider invocation so we can log it to the unified AI run
   # log. Each entry feeds `dot ai cost` so users see spend across every

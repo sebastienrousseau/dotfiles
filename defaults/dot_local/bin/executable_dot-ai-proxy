@@ -189,16 +189,20 @@ proxy_setup() {
   _need_serve >/dev/null 2>&1 || info "Deploy the server: chezmoi apply ~/.local/bin/dot-ai-serve"
 }
 
-# Write fleet routing env in both sh and fish syntaxes. Any tool the fleet
-# launches inherits these and connects to the local proxy.
+# Write the routing env consumed per-invocation by `dot ai <tool>` for
+# NON-Claude tools. It is deliberately NOT auto-sourced into your shell:
+# the primary `claude` always uses its native session, and setting
+# ANTHROPIC_API_KEY where Claude Code sees it would disable claude.ai
+# connectors. The placeholder key is a dummy the gateway ignores.
 local_on() {
   local key="${DOT_AI_API_KEY:-x}"
   mkdir -p "$CONFIG_DIR"
   (
     umask 077
     cat >"$ENV_SH" <<EOF
-# Managed by 'dot ai local' — routes the AI fleet through the local proxy.
-# Remove with 'dot ai local off'. Auto-sourced when DOTFILES_AI is set.
+# Managed by 'dot ai' — routing for NON-Claude fleet tools only.
+# Consumed per-invocation by 'dot ai <tool>'; NOT sourced into your shell.
+# The primary 'claude' is never routed (it uses its native session).
 export ANTHROPIC_BASE_URL="$BASE_URL"
 export ANTHROPIC_AUTH_TOKEN="$key"
 export ANTHROPIC_API_KEY="$key"
@@ -206,7 +210,7 @@ export OPENAI_BASE_URL="$BASE_URL/v1"
 export OPENAI_API_KEY="$key"
 EOF
     cat >"$ENV_FISH" <<EOF
-# Managed by 'dot ai local' — routes the AI fleet through the local proxy.
+# Managed by 'dot ai' — routing for NON-Claude fleet tools only.
 set -gx ANTHROPIC_BASE_URL "$BASE_URL"
 set -gx ANTHROPIC_AUTH_TOKEN "$key"
 set -gx ANTHROPIC_API_KEY "$key"
@@ -214,17 +218,14 @@ set -gx OPENAI_BASE_URL "$BASE_URL/v1"
 set -gx OPENAI_API_KEY "$key"
 EOF
   )
-  ok "Local routing ON — fleet → $BASE_URL"
-  info "New shells apply it automatically. For the current shell:"
-  info "  source \"$ENV_SH\""
+  ok "Routing ON — non-Claude tools via 'dot ai <tool>' → $BASE_URL"
+  info "The primary 'claude' keeps its native session (not routed)."
   [[ -n "$(_running_pid)" ]] || info "Start the engine with: dot ai proxy start"
 }
 
 local_off() {
   rm -f "$ENV_SH" "$ENV_FISH"
-  ok "Local routing OFF"
-  info "Open shells stay routed until you run:"
-  info "  unset ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN ANTHROPIC_API_KEY OPENAI_BASE_URL OPENAI_API_KEY"
+  ok "Routing OFF"
 }
 
 local_status() {
