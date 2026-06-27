@@ -51,16 +51,16 @@ test_start "ai_picker_is_flat_with_role_labels"
 assert_file_contains "$AI_SCRIPT" "printf '%-16s — %s'" "picker should include compact role labels"
 assert_file_contains "$AI_SCRIPT" "gum choose --header \"Select an AI CLI\"" "picker should use Select wording"
 
-test_start "ai_bridge_help_shows_patterns"
+test_start "ai_bridge_help_shows_styles"
 output=$(bash "$AI_SCRIPT" cl --help 2>&1 || true)
-if echo "$output" | grep -q "Available Patterns"; then
+if echo "$output" | grep -q "Available styles"; then
   ((TESTS_PASSED++)) || true
   printf '%b
-' "  ${GREEN}✓${NC} $CURRENT_TEST: help shows patterns"
+' "  ${GREEN}✓${NC} $CURRENT_TEST: help shows styles"
 else
   ((TESTS_FAILED++)) || true
   printf '%b
-' "  ${RED}✗${NC} $CURRENT_TEST: help missing patterns"
+' "  ${RED}✗${NC} $CURRENT_TEST: help missing styles"
 fi
 
 # Slice 2: drive real line coverage of the script under test

@@ -3,23 +3,24 @@
 # AI & Intelligent Assistance Aliases
 
 # Dotfiles AI Bridge (Context-aware wrappers)
-alias daid='dot ai dashboard'
-alias daish='dot ai dashboard'
+alias dai='dot ai'  # the cockpit
+alias daid='dot ai' # was: dot ai dashboard
+alias daish='dot ai'
 
-alias dcl='dot cl'
-alias dcla='dot cl --pattern architect'
-alias dclh='dot cl --pattern hardener'
-alias dclr='dot cl --pattern refactor'
+alias dcl='dot ai claude'
+alias dcla='dot ai claude --style architect'
+alias dclh='dot ai claude --style hardener'
+alias dclr='dot ai claude --style refactor'
 
-alias dagy='dot agy'
-alias dagya='dot agy --pattern architect'
-alias dagyh='dot agy --pattern hardener'
-alias dagyr='dot agy --pattern refactor'
+alias dagy='dot ai agy'
+alias dagya='dot ai agy --style architect'
+alias dagyh='dot ai agy --style hardener'
+alias dagyr='dot ai agy --style refactor'
 
-alias dki='dot kiro'
-alias dkia='dot kiro --pattern architect'
-alias dkih='dot kiro --pattern hardener'
-alias dkir='dot kiro --pattern refactor'
+alias dki='dot ai kiro'
+alias dkia='dot ai kiro --style architect'
+alias dkih='dot ai kiro --style hardener'
+alias dkir='dot ai kiro --style refactor'
 
 # Aider (AI Pair Programming)
 if command -v aider &>/dev/null; then

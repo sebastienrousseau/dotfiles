@@ -134,12 +134,12 @@ assert_file_contains "$REPO_ROOT/scripts/dot/commands/ai.sh" "_ai_mise_pkg" "mus
 
 test_start "critical_ai_bridge_help"
 output=$(bash "$REPO_ROOT/scripts/dot/commands/ai.sh" cl --help 2>&1 || true)
-if echo "$output" | grep -q "Available Patterns"; then
+if echo "$output" | grep -q "Available styles"; then
   ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: AI bridge help shows available patterns"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: AI bridge help shows available styles"
 else
   ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: AI bridge help should show patterns"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: AI bridge help should show styles"
 fi
 
 # ═══════════════════════════════════════════════════════════════

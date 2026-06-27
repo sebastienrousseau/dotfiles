@@ -12,6 +12,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../../../lib/dot/utils.sh
 source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
+# shellcheck source=../../../lib/dot/ai-commands.sh
+source "$SCRIPT_DIR/../../../lib/dot/ai-commands.sh"
 
 dot_ui_command_banner "AI and Agents" "${1:-}"
 
@@ -29,9 +31,14 @@ if [[ ! -d "$PATTERN_DIR" ]]; then
 fi
 
 _show_ai_bridge_usage() {
-  echo "Usage: dot cl|codex|copilot|agy|goose|kiro|autohand|vibe|qwen|zai --pattern [name] \"prompt\""
+  echo "Usage: dot ai \"<prompt>\"              # one-shot on Claude"
+  echo "       dot ai <tool> \"<prompt>\"       # one-shot on a tool"
+  echo "       dot ai <tool> --style <name> \"<prompt>\""
+  echo "       dot ai chat [tool]             # interactive session"
   echo ""
-  echo "Available Patterns:"
+  echo "Tools: cl codex copilot agy goose kiro sgpt ollama opencode aider autohand vibe qwen zai"
+  echo ""
+  echo "Available styles:"
   # shellcheck disable=SC2012
   ls -1 "$PATTERN_DIR" 2>/dev/null | sed 's/\.md$//' | sed 's/^/  - /' || echo "  (none)"
 }
@@ -306,52 +313,6 @@ cmd_ai_query() {
   run_script "dot_local/bin/executable_dot-ai" "AI RAG script" "$@"
 }
 
-# Locate the vibe-delegate / delegate-report tools deployed by the
-# /vibe Claude Code skill. Path stays in sync with
-# defaults/dot_claude/skills/vibe/tools/.
-_ai_delegate_tool() {
-  local tool="$1" # vibe-delegate | delegate-report
-  local path="${HOME}/.claude/skills/vibe/tools/${tool}"
-  if [[ ! -x "$path" ]]; then
-    # Errors to stderr so callers capturing stdout via $() get just the path.
-    ui_err "$tool" "not found at $path" >&2
-    ui_info "Hint" "Run 'chezmoi apply' to deploy the /vibe skill" >&2
-    return 1
-  fi
-  printf '%s\n' "$path"
-}
-
-cmd_ai_delegate() {
-  # Front-door to the same delegator the /vibe slash command uses.
-  # Usage: dot ai delegate "<prompt>" [max-turns] [agent] [timeout]
-  if [[ $# -lt 1 ]]; then
-    ui_err "Usage" "dot ai delegate \"<prompt>\" [max-turns] [agent] [timeout-secs]"
-    ui_info "Example" "dot ai delegate \"add a CHANGELOG entry for v0.2.505\""
-    return 1
-  fi
-  local prompt="$1"
-  shift
-  local max_turns="${1:-10}"
-  local agent="${2:-}"
-  local timeout="${3:-180}"
-  local tool
-  tool="$(_ai_delegate_tool vibe-delegate)" || return 1
-  if ! has_command vibe; then
-    ui_warn "vibe" "not installed"
-    ui_info "Install" "mise use -g pipx:mistral-vibe"
-    return 1
-  fi
-  "$tool" "$(pwd)" "$prompt" "$max_turns" "$agent" "$timeout"
-}
-
-cmd_ai_cost() {
-  # Unified AI spend report. Wraps delegate-report (vibe runs) and is
-  # the documented interface for users: path may move later.
-  local tool
-  tool="$(_ai_delegate_tool delegate-report)" || return 1
-  "$tool" "$@"
-}
-
 _ai_log_run() {
   local provider="$1" exit_code="$2" duration_secs="$3" prompt_words="$4"
   local project ts log_bin
@@ -374,7 +335,7 @@ run_ai_with_context() {
         _show_ai_bridge_usage
         exit 0
         ;;
-      --pattern | -p)
+      --style | --pattern | -p)
         pattern_name="$2"
         shift 2
         ;;
@@ -535,57 +496,89 @@ ${prompt}"
   return "$_ai_exit"
 }
 
-# Dispatch
+# Dispatch — flat, verb-first surface (see docs/AI.md).
 case "${1:-}" in
   ai)
     shift
-    # Subcommands first: `dot ai delegate`, `dot ai cost`. Fall through
-    # to status if no subcommand or unknown one.
     case "${1:-}" in
-      delegate)
+      "")
+        # Bare `dot ai` → the cockpit (fleet launcher today; a Bubble Tea
+        # TUI replaces this in a later slice).
+        cmd_ai_status
+        ;;
+      chat)
         shift
-        cmd_ai_delegate "$@"
+        cmd_ai_chat "$@"
+        ;;
+      tools)
+        shift
+        cmd_ai_status "$@"
+        ;;
+      serve)
+        shift
+        _ai_serve "$@"
         ;;
       cost)
         shift
         cmd_ai_cost "$@"
         ;;
-      dashboard | dash)
+      login)
         shift
-        if has_command dot-ai-dash; then
-          exec dot-ai-dash "$@"
-        else
-          ui_warn "dot-ai-dash" "not found — run: chezmoi apply"
-          cmd_ai_status
-        fi
+        cmd_ai_setup "$@"
         ;;
-      proxy | local)
-        # Both drive the local-proxy lifecycle/routing helper. Drop the
-        # leading `proxy` but keep `local` so it reaches the helper.
-        if ! has_command dot-ai-proxy; then
-          ui_warn "dot-ai-proxy" "not found — run: chezmoi apply"
-          exit 1
-        fi
-        [[ "$1" == proxy ]] && shift
-        exec dot-ai-proxy "$@"
+      doctor)
+        shift
+        cmd_ai_doctor "$@"
         ;;
-      "" | status)
+      ask)
+        shift
+        cmd_ai_query "$@"
+        ;;
+      run)
+        shift
+        _ai_oneshot "$@"
+        ;;
+      delegate)
+        shift
+        cmd_ai_delegate "$@"
+        ;;
+      # Deprecated verbs — still work, with a one-line hint to the new name.
+      status)
+        _ai_deprecated "dot ai tools"
         cmd_ai_status "$@"
+        ;;
+      dashboard | dash)
+        _ai_deprecated "dot ai  (cockpit) or  dot ai cost"
+        if has_command dot-ai-dash; then exec dot-ai-dash "${@:2}"; else cmd_ai_status; fi
+        ;;
+      proxy)
+        shift
+        _ai_deprecated "dot ai serve"
+        has_command dot-ai-proxy && exec dot-ai-proxy "$@" || exit 1
+        ;;
+      local)
+        _ai_deprecated "dot ai serve"
+        has_command dot-ai-proxy && exec dot-ai-proxy "$@" || exit 1
         ;;
       *)
-        cmd_ai_status "$@"
+        # Bare prompt (`dot ai "fix this"`) or `dot ai <tool> "…"` → one-shot.
+        _ai_oneshot "$@"
         ;;
     esac
     ;;
+  # Deprecated top-level forms — kept for muscle memory.
   ai-setup)
+    _ai_deprecated "dot ai login"
     shift
     cmd_ai_setup "$@"
     ;;
   ai-query)
+    _ai_deprecated "dot ai ask"
     shift
     cmd_ai_query "$@"
     ;;
   cl | claude | codex | copilot | agy | goose | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
+    _ai_deprecated "dot ai $1"
     tool="$1"
     shift
     run_ai_with_context "$tool" "$@"
