@@ -126,6 +126,9 @@ func clampi(v, lo, hi int) int {
 	return v
 }
 
+// execCommand is indirected so tests can substitute a harmless command.
+var execCommand = exec.Command
+
 type refreshMsg struct {
 	tools      []tool
 	gatewayUp  bool
@@ -312,7 +315,7 @@ func startStream(toolName, style string, history []line, prompt string) (chan st
 			args = append(args, "--style", style)
 		}
 		args = append(args, buildPrompt(history, prompt))
-		cmd := exec.Command("dot", args...)
+		cmd := execCommand("dot", args...)
 		cmd.Env = append(os.Environ(), "DOT_AI_RAW=1")
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
@@ -370,10 +373,13 @@ func highlight(text string) string {
 	return b.String()
 }
 
+// execDone is the post-exec callback — refresh after an interactive command.
+func execDone(error) tea.Msg { return refresh() }
+
 // dotExec suspends the TUI for an interactive `dot ai <args…>` then refreshes.
 func dotExec(args ...string) tea.Cmd {
-	c := exec.Command("dot", append([]string{"ai"}, args...)...)
-	return tea.ExecProcess(c, func(error) tea.Msg { return refresh() })
+	c := execCommand("dot", append([]string{"ai"}, args...)...)
+	return tea.ExecProcess(c, execDone)
 }
 
 func newModel() model {
@@ -640,10 +646,7 @@ func (m model) View() string {
 	}
 	header := " " + left + strings.Repeat(" ", gap) + right
 
-	bodyH := m.height - 5
-	if bodyH < 3 {
-		bodyH = 3
-	}
+	bodyH := m.height - 5 // height >= 12 is guaranteed above, so bodyH >= 7
 
 	// Left: the fleet, as lines, then windowed so it never overflows the
 	// panel height and the cursor stays visible.
@@ -826,13 +829,17 @@ func renderSnapshot() {
 	fmt.Println(m.View())
 }
 
-func main() {
+func run() error {
 	if os.Getenv("DOT_AI_SNAPSHOT") != "" {
 		renderSnapshot()
-		return
+		return nil
 	}
-	p := tea.NewProgram(newModel(), tea.WithAltScreen())
-	if _, err := p.Run(); err != nil {
+	_, err := tea.NewProgram(newModel(), tea.WithAltScreen()).Run()
+	return err
+}
+
+func main() {
+	if err := run(); err != nil {
 		fmt.Fprintln(os.Stderr, "dot-ai-tui:", err)
 		os.Exit(1)
 	}
