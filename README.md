@@ -110,7 +110,7 @@ Most dotfiles repos are personal collections. This one ships as workstation infr
 | **Fleet management** | Multi-node drift dashboard, per-host profiles. | `dot fleet` |
 | **Self-healing** | Auto-repair tools, chezmoi drift, broken symlinks, missing files. | `dot heal`, `dot chaos`, `dot rollback`, `dot bundle` |
 | **Sub-second startup** | Lazy loading, `_cached_eval` pattern, mtime-based cache invalidation, realpath sidecar pins. | `dot perf`, `dot health` |
-| **Multi-shell parity** | Tier-1 (full): zsh, bash. Tier-2 (bridged): fish. Tier-3 (compatible): nushell. PowerShell is supported as a contract-tested parity target. See [ADR-007](docs/adr/ADR-007-multi-shell-parity.md) and [ADR-011](docs/adr/ADR-011-nushell-tier3-keep.md). | `dot env`, `dot profile` |
+| **Multi-shell parity** | Tier-1 (full): zsh, bash. Tier-2 (bridged): fish. Tier-3 (compatible): nushell. PowerShell is supported as a contract-tested parity target. A cross-shell parity contract ([`tests/integration/test_shell_parity.sh`](tests/integration/test_shell_parity.sh)) verifies the canonical command surface and a runtime smoke in every available shell. See [ADR-007](docs/adr/ADR-007-multi-shell-parity.md) and [ADR-011](docs/adr/ADR-011-nushell-tier3-keep.md). | `dot env`, `dot profile` |
 | **Build artifacts → /tmp** | Cargo, Go, pip, uv, and Zig caches redirect to `/tmp/builds/`. Project dirs stay clean. | `~/.config/mise/config.toml`, `~/.cargo/config.toml` |
 | **Encrypted secrets** | Age and SOPS keep per-machine secrets out of plaintext history. | `dot secrets` |
 | **Portable runtimes** | Mise for managed toolchains. Nix Flakes for strict reproducibility. | `dot env`, `dot upgrade` |
