@@ -382,9 +382,17 @@ func (m model) updateFleet(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		if m.cursor < len(m.tools)-1 {
 			m.cursor++
 		}
-	case "enter", "/", "p":
+	case "enter":
+		// Open the tool's full native session (all its own commands —
+		// /exit, /clear, /model, … — work there). Suspends the TUI.
+		return m, dotExec("chat", m.tools[m.cursor].name)
+	case "/", "p":
+		// Jump into the quick in-cockpit chat input.
 		m.focus = "input"
 		m.input.Focus()
+		if msg.String() == "/" {
+			m.input.SetValue("/")
+		}
 		return m, textinput.Blink
 	case "c", "r":
 		m.status = "refreshing…"
@@ -440,10 +448,11 @@ func (m model) handleSlash(cmd string) (tea.Model, tea.Cmd) {
 	sys := func(s string) { m.transcript = append(m.transcript, line{who: "sys", text: s}) }
 	switch name {
 	case "/help", "/?":
-		sys("commands  ·  /tool <name>  /style <name|off>  /serve  /cost  /clear  /quit")
+		sys("cockpit commands: /tool <name> · /style <name|off> · /serve · /cost · /clear · /exit")
+		sys("for a tool's own commands (/exit, /model, …) press Enter on the fleet to open its session")
 	case "/clear":
 		m.transcript = nil
-	case "/quit", "/q":
+	case "/quit", "/q", "/exit":
 		return m, tea.Quit
 	case "/style":
 		if arg == "" || arg == "off" {
@@ -565,9 +574,16 @@ func (m model) View() string {
 	body := lipgloss.JoinHorizontal(lipgloss.Top, leftPane, rightPane)
 
 	// Footer keybar.
-	keys := []struct{ k, d string }{
-		{"tab", "focus"}, {"↑↓", "move"}, {"⏎", "send"},
-		{"s", "serve"}, {"i", "install"}, {"c", "refresh"}, {"q", "quit"},
+	var keys []struct{ k, d string }
+	if m.focus == "input" {
+		keys = []struct{ k, d string }{
+			{"⏎", "send"}, {"/help", "cmds"}, {"esc", "fleet"}, {"/exit", "quit"},
+		}
+	} else {
+		keys = []struct{ k, d string }{
+			{"↑↓", "move"}, {"⏎", "open session"}, {"tab", "quick chat"},
+			{"s", "serve"}, {"i", "install"}, {"q", "quit"},
+		}
 	}
 	var fbar strings.Builder
 	for i, kv := range keys {
@@ -611,9 +627,9 @@ func (m model) renderTranscript(w, h int) string {
 	}
 	var lines []string
 	if len(m.transcript) == 0 {
-		lines = append(lines, dimSt.Render("Type a prompt below and press Enter to chat with ")+
-			titleSt.Render(m.tools[m.cursor].name)+dimSt.Render("."))
-		lines = append(lines, dimSt.Render("Tab switches focus to the fleet list."))
+		lines = append(lines, dimSt.Render("Quick chat with ")+titleSt.Render(m.tools[m.cursor].name)+
+			dimSt.Render(" — type below, Enter to send (/help for commands)."))
+		lines = append(lines, dimSt.Render("For a full session (with the tool's own /exit, /model …) press Enter on the fleet."))
 		if len(m.recent) > 0 {
 			lines = append(lines, "", groupSt.Render("RECENT"))
 			for _, r := range m.recent {
