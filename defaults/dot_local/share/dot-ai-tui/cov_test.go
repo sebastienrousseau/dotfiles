@@ -183,7 +183,7 @@ func TestStartStreamAndExec(t *testing.T) {
 	defer func() { execCommand = orig }()
 
 	execCommand = func(name string, args ...string) *exec.Cmd { return exec.Command("printf", "hello world") }
-	ch, cmd := startStream("claude", "", nil, "hi")
+	ch, cmd := startStream("claude", "", "", nil, "hi")
 	if cmd == nil {
 		t.Fatal("nil cmd")
 	}
@@ -192,7 +192,7 @@ func TestStartStreamAndExec(t *testing.T) {
 	}
 	// error path (Start fails) + style + history branches
 	execCommand = func(name string, args ...string) *exec.Cmd { return exec.Command("/no/such/binary/xyz") }
-	ch2, _ := startStream("codex", "architect", []line{{who: "you", text: "a"}, {who: "codex", text: "b"}}, "go")
+	ch2, _ := startStream("codex", "architect", "opus", []line{{who: "you", text: "a"}, {who: "codex", text: "b"}}, "go")
 	drain(ch2)
 
 	if dotExec("serve") == nil { // dotExec returns a tea.Cmd
@@ -588,5 +588,91 @@ func TestCoverageGaps6(t *testing.T) {
 	m.transcript = []line{{who: "you", text: "x"}}
 	if got := m.renderTranscript(40, 0); strings.Count(got, "\n") != 0 {
 		t.Fatalf("h<1 should clamp to a single line, got %d", strings.Count(got, "\n")+1)
+	}
+}
+
+// ── Phase 1: model picker, session persistence, notifications ───────────────
+func TestModelPicker(t *testing.T) {
+	if modelLabel("") != "default" || modelLabel("opus") != "opus" {
+		t.Fatal("modelLabel")
+	}
+	if nextModel("") != "opus" || nextModel("haiku") != "" || nextModel("bogus") != "" {
+		t.Fatalf("nextModel cycle wrong")
+	}
+	// fleet 'm' cycles the model + sets status
+	m := sized()
+	m = upd(m, key("m"))
+	if m.aiModel != "opus" || !strings.Contains(m.status, "model") {
+		t.Fatalf("m key: model=%q status=%q", m.aiModel, m.status)
+	}
+	// header shows the model
+	if !strings.Contains(m.View(), "opus") {
+		t.Fatal("header missing model")
+	}
+	// slash: /model list, set, clear
+	mm, _ := m.handleSlash("/model")
+	mm, _ = mm.(model).handleSlash("/model sonnet")
+	if mm.(model).aiModel != "sonnet" {
+		t.Fatal("/model set")
+	}
+	mm, _ = mm.(model).handleSlash("/model default")
+	if mm.(model).aiModel != "" {
+		t.Fatal("/model default")
+	}
+}
+
+func TestSessionPersistence(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	if loadSession() != nil {
+		t.Fatal("no file → nil")
+	}
+	want := []line{{who: "you", text: "hi"}, {who: "claude", text: "yo\nthere"}}
+	saveSession(want)
+	got := loadSession()
+	if len(got) != 2 || got[1].text != "yo\nthere" || got[0].who != "you" {
+		t.Fatalf("round-trip: %+v", got)
+	}
+	// /save + /resume slash commands (resume adds a "resumed" sys note).
+	m := sized()
+	m.transcript = want
+	m.handleSlash("/save")
+	m.transcript = nil
+	mm, _ := m.handleSlash("/resume")
+	restored := false
+	for _, l := range mm.(model).transcript {
+		if l.who == "you" && l.text == "hi" {
+			restored = true
+		}
+	}
+	if !restored {
+		t.Fatal("/resume should restore the saved lines")
+	}
+	empty := sized()
+	t.Setenv("XDG_STATE_HOME", t.TempDir()) // fresh, no session
+	mm, _ = empty.handleSlash("/resume")
+	for _, l := range mm.(model).transcript {
+		if l.who == "you" {
+			t.Fatal("/resume with nothing saved must restore nothing")
+		}
+	}
+}
+
+func TestNotifyAndDoneHook(t *testing.T) {
+	orig := execCommand
+	defer func() { execCommand = orig }()
+	execCommand = func(name string, args ...string) *exec.Cmd { return exec.Command("true") }
+	notify("dot ai", "done") // current-GOOS branch
+	// streamMsg done with a long runStart → saveSession + notify path
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	m := sized()
+	m.transcript = []line{{who: "you", text: "q"}, {who: "claude", text: "answer"}}
+	m.running = true
+	m.runStart = nowUnix() - 20 // ≥8s elapsed → triggers notify
+	m = upd(m, streamMsg{done: true})
+	if m.running || m.runStart != 0 {
+		t.Fatal("done should clear running + runStart")
+	}
+	if loadSession() == nil {
+		t.Fatal("done should have saved the session")
 	}
 }

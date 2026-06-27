@@ -9,12 +9,14 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -96,9 +98,12 @@ type paletteItem struct {
 // Cockpit commands work in the in-chat one-shot mode.
 var cockpitCmds = []paletteItem{
 	{"/help", "list commands", "cockpit"},
-	{"/clear", "clear the chat", "cockpit"},
+	{"/model", "switch model", "cockpit"},
 	{"/style", "set steering style", "cockpit"},
 	{"/tool", "switch tool", "cockpit"},
+	{"/resume", "restore last session", "cockpit"},
+	{"/save", "save this session", "cockpit"},
+	{"/clear", "clear the chat", "cockpit"},
 	{"/serve", "start the gateway", "cockpit"},
 	{"/cost", "spend report", "cockpit"},
 	{"/exit", "quit the cockpit", "cockpit"},
@@ -159,7 +164,9 @@ type model struct {
 	status        string
 	style         string // active steering style (--style)
 	streamCh      chan streamMsg
-	palSel        int // selected index in the `/` command palette
+	palSel        int    // selected index in the `/` command palette
+	aiModel       string // model override ("" = tool default)
+	runStart      int64  // unix start of the in-flight turn (for notify)
 }
 
 // palette returns the filtered command list when the input begins with "/".
@@ -304,7 +311,7 @@ func buildPrompt(history []line, prompt string) string {
 // startStream runs `dot ai [tool] [--style s] "<prompt>"` in raw mode and
 // feeds its stdout to the channel chunk-by-chunk, so the reply streams into
 // the transcript live (no screen takeover, no banner pollution).
-func startStream(toolName, style string, history []line, prompt string) (chan streamMsg, tea.Cmd) {
+func startStream(toolName, style, aiModel string, history []line, prompt string) (chan streamMsg, tea.Cmd) {
 	ch := make(chan streamMsg, 64)
 	go func() {
 		args := []string{"ai"}
@@ -317,6 +324,9 @@ func startStream(toolName, style string, history []line, prompt string) (chan st
 		args = append(args, buildPrompt(history, prompt))
 		cmd := execCommand("dot", args...)
 		cmd.Env = append(os.Environ(), "DOT_AI_RAW=1")
+		if aiModel != "" {
+			cmd.Env = append(cmd.Env, "ANTHROPIC_MODEL="+aiModel)
+		}
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
 			ch <- streamMsg{err: err, done: true}
@@ -344,6 +354,83 @@ func startStream(toolName, style string, history []line, prompt string) (chan st
 
 func waitForChunk(ch chan streamMsg) tea.Cmd {
 	return func() tea.Msg { return <-ch }
+}
+
+// models — the model overrides offered by the picker. "" means the tool's
+// default (no override). Applied to the Claude engine via ANTHROPIC_MODEL.
+var models = []string{"", "opus", "sonnet", "haiku"}
+
+func modelLabel(m string) string {
+	if m == "" {
+		return "default"
+	}
+	return m
+}
+
+// nextModel returns the model after the given one in the cycle.
+func nextModel(cur string) string {
+	for i, m := range models {
+		if m == cur {
+			return models[(i+1)%len(models)]
+		}
+	}
+	return models[0]
+}
+
+func nowUnix() int64 { return time.Now().Unix() }
+
+// ── session persistence ─────────────────────────────────────────────────────
+type sessLine struct{ Who, Text string }
+
+func sessionPath() string {
+	base := envOr("XDG_STATE_HOME", filepath.Join(os.Getenv("HOME"), ".local", "state"))
+	return filepath.Join(base, "dot-ai-tui", "session.json")
+}
+
+func saveSession(lines []line) {
+	s := make([]sessLine, 0, len(lines))
+	for _, l := range lines {
+		s = append(s, sessLine{l.who, l.text})
+	}
+	b, err := json.Marshal(s)
+	if err != nil {
+		return
+	}
+	p := sessionPath()
+	if os.MkdirAll(filepath.Dir(p), 0o700) != nil {
+		return
+	}
+	_ = os.WriteFile(p, b, 0o600)
+}
+
+func loadSession() []line {
+	b, err := os.ReadFile(sessionPath())
+	if err != nil {
+		return nil
+	}
+	var s []sessLine
+	if json.Unmarshal(b, &s) != nil {
+		return nil
+	}
+	out := make([]line, 0, len(s))
+	for _, x := range s {
+		out = append(out, line{who: x.Who, text: x.Text})
+	}
+	return out
+}
+
+// notify fires a best-effort desktop notification (macOS osascript / Linux
+// notify-send); failures are silent.
+func notify(title, body string) {
+	var c *exec.Cmd
+	switch runtime.GOOS {
+	case "darwin":
+		c = execCommand("osascript", "-e",
+			fmt.Sprintf("display notification %q with title %q", body, title))
+	default:
+		c = execCommand("notify-send", title, body)
+	}
+	_ = c.Start()
 }
 
 // highlight syntax-colours fenced ``` code blocks (and inline diffs) with
@@ -438,6 +525,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.transcript[last].text = "(no output — is the tool installed and authenticated?)"
 			}
 			m.running, m.streamCh = false, nil
+			saveSession(m.transcript) // persist for /resume
+			// Desktop notification for replies that took a while (≥8s).
+			if m.runStart > 0 && nowUnix()-m.runStart >= 8 {
+				notify("dot ai · "+m.transcript[last].who, "reply ready")
+			}
+			m.runStart = 0
 			return m, nil
 		}
 		return m, waitForChunk(m.streamCh)
@@ -496,6 +589,9 @@ func (m model) updateFleet(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, refresh
 	case "i":
 		return m, dotExec("install", m.tools[m.cursor].name)
+	case "m":
+		m.aiModel = nextModel(m.aiModel)
+		m.status = "model → " + modelLabel(m.aiModel)
 	case "s":
 		if m.gatewayUp {
 			return m, dotExec("serve", "stop")
@@ -561,7 +657,8 @@ func (m model) updateInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.transcript = append(m.transcript, line{who: "you", text: q})
 		m.transcript = append(m.transcript, line{who: t.name, text: ""})
 		m.running = true
-		ch, cmd := startStream(t.name, m.style, history, q)
+		m.runStart = nowUnix()
+		ch, cmd := startStream(t.name, m.style, m.aiModel, history, q)
 		m.streamCh = ch
 		return m, tea.Batch(cmd, m.spin.Tick)
 	}
@@ -579,10 +676,31 @@ func (m model) handleSlash(cmd string) (tea.Model, tea.Cmd) {
 	sys := func(s string) { m.transcript = append(m.transcript, line{who: "sys", text: s}) }
 	switch name {
 	case "/help", "/?":
-		sys("cockpit commands: /tool <name> · /style <name|off> · /serve · /cost · /clear · /exit")
-		sys("for a tool's own commands (/exit, /model, …) press Enter on the fleet to open its session")
+		sys("cockpit: /model <name> · /style <name|off> · /tool <name> · /resume · /save · /serve · /cost · /clear · /exit")
+		sys("for a tool's own commands (/exit, /compact, …) press Enter on the fleet to open its session")
 	case "/clear":
 		m.transcript = nil
+	case "/model":
+		if arg == "" {
+			sys("models: " + strings.TrimSpace(strings.Join(models, " ")+" (blank = default)") + " — current: " + modelLabel(m.aiModel))
+		} else if arg == "default" || arg == "off" {
+			m.aiModel = ""
+			sys("model → default")
+		} else {
+			m.aiModel = arg
+			sys("model → " + arg)
+		}
+	case "/resume":
+		s := loadSession()
+		if len(s) == 0 {
+			sys("no saved session to resume")
+		} else {
+			m.transcript = s
+			sys(fmt.Sprintf("resumed last session (%d lines)", len(s)))
+		}
+	case "/save":
+		saveSession(m.transcript)
+		sys("session saved")
 	case "/quit", "/q", "/exit":
 		return m, tea.Quit
 	case "/style":
@@ -636,6 +754,9 @@ func (m model) View() string {
 		gw = chipOK.Render("● " + m.gatewayMsg)
 	}
 	left := logoSt.Render("◆ dot ai") + "  " + tagSt.Render("AI fleet cockpit")
+	if m.aiModel != "" {
+		left += dimSt.Render("  · model ") + selSt.Render(m.aiModel)
+	}
 	if m.style != "" {
 		left += dimSt.Render("  · style ") + selSt.Render(m.style)
 	}
@@ -717,7 +838,7 @@ func (m model) View() string {
 	} else {
 		keys = []struct{ k, d string }{
 			{"↑↓", "move"}, {"⏎", "open session"}, {"tab", "quick chat"},
-			{"s", "serve"}, {"i", "install"}, {"q", "quit"},
+			{"m", "model"}, {"s", "serve"}, {"i", "install"}, {"q", "quit"},
 		}
 	}
 	var fbar strings.Builder
