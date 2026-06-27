@@ -257,12 +257,17 @@ _dot() {
           ;;
         ai)
           local -a ai_cmds=(
-            'status:Show AI CLI status (default)'
-            'dashboard:Real-time multi-agent TUI dashboard'
-            'dash:Alias for dashboard'
-            'cost:Show token cost report'
+            'run:One-shot prompt on a tool (default Claude)'
+            'chat:Open an interactive session with a tool'
+            'tools:Install and manage the AI fleet'
+            'install:Install fleet tools (all or one)'
+            'serve:Run the local Claude gateway and route the fleet'
+            'cost:Show the spend report'
+            'login:Authenticate a tool'
+            'doctor:Health-check the fleet and gateway'
+            'ask:Context-aware RAG query over the repo'
             'delegate:Run a background AI delegate'
-            'install:Install a provider binary'
+            'dashboard:Deprecated — opens the cockpit (use: dot ai)'
           )
           _describe -t subcommands 'ai subcommand' ai_cmds
           ;;

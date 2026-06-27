@@ -18,12 +18,19 @@ complete -c dot -n "__fish_use_subcommand" -a sgpt -d "Shell-GPT with context pa
 complete -c dot -n "__fish_use_subcommand" -a ollama -d "Ollama with context patterns"
 complete -c dot -n "__fish_use_subcommand" -a opencode -d "OpenCode with context patterns"
 complete -c dot -n "__fish_use_subcommand" -a aider -d "Aider with context patterns"
+complete -c dot -n "__fish_use_subcommand" -a ai -d "AI fleet cockpit, gateway, and cost"
 complete -c dot -n "__fish_use_subcommand" -a add -d "Add a file to chezmoi source"
 
 # AI Pattern completions for AI CLIs
 for cmd in cl copilot agy kiro sgpt ollama opencode aider
     complete -c dot -n "__fish_seen_subcommand_from $cmd" -s p -l pattern -x -a "(ls -1 ~/.config/ai/patterns 2>/dev/null | sed 's/\.md\$//')"
 end
+
+# dot ai subcommands + style flag
+for sub in run chat tools install serve cost login doctor ask delegate
+    complete -c dot -n "__fish_seen_subcommand_from ai" -a $sub
+end
+complete -c dot -n "__fish_seen_subcommand_from ai" -s s -l style -x -a "(ls -1 ~/.config/ai/patterns 2>/dev/null | sed 's/\.md\$//')"
 complete -c dot -n "__fish_use_subcommand" -a diff -d "Show chezmoi diff with exclusions"
 complete -c dot -n "__fish_use_subcommand" -a status -d "Show configuration drift"
 complete -c dot -n "__fish_use_subcommand" -a remove -d "Safely remove a managed file"
