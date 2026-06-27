@@ -172,11 +172,21 @@ func sqlite(db, query string) string {
 	if _, err := os.Stat(db); err != nil {
 		return ""
 	}
-	b, err := exec.Command("sqlite3", "-noheader", db, query).Output()
+	// -init /dev/null skips ~/.sqliterc (which may enable .timer/.headers and
+	// pollute output); -batch -noheader keep it machine-readable.
+	b, err := exec.Command("sqlite3", "-batch", "-init", "/dev/null", "-noheader", db, query).Output()
 	if err != nil {
 		return ""
 	}
-	return strings.TrimSpace(string(b))
+	// Defensive: drop any stray "Run Time:"/dot-prefixed meta lines.
+	var keep []string
+	for _, ln := range strings.Split(strings.TrimSpace(string(b)), "\n") {
+		if strings.HasPrefix(ln, "Run Time:") || strings.HasPrefix(strings.TrimSpace(ln), ".") {
+			continue
+		}
+		keep = append(keep, ln)
+	}
+	return strings.TrimSpace(strings.Join(keep, "\n"))
 }
 
 // buildPrompt flattens prior turns into the prompt so the conversation has
