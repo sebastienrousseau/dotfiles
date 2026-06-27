@@ -204,7 +204,9 @@ func dotExec(args ...string) tea.Cmd {
 }
 
 func (m model) View() string {
-	if m.width == 0 {
+	// Guard the first render: View runs before the async refresh populates
+	// the model, and before the terminal size is known.
+	if m.width == 0 || len(m.tools) == 0 {
 		return "loading…"
 	}
 	gw := warnSt.Render("○ gateway off")
@@ -280,8 +282,16 @@ func routeLine(m model, t tool) string {
 	return "own provider (gateway off)"
 }
 
+// newModel seeds the fleet so the list renders immediately; the async
+// refresh then fills in install status, health, and cost.
+func newModel() model {
+	t := make([]tool, len(fleet))
+	copy(t, fleet)
+	return model{tools: t}
+}
+
 func main() {
-	p := tea.NewProgram(model{}, tea.WithAltScreen())
+	p := tea.NewProgram(newModel(), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Fprintln(os.Stderr, "dot-ai-tui:", err)
 		os.Exit(1)
