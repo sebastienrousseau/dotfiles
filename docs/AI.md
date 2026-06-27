@@ -48,17 +48,17 @@ The interface is flat and verb-first, modelled on the Claude CLI: bare opens an 
 
 ## The cockpit (`dot ai`)
 
-Running `dot ai` on a terminal opens a full-window TUI (built with [Bubble Tea](https://github.com/charmbracelet/bubbletea)) that puts the whole fleet on one screen:
+Running `dot ai` on a terminal opens a glamorous, chat-centric TUI (built with [Bubble Tea](https://github.com/charmbracelet/bubbletea), Charm/Crush-style):
 
-- **Header** — gateway status (`● serving :3456` / `○ off`) and today's cost.
-- **Left** — the fleet grouped by role, with `●`/`○` install markers.
-- **Right** — the selected tool's status, how it routes, and recent runs.
+- **Header** — the `◆ dot ai` wordmark plus gateway status (`● :3456` / `○ off`) and today's cost as colour chips.
+- **Left** — the fleet grouped by role, with `●`/`○` install markers and a `▌` selection accent.
+- **Right** — a **chat panel**: pick a tool, type a prompt in the input box, press `Enter`, and the response streams back in the transcript — all without leaving the TUI.
 
 ```text
-↑↓ move   ⏎ chat   i install   s serve(+route)   c refresh   q quit
+Tab focus   ↑↓ move   ⏎ send   s serve   i install   c refresh   q quit
 ```
 
-The cockpit shells out to the `dot ai` verbs below, so its actions and the command line behave identically. In non-interactive contexts (CI, pipes) `dot ai` falls back to a plain text fleet listing. The cockpit binary (`dot-ai-tui`) is built on `chezmoi apply` via the mise-managed Go toolchain.
+Default focus is the fleet (browse with `↑↓`/`j`/`k`); `Tab`, `Enter`, or `/` jumps to the chat input. Prompts run through `dot ai <tool>`, so the cockpit and the command line behave identically. In non-interactive contexts (CI, pipes) `dot ai` falls back to a plain text fleet listing. The cockpit binary (`dot-ai-tui`) is built on `chezmoi apply` via the mise-managed Go toolchain; `DOT_AI_SNAPSHOT=1 dot-ai-tui` prints a single frame for previews.
 
 ## Steering styles
 

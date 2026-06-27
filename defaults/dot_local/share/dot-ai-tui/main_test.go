@@ -36,6 +36,22 @@ func TestViewNeverPanics(t *testing.T) {
 	}
 }
 
+// The rendered frame must carry the cockpit chrome (logo, fleet, chat input)
+// once sized — guards the gorgeous layout against regressions.
+func TestRenderChrome(t *testing.T) {
+	m := newModel()
+	mm, _ := m.Update(tea.WindowSizeMsg{Width: 94, Height: 30})
+	m = mm.(model)
+	mm, _ = m.Update(refreshMsg{tools: fleet, costToday: "$0.00"})
+	m = mm.(model)
+	out := m.View()
+	for _, want := range []string{"dot ai", "claude", "❯", "gateway"} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("rendered frame missing %q", want)
+		}
+	}
+}
+
 // Cursor navigation must stay in bounds at both ends.
 func TestCursorBounds(t *testing.T) {
 	m := newModel()
