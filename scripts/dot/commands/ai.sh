@@ -5,7 +5,7 @@
 ##
 ## Provides AI CLI status, setup, RAG query, and bridge commands.
 ## Wraps AI CLI tools with contextual patterns and system metadata.
-## Usage: dot ai [delegate|cost|dashboard|status]|ai-setup|ai-query|cl|copilot|agy|kiro|sgpt|ollama|opencode|aider|autohand|vibe|qwen|zai
+## Usage: dot ai [delegate|cost|dashboard|proxy|local|status]|ai-setup|ai-query|cl|copilot|agy|kiro|sgpt|ollama|opencode|aider|autohand|vibe|qwen|zai
 
 set -euo pipefail
 
@@ -368,6 +368,15 @@ run_ai_with_context() {
   local pattern_name=""
   local prompt=""
 
+  # When `dot ai local on` is active, route this run through the local
+  # proxy even if the env wasn't sourced at shell start (e.g. toggled
+  # mid-session). Idempotent: a no-op when the file is absent.
+  local _ai_local_env="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/ai-local.env"
+  if [[ -z "${ANTHROPIC_BASE_URL:-}" && -r "$_ai_local_env" ]]; then
+    # shellcheck disable=SC1090
+    source "$_ai_local_env"
+  fi
+
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --help | -h)
@@ -544,6 +553,16 @@ case "${1:-}" in
           ui_warn "dot-ai-dash" "not found — run: chezmoi apply"
           cmd_ai_status
         fi
+        ;;
+      proxy | local)
+        # Both drive the local-proxy lifecycle/routing helper. Drop the
+        # leading `proxy` but keep `local` so it reaches the helper.
+        if ! has_command dot-ai-proxy; then
+          ui_warn "dot-ai-proxy" "not found — run: chezmoi apply"
+          exit 1
+        fi
+        [[ "$1" == proxy ]] && shift
+        exec dot-ai-proxy "$@"
         ;;
       "" | status)
         cmd_ai_status "$@"

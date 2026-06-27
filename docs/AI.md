@@ -100,6 +100,35 @@ Data comes from `~/.local/share/dotfiles-ai.db` (written by `dot ai delegate` an
 
 Aliases: `daid`, `daish`.
 
+### Local Claude proxy (`dot ai proxy` / `dot ai local`)
+
+Run one Claude subscription locally and point your whole AI fleet at it — with **no third-party dependency**. `dot-ai-serve` is a small, stdlib-only Python server (no pip packages) that wraps the `claude` CLI you already have and exposes the standard Anthropic (`/v1/messages`) **and** OpenAI (`/v1/chat/completions`) endpoints. Any tool that speaks either protocol — codex, aider, Open WebUI, an OpenAI SDK, Claude Code itself — connects to `http://127.0.0.1:3456` and gets Claude on your existing subscription.
+
+The `claude` CLI owns auth, prompt caching, and rate limits; the server only translates wire formats.
+
+```bash
+# One-time: make sure the engine is authenticated
+claude login
+dot ai proxy setup        # checks the claude CLI is present + ready
+
+# Run it
+dot ai proxy start        # launch dot-ai-serve in the background
+dot ai proxy status       # process + /health + routing state
+dot ai proxy logs -f      # follow the log
+
+# Point the fleet at it (writes ANTHROPIC_BASE_URL / OPENAI_BASE_URL)
+dot ai local on           # new shells route automatically; `source` it for the current one
+dot ai local off          # stop routing through the proxy
+```
+
+`dot ai local on` writes `~/.config/dotfiles/ai-local.env` (and a fish variant), auto-sourced by the shell when `DOTFILES_AI` is set. With routing on, `dot cl "…"` and direct tool invocations (`codex`, `aider`, …) all run on the proxied subscription — no per-provider API keys needed.
+
+**Config:** `DOT_AI_HOST` (default `127.0.0.1`), `DOT_AI_PORT` (default `3456`), `DOT_AI_DEFAULT_MODEL` (default `sonnet`), `DOT_AI_API_KEY` (optional shared secret).
+
+**Security:** the server binds to loopback by default. If you set `DOT_AI_HOST` to a LAN address, `dot ai proxy start` refuses to launch unless `DOT_AI_API_KEY` is set — an unprotected network proxy leaks your subscription.
+
+**Scope (v1):** chat/completions for both protocols, streaming and non-streaming, `/v1/models`, `/health`. Out of scope for now: tool-call passthrough for coding agents, token-by-token streaming (responses stream as one block), multimodal input, and session resumption.
+
 ## Optional AI CLI tools
 
 These tools are not installed for you. Pick and install only the ones you want:

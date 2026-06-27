@@ -1,0 +1,400 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+"""dot-ai-serve — a native, dependency-free local Claude proxy.
+
+A Meridian-style bridge with no third-party packages: it wraps the
+already-installed `claude` CLI in headless stream-json mode and exposes the
+standard Anthropic (`/v1/messages`) and OpenAI (`/v1/chat/completions`)
+endpoints. Any tool that speaks either protocol points at
+http://127.0.0.1:3456 and gets Claude on your existing subscription.
+
+Auth, prompt caching, and rate limits are owned by the `claude` CLI — this
+server only translates wire formats. Managed via `dot ai proxy`.
+
+Deliberately out of scope (v1): tool-call passthrough for coding agents,
+true token-by-token streaming (responses stream as one block), multimodal
+input, and session resumption. Stdlib only — runs on any python3.
+"""
+
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
+import uuid
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+HOST = os.environ.get("DOT_AI_HOST", "127.0.0.1")
+PORT = int(os.environ.get("DOT_AI_PORT", "3456"))
+CLAUDE_BIN = os.environ.get("DOT_AI_CLAUDE_BIN", "claude")
+DEFAULT_MODEL = os.environ.get("DOT_AI_DEFAULT_MODEL", "sonnet")
+API_KEY = os.environ.get("DOT_AI_API_KEY", "")  # optional shared-secret gate
+
+# Advertised models (also accepts any id/alias the claude CLI understands).
+MODELS = [
+    "claude-opus-4-8",
+    "claude-opus-4-7",
+    "claude-sonnet-4-6",
+    "claude-opus-4-6",
+    "claude-haiku-4-5-20251001",
+]
+
+
+def log(msg):
+    print(f"[dot-ai-serve] {msg}", file=sys.stderr, flush=True)
+
+
+# ---------------------------------------------------------------------------
+# Request shaping: collapse an Anthropic/OpenAI message array into a single
+# prompt + system string the headless `claude` CLI can consume.
+# ---------------------------------------------------------------------------
+def _text_of(content):
+    """Extract plain text from a string or a list of content blocks."""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for block in content:
+            if isinstance(block, dict):
+                if block.get("type") in ("text", None) and "text" in block:
+                    parts.append(block["text"])
+                elif "content" in block and isinstance(block["content"], str):
+                    parts.append(block["content"])
+            elif isinstance(block, str):
+                parts.append(block)
+        return "\n".join(parts)
+    return ""
+
+
+def shape_request(body):
+    """Return (model, system_prompt, prompt_text) from a parsed JSON body."""
+    model = body.get("model") or DEFAULT_MODEL
+    messages = body.get("messages", []) or []
+
+    # System prompt: Anthropic `system` field, else any system-role messages.
+    system_chunks = []
+    sys_field = body.get("system")
+    if sys_field:
+        system_chunks.append(_text_of(sys_field))
+
+    turns = []
+    for msg in messages:
+        role = msg.get("role", "user")
+        text = _text_of(msg.get("content", ""))
+        if not text:
+            continue
+        if role == "system":
+            system_chunks.append(text)
+        elif role == "assistant":
+            turns.append(f"Assistant: {text}")
+        else:
+            turns.append(f"User: {text}")
+
+    system_prompt = "\n\n".join(c for c in system_chunks if c).strip()
+
+    # Single user turn → send it raw. Multi-turn → replay a transcript so the
+    # CLI (a fresh session per request) has the full conversation context.
+    if len(turns) == 1 and turns[0].startswith("User: "):
+        prompt = turns[0][len("User: ") :]
+    else:
+        prompt = "\n\n".join(turns)
+        if turns and turns[-1].startswith("User: "):
+            prompt += "\n\nAssistant:"
+
+    return model, system_prompt, prompt
+
+
+# ---------------------------------------------------------------------------
+# Engine: run the headless `claude` CLI and collect the final result.
+# ---------------------------------------------------------------------------
+def run_claude(model, system_prompt, prompt):
+    """Invoke `claude -p` and return (text, usage_dict, error_or_None)."""
+    cmd = [
+        CLAUDE_BIN,
+        "-p",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--model",
+        model,
+        # Hermetic: ignore user/project/local settings and CLAUDE.md so the
+        # proxy behaves identically regardless of where it was launched.
+        "--setting-sources",
+        "",
+    ]
+    if system_prompt:
+        cmd += [
+            "--system-prompt",
+            system_prompt,
+            "--exclude-dynamic-system-prompt-sections",
+        ]
+
+    try:
+        proc = subprocess.run(
+            cmd,
+            input=prompt,
+            capture_output=True,
+            text=True,
+            timeout=int(os.environ.get("DOT_AI_TIMEOUT", "600")),
+        )
+    except FileNotFoundError:
+        return "", {}, f"claude CLI not found ({CLAUDE_BIN})"
+    except subprocess.TimeoutExpired:
+        return "", {}, "claude CLI timed out"
+
+    text, usage, err = "", {}, None
+    for line in proc.stdout.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            evt = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        etype = evt.get("type")
+        if etype == "assistant":
+            for block in evt.get("message", {}).get("content", []):
+                if block.get("type") == "text":
+                    text = block.get("text", text)
+        elif etype == "result":
+            if not evt.get("is_error"):
+                text = evt.get("result", text)
+            else:
+                err = evt.get("result") or "claude reported an error"
+            usage = evt.get("usage", {}) or {}
+
+    if not text and err is None:
+        err = (proc.stderr or "no output from claude").strip().splitlines()
+        err = err[-1] if err else "no output from claude"
+    return text, usage, err
+
+
+def _usage_pair(usage):
+    """Normalize CLI usage into (input_tokens, output_tokens)."""
+    inp = usage.get("input_tokens", 0) + usage.get("cache_read_input_tokens", 0)
+    inp += usage.get("cache_creation_input_tokens", 0)
+    return inp, usage.get("output_tokens", 0)
+
+
+# ---------------------------------------------------------------------------
+# Response builders for each protocol.
+# ---------------------------------------------------------------------------
+def anthropic_response(model, text, usage):
+    inp, out = _usage_pair(usage)
+    return {
+        "id": f"msg_{uuid.uuid4().hex[:24]}",
+        "type": "message",
+        "role": "assistant",
+        "model": model,
+        "content": [{"type": "text", "text": text}],
+        "stop_reason": "end_turn",
+        "stop_sequence": None,
+        "usage": {"input_tokens": inp, "output_tokens": out},
+    }
+
+
+def openai_response(model, text, usage):
+    inp, out = _usage_pair(usage)
+    return {
+        "id": f"chatcmpl-{uuid.uuid4().hex[:24]}",
+        "object": "chat.completion",
+        "created": int(time.time()),
+        "model": model,
+        "choices": [
+            {
+                "index": 0,
+                "message": {"role": "assistant", "content": text},
+                "finish_reason": "stop",
+            }
+        ],
+        "usage": {
+            "prompt_tokens": inp,
+            "completion_tokens": out,
+            "total_tokens": inp + out,
+        },
+    }
+
+
+def anthropic_sse(model, text, usage):
+    """Emit a protocol-correct Anthropic SSE stream (single text block)."""
+    inp, out = _usage_pair(usage)
+    mid = f"msg_{uuid.uuid4().hex[:24]}"
+
+    def ev(event, data):
+        return f"event: {event}\ndata: {json.dumps(data)}\n\n".encode()
+
+    yield ev(
+        "message_start",
+        {
+            "type": "message_start",
+            "message": {
+                "id": mid,
+                "type": "message",
+                "role": "assistant",
+                "model": model,
+                "content": [],
+                "stop_reason": None,
+                "usage": {"input_tokens": inp, "output_tokens": 0},
+            },
+        },
+    )
+    yield ev(
+        "content_block_start",
+        {"type": "content_block_start", "index": 0, "content_block": {"type": "text", "text": ""}},
+    )
+    yield ev(
+        "content_block_delta",
+        {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": text}},
+    )
+    yield ev("content_block_stop", {"type": "content_block_stop", "index": 0})
+    yield ev(
+        "message_delta",
+        {"type": "message_delta", "delta": {"stop_reason": "end_turn"}, "usage": {"output_tokens": out}},
+    )
+    yield ev("message_stop", {"type": "message_stop"})
+
+
+def openai_sse(model, text, usage):
+    cid = f"chatcmpl-{uuid.uuid4().hex[:24]}"
+    created = int(time.time())
+
+    def chunk(delta, finish=None):
+        data = {
+            "id": cid,
+            "object": "chat.completion.chunk",
+            "created": created,
+            "model": model,
+            "choices": [{"index": 0, "delta": delta, "finish_reason": finish}],
+        }
+        return f"data: {json.dumps(data)}\n\n".encode()
+
+    yield chunk({"role": "assistant"})
+    yield chunk({"content": text})
+    yield chunk({}, finish="stop")
+    yield b"data: [DONE]\n\n"
+
+
+# ---------------------------------------------------------------------------
+# HTTP layer.
+# ---------------------------------------------------------------------------
+class Handler(BaseHTTPRequestHandler):
+    protocol_version = "HTTP/1.1"
+
+    def log_message(self, fmt, *args):  # quieter default logging
+        log(fmt % args)
+
+    def _authed(self):
+        if not API_KEY:
+            return True
+        sent = (self.headers.get("x-api-key") or "").strip()
+        auth = (self.headers.get("authorization") or "").replace("Bearer ", "").strip()
+        return API_KEY in (sent, auth)
+
+    def _send_json(self, code, obj):
+        payload = json.dumps(obj).encode()
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(payload)))
+        self.end_headers()
+        self.wfile.write(payload)
+
+    def _send_sse(self, generator):
+        # Our stream is finite: emit all events then close. Advertising
+        # keep-alive here makes clients wait for more, so force-close the
+        # connection once the generator is exhausted.
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-cache")
+        self.send_header("Connection", "close")
+        self.end_headers()
+        self.close_connection = True
+        for piece in generator:
+            self.wfile.write(piece)
+            self.wfile.flush()
+
+    def _error(self, code, message):
+        self._send_json(code, {"type": "error", "error": {"type": "proxy_error", "message": message}})
+
+    def do_GET(self):
+        if self.path == "/health":
+            ok = shutil.which(CLAUDE_BIN) is not None
+            self._send_json(
+                200,
+                {
+                    "status": "healthy" if ok else "unhealthy",
+                    "engine": "claude-cli",
+                    "model": DEFAULT_MODEL,
+                    "claude": "found" if ok else "not-found",
+                },
+            )
+        elif self.path in ("/v1/models", "/models"):
+            self._send_json(
+                200,
+                {
+                    "object": "list",
+                    "data": [
+                        {"id": m, "object": "model", "owned_by": "anthropic"} for m in MODELS
+                    ],
+                },
+            )
+        elif self.path == "/":
+            self._send_json(
+                200,
+                {"service": "dot-ai-serve", "endpoints": ["/v1/messages", "/v1/chat/completions", "/v1/models", "/health"]},
+            )
+        else:
+            self._error(404, f"unknown route {self.path}")
+
+    def do_POST(self):
+        if not self._authed():
+            return self._error(401, "invalid or missing API key")
+        length = int(self.headers.get("Content-Length", "0") or "0")
+        try:
+            body = json.loads(self.rfile.read(length) or b"{}")
+        except json.JSONDecodeError:
+            return self._error(400, "invalid JSON body")
+
+        route = self.path.rstrip("/")
+        if route in ("/v1/messages", "/messages"):
+            protocol = "anthropic"
+        elif route in ("/v1/chat/completions", "/chat/completions"):
+            protocol = "openai"
+        else:
+            return self._error(404, f"unknown route {self.path}")
+
+        model, system_prompt, prompt = shape_request(body)
+        if not prompt and not system_prompt:
+            return self._error(400, "no message content")
+
+        text, usage, err = run_claude(model, system_prompt, prompt)
+        if err:
+            return self._error(502, f"claude engine: {err}")
+
+        stream = bool(body.get("stream"))
+        if protocol == "anthropic":
+            if stream:
+                return self._send_sse(anthropic_sse(model, text, usage))
+            return self._send_json(200, anthropic_response(model, text, usage))
+        else:
+            if stream:
+                return self._send_sse(openai_sse(model, text, usage))
+            return self._send_json(200, openai_response(model, text, usage))
+
+
+def main():
+    if not shutil.which(CLAUDE_BIN):
+        log(f"WARNING: '{CLAUDE_BIN}' not on PATH — requests will fail until it is installed and authenticated.")
+    server = ThreadingHTTPServer((HOST, PORT), Handler)
+    log(f"listening on http://{HOST}:{PORT}  (engine: {CLAUDE_BIN}, default model: {DEFAULT_MODEL})")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.server_close()
+
+
+if __name__ == "__main__":
+    main()
