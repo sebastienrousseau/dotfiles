@@ -496,9 +496,8 @@ case "${1:-}" in
     shift
     case "${1:-}" in
       "")
-        # Bare `dot ai` → the cockpit (fleet launcher today; a Bubble Tea
-        # TUI replaces this in a later slice).
-        cmd_ai_status
+        # Bare `dot ai` → the Bubble Tea cockpit (or the launcher fallback).
+        _ai_cockpit cmd_ai_status
         ;;
       chat)
         shift
@@ -551,8 +550,8 @@ case "${1:-}" in
         cmd_ai_status "$@"
         ;;
       dashboard | dash)
-        _ai_deprecated "dot ai  (cockpit) or  dot ai cost"
-        if has_command dot-ai-dash; then exec dot-ai-dash "${@:2}"; else cmd_ai_status; fi
+        _ai_deprecated "dot ai  (cockpit)"
+        _ai_cockpit cmd_ai_status
         ;;
       proxy)
         shift

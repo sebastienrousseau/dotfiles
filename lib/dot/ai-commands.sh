@@ -15,6 +15,16 @@ _ai_deprecated() {
   ui_warn "deprecated" "use: $1" >&2
 }
 
+# _ai_cockpit <fallback-cmd…> — launch the Bubble Tea cockpit (dot-ai-tui)
+# when it is built and we're on a TTY; otherwise run the fallback (the plain
+# fleet launcher for CI, pipes, or before the binary is built).
+_ai_cockpit() {
+  if has_command dot-ai-tui && [[ -t 1 ]]; then
+    exec dot-ai-tui
+  fi
+  "$@"
+}
+
 # _ai_oneshot [tool] <prompt…> — run a one-shot. An optional leading tool
 # name selects the provider; otherwise the prompt runs on Claude. This is
 # the engine behind `dot ai "<prompt>"` and `dot ai <tool> "<prompt>"`.
