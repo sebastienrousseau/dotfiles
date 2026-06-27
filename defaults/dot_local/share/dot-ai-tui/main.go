@@ -95,10 +95,10 @@ type refreshMsg struct {
 	recent     []string
 }
 
-type promptResultMsg struct {
-	toolName string
-	out      string
-	err      error
+type streamMsg struct {
+	chunk string
+	done  bool
+	err   error
 }
 
 type model struct {
@@ -116,6 +116,7 @@ type model struct {
 	running       bool
 	status        string
 	style         string // active steering style (--style)
+	streamCh      chan streamMsg
 }
 
 func gatewayBase() string {
@@ -178,28 +179,34 @@ func sqlite(db, query string) string {
 	return strings.TrimSpace(string(b))
 }
 
-// runPrompt runs a turn through `dot ai [tool] [--style s] "<prompt>"` and
-// returns the captured output. Prior turns are flattened into the prompt so
-// the conversation has context (multi-turn). Stays inside the TUI.
-func runPrompt(toolName, style string, history []line, prompt string) tea.Cmd {
-	return func() tea.Msg {
-		full := prompt
-		if len(history) > 0 {
-			var b strings.Builder
-			b.WriteString("Continue this conversation. Reply only as the assistant, concisely.\n\n")
-			for _, l := range history {
-				if l.who == "sys" {
-					continue
-				}
-				role := "Assistant"
-				if l.who == "you" {
-					role = "User"
-				}
-				b.WriteString(role + ": " + l.text + "\n\n")
-			}
-			b.WriteString("User: " + prompt + "\n\nAssistant:")
-			full = b.String()
+// buildPrompt flattens prior turns into the prompt so the conversation has
+// context (multi-turn) for a fresh one-shot.
+func buildPrompt(history []line, prompt string) string {
+	if len(history) == 0 {
+		return prompt
+	}
+	var b strings.Builder
+	b.WriteString("Continue this conversation. Reply only as the assistant, concisely.\n\n")
+	for _, l := range history {
+		if l.who == "sys" || l.text == "" {
+			continue
 		}
+		role := "Assistant"
+		if l.who == "you" {
+			role = "User"
+		}
+		b.WriteString(role + ": " + l.text + "\n\n")
+	}
+	b.WriteString("User: " + prompt + "\n\nAssistant:")
+	return b.String()
+}
+
+// startStream runs `dot ai [tool] [--style s] "<prompt>"` in raw mode and
+// feeds its stdout to the channel chunk-by-chunk, so the reply streams into
+// the transcript live (no screen takeover, no banner pollution).
+func startStream(toolName, style string, history []line, prompt string) (chan streamMsg, tea.Cmd) {
+	ch := make(chan streamMsg, 64)
+	go func() {
 		args := []string{"ai"}
 		if toolName != "" && toolName != "claude" {
 			args = append(args, toolName)
@@ -207,10 +214,36 @@ func runPrompt(toolName, style string, history []line, prompt string) tea.Cmd {
 		if style != "" {
 			args = append(args, "--style", style)
 		}
-		args = append(args, full)
-		out, err := exec.Command("dot", args...).CombinedOutput()
-		return promptResultMsg{toolName: toolName, out: strings.TrimSpace(string(out)), err: err}
-	}
+		args = append(args, buildPrompt(history, prompt))
+		cmd := exec.Command("dot", args...)
+		cmd.Env = append(os.Environ(), "DOT_AI_RAW=1")
+		stdout, err := cmd.StdoutPipe()
+		if err != nil {
+			ch <- streamMsg{err: err, done: true}
+			return
+		}
+		if err := cmd.Start(); err != nil {
+			ch <- streamMsg{err: err, done: true}
+			return
+		}
+		buf := make([]byte, 512)
+		for {
+			n, rerr := stdout.Read(buf)
+			if n > 0 {
+				ch <- streamMsg{chunk: string(buf[:n])}
+			}
+			if rerr != nil {
+				break
+			}
+		}
+		_ = cmd.Wait()
+		ch <- streamMsg{done: true}
+	}()
+	return ch, waitForChunk(ch)
+}
+
+func waitForChunk(ch chan streamMsg) tea.Cmd {
+	return func() tea.Msg { return <-ch }
 }
 
 // highlight syntax-colours fenced ``` code blocks (and inline diffs) with
@@ -283,16 +316,28 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.spin, c = m.spin.Update(msg)
 			cmds = append(cmds, c)
 		}
-	case promptResultMsg:
-		m.running = false
-		who, body := msg.toolName, msg.out
-		if who == "" {
-			who = "claude"
+	case streamMsg:
+		if len(m.transcript) == 0 {
+			return m, nil
 		}
-		if msg.err != nil && body == "" {
-			body = "error: " + msg.err.Error()
+		last := len(m.transcript) - 1
+		if msg.err != nil {
+			m.transcript[last].text = "error: " + msg.err.Error()
+			m.running, m.streamCh = false, nil
+			return m, nil
 		}
-		m.transcript = append(m.transcript, line{who: who, text: body})
+		if msg.chunk != "" {
+			m.transcript[last].text += msg.chunk
+		}
+		if msg.done {
+			m.transcript[last].text = strings.TrimSpace(m.transcript[last].text)
+			if m.transcript[last].text == "" {
+				m.transcript[last].text = "(no output — is the tool installed and authenticated?)"
+			}
+			m.running, m.streamCh = false, nil
+			return m, nil
+		}
+		return m, waitForChunk(m.streamCh)
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c":
@@ -366,8 +411,11 @@ func (m model) updateInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		t := m.tools[m.cursor]
 		history := append([]line(nil), m.transcript...)
 		m.transcript = append(m.transcript, line{who: "you", text: q})
+		m.transcript = append(m.transcript, line{who: t.name, text: ""})
 		m.running = true
-		return m, tea.Batch(runPrompt(t.name, m.style, history, q), m.spin.Tick)
+		ch, cmd := startStream(t.name, m.style, history, q)
+		m.streamCh = ch
+		return m, tea.Batch(cmd, m.spin.Tick)
 	}
 	var c tea.Cmd
 	m.input, c = m.input.Update(msg)

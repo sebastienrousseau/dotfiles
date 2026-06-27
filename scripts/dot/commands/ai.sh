@@ -15,7 +15,7 @@ source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 # shellcheck source=../../../lib/dot/ai-commands.sh
 source "$SCRIPT_DIR/../../../lib/dot/ai-commands.sh"
 
-dot_ui_command_banner "AI and Agents" "${1:-}"
+[[ -n "${DOT_AI_RAW:-}" ]] || dot_ui_command_banner "AI and Agents" "${1:-}" # raw mode: no banner
 
 PATTERN_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/ai/patterns"
 AI_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/ai"
@@ -356,19 +356,26 @@ run_ai_with_context() {
     fi
   fi
 
-  # Inject dynamic system metadata
-  local metadata
-  metadata="## System Metadata
+  # Build the prompt. Raw mode (DOT_AI_RAW) skips the system-metadata banner
+  # so callers like the cockpit get clean, streamable output.
+  local full_prompt
+  if [[ -n "${DOT_AI_RAW:-}" ]]; then
+    full_prompt="${system_context:+${system_context}
+
+}${prompt}"
+  else
+    local metadata
+    metadata="## System Metadata
 - OS: $(uname -s) $(uname -r)
 - Arch: $(uname -m)
 - Date: $(date -u)"
-
-  local full_prompt="${system_context}
+    full_prompt="${system_context}
 
 ${metadata}
 
 ## User Request
 ${prompt}"
+  fi
 
   # Resolve the binary name for the tool
   local tool_bin="$tool"
@@ -412,7 +419,7 @@ ${prompt}"
     fi
   fi
 
-  ui_info "Executing $tool with pattern: ${pattern_name:-none}"
+  [[ -n "${DOT_AI_RAW:-}" ]] || ui_info "Executing $tool with pattern: ${pattern_name:-none}"
 
   # Route non-Claude tools through the local gateway when one is running.
   # The primary Claude ALWAYS uses its native session — never route it,
