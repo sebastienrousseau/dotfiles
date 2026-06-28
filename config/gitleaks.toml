@@ -38,6 +38,9 @@ paths = [
     '''docs/.*\.md''',
     '''\.github/.*\.md''',
     '''\.github/security-policies/environment-template\.env''',
+    # Security tests deliberately embed secret-shaped patterns to prove the
+    # atuin history filter / scanners catch them — not real secrets.
+    '''tests/unit/secrets/.*\.sh''',
 ]
 
 # Specific commits to ignore (false positives from GPG public key fingerprint)

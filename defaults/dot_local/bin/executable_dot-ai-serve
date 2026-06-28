@@ -22,6 +22,7 @@ Stdlib only — runs on any python3.
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -99,13 +100,21 @@ def log(msg):
 # ---------------------------------------------------------------------------
 # Model routing + cost metering.
 # ---------------------------------------------------------------------------
+# A resolved model flows into the `claude` CLI argv, so constrain it to a
+# plain token — a request must not be able to inject a flag (e.g. a model of
+# "--dangerously-…"). Anything else falls back to a safe constant.
+_SAFE_MODEL = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
+
+
 def resolve_model(model):
-    """Follow the alias chain to the id/alias the claude CLI should run."""
+    """Follow the alias chain to the id/alias the claude CLI should run, then
+    validate it can't be mistaken for a command-line flag."""
     seen = set()
     while model in MODEL_ALIASES and model not in seen:
         seen.add(model)
         model = MODEL_ALIASES[model]
-    return model or DEFAULT_MODEL
+    model = model or DEFAULT_MODEL
+    return model if _SAFE_MODEL.match(model) else "sonnet"
 
 
 def _price_for(model):
@@ -236,6 +245,9 @@ def stream_claude(run_model, system_prompt, prompt):
     """Generator: yields ("delta", text) as Claude produces output, then a
     final ("done", usage_dict, error_or_None). Reads the CLI's stream-json
     NDJSON incrementally so callers get live tokens."""
+    # argv carries NO request-derived content: the model is validated to a
+    # plain token (resolve_model) and the system prompt + prompt go via stdin.
+    # This keeps user-controlled data off the command line entirely.
     cmd = [
         CLAUDE_BIN,
         "-p",
@@ -248,12 +260,9 @@ def stream_claude(run_model, system_prompt, prompt):
         "--setting-sources",
         "",
     ]
+    stdin_text = prompt
     if system_prompt:
-        cmd += [
-            "--system-prompt",
-            system_prompt,
-            "--exclude-dynamic-system-prompt-sections",
-        ]
+        stdin_text = system_prompt + "\n\n" + prompt
 
     try:
         proc = subprocess.Popen(
@@ -272,7 +281,7 @@ def stream_claude(run_model, system_prompt, prompt):
     timer.start()
     prev, usage, err, timed_out = "", {}, None, False
     try:
-        proc.stdin.write(prompt)
+        proc.stdin.write(stdin_text)
         proc.stdin.close()
         for line in proc.stdout:
             line = line.strip()
