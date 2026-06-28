@@ -41,7 +41,10 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # A PAT with `workflow` scope is required to push changes to
+          # .github/workflows/* (GITHUB_TOKEN is forbidden from doing so).
+          # Falls back to GITHUB_TOKEN, in which case the Open PR step skips.
+          token: ${{ secrets.WORKFLOW_PIN_BUMP_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Setup Git
         run: |
@@ -116,10 +119,25 @@ jobs:
       - name: Open PR
         if: steps.detect.outputs.changes != '0'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.WORKFLOW_PIN_BUMP_TOKEN || secrets.GITHUB_TOKEN }}
+          HAS_PAT: ${{ secrets.WORKFLOW_PIN_BUMP_TOKEN != '' }}
           SUMMARY: ${{ steps.detect.outputs.summary }}
         run: |
           set -euo pipefail
+          # GITHUB_TOKEN cannot push changes to .github/workflows/* (a GitHub
+          # App restriction), so without a PAT the push would hard-fail. Skip
+          # gracefully with a warning instead, and surface the pending bump.
+          if [[ "${HAS_PAT}" != "true" ]]; then
+            echo "::warning::WORKFLOW_PIN_BUMP_TOKEN not set — cannot push workflow-file pin bumps with GITHUB_TOKEN. Skipping the bump PR."
+            {
+              echo "### Stale reusable pins detected but not bumped"
+              echo
+              echo "Add a PAT with the \`workflow\` scope as the \`WORKFLOW_PIN_BUMP_TOKEN\` secret to enable the automated bump PR."
+              echo
+              printf '%s\n' "${SUMMARY}"
+            } >> "${GITHUB_STEP_SUMMARY}"
+            exit 0
+          fi
           git checkout -b "${BRANCH_NAME}"
           git add .github/workflows/
           git commit -m "$(cat <<MSG
