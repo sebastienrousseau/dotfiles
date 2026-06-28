@@ -42,6 +42,7 @@ var fleet = []tool{
 	{name: "crush", bin: "crush", group: "agents"},
 	{name: "amp", bin: "amp", group: "agents"},
 	{name: "cursor-agent", bin: "cursor-agent", group: "agents"},
+	{name: "grok", bin: "grok", group: "agents"},
 	{name: "opencode", bin: "opencode", group: "coding"},
 	{name: "aider", bin: "aider", group: "coding"},
 	{name: "autohand", bin: "autohand", group: "coding"},
@@ -123,6 +124,7 @@ var toolCmds = map[string][]paletteItem{
 	"crush":        {{"/model", "switch model", "session"}, {"/help", "list commands", "session"}, {"/compact", "summarise context", "session"}},
 	"amp":          {{"/help", "list commands", "session"}, {"/thread", "manage threads", "session"}},
 	"cursor-agent": {{"/model", "switch model", "session"}, {"/help", "list commands", "session"}},
+	"grok":         {{"/model", "switch model", "session"}, {"/plan", "plan-first mode", "session"}, {"/mcp", "MCP servers", "session"}},
 	"copilot":      {{"/model", "switch model", "session"}, {"/clear", "clear context", "session"}},
 	"qwen":         {{"/model", "switch model", "session"}, {"/clear", "clear", "session"}},
 }
@@ -883,22 +885,71 @@ func windowRows(rows []string, cursor, h int) []string {
 
 // renderTranscript returns exactly h lines (padded at the top) so the input
 // box pins to the bottom of the chat panel — a proper chat feel.
+// logoArt is the "dot ai" wordmark (half-block font), rendered with a
+// violet→mauve→pink gradient in the splash.
+var logoArt = []string{
+	"█▀▄ █▀█ ▀█▀   █▀█ █",
+	"█░█ █░█  █    █▀█ █",
+	"▀▀░ ▀▀▀  ▀    ▀░▀ ▀",
+}
+
+// splash renders the gorgeous empty-state: the wordmark, a one-line pitch,
+// and the quick-start keys, centred in a w×h box.
+func (m model) splash(w, h int) string {
+	c := func(s string) string { return lipgloss.PlaceHorizontal(w, lipgloss.Center, s) }
+	grad := []lipgloss.Color{violet, mauve, pink}
+	var b []string
+	b = append(b, "", c(selSt.Render("◆")), "")
+	for i, ln := range logoArt {
+		b = append(b, c(lipgloss.NewStyle().Foreground(grad[i]).Bold(true).Render(ln)))
+	}
+	b = append(b,
+		"",
+		c(tagSt.Render("the cockpit for your AI fleet")),
+		c(dimSt.Render("one subscription · every agent · zero keys")),
+		"",
+		c(keySt.Render("⏎")+dimSt.Render(" open session    ")+
+			keySt.Render("type")+dimSt.Render(" to chat    ")+
+			keySt.Render("/")+dimSt.Render(" commands")),
+	)
+	// Centre vertically: pad evenly until the box is full.
+	for i := 0; len(b) < h; i++ {
+		if i%2 == 0 {
+			b = append([]string{""}, b...)
+		} else {
+			b = append(b, "")
+		}
+	}
+	if len(b) > h {
+		b = b[:h]
+	}
+	return strings.Join(b, "\n")
+}
+
 func (m model) renderTranscript(w, h int) string {
 	if h < 1 {
 		h = 1
 	}
 	var lines []string
 	if len(m.transcript) == 0 {
-		lines = append(lines, dimSt.Render("Quick chat with ")+titleSt.Render(m.tools[m.cursor].name)+
-			dimSt.Render(" — type below, Enter to send (/help for commands)."))
-		lines = append(lines, dimSt.Render("For a full session (with the tool's own /exit, /model …) press Enter on the fleet."))
+		// Gorgeous splash; tuck up to 3 recent runs along the bottom.
+		var rec []string
 		if len(m.recent) > 0 {
-			lines = append(lines, "", groupSt.Render("RECENT"))
-			for _, r := range m.recent {
-				lines = append(lines, dimSt.Render("  "+r))
+			rec = append(rec, dimSt.Render("recent"))
+			for i, r := range m.recent {
+				if i >= 3 {
+					break
+				}
+				rec = append(rec, dimSt.Render("  "+r))
 			}
 		}
-	} else {
+		sp := m.splash(w, h-len(rec))
+		if len(rec) > 0 {
+			return sp + "\n" + strings.Join(rec, "\n")
+		}
+		return sp
+	}
+	{
 		for _, l := range m.transcript {
 			var tag, content string
 			hasCode := false
@@ -952,7 +1003,11 @@ func renderSnapshot() {
 	}
 	m.style = "architect"
 	m.focus = "input"
-	m.input.SetValue("/") // show the command palette in the preview
+	if os.Getenv("DOT_AI_SPLASH") != "" {
+		m.transcript = nil // preview the empty-state splash
+	} else {
+		m.input.SetValue("/") // show the command palette in the preview
+	}
 	fmt.Println(m.View())
 }
 

@@ -36,7 +36,7 @@ _show_ai_bridge_usage() {
   echo "       dot ai <tool> --style <name> \"<prompt>\""
   echo "       dot ai chat [tool]             # interactive session"
   echo ""
-  echo "Tools: cl codex copilot goose crush amp cursor-agent agy kiro sgpt ollama opencode aider autohand vibe qwen zai"
+  echo "Tools: cl codex copilot goose crush amp cursor-agent grok agy kiro sgpt ollama opencode aider autohand vibe qwen zai"
   echo ""
   echo "Available styles:"
   # shellcheck disable=SC2012
@@ -165,6 +165,7 @@ cmd_ai_status() {
     "Agents (autonomous)|agent|Crush|crush|Charm's glamorous TUI coding agent"
     "Agents (autonomous)|agent|Amp|amp|Sourcegraph's agentic coder"
     "Agents (autonomous)|agent|Cursor CLI|cursor-agent|Cursor's terminal agent"
+    "Agents (autonomous)|agent|Grok Build|grok|xAI's terminal coding agent"
     "Coding (interactive)|coding|Aider|aider|Git-aware AI pair programmer"
     "Coding (interactive)|coding|OpenCode|opencode|Open-source terminal coding agent"
     "Coding (interactive)|coding|Autohand Code|autohand|Autonomous multi-file coding agent"
@@ -542,7 +543,7 @@ case "${1:-}" in
     shift
     cmd_ai_query "$@"
     ;;
-  cl | claude | codex | copilot | goose | crush | amp | cursor-agent | agy | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
+  cl | claude | codex | copilot | goose | crush | amp | cursor-agent | grok | agy | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
     _ai_deprecated "dot ai $1"
     tool="$1"
     shift

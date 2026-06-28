@@ -37,6 +37,7 @@ assert_file_contains "$AI_SCRIPT" "Copilot CLI|copilot|" "should list Copilot CL
 assert_file_contains "$AI_SCRIPT" "Crush|crush|" "should list Crush"
 assert_file_contains "$AI_SCRIPT" "Amp|amp|" "should list Amp"
 assert_file_contains "$AI_SCRIPT" "Cursor CLI|cursor-agent|" "should list Cursor CLI"
+assert_file_contains "$AI_SCRIPT" "Grok Build|grok|" "should list Grok Build"
 
 test_start "ai_status_has_grouped_sections"
 assert_file_contains "$AI_SCRIPT" "Agents (autonomous)" "should group agents"

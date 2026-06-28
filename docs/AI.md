@@ -119,6 +119,7 @@ These tools are not installed for you. Install what you want with `dot ai instal
   - `crush` — Charm's glamorous TUI coding agent
   - `amp` — Sourcegraph's agentic coder
   - `cursor-agent` — Cursor's terminal agent
+  - `grok` — xAI's terminal coding agent (Grok Build; needs a SuperGrok / X Premium+ plan)
 - **Coding (interactive)** — focused pair-programming assistants:
   - `aider` — Git-aware AI pair programmer
   - `opencode` — open-source terminal coding agent

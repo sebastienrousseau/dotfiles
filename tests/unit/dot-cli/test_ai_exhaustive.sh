@@ -27,7 +27,7 @@ trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
 MB="$DOTFILES_COV_TMPDIR/bin"
-AI_TOOLS=(claude codex copilot goose crush amp cursor-agent opencode aider
+AI_TOOLS=(claude codex copilot goose crush amp cursor-agent grok opencode aider
   autohand vibe qwen zai agy sgpt ollama kiro-cli dot-ai-serve dot-ai-proxy
   dot-ai-log dot-ai-tui)
 
@@ -86,6 +86,8 @@ ex bridge_codex codex "hi"             # bridge + non-claude routing source
 ex bridge_crush crush "hi"             # new agent: crush run
 ex bridge_amp amp "hi"                 # new agent: amp -x
 ex bridge_cursor cursor-agent "hi"     # new agent: cursor-agent -p
+ex bridge_grok grok "hi"               # new agent: grok -p
+ex oneshot_crush ai crush "hi"         # dot ai <newtool> → _ai_oneshot routing
 ex bareprompt ai "summarise"           # _ai_oneshot bare prompt
 ex style ai --style architect "tune"   # steering-pattern path
 ex ask ai ask "2+2"                    # cmd_ai_query

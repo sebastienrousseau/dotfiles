@@ -676,3 +676,27 @@ func TestNotifyAndDoneHook(t *testing.T) {
 		t.Fatal("done should have saved the session")
 	}
 }
+
+func TestSplash(t *testing.T) {
+	m := sized()
+	// empty transcript → splash with wordmark + pitch + keys
+	out := m.renderTranscript(60, 24)
+	for _, want := range []string{"█▀▄", "cockpit for your AI fleet", "open session"} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("splash missing %q", want)
+		}
+	}
+	// recent runs tuck along the bottom (capped at 3)
+	m.recent = []string{"a", "b", "c", "d", "e"}
+	out = m.renderTranscript(60, 24)
+	if !strings.Contains(out, "recent") || strings.Count(out, "\n  ") < 1 {
+		t.Fatal("splash should show recent runs")
+	}
+	if strings.Contains(out, "  e") {
+		t.Fatal("recent should be capped at 3")
+	}
+	// the splash also drives run()'s SPLASH preview path indirectly
+	if m.splash(40, 3) == "" {
+		t.Fatal("splash should render even when squeezed")
+	}
+}
