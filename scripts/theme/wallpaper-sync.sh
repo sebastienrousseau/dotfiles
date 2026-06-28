@@ -196,12 +196,12 @@ system_wallpaper_for_theme() {
     local sys_wp=""
     case "$family" in
       "macos - sonoma") sys_wp="$SYS_MAC/Sonoma.heic" ;;
-      "macos - blue")   sys_wp="$SYS_MAC/Mac Blue.heic" ;;
-      "macos - pink")   sys_wp="$SYS_MAC/Mac Pink.heic" ;;
+      "macos - blue") sys_wp="$SYS_MAC/Mac Blue.heic" ;;
+      "macos - pink") sys_wp="$SYS_MAC/Mac Pink.heic" ;;
       "macos - purple") sys_wp="$SYS_MAC/Mac Purple.heic" ;;
       "macos - yellow") sys_wp="$SYS_MAC/Mac Yellow.heic" ;;
       "macos - orange") sys_wp="$SYS_MAC/iMac Orange.heic" ;;
-      "macos - green")  sys_wp="$SYS_MAC/iMac Green.heic" ;;
+      "macos - green") sys_wp="$SYS_MAC/iMac Green.heic" ;;
       "macos - silver") sys_wp="$SYS_MAC/iMac Silver.heic" ;;
     esac
     if [[ -n "$sys_wp" && -f "$sys_wp" ]]; then
