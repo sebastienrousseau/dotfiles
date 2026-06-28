@@ -99,11 +99,13 @@ dot ai serve stop         # stop the gateway and un-route
 
 **Native session, never a key.** The gateway authenticates through your `claude` CLI's native session — there is no API key anywhere. Routing is applied **per-invocation** to non-Claude tools (`dot ai codex "…"`); it is **not** sourced into your interactive shell. The primary `claude` is never routed — it always uses its own native session, so claude.ai connectors stay enabled. (Setting `ANTHROPIC_API_KEY` in your shell would disable those connectors, which is exactly why routing stays scoped to each tool's subprocess.)
 
-**Config:** `DOT_AI_HOST` (default `127.0.0.1`), `DOT_AI_PORT` (default `3456`), `DOT_AI_DEFAULT_MODEL` (default `sonnet`), `DOT_AI_API_KEY` (optional shared secret).
+**Streaming, routing & metering.** Replies stream **token-by-token** (real SSE for both protocols). Model **aliases/routing** map friendly names to a Claude tier — `cheap`/`fast` → haiku, `smart` → opus, and common OpenAI ids (`gpt-4` → sonnet, `gpt-3.5-turbo` → haiku); extend with `DOT_AI_MODEL_MAP`. Every request is **metered**: `GET /metrics` (Prometheus text) and `GET /v1/usage` (JSON) report requests, tokens, and estimated cost per model. An optional `DOT_AI_DAILY_BUDGET` (USD) caps daily spend — once reached, requests get `429`.
 
-**Security:** the server binds to loopback by default. If you set `DOT_AI_HOST` to a LAN address, `dot ai serve` refuses to launch unless `DOT_AI_API_KEY` is set — an unprotected network proxy leaks your subscription.
+**Config:** `DOT_AI_HOST` (default `127.0.0.1`), `DOT_AI_PORT` (default `3456`), `DOT_AI_DEFAULT_MODEL` (default `sonnet`), `DOT_AI_API_KEY` (optional shared secret), `DOT_AI_DAILY_BUDGET` (USD, `0` = off), `DOT_AI_MODEL_MAP` / `DOT_AI_PRICING` (JSON overrides).
 
-**Scope (v1):** chat/completions for both protocols, streaming and non-streaming, `/v1/models`, `/health`. Out of scope for now: tool-call passthrough for coding agents, token-by-token streaming (responses stream as one block), multimodal input, and session resumption.
+**Security:** the server binds to loopback by default. If you set `DOT_AI_HOST` to a LAN address, both the launcher *and* the server itself refuse to start unless `DOT_AI_API_KEY` is set — an unprotected network proxy leaks your subscription.
+
+**Engine limits.** The gateway wraps the `claude` CLI (an agent), not the raw API, so two things are handled gracefully rather than forwarded: **image** blocks are acknowledged inline but not sent (the engine is text-only), and **function/tool-calling** requests are answered in plain text (the CLI can't return caller-defined `tool_use` blocks). Session resumption is still out of scope.
 
 ## The fleet
 

@@ -60,10 +60,12 @@ present it behind a flat, verb-first surface modelled on the Claude CLI.
 - **Single source of truth.** The cockpit and completions both derive from the
   `ai.sh` verb dispatch; a completion-parity test and the docs-coverage contract
   keep them from drifting.
-- **Scope is bounded (v1).** The gateway does chat/completions for both
-  protocols (streaming + non-streaming), `/v1/models`, `/health`. Tool-call
-  passthrough, token-by-token streaming, multimodal input, and session
-  resumption are explicitly out of scope and documented as such in
+- **Scope (v2).** The gateway does chat/completions for both protocols with
+  real token-by-token streaming, model routing/aliases, cost metering
+  (`/metrics`, `/v1/usage`), an optional daily budget cap, `/v1/models`, and
+  `/health`. Because it wraps the `claude` CLI (an agent, not the raw API),
+  tool-call passthrough and multimodal image input are handled gracefully but
+  not forwarded, and session resumption stays out of scope — documented in
   [`docs/AI.md`](../AI.md).
 - **Naming churn.** Existing muscle memory (`dot cl`, `dot ai dashboard`,
   `dot ai proxy`) is preserved via deprecated aliases, so nothing breaks while
