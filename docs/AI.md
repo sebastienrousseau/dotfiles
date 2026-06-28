@@ -120,6 +120,7 @@ These tools are not installed for you. Install what you want with `dot ai instal
   - `amp` — Sourcegraph's agentic coder
   - `cursor-agent` — Cursor's terminal agent
   - `grok` — xAI's terminal coding agent (Grok Build; needs a SuperGrok / X Premium+ plan)
+
 - **Coding (interactive)** — focused pair-programming assistants:
   - `aider` — Git-aware AI pair programmer
   - `opencode` — open-source terminal coding agent
@@ -127,11 +128,14 @@ These tools are not installed for you. Install what you want with `dot ai instal
   - `vibe` — Mistral's coding agent
   - `qwen` — Alibaba Qwen coding assistant
   - `zai` — Zhipu GLM coding agent
+
 - **General (prompt-based)** — quick prompt/shell helpers:
   - `agy` — Google's Antigravity agent
   - `sgpt` — ChatGPT for the shell (Shell-GPT)
+
 - **Runtime (local)**:
   - `ollama` — run local **and** cloud-hosted open models (`ollama signin` for cloud)
+
 - **Cloud (platform)**:
   - `kiro-cli` — AWS's agentic dev assistant
 
