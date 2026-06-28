@@ -216,8 +216,8 @@ func TestUpdateMsgs(t *testing.T) {
 	m = upd(m, spinner.TickMsg{})
 	// streamMsg variants
 	m.transcript = []line{{who: "you", text: "q"}, {who: "claude", text: ""}}
-	m = upd(m, streamMsg{chunk: "hel"})
-	m = upd(m, streamMsg{chunk: "lo"})
+	m = upd(m, streamMsg{chunk: "he"})
+	m = upd(m, streamMsg{chunk: "llo"})
 	if m.transcript[len(m.transcript)-1].text != "hello" {
 		t.Fatal("stream chunks not appended")
 	}
