@@ -39,6 +39,9 @@ var fleet = []tool{
 	{name: "codex", bin: "codex", group: "agents"},
 	{name: "copilot", bin: "copilot", group: "agents"},
 	{name: "goose", bin: "goose", group: "agents"},
+	{name: "crush", bin: "crush", group: "agents"},
+	{name: "amp", bin: "amp", group: "agents"},
+	{name: "cursor-agent", bin: "cursor-agent", group: "agents"},
 	{name: "opencode", bin: "opencode", group: "coding"},
 	{name: "aider", bin: "aider", group: "coding"},
 	{name: "autohand", bin: "autohand", group: "coding"},
@@ -112,13 +115,16 @@ var cockpitCmds = []paletteItem{
 // Common native REPL commands per provider — for familiarity. Selecting one
 // opens the tool's session (overlapping cockpit labels are filtered out).
 var toolCmds = map[string][]paletteItem{
-	"claude":   {{"/compact", "summarise context", "session"}, {"/model", "switch model", "session"}, {"/resume", "resume a session", "session"}, {"/agents", "manage subagents", "session"}, {"/mcp", "MCP servers", "session"}, {"/usage", "usage & limits", "session"}, {"/init", "generate CLAUDE.md", "session"}},
-	"codex":    {{"/model", "switch model", "session"}, {"/approvals", "approval mode", "session"}, {"/status", "session status", "session"}, {"/mcp", "MCP servers", "session"}},
-	"aider":    {{"/add", "add files", "session"}, {"/drop", "drop files", "session"}, {"/diff", "show diff", "session"}, {"/commit", "commit changes", "session"}, {"/undo", "undo last edit", "session"}, {"/model", "switch model", "session"}},
-	"opencode": {{"/model", "switch model", "session"}, {"/share", "share session", "session"}, {"/undo", "undo", "session"}},
-	"goose":    {{"/mode", "set agent mode", "session"}, {"/extension", "manage extensions", "session"}, {"/model", "switch model", "session"}},
-	"copilot":  {{"/model", "switch model", "session"}, {"/clear", "clear context", "session"}},
-	"qwen":     {{"/model", "switch model", "session"}, {"/clear", "clear", "session"}},
+	"claude":       {{"/compact", "summarise context", "session"}, {"/model", "switch model", "session"}, {"/resume", "resume a session", "session"}, {"/agents", "manage subagents", "session"}, {"/mcp", "MCP servers", "session"}, {"/usage", "usage & limits", "session"}, {"/init", "generate CLAUDE.md", "session"}},
+	"codex":        {{"/model", "switch model", "session"}, {"/approvals", "approval mode", "session"}, {"/status", "session status", "session"}, {"/mcp", "MCP servers", "session"}},
+	"aider":        {{"/add", "add files", "session"}, {"/drop", "drop files", "session"}, {"/diff", "show diff", "session"}, {"/commit", "commit changes", "session"}, {"/undo", "undo last edit", "session"}, {"/model", "switch model", "session"}},
+	"opencode":     {{"/model", "switch model", "session"}, {"/share", "share session", "session"}, {"/undo", "undo", "session"}},
+	"goose":        {{"/mode", "set agent mode", "session"}, {"/extension", "manage extensions", "session"}, {"/model", "switch model", "session"}},
+	"crush":        {{"/model", "switch model", "session"}, {"/help", "list commands", "session"}, {"/compact", "summarise context", "session"}},
+	"amp":          {{"/help", "list commands", "session"}, {"/thread", "manage threads", "session"}},
+	"cursor-agent": {{"/model", "switch model", "session"}, {"/help", "list commands", "session"}},
+	"copilot":      {{"/model", "switch model", "session"}, {"/clear", "clear context", "session"}},
+	"qwen":         {{"/model", "switch model", "session"}, {"/clear", "clear", "session"}},
 }
 
 func clampi(v, lo, hi int) int {

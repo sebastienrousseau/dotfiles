@@ -22,6 +22,9 @@ _ai_mise_pkg() {
     codex) echo "npm:@openai/codex" ;;
     copilot) echo "npm:@github/copilot" ;;
     goose) echo "" ;;
+    crush) echo "npm:@charmland/crush" ;;
+    amp) echo "npm:@sourcegraph/amp" ;;
+    cursor-agent) echo "" ;;
     aider) echo "pipx:aider-chat" ;;
     opencode) echo "npm:opencode-ai" ;;
     sgpt) echo "pipx:shell-gpt" ;;
@@ -102,6 +105,31 @@ install_claude_native() {
   installer=$(umask 077 && mktemp)
   if curl -fsSL -o "$installer" https://claude.ai/install.sh &&
     [ "$(wc -c <"$installer")" -le 262144 ] &&
+    head -1 "$installer" | grep -q '^#!'; then
+    if command -v gum >/dev/null 2>&1; then
+      if gum spin --spinner dot --title "Installing $label (native installer)" -- bash "$installer"; then
+        ui_ok "$label" "installed"
+      else
+        ui_warn "$label" "install failed (continuing)"
+      fi
+    else
+      ui_info "Installing" "$label via native installer"
+      bash "$installer" || ui_warn "$label" "install failed (continuing)"
+    fi
+  else
+    ui_warn "$label" "installer download/validation failed (continuing)"
+  fi
+  rm -f "$installer"
+  # LCOV_EXCL_STOP
+}
+
+install_cursor_native() {
+  # LCOV_EXCL_START — network curl|bash installer (see install_agy_native).
+  local label="${1:-Cursor CLI}"
+  local installer
+  installer=$(umask 077 && mktemp)
+  if curl -fsSL -o "$installer" https://cursor.com/install &&
+    [ "$(wc -c <"$installer")" -le 524288 ] &&
     head -1 "$installer" | grep -q '^#!'; then
     if command -v gum >/dev/null 2>&1; then
       if gum spin --spinner dot --title "Installing $label (native installer)" -- bash "$installer"; then

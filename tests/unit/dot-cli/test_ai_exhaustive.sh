@@ -27,8 +27,9 @@ trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
 MB="$DOTFILES_COV_TMPDIR/bin"
-AI_TOOLS=(claude codex copilot goose opencode aider autohand vibe qwen zai
-  agy sgpt ollama kiro-cli dot-ai-serve dot-ai-proxy dot-ai-log dot-ai-tui)
+AI_TOOLS=(claude codex copilot goose crush amp cursor-agent opencode aider
+  autohand vibe qwen zai agy sgpt ollama kiro-cli dot-ai-serve dot-ai-proxy
+  dot-ai-log dot-ai-tui)
 
 mk_tool() {
   printf '#!/usr/bin/env bash\ncat >/dev/null 2>&1 || true\nexit 0\n' >"$MB/$1"
@@ -82,6 +83,9 @@ ex chat ai chat                        # cmd_ai_chat (picker)
 ex chat_tool ai chat claude            # cmd_ai_chat (direct)
 ex run ai run claude "hello"           # _ai_oneshot → run_ai_with_context
 ex bridge_codex codex "hi"             # bridge + non-claude routing source
+ex bridge_crush crush "hi"             # new agent: crush run
+ex bridge_amp amp "hi"                 # new agent: amp -x
+ex bridge_cursor cursor-agent "hi"     # new agent: cursor-agent -p
 ex bareprompt ai "summarise"           # _ai_oneshot bare prompt
 ex style ai --style architect "tune"   # steering-pattern path
 ex ask ai ask "2+2"                    # cmd_ai_query
@@ -106,10 +110,12 @@ unset DOT_AI_RAW
 # install short-circuits to "already installed"); keep the mocked installers.
 for t in "${AI_TOOLS[@]}"; do rm -f "$MB/$t"; done
 export PATH="$MB:/usr/bin:/bin"
-ex install_all ai install all       # bulk install loop
-ex install_claude ai install claude # native installer dispatch
-ex install_codex ai install codex   # mise-package install path
-ex install_unknown ai install nope  # unmapped tool
+ex install_all ai install all             # bulk install loop
+ex install_claude ai install claude       # native installer dispatch
+ex install_codex ai install codex         # mise-package install path
+ex install_crush ai install crush         # npm-package via mise
+ex install_cursor ai install cursor-agent # native installer dispatch
+ex install_unknown ai install nope        # unmapped tool
 rm -f "$HOME/.cache/dotfiles/ai/status.tsv"
 ex tools_absent ai tools      # status, nothing installed
 ex absent_codex ai codex "hi" # not-installed → gum-confirm install

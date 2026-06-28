@@ -36,7 +36,7 @@ _show_ai_bridge_usage() {
   echo "       dot ai <tool> --style <name> \"<prompt>\""
   echo "       dot ai chat [tool]             # interactive session"
   echo ""
-  echo "Tools: cl codex copilot agy goose kiro sgpt ollama opencode aider autohand vibe qwen zai"
+  echo "Tools: cl codex copilot goose crush amp cursor-agent agy kiro sgpt ollama opencode aider autohand vibe qwen zai"
   echo ""
   echo "Available styles:"
   # shellcheck disable=SC2012
@@ -158,20 +158,23 @@ cmd_ai_status() {
 
   # category|role|name|binary|description
   local -a ai_clis=(
-    "Agents (autonomous)|agent|Claude Code|claude|Anthropic CLI agent"
-    "Agents (autonomous)|agent|Codex CLI|codex|OpenAI Codex agent"
-    "Agents (autonomous)|agent|Copilot CLI|copilot|GitHub Copilot CLI"
-    "Agents (autonomous)|agent|Goose|goose|Block's coding agent"
-    "Coding (interactive)|coding|Aider|aider|AI pair programmer"
-    "Coding (interactive)|coding|OpenCode|opencode|Terminal coding assistant"
-    "Coding (interactive)|coding|Autohand Code|autohand|Autohand coding agent"
-    "Coding (interactive)|coding|Mistral Vibe|vibe|Mistral AI coding agent"
-    "Coding (interactive)|coding|Qwen Code|qwen|Qwen AI coding assistant"
-    "Coding (interactive)|coding|ZAI|zai|Zhipu AI coding agent"
-    "General (prompt-based)|general|Shell-GPT|sgpt|ChatGPT terminal interface"
-    "General (prompt-based)|general|Antigravity CLI|agy|Google Antigravity CLI"
-    "Runtime (local)|local|Ollama|ollama|Local LLM runner"
-    "Cloud (platform)|cloud|Kiro CLI|kiro-cli|AWS AI assistant"
+    "Agents (autonomous)|agent|Claude Code|claude|Anthropic's flagship agentic coder"
+    "Agents (autonomous)|agent|Codex CLI|codex|OpenAI's autonomous coding agent"
+    "Agents (autonomous)|agent|Copilot CLI|copilot|GitHub Copilot in the terminal"
+    "Agents (autonomous)|agent|Goose|goose|Block's open-source coding agent"
+    "Agents (autonomous)|agent|Crush|crush|Charm's glamorous TUI coding agent"
+    "Agents (autonomous)|agent|Amp|amp|Sourcegraph's agentic coder"
+    "Agents (autonomous)|agent|Cursor CLI|cursor-agent|Cursor's terminal agent"
+    "Coding (interactive)|coding|Aider|aider|Git-aware AI pair programmer"
+    "Coding (interactive)|coding|OpenCode|opencode|Open-source terminal coding agent"
+    "Coding (interactive)|coding|Autohand Code|autohand|Autonomous multi-file coding agent"
+    "Coding (interactive)|coding|Mistral Vibe|vibe|Mistral's coding agent"
+    "Coding (interactive)|coding|Qwen Code|qwen|Alibaba Qwen coding assistant"
+    "Coding (interactive)|coding|ZAI|zai|Zhipu GLM coding agent"
+    "General (prompt-based)|general|Shell-GPT|sgpt|ChatGPT for the shell"
+    "General (prompt-based)|general|Antigravity CLI|agy|Google's Antigravity agent"
+    "Runtime (local)|local|Ollama|ollama|Run local & cloud open models"
+    "Cloud (platform)|cloud|Kiro CLI|kiro-cli|AWS's agentic dev assistant"
   )
 
   if ! _ai_cache_fresh "$AI_STATUS_CACHE_FILE"; then
@@ -443,54 +446,7 @@ ${prompt}"
   _ai_start_ts=$(date +%s)
   _ai_prompt_words=$(printf '%s' "$prompt" | wc -w | tr -d ' ')
   _ai_exit=0
-  case "$tool" in
-    cl | claude)
-      printf "%s" "$full_prompt" | claude || _ai_exit=$?
-      ;;
-    codex)
-      printf "%s" "$full_prompt" | codex || _ai_exit=$?
-      ;;
-    copilot)
-      copilot -sp "$full_prompt" || _ai_exit=$?
-      ;;
-    agy)
-      printf "%s" "$full_prompt" | agy chat || _ai_exit=$?
-      ;;
-    goose)
-      printf "%s" "$full_prompt" | goose session start || _ai_exit=$?
-      ;;
-    kiro | kiro-cli)
-      printf "%s" "$full_prompt" | kiro-cli chat || _ai_exit=$?
-      ;;
-    sgpt)
-      printf "%s" "$full_prompt" | sgpt --chat shell-gpt || _ai_exit=$?
-      ;;
-    ollama)
-      printf "%s" "$full_prompt" | ollama run llama3.2 || _ai_exit=$?
-      ;;
-    opencode)
-      printf "%s" "$full_prompt" | opencode query || _ai_exit=$?
-      ;;
-    aider)
-      printf "%s" "$full_prompt" | aider --msg "-" || _ai_exit=$?
-      ;;
-    autohand)
-      printf "%s" "$full_prompt" | autohand chat || _ai_exit=$?
-      ;;
-    vibe)
-      printf "%s" "$full_prompt" | vibe chat || _ai_exit=$?
-      ;;
-    qwen)
-      printf "%s" "$full_prompt" | qwen chat || _ai_exit=$?
-      ;;
-    zai)
-      printf "%s" "$full_prompt" | zai chat || _ai_exit=$?
-      ;;
-    *)
-      ui_err "Unsupported tool" "$tool"
-      exit 1
-      ;;
-  esac
+  _ai_invoke_provider "$tool" "$full_prompt" || _ai_exit=$?
   _ai_end_ts=$(date +%s)
   _ai_dur=$((_ai_end_ts - _ai_start_ts))
   _ai_log_run "$tool_bin" "$_ai_exit" "$_ai_dur" "$_ai_prompt_words" 2>/dev/null || true
@@ -586,7 +542,7 @@ case "${1:-}" in
     shift
     cmd_ai_query "$@"
     ;;
-  cl | claude | codex | copilot | agy | goose | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
+  cl | claude | codex | copilot | goose | crush | amp | cursor-agent | agy | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
     _ai_deprecated "dot ai $1"
     tool="$1"
     shift

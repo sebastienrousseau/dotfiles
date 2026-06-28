@@ -111,11 +111,28 @@ dot ai serve stop         # stop the gateway and un-route
 
 These tools are not installed for you. Install what you want with `dot ai install <tool>` (or `dot ai install all`):
 
-- **Agents**: `claude`, `codex`, `copilot`, `goose`
-- **Coding assistants**: `aider`, `opencode`, `autohand`, `vibe`, `qwen`, `zai`
-- **General**: `agy`, `sgpt`
-- **Local-first**: `ollama`
-- **Cloud / platform**: `kiro-cli`
+- **Agents (autonomous)** — full coding agents that plan and execute:
+  - `claude` — Anthropic's flagship agentic coder (Claude Code)
+  - `codex` — OpenAI's autonomous coding agent
+  - `copilot` — GitHub Copilot in the terminal
+  - `goose` — Block's open-source coding agent
+  - `crush` — Charm's glamorous TUI coding agent
+  - `amp` — Sourcegraph's agentic coder
+  - `cursor-agent` — Cursor's terminal agent
+- **Coding (interactive)** — focused pair-programming assistants:
+  - `aider` — Git-aware AI pair programmer
+  - `opencode` — open-source terminal coding agent
+  - `autohand` — autonomous multi-file coding agent
+  - `vibe` — Mistral's coding agent
+  - `qwen` — Alibaba Qwen coding assistant
+  - `zai` — Zhipu GLM coding agent
+- **General (prompt-based)** — quick prompt/shell helpers:
+  - `agy` — Google's Antigravity agent
+  - `sgpt` — ChatGPT for the shell (Shell-GPT)
+- **Runtime (local)**:
+  - `ollama` — run local **and** cloud-hosted open models (`ollama signin` for cloud)
+- **Cloud (platform)**:
+  - `kiro-cli` — AWS's agentic dev assistant
 
 `dot ai tools` shows install status grouped by role and offers an interactive install picker. Status is cached in `~/.cache/dotfiles/ai/status.tsv` for 5 minutes (tune with `DOTFILES_AI_STATUS_TTL`).
 

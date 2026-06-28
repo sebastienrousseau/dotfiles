@@ -196,6 +196,7 @@ proxy_setup() {
 # connectors. The placeholder key is a dummy the gateway ignores.
 local_on() {
   local key="${DOT_AI_API_KEY:-x}"
+  local model="${DOT_AI_DEFAULT_MODEL:-sonnet}"
   mkdir -p "$CONFIG_DIR"
   (
     umask 077
@@ -204,18 +205,26 @@ local_on() {
 # Consumed per-invocation by 'dot ai <tool>'; NOT sourced into your shell.
 # The primary 'claude' is never routed (it uses its native session).
 export ANTHROPIC_BASE_URL="$BASE_URL"
+export ANTHROPIC_HOST="$BASE_URL"
 export ANTHROPIC_AUTH_TOKEN="$key"
 export ANTHROPIC_API_KEY="$key"
 export OPENAI_BASE_URL="$BASE_URL/v1"
 export OPENAI_API_KEY="$key"
+# Goose reads these from the env, overriding any stale config.yaml so it
+# routes through the gateway (it doesn't honour ANTHROPIC_BASE_URL alone).
+export GOOSE_PROVIDER="anthropic"
+export GOOSE_MODEL="$model"
 EOF
     cat >"$ENV_FISH" <<EOF
 # Managed by 'dot ai' — routing for NON-Claude fleet tools only.
 set -gx ANTHROPIC_BASE_URL "$BASE_URL"
+set -gx ANTHROPIC_HOST "$BASE_URL"
 set -gx ANTHROPIC_AUTH_TOKEN "$key"
 set -gx ANTHROPIC_API_KEY "$key"
 set -gx OPENAI_BASE_URL "$BASE_URL/v1"
 set -gx OPENAI_API_KEY "$key"
+set -gx GOOSE_PROVIDER "anthropic"
+set -gx GOOSE_MODEL "$model"
 EOF
   )
   ok "Routing ON — non-Claude tools via 'dot ai <tool>' → $BASE_URL"

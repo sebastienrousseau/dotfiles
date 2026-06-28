@@ -15,6 +15,38 @@ _ai_deprecated() {
   ui_warn "deprecated" "use: $1" >&2
 }
 
+# _ai_invoke_provider <tool> <full_prompt> — run a fleet tool headlessly and
+# return its exit code. Each provider has its own one-shot incantation; kept
+# here (not in the ai.sh dispatcher) so adding a tool is a single edit and the
+# dispatcher stays under the line budget.
+_ai_invoke_provider() {
+  local tool="$1" full_prompt="$2" rc=0
+  case "$tool" in
+    cl | claude) printf "%s" "$full_prompt" | claude || rc=$? ;;
+    codex) printf "%s" "$full_prompt" | codex || rc=$? ;;
+    copilot) copilot -sp "$full_prompt" || rc=$? ;;
+    agy) printf "%s" "$full_prompt" | agy chat || rc=$? ;;
+    goose) goose run -t "$full_prompt" || rc=$? ;;
+    crush) crush run "$full_prompt" || rc=$? ;;
+    amp) amp -x "$full_prompt" || rc=$? ;;
+    cursor | cursor-agent) cursor-agent -p "$full_prompt" || rc=$? ;;
+    kiro | kiro-cli) printf "%s" "$full_prompt" | kiro-cli chat || rc=$? ;;
+    sgpt) printf "%s" "$full_prompt" | sgpt --chat shell-gpt || rc=$? ;;
+    ollama) printf "%s" "$full_prompt" | ollama run llama3.2 || rc=$? ;;
+    opencode) printf "%s" "$full_prompt" | opencode query || rc=$? ;;
+    aider) printf "%s" "$full_prompt" | aider --msg "-" || rc=$? ;;
+    autohand) printf "%s" "$full_prompt" | autohand chat || rc=$? ;;
+    vibe) printf "%s" "$full_prompt" | vibe chat || rc=$? ;;
+    qwen) printf "%s" "$full_prompt" | qwen chat || rc=$? ;;
+    zai) printf "%s" "$full_prompt" | zai chat || rc=$? ;;
+    *)
+      ui_err "Unsupported tool" "$tool"
+      return 2
+      ;;
+  esac
+  return "$rc"
+}
+
 # _ai_cockpit <fallback-cmd…> — launch the Bubble Tea cockpit (dot-ai-tui)
 # when it is built and we're on a TTY; otherwise run the fallback (the plain
 # fleet launcher for CI, pipes, or before the binary is built).
@@ -106,7 +138,7 @@ cmd_ai_doctor() {
   fi
   has_command dot-ai-proxy && dot-ai-proxy status
   local installed=0 total=0 b
-  for b in claude codex copilot goose agy sgpt ollama opencode aider kiro-cli autohand vibe qwen zai; do
+  for b in claude codex copilot goose crush amp cursor-agent agy sgpt ollama opencode aider kiro-cli autohand vibe qwen zai; do
     total=$((total + 1))
     has_command "$b" && installed=$((installed + 1))
   done
@@ -127,7 +159,7 @@ cmd_ai_query() {
 # Uses the native installers for claude/goose/agy and mise for the rest.
 cmd_ai_install() {
   local target="${1:-all}"
-  local fleet=(claude codex copilot goose agy sgpt ollama opencode aider kiro-cli autohand vibe qwen zai)
+  local fleet=(claude codex copilot goose crush amp cursor-agent agy sgpt ollama opencode aider kiro-cli autohand vibe qwen zai)
   local -a todo=()
   local b pkg
   case "$target" in
@@ -159,6 +191,10 @@ cmd_ai_install() {
         ;;
       agy)
         install_agy_native "Antigravity CLI"
+        continue
+        ;;
+      cursor-agent)
+        install_cursor_native "Cursor CLI"
         continue
         ;;
     esac

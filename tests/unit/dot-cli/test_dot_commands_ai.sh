@@ -33,7 +33,10 @@ test_start "ai_bridge_pattern_handling"
 assert_file_contains "$AI_SCRIPT" "--pattern" "should handle pattern flag"
 
 test_start "ai_status_lists_new_providers"
-assert_file_contains "$AI_SCRIPT" "Copilot CLI|copilot|GitHub Copilot CLI" "should list Copilot CLI"
+assert_file_contains "$AI_SCRIPT" "Copilot CLI|copilot|" "should list Copilot CLI"
+assert_file_contains "$AI_SCRIPT" "Crush|crush|" "should list Crush"
+assert_file_contains "$AI_SCRIPT" "Amp|amp|" "should list Amp"
+assert_file_contains "$AI_SCRIPT" "Cursor CLI|cursor-agent|" "should list Cursor CLI"
 
 test_start "ai_status_has_grouped_sections"
 assert_file_contains "$AI_SCRIPT" "Agents (autonomous)" "should group agents"

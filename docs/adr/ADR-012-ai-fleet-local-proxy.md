@@ -14,9 +14,9 @@ Accepted
 
 ## Context
 
-The dotfiles manage a fleet of ~14 AI CLIs (claude, codex, copilot, goose,
-aider, opencode, agy, sgpt, ollama, autohand, vibe, qwen, zai, kiro-cli). Three
-problems had accumulated:
+The dotfiles manage a fleet of ~17 AI CLIs (claude, codex, copilot, goose,
+crush, amp, cursor-agent, aider, opencode, agy, sgpt, ollama, autohand, vibe,
+qwen, zai, kiro-cli). Three problems had accumulated:
 
 1. **Incoherent command surface.** The fleet was driven by three incompatible
    shapes — `dot ai <thing>`, `dot <tool>`, and `dot ai-<thing>` — with opaque
