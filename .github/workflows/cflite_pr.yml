@@ -1,0 +1,42 @@
+name: ClusterFuzzLite / PR
+
+# Continuous fuzzing of the Go input-handling harnesses on pull requests
+# (code-change mode). Gives the OpenSSF Scorecard "Fuzzing" check a
+# detectable fuzzing integration and catches regressions in the
+# validate-name / URL-resolver logic ported from the shell.
+
+on:
+  pull_request:
+    paths:
+      - "oss-fuzz-integration/**"
+      - ".clusterfuzzlite/**"
+      - ".github/workflows/cflite_pr.yml"
+
+permissions: read-all
+
+jobs:
+  fuzzing:
+    name: ClusterFuzzLite / Fuzz
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Build fuzzers
+        id: build
+        uses: google/clusterfuzzlite/actions/build_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1 # v1
+        with:
+          language: go
+          sanitizer: address
+
+      - name: Run fuzzers
+        uses: google/clusterfuzzlite/actions/run_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1 # v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fuzz-seconds: 120
+          mode: code-change
+          sanitizer: address
+          output-sarif: true

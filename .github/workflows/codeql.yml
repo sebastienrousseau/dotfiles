@@ -2,13 +2,9 @@ name: CodeQL
 
 on:
   push:
+    # No path filter on push: SAST must run on EVERY commit to the default
+    # branch (OpenSSF Scorecard counts the share of commits a SAST tool ran on).
     branches: [master]
-    # Only run CodeQL when relevant files change
-    paths:
-      - '**.py'
-      - '**.js'
-      - '**.ts'
-      - '.github/workflows/**'
   pull_request:
     branches: [master]
     paths:
