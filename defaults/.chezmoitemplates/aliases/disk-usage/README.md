@@ -1,6 +1,6 @@
-# Disk-usage Aliases
+# Disk Usage Aliases
 
-Manage Disk-usage aliases. Part of the **Universal Dotfiles** configuration.
+Manage disk usage aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 

@@ -1,6 +1,6 @@
-# Npm Aliases
+# npm Aliases
 
-Manage Npm aliases. Part of the **Universal Dotfiles** configuration.
+Manage npm aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 

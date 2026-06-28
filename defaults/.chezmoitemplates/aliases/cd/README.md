@@ -1,6 +1,6 @@
-# Cd Aliases
+# cd Aliases
 
-Manage Cd aliases. Part of the **Universal Dotfiles** configuration.
+Manage cd aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
@@ -162,7 +162,7 @@ Effortlessly navigate to critical system directories:
 
 ---
 
-## ‍ Usage Examples
+## Usage Examples
 
 ```bash
 # Navigate to a directory with history tracking
@@ -227,7 +227,7 @@ This project is licensed under the
 [MIT License](https://opensource.org/licenses/MIT)
 ---
 
-## ‍ Author
+## Author
 
 Created with  by [Sebastien Rousseau](https://sebastienrousseau.com)
 

@@ -1,4 +1,4 @@
-# Benchmarks
+# Benchmarks Aliases
 
 Aliases for quick benchmarking with hyperfine.
 

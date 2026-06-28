@@ -1,6 +1,6 @@
-# Uuid Aliases
+# UUID Aliases
 
-Manage Uuid aliases. Part of the **Universal Dotfiles** configuration.
+Manage UUID aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
