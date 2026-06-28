@@ -12,7 +12,8 @@ job `lint/command-index` fails when this file is stale.
 |---------|---------|
 | `dot add` | Add a file to chezmoi source |
 | `dot agent` | Profile-aware execution, agent card, a2a-card, session log, checkpoints, and conformance |
-| `dot ai` | AI CLI status, delegate, and cost report |
+| `dot agy` | Antigravity CLI with context patterns |
+| `dot ai` | AI fleet cockpit, gateway, and cost |
 | `dot ai-query` | Context-aware RAG query over your dotfiles |
 | `dot ai-setup` | Interactive setup for all AI CLI tools |
 | `dot aider` | Aider with context patterns |
@@ -38,7 +39,6 @@ job `lint/command-index` fails when this file is stale.
 | `dot fleet` | events Show recent fleet events from local event log |
 | `dot fleet` | namespace Show or set the active namespace for multi-tenant isolation |
 | `dot fonts` | Install Nerd Fonts (JetBrainsMono by default) |
-| `dot gemini` | Gemini CLI with context patterns |
 | `dot help` | Show this help message |
 | `dot history` | Shell history analysis |
 | `dot keys` | Keybindings (sign-check: verify git signing) |

@@ -1,6 +1,6 @@
-# Rsync Aliases
+# rsync Aliases
 
-Manage Rsync aliases. Part of the **Universal Dotfiles** configuration.
+Manage rsync aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 

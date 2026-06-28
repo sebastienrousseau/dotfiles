@@ -1,0 +1,671 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+"""dot-ai-serve — a native, dependency-free local Claude proxy.
+
+A Meridian-style bridge with no third-party packages: it wraps the
+already-installed `claude` CLI in headless stream-json mode and exposes the
+standard Anthropic (`/v1/messages`) and OpenAI (`/v1/chat/completions`)
+endpoints. Any tool that speaks either protocol points at
+http://127.0.0.1:3456 and gets Claude on your existing subscription.
+
+Auth, prompt caching, and rate limits are owned by the `claude` CLI — this
+server only translates wire formats. Managed via `dot ai serve`.
+
+Features: real token-by-token streaming (SSE), model routing/aliases, cost
+metering (/metrics, /v1/usage), an optional daily budget cap, and a shared
+API-key gate. Multimodal image blocks are acknowledged but not forwarded
+(the CLI engine is text-only); function/tool-calling is likewise unavailable
+through the CLI engine — `tools` requests are answered in plain text.
+Stdlib only — runs on any python3.
+"""
+
+import json
+import os
+import shutil
+import subprocess
+import sys
+import threading
+import time
+import uuid
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+HOST = os.environ.get("DOT_AI_HOST", "127.0.0.1")
+PORT = int(os.environ.get("DOT_AI_PORT", "3456"))
+CLAUDE_BIN = os.environ.get("DOT_AI_CLAUDE_BIN", "claude")
+DEFAULT_MODEL = os.environ.get("DOT_AI_DEFAULT_MODEL", "sonnet")
+API_KEY = os.environ.get("DOT_AI_API_KEY", "")  # optional shared-secret gate
+
+# Advertised models (also accepts any id/alias the claude CLI understands).
+MODELS = [
+    "claude-opus-4-8",
+    "claude-opus-4-7",
+    "claude-sonnet-4-6",
+    "claude-opus-4-6",
+    "claude-haiku-4-5-20251001",
+]
+
+# Per-million-token prices (USD) for rough cost metering, keyed by the family
+# substring of the resolved model. Override with DOT_AI_PRICING (JSON).
+PRICING = {"opus": (15.0, 75.0), "sonnet": (3.0, 15.0), "haiku": (0.80, 4.0)}
+try:
+    PRICING.update(
+        {k: tuple(v) for k, v in json.loads(os.environ.get("DOT_AI_PRICING", "") or "{}").items()}
+    )
+except (json.JSONDecodeError, TypeError, ValueError):
+    pass
+
+# Friendly aliases → an alias the claude CLI accepts. "cheap"/"fast" route to
+# haiku, "smart" to opus; common OpenAI ids map to a sensible Claude tier.
+# Extend/override with DOT_AI_MODEL_MAP (JSON).
+MODEL_ALIASES = {
+    "cheap": "haiku",
+    "fast": "haiku",
+    "smart": "opus",
+    "default": DEFAULT_MODEL,
+    "gpt-4": "sonnet",
+    "gpt-4o": "sonnet",
+    "gpt-4-turbo": "sonnet",
+    "gpt-3.5-turbo": "haiku",
+}
+try:
+    MODEL_ALIASES.update(json.loads(os.environ.get("DOT_AI_MODEL_MAP", "") or "{}"))
+except json.JSONDecodeError:
+    pass
+
+# Optional daily spend cap (USD). 0 disables it.
+DAILY_BUDGET = float(os.environ.get("DOT_AI_DAILY_BUDGET", "0") or "0")
+
+METRICS = {
+    "started": time.time(),
+    "requests": 0,
+    "errors": 0,
+    "streamed": 0,
+    "tools_dropped": 0,
+    "images_dropped": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0,
+    "by_model": {},
+}
+_BUDGET = {"day": time.strftime("%Y-%m-%d"), "spent": 0.0}
+_LOCK = threading.Lock()
+
+
+def log(msg):
+    print(f"[dot-ai-serve] {msg}", file=sys.stderr, flush=True)
+
+
+# ---------------------------------------------------------------------------
+# Model routing + cost metering.
+# ---------------------------------------------------------------------------
+# A resolved model flows into the `claude` CLI argv. Map the request's value
+# through a constant lookup table so the string reaching argv is ALWAYS one of
+# our own literals (the untrusted value is only ever a dict key, never the
+# result) — a request can't inject a flag or arbitrary value. Extend coverage
+# via MODELS, or map an alias to a known tier in DOT_AI_MODEL_MAP.
+_MODEL_LUT = {m: m for m in (set(MODELS) | {"opus", "sonnet", "haiku"})}
+
+
+def resolve_model(model):
+    """Follow the alias chain, then map the result to a known model id via a
+    constant lookup table; unknown models fall back to a safe constant."""
+    seen = set()
+    while model in MODEL_ALIASES and model not in seen:
+        seen.add(model)
+        model = MODEL_ALIASES[model]
+    return _MODEL_LUT.get(model or DEFAULT_MODEL, "sonnet")
+
+
+def _price_for(model):
+    m = resolve_model(model).lower()
+    for fam, price in PRICING.items():
+        if fam in m:
+            return price
+    return PRICING.get("sonnet", (3.0, 15.0))
+
+
+def estimate_cost(model, inp, out):
+    pin, pout = _price_for(model)
+    return (inp * pin + out * pout) / 1_000_000.0
+
+
+def _roll_day():
+    today = time.strftime("%Y-%m-%d")
+    if _BUDGET["day"] != today:
+        _BUDGET["day"], _BUDGET["spent"] = today, 0.0
+
+
+def budget_exceeded():
+    if DAILY_BUDGET <= 0:
+        return False
+    with _LOCK:
+        _roll_day()
+        return _BUDGET["spent"] >= DAILY_BUDGET
+
+
+def record(model, inp, out, streamed, error):
+    """Fold one request into the metrics + daily-budget counters."""
+    cost = estimate_cost(model, inp, out)
+    with _LOCK:
+        METRICS["requests"] += 1
+        if error:
+            METRICS["errors"] += 1
+        if streamed:
+            METRICS["streamed"] += 1
+        METRICS["input_tokens"] += inp
+        METRICS["output_tokens"] += out
+        METRICS["cost_usd"] += cost
+        bm = METRICS["by_model"].setdefault(
+            model, {"requests": 0, "input": 0, "output": 0, "cost": 0.0}
+        )
+        bm["requests"] += 1
+        bm["input"] += inp
+        bm["output"] += out
+        bm["cost"] += cost
+        _roll_day()
+        _BUDGET["spent"] += cost
+    return cost
+
+
+# ---------------------------------------------------------------------------
+# Request shaping: collapse an Anthropic/OpenAI message array into a single
+# prompt + system string the headless `claude` CLI can consume.
+# ---------------------------------------------------------------------------
+def _text_of(content):
+    """Extract plain text from a string or a list of content blocks. Image
+    blocks are acknowledged inline (the CLI engine can't accept them)."""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for block in content:
+            if isinstance(block, dict):
+                btype = block.get("type")
+                if btype in ("text", None) and "text" in block:
+                    parts.append(block["text"])
+                elif btype in ("image", "image_url"):
+                    METRICS["images_dropped"] += 1
+                    parts.append("[image attached — not forwarded; the engine is text-only]")
+                elif "content" in block and isinstance(block["content"], str):
+                    parts.append(block["content"])
+            elif isinstance(block, str):
+                parts.append(block)
+        return "\n".join(parts)
+    return ""
+
+
+def shape_request(body):
+    """Return (model, system_prompt, prompt_text) from a parsed JSON body."""
+    model = body.get("model") or DEFAULT_MODEL
+    messages = body.get("messages", []) or []
+
+    system_chunks = []
+    sys_field = body.get("system")
+    if sys_field:
+        system_chunks.append(_text_of(sys_field))
+
+    turns = []
+    for msg in messages:
+        role = msg.get("role", "user")
+        text = _text_of(msg.get("content", ""))
+        if not text:
+            continue
+        if role == "system":
+            system_chunks.append(text)
+        elif role == "assistant":
+            turns.append(f"Assistant: {text}")
+        else:
+            turns.append(f"User: {text}")
+
+    # Tool-calling can't pass through the CLI engine; steer to a text answer.
+    if body.get("tools"):
+        METRICS["tools_dropped"] += 1
+        system_chunks.append(
+            "Function/tool calling is unavailable through this gateway; "
+            "answer directly in plain text."
+        )
+
+    system_prompt = "\n\n".join(c for c in system_chunks if c).strip()
+
+    if len(turns) == 1 and turns[0].startswith("User: "):
+        prompt = turns[0][len("User: ") :]
+    else:
+        prompt = "\n\n".join(turns)
+        if turns and turns[-1].startswith("User: "):
+            prompt += "\n\nAssistant:"
+
+    return model, system_prompt, prompt
+
+
+# ---------------------------------------------------------------------------
+# Engine: run the headless `claude` CLI and stream its output token-by-token.
+# ---------------------------------------------------------------------------
+def stream_claude(run_model, system_prompt, prompt):
+    """Generator: yields ("delta", text) as Claude produces output, then a
+    final ("done", usage_dict, error_or_None). Reads the CLI's stream-json
+    NDJSON incrementally so callers get live tokens."""
+    # argv carries NO request-derived content: the model is validated to a
+    # plain token (resolve_model) and the system prompt + prompt go via stdin.
+    # This keeps user-controlled data off the command line entirely.
+    cmd = [
+        CLAUDE_BIN,
+        "-p",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--model",
+        run_model,
+        # Hermetic: ignore user/project/local settings and CLAUDE.md.
+        "--setting-sources",
+        "",
+    ]
+    stdin_text = prompt
+    if system_prompt:
+        stdin_text = system_prompt + "\n\n" + prompt
+
+    try:
+        proc = subprocess.Popen(
+            cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+        )
+    except FileNotFoundError:
+        yield ("done", {}, f"claude CLI not found ({CLAUDE_BIN})")
+        return
+
+    timer = threading.Timer(int(os.environ.get("DOT_AI_TIMEOUT", "600")), proc.kill)
+    timer.start()
+    prev, usage, err, timed_out = "", {}, None, False
+    try:
+        proc.stdin.write(stdin_text)
+        proc.stdin.close()
+        for line in proc.stdout:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                evt = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            etype = evt.get("type")
+            if etype == "assistant":
+                cur = prev
+                for block in evt.get("message", {}).get("content", []):
+                    if block.get("type") == "text":
+                        cur = block.get("text", cur)
+                delta = cur[len(prev) :] if cur.startswith(prev) else cur
+                if delta:
+                    yield ("delta", delta)
+                prev = cur
+            elif etype == "result":
+                usage = evt.get("usage", {}) or {}
+                if evt.get("is_error"):
+                    err = evt.get("result") or "claude reported an error"
+                else:
+                    final = evt.get("result", prev)
+                    if isinstance(final, str) and final.startswith(prev) and len(final) > len(prev):
+                        yield ("delta", final[len(prev) :])
+                        prev = final
+        proc.wait()
+    finally:
+        timed_out = not timer.is_alive() and proc.returncode is not None and proc.returncode < 0
+        timer.cancel()
+
+    if err is None and (not prev):
+        if timed_out:
+            err = "claude CLI timed out"
+        else:
+            tail = (proc.stderr.read() if proc.stderr else "").strip().splitlines()
+            err = tail[-1] if tail else "no output from claude"
+    return_usage = usage
+    yield ("done", return_usage, err)
+
+
+def run_claude(run_model, system_prompt, prompt):
+    """Collect the full stream into (text, usage, error) — non-streaming path."""
+    text, usage, err = "", {}, None
+    for item in stream_claude(run_model, system_prompt, prompt):
+        if item[0] == "delta":
+            text += item[1]
+        else:
+            _, usage, err = item
+    return text, usage, err
+
+
+def _usage_pair(usage):
+    """Normalize CLI usage into (input_tokens, output_tokens)."""
+    inp = usage.get("input_tokens", 0) + usage.get("cache_read_input_tokens", 0)
+    inp += usage.get("cache_creation_input_tokens", 0)
+    return inp, usage.get("output_tokens", 0)
+
+
+# ---------------------------------------------------------------------------
+# Response builders for each protocol.
+# ---------------------------------------------------------------------------
+def anthropic_response(model, text, usage):
+    inp, out = _usage_pair(usage)
+    return {
+        "id": f"msg_{uuid.uuid4().hex[:24]}",
+        "type": "message",
+        "role": "assistant",
+        "model": model,
+        "content": [{"type": "text", "text": text}],
+        "stop_reason": "end_turn",
+        "stop_sequence": None,
+        "usage": {"input_tokens": inp, "output_tokens": out},
+    }
+
+
+def openai_response(model, text, usage):
+    inp, out = _usage_pair(usage)
+    return {
+        "id": f"chatcmpl-{uuid.uuid4().hex[:24]}",
+        "object": "chat.completion",
+        "created": int(time.time()),
+        "model": model,
+        "choices": [
+            {
+                "index": 0,
+                "message": {"role": "assistant", "content": text},
+                "finish_reason": "stop",
+            }
+        ],
+        "usage": {
+            "prompt_tokens": inp,
+            "completion_tokens": out,
+            "total_tokens": inp + out,
+        },
+    }
+
+
+def anthropic_sse(model, run_model, gen):
+    """Protocol-correct Anthropic SSE that streams deltas from `gen` live."""
+    mid = f"msg_{uuid.uuid4().hex[:24]}"
+
+    def ev(event, data):
+        return f"event: {event}\ndata: {json.dumps(data)}\n\n".encode()
+
+    yield ev(
+        "message_start",
+        {
+            "type": "message_start",
+            "message": {
+                "id": mid,
+                "type": "message",
+                "role": "assistant",
+                "model": model,
+                "content": [],
+                "stop_reason": None,
+                "usage": {"input_tokens": 0, "output_tokens": 0},
+            },
+        },
+    )
+    yield ev(
+        "content_block_start",
+        {"type": "content_block_start", "index": 0, "content_block": {"type": "text", "text": ""}},
+    )
+    usage, err = {}, None
+    for item in gen:
+        if item[0] == "delta":
+            yield ev(
+                "content_block_delta",
+                {
+                    "type": "content_block_delta",
+                    "index": 0,
+                    "delta": {"type": "text_delta", "text": item[1]},
+                },
+            )
+        else:
+            _, usage, err = item
+    yield ev("content_block_stop", {"type": "content_block_stop", "index": 0})
+    inp, out = _usage_pair(usage)
+    yield ev(
+        "message_delta",
+        {
+            "type": "message_delta",
+            "delta": {"stop_reason": "error" if err else "end_turn"},
+            "usage": {"output_tokens": out},
+        },
+    )
+    if err:
+        yield ev("error", {"type": "error", "error": {"type": "engine_error", "message": err}})
+    yield ev("message_stop", {"type": "message_stop"})
+    record(run_model, inp, out, True, err)
+
+
+def openai_sse(model, run_model, gen):
+    cid = f"chatcmpl-{uuid.uuid4().hex[:24]}"
+    created = int(time.time())
+
+    def chunk(delta, finish=None):
+        data = {
+            "id": cid,
+            "object": "chat.completion.chunk",
+            "created": created,
+            "model": model,
+            "choices": [{"index": 0, "delta": delta, "finish_reason": finish}],
+        }
+        return f"data: {json.dumps(data)}\n\n".encode()
+
+    yield chunk({"role": "assistant"})
+    usage, err = {}, None
+    for item in gen:
+        if item[0] == "delta":
+            yield chunk({"content": item[1]})
+        else:
+            _, usage, err = item
+    yield chunk({}, finish="stop" if not err else "error")
+    yield b"data: [DONE]\n\n"
+    inp, out = _usage_pair(usage)
+    record(run_model, inp, out, True, err)
+
+
+# ---------------------------------------------------------------------------
+# Observability.
+# ---------------------------------------------------------------------------
+def usage_report():
+    with _LOCK:
+        _roll_day()
+        return {
+            "object": "usage",
+            "uptime_seconds": int(time.time() - METRICS["started"]),
+            "requests": METRICS["requests"],
+            "errors": METRICS["errors"],
+            "streamed": METRICS["streamed"],
+            "tools_dropped": METRICS["tools_dropped"],
+            "images_dropped": METRICS["images_dropped"],
+            "input_tokens": METRICS["input_tokens"],
+            "output_tokens": METRICS["output_tokens"],
+            "cost_usd": round(METRICS["cost_usd"], 6),
+            "budget": {
+                "daily_usd": DAILY_BUDGET,
+                "spent_today_usd": round(_BUDGET["spent"], 6),
+            },
+            "by_model": {
+                k: {**v, "cost": round(v["cost"], 6)} for k, v in METRICS["by_model"].items()
+            },
+        }
+
+
+def metrics_text():
+    with _LOCK:
+        _roll_day()
+        out = [
+            f"dot_ai_uptime_seconds {int(time.time() - METRICS['started'])}",
+            f"dot_ai_requests_total {METRICS['requests']}",
+            f"dot_ai_errors_total {METRICS['errors']}",
+            f"dot_ai_streamed_total {METRICS['streamed']}",
+            f"dot_ai_tools_dropped_total {METRICS['tools_dropped']}",
+            f"dot_ai_images_dropped_total {METRICS['images_dropped']}",
+            f"dot_ai_input_tokens_total {METRICS['input_tokens']}",
+            f"dot_ai_output_tokens_total {METRICS['output_tokens']}",
+            f"dot_ai_cost_usd_total {METRICS['cost_usd']:.6f}",
+            f"dot_ai_budget_today_usd {_BUDGET['spent']:.6f}",
+            f"dot_ai_budget_limit_usd {DAILY_BUDGET:.6f}",
+        ]
+        for model, bm in METRICS["by_model"].items():
+            safe = model.replace('"', "").replace("\\", "")
+            out.append(f'dot_ai_model_requests_total{{model="{safe}"}} {bm["requests"]}')
+            out.append(f'dot_ai_model_cost_usd_total{{model="{safe}"}} {bm["cost"]:.6f}')
+    return "\n".join(out) + "\n"
+
+
+# ---------------------------------------------------------------------------
+# HTTP layer.
+# ---------------------------------------------------------------------------
+class Handler(BaseHTTPRequestHandler):
+    protocol_version = "HTTP/1.1"
+
+    def log_message(self, fmt, *args):  # quieter default logging
+        log(fmt % args)
+
+    def _authed(self):
+        if not API_KEY:
+            return True
+        sent = (self.headers.get("x-api-key") or "").strip()
+        auth = (self.headers.get("authorization") or "").replace("Bearer ", "").strip()
+        return API_KEY in (sent, auth)
+
+    def _send_json(self, code, obj):
+        payload = json.dumps(obj).encode()
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(payload)))
+        self.end_headers()
+        self.wfile.write(payload)
+
+    def _send_text(self, code, text, ctype="text/plain; version=0.0.4"):
+        payload = text.encode()
+        self.send_response(code)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(payload)))
+        self.end_headers()
+        self.wfile.write(payload)
+
+    def _send_sse(self, generator):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-cache")
+        self.send_header("Connection", "close")
+        self.end_headers()
+        self.close_connection = True
+        for piece in generator:
+            self.wfile.write(piece)
+            self.wfile.flush()
+
+    def _error(self, code, message):
+        self._send_json(code, {"type": "error", "error": {"type": "proxy_error", "message": message}})
+
+    def do_GET(self):
+        if self.path == "/health":
+            ok = shutil.which(CLAUDE_BIN) is not None
+            self._send_json(
+                200,
+                {
+                    "status": "healthy" if ok else "unhealthy",
+                    "engine": "claude-cli",
+                    "model": DEFAULT_MODEL,
+                    "claude": "found" if ok else "not-found",
+                    "streaming": True,
+                },
+            )
+        elif self.path in ("/v1/models", "/models"):
+            self._send_json(
+                200,
+                {
+                    "object": "list",
+                    "data": [
+                        {"id": m, "object": "model", "owned_by": "anthropic"} for m in MODELS
+                    ],
+                },
+            )
+        elif self.path in ("/v1/usage", "/usage"):
+            if not self._authed():
+                return self._error(401, "invalid or missing API key")
+            self._send_json(200, usage_report())
+        elif self.path == "/metrics":
+            self._send_text(200, metrics_text())
+        elif self.path == "/":
+            self._send_json(
+                200,
+                {
+                    "service": "dot-ai-serve",
+                    "endpoints": [
+                        "/v1/messages",
+                        "/v1/chat/completions",
+                        "/v1/models",
+                        "/v1/usage",
+                        "/metrics",
+                        "/health",
+                    ],
+                },
+            )
+        else:
+            self._error(404, f"unknown route {self.path}")
+
+    def do_POST(self):
+        if not self._authed():
+            return self._error(401, "invalid or missing API key")
+        if budget_exceeded():
+            return self._error(
+                429, f"daily budget of ${DAILY_BUDGET:.2f} reached — set DOT_AI_DAILY_BUDGET to adjust"
+            )
+        length = int(self.headers.get("Content-Length", "0") or "0")
+        try:
+            body = json.loads(self.rfile.read(length) or b"{}")
+        except json.JSONDecodeError:
+            return self._error(400, "invalid JSON body")
+
+        route = self.path.rstrip("/")
+        if route in ("/v1/messages", "/messages"):
+            protocol = "anthropic"
+        elif route in ("/v1/chat/completions", "/chat/completions"):
+            protocol = "openai"
+        else:
+            return self._error(404, f"unknown route {self.path}")
+
+        model, system_prompt, prompt = shape_request(body)
+        if not prompt and not system_prompt:
+            return self._error(400, "no message content")
+        run_model = resolve_model(model)
+        stream = bool(body.get("stream"))
+
+        if stream:
+            gen = stream_claude(run_model, system_prompt, prompt)
+            if protocol == "anthropic":
+                return self._send_sse(anthropic_sse(model, run_model, gen))
+            return self._send_sse(openai_sse(model, run_model, gen))
+
+        text, usage, err = run_claude(run_model, system_prompt, prompt)
+        inp, out = _usage_pair(usage)
+        record(run_model, inp, out, False, err)
+        if err:
+            return self._error(502, f"claude engine: {err}")
+        if protocol == "anthropic":
+            return self._send_json(200, anthropic_response(model, text, usage))
+        return self._send_json(200, openai_response(model, text, usage))
+
+
+def main():
+    if not shutil.which(CLAUDE_BIN):
+        log(f"WARNING: '{CLAUDE_BIN}' not on PATH — requests will fail until it is installed and authenticated.")
+    if HOST not in ("127.0.0.1", "localhost", "::1") and not API_KEY:
+        log("REFUSING to bind a non-loopback host without DOT_AI_API_KEY set.")
+        sys.exit(2)
+    server = ThreadingHTTPServer((HOST, PORT), Handler)
+    extra = f", budget: ${DAILY_BUDGET:.2f}/day" if DAILY_BUDGET > 0 else ""
+    log(f"listening on http://{HOST}:{PORT}  (engine: {CLAUDE_BIN}, model: {DEFAULT_MODEL}{extra})")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.server_close()
+
+
+if __name__ == "__main__":
+    main()

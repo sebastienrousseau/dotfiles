@@ -9,13 +9,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/sebastienrousseau/dotfiles/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge&logo=github" alt="Build" /></a>
-  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.505-blue?style=for-the-badge" alt="Version" /></a>
-  <a href="https://github.com/sebastienrousseau/dotfiles/releases"><img src="https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge" alt="Downloads" /></a>
-  <a href="https://codespaces.new/sebastienrousseau/dotfiles"><img src="https://img.shields.io/badge/Open%20in-Codespaces-blue?style=for-the-badge&logo=github" alt="Open in GitHub Codespaces" /></a>
-  <a href="https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/dotfiles"><img src="https://img.shields.io/ossf-scorecard/github.com/sebastienrousseau/dotfiles?style=for-the-badge&label=OpenSSF%20Scorecard" alt="OpenSSF Scorecard" /></a>
-  <a href="https://www.bestpractices.dev/projects/12840"><img src="https://img.shields.io/cii/percentage/12840?style=for-the-badge&label=OpenSSF%20Best%20Practices" alt="OpenSSF Best Practices" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT" /></a>
+  <a href="https://github.com/sebastienrousseau/dotfiles/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge&logo=githubactions&logoColor=white" alt="Build" /></a>
+  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.506-blue?style=for-the-badge&logo=semanticrelease&logoColor=white" alt="Version" /></a>
+  <a href="https://github.com/sebastienrousseau/dotfiles/releases"><img src="https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge&logo=github&logoColor=white" alt="Downloads" /></a>
+  <a href="https://codespaces.new/sebastienrousseau/dotfiles"><img src="https://img.shields.io/badge/Open%20in-Codespaces-blue?style=for-the-badge&logo=github&logoColor=white" alt="Open in GitHub Codespaces" /></a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/dotfiles"><img src="https://img.shields.io/ossf-scorecard/github.com/sebastienrousseau/dotfiles?style=for-the-badge&logo=linuxfoundation&logoColor=white&label=OpenSSF%20Scorecard" alt="OpenSSF Scorecard" /></a>
+  <a href="https://www.bestpractices.dev/projects/12840"><img src="https://img.shields.io/cii/level/12840?style=for-the-badge&logo=linuxfoundation&logoColor=white&label=OpenSSF%20Best%20Practices" alt="OpenSSF Best Practices" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge&logo=opensourceinitiative&logoColor=white" alt="License: MIT" /></a>
 </p>
 
 ---
@@ -52,7 +52,7 @@
 
 ```bash
 curl -fsSL -o /tmp/dotfiles-install.sh \
-  https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.505/install.sh
+  https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.506/install.sh
 echo "d5a04c5e2813a93a63c8ecce9655cf3d107f6068862c6eba84a92cf22f801c7e  /tmp/dotfiles-install.sh" \
   | shasum -a 256 -c
 bash /tmp/dotfiles-install.sh
@@ -110,7 +110,7 @@ Most dotfiles repos are personal collections. This one ships as workstation infr
 | **Fleet management** | Multi-node drift dashboard, per-host profiles. | `dot fleet` |
 | **Self-healing** | Auto-repair tools, chezmoi drift, broken symlinks, missing files. | `dot heal`, `dot chaos`, `dot rollback`, `dot bundle` |
 | **Sub-second startup** | Lazy loading, `_cached_eval` pattern, mtime-based cache invalidation, realpath sidecar pins. | `dot perf`, `dot health` |
-| **Multi-shell parity** | Tier-1 (full): zsh, bash. Tier-2 (bridged): fish. Tier-3 (compatible): nushell. PowerShell is supported as a contract-tested parity target. See [ADR-007](docs/adr/ADR-007-multi-shell-parity.md) and [ADR-011](docs/adr/ADR-011-nushell-tier3-keep.md). | `dot env`, `dot profile` |
+| **Multi-shell parity** | Tier-1 (full): zsh, bash. Tier-2 (bridged): fish. Tier-3 (compatible): nushell. PowerShell is supported as a contract-tested parity target. A cross-shell parity contract ([`tests/integration/test_shell_parity.sh`](tests/integration/test_shell_parity.sh)) verifies the canonical command surface and a runtime smoke in every available shell. See [ADR-007](docs/adr/ADR-007-multi-shell-parity.md) and [ADR-011](docs/adr/ADR-011-nushell-tier3-keep.md). | `dot env`, `dot profile` |
 | **Build artifacts → /tmp** | Cargo, Go, pip, uv, and Zig caches redirect to `/tmp/builds/`. Project dirs stay clean. | `~/.config/mise/config.toml`, `~/.cargo/config.toml` |
 | **Encrypted secrets** | Age and SOPS keep per-machine secrets out of plaintext history. | `dot secrets` |
 | **Portable runtimes** | Mise for managed toolchains. Nix Flakes for strict reproducibility. | `dot env`, `dot upgrade` |
@@ -212,7 +212,7 @@ A [Claude Code skill](defaults/dot_claude/skills/dotfiles-bootstrap/SKILL.md) is
 
 | | |
 |:---|:---|
-| `dot ai` | Show installed AI tools |
+| `dot ai` | AI fleet cockpit — run, chat, install, serve a local Claude gateway, cost |
 | `dot mcp` | Inspect MCP policy and registry |
 | `dot mode` | Show or set the agent profile (ask / plan / apply / audit) |
 | `dot agent` | Agent metadata, logs, checkpoints, conformance |
@@ -300,7 +300,7 @@ See the [Migration Guide](docs/operations/MIGRATION.md) for version upgrades.
 - **Pattern library** (`dot patterns`) — architect, hardener, and refactor patterns bundled in `dot_config/ai/patterns/`
 - **MCP policy enforcement** (`dot mcp`) — validate the Model Context Protocol registry against policy
 - **AI commit messages** (`dot commit`) — conventional commits generated from the staged diff
-- **AI tools** (`dot ai`) — Codex, GitHub Copilot, Gemini CLI, and friends managed via Mise; Claude Code via Anthropic's native installer
+- **AI fleet cockpit** (`dot ai`) — install and run Codex, Copilot, Antigravity, Aider, OpenCode, and friends from one Bubble Tea TUI; `dot ai serve` serves your Claude subscription locally to any Anthropic/OpenAI-protocol tool. See [docs/AI.md](docs/AI.md)
 - **Attestation logs** — every agent session is logged with a policy hash and an outcome
 
 </details>

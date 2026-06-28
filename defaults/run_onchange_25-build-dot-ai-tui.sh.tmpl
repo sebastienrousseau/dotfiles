@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# run_onchange_25-build-dot-ai-tui.sh.tmpl
+# Builds the `dot ai` cockpit (Bubble Tea) to ~/.local/bin/dot-ai when its
+# Go source changes. Opt-in: only builds when DOTFILES_AI is set, or when
+# the cockpit is already installed (so existing users get rebuilds). Skips
+# cleanly when no Go toolchain is available.
+{{- if ne .chezmoi.os "windows" }}
+
+set -euo pipefail
+
+# Source hashes baked in at render time so this script's content changes
+# when the cockpit source changes, retriggering chezmoi onchange.
+# main.go: {{ include "dot_local/share/dot-ai-tui/main.go" | sha256sum }}
+# go.mod:  {{ include "dot_local/share/dot-ai-tui/go.mod" | sha256sum }}
+# go.sum:  {{ include "dot_local/share/dot-ai-tui/go.sum" | sha256sum }}
+
+SRC="$HOME/.local/share/dot-ai-tui"
+OUT="$HOME/.local/bin/dot-ai-tui"
+
+# Opt-in gate: build only if the fleet is in use (DOTFILES_AI) or the
+# cockpit is already installed (keep it fresh once a user has built it).
+if [[ -z "${DOTFILES_AI:-}" && ! -x "$OUT" ]]; then
+  echo "dot-ai cockpit: opt-in — set DOTFILES_AI=1 to build it. Skipping."
+  exit 0
+fi
+
+[[ -f "$SRC/main.go" ]] || {
+  echo "dot-ai cockpit: source not deployed yet — skipping."
+  exit 0
+}
+
+# Resolve a Go toolchain (mise shims put `go` on PATH when activated).
+if ! command -v go >/dev/null 2>&1; then
+  echo "dot-ai cockpit: no Go toolchain — install via mise to enable. Skipping."
+  exit 0
+fi
+
+mkdir -p "$HOME/.local/bin"
+echo "Building dot-ai cockpit…"
+if (cd "$SRC" && go build -o "$OUT" .); then
+  echo "dot-ai-tui cockpit installed: $OUT"
+else
+  echo "dot-ai cockpit: build failed (continuing)."
+fi
+{{- end }}

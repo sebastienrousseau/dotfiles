@@ -25,6 +25,11 @@ on:
         required: false
         default: "1.2.0"
         type: string
+      run_functional:
+        description: Boot headless Neovim and run the functional load test.
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: read
@@ -40,10 +45,10 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Cache Lua tools
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
         with:
           path: |
             ~/.luarocks
@@ -75,3 +80,25 @@ jobs:
           set -euo pipefail
           echo "::notice::Checking stylua formatting on ${{ inputs.target }}"
           "$HOME/.cargo/bin/stylua" --check --color Never "${{ inputs.target }}"
+
+      # Functional gate: boot a real headless Neovim and require every config
+      # module + plugin spec, catching runtime faults static linting misses.
+      - name: Setup Neovim
+        if: ${{ inputs.run_functional }}
+        uses: rhysd/action-setup-vim@febef33995d6649302e9d88dda81e071b68f16a7 # v1
+        with:
+          neovim: true
+
+      - name: Neovim functional load test
+        if: ${{ inputs.run_functional }}
+        run: |
+          set -euo pipefail
+          nvim --version | head -1
+          out="$(bash tests/unit/nvim/test_nvim_functional_load.sh)"
+          printf '%s\n' "$out"
+          failed="$(printf '%s\n' "$out" | grep -oE 'RESULTS:[0-9]+:[0-9]+:[0-9]+$' | tail -1 | cut -d: -f4)"
+          if [[ "${failed:-1}" != "0" ]]; then
+            echo "::error::Neovim functional load test reported ${failed:-?} failure(s)"
+            exit 1
+          fi
+          echo "::notice::Neovim functional load test passed"

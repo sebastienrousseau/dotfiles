@@ -67,7 +67,7 @@ test_start "integration_mise_has_ai_tools"
 # Claude Code is installed via Anthropic's native installer, not mise/npm:
 # npm 11 drops the platform-native optionalDependency on global installs.
 assert_file_contains "$REPO_ROOT/install/provision/run_onchange_15-ai-cli-tools.sh.tmpl" "claude.ai/install.sh" "provisioning must install Claude Code via native installer"
-assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml" "npm:@google/gemini-cli" "mise must include Gemini CLI"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml" "antigravity.google/cli/install.sh" "mise must document Antigravity CLI native installer"
 
 test_start "integration_mise_has_modern_cli_tools"
 assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml" "delta" "mise must include delta"
@@ -81,7 +81,7 @@ assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.tom
 test_start "integration_ai_providers_in_mise"
 # Every AI provider in ai.sh must have a matching mise package
 ai_script="$REPO_ROOT/scripts/dot/commands/ai.sh"
-for provider in claude copilot gemini aider opencode sgpt ollama kiro-cli autohand vibe qwen zai; do
+for provider in claude copilot agy aider opencode sgpt ollama kiro-cli autohand vibe qwen zai; do
   if ! grep -q "$provider" "$ai_script" 2>/dev/null; then
     ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: provider $provider missing from ai.sh"
@@ -137,7 +137,7 @@ assert_file_exists "$REPO_ROOT/defaults/dot_config/fish/completions/dot.fish.tmp
 
 test_start "integration_completions_include_ai"
 # All three completion files should know about AI commands
-assert_file_contains "$REPO_ROOT/share/completions/zsh/_dot" "gemini" "zsh completions must include AI commands"
+assert_file_contains "$REPO_ROOT/share/completions/zsh/_dot" "agy" "zsh completions must include AI commands"
 
 # ═══════════════════════════════════════════════════════════════
 # 7. SECURITY POLICY CHAIN
@@ -212,8 +212,8 @@ assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliase
 test_start "integration_ai_alias_copilot"
 assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh" "copilot" "AI aliases must include copilot"
 
-test_start "integration_ai_alias_gemini"
-assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh" "gemini" "AI aliases must include gemini"
+test_start "integration_ai_alias_agy"
+assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh" "agy" "AI aliases must include agy"
 
 test_start "integration_ai_alias_ollama"
 assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh" "ollama" "AI aliases must include ollama"
@@ -318,8 +318,8 @@ assert_file_contains "$REPO_ROOT/scripts/diagnostics/doctor.sh" "claude" "doctor
 test_start "integration_doctor_checks_copilot"
 assert_file_contains "$REPO_ROOT/scripts/diagnostics/doctor.sh" "copilot" "doctor must check for copilot"
 
-test_start "integration_doctor_checks_gemini"
-assert_file_contains "$REPO_ROOT/scripts/diagnostics/doctor.sh" "gemini" "doctor must check for gemini"
+test_start "integration_doctor_checks_agy"
+assert_file_contains "$REPO_ROOT/scripts/diagnostics/doctor.sh" "agy" "doctor must check for agy"
 
 test_start "integration_doctor_checks_ollama"
 assert_file_contains "$REPO_ROOT/scripts/diagnostics/doctor.sh" "ollama" "doctor must check for ollama"

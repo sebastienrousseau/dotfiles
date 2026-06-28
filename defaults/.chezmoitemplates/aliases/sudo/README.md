@@ -1,6 +1,6 @@
-# Sudo Aliases
+# sudo Aliases
 
-Manage Sudo aliases. Part of the **Universal Dotfiles** configuration.
+Manage sudo aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 

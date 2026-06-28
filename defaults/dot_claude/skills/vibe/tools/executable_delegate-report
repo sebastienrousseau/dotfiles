@@ -5,21 +5,48 @@ Usage:
   delegate-report [--since DAYS] [--project NAME] [--fails]
 """
 
-import json, sys, argparse
+import json, sqlite3, sys, argparse
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from collections import defaultdict
 
-LOG = Path.home() / '.local' / 'share' / 'delegate-runs.jsonl'
+DB   = Path.home() / '.local' / 'share' / 'dotfiles-ai.db'
+LOG  = Path.home() / '.local' / 'share' / 'delegate-runs.jsonl'  # legacy fallback
 
 
-def load_runs(since_days=None, project=None):
-    if not LOG.exists():
-        print(f"No log found at {LOG}")
-        sys.exit(0)
-    cutoff = None
-    if since_days:
-        cutoff = datetime.now(timezone.utc) - timedelta(days=since_days)
+def _cutoff_ts(since_days):
+    if not since_days:
+        return None
+    return (datetime.now(timezone.utc) - timedelta(days=since_days)).strftime('%Y-%m-%dT%H:%M:%SZ')
+
+
+def _row_to_dict(row):
+    d = dict(row)
+    d['timed_out']    = bool(d.get('timed_out', 0))
+    d['wrote_nothing'] = bool(d.get('wrote_nothing', 0))
+    return d
+
+
+def _load_from_sqlite(since_days=None, project=None):
+    cutoff = _cutoff_ts(since_days)
+    db = sqlite3.connect(str(DB), timeout=10)
+    db.row_factory = sqlite3.Row
+    q  = 'SELECT * FROM runs WHERE 1=1'
+    args = []
+    if cutoff:
+        q += ' AND ts >= ?'
+        args.append(cutoff)
+    if project:
+        q += ' AND project = ?'
+        args.append(project)
+    q += ' ORDER BY ts'
+    rows = db.execute(q, args).fetchall()
+    db.close()
+    return [_row_to_dict(r) for r in rows]
+
+
+def _load_from_jsonl(since_days=None, project=None):
+    cutoff = _cutoff_ts(since_days)
     runs = []
     for line in LOG.read_text().splitlines():
         line = line.strip()
@@ -31,16 +58,19 @@ def load_runs(since_days=None, project=None):
             continue
         if project and r.get('project') != project:
             continue
-        if cutoff:
-            ts = r.get('ts', '')
-            try:
-                run_time = datetime.fromisoformat(ts.replace('Z', '+00:00'))
-                if run_time < cutoff:
-                    continue
-            except Exception:
-                pass
+        if cutoff and r.get('ts', '') < cutoff:
+            continue
         runs.append(r)
     return runs
+
+
+def load_runs(since_days=None, project=None):
+    if DB.exists():
+        return _load_from_sqlite(since_days, project)
+    if LOG.exists():
+        return _load_from_jsonl(since_days, project)
+    print(f"No run log found at {DB} or {LOG}. Run some AI delegates first.")
+    sys.exit(0)
 
 
 def ceq(r):

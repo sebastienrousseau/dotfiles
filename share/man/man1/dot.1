@@ -1,4 +1,4 @@
-.TH DOT 1 "May 2026" "dotfiles v0.2.505" "User Commands"
+.TH DOT 1 "May 2026" "dotfiles v0.2.506" "User Commands"
 .SH NAME
 dot \- dotfiles management CLI
 .SH SYNOPSIS
@@ -81,16 +81,32 @@ MCP policy validation and server management.
 .SS AI
 .TP
 .B ai
-AI CLI status dashboard and interactive launcher.
+Open the AI fleet cockpit (TUI). With a prompt, run a one-shot on Claude
+(\fBdot ai "fix the bug"\fR); with a tool name, run it on that tool
+(\fBdot ai codex "..."\fR).
 .TP
-.B ai\-setup
-Bootstrap and authenticate AI CLIs.
+.B ai chat
+Open an interactive session with a fleet tool.
 .TP
-.B cl, copilot, gemini, kiro, sgpt, ollama, opencode, aider
-AI bridge commands with context pattern injection.
+.B ai tools, ai install
+Show, install, and manage the AI CLI fleet.
 .TP
-.B autohand, vibe, qwen, zai
-Additional AI coding CLI bridges.
+.B ai serve
+Run a local Claude gateway and route the non-Claude fleet through it,
+serving your Claude subscription over the Anthropic and OpenAI protocols.
+.TP
+.B ai cost, ai doctor, ai login
+Spend report, fleet/gateway health check, and tool authentication.
+.TP
+.B \-\-style <name>
+Steer any prompt with a context pattern (architect, hardener, refactor).
+.TP
+.B cl, codex, copilot, goose, crush, amp, cursor-agent, grok, agy, kiro, sgpt, ollama, opencode, aider, autohand, vibe, qwen, zai
+Deprecated bridge aliases for \fBdot ai <tool>\fR; each still works and
+prints a hint.
+.TP
+.B ai\-setup, ai\-query
+Deprecated aliases for \fBdot ai login\fR and \fBdot ai ask\fR.
 .SS Tools
 .TP
 .B env

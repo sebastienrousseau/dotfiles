@@ -45,9 +45,9 @@ detect_ai_agent() {
     return
   fi
 
-  # Gemini CLI (Google)
-  if [[ -n "${GEMINI_API_KEY:-}" && -n "${GEMINI_SESSION:-}" ]]; then
-    echo "Gemini:gemini-cli"
+  # Antigravity CLI (Google)
+  if [[ -n "${AGY_API_KEY:-}" && -n "${AGY_SESSION:-}" ]]; then
+    echo "Antigravity:antigravity-cli"
     return
   fi
 

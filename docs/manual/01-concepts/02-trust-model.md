@@ -70,7 +70,7 @@ All three must pass for a commit to be merged.
 
 ## Agent Policy Enforcement
 
-AI agent operations (Claude Code, Codex, Copilot, Gemini, etc.) are governed by the **Model Context Protocol (MCP)** policy in `dot_config/dotfiles/mcp.json` and validated by `dot mcp`.
+AI agent operations (Claude Code, Codex, Copilot, Antigravity CLI, etc.) are governed by the **Model Context Protocol (MCP)** policy in `dot_config/dotfiles/mcp.json` and validated by `dot mcp`.
 
 ### Policy Structure
 

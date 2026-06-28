@@ -1,6 +1,6 @@
-# Tmux Aliases
+# tmux Aliases
 
-Manage Tmux aliases. Part of the **Universal Dotfiles** configuration.
+Manage tmux aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
@@ -10,7 +10,7 @@ These aliases are defined in `tmux.aliases.sh` and are automatically loaded by `
 
 ## Aliases
 
-## 🆃🅼🆄🆇 🅲🅾🅽🅵🅸🅶🆄🆁🅰🆃🅸🅾🅽
+## Configuration
 
 A comprehensive tmux configuration designed for productivity and ease of use. The configuration is organized in modular files for better maintainability:
 

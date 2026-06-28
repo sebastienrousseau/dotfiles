@@ -5,15 +5,17 @@
 ##
 ## Provides AI CLI status, setup, RAG query, and bridge commands.
 ## Wraps AI CLI tools with contextual patterns and system metadata.
-## Usage: dot ai [delegate|cost|status]|ai-setup|ai-query|cl|copilot|gemini|kiro|sgpt|ollama|opencode|aider|autohand|vibe|qwen|zai
+## Usage: dot ai [delegate|cost|dashboard|proxy|local|status]|ai-setup|ai-query|cl|copilot|agy|kiro|sgpt|ollama|opencode|aider|autohand|vibe|qwen|zai
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../../../lib/dot/utils.sh
 source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
+# shellcheck source=../../../lib/dot/ai-commands.sh
+source "$SCRIPT_DIR/../../../lib/dot/ai-commands.sh"
 
-dot_ui_command_banner "AI and Agents" "${1:-}"
+[[ -n "${DOT_AI_RAW:-}" ]] || dot_ui_command_banner "AI and Agents" "${1:-}" # raw mode: no banner
 
 PATTERN_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/ai/patterns"
 AI_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/ai"
@@ -29,9 +31,14 @@ if [[ ! -d "$PATTERN_DIR" ]]; then
 fi
 
 _show_ai_bridge_usage() {
-  echo "Usage: dot cl|codex|copilot|gemini|goose|kiro|autohand|vibe|qwen|zai --pattern [name] \"prompt\""
+  echo "Usage: dot ai \"<prompt>\"              # one-shot on Claude"
+  echo "       dot ai <tool> \"<prompt>\"       # one-shot on a tool"
+  echo "       dot ai <tool> --style <name> \"<prompt>\""
+  echo "       dot ai chat [tool]             # interactive session"
   echo ""
-  echo "Available Patterns:"
+  echo "Tools: cl codex copilot goose crush amp cursor-agent grok agy kiro sgpt ollama opencode aider autohand vibe qwen zai"
+  echo ""
+  echo "Available styles:"
   # shellcheck disable=SC2012
   ls -1 "$PATTERN_DIR" 2>/dev/null | sed 's/\.md$//' | sed 's/^/  - /' || echo "  (none)"
 }
@@ -85,10 +92,12 @@ _ai_refresh_status_cache() {
     i=$((i + 1))
   done
   # Probe is non-interactive: </dev/null is a clean EOF for tools that
-  # prompt for an API key on first run; `timeout 3` caps the wait.
+  # prompt for an API key on first run; `timeout 8` caps the wait.
+  # Node-based tools (codex, copilot, opencode) need 5-8s on cold start;
+  # 3s caused false "not installed" results in the status cache.
   # shellcheck disable=SC2016
   local _TO=""
-  command -v timeout >/dev/null 2>&1 && _TO="timeout 3 "
+  command -v timeout >/dev/null 2>&1 && _TO="timeout 8 "
   local probe_script='
     payload="$1"; out_dir="$2"; to="$3"
     i="${payload%%|*}"; entry="${payload#*|}"
@@ -149,20 +158,24 @@ cmd_ai_status() {
 
   # category|role|name|binary|description
   local -a ai_clis=(
-    "Agents (autonomous)|agent|Claude Code|claude|Anthropic CLI agent"
-    "Agents (autonomous)|agent|Codex CLI|codex|OpenAI Codex agent"
-    "Agents (autonomous)|agent|Copilot CLI|copilot|GitHub Copilot CLI"
-    "Agents (autonomous)|agent|Goose|goose|Block's coding agent"
-    "Coding (interactive)|coding|Aider|aider|AI pair programmer"
-    "Coding (interactive)|coding|OpenCode|opencode|Terminal coding assistant"
-    "Coding (interactive)|coding|Autohand Code|autohand|Autohand coding agent"
-    "Coding (interactive)|coding|Mistral Vibe|vibe|Mistral AI coding agent"
-    "Coding (interactive)|coding|Qwen Code|qwen|Qwen AI coding assistant"
-    "Coding (interactive)|coding|ZAI|zai|Zhipu AI coding agent"
-    "General (prompt-based)|general|Shell-GPT|sgpt|ChatGPT terminal interface"
-    "General (prompt-based)|general|Gemini CLI|gemini|Google AI CLI"
-    "Runtime (local)|local|Ollama|ollama|Local LLM runner"
-    "Cloud (platform)|cloud|Kiro CLI|kiro-cli|AWS AI assistant"
+    "Agents (autonomous)|agent|Claude Code|claude|Anthropic's flagship agentic coder"
+    "Agents (autonomous)|agent|Codex CLI|codex|OpenAI's autonomous coding agent"
+    "Agents (autonomous)|agent|Copilot CLI|copilot|GitHub Copilot in the terminal"
+    "Agents (autonomous)|agent|Goose|goose|Block's open-source coding agent"
+    "Agents (autonomous)|agent|Crush|crush|Charm's glamorous TUI coding agent"
+    "Agents (autonomous)|agent|Amp|amp|Sourcegraph's agentic coder"
+    "Agents (autonomous)|agent|Cursor CLI|cursor-agent|Cursor's terminal agent"
+    "Agents (autonomous)|agent|Grok Build|grok|xAI's terminal coding agent"
+    "Coding (interactive)|coding|Aider|aider|Git-aware AI pair programmer"
+    "Coding (interactive)|coding|OpenCode|opencode|Open-source terminal coding agent"
+    "Coding (interactive)|coding|Autohand Code|autohand|Autonomous multi-file coding agent"
+    "Coding (interactive)|coding|Mistral Vibe|vibe|Mistral's coding agent"
+    "Coding (interactive)|coding|Qwen Code|qwen|Alibaba Qwen coding assistant"
+    "Coding (interactive)|coding|ZAI|zai|Zhipu GLM coding agent"
+    "General (prompt-based)|general|Shell-GPT|sgpt|ChatGPT for the shell"
+    "General (prompt-based)|general|Antigravity CLI|agy|Google's Antigravity agent"
+    "Runtime (local)|local|Ollama|ollama|Run local & cloud open models"
+    "Cloud (platform)|cloud|Kiro CLI|kiro-cli|AWS's agentic dev assistant"
   )
 
   if ! _ai_cache_fresh "$AI_STATUS_CACHE_FILE"; then
@@ -240,6 +253,10 @@ cmd_ai_status() {
           install_claude_native "$name"
           continue
         fi
+        if [[ "$bin" == "agy" ]]; then
+          install_agy_native "$name"
+          continue
+        fi
         local pkg
         pkg=$(_ai_mise_pkg "$bin")
         if [[ -n "$pkg" ]]; then
@@ -292,100 +309,16 @@ cmd_ai_status() {
   fi
 }
 
-cmd_ai_setup() {
-  run_script "scripts/ops/ai-setup.sh" "AI setup script" "$@"
-}
+# cmd_ai_setup / cmd_ai_query / cmd_ai_install live in lib/dot/ai-commands.sh.
 
-cmd_ai_query() {
-  run_script "dot_local/bin/executable_dot-ai" "AI RAG script" "$@"
-}
-
-# Locate the vibe-delegate / delegate-report tools deployed by the
-# /vibe Claude Code skill. Path stays in sync with
-# defaults/dot_claude/skills/vibe/tools/.
-_ai_delegate_tool() {
-  local tool="$1" # vibe-delegate | delegate-report
-  local path="${HOME}/.claude/skills/vibe/tools/${tool}"
-  if [[ ! -x "$path" ]]; then
-    # Errors to stderr so callers capturing stdout via $() get just the path.
-    ui_err "$tool" "not found at $path" >&2
-    ui_info "Hint" "Run 'chezmoi apply' to deploy the /vibe skill" >&2
-    return 1
-  fi
-  printf '%s\n' "$path"
-}
-
-cmd_ai_delegate() {
-  # Front-door to the same delegator the /vibe slash command uses.
-  # Usage: dot ai delegate "<prompt>" [max-turns] [agent] [timeout]
-  if [[ $# -lt 1 ]]; then
-    ui_err "Usage" "dot ai delegate \"<prompt>\" [max-turns] [agent] [timeout-secs]"
-    ui_info "Example" "dot ai delegate \"add a CHANGELOG entry for v0.2.505\""
-    return 1
-  fi
-  local prompt="$1"
-  shift
-  local max_turns="${1:-10}"
-  local agent="${2:-}"
-  local timeout="${3:-180}"
-  local tool
-  tool="$(_ai_delegate_tool vibe-delegate)" || return 1
-  if ! has_command vibe; then
-    ui_warn "vibe" "not installed"
-    ui_info "Install" "mise use -g pipx:mistral-vibe"
-    return 1
-  fi
-  "$tool" "$(pwd)" "$prompt" "$max_turns" "$agent" "$timeout"
-}
-
-cmd_ai_cost() {
-  # Unified AI spend report. Wraps delegate-report (vibe runs) and is
-  # the documented interface for users: path may move later.
-  local tool
-  tool="$(_ai_delegate_tool delegate-report)" || return 1
-  "$tool" "$@"
-}
-
-# Append a best-effort run entry to the unified AI log read by
-# delegate-report. Token/cost fields are left blank when the provider
-# CLI does not surface them — the report tolerates missing fields and
-# groups by `model`. This gives users one place to see invocations
-# across Claude, Gemini, Aider, Vibe, etc., not just Vibe.
 _ai_log_run() {
   local provider="$1" exit_code="$2" duration_secs="$3" prompt_words="$4"
-  local log_file="${HOME}/.local/share/delegate-runs.jsonl"
-  mkdir -p "$(dirname "$log_file")"
-  local project ts
+  local project ts log_bin
   project="$(basename "$PWD")"
   ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  # python3 keeps the encoding boring; jq would also work but isn't
-  # guaranteed present everywhere this script runs.
-  python3 - "$log_file" "$provider" "$project" "$exit_code" "$duration_secs" "$prompt_words" "$ts" <<'PY'
-import json, sys
-log, provider, project, ec, dur, pw, ts = sys.argv[1:8]
-entry = {
-    "ts": ts,
-    "delegate": provider,
-    "model": provider,
-    "project": project,
-    "exit_code": int(ec),
-    "duration_secs": float(dur),
-    "prompt_words": int(pw),
-    "tool_calls": 0,
-    "files_changed": 0,
-    "wrote_nothing": False,
-    "warn_count": 0,
-    "search_replace_fails": 0,
-    "syntax_errors": 0,
-    "tokens_in": 0,
-    "tokens_out": 0,
-    "tokens_total": 0,
-    "cost_usd": 0,
-    "cost_claude_eq": 0,
-}
-with open(log, "a") as fh:
-    fh.write(json.dumps(entry) + "\n")
-PY
+  log_bin="${HOME}/.local/bin/dot-ai-log"
+  [[ -x "$log_bin" ]] || return 0
+  "$log_bin" "$provider" "$project" "$exit_code" "$duration_secs" "$prompt_words" "$ts" || true
 }
 
 run_ai_with_context() {
@@ -400,7 +333,7 @@ run_ai_with_context() {
         _show_ai_bridge_usage
         exit 0
         ;;
-      --pattern | -p)
+      --style | --pattern | -p)
         pattern_name="$2"
         shift 2
         ;;
@@ -427,19 +360,26 @@ run_ai_with_context() {
     fi
   fi
 
-  # Inject dynamic system metadata
-  local metadata
-  metadata="## System Metadata
+  # Build the prompt. Raw mode (DOT_AI_RAW) skips the system-metadata banner
+  # so callers like the cockpit get clean, streamable output.
+  local full_prompt
+  if [[ -n "${DOT_AI_RAW:-}" ]]; then
+    full_prompt="${system_context:+${system_context}
+
+}${prompt}"
+  else
+    local metadata
+    metadata="## System Metadata
 - OS: $(uname -s) $(uname -r)
 - Arch: $(uname -m)
 - Date: $(date -u)"
-
-  local full_prompt="${system_context}
+    full_prompt="${system_context}
 
 ${metadata}
 
 ## User Request
 ${prompt}"
+  fi
 
   # Resolve the binary name for the tool
   local tool_bin="$tool"
@@ -473,13 +413,31 @@ ${prompt}"
         ui_err "$tool" "not installed — install with: mise use -g $mise_pkg@latest"
         exit 1
       fi
+    elif [[ "$tool_bin" == "agy" ]]; then
+      ui_warn "$tool" "not installed"
+      ui_info "Install" "curl -fsSL -o /tmp/agy-install.sh https://antigravity.google/cli/install.sh && bash /tmp/agy-install.sh"
+      exit 1
     else
       ui_err "$tool" "not installed and mise not available"
       exit 1
     fi
   fi
 
-  ui_info "Executing $tool with pattern: ${pattern_name:-none}"
+  [[ -n "${DOT_AI_RAW:-}" ]] || ui_info "Executing $tool with pattern: ${pattern_name:-none}"
+
+  # Route non-Claude tools through the local gateway when one is running.
+  # The primary Claude ALWAYS uses its native session — never route it,
+  # and never set ANTHROPIC_API_KEY where Claude Code can see it (that
+  # disables claude.ai connectors). Routing is scoped to this run's
+  # subprocess; the interactive shell is never touched.
+  case "$tool" in
+    cl | claude) : ;;
+    *)
+      local _ai_local_env="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/ai-local.env"
+      # shellcheck disable=SC1090
+      [[ -r "$_ai_local_env" ]] && source "$_ai_local_env"
+      ;;
+  esac
 
   # Wrap the provider invocation so we can log it to the unified AI run
   # log. Each entry feeds `dot ai cost` so users see spend across every
@@ -489,92 +447,104 @@ ${prompt}"
   _ai_start_ts=$(date +%s)
   _ai_prompt_words=$(printf '%s' "$prompt" | wc -w | tr -d ' ')
   _ai_exit=0
-  case "$tool" in
-    cl | claude)
-      printf "%s" "$full_prompt" | claude || _ai_exit=$?
-      ;;
-    codex)
-      printf "%s" "$full_prompt" | codex || _ai_exit=$?
-      ;;
-    copilot)
-      copilot -sp "$full_prompt" || _ai_exit=$?
-      ;;
-    gemini)
-      printf "%s" "$full_prompt" | gemini chat || _ai_exit=$?
-      ;;
-    goose)
-      printf "%s" "$full_prompt" | goose session start || _ai_exit=$?
-      ;;
-    kiro | kiro-cli)
-      printf "%s" "$full_prompt" | kiro-cli chat || _ai_exit=$?
-      ;;
-    sgpt)
-      printf "%s" "$full_prompt" | sgpt --chat shell-gpt || _ai_exit=$?
-      ;;
-    ollama)
-      printf "%s" "$full_prompt" | ollama run llama3.2 || _ai_exit=$?
-      ;;
-    opencode)
-      printf "%s" "$full_prompt" | opencode query || _ai_exit=$?
-      ;;
-    aider)
-      printf "%s" "$full_prompt" | aider --msg "-" || _ai_exit=$?
-      ;;
-    autohand)
-      printf "%s" "$full_prompt" | autohand chat || _ai_exit=$?
-      ;;
-    vibe)
-      printf "%s" "$full_prompt" | vibe chat || _ai_exit=$?
-      ;;
-    qwen)
-      printf "%s" "$full_prompt" | qwen chat || _ai_exit=$?
-      ;;
-    zai)
-      printf "%s" "$full_prompt" | zai chat || _ai_exit=$?
-      ;;
-    *)
-      ui_err "Unsupported tool" "$tool"
-      exit 1
-      ;;
-  esac
+  _ai_invoke_provider "$tool" "$full_prompt" || _ai_exit=$?
   _ai_end_ts=$(date +%s)
   _ai_dur=$((_ai_end_ts - _ai_start_ts))
   _ai_log_run "$tool_bin" "$_ai_exit" "$_ai_dur" "$_ai_prompt_words" 2>/dev/null || true
   return "$_ai_exit"
 }
 
-# Dispatch
+# Dispatch — flat, verb-first surface (see docs/AI.md).
 case "${1:-}" in
   ai)
     shift
-    # Subcommands first: `dot ai delegate`, `dot ai cost`. Fall through
-    # to status if no subcommand or unknown one.
     case "${1:-}" in
-      delegate)
+      "")
+        # Bare `dot ai` → the Bubble Tea cockpit (or the launcher fallback).
+        _ai_cockpit cmd_ai_status
+        ;;
+      chat)
         shift
-        cmd_ai_delegate "$@"
+        cmd_ai_chat "$@"
+        ;;
+      tools)
+        shift
+        if [[ "${1:-}" == install ]]; then
+          shift
+          cmd_ai_install "$@"
+        else
+          cmd_ai_status "$@"
+        fi
+        ;;
+      install)
+        shift
+        cmd_ai_install "$@"
+        ;;
+      serve)
+        shift
+        _ai_serve "$@"
         ;;
       cost)
         shift
         cmd_ai_cost "$@"
         ;;
-      "" | status)
+      login)
+        shift
+        cmd_ai_setup "$@"
+        ;;
+      doctor)
+        shift
+        cmd_ai_doctor "$@"
+        ;;
+      ask)
+        shift
+        cmd_ai_query "$@"
+        ;;
+      run)
+        shift
+        _ai_oneshot "$@"
+        ;;
+      delegate)
+        shift
+        cmd_ai_delegate "$@"
+        ;;
+      # Deprecated verbs — still work, with a one-line hint to the new name.
+      status)
+        _ai_deprecated "dot ai tools"
         cmd_ai_status "$@"
         ;;
+      dashboard | dash)
+        _ai_deprecated "dot ai  (cockpit)"
+        _ai_cockpit cmd_ai_status
+        ;;
+      proxy)
+        shift
+        _ai_deprecated "dot ai serve"
+        has_command dot-ai-proxy && exec dot-ai-proxy "$@" || exit 1
+        ;;
+      local)
+        _ai_deprecated "dot ai serve"
+        has_command dot-ai-proxy && exec dot-ai-proxy "$@" || exit 1
+        ;;
       *)
-        cmd_ai_status "$@"
+        # Bare prompt (`dot ai "fix this"`) or `dot ai <tool> "…"` → one-shot.
+        _ai_oneshot "$@"
         ;;
     esac
     ;;
+  # Deprecated top-level forms — kept for muscle memory.
   ai-setup)
+    _ai_deprecated "dot ai login"
     shift
     cmd_ai_setup "$@"
     ;;
   ai-query)
+    _ai_deprecated "dot ai ask"
     shift
     cmd_ai_query "$@"
     ;;
-  cl | claude | codex | copilot | gemini | goose | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
+  cl | claude | codex | copilot | goose | crush | amp | cursor-agent | grok | agy | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
+    _ai_deprecated "dot ai $1"
     tool="$1"
     shift
     run_ai_with_context "$tool" "$@"

@@ -1,6 +1,6 @@
-# Ps Aliases
+# ps Aliases
 
-Manage Ps aliases. Part of the **Universal Dotfiles** configuration.
+Manage ps aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 

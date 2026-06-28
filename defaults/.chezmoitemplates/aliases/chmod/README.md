@@ -1,6 +1,6 @@
-# Chmod Aliases
+# chmod Aliases
 
-Manage Chmod aliases. Part of the **Universal Dotfiles** configuration.
+Manage chmod aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
@@ -106,7 +106,7 @@ Set permissions for specific file types with ease:
 
 ---
 
-## ‍ Usage
+## Usage
 
 Here are some examples of how to use the `chmod` aliases and functions:
 
@@ -140,7 +140,7 @@ This project is licensed under the
 more information
 ---
 
-## ‍ Author
+## Author
 
 Created with  by [Sebastien Rousseau](https://sebastienrousseau.com)
 

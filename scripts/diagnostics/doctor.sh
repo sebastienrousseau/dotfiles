@@ -169,7 +169,7 @@ fi
 
 # --- AI CLIs ---
 _section "AI CLIs"
-for cmd in claude copilot gemini sgpt ollama opencode aider kiro-cli; do
+for cmd in claude copilot agy sgpt ollama opencode aider kiro-cli; do
   if check_cmd "$cmd"; then
     _ok "$cmd" "$(pretty_path "$(get_cmd_path "$cmd")")"
   else
@@ -733,7 +733,7 @@ else
 $doctor_report
 ---
 Suggest specific shell commands to fix these issues according to our architectural standards."
-    dot cl --pattern hardener "$ai_prompt"
+    dot ai claude --style hardener "$ai_prompt"
   fi
   exit 1
 fi

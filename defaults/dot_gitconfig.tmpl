@@ -45,6 +45,10 @@
 
 [gpg "ssh"]
 	allowedSignersFile = {{ .chezmoi.homeDir }}/.config/git/allowed_signers
+
+[tag]
+	gpgSign = true
+	forceSignAnnotated = true
 {{- end }}
 
 [alias]

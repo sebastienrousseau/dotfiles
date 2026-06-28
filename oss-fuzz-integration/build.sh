@@ -15,20 +15,23 @@ set -euo pipefail
 cd "$SRC/dotfiles/oss-fuzz-integration/fuzz"
 
 # OSS-Fuzz exports: $OUT (artefact dir), $SANITIZER, $CFLAGS,
-# $LIB_FUZZING_ENGINE. The compile_go_fuzzer helper takes the
-# package path, fuzz-function name, and output binary name.
+# $LIB_FUZZING_ENGINE. These are native Go fuzzers
+# (func Fuzz*(f *testing.F)), so they build with compile_native_go_fuzzer,
+# which rewrites the stdlib testing import to the go-118-fuzz-build shim.
 
 # Each fuzzer below is a tested-in-isolation harness for one piece
 # of input-handling code in the project. Add new harnesses by
-# (1) creating fuzz/<name>_test.go with `func Fuzz<Cap>(...)`,
-# (2) appending a `compile_go_fuzzer` call here.
+# (1) creating fuzz/<name>_test.go with `func Fuzz<Cap>(f *testing.F)`,
+# (2) appending a `compile_native_go_fuzzer` call here.
 
-compile_go_fuzzer \
+go get github.com/AdamKorcz/go-118-fuzz-build/testing
+
+compile_native_go_fuzzer \
   github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
   FuzzValidateName \
   fuzz_validate_name
 
-compile_go_fuzzer \
+compile_native_go_fuzzer \
   github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
   FuzzInitURLResolver \
   fuzz_init_url_resolver

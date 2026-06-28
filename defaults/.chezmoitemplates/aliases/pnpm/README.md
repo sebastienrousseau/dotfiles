@@ -1,6 +1,6 @@
-# Pnpm Aliases
+# pnpm Aliases
 
-Manage Pnpm aliases. Part of the **Universal Dotfiles** configuration.
+Manage pnpm aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 

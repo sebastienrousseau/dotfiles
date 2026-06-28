@@ -1,0 +1,55 @@
+name: Cockpit / Go Tests
+
+# Unit tests + coverage gate for the `dot ai` cockpit (dot-ai-tui).
+# Runs only when the Go source changes.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "defaults/dot_local/share/dot-ai-tui/**"
+      - ".github/workflows/cockpit-test.yml"
+  pull_request:
+    paths:
+      - "defaults/dot_local/share/dot-ai-tui/**"
+      - ".github/workflows/cockpit-test.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  cockpit:
+    name: Cockpit / Test + Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      MIN_COVERAGE: "97.0" # margin for platform/tool variance (local ~98%)
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version: "1.26"
+
+      - name: Ensure sqlite3 (deterministic coverage of the DB paths)
+        run: command -v sqlite3 >/dev/null || sudo apt-get install -y -q sqlite3 || true
+
+      - name: Test + coverage gate
+        working-directory: defaults/dot_local/share/dot-ai-tui
+        run: |
+          set -euo pipefail
+          gofmt -l . | (! grep .) || { echo "::error::gofmt"; exit 1; }
+          go vet ./...
+          go test -coverprofile=cov.out ./...
+          pct="$(go tool cover -func=cov.out | awk '/^total:/{gsub(/%/,"",$3); print $3}')"
+          echo "::notice::cockpit coverage ${pct}% (floor ${MIN_COVERAGE}%)"
+          awk -v p="$pct" -v m="$MIN_COVERAGE" 'BEGIN{exit !(p+0 >= m+0)}' || {
+            echo "::error::cockpit coverage ${pct}% is below the ${MIN_COVERAGE}% floor"
+            exit 1
+          }

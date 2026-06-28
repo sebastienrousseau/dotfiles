@@ -37,14 +37,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
-      contents: write   # upload release assets
+      contents: write      # upload release assets
+      id-token: write      # OIDC for keyless build-provenance attestation
+      attestations: write  # write the SLSA provenance attestation
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ inputs.release_tag || github.ref }}
 
@@ -126,6 +128,17 @@ jobs:
 
           echo "=== artefact sizes ==="
           ls -la "dot-${VERSION}".{tar.gz,zip}
+
+      # SLSA build provenance for the release artefacts. Keyless via OIDC
+      # (Fulcio + Rekor); verify with `gh attestation verify dot-<v>.tar.gz
+      # --repo sebastienrousseau/dotfiles`. Complements the Cosign-signed
+      # SBOM + asset manifest in security-release.yml.
+      - name: Attest build provenance (SLSA)
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        with:
+          subject-path: |
+            dot-${{ steps.ver.outputs.version }}.tar.gz
+            dot-${{ steps.ver.outputs.version }}.zip
 
       - name: Upload to release
         env:

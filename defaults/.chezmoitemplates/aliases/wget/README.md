@@ -1,6 +1,6 @@
-# Wget Aliases
+# wget Aliases
 
-Manage Wget aliases. Part of the **Universal Dotfiles** configuration.
+Manage wget aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 

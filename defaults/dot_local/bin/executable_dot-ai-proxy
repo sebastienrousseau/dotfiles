@@ -1,0 +1,285 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+# dot-ai-proxy — manage the native local Claude proxy (dot-ai-serve) and
+# route the AI fleet through it, so any Anthropic/OpenAI-protocol CLI
+# (codex, aider, opencode, claude, …) runs on a single Claude subscription
+# served locally — with no third-party dependency.
+#
+# The engine is dot-ai-serve: a stdlib Python server that wraps the
+# already-installed `claude` CLI and translates the Anthropic/OpenAI wire
+# formats. This script owns the lifecycle + routing around it.
+# Deployed to ~/.local/bin/dot-ai-proxy.
+#
+# Subcommands:
+#   start | stop | restart | status | logs | setup   server process
+#   local on | off | status                           fleet-wide routing env
+
+set -euo pipefail
+
+DOT_AI_HOST="${DOT_AI_HOST:-127.0.0.1}"
+DOT_AI_PORT="${DOT_AI_PORT:-3456}"
+BASE_URL="http://${DOT_AI_HOST}:${DOT_AI_PORT}"
+SERVE_BIN="${DOT_AI_SERVE_BIN:-dot-ai-serve}"
+
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/ai-serve"
+PID_FILE="$STATE_DIR/serve.pid"
+LOG_FILE="$STATE_DIR/serve.log"
+
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
+ENV_SH="$CONFIG_DIR/ai-local.env"
+ENV_FISH="$CONFIG_DIR/ai-local.fish"
+
+if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+  C_OK=$'\033[32m' C_INFO=$'\033[36m' C_WARN=$'\033[33m' C_ERR=$'\033[31m' C_RST=$'\033[0m'
+else
+  C_OK='' C_INFO='' C_WARN='' C_ERR='' C_RST=''
+fi
+info() { printf '  %s•%s %s\n' "$C_INFO" "$C_RST" "$*"; }
+ok() { printf '  %s✓%s %s\n' "$C_OK" "$C_RST" "$*"; }
+warn() { printf '  %s!%s %s\n' "$C_WARN" "$C_RST" "$*" >&2; }
+err() { printf '  %s✗%s %s\n' "$C_ERR" "$C_RST" "$*" >&2; }
+
+usage() {
+  cat <<EOF
+Usage: dot ai proxy <start|stop|restart|status|logs|setup>
+       dot ai local <on|off|status>
+
+  proxy start     Launch dot-ai-serve (background) at $BASE_URL
+  proxy stop      Stop the running server
+  proxy restart   Stop then start
+  proxy status    Show process + /health + local-routing state
+  proxy logs [-f] Show (or follow) the server log
+  proxy setup     Check the engine (claude CLI auth) is ready
+
+  local on        Route the AI fleet through the proxy (writes env)
+  local off       Stop routing through the proxy (removes env)
+  local status    Show whether local routing is active
+
+Env: DOT_AI_HOST (default 127.0.0.1), DOT_AI_PORT (default 3456),
+     DOT_AI_API_KEY (required to bind off-loopback).
+EOF
+}
+
+_have() { command -v "$1" >/dev/null 2>&1; }
+
+_need_serve() {
+  _have "$SERVE_BIN" && return 0
+  err "dot-ai-serve not found"
+  info "Deploy it with: chezmoi apply ~/.local/bin/dot-ai-serve"
+  return 1
+}
+
+# Echo the live PID when the server is running, nothing otherwise.
+_running_pid() {
+  [[ -f "$PID_FILE" ]] || return 0
+  local pid
+  pid="$(cat "$PID_FILE" 2>/dev/null || true)"
+  [[ -n "$pid" ]] || return 0
+  kill -0 "$pid" 2>/dev/null && printf '%s\n' "$pid"
+}
+
+# Refuse to expose the proxy off-loopback without an auth key — an open
+# network proxy is a Claude-subscription credential leak.
+_guard_bind() {
+  case "$DOT_AI_HOST" in
+    127.0.0.1 | localhost | ::1) return 0 ;;
+  esac
+  if [[ -z "${DOT_AI_API_KEY:-}" ]]; then
+    err "Refusing to bind to '$DOT_AI_HOST' without DOT_AI_API_KEY."
+    err "An unprotected network proxy leaks your Claude subscription."
+    info "Set a strong DOT_AI_API_KEY and require it on clients first."
+    return 1
+  fi
+  warn "Binding off-loopback ($DOT_AI_HOST) — DOT_AI_API_KEY auth is required on clients."
+}
+
+proxy_start() {
+  _need_serve || return 1
+  local pid
+  pid="$(_running_pid)"
+  if [[ -n "$pid" ]]; then
+    ok "Proxy already running (pid $pid) at $BASE_URL"
+    return 0
+  fi
+  _guard_bind || return 1
+  _have claude || warn "claude CLI not on PATH — the engine needs it; run 'claude login' once."
+  mkdir -p "$STATE_DIR"
+  DOT_AI_HOST="$DOT_AI_HOST" DOT_AI_PORT="$DOT_AI_PORT" \
+    nohup "$SERVE_BIN" >"$LOG_FILE" 2>&1 &
+  echo $! >"$PID_FILE"
+  local i
+  for i in $(seq 1 20); do
+    if _have curl && curl -fsS -m 2 "$BASE_URL/health" >/dev/null 2>&1; then
+      ok "Proxy started (pid $(cat "$PID_FILE")) at $BASE_URL"
+      info "Point any tool at it, or run: dot ai local on"
+      return 0
+    fi
+    sleep 0.3
+  done
+  warn "Server launched (pid $(cat "$PID_FILE")) but /health is not ready yet."
+  info "Check: dot ai proxy logs"
+}
+
+proxy_stop() {
+  local pid
+  pid="$(_running_pid)"
+  if [[ -z "$pid" ]]; then
+    info "Proxy not running"
+    rm -f "$PID_FILE"
+    return 0
+  fi
+  kill "$pid" 2>/dev/null || true
+  local i
+  for i in $(seq 1 10); do
+    kill -0 "$pid" 2>/dev/null || break
+    sleep 0.3
+  done
+  kill -0 "$pid" 2>/dev/null && kill -9 "$pid" 2>/dev/null || true
+  rm -f "$PID_FILE"
+  ok "Stopped proxy (pid $pid)"
+}
+
+proxy_status() {
+  local pid
+  pid="$(_running_pid)"
+  if [[ -n "$pid" ]]; then
+    ok "process: running (pid $pid) at $BASE_URL"
+  else
+    info "process: not running"
+  fi
+  if _have curl; then
+    local health
+    health="$(curl -fsS -m 3 "$BASE_URL/health" 2>/dev/null || true)"
+    if [[ -n "$health" ]]; then
+      if _have jq; then
+        info "health: $(printf '%s' "$health" | jq -r '"\(.status // "?")  engine=\(.engine // "?")  claude=\(.claude // "?")"' 2>/dev/null || echo "$health")"
+      else
+        info "health: $health"
+      fi
+    else
+      info "health: unreachable"
+    fi
+  fi
+  if [[ -f "$ENV_SH" ]]; then
+    ok "local routing: ON  (fleet → $BASE_URL)"
+  else
+    info "local routing: OFF"
+  fi
+}
+
+proxy_logs() {
+  [[ -f "$LOG_FILE" ]] || {
+    info "No log yet at $LOG_FILE"
+    return 0
+  }
+  if [[ "${1:-}" == "-f" ]]; then
+    exec tail -n 60 -f "$LOG_FILE"
+  fi
+  tail -n 60 "$LOG_FILE"
+}
+
+proxy_setup() {
+  if _have claude; then
+    ok "claude CLI found — the engine is ready (run 'claude login' once if unauthenticated)."
+  else
+    err "claude CLI not on PATH — install it ('dot ai status') and run 'claude login'."
+    return 1
+  fi
+  _need_serve >/dev/null 2>&1 || info "Deploy the server: chezmoi apply ~/.local/bin/dot-ai-serve"
+}
+
+# Write the routing env consumed per-invocation by `dot ai <tool>` for
+# NON-Claude tools. It is deliberately NOT auto-sourced into your shell:
+# the primary `claude` always uses its native session, and setting
+# ANTHROPIC_API_KEY where Claude Code sees it would disable claude.ai
+# connectors. The placeholder key is a dummy the gateway ignores.
+local_on() {
+  local key="${DOT_AI_API_KEY:-x}"
+  local model="${DOT_AI_DEFAULT_MODEL:-sonnet}"
+  mkdir -p "$CONFIG_DIR"
+  (
+    umask 077
+    cat >"$ENV_SH" <<EOF
+# Managed by 'dot ai' — routing for NON-Claude fleet tools only.
+# Consumed per-invocation by 'dot ai <tool>'; NOT sourced into your shell.
+# The primary 'claude' is never routed (it uses its native session).
+export ANTHROPIC_BASE_URL="$BASE_URL"
+export ANTHROPIC_HOST="$BASE_URL"
+export ANTHROPIC_AUTH_TOKEN="$key"
+export ANTHROPIC_API_KEY="$key"
+export OPENAI_BASE_URL="$BASE_URL/v1"
+export OPENAI_API_KEY="$key"
+# Goose reads these from the env, overriding any stale config.yaml so it
+# routes through the gateway (it doesn't honour ANTHROPIC_BASE_URL alone).
+export GOOSE_PROVIDER="anthropic"
+export GOOSE_MODEL="$model"
+EOF
+    cat >"$ENV_FISH" <<EOF
+# Managed by 'dot ai' — routing for NON-Claude fleet tools only.
+set -gx ANTHROPIC_BASE_URL "$BASE_URL"
+set -gx ANTHROPIC_HOST "$BASE_URL"
+set -gx ANTHROPIC_AUTH_TOKEN "$key"
+set -gx ANTHROPIC_API_KEY "$key"
+set -gx OPENAI_BASE_URL "$BASE_URL/v1"
+set -gx OPENAI_API_KEY "$key"
+set -gx GOOSE_PROVIDER "anthropic"
+set -gx GOOSE_MODEL "$model"
+EOF
+  )
+  ok "Routing ON — non-Claude tools via 'dot ai <tool>' → $BASE_URL"
+  info "The primary 'claude' keeps its native session (not routed)."
+  [[ -n "$(_running_pid)" ]] || info "Start the engine with: dot ai proxy start"
+}
+
+local_off() {
+  rm -f "$ENV_SH" "$ENV_FISH"
+  ok "Routing OFF"
+}
+
+local_status() {
+  if [[ -f "$ENV_SH" ]]; then
+    ok "local routing: ON  (fleet → $BASE_URL)"
+    info "env file: $ENV_SH"
+  else
+    info "local routing: OFF"
+  fi
+  [[ -n "${ANTHROPIC_BASE_URL:-}" ]] && info "this shell: ANTHROPIC_BASE_URL=$ANTHROPIC_BASE_URL"
+}
+
+local_cmd() {
+  case "${1:-status}" in
+    on) local_on ;;
+    off) local_off ;;
+    status | "") local_status ;;
+    *)
+      err "Usage: dot ai local <on|off|status>"
+      return 1
+      ;;
+  esac
+}
+
+case "${1:-status}" in
+  start) proxy_start ;;
+  stop) proxy_stop ;;
+  restart)
+    proxy_stop
+    proxy_start
+    ;;
+  status) proxy_status ;;
+  logs)
+    shift
+    proxy_logs "$@"
+    ;;
+  setup) proxy_setup ;;
+  local)
+    shift
+    local_cmd "$@"
+    ;;
+  -h | --help | help) usage ;;
+  *)
+    err "Unknown subcommand: $1"
+    usage
+    exit 1
+    ;;
+esac

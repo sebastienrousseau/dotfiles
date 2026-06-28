@@ -52,7 +52,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Import in-repo armored key + capture fingerprint
         id: in_repo
@@ -84,7 +84,15 @@ jobs:
           # require gpg-wks-client which isn't on the runner; the hash
           # is stable for a given local-part, so we pin it.
           url="https://sebastienrousseau.com/.well-known/openpgpkey/hu/t5s8ztdbon8yzntexy6oz5y48etqsnbb"
-          curl -fsSL --max-time 15 -o /tmp/wkd.bin "$url"
+          # The WKD endpoint is published out-of-band (GitHub Pages / DNS). If
+          # the key isn't live yet (404) or the host is unreachable, don't fail
+          # the build — the in-repo key was already validated above; just skip
+          # the live cross-check with a warning.
+          if ! curl -fsSL --max-time 15 -o /tmp/wkd.bin "$url"; then
+            echo "::warning::WKD key not reachable at ${url} (likely not published yet) — skipping live cross-check; in-repo key already validated."
+            echo "fpr=UNPUBLISHED" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           GNUPGHOME="$(mktemp -d)"
           export GNUPGHOME
           chmod 700 "$GNUPGHOME"
@@ -105,6 +113,12 @@ jobs:
           in_repo="${{ steps.in_repo.outputs.fpr }}"
           wkd="${{ steps.wkd.outputs.fpr }}"
           expected="55AFAD364FD9DB3819E61F0C8D688FAFA9144693"
+          if [[ "$wkd" == "UNPUBLISHED" ]]; then
+            echo "::warning::WKD cross-check skipped (key not published); validating in-repo ↔ pinned only."
+            [[ "$in_repo" == "$expected" ]] || { echo "::error::in-repo .asc does not match the pinned fingerprint." >&2; exit 1; }
+            echo "✓ in-repo .asc ↔ pinned fingerprint match (WKD skipped)"
+            exit 0
+          fi
           echo "in-repo: $in_repo"
           echo "WKD    : $wkd"
           echo "pinned : $expected"

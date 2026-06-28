@@ -1,6 +1,6 @@
-# Mkdir Aliases
+# mkdir Aliases
 
-Manage Mkdir aliases. Part of the **Universal Dotfiles** configuration.
+Manage mkdir aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 

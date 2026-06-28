@@ -33,7 +33,11 @@ test_start "ai_bridge_pattern_handling"
 assert_file_contains "$AI_SCRIPT" "--pattern" "should handle pattern flag"
 
 test_start "ai_status_lists_new_providers"
-assert_file_contains "$AI_SCRIPT" "Copilot CLI|copilot|GitHub Copilot CLI" "should list Copilot CLI"
+assert_file_contains "$AI_SCRIPT" "Copilot CLI|copilot|" "should list Copilot CLI"
+assert_file_contains "$AI_SCRIPT" "Crush|crush|" "should list Crush"
+assert_file_contains "$AI_SCRIPT" "Amp|amp|" "should list Amp"
+assert_file_contains "$AI_SCRIPT" "Cursor CLI|cursor-agent|" "should list Cursor CLI"
+assert_file_contains "$AI_SCRIPT" "Grok Build|grok|" "should list Grok Build"
 
 test_start "ai_status_has_grouped_sections"
 assert_file_contains "$AI_SCRIPT" "Agents (autonomous)" "should group agents"
@@ -51,16 +55,16 @@ test_start "ai_picker_is_flat_with_role_labels"
 assert_file_contains "$AI_SCRIPT" "printf '%-16s — %s'" "picker should include compact role labels"
 assert_file_contains "$AI_SCRIPT" "gum choose --header \"Select an AI CLI\"" "picker should use Select wording"
 
-test_start "ai_bridge_help_shows_patterns"
+test_start "ai_bridge_help_shows_styles"
 output=$(bash "$AI_SCRIPT" cl --help 2>&1 || true)
-if echo "$output" | grep -q "Available Patterns"; then
+if echo "$output" | grep -q "Available styles"; then
   ((TESTS_PASSED++)) || true
   printf '%b
-' "  ${GREEN}✓${NC} $CURRENT_TEST: help shows patterns"
+' "  ${GREEN}✓${NC} $CURRENT_TEST: help shows styles"
 else
   ((TESTS_FAILED++)) || true
   printf '%b
-' "  ${RED}✗${NC} $CURRENT_TEST: help missing patterns"
+' "  ${RED}✗${NC} $CURRENT_TEST: help missing styles"
 fi
 
 # Slice 2: drive real line coverage of the script under test

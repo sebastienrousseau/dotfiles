@@ -4,7 +4,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 set -euo pipefail
 
-# Dotfiles CLI Entry Point - v0.2.505
+# Dotfiles CLI Entry Point - v0.2.506
 
 # Ensure XDG Base Directory variables are set
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -22,7 +22,7 @@ if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
   . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
 fi
 
-VERSION="0.2.505"
+VERSION="0.2.506"
 
 COMMAND="${1:-}"
 if [ -n "${1:-}" ]; then
@@ -38,8 +38,8 @@ _resolve_source_dir() {
 
   if script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null)"; then
     script_dir="$script_path"
-    # Post-v0.2.505: the canonical dispatcher lives at <repo>/bin/dot, so
-    # $script_dir/.. is the repo root. Pre-v0.2.505 (and chezmoi-deployed
+    # Post-v0.2.506: the canonical dispatcher lives at <repo>/bin/dot, so
+    # $script_dir/.. is the repo root. Pre-v0.2.506 (and chezmoi-deployed
     # wrapper invocations that still exec the canonical) the dispatcher
     # was at <repo>/dot_local/bin/executable_dot, so $script_dir/../..
     # was the repo. Probe both to cover the transition.
@@ -215,7 +215,7 @@ Diagnostics|history|Shell history analysis|Inspect command usage patterns.
 Diagnostics|perf|Show performance mode and quick timing|Startup and shell timing surface.
 Diagnostics|metrics|Show recent observability metrics (JSONL)|Recent runtime events and counters.
 Diagnostics|load-bench|Measure time to heavy-layer readiness|Performance benchmarking helper.
-AI|ai|AI CLI status, delegate, and cost report|Subcommands: dot ai (status), dot ai delegate "<prompt>", dot ai cost [--since N].
+AI|ai|AI fleet cockpit, gateway, and cost|Subcommands: dot ai (cockpit), dot ai "<prompt>", dot ai serve, dot ai install, dot ai cost, dot ai doctor.
 AI|ai-setup|Interactive setup for all AI CLI tools|Initial AI tool bootstrap.
 AI|ai-query|Context-aware RAG query over your dotfiles|Ask questions over the repo state.
 AI|mcp|Inspect MCP policy, supply chain, and registry|Governance and validation surface.
@@ -223,7 +223,7 @@ AI|mode|Set or inspect agent operating profiles (ask/plan/apply/audit)|Bounded-a
 AI|agent|Profile-aware execution, agent card, a2a-card, session log, checkpoints, and conformance|Agent metadata and local audit trail.
 AI|cl|Claude CLI with context patterns|Context-aware Anthropic bridge.
 AI|copilot|GitHub Copilot CLI with context patterns|Context-aware Copilot bridge.
-AI|gemini|Gemini CLI with context patterns|Context-aware Gemini bridge.
+AI|agy|Antigravity CLI with context patterns|Context-aware Antigravity bridge.
 AI|kiro|Kiro CLI with context patterns|Context-aware Kiro bridge.
 AI|sgpt|Shell-GPT with context patterns|Context-aware Shell-GPT bridge.
 AI|ollama|Ollama with context patterns|Context-aware local-model bridge.
@@ -312,7 +312,7 @@ cl|Run the Claude CLI with dotfiles context patterns.|dot cl "explain this repo'
 claude|Run the Claude CLI bridge (alias for cl).|dot claude "summarise CHANGELOG"\ndot claude --model sonnet
 codex|Run the OpenAI Codex CLI with dotfiles context patterns.|dot codex "refactor wallpaper-sync.sh"\ndot codex --review
 copilot|Run the GitHub Copilot CLI with dotfiles context patterns.|dot copilot suggest "review my latest commit"\ndot copilot explain
-gemini|Run the Google Gemini CLI with dotfiles context patterns.|dot gemini "audit security/firewall.sh"\ndot gemini --model 1.5-pro
+agy|Run the Antigravity CLI with dotfiles context patterns.|dot agy "audit security/firewall.sh"\ndot agy chat
 goose|Run the Goose CLI with dotfiles context patterns.|dot goose session start\ndot goose run
 kiro|Run the Kiro CLI with dotfiles context patterns.|dot kiro "design a new dot subcommand"
 sgpt|Run the Shell-GPT CLI with dotfiles context patterns.|dot sgpt "find leftover macOS plist writes"\ndot sgpt --shell "tar gz wallpapers"
@@ -402,7 +402,7 @@ cl|ai
 claude|ai
 codex|ai
 copilot|ai
-gemini|ai
+agy|ai
 goose|ai
 kiro|ai
 sgpt|ai

@@ -89,7 +89,7 @@ fi
 
 # NPM Globals (via mise)
 if command -v mise >/dev/null 2>&1; then
-  step "NPM (claude, gemini, etc)"
+  step "NPM (claude, agy, etc)"
   mise exec node -- npm update -g --audit=false >/dev/null 2>&1
   ok
 
@@ -111,6 +111,38 @@ if command -v pipx >/dev/null 2>&1; then
 fi
 
 # --- 3. Specialized AI Binaries ---
+
+# Claude Code (self-updating native binary)
+if command -v claude >/dev/null 2>&1; then
+  step "Claude Code"
+  if claude update --force >/dev/null 2>&1; then ok; else skip "already up to date"; fi
+fi
+
+# Goose (Block — native binary, re-run installer to update)
+if command -v goose >/dev/null 2>&1 || [ -x "$HOME/.local/bin/goose" ]; then
+  step "Goose"
+  goose_installer="$(umask 077 && mktemp)"
+  if curl -fsSL -o "$goose_installer" https://github.com/block/goose/releases/download/stable/download_cli.sh 2>/dev/null &&
+    [ "$(wc -c <"$goose_installer")" -le 524288 ] && head -1 "$goose_installer" | grep -q '^#!'; then
+    if bash "$goose_installer" >/dev/null 2>&1; then ok; else skip "installer failed"; fi
+  else
+    skip "could not fetch installer"
+  fi
+  rm -f "$goose_installer"
+fi
+
+# Antigravity CLI — agy (native binary, re-run installer to update)
+if command -v agy >/dev/null 2>&1 || [ -x "$HOME/.local/bin/agy" ]; then
+  step "Antigravity CLI (agy)"
+  agy_installer="$(umask 077 && mktemp)"
+  if curl -fsSL -o "$agy_installer" https://antigravity.google/cli/install.sh 2>/dev/null &&
+    [ "$(wc -c <"$agy_installer")" -le 262144 ] && head -1 "$agy_installer" | grep -q '^#!'; then
+    if bash "$agy_installer" >/dev/null 2>&1; then ok; else skip "installer failed"; fi
+  else
+    skip "could not fetch installer"
+  fi
+  rm -f "$agy_installer"
+fi
 
 # Ollama (Verified Manual Override)
 if command -v ollama >/dev/null 2>&1; then

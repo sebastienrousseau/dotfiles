@@ -3,20 +3,24 @@
 # AI & Intelligent Assistance Aliases
 
 # Dotfiles AI Bridge (Context-aware wrappers)
-alias dcl='dot cl'
-alias dcla='dot cl --pattern architect'
-alias dclh='dot cl --pattern hardener'
-alias dclr='dot cl --pattern refactor'
+alias dai='dot ai'  # the cockpit
+alias daid='dot ai' # was: dot ai dashboard
+alias daish='dot ai'
 
-alias dgmn='dot gemini'
-alias dgmna='dot gemini --pattern architect'
-alias dgmnh='dot gemini --pattern hardener'
-alias dgmnr='dot gemini --pattern refactor'
+alias dcl='dot ai claude'
+alias dcla='dot ai claude --style architect'
+alias dclh='dot ai claude --style hardener'
+alias dclr='dot ai claude --style refactor'
 
-alias dki='dot kiro'
-alias dkia='dot kiro --pattern architect'
-alias dkih='dot kiro --pattern hardener'
-alias dkir='dot kiro --pattern refactor'
+alias dagy='dot ai agy'
+alias dagya='dot ai agy --style architect'
+alias dagyh='dot ai agy --style hardener'
+alias dagyr='dot ai agy --style refactor'
+
+alias dki='dot ai kiro'
+alias dkia='dot ai kiro --style architect'
+alias dkih='dot ai kiro --style hardener'
+alias dkir='dot ai kiro --style refactor'
 
 # Aider (AI Pair Programming)
 if command -v aider &>/dev/null; then
@@ -54,11 +58,11 @@ if command -v kiro-cli &>/dev/null; then
   alias kit='kiro-cli term'
 fi
 
-# Google Gemini CLI
-if command -v gemini &>/dev/null; then
-  alias gemi='gemini info'
-  alias gems='gemini chat'
-  alias gmn='gemini'
+# Google Antigravity CLI
+if command -v agy &>/dev/null; then
+  alias agyi='agy info'
+  alias agys='agy chat'
+  alias agy='agy'
 fi
 
 # GitHub Copilot CLI

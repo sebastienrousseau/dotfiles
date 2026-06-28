@@ -1,4 +1,4 @@
-# Vagrant
+# Vagrant Aliases
 
 Aliases for Vagrant workflows.
 

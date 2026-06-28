@@ -1,6 +1,6 @@
-# Gnu Aliases
+# GNU Aliases
 
-Manage Gnu aliases. Part of the **Universal Dotfiles** configuration.
+Manage GNU aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
