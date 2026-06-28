@@ -99,24 +99,22 @@ def log(msg):
 # ---------------------------------------------------------------------------
 # Model routing + cost metering.
 # ---------------------------------------------------------------------------
-# A resolved model flows into the `claude` CLI argv, so it MUST be one of a
-# fixed allowlist — a request can't inject a flag or arbitrary value. Unknown
-# models fall back to a safe constant. Extend coverage via MODELS or by mapping
-# an alias to a known tier in DOT_AI_MODEL_MAP.
-ALLOWED_MODELS = set(MODELS) | {"opus", "sonnet", "haiku", DEFAULT_MODEL}
+# A resolved model flows into the `claude` CLI argv. Map the request's value
+# through a constant lookup table so the string reaching argv is ALWAYS one of
+# our own literals (the untrusted value is only ever a dict key, never the
+# result) — a request can't inject a flag or arbitrary value. Extend coverage
+# via MODELS, or map an alias to a known tier in DOT_AI_MODEL_MAP.
+_MODEL_LUT = {m: m for m in (set(MODELS) | {"opus", "sonnet", "haiku"})}
 
 
 def resolve_model(model):
-    """Follow the alias chain, then constrain the result to the allowlist so it
-    can never be mistaken for a command-line flag."""
+    """Follow the alias chain, then map the result to a known model id via a
+    constant lookup table; unknown models fall back to a safe constant."""
     seen = set()
     while model in MODEL_ALIASES and model not in seen:
         seen.add(model)
         model = MODEL_ALIASES[model]
-    model = model or DEFAULT_MODEL
-    if model in ALLOWED_MODELS:
-        return model
-    return "sonnet"
+    return _MODEL_LUT.get(model or DEFAULT_MODEL, "sonnet")
 
 
 def _price_for(model):
