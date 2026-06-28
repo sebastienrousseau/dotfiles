@@ -1,0 +1,46 @@
+name: Verify Tag Signature
+
+# Release tags must be annotated AND cryptographically signed (git tag -s).
+# scripts/ops/release.sh already creates them with -s; this gate catches any
+# tag pushed outside that path (e.g. a lightweight `git tag vX.Y.Z`) so the
+# OpenSSF Best Practices `version_tags_signed` guarantee can't silently regress.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Signed annotated tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout (with tags)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Ensure the tag is a signed annotated tag
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF#refs/tags/}"
+          type="$(git cat-file -t "$tag")"
+          if [ "$type" != "tag" ]; then
+            echo "::error::$tag is a lightweight tag; release tags MUST be annotated and signed (git tag -s ${tag})"
+            exit 1
+          fi
+          if git cat-file tag "$tag" | grep -qE 'BEGIN (PGP|SSH) SIGNATURE'; then
+            echo "$tag is a signed annotated tag. ✓"
+          else
+            echo "::error::$tag is annotated but NOT signed; recreate it with git tag -s ${tag}"
+            exit 1
+          fi

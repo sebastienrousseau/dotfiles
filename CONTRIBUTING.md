@@ -11,16 +11,26 @@ make test
 bash scripts/git-hooks/pre-push
 ```
 
-Use a signed commit:
+Use a signed, signed-off commit:
 
 ```bash
-git commit -S -m "fix: concise summary"
+git commit -S -s -m "fix: concise summary"
 ```
 
-Signed commits are **enforced** at three layers (local commit-msg
-hook, local pre-push hook, GitHub Ruleset). An unsigned commit cannot
-reach `master`. Full SSH and GPG setup recipes plus verification
+`-S` adds the cryptographic signature; `-s` adds the DCO `Signed-off-by`
+line (see below). Signed commits are **enforced** at three layers (local
+commit-msg hook, local pre-push hook, GitHub Ruleset). An unsigned commit
+cannot reach `master`. Full SSH and GPG setup recipes plus verification
 commands live in [`docs/security/COMMIT_SIGNING.md`](docs/security/COMMIT_SIGNING.md).
+
+### Developer Certificate of Origin (DCO)
+
+Every commit must carry a `Signed-off-by` line certifying that you wrote the
+change (or otherwise have the right to submit it under the project's licence),
+per the [Developer Certificate of Origin](DCO) 1.1. Add it automatically with
+`git commit -s` (combine with `-S` to cryptographically sign as well). The
+**DCO** GitHub workflow checks every commit in a pull request; bring an existing
+branch into compliance with `git rebase --signoff <base>`.
 
 The pre-push audit is **mandatory by default**. If you need to bypass
 it for a single push (rare, almost never on `master`), see
