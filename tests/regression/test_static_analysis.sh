@@ -122,14 +122,20 @@ assert_equals "0" "$failures" "new scripts must not have unquoted variables (SC2
 
 test_start "shfmt_formatting"
 failures=0
-for f in "${CHANGED_SCRIPTS[@]}"; do
-  filepath="$REPO_ROOT/$f"
-  [[ -f "$filepath" ]] || continue
-  if ! shfmt -d -i 2 -ci "$filepath" >/dev/null 2>&1; then
-    printf '    shfmt: %s\n' "$f"
-    failures=$((failures + 1))
-  fi
-done
+if command -v shfmt >/dev/null 2>&1; then
+  for f in "${CHANGED_SCRIPTS[@]}"; do
+    filepath="$REPO_ROOT/$f"
+    [[ -f "$filepath" ]] || continue
+    if ! shfmt -d -i 2 -ci "$filepath" >/dev/null 2>&1; then
+      printf '    shfmt: %s\n' "$f"
+      failures=$((failures + 1))
+    fi
+  done
+else
+  # shfmt is not present in every CI job (the dedicated shell-lint job
+  # installs and runs it). Skip rather than false-fail on command-not-found.
+  printf '    shfmt not installed — skipping (covered by the shell-lint job)\n'
+fi
 assert_equals "0" "$failures" "all changed scripts must pass shfmt -i 2 -ci"
 
 # ═══════════════════════════════════════════════════════════════
