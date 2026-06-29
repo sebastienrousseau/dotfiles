@@ -19,7 +19,7 @@
 
 ## Project Overview
 
-Chezmoi-managed dotfiles for macOS, Linux, WSL, and PowerShell 7.5+. Version `0.2.506`.
+Chezmoi-managed dotfiles for macOS, Linux, WSL, and PowerShell 7.5+. Version `0.2.507`.
 
 ## Key Commands
 
