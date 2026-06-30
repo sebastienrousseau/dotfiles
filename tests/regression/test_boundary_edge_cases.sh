@@ -80,10 +80,16 @@ fi
 # ═══════════════════════════════════════════════════════════════
 
 test_start "edge_apply_has_lock_mechanism"
-assert_file_contains "$REPO_ROOT/scripts/ops/chezmoi-apply.sh" "LOCK_FILE" "apply must use lock file"
+assert_file_contains "$REPO_ROOT/scripts/ops/chezmoi-apply.sh" ".lock" "apply must use a lock file/dir"
 
 test_start "edge_apply_flock_guard"
-assert_file_contains "$REPO_ROOT/scripts/ops/chezmoi-apply.sh" "flock" "apply must use flock for concurrency"
+assert_file_contains "$REPO_ROOT/scripts/ops/chezmoi-apply.sh" "flock" "apply must use flock where available"
+
+test_start "edge_apply_mkdir_lock_fallback"
+# flock(1) is Linux-only; apply must fall back to an atomic mkdir lock so
+# concurrency stays guarded on macOS/BSD (regression: `! flock` previously
+# took the "already running" branch, making `dot apply` a silent no-op).
+assert_file_contains "$REPO_ROOT/scripts/ops/chezmoi-apply.sh" ".lock.d" "apply must fall back to a mkdir lock on macOS/BSD"
 
 test_start "edge_rollback_has_lock"
 assert_file_contains "$REPO_ROOT/scripts/ops/rollback.sh" "lock" "rollback must have lock mechanism"
@@ -329,7 +335,7 @@ assert_file_exists "$REPO_ROOT/defaults/dot_config/shell/00-core-paths.sh.tmpl" 
 test_start "edge_alias_files_under_50kb"
 oversized=0
 while IFS= read -r f; do
-  size=$(wc -c < "$f" | tr -d ' ')
+  size=$(wc -c <"$f" | tr -d ' ')
   if [[ "$size" -gt 51200 ]]; then
     oversized=$((oversized + 1))
   fi
@@ -339,7 +345,7 @@ assert_equals "0" "$oversized" "no alias files exceed 50KB"
 test_start "edge_function_files_under_50kb"
 oversized=0
 while IFS= read -r f; do
-  size=$(wc -c < "$f" | tr -d ' ')
+  size=$(wc -c <"$f" | tr -d ' ')
   if [[ "$size" -gt 51200 ]]; then
     oversized=$((oversized + 1))
   fi
