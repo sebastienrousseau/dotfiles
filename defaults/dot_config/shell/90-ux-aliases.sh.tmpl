@@ -79,6 +79,11 @@ fi
 _dotfiles_alias_shims() {
   [[ -n "${_DOTFILES_ALIAS_SHIMS_LOADED:-}" ]] && return 0
   _DOTFILES_ALIAS_SHIMS_LOADED=1
+  # Remove any same-named aliases first so the function definitions below
+  # don't trip zsh's "defining function based on alias" parse error when
+  # shims are force-enabled (DOTFILES_FORCE_ALIAS_SHIMS=1) while aliases
+  # are still active. `|| true` keeps it safe under `set -e`.
+  unalias c q e h l ll la lt lr lra lta d i a _ 2>/dev/null || true
   c() { clear_screen; }
   q() { exit; }
   e() { "${EDITOR:-nano}" "$@"; }
@@ -103,7 +108,14 @@ _dotfiles_alias_shims() {
 }
 
 if [ -n "${ZSH_VERSION:-}" ]; then
-  if ! setopt | grep -q '^aliases$' || [[ "${DOTFILES_FORCE_ALIAS_SHIMS:-0}" == "1" ]]; then
+  # Only install the function shims when zsh alias expansion is actually
+  # OFF. `[[ -o aliases ]]` is the correct test — the previous
+  # `setopt | grep '^aliases$'` never matched because `setopt` does not
+  # list options at their default (aliases is on by default), so the shims
+  # ran on every interactive login and collided with the same-named
+  # aliases (e.g. `c`), emitting "defining function based on alias" and a
+  # parse error.
+  if ! [[ -o aliases ]] || [[ "${DOTFILES_FORCE_ALIAS_SHIMS:-0}" == "1" ]]; then
     _dotfiles_alias_shims
   fi
 fi
