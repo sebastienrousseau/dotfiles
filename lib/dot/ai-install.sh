@@ -160,15 +160,24 @@ install_amp_native() {
   if curl -fsSL -o "$installer" https://ampcode.com/install.sh &&
     [ "$(wc -c <"$installer")" -le 524288 ] &&
     head -1 "$installer" | grep -q '^#!'; then
+    # Pre-resolve the version and pass it via AMP_VERSION. The installer's
+    # own version fetch leaves stray whitespace in the string, which it
+    # then splices into the checksum URL — curl rejects the malformed URL
+    # ("Malformed input to a URL function") and the install dies. Setting
+    # AMP_VERSION skips that fetch entirely. Empty on failure: the
+    # installer falls back to its own (possibly-working) fetch.
+    local amp_version
+    amp_version="$(curl -fsSL https://static.ampcode.com/cli/cli-version.txt 2>/dev/null | tr -d '[:space:]')"
     if command -v gum >/dev/null 2>&1; then
-      if gum spin --spinner dot --title "Installing $label (native installer)" -- bash "$installer"; then
+      if gum spin --spinner dot --title "Installing $label (native installer)" -- \
+        env AMP_VERSION="$amp_version" bash "$installer"; then
         ui_ok "$label" "installed"
       else
         ui_warn "$label" "install failed (continuing)"
       fi
     else
       ui_info "Installing" "$label via native installer"
-      bash "$installer" || ui_warn "$label" "install failed (continuing)"
+      AMP_VERSION="$amp_version" bash "$installer" || ui_warn "$label" "install failed (continuing)"
     fi
   else
     ui_warn "$label" "installer download/validation failed (continuing)"
