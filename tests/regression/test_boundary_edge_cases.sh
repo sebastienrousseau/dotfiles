@@ -80,10 +80,16 @@ fi
 # ═══════════════════════════════════════════════════════════════
 
 test_start "edge_apply_has_lock_mechanism"
-assert_file_contains "$REPO_ROOT/scripts/ops/chezmoi-apply.sh" "LOCK_FILE" "apply must use lock file"
+assert_file_contains "$REPO_ROOT/scripts/ops/chezmoi-apply.sh" ".lock" "apply must use a lock file/dir"
 
 test_start "edge_apply_flock_guard"
-assert_file_contains "$REPO_ROOT/scripts/ops/chezmoi-apply.sh" "flock" "apply must use flock for concurrency"
+assert_file_contains "$REPO_ROOT/scripts/ops/chezmoi-apply.sh" "flock" "apply must use flock where available"
+
+test_start "edge_apply_mkdir_lock_fallback"
+# flock(1) is Linux-only; apply must fall back to an atomic mkdir lock so
+# concurrency stays guarded on macOS/BSD (regression: `! flock` previously
+# took the "already running" branch, making `dot apply` a silent no-op).
+assert_file_contains "$REPO_ROOT/scripts/ops/chezmoi-apply.sh" ".lock.d" "apply must fall back to a mkdir lock on macOS/BSD"
 
 test_start "edge_rollback_has_lock"
 assert_file_contains "$REPO_ROOT/scripts/ops/rollback.sh" "lock" "rollback must have lock mechanism"
