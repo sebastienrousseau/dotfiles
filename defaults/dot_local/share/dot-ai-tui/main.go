@@ -472,8 +472,12 @@ func highlight(text string) string {
 func execDone(error) tea.Msg { return refresh() }
 
 // dotExec suspends the TUI for an interactive `dot ai <args…>` then refreshes.
+// DOT_AI_RAW=1 suppresses the command banner: the cockpit is already the UI,
+// and shelling out per tool (e.g. install) would otherwise reprint the full
+// Version/Command/Summary block on every invocation.
 func dotExec(args ...string) tea.Cmd {
 	c := execCommand("dot", append([]string{"ai"}, args...)...)
+	c.Env = append(os.Environ(), "DOT_AI_RAW=1")
 	return tea.ExecProcess(c, execDone)
 }
 

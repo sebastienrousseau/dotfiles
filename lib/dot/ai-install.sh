@@ -23,7 +23,7 @@ _ai_mise_pkg() {
     copilot) echo "npm:@github/copilot" ;;
     goose) echo "" ;;
     crush) echo "npm:@charmland/crush" ;;
-    amp) echo "npm:@sourcegraph/amp" ;;
+    amp) echo "" ;; # native installer (npm versions are prerelease-only; mise filters them out)
     cursor-agent) echo "" ;;
     grok) echo "" ;;
     aider) echo "pipx:aider-chat" ;;
@@ -149,12 +149,43 @@ install_grok_native() {
   # LCOV_EXCL_STOP
 }
 
+install_amp_native() {
+  # LCOV_EXCL_START — network curl|bash installer (see install_agy_native).
+  # amp publishes only prerelease-tagged npm versions (0.0.<epoch>-g<sha>),
+  # which mise's npm backend filters out — `@latest` resolves to nothing.
+  # Use Sourcegraph's native installer instead of mise.
+  local label="${1:-Amp}"
+  local installer
+  installer=$(umask 077 && mktemp)
+  if curl -fsSL -o "$installer" https://ampcode.com/install.sh &&
+    [ "$(wc -c <"$installer")" -le 524288 ] &&
+    head -1 "$installer" | grep -q '^#!'; then
+    if command -v gum >/dev/null 2>&1; then
+      if gum spin --spinner dot --title "Installing $label (native installer)" -- bash "$installer"; then
+        ui_ok "$label" "installed"
+      else
+        ui_warn "$label" "install failed (continuing)"
+      fi
+    else
+      ui_info "Installing" "$label via native installer"
+      bash "$installer" || ui_warn "$label" "install failed (continuing)"
+    fi
+  else
+    ui_warn "$label" "installer download/validation failed (continuing)"
+  fi
+  rm -f "$installer"
+  # LCOV_EXCL_STOP
+}
+
 install_cursor_native() {
   # LCOV_EXCL_START — network curl|bash installer (see install_agy_native).
   local label="${1:-Cursor CLI}"
   local installer
   installer=$(umask 077 && mktemp)
-  if curl -fsSL -o "$installer" https://cursor.com/install &&
+  # cursor.com/install User-Agent-sniffs: a default curl UA is served the
+  # marketing HTML page (which fails the shebang check below), while a
+  # browser-like UA gets the real install script. Spoof a browser UA.
+  if curl -fsSL -A "Mozilla/5.0" -o "$installer" https://cursor.com/install &&
     [ "$(wc -c <"$installer")" -le 524288 ] &&
     head -1 "$installer" | grep -q '^#!'; then
     if command -v gum >/dev/null 2>&1; then
