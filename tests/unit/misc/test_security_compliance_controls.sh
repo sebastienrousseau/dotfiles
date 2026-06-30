@@ -34,7 +34,10 @@ test_start "update_deps_uses_signed_commits"
 assert_file_contains "$update_deps_workflow" "git commit -S -m" "dependency updates use signed commits"
 
 test_start "sync_versions_uses_signed_commits"
-assert_file_contains "$sync_versions_workflow" "git commit -S -m" "version sync uses signed commits"
+# `git commit -S` (signed); tolerant of additional flags such as -s (DCO
+# sign-off), which the bot also needs so its auto-commit passes the
+# "Check sign-off" workflow on the PR it pushes to.
+assert_file_contains "$sync_versions_workflow" "git commit -S" "version sync uses signed commits"
 
 test_start "update_deps_avoids_unverified_yq_download"
 if ! grep -q "wget -qO /usr/local/bin/yq" "$update_deps_workflow"; then
