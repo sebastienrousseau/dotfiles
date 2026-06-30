@@ -335,7 +335,7 @@ assert_file_exists "$REPO_ROOT/defaults/dot_config/shell/00-core-paths.sh.tmpl" 
 test_start "edge_alias_files_under_50kb"
 oversized=0
 while IFS= read -r f; do
-  size=$(wc -c < "$f" | tr -d ' ')
+  size=$(wc -c <"$f" | tr -d ' ')
   if [[ "$size" -gt 51200 ]]; then
     oversized=$((oversized + 1))
   fi
@@ -345,7 +345,7 @@ assert_equals "0" "$oversized" "no alias files exceed 50KB"
 test_start "edge_function_files_under_50kb"
 oversized=0
 while IFS= read -r f; do
-  size=$(wc -c < "$f" | tr -d ' ')
+  size=$(wc -c <"$f" | tr -d ' ')
   if [[ "$size" -gt 51200 ]]; then
     oversized=$((oversized + 1))
   fi
