@@ -2,6 +2,35 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.508 — 2026-06-30
+
+Makes `dot apply` / `dot update` behave like an OS package-manager update —
+unattended and reliable on macOS — and converts the cross-platform required
+check into an always-runs gate so documentation-only PRs are mergeable.
+
+### Fixed
+
+- **`dot apply` / `dot update` run unattended** (#946). They no longer stall on
+  chezmoi's "file changed since chezmoi last wrote it" prompt, which could not
+  be answered because chezmoi always runs under `gum spin`/captured output (no
+  controlling TTY) and aborted with "could not open a new TTY". They now apply
+  the canonical source with `--force` by default, like `apt`/system updates;
+  local drift to *managed* files yields to the source. Opt back into prompts
+  with `DOTFILES_INTERACTIVE_APPLY=1`, and keep machine-local tweaks in the
+  unmanaged `~/.zshrc.local` or `~/.config/zsh/rc.d.local/*.zsh`.
+- **macOS apply no-op** (#946). The concurrency lock used `flock(1)`, which does
+  not exist on macOS — `! flock` took the "already running" branch and made
+  `dot apply` exit 0 without applying anything. It now falls back to an atomic
+  `mkdir` lock when `flock` is absent (portable to macOS/BSD). The optional
+  AI-provider installer menu is also gated on real interactivity (TTY + not CI).
+
+### Changed
+
+- **CI required check** (#944). `Test on ubuntu-latest` (path-filtered, so it
+  never ran on docs-only PRs and left them unmergeable) is replaced by an
+  always-runs `Cross-Platform Tests` gate that reports success when the OS
+  matrix is skipped and failure when it fails.
+
 ## v0.2.507 — 2026-06-30
 
 This release ships the **`dot ai` cockpit** — an interactive Bubble Tea TUI for
