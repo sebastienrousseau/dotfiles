@@ -5,6 +5,17 @@
 # Usage: bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
 # (or ./install.sh locally)
 
+# This installer uses bash features (set -o pipefail, arrays, [[ ]]). If it is
+# run under a POSIX/other shell — e.g. `sh install.sh` or piped to `sh` where
+# /bin/sh is dash — fail fast with a clear message instead of the cryptic
+# "set: Illegal option -o pipefail" from the next line. Kept strictly POSIX so
+# it parses in any shell before bash takes over.
+if [ -z "${BASH_VERSION:-}" ]; then
+  echo "install.sh requires bash. Run:  bash install.sh" >&2
+  echo "  or:  bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)\"" >&2
+  exit 1
+fi
+
 set -euo pipefail
 
 # Restrict the permissions of any file/dir we create during bootstrap.
