@@ -1,6 +1,9 @@
 # Dotfiles - gitignore
 # v0.2.500
 
+# Locally built Go binaries (dot-ai-tui is built to ~/.local/bin via run_onchange)
+defaults/dot_local/share/dot-ai-tui/dot-ai-tui
+
 # OS Artifacts
 .DS_Store
 .AppleDouble

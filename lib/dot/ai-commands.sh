@@ -194,6 +194,10 @@ cmd_ai_install() {
         install_agy_native "Antigravity CLI"
         continue
         ;;
+      amp)
+        install_amp_native "Amp"
+        continue
+        ;;
       cursor-agent)
         install_cursor_native "Cursor CLI"
         continue

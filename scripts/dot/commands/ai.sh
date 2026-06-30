@@ -249,14 +249,33 @@ cmd_ai_status() {
       echo ""
       for entry in "${_ai_to_install[@]}"; do
         IFS='|' read -r name bin <<<"$entry"
-        if [[ "$bin" == "claude" ]]; then
-          install_claude_native "$name"
-          continue
-        fi
-        if [[ "$bin" == "agy" ]]; then
-          install_agy_native "$name"
-          continue
-        fi
+        # Tools without a mise package use their vendor's native installer.
+        case "$bin" in
+          claude)
+            install_claude_native "$name"
+            continue
+            ;;
+          goose)
+            install_goose_native "$name"
+            continue
+            ;;
+          agy)
+            install_agy_native "$name"
+            continue
+            ;;
+          amp)
+            install_amp_native "$name"
+            continue
+            ;;
+          cursor-agent)
+            install_cursor_native "$name"
+            continue
+            ;;
+          grok)
+            install_grok_native "$name"
+            continue
+            ;;
+        esac
         local pkg
         pkg=$(_ai_mise_pkg "$bin")
         if [[ -n "$pkg" ]]; then

@@ -201,6 +201,9 @@ dot_command_summary() {
     apply | sync)
       echo "Apply dotfiles changes (sync is an alias for apply)."
       ;;
+    ai)
+      echo "AI fleet cockpit, gateway, tools, and cost."
+      ;;
     update)
       echo "Pull latest changes from remote, then apply."
       ;;
