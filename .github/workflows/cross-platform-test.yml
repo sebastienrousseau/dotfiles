@@ -6,12 +6,10 @@ name: Cross-Platform Test
 on:
   pull_request:
     branches: [master]
-    paths:
-      - '**.sh'
-      - '**.bash'
-      - '**.zsh'
-      - 'defaults/.chezmoitemplates/**'
-      - 'scripts/**'
+    # No `paths:` filter on purpose: the workflow must run on EVERY PR so the
+    # `Cross-Platform Tests` gate job below always reports a status (it is the
+    # branch-protection required check). The expensive OS matrix is gated
+    # internally via the `changes` job, so docs-only PRs stay cheap.
   push:
     branches: [master]
     paths:
@@ -38,10 +36,44 @@ concurrency:
 
 jobs:
   # ============================================================================
+  # Change detection — decides whether the heavy OS matrix needs to run.
+  # ============================================================================
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - '**.sh'
+              - '**.bash'
+              - '**.zsh'
+              - 'defaults/.chezmoitemplates/**'
+              - 'scripts/**'
+
+  # ============================================================================
   # Cross-Platform Script Validation
   # ============================================================================
   cross-platform-test:
     name: Test on ${{ matrix.os }}
+    needs: changes
+    # Run the expensive OS matrix only when shell-relevant files changed, or on
+    # non-PR events (push/merge_group/schedule/dispatch run the full suite).
+    # Docs-only PRs skip it; the `Cross-Platform Tests` gate still reports.
+    if: >-
+      needs.changes.outputs.relevant == 'true' ||
+      github.event_name != 'pull_request'
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     strategy:
@@ -333,3 +365,40 @@ jobs:
           echo "| \`date -d\` | GNU-only | Use \`date +%s\` |" >> "$GITHUB_STEP_SUMMARY"
           echo "| \`readarray\` | Bash 4+ | Use \`while read\` |" >> "$GITHUB_STEP_SUMMARY"
           echo "| \`declare -A\` | Bash 4+ | Use separate vars |" >> "$GITHUB_STEP_SUMMARY"
+
+  # ============================================================================
+  # Required-check gate. Always runs (no path filter) so EVERY pull request —
+  # including docs-only ones — gets a `Cross-Platform Tests` status. It reports
+  # success when the OS matrix is skipped (no shell-relevant changes) and
+  # failure when the matrix fails. This is the branch-protection required
+  # check, replacing the path-filtered `Test on ubuntu-latest`, which could not
+  # report on docs-only PRs and left them permanently unmergeable.
+  # ============================================================================
+  gate:
+    name: Cross-Platform Tests
+    needs: [changes, cross-platform-test]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Verify cross-platform results
+        run: |
+          detect='${{ needs.changes.result }}'
+          tests='${{ needs.cross-platform-test.result }}'
+          echo "detect-changes=$detect  cross-platform-test=$tests"
+          if [[ "$detect" == "failure" || "$detect" == "cancelled" ]]; then
+            echo "::error::change detection did not complete ($detect)"
+            exit 1
+          fi
+          if [[ "$tests" == "failure" || "$tests" == "cancelled" ]]; then
+            echo "::error::cross-platform tests failed ($tests)"
+            exit 1
+          fi
+          # 'success' (matrix ran and passed) or 'skipped' (no relevant
+          # changes) both satisfy the gate.
+          echo "Gate satisfied (cross-platform-test=$tests)."
