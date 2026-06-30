@@ -2,6 +2,40 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.507 — 2026-06-30
+
+This release ships the **`dot ai` cockpit** — an interactive Bubble Tea TUI for
+the 18-agent AI fleet with a local Claude gateway — grows the bundled theme
+collection from 150 to 173, and repairs the AI provider install path
+end-to-end.
+
+### Added
+
+- **`dot ai` cockpit** — bare `dot ai` now opens an interactive Bubble Tea TUI
+  to browse, launch, install, and monitor the AI fleet, backed by a local Claude
+  gateway and an 18-agent provider roster (#936).
+- **Floral theme collection** — grew the bundled themes from 150 to 173 (#940).
+
+### Fixed
+
+- **AI installs (`dot ai install`):** three reproducible failures (#942).
+  - *Duplicate banner* — the cockpit shells out to `dot ai install <tool>` once
+    per tool, and each subprocess reprinted the full command banner. `dotExec`
+    now sets `DOT_AI_RAW=1`, matching the streaming path.
+  - *amp* — `@sourcegraph/amp` publishes only prerelease-tagged npm versions,
+    which mise filters out (`@latest` resolves to nothing). Routed to amp's
+    native installer, pre-resolving `AMP_VERSION` to dodge an upstream bug where
+    amp's own version fetch builds a malformed checksum URL.
+  - *Cursor* — `cursor.com/install` User-Agent-sniffs and served marketing HTML
+    to curl (failing the shebang check); now sends a browser UA to fetch the
+    real install script.
+  - Also unified the `dot ai tools` fallback install loop (amp/cursor/goose/grok
+    were silently skipped there) and added an `ai` command summary line.
+- **CI / release reliability:** theme nil-guard and shfmt-absent skip (#939);
+  repinned a stale reusable shell-lint workflow and hardened pin-bumping (#937);
+  the distribute workflows now poll for the release asset before consuming it
+  (#931).
+
 ## v0.2.505 — 2026-06-04
 
 Claude Code is no longer installed through mise/npm. npm 11 silently drops
