@@ -145,5 +145,9 @@ jobs:
           git config --local user.name "GitHub Action"
 
           git add -A
-          git commit -S -m "chore: sync version references to v${TARGET_VERSION}"
+          # -s adds the DCO Signed-off-by trailer (the repo's "Check
+          # sign-off" workflow requires every PR commit to carry one, so
+          # without it this bot's auto-commit fails DCO on the PR it pushes
+          # to). -S keeps the existing SSH signature.
+          git commit -S -s -m "chore: sync version references to v${TARGET_VERSION}"
           git push origin "${{ github.ref_name }}"

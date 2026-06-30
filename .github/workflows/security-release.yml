@@ -21,6 +21,17 @@ on:
 permissions:
   contents: read
 
+# Serialize the `created` and `published` runs for a given release. The
+# `sbom` job runs on both events (the `published`-only manifest job needs
+# its same-run artifact), so without this they execute concurrently and
+# race while clobbering/verifying the same SBOM blobs on the release —
+# which previously failed the "Verify SBOM signature" step. cancel-in-progress
+# is false so both runs still complete (created → SBOM + provenance,
+# published → signed manifest), just one after the other.
+concurrency:
+  group: security-release-${{ github.event.release.tag_name || inputs.release_tag || github.ref }}
+  cancel-in-progress: false
+
 jobs:
   sbom:
     name: Release / SBOM
