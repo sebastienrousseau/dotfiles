@@ -59,7 +59,7 @@ jobs:
 
   secrets-scan:
     name: Security / Secrets Detection
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@91922371a9774e39e018179d9eaf44d4746f4a0d # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # master
     with:
       run_guard: true
       run_additional_patterns: false
@@ -83,7 +83,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: TruffleHog OSS
-        uses: trufflesecurity/trufflehog@30d5bb91af1a771378349dbbb0c82129392acf70 # v3.95.6
+        uses: trufflesecurity/trufflehog@f446421baf832d6356c42c1743d99abff52ff334 # v3.95.7
         with:
           path: ./
           base: ${{ github.event.pull_request.base.sha }}
@@ -111,7 +111,7 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Cache Grype DB
-        uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/grype
           key: grype-db-${{ runner.os }}-${{ github.run_id }}
@@ -154,7 +154,7 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Run Checkov
-        uses: bridgecrewio/checkov-action@063da70420ab562cb31f661b374a76b6a42ed6b5 # v12.3108.0
+        uses: bridgecrewio/checkov-action@a7683e7b72a04503521247973281ec8142e1ac1f # v12.3112.0
         with:
           output_format: sarif
           output_file_path: checkov-results.sarif
@@ -220,7 +220,7 @@ jobs:
 
   policy-enforcement:
     name: Security / Policy Enforcement
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@91922371a9774e39e018179d9eaf44d4746f4a0d # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # master
     needs: [secrets-scan]
     # Only run on PRs to catch issues before merge
     if: github.event_name == 'pull_request'
