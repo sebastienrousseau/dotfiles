@@ -79,32 +79,37 @@ fi
 _dotfiles_alias_shims() {
   [[ -n "${_DOTFILES_ALIAS_SHIMS_LOADED:-}" ]] && return 0
   _DOTFILES_ALIAS_SHIMS_LOADED=1
-  # Remove any same-named aliases first so the function definitions below
-  # don't trip zsh's "defining function based on alias" parse error when
-  # shims are force-enabled (DOTFILES_FORCE_ALIAS_SHIMS=1) while aliases
-  # are still active. `|| true` keeps it safe under `set -e`.
+  # Remove any same-named aliases first so the shims actually take effect
+  # when force-enabled (DOTFILES_FORCE_ALIAS_SHIMS=1) while aliases are
+  # still active. `|| true` keeps it safe under `set -e`.
   unalias c q e h l ll la lt lr lra lta d i a _ 2>/dev/null || true
-  c() { clear_screen; }
-  q() { exit; }
-  e() { "${EDITOR:-nano}" "$@"; }
-  h() { history; }
-  l() { dot_ls "$@"; }
-  ll() { dot_ll "$@"; }
-  la() { dot_la "$@"; }
-  lt() { dot_lt "$@"; }
-  lr() { dot_lr "$@"; }
-  lra() { dot_lra "$@"; }
-  lta() { dot_lta "$@"; }
-  d() {
+  # The function names are SINGLE-QUOTED ('c'() not c()). zsh expands
+  # aliases at parse time — when this file is sourced, the whole function
+  # body is parsed while aliases like `c` are active, so an unquoted
+  # `c() { … }` triggers "defining function based on alias `c`" and a parse
+  # error before any guard/unalias above can run. Quoting the name skips
+  # alias lookup; bash accepts the quoted form too.
+  'c'() { clear_screen; }
+  'q'() { exit; }
+  'e'() { "${EDITOR:-nano}" "$@"; }
+  'h'() { history; }
+  'l'() { dot_ls "$@"; }
+  'll'() { dot_ll "$@"; }
+  'la'() { dot_la "$@"; }
+  'lt'() { dot_lt "$@"; }
+  'lr'() { dot_lr "$@"; }
+  'lra'() { dot_lra "$@"; }
+  'lta'() { dot_lta "$@"; }
+  'd'() {
     if command -v dot >/dev/null 2>&1; then
       dot "$@"
     elif command -v docker >/dev/null 2>&1; then
       docker "$@"
     fi
   }
-  i() { command -v epoch >/dev/null 2>&1 && epoch "$@"; }
-  a() { command -v ai_core >/dev/null 2>&1 && ai_core query "$@"; }
-  _() { sudo "$@"; }
+  'i'() { command -v epoch >/dev/null 2>&1 && epoch "$@"; }
+  'a'() { command -v ai_core >/dev/null 2>&1 && ai_core query "$@"; }
+  '_'() { sudo "$@"; }
 }
 
 if [ -n "${ZSH_VERSION:-}" ]; then
