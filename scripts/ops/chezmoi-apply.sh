@@ -19,9 +19,11 @@ export DOT_COMMAND="apply"
 # (macOS) expanding an empty array under `set -u` is an "unbound
 # variable" error, which would fire on every clean `dot sync`.
 _TMPFILES=()
+_LOCK_DIR=""
 cleanup() {
   set +u
   rm -f "${_TMPFILES[@]}" 2>/dev/null
+  [[ -n "$_LOCK_DIR" ]] && rmdir "$_LOCK_DIR" 2>/dev/null
   set -u
 }
 trap cleanup EXIT
@@ -39,7 +41,9 @@ Environment Variables:
   DOTFILES_CHEZMOI_APPLY_FLAGS    Extra flags for chezmoi apply
   DOTFILES_CHEZMOI_VERBOSE=1      Enable verbose output
   DOTFILES_CHEZMOI_KEEP_GOING=1   Continue on errors
-  DOTFILES_NONINTERACTIVE=1       Force non-interactive mode
+  DOTFILES_NONINTERACTIVE=1       Skip interactive menus (AI provider installer)
+  DOTFILES_INTERACTIVE_APPLY=1    Re-enable chezmoi overwrite prompts
+                                  (apply is unattended/--force by default)
   DOTFILES_ALIAS_STRICT_MODE=1    Run alias governance checks
   DOTFILES_SNAPSHOT_ON_APPLY=1    Create baseline snapshot (default)
   DOTFILES_POST_APPLY_REPAIR=1   Run post-apply repairs (default)
@@ -67,25 +71,55 @@ fi
 has_flag() {
   local needle="$1"
   local arg
+  # Guard the expansion: on bash 3.2 (macOS) iterating an empty array
+  # under `set -u` is an unbound-variable error.
+  [[ ${#args[@]} -eq 0 ]] && return 1
   for arg in "${args[@]}"; do
     [[ "$arg" == "$needle" ]] && return 0
   done
   return 1
 }
 
-# In non-interactive runs, prevent TTY prompts from blocking apply.
-if [[ "${DOTFILES_NONINTERACTIVE:-0}" == "1" ]] && ! has_flag "--force"; then
+# Apply unattended by default, like an OS package manager. chezmoi is
+# always run below under `gum spin` or with its output captured, so it
+# never has a controlling TTY; its "<file> has changed since chezmoi last
+# wrote it" confirmation prompt therefore cannot be answered and aborts
+# the run with "could not open a new TTY". Passing --force applies the
+# canonical source without prompting, so local drift to *managed* files
+# yields to the source — exactly how `apt`/system updates behave. Keep
+# machine-specific tweaks in the unmanaged ~/.zshrc.local or
+# ~/.config/zsh/rc.d.local/*.zsh, which chezmoi never overwrites.
+# Opt back into chezmoi's prompts with DOTFILES_INTERACTIVE_APPLY=1.
+if [[ "${DOTFILES_INTERACTIVE_APPLY:-0}" != "1" ]] && ! has_flag "--force"; then
   args+=("--force")
+fi
+
+# Whether interactive menus (the optional AI-provider installer below) may
+# prompt. Suppressed without a TTY, under CI, or when non-interactive is
+# requested — so unattended runs never hang waiting on input.
+INTERACTIVE=1
+if [[ "${DOTFILES_NONINTERACTIVE:-0}" == "1" ]] || [[ -n "${CI:-}" ]] || [[ ! -t 0 ]] || [[ ! -t 1 ]]; then
+  INTERACTIVE=0
 fi
 
 ui_init
 
-# Prevent concurrent execution
-LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/dotfiles-chezmoi-apply.lock"
-exec 9>"$LOCK_FILE"
-if ! flock -n 9; then
+# Prevent concurrent execution. flock(1) is Linux-only — it does not exist
+# on macOS, where `! flock` previously took the "already running" branch and
+# made `dot apply` a silent no-op. Use flock where present, otherwise fall
+# back to an atomic mkdir lock (portable to macOS/BSD).
+_lock_base="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/dotfiles-chezmoi-apply"
+if command -v flock >/dev/null 2>&1; then
+  exec 9>"${_lock_base}.lock"
+  if ! flock -n 9; then
+    ui_warn "Already running" "Another instance is active"
+    exit 0
+  fi
+elif ! mkdir "${_lock_base}.lock.d" 2>/dev/null; then
   ui_warn "Already running" "Another instance is active"
   exit 0
+else
+  _LOCK_DIR="${_lock_base}.lock.d" # removed by cleanup() on exit
 fi
 
 run_step() {
@@ -187,7 +221,7 @@ for _entry in "${_AI_PROVIDERS[@]}"; do
   fi
 done
 
-if [[ ${#_ai_missing[@]} -gt 0 ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]]; then
+if [[ ${#_ai_missing[@]} -gt 0 ]] && [[ "$INTERACTIVE" == "1" ]]; then
   if command -v mise &>/dev/null; then
     echo ""
     _ai_install_action=""

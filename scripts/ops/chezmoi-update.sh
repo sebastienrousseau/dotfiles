@@ -14,6 +14,20 @@ if [[ "${DOTFILES_CHEZMOI_VERBOSE:-0}" = "1" ]]; then
   args+=("--verbose")
 fi
 
+# Apply unattended by default (see chezmoi-apply.sh). `chezmoi update` runs
+# `apply` internally, so without --force it blocks on the "<file> has
+# changed since chezmoi last wrote it" prompt — and `dot update` is often
+# run from cron/CI/--async with no TTY, where that prompt aborts the run.
+# --force makes updates land like an OS package-manager update; opt back
+# into prompting with DOTFILES_INTERACTIVE_APPLY=1.
+if [[ "${DOTFILES_INTERACTIVE_APPLY:-0}" != "1" ]]; then
+  _has_force=0
+  if [[ ${#args[@]} -gt 0 ]]; then
+    for _a in "${args[@]}"; do [[ "$_a" == "--force" ]] && _has_force=1; done
+  fi
+  [[ "$_has_force" == "0" ]] && args+=("--force")
+fi
+
 ASYNC=false
 if [[ "${DOTFILES_ASYNC_UPDATE:-0}" = "1" ]]; then
   ASYNC=true
