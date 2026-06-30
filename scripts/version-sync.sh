@@ -180,6 +180,16 @@ find_version_files() {
   echo "docs/reference/FEATURES.md" >>"$temp_file"
   echo "docs/COPYRIGHT" >>"$temp_file"
 
+  # Non-markdown and hidden-directory surfaces rg's `--type md` scan above
+  # cannot reach: a shell script, and READMEs under the dotfile-hidden
+  # `.chezmoitemplates/` tree (rg skips dot-dirs without --hidden). These
+  # carry "current version" stamps that check-version-consistency.sh and
+  # the test_version_consistency unit test enforce, so keep them in sync.
+  echo "scripts/git-hooks/pre-commit-audit.sh" >>"$temp_file"
+  echo "defaults/.chezmoitemplates/README.md" >>"$temp_file"
+  echo "defaults/.chezmoitemplates/functions/README.md" >>"$temp_file"
+  echo "defaults/.chezmoitemplates/aliases/README.md" >>"$temp_file"
+
   # Remove duplicates and filter existing files
   sort -u "$temp_file" | while IFS= read -r file; do
     if [[ -f "$file" ]]; then
@@ -257,14 +267,25 @@ update_version_references() {
     temp_file=$(umask 077 && mktemp)
     cp "$file" "$temp_file"
 
-    # Update various version reference patterns
-    case "$(basename "$file")" in
+    # Update various version reference patterns. Match on the full repo
+    # path (not basename) so the root README's badge rules don't also
+    # capture other README.md files (e.g. the .chezmoitemplates READMEs),
+    # which carry a `(vX.Y.Z)` stamp handled by the generic case below.
+    case "$file" in
       "README.md")
         # Update badge and release link versions.
         sed_in_place "$temp_file" \
           -e "s|Version-v$SED_VERSION_PATTERN|Version-v$target_version|g" \
           -e "s|/releases/tag/v$SED_VERSION_PATTERN|/releases/tag/v$target_version|g" \
           -e "s|/dotfiles/v$SED_VERSION_PATTERN/|/dotfiles/v$target_version/|g"
+        ;;
+      "scripts/git-hooks/pre-commit-audit.sh")
+        # "vX.Y.Z standards maintained" banner. Matched explicitly with a
+        # portable pattern — the generic `\bvX.Y.Z\b` rule below relies on
+        # GNU `\b`, which BSD/macOS sed does not support, so a local
+        # `version-sync` run would otherwise leave this script stale.
+        sed_in_place "$temp_file" \
+          -e "s|v$SED_VERSION_PATTERN standards maintained|v$target_version standards maintained|g"
         ;;
       *)
         # Update explicit markdown version labels, backticks, and parentheses.
