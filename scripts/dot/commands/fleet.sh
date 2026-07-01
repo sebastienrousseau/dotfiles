@@ -202,9 +202,13 @@ cmd_fleet_drift() {
       local count="${1:-20}"
       tail -n "$count" "$_DRIFT_HISTORY_FILE" | while IFS= read -r line; do
         local time status file_count
-        time="$(printf '%s' "$line" | jq -r '.time' 2>/dev/null || echo "?")"
-        status="$(printf '%s' "$line" | jq -r '.status' 2>/dev/null || echo "?")"
-        file_count="$(printf '%s' "$line" | jq '.files | length' 2>/dev/null || echo 0)"
+        # One jq per line (was three: .time, .status, .files|length).
+        IFS=$'\t' read -r time status file_count < <(
+          printf '%s' "$line" | jq -r '[.time, .status, (.files | length)] | @tsv' 2>/dev/null
+        )
+        [[ -n "$time" ]] || time="?"
+        [[ -n "$status" ]] || status="?"
+        [[ -n "$file_count" ]] || file_count=0
         if [[ "$status" == "clean" ]]; then
           ui_ok "$time" "clean"
         else

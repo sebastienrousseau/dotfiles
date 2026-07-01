@@ -147,9 +147,7 @@ _ai_get_cached_status() {
 
 # Look up field $2 (2=present 0/1, 3=version) for binary $1 from the
 # cached TSV. Replaces a bash-4 associative array for macOS bash 3.2.
-_ai_status_field() {
-  awk -F'\t' -v b="$1" -v f="$2" '$1==b{print $f;exit}' "$AI_STATUS_CACHE_FILE" 2>/dev/null
-}
+# (Removed _ai_status_field — cmd_ai_status now reads both fields in one awk.)
 
 # _ai_mise_pkg (binary -> mise package map) is defined in lib/dot/ai-install.sh.
 
@@ -193,8 +191,13 @@ cmd_ai_status() {
       ui_section "$category"
       current_category="$category"
     fi
-    if [[ "$(_ai_status_field "$bin" 2)" == "1" ]]; then
-      ver="$(_ai_status_field "$bin" 3)"
+    # One awk over the cache line for this tool (was two: field 2 and field 3).
+    local _st_installed _st_ver
+    IFS=$'\t' read -r _st_installed _st_ver < <(
+      awk -F'\t' -v b="$bin" '$1==b{print $2"\t"$3;exit}' "$AI_STATUS_CACHE_FILE" 2>/dev/null
+    )
+    if [[ "$_st_installed" == "1" ]]; then
+      ver="$_st_ver"
       [[ -z "$ver" ]] && ver="installed"
       [[ "$bin" == "claude" ]] && ver="${ver%% *}"
       ui_ok "$name" "$ver — $desc"
