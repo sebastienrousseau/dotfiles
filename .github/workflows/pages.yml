@@ -1,9 +1,9 @@
 name: Pages
 
 # Builds and deploys the docs/ site to GitHub Pages (custom domain:
-# doc.dotfiles.io). The repo's Pages settings have build_type=workflow,
-# so this is the canonical deploy path — no Jekyll-on-source-branch
-# fallback.
+# doc.dotfiles.io) with MkDocs Material. The repo's Pages settings have
+# build_type=workflow, so this is the canonical deploy path — no
+# Jekyll-on-source-branch fallback.
 #
 # Conflict note: manual-publish.yml builds the multi-format Manual
 # (HTML/PDF/EPUB/...) and attaches it to releases. It used to also
@@ -16,6 +16,8 @@ on:
     branches: [master]
     paths:
       - 'docs/**'
+      - 'mkdocs.yml'
+      - 'requirements-docs.txt'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -32,7 +34,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build site (Jekyll)
+    name: Build site (MkDocs Material)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -43,20 +45,27 @@ jobs:
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
+      - name: Setup Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install MkDocs Material
+        run: pip install -r requirements-docs.txt
+
       - name: Configure Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
-      - name: Build with Jekyll
-        # actions/jekyll-build-pages bundles the Pages-supported plugin
-        # set, mirrors what GH's own Jekyll runner would do, and emits
-        # the static site to ./_site.
-        uses: actions/jekyll-build-pages@44a6e6beabd48582f863aeeb6cb2151cc1716697 # v1.0.13
-        with:
-          source: ./docs
-          destination: ./_site
+      - name: Build with MkDocs
+        # Emits the static site to ./site (docs_dir=docs, site_dir=site in
+        # mkdocs.yml). CNAME is carried through via extra_files.
+        run: mkdocs build --clean
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: ./site
 
   deploy:
     name: Deploy to Pages

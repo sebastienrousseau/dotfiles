@@ -1,0 +1,100 @@
+# MkDocs Material configuration for doc.dotfiles.io
+# Replaces the Jekyll (cayman) site. Build: `mkdocs build`  Serve: `mkdocs serve`
+site_name: .dotfiles
+site_description: >-
+  Cross-platform, signed, local-first dotfiles for macOS, Linux, and WSL —
+  multi-shell parity (bash/zsh/fish/nushell), a fast `dot` CLI, wallpaper-driven
+  themes, SLSA-signed releases, and AI/MCP-aware tooling.
+site_url: https://doc.dotfiles.io/
+site_author: Sebastien Rousseau
+copyright: Copyright &copy; 2015-2026 Sebastien Rousseau
+
+repo_url: https://github.com/sebastienrousseau/dotfiles
+repo_name: sebastienrousseau/dotfiles
+edit_uri: edit/master/docs/
+
+docs_dir: docs
+site_dir: site
+
+# Source-only files that must not become site pages. NOTE: docs/CNAME is
+# intentionally NOT excluded — MkDocs copies non-Markdown files verbatim into
+# the built site, so docs/CNAME → site/CNAME preserves the custom domain.
+exclude_docs: |
+  _config.yml
+  .vitepress/
+  manual/_toc.yml
+  *.tmpl
+
+theme:
+  name: material
+  language: en
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/console
+  favicon: assets/favicon.png
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.indexes
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.action.edit
+    - content.tabs.link
+
+plugins:
+  - search
+  - awesome-pages
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/sebastienrousseau/dotfiles
+    - icon: fontawesome/brands/mastodon
+      link: https://sebastienrousseau.com
