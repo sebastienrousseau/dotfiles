@@ -242,7 +242,7 @@ Tools|learn|Start the interactive tour of your new tools|Guided onboarding.
 Tools|docs|Show repo README|Open the main documentation.
 Appearance|theme|Switch terminal theme (dark/light)|Terminal appearance control.
 Appearance|wallpaper|Apply a wallpaper from your library [macOS,Linux]|Desktop customization helper.
-Appearance|fonts|Install Nerd Fonts (JetBrainsMono by default)|Font bootstrap helper.
+Appearance|fonts|Install (default) or patch Nerd Fonts (JetBrainsMono by default)|Font bootstrap and patcher helper.
 Appearance|tune|Apply OS tuning (opt-in) [macOS,Linux]|Host tuning entrypoint.
 Secrets|secrets-init|Initialize age key for secrets|First-time secrets setup.
 Secrets|secrets|Edit encrypted secrets (age)|Primary secrets entrypoint.
@@ -408,7 +408,7 @@ new|Scaffold a new project from a managed template.|dot new\ndot new --template 
 packages|List installed packages across every package manager on this host.|dot packages\ndot packages --json
 aliases|Inspect or audit shell aliases shipped by the dotfiles.|dot aliases\ndot aliases --check
 wallpaper|Apply a wallpaper from your Pictures/Wallpapers/ library.|dot wallpaper\ndot wallpaper sync\ndot wallpaper rotate
-fonts|Install Nerd Fonts (JetBrainsMono by default) for terminal glyphs.|dot fonts\ndot fonts install Hack
+fonts|Install or patch Nerd Fonts (JetBrainsMono by default) for terminal glyphs.|dot fonts\ndot fonts install Hack\ndot fonts patch ~/Library/Fonts/MyFont.otf
 tune|Apply opt-in OS tuning (macOS / Linux desktop polish).|dot tune\ndot tune --dry-run
 secrets-init|Initialize the age key used for encrypted secrets.|dot secrets-init\ndot secrets-init --recipient ~/.config/sops/age/keys.txt
 secrets-create|Create a new encrypted secrets file.|dot secrets-create ai\ndot secrets-create work --recipient alice@example.com

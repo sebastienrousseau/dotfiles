@@ -79,6 +79,7 @@ else
     INPUT=$(printf "%s" "$INPUT" | tr '-_' '+/')
     while [ $((${#INPUT} % 4)) -ne 0 ]; do INPUT="${INPUT}="; done
   fi
-  printf "%s" "$INPUT" | base64 -d
+  # macOS/BSD base64 uses -D for decode; GNU coreutils uses -d.
+  printf "%s" "$INPUT" | base64 -d 2>/dev/null || printf "%s" "$INPUT" | base64 -D
 fi
 echo ""
