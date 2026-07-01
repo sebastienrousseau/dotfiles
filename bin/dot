@@ -202,6 +202,7 @@ Core|add|Add a file to chezmoi source|Start managing a file in the source tree.
 Core|diff|Show chezmoi diff with exclusions|Preview pending changes before apply.
 Core|status|Show configuration drift (chezmoi status)|Inspect the current managed state.
 Core|edit|Open chezmoi source in $EDITOR|Jump into the source tree quickly.
+Core|uninstall|Remove the managed dotfiles environment (prompts unless --force)|Guided teardown, counterpart to init.
 Core|cd|Print source directory path (use: cd $(dot cd))|Useful in shell scripts and jump helpers.
 Core|commit|AI-powered conventional commit|Wraps the commit helper flow.
 Diagnostics|doctor|Deep audit: tools, paths, portability, AI analysis (--ai|-A)|Main health and repair entrypoint.
@@ -258,6 +259,7 @@ Fleet|fleet|Show fleet node status, drift, and namespace (--json for machine out
 Fleet|fleet drift|Check for configuration drift across managed files|Drift detection and reporting.
 Fleet|fleet namespace|Show or set the active namespace for multi-tenant isolation|Namespace management.
 Fleet|fleet events|Show recent fleet events from local event log|Fleet observability.
+Fleet|teleport|Deploy the dotfiles environment to a remote host over SSH|Ephemeral remote provisioning.
 Meta|upgrade|Update system toolchains, plugins, and dotfiles|Managed upgrade flow.
 Meta|packages|List installed packages and package managers|Inventory and package surfaces.
 Meta|cache-refresh|Regenerate shell caches for ultra-fast startup|Refresh generated shell state.
@@ -440,6 +442,7 @@ status|core
 cd|core
 edit|core
 commit|core
+uninstall|core
 doctor|diagnostics
 scorecard|diagnostics
 score|diagnostics
@@ -449,6 +452,7 @@ perf|diagnostics
 load-bench|diagnostics
 load-bench-pty|diagnostics
 chaos|diagnostics
+teleport|diagnostics
 bundle|diagnostics
 rollback|diagnostics
 heal|diagnostics

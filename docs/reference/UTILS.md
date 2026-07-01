@@ -22,6 +22,7 @@ The `dot` command is the main interface for managing dotfiles. Run `dot version`
 | `dot diff` | Show local changes (excludes scripts) |
 | `dot status` | Show configuration drift |
 | `dot remove <path>` | Safely remove a managed file |
+| `dot uninstall` | Remove the managed dotfiles environment (prompts unless `--force`) |
 | `dot cd` | Print source directory path |
 | `dot edit` | Open source in your editor |
 | `dot clean-cache` | Clear generated shell initialization caches |
@@ -157,6 +158,7 @@ prints a one-line hint. See [AI.md](../AI.md) for the full surface.
 | `dot fleet drift` | Check configuration drift across managed files |
 | `dot fleet namespace` | Show or set the active fleet namespace |
 | `dot fleet events` | Show recent local fleet events |
+| `dot teleport <user@host>` | Deploy the dotfiles environment to a remote host over SSH |
 
 ## Subcommands
 
