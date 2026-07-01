@@ -39,3 +39,5 @@ It is enforced by `bash ./scripts/qa/traceability-coverage.sh`.
 | BT-27 | Workstation environment manifest emitter (`dot env emit`) | `scripts/dot/commands/env-emit.sh` | `tests/unit/dot-cli/test_cmd_env_emit.sh` | `docs/operations/MANIFEST.md`, `docs/schema/dot-env-v1.json` |
 | BT-28 | Cross-file version-string consistency contract | `scripts/qa/check-version-consistency.sh` | `tests/unit/qa/test_check_version_consistency.sh` | `docs/operations/RELIABILITY.md` |
 | BT-29 | OpenSSF Scorecard nightly snapshot artefact | `scripts/qa/scorecard-snapshot.sh` | `tests/unit/qa/test_scorecard_snapshot.sh` | `docs/security/SCORECARD.md` |
+| BT-30 | Shell completion generator (`dot completion <shell>`) | `scripts/dot/commands/completion.sh` | `tests/unit/dot-cli/test_dot_completion.sh` | `docs/reference/UTILS.md` |
+| BT-31 | Examples coverage contract (feature/command → example) | `scripts/qa/examples-coverage.sh` | `tests/unit/misc/test_qa_examples_coverage.sh` | `docs/reference/UTILS.md` |

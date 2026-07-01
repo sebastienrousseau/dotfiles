@@ -373,6 +373,11 @@ search|Find commands by keyword across the public surface.|dot search ai
 help|Show the overview or a focused command reference.|dot help\ndot help doctor\ndot help all
 --version|Show the installed dotfiles version.|dot --version\ndot version
 version|Show the installed dotfiles version.|dot --version\ndot version
+teleport|Deploy the dotfiles environment to a remote host over SSH.|dot teleport user@host
+uninstall|Remove the managed dotfiles environment (prompts unless --force).|dot uninstall\ndot uninstall --force
+policy|Check and enforce security policies across the environment.|dot policy
+secret-audit|Audit secret hygiene and leakage surface.|dot secret-audit
+completion|Generate shell completions from the command registry.|dot completion fish > ~/.config/fish/completions/dot.fish
 cd|Print the dotfiles source directory path for shell helpers.|cd $(dot cd)\ndot cd
 commit|Draft an AI-assisted Conventional Commit for staged changes.|dot commit\ngit add -p && dot commit
 score|Print a system health and security scorecard.|dot score\ndot score --json\ndot score -q
