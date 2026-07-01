@@ -264,6 +264,75 @@ Meta|cache-refresh|Regenerate shell caches for ultra-fast startup|Refresh genera
 Meta|search|Find commands by keyword|Find the right command quickly.
 Meta|version|Show version information.|Matches `dot --version`.
 Meta|help|Show this help message|Overview or focused command help.
+Fleet|fleet status|Show this node's fleet status: id, namespace, version, OS, drift, last apply|Subcommand — e.g. dot fleet status --json
+Fleet|fleet enforce|Show or set RBAC enforcement mode (advisory/strict) for agent profiles|Subcommand — e.g. dot fleet enforce set strict
+Fleet|fleet apply|SSH to every host in fleet.toml and run dot sync (or a custom --cmd)|Subcommand — e.g. dot fleet apply --dry-run
+AI|ai chat|Start an interactive AI session with a chosen tool|Subcommand — e.g. dot ai chat cl
+AI|ai tools|Show installed AI CLI tools and their versions|Subcommand — e.g. dot ai tools
+AI|ai install|Install AI CLI tools via mise/native installers|Subcommand — e.g. dot ai install
+AI|ai serve|Run the local AI gateway/proxy that routes non-Claude providers|Subcommand — e.g. dot ai serve
+AI|ai cost|Report AI spend across every provider from the unified run log|Subcommand — e.g. dot ai cost --since 7
+AI|ai login|Interactive setup/authentication for installed AI CLI tools|Subcommand — e.g. dot ai login
+AI|ai doctor|Diagnose AI tooling configuration and connectivity|Subcommand — e.g. dot ai doctor
+AI|ai ask|Context-aware RAG query over your dotfiles|Subcommand — e.g. dot ai ask "where is theme switch handled"
+AI|ai run|Run a one-shot prompt with an AI tool|Subcommand — e.g. dot ai run "fix this bug"
+AI|ai delegate|Delegate a coding task to a cheaper AI model under agent policy|Subcommand — e.g. dot ai delegate "rename get to fetch"
+AI|mode list|List available agent operating profiles (ask/plan/apply/audit)|Subcommand — e.g. dot mode list
+AI|mode current|Show the active agent profile and its policy|Subcommand — e.g. dot mode current
+AI|mode show|Show details of a specific agent profile|Subcommand — e.g. dot mode show audit
+AI|mode set|Switch the active agent profile|Subcommand — e.g. dot mode set apply
+AI|mode run|Run a command under a given agent profile with a checkpoint|Subcommand — e.g. dot mode run plan git status
+AI|mode doctor|Validate the agent-profiles.json config and default profile|Subcommand — e.g. dot mode doctor
+AI|agent card|Show the local agent card metadata|Subcommand — e.g. dot agent card
+AI|agent log|Tail the agent session audit log|Subcommand — e.g. dot agent log 20
+AI|agent checkpoint|Manage agent run checkpoints (save/list/show/replay)|Subcommand — e.g. dot agent checkpoint list
+AI|agent delegate|Delegate execution to an allowed sub-agent|Subcommand — e.g. dot agent delegate reviewer git diff
+AI|agent a2a-card|Show or validate the A2A v0.3 agent card|Subcommand — e.g. dot agent a2a-card --validate
+AI|agent conformance|Run the A2A conformance test suite|Subcommand — e.g. dot agent conformance --strict
+AI|mcp doctor|Run the MCP policy/supply-chain/config audit|Subcommand — e.g. dot mcp doctor
+AI|mcp registry|Show the configured MCP server registry|Subcommand — e.g. dot mcp registry
+Secrets|secrets edit|Edit the encrypted secrets file (age)|Subcommand — e.g. dot secrets edit
+Secrets|secrets set|Store a secret value under a key|Subcommand — e.g. dot secrets set OPENAI_API_KEY
+Secrets|secrets get|Retrieve a secret value (--raw for plaintext)|Subcommand — e.g. dot secrets get OPENAI_API_KEY --raw
+Secrets|secrets list|List indexed secret keys|Subcommand — e.g. dot secrets list
+Secrets|secrets load|Emit export lines for a secrets bucket (use with eval)|Subcommand — e.g. eval "$(dot secrets load ai)"
+Secrets|secrets provider|Show the active secrets provider|Subcommand — e.g. dot secrets provider
+Tools|env list|List managed tool versions via mise|Subcommand — e.g. dot env list
+Tools|env prune|Show or remove orphan tool installs (--yes to commit)|Subcommand — e.g. dot env prune --yes
+Tools|env install|Install requested tool versions via mise|Subcommand — e.g. dot env install
+Tools|env use|Pin a tool version globally/locally via mise|Subcommand — e.g. dot env use node@22
+Tools|registry list|List modules in the configured module registry|Subcommand — e.g. dot registry list
+Tools|registry search|Filter registry modules by keyword|Subcommand — e.g. dot registry search rust
+Tools|registry info|Print full metadata for a registry module|Subcommand — e.g. dot registry info rust-dev-setup
+Tools|registry install|Install a registry module (scaffold)|Subcommand — e.g. dot registry install rust-dev-setup
+Tools|registry url|Show the active registry URL|Subcommand — e.g. dot registry url
+Tools|registry set-url|Override the registry URL (https only; persists)|Subcommand — e.g. dot registry set-url https://example.com/registry.json
+Appearance|theme list|Show all available terminal/wallpaper themes|Subcommand — e.g. dot theme list
+Appearance|theme set|Set a theme by name (interactive picker if omitted)|Subcommand — e.g. dot theme set macos-sequoia-dark
+Appearance|theme toggle|Toggle light/dark within the current theme family|Subcommand — e.g. dot theme toggle
+Appearance|theme sync|Sync the dotfiles theme with system dark/light mode|Subcommand — e.g. dot theme sync
+Appearance|theme family|Cycle between theme families|Subcommand — e.g. dot theme family
+Appearance|theme current|Show the current theme info|Subcommand — e.g. dot theme current
+Appearance|theme rebuild|Regenerate themes from system and custom wallpapers|Subcommand — e.g. dot theme rebuild
+Appearance|wallpaper sync|Sync wallpaper from your library|Subcommand — e.g. dot wallpaper sync
+Appearance|wallpaper rotate|Rotate to the next wallpaper in your library|Subcommand — e.g. dot wallpaper rotate
+Tools|tools install|Enter the Nix development shell with all managed tools|Subcommand — e.g. dot tools install
+Tools|tools docs|Show the full tools markdown documentation|Subcommand — e.g. dot tools docs
+Tools|profile show|Show the active configuration profile and feature flags|Subcommand — e.g. dot profile show
+Tools|profile set|Set the active configuration profile (run dot sync to apply)|Subcommand — e.g. dot profile set work
+AI|agents list|Show recognised AI agent harnesses and their config paths|Subcommand — e.g. dot agents list
+AI|agents check|Verify AGENTS.md tracks CLAUDE.md (exit 1 if drifted)|Subcommand — e.g. dot agents check
+AI|agents render|Regenerate AGENTS.md and per-harness config from CLAUDE.md|Subcommand — e.g. dot agents render
+Tools|aliases list|List all shell aliases shipped by the dotfiles|Subcommand — e.g. dot aliases list
+Tools|aliases search|Search aliases by term|Subcommand — e.g. dot aliases search git
+Tools|aliases why|Show details and deprecation status for a single alias|Subcommand — e.g. dot aliases why ll
+Tools|aliases stats|Show alias usage counts from shell history|Subcommand — e.g. dot aliases stats
+Tools|aliases cheatsheet|Generate the alias cheatsheet markdown|Subcommand — e.g. dot aliases cheatsheet
+Tools|aliases tiers|Show which alias tiers/ecosystems are enabled|Subcommand — e.g. dot aliases tiers
+AI|patterns list|List AI steering patterns|Subcommand — e.g. dot patterns list
+AI|patterns view|View an AI steering pattern|Subcommand — e.g. dot patterns view code-review
+AI|patterns edit|Edit an AI steering pattern in $EDITOR|Subcommand — e.g. dot patterns edit code-review
+Tools|keys sign-check|Verify git commit-signing configuration and key availability|Subcommand — e.g. dot keys sign-check
 EOF
 }
 
