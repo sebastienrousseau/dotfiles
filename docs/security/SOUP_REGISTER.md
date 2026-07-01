@@ -12,13 +12,13 @@ Controlled inventory for software of unknown pedigree used by the dotfiles platf
 
 | Component | Source | Version control | Verification path | Owner | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| Homebrew installer | `raw.githubusercontent.com/Homebrew/install` | Moving upstream script, gated by `HOMEBREW_INSTALLER_SHA256` | SHA-256 in [package_managers.sh](../../install/lib/package_managers.sh) | Repo maintainer | Conditional |
+| Homebrew installer | `raw.githubusercontent.com/Homebrew/install` | Moving upstream script, gated by `HOMEBREW_INSTALLER_SHA256` | SHA-256 in [package_managers.sh](https://github.com/sebastienrousseau/dotfiles/blob/master/install/lib/package_managers.sh) | Repo maintainer | Conditional |
 | Chezmoi installer | `get.chezmoi.io` | Pinned by `CHEZMOI_INSTALLER_SHA256` when used | SHA-256 in `install/lib/chezmoi.sh` | Repo maintainer | Controlled |
 | GitHub Actions marketplace actions | GitHub Marketplace | Full commit SHA pinning | Workflow `uses:` pins | Repo maintainer | Controlled |
-| Grype container | `anchore/grype` | Pinned tag in workflow | Container tag in [security-enhanced.yml](../../.github/workflows/security-enhanced.yml) | Repo maintainer | Controlled |
-| Trivy container | `aquasec/trivy` | Pinned tag in workflow | Container tag in [security-enhanced.yml](../../.github/workflows/security-enhanced.yml) | Repo maintainer | Controlled |
+| Grype container | `anchore/grype` | Pinned tag in workflow | Container tag in [security-enhanced.yml](https://github.com/sebastienrousseau/dotfiles/blob/master/.github/workflows/security-enhanced.yml) | Repo maintainer | Controlled |
+| Trivy container | `aquasec/trivy` | Pinned tag in workflow | Container tag in [security-enhanced.yml](https://github.com/sebastienrousseau/dotfiles/blob/master/.github/workflows/security-enhanced.yml) | Repo maintainer | Controlled |
 | Checkov action | GitHub Marketplace | Full commit SHA pinning | Workflow `uses:` pin | Repo maintainer | Controlled |
-| Nix inputs | GitHub flakes | Locked in [flake.lock](../../flake.lock) | `narHash` and revision lock | Repo maintainer | Controlled |
+| Nix inputs | GitHub flakes | Locked in [flake.lock](https://github.com/sebastienrousseau/dotfiles/blob/master/flake.lock) | `narHash` and revision lock | Repo maintainer | Controlled |
 | GitHub release metadata queries | GitHub API | Discovery only, not release validation | `update-deps.yml` query path | Repo maintainer | Monitored |
 
 ## Validation record

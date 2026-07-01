@@ -79,8 +79,8 @@ auto-fail the gate even when they're still listed here.
 
 ## References
 
-- [`tools/ci/check-deps-dev.sh`](../../tools/ci/check-deps-dev.sh) — the scanner.
-- [`.github/workflows/deps-dev-validation.yml`](../../.github/workflows/deps-dev-validation.yml) — CI wiring.
-- [`tests/unit/security/test_check_deps_dev.sh`](../../tests/unit/security/test_check_deps_dev.sh) — contract test against canned fixtures.
+- [`tools/ci/check-deps-dev.sh`](https://github.com/sebastienrousseau/dotfiles/blob/master/tools/ci/check-deps-dev.sh) — the scanner.
+- [`.github/workflows/deps-dev-validation.yml`](https://github.com/sebastienrousseau/dotfiles/blob/master/.github/workflows/deps-dev-validation.yml) — CI wiring.
+- [`tests/unit/security/test_check_deps_dev.sh`](https://github.com/sebastienrousseau/dotfiles/blob/master/tests/unit/security/test_check_deps_dev.sh) — contract test against canned fixtures.
 - [deps.dev API reference](https://docs.deps.dev/api/v3/).
 - Issue [#877](https://github.com/sebastienrousseau/dotfiles/issues/877).

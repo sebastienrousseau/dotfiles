@@ -102,6 +102,6 @@ When adding a new workflow:
 
 ## References
 
-- [`nightly.yml`](../../.github/workflows/nightly.yml) — the workflow whose cadence flip triggered this page.
-- [`security-enhanced.yml`](../../.github/workflows/security-enhanced.yml) — earlier daily→weekly reduction.
+- [`nightly.yml`](https://github.com/sebastienrousseau/dotfiles/blob/master/.github/workflows/nightly.yml) — the workflow whose cadence flip triggered this page.
+- [`security-enhanced.yml`](https://github.com/sebastienrousseau/dotfiles/blob/master/.github/workflows/security-enhanced.yml) — earlier daily→weekly reduction.
 - Issue [#861](https://github.com/sebastienrousseau/dotfiles/issues/861).

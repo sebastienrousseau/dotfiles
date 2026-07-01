@@ -176,7 +176,7 @@ Adjust via the env vars at the top of `run-coverage.sh`.
 ## References
 
 - [Bash xtrace + PS4 + BASH_ENV docs](https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html).
-- [`tools/ci/run-coverage.sh`](../../tools/ci/run-coverage.sh).
-- [`.github/workflows/coverage.yml`](../../.github/workflows/coverage.yml).
+- [`tools/ci/run-coverage.sh`](https://github.com/sebastienrousseau/dotfiles/blob/master/tools/ci/run-coverage.sh).
+- [`.github/workflows/coverage.yml`](https://github.com/sebastienrousseau/dotfiles/blob/master/.github/workflows/coverage.yml).
 - Issue [#856](https://github.com/sebastienrousseau/dotfiles/issues/856) (closed) /
   [#883](https://github.com/sebastienrousseau/dotfiles/issues/883) (coverage roadmap).
