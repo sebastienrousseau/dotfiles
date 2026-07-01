@@ -111,7 +111,7 @@ Each phase ships as its own reviewed PR with before/after benchmarks.
 | Phase | Work | Risk | Target payoff |
 |-------|------|------|---------------|
 | **0** | Honest benchmark harness in-repo; make `dot doctor` report real numbers | low | truth in metrics |
-| **1** | Perf quick-wins: first-prompt deferral (atuin/fzf/highlight), `mise activate` last, trim eager sourcing | med | zsh ~35–45ms, bash ~30ms |
+| **1** | Perf quick-wins audit (deferral, compinit, zcompile, mise ordering) | low | verify + record baseline |
 | **2** | Extract `lib/dot/ui.sh` → versioned shared lib | med | unblocks decoupling |
 | **3** | `dot` plugin API + carve out `dotfiles-mcp` (lowest-risk repo) | med | proves the model |
 | **4** | Cross-shell manifest (single source → per-shell generators); de-bash-bridge fish | high | consistency + fish speed |
@@ -120,6 +120,25 @@ Each phase ships as its own reviewed PR with before/after benchmarks.
 | **7** | Docs + `examples/` + published honest benchmarks | med | completeness |
 
 ### Status
-- Phase 0 — in progress (this branch, `feat/v0.2.509`).
-- Phase 1 — in progress (this branch).
+- **Phase 0 — done** (`feat/v0.2.509`): `tests/performance/bench.sh` now times
+  every shell *interactively* (fish was measured non-interactively, faking
+  ~12ms vs the real ~118ms) and includes nushell; `dot doctor` reports the
+  real medians.
+- **Phase 1 — done (audit)** (`feat/v0.2.509`): the documented quick-wins are
+  **already implemented** in the deployed config, verified:
+  - `compinit` deferred to first prompt, `-C` + daily-audit cache
+    (`~/.config/zsh/rc.d/30-options.zsh`).
+  - Eagerly-sourced hub files are `zcompile`d (`.zwc` present).
+  - Plugins turbo-deferred (`zinit ice wait lucid`), fzf backgrounded, and
+    mise/atuin/starship/zoxide inits deferred to post-prompt hydration and
+    cached via `_cached_eval`.
+  - `mise activate` ordering is a non-issue here: zsh uses `add-zsh-hook`
+    (appends, no overwrite) and bash manages `PROMPT_COMMAND` explicitly.
+  - Net: `zsh -ic exit` (which runs before the prompt, so it excludes the
+    deferred inits) is ~66ms of *eager* rc — dominated by sourcing the large
+    aggregated alias/function hubs. No safe further quick-win remains.
+  - **Consequence:** sub-30ms is not reachable by tuning; it needs Phase 4
+    (manifest → cut the eager alias/function volume) or a lean profile.
+    fish (~118ms) is the biggest single opportunity (bash-bridge), also
+    Phase 4.
 - Phases 2–7 — planned; sequencing subject to review.
