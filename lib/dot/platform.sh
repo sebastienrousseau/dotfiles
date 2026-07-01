@@ -7,38 +7,61 @@
 
 set -euo pipefail
 
+# These are called repeatedly within one `dot` invocation (dot_host_os itself
+# calls dot_platform_id + dot_is_wsl), each forking `uname`/`grep`. Memoise per
+# process — the platform can't change mid-run. Caches are process-local (not
+# exported), so child processes still resolve fresh.
 if ! declare -F dot_is_wsl >/dev/null; then
   dot_is_wsl() {
-    [[ -f /proc/sys/kernel/osrelease ]] && grep -qiE '(microsoft|wsl)' /proc/sys/kernel/osrelease
+    if [[ -n "${_DOT_IS_WSL:-}" ]]; then
+      return "$_DOT_IS_WSL"
+    fi
+    if [[ -f /proc/sys/kernel/osrelease ]] && grep -qiE '(microsoft|wsl)' /proc/sys/kernel/osrelease; then
+      _DOT_IS_WSL=0
+    else
+      _DOT_IS_WSL=1
+    fi
+    return "$_DOT_IS_WSL"
   }
 fi
 
 dot_platform_id() {
-  case "$(uname -s)" in
-    Darwin) printf "%s\n" "macos" ;;
-    Linux)
-      if dot_is_wsl; then
-        printf "%s\n" "wsl"
-      else
-        printf "%s\n" "linux"
-      fi
-      ;;
-    FreeBSD | OpenBSD | NetBSD | DragonFly) printf "%s\n" "bsd" ;;
-    *) printf "%s\n" "unknown" ;;
-  esac
-}
-
-dot_host_os() {
-  if dot_is_wsl; then
-    printf "%s\n" "windows"
+  if [[ -n "${_DOT_PLATFORM_ID:-}" ]]; then
+    printf "%s\n" "$_DOT_PLATFORM_ID"
     return
   fi
   case "$(uname -s)" in
-    Darwin) printf "%s\n" "macos" ;;
-    Linux) printf "%s\n" "linux" ;;
-    FreeBSD | OpenBSD | NetBSD | DragonFly) printf "%s\n" "bsd" ;;
-    *) printf "%s\n" "unknown" ;;
+    Darwin) _DOT_PLATFORM_ID="macos" ;;
+    Linux)
+      if dot_is_wsl; then
+        _DOT_PLATFORM_ID="wsl"
+      else
+        _DOT_PLATFORM_ID="linux"
+      fi
+      ;;
+    FreeBSD | OpenBSD | NetBSD | DragonFly) _DOT_PLATFORM_ID="bsd" ;;
+    *) _DOT_PLATFORM_ID="unknown" ;;
   esac
+  printf "%s\n" "$_DOT_PLATFORM_ID"
+}
+
+dot_host_os() {
+  if [[ -n "${_DOT_HOST_OS:-}" ]]; then
+    printf "%s\n" "$_DOT_HOST_OS"
+    return
+  fi
+  if dot_is_wsl; then
+    _DOT_HOST_OS="windows"
+    printf "%s\n" "$_DOT_HOST_OS"
+    return
+  fi
+  case "$(uname -s)" in
+    Darwin) _DOT_HOST_OS="macos" ;;
+    Linux) _DOT_HOST_OS="linux" ;;
+    FreeBSD | OpenBSD | NetBSD | DragonFly) _DOT_HOST_OS="bsd" ;;
+    *) _DOT_HOST_OS="unknown" ;;
+  esac
+  printf "%s\n" "$_DOT_HOST_OS"
 }
 
 # Convert host-native path into Linux path when inside WSL.
