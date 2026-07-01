@@ -23,6 +23,7 @@ dot_platform_id() {
         printf "%s\n" "linux"
       fi
       ;;
+    FreeBSD | OpenBSD | NetBSD | DragonFly) printf "%s\n" "bsd" ;;
     *) printf "%s\n" "unknown" ;;
   esac
 }
@@ -35,6 +36,7 @@ dot_host_os() {
   case "$(uname -s)" in
     Darwin) printf "%s\n" "macos" ;;
     Linux) printf "%s\n" "linux" ;;
+    FreeBSD | OpenBSD | NetBSD | DragonFly) printf "%s\n" "bsd" ;;
     *) printf "%s\n" "unknown" ;;
   esac
 }
@@ -93,7 +95,7 @@ dot_open_path() {
         explorer.exe "$(dot_path_to_native "$target")"
       fi
       ;;
-    linux)
+    linux | bsd)
       xdg-open "$target"
       ;;
     *)
