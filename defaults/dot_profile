@@ -22,6 +22,11 @@ if [ -n "$PROFILE_SOURCED" ]; then
 fi
 export PROFILE_SOURCED=1
 
+# --- Dotfiles cockpit opt-in ---
+# Enables the run_onchange_25-build-dot-ai-tui hook so
+# ~/.local/bin/dot-ai-tui is (re)built by chezmoi apply.
+export DOTFILES_AI=1
+
 # --- XDG Base Directory Specification ---
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
