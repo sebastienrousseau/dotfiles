@@ -88,12 +88,13 @@ _agent_apply_profile_env() {
   # Split declare-and-assign to avoid masking the field-getter's exit
   # code (SC2155). If the profile JSON is malformed, the assignment
   # now fails the function instead of silently exporting an empty value.
-  local approval filesystem network mcp_profile max_steps
-  approval="$(_agent_profile_field "$name" "approval")"
-  filesystem="$(_agent_profile_field "$name" "filesystem")"
-  network="$(_agent_profile_field "$name" "network")"
-  mcp_profile="$(_agent_profile_field "$name" "mcpProfile")"
-  max_steps="$(_agent_profile_field "$name" "maxSteps")"
+  local approval filesystem network mcp_profile max_steps tuple
+  # One jq read of all five policy fields (was five separate jq processes on
+  # every profile application). `|| return 1` preserves fail-on-malformed.
+  tuple="$(jq -r --arg name "$name" \
+    '.profiles[$name] | [.approval, .filesystem, .network, .mcpProfile, .maxSteps] | @tsv' \
+    "$(_agent_profiles_file)")" || return 1
+  IFS=$'\t' read -r approval filesystem network mcp_profile max_steps <<<"$tuple"
   export DOT_AGENT_APPROVAL="$approval"
   export DOT_AGENT_FILESYSTEM="$filesystem"
   export DOT_AGENT_NETWORK="$network"
