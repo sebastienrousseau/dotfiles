@@ -96,18 +96,23 @@ ui_init() {
     fi
   fi
 
-  # --- Color palette (tput) ---
-  if [[ -t 1 ]] && [[ -z "${NO_COLOR:-}" ]] && command -v tput >/dev/null 2>&1 && tput setaf 1 >/dev/null 2>&1; then
+  # --- Color palette (hardcoded ANSI; no tput forks) ---
+  # This previously forked ~10 `tput` processes on every ui_init, and because
+  # the dispatched command module re-sources ui.sh and re-inits, that doubled
+  # to ~20 forks per invocation on a TTY. The escapes below are exactly what
+  # `tput bold/sgr0/setaf` emit on a standard terminal (the bin/dot fallback
+  # already hardcodes the same idea), so appearance is unchanged with zero forks.
+  if [[ -t 1 ]] && [[ -z "${NO_COLOR:-}" ]] && [[ "${TERM:-}" != "dumb" ]]; then
     UI_COLOR=1
-    BOLD="$(tput bold)"
-    NORMAL="$(tput sgr0)"
-    RED="$(tput setaf 1)"
-    GREEN="$(tput setaf 2)"
-    YELLOW="$(tput setaf 3)"
-    BLUE="$(tput setaf 4)"
-    MAGENTA="$(tput setaf 5)"
-    CYAN="$(tput setaf 6)"
-    GRAY="$(tput setaf 8)"
+    BOLD=$'\033[1m'
+    NORMAL=$'\033[0m'
+    RED=$'\033[31m'
+    GREEN=$'\033[32m'
+    YELLOW=$'\033[33m'
+    BLUE=$'\033[34m'
+    MAGENTA=$'\033[35m'
+    CYAN=$'\033[36m'
+    GRAY=$'\033[90m'
   fi
 
   UI_INITED=1

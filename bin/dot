@@ -469,7 +469,17 @@ _dot_command_route() {
   if [[ -z "$command_name" ]]; then
     return 1
   fi
-  awk -F'|' -v command_name="$command_name" '$1 == command_name { print $2; exit }' < <(_dot_command_routes)
+  # Pure-bash scan of the route table — avoids the extra awk fork on the hot
+  # path of every invocation (routes stay in _dot_command_routes for the
+  # tooling/tests that parse them from source).
+  local cmd module
+  while IFS='|' read -r cmd module; do
+    if [[ "$cmd" == "$command_name" ]]; then
+      printf '%s\n' "$module"
+      return 0
+    fi
+  done < <(_dot_command_routes)
+  return 1
 }
 
 show_help_overview() {
@@ -576,7 +586,9 @@ resolve_source_dir() { _resolve_source_dir; }
 # Routes COMMAND to the appropriate command module in scripts/dot/commands/.
 # Each module receives the original COMMAND as its first argument so that its
 # internal case statement can dispatch to the right sub-function.
-_SOURCE_DIR="$(_resolve_source_dir)"
+# Reuse the source dir already resolved at startup (line ~69) instead of
+# re-running _resolve_source_dir (several cd/pwd subshells) on every invocation.
+_SOURCE_DIR="$_DOT_SRC"
 _CMD_DIR="${_SOURCE_DIR}/scripts/dot/commands"
 
 _dispatch() {
