@@ -114,6 +114,10 @@ cmd_teleport() {
   run_script "scripts/ops/teleport.sh" "Teleport script" "$@"
 }
 
+cmd_secret_audit() {
+  run_script "scripts/diagnostics/secret-governance.sh" "Secret governance script" "$@"
+}
+
 cmd_bundle() {
   run_script "scripts/ops/bundle.sh" "Offline bundle script" "$@"
 }
@@ -214,6 +218,10 @@ case "${1:-}" in
   teleport)
     shift
     cmd_teleport "$@"
+    ;;
+  secret-audit)
+    shift
+    cmd_secret_audit "$@"
     ;;
   bundle)
     shift

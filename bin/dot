@@ -207,6 +207,7 @@ Core|cd|Print source directory path (use: cd $(dot cd))|Useful in shell scripts 
 Core|commit|AI-powered conventional commit|Wraps the commit helper flow.
 Diagnostics|doctor|Deep audit: tools, paths, portability, AI analysis (--ai|-A)|Main health and repair entrypoint.
 Diagnostics|attest|Export workstation attestation evidence (--json|-j, --write|-w, --fleet-store|-F)|Produce machine-readable evidence.
+Diagnostics|secret-audit|Audit secret hygiene and leakage surface|Secret governance report.
 Diagnostics|score|System health and security scorecard|Quick high-level readout.
 Diagnostics|snapshot|Capture baseline system snapshot|Use before larger changes.
 Diagnostics|chaos|Simulate config corruption to test self-healing|Advanced validation path.
@@ -249,6 +250,7 @@ Secrets|secrets-create|Create an encrypted secrets file|Create a new secret payl
 Secrets|ssh-key|Encrypt an SSH key locally with age|Protect local SSH keys.
 Secrets|ssh-cert|Manage short-lived SSH certificates|SSH certificate workflow.
 Security (opt-in)|backup|Create a compressed backup of your home|Safety copy before risky changes.
+Security (opt-in)|policy|Check and enforce security policies across the environment|Security policy audit.
 Security (opt-in)|encrypt-check|Check disk encryption status|Host security inspection.
 Security (opt-in)|firewall|Apply firewall hardening [macOS,Linux]|Opt-in host hardening.
 Security (opt-in)|telemetry|Disable OS telemetry [macOS,Linux]|Privacy-focused host control.
@@ -469,6 +471,7 @@ conflicts|diagnostics
 locks|diagnostics
 restore|diagnostics
 metrics|diagnostics
+secret-audit|diagnostics
 ai|ai
 ai-setup|ai
 ai-query|ai
@@ -507,6 +510,7 @@ secrets-create|secrets
 ssh-key|secrets
 ssh-cert|secrets
 backup|security
+policy|security
 encrypt-check|security
 firewall|security
 telemetry|security

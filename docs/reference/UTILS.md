@@ -40,6 +40,7 @@ The `dot` command is the main interface for managing dotfiles. Run `dot version`
 | Command | Description |
 |---------|-------------|
 | `dot doctor` | Run system health checks (`--score/-s`,`--heal/-H`) |
+| `dot secret-audit` | Audit secret hygiene and leakage surface |
 | `dot health` | Run the health dashboard (`--verbose/-v`,`--json/-j`,`--fix/-f`,`--force/-F`) |
 | `dot heal` | Auto-repair missing tools, chezmoi drift, broken symlinks, and critical files (`--dry-run/-n`,`--force/-f`) |
 | `dot smoke-test` | Verify toolchains (Rust, Go, AI CLIs) |
@@ -144,6 +145,7 @@ prints a one-line hint. See [AI.md](../AI.md) for the full surface.
 | Command | Description |
 |---------|-------------|
 | `dot backup` | Create a compressed backup |
+| `dot policy` | Check and enforce security policies across the environment |
 | `dot encrypt-check` | Check disk encryption status |
 | `dot firewall` | Apply firewall hardening |
 | `dot telemetry` | Disable telemetry |
