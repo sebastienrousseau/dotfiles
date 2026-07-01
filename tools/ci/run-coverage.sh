@@ -39,6 +39,18 @@ COV_INCLUDE_DIRS="${COV_INCLUDE_DIRS:-$REPO_ROOT/scripts:$REPO_ROOT/lib:$REPO_RO
 JOBS="${JOBS:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}"
 COV_TEST_TIMEOUT="${COV_TEST_TIMEOUT:-60}"
 
+# GNU `timeout` guards against a hung test stalling the sweep, but it does
+# not exist on stock macOS (it's coreutils). Prefer `timeout`, then
+# `gtimeout` (brew coreutils), else run with no wrapper — losing only the
+# hang-guard, not the measurement. Without this, every traced test on macOS
+# failed with "command not found: timeout" and coverage came out 0%.
+COV_TIMEOUT_CMD=""
+if command -v timeout >/dev/null 2>&1; then
+  COV_TIMEOUT_CMD="timeout"
+elif command -v gtimeout >/dev/null 2>&1; then
+  COV_TIMEOUT_CMD="gtimeout"
+fi
+
 mkdir -p "$COVERAGE_DIR"
 trace_dir="$COVERAGE_DIR/traces"
 rm -rf "$trace_dir"
@@ -103,15 +115,23 @@ run_one() {
   local f="$1"
   local trace
   trace="$COV_TRACE_DIR/$(basename "$f" .sh).trace"
-  PS4='+@COV@:${LINENO}:${BASH_SOURCE}:@ ' \
-    BASH_ENV="$COV_BASH_ENV" \
-    timeout --kill-after=5 "$COV_TEST_TIMEOUT" \
-    bash "$f" 2>"$trace" >/dev/null || true
+  if [[ -n "${COV_TIMEOUT_CMD:-}" ]]; then
+    PS4='+@COV@:${LINENO}:${BASH_SOURCE}:@ ' \
+      BASH_ENV="$COV_BASH_ENV" \
+      "$COV_TIMEOUT_CMD" --kill-after=5 "$COV_TEST_TIMEOUT" \
+      bash "$f" 2>"$trace" >/dev/null || true
+  else
+    # No timeout available (stock macOS): run without the hang-guard.
+    PS4='+@COV@:${LINENO}:${BASH_SOURCE}:@ ' \
+      BASH_ENV="$COV_BASH_ENV" \
+      bash "$f" 2>"$trace" >/dev/null || true
+  fi
 }
 
 export COV_TRACE_DIR="$trace_dir"
 export COV_BASH_ENV="$bash_env"
 export COV_TEST_TIMEOUT
+export COV_TIMEOUT_CMD
 export -f run_one
 
 start_ts=$(date +%s)
