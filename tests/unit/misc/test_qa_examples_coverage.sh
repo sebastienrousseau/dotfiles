@@ -26,6 +26,11 @@ assert_file_exists "$EXAMPLES_DIR/example-theme.sh" "theme feature must have an 
 assert_file_exists "$EXAMPLES_DIR/example-secrets.sh" "secrets feature must have an example"
 assert_file_exists "$EXAMPLES_DIR/example-fleet.sh" "fleet feature must have an example"
 
+# Per-command reference: every public dot command has a usage example.
+test_start "examples_have_per_command_reference"
+assert_file_exists "$EXAMPLES_DIR/example-command-reference.sh" "per-command reference example must exist"
+
+# Contract passes at 100% for BOTH feature domains and per-command coverage.
 test_start "examples_coverage_contract_passes"
 assert_exit_code 0 "REPO_ROOT='$REPO_ROOT' bash '$SCRIPT_FILE'"
 
