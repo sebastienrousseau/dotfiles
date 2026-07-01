@@ -79,6 +79,7 @@ The `dot` command is the main interface for managing dotfiles. Run `dot version`
 | `dot learn` | Start the guided onboarding tour |
 | `dot docs` | Show the main repository documentation |
 | `dot log-rotate` | Rotate `~/.local/share/dotfiles.log` |
+| `dot completion <bash\|zsh\|fish\|nu>` | Generate shell completions from the command registry |
 | `dot lint` | Lint shell scripts (`--check/-c`,`--fix/-f`) |
 
 ## Universal Scripts

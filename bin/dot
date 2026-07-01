@@ -263,6 +263,7 @@ Fleet|teleport|Deploy the dotfiles environment to a remote host over SSH|Ephemer
 Meta|upgrade|Update system toolchains, plugins, and dotfiles|Managed upgrade flow.
 Meta|packages|List installed packages and package managers|Inventory and package surfaces.
 Meta|cache-refresh|Regenerate shell caches for ultra-fast startup|Refresh generated shell state.
+Meta|completion|Generate shell completions (bash/zsh/fish/nu) from the command registry|e.g. dot completion fish > ~/.config/fish/completions/dot.fish
 Meta|search|Find commands by keyword|Find the right command quickly.
 Meta|version|Show version information.|Matches `dot --version`.
 Meta|help|Show this help message|Overview or focused command help.
@@ -514,6 +515,7 @@ lock-screen|security
 usb-safety|security
 upgrade|meta
 cache-refresh|meta
+completion|completion
 prewarm|meta
 docs|meta
 learn|meta
@@ -675,7 +677,7 @@ fi
 route="$(_dot_command_route "$COMMAND" || true)"
 
 case "$route" in
-  core | diagnostics | ai | tools | appearance | secrets | security | meta | fleet)
+  core | diagnostics | ai | tools | appearance | secrets | security | meta | fleet | completion)
     _dispatch "$route" "$@"
     ;;
 
