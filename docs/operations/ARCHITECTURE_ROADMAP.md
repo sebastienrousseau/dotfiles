@@ -120,11 +120,11 @@ Each phase ships as its own reviewed PR with before/after benchmarks.
 | **7** | Docs + `examples/` + published honest benchmarks | med | completeness |
 
 ### Status
-- **Phase 0 — done** (`feat/v0.2.509`): `tests/performance/bench.sh` now times
+- **Phase 0 — done** (`feat/v0.2.508`): `tests/performance/bench.sh` now times
   every shell *interactively* (fish was measured non-interactively, faking
   ~12ms vs the real ~118ms) and includes nushell; `dot doctor` reports the
   real medians.
-- **Phase 1 — done (audit)** (`feat/v0.2.509`): the documented quick-wins are
+- **Phase 1 — done (audit)** (`feat/v0.2.508`): the documented quick-wins are
   **already implemented** in the deployed config, verified:
   - `compinit` deferred to first prompt, `-C` + daily-audit cache
     (`~/.config/zsh/rc.d/30-options.zsh`).
