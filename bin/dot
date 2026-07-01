@@ -303,6 +303,7 @@ Secrets|secrets list|List indexed secret keys|Subcommand — e.g. dot secrets li
 Secrets|secrets load|Emit export lines for a secrets bucket (use with eval)|Subcommand — e.g. eval "$(dot secrets load ai)"
 Secrets|secrets provider|Show the active secrets provider|Subcommand — e.g. dot secrets provider
 Tools|env list|List managed tool versions via mise|Subcommand — e.g. dot env list
+Tools|env emit|Emit a portable workstation environment manifest (SBOM; --format json)|Subcommand — e.g. dot env emit --format json
 Tools|env prune|Show or remove orphan tool installs (--yes to commit)|Subcommand — e.g. dot env prune --yes
 Tools|env install|Install requested tool versions via mise|Subcommand — e.g. dot env install
 Tools|env use|Pin a tool version globally/locally via mise|Subcommand — e.g. dot env use node@22

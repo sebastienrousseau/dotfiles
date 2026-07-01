@@ -126,6 +126,7 @@ printf '  dot secrets load — Emit export lines for a secrets bucket (use with 
 printf '  dot secrets provider — Show the active secrets provider\n'
 printf '\n[Tools]\n'
 printf '  dot env list — List managed tool versions via mise\n'
+printf '  dot env emit — Emit a portable workstation environment manifest (SBOM; --format json)\n'
 printf '  dot env prune — Show or remove orphan tool installs (--yes to commit)\n'
 printf '  dot env install — Install requested tool versions via mise\n'
 printf '  dot env use — Pin a tool version globally/locally via mise\n'

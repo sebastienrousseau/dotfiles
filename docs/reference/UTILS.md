@@ -71,6 +71,7 @@ The `dot` command is the main interface for managing dotfiles. Run `dot version`
 | Command | Description |
 |---------|-------------|
 | `dot env` | Show managed runtime and tool versions |
+| `dot env emit` | Emit a portable workstation environment manifest (SBOM) |
 | `dot profile` | Show or switch the active configuration profile |
 | `dot keys` | Show the keybindings and signing reference |
 | `dot tools` | Show tools documentation |
