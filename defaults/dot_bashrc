@@ -294,6 +294,14 @@ for _hub_layer in 00-core-paths 05-core-safety 40-ls-colors \
 done
 unset _dotfiles_shell_dir _hub_layer
 
+# --- Optional secret bucket auto-loader ---
+# Shared with zsh (dot_zshrc sources the same file). No-op unless
+# DOTFILES_SECRETS_AUTO_LOAD=1; emits POSIX export lines bash can source.
+if [[ -f "$HOME/.config/shell/10-secrets.sh" ]]; then
+  # shellcheck source=/dev/null
+  . "$HOME/.config/shell/10-secrets.sh"
+fi
+
 # --- Source local overrides ---
 if [[ -f "$HOME/.bashrc.local" ]]; then
   # shellcheck source=/dev/null
