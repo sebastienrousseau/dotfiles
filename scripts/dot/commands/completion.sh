@@ -44,6 +44,27 @@ _completion_commands() {
   ' "$cli"
 }
 
+# Emit "parent<TAB>child<TAB>description" for every subcommand (a field-2
+# entry that contains a space, e.g. "theme list" -> parent=theme child=list).
+_completion_subcommands() {
+  local cli
+  cli="$(_completion_dot_cli)"
+  awk -F'|' '
+    /_dot_help_specs\(\)/ { in_func = 1; next }
+    in_func && /cat <<'\''EOF'\''/ { in_block = 1; next }
+    in_block && /^EOF$/ { exit }
+    in_block && NF >= 3 && $2 ~ / / {
+      full = $2; desc = $3
+      gsub(/^[ \t]+|[ \t]+$/, "", full)
+      gsub(/^[ \t]+|[ \t]+$/, "", desc)
+      gsub(/[":\047]/, "", desc)
+      parent = full; sub(/ .*/, "", parent)
+      child = full; sub(/^[^ ]+ /, "", child)
+      if (parent != "" && child != "") print parent "\t" child "\t" desc
+    }
+  ' "$cli"
+}
+
 gen_bash() {
   local names
   names="$(_completion_commands | cut -f1 | tr '\n' ' ')"
@@ -68,6 +89,11 @@ gen_fish() {
   while IFS=$'\t' read -r name desc; do
     printf 'complete -c dot -n "__fish_use_subcommand" -a %s -d "%s"\n' "$name" "$desc"
   done < <(_completion_commands)
+  local parent child
+  while IFS=$'\t' read -r parent child desc; do
+    printf 'complete -c dot -n "__fish_seen_subcommand_from %s" -a %s -d "%s"\n' \
+      "$parent" "$child" "$desc"
+  done < <(_completion_subcommands)
 }
 
 gen_nu() {
