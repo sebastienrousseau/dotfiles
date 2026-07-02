@@ -14,13 +14,18 @@ if status is-interactive
     # Native fish functions that must not be overridden by bash aliases
     set -l _skip{{ range $fishFuncs }} {{ trimSuffix ".fish" (base .) }}{{ end }}
 
-    # Rebuild cache when alias sources change or cache is missing
+    # Rebuild cache when alias sources change or cache is missing / stale.
+    # A cache still using the old `alias name=value` format (v0) is also
+    # treated as stale so upgrading users pick up the abbr-based cache
+    # without needing to nuke it manually.
     set -l _stale 0
     if not test -f "$_alias_cache"
         set _stale 1
     else if test -f "$_src_eager"; and test "$_src_eager" -nt "$_alias_cache"
         set _stale 1
     else if test -f "$_src_lazy"; and test "$_src_lazy" -nt "$_alias_cache"
+        set _stale 1
+    else if not head -n 1 "$_alias_cache" 2>/dev/null | string match -qr '^abbr --add '
         set _stale 1
     end
 
@@ -43,15 +48,15 @@ if status is-interactive
                     *"[[ "*) continue ;;
                     *\`*) continue ;;
                 esac
-                printf "alias %s=%s\n" "$name" "$val"
+                printf "abbr --add %s -- %s\n" "$name" "$val"
             done
         ' 2>/dev/null | while read -l _line
-            set -l _parts (string match -r '^alias ([^=]+)=' -- "$_line")
+            set -l _parts (string match -r '^abbr --add (\S+) -- ' -- "$_line")
             set -l _name
             if set -q _parts[2]
                 set _name $_parts[2]
             end
-            set -l _target (string replace -r '^alias [^=]+=["'\'']?([^ "'\'']+).*$' '$1' -- "$_line")
+            set -l _target (string replace -r '^abbr --add \S+ -- ["'\'']?([^ "'\'']+).*$' '$1' -- "$_line")
             if set -q _name[1]; and not contains -- "$_name" $_skip
                 if string match -rq '^dot_[a-z0-9_]+$' -- "$_target"
                     continue
