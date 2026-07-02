@@ -13,7 +13,7 @@
 
 {{- $theme := default "tokyonight-night" .theme -}}
 {{- $fontFamily := default "JetBrains Mono" .terminal_font_family -}}
-{{- $fontSize := default 12 .terminal_font_size -}}
+{{- $fontSize := default 14 .terminal_font_size -}}
 {{- $linuxDesktop := or .features.linux_desktop .features.niri -}}
 {{- $wsl := and (hasKey .chezmoi.kernel "osrelease") (contains "microsoft" (get .chezmoi.kernel "osrelease" | default "")) -}}
 
