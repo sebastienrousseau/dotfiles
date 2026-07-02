@@ -72,7 +72,7 @@ job `lint/command-index` fails when this file is stale.
 | `dot fleet` | events Show recent fleet events from local event log |
 | `dot fleet` | namespace Show or set the active namespace for multi-tenant isolation |
 | `dot fleet` | status Show this node's fleet status: id, namespace, version, OS, drift, last apply |
-| `dot fonts` | Install Nerd Fonts (JetBrainsMono by default) |
+| `dot fonts` | Install (default) or patch Nerd Fonts (JetBrainsMono by default) |
 | `dot help` | Show this help message |
 | `dot history` | Shell history analysis |
 | `dot keys` | Keybindings (sign-check: verify git signing) |
