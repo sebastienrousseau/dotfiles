@@ -18,7 +18,7 @@ theme = "plasma-dark"
 
 # Terminal settings
 terminal_font_family = "JetBrainsMono Nerd Font"
-terminal_font_size = 14
+terminal_font_size = 20
 default_shell = "fish" # zsh, fish, or nu
 
 # Git identity (should be set via chezmoi init prompts or local overrides)
