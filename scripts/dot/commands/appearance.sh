@@ -33,7 +33,20 @@ cmd_wallpaper() {
 }
 
 cmd_fonts() {
-  run_script "scripts/fonts/install-nerd-fonts.sh" "Font install script" "$@"
+  local sub="${1:-install}"
+  case "$sub" in
+    patch)
+      shift
+      run_script "scripts/fonts/patch-fonts.sh" "Font patch helper" "$@"
+      ;;
+    install | "")
+      [[ "$sub" == install ]] && shift || true
+      run_script "scripts/fonts/install-nerd-fonts.sh" "Font install script" "$@"
+      ;;
+    *)
+      run_script "scripts/fonts/install-nerd-fonts.sh" "Font install script" "$@"
+      ;;
+  esac
 }
 
 cmd_tune() {

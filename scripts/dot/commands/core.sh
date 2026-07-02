@@ -129,6 +129,10 @@ cmd_commit() {
   run_script "dot_local/bin/executable_git-ai-commit" "Git AI commit script" "$@"
 }
 
+cmd_uninstall() {
+  run_script "scripts/uninstall.sh" "Uninstall script" "$@"
+}
+
 cmd_clean_cache() {
   ui_info "Cache" "Clearing shell initialization caches"
   local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}"
@@ -184,6 +188,10 @@ case "${1:-}" in
   clean-cache)
     shift
     cmd_clean_cache "$@"
+    ;;
+  uninstall)
+    shift
+    cmd_uninstall "$@"
     ;;
   *)
     echo "Unknown core command: ${1:-}" >&2

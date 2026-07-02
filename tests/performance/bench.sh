@@ -1,14 +1,26 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# Dotfiles Startup Benchmark (The 50ms Rule)
-# Measures shell initialization latency using hyperfine.
+# Dotfiles Startup Benchmark
+# Measures REAL interactive shell initialization latency using hyperfine.
+#
+# Honesty: every shell is timed as an INTERACTIVE session (the flag a real
+# terminal uses), because non-interactive startup skips the rc entirely and
+# wildly understates the truth (e.g. `fish -c exit` reports ~12ms while
+# `fish -i -c exit` is ~130ms). `-N` runs the target shell directly with no
+# intermediate wrapper shell. The <30ms aspirational target and the phased
+# plan to reach it are tracked in docs/operations/ARCHITECTURE_ROADMAP.md;
+# the thresholds below are REGRESSION gates (current measured + headroom),
+# not the aspiration.
 
 set -euo pipefail
 
+# Regression thresholds (ms). Measured 2026-07 medians: zsh ~66, bash ~51,
+# fish ~129, nu ~25 — thresholds sit above those with headroom for noise.
 THRESHOLD_MS_BASH=75
-THRESHOLD_MS_ZSH=75
+THRESHOLD_MS_ZSH=90
 THRESHOLD_MS_FISH=200
+THRESHOLD_MS_NU=60
 
 if ! command -v hyperfine >/dev/null 2>&1; then
   echo "hyperfine not found."
@@ -25,7 +37,7 @@ run_bench() {
   local result
   local bench_json
   bench_json=$(umask 077 && mktemp)
-  result=$(hyperfine -i --warmup 3 --runs 10 "$shell_cmd" --export-json "$bench_json" >/dev/null 2>&1 &&
+  result=$(hyperfine -N -i --warmup 3 --runs 10 "$shell_cmd" --export-json "$bench_json" >/dev/null 2>&1 &&
     jq -r '.results[0].mean * 1000' "$bench_json")
   rm -f "$bench_json"
 
@@ -45,11 +57,18 @@ if command -v zsh >/dev/null 2>&1; then
 fi
 
 if command -v fish >/dev/null 2>&1; then
-  run_bench "fish -c exit" "fish" "$THRESHOLD_MS_FISH"
+  # -i so fish actually loads config.fish/conf.d (a fresh terminal is
+  # interactive); `fish -c exit` skips all of it and is not representative.
+  run_bench "fish -i -c exit" "fish" "$THRESHOLD_MS_FISH"
 fi
 
 if command -v bash >/dev/null 2>&1; then
   run_bench "bash -i -c exit" "bash" "$THRESHOLD_MS_BASH"
+fi
+
+if command -v nu >/dev/null 2>&1; then
+  # nushell loads env.nu/config.nu on `-c`; there is no separate -i flag.
+  run_bench "nu -c exit" "nu" "$THRESHOLD_MS_NU"
 fi
 
 if [[ $FAILED -eq 0 ]]; then

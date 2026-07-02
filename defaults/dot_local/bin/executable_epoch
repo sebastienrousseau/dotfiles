@@ -60,7 +60,17 @@ elif [[ $# -gt 0 ]]; then
   date -d "@$EPOCH" 2>/dev/null || date -r "$EPOCH" 2>/dev/null
 else
   if $MILLIS; then
-    date +%s%3N
+    # GNU date supports %3N; macOS/BSD emits a literal 'N'. Try gdate, then
+    # a python fallback, before degrading to seconds*1000.
+    if date +%s%3N 2>/dev/null | grep -qE '^[0-9]+$'; then
+      date +%s%3N
+    elif command -v gdate >/dev/null 2>&1; then
+      gdate +%s%3N
+    elif command -v python3 >/dev/null 2>&1; then
+      python3 -c 'import time; print(int(time.time()*1000))'
+    else
+      printf '%s000\n' "$(date +%s)"
+    fi
   else
     date +%s
   fi

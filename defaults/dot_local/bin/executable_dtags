@@ -23,6 +23,11 @@ if [[ -z "${image}" ]]; then
   exit 1
 fi
 
-curl --silent \
+tags="$(curl --silent \
   "https://registry.hub.docker.com/v2/repositories/library/${image}/tags?page_size=1000" |
-  jq -r ".results[].name" | sort -V 2>/dev/null || sort -t. -k1,1n -k2,2n -k3,3n
+  jq -r ".results[].name")"
+
+# Buffer first, then choose the sorter — the direct `sort -V || sort -t.`
+# chain consumes stdin on the first attempt so the fallback got nothing.
+printf '%s\n' "${tags}" | sort -V 2>/dev/null \
+  || printf '%s\n' "${tags}" | sort -t. -k1,1n -k2,2n -k3,3n

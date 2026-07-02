@@ -93,3 +93,6 @@ _build/
 .roo/
 .windsurf/
 .zed/
+
+# MkDocs Material build output
+/site/

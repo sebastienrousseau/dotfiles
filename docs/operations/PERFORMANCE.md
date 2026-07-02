@@ -20,7 +20,7 @@ lifecycle, and the regression-alert pipeline. Managed under
 
 `dot perf` measures every installed shell and flags any whose mean
 exceeds its target. The numbers come from
-[`scripts/diagnostics/perf.sh`](../../scripts/diagnostics/perf.sh) —
+[`scripts/diagnostics/perf.sh`](https://github.com/sebastienrousseau/dotfiles/blob/master/scripts/diagnostics/perf.sh) —
 warm-up + 3 runs by default.
 
 ## The baseline
@@ -100,7 +100,7 @@ spiking from 5ms steady-state to 200ms once).
 
 ## CI workflow
 
-[`.github/workflows/perf-baseline.yml`](../../.github/workflows/perf-baseline.yml)
+[`.github/workflows/perf-baseline.yml`](https://github.com/sebastienrousseau/dotfiles/blob/master/.github/workflows/perf-baseline.yml)
 runs weekly on Sunday at 03:00 UTC on `ubuntu-latest`. It:
 
 1. Restores the previous week's baseline from a workflow artifact.
@@ -116,7 +116,7 @@ each developer's box and aren't synced.
 ## Adjusting the budget
 
 Per-shell targets live in
-[`scripts/diagnostics/perf.sh`](../../scripts/diagnostics/perf.sh)
+[`scripts/diagnostics/perf.sh`](https://github.com/sebastienrousseau/dotfiles/blob/master/scripts/diagnostics/perf.sh)
 under `shell_target_for()`. Bumping a target should always come with:
 
 - A commit-message rationale explaining why slower is acceptable
@@ -126,8 +126,8 @@ under `shell_target_for()`. Bumping a target should always come with:
 
 ## References
 
-- [`scripts/diagnostics/perf.sh`](../../scripts/diagnostics/perf.sh)
-- [`tests/unit/diagnostics/test_perf_percentiles.sh`](../../tests/unit/diagnostics/test_perf_percentiles.sh) — percentile math contract
-- [`.github/workflows/perf-baseline.yml`](../../.github/workflows/perf-baseline.yml)
+- [`scripts/diagnostics/perf.sh`](https://github.com/sebastienrousseau/dotfiles/blob/master/scripts/diagnostics/perf.sh)
+- [`tests/unit/diagnostics/test_perf_percentiles.sh`](https://github.com/sebastienrousseau/dotfiles/blob/master/tests/unit/diagnostics/test_perf_percentiles.sh) — percentile math contract
+- [`.github/workflows/perf-baseline.yml`](https://github.com/sebastienrousseau/dotfiles/blob/master/.github/workflows/perf-baseline.yml)
 - ADR-002 (Shell Performance Optimization)
 - Issue [#863](https://github.com/sebastienrousseau/dotfiles/issues/863)

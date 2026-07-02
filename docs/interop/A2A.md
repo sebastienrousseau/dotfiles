@@ -8,8 +8,8 @@ The repository now ships an agent card and an A2A-ready discovery document.
 
 Artifacts:
 
-- [agent-card.json](../../defaults/dot_config/dotfiles/agent-card.json)
-- [agent.json](../../.well-known/agent.json)
+- [agent-card.json](https://github.com/sebastienrousseau/dotfiles/blob/master/defaults/dot_config/dotfiles/agent-card.json)
+- [agent.json](https://github.com/sebastienrousseau/dotfiles/blob/master/.well-known/agent.json)
 
 Core properties:
 

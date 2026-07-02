@@ -18,6 +18,10 @@ fi
 # Zsh
 export ZDOTDIR="${XDG_CONFIG_HOME}/zsh"
 
+# Dotfiles cockpit opt-in — enables the run_onchange_25-build-dot-ai-tui
+# hook so ~/.local/bin/dot-ai-tui is (re)built by chezmoi apply.
+export DOTFILES_AI=1
+
 # Tools
 export CURL_HOME="${XDG_CONFIG_HOME}/curl"
 export WGETRC="${XDG_CONFIG_HOME}/wget/wgetrc"

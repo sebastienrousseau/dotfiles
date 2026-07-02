@@ -152,26 +152,80 @@ cmd_secrets_list() {
 }
 
 cmd_env_load() {
-  local bucket="${1:-ai}" data_file key value count=0
+  # Usage: dot secrets load [<bucket>] [--shell posix|fish|nu]
+  # Emits shell code to set the bucket's secrets as env vars, in the target
+  # shell's dialect so it works beyond POSIX:
+  #   posix (default):  eval "$(dot secrets load ai)"
+  #   fish:             dot secrets load ai --shell fish | source
+  #   nu:               load-env (dot secrets load ai --shell nu | from nuon)
+  local bucket="ai" dialect="posix" data_file key value count=0
+  local -a keys=() values=()
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --shell)
+        dialect="${2:-posix}"
+        shift 2
+        ;;
+      --shell=*)
+        dialect="${1#*=}"
+        shift
+        ;;
+      -*) die "Unknown flag: $1 (usage: dot secrets load [<bucket>] [--shell posix|fish|nu])" ;;
+      *)
+        bucket="$1"
+        shift
+        ;;
+    esac
+  done
+
   data_file="$(dot_data_file)"
   [[ -f "$data_file" ]] || die "Missing data file: $data_file"
 
   while IFS= read -r key; do
     value="$(dot_secrets_get "$key" || true)"
     if [[ -n "$value" ]]; then
-      # shell-safe export lines intended for: eval "$(dot env load <bucket>)"
-      printf "export %s=%q\n" "$key" "$value"
+      keys+=("$key")
+      values+=("$value")
       count=$((count + 1))
     fi
   done < <(dot_secrets_bucket_keys "$data_file" "$bucket")
 
-  if [[ "$count" -eq 0 ]]; then
-    die "No secrets loaded for bucket: $bucket"
-  fi
+  [[ "$count" -gt 0 ]] || die "No secrets loaded for bucket: $bucket"
+
+  local i k v esc
+  case "$dialect" in
+    posix | sh | bash | zsh)
+      for i in "${!keys[@]}"; do
+        printf 'export %s=%q\n' "${keys[$i]}" "${values[$i]}"
+      done
+      ;;
+    fish)
+      for i in "${!keys[@]}"; do
+        v="${values[$i]}"
+        esc="${v//\\/\\\\}"
+        esc="${esc//\'/\\\'}" # fish single-quote escaping
+        printf "set -gx %s '%s'\n" "${keys[$i]}" "$esc"
+      done
+      ;;
+    nu | nushell)
+      # Emit a NUON record for: load-env (dot secrets load <bucket> --shell nu | from nuon)
+      printf '{\n'
+      for i in "${!keys[@]}"; do
+        v="${values[$i]}"
+        esc="${v//\\/\\\\}"
+        esc="${esc//\"/\\\"}" # double-quote escaping
+        printf '  "%s": "%s"\n' "${keys[$i]}" "$esc"
+      done
+      printf '}\n'
+      ;;
+    *)
+      die "Unknown shell dialect: $dialect (want: posix|fish|nu)"
+      ;;
+  esac
 }
 
 cmd_secrets_load() {
-  cmd_env_load "${1:-ai}"
+  cmd_env_load "$@"
 }
 
 # Dispatch

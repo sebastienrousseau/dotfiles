@@ -78,6 +78,11 @@ EXCLUDE_FILES=(
   # CI_COMPOSITES.md cites third-party action versions (e.g. v5.0.5),
   # not dotfiles_version. False-positive pattern match.
   "docs/operations/CI_COMPOSITES.md"
+
+  # Living roadmap: references branch names / target versions (e.g.
+  # `feat/v0.2.509`, phase milestones) that are NOT the current
+  # dotfiles_version. Auto-syncing rewrites them incorrectly.
+  "docs/operations/ARCHITECTURE_ROADMAP.md"
 )
 
 # shellcheck source=../lib/dot/ui.sh

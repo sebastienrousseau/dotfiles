@@ -71,7 +71,7 @@ marks reflect this repo's posture at the time of writing — the
 | Dependency-Update-Tool | ✓ | Dependabot configured for github-actions / npm / docker / devcontainers / uv. |
 | Fuzzing | ⚠ | `install.sh` fuzz harness lives under `tests/fuzz/` (closes #881), but it's shell-based and Scorecard's heuristic only recognizes OSS-Fuzz / ClusterFuzzLite / native Go fuzz / libFuzzer / Atheris. None support shell. Property tests under `tests/unit/functions/test_property_*.sh` cover the closest equivalent surface. |
 | License | ✓ | MIT at repo root (`LICENSE`). |
-| Maintained | ✓ | Active commit cadence; the [README](../../README.md) lists the current `dotfiles_version`. |
+| Maintained | ✓ | Active commit cadence; the [README](https://github.com/sebastienrousseau/dotfiles/blob/master/README.md) lists the current `dotfiles_version`. |
 | Pinned-Dependencies | ⚠ | Closed 8 of 14 findings this cycle (every Dockerfile base + every workflow action + 2 `curl \| sh` installers + the `npm install -g npm` upgrade step). 5 residual findings stay open by design — see `Open findings`. |
 | SAST | ✓ | CodeQL (`.github/workflows/codeql.yml`) + Checkov + Grype. |
 | SBOM | ✓ | Generated per PR by `sbom-diff.yml` and per release by `security-release.yml`. |

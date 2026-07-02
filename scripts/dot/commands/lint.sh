@@ -19,6 +19,33 @@ dot_ui_command_banner "Lint" "${1:-}"
 SHELLCHECK_ARGS=(--severity=error -e SC1091 -e SC2030 -e SC2031)
 SHFMT_ARGS=(-i 2 -ci)
 
+# True only if the file's shebang names a shell that both shellcheck and shfmt
+# can process. The old `grep -qiE 'shell|bash|sh'` matched loosely — "sh" hit
+# "fish", and `file` output pulled in python3 scripts — so non-shell files
+# landed in the lint set and produced spurious SC1071 / shfmt parse "errors".
+_lint_is_shell() {
+  local first interp
+  first="$(head -1 "$1" 2>/dev/null)"
+  case "$first" in '#!'*) ;; *) return 1 ;; esac
+  interp="${first#\#!}"
+  interp="${interp#"${interp%%[![:space:]]*}"}" # ltrim
+  case "$interp" in
+    */env[[:space:]]*)
+      interp="${interp#*/env}"
+      interp="${interp#"${interp%%[![:space:]]*}"}"
+      interp="${interp%%[[:space:]]*}"
+      ;;
+    *)
+      interp="${interp%%[[:space:]]*}"
+      interp="${interp##*/}"
+      ;;
+  esac
+  case "$interp" in
+    sh | bash | dash | ksh | mksh | ash) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 cmd_lint() {
   local mode="${1:-all}"
   local src_dir
@@ -40,11 +67,10 @@ cmd_lint() {
   chezmoi_src="$(resolve_chezmoi_source_dir)"
   [[ -z "$chezmoi_src" ]] && chezmoi_src="$src_dir"
 
-  # dot_local/bin/executable_* scripts (shell scripts only)
+  # dot_local/bin/executable_* scripts — shell scripts only (skip python/zsh/etc
+  # by inspecting the shebang, so shellcheck/shfmt never see files they can't parse).
   while IFS= read -r -d '' f; do
-    if file "$f" 2>/dev/null | grep -qiE 'shell|bash|sh'; then
-      files+=("$f")
-    elif head -1 "$f" 2>/dev/null | grep -qE '^#!.*(bash|sh)'; then
+    if _lint_is_shell "$f"; then
       files+=("$f")
     fi
   done < <(find "$chezmoi_src/dot_local/bin" -name 'executable_*' -type f -print0 2>/dev/null)
@@ -69,17 +95,16 @@ cmd_lint() {
       if has_command shellcheck; then
         ui_section "ShellCheck"
         echo ""
-        local sc_fail=0
-        for f in "${files[@]}"; do
-          if ! shellcheck "${SHELLCHECK_ARGS[@]}" "$f" 2>/dev/null; then
-            sc_fail=$((sc_fail + 1))
-          fi
-        done
-        if [[ "$sc_fail" -eq 0 ]]; then
+        # One shellcheck invocation over all files (was one fork per file).
+        # gcc format is one line per issue, so failing files = unique paths.
+        local sc_out
+        sc_out="$(shellcheck -f gcc "${SHELLCHECK_ARGS[@]}" "${files[@]}" 2>/dev/null || true)"
+        if [[ -z "$sc_out" ]]; then
           ui_ok "shellcheck" "$total files clean"
         else
-          sc_errors=$sc_fail
-          ui_err "shellcheck" "$sc_fail file(s) with errors"
+          printf '%s\n' "$sc_out"
+          sc_errors=$(printf '%s\n' "$sc_out" | cut -d: -f1 | sort -u | grep -c .)
+          ui_err "shellcheck" "$sc_errors file(s) with errors"
         fi
         echo ""
       else
@@ -91,17 +116,15 @@ cmd_lint() {
       if has_command shfmt; then
         ui_section "shfmt"
         echo ""
-        local fmt_fail=0
-        for f in "${files[@]}"; do
-          if ! shfmt "${SHFMT_ARGS[@]}" -d "$f" >/dev/null 2>&1; then
-            fmt_fail=$((fmt_fail + 1))
-          fi
-        done
-        if [[ "$fmt_fail" -eq 0 ]]; then
+        # `shfmt -l` lists files needing formatting in one invocation
+        # (was `shfmt -d` per file).
+        local fmt_list
+        fmt_list="$(shfmt "${SHFMT_ARGS[@]}" -l "${files[@]}" 2>/dev/null || true)"
+        if [[ -z "$fmt_list" ]]; then
           ui_ok "shfmt" "$total files formatted correctly"
         else
-          fmt_errors=$fmt_fail
-          ui_err "shfmt" "$fmt_fail file(s) need formatting"
+          fmt_errors=$(printf '%s\n' "$fmt_list" | grep -c .)
+          ui_err "shfmt" "$fmt_errors file(s) need formatting"
         fi
         echo ""
       else
@@ -118,17 +141,19 @@ cmd_lint() {
       fi
       ui_section "Auto-fixing with shfmt"
       echo ""
-      local fixed=0
-      for f in "${files[@]}"; do
-        if ! shfmt "${SHFMT_ARGS[@]}" -d "$f" >/dev/null 2>&1; then
+      # Find files needing formatting in one `shfmt -l` pass, then only
+      # rewrite that (usually small) set — was `shfmt -d` per file.
+      local fmt_list fixed=0
+      fmt_list="$(shfmt "${SHFMT_ARGS[@]}" -l "${files[@]}" 2>/dev/null || true)"
+      if [[ -z "$fmt_list" ]]; then
+        ui_ok "shfmt" "All files already formatted"
+      else
+        while IFS= read -r f; do
+          [[ -n "$f" ]] || continue
           shfmt "${SHFMT_ARGS[@]}" -w "$f"
           ui_ok "fixed" "${f#"$src_dir/"}"
           fixed=$((fixed + 1))
-        fi
-      done
-      if [[ "$fixed" -eq 0 ]]; then
-        ui_ok "shfmt" "All files already formatted"
-      else
+        done <<<"$fmt_list"
         ui_ok "shfmt" "$fixed file(s) reformatted"
       fi
       echo ""

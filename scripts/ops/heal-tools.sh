@@ -31,6 +31,12 @@ detect_pkg_manager() {
     echo "dnf"
   elif command -v pacman >/dev/null 2>&1; then
     echo "pacman"
+  elif command -v zypper >/dev/null 2>&1; then
+    echo "zypper"
+  elif command -v apk >/dev/null 2>&1; then
+    echo "apk"
+  elif command -v pkg >/dev/null 2>&1; then
+    echo "pkg"
   elif command -v nix-env >/dev/null 2>&1; then
     echo "nix"
   else
@@ -65,6 +71,28 @@ install_package() {
         return 1
       fi
       sudo pacman -S --noconfirm --quiet "$pkg" >/dev/null 2>&1
+      ;;
+    zypper)
+      if ! command -v sudo >/dev/null 2>&1; then
+        log_error "sudo not found — cannot install '$pkg' via zypper"
+        return 1
+      fi
+      sudo zypper --quiet install -y "$pkg" >/dev/null 2>&1
+      ;;
+    apk)
+      if command -v sudo >/dev/null 2>&1; then
+        sudo apk add --quiet "$pkg" >/dev/null 2>&1
+      else
+        apk add --quiet "$pkg" >/dev/null 2>&1
+      fi
+      ;;
+    pkg)
+      # FreeBSD/OpenBSD/NetBSD — install as root when available.
+      if command -v sudo >/dev/null 2>&1; then
+        sudo pkg install -y "$pkg" >/dev/null 2>&1
+      else
+        pkg install -y "$pkg" >/dev/null 2>&1
+      fi
       ;;
     nix) nix-env -iA "nixpkgs.$pkg" >/dev/null 2>&1 ;;
     *)

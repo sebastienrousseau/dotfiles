@@ -202,10 +202,12 @@ Core|add|Add a file to chezmoi source|Start managing a file in the source tree.
 Core|diff|Show chezmoi diff with exclusions|Preview pending changes before apply.
 Core|status|Show configuration drift (chezmoi status)|Inspect the current managed state.
 Core|edit|Open chezmoi source in $EDITOR|Jump into the source tree quickly.
+Core|uninstall|Remove the managed dotfiles environment (prompts unless --force)|Guided teardown, counterpart to init.
 Core|cd|Print source directory path (use: cd $(dot cd))|Useful in shell scripts and jump helpers.
 Core|commit|AI-powered conventional commit|Wraps the commit helper flow.
 Diagnostics|doctor|Deep audit: tools, paths, portability, AI analysis (--ai|-A)|Main health and repair entrypoint.
 Diagnostics|attest|Export workstation attestation evidence (--json|-j, --write|-w, --fleet-store|-F)|Produce machine-readable evidence.
+Diagnostics|secret-audit|Audit secret hygiene and leakage surface|Secret governance report.
 Diagnostics|score|System health and security scorecard|Quick high-level readout.
 Diagnostics|snapshot|Capture baseline system snapshot|Use before larger changes.
 Diagnostics|chaos|Simulate config corruption to test self-healing|Advanced validation path.
@@ -240,7 +242,7 @@ Tools|learn|Start the interactive tour of your new tools|Guided onboarding.
 Tools|docs|Show repo README|Open the main documentation.
 Appearance|theme|Switch terminal theme (dark/light)|Terminal appearance control.
 Appearance|wallpaper|Apply a wallpaper from your library [macOS,Linux]|Desktop customization helper.
-Appearance|fonts|Install Nerd Fonts (JetBrainsMono by default)|Font bootstrap helper.
+Appearance|fonts|Install (default) or patch Nerd Fonts (JetBrainsMono by default)|Font bootstrap and patcher helper.
 Appearance|tune|Apply OS tuning (opt-in) [macOS,Linux]|Host tuning entrypoint.
 Secrets|secrets-init|Initialize age key for secrets|First-time secrets setup.
 Secrets|secrets|Edit encrypted secrets (age)|Primary secrets entrypoint.
@@ -248,6 +250,7 @@ Secrets|secrets-create|Create an encrypted secrets file|Create a new secret payl
 Secrets|ssh-key|Encrypt an SSH key locally with age|Protect local SSH keys.
 Secrets|ssh-cert|Manage short-lived SSH certificates|SSH certificate workflow.
 Security (opt-in)|backup|Create a compressed backup of your home|Safety copy before risky changes.
+Security (opt-in)|policy|Check and enforce security policies across the environment|Security policy audit.
 Security (opt-in)|encrypt-check|Check disk encryption status|Host security inspection.
 Security (opt-in)|firewall|Apply firewall hardening [macOS,Linux]|Opt-in host hardening.
 Security (opt-in)|telemetry|Disable OS telemetry [macOS,Linux]|Privacy-focused host control.
@@ -258,12 +261,84 @@ Fleet|fleet|Show fleet node status, drift, and namespace (--json for machine out
 Fleet|fleet drift|Check for configuration drift across managed files|Drift detection and reporting.
 Fleet|fleet namespace|Show or set the active namespace for multi-tenant isolation|Namespace management.
 Fleet|fleet events|Show recent fleet events from local event log|Fleet observability.
+Fleet|teleport|Deploy the dotfiles environment to a remote host over SSH|Ephemeral remote provisioning.
 Meta|upgrade|Update system toolchains, plugins, and dotfiles|Managed upgrade flow.
 Meta|packages|List installed packages and package managers|Inventory and package surfaces.
 Meta|cache-refresh|Regenerate shell caches for ultra-fast startup|Refresh generated shell state.
+Meta|completion|Generate shell completions (bash/zsh/fish/nu) from the command registry|e.g. dot completion fish > ~/.config/fish/completions/dot.fish
 Meta|search|Find commands by keyword|Find the right command quickly.
 Meta|version|Show version information.|Matches `dot --version`.
 Meta|help|Show this help message|Overview or focused command help.
+Fleet|fleet status|Show this node's fleet status: id, namespace, version, OS, drift, last apply|Subcommand — e.g. dot fleet status --json
+Fleet|fleet enforce|Show or set RBAC enforcement mode (advisory/strict) for agent profiles|Subcommand — e.g. dot fleet enforce set strict
+Fleet|fleet apply|SSH to every host in fleet.toml and run dot sync (or a custom --cmd)|Subcommand — e.g. dot fleet apply --dry-run
+AI|ai chat|Start an interactive AI session with a chosen tool|Subcommand — e.g. dot ai chat cl
+AI|ai tools|Show installed AI CLI tools and their versions|Subcommand — e.g. dot ai tools
+AI|ai install|Install AI CLI tools via mise/native installers|Subcommand — e.g. dot ai install
+AI|ai serve|Run the local AI gateway/proxy that routes non-Claude providers|Subcommand — e.g. dot ai serve
+AI|ai cost|Report AI spend across every provider from the unified run log|Subcommand — e.g. dot ai cost --since 7
+AI|ai login|Interactive setup/authentication for installed AI CLI tools|Subcommand — e.g. dot ai login
+AI|ai doctor|Diagnose AI tooling configuration and connectivity|Subcommand — e.g. dot ai doctor
+AI|ai ask|Context-aware RAG query over your dotfiles|Subcommand — e.g. dot ai ask "where is theme switch handled"
+AI|ai run|Run a one-shot prompt with an AI tool|Subcommand — e.g. dot ai run "fix this bug"
+AI|ai delegate|Delegate a coding task to a cheaper AI model under agent policy|Subcommand — e.g. dot ai delegate "rename get to fetch"
+AI|mode list|List available agent operating profiles (ask/plan/apply/audit)|Subcommand — e.g. dot mode list
+AI|mode current|Show the active agent profile and its policy|Subcommand — e.g. dot mode current
+AI|mode show|Show details of a specific agent profile|Subcommand — e.g. dot mode show audit
+AI|mode set|Switch the active agent profile|Subcommand — e.g. dot mode set apply
+AI|mode run|Run a command under a given agent profile with a checkpoint|Subcommand — e.g. dot mode run plan git status
+AI|mode doctor|Validate the agent-profiles.json config and default profile|Subcommand — e.g. dot mode doctor
+AI|agent card|Show the local agent card metadata|Subcommand — e.g. dot agent card
+AI|agent log|Tail the agent session audit log|Subcommand — e.g. dot agent log 20
+AI|agent checkpoint|Manage agent run checkpoints (save/list/show/replay)|Subcommand — e.g. dot agent checkpoint list
+AI|agent delegate|Delegate execution to an allowed sub-agent|Subcommand — e.g. dot agent delegate reviewer git diff
+AI|agent a2a-card|Show or validate the A2A v0.3 agent card|Subcommand — e.g. dot agent a2a-card --validate
+AI|agent conformance|Run the A2A conformance test suite|Subcommand — e.g. dot agent conformance --strict
+AI|mcp doctor|Run the MCP policy/supply-chain/config audit|Subcommand — e.g. dot mcp doctor
+AI|mcp registry|Show the configured MCP server registry|Subcommand — e.g. dot mcp registry
+Secrets|secrets edit|Edit the encrypted secrets file (age)|Subcommand — e.g. dot secrets edit
+Secrets|secrets set|Store a secret value under a key|Subcommand — e.g. dot secrets set OPENAI_API_KEY
+Secrets|secrets get|Retrieve a secret value (--raw for plaintext)|Subcommand — e.g. dot secrets get OPENAI_API_KEY --raw
+Secrets|secrets list|List indexed secret keys|Subcommand — e.g. dot secrets list
+Secrets|secrets load|Emit export lines for a secrets bucket (use with eval)|Subcommand — e.g. eval "$(dot secrets load ai)"
+Secrets|secrets provider|Show the active secrets provider|Subcommand — e.g. dot secrets provider
+Tools|env list|List managed tool versions via mise|Subcommand — e.g. dot env list
+Tools|env emit|Emit a portable workstation environment manifest (SBOM; --format json)|Subcommand — e.g. dot env emit --format json
+Tools|env prune|Show or remove orphan tool installs (--yes to commit)|Subcommand — e.g. dot env prune --yes
+Tools|env install|Install requested tool versions via mise|Subcommand — e.g. dot env install
+Tools|env use|Pin a tool version globally/locally via mise|Subcommand — e.g. dot env use node@22
+Tools|registry list|List modules in the configured module registry|Subcommand — e.g. dot registry list
+Tools|registry search|Filter registry modules by keyword|Subcommand — e.g. dot registry search rust
+Tools|registry info|Print full metadata for a registry module|Subcommand — e.g. dot registry info rust-dev-setup
+Tools|registry install|Install a registry module (scaffold)|Subcommand — e.g. dot registry install rust-dev-setup
+Tools|registry url|Show the active registry URL|Subcommand — e.g. dot registry url
+Tools|registry set-url|Override the registry URL (https only; persists)|Subcommand — e.g. dot registry set-url https://example.com/registry.json
+Appearance|theme list|Show all available terminal/wallpaper themes|Subcommand — e.g. dot theme list
+Appearance|theme set|Set a theme by name (interactive picker if omitted)|Subcommand — e.g. dot theme set macos-sequoia-dark
+Appearance|theme toggle|Toggle light/dark within the current theme family|Subcommand — e.g. dot theme toggle
+Appearance|theme sync|Sync the dotfiles theme with system dark/light mode|Subcommand — e.g. dot theme sync
+Appearance|theme family|Cycle between theme families|Subcommand — e.g. dot theme family
+Appearance|theme current|Show the current theme info|Subcommand — e.g. dot theme current
+Appearance|theme rebuild|Regenerate themes from system and custom wallpapers|Subcommand — e.g. dot theme rebuild
+Appearance|wallpaper sync|Sync wallpaper from your library|Subcommand — e.g. dot wallpaper sync
+Appearance|wallpaper rotate|Rotate to the next wallpaper in your library|Subcommand — e.g. dot wallpaper rotate
+Tools|tools install|Enter the Nix development shell with all managed tools|Subcommand — e.g. dot tools install
+Tools|tools docs|Show the full tools markdown documentation|Subcommand — e.g. dot tools docs
+Tools|profile show|Show the active configuration profile and feature flags|Subcommand — e.g. dot profile show
+Tools|profile set|Set the active configuration profile (run dot sync to apply)|Subcommand — e.g. dot profile set work
+AI|agents list|Show recognised AI agent harnesses and their config paths|Subcommand — e.g. dot agents list
+AI|agents check|Verify AGENTS.md tracks CLAUDE.md (exit 1 if drifted)|Subcommand — e.g. dot agents check
+AI|agents render|Regenerate AGENTS.md and per-harness config from CLAUDE.md|Subcommand — e.g. dot agents render
+Tools|aliases list|List all shell aliases shipped by the dotfiles|Subcommand — e.g. dot aliases list
+Tools|aliases search|Search aliases by term|Subcommand — e.g. dot aliases search git
+Tools|aliases why|Show details and deprecation status for a single alias|Subcommand — e.g. dot aliases why ll
+Tools|aliases stats|Show alias usage counts from shell history|Subcommand — e.g. dot aliases stats
+Tools|aliases cheatsheet|Generate the alias cheatsheet markdown|Subcommand — e.g. dot aliases cheatsheet
+Tools|aliases tiers|Show which alias tiers/ecosystems are enabled|Subcommand — e.g. dot aliases tiers
+AI|patterns list|List AI steering patterns|Subcommand — e.g. dot patterns list
+AI|patterns view|View an AI steering pattern|Subcommand — e.g. dot patterns view code-review
+AI|patterns edit|Edit an AI steering pattern in $EDITOR|Subcommand — e.g. dot patterns edit code-review
+Tools|keys sign-check|Verify git commit-signing configuration and key availability|Subcommand — e.g. dot keys sign-check
 EOF
 }
 
@@ -298,6 +373,11 @@ search|Find commands by keyword across the public surface.|dot search ai
 help|Show the overview or a focused command reference.|dot help\ndot help doctor\ndot help all
 --version|Show the installed dotfiles version.|dot --version\ndot version
 version|Show the installed dotfiles version.|dot --version\ndot version
+teleport|Deploy the dotfiles environment to a remote host over SSH.|dot teleport user@host
+uninstall|Remove the managed dotfiles environment (prompts unless --force).|dot uninstall\ndot uninstall --force
+policy|Check and enforce security policies across the environment.|dot policy
+secret-audit|Audit secret hygiene and leakage surface.|dot secret-audit
+completion|Generate shell completions from the command registry.|dot completion fish > ~/.config/fish/completions/dot.fish
 cd|Print the dotfiles source directory path for shell helpers.|cd $(dot cd)\ndot cd
 commit|Draft an AI-assisted Conventional Commit for staged changes.|dot commit\ngit add -p && dot commit
 score|Print a system health and security scorecard.|dot score\ndot score --json\ndot score -q
@@ -328,7 +408,7 @@ new|Scaffold a new project from a managed template.|dot new\ndot new --template 
 packages|List installed packages across every package manager on this host.|dot packages\ndot packages --json
 aliases|Inspect or audit shell aliases shipped by the dotfiles.|dot aliases\ndot aliases --check
 wallpaper|Apply a wallpaper from your Pictures/Wallpapers/ library.|dot wallpaper\ndot wallpaper sync\ndot wallpaper rotate
-fonts|Install Nerd Fonts (JetBrainsMono by default) for terminal glyphs.|dot fonts\ndot fonts install Hack
+fonts|Install or patch Nerd Fonts (JetBrainsMono by default) for terminal glyphs.|dot fonts\ndot fonts install Hack\ndot fonts patch ~/Library/Fonts/MyFont.otf
 tune|Apply opt-in OS tuning (macOS / Linux desktop polish).|dot tune\ndot tune --dry-run
 secrets-init|Initialize the age key used for encrypted secrets.|dot secrets-init\ndot secrets-init --recipient ~/.config/sops/age/keys.txt
 secrets-create|Create a new encrypted secrets file.|dot secrets-create ai\ndot secrets-create work --recipient alice@example.com
@@ -371,6 +451,7 @@ status|core
 cd|core
 edit|core
 commit|core
+uninstall|core
 doctor|diagnostics
 scorecard|diagnostics
 score|diagnostics
@@ -380,6 +461,7 @@ perf|diagnostics
 load-bench|diagnostics
 load-bench-pty|diagnostics
 chaos|diagnostics
+teleport|diagnostics
 bundle|diagnostics
 rollback|diagnostics
 heal|diagnostics
@@ -395,6 +477,7 @@ conflicts|diagnostics
 locks|diagnostics
 restore|diagnostics
 metrics|diagnostics
+secret-audit|diagnostics
 ai|ai
 ai-setup|ai
 ai-query|ai
@@ -433,6 +516,7 @@ secrets-create|secrets
 ssh-key|secrets
 ssh-cert|secrets
 backup|security
+policy|security
 encrypt-check|security
 firewall|security
 telemetry|security
@@ -441,6 +525,7 @@ lock-screen|security
 usb-safety|security
 upgrade|meta
 cache-refresh|meta
+completion|completion
 prewarm|meta
 docs|meta
 learn|meta
@@ -469,7 +554,17 @@ _dot_command_route() {
   if [[ -z "$command_name" ]]; then
     return 1
   fi
-  awk -F'|' -v command_name="$command_name" '$1 == command_name { print $2; exit }' < <(_dot_command_routes)
+  # Pure-bash scan of the route table — avoids the extra awk fork on the hot
+  # path of every invocation (routes stay in _dot_command_routes for the
+  # tooling/tests that parse them from source).
+  local cmd module
+  while IFS='|' read -r cmd module; do
+    if [[ "$cmd" == "$command_name" ]]; then
+      printf '%s\n' "$module"
+      return 0
+    fi
+  done < <(_dot_command_routes)
+  return 1
 }
 
 show_help_overview() {
@@ -576,7 +671,9 @@ resolve_source_dir() { _resolve_source_dir; }
 # Routes COMMAND to the appropriate command module in scripts/dot/commands/.
 # Each module receives the original COMMAND as its first argument so that its
 # internal case statement can dispatch to the right sub-function.
-_SOURCE_DIR="$(_resolve_source_dir)"
+# Reuse the source dir already resolved at startup (line ~69) instead of
+# re-running _resolve_source_dir (several cd/pwd subshells) on every invocation.
+_SOURCE_DIR="$_DOT_SRC"
 _CMD_DIR="${_SOURCE_DIR}/scripts/dot/commands"
 
 _dispatch() {
@@ -602,7 +699,7 @@ fi
 route="$(_dot_command_route "$COMMAND" || true)"
 
 case "$route" in
-  core | diagnostics | ai | tools | appearance | secrets | security | meta | fleet)
+  core | diagnostics | ai | tools | appearance | secrets | security | meta | fleet | completion)
     _dispatch "$route" "$@"
     ;;
 

@@ -13,9 +13,9 @@ and what specifically is verified. Closes the docs slice of
 
 | File | Role |
 |---|---|
-| [`dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl`](../../defaults/dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl) | The dotfiles PowerShell profile. Deployed to `$PROFILE` (resolves to `~/.config/powershell/Microsoft.PowerShell_profile.ps1` on Linux/macOS; `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` on Windows). |
-| [`scripts/qa/powershell-contract.ps1`](../../scripts/qa/powershell-contract.ps1) | The runtime contract. Renders the template, dot-sources it, asserts required function shims exist, runs PSScriptAnalyzer. |
-| [`tests/unit/install/test_powershell_profile_syntax.sh`](../../tests/unit/install/test_powershell_profile_syntax.sh) | Static-syntax test runnable on Linux/macOS via `pwsh` when present; falls back to brace-balance + textual invariants when not. |
+| [`dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl`](https://github.com/sebastienrousseau/dotfiles/blob/master/defaults/dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl) | The dotfiles PowerShell profile. Deployed to `$PROFILE` (resolves to `~/.config/powershell/Microsoft.PowerShell_profile.ps1` on Linux/macOS; `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` on Windows). |
+| [`scripts/qa/powershell-contract.ps1`](https://github.com/sebastienrousseau/dotfiles/blob/master/scripts/qa/powershell-contract.ps1) | The runtime contract. Renders the template, dot-sources it, asserts required function shims exist, runs PSScriptAnalyzer. |
+| [`tests/unit/install/test_powershell_profile_syntax.sh`](https://github.com/sebastienrousseau/dotfiles/blob/master/tests/unit/install/test_powershell_profile_syntax.sh) | Static-syntax test runnable on Linux/macOS via `pwsh` when present; falls back to brace-balance + textual invariants when not. |
 
 ## What's verified
 

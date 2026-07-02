@@ -7,10 +7,10 @@
 
 set -euo pipefail
 
-TARGET="$1"
+TARGET="${1:-}"
 
 if [[ -z "$TARGET" ]]; then
-  echo "Usage: $0 user@host"
+  echo "Usage: dot teleport user@host"
   exit 1
 fi
 

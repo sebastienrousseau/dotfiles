@@ -86,13 +86,23 @@ assert_equals "linux" "$result" "Linux uname without WSL should yield 'linux'"
 _source_platform # restore original definitions
 
 # ──────────────────────────────────────────────────────────────────────────────
-# 3. dot_platform_id returns "unknown" for unrecognised kernel
+# 3. dot_platform_id returns "bsd" for the BSD family
 # ──────────────────────────────────────────────────────────────────────────────
-test_start "platform_id_unknown"
+test_start "platform_id_bsd"
 _mock_uname "FreeBSD"
 dot_is_wsl() { return 1; }
 result=$(dot_platform_id)
-assert_equals "unknown" "$result" "unknown uname should yield 'unknown'"
+assert_equals "bsd" "$result" "FreeBSD uname should yield 'bsd'"
+_source_platform
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 3b. dot_platform_id returns "unknown" for a genuinely unrecognised kernel
+# ──────────────────────────────────────────────────────────────────────────────
+test_start "platform_id_unknown"
+_mock_uname "Plan9"
+dot_is_wsl() { return 1; }
+result=$(dot_platform_id)
+assert_equals "unknown" "$result" "unrecognised uname should yield 'unknown'"
 _source_platform
 
 # ──────────────────────────────────────────────────────────────────────────────

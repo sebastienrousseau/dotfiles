@@ -136,7 +136,7 @@ rm -rf ~/.local/share/chezmoi ~/.local/share/dotfiles.log
 
 ### Signed contributions
 
-All commits must be signed. See [Contributing](../../CONTRIBUTING.md) for details.
+All commits must be signed. See [Contributing](https://github.com/sebastienrousseau/dotfiles/blob/master/CONTRIBUTING.md) for details.
 
 ---
 

@@ -40,6 +40,10 @@ cmd_usb_safety() {
   run_script "scripts/security/usb-safety.sh" "USB safety script" "$@"
 }
 
+cmd_policy() {
+  run_script "scripts/security/enforce-policies.sh" "Policy enforcement script" "$@"
+}
+
 # Dispatch
 case "${1:-}" in
   backup)
@@ -69,6 +73,10 @@ case "${1:-}" in
   usb-safety)
     shift
     cmd_usb_safety "$@"
+    ;;
+  policy)
+    shift
+    cmd_policy "$@"
     ;;
   *)
     echo "Unknown security command: ${1:-}" >&2
