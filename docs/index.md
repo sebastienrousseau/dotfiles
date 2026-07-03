@@ -110,13 +110,11 @@ Install onto a fresh machine:
 
 Once installed:
 
-```bash
-dot doctor      # verify state
-dot health      # dashboard with actionable warnings
-dot ai          # launch the AI cockpit (Bubble Tea TUI)
-dot theme       # pick a wallpaper-driven theme
-dot help all    # full CLI reference
-```
+    dot doctor      # verify state
+    dot health      # dashboard with actionable warnings
+    dot ai          # launch the AI cockpit (Bubble Tea TUI)
+    dot theme       # pick a wallpaper-driven theme
+    dot help all    # full CLI reference
 
 ## Where to next
 
@@ -130,6 +128,5 @@ dot help all    # full CLI reference
 
 ## Current release
 
-- Latest tag: [`v0.2.509`](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.509)
 - Release feed: [GitHub releases](https://github.com/sebastienrousseau/dotfiles/releases/latest)
 - Source: [sebastienrousseau/dotfiles](https://github.com/sebastienrousseau/dotfiles)
