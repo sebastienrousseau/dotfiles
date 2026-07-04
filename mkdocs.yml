@@ -32,29 +32,37 @@ theme:
     repo: fontawesome/brands/github
     logo: material/console
   favicon: assets/favicon.png
+  font:
+    text: Inter
+    code: JetBrains Mono
+  # Dark by default; slate scheme + palette override in stylesheets/extra.css
+  # gives us the terminal-green-on-near-black look. Users can still flip to
+  # the light scheme via the header toggle.
   palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: teal
-      accent: teal
-      toggle:
-        icon: material/weather-night
-        name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: teal
-      accent: teal
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
   features:
     - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.sections
     - navigation.top
     - navigation.instant
     - navigation.instant.progress
     - navigation.tracking
     - navigation.indexes
+    - navigation.footer
     - toc.follow
     - search.suggest
     - search.highlight
@@ -63,6 +71,9 @@ theme:
     - content.code.annotate
     - content.action.edit
     - content.tabs.link
+
+extra_css:
+  - stylesheets/extra.css
 
 plugins:
   - search

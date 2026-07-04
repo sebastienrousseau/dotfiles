@@ -1,43 +1,132 @@
 ---
+title: .dotfiles — dark, signed, cross-platform
+description: Cross-platform, signed, local-first dotfiles for macOS, Linux, and WSL.
+hide:
+  - navigation
+  - toc
 render_with_liquid: false
 ---
 
+<section class="dot-hero" markdown>
+
 # .dotfiles
 
-Cross-platform, signed, local-first dotfiles for macOS, Linux, and WSL.
+<p class="tagline">Cross-platform, signed, local-first dotfiles for macOS, Linux, and WSL — multi-shell parity (bash/zsh/fish/nushell), a fast <code>dot</code> CLI, wallpaper-driven themes, SLSA-signed releases, and AI/MCP-aware tooling.</p>
 
-[![Build](https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge&logo=github)](https://github.com/sebastienrousseau/dotfiles/actions)
-[![Version](https://img.shields.io/badge/Version-v0.2.508-blue?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.508)
-[![Downloads](https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge)](https://github.com/sebastienrousseau/dotfiles/releases)
+<div class="buttons">
+  <a class="primary" href="guides/INSTALL/">Install →</a>
+  <a href="https://github.com/sebastienrousseau/dotfiles">GitHub</a>
+  <a href="reference/UTILS/">Utilities</a>
+  <a href="architecture/ARCHITECTURE/">Architecture</a>
+</div>
 
-This site is published from the `docs/` directory on `master` and tracks the current workstation baseline, operational guidance, and security material for the repository.
+</section>
 
-## Start Here
+## What's inside
 
-- [Repository README](https://github.com/sebastienrousseau/dotfiles#readme)
-- [Install guide](guides/INSTALL.md)
-- [Troubleshooting](guides/TROUBLESHOOTING.md)
-- [Support matrix](reference/SUPPORT_MATRIX.md)
+<div class="grid cards" markdown>
 
-## Workstation Operations
+- :material-console:{ .lg .middle } **Multi-shell parity**
 
-- [Utilities and `dot` CLI](reference/UTILS.md)
-- [Trusted agent workstation](operations/TRUSTED_AGENT_WORKSTATION.md)
-- [Workstation attestation](operations/ATTESTATION.md)
-- [Operations runbooks](operations/OPERATIONS.md)
-- [Architecture overview](architecture/ARCHITECTURE.md)
-- [Repository layout](architecture/REPO_LAYOUT.md)
+    ---
 
-## Security and Governance
+    Bash, Zsh, Fish, Nushell — same aliases, functions, prompt, and completions. Cross-shell env parity from `.chezmoidata.toml`.
 
-- [Security overview](security/SECURITY.md)
-- [Security checklist](security/SECURITY_CHECKLIST.md)
-- [Compliance](security/COMPLIANCE.md)
-- [Policy bundle releases](security/POLICY_RELEASES.md)
-- [Threat model](security/THREAT_MODEL.md)
+    [→ Shell hub](reference/UTILS.md)
 
-## Current Release
+- :material-lock-check:{ .lg .middle } **Signed & attested**
 
-- Current tagged release: [`v0.2.508`](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.508)
-- Latest release feed: [GitHub releases](https://github.com/sebastienrousseau/dotfiles/releases/latest)
-- Source repository: [sebastienrousseau/dotfiles](https://github.com/sebastienrousseau/dotfiles)
+    ---
+
+    Every commit SSH-signed, DCO enforced, SLSA-signed releases, SBOM + CVE gate, secret encryption via age.
+
+    [→ Security](operations/ATTESTATION.md)
+
+- :material-palette:{ .lg .middle } **190 wallpaper-driven themes**
+
+    ---
+
+    K-Means CIELAB color extraction. Terminal, editor, DE — all follow the wallpaper. `dot theme rebuild --force` regenerates from `~/Pictures/Wallpapers/`.
+
+    [→ Theme system](reference/UTILS.md)
+
+- :material-rocket-launch:{ .lg .middle } **Fast `dot` CLI**
+
+    ---
+
+    142+ subcommands: apply, health, doctor, heal, ai, agent, fleet, secrets, teleport, uninstall — with fzf pickers and a Bubble Tea cockpit.
+
+    [→ CLI reference](reference/UTILS.md)
+
+- :material-check-decagram:{ .lg .middle } **CI you can trust**
+
+    ---
+
+    35+ checks — shellcheck, shfmt, luacheck, stylua, CodeQL, Snyk, grype/SBOM, deps.dev, doc-drift gate, examples contract at 100%.
+
+    [→ Operations](operations/OPERATIONS.md)
+
+- :material-earth:{ .lg .middle } **Cross-platform**
+
+    ---
+
+    macOS (Intel & Apple Silicon), Linux (Ubuntu, Fedora, Arch, Alpine, openSUSE), WSL, PowerShell 7.5+, real BSDs.
+
+    [→ Support matrix](reference/SUPPORT_MATRIX.md)
+
+- :material-brain:{ .lg .middle } **AI & MCP aware**
+
+    ---
+
+    18-agent fleet cockpit (`dot ai`), local Claude gateway, MCP registry, context patterns, provider secrets — first-class support, not bolted on.
+
+    [→ AI operations](AI.md)
+
+- :material-account-cog:{ .lg .middle } **Chezmoi under the hood**
+
+    ---
+
+    Deterministic templates, feature flags, profiles, `run_onchange_` hooks. Everything lives in `defaults/` and applies to `$HOME` on-demand.
+
+    [→ Architecture](architecture/ARCHITECTURE.md)
+
+</div>
+
+## Quick start
+
+Install onto a fresh machine:
+
+=== "macOS / Linux / WSL"
+
+    ```bash
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
+    ```
+
+=== "Windows (PowerShell 7+)"
+
+    ```powershell
+    iwr -useb https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.ps1 | iex
+    ```
+
+Once installed:
+
+    dot doctor      # verify state
+    dot health      # dashboard with actionable warnings
+    dot ai          # launch the AI cockpit (Bubble Tea TUI)
+    dot theme       # pick a wallpaper-driven theme
+    dot help all    # full CLI reference
+
+## Where to next
+
+- [**Install guide**](guides/INSTALL.md) — full bootstrap walkthrough, per-platform.
+- [**Utilities & `dot` CLI**](reference/UTILS.md) — every subcommand with examples.
+- [**Architecture**](architecture/ARCHITECTURE.md) — how the layers fit together.
+- [**Trusted agent workstation**](operations/TRUSTED_AGENT_WORKSTATION.md) — hardening + attestation runbook.
+- [**Troubleshooting**](guides/TROUBLESHOOTING.md) — the common gotchas.
+- [**Support matrix**](reference/SUPPORT_MATRIX.md) — OS × shell × package-manager grid.
+- [**Security overview**](security/SECURITY.md) — signing, attestation, secret handling, threat model.
+
+## Current release
+
+- Release feed: [GitHub releases](https://github.com/sebastienrousseau/dotfiles/releases/latest)
+- Source: [sebastienrousseau/dotfiles](https://github.com/sebastienrousseau/dotfiles)
