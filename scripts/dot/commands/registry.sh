@@ -102,7 +102,13 @@ _registry_fetch() {
   fi
   local tmp
   tmp="$(mktemp "${cache_file}.XXXXXX")"
-  if ! curl -fsSL --max-time 15 -o "$tmp" "$url"; then
+  # `-fsSL -o file` should be silent, but with some upstreams (e.g.
+  # GitHub Pages) curl still writes a stray newline to stdout. That
+  # newline leaks into the caller's `$(_registry_fetch)` and later
+  # into `jq FILE` as a two-argument invocation
+  # (`jq \n /path/to/file`), producing a confusing
+  # "Could not open file" error. Silence stdout explicitly.
+  if ! curl -fsSL --max-time 15 -o "$tmp" "$url" >/dev/null; then
     rm -f "$tmp"
     if [[ -s "$cache_file" ]]; then
       ui_warn "registry" "fetch failed; using stale cache at $cache_file"

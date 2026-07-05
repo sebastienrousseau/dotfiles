@@ -67,20 +67,24 @@ else
 fi
 
 ui_section "Node/Python pins"
-if [[ -f "$src_dir/dot_node-version" ]]; then
-  ui_kv "node" "$(cat "$src_dir/dot_node-version")"
+# Chezmoi-tracked files (dot_*) live under $cm_src (defaults/) post-
+# Phase-4b, NOT at repo root. Using $src_dir here silently rendered
+# an empty section on every workstation.
+if [[ -f "$cm_src/dot_node-version" ]]; then
+  ui_kv "node" "$(cat "$cm_src/dot_node-version")"
 fi
-if [[ -f "$src_dir/dot_noderc.tmpl" ]]; then
-  ui_kv "noderc" "$(sed -n '1p' "$src_dir/dot_noderc.tmpl")"
+if [[ -f "$cm_src/dot_noderc.tmpl" ]]; then
+  ui_kv "noderc" "$(sed -n '1p' "$cm_src/dot_noderc.tmpl")"
 fi
 
 ui_section "Package manager locks"
-if [[ -f "$src_dir/dot_config/shell/Brewfile" ]]; then
+if [[ -f "$cm_src/dot_config/shell/Brewfile" ]]; then
   ui_kv "brew" "Brewfile present"
 fi
-if [[ -f "$src_dir/dot_config/shell/Brewfile.cli" ]]; then
+if [[ -f "$cm_src/dot_config/shell/Brewfile.cli" ]]; then
   ui_kv "brew-cli" "Brewfile.cli present"
 fi
+# package.json (if any) is a repo-root artefact — use $src_dir.
 if [[ -f "$src_dir/package.json" ]]; then
   ui_kv "node" "package.json version pinned"
 fi

@@ -102,7 +102,10 @@ cmd_fleet_status() {
   local last_apply=""
   local state_log="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/dot.log"
   if [[ -f "$state_log" ]]; then
-    last_apply="$(grep 'apply' "$state_log" 2>/dev/null | tail -1 | sed -n 's/^\[\([^]]*\)\].*/\1/p')"
+    # `set -euo pipefail` at the top of this script kills the whole
+    # command when grep matches nothing (rc=1). Wrap the pipeline so
+    # `last_apply` cleanly becomes empty and the UI still renders.
+    last_apply="$(grep 'apply' "$state_log" 2>/dev/null | tail -1 | sed -n 's/^\[\([^]]*\)\].*/\1/p' || true)"
   fi
 
   if [[ "$json_mode" -eq 1 ]]; then

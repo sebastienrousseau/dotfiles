@@ -32,8 +32,12 @@ check_alias_in_config() {
 }
 
 # 1. Verify Docs
-check_file ".chezmoitemplates/aliases/security/README.md"
-check_file ".chezmoitemplates/aliases/legal/README.md"
+# Post-Phase-4b (v0.2.503): chezmoi source is under the subdir
+# named in .chezmoiroot (typically "defaults/"). Paths without the
+# prefix silently return "missing" from any CWD other than
+# ~/.dotfiles/defaults/.
+check_file "defaults/.chezmoitemplates/aliases/security/README.md"
+check_file "defaults/.chezmoitemplates/aliases/legal/README.md"
 
 # 2. Verify Scripts
 check_file "scripts/security/lock-configs.sh"

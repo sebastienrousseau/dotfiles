@@ -405,7 +405,11 @@ EOF
     a2a-card)
       local a2a_card_file json_mode=0 validate_mode=0 strict_mode=0
       local repo_root
-      repo_root="$(_agent_repo_root)"
+      # `.well-known/` is NOT chezmoi-tracked — it lives at the
+      # actual repo root, not the descended `defaults/` subdir.
+      # Bypass `_agent_repo_root` (which descends) and read the
+      # true root directly.
+      repo_root="$(require_source_dir)"
       a2a_card_file="$repo_root/.well-known/agent-card.json"
       while [[ $# -gt 0 ]]; do
         case "$1" in

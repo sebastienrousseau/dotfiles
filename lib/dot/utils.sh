@@ -77,13 +77,21 @@ run_script() {
   local script_rel="$1"
   local label="$2"
   shift 2
-  local src_dir
+  local src_dir cm_src_dir
   src_dir="$(resolve_source_dir)"
   if [ -z "$src_dir" ]; then
     echo "Dotfiles source not found." >&2
     exit 1
   fi
-  if [ -f "$src_dir/$script_rel" ]; then
+  # Post-Phase-4b (v0.2.503) chezmoi-tracked content (dot_config/,
+  # dot_local/, .chezmoitemplates/, …) lives under the subdir named
+  # in `.chezmoiroot` (typically `defaults/`). Try the chezmoi-source
+  # path first, fall back to the repo root for scripts/ + lib/ + bin/
+  # which stay at the root regardless.
+  cm_src_dir="$(resolve_chezmoi_source_dir)"
+  if [ -n "$cm_src_dir" ] && [ -f "$cm_src_dir/$script_rel" ]; then
+    exec bash "$cm_src_dir/$script_rel" "$@"
+  elif [ -f "$src_dir/$script_rel" ]; then
     exec bash "$src_dir/$script_rel" "$@"
   else
     echo "$label not found." >&2

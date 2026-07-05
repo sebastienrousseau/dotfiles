@@ -22,7 +22,25 @@ resolve_source_dir() {
   return 1
 }
 
-src_dir="${1:-$(resolve_source_dir)}"
+# Descend into the chezmoi source subdir (per `.chezmoiroot`) if
+# present — post-Phase-4b (v0.2.503) the aliases + functions trees
+# live under `defaults/.chezmoitemplates/`, not at the repo root.
+# See `resolve_chezmoi_source_dir` in lib/dot/utils.sh.
+resolve_chezmoi_source_dir() {
+  local root="$1"
+  if [[ -f "$root/.chezmoiroot" ]]; then
+    local sub
+    sub="$(head -1 "$root/.chezmoiroot" | tr -d '[:space:]')"
+    if [[ -n "$sub" && -d "$root/$sub" ]]; then
+      printf "%s\n" "$root/$sub"
+      return
+    fi
+  fi
+  printf "%s\n" "$root"
+}
+
+src_root="${1:-$(resolve_source_dir)}"
+src_dir="$(resolve_chezmoi_source_dir "$src_root")"
 
 rg -n \
   -e '^[[:space:]]*alias[[:space:]]+[A-Za-z0-9_.:-]+=' \

@@ -8,7 +8,25 @@ import os
 import re
 import sys
 
-BASE_DIR = os.path.expanduser("~/.dotfiles/.chezmoitemplates")
+# Post-Phase-4b (v0.2.503): chezmoi source is under the subdir
+# named in .chezmoiroot (typically "defaults/"). Prefer the
+# descended path; fall back to the old top-level layout for
+# backwards compatibility.
+_DOTFILES_ROOT = os.path.expanduser("~/.dotfiles")
+_CHEZMOIROOT_FILE = os.path.join(_DOTFILES_ROOT, ".chezmoiroot")
+
+
+def _resolve_chezmoi_root() -> str:
+    if os.path.isfile(_CHEZMOIROOT_FILE):
+        with open(_CHEZMOIROOT_FILE, "r", encoding="utf-8") as _f:
+            sub = _f.read().strip()
+        cand = os.path.join(_DOTFILES_ROOT, sub)
+        if os.path.isdir(cand):
+            return cand
+    return _DOTFILES_ROOT
+
+
+BASE_DIR = os.path.join(_resolve_chezmoi_root(), ".chezmoitemplates")
 ALIASES_DIR = os.path.join(BASE_DIR, "aliases")
 FUNCTIONS_DIR = os.path.join(BASE_DIR, "functions")
 

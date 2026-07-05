@@ -189,8 +189,17 @@ show_language_package_managers() {
     echo "  pip: $(pip3 --version | cut -d' ' -f2)"
   fi
   if has_command pipx; then
-    local pipx_installed
-    pipx_installed=$(pipx list --short 2>/dev/null | wc -l | tr -d ' ')
+    local pipx_installed pipx_list_out
+    # `pipx list --short` returns non-zero when any installed package
+    # has a broken interpreter (common). Under `set -euo pipefail` a
+    # naive `local x=$(pipx …)` cascades and kills `dot packages`
+    # mid-output. Capture the pipeline separately so we can fall back
+    # cleanly without stray "N/A" lines from pipe-with-|| tricks.
+    if pipx_list_out="$(pipx list --short 2>/dev/null)"; then
+      pipx_installed="$(printf '%s' "$pipx_list_out" | wc -l | tr -d ' ')"
+    else
+      pipx_installed="N/A"
+    fi
     echo "  pipx: $(pipx --version)"
     echo "    Installed: $pipx_installed"
   fi
