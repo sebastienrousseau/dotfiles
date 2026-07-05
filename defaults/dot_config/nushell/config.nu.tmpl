@@ -32,11 +32,24 @@ source ~/.config/nushell/completions.nu
 source ~/.config/nushell/aliases.nu
 source ~/.config/nushell/functions.nu
 
-# Auto-start Pueue daemon if not running
-if (which pueued | length) > 0 {
-    let status = (do -i { pueue status } | complete)
-    if $status.exit_code != 0 {
-        pueued -d
+# Auto-start Pueue daemon if not running.
+#
+# This spawned two subprocesses on every shell startup: `which pueued`
+# (~10ms) + `pueue status` (~40ms warm, more when the daemon needs to
+# spin up). That's HALF the total nu-startup budget on a machine
+# where pueue isn't actively being driven. Guard behind an opt-in env
+# var so users who actively use pueue can restore the auto-start:
+#
+#     DOTFILES_NU_PUEUE_AUTOSTART=1
+#
+# The daemon will otherwise be started on first `pueue` invocation
+# (pueue's own client already lazy-spawns the daemon).
+if ($env | get -o DOTFILES_NU_PUEUE_AUTOSTART | default "") == "1" {
+    if (which pueued | length) > 0 {
+        let status = (do -i { pueue status } | complete)
+        if $status.exit_code != 0 {
+            pueued -d
+        }
     }
 }
 

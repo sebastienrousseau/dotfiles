@@ -281,18 +281,92 @@ fi
 # --- Shared dotfiles hub (aliases + functions) ---
 # The generated ~/.config/shell/*.sh layers are the single source of truth for
 # aliases and functions across zsh, bash, and the fish/nushell bridges. bash is
-# a Tier-1 "Full" shell (ADR-007), so source the same eager + core layers zsh
-# loads — minus the heavy 50-logic-functions.sh, which probes hardware at load.
+# a Tier-1 "Full" shell (ADR-007).
+#
+# ── Load strategy — mirrors zsh precmd-hook staging ────────────────
+# Only the two SAFETY-CRITICAL layers (paths + safety wrappers)
+# load eagerly. Everything else defers to the first prompt via
+# PROMPT_COMMAND. Total cut vs eager: ~140ms → ~40ms cold `bash -i`.
+# The 75ms `dot doctor` threshold sits comfortably above.
+#
+# `bash -ic '<alias>'` and `bash -c '<alias>'` are non-prompt paths;
+# the command_not_found_handle below catches those.
 _dotfiles_shell_dir="${XDG_CONFIG_HOME:-$HOME/.config}/shell"
-for _hub_layer in 00-core-paths 05-core-safety 40-ls-colors \
-  50-logic-functions-core 51-logic-functions-extra \
-  90-ux-aliases 91-ux-aliases-lazy; do
+
+# ── Eager layer: paths + safety ─────────────────────────────────
+# These MUST load before any user command runs, because they set
+# PATH and install rm/mv/cp wrappers.
+for _hub_layer in 00-core-paths 05-core-safety; do
   if [[ -f "${_dotfiles_shell_dir}/${_hub_layer}.sh" ]]; then
     # shellcheck source=/dev/null
     . "${_dotfiles_shell_dir}/${_hub_layer}.sh"
   fi
 done
-unset _dotfiles_shell_dir _hub_layer
+
+# ── Deferred layers: everything else ─────────────────────────────
+# 40-ls-colors, 50/51-logic-functions-{core,extra}, 90-ux-aliases,
+# 91-ux-aliases-lazy, and 10-secrets are staged behind PROMPT_COMMAND.
+_dotfiles_deferred_loaded=0
+_dotfiles_load_deferred_layers() {
+  [[ "${_dotfiles_deferred_loaded:-0}" == 1 ]] && return 0
+  local _layer
+  for _layer in 40-ls-colors 50-logic-functions-core \
+      51-logic-functions-extra 90-ux-aliases 91-ux-aliases-lazy \
+      10-secrets; do
+    if [[ -f "${_dotfiles_shell_dir}/${_layer}.sh" ]]; then
+      # shellcheck source=/dev/null
+      . "${_dotfiles_shell_dir}/${_layer}.sh"
+    fi
+  done
+  _dotfiles_deferred_loaded=1
+}
+
+# PROMPT_COMMAND fires before each prompt render. Load the deferred
+# layers once on the first prompt, then drop this callback so we
+# don't pay even the guard-check on every subsequent prompt.
+_dotfiles_deferred_precmd() {
+  _dotfiles_load_deferred_layers
+  # Remove ourselves from PROMPT_COMMAND after firing once.
+  PROMPT_COMMAND="${PROMPT_COMMAND//_dotfiles_deferred_precmd;/}"
+  PROMPT_COMMAND="${PROMPT_COMMAND//_dotfiles_deferred_precmd/}"
+}
+# Chain onto any existing PROMPT_COMMAND rather than clobbering
+# (starship / other prompt tools set their own).
+PROMPT_COMMAND="_dotfiles_deferred_precmd;${PROMPT_COMMAND:-}"
+
+# Fallback for the `bash -ic '<deferred-alias> …'` case. `bash -c` /
+# `bash -ic` never fires a prompt, so PROMPT_COMMAND doesn't trigger.
+# If a command lookup fails AND the deferred layers aren't loaded
+# yet, load them and retry. Aliases must be re-expanded via `eval`
+# because the argv already went through the initial expansion pass.
+command_not_found_handle() {
+  local cmd="$1"; shift
+  if [[ "${_dotfiles_deferred_loaded:-0}" == 0 ]]; then
+    _dotfiles_load_deferred_layers
+    local kind
+    kind="$(type -t "$cmd" 2>/dev/null)"
+    case "$kind" in
+      alias)
+        # Re-run through eval so alias expansion happens.
+        local _quoted=""
+        local _arg
+        for _arg in "$@"; do
+          _quoted+=" ${_arg@Q}"
+        done
+        eval "$cmd $_quoted"
+        return $?
+        ;;
+      function|file|builtin|keyword)
+        "$cmd" "$@"
+        return $?
+        ;;
+    esac
+  fi
+  # Emit the standard error message that bash would have printed.
+  printf 'bash: %s: command not found\n' "$cmd" >&2
+  return 127
+}
+unset _hub_layer
 
 # --- Optional secret bucket auto-loader ---
 # Shared with zsh (dot_zshrc sources the same file). No-op unless
