@@ -14,11 +14,11 @@ machine = ""
 # names a theme that isn't defined. The hard-coded fallback in
 # dot_gitconfig.tmpl is `macos-monterey-dark`, which also isn't a
 # valid key — so the default has to render on its own.
-theme = "flower-dark"
+theme = "plasma-dark"
 
 # Terminal settings
 terminal_font_family = "JetBrainsMono Nerd Font"
-terminal_font_size = 12
+terminal_font_size = 20
 default_shell = "fish" # zsh, fish, or nu
 
 # Git identity (should be set via chezmoi init prompts or local overrides)

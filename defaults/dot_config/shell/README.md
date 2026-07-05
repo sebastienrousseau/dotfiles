@@ -219,7 +219,7 @@ Set the theme in `.chezmoidata.toml`:
 ```toml
 theme = "tokyonight-night"
 terminal_font_family = "JetBrains Mono"
-terminal_font_size = 12
+terminal_font_size = 20
 ```
 
 Available themes:

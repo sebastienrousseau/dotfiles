@@ -6,7 +6,7 @@ if wezterm.config_builder then
 end
 
 {{- $fontFamily := default "JetBrainsMono Nerd Font" .terminal_font_family -}}
-{{- $fontSize := default 12 .terminal_font_size -}}
+{{- $fontSize := default 20 .terminal_font_size -}}
 {{- $t := index .themes (default "big-sur-dark" .theme) -}}
 {{- if not $t -}}{{- $t = index .themes "big-sur-dark" -}}{{- end }}
 {{- $tt := $t -}}
