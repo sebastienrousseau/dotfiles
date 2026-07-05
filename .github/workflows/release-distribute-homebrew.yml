@@ -170,7 +170,7 @@ jobs:
           set -euo pipefail
           TAP_REPO="sebastienrousseau/homebrew-tap"
           git clone "https://${{ secrets.TAP_PUSH_TOKEN || secrets.GITHUB_TOKEN }}@github.com/${TAP_REPO}.git" homebrew-tap
-          # Detect the default branch (main vs master) so the PR targets
+          # Detect the default branch (main) so the PR targets
           # the right base regardless of how the tap is initialised.
           cd homebrew-tap
           default_branch=$(git symbolic-ref --short HEAD)

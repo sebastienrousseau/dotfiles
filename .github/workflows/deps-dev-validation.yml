@@ -8,7 +8,7 @@ name: deps.dev Validation
 #   * PR (advisory)         — runs the scan, reports findings as
 #     SARIF annotations, but does NOT fail the build. Lets
 #     contributors iterate without the gate blocking unrelated work.
-#   * push to master (hard) — same scan, but hard-fails on any HIGH+
+#   * push to main (hard) — same scan, but hard-fails on any HIGH+
 #     advisory.
 #   * weekly cron           — re-scans even when deps haven't changed,
 #     so a newly-published advisory against a frozen dep still gets
@@ -23,7 +23,7 @@ on:
       - 'tools/ci/check-deps-dev.sh'
       - 'docs/security/DEPS_DEV_EXCEPTIONS.md'
   push:
-    branches: [master]
+    branches: [main, master]
   schedule:
     - cron: '0 4 * * 2'   # Tuesday 04:00 UTC — after Dependabot
   workflow_dispatch:
@@ -57,7 +57,7 @@ jobs:
       - name: Run deps.dev validation
         id: scan
         env:
-          # PRs are advisory; push-to-master + schedule are hard-fail.
+          # PRs are advisory; push-to-main + schedule are hard-fail.
           DEPS_DEV_SARIF_OUT: ${{ github.workspace }}/deps-dev.sarif
         run: |
           set -uo pipefail

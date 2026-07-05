@@ -1,7 +1,7 @@
 name: Drift Detection
 
 # Nightly chezmoi drift detection (closes #875). Runs `dot drift --json`
-# in a clean container against the master branch and opens (or updates)
+# in a clean container against the main branch and opens (or updates)
 # a tracking issue if anything has drifted between the chezmoi source
 # and what a fresh apply would produce.
 #
@@ -38,7 +38,7 @@ jobs:
       - name: Install chezmoi
         uses: ./.github/actions/setup-chezmoi
         with:
-          # drift-detection runs on every push to master and isn't tied
+          # drift-detection runs on every push to main and isn't tied
           # to the CI envfile — provide a fallback version explicitly.
           version: '2.70.3'
 
@@ -76,7 +76,7 @@ jobs:
         run: |
           set -euo pipefail
           total="${{ steps.drift.outputs.total }}"
-          title="Drift detected on master ($(date -u +%Y-%m-%d))"
+          title="Drift detected on main ($(date -u +%Y-%m-%d))"
           body=$(cat <<EOF
           Nightly drift scan found **$total** drift signal(s).
 
@@ -98,7 +98,7 @@ jobs:
           )
 
           existing=$(gh issue list \
-            --search 'Drift detected on master' \
+            --search 'Drift detected on main' \
             --state open \
             --json number \
             --jq '.[0].number' 2>/dev/null || true)

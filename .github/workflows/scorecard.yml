@@ -1,6 +1,6 @@
 name: OpenSSF Scorecard
 
-# Weekly OpenSSF Scorecard scan + a push-to-master trigger so the score
+# Weekly OpenSSF Scorecard scan + a push-to-main trigger so the score
 # is recomputed every time the canonical branch moves. Closes #869.
 #
 # Results land in three places:
@@ -30,7 +30,7 @@ on:
   schedule:
     - cron: '0 6 * * 1'  # Monday 06:00 UTC
   push:
-    branches: [master]
+    branches: [main, master]
   workflow_dispatch:
 
 permissions: read-all

@@ -26,7 +26,7 @@ if command -v git &>/dev/null; then
       printf "main\n"
       return
     fi
-    if git show-ref --verify --quiet refs/heads/master; then
+    if git show-ref --verify --quiet refs/heads/main; then
       printf "master\n"
       return
     fi
@@ -186,8 +186,8 @@ if command -v git &>/dev/null; then
   alias gbs='git bisect'
   if [[ "${DOTFILES_ENABLE_DANGEROUS_ALIASES:-0}" == "1" ]]; then
     undopush() {
-      dot_confirm_destructive "git push -f origin HEAD^:master" || return 1
-      git push -f origin HEAD^:master
+      dot_confirm_destructive "git push -f origin HEAD^:main" || return 1
+      git push -f origin HEAD^:main
     }
   fi
 

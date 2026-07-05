@@ -850,7 +850,7 @@ build_html_multi() {
     mkdir -p "$(dirname "$outpath")"
 
     # Compute edit URL + last-modified date
-    local edit_url="$REPO_URL/edit/master/docs/manual/$rel_src"
+    local edit_url="$REPO_URL/edit/main/docs/manual/$rel_src"
     local last_modified
     last_modified="$(cd "$REPO_ROOT" && git log -1 --format='%ai' -- "docs/manual/$rel_src" 2>/dev/null | cut -d' ' -f1)"
     [[ -z "$last_modified" ]] && last_modified="$BUILD_DATE"
@@ -943,7 +943,7 @@ $sub_nav\\
     echo '</ul></nav>'
     echo '</main>'
     echo '<footer class="site-footer"><div class="footer-inner">'
-    echo "<p>Generated $BUILD_DATE · <a href=\"$REPO_URL\">sebastienrousseau/dotfiles</a> · <a href=\"$REPO_URL/blob/master/LICENSE\">MIT License</a></p>"
+    echo "<p>Generated $BUILD_DATE · <a href=\"$REPO_URL\">sebastienrousseau/dotfiles</a> · <a href=\"$REPO_URL/blob/main/LICENSE\">MIT License</a></p>"
     echo '</div></footer>'
     echo '<script src="../search.js" defer></script>'
     echo '</body></html>'
@@ -1151,7 +1151,7 @@ build_landing() {
       {
         "@type": "Question",
         "name": "How do I install .dotfiles?",
-        "acceptedAnswer": {"@type": "Answer", "text": "Run: bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)\" — then verify with 'dot doctor'."}
+        "acceptedAnswer": {"@type": "Answer", "text": "Run: bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)\" — then verify with 'dot doctor'."}
       },
       {
         "@type": "Question",
@@ -1249,19 +1249,19 @@ HTML
     <p>Integrity: <a href="SHA256SUMS">SHA256SUMS</a> · Version history: <a href="$REPO_URL/releases">GitHub Releases</a></p>
 
     <h2>Quick start</h2>
-    <pre><code>bash -c "\$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
+    <pre><code>bash -c "\$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 dot doctor
 dot learn</code></pre>
 
     <h2>Source</h2>
-    <p>Repository: <a href="$REPO_URL">sebastienrousseau/dotfiles</a> · License: <a href="$REPO_URL/blob/master/LICENSE">MIT</a></p>
+    <p>Repository: <a href="$REPO_URL">sebastienrousseau/dotfiles</a> · License: <a href="$REPO_URL/blob/main/LICENSE">MIT</a></p>
   </main>
 
   <footer class="site-footer">
     <div class="footer-inner">
       <p>Generated $BUILD_DATE from <a href="dotfiles-md.tar.gz">docs/manual/</a> via <code>tools/docs/build-manual.sh</code>.
       Questions? <a href="$REPO_URL/issues">Open an issue</a> or <a href="$REPO_URL/discussions">start a discussion</a>.</p>
-      <p>&copy; 2015–$(date +%Y) Sebastien Rousseau · <a href="$REPO_URL/blob/master/LICENSE">MIT License</a></p>
+      <p>&copy; 2015–$(date +%Y) Sebastien Rousseau · <a href="$REPO_URL/blob/main/LICENSE">MIT License</a></p>
     </div>
   </footer>
 

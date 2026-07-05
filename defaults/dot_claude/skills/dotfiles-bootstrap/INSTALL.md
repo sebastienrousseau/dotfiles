@@ -12,9 +12,9 @@ Drop the skill directory into your global Claude Code skills path:
 
 ```bash
 mkdir -p ~/.claude/skills
-curl -fsSL https://github.com/sebastienrousseau/dotfiles/archive/refs/heads/master.tar.gz \
+curl -fsSL https://github.com/sebastienrousseau/dotfiles/archive/refs/heads/main.tar.gz \
   | tar -xz -C /tmp
-cp -r /tmp/dotfiles-master/dot_claude/skills/dotfiles-bootstrap \
+cp -r /tmp/dotfiles-main/dot_claude/skills/dotfiles-bootstrap \
       ~/.claude/skills/
 ```
 

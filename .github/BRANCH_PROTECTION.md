@@ -28,7 +28,7 @@ Configure these settings in GitHub repository settings:
 
 ```yaml
 protection_rules:
-  master:
+  main:
     required_status_checks:
       strict: true  # Require branches to be up to date before merging
       contexts:
@@ -77,7 +77,7 @@ protection_rules:
 
 ### Emergency Hotfix Process
 
-1. Create hotfix branch from `master`
+1. Create hotfix branch from `main`
 2. Apply minimal fix with full justification
 3. Request emergency review from CODEOWNERS
 4. Merge with admin override if critical security issue
@@ -111,12 +111,12 @@ Apply branch protection via GitHub CLI:
 
 ```bash
 # Set branch protection rules
-gh api repos/:owner/:repo/branches/master/protection \
+gh api repos/:owner/:repo/branches/main/protection \
   --method PUT \
   --input protection-rules.json
 
 # Verify protection is active
-gh api repos/:owner/:repo/branches/master/protection \
+gh api repos/:owner/:repo/branches/main/protection \
   --jq '.required_status_checks.contexts[]'
 ```
 

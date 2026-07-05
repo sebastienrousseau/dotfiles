@@ -18,7 +18,7 @@ name: Verify GPG WKD
 
 on:
   push:
-    branches: [master]
+    branches: [main, master]
     paths:
       - 'docs/security/security-pubkey.asc'
       - '.github/SECURITY.md'

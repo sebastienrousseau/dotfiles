@@ -99,13 +99,13 @@ Install onto a fresh machine:
 === "macOS / Linux / WSL"
 
     ```bash
-    bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
     ```
 
 === "Windows (PowerShell 7+)"
 
     ```powershell
-    iwr -useb https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.ps1 | iex
+    iwr -useb https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.ps1 | iex
     ```
 
 Once installed:

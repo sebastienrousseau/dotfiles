@@ -70,7 +70,7 @@
     <!-- New prompt -->
     <text x="40" y="405" fill="#a6e3a1">&#10148;</text>
     <text x="60" y="405" fill="#cdd6f4">~/.dotfiles</text>
-    <text x="170" y="405" fill="#f5c2e7">on master</text>
+    <text x="170" y="405" fill="#f5c2e7">on main</text>
     <rect x="275" y="393" width="8" height="16" fill="#cdd6f4">
       <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite" />
     </rect>

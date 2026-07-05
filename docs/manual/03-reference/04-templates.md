@@ -174,7 +174,7 @@ chezmoi execute-template '{{- $t := index .themes .theme -}}{{ $t.term.bg }}'
 
 ## Validation in CI
 
-Every push to master runs:
+Every push to main runs:
 
 ```sh
 chezmoi apply --dry-run

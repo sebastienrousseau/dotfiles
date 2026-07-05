@@ -71,7 +71,7 @@ name: Reliability Gate
 on:
   pull_request:
   push:
-    branches: [master]
+    branches: [main]
   workflow_dispatch:
 
 jobs:

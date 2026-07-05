@@ -18,8 +18,8 @@ source "$SCRIPT_DIR/../framework/assertions.sh"
 # ═══════════════════════════════════════════════════════════════
 
 test_start "readme_install_url_valid"
-# Install URL must point to install.sh on master
-assert_file_contains "$REPO_ROOT/README.md" "raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh" "README install URL must reference master/install.sh"
+# Install URL must point to install.sh on main
+assert_file_contains "$REPO_ROOT/README.md" "raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh" "README install URL must reference main/install.sh"
 
 test_start "readme_dot_doctor_exists"
 assert_file_contains "$REPO_ROOT/README.md" "dot doctor" "README must reference dot doctor"

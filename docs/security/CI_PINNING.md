@@ -17,7 +17,7 @@ Every external dependency the CI pipeline consumes must be pinned by
 When `ci.yml` calls a reusable via `./.github/workflows/reusable-X.yml`,
 GitHub resolves the reusable from the **same ref as the calling
 workflow at run time**. For an in-repo PR that's the PR's branch —
-fine. The risk is the inverse: a malicious push to `master` (or any
+fine. The risk is the inverse: a malicious push to `main` (or any
 ref the calling workflow might resolve from) can swap reusable
 content under a CI run, with no audit trail in the PR diff.
 
@@ -29,11 +29,11 @@ site — visible in the PR diff, reviewable, revertible.
 
 ```yaml
 # Acceptable — full SHA pin.
-uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # master
+uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # main
 ```
 
 The trailing comment is a human-readable hint at what the SHA
-represented when it was pinned (typically `master`, sometimes a tag
+represented when it was pinned (typically `main`, sometimes a tag
 like `v0.2.501`). The hint is documentation only — the SHA is what
 GitHub uses.
 
@@ -44,7 +44,7 @@ GitHub uses.
 uses: ./.github/workflows/reusable-shell-lint.yml
 
 # Rejected — branch ref is mutable.
-uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@master
+uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@main
 
 # Rejected — tag ref is mutable (tags can be moved).
 uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@v0.2.501
@@ -57,20 +57,20 @@ rejected forms above.
 ## Refreshing pinned SHAs
 
 `bump-reusable-pins.yml` handles this automatically. On every push to
-`master` that touches `.github/workflows/reusable-*.yml`, the bot scans
+`main` that touches `.github/workflows/reusable-*.yml`, the bot scans
 caller workflows for stale pins and opens a PR bumping them to the new
 SHA. Signed with `ACTIONS_BOT_SIGNING_KEY` so the resulting commit
 passes `Verify Commit Signatures`.
 
 The manual recipe below stays here as a fallback — for example, if you
-need to bump pins before a merge to master, or if the bot's run failed
+need to bump pins before a merge to main, or if the bot's run failed
 and you want to short-circuit waiting for the next push trigger.
 
 ```sh
-# 1. Land the change to the reusable on master via a PR.
-# 2. After merge, capture the new master SHA:
-git fetch origin master
-PIN=$(git rev-parse origin/master)
+# 1. Land the change to the reusable on main via a PR.
+# 2. After merge, capture the new main SHA:
+git fetch origin main
+PIN=$(git rev-parse origin/main)
 echo "$PIN"
 
 # 3. Bump every call site:

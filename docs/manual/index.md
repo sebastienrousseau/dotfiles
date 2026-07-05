@@ -8,7 +8,7 @@ render_with_liquid: false
 
 A trusted agent workstation baseline for macOS, Linux, and WSL. Chezmoi handles templating and platform differences; the `dot` CLI coordinates lifecycle operations on top.
 
-This manual is generated from the Markdown sources in [`docs/manual/`](https://github.com/sebastienrousseau/dotfiles/tree/master/docs/manual) and published in nine formats per release. The HTML edition you are reading is the canonical online version.
+This manual is generated from the Markdown sources in [`docs/manual/`](https://github.com/sebastienrousseau/dotfiles/tree/main/docs/manual) and published in nine formats per release. The HTML edition you are reading is the canonical online version.
 
 ## Read it your way
 

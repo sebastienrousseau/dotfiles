@@ -199,7 +199,7 @@ jobs:
 
       - name: Scan SBOM for CVEs with Grype
         # Gate policy (closes #852):
-        #   - PRs targeting `master`: hard-fail on high/critical findings.
+        #   - PRs targeting `main`: hard-fail on high/critical findings.
         #   - PRs targeting feature branches: advisory (annotation only),
         #     so contributors can iterate without the gate blocking work
         #     that hasn't yet reached the protected branch.
@@ -209,7 +209,7 @@ jobs:
         id: grype
         with:
           sbom: pr-sbom.spdx.json
-          fail-build: ${{ github.base_ref == 'master' && 'true' || 'false' }}
+          fail-build: ${{ github.base_ref == 'main' && 'true' || 'false' }}
           severity-cutoff: high
           output-format: json
 

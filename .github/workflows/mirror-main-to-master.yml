@@ -1,0 +1,64 @@
+name: Mirror main → master
+
+# During the default-branch rename from `master` → `main`, this workflow
+# keeps `master` as a passive mirror of `main` so previously-published
+# `raw.githubusercontent.com/…/master/…` install URLs keep resolving.
+#
+# The rename PR flips defaults, but historical install commands people
+# have bookmarked (`bash -c "$(curl -fsSL .../master/install.sh)"`) don't
+# auto-redirect on the raw-content host — only `github.com/*` URLs do.
+# This mirror closes that gap for the grace period.
+#
+# When we're ready to retire `master` (probably 6–12 months out), delete
+# this workflow and then delete the `master` branch:
+#     git push origin --delete master
+#
+# NOTE: this workflow needs write access to push a branch. It uses the
+# default GITHUB_TOKEN, which has `contents: write` when granted below.
+
+on:
+  # Only fire on main pushes — if this also fired on master pushes, the
+  # mirror itself would trigger it, wasting minutes on a no-op re-push.
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mirror-main-to-master
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    name: Fast-forward master to main
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout (full history — we push a specific SHA to master)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Mirror main → master
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # If master doesn't exist yet, GitHub returns 404 — create it.
+          if ! git ls-remote --exit-code --heads origin master >/dev/null 2>&1; then
+            echo "Creating master from main..."
+            git push origin "$GITHUB_SHA:refs/heads/master"
+            exit 0
+          fi
+          # Otherwise fast-forward. If it can't fast-forward (someone
+          # pushed directly to master), fail loudly rather than clobber.
+          echo "Fast-forwarding master to $GITHUB_SHA..."
+          git push origin "$GITHUB_SHA:refs/heads/master"

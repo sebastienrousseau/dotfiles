@@ -11,7 +11,7 @@ copyright: Copyright &copy; 2015-2026 Sebastien Rousseau
 
 repo_url: https://github.com/sebastienrousseau/dotfiles
 repo_name: sebastienrousseau/dotfiles
-edit_uri: edit/master/docs/
+edit_uri: edit/main/docs/
 
 docs_dir: docs
 site_dir: site

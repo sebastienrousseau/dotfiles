@@ -7,10 +7,10 @@ render_with_liquid: false
 Every bash script in this repo must include `set -euo pipefail` (or
 `set -eu` for POSIX `sh`) within its first 50 lines. The rule is
 enforced by
-[`tools/ci/check-shell-preamble.sh`](https://github.com/sebastienrousseau/dotfiles/blob/master/tools/ci/check-shell-preamble.sh),
+[`tools/ci/check-shell-preamble.sh`](https://github.com/sebastienrousseau/dotfiles/blob/main/tools/ci/check-shell-preamble.sh),
 wired into `pre-commit` and the `reusable-shell-lint.yml` CI job.
 Tests pin the contract under
-[`tests/unit/security/test_shell_preamble_lint.sh`](https://github.com/sebastienrousseau/dotfiles/blob/master/tests/unit/security/test_shell_preamble_lint.sh).
+[`tests/unit/security/test_shell_preamble_lint.sh`](https://github.com/sebastienrousseau/dotfiles/blob/main/tests/unit/security/test_shell_preamble_lint.sh).
 
 ## Why the preamble is mandatory
 

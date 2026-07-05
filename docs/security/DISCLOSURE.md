@@ -34,7 +34,7 @@ gpg --fingerprint security@sebastienrousseau.com
 ```
 
 The fingerprint must match the one published in
-[`.github/SECURITY.md`](https://github.com/sebastienrousseau/dotfiles/blob/master/.github/SECURITY.md). Cross-verify
+[`.github/SECURITY.md`](https://github.com/sebastienrousseau/dotfiles/blob/main/.github/SECURITY.md). Cross-verify
 against the SSH signing key in `dot_config/git/allowed_signers.tmpl`
 — the maintainer signs commits with the same identity, so both
 fingerprints derive from the same identity claim.
@@ -75,7 +75,7 @@ subjects in plain text).
 ## 5. Acknowledgement
 
 You should receive an acknowledgement within the SLA in
-[`.github/SECURITY.md`](https://github.com/sebastienrousseau/dotfiles/blob/master/.github/SECURITY.md):
+[`.github/SECURITY.md`](https://github.com/sebastienrousseau/dotfiles/blob/main/.github/SECURITY.md):
 
 | Severity | Initial response |
 |---|---|
@@ -122,7 +122,7 @@ The maintainer commits to:
 
 ## See also
 
-- [`.github/SECURITY.md`](https://github.com/sebastienrousseau/dotfiles/blob/master/.github/SECURITY.md) — policy
+- [`.github/SECURITY.md`](https://github.com/sebastienrousseau/dotfiles/blob/main/.github/SECURITY.md) — policy
   overview + fingerprint.
 - [`docs/security/KEY_ROTATION.md`](KEY_ROTATION.md) — schedule for
   when the disclosure key is rotated.

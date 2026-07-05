@@ -78,7 +78,7 @@ Target the [public Scorecard report](https://scorecard.dev/viewer/?uri=github.co
 | Check | Today (baseline) | Path to 10 |
 |---|---|---|
 | **Binary-Artifacts** | 10 (no binaries committed) | Maintain — pre-commit guard rejecting any committed binary. |
-| **Branch-Protection** | needs token | Already configured on `master` (required reviews, signed commits, status-check gating, linear history). Verify in `gh api repos/.../branches/master/protection` and document in `docs/security/`. |
+| **Branch-Protection** | needs token | Already configured on `main` (required reviews, signed commits, status-check gating, linear history). Verify in `gh api repos/.../branches/main/protection` and document in `docs/security/`. |
 | **CI-Tests** | 10 (CI passes on every PR) | Maintain — current 75-check matrix is comprehensive. |
 | **CII-Best-Practices** / OpenSSF Best Practices badge | not present | Apply for the badge at [bestpractices.coreinfrastructure.org](https://www.bestpractices.dev/) and embed the badge in README. |
 | **Code-Review** | needs verification | Already enforced via branch protection; document in CONTRIBUTING.md. |

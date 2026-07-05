@@ -65,7 +65,7 @@ common Git commands, making them shorter and more intuitive.
 - `gpoll` Push each of your local git branches to the remote repository
 - `gpull` Fetch from and integrate with another repository or a local
   branch.
-- `gpullm` Pull changes from the locally stored branch origin/master
+- `gpullm` Pull changes from the locally stored branch origin/main
   and merge that to the local checked-out branch.
 - `gpullo` Do a pull for just one branch.
 - `gpush` Update remote refs along with associated objects.

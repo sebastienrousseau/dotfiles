@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2034,SC1091
 # 🅳🅾🆃🅵🅸🅻🅴🆂 - Deterministic Remote Provisioner
-# Usage: curl -sL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/dot_local/bin/executable_dot-bootstrap | bash
+# Usage: curl -sL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/dot_local/bin/executable_dot-bootstrap | bash
 #
 # This script provisions an entire machine from scratch using Nix.
 # It installs the Nix package manager, clones the dotfiles,

@@ -2,12 +2,12 @@ name: Devcontainer Prebuild
 
 on:
   push:
-    branches: [master]
+    branches: [main, master]
     paths:
       - '.devcontainer/**'
       - '.github/workflows/devcontainer-prebuild.yml'
   pull_request:
-    branches: [master]
+    branches: [main, master]
     paths:
       # Only validate devcontainer changes; do not rebuild on workflow edits
       # to avoid 30-min apt downloads on unrelated PRs.
@@ -76,7 +76,7 @@ jobs:
           imageName: ghcr.io/${{ github.repository_owner }}/dotfiles-devcontainer
           cacheFrom: ghcr.io/${{ github.repository_owner }}/dotfiles-devcontainer
           push: filter
-          refFilterForPush: refs/heads/master
+          refFilterForPush: refs/heads/main
           eventFilterForPush: push,workflow_dispatch,schedule
           runCmd: |
             zsh --version

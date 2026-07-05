@@ -21,6 +21,6 @@ render_with_liquid: false
 ## Provisioning notes
 
 1. Store the SSH signing private key in GitHub Actions as `ACTIONS_BOT_SIGNING_KEY`.
-2. Store the matching public key in [allowed_signers](https://github.com/sebastienrousseau/dotfiles/blob/master/defaults/dot_config/git/allowed_signers.tmpl).
+2. Store the matching public key in [allowed_signers](https://github.com/sebastienrousseau/dotfiles/blob/main/defaults/dot_config/git/allowed_signers.tmpl).
 3. Rotate the key on personnel or workstation change.
 4. Fail closed when secrets are absent.

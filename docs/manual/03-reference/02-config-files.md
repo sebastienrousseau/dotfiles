@@ -247,7 +247,7 @@ Agent Card (MCP A2A spec):
 
 ## Verified Files
 
-Every commit on `master` modifies tracked files only. Untracked files in the source directory (e.g. editor swap files) are ignored via `.chezmoiignore`:
+Every commit on `main` modifies tracked files only. Untracked files in the source directory (e.g. editor swap files) are ignored via `.chezmoiignore`:
 
 ```
 .DS_Store

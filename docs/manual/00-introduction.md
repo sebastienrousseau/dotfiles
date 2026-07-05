@@ -52,7 +52,7 @@ dot manual text      # pipe plain text to pager
 ## Quick Install
 
 ```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 dot doctor
 ```
 
@@ -86,4 +86,4 @@ Individual tools packaged, referenced, or templated by this repository retain th
 
 - **Bugs and feature requests** — <https://github.com/sebastienrousseau/dotfiles/issues>
 - **Security vulnerabilities** — see [Security Policy](../security/SECURITY.md); do not open public issues for unpatched vulnerabilities
-- **Documentation corrections** — open a pull request against `docs/manual/` on the `master` branch
+- **Documentation corrections** — open a pull request against `docs/manual/` on the `main` branch

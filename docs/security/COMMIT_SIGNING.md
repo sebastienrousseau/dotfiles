@@ -1,6 +1,6 @@
 # Commit Signing — Policy & Setup
 
-Every commit that reaches `master` in this repository must carry a
+Every commit that reaches `main` in this repository must carry a
 cryptographic signature that GitHub can verify. The policy is enforced
 in three independent layers, so a single bypass does not break the
 chain. This document explains the policy, walks through SSH and GPG
@@ -24,16 +24,16 @@ is missing. The chain below removes every escape hatch.
    `git verify-commit` against every commit in the push range. A
    single unverified commit aborts the push. `--no-verify` skips
    this layer; the next two catch it.
-3. **GitHub Rulesets** — `.github/rulesets/master.json` declares
-   `required_signatures` on `refs/heads/master`. The rule is part
+3. **GitHub Rulesets** — `.github/rulesets/main.json` declares
+   `required_signatures` on `refs/heads/main`. The rule is part
    of the repo so it's reproducible across forks. Apply with
-   `gh ruleset import .github/rulesets/master.json`.
+   `gh ruleset import .github/rulesets/main.json`.
 4. **`compliance-guard.yml` workflow** — runs on every PR targeting
-   `master`. Walks the commit range with `git verify-commit` and
+   `main`. Walks the commit range with `git verify-commit` and
    marks unsigned commits in the PR summary; fails the workflow
    when `unsigned_count > 0`.
 
-A merge to `master` therefore requires (Ruleset accepts the push) AND
+A merge to `main` therefore requires (Ruleset accepts the push) AND
 (the workflow's signed-commit check passes) AND (the maintainer's
 push key is allowed). The protection holds even if a contributor's
 local hooks are missing or skipped.
@@ -100,7 +100,7 @@ git log "$(git merge-base @{u} HEAD)..HEAD" \
 for c in $(git rev-list "$(git merge-base @{u} HEAD)..HEAD"); do
   git verify-commit "$c" >/dev/null 2>&1 \
     && echo "✓ $c" \
-    || echo "✗ $c — unsigned, will be rejected by master ruleset"
+    || echo "✗ $c — unsigned, will be rejected by main ruleset"
 done
 ```
 
@@ -112,7 +112,7 @@ done
 | `error: Load key "/.../id_ed25519": Permission denied` | SSH key permissions too open | `chmod 600 ~/.ssh/id_ed25519` |
 | GitHub shows "Unverified" on a commit signed locally | Signing key not uploaded to GitHub | `gh ssh-key add … --type signing` (SSH) or `gh gpg-key add` (GPG) |
 | Pre-push hook rejects a merge commit you didn't author | Upstream commit lacks a signature | Either pull the rebased branch, or fast-forward instead of merging |
-| Ruleset import via `gh` complains "invalid JSON" | Rulesets API expects the `target` + `rules` envelope, not just the rules array | Use the file as-is — `gh ruleset import .github/rulesets/master.json` |
+| Ruleset import via `gh` complains "invalid JSON" | Rulesets API expects the `target` + `rules` envelope, not just the rules array | Use the file as-is — `gh ruleset import .github/rulesets/main.json` |
 
 ## Re-applying the ruleset after a manual edit
 
@@ -121,14 +121,14 @@ file-of-truth wins. Re-apply:
 
 ```sh
 gh api -X POST repos/{owner}/{repo}/rulesets \
-  --input .github/rulesets/master.json
+  --input .github/rulesets/main.json
 ```
 
 (or `-X PUT` against the existing ruleset's ID if it already exists).
 
 ## References
 
-- `.github/rulesets/master.json` — the enforced policy.
+- `.github/rulesets/main.json` — the enforced policy.
 - `.github/workflows/compliance-guard.yml` — the workflow that
   fails PRs containing unsigned commits.
 - `scripts/git-hooks/pre-push` — the local pre-push gate.

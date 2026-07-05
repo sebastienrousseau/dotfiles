@@ -19,7 +19,7 @@ any one change:
   docs-coverage contract, and the cross-shell parity contract. See
   [`docs/operations/`](docs/operations/) and `.github/workflows/`.
 - **Signed history.** Commits are signed (SSH ED25519) and `required_signatures`
-  is enforced on `master`. See [`docs/security/COMMIT_SIGNING.md`](docs/security/COMMIT_SIGNING.md).
+  is enforced on `main`. See [`docs/security/COMMIT_SIGNING.md`](docs/security/COMMIT_SIGNING.md).
 - **Pinned supply chain.** GitHub Actions are SHA-pinned, dependencies are
   lockfile-pinned, and an SBOM is generated per release.
 - **Documented decisions.** Significant choices are recorded as ADRs in

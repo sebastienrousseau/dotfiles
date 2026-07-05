@@ -11,7 +11,7 @@ Thirty short recipes for common tasks.
 ### 1. Install on a fresh machine
 
 ```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 ```
 
 ### 2. Update everything

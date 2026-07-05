@@ -21,7 +21,7 @@ The trust model combines cryptographic signing, local-first secrets, policy-gate
 
 ### SSH ED25519 for Git
 
-Every commit on `master` is signed with SSH ED25519:
+Every commit on `main` is signed with SSH ED25519:
 
 ```sh
 git verify-commit HEAD
@@ -62,7 +62,7 @@ CI runs three independent scanners:
 
 | Scanner | Purpose | Threshold |
 |:---|:---|:---|
-| `gitleaks` | Pattern-based secret detection | Zero leaks on `master` |
+| `gitleaks` | Pattern-based secret detection | Zero leaks on `main` |
 | `detect-secrets` | Baseline-comparing scanner | Zero new secrets vs `.secrets.baseline` |
 | `trufflehog` | Verified-secret scanner (API-tested) | Zero verified secrets |
 
@@ -119,7 +119,7 @@ Violations are logged to `~/.local/state/dotfiles/mcp-violations.log` and report
   },
   "git": {
     "head": "abc123...",
-    "branch": "master",
+    "branch": "main",
     "signed": true,
     "verified": true
   }

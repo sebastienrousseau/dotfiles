@@ -5,7 +5,7 @@ render_with_liquid: false
 # Pre-Push Audit Bypass
 
 This page documents when the pre-push reliability audit can be bypassed,
-how to do it, and why the answer is "almost never on `master`."
+how to do it, and why the answer is "almost never on `main`."
 
 ## Background
 
@@ -57,7 +57,7 @@ bypassed?" without git archaeology.
 
 Short list — anything outside this is suspicious:
 
-- **Hotfix push to a non-master branch** when CI infrastructure itself
+- **Hotfix push to a non-main branch** when CI infrastructure itself
   is the audit blocker (e.g., the audit pre-flight depends on a remote
   service that's down). The fix should land *before* the
   infrastructure recovers; bypass is the bridge.
@@ -66,7 +66,7 @@ Short list — anything outside this is suspicious:
 
 When bypass is **not** legitimate:
 
-- Routine `master` pushes. The whole point of the audit is to guard
+- Routine `main` pushes. The whole point of the audit is to guard
   the protected branch.
 - Pushes whose audit failure is "annoying" — the right move is to fix
   the failure, not skip the check.

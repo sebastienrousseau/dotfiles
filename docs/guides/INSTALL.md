@@ -14,7 +14,7 @@ Set up on macOS, Linux, or WSL in 3 to 5 minutes.
 
 ```bash
 bash -c "$(
-  curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh
+  curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh
 )"
 ```
 
@@ -99,7 +99,7 @@ Use this mode for CI or scripts that run without user input:
 ```bash
 DOTFILES_SILENT=1 DOTFILES_NONINTERACTIVE=1 \
   bash -c "$(
-    curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh
+    curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh
   )"
 ```
 
@@ -136,7 +136,7 @@ rm -rf ~/.local/share/chezmoi ~/.local/share/dotfiles.log
 
 ### Signed contributions
 
-All commits must be signed. See [Contributing](https://github.com/sebastienrousseau/dotfiles/blob/master/CONTRIBUTING.md) for details.
+All commits must be signed. See [Contributing](https://github.com/sebastienrousseau/dotfiles/blob/main/CONTRIBUTING.md) for details.
 
 ---
 
