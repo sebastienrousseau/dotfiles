@@ -17,11 +17,11 @@ This runbook captures recovery and release maintenance operations for this repos
 
 **Procedure:**
 
-1. Create a backup ref for current `master`.
+1. Create a backup ref for current `main`.
 2. Build a rewritten signed baseline commit from the current tree.
 3. Push the rewritten branch to remote.
-4. Temporarily allow force-push on `master` protections/rulesets.
-5. Force-update `master` to the rewritten signed baseline.
+4. Temporarily allow force-push on `main` protections/rulesets.
+5. Force-update `main` to the rewritten signed baseline.
 6. Disable force-push again immediately.
 7. Re-run CI and verify required checks are green.
 8. Repoint the release tag/target as needed.
@@ -30,7 +30,7 @@ This runbook captures recovery and release maintenance operations for this repos
 
 ```bash
 git verify-commit HEAD
-gh run list --workflow ci.yml --branch master --limit 1
+gh run list --workflow ci.yml --branch main --limit 1
 gh release view v0.2.501 --json tagName,targetCommitish,url
 ```
 
@@ -38,10 +38,10 @@ gh release view v0.2.501 --json tagName,targetCommitish,url
 
 For every release update:
 
-1. `master` branch is clean and synced.
+1. `main` branch is clean and synced.
 2. CI is green on the release commit.
 3. Annotated release tag points to the intended commit.
-4. GitHub release target is correct (`master` or explicit commit).
+4. GitHub release target is correct (`main` or explicit commit).
 5. Branch protections/rulesets are restored to strict state.
 6. Local apply has completed:
 

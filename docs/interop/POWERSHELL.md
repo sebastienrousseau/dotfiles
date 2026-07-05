@@ -13,9 +13,9 @@ and what specifically is verified. Closes the docs slice of
 
 | File | Role |
 |---|---|
-| [`dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl`](https://github.com/sebastienrousseau/dotfiles/blob/master/defaults/dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl) | The dotfiles PowerShell profile. Deployed to `$PROFILE` (resolves to `~/.config/powershell/Microsoft.PowerShell_profile.ps1` on Linux/macOS; `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` on Windows). |
-| [`scripts/qa/powershell-contract.ps1`](https://github.com/sebastienrousseau/dotfiles/blob/master/scripts/qa/powershell-contract.ps1) | The runtime contract. Renders the template, dot-sources it, asserts required function shims exist, runs PSScriptAnalyzer. |
-| [`tests/unit/install/test_powershell_profile_syntax.sh`](https://github.com/sebastienrousseau/dotfiles/blob/master/tests/unit/install/test_powershell_profile_syntax.sh) | Static-syntax test runnable on Linux/macOS via `pwsh` when present; falls back to brace-balance + textual invariants when not. |
+| [`dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl`](https://github.com/sebastienrousseau/dotfiles/blob/main/defaults/dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl) | The dotfiles PowerShell profile. Deployed to `$PROFILE` (resolves to `~/.config/powershell/Microsoft.PowerShell_profile.ps1` on Linux/macOS; `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` on Windows). |
+| [`scripts/qa/powershell-contract.ps1`](https://github.com/sebastienrousseau/dotfiles/blob/main/scripts/qa/powershell-contract.ps1) | The runtime contract. Renders the template, dot-sources it, asserts required function shims exist, runs PSScriptAnalyzer. |
+| [`tests/unit/install/test_powershell_profile_syntax.sh`](https://github.com/sebastienrousseau/dotfiles/blob/main/tests/unit/install/test_powershell_profile_syntax.sh) | Static-syntax test runnable on Linux/macOS via `pwsh` when present; falls back to brace-balance + textual invariants when not. |
 
 ## What's verified
 
@@ -96,7 +96,7 @@ pwsh ./scripts/qa/powershell-contract.ps1
 ## References
 
 - [PowerShell 7 docs](https://learn.microsoft.com/en-us/powershell/scripting/overview)
-- [PSScriptAnalyzer rule reference](https://github.com/PowerShell/PSScriptAnalyzer/blob/master/docs/Rules/README.md)
+- [PSScriptAnalyzer rule reference](https://github.com/PowerShell/PSScriptAnalyzer/blob/main/docs/Rules/README.md)
 - `.github/workflows/reliability-gate.yml` — Windows job definition.
 - Issue [#860](https://github.com/sebastienrousseau/dotfiles/issues/860).
 {% endraw %}

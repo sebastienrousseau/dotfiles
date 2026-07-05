@@ -126,7 +126,7 @@ function Invoke-DotHelp {
     Write-Host ''
     Write-Host "  Version    v$version"
     Write-Host "  Repo       https://github.com/sebastienrousseau/dotfiles"
-    Write-Host "  Docs       https://github.com/sebastienrousseau/dotfiles/blob/master/docs/manual/"
+    Write-Host "  Docs       https://github.com/sebastienrousseau/dotfiles/blob/main/docs/manual/"
     Write-Host ''
     Write-Host 'Native PowerShell commands (no bash required):'
     Write-Host ''

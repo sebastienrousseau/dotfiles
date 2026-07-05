@@ -2,7 +2,7 @@ name: Enhanced Security Pipeline
 
 on:
   push:
-    branches: [master, main]
+    branches: [main, main]
     # Only run security scans when security-relevant files change
     paths:
       - '**.sh'
@@ -14,7 +14,7 @@ on:
       - 'config/gitleaks.toml'
       - '.github/security-policies/**'
   pull_request:
-    branches: [master, main]
+    branches: [main, main]
     paths:
       - '**.sh'
       - '**.tmpl'
@@ -25,7 +25,7 @@ on:
       - 'config/gitleaks.toml'
       - '.github/security-policies/**'
   merge_group:
-    branches: [master, main]
+    branches: [main, main]
     # NOTE: `paths:` is ignored under merge_group; merge-queue runs
     # always execute the full security pipeline regardless of changes.
   schedule:
@@ -59,7 +59,7 @@ jobs:
 
   secrets-scan:
     name: Security / Secrets Detection
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
     with:
       run_guard: true
       run_additional_patterns: false
@@ -220,7 +220,7 @@ jobs:
 
   policy-enforcement:
     name: Security / Policy Enforcement
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
     needs: [secrets-scan]
     # Only run on PRs to catch issues before merge
     if: github.event_name == 'pull_request'
@@ -239,7 +239,7 @@ jobs:
     timeout-minutes: 10
     needs: [secrets-scan]
     # Only generate attestations on schedule for main branch
-    if: github.event_name == 'schedule' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+    if: github.event_name == 'schedule' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/main')
     permissions:
       contents: read
       id-token: write

@@ -166,7 +166,7 @@ jobs:
 
           ---
           🤖 Generated automatically by [Update Dependencies](.github/workflows/update-deps.yml)" \
-            --base master \
+            --base main \
             --head "$BRANCH_NAME"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -239,4 +239,4 @@ jobs:
           gh pr create \
             --title "chore(nvim): update plugin versions" \
             --body "Automated Neovim plugin update via lazy.nvim" \
-            --base master
+            --base main

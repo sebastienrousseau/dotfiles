@@ -2,13 +2,13 @@ name: Manual Publish
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - 'docs/manual/**'
       - 'tools/docs/**'
       - '.github/workflows/manual-publish.yml'
   pull_request:
-    branches: [master]
+    branches: [main]
     paths:
       - 'docs/manual/**'
       - 'tools/docs/**'
@@ -63,7 +63,7 @@ jobs:
     if: >-
       github.event_name == 'release' ||
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' && github.ref == 'refs/heads/master')
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:

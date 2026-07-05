@@ -17,7 +17,7 @@ Symptom → cause → fix.
 
 ```sh
 export PATH="$HOME/.local/bin:$PATH"
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 ```
 
 ### Symptom: "could not create directory ~/.local/share/chezmoi"

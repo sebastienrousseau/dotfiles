@@ -45,7 +45,7 @@ Run `dot mcp --strict --json` to validate all MCP server configurations and capt
 - [ ] **SBOM Generation**: Verify `dotfiles-sbom.spdx.json` is generated in release workflow.
 - [ ] **Attestation Signing**: Confirm `actions/attest-build-provenance` signs the release artifacts.
 - [ ] **Attestation Verification**: Verify with `gh attestation verify <artifact> --repo sebastienrousseau/dotfiles`.
-- [ ] **Branch Protection**: Ensure `security-attestation` is a required status check on master.
+- [ ] **Branch Protection**: Ensure `security-attestation` is a required status check on main.
 - [ ] **Automation Keying**: Confirm `ACTIONS_BOT_SIGNING_KEY` exists and matches the signer in `dot_config/git/allowed_signers`.
 
 ## 7. Final Verification

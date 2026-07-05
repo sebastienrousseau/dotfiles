@@ -113,7 +113,7 @@ lock-configs
 gh workflow disable <workflow-name>
 
 # Force-protect the main branch
-gh api repos/{owner}/{repo}/branches/master/protection \
+gh api repos/{owner}/{repo}/branches/main/protection \
   --method PUT \
   --field required_status_checks='{"strict":true,"contexts":["ci"]}' \
   --field enforce_admins=true

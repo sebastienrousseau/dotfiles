@@ -43,7 +43,7 @@ matches and emits standard `lcov.info` that Codecov ingests natively.
 
 | Surface | What runs |
 |---|---|
-| **PR + push to master** | `.github/workflows/coverage.yml` → `Coverage / kcov` job → uploads lcov.info to Codecov and fails the build below `MIN_COVERAGE_PCT` (currently `0`, ratcheted up each slice). |
+| **PR + push to main** | `.github/workflows/coverage.yml` → `Coverage / kcov` job → uploads lcov.info to Codecov and fails the build below `MIN_COVERAGE_PCT` (currently `0`, ratcheted up each slice). |
 | **Local dev** | `bash tools/ci/run-coverage.sh` — works on Linux + macOS (xtrace is a bash primitive, no platform tools needed). |
 | **macOS dev** | Supported. xtrace-based instrumentation runs on macOS bash 3.2+ and Homebrew bash 5.x. |
 
@@ -117,7 +117,7 @@ heatmap.
 When the `Coverage / kcov` PR check fails:
 
 1. Pull the workflow's `coverage-lcov` artifact (30-day retention).
-2. Compare against the previous master run by downloading its
+2. Compare against the previous main run by downloading its
    `coverage-lcov` artifact too.
 3. Identify the file(s) where the line-coverage dropped.
 4. Either:
@@ -176,7 +176,7 @@ Adjust via the env vars at the top of `run-coverage.sh`.
 ## References
 
 - [Bash xtrace + PS4 + BASH_ENV docs](https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html).
-- [`tools/ci/run-coverage.sh`](https://github.com/sebastienrousseau/dotfiles/blob/master/tools/ci/run-coverage.sh).
-- [`.github/workflows/coverage.yml`](https://github.com/sebastienrousseau/dotfiles/blob/master/.github/workflows/coverage.yml).
+- [`tools/ci/run-coverage.sh`](https://github.com/sebastienrousseau/dotfiles/blob/main/tools/ci/run-coverage.sh).
+- [`.github/workflows/coverage.yml`](https://github.com/sebastienrousseau/dotfiles/blob/main/.github/workflows/coverage.yml).
 - Issue [#856](https://github.com/sebastienrousseau/dotfiles/issues/856) (closed) /
   [#883](https://github.com/sebastienrousseau/dotfiles/issues/883) (coverage roadmap).

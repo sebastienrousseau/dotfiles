@@ -79,6 +79,6 @@ Closes the round-1 audit's adoption gap "bootstrap a foreign dotfiles repo throu
 
 ## References
 
-- `dot init` source: [`scripts/dot/commands/init.sh`](https://github.com/sebastienrousseau/dotfiles/blob/master/scripts/dot/commands/init.sh)
-- Roadmap entry: [ROADMAP_2026 §B2](https://github.com/sebastienrousseau/dotfiles/blob/master/docs/operations/ROADMAP_2026.md)
+- `dot init` source: [`scripts/dot/commands/init.sh`](https://github.com/sebastienrousseau/dotfiles/blob/main/scripts/dot/commands/init.sh)
+- Roadmap entry: [ROADMAP_2026 §B2](https://github.com/sebastienrousseau/dotfiles/blob/main/docs/operations/ROADMAP_2026.md)
 - AGENTS.md / CLAUDE.md sync: `dot agents render`

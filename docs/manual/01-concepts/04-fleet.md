@@ -91,7 +91,7 @@ Recommended rollout procedure for fleet-wide changes:
 
 1. **Develop on one host** — make the change, test locally with `dot apply --dry-run` then `dot apply`
 2. **Open a PR** — CI validates shellcheck, tests, security scanners
-3. **Merge to master** — signed commit required
+3. **Merge to main** — signed commit required
 4. **Per-host pull** — on each fleet host: `dot update` (git pull + apply)
 5. **Verify alignment** — run `dot fleet attest` from any host
 

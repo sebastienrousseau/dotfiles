@@ -16,7 +16,7 @@ End-to-end installation and verification, from zero to a fully-working environme
 ## Step 1: Run the Installer
 
 ```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 ```
 
 The installer:

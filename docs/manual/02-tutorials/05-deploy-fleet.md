@@ -21,7 +21,7 @@ Goal: all three running identical `.dotfiles` with per-host customization, with 
 On each new host:
 
 ```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 ```
 
 During `chezmoi init`, answer with the host's preset:
@@ -164,7 +164,7 @@ Both hosts render from the same templates, producing correct platform-appropriat
 
 ## Step 6: Fleet-Wide Updates
 
-When you push a commit to master, each host pulls independently:
+When you push a commit to main, each host pulls independently:
 
 ```sh
 # On each host

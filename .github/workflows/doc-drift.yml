@@ -15,7 +15,7 @@ name: Doc Drift / Generators
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
     paths:
       - 'docs/manual/command-index.md'

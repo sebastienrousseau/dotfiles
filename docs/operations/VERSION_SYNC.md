@@ -35,7 +35,7 @@ This system provides automated version synchronization through:
 
 **Triggers**:
 
-- Push to `master` branch when `package.json` changes
+- Push to `main` branch when `package.json` changes
 - Pull requests affecting `package.json`
 - Manual dispatch with optional target version
 
@@ -146,8 +146,8 @@ Version changes in `package.json` automatically trigger synchronization:
 # Developer updates package.json version
 npm version patch
 
-# Push to master
-git push origin master
+# Push to main
+git push origin main
 
 # GitHub Actions automatically:
 # 1. Detects version change

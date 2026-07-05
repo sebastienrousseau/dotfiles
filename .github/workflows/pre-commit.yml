@@ -1,7 +1,7 @@
 name: Pre-Commit Hooks
 
 # Runs the same `pre-commit` hook chain CI uses, on every PR + on push to
-# master. This makes the linting surface (typos-cli, actionlint, yamllint,
+# main. This makes the linting surface (typos-cli, actionlint, yamllint,
 # markdownlint-cli2, luacheck, stylua, shellcheck, shfmt, hadolint,
 # gitleaks, detect-secrets, the repo-local custom hooks) gate the PR
 # the same way they gate local commits.
@@ -11,9 +11,9 @@ name: Pre-Commit Hooks
 
 on:
   pull_request:
-    branches: [master]
+    branches: [main]
   push:
-    branches: [master]
+    branches: [main]
   merge_group:
 
 concurrency:

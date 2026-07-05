@@ -2,10 +2,10 @@ name: CI (Standards Enforced)
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     tags: ['v*.*.*']
   pull_request:
-    branches: [master]
+    branches: [main]
   # Manual trigger for full CI
   workflow_dispatch:
 
@@ -33,7 +33,7 @@ jobs:
   # ============================================================================
   lint-shell:
     name: Lint / Shell (Zero Warnings)
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
     with:
       include_tests: false
       shellcheck_severity: error
@@ -44,7 +44,7 @@ jobs:
 
   lint-lua:
     name: Lint / Lua (Zero Warnings)
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
     with:
       target: defaults/dot_config/nvim
       strict: true
@@ -58,7 +58,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
     with:
       flake_dir: nix
       run_fmt_check: true
@@ -67,7 +67,7 @@ jobs:
 
   lint-copyright:
     name: Lint / Copyright Headers (Zero Tolerance)
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
 
   # ============================================================================
   # STAGE 2: SECURITY (Mandatory - No bypass allowed)
@@ -191,7 +191,7 @@ jobs:
 
   test-unit:
     name: Test / Unit Tests
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
     with:
       min_coverage: "100"
       run_integration: true

@@ -63,7 +63,7 @@ If a host is compromised:
 
 ## Gates Enforced by CI
 
-Every PR to master must pass:
+Every PR to main must pass:
 
 - [x] SSH-signed commits
 - [x] Shellcheck zero warnings (severity=error)

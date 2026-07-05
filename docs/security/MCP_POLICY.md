@@ -21,9 +21,9 @@ Properties:
 
 ## Policy artifact
 
-The source of truth lives in [mcp-policy.json](https://github.com/sebastienrousseau/dotfiles/blob/master/defaults/dot_config/dotfiles/mcp-policy.json).
-Approved package pins live in [mcp-lock.json](https://github.com/sebastienrousseau/dotfiles/blob/master/defaults/dot_config/dotfiles/mcp-lock.json).
-Tracked server registry entries live in [mcp-registry.json](https://github.com/sebastienrousseau/dotfiles/blob/master/defaults/dot_config/dotfiles/mcp-registry.json).
+The source of truth lives in [mcp-policy.json](https://github.com/sebastienrousseau/dotfiles/blob/main/defaults/dot_config/dotfiles/mcp-policy.json).
+Approved package pins live in [mcp-lock.json](https://github.com/sebastienrousseau/dotfiles/blob/main/defaults/dot_config/dotfiles/mcp-lock.json).
+Tracked server registry entries live in [mcp-registry.json](https://github.com/sebastienrousseau/dotfiles/blob/main/defaults/dot_config/dotfiles/mcp-registry.json).
 
 Current defaults:
 
@@ -75,4 +75,4 @@ Current approved refs:
 - active servers match the tracked registry entries
 - remote HTTP transports are HTTPS and OAuth-backed
 
-Policy bundle baselines live in [policy-bundles.json](https://github.com/sebastienrousseau/dotfiles/blob/master/defaults/dot_config/dotfiles/policy-bundles.json).
+Policy bundle baselines live in [policy-bundles.json](https://github.com/sebastienrousseau/dotfiles/blob/main/defaults/dot_config/dotfiles/policy-bundles.json).

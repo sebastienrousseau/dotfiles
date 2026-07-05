@@ -1,6 +1,6 @@
 name: Dot CLI Cold-Start Bench
 
-# Runs the dot CLI cold-start gate on every PR and push to master.
+# Runs the dot CLI cold-start gate on every PR and push to main.
 # Complements the weekly perf-baseline (shell-startup) workflow — this
 # one is fast (<30s) and specifically targets the `dot` dispatcher
 # cold-start, which is the user-visible cost of every `dot` invocation.
@@ -13,7 +13,7 @@ name: Dot CLI Cold-Start Bench
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - 'bin/dot'
       - 'scripts/dot/**'

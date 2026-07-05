@@ -47,7 +47,7 @@ Exit code: `0` if every class is clean; `1` if any drift is found;
 ## How the nightly check works
 
 `.github/workflows/drift-detection.yml` runs `dot drift --json` against
-a fresh checkout of `master` every day at 04:00 UTC. If `total != 0`
+a fresh checkout of `main` every day at 04:00 UTC. If `total != 0`
 it opens (or updates) a tracking issue labelled
 `type:chore + priority:medium` with the JSON summary, full
 `chezmoi diff`, and `chezmoi status` attached as a workflow artifact.

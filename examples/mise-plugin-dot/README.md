@@ -12,7 +12,7 @@ mise install dot@alice/cfg                       # any user's dotfiles
 mise use -g dot@v0.2.502                         # set globally
 ```
 
-Under the hood the plugin invokes `dot init <owner/repo>` so every install runs through the framework's signed-bootstrap pipeline (see [HARD_AUDIT_2026 §H6](https://github.com/sebastienrousseau/dotfiles/blob/master/docs/operations/HARD_AUDIT_2026.md)). No unverified `curl | sh`.
+Under the hood the plugin invokes `dot init <owner/repo>` so every install runs through the framework's signed-bootstrap pipeline (see [HARD_AUDIT_2026 §H6](https://github.com/sebastienrousseau/dotfiles/blob/main/docs/operations/HARD_AUDIT_2026.md)). No unverified `curl | sh`.
 
 ## Status
 
@@ -42,7 +42,7 @@ This vendored copy exists so:
 1. Maintainer extracts this directory to `github.com/sebastienrousseau/mise-plugin-dot`.
 2. Maintainer opens a PR to [`mise-en-place/registry`](https://github.com/mise-en-place/registry) adding the plugin entry.
 3. Once merged, `mise install dot@latest` works for every mise user globally.
-4. devtools.fm episode pitch sent to Jeff Dickey (per [ROADMAP_2026 §E1](https://github.com/sebastienrousseau/dotfiles/blob/master/docs/operations/ROADMAP_2026.md)).
+4. devtools.fm episode pitch sent to Jeff Dickey (per [ROADMAP_2026 §E1](https://github.com/sebastienrousseau/dotfiles/blob/main/docs/operations/ROADMAP_2026.md)).
 
 Expected timeline: ~1 week from extraction to merged registry PR. Plugin code is here today so the extraction is purely a `git filter-branch` + a new remote.
 

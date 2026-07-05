@@ -30,7 +30,7 @@
          --idle-time-limit 1 --rows 30 --cols 100 \
          --title "Dotfiles: install → doctor → theme"
        # in the recording shell:
-       #   curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh | bash
+       #   curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh | bash
        #   dot doctor
        #   dot theme rebuild --force
        # then Ctrl-D to stop
@@ -61,7 +61,7 @@ bash /tmp/dotfiles-install.sh
 **Trust-source one-liner** (skips the SHA check — fine for sandboxes and ephemeral CI, not recommended for primary workstations):
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 ```
 
 Then verify and explore:
@@ -80,7 +80,7 @@ Silent install (no prompts):
 
 ```bash
 DOTFILES_SILENT=1 DOTFILES_NONINTERACTIVE=1 \
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh)"
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 ```
 
 Docker sandbox:

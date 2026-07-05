@@ -167,7 +167,7 @@ jobs:
           set -euo pipefail
           BUCKET_REPO="sebastienrousseau/scoop-bucket"
           git clone "https://${{ secrets.TAP_PUSH_TOKEN || secrets.GITHUB_TOKEN }}@github.com/${BUCKET_REPO}.git" scoop-bucket
-          # Detect the default branch (main vs master) so the PR targets
+          # Detect the default branch (main) so the PR targets
           # the right base regardless of how the bucket is initialised.
           cd scoop-bucket
           default_branch=$(git symbolic-ref --short HEAD)

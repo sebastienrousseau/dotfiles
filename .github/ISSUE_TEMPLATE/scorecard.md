@@ -30,7 +30,7 @@ Live dashboard: <https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/
 
 - [ ] <step 1>
 - [ ] <step 2>
-- [ ] Re-run Scorecard via `gh workflow run scorecard.yml --ref master`
+- [ ] Re-run Scorecard via `gh workflow run scorecard.yml --ref main`
 - [ ] Verify dashboard reflects the fix
 - [ ] Update `docs/security/SCORECARD.md` "Closed this cycle" table
 

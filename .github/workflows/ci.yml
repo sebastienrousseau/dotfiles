@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     tags: ['v*.*.*']
     # Path filters: Only run when relevant files change
     paths:
@@ -17,7 +17,7 @@ on:
       - '!**.md'
       - '!docs/**'
   pull_request:
-    branches: [master]
+    branches: [main]
     paths:
       - '**.sh'
       - '**.tmpl'
@@ -30,7 +30,7 @@ on:
       - '!**.md'
       - '!docs/**'
   merge_group:
-    branches: [master]
+    branches: [main]
     # Note: merge_group does not support `paths` filters (GitHub Actions
     # limitation). Merge queue runs trigger the full CI graph; path filtering
     # happens downstream via the `changes` job's dorny/paths-filter step.
@@ -104,7 +104,7 @@ jobs:
     name: Lint / Shell
     needs: changes
     if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
     with:
       include_tests: false
       shellcheck_severity: error
@@ -117,7 +117,7 @@ jobs:
     name: Lint / Lua
     needs: changes
     if: needs.changes.outputs.lua == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
     with:
       target: defaults/dot_config/nvim
       strict: false
@@ -173,7 +173,7 @@ jobs:
       || needs.changes.outputs.nix == 'true'
       || github.event_name == 'schedule'
       || github.event_name == 'workflow_dispatch'
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
 
   lint-reusable-pins:
     name: Lint / Reusable Workflow Pins
@@ -231,7 +231,7 @@ jobs:
   # ============================================================================
   security-secrets:
     name: Security / Secrets Scan
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
     with:
       run_guard: true
       run_additional_patterns: true
@@ -240,7 +240,7 @@ jobs:
 
   security-dependencies:
     name: Security / Dependency Audit
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
     with:
       run_dependency_audit: true
       run_supply_chain_checks: true
@@ -473,7 +473,7 @@ jobs:
   test-unit:
     name: Test / Unit
     needs: changes
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
     with:
       min_coverage: "95"
       run_integration: true
@@ -524,7 +524,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # master
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
     with:
       flake_dir: nix
       run_fmt_check: false

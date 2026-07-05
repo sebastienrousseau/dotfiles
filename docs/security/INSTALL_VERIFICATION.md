@@ -56,7 +56,7 @@ These are weaker than a SHA256 check, but they catch the obvious
 After chezmoi is installed, `install.sh` clones the dotfiles repo
 itself. This isn't currently cryptographically verified beyond Git's
 own object integrity, but commits in the repo are SSH-signed and
-branch protection on `master` requires signed commits (see #853).
+branch protection on `main` requires signed commits (see #853).
 
 ## How to obtain per-release hashes
 
@@ -64,7 +64,7 @@ The verified-install snippet uses the SHA256 of the `install.sh`
 file *as it exists at the release tag*. To regenerate after a release:
 
 ```bash
-git switch master
+git switch main
 git pull
 NEW_TAG="v0.2.502"   # adjust
 git tag -s "$NEW_TAG" -m "..."

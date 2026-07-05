@@ -20,7 +20,7 @@ git commit -S -s -m "fix: concise summary"
 `-S` adds the cryptographic signature; `-s` adds the DCO `Signed-off-by`
 line (see below). Signed commits are **enforced** at three layers (local
 commit-msg hook, local pre-push hook, GitHub Ruleset). An unsigned commit
-cannot reach `master`. Full SSH and GPG setup recipes plus verification
+cannot reach `main`. Full SSH and GPG setup recipes plus verification
 commands live in [`docs/security/COMMIT_SIGNING.md`](docs/security/COMMIT_SIGNING.md).
 
 ### Developer Certificate of Origin (DCO)
@@ -33,7 +33,7 @@ per the [Developer Certificate of Origin](DCO) 1.1. Add it automatically with
 branch into compliance with `git rebase --signoff <base>`.
 
 The pre-push audit is **mandatory by default**. If you need to bypass
-it for a single push (rare, almost never on `master`), see
+it for a single push (rare, almost never on `main`), see
 [`docs/security/AUDIT_BYPASS.md`](docs/security/AUDIT_BYPASS.md). The
 legacy `DOTFILES_SKIP_PRE_PUSH_AUDIT=1` variable is no longer honored.
 

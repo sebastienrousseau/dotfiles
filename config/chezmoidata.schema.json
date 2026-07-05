@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/config/chezmoidata.schema.json",
+  "$id": "https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/config/chezmoidata.schema.json",
   "title": ".chezmoidata.toml",
   "description": "Schema for the dotfiles project's root .chezmoidata.toml file. Catches typos in feature flags, profile names, and tool selections at PR time.",
   "type": "object",

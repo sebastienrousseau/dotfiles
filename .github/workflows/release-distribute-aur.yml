@@ -154,7 +154,7 @@ jobs:
 
           git add PKGBUILD .SRCINFO
           git commit -m "dot ${VERSION}"
-          git push origin master
+          git push origin main
 
       - name: Print AUR URL
         run: |

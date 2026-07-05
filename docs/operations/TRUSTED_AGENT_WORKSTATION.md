@@ -20,12 +20,12 @@ It defines a signed, local-first workstation baseline for agentic development on
 
 The source of truth lives in tracked JSON artifacts:
 
-- [policy-bundles.json](https://github.com/sebastienrousseau/dotfiles/blob/master/defaults/dot_config/dotfiles/policy-bundles.json)
-- [agent-profiles.json](https://github.com/sebastienrousseau/dotfiles/blob/master/defaults/dot_config/dotfiles/agent-profiles.json)
-- [mcp-policy.json](https://github.com/sebastienrousseau/dotfiles/blob/master/defaults/dot_config/dotfiles/mcp-policy.json)
-- [mcp-registry.json](https://github.com/sebastienrousseau/dotfiles/blob/master/defaults/dot_config/dotfiles/mcp-registry.json)
-- [model-registry.json](https://github.com/sebastienrousseau/dotfiles/blob/master/defaults/dot_config/dotfiles/model-registry.json)
-- [prompt-registry.json](https://github.com/sebastienrousseau/dotfiles/blob/master/defaults/dot_config/dotfiles/prompt-registry.json)
+- [policy-bundles.json](https://github.com/sebastienrousseau/dotfiles/blob/main/defaults/dot_config/dotfiles/policy-bundles.json)
+- [agent-profiles.json](https://github.com/sebastienrousseau/dotfiles/blob/main/defaults/dot_config/dotfiles/agent-profiles.json)
+- [mcp-policy.json](https://github.com/sebastienrousseau/dotfiles/blob/main/defaults/dot_config/dotfiles/mcp-policy.json)
+- [mcp-registry.json](https://github.com/sebastienrousseau/dotfiles/blob/main/defaults/dot_config/dotfiles/mcp-registry.json)
+- [model-registry.json](https://github.com/sebastienrousseau/dotfiles/blob/main/defaults/dot_config/dotfiles/model-registry.json)
+- [prompt-registry.json](https://github.com/sebastienrousseau/dotfiles/blob/main/defaults/dot_config/dotfiles/prompt-registry.json)
 
 ## Enterprise path
 

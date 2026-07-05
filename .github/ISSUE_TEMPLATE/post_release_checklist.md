@@ -16,11 +16,11 @@ assignees: ''
 ## CI
 
 - [ ] CI passed on release commit
-- [ ] Required checks configured and enforced on `master`
+- [ ] Required checks configured and enforced on `main`
 
 ## Security/Policy
 
-- [ ] Commit signature policy verified on `master`
+- [ ] Commit signature policy verified on `main`
 - [ ] Force-push disabled on protected branches/rulesets
 - [ ] Secret scanning policy validated
 

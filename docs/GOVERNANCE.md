@@ -22,7 +22,7 @@ exist.
 ## Contribution flow
 
 1. **Issue** for non-trivial work. Confirm scope before coding.
-2. **Branch** off `master`: `feat/<scope>`, `fix/<scope>`,
+2. **Branch** off `main`: `feat/<scope>`, `fix/<scope>`,
    `docs/<scope>`, etc.
 3. **PR** with description following the template:
    - Summary (1–3 bullets)
@@ -51,7 +51,7 @@ For breaking changes or substantial new features:
    - **Backwards compatibility** (what breaks, migration path)
    - **Alternatives considered** (with reasons rejected)
    - **Unresolved questions**
-2. Open a PR labelled `rfc` against `master`.
+2. Open a PR labelled `rfc` against `main`.
 3. Comment window: 14 days minimum.
 4. Maintainer renders a decision (accept / accept-with-changes /
    reject) with public reasoning in the PR.

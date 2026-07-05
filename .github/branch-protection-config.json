@@ -2,7 +2,7 @@
   "description": "Branch protection configuration for dotfiles repository v0.2.501",
   "enforcement": "strict",
   "rules": {
-    "master": {
+    "main": {
       "protection": {
         "required_status_checks": {
           "strict": true,
