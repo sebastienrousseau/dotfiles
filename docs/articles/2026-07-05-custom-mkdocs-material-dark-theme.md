@@ -171,7 +171,7 @@ hide:
 
     Bash, Zsh, Fish, Nushell — same aliases, functions, prompt, and completions.
 
-    [→ Shell hub](reference/UTILS.md)
+    [→ Shell hub](https://doc.dotfiles.io/reference/UTILS/)
 
 </div>
 ```
@@ -201,7 +201,7 @@ Cloudflare CDN cache invalidation after Pages deploy: ~10 minutes on `max-age=60
 | Visual differentiation from default | Zero | Distinctive palette + hero + grid |
 | Build reproducibility | Jekyll on `github-pages` gem (unpinned transitive deps) | `pip install --require-hashes` (fully locked) |
 
-## Take-Aways #
+## Takeaways #
 
 1. **`primary: custom` + `extra_css` beats theme forking.** No `custom_dir`, no Jinja templates, no plugin authoring. All the customisation lives in files MkDocs Material is explicitly designed to consume.
 

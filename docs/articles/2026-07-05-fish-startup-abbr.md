@@ -140,7 +140,7 @@ The stronger case is qualitative. Interactive-latency perception is nonlinear: a
 | CI regression threshold | ✗ 231 > 200 | ✓ 119 ≤ 200 | Now under budget |
 | Full test suite | 4703 tests, 0 fail | 4703 tests, 0 fail | Zero regressions |
 
-## Take-Aways #
+## Takeaways #
 
 1. **Profile every interactive shell in CI.** Fish, Zsh, Nushell, Bash — each has its own primitives with different costs. Treat first-prompt latency as a signal with a threshold, not a comfort metric.
 

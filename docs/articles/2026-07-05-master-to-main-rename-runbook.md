@@ -113,7 +113,7 @@ The commercial value of a supply-chain-safe rename is defensive, not offensive: 
 | Local-clone update commands | 4 lines, ~5 seconds per workstation |
 | Operational debt introduced | 1 mirror workflow, retired via calendar-scheduled task 2027-07-05 |
 
-## Take-Aways #
+## Takeaways #
 
 1. **Land the in-repo edits before the GitHub-side rename.** Merging Phase 1 while `master` is still default gives you both a working CI baseline and a rehearsal.
 
