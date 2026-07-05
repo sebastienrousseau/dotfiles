@@ -698,6 +698,45 @@ fi
 # through the case below into the user-command path that emits the proper error.
 route="$(_dot_command_route "$COMMAND" || true)"
 
+# ═════════════════════════════════════════════════════════════════
+# Universal --help / -h intercept — MUST run before any dispatch.
+# ═════════════════════════════════════════════════════════════════
+# The 2026-07-05 command audit found ~22 commands that mishandled
+# --help when passed as a sub-argument: `dot ai delegate --help`
+# actually invoked the vibe delegate with prompt "--help" (spent
+# money), `dot edit --help` opened the editor and blocked on TTY,
+# `dot upgrade --help` ran the real upgrade including git pulls
+# + nvim spawn, `dot sandbox --help` built a Docker sandbox, and
+# many secrets/mode/agent subcommands treated --help as a data
+# arg.
+#
+# The fix is at the dispatcher: if any user arg is --help or -h
+# (before a `--` sentinel), delegate to `dot help <COMMAND>` before
+# routing. This is the same route users get from `dot help <cmd>`
+# and it honours the help renderer's terminal capabilities.
+#
+# Excluded from the intercept:
+#   - `help` itself — `dot help --help` short-circuits to `dot help`.
+#   - `search` — searching for the literal string "--help" is
+#     surreal but we honour it if requested.
+#   - top-level `--help`/`-h` (COMMAND=="--help") already handled
+#     by the shebang-block long-option case.
+_has_help_flag() {
+  local a
+  for a in "$@"; do
+    case "$a" in
+      --help|-h) return 0 ;;
+      --) return 1 ;;
+    esac
+  done
+  return 1
+}
+
+if [[ -n "$route" ]] && [[ "$route" != "help" ]] && [[ "$route" != "search" ]] \
+    && _has_help_flag "$@"; then
+  exec bash "$_SOURCE_DIR/bin/dot" help "$COMMAND"
+fi
+
 case "$route" in
   core | diagnostics | ai | tools | appearance | secrets | security | meta | fleet | completion)
     _dispatch "$route" "$@"

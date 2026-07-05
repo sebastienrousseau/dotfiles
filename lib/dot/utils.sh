@@ -416,3 +416,76 @@ dot_ui_command_banner() {
   ui_key_value "Summary" "$summary"
   printf "\n"
 }
+
+## ═════════════════════════════════════════════════════════════════
+## HELP-FLAG SHORT-CIRCUIT
+## Any command that accepts positional args from users MUST call
+## `handle_help_flag` at entry — before any state-mutating logic
+## (git ops, file writes, LLM calls, docker builds, editor spawns).
+## Without this guard, `dot <cmd> --help` was treated as a data
+## arg by many commands (audited 2026-07-05); some spent money
+## (ai delegate), some opened editors and blocked on TTY (edit,
+## sandbox), some invoked destructive subprocesses. Fix by
+## short-circuiting to `dot help <cmd>` on --help / -h.
+## ═════════════════════════════════════════════════════════════════
+
+## is_help_flag — True (rc=0) iff any arg is --help or -h.
+## Usage:
+##   is_help_flag "$@" && { dot_show_help "backup"; return 0; }
+is_help_flag() {
+  local arg
+  for arg in "$@"; do
+    case "$arg" in
+      --help|-h) return 0 ;;
+      # `--` marks end of options; anything after is positional data.
+      # Stop scanning so a literal `--help` value doesn't trigger.
+      --) return 1 ;;
+    esac
+  done
+  return 1
+}
+
+## dot_show_help — Print the canonical help for a subcommand and
+## return 0. Delegates to `dot help <cmd>` (the same route users
+## get from `dot help <cmd>` directly), which honours help formats
+## and terminal capabilities.
+##
+## Usage (at command entry):
+##   cmd_backup() {
+##     is_help_flag "$@" && { dot_show_help "backup"; return 0; }
+##     ...
+##   }
+dot_show_help() {
+  local cmd="$1"
+  local dot_cli
+  local src_dir
+  src_dir="$(resolve_source_dir)"
+  dot_cli="${src_dir}/bin/dot"
+  if [[ -x "$dot_cli" ]]; then
+    "$dot_cli" help "$cmd"
+  else
+    # Fallback: just print the summary line if the dispatcher is
+    # not reachable (unusual — implies the entire dot install is
+    # broken, but at least give the user something).
+    printf 'Usage: dot %s [args…]\n' "$cmd"
+  fi
+}
+
+## handle_help_flag — Convenience wrapper for the common case:
+##   if `--help`/`-h` in "$@", print help and return 0 to caller.
+## The caller must propagate the return code.
+##
+## Usage:
+##   cmd_backup() {
+##     handle_help_flag "backup" "$@" && return 0
+##     ...
+##   }
+handle_help_flag() {
+  local cmd="$1"
+  shift
+  if is_help_flag "$@"; then
+    dot_show_help "$cmd"
+    return 0
+  fi
+  return 1
+}

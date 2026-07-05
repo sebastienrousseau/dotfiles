@@ -156,7 +156,7 @@ run_dot_and_assert_clean() {
 
   # ── Assertion 1: exit code should be 0 (or 1 for known-signal
   # commands like `dot score` which signals via rc).
-  if [ $exit_code -ne 0 ] && [ $exit_code -ne 1 ]; then
+  if [[ $exit_code -ne 0 && $exit_code -ne 1 ]]; then
     failure_reasons+=("exit code=$exit_code (expected 0 or 1)")
   fi
 
@@ -174,12 +174,12 @@ run_dot_and_assert_clean() {
   if [[ "$args" == *" list" ]] || [[ "$args" == *" status" ]] \
       || [[ "$args" == *" stats" ]] || [[ "$args" == *" card" ]] \
       || [[ "$args" == *" current" ]]; then
-    if [ ! -s "$stdout_file" ]; then
+    if [[ ! -s "$stdout_file" ]]; then
       failure_reasons+=("stdout empty (expected content for list-style command)")
     fi
   fi
 
-  if [ ${#failure_reasons[@]} -eq 0 ]; then
+  if [[ ${#failure_reasons[@]} -eq 0 ]]; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
   else
@@ -189,7 +189,7 @@ run_dot_and_assert_clean() {
       printf '        %s\n' "$r"
     done
     # Print first few lines of stderr for triage.
-    if [ -s "$stderr_file" ]; then
+    if [[ -s "$stderr_file" ]]; then
       printf '        stderr (first 3 lines):\n'
       head -3 "$stderr_file" | sed 's/^/          /'
     fi
@@ -218,4 +218,4 @@ echo "  FAILED: $TESTS_FAILED"
 TESTS_RUN=$((TESTS_PASSED + TESTS_FAILED))
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
 
-[ $TESTS_FAILED -eq 0 ]
+[[ $TESTS_FAILED -eq 0 ]]
