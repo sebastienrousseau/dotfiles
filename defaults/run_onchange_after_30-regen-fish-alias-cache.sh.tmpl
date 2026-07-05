@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# run_onchange_after_30-regen-fish-alias-cache.sh.tmpl
+# Pre-warm ~/.cache/fish/bash-aliases.fish after chezmoi apply so the FIRST
+# fish shell doesn't pay ~200ms rebuilding it from the bash-alias source
+# files. Runs after file materialization so the source files are on disk.
+# The 3 embedded source hashes make this script's content change any time
+# an aliases source file or the fish consumer file changes — that is what
+# retriggers chezmoi's onchange logic.
+{{- if ne .chezmoi.os "windows" }}
+
+set -euo pipefail
+
+# Source hashes (retrigger key):
+#   90-ux-aliases.sh.tmpl:     {{ include "dot_config/shell/90-ux-aliases.sh.tmpl" | sha256sum }}
+#   91-ux-aliases-lazy.sh.tmpl:{{ include "dot_config/shell/91-ux-aliases-lazy.sh.tmpl" | sha256sum }}
+#   aliases.fish.tmpl:         {{ include "dot_config/fish/conf.d/aliases.fish.tmpl" | sha256sum }}
+
+# Skip cleanly if fish isn't installed. The cache is fish-only.
+if ! command -v fish >/dev/null 2>&1; then
+  exit 0
+fi
+
+# The cache regen logic lives in aliases.fish.tmpl; we let fish itself do
+# the work so both paths (this hook + the shell-startup fallback in the
+# consumer file) stay in lockstep. Invalidating the cache first forces the
+# staleness check inside aliases.fish.tmpl to fire.
+rm -f "${HOME}/.cache/fish/bash-aliases.fish"
+
+# Spawn a throwaway interactive fish so aliases.fish.tmpl runs its
+# regen path. Timing is one-off (per apply, not per shell), so the
+# ~200ms cost lands here instead of on the user's first prompt.
+fish -i -c 'exit' >/dev/null 2>&1 || true
+
+if [[ -s "${HOME}/.cache/fish/bash-aliases.fish" ]]; then
+  entries=$(wc -l < "${HOME}/.cache/fish/bash-aliases.fish" | tr -d ' ')
+  echo "fish alias cache pre-warmed: ${entries} entries"
+else
+  echo "fish alias cache pre-warm produced empty file (non-fatal)"
+fi
+{{- end }}
