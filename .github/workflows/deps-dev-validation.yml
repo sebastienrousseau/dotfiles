@@ -23,7 +23,7 @@ on:
       - 'tools/ci/check-deps-dev.sh'
       - 'docs/security/DEPS_DEV_EXCEPTIONS.md'
   push:
-    branches: [main]
+    branches: [main, master]
   schedule:
     - cron: '0 4 * * 2'   # Tuesday 04:00 UTC — after Dependabot
   workflow_dispatch:

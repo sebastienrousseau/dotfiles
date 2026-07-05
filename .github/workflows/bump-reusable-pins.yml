@@ -13,7 +13,7 @@ name: Bump Reusable Pins
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
     paths:
       - '.github/workflows/reusable-*.yml'
   workflow_dispatch:

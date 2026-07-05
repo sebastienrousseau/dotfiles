@@ -6,11 +6,11 @@ name: Compliance Guard
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, master]
   merge_group:
-    branches: [main]
+    branches: [main, master]
   push:
-    branches: [main]
+    branches: [main, master]
     paths:
       - '**.sh'
       - '**.bash'

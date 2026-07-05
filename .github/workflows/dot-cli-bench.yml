@@ -13,7 +13,7 @@ name: Dot CLI Cold-Start Bench
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
     paths:
       - 'bin/dot'
       - 'scripts/dot/**'

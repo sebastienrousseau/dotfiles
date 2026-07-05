@@ -2,10 +2,10 @@ name: CI (Standards Enforced)
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
     tags: ['v*.*.*']
   pull_request:
-    branches: [main]
+    branches: [main, master]
   # Manual trigger for full CI
   workflow_dispatch:
 

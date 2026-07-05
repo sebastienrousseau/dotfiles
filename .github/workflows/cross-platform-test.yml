@@ -5,13 +5,13 @@ name: Cross-Platform Test
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, master]
     # No `paths:` filter on purpose: the workflow must run on EVERY PR so the
     # `Cross-Platform Tests` gate job below always reports a status (it is the
     # branch-protection required check). The expensive OS matrix is gated
     # internally via the `changes` job, so docs-only PRs stay cheap.
   push:
-    branches: [main]
+    branches: [main, master]
     paths:
       - '**.sh'
       - '**.bash'
@@ -19,7 +19,7 @@ on:
       - 'defaults/.chezmoitemplates/**'
       - 'scripts/**'
   merge_group:
-    branches: [main]
+    branches: [main, master]
     # NOTE: `paths:` is ignored under merge_group; merge-queue runs
     # always execute the full workflow regardless of changed paths.
   # Weekly check for tool version drift

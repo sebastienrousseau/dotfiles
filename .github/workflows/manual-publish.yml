@@ -2,13 +2,13 @@ name: Manual Publish
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
     paths:
       - 'docs/manual/**'
       - 'tools/docs/**'
       - '.github/workflows/manual-publish.yml'
   pull_request:
-    branches: [main]
+    branches: [main, master]
     paths:
       - 'docs/manual/**'
       - 'tools/docs/**'
