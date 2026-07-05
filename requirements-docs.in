@@ -1,0 +1,5 @@
+# Documentation site toolchain (MkDocs Material) for doc.dotfiles.io.
+# Install:  pip install -r requirements-docs.txt
+# Build:    mkdocs build      Serve locally:  mkdocs serve
+mkdocs-material==9.7.6
+mkdocs-awesome-pages-plugin==2.10.1

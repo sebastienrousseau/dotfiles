@@ -2,6 +2,36 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.510 — 2026-07-05
+
+Post-v0.2.509 quality-of-life release: default branch renamed `master` → `main`, docs site relit with a custom dark + terminal-green MkDocs Material theme, shells warmed up (fish alias→abbr, zsh PATH prune), font bumped to 20pt across every terminal template, themes rebuilt from wallpapers.
+
+### Added
+
+- **Custom docs theme** (#960). doc.dotfiles.io now serves MkDocs Material with a bespoke palette (near-black `#0b0e14` background, terminal-green `#7ee787` accent), Inter + JetBrains Mono fonts, hero + 8-card feature grid landing page. Header, tabs, sidebar, TOC, admonitions, code blocks, tables, custom scrollbar all restyled in `docs/stylesheets/extra.css`.
+- **CLAUDE.md `## Handing over commands` rule** (#959). Cross-project preference deployed to `~/.claude/CLAUDE.md`: when Claude Code needs the user to run shell steps themselves, it must hand them over as one runnable script file, not fenced code blocks or scattered one-liners.
+- **`mirror-main-to-master` workflow** (#961). Fast-forwards `master` from `main` on every push during the rename grace period so bookmarked `raw.githubusercontent.com/…/master/…` install URLs keep resolving. Retire on 2027-07-05 per tracking issue #962.
+- **fish alias-cache pre-warm** (#964). New `run_onchange_after_30-regen-fish-alias-cache.sh.tmpl` regenerates `~/.cache/fish/bash-aliases.fish` at chezmoi-apply time when the alias sources change, so the first fish shell after apply doesn't pay ~200ms rebuilding the cache from scratch.
+
+### Changed
+
+- **Default branch: `master` → `main`** (#961). GitHub-side rename plus 96 in-repo edits (workflow triggers, docs URIs, install URLs, ruleset filename, git aliases). Every `raw.githubusercontent.com/…/master/…` and `github.com/…/blob/master/…` reference now points at `/main/`. Workflow `pull_request:` / `push:` triggers keep `master` as a grace-period fallback until the mirror is retired.
+- **Portability + missing commands** (#953). Ships as part of v0.2.509 via PR #953 (already tagged) — cross-platform fixes for macOS/BSD/Alpine/openSUSE (base64 `-D` fallback, `sort -V` stdin buffering, `date +%s%3N` guards, zypper/apk/pkg package-manager detection) plus wiring for `dot teleport`, `dot uninstall`, `dot policy`, `dot secret-audit`, `dot completion <bash|zsh|fish|nu>`, `dot fonts patch`. Cross-shell parity for `dot secrets load --shell posix|fish|nu` and auto-secret-load in bash/fish/nushell. See [v0.2.509 release notes](https://github.com/sebastienrousseau/dotfiles/releases/tag/v0.2.509).
+- **Terminal font 12 → 20** (#963). `defaults/.chezmoidata.toml` and every terminal template (alacritty, wezterm, ghostty, kitty, waybar) bumped so a fresh install reads at 20pt across the surface.
+- **Themes rebuilt** (#963). K-Means CIELAB color extraction re-run over all 206 detected wallpapers → 752 theme sections. Five dark themes removed where the underlying wallpaper is inherently light-toned (hello, iphone, valentine, modern, firewatch) — their `-light` counterparts kept.
+- **Zsh PATH prune** (#963). The pre-existing dedup+prune tail in `00-core-paths.sh` was gated behind `[ -z "$ZSH_VERSION" ]`, so zsh never pruned. Now runs native zsh path-array iteration for zsh (89 → 77 entries with no non-existent dirs) alongside the existing bash 4+ associative-array and bash 3.x awk paths.
+
+### Fixed
+
+- **Fish startup 217 ms → 119 ms** (#963). `defaults/dot_config/fish/conf.d/aliases.fish.tmpl` now writes the bash-bridge cache as `abbr --add NAME -- VALUE` instead of `alias NAME=VALUE`. Fish's `alias` builtin creates one function per entry (~183 µs); `abbr` is a command-line-time expansion at ~40 µs. Sourcing the same 878-entry cache went 170 ms → 34 ms. Cache self-heals on upgrade (staleness now also fires on the old `alias` format).
+- **Scorecard code-scanning alerts** (this release, #965). Nine `TokenPermissionsID` alerts closed by adding top-level `permissions: contents: read` (least-privilege default) to workflows that only declared job-level write permissions. One `PinnedDependenciesID` alert closed by hash-locking `requirements-docs.txt` via `pip-compile --generate-hashes` and switching pages.yml to `pip install --require-hashes`.
+
+### Housekeeping
+
+- Bumped `package.json`, `defaults/.chezmoidata.toml`, and every managed markdown reference from `v0.2.508` → `v0.2.510` (26 files consistent).
+- Pruned the stale `feat/v0.2.509` local branch (its remote was deleted at merge time).
+- Retired the `.git/*.sh` session helper scripts left over from the rename + docs-theme + housekeeping PRs.
+
 ## v0.2.508 — 2026-06-30
 
 Makes `dot apply` / `dot update` behave like an OS package-manager update —
