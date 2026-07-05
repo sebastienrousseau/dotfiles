@@ -17,8 +17,10 @@ name: Mirror main → master
 # default GITHUB_TOKEN, which has `contents: write` when granted below.
 
 on:
+  # Only fire on main pushes — if this also fired on master pushes, the
+  # mirror itself would trigger it, wasting minutes on a no-op re-push.
   push:
-    branches: [main, master]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
