@@ -9,12 +9,29 @@
 # Why: Without hard-fail, portability drift accumulated invisibly — the
 # job ran, reported, and exited 0 regardless of findings.
 
-set -euo pipefail
+# NOT `set -e` — a failing `assert_*` returns non-zero, and under
+# `-e` that terminated the whole suite before the RESULTS: line
+# fired (framework-invariant test then complained "no RESULTS").
+# Mirror the pattern used by test_code_quality.sh /
+# test_static_analysis.sh.
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 # shellcheck source=../framework/assertions.sh
 source "$SCRIPT_DIR/../framework/assertions.sh"
+
+# Guarantee a RESULTS: line even if `assert_*` leaks `set -e` back
+# on and an unhandled non-zero terminates the script. Framework
+# invariant test (test_test_framework_invariants.sh) parses this
+# line to detect suites that under-count assertions vs runs.
+_emit_results() {
+  # Only emit if we haven't already (idempotent).
+  [[ "${_RESULTS_EMITTED:-0}" == 1 ]] && return 0
+  _RESULTS_EMITTED=1
+  echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
+}
+trap _emit_results EXIT
 
 WORKFLOW="$REPO_ROOT/.github/workflows/compliance-guard.yml"
 

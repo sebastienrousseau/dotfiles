@@ -63,15 +63,22 @@ while IFS= read -r line; do
 done < "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml"
 assert_equals "0" "$unmatched" "mise config.toml must have balanced quotes"
 
-test_start "integration_mise_has_ai_tools"
+# Each mise-integration probe is scored separately so the framework
+# invariant `TESTS_RUN == TESTS_PASSED + TESTS_FAILED` holds: one
+# `test_start` per assertion, not one per group.
+#
 # Claude Code is installed via Anthropic's native installer, not mise/npm:
 # npm 11 drops the platform-native optionalDependency on global installs.
+test_start "integration_mise_has_ai_tools_claude"
 assert_file_contains "$REPO_ROOT/install/provision/run_onchange_15-ai-cli-tools.sh.tmpl" "claude.ai/install.sh" "provisioning must install Claude Code via native installer"
+test_start "integration_mise_has_ai_tools_antigravity"
 assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml" "antigravity.google/cli/install.sh" "mise must document Antigravity CLI native installer"
 
-test_start "integration_mise_has_modern_cli_tools"
+test_start "integration_mise_has_modern_cli_tools_delta"
 assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml" "delta" "mise must include delta"
+test_start "integration_mise_has_modern_cli_tools_lazygit"
 assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml" "lazygit" "mise must include lazygit"
+test_start "integration_mise_has_modern_cli_tools_fd"
 assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml" "fd" "mise must include fd"
 
 # ═══════════════════════════════════════════════════════════════

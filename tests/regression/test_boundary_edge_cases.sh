@@ -146,9 +146,14 @@ assert_file_contains "$REPO_ROOT/install.sh" "umask" "installer must set restric
 test_start "edge_wsl_detection_function"
 assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/functions/system/environment.sh" "is_wsl" "WSL detection function must exist"
 
-test_start "edge_clipboard_unification"
+# Each clipboard-support probe is scored separately so the framework
+# invariant `TESTS_RUN == TESTS_PASSED + TESTS_FAILED` holds: one
+# `test_start` per assertion, not one per group.
+test_start "edge_clipboard_unification_wayland"
 assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/default/default.aliases.sh" "wl-copy" "clipboard must support Wayland"
+test_start "edge_clipboard_unification_x11"
 assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/default/default.aliases.sh" "xclip" "clipboard must support X11"
+test_start "edge_clipboard_unification_wsl"
 assert_file_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/default/default.aliases.sh" "clip.exe" "clipboard must support WSL"
 
 test_start "edge_homebrew_path_conditional"
