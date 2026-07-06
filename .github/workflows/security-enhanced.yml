@@ -59,7 +59,7 @@ jobs:
 
   secrets-scan:
     name: Security / Secrets Detection
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@3dd2b9d97d46b26523e0e9a8dfe35207cdae24a4 # main
     with:
       run_guard: true
       run_additional_patterns: false
@@ -83,7 +83,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: TruffleHog OSS
-        uses: trufflesecurity/trufflehog@f446421baf832d6356c42c1743d99abff52ff334 # v3.95.7
+        uses: trufflesecurity/trufflehog@00155c9dc586f34d189adc83d3ac2698c2ec551f # v3.95.8
         with:
           path: ./
           base: ${{ github.event.pull_request.base.sha }}
@@ -128,7 +128,7 @@ jobs:
 
       - name: Upload Grype results to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4
+        uses: github/codeql-action/upload-sarif@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a # v4
         with:
           sarif_file: grype-results.sarif
           category: grype-analysis
@@ -166,7 +166,7 @@ jobs:
 
       - name: Upload Checkov results to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4
+        uses: github/codeql-action/upload-sarif@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a # v4
         with:
           sarif_file: checkov-results.sarif
           category: checkov-analysis
@@ -209,7 +209,7 @@ jobs:
 
       - name: Upload container scan results
         if: always() && hashFiles('**/Dockerfile*') != ''
-        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4
+        uses: github/codeql-action/upload-sarif@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a # v4
         with:
           sarif_file: container-scan.sarif
           category: container-analysis
@@ -220,7 +220,7 @@ jobs:
 
   policy-enforcement:
     name: Security / Policy Enforcement
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@3dd2b9d97d46b26523e0e9a8dfe35207cdae24a4 # main
     needs: [secrets-scan]
     # Only run on PRs to catch issues before merge
     if: github.event_name == 'pull_request'

@@ -71,7 +71,7 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+      - uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
         id: filter
         with:
           filters: |
@@ -104,7 +104,7 @@ jobs:
     name: Lint / Shell
     needs: changes
     if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@3dd2b9d97d46b26523e0e9a8dfe35207cdae24a4 # main
     with:
       include_tests: false
       shellcheck_severity: error
@@ -117,7 +117,7 @@ jobs:
     name: Lint / Lua
     needs: changes
     if: needs.changes.outputs.lua == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@3dd2b9d97d46b26523e0e9a8dfe35207cdae24a4 # main
     with:
       target: defaults/dot_config/nvim
       strict: false
@@ -173,7 +173,7 @@ jobs:
       || needs.changes.outputs.nix == 'true'
       || github.event_name == 'schedule'
       || github.event_name == 'workflow_dispatch'
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@3dd2b9d97d46b26523e0e9a8dfe35207cdae24a4 # main
 
   lint-reusable-pins:
     name: Lint / Reusable Workflow Pins
@@ -231,7 +231,7 @@ jobs:
   # ============================================================================
   security-secrets:
     name: Security / Secrets Scan
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@3dd2b9d97d46b26523e0e9a8dfe35207cdae24a4 # main
     with:
       run_guard: true
       run_additional_patterns: true
@@ -240,7 +240,7 @@ jobs:
 
   security-dependencies:
     name: Security / Dependency Audit
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@3dd2b9d97d46b26523e0e9a8dfe35207cdae24a4 # main
     with:
       run_dependency_audit: true
       run_supply_chain_checks: true
@@ -261,7 +261,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: TruffleHog Scan
-        uses: trufflesecurity/trufflehog@f446421baf832d6356c42c1743d99abff52ff334 # v3.95.7
+        uses: trufflesecurity/trufflehog@00155c9dc586f34d189adc83d3ac2698c2ec551f # v3.95.8
         with:
           extra_args: --only-verified
 
@@ -473,7 +473,7 @@ jobs:
   test-unit:
     name: Test / Unit
     needs: changes
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@3dd2b9d97d46b26523e0e9a8dfe35207cdae24a4 # main
     with:
       min_coverage: "95"
       run_integration: true
@@ -524,7 +524,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@3dd2b9d97d46b26523e0e9a8dfe35207cdae24a4 # main
     with:
       flake_dir: nix
       run_fmt_check: false
