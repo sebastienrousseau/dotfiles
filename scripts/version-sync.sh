@@ -84,6 +84,13 @@ EXCLUDE_FILES=(
   # that are NOT the current dotfiles_version. Auto-syncing
   # rewrites them incorrectly.
   "docs/operations/ARCHITECTURE_ROADMAP.md"
+
+  # Dated release write-ups: each article records the release it
+  # shipped in (e.g. "shipped in v0.2.510" + a link to that release
+  # tag). Those refs are historical fact, not current-version claims —
+  # bumping them would falsify the history.
+  "docs/articles/2026-07-05-fish-startup-abbr.md"
+  "docs/articles/2026-07-05-master-to-main-rename-runbook.md"
 )
 
 # shellcheck source=../lib/dot/ui.sh

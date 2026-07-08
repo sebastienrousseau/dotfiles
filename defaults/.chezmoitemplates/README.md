@@ -5,7 +5,7 @@
   align="right"
 />
 
-# Chezmoi Templates (v0.2.510)
+# Chezmoi Templates (v0.2.511)
 
 Modular shell configuration managed by Chezmoi
 

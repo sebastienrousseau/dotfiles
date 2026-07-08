@@ -56,3 +56,35 @@ captured in.
 - Shell: zsh (primary), fish, bash
 - Editor: Neovim with lazy.nvim
 - Dotfiles: chezmoi-managed
+
+## Working discipline
+
+Read every instruction — mine, a repo's, or a skill's — as **conditions,
+not quotas**.
+
+- **Conditions, not quotas.** "Add a test when behaviour changes" is not
+  "always add N tests". Don't inflate work to hit a number; a rule whose
+  triggering condition isn't present doesn't fire.
+- **No manufactured urgency.** Caps / "MUST" / "NEVER" mark a hard gate,
+  not a demand to over-act. Satisfy the gate; don't escalate unrelated
+  behaviour because a nearby instruction shouted.
+- **Autonomy on minor decisions.** For reversible, low-stakes choices that
+  follow from the task, decide and proceed — note the choice, don't stop to
+  ask. Reserve questions for ambiguous or irreversible forks.
+- **Coverage-first for reviews.** When reviewing or auditing, report
+  everything with a confidence/severity tag and let a later step filter —
+  don't self-censor mid-pass to hit a "top N" shape.
+
+**Anti-rationalization — before declaring anything done, check honestly:**
+
+- Red flags that mean "not done": "it compiles / typechecks" (necessary,
+  not sufficient); "it looks right" (reading a diff is not running it); a
+  test that passes but was never seen to fail first; "green on my machine"
+  without the full gate; a benchmark delta within noise cited as a win.
+- Rationalizations to reject: "this edge case won't happen" (test it or
+  document why it can't); "I'll add the test in a follow-up" (same commit,
+  or it didn't happen); "the linter is wrong here" (justify a specific
+  inline suppression, never a blanket one); "close enough" on a claimed
+  equivalence (prove it, don't assert it).
+- Verification is a step, not a vibe: state what you did to verify and what
+  you observed; if you skipped a step, say so.
