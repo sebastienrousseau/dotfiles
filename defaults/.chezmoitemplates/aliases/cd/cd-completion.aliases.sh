@@ -44,30 +44,32 @@ if [[ -n "${ZSH_VERSION:-}" ]]; then
   [[ -n "${_CD_COMPLETION_LOADED_ZSH:-}" ]] && :
   _CD_COMPLETION_LOADED_ZSH=1
 
-  # compdef is only available after compinit; skip quietly if not ready.
-  if ! command -v compdef >/dev/null 2>&1; then
-    return 0
+  # compdef is only available after compinit. Guard the registration with
+  # a positive check instead of an early `return`: this fragment is inlined
+  # into the single concatenated 90-ux-aliases.sh, so a file-scope `return`
+  # here aborts the WHOLE file and drops every alias defined afterwards
+  # (reload, r, mkcd, quit, …). Skipping only this block is the safe form.
+  if command -v compdef >/dev/null 2>&1; then
+    _get_bookmarks() {
+      if [[ -f "${BOOKMARK_FILE}" ]]; then
+        cut -d':' -f1 "${BOOKMARK_FILE}"
+      fi
+    }
+
+    _bookmark_complete_zsh() {
+      local -a bookmarks
+      local line
+      while IFS= read -r line; do
+        bookmarks+=("$line")
+      done < <(_get_bookmarks)
+      compadd -Q -- "${bookmarks[@]}"
+    }
+
+    compdef _bookmark_complete_zsh goto
+    compdef _bookmark_complete_zsh bookmark_update
+    compdef _bookmark_complete_zsh bookmark_remove
+    compdef _bookmark_complete_zsh bmg
+    compdef _bookmark_complete_zsh bmu
+    compdef _bookmark_complete_zsh bmr
   fi
-
-  _get_bookmarks() {
-    if [[ -f "${BOOKMARK_FILE}" ]]; then
-      cut -d':' -f1 "${BOOKMARK_FILE}"
-    fi
-  }
-
-  _bookmark_complete_zsh() {
-    local -a bookmarks
-    local line
-    while IFS= read -r line; do
-      bookmarks+=("$line")
-    done < <(_get_bookmarks)
-    compadd -Q -- "${bookmarks[@]}"
-  }
-
-  compdef _bookmark_complete_zsh goto
-  compdef _bookmark_complete_zsh bookmark_update
-  compdef _bookmark_complete_zsh bookmark_remove
-  compdef _bookmark_complete_zsh bmg
-  compdef _bookmark_complete_zsh bmu
-  compdef _bookmark_complete_zsh bmr
 fi

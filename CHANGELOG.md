@@ -2,6 +2,18 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.511 — 2026-07-08
+
+Bug-fix release: restore shell aliases that were silently dropped after the CD-completion fragment.
+
+### Fixed
+
+- **`reload`, `r`, `mkcd`, `quit` — and every alias/function defined after the CD-completion block — were undefined** whenever `compdef` was not yet available when `90-ux-aliases.sh` was sourced (profiles that don't run `compinit`, and fast-startup shells). The zsh branch of `defaults/.chezmoitemplates/aliases/cd/cd-completion.aliases.sh` skipped completion registration with a **file-scope `return 0`**; because that fragment is inlined into the single concatenated `90-ux-aliases.sh`, the bare `return` aborted the whole file, dropping `set_default_aliases()` (which defines `reload` et al.) and everything after it. Replaced the early-return with a positive `if command -v compdef …; then … fi` guard, so only the completion block is skipped when `compdef` is not ready.
+
+### Changed
+
+- **`scripts/version-sync.sh`**: excluded the two dated release write-ups (`docs/articles/2026-07-05-*.md`) from version verification. They record the release they shipped in ("shipped in v0.2.510" + release-tag link) as historical fact; the `--verify` pass was false-flagging those refs as inconsistent even though the update pass correctly leaves them alone.
+
 ## v0.2.510 — 2026-07-05
 
 Post-v0.2.509 quality-of-life release: default branch renamed `master` → `main`, docs site relit with a custom dark + terminal-green MkDocs Material theme, shells warmed up (fish alias→abbr, zsh PATH prune), font bumped to 20pt across every terminal template, themes rebuilt from wallpapers.
