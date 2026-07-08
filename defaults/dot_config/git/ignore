@@ -20,6 +20,9 @@ __pycache__/
 # Logs
 *.log
 
+# corral sync-state (generated per-repo, machine-local)
+.corral-state.json
+
 # Editor
 .vscode/
 .idea/
