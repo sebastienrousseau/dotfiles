@@ -154,7 +154,12 @@ jobs:
 
           git add PKGBUILD .SRCINFO
           git commit -m "dot ${VERSION}"
-          git push origin main
+          # AUR repositories use the `master` branch — do NOT rename this to
+          # `main`. `HEAD:master` is robust whether the clone landed on an
+          # existing `master` (published package) or an unborn default branch
+          # (first publish). This line was wrongly swept master→main in #961's
+          # default-branch rename, which broke AUR publishing from v0.2.510.
+          git push origin HEAD:master
 
       - name: Print AUR URL
         run: |
