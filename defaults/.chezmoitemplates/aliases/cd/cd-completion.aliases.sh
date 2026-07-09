@@ -1,9 +1,7 @@
 # shellcheck shell=bash
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
-if [[ -n "${BASH_VERSION:-}" ]]; then
+if [[ -n "${BASH_VERSION:-}" && -z "${_CD_COMPLETION_LOADED:-}" ]]; then
   # CD Navigation - Tab Completion
-  [[ -n "${_CD_COMPLETION_LOADED:-}" ]] && :
-  _CD_COMPLETION_LOADED=1
 
   # Helper to list all bookmark names
   _get_bookmarks() {
@@ -28,8 +26,11 @@ if [[ -n "${BASH_VERSION:-}" ]]; then
     fi
   }
 
-  # Set up completions
+  # Set up completions. Mark loaded only once they are actually registered,
+  # so a re-source before `complete` is available retries instead of being
+  # permanently skipped.
   if type complete &>/dev/null; then
+    _CD_COMPLETION_LOADED=1
     complete -F _bookmark_complete goto
     complete -F _bookmark_complete bookmark_update
     complete -F _bookmark_complete bookmark_remove
@@ -39,17 +40,21 @@ if [[ -n "${BASH_VERSION:-}" ]]; then
   fi
 fi
 
-if [[ -n "${ZSH_VERSION:-}" ]]; then
+if [[ -n "${ZSH_VERSION:-}" && -z "${_CD_COMPLETION_LOADED_ZSH:-}" ]]; then
   # CD Navigation - Tab Completion (zsh)
-  [[ -n "${_CD_COMPLETION_LOADED_ZSH:-}" ]] && :
-  _CD_COMPLETION_LOADED_ZSH=1
-
-  # compdef is only available after compinit. Guard the registration with
-  # a positive check instead of an early `return`: this fragment is inlined
-  # into the single concatenated 90-ux-aliases.sh, so a file-scope `return`
-  # here aborts the WHOLE file and drops every alias defined afterwards
-  # (reload, r, mkcd, quit, …). Skipping only this block is the safe form.
+  #
+  # compdef is only available after compinit. Guard registration with a
+  # positive check instead of a file-scope `return`: this fragment is inlined
+  # into the single concatenated 90-ux-aliases.sh, so a bare `return` here
+  # would abort the whole file and drop every alias defined afterwards
+  # (reload, r, mkcd, quit, …).
+  #
+  # Mark loaded only AFTER a successful registration: if compdef is not ready
+  # yet (sourced before compinit), leave _CD_COMPLETION_LOADED_ZSH unset so a
+  # later re-source retries — otherwise completions are permanently skipped.
   if command -v compdef >/dev/null 2>&1; then
+    _CD_COMPLETION_LOADED_ZSH=1
+
     _get_bookmarks() {
       if [[ -f "${BOOKMARK_FILE}" ]]; then
         cut -d':' -f1 "${BOOKMARK_FILE}"
