@@ -77,6 +77,11 @@ fd = "latest"
 "npm:tldr" = "latest"
 "aqua:jesseduffield/lazygit" = "latest"
 "aqua:jesseduffield/lazydocker" = "latest"
+"aqua:charmbracelet/gum" = "latest"
+"aqua:charmbracelet/glow" = "latest"
+"aqua:charmbracelet/mods" = "latest"
+"aqua:topgrade-rs/topgrade" = "latest"
+starship = "latest"
 
 # Python tools
 "pipx:poetry" = "latest"
@@ -91,8 +96,10 @@ uv = "latest"
 # curl -fsSL https://antigravity.google/cli/install.sh | bash
 # codex provided by the native `codex` pin above; `npm:codex-cli` was an
 # unrelated legacy package (codex.js) that collided on the `codex` bin name.
-# opencode provided by the native `opencode` pin in mise.toml; `npm:opencode-ai`
-# was a redundant duplicate using the broken npm optional-dep wrapper pattern.
+# opencode: native pin below (folded in from the retired ~/mise.toml).
+# `npm:opencode-ai` is a redundant duplicate using the broken npm optional-dep
+# wrapper pattern — do not reintroduce it.
+opencode = "latest"
 kiro-cli = "latest"
 "npm:autohand-cli" = "latest"
 "npm:@qwen-code/qwen-code" = "latest"
