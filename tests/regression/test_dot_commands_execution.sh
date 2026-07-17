@@ -174,6 +174,16 @@ run_dot_and_assert_clean() {
     printf '%b\n' "  ${YELLOW}⊘${NC} $CURRENT_TEST: skipped — network unavailable"
     return 0
   fi
+  # rc 127 is the shell's universal "command not found". Some paths
+  # exec the backing tool directly (e.g. `dot status` → `exec chezmoi
+  # status`), so the failure surfaces only as 127 with no parseable
+  # stderr line. Treat a bare 127 as a missing-tool environment skip —
+  # real --help/arg regressions this suite targets never exit 127.
+  if [[ $exit_code -eq 127 ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${YELLOW}⊘${NC} $CURRENT_TEST: skipped — backing tool unavailable (rc 127)"
+    return 0
+  fi
 
   local failure_reasons=()
 
