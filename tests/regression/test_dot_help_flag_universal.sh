@@ -69,10 +69,14 @@ reset_sandbox() {
 # command runs. We hash file paths + sizes rather than mtimes so we
 # don't false-positive on ls-time updates.
 #
-# stat's format flag differs across platforms: GNU (Linux) uses
-# `-c '%n %s'`, BSD/macOS uses `-f '%N %z'`. Probe once so this runs
-# on Linux CI too — the old BSD-only form exited non-zero under xargs
-# (rc=123) and, via `set -e`, aborted before the RESULTS: line.
+# Two portability traps this code hit on Linux CI (both aborted the
+# script at rc=123 before the RESULTS: line, via `set -e`):
+#   1. stat's format flag differs: GNU (Linux) uses `-c '%n %s'`,
+#      BSD/macOS uses `-f '%N %z'`. Probe once.
+#   2. A freshly reset sandbox has NO regular files, so `find -type f`
+#      emits nothing. GNU xargs then runs `stat` ONCE with no operands
+#      (BSD xargs skips empty input) → stat exits 1 → xargs 123. Use
+#      `find -exec … +`, which runs nothing when nothing matches.
 if stat -c '%s' . >/dev/null 2>&1; then
   _STAT_FMT=(stat -c '%n %s') # GNU coreutils
 else
@@ -80,9 +84,7 @@ else
 fi
 sandbox_snapshot() {
   local root="$1"
-  find "$root" -type f -print0 2>/dev/null \
-    | xargs -0 "${_STAT_FMT[@]}" 2>/dev/null \
-    | sort
+  find "$root" -type f -exec "${_STAT_FMT[@]}" {} + 2>/dev/null | sort || true
 }
 
 # ═══════════════════════════════════════════════════════════════
