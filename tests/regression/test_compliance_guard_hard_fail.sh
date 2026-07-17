@@ -128,7 +128,11 @@ fi
 
 if command -v shellcheck >/dev/null 2>&1 && command -v rg >/dev/null 2>&1; then
   test_start "no_committed_findings"
-  files=$(rg --files -g "*.sh" -g "!tests/**" 2>/dev/null)
+  # Search from REPO_ROOT so the corpus is the same regardless of the
+  # caller's CWD (the framework-invariant harness runs this from a
+  # scratch dir, where a bare `rg --files` would return nothing and
+  # leave test_start unpaired → RUN != PASSED+FAILED).
+  files=$(rg --files -g "*.sh" -g "!tests/**" "$REPO_ROOT" 2>/dev/null)
   if [[ -n "$files" ]]; then
     # shellcheck disable=SC2086  # word-split is what we want here
     if echo "$files" | xargs shellcheck -x -S warning -e SC1090,SC1091,SC2034 -f gcc >/dev/null 2>&1; then
@@ -136,6 +140,10 @@ if command -v shellcheck >/dev/null 2>&1 && command -v rg >/dev/null 2>&1; then
     else
       assert_exit_code 0 "false  # committed shell tree fails portability lint"
     fi
+  else
+    # No committed .sh files resolved — trivially clean, but still
+    # record a result so every test_start pairs with an assertion.
+    assert_exit_code 0 "true"
   fi
 fi
 

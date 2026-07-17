@@ -68,10 +68,20 @@ reset_sandbox() {
 # Snapshot the shape of a directory tree so we can diff it after a
 # command runs. We hash file paths + sizes rather than mtimes so we
 # don't false-positive on ls-time updates.
+#
+# stat's format flag differs across platforms: GNU (Linux) uses
+# `-c '%n %s'`, BSD/macOS uses `-f '%N %z'`. Probe once so this runs
+# on Linux CI too — the old BSD-only form exited non-zero under xargs
+# (rc=123) and, via `set -e`, aborted before the RESULTS: line.
+if stat -c '%s' . >/dev/null 2>&1; then
+  _STAT_FMT=(stat -c '%n %s') # GNU coreutils
+else
+  _STAT_FMT=(stat -f '%N %z') # BSD / macOS
+fi
 sandbox_snapshot() {
   local root="$1"
   find "$root" -type f -print0 2>/dev/null \
-    | xargs -0 stat -f '%N %z' 2>/dev/null \
+    | xargs -0 "${_STAT_FMT[@]}" 2>/dev/null \
     | sort
 }
 

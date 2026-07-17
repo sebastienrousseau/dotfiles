@@ -4,7 +4,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 set -euo pipefail
 
-# Dotfiles CLI Entry Point - v0.2.511
+# Dotfiles CLI Entry Point - v0.2.512
 
 # Ensure XDG Base Directory variables are set
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -22,7 +22,7 @@ if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
   . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
 fi
 
-VERSION="0.2.511"
+VERSION="0.2.512"
 
 COMMAND="${1:-}"
 if [ -n "${1:-}" ]; then
@@ -38,8 +38,8 @@ _resolve_source_dir() {
 
   if script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null)"; then
     script_dir="$script_path"
-    # Post-v0.2.511: the canonical dispatcher lives at <repo>/bin/dot, so
-    # $script_dir/.. is the repo root. Pre-v0.2.511 (and chezmoi-deployed
+    # Post-v0.2.512: the canonical dispatcher lives at <repo>/bin/dot, so
+    # $script_dir/.. is the repo root. Pre-v0.2.512 (and chezmoi-deployed
     # wrapper invocations that still exec the canonical) the dispatcher
     # was at <repo>/dot_local/bin/executable_dot, so $script_dir/../..
     # was the repo. Probe both to cover the transition.
@@ -374,6 +374,7 @@ help|Show the overview or a focused command reference.|dot help\ndot help doctor
 --version|Show the installed dotfiles version.|dot --version\ndot version
 version|Show the installed dotfiles version.|dot --version\ndot version
 teleport|Deploy the dotfiles environment to a remote host over SSH.|dot teleport user@host
+init|Bootstrap a foreign dotfiles repo through chezmoi + dot.|dot init <github-user>\ndot init owner/repo --dry-run\ndot init https://example.com/repo.git
 uninstall|Remove the managed dotfiles environment (prompts unless --force).|dot uninstall\ndot uninstall --force
 policy|Check and enforce security policies across the environment.|dot policy
 secret-audit|Audit secret hygiene and leakage surface.|dot secret-audit
