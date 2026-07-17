@@ -25,6 +25,25 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
+# Portable `timeout` shim. GNU coreutils ships `timeout`, but stock
+# macOS does not (only `gtimeout`, and only after `brew install
+# coreutils`). The macOS reliability runners don't install coreutils,
+# so tests that wrap commands in `timeout <secs> <cmd>` otherwise fail
+# with "timeout: command not found" (rc 127) on every invocation.
+# Prefer real `timeout`, then `gtimeout`, else run the command without
+# the hang-guard (losing only the timeout, not correctness). All test
+# usages are the simple `timeout <duration> <command…>` form.
+if ! command -v timeout >/dev/null 2>&1; then
+  if command -v gtimeout >/dev/null 2>&1; then
+    timeout() { gtimeout "$@"; }
+  else
+    timeout() {
+      shift # drop the DURATION operand
+      "$@"
+    }
+  fi
+fi
+
 # Start a new test case
 test_start() {
   CURRENT_TEST="$1"
