@@ -462,12 +462,13 @@ def _build_ansi_color(base_lab, accent_lab, bg_rgb, is_dark):
         # never darker than the normal (matches Apple's light ANSI ramp,
         # where brights read as more saturated, not muddier).
         bright = (normal[0], normal[1] * 1.25, normal[2] * 1.25)
-        bright_min = 4.5
-    # WCAG AA (4.5:1) for the chromatic slots so coloured text (paths, syntax)
-    # stays readable — on a light bg the natural contrast landed ~3.9:1, which
-    # washed out. Dark mode keeps its lower floor (light text on dark reads at
-    # a lower ratio without straining).
-    normal_min = 3.0 if is_dark else 4.5
+        bright_min = 7.0
+    # WCAG AAA (7:1) for the chromatic slots on a light bg so coloured text
+    # (paths, syntax) is unambiguously legible — AA (4.5:1) still read as washed
+    # out on cream. Brights stay AAA too and differ from normals by saturation
+    # (Apple's light ramp), not lightness. Dark mode keeps its lower floor
+    # (light text on dark reads comfortably at a lower ratio).
+    normal_min = 3.0 if is_dark else 7.0
     normal_rgb = ensure_contrast(lab_to_rgb(*normal), bg_rgb, normal_min, is_dark)
     bright_rgb = ensure_contrast(lab_to_rgb(*bright), bg_rgb, bright_min, is_dark)
     return normal_rgb, bright_rgb

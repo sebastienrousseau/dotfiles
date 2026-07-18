@@ -13,9 +13,8 @@ symbol_map U+E000-U+F8FF Symbols Nerd Font
 font_size {{ $fontSize }}
 
 window_padding_width 16
-# Light themes are opaque — a translucent cream bg lets a dark wallpaper bleed
-# through and destroys contrast. Subtle translucency only for dark themes.
-background_opacity {{ if hasSuffix "-light" (default "" .theme) }}1.0{{ else if eq .chezmoi.os "darwin" }}0.92{{ else }}0.96{{ end }}
+background_opacity {{ if eq .chezmoi.os "darwin" }}0.92{{ else }}0.96{{ end }}
+dim_opacity 0.75
 confirm_os_window_close 0
 enable_audio_bell no
 cursor_trail 0
@@ -23,7 +22,14 @@ cursor_trail 0
 linux_display_server wayland
 {{- end }}
 
-{{- $t := index .themes (default "big-sur-dark" .theme) -}}
+{{- /* The terminal always uses the DARK palette, in both OS light and dark
+       modes: the engineered dark scheme is high-contrast and low-fatigue,
+       whereas a very light (cream) terminal bg washes out faint/secondary text.
+       The wallpaper and the rest of the desktop still follow the OS mode. */ -}}
+{{- $themeName := default "big-sur-dark" .theme -}}
+{{- $family := trimSuffix "-dark" (trimSuffix "-light" $themeName) -}}
+{{- $t := index .themes (printf "%s-dark" $family) -}}
+{{- if not $t -}}{{- $t = index .themes $themeName -}}{{- end -}}
 {{- if not $t -}}{{- $t = index .themes "big-sur-dark" -}}{{- end }}
 background {{ $t.term.bg }}
 foreground {{ $t.term.fg }}
