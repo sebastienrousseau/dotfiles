@@ -384,6 +384,254 @@ ui_run_cmd() {
 }
 
 # ═══════════════════════════════════════════════════════════════════════
+# Theme colour export — dogfood the active wallpaper theme in dot-ui
+#
+# Exports DOT_UI_* from the active [themes.NAME.ui]/.term colours so the
+# renderer matches the current wallpaper. Missing values are fine — dot-ui
+# falls back per-field to its fixed palette.
+# ═══════════════════════════════════════════════════════════════════════
+
+# Resolve + cache the chezmoi source paths for the theme data.
+_ui_theme_files() {
+  [[ -n "${_UI_THEMES_FILE:-}" ]] && return 0
+  local src=""
+  if command -v chezmoi >/dev/null 2>&1; then
+    src="$(chezmoi source-path 2>/dev/null || true)"
+  fi
+  [[ -z "$src" && -d "$HOME/.local/share/chezmoi" ]] && src="$HOME/.local/share/chezmoi"
+  [[ -z "$src" && -d "$HOME/.dotfiles" ]] && src="$HOME/.dotfiles"
+  [[ -n "$src" ]] || return 1
+  if [[ -f "$src/.chezmoiroot" ]]; then
+    local sub
+    sub="$(head -1 "$src/.chezmoiroot" | tr -d '[:space:]')"
+    [[ -n "$sub" && -d "$src/$sub" ]] && src="$src/$sub"
+  fi
+  _UI_DATA_FILE="$src/.chezmoidata.toml"
+  _UI_THEMES_FILE="$src/.chezmoidata/themes.toml"
+  [[ -f "$_UI_THEMES_FILE" ]] || return 1
+  return 0
+}
+
+_ui_active_mode() {
+  case "$(uname -s)" in
+    Darwin)
+      [[ "$(defaults read -g AppleInterfaceStyle 2>/dev/null || true)" == "Dark" ]] &&
+        echo dark || echo light
+      ;;
+    *)
+      if command -v gsettings >/dev/null 2>&1 &&
+        [[ "$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null || true)" == *dark* ]]; then
+        echo dark
+      else
+        echo light
+      fi
+      ;;
+  esac
+}
+
+# The active theme section, e.g. "pulse-dark" (family from .chezmoidata.toml +
+# current mode, tolerant of unpaired themes).
+_ui_active_theme_section() {
+  _ui_theme_files || return 1
+  local family mode cand
+  family="$(awk -F'"' '/^theme *=/{print $2; exit}' "$_UI_DATA_FILE" 2>/dev/null || true)"
+  [[ -n "$family" ]] || return 1
+  mode="$(_ui_active_mode)"
+  for cand in "${family}-${mode}" "${family}-dark" "${family}-light" "$family"; do
+    if grep -q "^\[themes\.${cand}\]" "$_UI_THEMES_FILE" 2>/dev/null; then
+      echo "$cand"
+      return 0
+    fi
+  done
+  return 1
+}
+
+# theme_ui_value <section> <subsection> <key>  → hex colour (or empty).
+theme_ui_value() {
+  local section="$1" sub="$2" key="$3"
+  _ui_theme_files || return 0
+  awk -v sec="[themes.${section}.${sub}]" -v key="$key" '
+    $0 == sec { inss = 1; next }
+    /^\[/ { inss = 0 }
+    inss && $1 == key {
+      v = $3
+      gsub(/[",]/, "", v)
+      print v
+      exit
+    }
+  ' "$_UI_THEMES_FILE" 2>/dev/null || true
+}
+
+_ui_export_theme_colors() {
+  [[ "${_UI_COLORS_EXPORTED:-0}" == "1" ]] && return 0
+  _UI_COLORS_EXPORTED=1
+  local sec
+  sec="$(_ui_active_theme_section 2>/dev/null || true)"
+  [[ -n "$sec" ]] || return 0
+  export DOT_UI_ACCENT DOT_UI_ERROR DOT_UI_WARNING DOT_UI_SUCCESS DOT_UI_INFO
+  export DOT_UI_PANEL DOT_UI_BORDER DOT_UI_FG DOT_UI_BG
+  DOT_UI_ACCENT="$(theme_ui_value "$sec" ui accent)"
+  DOT_UI_ERROR="$(theme_ui_value "$sec" ui error)"
+  DOT_UI_WARNING="$(theme_ui_value "$sec" ui warning)"
+  DOT_UI_SUCCESS="$(theme_ui_value "$sec" ui success)"
+  DOT_UI_INFO="$(theme_ui_value "$sec" ui info)"
+  DOT_UI_PANEL="$(theme_ui_value "$sec" ui panel)"
+  DOT_UI_BORDER="$(theme_ui_value "$sec" ui border)"
+  DOT_UI_FG="$(theme_ui_value "$sec" term fg)"
+  DOT_UI_BG="$(theme_ui_value "$sec" term bg)"
+}
+
+# ═══════════════════════════════════════════════════════════════════════
+# Step-runner API (delegates to the `dot-ui` renderer)
+#
+# Sequential multi-step operations (theme sync, heal, upgrade, …). In a rich
+# TTY with dot-ui present it streams NDJSON to an animated Bubble Tea view;
+# otherwise it prints today's plain ui_ok/ui_info/ui_err lines. Every
+# step-runner using this one API is what makes the output consistent.
+#
+#   ui_steps_begin "dot theme" "pulse"
+#   ui_step ghostty "Ghostty" run
+#   ...work...
+#   ui_step ghostty "Ghostty" ok "reloaded"
+#   ui_step dms "DMS" na                  # dropped — not applicable here
+#   ui_steps_end "reloaded ghostty, desktop"
+# ═══════════════════════════════════════════════════════════════════════
+_UI_STEPS_ACTIVE=0
+_UI_STEPS_RICH=0
+_UI_STEPS_FD=""
+_UI_STEPS_PID=""
+_UI_STEPS_START=""
+declare -gA _UI_STEP_LABELS 2>/dev/null || true
+
+# Milliseconds since epoch (macOS `date` lacks %N → fall back to seconds).
+_ui_now_ms() {
+  local ns
+  ns="$(date +%s%N 2>/dev/null || true)"
+  if [[ -z "$ns" || "$ns" == *N ]]; then
+    echo $(($(date +%s) * 1000))
+  else
+    echo $((ns / 1000000))
+  fi
+}
+
+# Minimal JSON string escaper (backslash + quote; flatten newlines/tabs).
+_ui_json_esc() {
+  local s="${1//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\n'/ }"
+  s="${s//$'\t'/ }"
+  printf '%s' "$s"
+}
+
+# Write one event to the renderer, never failing the caller.
+_ui_steps_emit() {
+  [[ -n "$_UI_STEPS_FD" ]] || return 0
+  { printf '%s\n' "$1" >&"$_UI_STEPS_FD"; } 2>/dev/null || true
+}
+
+# Rich-mode gate: interactive TTY + dot-ui, honouring every opt-out.
+_ui_steps_rich_ok() {
+  [[ -t 1 ]] || return 1
+  [[ "${DOTFILES_ACCESSIBILITY:-0}" != "1" ]] || return 1
+  [[ -z "${NO_COLOR:-}" ]] || return 1
+  [[ "${DOTFILES_NO_TUI:-0}" != "1" ]] || return 1
+  command -v dot-ui >/dev/null 2>&1 || return 1
+  return 0
+}
+
+ui_steps_begin() {
+  local title="${1:-}" subtitle="${2:-}"
+  ui_init
+  _UI_STEPS_ACTIVE=1
+  _UI_STEPS_START="$(_ui_now_ms)"
+  _UI_STEP_LABELS=()
+
+  if _ui_steps_rich_ok; then
+    _ui_export_theme_colors
+    # FIFO: dot-ui reads events on stdin while its stdout stays the terminal,
+    # and we keep a real PID to wait on when finalising.
+    local fifo
+    fifo="$(mktemp -u 2>/dev/null || echo "/tmp/dot-ui.$$.$RANDOM")"
+    if mkfifo "$fifo" 2>/dev/null; then
+      dot-ui run <"$fifo" &
+      _UI_STEPS_PID=$!
+      if exec {_UI_STEPS_FD}>"$fifo" 2>/dev/null; then
+        rm -f "$fifo"
+        _UI_STEPS_RICH=1
+        _ui_steps_emit "{\"t\":\"header\",\"title\":\"$(_ui_json_esc "$title")\",\"subtitle\":\"$(_ui_json_esc "$subtitle")\"}"
+        return 0
+      fi
+      # exec failed — reap the blocked reader and fall back.
+      kill "$_UI_STEPS_PID" 2>/dev/null || true
+      _UI_STEPS_PID=""
+      rm -f "$fifo"
+    fi
+  fi
+
+  _UI_STEPS_RICH=0
+  if [[ -n "$title" ]]; then
+    [[ -n "$subtitle" ]] && ui_section "$title · $subtitle" || ui_section "$title"
+  fi
+  return 0
+}
+
+# ui_step <id> <label> <state> [detail]   state: run|ok|skip|fail|warn|na
+ui_step() {
+  local id="$1" label="${2:-}" state="${3:-run}" detail="${4:-}"
+  [[ "$_UI_STEPS_ACTIVE" == "1" ]] || return 0
+
+  if [[ "$_UI_STEPS_RICH" == "1" ]]; then
+    _ui_steps_emit "{\"t\":\"step\",\"id\":\"$(_ui_json_esc "$id")\",\"label\":\"$(_ui_json_esc "$label")\",\"state\":\"$(_ui_json_esc "$state")\",\"detail\":\"$(_ui_json_esc "$detail")\"}"
+    return 0
+  fi
+
+  # Plain mode: remember the label (set on the `run` event), print only on a
+  # terminal state so each step is exactly one line.
+  [[ -n "$label" ]] && _UI_STEP_LABELS["$id"]="$label"
+  local lbl="${_UI_STEP_LABELS[$id]:-$id}"
+  case "$state" in
+    ok) ui_ok "$lbl" "$detail" ;;
+    skip) ui_info "$lbl" "$detail" ;;
+    fail) ui_err "$lbl" "$detail" ;;
+    warn) ui_warn "$lbl" "$detail" ;;
+    na | run) : ;;
+  esac
+  return 0
+}
+
+ui_step_progress() {
+  [[ "$_UI_STEPS_ACTIVE" == "1" && "$_UI_STEPS_RICH" == "1" ]] || return 0
+  _ui_steps_emit "{\"t\":\"progress\",\"cur\":${1:-0},\"total\":${2:-0}}"
+}
+
+# Indeterminate wait line (spinner + label) — rich mode only.
+ui_step_wait() {
+  [[ "$_UI_STEPS_ACTIVE" == "1" && "$_UI_STEPS_RICH" == "1" ]] || return 0
+  _ui_steps_emit "{\"t\":\"wait\",\"label\":\"$(_ui_json_esc "${1:-}")\"}"
+}
+
+ui_steps_end() {
+  local summary="${1:-}"
+  [[ "$_UI_STEPS_ACTIVE" == "1" ]] || return 0
+
+  if [[ "$_UI_STEPS_RICH" == "1" ]]; then
+    local elapsed=0
+    [[ -n "$_UI_STEPS_START" ]] && elapsed=$(($(_ui_now_ms) - _UI_STEPS_START))
+    _ui_steps_emit "{\"t\":\"done\",\"elapsed_ms\":${elapsed},\"summary\":\"$(_ui_json_esc "$summary")\"}"
+    [[ -n "$_UI_STEPS_FD" ]] && exec {_UI_STEPS_FD}>&-
+    [[ -n "$_UI_STEPS_PID" ]] && wait "$_UI_STEPS_PID" 2>/dev/null || true
+  elif [[ -n "$summary" ]]; then
+    ui_ok "Done" "$summary"
+  fi
+
+  _UI_STEPS_ACTIVE=0
+  _UI_STEPS_RICH=0
+  _UI_STEPS_FD=""
+  _UI_STEPS_PID=""
+  return 0
+}
+
+# ═══════════════════════════════════════════════════════════════════════
 # Interactive confirm prompt
 #
 #   if ui_confirm "Apply changes?"; then ... fi
