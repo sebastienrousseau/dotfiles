@@ -286,16 +286,26 @@ done
 # Generate themes
 # ---------------------------------------------------------------------------
 
-sys_count=0
-cust_count=0
+# Report distinct WALLPAPERS (families), not theme sections. Every
+# wallpaper — a dynamic HEIC (light+dark frames) or a static image —
+# yields a `-light` and a `-dark` theme, so a raw section count is ~2x
+# the file count and reads as wrong ("74 files → 148 custom"). Collapse
+# -dark/-light back to the family so the numbers match what's on disk
+# and what `dot theme list` shows, and report the theme total separately.
+declare -A sys_fam cust_fam
 for name in "${!WP_SOURCE[@]}"; do
+  family="${name%-dark}"
+  family="${family%-light}"
   case "${WP_SOURCE[$name]}" in
-    system) sys_count=$((sys_count + 1)) ;;
-    custom) cust_count=$((cust_count + 1)) ;;
+    system) sys_fam["$family"]=1 ;;
+    custom) cust_fam["$family"]=1 ;;
   esac
 done
+sys_count=${#sys_fam[@]}
+cust_count=${#cust_fam[@]}
 echo "Discovering wallpapers..."
-echo "  Found: $sys_count system, $cust_count custom (${#WALLPAPERS[@]} total)"
+echo "  Found: $sys_count system, $cust_count custom wallpapers" \
+  "($((sys_count + cust_count)) total → ${#WALLPAPERS[@]} light/dark themes)"
 echo ""
 
 GENERATED=0
