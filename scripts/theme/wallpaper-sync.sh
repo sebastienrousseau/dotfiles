@@ -136,7 +136,9 @@ wallpaper_for_theme() {
     ' "$themes_file")"
     if [[ -n "$stored_wp" ]]; then
       # Home-relative form (current generator): ~/Pictures/... → $HOME/Pictures/...
-      if [[ "$stored_wp" == "~/"* ]]; then
+      # Prefix-strip comparison avoids a quoted-tilde glob (SC2088); the tilde
+      # here is a literal leading character, not a path to expand.
+      if [[ "$stored_wp" != "${stored_wp#\~/}" ]]; then
         stored_wp="${HOME}/${stored_wp#\~/}"
       fi
       # Cross-platform: resolve legacy absolute macOS paths on Linux
