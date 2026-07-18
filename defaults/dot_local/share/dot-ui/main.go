@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2015-2026 Sebastien Rousseau
+//
 // dot-ui — the shared Bubble Tea rendering binary for the `dot` CLI.
 //
 // It is a thin renderer driven by the bash command layer (lib/dot/ui.sh): the

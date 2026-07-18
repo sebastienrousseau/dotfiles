@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2015-2026 Sebastien Rousseau
+//
 // `dot-ui run` — the step-runner view.
 //
 // Reads an NDJSON event stream on stdin and renders an inline (no alt-screen)

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2015-2026 Sebastien Rousseau
+//
 // Palette + lipgloss styles for dot-ui.
 //
 // Colors are sourced from the active wallpaper theme via DOT_UI_* environment
