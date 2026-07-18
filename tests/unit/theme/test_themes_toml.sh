@@ -194,7 +194,10 @@ for name in sorted(themes):
         cr(ui["accent_text"], ui["accent"]) >= 7.0,
         cr(term["c0"], bg) >= 1.5,
         cr(term["c8"], bg) >= 2.5,
-        cr(term.get("c15", fg), bg) >= 7.0,
+        # Bright white (c15) is the lightest structural tone in either mode —
+        # high-contrast on a dark bg, near-white on a light bg. Readable text
+        # is gated by fg (above), not c15.
+        rl(hex_to_rgb(term["c15"])) >= rl(hex_to_rgb(term["c7"])),
         cr(fg, term["sel_bg"]) >= 4.5,
         1.03 <= cr(ui["panel"], bg) <= 2.0,
         1.08 <= cr(ui["border"], bg) <= 3.5,
