@@ -98,9 +98,9 @@ func TestViewRendersStates(t *testing.T) {
 	m := newTestModel()
 	m.apply(Event{T: "header", Title: "dot theme", Subtitle: "pulse"})
 	m.apply(Event{T: "step", ID: "ok", Label: "Okay", State: "ok", Detail: "good"})
-	m.apply(Event{T: "step", ID: "sk", Label: "Skipp", State: "skip", Detail: "n/a"})
-	m.apply(Event{T: "step", ID: "fa", Label: "Faild", State: "fail", Detail: "boom"})
-	m.apply(Event{T: "step", ID: "wa", Label: "Warnn", State: "warn"})
+	m.apply(Event{T: "step", ID: "sk", Label: "Muted", State: "skip", Detail: "n/a"})
+	m.apply(Event{T: "step", ID: "fa", Label: "Broken", State: "fail", Detail: "boom"})
+	m.apply(Event{T: "step", ID: "wa", Label: "Alert", State: "warn"})
 	m.apply(Event{T: "progress", Cur: 2, Total: 4})
 	out := m.View()
 	for _, want := range []string{"dot theme", "pulse", "Okay", "good", "✓", "·", "✗", "⚠", "2/4"} {
