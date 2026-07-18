@@ -124,51 +124,99 @@ discover_linux_system() {
     /usr/share/wallpapers
   )
 
-  local dir file name
+  local dir file name variant
   for dir in "${dirs[@]}"; do
     [[ -d "$dir" ]] || continue
     while IFS= read -r file; do
       name="$(basename "$file")"
       name="${name%.*}"
-      name="$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')"
+      name="$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr ' _' '--')"
       name="${name//[^a-z0-9-]/}"
-      # Avoid duplicates — first found wins for system
-      if [[ -z "${WALLPAPERS[$name]+x}" ]]; then
-        WALLPAPERS["$name"]="$file"
-        WP_SOURCE["$name"]="system"
+      while [[ "$name" == *--* ]]; do name="${name//--/-}"; done
+      name="${name#-}"
+      name="${name%-}"
+      [[ -n "$name" ]] || continue
+      # Static system images carry no mode; theme them in both modes so
+      # they show as a pair (unless the file is already a -dark/-light).
+      if [[ "$name" == *-dark || "$name" == *-light ]]; then
+        [[ -z "${WALLPAPERS[$name]+x}" ]] && {
+          WALLPAPERS["$name"]="$file"
+          WP_SOURCE["$name"]="system"
+        }
+        continue
       fi
-    done < <(find "$dir" -maxdepth 3 -type f \( -name "*.jpg" -o -name "*.png" -o -name "*.heic" \) 2>/dev/null | sort)
+      local key
+      for variant in dark light; do
+        key="${name}-${variant}"
+        if [[ -z "${WALLPAPERS[$key]+x}" ]]; then
+          WALLPAPERS["$key"]="$file"
+          WP_SOURCE["$key"]="system"
+        fi
+      done
+    done < <(find "$dir" -maxdepth 3 -type f \
+      \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \
+      -o -iname '*.heic' -o -iname '*.webp' -o -iname '*.tiff' \) 2>/dev/null | sort)
   done
 }
 
 discover_custom() {
   [[ -d "$CUSTOM_DIR" ]] || return 0
 
-  local file name frame_count
-  for file in "$CUSTOM_DIR"/*.heic "$CUSTOM_DIR"/*.jpg "$CUSTOM_DIR"/*.png; do
+  local file base name ext frame_count
+  # Case-insensitive, wide extension match. The old fixed-glob loop
+  # (`*.heic *.jpg *.png`) silently dropped `.jpeg`, `.webp`, `.tiff`
+  # and every uppercase variant (`.JPG`, `.HEIC`, …), so those
+  # wallpapers never made it into the theme table.
+  while IFS= read -r file; do
     [[ -f "$file" ]] || continue
-    name="$(basename "$file")"
-    name="${name%.*}"
+    base="$(basename "$file")"
+    base="${base%.*}"
+    ext="$(echo "${file##*.}" | tr '[:upper:]' '[:lower:]')"
 
-    # Check if this is a dynamic HEIC (multi-frame = light+dark in one file)
-    if [[ "${file##*.}" == "heic" ]]; then
+    # Normalize to the [a-z0-9-] namespace that themes.toml and the
+    # `dot theme list` picker regex both require — a raw name with
+    # spaces/uppercase would generate a section the picker can't match.
+    name="$(echo "$base" | tr '[:upper:]' '[:lower:]' | tr ' _' '--')"
+    name="${name//[^a-z0-9-]/}"
+    while [[ "$name" == *--* ]]; do name="${name//--/-}"; done
+    name="${name#-}"
+    name="${name%-}"
+    [[ -n "$name" ]] || continue
+
+    # Dynamic HEIC (multi-frame = light+dark packed in one file).
+    if [[ "$ext" == "heic" ]]; then
       frame_count="$(magick identify "$file" 2>/dev/null | wc -l | tr -d ' ')"
       if [[ "$frame_count" -ge 2 && "$name" != *-dark && "$name" != *-light ]]; then
-        # Dynamic HEIC: register as both dark and light
         WALLPAPERS["${name}-light"]="${file}[0]"
         WP_SOURCE["${name}-light"]="custom"
         WALLPAPERS["${name}-dark"]="${file}[1]"
         WP_SOURCE["${name}-dark"]="custom"
-        # Store the original file path for wallpaper-sync
+        # Store the original file path for wallpaper-sync.
         WALLPAPERS["${name}"]="$file"
         WP_SOURCE["${name}"]="custom-dynamic"
         continue
       fi
     fi
 
-    WALLPAPERS["$name"]="$file"
-    WP_SOURCE["$name"]="custom"
-  done
+    # Explicitly-named single-mode variant (foo-dark.jpg / foo-light.jpg):
+    # honour the author's mode, register the one variant as-is.
+    if [[ "$name" == *-dark || "$name" == *-light ]]; then
+      WALLPAPERS["$name"]="$file"
+      WP_SOURCE["$name"]="custom"
+      continue
+    fi
+
+    # Static single image: theme it in BOTH modes (extract-theme forces
+    # the mode from the -dark/-light suffix) so it appears as a light/dark
+    # pair in `dot theme list`. Previously a static produced only one
+    # variant and paired_families() hid it entirely.
+    WALLPAPERS["${name}-dark"]="$file"
+    WP_SOURCE["${name}-dark"]="custom"
+    WALLPAPERS["${name}-light"]="$file"
+    WP_SOURCE["${name}-light"]="custom"
+  done < <(find "$CUSTOM_DIR" -maxdepth 1 -type f \
+    \( -iname '*.heic' -o -iname '*.jpg' -o -iname '*.jpeg' \
+    -o -iname '*.png' -o -iname '*.webp' -o -iname '*.tiff' \) 2>/dev/null | sort)
 }
 
 # Remove dynamic base entries (keep only the -dark/-light variants for theme gen)

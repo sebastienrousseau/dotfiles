@@ -372,9 +372,19 @@ def _compute_bg_fg(clusters, is_dark):
 
 
 def _compute_accent(clusters, is_dark):
-    """Select and AAA-compliant-darken the most saturated cluster for accent."""
-    sorted_by_chroma = sorted(clusters, key=lambda c: lab_chroma(*c[0]), reverse=True)
-    accent_lab = sorted_by_chroma[0][0]
+    """Select the accent from the wallpaper's DOMINANT chromatic colour.
+
+    Rank clusters by population x chroma so the accent follows the *main*
+    colour of the wallpaper (a large, colourful region) rather than the
+    single most-saturated cluster — which is often a tiny vivid splash
+    that doesn't represent the image. Near-neutral clusters score ~0 and
+    are skipped; if the whole image is neutral we fall back to the most
+    saturated cluster so the accent still carries a hue. The selected
+    colour is then AAA-darkened below (ADR-009 contrast requirement)."""
+    ranked = sorted(clusters, key=lambda c: c[1] * lab_chroma(*c[0]), reverse=True)
+    accent_lab = ranked[0][0]
+    if lab_chroma(*accent_lab) < 5.0:
+        accent_lab = max(clusters, key=lambda c: lab_chroma(*c[0]))[0]
     if is_dark:
         accent_lab = (max(accent_lab[0], 35.0), accent_lab[1], accent_lab[2])
     else:
