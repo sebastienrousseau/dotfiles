@@ -498,13 +498,25 @@ reload_desktop() {
     fi
 
     if [[ $changed -gt 0 ]]; then
-      # Force running apps to pick up the new accent/highlight preferences
+      # Flush the prefs daemon so newly-focused apps read the new accent.
+      # This is cheap and non-disruptive.
       killall -HUP cfprefsd 2>/dev/null || true
-      killall SystemUIServer 2>/dev/null || true
-      killall Dock 2>/dev/null || true
-      killall "System Settings" 2>/dev/null || true
+
+      # Restarting SystemUIServer + Dock is what makes the menu-bar/Dock
+      # accent update INSTANTLY — but it visibly freezes the workspace for
+      # a few seconds while they respawn, on every theme switch. Default to
+      # NOT doing it: dark/light mode (System Events, above) and the app
+      # themes apply live; only the macOS system accent updates lazily.
+      # Opt in with DOT_THEME_RESTART_UI=1 for the instant-accent behaviour.
+      if [[ "${DOT_THEME_RESTART_UI:-0}" == "1" ]]; then
+        killall SystemUIServer 2>/dev/null || true
+        killall Dock 2>/dev/null || true
+        killall "System Settings" 2>/dev/null || true
+        _ok "Desktop" "macOS ${color_scheme}, accent ${accent} (UI restarted)"
+      else
+        _ok "Desktop" "macOS ${color_scheme}, accent ${accent}"
+      fi
       RELOADED+=("desktop")
-      _ok "Desktop" "macOS ${color_scheme}, accent ${accent}"
     else
       SKIPPED+=("desktop")
       _skip "Desktop" "macOS appearance unchanged"
