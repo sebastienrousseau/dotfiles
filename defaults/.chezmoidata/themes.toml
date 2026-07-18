@@ -8151,14 +8151,8 @@ vscode_light = "Catppuccin Latte"
 cat_wallpaper = ""
 starship_palette = "catppuccin_latte"
 
-
 # ─────────────────────────────────────────────────────────────────────
 # Synthetic fallback themes (NOT wallpaper-derived, NEVER user-selectable).
-# Every theme template degrades to `fallback-dark` when `.theme` is unset or
-# names a theme absent from this file — without these, a bad `.theme` crashed
-# rendering with `nil data; no entry for key term`. rebuild-themes.sh always
-# re-emits this pair, so a regeneration that drops any wallpaper theme can
-# never break the fallback. switch.sh hides the `fallback` family from lists.
 # ─────────────────────────────────────────────────────────────────────
 
 [themes.fallback-dark]
@@ -8271,4 +8265,3 @@ vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
 cat_wallpaper = ""
 starship_palette = "catppuccin_latte"
-
