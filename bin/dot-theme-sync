@@ -422,11 +422,8 @@ reload_tmux() {
     _skip "Tmux" "not installed"
     return
   fi
-  if ! tmux list-sessions &>/dev/null; then
-    SKIPPED+=("tmux")
-    _skip "Tmux" "no active sessions"
-    return
-  fi
+  # (Don't gate on the default socket here — a session may live on a named
+  # socket; the per-server loop below detects "no sessions anywhere" and skips.)
   local conf="$HOME/.config/tmux/tmux.conf"
   if [[ ! -f "$conf" ]]; then
     conf="$HOME/.tmux.conf"
@@ -436,22 +433,39 @@ reload_tmux() {
     _skip "Tmux" "config not found"
     return
   fi
-  # source-file may return non-zero if plugins (TPM) aren't installed,
-  # but the theme/colors still reload successfully — treat as success.
-  local out
-  out="$(tmux source-file "$conf" 2>&1)" || true
-  # source-file updates the option values, but attached clients only repaint the
-  # status line on the next status-interval tick (up to 5s). Force every client
-  # to redraw its status line now so existing sessions refresh immediately.
-  local cl
-  while IFS= read -r cl; do
-    [[ -n "$cl" ]] && tmux refresh-client -S -t "$cl" 2>/dev/null || true
-  done < <(tmux list-clients -F '#{client_name}' 2>/dev/null)
-  RELOADED+=("tmux")
-  if [[ -n "$out" ]]; then
-    _ok "Tmux" "source-file (warnings: ${out##*: })"
+  # Reload EVERY running tmux server, not just the one on the default socket:
+  # a session started by tmux-sessionizer or a plugin can live on a named
+  # socket, and the caller may run outside tmux (no $TMUX to point us at the
+  # right server). For each server: re-source the config (updates the option
+  # values) then force every attached client to redraw NOW — otherwise existing
+  # sessions only repaint on the next status-interval tick (up to 5s), which
+  # reads as "existing sessions don't refresh".
+  local sockdir cl sock reloaded=0
+  sockdir="${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)"
+  local -a socks=()
+  local s
+  for s in "$sockdir"/*; do
+    [[ -S "$s" ]] && socks+=("$s")
+  done
+  # Fall back to the default socket if enumeration found nothing (non-standard
+  # TMUX_TMPDIR, or a socket outside the conventional dir).
+  [[ ${#socks[@]} -eq 0 ]] && socks=("")
+  for sock in "${socks[@]}"; do
+    local -a tmuxc=(tmux)
+    [[ -n "$sock" ]] && tmuxc=(tmux -S "$sock")
+    "${tmuxc[@]}" list-sessions &>/dev/null || continue
+    "${tmuxc[@]}" source-file "$conf" &>/dev/null || true
+    while IFS= read -r cl; do
+      [[ -n "$cl" ]] && "${tmuxc[@]}" refresh-client -S -t "$cl" 2>/dev/null || true
+    done < <("${tmuxc[@]}" list-clients -F '#{client_name}' 2>/dev/null)
+    reloaded=1
+  done
+  if [[ $reloaded -eq 1 ]]; then
+    RELOADED+=("tmux")
+    _ok "Tmux" "source-file + refresh (all servers)"
   else
-    _ok "Tmux" "source-file + refresh"
+    SKIPPED+=("tmux")
+    _skip "Tmux" "no active sessions"
   fi
 }
 
