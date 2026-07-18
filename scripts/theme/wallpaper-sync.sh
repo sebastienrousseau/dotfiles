@@ -397,6 +397,56 @@ ensure_linux_compatible() {
   printf '%s\n' "$wp"
 }
 
+# macOS: a dynamic appearance HEIC (two frames + apple_desktop:apr metadata)
+# set as a plain imageFile gets pinned to a single frame and stops tracking
+# Light/Dark — so Light mode can show the dark frame. Extract the frame that
+# matches the requested mode (0 = light, 1 = dark, per Apple's apr convention,
+# same as the Linux -0/-1 path) to a small single-image HEIC and apply that
+# instead. Single-image HEICs and non-HEICs are returned unchanged.
+macos_appearance_frame() {
+  local wp="$1" mode="$2"
+  [[ "${wp##*.}" == "heic" ]] || {
+    printf '%s\n' "$wp"
+    return
+  }
+  command -v magick &>/dev/null || {
+    printf '%s\n' "$wp"
+    return
+  }
+  local frames
+  frames="$(magick identify "$wp" 2>/dev/null | wc -l | tr -d ' ')"
+  [[ "${frames:-0}" -ge 2 ]] || {
+    printf '%s\n' "$wp"
+    return
+  }
+
+  local idx=0
+  [[ "$mode" == "dark" ]] && idx=1
+  local cache_dir="$WALLPAPER_DIR/.dot-frames"
+  mkdir -p "$cache_dir" 2>/dev/null || {
+    printf '%s\n' "$wp"
+    return
+  }
+  local frame
+  frame="$cache_dir/$(basename "${wp%.heic}")-${mode}.heic"
+
+  # Reuse a cached frame that is newer than its source wallpaper.
+  if [[ -f "$frame" && "$frame" -nt "$wp" ]]; then
+    printf '%s\n' "$frame"
+    return
+  fi
+  local tmp
+  tmp="$(mktemp "${frame%.heic}.XXXXXX.heic")"
+  if magick "${wp}[${idx}]" "$tmp" 2>/dev/null && [[ -s "$tmp" ]]; then
+    if mv -f "$tmp" "$frame" 2>/dev/null; then
+      printf '%s\n' "$frame"
+      return
+    fi
+  fi
+  rm -f "$tmp" 2>/dev/null
+  printf '%s\n' "$wp"
+}
+
 # Apply wallpaper based on platform and compositor
 apply_wallpaper() {
   local wp="$1"
@@ -408,6 +458,10 @@ apply_wallpaper() {
 
   case "$(uname -s)" in
     Darwin)
+      # Resolve a dynamic HEIC down to the mode-appropriate static frame so
+      # macOS renders the right appearance instead of pinning one frame.
+      wp="$(macos_appearance_frame "$wp" "$mode")"
+
       # macOS Sonoma+ moved wallpaper state to ~/Library/Application Support/
       # com.apple.wallpaper/Store/Index.plist, owned by WallpaperAgent. Each
       # Space and Display has its own entry, and AppleScript's `every desktop`
