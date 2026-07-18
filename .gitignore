@@ -3,6 +3,9 @@
 
 # Locally built Go binaries (dot-ai-tui is built to ~/.local/bin via run_onchange)
 defaults/dot_local/share/dot-ai-tui/dot-ai-tui
+defaults/dot_local/share/dot-ui/dot-ui
+# Go coverage profiles from local test runs
+defaults/dot_local/share/*/cov.out
 
 # OS Artifacts
 .DS_Store

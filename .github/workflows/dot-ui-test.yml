@@ -1,0 +1,54 @@
+name: dot-ui / Go Tests
+
+# Unit tests + coverage gate for the shared `dot` UI renderer (dot-ui).
+# Runs only when the Go source changes.
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "defaults/dot_local/share/dot-ui/**"
+      - ".github/workflows/dot-ui-test.yml"
+  pull_request:
+    paths:
+      - "defaults/dot_local/share/dot-ui/**"
+      - ".github/workflows/dot-ui-test.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  dot-ui:
+    name: dot-ui / Test + Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      # Floor below the local ~82% — the remaining statements are the
+      # interactive Bubble Tea / /dev/tty paths that need a real PTY.
+      MIN_COVERAGE: "80.0"
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version: "1.26"
+
+      - name: Test + coverage gate
+        working-directory: defaults/dot_local/share/dot-ui
+        run: |
+          set -euo pipefail
+          gofmt -l . | (! grep .) || { echo "::error::gofmt"; exit 1; }
+          go vet ./...
+          go test -coverprofile=cov.out ./...
+          pct="$(go tool cover -func=cov.out | awk '/^total:/{gsub(/%/,"",$3); print $3}')"
+          echo "::notice::dot-ui coverage ${pct}% (floor ${MIN_COVERAGE}%)"
+          awk -v p="$pct" -v m="$MIN_COVERAGE" 'BEGIN{exit !(p+0 >= m+0)}' || {
+            echo "::error::dot-ui coverage ${pct}% is below the ${MIN_COVERAGE}% floor"
+            exit 1
+          }
