@@ -494,8 +494,29 @@ if updated:
 print(updated)
 PYEOF
 
-      # Update the ACTIVE Space's wallpaper live through the running agent —
-      # this is what the user sees immediately and needs no restart.
+      # Restart WallpaperAgent so it re-reads the store and repaints EVERY
+      # Space (the store rewrite above covers all Spaces; the agent only
+      # applies it on respawn). Then BLOCK until it's actually back and the
+      # wallpaper has re-applied — the caller reports "Done" once this returns,
+      # so it must not return while Spaces are still repainting. Set
+      # DOT_THEME_SKIP_WALLPAPER_AGENT=1 to skip the restart (faster, but
+      # background Spaces won't refresh until next login).
+      if [[ "${DOT_THEME_SKIP_WALLPAPER_AGENT:-0}" != "1" ]]; then
+        killall WallpaperAgent 2>/dev/null || true
+
+        # Wait for launchd to bring WallpaperAgent back (KeepAlive respawns it
+        # within ~1s; cap the wait so a theme switch can never hang).
+        local _waited=0
+        while ! pgrep -x WallpaperAgent >/dev/null 2>&1; do
+          sleep 0.1
+          _waited=$((_waited + 1))
+          [[ "$_waited" -ge 60 ]] && break
+        done
+      fi
+
+      # Re-assert the wallpaper through the (now running) agent — covers the
+      # active Space's first paint and any screen the store rewrite missed —
+      # then give that paint a moment to finish before returning.
       if command -v wallpaper &>/dev/null; then
         wallpaper set "$wp" --screen all 2>/dev/null || true
       else
@@ -507,18 +528,7 @@ tell application \"System Events\"
     end repeat
 end tell" 2>/dev/null || true
       fi
-
-      # Restarting WallpaperAgent forces a cold respawn that re-renders EVERY
-      # Space at once. Switching Spaces right after a theme change then stalls
-      # for several seconds while the just-restarted agent renders the target
-      # Space (much worse with dynamic HEIC). The Index.plist rewrite above
-      # already persists the new wallpaper for every Space, and the agent
-      # re-reads it lazily as each Space is next activated — so default to NOT
-      # restarting, which keeps Space switches smooth. Opt in only if a
-      # background Space fails to refresh: DOT_THEME_RESTART_WALLPAPER_AGENT=1
-      if [[ "${DOT_THEME_RESTART_WALLPAPER_AGENT:-0}" == "1" ]]; then
-        killall WallpaperAgent 2>/dev/null || true
-      fi
+      sleep 0.5
       ;;
     Linux)
       # DMS owns wallpaper display and runs matugen for color extraction.
