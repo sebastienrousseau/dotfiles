@@ -494,12 +494,8 @@ if updated:
 print(updated)
 PYEOF
 
-      # Restart WallpaperAgent so it re-reads the store. launchd respawns it.
-      killall WallpaperAgent 2>/dev/null || true
-
-      # Also nudge the active Space via the public API. This covers the
-      # initial render before WallpaperAgent comes back, and handles screens
-      # the Index.plist rewrite somehow missed.
+      # Update the ACTIVE Space's wallpaper live through the running agent —
+      # this is what the user sees immediately and needs no restart.
       if command -v wallpaper &>/dev/null; then
         wallpaper set "$wp" --screen all 2>/dev/null || true
       else
@@ -510,6 +506,18 @@ tell application \"System Events\"
         set picture of d to theFile
     end repeat
 end tell" 2>/dev/null || true
+      fi
+
+      # Restarting WallpaperAgent forces a cold respawn that re-renders EVERY
+      # Space at once. Switching Spaces right after a theme change then stalls
+      # for several seconds while the just-restarted agent renders the target
+      # Space (much worse with dynamic HEIC). The Index.plist rewrite above
+      # already persists the new wallpaper for every Space, and the agent
+      # re-reads it lazily as each Space is next activated — so default to NOT
+      # restarting, which keeps Space switches smooth. Opt in only if a
+      # background Space fails to refresh: DOT_THEME_RESTART_WALLPAPER_AGENT=1
+      if [[ "${DOT_THEME_RESTART_WALLPAPER_AGENT:-0}" == "1" ]]; then
+        killall WallpaperAgent 2>/dev/null || true
       fi
       ;;
     Linux)
