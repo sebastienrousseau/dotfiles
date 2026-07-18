@@ -504,15 +504,18 @@ def _structural_colors(bg_lab, bg_rgb, is_dark):
             ensure_contrast(lab_to_rgb(bg_lab[0] + 25, bg_lab[1], bg_lab[2]), bg_rgb, 2.5, True),
             ensure_contrast(lab_to_rgb(90.0, bg_lab[1] * 0.05, bg_lab[2] * 0.05), bg_rgb, 7.0, True),
         )
-    # Light bg: the whole neutral ramp must stay READABLE — a near-white c7/c15
-    # is invisible on cream. Keep them progressively lighter (c0<c8<c7<c15) but
-    # never below AA, so "white"/"bright-white" text is a legible grey rather
-    # than vanishing.
+    # Light bg: the neutral ramp increases in lightness (c0 < c8 < c7 < c15).
+    # c0/c8/c7 stay readable (>= AA); c15 ("bright white") is the LIGHTEST tone,
+    # strictly lighter than c7 — bright-white text legibility is gated by fg, not
+    # c15, and forcing c15 to the same floor as c7 made them converge (c15 ended
+    # a hair darker, breaking the ramp). Start c15 well above c7 with only a mild
+    # floor so it stays the lightest. (Terminals render the dark palette; this
+    # ramp only feeds non-terminal light-palette consumers.)
     return (
         ensure_contrast(lab_to_rgb(18.0, bg_lab[1] * 0.2, bg_lab[2] * 0.2), bg_rgb, 7.0, False),
         ensure_contrast(lab_to_rgb(50.0, bg_lab[1] * 0.15, bg_lab[2] * 0.15), bg_rgb, 4.5, False),
         ensure_contrast(lab_to_rgb(35.0, bg_lab[1] * 0.2, bg_lab[2] * 0.2), bg_rgb, 4.5, False),
-        ensure_contrast(lab_to_rgb(55.0, bg_lab[1] * 0.1, bg_lab[2] * 0.1), bg_rgb, 4.5, False),
+        ensure_contrast(lab_to_rgb(64.0, bg_lab[1] * 0.08, bg_lab[2] * 0.08), bg_rgb, 2.5, False),
     )
 
 
