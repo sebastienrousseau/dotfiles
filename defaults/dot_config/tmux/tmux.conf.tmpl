@@ -1,4 +1,10 @@
-{{- $t := index .themes (default "big-sur-dark" .theme) -}}
+{{- /* tmux tracks the terminal, which always renders the DARK palette (a light
+       status bar clashes inside a dark terminal). Resolve the theme's -dark
+       variant in both OS modes; the accent still comes from the wallpaper. */ -}}
+{{- $themeName := default "big-sur-dark" .theme -}}
+{{- $family := trimSuffix "-dark" (trimSuffix "-light" $themeName) -}}
+{{- $t := index .themes (printf "%s-dark" $family) -}}
+{{- if not $t -}}{{- $t = index .themes $themeName -}}{{- end -}}
 {{- if not $t -}}{{- $t = index .themes "big-sur-dark" -}}{{- end -}}
 {{- $bg := $t.term.bg -}}
 {{- $fg := $t.term.fg -}}
