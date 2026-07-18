@@ -37,7 +37,16 @@ if ! command -v timeout >/dev/null 2>&1; then
   if command -v gtimeout >/dev/null 2>&1; then
     timeout() { gtimeout "$@"; }
   else
+    # Fallback: strip any leading options (e.g. `--kill-after=5`, `-k 5`,
+    # `-s TERM`) and the DURATION operand, then run the command unguarded.
+    # Handles both `timeout 15 cmd` and `timeout --kill-after=5 60 cmd`.
     timeout() {
+      while [[ "${1:-}" == -* ]]; do
+        case "$1" in
+          -k | --kill-after | -s | --signal) shift 2 ;; # option takes a value
+          *) shift ;;                                   # bare flag or --opt=val
+        esac
+      done
       shift # drop the DURATION operand
       "$@"
     }
