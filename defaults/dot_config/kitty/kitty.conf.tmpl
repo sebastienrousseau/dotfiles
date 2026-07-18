@@ -13,7 +13,9 @@ symbol_map U+E000-U+F8FF Symbols Nerd Font
 font_size {{ $fontSize }}
 
 window_padding_width 16
-background_opacity {{ if eq .chezmoi.os "darwin" }}0.92{{ else }}0.96{{ end }}
+# Light themes are opaque — a translucent cream bg lets a dark wallpaper bleed
+# through and destroys contrast. Subtle translucency only for dark themes.
+background_opacity {{ if hasSuffix "-light" (default "" .theme) }}1.0{{ else if eq .chezmoi.os "darwin" }}0.92{{ else }}0.96{{ end }}
 confirm_os_window_close 0
 enable_audio_bell no
 cursor_trail 0
