@@ -51,6 +51,8 @@ func dispatch(args []string, stdout, stderr io.Writer) int {
 			return 1
 		}
 		return 0
+	case "pick":
+		return cmdPick(NewStyles(LoadPalette()), args[1:], stdout)
 	default:
 		// Reserved / unknown subcommand — non-zero so the bash façade uses
 		// its plain fallback instead of assuming rich output happened.
@@ -77,6 +79,49 @@ func cmdRun(st Styles) error {
 		}
 	}
 	return runStep(st, os.Stdin, ttyReader, os.Stdout, interactive)
+}
+
+// cmdPick parses --header/--prompt, drives the picker on /dev/tty, and prints
+// the selection to stdout (exit 0) or nothing (exit 1 on cancel/no-TTY) so the
+// bash caller can fall back.
+func cmdPick(st Styles, args []string, stdout io.Writer) int {
+	var header, prompt string
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "--header":
+			if i+1 < len(args) {
+				i++
+				header = args[i]
+			}
+		case "--prompt":
+			if i+1 < len(args) {
+				i++
+				prompt = args[i]
+			}
+		}
+	}
+	snapshot := os.Getenv("DOT_UI_SNAPSHOT") == "1"
+	var tty *os.File
+	// Only engage the interactive picker in a real session. stderr stays a
+	// terminal even when stdout is captured (sel=$(… | dot-ui pick)); if it
+	// isn't a tty we're piped/non-interactive, so bail to the fallback rather
+	// than block on a /dev/tty that never delivers input.
+	if !snapshot && isTTY(os.Stderr) {
+		if f, err := os.OpenFile("/dev/tty", os.O_RDWR, 0); err == nil {
+			tty = f
+			defer f.Close()
+		}
+	}
+	sel, outcome := runPick(st, header, prompt, os.Stdin, tty, snapshot)
+	switch outcome {
+	case pickSelected:
+		fmt.Fprintln(stdout, sel)
+		return 0
+	case pickCancelled:
+		return 1 // interactive cancel — caller stops, no fallback
+	default:
+		return 2 // could not run — caller falls back to fzf/gum
+	}
 }
 
 // isTTY reports whether f is a character device (a terminal).

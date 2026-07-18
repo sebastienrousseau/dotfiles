@@ -185,12 +185,6 @@ set_theme() {
 
 # Interactive theme picker
 pick_theme() {
-  if ! command -v fzf &>/dev/null; then
-    ui_err "fzf" "required for interactive picker"
-    ui_info "Usage" "dot theme set <name>"
-    exit 1
-  fi
-
   local current
   current="$(current_theme)"
 
@@ -220,14 +214,9 @@ pick_theme() {
   done < <(paired_families)
 
   local selected_family
-  selected_family="$(echo "$theme_list" | fzf \
+  selected_family="$(printf '%s' "$theme_list" | ui_pick \
     --header "Select wallpaper theme (current: $current_family [$current_mode])" \
-    --prompt "Theme > " \
-    --height 30 \
-    --reverse \
-    --no-sort \
-    --no-preview \
-    --ansi |
+    --prompt "Theme >" |
     awk '$1 !~ /^#/ && NF >= 2 {print $2}')" || return 0
 
   if [[ -n "$selected_family" ]]; then

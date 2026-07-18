@@ -632,6 +632,69 @@ ui_steps_end() {
 }
 
 # ═══════════════════════════════════════════════════════════════════════
+# Interactive picker — themed dot-ui list with fzf/gum/plain fallback
+#
+#   sel="$(printf '%s\n' "$rows" | ui_pick --header "…" --prompt "…")"
+#
+# Prints the chosen line (empty on cancel / no selector). Prefers dot-ui pick
+# (rendered on /dev/tty, themed to the wallpaper); falls back to fzf, then gum
+# choose. dot-ui pick's exit code distinguishes an intentional cancel (1, stop)
+# from an inability to run (2, fall back).
+# ═══════════════════════════════════════════════════════════════════════
+ui_pick() {
+  local header="" prompt=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --header)
+        header="${2:-}"
+        shift 2
+        ;;
+      --prompt)
+        prompt="${2:-}"
+        shift 2
+        ;;
+      *) shift ;;
+    esac
+  done
+  ui_init
+  local input
+  input="$(cat)"
+
+  if command -v dot-ui >/dev/null 2>&1 &&
+    [[ "${DOTFILES_NO_TUI:-0}" != "1" ]] &&
+    [[ "${DOTFILES_ACCESSIBILITY:-0}" != "1" ]] &&
+    [[ -z "${NO_COLOR:-}" ]]; then
+    _ui_export_theme_colors
+    local sel rc
+    sel="$(printf '%s\n' "$input" | dot-ui pick --header "$header" --prompt "$prompt")"
+    rc=$?
+    case "$rc" in
+      0)
+        printf '%s\n' "$sel"
+        return 0
+        ;;
+      1) return 0 ;; # cancelled — no selection
+      *) : ;;        # 2 = could not run → fall through
+    esac
+  fi
+
+  if command -v fzf >/dev/null 2>&1 && [[ -t 2 ]]; then
+    local -a fzf_args=(--height 30 --reverse --no-sort --no-preview --ansi)
+    [[ -n "$header" ]] && fzf_args+=(--header "$header")
+    [[ -n "$prompt" ]] && fzf_args+=(--prompt "$prompt ")
+    printf '%s\n' "$input" | fzf "${fzf_args[@]}" || true
+    return 0
+  fi
+
+  if command -v gum >/dev/null 2>&1 && [[ -t 2 ]]; then
+    printf '%s\n' "$input" | gum choose || true
+    return 0
+  fi
+
+  return 0 # no interactive selector available
+}
+
+# ═══════════════════════════════════════════════════════════════════════
 # Interactive confirm prompt
 #
 #   if ui_confirm "Apply changes?"; then ... fi
