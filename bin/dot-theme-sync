@@ -440,11 +440,18 @@ reload_tmux() {
   # but the theme/colors still reload successfully — treat as success.
   local out
   out="$(tmux source-file "$conf" 2>&1)" || true
+  # source-file updates the option values, but attached clients only repaint the
+  # status line on the next status-interval tick (up to 5s). Force every client
+  # to redraw its status line now so existing sessions refresh immediately.
+  local cl
+  while IFS= read -r cl; do
+    [[ -n "$cl" ]] && tmux refresh-client -S -t "$cl" 2>/dev/null || true
+  done < <(tmux list-clients -F '#{client_name}' 2>/dev/null)
   RELOADED+=("tmux")
   if [[ -n "$out" ]]; then
     _ok "Tmux" "source-file (warnings: ${out##*: })"
   else
-    _ok "Tmux" "source-file $conf"
+    _ok "Tmux" "source-file + refresh"
   fi
 }
 
@@ -1015,15 +1022,24 @@ main() {
   # Signal running applications to reload. Each `_info <Label>` starts the step
   # (spinner); the reload's terminal _ok/_skip/_err/_na resolves it. Labels
   # match the reload functions' status labels so ids line up.
-  _info "Ghostty"; reload_ghostty
-  _info "Kitty"; reload_kitty
-  _info "Tmux"; reload_tmux
-  _info "Niri"; reload_niri
-  _info "Desktop"; reload_desktop "$theme"
-  _info "DMS"; reload_dms
-  _info "Wallpaper"; reload_wallpaper
-  _info "Browsers"; reload_browsers "$theme"
-  _info "Neovim"; reload_nvim "$theme"
+  _info "Ghostty"
+  reload_ghostty
+  _info "Kitty"
+  reload_kitty
+  _info "Tmux"
+  reload_tmux
+  _info "Niri"
+  reload_niri
+  _info "Desktop"
+  reload_desktop "$theme"
+  _info "DMS"
+  reload_dms
+  _info "Wallpaper"
+  reload_wallpaper
+  _info "Browsers"
+  reload_browsers "$theme"
+  _info "Neovim"
+  reload_nvim "$theme"
 
   # Summary line — finalises the run (and, in rich mode, waits for the render).
   local summary
