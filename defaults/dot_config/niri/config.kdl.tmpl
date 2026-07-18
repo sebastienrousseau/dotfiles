@@ -9,8 +9,8 @@
     {{- $hw = $m -}}
   {{- end -}}
 {{- end -}}
-{{- $t := index .themes (default "big-sur-dark" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "big-sur-dark" -}}{{- end }}
+{{- $t := index .themes (default "bloom-dark" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "bloom-dark" -}}{{- end }}
 config-notification {
     disable-failed
 }

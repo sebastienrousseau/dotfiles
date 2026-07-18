@@ -4,11 +4,11 @@
        frame actually on screen — the HEIC's light and dark frames are different
        images with different dominant colours, so the dark accent would not match
        the light-mode wallpaper the user sees. */ -}}
-{{- $themeName := default "big-sur-dark" .theme -}}
+{{- $themeName := default "bloom-dark" .theme -}}
 {{- $family := trimSuffix "-dark" (trimSuffix "-light" $themeName) -}}
 {{- $t := index .themes (printf "%s-dark" $family) -}}
 {{- if not $t -}}{{- $t = index .themes $themeName -}}{{- end -}}
-{{- if not $t -}}{{- $t = index .themes "big-sur-dark" -}}{{- end -}}
+{{- if not $t -}}{{- $t = index .themes "bloom-dark" -}}{{- end -}}
 {{- $active := index .themes $themeName -}}
 {{- if not $active -}}{{- $active = $t -}}{{- end -}}
 {{- $bg := $t.term.bg -}}
@@ -152,7 +152,7 @@ bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  THEME — Powerline Status Bar                                           ║
-# ║  Colors from .chezmoidata/themes.toml ({{ default "big-sur-dark" .theme }})  ║
+# ║  Colors from .chezmoidata/themes.toml ({{ default "bloom-dark" .theme }})  ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
 
 # --- Status Bar ---

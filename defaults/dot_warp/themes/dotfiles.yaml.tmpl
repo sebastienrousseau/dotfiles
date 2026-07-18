@@ -6,10 +6,10 @@
 
   Schema reference: https://docs.warp.dev/appearance/custom-themes
 */ -}}
-{{- $t := index .themes (default "big-sur-dark" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "big-sur-dark" -}}{{- end }}
+{{- $t := index .themes (default "bloom-dark" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "bloom-dark" -}}{{- end }}
 {{- $tt := $t -}}
-{{- $themeName := default "big-sur-dark" .theme -}}
+{{- $themeName := default "bloom-dark" .theme -}}
 {{- if hasSuffix "-light" $themeName -}}
   {{- $darkTheme := index .themes (printf "%s-dark" (trimSuffix "-light" $themeName)) -}}
   {{- if $darkTheme -}}{{- $tt = $darkTheme -}}{{- end -}}
