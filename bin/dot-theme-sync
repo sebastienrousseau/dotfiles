@@ -21,17 +21,25 @@
 set -euo pipefail
 
 # =============================================================================
-# Constants & Colors
+# Shared UI layer (lib/dot/ui.sh)
 # =============================================================================
+# Drive output through the shared primitives so this binary matches every other
+# `dot` command: the reload steps stream through the ui_steps_* API, which
+# animates via the dot-ui renderer on a rich TTY and falls back to plain
+# ui_ok/ui_info/ui_err lines otherwise. lib/dot/ is a sibling of bin/.
 
-readonly RESET=$'\033[0m'
-readonly BOLD=$'\033[1m'
-readonly DIM=$'\033[2m'
-readonly GREEN=$'\033[32m'
-readonly YELLOW=$'\033[33m'
-readonly BLUE=$'\033[34m'
-readonly RED=$'\033[31m'
-readonly CYAN=$'\033[36m'
+_ui_lib="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)/lib/dot/ui.sh"
+if [[ -r "$_ui_lib" ]]; then
+  # shellcheck source=/dev/null
+  source "$_ui_lib"
+else
+  printf 'dot-theme-sync: cannot find %s\n' "$_ui_lib" >&2
+  exit 1
+fi
+ui_init
+# Legacy colour aliases for the few remaining direct prints (usage, errors).
+RESET="${NORMAL:-}"
+DIM="${GRAY:-}"
 
 # Platform detection (R10: declare and assign separately)
 PLATFORM="$(uname -s)"
@@ -93,10 +101,16 @@ readonly CHEZMOI_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
 # Output Helpers
 # =============================================================================
 
-_ok() { printf '  %s✓%s  %-12s %s%s%s\n' "$GREEN" "$RESET" "$1" "$DIM" "$2" "$RESET"; }
-_skip() { printf '  %s·%s  %-12s %s%s%s\n' "$DIM" "$RESET" "$1" "$DIM" "$2" "$RESET"; }
-_err() { printf '  %s✗%s  %-12s %s%s%s\n' "$RED" "$RESET" "$1" "$DIM" "$2" "$RESET"; }
-_info() { printf '  %s→%s  %-12s %s%s%s\n' "$BLUE" "$RESET" "$1" "$DIM" "$2" "$RESET"; }
+# Status helpers now delegate to the shared step API. The step id is derived
+# from the label so a `run` emit (spinner) and its terminal ok/skip/fail
+# resolve to the same line. `_na` marks a step not applicable on this platform
+# (dropped from the display); `_info` starts a step in the running state.
+_id() { printf '%s' "$1" | tr '[:upper:] ' '[:lower:]_'; }
+_ok() { ui_step "$(_id "$1")" "$1" ok "${2:-}"; }
+_skip() { ui_step "$(_id "$1")" "$1" skip "${2:-}"; }
+_err() { ui_step "$(_id "$1")" "$1" fail "${2:-}"; }
+_na() { ui_step "$(_id "$1")" "$1" na "${2:-}"; }
+_info() { ui_step "$(_id "$1")" "$1" run "${2:-}"; }
 
 join_lines() {
   local delimiter="$1"
@@ -413,12 +427,12 @@ reload_tmux() {
 reload_niri() {
   if ! command -v niri &>/dev/null; then
     SKIPPED+=("niri")
-    _skip "Niri" "not installed"
+    _na "Niri" "not installed"
     return
   fi
   if ! pgrep -x niri &>/dev/null; then
     SKIPPED+=("niri")
-    _skip "Niri" "not running"
+    _na "Niri" "not running"
     return
   fi
   # Reload config (picks up new colors) then trigger visual transition
@@ -428,7 +442,7 @@ reload_niri() {
     _ok "Niri" "config reloaded + transition"
   else
     SKIPPED+=("niri")
-    _skip "Niri" "IPC unavailable"
+    _na "Niri" "IPC unavailable"
   fi
 }
 
@@ -443,7 +457,7 @@ reload_desktop() {
   if [[ "$(uname -s)" == "Darwin" ]]; then
     if ! command -v osascript &>/dev/null; then
       SKIPPED+=("desktop")
-      _skip "Desktop" "osascript not available"
+      _na "Desktop" "osascript not available"
       return
     fi
 
@@ -526,7 +540,7 @@ reload_desktop() {
 
   if ! command -v gsettings &>/dev/null; then
     SKIPPED+=("desktop")
-    _skip "Desktop" "gsettings not available"
+    _na "Desktop" "gsettings not available"
     return
   fi
 
@@ -865,7 +879,7 @@ reload_wallpaper() {
 reload_dms() {
   if [[ "$PLATFORM" != "Linux" ]]; then
     SKIPPED+=("dms")
-    _skip "DMS" "not Linux"
+    _na "DMS" "not Linux"
     return
   fi
 
@@ -933,10 +947,6 @@ main() {
       ;;
   esac
 
-  # Header
-  printf '%s\n' "${BOLD}${CYAN}dot-theme-sync${RESET}"
-  echo ""
-
   # Save previous theme for rollback on failure
   local prev_theme
   prev_theme="$(current_theme)"
@@ -948,72 +958,59 @@ main() {
     sync_theme_state
   fi
 
-  # Read the active theme and print exactly once. When `new_theme` was
-  # supplied it's the same value `current_theme` returns now, so the
-  # earlier "set to $new_theme" line was just noise; we print the
-  # canonical active theme regardless of how we got here.
+  # Resolve the active theme (same value whether set or synced above).
   local theme
   theme="$(current_theme)"
   if [[ -z "$theme" ]]; then
-    _err "Theme" "no theme found in $DATA_FILE"
+    printf '%s\n' "${RED:-}error${RESET}: no theme found in $DATA_FILE" >&2
     exit 1
   fi
-  _info "Theme" "$theme"
-  echo ""
 
-  # Regenerate config files with new theme data
+  # Begin the animated step run. ui_steps_begin streams to the dot-ui renderer
+  # on a rich TTY and falls back to plain ui_* lines otherwise; every reload
+  # below reports through _ok/_skip/_err (→ ui_step) for one consistent UI.
+  ui_steps_begin "dot theme" "$theme"
+
+  # Regenerate config files with the new theme data.
+  _info "Chezmoi"
   if [[ "$do_full" == true ]]; then
-    _info "Chezmoi" "full apply..."
     if chezmoi apply --force 2>/dev/null || chezmoi apply; then
       _ok "Chezmoi" "full apply completed"
     else
-      _err "Chezmoi" "apply failed — rolling back to $prev_theme"
+      _err "Chezmoi" "apply failed"
       write_theme "$prev_theme"
       apply_theme_configs
+      ui_steps_end "rolled back to $prev_theme"
       return 1
     fi
   else
     apply_theme_configs
   fi
   sync_ghostty_macos_config
-  echo ""
 
-  # Signal running applications to reload
-  reload_ghostty
-  reload_tmux
-  reload_niri
-  reload_desktop "$theme"
-  reload_dms
-  reload_wallpaper
-  reload_browsers "$theme"
-  reload_nvim "$theme"
+  # Signal running applications to reload. Each `_info <Label>` starts the step
+  # (spinner); the reload's terminal _ok/_skip/_err/_na resolves it. Labels
+  # match the reload functions' status labels so ids line up.
+  _info "Ghostty"; reload_ghostty
+  _info "Tmux"; reload_tmux
+  _info "Niri"; reload_niri
+  _info "Desktop"; reload_desktop "$theme"
+  _info "DMS"; reload_dms
+  _info "Wallpaper"; reload_wallpaper
+  _info "Browsers"; reload_browsers "$theme"
+  _info "Neovim"; reload_nvim "$theme"
 
-  # Summary
-  echo ""
-  local elapsed
-  elapsed="$(_elapsed_ms)"
-  local reloaded_count=${#RELOADED[@]}
-  local skipped_count=${#SKIPPED[@]}
-
-  if [[ $reloaded_count -gt 0 ]]; then
-    local apps
-    apps="$(
+  # Summary line — finalises the run (and, in rich mode, waits for the render).
+  local summary
+  if [[ ${#RELOADED[@]} -gt 0 ]]; then
+    summary="reloaded $(
       IFS=', '
       echo "${RELOADED[*]}"
     )"
-    printf '%s\n' "${GREEN}${BOLD}Done${RESET} ${DIM}in ${elapsed}ms${RESET} — reloaded ${BOLD}${apps}${RESET}"
   else
-    printf '%s\n' "${YELLOW}${BOLD}Done${RESET} ${DIM}in ${elapsed}ms${RESET} — no running apps to reload"
+    summary="no running apps to reload"
   fi
-
-  if [[ $skipped_count -gt 0 ]]; then
-    local skips
-    skips="$(
-      IFS=', '
-      echo "${SKIPPED[*]}"
-    )"
-    printf '%s\n' "${DIM}Skipped: ${skips}${RESET}"
-  fi
+  ui_steps_end "$summary"
 }
 
 main "$@"
