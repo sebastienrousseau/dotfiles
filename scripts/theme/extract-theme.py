@@ -362,19 +362,37 @@ def _macos_accent_from_hue(hue: float) -> int:
     return 5       # Purple / indigo (300–345)
 
 
+def _env_hex(key: str, fallback: str) -> str:
+    """A #rrggbb value from env, or the fallback when unset/invalid."""
+    v = os.environ.get(key, "")
+    if len(v) == 7 and v[0] == "#":
+        try:
+            hex_to_rgb(v)
+            return v
+        except ValueError:
+            pass
+    return fallback
+
+
 def _compute_bg_fg(clusters, is_dark):
-    """Select background and foreground from clustered colors."""
-    sorted_by_L = sorted(clusters, key=lambda c: c[0][0])
+    """Terminal background/foreground — fixed, engineered neutrals per mode.
+
+    Deliberately NOT derived from the wallpaper: a terminal wants a
+    high-contrast, low-eye-strain surface that stays stable across themes.
+    Dark mode uses a deep neutral grey with off-white text; light mode a warm
+    paper cream with charcoal text. The wallpaper still drives the accent and
+    the 16 ANSI colours (which are computed against this bg for contrast).
+    Override per mode via DOTFILES_TERM_BG_DARK / _FG_DARK / _BG_LIGHT /
+    _FG_LIGHT.
+    """
+    _ = clusters  # bg/fg no longer wallpaper-derived
     if is_dark:
-        bg_lab = sorted_by_L[0][0]
-        bg_lab = (min(bg_lab[0], 15.0), bg_lab[1] * 0.3, bg_lab[2] * 0.3)
-        fg_lab = (88.0, bg_lab[1] * 0.1, bg_lab[2] * 0.1)
+        bg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_BG_DARK", "#1e1e2e"))
+        fg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_FG_DARK", "#d4d4d4"))
     else:
-        bg_lab = sorted_by_L[-1][0]
-        bg_lab = (max(bg_lab[0], 92.0), bg_lab[1] * 0.15, bg_lab[2] * 0.15)
-        fg_lab = (18.0, bg_lab[1] * 0.15, bg_lab[2] * 0.15)
-    bg_rgb = lab_to_rgb(*bg_lab)
-    fg_rgb = ensure_contrast(lab_to_rgb(*fg_lab), bg_rgb, 7.0, is_dark)
+        bg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_BG_LIGHT", "#fbf1c7"))
+        fg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_FG_LIGHT", "#3c3836"))
+    bg_lab = rgb_to_lab(*bg_rgb)
     return bg_lab, bg_rgb, fg_rgb
 
 
@@ -444,8 +462,13 @@ def _build_ansi_color(base_lab, accent_lab, bg_rgb, is_dark):
         # never darker than the normal (matches Apple's light ANSI ramp,
         # where brights read as more saturated, not muddier).
         bright = (normal[0], normal[1] * 1.25, normal[2] * 1.25)
-        bright_min = 3.0
-    normal_rgb = ensure_contrast(lab_to_rgb(*normal), bg_rgb, 3.0, is_dark)
+        bright_min = 4.5
+    # WCAG AA (4.5:1) for the chromatic slots so coloured text (paths, syntax)
+    # stays readable — on a light bg the natural contrast landed ~3.9:1, which
+    # washed out. Dark mode keeps its lower floor (light text on dark reads at
+    # a lower ratio without straining).
+    normal_min = 3.0 if is_dark else 4.5
+    normal_rgb = ensure_contrast(lab_to_rgb(*normal), bg_rgb, normal_min, is_dark)
     bright_rgb = ensure_contrast(lab_to_rgb(*bright), bg_rgb, bright_min, is_dark)
     return normal_rgb, bright_rgb
 
@@ -480,14 +503,15 @@ def _structural_colors(bg_lab, bg_rgb, is_dark):
             ensure_contrast(lab_to_rgb(bg_lab[0] + 25, bg_lab[1], bg_lab[2]), bg_rgb, 2.5, True),
             ensure_contrast(lab_to_rgb(90.0, bg_lab[1] * 0.05, bg_lab[2] * 0.05), bg_rgb, 7.0, True),
         )
+    # Light bg: the whole neutral ramp must stay READABLE — a near-white c7/c15
+    # is invisible on cream. Keep them progressively lighter (c0<c8<c7<c15) but
+    # never below AA, so "white"/"bright-white" text is a legible grey rather
+    # than vanishing.
     return (
         ensure_contrast(lab_to_rgb(18.0, bg_lab[1] * 0.2, bg_lab[2] * 0.2), bg_rgb, 7.0, False),
-        ensure_contrast(lab_to_rgb(bg_lab[0] - 8, bg_lab[1], bg_lab[2]), bg_rgb, 1.3, False),
+        ensure_contrast(lab_to_rgb(50.0, bg_lab[1] * 0.15, bg_lab[2] * 0.15), bg_rgb, 4.5, False),
         ensure_contrast(lab_to_rgb(35.0, bg_lab[1] * 0.2, bg_lab[2] * 0.2), bg_rgb, 4.5, False),
-        # c15 bright white — the lightest structural tone, near-white. On a
-        # light bg this is intentionally low-contrast; readable text uses
-        # fg/c0. Mirrors the dark ramp, where c15 is likewise the lightest.
-        lab_to_rgb(min(max(bg_lab[0] + 2.0, 96.0), 100.0), bg_lab[1] * 0.05, bg_lab[2] * 0.05),
+        ensure_contrast(lab_to_rgb(55.0, bg_lab[1] * 0.1, bg_lab[2] * 0.1), bg_rgb, 4.5, False),
     )
 
 
