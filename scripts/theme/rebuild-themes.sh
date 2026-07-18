@@ -229,11 +229,15 @@ cleanup_dynamic_entries() {
   done
 }
 
-# Discover in order: system first, custom overrides
-case "$(uname -s)" in
-  Darwin) discover_macos_system ;;
-  Linux) discover_linux_system ;;
-esac
+# Discover in order: system first, custom overrides. System (OS-shipped)
+# wallpapers are opt-in — most users only want themes from their own
+# wallpapers. Enable the ~100 built-in ones with DOTFILES_THEME_SYSTEM=1.
+if [[ "${DOTFILES_THEME_SYSTEM:-0}" == "1" ]]; then
+  case "$(uname -s)" in
+    Darwin) discover_macos_system ;;
+    Linux) discover_linux_system ;;
+  esac
+fi
 discover_custom
 cleanup_dynamic_entries
 
@@ -292,7 +296,10 @@ done
 # the file count and reads as wrong ("74 files → 148 custom"). Collapse
 # -dark/-light back to the family so the numbers match what's on disk
 # and what `dot theme list` shows, and report the theme total separately.
-declare -A sys_fam cust_fam
+# Explicit empty init: a `declare -A x` that never gets a key still trips
+# `set -u` on ${#x[@]} (even in bash 5) — happens now that system wallpapers
+# are opt-in and sys_fam can stay empty.
+declare -A sys_fam=() cust_fam=()
 for name in "${!WP_SOURCE[@]}"; do
   family="${name%-dark}"
   family="${family%-light}"
@@ -393,7 +400,12 @@ echo "Assembling themes.toml..."
 
 HEADER
 
-  for cache_file in "$CACHE_DIR"/*.toml; do
+  # Assemble ONLY the wallpapers discovered this run, not every file left in
+  # the cache. This drops themes for wallpapers no longer present (e.g. system
+  # wallpapers once DOTFILES_THEME_SYSTEM is turned off) instead of letting
+  # stale cache entries pile up in themes.toml.
+  for name in $(printf '%s\n' "${!WALLPAPERS[@]}" | sort); do
+    cache_file="$CACHE_DIR/${name}.toml"
     [[ -f "$cache_file" ]] || continue
     echo ""
     cat "$cache_file"
