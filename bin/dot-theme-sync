@@ -392,6 +392,30 @@ reload_ghostty() {
   _skip "Ghostty" "config regenerated but no runtime reload target was found"
 }
 
+reload_kitty() {
+  # kitty reloads its config (colours included) live on SIGUSR1 — applied to
+  # every OS window, no remote-control socket required.
+  local pids
+  pids="$(pgrep -x kitty 2>/dev/null || true)"
+  if [[ -z "$pids" ]]; then
+    SKIPPED+=("kitty")
+    _skip "Kitty" "not running"
+    return
+  fi
+  local sent=0 pid
+  while IFS= read -r pid; do
+    [[ -n "$pid" ]] || continue
+    kill -SIGUSR1 "$pid" 2>/dev/null && sent=1
+  done <<<"$pids"
+  if [[ "$sent" == "1" ]]; then
+    RELOADED+=("kitty")
+    _ok "Kitty" "SIGUSR1 config reload"
+  else
+    SKIPPED+=("kitty")
+    _skip "Kitty" "reload signal not delivered"
+  fi
+}
+
 reload_tmux() {
   if ! command -v tmux &>/dev/null; then
     SKIPPED+=("tmux")
@@ -992,6 +1016,7 @@ main() {
   # (spinner); the reload's terminal _ok/_skip/_err/_na resolves it. Labels
   # match the reload functions' status labels so ids line up.
   _info "Ghostty"; reload_ghostty
+  _info "Kitty"; reload_kitty
   _info "Tmux"; reload_tmux
   _info "Niri"; reload_niri
   _info "Desktop"; reload_desktop "$theme"
