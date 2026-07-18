@@ -441,11 +441,21 @@ reload_tmux() {
   # sessions only repaint on the next status-interval tick (up to 5s), which
   # reads as "existing sessions don't refresh".
   local sockdir cl sock reloaded=0
-  sockdir="${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)"
   local -a socks=()
-  local s
+  local s existing dup
+  # The caller's OWN server first ($TMUX = "socket,pid,session"). This guarantees
+  # we hit the exact tmux the user is attached to, even when its socket lives
+  # outside the conventional dir — which is the case that made a theme switch
+  # appear to skip the running session entirely.
+  if [[ -n "${TMUX:-}" && -S "${TMUX%%,*}" ]]; then
+    socks+=("${TMUX%%,*}")
+  fi
+  sockdir="${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)"
   for s in "$sockdir"/*; do
-    [[ -S "$s" ]] && socks+=("$s")
+    [[ -S "$s" ]] || continue
+    dup=0
+    for existing in "${socks[@]}"; do [[ "$existing" == "$s" ]] && dup=1; done
+    [[ $dup -eq 0 ]] && socks+=("$s")
   done
   # Fall back to the default socket if enumeration found nothing (non-standard
   # TMUX_TMPDIR, or a socket outside the conventional dir).
@@ -455,8 +465,10 @@ reload_tmux() {
     [[ -n "$sock" ]] && tmuxc=(tmux -S "$sock")
     "${tmuxc[@]}" list-sessions &>/dev/null || continue
     "${tmuxc[@]}" source-file "$conf" &>/dev/null || true
+    # Full redraw (not just -S): a stale/frozen client won't repaint on a
+    # status-only refresh.
     while IFS= read -r cl; do
-      [[ -n "$cl" ]] && "${tmuxc[@]}" refresh-client -S -t "$cl" 2>/dev/null || true
+      [[ -n "$cl" ]] && "${tmuxc[@]}" refresh-client -t "$cl" 2>/dev/null || true
     done < <("${tmuxc[@]}" list-clients -F '#{client_name}' 2>/dev/null)
     reloaded=1
   done
