@@ -768,6 +768,27 @@ ui_table_end() {
     return 0
   fi
 
+  # Preferred: a themed dot-ui table (matches the active wallpaper). Buffered
+  # data, static render — safe, no terminal takeover. Falls through to gum /
+  # printf when dot-ui is absent or any opt-out is set.
+  if command -v dot-ui >/dev/null 2>&1 &&
+    [[ -t 1 ]] &&
+    [[ "${DOTFILES_NO_TUI:-0}" != "1" ]] &&
+    [[ "${DOTFILES_ACCESSIBILITY:-0}" != "1" ]] &&
+    [[ -z "${NO_COLOR:-}" ]]; then
+    _ui_export_theme_colors
+    local _hdr IFS=$'\x1f'
+    _hdr="${_UI_TABLE_HEADERS[*]}"
+    if {
+      printf '%s\n' "$_hdr"
+      printf '%s\n' "${_UI_TABLE_ROWS[@]}"
+    } | dot-ui table 2>/dev/null; then
+      _UI_TABLE_HEADERS=()
+      _UI_TABLE_ROWS=()
+      return 0
+    fi
+  fi
+
   local use_gum=0
   if command -v gum >/dev/null 2>&1 &&
     [[ -t 1 ]] &&

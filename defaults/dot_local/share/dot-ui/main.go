@@ -45,6 +45,12 @@ func dispatch(args []string, stdout, stderr io.Writer) int {
 			return 1
 		}
 		return 0
+	case "table":
+		if err := runTable(LoadPalette(), os.Stdin, os.Stdout); err != nil {
+			fmt.Fprintln(stderr, "dot-ui table:", err)
+			return 1
+		}
+		return 0
 	default:
 		// Reserved / unknown subcommand — non-zero so the bash façade uses
 		// its plain fallback instead of assuming rich output happened.
