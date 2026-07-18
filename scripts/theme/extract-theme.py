@@ -339,20 +339,27 @@ def _nvim_from_hue(hue: float, is_dark: bool) -> Tuple[str, str]:
 
 
 def _macos_accent_from_hue(hue: float) -> int:
-    """Map accent hue angle to macOS accent color integer."""
-    if hue < 30 or hue >= 345:
+    """Map a CIELAB hue angle to a macOS accent-colour integer.
+
+    Boundaries are calibrated to the CIELAB hues of Apple's own accent
+    swatches (not HSL): red≈36°, orange≈67°, yellow≈87°, green≈144°,
+    blue≈287°, purple≈317°. The previous HSL-style cutoffs pushed blue
+    accents (~283°) into Purple and purple into Pink.
+    """
+    hue = hue % 360
+    if hue < 15 or hue >= 345:
+        return 6   # Pink / magenta
+    if hue < 50:
         return 0   # Red
-    if hue < 60:
+    if hue < 77:
         return 1   # Orange
-    if hue < 105:
+    if hue < 110:
         return 2   # Yellow
-    if hue < 165:
+    if hue < 200:
         return 3   # Green
-    if hue < 255:
-        return 4   # Blue
     if hue < 300:
-        return 5   # Purple
-    return 6       # Pink
+        return 4   # Blue (incl. teal-blue and navy)
+    return 5       # Purple / indigo (300–345)
 
 
 def _compute_bg_fg(clusters, is_dark):
@@ -422,16 +429,24 @@ def _compute_panel_border(bg_lab, bg_rgb, is_dark):
 
 def _build_ansi_color(base_lab, accent_lab, bg_rgb, is_dark):
     """Build normal + bright ANSI variant from a base Lab color."""
-    if is_dark:
-        normal_L = max(55.0, min(75.0, base_lab[0]))
-        bright_L = normal_L + 12
-    else:
-        normal_L = max(30.0, min(50.0, base_lab[0]))
-        bright_L = normal_L - 8
+    normal_L = (
+        max(55.0, min(75.0, base_lab[0])) if is_dark
+        else max(30.0, min(50.0, base_lab[0]))
+    )
     normal = adjust_lightness(base_lab, normal_L)
-    bright = adjust_lightness(base_lab, bright_L)
+    if is_dark:
+        # Dark bg: the bright variant pops by getting lighter.
+        bright = adjust_lightness(base_lab, normal_L + 12)
+        bright_min = 4.5
+    else:
+        # Light bg: a lighter bright would wash out against near-white, so
+        # brighten by vividness at equal lightness instead — the bright is
+        # never darker than the normal (matches Apple's light ANSI ramp,
+        # where brights read as more saturated, not muddier).
+        bright = (normal[0], normal[1] * 1.25, normal[2] * 1.25)
+        bright_min = 3.0
     normal_rgb = ensure_contrast(lab_to_rgb(*normal), bg_rgb, 3.0, is_dark)
-    bright_rgb = ensure_contrast(lab_to_rgb(*bright), bg_rgb, 4.5, is_dark)
+    bright_rgb = ensure_contrast(lab_to_rgb(*bright), bg_rgb, bright_min, is_dark)
     return normal_rgb, bright_rgb
 
 
@@ -469,7 +484,10 @@ def _structural_colors(bg_lab, bg_rgb, is_dark):
         ensure_contrast(lab_to_rgb(18.0, bg_lab[1] * 0.2, bg_lab[2] * 0.2), bg_rgb, 7.0, False),
         ensure_contrast(lab_to_rgb(bg_lab[0] - 8, bg_lab[1], bg_lab[2]), bg_rgb, 1.3, False),
         ensure_contrast(lab_to_rgb(35.0, bg_lab[1] * 0.2, bg_lab[2] * 0.2), bg_rgb, 4.5, False),
-        ensure_contrast(lab_to_rgb(8.0, 0, 0), bg_rgb, 10.0, False),
+        # c15 bright white — the lightest structural tone, near-white. On a
+        # light bg this is intentionally low-contrast; readable text uses
+        # fg/c0. Mirrors the dark ramp, where c15 is likewise the lightest.
+        lab_to_rgb(min(max(bg_lab[0] + 2.0, 96.0), 100.0), bg_lab[1] * 0.05, bg_lab[2] * 0.05),
     )
 
 
