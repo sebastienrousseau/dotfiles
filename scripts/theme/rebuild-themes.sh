@@ -355,11 +355,20 @@ if [[ $TOTAL_WORK -gt 0 ]]; then
   wait
 fi
 
-# Count results
-GENERATED=$(find "$CACHE_DIR" -name "*.toml" -newer "$0" 2>/dev/null | wc -l | tr -d ' ')
-FAILED=$((TOTAL_WORK - GENERATED))
+# Count results — how many of THIS run's work items produced a cache file.
+# (The old `find -newer "$0"` counted every cache file newer than the script,
+# so when everything was cached FAILED went negative.)
+GENERATED=0
+FAILED=0
+for name in "${WORK[@]}"; do
+  if [[ -f "$CACHE_DIR/${name}.toml" ]]; then
+    GENERATED=$((GENERATED + 1))
+  else
+    FAILED=$((FAILED + 1))
+  fi
+done
 echo ""
-echo "Results: $TOTAL_WORK processed, $CACHED cached, $FAILED failed"
+echo "Results: $GENERATED generated, $CACHED cached, $FAILED failed"
 
 # ---------------------------------------------------------------------------
 # Assemble themes.toml
@@ -391,7 +400,9 @@ HEADER
   done
 } >"$THEMES_FILE"
 
-theme_count=$(grep -c '^\[themes\.' "$THEMES_FILE" | head -1)
-echo "  Written: $THEMES_FILE ($theme_count theme sections)"
+# Count top-level [themes.NAME] blocks only — not the .term/.ui/.app
+# subsections (which inflated the tally ~4x).
+theme_count=$(grep -cE '^\[themes\.[a-z0-9-]+\]$' "$THEMES_FILE")
+echo "  Written: $THEMES_FILE ($theme_count themes)"
 echo ""
 echo "Done. Run 'dot theme list' to see available themes."
