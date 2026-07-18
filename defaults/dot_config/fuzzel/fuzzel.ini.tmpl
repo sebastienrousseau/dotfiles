@@ -1,5 +1,5 @@
-{{- $t := index .themes (default "bloom-dark" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "bloom-dark" -}}{{- end }}
+{{- $t := index .themes (default "fallback-dark" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "fallback-dark" -}}{{- end }}
 [main]
 font={{ .terminal_font_family }}:size={{ .terminal_font_size }}
 terminal=ghostty

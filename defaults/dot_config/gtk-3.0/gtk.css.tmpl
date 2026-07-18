@@ -1,6 +1,6 @@
 {{- /* GTK-3.0 custom CSS — colors from SSOT theme manifest */ -}}
-{{- $t := index .themes (default "bloom-dark" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "bloom-dark" -}}{{- end -}}
+{{- $t := index .themes (default "fallback-dark" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "fallback-dark" -}}{{- end -}}
 {{- $is_dark := eq $t.mode "dark" -}}
 
 /* GTK3 Custom Styling for {{ .theme }} */

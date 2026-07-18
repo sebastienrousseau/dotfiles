@@ -135,10 +135,14 @@ wallpaper_for_theme() {
       found && /^wallpaper/ { sub(/.*= *"/, ""); sub(/".*/, ""); print; exit }
     ' "$themes_file")"
     if [[ -n "$stored_wp" ]]; then
-      # Cross-platform: resolve macOS paths on Linux
+      # Home-relative form (current generator): ~/Pictures/... → $HOME/Pictures/...
+      if [[ "$stored_wp" == "~/"* ]]; then
+        stored_wp="${HOME}/${stored_wp#\~/}"
+      fi
+      # Cross-platform: resolve legacy absolute macOS paths on Linux
       if [[ ! -f "$stored_wp" ]]; then
         if [[ "$stored_wp" == /Users/* ]]; then
-          # /Users/<user>/Pictures/... → $HOME/Pictures/...
+          # /Users/<user>/Pictures/... → $HOME/Pictures/... (pre-relativize data)
           stored_wp="${HOME}/${stored_wp#/Users/*/}"
         elif [[ "$stored_wp" == /System/* ]]; then
           # macOS system wallpapers don't exist on Linux — skip to next fallback

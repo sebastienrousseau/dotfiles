@@ -4,8 +4,8 @@
 
 /* global user_pref */
 
-{{- $t := index .themes (default "bloom-dark" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "bloom-dark" -}}{{- end -}}
+{{- $t := index .themes (default "fallback-dark" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "fallback-dark" -}}{{- end -}}
 
 // Disable telemetry
 user_pref("toolkit.telemetry.enabled", false);

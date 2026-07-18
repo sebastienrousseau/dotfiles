@@ -410,6 +410,130 @@ HEADER
     echo ""
     cat "$cache_file"
   done
+
+  # Synthetic fallback themes — always emitted, never wallpaper-derived.
+  # Every theme template degrades to `fallback-dark` when `.theme` is unset or
+  # names a theme absent from this file. Because these are re-emitted on every
+  # rebuild, a regeneration that drops any wallpaper theme can never break the
+  # fallback (unlike hardcoding a wallpaper theme like the old big-sur-dark).
+  # switch.sh hides the `fallback` family from user-facing theme lists.
+  cat <<'FALLBACK'
+
+# ─────────────────────────────────────────────────────────────────────
+# Synthetic fallback themes (NOT wallpaper-derived, NEVER user-selectable).
+# ─────────────────────────────────────────────────────────────────────
+
+[themes.fallback-dark]
+mode = "dark"
+family = "fallback"
+macos_accent = 4
+wallpaper = ""
+source = "custom"
+
+[themes.fallback-dark.term]
+bg = "#1e1e2e"
+fg = "#d4d4d4"
+cursor = "#455c67"
+cursor_text = "#1e1e2e"
+sel_bg = "#394145"
+sel_fg = "#d4d4d4"
+c0  = "#3c3c4d"
+c1  = "#997d7a"
+c2  = "#479174"
+c3  = "#8a836f"
+c4  = "#5f86b7"
+c5  = "#917e8e"
+c6  = "#5c8d82"
+c7  = "#b9b8bb"
+c8  = "#605f72"
+c9  = "#bf9b97"
+c10 = "#67b293"
+c11 = "#aba389"
+c12 = "#7fa6d9"
+c13 = "#b49cb0"
+c14 = "#7bada1"
+c15 = "#e2e2e3"
+
+[themes.fallback-dark.ui]
+accent = "#455c67"
+accent_text = "#ffffff"
+error = "#997d7a"
+warning = "#8a836f"
+success = "#479174"
+info = "#5f86b7"
+panel = "#242435"
+border = "#302f38"
+
+[themes.fallback-dark.app]
+nvim = "tokyonight"
+nvim_style = "night"
+lualine = "tokyonight"
+gtk_theme = "Adwaita-dark"
+gtk_icon = "Papirus-Dark"
+gnome_shell = ""
+gnome_gtk = "Adwaita-dark"
+vscode = "Tokyonight Mocha"
+vscode_dark = "Tokyonight Mocha"
+vscode_light = "Tokyonight Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_mocha"
+
+
+[themes.fallback-light]
+mode = "light"
+family = "fallback"
+macos_accent = 4
+wallpaper = ""
+source = "custom"
+
+[themes.fallback-light.term]
+bg = "#fbf1c7"
+fg = "#3c3836"
+cursor = "#2c5989"
+cursor_text = "#fbf1c7"
+sel_bg = "#c6cfe0"
+sel_fg = "#3c3836"
+c0  = "#2e2c26"
+c1  = "#7d3d39"
+c2  = "#205a48"
+c3  = "#5b501d"
+c4  = "#2b527d"
+c5  = "#6e4069"
+c6  = "#25554c"
+c7  = "#6f6d67"
+c8  = "#54524b"
+c9  = "#853733"
+c10 = "#025c46"
+c11 = "#5b500b"
+c12 = "#0d5388"
+c13 = "#743b6f"
+c14 = "#15564b"
+c15 = "#979693"
+
+[themes.fallback-light.ui]
+accent = "#2c5989"
+accent_text = "#ffffff"
+error = "#7d3d39"
+warning = "#5b501d"
+success = "#205a48"
+info = "#2b527d"
+panel = "#f2e8bf"
+border = "#e3e0d3"
+
+[themes.fallback-light.app]
+nvim = "catppuccin"
+nvim_style = "latte"
+lualine = "catppuccin"
+gtk_theme = "Adwaita"
+gtk_icon = "Papirus-Light"
+gnome_shell = ""
+gnome_gtk = "Adwaita"
+vscode = "Catppuccin Latte"
+vscode_dark = "Catppuccin Mocha"
+vscode_light = "Catppuccin Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_latte"
+FALLBACK
 } >"$THEMES_FILE"
 
 # Count top-level [themes.NAME] blocks only — not the .term/.ui/.app

@@ -78,15 +78,33 @@ fi
 # Theme Database
 # =============================================================================
 
-# Default preferences
-DEFAULT_DARK="macos-monterey-dark"
-DEFAULT_LIGHT="macos-monterey-light"
+# Default preferences (must be present keys in themes.toml — the theme
+# regeneration removed the old macos-monterey-* names; bloom is the current
+# default family and always ships a dark+light pair).
+DEFAULT_DARK="bloom-dark"
+DEFAULT_LIGHT="bloom-light"
+
+# Machine-local chezmoi override (chezmoi.toml [data] theme) takes precedence
+# over .chezmoidata.toml when rendering, so it is the authoritative "current"
+# value. Kept in sync by dot-theme-sync's write_theme().
+CHEZMOI_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
 
 # =============================================================================
 # Theme Functions
 # =============================================================================
 
 current_theme() {
+  # Prefer the machine-local override (what chezmoi actually renders), so
+  # `dot theme current` never disagrees with the deployed configs. Fall back
+  # to the repo default in .chezmoidata.toml when no override is set.
+  if [[ -f "$CHEZMOI_CFG" ]]; then
+    local override
+    override="$(awk -F'"' '/^theme =/ {print $2}' "$CHEZMOI_CFG" | head -n 1)"
+    if [[ -n "$override" ]]; then
+      echo "$override"
+      return 0
+    fi
+  fi
   awk -F'"' '/^theme =/ {print $2}' "$DATA_FILE" | head -n 1
 }
 
@@ -124,6 +142,9 @@ paired_families() {
   done < <(all_theme_names)
 
   for family in $(printf '%s\n' "${!has_dark[@]}" | sort); do
+    # `fallback` is a synthetic safety theme (see themes.toml) that templates
+    # degrade to when .theme is unset/invalid — never a user-selectable one.
+    [[ "$family" == "fallback" ]] && continue
     [[ -n "${has_light[$family]+x}" ]] && echo "$family"
   done
 }

@@ -9,8 +9,8 @@
     {{- $hw = $m -}}
   {{- end -}}
 {{- end -}}
-{{- $t := index .themes (default "bloom-dark" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "bloom-dark" -}}{{- end }}
+{{- $t := index .themes (default "fallback-dark" .theme) -}}
+{{- if not $t -}}{{- $t = index .themes "fallback-dark" -}}{{- end }}
 config-notification {
     disable-failed
 }

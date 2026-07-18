@@ -11,9 +11,10 @@ machine = ""
 # Visual theme — must be a key in .chezmoidata/themes.toml. Templates
 # that consult `.theme` (dot_gitconfig.tmpl, dot_config/alacritty/
 # alacritty.toml.tmpl, etc.) crash with `no entry for key` when this
-# names a theme that isn't defined. Those templates fall back to
-# `bloom-dark` (a valid key) if `.theme` is unset or unknown, so an
-# invalid value degrades gracefully rather than aborting the render.
+# names a theme that isn't defined. Those templates fall back to the
+# synthetic `fallback-dark` theme (always present — re-emitted by
+# rebuild-themes.sh, never wallpaper-derived) if `.theme` is unset or
+# unknown, so an invalid value degrades gracefully rather than aborting.
 theme = "bloom-light"
 
 # Terminal settings

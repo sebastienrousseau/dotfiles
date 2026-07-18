@@ -720,7 +720,15 @@ def main():
     # Generate theme
     theme = generate_theme(clusters, name, is_dark)
     wp_base = args.image.split("[")[0] if "[" in args.image else args.image
-    theme["wallpaper"] = os.path.abspath(wp_base)
+    wp_abs = os.path.abspath(wp_base)
+    # Store home-relative with a `~` so the committed themes.toml is not tied to
+    # one machine's username. Consumers (wallpaper-sync.sh) expand `~/`. System
+    # wallpapers (/System/..., /usr/share/...) stay absolute — identical on
+    # every host anyway.
+    home = os.path.expanduser("~")
+    if wp_abs == home or wp_abs.startswith(home + os.sep):
+        wp_abs = "~" + wp_abs[len(home):]
+    theme["wallpaper"] = wp_abs
     theme["source"] = args.source
 
     # Output

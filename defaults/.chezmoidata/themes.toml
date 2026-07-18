@@ -15,7 +15,7 @@
 mode = "dark"
 family = "altai"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Altai.heic"
+wallpaper = "~/Pictures/Wallpapers/Altai.heic"
 source = "custom"
 
 [themes.altai-dark.term]
@@ -70,7 +70,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "altai"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Altai.heic"
+wallpaper = "~/Pictures/Wallpapers/Altai.heic"
 source = "custom"
 
 [themes.altai-light.term]
@@ -125,7 +125,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "berlin"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Berlin.heic"
+wallpaper = "~/Pictures/Wallpapers/Berlin.heic"
 source = "custom"
 
 [themes.berlin-dark.term]
@@ -180,7 +180,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "berlin"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Berlin.heic"
+wallpaper = "~/Pictures/Wallpapers/Berlin.heic"
 source = "custom"
 
 [themes.berlin-light.term]
@@ -235,7 +235,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "bloom"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Bloom.heic"
+wallpaper = "~/Pictures/Wallpapers/Bloom.heic"
 source = "custom"
 
 [themes.bloom-dark.term]
@@ -290,7 +290,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "bloom"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Bloom.heic"
+wallpaper = "~/Pictures/Wallpapers/Bloom.heic"
 source = "custom"
 
 [themes.bloom-light.term]
@@ -345,7 +345,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "canary"
 macos_accent = 2
-wallpaper = "/Users/seb/Pictures/Wallpapers/Canary.heic"
+wallpaper = "~/Pictures/Wallpapers/Canary.heic"
 source = "custom"
 
 [themes.canary-dark.term]
@@ -400,7 +400,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "canary"
 macos_accent = 2
-wallpaper = "/Users/seb/Pictures/Wallpapers/Canary.heic"
+wallpaper = "~/Pictures/Wallpapers/Canary.heic"
 source = "custom"
 
 [themes.canary-light.term]
@@ -455,7 +455,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "capitan"
 macos_accent = 1
-wallpaper = "/Users/seb/Pictures/Wallpapers/Capitan.heic"
+wallpaper = "~/Pictures/Wallpapers/Capitan.heic"
 source = "custom"
 
 [themes.capitan-dark.term]
@@ -510,7 +510,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "capitan"
 macos_accent = 1
-wallpaper = "/Users/seb/Pictures/Wallpapers/Capitan.heic"
+wallpaper = "~/Pictures/Wallpapers/Capitan.heic"
 source = "custom"
 
 [themes.capitan-light.term]
@@ -565,7 +565,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "catalina"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Catalina.heic"
+wallpaper = "~/Pictures/Wallpapers/Catalina.heic"
 source = "custom"
 
 [themes.catalina-dark.term]
@@ -620,7 +620,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "catalina"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Catalina.heic"
+wallpaper = "~/Pictures/Wallpapers/Catalina.heic"
 source = "custom"
 
 [themes.catalina-light.term]
@@ -675,7 +675,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "coast"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Coast.heic"
+wallpaper = "~/Pictures/Wallpapers/Coast.heic"
 source = "custom"
 
 [themes.coast-dark.term]
@@ -730,7 +730,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "coast"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Coast.heic"
+wallpaper = "~/Pictures/Wallpapers/Coast.heic"
 source = "custom"
 
 [themes.coast-light.term]
@@ -785,7 +785,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "comet"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Comet.heic"
+wallpaper = "~/Pictures/Wallpapers/Comet.heic"
 source = "custom"
 
 [themes.comet-dark.term]
@@ -840,7 +840,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "comet"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Comet.heic"
+wallpaper = "~/Pictures/Wallpapers/Comet.heic"
 source = "custom"
 
 [themes.comet-light.term]
@@ -895,7 +895,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "cove"
 macos_accent = 2
-wallpaper = "/Users/seb/Pictures/Wallpapers/Cove.heic"
+wallpaper = "~/Pictures/Wallpapers/Cove.heic"
 source = "custom"
 
 [themes.cove-dark.term]
@@ -950,7 +950,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "cove"
 macos_accent = 2
-wallpaper = "/Users/seb/Pictures/Wallpapers/Cove.heic"
+wallpaper = "~/Pictures/Wallpapers/Cove.heic"
 source = "custom"
 
 [themes.cove-light.term]
@@ -1005,7 +1005,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "dahlia"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Dahlia.heic"
+wallpaper = "~/Pictures/Wallpapers/Dahlia.heic"
 source = "custom"
 
 [themes.dahlia-dark.term]
@@ -1060,7 +1060,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "dahlia"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Dahlia.heic"
+wallpaper = "~/Pictures/Wallpapers/Dahlia.heic"
 source = "custom"
 
 [themes.dahlia-light.term]
@@ -1115,7 +1115,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "daisy"
 macos_accent = 3
-wallpaper = "/Users/seb/Pictures/Wallpapers/Daisy.heic"
+wallpaper = "~/Pictures/Wallpapers/Daisy.heic"
 source = "custom"
 
 [themes.daisy-dark.term]
@@ -1170,7 +1170,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "daisy"
 macos_accent = 3
-wallpaper = "/Users/seb/Pictures/Wallpapers/Daisy.heic"
+wallpaper = "~/Pictures/Wallpapers/Daisy.heic"
 source = "custom"
 
 [themes.daisy-light.term]
@@ -1225,7 +1225,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "denim"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Denim.heic"
+wallpaper = "~/Pictures/Wallpapers/Denim.heic"
 source = "custom"
 
 [themes.denim-dark.term]
@@ -1280,7 +1280,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "denim"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Denim.heic"
+wallpaper = "~/Pictures/Wallpapers/Denim.heic"
 source = "custom"
 
 [themes.denim-light.term]
@@ -1335,7 +1335,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "dune"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Dune.heic"
+wallpaper = "~/Pictures/Wallpapers/Dune.heic"
 source = "custom"
 
 [themes.dune-dark.term]
@@ -1390,7 +1390,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "dune"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Dune.heic"
+wallpaper = "~/Pictures/Wallpapers/Dune.heic"
 source = "custom"
 
 [themes.dune-light.term]
@@ -1445,7 +1445,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "dusk"
 macos_accent = 0
-wallpaper = "/Users/seb/Pictures/Wallpapers/Dusk.heic"
+wallpaper = "~/Pictures/Wallpapers/Dusk.heic"
 source = "custom"
 
 [themes.dusk-dark.term]
@@ -1500,7 +1500,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "dusk"
 macos_accent = 0
-wallpaper = "/Users/seb/Pictures/Wallpapers/Dusk.heic"
+wallpaper = "~/Pictures/Wallpapers/Dusk.heic"
 source = "custom"
 
 [themes.dusk-light.term]
@@ -1555,7 +1555,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "eclipse"
 macos_accent = 0
-wallpaper = "/Users/seb/Pictures/Wallpapers/Eclipse.heic"
+wallpaper = "~/Pictures/Wallpapers/Eclipse.heic"
 source = "custom"
 
 [themes.eclipse-dark.term]
@@ -1610,7 +1610,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "eclipse"
 macos_accent = 0
-wallpaper = "/Users/seb/Pictures/Wallpapers/Eclipse.heic"
+wallpaper = "~/Pictures/Wallpapers/Eclipse.heic"
 source = "custom"
 
 [themes.eclipse-light.term]
@@ -1665,7 +1665,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "facet"
 macos_accent = 3
-wallpaper = "/Users/seb/Pictures/Wallpapers/Facet.heic"
+wallpaper = "~/Pictures/Wallpapers/Facet.heic"
 source = "custom"
 
 [themes.facet-dark.term]
@@ -1720,7 +1720,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "facet"
 macos_accent = 3
-wallpaper = "/Users/seb/Pictures/Wallpapers/Facet.heic"
+wallpaper = "~/Pictures/Wallpapers/Facet.heic"
 source = "custom"
 
 [themes.facet-light.term]
@@ -1775,7 +1775,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "flux"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Flux.heic"
+wallpaper = "~/Pictures/Wallpapers/Flux.heic"
 source = "custom"
 
 [themes.flux-dark.term]
@@ -1830,7 +1830,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "flux"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Flux.heic"
+wallpaper = "~/Pictures/Wallpapers/Flux.heic"
 source = "custom"
 
 [themes.flux-light.term]
@@ -1885,7 +1885,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "forest"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Forest.heic"
+wallpaper = "~/Pictures/Wallpapers/Forest.heic"
 source = "custom"
 
 [themes.forest-dark.term]
@@ -1940,7 +1940,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "forest"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Forest.heic"
+wallpaper = "~/Pictures/Wallpapers/Forest.heic"
 source = "custom"
 
 [themes.forest-light.term]
@@ -1995,7 +1995,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "fuchsia"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Fuchsia.heic"
+wallpaper = "~/Pictures/Wallpapers/Fuchsia.heic"
 source = "custom"
 
 [themes.fuchsia-dark.term]
@@ -2050,7 +2050,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "fuchsia"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Fuchsia.heic"
+wallpaper = "~/Pictures/Wallpapers/Fuchsia.heic"
 source = "custom"
 
 [themes.fuchsia-light.term]
@@ -2105,7 +2105,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "fuji"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Fuji.heic"
+wallpaper = "~/Pictures/Wallpapers/Fuji.heic"
 source = "custom"
 
 [themes.fuji-dark.term]
@@ -2160,7 +2160,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "fuji"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Fuji.heic"
+wallpaper = "~/Pictures/Wallpapers/Fuji.heic"
 source = "custom"
 
 [themes.fuji-light.term]
@@ -2215,7 +2215,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "galaxy"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Galaxy.heic"
+wallpaper = "~/Pictures/Wallpapers/Galaxy.heic"
 source = "custom"
 
 [themes.galaxy-dark.term]
@@ -2270,7 +2270,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "galaxy"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Galaxy.heic"
+wallpaper = "~/Pictures/Wallpapers/Galaxy.heic"
 source = "custom"
 
 [themes.galaxy-light.term]
@@ -2325,7 +2325,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "geisha"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Geisha.heic"
+wallpaper = "~/Pictures/Wallpapers/Geisha.heic"
 source = "custom"
 
 [themes.geisha-dark.term]
@@ -2380,7 +2380,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "geisha"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Geisha.heic"
+wallpaper = "~/Pictures/Wallpapers/Geisha.heic"
 source = "custom"
 
 [themes.geisha-light.term]
@@ -2435,7 +2435,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "granite"
 macos_accent = 1
-wallpaper = "/Users/seb/Pictures/Wallpapers/Granite.heic"
+wallpaper = "~/Pictures/Wallpapers/Granite.heic"
 source = "custom"
 
 [themes.granite-dark.term]
@@ -2490,7 +2490,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "granite"
 macos_accent = 1
-wallpaper = "/Users/seb/Pictures/Wallpapers/Granite.heic"
+wallpaper = "~/Pictures/Wallpapers/Granite.heic"
 source = "custom"
 
 [themes.granite-light.term]
@@ -2545,7 +2545,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "grass"
 macos_accent = 3
-wallpaper = "/Users/seb/Pictures/Wallpapers/Grass.heic"
+wallpaper = "~/Pictures/Wallpapers/Grass.heic"
 source = "custom"
 
 [themes.grass-dark.term]
@@ -2600,7 +2600,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "grass"
 macos_accent = 3
-wallpaper = "/Users/seb/Pictures/Wallpapers/Grass.heic"
+wallpaper = "~/Pictures/Wallpapers/Grass.heic"
 source = "custom"
 
 [themes.grass-light.term]
@@ -2655,7 +2655,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "grove"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Grove.heic"
+wallpaper = "~/Pictures/Wallpapers/Grove.heic"
 source = "custom"
 
 [themes.grove-dark.term]
@@ -2710,7 +2710,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "grove"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Grove.heic"
+wallpaper = "~/Pictures/Wallpapers/Grove.heic"
 source = "custom"
 
 [themes.grove-light.term]
@@ -2765,7 +2765,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "hawaiian"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Hawaiian.heic"
+wallpaper = "~/Pictures/Wallpapers/Hawaiian.heic"
 source = "custom"
 
 [themes.hawaiian-dark.term]
@@ -2820,7 +2820,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "hawaiian"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Hawaiian.heic"
+wallpaper = "~/Pictures/Wallpapers/Hawaiian.heic"
 source = "custom"
 
 [themes.hawaiian-light.term]
@@ -2875,7 +2875,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "helix"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Helix.heic"
+wallpaper = "~/Pictures/Wallpapers/Helix.heic"
 source = "custom"
 
 [themes.helix-dark.term]
@@ -2930,7 +2930,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "helix"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Helix.heic"
+wallpaper = "~/Pictures/Wallpapers/Helix.heic"
 source = "custom"
 
 [themes.helix-light.term]
@@ -2985,7 +2985,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "hydrangea"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Hydrangea.heic"
+wallpaper = "~/Pictures/Wallpapers/Hydrangea.heic"
 source = "custom"
 
 [themes.hydrangea-dark.term]
@@ -3040,7 +3040,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "hydrangea"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Hydrangea.heic"
+wallpaper = "~/Pictures/Wallpapers/Hydrangea.heic"
 source = "custom"
 
 [themes.hydrangea-light.term]
@@ -3095,7 +3095,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "ion"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Ion.heic"
+wallpaper = "~/Pictures/Wallpapers/Ion.heic"
 source = "custom"
 
 [themes.ion-dark.term]
@@ -3150,7 +3150,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "ion"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Ion.heic"
+wallpaper = "~/Pictures/Wallpapers/Ion.heic"
 source = "custom"
 
 [themes.ion-light.term]
@@ -3205,7 +3205,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "iris"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Iris.heic"
+wallpaper = "~/Pictures/Wallpapers/Iris.heic"
 source = "custom"
 
 [themes.iris-dark.term]
@@ -3260,7 +3260,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "iris"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Iris.heic"
+wallpaper = "~/Pictures/Wallpapers/Iris.heic"
 source = "custom"
 
 [themes.iris-light.term]
@@ -3315,7 +3315,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "isles"
 macos_accent = 1
-wallpaper = "/Users/seb/Pictures/Wallpapers/Isles.heic"
+wallpaper = "~/Pictures/Wallpapers/Isles.heic"
 source = "custom"
 
 [themes.isles-dark.term]
@@ -3370,7 +3370,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "isles"
 macos_accent = 1
-wallpaper = "/Users/seb/Pictures/Wallpapers/Isles.heic"
+wallpaper = "~/Pictures/Wallpapers/Isles.heic"
 source = "custom"
 
 [themes.isles-light.term]
@@ -3425,7 +3425,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "lotus"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Lotus.heic"
+wallpaper = "~/Pictures/Wallpapers/Lotus.heic"
 source = "custom"
 
 [themes.lotus-dark.term]
@@ -3480,7 +3480,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "lotus"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Lotus.heic"
+wallpaper = "~/Pictures/Wallpapers/Lotus.heic"
 source = "custom"
 
 [themes.lotus-light.term]
@@ -3535,7 +3535,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "mavericks"
 macos_accent = 3
-wallpaper = "/Users/seb/Pictures/Wallpapers/Mavericks.heic"
+wallpaper = "~/Pictures/Wallpapers/Mavericks.heic"
 source = "custom"
 
 [themes.mavericks-dark.term]
@@ -3590,7 +3590,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "mavericks"
 macos_accent = 3
-wallpaper = "/Users/seb/Pictures/Wallpapers/Mavericks.heic"
+wallpaper = "~/Pictures/Wallpapers/Mavericks.heic"
 source = "custom"
 
 [themes.mavericks-light.term]
@@ -3645,7 +3645,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "miami"
 macos_accent = 2
-wallpaper = "/Users/seb/Pictures/Wallpapers/Miami.heic"
+wallpaper = "~/Pictures/Wallpapers/Miami.heic"
 source = "custom"
 
 [themes.miami-dark.term]
@@ -3700,7 +3700,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "miami"
 macos_accent = 2
-wallpaper = "/Users/seb/Pictures/Wallpapers/Miami.heic"
+wallpaper = "~/Pictures/Wallpapers/Miami.heic"
 source = "custom"
 
 [themes.miami-light.term]
@@ -3755,7 +3755,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "mojave"
 macos_accent = 1
-wallpaper = "/Users/seb/Pictures/Wallpapers/Mojave.heic"
+wallpaper = "~/Pictures/Wallpapers/Mojave.heic"
 source = "custom"
 
 [themes.mojave-dark.term]
@@ -3810,7 +3810,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "mojave"
 macos_accent = 1
-wallpaper = "/Users/seb/Pictures/Wallpapers/Mojave.heic"
+wallpaper = "~/Pictures/Wallpapers/Mojave.heic"
 source = "custom"
 
 [themes.mojave-light.term]
@@ -3865,7 +3865,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "monterey"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Monterey.heic"
+wallpaper = "~/Pictures/Wallpapers/Monterey.heic"
 source = "custom"
 
 [themes.monterey-dark.term]
@@ -3920,7 +3920,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "monterey"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Monterey.heic"
+wallpaper = "~/Pictures/Wallpapers/Monterey.heic"
 source = "custom"
 
 [themes.monterey-light.term]
@@ -3975,7 +3975,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "neon"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Neon.heic"
+wallpaper = "~/Pictures/Wallpapers/Neon.heic"
 source = "custom"
 
 [themes.neon-dark.term]
@@ -4030,7 +4030,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "neon"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Neon.heic"
+wallpaper = "~/Pictures/Wallpapers/Neon.heic"
 source = "custom"
 
 [themes.neon-light.term]
@@ -4085,7 +4085,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "nigella"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Nigella.heic"
+wallpaper = "~/Pictures/Wallpapers/Nigella.heic"
 source = "custom"
 
 [themes.nigella-dark.term]
@@ -4140,7 +4140,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "nigella"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Nigella.heic"
+wallpaper = "~/Pictures/Wallpapers/Nigella.heic"
 source = "custom"
 
 [themes.nigella-light.term]
@@ -4195,7 +4195,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "nova"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Nova.heic"
+wallpaper = "~/Pictures/Wallpapers/Nova.heic"
 source = "custom"
 
 [themes.nova-dark.term]
@@ -4250,7 +4250,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "nova"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Nova.heic"
+wallpaper = "~/Pictures/Wallpapers/Nova.heic"
 source = "custom"
 
 [themes.nova-light.term]
@@ -4305,7 +4305,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "odyssey"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Odyssey.heic"
+wallpaper = "~/Pictures/Wallpapers/Odyssey.heic"
 source = "custom"
 
 [themes.odyssey-dark.term]
@@ -4360,7 +4360,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "odyssey"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Odyssey.heic"
+wallpaper = "~/Pictures/Wallpapers/Odyssey.heic"
 source = "custom"
 
 [themes.odyssey-light.term]
@@ -4415,7 +4415,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "origami"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Origami.heic"
+wallpaper = "~/Pictures/Wallpapers/Origami.heic"
 source = "custom"
 
 [themes.origami-dark.term]
@@ -4470,7 +4470,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "origami"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Origami.heic"
+wallpaper = "~/Pictures/Wallpapers/Origami.heic"
 source = "custom"
 
 [themes.origami-light.term]
@@ -4525,7 +4525,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "poppy"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Poppy.heic"
+wallpaper = "~/Pictures/Wallpapers/Poppy.heic"
 source = "custom"
 
 [themes.poppy-dark.term]
@@ -4580,7 +4580,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "poppy"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Poppy.heic"
+wallpaper = "~/Pictures/Wallpapers/Poppy.heic"
 source = "custom"
 
 [themes.poppy-light.term]
@@ -4635,7 +4635,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "prism"
 macos_accent = 6
-wallpaper = "/Users/seb/Pictures/Wallpapers/Prism.heic"
+wallpaper = "~/Pictures/Wallpapers/Prism.heic"
 source = "custom"
 
 [themes.prism-dark.term]
@@ -4690,7 +4690,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "prism"
 macos_accent = 6
-wallpaper = "/Users/seb/Pictures/Wallpapers/Prism.heic"
+wallpaper = "~/Pictures/Wallpapers/Prism.heic"
 source = "custom"
 
 [themes.prism-light.term]
@@ -4745,7 +4745,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "protea"
 macos_accent = 6
-wallpaper = "/Users/seb/Pictures/Wallpapers/Protea.heic"
+wallpaper = "~/Pictures/Wallpapers/Protea.heic"
 source = "custom"
 
 [themes.protea-dark.term]
@@ -4800,7 +4800,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "protea"
 macos_accent = 6
-wallpaper = "/Users/seb/Pictures/Wallpapers/Protea.heic"
+wallpaper = "~/Pictures/Wallpapers/Protea.heic"
 source = "custom"
 
 [themes.protea-light.term]
@@ -4855,7 +4855,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "pulse"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Pulse.heic"
+wallpaper = "~/Pictures/Wallpapers/Pulse.heic"
 source = "custom"
 
 [themes.pulse-dark.term]
@@ -4910,7 +4910,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "pulse"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Pulse.heic"
+wallpaper = "~/Pictures/Wallpapers/Pulse.heic"
 source = "custom"
 
 [themes.pulse-light.term]
@@ -4965,7 +4965,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "pyramid"
 macos_accent = 0
-wallpaper = "/Users/seb/Pictures/Wallpapers/Pyramid.heic"
+wallpaper = "~/Pictures/Wallpapers/Pyramid.heic"
 source = "custom"
 
 [themes.pyramid-dark.term]
@@ -5020,7 +5020,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "pyramid"
 macos_accent = 3
-wallpaper = "/Users/seb/Pictures/Wallpapers/Pyramid.heic"
+wallpaper = "~/Pictures/Wallpapers/Pyramid.heic"
 source = "custom"
 
 [themes.pyramid-light.term]
@@ -5075,7 +5075,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "quasar"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Quasar.heic"
+wallpaper = "~/Pictures/Wallpapers/Quasar.heic"
 source = "custom"
 
 [themes.quasar-dark.term]
@@ -5130,7 +5130,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "quasar"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Quasar.heic"
+wallpaper = "~/Pictures/Wallpapers/Quasar.heic"
 source = "custom"
 
 [themes.quasar-light.term]
@@ -5185,7 +5185,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "quay"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Quay.heic"
+wallpaper = "~/Pictures/Wallpapers/Quay.heic"
 source = "custom"
 
 [themes.quay-dark.term]
@@ -5240,7 +5240,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "quay"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Quay.heic"
+wallpaper = "~/Pictures/Wallpapers/Quay.heic"
 source = "custom"
 
 [themes.quay-light.term]
@@ -5295,7 +5295,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "rainbow"
 macos_accent = 0
-wallpaper = "/Users/seb/Pictures/Wallpapers/Rainbow.heic"
+wallpaper = "~/Pictures/Wallpapers/Rainbow.heic"
 source = "custom"
 
 [themes.rainbow-dark.term]
@@ -5350,7 +5350,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "rainbow"
 macos_accent = 0
-wallpaper = "/Users/seb/Pictures/Wallpapers/Rainbow.heic"
+wallpaper = "~/Pictures/Wallpapers/Rainbow.heic"
 source = "custom"
 
 [themes.rainbow-light.term]
@@ -5405,7 +5405,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "rancho"
 macos_accent = 1
-wallpaper = "/Users/seb/Pictures/Wallpapers/Rancho.heic"
+wallpaper = "~/Pictures/Wallpapers/Rancho.heic"
 source = "custom"
 
 [themes.rancho-dark.term]
@@ -5460,7 +5460,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "rancho"
 macos_accent = 1
-wallpaper = "/Users/seb/Pictures/Wallpapers/Rancho.heic"
+wallpaper = "~/Pictures/Wallpapers/Rancho.heic"
 source = "custom"
 
 [themes.rancho-light.term]
@@ -5515,7 +5515,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "ranunculus"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Ranunculus.heic"
+wallpaper = "~/Pictures/Wallpapers/Ranunculus.heic"
 source = "custom"
 
 [themes.ranunculus-dark.term]
@@ -5570,7 +5570,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "ranunculus"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Ranunculus.heic"
+wallpaper = "~/Pictures/Wallpapers/Ranunculus.heic"
 source = "custom"
 
 [themes.ranunculus-light.term]
@@ -5625,7 +5625,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "ridge"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Ridge.heic"
+wallpaper = "~/Pictures/Wallpapers/Ridge.heic"
 source = "custom"
 
 [themes.ridge-dark.term]
@@ -5680,7 +5680,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "ridge"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Ridge.heic"
+wallpaper = "~/Pictures/Wallpapers/Ridge.heic"
 source = "custom"
 
 [themes.ridge-light.term]
@@ -5735,7 +5735,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "ripple"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Ripple.heic"
+wallpaper = "~/Pictures/Wallpapers/Ripple.heic"
 source = "custom"
 
 [themes.ripple-dark.term]
@@ -5790,7 +5790,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "ripple"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Ripple.heic"
+wallpaper = "~/Pictures/Wallpapers/Ripple.heic"
 source = "custom"
 
 [themes.ripple-light.term]
@@ -5845,7 +5845,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "rose"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Rose.heic"
+wallpaper = "~/Pictures/Wallpapers/Rose.heic"
 source = "custom"
 
 [themes.rose-dark.term]
@@ -5900,7 +5900,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "rose"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Rose.heic"
+wallpaper = "~/Pictures/Wallpapers/Rose.heic"
 source = "custom"
 
 [themes.rose-light.term]
@@ -5955,7 +5955,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "sakura"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Sakura.heic"
+wallpaper = "~/Pictures/Wallpapers/Sakura.heic"
 source = "custom"
 
 [themes.sakura-dark.term]
@@ -6010,7 +6010,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "sakura"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Sakura.heic"
+wallpaper = "~/Pictures/Wallpapers/Sakura.heic"
 source = "custom"
 
 [themes.sakura-light.term]
@@ -6065,7 +6065,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "sequoia"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Sequoia.heic"
+wallpaper = "~/Pictures/Wallpapers/Sequoia.heic"
 source = "custom"
 
 [themes.sequoia-dark.term]
@@ -6120,7 +6120,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "sequoia"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Sequoia.heic"
+wallpaper = "~/Pictures/Wallpapers/Sequoia.heic"
 source = "custom"
 
 [themes.sequoia-light.term]
@@ -6175,7 +6175,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "shore"
 macos_accent = 2
-wallpaper = "/Users/seb/Pictures/Wallpapers/Shore.heic"
+wallpaper = "~/Pictures/Wallpapers/Shore.heic"
 source = "custom"
 
 [themes.shore-dark.term]
@@ -6230,7 +6230,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "shore"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Shore.heic"
+wallpaper = "~/Pictures/Wallpapers/Shore.heic"
 source = "custom"
 
 [themes.shore-light.term]
@@ -6285,7 +6285,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "sonoma"
 macos_accent = 3
-wallpaper = "/Users/seb/Pictures/Wallpapers/Sonoma.heic"
+wallpaper = "~/Pictures/Wallpapers/Sonoma.heic"
 source = "custom"
 
 [themes.sonoma-dark.term]
@@ -6340,7 +6340,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "sonoma"
 macos_accent = 3
-wallpaper = "/Users/seb/Pictures/Wallpapers/Sonoma.heic"
+wallpaper = "~/Pictures/Wallpapers/Sonoma.heic"
 source = "custom"
 
 [themes.sonoma-light.term]
@@ -6395,7 +6395,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "sunflower"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Sunflower.heic"
+wallpaper = "~/Pictures/Wallpapers/Sunflower.heic"
 source = "custom"
 
 [themes.sunflower-dark.term]
@@ -6450,7 +6450,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "sunflower"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Sunflower.heic"
+wallpaper = "~/Pictures/Wallpapers/Sunflower.heic"
 source = "custom"
 
 [themes.sunflower-light.term]
@@ -6505,7 +6505,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "tahoe"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Tahoe.heic"
+wallpaper = "~/Pictures/Wallpapers/Tahoe.heic"
 source = "custom"
 
 [themes.tahoe-dark.term]
@@ -6560,7 +6560,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "tahoe"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Tahoe.heic"
+wallpaper = "~/Pictures/Wallpapers/Tahoe.heic"
 source = "custom"
 
 [themes.tahoe-light.term]
@@ -6615,7 +6615,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "tarn"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Tarn.heic"
+wallpaper = "~/Pictures/Wallpapers/Tarn.heic"
 source = "custom"
 
 [themes.tarn-dark.term]
@@ -6670,7 +6670,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "tarn"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Tarn.heic"
+wallpaper = "~/Pictures/Wallpapers/Tarn.heic"
 source = "custom"
 
 [themes.tarn-light.term]
@@ -6725,7 +6725,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "terracotta"
 macos_accent = 2
-wallpaper = "/Users/seb/Pictures/Wallpapers/Terracotta.heic"
+wallpaper = "~/Pictures/Wallpapers/Terracotta.heic"
 source = "custom"
 
 [themes.terracotta-dark.term]
@@ -6780,7 +6780,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "terracotta"
 macos_accent = 2
-wallpaper = "/Users/seb/Pictures/Wallpapers/Terracotta.heic"
+wallpaper = "~/Pictures/Wallpapers/Terracotta.heic"
 source = "custom"
 
 [themes.terracotta-light.term]
@@ -6835,7 +6835,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "tiburon"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Tiburon.heic"
+wallpaper = "~/Pictures/Wallpapers/Tiburon.heic"
 source = "custom"
 
 [themes.tiburon-dark.term]
@@ -6890,7 +6890,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "tiburon"
 macos_accent = 3
-wallpaper = "/Users/seb/Pictures/Wallpapers/Tiburon.heic"
+wallpaper = "~/Pictures/Wallpapers/Tiburon.heic"
 source = "custom"
 
 [themes.tiburon-light.term]
@@ -6945,7 +6945,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "tide"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Tide.heic"
+wallpaper = "~/Pictures/Wallpapers/Tide.heic"
 source = "custom"
 
 [themes.tide-dark.term]
@@ -7000,7 +7000,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "tide"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Tide.heic"
+wallpaper = "~/Pictures/Wallpapers/Tide.heic"
 source = "custom"
 
 [themes.tide-light.term]
@@ -7055,7 +7055,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "tiger"
 macos_accent = 0
-wallpaper = "/Users/seb/Pictures/Wallpapers/Tiger.heic"
+wallpaper = "~/Pictures/Wallpapers/Tiger.heic"
 source = "custom"
 
 [themes.tiger-dark.term]
@@ -7110,7 +7110,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "tiger"
 macos_accent = 0
-wallpaper = "/Users/seb/Pictures/Wallpapers/Tiger.heic"
+wallpaper = "~/Pictures/Wallpapers/Tiger.heic"
 source = "custom"
 
 [themes.tiger-light.term]
@@ -7165,7 +7165,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "tulip"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Tulip.heic"
+wallpaper = "~/Pictures/Wallpapers/Tulip.heic"
 source = "custom"
 
 [themes.tulip-dark.term]
@@ -7220,7 +7220,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "tulip"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Tulip.heic"
+wallpaper = "~/Pictures/Wallpapers/Tulip.heic"
 source = "custom"
 
 [themes.tulip-light.term]
@@ -7275,7 +7275,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "valentine"
 macos_accent = 6
-wallpaper = "/Users/seb/Pictures/Wallpapers/Valentine.heic"
+wallpaper = "~/Pictures/Wallpapers/Valentine.heic"
 source = "custom"
 
 [themes.valentine-dark.term]
@@ -7330,7 +7330,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "valentine"
 macos_accent = 6
-wallpaper = "/Users/seb/Pictures/Wallpapers/Valentine.heic"
+wallpaper = "~/Pictures/Wallpapers/Valentine.heic"
 source = "custom"
 
 [themes.valentine-light.term]
@@ -7385,7 +7385,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "vapor"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Vapor.heic"
+wallpaper = "~/Pictures/Wallpapers/Vapor.heic"
 source = "custom"
 
 [themes.vapor-dark.term]
@@ -7440,7 +7440,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "vapor"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Vapor.heic"
+wallpaper = "~/Pictures/Wallpapers/Vapor.heic"
 source = "custom"
 
 [themes.vapor-light.term]
@@ -7495,7 +7495,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "ventura"
 macos_accent = 1
-wallpaper = "/Users/seb/Pictures/Wallpapers/Ventura.heic"
+wallpaper = "~/Pictures/Wallpapers/Ventura.heic"
 source = "custom"
 
 [themes.ventura-dark.term]
@@ -7550,7 +7550,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "ventura"
 macos_accent = 1
-wallpaper = "/Users/seb/Pictures/Wallpapers/Ventura.heic"
+wallpaper = "~/Pictures/Wallpapers/Ventura.heic"
 source = "custom"
 
 [themes.ventura-light.term]
@@ -7605,7 +7605,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "vertex"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Vertex.heic"
+wallpaper = "~/Pictures/Wallpapers/Vertex.heic"
 source = "custom"
 
 [themes.vertex-dark.term]
@@ -7660,7 +7660,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "vertex"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Vertex.heic"
+wallpaper = "~/Pictures/Wallpapers/Vertex.heic"
 source = "custom"
 
 [themes.vertex-light.term]
@@ -7715,7 +7715,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "vista"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Vista.heic"
+wallpaper = "~/Pictures/Wallpapers/Vista.heic"
 source = "custom"
 
 [themes.vista-dark.term]
@@ -7770,7 +7770,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "vista"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Vista.heic"
+wallpaper = "~/Pictures/Wallpapers/Vista.heic"
 source = "custom"
 
 [themes.vista-light.term]
@@ -7825,7 +7825,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "wave"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Wave.heic"
+wallpaper = "~/Pictures/Wallpapers/Wave.heic"
 source = "custom"
 
 [themes.wave-dark.term]
@@ -7880,7 +7880,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "wave"
 macos_accent = 4
-wallpaper = "/Users/seb/Pictures/Wallpapers/Wave.heic"
+wallpaper = "~/Pictures/Wallpapers/Wave.heic"
 source = "custom"
 
 [themes.wave-light.term]
@@ -7935,7 +7935,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "wireless"
 macos_accent = 2
-wallpaper = "/Users/seb/Pictures/Wallpapers/Wireless.heic"
+wallpaper = "~/Pictures/Wallpapers/Wireless.heic"
 source = "custom"
 
 [themes.wireless-dark.term]
@@ -7990,7 +7990,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "wireless"
 macos_accent = 2
-wallpaper = "/Users/seb/Pictures/Wallpapers/Wireless.heic"
+wallpaper = "~/Pictures/Wallpapers/Wireless.heic"
 source = "custom"
 
 [themes.wireless-light.term]
@@ -8045,7 +8045,7 @@ starship_palette = "catppuccin_latte"
 mode = "dark"
 family = "zenith"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Zenith.heic"
+wallpaper = "~/Pictures/Wallpapers/Zenith.heic"
 source = "custom"
 
 [themes.zenith-dark.term]
@@ -8100,7 +8100,7 @@ starship_palette = "catppuccin_mocha"
 mode = "light"
 family = "zenith"
 macos_accent = 5
-wallpaper = "/Users/seb/Pictures/Wallpapers/Zenith.heic"
+wallpaper = "~/Pictures/Wallpapers/Zenith.heic"
 source = "custom"
 
 [themes.zenith-light.term]
@@ -8150,3 +8150,125 @@ vscode_dark = "Catppuccin Mocha"
 vscode_light = "Catppuccin Latte"
 cat_wallpaper = ""
 starship_palette = "catppuccin_latte"
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Synthetic fallback themes (NOT wallpaper-derived, NEVER user-selectable).
+# Every theme template degrades to `fallback-dark` when `.theme` is unset or
+# names a theme absent from this file — without these, a bad `.theme` crashed
+# rendering with `nil data; no entry for key term`. rebuild-themes.sh always
+# re-emits this pair, so a regeneration that drops any wallpaper theme can
+# never break the fallback. switch.sh hides the `fallback` family from lists.
+# ─────────────────────────────────────────────────────────────────────
+
+[themes.fallback-dark]
+mode = "dark"
+family = "fallback"
+macos_accent = 4
+wallpaper = ""
+source = "custom"
+
+[themes.fallback-dark.term]
+bg = "#1e1e2e"
+fg = "#d4d4d4"
+cursor = "#455c67"
+cursor_text = "#1e1e2e"
+sel_bg = "#394145"
+sel_fg = "#d4d4d4"
+c0  = "#3c3c4d"
+c1  = "#997d7a"
+c2  = "#479174"
+c3  = "#8a836f"
+c4  = "#5f86b7"
+c5  = "#917e8e"
+c6  = "#5c8d82"
+c7  = "#b9b8bb"
+c8  = "#605f72"
+c9  = "#bf9b97"
+c10 = "#67b293"
+c11 = "#aba389"
+c12 = "#7fa6d9"
+c13 = "#b49cb0"
+c14 = "#7bada1"
+c15 = "#e2e2e3"
+
+[themes.fallback-dark.ui]
+accent = "#455c67"
+accent_text = "#ffffff"
+error = "#997d7a"
+warning = "#8a836f"
+success = "#479174"
+info = "#5f86b7"
+panel = "#242435"
+border = "#302f38"
+
+[themes.fallback-dark.app]
+nvim = "tokyonight"
+nvim_style = "night"
+lualine = "tokyonight"
+gtk_theme = "Adwaita-dark"
+gtk_icon = "Papirus-Dark"
+gnome_shell = ""
+gnome_gtk = "Adwaita-dark"
+vscode = "Tokyonight Mocha"
+vscode_dark = "Tokyonight Mocha"
+vscode_light = "Tokyonight Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_mocha"
+
+
+[themes.fallback-light]
+mode = "light"
+family = "fallback"
+macos_accent = 4
+wallpaper = ""
+source = "custom"
+
+[themes.fallback-light.term]
+bg = "#fbf1c7"
+fg = "#3c3836"
+cursor = "#2c5989"
+cursor_text = "#fbf1c7"
+sel_bg = "#c6cfe0"
+sel_fg = "#3c3836"
+c0  = "#2e2c26"
+c1  = "#7d3d39"
+c2  = "#205a48"
+c3  = "#5b501d"
+c4  = "#2b527d"
+c5  = "#6e4069"
+c6  = "#25554c"
+c7  = "#6f6d67"
+c8  = "#54524b"
+c9  = "#853733"
+c10 = "#025c46"
+c11 = "#5b500b"
+c12 = "#0d5388"
+c13 = "#743b6f"
+c14 = "#15564b"
+c15 = "#979693"
+
+[themes.fallback-light.ui]
+accent = "#2c5989"
+accent_text = "#ffffff"
+error = "#7d3d39"
+warning = "#5b501d"
+success = "#205a48"
+info = "#2b527d"
+panel = "#f2e8bf"
+border = "#e3e0d3"
+
+[themes.fallback-light.app]
+nvim = "catppuccin"
+nvim_style = "latte"
+lualine = "catppuccin"
+gtk_theme = "Adwaita"
+gtk_icon = "Papirus-Light"
+gnome_shell = ""
+gnome_gtk = "Adwaita"
+vscode = "Catppuccin Latte"
+vscode_dark = "Catppuccin Mocha"
+vscode_light = "Catppuccin Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_latte"
+
