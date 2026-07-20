@@ -56,6 +56,19 @@ export DOT_COMMAND="benchmark"
 BENCHMARK_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/benchmarks"
 mkdir -p "$BENCHMARK_DIR"
 
+usage() {
+  cat <<'EOF'
+Usage: dot benchmark [--detailed] [--profile] [--compare] [--waterfall]
+
+Options:
+  -d, --detailed    Show per-component timing before the benchmark
+  -p, --profile     Run zsh zprof analysis
+  -c, --compare     Compare recent benchmark history
+  -w, --waterfall   Show an ASCII component waterfall
+  -h, --help        Show this help
+EOF
+}
+
 # Parse arguments
 DETAILED=false
 PROFILE=false
@@ -79,11 +92,24 @@ while [[ $# -gt 0 ]]; do
       WATERFALL=true
       shift
       ;;
-    *) shift ;;
+    --help | -h)
+      usage
+      exit 0
+      ;;
+    *)
+      printf 'Unknown option: %s\n' "$1" >&2
+      usage >&2
+      exit 2
+      ;;
   esac
 done
 
 ui_init
+GREEN="${GREEN:-}"
+YELLOW="${YELLOW:-}"
+RED="${RED:-}"
+CYAN="${CYAN:-}"
+NC="${NC:-}"
 
 print_header() {
   echo ""

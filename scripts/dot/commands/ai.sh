@@ -478,6 +478,27 @@ ${prompt}"
 
 # Dispatch — flat, verb-first surface (see docs/AI.md).
 case "${1:-}" in
+  --help | -h | help)
+    cat <<'EOF'
+Usage: ai.sh <command> [args...]
+
+Commands:
+  ai, ai-setup, ai-query, cl, claude, codex, copilot, goose, crush, amp,
+  cursor-agent, grok, agy, kiro, sgpt, ollama, opencode, aider, autohand,
+  vibe, qwen, zai
+EOF
+    ;;
+  "")
+    cat <<'EOF'
+Usage: ai.sh <command> [args...]
+
+Commands:
+  ai, ai-setup, ai-query, cl, claude, codex, copilot, goose, crush, amp,
+  cursor-agent, grok, agy, kiro, sgpt, ollama, opencode, aider, autohand,
+  vibe, qwen, zai
+EOF
+    exit 1
+    ;;
   ai)
     shift
     case "${1:-}" in

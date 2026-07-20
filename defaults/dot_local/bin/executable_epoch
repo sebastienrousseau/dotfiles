@@ -46,6 +46,10 @@ while [[ $# -gt 0 ]]; do
       echo "  -m, --millis    Use milliseconds"
       exit 0
       ;;
+    -*)
+      printf 'Unknown option: %s\n' "$1" >&2
+      exit 2
+      ;;
     *) break ;;
   esac
 done
@@ -56,6 +60,10 @@ if $REVERSE; then
   date -d "$STR" +%s 2>/dev/null || date -j -f "%Y-%m-%d" "$STR" +%s 2>/dev/null
 elif [[ $# -gt 0 ]]; then
   EPOCH="$1"
+  if ! [[ "$EPOCH" =~ ^[0-9]+$ ]]; then
+    printf 'Invalid epoch value: %s\n' "$EPOCH" >&2
+    exit 2
+  fi
   [[ ${#EPOCH} -gt 10 ]] && EPOCH=$((EPOCH / 1000))
   date -d "@$EPOCH" 2>/dev/null || date -r "$EPOCH" 2>/dev/null
 else

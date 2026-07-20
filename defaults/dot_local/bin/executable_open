@@ -6,6 +6,22 @@ set -eu
 
 target="${1:-.}"
 
+usage() {
+  echo "Usage: open [path-or-url]"
+}
+
+case "$target" in
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  -*)
+    printf 'Unknown option: %s\n' "$target" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
+
 # Helper for rich feedback if TTY is present
 log_info() {
   if [ -t 1 ] && command -v gum >/dev/null 2>&1; then

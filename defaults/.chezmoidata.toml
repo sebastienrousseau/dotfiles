@@ -15,7 +15,7 @@ machine = ""
 # synthetic `fallback-dark` theme (always present — re-emitted by
 # rebuild-themes.sh, never wallpaper-derived) if `.theme` is unset or
 # unknown, so an invalid value degrades gracefully rather than aborting.
-theme = "bloom-light"
+theme = "altai-dark"
 
 # Terminal settings
 terminal_font_family = "JetBrainsMono Nerd Font"

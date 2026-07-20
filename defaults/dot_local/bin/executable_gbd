@@ -10,6 +10,28 @@
 
 set -euo pipefail
 
+usage() {
+  cat <<'EOF'
+Usage: gbd [whitelist-pattern] [--dry-run]
+
+Delete local branches except main/master and the current branch.
+EOF
+}
+
+case "${1:-}" in
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  --dry-run | "")
+    ;;
+  -*)
+    printf 'Unknown option: %s\n' "$1" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
+
 if ! command -v git &>/dev/null; then
   echo "gbd requires git" >&2
   exit 1
@@ -29,6 +51,12 @@ dry_run="${2:-}"
 if [[ "${skip_branches}" == "--dry-run" ]]; then
   skip_branches="${default_whitelist}"
   dry_run="--dry-run"
+fi
+
+if [[ -n "${dry_run}" && "${dry_run}" != "--dry-run" ]]; then
+  printf 'Unknown option: %s\n' "$dry_run" >&2
+  usage >&2
+  exit 2
 fi
 
 # R5: validate regex pattern before use

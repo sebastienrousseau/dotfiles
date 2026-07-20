@@ -1,7 +1,13 @@
 -- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
--- Check if we need to reload the file when it changed
-vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
-  command = "checktime",
+-- Reload externally changed files before autowrite can flush stale buffers.
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "TermClose", "TermLeave" }, {
+  command = "if mode() != 'c' && getcmdwintype() == '' | checktime | endif",
+})
+
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  callback = function()
+    vim.notify("File changed on disk; buffer reloaded", vim.log.levels.WARN)
+  end,
 })
 
 -- Highlight on yank

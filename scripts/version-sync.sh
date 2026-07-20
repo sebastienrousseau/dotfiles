@@ -268,6 +268,7 @@ update_version_references() {
       log_warning "File not found: $file"
       continue
     fi
+    files_processed=$((files_processed + 1))
 
     # Skip milestone and other historical files
     if [[ "$(basename "$file")" == MILESTONE_* ]]; then
@@ -328,6 +329,7 @@ update_version_references() {
         cat "$temp_file" >"$file"
         log_success "Updated: $file"
       fi
+      rm -f "$temp_file"
       changes_made=$((changes_made + 1))
     else
       log_info "No changes needed: $file"
@@ -456,6 +458,12 @@ main() {
         ;;
     esac
   done
+
+  if [[ -n "${DOTFILES_COV_TMPDIR:-}" && "${DOTFILES_ALLOW_COVERAGE_WRITES:-0}" != "1" ]]; then
+    dry_run="true"
+    create_backup_flag="false"
+    log_info "Coverage sandbox detected; forcing --dry-run"
+  fi
 
   # Change to project root
   cd "$PROJECT_ROOT"

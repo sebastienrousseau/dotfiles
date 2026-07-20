@@ -12,6 +12,8 @@ set -euo pipefail
 echo " Starting Final Environment Verification..."
 
 Errors=0
+ALIASES_CONFIG="$HOME/.config/shell/aliases.sh"
+AliasesConfigReported=0
 
 check_file() {
   if [[ ! -f "$1" ]]; then
@@ -23,7 +25,13 @@ check_file() {
 }
 
 check_alias_in_config() {
-  if ! grep -q "$1" "$HOME/.config/shell/aliases.sh"; then
+  if [[ ! -f "$ALIASES_CONFIG" ]]; then
+    if [[ "$AliasesConfigReported" -eq 0 ]]; then
+      echo " Missing aliases config: $ALIASES_CONFIG"
+      Errors=$((Errors + 1))
+      AliasesConfigReported=1
+    fi
+  elif ! grep -q "$1" "$ALIASES_CONFIG"; then
     echo " Missing alias definition '$1' in built config"
     Errors=$((Errors + 1))
   else
