@@ -28,7 +28,7 @@ dot_agent_checkpoint_dir() {
 dot_jsonl_append() {
   local file="$1" payload="$2"
   mkdir -p "$_DOT_LOG_STATE_DIR" 2>/dev/null || return 0
-  printf '%s\n' "$payload" >>"$_DOT_LOG_STATE_DIR/$file" 2>/dev/null || true
+  { printf '%s\n' "$payload"; } 2>/dev/null >>"$_DOT_LOG_STATE_DIR/$file" || true
 }
 
 # Always-on file logging (appends to dot.log, rotates at 1MB)
@@ -45,13 +45,15 @@ dot_log_file() {
       mv "$log_file" "${log_file}.1" 2>/dev/null || true
     fi
   fi
-  printf '[%s] [%s] [%s] %s' \
-    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$level" "$DOT_TRACE_ID" "$event" >>"$log_file" 2>/dev/null || return 0
-  while [[ $# -gt 0 ]]; do
-    printf ' %s' "$1" >>"$log_file" 2>/dev/null || return 0
-    shift
-  done
-  printf '\n' >>"$log_file" 2>/dev/null || true
+  {
+    printf '[%s] [%s] [%s] %s' \
+      "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$level" "$DOT_TRACE_ID" "$event"
+    while [[ $# -gt 0 ]]; do
+      printf ' %s' "$1"
+      shift
+    done
+    printf '\n'
+  } 2>/dev/null >>"$log_file" || true
 }
 
 # Structured log entry (JSON when DOTFILES_JSON_LOG=1, silent otherwise)
@@ -82,8 +84,10 @@ dot_metric() {
   ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   local metrics_file="$_DOT_LOG_STATE_DIR/metrics.jsonl"
   mkdir -p "$_DOT_LOG_STATE_DIR" 2>/dev/null || return 0
-  printf '{"time":"%s","metric":"%s","value":%s,"unit":"%s","trace_id":"%s"}\n' \
-    "$ts" "$name" "$value" "$unit" "$DOT_TRACE_ID" >>"$metrics_file" 2>/dev/null || true
+  {
+    printf '{"time":"%s","metric":"%s","value":%s,"unit":"%s","trace_id":"%s"}\n' \
+      "$ts" "$name" "$value" "$unit" "$DOT_TRACE_ID"
+  } 2>/dev/null >>"$metrics_file" || true
 }
 
 # Print recent metrics (for `dot metrics` command)
