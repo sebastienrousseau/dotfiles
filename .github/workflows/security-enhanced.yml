@@ -128,7 +128,7 @@ jobs:
 
       - name: Upload Grype results to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4
+        uses: github/codeql-action/upload-sarif@7188fc363630916deb702c7fdcf4e481b751f97a # v4
         with:
           sarif_file: grype-results.sarif
           category: grype-analysis
@@ -166,7 +166,7 @@ jobs:
 
       - name: Upload Checkov results to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4
+        uses: github/codeql-action/upload-sarif@7188fc363630916deb702c7fdcf4e481b751f97a # v4
         with:
           sarif_file: checkov-results.sarif
           category: checkov-analysis
@@ -209,7 +209,7 @@ jobs:
 
       - name: Upload container scan results
         if: always() && hashFiles('**/Dockerfile*') != ''
-        uses: github/codeql-action/upload-sarif@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4
+        uses: github/codeql-action/upload-sarif@7188fc363630916deb702c7fdcf4e481b751f97a # v4
         with:
           sarif_file: container-scan.sarif
           category: container-analysis
