@@ -17,6 +17,11 @@ alias dagya='dot ai agy --style architect'
 alias dagyh='dot ai agy --style hardener'
 alias dagyr='dot ai agy --style refactor'
 
+alias dkm='dot ai kimi'
+alias dkma='dot ai kimi --style architect'
+alias dkmh='dot ai kimi --style hardener'
+alias dkmr='dot ai kimi --style refactor'
+
 alias dki='dot ai kiro'
 alias dkia='dot ai kiro --style architect'
 alias dkih='dot ai kiro --style hardener'
@@ -63,6 +68,13 @@ if command -v agy &>/dev/null; then
   alias agyi='agy info'
   alias agys='agy chat'
   alias agy='agy'
+fi
+
+# Moonshot Kimi CLI
+if command -v kimi &>/dev/null; then
+  alias km='kimi'
+  alias kmc='kimi'
+  alias kmp='kimi -p'
 fi
 
 # GitHub Copilot CLI

@@ -30,6 +30,7 @@ _ai_mise_pkg() {
     opencode) echo "npm:opencode-ai" ;;
     sgpt) echo "pipx:shell-gpt" ;;
     agy) echo "" ;;
+    kimi) echo "" ;;
     ollama) echo "aqua:ollama/ollama" ;;
     kiro-cli) echo "kiro-cli" ;;
     autohand) echo "npm:autohand-cli" ;;
@@ -119,6 +120,31 @@ install_claude_native() {
     fi
   else
     ui_warn "$label" "installer download/validation failed (continuing)"
+  fi
+  rm -f "$installer"
+  # LCOV_EXCL_STOP
+}
+
+install_kimi_native() {
+  # LCOV_EXCL_START — network curl|bash installer (see install_agy_native).
+  local label="${1:-Kimi CLI}"
+  local installer
+  installer=$(umask 077 && mktemp)
+  if curl -fsSL -o "$installer" https://code.kimi.com/kimi-code/install.sh &&
+    [ "$(wc -c <"$installer")" -le 524288 ] &&
+    head -1 "$installer" | grep -q '^#!'; then
+    if command -v gum >/dev/null 2>&1; then
+      if gum spin --spinner dot --title "Installing $label (native installer)" -- bash "$installer"; then
+        ui_ok "$label" "installed"
+      else
+        ui_warn "$label" "install failed (continuing)"
+      fi
+    else
+      ui_info "Installing" "$label via native installer"
+      bash "$installer" || ui_warn "$label" "install failed (continuing)"
+    fi
+  else
+    ui_warn "$label" "installer download/validation failed; manual fallback: npm install -g @moonshot-ai/kimi-code"
   fi
   rm -f "$installer"
   # LCOV_EXCL_STOP

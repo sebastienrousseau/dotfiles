@@ -225,6 +225,7 @@ AI|mode|Set or inspect agent operating profiles (ask/plan/apply/audit)|Bounded-a
 AI|agent|Profile-aware execution, agent card, a2a-card, session log, checkpoints, and conformance|Agent metadata and local audit trail.
 AI|cl|Claude CLI with context patterns|Context-aware Anthropic bridge.
 AI|copilot|GitHub Copilot CLI with context patterns|Context-aware Copilot bridge.
+AI|kimi|Kimi CLI with context patterns|Context-aware Moonshot AI bridge.
 AI|agy|Antigravity CLI with context patterns|Context-aware Antigravity bridge.
 AI|kiro|Kiro CLI with context patterns|Context-aware Kiro bridge.
 AI|sgpt|Shell-GPT with context patterns|Context-aware Shell-GPT bridge.
@@ -393,6 +394,7 @@ cl|Run the Claude CLI with dotfiles context patterns.|dot cl "explain this repo'
 claude|Run the Claude CLI bridge (alias for cl).|dot claude "summarise CHANGELOG"\ndot claude --model sonnet
 codex|Run the OpenAI Codex CLI with dotfiles context patterns.|dot codex "refactor wallpaper-sync.sh"\ndot codex --review
 copilot|Run the GitHub Copilot CLI with dotfiles context patterns.|dot copilot suggest "review my latest commit"\ndot copilot explain
+kimi|Run the Kimi CLI with dotfiles context patterns.|dot kimi "review this branch"\ndot kimi --style hardener "audit scripts"
 agy|Run the Antigravity CLI with dotfiles context patterns.|dot agy "audit security/firewall.sh"\ndot agy chat
 goose|Run the Goose CLI with dotfiles context patterns.|dot goose session start\ndot goose run
 kiro|Run the Kiro CLI with dotfiles context patterns.|dot kiro "design a new dot subcommand"
@@ -486,6 +488,7 @@ cl|ai
 claude|ai
 codex|ai
 copilot|ai
+kimi|ai
 agy|ai
 goose|ai
 kiro|ai

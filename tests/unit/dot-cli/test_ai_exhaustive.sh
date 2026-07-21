@@ -28,7 +28,7 @@ cov_setup_sandbox
 
 MB="$DOTFILES_COV_TMPDIR/bin"
 AI_TOOLS=(claude codex copilot goose crush amp cursor-agent grok opencode aider
-  autohand vibe qwen zai agy sgpt ollama kiro-cli dot-ai-serve dot-ai-proxy
+  kimi autohand vibe qwen zai agy sgpt ollama kiro-cli dot-ai-serve dot-ai-proxy
   dot-ai-log dot-ai-tui)
 
 mk_tool() {
@@ -87,6 +87,7 @@ ex bridge_crush crush "hi"             # new agent: crush run
 ex bridge_amp amp "hi"                 # new agent: amp -x
 ex bridge_cursor cursor-agent "hi"     # new agent: cursor-agent -p
 ex bridge_grok grok "hi"               # new agent: grok -p
+ex bridge_kimi kimi "hi"               # new agent: kimi -p --quiet
 ex oneshot_crush ai crush "hi"         # dot ai <newtool> → _ai_oneshot routing
 ex bareprompt ai "summarise"           # _ai_oneshot bare prompt
 ex style ai --style architect "tune"   # steering-pattern path
@@ -117,11 +118,13 @@ ex install_claude ai install claude       # native installer dispatch
 ex install_codex ai install codex         # mise-package install path
 ex install_crush ai install crush         # npm-package via mise
 ex install_cursor ai install cursor-agent # native installer dispatch
+ex install_kimi ai install kimi           # native installer dispatch
 ex install_unknown ai install nope        # unmapped tool
 rm -f "$HOME/.cache/dotfiles/ai/status.tsv"
 ex tools_absent ai tools      # status, nothing installed
 ex absent_codex ai codex "hi" # not-installed → gum-confirm install
 ex absent_agy ai agy "hi"     # agy native-installer hint branch
+ex absent_kimi ai kimi "hi"   # Kimi native-installer hint branch
 
 # Static guards keep the file meaningful without xtrace.
 test_start "ai_exhaustive_files_present"

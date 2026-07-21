@@ -199,6 +199,7 @@ _AI_PROVIDERS=(
   "copilot|npm:@github/copilot|Copilot CLI"
   "goose|native|Goose"
   "agy|native|Antigravity CLI"
+  "kimi|native|Kimi CLI"
   "sgpt|pipx:shell-gpt|Shell-GPT"
   "ollama|aqua:ollama/ollama|Ollama"
   "opencode|npm:opencode-ai|OpenCode"
@@ -274,6 +275,10 @@ if [[ ${#_ai_missing[@]} -gt 0 ]] && [[ "$INTERACTIVE" == "1" ]]; then
         fi
         if [[ "$_bin" == "agy" ]]; then
           install_agy_native "$_label"
+          continue
+        fi
+        if [[ "$_bin" == "kimi" ]]; then
+          install_kimi_native "$_label"
           continue
         fi
         if command -v gum &>/dev/null; then

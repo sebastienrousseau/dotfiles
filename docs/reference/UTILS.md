@@ -124,6 +124,7 @@ prints a one-line hint. See [AI.md](../AI.md) for the full surface.
 |---------|-------------|
 | `dot cl` | Claude Code with context injection — use `dot ai claude` |
 | `dot copilot` | GitHub Copilot CLI — use `dot ai copilot` |
+| `dot kimi` | Kimi CLI — use `dot ai kimi` |
 | `dot agy` | Antigravity CLI — use `dot ai agy` |
 | `dot kiro` | Kiro CLI — use `dot ai kiro` |
 | `dot sgpt` | Shell-GPT — use `dot ai sgpt` |

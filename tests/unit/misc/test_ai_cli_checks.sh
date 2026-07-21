@@ -32,6 +32,13 @@ PYTOOLS_FILE="$REPO_ROOT/install/provision/run_onchange_25-python-tools.sh.tmpl"
 # Chezmoi apply should list AI providers and offer mise installation
 check_contains "$APPLY_FILE" "AI provider CLI checks (optional)"
 check_contains "$APPLY_FILE" "copilot|npm:@github/copilot|Copilot CLI"
+check_contains "$APPLY_FILE" "kimi|native|Kimi CLI"
+check_contains "$REPO_ROOT/lib/dot/ai-install.sh" "https://code.kimi.com/kimi-code/install.sh"
+check_contains "$REPO_ROOT/install/provision/run_onchange_15-ai-cli-tools.sh.tmpl" "https://code.kimi.com/kimi-code/install.sh"
+check_contains "$REPO_ROOT/defaults/dot_config/shell/00-core-paths.sh.tmpl" '${HOME}/.kimi-code/bin'
+check_contains "$REPO_ROOT/defaults/dot_config/fish/conf.d/env.fish.tmpl" '$HOME/.kimi-code/bin'
+check_contains "$REPO_ROOT/defaults/dot_config/nushell/env.nu.tmpl" '.kimi-code/bin'
+check_contains "$REPO_ROOT/defaults/dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl" '.kimi-code/bin'
 check_contains "$APPLY_FILE" "sgpt|pipx:shell-gpt|Shell-GPT"
 check_contains "$APPLY_FILE" "ollama|aqua:ollama/ollama|Ollama"
 check_contains "$APPLY_FILE" "kiro-cli|kiro-cli|Kiro CLI"
@@ -43,6 +50,7 @@ check_contains "$APPLY_FILE" "mise use -g"
 
 # Tools catalog should list Copilot, sgpt, ollama, and new AI CLIs
 check_contains "$DOC_FILE" "| **Copilot CLI** | GitHub Copilot in the terminal |"
+check_contains "$DOC_FILE" "| **Kimi CLI** | Moonshot AI Kimi Code terminal coding agent |"
 check_contains "$DOC_FILE" "| **sgpt** | Shell-GPT for terminal AI queries |"
 check_contains "$DOC_FILE" "| **Ollama** | Run large language models locally |"
 check_contains "$DOC_FILE" "| **Autohand Code** | Autohand coding agent CLI |"

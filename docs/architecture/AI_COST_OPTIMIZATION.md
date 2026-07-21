@@ -114,6 +114,7 @@ Providers tracked today:
 | Copilot CLI | `copilot` | yes | no |
 | Gemini CLI | `gemini` | yes | no |
 | Goose | `goose` | yes | no |
+| Kimi CLI | `kimi` | yes | no |
 | Aider | `aider` | yes | no |
 | OpenCode | `opencode` | yes | no |
 | Autohand | `autohand` | yes | no |

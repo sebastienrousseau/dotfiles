@@ -31,6 +31,7 @@ _ai_invoke_provider() {
     amp) amp -x "$full_prompt" || rc=$? ;;
     cursor | cursor-agent) cursor-agent -p "$full_prompt" || rc=$? ;;
     grok) grok --no-auto-update -p "$full_prompt" || rc=$? ;;
+    kimi) kimi -p "$full_prompt" --quiet || rc=$? ;;
     kiro | kiro-cli) printf "%s" "$full_prompt" | kiro-cli chat || rc=$? ;;
     sgpt) printf "%s" "$full_prompt" | sgpt --chat shell-gpt || rc=$? ;;
     ollama) printf "%s" "$full_prompt" | ollama run llama3.2 || rc=$? ;;
@@ -64,7 +65,7 @@ _ai_cockpit() {
 _ai_oneshot() {
   local tool="claude"
   case "${1:-}" in
-    cl | claude | codex | copilot | goose | crush | amp | cursor-agent | grok | agy | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
+    cl | claude | codex | copilot | goose | crush | amp | cursor-agent | grok | kimi | agy | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
       tool="$1"
       shift
       ;;
@@ -139,7 +140,7 @@ cmd_ai_doctor() {
   fi
   has_command dot-ai-proxy && dot-ai-proxy status
   local installed=0 total=0 b
-  for b in claude codex copilot goose crush amp cursor-agent grok agy sgpt ollama opencode aider kiro-cli autohand vibe qwen zai; do
+  for b in claude codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider kiro-cli autohand vibe qwen zai; do
     total=$((total + 1))
     has_command "$b" && installed=$((installed + 1))
   done
@@ -160,7 +161,7 @@ cmd_ai_query() {
 # Uses the native installers for claude/goose/agy and mise for the rest.
 cmd_ai_install() {
   local target="${1:-all}"
-  local fleet=(claude codex copilot goose crush amp cursor-agent grok agy sgpt ollama opencode aider kiro-cli autohand vibe qwen zai)
+  local fleet=(claude codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider kiro-cli autohand vibe qwen zai)
   local -a todo=()
   local b pkg
   case "$target" in
@@ -204,6 +205,10 @@ cmd_ai_install() {
         ;;
       grok)
         install_grok_native "Grok Build"
+        continue
+        ;;
+      kimi)
+        install_kimi_native "Kimi CLI"
         continue
         ;;
     esac
