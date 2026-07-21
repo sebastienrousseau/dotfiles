@@ -79,8 +79,10 @@ jobs:
           #   Slice 9: 41.35% measured after version-sync and tools
           #            branch-driving coverage. tools.sh reached 72.85%,
           #            utils.sh reached 73.24%, floor=41.
+          #   Slice 10: 42.30% measured after aliases branch-driving
+          #             coverage. aliases.sh reached 70.00%, floor=42.
           # Bump in lockstep with the slice that lands the bump.
-          MIN_COVERAGE_PCT: '41'
+          MIN_COVERAGE_PCT: '42'
         run: bash tools/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact
