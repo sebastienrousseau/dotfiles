@@ -76,8 +76,11 @@ jobs:
           #   Slice 8: 39.82% measured after core UI/utils branch-driving
           #            coverage, including lib/dot/ui.sh at 52.23%.
           #            floor=39.
+          #   Slice 9: 41.35% measured after version-sync and tools
+          #            branch-driving coverage. tools.sh reached 72.85%,
+          #            utils.sh reached 73.24%, floor=41.
           # Bump in lockstep with the slice that lands the bump.
-          MIN_COVERAGE_PCT: '39'
+          MIN_COVERAGE_PCT: '41'
         run: bash tools/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact

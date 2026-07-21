@@ -34,13 +34,41 @@ CHEZMOIDATA="$SANDBOX/defaults/.chezmoidata.toml"
 build_sandbox() {
   local pkg="$1" readme="$2" cmd="$3"
   rm -rf "${SANDBOX:?}/scripts" "${SANDBOX:?}/defaults" "${SANDBOX:?}/lib" \
-    "${SANDBOX:?}/README.md" "${SANDBOX:?}/package.json"
-  mkdir -p "$SANDBOX/scripts" "$SANDBOX/defaults"
+    "${SANDBOX:?}/README.md" "${SANDBOX:?}/package.json" "${SANDBOX:?}/docs"
+  mkdir -p "$SANDBOX/scripts" "$SANDBOX/defaults" \
+    "$SANDBOX/docs/reference" "$SANDBOX/docs/archive" "$SANDBOX/docs/operations"
   cp "$VERSION_FILE" "$SANDBOX/scripts/version-sync.sh"
   ln -s "$REPO_ROOT/lib" "$SANDBOX/lib"
   printf '{\n  "version": "%s"\n}\n' "$pkg" >"$SANDBOX/package.json"
   printf 'dotfiles_version = "%s"\n' "$cmd" >"$CHEZMOIDATA"
-  printf '# Demo\n\n**Version**: v%s\n' "$readme" >"$SANDBOX/README.md"
+  cat >"$SANDBOX/README.md" <<EOF
+# Demo
+
+![Version](https://img.shields.io/badge/Version-v$readme-blue)
+[release](https://github.com/example/dotfiles/releases/tag/v$readme)
+[site](https://example.invalid/dotfiles/v$readme/)
+EOF
+  cat >"$SANDBOX/docs/reference/FEATURES.md" <<EOF
+# Features
+
+**Dotfiles Version**: $readme
+Version: v$readme
+Dotfiles Version: v$readme
+Version \`v$readme\`
+(v$readme)
+/v$readme/
+dotfiles:$readme
+notes — v$readme
+MILESTONE v0.0.1 stays historical
+EOF
+  printf 'Copyright test\n' >"$SANDBOX/docs/COPYRIGHT"
+  printf '# Milestone\n\nVersion: v0.0.1\n' >"$SANDBOX/docs/archive/MILESTONE_v0.0.1.md"
+  printf '# Excluded\n\nVersion: v0.0.1\n' >"$SANDBOX/docs/operations/VERSION_SYNC.md"
+  mkdir -p "$SANDBOX/scripts/git-hooks" "$SANDBOX/bin" "$SANDBOX/dot_local/bin"
+  printf 'echo "v%s standards maintained"\n' "$cmd" >"$SANDBOX/scripts/git-hooks/pre-commit-audit.sh"
+  printf 'VERSION="v%s"\n' "$cmd" >"$SANDBOX/bin/dot"
+  printf 'VERSION="v%s"\n' "$cmd" >"$SANDBOX/dot_local/bin/executable_tour"
+  printf 'DOTFILES_VERSION="%s"\n' "$cmd" >"$SANDBOX/install.sh"
 }
 
 # Run the sandboxed script; captures VS_OUT / VS_RC. Set ALLOW_W=1 to permit
@@ -94,5 +122,34 @@ test_start "version_sync_exec_dry_run_no_write"
 ALLOW_W=1 run_vs --dry-run
 assert_file_contains "$CHEZMOIDATA" 'dotfiles_version = "0.0.1"' \
   "--dry-run leaves files untouched"
+
+# 8. Coverage-visible branch run: full write path, generic replacements,
+# script-file sync, no-backup path, and post-write verification. Keep stderr
+# visible so the xtrace coverage runner can attribute sourced and child-script
+# lines; stdout is enough to discard normal command output.
+build_sandbox "8.8.8" "0.0.1" "0.0.1"
+test_start "version_sync_exec_branch_visible_write"
+(
+  cd "$SANDBOX" || exit 1
+  DOTFILES_ALLOW_COVERAGE_WRITES=1 bash scripts/version-sync.sh --force --no-backup >/dev/null
+)
+assert_file_contains "$SANDBOX/README.md" "Version-v8.8.8" \
+  "write path updates README badge"
+assert_file_contains "$SANDBOX/docs/reference/FEATURES.md" "dotfiles:8.8.8" \
+  "write path updates generic docs"
+assert_file_contains "$SANDBOX/scripts/git-hooks/pre-commit-audit.sh" "v8.8.8 standards maintained" \
+  "write path updates pre-commit audit banner"
+
+# 9. Coverage-visible fallback discovery: remove rg/jq from PATH so
+# find_version_files and get_package_version take the portable sed/grep path.
+build_sandbox "7.7.7" "0.0.1" "0.0.1"
+test_start "version_sync_exec_branch_visible_portable_fallbacks"
+(
+  cd "$SANDBOX" || exit 1
+  PATH="/usr/bin:/bin" DOTFILES_ALLOW_COVERAGE_WRITES=1 \
+    bash scripts/version-sync.sh --dry-run 7.7.7 >/dev/null
+)
+assert_file_contains "$CHEZMOIDATA" 'dotfiles_version = "0.0.1"' \
+  "portable fallback dry-run leaves files untouched"
 
 printf 'RESULTS:%s:%s:%s\n' "$TESTS_RUN" "$TESTS_PASSED" "$TESTS_FAILED"
