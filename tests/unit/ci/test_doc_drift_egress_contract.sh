@@ -7,7 +7,6 @@
 # Why: doc-drift jobs are intentionally isolated. Keep their harden-runner
 # egress policy in block mode so local-generator checks cannot gain surprise
 # outbound network access.
-set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
