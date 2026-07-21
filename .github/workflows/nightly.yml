@@ -241,11 +241,14 @@ jobs:
         run: |
           echo "Running advanced secret detection..."
 
-          # Install truffleHog for additional secret detection
-          docker pull trufflesecurity/trufflehog:latest
+          # Install truffleHog for additional secret detection.
+          # Pinned by digest (was :latest) on 2026-07-21 to remove the
+          # mutable-tag supply-chain risk; bump the digest deliberately.
+          TRUFFLEHOG_IMAGE="trufflesecurity/trufflehog@sha256:59b244249d1a1aef4baa24fe73d3c931616264482580d806d77f6c74d26b3e42"
+          docker pull "$TRUFFLEHOG_IMAGE"
 
           # Scan git history (limited to avoid timeout)
-          timeout 300 docker run --rm -v "$(pwd):/src" trufflesecurity/trufflehog:latest \
+          timeout 300 docker run --rm -v "$(pwd):/src" "$TRUFFLEHOG_IMAGE" \
             git file:///src --only-verified --fail || {
             echo "⚠️ Trufflehog scan timed out or found issues"
           }
