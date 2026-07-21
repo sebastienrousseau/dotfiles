@@ -70,8 +70,11 @@ jobs:
           #            override during source. Unlocked the dot
           #            command files (agent.sh 2→75 traced per probe,
           #            ai.sh 15→87). floor=35 (3-pt cushion).
+          #   Slice 7: 37.89% measured after #954 deep-branch tests for
+          #            switch.sh, mcp-doctor.sh, and Linux/WSL doctor.sh
+          #            branches. floor=37.
           # Bump in lockstep with the slice that lands the bump.
-          MIN_COVERAGE_PCT: '35'
+          MIN_COVERAGE_PCT: '37'
         run: bash tools/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact

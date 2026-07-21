@@ -112,6 +112,101 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: strict-local baseline should pass"
 fi
 
+test_start "mcp_doctor_deep_policy_warning_branches"
+if command -v jq >/dev/null 2>&1; then
+  fixture_dir="$DOTFILES_COV_TMPDIR/mcp-fixtures"
+  mkdir -p "$fixture_dir"
+  cat >"$fixture_dir/mcp_servers.json" <<'JSON'
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/"]
+    },
+    "unsafe": {
+      "command": "python",
+      "args": ["--unsafe"]
+    },
+    "remote": {
+      "transport": "http",
+      "command": "node",
+      "url": "http://example.invalid/mcp"
+    },
+    "stream": {
+      "transport": "streamable-http",
+      "command": "node",
+      "url": "http://example.invalid/stream"
+    }
+  }
+}
+JSON
+  cat >"$fixture_dir/policy.json" <<'JSON'
+{
+  "defaultProfile": "strict-local",
+  "profiles": {
+    "strict-local": {
+      "allowedLaunchers": ["npx", "node", "uvx"],
+      "trustedTransports": ["stdio"],
+      "blockedFilesystemRoots": ["/", "/home", "/Users"],
+      "blockedArgPatterns": ["^--allow-.*", "^--unsafe$", "^\\\\*$"],
+      "forbidNetworkServersByDefault": ["filesystem"],
+      "requiredEnvByServer": {"filesystem": ["GITHUB_TOKEN"]},
+      "warnOnUnpinnedNpx": true,
+      "requireApprovedPackageLock": true,
+      "requireRegistryEntry": true,
+      "requireHttpsForHttpTransports": true,
+      "requireOauthForHttpTransports": true,
+      "authProfiles": ["oauth2"]
+    }
+  }
+}
+JSON
+  cat >"$fixture_dir/lock.json" <<'JSON'
+{"packages": {"filesystem": {"package": "@modelcontextprotocol/server-filesystem@2026.3.0"}}}
+JSON
+  cat >"$fixture_dir/registry.json" <<'JSON'
+{"servers": {"remote": {"transport": "http", "launcher": "node", "url": "https://example.invalid/mcp", "auth": "none", "authProfile": "none"}}}
+JSON
+  output="$(
+    REPO_ROOT="$REPO_ROOT" \
+      MCP_CONFIG="$fixture_dir/mcp_servers.json" \
+      MCP_POLICY_CONFIG="$fixture_dir/policy.json" \
+      MCP_LOCK_CONFIG="$fixture_dir/lock.json" \
+      MCP_REGISTRY_CONFIG="$fixture_dir/registry.json" \
+      bash "$TEST_SCRIPT" --json
+  )" || true
+  if [[ "$output" == *'"status": "warning"'* ]] && [[ "$output" == *'"warnings":'* ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: policy warnings summarized"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected warning JSON summary"
+    printf '%b\n' "    Output: $output"
+  fi
+else
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: jq unavailable, skipped"
+fi
+
+test_start "mcp_doctor_strict_warning_branch_fails"
+if command -v jq >/dev/null 2>&1; then
+  if REPO_ROOT="$REPO_ROOT" \
+    MCP_CONFIG="$fixture_dir/mcp_servers.json" \
+    MCP_POLICY_CONFIG="$fixture_dir/policy.json" \
+    MCP_LOCK_CONFIG="$fixture_dir/lock.json" \
+    MCP_REGISTRY_CONFIG="$fixture_dir/registry.json" \
+    bash "$TEST_SCRIPT" --strict --json >/dev/null; then
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: strict warnings should fail"
+  else
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: strict warnings fail the check"
+  fi
+else
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: jq unavailable, skipped"
+fi
+
 # Slice 2: drive real line coverage of the script under test
 cov_exercise_script "$TEST_SCRIPT"
 

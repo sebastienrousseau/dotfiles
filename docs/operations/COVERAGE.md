@@ -43,17 +43,20 @@ matches and emits standard `lcov.info` that Codecov ingests natively.
 
 | Surface | What runs |
 |---|---|
-| **PR + push to main** | `.github/workflows/coverage.yml` → `Coverage / kcov` job → uploads lcov.info to Codecov and fails the build below `MIN_COVERAGE_PCT` (currently `0`, ratcheted up each slice). |
+| **PR + push to main** | `.github/workflows/coverage.yml` → `Coverage / kcov` job → uploads lcov.info to Codecov and fails the build below `MIN_COVERAGE_PCT` (currently `37`, ratcheted up each slice). |
 | **Local dev** | `bash tools/ci/run-coverage.sh` — works on Linux + macOS (xtrace is a bash primitive, no platform tools needed). |
 | **macOS dev** | Supported. xtrace-based instrumentation runs on macOS bash 3.2+ and Homebrew bash 5.x. |
 
 ## The current floor
 
-`MIN_COVERAGE_PCT=0` in `.github/workflows/coverage.yml`. Slice 1
+`MIN_COVERAGE_PCT=37` in `.github/workflows/coverage.yml`. Slice 1
 of [#883](https://github.com/sebastienrousseau/dotfiles/issues/883)
 established the baseline at **~2.7% measured** (~613 of ~22 500 lines
 across 231 files). Successive slices raised it; the current measured
-value sits at **~47%**.
+value sits at **37.89%** (`4687/12369` lines) after the #954
+deep-branch pass for `scripts/theme/switch.sh`,
+`scripts/diagnostics/mcp-doctor.sh`, and Linux/WSL branches in
+`scripts/diagnostics/doctor.sh`.
 
 To tighten:
 
