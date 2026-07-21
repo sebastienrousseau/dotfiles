@@ -48,3 +48,16 @@ opt.virtualedit = "block" -- Allow cursor to move where there is no text in visu
 opt.wildmode = "longest:full,full" -- Command-line completion mode
 opt.winminwidth = 5 -- Minimum window width
 opt.wrap = false -- Disable line wrap
+
+-- stale-buffer guard: reload changed files from disk instead of letting
+-- autowrite flush an old buffer over them (re-added 2026-07-21 after the
+-- uncommitted original was dropped in a branch sync). autoread is already
+-- set above; these autocmds make it actually fire, plus a visible warning.
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
+  command = "if mode() != 'c' && getcmdwintype() == '' | checktime | endif",
+})
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  callback = function()
+    vim.notify("File changed on disk; buffer reloaded", vim.log.levels.WARN)
+  end,
+})
