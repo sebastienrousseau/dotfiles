@@ -46,10 +46,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - name: Harden runner (audit mode)
+      - name: Harden runner (block mode)
         uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
-          egress-policy: audit
+          egress-policy: block
+          # Isolated jobs: checkout + a local script only, no external
+          # fetches. Endpoints are the GitHub set the runner needs to pull
+          # actions and the repo. If a future step here needs more egress,
+          # add it or revert this job to `audit`.
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            codeload.github.com:443
+            objects.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Verify docs/manual/command-index.md is in sync
         run: bash tools/docs/generate-command-index.sh --check
@@ -59,10 +69,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - name: Harden runner (audit mode)
+      - name: Harden runner (block mode)
         uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
-          egress-policy: audit
+          egress-policy: block
+          # Isolated jobs: checkout + a local script only, no external
+          # fetches. Endpoints are the GitHub set the runner needs to pull
+          # actions and the repo. If a future step here needs more egress,
+          # add it or revert this job to `audit`.
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            codeload.github.com:443
+            objects.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Verify version-bearing files match defaults/.chezmoidata.toml
         run: bash scripts/qa/check-version-consistency.sh
