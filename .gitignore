@@ -67,6 +67,9 @@ yarn-error.log*
 # Version-sync backups (timestamped, not needed in repo)
 .version-sync-backup/
 
+# Local scratch archive dirs (random-suffixed, not needed in repo)
+archive-*/
+
 # Machine-specific configs (local only, never pushed)
 dot_etc/machines/
 install/provision/run_onchange_60-macbookair9-1-zorinos.sh.tmpl

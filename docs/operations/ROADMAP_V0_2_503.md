@@ -5,6 +5,12 @@ date: 2026-05-17
 
 # v0.2.503 — Enterprise-Ready Cross-Platform Polish
 
+> **Superseded / historical.** This is the frozen roadmap for the v0.2.503
+> release (May 2026). For current direction see the canonical
+> [ROADMAP](../../ROADMAP.md); active work lives in
+> [GitHub Issues](https://github.com/sebastienrousseau/dotfiles/issues) and
+> [Milestones](https://github.com/sebastienrousseau/dotfiles/milestones).
+
 ## Why this release
 
 The R4 audit (`HARD_AUDIT_2026.md` Part 8) ranked the framework
