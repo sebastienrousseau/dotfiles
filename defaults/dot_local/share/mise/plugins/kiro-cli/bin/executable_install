@@ -14,5 +14,6 @@ cp "$download_path/kirocli/bin/kiro-cli-term" "$install_path/bin/"
 
 # Create symlink for 'kiro'
 ln -sf "kiro-cli" "$install_path/bin/kiro"
+ln -sf "kiro-cli" "$install_path/bin/kiri"
 
 echo "Kiro CLI installed to $install_path"

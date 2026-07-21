@@ -59,6 +59,7 @@ fi
 # Kiro CLI (AI terminal assistant)
 if command -v kiro-cli &>/dev/null; then
   alias kiro='kiro-cli'
+  alias kiri='kiro-cli'
   alias kic='kiro-cli chat'
   alias kit='kiro-cli term'
 fi

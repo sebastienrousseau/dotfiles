@@ -39,6 +39,8 @@ check_contains "$REPO_ROOT/defaults/dot_config/shell/00-core-paths.sh.tmpl" '${H
 check_contains "$REPO_ROOT/defaults/dot_config/fish/conf.d/env.fish.tmpl" '$HOME/.kimi-code/bin'
 check_contains "$REPO_ROOT/defaults/dot_config/nushell/env.nu.tmpl" '.kimi-code/bin'
 check_contains "$REPO_ROOT/defaults/dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl" '.kimi-code/bin'
+check_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh" "alias kiri='kiro-cli'"
+check_contains "$REPO_ROOT/defaults/dot_local/share/mise/plugins/kiro-cli/bin/executable_install" 'ln -sf "kiro-cli" "$install_path/bin/kiri"'
 check_contains "$APPLY_FILE" "sgpt|pipx:shell-gpt|Shell-GPT"
 check_contains "$APPLY_FILE" "ollama|aqua:ollama/ollama|Ollama"
 check_contains "$APPLY_FILE" "kiro-cli|kiro-cli|Kiro CLI"
