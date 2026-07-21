@@ -2,6 +2,48 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.512 — 2026-07-21
+
+### Added
+
+- **`dot-ui`** — a shared Bubble Tea (Go) renderer for the `dot` CLI: themed
+  tables across all list/table commands, a unified `dot-ui pick` that replaces
+  fzf in the theme picker, and a step-runner façade. Degrades gracefully when
+  Go is absent, so it never fails a `chezmoi apply`.
+- **AI CLIs** — Kimi Code CLI support, with a Kiri compatibility shim.
+- **Themes** — regenerated the full theme set from the updated wallpaper
+  library; system wallpapers are now opt-in (only discovered themes are
+  assembled); `bloom-light` is the new default theme.
+- **`corralctl`** — scheduled daily repo sync.
+- Symlink iCloud Drive folders into home.
+
+### Changed
+
+- **Theme engine overhaul** — terminals always use the dark palette with an
+  AAA light ramp; Apple-consistent light ANSI ramp; accurate wallpaper counts
+  and dominant-colour tracking; `dot-theme-sync` now drives through the shared
+  UI.
+- **mise** — folded `~/mise.toml` overrides into the managed base layer; bumped
+  topgrade to 17.4.0 and dropped the typos pin.
+- Bumped GitHub Actions pins (minor-patch group plus setup-go/node/python,
+  codeql-action, and action-gh-release), folding Dependabot #977 and #978.
+
+### Fixed
+
+- **Themes / terminals** — readable light-mode palettes (fixed bg/fg with
+  AA/AAA ANSI contrast); kitty now renders light themes, is opaque in light
+  mode, and gets a runtime reloader; tmux client redraw across all servers so
+  existing sessions refresh immediately; regen-proof fallback themes; correct
+  macOS accent mapping and per-mode HEIC frame resolution; no workspace freeze
+  or WallpaperAgent restart on apply.
+- **git** — render `allowed_signers` and guard it on a missing key / unset
+  email.
+- **CI / reliability** — portable `timeout` shim for macOS (real `gtimeout`);
+  reliability tests made portable and environment-tolerant; diagnostics
+  scorecard to 100; copyright and coverage gate fixes.
+- **aliases** — the CD-completion load-once guard now actually gates.
+- Push the AUR package to `master`, not `main`.
+
 ## v0.2.511 — 2026-07-08
 
 Bug-fix release: restore shell aliases that were silently dropped after the CD-completion fragment.
