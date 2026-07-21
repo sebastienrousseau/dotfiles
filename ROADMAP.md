@@ -84,7 +84,7 @@ These paths are retained for old links only:
 | `docs/operations/ROADMAP.md` | Redirects here |
 | `docs/operations/ROADMAP_2026.md` | Historical 2026 audit plan; redirected here |
 | `docs/operations/ARCHITECTURE_ROADMAP.md` | Historical architecture plan; redirected here |
-| `docs/operations/ROADMAP_V0_2_503.md` | Frozen v0.2.503 plan; redirected here |
+| `docs/operations/ROADMAP_V0_2_503.md` | Frozen v0.2.512 plan; redirected here |
 | `docs/archive/LEGACY_ROADMAP.md` | Legacy archive; redirected here |
 
 ## How To Influence The Roadmap
