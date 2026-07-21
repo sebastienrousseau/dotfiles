@@ -7,6 +7,11 @@
 # jane.doe@example.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI...
 #
 # Git verifies SSH-signed commits against this trust roster.
+#
+# sync-versions.yml signs automated version-sync commits with this Actions bot
+# key. Keep it trusted locally so merge.verifySignatures accepts bot-authored
+# commits from this repository.
+action@github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAv9JFSBTuDRWh5kqV83Tx+dipPtSsH2diE6SmcLEONk
 {{- $signer_email := "" -}}
 {{- if hasKey . "git_email" }}{{ $signer_email = .git_email }}{{ else if hasKey . "email" }}{{ $signer_email = .email }}{{ end -}}
 {{- if eq $signer_email "sebastian.rousseau@gmail.com" }}
