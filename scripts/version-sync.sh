@@ -156,7 +156,11 @@ get_package_version() {
   fi
 
   local version
-  version=$(jq -r '.version' "$package_file" 2>/dev/null)
+  if command -v jq &>/dev/null; then
+    version=$(jq -r '.version' "$package_file" 2>/dev/null)
+  else
+    version=$(sed -nE 's/^[[:space:]]*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p' "$package_file" | head -n 1)
+  fi
   if [[ "$version" == "null" || -z "$version" ]]; then
     log_error "Could not extract version from package.json"
     exit 1
@@ -186,7 +190,17 @@ find_version_files() {
   # the paths match the EXCLUDE_FILES entries (which have no "./"),
   # otherwise excluded historical docs get rewritten.
   cd "$PROJECT_ROOT"
-  rg -l "v?$VERSION_PATTERN" --type md . 2>/dev/null | sed 's|^\./||' >"$temp_file" || true
+  if command -v rg &>/dev/null; then
+    rg -l "v?$VERSION_PATTERN" --type md . 2>/dev/null | sed 's|^\./||' >"$temp_file" || true
+  else
+    {
+      while IFS= read -r file; do
+        if grep -Eq "v?$VERSION_PATTERN" "$file" 2>/dev/null; then
+          printf '%s\n' "${file#./}"
+        fi
+      done < <(find . -type f -name '*.md' -print)
+    } >"$temp_file"
+  fi
 
   # Add known files that should be checked even if they don't have versions yet
   echo "README.md" >>"$temp_file"
@@ -369,26 +383,49 @@ verify_version_consistency() {
 
     # Extract only dotfiles-targeted version references (ignore unrelated tool versions).
     local versions_in_file=()
-    while IFS= read -r match; do
-      while IFS= read -r version; do
-        versions_in_file+=("$version")
-      done < <(printf "%s\n" "$match" | rg -o "v?$VERSION_PATTERN" || true)
-    done < <(
-      rg -v "MILESTONE" "$file" 2>/dev/null | rg -o \
-        -e "Version-v$VERSION_PATTERN" \
-        -e "/releases/tag/v$VERSION_PATTERN" \
-        -e "/dotfiles/v$VERSION_PATTERN/" \
-        -e "\\*\\*Version\\*\\*:[[:space:]]*v?$VERSION_PATTERN" \
-        -e "\\*\\*Dotfiles Version\\*\\*:[[:space:]]*v?$VERSION_PATTERN" \
-        -e "(^|[[:space:]])Version:[[:space:]]*v?$VERSION_PATTERN" \
-        -e "(^|[[:space:]])Dotfiles Version:[[:space:]]*v?$VERSION_PATTERN" \
-        -e "Version[[:space:]]*\`v?$VERSION_PATTERN\`" \
-        -e "\\(v$VERSION_PATTERN\\)" \
-        -e "/v$VERSION_PATTERN/" \
-        -e "v$VERSION_PATTERN\\b" \
-        -e "dotfiles:v?$VERSION_PATTERN" \
-        -e "notes — v$VERSION_PATTERN" || true
-    )
+    if command -v rg &>/dev/null; then
+      while IFS= read -r match; do
+        while IFS= read -r version; do
+          versions_in_file+=("$version")
+        done < <(printf "%s\n" "$match" | rg -o "v?$VERSION_PATTERN" || true)
+      done < <(
+        rg -v "MILESTONE" "$file" 2>/dev/null | rg -o \
+          -e "Version-v$VERSION_PATTERN" \
+          -e "/releases/tag/v$VERSION_PATTERN" \
+          -e "/dotfiles/v$VERSION_PATTERN/" \
+          -e "\\*\\*Version\\*\\*:[[:space:]]*v?$VERSION_PATTERN" \
+          -e "\\*\\*Dotfiles Version\\*\\*:[[:space:]]*v?$VERSION_PATTERN" \
+          -e "(^|[[:space:]])Version:[[:space:]]*v?$VERSION_PATTERN" \
+          -e "(^|[[:space:]])Dotfiles Version:[[:space:]]*v?$VERSION_PATTERN" \
+          -e "Version[[:space:]]*\`v?$VERSION_PATTERN\`" \
+          -e "\\(v$VERSION_PATTERN\\)" \
+          -e "/v$VERSION_PATTERN/" \
+          -e "v$VERSION_PATTERN\\b" \
+          -e "dotfiles:v?$VERSION_PATTERN" \
+          -e "notes — v$VERSION_PATTERN" || true
+      )
+    else
+      while IFS= read -r match; do
+        while IFS= read -r version; do
+          versions_in_file+=("$version")
+        done < <(printf "%s\n" "$match" | grep -Eo "v?$VERSION_PATTERN" || true)
+      done < <(
+        grep -Ev "MILESTONE" "$file" 2>/dev/null | grep -Eo \
+          -e "Version-v$VERSION_PATTERN" \
+          -e "/releases/tag/v$VERSION_PATTERN" \
+          -e "/dotfiles/v$VERSION_PATTERN/" \
+          -e "\\*\\*Version\\*\\*:[[:space:]]*v?$VERSION_PATTERN" \
+          -e "\\*\\*Dotfiles Version\\*\\*:[[:space:]]*v?$VERSION_PATTERN" \
+          -e "(^|[[:space:]])Version:[[:space:]]*v?$VERSION_PATTERN" \
+          -e "(^|[[:space:]])Dotfiles Version:[[:space:]]*v?$VERSION_PATTERN" \
+          -e "Version[[:space:]]*\`v?$VERSION_PATTERN\`" \
+          -e "\\(v$VERSION_PATTERN\\)" \
+          -e "/v$VERSION_PATTERN/" \
+          -e "v$VERSION_PATTERN([^0-9.]|$)" \
+          -e "dotfiles:v?$VERSION_PATTERN" \
+          -e "notes — v$VERSION_PATTERN" || true
+      )
+    fi
 
     if [[ ${#versions_in_file[@]} -eq 0 ]]; then
       continue
@@ -478,8 +515,11 @@ main() {
   fi
 
   # Find files with version references
-  local version_files
-  readarray -t version_files < <(find_version_files)
+  local version_files=()
+  local version_file
+  while IFS= read -r version_file; do
+    version_files+=("$version_file")
+  done < <(find_version_files)
 
   if [[ ${#version_files[@]} -eq 0 ]]; then
     log_warning "No files with version references found"
@@ -581,17 +621,6 @@ EOF
     exit 1
   fi
 }
-
-# Ensure we have required tools
-if ! command -v jq &>/dev/null; then
-  log_warning "jq is not installed — skipping version sync"
-  exit 0
-fi
-
-if ! command -v rg &>/dev/null; then
-  log_warning "ripgrep (rg) is not installed — skipping version sync"
-  exit 0
-fi
 
 # Run main function
 main "$@"
