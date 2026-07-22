@@ -501,7 +501,46 @@ _UI_STEPS_RICH=0
 _UI_STEPS_FD=""
 _UI_STEPS_PID=""
 _UI_STEPS_START=""
-declare -gA _UI_STEP_LABELS 2>/dev/null || true
+# Step id → label store.
+#
+# This was `declare -gA _UI_STEP_LABELS`. Associative arrays are bash 4
+# only, and macOS still ships 3.2 as /bin/bash. The `2>/dev/null ||
+# true` made the declaration look harmless, but the *use* was not: on
+# 3.2, `arr[some-id]=x` evaluates the subscript as arithmetic, so a
+# non-numeric id like "install-deps" became `install - deps` and, under
+# `set -u`, aborted with "install: unbound variable". Any `dot` command
+# using the steps API died on stock macOS in plain (non-dot-ui) mode.
+#
+# Parallel indexed arrays work identically on 3.2 and 4+. Step counts
+# are small (tens at most), so the linear lookup costs nothing.
+_UI_STEP_IDS=()
+_UI_STEP_LABEL_VALUES=()
+
+_ui_step_label_set() {
+  local id="$1" label="$2" i=0
+  while ((i < ${#_UI_STEP_IDS[@]})); do
+    if [[ "${_UI_STEP_IDS[$i]}" == "$id" ]]; then
+      _UI_STEP_LABEL_VALUES[$i]="$label"
+      return 0
+    fi
+    ((i++)) || true
+  done
+  _UI_STEP_IDS+=("$id")
+  _UI_STEP_LABEL_VALUES+=("$label")
+}
+
+# Echoes the stored label, or the id itself when none was recorded.
+_ui_step_label_get() {
+  local id="$1" i=0
+  while ((i < ${#_UI_STEP_IDS[@]})); do
+    if [[ "${_UI_STEP_IDS[$i]}" == "$id" ]]; then
+      printf '%s' "${_UI_STEP_LABEL_VALUES[$i]}"
+      return 0
+    fi
+    ((i++)) || true
+  done
+  printf '%s' "$id"
+}
 
 # Milliseconds since epoch (macOS `date` lacks %N → fall back to seconds).
 _ui_now_ms() {
@@ -544,7 +583,8 @@ ui_steps_begin() {
   ui_init
   _UI_STEPS_ACTIVE=1
   _UI_STEPS_START="$(_ui_now_ms)"
-  _UI_STEP_LABELS=()
+  _UI_STEP_IDS=()
+  _UI_STEP_LABEL_VALUES=()
 
   if _ui_steps_rich_ok; then
     _ui_export_theme_colors
@@ -587,8 +627,9 @@ ui_step() {
 
   # Plain mode: remember the label (set on the `run` event), print only on a
   # terminal state so each step is exactly one line.
-  [[ -n "$label" ]] && _UI_STEP_LABELS["$id"]="$label"
-  local lbl="${_UI_STEP_LABELS[$id]:-$id}"
+  [[ -n "$label" ]] && _ui_step_label_set "$id" "$label"
+  local lbl
+  lbl="$(_ui_step_label_get "$id")"
   case "$state" in
     ok) ui_ok "$lbl" "$detail" ;;
     skip) ui_info "$lbl" "$detail" ;;

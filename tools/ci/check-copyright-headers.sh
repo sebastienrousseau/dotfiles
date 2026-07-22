@@ -58,7 +58,13 @@ for i in "${!exts[@]}"; do
 done
 glob+="}"
 
-mapfile -t all_files < <(rg --files -g "$glob" 2>/dev/null || true)
+# `mapfile` is a bash 4 builtin; macOS still ships bash 3.2 as
+# /bin/bash, where it fails with "command not found" (rc 127) and this
+# check silently reports nothing. Read the list portably instead.
+all_files=()
+while IFS= read -r _line; do
+  [[ -n "$_line" ]] && all_files+=("$_line")
+done < <(rg --files -g "$glob" 2>/dev/null || true)
 
 if [[ "${#all_files[@]}" -eq 0 ]]; then
   echo "::notice::No files matched extensions: $EXTENSIONS"

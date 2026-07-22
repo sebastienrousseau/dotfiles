@@ -136,7 +136,12 @@ fi
 # -----------------------------------------------------------------------------
 # Collect test files (mirror tests/framework/test_runner.sh discovery).
 # -----------------------------------------------------------------------------
-mapfile -t test_files < <(find "$TESTS_DIR/unit" -name 'test_*.sh' -type f | sort)
+# Portable read — `mapfile` is bash 4 only and this runner documents
+# macOS support, where /bin/bash is 3.2.
+test_files=()
+while IFS= read -r _line; do
+  [[ -n "$_line" ]] && test_files+=("$_line")
+done < <(find "$TESTS_DIR/unit" -name 'test_*.sh' -type f | sort)
 
 if [[ "${#test_files[@]}" -eq 0 ]]; then
   echo "::error::no unit test files discovered under $TESTS_DIR/unit" >&2
