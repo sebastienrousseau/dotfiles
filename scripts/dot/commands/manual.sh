@@ -31,27 +31,27 @@ USE_OFFLINE=false
 
 for arg in "$@"; do
   case "$arg" in
-  html | html-multi | pdf | epub | text | markdown) FORMAT="$arg" ;;
-  download) MODE="download" ;;
-  --offline) USE_OFFLINE=true ;;
-  --local) USE_LOCAL=true ;;
-  --url=*) MANUAL_URL="${arg#*=}" ;;
-  --help | -h)
-    sed -n 's/^# //p;s/^#$//p' "$0" | head -20
-    exit 0
-    ;;
+    html | html-multi | pdf | epub | text | markdown) FORMAT="$arg" ;;
+    download) MODE="download" ;;
+    --offline) USE_OFFLINE=true ;;
+    --local) USE_LOCAL=true ;;
+    --url=*) MANUAL_URL="${arg#*=}" ;;
+    --help | -h)
+      sed -n 's/^# //p;s/^#$//p' "$0" | head -20
+      exit 0
+      ;;
   esac
 done
 
 format_file() {
   case "$1" in
-  html) echo "dotfiles.html" ;;
-  html-multi) echo "html/index.html" ;;
-  pdf) echo "dotfiles.pdf" ;;
-  epub) echo "dotfiles.epub" ;;
-  text) echo "dotfiles.txt" ;;
-  markdown) echo "dotfiles-md.tar.gz" ;;
-  *) return 1 ;;
+    html) echo "dotfiles.html" ;;
+    html-multi) echo "html/index.html" ;;
+    pdf) echo "dotfiles.pdf" ;;
+    epub) echo "dotfiles.epub" ;;
+    text) echo "dotfiles.txt" ;;
+    markdown) echo "dotfiles-md.tar.gz" ;;
+    *) return 1 ;;
   esac
 }
 
@@ -96,24 +96,24 @@ resolve_source() {
 open_file() {
   local path="$1"
   case "$(uname -s)" in
-  Darwin)
-    # Use the system open explicitly — ~/.local/bin/open is a wrapper
-    # that would recurse on itself.
-    /usr/bin/open "$path"
-    ;;
-  Linux)
-    if command -v xdg-open &>/dev/null; then
-      xdg-open "$path"
-    elif command -v gio &>/dev/null; then
-      gio open "$path"
-    else
-      ui_err "manual" "no opener found (xdg-open, gio); use file://$path"
-      return 1
-    fi
-    ;;
-  *)
-    ui_info "manual" "saved to: $path"
-    ;;
+    Darwin)
+      # Use the system open explicitly — ~/.local/bin/open is a wrapper
+      # that would recurse on itself.
+      /usr/bin/open "$path"
+      ;;
+    Linux)
+      if command -v xdg-open &>/dev/null; then
+        xdg-open "$path"
+      elif command -v gio &>/dev/null; then
+        gio open "$path"
+      else
+        ui_err "manual" "no opener found (xdg-open, gio); use file://$path"
+        return 1
+      fi
+      ;;
+    *)
+      ui_info "manual" "saved to: $path"
+      ;;
   esac
 }
 
@@ -123,33 +123,33 @@ cmd_open() {
   [[ -z "$path" ]] && exit 1
 
   case "$FORMAT" in
-  text)
-    ${PAGER:-less} "$path"
-    ;;
-  markdown)
-    local tmpdir
-    tmpdir="$(mktemp -d)"
-    tar -xzf "$path" -C "$tmpdir"
-    ui_info "manual" "Markdown source extracted to: $tmpdir"
-    open_file "$tmpdir" 2>/dev/null || true
-    ;;
-  html)
-    if ! $USE_LOCAL && ! $USE_OFFLINE; then
-      open_file "$MANUAL_URL/"
-    else
+    text)
+      ${PAGER:-less} "$path"
+      ;;
+    markdown)
+      local tmpdir
+      tmpdir="$(mktemp -d)"
+      tar -xzf "$path" -C "$tmpdir"
+      ui_info "manual" "Markdown source extracted to: $tmpdir"
+      open_file "$tmpdir" 2>/dev/null || true
+      ;;
+    html)
+      if ! $USE_LOCAL && ! $USE_OFFLINE; then
+        open_file "$MANUAL_URL/"
+      else
+        open_file "$path"
+      fi
+      ;;
+    html-multi)
+      if ! $USE_LOCAL && ! $USE_OFFLINE; then
+        open_file "$MANUAL_URL/html/"
+      else
+        open_file "$path"
+      fi
+      ;;
+    *)
       open_file "$path"
-    fi
-    ;;
-  html-multi)
-    if ! $USE_LOCAL && ! $USE_OFFLINE; then
-      open_file "$MANUAL_URL/html/"
-    else
-      open_file "$path"
-    fi
-    ;;
-  *)
-    open_file "$path"
-    ;;
+      ;;
   esac
 }
 
@@ -164,6 +164,6 @@ cmd_download() {
 }
 
 case "$MODE" in
-open) cmd_open ;;
-download) cmd_download ;;
+  open) cmd_open ;;
+  download) cmd_download ;;
 esac

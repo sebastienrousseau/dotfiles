@@ -10,6 +10,10 @@ extend-ignore-re = [
   "\\b[0-9a-fA-F]{8}\\b",        # 8-char hex (with alpha)
   "\\(ba\\)\\?sh",               # the (ba)?sh malware-regex literal
   "bs-hl-color",                 # swaylock key name (bs = backspace)
+  # Character-class regex literals like `[Ee]rror` / `[Ww]arning`: typos
+  # reads the tail after `]` as its own word, "corrects" `rror` -> `error`
+  # and rewrites the pattern into the nonsensical `[Ee]error`.
+  "\\[[A-Za-z]{2,}\\][a-z]+",
 ]
 
 [default.extend-words]
