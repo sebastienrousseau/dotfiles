@@ -81,6 +81,8 @@ jobs:
           #            utils.sh reached 73.24%, floor=41.
           #   Slice 10: 42.30% measured after aliases branch-driving
           #             coverage. aliases.sh reached 70.00%, floor=42.
+          #   Slice 11: 42.99% measured after registry branch-driving
+          #             coverage. registry.sh reached 65.03%, floor=42.
           # Bump in lockstep with the slice that lands the bump.
           MIN_COVERAGE_PCT: '42'
         run: bash tools/ci/run-coverage.sh
