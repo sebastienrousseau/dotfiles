@@ -41,15 +41,53 @@ COV_TEST_TIMEOUT="${COV_TEST_TIMEOUT:-60}"
 
 # GNU `timeout` guards against a hung test stalling the sweep, but it does
 # not exist on stock macOS (it's coreutils). Prefer `timeout`, then
-# `gtimeout` (brew coreutils), else run with no wrapper — losing only the
-# hang-guard, not the measurement. Without this, every traced test on macOS
-# failed with "command not found: timeout" and coverage came out 0%.
+# `gtimeout` (brew coreutils), then a Perl alarm fallback available on
+# stock macOS. Without a wrapper, a single blocking traced test can stall
+# the entire sweep.
 COV_TIMEOUT_CMD=""
 if command -v timeout >/dev/null 2>&1; then
   COV_TIMEOUT_CMD="timeout"
 elif command -v gtimeout >/dev/null 2>&1; then
   COV_TIMEOUT_CMD="gtimeout"
+elif command -v perl >/dev/null 2>&1; then
+  COV_TIMEOUT_CMD="_cov_perl_timeout"
 fi
+
+# shellcheck disable=SC2317  # exported for indirect worker invocation
+_cov_perl_timeout() {
+  local kill_after=5
+  if [[ "${1:-}" == --kill-after=* ]]; then
+    kill_after="${1#--kill-after=}"
+    shift
+  fi
+  local seconds="${1:-60}"
+  shift || true
+  perl -e '
+    my $seconds = shift @ARGV;
+    my $kill_after = shift @ARGV;
+    my $pid = fork();
+    if (!defined $pid) { exit 127; }
+    if ($pid == 0) {
+      setpgrp(0, 0);
+      exec @ARGV;
+      exit 127;
+    }
+    $SIG{ALRM} = sub {
+      kill "TERM", -$pid;
+      sleep $kill_after;
+      kill "KILL", -$pid;
+      waitpid($pid, 0);
+      exit 124;
+    };
+    alarm $seconds;
+    waitpid($pid, 0);
+    my $status = $?;
+    alarm 0;
+    if ($status == -1) { exit 127; }
+    if ($status & 127) { exit 128 + ($status & 127); }
+    exit($status >> 8);
+  ' "$seconds" "$kill_after" "$@"
+}
 
 mkdir -p "$COVERAGE_DIR"
 trace_dir="$COVERAGE_DIR/traces"
@@ -110,7 +148,7 @@ echo "Tracing ${#test_files[@]} test files (parallel × $JOBS, timeout ${COV_TES
 # -----------------------------------------------------------------------------
 # Worker function — runs one test under xtrace, captures stderr.
 # -----------------------------------------------------------------------------
-# shellcheck disable=SC2329  # called indirectly via xargs subshell
+# shellcheck disable=SC2317,SC2329  # called indirectly via xargs subshell
 run_one() {
   local f="$1"
   local trace
@@ -132,6 +170,7 @@ export COV_TRACE_DIR="$trace_dir"
 export COV_BASH_ENV="$bash_env"
 export COV_TEST_TIMEOUT
 export COV_TIMEOUT_CMD
+export -f _cov_perl_timeout
 export -f run_one
 
 start_ts=$(date +%s)
