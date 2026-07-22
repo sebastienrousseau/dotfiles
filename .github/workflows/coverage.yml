@@ -83,8 +83,10 @@ jobs:
           #             coverage. aliases.sh reached 70.00%, floor=42.
           #   Slice 11: 42.99% measured after registry branch-driving
           #             coverage. registry.sh reached 65.03%, floor=42.
+          #   Slice 12: 45.04% measured after proxy/completion/agents/
+          #             secrets branch-driving coverage. floor=45.
           # Bump in lockstep with the slice that lands the bump.
-          MIN_COVERAGE_PCT: '42'
+          MIN_COVERAGE_PCT: '45'
         run: bash tools/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact
