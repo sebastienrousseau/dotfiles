@@ -110,6 +110,54 @@ test_start "test_counters_consistent"
 expected_tests=$((TESTS_PASSED + TESTS_FAILED + 1))
 assert_equals "$TESTS_RUN" "$expected_tests" "TESTS_RUN should equal PASSED + FAILED + 1 (current)"
 
+# ============ assert_exit_code errexit hygiene ============
+#
+# assert_exit_code used to end with an unconditional `set -e`. Suites
+# that deliberately run without errexit (so a failing assert_* tallies
+# instead of aborting) silently gained it after their first call. The
+# next command that legitimately returned non-zero then killed the
+# suite between test_start and its assertion, leaving
+# RUN != PASSED+FAILED — which is exactly what the framework-invariant
+# check flags. It must restore the caller's state, not impose one.
+
+test_start "assert_exit_code_preserves_errexit_off"
+if out="$(
+  bash -c '
+    set -uo pipefail          # deliberately no errexit
+    source "$1"
+    assert_exit_code 0 "true" >/dev/null 2>&1
+    case "$-" in
+      *e*) printf "LEAKED\n" ;;
+      *)   printf "CLEAN\n" ;;
+    esac
+  ' _ "$SCRIPT_DIR/../../framework/assertions.sh" 2>&1
+)" && [[ "$out" == *CLEAN* ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: errexit left off"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: ${out:-no output}"
+fi
+
+test_start "assert_exit_code_preserves_errexit_on"
+if out="$(
+  bash -c '
+    set -euo pipefail         # errexit on — must stay on
+    source "$1"
+    assert_exit_code 0 "true" >/dev/null 2>&1
+    case "$-" in
+      *e*) printf "KEPT\n" ;;
+      *)   printf "DROPPED\n" ;;
+    esac
+  ' _ "$SCRIPT_DIR/../../framework/assertions.sh" 2>&1
+)" && [[ "$out" == *KEPT* ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: errexit preserved"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: ${out:-no output}"
+fi
+
 echo ""
 echo "Framework edge case tests completed."
 print_summary

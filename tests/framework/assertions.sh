@@ -97,11 +97,27 @@ assert_exit_code() {
   shift
   local cmd="$*"
   local actual
+
+  # Save the caller's errexit state rather than assuming it was on.
+  # This unconditionally ran `set -e` on the way out, which switched
+  # errexit ON for suites that deliberately run without it (the
+  # assert_* helpers return non-zero on failure, so `set -e` would
+  # abort the suite at the first failed assertion instead of tallying
+  # it). The leak meant the next command that legitimately returned
+  # non-zero — `files=$(rg ...)` with no matches, say — killed the
+  # suite between test_start and its assertion, leaving
+  # RUN != PASSED+FAILED and tripping the framework-invariant check.
+  local _had_errexit=0
+  case "$-" in
+    *e*) _had_errexit=1 ;;
+  esac
+
   set +e
   # shellcheck disable=SC2086
   eval "$cmd" </dev/null >/dev/null 2>&1
   actual=$?
-  set -e
+  ((_had_errexit)) && set -e
+
   assert_equals "$expected" "$actual" "exit code for: $cmd"
 }
 
