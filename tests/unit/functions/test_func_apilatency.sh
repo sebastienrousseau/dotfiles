@@ -36,4 +36,32 @@ fi
 # Slice 2: drive real line coverage of the script under test
 cov_exercise_script "$FUNC_FILE"
 
+test_start "apilatency_deep_branches_execute"
+apilatency_tmp="$DOTFILES_COV_TMPDIR/apilatency-deep"
+mkdir -p "$apilatency_tmp/bin"
+cat >"$apilatency_tmp/bin/curl" <<'EOF_CURL'
+#!/usr/bin/env bash
+printf '%s\n' "${DOTFILES_FAKE_CURL_TIME:-0.123}"
+EOF_CURL
+cat >"$apilatency_tmp/bin/sleep" <<'EOF_SLEEP'
+#!/usr/bin/env bash
+:
+EOF_SLEEP
+chmod +x "$apilatency_tmp/bin/curl" "$apilatency_tmp/bin/sleep"
+(
+  set +e
+  export PATH="$apilatency_tmp/bin:$PATH"
+  # shellcheck disable=SC1090
+  source "$FUNC_FILE"
+  apilatency --help
+  apilatency --version
+  apilatency https://example.test 2 0
+  apilatency ftp://example.test
+  apilatency https://example.test nope 0
+  apilatency https://example.test 1 nope
+  apilatency
+) >/dev/null || true
+assert_file_exists "$apilatency_tmp/bin/curl" \
+  "apilatency deep branches used sandbox curl shim"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

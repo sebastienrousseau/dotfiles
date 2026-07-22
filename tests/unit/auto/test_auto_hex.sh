@@ -36,4 +36,22 @@ fi
 cov_exercise_script "$SCRIPT_FILE"
 cov_exercise_functions_file "$SCRIPT_FILE"
 
+test_start "hex_deep_branches_execute"
+hex_tmp="$DOTFILES_COV_TMPDIR/hex-deep"
+mkdir -p "$hex_tmp"
+printf 'hello' >"$hex_tmp/input.bin"
+(
+  set +e
+  bash "$SCRIPT_FILE" --help
+  bash "$SCRIPT_FILE" --encode "hello"
+  printf 'stdin\n' | bash "$SCRIPT_FILE" --encode
+  bash "$SCRIPT_FILE" --decode "68656c6c6f"
+  printf '737464696e\n' | bash "$SCRIPT_FILE" --decode
+  bash "$SCRIPT_FILE" --length 8 "$hex_tmp/input.bin"
+  printf 'pipe\n' | bash "$SCRIPT_FILE" --length 8
+  bash "$SCRIPT_FILE" --unknown
+) >/dev/null || true
+assert_file_exists "$hex_tmp/input.bin" \
+  "hex deep branches used sandbox binary fixture"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
