@@ -72,9 +72,18 @@ jobs:
           #            ai.sh 15→87). floor=35 (3-pt cushion).
           #   Slice 7: 37.89% measured after #954 deep-branch tests for
           #            switch.sh, mcp-doctor.sh, and Linux/WSL doctor.sh
-          #            branches. floor=37.
+          #            branches. floor=37. Landed at 37.64% on CI once
+          #            the doctor lspci abort was fixed — a 0.64-pt
+          #            cushion, thin enough that the next honest
+          #            re-measure could trip it.
+          #   Slice 8: 39.89% measured after runtime-exercise tests for
+          #            tools.sh + aliases.sh + env-emit.sh (dot tools
+          #            surface) and registry.sh. Those four files had
+          #            grep-only tests that asserted a function was
+          #            defined without ever calling it. floor=38
+          #            (~1.9-pt cushion).
           # Bump in lockstep with the slice that lands the bump.
-          MIN_COVERAGE_PCT: '37'
+          MIN_COVERAGE_PCT: '38'
         run: bash tools/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact
