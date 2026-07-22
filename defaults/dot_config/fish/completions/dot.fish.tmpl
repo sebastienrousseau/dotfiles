@@ -12,6 +12,7 @@ complete -c dot -n "__fish_use_subcommand" -a clean-cache -d "Clear shell initia
 complete -c dot -n "__fish_use_subcommand" -a prewarm -d "Regenerate shell caches for ultra-fast startup"
 complete -c dot -n "__fish_use_subcommand" -a cl -d "Claude CLI with context patterns"
 complete -c dot -n "__fish_use_subcommand" -a copilot -d "GitHub Copilot CLI with context patterns"
+complete -c dot -n "__fish_use_subcommand" -a kimi -d "Kimi CLI with context patterns"
 complete -c dot -n "__fish_use_subcommand" -a agy -d "Antigravity CLI with context patterns"
 complete -c dot -n "__fish_use_subcommand" -a kiro -d "Kiro CLI with context patterns"
 complete -c dot -n "__fish_use_subcommand" -a sgpt -d "Shell-GPT with context patterns"
@@ -22,7 +23,7 @@ complete -c dot -n "__fish_use_subcommand" -a ai -d "AI fleet cockpit, gateway, 
 complete -c dot -n "__fish_use_subcommand" -a add -d "Add a file to chezmoi source"
 
 # AI Pattern completions for AI CLIs
-for cmd in cl copilot agy kiro sgpt ollama opencode aider
+for cmd in cl copilot kimi agy kiro sgpt ollama opencode aider
     complete -c dot -n "__fish_seen_subcommand_from $cmd" -s p -l pattern -x -a "(ls -1 ~/.config/ai/patterns 2>/dev/null | sed 's/\.md\$//')"
 end
 

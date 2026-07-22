@@ -79,6 +79,33 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available"
 fi
 
+# Test: a zero-row table must render, not abort.
+#
+# Regression guard. ui_table_end and _ui_table_printf_fallback expanded
+# "${_UI_TABLE_ROWS[@]}" unguarded. On bash 3.2 — still /bin/bash on
+# macOS — expanding an empty array under `set -u` is an unbound-variable
+# error, which is fatal regardless of errexit. Any command rendering an
+# empty table (e.g. `dot registry search` with no matches) died instead
+# of printing an empty table. bash 4.4+ is unaffected, so this only
+# fails on the macOS runners.
+test_start "ui_table_empty_no_unbound_variable"
+if out="$(
+  bash -c '
+    set -euo pipefail
+    source "$1" || exit 1
+    ui_table_begin "Col A" "Col B"
+    ui_table_end
+    ui_table_sep
+    printf "SURVIVED\n"
+  ' _ "$UI_FILE" 2>&1
+)" && [[ "$out" == *SURVIVED* ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: empty table renders"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: aborted on empty table — ${out:-no output}"
+fi
+
 echo ""
 echo "UI library tests completed."
 # Slice 3 (#883): exercise the script under sandbox for line coverage

@@ -32,7 +32,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: audit
 
@@ -107,7 +107,7 @@ jobs:
 
   nightly-test-suite:
     name: Nightly / Test Suite
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@510ff7b4cc3dfa477c8376f56c294128b59dcfa2 # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@e28fc51b0e0ef19dd5dff873636a33f8f584facd # main
     with:
       min_coverage: "95"
       run_integration: false
@@ -131,7 +131,7 @@ jobs:
         os: [ubuntu-latest, macos-latest, macos-15-intel, macos-14]
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: audit
 
@@ -174,7 +174,7 @@ jobs:
     continue-on-error: true  # Beta tools may fail
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: audit
 
@@ -229,7 +229,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: audit
 
@@ -241,11 +241,14 @@ jobs:
         run: |
           echo "Running advanced secret detection..."
 
-          # Install truffleHog for additional secret detection
-          docker pull trufflesecurity/trufflehog:latest
+          # Install truffleHog for additional secret detection.
+          # Pinned by digest (was :latest) on 2026-07-21 to remove the
+          # mutable-tag supply-chain risk; bump the digest deliberately.
+          TRUFFLEHOG_IMAGE="trufflesecurity/trufflehog@sha256:59b244249d1a1aef4baa24fe73d3c931616264482580d806d77f6c74d26b3e42"
+          docker pull "$TRUFFLEHOG_IMAGE"
 
           # Scan git history (limited to avoid timeout)
-          timeout 300 docker run --rm -v "$(pwd):/src" trufflesecurity/trufflehog:latest \
+          timeout 300 docker run --rm -v "$(pwd):/src" "$TRUFFLEHOG_IMAGE" \
             git file:///src --only-verified --fail || {
             echo "⚠️ Trufflehog scan timed out or found issues"
           }
@@ -293,7 +296,7 @@ jobs:
     timeout-minutes: 25
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: audit
 
@@ -390,7 +393,7 @@ jobs:
     if: always()
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: audit
 

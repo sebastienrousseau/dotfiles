@@ -3,6 +3,8 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$repo_root"
 
-./tests/framework/test_runner.sh utility_functions
+printf 'Test runner: %s\n' "$repo_root/tests/framework/test_runner.sh"
+printf 'Run all tests: ./tests/framework/test_runner.sh\n'
+printf 'Run matching tests: ./tests/framework/test_runner.sh utility_functions\n'
+printf 'Run integration tests: RUN_INTEGRATION=1 ./tests/framework/test_runner.sh -i\n'

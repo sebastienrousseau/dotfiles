@@ -4,7 +4,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 set -euo pipefail
 
-# Dotfiles CLI Entry Point - v0.2.511
+# Dotfiles CLI Entry Point - v0.2.512
 
 # Ensure XDG Base Directory variables are set
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -22,7 +22,7 @@ if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
   . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
 fi
 
-VERSION="0.2.511"
+VERSION="0.2.512"
 
 COMMAND="${1:-}"
 if [ -n "${1:-}" ]; then
@@ -38,8 +38,8 @@ _resolve_source_dir() {
 
   if script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null)"; then
     script_dir="$script_path"
-    # Post-v0.2.511: the canonical dispatcher lives at <repo>/bin/dot, so
-    # $script_dir/.. is the repo root. Pre-v0.2.511 (and chezmoi-deployed
+    # Post-v0.2.512: the canonical dispatcher lives at <repo>/bin/dot, so
+    # $script_dir/.. is the repo root. Pre-v0.2.512 (and chezmoi-deployed
     # wrapper invocations that still exec the canonical) the dispatcher
     # was at <repo>/dot_local/bin/executable_dot, so $script_dir/../..
     # was the repo. Probe both to cover the transition.
@@ -225,6 +225,7 @@ AI|mode|Set or inspect agent operating profiles (ask/plan/apply/audit)|Bounded-a
 AI|agent|Profile-aware execution, agent card, a2a-card, session log, checkpoints, and conformance|Agent metadata and local audit trail.
 AI|cl|Claude CLI with context patterns|Context-aware Anthropic bridge.
 AI|copilot|GitHub Copilot CLI with context patterns|Context-aware Copilot bridge.
+AI|kimi|Kimi CLI with context patterns|Context-aware Moonshot AI bridge.
 AI|agy|Antigravity CLI with context patterns|Context-aware Antigravity bridge.
 AI|kiro|Kiro CLI with context patterns|Context-aware Kiro bridge.
 AI|sgpt|Shell-GPT with context patterns|Context-aware Shell-GPT bridge.
@@ -374,6 +375,7 @@ help|Show the overview or a focused command reference.|dot help\ndot help doctor
 --version|Show the installed dotfiles version.|dot --version\ndot version
 version|Show the installed dotfiles version.|dot --version\ndot version
 teleport|Deploy the dotfiles environment to a remote host over SSH.|dot teleport user@host
+init|Bootstrap a foreign dotfiles repo through chezmoi + dot.|dot init <github-user>\ndot init owner/repo --dry-run\ndot init https://example.com/repo.git
 uninstall|Remove the managed dotfiles environment (prompts unless --force).|dot uninstall\ndot uninstall --force
 policy|Check and enforce security policies across the environment.|dot policy
 secret-audit|Audit secret hygiene and leakage surface.|dot secret-audit
@@ -392,6 +394,7 @@ cl|Run the Claude CLI with dotfiles context patterns.|dot cl "explain this repo'
 claude|Run the Claude CLI bridge (alias for cl).|dot claude "summarise CHANGELOG"\ndot claude --model sonnet
 codex|Run the OpenAI Codex CLI with dotfiles context patterns.|dot codex "refactor wallpaper-sync.sh"\ndot codex --review
 copilot|Run the GitHub Copilot CLI with dotfiles context patterns.|dot copilot suggest "review my latest commit"\ndot copilot explain
+kimi|Run the Kimi CLI with dotfiles context patterns.|dot kimi "review this branch"\ndot kimi --style hardener "audit scripts"
 agy|Run the Antigravity CLI with dotfiles context patterns.|dot agy "audit security/firewall.sh"\ndot agy chat
 goose|Run the Goose CLI with dotfiles context patterns.|dot goose session start\ndot goose run
 kiro|Run the Kiro CLI with dotfiles context patterns.|dot kiro "design a new dot subcommand"
@@ -485,6 +488,7 @@ cl|ai
 claude|ai
 codex|ai
 copilot|ai
+kimi|ai
 agy|ai
 goose|ai
 kiro|ai

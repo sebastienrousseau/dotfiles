@@ -490,6 +490,25 @@ cmd_profile() {
 
 # Dispatch — aliases and alias-check are defined in aliases.sh (sourced above)
 case "${1:-}" in
+  --help | -h | help)
+    cat <<'EOF'
+Usage: tools.sh <command> [args...]
+
+Commands:
+  tools, alias-check, new, packages, log-rotate, setup, aliases, env,
+  profile, lint
+EOF
+    ;;
+  "")
+    cat <<'EOF'
+Usage: tools.sh <command> [args...]
+
+Commands:
+  tools, alias-check, new, packages, log-rotate, setup, aliases, env,
+  profile, lint
+EOF
+    exit 1
+    ;;
   tools)
     shift
     cmd_tools "$@"

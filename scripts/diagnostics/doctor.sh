@@ -169,7 +169,7 @@ fi
 
 # --- AI CLIs ---
 _section "AI CLIs"
-for cmd in claude copilot agy sgpt ollama opencode aider kiro-cli; do
+for cmd in claude copilot kimi agy sgpt ollama opencode aider kiro-cli; do
   if check_cmd "$cmd"; then
     _ok "$cmd" "$(pretty_path "$(get_cmd_path "$cmd")")"
   else
@@ -226,6 +226,9 @@ fi
 
 # --- OS-specific detection ---
 _os="" _host="" _cpu="" _cpu_cores="" _gpu="" _mem="" _resolution="" _packages="" _de=""
+os_release_file="${DOT_DOCTOR_OS_RELEASE:-/etc/os-release}"
+proc_root="${DOT_DOCTOR_PROC_ROOT:-/proc}"
+sys_root="${DOT_DOCTOR_SYS_ROOT:-/sys}"
 
 if [[ "$_os_name" == "Darwin" ]]; then
   # macOS
@@ -243,33 +246,37 @@ if [[ "$_os_name" == "Darwin" ]]; then
   _packages="$(brew list --formula 2>/dev/null | wc -l | tr -d ' ') (brew)"
   _de="Aqua"
 
-elif [[ -r /etc/os-release ]]; then
+elif [[ -r "$os_release_file" ]]; then
   # Linux (Debian, Ubuntu, Arch, Fedora, RHEL, etc.)
   # shellcheck disable=SC1091
-  . /etc/os-release
+  . "$os_release_file"
   _os="${PRETTY_NAME:-$ID}"
 
-  _host="$(cat /sys/devices/virtual/dmi/id/product_name 2>/dev/null || cat /sys/firmware/devicetree/base/model 2>/dev/null || echo "Linux")"
+  _host="$(cat "$sys_root/devices/virtual/dmi/id/product_name" 2>/dev/null || cat "$sys_root/firmware/devicetree/base/model" 2>/dev/null || echo "Linux")"
 
   if command -v lscpu >/dev/null 2>&1; then
     _cpu="$(lscpu | awk -F': +' '/Model name/{print $2}')"
     _cpu_cores="$(lscpu | awk -F': +' '/^CPU\(s\):/{print $2}')"
   else
-    _cpu="$(grep -m1 'model name' /proc/cpuinfo 2>/dev/null | cut -d: -f2 | sed 's/^ //' || uname -p)"
-    _cpu_cores="$(grep -c '^processor' /proc/cpuinfo 2>/dev/null || echo "?")"
+    _cpu="$(grep -m1 'model name' "$proc_root/cpuinfo" 2>/dev/null | cut -d: -f2 | sed 's/^ //' || uname -p)"
+    _cpu_cores="$(grep -c '^processor' "$proc_root/cpuinfo" 2>/dev/null || echo "?")"
   fi
 
   if command -v lspci >/dev/null 2>&1; then
-    _gpu="$(lspci 2>/dev/null | grep -iE 'vga|3d|display' | head -1 | sed 's/.*: //')"
+    # Headless hosts (VMs, containers, CI runners) expose no display
+    # controller, so `grep` exits 1 and — under `set -euo pipefail` —
+    # would abort the whole report mid-section. Absorb the miss.
+    _gpu="$(lspci 2>/dev/null | grep -iE 'vga|3d|display' | head -1 | sed 's/.*: //' || true)"
+    _gpu="${_gpu:-n/a}"
   else
     _gpu="n/a"
   fi
 
   if command -v free >/dev/null 2>&1; then
     _mem="$(free -b | awk '/Mem:/{printf "%.2f GiB / %.2f GiB", $3/1073741824, $2/1073741824}')"
-  elif [[ -r /proc/meminfo ]]; then
-    _mem_total_kb="$(awk '/MemTotal/{print $2}' /proc/meminfo)"
-    _mem_avail_kb="$(awk '/MemAvailable/{print $2}' /proc/meminfo)"
+  elif [[ -r "$proc_root/meminfo" ]]; then
+    _mem_total_kb="$(awk '/MemTotal/{print $2}' "$proc_root/meminfo")"
+    _mem_avail_kb="$(awk '/MemAvailable/{print $2}' "$proc_root/meminfo")"
     _mem_used_kb=$((_mem_total_kb - _mem_avail_kb))
     _mem="$(awk "BEGIN{printf \"%.2f GiB / %.2f GiB\", ${_mem_used_kb}/1048576, ${_mem_total_kb}/1048576}")"
   else
@@ -319,7 +326,7 @@ fi
 
 # WSL detection and overrides
 _wsl=""
-if [[ -f /proc/version ]] && grep -qi microsoft /proc/version 2>/dev/null; then
+if [[ -f "$proc_root/version" ]] && grep -qi microsoft "$proc_root/version" 2>/dev/null; then
   _wsl="yes"
   _os="${_os} (WSL)"
   _de="Windows Desktop (WSL)"

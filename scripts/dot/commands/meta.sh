@@ -251,6 +251,23 @@ case "${1:-}" in
     shift
     cmd_mode "$@"
     ;;
+  --help | -h | help)
+    cat <<'EOF'
+Usage: meta.sh <command> [args...]
+
+Commands:
+  cache-refresh, prewarm, docs, learn, keys, sandbox, mcp, mode, agent
+EOF
+    ;;
+  "")
+    cat <<'EOF'
+Usage: meta.sh <command> [args...]
+
+Commands:
+  cache-refresh, prewarm, docs, learn, keys, sandbox, mcp, mode, agent
+EOF
+    exit 1
+    ;;
   *)
     echo "Unknown meta command: ${1:-}" >&2
     exit 1

@@ -4,14 +4,19 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+bin_dir="$repo_root/defaults/dot_local/bin"
 
 # Verify all executable scripts have valid syntax
 count=0
-for script in "$repo_root"/dot_local/bin/executable_*; do
+for script in "$bin_dir"/executable_*; do
+  [[ -e "$script" ]] || continue
   [[ -d "$script" ]] && continue
   # Skip non-shell files
   head -1 "$script" | grep -q 'bash\|sh' || continue
-  bash -n "$script" || { printf 'FAIL: %s\n' "$script" >&2; exit 1; }
+  bash -n "$script" || {
+    printf 'FAIL: %s\n' "$script" >&2
+    exit 1
+  }
   count=$((count + 1))
 done
 printf 'All %d CLI utilities pass syntax check.\n' "$count"

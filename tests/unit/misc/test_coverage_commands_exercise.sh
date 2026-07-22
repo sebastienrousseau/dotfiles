@@ -54,4 +54,15 @@ done
 test_start "dot_command_help_exercised"
 assert_file_exists "$REPO_ROOT/bin/dot" "dot dispatcher exercised"
 
+# 5. corralctl-sync — scheduled launchd sync helper. NOT executed: it drives a
+#    real multi-repo `corralctl` sync, hardcodes PATH, and writes to
+#    ~/Library/Logs, so it is validated statically instead.
+CORRALCTL_SYNC="$REPO_ROOT/defaults/dot_local/bin/executable_corralctl-sync.sh"
+test_start "corralctl_sync_present"
+assert_file_exists "$CORRALCTL_SYNC" "corralctl-sync.sh present"
+test_start "corralctl_sync_syntax"
+assert_true "bash -n '$CORRALCTL_SYNC'" "corralctl-sync.sh parses cleanly"
+test_start "corralctl_sync_contract"
+assert_file_contains "$CORRALCTL_SYNC" "corralctl" "corralctl-sync invokes corralctl"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

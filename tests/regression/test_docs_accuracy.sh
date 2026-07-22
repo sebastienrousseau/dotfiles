@@ -50,7 +50,7 @@ test_start "ai_doc_bridge_commands_match_code"
 # Every bridge command documented in AI.md must exist in ai.sh dispatch
 ai_script="$REPO_ROOT/scripts/dot/commands/ai.sh"
 failures=0
-for cmd in cl copilot agy kiro sgpt ollama opencode aider autohand vibe qwen zai; do
+for cmd in cl copilot kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai; do
   if grep -q "dot $cmd" "$REPO_ROOT/docs/AI.md" 2>/dev/null; then
     if ! grep -q "$cmd" "$ai_script" 2>/dev/null; then
       failures=$((failures + 1))
@@ -176,7 +176,7 @@ while IFS= read -r doc; do
     [[ -z "$link" ]] && continue
     [[ "$link" == http* ]] && continue
     [[ "$link" == "#"* ]] && continue
-    [[ "$link" == /* ]] && continue  # Skip absolute paths (env-specific)
+    [[ "$link" == /* ]] && continue # Skip absolute paths (env-specific)
     # Resolve relative to the doc's directory
     doc_dir="$(dirname "$doc")"
     target="$doc_dir/$link"
@@ -344,7 +344,7 @@ test_start "changelog_exists"
 assert_file_exists "$REPO_ROOT/CHANGELOG.md" "CHANGELOG.md must exist"
 
 test_start "changelog_has_content"
-changelog_lines=$(wc -l < "$REPO_ROOT/CHANGELOG.md" 2>/dev/null | tr -d ' ')
+changelog_lines=$(wc -l <"$REPO_ROOT/CHANGELOG.md" 2>/dev/null | tr -d ' ')
 if [[ "$changelog_lines" -ge 10 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: CHANGELOG.md has $changelog_lines lines"

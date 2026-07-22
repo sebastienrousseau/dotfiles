@@ -4,7 +4,30 @@ set -euo pipefail
 # Measure time to load heavy layers in a fresh interactive shell
 # Usage: dot-load-benchmark [runs]
 
+usage() {
+  echo "Usage: dot-load-benchmark [runs]"
+  echo "  runs: positive integer number of benchmark runs (default: 5)"
+}
+
+case "${1:-}" in
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  -*)
+    printf 'Unknown option: %s\n' "$1" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
+
 RUNS=${1:-5}
+if ! [[ "$RUNS" =~ ^[1-9][0-9]*$ ]]; then
+  printf 'Invalid runs value: %s\n' "$RUNS" >&2
+  usage >&2
+  exit 2
+fi
+
 TOTAL=0
 
 printf "dot load benchmark (runs=%s)\n" "$RUNS"
@@ -20,7 +43,7 @@ for i in $(seq 1 "$RUNS"); do
     else
       echo 0
     fi
-  ')
+  ' 2>/dev/null)
   printf "  run %s: %0.1f ms\n" "$i" "$ms"
   TOTAL=$(awk -v a="$TOTAL" -v b="$ms" 'BEGIN {print a+b}')
 

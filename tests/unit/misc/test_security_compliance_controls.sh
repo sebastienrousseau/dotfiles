@@ -78,6 +78,7 @@ fi
 test_start "allowed_signers_file_documented"
 assert_file_contains "$allowed_signers_file" "Git verifies SSH-signed commits" "allowed signers file documents trust roster"
 assert_file_contains "$allowed_signers_file" "sebastian.rousseau@gmail.com ssh-ed25519" "allowed signers file contains the current trusted signer"
+assert_file_contains "$allowed_signers_file" "action@github.com ssh-ed25519" "allowed signers file contains the Actions bot signer"
 
 test_start "root_flake_lock_present"
 assert_file_exists "$flake_lock_file" "root flake.lock exists for deterministic Nix inputs"

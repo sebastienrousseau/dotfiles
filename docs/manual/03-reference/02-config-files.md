@@ -122,7 +122,7 @@ sourceDir = "/Users/you/.dotfiles"
 
 [data]
 machine = "surface-pro"      # selects preset from hardware.toml
-theme = "dome-dark"          # overrides .chezmoidata.toml default
+theme = "monterey-dark"      # overrides .chezmoidata.toml default
 default_shell = "fish"
 terminal_font_size = 11
 email = "you@example.com"

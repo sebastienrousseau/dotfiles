@@ -5,10 +5,25 @@
 set -eu
 
 # R5: validate input
-if [ -z "${1:-}" ]; then
-  echo "Usage: extract <archive>" >&2
-  exit 1
-fi
+usage() {
+  echo "Usage: extract <archive>"
+}
+
+case "${1:-}" in
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  "")
+    usage >&2
+    exit 1
+    ;;
+  -*)
+    printf 'Unknown option: %s\n' "$1" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
 
 # If tool is missing, use Nix to run it.
 run_if_not_found() {

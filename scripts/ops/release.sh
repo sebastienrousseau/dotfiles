@@ -19,6 +19,8 @@ source "$SCRIPT_DIR/../../lib/dot/ui.sh"
 source "$SCRIPT_DIR/../../lib/dot/log.sh"
 export DOT_COMMAND="release"
 ui_init
+BOLD="${BOLD:-}"
+NC="${NC:-}"
 
 log_info() { ui_info "$@"; }
 log_success() { ui_ok "$@"; }
@@ -129,11 +131,18 @@ main() {
   done
 
   # Concurrency guard
-  LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/dotfiles-release.lock"
-  exec 9>"$LOCK_FILE"
-  if ! flock -n 9; then
-    ui_warn "Already running" "Another release is in progress"
-    exit 0
+  local lock_dir
+  lock_dir="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}"
+  if [[ ! -d "$lock_dir" || ! -w "$lock_dir" ]]; then
+    lock_dir="${TMPDIR:-/tmp}"
+  fi
+  LOCK_FILE="$lock_dir/dotfiles-release.lock"
+  if command -v flock >/dev/null 2>&1; then
+    exec 9>"$LOCK_FILE"
+    if ! flock -n 9; then
+      ui_warn "Already running" "Another release is in progress"
+      exit 0
+    fi
   fi
 
   cd "$PROJECT_ROOT"

@@ -54,7 +54,7 @@ Examples (depend on what's present on your system):
 |:---|:---|
 | `~/Pictures/Wallpapers/tahoe.heic` (dynamic HEIC, 2 frames) | `tahoe-dark`, `tahoe-light` |
 | `/System/Library/Desktop Pictures/Sonoma.heic` | `sonoma-dark`, `sonoma-light` |
-| `/System/Library/Desktop Pictures/.thumbnails/Dome Dark.heic` + `Dome Light.heic` | `dome-dark`, `dome-light` |
+| `/System/Library/Desktop Pictures/.thumbnails/Monterey Dark.heic` + `Monterey Light.heic` | `monterey-dark`, `monterey-light` |
 
 Only paired themes (with both dark and light variants) appear in `dot theme` and `dot theme list`.
 

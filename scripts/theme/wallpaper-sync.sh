@@ -43,6 +43,16 @@ detect_mode() {
     esac
   fi
 
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    # AppleInterfaceStyle is "Dark" in dark mode and unset in light mode.
+    if [[ "$(defaults read -g AppleInterfaceStyle 2>/dev/null || true)" == "Dark" ]]; then
+      echo "dark"
+    else
+      echo "light"
+    fi
+    return 0
+  fi
+
   if command -v gsettings &>/dev/null; then
     local scheme
     scheme="$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null || echo "")"
@@ -125,10 +135,16 @@ wallpaper_for_theme() {
       found && /^wallpaper/ { sub(/.*= *"/, ""); sub(/".*/, ""); print; exit }
     ' "$themes_file")"
     if [[ -n "$stored_wp" ]]; then
-      # Cross-platform: resolve macOS paths on Linux
+      # Home-relative form (current generator): ~/Pictures/... → $HOME/Pictures/...
+      # Prefix-strip comparison avoids a quoted-tilde glob (SC2088); the tilde
+      # here is a literal leading character, not a path to expand.
+      if [[ "$stored_wp" != "${stored_wp#\~/}" ]]; then
+        stored_wp="${HOME}/${stored_wp#\~/}"
+      fi
+      # Cross-platform: resolve legacy absolute macOS paths on Linux
       if [[ ! -f "$stored_wp" ]]; then
         if [[ "$stored_wp" == /Users/* ]]; then
-          # /Users/<user>/Pictures/... → $HOME/Pictures/...
+          # /Users/<user>/Pictures/... → $HOME/Pictures/... (pre-relativize data)
           stored_wp="${HOME}/${stored_wp#/Users/*/}"
         elif [[ "$stored_wp" == /System/* ]]; then
           # macOS system wallpapers don't exist on Linux — skip to next fallback
@@ -397,6 +413,56 @@ ensure_linux_compatible() {
   printf '%s\n' "$wp"
 }
 
+# macOS: a dynamic appearance HEIC (two frames + apple_desktop:apr metadata)
+# set as a plain imageFile gets pinned to a single frame and stops tracking
+# Light/Dark — so Light mode can show the dark frame. Extract the frame that
+# matches the requested mode (0 = light, 1 = dark, per Apple's apr convention,
+# same as the Linux -0/-1 path) to a small single-image HEIC and apply that
+# instead. Single-image HEICs and non-HEICs are returned unchanged.
+macos_appearance_frame() {
+  local wp="$1" mode="$2"
+  [[ "${wp##*.}" == "heic" ]] || {
+    printf '%s\n' "$wp"
+    return
+  }
+  command -v magick &>/dev/null || {
+    printf '%s\n' "$wp"
+    return
+  }
+  local frames
+  frames="$(magick identify "$wp" 2>/dev/null | wc -l | tr -d ' ')"
+  [[ "${frames:-0}" -ge 2 ]] || {
+    printf '%s\n' "$wp"
+    return
+  }
+
+  local idx=0
+  [[ "$mode" == "dark" ]] && idx=1
+  local cache_dir="$WALLPAPER_DIR/.dot-frames"
+  mkdir -p "$cache_dir" 2>/dev/null || {
+    printf '%s\n' "$wp"
+    return
+  }
+  local frame
+  frame="$cache_dir/$(basename "${wp%.heic}")-${mode}.heic"
+
+  # Reuse a cached frame that is newer than its source wallpaper.
+  if [[ -f "$frame" && "$frame" -nt "$wp" ]]; then
+    printf '%s\n' "$frame"
+    return
+  fi
+  local tmp
+  tmp="$(mktemp "${frame%.heic}.XXXXXX.heic")"
+  if magick "${wp}[${idx}]" "$tmp" 2>/dev/null && [[ -s "$tmp" ]]; then
+    if mv -f "$tmp" "$frame" 2>/dev/null; then
+      printf '%s\n' "$frame"
+      return
+    fi
+  fi
+  rm -f "$tmp" 2>/dev/null
+  printf '%s\n' "$wp"
+}
+
 # Apply wallpaper based on platform and compositor
 apply_wallpaper() {
   local wp="$1"
@@ -408,6 +474,10 @@ apply_wallpaper() {
 
   case "$(uname -s)" in
     Darwin)
+      # Resolve a dynamic HEIC down to the mode-appropriate static frame so
+      # macOS renders the right appearance instead of pinning one frame.
+      wp="$(macos_appearance_frame "$wp" "$mode")"
+
       # macOS Sonoma+ moved wallpaper state to ~/Library/Application Support/
       # com.apple.wallpaper/Store/Index.plist, owned by WallpaperAgent. Each
       # Space and Display has its own entry, and AppleScript's `every desktop`
@@ -494,12 +564,29 @@ if updated:
 print(updated)
 PYEOF
 
-      # Restart WallpaperAgent so it re-reads the store. launchd respawns it.
-      killall WallpaperAgent 2>/dev/null || true
+      # Restart WallpaperAgent so it re-reads the store and repaints EVERY
+      # Space (the store rewrite above covers all Spaces; the agent only
+      # applies it on respawn). Then BLOCK until it's actually back and the
+      # wallpaper has re-applied — the caller reports "Done" once this returns,
+      # so it must not return while Spaces are still repainting. Set
+      # DOT_THEME_SKIP_WALLPAPER_AGENT=1 to skip the restart (faster, but
+      # background Spaces won't refresh until next login).
+      if [[ "${DOT_THEME_SKIP_WALLPAPER_AGENT:-0}" != "1" ]]; then
+        killall WallpaperAgent 2>/dev/null || true
 
-      # Also nudge the active Space via the public API. This covers the
-      # initial render before WallpaperAgent comes back, and handles screens
-      # the Index.plist rewrite somehow missed.
+        # Wait for launchd to bring WallpaperAgent back (KeepAlive respawns it
+        # within ~1s; cap the wait so a theme switch can never hang).
+        local _waited=0
+        while ! pgrep -x WallpaperAgent >/dev/null 2>&1; do
+          sleep 0.1
+          _waited=$((_waited + 1))
+          [[ "$_waited" -ge 60 ]] && break
+        done
+      fi
+
+      # Re-assert the wallpaper through the (now running) agent — covers the
+      # active Space's first paint and any screen the store rewrite missed —
+      # then give that paint a moment to finish before returning.
       if command -v wallpaper &>/dev/null; then
         wallpaper set "$wp" --screen all 2>/dev/null || true
       else
@@ -511,6 +598,7 @@ tell application \"System Events\"
     end repeat
 end tell" 2>/dev/null || true
       fi
+      sleep 0.5
       ;;
     Linux)
       # DMS owns wallpaper display and runs matugen for color extraction.

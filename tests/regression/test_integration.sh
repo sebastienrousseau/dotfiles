@@ -60,7 +60,7 @@ while IFS= read -r line; do
   if ((quote_count % 2 != 0)); then
     unmatched=$((unmatched + 1))
   fi
-done < "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml"
+done <"$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml"
 assert_equals "0" "$unmatched" "mise config.toml must have balanced quotes"
 
 # Each mise-integration probe is scored separately so the framework
@@ -88,7 +88,7 @@ assert_file_contains "$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.tom
 test_start "integration_ai_providers_in_mise"
 # Every AI provider in ai.sh must have a matching mise package
 ai_script="$REPO_ROOT/scripts/dot/commands/ai.sh"
-for provider in claude copilot agy aider opencode sgpt ollama kiro-cli autohand vibe qwen zai; do
+for provider in claude copilot kimi agy aider opencode sgpt ollama kiro-cli autohand vibe qwen zai; do
   if ! grep -q "$provider" "$ai_script" 2>/dev/null; then
     ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: provider $provider missing from ai.sh"
@@ -101,7 +101,7 @@ printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: all AI providers present in bri
 test_start "integration_ai_aliases_match_bridge"
 # AI aliases should reference tools that the bridge supports
 alias_file="$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh"
-for tool in autohand vibe qwen zai; do
+for tool in kimi autohand vibe qwen zai; do
   if ! grep -q "$tool" "$alias_file" 2>/dev/null; then
     ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: alias for $tool missing"

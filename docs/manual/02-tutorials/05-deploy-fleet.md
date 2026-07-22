@@ -146,7 +146,7 @@ Each host has its own `~/.config/chezmoi/chezmoi.toml` — use it for things tha
 # surface-pro's chezmoi.toml
 [data]
 machine = "surface-pro"
-theme = "dome-dark"           # per-host default
+theme = "monterey-dark"       # per-host default
 default_shell = "fish"
 terminal_font_size = 11       # smaller for HiDPI
 ```

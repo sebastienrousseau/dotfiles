@@ -36,4 +36,28 @@ fi
 cov_exercise_script "$SCRIPT_FILE"
 cov_exercise_functions_file "$SCRIPT_FILE"
 
+test_start "hashsum_deep_branches_execute"
+hashsum_tmp="$DOTFILES_COV_TMPDIR/hashsum-deep"
+mkdir -p "$hashsum_tmp"
+printf 'hello' >"$hashsum_tmp/input.txt"
+(
+  set +e
+  bash "$SCRIPT_FILE" --help
+  bash "$SCRIPT_FILE" "hello"
+  bash "$SCRIPT_FILE" --md5 "hello"
+  bash "$SCRIPT_FILE" --sha1 "hello"
+  bash "$SCRIPT_FILE" --sha512 "hello"
+  bash "$SCRIPT_FILE" --all "hello"
+  bash "$SCRIPT_FILE" --file "$hashsum_tmp/input.txt"
+  bash "$SCRIPT_FILE" --check \
+    "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824" \
+    "hello"
+  bash "$SCRIPT_FILE" --check "deadbeef" "hello"
+  bash "$SCRIPT_FILE" --file "$hashsum_tmp/missing.txt"
+  bash "$SCRIPT_FILE" --unknown "hello"
+  printf 'stdin-value\n' | bash "$SCRIPT_FILE"
+) >/dev/null || true
+assert_file_exists "$hashsum_tmp/input.txt" \
+  "hashsum deep branches used sandbox input file"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

@@ -124,51 +124,99 @@ discover_linux_system() {
     /usr/share/wallpapers
   )
 
-  local dir file name
+  local dir file name variant
   for dir in "${dirs[@]}"; do
     [[ -d "$dir" ]] || continue
     while IFS= read -r file; do
       name="$(basename "$file")"
       name="${name%.*}"
-      name="$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')"
+      name="$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr ' _' '--')"
       name="${name//[^a-z0-9-]/}"
-      # Avoid duplicates — first found wins for system
-      if [[ -z "${WALLPAPERS[$name]+x}" ]]; then
-        WALLPAPERS["$name"]="$file"
-        WP_SOURCE["$name"]="system"
+      while [[ "$name" == *--* ]]; do name="${name//--/-}"; done
+      name="${name#-}"
+      name="${name%-}"
+      [[ -n "$name" ]] || continue
+      # Static system images carry no mode; theme them in both modes so
+      # they show as a pair (unless the file is already a -dark/-light).
+      if [[ "$name" == *-dark || "$name" == *-light ]]; then
+        [[ -z "${WALLPAPERS[$name]+x}" ]] && {
+          WALLPAPERS["$name"]="$file"
+          WP_SOURCE["$name"]="system"
+        }
+        continue
       fi
-    done < <(find "$dir" -maxdepth 3 -type f \( -name "*.jpg" -o -name "*.png" -o -name "*.heic" \) 2>/dev/null | sort)
+      local key
+      for variant in dark light; do
+        key="${name}-${variant}"
+        if [[ -z "${WALLPAPERS[$key]+x}" ]]; then
+          WALLPAPERS["$key"]="$file"
+          WP_SOURCE["$key"]="system"
+        fi
+      done
+    done < <(find "$dir" -maxdepth 3 -type f \
+      \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \
+      -o -iname '*.heic' -o -iname '*.webp' -o -iname '*.tiff' \) 2>/dev/null | sort)
   done
 }
 
 discover_custom() {
   [[ -d "$CUSTOM_DIR" ]] || return 0
 
-  local file name frame_count
-  for file in "$CUSTOM_DIR"/*.heic "$CUSTOM_DIR"/*.jpg "$CUSTOM_DIR"/*.png; do
+  local file base name ext frame_count
+  # Case-insensitive, wide extension match. The old fixed-glob loop
+  # (`*.heic *.jpg *.png`) silently dropped `.jpeg`, `.webp`, `.tiff`
+  # and every uppercase variant (`.JPG`, `.HEIC`, …), so those
+  # wallpapers never made it into the theme table.
+  while IFS= read -r file; do
     [[ -f "$file" ]] || continue
-    name="$(basename "$file")"
-    name="${name%.*}"
+    base="$(basename "$file")"
+    base="${base%.*}"
+    ext="$(echo "${file##*.}" | tr '[:upper:]' '[:lower:]')"
 
-    # Check if this is a dynamic HEIC (multi-frame = light+dark in one file)
-    if [[ "${file##*.}" == "heic" ]]; then
+    # Normalize to the [a-z0-9-] namespace that themes.toml and the
+    # `dot theme list` picker regex both require — a raw name with
+    # spaces/uppercase would generate a section the picker can't match.
+    name="$(echo "$base" | tr '[:upper:]' '[:lower:]' | tr ' _' '--')"
+    name="${name//[^a-z0-9-]/}"
+    while [[ "$name" == *--* ]]; do name="${name//--/-}"; done
+    name="${name#-}"
+    name="${name%-}"
+    [[ -n "$name" ]] || continue
+
+    # Dynamic HEIC (multi-frame = light+dark packed in one file).
+    if [[ "$ext" == "heic" ]]; then
       frame_count="$(magick identify "$file" 2>/dev/null | wc -l | tr -d ' ')"
       if [[ "$frame_count" -ge 2 && "$name" != *-dark && "$name" != *-light ]]; then
-        # Dynamic HEIC: register as both dark and light
         WALLPAPERS["${name}-light"]="${file}[0]"
         WP_SOURCE["${name}-light"]="custom"
         WALLPAPERS["${name}-dark"]="${file}[1]"
         WP_SOURCE["${name}-dark"]="custom"
-        # Store the original file path for wallpaper-sync
+        # Store the original file path for wallpaper-sync.
         WALLPAPERS["${name}"]="$file"
         WP_SOURCE["${name}"]="custom-dynamic"
         continue
       fi
     fi
 
-    WALLPAPERS["$name"]="$file"
-    WP_SOURCE["$name"]="custom"
-  done
+    # Explicitly-named single-mode variant (foo-dark.jpg / foo-light.jpg):
+    # honour the author's mode, register the one variant as-is.
+    if [[ "$name" == *-dark || "$name" == *-light ]]; then
+      WALLPAPERS["$name"]="$file"
+      WP_SOURCE["$name"]="custom"
+      continue
+    fi
+
+    # Static single image: theme it in BOTH modes (extract-theme forces
+    # the mode from the -dark/-light suffix) so it appears as a light/dark
+    # pair in `dot theme list`. Previously a static produced only one
+    # variant and paired_families() hid it entirely.
+    WALLPAPERS["${name}-dark"]="$file"
+    WP_SOURCE["${name}-dark"]="custom"
+    WALLPAPERS["${name}-light"]="$file"
+    WP_SOURCE["${name}-light"]="custom"
+  done < <(find "$CUSTOM_DIR" -maxdepth 1 -type f \
+    \( -iname '*.heic' -o -iname '*.jpg' -o -iname '*.jpeg' \
+    -o -iname '*.png' -o -iname '*.webp' -o -iname '*.tiff' \) 2>/dev/null | sort)
 }
 
 # Remove dynamic base entries (keep only the -dark/-light variants for theme gen)
@@ -181,11 +229,15 @@ cleanup_dynamic_entries() {
   done
 }
 
-# Discover in order: system first, custom overrides
-case "$(uname -s)" in
-  Darwin) discover_macos_system ;;
-  Linux) discover_linux_system ;;
-esac
+# Discover in order: system first, custom overrides. System (OS-shipped)
+# wallpapers are opt-in — most users only want themes from their own
+# wallpapers. Enable the ~100 built-in ones with DOTFILES_THEME_SYSTEM=1.
+if [[ "${DOTFILES_THEME_SYSTEM:-0}" == "1" ]]; then
+  case "$(uname -s)" in
+    Darwin) discover_macos_system ;;
+    Linux) discover_linux_system ;;
+  esac
+fi
 discover_custom
 cleanup_dynamic_entries
 
@@ -238,16 +290,29 @@ done
 # Generate themes
 # ---------------------------------------------------------------------------
 
-sys_count=0
-cust_count=0
+# Report distinct WALLPAPERS (families), not theme sections. Every
+# wallpaper — a dynamic HEIC (light+dark frames) or a static image —
+# yields a `-light` and a `-dark` theme, so a raw section count is ~2x
+# the file count and reads as wrong ("74 files → 148 custom"). Collapse
+# -dark/-light back to the family so the numbers match what's on disk
+# and what `dot theme list` shows, and report the theme total separately.
+# Explicit empty init: a `declare -A x` that never gets a key still trips
+# `set -u` on ${#x[@]} (even in bash 5) — happens now that system wallpapers
+# are opt-in and sys_fam can stay empty.
+declare -A sys_fam=() cust_fam=()
 for name in "${!WP_SOURCE[@]}"; do
+  family="${name%-dark}"
+  family="${family%-light}"
   case "${WP_SOURCE[$name]}" in
-    system) sys_count=$((sys_count + 1)) ;;
-    custom) cust_count=$((cust_count + 1)) ;;
+    system) sys_fam["$family"]=1 ;;
+    custom) cust_fam["$family"]=1 ;;
   esac
 done
+sys_count=${#sys_fam[@]}
+cust_count=${#cust_fam[@]}
 echo "Discovering wallpapers..."
-echo "  Found: $sys_count system, $cust_count custom (${#WALLPAPERS[@]} total)"
+echo "  Found: $sys_count system, $cust_count custom wallpapers" \
+  "($((sys_count + cust_count)) total → ${#WALLPAPERS[@]} light/dark themes)"
 echo ""
 
 GENERATED=0
@@ -297,11 +362,20 @@ if [[ $TOTAL_WORK -gt 0 ]]; then
   wait
 fi
 
-# Count results
-GENERATED=$(find "$CACHE_DIR" -name "*.toml" -newer "$0" 2>/dev/null | wc -l | tr -d ' ')
-FAILED=$((TOTAL_WORK - GENERATED))
+# Count results — how many of THIS run's work items produced a cache file.
+# (The old `find -newer "$0"` counted every cache file newer than the script,
+# so when everything was cached FAILED went negative.)
+GENERATED=0
+FAILED=0
+for name in "${WORK[@]}"; do
+  if [[ -f "$CACHE_DIR/${name}.toml" ]]; then
+    GENERATED=$((GENERATED + 1))
+  else
+    FAILED=$((FAILED + 1))
+  fi
+done
 echo ""
-echo "Results: $TOTAL_WORK processed, $CACHED cached, $FAILED failed"
+echo "Results: $GENERATED generated, $CACHED cached, $FAILED failed"
 
 # ---------------------------------------------------------------------------
 # Assemble themes.toml
@@ -326,14 +400,145 @@ echo "Assembling themes.toml..."
 
 HEADER
 
-  for cache_file in "$CACHE_DIR"/*.toml; do
+  # Assemble ONLY the wallpapers discovered this run, not every file left in
+  # the cache. This drops themes for wallpapers no longer present (e.g. system
+  # wallpapers once DOTFILES_THEME_SYSTEM is turned off) instead of letting
+  # stale cache entries pile up in themes.toml.
+  for name in $(printf '%s\n' "${!WALLPAPERS[@]}" | sort); do
+    cache_file="$CACHE_DIR/${name}.toml"
     [[ -f "$cache_file" ]] || continue
     echo ""
     cat "$cache_file"
   done
+
+  # Synthetic fallback themes — always emitted, never wallpaper-derived.
+  # Every theme template degrades to `fallback-dark` when `.theme` is unset or
+  # names a theme absent from this file. Because these are re-emitted on every
+  # rebuild, a regeneration that drops any wallpaper theme can never break the
+  # fallback (unlike hardcoding a wallpaper theme like the old big-sur-dark).
+  # switch.sh hides the `fallback` family from user-facing theme lists.
+  cat <<'FALLBACK'
+
+# ─────────────────────────────────────────────────────────────────────
+# Synthetic fallback themes (NOT wallpaper-derived, NEVER user-selectable).
+# ─────────────────────────────────────────────────────────────────────
+
+[themes.fallback-dark]
+mode = "dark"
+family = "fallback"
+macos_accent = 4
+wallpaper = ""
+source = "custom"
+
+[themes.fallback-dark.term]
+bg = "#1e1e2e"
+fg = "#d4d4d4"
+cursor = "#455c67"
+cursor_text = "#1e1e2e"
+sel_bg = "#394145"
+sel_fg = "#d4d4d4"
+c0  = "#3c3c4d"
+c1  = "#997d7a"
+c2  = "#479174"
+c3  = "#8a836f"
+c4  = "#5f86b7"
+c5  = "#917e8e"
+c6  = "#5c8d82"
+c7  = "#b9b8bb"
+c8  = "#605f72"
+c9  = "#bf9b97"
+c10 = "#67b293"
+c11 = "#aba389"
+c12 = "#7fa6d9"
+c13 = "#b49cb0"
+c14 = "#7bada1"
+c15 = "#e2e2e3"
+
+[themes.fallback-dark.ui]
+accent = "#455c67"
+accent_text = "#ffffff"
+error = "#997d7a"
+warning = "#8a836f"
+success = "#479174"
+info = "#5f86b7"
+panel = "#242435"
+border = "#302f38"
+
+[themes.fallback-dark.app]
+nvim = "tokyonight"
+nvim_style = "night"
+lualine = "tokyonight"
+gtk_theme = "Adwaita-dark"
+gtk_icon = "Papirus-Dark"
+gnome_shell = ""
+gnome_gtk = "Adwaita-dark"
+vscode = "Tokyonight Mocha"
+vscode_dark = "Tokyonight Mocha"
+vscode_light = "Tokyonight Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_mocha"
+
+
+[themes.fallback-light]
+mode = "light"
+family = "fallback"
+macos_accent = 4
+wallpaper = ""
+source = "custom"
+
+[themes.fallback-light.term]
+bg = "#fbf1c7"
+fg = "#3c3836"
+cursor = "#2c5989"
+cursor_text = "#fbf1c7"
+sel_bg = "#c6cfe0"
+sel_fg = "#3c3836"
+c0  = "#2e2c26"
+c1  = "#7d3d39"
+c2  = "#205a48"
+c3  = "#5b501d"
+c4  = "#2b527d"
+c5  = "#6e4069"
+c6  = "#25554c"
+c7  = "#6f6d67"
+c8  = "#54524b"
+c9  = "#853733"
+c10 = "#025c46"
+c11 = "#5b500b"
+c12 = "#0d5388"
+c13 = "#743b6f"
+c14 = "#15564b"
+c15 = "#979693"
+
+[themes.fallback-light.ui]
+accent = "#2c5989"
+accent_text = "#ffffff"
+error = "#7d3d39"
+warning = "#5b501d"
+success = "#205a48"
+info = "#2b527d"
+panel = "#f2e8bf"
+border = "#e3e0d3"
+
+[themes.fallback-light.app]
+nvim = "catppuccin"
+nvim_style = "latte"
+lualine = "catppuccin"
+gtk_theme = "Adwaita"
+gtk_icon = "Papirus-Light"
+gnome_shell = ""
+gnome_gtk = "Adwaita"
+vscode = "Catppuccin Latte"
+vscode_dark = "Catppuccin Mocha"
+vscode_light = "Catppuccin Latte"
+cat_wallpaper = ""
+starship_palette = "catppuccin_latte"
+FALLBACK
 } >"$THEMES_FILE"
 
-theme_count=$(grep -c '^\[themes\.' "$THEMES_FILE" | head -1)
-echo "  Written: $THEMES_FILE ($theme_count theme sections)"
+# Count top-level [themes.NAME] blocks only — not the .term/.ui/.app
+# subsections (which inflated the tally ~4x).
+theme_count=$(grep -cE '^\[themes\.[a-z0-9-]+\]$' "$THEMES_FILE")
+echo "  Written: $THEMES_FILE ($theme_count themes)"
 echo ""
 echo "Done. Run 'dot theme list' to see available themes."

@@ -32,19 +32,27 @@ jobs:
         os: [ubuntu-latest, macos-latest, macos-14]
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: audit
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - name: Install shfmt + shellcheck
+      - name: Install shfmt + shellcheck + coreutils
         # tests/regression/test_static_analysis.sh shells out to both
         # tools but the GitHub-hosted runners don't preinstall shfmt
         # (shellcheck is on ubuntu-latest but not macOS). Without the
         # tools every `! shfmt ...` check inverts a "command not found"
         # into a "fail" and the static-analysis test reports every
         # file in CHANGED_SCRIPTS as broken regardless of content.
+        #
+        # coreutils gives macOS a real `gtimeout`. Stock macOS has no
+        # GNU `timeout`, so the coverage harness would fall back to
+        # running probes unguarded — and its async `2> >(tee …)` stderr
+        # capture then races the strict-mode grep, so a real
+        # command-not-found violation is missed (test_cov_strict_mode).
+        # A genuine timeout binary keeps macOS behaviour identical to
+        # Linux.
         run: |
           set -euo pipefail
           case "$(uname -s)" in
@@ -53,7 +61,7 @@ jobs:
               sudo apt-get install -y -qq shfmt shellcheck
               ;;
             Darwin)
-              brew install shfmt shellcheck
+              brew install shfmt shellcheck coreutils
               ;;
           esac
           shfmt --version
@@ -67,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: audit
 
@@ -80,7 +88,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: audit
 
@@ -99,7 +107,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: audit
 
@@ -122,7 +130,7 @@ jobs:
     if: always()
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: audit
 

@@ -39,7 +39,8 @@ if config_path.exists():
 
 lines = content.splitlines()
 
-# Remove existing encryption/age block
+# Remove existing encryption keys and age blocks regardless of where a previous
+# run placed them.
 out = []
 in_age = False
 for line in lines:
@@ -57,9 +58,19 @@ for line in lines:
             continue
         out.append(line)
 
-# Append updated config (use json.dumps for safe string escaping)
-out.append("")
-out.append("encryption = \"age\"")
+# Keep encryption at top level; chezmoi warns when it is nested under [data].
+insert_at = 0
+for i, line in enumerate(out):
+    if line.strip().startswith("["):
+        insert_at = i
+        break
+else:
+    insert_at = len(out)
+
+top_level = ["encryption = \"age\"", ""]
+out[insert_at:insert_at] = top_level
+
+# Append updated age config (use json.dumps for safe string escaping)
 out.append("")
 out.append("[age]")
 out.append(f"identity = {json.dumps(key_file)}")

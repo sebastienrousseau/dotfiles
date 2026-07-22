@@ -339,42 +339,77 @@ def _nvim_from_hue(hue: float, is_dark: bool) -> Tuple[str, str]:
 
 
 def _macos_accent_from_hue(hue: float) -> int:
-    """Map accent hue angle to macOS accent color integer."""
-    if hue < 30 or hue >= 345:
+    """Map a CIELAB hue angle to a macOS accent-colour integer.
+
+    Boundaries are calibrated to the CIELAB hues of Apple's own accent
+    swatches (not HSL): red≈36°, orange≈67°, yellow≈87°, green≈144°,
+    blue≈287°, purple≈317°. The previous HSL-style cutoffs pushed blue
+    accents (~283°) into Purple and purple into Pink.
+    """
+    hue = hue % 360
+    if hue < 15 or hue >= 345:
+        return 6   # Pink / magenta
+    if hue < 50:
         return 0   # Red
-    if hue < 60:
+    if hue < 77:
         return 1   # Orange
-    if hue < 105:
+    if hue < 110:
         return 2   # Yellow
-    if hue < 165:
+    if hue < 200:
         return 3   # Green
-    if hue < 255:
-        return 4   # Blue
     if hue < 300:
-        return 5   # Purple
-    return 6       # Pink
+        return 4   # Blue (incl. teal-blue and navy)
+    return 5       # Purple / indigo (300–345)
+
+
+def _env_hex(key: str, fallback: str) -> str:
+    """A #rrggbb value from env, or the fallback when unset/invalid."""
+    v = os.environ.get(key, "")
+    if len(v) == 7 and v[0] == "#":
+        try:
+            hex_to_rgb(v)
+            return v
+        except ValueError:
+            pass
+    return fallback
 
 
 def _compute_bg_fg(clusters, is_dark):
-    """Select background and foreground from clustered colors."""
-    sorted_by_L = sorted(clusters, key=lambda c: c[0][0])
+    """Terminal background/foreground — fixed, engineered neutrals per mode.
+
+    Deliberately NOT derived from the wallpaper: a terminal wants a
+    high-contrast, low-eye-strain surface that stays stable across themes.
+    Dark mode uses a deep neutral grey with off-white text; light mode a warm
+    paper cream with charcoal text. The wallpaper still drives the accent and
+    the 16 ANSI colours (which are computed against this bg for contrast).
+    Override per mode via DOTFILES_TERM_BG_DARK / _FG_DARK / _BG_LIGHT /
+    _FG_LIGHT.
+    """
+    _ = clusters  # bg/fg no longer wallpaper-derived
     if is_dark:
-        bg_lab = sorted_by_L[0][0]
-        bg_lab = (min(bg_lab[0], 15.0), bg_lab[1] * 0.3, bg_lab[2] * 0.3)
-        fg_lab = (88.0, bg_lab[1] * 0.1, bg_lab[2] * 0.1)
+        bg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_BG_DARK", "#1e1e2e"))
+        fg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_FG_DARK", "#d4d4d4"))
     else:
-        bg_lab = sorted_by_L[-1][0]
-        bg_lab = (max(bg_lab[0], 92.0), bg_lab[1] * 0.15, bg_lab[2] * 0.15)
-        fg_lab = (18.0, bg_lab[1] * 0.15, bg_lab[2] * 0.15)
-    bg_rgb = lab_to_rgb(*bg_lab)
-    fg_rgb = ensure_contrast(lab_to_rgb(*fg_lab), bg_rgb, 7.0, is_dark)
+        bg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_BG_LIGHT", "#fbf1c7"))
+        fg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_FG_LIGHT", "#3c3836"))
+    bg_lab = rgb_to_lab(*bg_rgb)
     return bg_lab, bg_rgb, fg_rgb
 
 
 def _compute_accent(clusters, is_dark):
-    """Select and AAA-compliant-darken the most saturated cluster for accent."""
-    sorted_by_chroma = sorted(clusters, key=lambda c: lab_chroma(*c[0]), reverse=True)
-    accent_lab = sorted_by_chroma[0][0]
+    """Select the accent from the wallpaper's DOMINANT chromatic colour.
+
+    Rank clusters by population x chroma so the accent follows the *main*
+    colour of the wallpaper (a large, colourful region) rather than the
+    single most-saturated cluster — which is often a tiny vivid splash
+    that doesn't represent the image. Near-neutral clusters score ~0 and
+    are skipped; if the whole image is neutral we fall back to the most
+    saturated cluster so the accent still carries a hue. The selected
+    colour is then AAA-darkened below (ADR-009 contrast requirement)."""
+    ranked = sorted(clusters, key=lambda c: c[1] * lab_chroma(*c[0]), reverse=True)
+    accent_lab = ranked[0][0]
+    if lab_chroma(*accent_lab) < 5.0:
+        accent_lab = max(clusters, key=lambda c: lab_chroma(*c[0]))[0]
     if is_dark:
         accent_lab = (max(accent_lab[0], 35.0), accent_lab[1], accent_lab[2])
     else:
@@ -412,16 +447,30 @@ def _compute_panel_border(bg_lab, bg_rgb, is_dark):
 
 def _build_ansi_color(base_lab, accent_lab, bg_rgb, is_dark):
     """Build normal + bright ANSI variant from a base Lab color."""
-    if is_dark:
-        normal_L = max(55.0, min(75.0, base_lab[0]))
-        bright_L = normal_L + 12
-    else:
-        normal_L = max(30.0, min(50.0, base_lab[0]))
-        bright_L = normal_L - 8
+    normal_L = (
+        max(55.0, min(75.0, base_lab[0])) if is_dark
+        else max(30.0, min(50.0, base_lab[0]))
+    )
     normal = adjust_lightness(base_lab, normal_L)
-    bright = adjust_lightness(base_lab, bright_L)
-    normal_rgb = ensure_contrast(lab_to_rgb(*normal), bg_rgb, 3.0, is_dark)
-    bright_rgb = ensure_contrast(lab_to_rgb(*bright), bg_rgb, 4.5, is_dark)
+    if is_dark:
+        # Dark bg: the bright variant pops by getting lighter.
+        bright = adjust_lightness(base_lab, normal_L + 12)
+        bright_min = 4.5
+    else:
+        # Light bg: a lighter bright would wash out against near-white, so
+        # brighten by vividness at equal lightness instead — the bright is
+        # never darker than the normal (matches Apple's light ANSI ramp,
+        # where brights read as more saturated, not muddier).
+        bright = (normal[0], normal[1] * 1.25, normal[2] * 1.25)
+        bright_min = 7.0
+    # WCAG AAA (7:1) for the chromatic slots on a light bg so coloured text
+    # (paths, syntax) is unambiguously legible — AA (4.5:1) still read as washed
+    # out on cream. Brights stay AAA too and differ from normals by saturation
+    # (Apple's light ramp), not lightness. Dark mode keeps its lower floor
+    # (light text on dark reads comfortably at a lower ratio).
+    normal_min = 3.0 if is_dark else 7.0
+    normal_rgb = ensure_contrast(lab_to_rgb(*normal), bg_rgb, normal_min, is_dark)
+    bright_rgb = ensure_contrast(lab_to_rgb(*bright), bg_rgb, bright_min, is_dark)
     return normal_rgb, bright_rgb
 
 
@@ -455,11 +504,18 @@ def _structural_colors(bg_lab, bg_rgb, is_dark):
             ensure_contrast(lab_to_rgb(bg_lab[0] + 25, bg_lab[1], bg_lab[2]), bg_rgb, 2.5, True),
             ensure_contrast(lab_to_rgb(90.0, bg_lab[1] * 0.05, bg_lab[2] * 0.05), bg_rgb, 7.0, True),
         )
+    # Light bg: the neutral ramp increases in lightness (c0 < c8 < c7 < c15).
+    # c0/c8/c7 stay readable (>= AA); c15 ("bright white") is the LIGHTEST tone,
+    # strictly lighter than c7 — bright-white text legibility is gated by fg, not
+    # c15, and forcing c15 to the same floor as c7 made them converge (c15 ended
+    # a hair darker, breaking the ramp). Start c15 well above c7 with only a mild
+    # floor so it stays the lightest. (Terminals render the dark palette; this
+    # ramp only feeds non-terminal light-palette consumers.)
     return (
         ensure_contrast(lab_to_rgb(18.0, bg_lab[1] * 0.2, bg_lab[2] * 0.2), bg_rgb, 7.0, False),
-        ensure_contrast(lab_to_rgb(bg_lab[0] - 8, bg_lab[1], bg_lab[2]), bg_rgb, 1.3, False),
+        ensure_contrast(lab_to_rgb(50.0, bg_lab[1] * 0.15, bg_lab[2] * 0.15), bg_rgb, 4.5, False),
         ensure_contrast(lab_to_rgb(35.0, bg_lab[1] * 0.2, bg_lab[2] * 0.2), bg_rgb, 4.5, False),
-        ensure_contrast(lab_to_rgb(8.0, 0, 0), bg_rgb, 10.0, False),
+        ensure_contrast(lab_to_rgb(64.0, bg_lab[1] * 0.08, bg_lab[2] * 0.08), bg_rgb, 2.5, False),
     )
 
 
@@ -664,7 +720,15 @@ def main():
     # Generate theme
     theme = generate_theme(clusters, name, is_dark)
     wp_base = args.image.split("[")[0] if "[" in args.image else args.image
-    theme["wallpaper"] = os.path.abspath(wp_base)
+    wp_abs = os.path.abspath(wp_base)
+    # Store home-relative with a `~` so the committed themes.toml is not tied to
+    # one machine's username. Consumers (wallpaper-sync.sh) expand `~/`. System
+    # wallpapers (/System/..., /usr/share/...) stay absolute — identical on
+    # every host anyway.
+    home = os.path.expanduser("~")
+    if wp_abs == home or wp_abs.startswith(home + os.sep):
+        wp_abs = "~" + wp_abs[len(home):]
+    theme["wallpaper"] = wp_abs
     theme["source"] = args.source
 
     # Output

@@ -37,7 +37,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: audit
 
@@ -70,8 +70,36 @@ jobs:
           #            override during source. Unlocked the dot
           #            command files (agent.sh 2→75 traced per probe,
           #            ai.sh 15→87). floor=35 (3-pt cushion).
+          #   Slice 7: 37.89% measured after #954 deep-branch tests for
+          #            switch.sh, mcp-doctor.sh, and Linux/WSL doctor.sh
+          #            branches. floor=37.
+          #   Slice 8: 39.82% measured after core UI/utils branch-driving
+          #            coverage, including lib/dot/ui.sh at 52.23%.
+          #            floor=39.
+          #   Slice 9: 41.35% measured after version-sync and tools
+          #            branch-driving coverage. tools.sh reached 72.85%,
+          #            utils.sh reached 73.24%, floor=41.
+          #   Slice 10: 42.30% measured after aliases branch-driving
+          #             coverage. aliases.sh reached 70.00%, floor=42.
+          #   Slice 11: 42.99% measured after registry branch-driving
+          #             coverage. registry.sh reached 65.03%, floor=42.
+          #   Slice 12: 45.04% measured after proxy/completion/agents/
+          #             secrets branch-driving coverage. floor=45.
+          #   Slice 13: 46.04% measured after secrets load-success and
+          #             core/init/manual branch-driving coverage. floor=46.
+          #   Slice 14: 49.10% measured after diagnostics/meta/restore/log/
+          #             env/git-ai/hashsum/regex/jsonv/gl/hex helper
+          #             branch-driving coverage. floor=49.
+          #   Slice 15: 50.75% measured after jwt portability coverage
+          #             plus apihealth/apiload/apilatency function
+          #             branch-driving coverage. floor=50.
+          #   Merge:    50.16% (6205/12371) re-measured after merging the
+          #             core-ratchet branch into feat/v0.2.512 (folds in the
+          #             v0.2.512 doctor/ui fixes). floor=49 — the margin
+          #             absorbs local<->CI drift and ~0.6-pt run-to-run
+          #             xtrace variance; bump to 50 once CI confirms >=50.
           # Bump in lockstep with the slice that lands the bump.
-          MIN_COVERAGE_PCT: '35'
+          MIN_COVERAGE_PCT: '49'
         run: bash tools/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact

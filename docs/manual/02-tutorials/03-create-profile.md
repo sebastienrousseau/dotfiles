@@ -48,7 +48,7 @@ Edit `~/.config/chezmoi/chezmoi.toml`:
 ```toml
 [data]
 machine = "surface-pro"      # choose from .chezmoidata/hardware.toml
-theme = "dome-dark"
+theme = "monterey-dark"
 default_shell = "fish"
 terminal_font_family = "JetBrainsMono Nerd Font"
 terminal_font_size = 11       # larger for HiDPI, smaller for dense screens

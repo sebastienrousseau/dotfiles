@@ -78,15 +78,33 @@ fi
 # Theme Database
 # =============================================================================
 
-# Default preferences
-DEFAULT_DARK="macos-monterey-dark"
-DEFAULT_LIGHT="macos-monterey-light"
+# Default preferences (must be present keys in themes.toml — the theme
+# regeneration removed the old macos-monterey-* names; bloom is the current
+# default family and always ships a dark+light pair).
+DEFAULT_DARK="bloom-dark"
+DEFAULT_LIGHT="bloom-light"
+
+# Machine-local chezmoi override (chezmoi.toml [data] theme) takes precedence
+# over .chezmoidata.toml when rendering, so it is the authoritative "current"
+# value. Kept in sync by dot-theme-sync's write_theme().
+CHEZMOI_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
 
 # =============================================================================
 # Theme Functions
 # =============================================================================
 
 current_theme() {
+  # Prefer the machine-local override (what chezmoi actually renders), so
+  # `dot theme current` never disagrees with the deployed configs. Fall back
+  # to the repo default in .chezmoidata.toml when no override is set.
+  if [[ -f "$CHEZMOI_CFG" ]]; then
+    local override
+    override="$(awk -F'"' '/^theme =/ {print $2}' "$CHEZMOI_CFG" | head -n 1)"
+    if [[ -n "$override" ]]; then
+      echo "$override"
+      return 0
+    fi
+  fi
   awk -F'"' '/^theme =/ {print $2}' "$DATA_FILE" | head -n 1
 }
 
@@ -124,6 +142,9 @@ paired_families() {
   done < <(all_theme_names)
 
   for family in $(printf '%s\n' "${!has_dark[@]}" | sort); do
+    # `fallback` is a synthetic safety theme (see themes.toml) that templates
+    # degrade to when .theme is unset/invalid — never a user-selectable one.
+    [[ "$family" == "fallback" ]] && continue
     [[ -n "${has_light[$family]+x}" ]] && echo "$family"
   done
 }
@@ -185,12 +206,6 @@ set_theme() {
 
 # Interactive theme picker
 pick_theme() {
-  if ! command -v fzf &>/dev/null; then
-    ui_err "fzf" "required for interactive picker"
-    ui_info "Usage" "dot theme set <name>"
-    exit 1
-  fi
-
   local current
   current="$(current_theme)"
 
@@ -220,14 +235,9 @@ pick_theme() {
   done < <(paired_families)
 
   local selected_family
-  selected_family="$(echo "$theme_list" | fzf \
+  selected_family="$(printf '%s' "$theme_list" | ui_pick \
     --header "Select wallpaper theme (current: $current_family [$current_mode])" \
-    --prompt "Theme > " \
-    --height 30 \
-    --reverse \
-    --no-sort \
-    --no-preview \
-    --ansi |
+    --prompt "Theme >" |
     awk '$1 !~ /^#/ && NF >= 2 {print $2}')" || return 0
 
   if [[ -n "$selected_family" ]]; then

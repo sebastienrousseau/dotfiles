@@ -36,4 +36,70 @@ fi
 cov_exercise_script "$SCRIPT_FILE"
 cov_exercise_functions_file "$SCRIPT_FILE"
 
+test_start "gl_deep_branches_execute"
+gl_tmp="$DOTFILES_COV_TMPDIR/gl-deep"
+mkdir -p "$gl_tmp/bin" "$gl_tmp/work"
+cat >"$gl_tmp/bin/git" <<'EOF_GIT'
+#!/usr/bin/env bash
+case "$*" in
+  "rev-parse --is-inside-work-tree")
+    exit 0
+    ;;
+  "branch --show-current")
+    printf 'main\n'
+    ;;
+  "config --get branch.main.remote")
+    printf 'origin\n'
+    ;;
+  "remote get-url origin")
+    printf 'git@github.com:owner/repo.git\n'
+    ;;
+  "log "*)
+    printf '1700000000 abc123 2026-01-01 > subject\n'
+    ;;
+  "show "*)
+    printf 'diff --git a/file b/file\n+new\n'
+    ;;
+  *)
+    printf 'git:%s\n' "$*"
+    ;;
+esac
+EOF_GIT
+cat >"$gl_tmp/bin/fzf" <<'EOF_FZF'
+#!/usr/bin/env bash
+printf 'abc123 subject\n'
+EOF_FZF
+cat >"$gl_tmp/bin/delta" <<'EOF_DELTA'
+#!/usr/bin/env bash
+cat >/dev/null
+EOF_DELTA
+cat >"$gl_tmp/bin/open" <<'EOF_OPEN'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"${DOTFILES_GL_OPEN_LOG:?}"
+EOF_OPEN
+cat >"$gl_tmp/bin/xdg-open" <<'EOF_XDG'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"${DOTFILES_GL_OPEN_LOG:?}"
+EOF_XDG
+cat >"$gl_tmp/bin/cb" <<'EOF_CB'
+#!/usr/bin/env bash
+cat >/dev/null
+EOF_CB
+chmod +x "$gl_tmp/bin/git" "$gl_tmp/bin/fzf" "$gl_tmp/bin/delta" \
+  "$gl_tmp/bin/open" "$gl_tmp/bin/xdg-open" "$gl_tmp/bin/cb"
+(
+  set +e
+  export PATH="$gl_tmp/bin:$PATH"
+  export DOTFILES_GL_OPEN_LOG="$gl_tmp/open.log"
+  cd "$gl_tmp/work" || exit 1
+  bash "$SCRIPT_FILE"
+  bash "$SCRIPT_FILE" --side --max-count=5
+  # shellcheck disable=SC1090
+  source "$SCRIPT_FILE"
+  open_commit_url "abc123"
+  open_commit_url ""
+) >/dev/null || true
+assert_file_exists "$gl_tmp/open.log" \
+  "gl deep branches opened sandbox commit URL"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

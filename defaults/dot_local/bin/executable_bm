@@ -17,13 +17,23 @@ BOOKMARKS_FILE="$HOME/.config/shell/bookmarks"
 mkdir -p "$(dirname "$BOOKMARKS_FILE")"
 touch "$BOOKMARKS_FILE"
 
-if [ -z "$1" ]; then
+usage() {
   echo "Usage: bm <add|goto|list|remove|update> [name]"
-  exit 1
-fi
+}
+
+case "${1:-}" in
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  "")
+    usage
+    exit 1
+    ;;
+esac
 
 action=$1
-name=$2
+name=${2:-}
 
 case "$action" in
   add)

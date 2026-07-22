@@ -1,43 +1,94 @@
 # Roadmap
 
-This roadmap describes the direction of the project. It is intentionally
-high-level; concrete, dated work is tracked in
+This is the canonical roadmap for the dotfiles project. Other roadmap files in
+`docs/operations/` and `docs/archive/` are kept only as compatibility stubs and
+must link back here rather than carrying separate active plans.
+
+Concrete work is tracked in
 [GitHub Issues](https://github.com/sebastienrousseau/dotfiles/issues) and
-[Milestones](https://github.com/sebastienrousseau/dotfiles/milestones), and
-shipped changes are recorded in [`CHANGELOG.md`](CHANGELOG.md). Versioning
-follows [SemVer](https://semver.org/) with the source of truth in
-`.chezmoidata.toml`.
+[Milestones](https://github.com/sebastienrousseau/dotfiles/milestones). Shipped
+changes are recorded in [`CHANGELOG.md`](CHANGELOG.md). Versioning follows
+[SemVer](https://semver.org/) with `.chezmoidata.toml` as the source of truth.
 
-## Now (current series — 0.2.x)
+## Current Series: 0.2.x
 
-- **Cross-platform parity** — keep macOS, Linux, WSL, and PowerShell 7.5+
-  behaviour aligned across the shell, aliases, and `dot` CLI.
-- **AI fleet (`dot ai`)** — the cockpit, the local Claude gateway, and fleet
-  curation (see [`docs/AI.md`](docs/AI.md)).
-- **Supply-chain hardening** — signed commits and release tags, Cosign/SLSA
-  provenance, SBOMs, pinned and monitored dependencies, and continuous
-  static/dynamic analysis (CodeQL, ClusterFuzzLite).
+The current line is focused on turning a broad personal dotfiles system into a
+reliable cross-platform shell distribution.
 
-## Next
+### Trust
 
-- **OpenSSF Best Practices — silver tier.** Close the remaining gaps that are
-  in the project's control (reproducible-build attestation, broader coverage).
-  Some silver criteria (≥2 maintainers / two-person review, ≥80% statement
-  coverage) require a co-maintainer and a sustained coverage push; see the
-  badge at [project 12840](https://www.bestpractices.dev/projects/12840).
-- **Test coverage** — continue raising measured shell coverage from the current
-  documented floor (see [`docs/operations/COVERAGE.md`](docs/operations/COVERAGE.md)).
-- **Documentation** — keep the reference manual (`docs/manual/`) and guides in
-  step with the shipping surface.
+- Keep commits, release tags, SBOMs, and provenance signed and continuously
+  verified.
+- Expand egress-blocked CI from proven local-only jobs before broader networked
+  jobs.
+- Maintain MCP policy, lock, registry, server-card, and secret-scanning gates.
+- Keep disclosure keys, release identity, DCO, and PR-signature checks enforced.
 
-## Later / under consideration
+### Predictability
 
-- A second maintainer to unlock independent review and a higher bus factor.
-- Containerised integration runs to exercise the system-mutation surface.
+- Keep macOS, Linux, WSL, and PowerShell 7.5+ behaviour aligned across shell
+  startup, aliases, functions, and the `dot` CLI.
+- Preserve chezmoi idempotency and dry-run safety for every managed surface.
+- Continue pinning external actions, reusable workflows, tool versions, and
+  package references where reproducible locks are practical.
+- Keep feature flags explicit so advanced desktop, AI, and fleet behaviour stays
+  opt-in.
 
-## How to influence the roadmap
+### Observability
+
+- Keep `dot doctor`, `dot health`, `dot drift`, `dot perf`, and reliability
+  dashboards as first-class diagnostic surfaces.
+- Ratchet measured bash coverage as tests move from source-text assertions to
+  branch-driving sandbox execution.
+- Keep documentation, examples, traceability, and generated command indexes under
+  drift checks.
+
+### AI Fleet
+
+- Keep `dot ai` as the cockpit for Claude, Codex, Copilot, Kimi, Aider,
+  OpenCode, Ollama, and related AI CLIs.
+- Keep the local Claude gateway scoped per subprocess, never globally exported
+  into the interactive shell.
+- Track provider-specific install, doctor, routing, and cost behaviours through
+  docs, tests, and regression cases.
+
+## Near-Term Priorities
+
+1. **Coverage ratchet** - finish deep branch coverage for the scripts that still
+   dominate the denominator, then raise the CI floor in lockstep with measured
+   coverage.
+2. **Egress hardening** - keep expanding `egress-policy: block` from local-only
+   jobs to package-installing jobs once each allowlist is proven by CI logs.
+3. **Docs governance** - keep this file as the only active roadmap and enforce
+   redirects for historical roadmap paths.
+4. **Platform parity** - continue closing Windows-native PowerShell and WSL gaps
+   without weakening macOS/Linux behaviour.
+5. **Distribution** - keep Homebrew, Scoop, AUR, devcontainer, and install
+   surfaces aligned with signed release artifacts.
+
+## Later
+
+- Add a second maintainer to improve review independence and bus factor.
+- Add containerized integration runs that can safely exercise system-mutation
+  surfaces.
+- Add deeper enterprise fleet workflows: attested fleet apply, host inventory,
+  policy bundles, and rollback evidence.
+- Add richer local observability for shell lifecycle timing and AI-agent runs.
+
+## Historical Roadmaps
+
+These paths are retained for old links only:
+
+| Path | Status |
+| --- | --- |
+| `docs/operations/ROADMAP.md` | Redirects here |
+| `docs/operations/ROADMAP_2026.md` | Historical 2026 audit plan; redirected here |
+| `docs/operations/ARCHITECTURE_ROADMAP.md` | Historical architecture plan; redirected here |
+| `docs/operations/ROADMAP_V0_2_503.md` | Frozen v0.2.512 plan; redirected here |
+| `docs/archive/LEGACY_ROADMAP.md` | Legacy archive; redirected here |
+
+## How To Influence The Roadmap
 
 Open or comment on a
 [GitHub Issue](https://github.com/sebastienrousseau/dotfiles/issues), or start a
-discussion. Contributions are welcome — see
-[`CONTRIBUTING.md`](CONTRIBUTING.md).
+discussion. Contributions are welcome; see [`CONTRIBUTING.md`](CONTRIBUTING.md).

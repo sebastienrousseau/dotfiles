@@ -133,12 +133,36 @@ cmd_aliases() {
       rm -f "$tmp_aliases"
       ;;
     cheatsheet)
+      # Destination defaults to the checkout's docs/ but can be
+      # redirected with `--output PATH` (or `-` for stdout). The
+      # hardcoded path made this the one subcommand that could not be
+      # exercised without writing into the working tree:
+      # require_source_dir() resolves from the location of the lib that
+      # was sourced, so it always pointed at the real repo no matter
+      # how the sandbox redirected $HOME/.dotfiles.
       ui_header "Alias Cheatsheet"
-      local src_dir out
+      local src_dir out=""
       src_dir="$(require_source_dir)"
-      out="$src_dir/docs/ALIASES_CHEATSHEET.md"
-      bash "$src_dir/scripts/diagnostics/aliases-cheatsheet.sh" >"$out"
-      ui_ok "Generated" "$out"
+      while (($#)); do
+        case "$1" in
+          --output | -o)
+            out="${2:-}"
+            [[ -n "$out" ]] || die "Usage: dot aliases cheatsheet [--output PATH|-]"
+            shift 2
+            ;;
+          *)
+            die "Unknown option for cheatsheet: $1"
+            ;;
+        esac
+      done
+      out="${out:-$src_dir/docs/ALIASES_CHEATSHEET.md}"
+      if [[ "$out" == "-" ]]; then
+        bash "$src_dir/scripts/diagnostics/aliases-cheatsheet.sh"
+      else
+        mkdir -p "$(dirname "$out")"
+        bash "$src_dir/scripts/diagnostics/aliases-cheatsheet.sh" >"$out"
+        ui_ok "Generated" "$out"
+      fi
       ;;
     tiers)
       local profile ecosystems security_mode dangerous buckets

@@ -21,17 +21,25 @@
 set -euo pipefail
 
 # =============================================================================
-# Constants & Colors
+# Shared UI layer (lib/dot/ui.sh)
 # =============================================================================
+# Drive output through the shared primitives so this binary matches every other
+# `dot` command: the reload steps stream through the ui_steps_* API, which
+# animates via the dot-ui renderer on a rich TTY and falls back to plain
+# ui_ok/ui_info/ui_err lines otherwise. lib/dot/ is a sibling of bin/.
 
-readonly RESET=$'\033[0m'
-readonly BOLD=$'\033[1m'
-readonly DIM=$'\033[2m'
-readonly GREEN=$'\033[32m'
-readonly YELLOW=$'\033[33m'
-readonly BLUE=$'\033[34m'
-readonly RED=$'\033[31m'
-readonly CYAN=$'\033[36m'
+_ui_lib="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)/lib/dot/ui.sh"
+if [[ -r "$_ui_lib" ]]; then
+  # shellcheck source=/dev/null
+  source "$_ui_lib"
+else
+  printf 'dot-theme-sync: cannot find %s\n' "$_ui_lib" >&2
+  exit 1
+fi
+ui_init
+# Legacy colour aliases for the few remaining direct prints (usage, errors).
+RESET="${NORMAL:-}"
+DIM="${GRAY:-}"
 
 # Platform detection (R10: declare and assign separately)
 PLATFORM="$(uname -s)"
@@ -93,10 +101,16 @@ readonly CHEZMOI_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
 # Output Helpers
 # =============================================================================
 
-_ok() { printf '  %s✓%s  %-12s %s%s%s\n' "$GREEN" "$RESET" "$1" "$DIM" "$2" "$RESET"; }
-_skip() { printf '  %s·%s  %-12s %s%s%s\n' "$DIM" "$RESET" "$1" "$DIM" "$2" "$RESET"; }
-_err() { printf '  %s✗%s  %-12s %s%s%s\n' "$RED" "$RESET" "$1" "$DIM" "$2" "$RESET"; }
-_info() { printf '  %s→%s  %-12s %s%s%s\n' "$BLUE" "$RESET" "$1" "$DIM" "$2" "$RESET"; }
+# Status helpers now delegate to the shared step API. The step id is derived
+# from the label so a `run` emit (spinner) and its terminal ok/skip/fail
+# resolve to the same line. `_na` marks a step not applicable on this platform
+# (dropped from the display); `_info` starts a step in the running state.
+_id() { printf '%s' "$1" | tr '[:upper:] ' '[:lower:]_'; }
+_ok() { ui_step "$(_id "$1")" "$1" ok "${2:-}"; }
+_skip() { ui_step "$(_id "$1")" "$1" skip "${2:-}"; }
+_err() { ui_step "$(_id "$1")" "$1" fail "${2:-}"; }
+_na() { ui_step "$(_id "$1")" "$1" na "${2:-}"; }
+_info() { ui_step "$(_id "$1")" "$1" run "${2:-}"; }
 
 join_lines() {
   local delimiter="$1"
@@ -378,17 +392,38 @@ reload_ghostty() {
   _skip "Ghostty" "config regenerated but no runtime reload target was found"
 }
 
+reload_kitty() {
+  # kitty reloads its config (colours included) live on SIGUSR1 — applied to
+  # every OS window, no remote-control socket required.
+  local pids
+  pids="$(pgrep -x kitty 2>/dev/null || true)"
+  if [[ -z "$pids" ]]; then
+    SKIPPED+=("kitty")
+    _skip "Kitty" "not running"
+    return
+  fi
+  local sent=0 pid
+  while IFS= read -r pid; do
+    [[ -n "$pid" ]] || continue
+    kill -SIGUSR1 "$pid" 2>/dev/null && sent=1
+  done <<<"$pids"
+  if [[ "$sent" == "1" ]]; then
+    RELOADED+=("kitty")
+    _ok "Kitty" "SIGUSR1 config reload"
+  else
+    SKIPPED+=("kitty")
+    _skip "Kitty" "reload signal not delivered"
+  fi
+}
+
 reload_tmux() {
   if ! command -v tmux &>/dev/null; then
     SKIPPED+=("tmux")
     _skip "Tmux" "not installed"
     return
   fi
-  if ! tmux list-sessions &>/dev/null; then
-    SKIPPED+=("tmux")
-    _skip "Tmux" "no active sessions"
-    return
-  fi
+  # (Don't gate on the default socket here — a session may live on a named
+  # socket; the per-server loop below detects "no sessions anywhere" and skips.)
   local conf="$HOME/.config/tmux/tmux.conf"
   if [[ ! -f "$conf" ]]; then
     conf="$HOME/.tmux.conf"
@@ -398,27 +433,63 @@ reload_tmux() {
     _skip "Tmux" "config not found"
     return
   fi
-  # source-file may return non-zero if plugins (TPM) aren't installed,
-  # but the theme/colors still reload successfully — treat as success.
-  local out
-  out="$(tmux source-file "$conf" 2>&1)" || true
-  RELOADED+=("tmux")
-  if [[ -n "$out" ]]; then
-    _ok "Tmux" "source-file (warnings: ${out##*: })"
+  # Reload EVERY running tmux server, not just the one on the default socket:
+  # a session started by tmux-sessionizer or a plugin can live on a named
+  # socket, and the caller may run outside tmux (no $TMUX to point us at the
+  # right server). For each server: re-source the config (updates the option
+  # values) then force every attached client to redraw NOW — otherwise existing
+  # sessions only repaint on the next status-interval tick (up to 5s), which
+  # reads as "existing sessions don't refresh".
+  local sockdir cl sock reloaded=0
+  local -a socks=()
+  local s existing dup
+  # The caller's OWN server first ($TMUX = "socket,pid,session"). This guarantees
+  # we hit the exact tmux the user is attached to, even when its socket lives
+  # outside the conventional dir — which is the case that made a theme switch
+  # appear to skip the running session entirely.
+  if [[ -n "${TMUX:-}" && -S "${TMUX%%,*}" ]]; then
+    socks+=("${TMUX%%,*}")
+  fi
+  sockdir="${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)"
+  for s in "$sockdir"/*; do
+    [[ -S "$s" ]] || continue
+    dup=0
+    for existing in "${socks[@]}"; do [[ "$existing" == "$s" ]] && dup=1; done
+    [[ $dup -eq 0 ]] && socks+=("$s")
+  done
+  # Fall back to the default socket if enumeration found nothing (non-standard
+  # TMUX_TMPDIR, or a socket outside the conventional dir).
+  [[ ${#socks[@]} -eq 0 ]] && socks=("")
+  for sock in "${socks[@]}"; do
+    local -a tmuxc=(tmux)
+    [[ -n "$sock" ]] && tmuxc=(tmux -S "$sock")
+    "${tmuxc[@]}" list-sessions &>/dev/null || continue
+    "${tmuxc[@]}" source-file "$conf" &>/dev/null || true
+    # Full redraw (not just -S): a stale/frozen client won't repaint on a
+    # status-only refresh.
+    while IFS= read -r cl; do
+      [[ -n "$cl" ]] && "${tmuxc[@]}" refresh-client -t "$cl" 2>/dev/null || true
+    done < <("${tmuxc[@]}" list-clients -F '#{client_name}' 2>/dev/null)
+    reloaded=1
+  done
+  if [[ $reloaded -eq 1 ]]; then
+    RELOADED+=("tmux")
+    _ok "Tmux" "source-file + refresh (all servers)"
   else
-    _ok "Tmux" "source-file $conf"
+    SKIPPED+=("tmux")
+    _skip "Tmux" "no active sessions"
   fi
 }
 
 reload_niri() {
   if ! command -v niri &>/dev/null; then
     SKIPPED+=("niri")
-    _skip "Niri" "not installed"
+    _na "Niri" "not installed"
     return
   fi
   if ! pgrep -x niri &>/dev/null; then
     SKIPPED+=("niri")
-    _skip "Niri" "not running"
+    _na "Niri" "not running"
     return
   fi
   # Reload config (picks up new colors) then trigger visual transition
@@ -428,7 +499,7 @@ reload_niri() {
     _ok "Niri" "config reloaded + transition"
   else
     SKIPPED+=("niri")
-    _skip "Niri" "IPC unavailable"
+    _na "Niri" "IPC unavailable"
   fi
 }
 
@@ -443,7 +514,7 @@ reload_desktop() {
   if [[ "$(uname -s)" == "Darwin" ]]; then
     if ! command -v osascript &>/dev/null; then
       SKIPPED+=("desktop")
-      _skip "Desktop" "osascript not available"
+      _na "Desktop" "osascript not available"
       return
     fi
 
@@ -498,13 +569,25 @@ reload_desktop() {
     fi
 
     if [[ $changed -gt 0 ]]; then
-      # Force running apps to pick up the new accent/highlight preferences
+      # Flush the prefs daemon so newly-focused apps read the new accent.
+      # This is cheap and non-disruptive.
       killall -HUP cfprefsd 2>/dev/null || true
-      killall SystemUIServer 2>/dev/null || true
-      killall Dock 2>/dev/null || true
-      killall "System Settings" 2>/dev/null || true
+
+      # Restarting SystemUIServer + Dock is what makes the menu-bar/Dock
+      # accent update INSTANTLY — but it visibly freezes the workspace for
+      # a few seconds while they respawn, on every theme switch. Default to
+      # NOT doing it: dark/light mode (System Events, above) and the app
+      # themes apply live; only the macOS system accent updates lazily.
+      # Opt in with DOT_THEME_RESTART_UI=1 for the instant-accent behaviour.
+      if [[ "${DOT_THEME_RESTART_UI:-0}" == "1" ]]; then
+        killall SystemUIServer 2>/dev/null || true
+        killall Dock 2>/dev/null || true
+        killall "System Settings" 2>/dev/null || true
+        _ok "Desktop" "macOS ${color_scheme}, accent ${accent} (UI restarted)"
+      else
+        _ok "Desktop" "macOS ${color_scheme}, accent ${accent}"
+      fi
       RELOADED+=("desktop")
-      _ok "Desktop" "macOS ${color_scheme}, accent ${accent}"
     else
       SKIPPED+=("desktop")
       _skip "Desktop" "macOS appearance unchanged"
@@ -514,7 +597,7 @@ reload_desktop() {
 
   if ! command -v gsettings &>/dev/null; then
     SKIPPED+=("desktop")
-    _skip "Desktop" "gsettings not available"
+    _na "Desktop" "gsettings not available"
     return
   fi
 
@@ -853,7 +936,7 @@ reload_wallpaper() {
 reload_dms() {
   if [[ "$PLATFORM" != "Linux" ]]; then
     SKIPPED+=("dms")
-    _skip "DMS" "not Linux"
+    _na "DMS" "not Linux"
     return
   fi
 
@@ -921,10 +1004,6 @@ main() {
       ;;
   esac
 
-  # Header
-  printf '%s\n' "${BOLD}${CYAN}dot-theme-sync${RESET}"
-  echo ""
-
   # Save previous theme for rollback on failure
   local prev_theme
   prev_theme="$(current_theme)"
@@ -936,72 +1015,69 @@ main() {
     sync_theme_state
   fi
 
-  # Read the active theme and print exactly once. When `new_theme` was
-  # supplied it's the same value `current_theme` returns now, so the
-  # earlier "set to $new_theme" line was just noise; we print the
-  # canonical active theme regardless of how we got here.
+  # Resolve the active theme (same value whether set or synced above).
   local theme
   theme="$(current_theme)"
   if [[ -z "$theme" ]]; then
-    _err "Theme" "no theme found in $DATA_FILE"
+    printf '%s\n' "${RED:-}error${RESET}: no theme found in $DATA_FILE" >&2
     exit 1
   fi
-  _info "Theme" "$theme"
-  echo ""
 
-  # Regenerate config files with new theme data
+  # Begin the animated step run. ui_steps_begin streams to the dot-ui renderer
+  # on a rich TTY and falls back to plain ui_* lines otherwise; every reload
+  # below reports through _ok/_skip/_err (→ ui_step) for one consistent UI.
+  ui_steps_begin "dot theme" "$theme"
+
+  # Regenerate config files with the new theme data.
+  _info "Chezmoi"
   if [[ "$do_full" == true ]]; then
-    _info "Chezmoi" "full apply..."
     if chezmoi apply --force 2>/dev/null || chezmoi apply; then
       _ok "Chezmoi" "full apply completed"
     else
-      _err "Chezmoi" "apply failed — rolling back to $prev_theme"
+      _err "Chezmoi" "apply failed"
       write_theme "$prev_theme"
       apply_theme_configs
+      ui_steps_end "rolled back to $prev_theme"
       return 1
     fi
   else
     apply_theme_configs
   fi
   sync_ghostty_macos_config
-  echo ""
 
-  # Signal running applications to reload
+  # Signal running applications to reload. Each `_info <Label>` starts the step
+  # (spinner); the reload's terminal _ok/_skip/_err/_na resolves it. Labels
+  # match the reload functions' status labels so ids line up.
+  _info "Ghostty"
   reload_ghostty
+  _info "Kitty"
+  reload_kitty
+  _info "Tmux"
   reload_tmux
+  _info "Niri"
   reload_niri
+  _info "Desktop"
   reload_desktop "$theme"
+  _info "DMS"
   reload_dms
+  _info "Wallpaper"
   reload_wallpaper
+  _info "Browsers"
   reload_browsers "$theme"
+  _info "Neovim"
   reload_nvim "$theme"
 
-  # Summary
-  echo ""
-  local elapsed
-  elapsed="$(_elapsed_ms)"
-  local reloaded_count=${#RELOADED[@]}
-  local skipped_count=${#SKIPPED[@]}
-
-  if [[ $reloaded_count -gt 0 ]]; then
-    local apps
-    apps="$(
+  # Summary line — finalises the run (and, in rich mode, waits for the render).
+  local summary
+  if [[ ${#RELOADED[@]} -gt 0 ]]; then
+    summary="reloaded $(
       IFS=', '
       echo "${RELOADED[*]}"
     )"
-    printf '%s\n' "${GREEN}${BOLD}Done${RESET} ${DIM}in ${elapsed}ms${RESET} — reloaded ${BOLD}${apps}${RESET}"
   else
-    printf '%s\n' "${YELLOW}${BOLD}Done${RESET} ${DIM}in ${elapsed}ms${RESET} — no running apps to reload"
+    summary="no running apps to reload"
   fi
-
-  if [[ $skipped_count -gt 0 ]]; then
-    local skips
-    skips="$(
-      IFS=', '
-      echo "${SKIPPED[*]}"
-    )"
-    printf '%s\n' "${DIM}Skipped: ${skips}${RESET}"
-  fi
+  ui_steps_end "$summary"
 }
 
 main "$@"
