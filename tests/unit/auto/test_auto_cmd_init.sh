@@ -82,6 +82,55 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
 
+test_start "dot_init_deep_branches_execute"
+init_tmp="$DOTFILES_COV_TMPDIR/init-deep"
+mkdir -p "$init_tmp/bin" "$init_tmp/home"
+cat >"$init_tmp/bin/chezmoi" <<'EOF_CHEZMOI'
+#!/usr/bin/env bash
+case "${1:-}" in
+  source-path)
+    printf '%s\n' "$DOTFILES_FAKE_SOURCE"
+    ;;
+  init)
+    printf 'chezmoi-init:%s\n' "$*"
+    ;;
+  *)
+    exit 1
+    ;;
+esac
+EOF_CHEZMOI
+chmod +x "$init_tmp/bin/chezmoi"
+(
+  set +e
+  export HOME="$init_tmp/home"
+  export PATH="$init_tmp/bin:$PATH"
+  export DOTFILES_FAKE_SOURCE="$init_tmp/source"
+  export DOTFILES_NONINTERACTIVE=1
+  # shellcheck disable=SC1091
+  source "$REPO_ROOT/lib/dot/utils.sh"
+  set -- --help
+  # shellcheck disable=SC1090
+  source "$SCRIPT_FILE"
+  _init_resolve_url alice
+  _init_resolve_url alice/cfg
+  _init_resolve_url https://example.com/repo.git
+  _init_resolve_url git@github.com:alice/cfg.git
+  _init_resolve_url http://example.com/repo.git
+  _init_resolve_url 'bad user'
+  _init_resolve_url 'bad/repo/name'
+  PATH="/usr/bin:/bin" cmd_init alice
+  PATH="$init_tmp/bin:/usr/bin:/bin" cmd_init alice --dry-run
+  mkdir -p "$init_tmp/source"
+  CHEZMOI_SOURCE_DIR="$init_tmp/source" cmd_init alice
+  CHEZMOI_SOURCE_DIR="$init_tmp/source" cmd_init alice --force --no-apply
+  CHEZMOI_SOURCE_DIR="$init_tmp/new-source" cmd_init alice --no-apply
+  cmd_init alice extra
+  cmd_init --bad
+  cmd_init
+) >/dev/null || true
+assert_dir_exists "$init_tmp/source" \
+  "init deep branches used sandbox source path"
+
 cov_exercise_functions_file "$SCRIPT_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

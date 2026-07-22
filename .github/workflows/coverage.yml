@@ -72,18 +72,34 @@ jobs:
           #            ai.sh 15→87). floor=35 (3-pt cushion).
           #   Slice 7: 37.89% measured after #954 deep-branch tests for
           #            switch.sh, mcp-doctor.sh, and Linux/WSL doctor.sh
-          #            branches. floor=37. Landed at 37.64% on CI once
-          #            the doctor lspci abort was fixed — a 0.64-pt
-          #            cushion, thin enough that the next honest
-          #            re-measure could trip it.
-          #   Slice 8: 39.89% measured after runtime-exercise tests for
-          #            tools.sh + aliases.sh + env-emit.sh (dot tools
-          #            surface) and registry.sh. Those four files had
-          #            grep-only tests that asserted a function was
-          #            defined without ever calling it. floor=38
-          #            (~1.9-pt cushion).
+          #            branches. floor=37.
+          #   Slice 8: 39.82% measured after core UI/utils branch-driving
+          #            coverage, including lib/dot/ui.sh at 52.23%.
+          #            floor=39.
+          #   Slice 9: 41.35% measured after version-sync and tools
+          #            branch-driving coverage. tools.sh reached 72.85%,
+          #            utils.sh reached 73.24%, floor=41.
+          #   Slice 10: 42.30% measured after aliases branch-driving
+          #             coverage. aliases.sh reached 70.00%, floor=42.
+          #   Slice 11: 42.99% measured after registry branch-driving
+          #             coverage. registry.sh reached 65.03%, floor=42.
+          #   Slice 12: 45.04% measured after proxy/completion/agents/
+          #             secrets branch-driving coverage. floor=45.
+          #   Slice 13: 46.04% measured after secrets load-success and
+          #             core/init/manual branch-driving coverage. floor=46.
+          #   Slice 14: 49.10% measured after diagnostics/meta/restore/log/
+          #             env/git-ai/hashsum/regex/jsonv/gl/hex helper
+          #             branch-driving coverage. floor=49.
+          #   Slice 15: 50.75% measured after jwt portability coverage
+          #             plus apihealth/apiload/apilatency function
+          #             branch-driving coverage. floor=50.
+          #   Merge:    50.16% (6205/12371) re-measured after merging the
+          #             core-ratchet branch into feat/v0.2.512 (folds in the
+          #             v0.2.512 doctor/ui fixes). floor=49 — the margin
+          #             absorbs local<->CI drift and ~0.6-pt run-to-run
+          #             xtrace variance; bump to 50 once CI confirms >=50.
           # Bump in lockstep with the slice that lands the bump.
-          MIN_COVERAGE_PCT: '38'
+          MIN_COVERAGE_PCT: '49'
         run: bash tools/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact
