@@ -43,21 +43,28 @@ matches and emits standard `lcov.info` that Codecov ingests natively.
 
 | Surface | What runs |
 |---|---|
-| **PR + push to main** | `.github/workflows/coverage.yml` → `Coverage / kcov` job → uploads lcov.info to Codecov and fails the build below `MIN_COVERAGE_PCT` (currently `45`, ratcheted up after measured integer-floor gains). |
+| **PR + push to main** | `.github/workflows/coverage.yml` → `Coverage / kcov` job → uploads lcov.info to Codecov and fails the build below `MIN_COVERAGE_PCT` (currently `50`, ratcheted up after measured integer-floor gains). |
 | **Local dev** | `bash tools/ci/run-coverage.sh` — works on Linux + macOS (xtrace is a bash primitive, no platform tools needed). |
 | **macOS dev** | Supported. xtrace-based instrumentation runs on macOS bash 3.2+ and Homebrew bash 5.x, with a Perl alarm fallback when GNU `timeout`/`gtimeout` is unavailable. |
 
 ## The current floor
 
-`MIN_COVERAGE_PCT=46` in `.github/workflows/coverage.yml`. Slice 1
+`MIN_COVERAGE_PCT=50` in `.github/workflows/coverage.yml`. Slice 1
 of [#883](https://github.com/sebastienrousseau/dotfiles/issues/883)
 established the baseline at **~2.7% measured** (~613 of ~22 500 lines
 across 231 files). Successive slices raised it; the current measured
-value sits at **46.04%** (`5696/12371` lines) after the sixth core
-coverage-ratchet slice drove `scripts/dot/commands/init.sh` to 72.09%,
-`scripts/dot/commands/manual.sh` to 62.50%,
-`scripts/dot/commands/core.sh` to 55.86%, and
-`scripts/dot/commands/secrets.sh` to 54.97%. This builds on the prior
+value sits at **50.75%** (`6278/12371` lines) after the eighth core
+coverage-ratchet slice added `jwt` portability coverage and
+branch-driving function coverage for `apihealth`, `apiload`, and
+`apilatency`. This builds on the prior helper slice that drove
+`scripts/dot/commands/restore.sh` to 75.17%,
+`scripts/dot/commands/meta.sh` to 66.88%, `lib/dot/log.sh` to 59.56%,
+and `scripts/dot/commands/diagnostics.sh` to 49.63%, with additional
+git AI, hashsum, regex, jsonv, gl, and hex helper branch coverage.
+This builds on the prior core slice (`scripts/dot/commands/init.sh` at 72.09%,
+`scripts/dot/commands/manual.sh` at 62.50%,
+`scripts/dot/commands/core.sh` at 55.86%, and
+`scripts/dot/commands/secrets.sh` at 54.97%), the prior
 AI command slice (`defaults/dot_local/bin/executable_dot-ai-proxy` at
 76.00%, `scripts/dot/commands/agents.sh` at 66.15%, and
 `scripts/dot/commands/completion.sh` at 45.68%), the registry slice

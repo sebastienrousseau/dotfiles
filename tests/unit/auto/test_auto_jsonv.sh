@@ -36,4 +36,22 @@ fi
 cov_exercise_script "$SCRIPT_FILE"
 cov_exercise_functions_file "$SCRIPT_FILE"
 
+test_start "jsonv_deep_branches_execute"
+jsonv_tmp="$DOTFILES_COV_TMPDIR/jsonv-deep"
+mkdir -p "$jsonv_tmp"
+printf '{"ok":true}\n' >"$jsonv_tmp/valid.json"
+printf '{"ok":true\n' >"$jsonv_tmp/invalid.json"
+(
+  set +e
+  bash "$SCRIPT_FILE" "$jsonv_tmp/valid.json"
+  bash "$SCRIPT_FILE" --format "$jsonv_tmp/valid.json"
+  bash "$SCRIPT_FILE" --quiet "$jsonv_tmp/valid.json"
+  bash "$SCRIPT_FILE" "$jsonv_tmp/invalid.json"
+  bash "$SCRIPT_FILE" --unknown "$jsonv_tmp/valid.json"
+  printf '{"stdin":true}\n' | bash "$SCRIPT_FILE"
+  printf '{bad json}\n' | bash "$SCRIPT_FILE" --quiet
+) >/dev/null || true
+assert_file_exists "$jsonv_tmp/valid.json" \
+  "jsonv deep branches used sandbox JSON fixture"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

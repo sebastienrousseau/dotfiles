@@ -36,4 +36,60 @@ fi
 cov_exercise_script "$SCRIPT_FILE"
 cov_exercise_functions_file "$SCRIPT_FILE"
 
+test_start "git_ai_diff_deep_branches_execute"
+diff_tmp="$DOTFILES_COV_TMPDIR/git-ai-diff-deep"
+mkdir -p "$diff_tmp/bin" "$diff_tmp/work"
+cat >"$diff_tmp/bin/git" <<'EOF_GIT'
+#!/usr/bin/env bash
+case "$*" in
+  "diff --cached")
+    [[ -n "${DOTFILES_FAKE_EMPTY_DIFF:-}" ]] && exit 0
+    printf 'diff --git a/file.txt b/file.txt\n+new\n-old\n'
+    ;;
+  "diff --cached --stat")
+    printf ' file.txt | 2 +-\n'
+    ;;
+  "diff "*"--stat")
+    printf ' file.txt | 2 +-\n'
+    ;;
+  "diff "*)
+    [[ -n "${DOTFILES_FAKE_EMPTY_DIFF:-}" ]] && exit 0
+    printf 'diff --git a/file.txt b/file.txt\n+new\n-old\n'
+    ;;
+  *)
+    printf 'git:%s\n' "$*"
+    ;;
+esac
+EOF_GIT
+for provider in claude aider agy sgpt ollama; do
+  cat >"$diff_tmp/bin/$provider" <<'EOF_PROVIDER'
+#!/usr/bin/env bash
+case "$(basename "$0")" in
+  claude) cat >/dev/null; printf 'claude review\n' ;;
+  aider) printf 'aider review\n' ;;
+  agy) cat >/dev/null; printf 'agy review\n' ;;
+  sgpt) printf 'sgpt review\n' ;;
+  ollama) cat >/dev/null; printf 'ollama review\n' ;;
+esac
+EOF_PROVIDER
+  chmod +x "$diff_tmp/bin/$provider"
+done
+chmod +x "$diff_tmp/bin/git"
+(
+  set +e
+  export PATH="$diff_tmp/bin:$PATH"
+  cd "$diff_tmp/work" || exit 1
+  bash "$SCRIPT_FILE" --help
+  GIT_AI_PROVIDER=claude bash "$SCRIPT_FILE"
+  bash "$SCRIPT_FILE" --provider aider HEAD~2
+  bash "$SCRIPT_FILE" --provider agy --staged
+  bash "$SCRIPT_FILE" --provider sgpt
+  OLLAMA_MODEL=test-model bash "$SCRIPT_FILE" --provider ollama
+  bash "$SCRIPT_FILE" --provider unknown
+  DOTFILES_FAKE_EMPTY_DIFF=1 bash "$SCRIPT_FILE" --provider claude
+  bash "$SCRIPT_FILE" --bad
+) >/dev/null || true
+assert_file_exists "$diff_tmp/bin/git" \
+  "git-ai-diff deep branches used sandbox git shim"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

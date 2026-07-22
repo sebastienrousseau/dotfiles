@@ -87,8 +87,14 @@ jobs:
           #             secrets branch-driving coverage. floor=45.
           #   Slice 13: 46.04% measured after secrets load-success and
           #             core/init/manual branch-driving coverage. floor=46.
+          #   Slice 14: 49.10% measured after diagnostics/meta/restore/log/
+          #             env/git-ai/hashsum/regex/jsonv/gl/hex helper
+          #             branch-driving coverage. floor=49.
+          #   Slice 15: 50.75% measured after jwt portability coverage
+          #             plus apihealth/apiload/apilatency function
+          #             branch-driving coverage. floor=50.
           # Bump in lockstep with the slice that lands the bump.
-          MIN_COVERAGE_PCT: '46'
+          MIN_COVERAGE_PCT: '50'
         run: bash tools/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact
