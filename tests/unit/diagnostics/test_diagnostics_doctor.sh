@@ -170,7 +170,15 @@ if [[ "$output" == *"Fixture Linux 2026 (WSL)"* ]] &&
 else
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected Linux/WSL fixture details"
-  printf '%b\n' "    Output: ${output:0:500}"
+  # Name the missing markers and dump the tail of the report rather
+  # than a 500-char head. When doctor.sh aborts mid-run the head is
+  # identical to a healthy run and tells us nothing; the tail shows
+  # exactly which section it died in.
+  for marker in "Fixture Linux 2026 (WSL)" "FixtureBook" "Fixture CPU" "WSL bridge"; do
+    [[ "$output" == *"$marker"* ]] || printf '%b\n' "    missing marker: $marker"
+  done
+  printf '%b\n' "    Report tail:"
+  printf '%s\n' "$output" | tail -25 | sed 's/^/      /'
 fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

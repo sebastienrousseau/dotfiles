@@ -263,7 +263,11 @@ elif [[ -r "$os_release_file" ]]; then
   fi
 
   if command -v lspci >/dev/null 2>&1; then
-    _gpu="$(lspci 2>/dev/null | grep -iE 'vga|3d|display' | head -1 | sed 's/.*: //')"
+    # Headless hosts (VMs, containers, CI runners) expose no display
+    # controller, so `grep` exits 1 and — under `set -euo pipefail` —
+    # would abort the whole report mid-section. Absorb the miss.
+    _gpu="$(lspci 2>/dev/null | grep -iE 'vga|3d|display' | head -1 | sed 's/.*: //' || true)"
+    _gpu="${_gpu:-n/a}"
   else
     _gpu="n/a"
   fi
