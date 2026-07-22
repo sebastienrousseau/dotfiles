@@ -43,20 +43,23 @@ matches and emits standard `lcov.info` that Codecov ingests natively.
 
 | Surface | What runs |
 |---|---|
-| **PR + push to main** | `.github/workflows/coverage.yml` → `Coverage / kcov` job → uploads lcov.info to Codecov and fails the build below `MIN_COVERAGE_PCT` (currently `42`, ratcheted up after measured integer-floor gains). |
+| **PR + push to main** | `.github/workflows/coverage.yml` → `Coverage / kcov` job → uploads lcov.info to Codecov and fails the build below `MIN_COVERAGE_PCT` (currently `45`, ratcheted up after measured integer-floor gains). |
 | **Local dev** | `bash tools/ci/run-coverage.sh` — works on Linux + macOS (xtrace is a bash primitive, no platform tools needed). |
 | **macOS dev** | Supported. xtrace-based instrumentation runs on macOS bash 3.2+ and Homebrew bash 5.x, with a Perl alarm fallback when GNU `timeout`/`gtimeout` is unavailable. |
 
 ## The current floor
 
-`MIN_COVERAGE_PCT=42` in `.github/workflows/coverage.yml`. Slice 1
+`MIN_COVERAGE_PCT=45` in `.github/workflows/coverage.yml`. Slice 1
 of [#883](https://github.com/sebastienrousseau/dotfiles/issues/883)
 established the baseline at **~2.7% measured** (~613 of ~22 500 lines
 across 231 files). Successive slices raised it; the current measured
-value sits at **42.99%** (`5318/12371` lines) after the fourth core
-coverage-ratchet slice drove `scripts/dot/commands/registry.sh` to
-65.03% and hardened local macOS coverage runs with a Perl timeout
-fallback. This builds on the aliases slice
+value sits at **45.04%** (`5572/12371` lines) after the fifth core
+coverage-ratchet slice drove `defaults/dot_local/bin/executable_dot-ai-proxy`
+to 76.00%, `scripts/dot/commands/agents.sh` to 66.15%,
+`scripts/dot/commands/completion.sh` to 45.68%, and
+`scripts/dot/commands/secrets.sh` to 42.11%. This builds on the
+registry slice (`scripts/dot/commands/registry.sh` at 65.03%) and the
+macOS coverage-runner Perl timeout fallback, the aliases slice
 (`scripts/dot/commands/aliases.sh` at 70.00%), the tools/version-sync
 slice (`scripts/dot/commands/tools.sh` at 72.85%, `lib/dot/utils.sh` at
 73.24%, and `scripts/version-sync.sh` at 36.53%), the first core slice
