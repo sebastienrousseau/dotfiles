@@ -784,7 +784,10 @@ ui_table_row() {
 
 ui_table_sep() {
   local total=2
-  for w in "${_UI_TABLE_WIDTHS[@]}"; do
+  # Same bash 3.2 empty-array hazard as ui_table_end: _UI_TABLE_WIDTHS
+  # is empty until ui_table_header populates it, so a separator drawn
+  # before any header would abort under `set -u`.
+  for w in ${_UI_TABLE_WIDTHS[@]+"${_UI_TABLE_WIDTHS[@]}"}; do
     ((total += w)) || true
   done
   printf '  '
@@ -844,7 +847,11 @@ ui_table_end() {
     _hdr="${_UI_TABLE_HEADERS[*]}"
     if {
       printf '%s\n' "$_hdr"
-      printf '%s\n' "${_UI_TABLE_ROWS[@]}"
+      # A zero-row table is legitimate (a search that matched nothing).
+      # bash 3.2 — still /bin/bash on macOS — treats "${arr[@]}" on an
+      # empty array as an unbound variable under `set -u`, which is
+      # fatal regardless of errexit. Guard on the count.
+      ((${#_UI_TABLE_ROWS[@]} > 0)) && printf '%s\n' "${_UI_TABLE_ROWS[@]}"
     } | dot-ui table 2>/dev/null; then
       _UI_TABLE_HEADERS=()
       _UI_TABLE_ROWS=()
@@ -872,7 +879,8 @@ ui_table_end() {
     local header_fg="${DOTFILES_TABLE_HEADER_FG:-212}"
     {
       printf '%s\n' "$header_row"
-      printf '%s\n' "${_UI_TABLE_ROWS[@]}"
+      # See the bash 3.2 empty-array note in ui_table_end above.
+      ((${#_UI_TABLE_ROWS[@]} > 0)) && printf '%s\n' "${_UI_TABLE_ROWS[@]}"
     } | gum table --print \
       --separator=$'\x1f' \
       --border=rounded \
@@ -899,7 +907,7 @@ _ui_table_printf_fallback() {
     widths[i]="${#_UI_TABLE_HEADERS[i]}"
   done
   local row
-  for row in "${_UI_TABLE_ROWS[@]}"; do
+  for row in ${_UI_TABLE_ROWS[@]+"${_UI_TABLE_ROWS[@]}"}; do
     local -a _fields=()
     local IFS=$'\x1f'
     read -ra _fields <<<"$row"
@@ -930,7 +938,7 @@ _ui_table_printf_fallback() {
   for ((i = 0; i < total - 2; i++)); do printf '─'; done
   printf '\n'
 
-  for row in "${_UI_TABLE_ROWS[@]}"; do
+  for row in ${_UI_TABLE_ROWS[@]+"${_UI_TABLE_ROWS[@]}"}; do
     local -a _fields=()
     local IFS=$'\x1f'
     read -ra _fields <<<"$row"
