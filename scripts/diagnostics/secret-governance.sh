@@ -13,7 +13,13 @@ STRICT="${DOTFILES_ALIAS_STRICT_MODE:-${DOTFILES_SECRETS_STRICT_MODE:-0}}"
 
 cd "$REPO_ROOT"
 
-mapfile -t staged_files < <(git diff --cached --name-only --diff-filter=ACM || true)
+# Portable read — `mapfile` is bash 4 only, and this runs from the
+# pre-commit hook on macOS where /bin/bash is 3.2. Without this the
+# hook exits 127 and the secret scan is skipped entirely.
+staged_files=()
+while IFS= read -r _line; do
+  [[ -n "$_line" ]] && staged_files+=("$_line")
+done < <(git diff --cached --name-only --diff-filter=ACM || true)
 if [[ "${#staged_files[@]}" -eq 0 ]]; then
   echo "Secret governance: no staged files."
   exit 0
