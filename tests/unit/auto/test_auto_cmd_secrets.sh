@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# shellcheck disable=SC1090,SC1091,SC2034
+# shellcheck disable=SC1090,SC1091,SC2030,SC2031,SC2034
 # Auto-generated function-exercise test for scripts/dot/commands/secrets.sh.
 # AUTO-GENERATED: true
 
@@ -39,6 +39,7 @@ auto_load = true
 ai = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY"]
 ops = ["OPS_TOKEN"]
 EOF_DATA
+cp "$secrets_tmp/repo/defaults/.chezmoidata.toml" "$secrets_tmp/repo/.chezmoidata.toml"
 cat >"$secrets_tmp/bin/chezmoi" <<'EOF_CHEZMOI'
 #!/usr/bin/env bash
 case "${1:-}" in
@@ -94,6 +95,29 @@ chmod +x "$secrets_tmp/bin/chezmoi" "$secrets_tmp/bin/pass"
   bash "$SCRIPT_FILE" secrets unknown
   bash "$SCRIPT_FILE" env unknown
   bash "$SCRIPT_FILE" unknown-command
+) >/dev/null || true
+
+(
+  set +e
+  export HOME="$secrets_tmp/home"
+  export DOTFILES_FAKE_SOURCE="$secrets_tmp/repo"
+  export DOTFILES_FAKE_PASS_STORE="$secrets_tmp/pass-store"
+  export DOT_SECRETS_HOME="$secrets_tmp/secrets"
+  export DOTFILES_SECRETS_PROVIDER="pass"
+  export PATH="$secrets_tmp/bin:$PATH"
+  # Preload utils so the source-dir cache can point at the sandbox before
+  # secrets.sh performs its policy load during source.
+  # shellcheck disable=SC1091
+  source "$REPO_ROOT/lib/dot/utils.sh"
+  _DOT_SOURCE_DIR_CACHE="$secrets_tmp/repo"
+  set -- --help
+  # shellcheck disable=SC1090
+  source "$SCRIPT_FILE"
+  cmd_env_load ai
+  cmd_env_load ai --shell fish
+  cmd_env_load ai --shell nu
+  cmd_env_load ops
+  cmd_env_load ai --shell unknown
 ) >/dev/null || true
 assert_file_contains "$secrets_tmp/secrets/index.txt" \
   "OPENAI_API_KEY" "secrets deep branches indexed stored key"

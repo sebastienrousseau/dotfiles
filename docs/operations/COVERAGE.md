@@ -49,17 +49,20 @@ matches and emits standard `lcov.info` that Codecov ingests natively.
 
 ## The current floor
 
-`MIN_COVERAGE_PCT=45` in `.github/workflows/coverage.yml`. Slice 1
+`MIN_COVERAGE_PCT=46` in `.github/workflows/coverage.yml`. Slice 1
 of [#883](https://github.com/sebastienrousseau/dotfiles/issues/883)
 established the baseline at **~2.7% measured** (~613 of ~22 500 lines
 across 231 files). Successive slices raised it; the current measured
-value sits at **45.04%** (`5572/12371` lines) after the fifth core
-coverage-ratchet slice drove `defaults/dot_local/bin/executable_dot-ai-proxy`
-to 76.00%, `scripts/dot/commands/agents.sh` to 66.15%,
-`scripts/dot/commands/completion.sh` to 45.68%, and
-`scripts/dot/commands/secrets.sh` to 42.11%. This builds on the
-registry slice (`scripts/dot/commands/registry.sh` at 65.03%) and the
-macOS coverage-runner Perl timeout fallback, the aliases slice
+value sits at **46.04%** (`5696/12371` lines) after the sixth core
+coverage-ratchet slice drove `scripts/dot/commands/init.sh` to 72.09%,
+`scripts/dot/commands/manual.sh` to 62.50%,
+`scripts/dot/commands/core.sh` to 55.86%, and
+`scripts/dot/commands/secrets.sh` to 54.97%. This builds on the prior
+AI command slice (`defaults/dot_local/bin/executable_dot-ai-proxy` at
+76.00%, `scripts/dot/commands/agents.sh` at 66.15%, and
+`scripts/dot/commands/completion.sh` at 45.68%), the registry slice
+(`scripts/dot/commands/registry.sh` at 65.03%) and the macOS
+coverage-runner Perl timeout fallback, the aliases slice
 (`scripts/dot/commands/aliases.sh` at 70.00%), the tools/version-sync
 slice (`scripts/dot/commands/tools.sh` at 72.85%, `lib/dot/utils.sh` at
 73.24%, and `scripts/version-sync.sh` at 36.53%), the first core slice
