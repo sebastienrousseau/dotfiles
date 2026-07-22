@@ -175,22 +175,24 @@ ex aliases_why_noarg aliases why
 ex aliases_stats aliases stats
 ex aliases_tiers aliases tiers
 
-# `aliases cheatsheet` is deliberately NOT exercised through tools.sh.
-# Its body redirects into "$(require_source_dir)/docs/
-# ALIASES_CHEATSHEET.md", and resolve_source_dir() derives that path
-# from the location of the lib it sourced — the real repo — so no
-# amount of $HOME/.dotfiles redirection keeps the write inside the
-# sandbox. Running the arm drops a generated file into the working
-# tree. The generator behind it is covered directly instead, which is
-# where the actual line volume lives; only the five-line wrapper is
-# skipped.
-test_start "tools_aliases_cheatsheet_generator"
-set +e
-bash "$REPO_ROOT/scripts/diagnostics/aliases-cheatsheet.sh" </dev/null >/dev/null 2>&1
-cheatsheet_rc=$?
-set -e
-((TESTS_PASSED++)) || true
-printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$cheatsheet_rc)"
+# `aliases cheatsheet` writes to the checkout's docs/ by default —
+# require_source_dir() resolves from the sourced lib's location, so the
+# sandbox cannot redirect it. `--output` exists precisely so the arm is
+# exercisable; point it at the sandbox.
+CHEATSHEET_OUT="$DOTFILES_COV_TMPDIR/cheatsheet/ALIASES_CHEATSHEET.md"
+ex aliases_cheatsheet_output aliases cheatsheet --output "$CHEATSHEET_OUT"
+ex aliases_cheatsheet_stdout aliases cheatsheet --output -
+ex aliases_cheatsheet_missing_value aliases cheatsheet --output
+ex aliases_cheatsheet_bad_flag aliases cheatsheet --nope
+
+test_start "tools_cheatsheet_writes_to_output"
+if [[ -s "$CHEATSHEET_OUT" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: wrote $CHEATSHEET_OUT"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: nothing written"
+fi
 
 # Tripwire: nothing in this sweep may write the generated cheatsheet
 # into the checkout. Guards against the wrapper arm being added back.
