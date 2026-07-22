@@ -37,4 +37,20 @@ test_start "completion_no_arg_shows_usage"
 out="$(bash "$DOT" completion 2>&1 || true)"
 assert_contains "Usage: dot completion" "$out" "no-arg completion prints usage"
 
+COMPLETION_MODULE="$REPO_ROOT/scripts/dot/commands/completion.sh"
+
+test_start "completion_module_direct_branches"
+out="$(
+  set +e
+  bash "$COMPLETION_MODULE" completion bash
+  bash "$COMPLETION_MODULE" completion zsh
+  bash "$COMPLETION_MODULE" completion fish
+  bash "$COMPLETION_MODULE" completion nu
+  bash "$COMPLETION_MODULE" completion nushell
+  bash "$COMPLETION_MODULE" completion
+  bash "$COMPLETION_MODULE" completion unknown-shell
+  true
+)"
+assert_contains "export extern dot" "$out" "direct completion module exercises supported shells"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

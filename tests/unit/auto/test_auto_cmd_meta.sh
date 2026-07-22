@@ -57,6 +57,107 @@ for cmd in "docs" "keys"; do
   fi
 done
 
+test_start "meta_deep_branches_execute"
+meta_tmp="$DOTFILES_COV_TMPDIR/meta-deep"
+mkdir -p "$meta_tmp/repo/docs" \
+  "$meta_tmp/repo/scripts/ops" \
+  "$meta_tmp/repo/scripts/diagnostics" \
+  "$meta_tmp/repo/defaults/dot_local/bin" \
+  "$meta_tmp/repo/dot_config/dotfiles" \
+  "$meta_tmp/repo/nix" \
+  "$meta_tmp/bin" \
+  "$meta_tmp/cache/zsh" \
+  "$meta_tmp/cache/bash" \
+  "$meta_tmp/cache/fish" \
+  "$meta_tmp/cache/nushell"
+printf '# Readme\n' >"$meta_tmp/repo/README.md"
+printf '# Keys\n\nssh signing\n' >"$meta_tmp/repo/docs/KEYS.md"
+printf '{}\n' >"$meta_tmp/repo/nix/flake.nix"
+cat >"$meta_tmp/repo/dot_config/dotfiles/mcp-registry.json" <<'EOF_REGISTRY'
+{
+  "servers": {
+    "local": {
+      "transport": "stdio",
+      "launcher": "npx",
+      "package": "@example/mcp"
+    }
+  }
+}
+EOF_REGISTRY
+for helper in \
+  scripts/ops/prewarm.sh \
+  scripts/ops/tour.sh \
+  scripts/diagnostics/keys.sh \
+  scripts/diagnostics/mcp-doctor.sh \
+  defaults/dot_local/bin/executable_tour; do
+  mkdir -p "$meta_tmp/repo/$(dirname "$helper")"
+  cat >"$meta_tmp/repo/$helper" <<'EOF_HELPER'
+#!/usr/bin/env bash
+printf 'helper:%s\n' "$0"
+EOF_HELPER
+  chmod +x "$meta_tmp/repo/$helper"
+done
+for tool in chezmoi nix nix-collect-garbage nvim glow rg jq docker podman git; do
+  cat >"$meta_tmp/bin/$tool" <<'EOF_TOOL'
+#!/usr/bin/env bash
+case "$(basename "$0")" in
+  git)
+    case "$*" in
+      *user.signingkey*) printf '%s\n' "$HOME/.ssh/signing.pub" ;;
+      *gpg.format*) printf 'ssh\n' ;;
+    esac
+    ;;
+  jq)
+    printf 'local\tstdio\tnpx\t@example/mcp\n'
+    ;;
+  *)
+    printf '%s:%s\n' "$(basename "$0")" "$*"
+    ;;
+esac
+EOF_TOOL
+  chmod +x "$meta_tmp/bin/$tool"
+done
+mkdir -p "$meta_tmp/home/.ssh"
+printf 'ssh-ed25519 AAAATEST\n' >"$meta_tmp/home/.ssh/signing.pub"
+touch "$meta_tmp/cache/zsh/tool-init.zsh" \
+  "$meta_tmp/cache/bash/tool-init.bash" \
+  "$meta_tmp/cache/fish/tool-init.fish" \
+  "$meta_tmp/cache/nushell/tool.nu"
+(
+  set +e
+  export HOME="$meta_tmp/home"
+  export XDG_CACHE_HOME="$meta_tmp/cache"
+  export PATH="$meta_tmp/bin:$PATH"
+  export DOTFILES_FONTS=0
+  # shellcheck disable=SC1091
+  source "$REPO_ROOT/lib/dot/utils.sh"
+  _DOT_SOURCE_DIR_CACHE="$meta_tmp/repo"
+  set -- help
+  # shellcheck disable=SC1090
+  source "$SCRIPT_FILE"
+  meta_banner_section mcp
+  meta_banner_section docs
+  meta_banner_section upgrade
+  cmd_upgrade
+  cmd_prewarm
+  (cmd_docs)
+  cmd_keys sign-check
+  cmd_keys ssh
+  rm -f "$meta_tmp/repo/docs/KEYS.md"
+  (cmd_keys)
+  (cmd_learn)
+  rm -f "$meta_tmp/repo/defaults/dot_local/bin/executable_tour"
+  (cmd_learn)
+  (cmd_sandbox)
+  PATH="$meta_tmp/bin:/usr/bin:/bin" cmd_mcp registry
+  PATH="/usr/bin:/bin" cmd_mcp registry
+  MCP_REGISTRY_CONFIG="$meta_tmp/repo/dot_config/dotfiles/mcp-registry.json" cmd_mcp registry --json
+  (cmd_mcp doctor --strict)
+  (cmd_mcp nope)
+) >/dev/null || true
+assert_file_not_exists "$meta_tmp/cache/zsh/tool-init.zsh" \
+  "meta deep branches cleared sandbox zsh cache"
+
 cov_exercise_functions_file "$SCRIPT_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

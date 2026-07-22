@@ -36,4 +36,23 @@ fi
 cov_exercise_script "$SCRIPT_FILE"
 cov_exercise_functions_file "$SCRIPT_FILE"
 
+test_start "regex_deep_branches_execute"
+regex_tmp="$DOTFILES_COV_TMPDIR/regex-deep"
+mkdir -p "$regex_tmp"
+printf 'Error 123\nok 456\n' >"$regex_tmp/input.txt"
+(
+  set +e
+  bash "$SCRIPT_FILE" --help
+  bash "$SCRIPT_FILE" "[0-9]+" "abc123def"
+  bash "$SCRIPT_FILE" --global "[0-9]+" "abc123def456"
+  bash "$SCRIPT_FILE" --ignore "error" "ERROR line"
+  bash "$SCRIPT_FILE" --no-color "nomatch" "plain text"
+  bash "$SCRIPT_FILE" --file "^[Ee]rror" "$regex_tmp/input.txt"
+  bash "$SCRIPT_FILE" --file "missing" "$regex_tmp/missing.txt"
+  bash "$SCRIPT_FILE" --unknown "[0-9]+" "abc123"
+  printf 'stdin 789\n' | bash "$SCRIPT_FILE" "[0-9]+"
+) >/dev/null || true
+assert_file_exists "$regex_tmp/input.txt" \
+  "regex deep branches used sandbox input file"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

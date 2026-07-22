@@ -83,16 +83,64 @@ restore_output="$(
     XDG_DATA_HOME="$restore_sandbox/data" \
     bash "$RESTORE_FILE" --latest 2>&1
 )"
-if [[ -f "$restore_sandbox/home/.zshrc" ]] \
-  && [[ -f "$restore_sandbox/home/.config/zsh/.zshrc" ]] \
-  && grep -q "Restored: .zshrc" <<<"$restore_output" \
-  && grep -q "Restored: .config" <<<"$restore_output"; then
+if [[ -f "$restore_sandbox/home/.zshrc" ]] &&
+  [[ -f "$restore_sandbox/home/.config/zsh/.zshrc" ]] &&
+  grep -q "Restored: .zshrc" <<<"$restore_output" &&
+  grep -q "Restored: .config" <<<"$restore_output"; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: restore_latest restores hidden files and nested paths"
 else
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: restore_latest should restore hidden files and nested paths"
 fi
+
+test_start "restore_deep_branches_execute"
+restore_deep="$DOTFILES_COV_TMPDIR/restore-deep"
+mkdir -p "$restore_deep/home/.dotfiles/.git" \
+  "$restore_deep/data/dotfiles/backups/backup-20260722_120000/.config/zsh" \
+  "$restore_deep/bin"
+printf 'zshrc\n' >"$restore_deep/home/.zshrc"
+printf 'gitconfig\n' >"$restore_deep/home/.gitconfig"
+printf 'backup zshrc\n' >"$restore_deep/data/dotfiles/backups/backup-20260722_120000/.zshrc"
+printf 'backup nested\n' >"$restore_deep/data/dotfiles/backups/backup-20260722_120000/.config/zsh/.zshrc"
+cat >"$restore_deep/bin/git" <<'EOF_GIT'
+#!/usr/bin/env bash
+case "$*" in
+  *"log --oneline -10"*) printf 'abc123 latest\n' ;;
+  *"diff "*" --stat"*) printf ' files changed\n' ;;
+  *"diff "*) printf 'diff --git a/file b/file\n' ;;
+  *"checkout "*) printf 'checkout ok\n' ;;
+  *) printf 'git:%s\n' "$*" ;;
+esac
+EOF_GIT
+cat >"$restore_deep/bin/chezmoi" <<'EOF_CHEZMOI'
+#!/usr/bin/env bash
+printf 'chezmoi:%s\n' "$*"
+EOF_CHEZMOI
+chmod +x "$restore_deep/bin/git" "$restore_deep/bin/chezmoi"
+(
+  set +e
+  export HOME="$restore_deep/home"
+  export XDG_DATA_HOME="$restore_deep/data"
+  export PATH="$restore_deep/bin:$PATH"
+  bash "$RESTORE_FILE" --list
+  bash "$RESTORE_FILE" --latest
+  bash "$RESTORE_FILE" --dry-run --git HEAD~1
+  bash "$RESTORE_FILE" --git HEAD~1
+  bash "$RESTORE_FILE" --diff HEAD~1
+  bash "$RESTORE_FILE" --help
+  bash "$RESTORE_FILE"
+  rm -rf "$restore_deep/home/.dotfiles/.git"
+  bash "$RESTORE_FILE" --git HEAD~1
+  bash "$RESTORE_FILE" --diff HEAD~1
+  HOME="$restore_deep/empty-home" XDG_DATA_HOME="$restore_deep/empty-data" \
+    bash "$RESTORE_FILE" --latest
+  HOME="$restore_deep/empty-home" XDG_DATA_HOME="$restore_deep/empty-data" \
+    bash "$RESTORE_FILE" --list
+  bash "$RESTORE_FILE" --bad-option
+) >/dev/null || true
+assert_file_exists "$restore_deep/home/.config/zsh/.zshrc" \
+  "restore deep branches restored nested hidden zsh config"
 
 echo ""
 echo "Restore command tests completed."

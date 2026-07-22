@@ -36,4 +36,36 @@ fi
 # Slice 2: drive real line coverage of the script under test
 cov_exercise_script "$FUNC_FILE"
 
+test_start "apihealth_deep_branches_execute"
+apihealth_tmp="$DOTFILES_COV_TMPDIR/apihealth-deep"
+mkdir -p "$apihealth_tmp/bin"
+cat >"$apihealth_tmp/bin/curl" <<'EOF_CURL'
+#!/usr/bin/env bash
+if [[ -n "${DOTFILES_FAKE_CURL_FAIL:-}" ]]; then
+  exit 7
+fi
+printf '%s\n' "${DOTFILES_FAKE_CURL_CODE:-200}"
+EOF_CURL
+chmod +x "$apihealth_tmp/bin/curl"
+(
+  set +e
+  export PATH="$apihealth_tmp/bin:$PATH"
+  # shellcheck disable=SC1090
+  source "$FUNC_FILE"
+  apihealth --help
+  apihealth --version
+  apihealth --method POST --expect 201 --header "Authorization: Bearer token" \
+    --timeout 2 https://example.test/created
+  DOTFILES_FAKE_CURL_CODE=500 apihealth https://example.test/fail
+  DOTFILES_FAKE_CURL_FAIL=1 apihealth https://example.test/no-response
+  apihealth --method
+  apihealth --expect
+  apihealth --header "broken"
+  apihealth --timeout nope https://example.test
+  apihealth --unknown
+  apihealth
+) >/dev/null || true
+assert_file_exists "$apihealth_tmp/bin/curl" \
+  "apihealth deep branches used sandbox curl shim"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

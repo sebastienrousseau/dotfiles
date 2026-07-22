@@ -58,13 +58,56 @@ for sub in "--help" "list" "check"; do
 done
 
 test_start "dot_agents_unknown_subcommand"
-if ( cd "$REPO_ROOT" && bash "$DOT_BIN" agents this-does-not-exist >/dev/null 2>&1 ); then
+if (cd "$REPO_ROOT" && bash "$DOT_BIN" agents this-does-not-exist >/dev/null 2>&1); then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have rejected"
 else
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
+
+test_start "dot_agents_deep_branches_execute"
+agents_tmp="$DOTFILES_COV_TMPDIR/agents-deep"
+mkdir -p "$agents_tmp/repo/defaults" "$agents_tmp/bin"
+cat >"$agents_tmp/repo/defaults/.chezmoidata.toml" <<'EOF_DATA'
+dotfiles_version = "0.0.0-test"
+EOF_DATA
+cat >"$agents_tmp/repo/CLAUDE.md" <<'EOF_CLAUDE'
+# CLAUDE.md — Test Agent Guidance
+
+## Project Overview
+
+Test body shared by agent renderers.
+EOF_CLAUDE
+cat >"$agents_tmp/bin/chezmoi" <<'EOF_CHEZMOI'
+#!/usr/bin/env bash
+if [[ "${1:-}" == "source-path" ]]; then
+  printf '%s\n' "$DOTFILES_FAKE_SOURCE/defaults"
+else
+  exit 1
+fi
+EOF_CHEZMOI
+chmod +x "$agents_tmp/bin/chezmoi"
+(
+  set +e
+  export DOTFILES_FAKE_SOURCE="$agents_tmp/repo"
+  export PATH="$agents_tmp/bin:$PATH"
+  cd "$agents_tmp/repo" || exit 1
+  # shellcheck disable=SC1090
+  source "$SCRIPT_FILE"
+  _agents_repo_root
+  _agents_canonical
+  _agents_targets
+  _agents_body "$agents_tmp/repo/CLAUDE.md"
+  cmd_agents list
+  cmd_agents check
+  cmd_agents render
+  cmd_agents check
+  cmd_agents --help
+  cmd_agents unknown
+) >/dev/null || true
+assert_file_exists "$agents_tmp/repo/.continuerc.json" \
+  "agents deep branches rendered sandbox harness files"
 
 cov_exercise_functions_file "$SCRIPT_FILE"
 
