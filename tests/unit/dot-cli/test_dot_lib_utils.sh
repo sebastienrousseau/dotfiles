@@ -85,6 +85,61 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available"
 fi
 
+# -----------------------------------------------------------------------------
+# check_cmd — behavioural tests
+#
+# check_cmd was consolidated from four in-line copies (smoke-test,
+# doctor, chezmoi-apply, heal-tools) into utils.sh. These tests pin
+# the contract so future refactors can't silently change semantics.
+# The load guard in utils.sh means sourcing here is safe even if a
+# transitive source has already run.
+# -----------------------------------------------------------------------------
+
+# shellcheck disable=SC1090,SC1091
+source "$UTILS_FILE" 2>/dev/null || true
+
+test_start "check_cmd_finds_existing_command"
+if check_cmd bash; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: bash resolves"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: bash should resolve"
+fi
+
+test_start "check_cmd_rejects_missing_command"
+# Randomised name so it can't accidentally exist on the test host.
+_dot_probe="__dot_check_cmd_probe_$$_$RANDOM"
+if ! check_cmd "$_dot_probe"; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: nonexistent name rejected"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: nonexistent name incorrectly resolved"
+fi
+
+test_start "check_cmd_is_silent_on_success"
+# Contract: check_cmd never writes to stdout or stderr — callers rely
+# on the exit status only, so log noise would break piped consumers.
+_dot_out="$(check_cmd bash 2>&1)"
+if [[ -z $_dot_out ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: silent on success"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: leaked output: $_dot_out"
+fi
+
+test_start "check_cmd_is_silent_on_failure"
+_dot_out="$(check_cmd "$_dot_probe" 2>&1)"
+if [[ -z $_dot_out ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: silent on failure"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: leaked output on failure: $_dot_out"
+fi
+
 echo ""
 echo "Utils library tests completed."
 # Slice 2: drive real line coverage of the script under test

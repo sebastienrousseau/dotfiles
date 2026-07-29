@@ -62,6 +62,14 @@ jobs:
       - name: Reliability audit
         run: bash ./scripts/qa/reliability-audit.sh --with-integration
 
+      - name: Shell surface audit (ratchet)
+        # Fails the job if the total shell-file count grows beyond the
+        # committed ceiling. Consolidation drops the number; adding
+        # new files needs to be paired with either a consolidation of
+        # comparable size or an RFC that lifts the ceiling. See
+        # docs/operations/SHELL_SURFACE.md for the policy.
+        run: bash ./scripts/qa/shell-surface-audit.sh --max-total 1000
+
   examples-contract:
     name: Examples Contract
     runs-on: ubuntu-latest
