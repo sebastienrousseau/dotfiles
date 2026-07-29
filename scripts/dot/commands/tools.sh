@@ -11,14 +11,7 @@ source "$_TOOLS_DIR/../../../lib/dot/utils.sh"
 # shellcheck source=aliases.sh
 source "$_TOOLS_DIR/aliases.sh"
 
-# Cross-platform sed in-place (BSD vs GNU)
-sed_in_place() {
-  if sed --version >/dev/null 2>&1; then
-    sed -i "$@" # GNU
-  else
-    sed -i '' "$@" # BSD (macOS)
-  fi
-}
+# sed_in_place() is provided by lib/dot/utils.sh (sourced above).
 
 dot_ui_command_banner "Tools" "${1:-}"
 

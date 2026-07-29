@@ -1,0 +1,127 @@
+# scripts/qa/shell-surface-allowlist
+#
+# Names that legitimately recur across the repo — checked against
+# both duplicate-function-name and duplicate-basename signals from
+# scripts/qa/shell-surface-audit.sh. Anything listed here is filtered
+# out of the audit report.
+#
+# Format:
+#   NAME       # rationale
+#
+# Rules:
+#   - one entry per line
+#   - blank lines and lines starting with `#` are comments
+#   - inline `# rationale` is REQUIRED (auditor rejects entries
+#     without a comment so nobody silences a signal without saying why)
+#   - function names have no dot; basenames end in `.sh`
+#   - entries tagged `# TODO: extract` are consolidation candidates
+#     — allowlisted for now so the auditor stays quiet while the real
+#     extraction is scheduled separately
+#   - policy: prefer to consolidate the duplication than to allowlist
+#     it away permanently
+
+# --- Executable-script entry-point pattern -------------------------
+# Every executable script conventionally defines these; sharing an
+# implementation would either overreach (main() differs per script)
+# or under-serve (usage() text is script-specific).
+main                   # script entry function — one per executable
+usage                  # script-local `--help` printer
+show_help              # variant of usage in some scripts
+print_header           # script-local report header
+print_summary          # script-local report footer
+section                # script-local sub-section separator
+run_step               # per-script step tracker with local counters
+
+# --- Trap-handler pattern ------------------------------------------
+# `cleanup` is the conventional name for a script-local trap EXIT
+# function. Each script owns its own temp files, lock dirs, and
+# other state that must be removed on exit — sharing a single
+# implementation across scripts is impossible and would hide bugs.
+cleanup                # script-local trap EXIT handlers
+
+# --- Logging fallback shim pattern ---------------------------------
+# Many scripts define these as inline fallbacks so they degrade
+# gracefully when the shared logging lib (lib/dot/log.sh or ui.sh)
+# isn't sourced — e.g. when the script is copied into an installer
+# context or a CI ephemeral runner without the full repo. The
+# canonical implementations live in lib/dot/{log,ui}.sh; inline
+# copies are stubs that print to stderr with the right shape so the
+# script's caller can `grep '^ERROR'` etc. regardless of context.
+log                    # fallback logging shim
+_log                   # internal fallback logging shim
+log_error              # fallback error logging shim
+log_info               # fallback info logging shim
+log_success            # fallback success logging shim
+log_warn               # fallback warn logging shim
+log_warning            # variant of log_warn
+log_step               # fallback step-progress shim
+persist_log            # fallback log-persistence shim
+error                  # fallback stderr helper
+info                   # fallback stdout helper
+success                # fallback OK helper
+warn                   # fallback warn helper
+_warn                  # internal variant of warn
+die                    # fallback exit-with-error helper
+_die                   # internal variant of die
+
+# --- Platform-specialised wallpaper setters ------------------------
+# Three scripts under scripts/theme/ each define apply_wallpaper()
+# with a different signature and different platform paths:
+#   - wallpaper-rotate.sh: (wp, mode) via osascript / gsettings / swaybg
+#   - wallpaper-sync.sh:   (wp, mode) via HEIC conversion + macOS
+#                           Index.plist patching (per-Space + per-Display)
+#   - apply-gnome-theme.sh: (theme)   resolves a wallpaper for the
+#                                     given theme, then delegates
+apply_wallpaper        # platform-specific setters + wrapper (see rationale)
+pick_wallpaper         # script-local wallpaper-chooser variants
+
+# --- Theme-detection helpers ---------------------------------------
+# Multiple theme scripts each detect the current mode/theme from
+# different sources (gsettings, macOS defaults, env vars). Splitting
+# by source is intentional.
+detect_mode            # per-script light/dark detection
+current_theme          # per-script theme name extraction
+
+# --- Per-script required-tool wrappers -----------------------------
+# Each script wraps its own set of required tools with domain-specific
+# logging ("All security tools present" vs "Optional GNOME extension
+# missing"). The common existence-check primitive is check_cmd() in
+# lib/dot/utils.sh.
+check_dependencies     # each script wraps its own required-tools list
+check_secrets          # each caller has a distinct set of secret keys
+
+# --- Domain-scoped command helpers ---------------------------------
+# `cmd_status` in dot/commands/core is the `dot status` subcommand;
+# in scripts/security/ssh-cert.sh it's the `ssh-cert status`
+# implementation. Different domains, same short name.
+cmd_status             # dot-subcommand vs ssh-cert subcommand
+
+# --- Cross-platform sed helper (partial consolidation) -------------
+# 5 of 6 identical copies of sed_in_place() were extracted into
+# lib/dot/utils.sh. `scripts/version-sync.sh` keeps a specialised
+# file-first variant (`sed_in_place FILE ARGS...` with `-E`); the
+# install/ scripts and install.sh at repo root still carry their own
+# because the install path can't yet assume lib/dot/ is sourceable.
+sed_in_place           # TODO: extract remaining install/ copies
+
+# --- Consolidation candidates (allowlisted while work is scheduled)
+# The following are genuine duplicates worth extracting into
+# lib/dot/utils.sh (or a new lib/dot/tools.sh) — allowlisted so the
+# auditor stays quiet, but tracked here so they don't hide forever.
+# Each entry should be removed once the extraction lands.
+sha256_file            # TODO: extract — install/lib/ hash helper
+has_command            # TODO: check vs utils.sh has_command — probably a stray copy
+_run_cmd               # TODO: extract — canonical wrapped-command runner
+create_backup          # TODO: extract — backup-file creation helper
+list_backups           # TODO: extract — backup-file listing helper
+get_version            # TODO: check whether snapshot vs release actually differ
+resolve_source_dir     # TODO: 6 non-lib copies exist — most should just source utils.sh
+
+# --- Same basename, different domain -------------------------------
+# backup.sh appears in three places because backup is a general
+# concern that means different things per role:
+#   - install/lib/backup.sh: pre-install snapshot of user files
+#   - scripts/security/backup.sh: age-encrypted secrets backup
+#   - defaults/.chezmoitemplates/functions/files/backup.sh: chezmoi
+#     template partial that generates a per-file backup on apply
+backup.sh              # installer / security / chezmoi-template distinct concerns

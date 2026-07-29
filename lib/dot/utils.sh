@@ -19,6 +19,24 @@ source "$_DOT_LIB_DIR/platform.sh"
 
 _DOT_SOURCE_DIR_CACHE=""
 
+## sed_in_place — Portable in-place `sed` that works on GNU + BSD sed.
+## GNU sed accepts `-i` with no argument; BSD (macOS) sed requires an
+## empty extension argument (`-i ''`). Callers pass sed args exactly
+## as they would to `sed`; the wrapper picks the right `-i` form
+## based on `sed --version`.
+## Args:  arguments passed verbatim to sed.
+## Usage: sed_in_place -e 's/foo/bar/' path/to/file
+## Note:  scripts/version-sync.sh keeps a specialised file-first
+##        variant (`sed_in_place FILE ARGS...` with `-E`) for the
+##        template-syncing pipeline; that one is intentionally distinct.
+sed_in_place() {
+  if sed --version >/dev/null 2>&1; then
+    sed -i "$@" # GNU
+  else
+    sed -i '' "$@" # BSD (macOS)
+  fi
+}
+
 ## check_cmd — Test whether a command is invokable.
 ## Checks the process PATH first, then falls back to `mise ls --installed`
 ## so mise-managed tools (aqua:foo, npm:bar, plain foo) are recognised
