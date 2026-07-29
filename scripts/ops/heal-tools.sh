@@ -6,20 +6,8 @@
 # Sourced by heal.sh; inherits set -euo pipefail, ui.sh, and shared variables.
 # =============================================================================
 
-# Helper to check command (mise-aware, mirrors doctor.sh)
-check_cmd() {
-  local cmd="$1"
-  if command -v "$cmd" &>/dev/null; then
-    return 0
-  fi
-  # Fallback: check if installed via mise
-  if command -v mise &>/dev/null; then
-    if mise ls --installed 2>/dev/null | grep -qE "($cmd|aqua:.*$cmd)"; then
-      return 0
-    fi
-  fi
-  return 1
-}
+# check_cmd() is provided by lib/dot/utils.sh — sourced by heal.sh
+# (this file is a partial, sourced after heal.sh's own source lines).
 
 detect_pkg_manager() {
   if command -v brew >/dev/null 2>&1; then

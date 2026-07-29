@@ -19,6 +19,25 @@ source "$_DOT_LIB_DIR/platform.sh"
 
 _DOT_SOURCE_DIR_CACHE=""
 
+## check_cmd — Test whether a command is invokable.
+## Checks the process PATH first, then falls back to `mise ls --installed`
+## so mise-managed tools (aqua:foo, npm:bar, plain foo) are recognised
+## even when their shim hasn't been added to the current shell's PATH.
+## Args:  $1 — command name to look up.
+## Exit:  0 if available, 1 otherwise. Silent on stdout/stderr.
+check_cmd() {
+  local cmd="$1"
+  if command -v "$cmd" >/dev/null 2>&1; then
+    return 0
+  fi
+  if command -v mise >/dev/null 2>&1; then
+    if mise ls --installed 2>/dev/null | grep -qE "($cmd|aqua:.*$cmd)"; then
+      return 0
+    fi
+  fi
+  return 1
+}
+
 ## resolve_source_dir — Locate the dotfiles source tree.
 ## Checks (in order): relative to this script, $CHEZMOI_SOURCE_DIR,
 ## ~/.dotfiles, ~/.local/share/chezmoi. Caches the result for the process.

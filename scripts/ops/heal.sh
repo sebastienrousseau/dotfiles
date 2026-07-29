@@ -27,6 +27,9 @@ source "$SCRIPT_DIR/../../lib/dot/ui.sh"
 # shellcheck source=../../lib/dot/log.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../../lib/dot/log.sh"
+# shellcheck source=../../lib/dot/utils.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../../lib/dot/utils.sh"
 DOT_COMMAND="heal"
 REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 DOTFILES_SOURCE="$REPO_ROOT"

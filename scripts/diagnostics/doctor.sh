@@ -28,6 +28,9 @@ source "$SCRIPT_DIR/../../lib/dot/platform.sh"
 # shellcheck source=../../lib/dot/log.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../../lib/dot/log.sh"
+# shellcheck source=../../lib/dot/utils.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../../lib/dot/utils.sh"
 export DOT_COMMAND="doctor"
 
 ui_init
@@ -78,16 +81,7 @@ tool_source() {
   fi
 }
 
-check_cmd() {
-  local cmd="$1"
-  if command -v "$cmd" &>/dev/null; then return 0; fi
-  if command -v mise &>/dev/null; then
-    if mise ls --installed 2>/dev/null | grep -qE "($cmd|aqua:.*$cmd)"; then
-      return 0
-    fi
-  fi
-  return 1
-}
+# check_cmd() is provided by lib/dot/utils.sh — sourced above.
 
 get_cmd_path() {
   local cmd="$1"
