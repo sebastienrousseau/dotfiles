@@ -110,7 +110,8 @@ sed_in_place           # TODO: extract remaining install/ copies
 # auditor stays quiet, but tracked here so they don't hide forever.
 # Each entry should be removed once the extraction lands.
 sha256_file            # TODO: extract — install/lib/ hash helper
-has_command            # TODO: check vs utils.sh has_command — probably a stray copy
+# has_command was extracted 2026-07-30 — scripts/diagnostics/health.sh
+# now sources lib/dot/utils.sh instead of redefining locally.
 _run_cmd               # TODO: extract — canonical wrapped-command runner
 create_backup          # TODO: extract — backup-file creation helper
 list_backups           # TODO: extract — backup-file listing helper
