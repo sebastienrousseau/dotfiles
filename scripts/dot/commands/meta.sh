@@ -30,30 +30,88 @@ meta_banner_section() {
 
 dot_ui_command_banner "$(meta_banner_section "${1:-}")" "${1:-}" "$@"
 
+# Last meaningful line of a captured log, used as a step's `ok` detail.
+# Collapses carriage-return progress (git/nvim spam \r), strips ANSI,
+# takes the last non-empty line, and clips it so the rendered step stays
+# on one line.
+_upgrade_last_line() {
+  tr '\r' '\n' <"$1" 2>/dev/null |
+    sed -E 's/\x1b\[[0-9;?]*[a-zA-Z]//g' |
+    awk 'NF{last=$0} END{print last}' |
+    cut -c1-56
+}
+
 cmd_upgrade() {
   local src_dir
   src_dir="$(require_source_dir)"
 
+  # Per-step logs. Each phase's stdout+stderr is captured here rather
+  # than streamed to the terminal: the git/nvim/chezmoi output is noisy
+  # (carriage-return progress bars, remote counters) and, in rich mode,
+  # writing it to the terminal corrupts the dot-ui renderer that owns
+  # the screen. Failing steps get their tail dumped after the run.
+  local log_dir
+  log_dir="$(mktemp -d "${TMPDIR:-/tmp}/dot-upgrade.XXXXXX")"
+  local fail_labels=() fail_logs=()
+
+  # _upgrade_step <id> <label> <running-detail> -- cmd [args...]
+  # Renders one tracked step: spinner while it runs, then ok (with the
+  # log's last line) or fail. Never aborts the run — a failed phase is
+  # recorded and surfaced at the end, matching the previous `|| true`
+  # behaviour but without the raw flood.
+  _upgrade_step() {
+    local id="$1" label="$2" running="$3"
+    shift 3
+    [[ "${1:-}" == "--" ]] && shift
+    local log="$log_dir/$id.log" rc=0
+    ui_step "$id" "$label" run "$running"
+    "$@" >"$log" 2>&1 || rc=$?
+    if [[ "$rc" -eq 0 ]]; then
+      ui_step "$id" "" ok "$(_upgrade_last_line "$log")"
+    else
+      ui_step "$id" "" fail "exited $rc"
+      fail_labels+=("$label")
+      fail_logs+=("$log")
+    fi
+    return 0
+  }
+
+  ui_steps_begin "Upgrade" ""
+
   if [ -f "$src_dir/nix/flake.nix" ] && has_command nix; then
-    ui_info "Updating Nix flake"
-    (cd "$src_dir" && nix flake update) || true
-    ui_info "Running Nix garbage collection"
-    nix-collect-garbage -d || true
+    _upgrade_step nix-flake "Nix flake" "updating…" -- \
+      sh -c 'cd "$1" && nix flake update' _ "$src_dir"
+    _upgrade_step nix-gc "Nix GC" "collecting…" -- nix-collect-garbage -d
   fi
 
-  ui_info "Updating dotfiles"
-  chezmoi update || true
+  _upgrade_step dotfiles "Dotfiles" "chezmoi update…" -- chezmoi update
 
   if has_command nvim; then
-    ui_info "Updating Neovim plugins"
-    nvim --headless "+Lazy! sync" +qa || true
+    _upgrade_step nvim "Neovim plugins" "Lazy sync…" -- \
+      nvim --headless "+Lazy! sync" +qa
   fi
 
-  if [ "${DOTFILES_FONTS:-}" = "1" ]; then
-    if [ -f "$src_dir/scripts/fonts/install-nerd-fonts.sh" ]; then
-      ui_info "Installing Nerd Fonts"
+  if [ "${DOTFILES_FONTS:-}" = "1" ] &&
+    [ -f "$src_dir/scripts/fonts/install-nerd-fonts.sh" ]; then
+    _upgrade_step fonts "Nerd Fonts" "installing…" -- \
       sh "$src_dir/scripts/fonts/install-nerd-fonts.sh"
-    fi
+  fi
+
+  local n=${#fail_labels[@]}
+  if [[ "$n" -eq 0 ]]; then
+    ui_steps_end "toolchains, plugins, and dotfiles up to date"
+    rm -rf "$log_dir"
+  else
+    ui_steps_end "$n step(s) failed"
+    # Surfaced after ui_steps_end so the rich renderer has torn down —
+    # printing mid-render would garble the display.
+    local i=0
+    while ((i < n)); do
+      ui_err "${fail_labels[$i]}" "log tail:"
+      tail -n 15 "${fail_logs[$i]}" | sed 's/^/    /'
+      ((i++)) || true
+    done
+    ui_info "Logs" "$log_dir"
   fi
 }
 
