@@ -19,6 +19,22 @@ TESTS_PASSED=0
 TESTS_FAILED=0
 CURRENT_TEST=""
 
+# Run a command with a time limit on GNU and BSD/macOS hosts. macOS does not
+# ship GNU timeout, so use gtimeout when available and Perl's alarm otherwise.
+run_with_timeout() {
+  local seconds="$1"
+  shift
+  if command -v timeout >/dev/null 2>&1; then
+    command timeout "$seconds" "$@"
+  elif command -v gtimeout >/dev/null 2>&1; then
+    command gtimeout "$seconds" "$@"
+  elif command -v perl >/dev/null 2>&1; then
+    perl -e 'alarm shift; exec @ARGV or exit 127' "$seconds" "$@"
+  else
+    "$@"
+  fi
+}
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'

@@ -86,7 +86,7 @@ EXCLUDE_FILES=(
   "docs/operations/ARCHITECTURE_ROADMAP.md"
 
   # Dated release write-ups: each article records the release it
-  # shipped in (e.g. "shipped in v0.2.510" + a link to that release
+  # shipped in (for example, a release note plus a link to that release
   # tag). Those refs are historical fact, not current-version claims —
   # bumping them would falsify the history.
   "docs/articles/2026-07-05-fish-startup-abbr.md"
@@ -189,19 +189,19 @@ find_version_files() {
   rg -l "v?$VERSION_PATTERN" --type md . 2>/dev/null | sed 's|^\./||' >"$temp_file" || true
 
   # Add known files that should be checked even if they don't have versions yet
-  echo "README.md" >>"$temp_file"
-  echo "docs/reference/FEATURES.md" >>"$temp_file"
-  echo "docs/COPYRIGHT" >>"$temp_file"
-
   # Non-markdown and hidden-directory surfaces rg's `--type md` scan above
   # cannot reach: a shell script, and READMEs under the dotfile-hidden
   # `.chezmoitemplates/` tree (rg skips dot-dirs without --hidden). These
   # carry "current version" stamps that check-version-consistency.sh and
   # the test_version_consistency unit test enforce, so keep them in sync.
-  echo "scripts/git-hooks/pre-commit-audit.sh" >>"$temp_file"
-  echo "defaults/.chezmoitemplates/README.md" >>"$temp_file"
-  echo "defaults/.chezmoitemplates/functions/README.md" >>"$temp_file"
-  echo "defaults/.chezmoitemplates/aliases/README.md" >>"$temp_file"
+  printf '%s\n' \
+    "README.md" \
+    "docs/reference/FEATURES.md" \
+    "docs/COPYRIGHT" \
+    "scripts/git-hooks/pre-commit-audit.sh" \
+    "defaults/.chezmoitemplates/README.md" \
+    "defaults/.chezmoitemplates/functions/README.md" \
+    "defaults/.chezmoitemplates/aliases/README.md" >>"$temp_file"
 
   # Remove duplicates and filter existing files
   sort -u "$temp_file" | while IFS= read -r file; do
