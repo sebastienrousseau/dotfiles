@@ -65,12 +65,12 @@ shell_syntax() {
 
 unit_tests() {
   cd "$REPO_ROOT"
-  ./tests/framework/test_runner.sh
+  ./tests/framework/test_runner.sh --jobs auto
 }
 
 integration_tests() {
   cd "$REPO_ROOT"
-  RUN_INTEGRATION=1 ./tests/framework/test_runner.sh -i
+  RUN_INTEGRATION=1 ./tests/framework/test_runner.sh --jobs auto -i
 }
 
 coverage_gate() {

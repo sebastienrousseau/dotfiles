@@ -24,6 +24,7 @@ printf 'All %d CLI utilities pass syntax check.\n' "$count"
 # List key utilities with descriptions
 printf '\nKey CLI utilities:\n'
 printf '  dot           — Dotfiles management CLI\n'
+printf '  corralctl-sync.sh — Scheduled repository synchronization\n'
 printf '  dot-ai        — AI RAG query tool\n'
 printf '  ai_core       — AI operations wrapper\n'
 printf '  ai-update     — AI tools updater\n'

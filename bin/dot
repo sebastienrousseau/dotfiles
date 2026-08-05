@@ -346,6 +346,7 @@ EOF
 _dot_help_details() {
   cat <<'EOF'
 sync|Apply the current dotfiles to this machine.|dot sync\ndot sync --check
+init|Bootstrap a dotfiles repository through chezmoi.|dot init alice\ndot init alice/configs --dry-run
 add|Start managing a file with chezmoi.|dot add ~/.gitconfig
 diff|Show pending dotfile changes before applying.|dot diff
 status|Show local drift in the managed home state.|dot status

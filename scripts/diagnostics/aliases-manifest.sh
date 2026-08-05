@@ -63,9 +63,15 @@ esac
 src_root="${1:-$(resolve_source_dir)}"
 src_dir="$(resolve_chezmoi_source_dir "$src_root")"
 
-rg -n \
-  -e '^[[:space:]]*alias[[:space:]]+[A-Za-z0-9_.:-]+=' \
-  -e '^[[:space:]]*[^#"'\'']*&&[[:space:]]*alias[[:space:]]+[A-Za-z0-9_.:-]+=' \
-  "$src_dir/.chezmoitemplates/aliases" \
-  "$src_dir/.chezmoitemplates/functions" |
-  sed -E 's#^([^:]+):([0-9]+):.*alias[[:space:]]+([A-Za-z0-9_.:-]+)=(.*)$#\3\t\4\t\1\t\2#'
+alias_pattern='^[[:space:]]*alias[[:space:]]+[A-Za-z0-9_.:-]+='
+conditional_alias_pattern='^[[:space:]]*[^#"'\'']*&&[[:space:]]*alias[[:space:]]+[A-Za-z0-9_.:-]+='
+search_paths=(
+  "$src_dir/.chezmoitemplates/aliases"
+  "$src_dir/.chezmoitemplates/functions"
+)
+
+if command -v rg >/dev/null 2>&1; then
+  rg -n -e "$alias_pattern" -e "$conditional_alias_pattern" "${search_paths[@]}"
+else
+  grep -rEn -e "$alias_pattern" -e "$conditional_alias_pattern" "${search_paths[@]}"
+fi | sed -E 's#^([^:]+):([0-9]+):.*alias[[:space:]]+([A-Za-z0-9_.:-]+)=(.*)$#\3\t\4\t\1\t\2#'
