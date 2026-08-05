@@ -14,6 +14,10 @@ FUNCS_DIR="$REPO_ROOT/defaults/.chezmoitemplates/functions"
 
 echo "Testing utility functions..."
 
+# hostinfo queries a public-IP service. Keep this unit test deterministic and
+# offline; network behavior is covered by integration tests.
+mock_command "curl" "203.0.113.1"
+
 run_hostinfo_capture() {
   local timeout_cmd=""
   timeout_cmd="$(command -v timeout || command -v gtimeout || true)"
