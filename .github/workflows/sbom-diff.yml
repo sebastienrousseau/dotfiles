@@ -101,10 +101,9 @@ jobs:
             fi
 
             echo 'SBOM_EOF'
+            echo "added=$ADDED_COUNT"
+            echo "removed=$REMOVED_COUNT"
           } >> "$GITHUB_OUTPUT"
-
-          echo "added=$ADDED_COUNT" >> "$GITHUB_OUTPUT"
-          echo "removed=$REMOVED_COUNT" >> "$GITHUB_OUTPUT"
 
       - name: Upload SBOM artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -212,8 +211,10 @@ jobs:
           fail-build: ${{ github.base_ref == 'main' && 'true' || 'false' }}
           severity-cutoff: high
           output-format: json
+          output-file: results.json
 
       - name: Upload CVE scan results
+        if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: cve-scan-results

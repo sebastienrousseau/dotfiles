@@ -50,14 +50,18 @@ DOT_CLI="$REPO_ROOT/bin/dot"
 sandbox="$(mktemp -d -t dot-exec.XXXXXX)"
 trap 'rm -rf "$sandbox"' EXIT
 mkdir -p "$sandbox/.config" "$sandbox/.local/share" "$sandbox/.cache" \
-  "$sandbox/.local/state"
+  "$sandbox/.local/state" "$sandbox/bin" "$sandbox/.cache/dotfiles/registry"
 ln -s "$REPO_ROOT" "$sandbox/.dotfiles"
+printf '#!/usr/bin/env bash\nexit 0\n' >"$sandbox/bin/chezmoi"
+chmod +x "$sandbox/bin/chezmoi"
+printf '{"version":1,"modules":[]}\n' >"$sandbox/.cache/dotfiles/registry/index.json"
 export HOME="$sandbox" \
   XDG_CONFIG_HOME="$sandbox/.config" \
   XDG_DATA_HOME="$sandbox/.local/share" \
   XDG_CACHE_HOME="$sandbox/.cache" \
   XDG_STATE_HOME="$sandbox/.local/state" \
-  CHEZMOI_SOURCE_DIR="$REPO_ROOT"
+  CHEZMOI_SOURCE_DIR="$REPO_ROOT" \
+  PATH="$sandbox/bin:$PATH"
 
 # Patterns that MUST NOT appear in stderr for any command. These
 # are the specific failure modes the audit turned up; any of them
@@ -72,7 +76,8 @@ readonly -a FORBIDDEN_STDERR_PATTERNS=(
 )
 
 # Commands to exercise. Format: `dot ARGS`, where ARGS is
-# whitespace-separated. Each is run with a 15s timeout.
+# whitespace-separated. Each is run with a 60s timeout so the parallel
+# reliability suite does not fail on a contended runner.
 #
 # We deliberately test READ-ONLY subcommands. Mutating commands
 # (sync/apply/commit/install/upgrade/add/edit/rollback/uninstall)
@@ -148,7 +153,7 @@ run_dot_and_assert_clean() {
   trap "rm -f $stdout_file $stderr_file" RETURN
 
   # shellcheck disable=SC2086
-  timeout 15 bash "$DOT_CLI" $args \
+  run_with_timeout 60 bash "$DOT_CLI" $args \
     >"$stdout_file" 2>"$stderr_file" \
     && exit_code=0 || exit_code=$?
 

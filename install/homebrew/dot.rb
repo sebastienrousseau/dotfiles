@@ -12,28 +12,28 @@
 #   brew install --build-from-source dot.rb && dot version
 
 class Dot < Formula
-  desc 'Declarative dotfiles CLI for macOS, Linux, WSL, and PowerShell'
-  homepage 'https://github.com/sebastienrousseau/dotfiles'
-  url 'https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.503/dot-0.2.503.tar.gz'
-  sha256 'PLACEHOLDER_FILL_ON_v0.2.503_PUBLICATION'
-  license 'MIT'
+  desc "Declarative dotfiles CLI for macOS, Linux, WSL, and PowerShell"
+  homepage "https://github.com/sebastienrousseau/dotfiles"
+  url "https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.511/dot-0.2.511.tar.gz"
+  sha256 "6b9f435ebeaca6ff5ec9e6c7458972cb1b8d43b80959a75ff990b629ff5af2cf"
+  license "MIT"
 
-  depends_on 'bash' => :build
-  depends_on 'chezmoi'
+  depends_on "bash" => :build
+  depends_on "chezmoi"
 
   # Optional but commonly used by the framework:
-  depends_on 'gum'      => :recommended
-  depends_on 'jq'       => :recommended
-  depends_on 'starship' => :recommended
+  depends_on "gum"      => :recommended
+  depends_on "jq"       => :recommended
+  depends_on "starship" => :recommended
 
   def install
-    bin.install 'bin/dot'
-    bin.install Dir['bin/dot-*']
-    lib.install Dir['lib/*']
-    man1.install 'share/man/man1/dot.1'
-    zsh_completion.install 'share/zsh/site-functions/_dot'
-    bash_completion.install 'share/bash-completion/completions/dot'
-    fish_completion.install 'share/fish/vendor_completions.d/dot.fish'
+    bin.install "bin/dot"
+    bin.install Dir["bin/dot-*"]
+    lib.install Dir["lib/*"]
+    man1.install "share/man/man1/dot.1"
+    zsh_completion.install "share/zsh/site-functions/_dot"
+    bash_completion.install "share/bash-completion/completions/dot"
+    fish_completion.install "share/fish/vendor_completions.d/dot.fish"
   end
 
   test do
