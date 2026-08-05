@@ -59,7 +59,7 @@ ruff = "latest"
 yazi = "latest"
 zellij = "latest"
 zoxide = "latest"
-"aqua:twpayne/chezmoi" = "latest"
+"aqua:twpayne/chezmoi" = "2.72.0"
 "aqua:junegunn/fzf" = "latest"
 "aqua:FiloSottile/age" = "latest"
 # hyperfine intentionally NOT managed by mise: the aqua package for
