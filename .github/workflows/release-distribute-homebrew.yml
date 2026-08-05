@@ -73,8 +73,8 @@ jobs:
           fi
           # Remove leading 'v' for VERSION
           VERSION="${TAG#v}"
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Download release asset
         id: download-asset
@@ -103,7 +103,7 @@ jobs:
             echo "::error::Asset ${ASSET_NAME} not found in release ${TAG} after ~5min"
             exit 1
           fi
-          echo "asset_path=${ASSET_PATH}" >> $GITHUB_OUTPUT
+          echo "asset_path=${ASSET_PATH}" >> "$GITHUB_OUTPUT"
 
       - name: Compute SHA256 of tarball
         id: compute-sha256
@@ -111,7 +111,7 @@ jobs:
           set -euo pipefail
           ASSET_PATH="${{ steps.download-asset.outputs.asset_path }}"
           SHA256=$(sha256sum "$ASSET_PATH" | awk '{print $1}')
-          echo "sha256=${SHA256}" >> $GITHUB_OUTPUT
+          echo "sha256=${SHA256}" >> "$GITHUB_OUTPUT"
           echo "SHA256: ${SHA256}"
 
       - name: Update Homebrew formula
@@ -135,21 +135,18 @@ jobs:
           # Update the url line - match the full url line and replace version
           NEW_URL="https://github.com/sebastienrousseau/dotfiles/releases/download/${TAG}/dot-${VERSION}.tar.gz"
           URL_RE="https://github\.com/sebastienrousseau/dotfiles/releases/download/v[0-9.]+/dot-[0-9.]+\.tar\.gz"
-          sed -i -E "s|^  url '${URL_RE}'\$|  url '${NEW_URL}'|" dot.rb
+          sed -i -E "s|^  url \"${URL_RE}\"\$|  url \"${NEW_URL}\"|" dot.rb
 
-          # Update the sha256 line. The template may carry either a real
-          # 64-hex digest from the previous release OR a literal
-          # placeholder (e.g. PLACEHOLDER_FILL_ON_v0.2.503_PUBLICATION).
-          # Match anything between the quotes so first-time substitution
-          # is not silently skipped.
+          # Match anything inside the canonical double quotes so a stale
+          # digest cannot silently survive the release rewrite.
           sed -i \
-            -E "s|^  sha256 '[^']*'$|  sha256 '${SHA256}'|" \
+            -E "s|^  sha256 \"[^\"]*\"$|  sha256 \"${SHA256}\"|" \
             dot.rb
 
           # Fail loudly if the substitution didn't take — a passing
           # workflow that ships an unhashed formula is the worst-case
           # outcome here.
-          if ! grep -qE "^  sha256 '${SHA256}'\$" dot.rb; then
+          if ! grep -qE "^  sha256 \"${SHA256}\"\$" dot.rb; then
             echo "::error::sha256 substitution failed — formula still shows:"
             grep -n sha256 dot.rb || true
             exit 1
@@ -162,7 +159,7 @@ jobs:
 
           echo "Updated formula:"
           cat dot.rb
-          echo "formula_path=$(pwd)/dot.rb" >> $GITHUB_OUTPUT
+          echo "formula_path=$(pwd)/dot.rb" >> "$GITHUB_OUTPUT"
 
       - name: Clone homebrew-tap repository
         id: clone-tap
@@ -207,6 +204,12 @@ jobs:
 
           # Commit the change
           git add Formula/dot.rb
+          if git diff --cached --quiet; then
+            echo "Formula/dot.rb already matches dot ${VERSION}; no bump commit needed."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "branch_name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           git commit -S -m "dot ${VERSION}
 
           Update Homebrew formula for dotfiles CLI release ${VERSION}."
@@ -215,7 +218,8 @@ jobs:
           # safely without clobbering unrelated commits.
           git push --force-with-lease origin "$BRANCH_NAME"
 
-          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "branch_name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Open Pull Request to homebrew-tap
         env:
@@ -226,6 +230,23 @@ jobs:
           BRANCH_NAME="${{ steps.prepare-bump.outputs.branch_name }}"
           BASE_BRANCH="${{ steps.clone-tap.outputs.default_branch }}"
           cd homebrew-tap
+
+          # A newer release makes all earlier dot bump PRs obsolete. Close
+          # them and delete their branches before handling the current PR.
+          while IFS= read -r superseded; do
+            [[ -n "$superseded" ]] || continue
+            gh pr close "$superseded" --delete-branch \
+              --comment "Superseded by dot ${VERSION}."
+          done < <(
+            gh pr list --state open --limit 100 --json number,headRefName | \
+              jq -r --arg branch "$BRANCH_NAME" \
+                '.[] | select((.headRefName | startswith("bump/dot-")) and .headRefName != $branch) | .number'
+          )
+
+          if [[ "${{ steps.prepare-bump.outputs.changed }}" != "true" ]]; then
+            echo "Homebrew formula is already current for dot ${VERSION}."
+            exit 0
+          fi
 
           # If a PR for this branch already exists (re-run), comment a refresh
           # note instead of failing on duplicate.

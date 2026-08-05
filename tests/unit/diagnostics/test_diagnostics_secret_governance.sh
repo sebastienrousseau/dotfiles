@@ -29,6 +29,15 @@ test_start "secret_governance_shebang"
 first_line=$(head -n 1 "$TEST_SCRIPT")
 assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
 
+test_start "secret_governance_bash_3_compatible"
+if ! grep -q -F "mapfile" "$TEST_SCRIPT"; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: supports macOS stock Bash 3.2"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: mapfile requires Bash 4+"
+fi
+
 # Slice 3 (#883): exercise the script under sandbox for line coverage
 cov_exercise_script "$TEST_SCRIPT"
 

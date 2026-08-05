@@ -60,7 +60,7 @@ check_suite_invariant() {
 
   local out results run passed failed
   # Give suites plenty of time (some do heavy shell probing).
-  out="$(timeout 180 bash "$suite_path" 2>&1)" || true
+  out="$(run_with_timeout 180 bash "$suite_path" 2>&1)" || true
 
   # The RESULTS: line is emitted by every well-formed suite.
   results="$(printf '%s\n' "$out" | grep -oE 'RESULTS:[0-9]+:[0-9]+:[0-9]+' | tail -1)"
@@ -83,8 +83,8 @@ check_suite_invariant() {
     ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: invariant broken ($results)"
     printf '        RUN=%d != PASSED+FAILED=%d\n' "$run" "$((passed + failed))"
-    printf '        Fix: some `test_start` blocks fire multiple asserts.\n'
-    printf '        Split each assert under its own `test_start "name_kind"`.\n'
+    printf '%s\n' "        Fix: some \`test_start\` blocks fire multiple asserts."
+    printf '%s\n' "        Split each assert under its own \`test_start \"name_kind\"\`."
   fi
 }
 
