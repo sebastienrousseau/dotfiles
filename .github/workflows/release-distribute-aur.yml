@@ -46,8 +46,8 @@ jobs:
             exit 1
           fi
           VERSION="${TAG#v}"
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Download release asset
         id: download-asset
@@ -76,7 +76,7 @@ jobs:
             echo "::error::Asset ${ASSET_NAME} not found in release ${TAG} after ~5min"
             exit 1
           fi
-          echo "asset_path=${ASSET_PATH}" >> $GITHUB_OUTPUT
+          echo "asset_path=${ASSET_PATH}" >> "$GITHUB_OUTPUT"
 
       - name: Compute SHA256 of tarball
         id: compute-sha256
@@ -84,7 +84,7 @@ jobs:
           set -euo pipefail
           ASSET_PATH="${{ steps.download-asset.outputs.asset_path }}"
           SHA256=$(sha256sum "$ASSET_PATH" | awk '{print $1}')
-          echo "sha256=${SHA256}" >> $GITHUB_OUTPUT
+          echo "sha256=${SHA256}" >> "$GITHUB_OUTPUT"
           echo "SHA256: ${SHA256}"
 
       - name: Configure AUR SSH
@@ -112,18 +112,33 @@ jobs:
         id: clone-aur
         run: |
           set -euo pipefail
-          if ! git clone ssh://aur@aur.archlinux.org/dot-cli-git.git aur-pkg 2>&1; then
-            echo "::error::First publication: the user must create the AUR package entry via the web UI at https://aur.archlinux.org/packages first"
-            exit 1
-          fi
+          # AUR periodically enters maintenance and rejects SSH clones. Retry
+          # transient endpoint failures for five minutes before surfacing the
+          # final git error. This also remains safe for first publication: an
+          # absent package fails consistently and reaches the same guidance.
+          clone_log="$(mktemp)"
+          trap 'rm -f "$clone_log"' EXIT
+          for attempt in $(seq 1 10); do
+            rm -rf aur-pkg
+            if git clone ssh://aur@aur.archlinux.org/dot-cli-git.git aur-pkg 2>"$clone_log"; then
+              exit 0
+            fi
+            cat "$clone_log" >&2
+            if [[ "$attempt" -lt 10 ]]; then
+              echo "AUR clone failed (attempt ${attempt}/10); retrying in 30s..."
+              sleep 30
+            fi
+          done
+          echo "::error::Unable to clone the AUR package after 10 attempts."
+          echo "The AUR may be unavailable. For a first publication, create the package entry first:"
+          echo "https://aur.archlinux.org/packages"
+          exit 1
 
       - name: Update PKGBUILD
         run: |
           set -euo pipefail
           VERSION="${{ steps.resolve-tag.outputs.version }}"
           SHA256="${{ steps.compute-sha256.outputs.sha256 }}"
-          ASSET_PATH="${{ steps.download-asset.outputs.asset_path }}"
-
           cp install/aur/PKGBUILD aur-pkg/PKGBUILD
           sed -i "s/^pkgver=.*/pkgver=${VERSION}/" aur-pkg/PKGBUILD
           sed -i "s/^sha256sums=(.*)$/sha256sums=('${SHA256}')/" aur-pkg/PKGBUILD
@@ -134,7 +149,7 @@ jobs:
         run: |
           set -euo pipefail
           docker run --rm \
-            -v $(pwd)/aur-pkg:/work \
+            -v "$(pwd)/aur-pkg:/work" \
             -w /work \
             archlinux/archlinux:base-devel \
             bash -c "useradd -m builder && chown -R builder:builder /work && su builder -c 'cd /work && makepkg --printsrcinfo > .SRCINFO'"
