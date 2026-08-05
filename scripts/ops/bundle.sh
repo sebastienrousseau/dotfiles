@@ -15,12 +15,38 @@ source "$SCRIPT_DIR/../lib/dot/ui.sh"
 source "$SCRIPT_DIR/../lib/dot/log.sh"
 export DOT_COMMAND="bundle"
 
+usage() {
+  cat <<'EOF'
+Usage: bundle.sh [output-dir]
+
+Create an offline dotfiles bundle as a .tar.zst archive.
+EOF
+}
+
+case "${1:-}" in
+  --help | -h)
+    usage
+    exit 0
+    ;;
+  -*)
+    printf 'Unknown option: %s\n' "$1" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
+
 # Concurrency guard
-LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/dotfiles-bundle.lock"
-exec 9>"$LOCK_FILE"
-if ! flock -n 9; then
-  ui_warn "Already running" "Another bundle instance is active"
-  exit 0
+LOCK_DIR="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}"
+if [[ ! -d "$LOCK_DIR" || ! -w "$LOCK_DIR" ]]; then
+  LOCK_DIR="${TMPDIR:-/tmp}"
+fi
+LOCK_FILE="$LOCK_DIR/dotfiles-bundle.lock"
+if command -v flock >/dev/null 2>&1; then
+  exec 9>"$LOCK_FILE"
+  if ! flock -n 9; then
+    ui_warn "Already running" "Another bundle instance is active"
+    exit 0
+  fi
 fi
 
 OUTPUT_DIR="${1:-$HOME/Downloads}"

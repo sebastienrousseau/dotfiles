@@ -171,13 +171,20 @@ check_encryption() {
     add_points "encryption" 0 5 "SOPS secrets manager"
   fi
 
-  # GPG available
+  # Signing key material: this repo uses SSH ED25519 signing by default, with
+  # GPG still accepted for users who prefer it.
+  local signing_format signing_key
+  signing_format="$(git config --global gpg.format 2>/dev/null || true)"
+  signing_key="$(git config --global user.signingkey 2>/dev/null || true)"
+  signing_key="${signing_key/#\~/$HOME}"
   if command -v gpg >/dev/null 2>&1 && gpg --list-secret-keys 2>/dev/null | grep -q sec; then
-    add_points "encryption" 10 10 "GPG keys configured"
+    add_points "encryption" 10 10 "Signing key configured (GPG)"
+  elif [[ "$signing_format" == "ssh" && -n "$signing_key" && -f "$signing_key" ]]; then
+    add_points "encryption" 10 10 "Signing key configured (SSH)"
   elif command -v gpg >/dev/null 2>&1; then
-    add_points "encryption" 3 10 "GPG keys configured"
+    add_points "encryption" 3 10 "Signing key configured"
   else
-    add_points "encryption" 0 10 "GPG keys configured"
+    add_points "encryption" 0 10 "Signing key configured"
   fi
 }
 
@@ -286,6 +293,8 @@ check_system() {
   if [[ "$(uname)" == "Darwin" ]]; then
     if fdesetup status 2>/dev/null | grep -q "FileVault is On"; then
       add_points "system" 10 10 "Disk encryption (FileVault)"
+    elif diskutil apfs list 2>/dev/null | grep -q "FileVault:[[:space:]]*Yes"; then
+      add_points "system" 10 10 "Disk encryption (APFS FileVault)"
     else
       add_points "system" 0 10 "Disk encryption (FileVault)"
     fi
@@ -323,7 +332,7 @@ check_secrets() {
     local secrets_found=false
     local match=""
     # Check for common secret patterns, ignore templates/placeholders and variable expansions.
-    match=$(grep -rE "(api_key|api_secret|password|token)[[:space:]]*=[[:space:]]*['\"][^'\"]+['\"]" \
+    match=$(grep -rE "^[[:space:]]*(export[[:space:]]+)?[A-Za-z_]*(api_key|api_secret|password|token)[A-Za-z_]*[[:space:]]*=[[:space:]]*['\"][^'\"]+['\"]" \
       "${HOME}/.dotfiles" --include="*.sh" --include="*.zsh" --include="*.toml" 2>/dev/null |
       grep -v "example\\|template\\|placeholder" | grep -F -v "\${" | head -1 || true)
     if [[ -n "$match" ]]; then

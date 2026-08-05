@@ -231,6 +231,23 @@ cmd_secrets_load() {
 # Dispatch
 top="${1:-}"
 case "$top" in
+  --help | -h | help)
+    cat <<'EOF'
+Usage: secrets.sh <command> [args...]
+
+Commands:
+  secrets-init, secrets, secrets-create, ssh-key, ssh-cert, env
+EOF
+    ;;
+  "")
+    cat <<'EOF'
+Usage: secrets.sh <command> [args...]
+
+Commands:
+  secrets-init, secrets, secrets-create, ssh-key, ssh-cert, env
+EOF
+    exit 1
+    ;;
   secrets-init)
     shift
     cmd_secrets_init "$@"

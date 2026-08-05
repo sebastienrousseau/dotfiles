@@ -1,8 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+case "${1:-}" in
+  -h | --help)
+    echo "Usage: start-niri"
+    exit 0
+    ;;
+  -*)
+    printf 'Unknown option: %s\n' "$1" >&2
+    echo "Usage: start-niri" >&2
+    exit 2
+    ;;
+esac
+
 export XDG_CURRENT_DESKTOP=niri
 export XDG_SESSION_DESKTOP=niri
 export NIXOS_OZONE_WL=1
+
+if ! command -v niri >/dev/null 2>&1; then
+  echo "start-niri requires niri" >&2
+  exit 127
+fi
 
 exec niri

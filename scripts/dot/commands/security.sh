@@ -12,6 +12,16 @@ source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 
 dot_ui_command_banner "Security" "${1:-}"
 
+usage() {
+  cat <<'EOF'
+Usage: security.sh <command> [args...]
+
+Commands:
+  backup, encrypt-check, firewall, telemetry, dns-doh, lock-screen,
+  usb-safety, policy
+EOF
+}
+
 cmd_backup() {
   run_script "scripts/security/backup.sh" "Backup script" "$@"
 }
@@ -46,6 +56,13 @@ cmd_policy() {
 
 # Dispatch
 case "${1:-}" in
+  --help | -h | help)
+    usage
+    ;;
+  "")
+    usage
+    exit 1
+    ;;
   backup)
     shift
     cmd_backup "$@"

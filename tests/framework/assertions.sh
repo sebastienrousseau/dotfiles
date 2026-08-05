@@ -23,11 +23,13 @@ CURRENT_TEST=""
 # ship GNU timeout, so use gtimeout when available and Perl's alarm otherwise.
 run_with_timeout() {
   local seconds="$1"
+  local timeout_bin
   shift
-  if command -v timeout >/dev/null 2>&1; then
-    command timeout "$seconds" "$@"
-  elif command -v gtimeout >/dev/null 2>&1; then
-    command gtimeout "$seconds" "$@"
+  timeout_bin="$(type -P timeout || true)"
+  if [[ -n "$timeout_bin" ]]; then
+    "$timeout_bin" "$seconds" "$@"
+  elif timeout_bin="$(type -P gtimeout || true)" && [[ -n "$timeout_bin" ]]; then
+    "$timeout_bin" "$seconds" "$@"
   elif command -v perl >/dev/null 2>&1; then
     perl -e 'alarm shift; exec @ARGV or exit 127' "$seconds" "$@"
   else
@@ -40,6 +42,34 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
+
+# Portable `timeout` shim. GNU coreutils ships `timeout`, but stock
+# macOS does not (only `gtimeout`, and only after `brew install
+# coreutils`). The macOS reliability runners don't install coreutils,
+# so tests that wrap commands in `timeout <secs> <cmd>` otherwise fail
+# with "timeout: command not found" (rc 127) on every invocation.
+# Prefer real `timeout`, then `gtimeout`, else run the command without
+# the hang-guard (losing only the timeout, not correctness). All test
+# usages are the simple `timeout <duration> <command…>` form.
+if ! command -v timeout >/dev/null 2>&1; then
+  if command -v gtimeout >/dev/null 2>&1; then
+    timeout() { gtimeout "$@"; }
+  else
+    # Fallback: strip any leading options (e.g. `--kill-after=5`, `-k 5`,
+    # `-s TERM`) and the DURATION operand, then run the command unguarded.
+    # Handles both `timeout 15 cmd` and `timeout --kill-after=5 60 cmd`.
+    timeout() {
+      while [[ "${1:-}" == -* ]]; do
+        case "$1" in
+          -k | --kill-after | -s | --signal) shift 2 ;; # option takes a value
+          *) shift ;;                                   # bare flag or --opt=val
+        esac
+      done
+      shift # drop the DURATION operand
+      "$@"
+    }
+  fi
+fi
 
 # Start a new test case
 test_start() {
@@ -85,11 +115,27 @@ assert_exit_code() {
   shift
   local cmd="$*"
   local actual
+
+  # Save the caller's errexit state rather than assuming it was on.
+  # This unconditionally ran `set -e` on the way out, which switched
+  # errexit ON for suites that deliberately run without it (the
+  # assert_* helpers return non-zero on failure, so `set -e` would
+  # abort the suite at the first failed assertion instead of tallying
+  # it). The leak meant the next command that legitimately returned
+  # non-zero — `files=$(rg ...)` with no matches, say — killed the
+  # suite between test_start and its assertion, leaving
+  # RUN != PASSED+FAILED and tripping the framework-invariant check.
+  local _had_errexit=0
+  case "$-" in
+    *e*) _had_errexit=1 ;;
+  esac
+
   set +e
   # shellcheck disable=SC2086
   eval "$cmd" </dev/null >/dev/null 2>&1
   actual=$?
-  set -e
+  ((_had_errexit)) && set -e
+
   assert_equals "$expected" "$actual" "exit code for: $cmd"
 }
 

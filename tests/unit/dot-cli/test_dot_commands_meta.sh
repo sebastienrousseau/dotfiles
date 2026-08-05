@@ -92,6 +92,82 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
 fi
 
+# ── cmd_upgrade renders through the step runner ──────────────────────
+# Regression for the "dot upgrade dumps raw subprocess output" report.
+# Each phase must run as a tracked step with its stdout+stderr captured
+# to a log, not streamed to the terminal — otherwise the noisy git/nvim
+# progress floods the screen and corrupts the dot-ui renderer. Drive
+# cmd_upgrade in plain mode (no dot-ui) with stubbed noisy tools and
+# assert: (a) no raw tool output leaks, (b) a neat step line per phase,
+# (c) a failing phase does not abort the run and its tail is surfaced.
+test_start "upgrade_captures_output_not_raw_flood"
+_up_sb="$(mktemp -d)"
+mkdir -p "$_up_sb/bin" "$_up_sb/src"
+cat >"$_up_sb/bin/chezmoi" <<'STUB'
+#!/usr/bin/env bash
+printf 'remote: Counting objects: 100%%\r\n'
+echo "RAWCHEZMOI up to date"
+STUB
+cat >"$_up_sb/bin/nvim" <<'STUB'
+#!/usr/bin/env bash
+printf '[copilot.lua] Receiving objects: 100%%\r\n'
+echo "RAWNVIM sync done"
+STUB
+chmod +x "$_up_sb/bin"/*
+_up_out="$(
+  PATH="$_up_sb/bin:$PATH" bash -c '
+    set -uo pipefail
+    require_source_dir() { printf "%s\n" "'"$_up_sb"'/src"; }
+    has_command() { command -v "$1" >/dev/null 2>&1; }
+    source "'"$REPO_ROOT"'/lib/dot/ui.sh"
+    eval "$(sed -n "/^_upgrade_last_line()/,/^}/p;/^cmd_upgrade()/,/^}\$/p" "'"$REPO_ROOT"'/scripts/dot/commands/meta.sh")"
+    cmd_upgrade
+  ' 2>&1
+)"
+# The raw progress/body lines must NOT appear on the terminal; only the
+# last-line detail (RAWCHEZMOI/RAWNVIM text) rides along in the step line.
+if printf '%s\n' "$_up_out" | grep -qE 'remote: Counting|copilot\.lua'; then
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: raw subprocess output leaked"
+  printf '%s\n' "$_up_out" | sed 's/^/      /'
+elif printf '%s\n' "$_up_out" | grep -q 'Dotfiles' &&
+  printf '%s\n' "$_up_out" | grep -q 'Neovim plugins'; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: phases render as steps, no raw flood"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected step lines missing"
+  printf '%s\n' "$_up_out" | sed 's/^/      /'
+fi
+
+test_start "upgrade_failed_phase_continues_and_surfaces_tail"
+cat >"$_up_sb/bin/chezmoi" <<'STUB'
+#!/usr/bin/env bash
+echo "network down: unable to pull" >&2
+exit 1
+STUB
+_up_out2="$(
+  PATH="$_up_sb/bin:$PATH" bash -c '
+    set -uo pipefail
+    require_source_dir() { printf "%s\n" "'"$_up_sb"'/src"; }
+    has_command() { command -v "$1" >/dev/null 2>&1; }
+    source "'"$REPO_ROOT"'/lib/dot/ui.sh"
+    eval "$(sed -n "/^_upgrade_last_line()/,/^}/p;/^cmd_upgrade()/,/^}\$/p" "'"$REPO_ROOT"'/scripts/dot/commands/meta.sh")"
+    cmd_upgrade; echo "RC=$?"
+  ' 2>&1
+)"
+if printf '%s\n' "$_up_out2" | grep -q 'network down' &&
+  printf '%s\n' "$_up_out2" | grep -q 'Neovim plugins' &&
+  printf '%s\n' "$_up_out2" | grep -q 'RC=0'; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: run continued, tail surfaced, rc=0"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: failure handling wrong"
+  printf '%s\n' "$_up_out2" | sed 's/^/      /'
+fi
+rm -rf "$_up_sb"
+
 echo ""
 echo "Meta commands tests completed."
 # Slice 3 (#883): exercise the script under sandbox for line coverage

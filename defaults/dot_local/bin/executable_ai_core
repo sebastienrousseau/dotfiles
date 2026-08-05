@@ -31,6 +31,10 @@ MODEL_PATH="$MODEL_DIR/llava-v1.5-7b-q4.llamafile"
 # Default to port 8080 for llamafile server
 SERVER_PORT=8080
 
+usage() {
+  echo "Usage: $0 {status|download|start|query}"
+}
+
 # Ensure model directory exists
 ensure_model_dir() {
   if [ ! -d "$MODEL_DIR" ]; then
@@ -103,7 +107,12 @@ start_server() {
 # Query the LLM
 # Usage: ai_core query "Your prompt here"
 query() {
-  local prompt="$1"
+  local prompt="${1:-}"
+
+  if [[ -z "$prompt" ]]; then
+    echo "Usage: $0 query <prompt>" >&2
+    return 1
+  fi
 
   # Priority 1: Local LLM Server if running
   if nc -z localhost "$SERVER_PORT" 2>/dev/null; then
@@ -131,7 +140,11 @@ query() {
   echo "No AI provider available. Run 'ai_core start' or install GitHub Copilot CLI."
 }
 
-case "$1" in
+case "${1:-}" in
+  -h | --help)
+    usage
+    exit 0
+    ;;
   status)
     status
     ;;
@@ -146,7 +159,7 @@ case "$1" in
     query "$@"
     ;;
   *)
-    echo "Usage: $0 {status|download|start|query}"
+    usage
     exit 1
     ;;
 esac

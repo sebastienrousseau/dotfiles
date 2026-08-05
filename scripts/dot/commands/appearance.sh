@@ -12,6 +12,15 @@ source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 
 dot_ui_command_banner "Appearance" "${1:-}"
 
+usage() {
+  cat <<'EOF'
+Usage: appearance.sh <command> [args...]
+
+Commands:
+  theme, wallpaper, fonts, tune
+EOF
+}
+
 cmd_theme() {
   run_script "scripts/theme/switch.sh" "Theme switcher" "$@"
 }
@@ -71,6 +80,13 @@ cmd_tune() {
 
 # Dispatch
 case "${1:-}" in
+  --help | -h | help)
+    usage
+    ;;
+  "")
+    usage
+    exit 1
+    ;;
   theme)
     shift
     cmd_theme "$@"

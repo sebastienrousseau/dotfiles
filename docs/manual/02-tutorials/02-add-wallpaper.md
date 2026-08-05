@@ -126,10 +126,10 @@ Output:
 ```
 NAME                        SOURCE     PATH
 ----                        ------     ----
-big-sur-graphic-dark        system     /System/Library/Desktop Pictures/.thumbnails/Big Sur Graphic Dark.heic
-big-sur-graphic-light       system     /System/Library/Desktop Pictures/.thumbnails/Big Sur Graphic Light.heic
-dome-dark                   system     /System/Library/Desktop Pictures/.thumbnails/Dome Dark.heic
-dome-light                  system     /System/Library/Desktop Pictures/.thumbnails/Dome Light.heic
+monterey-dark               system     /System/Library/Desktop Pictures/.thumbnails/Monterey Dark.heic
+monterey-light              system     /System/Library/Desktop Pictures/.thumbnails/Monterey Light.heic
+tahoe-dark                  system     /System/Library/Desktop Pictures/.thumbnails/Tahoe Dark.heic
+tahoe-light                 system     /System/Library/Desktop Pictures/.thumbnails/Tahoe Light.heic
 sonoma-dark                 system     /System/Library/Desktop Pictures/.thumbnails/Sonoma Dark.heic
 ...
 Total: 152 wallpapers
@@ -138,10 +138,10 @@ Total: 152 wallpapers
 Switch to any system wallpaper:
 
 ```sh
-dot theme dome-dark
+dot theme monterey-dark
 ```
 
-The engine extracts Dome Dark's dominant colors, generates a palette, and applies it to every surface.
+The engine extracts Monterey Dark's dominant colors, generates a palette, and applies it to every surface.
 
 ## Verifying the Result
 

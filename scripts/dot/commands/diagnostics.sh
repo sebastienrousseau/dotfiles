@@ -13,6 +13,18 @@ source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 
 dot_ui_command_banner "Diagnostics" "${1:-}" "$@"
 
+usage() {
+  cat <<'EOF'
+Usage: diagnostics.sh <command> [args...]
+
+Commands:
+  doctor, heal, health, security-score, scorecard, perf, conflicts, locks,
+  snapshot, attest, rollback, drift, history, benchmark, verify, restore,
+  load-bench, load-bench-pty, chaos, teleport, secret-audit, bundle, metrics,
+  smoke-test, intelligence
+EOF
+}
+
 cmd_doctor() {
   local src_dir
   src_dir="$(resolve_source_dir)"
@@ -139,6 +151,13 @@ cmd_metrics() {
 
 # Dispatch
 case "${1:-}" in
+  --help | -h | help)
+    usage
+    ;;
+  "")
+    usage
+    exit 1
+    ;;
   doctor)
     shift
     cmd_doctor "$@"

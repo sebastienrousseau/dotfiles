@@ -38,6 +38,7 @@ printf '  dot mode — Set or inspect agent operating profiles (ask/plan/apply/a
 printf '  dot agent — Profile-aware execution, agent card, a2a-card, session log, checkpoints, and conformance\n'
 printf '  dot cl — Claude CLI with context patterns\n'
 printf '  dot copilot — GitHub Copilot CLI with context patterns\n'
+printf '  dot kimi — Kimi CLI with context patterns\n'
 printf '  dot agy — Antigravity CLI with context patterns\n'
 printf '  dot kiro — Kiro CLI with context patterns\n'
 printf '  dot sgpt — Shell-GPT with context patterns\n'

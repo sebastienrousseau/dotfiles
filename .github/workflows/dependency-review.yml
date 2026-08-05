@@ -1,0 +1,40 @@
+# Dependency Review — PR-time supply-chain gate.
+#
+# Blocks pull requests that introduce dependencies with known
+# vulnerabilities or disallowed licenses, using GitHub's dependency graph
+# diff for the PR. Complements Dependabot (which bumps) and CodeQL/secret
+# scanning (which inspect code) by gating the *change* itself.
+#
+# Requires the repository Dependency Graph to be enabled (it is — Dependabot
+# is active).
+
+name: Dependency Review
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependency-review-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-review:
+    name: Security / Dependency Review
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Dependency review
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: on-failure

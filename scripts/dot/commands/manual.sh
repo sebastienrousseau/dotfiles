@@ -67,7 +67,7 @@ resolve_source() {
       echo "$src_dir/$fname"
       return 0
     fi
-    ui_err "manual" "local build not found at $src_dir/$fname — run bash tools/docs/build-manual.sh"
+    ui_err "manual" "local build not found at $src_dir/$fname — run bash tools/docs/build-manual.sh" >&2
     return 1
   fi
 
@@ -76,7 +76,7 @@ resolve_source() {
       echo "$OFFLINE_DIR/$fname"
       return 0
     fi
-    ui_err "manual" "offline copy not found at $OFFLINE_DIR/$fname"
+    ui_err "manual" "offline copy not found at $OFFLINE_DIR/$fname" >&2
     return 1
   fi
 
@@ -84,9 +84,9 @@ resolve_source() {
   if [[ ! -f "$cache_path" ]] || [[ $(find "$cache_path" -mtime +7 -print 2>/dev/null | wc -l) -gt 0 ]]; then
     mkdir -p "$(dirname "$cache_path")"
     local url="$MANUAL_URL/$fname"
-    ui_info "manual" "fetching $url"
+    ui_info "manual" "fetching $url" >&2
     if ! curl -fsSL "$url" -o "$cache_path"; then
-      ui_err "manual" "failed to download $url"
+      ui_err "manual" "failed to download $url" >&2
       return 1
     fi
   fi

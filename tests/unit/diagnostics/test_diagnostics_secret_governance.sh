@@ -30,7 +30,7 @@ first_line=$(head -n 1 "$TEST_SCRIPT")
 assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
 
 test_start "secret_governance_bash_3_compatible"
-if ! grep -q -F "mapfile" "$TEST_SCRIPT"; then
+if ! grep -Eq '^[[:space:]]*mapfile([[:space:]]|$)' "$TEST_SCRIPT"; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: supports macOS stock Bash 3.2"
 else

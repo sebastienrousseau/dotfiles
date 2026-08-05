@@ -43,14 +43,14 @@ open_commit_url() {
 
   # Normalize SSH/HTTPS/git@ URLs to https://
   normalized_url="$(sed -E \
-    's|^(git@|https?://|ssh://git@)([:/]+)?||; s|\.git/?$||; s|:|/|; s|^|https://|; s|/+|/|g; s|https:/|https://|; s|/$||' \
+    's#^(git@|https?://|ssh://git@)([:/]+)?##; s#\.git/?$##; s#:#/#; s#^#https://#; s#/+#/#g; s#https:/#https://#; s#/$##' \
     <<<"${remote_url}")"
 
   local commit_path
   case "${normalized_url}" in
-    *gitlab*) commit_path="-/commit/${commit}" ;;
-    *bitbucket*) commit_path="commits/${commit}" ;;
-    *) commit_path="commit/${commit}" ;;
+  *gitlab*) commit_path="-/commit/${commit}" ;;
+  *bitbucket*) commit_path="commits/${commit}" ;;
+  *) commit_path="commit/${commit}" ;;
   esac
 
   open "${normalized_url}/${commit_path}" 2>/dev/null || xdg-open "${normalized_url}/${commit_path}" 2>/dev/null || true

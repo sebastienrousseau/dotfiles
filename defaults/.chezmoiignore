@@ -47,6 +47,12 @@ _build
 coverage
 nightly-reports
 node_modules
+# dot-ui Go tests never belong in $HOME (`go build .` ignores them). The
+# `_test.go` glob covers main/pick/table/theme; `run_test.go` additionally
+# collides with chezmoi's `run_` prefix — chezmoi strips it to target
+# `test.go` and tries to EXECUTE it (exec format error) — so ignore that too.
+.local/share/dot-ui/*_test.go
+.local/share/dot-ui/test.go
 
 # ── Standalone files that aren't user-deployable ──────────────────────
 install.sh

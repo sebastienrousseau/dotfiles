@@ -263,14 +263,14 @@ SHIM
   # "if config exists" branch in every dot command reaches the body
   # rather than the missing-file error path.
   mkdir -p "$HOME/.config/dotfiles" \
-           "$HOME/.config/chezmoi" \
-           "$HOME/.config/claude" \
-           "$HOME/.config/atuin" \
-           "$HOME/.config/fish" \
-           "$HOME/.config/git" \
-           "$HOME/.config/nvim" \
-           "$HOME/.config/shell" \
-           "$HOME/.config/zsh"
+    "$HOME/.config/chezmoi" \
+    "$HOME/.config/claude" \
+    "$HOME/.config/atuin" \
+    "$HOME/.config/fish" \
+    "$HOME/.config/git" \
+    "$HOME/.config/nvim" \
+    "$HOME/.config/shell" \
+    "$HOME/.config/zsh"
 
   # dotfiles agent state — pre-populated so `dot agent current` finds
   # a valid profile rather than dying on a missing file.
@@ -650,10 +650,15 @@ cov_exercise_functions_file() {
       # Strictly out of scope for fn-exercise.
       return 0
       ;;
+    executable_dot-load-benchmark | executable_dot-launch-or-focus | executable_mkscript)
+      # Top-level launch/benchmark entrypoints; sourcing them executes
+      # environment-specific side effects rather than function bodies.
+      return 0
+      ;;
     executable_git-ai-commit | executable_git-ai-diff | \
       executable_hashsum | executable_uuid | executable_regex | \
       executable_hex | executable_epoch | executable_hash | \
-      executable_jsonv | executable_b64 | executable_cb)
+      executable_jsonv | executable_b64 | executable_cb | executable_bm)
       # Small utility CLI tools whose top-level body is a
       # `while [[ $# -gt 0 ]]; do case $1 in ... *) exit 1 ;; esac done`
       # arg parser WITHOUT a `shift` in the catchall arm. Sourcing

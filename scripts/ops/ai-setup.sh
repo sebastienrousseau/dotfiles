@@ -20,6 +20,10 @@ setup_tool() {
 
   ui_section "Setting up $name"
   if command -v "$cmd" >/dev/null 2>&1; then
+    if [[ ! -t 0 && "${auth_argv[*]}" != *"--version"* ]]; then
+      ui_info "$name" "non-interactive shell; skipping login. Run '${auth_argv[*]}' in a terminal."
+      return 0
+    fi
     ui_info "Tool found, initiating authentication..."
     "${auth_argv[@]}" || ui_warn "$name" "Setup/Auth skipped or failed."
   else
@@ -43,21 +47,24 @@ setup_tool "Copilot CLI" "copilot" copilot --version
 setup_tool "Goose" "goose" goose --version
 
 # 6. Kiro
-setup_tool "Kiro CLI" "kiro-cli" kiro-cli auth login
+setup_tool "Kiro CLI" "kiro-cli" kiro-cli login
 
-# 7. Aider
+# 7. Kimi
+setup_tool "Kimi CLI" "kimi" kimi --version
+
+# 8. Aider
 setup_tool "Aider" "aider" aider --version
 
-# 7. Autohand Code
+# 9. Autohand Code
 setup_tool "Autohand Code" "autohand" autohand --version
 
-# 8. Mistral Vibe
+# 10. Mistral Vibe
 setup_tool "Mistral Vibe" "vibe" vibe --version
 
-# 9. Qwen Code
+# 11. Qwen Code
 setup_tool "Qwen Code" "qwen" qwen --version
 
-# 10. ZAI
+# 12. ZAI
 setup_tool "ZAI" "zai" zai --version
 
 ui_header "AI Setup Complete"

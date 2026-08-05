@@ -21,6 +21,12 @@ if ! command -v python3 >/dev/null 2>&1 || ! command -v curl >/dev/null 2>&1; th
   exit 0
 fi
 
+if ! python3 -c 'import socket;s=socket.socket();s.bind(("127.0.0.1",0));s.close()' >/dev/null 2>&1; then
+  echo "SKIP: loopback port binding is unavailable in this environment"
+  echo "RESULTS:0:0:0"
+  exit 0
+fi
+
 WORK="$(mktemp -d)"
 PIDS=()
 cleanup() {

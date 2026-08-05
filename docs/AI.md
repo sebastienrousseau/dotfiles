@@ -120,6 +120,7 @@ These tools are not installed for you. Install what you want with `dot ai instal
   - `amp` — Sourcegraph's agentic coder
   - `cursor-agent` — Cursor's terminal agent
   - `grok` — xAI's terminal coding agent (Grok Build; needs a SuperGrok / X Premium+ plan)
+  - `kimi` — Moonshot AI's Kimi Code CLI; installed natively to `~/.kimi-code/bin/kimi` and supports native interactive use and one-shot prompts
 
 - **Coding (interactive)** — focused pair-programming assistants:
   - `aider` — Git-aware AI pair programmer
@@ -152,7 +153,7 @@ The old command shapes still work, but print a one-line hint pointing at the new
 | Deprecated | Use instead |
 |------------|-------------|
 | `dot cl` | `dot ai claude` |
-| `dot codex` / `dot copilot` / `dot agy` / `dot goose` | `dot ai codex` / `dot ai copilot` / `dot ai agy` / `dot ai goose` |
+| `dot codex` / `dot copilot` / `dot kimi` / `dot agy` / `dot goose` | `dot ai codex` / `dot ai copilot` / `dot ai kimi` / `dot ai agy` / `dot ai goose` |
 | `dot kiro` / `dot sgpt` / `dot ollama` / `dot opencode` | `dot ai kiro` / `dot ai sgpt` / `dot ai ollama` / `dot ai opencode` |
 | `dot aider` / `dot autohand` / `dot vibe` / `dot qwen` / `dot zai` | `dot ai aider` / `dot ai autohand` / `dot ai vibe` / `dot ai qwen` / `dot ai zai` |
 | `dot ai status` | `dot ai tools` |

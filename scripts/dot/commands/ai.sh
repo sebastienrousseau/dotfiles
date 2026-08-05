@@ -5,7 +5,7 @@
 ##
 ## Provides AI CLI status, setup, RAG query, and bridge commands.
 ## Wraps AI CLI tools with contextual patterns and system metadata.
-## Usage: dot ai [delegate|cost|dashboard|proxy|local|status]|ai-setup|ai-query|cl|copilot|agy|kiro|sgpt|ollama|opencode|aider|autohand|vibe|qwen|zai
+## Usage: dot ai [delegate|cost|dashboard|proxy|local|status]|ai-setup|ai-query|cl|copilot|kimi|agy|kiro|sgpt|ollama|opencode|aider|autohand|vibe|qwen|zai
 
 set -euo pipefail
 
@@ -36,7 +36,7 @@ _show_ai_bridge_usage() {
   echo "       dot ai <tool> --style <name> \"<prompt>\""
   echo "       dot ai chat [tool]             # interactive session"
   echo ""
-  echo "Tools: cl codex copilot goose crush amp cursor-agent grok agy kiro sgpt ollama opencode aider autohand vibe qwen zai"
+  echo "Tools: cl codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai"
   echo ""
   echo "Available styles:"
   # shellcheck disable=SC2012
@@ -69,21 +69,13 @@ _ai_refresh_status_cache() {
 
   local total=${#ai_entries[@]}
 
-  # Cold-cache refresh runs `$bin --version` for every tool — node-
-  # based ones are slow to start, so the total can hit 15-30s. Show a
-  # spinner so the user has feedback.
+  # Cold-cache refresh can take 15-30s across node-based tools; show progress.
   ui_spinner_start "Probing $total AI tools (cached for ${AI_STATUS_TTL}s)"
 
   local jobs="${DOTFILES_AI_PROBE_JOBS:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}"
   local probe_dir
   probe_dir="$(mktemp -d)"
 
-  # Probe via xargs -P. The probe logic lives INLINE in the bash -c
-  # string rather than as an exported function, because `export -f`
-  # doesn't always survive across bash invocations on every platform
-  # (notably macOS bash 3.2 needs the BASH_FUNC_*() env-var format,
-  # which subtly breaks for some shells in PATH). Inlining sidesteps
-  # the inheritance question entirely.
   local i=0
   local entry
   local indexed=()
@@ -110,14 +102,7 @@ _ai_refresh_status_cache() {
       printf "%s\t0\t\n" "$bin" >"$out_dir/$i"
     fi
   '
-  # NOTE: `-I{}` already implies one input line per invocation. Adding
-  # `-n1` on top triggers a BSD-xargs quirk where the input line is
-  # word-split on whitespace ("0|Agents (autonomous)|..." → multiple
-  # entries). Use only `-I{}`.
-  #
-  # ALSO: feed null-delimited records (`-0`) so apostrophes and
-  # other quote-like characters in the descriptions ("Block's coding
-  # agent") don't trigger xargs's "unterminated quote" parser.
+  # Use only `-I{}` and null records for BSD xargs and quote-safe descriptions.
   printf '%s\0' "${indexed[@]}" |
     xargs -0 -I{} -P"$jobs" \
       bash -c "$probe_script" _ {} "$probe_dir" "$_TO" \
@@ -130,12 +115,7 @@ _ai_refresh_status_cache() {
   done
   rm -rf "$probe_dir"
 
-  # Guard with `|| true` because ui_spinner_stop's last line evaluates
-  # to rc=1 when stdout is a TTY (the `[[ ! -t 1 ]] && printf` short-
-  # circuit). Under `set -euo pipefail` that rc would kill the script
-  # right before we get to write the cache, leaving the user with a
-  # silent broken cold-cache run. Defence in depth — the function
-  # now also has an explicit `return 0` upstream.
+  # Guard against older ui_spinner_stop implementations returning 1 on a TTY.
   ui_spinner_stop || true
 
   mv "$tmp_file" "$AI_STATUS_CACHE_FILE"
@@ -144,10 +124,6 @@ _ai_refresh_status_cache() {
 _ai_get_cached_status() {
   cat "$AI_STATUS_CACHE_FILE"
 }
-
-# Look up field $2 (2=present 0/1, 3=version) for binary $1 from the
-# cached TSV. Replaces a bash-4 associative array for macOS bash 3.2.
-# (Removed _ai_status_field — cmd_ai_status now reads both fields in one awk.)
 
 # _ai_mise_pkg (binary -> mise package map) is defined in lib/dot/ai-install.sh.
 
@@ -164,6 +140,7 @@ cmd_ai_status() {
     "Agents (autonomous)|agent|Amp|amp|Sourcegraph's agentic coder"
     "Agents (autonomous)|agent|Cursor CLI|cursor-agent|Cursor's terminal agent"
     "Agents (autonomous)|agent|Grok Build|grok|xAI's terminal coding agent"
+    "Agents (autonomous)|agent|Kimi CLI|kimi|Moonshot AI's terminal coding agent"
     "Coding (interactive)|coding|Aider|aider|Git-aware AI pair programmer"
     "Coding (interactive)|coding|OpenCode|opencode|Open-source terminal coding agent"
     "Coding (interactive)|coding|Autohand Code|autohand|Autonomous multi-file coding agent"
@@ -276,6 +253,10 @@ cmd_ai_status() {
             ;;
           grok)
             install_grok_native "$name"
+            continue
+            ;;
+          kimi)
+            install_kimi_native "$name"
             continue
             ;;
         esac
@@ -439,6 +420,11 @@ ${prompt}"
       ui_warn "$tool" "not installed"
       ui_info "Install" "curl -fsSL -o /tmp/agy-install.sh https://antigravity.google/cli/install.sh && bash /tmp/agy-install.sh"
       exit 1
+    elif [[ "$tool_bin" == "kimi" ]]; then
+      ui_warn "$tool" "not installed"
+      ui_info "Install" "dot ai install kimi"
+      ui_info "PATH" "Kimi Code installs to ~/.kimi-code/bin; restart your shell after install"
+      exit 1
     else
       ui_err "$tool" "not installed and mise not available"
       exit 1
@@ -478,6 +464,27 @@ ${prompt}"
 
 # Dispatch — flat, verb-first surface (see docs/AI.md).
 case "${1:-}" in
+  --help | -h | help)
+    cat <<'EOF'
+Usage: ai.sh <command> [args...]
+
+Commands:
+  ai, ai-setup, ai-query, cl, claude, codex, copilot, goose, crush, amp,
+  cursor-agent, grok, kimi, agy, kiro, sgpt, ollama, opencode, aider, autohand,
+  vibe, qwen, zai
+EOF
+    ;;
+  "")
+    cat <<'EOF'
+Usage: ai.sh <command> [args...]
+
+Commands:
+  ai, ai-setup, ai-query, cl, claude, codex, copilot, goose, crush, amp,
+  cursor-agent, grok, kimi, agy, kiro, sgpt, ollama, opencode, aider, autohand,
+  vibe, qwen, zai
+EOF
+    exit 1
+    ;;
   ai)
     shift
     case "${1:-}" in
@@ -565,7 +572,7 @@ case "${1:-}" in
     shift
     cmd_ai_query "$@"
     ;;
-  cl | claude | codex | copilot | goose | crush | amp | cursor-agent | grok | agy | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
+  cl | claude | codex | copilot | goose | crush | amp | cursor-agent | grok | kimi | agy | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
     _ai_deprecated "dot ai $1"
     tool="$1"
     shift

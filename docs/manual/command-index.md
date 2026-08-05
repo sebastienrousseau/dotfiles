@@ -77,6 +77,7 @@ job `lint/command-index` fails when this file is stale.
 | `dot history` | Shell history analysis |
 | `dot keys` | Keybindings (sign-check: verify git signing) |
 | `dot keys` | sign-check Verify git commit-signing configuration and key availability |
+| `dot kimi` | Kimi CLI with context patterns |
 | `dot kiro` | Kiro CLI with context patterns |
 | `dot learn` | Start the interactive tour of your new tools |
 | `dot lint` | Lint shell scripts (--fix |

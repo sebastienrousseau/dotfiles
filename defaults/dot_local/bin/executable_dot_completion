@@ -5,6 +5,12 @@
 # Zsh completion for the dot CLI
 # Source this file or place in a directory in $fpath
 
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  printf '%s\n' "Usage: dot_completion"
+  printf '%s\n' "Generate zsh completions for the dot CLI."
+  exit 0
+fi
+
 _dot() {
   local -a commands
   commands=(
@@ -51,6 +57,12 @@ _dot() {
     '--version:Show version information'
     'help:Show this help message'
   )
+
+  if ! whence -w _describe >/dev/null 2>&1; then
+    printf '%s\n' "${commands[@]}"
+    return 0
+  fi
+
   _describe 'command' commands
 }
 

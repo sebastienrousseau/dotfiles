@@ -6,6 +6,15 @@
 
 set -euo pipefail
 
+usage() {
+  cat <<'EOF'
+Usage: aliases-manifest.sh [chezmoi-source-dir]
+
+Emit alias definitions as tab-separated rows:
+  name<TAB>value<TAB>file<TAB>line
+EOF
+}
+
 resolve_source_dir() {
   if [[ -n "${CHEZMOI_SOURCE_DIR:-}" && -d "${CHEZMOI_SOURCE_DIR}" ]]; then
     printf "%s\n" "${CHEZMOI_SOURCE_DIR}"
@@ -38,6 +47,18 @@ resolve_chezmoi_source_dir() {
   fi
   printf "%s\n" "$root"
 }
+
+case "${1:-}" in
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  -*)
+    printf 'Unknown option: %s\n' "$1" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
 
 src_root="${1:-$(resolve_source_dir)}"
 src_dir="$(resolve_chezmoi_source_dir "$src_root")"

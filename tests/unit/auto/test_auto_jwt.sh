@@ -36,4 +36,24 @@ fi
 cov_exercise_script "$SCRIPT_FILE"
 cov_exercise_functions_file "$SCRIPT_FILE"
 
+test_start "jwt_deep_branches_execute"
+jwt_tmp="$DOTFILES_COV_TMPDIR/jwt-deep"
+mkdir -p "$jwt_tmp"
+header="eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0"
+payload_future="eyJleHAiOjQxMDI0NDQ4MDAsImlhdCI6MTcwMDAwMDAwMCwic3ViIjoidGVzdCJ9"
+payload_expired="eyJleHAiOjEwMDAsImlhdCI6MTAwLCJzdWIiOiJvbGQifQ"
+signature="c2lnbmF0dXJl"
+future_token="${header}.${payload_future}.${signature}"
+expired_token="${header}.${payload_expired}.${signature}"
+(
+  set +e
+  bash "$SCRIPT_FILE" "$future_token"
+  bash "$SCRIPT_FILE" "Bearer $future_token"
+  printf '%s\n' "bearer $expired_token" | bash "$SCRIPT_FILE"
+  bash "$SCRIPT_FILE" "invalid-token"
+) >/dev/null || true
+printf '%s\n' "$future_token" >"$jwt_tmp/token.jwt"
+assert_file_exists "$jwt_tmp/token.jwt" \
+  "jwt deep branches used sandbox token fixture"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

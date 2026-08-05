@@ -56,7 +56,7 @@ success() {
 }
 
 # Check if we're running GNOME
-if [ "$XDG_CURRENT_DESKTOP" != "GNOME" ] && [ "$XDG_SESSION_DESKTOP" != "gnome" ]; then
+if [ "${XDG_CURRENT_DESKTOP:-}" != "GNOME" ] && [ "${XDG_SESSION_DESKTOP:-}" != "gnome" ]; then
   warn "Not running GNOME desktop. Some settings may not apply."
 fi
 
@@ -208,7 +208,11 @@ apply_wallpaper() {
   # Pick a random wallpaper matching the mode from curated collection
   local wp=""
   if [ -d "$wallpaper_dir" ]; then
-    wp="$(find "$wallpaper_dir" -maxdepth 1 -type f -iname "*-${mode}.jpg" 2>/dev/null | shuf -n 1 || true)"
+    if command -v shuf >/dev/null 2>&1; then
+      wp="$(find "$wallpaper_dir" -maxdepth 1 -type f -iname "*-${mode}.jpg" 2>/dev/null | shuf -n 1 || true)"
+    else
+      wp="$(find "$wallpaper_dir" -maxdepth 1 -type f -iname "*-${mode}.jpg" 2>/dev/null | sort | head -n 1 || true)"
+    fi
   fi
 
   # Fallback: check Catppuccin system/user wallpapers

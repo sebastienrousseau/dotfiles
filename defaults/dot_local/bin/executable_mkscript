@@ -10,8 +10,28 @@ set -euo pipefail
 
 file="${1:-}"
 
-if [[ -z "${file}" ]]; then
+usage() {
   echo "Usage: mkscript <path>" >&2
+}
+
+case "$file" in
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  "")
+    usage
+    exit 1
+    ;;
+  -*)
+    printf 'Unknown option: %s\n' "$file" >&2
+    usage
+    exit 2
+    ;;
+esac
+
+if [[ -z "${file}" ]]; then
+  usage
   exit 1
 fi
 

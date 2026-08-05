@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# run_onchange_24-build-dot-ui.sh.tmpl
+# Builds the shared `dot` UI renderer (Bubble Tea) to ~/.local/bin/dot-ui when
+# its Go source changes. Unlike the AI cockpit this is NOT opt-in — it powers
+# the animated output of every `dot` command — but it degrades gracefully: when
+# no Go toolchain is present the build is skipped and lib/dot/ui.sh falls back
+# to plain output. Set DOTFILES_NO_DOT_UI=1 to skip the build entirely.
+{{- if ne .chezmoi.os "windows" }}
+
+set -euo pipefail
+
+# Source hashes baked in at render time so this script's content changes when
+# the renderer source changes, retriggering chezmoi onchange.
+# main.go:  {{ include "dot_local/share/dot-ui/main.go" | sha256sum }}
+# theme.go: {{ include "dot_local/share/dot-ui/theme.go" | sha256sum }}
+# run.go:   {{ include "dot_local/share/dot-ui/run.go" | sha256sum }}
+# go.mod:   {{ include "dot_local/share/dot-ui/go.mod" | sha256sum }}
+# go.sum:   {{ include "dot_local/share/dot-ui/go.sum" | sha256sum }}
+
+SRC="$HOME/.local/share/dot-ui"
+OUT="$HOME/.local/bin/dot-ui"
+
+# Explicit opt-out.
+if [[ "${DOTFILES_NO_DOT_UI:-0}" == "1" ]]; then
+  echo "dot-ui: DOTFILES_NO_DOT_UI set — skipping build."
+  exit 0
+fi
+
+[[ -f "$SRC/main.go" ]] || {
+  echo "dot-ui: source not deployed yet — skipping."
+  exit 0
+}
+
+# Resolve a Go toolchain (mise shims put `go` on PATH when activated). No Go →
+# ui.sh uses its bash fallback, so this is a clean skip, never a failure.
+if ! command -v go >/dev/null 2>&1; then
+  echo "dot-ui: no Go toolchain — install via mise to enable the rich UI. Skipping."
+  exit 0
+fi
+
+mkdir -p "$HOME/.local/bin"
+echo "Building dot-ui…"
+if (cd "$SRC" && go build -o "$OUT" .); then
+  echo "dot-ui installed: $OUT"
+else
+  echo "dot-ui: build failed (continuing with plain output)."
+fi
+{{- end }}

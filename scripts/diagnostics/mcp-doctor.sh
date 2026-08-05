@@ -77,12 +77,14 @@ log_success() {
   if [[ "$JSON_MODE" -ne 1 ]]; then
     ui_ok "$1" "${2:-}"
   fi
+  return 0
 }
 log_fail() {
   if [[ "$JSON_MODE" -ne 1 ]]; then
     ui_err "$1" "${2:-}"
   fi
   Errors=$((Errors + 1))
+  return 0
 }
 log_warn() {
   if [[ "$JSON_MODE" -ne 1 ]]; then
@@ -91,6 +93,7 @@ log_warn() {
   Warnings=$((Warnings + 1))
   # In strict mode, warnings become errors
   [[ "$STRICT_MODE" -eq 1 ]] && Errors=$((Errors + 1))
+  return 0
 }
 
 MCP_CONFIG="${MCP_CONFIG:-$HOME/.config/claude/mcp_servers.json}"

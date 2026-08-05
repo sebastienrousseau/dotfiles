@@ -38,6 +38,30 @@ install_claude_native() {
 # Claude Code is installed natively regardless of mise/npm availability.
 install_claude_native
 
+install_kimi_native() {
+  if command -v kimi >/dev/null 2>&1 || [ -x "$HOME/.kimi-code/bin/kimi" ] || [ -x "$HOME/.local/bin/kimi" ]; then
+    log_info "Kimi CLI already installed (Kimi Code native). Skipping."
+    return 0
+  fi
+  log_info "Installing Kimi CLI via native installer..."
+  local installer
+  installer=$(umask 077 && mktemp)
+  if curl -fsSL -o "$installer" https://code.kimi.com/kimi-code/install.sh; then
+    if [ "$(wc -c <"$installer")" -le 524288 ] && head -1 "$installer" | grep -q '^#!'; then
+      bash "$installer" || log_error "Kimi CLI native installer failed (continuing...)"
+    else
+      log_error "Kimi CLI installer failed validation. Install manually: npm install -g @moonshot-ai/kimi-code"
+    fi
+    rm -f "$installer"
+  else
+    rm -f "$installer"
+    log_error "Failed to download Kimi CLI installer."
+  fi
+}
+
+# Kimi CLI is installed natively; the documented fallback is npm, not mise.
+install_kimi_native
+
 log_info "Installing AI CLI and dev tools via mise..."
 
 # Prefer mise for all AI tool installations (ensures topgrade can update them)
@@ -49,6 +73,7 @@ if command -v mise >/dev/null 2>&1; then
     "npm:@github/copilot"
     "npm:opencode-ai"
     # agy (Antigravity CLI) installed via native installer below.
+    # Kimi CLI installed via native installer above (npm fallback is manual).
     "npm:autohand-cli"
     "npm:@qwen-code/qwen-code"
     "npm:@guizmo-ai/zai-cli"
@@ -156,7 +181,7 @@ else
 
   # Install AI CLI tools globally via npm (fallback when mise is unavailable)
   AI_TOOLS=(
-    # Claude Code: native installer above. Goose/agy: native installers below.
+    # Claude Code/Kimi: native installers above. Goose/agy: native installers below.
     "@openai/codex"
     "@github/copilot"
     "opencode-ai"
@@ -242,6 +267,7 @@ log_info "    - codex     (OpenAI Codex CLI)"
 log_info "    - copilot   (GitHub Copilot CLI)"
 log_info "    - goose     (Block coding agent)"
 log_info "    - agy       (Google Antigravity CLI)"
+log_info "    - kimi      (Moonshot AI Kimi CLI)"
 log_info "    - aider     (AI pair programmer)"
 log_info "    - opencode  (OpenCode AI)"
 log_info "    - autohand  (Autohand Code CLI)"

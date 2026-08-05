@@ -34,6 +34,16 @@ if [[ "${1:-}" != "cd" ]]; then
   dot_ui_command_banner "Core" "${1:-}"
 fi
 
+usage() {
+  cat <<'EOF'
+Usage: core.sh <command> [args...]
+
+Commands:
+  apply, sync, update, add, diff, status, remove, cd, edit, commit,
+  clean-cache, uninstall
+EOF
+}
+
 cmd_apply() {
   local src_dir
   src_dir="$(resolve_source_dir)"
@@ -145,6 +155,13 @@ cmd_clean_cache() {
 
 # Dispatch
 case "${1:-}" in
+  --help | -h | help)
+    usage
+    ;;
+  "")
+    usage
+    exit 1
+    ;;
   apply)
     shift
     cmd_apply "$@"

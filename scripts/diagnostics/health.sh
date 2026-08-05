@@ -198,6 +198,11 @@ check_dotfiles_core() {
 check_shell_env() {
   check_section "Shell Environment"
   local current_shell="${SHELL##*/}"
+  local default_shell="fish"
+  if [[ -f "$SCRIPT_DIR/../../defaults/.chezmoidata.toml" ]]; then
+    default_shell="$(awk -F= '/^[[:space:]]*default_shell[[:space:]]*=/{split($2, value, "#"); gsub(/[ "]/, "", value[1]); print value[1]; exit}' "$SCRIPT_DIR/../../defaults/.chezmoidata.toml")"
+    default_shell="${default_shell:-fish}"
+  fi
 
   if has_command zsh; then
     check "Zsh installed" "pass"
@@ -210,12 +215,12 @@ check_shell_env() {
     check "Zsh installed" "fail"
   fi
 
-  if [[ -d "${ZINIT_HOME:-$HOME/.local/share/zinit}" ]]; then
+  if [[ -f "${ZINIT_HOME:-$HOME/.local/share/zinit/zinit.git}/zinit.zsh" ]] || [[ -d "${ZINIT_HOME:-$HOME/.local/share/zinit}" ]]; then
     check "Zinit plugin manager" "pass"
-  elif [[ "$current_shell" == "zsh" ]]; then
+  elif [[ "$current_shell" == "zsh" && "$default_shell" == "zsh" ]]; then
     check "Zinit plugin manager" "warn" "Not found"
   else
-    check "Zinit plugin manager" "pass" "Not required for $current_shell"
+    check "Zinit plugin manager" "pass" "Not required for $default_shell"
   fi
 
   if has_command starship; then

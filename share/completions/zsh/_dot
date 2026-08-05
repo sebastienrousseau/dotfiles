@@ -15,6 +15,7 @@ _dot() {
     'prewarm:Regenerate shell caches for ultra-fast startup'
     'cl:Claude CLI with context patterns'
     'copilot:GitHub Copilot CLI with context patterns'
+    'kimi:Kimi CLI with context patterns'
     'agy:Antigravity CLI with context patterns'
     'kiro:Kiro CLI with context patterns'
     'sgpt:Shell-GPT with context patterns'
@@ -282,7 +283,7 @@ _dot() {
           )
           _describe -t subcommands 'secrets subcommand' secrets_cmds
           ;;
-        cl | copilot | agy | kiro | sgpt | ollama | opencode | aider)
+        cl | copilot | kimi | agy | kiro | sgpt | ollama | opencode | aider)
           _arguments -C \
             '(--pattern -p)'{--pattern,-p}'[Specify steering pattern]:pattern:->patterns' \
             '*:prompt: '

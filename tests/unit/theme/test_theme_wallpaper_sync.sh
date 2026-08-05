@@ -24,6 +24,17 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
+# macos_appearance_frame must return non-HEIC wallpapers unchanged so static
+# wallpapers are never rewritten; only multi-frame dynamic HEICs get resolved
+# to a per-mode frame (that path is macOS + magick specific).
+test_start "appearance_frame_passthrough_non_heic"
+_af_out="$(
+  eval "$(sed -n '/^macos_appearance_frame()/,/^}/p' "$SCRIPT_FILE")"
+  WALLPAPER_DIR=/tmp
+  macos_appearance_frame "/a/b/pic.png" "light"
+)"
+assert_equals "$_af_out" "/a/b/pic.png" "non-HEIC wallpaper returned unchanged"
+
 # Slice 2: drive real line coverage of the script under test
 cov_exercise_script "$SCRIPT_FILE"
 

@@ -1,9 +1,20 @@
-{{- $t := index .themes (default "big-sur-dark" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "big-sur-dark" -}}{{- end -}}
+{{- /* Structural colours come from the theme's DARK variant so the status bar
+       stays dark (a light bar clashes inside the always-dark terminal). But the
+       ACCENT tracks the mode-following active theme, so it matches the wallpaper
+       frame actually on screen — the HEIC's light and dark frames are different
+       images with different dominant colours, so the dark accent would not match
+       the light-mode wallpaper the user sees. */ -}}
+{{- $themeName := default "fallback-dark" .theme -}}
+{{- $family := trimSuffix "-dark" (trimSuffix "-light" $themeName) -}}
+{{- $t := index .themes (printf "%s-dark" $family) -}}
+{{- if not $t -}}{{- $t = index .themes $themeName -}}{{- end -}}
+{{- if not $t -}}{{- $t = index .themes "fallback-dark" -}}{{- end -}}
+{{- $active := index .themes $themeName -}}
+{{- if not $active -}}{{- $active = $t -}}{{- end -}}
 {{- $bg := $t.term.bg -}}
 {{- $fg := $t.term.fg -}}
-{{- $accent := $t.ui.accent -}}
-{{- $accent_text := $t.ui.accent_text -}}
+{{- $accent := $active.ui.accent -}}
+{{- $accent_text := $active.ui.accent_text -}}
 {{- $panel := $t.ui.panel -}}
 {{- $border := $t.ui.border -}}
 {{- $dim := $t.term.c8 -}}
@@ -141,7 +152,7 @@ bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  THEME — Powerline Status Bar                                           ║
-# ║  Colors from .chezmoidata/themes.toml ({{ default "big-sur-dark" .theme }})  ║
+# ║  Colors from .chezmoidata/themes.toml ({{ default "fallback-dark" .theme }})  ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
 
 # --- Status Bar ---
