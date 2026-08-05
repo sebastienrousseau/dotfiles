@@ -778,8 +778,11 @@ cov_exercise_functions_file() {
       "$fn" "$tmpfile" </dev/null >/dev/null
     done < <(grep -oE "^[a-zA-Z_][a-zA-Z0-9_]*\s*\(\)" "$1" | sed "s/[[:space:]]*()$//")
     exit 0
-  ' _ "$script" "$tmpfile" </dev/null 2> >(tee -a "$stderr_log" >&2)
+  ' _ "$script" "$tmpfile" </dev/null 2>"$stderr_log"
   rc=$?
+  if [[ "${DOTFILES_COV_ECHO_STDERR:-0}" == "1" ]]; then
+    cat "$stderr_log" >&2
+  fi
 
   # DOT_STRICT=1: promote silent-but-loud failures (command-not-found,
   # unbound variable in nounset mode) to test failures. Default behavior
@@ -788,7 +791,7 @@ cov_exercise_functions_file() {
   # body-coverage breadth.
   local strict_violations=""
   if [[ "${DOT_STRICT:-0}" == "1" && -s "$stderr_log" ]]; then
-    strict_violations="$(grep -E ': (command not found|unbound variable)$' "$stderr_log" | sort -u | head -5)"
+    strict_violations="$(grep -E ': (command not found|unbound variable)(: |$)' "$stderr_log" | sort -u | head -5)"
   fi
 
   rm -rf "$tmpdir"
