@@ -13,7 +13,10 @@ STRICT="${DOTFILES_ALIAS_STRICT_MODE:-${DOTFILES_SECRETS_STRICT_MODE:-0}}"
 
 cd "$REPO_ROOT"
 
-mapfile -t staged_files < <(git diff --cached --name-only --diff-filter=ACM || true)
+staged_files=()
+while IFS= read -r staged_file; do
+  [[ -n "$staged_file" ]] && staged_files+=("$staged_file")
+done < <(git diff --cached --name-only --diff-filter=ACM || true)
 if [[ "${#staged_files[@]}" -eq 0 ]]; then
   echo "Secret governance: no staged files."
   exit 0

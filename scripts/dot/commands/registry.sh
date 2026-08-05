@@ -89,7 +89,7 @@ _registry_fetch() {
   local now mtime
   now="$(date +%s)"
   if [[ -s "$cache_file" ]]; then
-    if mtime="$(stat -f %m "$cache_file" 2>/dev/null || stat -c %Y "$cache_file" 2>/dev/null)"; then
+    if mtime="$(stat -c %Y "$cache_file" 2>/dev/null || stat -f %m "$cache_file" 2>/dev/null)"; then
       if ((now - mtime < 21600)); then
         printf '%s\n' "$cache_file"
         return 0

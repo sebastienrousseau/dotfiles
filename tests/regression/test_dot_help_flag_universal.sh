@@ -70,9 +70,11 @@ reset_sandbox() {
 # don't false-positive on ls-time updates.
 sandbox_snapshot() {
   local root="$1"
-  find "$root" -type f -print0 2>/dev/null \
-    | xargs -0 stat -f '%N %z' 2>/dev/null \
-    | sort
+  if stat -c '%n %s' "$root" >/dev/null 2>&1; then
+    find "$root" -type f -exec stat -c '%n %s' {} + 2>/dev/null | sort
+  else
+    find "$root" -type f -exec stat -f '%N %z' {} + 2>/dev/null | sort
+  fi
 }
 
 # ═══════════════════════════════════════════════════════════════
@@ -119,7 +121,7 @@ readonly -a HIDDEN_FROM_HELP=(
   # AI-related sub-dispatchers that operate purely on routing
   load-bench-pty
   # Sub-dispatcher modules that print their own help when invoked
-  agents init registry manual patterns
+  agents registry manual patterns
 )
 
 is_hidden_alias() {
@@ -221,7 +223,7 @@ check_help_flag_safe() {
     XDG_CACHE_HOME="$sandbox/.cache" \
     XDG_STATE_HOME="$sandbox/.local/state" \
     CHEZMOI_SOURCE_DIR="$REPO_ROOT" \
-    timeout 10 bash "$DOT_CLI" $cmd "$flag" \
+    run_with_timeout 10 bash "$DOT_CLI" $cmd "$flag" \
     >"$stdout_file" 2>"$stderr_file" \
     && exit_code=0 || exit_code=$?
 
@@ -334,7 +336,7 @@ out="$(HOME="$sandbox" \
     XDG_CACHE_HOME="$sandbox/.cache" \
     XDG_STATE_HOME="$sandbox/.local/state" \
     CHEZMOI_SOURCE_DIR="$REPO_ROOT" \
-    timeout 5 bash "$DOT_CLI" ai delegate -h 2>&1)"
+    run_with_timeout 5 bash "$DOT_CLI" ai delegate -h 2>&1)"
 if echo "$out" | grep -qE 'delegate|vibe|Executing.*pattern|api\.openai|api\.anthropic'; then
   # If the delegate was actually invoked, we'd see those markers.
   # Presence == regression.
@@ -365,7 +367,7 @@ if HOME="$sandbox" \
     XDG_STATE_HOME="$sandbox/.local/state" \
     CHEZMOI_SOURCE_DIR="$REPO_ROOT" \
     EDITOR=/bin/false \
-    timeout 5 bash "$DOT_CLI" edit -h >/dev/null 2>&1; then
+    run_with_timeout 5 bash "$DOT_CLI" edit -h >/dev/null 2>&1; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
@@ -383,7 +385,7 @@ if HOME="$sandbox" \
     XDG_CACHE_HOME="$sandbox/.cache" \
     XDG_STATE_HOME="$sandbox/.local/state" \
     CHEZMOI_SOURCE_DIR="$REPO_ROOT" \
-    timeout 5 bash "$DOT_CLI" upgrade -h >/dev/null 2>&1; then
+    run_with_timeout 5 bash "$DOT_CLI" upgrade -h >/dev/null 2>&1; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
@@ -402,7 +404,7 @@ if HOME="$sandbox" \
     XDG_CACHE_HOME="$sandbox/.cache" \
     XDG_STATE_HOME="$sandbox/.local/state" \
     CHEZMOI_SOURCE_DIR="$REPO_ROOT" \
-    timeout 5 bash "$DOT_CLI" backup -h >/dev/null 2>&1; then
+    run_with_timeout 5 bash "$DOT_CLI" backup -h >/dev/null 2>&1; then
   # Additional check: no .tar files created anywhere in the sandbox.
   if find "$sandbox" -name '*.tar*' -type f 2>/dev/null | grep -q .; then
     ((TESTS_FAILED++)) || true
@@ -428,7 +430,7 @@ if HOME="$sandbox" \
     XDG_CACHE_HOME="$sandbox/.cache" \
     XDG_STATE_HOME="$sandbox/.local/state" \
     CHEZMOI_SOURCE_DIR="$REPO_ROOT" \
-    timeout 5 bash "$DOT_CLI" sandbox -h >/dev/null 2>&1; then
+    run_with_timeout 5 bash "$DOT_CLI" sandbox -h >/dev/null 2>&1; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
@@ -452,7 +454,7 @@ out="$(HOME="$sandbox" \
     XDG_CACHE_HOME="$sandbox/.cache" \
     XDG_STATE_HOME="$sandbox/.local/state" \
     CHEZMOI_SOURCE_DIR="$REPO_ROOT" \
-    timeout 5 bash "$DOT_CLI" search -- --help 2>&1)" || true
+    run_with_timeout 5 bash "$DOT_CLI" search -- --help 2>&1)" || true
 # `dot search` treats its arg as a keyword; either way (found or
 # not-found), it should not print the canonical `dot help` topic
 # for search. The presence of "Reference" / "Dotfiles Command
