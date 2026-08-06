@@ -87,13 +87,13 @@ if command -v apt-get >/dev/null; then
       curl --proto '=https' --tlsv1.2 -fsSL \
         -o "$github_key_tmp" \
         https://cli.github.com/packages/githubcli-archive-keyring.gpg
-      github_key_expected="6084d5d7bd8e288441e0e94fc6275570895da18e6751f70f057485dc2d1a811b"
+      github_digest_expected="6084d5d7bd8e288441e0e94fc6275570895da18e6751f70f057485dc2d1a811b"
       if command -v sha256sum >/dev/null 2>&1; then
-        github_key_actual="$(sha256sum "$github_key_tmp" | awk '{print $1}')"
+        github_digest_actual="$(sha256sum "$github_key_tmp" | awk '{print $1}')"
       else
-        github_key_actual="$(shasum -a 256 "$github_key_tmp" | awk '{print $1}')"
+        github_digest_actual="$(shasum -a 256 "$github_key_tmp" | awk '{print $1}')"
       fi
-      if [[ "$github_key_actual" != "$github_key_expected" ]]; then
+      if [[ "$github_digest_actual" != "$github_digest_expected" ]]; then
         log_error "GitHub CLI archive key checksum mismatch; refusing repository setup"
         exit 1
       fi
