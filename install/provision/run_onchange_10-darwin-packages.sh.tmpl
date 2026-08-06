@@ -9,15 +9,17 @@ set -euo pipefail
 log_info() { printf '\n[INFO] %s\n' "$*"; }
 log_error() { printf '\n[ERROR] %s\n' "$*" >&2; }
 
+VERIFIER="${DOTFILES_SOURCE_DIR:?install.sh must export DOTFILES_SOURCE_DIR}/lib/dot/verified-download.sh"
+# shellcheck source=../../lib/dot/verified-download.sh disable=SC1091
+source "$VERIFIER"
+
 log_info " macOS: Starting setup..."
 
 # Check Homebrew
 if ! command -v brew >/dev/null; then
   log_info "Homebrew not found. Installing..."
   brew_tmp=$(umask 077 && mktemp)
-  curl -fsSL -o "$brew_tmp" https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
-  # Validate: must be a shell script under 1MB
-  if [ -s "$brew_tmp" ] && head -1 "$brew_tmp" | grep -q '^#!'; then
+  if download_verified_script https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh "$brew_tmp" 65536; then
     /bin/bash "$brew_tmp"
   else
     log_error "Homebrew installer failed validation."

@@ -24,6 +24,7 @@ EXCLUDE_FILES=(
   "docs/reference/FONTS.md"
   "docs/archive/LEGACY_ROADMAP.md"
   "docs/archive/PLAN.md"
+  "ROADMAP.md"
 
   # Roadmap + audit narratives — describe per-version work; refs to
   # prior versions are intentional and historical.
@@ -315,6 +316,10 @@ update_version_references() {
         sed_in_place "$temp_file" \
           -e "s|v$SED_VERSION_PATTERN standards maintained|v$target_version standards maintained|g"
         ;;
+      "docs/manual/00-introduction.md")
+        sed_in_place "$temp_file" \
+          -e "s|\.dotfiles\` v$SED_VERSION_PATTERN|.dotfiles\` v$target_version|g"
+        ;;
       *)
         # Update explicit markdown version labels, backticks, and parentheses.
         # Skip lines containing MILESTONE.
@@ -555,6 +560,26 @@ main() {
         "s|^dotfiles_version = \"$SED_VERSION_PATTERN\"|dotfiles_version = \"$target_version\"|"
       log_success "Updated ${chezmoidata#"$PROJECT_ROOT/"}"
     fi
+  fi
+
+  # package.json is the release-tooling source used when VERSION is omitted.
+  # A caller-supplied target must update it atomically before downstream
+  # verification, otherwise the repository immediately contains two versions.
+  local package_json="$PROJECT_ROOT/package.json"
+  if [[ "$dry_run" == "true" ]]; then
+    log_info "Would update package.json: version = "$target_version""
+  else
+    local package_tmp
+    package_tmp=$(umask 077 && mktemp)
+    if command -v jq >/dev/null 2>&1; then
+      jq --arg version "$target_version" '.version = $version' "$package_json" >"$package_tmp"
+    else
+      cp "$package_json" "$package_tmp"
+      sed_in_place "$package_tmp" "s|\"version\": \"$SED_VERSION_PATTERN\"|\"version\": \"$target_version\"|"
+    fi
+    cat "$package_tmp" >"$package_json"
+    rm -f "$package_tmp"
+    log_success "Updated package.json"
   fi
 
   # Sync non-template script files that embed the version

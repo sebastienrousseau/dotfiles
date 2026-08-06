@@ -12,6 +12,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=os_detection.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/os_detection.sh" 2>/dev/null || true
+# shellcheck source=../../lib/dot/verified-download.sh disable=SC1091
+source "$SCRIPT_DIR/../../lib/dot/verified-download.sh"
 
 # Check if Homebrew is installed
 has_brew() {
@@ -31,18 +33,6 @@ has_dnf() {
 # Check if pacman is available
 has_pacman() {
   command -v pacman >/dev/null 2>&1
-}
-
-sha256_file_pm() {
-  local file="$1"
-  if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum "$file" | awk '{print $1}'
-  elif command -v shasum >/dev/null 2>&1; then
-    shasum -a 256 "$file" | awk '{print $1}'
-  else
-    echo "Error: sha256sum or shasum is required for verified bootstrap." >&2
-    return 1
-  fi
 }
 
 # Install Homebrew on macOS
@@ -68,26 +58,9 @@ install_homebrew() {
   echo "   Installing Homebrew..."
   local installer
   installer="$(umask 077 && mktemp)"
-  if ! curl -fsSL -o "$installer" https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh; then
+  if ! download_verified_script https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh "$installer" 65536; then
     rm -f "$installer"
     echo "Error: failed to download Homebrew installer." >&2
-    return 1
-  fi
-
-  local expected_checksum="${HOMEBREW_INSTALLER_SHA256:-}"
-  if [[ -z "$expected_checksum" ]]; then
-    rm -f "$installer"
-    echo "Error: HOMEBREW_INSTALLER_SHA256 is required for verified Homebrew bootstrap." >&2
-    return 1
-  fi
-
-  local actual_checksum
-  actual_checksum="$(sha256_file_pm "$installer")"
-  if [[ "$actual_checksum" != "$expected_checksum" ]]; then
-    rm -f "$installer"
-    echo "Error: Homebrew installer checksum mismatch." >&2
-    echo "Expected: $expected_checksum" >&2
-    echo "Got:      $actual_checksum" >&2
     return 1
   fi
 

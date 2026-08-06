@@ -160,7 +160,8 @@ See [Fleet Architecture](04-fleet.md) for the full model.
 | Shellcheck zero-warnings | `ci.yml` | Yes |
 | Gitleaks scan | `ci.yml` | Yes |
 | Copyright headers | `ci-enforced.yml` | Yes |
-| 100% unit test coverage | `ci-enforced.yml` | Yes |
+| 100% executable module mapping | `ci-enforced.yml` | Yes |
+| Measured Bash line coverage | `coverage.yml` | Ratcheted floor; see `docs/operations/COVERAGE.md` |
 | Reliability (macOS + Linux) | `ci-enforced.yml` | Yes |
 | Checkov infrastructure scan | `ci-enforced.yml` | On severity MEDIUM+ |
 | SBOM (CycloneDX) | `ci.yml` | No (informational) |

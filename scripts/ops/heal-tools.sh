@@ -3,6 +3,10 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC2034
 # =============================================================================
+
+HEAL_TOOLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../../lib/dot/verified-download.sh disable=SC1091
+source "$HEAL_TOOLS_DIR/../../lib/dot/verified-download.sh"
 # heal-tools.sh — Tool installation helpers for heal.sh
 # Sourced by heal.sh; inherits set -euo pipefail, ui.sh, and shared variables.
 # =============================================================================
@@ -140,14 +144,9 @@ _do_install() {
     starship)
       local installer
       installer=$(umask 077 && mktemp)
-      if ! curl -fsSL -o "$installer" https://starship.rs/install.sh; then
+      if ! download_verified_script https://starship.rs/install.sh "$installer"; then
         rm -f "$installer"
         log_error "Failed to download starship installer"
-        return 1
-      fi
-      if ! head -1 "$installer" | grep -q '^#!/'; then
-        rm -f "$installer"
-        log_error "starship installer does not look like a shell script"
         return 1
       fi
       sh "$installer" --yes
@@ -158,14 +157,9 @@ _do_install() {
     atuin)
       local installer
       installer=$(umask 077 && mktemp)
-      if ! curl -fsSL -o "$installer" https://setup.atuin.sh; then
+      if ! download_verified_script https://setup.atuin.sh "$installer"; then
         rm -f "$installer"
         log_error "Failed to download atuin installer"
-        return 1
-      fi
-      if ! head -1 "$installer" | grep -q '^#!/'; then
-        rm -f "$installer"
-        log_error "atuin installer does not look like a shell script"
         return 1
       fi
       bash "$installer" --yes

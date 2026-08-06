@@ -4,7 +4,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 set -euo pipefail
 
-# Dotfiles CLI Entry Point - v0.2.512
+# Dotfiles CLI Entry Point - v0.2.513
 
 # Ensure XDG Base Directory variables are set
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -22,7 +22,7 @@ if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
   . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
 fi
 
-VERSION="0.2.512"
+VERSION="0.2.513"
 
 COMMAND="${1:-}"
 if [ -n "${1:-}" ]; then
@@ -38,8 +38,8 @@ _resolve_source_dir() {
 
   if script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null)"; then
     script_dir="$script_path"
-    # Post-v0.2.512: the canonical dispatcher lives at <repo>/bin/dot, so
-    # $script_dir/.. is the repo root. Pre-v0.2.512 (and chezmoi-deployed
+    # Post-v0.2.513: the canonical dispatcher lives at <repo>/bin/dot, so
+    # $script_dir/.. is the repo root. Pre-v0.2.513 (and chezmoi-deployed
     # wrapper invocations that still exec the canonical) the dispatcher
     # was at <repo>/dot_local/bin/executable_dot, so $script_dir/../..
     # was the repo. Probe both to cover the transition.
@@ -345,6 +345,7 @@ EOF
 
 _dot_help_details() {
   cat <<'EOF'
+apply|Apply the current dotfiles to this machine.|dot apply\ndot apply --dry-run
 sync|Apply the current dotfiles to this machine.|dot sync\ndot sync --check
 init|Bootstrap a dotfiles repository through chezmoi.|dot init alice\ndot init alice/configs --dry-run
 add|Start managing a file with chezmoi.|dot add ~/.gitconfig
@@ -365,7 +366,9 @@ ai|Show installed AI tools, delegate a task to a cheap model, or report spend.|d
 mcp|Inspect MCP configuration, policy, and registry.|dot mcp\ndot mcp -s -j\ndot mcp registry
 mode|Inspect or switch the active agent mode.|dot mode list\ndot mode show ask\ndot mode set audit
 agent|Inspect agent metadata or run profile-aware actions.|dot agent card\ndot agent a2a-card --validate\ndot agent checkpoint list\ndot agent conformance --strict --json
+agents|Synchronize and render instructions for supported AI coding harnesses.|dot agents list\ndot agents check\ndot agents render
 fleet|Show fleet node status, drift, and namespace.|dot fleet\ndot fleet status --json\ndot fleet drift\ndot fleet namespace set engineering
+registry|Browse and manage reusable dotfile modules.|dot registry list\ndot registry search rust\ndot registry info rust-dev-setup
 env|Show managed tool versions and runtime state.|dot env
 profile|Show or switch the active configuration profile.|dot profile
 secrets|Manage encrypted secrets and environment loading.|dot secrets edit\ndot secrets list\ndot secrets load ai
@@ -435,7 +438,12 @@ EOF
 
 _dot_help_summary() {
   local command_name="${1:-}"
-  awk -F'|' -v command_name="$command_name" '$1 == command_name { print $2; exit }' < <(_dot_help_details)
+  local summary
+  summary="$(awk -F'|' -v command_name="$command_name" '$1 == command_name { print $2; exit }' < <(_dot_help_details))"
+  if [[ -z "$summary" ]]; then
+    summary="$(awk -F'|' -v command_name="$command_name" '$2 == command_name { print $3; exit }' < <(_dot_help_specs))"
+  fi
+  printf '%s\n' "$summary"
 }
 
 _dot_help_examples() {

@@ -75,7 +75,7 @@ Variables relevant in GitHub Actions.
 | `CI` | Set to `true` in CI; disables prompts |
 | `GITHUB_ACTIONS` | GHA-specific; enables step summary output |
 | `CHEZMOI_VERSION` | Pinned chezmoi version for CI |
-| `COVERAGE_THRESHOLD` | Test coverage threshold (100 in enforced CI) |
+| `COVERAGE_THRESHOLD` | Executable module-mapping threshold (100 in enforced CI; not line coverage) |
 | `DOTFILES_TEST_MODE` | Skip network-dependent tests |
 
 ## Secret-Related

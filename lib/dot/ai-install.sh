@@ -14,6 +14,10 @@
 [[ "${_DOT_LIB_AI_INSTALL_LOADED:-0}" == "1" ]] && return 0
 _DOT_LIB_AI_INSTALL_LOADED=1
 
+_AI_INSTALL_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=verified-download.sh disable=SC1091
+source "$_AI_INSTALL_LIB_DIR/verified-download.sh"
+
 # _ai_mise_pkg <binary> — map an AI provider binary to its mise package.
 # claude is intentionally absent (native installer, not mise/npm: npm 11
 # drops the platform-native optionalDependency on global installs).
@@ -47,14 +51,12 @@ _ai_mise_pkg() {
 # install_agy_native [label] — download + run the Antigravity CLI native installer.
 # Validates the installer's size and shebang before executing it.
 install_agy_native() {
-  # LCOV_EXCL_START — network curl|bash installer; can't run in the unit
+  # LCOV_EXCL_START — network installer; can't run in the unit
   # sandbox (the repo SKIPs install.sh / executable_update for the same reason).
   local label="${1:-Antigravity CLI}"
   local installer
   installer=$(umask 077 && mktemp)
-  if curl -fsSL -o "$installer" https://antigravity.google/cli/install.sh &&
-    [ "$(wc -c <"$installer")" -le 262144 ] &&
-    head -1 "$installer" | grep -q '^#!'; then
+  if download_verified_script https://antigravity.google/cli/install.sh "$installer" 262144; then
     if command -v gum >/dev/null 2>&1; then
       if gum spin --spinner dot --title "Installing $label (native installer)" -- bash "$installer"; then
         ui_ok "$label" "installed"
@@ -73,16 +75,14 @@ install_agy_native() {
 }
 
 install_goose_native() {
-  # LCOV_EXCL_START — network curl|bash installer (see install_agy_native).
+  # LCOV_EXCL_START — network installer (see install_agy_native).
   local label="${1:-Goose}"
   local installer
   installer=$(umask 077 && mktemp)
   # CONFIGURE=false: the goose installer otherwise runs `goose configure`
   # interactively after install, which hangs in non-interactive contexts
   # (gum spin, CI, `dot ai install`). Users can `goose configure` later.
-  if curl -fsSL -o "$installer" https://github.com/block/goose/releases/download/stable/download_cli.sh &&
-    [ "$(wc -c <"$installer")" -le 524288 ] &&
-    head -1 "$installer" | grep -q '^#!'; then
+  if download_verified_script https://github.com/block/goose/releases/download/stable/download_cli.sh "$installer"; then
     if command -v gum >/dev/null 2>&1; then
       if gum spin --spinner dot --title "Installing $label (native installer)" -- env CONFIGURE=false bash "$installer"; then
         ui_ok "$label" "installed"
@@ -101,13 +101,11 @@ install_goose_native() {
 }
 
 install_claude_native() {
-  # LCOV_EXCL_START — network curl|bash installer (see install_agy_native).
+  # LCOV_EXCL_START — network installer (see install_agy_native).
   local label="${1:-Claude Code}"
   local installer
   installer=$(umask 077 && mktemp)
-  if curl -fsSL -o "$installer" https://claude.ai/install.sh &&
-    [ "$(wc -c <"$installer")" -le 262144 ] &&
-    head -1 "$installer" | grep -q '^#!'; then
+  if download_verified_script https://claude.ai/install.sh "$installer" 262144; then
     if command -v gum >/dev/null 2>&1; then
       if gum spin --spinner dot --title "Installing $label (native installer)" -- bash "$installer"; then
         ui_ok "$label" "installed"
@@ -126,13 +124,11 @@ install_claude_native() {
 }
 
 install_kimi_native() {
-  # LCOV_EXCL_START — network curl|bash installer (see install_agy_native).
+  # LCOV_EXCL_START — network installer (see install_agy_native).
   local label="${1:-Kimi CLI}"
   local installer
   installer=$(umask 077 && mktemp)
-  if curl -fsSL -o "$installer" https://code.kimi.com/kimi-code/install.sh &&
-    [ "$(wc -c <"$installer")" -le 524288 ] &&
-    head -1 "$installer" | grep -q '^#!'; then
+  if download_verified_script https://code.kimi.com/kimi-code/install.sh "$installer"; then
     if command -v gum >/dev/null 2>&1; then
       if gum spin --spinner dot --title "Installing $label (native installer)" -- bash "$installer"; then
         ui_ok "$label" "installed"
@@ -151,13 +147,11 @@ install_kimi_native() {
 }
 
 install_grok_native() {
-  # LCOV_EXCL_START — network curl|bash installer (see install_agy_native).
+  # LCOV_EXCL_START — network installer (see install_agy_native).
   local label="${1:-Grok Build}"
   local installer
   installer=$(umask 077 && mktemp)
-  if curl -fsSL -o "$installer" https://x.ai/cli/install.sh &&
-    [ "$(wc -c <"$installer")" -le 524288 ] &&
-    head -1 "$installer" | grep -q '^#!'; then
+  if download_verified_script https://x.ai/cli/install.sh "$installer"; then
     if command -v gum >/dev/null 2>&1; then
       if gum spin --spinner dot --title "Installing $label (native installer)" -- bash "$installer"; then
         ui_ok "$label" "installed"
@@ -176,16 +170,14 @@ install_grok_native() {
 }
 
 install_amp_native() {
-  # LCOV_EXCL_START — network curl|bash installer (see install_agy_native).
+  # LCOV_EXCL_START — network installer (see install_agy_native).
   # amp publishes only prerelease-tagged npm versions (0.0.<epoch>-g<sha>),
   # which mise's npm backend filters out — `@latest` resolves to nothing.
   # Use Sourcegraph's native installer instead of mise.
   local label="${1:-Amp}"
   local installer
   installer=$(umask 077 && mktemp)
-  if curl -fsSL -o "$installer" https://ampcode.com/install.sh &&
-    [ "$(wc -c <"$installer")" -le 524288 ] &&
-    head -1 "$installer" | grep -q '^#!'; then
+  if download_verified_script https://ampcode.com/install.sh "$installer"; then
     # Pre-resolve the version and pass it via AMP_VERSION. The installer's
     # own version fetch leaves stray whitespace in the string, which it
     # then splices into the checksum URL — curl rejects the malformed URL
@@ -213,16 +205,14 @@ install_amp_native() {
 }
 
 install_cursor_native() {
-  # LCOV_EXCL_START — network curl|bash installer (see install_agy_native).
+  # LCOV_EXCL_START — network installer (see install_agy_native).
   local label="${1:-Cursor CLI}"
   local installer
   installer=$(umask 077 && mktemp)
   # cursor.com/install User-Agent-sniffs: a default curl UA is served the
   # marketing HTML page (which fails the shebang check below), while a
   # browser-like UA gets the real install script. Spoof a browser UA.
-  if curl -fsSL -A "Mozilla/5.0" -o "$installer" https://cursor.com/install &&
-    [ "$(wc -c <"$installer")" -le 524288 ] &&
-    head -1 "$installer" | grep -q '^#!'; then
+  if download_verified_script https://cursor.com/install "$installer" 524288 "Mozilla/5.0"; then
     if command -v gum >/dev/null 2>&1; then
       if gum spin --spinner dot --title "Installing $label (native installer)" -- bash "$installer"; then
         ui_ok "$label" "installed"

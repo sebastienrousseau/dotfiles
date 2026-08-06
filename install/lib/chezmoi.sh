@@ -7,6 +7,10 @@
 
 set -euo pipefail
 
+INSTALL_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../../lib/dot/verified-download.sh disable=SC1091
+source "$INSTALL_LIB_DIR/../../lib/dot/verified-download.sh"
+
 # Cross-platform sed in-place (BSD vs GNU)
 sed_in_place() {
   if sed --version >/dev/null 2>&1; then
@@ -52,48 +56,10 @@ install_chezmoi_binary() {
   # shellcheck disable=SC2064
   trap "rm -f '$installer'" RETURN
 
-  if ! curl -fsSL -o "$installer" https://get.chezmoi.io; then
+  if ! download_verified_script https://get.chezmoi.io "$installer" 102400; then
     rm -f "$installer"
     echo "Error: Failed to download chezmoi installer." >&2
     return 1
-  fi
-
-  # Basic validation: check it's a shell script and not suspiciously large
-  if [[ "$(wc -c <"$installer")" -gt 102400 ]]; then
-    rm -f "$installer"
-    echo "Error: Chezmoi installer suspiciously large. Aborting for security." >&2
-    return 1
-  fi
-
-  if ! head -1 "$installer" | grep -q '^#!/'; then
-    rm -f "$installer"
-    echo "Error: Chezmoi installer doesn't look like a shell script. Aborting." >&2
-    return 1
-  fi
-
-  # SHA256 checksum verification (graceful degradation if unavailable)
-  # Known checksum for get.chezmoi.io installer (update when installer changes)
-  local expected_checksum="${CHEZMOI_INSTALLER_SHA256:-}"
-  if [[ -n "$expected_checksum" ]]; then
-    local actual_checksum
-    if command -v sha256sum >/dev/null 2>&1; then
-      actual_checksum=$(sha256sum "$installer" | awk '{print $1}')
-    elif command -v shasum >/dev/null 2>&1; then
-      actual_checksum=$(shasum -a 256 "$installer" | awk '{print $1}')
-    else
-      printf '%b\n' "${CYAN:-}   INFO: No SHA256 tool available, skipping checksum verification${NC:-}"
-      actual_checksum=""
-    fi
-
-    if [[ -n "$actual_checksum" && "$actual_checksum" != "$expected_checksum" ]]; then
-      rm -f "$installer"
-      echo "Error: Chezmoi installer checksum mismatch. Aborting for security." >&2
-      echo "Expected: $expected_checksum" >&2
-      echo "Got:      $actual_checksum" >&2
-      return 1
-    elif [[ -n "$actual_checksum" ]]; then
-      printf '%b\n' "${CYAN:-}   Checksum verified: $actual_checksum${NC:-}"
-    fi
   fi
 
   # Execute the verified installer

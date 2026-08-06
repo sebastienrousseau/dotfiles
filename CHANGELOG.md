@@ -2,6 +2,36 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.513 — Unreleased
+
+### Security
+
+- Enforce signed commits, linear history, required merge/reliability/DCO/PR
+  signature checks, conversation resolution, and up-to-date branches on
+  `main`.
+- Default GitHub Actions tokens to read-only, disable workflow PR approvals,
+  enable secret push protection, and pin the SLSA reusable workflow to its
+  immutable commit.
+- Verify every remotely executed installer against a committed SHA-256
+  allowlist. CI rejects direct download-to-shell execution and verifier
+  bypasses.
+
+### Fixed
+
+- Package a self-contained `dot` distribution including command modules,
+  operational scripts, policies, schemas, help data, and the verified-download
+  manifest. Previously published archives omitted the command modules required
+  by most subcommands.
+- Add `make install PREFIX=... DESTDIR=...` and `make uninstall` using the
+  same tested staging path as release archives.
+- Store CLI benchmark baselines under `XDG_CACHE_HOME` instead of requiring a
+  writable source checkout.
+- Make focused help work for `apply`, `agents`, and `registry`.
+- Make an explicit version-sync target update `package.json` atomically and
+  distinguish historical roadmap versions from current-version references.
+- Correct documentation that conflated 100% executable-module mapping with
+  measured Bash line coverage.
+
 ## v0.2.512 — 2026-07-21
 
 ### Added

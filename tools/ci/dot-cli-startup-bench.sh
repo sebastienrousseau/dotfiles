@@ -112,7 +112,7 @@ echo
 echo "median: ${median}ms  budget: ${BUDGET_MS}ms"
 
 # Optional baseline record for trend tracking.
-baseline_file="${DOT_BENCH_BASELINE:-$REPO_ROOT/.cache/dot-cli-startup-baseline.txt}"
+baseline_file="${DOT_BENCH_BASELINE:-${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/dot-cli-startup-baseline.txt}"
 mkdir -p "$(dirname "$baseline_file")" 2>/dev/null || true
 printf '%s\n' "$median" >"$baseline_file"
 

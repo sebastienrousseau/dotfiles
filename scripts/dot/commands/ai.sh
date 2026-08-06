@@ -418,7 +418,7 @@ ${prompt}"
       fi
     elif [[ "$tool_bin" == "agy" ]]; then
       ui_warn "$tool" "not installed"
-      ui_info "Install" "curl -fsSL -o /tmp/agy-install.sh https://antigravity.google/cli/install.sh && bash /tmp/agy-install.sh"
+      ui_info "Install" "dot ai install agy (checksum verified)"
       exit 1
     elif [[ "$tool_bin" == "kimi" ]]; then
       ui_warn "$tool" "not installed"

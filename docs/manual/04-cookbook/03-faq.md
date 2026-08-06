@@ -25,7 +25,7 @@ Only via WSL2. Native Windows PowerShell support exists for baseline parity (ali
 
 ### Is it production-ready?
 
-Yes — it's the author's daily driver across multiple hosts and receives regular releases (see `CHANGELOG.md`). CI enforces 100% test coverage, zero-warning linting, WCAG AAA for themes, SBOM + CVE scanning, and signed commits on every merge.
+Yes — it's the author's daily driver across multiple hosts and receives regular releases (see `CHANGELOG.md`). CI enforces 100% executable-module mapping and a ratcheted measured Bash line-coverage floor, plus zero-warning linting, WCAG AAA for themes, SBOM + CVE scanning, and signed-commit verification. The current measured coverage and exclusions are documented in `docs/operations/COVERAGE.md`.
 
 ### Can I fork it and use it without attribution?
 

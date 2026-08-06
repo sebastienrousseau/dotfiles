@@ -67,43 +67,13 @@ jobs:
         run: |
           set -euo pipefail
           stage="dot-${VERSION}"
-          mkdir -p "$stage"/{bin,lib/dot,share/man/man1,share/zsh/site-functions,share/bash-completion/completions,share/fish/vendor_completions.d}
+          bash tools/release/stage-dot.sh "$stage"
 
-          # Dispatcher + companions
-          cp bin/dot "$stage/bin/"
-          for f in bin/dot-*; do [[ -f "$f" ]] && cp "$f" "$stage/bin/"; done
-
-          # Windows entrypoint + cmd shim for Scoop. The PowerShell
-          # script is the real driver; the .cmd is a one-line wrapper
-          # so plain cmd.exe (and Scoop's shim generator) can launch
-          # it. Synthesized rather than committed since it has no
-          # variant content.
-          if [[ -f bin/dot.ps1 ]]; then
-            cp bin/dot.ps1 "$stage/bin/dot.ps1"
-            # CRLF line endings: cmd.exe is strict about them, and the
-            # zip is consumed by Scoop on Windows where text-mode unzip
-            # is not implicit. printf with %% escapes %~dp0 and %*
-            # against the shell pass.
-            {
-              printf '@echo off\r\n'
-              printf 'powershell -ExecutionPolicy Bypass -NoProfile -File "%%~dp0dot.ps1" %%*\r\n'
-            } > "$stage/bin/dot.cmd"
-          else
-            echo "::warning::bin/dot.ps1 not found — Scoop install will lack a Windows entrypoint"
-          fi
-
-          # Sourced helpers
-          cp lib/dot/*.sh "$stage/lib/dot/"
-          # README.md kept alongside helpers for context; harmless on install.
-          [[ -f lib/dot/README.md ]] && cp lib/dot/README.md "$stage/lib/dot/"
-
-          # Man page
-          cp share/man/man1/dot.1 "$stage/share/man/man1/"
-
-          # Completions — source paths differ from install paths.
-          cp share/completions/zsh/_dot "$stage/share/zsh/site-functions/_dot"
-          cp defaults/dot_local/share/bash-completion/completions/dot "$stage/share/bash-completion/completions/dot"
-          cp defaults/dot_config/fish/functions/dot.fish "$stage/share/fish/vendor_completions.d/dot.fish"
+          # cmd.exe launcher for Scoop.
+          {
+            printf '@echo off\r\n'
+            printf 'powershell -ExecutionPolicy Bypass -NoProfile -File "%%~dp0dot.ps1" %%*\r\n'
+          } > "$stage/bin/dot.cmd"
 
           echo "=== staged layout ==="
           find "$stage" -type f | sort

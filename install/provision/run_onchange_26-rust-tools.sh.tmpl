@@ -18,7 +18,7 @@ fi
 
 # Check if rustup is available
 if ! command -v rustup >/dev/null 2>&1; then
-  log_warn "rustup not found. Install rustup first: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+  log_warn "rustup not found. Install it with 'mise use -g rust@stable' or rerun the verified Linux provisioner."
   exit 0
 fi
 
