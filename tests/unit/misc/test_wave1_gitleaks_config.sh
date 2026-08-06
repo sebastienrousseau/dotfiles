@@ -10,11 +10,19 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 GITLEAKS_CONF="$REPO_ROOT/config/gitleaks.toml"
+GITLEAKS_ENTRYPOINT="$REPO_ROOT/.gitleaks.toml"
 
 echo "Testing Wave 1: gitleaks configuration..."
 
 test_start "gitleaks_config_exists"
 assert_file_exists "$GITLEAKS_CONF" ".gitleaks.toml should exist"
+
+test_start "gitleaks_root_entrypoint_exists"
+assert_file_exists "$GITLEAKS_ENTRYPOINT" "hosted scanners should discover a root .gitleaks.toml"
+
+test_start "gitleaks_root_entrypoint_is_canonical"
+assert_equals "config/gitleaks.toml" "$(readlink "$GITLEAKS_ENTRYPOINT")" \
+  "root .gitleaks.toml should resolve to the canonical config"
 
 test_start "gitleaks_extends_default"
 assert_file_contains "$GITLEAKS_CONF" "useDefault = true" "should extend default gitleaks config"
