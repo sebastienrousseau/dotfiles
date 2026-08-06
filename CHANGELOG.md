@@ -5,6 +5,7 @@ This file documents all notable changes to this project.
 ## v0.2.513 — Unreleased
 
 - **Verified module registry installation.** `dot registry install` now validates the v1 index, verifies immutable archive SHA-256 digests, rejects traversal and link-bearing archives, previews with chezmoi by default, and applies only with explicit `--yes`. CI validates the published registry contract and JSON Schema.
+- **Native PowerShell daily workflow.** `dot.ps1` now handles core chezmoi operations, status, doctor, mise inventory, agent checks/listing, and local fleet status without bash. Windows CI exercises the cmdlets directly, and the parity matrix now distinguishes native behavior from bash bridges.
 
 ### Security
 
