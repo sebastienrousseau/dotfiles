@@ -450,6 +450,8 @@ main() {
     if [[ -d "$prov_dir" ]]; then
       local script
       # run_once_install_* (shells) first, then numbered run_onchange_* in order.
+      # The fixed globs contain no user-controlled filenames.
+      # shellcheck disable=SC2012
       while IFS= read -r script; do
         [[ -f "$script" ]] || continue
         echo "   → $(basename "$script")"

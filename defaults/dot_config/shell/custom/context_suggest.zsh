@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# preamble:skip - sourced by dot_zshrc.tmpl
 # zsh_context_suggest.zsh
 #
 # Context Autosuggest for Predictive Shell

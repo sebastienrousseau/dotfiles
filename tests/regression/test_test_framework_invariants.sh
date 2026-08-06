@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
+# Regression for: 125ee036
 # Regression: guard the test-framework invariant
 #
 #   TESTS_RUN == TESTS_PASSED + TESTS_FAILED

@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# preamble:skip - sourced by dot_zshrc.tmpl
 # error_analysis.zsh
 #
 # Error Analysis for Predictive Shell

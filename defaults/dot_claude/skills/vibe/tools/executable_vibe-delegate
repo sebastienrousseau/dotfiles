@@ -20,6 +20,8 @@
 #           duration_secs, tokens_in, tokens_out, tokens_total, cost_usd, model,
 #           warn_count, search_replace_fails, cost_claude_eq, wrote_nothing.
 
+set -euo pipefail
+
 WORKDIR="${1:?Usage: vibe-delegate <workdir> <prompt> [max-turns] [agent] [timeout-secs]}"
 PROMPT="${2:?Prompt required}"
 MAX_TURNS="${3:-10}"
@@ -36,7 +38,7 @@ fi
 VIBE_MODEL_FLAG="$HOME/.local/share/vibe-model.flag"
 VIBE_MODEL_OVERRIDE=""
 if [ -f "$VIBE_MODEL_FLAG" ]; then
-  VIBE_MODEL_OVERRIDE=$(tr -d '[:space:]' < "$VIBE_MODEL_FLAG")
+  VIBE_MODEL_OVERRIDE=$(tr -d '[:space:]' <"$VIBE_MODEL_FLAG")
   export VIBE_ACTIVE_MODEL="$VIBE_MODEL_OVERRIDE"
 fi
 
@@ -46,7 +48,10 @@ PROMPT_WORDS=$(printf '%s' "$PROMPT" | wc -w | tr -d ' ')
 GIT_BEFORE=$(git rev-parse HEAD 2>/dev/null || echo "no-git")
 
 # Track modified files for post-run syntax checks
-FILES_BEFORE=$(git diff --name-only 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null)
+FILES_BEFORE=$(
+  git diff --name-only 2>/dev/null
+  git ls-files --others --exclude-standard 2>/dev/null
+)
 
 echo "=== VIBE START ==="
 echo "Workdir : $WORKDIR"
@@ -60,7 +65,7 @@ echo "==================="
 # Write prompt to a temp file — avoids shell injection when prompt contains
 # colons, quotes, emojis, accented chars, or multi-line Python/JS code.
 PROMPT_FILE=$(mktemp /tmp/vibe-prompt-XXXXXX.txt)
-printf '%s' "$PROMPT" > "$PROMPT_FILE"
+printf '%s' "$PROMPT" >"$PROMPT_FILE"
 
 # Write the vibe command to a temp script.
 # Reads the prompt from the file to stay safe from shell expansion.
@@ -68,7 +73,7 @@ VIBE_SCRIPT=$(mktemp /tmp/vibe-cmd-XXXXXX.sh)
 
 # Stats handoff file: Python parser writes JSON here; bash reads it for the log.
 DELEGATE_STATS_FILE=$(mktemp /tmp/delegate-stats-XXXXXX.json)
-printf '{}' > "$DELEGATE_STATS_FILE"
+printf '{}' >"$DELEGATE_STATS_FILE"
 export DELEGATE_STATS_FILE
 
 trap 'rm -f "$VIBE_SCRIPT" "$PROMPT_FILE" "$DELEGATE_STATS_FILE"' EXIT
@@ -77,13 +82,17 @@ trap 'rm -f "$VIBE_SCRIPT" "$PROMPT_FILE" "$DELEGATE_STATS_FILE"' EXIT
   echo '#!/usr/bin/env bash'
   echo "PROMPT_CONTENT=$(printf '%q' "$(cat "$PROMPT_FILE")")"
   if [ -n "$AGENT" ]; then
+    # PROMPT_CONTENT expands in the generated script.
+    # shellcheck disable=SC2016
     printf 'exec vibe --agent %q -p "$PROMPT_CONTENT" --trust --max-turns %q --output streaming --workdir %q\n' \
       "$AGENT" "$MAX_TURNS" "$WORKDIR"
   else
+    # PROMPT_CONTENT expands in the generated script.
+    # shellcheck disable=SC2016
     printf 'exec vibe -p "$PROMPT_CONTENT" --trust --max-turns %q --output streaming --workdir %q\n' \
       "$MAX_TURNS" "$WORKDIR"
   fi
-} > "$VIBE_SCRIPT"
+} >"$VIBE_SCRIPT"
 chmod +x "$VIBE_SCRIPT"
 
 # Pseudo-TTY for vibe via python pty.spawn (works without a parent TTY, unlike `script`).
@@ -166,6 +175,8 @@ VIBE_EXIT=${PIPESTATUS[0]}
 
 # ── Real Mistral token counts from session log ─────────────────────────────────
 VIBE_HOME="${VIBE_HOME:-$HOME/.vibe}"
+# mtime ordering selects the latest session log.
+# shellcheck disable=SC2012
 SESSION_LOG=$(ls -t "$VIBE_HOME/logs/session"/*/meta.json 2>/dev/null | head -1)
 if [ -n "$SESSION_LOG" ]; then
   python3 -c "
@@ -248,15 +259,18 @@ else
 fi
 
 # ── Post-run syntax checks — language-agnostic ────────────────────────────────
-FILES_AFTER=$(git diff --name-only 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null)
+FILES_AFTER=$(
+  git diff --name-only 2>/dev/null
+  git ls-files --others --exclude-standard 2>/dev/null
+)
 CHANGED=$(comm -13 <(echo "$FILES_BEFORE" | sort) <(echo "$FILES_AFTER" | sort) 2>/dev/null)
 
 SYNTAX_COUNT_FILE=$(mktemp /tmp/vibe-syntax-count-XXXXXX.txt)
-echo 0 > "$SYNTAX_COUNT_FILE"
+echo 0 >"$SYNTAX_COUNT_FILE"
 export DELEGATE_CHANGED="$CHANGED"
 export SYNTAX_COUNT_FILE
 
-python3 << 'PYSYNTAX'
+python3 <<'PYSYNTAX'
 import os, shutil, subprocess
 
 changed = [f for f in os.environ.get('DELEGATE_CHANGED', '').splitlines() if f.strip()]
@@ -337,7 +351,6 @@ else
   git status --short 2>/dev/null
 fi
 
-
 # ── Run log ────────────────────────────────────────────────────────────────────
 END_NS=$(date +%s%N)
 FILES_CHANGED_COUNT=$(printf '%s\n' "$CHANGED" | grep -c '[^[:space:]]' 2>/dev/null)
@@ -356,7 +369,7 @@ export DELEGATE_SYNTAX_ERRORS="$TOTAL_ERRORS"
 export DELEGATE_START_NS="$START_NS"
 export DELEGATE_END_NS="$END_NS"
 
-python3 << 'PYLOG'
+python3 <<'PYLOG'
 import json, os, sqlite3
 from pathlib import Path
 from datetime import datetime, timezone
@@ -483,4 +496,4 @@ saved_str = f', saved ~${saved:.4f} vs Claude' if saved > 0 else ''
 print(f'[log] → {DB}  ({tok} tokens, exit {entry["exit_code"]}, {duration}s{saved_str})')
 PYLOG
 
-exit $VIBE_EXIT
+exit "$VIBE_EXIT"

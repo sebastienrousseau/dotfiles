@@ -35,6 +35,9 @@ regexes = [
 
 # Paths to ignore (documentation files with examples)
 paths = [
+    # detect-secrets stores one-way hashes of reviewed false positives. Those
+    # hashes are scanner metadata, not retrievable credentials.
+    '''\.secrets\.baseline''',
     '''docs/.*\.md''',
     '''\.github/.*\.md''',
     '''\.github/security-policies/environment-template\.env''',

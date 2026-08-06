@@ -17,7 +17,7 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 dest="$1"
 dest_name="$(basename "$dest")"
 [[ "$dest" != / && "$dest" != . && -n "$dest" &&
-  ( "$dest_name" == "dot" || "$dest_name" == dot-* || "$dest_name" == "bundle" ) ]] || {
+  ("$dest_name" == "dot" || "$dest_name" == dot-* || "$dest_name" == "bundle") ]] || {
   printf 'Refusing unsafe destination: %s\n' "$dest" >&2
   exit 2
 }

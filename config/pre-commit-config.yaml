@@ -11,18 +11,22 @@ repos:
     hooks:
       - id: shfmt
         args: ["-i", "2", "-ci"]
+        # PowerShell and Chezmoi Go templates are not valid shfmt input.
+        exclude: '(\.ps1|\.tmpl)$'
 
   # Security scanning
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.0
     hooks:
       - id: gitleaks
+        args: ['--config=config/gitleaks.toml']
 
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
     hooks:
       - id: detect-secrets
-        args: ['--baseline', '.secrets.baseline']
+        # Keep candidate values local; baseline comparison needs no network.
+        args: ['--no-verify', '--baseline', '.secrets.baseline']
         exclude: |
           (?x)^(
             \.github/security-policies/environment-template\.env|
@@ -56,8 +60,12 @@ repos:
         args: ['--maxkb=1024']  # Prevent files larger than 1MB
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
+        # Chezmoi encodes destination modes in source names (for example,
+        # `executable_dot`); test scripts are sourced by the test runner.
+        exclude: '^(defaults/|install/provision/|lib/dot/|scripts/dot/commands/|scripts/tuning/|tests/)'
       - id: detect-private-key
-        exclude: \.pub$  # Allow public keys
+        # The diagnostics test contains a deliberately truncated PEM fixture.
+        exclude: '(\.pub$|^tests/unit/diagnostics/test_diagnostics_doctor\.sh$)'
 
   # Conventional commit message validation
   - repo: https://github.com/compilerla/conventional-pre-commit
@@ -148,7 +156,7 @@ repos:
 
       - id: insecure-tls-check
         name: Block Insecure TLS Patterns
-        entry: scripts/ci/check-insecure-tls.sh
+        entry: tools/ci/check-insecure-tls.sh
         language: script
         pass_filenames: false
         # Extracted from an inline one-liner under #866 — awk-based matcher
@@ -156,13 +164,13 @@ repos:
 
       - id: dangerous-chmod-check
         name: Block Dangerous Permissions
-        entry: scripts/ci/check-dangerous-chmod.sh
+        entry: tools/ci/check-dangerous-chmod.sh
         language: script
         pass_filenames: false
 
       - id: shell-preamble-check
         name: Enforce set -euo pipefail (or set -eu for sh)
-        entry: scripts/ci/check-shell-preamble.sh
+        entry: tools/ci/check-shell-preamble.sh
         language: script
         types: [shell]
         # Sourced libraries opt out via a `# Sourced by` header or `# preamble:skip`
@@ -170,7 +178,7 @@ repos:
 
       - id: regression-traceability
         name: Enforce 'Regression for:' header on tests/regression/*.sh
-        entry: scripts/ci/check-regression-traceability.sh
+        entry: tools/ci/check-regression-traceability.sh
         language: script
         files: ^tests/regression/.*\.sh$
 

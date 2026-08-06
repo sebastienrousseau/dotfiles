@@ -54,6 +54,8 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
 
+# Invoked indirectly by the sourced function.
+# shellcheck disable=SC2317
 curl() {
   cat <<'EOF'
 IP Address: 192.0.2.1

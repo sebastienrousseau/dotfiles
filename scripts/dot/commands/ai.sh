@@ -90,6 +90,8 @@ _ai_refresh_status_cache() {
   # shellcheck disable=SC2016
   local _TO=""
   command -v timeout >/dev/null 2>&1 && _TO="timeout 8 "
+  # Variables expand inside the child Bash probe.
+  # shellcheck disable=SC2016
   local probe_script='
     payload="$1"; out_dir="$2"; to="$3"
     i="${payload%%|*}"; entry="${payload#*|}"

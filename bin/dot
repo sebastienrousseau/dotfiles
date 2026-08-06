@@ -44,7 +44,11 @@ _resolve_source_dir() {
     # was at <repo>/dot_local/bin/executable_dot, so $script_dir/../..
     # was the repo. Probe both to cover the transition.
     for candidate in "$script_dir/.." "$script_dir/../.."; do
-      repo_candidate="$(cd "$candidate" && pwd 2>/dev/null || true)"
+      if repo_candidate="$(cd "$candidate" && pwd 2>/dev/null)"; then
+        :
+      else
+        repo_candidate=""
+      fi
       if [ -n "$repo_candidate" ] && [ -f "$repo_candidate/lib/dot/ui.sh" ]; then
         dir="$repo_candidate"
         break
@@ -738,15 +742,15 @@ _has_help_flag() {
   local a
   for a in "$@"; do
     case "$a" in
-      --help|-h) return 0 ;;
+      --help | -h) return 0 ;;
       --) return 1 ;;
     esac
   done
   return 1
 }
 
-if [[ -n "$route" ]] && [[ "$route" != "help" ]] && [[ "$route" != "search" ]] \
-    && _has_help_flag "$@"; then
+if [[ -n "$route" ]] && [[ "$route" != "help" ]] && [[ "$route" != "search" ]] &&
+  _has_help_flag "$@"; then
   exec bash "$_SOURCE_DIR/bin/dot" help "$COMMAND"
 fi
 
@@ -832,6 +836,8 @@ case "$route" in
     _user_cmd="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/commands/${COMMAND}.sh"
     if [[ -f "$_user_cmd" ]]; then
       # Run in a subshell so a user `exit` doesn't kill the dot CLI.
+      # This source path is intentionally user-defined.
+      # shellcheck disable=SC1090
       (source "$_user_cmd" "$@")
       exit $?
     else

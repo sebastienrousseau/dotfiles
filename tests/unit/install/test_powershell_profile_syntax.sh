@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# shellcheck disable=SC1090,SC1091,SC2034
+# shellcheck disable=SC1090,SC1091,SC2016,SC2034
 # Static-syntax test for the dotfiles PowerShell profile.
 #
 # Runs portably on Linux + macOS dev hosts (where pwsh may or may not

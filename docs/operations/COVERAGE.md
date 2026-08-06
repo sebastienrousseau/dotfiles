@@ -53,7 +53,7 @@ matches and emits standard `lcov.info` that Codecov ingests natively.
 of [#883](https://github.com/sebastienrousseau/dotfiles/issues/883)
 established the baseline at **~2.7% measured** (~613 of ~22 500 lines
 across 231 files). Successive slices raised it; the current measured
-value sits at **55.30%** (`7012/12681` lines, measured on v0.2.513; gate floored at 54 for local<->CI drift + run variance). This release corrected the xtrace parser to count nested Bash execution prefixes and added deterministic branch-driving tests for Scorecard snapshots, examples coverage, and `httpdebug`. It builds on the eighth core
+value sits at **55.50%** (`7038/12681` lines, measured on v0.2.513; gate floored at 54 for local<->CI drift + run variance). This release corrected the xtrace parser to count nested Bash execution prefixes and added deterministic branch-driving tests for Scorecard snapshots, examples coverage, and `httpdebug`. It builds on the eighth core
 coverage-ratchet slice, which added `jwt` portability coverage and
 branch-driving function coverage for `apihealth`, `apiload`, and
 `apilatency`. This builds on the prior helper slice that drove
@@ -90,7 +90,7 @@ To tighten:
 ### Why not the 95% target from #883
 
 The roadmap originally targeted ≥95% measured. The current xtrace-only
-measurement is **55.30%** on this codebase. The remaining gap is largely
+measurement is **55.50%** on this codebase. The remaining gap is largely
 structural:
 
 - **System-mutation surface** — large parts of the repo orchestrate
