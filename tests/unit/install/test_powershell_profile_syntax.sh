@@ -59,11 +59,12 @@ fi
 # Behavioural: parse with pwsh if available
 # -----------------------------------------------------------------------------
 
-if command -v pwsh >/dev/null 2>&1; then
+pwsh_version="$(pwsh -NoProfile -Command '$PSVersionTable.PSVersion.Major' 2>/dev/null || true)"
+if [[ "$pwsh_version" =~ ^[0-9]+$ ]]; then
   test_start "profile_parses_with_pwsh"
   # Render the template (strip chezmoi `{{ ... }}` blocks) then parse.
   rendered=$(mktemp -t pwsh-profile.XXXXXX.ps1)
-  sed -E 's/\{\{[^}]+\}\}/0.0.0-fallback/g' "$PROFILE" > "$rendered"
+  sed -E 's/\{\{[^}]+\}\}/0.0.0-fallback/g' "$PROFILE" >"$rendered"
   if pwsh -NoProfile -Command "
       \$ErrorActionPreference = 'Stop'
       try {

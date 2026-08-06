@@ -567,7 +567,7 @@ main() {
   # verification, otherwise the repository immediately contains two versions.
   local package_json="$PROJECT_ROOT/package.json"
   if [[ "$dry_run" == "true" ]]; then
-    log_info "Would update package.json: version = "$target_version""
+    log_info "Would update package.json: version = \"$target_version\""
   else
     local package_tmp
     package_tmp=$(umask 077 && mktemp)
@@ -587,6 +587,8 @@ main() {
     "bin/dot"
     "dot_local/bin/executable_tour"
     "install.sh"
+    "lib/dot/bento.sh"
+    "share/man/man1/dot.1"
   )
   for script_file in "${script_files[@]}"; do
     local full_path="$PROJECT_ROOT/$script_file"

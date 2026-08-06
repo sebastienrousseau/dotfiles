@@ -38,7 +38,8 @@ test_start "powershell_ci_analyzes_dispatcher"
 assert_file_contains "$SMOKE" "bin/dot.ps1" \
   "PSScriptAnalyzer covers the native dispatcher"
 
-if command -v pwsh >/dev/null 2>&1; then
+pwsh_version="$(pwsh -NoProfile -Command '$PSVersionTable.PSVersion.Major' 2>/dev/null || true)"
+if [[ "$pwsh_version" =~ ^[0-9]+$ ]]; then
   for file in "$DISPATCHER" "$MODULE" "$SMOKE"; do
     test_start "powershell_parses_$(basename "$file" | tr '.-' '__')"
     if DOT_PS_FILE="$file" pwsh -NoProfile -Command '

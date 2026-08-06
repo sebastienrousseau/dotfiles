@@ -98,8 +98,11 @@ jobs:
           #             v0.2.512 doctor/ui fixes). floor=49 — the margin
           #             absorbs local<->CI drift and ~0.6-pt run-to-run
           #             xtrace variance; bump to 50 once CI confirms >=50.
+          #   v0.2.513: 55.30% (7012/12681) after fixing nested xtrace
+          #             parsing and adding deterministic Scorecard/examples/
+          #             httpdebug branch coverage. floor=54.
           # Bump in lockstep with the slice that lands the bump.
-          MIN_COVERAGE_PCT: '49'
+          MIN_COVERAGE_PCT: '54'
         run: bash tools/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact

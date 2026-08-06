@@ -43,18 +43,18 @@ matches and emits standard `lcov.info` that Codecov ingests natively.
 
 | Surface | What runs |
 |---|---|
-| **PR + push to main** | `.github/workflows/coverage.yml` → `Coverage / kcov` job → uploads lcov.info to Codecov and fails the build below `MIN_COVERAGE_PCT` (currently `49`, ratcheted up after measured integer-floor gains). |
+| **PR + push to main** | `.github/workflows/coverage.yml` → `Coverage / kcov` job → uploads lcov.info to Codecov and fails the build below `MIN_COVERAGE_PCT` (currently `54`, ratcheted up after measured integer-floor gains). |
 | **Local dev** | `bash tools/ci/run-coverage.sh` — works on Linux + macOS (xtrace is a bash primitive, no platform tools needed). |
 | **macOS dev** | Supported. xtrace-based instrumentation runs on macOS bash 3.2+ and Homebrew bash 5.x, with a Perl alarm fallback when GNU `timeout`/`gtimeout` is unavailable. |
 
 ## The current floor
 
-`MIN_COVERAGE_PCT=49` in `.github/workflows/coverage.yml`. Slice 1
+`MIN_COVERAGE_PCT=54` in `.github/workflows/coverage.yml`. Slice 1
 of [#883](https://github.com/sebastienrousseau/dotfiles/issues/883)
 established the baseline at **~2.7% measured** (~613 of ~22 500 lines
 across 231 files). Successive slices raised it; the current measured
-value sits at **50.16%** (`6205/12371` lines, re-measured on the merged tree; gate floored at 49 for local<->CI drift + run variance) after the eighth core
-coverage-ratchet slice added `jwt` portability coverage and
+value sits at **55.30%** (`7012/12681` lines, measured on v0.2.513; gate floored at 54 for local<->CI drift + run variance). This release corrected the xtrace parser to count nested Bash execution prefixes and added deterministic branch-driving tests for Scorecard snapshots, examples coverage, and `httpdebug`. It builds on the eighth core
+coverage-ratchet slice, which added `jwt` portability coverage and
 branch-driving function coverage for `apihealth`, `apiload`, and
 `apilatency`. This builds on the prior helper slice that drove
 `scripts/dot/commands/restore.sh` to 75.17%,
@@ -89,10 +89,9 @@ To tighten:
 
 ### Why not the 95% target from #883
 
-The roadmap originally targeted ≥95% measured. After working through
-all six slices, the achievable ceiling with xtrace-only instrumentation
-is closer to **~50%** on this codebase. The remaining gap is structural,
-not aspirational:
+The roadmap originally targeted ≥95% measured. The current xtrace-only
+measurement is **55.30%** on this codebase. The remaining gap is largely
+structural:
 
 - **System-mutation surface** — large parts of the repo orchestrate
   real OS state (`chezmoi apply`, `gpg`, `pass`/`age` keystores,

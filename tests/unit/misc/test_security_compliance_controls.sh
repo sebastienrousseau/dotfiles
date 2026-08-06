@@ -52,6 +52,13 @@ assert_file_contains "$update_deps_workflow" "apt-get install -y jq curl yq" "yq
 test_start "homebrew_bootstrap_requires_checksum"
 assert_file_contains "$package_managers_lib" "HOMEBREW_INSTALLER_SHA256" "homebrew bootstrap requires explicit checksum"
 assert_file_contains "$package_managers_lib" "checksum mismatch" "homebrew bootstrap verifies checksum"
+if ! grep -q 'Homebrew/install/HEAD/install.sh' "$package_managers_lib"; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: Homebrew installer URL uses an immutable revision"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: Homebrew installer URL still uses mutable HEAD"
+fi
 
 test_start "security_pipeline_runs_dependency_scan_on_core_events"
 if ! sed -n '/dependency-scan:/,/infrastructure-scan:/p' "$security_workflow" | grep -q "if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'"; then

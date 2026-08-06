@@ -56,11 +56,24 @@ install_homebrew() {
   fi
 
   echo "   Installing Homebrew..."
-  local installer
+  local installer actual_sha256
+  local HOMEBREW_INSTALLER_REVISION="24173182915f24bdd52a22fd073e421953b2a252"
+  local HOMEBREW_INSTALLER_SHA256="12479a24be3f5307eecac7cde670fad7118640f031229e964f544b1367b52a41"
+  local HOMEBREW_INSTALLER_URL="https://raw.githubusercontent.com/Homebrew/install/${HOMEBREW_INSTALLER_REVISION}/install.sh"
   installer="$(umask 077 && mktemp)"
-  if ! download_verified_script https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh "$installer" 65536; then
+  if ! download_verified_script "$HOMEBREW_INSTALLER_URL" "$installer" 65536; then
     rm -f "$installer"
     echo "Error: failed to download Homebrew installer." >&2
+    return 1
+  fi
+  actual_sha256="$(_dot_sha256_file "$installer")" || {
+    rm -f "$installer"
+    echo "Error: cannot verify Homebrew installer checksum." >&2
+    return 1
+  }
+  if [[ "$actual_sha256" != "$HOMEBREW_INSTALLER_SHA256" ]]; then
+    rm -f "$installer"
+    echo "Error: Homebrew installer checksum mismatch." >&2
     return 1
   fi
 

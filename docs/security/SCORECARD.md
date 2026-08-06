@@ -35,7 +35,7 @@ Aggregate score **7.6 / 10** at 2026-05-17T08:11:51Z.
 | Token-Permissions | 10 | GitHub workflow tokens follow principle of least privilege |
 | Vulnerabilities | 10 | 0 existing vulnerabilities detected |
 
-*Refresh: `scripts/qa/scorecard-snapshot.sh` · CI check: `lint/scorecard-snapshot` (planned).*
+*Refresh: `scripts/qa/scorecard-snapshot.sh` · Monitoring: `.github/workflows/scorecard.yml`.*
 <!-- END scorecard-snapshot -->
 
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/sebastienrousseau/dotfiles/badge)](https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/dotfiles)

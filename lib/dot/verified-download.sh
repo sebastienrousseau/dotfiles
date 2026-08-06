@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
+# Sourced by installer and provisioning scripts; inherits set -euo pipefail
 
 [[ "${_DOT_VERIFIED_DOWNLOAD_LOADED:-0}" == "1" ]] && return 0
 _DOT_VERIFIED_DOWNLOAD_LOADED=1
@@ -99,7 +100,7 @@ download_verified_asset() (
     rm -f "$destination"
     return 1
   fi
-  if (( $(wc -c <"$checksum_file" | tr -d '[:space:]') > 2097152 )); then
+  if (($(wc -c <"$checksum_file" | tr -d '[:space:]') > 2097152)); then
     printf 'Checksum manifest exceeds the 2 MiB safety limit\n' >&2
     rm -f "$destination"
     return 1

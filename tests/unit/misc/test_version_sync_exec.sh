@@ -30,7 +30,8 @@ trap 'rm -rf "$SANDBOX"; cov_teardown_sandbox' EXIT
 CHEZMOIDATA="$SANDBOX/defaults/.chezmoidata.toml"
 
 # build_sandbox <pkg_version> <readme_version> <chezmoidata_version>
-# version-sync.sh sources ../lib/dot/ui.sh, so the real lib is symlinked in.
+# version-sync.sh reads and updates files under ../lib, so copy that tree into
+# the sandbox. A symlink here would let version tests mutate the live checkout.
 build_sandbox() {
   local pkg="$1" readme="$2" cmd="$3"
   rm -rf "${SANDBOX:?}/scripts" "${SANDBOX:?}/defaults" "${SANDBOX:?}/lib" \
@@ -38,7 +39,7 @@ build_sandbox() {
   mkdir -p "$SANDBOX/scripts" "$SANDBOX/defaults" \
     "$SANDBOX/docs/reference" "$SANDBOX/docs/archive" "$SANDBOX/docs/operations"
   cp "$VERSION_FILE" "$SANDBOX/scripts/version-sync.sh"
-  ln -s "$REPO_ROOT/lib" "$SANDBOX/lib"
+  cp -R "$REPO_ROOT/lib" "$SANDBOX/lib"
   printf '{\n  "version": "%s"\n}\n' "$pkg" >"$SANDBOX/package.json"
   printf 'dotfiles_version = "%s"\n' "$cmd" >"$CHEZMOIDATA"
   cat >"$SANDBOX/README.md" <<EOF
@@ -129,6 +130,7 @@ assert_file_contains "$CHEZMOIDATA" 'dotfiles_version = "0.0.1"' \
 # lines; stdout is enough to discard normal command output.
 build_sandbox "8.8.8" "0.0.1" "0.0.1"
 test_start "version_sync_exec_branch_visible_write"
+live_bento_before="$(shasum -a 256 "$REPO_ROOT/lib/dot/bento.sh" | awk '{print $1}')"
 (
   cd "$SANDBOX" || exit 1
   DOTFILES_ALLOW_COVERAGE_WRITES=1 bash scripts/version-sync.sh --force --no-backup >/dev/null
@@ -137,6 +139,9 @@ assert_file_contains "$SANDBOX/README.md" "Version-v8.8.8" \
   "write path updates README badge"
 assert_file_contains "$SANDBOX/docs/reference/FEATURES.md" "dotfiles:8.8.8" \
   "write path updates generic docs"
+live_bento_after="$(shasum -a 256 "$REPO_ROOT/lib/dot/bento.sh" | awk '{print $1}')"
+assert_equals "$live_bento_before" "$live_bento_after" \
+  "sandboxed version sync must not mutate the live checkout"
 assert_file_contains "$SANDBOX/scripts/git-hooks/pre-commit-audit.sh" "v8.8.8 standards maintained" \
   "write path updates pre-commit audit banner"
 

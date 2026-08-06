@@ -38,6 +38,10 @@ test_start "uses_bash_xtrace_mechanism"
 assert_file_contains "$SCRIPT_FILE" "PS4=" "must set PS4 for line-marker capture"
 assert_file_contains "$SCRIPT_FILE" "BASH_ENV=" "must export BASH_ENV to enable xtrace in children"
 
+test_start "counts_nested_xtrace_records"
+assert_file_contains "$SCRIPT_FILE" 'hit_re = re.compile(r"^\++@COV@:' \
+  "must count commands executed inside command substitutions and subshells"
+
 test_start "parallel_via_xargs"
 assert_file_contains "$SCRIPT_FILE" "xargs -I" "must parallelize via xargs"
 
