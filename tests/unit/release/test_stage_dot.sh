@@ -17,10 +17,29 @@ if bash -n "$stage"; then ((TESTS_PASSED++)) || true; else ((TESTS_FAILED++)) ||
 test_start "stage_bundle_executes"
 if bash "$stage" "$tmp/bundle"; then ((TESTS_PASSED++)) || true; else ((TESTS_FAILED++)) || true; fi
 
-for path in bin/dot lib/dot/ui.sh scripts/dot/commands/core.sh security/remote-installers.sha256 share/man/man1/dot.1; do
+for path in Makefile bin/dot lib/dot/ui.sh scripts/dot/commands/core.sh security/remote-installers.sha256 share/man/man1/dot.1; do
   test_start "stage_contains_${path//\//_}"
   assert_file_exists "$tmp/bundle/$path" "staged bundle must contain $path"
 done
+
+test_start "stage_make_install_round_trip"
+install_root="$(mktemp -d -t dot-install.XXXXXX)"
+if make -C "$tmp/bundle" install PREFIX=/usr/local DESTDIR="$install_root" >/dev/null &&
+  CHEZMOI_SOURCE_DIR="$install_root/usr/local/lib/dotfiles" \
+    DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 \
+    "$install_root/usr/local/bin/dot" version >/dev/null &&
+  CHEZMOI_SOURCE_DIR="$install_root/usr/local/lib/dotfiles" \
+    DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 \
+    "$install_root/usr/local/bin/dot" registry --help >/dev/null &&
+  make -C "$tmp/bundle" uninstall PREFIX=/usr/local DESTDIR="$install_root" >/dev/null &&
+  [[ ! -e "$install_root/usr/local/bin/dot" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
+fi
+rm -rf "$install_root"
 
 test_start "stage_refuses_root"
 if bash "$stage" / >/dev/null 2>&1; then ((TESTS_FAILED++)) || true; else ((TESTS_PASSED++)) || true; fi

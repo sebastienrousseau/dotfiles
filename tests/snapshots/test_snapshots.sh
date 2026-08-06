@@ -27,7 +27,8 @@ DOT_BIN="$REPO_ROOT/bin/dot"
 SCRUB="$SCRIPT_DIR/scrub.sh"
 
 check_snapshot() {
-  local slug="$1" ; shift
+  local slug="$1"
+  shift
   local expected="$SCRIPT_DIR/${slug}.snap"
 
   test_start "snapshot_${slug}"
@@ -38,7 +39,7 @@ check_snapshot() {
   fi
 
   local actual
-  actual=$(DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 bash "$DOT_BIN" "$@" 2>&1 | bash "$SCRUB" || true)
+  actual=$(DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 bash "$DOT_BIN" "$@" 2>&1 | bash "$SCRUB" "$slug" || true)
   local snapshot
   snapshot=$(cat "$expected")
 
@@ -62,10 +63,10 @@ else
   assert_exit_code 0 "false  # scrub.sh must be executable"
 fi
 
-check_snapshot help    --help
+check_snapshot help --help
 check_snapshot version version
-check_snapshot doctor  doctor
-check_snapshot perf    perf
-check_snapshot health  health
+check_snapshot doctor doctor
+check_snapshot perf perf
+check_snapshot health health
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

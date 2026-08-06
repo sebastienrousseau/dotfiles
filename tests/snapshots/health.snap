@@ -1,6 +1,6 @@
 
 
-◈ DOTFILES 
+◈ DOTFILES
 Dot • Diagnostics
 
 Dotfiles Health Dashboard
@@ -9,98 +9,60 @@ Dotfiles Health Dashboard
 
 ▸ Dotfiles Core
 ───────────────────────────────────────────────
-✓ Chezmoi installed                   OK
-✓ Chezmoi source directory            OK
-✓ Git installed                       OK
-✓ Git user configured                 OK
+* <check> <state>
 
 
 ▸ Shell Environment
 ───────────────────────────────────────────────
-✓ Zsh installed                       OK
-✓ Active shell                        OK
-✓ Zinit plugin manager                OK
-✓ Starship prompt                     OK
+* <check> <state>
 
 
 ▸ Development Tools
 ───────────────────────────────────────────────
-✓ Node.js (v0.0.0)                  OK
-✓ fnm (Node version manager)          OK
-✓ Python (3.12.13)                    OK
-✓ Rust toolchain                      OK
-✓ Go                                  OK
+* <check> <state>
 
 
 ▸ CLI Tools
 ───────────────────────────────────────────────
-✓ fzf                                 OK
-✓ ripgrep                             OK
-✓ fd                                  OK
-✓ bat                                 OK
-✓ eza                                 OK
-✓ zoxide                              OK
-✓ atuin                               OK
-✓ delta                               OK
-✓ jq                                  OK
-✓ yq                                  OK
-✓ sops                                OK
-✓ mise                                OK
-✓ just                                OK
-✓ zellij                              OK
-✓ hyperfine                           OK
+* <check> <state>
 
 
 ▸ Editors
 ───────────────────────────────────────────────
-✓ Neovim                              OK
-✓ Neovim plugins (lazy.nvim)          OK
+* <check> <state>
 
 
 ▸ Terminal
 ───────────────────────────────────────────────
-✓ Ghostty terminal                    OK
-✓ Nerd Font available                 OK
+* <check> <state>
 
 
 ▸ Security
 ───────────────────────────────────────────────
-✓ Age encryption                      OK
-✓ Age key configured                  OK
-✓ SSH keys present                    OK
-✓ SSH key perms (id_ed25519)          OK
-✓ SSH key perms (id_rsa)              OK
-✓ Git signing                         OK
+* <check> <state>
 
 
 ▸ Config Directories
 ───────────────────────────────────────────────
-✓ Config: shell                       OK
-✓ Config: nvim                        OK
-✓ Config: git                         OK
-✓ Config directories                  OK
+* <check> <state>
 
 
 ▸ Sync Status
 ───────────────────────────────────────────────
-⚠                                     WARNING 22 file(s) out of sync
-✓ Git working tree                    OK
+* <check> <state>
 
 
 ▸ Performance
 ───────────────────────────────────────────────
-✓ Shell startup time                  OK
+* <check> <state>
 
 Summary
 
-  Total checks:  45
-  Passed:        44
-  Warnings:      1
-  Failures:      0
+  Total checks:  <n>
+  Passed:        <n>
+  Warnings:      <n>
+  Failures:      <n>
 
-  Health Score: [￭￭￭￭￭￭￭￭￭￭￭￭￭￭￭￭￭￭￭￭￭￭￭￭￭￭￭￭￭･] 97%
+  Health Score: <score>
 
-  ⚡ Excellent! Your dotfiles are in great shape.
-
-  Tip: Run 'dot health --fix' to auto-repair common issues.
-
+  <health summary>

@@ -74,9 +74,9 @@ test_start "qa_reliability_with_integration_runs_integration"
 stub_repo="$(make_stub_repo)"
 log_file="$stub_repo/run.log"
 if LOG_FILE="$log_file" bash "$stub_repo/scripts/qa/reliability-audit.sh" --with-integration >/dev/null 2>&1; then
-  if grep -q "test_runner:--jobs auto -i" "$log_file" && grep -q "docs_coverage" "$log_file" && grep -q "traceability_coverage" "$log_file"; then
+  if grep -q "test_runner:--jobs auto --integration-only" "$log_file" && grep -q "docs_coverage" "$log_file" && grep -q "traceability_coverage" "$log_file"; then
     ((TESTS_PASSED++))
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: integration flag runs integration suite with docs and traceability coverage"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: integration flag runs integration-only suite with docs and traceability coverage"
   else
     ((TESTS_FAILED++))
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: integration flag should run integration suite with docs and traceability coverage"

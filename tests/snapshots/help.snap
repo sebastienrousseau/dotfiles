@@ -1,5 +1,5 @@
 
-◈ DOTFILES 
+◈ DOTFILES
 Dot • Reference
 
 --- Dotfiles ---
@@ -17,6 +17,7 @@ Dot • Reference
   •  help             Show the overview or help for one command.
 
 == Daily Use ==
+  •  init             Bootstrap a foreign dotfiles repo through chezmoi + dot.
   •  status           Show local drift.
   •  diff             Preview pending changes.
   •  edit             Open the source directory.
@@ -33,8 +34,10 @@ Dot • Reference
   •  mcp              Inspect MCP policy and registry.
   •  mode             Show or set the agent profile.
   •  agent            Show agent metadata, logs, checkpoints, and conformance.
+  •  agents           Multi-harness agent context (AGENTS.md sync, Cursor/Codex stubs).
 
 == Fleet ==
+  •  registry         Browse reusable dotfile modules from the dot registry.
   •  fleet            Show fleet node status, drift, and namespace.
 
 == Configuration ==

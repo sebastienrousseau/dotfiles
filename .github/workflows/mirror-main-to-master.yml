@@ -7,11 +7,9 @@ name: Mirror main → master
 # The rename PR flips defaults, but historical install commands people
 # have bookmarked (`bash -c "$(curl -fsSL .../master/install.sh)"`) don't
 # auto-redirect on the raw-content host — only `github.com/*` URLs do.
-# This mirror closes that gap for the grace period.
-#
-# When we're ready to retire `master` (probably 6–12 months out), delete
-# this workflow and then delete the `master` branch:
-#     git push origin --delete master
+# This mirror is the permanent compatibility redirect for raw-content URLs.
+# `main` remains the only development/default branch; never commit directly to
+# `master` or add it as a pull-request target.
 #
 # NOTE: this workflow needs write access to push a branch. It uses the
 # default GITHUB_TOKEN, which has `contents: write` when granted below.
@@ -64,3 +62,13 @@ jobs:
           # pushed directly to master), fail loudly rather than clobber.
           echo "Fast-forwarding master to $GITHUB_SHA..."
           git push origin "$GITHUB_SHA:refs/heads/master"
+
+      - name: Verify compatibility mirror
+        run: |
+          set -euo pipefail
+          mirrored_sha="$(git ls-remote origin refs/heads/master | awk '{print $1}')"
+          if [[ "$mirrored_sha" != "$GITHUB_SHA" ]]; then
+            echo "::error::master mirror is $mirrored_sha; expected $GITHUB_SHA"
+            exit 1
+          fi
+          echo "master compatibility mirror matches main at $GITHUB_SHA"

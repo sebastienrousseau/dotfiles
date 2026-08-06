@@ -30,6 +30,7 @@ for file in "$repo_root"/bin/dot-*; do
   [[ -f "$file" ]] && cp "$file" "$dest/bin/"
 done
 cp "$repo_root/bin/dot.ps1" "$dest/bin/"
+cp "$repo_root/tools/release/Makefile.dist" "$dest/Makefile"
 cp -R "$repo_root/lib/dot" "$dest/lib/"
 cp -R "$repo_root/scripts" "$dest/"
 cp -R "$repo_root/security" "$dest/"

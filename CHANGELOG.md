@@ -2,7 +2,7 @@
 
 This file documents all notable changes to this project.
 
-## v0.2.513 — Unreleased
+## v0.2.513 — 2026-08-06
 
 - **Verified module registry installation.** `dot registry install` now validates the v1 index, verifies immutable archive SHA-256 digests, rejects traversal and link-bearing archives, previews with chezmoi by default, and applies only with explicit `--yes`. CI validates the published registry contract and JSON Schema.
 - **Native PowerShell daily workflow.** `dot.ps1` now handles core chezmoi operations, status, doctor, mise inventory, agent checks/listing, and local fleet status without bash. Windows CI exercises the cmdlets directly, and the parity matrix now distinguishes native behavior from bash bridges.
@@ -23,12 +23,25 @@ This file documents all notable changes to this project.
 
 ### Fixed
 
+- Make CLI snapshots hermetic across hosts by normalizing platform facts,
+  installed-tool paths, versions, health counts, and timing measurements.
+- Keep `dot health` best-effort when an interactive zsh startup probe fails or
+  omits timing output, so macOS diagnostics still reach the health summary.
+- Measure both unit and mandatory regression tests in Bash coverage, retain
+  function-probe xtrace, and cache source normalization. Measured line
+  coverage rises to 59.32%, the enforced floor rises to 58%, and aggregation
+  now completes in seconds instead of minutes.
+- Run the reliability audit's integration phase without repeating the full
+  unit and regression suites.
+- Keep `master` as a verified, fast-forward-only compatibility mirror of
+  `main` for historical raw-content install URLs.
 - Package a self-contained `dot` distribution including command modules,
   operational scripts, policies, schemas, help data, and the verified-download
   manifest. Previously published archives omitted the command modules required
   by most subcommands.
 - Add `make install PREFIX=... DESTDIR=...` and `make uninstall` using the
-  same tested staging path as release archives.
+  same tested staging path as release archives. Published releases now run a
+  provenance-verified clean-install smoke test on Linux and macOS.
 - Store CLI benchmark baselines under `XDG_CACHE_HOME` instead of requiring a
   writable source checkout.
 - Make focused help work for `apply`, `agents`, and `registry`.

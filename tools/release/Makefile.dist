@@ -1,0 +1,18 @@
+PREFIX ?= /usr/local
+DESTDIR ?=
+LIBEXECDIR ?= $(PREFIX)/lib/dotfiles
+
+.PHONY: install uninstall smoke
+
+install:
+	install -d "$(DESTDIR)$(LIBEXECDIR)" "$(DESTDIR)$(PREFIX)/bin"
+	cp -R bin lib scripts security docs defaults share "$(DESTDIR)$(LIBEXECDIR)/"
+	ln -sfn "../lib/dotfiles/bin/dot" "$(DESTDIR)$(PREFIX)/bin/dot"
+
+uninstall:
+	rm -f "$(DESTDIR)$(PREFIX)/bin/dot"
+	rm -rf "$(DESTDIR)$(LIBEXECDIR)"
+
+smoke:
+	CHEZMOI_SOURCE_DIR="$(CURDIR)" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 ./bin/dot version
+	CHEZMOI_SOURCE_DIR="$(CURDIR)" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 ./bin/dot registry --help >/dev/null

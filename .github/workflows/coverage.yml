@@ -101,8 +101,11 @@ jobs:
           #   v0.2.513: 55.50% (7038/12681) after fixing nested xtrace
           #             parsing and adding deterministic Scorecard/examples/
           #             httpdebug branch coverage. floor=54.
+          #   Release hardening: 59.32% (7523/12682) after including the
+          #             mandatory regression suite and replaying function-probe
+          #             xtrace into the aggregator. floor=58.
           # Bump in lockstep with the slice that lands the bump.
-          MIN_COVERAGE_PCT: '54'
+          MIN_COVERAGE_PCT: '58'
         run: bash tools/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact
