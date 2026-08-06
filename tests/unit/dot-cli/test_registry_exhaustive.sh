@@ -31,35 +31,44 @@ cov_setup_sandbox
 test_start "registry_file_exists"
 assert_file_exists "$REGISTRY_SCRIPT" "registry.sh should exist"
 
-# Fixture index. Two modules with tags and descriptions so search can
-# match on each of the three fields the jq filter checks.
+# Fixture module and index. Two entries exercise search fields while
+# the first points at a real, checksum-pinned chezmoi source archive.
+MODULE_SOURCE="$DOTFILES_COV_TMPDIR/module-source/starship-preset"
+mkdir -p "$MODULE_SOURCE"
+printf '%s\n' 'export STARSHIP_CONFIG="$HOME/.config/starship.toml"' \
+  >"$MODULE_SOURCE/dot_profile"
+MODULE_ARCHIVE="$DOTFILES_COV_TMPDIR/starship-preset-1.2.0.tar.gz"
+tar -czf "$MODULE_ARCHIVE" -C "$(dirname "$MODULE_SOURCE")" "$(basename "$MODULE_SOURCE")"
+if command -v sha256sum >/dev/null 2>&1; then
+  MODULE_SHA256="$(sha256sum "$MODULE_ARCHIVE" | awk '{print $1}')"
+else
+  MODULE_SHA256="$(shasum -a 256 "$MODULE_ARCHIVE" | awk '{print $1}')"
+fi
 FIXTURE="$DOTFILES_COV_TMPDIR/registry-index.json"
-cat >"$FIXTURE" <<'JSON'
-{
-  "schema": 1,
-  "modules": [
+jq -n --arg archive_url "file://$MODULE_ARCHIVE" --arg sha256 "$MODULE_SHA256" '{
+  version: 1,
+  modules: [
     {
-      "name": "starship-preset",
-      "version": "1.2.0",
-      "description": "Opinionated starship prompt preset",
-      "tags": ["prompt", "shell"],
-      "url": "file:///dev/null",
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      name: "starship-preset",
+      version: "1.2.0",
+      description: "Opinionated starship prompt preset",
+      tags: ["prompt", "shell"],
+      archive_url: $archive_url,
+      sha256: $sha256
     },
     {
-      "name": "nvim-minimal",
-      "version": "0.4.1",
-      "description": "Minimal Neovim configuration overlay",
-      "tags": ["editor"],
-      "url": "file:///dev/null",
-      "sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+      name: "nvim-minimal",
+      version: "0.4.1",
+      description: "Minimal Neovim configuration overlay",
+      tags: ["editor"],
+      archive_url: $archive_url,
+      sha256: $sha256
     }
   ]
-}
-JSON
+}' >"$FIXTURE"
 
 EMPTY_FIXTURE="$DOTFILES_COV_TMPDIR/registry-empty.json"
-printf '{"schema":1,"modules":[]}\n' >"$EMPTY_FIXTURE"
+printf '{"version":1,"modules":[]}\n' >"$EMPTY_FIXTURE"
 
 # cov_setup_sandbox installs a curl shim that always returns an empty
 # body — fine for callers that only check rc, but it would leave the
@@ -85,6 +94,14 @@ if [[ -n "$out" ]]; then cp "$src" "$out"; else cat "$src"; fi
 exit 0
 SHIM
 chmod +x "$DOTFILES_COV_TMPDIR/bin/curl"
+
+# Record chezmoi calls so preview and apply behavior can be asserted.
+cat >"$DOTFILES_COV_TMPDIR/bin/chezmoi" <<'SHIM'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"$DOTFILES_COV_TMPDIR/chezmoi.calls"
+exit 0
+SHIM
+chmod +x "$DOTFILES_COV_TMPDIR/bin/chezmoi"
 
 # Source registry.sh the way the dot driver does. It runs under
 # `set -euo pipefail`; the arms below deliberately return non-zero, so
@@ -158,8 +175,32 @@ ex info_hit info starship-preset
 ex info_miss info not-a-module
 ex info_noarg info
 ex install_noarg install
-ex install install starship-preset
+ex install_preview install starship-preset
+test_start "registry_install_preview_is_non_mutating"
+if [[ ! -e "$XDG_DATA_HOME/dotfiles/modules/starship-preset" ]] &&
+  grep -q -- '--dry-run' "$DOTFILES_COV_TMPDIR/chezmoi.calls"; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
+fi
+
+ex install_apply install starship-preset --yes
+test_start "registry_install_apply_persists_verified_source"
+installed="$XDG_DATA_HOME/dotfiles/modules/starship-preset/1.2.0"
+if [[ -f "$installed/dot_profile" ]] &&
+  [[ -f "$XDG_DATA_HOME/dotfiles/modules/starship-preset/installed.json" ]] &&
+  [[ "$(grep -c -- '--dry-run' "$DOTFILES_COV_TMPDIR/chezmoi.calls")" -eq 2 ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
+fi
+ex installed installed
 ex install_miss install not-a-module
+ex install_bad_option install starship-preset --force
 ex help --help
 ex unknown definitely-not-a-subcommand
 
@@ -172,6 +213,21 @@ ex list_empty list
 export DOTFILES_REGISTRY_URL="file://$DOTFILES_COV_TMPDIR/does-not-exist.json"
 _clear_cache
 ex list_fetch_fails list
+
+# Link-bearing archives are rejected before extraction.
+LINK_SOURCE="$DOTFILES_COV_TMPDIR/link-source"
+mkdir -p "$LINK_SOURCE"
+ln -s /etc/passwd "$LINK_SOURCE/unsafe-link"
+LINK_ARCHIVE="$DOTFILES_COV_TMPDIR/link-module.tar.gz"
+tar -czf "$LINK_ARCHIVE" -C "$LINK_SOURCE" .
+test_start "registry_rejects_link_archive"
+if _registry_archive_is_safe "$LINK_ARCHIVE" >/dev/null 2>&1; then
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: link archive accepted"
+else
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+fi
 
 # Env override beats the config file.
 test_start "registry_env_override_wins"

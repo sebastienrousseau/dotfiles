@@ -31,11 +31,13 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
-# Point the fetcher at the in-repo sample registry so list/search/info
-# don't hit the network. The smoke also exercises _registry_url's
-# DOTFILES_REGISTRY_URL branch.
+# Point the fetcher at the in-repo sample registry and seed the cache
+# so list/search/info stay offline. The smoke also exercises
+# _registry_url's DOTFILES_REGISTRY_URL branch.
 LOCAL_REGISTRY="file://$REPO_ROOT/docs/registry.json"
 export DOTFILES_REGISTRY_URL="$LOCAL_REGISTRY"
+mkdir -p "$XDG_CACHE_HOME/dotfiles/registry"
+cp "$REPO_ROOT/docs/registry.json" "$XDG_CACHE_HOME/dotfiles/registry/index.json"
 
 for sub in "--help" "url" "list"; do
   test_start "dot_registry_$(echo "$sub" | tr -d -- '-')"
@@ -44,13 +46,8 @@ for sub in "--help" "url" "list"; do
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=0)"
   else
     rc=$?
-    if [[ "$rc" -ne 124 ]]; then
-      ((TESTS_PASSED++)) || true
-      printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
-    else
-      ((TESTS_FAILED++)) || true
-      printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: unexpected rc=$rc"
-    fi
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: rc=$rc"
   fi
 done
 
@@ -61,13 +58,8 @@ if bash "$DOT_BIN" registry search anything >/dev/null 2>&1; then
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
   rc=$?
-  if [[ "$rc" -ne 124 ]]; then
-    ((TESTS_PASSED++)) || true
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$rc)"
-  else
-    ((TESTS_FAILED++)) || true
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: rc=$rc"
-  fi
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: rc=$rc"
 fi
 
 test_start "dot_registry_info_missing_module"
@@ -81,15 +73,14 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have rejected"
 fi
 
-test_start "dot_registry_install_stub"
-# install is a scaffold today — should print the would-fetch hint
-# and return 0. Exercises the install case arm.
+test_start "dot_registry_install_missing_module"
+# The installer must fail closed when a requested module is absent.
 if bash "$DOT_BIN" registry install some-module >/dev/null 2>&1; then
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: missing module accepted"
+else
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
 # Safety guards on set-url.
@@ -137,7 +128,8 @@ cat >"$registry_tmp/cache/dotfiles/registry/index.json" <<'JSON'
       "tags": ["rust", "dev", "language"],
       "maintainer": "alice@example.com",
       "version": "1.2.0",
-      "sha256": "abc123"
+      "archive_url": "https://example.com/rust-dev-setup-1.2.0.tar.gz",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     },
     {
       "name": "k8s-operator-laptop",
@@ -146,7 +138,8 @@ cat >"$registry_tmp/cache/dotfiles/registry/index.json" <<'JSON'
       "tags": ["kubernetes", "ops"],
       "maintainer": "bob@example.com",
       "version": "0.4.0",
-      "sha256": "def456"
+      "archive_url": "https://example.com/k8s-operator-laptop-0.4.0.tar.gz",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
     }
   ]
 }
@@ -159,7 +152,9 @@ cat >"$registry_tmp/curl-success.json" <<'JSON'
       "name": "fetched-module",
       "description": "Fetched test module",
       "tags": ["fetched"],
-      "version": "9.9.9"
+      "version": "9.9.9",
+      "archive_url": "https://example.com/fetched-module-9.9.9.tar.gz",
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
     }
   ]
 }

@@ -4,6 +4,8 @@ This file documents all notable changes to this project.
 
 ## v0.2.513 — Unreleased
 
+- **Verified module registry installation.** `dot registry install` now validates the v1 index, verifies immutable archive SHA-256 digests, rejects traversal and link-bearing archives, previews with chezmoi by default, and applies only with explicit `--yes`. CI validates the published registry contract and JSON Schema.
+
 ### Security
 
 - Enforce signed commits, linear history, required merge/reliability/DCO/PR

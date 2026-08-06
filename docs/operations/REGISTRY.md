@@ -20,7 +20,9 @@ This page documents the JSON contract and the contribution flow. It is the §3 /
 dot registry list                   # list every published module
 dot registry search rust            # filter by keyword
 dot registry info rust-dev-setup    # full metadata for one module
-dot registry install rust-dev-setup # apply to this workstation (scaffold)
+dot registry install rust-dev-setup # verify and preview changes
+dot registry install rust-dev-setup --yes # verify, persist, and apply
+dot registry installed              # list locally installed modules
 dot registry url                    # show active registry URL
 dot registry set-url <url>          # point at a different registry
 ```
@@ -44,44 +46,43 @@ A registry index is a single JSON document:
       "version": "1.2.0",
       "tags": ["rust", "language", "dev"],
       "maintainer": "alice@example.com",
-      "sha256": "f9a2c1b…",
+      "archive_url": "https://example.com/rust-dev-setup-1.2.0.tar.gz",
+      "sha256": "f9a2c1b0a8d27c41b99c8c93641a0d476a0e54b23161847c47c780025ac7c4a1",
       "license": "MIT"
     }
   ]
 }
 ```
 
-Required keys: `name` (kebab-case, ≤ 32 chars), `description` (≤ 200 chars), `repo` (HTTPS clone URL), `version` (semver).
+Required keys: `name` (kebab-case, no more than 32 characters), `description` (no more than 200 characters), `version` (semver), `archive_url` (immutable HTTPS archive), and `sha256` (64 lowercase hexadecimal characters).
 
-Recommended keys: `tags` (lower-case array), `maintainer`, `sha256` (pinned at publish time so installers can verify), `license` (SPDX identifier).
+Optional keys: `repo` (HTTPS project URL), `tags` (lower-case array), `maintainer`, and `license` (SPDX identifier). The machine-readable contract is [`docs/schema/dot-registry-v1.json`](../schema/dot-registry-v1.json).
 
 ## Contributing a module
 
-1. Build your module as a chezmoi-source-compatible directory at `https://github.com/<you>/<module>.git`. The contents are overlaid onto the consumer's chezmoi source dir during install.
+1. Build a gzip-compressed tar archive containing a chezmoi-source-compatible directory. Publish it at an immutable HTTPS URL, such as a versioned GitHub release asset.
 2. Open a PR against `sebastienrousseau/dotfiles` adding one entry to `docs/registry.json` (alphabetical by `name`).
 3. The PR runs CI checks for:
-   - Schema validity (`jq` against the JSON contract).
-   - `repo` URL resolves and is a public git repo.
-   - `sha256` matches the latest tag at `repo`.
+   - Runtime contract validity and unique, sorted module names.
+   - Valid JSON for both the index and its published JSON Schema.
+   - A pinned SHA-256 digest for every archive.
 4. Once merged, the GitHub Pages workflow re-deploys the registry; `dot registry list` picks it up within 6 hours (or immediately if the consumer purges the cache).
 
-## Install pipeline (scaffold today, full in Phase 2)
+## Install pipeline
 
-`dot registry install <name>` currently prints what *would* happen. The full pipeline lands as follows:
+`dot registry install <name>` is preview-first and does not mutate the workstation. Pass `--yes` only after reviewing the chezmoi dry-run. The installer:
 
 1. Resolve the module entry from the registry index.
-2. Clone the module to `$XDG_DATA_HOME/dotfiles/modules/<name>/<version>`.
-3. Verify the clone's HEAD matches `sha256` from the registry.
-4. Source the module's `module.toml` (if present) for declared profiles + feature flags.
-5. Merge the module's chezmoi source into the consumer's chezmoi source dir under a namespaced subtree (`/registry/<name>/...`).
-6. Run `chezmoi apply --include /registry/<name>/**` so only the module's files are written.
-
-The sandboxed apply (point 6) requires changes to `dot sync` to accept an include filter — that is its own roadmap issue and tracked separately.
+2. Download the versioned archive using HTTPS and TLS 1.2 or newer.
+3. Verify the archive against the registry's SHA-256 digest.
+4. Reject absolute paths, parent traversal, symbolic links, and hard links before extraction.
+5. Run `chezmoi apply --dry-run` against the isolated module source.
+6. With `--yes`, persist it at `${XDG_DATA_HOME:-~/.local/share}/dotfiles/modules/<name>/<version>` and apply that exact verified source.
 
 ## Security model
 
-- Modules execute with the consumer's user privileges via chezmoi `run_onchange_*` scripts. The trust contract is identical to consuming any third-party dotfiles repo.
-- Pinning `sha256` lets a consumer verify the registry entry hasn't been tampered with between publish and install.
+- Modules execute with the consumer's user privileges via chezmoi scripts. Review the default dry-run and publisher before passing `--yes`.
+- The SHA-256 pin binds installation to the reviewed archive bytes, even if the hosting release later changes.
 - The registry index itself is fetched over HTTPS; the GitHub Pages cert chain provides transport integrity.
 
 ## Why this lives in this repo (for now)
