@@ -167,6 +167,28 @@ else
   printf '%b\n' "    Output: $result"
 fi
 
+test_start "archive_safety_accepts_regular_tar"
+mkdir -p "$tmp_dir/safe"
+printf 'safe\n' >"$tmp_dir/safe/tool"
+tar -czf "$tmp_dir/safe.tar.gz" -C "$tmp_dir/safe" tool
+assert_exit_code 0 "bash -c 'source \"$LOGGING_FILE\"; source \"$INSTALLERS_FILE\"; archive_paths_are_safe tar \"$tmp_dir/safe.tar.gz\"'"
+
+test_start "archive_safety_rejects_link_tar"
+mkdir -p "$tmp_dir/unsafe"
+ln -s /etc/passwd "$tmp_dir/unsafe/tool"
+tar -czf "$tmp_dir/unsafe.tar.gz" -C "$tmp_dir/unsafe" tool
+assert_exit_code 1 "bash -c 'source \"$LOGGING_FILE\"; source \"$INSTALLERS_FILE\"; archive_paths_are_safe tar \"$tmp_dir/unsafe.tar.gz\"'"
+
+if command -v zip >/dev/null 2>&1 && command -v zipinfo >/dev/null 2>&1; then
+  test_start "archive_safety_accepts_regular_zip"
+  (cd "$tmp_dir/safe" && zip -q "$tmp_dir/safe.zip" tool)
+  assert_exit_code 0 "bash -c 'source \"$LOGGING_FILE\"; source \"$INSTALLERS_FILE\"; archive_paths_are_safe zip \"$tmp_dir/safe.zip\"'"
+
+  test_start "archive_safety_rejects_link_zip"
+  (cd "$tmp_dir/unsafe" && zip -qy "$tmp_dir/unsafe.zip" tool)
+  assert_exit_code 1 "bash -c 'source \"$LOGGING_FILE\"; source \"$INSTALLERS_FILE\"; archive_paths_are_safe zip \"$tmp_dir/unsafe.zip\"'"
+fi
+
 # Test: double-sourcing installers is idempotent
 test_start "installers_idempotent"
 assert_exit_code 0 "bash -c 'source \"$LOGGING_FILE\"; source \"$INSTALLERS_FILE\"; source \"$INSTALLERS_FILE\"; echo ok'"

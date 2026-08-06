@@ -25,4 +25,7 @@ done
 test_start "stage_refuses_root"
 if bash "$stage" / >/dev/null 2>&1; then ((TESTS_FAILED++)) || true; else ((TESTS_PASSED++)) || true; fi
 
+test_start "stage_refuses_unrelated_directory"
+if bash "$stage" "$tmp/unrelated" >/dev/null 2>&1; then ((TESTS_FAILED++)) || true; else ((TESTS_PASSED++)) || true; fi
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

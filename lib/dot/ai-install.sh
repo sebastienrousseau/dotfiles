@@ -185,7 +185,7 @@ install_amp_native() {
     # AMP_VERSION skips that fetch entirely. Empty on failure: the
     # installer falls back to its own (possibly-working) fetch.
     local amp_version
-    amp_version="$(curl -fsSL https://static.ampcode.com/cli/cli-version.txt 2>/dev/null | tr -d '[:space:]')"
+    amp_version="$(curl --proto '=https' --tlsv1.2 -fsSL https://static.ampcode.com/cli/cli-version.txt 2>/dev/null | tr -d '[:space:]')"
     if command -v gum >/dev/null 2>&1; then
       if gum spin --spinner dot --title "Installing $label (native installer)" -- \
         env AMP_VERSION="$amp_version" bash "$installer"; then

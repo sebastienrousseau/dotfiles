@@ -43,10 +43,10 @@ TMP_DIR="$(umask 077 && mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 # Support both old and new checksum filenames.
-if ! curl -fsSL -o "$TMP_DIR/checksums.txt" "$BASE_URL/$CHECKSUMS_ASSET"; then
-  curl -fsSL -o "$TMP_DIR/checksums.txt" "$BASE_URL/checksums.txt"
+if ! curl --proto '=https' --tlsv1.2 -fsSL -o "$TMP_DIR/checksums.txt" "$BASE_URL/$CHECKSUMS_ASSET"; then
+  curl --proto '=https' --tlsv1.2 -fsSL -o "$TMP_DIR/checksums.txt" "$BASE_URL/checksums.txt"
 fi
-curl -fsSL -o "$TMP_DIR/$ASSET" "$BASE_URL/$ASSET"
+curl --proto '=https' --tlsv1.2 -fsSL -o "$TMP_DIR/$ASSET" "$BASE_URL/$ASSET"
 
 CHECKSUM_LINE="$(grep -E "[[:space:]]${ASSET}$" "$TMP_DIR/checksums.txt" | head -n1 || true)"
 if [[ -z "$CHECKSUM_LINE" ]]; then

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Universal Dotfiles Installer (Zero-Dependency)
-# Usage: bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+# Usage: gh repo clone sebastienrousseau/dotfiles && cd dotfiles && ./install.sh
 # (or ./install.sh locally)
 
 # This installer uses bash features (set -o pipefail, arrays, [[ ]]). If it is
@@ -12,7 +12,7 @@
 # it parses in any shell before bash takes over.
 if [ -z "${BASH_VERSION:-}" ]; then
   echo "install.sh requires bash. Run:  bash install.sh" >&2
-  echo "  or:  bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)\"" >&2
+  echo "  clone: gh repo clone sebastienrousseau/dotfiles && cd dotfiles && ./install.sh" >&2
   exit 1
 fi
 
@@ -158,8 +158,15 @@ main() {
       brew install gum >/dev/null 2>&1
     elif [[ "$target_os" == "debian" || "$target_os" == "wsl2" ]]; then
       sudo mkdir -p /etc/apt/keyrings
-      curl -fsSL https://repo.charm.sh/apt/gpg.key |
-        sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/charm.gpg
+      charm_key_tmp="$(mktemp -t charm-key.XXXXXX)"
+      if ! curl --proto '=https' --tlsv1.2 -fsSL \
+        -o "$charm_key_tmp" https://repo.charm.sh/apt/gpg.key; then
+        rm -f "$charm_key_tmp"
+        return 1
+      fi
+      sudo gpg --batch --yes --dearmor \
+        -o /etc/apt/keyrings/charm.gpg "$charm_key_tmp"
+      rm -f "$charm_key_tmp"
       # Pin the Charm GPG key fingerprint — a DNS attacker swapping
       # repo.charm.sh/apt/gpg.key for a forged key with the same uid
       # would otherwise pass the prior "any fid: present" check.

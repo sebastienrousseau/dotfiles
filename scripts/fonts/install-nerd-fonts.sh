@@ -7,32 +7,38 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../../lib/dot/ui.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../../lib/dot/ui.sh"
+# shellcheck source=../../lib/dot/verified-download.sh disable=SC1091
+source "$SCRIPT_DIR/../../lib/dot/verified-download.sh"
 
 ui_init
 ui_header "Nerd Fonts"
 
 DEFAULT_FONTS="JetBrainsMono FiraCode Iosevka"
 FONT_LIST="${*:-$DEFAULT_FONTS}"
+FONT_VERSION="v3.4.0"
+FONT_BASE_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/${FONT_VERSION}"
+FONT_CHECKSUM_URL="${FONT_BASE_URL}/SHA-256.txt"
 
-install_linux() {
-  font_name="$1"
-  target_dir="$HOME/.local/share/fonts/${font_name}NerdFont"
+install_linux() (
+  local font_name="$1"
+  local target_dir="$HOME/.local/share/fonts/${font_name}NerdFont"
   mkdir -p "$target_dir"
+  local tmp_dir
   tmp_dir="$(umask 077 && mktemp -d)"
-  # shellcheck disable=SC2064
-  trap "rm -rf '$tmp_dir'" RETURN
-  url="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${font_name}.zip"
+  trap 'rm -rf "$tmp_dir"' EXIT
+  local asset="${font_name}.zip"
+  local url="${FONT_BASE_URL}/${asset}"
   ui_info "Downloading" "$font_name Nerd Font"
-  curl -fL --connect-timeout 10 --max-time 300 "$url" -o "$tmp_dir/${font_name}.zip"
-  if ! unzip -o "$tmp_dir/${font_name}.zip" -d "$target_dir" >/dev/null; then
-    ui_err "Unzip failed" "${font_name}.zip" >&2
+  download_verified_asset "$url" "$FONT_CHECKSUM_URL" "$asset" "$tmp_dir/$asset" 104857600
+  if ! unzip -o "$tmp_dir/$asset" -d "$target_dir" >/dev/null; then
+    ui_err "Unzip failed" "$asset" >&2
     return 1
   fi
   if command -v fc-cache >/dev/null; then
     fc-cache -f "$target_dir"
   fi
   ui_ok "Installed" "$target_dir"
-}
+)
 
 install_macos() {
   font_name="$1"

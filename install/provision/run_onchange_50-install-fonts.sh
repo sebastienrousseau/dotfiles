@@ -6,11 +6,24 @@
 
 set -euo pipefail
 
+SOURCE_ROOT="${DOTFILES_SOURCE_DIR:-}"
+if [[ -z "$SOURCE_ROOT" ]] && command -v chezmoi >/dev/null 2>&1; then
+    SOURCE_ROOT="$(chezmoi source-path 2>/dev/null || true)"
+    [[ "$(basename "$SOURCE_ROOT")" == "defaults" ]] && SOURCE_ROOT="$(dirname "$SOURCE_ROOT")"
+fi
+if [[ -z "$SOURCE_ROOT" || ! -r "$SOURCE_ROOT/lib/dot/verified-download.sh" ]]; then
+    printf '[ERROR] verified-download.sh not found; refusing unverified font installation\n' >&2
+    exit 1
+fi
+# shellcheck source=../../lib/dot/verified-download.sh disable=SC1091
+source "$SOURCE_ROOT/lib/dot/verified-download.sh"
+
 # Support for DOTFILES_SILENT
 log_info() { if [[ "${DOTFILES_SILENT:-0}" != "1" ]]; then printf '\n[INFO] %s\n' "$*"; fi; }
 
 FONT_VERSION="v3.4.0"
 NERD_FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/${FONT_VERSION}"
+NERD_FONT_CHECKSUM_URL="${NERD_FONT_URL}/SHA-256.txt"
 
 # Define fonts to install
 FONTS=(
@@ -48,7 +61,12 @@ for font in "${FONTS[@]}"; do
         if [[ "${DOTFILES_SILENT:-0}" != "1" ]]; then
             echo "   -> Processing $font..."
         fi
-        curl -fLo "$TMP_DIR/${font}.zip" "${NERD_FONT_URL}/${font}.zip" >/dev/null 2>&1
+        download_verified_asset \
+            "${NERD_FONT_URL}/${font}.zip" \
+            "$NERD_FONT_CHECKSUM_URL" \
+            "${font}.zip" \
+            "$TMP_DIR/${font}.zip" \
+            104857600
         unzip -o -q "$TMP_DIR/${font}.zip" -d "$FONT_DIR"
         rm -f "$TMP_DIR/${font}.zip"
     ) &

@@ -1,7 +1,8 @@
 name: Release / Package dot CLI
 
 # On every release, package a standalone tarball + zip of the dot CLI
-# (bin/, lib/, share/) and attach to the release as a distribution-
+# (bin/, lib/, scripts/, security/, docs/, defaults/, share/) and attach it
+# to the release as a self-contained distribution-
 # ready artefact. Downstream distribution workflows
 # (release-distribute.yml) hash the tarball and push to Homebrew /
 # Scoop / AUR taps.
@@ -84,6 +85,9 @@ jobs:
         run: |
           set -euo pipefail
           stage="dot-${VERSION}"
+          # ZIP stores DOS timestamps. Normalize the complete tree to the
+          # earliest portable ZIP timestamp before either archive is built.
+          find "$stage" -exec touch -h -d '1980-01-01 00:00:00 UTC' {} +
           # GNU tar deterministic flags: stable mtime, owner, sort order.
           # Without these, byte-for-byte hashes drift across runners.
           TZ=UTC tar --sort=name \
@@ -94,7 +98,8 @@ jobs:
           # Windows-friendly zip variant for Scoop. zip's `-X` strips
           # extra file attrs; `-D` skips directory entries for stable
           # hashing.
-          zip -X -D -r "dot-${VERSION}.zip" "$stage"
+          find "$stage" -type f -print | LC_ALL=C sort \
+            | zip -X -D "dot-${VERSION}.zip" -@
 
           echo "=== artefact sizes ==="
           ls -la "dot-${VERSION}".{tar.gz,zip}

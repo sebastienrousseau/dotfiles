@@ -26,7 +26,7 @@ _dot_installer_manifest() {
   printf '%s/security/remote-installers.sha256\n' "$(cd "$lib_dir/../.." && pwd)"
 }
 
-download_verified_script() {
+download_verified_script() (
   local url="$1"
   local destination="$2"
   local max_bytes="${3:-524288}"
@@ -73,4 +73,60 @@ download_verified_script() {
     rm -f "$destination"
     return 1
   fi
-}
+)
+
+download_verified_asset() (
+  local url="$1"
+  local checksum_url="$2"
+  local asset_name="$3"
+  local destination="$4"
+  local max_bytes="${5:-104857600}"
+  local checksum_file expected actual size
+
+  [[ "$url" == https://* && "$checksum_url" == https://* ]] || {
+    printf 'Refusing non-HTTPS release asset URL\n' >&2
+    return 2
+  }
+  [[ "$asset_name" != */* && -n "$asset_name" ]] || {
+    printf 'Invalid release asset name: %s\n' "$asset_name" >&2
+    return 2
+  }
+
+  checksum_file="$(mktemp -t dot-checksums.XXXXXX)"
+  trap 'rm -f "$checksum_file"' EXIT
+  umask 077
+  if ! curl --proto '=https' --tlsv1.2 -fsSL -o "$checksum_file" "$checksum_url"; then
+    rm -f "$destination"
+    return 1
+  fi
+  if (( $(wc -c <"$checksum_file" | tr -d '[:space:]') > 2097152 )); then
+    printf 'Checksum manifest exceeds the 2 MiB safety limit\n' >&2
+    rm -f "$destination"
+    return 1
+  fi
+  expected="$(awk -v asset="$asset_name" '{ name=$2; sub(/^\*/, "", name); if (name == asset) print $1 }' "$checksum_file")"
+  [[ "$expected" =~ ^[0-9a-f]{64}$ ]] || {
+    printf 'Release asset is absent or ambiguous in checksum manifest: %s\n' "$asset_name" >&2
+    rm -f "$destination"
+    return 1
+  }
+  if ! curl --proto '=https' --tlsv1.2 -fsSL -o "$destination" "$url"; then
+    rm -f "$destination"
+    return 1
+  fi
+  size="$(wc -c <"$destination" | tr -d '[:space:]')"
+  if ((size == 0 || size > max_bytes)); then
+    printf 'Release asset size outside allowed range: %s bytes (%s)\n' "$size" "$url" >&2
+    rm -f "$destination"
+    return 1
+  fi
+  actual="$(_dot_sha256_file "$destination")" || {
+    rm -f "$destination"
+    return 1
+  }
+  if [[ "$actual" != "$expected" ]]; then
+    printf 'Release asset checksum mismatch: %s\n' "$asset_name" >&2
+    rm -f "$destination"
+    return 1
+  fi
+)

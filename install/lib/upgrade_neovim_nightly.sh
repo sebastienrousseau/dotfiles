@@ -27,8 +27,8 @@ sha256_file() {
 }
 
 echo "Downloading Nightly (v0.11) [Correct URL]..."
-curl -fLo nvim-linux-x86_64.tar.gz https://github.com/neovim/neovim/releases/download/nightly/nvim-linux-x86_64.tar.gz
-curl -fLo nvim-linux-x86_64.tar.gz.sha256sum https://github.com/neovim/neovim/releases/download/nightly/nvim-linux-x86_64.tar.gz.sha256sum
+curl --proto '=https' --tlsv1.2 -fLo nvim-linux-x86_64.tar.gz https://github.com/neovim/neovim/releases/download/nightly/nvim-linux-x86_64.tar.gz
+curl --proto '=https' --tlsv1.2 -fLo nvim-linux-x86_64.tar.gz.sha256sum https://github.com/neovim/neovim/releases/download/nightly/nvim-linux-x86_64.tar.gz.sha256sum
 
 expected="$(awk -v f="nvim-linux-x86_64.tar.gz" '$2==f {print $1}' nvim-linux-x86_64.tar.gz.sha256sum)"
 if [ -z "$expected" ]; then
