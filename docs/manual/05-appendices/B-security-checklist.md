@@ -71,7 +71,8 @@ Every PR to main must pass:
 - [x] Detect-secrets baseline diff
 - [x] TruffleHog verified scan
 - [x] Copyright headers present
-- [x] 100% unit test coverage
+- [x] 100% executable module mapping
+- [ ] 100% measured line and branch coverage (current ratchet is documented in `docs/operations/COVERAGE.md`)
 - [x] Reliability tests (macOS + Ubuntu)
 - [x] Checkov infra scan
 - [x] Version sync (bumped across all files)

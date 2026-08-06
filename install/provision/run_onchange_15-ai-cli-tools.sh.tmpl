@@ -9,6 +9,10 @@ set -euo pipefail
 log_info() { printf '\n[INFO] %s\n' "$*"; }
 log_error() { printf '\n[ERROR] %s\n' "$*" >&2; }
 
+VERIFIER="${DOTFILES_SOURCE_DIR:?install.sh must export DOTFILES_SOURCE_DIR}/lib/dot/verified-download.sh"
+# shellcheck source=../../lib/dot/verified-download.sh disable=SC1091
+source "$VERIFIER"
+
 # Install Claude Code via Anthropic's native installer.
 # npm 11 silently drops the platform-native optionalDependency on global
 # installs, leaving a broken binary, so Claude Code is NOT managed via
@@ -22,12 +26,8 @@ install_claude_native() {
   log_info "Installing Claude Code via native installer..."
   local installer
   installer=$(umask 077 && mktemp)
-  if curl -fsSL -o "$installer" https://claude.ai/install.sh; then
-    if [ "$(wc -c <"$installer")" -le 262144 ] && head -1 "$installer" | grep -q '^#!'; then
-      bash "$installer" || log_error "Claude Code native installer failed (continuing...)"
-    else
-      log_error "Claude Code installer failed validation. Install manually: https://claude.ai/install.sh"
-    fi
+  if download_verified_script https://claude.ai/install.sh "$installer" 262144; then
+    bash "$installer" || log_error "Claude Code native installer failed (continuing...)"
     rm -f "$installer"
   else
     rm -f "$installer"
@@ -46,12 +46,8 @@ install_kimi_native() {
   log_info "Installing Kimi CLI via native installer..."
   local installer
   installer=$(umask 077 && mktemp)
-  if curl -fsSL -o "$installer" https://code.kimi.com/kimi-code/install.sh; then
-    if [ "$(wc -c <"$installer")" -le 524288 ] && head -1 "$installer" | grep -q '^#!'; then
-      bash "$installer" || log_error "Kimi CLI native installer failed (continuing...)"
-    else
-      log_error "Kimi CLI installer failed validation. Install manually: npm install -g @moonshot-ai/kimi-code"
-    fi
+  if download_verified_script https://code.kimi.com/kimi-code/install.sh "$installer"; then
+    bash "$installer" || log_error "Kimi CLI native installer failed (continuing...)"
     rm -f "$installer"
   else
     rm -f "$installer"
@@ -97,12 +93,8 @@ if command -v mise >/dev/null 2>&1; then
   else
     log_info "Installing Goose (Block) via native installer..."
     goose_installer=$(umask 077 && mktemp)
-    if curl -fsSL -o "$goose_installer" https://github.com/block/goose/releases/download/stable/download_cli.sh; then
-      if [ "$(wc -c <"$goose_installer")" -le 524288 ] && head -1 "$goose_installer" | grep -q '^#!'; then
-        bash "$goose_installer" || log_error "Goose native installer failed (continuing...)"
-      else
-        log_error "Goose installer failed validation. Install manually: https://github.com/block/goose"
-      fi
+    if download_verified_script https://github.com/block/goose/releases/download/stable/download_cli.sh "$goose_installer"; then
+      CONFIGURE=false bash "$goose_installer" || log_error "Goose native installer failed (continuing...)"
     else
       log_error "Failed to download Goose installer."
     fi
@@ -115,12 +107,8 @@ if command -v mise >/dev/null 2>&1; then
   else
     log_info "Installing Antigravity CLI (agy) via native installer..."
     agy_installer=$(umask 077 && mktemp)
-    if curl -fsSL -o "$agy_installer" https://antigravity.google/cli/install.sh; then
-      if [ "$(wc -c <"$agy_installer")" -le 262144 ] && head -1 "$agy_installer" | grep -q '^#!'; then
-        bash "$agy_installer" || log_error "Antigravity CLI installer failed (continuing...)"
-      else
-        log_error "Antigravity CLI installer failed validation."
-      fi
+    if download_verified_script https://antigravity.google/cli/install.sh "$agy_installer" 262144; then
+      bash "$agy_installer" || log_error "Antigravity CLI installer failed (continuing...)"
     else
       log_error "Failed to download Antigravity CLI installer."
     fi
@@ -137,12 +125,8 @@ else
 {{- else }}
     log_info "fnm not found. Installing fnm..."
     fnm_installer=$(umask 077 && mktemp)
-    if curl -fsSL -o "$fnm_installer" https://fnm.vercel.app/install; then
-      if [ "$(wc -c <"$fnm_installer")" -le 204800 ] && head -1 "$fnm_installer" | grep -q '^#!'; then
-        bash "$fnm_installer"
-      else
-        log_error "fnm installer failed validation. Install manually."
-      fi
+    if download_verified_script https://fnm.vercel.app/install "$fnm_installer" 204800; then
+      bash "$fnm_installer"
       rm -f "$fnm_installer"
     else
       rm -f "$fnm_installer"
@@ -209,12 +193,8 @@ else
   if ! command -v goose >/dev/null 2>&1 && [ ! -x "$HOME/.local/bin/goose" ]; then
     log_info "Installing Goose (Block) via native installer..."
     goose_installer=$(umask 077 && mktemp)
-    if curl -fsSL -o "$goose_installer" https://github.com/block/goose/releases/download/stable/download_cli.sh; then
-      if [ "$(wc -c <"$goose_installer")" -le 524288 ] && head -1 "$goose_installer" | grep -q '^#!'; then
-        bash "$goose_installer" || log_error "Goose native installer failed (continuing...)"
-      else
-        log_error "Goose installer failed validation."
-      fi
+    if download_verified_script https://github.com/block/goose/releases/download/stable/download_cli.sh "$goose_installer"; then
+      CONFIGURE=false bash "$goose_installer" || log_error "Goose native installer failed (continuing...)"
     else
       log_error "Failed to download Goose installer."
     fi
@@ -225,12 +205,8 @@ else
   if ! command -v agy >/dev/null 2>&1 && [ ! -x "$HOME/.local/bin/agy" ]; then
     log_info "Installing Antigravity CLI (agy) via native installer..."
     agy_installer=$(umask 077 && mktemp)
-    if curl -fsSL -o "$agy_installer" https://antigravity.google/cli/install.sh; then
-      if [ "$(wc -c <"$agy_installer")" -le 262144 ] && head -1 "$agy_installer" | grep -q '^#!'; then
-        bash "$agy_installer" || log_error "Antigravity CLI installer failed (continuing...)"
-      else
-        log_error "Antigravity CLI installer failed validation."
-      fi
+    if download_verified_script https://antigravity.google/cli/install.sh "$agy_installer" 262144; then
+      bash "$agy_installer" || log_error "Antigravity CLI installer failed (continuing...)"
     else
       log_error "Failed to download Antigravity CLI installer."
     fi

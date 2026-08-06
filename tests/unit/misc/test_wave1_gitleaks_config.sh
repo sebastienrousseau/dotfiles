@@ -10,11 +10,25 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 GITLEAKS_CONF="$REPO_ROOT/config/gitleaks.toml"
+GITLEAKS_ENTRYPOINT="$REPO_ROOT/.gitleaks.toml"
+GITLEAKS_IGNORE="$REPO_ROOT/.gitleaksignore"
 
 echo "Testing Wave 1: gitleaks configuration..."
 
 test_start "gitleaks_config_exists"
 assert_file_exists "$GITLEAKS_CONF" ".gitleaks.toml should exist"
+
+test_start "gitleaks_root_entrypoint_exists"
+assert_file_exists "$GITLEAKS_ENTRYPOINT" "hosted scanners should discover a root .gitleaks.toml"
+
+test_start "gitleaks_root_entrypoint_is_canonical"
+assert_equals "config/gitleaks.toml" "$(readlink "$GITLEAKS_ENTRYPOINT")" \
+  "root .gitleaks.toml should resolve to the canonical config"
+
+test_start "gitleaks_history_exception_is_exact"
+assert_file_contains "$GITLEAKS_IGNORE" \
+  "5d64f60abe98b2df3a0550c5d8a74b28cd01731e:install/provision/run_onchange_10-linux-packages.sh.tmpl:generic-api-key:90" \
+  "historical checksum exception should be scoped to one finding"
 
 test_start "gitleaks_extends_default"
 assert_file_contains "$GITLEAKS_CONF" "useDefault = true" "should extend default gitleaks config"

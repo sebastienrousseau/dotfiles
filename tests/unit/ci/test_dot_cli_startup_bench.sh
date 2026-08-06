@@ -42,7 +42,8 @@ fi
 # pipeline runs end-to-end and prints a median; the per-OS gate
 # budgets live in `.github/workflows/dot-cli-bench.yml`.
 test_start "script_executes_5_runs"
-out="$(bash "$SCRIPT_FILE" --runs 5 --budget-ms 5000 2>&1 || true)"
+out="$(DOT_BENCH_BASELINE="$XDG_CACHE_HOME/dotfiles/startup-baseline.txt" \
+  bash "$SCRIPT_FILE" --runs 5 --budget-ms 500 2>&1 || true)"
 if [[ "$out" == *"median:"* ]] && [[ "$out" == *"within budget"* ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
@@ -51,6 +52,9 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
   printf '    last 5 lines:\n%s\n' "$(printf '%s' "$out" | tail -5)"
 fi
+
+test_start "baseline_isolated_from_checkout"
+assert_file_exists "$XDG_CACHE_HOME/dotfiles/startup-baseline.txt" "benchmark baseline must use an isolated writable cache"
 
 # Bench should refuse unknown flags (defensive).
 test_start "script_rejects_unknown_flag"

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sebastienrousseau.github.io/dotfiles/schema/dot-registry-v1.json",
+  "title": "Dot Module Registry v1",
+  "description": "Integrity-pinned index consumed by dot registry.",
+  "type": "object",
+  "required": ["version", "modules"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 1 },
+    "updated": { "type": "string", "format": "date-time" },
+    "registry": { "type": "string", "minLength": 1 },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "version", "description", "archive_url", "sha256"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,31}$" },
+          "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([+-][0-9A-Za-z.-]+)?$" },
+          "description": { "type": "string", "maxLength": 200 },
+          "archive_url": { "type": "string", "pattern": "^https://" },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "repo": { "type": "string", "pattern": "^https://" },
+          "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+          "maintainer": { "type": "string", "minLength": 1 },
+          "license": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

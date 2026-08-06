@@ -90,6 +90,8 @@ _ai_refresh_status_cache() {
   # shellcheck disable=SC2016
   local _TO=""
   command -v timeout >/dev/null 2>&1 && _TO="timeout 8 "
+  # Variables expand inside the child Bash probe.
+  # shellcheck disable=SC2016
   local probe_script='
     payload="$1"; out_dir="$2"; to="$3"
     i="${payload%%|*}"; entry="${payload#*|}"
@@ -418,7 +420,7 @@ ${prompt}"
       fi
     elif [[ "$tool_bin" == "agy" ]]; then
       ui_warn "$tool" "not installed"
-      ui_info "Install" "curl -fsSL -o /tmp/agy-install.sh https://antigravity.google/cli/install.sh && bash /tmp/agy-install.sh"
+      ui_info "Install" "dot ai install agy (checksum verified)"
       exit 1
     elif [[ "$tool_bin" == "kimi" ]]; then
       ui_warn "$tool" "not installed"

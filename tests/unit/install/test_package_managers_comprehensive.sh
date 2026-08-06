@@ -68,4 +68,41 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: unknown target should be non-fatal"
 fi
 
+test_start "homebrew_checksum_mismatch_fails_closed"
+homebrew_tmp="$(mktemp -d)"
+if HOME="$homebrew_tmp" DOTFILES_NONINTERACTIVE=1 bash -c '
+  source "$1"
+  has_brew() { return 1; }
+  download_verified_script() { printf "#!/bin/bash\nexit 0\n" >"$2"; }
+  _dot_sha256_file() { printf "%064d\n" 0; }
+  install_homebrew
+' _ "$PM_LIB" >"$homebrew_tmp/output" 2>&1; then
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: mismatched installer was accepted"
+else
+  assert_file_contains "$homebrew_tmp/output" "checksum mismatch" \
+    "mismatched installer must be rejected"
+fi
+
+test_start "homebrew_verified_installer_executes"
+marker="$homebrew_tmp/executed"
+if HOME="$homebrew_tmp" DOTFILES_NONINTERACTIVE=1 HOMEBREW_TEST_MARKER="$marker" bash -c '
+  source "$1"
+  has_brew() { return 1; }
+  download_verified_script() {
+    printf "#!/bin/bash\n: > \\\"\${HOMEBREW_TEST_MARKER}\\\"\n" >"$2"
+  }
+  _dot_sha256_file() {
+    printf "%s\n" "12479a24be3f5307eecac7cde670fad7118640f031229e964f544b1367b52a41"
+  }
+  install_homebrew
+' _ "$PM_LIB" >/dev/null 2>&1 && [[ -f "$marker" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: verified installer executed"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: verified installer did not execute"
+fi
+rm -rf "$homebrew_tmp"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

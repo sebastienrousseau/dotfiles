@@ -41,6 +41,28 @@ assert_exit_code 0 "bash -n '$heal_tools'"
 test_start "heal_tools_functions"
 assert_file_contains "$heal_tools" "detect_pkg_manager()" "detect_pkg_manager present"
 assert_file_contains "$heal_tools" "install_package()" "install_package present"
-assert_file_contains "$heal_tools" "_gh_latest_tag()" "_gh_latest_tag present"
+assert_file_contains "$heal_tools" "_mise_tool_specs()" "pinned mise mapping present"
+
+test_start "heal_tools_has_no_direct_binary_downloads"
+if rg -q 'github\.com/.*/releases/.*/(download|latest)' "$heal_tools"; then
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: direct release download found"
+else
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+fi
+
+test_start "heal_tools_mise_specs_are_exact"
+# shellcheck disable=SC1090
+source "$heal_tools"
+specs="$(for tool in nushell pueue wasmtime sops yazi zellij; do _mise_tool_specs "$tool"; done)"
+if [[ "$(printf '%s\n' "$specs" | wc -l | tr -d ' ')" -eq 7 ]] &&
+  ! grep -Ev '^[A-Za-z0-9:_/-]+@[0-9]+\.[0-9]+\.[0-9]+$' <<<"$specs" | grep -q .; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: invalid specs"
+fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

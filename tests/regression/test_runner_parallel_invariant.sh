@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2030,SC2031
+# Regression for: c5baba39
 # Regression: the test runner must produce the same totals whether
 # run serially (--jobs 1) or in parallel (--jobs auto).
 #
@@ -13,7 +14,6 @@
 # Skips itself when REPO_ROOT can't reach the runner; tolerates the
 # `set -euo pipefail` outer-shell context that wraps assertions.
 #
-# Regression for: GH-867
 # Why: Parallelism is a new behavior; without an invariance test,
 # silent order-coupling could grow back over time.
 

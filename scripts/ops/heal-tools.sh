@@ -3,6 +3,10 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC2034
 # =============================================================================
+
+HEAL_TOOLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../../lib/dot/verified-download.sh disable=SC1091
+source "$HEAL_TOOLS_DIR/../../lib/dot/verified-download.sh"
 # heal-tools.sh — Tool installation helpers for heal.sh
 # Sourced by heal.sh; inherits set -euo pipefail, ui.sh, and shared variables.
 # =============================================================================
@@ -123,31 +127,54 @@ get_package_name() {
 # Usage: _pkg_install "label" completed total command [args...]
 _pkg_install() { ui_run_cmd "$@"; }
 
-# Resolve latest GitHub release tag for a repo
-_gh_latest_tag() {
-  curl -fsSLI -o /dev/null -w '%{url_effective}' "https://github.com/$1/releases/latest" | sed 's|.*/||'
+_mise_tool_specs() {
+  case "$1" in
+    nushell) printf '%s\n' 'aqua:nushell/nushell@0.114.1' ;;
+    pueue)
+      printf '%s\n' 'aqua:Nukesor/pueue/pueue@4.0.4'
+      printf '%s\n' 'aqua:Nukesor/pueue/pueued@4.0.4'
+      ;;
+    wasmtime) printf '%s\n' 'wasmtime@47.0.3' ;;
+    sops) printf '%s\n' 'sops@3.13.3' ;;
+    yazi) printf '%s\n' 'yazi@26.5.6' ;;
+    zellij) printf '%s\n' 'zellij@0.44.3' ;;
+    *) return 1 ;;
+  esac
+}
+
+_install_with_mise() {
+  local cmd="$1" spec
+  command -v mise >/dev/null 2>&1 || return 1
+  while IFS= read -r spec; do
+    [[ -n "$spec" ]] || continue
+    # --pin writes an exact version to the user's writable global config;
+    # aqua/ubi backends verify publisher-provided checksums before install.
+    mise use --global --pin "$spec" || return 1
+  done < <(_mise_tool_specs "$cmd")
 }
 
 # Install a single package (dispatcher for _pkg_install to call in subshell)
 _do_install() {
   local cmd="$1"
   local pkg_mgr="$2"
-  local bin_dir="$HOME/.local/bin"
-  mkdir -p "$bin_dir"
+
+  case "$cmd" in
+    nushell | pueue | wasmtime | sops | yazi | zellij)
+      if _install_with_mise "$cmd"; then
+        return 0
+      fi
+      log_warn "mise install unavailable for $cmd; trying $pkg_mgr"
+      ;;
+  esac
 
   # Binary/curl installers for tools not in standard apt repos
   case "$cmd" in
     starship)
       local installer
       installer=$(umask 077 && mktemp)
-      if ! curl -fsSL -o "$installer" https://starship.rs/install.sh; then
+      if ! download_verified_script https://starship.rs/install.sh "$installer"; then
         rm -f "$installer"
         log_error "Failed to download starship installer"
-        return 1
-      fi
-      if ! head -1 "$installer" | grep -q '^#!/'; then
-        rm -f "$installer"
-        log_error "starship installer does not look like a shell script"
         return 1
       fi
       sh "$installer" --yes
@@ -158,113 +185,14 @@ _do_install() {
     atuin)
       local installer
       installer=$(umask 077 && mktemp)
-      if ! curl -fsSL -o "$installer" https://setup.atuin.sh; then
+      if ! download_verified_script https://setup.atuin.sh "$installer"; then
         rm -f "$installer"
         log_error "Failed to download atuin installer"
-        return 1
-      fi
-      if ! head -1 "$installer" | grep -q '^#!/'; then
-        rm -f "$installer"
-        log_error "atuin installer does not look like a shell script"
         return 1
       fi
       bash "$installer" --yes
       local rc=$?
       rm -f "$installer"
-      return $rc
-      ;;
-    nushell)
-      local arch tag ver
-      arch=$(uname -m)
-      tag=$(_gh_latest_tag "nushell/nushell")
-      ver="${tag#v}"
-      local tmp
-      tmp=$(mktemp -d)
-      curl -fsSL -o "$tmp/nu.tar.gz" \
-        "https://github.com/nushell/nushell/releases/download/${tag}/nu-${ver}-${arch}-unknown-linux-musl.tar.gz" &&
-        tar xzf "$tmp/nu.tar.gz" -C "$tmp" --strip-components=1 &&
-        install -m 755 "$tmp/nu" "$bin_dir/nu"
-      local rc=$?
-      rm -rf "$tmp"
-      return $rc
-      ;;
-    pueue)
-      local arch
-      arch=$(uname -m)
-      curl -fsSL -o "$bin_dir/pueue" \
-        "https://github.com/Nukesor/pueue/releases/latest/download/pueue-${arch}-unknown-linux-musl" &&
-        chmod +x "$bin_dir/pueue"
-      curl -fsSL -o "$bin_dir/pueued" \
-        "https://github.com/Nukesor/pueue/releases/latest/download/pueued-${arch}-unknown-linux-musl" &&
-        chmod +x "$bin_dir/pueued"
-      return $?
-      ;;
-    wasmtime)
-      local arch tag
-      arch=$(uname -m)
-      tag=$(_gh_latest_tag "bytecodealliance/wasmtime")
-      local tmp
-      tmp=$(mktemp -d)
-      # xz-utils required for .tar.xz extraction
-      command -v xz >/dev/null 2>&1 || sudo apt-get install -y -qq xz-utils >/dev/null 2>&1 || true
-      curl -fsSL -o "$tmp/wasmtime.tar.xz" \
-        "https://github.com/bytecodealliance/wasmtime/releases/download/${tag}/wasmtime-${tag}-${arch}-linux.tar.xz" &&
-        tar xJf "$tmp/wasmtime.tar.xz" -C "$tmp" --strip-components=1 &&
-        install -m 755 "$tmp/wasmtime" "$bin_dir/wasmtime"
-      local rc=$?
-      rm -rf "$tmp"
-      return $rc
-      ;;
-    sops)
-      local arch tag
-      arch=$(uname -m)
-      [[ "$arch" == "x86_64" ]] && arch="amd64"
-      [[ "$arch" == "aarch64" ]] && arch="arm64"
-      tag=$(_gh_latest_tag "getsops/sops")
-      curl -fsSL -o "$bin_dir/sops" \
-        "https://github.com/getsops/sops/releases/download/${tag}/sops-${tag}.linux.${arch}" &&
-        chmod +x "$bin_dir/sops"
-      return $?
-      ;;
-    hyperfine)
-      local arch tag
-      arch=$(uname -m)
-      tag=$(_gh_latest_tag "sharkdp/hyperfine")
-      local tmp
-      tmp=$(mktemp -d)
-      curl -fsSL -o "$tmp/hyperfine.tar.gz" \
-        "https://github.com/sharkdp/hyperfine/releases/download/${tag}/hyperfine-${tag}-${arch}-unknown-linux-musl.tar.gz" &&
-        tar xzf "$tmp/hyperfine.tar.gz" -C "$tmp" --strip-components=1 &&
-        install -m 755 "$tmp/hyperfine" "$bin_dir/hyperfine"
-      local rc=$?
-      rm -rf "$tmp"
-      return $rc
-      ;;
-    yazi)
-      local arch
-      arch=$(uname -m)
-      local url="https://github.com/sxyazi/yazi/releases/latest/download/yazi-${arch}-unknown-linux-musl.zip"
-      local tmp
-      tmp=$(mktemp -d)
-      command -v unzip >/dev/null 2>&1 || sudo apt-get install -y -qq unzip
-      curl -fsSL -o "$tmp/yazi.zip" "$url" &&
-        (cd "$tmp" && unzip -oq yazi.zip) &&
-        install -m 755 "$tmp"/yazi-*/yazi "$bin_dir/yazi"
-      local rc=$?
-      rm -rf "$tmp"
-      return $rc
-      ;;
-    zellij)
-      local arch
-      arch=$(uname -m)
-      local url="https://github.com/zellij-org/zellij/releases/latest/download/zellij-${arch}-unknown-linux-musl.tar.gz"
-      local tmp
-      tmp=$(mktemp -d)
-      curl -fsSL -o "$tmp/zellij.tar.gz" "$url" &&
-        tar xzf "$tmp/zellij.tar.gz" -C "$tmp" &&
-        install -m 755 "$tmp/zellij" "$bin_dir/zellij"
-      local rc=$?
-      rm -rf "$tmp"
       return $rc
       ;;
   esac

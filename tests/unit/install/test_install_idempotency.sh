@@ -18,6 +18,7 @@ test_start "font_idempotency"
 MOCK_HOME=$(mktemp -d)
 export HOME="$MOCK_HOME"
 export DOTFILES_SILENT=1
+export DOTFILES_SOURCE_DIR="$REPO_ROOT"
 
 # Prepare mock font directory
 if [[ "$(uname)" == "Darwin" ]]; then
@@ -32,8 +33,25 @@ mkdir -p "$FONT_DIR"
 MOCK_BIN=$(mktemp -d)
 export PATH="$MOCK_BIN:$PATH"
 
-echo "#!/bin/sh" >"$MOCK_BIN/curl"
-echo "touch \$3" >>"$MOCK_BIN/curl" # mock -o/Lo behavior
+cat >"$MOCK_BIN/curl" <<'EOF'
+#!/bin/sh
+set -eu
+destination=""
+url=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -o) destination="$2"; shift 2 ;;
+    http*) url="$1"; shift ;;
+    *) shift ;;
+  esac
+done
+if [ "${url##*/}" = "SHA-256.txt" ]; then
+  digest="$(printf 'fake archive' | shasum -a 256 | awk '{print $1}')"
+  printf '%s  JetBrainsMono.zip\n%s  NerdFontsSymbolsOnly.zip\n' "$digest" "$digest" >"$destination"
+else
+  printf 'fake archive' >"$destination"
+fi
+EOF
 chmod +x "$MOCK_BIN/curl"
 
 echo "#!/bin/sh" >"$MOCK_BIN/unzip"

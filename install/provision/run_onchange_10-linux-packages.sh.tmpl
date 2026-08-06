@@ -60,7 +60,7 @@ if command -v apt-get >/dev/null; then
   $sudo_cmd apt-get update
   packages=(
     curl git zsh unzip fontconfig build-essential
-    ripgrep fd-find bat jq yq hyperfine fastfetch
+    ripgrep fd-find bat fzf jq yq hyperfine fastfetch
     age podman lua5.1 luajit luarocks
     tmux pipx ruby ruby-dev gnupg
   )
@@ -82,8 +82,22 @@ if command -v apt-get >/dev/null; then
     if ! apt-cache show gh >/dev/null 2>&1; then
       log_info "Adding GitHub CLI apt repository..."
       $sudo_cmd mkdir -p /etc/apt/keyrings
-      curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-        | $sudo_cmd tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+      github_key_tmp="$(mktemp -t github-cli-key.XXXXXX)"
+      trap 'rm -f "$github_key_tmp"' EXIT
+      curl --proto '=https' --tlsv1.2 -fsSL \
+        -o "$github_key_tmp" \
+        https://cli.github.com/packages/githubcli-archive-keyring.gpg
+      github_digest_expected="6084d5d7bd8e288441e0e94fc6275570895da18e6751f70f057485dc2d1a811b"
+      if command -v sha256sum >/dev/null 2>&1; then
+        github_digest_actual="$(sha256sum "$github_key_tmp" | awk '{print $1}')"
+      else
+        github_digest_actual="$(shasum -a 256 "$github_key_tmp" | awk '{print $1}')"
+      fi
+      if [[ "$github_digest_actual" != "$github_digest_expected" ]]; then
+        log_error "GitHub CLI archive key checksum mismatch; refusing repository setup"
+        exit 1
+      fi
+      $sudo_cmd install -m 0644 "$github_key_tmp" /etc/apt/keyrings/githubcli-archive-keyring.gpg
       echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
         | $sudo_cmd tee /etc/apt/sources.list.d/github-cli.list >/dev/null
       $sudo_cmd apt-get update
@@ -108,7 +122,7 @@ elif command -v dnf >/dev/null; then
   log_info "Updating packages (dnf)..."
   packages=(
     curl git zsh unzip fontconfig gcc make
-    ripgrep fd-find bat jq yq hyperfine fastfetch
+    ripgrep fd-find bat fzf jq yq hyperfine fastfetch
     age podman lua luajit luarocks
     tmux pipx ruby ruby-devel gh gnupg2
   )
@@ -132,7 +146,7 @@ elif command -v pacman >/dev/null; then
   $sudo_cmd pacman -Syu --noconfirm
   packages=(
     curl git zsh unzip fontconfig base-devel
-    ripgrep fd bat jq yq hyperfine fastfetch
+    ripgrep fd bat fzf jq yq hyperfine fastfetch
     age podman lua luajit luarocks
     tmux pipx ruby github-cli gnupg
   )
@@ -202,22 +216,10 @@ if ! command -v zoxide >/dev/null; then
   install_from_tarball "$url" "$sha_url" "zoxide" "$HOME/.local/bin"
 fi
 
-# FZF (git-based install)
+# FZF is installed from the signed distro repository above. Never execute a
+# mutable source checkout as an installation fallback.
 if ! command -v fzf >/dev/null; then
-  log_info "Installing FZF..."
-  if [ -d "${HOME}/.fzf" ]; then
-    if [ -x "${HOME}/.fzf/install" ]; then
-      if [ -d "${HOME}/.fzf/.git" ]; then
-        git -C "${HOME}/.fzf" pull --ff-only || true
-      fi
-      "${HOME}/.fzf/install" --all
-    else
-      log_warn "Existing ~/.fzf without install script; skipping FZF install."
-    fi
-  else
-    git clone --depth 1 https://github.com/junegunn/fzf.git "${HOME}/.fzf"
-    "${HOME}/.fzf/install" --all
-  fi
+  log_warn "FZF is unavailable from the active package repository; install a signed package manually."
 fi
 
 # Neovim (custom install to /opt). Neovim renamed its release assets after
@@ -234,6 +236,7 @@ if ! command -v nvim >/dev/null; then
   sha_url="$(github_asset_url "neovim/neovim" "${nvim_asset}.tar.gz.${neovim_sha_suffix}" "$NEOVIM_TAG")"
   tmp_dir="$(umask 077 && mktemp -d)"
   download_and_verify_sha256 "$url" "$sha_url" "$tmp_dir/${nvim_asset}.tar.gz"
+  archive_paths_are_safe tar "$tmp_dir/${nvim_asset}.tar.gz"
   tar -xzf "$tmp_dir/${nvim_asset}.tar.gz" -C "$tmp_dir"
   $sudo_cmd rm -rf "/opt/${nvim_asset}" /opt/nvim-linux64
   $sudo_cmd mv "$tmp_dir/${nvim_asset}" /opt/
@@ -280,8 +283,8 @@ if ! command -v rustup >/dev/null; then
   rustup_tmp=$(umask 077 && mktemp -d)
   rustup_installer="$rustup_tmp/rustup-init.sh"
   rustup_sha="$rustup_tmp/rustup-init.sh.sha256"
-  if curl -fsSL -o "$rustup_installer" https://sh.rustup.rs \
-     && curl -fsSL -o "$rustup_sha" https://static.rust-lang.org/rustup/rustup-init.sh.sha256; then
+  if curl --proto '=https' --tlsv1.2 -fsSL -o "$rustup_installer" https://sh.rustup.rs \
+     && curl --proto '=https' --tlsv1.2 -fsSL -o "$rustup_sha" https://static.rust-lang.org/rustup/rustup-init.sh.sha256; then
     expected_sha="$(awk '{print $1}' "$rustup_sha")"
     actual_sha="$(sha256sum "$rustup_installer" | awk '{print $1}')"
     if [ -n "$expected_sha" ] && [ "$expected_sha" = "$actual_sha" ]; then
@@ -332,6 +335,7 @@ if ! command -v uv >/dev/null; then
   sha_url="$(github_asset_url "astral-sh/uv" "${target}.tar.gz.sha256" "$UV_TAG")"
   tmp_dir="$(umask 077 && mktemp -d)"
   download_and_verify_sha256 "$url" "$sha_url" "$tmp_dir/uv.tar.gz"
+  archive_paths_are_safe tar "$tmp_dir/uv.tar.gz"
   tar -xzf "$tmp_dir/uv.tar.gz" -C "$tmp_dir"
   mkdir -p "$HOME/.local/bin"
   find "$tmp_dir" -type f \( -name "uv" -o -name "uvx" \) -perm -u+x -exec install -m 0755 {} "$HOME/.local/bin/" \;

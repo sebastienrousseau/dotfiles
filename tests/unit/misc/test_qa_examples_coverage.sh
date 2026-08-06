@@ -34,4 +34,13 @@ assert_file_exists "$EXAMPLES_DIR/example-command-reference.sh" "per-command ref
 test_start "examples_coverage_contract_passes"
 assert_exit_code 0 "REPO_ROOT='$REPO_ROOT' bash '$SCRIPT_FILE'"
 
+test_start "examples_coverage_direct_execution"
+if REPO_ROOT="$REPO_ROOT" bash "$SCRIPT_FILE" >/dev/null; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: direct contract execution passes"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: direct contract execution failed"
+fi
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

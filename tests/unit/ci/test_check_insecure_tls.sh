@@ -44,6 +44,9 @@ test_start "self_excludes_from_grep"
 # so match the value alone rather than the verbatim `=value` form.
 assert_file_contains "$SCRIPT_FILE" "check-insecure-tls.sh" "must skip itself"
 
+test_start "negative_fixtures_are_excluded"
+assert_file_contains "$SCRIPT_FILE" "--exclude-dir='tests'" "repo scan must skip intentional test fixtures"
+
 # Exercise the scanner against a tmp dir with one clean file: should
 # return 0 (no insecure patterns).
 clean_dir="$DOTFILES_COV_TMPDIR/clean"

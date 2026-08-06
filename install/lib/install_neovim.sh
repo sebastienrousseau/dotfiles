@@ -75,7 +75,8 @@ if [ ! -f "$TARBALL" ]; then
   exit 1
 fi
 
-# Verify checksum if available
+# A checksum is mandatory: this script installs an executable with user or
+# root privileges and must never silently downgrade to transport-only trust.
 if [ -f "$CHECKSUM_FILE" ]; then
   echo "   Checking SHA256 checksum..."
   if command -v sha256sum >/dev/null 2>&1; then
@@ -94,12 +95,14 @@ if [ -f "$CHECKSUM_FILE" ]; then
     fi
     echo "   Checksum verified."
   else
-    echo "[WARN] No sha256sum/shasum available, skipping verification" >&2
+    echo "[ERROR] No SHA-256 verifier available; refusing installation" >&2
+    exit 1
   fi
 else
-  echo "[WARN] No checksum file found at $CHECKSUM_FILE" >&2
-  echo "[WARN] Cannot verify tarball integrity. Proceeding with caution." >&2
+  echo "[ERROR] No checksum file found at $CHECKSUM_FILE" >&2
+  echo "[ERROR] Refusing to install an unverified executable archive." >&2
   echo "[INFO] Download checksums from: https://github.com/neovim/neovim/releases" >&2
+  exit 1
 fi
 
 echo "Removing old version..."

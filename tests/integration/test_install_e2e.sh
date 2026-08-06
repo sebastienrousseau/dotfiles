@@ -16,8 +16,14 @@ MOCK_HOME=$(mktemp -d)
 export HOME="$MOCK_HOME"
 export PATH="$HOME/.local/bin:$PATH"
 
-# Cleanup on exit
-trap 'rm -rf "$MOCK_HOME"' EXIT
+# Go deliberately makes downloaded module-cache files read-only. Restore owner
+# write permission before removing the isolated HOME so E2E runs never leak
+# temporary directories on macOS or Linux.
+cleanup_mock_home() {
+  chmod -R u+w "$MOCK_HOME" 2>/dev/null || true
+  rm -rf "$MOCK_HOME"
+}
+trap cleanup_mock_home EXIT
 
 # Stub ui_header if not already defined (not available in test context)
 command -v ui_header >/dev/null 2>&1 || ui_header() { echo "== $* =="; }

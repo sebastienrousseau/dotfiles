@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091
+# Regression for: 9fdf93c0
 # Regression: every safe-to-run `dot` subcommand executes cleanly.
 #
 # Companion to `test_dot_subcommand_smoke.sh` (which validates the

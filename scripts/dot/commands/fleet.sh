@@ -73,7 +73,7 @@ _fleet_emit_event() {
     endpoint="$(sed -n 's/^endpoint = "\(.*\)"/\1/p' "$data_file" | head -1)"
   fi
   if [[ -n "$endpoint" ]] && [[ "$endpoint" == https://* ]]; then
-    curl -fsSL -X POST -H "Content-Type: application/json" \
+    curl --proto '=https' --tlsv1.2 -fsSL -X POST -H "Content-Type: application/json" \
       -d "$payload" "$endpoint" >/dev/null 2>&1 || true
   fi
 }

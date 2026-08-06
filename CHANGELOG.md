@@ -2,6 +2,41 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.513 — Unreleased
+
+- **Verified module registry installation.** `dot registry install` now validates the v1 index, verifies immutable archive SHA-256 digests, rejects traversal and link-bearing archives, previews with chezmoi by default, and applies only with explicit `--yes`. CI validates the published registry contract and JSON Schema.
+- **Native PowerShell daily workflow.** `dot.ps1` now handles core chezmoi operations, status, doctor, mise inventory, agent checks/listing, and local fleet status without bash. Windows CI exercises the cmdlets directly, and the parity matrix now distinguishes native behavior from bash bridges.
+- **Checksum-verified self-healing tools.** Nushell, Pueue, Wasmtime, SOPS, Yazi, and Zellij recovery now uses exact mise/aqua pins instead of mutable GitHub release URLs and unverified executable downloads.
+- **Reproducible toolchain lock.** The development toolchain now ships a cross-platform `mise.lock` covering Linux, macOS, and Windows with exact download URLs and available SHA-256 checksums. Font archives, distro signing keys, and binary archives now fail closed on integrity or unsafe archive structure.
+
+### Security
+
+- Enforce signed commits, linear history, required merge/reliability/DCO/PR
+  signature checks, conversation resolution, and up-to-date branches on
+  `main`.
+- Default GitHub Actions tokens to read-only, disable workflow PR approvals,
+  enable secret push protection, and pin the SLSA reusable workflow to its
+  immutable commit.
+- Verify every remotely executed installer against a committed SHA-256
+  allowlist. CI rejects direct download-to-shell execution and verifier
+  bypasses.
+
+### Fixed
+
+- Package a self-contained `dot` distribution including command modules,
+  operational scripts, policies, schemas, help data, and the verified-download
+  manifest. Previously published archives omitted the command modules required
+  by most subcommands.
+- Add `make install PREFIX=... DESTDIR=...` and `make uninstall` using the
+  same tested staging path as release archives.
+- Store CLI benchmark baselines under `XDG_CACHE_HOME` instead of requiring a
+  writable source checkout.
+- Make focused help work for `apply`, `agents`, and `registry`.
+- Make an explicit version-sync target update `package.json` atomically and
+  distinguish historical roadmap versions from current-version references.
+- Correct documentation that conflated 100% executable-module mapping with
+  measured Bash line coverage.
+
 ## v0.2.512 — 2026-07-21
 
 ### Added

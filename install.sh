@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Universal Dotfiles Installer (Zero-Dependency)
-# Usage: bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+# Usage: gh repo clone sebastienrousseau/dotfiles && cd dotfiles && ./install.sh
 # (or ./install.sh locally)
 
 # This installer uses bash features (set -o pipefail, arrays, [[ ]]). If it is
@@ -12,7 +12,7 @@
 # it parses in any shell before bash takes over.
 if [ -z "${BASH_VERSION:-}" ]; then
   echo "install.sh requires bash. Run:  bash install.sh" >&2
-  echo "  or:  bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)\"" >&2
+  echo "  clone: gh repo clone sebastienrousseau/dotfiles && cd dotfiles && ./install.sh" >&2
   exit 1
 fi
 
@@ -71,7 +71,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.512)
+  version       The version (tag or branch) to install (default: v0.2.513)
 
 Options:
   --help        Show this help message
@@ -87,7 +87,7 @@ EOF
 }
 
 main() {
-  local version="v0.2.512"
+  local version="v0.2.513"
   local version_set=0
   local minimal=0
   local provision="${DOTFILES_PROVISION:-0}"
@@ -117,7 +117,7 @@ main() {
         # like `foobar` doesn't trigger a 30s+ network download attempt.
         # Caught by the install.sh fuzz harness (#881).
         if [[ ! "$arg" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-+][a-zA-Z0-9.-]+)?$ ]]; then
-          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.512)."
+          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.513)."
         fi
         version="$arg"
         version_set=1
@@ -158,8 +158,15 @@ main() {
       brew install gum >/dev/null 2>&1
     elif [[ "$target_os" == "debian" || "$target_os" == "wsl2" ]]; then
       sudo mkdir -p /etc/apt/keyrings
-      curl -fsSL https://repo.charm.sh/apt/gpg.key |
-        sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/charm.gpg
+      charm_key_tmp="$(mktemp -t charm-key.XXXXXX)"
+      if ! curl --proto '=https' --tlsv1.2 -fsSL \
+        -o "$charm_key_tmp" https://repo.charm.sh/apt/gpg.key; then
+        rm -f "$charm_key_tmp"
+        return 1
+      fi
+      sudo gpg --batch --yes --dearmor \
+        -o /etc/apt/keyrings/charm.gpg "$charm_key_tmp"
+      rm -f "$charm_key_tmp"
       # Pin the Charm GPG key fingerprint — a DNS attacker swapping
       # repo.charm.sh/apt/gpg.key for a forged key with the same uid
       # would otherwise pass the prior "any fid: present" check.
@@ -362,7 +369,7 @@ main() {
   # 6. Initialize & Apply
   step "Applying Configuration..."
 
-  # ── Auto-migration for v0.2.512 reorg ─────────────────────────────────
+  # ── Auto-migration for v0.2.513 reorg ─────────────────────────────────
   # If the user is upgrading from a pre-0.2.503 install, run the
   # migration script BEFORE `chezmoi apply` so the reorg's source-
   # path moves don't cause chezmoi to delete deployed files.
@@ -371,7 +378,7 @@ main() {
   for migrate_src in "$SOURCE_DIR" "$LEGACY_SOURCE_DIR"; do
     migrate_script="$migrate_src/install/migrate/migrate-v0_2-to-v0_2_503.sh"
     if [[ -x "$migrate_script" ]]; then
-      echo "   Running v0.2.512 migration (idempotent; safe on fresh installs)..."
+      echo "   Running v0.2.513 migration (idempotent; safe on fresh installs)..."
       "$migrate_script" || echo "   migration exited non-zero — continuing apply"
       break
     fi
@@ -443,14 +450,16 @@ main() {
     if [[ -d "$prov_dir" ]]; then
       local script
       # run_once_install_* (shells) first, then numbered run_onchange_* in order.
+      # The fixed globs contain no user-controlled filenames.
+      # shellcheck disable=SC2012
       while IFS= read -r script; do
         [[ -f "$script" ]] || continue
         echo "   → $(basename "$script")"
         if [[ "$script" == *.tmpl ]]; then
-          chezmoi execute-template <"$script" | bash ||
+          chezmoi execute-template <"$script" | DOTFILES_SOURCE_DIR="$SOURCE_DIR" bash ||
             echo "     (step exited non-zero — continuing)"
         else
-          bash "$script" || echo "     (step exited non-zero — continuing)"
+          DOTFILES_SOURCE_DIR="$SOURCE_DIR" bash "$script" || echo "     (step exited non-zero — continuing)"
         fi
       done < <(ls "$prov_dir"/run_once_install_* "$prov_dir"/run_onchange_* 2>/dev/null | sort)
     fi

@@ -1,13 +1,9 @@
 name: Pre-Commit Hooks
 
-# Runs the same `pre-commit` hook chain CI uses, on every PR + on push to
-# main. This makes the linting surface (typos-cli, actionlint, yamllint,
-# markdownlint-cli2, luacheck, stylua, shellcheck, shfmt, hadolint,
-# gitleaks, detect-secrets, the repo-local custom hooks) gate the PR
-# the same way they gate local commits.
-#
-# Added under #866 to enforce the yamllint + markdownlint additions
-# (the other hooks were already CI-enforced via separate workflows).
+# Runs the repository-wide hooks that are deterministic in a single runner.
+# Shell, Lua, container, secret, and custom policy checks are enforced by
+# their dedicated workflows; this job owns YAML, Markdown, spelling, and
+# GitHub Actions linting without duplicating those heavier gates.
 
 on:
   pull_request:

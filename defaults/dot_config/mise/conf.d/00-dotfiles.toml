@@ -56,8 +56,8 @@ eza = "latest"
 gping = "latest"
 ripgrep = "latest"
 ruff = "latest"
-yazi = "latest"
-zellij = "latest"
+yazi = "26.5.6"
+zellij = "0.44.3"
 zoxide = "latest"
 "aqua:twpayne/chezmoi" = "2.72.0"
 "aqua:junegunn/fzf" = "latest"
@@ -69,8 +69,10 @@ zoxide = "latest"
 # It's provided natively by Brewfile.cli (arm64) and by Linux package
 # managers instead.
 "aqua:ollama/ollama" = "latest"
-"aqua:Nukesor/pueue/pueue" = "4.0.3"
-"aqua:Nukesor/pueue/pueued" = "4.0.3"
+"aqua:Nukesor/pueue/pueue" = "4.0.4"
+"aqua:Nukesor/pueue/pueued" = "4.0.4"
+wasmtime = "47.0.3"
+sops = "3.13.3"
 "aqua:dandavison/delta" = "latest"
 fd = "latest"
 "aqua:ClementTsang/bottom" = "latest"
@@ -113,7 +115,7 @@ just = "latest"
 # Nushell (structured-data shell). The bare `nushell` name isn't in
 # mise's tool registry; the aqua: backend resolves it from the official
 # release tarballs.
-"aqua:nushell/nushell" = "latest"
+"aqua:nushell/nushell" = "0.114.1"
 
 [env]
 # Environment variables to set

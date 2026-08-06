@@ -12,8 +12,19 @@
 set -euo pipefail
 
 PATTERN='^[[:space:]]*chmod[[:space:]]+(-R[[:space:]]+)?(777|666)'
+EXCLUDES=(
+  --exclude=check-dangerous-chmod.sh
+  --exclude=test_check_dangerous_chmod.sh
+  --exclude-dir=.git
+  --exclude-dir=tests
+)
 
-if grep -rn --include='*.sh' -E "$PATTERN" . 2>/dev/null | grep -v '^Binary'; then
+if grep -rn \
+  --include='*.sh' \
+  --include='*.bash' \
+  --include='*.zsh' \
+  "${EXCLUDES[@]}" \
+  -E "$PATTERN" . 2>/dev/null | grep -v '^Binary'; then
   echo "ERROR: Dangerous chmod patterns found (777 or 666)." >&2
   echo "Use the minimum permissions actually required; document any exception." >&2
   exit 1

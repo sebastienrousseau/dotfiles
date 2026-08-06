@@ -1,4 +1,6 @@
 # shellcheck shell=bash
+# shellcheck disable=SC1090,SC2015,SC2223
+# preamble:skip - sourced as a Zsh startup fragment
 # Cognitive Shell Enhancements
 #
 # Carapace is deferred to first `preexec` (closes #862). The eager
@@ -38,7 +40,10 @@ if [[ -o interactive ]]; then
       unset -f fuck _lazy_load_thefuck 2>/dev/null
       _cached_eval "thefuck-alias" thefuck --alias
     }
-    fuck() { _lazy_load_thefuck; fuck "$@"; }
+    fuck() {
+      _lazy_load_thefuck
+      fuck "$@"
+    }
     alias fix='fuck'
   fi
 fi

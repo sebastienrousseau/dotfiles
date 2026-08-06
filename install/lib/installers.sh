@@ -42,14 +42,40 @@ download_and_verify_sha256() {
   local checksum_url="$2"
   local dest="$3"
 
-  curl -fsSL -o "$dest" "$url"
-  curl -fsSL -o "${dest}.sha256" "$checksum_url"
+  curl --proto '=https' --tlsv1.2 -fsSL -o "$dest" "$url"
+  curl --proto '=https' --tlsv1.2 -fsSL -o "${dest}.sha256" "$checksum_url"
 
   local expected actual
   expected="$(awk '{print $1}' "${dest}.sha256")"
   actual="$(sha256_file "$dest")"
   if [[ -z "$expected" ]] || [[ "$expected" != "$actual" ]]; then
     die "Checksum verification failed for $dest."
+  fi
+}
+
+archive_paths_are_safe() {
+  local kind="$1" archive="$2" entry
+  local list_cmd=()
+  case "$kind" in
+    tar) list_cmd=(tar -tf "$archive") ;;
+    zip) list_cmd=(unzip -Z -1 "$archive") ;;
+    *) die "Unsupported archive type: $kind" ;;
+  esac
+  while IFS= read -r entry; do
+    [[ -n "$entry" ]] || continue
+    case "$entry" in
+      /* | ../* | */../* | */..) die "Archive contains unsafe path: $entry" ;;
+    esac
+  done < <("${list_cmd[@]}")
+  if [[ "$kind" == "tar" ]] &&
+    tar -tvf "$archive" | awk 'substr($1,1,1) == "l" || substr($1,1,1) == "h" { found=1 } END { exit !found }'; then
+    die "Archive contains links; refusing extraction."
+  fi
+  if [[ "$kind" == "zip" ]]; then
+    command -v zipinfo >/dev/null 2>&1 || die "zipinfo is required for safe ZIP extraction."
+    if zipinfo -l "$archive" | awk 'substr($1,1,1) == "l" { found=1 } END { exit !found }'; then
+      die "ZIP archive contains symbolic links; refusing extraction."
+    fi
   fi
 }
 
@@ -62,9 +88,9 @@ github_release_json() {
     auth_header=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
   fi
   if [[ "$tag" = "latest" ]]; then
-    curl -fsSL "${auth_header[@]}" "https://api.github.com/repos/$repo/releases/latest"
+    curl --proto '=https' --tlsv1.2 -fsSL "${auth_header[@]}" "https://api.github.com/repos/$repo/releases/latest"
   else
-    curl -fsSL "${auth_header[@]}" "https://api.github.com/repos/$repo/releases/tags/$tag"
+    curl --proto '=https' --tlsv1.2 -fsSL "${auth_header[@]}" "https://api.github.com/repos/$repo/releases/tags/$tag"
   fi
 }
 
@@ -106,6 +132,7 @@ install_from_tarball() {
   local tmp_dir
   tmp_dir="$(umask 077 && mktemp -d)"
   download_and_verify_sha256 "$url" "$checksum_url" "$tmp_dir/archive.tar.gz"
+  archive_paths_are_safe tar "$tmp_dir/archive.tar.gz"
   tar -xzf "$tmp_dir/archive.tar.gz" -C "$tmp_dir"
 
   local bin_path
@@ -131,8 +158,8 @@ install_from_tarball_checksums() {
 
   local tmp_dir
   tmp_dir="$(umask 077 && mktemp -d)"
-  curl -fsSL -o "$tmp_dir/archive.tar.gz" "$url"
-  curl -fsSL -o "$tmp_dir/checksums.txt" "$checksums_url"
+  curl --proto '=https' --tlsv1.2 -fsSL -o "$tmp_dir/archive.tar.gz" "$url"
+  curl --proto '=https' --tlsv1.2 -fsSL -o "$tmp_dir/checksums.txt" "$checksums_url"
 
   local expected actual
   expected="$(awk -v f="$(basename "$url")" '$2==f {print $1}' "$tmp_dir/checksums.txt")"
@@ -141,6 +168,7 @@ install_from_tarball_checksums() {
     rm -rf "$tmp_dir"
     die "Checksum verification failed for $bin_name."
   fi
+  archive_paths_are_safe tar "$tmp_dir/archive.tar.gz"
   tar xf "$tmp_dir/archive.tar.gz" -C "$tmp_dir"
 
   local bin_path
@@ -167,8 +195,8 @@ install_from_zip() {
 
   local tmp_dir
   tmp_dir="$(umask 077 && mktemp -d)"
-  curl -fsSL -o "$tmp_dir/archive.zip" "$url"
-  curl -fsSL -o "$tmp_dir/archive.zip.sha256" "$checksum_url"
+  curl --proto '=https' --tlsv1.2 -fsSL -o "$tmp_dir/archive.zip" "$url"
+  curl --proto '=https' --tlsv1.2 -fsSL -o "$tmp_dir/archive.zip.sha256" "$checksum_url"
 
   local expected actual
   expected="$(awk '{print $1}' "$tmp_dir/archive.zip.sha256")"
@@ -177,6 +205,7 @@ install_from_zip() {
     rm -rf "$tmp_dir"
     die "Checksum verification failed for zip archive."
   fi
+  archive_paths_are_safe zip "$tmp_dir/archive.zip"
   unzip -o "$tmp_dir/archive.zip" -d "$tmp_dir"
   mkdir -p "$install_dir"
 

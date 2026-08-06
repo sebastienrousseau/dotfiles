@@ -12,9 +12,9 @@ This document tracks what is supported on Windows-native PowerShell 7.4 LTS / 7.
 
 | Tier | Meaning | Examples |
 |---|---|---|
-| **Full** | Native PowerShell path; tested in CI on `windows-latest`. | `dot version`, `dot help`, `dot agents check` (via WSL-bash fallback). |
+| **Full** | Native PowerShell path; tested in CI on `windows-latest`. | `dot version`, `dot help`, `dot agents check`. |
 | **WSL-bridged** | Runs under WSL2 bash with the same UX as Linux. | All `dot` subcommands, the test suite, the cold-start bench. |
-| **Stub** | The command exists as a PowerShell entry-point but delegates to bash. | `dot init`, `dot fleet apply` (require chezmoi/ssh; both Windows-installable). |
+| **Bash-bridged** | The PowerShell dispatcher delegates to Git Bash or WSL bash and fails clearly when bash is unavailable. | `dot registry`, `dot fleet apply`, Unix-specific diagnostics. |
 | **N/A** | The command targets a Unix-only surface and is not exposed on PowerShell. | Wallpaper-driven theming via macOS `defaults`; Linux-only `lock-configs.sh`. |
 
 ## Command-by-command matrix
@@ -22,26 +22,24 @@ This document tracks what is supported on Windows-native PowerShell 7.4 LTS / 7.
 | Command | Windows-native | WSL2 | macOS | Linux |
 |---|---|---|---|---|
 | `dot version` | **Full (native)** — `Get-DotVersion` cmdlet in `scripts/dot/powershell/Dot.psm1`; reads `.chezmoidata.toml` directly, no bash | Full | Full | Full |
-| `dot help` | **Full (native)** — `Invoke-DotHelp` cmdlet; `dot help <subcmd>` still bash-bridged | Full | Full | Full |
-| `dot doctor` | Full (subset of checks; some Unix-only checks return N/A) | Full | Full | Full |
-| `dot init <user>` | Full (requires `chezmoi` on PATH — install via `scoop install chezmoi`) | Full | Full | Full |
+| `dot help` | **Full (native)** — `Invoke-DotHelp`; detailed Unix command help remains bash-bridged | Full | Full | Full |
+| `dot status` | **Full (native)** — structured clean/drifted result from chezmoi | Full | Full | Full |
+| `dot diff` / `apply` / `sync` / `update` | **Full (native)** — direct, exit-code-checked chezmoi operations | Full | Full | Full |
+| `dot add` / `remove` / `init` / `cd` | **Full (native)** — direct chezmoi operations and source-path lookup | Full | Full | Full |
+| `dot doctor` | **Full (native baseline)** — PowerShell, chezmoi, git, repo data, and module checks; Unix-only diagnostics are bash-bridged | Full | Full | Full |
 | `dot agents check` | **Full (native)** — `Test-DotAgentsSync` cmdlet; CI smoke test runs the cmdlet directly | Full | Full | Full |
-| `dot agents render` / `list` | Stub (bash-bridged — `render` is a multi-harness mustache-equivalent rewrite, tracked as a separate ticket) | Full | Full | Full |
-| `dot fleet status` / `drift` / `events` | Full | Full | Full | Full |
-| `dot fleet apply` | Stub (bash-bridged + requires Windows OpenSSH `ssh.exe` on PATH; no native pwsh-side test in CI yet — tracked in ROADMAP §C5 follow-up) | Full | Full | Full |
-| `dot fleet namespace set` | Full | Full | Full | Full |
-| `dot registry list` / `search` / `info` | Full | Full | Full | Full |
-| `dot registry install <name>` | Scaffold (no behavior yet on any platform) | Scaffold | Scaffold | Scaffold |
-| `dot agent` / `dot mode` | Full | Full | Full | Full |
-| `dot ai` / `dot ai-setup` / `dot ai-query` | Full | Full | Full | Full |
-| AI bridges (`cl`, `codex`, `copilot`, `gemini`, `goose`, etc.) | Full when the underlying AI CLI is installed (scoop / winget / native) | Full | Full | Full |
+| `dot agents list` | **Full (native)** — structured harness/path/rendered records | Full | Full | Full |
+| `dot agents render` | Bash-bridged | Full | Full | Full |
+| `dot env list` | **Full (native)** — mise text or JSON inventory | Full | Full | Full |
+| `dot env emit` | Bash-bridged | Full | Full | Full |
+| `dot fleet status` | **Full (native)** — node, version, OS, architecture, and drift | Full | Full | Full |
+| `dot fleet drift` / `events` / `apply` / `namespace` | Bash-bridged | Full | Full | Full |
+| `dot registry list` / `search` / `info` / `install` | Bash-bridged; Unix path is verified, checksum-pinned, and preview-first | Full | Full | Full |
+| `dot agent` / `mode` / AI commands | Bash-bridged | Full | Full | Full |
 | `dot lint` | WSL-bridged (shellcheck/shfmt are Unix-native) | Full | Full | Full |
-| `dot perf` | Full (uses pwsh `Measure-Command` on the PS path) | Full | Full | Full |
-| `dot health` | Full | Full | Full | Full |
-| `dot tools` | Full (uses winget/scoop on Windows; brew/apt elsewhere) | Full | Full | Full |
-| `dot theme` (wallpaper-driven) | Stub (Windows wallpaper API needs additional work) | Stub (X11 only — Wayland support pending) | Full | Full (X11 only) |
-| `dot wallpaper` | Stub | Stub | Full | Full |
-| `dot security firewall` | Full (Windows Defender Firewall via `Set-NetFirewallProfile`) | N/A | Full (pf) | Full (ufw/firewalld) |
+| `dot perf` / `health` / `tools` | Bash-bridged | Full | Full | Full |
+| `dot theme` / `wallpaper` | N/A on native Windows | Limited | Full | Full (desktop-dependent) |
+| `dot security firewall` | Bash-bridged; no native Defender mutation | N/A | Full (pf) | Full (ufw/firewalld) |
 | `dot security lock-configs` | N/A (Windows ACL model differs; tracked) | N/A | Full (`chflags uchg`) | Full (`chattr +i`) |
 | Shell startup integration | Full (`Microsoft.PowerShell_profile.ps1` ships) | Full (zsh, bash, fish) | Full (zsh, bash, fish, nu) | Full (zsh, bash, fish, nu) |
 
@@ -51,27 +49,30 @@ This document tracks what is supported on Windows-native PowerShell 7.4 LTS / 7.
 |---|---|
 | `dot version` exits 0 | windows-latest, ubuntu-latest, macos-latest, macos-14 |
 | `dot help` exits 0 | windows-latest, ubuntu-latest, macos-latest, macos-14 |
-| `dot agents check` exits 0 | windows-latest (via bash on PATH), ubuntu-latest, macos-latest, macos-14 |
+| `dot agents check` exits 0 | windows-latest (native), ubuntu-latest, macos-latest, macos-14 |
+| Native module import, agent-body sync, harness inventory, doctor baseline, and chezmoi diff | windows-latest |
+| Native dispatcher version, help, and agents check | windows-latest |
 | PowerShell ≥ 7.4 | windows-latest (smoke test at `tools/ci/windows-smoke-test.ps1`) |
 | PSScriptAnalyzer Error-level findings | windows-latest |
 | `chezmoi --version` exits 0 | windows-latest (via scoop), all Unix matrices |
 | `bash tools/ci/dot-cli-startup-bench.sh` median < 200ms | macos-latest |
 | `bash tools/ci/dot-cli-startup-bench.sh` median < 150ms | ubuntu-latest |
 
-## Known parity gaps (deferred to follow-up PRs)
+## Known parity gaps
 
 These are scoped in [`ROADMAP_2026 §C5`](../operations/ROADMAP_2026.md) but not in this PR's scope:
 
-1. **Native PowerShell `dot.ps1` dispatcher.** Today the Windows path either uses `bash dot` (when bash is on PATH via Git for Windows / WSL) or shells out via `pwsh -Command`. A truly idiomatic PowerShell dispatcher with native cmdlet semantics (verb-noun naming, `[CmdletBinding()]`, pipeline support) is a separate effort.
-2. **Wallpaper-driven theming on Windows.** Requires SystemParametersInfo W32 API or `Set-ItemProperty HKCU:\Control Panel\Desktop`. macOS-native today.
-3. **`dot security lock-configs` for Windows.** Needs an ACL/EFS-based equivalent of `chattr +i` / `chflags uchg`. Not in this PR's scope; documented here so it doesn't get re-discovered.
-4. **Native Windows installer signing.** The repo signs the bootstrap tarball via Cosign keyless; a SignTool-signed `install.ps1` for code-signing-enforced enterprises is a future enhancement.
+1. **Registry and fleet mutation.** Verified registry installation and multi-node fleet application still use the explicit bash bridge.
+2. **Wallpaper-driven theming.** Native Windows wallpaper extraction and application are not implemented.
+3. **Windows config locking.** There is no ACL/EFS equivalent of the Unix immutable-file operation.
+4. **Authenticode signing.** Release provenance covers the archive, but `install.ps1` and `dot.ps1` are not Authenticode-signed for enterprise execution policies.
 
 ## Source-of-truth files
 
 - `.github/workflows/ci.yml` — `test-windows` job (pwsh + scoop + chezmoi + smoke)
 - `tools/ci/windows-smoke-test.ps1` — the actual gate
-- `dot_config/powershell/Microsoft.PowerShell_profile.ps1` — the deployed PowerShell profile (if present)
+- `bin/dot.ps1` and `scripts/dot/powershell/Dot.psm1` — native dispatcher and cmdlets
+- `defaults/dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl` — deployed profile
 - `scripts/dot/lib/platform.sh` — the dot_path_to_unix/native bridge (H9 audit fix)
 
 ## Why this matters

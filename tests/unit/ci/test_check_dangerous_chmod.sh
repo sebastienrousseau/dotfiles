@@ -36,6 +36,12 @@ assert_file_contains "$SCRIPT_FILE" "777" "must scan for chmod 777"
 test_start "rejects_chmod_666"
 assert_file_contains "$SCRIPT_FILE" "666" "must scan for chmod 666"
 
+test_start "excludes_test_fixtures"
+assert_file_contains "$SCRIPT_FILE" "--exclude-dir=tests" "must exclude intentional test fixtures"
+
+test_start "scans_all_shell_extensions"
+assert_file_contains "$SCRIPT_FILE" "--include='*.zsh'" "must scan zsh scripts"
+
 # Functional: scan a known-clean tree (HOME, sandboxed) — should exit 0.
 test_start "passes_on_clean_tree"
 mkdir -p "$HOME/clean"
@@ -43,7 +49,7 @@ cat >"$HOME/clean/safe.sh" <<'EOF'
 #!/usr/bin/env bash
 chmod 755 some-file
 EOF
-pushd "$HOME/clean" >/dev/null
+pushd "$HOME/clean" >/dev/null || exit 1
 if bash "$SCRIPT_FILE" >/dev/null 2>&1; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
@@ -51,7 +57,7 @@ else
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should exit 0 on clean tree"
 fi
-popd >/dev/null
+popd >/dev/null || exit 1
 
 # Functional: scan a tree with chmod 777 — must exit non-zero.
 test_start "rejects_chmod_777_in_tree"
@@ -59,7 +65,7 @@ cat >"$HOME/clean/bad.sh" <<'EOF'
 #!/usr/bin/env bash
 chmod 777 /tmp/insecure
 EOF
-pushd "$HOME/clean" >/dev/null
+pushd "$HOME/clean" >/dev/null || exit 1
 if ! bash "$SCRIPT_FILE" >/dev/null 2>&1; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
@@ -67,6 +73,6 @@ else
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should reject chmod 777"
 fi
-popd >/dev/null
+popd >/dev/null || exit 1
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

@@ -94,11 +94,34 @@ Assert-Step 'Get-DotVersion (native)' {
   if ($v -notmatch '^\d+\.\d+\.\d+$') { throw "unexpected version: $v" }
 }
 
-Assert-Step 'Test-DotAgentsSync (native — AGENTS.md ↔ CLAUDE.md)' {
+Assert-Step 'Test-DotAgentsSync (native AGENTS.md to CLAUDE.md)' {
   $env:DOT_REPO_ROOT = $RepoRoot
   Import-Module (Join-Path $RepoRoot 'scripts/dot/powershell/Dot.psm1') -Force
   if (-not (Test-DotAgentsSync)) {
     throw 'AGENTS.md not in sync with CLAUDE.md'
+  }
+}
+
+Assert-Step 'Get-DotAgents returns every native harness target' {
+  $targets = @(Get-DotAgents)
+  if ($targets.Count -lt 11) { throw "expected at least 11 harnesses, got $($targets.Count)" }
+  if (-not ($targets.Harness -contains 'agents-md')) { throw 'agents-md harness missing' }
+}
+
+Assert-Step 'Invoke-DotDoctor reports a healthy native baseline' {
+  $checks = @(Invoke-DotDoctor -AsObject)
+  $failed = @($checks | Where-Object { -not $_.Ok })
+  if ($failed.Count -gt 0) { throw "failed checks: $($failed.Name -join ', ')" }
+}
+
+Assert-Step 'Invoke-DotChezmoi diff is native' {
+  $destDir = Join-Path $env:RUNNER_TEMP "chezmoi-diff-$([System.IO.Path]::GetRandomFileName())"
+  try {
+    New-Item -ItemType Directory -Path $destDir | Out-Null
+    Invoke-DotChezmoi -Operation diff -Arguments @('--source', $RepoRoot, '--destination', $destDir)
+  }
+  finally {
+    if (Test-Path $destDir) { Remove-Item -Recurse -Force $destDir -ErrorAction SilentlyContinue }
   }
 }
 
@@ -113,6 +136,13 @@ Assert-Step 'dot.ps1 dispatcher: agents check subcommand' {
   $ps1 = Join-Path $RepoRoot 'bin/dot.ps1'
   $out = & pwsh -NoProfile -File $ps1 'agents' 'check' 2>&1
   if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
+}
+
+Assert-Step 'dot.ps1 dispatcher: native help' {
+  $ps1 = Join-Path $RepoRoot 'bin/dot.ps1'
+  $out = & pwsh -NoProfile -File $ps1 'help' 2>&1
+  if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
+  if (($out -join "`n") -notmatch 'Native PowerShell commands') { throw 'native help marker missing' }
 }
 
 # Native Windows: validate every chezmoi template renders without needing
@@ -179,7 +209,14 @@ Assert-Step 'PSScriptAnalyzer over tools/ci/*.ps1' {
   }
   # `@(...)` so a single-result return value is still an array, otherwise
   # `.Count` on a $null / scalar trips the strict-mode property check.
-  $issues = @(Invoke-ScriptAnalyzer -Path (Join-Path $RepoRoot 'scripts/ci') -Severity Error -ErrorAction Stop)
+  $paths = @(
+    (Join-Path $RepoRoot 'tools/ci'),
+    (Join-Path $RepoRoot 'bin/dot.ps1'),
+    (Join-Path $RepoRoot 'scripts/dot/powershell/Dot.psm1')
+  )
+  $issues = @($paths | ForEach-Object {
+    Invoke-ScriptAnalyzer -Path $_ -Recurse -Severity Error -ErrorAction Stop
+  })
   if ($issues.Count -gt 0) {
     $msg = ($issues | ForEach-Object { "$($_.RuleName) at $($_.ScriptPath):$($_.Line)" }) -join '; '
     throw "PSScriptAnalyzer found $($issues.Count) error(s): $msg"

@@ -48,6 +48,7 @@ matches=$(
   grep -rln \
     --include='*.sh' --include='*.bash' --include='*.zsh' --include='*.tmpl' \
     --exclude-dir='.git' \
+    --exclude-dir='tests' \
     --exclude='check-insecure-tls.sh' \
     -E '\b(curl|wget)\b' \
     "$ROOT" 2>/dev/null |

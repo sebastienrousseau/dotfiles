@@ -7,3 +7,7 @@ c26337708b2c87e0f240c643d203da45eb687aff:install.sh:generic-api-key:154
 e01b6d177caf67cf388abe8d84ad56e2dfa7f770:lib/paths/tauri/tauri.paths.sh:generic-api-key:13
 # MAINTAINERS.md: GPG disclosure key fingerprint for the project owner (public, not secret)
 d03171b2fd8575a13d37f052a3988a033fa9e0f8:MAINTAINERS.md:generic-api-key:12
+# PR #987: pinned SHA-256 digest was initially stored in a key-named variable.
+# The variable is now named github_digest_expected; retain this exact historical
+# fingerprint so PR history scans do not classify the public digest as a secret.
+5d64f60abe98b2df3a0550c5d8a74b28cd01731e:install/provision/run_onchange_10-linux-packages.sh.tmpl:generic-api-key:90

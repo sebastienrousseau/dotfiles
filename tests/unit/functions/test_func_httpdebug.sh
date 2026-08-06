@@ -33,6 +33,50 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
+# shellcheck source=/dev/null
+source "$FUNC_FILE"
+
+test_start "httpdebug_help_executes"
+if httpdebug --help >/dev/null; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
+fi
+
+test_start "httpdebug_no_url_fails_cleanly"
+if httpdebug >/dev/null; then
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: missing URL was accepted"
+else
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+fi
+
+# Invoked indirectly by the sourced function.
+# shellcheck disable=SC2317
+curl() {
+  cat <<'EOF'
+IP Address: 192.0.2.1
+DNS Lookup: 0.001
+TCP Connection: 0.002
+SSL Handshake: 0.003
+Server Processing: 0.004
+Time to First Byte: 0.005
+Total Time: 0.006
+EOF
+}
+test_start "httpdebug_formats_timing_output"
+if httpdebug https://example.test >/dev/null; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
+fi
+unset -f curl
+
 # Slice 2: drive real line coverage of the script under test
 cov_exercise_script "$FUNC_FILE"
 

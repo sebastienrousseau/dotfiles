@@ -20,7 +20,7 @@
 
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$REPO_ROOT"
 
 mode="write"
@@ -51,7 +51,7 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 2
 fi
 
-payload="$(curl -sSfL "$api")" || {
+payload="$(curl --proto '=https' --tlsv1.2 -fsSL --connect-timeout 10 --max-time 30 "$api")" || {
   echo "Scorecard API unreachable: $api" >&2
   exit 2
 }
@@ -75,7 +75,7 @@ trap 'rm -f "$block"' EXIT
         | [.name, (.score|tostring), ((.reason // "") | gsub("\\|"; "\\|") | .[0:100])]
         | "| " + (. | join(" | ")) + " |"'
   # shellcheck disable=SC2016 # backticks here are markdown code-spans, not subshells
-  printf '\n_Refresh: `scripts/qa/scorecard-snapshot.sh` · CI check: `lint/scorecard-snapshot` (planned)._\n'
+  printf '\n_Refresh: `scripts/qa/scorecard-snapshot.sh` · Monitoring: `.github/workflows/scorecard.yml`._\n'
   printf '<!-- END scorecard-snapshot -->\n'
 } >"$block"
 

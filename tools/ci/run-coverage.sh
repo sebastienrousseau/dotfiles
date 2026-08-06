@@ -284,8 +284,10 @@ def is_skipped(abs_path: Path) -> bool:
         return False
     return rel in SKIP_PATHS
 
-# Pattern: +@COV@:<lineno>:<source>:@
-hit_re = re.compile(r"^\+@COV@:(\d+):([^:]+):@")
+# Bash adds one xtrace prefix for each nested execution context. Count both
+# top-level `+@COV@` records and `++@COV@`/`+++@COV@` records emitted from
+# functions inside command substitutions and subshells.
+hit_re = re.compile(r"^\++@COV@:(\d+):([^:]+):@")
 
 # files[abs_path][line] = total hits
 files = defaultdict(lambda: defaultdict(int))

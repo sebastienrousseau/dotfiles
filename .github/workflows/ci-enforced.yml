@@ -109,6 +109,8 @@ jobs:
             echo "::error::Found potentially unsafe curl|sh pattern"
             exit 1
           fi
+          bash tools/ci/check-remote-installers.sh
+          bash tools/ci/check-registry.sh
           # Check for unverified downloads
           if rg -n "wget.*-O.*-.*\|.*sh" --type sh .; then
             echo "::error::Found potentially unsafe wget pattern"

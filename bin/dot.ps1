@@ -1,10 +1,8 @@
 #!/usr/bin/env pwsh
 # dot.ps1 — Windows-native PowerShell dispatcher for the dotfiles CLI.
 #
-# Routes subcommands to the native PowerShell module
-# (scripts/dot/powershell/Dot.psm1) where one exists, falls back to
-# the bash dispatcher (bin/dot) for everything
-# else.
+# Routes daily commands to the native PowerShell module and uses an
+# explicit bash bridge for Unix-specific orchestration.
 #
 # Goals: zero-bash UX for the supported subcommands; transparent
 # bash fallback for the rest (mirrors the existing
@@ -13,7 +11,9 @@
 # Subcommand routing
 #   version | -v | --version  →  Get-DotVersion        (native)
 #   help    | -h | --help     →  Invoke-DotHelp        (native)
-#   agents check              →  Test-DotAgentsSync    (native)
+#   status/diff/apply/sync    →  native chezmoi calls
+#   doctor/env/fleet          →  native PowerShell views
+#   agents check/list         →  native PowerShell checks
 #   <anything else>           →  bash executable_dot   (fallback)
 #
 # Exit codes
@@ -60,7 +60,12 @@ The bash fallback requires 'bash' on PATH (Git for Windows or WSL).
 Native PowerShell commands currently supported:
   dot version
   dot help
-  dot agents check
+  dot status | diff | apply | sync | update
+  dot add | remove | cd | init
+  dot doctor
+  dot env list
+  dot agents check | list
+  dot fleet status
 
 For everything else, install:
   scoop install gh git
@@ -110,7 +115,56 @@ switch ($cmd) {
                 exit 1
             }
         }
+        if ($rest.Count -eq 0 -or $rest[0] -eq 'list') {
+            Get-DotAgents | Format-Table -AutoSize
+            exit 0
+        }
         Invoke-BashFallback agents @rest
+    }
+    'status' {
+        Get-DotStatus
+        exit 0
+    }
+    'diff' {
+        Invoke-DotChezmoi -Operation diff -Arguments $rest
+        exit 0
+    }
+    { $_ -in 'apply', 'sync' } {
+        Invoke-DotChezmoi -Operation apply -Arguments $rest
+        exit 0
+    }
+    'update' {
+        Invoke-DotChezmoi -Operation update -Arguments $rest
+        exit 0
+    }
+    { $_ -in 'add', 'remove', 'init' } {
+        Invoke-DotChezmoi -Operation $cmd -Arguments $rest
+        exit 0
+    }
+    'cd' {
+        Get-DotSourcePath
+        exit 0
+    }
+    'doctor' {
+        if (Invoke-DotDoctor) { exit 0 }
+        exit 1
+    }
+    'env' {
+        if ($rest.Count -eq 0 -or $rest[0] -eq 'list') {
+            $json = $rest -contains '--json'
+            Get-DotEnvironment -AsJson:$json
+            exit 0
+        }
+        Invoke-BashFallback env @rest
+    }
+    'fleet' {
+        if ($rest.Count -eq 0 -or $rest[0] -eq 'status') {
+            $json = $rest -contains '--json'
+            if ($json) { Get-DotFleetStatus -AsJson }
+            else { Get-DotFleetStatus | Format-List }
+            exit 0
+        }
+        Invoke-BashFallback fleet @rest
     }
     default {
         Invoke-BashFallback $cmd @rest

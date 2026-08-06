@@ -29,7 +29,7 @@
 
 httpdebug() {
   # Display help menu
-  if [[ "$1" == "--help" ]]; then
+  if [[ "${1:-}" == "--help" ]]; then
     echo "httpdebug: HTTP Debugging Utility"
     echo
     echo "Usage:"
@@ -61,7 +61,7 @@ httpdebug() {
   fi
 
   # Check if a URL or options are provided
-  if [[ -z "$1" ]]; then
+  if [[ -z "${1:-}" ]]; then
     echo "[ERROR] No URL provided. Use 'httpdebug --help' for usage information." >&2
     return 1
   fi

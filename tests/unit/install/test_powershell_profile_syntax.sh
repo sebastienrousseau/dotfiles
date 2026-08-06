@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# shellcheck disable=SC1090,SC1091,SC2034
+# shellcheck disable=SC1090,SC1091,SC2016,SC2034
 # Static-syntax test for the dotfiles PowerShell profile.
 #
 # Runs portably on Linux + macOS dev hosts (where pwsh may or may not
@@ -59,11 +59,12 @@ fi
 # Behavioural: parse with pwsh if available
 # -----------------------------------------------------------------------------
 
-if command -v pwsh >/dev/null 2>&1; then
+pwsh_version="$(pwsh -NoProfile -Command '$PSVersionTable.PSVersion.Major' 2>/dev/null || true)"
+if [[ "$pwsh_version" =~ ^[0-9]+$ ]]; then
   test_start "profile_parses_with_pwsh"
   # Render the template (strip chezmoi `{{ ... }}` blocks) then parse.
   rendered=$(mktemp -t pwsh-profile.XXXXXX.ps1)
-  sed -E 's/\{\{[^}]+\}\}/0.0.0-fallback/g' "$PROFILE" > "$rendered"
+  sed -E 's/\{\{[^}]+\}\}/0.0.0-fallback/g' "$PROFILE" >"$rendered"
   if pwsh -NoProfile -Command "
       \$ErrorActionPreference = 'Stop'
       try {

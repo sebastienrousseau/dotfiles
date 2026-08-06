@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
+# Regression for: 7076b6b1
 # Regression: `dot <cmd> --help` and `dot <cmd> -h` MUST short-circuit
 # to `dot help <cmd>` for EVERY registered top-level command, and for
 # every documented two-word subcommand — WITHOUT triggering any of
