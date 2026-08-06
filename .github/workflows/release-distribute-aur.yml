@@ -93,7 +93,7 @@ jobs:
         run: |
           set -euo pipefail
           if [[ -z "${AUR_SSH_KEY}" ]]; then
-            echo "::error::Missing AUR_SSH_KEY secret. See docs/security/AUR_PUBLISHING.md for setup."
+            echo "::error::Missing AUR_SSH_KEY secret. See docs/operations/RELEASE_PIPELINE.md#secrets-used for setup."
             exit 1
           fi
           install -d -m 700 ~/.ssh
