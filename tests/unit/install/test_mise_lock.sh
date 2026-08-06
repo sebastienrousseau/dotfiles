@@ -18,7 +18,7 @@ test_start "mise_lock_enabled"
 assert_file_contains "$config" "lockfile = true" "mise consumes the committed lockfile"
 
 test_start "mise_project_config_has_no_mutable_versions"
-if rg -n '= "(latest|nightly|lts)"' "$config" >/dev/null; then
+if grep -En '= "(latest|nightly|lts)"' "$config" >/dev/null; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 else
@@ -37,7 +37,8 @@ for platform in linux-arm64 linux-x64 macos-arm64 macos-x64 windows-x64; do
 done
 
 test_start "mise_lock_has_sha256_metadata"
-if [[ "$(rg -c '^checksum = "sha256:[0-9a-f]{64}"$' "$lock")" -ge 50 ]]; then
+checksum_count="$(grep -Ec '^checksum = "sha256:[0-9a-f]{64}"$' "$lock" || true)"
+if [[ "$checksum_count" -ge 50 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
