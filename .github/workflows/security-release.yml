@@ -135,7 +135,10 @@ jobs:
     # release, so downstream verifiers don't need to enumerate.
     if: github.event_name == 'workflow_dispatch' || github.event.action == 'published'
     runs-on: ubuntu-latest
-    needs: [sbom]
+    # Provenance is itself a release asset, so the manifest must wait until
+    # the generator uploads it. Running these jobs in parallel leaves the
+    # signed manifest incomplete and creates a verification race.
+    needs: [sbom, provenance]
     permissions:
       contents: write   # upload manifest + sig + cert
       id-token: write   # OIDC for Cosign keyless
@@ -293,10 +296,9 @@ jobs:
           echo "SBOM hash verified"
 
       - name: Verify provenance asset exists on release
-        if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ inputs.release_tag || github.event.release.tag_name }}
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
