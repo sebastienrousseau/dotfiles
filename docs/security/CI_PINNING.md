@@ -12,6 +12,14 @@ Every external dependency the CI pipeline consumes must be pinned by
 3. **Container base images** — `FROM image:tag@sha256:<digest>` (closed by [#886](https://github.com/sebastienrousseau/dotfiles/pull/886)).
 4. **Release binaries downloaded at build time** — `curl … && echo "<sha256> ..." | sha256sum -c` (closed by [#888](https://github.com/sebastienrousseau/dotfiles/pull/888)).
 
+The sole exception is the SLSA generic reusable workflow. Its bootstrap
+validates that the caller reference has the form `refs/tags/vX.Y.Z` and
+fails when invoked through a bare commit SHA. Therefore
+`generator_generic_slsa3.yml` is pinned to the exact release tag
+`v2.1.0`; the corresponding commit SHA is recorded beside the call site
+and must be verified before any tag bump. OpenSSF Scorecard explicitly
+exempts the SLSA generator from its SHA-pinning check for this constraint.
+
 ## Why SHA-pin reusable workflows
 
 When `ci.yml` calls a reusable via `./.github/workflows/reusable-X.yml`,

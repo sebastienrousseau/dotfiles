@@ -28,6 +28,15 @@ test_start "release_signing_asset_manifest"
 assert_file_contains "$SEC" "ALL_SHA256SUMS" "builds a SHA256SUMS manifest over release assets"
 
 # ── 2. SLSA build provenance for the release artefacts ──────────────────────
+test_start "release_slsa_generator_uses_required_tag_ref"
+assert_file_contains \
+  "$SEC" \
+  "generator_generic_slsa3.yml@v2.1.0" \
+  "SLSA generator uses its required version-tag reference"
+assert_output_not_contains \
+  "generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a" \
+  "cat '$SEC'"
+
 test_start "release_provenance_attestation"
 assert_file_exists "$PKG" "release-package workflow exists"
 assert_file_contains "$PKG" "actions/attest-build-provenance" "attests build provenance"
