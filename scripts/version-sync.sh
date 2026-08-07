@@ -32,6 +32,7 @@ EXCLUDE_FILES=(
   "docs/operations/VERSION_SYNC.md"
   "docs/operations/RFC_v0_2_503_reorganization.md"
   "docs/operations/HARD_AUDIT_2026.md"
+  "docs/operations/COVERAGE.md"
   "docs/reference/ALIASES_DEPRECATIONS.md"
 
   # Security docs — INSTALL_VERIFICATION + CI_PINNING + SCORECARD
