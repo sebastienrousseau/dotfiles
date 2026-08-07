@@ -36,6 +36,14 @@ assert_file_contains \
 assert_output_not_contains \
   "generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a" \
   "cat '$SEC'"
+assert_file_contains \
+  "$SEC" \
+  "needs: [sbom, provenance]" \
+  "signed manifest waits for provenance upload"
+assert_file_contains \
+  "$SEC" \
+  "RELEASE_TAG: \${{ inputs.release_tag || github.event.release.tag_name }}" \
+  "dispatch integrity check targets the requested release"
 
 test_start "release_provenance_attestation"
 assert_file_exists "$PKG" "release-package workflow exists"
