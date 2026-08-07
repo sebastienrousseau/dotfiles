@@ -8,9 +8,10 @@ date: 2026-05-24
 End-to-end flow from `git tag v0.2.503 && git push --tags` to a fully
 signed, distributed release on GitHub + Homebrew + Scoop + AUR.
 
-Five workflows are involved, each scoped to one job and triggered off
-either `release.created` or `release.published`. They run in parallel
-where dependencies allow.
+Release workflows are triggered by either `release.created` or
+`release.published`. Packaging starts at creation; distribution and the
+single security chain start at publication and run in parallel where
+dependencies allow.
 
 ```
             git push --tags                       (you)
@@ -19,26 +20,20 @@ where dependencies allow.
        ┌────────────────────────────┐
        │  GitHub creates Release    │ (auto, from tag)
        └─┬──────────────────────────┘
-         │ on: release.created
-         ▼
-   ┌─────────────────────────────┐   ┌─────────────────────────────┐
-   │  release-package-dot.yml    │   │  security-release.yml (sbom)│
-   │  → dot-VERSION.tar.gz       │   │  → SBOM + cosign sig + cert │
-   │  → dot-VERSION.zip          │   │  → SLSA L3 provenance       │
-   └─────────────┬───────────────┘   └──────────────┬──────────────┘
-                 │ uploaded to release              │
-                 │                                  │
-                 │ on: release.published            │ on: release.published
-                 │ (after human "publish" click,    │ (same trigger)
-                 │  or auto if Release was created  │
-                 │  with assets+published in one)   │
+         ├── on: release.created
+         │       └── release-package-dot.yml
+         │           → dot-VERSION.tar.gz + .zip
+         │
+         └── on: release.published
+                 │
+                 ├──────────────────────────────────┐
                  ▼                                  ▼
    ┌─────────────────────────────┐   ┌─────────────────────────────┐
    │  release-distribute-*.yml   │   │  security-release.yml       │
-   │  ┌─────────────────────┐    │   │  (manifest job)             │
+   │  ┌─────────────────────┐    │   │  → SBOM + provenance        │
    │  │ homebrew → tap PR   │    │   │  → ALL_SHA256SUMS           │
    │  │ scoop    → bucket PR│    │   │  → cosign sig + cert        │
-   │  │ aur      → AUR push │    │   │                             │
+   │  │ aur      → AUR push │    │   │  → verify full bundle       │
    │  └─────────────────────┘    │   └─────────────────────────────┘
    └─────────────────────────────┘
                  │
@@ -54,30 +49,33 @@ where dependencies allow.
 | Workflow | Trigger | Owns | Outputs |
 |---|---|---|---|
 | `release-package-dot.yml` | `release.created`, dispatch | Build deterministic `dot-VERSION.{tar.gz,zip}` from `bin/`, `lib/`, `share/`, completions. | Two release assets. |
-| `security-release.yml` (sbom job) | `release.created`, dispatch | Generate SPDX SBOM via anchore/sbom-action. Cosign keyless sign the SBOM. | `dotfiles-sbom.spdx.json` + `.sig` + `.pem`. |
+| `security-release.yml` (sbom job) | `release.published`, dispatch | Generate SPDX SBOM via anchore/sbom-action. Cosign keyless sign the SBOM. | `dotfiles-sbom.spdx.json` + `.sig` + `.pem`. |
 | `security-release.yml` (provenance job) | needs sbom | SLSA L3 provenance via slsa-framework/slsa-github-generator. | `dotfiles-sbom.spdx.json.intoto.jsonl`. |
-| `security-release.yml` (manifest job) | `release.published`, dispatch | Build `ALL_SHA256SUMS` over every release asset, Cosign-sign it. | `ALL_SHA256SUMS` + `.sig` + `.pem`. |
+| `security-release.yml` (manifest job) | needs provenance + complete asset set | Build `ALL_SHA256SUMS` over every release asset, Cosign-sign it, and verify its signature and digests. | `ALL_SHA256SUMS` + `.sig` + `.pem`. |
 | `release-distribute-homebrew.yml` | `release.published`, dispatch | Hash `dot-VERSION.tar.gz`, regenerate `install/homebrew/dot.rb`, push branch + PR to `sebastienrousseau/homebrew-tap`. | One PR on the tap repo. |
 | `release-distribute-scoop.yml` | `release.published`, dispatch | Hash `dot-VERSION.zip`, rewrite `install/scoop/dot.json` via jq (both 64bit + arm64 point at same zip), PR to `sebastienrousseau/scoop-bucket`. | One PR on the bucket repo. |
 | `release-distribute-aur.yml` | `release.published`, dispatch | Hash `dot-VERSION.tar.gz`, rewrite `pkgver` + `sha256sums` in `install/aur/PKGBUILD`, regenerate `.SRCINFO` via dockerised `makepkg`, push to `ssh://aur@aur.archlinux.org/dot-cli-git.git`. | One commit on AUR. |
 | `release-attestation-check.yml` | weekly cron + dispatch | Verify the latest release carries the full attestation bundle (SBOM + sig + cert + intoto + manifest + sig + cert). | Opens or comments on a tracking issue. |
 
-## Why `created` vs `published`
+## Event ownership and readiness
 
 GitHub fires `release.created` the moment a Release record exists.
-That covers SBOM + SLSA + the packaging step: those depend only on
-source bytes at the tag and don't need other assets to be present.
+That starts the packaging step, which depends only on source bytes at
+the tag and does not need other assets to be present.
 
 `release.published` fires later, when a human flips the Release from
 draft to public (or when a Release is created already-public, the
-events fire together). The manifest job and the three distribution
-jobs wait for that because they enumerate *all* assets on the release;
-running them earlier would miss the manual / docs artefacts uploaded
-by `manual-publish.yml` and the packaging step's tarball + zip.
+events fire together). Distribution and the security chain start from
+this event. Publication does not mean independently triggered asset
+publishers have finished, so the manifest job waits for all 13 required
+package, documentation, SBOM, signature, and provenance assets before
+it downloads or signs the bundle. The final integrity job then verifies
+the manifest's Cosign identity and every recorded digest.
 
-Both arms of `security-release.yml` are idempotent: re-running the
-manifest job after late asset uploads picks up the new state and the
-`--clobber` flag overwrites the previous manifest sig + cert.
+Both release and dispatch paths of `security-release.yml` are
+idempotent: re-running the manifest job after late asset uploads picks
+up the new state and the `--clobber` flag overwrites the previous
+manifest sig + cert.
 
 ## Secrets used
 

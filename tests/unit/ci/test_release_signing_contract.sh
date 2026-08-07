@@ -26,6 +26,10 @@ assert_file_contains "$SEC" "id-token: write" "OIDC token for keyless signing"
 
 test_start "release_signing_asset_manifest"
 assert_file_contains "$SEC" "ALL_SHA256SUMS" "builds a SHA256SUMS manifest over release assets"
+assert_file_contains "$SEC" "types: [published]" "uses one mutating security run per release"
+assert_file_contains "$SEC" "All \${#required[@]} prerequisite release assets are present." "waits for the complete release bundle"
+assert_file_contains "$SEC" "needs: [sbom, provenance, manifest]" "integrity verification waits for manifest upload"
+assert_file_contains "$SEC" "sha256sum -c ALL_SHA256SUMS" "verifies every manifest-covered release asset"
 
 # ── 2. SLSA build provenance for the release artefacts ──────────────────────
 test_start "release_slsa_generator_uses_required_tag_ref"
