@@ -386,7 +386,10 @@ check_performance() {
 
   if has_command zsh; then
     local startup_time
-    startup_time=$({ time zsh -i -c exit; } 2>&1 | grep real | awk '{print $2}' | sed 's/[ms]//g')
+    # Startup timing is diagnostic only. A user's interactive configuration
+    # may exit non-zero or omit a `real` row, which must not abort health under
+    # `set -euo pipefail` before the summary is printed.
+    startup_time=$({ time zsh -i -c exit; } 2>&1 | awk '/real/ { print $2; exit }' | sed 's/[ms]//g' || true)
     if [[ -n "$startup_time" ]]; then
       check "Shell startup time" "pass"
     else

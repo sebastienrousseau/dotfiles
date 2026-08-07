@@ -1,0 +1,110 @@
+name: Release / Clean Install Smoke
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Release tag to verify (for example, v0.2.513)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  attestations: read
+
+jobs:
+  clean-install:
+    name: Clean install / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14]
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Resolve release
+        id: release
+        env:
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          tag="${EVENT_TAG:-$INPUT_TAG}"
+          version="${tag#v}"
+          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Download published archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          TAG: ${{ steps.release.outputs.tag }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          asset="dot-${VERSION}.tar.gz"
+          for attempt in $(seq 1 30); do
+            if gh release download "$TAG" --repo "$REPOSITORY" \
+              --pattern "$asset" --clobber; then
+              break
+            fi
+            if [[ "$attempt" -eq 30 ]]; then
+              echo "::error::$asset was not published within five minutes"
+              exit 1
+            fi
+            sleep 10
+          done
+          [[ -s "$asset" ]]
+
+      - name: Verify build provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          asset="dot-${VERSION}.tar.gz"
+          for attempt in $(seq 1 30); do
+            if gh attestation verify "$asset" --repo "$REPOSITORY"; then
+              exit 0
+            fi
+            if [[ "$attempt" -eq 30 ]]; then
+              echo "::error::Build provenance was not available within five minutes"
+              exit 1
+            fi
+            sleep 10
+          done
+
+      - name: Install, execute, and uninstall from an empty prefix
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          tar -xzf "dot-${VERSION}.tar.gz"
+          package="$PWD/dot-${VERSION}"
+          root="$(mktemp -d)"
+          trap 'rm -rf "$root"' EXIT
+
+          make -C "$package" smoke
+          make -C "$package" install PREFIX=/usr/local DESTDIR="$root"
+
+          installed="$root/usr/local/bin/dot"
+          [[ -L "$installed" ]]
+          CHEZMOI_SOURCE_DIR="$root/usr/local/lib/dotfiles" \
+            DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 \
+            "$installed" version | grep -F ".dotfiles ${VERSION}"
+          CHEZMOI_SOURCE_DIR="$root/usr/local/lib/dotfiles" \
+            DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 \
+            "$installed" registry --help >/dev/null
+
+          make -C "$package" uninstall PREFIX=/usr/local DESTDIR="$root"
+          [[ ! -e "$installed" ]]
+          [[ ! -e "$root/usr/local/lib/dotfiles" ]]

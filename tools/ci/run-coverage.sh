@@ -141,10 +141,10 @@ fi
 test_files=()
 while IFS= read -r _line; do
   [[ -n "$_line" ]] && test_files+=("$_line")
-done < <(find "$TESTS_DIR/unit" -name 'test_*.sh' -type f | sort)
+done < <(find "$TESTS_DIR/unit" "$TESTS_DIR/regression" -name 'test_*.sh' -type f | sort)
 
 if [[ "${#test_files[@]}" -eq 0 ]]; then
-  echo "::error::no unit test files discovered under $TESTS_DIR/unit" >&2
+  echo "::error::no unit or regression test files discovered under $TESTS_DIR" >&2
   exit 1
 fi
 
@@ -156,8 +156,9 @@ echo "Tracing ${#test_files[@]} test files (parallel × $JOBS, timeout ${COV_TES
 # shellcheck disable=SC2317,SC2329  # called indirectly via xargs subshell
 run_one() {
   local f="$1"
-  local trace
-  trace="$COV_TRACE_DIR/$(basename "$f" .sh).trace"
+  local relative trace
+  relative="${f#"$COV_TESTS_DIR"/}"
+  trace="$COV_TRACE_DIR/${relative//\//__}.trace"
   if [[ -n "${COV_TIMEOUT_CMD:-}" ]]; then
     PS4='+@COV@:${LINENO}:${BASH_SOURCE}:@ ' \
       BASH_ENV="$COV_BASH_ENV" \
@@ -173,8 +174,13 @@ run_one() {
 
 export COV_TRACE_DIR="$trace_dir"
 export COV_BASH_ENV="$bash_env"
+export COV_TESTS_DIR="$TESTS_DIR"
 export COV_TEST_TIMEOUT
 export COV_TIMEOUT_CMD
+# Function-file probes retain stderr temporarily so normal unit runs stay
+# quiet. Replay it here because it contains the source function xtrace that
+# the coverage aggregator must see.
+export DOTFILES_COV_ECHO_STDERR=1
 export -f _cov_perl_timeout
 export -f run_one
 
@@ -291,6 +297,7 @@ hit_re = re.compile(r"^\++@COV@:(\d+):([^:]+):@")
 
 # files[abs_path][line] = total hits
 files = defaultdict(lambda: defaultdict(int))
+source_cache = {}
 
 def in_includes(path: Path) -> bool:
     try:
@@ -305,6 +312,21 @@ def in_includes(path: Path) -> bool:
             continue
     return False
 
+def normalized_source(src: str):
+    """Resolve and classify each distinct xtrace source path once."""
+    if src in source_cache:
+        return source_cache[src]
+    src_path = Path(src)
+    if not src_path.is_absolute():
+        src_path = repo_root / src_path
+    try:
+        src_path = src_path.resolve()
+    except (OSError, RuntimeError):
+        pass
+    result = str(src_path) if in_includes(src_path) and not is_skipped(src_path) else None
+    source_cache[src] = result
+    return result
+
 # Parse every trace file. Each trace can be MBs; iterate line by line.
 for trace_path in sorted(trace_dir.glob("*.trace")):
     try:
@@ -317,23 +339,14 @@ for trace_path in sorted(trace_dir.glob("*.trace")):
                 src = m.group(2).strip()
                 if not src or src == "main":
                     continue
-                src_path = Path(src)
-                if not src_path.is_absolute():
-                    src_path = (repo_root / src_path)
-                # Always resolve so `..`-style paths from inside
-                # `commands/foo.sh` sourcing `../lib/log.sh` collapse
-                # to the same canonical SF: key as a direct hit on
-                # `lib/log.sh`. Without this we get three SF: blocks
-                # for one file and the denominator inflates.
-                try:
-                    src_path = src_path.resolve()
-                except (OSError, RuntimeError):
-                    pass
-                if not in_includes(src_path):
+                # Resolve once per distinct source string. Trace files can
+                # contain millions of records but only hundreds of sources.
+                # Caching avoids repeated filesystem resolution while still
+                # collapsing `..` paths into one canonical lcov SF entry.
+                source_path = normalized_source(src)
+                if source_path is None:
                     continue
-                if is_skipped(src_path):
-                    continue
-                files[str(src_path)][lineno] += 1
+                files[source_path][lineno] += 1
     except OSError as e:
         print(f"warn: read error {trace_path}: {e}", file=sys.stderr)
 

@@ -33,19 +33,20 @@ if [[ ! -x "$DOT_BIN" && ! -f "$DOT_BIN" ]]; then
 fi
 
 capture() {
-  local slug="$1" ; shift
+  local slug="$1"
+  shift
   local out="$SCRIPT_DIR/${slug}.snap"
   printf 'Updating %s ...\n' "$out"
   # Run the command; tolerate non-zero exit so we still capture the
   # output (e.g., `doctor` returns 1 when something is sub-optimal).
-  DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 bash "$DOT_BIN" "$@" 2>&1 | bash "$SCRUB" > "$out" || true
+  DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 bash "$DOT_BIN" "$@" 2>&1 | bash "$SCRUB" "$slug" >"$out" || true
 }
 
-capture help    --help
+capture help --help
 capture version version
-capture doctor  doctor
-capture perf    perf
-capture health  health
+capture doctor doctor
+capture perf perf
+capture health health
 
 echo ""
 echo "Snapshots updated. Review with:"

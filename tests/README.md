@@ -80,6 +80,9 @@ The runner accepts `--jobs N` (number of files concurrently) and
 
 # Force serial (the default) — useful when debugging output order
 ./tests/framework/test_runner.sh --jobs 1
+
+# Run integration files after a separate unit pass without duplicating units
+./tests/framework/test_runner.sh --jobs auto --integration-only
 ```
 
 Trade-offs:

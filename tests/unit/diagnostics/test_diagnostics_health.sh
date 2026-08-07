@@ -98,6 +98,14 @@ assert_file_contains "$HEALTH_FILE" 'check "Node version manager" "pass" "mise"'
 assert_file_contains "$HEALTH_FILE" 'check "Nerd Font available" "pass"' "health accepts any Nerd Font"
 assert_file_contains "$HEALTH_FILE" 'check "Git signing" "pass" "ssh"' "health accepts SSH commit signing"
 
+test_start "health_failed_zsh_timing_still_prints_summary"
+printf '#!/usr/bin/env bash\nexit 1\n' >"$DOTFILES_COV_TMPDIR/bin/zsh"
+chmod +x "$DOTFILES_COV_TMPDIR/bin/zsh"
+health_output=$(NO_COLOR=1 DOTFILES_NONINTERACTIVE=1 bash "$HEALTH_FILE" 2>&1)
+health_rc=$?
+assert_equals "0" "$health_rc" "failed interactive zsh timing must not abort health"
+assert_output_contains "Summary" "printf '%s' \"\$health_output\""
+
 echo ""
 echo "Health diagnostic tests completed."
 # Slice 2: drive real line coverage of the script under test

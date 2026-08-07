@@ -70,7 +70,7 @@ unit_tests() {
 
 integration_tests() {
   cd "$REPO_ROOT"
-  RUN_INTEGRATION=1 ./tests/framework/test_runner.sh --jobs auto -i
+  ./tests/framework/test_runner.sh --jobs auto --integration-only
 }
 
 coverage_gate() {

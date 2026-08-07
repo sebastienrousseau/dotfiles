@@ -177,6 +177,7 @@ Options:
   -h, --help          Show this help message
   -v, --verbose       Verbose output
   -i, --integration   Include integration tests
+  --integration-only  Run integration tests without repeating unit/regression tests
   -u, --unit-only     Run only unit tests
   --jobs N            Run N test files in parallel (default 1)
   --jobs auto         Use the detected CPU count
@@ -189,6 +190,7 @@ Examples:
   $(basename "$0") --jobs auto        # Run all unit tests in parallel
   $(basename "$0") extract            # Run only extract tests
   $(basename "$0") -i                 # Run unit and integration tests
+  $(basename "$0") --integration-only # Run only integration tests
   RUN_INTEGRATION=1 $(basename "$0")  # Alternative way to run integration tests
 
 Environment Variables:
@@ -203,6 +205,7 @@ main() {
   local run_integration="${RUN_INTEGRATION:-0}"
   local verbose="${VERBOSE:-0}"
   local unit_only=0
+  local integration_only=0
   JOBS="${TEST_JOBS:-1}"
 
   TOTAL_TESTS_RUN=0
@@ -222,6 +225,11 @@ main() {
         ;;
       -i | --integration)
         run_integration=1
+        shift
+        ;;
+      --integration-only)
+        run_integration=1
+        integration_only=1
         shift
         ;;
       -u | --unit-only)
@@ -272,16 +280,18 @@ main() {
   echo "Parallelism: $JOBS"
   echo ""
 
-  # Collect unit tests
-  local unit_files=()
-  while IFS= read -r -d '' f; do
-    unit_files+=("$f")
-  done < <(find "$TESTS_DIR"/unit -name "test_${test_pattern}.sh" -type f -print0 | sort -z)
+  if [[ "$integration_only" != "1" ]]; then
+    # Collect unit tests
+    local unit_files=()
+    while IFS= read -r -d '' f; do
+      unit_files+=("$f")
+    done < <(find "$TESTS_DIR"/unit -name "test_${test_pattern}.sh" -type f -print0 | sort -z)
 
-  if [[ ${#unit_files[@]} -eq 0 ]]; then
-    echo "No unit tests found matching pattern: $test_pattern"
-  else
-    run_test_list "UNIT TESTS (${#unit_files[@]} files)" "${unit_files[@]}"
+    if [[ ${#unit_files[@]} -eq 0 ]]; then
+      echo "No unit tests found matching pattern: $test_pattern"
+    else
+      run_test_list "UNIT TESTS (${#unit_files[@]} files)" "${unit_files[@]}"
+    fi
   fi
 
   # Collect + run regression tests. These are always run alongside unit
@@ -290,7 +300,7 @@ main() {
   # narrows the unit set (e.g. `--jobs 1 secrets_*` from
   # test_runner_parallel_invariant.sh), skip regression tests to avoid
   # recursive self-invocation through the parallel-invariant guard.
-  if [[ "$unit_only" != "1" && "$test_pattern" == "*" ]]; then
+  if [[ "$unit_only" != "1" && "$integration_only" != "1" && "$test_pattern" == "*" ]]; then
     local regression_files=()
     while IFS= read -r -d '' f; do
       regression_files+=("$f")

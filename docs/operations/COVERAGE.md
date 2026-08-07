@@ -43,17 +43,17 @@ matches and emits standard `lcov.info` that Codecov ingests natively.
 
 | Surface | What runs |
 |---|---|
-| **PR + push to main** | `.github/workflows/coverage.yml` → `Coverage / kcov` job → uploads lcov.info to Codecov and fails the build below `MIN_COVERAGE_PCT` (currently `54`, ratcheted up after measured integer-floor gains). |
+| **PR + push to main** | `.github/workflows/coverage.yml` → `Coverage / kcov` job → uploads lcov.info to Codecov and fails the build below `MIN_COVERAGE_PCT` (currently `58`, ratcheted up after measured integer-floor gains). |
 | **Local dev** | `bash tools/ci/run-coverage.sh` — works on Linux + macOS (xtrace is a bash primitive, no platform tools needed). |
 | **macOS dev** | Supported. xtrace-based instrumentation runs on macOS bash 3.2+ and Homebrew bash 5.x, with a Perl alarm fallback when GNU `timeout`/`gtimeout` is unavailable. |
 
 ## The current floor
 
-`MIN_COVERAGE_PCT=54` in `.github/workflows/coverage.yml`. Slice 1
+`MIN_COVERAGE_PCT=58` in `.github/workflows/coverage.yml`. Slice 1
 of [#883](https://github.com/sebastienrousseau/dotfiles/issues/883)
 established the baseline at **~2.7% measured** (~613 of ~22 500 lines
 across 231 files). Successive slices raised it; the current measured
-value sits at **55.50%** (`7038/12681` lines, measured on v0.2.513; gate floored at 54 for local<->CI drift + run variance). This release corrected the xtrace parser to count nested Bash execution prefixes and added deterministic branch-driving tests for Scorecard snapshots, examples coverage, and `httpdebug`. It builds on the eighth core
+value sits at **59.32%** (`7523/12682` lines, measured on v0.2.513; gate floored at 58 for local<->CI drift + run variance). This release now traces both mandatory unit and regression suites, replays the function exerciser's captured xtrace, and caches source-path normalization so aggregation completes in seconds instead of minutes. It builds on the earlier parser correction for nested Bash execution prefixes and deterministic branch-driving tests for Scorecard snapshots, examples coverage, and `httpdebug`. It builds on the eighth core
 coverage-ratchet slice, which added `jwt` portability coverage and
 branch-driving function coverage for `apihealth`, `apiload`, and
 `apilatency`. This builds on the prior helper slice that drove
@@ -90,7 +90,7 @@ To tighten:
 ### Why not the 95% target from #883
 
 The roadmap originally targeted ≥95% measured. The current xtrace-only
-measurement is **55.50%** on this codebase. The remaining gap is largely
+measurement is **59.32%** on this codebase. The remaining gap is largely
 structural:
 
 - **System-mutation surface** — large parts of the repo orchestrate
