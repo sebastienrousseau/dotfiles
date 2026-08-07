@@ -2,12 +2,10 @@ name: Release / Security Attestation
 
 on:
   release:
-    # `created` fires once when the release first appears (covers the
-    # SBOM + provenance generated from source). `published` fires when
-    # a human edits a draft → public, by which point asset-uploading
-    # workflows (manual-publish.yml etc.) have finished — that's when
-    # we sign the full asset manifest. Both runs are idempotent.
-    types: [created, published]
+    # A single published-event run owns SBOM, provenance, and manifest
+    # generation. Running on both created and published lets two runs
+    # overwrite one another's signed assets in an indeterminate order.
+    types: [published]
   workflow_dispatch:
     inputs:
       release_tag:
@@ -21,13 +19,8 @@ on:
 permissions:
   contents: read
 
-# Serialize the `created` and `published` runs for a given release. The
-# `sbom` job runs on both events (the `published`-only manifest job needs
-# its same-run artifact), so without this they execute concurrently and
-# race while clobbering/verifying the same SBOM blobs on the release —
-# which previously failed the "Verify SBOM signature" step. cancel-in-progress
-# is false so both runs still complete (created → SBOM + provenance,
-# published → signed manifest), just one after the other.
+# Serialize release events and manual repair dispatches for a given tag so
+# operators cannot race a repair against normal publication.
 concurrency:
   group: security-release-${{ github.event.release.tag_name || inputs.release_tag || github.ref }}
   cancel-in-progress: false
@@ -129,11 +122,8 @@ jobs:
 
   manifest:
     name: Release / Signed Asset Manifest
-    # Runs on `published` (after asset-uploaders have finished) to
-    # build ALL_SHA256SUMS over every release asset and Cosign-sign
-    # it. The result: one signed file covers every artefact on the
-    # release, so downstream verifiers don't need to enumerate.
-    if: github.event_name == 'workflow_dispatch' || github.event.action == 'published'
+    # Build ALL_SHA256SUMS only after provenance and every independently
+    # published release asset are present.
     runs-on: ubuntu-latest
     # Provenance is itself a release asset, so the manifest must wait until
     # the generator uploads it. Running these jobs in parallel leaves the
@@ -152,20 +142,56 @@ jobs:
         with:
           ref: ${{ inputs.release_tag || github.ref }}
 
-      - name: Download every release asset
+      - name: Wait for complete release asset set and download
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
         run: |
           set -euo pipefail
+          version="${RELEASE_TAG#v}"
+          required=(
+            "dot-${version}.tar.gz"
+            "dot-${version}.zip"
+            "SHA256SUMS"
+            "dotfiles-md.tar.gz"
+            "dotfiles.html.gz"
+            "dotfiles.epub"
+            "dotfiles.pdf"
+            "dotfiles.txt.gz"
+            "html.tar.gz"
+            "dotfiles-sbom.spdx.json"
+            "dotfiles-sbom.spdx.json.sig"
+            "dotfiles-sbom.spdx.json.pem"
+            "dotfiles-sbom.spdx.json.intoto.jsonl"
+          )
+
+          for attempt in $(seq 1 20); do
+            mapfile -t present < <(
+              gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name'
+            )
+            missing=()
+            for expected in "${required[@]}"; do
+              found=0
+              for asset in "${present[@]}"; do
+                [[ "$asset" == "$expected" ]] && { found=1; break; }
+              done
+              [[ "$found" -eq 0 ]] && missing+=("$expected")
+            done
+            if [[ "${#missing[@]}" -eq 0 ]]; then
+              echo "All ${#required[@]} prerequisite release assets are present."
+              break
+            fi
+            if [[ "$attempt" -eq 20 ]]; then
+              echo "::error::Timed out waiting for prerequisite release assets: ${missing[*]}"
+              exit 1
+            fi
+            echo "Waiting for release assets (attempt ${attempt}/20): ${missing[*]}"
+            sleep 15
+          done
+
           mkdir -p assets
-          cd assets
-          # Pull everything attached to the release at this moment.
-          # Re-running the job after additional assets land will pick
-          # them up; the upload step uses --clobber so the manifest
-          # tracks current state.
-          gh release download "$RELEASE_TAG" --dir . || true
-          ls -la
+          gh release download "$RELEASE_TAG" --dir assets
+          ls -la assets
 
       - name: Build ALL_SHA256SUMS (excludes manifest's own .sig/.pem/itself)
         run: |
@@ -260,7 +286,7 @@ jobs:
   verify-release-integrity:
     name: Release / Verify Integrity
     runs-on: ubuntu-latest
-    needs: [sbom, provenance]
+    needs: [sbom, provenance, manifest]
     permissions:
       contents: read
     steps:
@@ -345,3 +371,27 @@ jobs:
             --certificate-oidc-issuer https://token.actions.githubusercontent.com \
             dotfiles-sbom.spdx.json
           echo "SBOM Cosign signature verified"
+
+      - name: Download release assets for manifest verification
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag || github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          gh release download "$RELEASE_TAG" --dir release-assets
+
+      - name: Verify signed manifest and every covered asset
+        env:
+          REPO: ${{ github.repository }}
+        working-directory: release-assets
+        run: |
+          set -euo pipefail
+          cosign verify-blob \
+            --certificate ALL_SHA256SUMS.pem \
+            --signature ALL_SHA256SUMS.sig \
+            --certificate-identity-regexp "^https://github.com/${REPO}/" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            ALL_SHA256SUMS
+          sha256sum -c ALL_SHA256SUMS
+          echo "Signed release manifest and all covered asset digests verified"
