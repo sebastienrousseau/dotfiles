@@ -32,7 +32,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
         with:
           egress-policy: audit
 
@@ -107,7 +107,7 @@ jobs:
 
   nightly-test-suite:
     name: Nightly / Test Suite
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@e28fc51b0e0ef19dd5dff873636a33f8f584facd # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@78cc93ccf1ac558a53a979e54544b19596d07bec # main
     with:
       min_coverage: "95"
       run_integration: false
@@ -131,7 +131,7 @@ jobs:
         os: [ubuntu-latest, macos-latest, macos-15-intel, macos-14]
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
         with:
           egress-policy: audit
 
@@ -174,7 +174,7 @@ jobs:
     continue-on-error: true  # Beta tools may fail
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
         with:
           egress-policy: audit
 
@@ -229,7 +229,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
         with:
           egress-policy: audit
 
@@ -296,7 +296,7 @@ jobs:
     timeout-minutes: 25
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
         with:
           egress-policy: audit
 
@@ -393,7 +393,7 @@ jobs:
     if: always()
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
         with:
           egress-policy: audit
 
