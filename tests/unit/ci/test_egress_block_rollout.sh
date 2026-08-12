@@ -11,7 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-HARDEN_RUNNER_SHA="bf7454d06d71f1098171f2acdf0cd4708d7b5920"
+HARDEN_RUNNER_SHA="b09bb98e06d4d774595224525879c09bc6e98c40"
 CHECKOUT_ENDPOINTS=(
   "github.com:443"
   "api.github.com:443"
