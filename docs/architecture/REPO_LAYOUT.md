@@ -72,7 +72,7 @@ convention in [`../NAMING_CONVENTIONS.md`](../NAMING_CONVENTIONS.md):
 
 - `run_onchange_20-ghostty-config.sh.tmpl` — re-renders Ghostty config
 - `run_onchange_21-topgrade-config.sh.tmpl` — refreshes topgrade config
-- `run_onchange_after_fonts.sh` — post-deploy font cache refresh
+- `run_onchange_after_fonts.sh.tmpl` — post-deploy font cache refresh
 
 ---
 

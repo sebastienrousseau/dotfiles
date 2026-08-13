@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/sebastienrousseau/dotfiles/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge&logo=githubactions&logoColor=white" alt="Build" /></a>
-  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.518-blue?style=for-the-badge&logo=semanticrelease&logoColor=white" alt="Version" /></a>
+  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.519-blue?style=for-the-badge&logo=semanticrelease&logoColor=white" alt="Version" /></a>
   <a href="https://github.com/sebastienrousseau/dotfiles/releases"><img src="https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge&logo=github&logoColor=white" alt="Downloads" /></a>
   <a href="https://codespaces.new/sebastienrousseau/dotfiles"><img src="https://img.shields.io/badge/Open%20in-Codespaces-blue?style=for-the-badge&logo=github&logoColor=white" alt="Open in GitHub Codespaces" /></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/dotfiles"><img src="https://img.shields.io/ossf-scorecard/github.com/sebastienrousseau/dotfiles?style=for-the-badge&logo=linuxfoundation&logoColor=white&label=OpenSSF%20Scorecard" alt="OpenSSF Scorecard" /></a>
@@ -52,8 +52,8 @@
 
 ```bash
 curl -fsSL -o /tmp/dotfiles-install.sh \
-  https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.518/install.sh
-echo "1f8ef5b5ca0de42002269461ded3acc9d30cadc4f77e04d0abfd008d5690c0c5  /tmp/dotfiles-install.sh" \
+  https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.519/install.sh
+echo "3b5d1332fb07a1261da117e53f69acc0097c3d9bd676fc9f53a000257b72978e  /tmp/dotfiles-install.sh" \
   | shasum -a 256 -c
 bash /tmp/dotfiles-install.sh
 ```

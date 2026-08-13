@@ -5,12 +5,9 @@
 
 set -euo pipefail
 
-SOURCE_ROOT="${DOTFILES_SOURCE_DIR:-}"
-[[ -n "$SOURCE_ROOT" && "$(basename "$SOURCE_ROOT")" == "defaults" ]] && SOURCE_ROOT="$(dirname "$SOURCE_ROOT")"
-if [[ -z "$SOURCE_ROOT" ]] && command -v chezmoi >/dev/null 2>&1; then
-  SOURCE_ROOT="$(chezmoi source-path 2>/dev/null || true)"
-  [[ "$(basename "$SOURCE_ROOT")" == "defaults" ]] && SOURCE_ROOT="$(dirname "$SOURCE_ROOT")"
-fi
+SOURCE_ROOT={{ .chezmoi.sourceDir | quote }}
+[[ -n "${DOTFILES_SOURCE_DIR:-}" ]] && SOURCE_ROOT="$DOTFILES_SOURCE_DIR"
+[[ "$(basename "$SOURCE_ROOT")" == "defaults" ]] && SOURCE_ROOT="$(dirname "$SOURCE_ROOT")"
 if [[ -z "$SOURCE_ROOT" || ! -r "$SOURCE_ROOT/lib/dot/verified-download.sh" ]]; then
   printf 'Font Check: verified-download.sh unavailable; refusing unverified install\n' >&2
   exit 1
