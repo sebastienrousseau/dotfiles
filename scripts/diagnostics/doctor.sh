@@ -628,14 +628,18 @@ else
 fi
 
 # 5. Shell coverage. Surface installed shells that the project's caching
-# infrastructure doesn't currently maintain caches for. zsh/bash/fish/nu
-# all have a `_cached_eval` analogue; pwsh does not.
+# infrastructure doesn't currently maintain caches for.
 shells_unmanaged=""
 for sh in nu pwsh; do
   command -v "$sh" >/dev/null 2>&1 || continue
   case "$sh" in
     nu)
       [[ -f "$HOME/.config/nushell/cached_eval.nu" ]] && continue
+      ;;
+    pwsh)
+      pwsh -NoLogo -NoProfile -NonInteractive -Command 'exit 0' >/dev/null 2>&1 || continue
+      pwsh_profile="$HOME/.config/powershell/Microsoft.PowerShell_profile.ps1"
+      [[ -f "$pwsh_profile" ]] && grep -q 'Get-DotfilesCachedInit' "$pwsh_profile" && continue
       ;;
   esac
   shells_unmanaged="${shells_unmanaged:+$shells_unmanaged, }$sh"

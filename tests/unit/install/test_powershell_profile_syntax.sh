@@ -45,6 +45,18 @@ test_start "profile_defines_xdg_env"
 assert_file_contains "$PROFILE" "XDG_CONFIG_HOME" \
   "profile must define XDG_CONFIG_HOME to match Unix shells"
 
+test_start "profile_caches_generated_init_scripts"
+assert_file_contains "$PROFILE" "Get-DotfilesCachedInit" \
+  "PowerShell profile should cache generated init scripts"
+
+test_start "profile_caches_mise_activation"
+assert_file_contains "$PROFILE" "mise-init" \
+  "PowerShell profile should cache mise activation"
+
+test_start "profile_caches_zoxide_initialization"
+assert_file_contains "$PROFILE" "zoxide-init" \
+  "PowerShell profile should cache zoxide initialization"
+
 test_start "profile_balanced_braces"
 opens=$(grep -c '{' "$PROFILE" || true)
 closes=$(grep -c '}' "$PROFILE" || true)

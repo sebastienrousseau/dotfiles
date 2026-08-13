@@ -6,6 +6,7 @@
 set -euo pipefail
 
 SOURCE_ROOT="${DOTFILES_SOURCE_DIR:-}"
+[[ -n "$SOURCE_ROOT" && "$(basename "$SOURCE_ROOT")" == "defaults" ]] && SOURCE_ROOT="$(dirname "$SOURCE_ROOT")"
 if [[ -z "$SOURCE_ROOT" ]] && command -v chezmoi >/dev/null 2>&1; then
   SOURCE_ROOT="$(chezmoi source-path 2>/dev/null || true)"
   [[ "$(basename "$SOURCE_ROOT")" == "defaults" ]] && SOURCE_ROOT="$(dirname "$SOURCE_ROOT")"

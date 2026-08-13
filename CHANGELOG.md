@@ -2,6 +2,26 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.518 — 2026-08-13
+
+### Changed
+
+- Added binary-aware cached initialization for mise and zoxide in PowerShell,
+  bringing PowerShell startup behavior in line with Bash, Fish, Nushell, and
+  Zsh.
+- Activated the existing PowerShell 7.5.2 mise installation in the managed
+  workstation tool configuration, preventing an unresolved `pwsh` shim.
+- Pruned duplicate and nonexistent PATH entries after deferred mise hydration
+  so tool upgrades resolve through the current mise environment.
+
+### Fixed
+
+- Normalized chezmoi source paths ending in `defaults` in both Nerd Font hooks.
+  This prevents a verified `dot apply` from failing to locate
+  `lib/dot/verified-download.sh` after the v0.2.503 repository reorganization.
+- Updated workstation diagnostics to recognize the PowerShell cached-init
+  implementation instead of reporting a false shell-coverage warning.
+
 ## v0.2.517 — 2026-08-12
 
 ### Changed
@@ -447,7 +467,7 @@ verified by `dot lint` + the existing test matrix.
 - **`dot_config/shell/00-core-paths.sh.tmpl`** — system paths added via `path_prepend` (which removes duplicates first) instead of `PATH="...:${PATH}"`, eliminating the duplicate-system-path bloat that accumulates when the parent shell already had those entries (macOS launchd default).
 - **`dot_config/zsh/dot_zshrc.tmpl`** — re-apply `typeset -U path` after `_dotfiles_async_init` runs cached `export PATH=...` from mise/atuin/etc, since those bypass zsh's `-U` flag on the `path` array.
 - **`scripts/diagnostics/doctor.sh`** — only flag tools that actually emit shell-init eval and are not already lazy-loaded; raise PATH-length thresholds (60 ok / 120 warn) to match a populated mise-managed dev machine; skip `nu` when `cached_eval.nu` is present.
-- **`dot_config/git/hooks/executable_commit-msg`** — replaced hardcoded `/Users/seb` path with `${HOME}` so the hook is portable across hosts.
+- **`dot_config/git/hooks/executable_commit-msg`** — replaced a hardcoded user-home path with `${HOME}` so the hook is portable across hosts.
 - **`dot_config/fish/conf.d/{direnv,mise-activate}.fish`** — empty shadow files that override Homebrew `vendor_conf.d` to prevent eager init. fish dedupes `conf.d/` by basename, user wins. Saves ~140ms on every fish shell start; both tools are loaded lazily via `_cached_eval` in `init.fish`.
 - **`.devcontainer/Dockerfile`** — chezmoi install now goes through `tools/ci/install-chezmoi-verified.sh` (SHA256-verified) instead of the unverified `curl -fsSL https://get.chezmoi.io` fallback. Closes R4 §8.3 P3 / mirrors R1 H6 fix in `install.sh`.
 - **`typos.toml`** — extended file exclusions (`**/*.asc`, `**/*.pgp`, `**/*.gpg`, `**/*.sig`) to skip armored cryptographic blobs; added `fpr` / `FPR` to the allow-list (GPG `--with-colons` fingerprint column label).

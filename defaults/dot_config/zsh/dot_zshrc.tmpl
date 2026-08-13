@@ -656,6 +656,16 @@ _dotfiles_async_init() {
   # into the cached output (e.g. system paths inherited from a dirty
   # parent shell).
   typeset -U path
+  local -a _hydrated_path
+  local -A _hydrated_seen
+  local _hydrated_dir
+  for _hydrated_dir in $path; do
+    if [[ -n "$_hydrated_dir" && -d "$_hydrated_dir" && -z "${_hydrated_seen[$_hydrated_dir]:-}" ]]; then
+      _hydrated_seen[$_hydrated_dir]=1
+      _hydrated_path+=("$_hydrated_dir")
+    fi
+  done
+  path=("${_hydrated_path[@]}")
 }
 
 # Deferred Hydration for Zero-Jank Experience
