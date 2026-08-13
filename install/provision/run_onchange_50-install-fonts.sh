@@ -7,6 +7,7 @@
 set -euo pipefail
 
 SOURCE_ROOT="${DOTFILES_SOURCE_DIR:-}"
+[[ -n "$SOURCE_ROOT" && "$(basename "$SOURCE_ROOT")" == "defaults" ]] && SOURCE_ROOT="$(dirname "$SOURCE_ROOT")"
 if [[ -z "$SOURCE_ROOT" ]]; then
   SCRIPT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
   [[ -r "$SCRIPT_ROOT/lib/dot/verified-download.sh" ]] && SOURCE_ROOT="$SCRIPT_ROOT"

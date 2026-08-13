@@ -116,6 +116,7 @@ just = "latest"
 # mise's tool registry; the aqua: backend resolves it from the official
 # release tarballs.
 "aqua:nushell/nushell" = "0.114.1"
+"aqua:PowerShell/PowerShell" = "7.5.2"
 
 [env]
 # Environment variables to set

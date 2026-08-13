@@ -8,6 +8,42 @@ $env:XDG_CONFIG_HOME = if ($env:XDG_CONFIG_HOME) { $env:XDG_CONFIG_HOME } else {
 $env:XDG_CACHE_HOME = if ($env:XDG_CACHE_HOME) { $env:XDG_CACHE_HOME } else { Join-Path $HOME ".cache" }
 $env:XDG_DATA_HOME = if ($env:XDG_DATA_HOME) { $env:XDG_DATA_HOME } else { Join-Path $HOME ".local/share" }
 
+function Get-DotfilesCachedInit {
+    param(
+        [Parameter(Mandatory = $true)][string]$Label,
+        [Parameter(Mandatory = $true)][string]$Command,
+        [string[]]$Arguments = @()
+    )
+
+    $commandInfo = Get-Command $Command -ErrorAction SilentlyContinue
+    if (-not $commandInfo) { return $null }
+
+    $cacheDir = Join-Path $env:XDG_CACHE_HOME "dotfiles/evalcache/pwsh"
+    New-Item -ItemType Directory -Force -Path $cacheDir | Out-Null
+    $source = if ($commandInfo.Source) { $commandInfo.Source } else { $commandInfo.Path }
+    $mtime = if ($source -and (Test-Path $source)) {
+        (Get-Item $source).LastWriteTimeUtc.Ticks
+    } else {
+        0
+    }
+    $fingerprint = "$source|$mtime|$($Arguments -join '|')"
+    $hashBytes = [System.Security.Cryptography.SHA256]::HashData(
+        [System.Text.Encoding]::UTF8.GetBytes($fingerprint)
+    )
+    $hash = [Convert]::ToHexString($hashBytes).ToLowerInvariant().Substring(0, 16)
+    $cachePath = Join-Path $cacheDir "$Label-$hash.ps1"
+
+    if (-not (Test-Path $cachePath)) {
+        Get-ChildItem -Path $cacheDir -Filter "$Label-*.ps1" -ErrorAction SilentlyContinue |
+            Remove-Item -Force -ErrorAction SilentlyContinue
+        $content = & $Command @Arguments | Out-String
+        if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($content)) { return $null }
+        [IO.File]::WriteAllText($cachePath, $content, [Text.UTF8Encoding]::new($false))
+    }
+
+    return $cachePath
+}
+
 $KimiCodeBin = Join-Path $HOME ".kimi-code/bin"
 if ((Test-Path $KimiCodeBin) -and (($env:PATH -split [IO.Path]::PathSeparator) -notcontains $KimiCodeBin)) {
     $env:PATH = "$KimiCodeBin$([IO.Path]::PathSeparator)$env:PATH"
@@ -65,6 +101,8 @@ function cat {
 Set-Alias -Name open -Value Invoke-Item -Option AllScope
 
 if (Get-Command mise -ErrorAction SilentlyContinue) {
+    $miseInit = Get-DotfilesCachedInit -Label "mise-init" -Command "mise" -Arguments @("activate", "pwsh")
+    if ($miseInit) { . $miseInit }
     function ms { & mise @args }
 }
 
@@ -85,5 +123,6 @@ if (Get-Command podman -ErrorAction SilentlyContinue) {
 }
 
 if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-    Invoke-Expression (& { (zoxide init powershell | Out-String) })
+    $zoxideInit = Get-DotfilesCachedInit -Label "zoxide-init" -Command "zoxide" -Arguments @("init", "powershell")
+    if ($zoxideInit) { . $zoxideInit }
 }

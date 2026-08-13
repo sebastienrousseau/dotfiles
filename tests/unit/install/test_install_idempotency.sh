@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
+# shellcheck disable=SC1090,SC1091,SC2016
 # Idempotency Unit Test for Font Installation
 
 set -euo pipefail
@@ -8,9 +9,16 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 FONT_INSTALL_SCRIPT="$REPO_ROOT/install/provision/run_onchange_50-install-fonts.sh"
+FONT_CHECK_SCRIPT="$REPO_ROOT/defaults/run_onchange_after_fonts.sh"
 
 # Load test framework
 source "$REPO_ROOT/tests/framework/assertions.sh"
+
+test_start "font_hooks_normalize_chezmoi_defaults_source"
+assert_file_contains "$FONT_INSTALL_SCRIPT" 'basename "$SOURCE_ROOT")" == "defaults"' \
+  "font installer should normalize a chezmoi defaults source path"
+assert_file_contains "$FONT_CHECK_SCRIPT" 'basename "$SOURCE_ROOT")" == "defaults"' \
+  "font checker should normalize a chezmoi defaults source path"
 
 test_start "font_idempotency"
 
@@ -18,7 +26,7 @@ test_start "font_idempotency"
 MOCK_HOME=$(mktemp -d)
 export HOME="$MOCK_HOME"
 export DOTFILES_SILENT=1
-export DOTFILES_SOURCE_DIR="$REPO_ROOT"
+export DOTFILES_SOURCE_DIR="$REPO_ROOT/defaults"
 
 # Prepare mock font directory
 if [[ "$(uname)" == "Darwin" ]]; then

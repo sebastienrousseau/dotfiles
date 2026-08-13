@@ -49,6 +49,10 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should check system configuration"
 fi
 
+test_start "doctor_recognizes_powershell_cached_init"
+assert_file_contains "$DOCTOR_FILE" "Get-DotfilesCachedInit" \
+  "doctor should recognize the managed PowerShell cached-init helper"
+
 # Test: provides remediation suggestions
 test_start "doctor_provides_remediation"
 if grep -qE 'fix|suggest|recommend|try|run' "$DOCTOR_FILE" 2>/dev/null; then
