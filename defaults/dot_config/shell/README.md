@@ -27,7 +27,7 @@ Welcome to your universally compatible, high-performance dotfiles configuration,
 To install these dotfiles on a new machine, run:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.516/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.517/install.sh)"
 ```
 
 This command will:

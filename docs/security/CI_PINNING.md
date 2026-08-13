@@ -99,17 +99,17 @@ intentional before merge.
 
 ## Dependabot
 
-Dependabot's `github-actions` ecosystem **does not** support same-repo
-reusable workflow SHA bumps as of May 2026 — it only updates
-references to external actions. Same-repo reusables are tracked
-manually via the recipe above. The Dependabot config in
-`.github/dependabot.yml` covers the external dimension; this
-document covers the in-repo one.
+Dependabot's `github-actions` ecosystem now updates full-SHA references to
+same-repository reusable workflows. PR
+[#992](https://github.com/sebastienrousseau/dotfiles/pull/992) verified this
+behavior by moving the reusable workflow baseline from v0.2.511 to the
+immutable v0.2.516 commit alongside the external minor/patch action group.
 
-If GitHub ships native Dependabot support for reusable workflows,
-delete this section and switch to `package-ecosystem: github-actions`
-with `directory: /.github/workflows`. Track on
-[github/feedback#10539](https://github.com/orgs/community/discussions/10539).
+Keep `bump-reusable-pins.yml` enabled as the immediate post-merge path. It
+updates callers as soon as a reusable workflow changes on `main`, while
+Dependabot provides the scheduled dependency review and grouped update path.
+Both mechanisms must preserve full 40-hex SHA references and pass
+`lint-reusable-pins` plus the egress-policy contract tests.
 
 ## Negative test
 
