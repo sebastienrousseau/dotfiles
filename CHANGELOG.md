@@ -2,6 +2,25 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.517 — 2026-08-12
+
+### Changed
+
+- Updated the GitHub Actions minor/patch dependency group across the CI,
+  security, release, documentation, and reliability workflows. The reviewed
+  updates include Harden Runner 2.20.1, Checkout 7.0.1, CodeQL 4.37.6,
+  Checkov Action 12.3115.0, Paths Filter 4.0.3, and Build Provenance 4.2.2.
+- Refreshed all same-repository reusable workflow pins from the v0.2.511
+  baseline to the immutable v0.2.516 commit.
+
+### Fixed
+
+- Kept the block-mode egress and documentation-drift contract tests aligned
+  with the reviewed Harden Runner 2.20.1 SHA, preventing dependency updates
+  from invalidating otherwise-correct CI security policy checks.
+- Documented Dependabot's current support for grouped updates to immutable
+  same-repository reusable workflow references.
+
 ## v0.2.513 — 2026-08-06
 
 - **Verified module registry installation.** `dot registry install` now validates the v1 index, verifies immutable archive SHA-256 digests, rejects traversal and link-bearing archives, previews with chezmoi by default, and applies only with explicit `--yes`. CI validates the published registry contract and JSON Schema.
