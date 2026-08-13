@@ -9,7 +9,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 FONT_INSTALL_SCRIPT="$REPO_ROOT/install/provision/run_onchange_50-install-fonts.sh"
-FONT_CHECK_SCRIPT="$REPO_ROOT/defaults/run_onchange_after_fonts.sh"
+FONT_CHECK_TEMPLATE="$REPO_ROOT/defaults/run_onchange_after_fonts.sh.tmpl"
 
 # Load test framework
 source "$REPO_ROOT/tests/framework/assertions.sh"
@@ -17,8 +17,25 @@ source "$REPO_ROOT/tests/framework/assertions.sh"
 test_start "font_hooks_normalize_chezmoi_defaults_source"
 assert_file_contains "$FONT_INSTALL_SCRIPT" 'basename "$SOURCE_ROOT")" == "defaults"' \
   "font installer should normalize a chezmoi defaults source path"
-assert_file_contains "$FONT_CHECK_SCRIPT" 'basename "$SOURCE_ROOT")" == "defaults"' \
+assert_file_contains "$FONT_CHECK_TEMPLATE" 'basename "$SOURCE_ROOT")" == "defaults"' \
   "font checker should normalize a chezmoi defaults source path"
+
+test_start "font_checker_embeds_chezmoi_source"
+assert_file_contains "$FONT_CHECK_TEMPLATE" 'SOURCE_ROOT={{ .chezmoi.sourceDir | quote }}' \
+  "font checker should embed the source path before an apply starts"
+assert_equals "0" "$(grep -c 'chezmoi source-path' "$FONT_CHECK_TEMPLATE" || true)" \
+  "font checker should not invoke chezmoi recursively during apply"
+
+if command -v chezmoi >/dev/null 2>&1; then
+  test_start "font_checker_runs_during_real_apply"
+  APPLY_DESTINATION="$(mktemp -d)"
+  apply_status=0
+  chezmoi --source "$REPO_ROOT/defaults" --destination "$APPLY_DESTINATION" \
+    apply --force "$APPLY_DESTINATION/fonts.sh" >/dev/null 2>&1 || apply_status=$?
+  assert_equals "0" "$apply_status" \
+    "font checker should resolve the verifier while chezmoi is applying"
+  rm -rf "$APPLY_DESTINATION"
+fi
 
 test_start "font_idempotency"
 

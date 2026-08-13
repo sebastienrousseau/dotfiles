@@ -2,6 +2,15 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.519 — 2026-08-13
+
+### Fixed
+
+- Rendered the Nerd Font check as a chezmoi template so its verified-download
+  dependency is resolved before an apply begins. This avoids an unreliable
+  nested `chezmoi source-path` call while chezmoi is executing the hook.
+- Added a real-apply regression test for the font hook's source resolution.
+
 ## v0.2.518 — 2026-08-13
 
 ### Changed
