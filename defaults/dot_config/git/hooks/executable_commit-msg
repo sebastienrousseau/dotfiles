@@ -9,11 +9,19 @@ set -euo pipefail
 # Format:    Assisted-by: AGENT_NAME:MODEL_VERSION [TOOL1] [TOOL2]
 
 detect_ai_agent() {
-  # Default model when running under Claude Code. Override at any time
-  # without editing this hook by exporting CLAUDE_MODEL in your shell
-  # rc, e.g. `export CLAUDE_MODEL=claude-opus-4-7`. Kept current with
-  # the latest generally-available Opus at time of last hook update.
-  local claude_default="${CLAUDE_MODEL:-claude-opus-4-7}"
+  # Default model when running under Claude Code.
+  #
+  # This has to be hardcoded: Claude Code exports CLAUDECODE,
+  # CLAUDE_CODE_ENTRYPOINT, CLAUDE_CODE_SESSION_ID and friends, but no
+  # variable carrying the model, and ~/.claude/settings.json has no `model`
+  # key unless the user pins one. So there is nothing to read it from, and
+  # the default goes stale whenever a new Opus ships — it was still
+  # claude-opus-4-7 while sessions were running on Opus 5, quietly
+  # misattributing every commit.
+  #
+  # Override per session without editing this hook:
+  #   export CLAUDE_MODEL=claude-sonnet-5
+  local claude_default="${CLAUDE_MODEL:-claude-opus-5}"
 
   # Claude Code (Anthropic). The CLI actually sets CLAUDECODE=1 (no
   # underscore); the other vars are kept as historical aliases and for
