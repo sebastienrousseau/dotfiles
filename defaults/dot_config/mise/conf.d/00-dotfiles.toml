@@ -52,6 +52,14 @@ zig = "latest"
 atuin = "latest"
 bat = "latest"
 codex = "latest"
+# corralctl (bulk clone/organise GitHub repos). Not in mise's tool registry,
+# so the backend is explicit. Must be `github:` and not `ubi:`: the repo is
+# named `corral` but the binary inside the archive is `corralctl`, and ubi
+# names the extracted binary after the *repo*, so it installs a `corral`
+# binary and `corralctl` is never on PATH. The github: backend unpacks the
+# release tarball as-is and yields the real `corralctl`. Verified against
+# v0.0.18 assets (corralctl_Darwin_arm64.tar.gz et al).
+"github:sebastienrousseau/corral" = "latest"
 eza = "latest"
 gping = "latest"
 ripgrep = "latest"
