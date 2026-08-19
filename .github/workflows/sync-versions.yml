@@ -37,7 +37,7 @@ jobs:
     name: Verify Version Sync
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
@@ -48,8 +48,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y jq ripgrep
+          bash tools/ci/install-tools.sh jq ripgrep:rg
 
       - name: Verify versions
         run: ./scripts/version-sync.sh --verify
@@ -58,7 +57,7 @@ jobs:
     name: Verify Version Sync (Protected Branch)
     if: github.event_name != 'pull_request' && github.ref_name == 'main'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
@@ -69,8 +68,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y jq ripgrep
+          bash tools/ci/install-tools.sh jq ripgrep:rg
 
       - name: Verify versions (no auto-commit on protected branch)
         run: ./scripts/version-sync.sh --verify
@@ -94,8 +92,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y jq ripgrep
+          bash tools/ci/install-tools.sh jq ripgrep:rg
 
       - name: Determine target version
         id: version

@@ -41,7 +41,7 @@ jobs:
   shell-lint:
     name: Shell Lint
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       # harden-runner removed: audit-only mode was crashing the runner
       # agent (armour lockdown) on ubuntu-latest, preventing the lint
@@ -50,8 +50,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install tools
-        run: |
-          sudo apt-get update && sudo apt-get install -y shellcheck ripgrep shfmt
+        run: bash tools/ci/install-tools.sh shellcheck ripgrep:rg shfmt
 
       - name: ShellCheck
         run: |

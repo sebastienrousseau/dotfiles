@@ -46,8 +46,7 @@ jobs:
       - name: Ensure ancillary linters are present
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends shellcheck ripgrep shfmt
+          bash tools/ci/install-tools.sh shellcheck ripgrep:rg shfmt
 
       - name: Run coverage
         env:

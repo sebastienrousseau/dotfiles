@@ -207,7 +207,7 @@ jobs:
           # Install Go and build a pinned shfmt. Scorecard's
           # Pinned-Dependencies check flags `@latest`; refresh
           # this tag with each shfmt release.
-          sudo apt-get update && sudo apt-get install -y golang-go
+          bash tools/ci/install-tools.sh golang-go:go
           go install mvdan.cc/sh/v3/cmd/shfmt@v3.13.1
 
           echo "Running development shfmt..."
@@ -304,7 +304,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get update && sudo apt-get install -y zsh hyperfine jq
+          bash tools/ci/install-tools.sh zsh hyperfine jq
 
       - name: Setup Chezmoi
         uses: ./.github/actions/setup-chezmoi

@@ -45,7 +45,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install pandoc
-        run: sudo apt-get update && sudo apt-get install -y pandoc codespell
+        run: bash tools/ci/install-tools.sh pandoc codespell
 
       - name: Run manual quality gates
         run: bash tools/docs/check-manual.sh

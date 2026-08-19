@@ -11,7 +11,17 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-HARDEN_RUNNER_SHA="05e31511f85b41b11d1cf0ef85d0992719546e2c"
+# The harden-runner pin is derived from the workflows, never hardcoded here.
+#
+# The properties worth protecting are that harden-runner is pinned to a full
+# commit SHA rather than a floating tag, and that every block-mode workflow
+# agrees on the same one. Naming a specific SHA in this file protected
+# neither: it only asserted "still on the release I was written against", so
+# every harden-runner bump broke this test until someone edited it by hand.
+# That is exactly what stalled the v2.20.1 -> v2.21.0 bump for two days.
+harden_runner_refs() {
+  grep -oE 'step-security/harden-runner@[^[:space:]]+' "$1" | sed 's|.*@||' | sort -u
+}
 CHECKOUT_ENDPOINTS=(
   "github.com:443"
   "api.github.com:443"
@@ -33,11 +43,35 @@ CHECKOUT_WORKFLOWS=(
   ".github/workflows/verify-tag-signature.yml"
 )
 
+ALL_PINS=""
+
 test_start "egress_block_workflows_use_pinned_harden_runner"
 for rel in "${BLOCKED_WORKFLOWS[@]}"; do
-  assert_file_contains "$REPO_ROOT/$rel" "step-security/harden-runner@$HARDEN_RUNNER_SHA" \
-    "$rel pins harden-runner"
+  refs="$(harden_runner_refs "$REPO_ROOT/$rel")"
+  assert_not_empty "$refs" "$rel references harden-runner"
+  while IFS= read -r ref; do
+    [[ -n "$ref" ]] || continue
+    ALL_PINS="$ALL_PINS$ref
+"
+    if printf '%s' "$ref" | grep -qE '^[0-9a-f]{40}$'; then
+      ((TESTS_PASSED++)) || true
+      printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $rel pins harden-runner to a full commit SHA"
+    else
+      ((TESTS_FAILED++)) || true
+      printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $rel pins harden-runner to '$ref', which is not a 40-character commit SHA"
+    fi
+  done <<EOF
+$refs
+EOF
 done
+
+# A per-file SHA check alone would pass if two workflows pinned different
+# releases, which is the state a partial bump leaves behind.
+test_start "egress_block_workflows_agree_on_one_harden_runner_pin"
+unique_pins="$(printf '%s' "$ALL_PINS" | grep -v '^$' | sort -u)"
+unique_count="$(printf '%s\n' "$unique_pins" | grep -c . || true)"
+assert_equals "1" "$unique_count" \
+  "all block-mode workflows pin the same harden-runner SHA (found: $(printf '%s' "$unique_pins" | tr '\n' ' '))"
 
 test_start "egress_block_workflows_do_not_use_audit_mode"
 for rel in "${BLOCKED_WORKFLOWS[@]}"; do

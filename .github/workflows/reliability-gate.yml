@@ -57,8 +57,7 @@ jobs:
           set -euo pipefail
           case "$(uname -s)" in
             Linux)
-              sudo apt-get update -qq
-              sudo apt-get install -y -qq shfmt shellcheck
+              bash tools/ci/install-tools.sh shfmt shellcheck
               ;;
             Darwin)
               brew install shfmt shellcheck coreutils

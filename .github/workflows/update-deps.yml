@@ -64,7 +64,7 @@ jobs:
       - name: Install tools
         run: |
           # Install jq, yq, and other tools
-          sudo apt-get update && sudo apt-get install -y jq curl yq
+          bash tools/ci/install-tools.sh jq curl yq
 
       - name: Check for updates
         id: updates
