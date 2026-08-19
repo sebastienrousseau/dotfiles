@@ -13,14 +13,29 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 WORKFLOW="$REPO_ROOT/.github/workflows/doc-drift.yml"
-HARDEN_RUNNER_SHA="05e31511f85b41b11d1cf0ef85d0992719546e2c"
 
 test_start "doc_drift_workflow_exists"
 assert_file_exists "$WORKFLOW" "doc-drift workflow must exist"
 
+# Derived from the workflow, never hardcoded. The property this test names is
+# "pinned to a full commit SHA" — a literal SHA here asserted the narrower and
+# far less useful "still on the release this file was written against", and so
+# broke on every harden-runner bump until someone edited it by hand.
 test_start "doc_drift_harden_runner_pinned"
-assert_file_contains "$WORKFLOW" "step-security/harden-runner@$HARDEN_RUNNER_SHA" \
-  "doc-drift harden-runner action must stay pinned to a full commit SHA"
+harden_refs="$(grep -oE 'step-security/harden-runner@[^[:space:]]+' "$WORKFLOW" | sed 's|.*@||' | sort -u)"
+assert_not_empty "$harden_refs" "doc-drift must reference harden-runner"
+while IFS= read -r ref; do
+  [[ -n "$ref" ]] || continue
+  if printf '%s' "$ref" | grep -qE '^[0-9a-f]{40}$'; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: doc-drift harden-runner is pinned to a full commit SHA"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: doc-drift pins harden-runner to '$ref', which is not a 40-character commit SHA"
+  fi
+done <<EOF
+$harden_refs
+EOF
 
 test_start "doc_drift_all_jobs_block_egress"
 harden_steps="$(grep -c 'step-security/harden-runner@' "$WORKFLOW" || true)"

@@ -73,7 +73,7 @@ jobs:
       - name: Enforce module coverage
         run: |
           set -euo pipefail
-          sudo apt-get update && sudo apt-get install -y ripgrep
+          bash tools/ci/install-tools.sh ripgrep:rg
           chmod +x tests/framework/module_coverage.sh
           MIN_COVERAGE="${{ inputs.min_coverage }}" ./tests/framework/module_coverage.sh
 

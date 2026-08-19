@@ -58,7 +58,7 @@ jobs:
       - name: Install tools
         run: |
           set -euo pipefail
-          sudo apt-get update && sudo apt-get install -y lua5.1 luarocks
+          bash tools/ci/install-tools.sh lua5.1 luarocks
           luarocks install --local luacheck "${{ inputs.luacheck_version }}"
           echo "$HOME/.luarocks/bin" >> "$GITHUB_PATH"
           if [[ ! -x "$HOME/.cargo/bin/stylua" ]]; then
