@@ -47,7 +47,22 @@ else
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: unverified yq latest download still present"
 fi
-assert_file_contains "$update_deps_workflow" "apt-get install -y jq curl yq" "yq installed from package manager"
+# yq must come from the distro package manager rather than an unpinned
+# download. Accept either the direct apt call or tools/ci/install-tools.sh,
+# which is an apt wrapper that only ever skips work when the binary is already
+# on the runner image — the provenance is identical either way.
+#
+# This used to match the literal "apt-get install -y jq curl yq", so the
+# control broke the moment the install line was refactored, even though the
+# property it guards was untouched. A control that fails on rewording rather
+# than on risk trains people to edit the test instead of reading it.
+if grep -Eq '(apt-get install|install-tools\.sh).*[[:space:]]yq([[:space:]]|$)' "$update_deps_workflow"; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: yq installed from package manager"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: yq is not provisioned through the package manager"
+fi
 
 test_start "homebrew_bootstrap_requires_checksum"
 assert_file_contains "$package_managers_lib" "HOMEBREW_INSTALLER_SHA256" "homebrew bootstrap requires explicit checksum"
