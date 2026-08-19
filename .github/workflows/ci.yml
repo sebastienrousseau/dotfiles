@@ -66,7 +66,7 @@ jobs:
       workflows: ${{ steps.filter.outputs.workflows }}
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -104,7 +104,7 @@ jobs:
     name: Lint / Shell
     needs: changes
     if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@78cc93ccf1ac558a53a979e54544b19596d07bec # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@1f7213b1de6922447d19cd29a8c09c0db98de83e # main
     with:
       include_tests: false
       shellcheck_severity: error
@@ -117,7 +117,7 @@ jobs:
     name: Lint / Lua
     needs: changes
     if: needs.changes.outputs.lua == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@78cc93ccf1ac558a53a979e54544b19596d07bec # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@1f7213b1de6922447d19cd29a8c09c0db98de83e # main
     with:
       target: defaults/dot_config/nvim
       strict: false
@@ -131,7 +131,7 @@ jobs:
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -153,7 +153,7 @@ jobs:
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -173,7 +173,7 @@ jobs:
       || needs.changes.outputs.nix == 'true'
       || github.event_name == 'schedule'
       || github.event_name == 'workflow_dispatch'
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@78cc93ccf1ac558a53a979e54544b19596d07bec # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@1f7213b1de6922447d19cd29a8c09c0db98de83e # main
 
   lint-reusable-pins:
     name: Lint / Reusable Workflow Pins
@@ -186,7 +186,7 @@ jobs:
       contents: read
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -202,7 +202,7 @@ jobs:
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -231,7 +231,7 @@ jobs:
   # ============================================================================
   security-secrets:
     name: Security / Secrets Scan
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@78cc93ccf1ac558a53a979e54544b19596d07bec # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@1f7213b1de6922447d19cd29a8c09c0db98de83e # main
     with:
       run_guard: true
       run_additional_patterns: true
@@ -240,7 +240,7 @@ jobs:
 
   security-dependencies:
     name: Security / Dependency Audit
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@78cc93ccf1ac558a53a979e54544b19596d07bec # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@1f7213b1de6922447d19cd29a8c09c0db98de83e # main
     with:
       run_dependency_audit: true
       run_supply_chain_checks: true
@@ -253,7 +253,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -261,7 +261,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: TruffleHog Scan
-        uses: trufflesecurity/trufflehog@6f3c981e7b77f235fd2702dd74af25fc4b72bf11 # v3.96.0
+        uses: trufflesecurity/trufflehog@bcfcf73aaf4759d4dadc2783177c245a02792318 # v3.97.0
         with:
           extra_args: --only-verified
 
@@ -271,7 +271,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -305,7 +305,7 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -333,7 +333,7 @@ jobs:
     if: needs.changes.outputs.config == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -359,7 +359,7 @@ jobs:
     needs: changes
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -388,7 +388,7 @@ jobs:
     if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -448,7 +448,7 @@ jobs:
         distro: [ubuntu]
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -473,7 +473,7 @@ jobs:
   test-unit:
     name: Test / Unit
     needs: changes
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@78cc93ccf1ac558a53a979e54544b19596d07bec # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@1f7213b1de6922447d19cd29a8c09c0db98de83e # main
     with:
       min_coverage: "95"
       run_integration: true
@@ -492,7 +492,7 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -524,7 +524,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@78cc93ccf1ac558a53a979e54544b19596d07bec # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@1f7213b1de6922447d19cd29a8c09c0db98de83e # main
     with:
       flake_dir: nix
       run_fmt_check: false
@@ -543,7 +543,7 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -717,7 +717,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 

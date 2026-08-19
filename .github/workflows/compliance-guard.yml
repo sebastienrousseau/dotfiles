@@ -38,7 +38,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -150,7 +150,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -260,7 +260,7 @@ jobs:
   # ============================================================================
   portability-shell-lint:
     name: Portability Shell Lint
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@78cc93ccf1ac558a53a979e54544b19596d07bec # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@1f7213b1de6922447d19cd29a8c09c0db98de83e # main
     with:
       include_tests: false
       # Severity widened to `warning` and the gate flipped to hard-fail
@@ -280,7 +280,7 @@ jobs:
     needs: [portability-shell-lint]
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -334,7 +334,7 @@ jobs:
     # Only run if Dockerfiles exist
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -383,7 +383,7 @@ jobs:
     if: always()
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 

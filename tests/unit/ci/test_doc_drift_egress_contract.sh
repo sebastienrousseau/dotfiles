@@ -13,7 +13,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 WORKFLOW="$REPO_ROOT/.github/workflows/doc-drift.yml"
-HARDEN_RUNNER_SHA="b09bb98e06d4d774595224525879c09bc6e98c40"
+HARDEN_RUNNER_SHA="05e31511f85b41b11d1cf0ef85d0992719546e2c"
 
 test_start "doc_drift_workflow_exists"
 assert_file_exists "$WORKFLOW" "doc-drift workflow must exist"
