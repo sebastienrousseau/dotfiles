@@ -118,86 +118,84 @@ path_prepend "${HOME}/.kimi-code/bin"
 path_prepend "${HOME}/.local/share/mise/shims"
 path_prepend "${HOME}/bin"
 
+# Deduplicate, prune, and order PATH in a single pass.
+#
+# Ordering matters as much as deduping here. `mise activate` puts a directory
+# on PATH per active tool, and a mise shim resolves to the same binary — but by
+# re-execing mise, a 137MB binary, on every call. With the shims directory (or
+# Homebrew) ahead of those tool directories, every mise-managed command pays
+# that. Measured 2026-08-20 at load 2.1:
+#
+#     rg --version    94ms via shim   vs   2ms direct   (~47x)
+#     nu -c exit     112ms via shim   vs  15ms direct
+#
+# Demoting the shims is the obvious fix and is the wrong one: Homebrew ships
+# its own rg, nu, fd, bat, eza and delta, so that hands version management to
+# brew. mise.toml pins exist so mise decides. Promoting mise keeps it
+# authoritative and removes the shim hop.
+#
 # Deduplicate and prune PATH (keep first occurrence, drop non-existent dirs).
 # Zsh's `typeset -U path` dedupes but doesn't prune, and inherited PATH from
 # launchd + /etc/paths.d/ often has stale/nonexistent entries (uninstalled
 # apps, cryptex bootstrap dirs, unexpanded ~). Run the prune unconditionally.
 if [ -n "${ZSH_VERSION:-}" ]; then
     # zsh: iterate the path array, keep only extant unique dirs.
-    typeset -a _new_path
+    typeset -a _new_path _mise_path
     typeset -A _seen_paths
     for _dir in $path; do
         if [[ -n "$_dir" && -d "$_dir" && -z "${_seen_paths[$_dir]:-}" ]]; then
             _seen_paths[$_dir]=1
-            _new_path+=("$_dir")
+            # mise's tool directories are bucketed out here and put back in
+            # front below — see the note above the dedup block. Done in this
+            # same pass on purpose: a separate loop plus a second `path=`
+            # assignment measured ~23ms of zsh startup (68ms -> 91ms), which
+            # is most of the budget for a fix whose whole point is speed.
+            case "$_dir" in
+                "${HOME}/.local/share/mise/installs/"*) _mise_path+=("$_dir") ;;
+                *) _new_path+=("$_dir") ;;
+            esac
         fi
     done
-    path=(${_new_path[@]})
-    unset _seen_paths _new_path _dir
+    # mise's directories go at the very front, ahead of everything.
+    #
+    # A narrower placement was tried — inserting them just before Homebrew, on
+    # the theory that brew was the only thing shadowing mise, and to avoid
+    # making every lookup that misses them stat all 65 first. It is wrong:
+    # ~/.local/bin also precedes them under that scheme, and it holds a stale
+    # `corralctl v0.0.20-2-gabcc283-dirty` that would then silently win over
+    # mise's released 0.0.23. Anything ahead of the tool directories can
+    # shadow them, so "ahead of everything" is the only placement that keeps
+    # mise authoritative.
+    #
+    # The cost is real and measured: ~32ms of zsh startup at load 3.4 (58ms
+    # without, 90ms with), because lookups that miss the mise directories now
+    # stat through them first. That buys ~92ms on every mise-managed command
+    # (rg: 94ms via shim, 2ms direct), which is paid per command rather than
+    # once per shell.
+    path=(${_mise_path[@]} ${_new_path[@]})
+    unset _seen_paths _new_path _mise_path _dir
 elif [[ ${BASH_VERSION%%.*} -ge 4 ]]; then
     # bash 4+: native associative arrays.
     declare -A _seen_paths
     IFS=':' read -ra _path_array <<< "$PATH"
     _new_path=""
+    _mise_path=""
     for _dir in "${_path_array[@]}"; do
         if [[ -n "$_dir" && -d "$_dir" && -z "${_seen_paths[$_dir]:-}" ]]; then
             _seen_paths[$_dir]=1
-            _new_path="${_new_path:+$_new_path:}$_dir"
+            case "$_dir" in
+                "${HOME}/.local/share/mise/installs/"*)
+                    _mise_path="${_mise_path:+$_mise_path:}$_dir" ;;
+                *)
+                    _new_path="${_new_path:+$_new_path:}$_dir" ;;
+            esac
         fi
     done
-    PATH="$_new_path"
-    unset _seen_paths _path_array _new_path _dir
+    PATH="${_mise_path:+$_mise_path:}$_new_path"
+    unset _seen_paths _path_array _new_path _mise_path _dir
 else
     # bash 3.x fallback: dedup only via awk (prune not feasible).
     PATH=$(echo "$PATH" | awk -v RS=':' '!seen[$0]++ {ORS=(NR>1?":":"")} {print}')
 fi
 
-# Promote mise's tool directories above everything else.
-#
-# `mise activate` puts a directory on PATH for each active tool, and a mise
-# shim resolves to the same binary — but by re-execing mise, a 137MB binary,
-# on every single call. When the shims directory or Homebrew sits ahead of the
-# tool directories, every mise-managed command pays that. Measured 2026-08-20
-# at load 2.1:
-#
-#     rg --version    95ms via shim   vs   2ms direct   (~47x)
-#     nu -c exit     112ms via shim   vs  25ms direct
-#
-# Homebrew is the reason this cannot simply be fixed by demoting the shims: it
-# carries its own copy of rg, nu, fd, bat, eza, delta and more, so dropping
-# shims below Homebrew silently moves version management from mise to brew.
-# Promoting mise instead keeps mise authoritative, which is the whole point of
-# pinning versions in mise.toml.
-#
-# This reorders entries already on PATH rather than asking mise for them
-# (`mise bin-paths` is correct but costs ~85ms per shell start). Relative order
-# within each group is preserved, and it is idempotent — running it twice is a
-# no-op.
-if [ -n "${ZSH_VERSION:-}" ]; then
-    typeset -a _mise_dirs _rest_dirs
-    for _dir in $path; do
-        case "$_dir" in
-            "${HOME}/.local/share/mise/installs/"*) _mise_dirs+=("$_dir") ;;
-            *) _rest_dirs+=("$_dir") ;;
-        esac
-    done
-    (( ${#_mise_dirs[@]} )) && path=(${_mise_dirs[@]} ${_rest_dirs[@]})
-    unset _mise_dirs _rest_dirs _dir
-else
-    _mise_dirs=""
-    _rest_dirs=""
-    _old_ifs="$IFS"
-    IFS=':'
-    for _dir in $PATH; do
-        case "$_dir" in
-            "${HOME}/.local/share/mise/installs/"*)
-                _mise_dirs="${_mise_dirs:+$_mise_dirs:}$_dir" ;;
-            *)
-                _rest_dirs="${_rest_dirs:+$_rest_dirs:}$_dir" ;;
-        esac
-    done
-    IFS="$_old_ifs"
-    [ -n "$_mise_dirs" ] && PATH="${_mise_dirs}${_rest_dirs:+:$_rest_dirs}"
-    unset _mise_dirs _rest_dirs _old_ifs _dir
-fi
 export PATH
