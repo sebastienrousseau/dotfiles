@@ -7,7 +7,18 @@ set -euo pipefail
 # Invoked by the launchd agent com.sebastienrousseau.corralctl (daily 00:00).
 # Logs every run; posts a macOS notification only when a run has failures.
 
-export PATH="/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+# The mise shims directory has to lead here, and this is the one place shims
+# are the right answer. launchd starts this with a bare environment and never
+# runs `mise activate`, so the tool directories an interactive shell gets do
+# not exist — a shim is how a non-interactive context reaches a mise-managed
+# binary at all.
+#
+# Without it this script had been failing every night since at least
+# 2026-08-15: `corralctl: command not found`, exit 127, synced=0, silently,
+# because the notification only fires on *reported* errors and a 127 never
+# gets that far. corralctl lives only under mise, so neither /opt/homebrew/bin
+# nor ~/.local/bin could ever have resolved it.
+export PATH="$HOME/.local/share/mise/shims:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
 OWNER="sebastienrousseau"
 LOG="$HOME/Library/Logs/corralctl.log"
