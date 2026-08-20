@@ -62,6 +62,13 @@ codex = "latest"
 "github:sebastienrousseau/corral" = "latest"
 eza = "latest"
 gping = "latest"
+# pandoc builds the HTML/PDF/EPUB manual. Without it tools/docs/build-manual.sh
+# exits 1 at the "building HTML single page" step with "No version is set for
+# shim: pandoc", so `dot doctor`'s manual check reports a missing local build on
+# any machine that has not installed it by hand. Managed here rather than in
+# config.toml (which is chezmoi-ignored) so every machine can build the docs,
+# not just the one where someone ran `mise use -g`.
+pandoc = "latest"
 ripgrep = "latest"
 ruff = "latest"
 yazi = "26.5.6"
