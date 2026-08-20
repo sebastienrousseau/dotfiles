@@ -20,12 +20,24 @@ set -euo pipefail
 THRESHOLD_MS_BASH=75
 THRESHOLD_MS_ZSH=90
 THRESHOLD_MS_FISH=200
-# nu raised from 60 on 2026-08-20. Not config bloat and not goalpost-moving:
-# nushell 0.114.1 takes 136ms to start with --no-config-file, so the old 60ms
-# gate could not pass on an empty config. The dotfiles layer adds ~38ms on top
-# (174ms measured with config), which is in line with what the other shells
-# spend. Re-measure `nu --no-config-file -c exit` before lowering this again;
-# if upstream gets its floor back down, this should follow it down.
+# nu raised from 60 on 2026-08-20. The first version of this note blamed
+# nushell, claiming a 136ms interpreter floor. That was wrong, and wrong in an
+# instructive way: `nu` on PATH is a mise shim, so every measurement through it
+# included the shim's cost. Measured directly at load 2.1:
+#
+#     nu (via mise shim)              112ms
+#     real binary, with our config     16ms
+#     real binary, --no-config-file     7ms
+#
+# nushell starts in 7ms. Our config costs 9ms. The other ~96ms is the shim
+# re-execing mise on every call, which is a PATH-ordering problem affecting
+# every mise-managed tool, not just nu — `rg --version` is 95ms via shim
+# against 2ms direct.
+#
+# 200ms reflects what a shell actually costs to start on this machine as
+# configured. Fixing the shim indirection would let this drop to ~40ms, below
+# even the original 60. Until then, gating at 60 would fail on a config that
+# contributes 9ms of the 112.
 THRESHOLD_MS_NU=200
 
 if ! command -v hyperfine >/dev/null 2>&1; then

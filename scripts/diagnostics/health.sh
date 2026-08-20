@@ -235,7 +235,13 @@ check_dev_tools() {
 
   if has_command node; then
     local node_version
-    node_version=$(node --version 2>/dev/null)
+    # `|| true` is load-bearing under `set -e`: an assignment takes the exit
+    # status of its command substitution, so a `node` that fails to report a
+    # version aborts the entire health report mid-section — no Summary, no
+    # score, rc=1. That is exactly what happened when `node` resolved to a
+    # mise shim under a sandboxed HOME. A diagnostic tool must survive the
+    # tools it is diagnosing.
+    node_version=$(node --version 2>/dev/null || true)
     check "Node.js ($node_version)" "pass"
   else
     check "Node.js" "warn" "Not installed"
@@ -251,7 +257,10 @@ check_dev_tools() {
 
   if has_command python3; then
     local py_version
-    py_version=$(python3 --version 2>/dev/null | cut -d' ' -f2)
+    # pipefail is on, so this pipeline reports python3's failure even though
+    # `cut` succeeds — and an assignment inherits that status, aborting the
+    # report under `set -e`. Same hazard as node_version above.
+    py_version=$(python3 --version 2>/dev/null | cut -d' ' -f2 || true)
     check "Python ($py_version)" "pass"
   else
     check "Python" "warn" "Not installed"
@@ -354,7 +363,12 @@ check_security() {
   for key in "$HOME/.ssh/id_ed25519" "$HOME/.ssh/id_rsa" "$HOME/.ssh/id_ed25519_sk"; do
     if [[ -f "$key" ]]; then
       local perms
-      perms=$(stat -c '%a' "$key" 2>/dev/null || stat -f '%Lp' "$key" 2>/dev/null)
+      # Same hazard as node_version above: if BOTH stat spellings fail (a
+      # platform with neither GNU nor BSD stat), the assignment is non-zero
+      # and `set -e` kills the report. Empty perms falls through to the
+      # "should be 600" warning, which is the right answer when the mode
+      # cannot be read.
+      perms=$(stat -c '%a' "$key" 2>/dev/null || stat -f '%Lp' "$key" 2>/dev/null || true)
       if [[ "$perms" != "600" && "$perms" != "400" ]]; then
         check "SSH key perms (${key##*/})" "warn" "mode $perms (should be 600)"
       else
