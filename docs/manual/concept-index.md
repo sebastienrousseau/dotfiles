@@ -9,6 +9,7 @@ Alphabetical list of concepts covered in the manual.
 - Accessibility
 - Adding a New Flag
 - Agent Policy Enforcement
+- Agents
 - AI & Agents
 - Algorithms
 - Apply / Sync
@@ -97,6 +98,7 @@ Alphabetical list of concepts covered in the manual.
 - Read by Tools
 - Recovery
 - Reference
+- Registry
 - Required Binaries
 - Scenario
 - Secret-Related
