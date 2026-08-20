@@ -277,6 +277,45 @@ fi
 
 mkdir -p "$CACHE_DIR"
 
+# ---------------------------------------------------------------------------
+# Invalidate the cache when the generator itself changes
+#
+# A cache entry is only valid for the extract-theme.py that produced it, but
+# the freshness check below compares the entry against its *wallpaper* alone.
+# So a wallpaper that never changes keeps serving whatever the generator
+# emitted the first time, indefinitely — while every other theme silently
+# moves on.
+#
+# That is not hypothetical: catalina and sonoma shipped in themes.toml with
+# blocks generated in June/July, months after the rest. They carried an
+# absolute /Users/<name>/ wallpaper path (predating the `~/` normalisation)
+# and a c15 of #181818 in a *light* theme (predating the structural-ramp fix),
+# which failed the WCAG AAA gate in CI. Two real defects, both invisible here
+# because those two wallpapers had simply not been touched since.
+#
+# Keyed on the generator's CONTENT, not its mtime: `git checkout` rewrites
+# mtimes without changing behaviour, and mtime alone would force a full
+# rebuild of every theme on each checkout.
+generator_digest() {
+  if command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" | awk '{print $1}'
+  elif command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  else
+    # No digest tool: fall back to always regenerating rather than risk
+    # serving stale blocks. Correctness over speed.
+    echo "no-digest-tool-$(date +%s)"
+  fi
+}
+
+GENERATOR_STAMP="$CACHE_DIR/.extract-theme.sha256"
+GENERATOR_HASH="$(generator_digest "$EXTRACT_SCRIPT")"
+GENERATOR_STALE=false
+if [[ ! -f "$GENERATOR_STAMP" || "$(cat "$GENERATOR_STAMP")" != "$GENERATOR_HASH" ]]; then
+  GENERATOR_STALE=true
+  echo "Generator changed since the cache was written — rebuilding all themes."
+fi
+
 # Clean orphaned cache files (wallpapers that no longer exist)
 for cache_file in "$CACHE_DIR"/*.toml; do
   [[ -f "$cache_file" ]] || continue
@@ -328,7 +367,8 @@ for name in $(printf '%s\n' "${!WALLPAPERS[@]}" | sort); do
   wp_path="${WALLPAPERS[$name]}"
   cache_file="$CACHE_DIR/${name}.toml"
 
-  if [[ "$FORCE" != "true" && -f "$cache_file" && "$cache_file" -nt "$wp_path" ]]; then
+  if [[ "$FORCE" != "true" && "$GENERATOR_STALE" != "true" &&
+    -f "$cache_file" && "$cache_file" -nt "$wp_path" ]]; then
     CACHED=$((CACHED + 1))
     continue
   fi
@@ -540,5 +580,10 @@ FALLBACK
 # subsections (which inflated the tally ~4x).
 theme_count=$(grep -cE '^\[themes\.[a-z0-9-]+\]$' "$THEMES_FILE")
 echo "  Written: $THEMES_FILE ($theme_count themes)"
+
+# Record which generator produced this cache. Written only now, after the file
+# has been assembled: stamping earlier would mark the cache current even if the
+# run died partway, so the next run would trust half-regenerated blocks.
+printf '%s\n' "$GENERATOR_HASH" >"$GENERATOR_STAMP"
 echo ""
 echo "Done. Run 'dot theme list' to see available themes."

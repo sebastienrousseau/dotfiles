@@ -245,4 +245,28 @@ while IFS= read -r line; do
 done < "$THEMES_FILE"
 assert_equals "$bad" "0" "all color values must be valid 6-digit hex"
 
+# --- Wallpaper paths must not carry one machine's home directory ---
+#
+# themes.toml is committed and read on every machine, so a wallpaper path under
+# /Users/<name>/ or /home/<name>/ is broken everywhere except the host that
+# generated it. extract-theme.py rewrites home-relative paths to `~/` for
+# exactly this reason; system paths (/System/..., /usr/share/...) are identical
+# on every host and stay absolute.
+#
+# This is a real regression, not a hypothetical: catalina and sonoma shipped
+# with /Users/seb/... paths from a cache entry generated months earlier, and
+# nothing caught it. The WCAG gate caught their colour defect; their path
+# defect had no test at all.
+test_start "wallpaper_paths_are_not_machine_specific"
+machine_paths="$(grep -E '^wallpaper = "(/Users/|/home/)' "$THEMES_FILE" || true)"
+if [[ -z "$machine_paths" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no wallpaper path hardcodes a home directory"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: wallpaper paths hardcode a home directory"
+  printf '%s\n' "$machine_paths" | sed 's/^/    /'
+  printf '%b\n' "    ${YELLOW:-}fix: run 'dot theme rebuild' so extract-theme.py re-emits them as ~/${NC}"
+fi
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
