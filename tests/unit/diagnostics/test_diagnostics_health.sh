@@ -98,12 +98,24 @@ assert_file_contains "$HEALTH_FILE" 'check "Node version manager" "pass" "mise"'
 assert_file_contains "$HEALTH_FILE" 'check "Nerd Font available" "pass"' "health accepts any Nerd Font"
 assert_file_contains "$HEALTH_FILE" 'check "Git signing" "pass" "ssh"' "health accepts SSH commit signing"
 
+# A diagnostic tool has to survive the tools it is diagnosing. Every probed
+# binary is replaced with one that exits 1, which is what a broken install, a
+# shim with no backing tool, or a sandboxed HOME actually looks like.
+#
+# Only `zsh` used to be faked here, and the test passed or failed depending on
+# whether the *host* happened to have a working node — green in CI, red
+# locally where `node` resolved to a mise shim under the sandbox HOME. The
+# abort was never in the zsh path at all: `node_version=$(node --version)`
+# takes the substitution's exit status, so under `set -e` it killed the report
+# mid-section with no Summary and rc=1.
 test_start "health_failed_zsh_timing_still_prints_summary"
-printf '#!/usr/bin/env bash\nexit 1\n' >"$DOTFILES_COV_TMPDIR/bin/zsh"
-chmod +x "$DOTFILES_COV_TMPDIR/bin/zsh"
+for _broken in zsh node python3 git stat; do
+  printf '#!/usr/bin/env bash\nexit 1\n' >"$DOTFILES_COV_TMPDIR/bin/$_broken"
+  chmod +x "$DOTFILES_COV_TMPDIR/bin/$_broken"
+done
 health_output=$(NO_COLOR=1 DOTFILES_NONINTERACTIVE=1 bash "$HEALTH_FILE" 2>&1)
 health_rc=$?
-assert_equals "0" "$health_rc" "failed interactive zsh timing must not abort health"
+assert_equals "0" "$health_rc" "a failing probed tool must not abort health"
 assert_output_contains "Summary" "printf '%s' \"\$health_output\""
 
 echo ""
