@@ -1,3 +1,4 @@
+-- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 -- headless-upgrade.lua — plugin/tool refresh for `dot upgrade`.
 --
 -- Runs Lazy sync and then waits for Mason's async install queue to drain
