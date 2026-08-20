@@ -470,20 +470,33 @@ fi
 
 # --- Symlinks ---
 broken_links=0
+broken_list=""
 for root in "$HOME/.config" "$HOME/.local/bin" "$HOME/.local/share" "$HOME/.ssh"; do
   [[ -d "$root" ]] || continue
   while IFS= read -r -d '' link; do
     link_name="$(basename "$link")"
     [[ "$link" == *"google-chrome-backup"* ]] && continue
     [[ "$link_name" == SingletonLock || "$link_name" == SingletonCookie || "$link_name" == SingletonSocket ]] && continue
-    [[ -e "$link" ]] || broken_links=$((broken_links + 1))
+    [[ -e "$link" ]] && continue
+    # A link into ~/Library/Caches dangling is macOS working as designed, not a
+    # health problem: the OS purges that directory whenever it wants the space,
+    # and the owning tool recreates its cache on next use. ~/.config/swiftpm/cache
+    # -> ~/Library/Caches/org.swift.swiftpm is the usual one; it was "fixed" by
+    # recreating the target earlier the same day and had broken again by evening,
+    # which is the tell that it is not fixable, only re-reported.
+    case "$(readlink "$link" 2>/dev/null)" in
+      "$HOME/Library/Caches/"*) continue ;;
+    esac
+    broken_links=$((broken_links + 1))
+    broken_list="${broken_list:+$broken_list, }$(pretty_path "$link")"
   done < <(find "$root" -maxdepth 3 -type l -print0 2>/dev/null)
 done
 
 if [[ $broken_links -eq 0 ]]; then
   _ok "symlinks" "none broken"
 else
-  _warn "symlinks" "$broken_links broken"
+  # Name them. "1 broken" with no path meant hunting for it by hand, twice.
+  _warn "symlinks" "$broken_links broken: $broken_list"
 fi
 
 # --- Portability ---
