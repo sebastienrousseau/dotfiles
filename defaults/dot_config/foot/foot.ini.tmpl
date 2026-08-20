@@ -1,10 +1,9 @@
-{{- $t := index .themes (default "fallback-dark" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "fallback-dark" -}}{{- end }}
+{{- $themeName := includeTemplate "theme-name" . -}}
+{{- $t := index .themes $themeName -}}
 {{- $tt := $t -}}
-{{- $themeName := default "fallback-dark" .theme -}}
 {{- if hasSuffix "-light" $themeName -}}
   {{- $darkTheme := index .themes (printf "%s-dark" (trimSuffix "-light" $themeName)) -}}
-  {{- if $darkTheme -}}{{- $tt = $darkTheme -}}{{- end -}}
+  {{- if and $darkTheme (hasKey $darkTheme "term") -}}{{- $tt = $darkTheme -}}{{- end -}}
 {{- end }}
 [main]
 font={{ .terminal_font_family }}:size={{ .terminal_font_size }}

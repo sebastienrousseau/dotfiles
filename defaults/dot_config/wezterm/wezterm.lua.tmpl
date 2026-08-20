@@ -7,13 +7,12 @@ end
 
 {{- $fontFamily := default "JetBrainsMono Nerd Font" .terminal_font_family -}}
 {{- $fontSize := default 20 .terminal_font_size -}}
-{{- $t := index .themes (default "fallback-dark" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "fallback-dark" -}}{{- end }}
+{{- $themeName := includeTemplate "theme-name" . -}}
+{{- $t := index .themes $themeName -}}
 {{- $tt := $t -}}
-{{- $themeName := default "fallback-dark" .theme -}}
 {{- if hasSuffix "-light" $themeName -}}
   {{- $darkTheme := index .themes (printf "%s-dark" (trimSuffix "-light" $themeName)) -}}
-  {{- if $darkTheme -}}{{- $tt = $darkTheme -}}{{- end -}}
+  {{- if and $darkTheme (hasKey $darkTheme "term") -}}{{- $tt = $darkTheme -}}{{- end -}}
 {{- end }}
 
 config.font = wezterm.font_with_fallback({
