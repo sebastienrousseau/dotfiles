@@ -4,11 +4,14 @@
        frame actually on screen — the HEIC's light and dark frames are different
        images with different dominant colours, so the dark accent would not match
        the light-mode wallpaper the user sees. */ -}}
-{{- $themeName := default "fallback-dark" .theme -}}
+{{- $themeName := includeTemplate "theme-name" . -}}
 {{- $family := trimSuffix "-dark" (trimSuffix "-light" $themeName) -}}
 {{- $t := index .themes (printf "%s-dark" $family) -}}
-{{- if not $t -}}{{- $t = index .themes $themeName -}}{{- end -}}
-{{- if not $t -}}{{- $t = index .themes "fallback-dark" -}}{{- end -}}
+{{- if or (not $t) (not (hasKey $t "term")) -}}
+  {{- /* `family-dark` variant is missing/malformed — fall back to the
+         validated theme-name partial's return (guaranteed well-formed). */ -}}
+  {{- $t = index .themes $themeName -}}
+{{- end -}}
 {{- $active := index .themes $themeName -}}
 {{- if not $active -}}{{- $active = $t -}}{{- end -}}
 {{- $bg := $t.term.bg -}}
@@ -152,7 +155,7 @@ bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  THEME — Powerline Status Bar                                           ║
-# ║  Colors from .chezmoidata/themes.toml ({{ default "fallback-dark" .theme }})  ║
+# ║  Colors from .chezmoidata/themes.toml ({{ $themeName }})  ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
 
 # --- Status Bar ---

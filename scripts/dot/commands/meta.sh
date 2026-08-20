@@ -87,8 +87,11 @@ cmd_upgrade() {
   _upgrade_step dotfiles "Dotfiles" "chezmoi update…" -- chezmoi update
 
   if has_command nvim; then
-    _upgrade_step nvim "Neovim plugins" "Lazy sync…" -- \
-      nvim --headless "+Lazy! sync" +qa
+    # scripts/nvim/headless-upgrade.lua runs Lazy sync AND waits for
+    # Mason's async install queue to drain, so ensure_installed installs
+    # (codelldb, debugpy, delve, etc.) aren't aborted by an early quitall.
+    _upgrade_step nvim "Neovim plugins" "Lazy sync + Mason drain…" -- \
+      nvim --headless -l "$src_dir/scripts/nvim/headless-upgrade.lua"
   fi
 
   if [ "${DOTFILES_FONTS:-}" = "1" ] &&

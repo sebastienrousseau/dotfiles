@@ -1,0 +1,42 @@
+{{- /* theme-name — resolve the currently-active theme name defensively.
+
+       Returns the name of a theme that is guaranteed to (a) exist as a key
+       under `.themes` and (b) have a `.term` sub-map (the proxy we use for
+       "well-formed theme entry", since every documented theme carries a
+       `.term` block). This keeps 21+ templates that need `.theme` from
+       crashing with an opaque `nil data; no entry for key "term"` when
+       `.theme` names a theme that isn't (or isn't-yet) defined.
+
+       Resolution order:
+         1. `.theme` — whatever the user asked for
+         2. `fallback-dark` — the canonical fallback (guaranteed by
+            `dot theme rebuild`)
+         3. `fail` with a clear diagnostic pointing at the real fix,
+            instead of letting the caller crash on a nil dereference
+            whose stack trace names the caller's line rather than the
+            missing theme.
+
+       Usage:
+         {{`{{- $themeName := includeTemplate "theme-name" . -}}`}}
+         {{`{{- $t := index .themes $themeName -}}`}}
+
+       Callers that also need a `-light` -> `-dark` fallback (terminal
+       colour templates that keep a dark surface under a light system
+       theme) can add the standard remap after resolving `$t`:
+
+         {{`{{- $tt := $t -}}`}}
+         {{`{{- if hasSuffix "-light" $themeName -}}`}}
+         {{`  {{- $dv := index .themes (printf "%s-dark" (trimSuffix "-light" $themeName)) -}}`}}
+         {{`  {{- if and $dv (hasKey $dv "term") -}}{{- $tt = $dv -}}{{- end -}}`}}
+         {{`{{- end -}}`}}
+    */ -}}
+{{- $requested := default "fallback-dark" .theme -}}
+{{- $t := index .themes $requested -}}
+{{- if or (not $t) (not (hasKey $t "term")) -}}
+  {{- $requested = "fallback-dark" -}}
+  {{- $t = index .themes $requested -}}
+{{- end -}}
+{{- if or (not $t) (not (hasKey $t "term")) -}}
+  {{- fail (printf "theme %q not found or missing .term in .chezmoidata/themes.toml, and canonical fallback %q is also missing. Run `dot theme rebuild` to regenerate the theme manifest, or set `theme = \"<valid-key>\"` in ~/.config/chezmoi/chezmoi.toml under [data]." (default "" .theme) "fallback-dark") -}}
+{{- end -}}
+{{- $requested -}}

@@ -1,6 +1,6 @@
 {{- /* GTK-4.0 custom CSS — colors from SSOT theme manifest */ -}}
-{{- $t := index .themes (default "fallback-dark" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "fallback-dark" -}}{{- end -}}
+{{- $themeName := includeTemplate "theme-name" . -}}
+{{- $t := index .themes $themeName -}}
 {{- $is_dark := eq $t.mode "dark" -}}
 
 /* GTK4 Custom Styling for {{ .theme }} */
