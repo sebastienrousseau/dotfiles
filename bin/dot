@@ -219,6 +219,7 @@ Diagnostics|bundle|Create offline archive of dotfiles environment|Portable suppo
 Diagnostics|rollback|Rollback dotfiles to a previous state|Use after a bad apply.
 Diagnostics|history|Shell history analysis|Inspect command usage patterns.
 Diagnostics|perf|Show performance mode and quick timing|Startup and shell timing surface.
+Diagnostics|benchmark|Benchmark shell startup with per-component profiling|Hyperfine timings per shell, plus a breakdown of what each init step costs.
 Diagnostics|metrics|Show recent observability metrics (JSONL)|Recent runtime events and counters.
 Diagnostics|load-bench|Measure time to heavy-layer readiness|Performance benchmarking helper.
 AI|ai|AI fleet cockpit, gateway, and cost|Subcommands: dot ai (cockpit), dot ai "<prompt>", dot ai serve, dot ai install, dot ai cost, dot ai doctor.
@@ -474,6 +475,7 @@ score|diagnostics
 snapshot|diagnostics
 history|diagnostics
 perf|diagnostics
+benchmark|diagnostics
 load-bench|diagnostics
 load-bench-pty|diagnostics
 chaos|diagnostics
