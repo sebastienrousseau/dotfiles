@@ -44,6 +44,7 @@ job `lint/command-index` fails when this file is stale.
 | `dot aliases` | why Show details and deprecation status for a single alias |
 | `dot attest` | Export workstation attestation evidence (--json |
 | `dot backup` | Create a compressed backup of your home |
+| `dot benchmark` | Benchmark shell startup with per-component profiling |
 | `dot bundle` | Create offline archive of dotfiles environment |
 | `dot cache-refresh` | Regenerate shell caches for ultra-fast startup |
 | `dot cd` | Print source directory path (use: cd $(dot cd)) |
