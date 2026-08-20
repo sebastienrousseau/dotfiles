@@ -18,21 +18,43 @@ set -euo pipefail
 # Regression thresholds (ms). Measured 2026-07 medians: zsh ~66, bash ~51,
 # fish ~129, nu ~25 — thresholds sit above those with headroom for noise.
 THRESHOLD_MS_BASH=75
-# zsh: 90 -> 110 -> 100 on 2026-08-20.
+# zsh: calibrated to measured variance, 2026-08-20. Final value; the history
+# is recorded because the three earlier moves were each wrong for a different
+# reason and the reasoning matters more than the number.
 #
-# 110 was set while a Rust build was saturating the machine (load 6-13 on 6
-# cores) and readings ranged 82-131ms, so it was padded for noise rather than
-# derived. On a quiet machine the honest figure is tighter: 89ms at load 2.14,
-# 82-90ms across loads 2.0-3.4. 100 sits above that with real headroom and
-# still catches a regression 110 would have waved through.
+#   90   original, from a 2026-07 median of ~66ms
+#   110  padded during a Rust build (load 6-13) - fitted to noise
+#   100  from one 89ms reading at load 2.14 - fitted to one sample
+#   130  this value, from the observed spread
 #
-# The gap from the pre-#1006 58ms is the deliberate cost of promoting mise's
-# 65 tool directories to the front of PATH: every lookup that misses them
-# stats through them first. Measured with the identical loop, changing only
-# the final ordering: mise last 58ms, mise first 90ms. That ~32ms is paid once
-# per shell and buys ~92ms on every mise-managed command (rg: 94ms via shim
-# against 2ms direct). If the promotion is ever reverted, put this back to 90.
-THRESHOLD_MS_ZSH=100
+# zsh startup on this machine is not measurable to better than about +/-25%.
+# Three back-to-back hyperfine sessions, same machine, load 2.6, 20 runs each,
+# gating on min:
+#
+#     session 1: min= 84ms
+#     session 2: min=100ms
+#     session 3: min=111ms
+#
+# Across the whole day the min ranged 79-124ms. The variance is *between*
+# sessions rather than within them, so raising the run count does not help --
+# tested at 10, 25 and 40 runs, which produced 111ms, 124ms and 118ms.
+#
+# A gate at 100 therefore passes or fails on when it happens to run. That is
+# worse than a loose gate: a check that fails half the time teaches you to
+# ignore it, and the next real regression goes unnoticed with it. 130 sits
+# above the observed spread and still catches anything that genuinely doubles
+# startup.
+#
+# The floor itself is ~32ms higher than it was before #1006, which promoted
+# mise's 65 tool directories to the front of PATH so that every mise-managed
+# command resolves directly instead of through a shim (rg: 94ms -> 2ms). That
+# cost is deliberate and worth it, and it is not recoverable: placing the mise
+# directories after ~/.cargo/bin and ~/.local/bin instead - the obvious way to
+# shorten the scan - was dry-run across all 283 shims and would change the
+# resolution of 32 tools, moving the entire Rust toolchain from mise to
+# rustup's own ~/.cargo/bin. mise must win over everything, so it must be
+# first, so the scan cost stands.
+THRESHOLD_MS_ZSH=130
 THRESHOLD_MS_FISH=200
 # nu was briefly raised to 200 on 2026-08-20 on the theory that nushell itself
 # had regressed to a 136ms floor. That was wrong: `nu` on PATH was a mise shim,
