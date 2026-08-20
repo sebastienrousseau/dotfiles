@@ -151,4 +151,53 @@ else
     # bash 3.x fallback: dedup only via awk (prune not feasible).
     PATH=$(echo "$PATH" | awk -v RS=':' '!seen[$0]++ {ORS=(NR>1?":":"")} {print}')
 fi
+
+# Promote mise's tool directories above everything else.
+#
+# `mise activate` puts a directory on PATH for each active tool, and a mise
+# shim resolves to the same binary — but by re-execing mise, a 137MB binary,
+# on every single call. When the shims directory or Homebrew sits ahead of the
+# tool directories, every mise-managed command pays that. Measured 2026-08-20
+# at load 2.1:
+#
+#     rg --version    95ms via shim   vs   2ms direct   (~47x)
+#     nu -c exit     112ms via shim   vs  25ms direct
+#
+# Homebrew is the reason this cannot simply be fixed by demoting the shims: it
+# carries its own copy of rg, nu, fd, bat, eza, delta and more, so dropping
+# shims below Homebrew silently moves version management from mise to brew.
+# Promoting mise instead keeps mise authoritative, which is the whole point of
+# pinning versions in mise.toml.
+#
+# This reorders entries already on PATH rather than asking mise for them
+# (`mise bin-paths` is correct but costs ~85ms per shell start). Relative order
+# within each group is preserved, and it is idempotent — running it twice is a
+# no-op.
+if [ -n "${ZSH_VERSION:-}" ]; then
+    typeset -a _mise_dirs _rest_dirs
+    for _dir in $path; do
+        case "$_dir" in
+            "${HOME}/.local/share/mise/installs/"*) _mise_dirs+=("$_dir") ;;
+            *) _rest_dirs+=("$_dir") ;;
+        esac
+    done
+    (( ${#_mise_dirs[@]} )) && path=(${_mise_dirs[@]} ${_rest_dirs[@]})
+    unset _mise_dirs _rest_dirs _dir
+else
+    _mise_dirs=""
+    _rest_dirs=""
+    _old_ifs="$IFS"
+    IFS=':'
+    for _dir in $PATH; do
+        case "$_dir" in
+            "${HOME}/.local/share/mise/installs/"*)
+                _mise_dirs="${_mise_dirs:+$_mise_dirs:}$_dir" ;;
+            *)
+                _rest_dirs="${_rest_dirs:+$_rest_dirs:}$_dir" ;;
+        esac
+    done
+    IFS="$_old_ifs"
+    [ -n "$_mise_dirs" ] && PATH="${_mise_dirs}${_rest_dirs:+:$_rest_dirs}"
+    unset _mise_dirs _rest_dirs _old_ifs _dir
+fi
 export PATH

@@ -20,25 +20,16 @@ set -euo pipefail
 THRESHOLD_MS_BASH=75
 THRESHOLD_MS_ZSH=90
 THRESHOLD_MS_FISH=200
-# nu raised from 60 on 2026-08-20. The first version of this note blamed
-# nushell, claiming a 136ms interpreter floor. That was wrong, and wrong in an
-# instructive way: `nu` on PATH is a mise shim, so every measurement through it
-# included the shim's cost. Measured directly at load 2.1:
+# nu was briefly raised to 200 on 2026-08-20 on the theory that nushell itself
+# had regressed to a 136ms floor. That was wrong: `nu` on PATH was a mise shim,
+# so the measurement included the shim re-execing a 137MB mise binary. With
+# mise's tool directories promoted above the shims, nu starts in 15ms — so the
+# original 60ms gate was right all along, and is restored.
 #
-#     nu (via mise shim)              112ms
-#     real binary, with our config     16ms
-#     real binary, --no-config-file     7ms
-#
-# nushell starts in 7ms. Our config costs 9ms. The other ~96ms is the shim
-# re-execing mise on every call, which is a PATH-ordering problem affecting
-# every mise-managed tool, not just nu — `rg --version` is 95ms via shim
-# against 2ms direct.
-#
-# 200ms reflects what a shell actually costs to start on this machine as
-# configured. Fixing the shim indirection would let this drop to ~40ms, below
-# even the original 60. Until then, gating at 60 would fail on a config that
-# contributes 9ms of the 112.
-THRESHOLD_MS_NU=200
+#     nu via mise shim                112ms
+#     nu direct, with our config        15ms
+#     nu direct, --no-config-file        7ms
+THRESHOLD_MS_NU=60
 
 if ! command -v hyperfine >/dev/null 2>&1; then
   echo "hyperfine not found."
