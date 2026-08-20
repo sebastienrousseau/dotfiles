@@ -20,7 +20,13 @@ set -euo pipefail
 THRESHOLD_MS_BASH=75
 THRESHOLD_MS_ZSH=90
 THRESHOLD_MS_FISH=200
-THRESHOLD_MS_NU=60
+# nu raised from 60 on 2026-08-20. Not config bloat and not goalpost-moving:
+# nushell 0.114.1 takes 136ms to start with --no-config-file, so the old 60ms
+# gate could not pass on an empty config. The dotfiles layer adds ~38ms on top
+# (174ms measured with config), which is in line with what the other shells
+# spend. Re-measure `nu --no-config-file -c exit` before lowering this again;
+# if upstream gets its floor back down, this should follow it down.
+THRESHOLD_MS_NU=200
 
 if ! command -v hyperfine >/dev/null 2>&1; then
   echo "hyperfine not found."
@@ -37,17 +43,29 @@ run_bench() {
   local result
   local bench_json
   bench_json=$(umask 077 && mktemp)
+  # Gate on the MINIMUM, not the mean.
+  #
+  # This is a regression gate for *our* init code, and the mean measures the
+  # machine's spare capacity as much as the shell. Timed on 2026-08-20 while a
+  # Rust build was running (load 6.08 on 6 cores), fish reported mean=428ms
+  # against min=73ms — 5.9x apart, and a red gate for a config that had not
+  # changed. zsh reported mean=129ms / min=82ms, failing its 90ms threshold on
+  # the mean and passing on the min.
+  #
+  # The minimum of ten runs approximates the uncontended cost, which is the
+  # thing a regression gate is actually asking about. It cannot mask a real
+  # regression: work added to an rc file raises the floor too.
   result=$(hyperfine -N -i --warmup 3 --runs 10 "$shell_cmd" --export-json "$bench_json" >/dev/null 2>&1 &&
-    jq -r '.results[0].mean * 1000' "$bench_json")
+    jq -r '.results[0].min * 1000' "$bench_json")
   rm -f "$bench_json"
 
-  local mean_ms
-  mean_ms=$(printf "%.0f" "$result")
+  local min_ms
+  min_ms=$(printf "%.0f" "$result")
 
-  if [[ $mean_ms -le $threshold ]]; then
-    printf '  \033[38;5;42m✓\033[0m %-12s %dms\n' "$label" "$mean_ms"
+  if [[ $min_ms -le $threshold ]]; then
+    printf '  \033[38;5;42m✓\033[0m %-12s %dms\n' "$label" "$min_ms"
   else
-    printf '  \033[38;5;196m✗\033[0m %-12s %dms (> %dms)\n' "$label" "$mean_ms" "$threshold"
+    printf '  \033[38;5;196m✗\033[0m %-12s %dms (> %dms)\n' "$label" "$min_ms" "$threshold"
     FAILED=1
   fi
 }

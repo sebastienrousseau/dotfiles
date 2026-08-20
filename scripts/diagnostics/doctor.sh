@@ -548,8 +548,10 @@ for tool in mise starship zoxide atuin fzf direnv; do
   done
 done
 if [[ $stale_caches -eq 0 ]]; then
+  caches_fresh="fresh"
   _ok "shell caches" "fresh"
 else
+  caches_fresh="stale"
   _warn "shell caches" "stale ($stale_tools) — run dot prewarm"
 fi
 
@@ -618,8 +620,22 @@ fi
 # A mise-managed 2026 dev machine routinely adds 60-90 entries (one per
 # installed tool version + per-shim path), so the warn/fail thresholds
 # reflect that baseline rather than a lean default (~40).
+#
+# The OK ceiling was 75, which contradicted the 60-90 baseline stated right
+# above it and warned on every healthy mise machine. Worse, the implied remedy
+# was backwards: those per-tool entries are what let a command resolve to the
+# real binary instead of falling through to a mise shim. Measured 2026-08-20,
+# 20 invocations of ripgrep --version:
+#
+#     via shim            2741ms   (137ms per call)
+#     direct install dir    62ms   (3.1ms per call)
+#
+# ~44x. "Pruning" those entries to satisfy a length check would trade
+# microseconds of PATH scan for ~134ms on every single tool invocation. The
+# ceiling now matches the documented baseline; >90 still warns, because past
+# that the entries are worth auditing for tools you no longer use.
 path_count=$(printf '%s' "${PATH:-}" | tr ':' '\n' | grep -c . || true)
-if [[ "$path_count" -le 75 ]]; then
+if [[ "$path_count" -le 90 ]]; then
   _ok "PATH length" "$path_count entries"
 elif [[ "$path_count" -le 120 ]]; then
   _warn "PATH length" "$path_count entries — consider pruning"
@@ -669,7 +685,15 @@ if command -v hyperfine >/dev/null 2>&1; then
   if bash "$SCRIPT_DIR/../../tests/performance/bench.sh" 2>/dev/null; then
     _ok "startup latency" "within target thresholds"
   else
-    _warn "startup latency" "threshold exceeded (run dot prewarm)"
+    # Only suggest prewarm when it could actually help. The caches were
+    # already reported fresh above in the common case, and telling someone to
+    # re-run a no-op sends them in a circle — as it did on 2026-08-20, where
+    # prewarm changed nothing because nothing was cold.
+    if [[ "${caches_fresh:-unknown}" == "fresh" ]]; then
+      _warn "startup latency" "threshold exceeded (caches already fresh — profile with 'dot benchmark')"
+    else
+      _warn "startup latency" "threshold exceeded (run dot prewarm)"
+    fi
   fi
 else
   _warn "hyperfine" "missing (benchmark skipped)"
