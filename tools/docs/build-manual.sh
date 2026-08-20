@@ -127,6 +127,15 @@ log "found $TOTAL_FILES manual files"
 build_indexes() {
   log "generating concept-index"
   {
+    # `render_with_liquid: false` is required, not decoration. Jekyll otherwise
+    # parses `{{ ... }}` and `{% ... %}` inside the page, and concept headings
+    # come from manual prose that contains both. Every other doc under docs/
+    # carries it; omitting it here made every run of this script strip it back
+    # off, so the checked-in file and the generator disagreed permanently.
+    echo "---"
+    echo "render_with_liquid: false"
+    echo "---"
+    echo ""
     echo "# Concept Index"
     echo ""
     echo "Alphabetical list of concepts covered in the manual."
@@ -138,18 +147,19 @@ build_indexes() {
   } >"$SOURCE_DIR/concept-index.md.gen"
   mv "$SOURCE_DIR/concept-index.md.gen" "$SOURCE_DIR/concept-index.md"
 
-  log "generating command-index"
-  {
-    echo "# Command Index"
-    echo ""
-    echo "Alphabetical list of \`dot\` subcommands referenced in the manual."
-    echo ""
-    # shellcheck disable=SC2016 # literal grep pattern; single quotes intentional
-    grep -rhoE '`dot [a-z][a-z-]+( [a-z-]+)?`' "$SOURCE_DIR"/*.md "$SOURCE_DIR"/*/*.md 2>/dev/null |
-      sort -u |
-      awk '{ print "- " $0 }'
-  } >"$SOURCE_DIR/command-index.md.gen"
-  mv "$SOURCE_DIR/command-index.md.gen" "$SOURCE_DIR/command-index.md"
+  # command-index.md is deliberately NOT generated here.
+  #
+  # tools/docs/generate-command-index.sh owns that file, and the CI job
+  # `Generators / command-index` checks its output. This function used to write
+  # it too, from a different source (backticked `dot ...` strings scraped out of
+  # the manual) in a different format (a bullet list, no frontmatter, no
+  # descriptions). The two disagreed completely, so whichever ran last won:
+  # running build-manual.sh alone replaced the table with a bullet list and
+  # dropped the frontmatter, which fails that CI job for reasons unrelated to
+  # whatever the author was actually doing.
+  #
+  # One generator per generated file. This one reads command-index.md when it
+  # assembles the manual; it does not write it.
 }
 
 build_indexes
