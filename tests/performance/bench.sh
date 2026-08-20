@@ -18,7 +18,22 @@ set -euo pipefail
 # Regression thresholds (ms). Measured 2026-07 medians: zsh ~66, bash ~51,
 # fish ~129, nu ~25 — thresholds sit above those with headroom for noise.
 THRESHOLD_MS_BASH=75
-THRESHOLD_MS_ZSH=90
+# zsh raised from 90 to 110 on 2026-08-20, as the stated price of #1006.
+#
+# Promoting mise's 65 tool directories to the front of PATH means every lookup
+# during rc that misses them stats through them first. Measured at load 3.4
+# with the identical loop, changing only the final ordering:
+#
+#     mise directories last     58ms
+#     mise directories first    90-98ms
+#
+# That ~35ms is paid once per shell. It buys ~92ms on every mise-managed
+# command (rg: 94ms via shim against 2ms direct), paid per command. For any
+# shell in which more than one tool is run, the trade is heavily positive.
+#
+# This is a deliberate trade, not a stale number: if the promotion is ever
+# reverted, put this back to 90.
+THRESHOLD_MS_ZSH=110
 THRESHOLD_MS_FISH=200
 # nu was briefly raised to 200 on 2026-08-20 on the theory that nushell itself
 # had regressed to a 136ms floor. That was wrong: `nu` on PATH was a mise shim,
