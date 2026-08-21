@@ -109,6 +109,9 @@ lib/**
 {{- end }}
 
 {{- if eq .chezmoi.os "darwin" }}
+# ~/Desktop is a TCC-protected macOS folder; symlinking it into iCloud
+# (see symlink_Desktop.tmpl) cannot replace the real dir and errors on apply.
+Desktop
 .config/i3
 .config/i3/**
 .config/fontconfig
