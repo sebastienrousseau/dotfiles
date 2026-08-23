@@ -48,7 +48,7 @@
     "email": "sebastienrousseau@users.noreply.github.com",
     "url": "https://sebastienrousseau.com"
   },
-  "license": "MIT",
+  "license": "Apache-2.0 OR MIT",
   "bugs": {
     "url": "https://github.com/sebastienrousseau/dotfiles/issues"
   },
