@@ -109,13 +109,21 @@ lib/**
 {{- end }}
 
 {{- if eq .chezmoi.os "darwin" }}
-# TCC-protected macOS home folders: the symlink_*.tmpl entries try to route
-# these into iCloud, but chezmoi cannot remove the real dirs to replace them,
-# so apply errors. iCloud sync for these isn't set up (targets are circular
-# symlinks / separate folders), so ignore them here.
+# DO NOT let chezmoi manage these macOS home folders. The former symlink_*.tmpl
+# entries told chezmoi to replace them with iCloud symlinks; because chezmoi
+# removes the existing directory *recursively*, an apply deleted the real
+# ~/Documents contents. Those symlink_*.tmpl sources have been removed, and
+# these folders are ignored here so chezmoi can never touch or delete them
+# again. Set up any iCloud symlinks manually, outside chezmoi.
 Desktop
 Documents
+Downloads
+Drop
+Movies
+Music
+Pictures
 Public
+Safe
 .config/i3
 .config/i3/**
 .config/fontconfig
