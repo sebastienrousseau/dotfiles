@@ -109,9 +109,13 @@ lib/**
 {{- end }}
 
 {{- if eq .chezmoi.os "darwin" }}
-# ~/Desktop is a TCC-protected macOS folder; symlinking it into iCloud
-# (see symlink_Desktop.tmpl) cannot replace the real dir and errors on apply.
+# TCC-protected macOS home folders: the symlink_*.tmpl entries try to route
+# these into iCloud, but chezmoi cannot remove the real dirs to replace them,
+# so apply errors. iCloud sync for these isn't set up (targets are circular
+# symlinks / separate folders), so ignore them here.
 Desktop
+Documents
+Public
 .config/i3
 .config/i3/**
 .config/fontconfig
