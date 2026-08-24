@@ -231,7 +231,7 @@ jobs:
   # ============================================================================
   security-secrets:
     name: Security / Secrets Scan
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@000168c95cf69685a99eb5cf976445eed19b37c5 # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@d277155a752aced1eca2296ddda6f2f73a0419f9 # main
     with:
       run_guard: true
       run_additional_patterns: true
