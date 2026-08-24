@@ -58,7 +58,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@000168c95cf69685a99eb5cf976445eed19b37c5 # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-nix-lint.yml@d277155a752aced1eca2296ddda6f2f73a0419f9 # main
     with:
       flake_dir: nix
       run_fmt_check: true
