@@ -901,10 +901,10 @@ PY
 
   if [[ $changed -gt 0 ]]; then
     RELOADED+=("desktop")
-    _ok "Desktop" "$color_scheme, ${gtk_theme:-default}"
+    _ok "Desktop" "$de: $mode, ${gtk_theme:-default}"
   else
     SKIPPED+=("desktop")
-    _skip "Desktop" "gsettings failed"
+    _skip "Desktop" "$de: no changes applied"
   fi
 }
 
