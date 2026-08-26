@@ -145,6 +145,13 @@ write_theme() {
     _err "Invalid" "theme name: $new_theme"
     exit 1
   fi
+  # Existence check — catches typos before we regenerate configs against
+  # a nonexistent theme (which would silently apply template fallbacks
+  # and leave the desktop in a mixed state).
+  if [[ -f "$THEMES_FILE" ]] && ! grep -q "^\[themes\.${new_theme}\]$" "$THEMES_FILE"; then
+    _err "Unknown" "theme '$new_theme' — run 'dot theme list' to see available"
+    exit 1
+  fi
 
   # Update .chezmoidata.toml (source of truth for templates)
   local tmp_file
