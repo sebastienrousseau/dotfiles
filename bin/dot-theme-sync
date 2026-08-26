@@ -465,21 +465,61 @@ _detect_linux_de() {
   echo "unknown"
 }
 
-# Resolve wallpaper light/dark paths + macos_accent int from themes.toml.
+# Load all fields we need from [themes.<theme>] and [themes.<theme>.app] in a
+# single awk pass and populate globals. themes.toml is ~285 KB; the previous
+# code scanned it once per key (~6 scans per theme switch). This is one scan.
+# Sets: TH_MODE, TH_FAMILY, TH_WALLPAPER, TH_MACOS_ACCENT,
+#       TH_GTK_THEME, TH_GTK_ICON, TH_GNOME_SHELL
+_load_theme_fields() {
+  local theme="$1"
+  TH_MODE=""; TH_FAMILY=""; TH_WALLPAPER=""; TH_MACOS_ACCENT=""
+  TH_GTK_THEME=""; TH_GTK_ICON=""; TH_GNOME_SHELL=""
+  [[ -f "$THEMES_FILE" ]] || return 0
+  # awk emits KEY=VALUE lines; eval into shell.
+  local kv
+  kv="$(awk -v s="[themes.${theme}]" -v sa="[themes.${theme}.app]" '
+    BEGIN { in_root=0; in_app=0 }
+    $0 == s  { in_root=1; in_app=0; next }
+    $0 == sa { in_root=0; in_app=1; next }
+    /^\[/    { in_root=0; in_app=0; next }
+    function value(line,   v) {
+      v = line
+      sub(/^[^=]*= *"?/, "", v)
+      sub(/"?[[:space:]]*$/, "", v)
+      return v
+    }
+    in_root && /^mode /          { print "TH_MODE=" value($0) }
+    in_root && /^family /        { print "TH_FAMILY=" value($0) }
+    in_root && /^wallpaper /     { print "TH_WALLPAPER=" value($0) }
+    in_root && /^macos_accent /  { print "TH_MACOS_ACCENT=" value($0) }
+    in_app  && /^gtk_theme /     { print "TH_GTK_THEME=" value($0) }
+    in_app  && /^gtk_icon /      { print "TH_GTK_ICON=" value($0) }
+    in_app  && /^gnome_shell /   { print "TH_GNOME_SHELL=" value($0) }
+  ' "$THEMES_FILE" 2>/dev/null)"
+  # Safe eval: only KEY= form emitted, keys are hard-coded above.
+  if [[ -n "$kv" ]]; then
+    while IFS= read -r line; do
+      [[ -z "$line" ]] && continue
+      # shellcheck disable=SC2086
+      declare -g "$line"
+    done <<< "$kv"
+  fi
+  return 0
+}
+
+# Resolve wallpaper light/dark paths from the loaded TH_FAMILY / TH_WALLPAPER.
 # Sets globals: WP_LIGHT, WP_DARK, WP_FAMILY, MACOS_ACCENT
 # Prefers paired `{family}-0.{png,jpg,webp}` (light) / `-1.*` (dark) frames,
 # falls back to the theme's single `wallpaper` field for either variant.
 _resolve_theme_wallpapers() {
   local theme="$1"
-  WP_FAMILY=""; WP_LIGHT=""; WP_DARK=""; MACOS_ACCENT=""
-  WP_FAMILY="$(theme_value "$theme" "family" 2>/dev/null || echo "")"
-  local wp_field
-  wp_field="$(theme_value "$theme" "wallpaper" 2>/dev/null || echo "")"
-  MACOS_ACCENT="$(awk -v s="[themes.${theme}]" '
-    $0 == s {f=1; next}
-    /^\[/ {f=0}
-    f && /^macos_accent/ {sub(/.*= */, ""); print; exit}
-  ' "$THEMES_FILE" 2>/dev/null)"
+  # _load_theme_fields may already have been called by the caller; run it if
+  # TH_FAMILY isn't populated yet.
+  [[ -z "${TH_FAMILY:-}" ]] && _load_theme_fields "$theme"
+  WP_FAMILY="${TH_FAMILY:-}"
+  WP_LIGHT=""
+  WP_DARK=""
+  MACOS_ACCENT="${TH_MACOS_ACCENT:-}"
 
   local wp_dir="${DOTFILES_WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
   if [[ -n "$WP_FAMILY" ]]; then
@@ -488,6 +528,7 @@ _resolve_theme_wallpapers() {
       [[ -z "$WP_DARK" && -f "$wp_dir/${WP_FAMILY}-1.$ext" ]] && WP_DARK="$wp_dir/${WP_FAMILY}-1.$ext"
     done
   fi
+  local wp_field="${TH_WALLPAPER:-}"
   if [[ -n "$wp_field" && -f "$wp_field" ]]; then
     [[ -z "$WP_LIGHT" ]] && WP_LIGHT="$wp_field"
     [[ -z "$WP_DARK" ]] && WP_DARK="$wp_field"
@@ -680,9 +721,11 @@ _apply_wlroots_desktop() {
 reload_desktop() {
   local theme="$1"
   local mode gtk_theme gtk_icon color_scheme
-  mode="$(theme_value "$theme" "mode" 2>/dev/null || echo "dark")"
-  gtk_theme="$(theme_app_value "$theme" "gtk_theme" 2>/dev/null || true)"
-  gtk_icon="$(theme_app_value "$theme" "gtk_icon" 2>/dev/null || true)"
+  # One awk pass over themes.toml — populates TH_* globals.
+  _load_theme_fields "$theme"
+  mode="${TH_MODE:-dark}"
+  gtk_theme="${TH_GTK_THEME:-}"
+  gtk_icon="${TH_GTK_ICON:-}"
 
   # macOS desktop integration: apply dark/light appearance and accent color.
   if [[ "$(uname -s)" == "Darwin" ]]; then
