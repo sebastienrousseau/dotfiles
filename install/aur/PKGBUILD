@@ -1,20 +1,13 @@
-# Maintainer: Sebastien Rousseau <sebastian.rousseau@gmail.com>
+# Maintainer: Sebastien Rousseau <sebastian.rousseau at gmail dot com>
 #
-# AUR PKGBUILD scaffold for the `dot` CLI from
-# https://github.com/sebastienrousseau/dotfiles
-#
-# STATUS: scaffold only. The framework does not yet ship a single-
-# tarball release artefact (chezmoi-managed root layout). The
-# v0.3.0 reorganisation (docs/operations/ROADMAP_V0_2_503.md)
-# produces a tarball this PKGBUILD can point at. Until then, the
-# `sha256sums` is SKIP and source uses the master branch as a
-# placeholder.
+# AUR PKGBUILD for the `dot` CLI from the post-reorg dotfiles repo
+# (v0.2.503+ layout: bin/, lib/, share/, defaults/).
 #
 # Publication target: aur.archlinux.org/packages/dot-cli-git
 # Validate via:  paru -S dot-cli-git
 
 pkgname=dot-cli-git
-pkgver=0.2.503.r0
+pkgver=0.2.503
 pkgrel=1
 pkgdesc='Declarative dotfiles CLI for macOS, Linux, WSL, and PowerShell (git head)'
 arch=('any')
@@ -35,22 +28,42 @@ sha256sums=('SKIP')
 
 pkgver() {
   cd "${srcdir}/dotfiles" || return 1
-  printf '%s.r%s' "$(grep '^dotfiles_version' .chezmoidata.toml | cut -d'"' -f2)" \
+  # Version of record lives in defaults/.chezmoidata.toml after the
+  # v0.2.503 reorg (was at repo root pre-reorg).
+  printf '%s.r%s' "$(grep '^dotfiles_version' defaults/.chezmoidata.toml | cut -d'"' -f2)" \
     "$(git rev-list --count HEAD)"
 }
 
 package() {
   cd "${srcdir}/dotfiles" || return 1
-  install -Dm755 dot_local/bin/executable_dot "${pkgdir}/usr/bin/dot"
-  install -Dm644 dot_local/share/man/man1/dot.1 "${pkgdir}/usr/share/man/man1/dot.1"
+
+  # Dispatcher + companions
+  install -Dm755 bin/dot "${pkgdir}/usr/bin/dot"
+  for f in bin/dot-*; do
+    [[ -f "$f" ]] || continue
+    install -Dm755 "$f" "${pkgdir}/usr/bin/$(basename "$f")"
+  done
+
+  # Sourced helpers. bin/dot resolves `$script_dir/../lib/dot/ui.sh`,
+  # which lands on /usr/lib/dot/ui.sh once `dot` is symlinked from
+  # /usr/bin (the parent of /usr/bin is /usr, so .../lib/dot resolves).
+  for f in lib/dot/*.sh; do
+    [[ -f "$f" ]] || continue
+    install -Dm644 "$f" "${pkgdir}/usr/lib/dot/$(basename "$f")"
+  done
+
+  # Man page
+  install -Dm644 share/man/man1/dot.1 "${pkgdir}/usr/share/man/man1/dot.1"
+
+  # Completions (source paths differ from install paths).
+  install -Dm644 share/completions/zsh/_dot \
+    "${pkgdir}/usr/share/zsh/site-functions/_dot"
+  install -Dm644 defaults/dot_local/share/bash-completion/completions/dot \
+    "${pkgdir}/usr/share/bash-completion/completions/dot"
+  install -Dm644 defaults/dot_config/fish/functions/dot.fish \
+    "${pkgdir}/usr/share/fish/vendor_completions.d/dot.fish"
+
+  # Licence + README
   install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
   install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
-
-  # Install scripts/dot library — the dispatcher sources lib/* + commands/*
-  install -dm755 "${pkgdir}/usr/share/dotfiles/scripts"
-  cp -r scripts/dot "${pkgdir}/usr/share/dotfiles/scripts/"
-
-  # zsh completion
-  install -Dm644 dot_local/share/zsh/completions/_dot \
-    "${pkgdir}/usr/share/zsh/site-functions/_dot"
 }
