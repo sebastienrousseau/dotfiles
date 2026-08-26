@@ -158,6 +158,17 @@ cleanup_dynamic_entries() {
   done
 }
 
+# Pre-extract paired PNG frames from dynamic HEIC wallpapers on Linux —
+# GNOME's picture-uri/picture-uri-dark, DMS's matugen worker, and other
+# GDK-pixbuf consumers can't decode Apple's dynamic HEIC. Splitting each
+# HEIC into `{name}-0.png` (light) + `{name}-1.png` (dark) lets every
+# theme render its wallpaper without a HEIF pixbuf loader.
+if [[ "$(uname -s)" == "Linux" ]] && command -v heif-dec >/dev/null 2>&1 && command -v magick >/dev/null 2>&1; then
+  if [[ -x "$SCRIPT_DIR/extract-heic-frames.sh" ]]; then
+    bash "$SCRIPT_DIR/extract-heic-frames.sh" >/dev/null 2>&1 || true
+  fi
+fi
+
 # Discover in order: system first, custom overrides
 case "$(uname -s)" in
   Darwin) discover_macos_system ;;
