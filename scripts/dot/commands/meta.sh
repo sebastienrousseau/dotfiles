@@ -45,7 +45,10 @@ cmd_upgrade() {
 
   if has_command nvim; then
     ui_info "Updating Neovim plugins"
-    nvim --headless "+Lazy! sync" +qa || true
+    # scripts/nvim/headless-upgrade.lua runs Lazy sync AND waits for
+    # Mason's async install queue to drain, so ensure_installed installs
+    # (codelldb, debugpy, delve, etc.) aren't aborted by an early quitall.
+    nvim --headless -l "$src_dir/scripts/nvim/headless-upgrade.lua" || true
   fi
 
   if [ "${DOTFILES_FONTS:-}" = "1" ]; then
