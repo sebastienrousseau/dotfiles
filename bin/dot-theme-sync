@@ -541,6 +541,62 @@ reload_desktop() {
     gsettings set org.gnome.desktop.interface icon-theme "$gtk_icon" 2>/dev/null && changed=1
   fi
 
+  # ---------------------------------------------------------------------------
+  # GNOME wallpaper (light + dark variants) + accent color
+  # ---------------------------------------------------------------------------
+  # Resolves picture-uri / picture-uri-dark from paired PNG frames
+  # (family-0.{png,jpg,webp} = light, family-1.* = dark) and falls back to
+  # the theme's single `wallpaper` field when paired frames don't exist.
+  # Accent maps from the theme's macos_accent int (0–6, -1) → GNOME's
+  # 9-color accent-color enum (blue,teal,green,yellow,orange,red,pink,
+  # purple,slate) so both platforms track a single hue source.
+  local wp_family="" wp_field="" macos_accent="" gnome_accent="" wp_light="" wp_dark=""
+  wp_family="$(theme_value "$theme" "family" 2>/dev/null || echo "")"
+  wp_field="$(theme_value "$theme" "wallpaper" 2>/dev/null || echo "")"
+  # Numeric field — theme_value strips quotes but leaves the whole line
+  # for unquoted values; parse the raw right-hand side directly.
+  macos_accent="$(awk -v s="[themes.${theme}]" '
+    $0 == s {f=1; next}
+    /^\[/ {f=0}
+    f && /^macos_accent/ {sub(/.*= */, ""); print; exit}
+  ' "$THEMES_FILE" 2>/dev/null)"
+
+  local wp_dir="${DOTFILES_WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
+  if [[ -n "$wp_family" ]]; then
+    for ext in png jpg jpeg webp; do
+      [[ -z "$wp_light" && -f "$wp_dir/${wp_family}-0.$ext" ]] && wp_light="$wp_dir/${wp_family}-0.$ext"
+      [[ -z "$wp_dark" && -f "$wp_dir/${wp_family}-1.$ext" ]] && wp_dark="$wp_dir/${wp_family}-1.$ext"
+    done
+  fi
+  # Fallback: use the single wallpaper field for whichever mode is unresolved
+  if [[ -n "$wp_field" && -f "$wp_field" ]]; then
+    [[ -z "$wp_light" ]] && wp_light="$wp_field"
+    [[ -z "$wp_dark" ]] && wp_dark="$wp_field"
+  fi
+
+  if [[ -n "$wp_light" ]]; then
+    gsettings set org.gnome.desktop.background picture-uri "file://$wp_light" 2>/dev/null && changed=1
+    gsettings set org.gnome.desktop.screensaver picture-uri "file://$wp_light" 2>/dev/null || true
+  fi
+  if [[ -n "$wp_dark" ]]; then
+    gsettings set org.gnome.desktop.background picture-uri-dark "file://$wp_dark" 2>/dev/null && changed=1
+  fi
+
+  case "$macos_accent" in
+    -1) gnome_accent="slate" ;;
+    0) gnome_accent="red" ;;
+    1) gnome_accent="orange" ;;
+    2) gnome_accent="yellow" ;;
+    3) gnome_accent="green" ;;
+    4) gnome_accent="blue" ;;
+    5) gnome_accent="purple" ;;
+    6) gnome_accent="pink" ;;
+    *) gnome_accent="" ;;
+  esac
+  if [[ -n "$gnome_accent" ]]; then
+    gsettings set org.gnome.desktop.interface accent-color "$gnome_accent" 2>/dev/null && changed=1
+  fi
+
   # DMS (Dank Material Shell) — prefer dynamic theme colors generated from the
   # current wallpaper instead of forcing a stock palette in settings.
   if command -v dms &>/dev/null; then
