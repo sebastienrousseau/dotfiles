@@ -244,8 +244,38 @@ _dot() {
           _describe -t subcommands 'tools subcommand' tool_cmds
           ;;
         theme)
-          local -a themes=(dark light)
-          _describe -t themes 'theme mode' themes
+          # Subcommands + theme names (for quick-switch `dot theme NAME`).
+          local -a theme_cmds theme_names
+          theme_cmds=(
+            'list:Show all available themes'
+            'set:Set theme (interactive if no name)'
+            'toggle:Toggle between light/dark within family'
+            'family:Cycle to the next family'
+            'random:Pick a random family, keep current mode'
+            'preview:Try a theme, ENTER to keep or Ctrl-C to revert'
+            'current:Show current theme info'
+            'sync:Sync dotfiles with system dark/light mode'
+            'rebuild:Regenerate themes from wallpapers'
+            'help:Show subcommand help'
+          )
+          # Pull theme names from themes.toml if available (readable via user).
+          local themes_file="$HOME/.dotfiles/defaults/.chezmoidata/themes.toml"
+          [[ -f "$themes_file" ]] || themes_file="$HOME/.local/share/chezmoi/.chezmoidata/themes.toml"
+          if [[ -f "$themes_file" ]]; then
+            theme_names=( "${(@f)$(sed -n 's/^\[themes\.\([a-zA-Z0-9-]*\)\]$/\1/p' "$themes_file" | sort -u)}" )
+          fi
+          _describe -t subcommands 'theme subcommand' theme_cmds
+          _describe -t themes 'theme name' theme_names
+          ;;
+        theme:set|theme:preview)
+          # Second-arg completion: only theme names.
+          local themes_file="$HOME/.dotfiles/defaults/.chezmoidata/themes.toml"
+          [[ -f "$themes_file" ]] || themes_file="$HOME/.local/share/chezmoi/.chezmoidata/themes.toml"
+          if [[ -f "$themes_file" ]]; then
+            local -a theme_names
+            theme_names=( "${(@f)$(sed -n 's/^\[themes\.\([a-zA-Z0-9-]*\)\]$/\1/p' "$themes_file" | sort -u)}" )
+            _describe -t themes 'theme name' theme_names
+          fi
           ;;
         ssh-cert)
           local -a cert_cmds=(

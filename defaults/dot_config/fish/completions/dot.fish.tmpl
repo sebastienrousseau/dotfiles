@@ -64,7 +64,24 @@ complete -c dot -n "__fish_use_subcommand" -a env -d "Show managed tool versions
 complete -c dot -n "__fish_use_subcommand" -a profile -d "Show or switch configuration profile"
 
 # Appearance
-complete -c dot -n "__fish_use_subcommand" -a theme -d "Switch terminal theme (dark/light)"
+complete -c dot -n "__fish_use_subcommand" -a theme -d "Switch terminal + desktop theme"
+
+# `dot theme` subcommands and theme-name completions.
+set -l __dot_theme_subs list set toggle family random preview current sync rebuild help
+for sub in $__dot_theme_subs
+    complete -c dot -n "__fish_seen_subcommand_from theme; and not __fish_seen_subcommand_from $__dot_theme_subs" -a $sub
+end
+function __dot_theme_names
+    set -l f "$HOME/.dotfiles/defaults/.chezmoidata/themes.toml"
+    test -f "$f"; or set f "$HOME/.local/share/chezmoi/.chezmoidata/themes.toml"
+    test -f "$f"; or return
+    sed -n 's/^\[themes\.\([a-zA-Z0-9-]*\)\]$/\1/p' "$f" | sort -u
+end
+complete -c dot -n "__fish_seen_subcommand_from theme; and __fish_seen_subcommand_from set preview" -a "(__dot_theme_names)"
+complete -c dot -n "__fish_seen_subcommand_from theme; and not __fish_seen_subcommand_from $__dot_theme_subs" -a "(__dot_theme_names)"
+complete -c dot -n "__fish_seen_subcommand_from theme; and __fish_seen_subcommand_from set" -l force -d "Re-apply even if theme unchanged"
+complete -c dot -n "__fish_seen_subcommand_from theme; and __fish_seen_subcommand_from set" -l full -d "Force full chezmoi apply"
+
 complete -c dot -n "__fish_use_subcommand" -a wallpaper -d "Apply a wallpaper"
 complete -c dot -n "__fish_use_subcommand" -a fonts -d "Install Nerd Fonts"
 
