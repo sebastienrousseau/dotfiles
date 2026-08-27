@@ -221,15 +221,42 @@ pick_theme() {
     theme_list+="$(printf '%s  %-35s  %-8s  %s' "$marker" "$family" "$source" "$active_mode")"$'\n'
   done < <(paired_families)
 
+  # Preview helper: awk-extracts the theme's UI accent hex + wallpaper
+  # path from themes.toml. Fast — no image decoding, just structured
+  # TOML section reads.
+  local preview_cmd
+  preview_cmd='family={2}; mode='"$current_mode"'; f="'"$THEMES_FILE"'"; awk -v F="$family" -v M="$mode" '"'"'
+BEGIN {
+  root = "[themes." F "-" M "]"
+  ui   = "[themes." F "-" M ".ui]"
+  term = "[themes." F "-" M ".term]"
+}
+$0 == root { in_root=1; in_ui=0; in_term=0; next }
+$0 == ui   { in_ui=1; in_root=0; in_term=0; next }
+$0 == term { in_term=1; in_root=0; in_ui=0; next }
+/^\[/ { in_root=0; in_ui=0; in_term=0; next }
+in_root && /^wallpaper /   { sub(/.*= *"?/,""); sub(/"$/,""); wallpaper=$0 }
+in_root && /^macos_accent/ { sub(/.*= */,"");   accent_int=$0 }
+in_ui && /^accent /        { sub(/.*= *"?/,""); sub(/"$/,""); accent=$0 }
+in_term && /^bg /          { sub(/.*= *"?/,""); sub(/"$/,""); bg=$0 }
+in_term && /^fg /          { sub(/.*= *"?/,""); sub(/"$/,""); fg=$0 }
+END {
+  print "family:    " F " (" M ")"
+  print "wallpaper: " wallpaper
+  print "accent:    " accent " (macos=" accent_int ")"
+  print "bg / fg:   " bg " / " fg
+}'"'"' "$f"'
+
   local selected_family
   selected_family="$(echo "$theme_list" | fzf \
-    --header "Select wallpaper theme (current: $current_family [$current_mode])" \
+    --header "Select wallpaper theme (current: $current_family [$current_mode], TAB = preview)" \
     --prompt "Theme > " \
     --height 30 \
     --reverse \
     --no-sort \
-    --no-preview \
-    --ansi |
+    --ansi \
+    --preview "$preview_cmd" \
+    --preview-window "right:45%:wrap" |
     awk '$1 !~ /^#/ && NF >= 2 {print $2}')" || return 0
 
   if [[ -n "$selected_family" ]]; then
