@@ -134,6 +134,27 @@ current_theme() {
 
 # Write a new theme into .chezmoidata.toml AND chezmoi.toml [data] section.
 # Both must be updated: chezmoi.toml [data] takes precedence over .chezmoidata.toml.
+_theme_history_file() {
+  printf '%s' "${XDG_STATE_HOME:-$HOME/.local/state}/dot/theme-history"
+}
+
+# Prepend `prev` to the history stack (most-recent-first), dedupe it out
+# of the tail, and cap at 20 entries. Called from main() after a successful
+# apply when the theme actually changed.
+_record_theme_history() {
+  local prev="${1:-}" new="${2:-}"
+  [[ -z "$prev" || "$prev" == "$new" ]] && return 0
+  local hist tmp
+  hist="$(_theme_history_file)"
+  mkdir -p "$(dirname "$hist")"
+  tmp="$(mktemp)"
+  {
+    printf '%s\n' "$prev"
+    [[ -f "$hist" ]] && grep -Fxv -- "$prev" "$hist" | head -19
+  } > "$tmp" 2>/dev/null
+  mv "$tmp" "$hist" 2>/dev/null || rm -f "$tmp"
+}
+
 write_theme() {
   local new_theme="${1:-}"
   # R5: validate input
@@ -1425,6 +1446,10 @@ main() {
   reload_wallpaper
   reload_browsers "$theme"
   reload_nvim "$theme"
+
+  # Record theme change in the history stack so `dot theme undo` can
+  # step back through recent choices. Skipped when apply was a no-op.
+  _record_theme_history "$prev_theme" "$theme"
 
   # Summary
   echo ""

@@ -519,6 +519,54 @@ case "${1:-}" in
   current)
     show_current
     ;;
+  undo)
+    # Step back one entry in the theme-history stack. Applied theme goes
+    # to the top so a second `undo` returns to it (toggle behaviour).
+    hist="${XDG_STATE_HOME:-$HOME/.local/state}/dot/theme-history"
+    if [[ ! -s "$hist" ]]; then
+      ui_err "History" "empty — no previous theme recorded"
+      exit 1
+    fi
+    prev="$(head -1 "$hist")"
+    current="$(current_theme)"
+    rest="$(tail -n +2 "$hist" 2>/dev/null | grep -Fxv -- "$current" || true)"
+    tmp="$(mktemp)"
+    {
+      printf '%s\n' "$current"
+      [[ -n "$rest" ]] && printf '%s\n' "$rest"
+    } > "$tmp"
+    mv "$tmp" "$hist"
+    set_theme "$prev"
+    ;;
+  history)
+    hist="${XDG_STATE_HOME:-$HOME/.local/state}/dot/theme-history"
+    if [[ ! -s "$hist" ]]; then
+      ui_info "History" "empty — apply a theme to start tracking"
+      exit 0
+    fi
+    ui_header "Recent themes (newest first)"
+    n=1
+    while IFS= read -r line; do
+      printf '  %2d  %s\n' "$n" "$line"
+      n=$((n + 1))
+    done < "$hist"
+    ui_info "Current" "$(current_theme)"
+    ;;
+  reset)
+    # Restore sane defaults: Adwaita GTK, default cursor/font, remove
+    # accent + shell theme. Wallpaper stays — we don't clobber user
+    # media choices. Use --force so DE handlers actually re-apply.
+    if command -v gsettings >/dev/null 2>&1; then
+      gsettings reset org.gnome.desktop.interface accent-color 2>/dev/null || true
+      gsettings reset org.gnome.desktop.interface cursor-theme 2>/dev/null || true
+      gsettings reset org.gnome.desktop.interface monospace-font-name 2>/dev/null || true
+      gsettings reset org.gnome.desktop.interface font-name 2>/dev/null || true
+      gsettings reset org.gnome.desktop.interface document-font-name 2>/dev/null || true
+      gsettings set org.gnome.shell.extensions.user-theme name "" 2>/dev/null || true
+    fi
+    ui_ok "Reset" "GNOME accent / cursor / fonts / shell-theme restored to defaults"
+    ui_info "Note" "wallpaper untouched — re-run 'dot theme set <name>' to apply a theme"
+    ;;
   status)
     # Comprehensive dashboard: recorded theme, live gsettings/kwriteconfig
     # state, wallpaper file existence, detected DE. Great for diagnosing
@@ -631,6 +679,9 @@ case "${1:-}" in
     ui_ok "family" "Cycle to the next family"
     ui_ok "random" "Pick a random family, keep current mode"
     ui_ok "preview [NAME]" "Try a theme, ENTER to keep or Ctrl-C to revert"
+    ui_ok "undo" "Step back to the previous theme (re-run to toggle)"
+    ui_ok "history" "Show recently-applied themes"
+    ui_ok "reset" "Restore GNOME defaults (accent/cursor/fonts/shell theme)"
     ui_ok "current" "Show current theme info"
     ui_ok "status" "Dashboard: recorded vs applied theme state"
     ui_ok "sync" "Sync dotfiles with system dark/light mode"
