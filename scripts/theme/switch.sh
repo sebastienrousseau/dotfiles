@@ -409,6 +409,28 @@ case "${1:-}" in
     shift
     bash "$SCRIPT_DIR/rebuild-themes.sh" "$@"
     ;;
+  preview)
+    shift
+    preview="${1:-}"
+    if [[ -z "$preview" ]]; then
+      ui_err "Usage" "dot theme preview <name>"
+      exit 1
+    fi
+    prev="$(current_theme)"
+    ui_info "Preview" "$preview (was $prev)"
+    # Revert on Ctrl-C. Trap fires before exit so the shell prompt
+    # returns with the original theme active.
+    trap 'echo; dot-theme-sync --force "'"$prev"'" >/dev/null 2>&1; ui_info "Reverted" "'"$prev"'"; exit 130' INT
+    if ! dot-theme-sync --force "$preview"; then
+      ui_err "Preview" "apply failed — reverting"
+      dot-theme-sync --force "$prev" >/dev/null 2>&1
+      exit 1
+    fi
+    echo ""
+    read -r -p "  Press ENTER to keep '$preview' or Ctrl-C to revert to '$prev': " _
+    trap - INT
+    ui_ok "Kept" "$preview"
+    ;;
   random)
     # Pick a random paired family and apply it in the current mode.
     # Great for wallpaper-rotation cron jobs / systemd timers.
@@ -442,6 +464,7 @@ case "${1:-}" in
     ui_ok "toggle" "Toggle between light/dark within current family"
     ui_ok "family" "Cycle to the next family"
     ui_ok "random" "Pick a random family, keep current mode"
+    ui_ok "preview [NAME]" "Try a theme, ENTER to keep or Ctrl-C to revert"
     ui_ok "current" "Show current theme info"
     ui_ok "sync" "Sync dotfiles with system dark/light mode"
     ui_ok "rebuild" "Regenerate themes from system + custom wallpapers"
