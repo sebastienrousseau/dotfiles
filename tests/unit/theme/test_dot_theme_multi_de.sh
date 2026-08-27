@@ -204,4 +204,6 @@ assert_equals "5" "$MACOS_ACCENT"
 # ---------------------------------------------------------------------------
 echo ""
 printf '%b\n' "  Tests: ${TESTS_RUN}  ${GREEN}Passed: ${TESTS_PASSED}${NC}  ${RED}Failed: ${TESTS_FAILED}${NC}"
+# Machine-readable line consumed by tests/framework/test_runner.sh.
+echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
 [[ $TESTS_FAILED -eq 0 ]]
