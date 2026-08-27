@@ -485,6 +485,7 @@ _load_theme_fields() {
   local theme="$1"
   TH_MODE=""; TH_FAMILY=""; TH_WALLPAPER=""; TH_MACOS_ACCENT=""
   TH_GTK_THEME=""; TH_GTK_ICON=""; TH_GNOME_SHELL=""
+  TH_MONO_FONT=""; TH_UI_FONT=""; TH_DOC_FONT=""
   [[ -f "$THEMES_FILE" ]] || return 0
   # awk emits KEY=VALUE lines; eval into shell.
   local kv
@@ -506,6 +507,9 @@ _load_theme_fields() {
     in_app  && /^gtk_theme /     { print "TH_GTK_THEME=" value($0) }
     in_app  && /^gtk_icon /      { print "TH_GTK_ICON=" value($0) }
     in_app  && /^gnome_shell /   { print "TH_GNOME_SHELL=" value($0) }
+    in_app  && /^mono_font /     { print "TH_MONO_FONT=" value($0) }
+    in_app  && /^ui_font /       { print "TH_UI_FONT=" value($0) }
+    in_app  && /^document_font / { print "TH_DOC_FONT=" value($0) }
   ' "$THEMES_FILE" 2>/dev/null)"
   # Safe eval: only KEY= form emitted, keys are hard-coded above.
   if [[ -n "$kv" ]]; then
@@ -556,6 +560,41 @@ _wallpaper_for_mode() {
   else
     printf '%s' "${WP_DARK:-$WP_LIGHT}"
   fi
+}
+
+# Resolve fonts to apply for this theme. Priority (per-slot):
+#   1. Theme's TH_MONO_FONT / TH_UI_FONT / TH_DOC_FONT (from themes.toml)
+#   2. Env var override (DOT_THEME_MONO_FONT etc.)
+#   3. Empty -> skip that font (don't touch system state)
+# Sets globals: FONT_MONO, FONT_UI, FONT_DOC
+_resolve_fonts() {
+  FONT_MONO="${TH_MONO_FONT:-${DOT_THEME_MONO_FONT:-}}"
+  FONT_UI="${TH_UI_FONT:-${DOT_THEME_UI_FONT:-}}"
+  FONT_DOC="${TH_DOC_FONT:-${DOT_THEME_DOC_FONT:-}}"
+  return 0
+}
+
+# Resolve the GNOME Shell theme name (used only when the User Themes
+# extension is enabled). Priority:
+#   1. Theme's TH_GNOME_SHELL (from themes.toml)
+#   2. Env override DOT_THEME_GNOME_SHELL
+#   3. Match gtk_theme name — many shell themes ship under the same name
+#      (Adwaita-dark, Yaru-dark, WhiteSur-Dark, Fluent-Dark, etc.)
+#   4. Empty string ("") — GNOME's default Adwaita shell theme
+_resolve_gnome_shell_theme() {
+  local gtk="$1"
+  SHELL_THEME="${TH_GNOME_SHELL:-${DOT_THEME_GNOME_SHELL:-}}"
+  if [[ -z "$SHELL_THEME" && -n "$gtk" ]]; then
+    # Only propose a shell theme when its dir actually exists — avoids
+    # gsettings writing a name GNOME can't resolve.
+    for dir in "/usr/share/themes" "$HOME/.themes" "$HOME/.local/share/themes"; do
+      if [[ -d "$dir/$gtk/gnome-shell" ]]; then
+        SHELL_THEME="$gtk"
+        break
+      fi
+    done
+  fi
+  return 0
 }
 
 # Pick a cursor theme for the given mode (light|dark). Prefers env-var
@@ -626,10 +665,20 @@ _apply_gnome_family_desktop() {
   local changed=0
   local cursor
   cursor="$(_cursor_theme_for_mode "$mode")"
+  _resolve_fonts
+  _resolve_gnome_shell_theme "$gtk_theme"
   gsettings set org.gnome.desktop.interface color-scheme "$color_scheme" 2>/dev/null && changed=1
   [[ -n "$gtk_theme" ]] && gsettings set org.gnome.desktop.interface gtk-theme "$gtk_theme" 2>/dev/null && changed=1
   [[ -n "$gtk_icon" ]] && gsettings set org.gnome.desktop.interface icon-theme "$gtk_icon" 2>/dev/null && changed=1
   [[ -n "$cursor" ]] && gsettings set org.gnome.desktop.interface cursor-theme "$cursor" 2>/dev/null && changed=1
+  [[ -n "$FONT_MONO" ]] && gsettings set org.gnome.desktop.interface monospace-font-name "$FONT_MONO" 2>/dev/null && changed=1
+  [[ -n "$FONT_UI" ]] && gsettings set org.gnome.desktop.interface font-name "$FONT_UI" 2>/dev/null && changed=1
+  [[ -n "$FONT_DOC" ]] && gsettings set org.gnome.desktop.interface document-font-name "$FONT_DOC" 2>/dev/null && changed=1
+  # GNOME Shell theme — only meaningful when User Themes extension is enabled.
+  # Writing to the schema is a no-op if the extension isn't installed.
+  if [[ -n "$SHELL_THEME" ]]; then
+    gsettings set org.gnome.shell.extensions.user-theme name "$SHELL_THEME" 2>/dev/null && changed=1
+  fi
   if [[ -n "$WP_LIGHT" ]]; then
     gsettings set org.gnome.desktop.background picture-uri "file://$WP_LIGHT" 2>/dev/null && changed=1
   fi
@@ -697,6 +746,18 @@ _apply_kde_desktop() {
     gsettings set org.gnome.desktop.interface cursor-theme "$cursor" 2>/dev/null && changed=1
   fi
 
+  # Fonts — Plasma stores as CSV-ish under [General] font and fixed keys.
+  _resolve_fonts
+  if [[ -n "$kwrite" ]]; then
+    [[ -n "$FONT_UI" ]] && "$kwrite" --file kdeglobals --group General --key font "$FONT_UI" 2>/dev/null && changed=1
+    [[ -n "$FONT_MONO" ]] && "$kwrite" --file kdeglobals --group General --key fixed "$FONT_MONO" 2>/dev/null && changed=1
+  fi
+  # GTK apps under Plasma also honour gsettings font keys.
+  if command -v gsettings >/dev/null 2>&1; then
+    [[ -n "$FONT_MONO" ]] && gsettings set org.gnome.desktop.interface monospace-font-name "$FONT_MONO" 2>/dev/null && changed=1
+    [[ -n "$FONT_UI" ]] && gsettings set org.gnome.desktop.interface font-name "$FONT_UI" 2>/dev/null && changed=1
+  fi
+
   local wp
   wp="$(_wallpaper_for_mode "$mode")"
   if [[ -n "$wp" ]]; then
@@ -734,6 +795,9 @@ _apply_xfce_desktop() {
   local cursor
   cursor="$(_cursor_theme_for_mode "$mode")"
   [[ -n "$cursor" ]] && xfconf-query -c xsettings -p /Gtk/CursorThemeName -s "$cursor" 2>/dev/null && changed=1
+  _resolve_fonts
+  [[ -n "$FONT_UI" ]] && xfconf-query -c xsettings -p /Gtk/FontName -s "$FONT_UI" 2>/dev/null && changed=1
+  [[ -n "$FONT_MONO" ]] && xfconf-query -c xsettings -p /Gtk/MonospaceFontName -s "$FONT_MONO" 2>/dev/null && changed=1
   # Some XFCE builds expose a "prefer-dark-theme" hint.
   local pdt
   [[ "$mode" == "dark" ]] && pdt=true || pdt=false
@@ -768,6 +832,9 @@ _apply_wlroots_desktop() {
     local cursor
     cursor="$(_cursor_theme_for_mode "$mode")"
     [[ -n "$cursor" ]] && gsettings set org.gnome.desktop.interface cursor-theme "$cursor" 2>/dev/null && changed=1
+    _resolve_fonts
+    [[ -n "$FONT_MONO" ]] && gsettings set org.gnome.desktop.interface monospace-font-name "$FONT_MONO" 2>/dev/null && changed=1
+    [[ -n "$FONT_UI" ]] && gsettings set org.gnome.desktop.interface font-name "$FONT_UI" 2>/dev/null && changed=1
     local ga
     ga="$(_macos_accent_to_gnome "$MACOS_ACCENT")"
     [[ -n "$ga" ]] && gsettings set org.gnome.desktop.interface accent-color "$ga" 2>/dev/null && changed=1
