@@ -381,6 +381,97 @@ sync_theme() {
   fi
 }
 
+# Ambient auto-switch: pick light|dark based on time of day.
+# Default sunrise/sunset: 07:00 / 19:00 (configurable via env or state file).
+# Applies to the current wallpaper family — never changes wallpaper choice.
+ambient_theme() {
+  local sunrise sunset now hour minute now_min sunrise_min sunset_min desired
+  local state_file="${XDG_STATE_HOME:-$HOME/.local/state}/dot/theme-ambient.conf"
+  # Priority: env vars > state file > defaults.
+  sunrise="${DOT_THEME_SUNRISE:-}"
+  sunset="${DOT_THEME_SUNSET:-}"
+  if [[ -z "$sunrise" || -z "$sunset" ]] && [[ -f "$state_file" ]]; then
+    # shellcheck disable=SC1090
+    source "$state_file"
+    sunrise="${sunrise:-$DOT_THEME_SUNRISE}"
+    sunset="${sunset:-$DOT_THEME_SUNSET}"
+  fi
+  sunrise="${sunrise:-07:00}"
+  sunset="${sunset:-19:00}"
+
+  # Convert HH:MM strings to minutes since midnight for cheap comparison.
+  IFS=':' read -r hour minute <<< "$sunrise"
+  sunrise_min=$((10#$hour * 60 + 10#$minute))
+  IFS=':' read -r hour minute <<< "$sunset"
+  sunset_min=$((10#$hour * 60 + 10#$minute))
+  now="$(date +%H:%M)"
+  IFS=':' read -r hour minute <<< "$now"
+  now_min=$((10#$hour * 60 + 10#$minute))
+
+  if (( now_min >= sunrise_min && now_min < sunset_min )); then
+    desired="light"
+  else
+    desired="dark"
+  fi
+
+  local current family target
+  current="$(current_theme)"
+  family="${current%-dark}"
+  [[ "$family" != "$current" ]] || family="${current%-light}"
+  target="${family}-${desired}"
+
+  if [[ "$current" == "$target" ]]; then
+    ui_ok "Ambient" "$current — already matches (sunrise=$sunrise sunset=$sunset now=$now)"
+    return 0
+  fi
+  ui_info "Ambient" "$current -> $target (sunrise=$sunrise sunset=$sunset now=$now)"
+  set_theme "$target"
+}
+
+# Install/uninstall systemd user timer that runs `dot theme ambient` hourly.
+ambient_enable() {
+  local unit_dir="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
+  mkdir -p "$unit_dir"
+  local dot_path
+  dot_path="$(command -v dot 2>/dev/null || echo "$HOME/.local/bin/dot")"
+
+  cat > "$unit_dir/dot-theme-ambient.service" <<EOF
+[Unit]
+Description=Ambient theme switch (dot theme ambient)
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=${dot_path} theme ambient
+EOF
+
+  cat > "$unit_dir/dot-theme-ambient.timer" <<EOF
+[Unit]
+Description=Run 'dot theme ambient' hourly and on session start
+
+[Timer]
+OnStartupSec=30
+OnUnitActiveSec=1h
+AccuracySec=1m
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+  systemctl --user daemon-reload
+  systemctl --user enable --now dot-theme-ambient.timer
+  ui_ok "Ambient" "systemd timer enabled — will re-check hourly"
+}
+
+ambient_disable() {
+  systemctl --user disable --now dot-theme-ambient.timer 2>/dev/null || true
+  local unit_dir="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
+  rm -f "$unit_dir/dot-theme-ambient.service" "$unit_dir/dot-theme-ambient.timer"
+  systemctl --user daemon-reload
+  ui_ok "Ambient" "systemd timer disabled and removed"
+}
+
 # =============================================================================
 # Main
 # =============================================================================
@@ -398,6 +489,29 @@ case "${1:-}" in
     ;;
   sync)
     sync_theme
+    ;;
+  ambient)
+    shift
+    case "${1:-run}" in
+      run|"") ambient_theme ;;
+      enable) ambient_enable ;;
+      disable) ambient_disable ;;
+      status)
+        state_file="${XDG_STATE_HOME:-$HOME/.local/state}/dot/theme-ambient.conf"
+        ui_info "Sunrise" "${DOT_THEME_SUNRISE:-$(grep -h '^sunrise=' "$state_file" 2>/dev/null | cut -d= -f2 || echo '07:00 (default)')}"
+        ui_info "Sunset" "${DOT_THEME_SUNSET:-$(grep -h '^sunset=' "$state_file" 2>/dev/null | cut -d= -f2 || echo '19:00 (default)')}"
+        if systemctl --user is-active dot-theme-ambient.timer >/dev/null 2>&1; then
+          ui_ok "Timer" "active"
+          systemctl --user list-timers dot-theme-ambient.timer --no-pager 2>&1 | grep -v '^$' | tail -3
+        else
+          ui_info "Timer" "inactive — run 'dot theme ambient enable'"
+        fi
+        ;;
+      *)
+        ui_err "Unknown" "ambient subcommand '$1' (use: run|enable|disable|status)"
+        exit 1
+        ;;
+    esac
     ;;
   family)
     switch_family
@@ -520,6 +634,7 @@ case "${1:-}" in
     ui_ok "current" "Show current theme info"
     ui_ok "status" "Dashboard: recorded vs applied theme state"
     ui_ok "sync" "Sync dotfiles with system dark/light mode"
+    ui_ok "ambient" "Time-based mode switch (run|enable|disable|status)"
     ui_ok "rebuild" "Regenerate themes from system + custom wallpapers"
     echo ""
     show_current
