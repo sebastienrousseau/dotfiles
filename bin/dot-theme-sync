@@ -554,6 +554,29 @@ _wallpaper_for_mode() {
   fi
 }
 
+# Pick a cursor theme for the given mode (light|dark). Prefers env-var
+# overrides, then Bibata Modern (widely installed), then Adwaita. Returns
+# empty if nothing sensible is available.
+_cursor_theme_for_mode() {
+  local mode="$1" preferred=""
+  if [[ "$mode" == "light" ]]; then
+    preferred="${DOT_THEME_CURSOR_LIGHT:-Bibata-Modern-Ice}"
+  else
+    preferred="${DOT_THEME_CURSOR_DARK:-Bibata-Modern-Classic}"
+  fi
+  # Verify installed under either system or user cursor dirs.
+  if [[ -d "/usr/share/icons/$preferred" || -d "$HOME/.icons/$preferred" || -d "$HOME/.local/share/icons/$preferred" ]]; then
+    printf '%s' "$preferred"
+    return
+  fi
+  # Fallback: Adwaita ships with GTK, always available.
+  if [[ -d "/usr/share/icons/Adwaita" ]]; then
+    printf '%s' "Adwaita"
+    return
+  fi
+  printf ''
+}
+
 # Map macos_accent int → GNOME accent-color enum name (one of the 9 stock
 # values GNOME 47+ accepts). Empty if unmapped/missing.
 _macos_accent_to_gnome() {
@@ -597,9 +620,12 @@ _apply_gnome_family_desktop() {
     return 1
   fi
   local changed=0
+  local cursor
+  cursor="$(_cursor_theme_for_mode "$mode")"
   gsettings set org.gnome.desktop.interface color-scheme "$color_scheme" 2>/dev/null && changed=1
   [[ -n "$gtk_theme" ]] && gsettings set org.gnome.desktop.interface gtk-theme "$gtk_theme" 2>/dev/null && changed=1
   [[ -n "$gtk_icon" ]] && gsettings set org.gnome.desktop.interface icon-theme "$gtk_icon" 2>/dev/null && changed=1
+  [[ -n "$cursor" ]] && gsettings set org.gnome.desktop.interface cursor-theme "$cursor" 2>/dev/null && changed=1
   if [[ -n "$WP_LIGHT" ]]; then
     gsettings set org.gnome.desktop.background picture-uri "file://$WP_LIGHT" 2>/dev/null && changed=1
     gsettings set org.gnome.desktop.screensaver picture-uri "file://$WP_LIGHT" 2>/dev/null || true
@@ -652,6 +678,17 @@ _apply_kde_desktop() {
     "$kwrite" --file kdeglobals --group Icons --key Theme "$gtk_icon" 2>/dev/null && changed=1
   fi
 
+  # Cursor theme — Plasma reads XCursorTheme from kdeglobals [General].
+  local cursor
+  cursor="$(_cursor_theme_for_mode "$mode")"
+  if [[ -n "$cursor" && -n "$kwrite" ]]; then
+    "$kwrite" --file kdeglobals --group General --key XCursorTheme "$cursor" 2>/dev/null && changed=1
+  fi
+  # GTK apps under Plasma also honour gsettings cursor-theme.
+  if [[ -n "$cursor" ]] && command -v gsettings >/dev/null 2>&1; then
+    gsettings set org.gnome.desktop.interface cursor-theme "$cursor" 2>/dev/null && changed=1
+  fi
+
   local wp
   wp="$(_wallpaper_for_mode "$mode")"
   if [[ -n "$wp" ]]; then
@@ -686,6 +723,9 @@ _apply_xfce_desktop() {
   local changed=0
   [[ -n "$gtk_theme" ]] && xfconf-query -c xsettings -p /Net/ThemeName -s "$gtk_theme" 2>/dev/null && changed=1
   [[ -n "$gtk_icon" ]] && xfconf-query -c xsettings -p /Net/IconThemeName -s "$gtk_icon" 2>/dev/null && changed=1
+  local cursor
+  cursor="$(_cursor_theme_for_mode "$mode")"
+  [[ -n "$cursor" ]] && xfconf-query -c xsettings -p /Gtk/CursorThemeName -s "$cursor" 2>/dev/null && changed=1
   # Some XFCE builds expose a "prefer-dark-theme" hint.
   local pdt
   [[ "$mode" == "dark" ]] && pdt=true || pdt=false
@@ -717,6 +757,9 @@ _apply_wlroots_desktop() {
     gsettings set org.gnome.desktop.interface color-scheme "$color_scheme" 2>/dev/null && changed=1
     [[ -n "$gtk_theme" ]] && gsettings set org.gnome.desktop.interface gtk-theme "$gtk_theme" 2>/dev/null && changed=1
     [[ -n "$gtk_icon" ]] && gsettings set org.gnome.desktop.interface icon-theme "$gtk_icon" 2>/dev/null && changed=1
+    local cursor
+    cursor="$(_cursor_theme_for_mode "$mode")"
+    [[ -n "$cursor" ]] && gsettings set org.gnome.desktop.interface cursor-theme "$cursor" 2>/dev/null && changed=1
     local ga
     ga="$(_macos_accent_to_gnome "$MACOS_ACCENT")"
     [[ -n "$ga" ]] && gsettings set org.gnome.desktop.interface accent-color "$ga" 2>/dev/null && changed=1
