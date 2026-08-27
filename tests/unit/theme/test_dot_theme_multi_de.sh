@@ -254,6 +254,44 @@ _resolve_gnome_shell_theme "NonExistentTheme-9999"
 assert_equals "" "$SHELL_THEME"
 
 # ---------------------------------------------------------------------------
+# _record_theme_history — stack ordering + dedupe + cap
+# ---------------------------------------------------------------------------
+
+# Isolate the history file inside our sandbox.
+export XDG_STATE_HOME="$TMPHOME/state"
+mkdir -p "$XDG_STATE_HOME/dot"
+_hist="$XDG_STATE_HOME/dot/theme-history"
+rm -f "$_hist"
+
+test_start "history_records_first_transition"
+_record_theme_history "Miami-dark" "Sonoma-dark"
+assert_equals "Miami-dark" "$(head -1 "$_hist")" "prev goes on top after first apply"
+
+test_start "history_prepends_on_further_transitions"
+_record_theme_history "Sonoma-dark" "Firewatch-dark"
+assert_equals "Sonoma-dark" "$(head -1 "$_hist")" "most recent prev on top"
+assert_equals "Miami-dark" "$(sed -n '2p' "$_hist")" "older prev falls to position 2"
+
+test_start "history_dedupes_when_revisiting"
+_record_theme_history "Firewatch-dark" "Miami-dark"     # Miami already in the tail
+assert_equals "Firewatch-dark" "$(head -1 "$_hist")"
+# Miami should appear once, not twice
+_miami_count="$(grep -c '^Miami-dark$' "$_hist")"
+assert_equals "1" "$_miami_count" "duplicate previous is deduped"
+
+test_start "history_skips_no_op_apply"
+_before="$(wc -l < "$_hist")"
+_record_theme_history "Miami-dark" "Miami-dark"   # idempotent, should not touch history
+_after="$(wc -l < "$_hist")"
+assert_equals "$_before" "$_after" "prev==new writes nothing"
+
+test_start "history_skips_when_prev_empty"
+_before="$(wc -l < "$_hist")"
+_record_theme_history "" "Foo-dark"
+_after="$(wc -l < "$_hist")"
+assert_equals "$_before" "$_after" "empty prev writes nothing"
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo ""
