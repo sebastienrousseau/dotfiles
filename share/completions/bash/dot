@@ -1,0 +1,53 @@
+# Bash completion for the `dot` CLI — focused on the theme subcommand.
+# Source or drop into ~/.local/share/bash-completion/completions/dot
+#
+# Provides completions for:
+#   dot theme <TAB>              -> subcommands + theme names
+#   dot theme set <TAB>          -> theme names
+#   dot theme preview <TAB>      -> theme names
+#   dot theme set NAME --<TAB>   -> flags (--force, --full)
+
+_dot_theme_names() {
+  local f="$HOME/.dotfiles/defaults/.chezmoidata/themes.toml"
+  [[ -f "$f" ]] || f="$HOME/.local/share/chezmoi/.chezmoidata/themes.toml"
+  [[ -f "$f" ]] || return
+  sed -n 's/^\[themes\.\([a-zA-Z0-9-]*\)\]$/\1/p' "$f" | sort -u
+}
+
+_dot_completions() {
+  local cur prev words cword
+  _init_completion 2>/dev/null || COMPREPLY=()
+
+  # Top-level subcommand list — kept short; the full list lives in _dot (zsh)
+  # and dot.fish.tmpl (fish). Bash users get theme + a few common ones.
+  if [[ ${COMP_CWORD} -eq 1 ]]; then
+    local top="theme wallpaper apply sync update doctor heal health status \
+      profile mode secrets keys env"
+    COMPREPLY=( $(compgen -W "$top" -- "$cur") )
+    return
+  fi
+
+  # `dot theme ...`
+  if [[ "${COMP_WORDS[1]}" == "theme" ]]; then
+    local subs="list set toggle family random preview current status sync rebuild help"
+    if [[ ${COMP_CWORD} -eq 2 ]]; then
+      # subcommand OR theme name (quick-switch)
+      COMPREPLY=( $(compgen -W "$subs $(_dot_theme_names)" -- "$cur") )
+      return
+    fi
+    local sub="${COMP_WORDS[2]}"
+    case "$sub" in
+      set | preview)
+        # After name, allow --force / --full
+        if [[ "$cur" == -* ]]; then
+          COMPREPLY=( $(compgen -W "--force --full" -- "$cur") )
+        else
+          COMPREPLY=( $(compgen -W "$(_dot_theme_names)" -- "$cur") )
+        fi
+        return
+        ;;
+    esac
+  fi
+}
+
+complete -F _dot_completions dot
