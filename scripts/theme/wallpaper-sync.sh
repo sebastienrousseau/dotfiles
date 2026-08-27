@@ -566,7 +566,13 @@ end tell" 2>/dev/null || true
           dark_wp="$(ensure_linux_compatible "$dark_wp")"
           gsettings set org.gnome.desktop.background picture-uri "file://${light_wp}"
           gsettings set org.gnome.desktop.background picture-uri-dark "file://${dark_wp}"
-          gsettings set org.gnome.desktop.screensaver picture-uri "file://${light_wp}"
+          # Screensaver schema has no dark variant — pick by active mode
+          # so the lock screen matches the desktop the user was on.
+          if [[ "$mode" == "dark" ]]; then
+            gsettings set org.gnome.desktop.screensaver picture-uri "file://${dark_wp}"
+          else
+            gsettings set org.gnome.desktop.screensaver picture-uri "file://${light_wp}"
+          fi
         else
           gsettings set org.gnome.desktop.background picture-uri "$wp_uri"
           gsettings set org.gnome.desktop.background picture-uri-dark "$wp_uri"

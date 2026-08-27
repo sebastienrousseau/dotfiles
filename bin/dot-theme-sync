@@ -628,11 +628,15 @@ _apply_gnome_family_desktop() {
   [[ -n "$cursor" ]] && gsettings set org.gnome.desktop.interface cursor-theme "$cursor" 2>/dev/null && changed=1
   if [[ -n "$WP_LIGHT" ]]; then
     gsettings set org.gnome.desktop.background picture-uri "file://$WP_LIGHT" 2>/dev/null && changed=1
-    gsettings set org.gnome.desktop.screensaver picture-uri "file://$WP_LIGHT" 2>/dev/null || true
   fi
   if [[ -n "$WP_DARK" ]]; then
     gsettings set org.gnome.desktop.background picture-uri-dark "file://$WP_DARK" 2>/dev/null && changed=1
   fi
+  # Lock screen: track the active mode's wallpaper (screensaver schema
+  # only has one picture-uri key, no dark variant, so pick by mode).
+  local lock_wp
+  lock_wp="$(_wallpaper_for_mode "$mode")"
+  [[ -n "$lock_wp" ]] && gsettings set org.gnome.desktop.screensaver picture-uri "file://$lock_wp" 2>/dev/null || true
   local ga
   ga="$(_macos_accent_to_gnome "$MACOS_ACCENT")"
   if [[ -n "$ga" ]]; then
@@ -744,10 +748,10 @@ _apply_xfce_desktop() {
   return 0
 }
 
-# Wlroots-based Wayland compositors (sway, Hyprland, niri). No universal
-# color-scheme protocol yet, so we set the gsettings color-scheme (portals
-# read it) + GTK theme, and rely on wallpaper being handled by the shell
-# (swww/hyprpaper/DMS/etc.) — we don't own the compositor's wallpaper here.
+# Wlroots-based Wayland compositors (sway, Hyprland, niri). Colour-scheme
+# via gsettings (xdg-desktop-portal reads it), plus native wallpaper via
+# swww (sway/niri/generic) or hyprctl (Hyprland-native). DMS's matugen
+# still runs from reload_dms so dynamic accent colours also propagate.
 _apply_wlroots_desktop() {
   local mode="$1" gtk_theme="$2" gtk_icon="$3"
   local color_scheme
@@ -763,6 +767,18 @@ _apply_wlroots_desktop() {
     local ga
     ga="$(_macos_accent_to_gnome "$MACOS_ACCENT")"
     [[ -n "$ga" ]] && gsettings set org.gnome.desktop.interface accent-color "$ga" 2>/dev/null && changed=1
+  fi
+
+  # Wallpaper: pick the tool that's actually running / available.
+  local wp
+  wp="$(_wallpaper_for_mode "$mode")"
+  if [[ -n "$wp" ]]; then
+    if command -v swww >/dev/null 2>&1 && pgrep -x swww-daemon >/dev/null 2>&1; then
+      swww img "$wp" --transition-type fade --transition-duration 1 >/dev/null 2>&1 && changed=1
+    elif command -v hyprctl >/dev/null 2>&1 && pgrep -x Hyprland >/dev/null 2>&1; then
+      hyprctl hyprpaper preload "$wp" >/dev/null 2>&1 || true
+      hyprctl hyprpaper wallpaper ",$wp" >/dev/null 2>&1 && changed=1
+    fi
   fi
   CHANGED=$((CHANGED + changed))
   return 0
