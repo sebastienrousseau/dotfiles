@@ -409,6 +409,28 @@ case "${1:-}" in
     shift
     bash "$SCRIPT_DIR/rebuild-themes.sh" "$@"
     ;;
+  random)
+    # Pick a random paired family and apply it in the current mode.
+    # Great for wallpaper-rotation cron jobs / systemd timers.
+    current="$(current_theme)"
+    mode="dark"
+    is_dark_theme "$current" 2>/dev/null || mode="light"
+    current_family="${current%-dark}"
+    [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
+    mapfile -t families < <(paired_families)
+    if [[ ${#families[@]} -eq 0 ]]; then
+      ui_err "No themes" "run 'dot theme rebuild' first"
+      exit 1
+    fi
+    # Filter out the current family so `random` always changes something.
+    picks=()
+    for f in "${families[@]}"; do
+      [[ "$f" != "$current_family" ]] && picks+=("$f")
+    done
+    [[ ${#picks[@]} -eq 0 ]] && picks=("${families[@]}")
+    pick="${picks[RANDOM % ${#picks[@]}]}"
+    set_theme "${pick}-${mode}"
+    ;;
   help | --help | -h)
     ui_header "Usage"
     ui_info "dot theme" "[command]"
@@ -418,7 +440,8 @@ case "${1:-}" in
     ui_ok "list" "Show all available themes"
     ui_ok "set [NAME]" "Set theme (interactive if no name)"
     ui_ok "toggle" "Toggle between light/dark within current family"
-    ui_ok "family" "Cycle between theme families"
+    ui_ok "family" "Cycle to the next family"
+    ui_ok "random" "Pick a random family, keep current mode"
     ui_ok "current" "Show current theme info"
     ui_ok "sync" "Sync dotfiles with system dark/light mode"
     ui_ok "rebuild" "Regenerate themes from system + custom wallpapers"
