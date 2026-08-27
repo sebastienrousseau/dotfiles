@@ -200,6 +200,60 @@ test_start "resolver_carries_macos_accent_from_load"
 assert_equals "5" "$MACOS_ACCENT"
 
 # ---------------------------------------------------------------------------
+# _resolve_fonts — env + TH_* precedence
+# ---------------------------------------------------------------------------
+
+test_start "fonts_empty_when_nothing_set"
+unset TH_MONO_FONT TH_UI_FONT TH_DOC_FONT
+unset DOT_THEME_MONO_FONT DOT_THEME_UI_FONT DOT_THEME_DOC_FONT
+_resolve_fonts
+assert_equals "" "$FONT_MONO" "no font when nothing set"
+
+test_start "fonts_use_theme_when_present"
+TH_MONO_FONT="JetBrainsMono Nerd Font 12"
+_resolve_fonts
+assert_equals "JetBrainsMono Nerd Font 12" "$FONT_MONO"
+
+test_start "fonts_env_wins_over_theme_when_theme_empty"
+TH_MONO_FONT=""
+export DOT_THEME_MONO_FONT="Fira Code 11"
+_resolve_fonts
+assert_equals "Fira Code 11" "$FONT_MONO"
+unset DOT_THEME_MONO_FONT
+
+test_start "fonts_theme_wins_over_env"
+TH_MONO_FONT="Iosevka 10"
+export DOT_THEME_MONO_FONT="Fira Code 11"
+_resolve_fonts
+assert_equals "Iosevka 10" "$FONT_MONO" "theme.toml value takes precedence"
+unset DOT_THEME_MONO_FONT TH_MONO_FONT
+
+# ---------------------------------------------------------------------------
+# _resolve_gnome_shell_theme — resolution ladder
+# ---------------------------------------------------------------------------
+
+test_start "shell_theme_uses_theme_field_first"
+TH_GNOME_SHELL="Yaru-dark"
+_resolve_gnome_shell_theme "Adwaita-dark"
+assert_equals "Yaru-dark" "$SHELL_THEME"
+unset TH_GNOME_SHELL
+
+test_start "shell_theme_uses_env_when_theme_empty"
+export DOT_THEME_GNOME_SHELL="Fluent-Dark"
+_resolve_gnome_shell_theme "SomeGtkTheme"
+assert_equals "Fluent-Dark" "$SHELL_THEME"
+unset DOT_THEME_GNOME_SHELL
+
+test_start "shell_theme_matches_gtk_when_dir_exists"
+mkdir -p "$TMPHOME/.themes/MatchedTheme/gnome-shell"
+_resolve_gnome_shell_theme "MatchedTheme"
+assert_equals "MatchedTheme" "$SHELL_THEME"
+
+test_start "shell_theme_empty_when_no_match"
+_resolve_gnome_shell_theme "NonExistentTheme-9999"
+assert_equals "" "$SHELL_THEME"
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo ""
