@@ -1197,29 +1197,38 @@ usage() {
 
 main() {
   local do_full=false
+  local do_force=false
   local new_theme=""
 
-  # Parse arguments
-  case "${1:-}" in
-    --help | -h)
-      usage
-      exit 0
-      ;;
-    --full)
-      do_full=true
-      ;;
-    "")
-      # No arguments: use current theme
-      ;;
-    -*)
-      printf '%s\n' "${RED}error${RESET}: unknown flag '$1'"
-      usage
-      exit 1
-      ;;
-    *)
-      new_theme="$1"
-      ;;
-  esac
+  # Parse arguments — accept a flag before OR after the theme name.
+  while [[ $# -gt 0 ]]; do
+    case "${1:-}" in
+      --help | -h)
+        usage
+        exit 0
+        ;;
+      --full)
+        do_full=true
+        shift
+        ;;
+      --force | -f)
+        do_force=true
+        shift
+        ;;
+      "")
+        shift
+        ;;
+      -*)
+        printf '%s\n' "${RED}error${RESET}: unknown flag '$1'"
+        usage
+        exit 1
+        ;;
+      *)
+        new_theme="$1"
+        shift
+        ;;
+    esac
+  done
 
   # Header
   printf '%s\n' "${BOLD}${CYAN}dot-theme-sync${RESET}"
@@ -1228,6 +1237,17 @@ main() {
   # Save previous theme for rollback on failure
   local prev_theme
   prev_theme="$(current_theme)"
+
+  # Idempotency: if the requested theme is already active and there's no
+  # explicit --force / --full, skip the whole apply chain. Users who want
+  # to re-render after editing configs pass --force; scripts that fire
+  # `dot theme set X` repeatedly no longer pay the ~700 ms tax per call.
+  if [[ -n "$new_theme" && "$new_theme" == "$prev_theme" \
+        && "$do_full" == false && "$do_force" == false ]]; then
+    _info "Theme" "$new_theme"
+    _ok "Idempotent" "already active — pass --force to re-apply"
+    exit 0
+  fi
 
   # If a new theme was specified, write it to the data file
   if [[ -n "$new_theme" ]]; then

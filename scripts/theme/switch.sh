@@ -179,7 +179,10 @@ set_theme() {
     pick_theme
     return
   fi
-  dot-theme-sync "$new_theme"
+  # Pass remaining args (e.g. --force, --full) straight through so the
+  # sync backend can honour them.
+  shift
+  dot-theme-sync "$new_theme" "$@"
 }
 
 # Interactive theme picker
@@ -388,7 +391,7 @@ case "${1:-}" in
     ;;
   set)
     shift
-    set_theme "$1"
+    set_theme "$@"
     ;;
   toggle)
     toggle_theme
