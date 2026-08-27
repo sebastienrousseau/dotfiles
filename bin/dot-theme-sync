@@ -448,18 +448,22 @@ reload_niri() {
 _detect_linux_de() {
   local raw="${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}"
   raw="$(printf '%s' "$raw" | tr '[:upper:]' '[:lower:]')"
+  # Match specific DEs before the generic *gnome* — several GNOME-derived
+  # shells (Budgie, Cinnamon, Unity) advertise themselves as `Foo:GNOME`
+  # in XDG_CURRENT_DESKTOP, and we want to surface the specific handler
+  # in the desktop status line.
   case "$raw" in
-    *gnome*) echo "gnome"; return ;;
-    *kde*|*plasma*) echo "kde"; return ;;
-    *xfce*) echo "xfce"; return ;;
+    *budgie*) echo "budgie"; return ;;
     *cinnamon*) echo "cinnamon"; return ;;
     *mate*) echo "mate"; return ;;
-    *budgie*) echo "budgie"; return ;;
     *unity*) echo "unity"; return ;;
     *lxqt*) echo "lxqt"; return ;;
+    *kde*|*plasma*) echo "kde"; return ;;
+    *xfce*) echo "xfce"; return ;;
     *sway*) echo "sway"; return ;;
     *hyprland*) echo "hyprland"; return ;;
     *niri*) echo "niri"; return ;;
+    *gnome*) echo "gnome"; return ;;
   esac
   if pgrep -x plasmashell >/dev/null 2>&1; then echo "kde"; return; fi
   if pgrep -x gnome-shell >/dev/null 2>&1; then echo "gnome"; return; fi
@@ -1383,4 +1387,10 @@ main() {
   fi
 }
 
-main "$@"
+# Source guard: only run main when executed directly, not when sourced by
+# tests. Under bash, `${BASH_SOURCE[0]}` is the script's own path and `$0`
+# is the entry-point invocation — they match on direct execution and differ
+# under `source`. Default-empty for `set -u` compatibility when sourced.
+if [[ "${BASH_SOURCE[0]:-}" == "${0:-}" ]]; then
+  main "$@"
+fi
