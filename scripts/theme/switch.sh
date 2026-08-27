@@ -405,6 +405,58 @@ case "${1:-}" in
   current)
     show_current
     ;;
+  status)
+    # Comprehensive dashboard: recorded theme, live gsettings/kwriteconfig
+    # state, wallpaper file existence, detected DE. Great for diagnosing
+    # "why doesn't my theme match my terminal?" moments.
+    ui_header "dot theme status"
+    current="$(current_theme)"
+    current_family="${current%-dark}"
+    [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
+    ui_info "Recorded" "$current"
+    ui_info "Family" "$current_family"
+
+    # Live wallpaper (GNOME family)
+    if command -v gsettings >/dev/null 2>&1; then
+      live_dark="$(gsettings get org.gnome.desktop.background picture-uri-dark 2>/dev/null | tr -d "'" | sed 's|.*/||')"
+      live_light="$(gsettings get org.gnome.desktop.background picture-uri 2>/dev/null | tr -d "'" | sed 's|.*/||')"
+      live_accent="$(gsettings get org.gnome.desktop.interface accent-color 2>/dev/null | tr -d "'")"
+      live_scheme="$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")"
+      live_cursor="$(gsettings get org.gnome.desktop.interface cursor-theme 2>/dev/null | tr -d "'")"
+      ui_info "Color scheme" "$live_scheme"
+      ui_info "Accent" "$live_accent"
+      ui_info "Cursor" "$live_cursor"
+      ui_info "Wallpaper (light)" "$live_light"
+      ui_info "Wallpaper (dark)" "$live_dark"
+    fi
+    # KDE side (harmless on non-KDE — kreadconfig6 will just fail)
+    if command -v kreadconfig6 >/dev/null 2>&1; then
+      kde_scheme="$(kreadconfig6 --file kdeglobals --group General --key ColorScheme 2>/dev/null)"
+      kde_accent="$(kreadconfig6 --file kdeglobals --group General --key AccentColor 2>/dev/null)"
+      [[ -n "$kde_scheme" ]] && ui_info "KDE scheme" "$kde_scheme"
+      [[ -n "$kde_accent" ]] && ui_info "KDE accent" "$kde_accent"
+    fi
+    # Detected DE (matches dot-theme-sync's _detect_linux_de logic).
+    if [[ "$(uname -s)" == "Linux" ]]; then
+      raw="${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}"
+      raw="$(printf '%s' "$raw" | tr '[:upper:]' '[:lower:]')"
+      case "$raw" in
+        *budgie*) de=budgie ;;
+        *cinnamon*) de=cinnamon ;;
+        *mate*) de=mate ;;
+        *unity*) de=unity ;;
+        *lxqt*) de=lxqt ;;
+        *kde*|*plasma*) de=kde ;;
+        *xfce*) de=xfce ;;
+        *sway*) de=sway ;;
+        *hyprland*) de=hyprland ;;
+        *niri*) de=niri ;;
+        *gnome*) de=gnome ;;
+        *) de=unknown ;;
+      esac
+      ui_info "Detected DE" "$de"
+    fi
+    ;;
   rebuild)
     shift
     bash "$SCRIPT_DIR/rebuild-themes.sh" "$@"
@@ -466,6 +518,7 @@ case "${1:-}" in
     ui_ok "random" "Pick a random family, keep current mode"
     ui_ok "preview [NAME]" "Try a theme, ENTER to keep or Ctrl-C to revert"
     ui_ok "current" "Show current theme info"
+    ui_ok "status" "Dashboard: recorded vs applied theme state"
     ui_ok "sync" "Sync dotfiles with system dark/light mode"
     ui_ok "rebuild" "Regenerate themes from system + custom wallpapers"
     echo ""
