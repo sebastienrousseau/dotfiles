@@ -663,11 +663,29 @@ case "${1:-}" in
     ui_ok "Kept" "$preview"
     ;;
   random)
-    # Pick a random paired family and apply it in the current mode.
-    # Great for wallpaper-rotation cron jobs / systemd timers.
+    # Pick a random paired family and apply it. Default mode = current
+    # mode; override with `--mode dark|light`.
+    shift
+    _rand_mode=""
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --mode)
+          shift
+          case "${1:-}" in
+            dark|light) _rand_mode="$1" ;;
+            *) ui_err "Usage" "--mode dark|light"; exit 1 ;;
+          esac
+          shift
+          ;;
+        --mode=*) _rand_mode="${1#--mode=}"; shift ;;
+        *) ui_err "Usage" "dot theme random [--mode dark|light]"; exit 1 ;;
+      esac
+    done
     current="$(current_theme)"
-    mode="dark"
-    is_dark_theme "$current" 2>/dev/null || mode="light"
+    if [[ -z "$_rand_mode" ]]; then
+      _rand_mode="dark"
+      is_dark_theme "$current" 2>/dev/null || _rand_mode="light"
+    fi
     current_family="${current%-dark}"
     [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
     mapfile -t families < <(paired_families)
@@ -682,7 +700,7 @@ case "${1:-}" in
     done
     [[ ${#picks[@]} -eq 0 ]] && picks=("${families[@]}")
     pick="${picks[RANDOM % ${#picks[@]}]}"
-    set_theme "${pick}-${mode}"
+    set_theme "${pick}-${_rand_mode}"
     ;;
   help | --help | -h)
     ui_header "Usage"
