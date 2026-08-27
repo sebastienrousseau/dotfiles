@@ -366,7 +366,9 @@ show_current() {
   ui_info "Current" "$current ($family, $mode)"
 }
 
-# Detect system appearance (Dark/Light) and sync dotfiles
+# Detect system appearance (Dark/Light) and sync dotfiles. Also picks up
+# KDE Plasma's color scheme (BreezeLight vs BreezeDark), so KDE users get
+# the same auto-sync as GNOME users.
 sync_theme() {
   local os_mode="dark" # Default fallback
   case "$(uname -s)" in
@@ -378,34 +380,42 @@ sync_theme() {
       fi
       ;;
     Linux)
+      # GNOME family via gsettings
       if command -v gsettings >/dev/null 2>&1; then
-        # Check GNOME color scheme. Fixes a long-standing bug where the
-        # variable was declared as `local scheme=scheme=$(...)` — the
-        # extra `scheme=` prefix made the value always start with that
-        # literal, so the `prefer-light` test below could never match
-        # and the system always fell through to the dark branch.
         local scheme
         scheme=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")
         if [[ "$scheme" == "prefer-light" ]]; then
           os_mode="light"
-        else
+        elif [[ "$scheme" == "prefer-dark" || "$scheme" == "default" ]]; then
           os_mode="dark"
         fi
+      fi
+      # KDE — kreadconfig6 wins on KDE sessions
+      if command -v kreadconfig6 >/dev/null 2>&1; then
+        local kde_scheme
+        kde_scheme="$(kreadconfig6 --file kdeglobals --group General --key ColorScheme 2>/dev/null)"
+        case "$kde_scheme" in
+          *Light*|*light*) os_mode="light" ;;
+          *Dark*|*dark*) os_mode="dark" ;;
+        esac
       fi
       ;;
   esac
 
   local current
   current="$(current_theme)"
-  if is_dark_theme "$current" && [[ "$os_mode" == "light" ]]; then
-    ui_info "Sync" "System is light, switching dotfiles to light..."
-    toggle_theme
-  elif ! is_dark_theme "$current" && [[ "$os_mode" == "dark" ]]; then
-    ui_info "Sync" "System is dark, switching dotfiles to dark..."
-    toggle_theme
-  else
+  local current_mode="dark"
+  is_dark_theme "$current" 2>/dev/null || current_mode="light"
+
+  if [[ "$current_mode" == "$os_mode" ]]; then
     ui_ok "Sync" "Dotfiles already match system ($os_mode mode)"
+    return 0
   fi
+  ui_info "Sync" "System is $os_mode — switching from $current_mode..."
+  local family
+  family="${current%-dark}"
+  [[ "$family" != "$current" ]] || family="${current%-light}"
+  set_theme "${family}-${os_mode}"
 }
 
 # Ambient auto-switch: pick light|dark based on time of day.
