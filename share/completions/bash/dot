@@ -29,7 +29,7 @@ _dot_completions() {
 
   # `dot theme ...`
   if [[ "${COMP_WORDS[1]}" == "theme" ]]; then
-    local subs="list set toggle family random preview current status sync rebuild help"
+    local subs="list set toggle family random preview undo history current status sync ambient reset rebuild help"
     if [[ ${COMP_CWORD} -eq 2 ]]; then
       # subcommand OR theme name (quick-switch)
       COMPREPLY=( $(compgen -W "$subs $(_dot_theme_names)" -- "$cur") )
@@ -44,6 +44,10 @@ _dot_completions() {
         else
           COMPREPLY=( $(compgen -W "$(_dot_theme_names)" -- "$cur") )
         fi
+        return
+        ;;
+      ambient)
+        COMPREPLY=( $(compgen -W "run enable disable status" -- "$cur") )
         return
         ;;
     esac

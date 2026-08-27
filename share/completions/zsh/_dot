@@ -253,8 +253,13 @@ _dot() {
             'family:Cycle to the next family'
             'random:Pick a random family, keep current mode'
             'preview:Try a theme, ENTER to keep or Ctrl-C to revert'
+            'undo:Step back to the previous theme'
+            'history:Show recently-applied themes'
             'current:Show current theme info'
+            'status:Dashboard: recorded vs applied theme state'
             'sync:Sync dotfiles with system dark/light mode'
+            'ambient:Time-based mode switch (run|enable|disable|status)'
+            'reset:Restore GNOME defaults'
             'rebuild:Regenerate themes from wallpapers'
             'help:Show subcommand help'
           )
