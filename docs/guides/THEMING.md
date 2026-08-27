@@ -95,6 +95,116 @@ dot theme toggle
 
 Toggles between the dark and light variant of the current theme family. A theme named `macos-tahoe-dark` toggles to `macos-tahoe-light`, and vice versa.
 
+## Command Reference (v0.2.503+)
+
+The full `dot theme` command surface as of v0.2.503:
+
+| Command | Purpose |
+|---|---|
+| `dot theme` | Interactive fzf picker with live preview pane (accent + wallpaper + bg/fg) |
+| `dot theme list` | Print all paired families |
+| `dot theme set <NAME> [--force] [--full]` | Apply a theme by name; idempotent when unchanged |
+| `dot theme toggle` | Flip light ↔ dark within the current family |
+| `dot theme mode dark\|light` | Idempotently force a mode |
+| `dot theme family` | Cycle to the next paired family, preserve mode |
+| `dot theme random [--mode dark\|light]` | Random family; keeps current mode unless `--mode` given |
+| `dot theme preview <NAME>` | Apply, wait for ENTER to keep or Ctrl-C to revert |
+| `dot theme undo` | Step back one entry in the history stack (toggle-style) |
+| `dot theme history` | Show the recently-applied stack (max 20) |
+| `dot theme current` | Print the active theme |
+| `dot theme status` | Full dashboard: recorded vs live gsettings/kwriteconfig |
+| `dot theme sync` | Match the theme to system dark/light preference |
+| `dot theme ambient run\|enable\|disable\|status` | Time-based auto-switch + systemd user timer |
+| `dot theme reset` | Restore GNOME defaults (accent/cursor/fonts/shell-theme); wallpaper untouched |
+| `dot theme rebuild [--force\|--list]` | Regenerate `themes.toml` from wallpaper library |
+| `dot theme help` | Print the built-in usage list |
+
+### Idempotency and `--force`
+
+`dot theme set X` when X is already active is a **40 ms no-op** — no chezmoi apply, no reload chain. Pass `--force` (`-f`) to re-apply anyway (useful after editing config templates without changing the theme name):
+
+```bash
+dot theme set Sonoma-dark            # 40 ms if Sonoma-dark is current
+dot theme set Sonoma-dark --force    # ~900 ms full re-apply
+dot theme set Sonoma-dark --full     # even fuller: full chezmoi apply, not targeted
+```
+
+### Ambient auto-switch
+
+```bash
+dot theme ambient enable                          # install user timer (hourly + on login)
+DOT_THEME_SUNRISE=06:30 DOT_THEME_SUNSET=18:45 \
+  dot theme ambient run                           # one-shot with custom times
+dot theme ambient status                          # show sunrise/sunset + timer state
+```
+
+Persistent state lives at `~/.local/state/dot/theme-ambient.conf` (auto-generated on first `enable`). The systemd timer runs `dot theme ambient run` every hour and 30 s after login, with `Persistent=true` so a suspended machine catches up on missed firings when it wakes.
+
+## Cross-DE Coverage on Linux
+
+`dot theme` detects the running desktop via `$XDG_CURRENT_DESKTOP`, `$DESKTOP_SESSION`, and `pgrep` fallbacks, then routes to the correct handler. Supported:
+
+| DE / Compositor | Color scheme | GTK theme | Icons | Wallpaper | Accent | Cursor | Fonts | Shell theme |
+|---|---|---|---|---|---|---|---|---|
+| **GNOME 47+** | ✅ gsettings | ✅ | ✅ | ✅ light+dark | ✅ 9-color enum | ✅ | ✅ mono/UI/doc | ✅ User Themes ext |
+| **KDE Plasma 5.24+/6** | ✅ plasma-apply-colorscheme + kwriteconfig | ✅ (for GTK apps) | ✅ (+ kdeglobals Icons) | ✅ plasma-apply / qdbus | ✅ hex (Plasma 6.2+) | ✅ XCursorTheme | ✅ font/fixed | n/a |
+| **XFCE** | ⚠️ via GTK theme | ✅ xfconf | ✅ | ✅ per-monitor | ⚠️ inherit | ✅ | ✅ FontName/MonospaceFontName | n/a |
+| **Cinnamon/MATE/Budgie/Unity/LXQt** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | (varies) |
+| **sway / Hyprland / niri** | ✅ portal | ✅ | ✅ | ✅ swww / hyprctl / DMS | ✅ | ✅ | ✅ | n/a |
+
+Detection order:
+1. `$XDG_CURRENT_DESKTOP` (matches specific DEs like `Budgie:GNOME` before the generic `*gnome*`)
+2. `$DESKTOP_SESSION`
+3. `pgrep -x plasmashell / gnome-shell / xfce4-session / cinnamon / mate-session / sway / Hyprland / niri`
+4. `unknown` — falls through to the GNOME/gsettings path (safe defensive)
+
+### Font swaps
+
+Themes can optionally specify per-mode fonts in `themes.toml`:
+
+```toml
+[themes.Miami-dark.app]
+mono_font = "JetBrainsMono Nerd Font 12"
+ui_font = "Cantarell 11"
+document_font = "Cantarell 11"
+```
+
+Env-var override (lower priority than the theme value):
+
+```bash
+DOT_THEME_MONO_FONT="Fira Code 11" DOT_THEME_UI_FONT="Inter 11" dot theme set Sonoma-dark
+```
+
+When neither is set, `dot theme` **does not touch** font state — the user's existing font choices are preserved.
+
+### GNOME Shell theme
+
+Populate `gnome_shell` in `[themes.NAME.app]` OR set `DOT_THEME_GNOME_SHELL`, OR — if left empty — `dot theme` auto-matches the GTK theme name when a `/gnome-shell` subdir exists under `/usr/share/themes`, `~/.themes`, or `~/.local/share/themes`. Covers Adwaita-dark, Yaru-dark, WhiteSur-Dark, Fluent-Dark packaged together.
+
+Writing to `org.gnome.shell.extensions.user-theme` is a no-op if the User Themes extension is not installed — safe on any GNOME session.
+
+### Cursor themes
+
+Auto-switch with mode:
+
+- Dark → `Bibata-Modern-Classic`
+- Light → `Bibata-Modern-Ice`
+- Fallback → `Adwaita`
+
+Override via env: `DOT_THEME_CURSOR_DARK`, `DOT_THEME_CURSOR_LIGHT`.
+
+## Undo, History, Reset
+
+```bash
+dot theme random         # try something surprising
+dot theme undo           # nope, back to what I had
+dot theme undo           # actually the random pick was nice — toggle back
+dot theme history        # show recent themes
+dot theme reset          # restore GNOME defaults (wallpaper stays)
+```
+
+History lives at `~/.local/state/dot/theme-history`, one theme per line, deduped on entry, capped at 20.
+
 ## Theme Families
 
 Available themes depend on your system. Run `dot theme list` to see what's discovered. On macOS Sonoma, you'll see ~150+ themes from system wallpapers. Custom wallpapers in `~/Pictures/Wallpapers/` add more.
