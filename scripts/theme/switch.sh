@@ -487,6 +487,23 @@ case "${1:-}" in
   toggle)
     toggle_theme
     ;;
+  mode)
+    shift
+    want="${1:-}"
+    case "$want" in
+      dark|light) : ;;
+      *) ui_err "Usage" "dot theme mode <dark|light>"; exit 1 ;;
+    esac
+    current="$(current_theme)"
+    family="${current%-dark}"
+    [[ "$family" != "$current" ]] || family="${current%-light}"
+    target="${family}-${want}"
+    if [[ "$current" == "$target" ]]; then
+      ui_ok "Mode" "$current — already in $want mode"
+    else
+      set_theme "$target"
+    fi
+    ;;
   sync)
     sync_theme
     ;;
@@ -676,6 +693,7 @@ case "${1:-}" in
     ui_ok "list" "Show all available themes"
     ui_ok "set [NAME]" "Set theme (interactive if no name)"
     ui_ok "toggle" "Toggle between light/dark within current family"
+    ui_ok "mode <dark|light>" "Idempotently force a mode (no-op if already there)"
     ui_ok "family" "Cycle to the next family"
     ui_ok "random" "Pick a random family, keep current mode"
     ui_ok "preview [NAME]" "Try a theme, ENTER to keep or Ctrl-C to revert"

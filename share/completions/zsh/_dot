@@ -250,6 +250,7 @@ _dot() {
             'list:Show all available themes'
             'set:Set theme (interactive if no name)'
             'toggle:Toggle between light/dark within family'
+            'mode:Idempotently force dark or light mode'
             'family:Cycle to the next family'
             'random:Pick a random family, keep current mode'
             'preview:Try a theme, ENTER to keep or Ctrl-C to revert'
