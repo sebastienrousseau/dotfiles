@@ -11,6 +11,19 @@ permissions:
 jobs:
   check-signature:
     name: Verify PR description signature
+    # The signature is an authorship attestation -- "THE ARCHITECT ᛫
+    # Sebastien Rousseau". A bot cannot make it, and nobody should be
+    # adding it to a bot's PR on the author's behalf, which is the only
+    # way these could ever pass.
+    #
+    # Without this, every Dependabot PR fails a check it cannot satisfy.
+    # Nine were blocked simultaneously, including dependency bumps with
+    # security relevance. A required check that a whole class of PR can
+    # never pass is not a gate, it is a wall.
+    if: >-
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot-preview[bot]' &&
+      github.event.pull_request.user.login != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Harden runner (block mode)
