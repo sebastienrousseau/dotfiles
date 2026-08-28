@@ -101,20 +101,24 @@ The full `dot theme` command surface as of v0.2.503:
 
 | Command | Purpose |
 |---|---|
-| `dot theme` | Interactive fzf picker with live preview pane (accent + wallpaper + bg/fg) |
+| `dot theme` | Interactive picker — fzf with palette preview if available, numbered menu fallback if not |
 | `dot theme list` | Print all paired families |
-| `dot theme set <NAME> [--force] [--full]` | Apply a theme by name; idempotent when unchanged |
+| `dot theme set <NAME> [--force] [--full] [--dry-run]` | Apply a theme by name; idempotent when unchanged |
 | `dot theme toggle` | Flip light ↔ dark within the current family |
-| `dot theme mode dark\|light` | Idempotently force a mode |
+| `dot theme mode <dark\|light>` | Idempotently force a mode |
 | `dot theme family` | Cycle to the next paired family, preserve mode |
-| `dot theme random [--mode dark\|light]` | Random family; keeps current mode unless `--mode` given |
+| `dot theme random [--mode <dark\|light>]` | Random family; keeps current mode unless `--mode` given |
 | `dot theme preview <NAME>` | Apply, wait for ENTER to keep or Ctrl-C to revert |
 | `dot theme undo` | Step back one entry in the history stack (toggle-style) |
 | `dot theme history` | Show the recently-applied stack (max 20) |
 | `dot theme current` | Print the active theme |
-| `dot theme status` | Full dashboard: recorded vs live gsettings/kwriteconfig |
-| `dot theme sync` | Match the theme to system dark/light preference |
-| `dot theme ambient run\|enable\|disable\|status` | Time-based auto-switch + systemd user timer |
+| `dot theme status [--json]` | Full dashboard: recorded vs live gsettings/kwriteconfig (JSON output for scripting) |
+| `dot theme diff <a> <b>` | Side-by-side field-by-field comparison with colour swatches |
+| `dot theme accent [<color\|int>]` | Live-tweak the desktop accent without changing wallpaper/theme |
+| `dot theme wallpaper [<path>]` | Set an arbitrary wallpaper without a theme swap |
+| `dot theme fit <mode>` | Wallpaper scale mode (`zoom`, `spanned`, `centered`, `scaled`, `stretched`, `wallpaper`, `none`) |
+| `dot theme sync` | Match the theme to system dark/light preference (GNOME + KDE) |
+| `dot theme ambient <run\|enable\|disable\|status>` | Time-based auto-switch + systemd user timer |
 | `dot theme reset` | Restore GNOME defaults (accent/cursor/fonts/shell-theme); wallpaper untouched |
 | `dot theme rebuild [--force\|--list]` | Regenerate `themes.toml` from wallpaper library |
 | `dot theme help` | Print the built-in usage list |
