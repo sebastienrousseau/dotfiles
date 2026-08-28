@@ -73,3 +73,34 @@ jobs:
           # the run outcome.
           bash tests/performance/bench_dot_theme.sh
         # Fails the job on any bench that overshoots its threshold.
+
+      - name: Symbol coverage (100 % ratchet)
+        run: |
+          # Fails the run if any function in bin/dot-theme-sync or
+          # any subcommand in scripts/theme/switch.sh isn't
+          # referenced by at least one test file. Doubles as a
+          # "delete-a-test" alarm — removing the only mention of a
+          # helper trips the gate at PR time.
+          MIN_COVERAGE=100 bash tests/performance/coverage_dot_theme.sh
+
+      - name: Shellcheck info-severity sweep on theme dir
+        run: |
+          # Warnings are already zero (enforced by ci-enforced.yml).
+          # Excluded codes are intentional patterns in this codebase:
+          #   SC1090/SC1091 — dynamic source paths under $REPO_ROOT
+          #   SC2034 — unused local vars that document dispatch inputs
+          #   SC2015 — `A && B || C` is intentional in _ok/_fail helpers
+          #   SC2016 — single-quoted expressions are awk program bodies
+          #   SC2030/SC2031 — subshell modifications are our parallel
+          #                   orchestrator's whole point
+          #   SC2295 — quoting inside ${..:-defaults} is style-only
+          shellcheck --severity=info \
+            -e SC1090 -e SC1091 -e SC2034 \
+            -e SC2015 -e SC2016 -e SC2030 -e SC2031 -e SC2295 \
+            bin/dot-theme-sync \
+            scripts/theme/*.sh \
+            tests/unit/theme/*.sh \
+            tests/regression/test_dot_theme_regressions.sh \
+            tests/integration/test_dot_theme_e2e.sh \
+            tests/performance/bench_dot_theme.sh \
+            tests/performance/coverage_dot_theme.sh
