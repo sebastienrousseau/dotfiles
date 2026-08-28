@@ -22,18 +22,19 @@ _dot_completions() {
   # the zsh/fish completions by tests/unit/commands/test_cli_docs_sync.sh.
   if [[ ${COMP_CWORD} -eq 1 ]]; then
     local top="add agent agents ai ai-query ai-setup aider alias-check \
-      aliases apply attest attestation autohand backup bootstrap \
-      bundle cache-refresh cd chaos cl claude codex commit conflicts \
-      copilot diff dns-doh docs doctor drift edit encrypt-check env \
-      firewall fleet fonts gemini goose heal health health-check help \
-      history init intelligence keys kiro learn lint load-bench \
-      load-bench-pty load-benchmark-pty locks lock-screen log-rotate \
-      manual mcp metrics mode new ollama opencode packages patterns \
-      perf prewarm profile qwen registry remove restore rollback \
-      sandbox score scorecard search secrets secrets-create \
-      secrets-init security-score setup sgpt smoke-test snapshot \
-      ssh-cert ssh-key status sync telemetry theme theme-sync tools \
-      tune update upgrade usb-safety version vibe wallpaper zai"
+      aliases apply attest attestation autohand backup benchmark \
+      bootstrap bundle cache-refresh cd chaos cl claude clean-cache \
+      codex commit conflicts copilot diff dns-doh docs doctor drift \
+      edit encrypt-check env firewall fleet fonts gemini goose heal \
+      health health-check help history init intelligence keys kiro \
+      learn lint load-bench load-bench-pty load-benchmark-pty locks \
+      lock-screen log-rotate manual mcp metrics mode new ollama \
+      opencode packages patterns perf prewarm profile qwen registry \
+      remove restore rollback sandbox score scorecard search secrets \
+      secrets-create secrets-init security-score setup sgpt \
+      smoke-test snapshot ssh-cert ssh-key status sync telemetry \
+      theme theme-sync tools tune update upgrade usb-safety verify \
+      version vibe wallpaper zai"
     COMPREPLY=( $(compgen -W "$top" -- "$cur") )
     return
   fi

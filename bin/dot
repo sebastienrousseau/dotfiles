@@ -365,12 +365,16 @@ apply|core
 init|init
 update|core
 add|core
+remove|core
 diff|core
 status|core
 cd|core
 edit|core
 commit|core
+clean-cache|core
 doctor|diagnostics
+benchmark|diagnostics
+verify|diagnostics
 scorecard|diagnostics
 score|diagnostics
 snapshot|diagnostics

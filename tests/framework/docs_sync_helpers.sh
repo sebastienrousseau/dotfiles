@@ -60,11 +60,15 @@ _docs_extract_top_level_commands() {
 # ---------------------------------------------------------------------------
 _docs_extract_from_case_block() {
   local file="$1"
+  # Match any top-level dispatch case header. Real-world variants in
+  # this repo: case "${1:-}", case "$route", case "$top", case
+  # "$COMMAND", case "$subcommand". All follow the same 2-space
+  # indented label convention inside the block, so only the header
+  # regex needs to be permissive.
   awk '
-    /^case "\$\{1:-\}" in/ || /^case "\$route" in/ { in_case=1; next }
+    /^case "\$(\{[^}]+\}|[A-Za-z_][A-Za-z0-9_]*)" in/ { in_case=1; next }
     /^esac[[:space:]]*$/ && in_case { in_case=0 }
     in_case && /^  [a-z][a-zA-Z0-9_-]*([[:space:]]*\|[[:space:]]*[a-zA-Z0-9_-]+)*[[:space:]]*\)/ {
-      # Capture the label(s) between the leading 2 spaces and the `)`.
       match($0, /^  ([^)]+)\)/, m)
       n = split(m[1], parts, /[[:space:]]*\|[[:space:]]*/)
       for (i = 1; i <= n; i++) {
