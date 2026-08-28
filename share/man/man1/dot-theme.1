@@ -1,0 +1,282 @@
+.TH DOT-THEME 1 "August 2026" "dotfiles v0.2.503" "User Commands"
+.SH NAME
+dot\-theme \- switch terminal + desktop theme across families and modes
+.SH SYNOPSIS
+.B dot theme
+.RI [ subcommand ]
+.RI [ arguments ]
+.RI [ options ]
+.SH DESCRIPTION
+.B dot theme
+is the wallpaper\-driven theming system for the dotfiles framework.
+Each theme bundles a wallpaper family (dark + light variants), a
+terminal palette, GTK/icon/cursor themes, an accent colour, and font
+choices, all derived from the wallpaper's dominant colours by
+.BR extract\-theme (7).
+Applying a theme regenerates configs via
+.BR chezmoi (1)
+and signals every running application to reload.
+.PP
+The dispatcher detects the running desktop (GNOME family via
+.IR gsettings ,
+KDE Plasma via
+.IR plasma\-apply\-* / kwriteconfig6 ,
+XFCE via
+.IR xfconf\-query ,
+wlroots via
+.IR swww / hyprctl )
+and routes writes to the correct backend.
+On macOS the applier speaks
+.IR osascript " and " defaults
+directly.
+.SH SUBCOMMANDS
+.SS Discovery
+.TP
+.B list
+Show every paired wallpaper theme.
+.TP
+.B current
+Print the active theme name.
+.TP
+.B status \fR[\fB\-\-json\fR]
+Diagnostic dashboard: recorded theme vs.
+live
+.IR gsettings / kwriteconfig
+state, detected DE, wallpaper URIs.
+.TP
+.B diff \fITHEME_A\fR \fITHEME_B\fR
+Side\-by\-side field diff (family, mode, accent, wallpaper, bg, fg)
+with 24\-bit ANSI colour swatches; rows that differ are marked
+.RB \(dq \(!= \(dq.
+.SS Selection
+.TP
+.B set \fITHEME\fR \fR[\fB\-\-force\fR|\fB\-\-full\fR|\fB\-\-dry\-run\fR]
+Apply a named theme. Idempotent no\-op when the target is already
+active. Pass
+.B \-\-force
+to re\-apply anyway (useful after editing config templates),
+.B \-\-full
+to run the full
+.B chezmoi apply
+instead of the targeted 12\-template subset, or
+.B \-\-dry\-run
+to print what would happen without touching anything.
+.TP
+.B toggle
+Flip light \(-> dark within the current family.
+.TP
+.B mode \fR{\fBdark\fR|\fBlight\fR|\fBauto\fR}
+Idempotently force a mode.
+.B auto
+is an alias for
+.BR sync .
+.TP
+.B family
+Cycle to the next paired family, preserving mode.
+.TP
+.B random \fR[\fB\-\-mode\fR \fIdark\fR|\fIlight\fR]
+Pick a random family. Preserves current mode unless overridden.
+.TP
+.B preview \fITHEME\fR
+Apply the theme, then block waiting for
+.B ENTER
+(keep) or
+.B Ctrl\-C
+(revert to previous).
+.SS Live tweaks (no theme change)
+.TP
+.B accent \fR[\fICOLOR\fR|\fIINT\fR]
+Set only the desktop accent. Accepts a GNOME accent enum name
+(blue, teal, green, yellow, orange, red, pink, purple, slate) or an
+integer on the
+.I macos_accent
+scale (\-1 = slate, 0\-6 = red\-pink).
+No arg = show current.
+.TP
+.B wallpaper \fR[\fIPATH\fR]
+Set an arbitrary wallpaper without a theme swap.
+.TP
+.B fit \fIMODE\fR
+Wallpaper scale mode: zoom, spanned, centered, scaled, stretched,
+wallpaper (tiled), none.
+.SS History
+.TP
+.B undo
+Step back to the previous theme. Toggle behaviour: rerun to bounce
+back and forth.
+.TP
+.B history
+Print the recently\-applied stack (up to 20 entries, newest first).
+.SS Portability
+.TP
+.B export \fR[\fIFILE\fR]
+Snapshot current theme + fit to JSON.
+.I FILE
+missing or
+.B \-
+means stdout.
+.TP
+.B import \fIFILE\fR
+Restore theme + fit from a snapshot. Verifies the target theme
+exists in
+.I themes.toml
+first — an error, not a silent misapply, if the target machine
+hasn't run
+.B rebuild
+yet.
+.SS Sync + Automation
+.TP
+.B sync
+Match the theme to the system's dark/light preference
+.RB ( gsettings " " color\-scheme " on GNOME, " kdeglobals " ColorScheme on KDE)."
+.TP
+.B ambient \fR{\fBrun\fR|\fBenable\fR|\fBdisable\fR|\fBstatus\fR}
+Time\-of\-day auto\-switch. Sunrise/sunset resolves via env vars,
+.BR sunwait (1)
+with
+.BR DOT_THEME_LOCATION ,
+a state file, then fixed 07:00 / 19:00.
+.B enable
+installs a systemd user timer (hourly + on login,
+.BR Persistent=true ).
+.TP
+.B rotate \fR{\fBenable\fR \fR[\fIINTERVAL\fR]\fR|\fBdisable\fR|\fBstatus\fR}
+Periodic random\-family wallpaper rotator via systemd user timer.
+Default 30m interval. Runs alongside
+.B ambient
+cleanly — ambient handles mode, rotate handles family.
+.SS Maintenance
+.TP
+.B reset
+Restore GNOME defaults (accent, cursor, fonts, shell\-theme).
+Wallpaper is deliberately not cleared.
+.TP
+.B rebuild \fR[\fB\-\-force\fR|\fB\-\-list\fR]
+Regenerate
+.I themes.toml
+by scanning wallpaper directories and running
+.BR extract\-theme (7)
+on each. Runs
+.BR extract\-heic\-frames.sh (7)
+first on Linux so paired PNGs exist for every dynamic HEIC before
+theme discovery.
+.SH ENVIRONMENT
+.TP
+.B DOT_THEME_CURSOR_DARK\fR, \fBDOT_THEME_CURSOR_LIGHT
+Override the mode\-linked cursor theme
+(defaults: Bibata\-Modern\-Classic / \-Ice).
+.TP
+.B DOT_THEME_MONO_FONT\fR, \fBDOT_THEME_UI_FONT\fR, \fBDOT_THEME_DOC_FONT
+Override fonts per slot. Falls through to \(dqdon't touch\(dq if
+neither the theme nor the env var sets it.
+.TP
+.B DOT_THEME_GNOME_SHELL
+Override the GNOME Shell theme name
+.RB ( org.gnome.shell.extensions.user\-theme "  ).
+Falls back to matching the GTK theme name when a
+.I /gnome\-shell
+directory exists under
+.IR /usr/share/themes , " ~/.themes" ", or "  ~/.local/share/themes .
+.TP
+.B DOT_THEME_SUNRISE\fR, \fBDOT_THEME_SUNSET
+Fixed times for the
+.B ambient
+switcher (HH:MM).
+.TP
+.B DOT_THEME_LOCATION
+lat,lon pair for
+.BR sunwait (1)
+lookup, e.g.
+.RB \(dq 51.5N,0.13W \(dq.
+.TP
+.B DOT_THEME_SEQUENTIAL
+Set to
+.B 1
+to force the reload chain to run sequentially instead of in
+parallel. Useful for reproducing per\-step timing bugs.
+.TP
+.B DOTFILES_WALLPAPER_DIR
+Override the wallpaper library location
+.RB (default: ~/Pictures/Wallpapers ).
+.SH FILES
+.TP
+.I ~/.local/state/dot/theme\-history
+Persistent history stack for
+.BR undo .
+.TP
+.I ~/.local/state/dot/theme\-ambient.conf
+Persistent sunrise/sunset config for
+.BR ambient .
+.TP
+.I ~/.config/systemd/user/dot\-theme\-ambient.{service,timer}
+Ambient timer unit files installed by
+.BR "ambient enable" .
+.TP
+.I ~/.config/systemd/user/dot\-theme\-rotate.{service,timer}
+Rotate timer unit files installed by
+.BR "rotate enable" .
+.TP
+.I ${DOTFILES}/defaults/.chezmoidata/themes.toml
+The generated theme catalogue read by every apply.
+.TP
+.I ${DOTFILES}/defaults/.chezmoidata.toml
+Records the currently\-active theme via a
+.B theme
+key.
+.SH EXAMPLES
+.PP
+Interactive picker with palette preview:
+.PP
+.RS
+.B dot theme
+.RE
+.PP
+Random dark family, keep applying every 15 minutes:
+.PP
+.RS
+.B dot theme rotate enable 15m
+.RE
+.PP
+Try a theme, decide with the keyboard:
+.PP
+.RS
+.B dot theme preview Firewatch\-dark
+.RE
+.PP
+Snapshot the current setup and restore it on another machine:
+.PP
+.RS
+.B "dot theme export ~/theme\-snap.json"
+.br
+.B "scp ~/theme\-snap.json new\-box:"
+.br
+.B "ssh new\-box 'dot theme import ~/theme\-snap.json'"
+.RE
+.PP
+Sun\-based auto light/dark in London:
+.PP
+.RS
+.B "DOT_THEME_LOCATION=\(dq51.5N,0.13W\(dq dot theme ambient enable"
+.RE
+.PP
+Diagnostic sweep (all live vs recorded state):
+.PP
+.RS
+.B "dot theme status \-\-json | jq"
+.RE
+.SH PERFORMANCE
+.PP
+On a modern workstation, an idempotent no\-op set completes in
+about 40 ms; a full apply with the parallel reload chain in about
+550 ms (chezmoi\-dominated). Setting
+.B DOT_THEME_SEQUENTIAL=1
+adds roughly 30 % to that.
+.SH SEE ALSO
+.BR dot (1),
+.BR chezmoi (1),
+.BR sunwait (1),
+.BR gsettings (1),
+.BR kwriteconfig6 (1),
+.BR xfconf\-query (1)
+.SH AUTHORS
+Sebastien Rousseau <sebastian.rousseau@gmail.com>.
