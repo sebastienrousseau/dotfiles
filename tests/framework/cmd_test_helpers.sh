@@ -174,9 +174,17 @@ _cmd_asserts_defined() {
 _cmd_asserts_case_exists() {
   local file="$1" label="$2"
   test_start "case_${label}_in_$(basename "$file" .sh)"
-  # Accept 2-space indented case labels like `  set)` or
-  # 2-space indent + alternation like `  set|reset)`.
-  if grep -qE "^  ${label}[|)]" "$file"; then _ok; else _fail "no  ${label}) case"; fi
+  # Accept:
+  #   `  set)`                — no alternation
+  #   `  set | reset)`        — alternation with spaces
+  #   `  set|reset)`          — alternation no spaces
+  #   `  set)          <cmt>` — trailing whitespace / comment
+  # 2-space indent is required (top-level case body).
+  if grep -qE "^  ${label}[[:space:]]*[|)]" "$file"; then
+    _ok
+  else
+    _fail "no  ${label}) case"
+  fi
 }
 
 # ---------------------------------------------------------------------------

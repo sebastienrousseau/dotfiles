@@ -20,12 +20,25 @@ ZSH_COMP="$REPO_ROOT/share/completions/zsh/_dot"
 FISH_COMP_TMPL="$REPO_ROOT/defaults/dot_config/fish/completions/dot.fish.tmpl"
 THEMING_MD="$REPO_ROOT/docs/guides/THEMING.md"
 
-# Canonical subcommand list. Update here when adding a new subcommand
-# and re-run the test to see what else needs touching.
-SUBCOMMANDS=(
-  list set toggle mode family random preview undo history current
-  status diff accent wallpaper fit export import sync ambient rotate
-  reset rebuild help
+# Runtime-extract the subcommand list from switch.sh's top-level case.
+# When a new subcommand lands in the dispatcher, it auto-joins the
+# ratchet on the next run — no manual edit of this file required.
+#
+# The extraction pattern matches lines like:
+#   `  list)` or `  ambient)` at 2-space indent inside the case block.
+# It skips the `""` empty default and the `*)` wildcard fallthrough.
+mapfile -t SUBCOMMANDS < <(
+  awk '
+    /^case "\$\{1:-\}" in/ { in_case=1; next }
+    /^esac[[:space:]]*$/ && in_case { in_case=0 }
+    # Accept `  label)` and `  label |` (alternation with space padding).
+    in_case && /^  [a-z][a-zA-Z0-9_-]*[[:space:]]*[|)]/ {
+      match($0, /^  ([a-zA-Z0-9_-]+)[[:space:]]*[|)]/, m)
+      label = m[1]
+      # Skip meta labels handled by the shell dispatch loop.
+      if (label != "" && label != "*") print label
+    }
+  ' "$SWITCH_SH" | sort -u
 )
 
 _check_present() {
