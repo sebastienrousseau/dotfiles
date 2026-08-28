@@ -926,34 +926,29 @@ case "${1:-}" in
     # Comprehensive dashboard: recorded theme, live gsettings/kwriteconfig
     # state, wallpaper file existence, detected DE. Great for diagnosing
     # "why doesn't my theme match my terminal?" moments.
-    ui_header "dot theme status"
+    # `--json` emits machine-readable output for scripting / monitoring.
+    shift
+    _status_json=false
+    [[ "${1:-}" == "--json" ]] && _status_json=true
     current="$(current_theme)"
     current_family="${current%-dark}"
     [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
-    ui_info "Recorded" "$current"
-    ui_info "Family" "$current_family"
 
-    # Live wallpaper (GNOME family)
+    live_dark=""; live_light=""; live_accent=""; live_scheme=""; live_cursor=""
+    kde_scheme=""; kde_accent=""
     if command -v gsettings >/dev/null 2>&1; then
-      live_dark="$(gsettings get org.gnome.desktop.background picture-uri-dark 2>/dev/null | tr -d "'" | sed 's|.*/||')"
-      live_light="$(gsettings get org.gnome.desktop.background picture-uri 2>/dev/null | tr -d "'" | sed 's|.*/||')"
+      live_dark="$(gsettings get org.gnome.desktop.background picture-uri-dark 2>/dev/null | tr -d "'")"
+      live_light="$(gsettings get org.gnome.desktop.background picture-uri 2>/dev/null | tr -d "'")"
       live_accent="$(gsettings get org.gnome.desktop.interface accent-color 2>/dev/null | tr -d "'")"
       live_scheme="$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")"
       live_cursor="$(gsettings get org.gnome.desktop.interface cursor-theme 2>/dev/null | tr -d "'")"
-      ui_info "Color scheme" "$live_scheme"
-      ui_info "Accent" "$live_accent"
-      ui_info "Cursor" "$live_cursor"
-      ui_info "Wallpaper (light)" "$live_light"
-      ui_info "Wallpaper (dark)" "$live_dark"
     fi
-    # KDE side (harmless on non-KDE — kreadconfig6 will just fail)
     if command -v kreadconfig6 >/dev/null 2>&1; then
       kde_scheme="$(kreadconfig6 --file kdeglobals --group General --key ColorScheme 2>/dev/null)"
       kde_accent="$(kreadconfig6 --file kdeglobals --group General --key AccentColor 2>/dev/null)"
-      [[ -n "$kde_scheme" ]] && ui_info "KDE scheme" "$kde_scheme"
-      [[ -n "$kde_accent" ]] && ui_info "KDE accent" "$kde_accent"
     fi
-    # Detected DE (matches dot-theme-sync's _detect_linux_de logic).
+    # DE detection (inlined to match _detect_linux_de).
+    de=""
     if [[ "$(uname -s)" == "Linux" ]]; then
       raw="${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}"
       raw="$(printf '%s' "$raw" | tr '[:upper:]' '[:lower:]')"
@@ -971,8 +966,42 @@ case "${1:-}" in
         *gnome*) de=gnome ;;
         *) de=unknown ;;
       esac
-      ui_info "Detected DE" "$de"
     fi
+
+    if [[ "$_status_json" == true ]]; then
+      # Minimal jq-free JSON emission. Values are strings (no interior
+      # double-quotes expected from any of these gsettings/kreadconfig
+      # fields), so we can quote them directly.
+      printf '{\n'
+      printf '  "recorded": "%s",\n' "$current"
+      printf '  "family": "%s",\n' "$current_family"
+      printf '  "detected_de": "%s",\n' "$de"
+      printf '  "gnome": {\n'
+      printf '    "color_scheme": "%s",\n' "$live_scheme"
+      printf '    "accent": "%s",\n' "$live_accent"
+      printf '    "cursor": "%s",\n' "$live_cursor"
+      printf '    "wallpaper_light": "%s",\n' "$live_light"
+      printf '    "wallpaper_dark": "%s"\n' "$live_dark"
+      printf '  },\n'
+      printf '  "kde": {\n'
+      printf '    "color_scheme": "%s",\n' "$kde_scheme"
+      printf '    "accent": "%s"\n' "$kde_accent"
+      printf '  }\n'
+      printf '}\n'
+      exit 0
+    fi
+
+    ui_header "dot theme status"
+    ui_info "Recorded" "$current"
+    ui_info "Family" "$current_family"
+    [[ -n "$live_scheme" ]] && ui_info "Color scheme" "$live_scheme"
+    [[ -n "$live_accent" ]] && ui_info "Accent" "$live_accent"
+    [[ -n "$live_cursor" ]] && ui_info "Cursor" "$live_cursor"
+    [[ -n "$live_light" ]] && ui_info "Wallpaper (light)" "$(echo "$live_light" | sed 's|.*/||')"
+    [[ -n "$live_dark" ]] && ui_info "Wallpaper (dark)" "$(echo "$live_dark" | sed 's|.*/||')"
+    [[ -n "$kde_scheme" ]] && ui_info "KDE scheme" "$kde_scheme"
+    [[ -n "$kde_accent" ]] && ui_info "KDE accent" "$kde_accent"
+    [[ -n "$de" ]] && ui_info "Detected DE" "$de"
     ;;
   rebuild)
     shift
