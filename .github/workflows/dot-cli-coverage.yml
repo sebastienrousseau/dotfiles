@@ -80,6 +80,14 @@ jobs:
           # (or vice versa: a route with no handler on the other side).
           bash tests/unit/commands/test_cli_route_integrity.sh
 
+      - name: Ratchet — help topic parity with routes
+        run: |
+          # Every routed command must have a _dot_help_specs() entry so
+          # `dot help <cmd>` returns a useful description instead of
+          # "Unknown help topic". As of 2026-08-28 parity is 100/100
+          # and the gate is strict.
+          bash tests/unit/commands/test_cli_help_coverage.sh
+
       - name: Upload coverage.json
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
