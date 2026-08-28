@@ -60,6 +60,15 @@ jobs:
           # reference fails the run.
           MIN_COVERAGE=100 bash tests/performance/coverage_dot_cli.sh > /dev/null
 
+      - name: Ratchet — docs-sync across all 4 loci
+        run: |
+          # Every command in the ratchet (auto-extracted at runtime)
+          # must appear in bash + zsh + fish completions AND the dot(1)
+          # man page. Partial-coverage commands are surfaced as a
+          # visible "punch list" but do not fail the run — only
+          # regressions in already-locked-in commands do.
+          bash tests/unit/commands/test_cli_docs_sync.sh
+
       - name: Upload coverage.json
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
