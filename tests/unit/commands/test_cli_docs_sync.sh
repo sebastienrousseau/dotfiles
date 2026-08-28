@@ -37,12 +37,24 @@ HELP_DIR="$REPO_ROOT/scripts/dot/commands"
 # gets synchronised documentation. Removing entries is a regression.
 COMMANDS=(
   apply
+  attest
+  bundle
+  cd
   diff
   doctor
   edit
+  env
+  health
+  mcp
+  profile
+  remove
+  secrets
+  snapshot
   status
   sync
   theme
+  update
+  wallpaper
 )
 
 _ok()   { ((TESTS_PASSED++)) || true; printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"; }
