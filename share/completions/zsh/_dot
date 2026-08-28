@@ -260,6 +260,7 @@ _dot() {
             'status:Dashboard: recorded vs applied theme state'
             'diff:Side-by-side comparison of two themes'
             'accent:Tweak accent live without wallpaper/theme change'
+            'wallpaper:Set an arbitrary wallpaper without theme swap'
             'sync:Sync dotfiles with system dark/light mode'
             'ambient:Time-based mode switch (run|enable|disable|status)'
             'reset:Restore GNOME defaults'

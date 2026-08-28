@@ -722,6 +722,71 @@ case "${1:-}" in
       }
     ' "$THEMES_FILE"
     ;;
+  wallpaper)
+    shift
+    wp="${1:-}"
+    if [[ -z "$wp" ]]; then
+      command -v gsettings >/dev/null 2>&1 && {
+        ui_info "Current" "wallpaper (light)"
+        ui_info "  " "$(gsettings get org.gnome.desktop.background picture-uri 2>/dev/null | tr -d "'")"
+        ui_info "Current" "wallpaper (dark)"
+        ui_info "  " "$(gsettings get org.gnome.desktop.background picture-uri-dark 2>/dev/null | tr -d "'")"
+      }
+      exit 0
+    fi
+    # Resolve to absolute path.
+    if [[ "$wp" != /* ]]; then
+      wp="$(realpath -- "$wp" 2>/dev/null || readlink -f -- "$wp")"
+    fi
+    if [[ ! -f "$wp" ]]; then
+      ui_err "Wallpaper" "file not found: $wp"; exit 1
+    fi
+    # Detect DE (inlined mini-detector matching dot-theme-sync).
+    raw="$(printf '%s' "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}" | tr '[:upper:]' '[:lower:]')"
+    case "$raw" in
+      *kde*|*plasma*) de=kde ;;
+      *xfce*) de=xfce ;;
+      *) de=gnome ;;
+    esac
+    changed=0
+    case "$de" in
+      kde)
+        if command -v plasma-apply-wallpaperimage >/dev/null 2>&1; then
+          plasma-apply-wallpaperimage "$wp" >/dev/null 2>&1 && changed=1
+        elif command -v qdbus >/dev/null 2>&1; then
+          qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "
+            var Desktops = desktops();
+            for (i=0; i<Desktops.length; i++) {
+              d = Desktops[i];
+              d.wallpaperPlugin = 'org.kde.image';
+              d.currentConfigGroup = ['Wallpaper', 'org.kde.image', 'General'];
+              d.writeConfig('Image', '$wp');
+            }" >/dev/null 2>&1 && changed=1
+        fi
+        ;;
+      xfce)
+        if command -v xfconf-query >/dev/null 2>&1; then
+          while IFS= read -r prop; do
+            [[ -z "$prop" ]] && continue
+            xfconf-query -c xfce4-desktop -p "$prop" -s "$wp" 2>/dev/null && changed=1
+          done < <(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep -E '/last-image$' || true)
+        fi
+        ;;
+      *)
+        if command -v gsettings >/dev/null 2>&1; then
+          gsettings set org.gnome.desktop.background picture-uri "file://$wp" 2>/dev/null && changed=1
+          gsettings set org.gnome.desktop.background picture-uri-dark "file://$wp" 2>/dev/null && changed=1
+          gsettings set org.gnome.desktop.screensaver picture-uri "file://$wp" 2>/dev/null || true
+        fi
+        ;;
+    esac
+    if [[ $changed -gt 0 ]]; then
+      ui_ok "Wallpaper" "$wp ($de)"
+    else
+      ui_err "Wallpaper" "no wallpaper mechanism found for $de"
+      exit 1
+    fi
+    ;;
   accent)
     # Live-tweak the desktop accent colour without changing the theme
     # or the wallpaper. Accepts either a GNOME accent enum name
@@ -916,6 +981,7 @@ case "${1:-}" in
     ui_ok "status" "Dashboard: recorded vs applied theme state"
     ui_ok "diff <a> <b>" "Side-by-side comparison of two themes"
     ui_ok "accent [color]" "Tweak accent live (no wallpaper/theme change)"
+    ui_ok "wallpaper [path]" "Set an arbitrary wallpaper without theme swap"
     ui_ok "sync" "Sync dotfiles with system dark/light mode"
     ui_ok "ambient" "Time-based mode switch (run|enable|disable|status)"
     ui_ok "rebuild" "Regenerate themes from system + custom wallpapers"
