@@ -1,0 +1,75 @@
+name: dot theme Bench
+
+# Runs the dot theme micro-benchmarks on every push touching theme
+# code (or the bench itself). Each hot-path assertion has a threshold
+# baked into tests/performance/bench_dot_theme.sh; overshoots turn the
+# job red.
+#
+# This is a hard perf ratchet: if someone lands a change that regresses
+# 'dot theme set' idempotent from ~40ms to ~200ms, CI catches it.
+#
+# The benchmark tolerates absent `hyperfine` and absent `dot` by
+# exiting 0 with a SKIP marker, so this workflow is safe to enable on
+# runners that don't have the full dotfiles installed yet.
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'feat/**'
+    paths:
+      - 'bin/dot-theme-sync'
+      - 'scripts/theme/**'
+      - 'tests/performance/bench_dot_theme.sh'
+      - '.github/workflows/dot-theme-bench.yml'
+  pull_request:
+    paths:
+      - 'bin/dot-theme-sync'
+      - 'scripts/theme/**'
+      - 'tests/performance/bench_dot_theme.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bench:
+    name: dot theme benchmarks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install hyperfine + jq + shellcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y hyperfine jq shellcheck
+
+      - name: Symlink dotfiles source at ~/.dotfiles so `dot` resolves
+        run: |
+          ln -sf "$GITHUB_WORKSPACE" "$HOME/.dotfiles"
+
+      - name: Put the dot dispatcher on PATH
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          ln -sf "$GITHUB_WORKSPACE/bin/dot" "$HOME/.local/bin/dot"
+          ln -sf "$GITHUB_WORKSPACE/bin/dot-theme-sync" "$HOME/.local/bin/dot-theme-sync"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Bench
+        run: |
+          # `set +e` — the bench self-reports pass/fail via exit code.
+          # We want the pretty per-line output first, then decide on
+          # the run outcome.
+          bash tests/performance/bench_dot_theme.sh
+        # Fails the job on any bench that overshoots its threshold.
