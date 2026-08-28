@@ -75,19 +75,24 @@ mapfile -t commands < <(
 # ---------------------------------------------------------------------------
 # 2. Search test corpus.
 # ---------------------------------------------------------------------------
-_referenced() {
+_reference_count() {
   local sym="$1"
   # Anchor so `set` doesn't match `reset`, `sync` doesn't match `syncthing`.
-  grep -rqE "\\b${sym}\\b" "$TESTS_ROOT"/{unit,regression,integration} 2>/dev/null
+  grep -rlE "\\b${sym}\\b" "$TESTS_ROOT"/{unit,regression,integration} 2>/dev/null | wc -l
 }
 
+declare -A depth=()
 hits=()
 misses=()
+shallow=()  # commands with only 1 test file mention — candidates for deeper coverage
 for cmd in "${commands[@]}"; do
-  if _referenced "$cmd"; then
-    hits+=("$cmd")
-  else
+  count=$(_reference_count "$cmd")
+  depth[$cmd]=$count
+  if (( count == 0 )); then
     misses+=("$cmd")
+  else
+    hits+=("$cmd")
+    (( count == 1 )) && shallow+=("$cmd")
   fi
 done
 
@@ -120,6 +125,12 @@ else
     printf '\n  Untested commands:\n'
     for m in "${misses[@]}"; do
       printf '    \e[33m-\e[0m %s\n' "$m"
+    done
+  fi
+  if (( ${#shallow[@]} > 0 )); then
+    printf '\n  Shallowly-tested commands (1 test file mention only):\n'
+    for s in "${shallow[@]}"; do
+      printf '    \e[36m~\e[0m %s\n' "$s"
     done
   fi
   printf '\n  Threshold: %d%%\n' "$MIN_COVERAGE"
