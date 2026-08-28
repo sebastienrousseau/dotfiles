@@ -185,12 +185,69 @@ set_theme() {
   dot-theme-sync "$new_theme" "$@"
 }
 
-# Interactive theme picker
+# Interactive theme picker — prefers fzf, falls back to a numbered menu
+# when fzf isn't installed (useful in restricted environments / CI).
 pick_theme() {
   if ! command -v fzf &>/dev/null; then
-    ui_err "fzf" "required for interactive picker"
-    ui_info "Usage" "dot theme set <name>"
-    exit 1
+    ui_info "Picker" "fzf not found — using numbered menu (install fzf for the rich picker)"
+    local current
+    current="$(current_theme)"
+    local current_family="${current%-dark}"
+    [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
+    local current_mode="dark"
+    is_dark_theme "$current" 2>/dev/null || current_mode="light"
+
+    local -a families=()
+    while IFS= read -r fam; do
+      [[ -n "$fam" ]] && families+=("$fam")
+    done < <(paired_families)
+    if [[ ${#families[@]} -eq 0 ]]; then
+      ui_err "No themes" "run 'dot theme rebuild' first"
+      exit 1
+    fi
+    ui_info "Current" "$current_family ($current_mode)"
+    echo ""
+    # Show a page of 20 at a time; the user picks by number or types
+    # part of a name to filter.
+    local page=0 page_size=20
+    while :; do
+      local start=$((page * page_size))
+      local end=$((start + page_size))
+      (( end > ${#families[@]} )) && end=${#families[@]}
+      for (( i=start; i<end; i++ )); do
+        printf '  %3d  %s\n' "$((i+1))" "${families[$i]}"
+      done
+      echo ""
+      read -r -p "  # (n=next / p=prev / q=quit / /str = filter) > " ans
+      case "$ans" in
+        n) (( end < ${#families[@]} )) && page=$((page + 1)); continue ;;
+        p) (( page > 0 )) && page=$((page - 1)); continue ;;
+        q|"") return 0 ;;
+        /*)
+          local pat="${ans#/}"
+          local -a filtered=()
+          for f in "${families[@]}"; do
+            [[ "$f" == *"$pat"* ]] && filtered+=("$f")
+          done
+          if [[ ${#filtered[@]} -eq 0 ]]; then
+            ui_info "Filter" "no match — resetting"
+          else
+            families=("${filtered[@]}")
+            page=0
+          fi
+          continue
+          ;;
+        *[!0-9]*) ui_err "Invalid" "not a number"; continue ;;
+        *)
+          local idx=$((ans - 1))
+          if (( idx < 0 || idx >= ${#families[@]} )); then
+            ui_err "Invalid" "out of range"; continue
+          fi
+          set_theme "${families[$idx]}-${current_mode}"
+          return 0
+          ;;
+      esac
+    done
   fi
 
   local current
