@@ -1349,6 +1349,7 @@ usage() {
 main() {
   local do_full=false
   local do_force=false
+  local do_dry_run=false
   local new_theme=""
 
   # Parse arguments — accept a flag before OR after the theme name.
@@ -1364,6 +1365,10 @@ main() {
         ;;
       --force | -f)
         do_force=true
+        shift
+        ;;
+      --dry-run | -n)
+        do_dry_run=true
         shift
         ;;
       "")
@@ -1397,6 +1402,24 @@ main() {
         && "$do_full" == false && "$do_force" == false ]]; then
     _info "Theme" "$new_theme"
     _ok "Idempotent" "already active — pass --force to re-apply"
+    exit 0
+  fi
+
+  # Dry-run: print what would change and exit before mutating anything.
+  if [[ "$do_dry_run" == true ]]; then
+    local target="${new_theme:-$prev_theme}"
+    _info "Theme" "$target"
+    _info "Dry-run" "no writes will be performed"
+    if [[ -n "$new_theme" ]]; then
+      _info "Would" "write theme=\"$new_theme\" to $DATA_FILE"
+      if [[ -f "$CHEZMOI_CFG" ]] && grep -q '^theme = ' "$CHEZMOI_CFG" 2>/dev/null; then
+        _info "Would" "sync theme to $CHEZMOI_CFG"
+      fi
+    fi
+    _info "Would" "run chezmoi apply on 12 targeted templates"
+    _info "Would" "reload: ghostty tmux niri desktop dms wallpaper browsers nvim"
+    _info "Would" "detected DE: $(bash -c 'raw="${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}"; raw="${raw,,}"; case "$raw" in *budgie*) echo budgie;; *cinnamon*) echo cinnamon;; *kde*|*plasma*) echo kde;; *xfce*) echo xfce;; *gnome*) echo gnome;; *) echo unknown;; esac' 2>/dev/null)"
+    _ok "Dry-run" "complete — no changes made"
     exit 0
   fi
 
