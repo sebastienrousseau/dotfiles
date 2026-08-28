@@ -149,4 +149,42 @@ else
   _fail "routed commands with no help topic: ${missing[*]}"
 fi
 
+# ---------------------------------------------------------------------------
+# Functional gate. Actually run `dot help <cmd>` for every routed
+# command and verify the process exits 0 AND emits non-trivial
+# output that does NOT contain "Unknown help topic". Catches the
+# real bug that inspired this whole ratchet: the entry looks
+# present in one table but the runtime consults a different one.
+# ---------------------------------------------------------------------------
+test_start "dot_help_cmd_runs_for_every_routed_command"
+broken=()
+for cmd in "${ROUTES[@]}"; do
+  # bin/dot help <cmd> should exit 0 with meaningful output.
+  # Some routes are meta (help itself, version) — skip those.
+  case "$cmd" in
+    help|version|--version|-v|--help|-h) continue ;;
+  esac
+  out="$("$REPO_ROOT/bin/dot" help "$cmd" 2>&1)"
+  rc=$?
+  if (( rc != 0 )); then
+    broken+=("${cmd}:exit=${rc}")
+    continue
+  fi
+  # Strip ANSI escapes for the "Unknown" check.
+  clean="${out//$'\x1b'[??]*[mK]/}"
+  if [[ "$clean" == *"Unknown help topic"* ]]; then
+    broken+=("${cmd}:unknown-topic")
+    continue
+  fi
+  # Non-trivial output — must have at least 100 bytes after stripping.
+  if (( ${#out} < 100 )); then
+    broken+=("${cmd}:tiny-output(${#out}b)")
+  fi
+done
+if [[ ${#broken[@]} -eq 0 ]]; then
+  _ok "$(( ${#ROUTES[@]} - 6 )) commands answered dot help correctly"
+else
+  _fail "broken help topics: ${broken[*]}"
+fi
+
 _cmd_finish
