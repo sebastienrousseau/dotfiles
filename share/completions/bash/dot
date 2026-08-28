@@ -29,7 +29,7 @@ _dot_completions() {
 
   # `dot theme ...`
   if [[ "${COMP_WORDS[1]}" == "theme" ]]; then
-    local subs="list set toggle mode family random preview undo history current status diff accent wallpaper fit sync ambient reset rebuild help"
+    local subs="list set toggle mode family random preview undo history current status diff accent wallpaper fit export import sync ambient rotate reset rebuild help"
     if [[ ${COMP_CWORD} -eq 2 ]]; then
       # subcommand OR theme name (quick-switch)
       COMPREPLY=( $(compgen -W "$subs $(_dot_theme_names)" -- "$cur") )
@@ -52,7 +52,15 @@ _dot_completions() {
         return
         ;;
       mode)
-        COMPREPLY=( $(compgen -W "dark light" -- "$cur") )
+        COMPREPLY=( $(compgen -W "dark light auto" -- "$cur") )
+        return
+        ;;
+      rotate)
+        COMPREPLY=( $(compgen -W "enable disable status" -- "$cur") )
+        return
+        ;;
+      export | import)
+        _filedir 'json' 2>/dev/null || COMPREPLY=( $(compgen -f -- "$cur") )
         return
         ;;
       accent)

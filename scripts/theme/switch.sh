@@ -507,20 +507,49 @@ sync_theme() {
 }
 
 # Ambient auto-switch: pick light|dark based on time of day.
-# Default sunrise/sunset: 07:00 / 19:00 (configurable via env or state file).
+# Sunrise/sunset resolution ladder:
+#   1. DOT_THEME_SUNRISE / DOT_THEME_SUNSET env vars
+#   2. sunwait if installed AND DOT_THEME_LOCATION="lat,lon" is set
+#      (e.g. DOT_THEME_LOCATION="51.5N,0.13W")
+#   3. State file at ~/.local/state/dot/theme-ambient.conf
+#   4. Fixed defaults: 07:00 / 19:00
 # Applies to the current wallpaper family — never changes wallpaper choice.
 ambient_theme() {
   local sunrise sunset now hour minute now_min sunrise_min sunset_min desired
   local state_file="${XDG_STATE_HOME:-$HOME/.local/state}/dot/theme-ambient.conf"
-  # Priority: env vars > state file > defaults.
+  local resolved_source="defaults"
+
+  # Priority 1: env vars
   sunrise="${DOT_THEME_SUNRISE:-}"
   sunset="${DOT_THEME_SUNSET:-}"
-  if [[ -z "$sunrise" || -z "$sunset" ]] && [[ -f "$state_file" ]]; then
+  [[ -n "$sunrise$sunset" ]] && resolved_source="env"
+
+  # Priority 2: sunwait + location
+  if [[ (-z "$sunrise" || -z "$sunset") && -n "${DOT_THEME_LOCATION:-}" ]] && command -v sunwait >/dev/null 2>&1; then
+    IFS=',' read -r lat lon <<<"$DOT_THEME_LOCATION"
+    if [[ -n "$lat" && -n "$lon" ]]; then
+      # sunwait "list rise/set civil <lat> <lon>" prints HH:MM
+      local computed_rise computed_set
+      computed_rise="$(sunwait list rise "$lat" "$lon" 2>/dev/null | head -1)"
+      computed_set="$(sunwait list set "$lat" "$lon" 2>/dev/null | head -1)"
+      if [[ "$computed_rise" =~ ^[0-9]{2}:[0-9]{2}$ && "$computed_set" =~ ^[0-9]{2}:[0-9]{2}$ ]]; then
+        sunrise="${sunrise:-$computed_rise}"
+        sunset="${sunset:-$computed_set}"
+        resolved_source="sunwait($DOT_THEME_LOCATION)"
+      fi
+    fi
+  fi
+
+  # Priority 3: state file
+  if [[ (-z "$sunrise" || -z "$sunset") && -f "$state_file" ]]; then
     # shellcheck disable=SC1090
     source "$state_file"
     sunrise="${sunrise:-$DOT_THEME_SUNRISE}"
     sunset="${sunset:-$DOT_THEME_SUNSET}"
+    [[ -n "$sunrise$sunset" ]] && resolved_source="state-file"
   fi
+
+  # Priority 4: defaults
   sunrise="${sunrise:-07:00}"
   sunset="${sunset:-19:00}"
 
@@ -546,10 +575,10 @@ ambient_theme() {
   target="${family}-${desired}"
 
   if [[ "$current" == "$target" ]]; then
-    ui_ok "Ambient" "$current — already matches (sunrise=$sunrise sunset=$sunset now=$now)"
+    ui_ok "Ambient" "$current — already matches (${resolved_source} sunrise=$sunrise sunset=$sunset now=$now)"
     return 0
   fi
-  ui_info "Ambient" "$current -> $target (sunrise=$sunrise sunset=$sunset now=$now)"
+  ui_info "Ambient" "$current -> $target (${resolved_source} sunrise=$sunrise sunset=$sunset now=$now)"
   set_theme "$target"
 }
 
@@ -617,7 +646,13 @@ case "${1:-}" in
     want="${1:-}"
     case "$want" in
       dark|light) : ;;
-      *) ui_err "Usage" "dot theme mode <dark|light>"; exit 1 ;;
+      auto)
+        # Alias for `dot theme sync` — more discoverable next to
+        # `mode dark` / `mode light`.
+        sync_theme
+        exit 0
+        ;;
+      *) ui_err "Usage" "dot theme mode <dark|light|auto>"; exit 1 ;;
     esac
     current="$(current_theme)"
     family="${current%-dark}"
@@ -628,6 +663,67 @@ case "${1:-}" in
     else
       set_theme "$target"
     fi
+    ;;
+  rotate)
+    # Periodic wallpaper rotator built on the same timer pattern as
+    # `dot theme ambient`. Applies `dot theme random --mode <current>`
+    # on the requested interval so the wallpaper family cycles while
+    # the ambient timer independently drives light/dark.
+    shift
+    case "${1:-}" in
+      enable|"")
+        interval="${2:-30m}"
+        # Accept 5m / 1h / 30s / 3600 (raw seconds also fine — systemd
+        # OnUnitActiveSec is quite forgiving).
+        unit_dir="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
+        mkdir -p "$unit_dir"
+        dot_path="$(command -v dot 2>/dev/null || echo "$HOME/.local/bin/dot")"
+        cat > "$unit_dir/dot-theme-rotate.service" <<EOF
+[Unit]
+Description=Rotate wallpaper family (dot theme random)
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=${dot_path} theme random
+EOF
+        cat > "$unit_dir/dot-theme-rotate.timer" <<EOF
+[Unit]
+Description=Rotate wallpaper family on interval
+
+[Timer]
+OnStartupSec=1m
+OnUnitActiveSec=${interval}
+AccuracySec=30s
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+        systemctl --user daemon-reload
+        systemctl --user enable --now dot-theme-rotate.timer
+        ui_ok "Rotate" "timer enabled — will fire every $interval"
+        ;;
+      disable)
+        systemctl --user disable --now dot-theme-rotate.timer 2>/dev/null || true
+        unit_dir="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
+        rm -f "$unit_dir/dot-theme-rotate.service" "$unit_dir/dot-theme-rotate.timer"
+        systemctl --user daemon-reload
+        ui_ok "Rotate" "timer disabled and removed"
+        ;;
+      status)
+        if systemctl --user is-active dot-theme-rotate.timer >/dev/null 2>&1; then
+          ui_ok "Timer" "active"
+          systemctl --user list-timers dot-theme-rotate.timer --no-pager 2>&1 | grep -v '^$' | tail -3
+        else
+          ui_info "Timer" "inactive — run 'dot theme rotate enable [interval]'"
+        fi
+        ;;
+      *)
+        ui_err "Usage" "dot theme rotate [enable [interval]|disable|status]"
+        exit 1
+        ;;
+    esac
     ;;
   sync)
     sync_theme
@@ -778,6 +874,61 @@ case "${1:-}" in
         row_sw("term.fg",   get(A,"term","fg"),        get(B,"term","fg"))
       }
     ' "$THEMES_FILE"
+    ;;
+  export)
+    # Snapshot the current theme + DE state to a portable JSON file.
+    # `dot theme import` on any machine restores the same theme name
+    # (wallpaper/accent/cursor are derived from the theme + machine
+    # env, so we only ship what makes the snapshot reproducible).
+    shift
+    out="${1:-}"
+    payload_theme="$(current_theme)"
+    payload_hostname="$(hostname 2>/dev/null || echo unknown)"
+    payload_date="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    payload_fit=""
+    if command -v gsettings >/dev/null 2>&1; then
+      payload_fit="$(gsettings get org.gnome.desktop.background picture-options 2>/dev/null | tr -d "'")"
+    fi
+    payload="$(printf '{
+  "version": 1,
+  "theme": "%s",
+  "fit": "%s",
+  "exported_from": "%s",
+  "exported_at": "%s"
+}\n' "$payload_theme" "$payload_fit" "$payload_hostname" "$payload_date")"
+    if [[ -z "$out" || "$out" == "-" ]]; then
+      printf '%s\n' "$payload"
+    else
+      printf '%s\n' "$payload" > "$out"
+      ui_ok "Export" "$out"
+    fi
+    ;;
+  import)
+    shift
+    in_file="${1:-}"
+    if [[ -z "$in_file" || ! -f "$in_file" ]]; then
+      ui_err "Usage" "dot theme import <file.json>"
+      exit 1
+    fi
+    # Minimal JSON reader — extract "theme" and "fit" via awk. Avoids a
+    # hard jq dependency; JSON emitted by `dot theme export` is fixed
+    # shape, so brittle parsing is fine.
+    imp_theme="$(awk -F'"' '/"theme"/ {print $4; exit}' "$in_file")"
+    imp_fit="$(awk -F'"' '/"fit"/ {print $4; exit}' "$in_file")"
+    if [[ -z "$imp_theme" ]]; then
+      ui_err "Import" "no theme field in $in_file"
+      exit 1
+    fi
+    if ! grep -q "^\[themes\.${imp_theme}\]$" "$THEMES_FILE"; then
+      ui_err "Import" "theme '$imp_theme' not in themes.toml — run 'dot theme rebuild' first"
+      exit 1
+    fi
+    ui_info "Import" "$in_file"
+    set_theme "$imp_theme"
+    if [[ -n "$imp_fit" && "$imp_fit" != "" ]] && command -v gsettings >/dev/null 2>&1; then
+      gsettings set org.gnome.desktop.background picture-options "$imp_fit" 2>/dev/null && \
+        ui_ok "Fit" "$imp_fit"
+    fi
     ;;
   fit)
     shift
@@ -1078,7 +1229,8 @@ case "${1:-}" in
     ui_ok "list" "Show all available themes"
     ui_ok "set [NAME]" "Set theme (interactive if no name)"
     ui_ok "toggle" "Toggle between light/dark within current family"
-    ui_ok "mode <dark|light>" "Idempotently force a mode (no-op if already there)"
+    ui_ok "mode <dark|light|auto>" "Force a mode (auto = sync with system)"
+    ui_ok "rotate [enable [N]|disable|status]" "Wallpaper rotation timer"
     ui_ok "family" "Cycle to the next family"
     ui_ok "random" "Pick a random family, keep current mode"
     ui_ok "preview [NAME]" "Try a theme, ENTER to keep or Ctrl-C to revert"
@@ -1091,6 +1243,8 @@ case "${1:-}" in
     ui_ok "accent [color]" "Tweak accent live (no wallpaper/theme change)"
     ui_ok "wallpaper [path]" "Set an arbitrary wallpaper without theme swap"
     ui_ok "fit <mode>" "Wallpaper fit: zoom|spanned|centered|scaled|stretched"
+    ui_ok "export [file]" "Snapshot current theme+fit to JSON"
+    ui_ok "import <file>" "Restore theme+fit from a snapshot"
     ui_ok "sync" "Sync dotfiles with system dark/light mode"
     ui_ok "ambient" "Time-based mode switch (run|enable|disable|status)"
     ui_ok "rebuild" "Regenerate themes from system + custom wallpapers"

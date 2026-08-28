@@ -67,7 +67,7 @@ complete -c dot -n "__fish_use_subcommand" -a profile -d "Show or switch configu
 complete -c dot -n "__fish_use_subcommand" -a theme -d "Switch terminal + desktop theme"
 
 # `dot theme` subcommands and theme-name completions.
-set -l __dot_theme_subs list set toggle mode family random preview undo history current status diff accent wallpaper fit sync ambient reset rebuild help
+set -l __dot_theme_subs list set toggle mode family random preview undo history current status diff accent wallpaper fit export import sync ambient rotate reset rebuild help
 for sub in $__dot_theme_subs
     complete -c dot -n "__fish_seen_subcommand_from theme; and not __fish_seen_subcommand_from $__dot_theme_subs" -a $sub
 end
@@ -84,8 +84,12 @@ complete -c dot -n "__fish_seen_subcommand_from theme; and __fish_seen_subcomman
 
 # `dot theme ambient <sub>`
 complete -c dot -n "__fish_seen_subcommand_from theme; and __fish_seen_subcommand_from ambient" -a "run enable disable status"
-# `dot theme mode <dark|light>`
-complete -c dot -n "__fish_seen_subcommand_from theme; and __fish_seen_subcommand_from mode" -a "dark light"
+# `dot theme mode <dark|light|auto>`
+complete -c dot -n "__fish_seen_subcommand_from theme; and __fish_seen_subcommand_from mode" -a "dark light auto"
+# `dot theme rotate <enable|disable|status>`
+complete -c dot -n "__fish_seen_subcommand_from theme; and __fish_seen_subcommand_from rotate" -a "enable disable status"
+# `dot theme export|import <file>`
+complete -c dot -n "__fish_seen_subcommand_from theme; and __fish_seen_subcommand_from export import" -F
 # `dot theme accent <color>`
 complete -c dot -n "__fish_seen_subcommand_from theme; and __fish_seen_subcommand_from accent" -a "blue teal green yellow orange red pink purple slate"
 # `dot theme wallpaper <path>` - accept files
