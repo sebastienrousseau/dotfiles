@@ -197,14 +197,33 @@ EOF
 _dot_help_specs() {
   cat <<'EOF'
 Core|sync|Apply dotfiles (alias for apply; --pull to fetch, --check to preview)|Use after clone or after changes.
+Core|apply|Apply dotfiles via chezmoi (canonical form of sync)|The underlying operation `sync` wraps.
+Core|update|Pull latest changes and apply them|Combines git pull + dot apply.
 Core|add|Add a file to chezmoi source|Start managing a file in the source tree.
+Core|remove|Safely remove a managed file (chezmoi remove --keep-source)|Un-manage without deleting the target.
 Core|diff|Show chezmoi diff with exclusions|Preview pending changes before apply.
 Core|status|Show configuration drift (chezmoi status)|Inspect the current managed state.
 Core|edit|Open chezmoi source in $EDITOR|Jump into the source tree quickly.
 Core|cd|Print source directory path (use: cd $(dot cd))|Useful in shell scripts and jump helpers.
 Core|commit|AI-powered conventional commit|Wraps the commit helper flow.
+Core|clean-cache|Clear shell initialization caches|Use when startup gets slow or a cached value is stale.
 Diagnostics|doctor|Deep audit: tools, paths, portability, AI analysis (--ai|-A)|Main health and repair entrypoint.
+Diagnostics|heal|Auto-repair tools, chezmoi drift, symlinks, and missing files|Non-interactive companion to doctor.
+Diagnostics|health|Run health dashboard (--verbose|-v, --json|-j, --fix|-f)|Detailed live health readout.
+Diagnostics|health-check|Alias of health|Same as health.
+Diagnostics|smoke-test|Exercise critical toolchains and integrations|Fast go/no-go check.
+Diagnostics|benchmark|Run shell startup performance benchmarks|Measure DOTFILES_FAST vs full startup.
+Diagnostics|verify|Post-merge verification (doctor + status + chezmoi diff)|Run after upgrade or merge.
+Diagnostics|scorecard|Unified health / security / performance scorecard|Full drill-in of the score.
+Diagnostics|security-score|Analyse workstation security posture|Standalone security readout.
+Diagnostics|intelligence|Show Dotfiles Intelligence Surface|Patterns / agents / policies inventory.
+Diagnostics|conflicts|Report alias / command / binary conflicts across shells|Detect naming collisions.
+Diagnostics|locks|Show version locks for key tools|Inspect mise/asdf pins.
+Diagnostics|drift|Detailed drift dashboard (chezmoi status plus extras)|Wider than status.
+Diagnostics|restore|Restore from a backup or git ref|Inverse of backup.
 Diagnostics|attest|Export workstation attestation evidence (--json|-j, --write|-w, --fleet-store|-F)|Produce machine-readable evidence.
+Diagnostics|attestation|Full attestation flow (alias of attest)|Same as attest.
+Diagnostics|load-bench-pty|Measure background prewarm via a PTY|PTY-mode variant of load-bench.
 Diagnostics|score|System health and security scorecard|Quick high-level readout.
 Diagnostics|snapshot|Capture baseline system snapshot|Use before larger changes.
 Diagnostics|chaos|Simulate config corruption to test self-healing|Advanced validation path.
@@ -228,6 +247,14 @@ AI|sgpt|Shell-GPT with context patterns|Context-aware Shell-GPT bridge.
 AI|ollama|Ollama with context patterns|Context-aware local-model bridge.
 AI|opencode|OpenCode with context patterns|Context-aware OpenCode bridge.
 AI|aider|Aider with context patterns|Context-aware Aider bridge.
+AI|claude|Claude Code CLI passthrough|Direct invocation of the claude CLI.
+AI|codex|Codex CLI passthrough|Direct invocation of the codex CLI.
+AI|goose|Goose AI assistant passthrough|Direct invocation of the goose CLI.
+AI|qwen|Qwen coder CLI passthrough|Direct invocation of the qwen CLI.
+AI|vibe|Mistral Vibe CLI passthrough|Direct invocation of the vibe CLI.
+AI|zai|Z.ai CLI passthrough|Direct invocation of the zai CLI.
+AI|autohand|Autohand AI orchestrator passthrough|Direct invocation of the autohand CLI.
+AI|patterns|Manage AI steering patterns (add / list / edit / delete)|Curate the pattern library.
 Tools|env|Tool versions (mise)|Managed runtime versions.
 Tools|profile|Show/switch configuration profile|Profile-specific behavior.
 Tools|keys|Keybindings (sign-check: verify git signing)|Keyboard and signing references.
@@ -237,6 +264,11 @@ Tools|sandbox|Launch a safe sandbox preview (Docker/Podman)|Disposable environme
 Tools|lint|Lint shell scripts (--fix|-f to auto-format, --check|-c for CI)|Shell quality gate.
 Tools|learn|Start the interactive tour of your new tools|Guided onboarding.
 Tools|docs|Show repo README|Open the main documentation.
+Tools|setup|Interactive setup (profile, features, secrets)|First-run configuration wizard.
+Tools|manual|Open or download the multi-format manual (PDF / EPUB / HTML)|Reference documentation.
+Tools|aliases|List / search / explain aliases and tiers|Alias catalog.
+Tools|alias-check|Static-check alias definitions for conflicts|Alias QA gate.
+Tools|log-rotate|Rotate the dotfiles log; enforces size cap and retention|Housekeeping helper.
 Appearance|theme|Switch terminal theme (dark/light)|Terminal appearance control.
 Appearance|wallpaper|Apply a wallpaper from your library [macOS,Linux]|Desktop customization helper.
 Appearance|fonts|Install Nerd Fonts (JetBrainsMono by default)|Font bootstrap helper.
@@ -260,6 +292,10 @@ Fleet|fleet events|Show recent fleet events from local event log|Fleet observabi
 Meta|upgrade|Update system toolchains, plugins, and dotfiles|Managed upgrade flow.
 Meta|packages|List installed packages and package managers|Inventory and package surfaces.
 Meta|cache-refresh|Regenerate shell caches for ultra-fast startup|Refresh generated shell state.
+Meta|prewarm|Pre-populate shell caches for ultra-fast startup|Slower alternative to cache-refresh.
+Meta|agents|Multi-harness agent context (AGENTS.md sync, Cursor/Codex stubs)|Cross-tool AGENTS.md orchestration.
+Meta|init|Bootstrap a foreign dotfiles repo through chezmoi + dot|Adopt an existing config into dot.
+Meta|registry|Browse reusable dotfile modules from the dot registry|Discover modules to include.
 Meta|search|Find commands by keyword|Find the right command quickly.
 Meta|version|Show version information.|Matches `dot --version`.
 Meta|help|Show this help message|Overview or focused command help.
