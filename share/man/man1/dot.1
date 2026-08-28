@@ -75,18 +75,54 @@ Exercise critical toolchains and integrations.
 .B benchmark
 Run shell startup performance benchmarks.
 .TP
+.B load\-bench
+Measure time to heavy-layer readiness.
+.TP
+.B load\-bench\-pty
+Measure background prewarm through a PTY.
+.TP
+.B load\-benchmark\-pty
+Long-form alias of \fBload\-bench\-pty\fR.
+.TP
 .B metrics
 Emit machine-readable diagnostic metrics (JSON / Prometheus).
 .TP
-.B load\-benchmark\-pty
-Measure background prewarm through a PTY (long-form alias of \fBload\-bench\-pty\fR).
+.B perf
+Show current performance mode and startup timings.
+.TP
+.B chaos
+Simulate config corruption to exercise self-healing paths.
+.TP
+.B drift
+Show detailed drift dashboard (chezmoi status + extras).
+.TP
+.B locks
+Show version locks for key tools (mise/asdf pins).
+.TP
+.B conflicts
+Report alias / command / binary conflicts across shells.
+.TP
+.B intelligence
+Show the Dotfiles Intelligence Surface (patterns, agents, policies).
 .TP
 .B score
 Compute overall system health score.
+.TP
+.B scorecard
+Unified health / security / performance scorecard with drill-in.
+.TP
+.B security\-score
+Analyze workstation security posture and print a score.
 .SS Recovery
 .TP
 .B rollback
 Manage backups and rollback to previous states.
+.TP
+.B restore
+Restore from a backup or git ref.
+.TP
+.B backup
+Create a compressed backup of home / dotfiles state.
 .TP
 .B bundle
 Produce a portable support or recovery archive.
@@ -104,6 +140,36 @@ Full attestation flow (alias of \fBattest\fR).
 .B secrets \fIsubcommand\fR
 Manage encrypted secrets (load, edit, provider).
 .TP
+.B secrets\-init
+Initialize the age key used to encrypt/decrypt secrets.
+.TP
+.B secrets\-create
+Create a new encrypted secrets file.
+.TP
+.B ssh\-key
+Encrypt an SSH private key with age.
+.TP
+.B ssh\-cert
+Manage short-lived SSH certificates.
+.TP
+.B encrypt\-check
+Check disk encryption status (LUKS / FileVault / BitLocker).
+.TP
+.B firewall
+Apply firewall hardening policy for the current OS.
+.TP
+.B telemetry
+Disable OS telemetry / diagnostic uploads.
+.TP
+.B dns\-doh
+Enable DNS-over-HTTPS at the resolver layer.
+.TP
+.B lock\-screen
+Enforce lock-screen idle timeout and grace settings.
+.TP
+.B usb\-safety
+Disable automount for removable media / USB devices.
+.TP
 .B mcp
 MCP policy validation and server management.
 .SS AI
@@ -113,6 +179,15 @@ AI CLI status dashboard and interactive launcher.
 .TP
 .B ai\-setup
 Bootstrap and authenticate AI CLIs.
+.TP
+.B ai\-query
+Context-aware RAG query over your dotfiles + AI context.
+.TP
+.B patterns
+Manage AI steering patterns (add / list / edit / delete).
+.TP
+.B commit
+AI-powered conventional-commit message generator.
 .TP
 .B cl, claude, codex, copilot, gemini, goose, kiro, sgpt, ollama, opencode, aider
 AI bridge commands with context pattern injection.
@@ -174,6 +249,24 @@ Verify alias definitions across shells.
 .TP
 .B aliases
 Show or manage the alias catalog.
+.TP
+.B packages
+List installed system + user packages with drift markers.
+.TP
+.B log\-rotate
+Rotate the dotfiles log; enforces size cap and retention.
+.TP
+.B manual
+Open or download the multi-format manual (PDF / EPUB / HTML).
+.TP
+.B new
+Create a new project from a template (python / go / node / packer / molecule).
+.TP
+.B sandbox
+Launch a safe sandbox preview of a proposed change.
+.TP
+.B tune
+Apply OS tuning (kernel params, swappiness, filesystem hints).
 .TP
 .B bootstrap
 Bootstrap a fresh machine (install.sh entrypoint).

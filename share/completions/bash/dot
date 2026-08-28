@@ -21,13 +21,19 @@ _dot_completions() {
   # Top-level subcommand list — kept in sync with dot(1) man page and
   # the zsh/fish completions by tests/unit/commands/test_cli_docs_sync.sh.
   if [[ ${COMP_CWORD} -eq 1 ]]; then
-    local top="add agent agents ai ai-setup alias-check apply attest \
-      attestation bootstrap bundle cache-refresh cd claude codex \
-      diff docs doctor edit env fleet fonts goose heal health \
-      health-check help history init keys lint load-benchmark-pty \
-      mcp metrics mode patterns profile prewarm qwen registry \
-      remove rollback score search secrets snapshot status sync \
-      theme theme-sync update upgrade version vibe wallpaper zai"
+    local top="add agent agents ai ai-query ai-setup aider alias-check \
+      aliases apply attest attestation autohand backup bootstrap \
+      bundle cache-refresh cd chaos cl claude codex commit conflicts \
+      copilot diff dns-doh docs doctor drift edit encrypt-check env \
+      firewall fleet fonts gemini goose heal health health-check help \
+      history init intelligence keys kiro learn lint load-bench \
+      load-bench-pty load-benchmark-pty locks lock-screen log-rotate \
+      manual mcp metrics mode new ollama opencode packages patterns \
+      perf prewarm profile qwen registry remove restore rollback \
+      sandbox score scorecard search secrets secrets-create \
+      secrets-init security-score setup sgpt smoke-test snapshot \
+      ssh-cert ssh-key status sync telemetry theme theme-sync tools \
+      tune update upgrade usb-safety version vibe wallpaper zai"
     COMPREPLY=( $(compgen -W "$top" -- "$cur") )
     return
   fi
