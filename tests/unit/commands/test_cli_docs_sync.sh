@@ -136,4 +136,44 @@ else
   _skip "cli_dot_1_man_page_parses_cleanly" "no groff/mandoc"
 fi
 
+# ---------------------------------------------------------------------------
+# Completion-file source cleanliness. Bash and fish both let us source
+# the file in a subshell and check exit status; zsh needs a real
+# completion context so we skip it (its file syntax is validated by
+# compinit itself when a user starts a shell).
+# ---------------------------------------------------------------------------
+test_start "cli_bash_completion_sources_cleanly"
+if bash -n "$BASH_COMP" 2>/dev/null; then
+  _ok
+else
+  _fail "bash -n reported syntax errors in $BASH_COMP"
+fi
+
+test_start "cli_fish_completion_template_sources_cleanly"
+if command -v fish >/dev/null 2>&1; then
+  # Render the .tmpl by stripping the one chezmoi variable it uses.
+  _rendered="$(mktemp --suffix=.fish)"
+  sed 's|{{ \.dotfiles_version }}|0.0.0|g' "$FISH_TMPL" > "$_rendered"
+  if fish -c "source $_rendered" 2>&1 | grep -qE '^error|^-'; then
+    _fail "fish source errors in $FISH_TMPL"
+  else
+    _ok
+  fi
+  rm -f "$_rendered"
+else
+  _skip "cli_fish_completion_template_sources_cleanly" "no fish"
+fi
+
+test_start "cli_zsh_completion_syntax_valid"
+if command -v zsh >/dev/null 2>&1; then
+  # zsh -n parses the file for syntax errors without running it.
+  if zsh -n "$ZSH_COMP" 2>/dev/null; then
+    _ok
+  else
+    _fail "zsh -n reported syntax errors in $ZSH_COMP"
+  fi
+else
+  _skip "cli_zsh_completion_syntax_valid" "no zsh"
+fi
+
 _cmd_finish
