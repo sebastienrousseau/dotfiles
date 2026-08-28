@@ -2,10 +2,13 @@
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Diagnostic ratchet for `dot help <cmd>` topic coverage.
 #
-# bin/dot has two authoritative tables:
+# bin/dot has three authoritative tables:
 #   * _dot_command_routes()  — every top-level `dot <cmd>` (denominator)
-#   * _dot_help_specs()      — every command with a `dot help <cmd>`
-#                              entry (numerator)
+#   * _dot_help_specs()      — every command shown in the compact
+#                              `dot help` overview
+#   * _dot_help_details()    — every command with a summary/examples
+#                              entry served by `dot help <cmd>`
+#                              (this is what really has to be full)
 #
 # The gap between them is "commands you can run but can't ask about."
 # This test reports the gap and enforces a growing budget: the ratchet
@@ -35,10 +38,17 @@ mapfile -t ROUTES < <(
 )
 
 mapfile -t HELP_TOPICS < <(
-  # Field 2 is the topic name. Some description columns contain
-  # literal `|` characters (option lists like `--ai|-A`), so we can't
-  # rely on NF==4 — but field 2 is always a valid identifier, so
-  # discriminate on its shape instead.
+  # _dot_help_details drives `dot help <cmd>` (via _dot_help_summary
+  # and _dot_help_examples). Field 1 is the topic. Extra `|` in the
+  # description or examples columns is fine; we only look at column 1.
+  awk '/^_dot_help_details\(\)/,/^\}/' "$BIN_DOT" \
+    | awk -F'|' '$1 ~ /^[a-z][a-z0-9-]*$/ { print $1 }' \
+    | sort -u
+)
+
+mapfile -t HELP_OVERVIEW_TOPICS < <(
+  # _dot_help_specs drives the compact `dot help` overview table.
+  # Field 2 is the topic name. Description column may contain `|`.
   awk '/^_dot_help_specs\(\)/,/^\}/' "$BIN_DOT" \
     | awk -F'|' 'NF>=2 && $2 ~ /^[a-z][a-z0-9-]*$/ { print $2 }' \
     | sort -u
@@ -77,11 +87,26 @@ echo ""
 # ---------------------------------------------------------------------------
 # Assertions.
 # ---------------------------------------------------------------------------
-test_start "help_specs_table_has_entries"
+test_start "help_details_table_has_entries"
 if (( ${#HELP_TOPICS[@]} > 40 )); then
-  _ok "found ${#HELP_TOPICS[@]} help topics"
+  _ok "found ${#HELP_TOPICS[@]} help detail entries"
 else
-  _fail "only ${#HELP_TOPICS[@]} help topics (expected > 40)"
+  _fail "only ${#HELP_TOPICS[@]} entries (expected > 40)"
+fi
+
+test_start "help_overview_and_details_agree"
+# Every command in the overview should also have a details entry
+# so `dot help <cmd>` works after finding it in the overview.
+declare -A DETAILS_SET=()
+for t in "${HELP_TOPICS[@]}"; do DETAILS_SET["$t"]=1; done
+overview_orphans=()
+for t in "${HELP_OVERVIEW_TOPICS[@]}"; do
+  [[ -z "${DETAILS_SET[$t]:-}" ]] && overview_orphans+=("$t")
+done
+if [[ ${#overview_orphans[@]} -eq 0 ]]; then
+  _ok
+else
+  _fail "in overview but not in details: ${overview_orphans[*]}"
 fi
 
 test_start "help_topics_are_all_routed_commands"
@@ -104,7 +129,7 @@ fi
 # As of 2026-08-28 the floor is 100 (all routed commands covered).
 # Override in CI env via HELP_COVERAGE_FLOOR to relax temporarily.
 # ---------------------------------------------------------------------------
-FLOOR="${HELP_COVERAGE_FLOOR:-100}"
+FLOOR="${HELP_COVERAGE_FLOOR:-${#ROUTES[@]}}"
 test_start "help_coverage_meets_growing_floor"
 if (( have >= FLOOR )); then
   _ok "have=$have >= floor=$FLOOR"

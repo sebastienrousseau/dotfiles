@@ -381,6 +381,30 @@ prewarm|Alias of cache-refresh — regenerate shell init caches.|dot prewarm\ndo
 docs|Open the repository README in your pager.|dot docs\ndot docs --section architecture
 keys|Inspect keybindings and verify git signing.|dot keys\ndot keys sign-check
 sandbox|Launch a safe sandbox preview (Docker or Podman).|dot sandbox\ndot sandbox --runtime podman
+apply|Apply the current dotfiles to this machine (canonical form of sync).|dot apply\ndot apply --check
+update|Pull latest changes from the source repo and apply.|dot update
+remove|Un-manage a file (chezmoi remove --keep-source).|dot remove ~/.gitconfig
+clean-cache|Clear all shell initialization caches.|dot clean-cache
+heal|Auto-repair tools, drift, symlinks, missing files.|dot heal
+health-check|Alias of health.|dot health-check\ndot health-check --json
+smoke-test|Exercise critical toolchains and integrations.|dot smoke-test
+benchmark|Run shell startup performance benchmarks.|dot benchmark\ndot benchmark --runs 5
+verify|Post-merge verification (dot doctor + dot status + chezmoi diff).|dot verify
+scorecard|Unified health / security / performance scorecard.|dot scorecard
+intelligence|Show the Dotfiles Intelligence Surface.|dot intelligence
+conflicts|Report alias / command / binary conflicts across shells.|dot conflicts
+locks|Show version locks for key tools (mise / asdf pins).|dot locks
+drift|Detailed drift dashboard (chezmoi status plus extras).|dot drift
+attestation|Full attestation flow (alias of attest).|dot attestation
+load-bench-pty|Measure background prewarm through a PTY.|dot load-bench-pty
+setup|Interactive first-run setup (profile, features, secrets).|dot setup
+manual|Open or download the multi-format manual (PDF / EPUB / HTML).|dot manual\ndot manual --format pdf
+alias-check|Static-check alias definitions for conflicts.|dot alias-check
+log-rotate|Rotate the dotfiles log; enforces size cap and retention.|dot log-rotate
+init|Bootstrap a foreign dotfiles repo through chezmoi + dot.|dot init
+registry|Browse reusable dotfile modules from the dot registry.|dot registry
+agents|Multi-harness agent context (AGENTS.md sync, Cursor/Codex stubs).|dot agents
+patterns|Manage AI steering patterns (add / list / edit / delete).|dot patterns list\ndot patterns add my-pattern
 EOF
 }
 
