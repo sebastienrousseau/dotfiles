@@ -1,0 +1,68 @@
+name: dot CLI Coverage
+
+# Enforces the pan-CLI coverage ratchet: every top-level `dot <cmd>`
+# in bin/dot must be referenced by at least one file under tests/.
+# Runs on every push touching command modules or the coverage tool.
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'feat/**'
+    paths:
+      - 'bin/dot'
+      - 'bin/dot-*'
+      - 'scripts/dot/commands/**'
+      - 'tests/**'
+      - 'tests/performance/coverage_dot_cli.sh'
+      - '.github/workflows/dot-cli-coverage.yml'
+  pull_request:
+    paths:
+      - 'bin/dot'
+      - 'bin/dot-*'
+      - 'scripts/dot/commands/**'
+      - 'tests/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    name: pan-CLI command coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Symlink dotfiles source at ~/.dotfiles
+        run: ln -sf "$GITHUB_WORKSPACE" "$HOME/.dotfiles"
+
+      - name: Human-readable coverage table
+        run: bash tests/performance/coverage_dot_cli.sh
+
+      - name: JSON report
+        run: bash tests/performance/coverage_dot_cli.sh --json | tee coverage.json
+
+      - name: Ratchet — every command must have at least one test mention
+        run: |
+          # 100 % required. Any command in bin/dot without a test-file
+          # reference fails the run.
+          MIN_COVERAGE=100 bash tests/performance/coverage_dot_cli.sh > /dev/null
+
+      - name: Upload coverage.json
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dot-cli-coverage
+          path: coverage.json
+          retention-days: 30
