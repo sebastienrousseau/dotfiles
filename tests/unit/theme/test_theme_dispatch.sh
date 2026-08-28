@@ -8,6 +8,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/cmd_test_helpers.sh"
 
 SWITCH_SH="$REPO_ROOT/scripts/theme/switch.sh"
 
@@ -156,23 +157,6 @@ _run_theme() {
 
 _reset_log() { : > "$LOG"; }
 
-# Simple substring check on already-captured output. Sidesteps
-# assert_output_contains which uses eval on its second arg — that
-# barfs on ANSI escape sequences and unicode markers (✗) that our
-# UI helpers emit.
-_contains() {
-  local needle="$1" haystack="$2" msg="${3:-output should contain}"
-  if [[ "$haystack" == *"$needle"* ]]; then
-    ((TESTS_PASSED++)) || true
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $msg '$needle'"
-    return 0
-  else
-    ((TESTS_FAILED++)) || true
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected '$needle' in output"
-    printf '    Actual: %s\n' "$haystack" | head -3
-    return 1
-  fi
-}
 
 # ---------------------------------------------------------------------------
 # accent

@@ -7,6 +7,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/cmd_test_helpers.sh"
 
 DOT_THEME_SYNC="$REPO_ROOT/bin/dot-theme-sync"
 
@@ -55,8 +56,6 @@ EOF
   chmod +x "$MOCK_BIN/$cmd"
 done
 
-_ok()   { ((TESTS_PASSED++)) || true; printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"; }
-_fail() { ((TESTS_FAILED++)) || true; printf '  \033[0;31m✗\033[0m %s: %s\n' "$CURRENT_TEST" "${1:-}"; }
 
 # ---------------------------------------------------------------------------
 # 1. Rapid-fire alternation: 50 back-and-forth applies must leave a

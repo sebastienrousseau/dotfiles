@@ -8,6 +8,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/cmd_test_helpers.sh"
 
 SWITCH_SH="$REPO_ROOT/scripts/theme/switch.sh"
 
@@ -60,17 +61,6 @@ chmod +x "$MOCK_BIN/dot-theme-sync"
 
 _run() { ( bash "$SWITCH_SH" "$@" ); }
 _reset_log() { : > "$LOG"; }
-_contains() {
-  local needle="$1" haystack="$2" msg="${3:-output should contain}"
-  if [[ "$haystack" == *"$needle"* ]]; then
-    ((TESTS_PASSED++)) || true
-    printf '  \033[0;32m✓\033[0m %s: %s '\''%s'\''\n' "$CURRENT_TEST" "$msg" "$needle"
-  else
-    ((TESTS_FAILED++)) || true
-    printf '  \033[0;31m✗\033[0m %s: expected '\''%s'\''\n' "$CURRENT_TEST" "$needle"
-    printf '    Actual: %s\n' "$haystack" | head -3
-  fi
-}
 
 # ---------------------------------------------------------------------------
 # Sunrise/sunset resolution ladder

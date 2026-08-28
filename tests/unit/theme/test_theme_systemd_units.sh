@@ -13,6 +13,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/cmd_test_helpers.sh"
 
 SWITCH_SH="$REPO_ROOT/scripts/theme/switch.sh"
 
@@ -48,8 +49,6 @@ AMBIENT_TIMER="$XDG_CONFIG_HOME/systemd/user/dot-theme-ambient.timer"
 ROTATE_SERVICE="$XDG_CONFIG_HOME/systemd/user/dot-theme-rotate.service"
 ROTATE_TIMER="$XDG_CONFIG_HOME/systemd/user/dot-theme-rotate.timer"
 
-_ok()  { ((TESTS_PASSED++)) || true; printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"; }
-_fail(){ ((TESTS_FAILED++)) || true; printf '  \033[0;31m✗\033[0m %s: %s\n' "$CURRENT_TEST" "$1"; }
 
 _has_line() {
   local file="$1" pattern="$2"
