@@ -1,0 +1,53 @@
+# Frozen fixture for golden-file tests. Changing this file will require
+# regenerating the golden output files under tests/fixtures/theme_golden/.
+[themes.Solar-dark]
+mode = "dark"
+family = "Solar"
+wallpaper = "/tmp/solar.heic"
+macos_accent = 3
+source = "custom"
+
+[themes.Solar-dark.app]
+gtk_theme = "Adwaita-dark"
+gtk_icon = "Papirus-Dark"
+
+[themes.Solar-dark.ui]
+accent = "#2ecc71"
+
+[themes.Solar-dark.term]
+bg = "#101010"
+fg = "#eeeeee"
+c0  = "#000000"
+c1  = "#800000"
+c2  = "#008000"
+c3  = "#808000"
+c4  = "#000080"
+c5  = "#800080"
+c6  = "#008080"
+c7  = "#c0c0c0"
+c8  = "#808080"
+c9  = "#ff0000"
+c10 = "#00ff00"
+c11 = "#ffff00"
+c12 = "#0000ff"
+c13 = "#ff00ff"
+c14 = "#00ffff"
+c15 = "#ffffff"
+
+[themes.Firewatch-dark]
+mode = "dark"
+family = "Firewatch"
+wallpaper = "/tmp/firewatch.heic"
+macos_accent = 5
+source = "custom"
+
+[themes.Firewatch-dark.app]
+gtk_theme = "Adwaita-dark"
+gtk_icon = "Papirus-Dark"
+
+[themes.Firewatch-dark.ui]
+accent = "#9b59b6"
+
+[themes.Firewatch-dark.term]
+bg = "#282828"
+fg = "#dcdcdc"
