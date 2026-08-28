@@ -58,10 +58,13 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should provide remediation suggestions"
 fi
 
-# Test: shellcheck compliance
+# Test: shellcheck compliance. Runs the checker if it's a real binary
+# (not a mise shim without a resolved version — those emit stderr lines
+# that the previous `2>&1 | wc -l` counted as real findings). Stderr is
+# now suppressed so only shellcheck's own stdout findings register.
 test_start "doctor_shellcheck"
-if command -v shellcheck &>/dev/null; then
-  errors=$(shellcheck -S error "$DOCTOR_FILE" 2>&1 | wc -l)
+if command -v shellcheck &>/dev/null && shellcheck --version >/dev/null 2>&1; then
+  errors=$(shellcheck -S error "$DOCTOR_FILE" 2>/dev/null | wc -l)
   if [[ "$errors" -eq 0 ]]; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
