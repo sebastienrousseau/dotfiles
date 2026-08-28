@@ -11,11 +11,10 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/cmd_test_helpers.sh"
 
 SECRETS_SH="$REPO_ROOT/scripts/dot/commands/secrets.sh"
 
-_ok()   { ((TESTS_PASSED++)) || true; printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"; }
-_fail() { ((TESTS_FAILED++)) || true; printf '  \033[0;31m✗\033[0m %s: %s\n' "$CURRENT_TEST" "${1:-}"; }
 
 # ---------------------------------------------------------------------------
 # 1. Top-level dispatch cases exist for every secrets-family command
@@ -107,8 +106,4 @@ awk '/^cmd_secrets_edit\(\)/{f=1;next} f && /^}/{exit} f' "$SECRETS_SH" \
 # ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
-echo ""
-printf '  Tests: %d  \033[0;32mPassed: %d\033[0m  \033[0;31mFailed: %d\033[0m\n' \
-  "$TESTS_RUN" "$TESTS_PASSED" "$TESTS_FAILED"
-echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
-[[ $TESTS_FAILED -eq 0 ]]
+_cmd_finish

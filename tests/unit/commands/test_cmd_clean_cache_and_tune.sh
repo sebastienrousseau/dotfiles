@@ -10,6 +10,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/cmd_test_helpers.sh"
 
 CORE_SH="$REPO_ROOT/scripts/dot/commands/core.sh"
 APPEARANCE_SH="$REPO_ROOT/scripts/dot/commands/appearance.sh"
@@ -29,8 +30,7 @@ touch "$XDG_CACHE_HOME/nushell/foo.nu"
 # And a file that must NOT be nuked (guards against overreach).
 touch "$XDG_CACHE_HOME/zsh/history"
 
-_ok()   { ((TESTS_PASSED++)) || true; printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"; }
-_fail() { ((TESTS_FAILED++)) || true; printf '  \033[0;31m✗\033[0m %s: %s\n' "$CURRENT_TEST" "${1:-}"; }
+# _ok / _fail come from cmd_test_helpers.sh.
 
 # ---------------------------------------------------------------------------
 # dot clean-cache
@@ -92,11 +92,4 @@ test_start "tune_rejects_unknown_subcommand_shape"
 grep -q '^    \*)' "$APPEARANCE_SH" || grep -qE 'unknown.*platform' "$APPEARANCE_SH"
 [[ $? -eq 0 ]] && _ok || _fail
 
-# ---------------------------------------------------------------------------
-# Summary
-# ---------------------------------------------------------------------------
-echo ""
-printf '  Tests: %d  \033[0;32mPassed: %d\033[0m  \033[0;31mFailed: %d\033[0m\n' \
-  "$TESTS_RUN" "$TESTS_PASSED" "$TESTS_FAILED"
-echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
-[[ $TESTS_FAILED -eq 0 ]]
+_cmd_finish
