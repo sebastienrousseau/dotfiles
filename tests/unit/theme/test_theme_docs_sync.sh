@@ -12,6 +12,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/docs_sync_helpers.sh"
 
 SWITCH_SH="$REPO_ROOT/scripts/theme/switch.sh"
 MANPAGE="$REPO_ROOT/share/man/man1/dot-theme.1"
@@ -20,25 +21,12 @@ ZSH_COMP="$REPO_ROOT/share/completions/zsh/_dot"
 FISH_COMP_TMPL="$REPO_ROOT/defaults/dot_config/fish/completions/dot.fish.tmpl"
 THEMING_MD="$REPO_ROOT/docs/guides/THEMING.md"
 
-# Runtime-extract the subcommand list from switch.sh's top-level case.
-# When a new subcommand lands in the dispatcher, it auto-joins the
-# ratchet on the next run — no manual edit of this file required.
-#
-# The extraction pattern matches lines like:
-#   `  list)` or `  ambient)` at 2-space indent inside the case block.
-# It skips the `""` empty default and the `*)` wildcard fallthrough.
+# Runtime-extract the subcommand list from switch.sh's top-level case
+# via the shared docs_sync_helpers module. When a new subcommand lands
+# in the dispatcher, it auto-joins the ratchet on the next run — no
+# manual edit of this file required.
 mapfile -t SUBCOMMANDS < <(
-  awk '
-    /^case "\$\{1:-\}" in/ { in_case=1; next }
-    /^esac[[:space:]]*$/ && in_case { in_case=0 }
-    # Accept `  label)` and `  label |` (alternation with space padding).
-    in_case && /^  [a-z][a-zA-Z0-9_-]*[[:space:]]*[|)]/ {
-      match($0, /^  ([a-zA-Z0-9_-]+)[[:space:]]*[|)]/, m)
-      label = m[1]
-      # Skip meta labels handled by the shell dispatch loop.
-      if (label != "" && label != "*") print label
-    }
-  ' "$SWITCH_SH" | sort -u
+  _docs_extract_from_case_block "$SWITCH_SH" | sort -u
 )
 
 _check_present() {
