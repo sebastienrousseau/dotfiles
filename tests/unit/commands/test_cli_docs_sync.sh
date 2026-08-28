@@ -36,25 +36,14 @@ HELP_DIR="$REPO_ROOT/scripts/dot/commands"
 # Growing budget: extend this list over time as more of the surface
 # gets synchronised documentation. Removing entries is a regression.
 COMMANDS=(
-  apply
-  attest
-  bundle
-  cd
-  diff
-  doctor
-  edit
-  env
-  health
-  mcp
-  profile
-  remove
-  secrets
-  snapshot
-  status
-  sync
-  theme
-  update
+  add       apply     attest    bundle    cd        diff
+  doctor    edit      env       fonts     heal      health
+  help      history   keys      lint      mcp       mode
+  profile   registry  remove    rollback  search    secrets
+  snapshot  status    sync      theme     update    upgrade
   wallpaper
+  # Fleet
+  agent
 )
 
 _ok()   { ((TESTS_PASSED++)) || true; printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"; }
@@ -87,9 +76,17 @@ _in_manpage() {
 _in_help_source() {
   local cmd="$1"
   # `dot help` output is assembled from files in scripts/dot/commands
-  # (or module files). Look for `cmd_<cmd>()` or dispatch case.
+  # (or module files). A command is bound if any of:
+  #   * cmd_<name>() function defined in a module
+  #   * `  <name>)` dispatch case in a module
+  #   * A module file at scripts/dot/commands/<name>.sh
+  #   * A bin/dot-<name> executable
+  #   * Special-case: bin/dot's own top-level route case (agents, help,
+  #     search, version, init, registry, patterns, manual)
   grep -rqE "^cmd_${cmd//-/_}\\(\\)|^  ${cmd}\\)" "$HELP_DIR" 2>/dev/null \
-    || [[ -x "$REPO_ROOT/bin/dot-${cmd}" ]]
+    || [[ -f "$HELP_DIR/${cmd}.sh" ]] \
+    || [[ -x "$REPO_ROOT/bin/dot-${cmd}" ]] \
+    || grep -qE "^  ${cmd}\\)" "$REPO_ROOT/bin/dot"
 }
 
 # ---------------------------------------------------------------------------
@@ -136,6 +133,7 @@ orphans=()
 for cmd in "${COMMANDS[@]}"; do
   underscore="${cmd//-/_}"
   if ! grep -rqE "^cmd_${underscore}\\(\\)|^  ${cmd}\\)" "$HELP_DIR" 2>/dev/null \
+     && [[ ! -f "$HELP_DIR/${cmd}.sh" ]] \
      && [[ ! -x "$REPO_ROOT/bin/dot-${cmd}" ]] \
      && ! grep -qE "^  ${cmd}\)" "$REPO_ROOT/bin/dot"; then
     orphans+=("$cmd")
