@@ -29,13 +29,14 @@ source "$SCRIPT_DIR/../../framework/cmd_test_helpers.sh"
 BIN_DOT="$REPO_ROOT/bin/dot"
 
 # ---------------------------------------------------------------------------
-# Parse both tables.
+# Enumerate every top-level command the user can dispatch — routes
+# table entries PLUS bin/dot-* auto-shim executables. Since 2026-08-28
+# bin/dot has a git-style fallthrough that execs dot-<name> when no
+# route matches, so those are real user-facing commands and should
+# have help entries too.
 # ---------------------------------------------------------------------------
-mapfile -t ROUTES < <(
-  awk '/^_dot_command_routes\(\)/,/^\}/' "$BIN_DOT" \
-    | awk -F'|' '/^[a-z][a-z0-9-]*\|[a-z]+$/ { print $1 }' \
-    | sort -u
-)
+source "$SCRIPT_DIR/../../framework/docs_sync_helpers.sh"
+mapfile -t ROUTES < <(_docs_extract_top_level_commands "$REPO_ROOT")
 
 mapfile -t HELP_TOPICS < <(
   # _dot_help_details drives `dot help <cmd>` (via _dot_help_summary

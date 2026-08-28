@@ -296,6 +296,9 @@ Meta|prewarm|Pre-populate shell caches for ultra-fast startup|Slower alternative
 Meta|agents|Multi-harness agent context (AGENTS.md sync, Cursor/Codex stubs)|Cross-tool AGENTS.md orchestration.
 Meta|init|Bootstrap a foreign dotfiles repo through chezmoi + dot|Adopt an existing config into dot.
 Meta|registry|Browse reusable dotfile modules from the dot registry|Discover modules to include.
+Meta|bootstrap|Bootstrap a fresh machine (install.sh entrypoint)|First-run installer; safe to re-run.
+Meta|theme-sync|Cross-DE theme sync helper (direct invocation of dot-theme-sync)|Advanced: bypasses dot theme dispatcher.
+Meta|load-benchmark-pty|Measure background prewarm via a PTY (long-form dot-load-benchmark-pty)|Startup timing helper.
 Meta|search|Find commands by keyword|Find the right command quickly.
 Meta|version|Show version information.|Matches `dot --version`.
 Meta|help|Show this help message|Overview or focused command help.
@@ -405,6 +408,9 @@ init|Bootstrap a foreign dotfiles repo through chezmoi + dot.|dot init
 registry|Browse reusable dotfile modules from the dot registry.|dot registry
 agents|Multi-harness agent context (AGENTS.md sync, Cursor/Codex stubs).|dot agents
 patterns|Manage AI steering patterns (add / list / edit / delete).|dot patterns list\ndot patterns add my-pattern
+bootstrap|Bootstrap a fresh machine via install.sh (safe to re-run).|dot bootstrap\ndot bootstrap --dry-run
+theme-sync|Cross-DE theme sync helper — direct invocation of dot-theme-sync.|dot theme-sync\ndot theme-sync <theme-name>
+load-benchmark-pty|Measure background prewarm through a PTY (long form of load-bench-pty).|dot load-benchmark-pty
 EOF
 }
 
@@ -741,17 +747,27 @@ case "$route" in
     show_version
     ;;
 
-  # User-provided custom commands
+  # User-provided custom commands, then bin/dot-<name> auto-shim
+  # (git-style: `dot foo` -> `dot-foo` if a matching executable exists
+  # anywhere on PATH). Users can drop new commands next to `dot` and
+  # tab-completion will see them via the routes table extraction.
   *)
     _user_cmd="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/commands/${COMMAND}.sh"
     if [[ -f "$_user_cmd" ]]; then
       # Run in a subshell so a user `exit` doesn't kill the dot CLI.
       (source "$_user_cmd" "$@")
       exit $?
-    else
-      echo "Unknown command: ${COMMAND:-}" >&2
-      echo "Run 'dot help' for available commands." >&2
-      exit 1
     fi
+    # Try bin/dot-<name> in the same dir as this script, then $PATH.
+    _self_dir="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || echo "$0")")" && pwd)"
+    if [[ -x "$_self_dir/dot-${COMMAND}" ]]; then
+      exec "$_self_dir/dot-${COMMAND}" "$@"
+    fi
+    if command -v "dot-${COMMAND}" >/dev/null 2>&1; then
+      exec "dot-${COMMAND}" "$@"
+    fi
+    echo "Unknown command: ${COMMAND:-}" >&2
+    echo "Run 'dot help' for available commands." >&2
+    exit 1
     ;;
 esac
