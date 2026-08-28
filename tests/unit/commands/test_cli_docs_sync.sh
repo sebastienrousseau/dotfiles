@@ -25,15 +25,20 @@ HELP_DIR="$REPO_ROOT/scripts/dot/commands"
 # Enumerate the full command surface at runtime.
 # ---------------------------------------------------------------------------
 _extract_all_commands() {
-  # bin/dot's top-level route case (agents / help / version / ...)
-  _docs_extract_from_case_block "$REPO_ROOT/bin/dot"
-  # Each command module's case labels.
-  for f in "$REPO_ROOT/scripts/dot/commands"/*.sh; do
-    _docs_extract_from_case_block "$f"
-  done
-  # bin/dot-<name> executables.
+  # Authoritative source: bin/dot's _dot_command_routes() heredoc,
+  # a `cmd|namespace` table. Column 1 is the exact set of top-level
+  # commands the user can type after `dot`. Anything else (module
+  # internals, help-only tokens, section labels) is out of scope for
+  # the top-level dot(1) ratchet — module surfaces get their own
+  # per-module docs-sync (see tests/unit/theme/test_theme_docs_sync.sh
+  # for the reference pattern).
+  awk '/^_dot_command_routes\(\)/,/^\}/' "$REPO_ROOT/bin/dot" \
+    | awk -F'|' '/^[a-z][a-z0-9-]*\|[a-z]+$/ { print $1 }'
+  # bin/dot-<name> executables (dropped .ps1 which is the PowerShell
+  # entrypoint, not a bash-completion target).
   find "$REPO_ROOT/bin" -maxdepth 1 -name 'dot-*' -type f -exec basename {} \; \
-    | sed 's/^dot-//'
+    | sed 's/^dot-//' \
+    | grep -v '\.ps1$'
 }
 mapfile -t ALL_COMMANDS < <(_extract_all_commands | sort -u | grep -v '^$')
 
@@ -60,14 +65,19 @@ _in_help_source() {
   # `dot help` output is assembled from files in scripts/dot/commands
   # (or module files). A command is bound if any of:
   #   * cmd_<name>() function defined in a module
-  #   * `  <name>)` dispatch case in a module
+  #   * `  <name>)` dispatch case (bare or alternation) in any module
   #   * A module file at scripts/dot/commands/<name>.sh
   #   * A bin/dot-<name> executable
-  #   * bin/dot's own top-level route case
-  grep -rqE "^cmd_${cmd//-/_}\\(\\)|^  ${cmd}\\)" "$HELP_DIR" 2>/dev/null \
+  #   * `<name>|<namespace>` entry in bin/dot's routes heredoc
+  # Alternation-aware match: `foo | bar | ${cmd} | baz)` and
+  # `${cmd} | foo)` and bare `${cmd})` all count.
+  local alt_re="^  ([a-zA-Z0-9_-]+[[:space:]]*\\|[[:space:]]*)*${cmd}([[:space:]]*\\|[[:space:]]*[a-zA-Z0-9_-]+)*\\)"
+  grep -rqE "^cmd_${cmd//-/_}\\(\\)" "$HELP_DIR" 2>/dev/null \
+    || grep -rqE "$alt_re" "$HELP_DIR" 2>/dev/null \
     || [[ -f "$HELP_DIR/${cmd}.sh" ]] \
     || [[ -x "$REPO_ROOT/bin/dot-${cmd}" ]] \
-    || grep -qE "^  ${cmd}\\)" "$REPO_ROOT/bin/dot"
+    || grep -qE "$alt_re" "$REPO_ROOT/bin/dot" \
+    || grep -qE "^${cmd}\\|[a-z]+$" "$REPO_ROOT/bin/dot"
 }
 
 for cmd in "${COMMANDS[@]}"; do
@@ -99,13 +109,7 @@ if [[ ${#missing_help[@]} -eq 0 ]]; then _ok; else _fail "missing: ${missing_hel
 test_start "cli_every_command_has_at_least_one_binding"
 orphans=()
 for cmd in "${COMMANDS[@]}"; do
-  underscore="${cmd//-/_}"
-  if ! grep -rqE "^cmd_${underscore}\\(\\)|^  ${cmd}\\)" "$HELP_DIR" 2>/dev/null \
-     && [[ ! -f "$HELP_DIR/${cmd}.sh" ]] \
-     && [[ ! -x "$REPO_ROOT/bin/dot-${cmd}" ]] \
-     && ! grep -qE "^  ${cmd}\\)" "$REPO_ROOT/bin/dot"; then
-    orphans+=("$cmd")
-  fi
+  _in_help_source "$cmd" || orphans+=("$cmd")
 done
 if [[ ${#orphans[@]} -eq 0 ]]; then _ok; else _fail "orphans: ${orphans[*]}"; fi
 

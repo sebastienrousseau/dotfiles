@@ -80,7 +80,14 @@ _docs_in_fish_tmpl() {
 _docs_in_manpage() {
   local file="$1" cmd="$2"
   # dot(1) / dot-theme(1) man pages use `.B <cmd>` after a `.TP` tag.
-  grep -qE "^\.B ${cmd}\\b" "$file" 2>/dev/null
+  # groff escapes literal hyphens as `\-`, so `alias-check` in source
+  # renders as `alias\-check` in the .1 file. Also handle the comma-
+  # separated bundle form (`.B cl, copilot, gemini`). Matching a
+  # literal backslash in ERE requires four source-level backslashes:
+  # bash halves to two, ERE halves again to the one literal `\`.
+  local escaped="${cmd//-/\\\\-}"
+  grep -qE "^\.B ((${cmd}|${escaped})|.*[[:space:],]+(${cmd}|${escaped}))([[:space:],]|$)" \
+    "$file" 2>/dev/null
 }
 
 # ---------------------------------------------------------------------------

@@ -18,6 +18,12 @@ complete -c dot -n "__fish_use_subcommand" -a sgpt -d "Shell-GPT with context pa
 complete -c dot -n "__fish_use_subcommand" -a ollama -d "Ollama with context patterns"
 complete -c dot -n "__fish_use_subcommand" -a opencode -d "OpenCode with context patterns"
 complete -c dot -n "__fish_use_subcommand" -a aider -d "Aider with context patterns"
+complete -c dot -n "__fish_use_subcommand" -a claude -d "Claude Code CLI passthrough"
+complete -c dot -n "__fish_use_subcommand" -a codex -d "Codex CLI passthrough"
+complete -c dot -n "__fish_use_subcommand" -a goose -d "Goose AI assistant passthrough"
+complete -c dot -n "__fish_use_subcommand" -a qwen -d "Qwen coder CLI passthrough"
+complete -c dot -n "__fish_use_subcommand" -a vibe -d "Vibe CLI passthrough"
+complete -c dot -n "__fish_use_subcommand" -a zai -d "Z.ai CLI passthrough"
 complete -c dot -n "__fish_use_subcommand" -a add -d "Add a file to chezmoi source"
 
 # AI Pattern completions for AI CLIs
@@ -53,6 +59,10 @@ complete -c dot -n "__fish_use_subcommand" -a ai-query -d "Context-aware RAG que
 complete -c dot -n "__fish_use_subcommand" -a attest -d "Export workstation attestation evidence"
 complete -c dot -n "__fish_use_subcommand" -a lint -d "Lint shell scripts"
 complete -c dot -n "__fish_use_subcommand" -a rollback -d "Rollback to a previous state"
+complete -c dot -n "__fish_use_subcommand" -a health-check -d "Alias for health"
+complete -c dot -n "__fish_use_subcommand" -a metrics -d "Emit machine-readable diagnostic metrics"
+complete -c dot -n "__fish_use_subcommand" -a attestation -d "Full attestation flow (alias of attest)"
+complete -c dot -n "__fish_use_subcommand" -a load-benchmark-pty -d "Measure background prewarm via PTY (long form)"
 
 # Tools
 complete -c dot -n "__fish_use_subcommand" -a tools -d "Show or install nix packages"
@@ -63,9 +73,13 @@ complete -c dot -n "__fish_use_subcommand" -a learn -d "Interactive tour"
 complete -c dot -n "__fish_use_subcommand" -a docs -d "Show repo README"
 complete -c dot -n "__fish_use_subcommand" -a env -d "Show managed tool versions"
 complete -c dot -n "__fish_use_subcommand" -a profile -d "Show or switch configuration profile"
+complete -c dot -n "__fish_use_subcommand" -a alias-check -d "Static-check alias definitions for conflicts"
+complete -c dot -n "__fish_use_subcommand" -a bootstrap -d "Bootstrap a fresh machine (install.sh entrypoint)"
+complete -c dot -n "__fish_use_subcommand" -a cache-refresh -d "Clear and regenerate shell caches (alias of prewarm)"
 
 # Appearance
 complete -c dot -n "__fish_use_subcommand" -a theme -d "Switch terminal + desktop theme"
+complete -c dot -n "__fish_use_subcommand" -a theme-sync -d "Cross-DE theme sync helper (direct invocation)"
 
 # `dot theme` subcommands and theme-name completions.
 set -l __dot_theme_subs list set toggle mode family random preview undo history current status diff accent wallpaper fit export import sync ambient rotate reset rebuild help
