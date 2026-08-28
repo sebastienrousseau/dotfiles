@@ -62,11 +62,13 @@ jobs:
 
       - name: Ratchet — docs-sync across all 4 loci
         run: |
-          # Every command in the ratchet (auto-extracted at runtime)
-          # must appear in bash + zsh + fish completions AND the dot(1)
-          # man page. Partial-coverage commands are surfaced as a
-          # visible "punch list" but do not fail the run — only
-          # regressions in already-locked-in commands do.
+          # Every top-level dot command must appear in bash + zsh +
+          # fish completions AND the dot(1) man page. As of the
+          # 2026-08-28 push the ratchet holds at 100% (99/99) with a
+          # cli_no_partial_or_bare_commands_ratchet_full gate; any new
+          # top-level command lands in Partial or Bare and fails the
+          # run until documented in every locus. Also includes a
+          # groff/mandoc man-page parse-cleanliness gate.
           bash tests/unit/commands/test_cli_docs_sync.sh
 
       - name: Upload coverage.json
