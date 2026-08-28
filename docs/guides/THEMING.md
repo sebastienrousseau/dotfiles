@@ -117,11 +117,58 @@ The full `dot theme` command surface as of v0.2.503:
 | `dot theme accent [<color\|int>]` | Live-tweak the desktop accent without changing wallpaper/theme |
 | `dot theme wallpaper [<path>]` | Set an arbitrary wallpaper without a theme swap |
 | `dot theme fit <mode>` | Wallpaper scale mode (`zoom`, `spanned`, `centered`, `scaled`, `stretched`, `wallpaper`, `none`) |
+| `dot theme export [file]` | Snapshot current theme + fit to portable JSON (stdout if no file) |
+| `dot theme import <file>` | Restore theme + fit from a snapshot; verifies target exists first |
 | `dot theme sync` | Match the theme to system dark/light preference (GNOME + KDE) |
-| `dot theme ambient <run\|enable\|disable\|status>` | Time-based auto-switch + systemd user timer |
+| `dot theme ambient <run\|enable\|disable\|status>` | Time-based auto-switch + systemd user timer (sunwait if `DOT_THEME_LOCATION` set) |
+| `dot theme rotate <enable [interval]\|disable\|status>` | Periodic random-family wallpaper rotator |
 | `dot theme reset` | Restore GNOME defaults (accent/cursor/fonts/shell-theme); wallpaper untouched |
 | `dot theme rebuild [--force\|--list]` | Regenerate `themes.toml` from wallpaper library |
 | `dot theme help` | Print the built-in usage list |
+
+### Portable snapshots
+
+```bash
+dot theme export ~/theme-latest.json         # snapshot theme + fit
+dot theme export -                            # stdout for scripting
+dot theme import ~/theme-latest.json          # restore on same or other machine
+```
+
+Snapshot JSON is minimal (theme name, wallpaper fit, source hostname, ISO-8601 UTC
+timestamp). Import validates that the target theme exists in `themes.toml` first — a
+snapshot from a machine with a different wallpaper library will error clearly instead
+of silently applying a mystery default.
+
+### Wallpaper rotation
+
+```bash
+dot theme rotate enable        # 30-minute default interval
+dot theme rotate enable 15m    # every 15 minutes
+dot theme rotate disable
+dot theme rotate status        # timer state + next firing
+```
+
+Runs alongside `dot theme ambient` cleanly — ambient handles mode, rotate handles
+family. Two independent systemd user timers, so a rotate-driven family swap won't
+override ambient's mode decision.
+
+### Solar-time ambient
+
+```bash
+DOT_THEME_LOCATION="51.5N,0.13W" dot theme ambient enable   # London-ish
+```
+
+If `sunwait` is installed and `DOT_THEME_LOCATION="lat,lon"` is set, ambient computes
+actual sunrise/sunset for the location. The resolution ladder is:
+
+1. `DOT_THEME_SUNRISE` / `DOT_THEME_SUNSET` env vars (explicit override)
+2. `sunwait` + `DOT_THEME_LOCATION`
+3. State file at `~/.local/state/dot/theme-ambient.conf`
+4. Fixed defaults 07:00 / 19:00
+
+The status line shows which source was used (`sunwait(51.5N,0.13W) sunrise=06:34 …`
+vs. `defaults sunrise=07:00 …`), so it's obvious when a machine hasn't picked up
+its location config.
 
 ### Idempotency and `--force`
 
