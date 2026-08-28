@@ -24,23 +24,7 @@ HELP_DIR="$REPO_ROOT/scripts/dot/commands"
 # ---------------------------------------------------------------------------
 # Enumerate the full command surface at runtime.
 # ---------------------------------------------------------------------------
-_extract_all_commands() {
-  # Authoritative source: bin/dot's _dot_command_routes() heredoc,
-  # a `cmd|namespace` table. Column 1 is the exact set of top-level
-  # commands the user can type after `dot`. Anything else (module
-  # internals, help-only tokens, section labels) is out of scope for
-  # the top-level dot(1) ratchet — module surfaces get their own
-  # per-module docs-sync (see tests/unit/theme/test_theme_docs_sync.sh
-  # for the reference pattern).
-  awk '/^_dot_command_routes\(\)/,/^\}/' "$REPO_ROOT/bin/dot" \
-    | awk -F'|' '/^[a-z][a-z0-9-]*\|[a-z]+$/ { print $1 }'
-  # bin/dot-<name> executables (dropped .ps1 which is the PowerShell
-  # entrypoint, not a bash-completion target).
-  find "$REPO_ROOT/bin" -maxdepth 1 -name 'dot-*' -type f -exec basename {} \; \
-    | sed 's/^dot-//' \
-    | grep -v '\.ps1$'
-}
-mapfile -t ALL_COMMANDS < <(_extract_all_commands | sort -u | grep -v '^$')
+mapfile -t ALL_COMMANDS < <(_docs_extract_top_level_commands "$REPO_ROOT")
 
 # ---------------------------------------------------------------------------
 # Partition into fully-documented / partial / bare buckets.

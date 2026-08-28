@@ -32,6 +32,27 @@
 _DOT_DOCS_SYNC_HELPERS_LOADED=1
 
 # ---------------------------------------------------------------------------
+# _docs_extract_top_level_commands — the canonical enumerator used by
+# both the docs-sync ratchet (test_cli_docs_sync.sh) and the coverage
+# report (coverage_dot_cli.sh). Reads bin/dot's authoritative
+# _dot_command_routes() heredoc plus enumerates bin/dot-* executables.
+#
+# Usage:
+#   _docs_extract_top_level_commands <repo_root>
+#   → prints one command per line, sorted, unique, no blanks.
+# ---------------------------------------------------------------------------
+_docs_extract_top_level_commands() {
+  local repo_root="$1"
+  {
+    awk '/^_dot_command_routes\(\)/,/^\}/' "$repo_root/bin/dot" \
+      | awk -F'|' '/^[a-z][a-z0-9-]*\|[a-z]+$/ { print $1 }'
+    find "$repo_root/bin" -maxdepth 1 -name 'dot-*' -type f -exec basename {} \; \
+      | sed 's/^dot-//' \
+      | grep -v '\.ps1$'
+  } | sort -u | grep -v '^$'
+}
+
+# ---------------------------------------------------------------------------
 # _docs_extract_from_case_block — awk the top-level `case ... in`
 # block of a bash script and print each dispatch label on its own line.
 # Handles alternation with optional whitespace: `foo | bar | baz)`.

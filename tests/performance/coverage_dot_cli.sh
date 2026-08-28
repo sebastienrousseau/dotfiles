@@ -26,51 +26,14 @@ _json=false
 MIN_COVERAGE="${MIN_COVERAGE:-80}"
 
 # ---------------------------------------------------------------------------
-# 1. Enumerate top-level dot commands. Sources:
-#   a. scripts/dot/commands/*.sh — each module's case labels
-#   b. bin/dot-* executables — first-class dispatcher entries
-#   c. bin/dot's own top-level case (agents / init / registry / ...)
+# 1. Enumerate top-level dot commands via the shared authoritative
+# extractor. Reads bin/dot's _dot_command_routes() heredoc plus
+# bin/dot-* executables. Same source as tests/unit/commands/
+# test_cli_docs_sync.sh so both reports agree on the denominator.
 # ---------------------------------------------------------------------------
-commands=()
-
-# (a) Case labels inside every command-module file.
-while IFS= read -r label; do
-  # Split alternates on |, strip whitespace, drop wildcard / flag-like.
-  IFS='|' read -ra parts <<< "$label"
-  for p in "${parts[@]}"; do
-    p="${p## }"; p="${p%% }"
-    [[ -z "$p" || "$p" == "*" || "$p" == "\"\"" || "$p" =~ ^- ]] && continue
-    commands+=("$p")
-  done
-done < <(grep -h "^  [a-z][a-zA-Z0-9_-]*[)|]" \
-           "$REPO_ROOT/scripts/dot/commands"/*.sh 2>/dev/null |
-         sed -E 's/^  ([^)]+)\).*/\1/')
-
-# (b) bin/dot-<name> executables.
-while IFS= read -r f; do
-  base="${f##*/}"
-  commands+=("${base#dot-}")
-done < <(find "$REPO_ROOT/bin" -maxdepth 1 -name 'dot-*' -type f)
-
-# (c) bin/dot's own top-level cases (route-mode dispatch).
-while IFS= read -r line; do
-  IFS='|' read -ra parts <<< "$line"
-  for p in "${parts[@]}"; do
-    p="${p## }"; p="${p%% }"
-    [[ -z "$p" || "$p" == "*" || "$p" =~ ^- ]] && continue
-    commands+=("$p")
-  done
-done < <(sed -n '/^case "\$route" in/,/^esac/p' "$DOT_BIN" |
-         grep -E "^  [a-z][a-zA-Z0-9_ |-]+\)" |
-         sed -E 's/^  ([^)]+)\).*/\1/')
-
-# Dedupe + drop known non-commands.
-mapfile -t commands < <(
-  printf '%s\n' "${commands[@]}" |
-    grep -Ev '^(help|\*|"")$' |
-    sort -u |
-    grep -v '^$'
-)
+# shellcheck source=../framework/docs_sync_helpers.sh
+source "$REPO_ROOT/tests/framework/docs_sync_helpers.sh"
+mapfile -t commands < <(_docs_extract_top_level_commands "$REPO_ROOT" | grep -v '^help$')
 
 # ---------------------------------------------------------------------------
 # 2. Search test corpus.
