@@ -113,4 +113,18 @@ for cmd in "${COMMANDS[@]}"; do
 done
 if [[ ${#orphans[@]} -eq 0 ]]; then _ok; else _fail "orphans: ${orphans[*]}"; fi
 
+# ---------------------------------------------------------------------------
+# 100% ratchet gate. As of 2026-08-28 every top-level command is
+# documented in all 4 loci (bash + zsh + fish + man). This assertion
+# fails the moment a new command lands without matching doc updates —
+# preventing silent regressions of the ratchet. Growing budget: any
+# newly-added command must join Full immediately, no Partial period.
+# ---------------------------------------------------------------------------
+test_start "cli_no_partial_or_bare_commands_ratchet_full"
+if [[ ${#DOCS_PARTIAL[@]} -eq 0 && ${#DOCS_BARE[@]} -eq 0 ]]; then
+  _ok
+else
+  _fail "partial=${DOCS_PARTIAL[*]:-none} bare=${DOCS_BARE[*]:-none}"
+fi
+
 _cmd_finish
