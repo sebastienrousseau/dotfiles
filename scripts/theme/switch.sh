@@ -722,6 +722,62 @@ case "${1:-}" in
       }
     ' "$THEMES_FILE"
     ;;
+  accent)
+    # Live-tweak the desktop accent colour without changing the theme
+    # or the wallpaper. Accepts either a GNOME accent enum name
+    # (blue|teal|green|yellow|orange|red|pink|purple|slate) or an
+    # int 0-6 / -1 matching the macos_accent scale. Applies via the
+    # detected DE handler; skips silently on DEs without native accent.
+    shift
+    want="${1:-}"
+    if [[ -z "$want" ]]; then
+      ui_info "Current" "accent"
+      command -v gsettings >/dev/null 2>&1 \
+        && ui_info "GNOME" "$(gsettings get org.gnome.desktop.interface accent-color 2>/dev/null | tr -d "'")"
+      command -v kreadconfig6 >/dev/null 2>&1 \
+        && ui_info "KDE" "$(kreadconfig6 --file kdeglobals --group General --key AccentColor 2>/dev/null)"
+      exit 0
+    fi
+    # Map int → GNOME enum name if numeric.
+    case "$want" in
+      -1) want="slate" ;;
+      0) want="red" ;;
+      1) want="orange" ;;
+      2) want="yellow" ;;
+      3) want="green" ;;
+      4) want="blue" ;;
+      5) want="purple" ;;
+      6) want="pink" ;;
+      blue|teal|green|yellow|orange|red|pink|purple|slate) : ;;
+      *) ui_err "Usage" "dot theme accent <int -1..6 | blue|teal|green|yellow|orange|red|pink|purple|slate>"; exit 1 ;;
+    esac
+    changed=0
+    if command -v gsettings >/dev/null 2>&1; then
+      gsettings set org.gnome.desktop.interface accent-color "$want" 2>/dev/null && changed=1
+    fi
+    # Map GNOME name back to a KDE Plasma hex for kdeglobals.
+    case "$want" in
+      slate) hex="#4d4d4d" ;;
+      red) hex="#da4453" ;;
+      orange) hex="#f67400" ;;
+      yellow) hex="#f6bb00" ;;
+      green) hex="#2ecc71" ;;
+      teal) hex="#1abc9c" ;;
+      blue) hex="#3daee9" ;;
+      purple) hex="#9b59b6" ;;
+      pink) hex="#e91e63" ;;
+    esac
+    if command -v kwriteconfig6 >/dev/null 2>&1; then
+      kwriteconfig6 --file kdeglobals --group General --key AccentColor "$hex" 2>/dev/null && changed=1
+      command -v qdbus >/dev/null 2>&1 && qdbus org.kde.KWin /KWin reconfigure >/dev/null 2>&1 || true
+    fi
+    if [[ $changed -gt 0 ]]; then
+      ui_ok "Accent" "$want ($hex)"
+    else
+      ui_err "Accent" "no gsettings or kwriteconfig6 available"
+      exit 1
+    fi
+    ;;
   status)
     # Comprehensive dashboard: recorded theme, live gsettings/kwriteconfig
     # state, wallpaper file existence, detected DE. Great for diagnosing
@@ -859,6 +915,7 @@ case "${1:-}" in
     ui_ok "current" "Show current theme info"
     ui_ok "status" "Dashboard: recorded vs applied theme state"
     ui_ok "diff <a> <b>" "Side-by-side comparison of two themes"
+    ui_ok "accent [color]" "Tweak accent live (no wallpaper/theme change)"
     ui_ok "sync" "Sync dotfiles with system dark/light mode"
     ui_ok "ambient" "Time-based mode switch (run|enable|disable|status)"
     ui_ok "rebuild" "Regenerate themes from system + custom wallpapers"
