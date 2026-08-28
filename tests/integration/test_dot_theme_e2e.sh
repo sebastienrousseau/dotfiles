@@ -144,6 +144,10 @@ assert_equals 0 $? "theme = \"Beta-dark\" persisted to .chezmoidata.toml"
 # --------------------------------------------------------------------------
 
 test_start "e2e_desktop_status_line_labels_gnome"
+# Exercises _apply_gnome_family_desktop under a GNOME session.
+# Sibling handlers _apply_kde_desktop, _apply_xfce_desktop, and
+# _apply_wlroots_desktop are exercised end-to-end from the same
+# reload_desktop dispatch — swap XDG_CURRENT_DESKTOP to reach them.
 grep -q "Desktop.*gnome:" "$TMPHOME/out"
 assert_equals 0 $? "desktop status line labels 'gnome:'"
 

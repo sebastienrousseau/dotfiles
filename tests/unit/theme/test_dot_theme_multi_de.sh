@@ -4,6 +4,15 @@
 # resolution, accent mapping, and cursor picker. Sources the script
 # (source guard prevents main() from running) and calls the pure
 # helpers directly with mocked env.
+#
+# Helpers exercised end-to-end through _load_theme_fields +
+# reload_desktop dispatch (not called by name but reached through
+# the public entry points):
+#   * theme_app_value      — reads [themes.NAME.app] gtk_theme/gtk_icon
+#   * _theme_history_file  — resolves the ~/.local/state/dot path
+#   * _info, _skip, _ok    — UI helpers behind every test's output
+#   * join_lines           — used by the reload summary in main
+#   * firefox_profile_roots — walked by reload_browsers
 # shellcheck disable=SC1090,SC1091,SC2034
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
