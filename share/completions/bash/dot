@@ -29,7 +29,7 @@ _dot_completions() {
 
   # `dot theme ...`
   if [[ "${COMP_WORDS[1]}" == "theme" ]]; then
-    local subs="list set toggle mode family random preview undo history current status diff accent wallpaper sync ambient reset rebuild help"
+    local subs="list set toggle mode family random preview undo history current status diff accent wallpaper fit sync ambient reset rebuild help"
     if [[ ${COMP_CWORD} -eq 2 ]]; then
       # subcommand OR theme name (quick-switch)
       COMPREPLY=( $(compgen -W "$subs $(_dot_theme_names)" -- "$cur") )
@@ -62,6 +62,10 @@ _dot_completions() {
       wallpaper)
         # File paths — let bash's file completion do the work.
         _filedir 'png|jpg|jpeg|webp|heic' 2>/dev/null || COMPREPLY=( $(compgen -f -- "$cur") )
+        return
+        ;;
+      fit)
+        COMPREPLY=( $(compgen -W "zoom spanned centered scaled stretched wallpaper none" -- "$cur") )
         return
         ;;
     esac

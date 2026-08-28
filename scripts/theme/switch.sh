@@ -722,6 +722,28 @@ case "${1:-}" in
       }
     ' "$THEMES_FILE"
     ;;
+  fit)
+    shift
+    want="${1:-}"
+    if [[ -z "$want" ]]; then
+      command -v gsettings >/dev/null 2>&1 && {
+        ui_info "GNOME fit" "$(gsettings get org.gnome.desktop.background picture-options 2>/dev/null | tr -d "'")"
+      }
+      ui_info "Valid" "zoom | spanned | centered | scaled | stretched | wallpaper | none"
+      exit 0
+    fi
+    case "$want" in
+      zoom|spanned|centered|scaled|stretched|wallpaper|none) : ;;
+      *) ui_err "Usage" "dot theme fit <zoom|spanned|centered|scaled|stretched|wallpaper|none>"; exit 1 ;;
+    esac
+    if command -v gsettings >/dev/null 2>&1; then
+      gsettings set org.gnome.desktop.background picture-options "$want" 2>/dev/null
+      ui_ok "Fit" "$want"
+    else
+      ui_err "Fit" "gsettings not available"
+      exit 1
+    fi
+    ;;
   wallpaper)
     shift
     wp="${1:-}"
@@ -982,6 +1004,7 @@ case "${1:-}" in
     ui_ok "diff <a> <b>" "Side-by-side comparison of two themes"
     ui_ok "accent [color]" "Tweak accent live (no wallpaper/theme change)"
     ui_ok "wallpaper [path]" "Set an arbitrary wallpaper without theme swap"
+    ui_ok "fit <mode>" "Wallpaper fit: zoom|spanned|centered|scaled|stretched"
     ui_ok "sync" "Sync dotfiles with system dark/light mode"
     ui_ok "ambient" "Time-based mode switch (run|enable|disable|status)"
     ui_ok "rebuild" "Regenerate themes from system + custom wallpapers"
