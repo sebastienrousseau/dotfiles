@@ -258,6 +258,7 @@ _dot() {
             'history:Show recently-applied themes'
             'current:Show current theme info'
             'status:Dashboard: recorded vs applied theme state'
+            'diff:Side-by-side comparison of two themes'
             'sync:Sync dotfiles with system dark/light mode'
             'ambient:Time-based mode switch (run|enable|disable|status)'
             'reset:Restore GNOME defaults'

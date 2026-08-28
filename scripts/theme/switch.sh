@@ -652,6 +652,76 @@ case "${1:-}" in
     ui_ok "Reset" "GNOME accent / cursor / fonts / shell-theme restored to defaults"
     ui_info "Note" "wallpaper untouched — re-run 'dot theme set <name>' to apply a theme"
     ;;
+  diff)
+    shift
+    if [[ $# -lt 2 ]]; then
+      ui_err "Usage" "dot theme diff <theme-a> <theme-b>"
+      exit 1
+    fi
+    a="$1"; b="$2"
+    if ! grep -q "^\[themes\.${a}\]$" "$THEMES_FILE"; then
+      ui_err "Unknown" "theme '$a'"; exit 1
+    fi
+    if ! grep -q "^\[themes\.${b}\]$" "$THEMES_FILE"; then
+      ui_err "Unknown" "theme '$b'"; exit 1
+    fi
+    ui_header "Theme diff: $a  vs  $b"
+    awk -v A="$a" -v B="$b" '
+      BEGIN {
+        esc = sprintf("%c[", 27)
+        for (side in slot) delete slot[side]
+      }
+      function set_slot(name, section, key, value) {
+        # `section` is "" for root, "app" or "ui" or "term"
+        slot[name "." section "." key] = value
+      }
+      function get(name, section, key) {
+        return slot[name "." section "." key]
+      }
+      function hex2int(h,   n,i,c,d) {
+        d="0123456789abcdef"; n=0; h=tolower(h)
+        for(i=1;i<=length(h);i++){c=index(d,substr(h,i,1)); if(c==0)return 0; n=n*16+(c-1)}
+        return n
+      }
+      function swatch(hex,  s,r,g,b) {
+        if (hex == "" || hex !~ /^#/) return "    "
+        s = substr(hex, 2)
+        r = hex2int(substr(s,1,2)); g = hex2int(substr(s,3,2)); b = hex2int(substr(s,5,2))
+        return esc "48;2;" r ";" g ";" b "m    " esc "0m"
+      }
+      function val(line,   v) { v=line; sub(/^[^=]*= *"?/,"",v); sub(/"?[[:space:]]*$/,"",v); return v }
+      {
+        if ($0 == "[themes." A "]")      { name=A; section=""; next }
+        else if ($0 == "[themes." A ".ui]")   { name=A; section="ui"; next }
+        else if ($0 == "[themes." A ".term]") { name=A; section="term"; next }
+        else if ($0 == "[themes." B "]")      { name=B; section=""; next }
+        else if ($0 == "[themes." B ".ui]")   { name=B; section="ui"; next }
+        else if ($0 == "[themes." B ".term]") { name=B; section="term"; next }
+        else if (/^\[/) { name=""; section=""; next }
+      }
+      name != "" && /=/ {
+        key = $0; sub(/ *=.*/, "", key)
+        set_slot(name, section, key, val($0))
+      }
+      function row(label, left, right) {
+        mark = (left == right ? " " : "≠")
+        printf "  %s  %-14s  %-24s  %-24s\n", mark, label, left, right
+      }
+      function row_sw(label, left, right) {
+        mark = (left == right ? " " : "≠")
+        printf "  %s  %-14s  %s %-18s  %s %-18s\n", mark, label, swatch(left), left, swatch(right), right
+      }
+      END {
+        row("family",       get(A,"","family"),        get(B,"","family"))
+        row("mode",         get(A,"","mode"),          get(B,"","mode"))
+        row("macos_accent", get(A,"","macos_accent"),  get(B,"","macos_accent"))
+        row("wallpaper",    get(A,"","wallpaper"),     get(B,"","wallpaper"))
+        row_sw("ui.accent", get(A,"ui","accent"),      get(B,"ui","accent"))
+        row_sw("term.bg",   get(A,"term","bg"),        get(B,"term","bg"))
+        row_sw("term.fg",   get(A,"term","fg"),        get(B,"term","fg"))
+      }
+    ' "$THEMES_FILE"
+    ;;
   status)
     # Comprehensive dashboard: recorded theme, live gsettings/kwriteconfig
     # state, wallpaper file existence, detected DE. Great for diagnosing
@@ -788,6 +858,7 @@ case "${1:-}" in
     ui_ok "reset" "Restore GNOME defaults (accent/cursor/fonts/shell theme)"
     ui_ok "current" "Show current theme info"
     ui_ok "status" "Dashboard: recorded vs applied theme state"
+    ui_ok "diff <a> <b>" "Side-by-side comparison of two themes"
     ui_ok "sync" "Sync dotfiles with system dark/light mode"
     ui_ok "ambient" "Time-based mode switch (run|enable|disable|status)"
     ui_ok "rebuild" "Regenerate themes from system + custom wallpapers"

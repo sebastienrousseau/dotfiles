@@ -67,7 +67,7 @@ complete -c dot -n "__fish_use_subcommand" -a profile -d "Show or switch configu
 complete -c dot -n "__fish_use_subcommand" -a theme -d "Switch terminal + desktop theme"
 
 # `dot theme` subcommands and theme-name completions.
-set -l __dot_theme_subs list set toggle mode family random preview undo history current status sync ambient reset rebuild help
+set -l __dot_theme_subs list set toggle mode family random preview undo history current status diff sync ambient reset rebuild help
 for sub in $__dot_theme_subs
     complete -c dot -n "__fish_seen_subcommand_from theme; and not __fish_seen_subcommand_from $__dot_theme_subs" -a $sub
 end
@@ -77,7 +77,7 @@ function __dot_theme_names
     test -f "$f"; or return
     sed -n 's/^\[themes\.\([a-zA-Z0-9-]*\)\]$/\1/p' "$f" | sort -u
 end
-complete -c dot -n "__fish_seen_subcommand_from theme; and __fish_seen_subcommand_from set preview" -a "(__dot_theme_names)"
+complete -c dot -n "__fish_seen_subcommand_from theme; and __fish_seen_subcommand_from set preview diff" -a "(__dot_theme_names)"
 complete -c dot -n "__fish_seen_subcommand_from theme; and not __fish_seen_subcommand_from $__dot_theme_subs" -a "(__dot_theme_names)"
 complete -c dot -n "__fish_seen_subcommand_from theme; and __fish_seen_subcommand_from set" -l force -d "Re-apply even if theme unchanged"
 complete -c dot -n "__fish_seen_subcommand_from theme; and __fish_seen_subcommand_from set" -l full -d "Force full chezmoi apply"
