@@ -15,8 +15,14 @@ SWITCH_SH="$REPO_ROOT/scripts/theme/switch.sh"
 TMPHOME="$(mktemp -d)"
 trap 'rm -rf "$TMPHOME"' EXIT
 export HOME="$TMPHOME"
+# Explicit XDG dirs — parent shell's ${XDG_CONFIG_HOME} would otherwise
+# leak into subshells and rotate/ambient would write systemd unit files
+# to the real user's ~/.config/systemd/user (breaking test isolation).
 export XDG_STATE_HOME="$TMPHOME/state"
-mkdir -p "$XDG_STATE_HOME/dot"
+export XDG_CONFIG_HOME="$TMPHOME/.config"
+export XDG_DATA_HOME="$TMPHOME/.local/share"
+export XDG_CACHE_HOME="$TMPHOME/.cache"
+mkdir -p "$XDG_STATE_HOME/dot" "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME"
 
 # Fake dotfiles source so switch.sh's THEMES_FILE points at fixture data.
 mkdir -p "$TMPHOME/dotfiles/.chezmoidata"
@@ -307,6 +313,142 @@ _contains "not in themes.toml" "$out"
 test_start "import_rejects_missing_file"
 out="$(_run_theme import /nonesuch.json 2>&1)"
 _contains "Usage" "$out"
+
+# ---------------------------------------------------------------------------
+# random --mode pins target mode
+# ---------------------------------------------------------------------------
+
+test_start "random_with_mode_dark_calls_backend_with_dark_theme"
+_reset_log
+_run_theme random --mode dark > /dev/null 2>&1 || true
+# Any invocation of dot-theme-sync must end in -dark.
+if grep -Eq 'dot-theme-sync [A-Za-z0-9]+-dark' "$LOG"; then
+  ((TESTS_PASSED++)) || true
+  printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '  \033[0;31m✗\033[0m %s (backend called without -dark suffix)\n' "$CURRENT_TEST"
+fi
+
+test_start "random_with_mode_light_calls_backend_with_light_theme"
+_reset_log
+_run_theme random --mode light > /dev/null 2>&1 || true
+if grep -Eq 'dot-theme-sync [A-Za-z0-9]+-light' "$LOG"; then
+  ((TESTS_PASSED++)) || true
+  printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '  \033[0;31m✗\033[0m %s (backend called without -light suffix)\n' "$CURRENT_TEST"
+fi
+
+test_start "random_rejects_invalid_mode"
+out="$(_run_theme random --mode purple 2>&1)"
+_contains "Usage" "$out"
+
+# ---------------------------------------------------------------------------
+# reset
+# ---------------------------------------------------------------------------
+
+test_start "reset_resets_gsettings_accent_and_cursor"
+_reset_log
+_run_theme reset > /dev/null 2>&1
+grep -q "gsettings reset org.gnome.desktop.interface accent-color" "$LOG"
+_r1=$?
+grep -q "gsettings reset org.gnome.desktop.interface cursor-theme" "$LOG"
+_r2=$?
+assert_equals 0 $((_r1 + _r2)) "reset triggers gsettings reset on accent + cursor"
+
+test_start "reset_does_not_touch_wallpaper"
+_reset_log
+_run_theme reset > /dev/null 2>&1
+if grep -q "picture-uri" "$LOG"; then
+  ((TESTS_FAILED++)) || true
+  printf '  \033[0;31m✗\033[0m %s (reset unexpectedly touched picture-uri)\n' "$CURRENT_TEST"
+else
+  ((TESTS_PASSED++)) || true
+  printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
+fi
+
+# ---------------------------------------------------------------------------
+# rotate — systemd unit generation
+# ---------------------------------------------------------------------------
+
+test_start "rotate_enable_writes_service_unit"
+mkdir -p "$TMPHOME/.config/systemd/user"
+# systemctl mock so `--user daemon-reload` doesn't try to talk to real dbus
+cat > "$MOCK_BIN/systemctl" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+chmod +x "$MOCK_BIN/systemctl"
+_run_theme rotate enable 10m > /dev/null 2>&1
+if [[ -f "$TMPHOME/.config/systemd/user/dot-theme-rotate.service" ]] \
+   && [[ -f "$TMPHOME/.config/systemd/user/dot-theme-rotate.timer" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '  \033[0;31m✗\033[0m %s (unit files not created)\n' "$CURRENT_TEST"
+fi
+
+test_start "rotate_enable_honours_interval_arg"
+grep -q "OnUnitActiveSec=10m" "$TMPHOME/.config/systemd/user/dot-theme-rotate.timer" 2>/dev/null
+assert_equals 0 $? "OnUnitActiveSec=10m written to timer"
+
+test_start "rotate_disable_removes_unit_files"
+_run_theme rotate disable > /dev/null 2>&1
+if [[ ! -f "$TMPHOME/.config/systemd/user/dot-theme-rotate.service" ]] \
+   && [[ ! -f "$TMPHOME/.config/systemd/user/dot-theme-rotate.timer" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '  \033[0;31m✗\033[0m %s (unit files not removed)\n' "$CURRENT_TEST"
+fi
+
+# ---------------------------------------------------------------------------
+# undo / history
+# ---------------------------------------------------------------------------
+
+test_start "history_empty_reports_empty_message"
+rm -f "$XDG_STATE_HOME/dot/theme-history"
+out="$(_run_theme history 2>&1)"
+_contains "empty" "$out"
+
+test_start "history_lists_recorded_entries"
+mkdir -p "$XDG_STATE_HOME/dot"
+printf 'Miami-dark\nFirewatch-dark\n' > "$XDG_STATE_HOME/dot/theme-history"
+out="$(_run_theme history 2>&1)"
+_contains "Miami-dark" "$out"
+_contains "Firewatch-dark" "$out"
+
+test_start "undo_pops_head_and_applies"
+_reset_log
+_run_theme undo > /dev/null 2>&1
+grep -q "dot-theme-sync Miami-dark" "$LOG"
+assert_equals 0 $? "undo applied head of history (Miami-dark)"
+
+test_start "undo_empty_history_errors"
+rm -f "$XDG_STATE_HOME/dot/theme-history"
+out="$(_run_theme undo 2>&1)"
+_contains "empty" "$out"
+
+# ---------------------------------------------------------------------------
+# --dry-run: theme is not written to .chezmoidata.toml
+# ---------------------------------------------------------------------------
+
+test_start "dry_run_leaves_chezmoidata_theme_unchanged"
+# Reset chezmoi data to a known baseline.
+printf 'theme = "Solar-dark"\n' > "$TMPHOME/dotfiles/.chezmoidata.toml"
+# Use the real dot-theme-sync (not the mock in PATH) — dry-run must land there.
+PATH="/usr/bin:$PATH" bash "$REPO_ROOT/bin/dot-theme-sync" Bauhaus-dark --dry-run > /dev/null 2>&1 || true
+if grep -q '^theme = "Solar-dark"$' "$TMPHOME/dotfiles/.chezmoidata.toml"; then
+  ((TESTS_PASSED++)) || true
+  printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '  \033[0;31m✗\033[0m %s (dry-run mutated .chezmoidata.toml)\n' "$CURRENT_TEST"
+fi
 
 # ---------------------------------------------------------------------------
 # --dry-run on the sync backend — testable via the mocked binary being
