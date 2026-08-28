@@ -64,12 +64,21 @@ jobs:
         run: |
           # Every top-level dot command must appear in bash + zsh +
           # fish completions AND the dot(1) man page. As of the
-          # 2026-08-28 push the ratchet holds at 100% (99/99) with a
+          # 2026-08-28 push the ratchet holds at 100% (103/103) with a
           # cli_no_partial_or_bare_commands_ratchet_full gate; any new
           # top-level command lands in Partial or Bare and fails the
           # run until documented in every locus. Also includes a
           # groff/mandoc man-page parse-cleanliness gate.
           bash tests/unit/commands/test_cli_docs_sync.sh
+
+      - name: Ratchet — route integrity of _dot_command_routes()
+        run: |
+          # Every `cmd|namespace` row in bin/dot's routes heredoc must
+          # resolve to a real binding (case label, cmd_ function, inline
+          # bin/dot case, or bin/dot-<cmd> executable). Catches drift
+          # where a handler exists but the route entry was forgotten
+          # (or vice versa: a route with no handler on the other side).
+          bash tests/unit/commands/test_cli_route_integrity.sh
 
       - name: Upload coverage.json
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
