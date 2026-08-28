@@ -221,15 +221,36 @@ pick_theme() {
     theme_list+="$(printf '%s  %-35s  %-8s  %s' "$marker" "$family" "$source" "$active_mode")"$'\n'
   done < <(paired_families)
 
-  # Preview helper: awk-extracts the theme's UI accent hex + wallpaper
-  # path from themes.toml. Fast — no image decoding, just structured
-  # TOML section reads.
+  # Preview helper: awk-extracts the theme's accent + wallpaper + full
+  # 16-colour ANSI palette, then renders live swatches using 24-bit
+  # terminal escapes. Fast — one awk pass, no forks-per-swatch, no
+  # image decoding.
   local preview_cmd
   preview_cmd='family={2}; mode='"$current_mode"'; f="'"$THEMES_FILE"'"; awk -v F="$family" -v M="$mode" '"'"'
 BEGIN {
   root = "[themes." F "-" M "]"
   ui   = "[themes." F "-" M ".ui]"
   term = "[themes." F "-" M ".term]"
+  esc  = sprintf("%c[", 27)
+}
+function hex2int(h,   n, i, c, digits) {
+  digits = "0123456789abcdef"
+  n = 0
+  h = tolower(h)
+  for (i = 1; i <= length(h); i++) {
+    c = index(digits, substr(h, i, 1))
+    if (c == 0) return 0
+    n = n * 16 + (c - 1)
+  }
+  return n
+}
+function swatch(hex,   clean, r, g, b) {
+  clean = hex
+  sub(/^#/, "", clean)
+  r = hex2int(substr(clean, 1, 2))
+  g = hex2int(substr(clean, 3, 2))
+  b = hex2int(substr(clean, 5, 2))
+  return esc "48;2;" r ";" g ";" b "m    " esc "0m"
 }
 $0 == root { in_root=1; in_ui=0; in_term=0; next }
 $0 == ui   { in_ui=1; in_root=0; in_term=0; next }
@@ -240,11 +261,21 @@ in_root && /^macos_accent/ { sub(/.*= */,"");   accent_int=$0 }
 in_ui && /^accent /        { sub(/.*= *"?/,""); sub(/"$/,""); accent=$0 }
 in_term && /^bg /          { sub(/.*= *"?/,""); sub(/"$/,""); bg=$0 }
 in_term && /^fg /          { sub(/.*= *"?/,""); sub(/"$/,""); fg=$0 }
+in_term && match($0, /^c([0-9]+) *= *"([^"]+)"/, m) { term_c[m[1]+0] = m[2] }
 END {
   print "family:    " F " (" M ")"
   print "wallpaper: " wallpaper
-  print "accent:    " accent " (macos=" accent_int ")"
-  print "bg / fg:   " bg " / " fg
+  print "accent:    " swatch(accent) " " accent " (macos=" accent_int ")"
+  print "bg:        " swatch(bg) " " bg
+  print "fg:        " swatch(fg) " " fg
+  print ""
+  # 16-colour ANSI palette, laid out 8 wide × 2 rows.
+  line1 = ""; line2 = ""
+  for (i = 0; i <= 7; i++)  line1 = line1 swatch(term_c[i])
+  for (i = 8; i <= 15; i++) line2 = line2 swatch(term_c[i])
+  print "palette:"
+  print "  " line1
+  print "  " line2
 }'"'"' "$f"'
 
   local selected_family
