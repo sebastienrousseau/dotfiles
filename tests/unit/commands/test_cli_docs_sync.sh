@@ -111,4 +111,29 @@ else
   _fail "partial=${DOCS_PARTIAL[*]:-none} bare=${DOCS_BARE[*]:-none}"
 fi
 
+# ---------------------------------------------------------------------------
+# Man page lint. groff -mandoc -z parses without producing output;
+# any diagnostic on stderr indicates a real syntax problem (unclosed
+# .SS, malformed .TP, unrecognised escape). Skip if neither groff nor
+# mandoc is available (CI-only tools on some runners).
+# ---------------------------------------------------------------------------
+test_start "cli_dot_1_man_page_parses_cleanly"
+if command -v groff >/dev/null 2>&1; then
+  errors="$(groff -mandoc -z "$MANPAGE" 2>&1)"
+  if [[ -z "$errors" ]]; then
+    _ok
+  else
+    _fail "groff diagnostics: $(echo "$errors" | head -3)"
+  fi
+elif command -v mandoc >/dev/null 2>&1; then
+  errors="$(mandoc -T lint "$MANPAGE" 2>&1)"
+  if [[ -z "$errors" ]]; then
+    _ok
+  else
+    _fail "mandoc lint: $(echo "$errors" | head -3)"
+  fi
+else
+  _skip "cli_dot_1_man_page_parses_cleanly" "no groff/mandoc"
+fi
+
 _cmd_finish

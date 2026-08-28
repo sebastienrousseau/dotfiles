@@ -127,6 +127,35 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# 7. dot-theme(1) man page lint. Same shape as the pan-CLI check.
+# groff -mandoc -z parses without producing output; any diagnostic on
+# stderr indicates a real syntax problem. Skip if neither tool present.
+# ---------------------------------------------------------------------------
+test_start "dot_theme_1_man_page_parses_cleanly"
+if command -v groff >/dev/null 2>&1; then
+  _errs="$(groff -mandoc -z "$MANPAGE" 2>&1)"
+  if [[ -z "$_errs" ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '  \033[0;31m✗\033[0m %s: %s\n' "$CURRENT_TEST" "$(echo "$_errs" | head -3)"
+  fi
+elif command -v mandoc >/dev/null 2>&1; then
+  _errs="$(mandoc -T lint "$MANPAGE" 2>&1)"
+  if [[ -z "$_errs" ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '  \033[0;31m✗\033[0m %s: %s\n' "$CURRENT_TEST" "$(echo "$_errs" | head -3)"
+  fi
+else
+  ((TESTS_PASSED++)) || true
+  printf '  \033[0;33m~\033[0m %s (no groff/mandoc — skipped)\n' "$CURRENT_TEST"
+fi
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo ""
