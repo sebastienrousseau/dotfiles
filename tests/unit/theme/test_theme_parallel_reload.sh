@@ -39,7 +39,7 @@ source "$SCRIPT_FILE"
 TIMING_DIR="$TMPHOME/timing"
 mkdir -p "$TIMING_DIR"
 
-_reset_timing() { rm -rf "$TIMING_DIR"/*; }
+_reset_timing() { rm -rf "${TIMING_DIR:?}"/*; }
 
 _make_stub() {
   local name="$1" delay_ms="$2"
