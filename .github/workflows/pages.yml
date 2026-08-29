@@ -13,7 +13,7 @@ name: Pages
 
 on:
   push:
-    branches: [master]
+    branches: [master, main]
     paths:
       - 'docs/**'
       - '.github/workflows/pages.yml'

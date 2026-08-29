@@ -2,7 +2,7 @@ name: CodeQL
 
 on:
   push:
-    branches: [master]
+    branches: [master, main]
     # Only run CodeQL when relevant files change
     paths:
       - '**.py'
@@ -10,14 +10,14 @@ on:
       - '**.ts'
       - '.github/workflows/**'
   pull_request:
-    branches: [master]
+    branches: [master, main]
     paths:
       - '**.py'
       - '**.js'
       - '**.ts'
       - '.github/workflows/**'
   merge_group:
-    branches: [master]
+    branches: [master, main]
     # NOTE: `paths:` is not honored under merge_group — actionlint warns
     # if present. Merge-queue runs always execute the full workflow.
   schedule:

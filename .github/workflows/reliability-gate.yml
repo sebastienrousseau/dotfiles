@@ -2,9 +2,9 @@ name: Reliability Gate
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, main]
   push:
-    branches: [master]
+    branches: [master, main]
   workflow_dispatch:
 
 permissions:

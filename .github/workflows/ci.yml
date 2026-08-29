@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [master, main]
     tags: ['v*.*.*']
     # Path filters: Only run when relevant files change
     paths:
@@ -17,7 +17,7 @@ on:
       - '!**.md'
       - '!docs/**'
   pull_request:
-    branches: [master]
+    branches: [master, main]
     paths:
       - '**.sh'
       - '**.tmpl'
@@ -30,7 +30,7 @@ on:
       - '!**.md'
       - '!docs/**'
   merge_group:
-    branches: [master]
+    branches: [master, main]
     # Note: merge_group does not support `paths` filters (GitHub Actions
     # limitation). Merge queue runs trigger the full CI graph; path filtering
     # happens downstream via the `changes` job's dorny/paths-filter step.

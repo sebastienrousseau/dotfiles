@@ -30,7 +30,7 @@ on:
   schedule:
     - cron: '0 6 * * 1'  # Monday 06:00 UTC
   push:
-    branches: [master]
+    branches: [master, main]
   workflow_dispatch:
 
 permissions: read-all

@@ -5,7 +5,7 @@ name: Cross-Platform Test
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, main]
     paths:
       - '**.sh'
       - '**.bash'
@@ -13,7 +13,7 @@ on:
       - 'defaults/.chezmoitemplates/**'
       - 'scripts/**'
   push:
-    branches: [master]
+    branches: [master, main]
     paths:
       - '**.sh'
       - '**.bash'
@@ -21,7 +21,7 @@ on:
       - 'defaults/.chezmoitemplates/**'
       - 'scripts/**'
   merge_group:
-    branches: [master]
+    branches: [master, main]
     # NOTE: `paths:` is ignored under merge_group; merge-queue runs
     # always execute the full workflow regardless of changed paths.
   # Weekly check for tool version drift

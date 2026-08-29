@@ -2,14 +2,14 @@ name: Sync Versions
 
 on:
   push:
-    branches: [master, 'feat/v*']
+    branches: [master, main, 'feat/v*']
     paths:
       - '**/*.md'
       - 'package.json'
       - 'scripts/version-sync.sh'
       - 'docs/operations/VERSION_SYNC.md'
   pull_request:
-    branches: [master]
+    branches: [master, main]
     paths:
       - '**/*.md'
       - 'package.json'
