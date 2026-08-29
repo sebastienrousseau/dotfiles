@@ -109,7 +109,14 @@ main() {
     } | sort -u
   )
 
-  report_traceability
+  # Capture report_traceability's exit — without this the trailing
+  # `printf PASS...` returns 0 and overwrites the awk threshold verdict,
+  # so a below-threshold run silently exits 0 (same bug as docs-coverage.sh).
+  if ! report_traceability; then
+    printf 'FAIL: traceability coverage below MIN_TRACEABILITY_COVERAGE=%s%%\n' \
+      "$MIN_TRACEABILITY_COVERAGE" >&2
+    return 1
+  fi
 
   printf 'PASS: core internal behaviors have implementation, test, and documentation traceability at or above the required threshold\n'
 }
